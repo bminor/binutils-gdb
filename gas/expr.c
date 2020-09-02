@@ -1722,7 +1722,7 @@ add_to_result (expressionS *resultP, offsetT amount, int rhs_highbit)
   valueT ures = resultP->X_add_number;
   valueT uamount = amount;
 
-  resultP->X_add_number += amount;
+  resultP->X_add_number += uamount;
 
   resultP->X_extrabit ^= rhs_highbit;
 
@@ -1738,7 +1738,7 @@ subtract_from_result (expressionS *resultP, offsetT amount, int rhs_highbit)
   valueT ures = resultP->X_add_number;
   valueT uamount = amount;
 
-  resultP->X_add_number -= amount;
+  resultP->X_add_number -= uamount;
 
   resultP->X_extrabit ^= rhs_highbit;
 

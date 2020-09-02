@@ -1,5 +1,10 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* expr.c (add_to_result, subtract_from_result): Use unsigned
+	addition and subtraction.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-z80.c (is_overflow): Avoid too large shift.
 
 2020-09-02  Alan Modra  <amodra@gmail.com>
