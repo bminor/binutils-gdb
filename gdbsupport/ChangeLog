@@ -1,3 +1,7 @@
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* eintr.h: New file.
+
 2020-08-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* selftest.h (run_tests): Change parameter to array_view.
