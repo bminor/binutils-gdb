@@ -42,7 +42,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 set end_of_main          [gdb_get_line_number " end of main "]
 set end_of_inc_dec_tests [gdb_get_line_number " end inc_dec_tests "]
 
-runto main
+runto_main
 
 if [supports_process_record] {
     # Activate process record/replay

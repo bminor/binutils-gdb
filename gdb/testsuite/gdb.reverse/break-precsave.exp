@@ -37,7 +37,7 @@ proc precsave_tests {} {
     global foo_location bar_location main_location end_location
     global decimal srcfile precsave gdb_prompt
 
-    runto main
+    runto_main
 
     if [supports_process_record] {
 	# Activate process record/replay

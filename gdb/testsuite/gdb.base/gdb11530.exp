@@ -36,7 +36,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $testfile.c {debug}] } {
 }
 
 
-if { ![runto main] } then {
+if { ![runto_main] } then {
     fail "run to main"
     return
 }

@@ -26,7 +26,7 @@ save_vars { GDBFLAGS } {
     clean_restart ${executable}
 }
 
-if ![runto main] {
+if ![runto_main] {
     fail "can't run to main"
     return -1
 }

@@ -24,7 +24,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile { debug pthreads
 
 clean_restart ${binfile}
 
-if ![runto main] {
+if ![runto_main] {
     fail "can't run to main"
     return -1
 }

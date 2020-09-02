@@ -459,7 +459,7 @@ proc thread_test {} {
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
 	gdb_load ${binfile}
-	if { ![runto main] } then {
+	if { ![runto_main] } then {
 	    fail "run to main"
 	    return
 	}
