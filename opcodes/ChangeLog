@@ -1,5 +1,10 @@
 2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
+	* csky-opc.h (csky_v2_opcodes): Move divul and divsl
+	to CSKYV2_ISA_3E3R3 instruction set.
+
+2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
 	* csky-opc.h (csky_v2_opcodes): Fix Encode of mulsws.
 
 2020-09-01  Alan Modra  <amodra@gmail.com>

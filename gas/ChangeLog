@@ -1,5 +1,11 @@
 2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
+	* config/tc-csky.c (csky_cpus): Add ck803r3.
+	(CSKY_ISA_803R3): Define.
+	(CSKY_ISA_803R2): Refine, use CSKY_ISA_803R1.
+
+2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
 	* testsuite/gas/csky/cskyv2_dsp.d : Fix Encode of mulsws.
 
 2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
