@@ -9603,8 +9603,11 @@ load_register (int reg, expressionS *ep, int dbl)
 	      lo >>= 1;
 	      ++bit;
 	    }
-	  lo |= (hi & (((unsigned long) 1 << bit) - 1)) << (32 - bit);
-	  hi >>= bit;
+	  if (bit != 0)
+	    {
+	      lo |= (hi & ((2UL << (bit - 1)) - 1)) << (32 - bit);
+	      hi >>= bit;
+	    }
 	}
       else
 	{

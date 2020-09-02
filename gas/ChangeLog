@@ -1,5 +1,9 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-mips.c (load_register): Avoid too large shift.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-d30v.c (parallel_ok): Use 1UL for left shift expression.
 
 2020-09-02  Alan Modra  <amodra@gmail.com>
