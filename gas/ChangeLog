@@ -1,5 +1,11 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* config/rx-parse.y (rx_intop): Avoid too large shifts.
+	(rx_intop, rx_uintop, rx_disp3op, rx_disp5op, displacement),
+	(rtsd_immediate): Use correctly typed unsigned variables.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* config/obj-macho.c (obj_mach_o_zerofill): Correct type of
 	constant shifted left.
 
