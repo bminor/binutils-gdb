@@ -1,5 +1,9 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* csky-dis.c (print_insn_csky): Use unsigned type for "given".
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* crx-dis.c: Whitespace.
 	(print_arg): Use unsigned type for longdisp and mask variables,
 	and for left shift constant.
