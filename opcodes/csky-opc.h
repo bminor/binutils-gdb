@@ -2634,7 +2634,7 @@ const struct csky_opcode csky_v2_opcodes[] =
 			(21_25, AREG, OPRND_SHIFT_0_BIT)),
 	  CSKY_ISA_DSP),
     OP32 ("mulsws",
-	  OPCODE_INFO2 (0xc4009480,
+	  OPCODE_INFO2 (0xc4009500,
 			(16_20, AREG, OPRND_SHIFT_0_BIT),
 			(21_25, AREG, OPRND_SHIFT_0_BIT)),
 	  CSKY_ISA_DSP),
