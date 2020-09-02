@@ -1,3 +1,7 @@
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (disassemble_bytes): Use an unsigned type for "addend".
+
 2020-08-30  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (print_gnu_build_attribute_name): Use unsigned long

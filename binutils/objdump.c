@@ -3002,8 +3002,8 @@ disassemble_bytes (struct disassemble_info * inf,
 
 	      if (q->addend)
 		{
-		  bfd_signed_vma addend = q->addend;
-		  if (addend < 0)
+		  bfd_vma addend = q->addend;
+		  if ((bfd_signed_vma) addend < 0)
 		    {
 		      printf ("-0x");
 		      addend = -addend;
