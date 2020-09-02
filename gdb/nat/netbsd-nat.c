@@ -17,10 +17,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "gdbsupport/common-defs.h"
 #include "nat/netbsd-nat.h"
+#include "gdbsupport/common-debug.h"
 
 #include <sys/types.h>
 #include <sys/sysctl.h>
+
+#include <cstring>
+
+#include "gdbsupport/function-view.h"
 
 namespace netbsd_nat
 {
@@ -36,6 +42,125 @@ pid_to_exec_file (pid_t pid)
   if (::sysctl (mib, ARRAY_SIZE (mib), buf, &buflen, NULL, 0) != 0)
     return NULL;
   return buf;
+}
+
+/* Generic thread (LWP) lister within a specified PID.  The CALLBACK
+   parameters is a C++ function that is called for each detected thread.
+   When the CALLBACK function returns true, the iteration is interrupted.
+
+   This function assumes internally that the queried process is stopped
+   and the number of threads does not change between two sysctl () calls.  */
+
+static bool
+netbsd_thread_lister (const pid_t pid,
+		      gdb::function_view<bool (const struct kinfo_lwp *)>
+		      callback)
+{
+  int mib[5] = {CTL_KERN, KERN_LWP, pid, sizeof (struct kinfo_lwp), 0};
+  size_t size;
+
+  if (sysctl (mib, ARRAY_SIZE (mib), NULL, &size, NULL, 0) == -1 || size == 0)
+    perror_with_name (("sysctl"));
+
+  mib[4] = size / sizeof (size_t);
+
+  gdb::unique_xmalloc_ptr<struct kinfo_lwp[]> kl
+    ((struct kinfo_lwp *) xcalloc (size, 1));
+
+  if (sysctl (mib, ARRAY_SIZE (mib), kl.get (), &size, NULL, 0) == -1
+      || size == 0)
+    perror_with_name (("sysctl"));
+
+  for (size_t i = 0; i < size / sizeof (struct kinfo_lwp); i++)
+    {
+      struct kinfo_lwp *l = &kl[i];
+
+      /* Return true if the specified thread is alive.  */
+      auto lwp_alive
+	= [] (struct kinfo_lwp *lwp)
+	  {
+	    switch (lwp->l_stat)
+	      {
+	      case LSSLEEP:
+	      case LSRUN:
+	      case LSONPROC:
+	      case LSSTOP:
+	      case LSSUSPENDED:
+		return true;
+	      default:
+		return false;
+	      }
+	  };
+
+      /* Ignore embryonic or demised threads.  */
+      if (!lwp_alive (l))
+	continue;
+
+      if (callback (l))
+	return true;
+    }
+
+  return false;
+}
+
+/* See netbsd-nat.h.  */
+
+bool
+thread_alive (ptid_t ptid)
+{
+  pid_t pid = ptid.pid ();
+  lwpid_t lwp = ptid.lwp ();
+
+  auto fn
+    = [=] (const struct kinfo_lwp *kl)
+      {
+        return kl->l_lid == lwp;
+      };
+
+  return netbsd_thread_lister (pid, fn);
+}
+
+/* See netbsd-nat.h.  */
+
+const char *
+thread_name (ptid_t ptid)
+{
+  pid_t pid = ptid.pid ();
+  lwpid_t lwp = ptid.lwp ();
+
+  static char buf[KI_LNAMELEN] = {};
+
+  auto fn
+    = [=] (const struct kinfo_lwp *kl)
+      {
+	if (kl->l_lid == lwp)
+	  {
+	    xsnprintf (buf, sizeof buf, "%s", kl->l_name);
+	    return true;
+	  }
+	return false;
+      };
+
+  if (netbsd_thread_lister (pid, fn))
+    return buf;
+  else
+    return NULL;
+}
+
+/* See netbsd-nat.h.  */
+
+void
+for_each_thread (pid_t pid, gdb::function_view<void (ptid_t)> callback)
+{
+  auto fn
+    = [=, &callback] (const struct kinfo_lwp *kl)
+      {
+	ptid_t ptid = ptid_t (pid, kl->l_lid, 0);
+	callback (ptid);
+	return false;
+      };
+
+  netbsd_thread_lister (pid, fn);
 }
 
 }

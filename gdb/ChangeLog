@@ -1,5 +1,16 @@
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
+	* netbsd-nat.h: Include "gdbsupport/function-view.h".
+	* (netbsd_nat::thread_alive, netbsd_nat::thread_name)
+	(netbsd_nat::for_each_thread): Add.
+	* netbsd-nat.c: Include "gdbsupport/common-defs.h" and
+	"gdbsupport/common-debug.h".
+	* (netbsd_nat::netbsd_thread_lister)
+	(netbsd_nat::thread_alive, netbsd_nat::thread_name)
+	(netbsd_nat::for_each_thread): Add.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
 	* netbsd-nat.h: Include <unistd.h>.
 	* (netbsd_nat::pid_to_exec_file): Add.
 	* netbsd-nat.c: Include <sys/types.h> and <sys/sysctl.h>.

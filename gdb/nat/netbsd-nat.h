@@ -20,6 +20,8 @@
 #ifndef NAT_NETBSD_NAT_H
 #define NAT_NETBSD_NAT_H
 
+#include "gdbsupport/function-view.h"
+
 #include <unistd.h>
 
 namespace netbsd_nat
@@ -30,6 +32,24 @@ namespace netbsd_nat
 
 extern const char *pid_to_exec_file (pid_t pid);
 
+/* Return true if PTID is still active in the inferior.  */
+
+extern bool thread_alive (ptid_t ptid);
+
+/* Return the name assigned to a thread by an application.  Returns
+   the string in a static buffer.
+
+   This function assumes internally that the queried process is stopped.  */
+
+extern const char *thread_name (ptid_t ptid);
+
+/* A generic thread lister within a specific PID.  The CALLBACK parameter
+   is a C++ function that is called for each detected thread.
+
+   This function assumes internally that the queried process is stopped.  */
+
+extern void for_each_thread (pid_t pid,
+			     gdb::function_view<void (ptid_t)> callback);
 }
 
 #endif
