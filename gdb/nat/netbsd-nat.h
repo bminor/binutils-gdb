@@ -57,6 +57,16 @@ extern void for_each_thread (pid_t pid,
    traced.  */
 
 extern void enable_proc_events (pid_t pid);
+
+/* Implement reading and writing of inferior's siginfo_t specified by PID.
+   Returns -1 on failure and the number of bytes on a successful transfer.
+
+   This function assumes internally that the queried process is stopped and
+   traced.  */
+
+extern int qxfer_siginfo (pid_t pid, const char *annex, unsigned char *readbuf,
+			  unsigned const char *writebuf, CORE_ADDR offset,
+			  int len);
 }
 
 #endif

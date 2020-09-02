@@ -181,4 +181,33 @@ enable_proc_events (pid_t pid)
     perror_with_name (("ptrace"));
 }
 
+/* See netbsd-nat.h.  */
+
+int
+qxfer_siginfo (pid_t pid, const char *annex, unsigned char *readbuf,
+	       unsigned const char *writebuf, CORE_ADDR offset, int len)
+{
+  ptrace_siginfo_t psi;
+
+  if (offset > sizeof (siginfo_t))
+    return -1;
+
+  if (ptrace (PT_GET_SIGINFO, pid, &psi, sizeof (psi)) == -1)
+    return -1;
+
+  if (offset + len > sizeof (siginfo_t))
+    len = sizeof (siginfo_t) - offset;
+
+  if (readbuf != NULL)
+    memcpy (readbuf, ((gdb_byte *) &psi.psi_siginfo) + offset, len);
+  else
+    {
+      memcpy (((gdb_byte *) &psi.psi_siginfo) + offset, writebuf, len);
+
+      if (ptrace (PT_SET_SIGINFO, pid, &psi, sizeof (psi)) == -1)
+	return -1;
+    }
+  return len;
+}
+
 }
