@@ -1,5 +1,16 @@
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
+	* nbsd-nat.c: Include "nat/netbsd-nat.h".
+	* (nbsd_nat_target::pid_to_exec_file)
+	(nbsd_nat_target::thread_alive, nbsd_nat_target::thread_name)
+	(nbsd_nat_target::post_startup_inferior)
+	(nbsd_nat_target::post_attach, nbsd_nat_target::xfer_partial)
+	(nbsd_add_threads): Switch local code to common gdb/nat functions.
+	* (nbsd_pid_to_cmdline): Call sysctl from the global namespace.
+	* (nbsd_thread_lister): Remove.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
 	* fork-inferior.c (startup_inferior): Avoid double free.
 
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
