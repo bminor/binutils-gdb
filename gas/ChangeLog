@@ -1,5 +1,9 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-d30v.c (parallel_ok): Use 1UL for left shift expression.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* config/rx-parse.y (rx_intop): Avoid too large shifts.
 	(rx_intop, rx_uintop, rx_disp3op, rx_disp5op, displacement),
 	(rtsd_immediate): Use correctly typed unsigned variables.

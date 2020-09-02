@@ -862,9 +862,9 @@ parallel_ok (struct d30v_insn *op1,
 		      for (r = regno; r <= regno + z; r++)
 			{
 			  if (r >= 32)
-			    used_reg[j][1] |= 1L << (r - 32);
+			    used_reg[j][1] |= 1UL << (r - 32);
 			  else
-			    used_reg[j][0] |= 1L << r;
+			    used_reg[j][0] |= 1UL << r;
 			}
 		    }
 		}
