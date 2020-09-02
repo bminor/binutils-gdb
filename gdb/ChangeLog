@@ -1,3 +1,14 @@
+2020-09-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* maint.c (index_digits): New function.
+	(struct maint_print_section_data): Remove.
+	(print_bfd_section_info): Remove print_data parameter, add arg
+	and index_digits.
+	(print_objfile_section_info): Likewise.
+	(print_bfd_section_info_maybe_relocated): Likewise (plus
+	objfile).
+	(maintenance_info_sections): Adjust calls.
+
 2020-09-02  Tom Tromey  <tromey@adacore.com>
 
 	* ada-varobj.c (ada_varobj_get_ptr_number_of_children): Return 0
