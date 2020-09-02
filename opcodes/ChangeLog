@@ -1,5 +1,11 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* crx-dis.c: Whitespace.
+	(print_arg): Use unsigned type for longdisp and mask variables,
+	and for left shift constant.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* cgen-ibld.in (insert_normal, extract_normal): Use 1UL in left shift.
 	* bpf-ibld.c: Regenerate.
 	* epiphany-ibld.c: Regenerate.
