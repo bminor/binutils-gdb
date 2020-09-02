@@ -22,6 +22,7 @@
 #include "gdbsupport/common-debug.h"
 
 #include <sys/types.h>
+#include <sys/ptrace.h>
 #include <sys/sysctl.h>
 
 #include <cstring>
@@ -161,6 +162,23 @@ for_each_thread (pid_t pid, gdb::function_view<void (ptid_t)> callback)
       };
 
   netbsd_thread_lister (pid, fn);
+}
+
+/* See netbsd-nat.h.  */
+
+void
+enable_proc_events (pid_t pid)
+{
+  int events;
+
+  if (ptrace (PT_GET_EVENT_MASK, pid, &events, sizeof (events)) == -1)
+    perror_with_name (("ptrace"));
+
+  events |= PTRACE_LWP_CREATE;
+  events |= PTRACE_LWP_EXIT;
+
+  if (ptrace (PT_SET_EVENT_MASK, pid, &events, sizeof (events)) == -1)
+    perror_with_name (("ptrace"));
 }
 
 }

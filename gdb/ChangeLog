@@ -1,5 +1,11 @@
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
+	* netbsd-nat.h (netbsd_nat::enable_proc_events): Add.
+	* netbsd-nat.c: Include <sys/ptrace.h>.
+	* (netbsd_nat::enable_proc_events): Add.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
 	* netbsd-nat.h: Include "gdbsupport/function-view.h".
 	* (netbsd_nat::thread_alive, netbsd_nat::thread_name)
 	(netbsd_nat::for_each_thread): Add.

@@ -50,6 +50,13 @@ extern const char *thread_name (ptid_t ptid);
 
 extern void for_each_thread (pid_t pid,
 			     gdb::function_view<void (ptid_t)> callback);
+
+/* Enable additional event reporting in a new process specified by PID.
+
+   This function assumes internally that the queried process is stopped and
+   traced.  */
+
+extern void enable_proc_events (pid_t pid);
 }
 
 #endif
