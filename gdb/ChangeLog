@@ -1,5 +1,9 @@
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
+	* fork-inferior.c (startup_inferior): Avoid double free.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
 	* netbsd-nat.h (netbsd_nat::qxfer_siginfo): Add.
 	* netbsd-nat.c (netbsd_nat::qxfer_siginfo): Likewise.
 
