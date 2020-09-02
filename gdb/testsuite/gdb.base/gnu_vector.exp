@@ -42,7 +42,7 @@ if { [do_compile {-mcpu=native}] != ""
 
 clean_restart ${binfile}
 
-if { ![runto main] } {
+if { ![runto_main] } {
     fail "runto main"
     return -1
 }

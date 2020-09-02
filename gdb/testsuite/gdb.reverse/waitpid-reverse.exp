@@ -31,7 +31,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 
-runto main
+runto_main
 
 if [supports_process_record] {
     # Activate process record/replay

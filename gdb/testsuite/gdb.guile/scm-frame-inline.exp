@@ -24,7 +24,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 # Skip all tests if Guile scripting is not enabled.
 if { [skip_guile_tests] } { continue }
 
-if ![runto main] {
+if ![runto_main] {
     fail "can't run to main"
     return
 }

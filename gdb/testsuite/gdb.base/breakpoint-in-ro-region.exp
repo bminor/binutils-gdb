@@ -28,7 +28,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
     return -1
 }
 
-if ![runto main] {
+if ![runto_main] {
     return -1
 }
 

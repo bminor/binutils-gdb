@@ -24,7 +24,7 @@ if {[prepare_for_testing "failed to prepare" $testfile [list $srcfile]]} {
 }
 
 # The bug is a regression in the sequence "run; record; run".
-runto main
+runto_main
 gdb_test_no_output "record" "turn on process record"
 
 gdb_run_cmd

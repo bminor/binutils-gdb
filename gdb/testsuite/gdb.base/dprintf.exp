@@ -22,7 +22,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set dp_location1 [gdb_get_line_number "set dprintf 1 here"]
 
-if ![runto main] {
+if ![runto_main] {
     return -1
 }
 
@@ -72,7 +72,7 @@ proc restart {} {
 
     clean_restart $binfile
 
-    if ![runto main] {
+    if ![runto_main] {
 	return -1
     }
 

@@ -31,7 +31,7 @@ set bar_location  [gdb_get_line_number "break in bar" ]
 set main_location [gdb_get_line_number "break in main"]
 set end_location  [gdb_get_line_number "end of main"  ]
 
-runto main
+runto_main
 
 if [supports_process_record] {
     # Activate process record/replay

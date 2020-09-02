@@ -1,3 +1,63 @@
+2020-10-13  Pedro Alves  <pedro@palves.net>
+
+	* gdb.ada/fun_in_declare.exp: Use "runto_main" instead of
+	"runto main".
+	* gdb.ada/small_reg_param.exp: Likewise.
+	* gdb.arch/powerpc-d128-regs.exp: Likewise.
+	* gdb.base/annota1.exp: Likewise.
+	* gdb.base/anon.exp: Likewise.
+	* gdb.base/breakpoint-in-ro-region.exp: Likewise.
+	* gdb.base/dprintf-non-stop.exp: Likewise.
+	* gdb.base/dprintf.exp: Likewise.
+	* gdb.base/gdb11530.exp: Likewise.
+	* gdb.base/gdb11531.exp: Likewise.
+	* gdb.base/gnu_vector.exp: Likewise.
+	* gdb.base/interrupt-noterm.exp: Likewise.
+	* gdb.base/memattr.exp: Likewise.
+	* gdb.base/step-over-syscall.exp: Likewise.
+	* gdb.base/watch-cond-infcall.exp: Likewise.
+	* gdb.base/watch-read.exp: Likewise.
+	* gdb.base/watch-vfork.exp: Likewise.
+	* gdb.base/watch_thread_num.exp: Likewise.
+	* gdb.base/watchpoint-stops-at-right-insn.exp: Likewise.
+	* gdb.guile/scm-frame-inline.exp: Likewise.
+	* gdb.linespec/explicit.exp: Likewise.
+	* gdb.opt/inline-break.exp: Likewise.
+	* gdb.python/py-frame-inline.exp: Likewise.
+	* gdb.reverse/break-precsave.exp: Likewise.
+	* gdb.reverse/break-reverse.exp: Likewise.
+	* gdb.reverse/consecutive-precsave.exp: Likewise.
+	* gdb.reverse/consecutive-reverse.exp: Likewise.
+	* gdb.reverse/finish-precsave.exp: Likewise.
+	* gdb.reverse/finish-reverse.exp: Likewise.
+	* gdb.reverse/fstatat-reverse.exp: Likewise.
+	* gdb.reverse/getresuid-reverse.exp: Likewise.
+	* gdb.reverse/i386-precsave.exp: Likewise.
+	* gdb.reverse/i386-reverse.exp: Likewise.
+	* gdb.reverse/i386-sse-reverse.exp: Likewise.
+	* gdb.reverse/i387-env-reverse.exp: Likewise.
+	* gdb.reverse/i387-stack-reverse.exp: Likewise.
+	* gdb.reverse/insn-reverse.exp: Likewise.
+	* gdb.reverse/machinestate-precsave.exp: Likewise.
+	* gdb.reverse/machinestate.exp: Likewise.
+	* gdb.reverse/pipe-reverse.exp: Likewise.
+	* gdb.reverse/readv-reverse.exp: Likewise.
+	* gdb.reverse/recvmsg-reverse.exp: Likewise.
+	* gdb.reverse/rerun-prec.exp: Likewise.
+	* gdb.reverse/s390-mvcle.exp: Likewise.
+	* gdb.reverse/solib-precsave.exp: Likewise.
+	* gdb.reverse/solib-reverse.exp: Likewise.
+	* gdb.reverse/step-precsave.exp: Likewise.
+	* gdb.reverse/step-reverse.exp: Likewise.
+	* gdb.reverse/time-reverse.exp: Likewise.
+	* gdb.reverse/until-precsave.exp: Likewise.
+	* gdb.reverse/until-reverse.exp: Likewise.
+	* gdb.reverse/waitpid-reverse.exp: Likewise.
+	* gdb.reverse/watch-precsave.exp: Likewise.
+	* gdb.reverse/watch-reverse.exp: Likewise.
+	* gdb.threads/kill.exp: Likewise.
+	* gdb.threads/tid-reuse.exp: Likewise.
+
 2020-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26642
