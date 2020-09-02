@@ -302,6 +302,7 @@ struct literal
   struct tls_addend tls_addend;
   unsigned char   isdouble;
   uint64_t dbnum;
+  LITTLENUM_TYPE bignum[SIZE_OF_LARGE_NUMBER + 6];
 };
 
 static void csky_idly (void);
@@ -1660,7 +1661,7 @@ dump_literals (int isforce)
 
   colon (S_GET_NAME (poolsym));
 
-  for (i = 0, p = litpool; i < poolsize; i += (p->isdouble ? 2 : 1), p++)
+  for (i = 0, p = litpool; i < poolsize; p++)
     {
       insn_reloc = p->r_type;
       if (insn_reloc == BFD_RELOC_CKCORE_TLS_IE32
@@ -1684,8 +1685,18 @@ dump_literals (int isforce)
 	      emit_expr (& p->e, 4);
 	    }
 	}
+      else if (p->e.X_op == O_big)
+	{
+	  memcpy (generic_bignum, p->bignum, sizeof (p->bignum));
+	  emit_expr (& p->e, p->e.X_add_number * CHARS_PER_LITTLENUM);
+	}
       else
 	emit_expr (& p->e, 4);
+
+      if (p->e.X_op == O_big)
+	i += ((p->e.X_add_number  * CHARS_PER_LITTLENUM) >> 2);
+      else
+	i += (p->isdouble ? 2 : 1);
     }
 
   if (isforce && IS_CSKY_ARCH_V2 (mach_flag))
@@ -1739,7 +1750,7 @@ enter_literal (expressionS *e,
     }
 
   /* Search pool for value so we don't have duplicates.  */
-  for (p = litpool, i = 0; i < poolsize; i += (p->isdouble ? 2 : 1), p++)
+  for (p = litpool,i = 0; i < poolsize; p++)
     {
       if (e->X_op == p->e.X_op
 	  && e->X_add_symbol == p->e.X_add_symbol
@@ -1751,11 +1762,21 @@ enter_literal (expressionS *e,
 	  && insn_reloc != BFD_RELOC_CKCORE_TLS_LDM32
 	  && insn_reloc != BFD_RELOC_CKCORE_TLS_LDO32
 	  && insn_reloc != BFD_RELOC_CKCORE_TLS_IE32
-	  && insn_reloc != BFD_RELOC_CKCORE_TLS_LE32)
+	  && insn_reloc != BFD_RELOC_CKCORE_TLS_LE32
+	  && (e->X_op != O_big
+	      || (memcmp (generic_bignum, p->bignum,
+			  p->e.X_add_number * sizeof (LITTLENUM_TYPE)) == 0)))
 	{
 	  p->refcnt ++;
 	  return i;
 	}
+      if (p->e.X_op == O_big)
+	{
+	  i += (p->e.X_add_number >> 1);
+	  i += (p->e.X_add_number & 0x1);
+    }
+      else
+	i += (p->isdouble ? 2 : 1);
     }
   p->refcnt = 1;
   p->ispcrel = ispcrel;
@@ -1764,6 +1785,8 @@ enter_literal (expressionS *e,
   p->isdouble = isdouble;
   if (isdouble)
     p->dbnum = dbnum;
+  if (e->X_op == O_big)
+    memcpy (p->bignum, generic_bignum, sizeof (p->bignum));
 
   if (insn_reloc == BFD_RELOC_CKCORE_TLS_GD32
       || insn_reloc == BFD_RELOC_CKCORE_TLS_LDM32
@@ -1773,7 +1796,12 @@ enter_literal (expressionS *e,
       p->tls_addend.offset = csky_insn.output - frag_now->fr_literal;
       literal_insn_offset = p;
     }
+  if (p->e.X_op == O_big) {
+    poolsize += (p->e.X_add_number >> 1);
+    poolsize += (p->e.X_add_number & 0x1);
+  } else
   poolsize += (p->isdouble ? 2 : 1);
+
   return i;
 }
 
@@ -2955,6 +2983,26 @@ parse_type_freg (char** oper, int even)
     {
       SET_ERROR_STRING (ERROR_EXP_EVEN_FREG, NULL);
       return FALSE;
+    }
+
+  if (IS_CSKY_V2 (mach_flag)
+      && (csky_insn.opcode->isa_flag32 & CSKY_ISA_VDSP_2)
+      && reg > 15)
+    {
+      if ((csky_insn.opcode->isa_flag32 & CSKY_ISA_VDSP_2))
+	{
+	  SET_ERROR_INTEGER (ERROR_VREG_OVER_RANGE, reg);
+	}
+      else
+	{
+	  SET_ERROR_INTEGER (ERROR_FREG_OVER_RANGE, reg);
+	}
+      return FALSE;
+    }
+  /* TODO: recognize vreg or freg.  */
+  if (reg > 31)
+    {
+      SET_ERROR_INTEGER (ERROR_VREG_OVER_RANGE, reg);
     }
   csky_insn.val[csky_insn.idx++] = reg;
   return TRUE;

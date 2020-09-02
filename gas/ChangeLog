@@ -1,3 +1,10 @@
+2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (struct literal): New member bignum.
+	(dump_literals): Handle big constant.
+	(enter_literal): Likewise.
+	(parse_type_freg): Handle vector register.
+
 2020-09-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/as.texi: Document the .tls_common directive.
