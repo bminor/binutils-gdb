@@ -1,5 +1,20 @@
 2020-10-13  Pedro Alves  <pedro@palves.net>
 
+	* lib/mi-support.exp (mi_runto_main): New proc.
+	(mi_run_to_main): Use it.
+	* gdb.mi/mi-catch-cpp-exceptions.exp: Likewise.
+	* gdb.mi/mi-var-cmd.exp: Likewise.
+	* gdb.mi/mi-var-invalidate.exp: Likewise.
+	* mi-var-list-children-invalid-grandchild.exp: Likewise.
+	* gdb.mi/mi2-amd64-entry-value.exp: Likewise.
+	* gdb.mi/new-ui-mi-sync.exp: Likewise.
+	* gdb.mi/user-selected-context-sync.exp: Likewise.
+	* gdb.opt/inline-cmds.exp: Likewise.
+	* gdb.python/py-framefilter-mi.exp: Likewise.
+	* gdb.python/py-mi.exp: Likewise.
+
+2020-10-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.ada/fun_in_declare.exp: Use "runto_main" instead of
 	"runto main".
 	* gdb.ada/small_reg_param.exp: Likewise.

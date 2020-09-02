@@ -70,7 +70,7 @@ mi_create_floating_varobj float_simple array "create floating variable"
 #
 mi_delete_breakpoints
 mi_gdb_load ${binfile_bis}
-mi_runto main
+mi_runto_main
 
 # Change format of floating variable immediately after reload reveals a
 # bug where gdb still uses a free'd pointer.

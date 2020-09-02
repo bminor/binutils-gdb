@@ -1042,7 +1042,7 @@ proc mi_run_to_main { } {
     mi_gdb_reinitialize_dir $srcdir/$subdir
     mi_gdb_load ${binfile}
 
-    mi_runto main
+    mi_runto_main
 }
 
 
@@ -1084,6 +1084,12 @@ proc mi_runto_helper {func run_or_continue} {
 
 proc mi_runto {func} {
     return [mi_runto_helper $func "run"]
+}
+
+# Just like runto_main but works with the MI interface.
+
+proc mi_runto_main {} {
+    return [mi_runto_helper "main" "run"]
 }
 
 # Next to the next statement

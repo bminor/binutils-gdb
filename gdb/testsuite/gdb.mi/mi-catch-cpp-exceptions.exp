@@ -59,7 +59,7 @@ proc restart_for_test {} {
     mi_gdb_reinitialize_dir $srcdir/$subdir
     mi_gdb_load ${binfile}
 
-    mi_runto main
+    mi_runto_main
 
     mi_create_breakpoint \
 	"$srcfile:${main_lineno}" "break before exiting program" \
