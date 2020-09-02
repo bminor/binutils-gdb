@@ -19,6 +19,23 @@
 
 #include "nat/netbsd-nat.h"
 
+#include <sys/types.h>
+#include <sys/sysctl.h>
+
 namespace netbsd_nat
 {
+
+/* See netbsd-nat.h.  */
+
+const char *
+pid_to_exec_file (pid_t pid)
+{
+  static char buf[PATH_MAX];
+  int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
+  size_t buflen = sizeof (buf);
+  if (::sysctl (mib, ARRAY_SIZE (mib), buf, &buflen, NULL, 0) != 0)
+    return NULL;
+  return buf;
+}
+
 }

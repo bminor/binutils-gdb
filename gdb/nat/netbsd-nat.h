@@ -20,8 +20,16 @@
 #ifndef NAT_NETBSD_NAT_H
 #define NAT_NETBSD_NAT_H
 
+#include <unistd.h>
+
 namespace netbsd_nat
 {
+
+/* Return the executable file name of a process specified by PID.  Returns the
+   string in a static buffer.  */
+
+extern const char *pid_to_exec_file (pid_t pid);
+
 }
 
 #endif

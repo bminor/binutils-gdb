@@ -1,5 +1,12 @@
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
+	* netbsd-nat.h: Include <unistd.h>.
+	* (netbsd_nat::pid_to_exec_file): Add.
+	* netbsd-nat.c: Include <sys/types.h> and <sys/sysctl.h>.
+	* (netbsd_nat::pid_to_exec_file) Add.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
 	* configure.nat (NATDEPFILES): Add nat/netbsd-nat.o when needed.
 
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
