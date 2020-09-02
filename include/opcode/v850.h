@@ -133,7 +133,7 @@ struct v850_operand
      operand value is legal, *ERRMSG will be unchanged (most operands
      can accept any value).  */
   unsigned long (* insert)
-    (unsigned long instruction, long op, const char ** errmsg);
+    (unsigned long instruction, unsigned long op, const char ** errmsg);
 
   /* Extraction function.  This is used by the disassembler.  To
      extract this operand type from an instruction, check this field.

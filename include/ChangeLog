@@ -1,3 +1,8 @@
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
+	* opcode/v850.h (struct v850_operand <insert>): Make param op an
+	unsigned long.
+
 2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* opcode/csky.h (CSKYV2_ISA_3E3R3): Define.

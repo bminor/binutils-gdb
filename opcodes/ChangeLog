@@ -1,5 +1,18 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* v850-opc.c (insert_i5div1, insert_i5div2, insert_i5div3),
+	(insert_d5_4, insert_d8_6, insert_d8_7, insert_v8, insert_d9),
+	(insert_u16_loop, insert_d16_15, insert_d16_16, insert_d17_16),
+	(insert_d22, insert_d23, insert_d23_align1, insert_i9, insert_u9),
+	(insert_spe, insert_r4, insert_POS, insert_WIDTH, insert_SELID),
+	(insert_VECTOR8, insert_VECTOR5, insert_CACHEOP, insert_PREFOP),
+	(nsert_IMM10U, insert_SRSEL1, insert_SRSEL2): Use unsigned long
+	for value parameter and update code to suit.
+	(extract_d9, extract_d16_15, extract_d16_16, extract_d17_16),
+	(extract_d22, extract_d23, extract_i9): Use unsigned long variables.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* i386-dis.c (OP_E_memory): Don't cast to signed type when
 	negating.
 	(get32, get32s): Use unsigned types in shift expressions.
