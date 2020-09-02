@@ -1,3 +1,8 @@
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-nat.h: New file.
+	* netbsd-nat.c: Likewise.
+
 2020-09-09  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (remove_extra_symbols): Do not increment when
