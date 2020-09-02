@@ -1,3 +1,12 @@
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-low.cc: Add.
+	* netbsd-low.h: Likewise.
+	* netbsd-amd64-low.cc: Likewise.
+	* Makefile.in (SFILES): Register "netbsd-low.cc", "netbsd-low.h",
+	"netbsd-amd64-low.cc".
+	* configure.srv: Add x86_64-*-netbsd*.
+
 2020-08-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* server.cc (captured_main): Accept multiple `--selftest=`
