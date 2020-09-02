@@ -3653,7 +3653,7 @@ md_assemble (char *str)
 static int
 is_overflow (long value, unsigned bitsize)
 {
-  long fieldmask = (1UL << bitsize) - 1;
+  long fieldmask = (2UL << (bitsize - 1)) - 1;
   long signmask = ~fieldmask;
   long a = value & fieldmask;
   long ss = a & signmask;

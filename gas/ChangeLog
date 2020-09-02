@@ -1,5 +1,9 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-z80.c (is_overflow): Avoid too large shift.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-sparc.c (in_signed_range): Use an unsigned type for
 	sign mask.
 
