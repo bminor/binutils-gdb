@@ -1,5 +1,9 @@
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
+	* configure.nat (NATDEPFILES): Add nat/netbsd-nat.o when needed.
+
+2020-09-10  Kamil Rytarowski  <n54@gmx.com>
+
 	* netbsd-nat.h: New file.
 	* netbsd-nat.c: Likewise.
 

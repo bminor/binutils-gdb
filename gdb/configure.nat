@@ -68,7 +68,7 @@ case ${gdb_host} in
 	LOADLIBES='-lkvm'
 	;;
     nbsd*)
-	NATDEPFILES='fork-child.o nat/fork-inferior.o inf-ptrace.o'
+	NATDEPFILES='fork-child.o nat/fork-inferior.o nat/netbsd-nat.o inf-ptrace.o'
 	HAVE_NATIVE_GCORE_HOST=1
 	;;
     obsd*)
