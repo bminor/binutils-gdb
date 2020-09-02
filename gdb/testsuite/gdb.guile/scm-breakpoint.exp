@@ -43,7 +43,7 @@ proc test_bkpt_basic { } {
 	gdb_scm_test_silent_cmd "guile (define blist (breakpoints))" \
 	    "get breakpoint list 1"
 	gdb_test "guile (print (car blist))" \
-	    "<gdb:breakpoint #1 BP_BREAKPOINT enabled noisy hit:1 ignore:0 @main>" \
+	    "<gdb:breakpoint #1 BP_BREAKPOINT enabled noisy hit:1 ignore:0 @-qualified main>" \
 	    "check main breakpoint"
 	gdb_test "guile (print (breakpoint-location (car blist)))" \
 	    "main" "check main breakpoint location"

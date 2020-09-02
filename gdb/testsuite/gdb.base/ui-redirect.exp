@@ -47,7 +47,7 @@ gdb_breakpoint "foo"
 gdb_breakpoint "bar"
 
 set cmds [multi_line_input \
-	      "break main" \
+	      "break -qualified main" \
 	      "  commands" \
 	      "    print 1" \
 	      "  end" \

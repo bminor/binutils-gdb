@@ -1,5 +1,16 @@
 2020-10-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/ui-redirect.exp: Expect "break -qualified main" in
+	saved breakpoints file.
+	* gdb.guile/scm-breakpoint.exp: Expect "-qualified main" when
+	inspecting breakpoint list.
+	* lib/gdb.exp (runto_main): Add "qualified" to options.
+	* lib/mi-support.exp (mi_runto_helper): Add 'qualified' parameter,
+	and handle it.
+	(mi_runto_main): Pass 1 as qualified argument.
+
+2020-10-13  Pedro Alves  <pedro@palves.net>
+
 	* lib/mi-support.exp (mi_runto_main): New proc.
 	(mi_run_to_main): Use it.
 	* gdb.mi/mi-catch-cpp-exceptions.exp: Likewise.
