@@ -155,7 +155,7 @@ insert_normal (CGEN_CPU_DESC cd,
   /* Ensure VALUE will fit.  */
   if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGN_OPT))
     {
-      long minval = - (1L << (length - 1));
+      long minval = - (1UL << (length - 1));
       unsigned long maxval = mask;
 
       if ((value > 0 && (unsigned long) value > maxval)
@@ -193,8 +193,8 @@ insert_normal (CGEN_CPU_DESC cd,
     {
       if (! cgen_signed_overflow_ok_p (cd))
 	{
-	  long minval = - (1L << (length - 1));
-	  long maxval =   (1L << (length - 1)) - 1;
+	  long minval = - (1UL << (length - 1));
+	  long maxval =   (1UL << (length - 1)) - 1;
 
 	  if (value < minval || value > maxval)
 	    {
@@ -498,7 +498,7 @@ extract_normal (CGEN_CPU_DESC cd,
   value &= mask;
   /* sign extend? */
   if (CGEN_BOOL_ATTR (attrs, CGEN_IFLD_SIGNED)
-      && (value & (1L << (length - 1))))
+      && (value & (1UL << (length - 1))))
     value |= ~mask;
 
   *valuep = value;
