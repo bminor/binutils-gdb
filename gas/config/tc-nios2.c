@@ -1400,7 +1400,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      break;
 	    default:
 	      {
-		fixup &= ((valueT) 1 << howto->bitsize) - 1;
+		fixup &= ((valueT) 2 << (howto->bitsize - 1)) - 1;
 		break;
 	      }
 	    }

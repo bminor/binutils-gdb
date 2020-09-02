@@ -1,5 +1,9 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-nios2.c (md_apply_fix): Avoid too large shift.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-mips.c (load_register): Avoid too large shift.
 
 2020-09-02  Alan Modra  <amodra@gmail.com>
