@@ -1,3 +1,8 @@
+2020-09-03  Alan Modra  <amodra@gmail.com>
+
+	* xcofflink.c (xcoff_get_archive_info): Allocate xcoff_archive_info
+	on the output bfd objalloc memory.
+
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Correct type

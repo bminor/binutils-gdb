@@ -525,7 +525,7 @@ xcoff_get_archive_info (struct bfd_link_info *info, bfd *archive)
   entryp = *slot;
   if (!entryp)
     {
-      entryp = bfd_zalloc (archive, sizeof (entry));
+      entryp = bfd_zalloc (info->output_bfd, sizeof (entry));
       if (!entryp)
 	return NULL;
 

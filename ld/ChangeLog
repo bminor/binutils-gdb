@@ -1,3 +1,8 @@
+2020-09-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/sysroot-prefix.exp (single_sysroot_prefix_test):
+	Log $scriptname.
+
 2020-08-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/dwarf.exp: Append $NOSANTIZE_CFLAGS to CFLAGS.
