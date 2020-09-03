@@ -45,6 +45,8 @@
 #include "record-full.h"
 #include "linux-record.h"
 
+#include "value.h"
+
 /* Signal frame handling.
 
       +------------+  ^
@@ -1436,6 +1438,78 @@ aarch64_linux_gcc_target_options (struct gdbarch *gdbarch)
   return {};
 }
 
+/* AArch64 Linux implementation of the report_signal_info gdbarch
+   hook.  Displays information about possible memory tag violations or
+   capability violations.  */
+
+static void
+aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
+				  struct ui_out *uiout,
+				  enum gdb_signal siggnal)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->has_capability () || siggnal != GDB_SIGNAL_SEGV)
+    return;
+
+  CORE_ADDR fault_addr = 0;
+  long si_code = 0;
+
+  try
+    {
+      /* Sigcode tells us if the segfault is actually a capability
+	 violation.  */
+      si_code = parse_and_eval_long ("$_siginfo.si_code\n");
+
+      fault_addr
+	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
+    }
+  catch (const gdb_exception &exception)
+    {
+      return;
+    }
+
+  /* If this is not a capability violation, just return.  */
+  if (si_code != SEGV_CAPTAGERR && si_code != SEGV_CAPSEALEDERR
+      && si_code != SEGV_CAPBOUNDSERR && si_code != SEGV_CAPPERMERR
+      && si_code != SEGV_CAPSTORETAGERR)
+    return;
+
+  uiout->text ("\n");
+
+  std::string str_si_code;
+
+  switch (si_code)
+    {
+      case SEGV_CAPTAGERR:
+	str_si_code = "tag";
+	break;
+      case SEGV_CAPSEALEDERR:
+	str_si_code = "sealed";
+	break;
+      case SEGV_CAPBOUNDSERR:
+	str_si_code = "bounds";
+	break;
+      case SEGV_CAPPERMERR:
+	str_si_code = "permission";
+	break;
+      case SEGV_CAPSTORETAGERR:
+	str_si_code = "access";
+	break;
+      default:
+	str_si_code = "unknown";
+	break;
+    }
+
+  std::string str_meaning = "Capability " + str_si_code + " fault";
+  uiout->field_string ("sigcode-meaning", str_meaning);
+
+  /* FIXME-Morello: Show more information about the faults.  */
+  uiout->text (_(" while accessing address "));
+  uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
+  uiout->text ("\n");
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1667,6 +1741,12 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					    aarch64_displaced_step_hw_singlestep);
 
   set_gdbarch_gcc_target_options (gdbarch, aarch64_linux_gcc_target_options);
+
+  if (tdep->has_capability ())
+    {
+      set_gdbarch_report_signal_info (gdbarch,
+				      aarch64_linux_report_signal_info);
+    }
 }
 
 void _initialize_aarch64_linux_tdep ();

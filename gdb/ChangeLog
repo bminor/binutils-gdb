@@ -1,5 +1,15 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-tdep.c: Include value.h.
+	(aarch64_linux_report_signal_info): New function.
+	(aarch64_linux_init_abi): Register hook for reporting signal
+	information.
+	* arch/aarch64-cap-linux.h (SEGV_CAPTAGERR, SEGV_CAPSEALEDERR)
+	(SEGV_CAPBOUNDSERR, SEGV_CAPPERMERR, SEGV_CAPSTORETAGERR): New
+	constants.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (set_aarch64_cmdlist, show_aarch64_cmdlist,
 	aarch64_abi_strings, aarch64_current_abi_global)
 	(aarch64_current_abi_string): New static globals.
