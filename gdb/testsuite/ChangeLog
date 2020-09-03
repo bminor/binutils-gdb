@@ -1,3 +1,11 @@
+2020-09-03  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* lib/fortran.exp (fortran_complex8): New proc.
+	(fortran_complex16): New proc.
+	* gdb.fortran/complex.exp: Use routines from fortran.exp
+	* gdb.fortran/pointer-to-pointer.exp: Likewise.
+	* gdb.fortran/vla-ptr-info.exp: Likewise.
+
 2020-09-03  Tom de Vries  <tdevries@suse.de>
 
 	PR breakpoint/26546

@@ -30,6 +30,9 @@ if ![fortran_runto_main] {
     return -1
 }
 
+# Depending on the compiler being used, the type names can be printed differently.
+set real4 [fortran_real4]
+
 gdb_breakpoint [gdb_get_line_number "Break Here"]
 gdb_continue_to_breakpoint "Break Here"
 
@@ -38,9 +41,9 @@ gdb_test "print *buffer" \
 
 set l_buffer_type [multi_line \
 		       "Type l_buffer" \
-		       "    real\\(kind=4\\) :: alpha\\(:\\)" \
+		       "    $real4 :: alpha\\(:\\)" \
 		       "End Type l_buffer" ]
 
 gdb_test "ptype buffer" "type = PTR TO -> \\( ${l_buffer_type} \\)"
 gdb_test "ptype *buffer" "type = ${l_buffer_type}"
-gdb_test "ptype buffer%alpha" "type = real\\(kind=4\\) \\(5\\)"
+gdb_test "ptype buffer%alpha" "type = $real4 \\(5\\)"

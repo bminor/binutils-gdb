@@ -27,6 +27,10 @@ if ![fortran_runto_main] then {
     continue
 }
 
+# Depending on the compiler being used, the type names can be printed differently.
+set complex4 [fortran_complex4]
+set complex8 [fortran_complex8]
+set complex16 [fortran_complex16]
 
 gdb_breakpoint [gdb_get_line_number "stop"]
 gdb_continue_to_breakpoint "continue"
@@ -38,29 +42,29 @@ gdb_test "print dc" " = \\(321,-22\\)"
 
 gdb_test "print c16" " = \\(-874,19\\)"
 
-gdb_test "whatis c" "type = complex\\(kind=4\\)"
+gdb_test "whatis c" "type = $complex4"
 gdb_test "print \$_creal (c)" " = 1000"
 with_test_prefix "c" {
     gdb_test "whatis \$" " = real"
 }
 
-gdb_test "whatis c4" "type = complex\\(kind=4\\)"
+gdb_test "whatis c4" "type = $complex4"
 gdb_test "print \$_creal (c4)" " = 1000"
 with_test_prefix "c4" {
     gdb_test "whatis \$" " = real"
 }
-gdb_test "whatis c8" "type = complex\\(kind=8\\)"
+gdb_test "whatis c8" "type = $complex8"
 gdb_test "print \$_creal (c8)" " = 321"
 with_test_prefix "c8" {
     gdb_test "whatis \$" " = real\\*8"
 }
-gdb_test "whatis dc" "type = complex\\(kind=8\\)"
+gdb_test "whatis dc" "type = $complex8"
 gdb_test "print \$_creal (dc)" " = 321"
 with_test_prefix "dc" {
     gdb_test "whatis \$" " = real\\*8"
 }
 
-gdb_test "whatis c16" "type = complex\\(kind=16\\)"
+gdb_test "whatis c16" "type = $complex16"
 gdb_test "print \$_creal (c16)" " = -874"
 with_test_prefix "c16" {
     gdb_test "whatis \$" " = real\\*16"
