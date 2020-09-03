@@ -12847,6 +12847,17 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	      continue;
 	    }
 
+	  if (hdr->sh_entsize == 0)
+	    {
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB(%pA): error: secondary reloc section has zero sized entries"),
+		 abfd, relsec);
+	      bfd_set_error (bfd_error_bad_value);
+	      result = FALSE;
+	      continue;
+	    }
+
 	  reloc_count = hdr->sh_size / hdr->sh_entsize;
 	  if (reloc_count <= 0)
 	    {

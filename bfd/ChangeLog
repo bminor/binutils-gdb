@@ -1,3 +1,9 @@
+2020-09-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 26521
+	* elf.c (_bfd_elf_write_secondary_reloc_section): Check for
+	secondary reloc sections with a zero sh_entsize field.
+
 2020-09-03  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_i_or_e_p): Minor cleanup for warnings/errors.
