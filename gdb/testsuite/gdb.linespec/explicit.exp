@@ -611,15 +611,15 @@ namespace eval $testfile {
 
     # Test explicit "ranges."  Make sure that using explicit
     # locations doesn't alter the expected outcome.
-    gdb_test "list main" ".*" "list main 1"
+    gdb_test "list -q main" ".*" "list main 1"
     set list_result [capture_command_output "list -,+" ""]
-    gdb_test "list main" ".*" "list main 2"
+    gdb_test "list -q main" ".*" "list main 2"
     gdb_test "list -line -,-line +" [string_to_regexp $list_result]
 
     # Ditto for the reverse (except that no output is expected).
-    gdb_test "list myfunction" ".*" "list myfunction 1"
+    gdb_test "list -q myfunction" ".*" "list myfunction 1"
     gdb_test_no_output "list +,-"
-    gdb_test "list myfunction" ".*" "list myfunction 2"
+    gdb_test "list -q myfunction" ".*" "list myfunction 2"
     gdb_test_no_output "list -line +, -line -"
 }
 

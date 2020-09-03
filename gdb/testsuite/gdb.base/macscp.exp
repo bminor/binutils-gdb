@@ -193,7 +193,7 @@ proc list_and_check_macro {func macro expected} {
     return [check_macro $macro $expected "after `list $func'"]
 }
 
-gdb_test "list main" ".*main.*" "list main for support check"
+gdb_test "list -q main" ".*main.*" "list main for support check"
 set macro_support "unknown"
 gdb_test_multiple "info source" "test macro information"  {
     -re "Includes preprocessor macro info\..*$gdb_prompt $" {

@@ -195,16 +195,16 @@ proc test_list_function {} {
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
     # SunPRO cc is the second case below, it's also correct.
-    gdb_test "list main" "(5\[ \t\]+int x;.*8\[ \t\]+foo \[(\]+.*\[)\]+;|1\[ \t\]+#include .*7\[ \t\]+x = 0;)" "list function in source file 1"
+    gdb_test "list -q main" "(5\[ \t\]+int x;.*8\[ \t\]+foo \[(\]+.*\[)\]+;|1\[ \t\]+#include .*7\[ \t\]+x = 0;)" "list function in source file 1"
 
     # Ultrix gdb takes the second case below; it's also correct.
     # SunPRO cc is the third case.
-    gdb_test "list bar" "(4\[ \t\]+void.*\[ \t\]*long_line.*;.*bar.*9\[ \t\]*.*|1\[ \t\]+void.*8\[ \t\]+\}|1\[ \t\]+void.*7\[ \t\]*long_line ..;|7\[ \t\]+void.*14\[ \t\]+\})" "list function in source file 2"
+    gdb_test "list -q bar" "(4\[ \t\]+void.*\[ \t\]*long_line.*;.*bar.*9\[ \t\]*.*|1\[ \t\]+void.*8\[ \t\]+\}|1\[ \t\]+void.*7\[ \t\]*long_line ..;|7\[ \t\]+void.*14\[ \t\]+\})" "list function in source file 2"
 
     # Test "list function" for C include file
     # Ultrix gdb is the second case, still correct.
     # SunPRO cc is the third case.
-    gdb_test "list foo" "(3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;|2\[ \t\]+including file.*11\[ \t\]+bar \[(\]+.*\[)\]+;|1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;)" "list function in include file"
+    gdb_test "list -q foo" "(3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;|2\[ \t\]+including file.*11\[ \t\]+bar \[(\]+.*\[)\]+;|1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;)" "list function in include file"
 }
 
 proc test_list_forward {} {

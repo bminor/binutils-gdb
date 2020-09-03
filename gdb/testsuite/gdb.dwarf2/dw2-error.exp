@@ -45,4 +45,4 @@ gdb_test "file $binfile" \
     "file $testfile"
 
 # Now check that we can still break given the minimal symbol.
-gdb_test "break main" "Breakpoint $decimal.*"
+gdb_test "break -q main" "Breakpoint $decimal.*"

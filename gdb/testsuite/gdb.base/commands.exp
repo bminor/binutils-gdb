@@ -289,7 +289,7 @@ proc_with_prefix breakpoint_clear_command_test {} {
     delete_breakpoints
     gdb_test "break factorial" "Breakpoint.*at.*"
     gdb_test_no_output "set \$bpnumfactorial = \$bpnum"
-    gdb_test "break main" "Breakpoint.*at.*"
+    gdb_test "break -q main" "Breakpoint.*at.*"
     gdb_test_no_output "set \$bpnummain = \$bpnum"
 
     gdb_test \
@@ -873,7 +873,7 @@ proc_with_prefix if_commands_test {} {
 
     set test "if_commands_test 1"
     gdb_test_no_prompt "if \$tem == 2" { >} $test
-    gdb_test_no_prompt "break main" { >} $test
+    gdb_test_no_prompt "break -q main" { >} $test
     gdb_test_no_prompt "else" { >} $test
     gdb_test_no_prompt "break factorial" { >} $test
     gdb_test_no_prompt "commands" {  >} $test
@@ -899,7 +899,7 @@ proc_with_prefix if_commands_test {} {
 
     set test "if_commands_test 2"
     gdb_test_no_prompt "if \$tem == 1" { >} $test
-    gdb_test_no_prompt "break main" { >} $test
+    gdb_test_no_prompt "break -q main" { >} $test
     gdb_test_no_prompt "else" { >} $test
     gdb_test_no_prompt "break factorial" { >} $test
     gdb_test_no_prompt "commands" {  >} $test

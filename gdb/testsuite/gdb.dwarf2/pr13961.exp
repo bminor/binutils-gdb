@@ -32,7 +32,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     return -1
 }
 
-gdb_test "break main" "Breakpoint.*at.*"
+gdb_test "break -q main" "Breakpoint.*at.*"
 
 # If we get this far gdb didn't crash.
 pass $testfile

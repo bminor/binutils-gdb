@@ -79,11 +79,11 @@ foreach inf_sel {1 2} {
 	    "switch to inferior"
 
 	set test "set breakpoint"
-	gdb_test_multiple "break main" $test {
+	gdb_test_multiple "break -q main" $test {
 	    -re "Sending packet.*$gdb_prompt $" {
 		fail $test
 	    }
-	    -re "^break main\r\nBreakpoint .* at .*$gdb_prompt $" {
+	    -re "^break -q main\r\nBreakpoint .* at .*$gdb_prompt $" {
 		pass $test
 	    }
 	}

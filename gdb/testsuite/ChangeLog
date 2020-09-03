@@ -1,5 +1,54 @@
 2020-10-13  Pedro Alves  <pedro@palves.net>
 
+	* config/monitor.exp: Use "list -q".
+	* gdb.arch/gdb1558.exp: Use "break -q".
+	* gdb.arch/i386-permbkpt.exp: Use "break -q".
+	* gdb.arch/i386-prologue-skip-cf-protection.exp: Use "break -q".
+	* gdb.base/break.exp: Use "break -q", "list -q" and "tbreak -q".
+	* gdb.base/commands.exp: Use "break -q".
+	* gdb.base/condbreak.exp: Use "break -q".
+	* gdb.base/ctf-ptype.exp: Use "list -q".
+	* gdb.base/define.exp: Use "break -q".
+	* gdb.base/del.exp: Use "break -q".
+	* gdb.base/fullname.exp: Use "break -q".
+	* gdb.base/hbreak-in-shr-unsupported.exp: Use "hbreak -q".
+	* gdb.base/hbreak-unmapped.exp: Use "hbreak -q".
+	* gdb.base/hbreak2.exp: Use "hbreak -q" and "list -q".
+	* gdb.base/hw-sw-break-same-address.exp: Use "break -q" and
+	"hbreak -q".
+	* gdb.base/included.exp: Use "list -q".
+	* gdb.base/label.exp: Use "break -q".
+	* gdb.base/lineinc.exp: Use "break -q".
+	* gdb.base/list.exp: Use "list -q".
+	* gdb.base/macscp.exp: Use "list -q".
+	* gdb.base/pending.exp: Use "break -q".
+	* gdb.base/prologue-include.exp: Use "break -q".
+	* gdb.base/ptype.exp: Use "list -q".
+	* gdb.base/sepdebug.exp: Use "break -q", "list -q" and "tbreak -q".
+	* gdb.base/server-del-break.exp: Use "break -q".
+	* gdb.base/style.exp: Use "break -q".
+	* gdb.base/symbol-without-target_section.exp: Use "list -q".
+	* gdb.base/watchpoint-reuse-slot.exp: Use "hbreak -q".
+	* gdb.cp/exception.exp: Use "tbreak -q".
+	* gdb.dwarf2/dw2-error.exp: Use "break -q".
+	* gdb.dwarf2/fission-mix.exp: Use "break -q".
+	* gdb.dwarf2/fission-reread.exp: Use "break -q".
+	* gdb.dwarf2/pr13961.exp: Use "break -q".
+	* gdb.linespec/explicit.exp: Use "list -q".
+	* gdb.linespec/linespec.exp: Use "break -q".
+	* gdb.mi/mi-simplerun.exp: Use "--qualified".
+	* gdb.python/py-mi-objfile-gdb.py: Use "list -q".
+	* gdb.server/bkpt-other-inferior.exp: Use "break -q".
+	* gdb.server/connect-without-multi-process.exp: Use "break -q".
+	* gdb.trace/change-loc.exp: Use "break -q".
+	* gdb.trace/pending.exp: Use "break -q".
+	* gdb.tui/basic.exp: Use "list -q".
+	* gdb.tui/list-before.exp: Use "list -q".
+	* gdb.tui/list.exp: Use "list -q".
+	* lib/gdb.exp (gdb_has_argv0): Use "break -q".
+
+2020-10-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/ui-redirect.exp: Expect "break -qualified main" in
 	saved breakpoints file.
 	* gdb.guile/scm-breakpoint.exp: Expect "-qualified main" when

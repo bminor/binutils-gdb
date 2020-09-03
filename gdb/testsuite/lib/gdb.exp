@@ -5942,7 +5942,7 @@ gdb_caching_proc gdb_has_argv0 {
 	gdb_load "$exe"
 
 	# Set breakpoint on main.
-	gdb_test_multiple "break main" "break main" {
+	gdb_test_multiple "break -q main" "break -q main" {
 	    -re "Breakpoint.*${gdb_prompt} $" {
 	    }
 	    -re "${gdb_prompt} $" {

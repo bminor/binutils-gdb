@@ -23,4 +23,4 @@ import gdb
 # parameter change notification.
 gdb.execute("set width 101", to_string=True)
 # And finally a command that will use the console stream without redirection
-gdb.execute("list main")
+gdb.execute("list -q main")
