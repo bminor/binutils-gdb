@@ -1741,7 +1741,8 @@ aarch64_linux_memtag_to_string (struct gdbarch *gdbarch, struct value *tag_value
 }
 
 /* AArch64 Linux implementation of the report_signal_info gdbarch
-   hook.  Displays information about possible memory tag violations.  */
+   hook.  Displays information about possible memory tag violations or
+   capability violations.  */
 
 static void
 aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
@@ -1750,7 +1751,8 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
 {
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  if (!tdep->has_mte () || siggnal != GDB_SIGNAL_SEGV)
+  if ((!tdep->has_mte () && !!tdep->has_capability ())
+      || siggnal != GDB_SIGNAL_SEGV)
     return;
 
   CORE_ADDR fault_addr = 0;
@@ -1758,8 +1760,8 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
 
   try
     {
-      /* Sigcode tells us if the segfault is actually a memory tag
-	 violation.  */
+      /* Sigcode tells us if the segfault is actually a memory tag or
+	 capability violation.  */
       si_code = parse_and_eval_long ("$_siginfo.si_code");
 
       fault_addr
@@ -1771,40 +1773,83 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
       return;
     }
 
-  /* If this is not a memory tag violation, just return.  */
-  if (si_code != SEGV_MTEAERR && si_code != SEGV_MTESERR)
+  /* If this is not a memory tag or capability violation, just return.  */
+  if (si_code != SEGV_MTEAERR && si_code != SEGV_MTESERR
+      && si_code != SEGV_CAPTAGERR && si_code != SEGV_CAPSEALEDERR
+      && si_code != SEGV_CAPBOUNDSERR && si_code != SEGV_CAPPERMERR
+      && si_code != SEGV_CAPSTORETAGERR)
     return;
 
   uiout->text ("\n");
 
-  uiout->field_string ("sigcode-meaning", _("Memory tag violation"));
-
-  /* For synchronous faults, show additional information.  */
-  if (si_code == SEGV_MTESERR)
+  switch (si_code)
     {
-      uiout->text (_(" while accessing address "));
-      uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
-      uiout->text ("\n");
+      case SEGV_MTEAERR:
+      case SEGV_MTESERR:
+	uiout->field_string ("sigcode-meaning", _("Memory tag violation"));
 
-      gdb::optional<CORE_ADDR> atag
-	= aarch64_mte_get_atag (address_significant (gdbarch, fault_addr));
-      gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);
+	/* For synchronous faults, show additional information.  */
+	if (si_code == SEGV_MTESERR)
+	  {
+	    uiout->text (_(" while accessing address "));
+	    uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
+	    uiout->text ("\n");
 
-      if (!atag.has_value ())
-	uiout->text (_("Allocation tag unavailable"));
-      else
-	{
-	  uiout->text (_("Allocation tag "));
-	  uiout->field_string ("allocation-tag", hex_string (*atag));
-	  uiout->text ("\n");
-	  uiout->text (_("Logical tag "));
-	  uiout->field_string ("logical-tag", hex_string (ltag));
-	}
-    }
-  else
-    {
-      uiout->text ("\n");
-      uiout->text (_("Fault address unavailable"));
+	    gdb::optional<CORE_ADDR> atag
+	      = aarch64_mte_get_atag (address_significant (gdbarch, fault_addr));
+	    gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);
+
+	    if (!atag.has_value ())
+	      uiout->text (_("Allocation tag unavailable"));
+	    else
+	      {
+		uiout->text (_("Allocation tag "));
+		uiout->field_string ("allocation-tag", hex_string (*atag));
+		uiout->text ("\n");
+		uiout->text (_("Logical tag "));
+		uiout->field_string ("logical-tag", hex_string (ltag));
+	      }
+	  }
+	else
+	  {
+	    uiout->text ("\n");
+	    uiout->text (_("Fault address unavailable"));
+	  }
+	break;
+      case SEGV_CAPTAGERR:
+      case SEGV_CAPSEALEDERR:
+      case SEGV_CAPBOUNDSERR:
+      case SEGV_CAPPERMERR:
+      case SEGV_CAPSTORETAGERR:
+	std::string str_si_code;
+
+	switch (si_code)
+	  {
+	    case SEGV_CAPTAGERR:
+	      str_si_code = "tag";
+	      break;
+	    case SEGV_CAPSEALEDERR:
+	      str_si_code = "sealed";
+	      break;
+	    case SEGV_CAPBOUNDSERR:
+	      str_si_code = "bounds";
+	      break;
+	    case SEGV_CAPPERMERR:
+	      str_si_code = "permission";
+	      break;
+	    case SEGV_CAPSTORETAGERR:
+	      str_si_code = "access";
+	      break;
+	  }
+
+	std::string str_meaning = "Capability " + str_si_code + " fault";
+	uiout->field_string ("sigcode-meaning", str_meaning);
+
+	/* FIXME-Morello: Show more information about the faults.  */
+	uiout->text (_(" while accessing address "));
+	uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
+	uiout->text ("\n");
+	break;
     }
 }
 
@@ -2234,6 +2279,12 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					    aarch64_displaced_step_hw_singlestep);
 
   set_gdbarch_gcc_target_options (gdbarch, aarch64_linux_gcc_target_options);
+
+  if (tdep->has_capability ())
+    {
+      set_gdbarch_report_signal_info (gdbarch,
+				      aarch64_linux_report_signal_info);
+    }
 }
 
 #if GDB_SELF_TEST

@@ -30,4 +30,11 @@
 #define AARCH64_MORELLO_REGS_NUM 41
 #define AARCH64_C_REGS_NUM 31
 
+/* Capability fault si_code numbers.  */
+#define SEGV_CAPTAGERR	      10  /* Capability tag fault */
+#define SEGV_CAPSEALEDERR     11  /* Capability sealed fault */
+#define SEGV_CAPBOUNDSERR     12  /* Capability bounds fault */
+#define SEGV_CAPPERMERR	      13  /* Capability permission fault */
+#define SEGV_CAPSTORETAGERR   14  /* Capability tag store fault */
+
 #endif /*ARCH_AARCH64_CAP_LINUX_H */
