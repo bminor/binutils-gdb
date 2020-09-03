@@ -21447,10 +21447,12 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      addr = attr->value_as_address ();
 	      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + baseaddr);
 	      SET_SYMBOL_VALUE_ADDRESS (sym, addr);
+	      SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;
 	    }
+	  else
+	    SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
 	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
-	  SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_subprogram:

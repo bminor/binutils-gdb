@@ -19,6 +19,11 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
+if ![runto_main] then {
+    fail "can't run to main"
+    return 0
+}
+
 set supported 0
 gdb_test_multiple "l main:L1" "" {
     -wrap -re "No label \"L1\" defined in function \"main\"\." {
