@@ -48,7 +48,7 @@ gdb_assert {$main_addr != -1}
 set bp_addr -1
 
 # Put breakpoint on main, get the address where the breakpoint was installed.
-gdb_test_multiple "break main" "break on main, get address" {
+gdb_test_multiple "break -q main" "break on main, get address" {
     -re -wrap "Breakpoint $decimal at ($hex).*" {
 	set bp_addr $expect_out(1,string)
 

@@ -20,7 +20,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 
 gdb_test_no_output "set listsize 1"
 
-gdb_test "list main" ".*"
+gdb_test "list -q main" ".*"
 get_debug_format
 set non_dwarf [expr ! [test_debug_format "DWARF 2"]]
 

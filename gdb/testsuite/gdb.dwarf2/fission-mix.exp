@@ -37,7 +37,7 @@ if {[gdb_compile "$objfile $objfile2" $binfile executable {debug}] != "" } {
 
 clean_restart $binfile
 
-gdb_test "break main" "Breakpoint .*"
+gdb_test "break -q main" "Breakpoint .*"
 
 # Bug 15691: gdb would crash here on an assert violation.
 # The debug info for the TU for "struct s" has already been read,

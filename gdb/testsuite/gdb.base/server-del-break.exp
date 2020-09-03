@@ -24,7 +24,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
-gdb_test "break main" \
+gdb_test "break -q main" \
          "Breakpoint.*at.* file .*$srcfile, line .*"
 
 # Try deleting all breakpoints, using the "server" command prefix.

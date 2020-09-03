@@ -169,7 +169,7 @@ proc gdb_load { arg } {
 	    }
 	    if { $state == "pass" } {
 		if [gdb_target_monitor $arg] { return -1 }
-		gdb_test "list main" ".*" ""
+		gdb_test "list -q main" ".*" ""
 		verbose "Loaded $arg into $GDB\n"
 		return 0
 	    }

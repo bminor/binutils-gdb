@@ -21,6 +21,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile}] } {
 
 set bp_main [gdb_get_line_number "break main" ${testfile}.h]
 
-gdb_test "break main" \
+gdb_test "break -q main" \
     "Breakpoint.*at.* file .*$testfile.h, line $bp_main\\." \
     "breakpoint main"

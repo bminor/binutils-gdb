@@ -118,7 +118,7 @@ proc build_cmds_list {} {
     }
 
     set test "hbreak"
-    gdb_test_multiple "hbreak main" $test {
+    gdb_test_multiple "hbreak -q main" $test {
 	-re "You may have requested too many.*$gdb_prompt $" {
 	    unsupported $test
 	}

@@ -90,7 +90,7 @@ clean_restart ${binfile}
 # Any command that causes GDB to read the debugging info for the
 # lineinc.c compilation unit will do here.
 set test_name "tolerate macro info with multiple #inclusions per line"
-gdb_test_multiple "break main" $test_name {
+gdb_test_multiple "break -q main" $test_name {
     -re "Breakpoint 1 at 0x.*: file .*lineinc.c.*\\.\r\n${gdb_prompt}" {
         pass $test_name
     }

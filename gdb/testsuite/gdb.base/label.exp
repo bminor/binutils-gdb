@@ -29,11 +29,11 @@ if {![runto_main]} {
   return -1
 }
 
-gdb_test "break here" \
+gdb_test "break -q here" \
   "Breakpoint.*at.*" \
   "breakpoint here"
 
-gdb_test "break main:there" \
+gdb_test "break -q main:there" \
   "Breakpoint.*at.*" \
   "breakpoint there"
 

@@ -81,14 +81,14 @@ if { $gdb_file_cmd_debug_info != "debug" } then {
 #
 # test break at function
 #
-gdb_test "break main" \
+gdb_test "break -q main" \
     "Breakpoint.*at.* file .*$srcfile, line.*" \
     "breakpoint function"
 
 #
 # test break at quoted function
 #
-gdb_test "break \"marker2\"" \
+gdb_test "break -q \"marker2\"" \
     "Breakpoint.*at.* file .*$srcfile, line.*" \
     "breakpoint quoted function"
 
@@ -110,7 +110,7 @@ set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 # it's wherever the processor was stopped when we connected to the
 # board.  So, to be sure, we do a list command.
 #
-gdb_test "list main" \
+gdb_test "list -q main" \
     ".*main \\(int argc, char \\*\\*argv, char \\*\\*envp\\).*" \
     "use `list' to establish default source file"
 gdb_test "break $bp_location1" \
@@ -227,7 +227,7 @@ delete_breakpoints
 # test temporary breakpoint at function
 #
 
-gdb_test "tbreak main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "temporary breakpoint function"
+gdb_test "tbreak -q main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "temporary breakpoint function"
 
 #
 # test break at function in file
@@ -569,7 +569,7 @@ proc test_different_dir {type test_different_dir xfail} {
 	if {$xfail} {
 	    setup_xfail "*-*-*"
 	}
-	gdb_test "break main" \
+	gdb_test "break -q main" \
 	    "Breakpoint.*at.* file .*$srcfile, line.*" \
 	    "breakpoint function, optimized file"
 

@@ -63,7 +63,7 @@ save_vars { env(TERM) } {
 	"frame without styling"
     gdb_test_no_output "set style sources on"
 
-    gdb_test "break main" "file $base_file_expr.*"
+    gdb_test "break -q main" "file $base_file_expr.*"
 
     gdb_test "print &main" " = .* [style $hex address] <$main_expr>"
 

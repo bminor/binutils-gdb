@@ -40,7 +40,7 @@ delete_breakpoints
 
 set supports_hbreak 0
 set test "probe hardware breakpoint support"
-gdb_test_multiple "hbreak main" $test {
+gdb_test_multiple "hbreak -q main" $test {
     -re "No hardware breakpoint support in the target.*$gdb_prompt $" {
 	pass $test
     }
