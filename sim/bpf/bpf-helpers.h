@@ -26,6 +26,6 @@ enum bpf_kernel_helper
 #undef DEF_HELPER
   };
 
-/* void bpf_trace_printk (const char *fmt); */
+void bpf_trace_printk (SIM_CPU *current_cpu);
 
 #endif /* ! BPF_HELPERS_H */

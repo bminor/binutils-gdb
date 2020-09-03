@@ -1,5 +1,14 @@
 2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* bpf/bpf.c: Include bpf-helpers.h.
+	* bpf/bpf-helpers.h: Provide a prototype for bpf_trace_printk.
+	* bpf/configure.ac: Set simulator bitsize to 64.
+	* bpf/configure (includedir): Regenerate.
+	* bpf/sim-if.c: Include stdlib.h.
+	* bpf/traps.c: Likewise.
+
+2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* configure.ac: Do not configure sim/testsuite nor sim/igen if the
 	primary target doesn't have a simulator.
 	* configure: Regenerate.

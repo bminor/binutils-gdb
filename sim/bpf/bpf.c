@@ -27,6 +27,7 @@
 #include "decode.h"
 
 #include "defs-le.h"  /* For SCACHE */
+#include "bpf-helpers.h"
 
 /* It is not possible to include both defs-le.h and defs-be.h due to
    duplicated definitions, so we need a bunch of forward declarations

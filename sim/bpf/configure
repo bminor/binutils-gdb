@@ -782,6 +782,7 @@ enable_sim_environment
 enable_sim_inline
 with_pkgversion
 with_bugurl
+enable_sim_bitsize
 enable_sim_endian
 enable_sim_alignment
 enable_sim_scache
@@ -1436,6 +1437,7 @@ Optional Features:
                           environment
   --enable-sim-inline=inlines
                           Specify which functions should be inlined
+  --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
   --enable-sim-endian=endian
                           Specify target byte endian orientation
   --enable-sim-alignment=align
@@ -12882,7 +12884,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12885 "configure"
+#line 12899 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12988,7 +12990,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12991 "configure"
+#line 13005 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13538,6 +13540,65 @@ _ACEOF
 
 
 
+
+wire_word_bitsize="64"
+wire_word_msb=""
+wire_address_bitsize=""
+wire_cell_bitsize=""
+# Check whether --enable-sim-bitsize was given.
+if test "${enable_sim_bitsize+set}" = set; then :
+  enableval=$enable_sim_bitsize; sim_bitsize=
+case "${enableval}" in
+  64,63 | 64,63,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63";;
+  32,31 | 32,31,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31";;
+  64,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
+  32) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31"
+      else
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0"
+      fi ;;
+  64) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63"
+      else
+        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=0"
+      fi ;;
+  *)  as_fn_error $? "\"--enable-sim-bitsize was given $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
+esac
+# address bitsize
+tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9]*,*//"`
+case x"${tmp}" in
+  x ) ;;
+  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=32" ;;
+  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=64" ;;
+  * ) as_fn_error $? "\"--enable-sim-bitsize was given address size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
+esac
+# cell bitsize
+tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9*]*,*[0-9]*,*//"`
+case x"${tmp}" in
+  x ) ;;
+  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=32" ;;
+  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=64" ;;
+  * ) as_fn_error $? "\"--enable-sim-bitsize was given cell size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
+esac
+if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
+  echo "Setting bitsize flags = $sim_bitsize" 6>&1
+fi
+else
+  sim_bitsize=""
+if test x"$wire_word_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_BITSIZE=$wire_word_bitsize"
+fi
+if test x"$wire_word_msb" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_MSB=$wire_word_msb"
+fi
+if test x"$wire_address_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_ADDRESS_BITSIZE=$wire_address_bitsize"
+fi
+if test x"$wire_cell_bitsize" != x; then
+  sim_bitsize="$sim_bitsize -DWITH_TARGET_CELL_BITSIZE=$wire_cell_bitsize"
+fi
+fi
 
 
 wire_endian=""

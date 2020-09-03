@@ -19,6 +19,8 @@
 #define WANT_CPU bpfbf
 #define WANT_CPU_BPFBF
 
+#include <stdlib.h>
+
 #include "sim-main.h"
 
 SEM_PC
