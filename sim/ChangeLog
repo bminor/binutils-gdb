@@ -1,3 +1,9 @@
+2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* configure.ac: Do not configure sim/testsuite nor sim/igen if the
+	primary target doesn't have a simulator.
+	* configure: Regenerate.
+
 2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 	    David Faust <david.faust@oracle.com>
 
