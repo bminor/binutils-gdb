@@ -1,3 +1,12 @@
+2020-09-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/lto.exp: Don't run pr15146 tests.
+	* testsuite/ld-plugin/pr15146.d: Delete.
+	* testsuite/ld-plugin/pr15146a.c: Delete.
+	* testsuite/ld-plugin/pr15146b.c: Delete.
+	* testsuite/ld-plugin/pr15146c.c: Delete.
+	* testsuite/ld-plugin/pr15146d.c: Delete.
+
 2020-09-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/config/default.exp: Change NOSANTIZE_CFLAGS to

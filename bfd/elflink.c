@@ -4977,11 +4977,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	     object and a shared object.  */
 	  bfd_boolean dynsym = FALSE;
 
-	  /* Plugin symbols aren't normal.  Don't set def_regular or
-	     ref_regular for them, or make them dynamic.  */
-	  if ((abfd->flags & BFD_PLUGIN) != 0)
-	    ;
-	  else if (! dynamic)
+	  if (! dynamic)
 	    {
 	      if (! definition)
 		{
@@ -5162,10 +5158,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      && !bfd_link_relocatable (info))
 	    dynsym = FALSE;
 
-	  /* Nor should we make plugin symbols dynamic.  */
-	  if ((abfd->flags & BFD_PLUGIN) != 0)
-	    dynsym = FALSE;
-
 	  if (definition)
 	    {
 	      h->target_internal = isym->st_target_internal;
@@ -5192,7 +5184,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		}
 	    }
 
-	  if (dynsym && h->dynindx == -1)
+	  if (dynsym && (abfd->flags & BFD_PLUGIN) == 0 && h->dynindx == -1)
 	    {
 	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
 		goto error_free_vers;
