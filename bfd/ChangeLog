@@ -1,5 +1,12 @@
 2020-09-04  Alan Modra  <amodra@gmail.com>
 
+	PR 26574
+	* elfcode.h (elf_object_p): Sanity check section header offset.
+	* elf.c (_bfd_elf_slurp_secondary_reloc_section): Sanity check
+	sh_entsize.
+
+2020-09-04  Alan Modra  <amodra@gmail.com>
+
 	PR 15146
 	PR 26314
 	PR 26530

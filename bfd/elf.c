@@ -12576,7 +12576,9 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *      abfd,
       Elf_Internal_Shdr * hdr = & elf_section_data (relsec)->this_hdr;
 
       if (hdr->sh_type == SHT_SECONDARY_RELOC
-	  && hdr->sh_info == (unsigned) elf_section_data (sec)->this_idx)
+	  && hdr->sh_info == (unsigned) elf_section_data (sec)->this_idx
+	  && (hdr->sh_entsize == ebd->s->sizeof_rel
+	      || hdr->sh_entsize == ebd->s->sizeof_rela))
 	{
 	  bfd_byte * native_relocs;
 	  bfd_byte * native_reloc;
