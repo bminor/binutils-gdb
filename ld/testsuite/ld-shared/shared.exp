@@ -67,7 +67,7 @@ set shared_needs_pic "no"
 
 # Disable all sanitizers.
 set old_CFLAGS "$CFLAGS"
-append CFLAGS " $NOSANTIZE_CFLAGS"
+append CFLAGS " $NOSANITIZE_CFLAGS"
 
 if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 

@@ -65,7 +65,7 @@ if {[check_lto_available]} {
 }
 
 # Disable all sanitizers.
-append cc_cmd " $NOSANTIZE_CFLAGS"
+append cc_cmd " $NOSANITIZE_CFLAGS"
 
 if { ![ld_compile $cc_cmd $srcdir/$subdir/indirect1a.c tmpdir/indirect1a.o]
      || ![ld_compile $cc_cmd $srcdir/$subdir/indirect1b.c tmpdir/indirect1b.o]

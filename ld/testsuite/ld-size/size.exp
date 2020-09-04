@@ -134,8 +134,8 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build libsize-9.so" \
-	"-shared $NOSANTIZE_CFLAGS" \
-	"-fPIC $NOSANTIZE_CFLAGS" \
+	"-shared $NOSANITIZE_CFLAGS" \
+	"-fPIC $NOSANITIZE_CFLAGS" \
 	{size-9b.c} \
 	{{readelf -rW size-9.rd}} \
 	"libsize-9.so" \
@@ -284,12 +284,12 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run size-9" \
-	"-Wl,--no-as-needed tmpdir/libsize-9.so $NOSANTIZE_CFLAGS" \
+	"-Wl,--no-as-needed tmpdir/libsize-9.so $NOSANITIZE_CFLAGS" \
 	"" \
 	{size-9a.c} \
 	"size-9" \
 	"size-9.out" \
-	"$NOSANTIZE_CFLAGS" \
+	"$NOSANITIZE_CFLAGS" \
     ] \
     [list \
 	"Run size-10" \

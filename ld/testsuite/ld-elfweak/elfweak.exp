@@ -267,14 +267,14 @@ proc build_lib {test libname objs dynsymexp} {
     global shared
     global srcdir
     global subdir
-    global NOSANTIZE_CFLAGS
+    global NOSANITIZE_CFLAGS
 
     set files ""
     foreach obj $objs {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_link "$CC $NOSANTIZE_CFLAGS" $tmpdir/$libname.so "$shared $files"]} {
+    if {![ld_link "$CC $NOSANITIZE_CFLAGS" $tmpdir/$libname.so "$shared $files"]} {
 	fail $test
 	return
     }
@@ -294,14 +294,14 @@ proc build_exec { test execname objs flags dat dynsymexp symexp} {
     global srcdir
     global subdir
     global exec_output
-    global NOSANTIZE_CFLAGS
+    global NOSANITIZE_CFLAGS
 
     set files ""
     foreach obj $objs {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_link $CC $tmpdir/$execname "$flags $NOSANTIZE_CFLAGS $files"]} {
+    if {![ld_link $CC $tmpdir/$execname "$flags $NOSANITIZE_CFLAGS $files"]} {
 	fail "$test"
 	return
     }
@@ -357,7 +357,7 @@ if {[check_lto_available]} {
 }
 
 # Disable all sanitizers.
-append cc_cmd " $NOSANTIZE_CFLAGS"
+append cc_cmd " $NOSANITIZE_CFLAGS"
 
 # Old version of GCC for MIPS default to enabling -fpic
 # and get confused if it is used on the command line.
@@ -438,7 +438,7 @@ run_dump_test $srcdir/$subdir/size2
 
 if {![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/alias.c $tmpdir/alias.o]
     || ![ld_link $cc_cmd $tmpdir/alias.so "$shared $tmpdir/alias.o"]
-    || ![ld_compile "$cc_cmd $CFLAGS $NOSANTIZE_CFLAGS" $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
+    || ![ld_compile "$cc_cmd $CFLAGS $NOSANITIZE_CFLAGS" $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
     || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/weakref1.c $tmpdir/weakref1.o]
     || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/weakref2.c $tmpdir/weakref2.o]} then {
     unresolved "ELF weak (alias)"

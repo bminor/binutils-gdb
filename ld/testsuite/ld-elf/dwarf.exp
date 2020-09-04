@@ -70,7 +70,7 @@ set run_tests {
 
 # Disable all sanitizers.
 set old_CFLAGS "$CFLAGS"
-append CFLAGS " $NOSANTIZE_CFLAGS"
+append CFLAGS " $NOSANITIZE_CFLAGS"
 run_cc_link_tests $build_tests
 run_ld_link_exec_tests $run_tests
 set CFLAGS "$old_CFLAGS"

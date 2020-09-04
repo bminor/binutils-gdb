@@ -56,7 +56,7 @@ run_ld_link_exec_tests [list \
 	{ linux-x86.S pr23428.c dummy.s } \
 	"pr23428" \
 	"pass.out" \
-	"$NOPIE_CFLAGS $NOSANTIZE_CFLAGS -fno-asynchronous-unwind-tables" \
+	"$NOPIE_CFLAGS $NOSANITIZE_CFLAGS -fno-asynchronous-unwind-tables" \
 	"asm" \
     ] \
 ]

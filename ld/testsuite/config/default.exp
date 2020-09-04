@@ -576,10 +576,10 @@ if { ![info exists STATIC_PIE_LDFLAGS] } then {
     }
 }
 
-# Set NOSANTIZE_CFLAGS to "-fno-sanitize=all" if target compiler
+# Set NOSANITIZE_CFLAGS to "-fno-sanitize=all" if target compiler
 # supports it.
 
-if { ![info exists NOSANTIZE_CFLAGS] } then {
+if { ![info exists NOSANITIZE_CFLAGS] } then {
     if { [check_compiler_available] } {
 	# Check if gcc supports -fno-sanitize=all.
 	set flags ""
@@ -605,11 +605,11 @@ if { ![info exists NOSANTIZE_CFLAGS] } then {
 	file delete $src
 
 	if { $available == 1 } then {
-	    set NOSANTIZE_CFLAGS "-fno-sanitize=all"
+	    set NOSANITIZE_CFLAGS "-fno-sanitize=all"
 	} else {
-	    set NOSANTIZE_CFLAGS ""
+	    set NOSANITIZE_CFLAGS ""
 	}
     } else {
-	set NOSANTIZE_CFLAGS ""
+	set NOSANITIZE_CFLAGS ""
     }
 }

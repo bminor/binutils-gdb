@@ -351,11 +351,11 @@ if { ![check_compiler_available] } {
 # Pass -fplt to CC and CXX since -fno-plt doesn't work with S-records
 # tests. Also add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if PIE doesn't work
 # with S-records.  Also add $NOCF_PROTECTION_CFLAGS for S-records.
-# Also add $NOSANTIZE_CFLAGS for S-records.
+# Also add $NOSANITIZE_CFLAGS for S-records.
 set old_CC "$CC"
-set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANTIZE_CFLAGS"
+set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANITIZE_CFLAGS"
 set old_CXX "$CXX"
-set CXX "$CXX $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANTIZE_CFLAGS"
+set CXX "$CXX $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANITIZE_CFLAGS"
 
 # S-records can't handle .note.gnu.property sections.
 if { [is_elf_format] \

@@ -1,3 +1,26 @@
+2020-09-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/config/default.exp: Change NOSANTIZE_CFLAGS to
+	NOSANITIZE_CFLAGS.
+	* testsuite/ld-elf/dwarf.exp: Likewise.
+	* testsuite/ld-elf/indirect.exp: Likewise.
+	* testsuite/ld-elf/linux-x86.exp: Likewise.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-elf/tls.exp: Likewise.
+	* testsuite/ld-elfcomm/elfcomm.exp: Likewise.
+	* testsuite/ld-elfvers/vers.exp: Likewise.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	* testsuite/ld-elfweak/elfweak.exp: Likewise.
+	* testsuite/ld-gc/gc.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-plugin/plugin.exp: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Likewise.
+	* testsuite/ld-selective/selective.exp: Likewise.
+	* testsuite/ld-shared/shared.exp: Likewise.
+	* testsuite/ld-size/size.exp: Likewise.
+	* testsuite/ld-srec/srec.exp: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2020-09-03  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-01.d: Remove

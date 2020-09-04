@@ -703,7 +703,7 @@ if { [isnative] && [check_compiler_available] } {
     run_cc_link_tests [list \
 	[list \
 	    "Helper X32 DSO from x86-64 object" "" \
-	    "-m64 $NOSANTIZE_CFLAGS -fPIC -g" \
+	    "-m64 $NOSANITIZE_CFLAGS -fPIC -g" \
 	    {simple.c} {} "libsimple.a" \
 	] \
     ]
@@ -721,7 +721,7 @@ if { [isnative] && [check_compiler_available] } {
 	[list \
 	    "X32 DSO from x86-64 object" \
 	    "-shared -melf32_x86_64 tmpdir/simple-x32.o" \
-	    "$NOSANTIZE_CFLAGS" \
+	    "$NOSANITIZE_CFLAGS" \
 	    "--x32 -mx86-used-note=yes" \
 	    {dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} \
 	    "x86-64-x32" \
