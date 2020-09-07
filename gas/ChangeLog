@@ -1,5 +1,10 @@
 2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
+	* config/tc-csky.c (CSKYV2_ISA_DSP): CSKY_ISA_DSPE60.
+	(CSKY_ISA_860): Likewise.
+
+2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
 	* config/tc-csky.c (float_abi): New.
 	(md_longopts): Add mfloat-abi.
 	(struct sky_option_value_table): New.

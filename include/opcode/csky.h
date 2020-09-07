@@ -47,6 +47,7 @@
 #define CSKY_ISA_DSP        (1L << 20)
 #define CSKY_ISA_DSP_1E2    (1L << 21)
 #define CSKY_ISA_DSP_ENHANCE (1L << 22)
+#define CSKY_ISA_DSPE60     (1L << 23)
 
 /* Base float instruction (803f & 810f).  */
 #define CSKY_ISA_FLOAT_E1   (1L << 25)
