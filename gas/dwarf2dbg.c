@@ -102,6 +102,11 @@
 #define DWARF2_LINE_VERSION (dwarf_level > 3 ? dwarf_level : 3)
 #endif
 
+/* The .debug_rnglists has only been in DWARF version 5. */
+#ifndef DWARF2_RNGLISTS_VERSION
+#define DWARF2_RNGLISTS_VERSION 5
+#endif
+
 #include "subsegs.h"
 
 #include "dwarf2.h"
@@ -2303,7 +2308,7 @@ out_debug_line (segT line_seg)
 }
 
 static void
-out_debug_ranges (segT ranges_seg)
+out_debug_ranges (segT ranges_seg, symbolS **ranges_sym)
 {
   unsigned int addr_size = sizeof_address;
   struct line_seg *s;
@@ -2312,6 +2317,10 @@ out_debug_ranges (segT ranges_seg)
 
   memset (&exp, 0, sizeof exp);
   subseg_set (ranges_seg, 0);
+
+  /* For DW_AT_ranges to point at (there is no header, so really start
+     of section, but see out_debug_rnglists).  */
+  *ranges_sym = symbol_temp_new_now_octets ();
 
   /* Base Address Entry.  */
   for (i = 0; i < addr_size; i++)
@@ -2349,6 +2358,57 @@ out_debug_ranges (segT ranges_seg)
     out_byte (0);
   for (i = 0; i < addr_size; i++)
     out_byte (0);
+}
+
+static void
+out_debug_rnglists (segT ranges_seg, symbolS **ranges_sym)
+{
+  expressionS exp;
+  symbolS *ranges_end;
+  struct line_seg *s;
+
+  /* Unit length.  */
+  memset (&exp, 0, sizeof exp);
+  out_header (ranges_seg, &exp);
+  ranges_end = exp.X_add_symbol;
+
+  out_two (DWARF2_RNGLISTS_VERSION);
+  out_byte (sizeof_address);
+  out_byte (0); /* Segment Selector size.  */
+  out_four (0); /* Offset entry count.  */
+
+  /* For DW_AT_ranges to point at (must be after the header).   */
+  *ranges_sym = symbol_temp_new_now_octets ();
+
+  for (s = all_segs; s; s = s->next)
+    {
+      fragS *frag;
+      symbolS *beg, *end;
+
+      out_byte (DW_RLE_start_length);
+
+      frag = first_frag_for_seg (s->seg);
+      beg = symbol_temp_new (s->seg, frag, 0);
+      s->text_start = beg;
+
+      frag = last_frag_for_seg (s->seg);
+      end = symbol_temp_new (s->seg, frag, get_frag_fix (frag, s->seg));
+      s->text_end = end;
+
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = beg;
+      exp.X_add_number = 0;
+      emit_expr (&exp, sizeof_address);
+
+      exp.X_op = O_symbol;
+      exp.X_add_symbol = end;
+      exp.X_add_number = 0;
+      emit_leb128_expr (&exp, 0);
+    }
+
+  out_byte (DW_RLE_end_of_list);
+
+  symbol_set_value_now (ranges_end);
 }
 
 /* Emit data for .debug_aranges.  */
@@ -2468,8 +2528,9 @@ out_debug_abbrev (segT abbrev_seg,
 /* Emit a description of this compilation unit for .debug_info.  */
 
 static void
-out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg,
-		symbolS *name_sym, symbolS *comp_dir_sym, symbolS *producer_sym)
+out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg,
+		symbolS *ranges_sym, symbolS *name_sym,
+		symbolS *comp_dir_sym, symbolS *producer_sym)
 {
   expressionS exp;
   symbolS *info_end;
@@ -2538,7 +2599,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg,
     {
       /* This attribute is emitted if the code is disjoint.  */
       /* DW_AT_ranges.  */
-      TC_DWARF2_EMIT_OFFSET (section_symbol (ranges_seg), sizeof_offset);
+      TC_DWARF2_EMIT_OFFSET (ranges_sym, sizeof_offset);
     }
 
   /* DW_AT_name, DW_AT_comp_dir and DW_AT_producer.  Symbols in .debug_str
@@ -2703,9 +2764,8 @@ dwarf2_finish (void)
     {
       segT abbrev_seg;
       segT aranges_seg;
-      segT ranges_seg;
       segT str_seg;
-      symbolS *name_sym, *comp_dir_sym, *producer_sym;
+      symbolS *name_sym, *comp_dir_sym, *producer_sym, *ranges_sym;
 
       gas_assert (all_segs);
 
@@ -2728,20 +2788,32 @@ dwarf2_finish (void)
       record_alignment (aranges_seg, ffs (2 * sizeof_address) - 1);
 
       if (all_segs->next == NULL)
-	ranges_seg = NULL;
+	ranges_sym = NULL;
       else
 	{
-	  ranges_seg = subseg_new (".debug_ranges", 0);
-	  bfd_set_section_flags (ranges_seg,
-				 SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
-	  record_alignment (ranges_seg, ffs (2 * sizeof_address) - 1);
-	  out_debug_ranges (ranges_seg);
+	  if (DWARF2_VERSION < 5)
+	    {
+	      segT ranges_seg = subseg_new (".debug_ranges", 0);
+	      bfd_set_section_flags (ranges_seg, (SEC_READONLY
+						  | SEC_DEBUGGING
+						  | SEC_OCTETS));
+	      record_alignment (ranges_seg, ffs (2 * sizeof_address) - 1);
+	      out_debug_ranges (ranges_seg, &ranges_sym);
+	    }
+	  else
+	    {
+	      segT rnglists_seg = subseg_new (".debug_rnglists", 0);
+	      bfd_set_section_flags (rnglists_seg, (SEC_READONLY
+						    | SEC_DEBUGGING
+						    | SEC_OCTETS));
+	      out_debug_rnglists (rnglists_seg, &ranges_sym);
+	    }
 	}
 
       out_debug_aranges (aranges_seg, info_seg);
       out_debug_abbrev (abbrev_seg, info_seg, line_seg);
       out_debug_str (str_seg, &name_sym, &comp_dir_sym, &producer_sym);
-      out_debug_info (info_seg, abbrev_seg, line_seg, ranges_seg,
+      out_debug_info (info_seg, abbrev_seg, line_seg, ranges_sym,
 		      name_sym, comp_dir_sym, producer_sym);
     }
 }

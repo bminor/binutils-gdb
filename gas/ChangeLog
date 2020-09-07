@@ -1,4 +1,14 @@
-2020-09-07  +2020-08-28  Mark Wielaard  <mark@klomp.org>
+2020-09-07  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (DWARF2_RNGLISTS_VERSION): New constant.
+	(out_debug_ranges): Add ranges_sym argument and set it.
+	(out_debug_rnglists): New function.
+	(out_debug_info): Change ranges_seg argument to ranges_sym
+	and use it to set DW_AT_ranges value.
+	(dwarf2_finish): Remove ranges_seg, add ranges_sym. For
+	DWARF2_VERSION 5 call out_debug_rnglists.
+
+2020-09-07  Mark Wielaard  <mark@klomp.org>
 
 	* dwarf2dbg.c (dwarf2_directive_filename): Initialize with_md5 to
 	FALSE.
