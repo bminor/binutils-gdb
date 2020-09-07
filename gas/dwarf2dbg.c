@@ -226,8 +226,14 @@ static unsigned int  dirs_in_use = 0;
 static unsigned int  dirs_allocated = 0;
 
 /* TRUE when we've seen a .loc directive recently.  Used to avoid
-   doing work when there's nothing to do.  */
+   doing work when there's nothing to do.  Will be reset by
+   dwarf2_consume_line_info.  */
 bfd_boolean dwarf2_loc_directive_seen;
+
+/* TRUE when we've seen any .loc directive at any time during parsing.
+   Indicates the user wants us to generate a .debug_line section.
+   Used in dwarf2_finish as sanity check.  */
+static bfd_boolean dwarf2_any_loc_directive_seen;
 
 /* TRUE when we're supposed to set the basic block mark whenever a
    label is seen.  */
@@ -1290,7 +1296,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-  dwarf2_loc_directive_seen = TRUE;
+  dwarf2_any_loc_directive_seen = dwarf2_loc_directive_seen = TRUE;
   debug_type = DEBUG_NONE;
 
   /* If we were given a view id, emit the row right away.  */
@@ -2737,7 +2743,7 @@ dwarf2_init (void)
 
 
 /* Finish the dwarf2 debug sections.  We emit .debug.line if there
-   were any .file/.loc directives, or --gdwarf2 was given, or if the
+   were any .file/.loc directives, or --gdwarf2 was given, and if the
    file has a non-empty .debug_info section and an empty .debug_line
    section.  If we emit .debug_line, and the .debug_info section is
    empty, we also emit .debug_info, .debug_aranges and .debug_abbrev.
@@ -2761,8 +2767,10 @@ dwarf2_finish (void)
   empty_debug_line = line_seg == NULL || !seg_not_empty_p (line_seg);
 
   /* We can't construct a new debug_line section if we already have one.
-     Give an error.  */
-  if (all_segs && !empty_debug_line)
+     Give an error if we have seen any .loc, otherwise trust the user
+     knows what they are doing and want to generate the .debug_line
+     (and all other debug sections) themselves.  */
+  if (all_segs && !empty_debug_line && dwarf2_any_loc_directive_seen)
     as_fatal ("duplicate .debug_line sections");
 
   if ((!all_segs && emit_other_sections)
@@ -2776,8 +2784,12 @@ dwarf2_finish (void)
   sizeof_address = DWARF2_ADDR_SIZE (stdoutput);
 
   /* Create and switch to the line number section.  */
-  line_seg = subseg_new (".debug_line", 0);
-  bfd_set_section_flags (line_seg, SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
+  if (empty_debug_line)
+    {
+      line_seg = subseg_new (".debug_line", 0);
+      bfd_set_section_flags (line_seg,
+			     SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS);
+    }
 
   /* For each subsection, chain the debug entries together.  */
   for (s = all_segs; s; s = s->next)
@@ -2803,7 +2815,8 @@ dwarf2_finish (void)
 	}
     }
 
-  out_debug_line (line_seg);
+  if (empty_debug_line)
+    out_debug_line (line_seg);
 
   /* If this is assembler generated line info, and there is no
      debug_info already, we need .debug_info, .debug_abbrev and
