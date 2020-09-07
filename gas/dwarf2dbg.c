@@ -1972,10 +1972,32 @@ process_entries (segT seg, struct line_entry *e)
     }
 }
 
+/* Switch to LINE_STR_SEG and output the given STR.  Return the
+   symbol pointing to the new string in the section.  */
+
+static symbolS *
+add_line_strp (segT line_str_seg, const char *str)
+{
+  char *cp;
+  size_t size;
+  symbolS *sym;
+
+  subseg_set (line_str_seg, 0);
+
+  sym = symbol_temp_new_now_octets ();
+
+  size = strlen (str) + 1;
+  cp = frag_more (size);
+  memcpy (cp, str, size);
+
+  return sym;
+}
+
+
 /* Emit the directory and file tables for .debug_line.  */
 
 static void
-out_dir_and_file_list (void)
+out_dir_and_file_list (segT line_seg, int sizeof_offset)
 {
   size_t size;
   const char *dir;
@@ -1984,6 +2006,8 @@ out_dir_and_file_list (void)
   bfd_boolean emit_md5 = FALSE;
   bfd_boolean emit_timestamps = TRUE;
   bfd_boolean emit_filesize = TRUE;
+  segT line_str_seg = NULL;
+  symbolS *line_strp;
 
   /* Output the Directory Table.  */
   if (DWARF2_LINE_VERSION >= 5)
@@ -1993,9 +2017,9 @@ out_dir_and_file_list (void)
 
       /* Describe the purpose and format of the column.  */
       out_uleb128 (DW_LNCT_path);
-      /* FIXME: it would be better to store these strings in
-	 the .debug_line_str section and reference them here.  */
-      out_uleb128 (DW_FORM_string);
+      /* Store these strings in the .debug_line_str section so they
+	 can be shared.  */
+      out_uleb128 (DW_FORM_line_strp);
 
       /* Now state how many rows there are in the table.  We need at
 	 least 1 if there is one or more file names to store the
@@ -2009,6 +2033,12 @@ out_dir_and_file_list (void)
   /* Emit directory list.  */
   if (DWARF2_LINE_VERSION >= 5 && (dirs_in_use > 0 || files_in_use > 0))
     {
+      line_str_seg = subseg_new (".debug_line_str", 0);
+      bfd_set_section_flags (line_str_seg,
+			     SEC_READONLY | SEC_DEBUGGING | SEC_OCTETS
+			     | SEC_MERGE | SEC_STRINGS);
+      line_str_seg->entsize = 1;
+
       /* DWARF5 uses slot zero, but that is only set explicitly
 	 using a .file 0 directive.  If that isn't used, but dir
 	 one is used, then use that as main file directory.
@@ -2020,16 +2050,25 @@ out_dir_and_file_list (void)
       else
 	dir = remap_debug_filename (getpwd ());
 
-      size = strlen (dir) + 1;
-      cp = frag_more (size);
-      memcpy (cp, dir, size);
+      line_strp = add_line_strp (line_str_seg, dir);
+      subseg_set (line_seg, 0);
+      TC_DWARF2_EMIT_OFFSET (line_strp, sizeof_offset);
     }
   for (i = 1; i < dirs_in_use; ++i)
     {
       dir = remap_debug_filename (dirs[i]);
-      size = strlen (dir) + 1;
-      cp = frag_more (size);
-      memcpy (cp, dir, size);
+      if (DWARF2_LINE_VERSION < 5)
+	{
+	  size = strlen (dir) + 1;
+	  cp = frag_more (size);
+	  memcpy (cp, dir, size);
+	}
+      else
+	{
+	  line_strp = add_line_strp (line_str_seg, dir);
+	  subseg_set (line_seg, 0);
+	  TC_DWARF2_EMIT_OFFSET (line_strp, sizeof_offset);
+	}
     }
 
   if (DWARF2_LINE_VERSION < 5)
@@ -2066,9 +2105,9 @@ out_dir_and_file_list (void)
       out_byte (columns);
       /* The format of the file name.  */
       out_uleb128 (DW_LNCT_path);
-      /* FIXME: it would be better to store these strings in
-	 the .debug_line_str section and reference them here.  */
-      out_uleb128 (DW_FORM_string);
+      /* Store these strings in the .debug_line_str section so they
+	 can be shared.  */
+      out_uleb128 (DW_FORM_line_strp);
 
       /* The format of the directory index.  */
       out_uleb128 (DW_LNCT_directory_index);
@@ -2122,9 +2161,18 @@ out_dir_and_file_list (void)
 
       fullfilename = DWARF2_FILE_NAME (files[i].filename,
 				       files[i].dir ? dirs [files [i].dir] : "");
-      size = strlen (fullfilename) + 1;
-      cp = frag_more (size);
-      memcpy (cp, fullfilename, size);
+      if (DWARF2_LINE_VERSION < 5)
+	{
+	  size = strlen (fullfilename) + 1;
+	  cp = frag_more (size);
+	  memcpy (cp, fullfilename, size);
+	}
+      else
+	{
+	  line_strp = add_line_strp (line_str_seg, fullfilename);
+	  subseg_set (line_seg, 0);
+	  TC_DWARF2_EMIT_OFFSET (line_strp, sizeof_offset);
+	}
 
       /* Directory number.  */
       out_uleb128 (files[i].dir);
@@ -2282,7 +2330,7 @@ out_debug_line (segT line_seg)
      matches up to the opcode base value we have been using.  */
   gas_assert (DWARF2_LINE_OPCODE_BASE == 13);
 
-  out_dir_and_file_list ();
+  out_dir_and_file_list (line_seg, sizeof_offset);
 
   symbol_set_value_now (prologue_end);
 
