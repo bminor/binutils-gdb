@@ -1,3 +1,8 @@
+2020-09-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (fetch_inferior_event): Use
+	`switch_to_target_no_thread` to switch the target.
+
 2020-09-06  Tom Tromey  <tom@tromey.com>
 
 	* symfile.h (dwarf2_free_objfile): Don't declare.

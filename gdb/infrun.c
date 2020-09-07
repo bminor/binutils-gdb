@@ -3903,13 +3903,8 @@ fetch_inferior_event ()
     gdb_assert (ecs->ws.kind != TARGET_WAITKIND_IGNORE);
 
     /* Switch to the target that generated the event, so we can do
-       target calls.  Any inferior bound to the target will do, so we
-       just switch to the first we find.  */
-    for (inferior *inf : all_inferiors (ecs->target))
-      {
-	switch_to_inferior_no_thread (inf);
-	break;
-      }
+       target calls.  */
+    switch_to_target_no_thread (ecs->target);
 
     if (debug_infrun)
       print_target_wait_results (minus_one_ptid, ecs->ptid, &ecs->ws);
