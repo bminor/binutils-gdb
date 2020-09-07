@@ -8,7 +8,7 @@
 	.file 0 "master directory/master source file"
 	.line 1
 	.text
-	.word 0
+	.octa 0x12345678901234567890123456789012
 
 	.file 1 "secondary directory/secondary source file"
 	.line 2

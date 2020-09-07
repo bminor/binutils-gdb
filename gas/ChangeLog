@@ -1,3 +1,9 @@
+2020-09-07  +2020-08-28  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (dwarf2_directive_filename): Initialize with_md5 to
+	FALSE.
+	* gas/testsuite/gas/elf/dwarf-5-file0.s: Add a random bignum.
+
 2020-09-01  Mark Wielaard  <mark@klomp.org>
 
 	* dwarf2dbg.c (out_debug_abbrev): Use DW_FORM_sec_offset for DWARF
