@@ -1014,7 +1014,7 @@ dwarf2_emit_label (symbolS *label)
 char *
 dwarf2_directive_filename (void)
 {
-  bfd_boolean with_md5 = TRUE;
+  bfd_boolean with_md5 = FALSE;
   valueT num;
   char *filename;
   const char * dirname = NULL;
