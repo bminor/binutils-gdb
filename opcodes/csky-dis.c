@@ -623,6 +623,62 @@ csky_output_operand (char *str, struct operand const *oprnd,
 	strcat (str, buf);
 	break;
       }
+    case OPRND_TYPE_HFLOAT_FMOVI:
+    case OPRND_TYPE_SFLOAT_FMOVI:
+      {
+	int imm4;
+	int imm8;
+	imm4 = ((inst >> 16) & 0xf);
+	imm4 = (138 - imm4) << 23;
+
+	imm8 = ((inst >> 8) & 0x3);
+	imm8 |= (((inst >> 20) & 0x3f) << 2);
+	imm8 <<= 15;
+
+	value = ((inst >> 5) & 1) << 31;
+	value |= imm4 | imm8;
+
+	imm4 = 138 - (imm4 >> 23);
+	imm8 >>= 15;
+	if ((inst >> 5) & 1)
+	  {
+	    imm8 = 0 - imm8;
+	  }
+
+	float f = 0;
+	memcpy (&f, &value, sizeof (float));
+	sprintf (str, "%s%f\t// imm9:%4d, imm4:%2d", str, f, imm8, imm4);
+
+	break;
+      }
+
+    case OPRND_TYPE_DFLOAT_FMOVI:
+      {
+	uint64_t imm4;
+	uint64_t imm8;
+	uint64_t dvalue;
+	imm4 = ((inst >> 16) & 0xf);
+	imm4 = (1034 - imm4) << 52;
+
+	imm8 = ((inst >> 8) & 0x3);
+	imm8 |= (((inst >> 20) & 0x3f) << 2);
+	imm8 <<= 44;
+
+	dvalue = (((uint64_t)inst >> 5) & 1) << 63;
+	dvalue |= imm4 | imm8;
+
+	imm4 = 1034 - (imm4 >> 52);
+	imm8 >>= 44;
+	if (inst >> 5)
+	  {
+	    imm8 = 0 - imm8;
+	  }
+	double d = 0;
+	memcpy (&d, &dvalue, sizeof (double));
+	sprintf (str, "%s%lf\t// imm9:%4ld, imm4:%2ld", str, d, imm8, imm4);
+
+	break;
+      }
     case OPRND_TYPE_LABEL_WITH_BRACKET:
       sprintf (buf, "[0x%x]", (unsigned int)value);
       strcat (str, buf);
@@ -653,8 +709,20 @@ csky_output_operand (char *str, struct operand const *oprnd,
     case OPRND_TYPE_FREGLIST_DASH:
       if (IS_CSKY_V2 (mach_flag))
 	{
-	  int vrx = value & 0xf;
-	  int vry = vrx + (value >> 4);
+	  int vrx = 0;
+	  int vry = 0;
+	  if (dis_info.isa & CSKY_ISA_FLOAT_7E60
+	      && (strstr (str, "fstm") != NULL
+		  || strstr (str, "fldm") != NULL))
+	    {
+	      vrx = value & 0x1f;
+	      vry = vrx + (value >> 5);
+	    }
+	  else
+	    {
+	      vrx = value & 0xf;
+	      vry = vrx + (value >> 4);
+	    }
 	  sprintf (buf, "fr%d-fr%d", vrx, vry);
 	  strcat (str, buf);
 	}

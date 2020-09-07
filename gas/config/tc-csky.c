@@ -172,6 +172,8 @@ bfd_boolean v2_work_movih (void);
 bfd_boolean v2_work_ori (void);
 bfd_boolean float_work_fmovi (void);
 bfd_boolean dsp_work_bloop (void);
+bfd_boolean float_work_fpuv3_fmovi (void);
+bfd_boolean float_work_fpuv3_fstore (void);
 
 /* csky-opc.h must be included after workers are declared.  */
 #include "opcodes/csky-opc.h"
@@ -295,6 +297,7 @@ struct csky_insn_info
 struct literal
 {
   unsigned short  refcnt;
+  unsigned int    offset;
   unsigned char   ispcrel;
   unsigned char   unused;
   bfd_reloc_code_real_type r_type;
@@ -704,9 +707,10 @@ const struct csky_cpu_info csky_cpus[] =
   {"ck810ftv", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_VDSP | CSKY_ISA_FLOAT_810 | CSKY_ISA_TRUST},
 
   /* CK860 Series.  */
-#define CSKY_ISA_860    (CSKY_ISA_810 | CSKYV2_ISA_10E60)
-#define CSKY_ISA_FLOAT_860 (CSKY_ISA_FLOAT_810)
+#define CSKY_ISA_860    (CSKY_ISA_810 | CSKYV2_ISA_10E60 | CSKYV2_ISA_3E3R3)
+#define CSKY_ISA_860F (CSKY_ISA_860 | CSKY_ISA_FLOAT_7E60)
   {"ck860", CSKY_ARCH_860, CSKY_ISA_860},
+  {"ck860f", CSKY_ARCH_860, CSKY_ISA_860F},
 
   {NULL, 0, 0}
 };
@@ -1718,7 +1722,7 @@ dump_literals (int isforce)
   poolsize = 0;
 }
 
-static int
+static struct literal *
 enter_literal (expressionS *e,
 	       int ispcrel,
 	       unsigned char isdouble,
@@ -1772,7 +1776,7 @@ enter_literal (expressionS *e,
 			  p->e.X_add_number * sizeof (LITTLENUM_TYPE)) == 0)))
 	{
 	  p->refcnt ++;
-	  return i;
+	  return p;
 	}
       if (p->e.X_op == O_big)
 	{
@@ -1787,6 +1791,7 @@ enter_literal (expressionS *e,
   p->e = *e;
   p->r_type = insn_reloc;
   p->isdouble = isdouble;
+  p->offset = i;
   if (isdouble)
     p->dbnum = dbnum;
   if (e->X_op == O_big)
@@ -1806,7 +1811,7 @@ enter_literal (expressionS *e,
   } else
   poolsize += (p->isdouble ? 2 : 1);
 
-  return i;
+  return p;
 }
 
 /* Check whether we must dump the literal pool here.
@@ -2056,7 +2061,6 @@ parse_rt (char *s,
 	  long reg ATTRIBUTE_UNUSED)
 {
   expressionS e;
-  int n;
 
   if (ep)
     /* Indicate nothing there.  */
@@ -2089,24 +2093,45 @@ parse_rt (char *s,
       /* If the instruction has work, literal handling is in the work.  */
       if (!csky_insn.opcode->work)
 	{
-	  n = enter_literal (&e, ispcrel, 0, 0);
+	  struct literal *p = enter_literal (&e, ispcrel, 0, 0);
 	  if (ep)
 	   *ep = e;
 
 	  /* Create a reference to pool entry.  */
 	  ep->X_op = O_symbol;
 	  ep->X_add_symbol = poolsym;
-	  ep->X_add_number = n << 2;
+	  ep->X_add_number = p->offset << 2;
 	}
     }
   return s;
+}
+
+static int float_to_half (void *f, void *h)
+{
+  int imm_e;
+  int imm_f;
+  unsigned int value_f = *(unsigned int *)f;
+  unsigned short value_h;
+
+  imm_e = ((value_f >> 23) & 0xff);
+  imm_f = ((value_f  & 0x7fffff));
+
+  imm_e = ((imm_e - 127 + 15) << 10);
+  imm_f = ((imm_f & 0x7fe000) >> 13);
+
+  value_h = (value_f & 0x80000000 ? 0x8000 : 0x0) | imm_e | imm_f;
+
+  if (h)
+    *(unsigned short *)h = value_h;
+
+  return value_h;
 }
 
 static char *
 parse_rtf (char *s, int ispcrel, expressionS *ep)
 {
   expressionS e;
-  int n = 0;
+  struct literal *p = NULL;
 
   if (ep)
     /* Indicate nothing there.  */
@@ -2127,15 +2152,24 @@ parse_rtf (char *s, int ispcrel, expressionS *ep)
   else
     {
       uint64_t dbnum;
-      if (strstr (csky_insn.opcode->mnemonic, "flrws"))
+      if (strstr(csky_insn.opcode->mnemonic, "flrws")
+	  || strstr(csky_insn.opcode->mnemonic, "flrw.32"))
 	{
 	  s = parse_fexp (s, &e, 0, &dbnum);
-	  n = enter_literal (&e, ispcrel, 0, dbnum);
+	  p = enter_literal (& e, ispcrel, 0, dbnum);
 	}
-      else if (strstr (csky_insn.opcode->mnemonic, "flrwd"))
+      else if (strstr(csky_insn.opcode->mnemonic, "flrwd")
+	       || strstr(csky_insn.opcode->mnemonic, "flrw.64"))
 	{
 	  s = parse_fexp (s, &e, 1, &dbnum);
-	  n = enter_literal (&e, ispcrel, 1, dbnum);
+	  p = enter_literal (& e, ispcrel, 1, dbnum);
+	}
+      else if (strstr(csky_insn.opcode->mnemonic, "flrwh")
+	       || strstr(csky_insn.opcode->mnemonic, "flrw.16"))
+	{
+	  s = parse_fexp (s, &e, 0, NULL);
+	  e.X_add_number = float_to_half (&e.X_add_number, &e.X_add_number);
+	  p = enter_literal (& e, ispcrel, 0, 0);
 	}
       else
 	as_bad (_("unrecognized opcode"));
@@ -2146,7 +2180,7 @@ parse_rtf (char *s, int ispcrel, expressionS *ep)
       /* Create a reference to pool entry.  */
       ep->X_op         = O_symbol;
       ep->X_add_symbol = poolsym;
-      ep->X_add_number = n << 2;
+      ep->X_add_number = p->offset << 2;
     }
   return s;
 }
@@ -2592,6 +2626,7 @@ is_freglist_legal (char **oper)
   int reg1 = -1;
   int reg2 = -1;
   int len = 0;
+  int shift = 0;
   reg1 = csky_get_freg_val  (*oper, &len);
   *oper += len;
 
@@ -2627,12 +2662,34 @@ is_freglist_legal (char **oper)
     }
 
   reg2 = reg2 - reg1;
-  if (reg2 > (int)0x3)
+  /* The fldm/fstm in CSKY_ISA_FLOAT_7E60 has 5 bits frz(reg1).  */
+  shift = 4;
+  if (strncmp (csky_insn.opcode->mnemonic, "fstm", 4) == 0
+      || strncmp (csky_insn.opcode->mnemonic, "fldm", 4) == 0)
     {
-      SET_ERROR_STRING(ERROR_REG_FORMAT, (void *)"vry-vrx is over range");
-      return FALSE;
+      if ((!(isa_flag & CSKY_ISA_FLOAT_7E60)
+	   && (reg2 > (int)15 || reg1 > 15))
+	  || ((isa_flag & CSKY_ISA_FLOAT_7E60)
+	      && (reg2 > (int)31 || reg1 > (int)31)))
+	{
+	  /* ISA_FLOAT_E1 fstm/fldm fry-frx is within 15.
+	     ISA_FLOAT_7E60 fstm(u)/fldm(u) frx-fry is within 31.  */
+	  SET_ERROR_STRING(ERROR_REG_FORMAT, (void *)"frx-fry is over range");
+	  return FALSE;
+	}
+      if ((mach_flag & CSKY_ARCH_MASK) == CSKY_ARCH_860)
+	{
+	  shift = 5;
+	}
     }
-  reg2 <<= 4;
+  else
+    {
+      if (reg2 > (int)0x3) {
+        SET_ERROR_STRING(ERROR_REG_FORMAT, (void *)"vry-vrx is over range");
+        return FALSE;
+      }
+    }
+  reg2 <<= shift;
   reg1 |= reg2;
   csky_insn.val[csky_insn.idx++] = reg1;
   return TRUE;
@@ -2788,6 +2845,8 @@ is_imm_within_range (char **oper, int min, int max)
 	  ret = FALSE;
 	  SET_ERROR_STRING (ERROR_IMM_OVERFLOW, NULL);
 	}
+      if (!e.X_unsigned)
+	e.X_add_number |= 0x80000000;
       csky_insn.val[csky_insn.idx++] = e.X_add_number;
     }
 
@@ -2990,7 +3049,8 @@ parse_type_freg (char** oper, int even)
     }
 
   if (IS_CSKY_V2 (mach_flag)
-      && (csky_insn.opcode->isa_flag32 & CSKY_ISA_VDSP_2)
+      && ((csky_insn.opcode->isa_flag32 & CSKY_ISA_VDSP_2)
+	  || !(csky_insn.opcode->isa_flag32 & CSKY_ISA_FLOAT_7E60))
       && reg > 15)
     {
       if ((csky_insn.opcode->isa_flag32 & CSKY_ISA_VDSP_2))
@@ -3537,6 +3597,8 @@ get_operand_value (struct csky_opcode_info *op,
       return is_imm_within_range (oper, 0, 127);
     case OPRND_TYPE_IMM8b:
       return is_imm_within_range (oper, 0, 255);
+    case OPRND_TYPE_IMM9b:
+      return is_imm_within_range (oper, -256, 255);
     case OPRND_TYPE_IMM12b:
       return is_imm_within_range (oper, 0, 4095);
     case OPRND_TYPE_IMM15b:
@@ -3720,7 +3782,37 @@ get_operand_value (struct csky_opcode_info *op,
 	     | ((dbnum & 0x8000000000000000ULL) >> 43));
 	return TRUE;
       }
+    case OPRND_TYPE_HFLOAT_FMOVI:
+    case OPRND_TYPE_SFLOAT_FMOVI:
+    case OPRND_TYPE_DFLOAT_FMOVI:
+      /* For fpuv3 fmovis and fmovid, which accept a constant
+	 float with a limited range.  */
+      {
+	uint64_t dbnum;
+	int imm4, imm8, sign;
 
+	*oper = parse_fexp (*oper, &csky_insn.e1, 1, &dbnum);
+	if (csky_insn.e1.X_op == O_absent)
+	  return FALSE;
+
+	/* Convert the representation from IEEE double to the 13-bit
+	   encoding used internally for fmovis and fmovid.  */
+	imm4 = 11 - (((dbnum & 0x7ff0000000000000ULL) >> 52) - 1023);
+	/* Check float range.  */
+	if ((dbnum & 0x00000fffffffffffULL) || imm4 < 0 || imm4 > 15)
+	  {
+	    csky_show_error (ERROR_IMM_OVERFLOW, 2, NULL, NULL);
+	    return TRUE;
+	  }
+	imm8 = (dbnum & 0x000ff00000000000ULL) >> 44;
+	sign = (dbnum & 0x8000000000000000ULL) >> 58;
+	csky_insn.e1.X_add_number
+	  = (((imm8 & 0x3) << 8)
+	     | ((imm8 & 0xfc) << 18)
+	     | ((imm4 & 0xf) << 16)
+	     | sign);
+	return TRUE;
+      }
       /* For grs v2.  */
     case OPRND_TYPE_IMM_OFF18b:
       *oper = parse_exp (*oper, &csky_insn.e1);
@@ -5999,12 +6091,12 @@ v1_work_lrw (void)
       csky_insn.inst |= reg << 8;
       if (output_literal)
 	{
-	  int n = enter_literal (&csky_insn.e1, 0, 0, 0);
+	  struct literal *p = enter_literal (&csky_insn.e1, 0, 0, 0);
 
 	  /* Create a reference to pool entry.  */
 	  csky_insn.e1.X_op = O_symbol;
 	  csky_insn.e1.X_add_symbol = poolsym;
-	  csky_insn.e1.X_add_number = n << 2;
+	  csky_insn.e1.X_add_number = p->offset << 2;
 	}
 
       if (insn_reloc == BFD_RELOC_CKCORE_TLS_GD32
@@ -6212,12 +6304,12 @@ v1_work_jbsr (void)
       csky_insn.opcode_idx = 0;
       csky_insn.isize = 2;
 
-      int n = enter_literal (&csky_insn.e1, 1, 0, 0);
+      struct literal *p = enter_literal (&csky_insn.e1, 1, 0, 0);
 
       /* Create a reference to pool entry.  */
       csky_insn.e1.X_op = O_symbol;
       csky_insn.e1.X_add_symbol = poolsym;
-      csky_insn.e1.X_add_number = n << 2;
+      csky_insn.e1.X_add_number = p->offset << 2;
 
       /* Generate fixup BFD_RELOC_CKCORE_PCREL_IMM8BY4.  */
       fix_new_exp (frag_now, csky_insn.output - frag_now->fr_literal,
@@ -6226,7 +6318,7 @@ v1_work_jbsr (void)
       if (csky_insn.e1.X_op != O_absent && do_jsri2bsr)
 	/* Generate fixup BFD_RELOC_CKCORE_PCREL_JSR_IMM11BY2.  */
 	fix_new_exp (frag_now, csky_insn.output - frag_now->fr_literal,
-		     2, & (litpool + (csky_insn.e1.X_add_number >> 2))->e,
+		     2, &p->e,
 		     1, BFD_RELOC_CKCORE_PCREL_JSR_IMM11BY2);
     }
   csky_generate_insn ();
@@ -6815,11 +6907,11 @@ v2_work_lrw (void)
 
   if (output_literal)
     {
-      int n = enter_literal (&csky_insn.e1, 0, 0, 0);
+      struct literal *p = enter_literal (&csky_insn.e1, 0, 0, 0);
       /* Create a reference to pool entry.  */
       csky_insn.e1.X_op = O_symbol;
       csky_insn.e1.X_add_symbol = poolsym;
-      csky_insn.e1.X_add_number = n << 2;
+      csky_insn.e1.X_add_number = p->offset << 2;
     }
   /* If 16bit force.  */
   if (csky_insn.flag_force == INSN_OPCODE16F)
@@ -6960,11 +7052,11 @@ v2_work_jbsr (void)
     }
   else
     {
-      int n = enter_literal (&csky_insn.e1, 0, 0, 0);
+      struct literal *p = enter_literal (&csky_insn.e1, 0, 0, 0);
       csky_insn.output = frag_more (4);
       csky_insn.e1.X_op = O_symbol;
       csky_insn.e1.X_add_symbol = poolsym;
-      csky_insn.e1.X_add_number = n << 2;
+      csky_insn.e1.X_add_number = p->offset << 2;
       fix_new_exp (frag_now, csky_insn.output - frag_now->fr_literal,
 		 4, &csky_insn.e1, 1, BFD_RELOC_CKCORE_PCREL_IMM16BY4);
       if (do_jsri2bsr || IS_CSKY_ARCH_810 (mach_flag))
@@ -6994,10 +7086,10 @@ bfd_boolean
 v2_work_jsri (void)
 {
   /* dump literal.  */
-  int n = enter_literal (&csky_insn.e1, 1, 0, 0);
+  struct literal *p = enter_literal (&csky_insn.e1, 1, 0, 0);
   csky_insn.e1.X_op = O_symbol;
   csky_insn.e1.X_add_symbol = poolsym;
-  csky_insn.e1.X_add_number = n << 2;
+  csky_insn.e1.X_add_number = p->offset << 2;
 
   /* Generate relax or reloc if necessary.  */
   csky_generate_frags ();
@@ -7012,7 +7104,7 @@ v2_work_jsri (void)
 	 For 'jbsr .L1', this reloc type's symbol
 	 is bound to '.L1', isn't bound to literal pool.  */
       fix_new_exp (frag_now, csky_insn.output - frag_now->fr_literal,
-		   4, &(litpool + (csky_insn.e1.X_add_number >> 2))->e, 1,
+		   4, &p->e, 1,
 		   BFD_RELOC_CKCORE_PCREL_JSR_IMM26BY2);
       csky_insn.output = frag_more (4);
       dwarf2_emit_insn (0);
@@ -7155,6 +7247,57 @@ float_work_fmovi (void)
   return TRUE;
 }
 
+/* Like float_work_fmovi, but for FPUV3 fmovi.16, fmovi.32 and fmovi.64
+   instructions.  */
+
+bfd_boolean
+float_work_fpuv3_fmovi (void)
+{
+  int rx = csky_insn.val[0];
+  int idx = csky_insn.opcode_idx;
+  int imm4 = 0;
+  int imm8 = 0;
+  int sign = 0;
+
+  csky_insn.inst = csky_insn.opcode->op32[idx].opcode | rx;
+
+  if (csky_insn.opcode->op32[idx].operand_num == 3)
+    {
+      /* fmovi.xx frz, imm9, imm4.  */
+      imm8 = csky_insn.val[1];
+      imm4 = csky_insn.val[2];
+      if (imm8 < 0 || (imm8 & 0x80000000))
+	{
+	  sign = (1 << 5);
+	  imm8 = 0 - imm8;
+	}
+
+      if (imm8 > 255)
+	{
+	  csky_show_error (ERROR_IMM_OVERFLOW, 2, NULL, NULL);
+	  return FALSE;
+	}
+
+      /* imm8 store at bit [25:20] and [9:8].  */
+      /* imm4 store at bit [19:16].  */
+      /* sign store at bit [5].  */
+      csky_insn.inst = csky_insn.inst
+	| ((imm8 & 0x3) << 8)
+	| ((imm8 & 0xfc) << 18)
+	| ((imm4 & 0xf) << 16)
+	| sign;
+    }
+  else
+    {
+       csky_insn.inst |= (uint32_t) csky_insn.e1.X_add_number;
+    }
+
+  csky_insn.output = frag_more(4);
+  csky_insn.isize = 4;
+  csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);
+  return TRUE;
+}
+
 bfd_boolean
 dsp_work_bloop (void)
 {
@@ -7196,6 +7339,21 @@ dsp_work_bloop (void)
   return TRUE;
 }
 
+bfd_boolean
+float_work_fpuv3_fstore(void)
+{
+  /* Generate relax or reloc if necessary.  */
+  csky_generate_frags ();
+  /* Generate the insn by mask.  */
+  csky_generate_insn ();
+  /* Write inst to frag.  */
+  csky_write_insn (csky_insn.output,
+                   csky_insn.inst,
+                   csky_insn.isize);
+
+
+  return TRUE;
+}
 
 /* The following are for assembler directive handling.  */
 

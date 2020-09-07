@@ -1,3 +1,31 @@
+2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (float_work_fpuv3_fmovi): New function,
+	helper function to encode fpuv3 fmovi instructions.
+	(float_work_fpuv3_fstore): New function.
+	(struct literal): Add new member 'offset'.
+	(csky_cpus): New cpu CK860f.
+	(enter_literal): Return literal pool pointer instead of offset.
+	(parse_rt): Adjust the change of enter_literal.
+	(parse_rtf): Likewise.
+	(v1_work_lrw): Likewise.
+	(v1_work_jbsr): Likewise.
+	(v2_work_lrw): Likewise.
+	(v2_work_jbsr): Likewise.
+	(v2_work_jsri): Likewise.
+	(vdsp_work_vlrw): Likewise.
+	(is_freglist_legal): Add handler for FPUV3.
+	(parse_type_freg): Likewise.
+	(is_imm_within_range): Set e.X_add_number if it is a signed and
+	negtive number.
+	(get_operand_value): Add handler for OPRND_TYPE_IMM9b,
+	OPRND_TYPE_HFLOAT_FMOVI, OPRND_TYPE_SFLOAT_FMOVI
+	and OPRND_TYPE_DFLOAT_FMOVI.
+	(float_to_half): Convert float number to harf float.
+	* testsuite/gas/csky/case-fpuv3-ck860f/ : New folder containing
+	the test cases for FPUV3, they are divided by instruction
+	operands format and both have legal cases and illegal cases.
+
 2020-09-08  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 	Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
