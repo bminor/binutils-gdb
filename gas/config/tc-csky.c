@@ -463,6 +463,7 @@ static int do_func_dump = 0;      /* dump literals after every function.  */
 static int do_br_dump = 1;        /* work for -mabr/-mno-abr, control the literals dump.  */
 static int do_intr_stack = -1;    /* control interrupt stack module, 801&802&803
 				     default on, 807&810, default off.  */
+static int float_abi = 0;
 
 #ifdef INCLUDE_BRANCH_STUB
 static int do_use_branchstub = -1;
@@ -750,6 +751,8 @@ struct option md_longopts[] = {
   {"march", required_argument, NULL, OPTION_MARCH},
 #define OPTION_MCPU (OPTION_MD_BASE + 1)
   {"mcpu", required_argument, NULL, OPTION_MCPU},
+#define OPTION_FLOAT_ABI (OPTION_MD_BASE + 2)
+  {"mfloat-abi", required_argument, NULL, OPTION_FLOAT_ABI},
 
   /* Remaining options just set boolean flags.  */
   {"EL", no_argument, &target_big_endian, 0},
@@ -960,6 +963,35 @@ parse_arch (const char *str)
   as_bad (_("unknown architecture `%s'"), str);
 }
 
+struct csky_option_value_table
+{
+  const char *name;
+  long value;
+};
+
+static const struct csky_option_value_table csky_float_abis[] =
+{
+  {"hard",	VAL_CSKY_FPU_ABI_HARD},
+  {"softfp",	VAL_CSKY_FPU_ABI_SOFTFP},
+  {"soft",	VAL_CSKY_FPU_ABI_SOFT},
+  {NULL,	0}
+};
+
+static bfd_boolean
+parse_float_abi (const char *str)
+{
+  const struct csky_option_value_table * opt;
+
+  for (opt = csky_float_abis; opt->name != NULL; opt++)
+    if (strcasecmp (opt->name, str) == 0)
+      {
+	float_abi = opt->value;
+	return TRUE;
+      }
+
+  as_bad (_("unknown floating point abi `%s'\n"), str);
+  return FALSE;
+}
 
 #ifdef OBJ_ELF
 /* Implement the TARGET_FORMAT macro.  */
@@ -1142,6 +1174,25 @@ md_show_usage (FILE *fp)
   fprintf (fp, "\n");
 
   fprintf (fp, _("\
+  -mfloat-abi=ABI		select float ABI:"));
+  for (i = 0, n = margin; csky_float_abis[i].name != NULL; i++)
+    {
+      int l = strlen (csky_float_abis[i].name);
+      if (n + l >= margin)
+	{
+	  fprintf (fp, "\n\t\t\t\t");
+	  n = l;
+	}
+      else
+	{
+	  fprintf (fp, " ");
+	  n += l + 1;
+	}
+      fprintf (fp, "%s", csky_float_abis[i].name);
+    }
+  fprintf (fp, "\n");
+
+  fprintf (fp, _("\
   -EL  -mlittle-endian		generate little-endian output\n"));
   fprintf (fp, _("\
   -EB  -mbig-endian		generate big-endian output\n"));
@@ -1271,6 +1322,9 @@ static void set_csky_attribute (void)
 	  bfd_elf_add_obj_attr_string (stdoutput, OBJ_ATTR_PROC,
 				    Tag_CSKY_FPU_NUMBER_MODULE,
 				    "IEEE 754");
+	  bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				    Tag_CSKY_FPU_ABI,
+				    float_abi);
 	}
     }
 
@@ -4505,6 +4559,9 @@ md_parse_option (int c, const char *arg)
       break;
     case OPTION_MCPU:
       parse_cpu (arg);
+      break;
+    case OPTION_FLOAT_ABI:
+      parse_float_abi (arg);
       break;
     default:
       return 0;

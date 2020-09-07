@@ -1,5 +1,15 @@
 2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
+	* config/tc-csky.c (float_abi): New.
+	(md_longopts): Add mfloat-abi.
+	(struct sky_option_value_table): New.
+	(csky_float_abis): New, the possible values for -mfloat-abi.
+	(parse_float_abi): New funtion.
+	(md_show_usage): Show help information for -mfloat-abi.
+	(set_csky_attribute): Store float-abi value.
+
+2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
 	* config/tc-csky.c (float_work_fpuv3_fmovi): New function,
 	helper function to encode fpuv3 fmovi instructions.
 	(float_work_fpuv3_fstore): New function.
