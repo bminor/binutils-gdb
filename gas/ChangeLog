@@ -1,5 +1,16 @@
 2020-09-07  Mark Wielaard  <mark@klomp.org>
 
+	* dwarf2dbg.c (add_line_strp): New function.
+	(out_dir_and_file_list): Take line_seg and sizeof_offset as
+	arguments, Use DW_FORM_line_strp for dir and file. Call
+	add_line_strp and set symbol offset for DWARF2_LINE_VERSION 5.
+	(out_debug_line): Call out_dir_and_file_list with line_seg and
+	sizeof_offset.
+	* gas/testsuite/gas/elf/dwarf-5-file0.d: Expect indirect line
+	strings.
+
+2020-09-07  Mark Wielaard  <mark@klomp.org>
+
 	* dwarf2dbg.c (DWARF2_RNGLISTS_VERSION): New constant.
 	(out_debug_ranges): Add ranges_sym argument and set it.
 	(out_debug_rnglists): New function.
