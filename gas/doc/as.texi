@@ -745,7 +745,9 @@ compiler output).
 @itemx --gen-debug
 Generate debugging information for each assembler source line using whichever
 debug format is preferred by the target.  This currently means either STABS,
-ECOFF or DWARF2.
+ECOFF or DWARF2.  When the debug format is DWARF then a @code{.debug_info} and
+@code{.debug_line} section is only emitted when the assembly file doesn't
+generate one itself.
 
 @item --gstabs
 Generate stabs debugging information for each assembler line.  This
@@ -5857,7 +5859,8 @@ the @code{.loc} directive will add a row to the @code{.debug_line} line
 number matrix corresponding to the immediately following assembly
 instruction.  The @var{fileno}, @var{lineno}, and optional @var{column}
 arguments will be applied to the @code{.debug_line} state machine before
-the row is added.
+the row is added.  It is an error for the input assembly file to generate
+a non-empty @code{.debug_line} and also use @code{loc} directives.
 
 The @var{options} are a sequence of the following tokens in any order:
 

@@ -1,3 +1,17 @@
+2020-09-07  Mark Wielaard  <mark@klomp.org>
+
+	* as.texi (-g): Explicitly mention when .debug_info and .debug_line
+	are generated for the DWARF format.
+	(Loc): Add that it is an error to both use a .loc directive and
+	generate a .debug_line yourself.
+	* dwarf2dbg.c (dwarf2_any_loc_directive_seen): New static variable.
+	(dwarf2_directive_loc): Set dwarf2_any_loc_directive_seen to TRUE.
+	(dwarf2_finish): Check dwarf2_any_loc_directive_seen before emitting
+	an error. Only create .debug_line if it is empty (or doesn't exist).
+	* testsuite/gas/i386/i386.exp: Add dwarf2-line-{1,2,3,4} when testing
+	an elf target.
+	* testsuite/gas/i386/dwarf2-line-{1,2,3,4}.{s,d,l}: New test files.
+
 2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (md_begin): Enable extend lrw by default for
