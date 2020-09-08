@@ -1,3 +1,11 @@
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
+	* aarch64-dis.c (arch_variant): New.
+	(determine_disassembling_preference): Disassemble according to
+	arch variant.
+	(select_aarch64_variant): New.
+	(print_insn_aarch64): Set feature set.
+
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
 	* v850-opc.c (insert_i5div1, insert_i5div2, insert_i5div3),

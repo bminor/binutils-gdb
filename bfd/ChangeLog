@@ -1,3 +1,10 @@
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
+	* archures.c (bfd_mach_aarch64_8R): New.
+	* bfd-in2.h: Regenerate.
+	* cpu-aarch64.c (bfd_aarch64_arch_v8_r): New.
+	(bfd_aarch64_arch_ilp32): Update tail pointer.
+
 2020-09-08  Alan Modra  <amodra@gmail.com>
 
 	PR 13250

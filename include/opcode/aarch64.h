@@ -40,6 +40,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V8	     (1ULL << 0) /* All processors.  */
 #define AARCH64_FEATURE_V8_6	     (1ULL << 1) /* ARMv8.6 processors.  */
 #define AARCH64_FEATURE_BFLOAT16     (1ULL << 2) /* Bfloat16 insns.  */
+#define AARCH64_FEATURE_V8_A	     (1ULL << 3) /* Armv8-A processors.  */
 #define AARCH64_FEATURE_SVE2	     (1ULL << 4) /* SVE2 instructions.  */
 #define AARCH64_FEATURE_V8_2	     (1ULL << 5) /* ARMv8.2 processors.  */
 #define AARCH64_FEATURE_V8_3	     (1ULL << 6) /* ARMv8.3 processors.  */
@@ -48,6 +49,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SVE2_SM4     (1ULL << 9)
 #define AARCH64_FEATURE_SVE2_SHA3    (1ULL << 10)
 #define AARCH64_FEATURE_V8_4	     (1ULL << 11) /* ARMv8.4 processors.  */
+#define AARCH64_FEATURE_V8_R	     (1ULL << 12) /* Armv8-R processors.  */
 #define AARCH64_FEATURE_FP	     (1ULL << 17) /* FP instructions.  */
 #define AARCH64_FEATURE_SIMD	     (1ULL << 18) /* SIMD instructions.  */
 #define AARCH64_FEATURE_CRC	     (1ULL << 19) /* CRC instructions.  */
@@ -90,7 +92,8 @@ typedef uint32_t aarch64_insn;
 
 /* Architectures are the sum of the base and extensions.  */
 #define AARCH64_ARCH_V8		AARCH64_FEATURE (AARCH64_FEATURE_V8, \
-						 AARCH64_FEATURE_FP  \
+						 AARCH64_FEATURE_V8_A \
+						 | AARCH64_FEATURE_FP  \
 						 | AARCH64_FEATURE_SIMD)
 #define AARCH64_ARCH_V8_1	AARCH64_FEATURE (AARCH64_ARCH_V8, \
 						 AARCH64_FEATURE_CRC	\
@@ -125,6 +128,9 @@ typedef uint32_t aarch64_insn;
 						 AARCH64_FEATURE_V8_6   \
 						 | AARCH64_FEATURE_BFLOAT16 \
 						 | AARCH64_FEATURE_I8MM)
+#define AARCH64_ARCH_V8_R	(AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
+						 AARCH64_FEATURE_V8_R)	\
+			      & ~(AARCH64_FEATURE_V8_A | AARCH64_FEATURE_LOR))
 
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
