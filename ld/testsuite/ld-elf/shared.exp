@@ -841,6 +841,9 @@ append build_tests {
   {"Dump pr21978.so"
    "-shared" "-fPIC -g -O2"
    {pr21978a.c pr21978b.c} {{objdump {-Sl} pr21978.od}} "pr21978.so"}
+  {"libpr26580-2.so"
+   "-shared" "-fPIC -fcommon"
+   {pr26580-b.c} {} "libpr26580-2.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -1044,6 +1047,14 @@ set run_tests [list \
     [list "Run pr21964-3" \
      "-Wl,--no-as-needed,-rpath,tmpdir tmpdir/pr21964-1a.so tmpdir/pr21964-1b.so tmpdir/pr21964-3a.so" "" \
      {pr21964-3c.c} "pr21964-3" "pass.out" ] \
+    [list "pr26580-3" \
+     "" "" \
+     {pr26580-a.c} "pr26580-3" "pr26580-3.out" "-fcommon" "c" "" \
+     "-Wl,--as-needed tmpdir/libpr26580-2.so" ] \
+    [list "pr26580-4" \
+     "" "" \
+     {pr26580-a.c} "pr26580-4" "pr26580-4.out" "-fcommon" "c" "" \
+     "-Wl,--no-as-needed tmpdir/libpr26580-2.so" ] \
 ]
 
 # NetBSD ELF systems do not currently support the .*_array sections.

@@ -48,6 +48,16 @@ if { [istarget "mips*vr4100*-*-elf*"] \
     append LFLAGS " -call_shared"
 }
 
+# Set the pointer size according to the ELF flavor.
+set AFLAGS ""
+if [is_elf64 "tmpdir/libcomm-data.so"] {
+    append AFLAGS " --defsym ELF64=1"
+}
+# HPUX targets use a different .comm syntax.
+if [istarget "*-*-hpux*"] {
+    append AFLAGS " --defsym HPUX=1"
+}
+
 set testname "Common symbol override test"
 
 # Define a global symbol.
@@ -62,17 +72,15 @@ run_ld_link_tests [list \
 	} \
 	"libcomm-data.so" \
     ] \
+    [list \
+	"libpr26580-1.so" \
+	"$LFLAGS -shared" "" \
+	"$AFLAGS_PIC $AFLAGS" \
+	{ pr26580-b.s } \
+	{ } \
+	"libpr26580-1.so" \
+    ] \
 ]
-
-# Set the pointer size according to the ELF flavor.
-set AFLAGS ""
-if [is_elf64 "tmpdir/libcomm-data.so"] {
-    append AFLAGS " --defsym ELF64=1"
-}
-# HPUX targets use a different .comm syntax.
-if [istarget "*-*-hpux*"] {
-    append AFLAGS " --defsym HPUX=1"
-}
 
 # bfin-elf does not currently support copy relocs.
 setup_xfail "bfin-*-*"
@@ -112,5 +120,21 @@ run_ld_link_tests [list \
 	    { readelf -s comm-data3.sd } \
 	} \
 	"comm-data3b" \
+    ] \
+    [list \
+	"pr26580-1" \
+	"$LFLAGS --as-needed -Ltmpdir -lpr26580-1" "" \
+	"$AFLAGS" \
+	{ pr26580-a.s } \
+	{ {readelf -s pr26580-1.sd} } \
+	"pr26580-1" \
+    ] \
+    [list \
+	"pr26580-2" \
+	"$LFLAGS --no-as-needed -Ltmpdir -lpr26580-1" "" \
+	"$AFLAGS" \
+	{ pr26580-a.s } \
+	{ {readelf -s pr26580-2.sd} } \
+	"pr26580-2" \
     ] \
 ]

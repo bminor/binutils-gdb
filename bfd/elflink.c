@@ -1058,7 +1058,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       bfd_boolean *pold_weak,
 		       unsigned int *pold_alignment,
 		       bfd_boolean *skip,
-		       bfd_boolean *override,
+		       bfd **override,
 		       bfd_boolean *type_change_ok,
 		       bfd_boolean *size_change_ok,
 		       bfd_boolean *matched)
@@ -1076,7 +1076,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   bfd_boolean default_sym = *matched;
 
   *skip = FALSE;
-  *override = FALSE;
+  *override = NULL;
 
   sec = *psec;
   bind = ELF_ST_BIND (sym->st_info);
@@ -1652,7 +1652,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	  || (h->root.type == bfd_link_hash_common
 	      && (newweak || newfunc))))
     {
-      *override = TRUE;
+      *override = abfd;
       newdef = FALSE;
       newdyncommon = FALSE;
 
@@ -1678,7 +1678,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   if (newdyncommon
       && h->root.type == bfd_link_hash_common)
     {
-      *override = TRUE;
+      *override = oldbfd;
       newdef = FALSE;
       newdyncommon = FALSE;
       *pvalue = sym->st_size;
@@ -1854,7 +1854,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   const struct elf_backend_data *bed;
   bfd_boolean collect;
   bfd_boolean dynamic;
-  bfd_boolean override;
+  bfd *override;
   char *p;
   size_t len, shortlen;
   asection *tmp_sec;
@@ -4484,7 +4484,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      h = (struct elf_link_hash_entry *) p;
 	      entsize += htab->root.table.entsize;
 	      if (h->root.type == bfd_link_hash_warning)
-		entsize += htab->root.table.entsize;
+		{
+		  entsize += htab->root.table.entsize;
+		  h = (struct elf_link_hash_entry *) h->root.u.i.link;
+		}
+	      if (h->root.type == bfd_link_hash_common)
+		entsize += sizeof (*h->root.u.c.p);
 	    }
 	}
 
@@ -4528,13 +4533,19 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
 	    {
-	      memcpy (old_ent, p, htab->root.table.entsize);
-	      old_ent = (char *) old_ent + htab->root.table.entsize;
 	      h = (struct elf_link_hash_entry *) p;
+	      memcpy (old_ent, h, htab->root.table.entsize);
+	      old_ent = (char *) old_ent + htab->root.table.entsize;
 	      if (h->root.type == bfd_link_hash_warning)
 		{
-		  memcpy (old_ent, h->root.u.i.link, htab->root.table.entsize);
+		  h = (struct elf_link_hash_entry *) h->root.u.i.link;
+		  memcpy (old_ent, h, htab->root.table.entsize);
 		  old_ent = (char *) old_ent + htab->root.table.entsize;
+		}
+	      if (h->root.type == bfd_link_hash_common)
+		{
+		  memcpy (old_ent, h->root.u.c.p, sizeof (*h->root.u.c.p));
+		  old_ent = (char *) old_ent + sizeof (*h->root.u.c.p);
 		}
 	    }
 	}
@@ -4578,7 +4589,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       bfd_boolean type_change_ok;
       bfd_boolean new_weak;
       bfd_boolean old_weak;
-      bfd_boolean override;
+      bfd *override;
       bfd_boolean common;
       bfd_boolean discarded;
       unsigned int old_alignment;
@@ -4586,7 +4597,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       bfd *old_bfd;
       bfd_boolean matched;
 
-      override = FALSE;
+      override = NULL;
 
       flags = BSF_NO_FLAGS;
       sec = NULL;
@@ -4906,7 +4917,8 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
 
       if (! (_bfd_generic_link_add_one_symbol
-	     (info, abfd, name, flags, sec, value, NULL, FALSE, bed->collect,
+	     (info, override ? override : abfd, name, flags, sec, value,
+	      NULL, FALSE, bed->collect,
 	      (struct bfd_link_hash_entry **) sym_hash)))
 	goto error_free_vers;
 
@@ -5337,49 +5349,31 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	{
 	  struct bfd_hash_entry *p;
 	  struct elf_link_hash_entry *h;
-	  bfd_size_type size;
-	  unsigned int alignment_power;
 	  unsigned int non_ir_ref_dynamic;
 
 	  for (p = htab->root.table.table[i]; p != NULL; p = p->next)
 	    {
-	      h = (struct elf_link_hash_entry *) p;
-	      if (h->root.type == bfd_link_hash_warning)
-		h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	      /* Preserve the maximum alignment and size for common
-		 symbols even if this dynamic lib isn't on DT_NEEDED
-		 since it can still be loaded at run time by another
-		 dynamic lib.  */
-	      if (h->root.type == bfd_link_hash_common)
-		{
-		  size = h->root.u.c.size;
-		  alignment_power = h->root.u.c.p->alignment_power;
-		}
-	      else
-		{
-		  size = 0;
-		  alignment_power = 0;
-		}
 	      /* Preserve non_ir_ref_dynamic so that this symbol
 		 will be exported when the dynamic lib becomes needed
 		 in the second pass.  */
-	      non_ir_ref_dynamic = h->root.non_ir_ref_dynamic;
-	      memcpy (p, old_ent, htab->root.table.entsize);
-	      old_ent = (char *) old_ent + htab->root.table.entsize;
 	      h = (struct elf_link_hash_entry *) p;
 	      if (h->root.type == bfd_link_hash_warning)
+		h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	      non_ir_ref_dynamic = h->root.non_ir_ref_dynamic;
+
+	      h = (struct elf_link_hash_entry *) p;
+	      memcpy (h, old_ent, htab->root.table.entsize);
+	      old_ent = (char *) old_ent + htab->root.table.entsize;
+	      if (h->root.type == bfd_link_hash_warning)
 		{
-		  memcpy (h->root.u.i.link, old_ent, htab->root.table.entsize);
-		  old_ent = (char *) old_ent + htab->root.table.entsize;
 		  h = (struct elf_link_hash_entry *) h->root.u.i.link;
+		  memcpy (h, old_ent, htab->root.table.entsize);
+		  old_ent = (char *) old_ent + htab->root.table.entsize;
 		}
 	      if (h->root.type == bfd_link_hash_common)
 		{
-		  if (size > h->root.u.c.size)
-		    h->root.u.c.size = size;
-		  if (alignment_power > h->root.u.c.p->alignment_power)
-		    h->root.u.c.p->alignment_power = alignment_power;
+		  memcpy (h->root.u.c.p, old_ent, sizeof (*h->root.u.c.p));
+		  old_ent = (char *) old_ent + sizeof (*h->root.u.c.p);
 		}
 	      h->root.non_ir_ref_dynamic = non_ir_ref_dynamic;
 	    }
