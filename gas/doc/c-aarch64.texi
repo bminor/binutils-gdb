@@ -78,8 +78,9 @@ on the target processor.  The following processor names are recognized:
 @code{thunderx},
 @code{vulcan},
 @code{xgene1}
+@code{xgene2},
 and
-@code{xgene2}.
+@code{cortex-r82}.
 The special name @code{all} may be used to allow the assembler to accept
 instructions valid for any supported processor, including all optional
 extensions.

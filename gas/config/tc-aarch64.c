@@ -8976,6 +8976,7 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
   {"xgene1", AARCH64_ARCH_V8, "APM X-Gene 1"},
   {"xgene2", AARCH64_FEATURE (AARCH64_ARCH_V8,
 			      AARCH64_FEATURE_CRC), "APM X-Gene 2"},
+  {"cortex-r82", AARCH64_ARCH_V8_R, "Cortex-R82"},
   {"generic", AARCH64_ARCH_V8, NULL},
 
   {NULL, AARCH64_ARCH_NONE, NULL}

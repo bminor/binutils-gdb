@@ -1,5 +1,10 @@
 2020-09-08  Alex Coplan  <alex.coplan@arm.com>
 
+	* config/tc-aarch64.c (aarch64_cpus): Add Cortex-R82.
+	* doc/c-aarch64.texi: Document -mcpu=cortex-r82.
+
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
 	* config/tc-aarch64.c (parse_sys_reg): Also pass sysreg name to
 	validation function.
 	(parse_sys_ins_reg): Likewise.
