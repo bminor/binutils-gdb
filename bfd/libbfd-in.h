@@ -896,6 +896,8 @@ extern bfd_signed_vma _bfd_read_signed_leb128
 extern bfd_vma _bfd_safe_read_leb128
   (bfd *, bfd_byte *, unsigned int *, bfd_boolean, const bfd_byte * const)
   ATTRIBUTE_HIDDEN;
+extern bfd_byte * _bfd_write_unsigned_leb128
+  (bfd_byte *, bfd_byte *, bfd_vma) ATTRIBUTE_HIDDEN;
 
 #if GCC_VERSION >= 7000
 #define _bfd_mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)
