@@ -445,9 +445,11 @@ gdb_bfd_open (const char *name, const char *target, int fd,
       /* Weird situation here -- don't cache if we can't stat.  */
       if (debug_bfd_cache)
 	fprintf_unfiltered (gdb_stdlog,
-			    "Could not stat bfd %s for %s - not caching\n",
-			    host_address_to_string (abfd),
-			    bfd_get_filename (abfd));
+			    "Could not stat %s - not caching\n",
+			    name);
+      abfd = bfd_fopen (name, target, FOPEN_RB, fd);
+      if (abfd == nullptr)
+	return nullptr;
       return gdb_bfd_ref_ptr::new_reference (abfd);
     }
 
