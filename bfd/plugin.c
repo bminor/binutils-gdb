@@ -640,6 +640,8 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
 	  if (current_plugin->has_symbol_type)
 	    switch (syms[i].symbol_type)
 	      {
+	      default:
+		/* FIXME: Should we issue an error here ?  */
 	      case LDST_UNKNOWN:
 		/* What is the best fake section for LDST_UNKNOWN?  */
 	      case LDST_FUNCTION:

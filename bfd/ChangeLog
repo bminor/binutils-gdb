@@ -1,3 +1,8 @@
+2020-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* plugin.c (bfd_plugin_canonicalize_symtab): Handle the case of an
+	unrecognized symbol type in a weak definition.
+
 2020-09-04  Alan Modra  <amodra@gmail.com>
 
 	PR 26574
