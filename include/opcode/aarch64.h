@@ -977,7 +977,8 @@ typedef struct
 
 extern bfd_boolean aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *);
 extern bfd_boolean
-aarch64_sys_ins_reg_supported_p (const aarch64_feature_set, aarch64_insn,
+aarch64_sys_ins_reg_supported_p (const aarch64_feature_set,
+				 const char *reg_name, aarch64_insn,
                                  uint32_t, aarch64_feature_set);
 
 extern const aarch64_sys_ins_reg aarch64_sys_regs_ic [];
@@ -1270,7 +1271,8 @@ aarch64_get_opcode (enum aarch64_op);
 extern void
 aarch64_print_operand (char *, size_t, bfd_vma, const aarch64_opcode *,
 		       const aarch64_opnd_info *, int, int *, bfd_vma *,
-		       char **);
+		       char **,
+		       aarch64_feature_set features);
 
 /* Miscellaneous interface.  */
 

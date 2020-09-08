@@ -4141,8 +4141,8 @@ parse_sys_reg (char **str, htab_t sys_regs,
 	as_bad (_("selected processor does not support PSTATE field "
 		  "name '%s'"), buf);
       if (!pstatefield_p
-	  && !aarch64_sys_ins_reg_supported_p (cpu_variant, o->value,
-					       o->flags, o->features))
+	  && !aarch64_sys_ins_reg_supported_p (cpu_variant, o->name,
+					       o->value, o->flags, o->features))
 	as_bad (_("selected processor does not support system register "
 		  "name '%s'"), buf);
       if (aarch64_sys_reg_deprecated_p (o->flags))
@@ -4183,7 +4183,8 @@ parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
   if (!o)
     return NULL;
 
-  if (!aarch64_sys_ins_reg_supported_p (cpu_variant, o->value, o->flags, 0))
+  if (!aarch64_sys_ins_reg_supported_p (cpu_variant,
+					o->name, o->value, o->flags, 0))
     as_bad (_("selected processor does not support system register "
 	      "name '%s'"), buf);
   if (aarch64_sys_reg_deprecated_p (o->flags))
@@ -4715,7 +4716,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), 0, opcode, opnds, i, NULL, NULL,
-			     NULL);
+			     NULL, cpu_variant);
 
       /* Delimiter.  */
       if (str[0] != '\0')

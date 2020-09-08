@@ -1,5 +1,27 @@
 2020-09-08  Alex Coplan  <alex.coplan@arm.com>
 
+	* aarch64-dis.c (print_operands): Pass CPU features to
+	aarch64_print_operand().
+	* aarch64-opc.c (aarch64_print_operand): Use CPU features to determine
+	preferred disassembly of system registers.
+	(SR_RNG): Refactor to use new SR_FEAT2 macro.
+	(SR_FEAT2): New.
+	(SR_V8_1_A): New.
+	(SR_V8_4_A): New.
+	(SR_V8_A): New.
+	(SR_V8_R): New.
+	(SR_EXPAND_ELx): New.
+	(SR_EXPAND_EL12): New.
+	(aarch64_sys_regs): Specify which registers are only on
+	A-profile, add R-profile system registers.
+	(ENC_BARLAR): New.
+	(PRBARn_ELx): New.
+	(PRLARn_ELx): New.
+	(aarch64_sys_ins_reg_supported_p): Reject EL3 registers for
+	Armv8-R AArch64.
+
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_v8_r): New.
 	(ARMV8_R): New.
 	(V8_R_INSN): New.

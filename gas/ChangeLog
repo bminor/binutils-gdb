@@ -1,5 +1,19 @@
 2020-09-08  Alex Coplan  <alex.coplan@arm.com>
 
+	* config/tc-aarch64.c (parse_sys_reg): Also pass sysreg name to
+	validation function.
+	(parse_sys_ins_reg): Likewise.
+	(print_operands): Pass CPU features to aarch64_print_operand().
+	* testsuite/gas/aarch64/v8-r-bad-sysregs.d: New test.
+	* testsuite/gas/aarch64/v8-r-bad-sysregs.l: Error output.
+	* testsuite/gas/aarch64/v8-r-bad-sysregs.s: Input.
+	* testsuite/gas/aarch64/v8-r-sysregs-need-arch.d: New test.
+	* testsuite/gas/aarch64/v8-r-sysregs-need-arch.l: Error output.
+	* testsuite/gas/aarch64/v8-r-sysregs.d: New test.
+	* testsuite/gas/aarch64/v8-r-sysregs.s: Input for previous two tests.
+
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
 	* testsuite/gas/aarch64/dfb.d: New test.
 	* testsuite/gas/aarch64/dfb.s: Input.
 

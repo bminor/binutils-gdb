@@ -3082,7 +3082,7 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), pc, opcode, opnds, i, &pcrel_p,
-			     &info->target, &notes);
+			     &info->target, &notes, arch_variant);
 
       /* Print the delimiter (taking account of omitted operand(s)).  */
       if (str[0] != '\0')

@@ -1,5 +1,12 @@
 2020-09-08  Alex Coplan  <alex.coplan@arm.com>
 
+	* opcode/aarch64.h (aarch64_sys_ins_reg_supported_p): Also take
+	system register name in order to simplify validation for v8-R.
+	(aarch64_print_operand): Also take CPU feature set, as disassembly for
+	system registers now depends on arch variant.
+
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_V8_A): New.
 	(AARCH64_FEATURE_V8_R): New.
 	(AARCH64_ARCH_V8): Include new A-profile feature bit.

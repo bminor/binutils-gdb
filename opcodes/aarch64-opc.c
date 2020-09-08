@@ -3143,7 +3143,8 @@ void
 aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		       const aarch64_opcode *opcode,
 		       const aarch64_opnd_info *opnds, int idx, int *pcrel_p,
-		       bfd_vma *address, char** notes)
+		       bfd_vma *address, char** notes,
+		       aarch64_feature_set features)
 {
   unsigned int i, num_conds;
   const char *name = NULL;
@@ -3688,9 +3689,12 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SYSREG:
       for (i = 0; aarch64_sys_regs[i].name; ++i)
 	{
+	  const aarch64_sys_reg *sr = aarch64_sys_regs + i;
+
 	  bfd_boolean exact_match
-	    = (aarch64_sys_regs[i].flags & opnd->sysreg.flags)
-	       == opnd->sysreg.flags;
+	    = (!(sr->flags & (F_REG_READ | F_REG_WRITE))
+	    || (sr->flags & opnd->sysreg.flags) == opnd->sysreg.flags)
+	    && AARCH64_CPU_HAS_FEATURE (features, sr->features);
 
 	  /* Try and find an exact match, But if that fails, return the first
 	     partial match that was found.  */
@@ -3810,9 +3814,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define SR_FEAT(n,e,f,feat) \
   SYSREG ((n), (e), (f) | F_ARCHEXT, AARCH64_FEATURE_##feat)
 
-#define SR_RNG(n,e,f) \
-  SYSREG ((n), (e), (f) | F_ARCHEXT, AARCH64_FEATURE_RNG | AARCH64_FEATURE_V8_5)
+#define SR_FEAT2(n,e,f,fe1,fe2) \
+  SYSREG ((n), (e), (f) | F_ARCHEXT, \
+	  AARCH64_FEATURE_##fe1 | AARCH64_FEATURE_##fe2)
 
+#define SR_RNG(n,e,f)	 SR_FEAT2(n,e,f,RNG,V8_5)
+#define SR_V8_1_A(n,e,f) SR_FEAT2(n,e,f,V8_A,V8_1)
+#define SR_V8_4_A(n,e,f) SR_FEAT2(n,e,f,V8_A,V8_4)
+
+#define SR_V8_A(n,e,f)	  SR_FEAT (n,e,f,V8_A)
+#define SR_V8_R(n,e,f)	  SR_FEAT (n,e,f,V8_R)
 #define SR_V8_1(n,e,f)	  SR_FEAT (n,e,f,V8_1)
 #define SR_V8_2(n,e,f)	  SR_FEAT (n,e,f,V8_2)
 #define SR_V8_3(n,e,f)	  SR_FEAT (n,e,f,V8_3)
@@ -3826,6 +3837,27 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define SR_PROFILE(n,e,f) SR_FEAT (n,e,f,PROFILE)
 #define SR_MEMTAG(n,e,f)  SR_FEAT (n,e,f,MEMTAG)
 #define SR_SCXTNUM(n,e,f) SR_FEAT (n,e,f,SCXTNUM)
+
+#define SR_EXPAND_ELx(f,x) \
+  f (x, 1),  \
+  f (x, 2),  \
+  f (x, 3),  \
+  f (x, 4),  \
+  f (x, 5),  \
+  f (x, 6),  \
+  f (x, 7),  \
+  f (x, 8),  \
+  f (x, 9),  \
+  f (x, 10), \
+  f (x, 11), \
+  f (x, 12), \
+  f (x, 13), \
+  f (x, 14), \
+  f (x, 15),
+
+#define SR_EXPAND_EL12(f) \
+  SR_EXPAND_ELx (f,1) \
+  SR_EXPAND_ELx (f,2)
 
 /* TODO there is one more issues need to be resolved
    1. handle cpu-implementation-defined system registers.
@@ -3928,12 +3960,12 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_SVE  ("zidr_el1",		CPENC (3,0,C0,C0,7),	0),
   SR_CORE ("ttbr0_el1",		CPENC (3,0,C2,C0,0),	0),
   SR_CORE ("ttbr1_el1",		CPENC (3,0,C2,C0,1),	0),
-  SR_CORE ("ttbr0_el2",		CPENC (3,4,C2,C0,0),	0),
-  SR_V8_1 ("ttbr1_el2",		CPENC (3,4,C2,C0,1),	0),
+  SR_V8_A ("ttbr0_el2",		CPENC (3,4,C2,C0,0),	0),
+  SR_V8_1_A ("ttbr1_el2",	CPENC (3,4,C2,C0,1),	0),
   SR_CORE ("ttbr0_el3",		CPENC (3,6,C2,C0,0),	0),
   SR_V8_1 ("ttbr0_el12",	CPENC (3,5,C2,C0,0),	0),
   SR_V8_1 ("ttbr1_el12",	CPENC (3,5,C2,C0,1),	0),
-  SR_CORE ("vttbr_el2",		CPENC (3,4,C2,C1,0),	0),
+  SR_V8_A ("vttbr_el2",		CPENC (3,4,C2,C1,0),	0),
   SR_CORE ("tcr_el1",		CPENC (3,0,C2,C0,2),	0),
   SR_CORE ("tcr_el2",		CPENC (3,4,C2,C0,2),	0),
   SR_CORE ("tcr_el3",		CPENC (3,6,C2,C0,2),	0),
@@ -4231,7 +4263,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
 
   SR_V8_4 ("dit",		CPEN_ (3,C2,5),		0),
   SR_V8_4 ("vstcr_el2",		CPENC (3,4,C2,C6,2),	0),
-  SR_V8_4 ("vsttbr_el2",	CPENC (3,4,C2,C6,0),	0),
+  SR_V8_4_A ("vsttbr_el2",	CPENC (3,4,C2,C6,0),	0),
   SR_V8_4 ("cnthvs_tval_el2",	CPENC (3,4,C14,C4,0),	0),
   SR_V8_4 ("cnthvs_cval_el2",	CPENC (3,4,C14,C4,2),	0),
   SR_V8_4 ("cnthvs_ctl_el2",	CPENC (3,4,C14,C4,1),	0),
@@ -4257,6 +4289,27 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("mpamvpm6_el2",	CPENC (3,4,C10,C6,6),	0),
   SR_CORE ("mpamvpm7_el2",	CPENC (3,4,C10,C6,7),	0),
   SR_CORE ("mpamvpmv_el2",	CPENC (3,4,C10,C4,1),	0),
+
+  SR_V8_R ("mpuir_el1",		CPENC (3,0,C0,C0,4),	F_REG_READ),
+  SR_V8_R ("mpuir_el2",		CPENC (3,4,C0,C0,4),	F_REG_READ),
+  SR_V8_R ("prbar_el1",		CPENC (3,0,C6,C8,0),	0),
+  SR_V8_R ("prbar_el2",		CPENC (3,4,C6,C8,0),	0),
+
+#define ENC_BARLAR(x,n,lar) \
+  CPENC (3, (x-1) << 2, C6, 8 | (n >> 1), ((n & 1) << 2) | lar)
+
+#define PRBARn_ELx(x,n) SR_V8_R ("prbar" #n "_el" #x, ENC_BARLAR (x,n,0), 0)
+#define PRLARn_ELx(x,n) SR_V8_R ("prlar" #n "_el" #x, ENC_BARLAR (x,n,1), 0)
+
+  SR_EXPAND_EL12 (PRBARn_ELx)
+  SR_V8_R ("prenr_el1",		CPENC (3,0,C6,C1,1),	0),
+  SR_V8_R ("prenr_el2",		CPENC (3,4,C6,C1,1),	0),
+  SR_V8_R ("prlar_el1",		CPENC (3,0,C6,C8,1),	0),
+  SR_V8_R ("prlar_el2",		CPENC (3,4,C6,C8,1),	0),
+  SR_EXPAND_EL12 (PRLARn_ELx)
+  SR_V8_R ("prselr_el1",	CPENC (3,0,C6,C2,1),	0),
+  SR_V8_R ("prselr_el2",	CPENC (3,4,C6,C2,1),	0),
+  SR_V8_R ("vsctlr_el2",	CPENC (3,4,C2,C0,0),	0),
 
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
@@ -4462,10 +4515,18 @@ aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *sys_ins_reg)
 
 extern bfd_boolean
 aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
+		 const char *reg_name,
                  aarch64_insn reg_value,
                  uint32_t reg_flags,
                  aarch64_feature_set reg_features)
 {
+  /* Armv8-R has no EL3.  */
+  if (AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_R))
+    {
+      const char *suffix = strrchr (reg_name, '_');
+      if (suffix && !strcmp (suffix, "_el3"))
+	return FALSE;
+    }
 
   if (!(reg_flags & F_ARCHEXT))
     return TRUE;
