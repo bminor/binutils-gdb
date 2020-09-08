@@ -1,5 +1,10 @@
 2020-09-08  Alex Coplan  <alex.coplan@arm.com>
 
+	* testsuite/gas/aarch64/dfb.d: New test.
+	* testsuite/gas/aarch64/dfb.s: Input.
+
+2020-09-08  Alex Coplan  <alex.coplan@arm.com>
+
 	* config/tc-aarch64.c (aarch64_archs): Add armv8-r.
 	* doc/c-aarch64.texi: Document -march=armv8-r.
 

@@ -2406,6 +2406,8 @@ static const aarch64_feature_set aarch64_feature_f32mm_sve =
 static const aarch64_feature_set aarch64_feature_f64mm_sve =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_F64MM
        | AARCH64_FEATURE_SVE, 0);
+static const aarch64_feature_set aarch64_feature_v8_r =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_R, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2450,6 +2452,7 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
 #define F32MM_SVE     &aarch64_feature_f32mm_sve
 #define F64MM_SVE     &aarch64_feature_f64mm_sve
 #define I8MM      &aarch64_feature_i8mm
+#define ARMV8_R	  &aarch64_feature_v8_r
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2553,6 +2556,8 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
   { NAME, OPCODE, MASK, CLASS, 0, F64MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
 #define F32MATMUL_SVE_INSNC(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS, CONSTRAINTS, TIED) \
   { NAME, OPCODE, MASK, CLASS, 0, F32MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
+#define V8_R_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_R, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3845,6 +3850,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("tsb", 0xd503225f, 0xffffffff, ic_system, 0, OP1 (BARRIER_PSB), {}, F_ALIAS),
   CORE_INSN ("clrex", 0xd503305f, 0xfffff0ff, ic_system, 0, OP1 (UIMM4), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
   CORE_INSN ("dsb", 0xd503309f, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, F_HAS_ALIAS),
+  V8_R_INSN ("dfb", 0xd5033c9f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
   CORE_INSN ("ssbb", 0xd503309f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("pssbb", 0xd503349f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("dmb", 0xd50330bf, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, 0),
