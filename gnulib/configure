@@ -26907,8 +26907,7 @@ $as_echo "#define ssize_t int" >>confdefs.h
 
   case "$host_os" in
     mingw*)
-                  REPLACE_STAT=1
-      ;;
+                        ;;
     *)
                         { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether stat handles trailing slashes on files" >&5
 $as_echo_n "checking whether stat handles trailing slashes on files... " >&6; }

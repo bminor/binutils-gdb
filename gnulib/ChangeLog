@@ -1,3 +1,11 @@
+2020-09-08  Tom Tromey  <tromey@adacore.com>
+
+	PR win32/25302:
+	* update-gnulib.sh: Apply stat patch.
+	* patches/0001-use-windows-stat: New file.
+	* import/m4/stat.m4: Update.
+	* configure: Rebuild.
+
 2020-08-26  Christian Biesinger  <cbiesinger@google.com>
 	    Pedro Alves  <palves@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>

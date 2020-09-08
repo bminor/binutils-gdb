@@ -173,6 +173,8 @@ apply_patches ()
     fi
 }
 
+apply_patches "patches/0001-use-windows-stat"
+
 # Regenerate all necessary files...
 aclocal &&
 autoconf &&
