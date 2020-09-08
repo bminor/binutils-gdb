@@ -1,3 +1,8 @@
+2020-10-26  Pedro Alves  <pedro@palves.net>
+
+	* nat/linux-waitpid.c: Include "gdbsupport/eintr.h".
+	(my_waitpid): Use gdb::handle_eintr.
+
 2020-10-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* acinclude.m4: Update ptrace.m4 path.

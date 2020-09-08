@@ -22,6 +22,7 @@
 #include "linux-nat.h"
 #include "linux-waitpid.h"
 #include "gdbsupport/gdb_wait.h"
+#include "gdbsupport/eintr.h"
 
 /* Convert wait status STATUS to a string.  Used for printing debug
    messages only.  */
@@ -54,13 +55,5 @@ status_to_str (int status)
 int
 my_waitpid (int pid, int *status, int flags)
 {
-  int ret;
-
-  do
-    {
-      ret = waitpid (pid, status, flags);
-    }
-  while (ret == -1 && errno == EINTR);
-
-  return ret;
+  return gdb::handle_eintr (-1, ::waitpid, pid, status, flags);
 }

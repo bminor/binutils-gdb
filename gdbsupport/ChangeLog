@@ -1,3 +1,10 @@
+2020-10-26  Pedro Alves  <pedro@palves.net>
+
+	* eintr.h (handle_eintr): Replace Ret template parameter with
+	ErrorValType.  Use it as type of the failure value.  Deduce the
+	function's return type using decltype.  Use lowercase for function
+	parameter names.
+
 2020-10-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* Makefile.in: Re-generate.
