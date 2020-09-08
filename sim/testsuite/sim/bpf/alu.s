@@ -40,10 +40,15 @@ main:
     ;; div
     div         %r2, %r1
     fail_ne     %r2, 0
-    div         %r1, -10000
-    fail_ne     %r1, -11007531
+    div         %r1, 10000
+    fail_ne     %r1, 11007531
     div         %r1, %r1
     fail_ne     %r1, 1
+
+    ;; div is unsigned
+    lddw        %r1, -8
+    div         %r1, 2
+    fail_ne     %r1, 0x7ffffffffffffffc ; sign bits NOT maintained - large pos.
 
     ;; and
     lddw        %r1, 0xaaaaaaaa55555555
@@ -84,14 +89,21 @@ main:
 
     ;; mod
     mov         %r1, 1025
-    mod         %r1, -16
+    mod         %r1, 16
     fail_ne     %r1, 1
-    mov         %r1, -25
-    mov         %r2, 5
-    mod         %r1, %r2
-    fail_ne     %r1, 0
+
+    ;; mod is unsigned
+    mov         %r1, 1025
+    mod         %r1, -16        ; mod unsigned -> will treat as large positive
+    fail_ne     %r1, 1025
+
+    mov         %r1, -25        ; -25 is 0xff..ffe7
+    mov         %r2, 5          ; ... which when unsigned is a large positive
+    mod         %r1, %r2        ; ... which is not evenly divisible by 5
+    fail_ne     %r1, 1
 
     ;; xor
+    mov         %r1, 0
     xor         %r1, %r2
     fail_ne     %r1, 5
     xor         %r1, 0x7eadbeef

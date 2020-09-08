@@ -31,10 +31,15 @@ main:
     fail_ne32   %r1, 264
 
     ;; div
-    div32       %r1, %r2        ; r1 /= r2 (r1 = 264 / -6 = -44)
-    div32       %r1, -2         ; r1 /= -2 (r1 = 22)
-    div32       %r1, 2          ; r1 /= 2  (r1 = 11)
-    fail_ne32   %r1, 11
+    div32       %r1, 6
+    mov32       %r2, 11
+    div32       %r1, %r2
+    fail_ne32   %r1, 4
+
+    ;; div is unsigned
+    mov32       %r1, -8         ; 0xfffffff8
+    div32       %r1, 2
+    fail_ne32   %r1, 0x7ffffffc ; sign bits are not preserved
 
     ;; and (bitwise)
     mov32       %r1, 0xb        ; r1  = (0xb = 0b1011)
@@ -70,13 +75,19 @@ main:
                                 ; i.e. upper-32 bits should be untouched
 
     ;; mod
-    mov32       %r1, -25
-    mov32       %r2, 4
+    mov32       %r1, 1025
+    mod32       %r1, 16
+    fail_ne32   %r1, 1
+
+    ;; mod is unsigned
+    mov32       %r1, 1025
+    mod32       %r1, -16        ; when unsigned, much larger than 1025
+    fail_ne32   %r1, 1025
+
+    mov32       %r1, -25        ; when unsigned, a large positive which is
+    mov32       %r2, 5          ; ... not evenly divisible by 5
     mod32       %r1, %r2
-    fail_ne32   %r1, -1
-    mov32       %r1, 25
-    mod32       %r1, 5
-    fail_ne32   %r1, 0
+    fail_ne32   %r1, 1
 
     ;; xor
     xor32       %r1, %r2

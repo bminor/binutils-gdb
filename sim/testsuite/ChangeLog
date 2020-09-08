@@ -1,3 +1,8 @@
+2020-09-08  David Faust  <david.faust@oracle.com>
+
+	* sim/bpf/alu.s: Correct div and mod tests.
+	* sim/bpf/alu32.s: Likewise.
+
 2020-08-04  David Faust  <david.faust@oracle.com>
 	    Jose E. Marchesi  <jose.marchesi@oracle.com>
 

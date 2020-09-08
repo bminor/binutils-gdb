@@ -1,3 +1,8 @@
+2020-09-08  David Faust  <david.faust@oracle.com>
+
+	* bpf/sem-be.c: Regenerate.
+	* bpf/sem-le.c: Likewise.
+
 2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf/bpf.c: Include bpf-helpers.h.

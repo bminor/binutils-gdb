@@ -461,7 +461,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,divibe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    DI opval = DIVDI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
+    DI opval = UDIVDI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'D', opval);
   }
@@ -482,7 +482,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,divrbe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    DI opval = DIVDI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
+    DI opval = UDIVDI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'D', opval);
   }
@@ -503,7 +503,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,div32ibe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    USI opval = DIVSI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
+    USI opval = UDIVSI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'x', opval);
   }
@@ -524,7 +524,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,div32rbe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    USI opval = DIVSI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
+    USI opval = UDIVSI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'x', opval);
   }
@@ -881,7 +881,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,modibe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    DI opval = MODDI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
+    DI opval = UMODDI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'D', opval);
   }
@@ -902,7 +902,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,modrbe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    DI opval = MODDI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
+    DI opval = UMODDI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'D', opval);
   }
@@ -923,7 +923,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,mod32ibe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    USI opval = MODSI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
+    USI opval = UMODSI (CPU (h_gpr[FLD (f_dstbe)]), FLD (f_imm32));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'x', opval);
   }
@@ -944,7 +944,7 @@ SEM_FN_NAME (bpfbf_ebpfbe,mod32rbe) (SIM_CPU *current_cpu, SEM_ARG sem_arg)
   SEM_PC vpc = SEM_NEXT_VPC (sem_arg, pc, 8);
 
   {
-    USI opval = MODSI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
+    USI opval = UMODSI (CPU (h_gpr[FLD (f_dstbe)]), CPU (h_gpr[FLD (f_srcbe)]));
     CPU (h_gpr[FLD (f_dstbe)]) = opval;
     CGEN_TRACE_RESULT (current_cpu, abuf, "gpr", 'x', opval);
   }
