@@ -5048,8 +5048,56 @@ msp430_fix_adjustable (struct fix *fixp ATTRIBUTE_UNUSED)
   return FALSE;
 }
 
-/* Set the contents of the .MSP430.attributes and .GNU.attributes sections.  */
+/* Scan uleb128 subtraction expressions and insert fixups for them.
+   e.g., .uleb128 .L1 - .L0
+   Because relaxation may change the value of the subtraction, we
+   must resolve them at link-time.  */
 
+static void
+msp430_insert_uleb128_fixes (bfd *abfd ATTRIBUTE_UNUSED,
+			    asection *sec, void *xxx ATTRIBUTE_UNUSED)
+{
+  segment_info_type *seginfo = seg_info (sec);
+  struct frag *fragP;
+
+  subseg_set (sec, 0);
+
+  for (fragP = seginfo->frchainP->frch_root;
+       fragP; fragP = fragP->fr_next)
+    {
+      expressionS *exp, *exp_dup;
+
+      if (fragP->fr_type != rs_leb128  || fragP->fr_symbol == NULL)
+	continue;
+
+      exp = symbol_get_value_expression (fragP->fr_symbol);
+
+      if (exp->X_op != O_subtract)
+	continue;
+
+      /* FIXME: Skip for .sleb128.  */
+      if (fragP->fr_subtype != 0)
+	continue;
+
+      exp_dup = xmemdup (exp, sizeof (*exp), sizeof (*exp));
+      exp_dup->X_op = O_symbol;
+      exp_dup->X_op_symbol = NULL;
+
+      /* Emit the SUB relocation first, since the SET relocation will write out
+	 the final value.  */
+      exp_dup->X_add_symbol = exp->X_op_symbol;
+      fix_new_exp (fragP, fragP->fr_fix, 0,
+		   exp_dup, 0, BFD_RELOC_MSP430_SUB_ULEB128);
+
+      exp_dup->X_add_symbol = exp->X_add_symbol;
+      /* Insert relocations to resolve the subtraction at link-time.  */
+      fix_new_exp (fragP, fragP->fr_fix, 0,
+		   exp_dup, 0, BFD_RELOC_MSP430_SET_ULEB128);
+
+    }
+}
+
+/* Called after all assembly has been done.  */
 void
 msp430_md_end (void)
 {
@@ -5064,6 +5112,10 @@ msp430_md_end (void)
       else if (warn_interrupt_nops)
 	as_warn (_(WARN_NOP_AT_EOF));
     }
+
+  /* Insert relocations for uleb128 directives, so the values can be recomputed
+     at link time.  */
+  bfd_map_over_sections (stdoutput, msp430_insert_uleb128_fixes, NULL);
 
   /* We have already emitted an error if any of the following attributes
      disagree with the attributes in the input assembly file.  See

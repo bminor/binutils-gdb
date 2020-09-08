@@ -1,3 +1,10 @@
+2020-09-08  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+	Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elf/msp430.h (elf_msp430_reloc_type): Add
+	R_MSP430_GNU_{SET,SUB}_ULEB128.
+	(elf_msp430x_reloc_type): Add R_MSP430X_GNU_{SET,SUB}_ULEB128.
+
 2020-09-08  Alex Coplan  <alex.coplan@arm.com>
 
 	* opcode/aarch64.h (aarch64_sys_ins_reg_supported_p): Also take

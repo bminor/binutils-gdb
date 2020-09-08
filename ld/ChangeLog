@@ -1,3 +1,10 @@
+2020-09-08  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/ld-msp430-elf/msp430-elf.exp: Run new tests.
+	* testsuite/ld-msp430-elf/uleb128.s: New test.
+	* testsuite/ld-msp430-elf/uleb128_430.d: New test.
+	* testsuite/ld-msp430-elf/uleb128_430x.d: New test.
+
 2020-09-08  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/pr26580-a.s,

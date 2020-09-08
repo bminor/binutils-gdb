@@ -12586,10 +12586,12 @@ target_specific_reloc_handling (Filedata *           filedata,
 	switch (reloc_type)
 	  {
 	  case 10: /* R_MSP430_SYM_DIFF */
+	  case 12: /* R_MSP430_GNU_SUB_ULEB128 */
 	    if (uses_msp430x_relocs (filedata))
 	      break;
 	    /* Fall through.  */
 	  case 21: /* R_MSP430X_SYM_DIFF */
+	  case 23: /* R_MSP430X_GNU_SUB_ULEB128 */
 	    /* PR 21139.  */
 	    if (sym_index >= num_syms)
 	      error (_("MSP430 SYM_DIFF reloc contains invalid symbol index %lu\n"),
@@ -12604,12 +12606,14 @@ target_specific_reloc_handling (Filedata *           filedata,
 
 	  case 5: /* R_MSP430_16_BYTE */
 	  case 9: /* R_MSP430_8 */
+	  case 11: /* R_MSP430_GNU_SET_ULEB128 */
 	    if (uses_msp430x_relocs (filedata))
 	      break;
 	    goto handle_sym_diff;
 
 	  case 2: /* R_MSP430_ABS16 */
 	  case 15: /* R_MSP430X_ABS16 */
+	  case 22: /* R_MSP430X_GNU_SET_ULEB128 */
 	    if (! uses_msp430x_relocs (filedata))
 	      break;
 	    goto handle_sym_diff;
@@ -12617,10 +12621,29 @@ target_specific_reloc_handling (Filedata *           filedata,
 	  handle_sym_diff:
 	    if (saved_sym != NULL)
 	      {
-		int reloc_size = reloc_type == 1 ? 4 : 2;
 		bfd_vma value;
+		unsigned int reloc_size;
+		int leb_ret = 0;
+		switch (reloc_type)
+		  {
+		  case 1: /* R_MSP430_32 or R_MSP430_ABS32 */
+		    reloc_size = 4;
+		    break;
+		  case 11: /* R_MSP430_GNU_SET_ULEB128 */
+		  case 22: /* R_MSP430X_GNU_SET_ULEB128 */
+		    read_leb128 (start + reloc->r_offset, end, FALSE,
+				 &reloc_size, &leb_ret);
+		    break;
+		  default:
+		    reloc_size = 2;
+		    break;
+		  }
 
-		if (sym_index >= num_syms)
+		if (leb_ret != 0)
+		  error (_("MSP430 ULEB128 field at 0x%lx contains invalid "
+			   "ULEB128 value\n"),
+			 (long) reloc->r_offset);
+		else if (sym_index >= num_syms)
 		  error (_("MSP430 reloc contains invalid symbol index %lu\n"),
 			 sym_index);
 		else

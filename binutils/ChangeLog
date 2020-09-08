@@ -1,3 +1,9 @@
+2020-09-08  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+	Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* readelf.c (target_specific_reloc_handling): Handle
+	R_MSP430{,X}_GNU_{SET,SUB}_ULEB128.
+
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (disassemble_bytes): Use an unsigned type for "addend".

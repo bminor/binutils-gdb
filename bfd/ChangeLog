@@ -1,3 +1,19 @@
+2020-09-08  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+	Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* bfd-in2.h (bfd_reloc_code_real): Add
+	BFD_RELOC_MSP430_{SET,SUB}_ULEB128.
+	* elf32-msp430.c (msp430_elf_ignore_reloc): New.
+	(elf_msp430_howto_table): Add R_MSP430{,X}_GNU_{SET,SUB}_ULEB128.
+	(msp430_reloc_map): Add R_MSP430_GNU_{SET,SUB}_ULEB128.
+	(msp430x_reloc_map): Add R_MSP430X_GNU_{SET,SUB}_ULEB128.
+	(write_uleb128): New.
+	(msp430_final_link_relocate): Handle R_MSP430{,X}_GNU_{SET,SUB}_ULEB128.
+	* libbfd.c (_bfd_write_unsigned_leb128): New.
+	* libbfd.h (_bfd_write_unsigned_leb128): New prototype.
+	Add BFD_RELOC_MSP430_{SET,SUB}_ULEB128.
+	* reloc.c: Document BFD_RELOC_MSP430_{SET,SUB}_ULEB128.
+
 2020-09-08  Alex Coplan  <alex.coplan@arm.com>
 
 	* archures.c (bfd_mach_aarch64_8R): New.

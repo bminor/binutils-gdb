@@ -176,6 +176,9 @@ set msp430arraytests {
 
 run_ld_link_tests $msp430arraytests
 
+run_dump_test uleb128_430
+run_dump_test uleb128_430x
+
 # Don't run further tests when msp430 ISA is selected
 if {[string match "*-mcpu=msp430 *" [board_info [target_info name] multilib_flags]]
   || [string match "*-mcpu=msp430" [board_info [target_info name] multilib_flags]]} {
