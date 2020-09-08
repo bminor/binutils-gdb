@@ -1,3 +1,10 @@
+2020-09-08  Tom Tromey  <tromey@adacore.com>
+
+	PR win32/25302:
+	* gdb_bfd.c (gdb_bfd_data): Add "st" parameter.
+	(gdb_bfd_init_data): New function.
+	(gdb_bfd_open, gdb_bfd_ref): Use gdb_bfd_init_data.
+
 2020-09-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* infrun.c (fetch_inferior_event): Use

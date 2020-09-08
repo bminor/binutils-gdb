@@ -59,26 +59,16 @@ static htab_t all_bfds;
 
 struct gdb_bfd_data
 {
-  gdb_bfd_data (bfd *abfd)
-    : mtime (bfd_get_mtime (abfd)),
-      size (bfd_get_size (abfd)),
+  /* Note that if ST is nullptr, then we simply fill in zeroes.  */
+  gdb_bfd_data (bfd *abfd, struct stat *st)
+    : mtime (st == nullptr ? 0 : st->st_mtime),
+      size (st == nullptr ? 0 : st->st_size),
+      inode (st == nullptr ? 0 : st->st_ino),
+      device_id (st == nullptr ? 0 : st->st_dev),
       relocation_computed (0),
       needs_relocations (0),
       crc_computed (0)
   {
-    struct stat buf;
-
-    if (bfd_stat (abfd, &buf) == 0)
-      {
-	inode = buf.st_ino;
-	device_id = buf.st_dev;
-      }
-    else
-      {
-	/* The stat failed.  */
-	inode = 0;
-	device_id = 0;
-      }
   }
 
   ~gdb_bfd_data ()
@@ -382,6 +372,30 @@ gdb_bfd_iovec_fileio_fstat (struct bfd *abfd, void *stream,
   return result;
 }
 
+/* A helper function to initialize the data that gdb attaches to each
+   BFD.  */
+
+static void
+gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
+{
+  struct gdb_bfd_data *gdata;
+  void **slot;
+
+  gdb_assert (bfd_usrdata (abfd) == nullptr);
+
+  /* Ask BFD to decompress sections in bfd_get_full_section_contents.  */
+  abfd->flags |= BFD_DECOMPRESS;
+
+  gdata = new gdb_bfd_data (abfd, st);
+  bfd_set_usrdata (abfd, gdata);
+  bfd_alloc_data (abfd);
+
+  /* This is the first we've seen it, so add it to the hash table.  */
+  slot = htab_find_slot (all_bfds, abfd, INSERT);
+  gdb_assert (slot && !*slot);
+  *slot = abfd;
+}
+
 /* See gdb_bfd.h.  */
 
 gdb_bfd_ref_ptr
@@ -426,22 +440,22 @@ gdb_bfd_open (const char *name, const char *target, int fd,
 	}
     }
 
-  search.filename = name;
   if (fstat (fd, &st) < 0)
     {
-      /* Weird situation here.  */
-      search.mtime = 0;
-      search.size = 0;
-      search.inode = 0;
-      search.device_id = 0;
+      /* Weird situation here -- don't cache if we can't stat.  */
+      if (debug_bfd_cache)
+	fprintf_unfiltered (gdb_stdlog,
+			    "Could not stat bfd %s for %s - not caching\n",
+			    host_address_to_string (abfd),
+			    bfd_get_filename (abfd));
+      return gdb_bfd_ref_ptr::new_reference (abfd);
     }
-  else
-    {
-      search.mtime = st.st_mtime;
-      search.size = st.st_size;
-      search.inode = st.st_ino;
-      search.device_id = st.st_dev;
-    }
+
+  search.filename = name;
+  search.mtime = st.st_mtime;
+  search.size = st.st_size;
+  search.inode = st.st_ino;
+  search.device_id = st.st_dev;
 
   /* Note that this must compute the same result as hash_bfd.  */
   hash = htab_hash_string (name);
@@ -477,7 +491,14 @@ gdb_bfd_open (const char *name, const char *target, int fd,
       *slot = abfd;
     }
 
-  return gdb_bfd_ref_ptr::new_reference (abfd);
+  /* It's important to pass the already-computed stat info here,
+     rather than, say, calling gdb_bfd_ref_ptr::new_reference.  BFD by
+     default will "stat" the file each time bfd_get_mtime is called --
+     and since we already entered it into the hash table using this
+     mtime, if the file changed at the wrong moment, the race would
+     lead to a hash table corruption.  */
+  gdb_bfd_init_data (abfd, &st);
+  return gdb_bfd_ref_ptr (abfd);
 }
 
 /* A helper function that releases any section data attached to the
@@ -530,7 +551,6 @@ void
 gdb_bfd_ref (struct bfd *abfd)
 {
   struct gdb_bfd_data *gdata;
-  void **slot;
 
   if (abfd == NULL)
     return;
@@ -549,17 +569,9 @@ gdb_bfd_ref (struct bfd *abfd)
       return;
     }
 
-  /* Ask BFD to decompress sections in bfd_get_full_section_contents.  */
-  abfd->flags |= BFD_DECOMPRESS;
-
-  gdata = new gdb_bfd_data (abfd);
-  bfd_set_usrdata (abfd, gdata);
-  bfd_alloc_data (abfd);
-
-  /* This is the first we've seen it, so add it to the hash table.  */
-  slot = htab_find_slot (all_bfds, abfd, INSERT);
-  gdb_assert (slot && !*slot);
-  *slot = abfd;
+  /* Caching only happens via gdb_bfd_open, so passing nullptr here is
+     fine.  */
+  gdb_bfd_init_data (abfd, nullptr);
 }
 
 /* See gdb_bfd.h.  */
