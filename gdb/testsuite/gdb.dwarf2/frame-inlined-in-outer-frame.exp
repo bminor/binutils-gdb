@@ -105,6 +105,7 @@ if { [gdb_starti_cmd] != 0 } {
     fail "failed to run to first instruction"
     return
 }
+gdb_test "" "Program stopped.*" "starti prompt"
 
 gdb_test "frame" "in _start .*"
 

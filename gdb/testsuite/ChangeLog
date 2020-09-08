@@ -1,3 +1,8 @@
+2020-09-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/frame-inlined-in-outer-frame.exp: Consume gdb prompt
+	after gdb_starti_cmd.
+
 2020-09-03  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 
 	* lib/fortran.exp (fortran_complex8): New proc.
