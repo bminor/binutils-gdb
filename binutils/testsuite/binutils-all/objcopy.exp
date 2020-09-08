@@ -1354,7 +1354,12 @@ if { [istarget pdp11-*-*] } {
     set src "pr25662.s"
 }
 
+set ldflags "-T$srcdir/$subdir/pr25662.ld"
+if { [istarget *-*-cygwin] || [istarget *-*-mingw*] } {
+   append ldflags " --disable-reloc-section"
+}
+
 #xcoff doesn't support arbitrary sections
 if { ![is_xcoff_format] } {
-    objcopy_test "pr25662" $src executable "" "-T$srcdir/$subdir/pr25662.ld"
+    objcopy_test "pr25662" $src executable "" $ldflags
 }
