@@ -1,3 +1,62 @@
+2020-09-08  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+	Sync from gcc
+	2020-09-08  Alan Modra  <amodra@gmail.com>
+	* d-demangle.c: Include limits.h.
+	(ULONG_MAX, UINT_MAX): Provide fall-back definition.
+	(dlang_number): Simplify and correct overflow test.  Only
+	write *ret on returning non-NULL.  Make "ret" an unsigned long*.
+	Only succeed for result of [0,UINT_MAX].
+	(dlang_decode_backref): Simplify and correct overflow test.
+	Only write *ret on returning non-NULL.  Only succeed for
+	result [1,MAX_LONG].
+	(dlang_backref): Remove now unnecessary range check.
+	(dlang_symbol_name_p): Likewise.
+	(string_need): Take a size_t n arg, and use size_t tem.
+	(string_append): Use size_t n.
+	(string_appendn, string_prependn): Take a size_t n arg.
+	(TEMPLATE_LENGTH_UNKNOWN): Define as -1UL.
+	(dlang_lname, dlang_parse_template): Take an unsigned long len
+	arg.
+	(dlang_symbol_backref, dlang_identifier, dlang_parse_integer),
+	(dlang_parse_integer, dlang_parse_string),
+	(dlang_parse_arrayliteral, dlang_parse_assocarray),
+	(dlang_parse_structlit, dlang_parse_tuple),
+	(dlang_template_symbol_param, dlang_template_args): Use
+	unsigned long variables.
+	* testsuite/d-demangle-expected: Add new tests.
+
+	2020-08-04  Iain Buclaw  <ibuclaw@gdcproject.org>
+	* d-demangle.c (dlang_function_args): Handle 'in' and 'in ref'
+	parameter storage classes.
+	(dlang_type): Remove identifier type.
+	* testsuite/d-demangle-expected: Update tests.
+
+	2020-08-03  Richard Biener  <rguenther@suse.de>
+	PR lto/96385
+	* simple-object-elf.c
+	(simple_object_elf_copy_lto_debug_sections): Localize global
+	UNDEFs and reuse the prevailing name.
+
+	2020-07-10  Ian Lance Taylor  <iant@golang.org>
+	PR demangler/96143
+	* cp-demangle.c (d_lambda): Don't add substitution candidate.
+	* testsuite/demangle-expected: Update a few existing test cases
+	accordingly, and add a new test case.
+
+	2020-07-04  Jason Merrill  <jason@redhat.com>
+	* cp-demangle.c (cplus_demangle_operators): Add di, dx, dX.
+	(d_expression_1): Handle di and dX.
+	(is_designated_init, d_maybe_print_designated_init): New.
+	(d_print_comp_inner): Use d_maybe_print_designated_init.
+	* testsuite/demangle-expected: Add designator tests.
+
+	2020-06-25  Nick Clifton  <nickc@redhat.com>
+	* bsearch.c (bsearch): Remove use of register keyword.
+	* bsearch_r.c (bsearch_r): Likewise.
+
 2020-06-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* bsearch_r.c: New file.
