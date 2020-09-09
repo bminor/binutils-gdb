@@ -1,3 +1,12 @@
+2020-09-09  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/lto-18a.c,
+	* testsuite/ld-plugin/lto-18b.c,
+	* testsuite/ld-plugin/lto-18c.c,
+	* testsuite/ld-plugin/lto-18d.c,
+	* testsuite/ld-plugin/lto-18.out: New test.
+	* testsuite/ld-plugin/lto.exp: Run it.
+
 2020-09-08  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* testsuite/ld-msp430-elf/msp430-elf.exp: Run new tests.

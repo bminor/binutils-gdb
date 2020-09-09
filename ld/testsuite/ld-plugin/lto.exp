@@ -404,6 +404,15 @@ set lto_link_elf_tests [list \
    "-shared -Wl,--exclude-libs,ALL tmpdir/pr25618a.o tmpdir/pr25618.a" \
    "-fpic" \
    {dummy.c} {{readelf {--dyn-syms --wide} pr25618.d}} "pr25618.so" "c++"] \
+  [list {liblto-18b.so} \
+   {-shared} {-O2 -fpic} \
+   {lto-18b.c} {} {liblto-18b.so}] \
+  [list {liblto-18c.so} \
+   {-shared} {-O2 -fpic} \
+   {lto-18c.c} {} {liblto-18c.so}] \
+  [list {lto-18d.o} \
+   {} {-flto -O2} \
+   {lto-18d.c} {} {}] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
@@ -412,11 +421,11 @@ set lto_link_elf_tests [list \
 # __aeabi_unwind_cpp_pr0@@GCC_3.5 which is provided by libgcc_s.so.1, so the
 # test fails.  Hence this code to skip the test.
 if { ! [istarget "arm*-*-*"] } {
-    set lto_link_elf_tests [concat $lto_link_elf_tests [list \
+    lappend lto_link_elf_tests [list \
   [list "PR ld/14918" \
    "-flto" "-flto" \
    {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
-  ]]
+  ]
 }
 
 # PR 12982 checks that an executable stack is not created by default
@@ -424,11 +433,11 @@ if { ! [istarget "arm*-*-*"] } {
 # executable stack for syscall restarts and signal returns, so we
 # skip this test for that target.
 if { ! [istarget "hppa*-*-*"] } {
-    set lto_link_elf_tests [concat $lto_link_elf_tests [list \
+    lappend lto_link_elf_tests [list \
   [list "PR ld/12982" \
    "-O2 -flto -fuse-linker-plugin" "-O2 -flto" \
    {pr12982.c} {{"readelf" {-l --wide} "pr12982.d"}} "pr12982.exe"] \
-  ]]
+  ]
 }
 
 # Check final symbols in executables.
@@ -569,6 +578,14 @@ set lto_run_elf_shared_tests [list \
   [list {pr22220b} \
    {-flto -fuse-linker-plugin -Wl,--no-as-needed tmpdir/pr22220lib.so tmpdir/pr22220main.o} {} \
    {dummy.c} {pr22220b.exe} {pass.out} {} {c++}] \
+  [list {lto-18 (1)} \
+   {-flto -fuse-linker-plugin} {} \
+   {lto-18a.c} {lto-18-1.exe} {lto-18.out} {-flto -O2} {c} {} \
+   {tmpdir/lto-18d.o -Wl,--as-needed,-R,tmpdir -Ltmpdir -llto-18b -llto-18c}] \
+  [list {lto-18 (2)} \
+   {-flto -fuse-linker-plugin} {} \
+   {lto-18a.c} {lto-18-2.exe} {lto-18.out} {-flto -O2} {c} {} \
+   {-Wl,--as-needed,-R,tmpdir -Ltmpdir -llto-18b -llto-18c tmpdir/lto-18d.o}] \
 ]
 
 # LTO run-time tests for ELF
