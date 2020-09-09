@@ -1,5 +1,14 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_prologue_prev_register): Handle the PCC and
+	CSP registers. Remove the LSB.
+	(aarch64_dwarf2_prev_register): Handle CSP, PCC and remove the LSB
+	from CLR.
+	(aarch64_dwarf2_frame_init_reg): Handle PCC and CSP.
+	(aarch64_dwarf_reg_to_regnum): Handle C registers.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* dwarf2/frame.c (struct dwarf2_cie) <pure_cap>: New field.
 	(decode_frame_entry_1): Handle the 'C' augmentation character.
 
