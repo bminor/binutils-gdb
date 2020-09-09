@@ -1,3 +1,8 @@
+2020-09-09  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c (coff_link_check_archive_element): Move the check for
+	coff type input to the start of the function.
+
 2020-09-09  Alan Modra  <amodra@gmail.com>
 
 	* libbfd-in.h (_bfd_write_unsigned_leb128): Declare.

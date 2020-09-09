@@ -206,6 +206,10 @@ coff_link_check_archive_element (bfd *abfd,
 {
   *pneeded = FALSE;
 
+  /* PR 22369 - Skip non COFF objects in the archive.  */
+  if (! bfd_family_coff (abfd))
+    return TRUE;
+
   /* We are only interested in symbols that are currently undefined.
      If a symbol is currently known to be common, COFF linkers do not
      bring in an object file which defines it.  */
@@ -216,10 +220,6 @@ coff_link_check_archive_element (bfd *abfd,
      of the symbols defined by that element might have been
      made undefined due to being in a discarded section.  */
   if (((struct coff_link_hash_entry *) h)->indx == -3)
-    return TRUE;
-
-  /* PR 22369 - Skip non COFF objects in the archive.  */
-  if (! bfd_family_coff (abfd))
     return TRUE;
 
   /* Include this element?  */
