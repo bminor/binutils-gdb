@@ -1,5 +1,12 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c: Include inferior.h.
+	(aarch64_pointer_to_address, aarch64_address_to_pointer)
+	(aarch64_integer_to_address): New functions.
+	(aarch64_gdbarch_init): Register hooks.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-linux-tdep.c: Include value.h.
 	(aarch64_linux_report_signal_info): New function.
 	(aarch64_linux_init_abi): Register hook for reporting signal
