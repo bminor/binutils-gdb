@@ -529,6 +529,16 @@ value_cast (struct type *type, struct value *arg2)
 	    || code2 == TYPE_CODE_RANGE
 	    || is_fixed_point_type (type2));
 
+  /* Handle casting capabilities to other scalar types.  For now we truncate
+     the capability value to the size of the target type.  */
+  if (scalar && code2 == TYPE_CODE_CAPABILITY)
+    {
+      if (type->is_unsigned ())
+	value_from_ulongest (to_type, value_as_long (arg2));
+      else
+	value_from_longest (to_type, value_as_long (arg2));
+    }
+
   if ((code1 == TYPE_CODE_STRUCT || code1 == TYPE_CODE_UNION)
       && (code2 == TYPE_CODE_STRUCT || code2 == TYPE_CODE_UNION)
       && type->name () != 0)
