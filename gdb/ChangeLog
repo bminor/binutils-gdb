@@ -1,5 +1,10 @@
 2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* main.c (execute_cmdargs): New function.
+	(captured_main_1): Make use of execute_cmdargs.
+
+2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention changes to config file search path.
 	* main.c
 
