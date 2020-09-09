@@ -1274,15 +1274,17 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
   struct aarch64_prologue_cache *cache
     = aarch64_make_prologue_cache (this_frame, this_cache);
 
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  int pcc_regnum = tdep->cap_reg_base + 31;
+
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
      frame's prologue, not the next frame's resume location.  */
-  if (prev_regnum == AARCH64_PC_REGNUM)
+  if (prev_regnum == AARCH64_PC_REGNUM || prev_regnum == pcc_regnum)
     {
       CORE_ADDR lr;
       struct gdbarch *gdbarch = get_frame_arch (this_frame);
-      aarch64_gdbarch_tdep *tdep
-	= (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
       lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
 
@@ -1290,6 +1292,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 	  && cache->saved_regs[tdep->pauth_ra_state_regnum].is_value ())
 	lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
 
+      lr = gdbarch_addr_bits_remove (gdbarch, lr);
       return frame_unwind_got_constant (this_frame, prev_regnum, lr);
     }
 
@@ -1308,7 +1311,9 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 	 |          |
 	 |          |<- SP
 	 +----------+  */
-  if (prev_regnum == AARCH64_SP_REGNUM)
+  int csp_regnum = tdep->cap_reg_base + 32;
+
+  if (prev_regnum == AARCH64_SP_REGNUM || prev_regnum == csp_regnum)
     return frame_unwind_got_constant (this_frame, prev_regnum,
 				      cache->prev_sp);
 
@@ -1454,17 +1459,17 @@ aarch64_dwarf2_prev_register (struct frame_info *this_frame,
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (arch);
   CORE_ADDR lr;
 
-  switch (regnum)
+  int pcc_regnum = tdep->cap_reg_base + 31;
+
+  if (regnum == AARCH64_PC_REGNUM || regnum == pcc_regnum)
     {
-    case AARCH64_PC_REGNUM:
       lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
       lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
+      lr = gdbarch_addr_bits_remove (arch, lr);
       return frame_unwind_got_constant (this_frame, regnum, lr);
-
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("Unexpected register %d"), regnum);
     }
+
+  internal_error (__FILE__, __LINE__, _("Unexpected register %d"), regnum);
 }
 
 static const unsigned char op_lit0 = DW_OP_lit0;
@@ -1478,15 +1483,18 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct frame_info *this_frame)
 {
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int pcc_regnum = tdep->cap_reg_base + 31;
+  int csp_regnum = tdep->cap_reg_base + 32;
 
-  switch (regnum)
+  if (regnum == AARCH64_PC_REGNUM || regnum == pcc_regnum)
     {
-    case AARCH64_PC_REGNUM:
       reg->how = DWARF2_FRAME_REG_FN;
       reg->loc.fn = aarch64_dwarf2_prev_register;
       return;
+    }
 
-    case AARCH64_SP_REGNUM:
+  if (regnum == AARCH64_SP_REGNUM || regnum == csp_regnum)
+    {
       reg->how = DWARF2_FRAME_REG_CFA;
       return;
     }
@@ -2404,6 +2412,15 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
       if (reg == AARCH64_DWARF_PAUTH_RA_STATE)
 	return tdep->pauth_ra_state_regnum;
+    }
+
+  if (tdep->has_capability ())
+    {
+      if (reg >= AARCH64_DWARF_C0 && reg <= AARCH64_DWARF_C0 + 30)
+	return tdep->cap_reg_base + (reg - AARCH64_DWARF_C0);
+
+      if (reg == AARCH64_DWARF_CSP)
+	return tdep->cap_reg_base + 32;
     }
 
   return -1;
