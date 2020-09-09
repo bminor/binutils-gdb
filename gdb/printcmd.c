@@ -1212,6 +1212,10 @@ print_command_1 (const char *args, int voidprint)
 
   if (exp != nullptr && *exp)
     {
+      /* '*((int *(*) (void)) __errno_location) ()' is incompatible with
+         function descriptors.  */
+      if (target_has_execution && strcmp (exp, "errno") == 0)
+          exp = "*(*(int *(*)(void)) __errno_location) ()";
       expression_up expr = parse_expression (exp);
       val = evaluate_expression (expr.get ());
     }
@@ -2258,7 +2262,8 @@ printf_c_string (struct ui_file *stream, const char *format,
 {
   const gdb_byte *str;
 
-  if (VALUE_LVAL (value) == lval_internalvar
+  if (TYPE_CODE (value_type (value)) != TYPE_CODE_PTR
+      && VALUE_LVAL (value) == lval_internalvar
       && c_is_string_type_p (value_type (value)))
     {
       size_t len = TYPE_LENGTH (value_type (value));

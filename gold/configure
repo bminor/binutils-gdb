@@ -625,6 +625,7 @@ LTLIBOBJS
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
+MULTIARCH_DIRNAME
 DLOPEN_LIBS
 CXXCPP
 HAVE_NO_USE_LINKER_PLUGIN_FALSE
@@ -10154,6 +10155,14 @@ $as_echo "$am_cv_val_LC_MESSAGES" >&6; }
 $as_echo "#define HAVE_LC_MESSAGES 1" >>confdefs.h
 
   fi
+
+
+if test x$DEB_TARGET_MULTIARCH != x; then
+  multiarch=$DEB_TARGET_MULTIARCH
+  if test -n "$multiarch"; then
+    MULTIARCH_DIRNAME='-DMULTIARCH_DIRNAME=\"'$multiarch'\"'
+  fi
+fi
 
 
 

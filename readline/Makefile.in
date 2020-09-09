@@ -264,7 +264,7 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
 	$(am__cd) $(top_srcdir) && \
 	  $(AUTOMAKE) --foreign Makefile
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in 
 	@case '$?' in \
 	  *config.status*) \
 	    echo ' $(SHELL) ./config.status'; \
@@ -274,7 +274,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
 
-$(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+$(top_builddir)/config.status: $(top_srcdir)/configure 
 	$(SHELL) ./config.status --recheck
 
 $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)

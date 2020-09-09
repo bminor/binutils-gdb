@@ -465,14 +465,14 @@ maintainer-clean realclean: maintainer-clean-subdir
 
 force:
 
-Makefile: $(srcdir)/Makefile.in config.status
+Makefile: $(srcdir)/Makefile.in 
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
 
 # Depending on Makefile makes sure that config.status has been re-run
 # if needed.  This prevents problems with parallel builds.
 config.h: stamp-h ; @true
-stamp-h: $(srcdir)/config.in config.status Makefile
-	CONFIG_FILES= CONFIG_HEADERS=config.h:$(srcdir)/config.in $(SHELL) ./config.status
+stamp-h: $(srcdir)/config.in  Makefile
+	CONFIG_FILES= CONFIG_HEADERS=config.h:$(srcdir)/config.in $(SHELL) 
 
 config.status: $(srcdir)/configure
 	$(SHELL) ./config.status --recheck

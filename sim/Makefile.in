@@ -205,7 +205,7 @@ TAGS:
 
 force:
 
-Makefile: Makefile.in config.status
+Makefile: Makefile.in 
 	$(SHELL) ./config.status
 
 config.status: configure

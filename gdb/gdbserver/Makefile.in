@@ -500,13 +500,13 @@ subdir_do: force
 	done
 
 config.h: stamp-h ; @true
-stamp-h: config.in config.status
+stamp-h: config.in 
 	$(SHELL) ./config.status config.h
 
-Makefile: Makefile.in config.status
+Makefile: Makefile.in 
 	$(SHELL) ./config.status $@
 
-$(GNULIB_BUILDDIR)/Makefile: $(srcdir)/../../gnulib/Makefile.in config.status
+$(GNULIB_BUILDDIR)/Makefile: $(srcdir)/../../gnulib/Makefile.in 
 	  @cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS="depfiles" \
 	  CONFIG_HEADERS= \

@@ -6033,8 +6033,13 @@ find_main_name (void)
     }
 
   /* The languages above didn't identify the name of the main procedure.
-     Fallback to "main".  */
-  set_main_name ("main", language_unknown);
+     Fallback to "MAIN__" (g77 and gfortran) if we can find it in the
+     minimal symtab, to "main" otherwise.  */
+  struct bound_minimal_symbol msym = lookup_minimal_symbol ("MAIN__", NULL, NULL);
+  if (msym.minsym)
+    set_main_name ("MAIN__", language_fortran);
+  else
+    set_main_name ("main", language_unknown);
 }
 
 /* See symtab.h.  */

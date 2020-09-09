@@ -473,7 +473,7 @@ struct gcc_cp_context
 /* The name of the .so that the compiler builds.  We dlopen this
    later.  */
 
-#define GCC_CP_FE_LIBCC libcc1.so
+#define GCC_CP_FE_LIBCC libcc1.so.0
 
 /* The compiler exports a single initialization function.  This macro
    holds its name as a symbol.  */

@@ -2381,7 +2381,7 @@ remote_target::remote_add_inferior (bool fake_pid_p, int pid, int attached,
   return inf;
 }
 
-static remote_thread_info *get_remote_thread_info (thread_info *thread);
+static remote_thread_info *get_remote_thread_info (struct thread_info *thread);
 static remote_thread_info *get_remote_thread_info (ptid_t ptid);
 
 /* Add thread PTID to GDB's thread list.  Tag it as executing/running
@@ -2506,7 +2506,7 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
 /* Return THREAD's private thread data, creating it if necessary.  */
 
 static remote_thread_info *
-get_remote_thread_info (thread_info *thread)
+get_remote_thread_info (struct thread_info *thread)
 {
   gdb_assert (thread != NULL);
 
@@ -4322,7 +4322,7 @@ remote_target::add_current_inferior_and_thread (char *wait_status)
   /* Add the main thread and switch to it.  Don't try reading
      registers yet, since we haven't fetched the target description
      yet.  */
-  thread_info *tp = add_thread_silent (curr_ptid);
+  struct thread_info *tp = add_thread_silent (curr_ptid);
   switch_to_thread_no_regs (tp);
 }
 

@@ -19413,9 +19413,10 @@ read_attribute_value (const struct die_reader_specs *reader,
 	{
 	  /* For now flag a hard error.
 	     Later we can turn this into a complaint.  */
-	  error (_("Dwarf Error: %s found in non-DWO CU [in module %s]"),
+    return NULL;
+	  /*error (_("Dwarf Error: %s found in non-DWO CU [in module %s]"),
 		 dwarf_form_name (form),
-		 bfd_get_filename (abfd));
+		 bfd_get_filename (abfd));*/
 	}
       DW_ADDR (attr) = read_addr_index_from_leb128 (cu, info_ptr, &bytes_read);
       info_ptr += bytes_read;
@@ -19430,9 +19431,10 @@ read_attribute_value (const struct die_reader_specs *reader,
 	{
 	  /* For now flag a hard error.
 	     Later we can turn this into a complaint if warranted.  */
-	  error (_("Dwarf Error: %s found in non-DWO CU [in module %s]"),
+    return NULL;
+	 /* error (_("Dwarf Error: %s found in non-DWO CU [in module %s]"),
 		 dwarf_form_name (form),
-		 bfd_get_filename (abfd));
+		 bfd_get_filename (abfd)); */
 	}
       {
 	ULONGEST str_index;

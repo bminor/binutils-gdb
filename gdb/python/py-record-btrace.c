@@ -73,7 +73,7 @@ btrace_insn_from_recpy_insn (const PyObject * const pyobject)
 {
   const btrace_insn *insn;
   const recpy_element_object *obj;
-  thread_info *tinfo;
+  struct thread_info *tinfo;
   btrace_insn_iterator iter;
 
   if (Py_TYPE (pyobject) != &recpy_insn_type)
@@ -116,7 +116,7 @@ btrace_func_from_recpy_func (const PyObject * const pyobject)
 {
   const btrace_function *func;
   const recpy_element_object *obj;
-  thread_info *tinfo;
+  struct thread_info *tinfo;
   btrace_call_iterator iter;
 
   if (Py_TYPE (pyobject) != &recpy_func_type)
@@ -154,7 +154,7 @@ btrace_func_from_recpy_func (const PyObject * const pyobject)
    gdb.RecordInstruction or gdb.RecordGap object for it accordingly.  */
 
 static PyObject *
-btpy_insn_or_gap_new (thread_info *tinfo, Py_ssize_t number)
+btpy_insn_or_gap_new (struct thread_info *tinfo, Py_ssize_t number)
 {
   btrace_insn_iterator iter;
   int err_code;
@@ -336,7 +336,7 @@ PyObject *
 recpy_bt_func_level (PyObject *self, void *closure)
 {
   const btrace_function * const func = btrace_func_from_recpy_func (self);
-  thread_info *tinfo;
+  struct thread_info *tinfo;
 
   if (func == NULL)
     return NULL;

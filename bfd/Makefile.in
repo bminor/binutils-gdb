@@ -1200,7 +1200,7 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
 	$(am__cd) $(top_srcdir) && \
 	  $(AUTOMAKE) --foreign Makefile
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in 
 	@case '$?' in \
 	  *config.status*) \
 	    echo ' $(SHELL) ./config.status'; \
@@ -1210,7 +1210,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
 
-$(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
+$(top_builddir)/config.status: $(top_srcdir)/configure 
 	$(SHELL) ./config.status --recheck
 
 $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
@@ -1223,7 +1223,7 @@ config.h: stamp-h1
 	@test -f $@ || rm -f stamp-h1
 	@test -f $@ || $(MAKE) $(AM_MAKEFLAGS) stamp-h1
 
-stamp-h1: $(srcdir)/config.in $(top_builddir)/config.status
+stamp-h1: $(srcdir)/config.in 
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
 $(srcdir)/config.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
@@ -1233,9 +1233,9 @@ $(srcdir)/config.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-bfd-in3.h: $(top_builddir)/config.status $(srcdir)/bfd-in2.h
+bfd-in3.h:  $(srcdir)/bfd-in2.h
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
+po/Makefile.in:  $(top_srcdir)/po/Make-in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 clean-noinstLIBRARIES:
@@ -2086,14 +2086,14 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	@echo "creating $@"
 	@bfd_version=`echo "$(VERSION)" | $(SED) -e 's/\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\).*/\1.00\2.00\3.00\4.00\5/' -e 's/\([^\.]*\)\..*\(..\)\..*\(..\)\..*\(..\)\..*\(..\)$$/\1\2\3\4\5/'` ;\
 	bfd_version_string="\"$(VERSION)\"" ;\
-	bfd_soversion="$(VERSION)" ;\
+	bfd_soversion="$(VERSION)$(BFD_SOVER_EXT)" ;\
 	bfd_version_package="\"$(PKGVERSION)\"" ;\
 	report_bugs_to="\"$(REPORT_BUGS_TO)\"" ;\
 	. $(srcdir)/development.sh ;\
 	if test "$$development" = true ; then \
 	  bfd_version_date=`$(SED) -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
 	  bfd_version_string="\"$(VERSION).$${bfd_version_date}\"" ;\
-	  bfd_soversion="$(VERSION).$${bfd_version_date}" ;\
+	  bfd_soversion="$(VERSION)$(BFD_SOVER_EXT).$${bfd_version_date}" ;\
 	fi ;\
 	$(SED) -e "s,@bfd_version@,$$bfd_version," \
 	    -e "s,@bfd_version_string@,$$bfd_version_string," \

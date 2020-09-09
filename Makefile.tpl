@@ -1956,7 +1956,7 @@ $(srcdir)/Makefile.in: @MAINT@ $(srcdir)/Makefile.tpl $(srcdir)/Makefile.def
 	cd $(srcdir) && $(AUTOGEN) Makefile.def
 
 # Rebuilding Makefile.
-Makefile: $(srcdir)/Makefile.in config.status
+Makefile: $(srcdir)/Makefile.in 
 	CONFIG_FILES=$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 config.status: configure

@@ -410,7 +410,7 @@ clean-info:
 # will remove them.
 MAKEOVERRIDES=
 
-Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in 
 	cd $(top_builddir) && $(MAKE) data-directory/Makefile
 
 # Disable implicit make rules.

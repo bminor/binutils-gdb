@@ -965,6 +965,8 @@ parse_short_option(int argc, const char** argv, int pos_in_argv_i,
     {
       int dummy_i = 0;
       const char* dash_z_arg = *arg;
+      if (strncmp(dash_z_arg, "buildd", strlen("buildd")) == 0)
+	  *arg = "buildd";
       retval = parse_long_option(1, arg, true, arg, &dummy_i);
       if (retval == NULL)
 	usage(_("unknown -z option"), dash_z_arg);
@@ -1232,8 +1234,15 @@ General_options::finalize()
 	       || this->user_set_sysroot()
 	       || *TARGET_SYSTEM_ROOT != '\0')
 	{
+#ifdef MULTIARCH_DIRNAME
+	  this->add_to_library_path_with_sysroot("/lib/" MULTIARCH_DIRNAME);
+	  this->add_to_library_path_with_sysroot("/usr/lib/" MULTIARCH_DIRNAME);
+#endif
 	  this->add_to_library_path_with_sysroot("/lib");
 	  this->add_to_library_path_with_sysroot("/usr/lib");
+#ifdef APPEND_TOOLLIBDIR
+	  this->add_to_library_path_with_sysroot(TOOLLIBDIR);
+#endif
 	}
       else
 	this->add_to_library_path_with_sysroot(TOOLLIBDIR);

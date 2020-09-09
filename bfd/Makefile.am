@@ -970,14 +970,14 @@ bfdver.h: $(srcdir)/version.h $(srcdir)/development.sh $(srcdir)/Makefile.in
 	@echo "creating $@"
 	@bfd_version=`echo "$(VERSION)" | $(SED) -e 's/\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\)\.*\([^\.]*\).*/\1.00\2.00\3.00\4.00\5/' -e 's/\([^\.]*\)\..*\(..\)\..*\(..\)\..*\(..\)\..*\(..\)$$/\1\2\3\4\5/'` ;\
 	bfd_version_string="\"$(VERSION)\"" ;\
-	bfd_soversion="$(VERSION)" ;\
+	bfd_soversion="$(VERSION)$(BFD_SOVER_EXT)" ;\
 	bfd_version_package="\"$(PKGVERSION)\"" ;\
 	report_bugs_to="\"$(REPORT_BUGS_TO)\"" ;\
 	. $(srcdir)/development.sh ;\
 	if test "$$development" = true ; then \
 	  bfd_version_date=`$(SED) -n -e 's/.*DATE //p' < $(srcdir)/version.h` ;\
 	  bfd_version_string="\"$(VERSION).$${bfd_version_date}\"" ;\
-	  bfd_soversion="$(VERSION).$${bfd_version_date}" ;\
+	  bfd_soversion="$(VERSION)$(BFD_SOVER_EXT).$${bfd_version_date}" ;\
 	fi ;\
 	$(SED) -e "s,@bfd_version@,$$bfd_version," \
 	    -e "s,@bfd_version_string@,$$bfd_version_string," \

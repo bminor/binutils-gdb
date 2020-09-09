@@ -63,7 +63,7 @@ endif
 # We put the scripts in the directory $(scriptdir)/ldscripts.
 # We can't put the scripts in $(datadir) because the SEARCH_DIR
 # directives need to be different for native and cross linkers.
-scriptdir = $(tooldir)/lib
+scriptdir = $(libdir)
 
 EMUL = @EMUL@
 EMULATION_OFILES = @EMULATION_OFILES@
@@ -554,7 +554,7 @@ po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
 	for f in $(BLD_POTFILES); do echo $$f; done | LC_ALL=C sort > $@-tmp \
 	  && mv $@-tmp $(srcdir)/po/BLD-POTFILES.in
 
-ldmain.@OBJEXT@: ldmain.c config.status
+ldmain.@OBJEXT@: ldmain.c 
 if am__fastdepCC
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ \
 	  -DDEFAULT_EMULATION='"$(EMUL)"' \
@@ -573,7 +573,7 @@ endif
 	  $(srcdir)/ldmain.c
 endif
 
-ldfile.@OBJEXT@: ldfile.c config.status
+ldfile.@OBJEXT@: ldfile.c 
 if am__fastdepCC
 	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ \
 	-DSCRIPTDIR='"$(scriptdir)"' -DBINDIR='"$(bindir)"' -DTOOLBINDIR='"$(tooldir)/bin"' \

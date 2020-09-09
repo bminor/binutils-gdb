@@ -12621,7 +12621,7 @@ momentary_bkpt_print_mention (struct breakpoint *b)
 
 longjmp_breakpoint::~longjmp_breakpoint ()
 {
-  thread_info *tp = find_thread_global_id (this->thread);
+  struct thread_info *tp = find_thread_global_id (this->thread);
 
   if (tp != NULL)
     tp->initiating_frame = null_frame_id;

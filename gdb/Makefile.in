@@ -1709,7 +1709,7 @@ check-parallel: force
 # a shell that expands alternations within braces.  If GNU make is not
 # used, this rule will harmlessly fail to match.  Used FORCE_PARALLEL to
 # prevent serialized checking due to the passed RUNTESTFLAGS.
-# FIXME: use config.status --config not --version, when available.
+# FIXME: use  --config not --version, when available.
 check//%: force
 	@if [ -f testsuite/config.status ]; then \
 	  rootme=`pwd`; export rootme; \
@@ -1902,6 +1902,7 @@ libgdb.a: $(LIBGDB_OBS)
 	$(RANLIB) libgdb.a
 
 # Removing the old gdb first works better if it is running, at least on SunOS.
+TUI_LIBRARY += -l:libtinfo.so.6
 gdb$(EXEEXT): gdb.o $(LIBGDB_OBS) $(CDEPS) $(TDEPLIBS)
 	$(SILENCE) rm -f gdb$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_LDFLAGS) $(WIN32LDAPP) \
@@ -2017,10 +2018,10 @@ subdir_do: force
 		else true ; fi ; \
 	done
 
-Makefile: Makefile.in config.status
+Makefile: Makefile.in 
 	$(SHELL) config.status $@
 
-data-directory/Makefile: data-directory/Makefile.in config.status
+data-directory/Makefile: data-directory/Makefile.in 
 	$(SHELL) config.status $@
 
 .PHONY: run
@@ -2040,11 +2041,11 @@ gdb-gdb.gdb: $(srcdir)/gdb-gdb.gdb.in
 	$(SHELL) config.status $@
 
 config.h: stamp-h ; @true
-stamp-h: $(srcdir)/config.in config.status
+stamp-h: $(srcdir)/config.in 
 	$(SHELL) config.status config.h
 
 nm.h: stamp-nmh ; @true
-stamp-nmh: config.status
+stamp-nmh: 
 	$(SHELL) config.status nm.h
 
 config.status: $(srcdir)/configure configure.nat configure.tgt configure.host ../bfd/development.sh

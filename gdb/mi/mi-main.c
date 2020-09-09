@@ -552,7 +552,7 @@ mi_cmd_thread_select (const char *command, char **argv, int argc)
     error (_("-thread-select: USAGE: threadnum."));
 
   int num = value_as_long (parse_and_eval (argv[0]));
-  thread_info *thr = find_thread_global_id (num);
+  struct thread_info *thr = find_thread_global_id (num);
   if (thr == NULL)
     error (_("Thread ID %d not known."), num);
 

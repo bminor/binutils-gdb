@@ -868,8 +868,11 @@ update_solib_list (int from_tty)
 
 	  try
 	    {
-	      /* Fill in the rest of the `struct so_list' node.  */
-	      if (!solib_map_sections (i))
+	      /* Fill in the rest of the `struct so_list' node.
+		 Work around PR libc/13097.  */
+	      if (!solib_map_sections (i)
+		  && strcmp (i->so_original_name, "linux-vdso.so.1") != 0
+		  && strcmp (i->so_original_name, "linux-gate.so.1") != 0)
 		{
 		  not_found++;
 		  if (not_found_filename == NULL)

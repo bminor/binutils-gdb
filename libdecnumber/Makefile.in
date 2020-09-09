@@ -91,7 +91,7 @@ libdecnumber.a: $(libdecnumber_a_OBJS)
 
 # Rules to rebuild the configuration
 
-Makefile: $(srcdir)/Makefile.in config.status
+Makefile: $(srcdir)/Makefile.in 
 	$(SHELL) ./config.status Makefile
 
 config.status: $(srcdir)/configure
@@ -113,7 +113,7 @@ $(srcdir)/aclocal.m4: @MAINT@ $(aclocal_deps)
 config.h: stamp-h1
 	test -f config.h || (rm -f stamp-h1 && $(MAKE) stamp-h1)
 
-stamp-h1: $(srcdir)/config.in config.status
+stamp-h1: $(srcdir)/config.in 
 	-rm -f stamp-h1
 	$(SHELL) ./config.status config.h
 

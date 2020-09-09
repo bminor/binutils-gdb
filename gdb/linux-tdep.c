@@ -1610,7 +1610,7 @@ linux_collect_thread_registers (const struct regcache *regcache,
    buffer.  */
 
 static gdb::byte_vector
-linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
+linux_get_siginfo_data (struct thread_info *thread, struct gdbarch *gdbarch)
 {
   struct type *siginfo_type;
   LONGEST bytes_read;

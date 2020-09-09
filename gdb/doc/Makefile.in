@@ -653,7 +653,7 @@ gdbinit.5: $(GDB_DOC_FILES)
 
 force:
 
-Makefile: Makefile.in $(host_makefile_frag) ../config.status
+Makefile: Makefile.in $(host_makefile_frag) 
 	cd .. && $(SHELL) ./config.status doc/Makefile
 
 

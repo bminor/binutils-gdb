@@ -235,6 +235,104 @@ append_to_lib_path()
   fi
 }
 
+# set the multiarch tuples
+multiarch_name=
+multiarch_name_32=
+multiarch_name_64=
+multiarch_name_n32=
+multiarch_name_x32=
+
+if true; then
+  # based on TOOL_LIB
+  multiarch_name=$DEB_TARGET_MULTIARCH
+  multiarch_name_32=$DEB_TARGET_MULTIARCH32
+  multiarch_name_64=$DEB_TARGET_MULTIARCH64
+  multiarch_name_n32=$DEB_TARGET_MULTIARCHN32
+  multiarch_name_x32=$DEB_TARGET_MULTIARCHX32
+else
+  # based on the emulation name; using TOOL_LIB seems to unreliable, when
+  # configuring with --enable-targets=powerpc-linux-gnu,powerpc64-linux-gnu
+  # only the first one (?) wins.
+  # FIXME: should this go into ld/emulparams/*.sh ?
+  case "$EMULATION_NAME" in
+    aarch64linux)
+      multiarch_name=aarch64-linux-gnu
+      ;;
+    aarch64linux32)
+      multiarch_name=aarch64_ilp32-linux-gnu
+      ;;
+    aarch64linux32b)
+      multiarch_name=aarch64_be_ilp32-linux-gnu
+      ;;
+    aarch64linuxb)
+      multiarch_name=aarch64_be-linux-gnu
+      ;;
+    armelf_linux_eabi)
+      # FIXME: TOOL_LIB can be arm-linux-gnueabi, arm-linux-gnueabihf, aarch64-linux-gnu
+      multiarch_name=arm-linux-gnueabi
+      ;;
+    armelfb_linux_eabi)
+      # FIXME: TOOL_LIB can be arm-linux-gnueabi, arm-linux-gnueabihf, aarch64-linux-gnu
+      multiarch_name=armeb-linux-gnueabi
+      ;;
+    elf32_sparc)
+      multiarch_name=sparc-linux-gnu
+      multiarch_name_64=sparc64-linux-gnu
+      ;;
+    elf32_x86_64)
+      multiarch_name=x86_64-linux-gnux32
+      multiarch_name_32=i386-linux-gnu
+      multiarch_name_64=x86_64-linux-gnu
+      ;;
+    elf32btsmip)
+      ;;
+    elf32btsmipn32)
+      ;;
+    elf32ltsmip)
+      ;;
+    elf32ltsmipn32)
+      ;;
+    elf32elflppc) # necessary?
+      multiarch_name=powerpcle-linux-gnu
+      multiarch_name_64=powerpc64le-linux-gnu
+      ;;
+    elf32elflppclinux)
+      multiarch_name=powerpcle-linux-gnu
+      multiarch_name_64=powerpc64le-linux-gnu
+      ;;
+    elf32ppc) # necessary?
+      multiarch_name=powerpc-linux-gnu
+      multiarch_name_64=powerpc64-linux-gnu
+      ;;
+    elf32ppclinux)
+      multiarch_name=powerpc-linux-gnu
+      multiarch_name_64=powerpc64-linux-gnu
+      ;;
+    elf64ppc)
+      multiarch_name=powerpc64-linux-gnu
+      multiarch_name_32=powerpc-linux-gnu
+      ;;
+  esac
+fi
+
+if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
+  libs=${NATIVE_LIB_DIRS}
+  if [ "x${NATIVE}" = "xyes" ] ; then
+    case " ${libs} " in
+      *" ${libdir} "*) ;;
+      *) libs="${libdir} ${libs}" ;;
+    esac
+  fi
+  append_to_lib_path ${libs}
+fi
+
+case :${lib_path1}:${lib_path2}: in
+  *:: | ::*) LIB_PATH=${lib_path1}${lib_path2} ;;
+  *) LIB_PATH=${lib_path1}:${lib_path2} ;;
+esac
+lib_path1=
+lib_path2=
+
 # Always search $(tooldir)/lib, aka /usr/local/TARGET/lib when native
 # except when LIBPATH=":".
 if [ "${LIB_PATH}" != ":" ] ; then
@@ -253,6 +351,13 @@ if [ "${LIB_PATH}" != ":" ] ; then
       case "${NATIVE}:${libpath_suffix}:${TOOL_LIB}" in
 	:* | *::* | *:*:*${libpath_suffix}) ;;
 	*) libs="${exec_prefix}/${target_alias}/lib${libpath_suffix}" ;;
+	*)
+	  # FIXME:
+	  # For the binutils-multiarch build on x86_64-linux-gnu configured
+          # with --enable-targets=powerpc-linux-gnu, /usr/x86_64-linux-gnu/lib64
+          # is added instead of /usr/powerpc64-linux-gnu/lib64. However this
+	  # probably wanted for the "default" emulation. How to detect that?
+	  libs="${exec_prefix}/${target_alias}/lib${libpath_suffix}" ;;
       esac
     done
     libs="${exec_prefix}/${TOOL_LIB}/lib ${libs}"
@@ -260,23 +365,123 @@ if [ "${LIB_PATH}" != ":" ] ; then
   append_to_lib_path ${libs}
 fi
 
-if [ "x${LIB_PATH}" = "x" ] && [ "x${USE_LIBPATH}" = xyes ] ; then
-  libs=${NATIVE_LIB_DIRS}
-  if [ "x${NATIVE}" = "xyes" ] ; then
-    case " ${libs} " in
-      *" ${libdir} "*) ;;
-      *) libs="${libdir} ${libs}" ;;
-    esac
-  fi
-  append_to_lib_path ${libs}
-fi
-
 case :${lib_path1}:${lib_path2}: in
-  *:: | ::*) LIB_PATH=${lib_path1}${lib_path2} ;;
-  *) LIB_PATH=${lib_path1}:${lib_path2} ;;
+  *:: | ::*) LIB_PATH=${LIB_PATH}:${lib_path1}${lib_path2} ;;
+  *) LIB_PATH=${LIB_PATH}:${lib_path1}:${lib_path2} ;;
 esac
 
+# We use the $tool_lib variable in our multiarch mangling:
+if [ "x${TOOL_LIB}" = "x" ] ; then
+  tool_lib=${exec_prefix}/${target_alias}/lib
+else
+  tool_lib=${exec_prefix}/${TOOL_LIB}/lib
+fi
+
+# FIXME: why again? These already should be in LIBPATH
+if [ "x${APPEND_TOOLLIBDIR}" = "xyes" ] ; then
+  LIB_PATH=${LIB_PATH}:${tool_lib}
+  # For multilib targets, search both $tool_lib dirs
+  if [ "x${LIBPATH_SUFFIX}" != "x" ] ; then
+    LIB_PATH=${LIB_PATH}:${tool_lib}${LIBPATH_SUFFIX}
+  fi
+fi
+
 LIB_SEARCH_DIRS=`echo ${LIB_PATH} | sed -e 's/:/ /g' -e 's/\([^ ][^ ]*\)/SEARCH_DIR(\\"\1\\");/g'`
+
+if [ -n "$multiarch_name" ]; then
+    temp_dirs=' '
+    ma_dirs=' '
+    for dir in `echo ${LIB_PATH} | sed -e 's/:/ /g'`; do
+	case "$dir" in
+	    *${tool_lib}*|*/${target_alias}/*)
+	        ;;
+	    */lib)
+		if [ -n "$multiarch_name_32" ]; then
+		    case $EMULATION_NAME in
+			elf_i386|elf32*)
+			    ma_dirs="${ma_dirs}${dir}/$multiarch_name_32 ";;
+			*)
+			    ma_dirs="${ma_dirs}${dir}/$multiarch_name "
+		    esac
+		elif [ -n "$multiarch_name_64" ]; then
+		    case $EMULATION_NAME in
+			elf*_64|elf64*)
+			    ma_dirs="${ma_dirs}${dir}/$multiarch_name_64 ";;
+			*)
+			    ma_dirs="${ma_dirs}${dir}/$multiarch_name "
+		    esac
+		else
+		    ma_dirs="${ma_dirs}${dir}/$multiarch_name "
+		fi
+		;;
+	    */lib32)
+	        if [ -n "$multiarch_name_32" ]; then
+		    dir2=$(echo $dir | sed "s,32$,,")
+		    ma_dirs="${ma_dirs}${dir2}/$multiarch_name_32 "
+		fi
+		;;
+	    */lib64)
+	        case "${target}" in
+		    aarch64*-*-*|powerpc64-*-*|s390x-*-*|sparc64-*-*|x86_64-*-linux-gnu|mips64-*-gnuabi64)
+			#dir=$(echo $dir | sed "s,64$,,")
+			dir2=$(echo $dir | sed "s,64$,,")
+			ma_dirs="${ma_dirs}${dir2}/$multiarch_name "
+			;;
+		    *)
+			if [ -n "$multiarch_name_64" ]; then
+			    dir2=$(echo $dir | sed "s,64$,,")
+			    ma_dirs="${ma_dirs}${dir2}/$multiarch_name_64 "
+			fi
+			;;
+		esac
+	        ;;
+	    */libx32)
+		case "${target}" in
+		    x86_64-*-linux-gnux32)
+			dir2=$(echo $dir | sed "s,x32$,,")
+			ma_dirs="${ma_dirs}${dir2}/$multiarch_name "
+			;;
+		    *)
+			if [ -n "$multiarch_name_x32" ]; then
+			    dir2=$(echo $dir | sed "s,x32$,,")
+			    ma_dirs="${ma_dirs}${dir2}/$multiarch_name_x32 "
+			fi
+			;;
+		esac
+		;;
+	    */libn32)
+		case "${target}" in
+		    mips64*-*-linux-gnuabin32)
+			dir2=$(echo $dir | sed "s,n32$,,")
+			ma_dirs="${ma_dirs}${dir2}/$multiarch_name "
+			;;
+		    *)
+			if [ -n "$multiarch_name_n32" ]; then
+			    dir2=$(echo $dir | sed "s,n32$,,")
+			    ma_dirs="${ma_dirs}${dir2}/$multiarch_name_n32 "
+			fi
+			;;
+		esac
+		;;
+	    */libilp32)
+	        if [ -n "$multiarch_name_32" ]; then
+		    dir2=$(echo $dir | sed "s,ilp32$,,")
+		    ma_dirs="${ma_dirs}${dir2}/$multiarch_name_32 "
+		fi
+		;;
+	    *)
+		;;
+	esac
+	temp_dirs="${temp_dirs}${dir} "
+    done
+    LIB_SEARCH_DIRS=
+    for dir in $ma_dirs $temp_dirs; do
+	if echo "$LIB_SEARCH_DIRS" | fgrep -q "\"$dir\""; then
+	    continue
+	fi
+	LIB_SEARCH_DIRS="${LIB_SEARCH_DIRS}SEARCH_DIR(\"$dir\"); "
+    done
+fi
 
 # We need it for testsuite.
 set $EMULATION_LIBPATH

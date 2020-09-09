@@ -170,7 +170,7 @@ distclean maintainer-clean realclean: clean
 	    done ; \
 	else true; fi
 
-Makefile : Makefile.in config.status
+Makefile : Makefile.in 
 	$(SHELL) config.status
 
 config.status: $(srcdir)/configure

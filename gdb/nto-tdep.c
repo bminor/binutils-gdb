@@ -156,10 +156,12 @@ nto_find_and_open_solib (const char *solib, unsigned o_flags,
 void
 nto_init_solib_absolute_prefix (void)
 {
-  char buf[PATH_MAX * 2], arch_path[PATH_MAX];
+  char *buf, *arch_path;
   char *nto_root;
   const char *endian;
   const char *arch;
+  int arch_len, len;
+#define FMT "set solib-absolute-prefix %s"
 
   nto_root = nto_target ();
   if (strcmp (gdbarch_bfd_arch_info (target_gdbarch ())->arch_name, "i386") == 0)
@@ -182,9 +184,13 @@ nto_init_solib_absolute_prefix (void)
 	       == BFD_ENDIAN_BIG ? "be" : "le";
     }
 
-  xsnprintf (arch_path, sizeof (arch_path), "%s/%s%s", nto_root, arch, endian);
+  arch_len = strlen (nto_root) + 1 + strlen (arch) + strlen (endian) + 1;
+  arch_path = alloca (arch_len);
+  xsnprintf (arch_path, arch_len, "%s/%s%s", nto_root, arch, endian);
 
-  xsnprintf (buf, sizeof (buf), "set solib-absolute-prefix %s", arch_path);
+  len = strlen (FMT) - 2 + strlen (arch_path) + 1;
+  buf =  alloca (len);
+  xsnprintf (buf, len, FMT, arch_path);
   execute_command (buf, 0);
 }
 

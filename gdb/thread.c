@@ -70,21 +70,21 @@ static int thread_alive (struct thread_info *);
 class scoped_inc_dec_ref
 {
 public:
-  explicit scoped_inc_dec_ref (const std::vector<thread_info *> &thrds)
+  explicit scoped_inc_dec_ref (const std::vector<struct thread_info *> &thrds)
     : m_thrds (thrds)
   {
-    for (thread_info *thr : m_thrds)
+    for (struct thread_info *thr : m_thrds)
       thr->incref ();
   }
 
   ~scoped_inc_dec_ref ()
   {
-    for (thread_info *thr : m_thrds)
+    for (struct thread_info *thr : m_thrds)
       thr->decref ();
   }
 
 private:
-  const std::vector<thread_info *> &m_thrds;
+  const std::vector<struct thread_info *> &m_thrds;
 };
 
 
@@ -203,7 +203,7 @@ clear_thread_inferior_resources (struct thread_info *tp)
 /* Set the TP's state as exited.  */
 
 static void
-set_thread_exited (thread_info *tp, int silent)
+set_thread_exited (struct thread_info *tp, int silent)
 {
   /* Dead threads don't need to step-over.  Remove from queue.  */
   if (tp->step_over_next != NULL)
@@ -245,7 +245,7 @@ init_thread_list (void)
 static struct thread_info *
 new_thread (struct inferior *inf, ptid_t ptid)
 {
-  thread_info *tp = new thread_info (inf, ptid);
+  struct thread_info *tp = new struct thread_info (inf, ptid);
 
   if (inf->thread_list == NULL)
     inf->thread_list = tp;
@@ -1479,7 +1479,7 @@ print_thread_id (struct thread_info *thr)
    ascending order.  */
 
 static bool
-tp_array_compar_ascending (const thread_info *a, const thread_info *b)
+tp_array_compar_ascending (const struct thread_info *a, const struct thread_info *b)
 {
   if (a->inf->num != b->inf->num)
     return a->inf->num < b->inf->num;
@@ -1492,7 +1492,7 @@ tp_array_compar_ascending (const thread_info *a, const thread_info *b)
    descending order.  */
 
 static bool
-tp_array_compar_descending (const thread_info *a, const thread_info *b)
+tp_array_compar_descending (const struct thread_info *a, const struct thread_info *b)
 {
   if (a->inf->num != b->inf->num)
     return a->inf->num > b->inf->num;
@@ -1626,10 +1626,10 @@ thread_apply_all_command (const char *cmd, int from_tty)
 	 thread, in case the command is one that wipes threads.  E.g.,
 	 detach, kill, disconnect, etc., or even normally continuing
 	 over an inferior or thread exit.  */
-      std::vector<thread_info *> thr_list_cpy;
+      std::vector<struct thread_info *> thr_list_cpy;
       thr_list_cpy.reserve (tc);
 
-      for (thread_info *tp : all_non_exited_threads ())
+      for (struct thread_info *tp : all_non_exited_threads ())
 	thr_list_cpy.push_back (tp);
       gdb_assert (thr_list_cpy.size () == tc);
 
@@ -1644,7 +1644,7 @@ thread_apply_all_command (const char *cmd, int from_tty)
 
       scoped_restore_current_thread restore_thread;
 
-      for (thread_info *thr : thr_list_cpy)
+      for (struct thread_info *thr : thr_list_cpy)
 	if (thread_alive (thr))
 	  thr_try_catch_cmd (thr, cmd, from_tty, flags);
     }
@@ -1964,7 +1964,7 @@ show_print_thread_events (struct ui_file *file, int from_tty,
 /* See gdbthread.h.  */
 
 void
-thread_select (const char *tidstr, thread_info *tp)
+thread_select (const char *tidstr, struct thread_info *tp)
 {
   if (!thread_alive (tp))
     error (_("Thread ID %s has terminated."), tidstr);

@@ -169,7 +169,7 @@ depend.in: $(CFILES) term.h
 	for i in $(CFILES); do echo $$i; $(CPP_DEPEND) $$i >> tmp_make; done 
 	mv tmp_make Makefile.in
 
-Makefile makefile:	config.status $(srcdir)/Makefile.in
+Makefile makefile:	 $(srcdir)/Makefile.in
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
 
 config.status:	$(srcdir)/configure

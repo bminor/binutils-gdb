@@ -193,10 +193,10 @@ readline: $(OBJECTS) readline.h rldefs.h chardefs.h ./libreadline.a
 lint:	force
 	$(MAKE) $(MFLAGS) CCFLAGS='$(GCC_LINT_CFLAGS)' static
 
-Makefile makefile: config.status $(srcdir)/Makefile.in
+Makefile makefile:  $(srcdir)/Makefile.in
 	CONFIG_FILES=Makefile CONFIG_HEADERS= $(SHELL) ./config.status
 
-Makefiles makefiles: config.status $(srcdir)/Makefile.in
+Makefiles makefiles:  $(srcdir)/Makefile.in
 	@for mf in $(CREATED_MAKEFILES); do \
 		CONFIG_FILES=$$mf CONFIG_HEADERS= $(SHELL) ./config.status ; \
 	done
@@ -206,7 +206,7 @@ config.status: configure
 
 config.h:	stamp-h
 
-stamp-h: config.status $(srcdir)/config.h.in
+stamp-h:  $(srcdir)/config.h.in
 	CONFIG_FILES= CONFIG_HEADERS=config.h ./config.status
 	echo > $@
 
@@ -331,7 +331,7 @@ distclean maintainer-clean: clean
 	$(RM) $(CREATED_CONFIGURE)
 	$(RM) $(CREATED_TAGS)
 
-readline.pc:	config.status $(srcdir)/readline.pc.in
+readline.pc:	 $(srcdir)/readline.pc.in
 	$(SHELL) config.status
 
 info dvi html pdf ps:

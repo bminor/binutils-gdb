@@ -173,7 +173,7 @@ clean:
 	$(AS_FOR_TARGET) $(ASFLAGS_FOR_TARGET) -I$(srcdir) $(srcdir)/$*.S -o $*.o
 
 
-Makefile: Makefile.in config.status
+Makefile: Makefile.in 
 	$(SHELL) ./config.status
 
 config.status: configure

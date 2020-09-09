@@ -56,3 +56,12 @@ case `echo "$target" | sed -e 's/-.*//'`:"$EMULATION_NAME" in
   *:*64*) LIBPATH_SUFFIX=64 ;;
   *:*32*) LIBPATH_SUFFIX=32 ;;
 esac
+
+# On 64bit, look for 32 bit target libraries in /lib32, /usr/lib32 etc., first.
+case "$target" in
+  powerpc64-*-linux* | ppc64-*-linux*)
+    case "$EMULATION_NAME" in
+      *32*) LIBPATH_SUFFIX=32 ;;
+    esac
+    ;;
+esac

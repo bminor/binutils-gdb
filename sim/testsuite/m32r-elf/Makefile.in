@@ -149,7 +149,7 @@ distclean maintainer-clean realclean: clean
 	rm -f Makefile config.status *-init.exp
 	rm -fr *.log summary detail *.plog *.sum *.psum site.*
 
-Makefile : Makefile.in config.status
+Makefile : Makefile.in 
 	$(SHELL) config.status
 
 config.status: configure

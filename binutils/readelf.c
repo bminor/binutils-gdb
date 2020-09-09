@@ -17500,6 +17500,8 @@ get_gnu_elf_note_type (unsigned e_type)
       return _("NT_GNU_BUILD_ATTRIBUTE_OPEN");
     case NT_GNU_BUILD_ATTRIBUTE_FUNC:
       return _("NT_GNU_BUILD_ATTRIBUTE_FUNC");
+    case NT_GNU_INFINITY:
+      return _("NT_GNU_INFINITY (Infinity function)");
     default:
       {
 	static char buff[64];
@@ -17990,6 +17992,133 @@ next:
   printf ("\n");
 }
 
+#define I8_CHUNK_SIGNATURE	1
+#define I8_CHUNK_STRINGS	4
+
+typedef enum
+{
+  I8_NOTE_OK,
+  I8_NOTE_CORRUPT,
+  I8_NOTE_UNHANDLED,
+}
+i8_err_e;
+
+static i8_err_e
+infinity_get_string (const char **result,
+		     unsigned char **ptr, unsigned char *limit,
+		     unsigned char *table_start,
+		     unsigned char *table_limit)
+{
+  dwarf_vma offset;
+  unsigned int length;
+  const char *c;
+
+  /* Read the offset.  */
+  if (*ptr > limit)
+    return I8_NOTE_CORRUPT;
+
+  offset = read_uleb128 (*ptr, &length, limit);
+  *ptr += length;
+  if (*ptr > limit)
+    return I8_NOTE_CORRUPT;
+
+  /* Get the string.  */
+  *result = (const char *) (table_start + offset);
+
+  /* Check the result.  */
+  for (c = *result; c < (const char *) table_limit; c++)
+    {
+      if (*c == '\0')
+	return I8_NOTE_OK;
+
+      if (*c < ' ' || *c > '~')
+	return I8_NOTE_UNHANDLED;
+    }
+
+  return I8_NOTE_CORRUPT;
+}
+
+static i8_err_e
+print_infinity_note (Elf_Internal_Note *pnote)
+{
+  unsigned char *ptr = (unsigned char *) pnote->descdata;
+  unsigned char *limit = ptr + pnote->descsz;
+  unsigned char *sig_start = NULL;
+  unsigned char *str_start = NULL;
+  unsigned char *sig_limit, *str_limit;
+  const char *provider, *name, *ptypes, *rtypes;
+  i8_err_e status;
+
+  /* Locate the info and string table chunks.  */
+  while (ptr < limit)
+    {
+      dwarf_vma type_id, version, size;
+      unsigned int length;
+
+      type_id = read_uleb128 (ptr, &length, limit);
+      ptr += length;
+      if (ptr >= limit)
+	return I8_NOTE_CORRUPT;
+
+      version = read_uleb128 (ptr, &length, limit);
+      ptr += length;
+      if (ptr >= limit)
+	return I8_NOTE_CORRUPT;
+
+      size = read_uleb128 (ptr, &length, limit);
+      ptr += length;
+      if (ptr + size > limit)
+	return I8_NOTE_CORRUPT;
+
+      switch (type_id)
+	{
+	case I8_CHUNK_SIGNATURE:
+	  if (sig_start != NULL || (version != 1 && version != 2))
+	    return I8_NOTE_UNHANDLED;
+
+	  sig_start = ptr;
+	  sig_limit = ptr + size;
+	  break;
+
+	case I8_CHUNK_STRINGS:
+	  if (str_start != NULL || version != 1)
+	    return I8_NOTE_UNHANDLED;
+
+	  str_start = ptr;
+	  str_limit = ptr + size;
+	  break;
+	}
+
+      ptr += size;
+    }
+  if (sig_start == NULL || str_start == NULL)
+    return I8_NOTE_UNHANDLED;
+
+  ptr = sig_start;
+  status = infinity_get_string (&provider,
+				&ptr, sig_limit,
+				str_start, str_limit);
+  if (status != I8_NOTE_OK)
+    return status;
+  status = infinity_get_string (&name, &ptr, sig_limit,
+				str_start, str_limit);
+  if (status != I8_NOTE_OK)
+    return status;
+  status = infinity_get_string (&ptypes, &ptr, sig_limit,
+				str_start, str_limit);
+  if (status != I8_NOTE_OK)
+    return status;
+  status = infinity_get_string (&rtypes, &ptr, sig_limit,
+				str_start, str_limit);
+  if (status != I8_NOTE_OK)
+    return status;
+
+  printf (_("    Signature: %s::%s(%s)%s\n"),
+	  provider, name, ptypes, rtypes);
+
+  return I8_NOTE_OK;
+}
+
 static bfd_boolean
 print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
 {
@@ -18107,6 +18236,24 @@ print_gnu_note (Filedata * filedata, Elf_Internal_Note *pnote)
 	printf ("\n");
       }
       break;
+
+    case NT_GNU_INFINITY:
+      {
+	switch (print_infinity_note (pnote))
+	  {
+	  case I8_NOTE_OK:
+	    break;
+
+	  case I8_NOTE_CORRUPT:
+	    printf (_("    <corrupt note>\n"));
+	    break;
+
+	  case I8_NOTE_UNHANDLED:
+	    printf (_("    <unhandled note>\n"));
+	    break;
+	  }
+	break;
+      }
     }
 
   return TRUE;

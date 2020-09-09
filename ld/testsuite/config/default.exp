@@ -117,7 +117,7 @@ load_lib ld-lib.exp
 proc get_target_emul {} {
     global target_triplet
     global srcdir
-    set status [catch "exec sh -c \"targ='$target_triplet' && . $srcdir/../configure.tgt && echo \\\$targ_emul\"" result]
+    set status [catch "exec bash -c \"targ='$target_triplet' && . $srcdir/../configure.tgt && echo \\\$targ_emul\"" result]
     if $status { error "Error getting emulation name: $result" }
     return $result
 }

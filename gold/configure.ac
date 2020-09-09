@@ -682,6 +682,14 @@ AC_CHECK_HEADERS(locale.h)
 AC_CHECK_FUNCS(setlocale)
 AM_LC_MESSAGES
 
+if test x$DEB_TARGET_MULTIARCH != x; then
+  multiarch=$DEB_TARGET_MULTIARCH
+  if test -n "$multiarch"; then
+    MULTIARCH_DIRNAME='-DMULTIARCH_DIRNAME=\"'$multiarch'\"'
+  fi
+fi
+AC_SUBST(MULTIARCH_DIRNAME)
+
 AM_MAINTAINER_MODE
 
 AC_OUTPUT(Makefile testsuite/Makefile po/Makefile.in:po/Make-in)

@@ -656,7 +656,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   /* Queue a pending event so that the program stops immediately.  */
   if (run_how == RUN_STOP_AT_FIRST_INSN)
     {
-      thread_info *thr = inferior_thread ();
+      struct thread_info *thr = inferior_thread ();
       thr->suspend.waitstatus_pending_p = 1;
       thr->suspend.waitstatus.kind = TARGET_WAITKIND_STOPPED;
       thr->suspend.waitstatus.value.sig = GDB_SIGNAL_0;
@@ -906,7 +906,7 @@ set_step_frame (void)
   set_step_info (frame, sal);
 
   CORE_ADDR pc = get_frame_pc (frame);
-  thread_info *tp = inferior_thread ();
+  struct thread_info *tp = inferior_thread ();
   tp->control.step_start_function = find_pc_function (pc);
 }
 

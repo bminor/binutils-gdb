@@ -111,6 +111,6 @@ distclean: clean
 	rm -f Makefile
 maintainer-clean realclean: distclean
 
-Makefile: $(srcdir)/Makefile.in ../config.status
+Makefile: $(srcdir)/Makefile.in 
 	CONFIG_FILES=testsuite/Makefile CONFIG_HEADERS= \
 	  cd .. && $(SHELL) ./config.status

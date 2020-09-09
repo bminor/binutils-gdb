@@ -76,14 +76,14 @@ BUILT_SOURCES += $(ALLOCA_H)
 # We need the following in order to create <alloca.h> when the system
 # doesn't have one that works with the given compiler.
 if GL_GENERATE_ALLOCA_H
-alloca.h: alloca.in.h $(top_builddir)/config.status
+alloca.h: alloca.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  cat $(srcdir)/alloca.in.h; \
 	} > $@-t && \
 	mv -f $@-t $@
 else
-alloca.h: $(top_builddir)/config.status
+alloca.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += alloca.h alloca.h-t
@@ -98,7 +98,7 @@ BUILT_SOURCES += arpa/inet.h
 
 # We need the following in order to create <arpa/inet.h> when the system
 # doesn't have one.
-arpa/inet.h: arpa_inet.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H) $(ARG_NONNULL_H)
+arpa/inet.h: arpa_inet.in.h  $(CXXDEFS_H) $(WARN_ON_USE_H) $(ARG_NONNULL_H)
 	$(AM_V_at)$(MKDIR_P) arpa
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
@@ -239,7 +239,7 @@ BUILT_SOURCES += dirent.h
 
 # We need the following in order to create <dirent.h> when the system
 # doesn't have one that works with the given compiler.
-dirent.h: dirent.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+dirent.h: dirent.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -330,7 +330,7 @@ BUILT_SOURCES += $(ERRNO_H)
 # We need the following in order to create <errno.h> when the system
 # doesn't have one that is POSIX compliant.
 if GL_GENERATE_ERRNO_H
-errno.h: errno.in.h $(top_builddir)/config.status
+errno.h: errno.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -348,7 +348,7 @@ errno.h: errno.in.h $(top_builddir)/config.status
 	} > $@-t && \
 	mv $@-t $@
 else
-errno.h: $(top_builddir)/config.status
+errno.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += errno.h errno.h-t
@@ -398,7 +398,7 @@ BUILT_SOURCES += fcntl.h
 
 # We need the following in order to create <fcntl.h> when the system
 # doesn't have one that works with the given compiler.
-fcntl.h: fcntl.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+fcntl.h: fcntl.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -473,7 +473,7 @@ BUILT_SOURCES += $(FLOAT_H)
 # We need the following in order to create <float.h> when the system
 # doesn't have one that works with the given compiler.
 if GL_GENERATE_FLOAT_H
-float.h: float.in.h $(top_builddir)/config.status
+float.h: float.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -486,7 +486,7 @@ float.h: float.in.h $(top_builddir)/config.status
 	} > $@-t && \
 	mv $@-t $@
 else
-float.h: $(top_builddir)/config.status
+float.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += float.h float.h-t
@@ -504,7 +504,7 @@ BUILT_SOURCES += $(FNMATCH_H)
 # We need the following in order to create <fnmatch.h> when the system
 # doesn't have one that supports the required API.
 if GL_GENERATE_FNMATCH_H
-fnmatch.h: fnmatch.in.h $(top_builddir)/config.status $(ARG_NONNULL_H)
+fnmatch.h: fnmatch.in.h  $(ARG_NONNULL_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
@@ -512,7 +512,7 @@ fnmatch.h: fnmatch.in.h $(top_builddir)/config.status $(ARG_NONNULL_H)
 	} > $@-t && \
 	mv -f $@-t $@
 else
-fnmatch.h: $(top_builddir)/config.status
+fnmatch.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += fnmatch.h fnmatch.h-t
@@ -630,7 +630,7 @@ BUILT_SOURCES += $(GLOB_H)
 # We need the following in order to create <glob.h> when the system
 # doesn't have one that works with the given compiler.
 if GL_GENERATE_GLOB_H
-glob.h: glob.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+glob.h: glob.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''HAVE_SYS_CDEFS_H''@|$(HAVE_SYS_CDEFS_H)|g' \
@@ -641,7 +641,7 @@ glob.h: glob.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(
 	} > $@-t && \
 	mv -f $@-t $@
 else
-glob.h: $(top_builddir)/config.status
+glob.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += glob.h glob.h-t
@@ -689,7 +689,7 @@ BUILT_SOURCES += inttypes.h
 
 # We need the following in order to create <inttypes.h> when the system
 # doesn't have one that works with the given compiler.
-inttypes.h: inttypes.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H) $(ARG_NONNULL_H)
+inttypes.h: inttypes.in.h  $(CXXDEFS_H) $(WARN_ON_USE_H) $(ARG_NONNULL_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's/@''HAVE_INTTYPES_H''@/$(HAVE_INTTYPES_H)/g' \
@@ -753,7 +753,7 @@ BUILT_SOURCES += $(LIMITS_H)
 # We need the following in order to create <limits.h> when the system
 # doesn't have one that is compatible with GNU.
 if GL_GENERATE_LIMITS_H
-limits.h: limits.in.h $(top_builddir)/config.status
+limits.h: limits.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -765,7 +765,7 @@ limits.h: limits.in.h $(top_builddir)/config.status
 	} > $@-t && \
 	mv $@-t $@
 else
-limits.h: $(top_builddir)/config.status
+limits.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += limits.h limits.h-t
@@ -887,7 +887,7 @@ libgnu_a_SOURCES += math.c
 
 # We need the following in order to create <math.h> when the system
 # doesn't have one that works with the given compiler.
-math.h: math.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+math.h: math.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -1279,7 +1279,7 @@ BUILT_SOURCES += $(NETINET_IN_H)
 # We need the following in order to create <netinet/in.h> when the system
 # doesn't have one.
 if GL_GENERATE_NETINET_IN_H
-netinet/in.h: netinet_in.in.h $(top_builddir)/config.status
+netinet/in.h: netinet_in.in.h 
 	$(AM_V_at)$(MKDIR_P) netinet
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
@@ -1293,7 +1293,7 @@ netinet/in.h: netinet_in.in.h $(top_builddir)/config.status
 	} > $@-t && \
 	mv $@-t $@
 else
-netinet/in.h: $(top_builddir)/config.status
+netinet/in.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += netinet/in.h netinet/in.h-t
@@ -1452,7 +1452,7 @@ BUILT_SOURCES += signal.h
 
 # We need the following in order to create <signal.h> when the system
 # doesn't have a complete one.
-signal.h: signal.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+signal.h: signal.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -1585,14 +1585,14 @@ BUILT_SOURCES += $(STDALIGN_H)
 # We need the following in order to create <stdalign.h> when the system
 # doesn't have one that works.
 if GL_GENERATE_STDALIGN_H
-stdalign.h: stdalign.in.h $(top_builddir)/config.status
+stdalign.h: stdalign.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  cat $(srcdir)/stdalign.in.h; \
 	} > $@-t && \
 	mv $@-t $@
 else
-stdalign.h: $(top_builddir)/config.status
+stdalign.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += stdalign.h stdalign.h-t
@@ -1608,14 +1608,14 @@ BUILT_SOURCES += $(STDBOOL_H)
 # We need the following in order to create <stdbool.h> when the system
 # doesn't have one that works.
 if GL_GENERATE_STDBOOL_H
-stdbool.h: stdbool.in.h $(top_builddir)/config.status
+stdbool.h: stdbool.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's/@''HAVE__BOOL''@/$(HAVE__BOOL)/g' < $(srcdir)/stdbool.in.h; \
 	} > $@-t && \
 	mv $@-t $@
 else
-stdbool.h: $(top_builddir)/config.status
+stdbool.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += stdbool.h stdbool.h-t
@@ -1631,7 +1631,7 @@ BUILT_SOURCES += $(STDDEF_H)
 # We need the following in order to create <stddef.h> when the system
 # doesn't have one that works with the given compiler.
 if GL_GENERATE_STDDEF_H
-stddef.h: stddef.in.h $(top_builddir)/config.status
+stddef.h: stddef.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -1646,7 +1646,7 @@ stddef.h: stddef.in.h $(top_builddir)/config.status
 	} > $@-t && \
 	mv $@-t $@
 else
-stddef.h: $(top_builddir)/config.status
+stddef.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += stddef.h stddef.h-t
@@ -1662,7 +1662,7 @@ BUILT_SOURCES += $(STDINT_H)
 # We need the following in order to create <stdint.h> when the system
 # doesn't have one that works with the given compiler.
 if GL_GENERATE_STDINT_H
-stdint.h: stdint.in.h $(top_builddir)/config.status
+stdint.h: stdint.in.h 
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -1697,7 +1697,7 @@ stdint.h: stdint.in.h $(top_builddir)/config.status
 	} > $@-t && \
 	mv $@-t $@
 else
-stdint.h: $(top_builddir)/config.status
+stdint.h: 
 	rm -f $@
 endif
 MOSTLYCLEANFILES += stdint.h stdint.h-t
@@ -1712,7 +1712,7 @@ BUILT_SOURCES += stdio.h
 
 # We need the following in order to create <stdio.h> when the system
 # doesn't have one that works with the given compiler.
-stdio.h: stdio.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+stdio.h: stdio.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -1840,7 +1840,7 @@ BUILT_SOURCES += stdlib.h
 
 # We need the following in order to create <stdlib.h> when the system
 # doesn't have one that works with the given compiler.
-stdlib.h: stdlib.in.h $(top_builddir)/config.status $(CXXDEFS_H) \
+stdlib.h: stdlib.in.h  $(CXXDEFS_H) \
   $(_NORETURN_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
@@ -1998,7 +1998,7 @@ BUILT_SOURCES += string.h
 
 # We need the following in order to create <string.h> when the system
 # doesn't have one that works with the given compiler.
-string.h: string.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+string.h: string.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -2123,7 +2123,7 @@ libgnu_a_SOURCES += sys_socket.c
 
 # We need the following in order to create <sys/socket.h> when the system
 # doesn't have one that works with the given compiler.
-sys/socket.h: sys_socket.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H) $(ARG_NONNULL_H)
+sys/socket.h: sys_socket.in.h  $(CXXDEFS_H) $(WARN_ON_USE_H) $(ARG_NONNULL_H)
 	$(AM_V_at)$(MKDIR_P) sys
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
@@ -2174,7 +2174,7 @@ BUILT_SOURCES += sys/stat.h
 
 # We need the following in order to create <sys/stat.h> when the system
 # has one that is incomplete.
-sys/stat.h: sys_stat.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+sys/stat.h: sys_stat.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_at)$(MKDIR_P) sys
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
@@ -2236,7 +2236,7 @@ BUILT_SOURCES += sys/time.h
 
 # We need the following in order to create <sys/time.h> when the system
 # doesn't have one that works with the given compiler.
-sys/time.h: sys_time.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+sys/time.h: sys_time.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_at)$(MKDIR_P) sys
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
@@ -2270,7 +2270,7 @@ BUILT_SOURCES += sys/types.h
 
 # We need the following in order to create <sys/types.h> when the system
 # doesn't have one that works with the given compiler.
-sys/types.h: sys_types.in.h $(top_builddir)/config.status
+sys/types.h: sys_types.in.h 
 	$(AM_V_at)$(MKDIR_P) sys
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
@@ -2295,7 +2295,7 @@ BUILT_SOURCES += sys/uio.h
 
 # We need the following in order to create <sys/uio.h> when the system
 # doesn't have one that works with the given compiler.
-sys/uio.h: sys_uio.in.h $(top_builddir)/config.status
+sys/uio.h: sys_uio.in.h 
 	$(AM_V_at)$(MKDIR_P) sys
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
@@ -2337,7 +2337,7 @@ BUILT_SOURCES += time.h
 
 # We need the following in order to create <time.h> when the system
 # doesn't have one that works with the given compiler.
-time.h: time.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+time.h: time.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */' && \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -2395,7 +2395,7 @@ libgnu_a_SOURCES += unistd.c
 
 # We need the following in order to create an empty placeholder for
 # <unistd.h> when the system doesn't have one.
-unistd.h: unistd.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+unistd.h: unistd.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -2579,7 +2579,7 @@ BUILT_SOURCES += wchar.h
 
 # We need the following in order to create <wchar.h> when the system
 # version does not work standalone.
-wchar.h: wchar.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+wchar.h: wchar.in.h  $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
@@ -2701,7 +2701,7 @@ libgnu_a_SOURCES += wctype-h.c
 
 # We need the following in order to create <wctype.h> when the system
 # doesn't have one that works with the given compiler.
-wctype.h: wctype.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(WARN_ON_USE_H)
+wctype.h: wctype.in.h  $(CXXDEFS_H) $(WARN_ON_USE_H)
 	$(AM_V_GEN)rm -f $@-t $@ && \
 	{ echo '/* DO NOT EDIT! GENERATED AUTOMATICALLY! */'; \
 	  sed -e 's|@''GUARD_PREFIX''@|GL|g' \
