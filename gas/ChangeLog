@@ -1,3 +1,8 @@
+2020-09-09  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Emit prefix insn by parts when
+	valueT is smaller than 64 bits.
+
 2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (CSKYV2_ISA_DSP): CSKY_ISA_DSPE60.
