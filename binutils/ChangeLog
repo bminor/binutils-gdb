@@ -1,3 +1,9 @@
+2020-09-09  Alan Modra  <amodra@gmail.com>
+
+	PR 26578
+	* dwarf.c (parse_gnu_debugaltlink): Don't alloc build_id_data.
+	(load_separate_debug_files): Use a stack var for build_id_data.
+
 2020-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26587

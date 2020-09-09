@@ -10353,14 +10353,9 @@ parse_gnu_debugaltlink (struct dwarf_section * section, void * data)
   if (id_len < 0x14)
     return NULL;
 
-  build_id_data = calloc (1, sizeof * build_id_data);
-  if (build_id_data == NULL)
-    return NULL;
-
+  build_id_data = (Build_id_data *) data;
   build_id_data->len = id_len;
   build_id_data->data = section->start + namelen;
-
-  * (Build_id_data **) data = build_id_data;
 
   return name;
 }
@@ -10750,7 +10745,7 @@ load_separate_debug_files (void * file, const char * filename)
 
   if (load_debug_section (gnu_debugaltlink, file))
     {
-      Build_id_data * build_id_data;
+      Build_id_data build_id_data;
 
       load_separate_debug_info (filename,
 				& debug_displays[gnu_debugaltlink].section,
