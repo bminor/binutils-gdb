@@ -56,6 +56,9 @@
 
 #include "gdbsupport/capability.h"
 
+/* For address/int to pointer conversions.  */
+#include "inferior.h"
+
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
 #define HA_MAX_NUM_FLDS		4
@@ -3561,6 +3564,51 @@ aarch64_address_class_name_to_type_flags (struct gdbarch *gdbarch,
     return false;
 }
 
+/* Implements the gdbarch_pointer_to_address hook.  */
+
+static CORE_ADDR
+aarch64_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
+			    const gdb_byte *buf)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  if (type->length <= 8)
+    return signed_pointer_to_address (gdbarch, type, buf);
+  else
+    {
+      /* Convert a capability to a regular 64-bit address, discarding
+	 the extra information.  */
+      return extract_unsigned_integer (buf, 8, byte_order);
+    }
+}
+
+/* Implements the gdbarch_address_to_pointer hook.  */
+
+static void
+aarch64_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
+			    gdb_byte *buf, CORE_ADDR addr)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  if (type->length <= 8)
+    address_to_signed_pointer (gdbarch, type, buf, addr);
+  else
+    {
+      /* Create a fake capability with only the address part.  */
+      memset (buf, 0, type->length);
+      store_unsigned_integer (buf, 8, byte_order, addr);
+    }
+}
+
+/* Implements the gdbarch_integer_to_address hook.  */
+
+static CORE_ADDR
+aarch64_integer_to_address (struct gdbarch *gdbarch,
+			    struct type *type, const gdb_byte *buf)
+{
+  return aarch64_pointer_to_address (gdbarch, type, buf);
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3885,6 +3933,11 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	(gdbarch, aarch64_address_class_name_to_type_flags);
       set_gdbarch_address_class_type_flags_to_name
 	(gdbarch, aarch64_address_class_type_flags_to_name);
+
+      /* For converting between pointer/capability.  */
+      set_gdbarch_pointer_to_address (gdbarch, aarch64_pointer_to_address);
+      set_gdbarch_address_to_pointer (gdbarch, aarch64_address_to_pointer);
+      set_gdbarch_integer_to_address (gdbarch, aarch64_integer_to_address);
     }
 
   return gdbarch;
