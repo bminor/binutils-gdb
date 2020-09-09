@@ -4184,7 +4184,8 @@ md_assemble (char *str)
 
   /* The prefix part of an 8-byte instruction always occupies the lower
      addressed word in a doubleword, regardless of endianness.  */
-  if (!target_big_endian && insn_length == 8)
+  if (insn_length == 8
+      && (sizeof (insn) > sizeof (valueT) || !target_big_endian))
     {
       md_number_to_chars (f, PPC_GET_PREFIX (insn), 4);
       md_number_to_chars (f + 4, PPC_GET_SUFFIX (insn), 4);
