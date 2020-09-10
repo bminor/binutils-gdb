@@ -407,9 +407,15 @@ set lto_link_elf_tests [list \
   [list {liblto-18b.so} \
    {-shared} {-O2 -fpic} \
    {lto-18b.c} {} {liblto-18b.so}] \
+  [list {liblto-18b.a} \
+   "$plug_opt" {-flto -O2} \
+   {lto-18b.c} {} {liblto-18b.a}] \
   [list {liblto-18c.so} \
    {-shared} {-O2 -fpic} \
    {lto-18c.c} {} {liblto-18c.so}] \
+  [list {liblto-18c.a} \
+   "$plug_opt" {-flto -O2} \
+   {lto-18c.c} {} {liblto-18c.a}] \
   [list {lto-18d.o} \
    {} {-flto -O2} \
    {lto-18d.c} {} {}] \
@@ -586,6 +592,14 @@ set lto_run_elf_shared_tests [list \
    {-flto -fuse-linker-plugin} {} \
    {lto-18a.c} {lto-18-2.exe} {lto-18.out} {-flto -O2} {c} {} \
    {-Wl,--as-needed,-R,tmpdir -Ltmpdir -llto-18b -llto-18c tmpdir/lto-18d.o}] \
+  [list {lto-18 (3)} \
+   {-static -flto -fuse-linker-plugin} {} \
+   {lto-18a.c} {lto-18-3.exe} {lto-18.out} {-flto -O2} {c} {} \
+   {tmpdir/lto-18d.o -Ltmpdir -llto-18b -llto-18c}] \
+  [list {lto-18 (4)} \
+   {-static -flto -fuse-linker-plugin} {} \
+   {lto-18a.c} {lto-18-4.exe} {lto-18.out} {-flto -O2} {c} {} \
+   { -Ltmpdir -llto-18b -llto-18c tmpdir/lto-18d.o}] \
 ]
 
 # LTO run-time tests for ELF

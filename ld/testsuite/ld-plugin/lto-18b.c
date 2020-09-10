@@ -1,5 +1,3 @@
-int select (void) { return 1; }
-
 extern int f2 (int);
 
 int f1 (int x)
