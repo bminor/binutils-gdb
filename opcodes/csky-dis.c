@@ -675,7 +675,7 @@ csky_output_operand (char *str, struct operand const *oprnd,
 	  }
 	double d = 0;
 	memcpy (&d, &dvalue, sizeof (double));
-	sprintf (buf, "%lf\t// imm9:%4ld, imm4:%2ld", d, imm8, imm4);
+	sprintf (buf, "%lf\t// imm9:%4ld, imm4:%2ld", d, (long) imm8, (long) imm4);
 	strcat (str, buf);
 	break;
       }

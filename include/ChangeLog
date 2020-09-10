@@ -1,3 +1,8 @@
+2020-09-10  Nick Clifton  <nickc@redhat.com>
+
+	* opcode/csky.h (CSKY_ISA_FLOAT_7E60): Use a long long type for
+	this value.
+
 2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* opcode/csky.h (CSKY_ISA_DSPE60): Define.
