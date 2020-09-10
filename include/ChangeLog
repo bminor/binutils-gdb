@@ -1,3 +1,11 @@
+2020-09-11  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	Sync with GCC
+	2020-09-08  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* floatformat.h (floatformat_bfloat16_big): New.
+	(floatformat_bfloat16_little): New.
+
 2020-09-12 Cooper Qu <cooper.qu@linux.alibaba.com>
 
 	* opcode/csky.h (CSKYV1_ISA_E1): Convert to bfd_uint64_t type.

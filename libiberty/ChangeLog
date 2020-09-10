@@ -1,3 +1,11 @@
+2020-09-11  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	Sync with GCC
+	2020-09-08  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* floatformat.c (floatformat_bfloat16_big): New.
+	(floatformat_bfloat16_little): New.
+
 2020-09-08  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
