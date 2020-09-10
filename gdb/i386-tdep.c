@@ -3105,13 +3105,13 @@ i386_zmm_type (struct gdbarch *gdbarch)
 #if 0
       union __gdb_builtin_type_vec512i
       {
-	int128_t uint128[4];
-	int64_t v4_int64[8];
-	int32_t v8_int32[16];
-	int16_t v16_int16[32];
-	int8_t v32_int8[64];
-	double v4_double[8];
-	float v8_float[16];
+	int128_t v4_int128[4];
+	int64_t v8_int64[8];
+	int32_t v16_int32[16];
+	int16_t v32_int16[32];
+	int8_t v64_int8[64];
+	double v8_double[8];
+	float v16_float[16];
       };
 #endif
 
@@ -3158,13 +3158,13 @@ i386_ymm_type (struct gdbarch *gdbarch)
 #if 0
       union __gdb_builtin_type_vec256i
       {
-        int128_t uint128[2];
-        int64_t v2_int64[4];
-        int32_t v4_int32[8];
-        int16_t v8_int16[16];
-        int8_t v16_int8[32];
-        double v2_double[4];
-        float v4_float[8];
+        int128_t v2_int128[2];
+        int64_t v4_int64[4];
+        int32_t v8_int32[8];
+        int16_t v16_int16[16];
+        int8_t v32_int8[32];
+        double v4_double[4];
+        float v8_float[8];
       };
 #endif
 

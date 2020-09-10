@@ -1,3 +1,8 @@
+2020-09-11  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* i386-tdep.c (i386_zmm_type): Fix field names.
+	(i386_ymm_type): Fix field names.
+
 2020-09-11  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* breakpoint.c: Fix typo in the help message of the
