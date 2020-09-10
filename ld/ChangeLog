@@ -1,3 +1,13 @@
+2020-09-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26590
+	* testsuite/ld-elf/pr26590.err: New file.
+	* testsuite/ld-elf/pr26590a.c: Likewise.
+	* testsuite/ld-elf/pr26590b.c: Likewise.
+	* testsuite/ld-elf/pr26590c.c: Likewise.
+	* testsuite/ld-elf/pr26590d.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run ld/26590 tests.
+
 2020-09-10  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/pr26580-2.sd: Accept undefined symbol.
