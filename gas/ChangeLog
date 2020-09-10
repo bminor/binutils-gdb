@@ -1,3 +1,34 @@
+2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (struct csky_cpu_info): Add new members
+	isa_flag, features and ver.
+	(struct csky_cpu_feature): New.
+	(struct csky_cpu_version): New.
+	(CSKY_FEATURE_MAX): Define.
+	(CSKY_CPU_REVERISON_MAX): Define.
+	(FEATURE_DSP_EXT, FEATURE_DSP, FEATURE_MMU, FEATURE_VDSP,
+	 FEATURE_FLOAT, FEATURE_TRUST, FEATURE_JAVA, FEATURE_SHIELD):
+	Define, each standard one collection of instructions.
+	(CSKY_FEATURES_DEF_NULL, CSKY_FEATURES_DEF_e,
+	 CSKY_FEATURES_DEF_t, CSKY_FEATURES_DEF_f, CSKY_FEATURES_DEF_v,
+	 CSKY_FEATURES_DEF_ef, CSKY_FEATURES_DEF_jt,
+	 CSKY_FEATURES_DEF_efht, CSKY_FEATURES_DEF_efv,
+	 CSKY_FEATURES_DEF_eft, CSKY_FEATURES_DEF_d,
+	 CSKY_FEATURES_DEF_df, CSKY_FEATURES_DEF_ft,
+	 CSKY_FEATURES_DEF_tv, CSKY_FEATURES_DEF_fv,
+	 CSKY_FEATURES_DEF_dft, CSKY_FEATURES_DEF_dfv,
+	 CSKY_FEATURES_DEF_ftv, CSKY_FEATURES_DEF_eftv): Define,
+	the features combination used by cpu.
+	(CSKY_CPU_REVERISON_r0p0, CSKY_CPU_REVERISON_r1p0,
+	 CSKY_CPU_REVERISON_r2p0, CSKY_CPU_REVERISON_r3p0,
+	 CSKY_CPU_REVERISON_RESERVED, CSKY_CPU_REVERISON_R3):
+	Define, version information used by cpu.
+	(csky_cpus): Refine, and add CK804, CK805 and CK800.
+	(parse_cpu): Refine.
+	(parse_arch): Refine.
+	(md_show_usage): Refine.
+	(md_begin): Refine.
+
 2020-09-09  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_assemble): Emit prefix insn by parts when

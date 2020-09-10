@@ -1,3 +1,9 @@
+2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKY_ARCH_804): Define.
+	(CSKY_ARCH_805): Define.
+	(CSKY_ARCH_800): Define.
+
 2020-09-10  Nick Clifton  <nickc@redhat.com>
 
 	* opcode/csky.h (CSKY_ISA_FLOAT_7E60): Use a long long type for

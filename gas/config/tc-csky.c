@@ -231,13 +231,6 @@ struct csky_arch_info
   unsigned int bfd_mach_flag;
 };
 
-struct csky_cpu_info
-{
-  const char *name;
-  unsigned int mach_flag;
-  BFD_HOST_U_64_BIT isa_flag;
-};
-
 typedef enum
 {
   INSN_OPCODE,
@@ -266,6 +259,8 @@ struct csky_insn_info
   char *output;
   /* End of instruction.  */
   char *opcode_end;
+  /* CPU infomations.  */
+  const struct csky_cpu_info *cpu;
   /* Flag for INSN_OPCODE16F, INSN_OPCODE32F, INSN_OPCODE, INSN_MACRO.  */
   inst_flag flag_force;
   /* Operand number.  */
@@ -591,129 +586,356 @@ const struct csky_arch_info csky_archs[] =
 #define CSKY_ARCH_807_BASE    CSKY_ARCH_807 | CSKY_ARCH_DSP
 #define CSKY_ARCH_810_BASE    CSKY_ARCH_810 | CSKY_ARCH_DSP
 
-/* C-SKY cpus table.  */
+struct csky_cpu_feature
+{
+  const char unique;
+  unsigned int arch_flag;
+  bfd_uint64_t isa_flag;
+};
+
+struct csky_cpu_version
+{
+  int r;
+  int p;
+  bfd_uint64_t isa_flag;
+};
+
+#define CSKY_FEATURE_MAX  10
+#define CSKY_CPU_REVERISON_MAX 10
+
+struct csky_cpu_info
+{
+  const char *name;
+  unsigned int arch_flag;
+  bfd_uint64_t isa_flag;
+  struct csky_cpu_feature features[CSKY_FEATURE_MAX];
+  struct csky_cpu_version ver[CSKY_CPU_REVERISON_MAX];
+};
+
+#define FEATURE_DSP_EXT(isa)                \
+   {'e', CSKY_ARCH_DSP, isa}
+#define FEATURE_DSP(isa)                    \
+   {'d', CSKY_ARCH_DSP, isa}
+#define FEATURE_MMU()                       \
+   {'m', 0, 0}
+#define FEATURE_VDSP(isa)                   \
+   {'v', CSKY_ARCH_DSP, isa}
+#define FEATURE_FLOAT(isa)                  \
+   {'f', CSKY_ARCH_FLOAT, isa}
+#define FEATURE_TRUST(isa)                  \
+   {'t', 0, isa}
+#define FEATURE_JAVA(isa)                   \
+   {'j', CSKY_ARCH_JAVA, isa}
+#define FEATURE_SHIELD(isa)                 \
+   {'h', 0, isa}
+
+
+#define CSKY_FEATURES_DEF_NULL()            \
+   {{0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_e(isa_e)          \
+   {FEATURE_DSP_EXT(isa_e),                 \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_t(isa_t)          \
+   {FEATURE_TRUST(isa_t),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_f(isa_f)          \
+   {FEATURE_FLOAT(isa_f),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_v(isa_v)          \
+   {FEATURE_VDSP(isa_v),                    \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_ef(isa_e, isa_f)  \
+   {FEATURE_DSP_EXT(isa_e),                 \
+    FEATURE_FLOAT(isa_f),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_jt(isa_j, isa_t)  \
+   {FEATURE_JAVA(isa_j),                    \
+    FEATURE_TRUST(isa_t),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_efht(isa_e, isa_f, isa_h, isa_t) \
+   {FEATURE_DSP_EXT(isa_e),                 \
+    FEATURE_FLOAT(isa_f),                   \
+    FEATURE_SHIELD(isa_h),                  \
+    FEATURE_TRUST(isa_t),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_efv(isa_e, isa_f, isa_v) \
+   {FEATURE_DSP_EXT(isa_e),                 \
+    FEATURE_FLOAT(isa_f),                   \
+    FEATURE_VDSP(isa_v),                    \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_eft(isa_e, isa_f, isa_t) \
+   {FEATURE_DSP_EXT(isa_e),                 \
+    FEATURE_FLOAT(isa_f),                   \
+    FEATURE_TRUST(isa_t),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_d(isa_d) \
+   {FEATURE_DSP(isa_d),             \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_df(isa_d, isa_f)  \
+   {FEATURE_DSP(isa_d),             \
+    FEATURE_FLOAT(isa_f),               \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_ft(isa_f, isa_t)  \
+   {FEATURE_FLOAT(isa_f),                   \
+    FEATURE_TRUST(isa_t),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_tv(isa_t, isa_v)  \
+   {FEATURE_TRUST(isa_t),                   \
+    FEATURE_VDSP(isa_v),                    \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_fv(isa_f, isa_v)  \
+   {FEATURE_FLOAT(isa_f),                   \
+    FEATURE_VDSP(isa_v),                    \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+
+#define CSKY_FEATURES_DEF_dft(isa_d, isa_f, isa_t) \
+   {FEATURE_DSP(isa_d),                     \
+    FEATURE_FLOAT(isa_f),                   \
+    FEATURE_TRUST(isa_t),                   \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_dfv(isa_d, isa_f, isa_v) \
+   {FEATURE_DSP(isa_d),                     \
+    FEATURE_FLOAT(isa_f),                   \
+    FEATURE_VDSP(isa_v),                    \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_ftv(isa_f, isa_t, isa_v) \
+   {FEATURE_FLOAT(isa_f),                   \
+    FEATURE_TRUST(isa_t),                   \
+    FEATURE_VDSP(isa_v),                    \
+    {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_FEATURES_DEF_eftv(isa_e, isa_f, isa_t, isa_v) \
+   {FEATURE_DSP_EXT(isa_e),                 \
+    FEATURE_FLOAT(isa_f),                   \
+    FEATURE_TRUST(isa_t),                   \
+    FEATURE_VDSP(isa_v),                    \
+    {0}, {0}, {0}, {0}, {0}, {0}}
+
+
+#define CSKY_CPU_REVERISON_r0p0(isa)        \
+    {0, 0, 0}
+#define CSKY_CPU_REVERISON_r1p0(isa)        \
+    {1, 0, isa}
+#define CSKY_CPU_REVERISON_r2p0(isa)        \
+    {2, 0, isa}
+#define CSKY_CPU_REVERISON_r3p0(isa)        \
+    {3, 0, isa}
+
+#define CSKY_CPU_REVERISON_RESERVED()  \
+{{0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+#define CSKY_CPU_REVERISON_R3(isa1, isa2, isa3) \
+  {CSKY_CPU_REVERISON_r1p0(isa1),           \
+   CSKY_CPU_REVERISON_r2p0(isa2),           \
+   CSKY_CPU_REVERISON_r3p0(isa3),           \
+   {0}, {0}, {0}, {0}, {0}, {0}, {0}}
+
+/* CSKY cpus table.  */
 const struct csky_cpu_info csky_cpus[] =
 {
-  /* CK510 series.  */
-#define CSKYV1_ISA_DSP   CSKY_ISA_DSP | CSKY_ISA_MAC_DSP
-  {"ck510",  CSKY_ARCH_510, CSKYV1_ISA_E1},
-  {"ck510e", CSKY_ARCH_510 | CSKY_ARCH_DSP, CSKYV1_ISA_E1 | CSKYV1_ISA_DSP},
-  {"ck520",  CSKY_ARCH_510 | CSKY_ARCH_MAC, CSKYV1_ISA_E1 | CSKY_ISA_MAC | CSKY_ISA_MAC_DSP},
+#define CSKYV1_ISA_DSP   (CSKY_ISA_DSP | CSKY_ISA_MAC_DSP)
+#define CSKY_ISA_510     (CSKYV1_ISA_E1)
+#define CSKY_ISA_610     (CSKYV1_ISA_E1 | CSKY_ISA_CP)
+  {"ck510",
+    CSKY_ARCH_510,
+    CSKY_ISA_510,
+    CSKY_FEATURES_DEF_e(CSKYV1_ISA_DSP),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"ck520",
+    CSKY_ARCH_510 | CSKY_ARCH_MAC,
+    CSKY_ISA_510 | CSKY_ISA_MAC | CSKY_ISA_MAC_DSP,
+    CSKY_FEATURES_DEF_NULL(),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"ck610", CSKY_ARCH_610, CSKY_ISA_610,
+    CSKY_FEATURES_DEF_ef(CSKYV1_ISA_DSP, CSKY_ISA_FLOAT_E1),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"ck620",
+    CSKY_ARCH_610 | CSKY_ARCH_MAC,
+    CSKY_ISA_610 | CSKY_ISA_MAC | CSKY_ISA_MAC_DSP,
+    CSKY_FEATURES_DEF_NULL(),
+    CSKY_CPU_REVERISON_RESERVED()},
 
-#define CSKY_ISA_610          CSKYV1_ISA_E1 | CSKY_ISA_CP
-  /* CK610 series.  */
-  {"ck610",  CSKY_ARCH_610, CSKY_ISA_610},
-  {"ck610e", CSKY_ARCH_610 | CSKY_ARCH_DSP, CSKY_ISA_610 | CSKYV1_ISA_DSP},
-  {"ck610f", CSKY_ARCH_610 | CSKY_ARCH_FLOAT, CSKY_ISA_610 | CSKY_ISA_FLOAT_E1},
-  {"ck610ef", CSKY_ARCH_610 | CSKY_ARCH_FLOAT | CSKY_ARCH_DSP, CSKY_ISA_610 | CSKY_ISA_FLOAT_E1 | CSKYV1_ISA_DSP},
-  {"ck610fe", CSKY_ARCH_610 | CSKY_ARCH_FLOAT | CSKY_ARCH_DSP, CSKY_ISA_610 | CSKY_ISA_FLOAT_E1 | CSKYV1_ISA_DSP},
-  {"ck620",  CSKY_ARCH_610 | CSKY_ARCH_MAC, CSKY_ISA_610 | CSKY_ISA_MAC | CSKY_ISA_MAC_DSP},
-
-  /* CK801 series.  */
-#define CSKY_ISA_801    CSKYV2_ISA_E1
+#define CSKY_ISA_801    (CSKYV2_ISA_E1 | CSKY_ISA_TRUST)
 #define CSKYV2_ISA_DSP  (CSKY_ISA_DSP | CSKY_ISA_DSP_1E2 | CSKY_ISA_DSPE60)
-  {"ck801", CSKY_ARCH_801, CSKY_ISA_801},
-  {"ck801t", CSKY_ARCH_801, CSKY_ISA_801 | CSKY_ISA_TRUST},
-
-  /* CK802 series.  */
+  {"ck801",
+    CSKY_ARCH_801,
+    CSKY_ISA_801,
+    CSKY_FEATURES_DEF_t(0),
+    CSKY_CPU_REVERISON_RESERVED()},
 #define CSKY_ISA_802    (CSKY_ISA_801 | CSKYV2_ISA_1E2 | CSKY_ISA_NVIC)
-  {"ck802", CSKY_ARCH_802, CSKY_ISA_802},
-  {"ck802j", CSKY_ARCH_802 | CSKY_ARCH_JAVA, CSKY_ISA_802 | CSKY_ISA_JAVA},
-  {"ck802t", CSKY_ARCH_802, CSKY_ISA_802 | CSKY_ISA_TRUST},
-
-  /* CK803 series.  */
+  {"ck802",
+    CSKY_ARCH_802,
+    CSKY_ISA_802,
+    CSKY_FEATURES_DEF_jt(CSKY_ISA_JAVA, 0),
+    CSKY_CPU_REVERISON_RESERVED()},
 #define CSKY_ISA_803    (CSKY_ISA_802 | CSKYV2_ISA_2E3 | CSKY_ISA_MP)
-#define CSKY_ISA_803R1  (CSKY_ISA_803 | CSKYV2_ISA_3E3R1)
+#define CSKY_ISA_803R1  (CSKYV2_ISA_3E3R1)
+#define CSKY_ISA_803R2  (CSKYV2_ISA_3E3R1 | CSKYV2_ISA_3E3R2)
+#define CSKY_ISA_803R3  (CSKYV2_ISA_3E3R1 | CSKYV2_ISA_3E3R2 | CSKYV2_ISA_3E3R3)
 #define CSKY_ISA_FLOAT_803 (CSKY_ISA_FLOAT_E1 | CSKY_ISA_FLOAT_1E3)
-#define CSKY_ISA_EDSP   (CSKYV2_ISA_3E3R3 | CSKY_ISA_DSP_ENHANCE)
-  {"ck803", CSKY_ARCH_803, CSKY_ISA_803 },
-  {"ck803h", CSKY_ARCH_803, CSKY_ISA_803 },
-  {"ck803t", CSKY_ARCH_803, CSKY_ISA_803 | CSKY_ISA_TRUST},
-  {"ck803ht", CSKY_ARCH_803, CSKY_ISA_803 | CSKY_ISA_TRUST},
-  {"ck803f", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803 | CSKY_ISA_FLOAT_803},
-  {"ck803fh", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803 | CSKY_ISA_FLOAT_803},
-  {"ck803e", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803 | CSKYV2_ISA_DSP},
-  {"ck803eh", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803 | CSKYV2_ISA_DSP},
-  {"ck803et", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803 | CSKYV2_ISA_DSP | CSKY_ISA_TRUST},
-  {"ck803eht", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803 | CSKYV2_ISA_DSP | CSKY_ISA_TRUST},
-  {"ck803ef", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_803},
-  {"ck803efh", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_803},
-  {"ck803ft", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803 | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-  {"ck803eft", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-  {"ck803efht", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-  {"ck803r1", CSKY_ARCH_803, CSKY_ISA_803R1 },
-  {"ck803hr1", CSKY_ARCH_803, CSKY_ISA_803R1 },
-  {"ck803tr1", CSKY_ARCH_803, CSKY_ISA_803R1 | CSKY_ISA_TRUST},
-  {"ck803htr1", CSKY_ARCH_803, CSKY_ISA_803R1 | CSKY_ISA_TRUST},
-  {"ck803fr1", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_FLOAT_803},
-  {"ck803fhr1", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_FLOAT_803},
-  {"ck803er1", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R1 | CSKY_ISA_EDSP},
-  {"ck803ehr1", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R1 | CSKY_ISA_EDSP},
-  {"ck803etr1", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R1 | CSKY_ISA_EDSP | CSKY_ISA_TRUST},
-  {"ck803ehtr1", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R1 | CSKY_ISA_EDSP | CSKY_ISA_TRUST},
-  {"ck803efr1", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803},
-  {"ck803efhr1", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803},
-  {"ck803ftr1", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-  {"ck803eftr1", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-  {"ck803ehftr1", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-
-#define CSKY_ISA_803R2  (CSKY_ISA_803R1 | CSKYV2_ISA_3E3R2)
-  {"ck803r2", CSKY_ARCH_803, CSKY_ISA_803R2},
-  {"ck803hr2", CSKY_ARCH_803, CSKY_ISA_803R2},
-  {"ck803tr2", CSKY_ARCH_803, CSKY_ISA_803R2 | CSKY_ISA_TRUST},
-  {"ck803htr2", CSKY_ARCH_803, CSKY_ISA_803R2 | CSKY_ISA_TRUST},
-  {"ck803fr2", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_FLOAT_803},
-  {"ck803fhr2", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_FLOAT_803},
-  {"ck803er2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_EDSP},
-  {"ck803ehr2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_EDSP},
-  {"ck803etr2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_EDSP | CSKY_ISA_TRUST},
-  {"ck803ehtr2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_EDSP | CSKY_ISA_TRUST},
-  {"ck803efr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803},
-  {"ck803efhr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803},
-  {"ck803ftr2", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-  {"ck803eftr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-  {"ck803efhtr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_EDSP | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
-
-#define CSKY_ISA_803R3  (CSKY_ISA_803R2 | CSKYV2_ISA_3E3R3)
-  {"ck803r3", CSKY_ARCH_803, CSKY_ISA_803R3},
-
-  {"ck803s", CSKY_ARCH_803, CSKY_ISA_803R1 },
-  {"ck803se", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R1 | CSKYV2_ISA_DSP},
-  {"ck803sj", CSKY_ARCH_803 | CSKY_ARCH_JAVA, CSKY_ISA_803R1 | CSKY_ISA_JAVA},
-  {"ck803sf", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_FLOAT_803},
-  {"ck803sef", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_803},
-  {"ck803st", CSKY_ARCH_803, CSKY_ISA_803R1 | CSKY_ISA_TRUST},
-
-  /* CK807 series.  */
-#define CSKY_ISA_807    (CSKY_ISA_803 | CSKYV2_ISA_3E7 | CSKY_ISA_DSP | CSKY_ISA_MP_1E2 | CSKY_ISA_CACHE)
+#define CSKY_ISA_EDSP   (CSKYV2_ISA_3E3R1 | CSKYV2_ISA_3E3R3 | CSKY_ISA_DSP_ENHANCE)
+   {"ck803s",
+    CSKY_ARCH_803,
+    CSKY_ISA_803 | CSKY_ISA_803R1,
+    CSKY_FEATURES_DEF_eft(CSKYV2_ISA_DSP, CSKY_ISA_FLOAT_803, 0),
+    CSKY_CPU_REVERISON_RESERVED()},
+   {"ck803",
+    CSKY_ARCH_803,
+    CSKY_ISA_803,
+    CSKY_FEATURES_DEF_efht(CSKYV2_ISA_DSP, CSKY_ISA_FLOAT_803, 0, 0),
+    CSKY_CPU_REVERISON_R3(CSKY_ISA_803R1, CSKY_ISA_803R2, CSKY_ISA_803R3)},
+#define CSKY_ISA_804   (CSKY_ISA_803 | CSKY_ISA_803R3)
+   {"ck804",
+    CSKY_ARCH_804,
+    CSKY_ISA_804,
+    CSKY_FEATURES_DEF_efht(CSKY_ISA_EDSP, CSKY_ISA_FLOAT_803, 0, 0),
+    CSKY_CPU_REVERISON_RESERVED()},
+#define CSKY_ISA_805   (CSKY_ISA_804 | CSKY_ISA_VDSP_2)
+#define CSKY_ARCH_805V  (CSKY_ARCH_805 | CSKY_ARCH_DSP)
+#define CSKY_ISA_FLOAT_805 CSKY_ISA_FLOAT_803
+   {"ck805",
+    CSKY_ARCH_805,
+    CSKY_ISA_805,
+    CSKY_FEATURES_DEF_eft(CSKY_ISA_EDSP, CSKY_ISA_FLOAT_805, 0),
+    CSKY_CPU_REVERISON_RESERVED()},
+#define CSKY_ISA_807       (CSKY_ISA_803 | CSKYV2_ISA_3E7 | CSKY_ISA_MP_1E2 | CSKY_ISA_CACHE | CSKYV2_ISA_DSP)
 #define CSKY_ISA_FLOAT_807 (CSKY_ISA_FLOAT_803 | CSKY_ISA_FLOAT_3E4 | CSKY_ISA_FLOAT_1E2)
-  {"ck807e", CSKY_ARCH_807_BASE, CSKY_ISA_807 | CSKYV2_ISA_DSP},
-  {"ck807ef", CSKY_ARCH_807_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_807 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_807},
-  {"ck807", CSKY_ARCH_807_BASE, CSKY_ISA_807 | CSKYV2_ISA_DSP},
-  {"ck807f", CSKY_ARCH_807_BASE | CSKY_ARCH_FLOAT,  CSKY_ISA_807 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_807},
-
-  /* CK810 series.  */
-#define CSKY_ISA_810    (CSKY_ISA_807 | CSKYV2_ISA_7E10)
+   {"ck807",
+    CSKY_ARCH_807,
+    CSKY_ISA_807,
+    CSKY_FEATURES_DEF_ef(CSKYV2_ISA_DSP, CSKY_ISA_FLOAT_807),
+    CSKY_CPU_REVERISON_RESERVED()},
+#define CSKY_ISA_810       (CSKY_ISA_807 | CSKYV2_ISA_7E10)
 #define CSKY_ISA_FLOAT_810 (CSKY_ISA_FLOAT_E1 | CSKY_ISA_FLOAT_1E2)
-  {"ck810e", CSKY_ARCH_810_BASE, CSKY_ISA_810 | CSKYV2_ISA_DSP},
-  {"ck810et", CSKY_ARCH_810_BASE, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_TRUST},
-  {"ck810ef", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_810},
-  {"ck810eft", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_810 | CSKY_ISA_TRUST},
-  {"ck810", CSKY_ARCH_810_BASE, CSKY_ISA_810 | CSKYV2_ISA_DSP},
-  {"ck810v", CSKY_ARCH_810_BASE, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_VDSP},
-  {"ck810f", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_FLOAT_810},
-  {"ck810t", CSKY_ARCH_810_BASE, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_TRUST},
-  {"ck810tv", CSKY_ARCH_810_BASE, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_TRUST},
-  {"ck810ft", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_VDSP | CSKY_ISA_FLOAT_810 | CSKY_ISA_TRUST},
-  {"ck810ftv", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_VDSP | CSKY_ISA_FLOAT_810 | CSKY_ISA_TRUST},
+   {"ck810v",
+    CSKY_ARCH_810 | CSKY_ARCH_DSP,
+    CSKY_ISA_810 | CSKY_ISA_VDSP,
+    CSKY_FEATURES_DEF_NULL (),
+    CSKY_CPU_REVERISON_RESERVED()},
+   {"ck810",
+    CSKY_ARCH_810,
+    CSKY_ISA_810,
+    CSKY_FEATURES_DEF_eftv(0, CSKY_ISA_FLOAT_810, 0, CSKY_ISA_VDSP),
+    CSKY_CPU_REVERISON_RESERVED()},
+#define CSKY_ISA_860       ((CSKY_ISA_810 & ~(CSKYV2_ISA_DSP)) | CSKYV2_ISA_10E60 | CSKY_ISA_803R3 | CSKY_ISA_DSPE60)
+#define CSKY_ISA_860F      (CSKY_ISA_860 | CSKY_ISA_FLOAT_7E60)
+#define CSKY_ISA_VDSP_860  (CSKY_ISA_VDSP_2)
+   {"ck860v",
+    CSKY_ARCH_860 | CSKY_ARCH_DSP,
+    CSKY_ISA_860 | CSKY_ISA_VDSP_860,
+    CSKY_FEATURES_DEF_f(CSKY_ISA_FLOAT_7E60),
+    CSKY_CPU_REVERISON_RESERVED()},
+   {"ck860",
+    CSKY_ARCH_860,
+    CSKY_ISA_860,
+    CSKY_FEATURES_DEF_fv(CSKY_ISA_FLOAT_7E60, CSKY_ISA_VDSP_860),
+    CSKY_CPU_REVERISON_RESERVED()},
 
-  /* CK860 Series.  */
-#define CSKY_ISA_860    (CSKY_ISA_810 | CSKYV2_ISA_10E60 | CSKYV2_ISA_3E3R3 | CSKY_ISA_DSPE60)
-#define CSKY_ISA_860F (CSKY_ISA_860 | CSKY_ISA_FLOAT_7E60)
-  {"ck860", CSKY_ARCH_860, CSKY_ISA_860},
-  {"ck860f", CSKY_ARCH_860, CSKY_ISA_860F},
+   /* It is a special cpu, support all instructions.  */
+#define CSKY_ISA_800       (CSKY_ISA_860 | CSKY_ISA_810 | CSKY_ISA_807 | CSKY_ISA_803)
+   {"ck800",
+    CSKY_ARCH_800,
+    CSKY_ISA_800,
+    CSKY_FEATURES_DEF_NULL(),
+    CSKY_CPU_REVERISON_RESERVED()},
 
-  {NULL, 0, 0}
+
+#define CSKY_ISA_E801      (CSKY_ISA_801)
+#define CSKY_ISA_E802      (CSKY_ISA_E801 | CSKYV2_ISA_1E2 | CSKY_ISA_NVIC)
+#define CSKY_ISA_E803      (CSKY_ISA_E802 | CSKYV2_ISA_2E3 | CSKY_ISA_MP | CSKYV2_ISA_3E3R1 | CSKYV2_ISA_3E3R2 | CSKYV2_ISA_3E3R3)
+#define CSKY_ISA_E804      (CSKY_ISA_E803)
+#define CSKY_ISA_FLOAT_V1  (CSKY_ISA_FLOAT_E1 | CSKY_ISA_FLOAT_1E3)
+  {"e801",
+    CSKY_ARCH_801,
+    CSKY_ISA_E801,
+    CSKY_FEATURES_DEF_NULL(),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"e802",
+    CSKY_ARCH_802,
+    CSKY_ISA_E802,
+    CSKY_FEATURES_DEF_t(0),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"e803",
+    CSKY_ARCH_803,
+    CSKY_ISA_E803,
+    CSKY_FEATURES_DEF_t(0),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"e804",
+    CSKY_ARCH_804,
+    CSKY_ISA_E804,
+    CSKY_FEATURES_DEF_dft(CSKY_ISA_EDSP, CSKY_ISA_FLOAT_V1, 0),
+    CSKY_CPU_REVERISON_RESERVED()},
+
+#define CSKY_ISA_S802       (CSKY_ISA_E801 | CSKYV2_ISA_1E2 | CSKY_ISA_NVIC | CSKY_ISA_TRUST)
+#define CSKY_ISA_S803       (CSKY_ISA_S802 | CSKYV2_ISA_2E3 | CSKY_ISA_MP | CSKYV2_ISA_3E3R1 | CSKYV2_ISA_3E3R2 | CSKYV2_ISA_3E3R3)
+  {"s802",
+    CSKY_ARCH_802,
+    CSKY_ISA_S802,
+    CSKY_FEATURES_DEF_t(0),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"s803",
+    CSKY_ARCH_803,
+    CSKY_ISA_S803,
+    CSKY_FEATURES_DEF_t(0),
+    CSKY_CPU_REVERISON_RESERVED()},
+#define CSKY_ISA_I805       (CSKY_ISA_S803)
+  {"i805",
+    CSKY_ARCH_805 | CSKY_ARCH_DSP,
+    CSKY_ISA_I805 | CSKY_ISA_VDSP_2,
+    CSKY_FEATURES_DEF_ft(CSKY_ISA_FLOAT_V1, 0),
+    CSKY_CPU_REVERISON_RESERVED()},
+#define CSKYV2_ISA_DSP      (CSKY_ISA_DSP | CSKY_ISA_DSP_1E2 | CSKY_ISA_DSPE60)
+#define CSKY_ISA_C807       (CSKY_ISA_E802 | CSKYV2_ISA_2E3 | CSKY_ISA_MP | CSKYV2_ISA_3E7 | CSKY_ISA_MP_1E2 | CSKY_ISA_CACHE | CSKYV2_ISA_DSP)
+#define CSKY_ISA_FLOAT_C807 (CSKY_ISA_FLOAT_V1 | CSKY_ISA_FLOAT_3E4 | CSKY_ISA_FLOAT_1E2)
+#define CSKY_ISA_FLOAT_C810 (CSKY_ISA_FLOAT_E1 | CSKY_ISA_FLOAT_1E2)
+#define CSKY_ARCH_C810      (CSKY_ARCH_810 | CSKY_ARCH_FLOAT)
+#define CSKY_ISA_C810       (CSKY_ISA_C807 | CSKYV2_ISA_7E10 | CSKY_ISA_FLOAT_C810)
+#define CSKY_ARCH_C860      (CSKY_ARCH_860 | CSKY_ARCH_FLOAT)
+#define CSKY_ISA_C860       (CSKY_ISA_860 | CSKY_ISA_FLOAT_7E60)
+  {"c807",
+    CSKY_ARCH_807,
+    CSKY_ISA_C807,
+    CSKY_FEATURES_DEF_fv(CSKY_ISA_FLOAT_C807, CSKY_ISA_VDSP),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"c810",
+    CSKY_ARCH_C810,
+    CSKY_ISA_C810,
+    CSKY_FEATURES_DEF_tv(0, CSKY_ISA_VDSP),
+    CSKY_CPU_REVERISON_RESERVED()},
+  {"c860",
+    CSKY_ARCH_C860,
+    CSKY_ISA_C860,
+    CSKY_FEATURES_DEF_v(CSKY_ISA_VDSP_2),
+    CSKY_CPU_REVERISON_RESERVED()},
+#define CSKY_ISA_R807       (CSKY_ISA_E802 | CSKYV2_ISA_2E3 | CSKY_ISA_MP | CSKYV2_ISA_3E7 | CSKY_ISA_MP_1E2 | CSKY_ISA_CACHE | CSKYV2_ISA_DSP)
+#define CSKY_ISA_FLOAT_R807 (CSKY_ISA_FLOAT_V1 | CSKY_ISA_FLOAT_3E4 | CSKY_ISA_FLOAT_1E2)
+  {"r807",
+    CSKY_ARCH_807,
+    CSKY_ISA_R807,
+    CSKY_FEATURES_DEF_f(CSKY_ISA_FLOAT_R807),
+    CSKY_CPU_REVERISON_RESERVED()},
+
+/* Start of private CPUs.  */
+/* End of private CPUs.  */
+
+  {NULL},
 };
 
 int md_short_jump_size = 2;
@@ -938,13 +1160,60 @@ parse_cpu (const char *str)
   int i = 0;
 
   for (; csky_cpus[i].name != NULL; i++)
-    if (strcasecmp (str, csky_cpus[i].name) == 0)
+    if (strncasecmp (str, csky_cpus[i].name, strlen (csky_cpus[i].name)) == 0)
       {
-	mach_flag |= csky_cpus[i].mach_flag;
+	csky_insn.cpu = &csky_cpus[i];
+	mach_flag |= csky_cpus[i].arch_flag;
 	isa_flag = csky_cpus[i].isa_flag;
-	other_flag |= (csky_cpus[i].mach_flag & ~CSKY_ARCH_MASK);
+	const char *s = str + strlen (csky_cpus[i].name);
+	while (*s)
+	  {
+	    const struct csky_cpu_feature *feature = csky_cpus[i].features;
+	    const struct csky_cpu_version *version = csky_cpus[i].ver;
+	    char *next;
+
+	    if (*s == 'r')
+	      {
+		s++;
+		while (version->r)
+		  {
+		    if (version->r == strtol (s, &next, 10))
+		      break;
+		    version++;
+		  }
+		if (version->r)
+		  {
+		    isa_flag |= version->isa_flag;
+		    s = next;
+		  }
+		else
+		  goto unknown_cpu;
+		isa_flag = isa_flag & ~CSKYV2_ISA_DSP;
+		isa_flag |= CSKY_ISA_EDSP;
+		continue;
+	      }
+
+	    /* Parse csky features.  */
+	    while (feature->unique)
+	      {
+		if (feature->unique == *s)
+		  break;
+		feature++;
+	      }
+	    if (feature->unique)
+	      {
+		isa_flag |= feature->isa_flag;
+		mach_flag |= feature->arch_flag;
+	      }
+	    else
+	      goto unknown_cpu;
+
+	    s++;
+	  }
 	return;
       }
+
+unknown_cpu:
   as_bad (_("unknown cpu `%s'"), str);
 }
 
@@ -954,10 +1223,12 @@ static void
 parse_arch (const char *str)
 {
   int i = 0;
-  for (; csky_archs[i].name != NULL; i++)
-    if (strcasecmp (str, csky_archs[i].name) == 0)
+  for (; csky_cpus[i].name != NULL; i++)
+    if (strcasecmp (str, csky_cpus[i].name) == 0)
       {
-	arch_flag |= csky_archs[i].arch_flag;
+	csky_insn.cpu = &csky_cpus[i];
+	arch_flag |= csky_cpus[i].arch_flag;
+	isa_flag |= csky_cpus[i].isa_flag;
 	return;
       }
   as_bad (_("unknown architecture `%s'"), str);
@@ -1156,20 +1427,28 @@ md_show_usage (FILE *fp)
 
   fprintf (fp, _("\
   -mcpu=CPU			select processor CPU:"));
-  for (i = 0, n = margin; csky_cpus[i].name != NULL; i++)
+  const struct csky_cpu_feature *feature = NULL;
+  const struct csky_cpu_version *version = NULL;
+  for (i = 0; csky_cpus[i].name != NULL; i++)
     {
-      int l = strlen (csky_cpus[i].name);
-      if (n + l >= margin)
-	{
-	  fprintf (fp, "\n\t\t\t\t");
-	  n = l;
-	}
-      else
-	{
-	  fprintf (fp, " ");
-	  n += l + 1;
-	}
-      fprintf (fp, "%s", csky_cpus[i].name);
+	fprintf (fp, "\t\t\t\t%s", csky_cpus[i].name);
+	feature = csky_cpus[i].features;
+	version = csky_cpus[i].ver;
+	while (feature->unique)
+	  {
+	    if ((feature + 1)->unique)
+	      fprintf (fp, "[%c]", feature->unique);
+	    feature++;
+	  }
+	while (version->r)
+	  {
+	    if (csky_cpus[i].name[0] == 'c'
+		&& csky_cpus[i].name[1] == 'k')
+	      fprintf (fp, "[r%d]", version->r);
+	    else
+	      fprintf (fp, "[-r%dp%d]", version->r, version->p);
+	    version++;
+	  }
     }
   fprintf (fp, "\n");
 
@@ -1346,50 +1625,34 @@ md_begin (void)
   struct csky_macro_info const *macro;
   struct csky_arch_info const *p_arch;
   struct csky_cpu_info const *p_cpu;
-  unsigned int flags = (other_flag | do_opt_mmp | do_opt_mcp | do_opt_mcache
-			| do_opt_msecurity | do_opt_mhard_float);
+  int flags;
+  other_flag = (do_opt_mmp | do_opt_mcp | do_opt_mcache
+		| do_opt_msecurity | do_opt_mhard_float);
   dsp_flag |= do_opt_mdsp | do_opt_medsp;
   isa_flag |= do_opt_mtrust | do_opt_mvdsp;
+  flags = other_flag;
 
   if (dsp_flag)
     flags |= CSKY_ARCH_DSP;
 
   if (mach_flag != 0)
     {
-      if (((mach_flag & CSKY_ARCH_MASK) != (arch_flag & CSKY_ARCH_MASK))
-          && arch_flag != 0)
-	as_warn (_("-mcpu conflict with -march option, using -mcpu"));
-      if (((mach_flag & ~CSKY_ARCH_MASK) != (flags & ~CSKY_ARCH_MASK))
-	  && flags != 0)
-	as_warn (_("-mcpu conflict with other model parameters, using -mcpu"));
+      if (((mach_flag & CSKY_ARCH_MASK)
+	    != (arch_flag & CSKY_ARCH_MASK))
+	   && arch_flag != 0)
+	as_warn ("-mcpu conflict with -march option, actually use -mcpu");
     }
   else if (arch_flag != 0)
-    {
-      if ((arch_flag & CSKY_ARCH_MASK) == CSKY_ARCH_810
-	  || ((arch_flag & CSKY_ARCH_MASK) == CSKY_ARCH_807)) {
-	  /* CK807 and CK810 have DSP instruction by default.  */
-	  mach_flag |= CSKY_ARCH_DSP;
-      }
-      mach_flag |= arch_flag | flags;
-    }
+    mach_flag |= arch_flag | other_flag;
   else
     {
 #ifdef TARGET_WITH_CPU
-      int i = 0;
-      for (; csky_cpus[i].name != NULL; i++)
-	{
-	  if (strcmp (TARGET_WITH_CPU, csky_cpus[i].name) == 0)
-	    {
-	      mach_flag |= csky_cpus[i].mach_flag;
-	      isa_flag = csky_cpus[i].isa_flag;
-	      break;
-	    }
-	}
+      parse_cpu (TARGET_WITH_CPU);
 #else
 #if _CSKY_ABI==1
-      mach_flag |= CSKY_ARCH_610 | flags;
+      parse_cpu ("ck610");
 #else
-      mach_flag |= CSKY_ARCH_810_BASE | flags;
+      parse_cpu ("ck810");
 #endif
 #endif
     }
@@ -1420,8 +1683,8 @@ md_begin (void)
       }
 
   /* Find isa_flag.  */
-  for (p_cpu = csky_cpus; p_cpu->mach_flag != 0; p_cpu++)
-    if ((mach_flag & CPU_ARCH_MASK) == p_cpu->mach_flag)
+  for (p_cpu = csky_cpus; p_cpu->arch_flag != 0; p_cpu++)
+    if ((mach_flag & CPU_ARCH_MASK) == p_cpu->arch_flag)
       {
 	bfd_elf_add_obj_attr_string (stdoutput, OBJ_ATTR_PROC,
 				     Tag_CSKY_CPU_NAME, p_cpu->name);
