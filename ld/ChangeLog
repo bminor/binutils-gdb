@@ -1,5 +1,9 @@
 2020-09-10  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/pr26580-2.sd: Accept undefined symbol.
+
+2020-09-10  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-plugin/lto-18b.c (select): Remove.
 	* testsuite/ld-plugin/lto-18c.c (select): Remove.
 	* testsuite/ld-plugin/lto.exp: Build archives for lto-18 too,
