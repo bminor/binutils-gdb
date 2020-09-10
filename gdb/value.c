@@ -2809,6 +2809,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
+    case TYPE_CODE_CAPABILITY:
       /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
          whether we want this to be true eventually.  */
       return extract_typed_address (valaddr, type);
@@ -3369,6 +3370,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
     case TYPE_CODE_PTR:
+    case TYPE_CODE_CAPABILITY:
       store_typed_address (buf, type, (CORE_ADDR) num);
       break;
 

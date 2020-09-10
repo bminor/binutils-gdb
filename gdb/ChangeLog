@@ -1,5 +1,12 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* findvar.c (extract_typed_address): Handle capabilities.
+	(store_typed_address): Likewise.
+	* value.c (unpack_long): Likewise.
+	(pack_long): Likewise.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* valops.c (value_cast): Cast from capability to scalar types.
 
 2020-10-20  Luis Machado  <luis.machado@arm.com>
