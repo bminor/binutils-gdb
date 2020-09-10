@@ -173,6 +173,7 @@ enum tdesc_type_kind
   TDESC_TYPE_IEEE_DOUBLE,
   TDESC_TYPE_ARM_FPA_EXT,
   TDESC_TYPE_I387_EXT,
+  TDESC_TYPE_BFLOAT16,
 
   /* Types defined by a target feature.  */
   TDESC_TYPE_VECTOR,

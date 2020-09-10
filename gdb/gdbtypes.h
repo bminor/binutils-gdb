@@ -1847,6 +1847,7 @@ struct builtin_type
   struct type *builtin_unsigned_short;
   struct type *builtin_unsigned_int;
   struct type *builtin_unsigned_long;
+  struct type *builtin_bfloat16;
   struct type *builtin_half;
   struct type *builtin_float;
   struct type *builtin_double;
@@ -1981,7 +1982,7 @@ extern const struct floatformat *floatformats_ia64_quad[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_vax_f[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN];
 extern const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN];
-
+extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
 
 /* Allocate space for storing data associated with a particular
    type.  We ensure that the space is allocated using the same

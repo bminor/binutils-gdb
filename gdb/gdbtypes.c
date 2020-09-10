@@ -115,6 +115,10 @@ const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ibm_long_double_big,
   &floatformat_ibm_long_double_little
 };
+const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_bfloat16_big,
+  &floatformat_bfloat16_little
+};
 
 /* Should opaque types be resolved?  */
 
@@ -5760,6 +5764,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_float
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 		       "float", gdbarch_float_format (gdbarch));
+  builtin_type->builtin_bfloat16
+    = arch_float_type (gdbarch, gdbarch_bfloat16_bit (gdbarch),
+		       "bfloat16", gdbarch_bfloat16_format (gdbarch));
   builtin_type->builtin_double
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
 		       "double", gdbarch_double_format (gdbarch));

@@ -54,7 +54,8 @@ static tdesc_type_builtin tdesc_predefined_types[] =
   { "ieee_single", TDESC_TYPE_IEEE_SINGLE },
   { "ieee_double", TDESC_TYPE_IEEE_DOUBLE },
   { "arm_fpa_ext", TDESC_TYPE_ARM_FPA_EXT },
-  { "i387_ext", TDESC_TYPE_I387_EXT }
+  { "i387_ext", TDESC_TYPE_I387_EXT },
+  { "bfloat16", TDESC_TYPE_BFLOAT16 }
 };
 
 void tdesc_feature::accept (tdesc_element_visitor &v) const

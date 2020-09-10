@@ -1,3 +1,10 @@
+2020-09-11  Moritz Riesterer  <moritz.riesterer@intel.com>
+	    Felix Willgerodt  <Felix.Willgerodt@intel.com>
+
+	* x86-avx512bf16.c: New file.
+	* x86-avx512bf16.exp: Likewise.
+	* lib/gdb.exp (skip_avx512bf16_tests): New function.
+
 2020-09-11  Tom de Vries  <tdevries@suse.de>
 
 	PR exp/26602

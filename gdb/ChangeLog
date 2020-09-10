@@ -1,3 +1,24 @@
+2020-09-11  Moritz Riesterer  <moritz.riesterer@intel.com>
+	    Felix Willgerodt  <Felix.Willgerodt@intel.com>
+
+	* gdbarch.sh: Added bfloat16 type.
+	* gdbarch.c: Regenerated.
+	* gdbarch.h: Regenerated.
+	* gdbtypes.c (floatformats_bfloat16): New struct.
+	(gdbtypes_post_init): Add builtin_bfloat16.
+	* gdbtypes.h (struct builtin_type) <builtin_bfloat16>: New member.
+	(floatformats_bfloat16): New struct.
+	* i386-tdep.c (i386_zmm_type): Add field "v32_bfloat16"
+	(i386_ymm_type): Add field "v16_bfloat16"
+	(i386_gdbarch_init): Add set_gdbarch_bfloat16_format.
+	* target-descriptions.c (make_gdb_type): Add case TDESC_TYPE_BFLOAT16.
+	* gdbsupport/tdesc.cc (tdesc_predefined_types): New member bfloat16.
+	* gdbsupport/tdesc.h (tdesc_type_kind): New member TDESC_TYPE_BFLOAT16.
+	* features/i386/64bit-avx512.xml: Add bfloat16 type.
+	* features/i386/64bit-avx512.c: Regenerated.
+	* features/i386/64bit-sse.xml: Add bfloat16 type.
+	* features/i386/64bit-sse.c: Regenerated.
+
 2020-09-11  Felix Willgerodt  <felix.willgerodt@intel.com>
 
 	* i386-tdep.c (i386_zmm_type): Fix field names.

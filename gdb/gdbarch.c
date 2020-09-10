@@ -166,6 +166,8 @@ struct gdbarch
   int int_bit;
   int long_bit;
   int long_long_bit;
+  int bfloat16_bit;
+  const struct floatformat ** bfloat16_format;
   int half_bit;
   const struct floatformat ** half_format;
   int float_bit;
@@ -383,6 +385,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->int_bit = 4*TARGET_CHAR_BIT;
   gdbarch->long_bit = 4*TARGET_CHAR_BIT;
   gdbarch->long_long_bit = 2*gdbarch->long_bit;
+  gdbarch->bfloat16_bit = 2*TARGET_CHAR_BIT;
   gdbarch->half_bit = 2*TARGET_CHAR_BIT;
   gdbarch->float_bit = 4*TARGET_CHAR_BIT;
   gdbarch->double_bit = 8*TARGET_CHAR_BIT;
@@ -523,6 +526,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of int_bit, invalid_p == 0 */
   /* Skip verify of long_bit, invalid_p == 0 */
   /* Skip verify of long_long_bit, invalid_p == 0 */
+  /* Skip verify of bfloat16_bit, invalid_p == 0 */
+  if (gdbarch->bfloat16_format == 0)
+    gdbarch->bfloat16_format = floatformats_bfloat16;
   /* Skip verify of half_bit, invalid_p == 0 */
   if (gdbarch->half_format == 0)
     gdbarch->half_format = floatformats_ieee_half;
@@ -807,6 +813,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: bfd_arch_info = %s\n",
                       gdbarch_bfd_arch_info (gdbarch)->printable_name);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: bfloat16_bit = %s\n",
+                      plongest (gdbarch->bfloat16_bit));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: bfloat16_format = %s\n",
+                      pformat (gdbarch->bfloat16_format));
   fprintf_unfiltered (file,
                       "gdbarch_dump: breakpoint_from_pc = <%s>\n",
                       host_address_to_string (gdbarch->breakpoint_from_pc));
@@ -1618,6 +1630,39 @@ set_gdbarch_long_long_bit (struct gdbarch *gdbarch,
                            int long_long_bit)
 {
   gdbarch->long_long_bit = long_long_bit;
+}
+
+int
+gdbarch_bfloat16_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of bfloat16_bit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_bfloat16_bit called\n");
+  return gdbarch->bfloat16_bit;
+}
+
+void
+set_gdbarch_bfloat16_bit (struct gdbarch *gdbarch,
+                          int bfloat16_bit)
+{
+  gdbarch->bfloat16_bit = bfloat16_bit;
+}
+
+const struct floatformat **
+gdbarch_bfloat16_format (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_bfloat16_format called\n");
+  return gdbarch->bfloat16_format;
+}
+
+void
+set_gdbarch_bfloat16_format (struct gdbarch *gdbarch,
+                             const struct floatformat ** bfloat16_format)
+{
+  gdbarch->bfloat16_format = bfloat16_format;
 }
 
 int

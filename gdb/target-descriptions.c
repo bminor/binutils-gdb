@@ -141,6 +141,11 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_i387_ext",
 				    floatformats_i387_ext);
 	  return;
+
+	case TDESC_TYPE_BFLOAT16:
+	  m_type = arch_float_type (m_gdbarch, -1, "builtin_type_bfloat16",
+				    floatformats_bfloat16);
+	  return;
 	}
 
       internal_error (__FILE__, __LINE__,

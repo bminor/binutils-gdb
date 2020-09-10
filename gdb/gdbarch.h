@@ -158,11 +158,17 @@ extern void set_gdbarch_long_bit (struct gdbarch *gdbarch, int long_bit);
 extern int gdbarch_long_long_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_long_long_bit (struct gdbarch *gdbarch, int long_long_bit);
 
-/* The ABI default bit-size and format for "half", "float", "double", and
+/* The ABI default bit-size and format for "bfloat16", "half", "float", "double", and
    "long double".  These bit/format pairs should eventually be combined
    into a single object.  For the moment, just initialize them as a pair.
    Each format describes both the big and little endian layouts (if
    useful). */
+
+extern int gdbarch_bfloat16_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_bfloat16_bit (struct gdbarch *gdbarch, int bfloat16_bit);
+
+extern const struct floatformat ** gdbarch_bfloat16_format (struct gdbarch *gdbarch);
+extern void set_gdbarch_bfloat16_format (struct gdbarch *gdbarch, const struct floatformat ** bfloat16_format);
 
 extern int gdbarch_half_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_half_bit (struct gdbarch *gdbarch, int half_bit);
