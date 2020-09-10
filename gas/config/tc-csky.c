@@ -1779,7 +1779,10 @@ md_begin (void)
 
   if (do_extend_lrw == -1)
     {
-      if (IS_CSKY_ARCH_801 (mach_flag))
+      if ((mach_flag & CSKY_ARCH_MASK) == CSKY_ARCH_801
+	  || (mach_flag & CSKY_ARCH_MASK) == CSKY_ARCH_802
+	  || (mach_flag & CSKY_ARCH_MASK) == CSKY_ARCH_803
+	  || (mach_flag & CSKY_ARCH_MASK) == CSKY_ARCH_860)
 	do_extend_lrw = 1;
       else
 	do_extend_lrw = 0;

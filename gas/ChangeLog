@@ -1,5 +1,10 @@
 2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
+	* config/tc-csky.c (md_begin): Enable extend lrw by default for
+	CK802, CK803 and CK860.
+
+2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
 	* config/tc-csky.c (struct csky_cpu_info): Add new members
 	isa_flag, features and ver.
 	(struct csky_cpu_feature): New.
