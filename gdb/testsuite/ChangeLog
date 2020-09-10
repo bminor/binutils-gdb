@@ -1,3 +1,8 @@
+2020-09-10  Alan Modra  <amodra@gmail.com>
+
+	PR 26597
+	* gdb.dlang/demangle.exp: Update tests as per gcc commit 387d0773f3.
+
 2020-09-08  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/frame-inlined-in-outer-frame.exp: Consume gdb prompt
