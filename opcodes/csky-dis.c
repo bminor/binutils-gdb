@@ -647,8 +647,8 @@ csky_output_operand (char *str, struct operand const *oprnd,
 
 	float f = 0;
 	memcpy (&f, &value, sizeof (float));
-	sprintf (str, "%s%f\t// imm9:%4d, imm4:%2d", str, f, imm8, imm4);
-
+	sprintf (buf, "%f\t// imm9:%4d, imm4:%2d", f, imm8, imm4);
+	strcat (str, buf);
 	break;
       }
 
@@ -675,8 +675,8 @@ csky_output_operand (char *str, struct operand const *oprnd,
 	  }
 	double d = 0;
 	memcpy (&d, &dvalue, sizeof (double));
-	sprintf (str, "%s%lf\t// imm9:%4ld, imm4:%2ld", str, d, imm8, imm4);
-
+	sprintf (buf, "%lf\t// imm9:%4ld, imm4:%2ld", d, imm8, imm4);
+	strcat (str, buf);
 	break;
       }
     case OPRND_TYPE_LABEL_WITH_BRACKET:

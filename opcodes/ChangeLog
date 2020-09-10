@@ -1,3 +1,7 @@
+2020-09-10  Alan Modra  <amodra@gmail.com>
+
+	* csky-dis.c (csky_output_operand): Don't sprintf str to itself.
+
 2020-09-07  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* csky-opc.h (csky_v2_opcodes): Change mvtc and mulsw's
