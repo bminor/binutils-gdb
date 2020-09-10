@@ -1,3 +1,10 @@
+2020-09-10  Nick Clifton  <nickc@redhat.com>
+
+	* ppc-dis.c (ppc_symbol_is_valid): New function.  Returns false
+	for hidden, local, no-type symbols.
+	(disassemble_init_powerpc): Point the symbol_is_valid field in the
+	info structure at the new function.
+
 2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* csky-opc.h (csky_v2_opcodes): Add L2Cache instructions.
