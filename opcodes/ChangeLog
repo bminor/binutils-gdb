@@ -1,3 +1,9 @@
+2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky-opc.h (csky_v2_opcodes): Add L2Cache instructions.
+	* testsuite/gas/csky/cskyv2_ck860.d : Adjust to icache.iva
+	opcode fixing.
+
 2020-09-10  Nick Clifton  <nickc@redhat.com>
 
 	* csky-dis.c (csky_output_operand): Coerce the immediate values to
