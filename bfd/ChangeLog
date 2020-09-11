@@ -1,5 +1,26 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* reloc.c: Add MORELLO_ADR_HI20_PCREL,
+	MORELLO_ADR_HI20_NC_PCREL and MORELLO_ADR_GOT_PAGE.
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Likewise.
+	(aarch64_reloc_got_type): Add MORELLO_ADR_GOT_PAGE.
+	(_bfd_aarch64_erratum_843419_branch_to_stub): Add C64 argument
+	to _bfd_aarch64_reencode_adr_imm.
+	(elfNN_aarch64_final_link_relocate,
+	elfNN_aarch64_check_relocs): Add MORELLO_ADR_GOT_PAGE,
+	MORELLO_ADR_HI20_PCREL and MORELLO_ADR_HI20_NC_PCREL.
+	* elfxx-aarch64.c (_bfd_aarch64_reencode_adr_imm): Add C64
+	argument.
+	(_bfd_aarch64_elf_put_addend): Adjust callers.
+	* elfxx-aarch64.h (_bfd_aarch64_reencode_adr_imm): Add C64
+	argument.
+	* libbfd.h (bfd_reloc_code_real_names): Add
+	MORELLO_ADR_GOT_PAGE, MORELLO_ADR_HI20_PCREL and
+	MORELLO_ADR_HI20_NC_PCREL.
+	* bfd-in2.h: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Add
 	LD_PREL_LO17.
 	(elfNN_aarch64_final_link_relocate,

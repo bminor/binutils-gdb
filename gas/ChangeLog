@@ -1,5 +1,15 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (reloc_table_entry): Add c64_adrp_type
+	field.
+	(reloc_table): Adjust.
+	(parse_adrp): Adjust users.
+	(md_apply_fix): Add MORELLO_ADR_GOT_PAGE,
+	MORELLO_ADR_HI20_PCREL and MORELLO_ADR_HI20_NC_PCREL.
+	* testsuite/gas/aarch64/morello_insn-c64.d: Adjust test.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (process_omitted_operand,
 	parse_operands): Add Cat_SYS.
 	* testsuite/gas/aarch64/morello_ldst-c64.d: Add tests.

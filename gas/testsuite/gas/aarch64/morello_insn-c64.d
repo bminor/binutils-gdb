@@ -76,7 +76,7 @@ Disassembly of section \.text:
 .* <Label>:
 .*:	10000000 	adr	c0, .* <Label>
 .*:	90800000 	adrp	c0, .* <.*>
-			.*: R_AARCH64_ADR_PREL_PG_HI21	.*
+			.*: R_MORELLO_ADR_PREL_PG_HI20	.*
 .*:	b0000000 	adrdp	c0, #0x1000
 .*:	023fc135 	add	c21, c9, #0xff0
 .*:	023ffd35 	add	c21, c9, #0xfff
