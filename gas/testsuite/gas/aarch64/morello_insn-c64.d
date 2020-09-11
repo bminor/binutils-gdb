@@ -24,15 +24,19 @@ Disassembly of section \.text:
 .*:	c2c1d26b 	mov	c11, c19
 .*:	c2c1d26b 	mov	c11, c19
 .*:	c2d38561 	chkss	c11, c19
+.*:	c2c1926b 	clrtag	c11, c19
 .*:	c2c1d3eb 	mov	c11, csp
 .*:	c2c1d3eb 	mov	c11, csp
 .*:	c2df8561 	chkss	c11, csp
+.*:	c2c193eb 	clrtag	c11, csp
 .*:	c2c1d17f 	mov	csp, c11
 .*:	c2c1d17f 	mov	csp, c11
 .*:	c2cb87e1 	chkss	csp, c11
+.*:	c2c1917f 	clrtag	csp, c11
 .*:	c2c1d3ff 	mov	csp, csp
 .*:	c2c1d3ff 	mov	csp, csp
 .*:	c2df87e1 	chkss	csp, csp
+.*:	c2c193ff 	clrtag	csp, csp
 .*:	aa1f03e0 	mov	x0, xzr
 .*:	c2c59020 	cvtd	c0, x1
 .*:	c2c5d020 	cvtdz	c0, x1
@@ -188,18 +192,37 @@ Disassembly of section \.text:
 .*:	c2cf5bff 	alignu	csp, csp, #30
 .*:	c2c05bff 	alignu	csp, csp, #0
 .*:	c2d05bff 	alignu	csp, csp, #32
+.*:	c2c692f6 	clrperm	c22, c23, r
+.*:	c2c652f6 	clrperm	c22, c23, w
+.*:	c2c632f6 	clrperm	c22, c23, x
+.*:	c2c6b2f6 	clrperm	c22, c23, rx
+.*:	c2c672f6 	clrperm	c22, c23, wx
+.*:	c2c6d2f6 	clrperm	c22, c23, rw
+.*:	c2c6f2f6 	clrperm	c22, c23, rwx
+.*:	c2c612f6 	clrperm	c22, c23, #0
+.*:	c2c632f6 	clrperm	c22, c23, x
+.*:	c2c652f6 	clrperm	c22, c23, w
+.*:	c2c672f6 	clrperm	c22, c23, wx
+.*:	c2c692f6 	clrperm	c22, c23, r
+.*:	c2c6b2f6 	clrperm	c22, c23, rx
+.*:	c2c6d2f6 	clrperm	c22, c23, rw
+.*:	c2c6f2f6 	clrperm	c22, c23, rwx
 .*:	c2d928c7 	bicflgs	c7, c6, x25
 .*:	c2d9a8c7 	eorflgs	c7, c6, x25
 .*:	c2d968c7 	orrflgs	c7, c6, x25
+.*:	c2d9a0c7 	clrperm	c7, c6, x25
 .*:	c2d92be7 	bicflgs	c7, csp, x25
 .*:	c2d9abe7 	eorflgs	c7, csp, x25
 .*:	c2d96be7 	orrflgs	c7, csp, x25
+.*:	c2d9a3e7 	clrperm	c7, csp, x25
 .*:	c2d928df 	bicflgs	csp, c6, x25
 .*:	c2d9a8df 	eorflgs	csp, c6, x25
 .*:	c2d968df 	orrflgs	csp, c6, x25
+.*:	c2d9a0df 	clrperm	csp, c6, x25
 .*:	c2d92bff 	bicflgs	csp, csp, x25
 .*:	c2d9abff 	eorflgs	csp, csp, x25
 .*:	c2d96bff 	orrflgs	csp, csp, x25
+.*:	c2d9a3ff 	clrperm	csp, csp, x25
 .*:	c2ee99a4 	subs	x4, c13, c14
 .*:	c2c4a440 	blrs	c29, c2, c4
 .*:	c2c48440 	brs	c29, c2, c4

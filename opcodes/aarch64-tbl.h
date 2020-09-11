@@ -180,6 +180,11 @@
   QLF2(X,X),			\
 }
 
+#define QL_I2SAMEQ		\
+{				\
+  QLF2(S_Q,S_Q),		\
+}
+
 /* e.g. CRC32B <Wd>, <Wn>, <Wm>.  */
 #define QL_I3SAMEW		\
 {				\
@@ -4111,6 +4116,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("chksld", 0xc2c21001, 0xfffffc1f, a64c, 0, OP1 (Can_SP), QL1_A64C_CA, 0),
   A64C_INSN ("chktgd", 0xc2c23001, 0xfffffc1f, a64c, 0, OP1 (Can_SP), QL1_A64C_CA, 0),
   A64C_INSN ("chkssu", 0xc2c08800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can_SP, Cam_SP), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("clrtag", 0xc2c19000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, 0),
+  A64C_INSN ("clrperm", 0xc2c0a000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("clrperm", 0xc2c61000, 0xffff1c00, a64c, 0, OP3 (Cad_SP, Can_SP, PERM), QL3_A64C_CA_CA_X, 0),
   A64C_INSN ("cseal", 0xc2c04400, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Cam_SP), QL3_A64C_CA_CA_CA, 0),
   A64C_INSN ("csel", 0xc2c00c00, 0xffe00c00, a64c, 0, OP4 (Cad, Can, Cam, COND), QL4_A64C_CSEL, 0),
   A64C_INSN ("cthi", 0xc2c0e800, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can, Rm), QL3_A64C_CA_CA_X, 0),
@@ -6087,4 +6095,5 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_a64c_shift_ai,FLD_imm12),					\
       "a 12-bit unsigned immediate with optional left shift of 12 bits")\
     Y(IMMEDIATE, imm, "A64C_IMM8", 0, F(FLD_a64c_imm8),			\
-      "8-bit unsigned immediate")
+      "8-bit unsigned immediate")					\
+    Y(PERM, perm, "PERM", 0, F(), "a capability permission")

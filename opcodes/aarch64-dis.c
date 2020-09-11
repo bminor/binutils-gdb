@@ -1250,6 +1250,18 @@ aarch64_ext_cond (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Decode the permission operand for e.g. CLRPERM <Cd>, <Cn>, <perm>.  */
+bool
+aarch64_ext_perm (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  aarch64_opnd_info *info,
+		  aarch64_insn code, const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  /* perm */
+  info->perm = extract_field (FLD_perm, code, 0);
+  return true;
+}
+
 /* Decode the system register operand for e.g. MRS <Xt>, <systemreg>.  */
 bool
 aarch64_ext_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,

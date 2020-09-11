@@ -354,6 +354,7 @@ const aarch64_field fields[] =
 		   type instructions.  */
     { 22,  1 },	/* a64c_shift_ai: Shift bit in immediate ADD/SUB.  */
     { 13,  8 },	/* a64c_imm8: BICFLGS imm8.  */
+    { 13,  3 },	/* perm: permission specifier in clrperm.  */
 };
 
 enum aarch64_operand_class
@@ -408,6 +409,47 @@ const aarch64_cond *
 get_inverted_cond (const aarch64_cond *cond)
 {
   return &aarch64_conds[cond->value ^ 0x1];
+}
+
+/* Return a permission string in OUT.  OUT needs to be at least 4 bytes wide.  */
+static void
+get_perm_str (aarch64_insn perm, char *out)
+{
+  int i = 0;
+  assert (perm < 8);
+
+  /* XXX 0x0 is a valid permission, i.e. no permissions at all.  The
+     reference however deems the value to be RESERVED.  */
+  if (perm == 0)
+    {
+      out[i++] = '#';
+      out[i++] = '0';
+    }
+
+  if (perm & 4)
+    out[i++] = 'r';
+  if (perm & 2)
+    out[i++] = 'w';
+  if (perm & 1)
+    out[i++] = 'x';
+
+  out [i] = '\0';
+}
+
+aarch64_insn
+get_perm_bit (char p)
+{
+  switch (p)
+    {
+    case 'r':
+      return 4;
+    case 'w':
+      return 2;
+    case 'x':
+      return 1;
+    }
+
+  return 8;
 }
 
 /* Table describing the operand extension/shifting operators; indexed by
@@ -3729,6 +3771,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	/* Omit the operand, e.g. DCPS1.  */
 	break;
       snprintf (buf, size, "#0x%x", (unsigned int)opnd->imm.value);
+      break;
+
+    case AARCH64_OPND_PERM:
+	{
+	  char perm[4];
+	  get_perm_str (opnd->perm, perm);
+	  snprintf (buf, size, "%s", perm);
+	}
       break;
 
     case AARCH64_OPND_COND:

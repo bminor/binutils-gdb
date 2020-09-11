@@ -6320,6 +6320,46 @@ reg_list_valid_p (uint32_t reginfo, int accept_alternate)
   return true;
 }
 
+static bool
+parse_perms (char **str, aarch64_opnd_info *info)
+{
+  char *p = *str;
+  char c;
+  aarch64_insn perms = 0;
+
+  /* Numeric value of permissions.  */
+  if (ISDIGIT (*p) || (*p == '#' && p++))
+    {
+      perms = *p - '0';
+      if (p[1] > 0 || perms > 7)
+	{
+	  set_syntax_error (_("invalid permission value"));
+	  return false;
+	}
+      p += 2;
+      goto out;
+    }
+
+  /* Permission specifier mnemonics r, w and x, in that order.  Do not accept
+     jumbled up sequences such as rxw, wrx, etc. and also reject duplicate
+     permissions such as rrxw.  */
+  while ((c = *p++) != '\0')
+    {
+      aarch64_insn i = get_perm_bit (c);
+      if (i > 7 || i & perms || (i - 1) & perms)
+	{
+	  set_syntax_error (_("invalid permissions"));
+	  return false;
+	}
+      perms |= i;
+    }
+
+out:
+  *str = p - 1;
+  info->perm = perms;
+  return true;
+}
+
 /* Generic instruction operand parser.	This does no encoding and no
    semantic validation; it merely squirrels values away in the inst
    structure.  Returns TRUE or FALSE depending on whether the
@@ -7017,6 +7057,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    po_imm_or_fail (0, 15);
 	    info->imm.value = val;
 	  }
+	  break;
+
+	case AARCH64_OPND_PERM:
+	  po_misc_or_fail (parse_perms (&str, info));
 	  break;
 
 	case AARCH64_OPND_COND:
