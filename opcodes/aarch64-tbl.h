@@ -2395,6 +2395,21 @@
   QLF2(CA, CA),			\
 }
 
+#define QL2_A64C_X_CA		\
+{				\
+  QLF2(X, CA),			\
+}
+
+#define QL2_A64C_CA_X		\
+{				\
+  QLF2(CA, X),			\
+}
+
+#define QL2_A64C_X_X		\
+{				\
+  QLF2(X, X),			\
+}
+
 #define QL3_A64C_CA_CA_NIL	\
 {				\
  QLF3(CA, CA, NIL),		\
@@ -2413,9 +2428,24 @@
   QLF3(CA, CA, X),		\
 }
 
+#define QL3_A64C_X_CA_CA	\
+{				\
+  QLF3(X, CA, CA),		\
+}
+
 #define QL3_A64C_CA_CA_CA	\
 {				\
   QLF3(CA, CA, CA),		\
+}
+
+#define QL3_A64C_CA_CA_ADDR	\
+{				\
+  QLF3(CA, CA, S_Q),		\
+}
+/* e.g. CSEL <Cad>, <Can>, <Cam>, <cond>.  */
+#define QL4_A64C_CSEL		\
+{				\
+  QLF4(CA, CA, CA, NIL),	\
 }
 
 /* Opcode table.  */
@@ -4047,9 +4077,15 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("cpy", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_HAS_ALIAS),
   A64C_INSN ("mov", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_ALIAS | F_P1),
   A64C_INSN ("mov", 0x2a1f03e0, 0x7fffffe0, a64c, OP_MOV_C_ZR, OP2 (Cad, Can), QL2_A64C_CA_CA, F_ALIAS | F_SF | F_P1),
+  A64C_INSN ("cpytype", 0xc2c02400, 0xffe0fc00, a64c, 0, OP3 (Cad, Can, Cam), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("cpyvalue", 0xc2c06400, 0xffe0fc00, a64c, 0, OP3 (Cad, Can, Cam), QL3_A64C_CA_CA_CA, 0),
   A64C_INSN ("add", 0x02000000, 0xff800000, a64c, OP_A64C_ADD, OP3 (Cad_SP, Can_SP, AIMM), QL3_A64C_CA_CA_NIL, 0),
   A64C_INSN ("add", 0xc2a00000, 0xffe00000, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_Rm_EXT), QL3_A64C_CA_CA_R, 0),
   A64C_INSN ("sub", 0x02800000, 0xff800000, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_AIMM), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("subs", 0xc2e09800, 0xffe0fc00, a64c, 0, OP3 (Rd, Can, Cam), QL3_A64C_X_CA_CA, F_HAS_ALIAS),
+  CORE_INSN ("cmp",  0xc2e0981f, 0xffe0fc1f, a64c, 0, OP2 (Can, Cam), QL2_A64C_CA_CA, F_ALIAS),
+  A64C_INSN ("alignd", 0xc2c01800, 0xffe07c00, a64c, 0, OP3 (Cad_SP, Can_SP, IMM_2), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("alignu", 0xc2c05800, 0xffe07c00, a64c, 0, OP3 (Cad_SP, Can_SP, IMM_2), QL3_A64C_CA_CA_NIL, 0),
   A64C_INSN ("bicflgs", 0xc2e00000, 0xffe01c00, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_IMM8), QL3_A64C_CA_CA_NIL, 0),
   A64C_INSN ("bicflgs", 0xc2c02800, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
   A64C_INSN ("blr", 0xc2c23000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
@@ -4060,11 +4096,60 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("brr", 0xc2c21003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
   A64C_INSN ("brs", 0xc2c21002, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
   A64C_INSN ("brs", 0xc2c08400, 0xffe0fc1f, br_sealed, 0, OP3 (A64C_CST_REG, Can, Cam), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("build", 0xc2c00400, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Cam_SP), QL3_A64C_CA_CA_CA, 0),
   A64C_INSN ("bx", 0xc2c273e0, 0xffffffff, a64c, 0, OP1 (A64C_IMMV4), {}, 0),
+
+  /* Compare and swap capabilities.  */
+  A64C_INSN ("cas", 0xa2a07c00, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("casa", 0xa2e07c00, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("casal", 0xa2e0fc00, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("casl", 0xa2a0fc00, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+
+  A64C_INSN ("cfhi", 0xc2c15000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("chkeq", 0xc2c0a401, 0xffe0fc1f, a64c, 0, OP2 (Can_SP, Cam), QL2_A64C_CA_CA, 0),
+  A64C_INSN ("chkss", 0xc2c08401, 0xffe0fc1f, a64c, 0, OP2 (Can_SP, Cam_SP), QL2_A64C_CA_CA, 0),
+  A64C_INSN ("chksld", 0xc2c21001, 0xfffffc1f, a64c, 0, OP1 (Can_SP), QL1_A64C_CA, 0),
+  A64C_INSN ("chktgd", 0xc2c23001, 0xfffffc1f, a64c, 0, OP1 (Can_SP), QL1_A64C_CA, 0),
+  A64C_INSN ("chkssu", 0xc2c08800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can_SP, Cam_SP), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("cseal", 0xc2c04400, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Cam_SP), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("csel", 0xc2c00c00, 0xffe00c00, a64c, 0, OP4 (Cad, Can, Cam, COND), QL4_A64C_CSEL, 0),
+  A64C_INSN ("cthi", 0xc2c0e800, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("cvt", 0xc2e01800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("cvt", 0xc2c0c000, 0xffe0fc00, a64c, 0, OP3 (Rd, Can_SP, Cam), QL3_A64C_X_CA_CA, 0),
+  A64C_INSN ("cvtd", 0xc2c59000, 0xfffffc00, a64c, 0, OP2 (Cad, Rn), QL2_A64C_CA_X, 0),
+  A64C_INSN ("cvtd", 0xc2c51000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("cvtdz", 0xc2c5d000, 0xfffffc00, a64c, 0, OP2 (Cad, Rn), QL2_A64C_CA_X, 0),
+  A64C_INSN ("cvtp", 0xc2c5b000, 0xfffffc00, a64c, 0, OP2 (Cad, Rn), QL2_A64C_CA_X, 0),
+  A64C_INSN ("cvtp", 0xc2c53000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("cvtpz", 0xc2c5f000, 0xfffffc00, a64c, 0, OP2 (Cad, Rn), QL2_A64C_CA_X, 0),
+  A64C_INSN ("cvtz", 0xc2e05800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("eorflgs", 0xc2c0a800, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("eorflgs", 0xc2e01000, 0xffe01c00, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_IMM8), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("orrflgs", 0xc2c06800, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("orrflgs", 0xc2e00800, 0xffe01c00, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_IMM8), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("gcbase", 0xc2c01000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gcflgs", 0xc2c13000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gclen", 0xc2c03000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gclim", 0xc2c11000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gcoff", 0xc2c07000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gcperm", 0xc2c0d000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gcseal", 0xc2c0b000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gctag", 0xc2c09000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gctype", 0xc2c0f000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+  A64C_INSN ("gcvalue", 0xc2c05000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+
+  /* Swap capabilities in memory.  */
+  A64C_INSN ("swp", 0xa2208000, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("swpa", 0xa2a08000, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("swpal", 0xa2e08000, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("swpl", 0xa2608000, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+
   A64C_INSN ("ret", 0xc2c25000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, F_OPD0_OPT | F_DEFAULT (30)),
   A64C_INSN ("retr", 0xc2c25003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
   A64C_INSN ("rets", 0xc2c25002, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
   A64C_INSN ("rets", 0xc2c0c400, 0xffe0fc1f, br_sealed, 0, OP3 (A64C_CST_REG, Can, Cam), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("rrlen", 0xc2c71000, 0xfffffc00, a64c, 0, OP2 (Rd, Rn), QL2_A64C_X_X, 0),
+  A64C_INSN ("rrmask", 0xc2c73000, 0xfffffc00, a64c, 0, OP2 (Rd, Rn), QL2_A64C_X_X, 0),
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
