@@ -7,4 +7,12 @@
 Disassembly of section \.text:
 
 .* <.text>:
-.*:	d503201f 	nop
+.*:	c2c1d26b 	mov	c11, c19
+.*:	c2c1d26b 	mov	c11, c19
+.*:	c2c1d3eb 	mov	c11, csp
+.*:	c2c1d3eb 	mov	c11, csp
+.*:	c2c1d17f 	mov	csp, c11
+.*:	c2c1d17f 	mov	csp, c11
+.*:	c2c1d3ff 	mov	csp, csp
+.*:	c2c1d3ff 	mov	csp, csp
+.*:	aa1f03e0 	mov	x0, xzr

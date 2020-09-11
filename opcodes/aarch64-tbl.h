@@ -3824,7 +3824,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("and", 0xa000000, 0x7f200000, log_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_SF),
   CORE_INSN ("bic", 0xa200000, 0x7f200000, log_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_SF),
   CORE_INSN ("orr", 0x2a000000, 0x7f200000, log_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_HAS_ALIAS | F_SF),
-  CORE_INSN ("mov", 0x2a0003e0, 0x7fe0ffe0, log_shift, 0, OP2 (Rd, Rm_SFT), QL_I2SAMER, F_ALIAS | F_SF),
+  CORE_INSN ("mov", 0x2a0003e0, 0x7fe0ffe0, log_shift, 0, OP2 (Rd, Rm_SFT), QL_I2SAMER, F_ALIAS | F_SF | F_P2),
   CORE_INSN ("uxtw", 0x2a0003e0, 0x7f2003e0, log_shift, OP_UXTW, OP2 (Rd, Rm), QL_I2SAMEW, F_ALIAS | F_PSEUDO),
   CORE_INSN ("orn", 0x2a200000, 0x7f200000, log_shift, 0, OP3 (Rd, Rn, Rm_SFT), QL_I3SAMER, F_HAS_ALIAS | F_SF),
   CORE_INSN ("mvn", 0x2a2003e0, 0x7f2003e0, log_shift, 0, OP2 (Rd, Rm_SFT), QL_I2SAMER, F_ALIAS | F_SF),
@@ -4015,6 +4015,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   /* PC-rel. addressing.  */
   CORE_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_PCREL21), QL_ADRP, 0),
   CORE_INSN ("adrp", 0x90000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_ADRP), QL_ADRP, 0),
+  /* A64C Instructions.  */
+  A64C_INSN ("cpy", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_HAS_ALIAS),
+  A64C_INSN ("mov", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_ALIAS | F_P1),
+  A64C_INSN ("mov", 0x2a1f03e0, 0x7fffffe0, a64c, OP_MOV_C_ZR, OP2 (Cad, Can), QL2_A64C_CA_CA, F_ALIAS | F_SF | F_P1),
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
@@ -5929,4 +5933,15 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(INT_REG, x0_to_x30, "MOPS_ADDR_Rs", 0, F(FLD_Rs),			\
       "a register source address with writeback")			\
     Y(INT_REG, x0_to_x30, "MOPS_WB_Rd", 0, F(FLD_Rn),			\
-      "an integer register with writeback")
+      "an integer register with writeback")				\
+    Y(CAP_REG, regno, "Cad", 0, F(FLD_Cad), "a Capability register")	\
+    Y(CAP_REG, regno, "Cam", 0, F(FLD_Cam), "a Capability register") 	\
+    Y(CAP_REG, regno, "Can", 0, F(FLD_Can), "a Capability register") 	\
+    Y(CAP_REG, regno, "Cas", 0, F(FLD_Cas),				\
+      "a Capability register used as a source") 			\
+    Y(CAP_REG, regno, "Cat", 0, F(FLD_Cat), "a Capability register")	\
+    Y(CAP_REG, regno, "Cat2", 0, F(FLD_Cat2), "a Capability register")	\
+    Y(CAP_REG, regno, "Cad_SP", OPD_F_MAYBE_CSP, F(FLD_Cad),		\
+      "a Capability register or a capability stack pointer register")	\
+    Y(CAP_REG, regno, "Can_SP", OPD_F_MAYBE_CSP, F(FLD_Can),		\
+      "a Capability register or a capability stack pointer register")

@@ -1,5 +1,21 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (do_special_encoding): Recognise capability
+	registers.
+	* aarch64-opc.c (aarch64_opnd_qualifiers): Capability operand
+	qualifiers.
+	(aarch64_print_operand): Support capability operands.
+	* aarch64-opc.h (select_operand_for_sf_field_coding):
+	Recognise capability registers.
+	* aarch64-tbl.h (QL2_A64C_CA_CA): New macro.
+	(aarch64_opcode_table): Add mov and cpy.
+	(AARCH64_OPERANDS): Add capability register operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-dis.c: Include elf/aarch64.h.
 	(get_sym_code_type): Identify C64 functions.
 

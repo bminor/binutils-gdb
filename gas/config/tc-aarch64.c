@@ -6631,6 +6631,35 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
+	case AARCH64_OPND_Can:
+	case AARCH64_OPND_Cam:
+	case AARCH64_OPND_Cas:
+	case AARCH64_OPND_Cad:
+	case AARCH64_OPND_Cat:
+	case AARCH64_OPND_Cat2:
+	  po_reg_or_fail (REG_TYPE_CA_N_Z);
+	  if (opcode->op == OP_MOV_C_ZR && operands[i] == AARCH64_OPND_Can
+	      && val != 31)
+	    {
+	      set_fatal_syntax_error (_(get_reg_expected_msg (REG_TYPE_CA_Z)));
+	      goto failure;
+	    }
+	  if (val > 31)
+	    {
+	      set_fatal_syntax_error (_(get_reg_expected_msg (REG_TYPE_CA_N)));
+	      goto failure;
+	    }
+	  info->reg.regno = val;
+	  info->qualifier = AARCH64_OPND_QLF_CA;
+	  break;
+
+	case AARCH64_OPND_Can_SP:
+	case AARCH64_OPND_Cad_SP:
+	  po_reg_or_fail (REG_TYPE_CA_N_SP);
+	  info->reg.regno = val;
+	  info->qualifier = AARCH64_OPND_QLF_CA;
+	  break;
+
 	case AARCH64_OPND_CRn:
 	case AARCH64_OPND_CRm:
 	    {

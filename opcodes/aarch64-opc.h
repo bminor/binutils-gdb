@@ -474,7 +474,9 @@ select_operand_for_sf_field_coding (const aarch64_opcode *opcode)
 {
   int idx = -1;
   if (aarch64_get_operand_class (opcode->operands[0])
-      == AARCH64_OPND_CLASS_INT_REG)
+      == AARCH64_OPND_CLASS_INT_REG
+      || aarch64_get_operand_class (opcode->operands[0])
+      == AARCH64_OPND_CLASS_CAP_REG)
     /* normal case.  */
     idx = 0;
   else if (aarch64_get_operand_class (opcode->operands[1])

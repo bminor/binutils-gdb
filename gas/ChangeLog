@@ -1,5 +1,13 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (parse_operands): Add capability
+	register operands.
+	* testsuite/gas/aarch64/morello_insn.d: Add tests.
+	* testsuite/gas/aarch64/morello_insn-c64.d: Likewise.
+	* testsuite/gas/aarch64/morello_insn.s: Likewise.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (FIXUP_F_C64): New macro.
 	(output_inst, parse_operands): Use it.
 	(aarch64_force_relocation, aarch64_fix_adjustable): Defer

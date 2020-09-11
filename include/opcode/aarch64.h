@@ -809,6 +809,7 @@ enum aarch64_op
   OP_MOVZ_P_P_P,
   OP_NOTS_P_P_P_Z,
   OP_NOT_P_P_P_Z,
+  OP_MOV_C_ZR,
 
   OP_FCMLA_ELEM,	/* ARMv8.3, indexed element version.  */
 
