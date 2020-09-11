@@ -1996,7 +1996,8 @@ gld_${EMULATION_NAME}_finish (void)
     )
     {
       pe_dll_fill_sections (link_info.output_bfd, &link_info);
-      if (command_line.out_implib_filename)
+      if (command_line.out_implib_filename
+          && pe_def_file->num_exports != 0)
 	pe_dll_generate_implib (pe_def_file, command_line.out_implib_filename,
 				&link_info);
     }
