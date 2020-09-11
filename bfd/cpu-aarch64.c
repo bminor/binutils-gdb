@@ -122,7 +122,7 @@ bfd_is_aarch64_special_symbol_name (const char *name, int type)
 {
   if (!name || name[0] != '$')
     return false;
-  if (name[1] == 'x' || name[1] == 'd')
+  if (name[1] == 'x' || name[1] == 'd' || name[1] == 'c')
     type &= BFD_AARCH64_SPECIAL_SYM_TYPE_MAP;
   else if (name[1] == 'm' || name[1] == 'f' || name[1] == 'p')
     type &= BFD_AARCH64_SPECIAL_SYM_TYPE_TAG;

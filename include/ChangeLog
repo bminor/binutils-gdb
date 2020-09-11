@@ -1,5 +1,10 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_opcode_encode): Add cpu variant
+	argument.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (AARCH64_FEATURE_A64C,
 	AARCH64_FEATURE_C64): New feature macros.
 	(AARCH64_ARCH_MORELLO): New architecture macro.

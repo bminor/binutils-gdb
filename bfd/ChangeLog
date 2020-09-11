@@ -1,3 +1,10 @@
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* cpu-aarch64.c (bfd_is_aarch64_special_symbol_name): Add
+	capability mapping symbol.
+	* elfnn-aarch64.c (elfNN_aarch64_output_map_sym,
+	is_aarch64_mapping_symbol): Likewise.
+
 2022-04-27  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf.c (elfcore_grok_freebsd_note): Handle NT_ARM_TLS notes.

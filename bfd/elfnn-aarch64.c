@@ -8353,7 +8353,7 @@ static bool
 elfNN_aarch64_output_map_sym (output_arch_syminfo *osi,
 			      enum map_symbol_type type, bfd_vma offset)
 {
-  static const char *names[2] = { "$x", "$d" };
+  static const char *names[3] = { "$x", "$d", "$c" };
   Elf_Internal_Sym sym;
 
   sym.st_value = (osi->sec->output_section->vma
@@ -9934,7 +9934,7 @@ is_aarch64_mapping_symbol (const char * name)
 			 the mapping symbols could have acquired a prefix.
 			 We do not support this here, since such symbols no
 			 longer conform to the ARM ELF ABI.  */
-    && (name[1] == 'd' || name[1] == 'x')
+    && (name[1] == 'd' || name[1] == 'x' || name[1] == 'c')
     && (name[2] == 0 || name[2] == '.');
   /* FIXME: Strictly speaking the symbol is only a valid mapping symbol if
      any characters that follow the period are legal characters for the body

@@ -44,6 +44,10 @@
 
 #define END_OF_INSN '\0'
 
+#define MAP_CUR_INSN (AARCH64_CPU_HAS_FEATURE (cpu_variant,		\
+					       AARCH64_FEATURE_C64)	\
+		      ? MAP_C64 : MAP_INSN)
+
 static aarch64_feature_set cpu_variant;
 
 /* Variables that we set while parsing command-line options.  Once all
@@ -1524,6 +1528,10 @@ make_mapping_symbol (enum mstate state, valueT value, fragS * frag)
       symname = "$x";
       type = BSF_NO_FLAGS;
       break;
+    case MAP_C64:
+      symname = "$c";
+      type = BSF_NO_FLAGS;
+      break;
     default:
       abort ();
     }
@@ -1599,7 +1607,7 @@ mapping_state (enum mstate state)
 {
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
 
-  if (state == MAP_INSN)
+  if (state == MAP_CUR_INSN)
     /* AArch64 instructions require 4-byte alignment.  When emitting
        instructions into any section, record the appropriate section
        alignment.  */
@@ -1615,7 +1623,7 @@ mapping_state (enum mstate state)
     /* Emit MAP_DATA within executable section in order.  Otherwise, it will be
        evaluated later in the next else.  */
     return;
-  else if (TRANSITION (MAP_UNDEFINED, MAP_INSN))
+  else if (TRANSITION (MAP_UNDEFINED, MAP_CUR_INSN))
     {
       /* Only add the symbol if the offset is > 0:
 	 if we're at the first frag, check it's size > 0;
@@ -2019,14 +2027,14 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
 
   /* Sections are assumed to start aligned. In executable section, there is no
      MAP_DATA symbol pending. So we only align the address during
-     MAP_DATA --> MAP_INSN transition.
+     MAP_DATA --> MAP_CUR_INSN transition.
      For other sections, this is not guaranteed.  */
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
   if (!need_pass_2 && subseg_text_p (now_seg) && mapstate == MAP_DATA)
     frag_align_code (2, 0);
 
 #ifdef OBJ_ELF
-  mapping_state (MAP_INSN);
+  mapping_state (MAP_CUR_INSN);
 #endif
 
   do
@@ -5530,8 +5538,9 @@ output_operand_error_record (const operand_error_record *record, char *str)
 	  result = parse_operands (str + len, opcode)
 	    && programmer_friendly_fixup (&inst);
 	  gas_assert (result);
-	  result = aarch64_opcode_encode (opcode, inst_base, &inst_base->value,
-					  NULL, NULL, insn_sequence);
+	  result = aarch64_opcode_encode (cpu_variant, opcode, inst_base,
+					  &inst_base->value, NULL, NULL,
+					  insn_sequence);
 	  gas_assert (!result);
 
 	  /* Find the most matched qualifier sequence.  */
@@ -7926,7 +7935,8 @@ do_encode (const aarch64_opcode *opcode, aarch64_inst *instr,
   aarch64_operand_error error_info;
   memset (&error_info, '\0', sizeof (error_info));
   error_info.kind = AARCH64_OPDE_NIL;
-  if (aarch64_opcode_encode (opcode, instr, code, NULL, &error_info, insn_sequence)
+  if (aarch64_opcode_encode (cpu_variant, opcode, instr, code, NULL,
+			     &error_info, insn_sequence)
       && !error_info.non_fatal)
     return true;
 
@@ -8020,7 +8030,7 @@ md_assemble (char *str)
 
   /* Sections are assumed to start aligned. In executable section, there is no
      MAP_DATA symbol pending. So we only align the address during
-     MAP_DATA --> MAP_INSN transition.
+     MAP_DATA --> MAP_CUR_INSN transition.
      For other sections, this is not guaranteed.  */
   enum mstate mapstate = seg_info (now_seg)->tc_segment_info_data.mapstate;
   if (!need_pass_2 && subseg_text_p (now_seg) && mapstate == MAP_DATA)
@@ -8041,7 +8051,7 @@ md_assemble (char *str)
 	dump_opcode_operands (opcode);
 #endif /* DEBUG_AARCH64 */
 
-      mapping_state (MAP_INSN);
+      mapping_state (MAP_CUR_INSN);
 
       inst_base = &inst.base;
       inst_base->opcode = opcode;
@@ -8369,7 +8379,7 @@ aarch64_handle_align (fragS * fragP)
   if (fix)
     {
 #ifdef OBJ_ELF
-      insert_data_mapping_symbol (MAP_INSN, fragP->fr_fix, fragP, fix);
+      insert_data_mapping_symbol (MAP_CUR_INSN, fragP->fr_fix, fragP, fix);
 #endif
       memset (p, 0, fix);
       p += fix;
@@ -8417,10 +8427,10 @@ aarch64_init_frag (fragS * fragP, int max_chars)
     case rs_align:
       /* PR 20364: We can get alignment frags in code sections,
 	 so do not just assume that we should use the MAP_DATA state.  */
-      mapping_state_2 (subseg_text_p (now_seg) ? MAP_INSN : MAP_DATA, max_chars);
+      mapping_state_2 (subseg_text_p (now_seg) ? MAP_CUR_INSN : MAP_DATA, max_chars);
       break;
     case rs_align_code:
-      mapping_state_2 (MAP_INSN, max_chars);
+      mapping_state_2 (MAP_CUR_INSN, max_chars);
       break;
     default:
       break;
@@ -8612,8 +8622,8 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
 
   DEBUG_TRACE ("Found LDURB entry to encode programmer-friendly LDRB");
 
-  if (!aarch64_opcode_encode (instr->opcode, instr, &instr->value, NULL, NULL,
-			      insn_sequence))
+  if (!aarch64_opcode_encode (cpu_variant, instr->opcode, instr, &instr->value,
+			      NULL, NULL, insn_sequence))
     return false;
 
   return true;
@@ -8646,7 +8656,7 @@ fix_mov_imm_insn (fixS *fixP, char *buf, aarch64_inst *instr, offsetT value)
       /* Try the MOVZ alias.  */
       opcode = aarch64_get_opcode (OP_MOV_IMM_WIDE);
       aarch64_replace_opcode (instr, opcode);
-      if (aarch64_opcode_encode (instr->opcode, instr,
+      if (aarch64_opcode_encode (cpu_variant, instr->opcode, instr,
 				 &instr->value, NULL, NULL, insn_sequence))
 	{
 	  put_aarch64_insn (buf, instr->value);
@@ -8655,7 +8665,7 @@ fix_mov_imm_insn (fixS *fixP, char *buf, aarch64_inst *instr, offsetT value)
       /* Try the MOVK alias.  */
       opcode = aarch64_get_opcode (OP_MOV_IMM_WIDEN);
       aarch64_replace_opcode (instr, opcode);
-      if (aarch64_opcode_encode (instr->opcode, instr,
+      if (aarch64_opcode_encode (cpu_variant, instr->opcode, instr,
 				 &instr->value, NULL, NULL, insn_sequence))
 	{
 	  put_aarch64_insn (buf, instr->value);
@@ -8668,7 +8678,7 @@ fix_mov_imm_insn (fixS *fixP, char *buf, aarch64_inst *instr, offsetT value)
       /* Try the ORR alias.  */
       opcode = aarch64_get_opcode (OP_MOV_IMM_LOG);
       aarch64_replace_opcode (instr, opcode);
-      if (aarch64_opcode_encode (instr->opcode, instr,
+      if (aarch64_opcode_encode (cpu_variant, instr->opcode, instr,
 				 &instr->value, NULL, NULL, insn_sequence))
 	{
 	  put_aarch64_insn (buf, instr->value);
@@ -8780,7 +8790,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
       gas_assert (new_inst != NULL);
       idx = aarch64_operand_index (new_inst->opcode->operands, opnd);
       new_inst->operands[idx].imm.value = value;
-      if (aarch64_opcode_encode (new_inst->opcode, new_inst,
+      if (aarch64_opcode_encode (cpu_variant, new_inst->opcode, new_inst,
 				 &new_inst->value, NULL, NULL, insn_sequence))
 	put_aarch64_insn (buf, new_inst->value);
       else
@@ -8836,7 +8846,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
       new_inst->operands[idx].addr.offset.imm = value;
 
       /* Encode/fix-up.  */
-      if (aarch64_opcode_encode (new_inst->opcode, new_inst,
+      if (aarch64_opcode_encode (cpu_variant, new_inst->opcode, new_inst,
 				 &new_inst->value, NULL, NULL, insn_sequence))
 	{
 	  put_aarch64_insn (buf, new_inst->value);

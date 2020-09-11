@@ -1380,9 +1380,10 @@ struct aarch64_instr_sequence
 /* Encoding entrypoint.  */
 
 extern bool
-aarch64_opcode_encode (const aarch64_opcode *, const aarch64_inst *,
-		       aarch64_insn *, aarch64_opnd_qualifier_t *,
-		       aarch64_operand_error *, aarch64_instr_sequence *);
+aarch64_opcode_encode (aarch64_feature_set, const aarch64_opcode *,
+		       const aarch64_inst *, aarch64_insn *,
+		       aarch64_opnd_qualifier_t *, aarch64_operand_error *,
+		       aarch64_instr_sequence *);
 
 extern const aarch64_opcode *
 aarch64_replace_opcode (struct aarch64_inst *,

@@ -219,6 +219,7 @@ enum mstate
   MAP_UNDEFINED = 0, /* Must be zero, for seginfo in new sections.  */
   MAP_DATA,
   MAP_INSN,
+  MAP_C64,
 };
 
 void mapping_state (enum mstate);

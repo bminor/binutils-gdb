@@ -559,6 +559,11 @@ into object files to mark certain features:
 @item $x
 At the start of a region of code containing AArch64 instructions.
 
+@cindex @code{$c}
+@item $c
+At the start of a region of code containing C64 instructions (as oppposed to
+standard A64 or A64C instructions).
+
 @cindex @code{$d}
 @item $d
 At the start of a region of data.

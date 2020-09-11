@@ -32,7 +32,8 @@
 enum map_type
 {
   MAP_INSN,
-  MAP_DATA
+  MAP_DATA,
+  MAP_C64
 };
 
 static aarch64_feature_set arch_variant; /* See select_aarch64_variant.  */
@@ -40,6 +41,8 @@ static enum map_type last_type;
 static int last_mapping_sym = -1;
 static bfd_vma last_stop_offset = 0;
 static bfd_vma last_mapping_addr = 0;
+
+#define MAYBE_C64 (last_type == MAP_C64 ? AARCH64_FEATURE_C64 : 0)
 
 /* Other options */
 static int no_aliases = 0;	/* If set disassemble as most general inst.  */
@@ -2925,7 +2928,8 @@ determine_disassembling_preference (struct aarch64_inst *inst,
 	  if (convert_to_alias (&copy, alias) == 1)
 	    {
 	      aarch64_replace_opcode (&copy, alias);
-	      if (aarch64_match_operands_constraint (&copy, NULL) != 1)
+	      if (aarch64_match_operands_constraint (MAYBE_C64, &copy,
+						     NULL) != 1)
 		{
 		  DEBUG_TRACE ("FAILED with alias %s ", alias->name);
 		}
@@ -3189,7 +3193,7 @@ aarch64_opcode_decode (const aarch64_opcode *opcode, const aarch64_insn code,
     }
 
   /* Match the qualifiers.  */
-  if (aarch64_match_operands_constraint (inst, NULL) == 1)
+  if (aarch64_match_operands_constraint (MAYBE_C64, inst, NULL) == 1)
     {
       /* Arriving here, the CODE has been determined as a valid instruction
 	 of OPCODE and *INST has been filled with information of this OPCODE
@@ -3298,7 +3302,7 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), pc, opcode, opnds, i, &pcrel_p,
-			     &info->target, &notes, arch_variant);
+			     &info->target, &notes, arch_variant | MAYBE_C64);
 
       /* Print the delimiter (taking account of omitted operand(s)).  */
       if (str[0] != '\0')
@@ -3528,7 +3532,7 @@ aarch64_symbol_is_valid (asymbol * sym,
 
   return name
     && (name[0] != '$'
-	|| (name[1] != 'x' && name[1] != 'd')
+	|| (name[1] != 'x' && name[1] != 'd' && name[1] != 'c')
 	|| (name[2] != '\0' && name[2] != '.'));
 }
 
@@ -3582,20 +3586,35 @@ get_sym_code_type (struct disassemble_info *info, int n,
 
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
-  /* If the symbol has function type then use that.  */
+  /* If the symbol has function type then use that.  Set mapping symbol as
+     MAP_INSN only if transitioning from MAP_DATA.  We do this to conserve any
+     previous MAP_C64 type.  */
   if (type == STT_FUNC)
     {
-      *map_type = MAP_INSN;
+      *map_type = *map_type == MAP_DATA ? MAP_INSN : *map_type;
       return true;
     }
 
   /* Check for mapping symbols.  */
   name = bfd_asymbol_name(info->symtab[n]);
   if (name[0] == '$'
-      && (name[1] == 'x' || name[1] == 'd')
+      && (name[1] == 'x' || name[1] == 'd' || name[1] == 'c')
       && (name[2] == '\0' || name[2] == '.'))
     {
-      *map_type = (name[1] == 'x' ? MAP_INSN : MAP_DATA);
+      switch (name[1])
+	{
+	case 'd':
+	  *map_type = MAP_DATA;
+	  break;
+	case 'x':
+	  *map_type = MAP_INSN;
+	  break;
+	case 'c':
+	  *map_type = MAP_C64;
+	  break;
+	default:
+	  abort ();
+	}
       return true;
     }
 
@@ -3606,7 +3625,8 @@ get_sym_code_type (struct disassemble_info *info, int n,
    for the chosen architecture variant.
 
    Currently we only restrict disassembly for Armv8-R and otherwise enable all
-   non-R-profile features.  */
+   non-R-profile features with the exception of C64, which is set based on
+   mapping symbols.  */
 static void
 select_aarch64_variant (unsigned mach)
 {
@@ -3616,7 +3636,8 @@ select_aarch64_variant (unsigned mach)
       arch_variant = AARCH64_ARCH_V8_R;
       break;
     default:
-      arch_variant = AARCH64_ANY & ~(AARCH64_FEATURE_V8_R);
+      arch_variant = AARCH64_ANY & ~(AARCH64_FEATURE_V8_R
+				     | AARCH64_FEATURE_C64);
     }
 }
 
@@ -3665,7 +3686,7 @@ print_insn_aarch64 (bfd_vma pc,
      HEX file or similar.  */
   enum map_type type = MAP_DATA;
   if ((info->section && info->section->flags & SEC_CODE) || !info->section)
-    type = MAP_INSN;
+    type = last_type == MAP_C64 ? MAP_C64 : MAP_INSN;
 
   /* First check the full symtab for a mapping symbol, even if there
      are no usable non-mapping symbols for this address.  */
