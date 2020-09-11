@@ -5674,6 +5674,26 @@ The lowest two bits must be zero and are not stored in the instruction,
 giving a 28 bit signed byte offset.  */
   BFD_RELOC_AARCH64_CALL26,
 
+/* A64C 14 bit pc-relative test bit and branch.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 16 bit signed byte offset.  */
+  BFD_RELOC_MORELLO_TSTBR14,
+
+/* A64C 19 bit pc-relative conditional branch and compare & branch.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 21 bit signed byte offset.  */
+  BFD_RELOC_MORELLO_BRANCH19,
+
+/* AArch64 26 bit pc-relative unconditional branch to capability.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 28 bit signed byte offset.  */
+  BFD_RELOC_MORELLO_JUMP26,
+
+/* AArch64 26 bit pc-relative unconditional branch and link to capability.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 28 bit signed byte offset.  */
+  BFD_RELOC_MORELLO_CALL26,
+
 /* AArch64 16-bit load/store instruction, holding bits 0 to 11 of the
 address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
   BFD_RELOC_AARCH64_LDST16_LO12,
@@ -5960,8 +5980,14 @@ instructions.  */
 /* Morello Capability global data.  */
   BFD_RELOC_MORELLO_GLOB_DAT,
 
+/* Morello Jump Slot.  */
+  BFD_RELOC_MORELLO_JUMP_SLOT,
+
 /* Morello relative relocation for capabilities.  */
   BFD_RELOC_MORELLO_RELATIVE,
+
+/* C64 support for STT_GNU_IFUNC.  */
+  BFD_RELOC_MORELLO_IRELATIVE,
 
 /* AArch64 pseudo relocation code to mark the end of the AArch64
 relocation enumerators that have direct mapping to ELF reloc codes.

@@ -1,5 +1,9 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-dis.c (get_sym_code_type): Fix C64 PLT disassembly.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-opc.c (operand_general_constraint_met_p): Expect
 	capability registers for cache operations in C64.
 	(aarch64_print_operand): Print register arguments for cache

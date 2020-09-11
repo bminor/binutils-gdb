@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elf/aarch64.h: New relocations R_MORELLO_TSTBR14,
+	R_MORELLO_CONDBR19, R_MORELLO_JUMP26, R_MORELLO_CALL26,
+	R_MORELLO_JUMP_SLOT and R_MORELLO_IRELATIVE.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elf/aarch64.h: New relocations R_MORELLO_LD128_GOT_LO12_NC
 	and R_MORELLO_GLOB_DAT.
 

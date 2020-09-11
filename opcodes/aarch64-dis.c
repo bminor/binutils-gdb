@@ -3781,8 +3781,9 @@ get_sym_code_type (struct disassemble_info *info, int n,
 
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
-  /* ST_TARGET_INTERNAL is set for C64.  */
-  if (type == STT_FUNC)
+  /* ST_TARGET_INTERNAL is set for C64.  For PLT stubs, depend only on the
+     mapping symbol that the linker generated for it.  */
+  if (type == STT_FUNC && !(es->symbol.flags & BSF_SYNTHETIC))
     {
       *map_type = (es->internal_elf_sym.st_target_internal & ST_BRANCH_TO_C64
 		   ? MAP_C64 : MAP_INSN);

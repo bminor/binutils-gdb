@@ -325,6 +325,19 @@ static const bfd_byte elfNN_aarch64_small_plt0_bti_entry[PLT_ENTRY_SIZE] =
   0x1f, 0x20, 0x03, 0xd5,	/* nop */
 };
 
+/* The C64 PLT0.  */
+static const bfd_byte elfNN_c64_small_plt0_entry[PLT_ENTRY_SIZE] =
+{
+  0xf0, 0x7b, 0xbf, 0x62,	/* stp c16, c30, [csp, #-32]!  */
+  0x10, 0x00, 0x80, 0x90,	/* adrp c16, (GOT+16)  */
+  0x11, 0x0a, 0x40, 0xc2,	/* ldr c17, [c16, #PLT_GOT+0x10]  */
+  0x10, 0x02, 0x00, 0x02,	/* add c16, c16,#PLT_GOT+0x10   */
+  0x20, 0x12, 0xc2, 0xc2,	/* br c17  */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+};
+
 /* Per function entry in a procedure linkage table looks like this
    if the distance between the PLTGOT and the PLT is < 4GB use
    these PLT entries.  Use BTI versions of the PLTs when enabled.  */
@@ -339,6 +352,15 @@ static const bfd_byte elfNN_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
   0x10, 0x02, 0x00, 0x11,	/* add w16, w16, :lo12:PLTGOT + n * 4  */
 #endif
   0x20, 0x02, 0x1f, 0xd6,	/* br x17.  */
+};
+
+/* The C64 PLT.  */
+static const bfd_byte elfNN_c64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
+{
+  0x10, 0x00, 0x80, 0x90,	/* adrp c16, PLTGOT + offset  */
+  0x11, 0x02, 0x40, 0xc2,	/* ldr c17, [c16, PLTGOT + offset] */
+  0x10, 0x02, 0x00, 0x02,	/* add c16, c16, :lo12:PLTGOT + offset  */
+  0x20, 0x12, 0xc2, 0xc2,	/* br c17.  */
 };
 
 static const bfd_byte
@@ -1021,6 +1043,66 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 AARCH64_R_STR (CALL26),	/* name */
+	 false,			/* partial_inplace */
+	 0x3ffffff,		/* src_mask */
+	 0x3ffffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* TBZ/NZ: ((S+A-P) >> 2) & 0x3fff */
+  HOWTO64 (MORELLO_R (TSTBR14),	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 14,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TSTBR14),	/* name */
+	 false,			/* partial_inplace */
+	 0x3fff,		/* src_mask */
+	 0x3fff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* B.cond: ((S+A-P) >> 2) & 0x7ffff */
+  HOWTO64 (MORELLO_R (CONDBR19),	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 19,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (CONDBR19),	/* name */
+	 false,			/* partial_inplace */
+	 0x7ffff,		/* src_mask */
+	 0x7ffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* B:      ((S+A-P) >> 2) & 0x3ffffff */
+  HOWTO64 (MORELLO_R (JUMP26),	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 26,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (JUMP26),	/* name */
+	 false,			/* partial_inplace */
+	 0x3ffffff,		/* src_mask */
+	 0x3ffffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* BL:     ((S+A-P) >> 2) & 0x3ffffff */
+  HOWTO64 (MORELLO_R (CALL26),	/* type */
+	 2,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 26,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (CALL26),	/* name */
 	 false,			/* partial_inplace */
 	 0x3ffffff,		/* src_mask */
 	 0x3ffffff,		/* dst_mask */
@@ -2257,7 +2339,21 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0xffffffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  HOWTO64 (MORELLO_R (RELATIVE),/* type */
+  HOWTO64 (MORELLO_R (JUMP_SLOT),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (JUMP_SLOT),	/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (RELATIVE),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
@@ -2268,6 +2364,20 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 MORELLO_R_STR (RELATIVE),	/* name */
 	 true,			/* partial_inplace */
 	 ALL_ONES,		/* src_mask */
+	 ALL_ONES,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (IRELATIVE),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (IRELATIVE),	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
@@ -4951,6 +5061,21 @@ setup_plt_values (struct bfd_link_info *link_info,
   struct elf_aarch64_link_hash_table *globals;
   globals = elf_aarch64_hash_table (link_info);
 
+  /* Set up plt stubs in case we need C64 PLT.  Override BTI/PAC since they're
+     not compatible.  PLT stub sizes are the same as the default ones.  */
+  if (globals->c64_rel)
+    {
+      if (plt_type != PLT_NORMAL)
+	_bfd_error_handler
+	  (_("ignoring C64-incompatible extensions: %s"),
+	   (plt_type == PLT_BTI_PAC ? "BTI, PAC"
+	    : plt_type == PLT_BTI ? "BTI" : "PAC"));
+
+      globals->plt0_entry = elfNN_c64_small_plt0_entry;
+      globals->plt_entry = elfNN_c64_small_plt_entry;
+      return;
+    }
+
   if (plt_type == PLT_BTI_PAC)
     {
       globals->plt0_entry = elfNN_aarch64_small_plt0_bti_entry;
@@ -5024,7 +5149,6 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
       break;
     }
   elf_aarch64_tdata (output_bfd)->plt_type = bp_info.plt_type;
-  setup_plt_values (link_info, bp_info.plt_type);
   elf_aarch64_tdata (output_bfd)->secmaps_initialised = false;
 }
 
@@ -5960,7 +6084,10 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		  || bfd_link_executable (info))
 		{
 		  /* This symbol is resolved locally.  */
-		  outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (IRELATIVE));
+		  outrel.r_info = (elf_aarch64_hash_entry (h)->got_type
+				   == GOT_CAP
+				   ? ELFNN_R_INFO (0, MORELLO_R (IRELATIVE))
+				   : ELFNN_R_INFO (0, AARCH64_R (IRELATIVE)));
 		  outrel.r_addend = (h->root.u.def.value
 				     + h->root.u.def.section->output_section->vma
 				     + h->root.u.def.section->output_offset);
@@ -5982,6 +6109,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      return bfd_reloc_ok;
 	    }
 	  /* FALLTHROUGH */
+	case BFD_RELOC_MORELLO_CALL26:
+	case BFD_RELOC_MORELLO_JUMP26:
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
 	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
@@ -6195,6 +6324,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	value += signed_addend;
       break;
 
+    case BFD_RELOC_MORELLO_CALL26:
+    case BFD_RELOC_MORELLO_JUMP26:
     case BFD_RELOC_AARCH64_CALL26:
     case BFD_RELOC_AARCH64_JUMP26:
       {
@@ -6294,6 +6425,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	value |= 1;
       break;
 
+    case BFD_RELOC_MORELLO_BRANCH19:
+    case BFD_RELOC_MORELLO_TSTBR14:
     case BFD_RELOC_AARCH64_BRANCH19:
     case BFD_RELOC_AARCH64_TSTBR14:
       if (h && h->root.type == bfd_link_hash_undefined)
@@ -8209,6 +8342,14 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    default:
 	      break;
 
+	    case BFD_RELOC_MORELLO_CALL26:
+	    case BFD_RELOC_MORELLO_JUMP26:
+	      /* For dynamic symbols record caller information so that we can
+		 decide what kind of PLT stubs to emit.  */
+	      if (h != NULL)
+		elf_aarch64_hash_entry (h)->got_type = GOT_CAP;
+	      /* Fall through.  */
+
 	    case BFD_RELOC_AARCH64_ADD_LO12:
 	    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
 	    case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
@@ -8522,6 +8663,13 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    break;
 	  }
 
+	case BFD_RELOC_MORELLO_CALL26:
+	case BFD_RELOC_MORELLO_JUMP26:
+	  htab->c64_rel = 1;
+	  if (h != NULL)
+	    elf_aarch64_hash_entry (h)->got_type = GOT_CAP;
+
+	  /* Fall through.  */
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
 	  if (h == NULL)
@@ -8709,10 +8857,13 @@ elfNN_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
   switch ((int) ELFNN_R_TYPE (rela->r_info))
     {
     case AARCH64_R (IRELATIVE):
+    case MORELLO_R (IRELATIVE):
       return reloc_class_ifunc;
     case AARCH64_R (RELATIVE):
+    case MORELLO_R (RELATIVE):
       return reloc_class_relative;
     case AARCH64_R (JUMP_SLOT):
+    case MORELLO_R (JUMP_SLOT):
       return reloc_class_plt;
     case AARCH64_R (COPY):
       return reloc_class_copy;
@@ -8846,7 +8997,8 @@ typedef struct
 enum map_symbol_type
 {
   AARCH64_MAP_INSN,
-  AARCH64_MAP_DATA
+  AARCH64_MAP_DATA,
+  AARCH64_MAP_C64,
 };
 
 
@@ -9008,7 +9160,8 @@ elfNN_aarch64_output_arch_local_syms (bfd *output_bfd,
     (output_bfd, htab->root.splt->output_section);
   osi.sec = htab->root.splt;
 
-  elfNN_aarch64_output_map_sym (&osi, AARCH64_MAP_INSN, 0);
+  elfNN_aarch64_output_map_sym (&osi, (htab->c64_rel ? AARCH64_MAP_C64
+				       : AARCH64_MAP_INSN), 0);
 
   return true;
 
@@ -9449,6 +9602,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 
   aarch64_elf_init_got_section (output_bfd, info);
 
+  setup_plt_values (info, elf_aarch64_tdata (output_bfd)->plt_type);
+
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link.next)
@@ -9721,6 +9876,26 @@ elf_aarch64_update_plt_entry (bfd *output_bfd,
 }
 
 static void
+aarch64_update_c64_plt_entry (bfd *output_bfd, bfd_byte *plt_entry,
+			      bfd_vma plt_base, bfd_vma plt_got_ent)
+{
+  /* Fill in the top 20 bits for this: ADRP c16, PLT_GOT + n * 16.
+     ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0xfffff */
+  elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_MORELLO_ADR_HI20_PCREL,
+				plt_entry,
+				PG (plt_got_ent) - PG (plt_base));
+
+  elf_aarch64_update_plt_entry (output_bfd,
+				BFD_RELOC_AARCH64_LDST128_LO12,
+				plt_entry + 4,
+				PG_OFFSET (plt_got_ent));
+
+  elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_ADD_LO12,
+				plt_entry + 8,
+				PG_OFFSET (plt_got_ent));
+}
+
+static void
 elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
 				       struct elf_aarch64_link_hash_table
 				       *htab, bfd *output_bfd,
@@ -9781,33 +9956,42 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
   /* Copy in the boiler-plate for the PLTn entry.  */
   memcpy (plt_entry, htab->plt_entry, htab->plt_entry_size);
 
-  /* First instruction in BTI enabled PLT stub is a BTI
-     instruction so skip it.  */
-  if (elf_aarch64_tdata (output_bfd)->plt_type & PLT_BTI
-      && elf_elfheader (output_bfd)->e_type == ET_EXEC)
-    plt_entry = plt_entry + 4;
+  if (htab->c64_rel)
+    aarch64_update_c64_plt_entry (output_bfd, plt_entry, plt_entry_address,
+				  gotplt_entry_address);
+  else
+    {
 
-  /* Fill in the top 21 bits for this: ADRP x16, PLT_GOT + n * 8.
-     ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
-  elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_ADR_HI21_PCREL,
-				plt_entry,
-				PG (gotplt_entry_address) -
-				PG (plt_entry_address));
+      /* First instruction in BTI enabled PLT stub is a BTI
+	 instruction so skip it.  */
+      if (elf_aarch64_tdata (output_bfd)->plt_type & PLT_BTI
+	  && elf_elfheader (output_bfd)->e_type == ET_EXEC)
+	plt_entry = plt_entry + 4;
 
-  /* Fill in the lo12 bits for the load from the pltgot.  */
-  elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_LDSTNN_LO12,
-				plt_entry + 4,
-				PG_OFFSET (gotplt_entry_address));
+      /* Fill in the top 21 bits for this: ADRP x16, PLT_GOT + n * 8.
+	 ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
+      elf_aarch64_update_plt_entry (output_bfd,
+				    BFD_RELOC_AARCH64_ADR_HI21_PCREL,
+				    plt_entry,
+				    PG (gotplt_entry_address) -
+				    PG (plt_entry_address));
 
-  /* Fill in the lo12 bits for the add from the pltgot entry.  */
-  elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_ADD_LO12,
-				plt_entry + 8,
-				PG_OFFSET (gotplt_entry_address));
+      /* Fill in the lo12 bits for the load from the pltgot.  */
+      elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_LDSTNN_LO12,
+				    plt_entry + 4,
+				    PG_OFFSET (gotplt_entry_address));
 
-  /* All the GOTPLT Entries are essentially initialized to PLT0.  */
-  bfd_put_NN (output_bfd,
-	      plt->output_section->vma + plt->output_offset,
-	      gotplt->contents + got_offset);
+      /* Fill in the lo12 bits for the add from the pltgot entry.  */
+      elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_ADD_LO12,
+				    plt_entry + 8,
+				    PG_OFFSET (gotplt_entry_address));
+    }
+
+  /* All the GOTPLT Entries are essentially initialized to PLT0.  Set LSB if
+     the PLT is C64.  */
+  bfd_vma plt0 = ((plt->output_section->vma + plt->output_offset)
+		  | htab->c64_rel);
+  bfd_put_NN (output_bfd, plt0, gotplt->contents + got_offset);
 
   rela.r_offset = gotplt_entry_address;
 
@@ -9819,7 +10003,9 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
     {
       /* If an STT_GNU_IFUNC symbol is locally defined, generate
 	 R_AARCH64_IRELATIVE instead of R_AARCH64_JUMP_SLOT.  */
-      rela.r_info = ELFNN_R_INFO (0, AARCH64_R (IRELATIVE));
+      rela.r_info = (elf_aarch64_hash_entry (h)->got_type == GOT_CAP
+		     ? ELFNN_R_INFO (0, MORELLO_R (IRELATIVE))
+		     : ELFNN_R_INFO (0, AARCH64_R (IRELATIVE)));
       rela.r_addend = (h->root.u.def.value
 		       + h->root.u.def.section->output_section->vma
 		       + h->root.u.def.section->output_offset);
@@ -9827,7 +10013,9 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
   else
     {
       /* Fill in the entry in the .rela.plt section.  */
-      rela.r_info = ELFNN_R_INFO (h->dynindx, AARCH64_R (JUMP_SLOT));
+      rela.r_info = (elf_aarch64_hash_entry (h)->got_type == GOT_CAP
+		     ? ELFNN_R_INFO (h->dynindx, MORELLO_R (JUMP_SLOT))
+		     : ELFNN_R_INFO (h->dynindx, AARCH64_R (JUMP_SLOT)));
       rela.r_addend = 0;
     }
 
@@ -10137,9 +10325,17 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
   plt_base = htab->root.splt->output_section->vma +
     htab->root.splt->output_offset;
 
+  bfd_byte *plt0_entry = htab->root.splt->contents;
+
+  if (htab->c64_rel)
+    {
+      aarch64_update_c64_plt_entry (output_bfd, plt0_entry + 4,
+				    plt_base + 4, plt_got_2nd_ent);
+      return;
+    }
+
   /* First instruction in BTI enabled PLT stub is a BTI
      instruction so skip it.  */
-  bfd_byte *plt0_entry = htab->root.splt->contents;
   if (elf_aarch64_tdata (output_bfd)->plt_type & PLT_BTI)
     plt0_entry = plt0_entry + 4;
 
@@ -10485,7 +10681,6 @@ elfNN_aarch64_link_setup_gnu_properties (struct bfd_link_info *info)
   elf_aarch64_tdata (info->output_bfd)->gnu_and_prop = prop;
   elf_aarch64_tdata (info->output_bfd)->plt_type
     |= (prop & GNU_PROPERTY_AARCH64_FEATURE_1_BTI) ? PLT_BTI : 0;
-  setup_plt_values (info, elf_aarch64_tdata (info->output_bfd)->plt_type);
   return pbfd;
 }
 

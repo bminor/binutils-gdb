@@ -7188,6 +7188,30 @@ ENUMDOC
   The lowest two bits must be zero and are not stored in the instruction,
   giving a 28 bit signed byte offset.
 ENUM
+  BFD_RELOC_MORELLO_TSTBR14
+ENUMDOC
+  A64C 14 bit pc-relative test bit and branch.
+  The lowest two bits must be zero and are not stored in the instruction,
+  giving a 16 bit signed byte offset.
+ENUM
+  BFD_RELOC_MORELLO_BRANCH19
+ENUMDOC
+  A64C 19 bit pc-relative conditional branch and compare & branch.
+  The lowest two bits must be zero and are not stored in the instruction,
+  giving a 21 bit signed byte offset.
+ENUM
+  BFD_RELOC_MORELLO_JUMP26
+ENUMDOC
+  AArch64 26 bit pc-relative unconditional branch to capability.
+  The lowest two bits must be zero and are not stored in the instruction,
+  giving a 28 bit signed byte offset.
+ENUM
+  BFD_RELOC_MORELLO_CALL26
+ENUMDOC
+  AArch64 26 bit pc-relative unconditional branch and link to capability.
+  The lowest two bits must be zero and are not stored in the instruction,
+  giving a 28 bit signed byte offset.
+ENUM
   BFD_RELOC_AARCH64_LDST16_LO12
 ENUMDOC
   AArch64 16-bit load/store instruction, holding bits 0 to 11 of the
@@ -7557,9 +7581,17 @@ ENUM
 ENUMDOC
   Morello Capability global data.
 ENUM
+  BFD_RELOC_MORELLO_JUMP_SLOT
+ENUMDOC
+  Morello Jump Slot.
+ENUM
   BFD_RELOC_MORELLO_RELATIVE
 ENUMDOC
   Morello relative relocation for capabilities.
+ENUM
+  BFD_RELOC_MORELLO_IRELATIVE
+ENUMDOC
+  C64 support for STT_GNU_IFUNC.
 ENUM
   BFD_RELOC_AARCH64_RELOC_END
 ENUMDOC
