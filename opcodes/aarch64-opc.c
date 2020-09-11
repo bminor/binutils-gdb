@@ -3120,6 +3120,17 @@ get_cap_reg_name (int regno, int sp_reg_p)
 }
 
 static inline const char *
+get_altbase_reg_name (aarch64_feature_set features, int regno, int sp_reg_p,
+		      const aarch64_opcode *opcode)
+{
+  if (AARCH64_CPU_HAS_FEATURE(features, AARCH64_FEATURE_C64)
+      && opcode->iclass != br_capaddr)
+    return get_64bit_int_reg_name (regno, sp_reg_p);
+  else
+    return get_cap_reg_name (regno, sp_reg_p);
+}
+
+static inline const char *
 get_base_reg_name (aarch64_feature_set features, int regno, int sp_reg_p)
 {
   if (AARCH64_CPU_HAS_FEATURE(features, AARCH64_FEATURE_C64))
@@ -3433,6 +3444,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Rn:
     case AARCH64_OPND_Rm:
     case AARCH64_OPND_Rt:
+    case AARCH64_OPND_Wt:
     case AARCH64_OPND_Rt2:
     case AARCH64_OPND_Rs:
     case AARCH64_OPND_Ra:
@@ -3927,7 +3939,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
     case AARCH64_OPND_CAPADDR_SIMPLE:
       snprintf (buf, size, "[%s]",
-		get_cap_reg_name (opnd->addr.base_regno, 1));
+		get_altbase_reg_name (features, opnd->addr.base_regno, 1, opcode));
       break;
 
     case AARCH64_OPND_ADDR_SIMPLE:

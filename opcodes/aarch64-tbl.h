@@ -2427,6 +2427,12 @@
   QLF2(CA, S_Q),		\
 }
 
+/* LDAR Wt, [<Cn|CSP>] */
+#define QL2_A64C_W_CAPADDR	\
+{				\
+  QLF2(W, S_S),		\
+}
+
 /* LDAPR Ct, [<Xn|SP>] */
 #define QL2_A64C_CA_ADDR	\
 {				\
@@ -4232,6 +4238,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("swpal", 0xa2e08000, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
   A64C_INSN ("swpl", 0xa2608000, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
 
+  /* Load/stores with alternate base, i.e. [<Cn|CSP>] in A64 mode and [<Xn|SP>] in C64 mode.  */
+  A64C_INSN ("ldar", 0x425f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, CAPADDR_SIMPLE), QL2_A64C_CA_CAPADDR, 0),
+  A64C_INSN ("ldar", 0x427ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+  A64C_INSN ("ldarb", 0x427f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+  A64C_INSN ("stlr", 0x421f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, CAPADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("stlr", 0x423ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+  A64C_INSN ("stlrb", 0x423f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+
   A64C_INSN ("ret", 0xc2c25000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, F_OPD0_OPT | F_DEFAULT (30)),
   A64C_INSN ("retr", 0xc2c25003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
   A64C_INSN ("rets", 0xc2c25002, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
@@ -5697,6 +5711,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(INT_REG, regno, "Rn", 0, F(FLD_Rn), "an integer register")	\
     Y(INT_REG, regno, "Rm", 0, F(FLD_Rm), "an integer register")	\
     Y(INT_REG, regno, "Rt", 0, F(FLD_Rt), "an integer register")	\
+    Y(INT_REG, regno, "Wt", 0, F(FLD_Rt), "a 32-bit integer register")	\
     Y(INT_REG, regno, "Rt2", 0, F(FLD_Rt2), "an integer register")	\
     Y(INT_REG, regno, "Rt_LS64", 0, F(FLD_Rt), "an integer register")	\
     Y(INT_REG, regno, "Rt_SP", OPD_F_MAYBE_SP, F(FLD_Rt),		\
