@@ -7543,6 +7543,14 @@ ENUM
 ENUMDOC
   AArch64 support for STT_GNU_IFUNC.
 ENUM
+  BFD_RELOC_MORELLO_CAPINIT
+ENUMDOC
+  Morello Capability initialization.
+ENUM
+  BFD_RELOC_MORELLO_RELATIVE
+ENUMDOC
+  Morello relative relocation for capabilities.
+ENUM
   BFD_RELOC_AARCH64_RELOC_END
 ENUMDOC
   AArch64 pseudo relocation code to mark the end of the AArch64

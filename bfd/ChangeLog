@@ -1,5 +1,21 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table,
+	elfNN_aarch64_final_link_relocate, elfNN_aarch64_check_relocs,
+	elfNN_aarch64_relocate_section): Add R_MORELLO_CAPINIT and
+	R_MORELLO_RELATIVE.
+	(elf_aarch64_link_hash_table): New member srelcaps.
+	(c64_valid_cap_range, exponent, cap_meta,
+	section_start_symbol, c64_fixup_frag): New functions.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend,
+	_bfd_aarch64_elf_resolve_relocation): Add
+	BFD_RELOC_MORELLO_CAPINIT and BFD_RELOC_MORELLO_RELATIVE.
+	* libbfd.h (bfd_reloc_code_real_names): Likewise.
+	* reloc.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* reloc.c: Add MORELLO_ADR_HI20_PCREL,
 	MORELLO_ADR_HI20_NC_PCREL and MORELLO_ADR_GOT_PAGE.
 	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Likewise.

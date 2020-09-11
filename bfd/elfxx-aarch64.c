@@ -381,6 +381,10 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
       contents = reencode_movw_imm (contents, addend);
       break;
 
+    case BFD_RELOC_MORELLO_CAPINIT:
+      contents = addend;
+      break;
+
     default:
       /* Repack simple data */
       if (howto->dst_mask & (howto->dst_mask + 1))
@@ -588,6 +592,9 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
       value = (value + addend) & ~(bfd_vma) 0xffffffff;
       value -= place & ~(bfd_vma) 0xffffffff;
       break;
+
+    case BFD_RELOC_MORELLO_CAPINIT:
+      value += addend;
 
     default:
       break;

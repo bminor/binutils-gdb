@@ -2213,6 +2213,34 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 ALL_ONES,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
+  HOWTO64 (MORELLO_R (CAPINIT),	/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (CAPINIT),	/* name */
+	 false,			/* partial_inplace */
+	 ALL_ONES,		/* src_mask */
+	 ALL_ONES,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (RELATIVE),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (RELATIVE),	/* name */
+	 true,			/* partial_inplace */
+	 ALL_ONES,		/* src_mask */
+	 ALL_ONES,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
   EMPTY_HOWTO (0),
 };
 
@@ -2827,6 +2855,9 @@ struct elf_aarch64_link_hash_table
   /* Used by local STT_GNU_IFUNC symbols.  */
   htab_t loc_hash_table;
   void * loc_hash_memory;
+
+  /* Used for capability relocations.  */
+  asection *srelcaps;
 };
 
 /* Create an entry in an AArch64 ELF linker hash table.  */
@@ -5547,6 +5578,189 @@ aarch64_relocation_aginst_gp_p (bfd_reloc_code_real_type reloc)
 	  || reloc == BFD_RELOC_AARCH64_MOVW_GOTOFF_G1);
 }
 
+/* Capability format functions.  */
+
+static unsigned
+exponent (uint64_t len)
+{
+#define CAP_MAX_EXPONENT 50
+  /* Size is a 65 bit value, so there's an implicit 0 MSB.  */
+  unsigned zeroes = __builtin_clzl (len) + 1;
+
+  /* All bits up to and including CAP_MW - 2 are zero.  */
+  if (CAP_MAX_EXPONENT < zeroes)
+    return (unsigned) -1;
+  else
+    return CAP_MAX_EXPONENT - zeroes;
+#undef CAP_MAX_EXPONENT
+}
+
+#define ONES(x)         ((1ULL << ((x) + 1)) - 1)
+#define ALIGN_UP(x, a)  (((x) + ONES (a)) & (~ONES (a)))
+
+static bool
+c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp)
+{
+  bfd_vma base = *basep, size = *limitp - *basep;
+
+  unsigned e, old_e;
+
+  if ((e = exponent (size)) == (unsigned) -1)
+    return true;
+
+  size = ALIGN_UP (size, e + 3);
+  old_e = e;
+  e = exponent (size);
+  if (old_e != e)
+    size = ALIGN_UP (size, e + 3);
+
+  base = ALIGN_UP (base, e + 3);
+
+  if (base == *basep && *limitp == base + size)
+    return true;
+
+  *basep = base;
+  *limitp = base + size;
+  return false;
+}
+
+
+/* Build capability meta data, i.e. size and permissions for a capability.  */
+
+static bfd_vma
+cap_meta (size_t size, const asection *sec)
+{
+
+  if (size >= (1ULL << 56))
+    return (bfd_vma) -1;
+
+  size <<= 8;
+  if (sec->flags & SEC_READONLY
+      || sec->flags & SEC_ROM)
+    return size | 1;
+  if (sec->flags & SEC_CODE)
+    return size | 4;
+  if (sec->flags & SEC_ALLOC)
+    return size | 2;
+
+  /* We should always be able to derive a valid set of permissions
+     from the section flags.  */
+  abort ();
+}
+
+static bool
+section_start_symbol (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
+		      void *valp)
+{
+  return section->vma == *(bfd_vma *)valp;
+}
+
+static bfd_reloc_status_type
+c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
+		bfd_reloc_code_real_type bfd_r_type, Elf_Internal_Sym *sym,
+		struct elf_link_hash_entry *h, asection *sym_sec,
+		bfd_byte *frag_loc, bfd_vma value, bfd_signed_vma addend)
+{
+  bfd_vma size = 0;
+  asection *perm_sec = sym_sec;
+  bool bounds_ok = false;
+
+  if (sym != NULL)
+    {
+      size = sym->st_size;
+      if (size == 0)
+	goto need_size;
+    }
+  else if (h != NULL)
+    {
+      size = h->size;
+
+      if (size == 0 && sym_sec != NULL)
+	{
+	  /* Linker defined symbols are always at the start of the section they
+	     track.  */
+	  if (h->root.linker_def)
+	    {
+	      size = sym_sec->output_section->size;
+	      bounds_ok = true;
+	    }
+	  else if (h->root.ldscript_def)
+	    {
+	      const char *name = h->root.root.string;
+	      size_t len = strlen (name);
+
+	      /* In the general case, the symbol should be able to access the
+	         entire output section following it.  */
+	      size = sym_sec->size - (value - sym_sec->vma);
+
+	      /* The special case: the symbol is at the end of the section.
+		 This could either mean that it is an end symbol or it is the
+		 start of the output section following the symbol.  We try to
+		 guess if it is a start of the next section by reading its
+		 name.  This is a compatibility hack, ideally linker scripts
+		 should be written such that start symbols are defined within
+		 the output section it intends to track.  */
+	      if (size == 0
+		  && (len > 8 && name[0] == '_' && name[1] == '_'
+		      && (!strncmp (name + 2, "start_", 6)
+			  || !strcmp (name + len - 6, "_start"))))
+		{
+		  asection *s = bfd_sections_find_if (info->output_bfd,
+						      section_start_symbol,
+						      &value);
+		  if (s != NULL)
+		    {
+		      perm_sec = s;
+		      size = s->size;
+		    }
+		}
+	      bounds_ok = true;
+	    }
+	  else if (size == 0 && bfd_link_pic (info)
+		   && SYMBOL_REFERENCES_LOCAL (info, h))
+	    goto need_size;
+	}
+    }
+
+  /* Negative addends are not allowed for capability symbols.  */
+  if (addend < 0 || (bfd_vma) addend > size)
+    return bfd_reloc_outofrange;
+
+  bfd_vma base = value + addend, limit = value + addend + size;
+
+  if (!bounds_ok && !c64_valid_cap_range (&base, &limit))
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: capability range may exceed object bounds"),
+			  input_bfd);
+      bfd_set_error (bfd_error_bad_value);
+      return bfd_reloc_notsupported;
+    }
+
+  if (perm_sec != NULL)
+    {
+      bfd_vma frag = cap_meta (size, perm_sec);
+
+      if (frag == (bfd_vma) -1)
+	return bfd_reloc_outofrange;
+
+      bfd_put_64 (input_bfd, frag, frag_loc);
+    }
+
+  return bfd_reloc_continue;
+
+need_size:
+    {
+      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB: relocation %s against local symbol without size info"),
+	 input_bfd, elfNN_aarch64_howto_table[howto_index].name);
+      bfd_set_error (bfd_error_bad_value);
+      return bfd_reloc_notsupported;
+    }
+}
+
 /* Perform a relocation as part of a final link.  The input relocation type
    should be TLS relaxed.  */
 
@@ -6344,6 +6558,59 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 						   place, value,
 						   0, weak_undef_p);
       *unresolved_reloc_p = false;
+      break;
+
+    case BFD_RELOC_MORELLO_CAPINIT:
+	{
+	  Elf_Internal_Rela outrel;
+
+	  if (input_section->flags & SEC_READONLY)
+	    {
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB: capability relocation section must be writable"),
+		 input_bfd);
+	      bfd_set_error (bfd_error_bad_value);
+	      return bfd_reloc_notsupported;
+	    }
+
+	  outrel.r_offset = _bfd_elf_section_offset (output_bfd, info,
+						     input_section,
+						     rel->r_offset);
+
+	  outrel.r_offset += (input_section->output_section->vma
+			      + input_section->output_offset);
+
+	  /* Capability-aligned.  */
+	  if (outrel.r_offset & 0xf)
+	    return bfd_reloc_overflow;
+
+	  bfd_reloc_status_type ret;
+
+	  ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h, sym_sec,
+				hit_data + 8, value, signed_addend);
+
+	  if (ret != bfd_reloc_continue)
+	    return ret;
+
+	  outrel.r_addend = signed_addend;
+
+	  /* Emit a dynamic relocation if we are building PIC.  */
+	  if (h != NULL
+	      && h->dynindx != -1
+	      && bfd_link_pic (info)
+	      && !SYMBOL_REFERENCES_LOCAL (info, h))
+	    outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
+	  else
+	    outrel.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
+
+	  value |= (h != NULL ? h->target_internal : sym->st_target_internal);
+
+	  asection *s = globals->srelcaps;
+
+	  elf_append_rela (output_bfd, s, &outrel);
+	  *unresolved_reloc_p = false;
+	}
       break;
 
     default:
@@ -7310,6 +7577,11 @@ symbol is being referenced in the indicated code as if it had a larger \
 alignment than was declared where it was defined"),
 		     name, input_bfd, input_section, rel->r_offset);
 		}
+
+	      if (real_r_type == BFD_RELOC_MORELLO_CAPINIT)
+		info->callbacks->warning
+		  (info, _("relocation offset must be capability aligned"),
+		   name, input_bfd, input_section, rel->r_offset);
 	      break;
 
 	    case bfd_reloc_undefined:
@@ -8169,6 +8441,25 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    h->plt.refcount = 1;
 	  else
 	    h->plt.refcount += 1;
+	  break;
+
+	case BFD_RELOC_MORELLO_CAPINIT:
+	  if (htab->srelcaps == NULL)
+	    {
+	      if (htab->root.dynobj == NULL)
+		htab->root.dynobj = abfd;
+
+	      sreloc = _bfd_elf_make_dynamic_reloc_section
+		(sec, htab->root.dynobj, LOG_FILE_ALIGN,
+		 abfd, /*rela? */ true);
+
+	      if (sreloc == NULL)
+		return false;
+
+	      htab->srelcaps = sreloc;
+	    }
+	  htab->srelcaps->size += RELOC_SIZE (htab);
+
 	  break;
 
 	default:

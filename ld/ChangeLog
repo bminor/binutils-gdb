@@ -1,3 +1,10 @@
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add test.
+	* testsuite/ld-aarch64/morello-capinit.d: New file.
+	* testsuite/ld-aarch64/morello-capinit.ld: New file.
+	* testsuite/ld-aarch64/morello-capinit.s: New file.
+
 2022-03-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 21964

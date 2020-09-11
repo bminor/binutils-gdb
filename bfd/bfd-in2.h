@@ -5949,6 +5949,12 @@ instructions.  */
 /* AArch64 support for STT_GNU_IFUNC.  */
   BFD_RELOC_AARCH64_IRELATIVE,
 
+/* Morello Capability initialization.  */
+  BFD_RELOC_MORELLO_CAPINIT,
+
+/* Morello relative relocation for capabilities.  */
+  BFD_RELOC_MORELLO_RELATIVE,
+
 /* AArch64 pseudo relocation code to mark the end of the AArch64
 relocation enumerators that have direct mapping to ELF reloc codes.
 There are a few more enumerators after this one; those are mainly
