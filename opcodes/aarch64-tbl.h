@@ -2433,6 +2433,21 @@
   QLF2(W, S_S),		\
 }
 
+#define QL2_B_ADDR		\
+{				\
+  QLF2(W,S_B),			\
+}
+
+#define QL2_X_ADDR		\
+{				\
+  QLF2(X,S_B),			\
+}
+
+#define QL2_H_ADDR		\
+{				\
+  QLF2(W,S_H),			\
+}
+
 /* LDR <Wt|Xt>, [<Cn|CSP>] */
 #define QL2_A64C_R_CAPADDR	\
 {				\
@@ -4277,6 +4292,30 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("stur", 0xe2800000, 0xffa00c00, ldst_altbase, OP_STUR_4, OP2 (Rsz2, CAPADDR_SIMM9), QL2_A64C_R_CAPADDR, 0),
   A64C_INSN ("stur", 0xe2200000, 0xff200c00, ldst_altbase, 0, OP2 (Fsz, CAPADDR_SIMM9), QL_S_2SAME, 0),
   A64C_INSN ("stur", 0xe2200800, 0xffe00c00, ldst_altbase, 0, OP2 (St, CAPADDR_SIMM9), QL_I2SAMEQ, 0),
+
+  A64C_INSN ("ldrb", 0x82600400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_UIMM9), QL2_B_ADDR, F_NOSHIFT),
+  A64C_INSN ("ldrb", 0x82c00000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+  A64C_INSN ("strb", 0x82400400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_UIMM9), QL2_B_ADDR, F_NOSHIFT),
+  A64C_INSN ("strb", 0x82800000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+
+  A64C_INSN ("ldrsb", 0x82c00400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+  A64C_INSN ("ldrsb", 0x82800400, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_X_ADDR, 0),
+  A64C_INSN ("ldrsh", 0x82c00800, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+  A64C_INSN ("ldrsh", 0x82800800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_X_ADDR, 0),
+
+  A64C_INSN ("ldursb", 0xe2000c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
+  A64C_INSN ("ldursb", 0xe2000800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, 0),
+  A64C_INSN ("ldursh", 0xe2400c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
+  A64C_INSN ("ldursh", 0xe2400800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, 0),
+  A64C_INSN ("ldursw", 0xe2800800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, 0),
+
+  A64C_INSN ("ldrh", 0x82c00c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_H_ADDR, 0),
+  A64C_INSN ("strh", 0x82800c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_H_ADDR, 0),
+
+  A64C_INSN ("ldurb", 0xe2000400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
+  A64C_INSN ("sturb", 0xe2000000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
+  A64C_INSN ("ldurh", 0xe2400400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_H_ADDR, 0),
+  A64C_INSN ("sturh", 0xe2400000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_H_ADDR, 0),
 
   A64C_INSN ("ret", 0xc2c25000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, F_OPD0_OPT | F_DEFAULT (30)),
   A64C_INSN ("retr", 0xc2c25003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),

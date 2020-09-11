@@ -813,7 +813,10 @@ aarch64_ins_addr_uimm (const aarch64_operand *self,
 		       const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  int shift = get_logsz (aarch64_get_qualifier_esize (info->qualifier));
+  int shift = 0;
+
+  if ((inst->opcode->flags & F_NOSHIFT) == 0)
+    shift = get_logsz (aarch64_get_qualifier_esize (info->qualifier));
 
   /* Rn */
   insert_field (self->fields[0], code, info->addr.base_regno, 0);

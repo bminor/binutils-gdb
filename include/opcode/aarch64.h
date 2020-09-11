@@ -1019,7 +1019,9 @@ extern const aarch64_opcode aarch64_opcode_table[];
 /* This instruction has an extra constraint on it that imposes a requirement on
    subsequent instructions.  */
 #define F_SCAN (1ULL << 31)
-/* Next bit is 32.  */
+/* Do no shift immediate operand.  */
+#define F_NOSHIFT (1ULL << 32)
+/* Next bit is 33.  */
 
 /* Instruction constraints.  */
 /* This instruction has a predication constraint on the instruction at PC+4.  */
