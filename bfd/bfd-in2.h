@@ -5615,6 +5615,11 @@ of a signed value.  */
 of a signed value.  */
   BFD_RELOC_AARCH64_MOVW_PREL_G3,
 
+/* AArch64 A64C Load Literal instruction, holding a 17 bit pc-relative
+word offset.  The lowest four bits must be zero and are not stored in
+the instruction, giving a 21 bit signed byte offset.  */
+  BFD_RELOC_MORELLO_LD_LO17_PCREL,
+
 /* AArch64 Load Literal instruction, holding a 19 bit pc-relative word
 offset.  The lowest two bits must be zero and are not stored in the
 instruction, giving a 21 bit signed byte offset.  */

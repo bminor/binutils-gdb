@@ -530,6 +530,7 @@ enum aarch64_opnd
 				   BLR/BR.  */
   AARCH64_OPND_CAPADDR_SIMPLE,	/* Simple base address with no offset.  */
   AARCH64_OPND_A64C_ADDR_SIMM7,	/* Address with 7-bit immediate offset.  */
+  AARCH64_OPND_ADDR_PCREL17,	/* 17-bit PC-relative address for e.g. LDR.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -761,6 +762,7 @@ enum aarch64_op
   OP_PRFUM,
 
   OP_LDR_LIT,
+  OP_LDR_LIT_2,
   OP_LDRV_LIT,
   OP_LDRSW_LIT,
   OP_PRFM_LIT,

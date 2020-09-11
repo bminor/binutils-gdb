@@ -2438,6 +2438,11 @@
   QLF2(X, S_D),			\
 }
 
+# define QL2_A64C_CA_PCREL	\
+{				\
+  QLF2(CA,NIL),			\
+}
+
 #define QL3_A64C_CA_CA_NIL	\
 {				\
  QLF3(CA, CA, NIL),		\
@@ -4205,6 +4210,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("stp", 0x42800000, 0xffc00000, ldstpair_off, 0, OP3 (Cat, Cat2, ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
   A64C_INSN ("ldp", 0x22c00000, 0xbfc00000, ldstpair_indexed, 0, OP3 (Cat, Cat2, A64C_ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
   A64C_INSN ("stp", 0x22800000, 0xbfc00000, ldstpair_indexed, 0, OP3 (Cat, Cat2, A64C_ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
+
+  A64C_INSN ("ldr", 0x82000000, 0xffc00000, loadlit, OP_LDR_LIT_2, OP2 (Cat, ADDR_PCREL17), QL2_A64C_CA_PCREL, 0),
 
   A64C_INSN ("ldct", 0xc2c4b000, 0xfffffc00, a64c, 0, OP2 (Rt, ADDR_SIMPLE), QL2_A64C_X_ADDR, 0),
   A64C_INSN ("stct", 0xc2c49000, 0xfffffc00, a64c, 0, OP2 (Rt, ADDR_SIMPLE), QL2_A64C_X_ADDR, 0),
@@ -6181,4 +6188,6 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a capability address with base register (no offset)")		\
     Y(ADDRESS, addr_simm, "A64C_ADDR_SIMM7", 0,				\
       F(FLD_imm7,FLD_a64c_index2),					\
-      "an address with 7-bit signed immediate offset")
+      "an address with 7-bit signed immediate offset")			\
+    Y(ADDRESS, imm, "ADDR_PCREL17", OPD_F_SEXT | OPD_F_SHIFT_BY_4,	\
+      F(FLD_imm17), "17-bit PC-relative address")

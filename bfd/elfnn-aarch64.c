@@ -157,6 +157,9 @@
 #define BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC BFD_RELOC_AARCH64_TLSDESC_LD64_LO12
 #endif
 
+#define MORELLO_R(NAME)		R_MORELLO_ ## NAME
+#define MORELLO_R_STR(NAME)	"R_MORELLO_" #NAME
+
 #if ARCH_SIZE == 32
 #define AARCH64_R(NAME)		R_AARCH64_P32_ ## NAME
 #define AARCH64_R_STR(NAME)	"R_AARCH64_P32_" #NAME
@@ -824,6 +827,21 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 
 /* Relocations to generate 19, 21 and 33 bit PC-relative load/store
    addresses: PG(x) is (x & ~0xfff).  */
+
+  /* LD-lit: ((S+A-P) >> 4) & 0x1ffff */
+  HOWTO64 (MORELLO_R (LD_PREL_LO17),	/* type */
+	 4,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 17,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (LD_PREL_LO17),	/* name */
+	 false,			/* partial_inplace */
+	 0x1ffff,		/* src_mask */
+	 0x1ffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
 
   /* LD-lit: ((S+A-P) >> 2) & 0x7ffff */
   HOWTO (AARCH64_R (LD_PREL_LO19),	/* type */
@@ -5939,6 +5957,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
     case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
     case BFD_RELOC_AARCH64_LD_LO19_PCREL:
+    case BFD_RELOC_MORELLO_LD_LO17_PCREL:
     case BFD_RELOC_AARCH64_MOVW_PREL_G0:
     case BFD_RELOC_AARCH64_MOVW_PREL_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_PREL_G1:
@@ -7844,6 +7863,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_AARCH64_LDST64_LO12:
 	case BFD_RELOC_AARCH64_LDST8_LO12:
 	case BFD_RELOC_AARCH64_LD_LO19_PCREL:
+	case BFD_RELOC_MORELLO_LD_LO17_PCREL:
 	  if (h == NULL || bfd_link_pic (info))
 	    break;
 	  /* Fall through.  */

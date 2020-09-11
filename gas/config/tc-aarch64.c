@@ -5022,6 +5022,13 @@ encode_cond_branch_ofs_19 (uint32_t ofs)
   return (ofs & ((1 << 19) - 1)) << 5;
 }
 
+/* encode the 17-bit offset of ld literal */
+static inline uint32_t
+encode_ld_lit_ofs_17 (uint32_t ofs)
+{
+  return (ofs & ((1 << 17) - 1)) << 5;
+}
+
 /* encode the 19-bit offset of ld literal */
 static inline uint32_t
 encode_ld_lit_ofs_19 (uint32_t ofs)
@@ -7147,6 +7154,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_ADDR_PCREL14:
+	case AARCH64_OPND_ADDR_PCREL17:
 	case AARCH64_OPND_ADDR_PCREL19:
 	case AARCH64_OPND_ADDR_PCREL21:
 	case AARCH64_OPND_ADDR_PCREL26:
@@ -7202,8 +7210,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 			 : BFD_RELOC_AARCH64_JUMP26;
 		    break;
 		  case loadlit:
-		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL19);
-		    inst.reloc.type = BFD_RELOC_AARCH64_LD_LO19_PCREL;
+		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL19
+				|| operands[i] == AARCH64_OPND_ADDR_PCREL17);
+		    inst.reloc.type = (operands[i] == AARCH64_OPND_ADDR_PCREL19
+				       ? BFD_RELOC_AARCH64_LD_LO19_PCREL
+				       : BFD_RELOC_MORELLO_LD_LO17_PCREL);
 		    break;
 		  case pcreladdr:
 		    gas_assert (operands[i] == AARCH64_OPND_ADDR_PCREL21);
@@ -7994,7 +8005,8 @@ programmer_friendly_fixup (aarch64_instruction *instr)
 	 nearby literal pool and generate a hidden label which references it.
 	 ISREG has been set to 0 in the case of =value.  */
       if (instr->gen_lit_pool
-	  && (op == OP_LDR_LIT || op == OP_LDRV_LIT || op == OP_LDRSW_LIT))
+	  && (op == OP_LDR_LIT || op == OP_LDRV_LIT || op == OP_LDRSW_LIT
+	      || op == OP_LDR_LIT_2))
 	{
 	  int size = aarch64_get_qualifier_esize (operands[0].qualifier);
 	  if (op == OP_LDRSW_LIT)
@@ -9193,6 +9205,25 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 	  goto apply_fix_return;
 	}
       fix_insn (fixP, flags, value);
+      break;
+
+    case BFD_RELOC_MORELLO_LD_LO17_PCREL:
+      if (fixP->fx_done || !seg->use_rela_p)
+	{
+	  /* The LDR-immediate that uses LO17 aligns the address down to
+	     16-byte boundary to get the final address of the capability.
+	     Since the fixed up immediate also needs to be 16-byte aligned,
+	     align it up to the 16-byte boundary so that the downward alignment
+	     of the load literal instruction gets us the correct address.  */
+	  value = (value + 0xf) & ~(offsetT) 0xf;
+
+	  if (signed_overflow (value, 21))
+	    as_bad_where (fixP->fx_file, fixP->fx_line,
+			  _("pcc-relative load offset out of range"));
+	  insn = get_aarch64_insn (buf);
+	  insn |= encode_ld_lit_ofs_17 (value >> 4);
+	  put_aarch64_insn (buf, insn);
+	}
       break;
 
     case BFD_RELOC_AARCH64_LD_LO19_PCREL:

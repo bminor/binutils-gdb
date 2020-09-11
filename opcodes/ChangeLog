@@ -3,6 +3,19 @@
 	* aarch64-asm-2.c: Regenerate.
 	* aarch64-dis-2.c: Regenerate.
 	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (fields): Add imm17.
+	(operand_general_constraint_met_p, aarch64_print_operand): Add
+	ADDR_PCREL17.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_imm17.
+	* aarch64-tbl.h (QL2_A64C_CA_PCREL): New macro.
+	(aarch64_opcode_table): New instruction.
+	(AARCH64_OPERANDS): New operand.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
 	* aarch64-opc.c (fields): Add a64c_index2.
 	(operand_general_constraint_met_p, aarch64_print_operand): Add
 	A64C_ADDR_SIMM7.

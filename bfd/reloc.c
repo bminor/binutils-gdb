@@ -7116,6 +7116,12 @@ ENUMDOC
   AArch64 MOVK instruction with most significant bits 47 to 63
   of a signed value.
 ENUM
+  BFD_RELOC_MORELLO_LD_LO17_PCREL
+ENUMDOC
+  AArch64 A64C Load Literal instruction, holding a 17 bit pc-relative
+  word offset.  The lowest four bits must be zero and are not stored in
+  the instruction, giving a 21 bit signed byte offset.
+ENUM
   BFD_RELOC_AARCH64_LD_LO19_PCREL
 ENUMDOC
   AArch64 Load Literal instruction, holding a 19 bit pc-relative word
