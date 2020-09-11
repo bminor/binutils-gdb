@@ -1,5 +1,16 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (s_tlsdesccall): Emit Morello
+	TLSDESC_CALL in C64 code.
+	(reloc_table): Add Morello relocation.
+	(md_apply_fix): Emit Morello TLSDESC_LD128_LO12 in C64 code.
+	(aarch64_force_relocation): Add Morello TLSDESC relocations.
+	* testsuite/gas/aarch64/morello-tlsdesc-c64.d: New file.
+	* testsuite/gas/aarch64/morello-tlsdesc.d: New file.
+	* testsuite/gas/aarch64/morello-tlsdesc.s: New file.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (REG_DW_CSP, REG_DW_CLR): New macros.
 	(s_aarch64_cfi_b_key_frame): Adjust for new entry_extras
 	struct.

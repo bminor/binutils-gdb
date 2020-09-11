@@ -1,5 +1,35 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (IS_AARCH64_TLSDESC_RELOC): Add Morello
+	relocations.
+	(elfNN_aarch64_tlsdesc_small_plt_c64_entry): New Morello
+	tlsdesc PLT entry.
+	(elfNN_aarch64_howto_table): Add TLSDESC_ADR_PAGE20,
+	TLSDESC_LD128_LO12, TLSDESC_CALL, TLSDESC relocations for
+	Morello.
+	(aarch64_tls_transition_without_check): Add INFO and
+	MORELLO_RELOC arguments.  Add morello TLSDESC relocations.
+	(aarch64_reloc_got_type, elfNN_aarch64_final_link_relocate,
+	elfNN_aarch64_tls_relax, elfNN_aarch64_check_relocs,
+	aarch64_can_relax_tls): Add morello TLSDESC relocations.
+	(aarch64_tls_transition): Add transitions for morello TLSDESC
+	relocations.
+	(elfNN_aarch64_tls_relax): Add relaxations for morello
+	TLSDESC.
+	(elfNN_aarch64_relocate_section): Emit dynamic relocation for
+	Morello static relocations.
+	(elfNN_aarch64_allocate_dynrelocs): Allocate dynamic
+	relocation space for Morello TLSDESC.
+	(elfNN_aarch64_finish_dynamic_sections): Emit Morello tlsdesc
+	PLT entry.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend,
+	_bfd_aarch64_elf_resolve_relocation): Add Morello relocations.
+	* reloc.c: Add Morello relocations.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (elf_aarch64_link_hash_table): New member.
 	(section_start_symbol, c64_valid_cap_range, exponent): Move
 	up.
