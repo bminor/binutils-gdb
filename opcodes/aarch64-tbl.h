@@ -2315,6 +2315,11 @@
 {		      \
   QLF3(V_4S, V_8H, S_H),	\
 }
+
+#define QL2_A64C_CA_CA		\
+{				\
+  QLF2(CA, CA),			\
+}
 
 /* Opcode table.  */
 
@@ -2408,6 +2413,8 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
        | AARCH64_FEATURE_SVE, 0);
 static const aarch64_feature_set aarch64_feature_v8_r =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_R, 0);
+static const aarch64_feature_set aarch64_feature_a64c =
+  AARCH64_FEATURE (AARCH64_FEATURE_A64C, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2453,6 +2460,7 @@ static const aarch64_feature_set aarch64_feature_v8_r =
 #define F64MM_SVE     &aarch64_feature_f64mm_sve
 #define I8MM      &aarch64_feature_i8mm
 #define ARMV8_R	  &aarch64_feature_v8_r
+#define A64C		&aarch64_feature_a64c
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2558,6 +2566,8 @@ static const aarch64_feature_set aarch64_feature_v8_r =
   { NAME, OPCODE, MASK, CLASS, 0, F32MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
 #define V8_R_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8_R, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define A64C_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, OP, A64C, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {

@@ -154,7 +154,13 @@ enum aarch64_field_kind
   FLD_rotate2,
   FLD_rotate3,
   FLD_SM3_imm2,
-  FLD_sz
+  FLD_sz,
+  FLD_Cad,
+  FLD_Can,
+  FLD_Cam,
+  FLD_Cas,
+  FLD_Cat,
+  FLD_Cat2,
 };
 
 /* Field description.  */
@@ -205,6 +211,7 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 						   value by 2 to get the value
 						   of an immediate operand.  */
 #define OPD_F_MAYBE_SP		0x00000010	/* May potentially be SP.  */
+#define OPD_F_MAYBE_CSP		0x00000020	/* May potentially be CSP.  */
 #define OPD_F_OD_MASK		0x000000e0	/* Operand-dependent data.  */
 #define OPD_F_OD_LSB		5
 #define OPD_F_NO_ZR		0x00000100	/* ZR index not allowed.  */
@@ -269,6 +276,12 @@ static inline bfd_boolean
 operand_need_shift_by_four (const aarch64_operand *operand)
 {
   return (operand->flags & OPD_F_SHIFT_BY_4) ? TRUE : FALSE;
+}
+
+static inline bfd_boolean
+operand_maybe_cap_stack_pointer (const aarch64_operand *operand)
+{
+  return (operand->flags & OPD_F_MAYBE_CSP) ? TRUE : FALSE;
 }
 
 static inline bfd_boolean

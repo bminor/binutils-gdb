@@ -1,5 +1,18 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (AARCH64_REG_TYPES,
+	get_reg_expected_msg, aarch64_addr_reg_parse, parse_address,
+	reg_names): Add capability registers.
+	(parse_operands): Identify capability register based address.
+	(aarch64_archs): Add morello.
+	(aarch64_features): Add a64c and c64.
+	* doc/c-aarch64.texi: Document -march flags.
+	* testsuite/gas/aarch64/morello_insn.d: New file
+	* testsuite/gas/aarch64/morello_insn-c64.d: New file
+	* testsuite/gas/aarch64/morello_insn.s: New file.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (output_operand_error_report): Account
 	for CPU_VARIANT in error messages.
 	* testsuite/gas/aarch64/illegal-sve2.l: Adjust.
