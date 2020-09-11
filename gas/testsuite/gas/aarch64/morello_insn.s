@@ -96,7 +96,7 @@ morello_cspcspi8 c8, csp
 morello_cspcspi8 csp, csp
 
 	.macro morello_cspcspi6 cdsp, cnsp
-	  .irp op, alignd, alignu
+	  .irp op, alignd, alignu, scbnds
 	    \op   \cdsp, \cnsp, #0x3f
 	    \op   \cdsp, \cnsp, #0x1e
 	    \op   \cdsp, \cnsp, #0
@@ -115,10 +115,23 @@ morello_cspcspi6 csp, csp
 	.endm
 morello_perm c22, c23
 
+	.macro morello_scbnds cdsp, cnsp
+	  scbnds   \cdsp, \cnsp, #0x3f, lsl #4
+	  scbnds   \cdsp, \cnsp, #0x1e, lsl #4
+	  scbnds   \cdsp, \cnsp, #0, lsl #4
+	  scbnds   \cdsp, \cnsp, #0x20, lsl #4
+	  scbnds   \cdsp, \cnsp, #0x3f0
+	  scbnds   \cdsp, \cnsp, #0x40
+	.endm
+morello_scbnds c17, c16
+morello_scbnds csp, c16
+morello_scbnds c18, csp
+morello_scbnds csp, csp
+
 // Three operands (dnm)
 
 	.macro morello_cspcspx cdsp, cnsp, xm
-	  .irp op, bicflgs, eorflgs, orrflgs, clrperm
+	  .irp op, bicflgs, eorflgs, orrflgs, clrperm, scbnds, scbndse, scoff, scflgs, sctag, scvalue
 	    \op   \cdsp, \cnsp, \xm
 	  .endr
 	.endm

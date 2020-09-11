@@ -435,167 +435,167 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
     case 1197:	/* subs */
       value = 1197;	/* --> subs.  */
       break;
-    case 1312:	/* autibsp */
-    case 1311:	/* autibz */
-    case 1310:	/* autiasp */
-    case 1309:	/* autiaz */
-    case 1308:	/* pacibsp */
-    case 1307:	/* pacibz */
-    case 1306:	/* paciasp */
-    case 1305:	/* paciaz */
-    case 1284:	/* tsb */
-    case 1283:	/* psb */
-    case 1282:	/* esb */
-    case 1281:	/* autib1716 */
-    case 1280:	/* autia1716 */
-    case 1279:	/* pacib1716 */
-    case 1278:	/* pacia1716 */
-    case 1277:	/* xpaclri */
-    case 1275:	/* sevl */
-    case 1274:	/* sev */
-    case 1273:	/* wfi */
-    case 1272:	/* wfe */
-    case 1271:	/* yield */
-    case 1270:	/* bti */
-    case 1269:	/* csdb */
-    case 1268:	/* nop */
-    case 1267:	/* hint */
-      value = 1267;	/* --> hint.  */
+    case 1319:	/* autibsp */
+    case 1318:	/* autibz */
+    case 1317:	/* autiasp */
+    case 1316:	/* autiaz */
+    case 1315:	/* pacibsp */
+    case 1314:	/* pacibz */
+    case 1313:	/* paciasp */
+    case 1312:	/* paciaz */
+    case 1291:	/* tsb */
+    case 1290:	/* psb */
+    case 1289:	/* esb */
+    case 1288:	/* autib1716 */
+    case 1287:	/* autia1716 */
+    case 1286:	/* pacib1716 */
+    case 1285:	/* pacia1716 */
+    case 1284:	/* xpaclri */
+    case 1282:	/* sevl */
+    case 1281:	/* sev */
+    case 1280:	/* wfi */
+    case 1279:	/* wfe */
+    case 1278:	/* yield */
+    case 1277:	/* bti */
+    case 1276:	/* csdb */
+    case 1275:	/* nop */
+    case 1274:	/* hint */
+      value = 1274;	/* --> hint.  */
       break;
-    case 1289:	/* pssbb */
-    case 1288:	/* ssbb */
-    case 1287:	/* dfb */
-    case 1286:	/* dsb */
-      value = 1286;	/* --> dsb.  */
+    case 1296:	/* pssbb */
+    case 1295:	/* ssbb */
+    case 1294:	/* dfb */
+    case 1293:	/* dsb */
+      value = 1293;	/* --> dsb.  */
       break;
-    case 1300:	/* cpp */
-    case 1299:	/* dvp */
-    case 1298:	/* cfp */
-    case 1297:	/* tlbi */
-    case 1296:	/* ic */
-    case 1295:	/* dc */
-    case 1294:	/* at */
-    case 1293:	/* sys */
-      value = 1293;	/* --> sys.  */
+    case 1307:	/* cpp */
+    case 1306:	/* dvp */
+    case 1305:	/* cfp */
+    case 1304:	/* tlbi */
+    case 1303:	/* ic */
+    case 1302:	/* dc */
+    case 1301:	/* at */
+    case 1300:	/* sys */
+      value = 1300;	/* --> sys.  */
       break;
-    case 2110:	/* bic */
-    case 1360:	/* and */
-      value = 1360;	/* --> and.  */
+    case 2117:	/* bic */
+    case 1367:	/* and */
+      value = 1367;	/* --> and.  */
       break;
-    case 1343:	/* mov */
-    case 1362:	/* and */
-      value = 1362;	/* --> and.  */
+    case 1350:	/* mov */
+    case 1369:	/* and */
+      value = 1369;	/* --> and.  */
       break;
-    case 1347:	/* movs */
-    case 1363:	/* ands */
-      value = 1363;	/* --> ands.  */
+    case 1354:	/* movs */
+    case 1370:	/* ands */
+      value = 1370;	/* --> ands.  */
       break;
-    case 2111:	/* cmple */
-    case 1398:	/* cmpge */
-      value = 1398;	/* --> cmpge.  */
+    case 2118:	/* cmple */
+    case 1405:	/* cmpge */
+      value = 1405;	/* --> cmpge.  */
       break;
-    case 2114:	/* cmplt */
-    case 1401:	/* cmpgt */
-      value = 1401;	/* --> cmpgt.  */
+    case 2121:	/* cmplt */
+    case 1408:	/* cmpgt */
+      value = 1408;	/* --> cmpgt.  */
       break;
-    case 2112:	/* cmplo */
-    case 1403:	/* cmphi */
-      value = 1403;	/* --> cmphi.  */
+    case 2119:	/* cmplo */
+    case 1410:	/* cmphi */
+      value = 1410;	/* --> cmphi.  */
       break;
-    case 2113:	/* cmpls */
-    case 1406:	/* cmphs */
-      value = 1406;	/* --> cmphs.  */
+    case 2120:	/* cmpls */
+    case 1413:	/* cmphs */
+      value = 1413;	/* --> cmphs.  */
       break;
-    case 1340:	/* mov */
-    case 1428:	/* cpy */
-      value = 1428;	/* --> cpy.  */
+    case 1347:	/* mov */
+    case 1435:	/* cpy */
+      value = 1435;	/* --> cpy.  */
+      break;
+    case 1349:	/* mov */
+    case 1436:	/* cpy */
+      value = 1436;	/* --> cpy.  */
+      break;
+    case 2128:	/* fmov */
+    case 1352:	/* mov */
+    case 1437:	/* cpy */
+      value = 1437;	/* --> cpy.  */
       break;
     case 1342:	/* mov */
-    case 1429:	/* cpy */
-      value = 1429;	/* --> cpy.  */
-      break;
-    case 2121:	/* fmov */
-    case 1345:	/* mov */
-    case 1430:	/* cpy */
-      value = 1430;	/* --> cpy.  */
-      break;
-    case 1335:	/* mov */
-    case 1442:	/* dup */
-      value = 1442;	/* --> dup.  */
-      break;
-    case 1337:	/* mov */
-    case 1334:	/* mov */
-    case 1443:	/* dup */
-      value = 1443;	/* --> dup.  */
-      break;
-    case 2120:	/* fmov */
-    case 1339:	/* mov */
-    case 1444:	/* dup */
-      value = 1444;	/* --> dup.  */
-      break;
-    case 1338:	/* mov */
-    case 1445:	/* dupm */
-      value = 1445;	/* --> dupm.  */
-      break;
-    case 2115:	/* eon */
-    case 1447:	/* eor */
-      value = 1447;	/* --> eor.  */
-      break;
-    case 1348:	/* not */
-    case 1449:	/* eor */
-      value = 1449;	/* --> eor.  */
-      break;
-    case 1349:	/* nots */
-    case 1450:	/* eors */
-      value = 1450;	/* --> eors.  */
-      break;
-    case 2116:	/* facle */
-    case 1455:	/* facge */
-      value = 1455;	/* --> facge.  */
-      break;
-    case 2117:	/* faclt */
-    case 1456:	/* facgt */
-      value = 1456;	/* --> facgt.  */
-      break;
-    case 2118:	/* fcmle */
-    case 1469:	/* fcmge */
-      value = 1469;	/* --> fcmge.  */
-      break;
-    case 2119:	/* fcmlt */
-    case 1471:	/* fcmgt */
-      value = 1471;	/* --> fcmgt.  */
-      break;
-    case 1332:	/* fmov */
-    case 1477:	/* fcpy */
-      value = 1477;	/* --> fcpy.  */
-      break;
-    case 1331:	/* fmov */
-    case 1500:	/* fdup */
-      value = 1500;	/* --> fdup.  */
-      break;
-    case 1333:	/* mov */
-    case 1831:	/* orr */
-      value = 1831;	/* --> orr.  */
-      break;
-    case 2122:	/* orn */
-    case 1832:	/* orr */
-      value = 1832;	/* --> orr.  */
-      break;
-    case 1336:	/* mov */
-    case 1834:	/* orr */
-      value = 1834;	/* --> orr.  */
-      break;
-    case 1346:	/* movs */
-    case 1835:	/* orrs */
-      value = 1835;	/* --> orrs.  */
-      break;
-    case 1341:	/* mov */
-    case 1897:	/* sel */
-      value = 1897;	/* --> sel.  */
+    case 1449:	/* dup */
+      value = 1449;	/* --> dup.  */
       break;
     case 1344:	/* mov */
-    case 1898:	/* sel */
-      value = 1898;	/* --> sel.  */
+    case 1341:	/* mov */
+    case 1450:	/* dup */
+      value = 1450;	/* --> dup.  */
+      break;
+    case 2127:	/* fmov */
+    case 1346:	/* mov */
+    case 1451:	/* dup */
+      value = 1451;	/* --> dup.  */
+      break;
+    case 1345:	/* mov */
+    case 1452:	/* dupm */
+      value = 1452;	/* --> dupm.  */
+      break;
+    case 2122:	/* eon */
+    case 1454:	/* eor */
+      value = 1454;	/* --> eor.  */
+      break;
+    case 1355:	/* not */
+    case 1456:	/* eor */
+      value = 1456;	/* --> eor.  */
+      break;
+    case 1356:	/* nots */
+    case 1457:	/* eors */
+      value = 1457;	/* --> eors.  */
+      break;
+    case 2123:	/* facle */
+    case 1462:	/* facge */
+      value = 1462;	/* --> facge.  */
+      break;
+    case 2124:	/* faclt */
+    case 1463:	/* facgt */
+      value = 1463;	/* --> facgt.  */
+      break;
+    case 2125:	/* fcmle */
+    case 1476:	/* fcmge */
+      value = 1476;	/* --> fcmge.  */
+      break;
+    case 2126:	/* fcmlt */
+    case 1478:	/* fcmgt */
+      value = 1478;	/* --> fcmgt.  */
+      break;
+    case 1339:	/* fmov */
+    case 1484:	/* fcpy */
+      value = 1484;	/* --> fcpy.  */
+      break;
+    case 1338:	/* fmov */
+    case 1507:	/* fdup */
+      value = 1507;	/* --> fdup.  */
+      break;
+    case 1340:	/* mov */
+    case 1838:	/* orr */
+      value = 1838;	/* --> orr.  */
+      break;
+    case 2129:	/* orn */
+    case 1839:	/* orr */
+      value = 1839;	/* --> orr.  */
+      break;
+    case 1343:	/* mov */
+    case 1841:	/* orr */
+      value = 1841;	/* --> orr.  */
+      break;
+    case 1353:	/* movs */
+    case 1842:	/* orrs */
+      value = 1842;	/* --> orrs.  */
+      break;
+    case 1348:	/* mov */
+    case 1904:	/* sel */
+      value = 1904;	/* --> sel.  */
+      break;
+    case 1351:	/* mov */
+    case 1905:	/* sel */
+      value = 1905;	/* --> sel.  */
       break;
     default: return NULL;
     }
@@ -744,6 +744,7 @@ aarch64_insert_operand (const aarch64_operand *self,
       return aarch64_ins_limm (self, info, code, inst, errors);
     case 70:
     case 221:
+    case 223:
       return aarch64_ins_aimm (self, info, code, inst, errors);
     case 71:
       return aarch64_ins_imm_half (self, info, code, inst, errors);
@@ -885,7 +886,7 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 204:
     case 206:
       return aarch64_ins_sve_reglist (self, info, code, inst, errors);
-    case 223:
+    case 224:
       return aarch64_ins_perm (self, info, code, inst, errors);
     default: assert (0); abort ();
     }
