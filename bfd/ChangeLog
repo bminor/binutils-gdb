@@ -1,5 +1,19 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elf-bfd.h (elf_backend_data): New callback
+	elf_backend_eh_frame_augmentation_char.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Use it.
+	* elfnn-aarch64.c (elf64_aarch64_eh_frame_augmentation_char):
+	New function.
+	(elf_backend_eh_frame_augmentation_char): New macro.
+
+	* elfxx-target.h [!elf_backend_eh_frame_augmentation_char]:
+	Set elf_backend_eh_frame_augmentation_char to NULL.
+	(elfNN_bed): Initialise
+	elf_backend_eh_frame_augmentation_char.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (STUB_ENTRY_NAME): Add format specifier for
 	veneer type.
 	(C64_MAX_ADRP_IMM, C64_MIN_ADRP_IMM): New macros.
