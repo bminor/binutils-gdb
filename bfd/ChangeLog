@@ -1,5 +1,20 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (elf_aarch64_link_hash_table): New member.
+	(section_start_symbol, c64_valid_cap_range, exponent): Move
+	up.
+	(sec_change_queue): New structure.
+	(queue_section_padding, record_section_change,
+	elfNN_c64_resize_sections): New functions.
+	(bfd_elfNN_aarch64_init_maps): Add info argument.  Adjust
+	callers.
+	* elfxx-aarch64.h (bfd_elf64_aarch64_init_maps,
+	bfd_elf32_aarch64_init_maps): Add info argument.
+	(elf64_c64_resize_sections, elf32_c64_resize_sections): New
+	function declarations.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elf-bfd.h (elf_backend_data): New callback
 	elf_backend_eh_frame_augmentation_char.
 	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): Use it.

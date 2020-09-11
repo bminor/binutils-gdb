@@ -1,5 +1,17 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* emultempl/aarch64elf.em (elf64_c64_pad_section): New
+	function.
+	(gld${EMULATION_NAME}_after_allocation): Resize C64 sections.
+	* ldlang.c (lang_add_newdot): New function.
+	* ldlang.h (lang_add_newdot): New function declaration.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new test.
+	* testsuite/ld-aarch64/morello-sec-round.d: New file.
+	* testsuite/ld-aarch64/morello-sec-round.ld: New file.
+	* testsuite/ld-aarch64/morello-sec-round.s: New file.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* testsuite/ld-aarch64/aarch64-elf.exp: Add test.
 	* testsuite/ld-aarch64/morello-stubs-static.d: New file.
 	* testsuite/ld-aarch64/morello-stubs.d: New file.
