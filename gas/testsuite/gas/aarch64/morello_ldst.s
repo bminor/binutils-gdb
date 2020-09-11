@@ -207,3 +207,13 @@ morello_alt_uimm w4, ALTSP, #2044
 	.endm
 morello_alt_imm ALTVAREG
 morello_alt_imm ALTSP
+
+	.macro morello_alt_uimmw wt, cnsp
+	  .irp op, ldrb, strb
+	    \op    \wt, [\cnsp, #511]
+	    \op    \wt, [\cnsp, #32]
+	    \op    \wt, [\cnsp, #0]
+	  .endr
+	.endm
+morello_alt_uimmw w4, ALTVAREG
+morello_alt_uimmw w4, ALTSP

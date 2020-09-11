@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* testsuite/gas/aarch64/morello_ldst-c64.d: Add tests.
+	* testsuite/gas/aarch64/morello_ldst.d: Likewise.
+	* testsuite/gas/aarch64/morello_ldst.s: Likewise.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Add Rsz2, Fsz, St and
 	CAPADDR_SIMM9.
 	(try_to_encode_as_unscaled_ldst): Add unscaled altbase loads.

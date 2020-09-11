@@ -1,5 +1,16 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_addr_uimm): Shift only if
+	F_NOSHIFT is not set.
+	* aarch64-tbl.h (QL2_B_ADDR, QL2_X_ADDR, QL2_H_ADDR): New
+	macro.
+	(aarch64_opcode_table): New instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_fregsz): New function.
 	(aarch64_ins_addr_simm): Add ldst_altbase to assert.
 	* aarch64-asm.h (ins_fregsz): New function declaration.

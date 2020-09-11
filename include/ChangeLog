@@ -1,5 +1,9 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.c (F_NOSHIFT): New flag.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add sz2, Fsz, St and
 	CAPADDR_SIMM9.
 	(aarch64_op): Add OP_STR_POS_3, OP_LDR_POS_3, OP_STR_POS_4,
