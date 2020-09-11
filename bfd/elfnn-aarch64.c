@@ -2489,11 +2489,85 @@ typedef struct _aarch64_elf_section_data
   unsigned int mapcount;
   unsigned int mapsize;
   elf_aarch64_section_map *map;
+  bool sorted;
 }
 _aarch64_elf_section_data;
 
 #define elf_aarch64_section_data(sec) \
   ((_aarch64_elf_section_data *) elf_section_data (sec))
+
+/* Used to order a list of mapping symbols by address.  */
+
+static int
+elf_aarch64_compare_mapping (const void *a, const void *b)
+{
+  const elf_aarch64_section_map *amap = (const elf_aarch64_section_map *) a;
+  const elf_aarch64_section_map *bmap = (const elf_aarch64_section_map *) b;
+
+  if (amap->vma > bmap->vma)
+    return 1;
+  else if (amap->vma < bmap->vma)
+    return -1;
+  else if (amap->type > bmap->type)
+    /* Ensure results do not depend on the host qsort for objects with
+       multiple mapping symbols at the same address by sorting on type
+       after vma.  */
+    return 1;
+  else if (amap->type < bmap->type)
+    return -1;
+  else
+    return 0;
+}
+
+static _aarch64_elf_section_data *
+elf_aarch64_section_data_get (asection *sec)
+{
+  _aarch64_elf_section_data *sec_data = elf_aarch64_section_data(sec);
+
+  /* A section that does not have aarch64 section data, so it does not have any
+     map information.  Assume A64.  */
+  if (sec_data == NULL || !sec_data->elf.is_target_section_data)
+    return NULL;
+
+  if (sec_data->sorted)
+    goto done;
+
+  qsort (sec_data->map, sec_data->mapcount, sizeof (elf_aarch64_section_map),
+        elf_aarch64_compare_mapping);
+
+  sec_data->sorted = true;
+
+done:
+  return sec_data;
+}
+
+/* Returns TRUE if the label with st_value as VALUE is within a C64 code
+   section or not.  */
+
+static bool
+c64_value_p (asection *section, unsigned int value)
+{
+  struct _aarch64_elf_section_data *sec_data =
+    elf_aarch64_section_data_get (section);
+
+  if (sec_data == NULL)
+    return false;
+
+  unsigned int span;
+
+  for (span = 0; span < sec_data->mapcount; span++)
+    {
+      unsigned int span_start = sec_data->map[span].vma;
+      unsigned int span_end = ((span == sec_data->mapcount - 1)
+			       ? sec_data->map[0].vma + section->size
+			       : sec_data->map[span + 1].vma);
+      char span_type = sec_data->map[span].type;
+
+      if (span_start <= value && value < span_end && span_type == 'c')
+	return true;
+    }
+  return false;
+}
 
 /* The size of the thread control block which is defined to be two pointers.  */
 #define TCB_SIZE	(ARCH_SIZE/8)*2
@@ -2535,6 +2609,10 @@ struct elf_aarch64_obj_tdata
 
   /* PLT type based on security.  */
   aarch64_plt_type plt_type;
+
+  /* Flag to check if section maps have been initialised for all sections in
+     this object.  */
+  bool secmaps_initialised;
 };
 
 #define elf_aarch64_tdata(bfd)				\
@@ -3853,29 +3931,6 @@ aarch64_erratum_sequence (uint32_t insn_1, uint32_t insn_2)
   return false;
 }
 
-/* Used to order a list of mapping symbols by address.  */
-
-static int
-elf_aarch64_compare_mapping (const void *a, const void *b)
-{
-  const elf_aarch64_section_map *amap = (const elf_aarch64_section_map *) a;
-  const elf_aarch64_section_map *bmap = (const elf_aarch64_section_map *) b;
-
-  if (amap->vma > bmap->vma)
-    return 1;
-  else if (amap->vma < bmap->vma)
-    return -1;
-  else if (amap->type > bmap->type)
-    /* Ensure results do not depend on the host qsort for objects with
-       multiple mapping symbols at the same address by sorting on type
-       after vma.  */
-    return 1;
-  else if (amap->type < bmap->type)
-    return -1;
-  else
-    return 0;
-}
-
 
 static char *
 _bfd_aarch64_erratum_835769_stub_name (unsigned num_fixes)
@@ -4355,7 +4410,6 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	{
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
-	  Elf_Internal_Sym *local_syms = NULL;
 
 	  if (!is_aarch64_elf (input_bfd)
 	      || (input_bfd->flags & BFD_LINKER_CREATED) != 0)
@@ -4438,24 +4492,15 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 		  if (r_indx < symtab_hdr->sh_info)
 		    {
 		      /* It's a local symbol.  */
-		      Elf_Internal_Sym *sym;
-		      Elf_Internal_Shdr *hdr;
+		      Elf_Internal_Sym *sym =
+			bfd_sym_from_r_symndx (&htab->root.sym_cache,
+					       input_bfd, r_indx);
+		      if (sym == NULL)
+			goto error_ret_free_internal;
 
-		      if (local_syms == NULL)
-			{
-			  local_syms
-			    = (Elf_Internal_Sym *) symtab_hdr->contents;
-			  if (local_syms == NULL)
-			    local_syms
-			      = bfd_elf_get_elf_syms (input_bfd, symtab_hdr,
-						      symtab_hdr->sh_info, 0,
-						      NULL, NULL, NULL);
-			  if (local_syms == NULL)
-			    goto error_ret_free_internal;
-			}
+		      Elf_Internal_Shdr *hdr =
+			elf_elfsections (input_bfd)[sym->st_shndx];
 
-		      sym = local_syms + r_indx;
-		      hdr = elf_elfsections (input_bfd)[sym->st_shndx];
 		      sym_sec = hdr->bfd_section;
 		      if (!sym_sec)
 			/* This is an undefined symbol.  It can never
@@ -4676,11 +4721,27 @@ elfNN_aarch64_build_stubs (struct bfd_link_info *info)
 /* Add an entry to the code/data map for section SEC.  */
 
 static void
-elfNN_aarch64_section_map_add (asection *sec, char type, bfd_vma vma)
+elfNN_aarch64_section_map_add (bfd *abfd, asection *sec, char type,
+			       bfd_vma vma)
 {
   struct _aarch64_elf_section_data *sec_data =
     elf_aarch64_section_data (sec);
   unsigned int newidx;
+
+  /* The aarch64 section hook was not called for this section.  */
+  if (!sec_data->elf.is_target_section_data)
+    {
+      struct _aarch64_elf_section_data *newdata =
+	bfd_zalloc (abfd, sizeof (*newdata));
+
+      if (newdata == NULL)
+	return;
+
+      newdata->elf = sec_data->elf;
+      newdata->elf.is_target_section_data = true;
+      free (sec_data);
+      sec->used_by_bfd = sec_data = newdata;
+    }
 
   if (sec_data->map == NULL)
     {
@@ -4718,6 +4779,9 @@ bfd_elfNN_aarch64_init_maps (bfd *abfd)
   if (!is_aarch64_elf (abfd))
     return;
 
+  if (elf_aarch64_tdata (abfd)->secmaps_initialised)
+    return;
+
   if ((abfd->flags & DYNAMIC) != 0)
    return;
 
@@ -4747,9 +4811,10 @@ bfd_elfNN_aarch64_init_maps (bfd *abfd)
 
 	  if (bfd_is_aarch64_special_symbol_name
 	      (name, BFD_AARCH64_SPECIAL_SYM_TYPE_MAP))
-	    elfNN_aarch64_section_map_add (sec, name[1], isym->st_value);
+	    elfNN_aarch64_section_map_add (abfd, sec, name[1], isym->st_value);
 	}
     }
+  elf_aarch64_tdata (abfd)->secmaps_initialised = true;
 }
 
 static void
@@ -4832,6 +4897,7 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
     }
   elf_aarch64_tdata (output_bfd)->plt_type = bp_info.plt_type;
   setup_plt_values (link_info, bp_info.plt_type);
+  elf_aarch64_tdata (output_bfd)->secmaps_initialised = false;
 }
 
 static bfd_vma
@@ -5450,6 +5516,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   bfd_vma orig_value = value;
   bool resolved_to_zero;
   bool abs_symbol_p;
+  Elf_Internal_Sym *isym = NULL;
 
   globals = elf_aarch64_hash_table (info);
 
@@ -5470,6 +5537,10 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   weak_undef_p = (h ? h->root.type == bfd_link_hash_undefweak
 		  : bfd_is_und_section (sym_sec));
   abs_symbol_p = h != NULL && bfd_is_abs_symbol (&h->root);
+
+  if (sym)
+    isym = bfd_sym_from_r_symndx (&globals->root.sym_cache, input_bfd,
+				  r_symndx);
 
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
@@ -5897,8 +5968,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 						   signed_addend,
 						   weak_undef_p);
 
-      if (bfd_r_type == BFD_RELOC_AARCH64_ADR_LO21_PCREL && sym != NULL
-	  && sym->st_target_internal & ST_BRANCH_TO_C64)
+      if (bfd_r_type == BFD_RELOC_AARCH64_ADR_LO21_PCREL && isym != NULL
+	  && isym->st_target_internal & ST_BRANCH_TO_C64)
 	value |= 1;
       break;
 
@@ -5938,8 +6009,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
 						   place, value,
 						   signed_addend, weak_undef_p);
-      if (bfd_r_type == BFD_RELOC_AARCH64_ADD_LO12 && sym != NULL
-	  && sym->st_target_internal & ST_BRANCH_TO_C64)
+      if (bfd_r_type == BFD_RELOC_AARCH64_ADD_LO12 && isym != NULL
+	  && isym->st_target_internal & ST_BRANCH_TO_C64)
 	value |= 1;
 
       break;
@@ -7601,6 +7672,8 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
+  bfd_elfNN_aarch64_init_maps (abfd);
+
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
     {
@@ -7984,10 +8057,35 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
-	  /* If this is a local symbol then we resolve it
-	     directly without creating a PLT entry.  */
 	  if (h == NULL)
-	    continue;
+	    {
+	      isym = bfd_sym_from_r_symndx (&htab->root.sym_cache, abfd,
+					    r_symndx);
+	      if (isym == NULL)
+		return false;
+
+	      asection *s = bfd_section_from_elf_index (abfd, isym->st_shndx);
+
+	      if (s == NULL)
+		s = sec;
+
+	      if (c64_value_p (s, isym->st_value))
+		isym->st_target_internal |= ST_BRANCH_TO_C64;
+
+	      /* If this is a local symbol then we resolve it
+		 directly without creating a PLT entry.  */
+	      continue;
+	    }
+
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      asection *sym_sec = h->root.u.def.section;
+	      bfd_vma sym_value = h->root.u.def.value;
+
+	      if (sym_sec != NULL && c64_value_p (sym_sec, sym_value))
+		h->target_internal |= ST_BRANCH_TO_C64;
+	    }
 
 	  h->needs_plt = 1;
 	  if (h->plt.refcount <= 0)
@@ -8443,6 +8541,7 @@ elfNN_aarch64_new_section_hook (bfd *abfd, asection *sec)
       sdata = bfd_zalloc (abfd, amt);
       if (sdata == NULL)
 	return false;
+      sdata->elf.is_target_section_data = true;
       sec->used_by_bfd = sdata;
     }
 

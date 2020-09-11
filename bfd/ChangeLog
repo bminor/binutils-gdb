@@ -1,5 +1,21 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elf-bfd.h (bfd_elf_section_data): New member
+	is_target_section_data.
+	* elfnn-aarch64.c (_aarch64_elf_section_data): New member
+	sorted.
+	(elf_aarch64_section_data_get, c64_value_p): New functions.
+	(elf_aarch64_compare_mapping): Move function up in the file.
+	(elf_aarch64_obj_tdata): New member secmaps_initialised.
+	(bfd_elfNN_aarch64_init_maps, bfd_elfNN_aarch64_set_options):
+	Use it.
+	(elfNN_aarch64_size_stubs): Use symbol cache.
+	(elfNN_aarch64_check_relocs): Call
+	bfd_elfNN_aarch64_init_maps.  Mark C64 symbols in relocations
+	in the symbol cache.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (section_list,
 	sections_with_aarch64_elf_section_data,
 	record_section_with_aarch64_elf_section_data,

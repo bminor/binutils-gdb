@@ -57,6 +57,7 @@ struct aarch64_fix
 {
   struct aarch64_inst *inst;
   enum aarch64_opnd opnd;
+  bool c64;
 };
 
 #if defined OBJ_ELF
