@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64 (aarch64_opnd): Add A64C_AIMM and
+	A64C_Rm_EXT.
+	(aarch64_op): Add OP_A64C_ADD.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): New capability operands.
 
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>

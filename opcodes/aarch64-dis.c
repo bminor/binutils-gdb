@@ -273,6 +273,10 @@ aarch64_ext_regno (const aarch64_operand *self, aarch64_opnd_info *info,
 		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   info->reg.regno = extract_field (self->fields[0], code, 0);
+  /* For capability registers, set the qualifier.  */
+  if (aarch64_get_operand_class (info->type) == AARCH64_OPND_CLASS_CAP_REG)
+    info->qualifier = AARCH64_OPND_QLF_CA;
+
   return TRUE;
 }
 
@@ -821,6 +825,39 @@ aarch64_ext_fbits (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+static bfd_boolean
+do_ext_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  aarch64_opnd_info *info, const aarch64_insn code,
+		  const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		  aarch64_operand_error *errors ATTRIBUTE_UNUSED,
+		  int shift_amount, enum aarch64_field_kind imm,
+		  enum aarch64_field_kind shift)
+{
+  aarch64_insn value;
+
+  info->shifter.kind = AARCH64_MOD_LSL;
+  /* shift */
+  value = extract_field (shift, code, 0);
+  if (value >= 2)
+    return FALSE;
+  info->shifter.amount = value ? shift_amount : 0;
+  info->imm.value = extract_field (imm, code, 0);
+
+  return TRUE;
+}
+
+/* Decode arithmetic immediate for e.g.
+     SUBS <Cd>, <Cn|CSP>, #<imm> {, <shift>}.  */
+bfd_boolean
+aarch64_ext_a64c_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		      aarch64_opnd_info *info, const aarch64_insn code,
+		      const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		      aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  return do_ext_aimm (self, info, code, inst, errors, 12, FLD_imm12,
+		      FLD_a64c_shift_ai);
+}
+
 /* Decode arithmetic immediate for e.g.
      SUBS <Wd>, <Wn|WSP>, #<imm> {, <shift>}.  */
 bfd_boolean
@@ -829,18 +866,8 @@ aarch64_ext_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		  const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  aarch64_insn value;
-
-  info->shifter.kind = AARCH64_MOD_LSL;
-  /* shift */
-  value = extract_field (FLD_shift, code, 0);
-  if (value >= 2)
-    return FALSE;
-  info->shifter.amount = value ? 12 : 0;
-  /* imm12 (unsigned) */
-  info->imm.value = extract_field (FLD_imm12, code, 0);
-
-  return TRUE;
+  return do_ext_aimm (self, info, code, inst, errors, 12, FLD_imm12,
+		      FLD_shift);
 }
 
 /* Return true if VALUE is a valid logical immediate encoding, storing the
@@ -1365,7 +1392,8 @@ aarch64_ext_reg_extended (const aarch64_operand *self ATTRIBUTE_UNUSED,
   /* Assume inst->operands[0].qualifier has been resolved.  */
   assert (inst->operands[0].qualifier != AARCH64_OPND_QLF_NIL);
   info->qualifier = AARCH64_OPND_QLF_W;
-  if (inst->operands[0].qualifier == AARCH64_OPND_QLF_X
+  if ((inst->operands[0].qualifier == AARCH64_OPND_QLF_CA
+       || inst->operands[0].qualifier == AARCH64_OPND_QLF_X)
       && (info->shifter.kind == AARCH64_MOD_UXTX
 	  || info->shifter.kind == AARCH64_MOD_SXTX))
     info->qualifier = AARCH64_OPND_QLF_X;

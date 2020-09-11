@@ -1,5 +1,25 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-dis.c (aarch64_ext_regno, aarch64_ext_reg_extended):
+	Identify capability register class.
+	(do_ext_aimm): New function.
+	(arch64_ext_aimm): Call it.
+	(aarch64_ext_a64c_aimm): New function.
+	* aarch64-dis.h (ext_a64c_aimm): New function.
+	* aarch64-opc.c (fields): Add a64c_shift_ai field.
+	(operand_general_constraint_met_p, aarch64_print_operand): Add
+	A64C_AIMM and A64C_Rm_EXT.
+	* aarch64-opc.h (aarch64_field_kind): Add a64c_shift_ai.
+	* aarch64-tbl.h (QL3_A64C_CA_CA_NIL, QL3_A64C_CA_CA_R): New
+	macro.
+	(aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): Add new operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (do_special_encoding): Recognise capability
 	registers.
 	* aarch64-opc.c (aarch64_opnd_qualifiers): Capability operand
