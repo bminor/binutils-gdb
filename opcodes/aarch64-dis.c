@@ -1014,6 +1014,23 @@ aarch64_ext_inv_limm (const aarch64_operand *self,
   return true;
 }
 
+/* Decode register using an additional field that specifies size.
+   e.g. altbase instructions.  */
+bool
+aarch64_ext_regsz (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		   aarch64_opnd_info *info,
+		   const aarch64_insn code,
+		   const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		   aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+
+  aarch64_insn value = extract_field (self->fields[1], code, 0);
+  info->reg.regno = extract_field (self->fields[0], code, 0);
+  info->qualifier = value == 1 ? AARCH64_OPND_QLF_X : AARCH64_OPND_QLF_W;
+
+  return true;
+}
+
 /* Decode Ft for e.g. STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}]
    or LDP <Qt1>, <Qt2>, [<Xn|SP>], #<imm>.  */
 bool
@@ -1026,6 +1043,21 @@ aarch64_ext_ft (const aarch64_operand *self ATTRIBUTE_UNUSED,
 
   /* Rt */
   info->reg.regno = extract_field (FLD_Rt, code, 0);
+
+  if (inst->opcode->iclass == ldst_altbase)
+    {
+      enum aarch64_opnd_qualifier qualifier;
+      value = extract_field (FLD_altbase_sf, code, 0);
+      switch (value)
+	{
+	case 0: qualifier = AARCH64_OPND_QLF_S_D; break;
+	case 1: qualifier = AARCH64_OPND_QLF_S_S; break;
+	default: return false;
+	}
+      info->qualifier = qualifier;
+
+      return true;
+    }
 
   /* size */
   value = extract_field (FLD_ldst_size, code, 0);
@@ -1179,10 +1211,10 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
 
 /* Decode the address operand for e.g. LDRSW <Xt>, [<Xn|SP>{, #<simm>}].  */
 bool
-aarch64_ext_addr_uimm12 (const aarch64_operand *self, aarch64_opnd_info *info,
-			 aarch64_insn code,
-			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
-			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+aarch64_ext_addr_uimm (const aarch64_operand *self, aarch64_opnd_info *info,
+		       aarch64_insn code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   int shift;
   info->qualifier = get_expected_qualifier (inst, info->idx);

@@ -181,3 +181,17 @@ morello_ldst_alt_base c2, ALTSP
 	.endm
 morello_ldst_alt_basew w2, ALTVAREG
 morello_ldst_alt_basew w2, ALTSP
+
+	.macro morello_alt_uimm rt, cnsp, max
+	  .irp op, ldr, str
+	    \op    \rt, [\cnsp, \max]
+	    \op    \rt, [\cnsp, #32]
+	    \op    \rt, [\cnsp, #0]
+	  .endr
+	.endm
+morello_alt_uimm c4, ALTVAREG, #8176
+morello_alt_uimm c4, ALTSP, #8176
+morello_alt_uimm x4, ALTVAREG, #4088
+morello_alt_uimm x4, ALTSP, #4088
+morello_alt_uimm w4, ALTVAREG, #2044
+morello_alt_uimm w4, ALTSP, #2044

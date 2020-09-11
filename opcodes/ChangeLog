@@ -1,5 +1,31 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_regsz): New function.
+	(aarch64_ins_ft): Support altbase loads.
+	(aarch64_ins_addr_uimm12): Rename to aarch64_ins_addr_uimm.
+	* aarch64-asm.h: (ins_regsz): New function declaration.
+	(ins_addr_uimm12): Rename to ins_addr_uimm.
+	* aarch64-dis.c (aarch64_ext_regsz): New function.
+	(aarch64_ext_ft): Support altbase loads.
+	(aarch64_ext_addr_uimm12): Rename to aarch64_ext_addr_uimm.
+	* aarch64-dis.h: (ext_regsz): New function declaration.
+	(dis_addr_uimm12): Rename to dis_addr_uimm.
+	* aarch64-opc.c (fields): Add altbase_sf.
+	(operand_general_constraint_met_p): Check constraints for
+	ldst_altbase, CAPADDR_REGOFF, CAPADDR_UIMM9.
+	(aarch64_print_operand): Print Rsz, CAPADDR_REGOFF,
+	CAPADDR_UIMM9.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_altbase_sf.
+	* aarch64-tbl.h (QL2_A64C_R_CAPADDR, QL2_A64C_FP_CAPADDR): New
+	macro.
+	(aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-opc.c (get_altbase_reg_name): New function.
 	(aarch64_print_operand): Use it.  Add Wt.
 	* aarch64-tbl.h (QL2_A64C_W_CAPADDR): New macro.

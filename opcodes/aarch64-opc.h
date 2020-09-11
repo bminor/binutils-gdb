@@ -183,6 +183,7 @@ enum aarch64_field_kind
   FLD_capaddr_simm7,
   FLD_a64c_index2,
   FLD_imm17,
+  FLD_altbase_sf,
 };
 
 /* Field description.  */

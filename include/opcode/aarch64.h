@@ -519,6 +519,7 @@ enum aarch64_opnd
 				   destination.  */
   AARCH64_OPND_Can_SP,		/* Capability register or Cap SP as source. */
   AARCH64_OPND_Cam_SP,		/* Capability register or Cap SP as source. */
+  AARCH64_OPND_Rsz,		/* Integer register with a size field.  */
   AARCH64_OPND_A64C_Rm_EXT,	/* Integer Xm extended.  */
   AARCH64_OPND_A64C_IMMV4,	/* Immediate value #4 for BX.  */
   AARCH64_OPND_A64C_CST_REG,	/* Constant capability register c29 for
@@ -534,6 +535,10 @@ enum aarch64_opnd
   AARCH64_OPND_A64C_ADDR_SIMM7,	/* Address with 7-bit immediate offset.  */
   AARCH64_OPND_A64C_ADDR_SIMM9,	/* Address with 9-bit immediate offset.  */
   AARCH64_OPND_ADDR_PCREL17,	/* 17-bit PC-relative address for e.g. LDR.  */
+  AARCH64_OPND_CAPADDR_UIMM9,	/* Immediate offset with capability base for
+				   altbase instructions.  */
+  AARCH64_OPND_CAPADDR_REGOFF,	/* Register offset with capability base for
+				   altbase instructions.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -731,6 +736,7 @@ enum aarch64_insn_class
   a64c,
   br_sealed,
   br_capaddr,
+  ldst_altbase,
 };
 
 /* Opcode enumerators.  */

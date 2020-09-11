@@ -6448,6 +6448,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  po_int_reg_or_fail (REG_TYPE_R_32);
 	  break;
 
+	case AARCH64_OPND_Rsz:
 	case AARCH64_OPND_Rd:
 	case AARCH64_OPND_Rn:
 	case AARCH64_OPND_Rm:
@@ -7288,6 +7289,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    break;
 	  }
 
+	case AARCH64_OPND_CAPADDR_REGOFF:
+	  po_misc_or_fail (parse_cap_address (&str, info, opcode->iclass));
+	  goto regoff_addr;
+
 	case AARCH64_OPND_ADDR_REGOFF:
 	  /* [<Xn|SP>, <R><m>{, <extend> {<amount>}}]  */
 	  po_misc_or_fail (parse_address (&str, info));
@@ -7412,6 +7417,28 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 					      /* addr_off_p */ 1,
 					      /* need_libopcodes_p */ 1,
 					      /* skip_p */ 0);
+	  break;
+
+	case AARCH64_OPND_CAPADDR_UIMM9:
+	  po_misc_or_fail (parse_cap_address (&str, info, opcode->iclass));
+	  if (info->addr.pcrel || info->addr.offset.is_reg
+	      || !info->addr.preind || info->addr.writeback)
+	    {
+	      set_syntax_error (_("invalid addressing mode"));
+	      goto failure;
+	    }
+	  if (inst.reloc.type != BFD_RELOC_UNUSED)
+	    {
+	      set_syntax_error (_("relocation not allowed"));
+	      goto failure;
+	    }
+	  if (inst.reloc.exp.X_op == O_constant && !inst.gen_lit_pool)
+	    info->addr.offset.imm = inst.reloc.exp.X_add_number;
+	  else
+	    {
+	      set_syntax_error (_("Invalid offset constant"));
+	      goto failure;
+	    }
 	  break;
 
 	case AARCH64_OPND_ADDR_UIMM12:

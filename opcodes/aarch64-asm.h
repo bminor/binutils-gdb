@@ -43,6 +43,7 @@ bool aarch64_insert_operand (const aarch64_operand *,
 
 AARCH64_DECL_OPD_INSERTER (ins_none);
 AARCH64_DECL_OPD_INSERTER (ins_regno);
+AARCH64_DECL_OPD_INSERTER (ins_regsz);
 AARCH64_DECL_OPD_INSERTER (ins_reglane);
 AARCH64_DECL_OPD_INSERTER (ins_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_ldst_reglist);
@@ -63,7 +64,7 @@ AARCH64_DECL_OPD_INSERTER (ins_addr_offset);
 AARCH64_DECL_OPD_INSERTER (ins_addr_regoff);
 AARCH64_DECL_OPD_INSERTER (ins_addr_simm);
 AARCH64_DECL_OPD_INSERTER (ins_addr_simm10);
-AARCH64_DECL_OPD_INSERTER (ins_addr_uimm12);
+AARCH64_DECL_OPD_INSERTER (ins_addr_uimm);
 AARCH64_DECL_OPD_INSERTER (ins_simd_addr_post);
 AARCH64_DECL_OPD_INSERTER (ins_cond);
 AARCH64_DECL_OPD_INSERTER (ins_perm);

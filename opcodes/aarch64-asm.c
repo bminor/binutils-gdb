@@ -581,6 +581,22 @@ aarch64_ins_inv_limm (const aarch64_operand *self,
   return aarch64_ins_limm_1 (self, info, code, inst, true, errors);
 }
 
+/* Encode register and an additional field that specifies size.
+   e.g. altbase instructions.  */
+bool
+aarch64_ins_regsz (const aarch64_operand *self, const aarch64_opnd_info *info,
+		   aarch64_insn *code, const aarch64_inst *inst,
+		   aarch64_operand_error *errors)
+{
+  aarch64_insn value = 0;
+
+  aarch64_ins_regno (self, info, code, inst, errors);
+
+  value = info->qualifier == AARCH64_OPND_QLF_X ? 1 : 0;
+  insert_field (self->fields[1], code, value, 0);
+  return true;
+}
+
 /* Encode Ft for e.g. STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}]
    or LDP <Qt1>, <Qt2>, [<Xn|SP>], #<imm>.  */
 bool
@@ -594,6 +610,19 @@ aarch64_ins_ft (const aarch64_operand *self, const aarch64_opnd_info *info,
 
   /* Rt */
   aarch64_ins_regno (self, info, code, inst, errors);
+
+  if (inst->opcode->iclass == ldst_altbase)
+    {
+      switch (info->qualifier)
+	{
+	case AARCH64_OPND_QLF_S_D: value = 0; break;
+	case AARCH64_OPND_QLF_S_S: value = 1; break;
+	default: assert (0);
+	}
+      insert_field (FLD_altbase_sf, code, value, 0);
+      return true;
+    }
+
   if (inst->opcode->iclass == ldstpair_indexed
       || inst->opcode->iclass == ldstnapair_offs
       || inst->opcode->iclass == ldstpair_off
@@ -753,17 +782,17 @@ aarch64_ins_addr_simm10 (const aarch64_operand *self,
 
 /* Encode the address operand for e.g. LDRSW <Xt>, [<Xn|SP>{, #<pimm>}].  */
 bool
-aarch64_ins_addr_uimm12 (const aarch64_operand *self,
-			 const aarch64_opnd_info *info,
-			 aarch64_insn *code,
-			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
-			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+aarch64_ins_addr_uimm (const aarch64_operand *self,
+		       const aarch64_opnd_info *info,
+		       aarch64_insn *code,
+		       const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		       aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
   int shift = get_logsz (aarch64_get_qualifier_esize (info->qualifier));
 
   /* Rn */
   insert_field (self->fields[0], code, info->addr.base_regno, 0);
-  /* uimm12 */
+  /* uimm12/capaddr_uimm9 */
   insert_field (self->fields[1], code,info->addr.offset.imm >> shift, 0);
   return true;
 }
