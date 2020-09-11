@@ -15914,7 +15914,7 @@ breakpoint conditions will be downloaded to the target (if the target\n\
 supports such feature) and conditions will be evaluated on the target's side.\n\
 If this is set to \"auto\" (default), this will be automatically set to\n\
 \"target\" if it supports condition evaluation, otherwise it will\n\
-be set to \"gdb\""),
+be set to \"host\"."),
 			   &set_condition_evaluation_mode,
 			   &show_condition_evaluation_mode,
 			   &breakpoint_set_cmdlist,
