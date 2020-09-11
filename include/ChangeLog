@@ -1,5 +1,10 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elf/aarch64.h (R_MORELLO_CAPINIT, R_MORELLO_RELATIVE): New
+	relocations.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elf/aarch64.h: Add R_MORELLO_ADR_PREL_PG_HI20,
 	R_MORELLO_ADR_PREL_PG_HI20_NC and R_MORELLO_ADR_GOT_PAGE.
 
