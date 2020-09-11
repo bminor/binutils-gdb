@@ -8519,6 +8519,16 @@ lang_add_assignment (etree_type *exp)
 }
 
 void
+lang_add_newdot (lang_statement_list_type *ptr, bfd_vma newdot)
+{
+  lang_assignment_statement_type *new_stmt;
+  etree_type *exp = exp_assign (".", exp_intop (newdot), false);
+
+  new_stmt = new_stat (lang_assignment_statement, ptr);
+  new_stmt->exp = exp;
+}
+
+void
 lang_add_attribute (enum statement_enum attribute)
 {
   new_statement (attribute, sizeof (lang_statement_header_type), stat_ptr);

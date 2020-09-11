@@ -67,7 +67,7 @@ aarch64_elf_before_allocation (void)
       LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
 	/* Initialise mapping tables for code/data.  */
-	bfd_elf${ELFSIZE}_aarch64_init_maps (is->the_bfd);
+	bfd_elf${ELFSIZE}_aarch64_init_maps (is->the_bfd, &link_info);
       }
     }
 
@@ -205,6 +205,30 @@ elf${ELFSIZE}_aarch64_add_stub_section (const char *stub_sec_name,
   return NULL;
 }
 
+/* Insert a pad immediately after OUTPUT_SECTION.  */
+
+static void
+elf64_c64_pad_section (asection *osec, bfd_vma padding)
+{
+  if (padding > 0)
+    {
+      lang_statement_list_type list;
+      lang_output_section_statement_type *os = lang_output_section_get (osec);
+
+      lang_list_init (&list);
+      lang_add_newdot (&list, osec->vma + osec->size + padding);
+
+      if (list.head == NULL)
+        {
+          einfo (_("%X%P: can not make padding section: %E\n"));
+          return;
+        }
+
+      *(list.tail) = os->header.next;
+      os->header.next = list.head;
+    }
+}
+
 /* Another call-back for elf${ELFSIZE}_aarch64_size_stubs.  */
 
 static void
@@ -249,6 +273,10 @@ gld${EMULATION_NAME}_after_allocation (void)
     }
   else if (ret > 0)
     need_laying_out = 1;
+
+  elf${ELFSIZE}_c64_resize_sections (link_info.output_bfd, & link_info,
+				     & elf64_c64_pad_section,
+				     & gldaarch64_layout_sections_again);
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */

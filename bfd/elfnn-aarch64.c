@@ -3049,6 +3049,7 @@ struct elf_aarch64_link_hash_table
   /* Used for capability relocations.  */
   asection *srelcaps;
   int c64_rel;
+  bool c64_output;
 };
 
 /* Create an entry in an AArch64 ELF linker hash table.  */
@@ -4694,6 +4695,306 @@ _bfd_aarch64_erratum_843419_scan (bfd *input_bfd, asection *section,
   return true;
 }
 
+static bool
+section_start_symbol (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
+		      void *valp)
+{
+  return section->vma == *(bfd_vma *)valp;
+}
+
+/* Capability format functions.  */
+
+static unsigned
+exponent (uint64_t len)
+{
+#define CAP_MAX_EXPONENT 50
+  /* Size is a 65 bit value, so there's an implicit 0 MSB.  */
+  unsigned zeroes = __builtin_clzl (len) + 1;
+
+  /* All bits up to and including CAP_MW - 2 are zero.  */
+  if (CAP_MAX_EXPONENT < zeroes)
+    return (unsigned) -1;
+  else
+    return CAP_MAX_EXPONENT - zeroes;
+#undef CAP_MAX_EXPONENT
+}
+
+#define ONES(x)         ((1ULL << ((x) + 1)) - 1)
+#define ALIGN_UP(x, a)  (((x) + ONES (a)) & (~ONES (a)))
+
+static bool
+c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp)
+{
+  bfd_vma base = *basep, size = *limitp - *basep;
+
+  unsigned e, old_e;
+
+  if ((e = exponent (size)) == (unsigned) -1)
+    return true;
+
+  size = ALIGN_UP (size, e + 3);
+  old_e = e;
+  e = exponent (size);
+  if (old_e != e)
+    size = ALIGN_UP (size, e + 3);
+
+  base = ALIGN_UP (base, e + 3);
+
+  if (base == *basep && *limitp == base + size)
+    return true;
+
+  *basep = base;
+  *limitp = base + size;
+  return false;
+}
+
+struct sec_change_queue
+{
+  asection *sec;
+  struct sec_change_queue *next;
+};
+
+/* Queue up the change, sorted in order of the output section vma.  */
+
+static void
+queue_section_padding (struct sec_change_queue **queue, asection *sec)
+{
+  struct sec_change_queue *q = *queue, *last_q = NULL, *n;
+
+  while (q != NULL)
+    {
+      if (q->sec->vma > sec->vma)
+	break;
+      last_q = q;
+      q = q->next;
+    }
+
+  n = bfd_zmalloc (sizeof (struct sec_change_queue));
+
+  if (last_q == NULL)
+    *queue = n;
+  else
+    {
+      n->next = q;
+      last_q->next = n;
+    }
+
+  n->sec = sec;
+}
+
+/* Check if the bounds covering all sections between LOW_SEC and HIGH_SEC will
+   get rounded off in the Morello capability format and if it does, queue up a
+   change to fix up the section layout.  */
+static inline void
+record_section_change (asection *sec, struct sec_change_queue **queue)
+{
+  bfd_vma low = sec->vma;
+  bfd_vma high = sec->vma + sec->size;
+
+  if (!c64_valid_cap_range (&low, &high))
+    queue_section_padding (queue, sec);
+}
+
+/* Make sure that all capabilities that refer to sections have bounds that
+   won't overlap with neighbouring sections.  This is needed in two specific
+   cases.  The first case is that of PCC, which needs to span across all
+   executable sections as well as the GOT and PLT sections in the output
+   binary.  The second case is that of linker and ldscript defined symbols that
+   indicate start and/or end of sections.
+
+   In both cases, overlap of capability bounds are avoided by aligning the base
+   of the section and if necessary, adding a pad at the end of the section so
+   that the section following it starts only after the pad.  */
+
+void
+elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
+			   void (*c64_pad_section) (asection *, bfd_vma),
+			   void (*layout_sections_again) (void))
+{
+  asection *sec, *pcc_low_sec = NULL, *pcc_high_sec = NULL;
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+  bfd_vma low = (bfd_vma) -1, high = 0;
+
+  htab->layout_sections_again = layout_sections_again;
+
+  if (!htab->c64_output)
+    return;
+
+  struct sec_change_queue *queue = NULL;
+
+  /* First, walk through all the relocations to find those referring to linker
+     defined and ldscript defined symbols since we set their range to their
+     output sections.  */
+  for (bfd *input_bfd = info->input_bfds;
+       htab->c64_rel && input_bfd != NULL; input_bfd = input_bfd->link.next)
+    {
+      Elf_Internal_Shdr *symtab_hdr;
+
+      symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+      if (symtab_hdr->sh_info == 0)
+	continue;
+
+      for (sec = input_bfd->sections; sec != NULL; sec = sec->next)
+	{
+	  Elf_Internal_Rela *irelaend, *irela;
+
+	  /* If there aren't any relocs, then there's nothing more to do.  */
+	  if ((sec->flags & SEC_RELOC) == 0 || sec->reloc_count == 0)
+	    continue;
+
+	  irela = _bfd_elf_link_read_relocs (input_bfd, sec, NULL, NULL,
+					     info->keep_memory);
+	  if (irela == NULL)
+	    continue;
+
+	  /* Now examine each relocation.  */
+	  irelaend = irela + sec->reloc_count;
+	  for (; irela < irelaend; irela++)
+	    {
+	      unsigned int r_indx;
+	      struct elf_link_hash_entry *h;
+	      int e_indx;
+	      asection *os;
+
+	      r_indx = ELFNN_R_SYM (irela->r_info);
+
+	      /* Linker defined or linker script defined symbols are always in
+		 the symbol hash.  */
+	      if (r_indx < symtab_hdr->sh_info)
+		continue;
+
+	      e_indx = r_indx - symtab_hdr->sh_info;
+	      h = elf_sym_hashes (input_bfd)[e_indx];
+
+	      /* XXX Does this ever happen?  */
+	      if (h == NULL)
+		continue;
+
+	      os = h->root.u.def.section->output_section;
+
+	      if (h->root.linker_def)
+		record_section_change (os, &queue);
+	      else if (h->root.ldscript_def)
+		{
+		  const char *name = h->root.root.string;
+		  size_t len = strlen (name);
+
+		  if (len > 8 && name[0] == '_' && name[1] == '_'
+		      && (!strncmp (name + 2, "start_", 6)
+			  || !strcmp (name + len - 6, "_start")))
+
+		    {
+		      bfd_vma value = os->vma + os->size;
+
+		      os = bfd_sections_find_if (info->output_bfd,
+						 section_start_symbol, &value);
+
+		      if (os != NULL)
+			record_section_change (os, &queue);
+		    }
+		  /* XXX We're overfitting here because the offset of H within
+		     the output section is not yet resolved and ldscript
+		     defined symbols do not have input section information.  */
+		  else
+		    record_section_change (os, &queue);
+		}
+	    }
+	}
+    }
+
+  /* Next, walk through output sections to find the PCC span and add a padding
+     at the end to ensure that PCC bounds don't bleed into neighbouring
+     sections.  For now PCC needs to encompass all code sections, .got, .plt
+     and .got.plt.  */
+  for (sec = output_bfd->sections; sec != NULL; sec = sec->next)
+    {
+      /* XXX This is a good place to figure out if there are any readable or
+	 writable sections in the PCC range that are not in the list of
+	 sections we want the PCC to span and then warn the user of it.  */
+
+#define NOT_OP_SECTION(s) ((s) == NULL || (s)->output_section != sec)
+
+      if ((sec->flags & SEC_CODE) == 0
+	  && NOT_OP_SECTION (htab->root.sgotplt)
+	  && NOT_OP_SECTION (htab->root.igotplt)
+	  && NOT_OP_SECTION (htab->root.sgot)
+	  && NOT_OP_SECTION (htab->root.splt)
+	  && NOT_OP_SECTION (htab->root.iplt))
+	continue;
+
+      if (sec->vma < low)
+	{
+	  low = sec->vma;
+	  pcc_low_sec = sec;
+	}
+      if (sec->vma + sec->size > high)
+	{
+	  high = sec->vma + sec->size;
+	  pcc_high_sec = sec;
+	}
+
+#undef NOT_OP_SECTION
+    }
+
+  /* Sequentially add alignment and padding as required.  We also need to
+     account for the PCC-related alignment and padding here since its
+     requirements could change based on the range of sections it encompasses
+     and whether they need to be padded or aligned.  */
+  while (queue)
+    {
+      unsigned align = 0;
+      bfd_vma padding = 0;
+
+      low = queue->sec->vma;
+      high = queue->sec->vma + queue->sec->size;
+
+      if (!c64_valid_cap_range (&low, &high))
+	{
+	  align = __builtin_ctzl (low);
+
+	  if (queue->sec->alignment_power < align)
+	    queue->sec->alignment_power = align;
+
+	  padding = high - queue->sec->vma - queue->sec->size;
+
+	  if (queue->sec != pcc_high_sec)
+	    {
+	      c64_pad_section (queue->sec, padding);
+	      padding = 0;
+	    }
+	}
+
+      /* If we have crossed all sections within the PCC range, set up alignment
+         and padding for the PCC range.  */
+      if (pcc_high_sec != NULL && pcc_low_sec != NULL
+	  && (queue->next == NULL
+	      || queue->next->sec->vma > pcc_high_sec->vma))
+	{
+	  /* Layout sections since it affects the final range of PCC.  */
+	  (*htab->layout_sections_again) ();
+
+	  bfd_vma pcc_low = pcc_low_sec->vma;
+	  bfd_vma pcc_high = pcc_high_sec->vma + pcc_high_sec->size + padding;
+
+	  if (!c64_valid_cap_range (&pcc_low, &pcc_high))
+	    {
+	      align = __builtin_ctzl (pcc_low);
+	      if (pcc_low_sec->alignment_power < align)
+		pcc_low_sec->alignment_power = align;
+
+	      padding = pcc_high - pcc_high_sec->vma - pcc_high_sec->size;
+	      c64_pad_section (pcc_high_sec, padding);
+	    }
+	}
+
+      (*htab->layout_sections_again) ();
+
+      struct sec_change_queue *queue_free = queue;
+
+      queue = queue->next;
+      free (queue_free);
+    }
+}
 
 /* Determine and set the size of the stub section for a final link.
 
@@ -5194,7 +5495,7 @@ elfNN_aarch64_section_map_add (bfd *abfd, asection *sec, char type,
 
 /* Initialise maps of insn/data for input BFDs.  */
 void
-bfd_elfNN_aarch64_init_maps (bfd *abfd)
+bfd_elfNN_aarch64_init_maps (bfd *abfd, struct bfd_link_info *info)
 {
   Elf_Internal_Sym *isymbuf;
   Elf_Internal_Shdr *hdr;
@@ -5222,6 +5523,8 @@ bfd_elfNN_aarch64_init_maps (bfd *abfd)
   if (isymbuf == NULL)
     return;
 
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table ((info));
+
   for (i = 0; i < localsyms; i++)
     {
       Elf_Internal_Sym *isym = &isymbuf[i];
@@ -5236,7 +5539,12 @@ bfd_elfNN_aarch64_init_maps (bfd *abfd)
 
 	  if (bfd_is_aarch64_special_symbol_name
 	      (name, BFD_AARCH64_SPECIAL_SYM_TYPE_MAP))
-	    elfNN_aarch64_section_map_add (abfd, sec, name[1], isym->st_value);
+	    {
+	      elfNN_aarch64_section_map_add (abfd, sec, name[1],
+					     isym->st_value);
+	      if (!htab->c64_output && name[1] == 'c')
+		htab->c64_output = true;
+	    }
 	}
     }
   elf_aarch64_tdata (abfd)->secmaps_initialised = true;
@@ -5926,53 +6234,6 @@ aarch64_relocation_aginst_gp_p (bfd_reloc_code_real_type reloc)
 	  || reloc == BFD_RELOC_AARCH64_MOVW_GOTOFF_G1);
 }
 
-/* Capability format functions.  */
-
-static unsigned
-exponent (uint64_t len)
-{
-#define CAP_MAX_EXPONENT 50
-  /* Size is a 65 bit value, so there's an implicit 0 MSB.  */
-  unsigned zeroes = __builtin_clzl (len) + 1;
-
-  /* All bits up to and including CAP_MW - 2 are zero.  */
-  if (CAP_MAX_EXPONENT < zeroes)
-    return (unsigned) -1;
-  else
-    return CAP_MAX_EXPONENT - zeroes;
-#undef CAP_MAX_EXPONENT
-}
-
-#define ONES(x)         ((1ULL << ((x) + 1)) - 1)
-#define ALIGN_UP(x, a)  (((x) + ONES (a)) & (~ONES (a)))
-
-static bool
-c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp)
-{
-  bfd_vma base = *basep, size = *limitp - *basep;
-
-  unsigned e, old_e;
-
-  if ((e = exponent (size)) == (unsigned) -1)
-    return true;
-
-  size = ALIGN_UP (size, e + 3);
-  old_e = e;
-  e = exponent (size);
-  if (old_e != e)
-    size = ALIGN_UP (size, e + 3);
-
-  base = ALIGN_UP (base, e + 3);
-
-  if (base == *basep && *limitp == base + size)
-    return true;
-
-  *basep = base;
-  *limitp = base + size;
-  return false;
-}
-
-
 /* Build capability meta data, i.e. size and permissions for a capability.  */
 
 static bfd_vma
@@ -5994,13 +6255,6 @@ cap_meta (size_t size, const asection *sec)
   /* We should always be able to derive a valid set of permissions
      from the section flags.  */
   abort ();
-}
-
-static bool
-section_start_symbol (bfd *abfd ATTRIBUTE_UNUSED, asection *section,
-		      void *valp)
-{
-  return section->vma == *(bfd_vma *)valp;
 }
 
 static bfd_reloc_status_type
@@ -8480,7 +8734,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
-  bfd_elfNN_aarch64_init_maps (abfd);
+  bfd_elfNN_aarch64_init_maps (abfd, info);
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -9998,7 +10252,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
       {
 	if (!is_aarch64_elf (ibfd))
 	  continue;
-	bfd_elfNN_aarch64_init_maps (ibfd);
+	bfd_elfNN_aarch64_init_maps (ibfd, info);
       }
 
   /* We now have determined the sizes of the various dynamic sections.
