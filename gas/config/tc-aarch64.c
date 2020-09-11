@@ -7429,28 +7429,16 @@ addr_simm:
 
 	case AARCH64_OPND_CAPADDR_UIMM9:
 	  po_misc_or_fail (parse_cap_address (&str, info, opcode->iclass));
-	  if (info->addr.pcrel || info->addr.offset.is_reg
-	      || !info->addr.preind || info->addr.writeback)
-	    {
-	      set_syntax_error (_("invalid addressing mode"));
-	      goto failure;
-	    }
 	  if (inst.reloc.type != BFD_RELOC_UNUSED)
 	    {
 	      set_syntax_error (_("relocation not allowed"));
 	      goto failure;
 	    }
-	  if (inst.reloc.exp.X_op == O_constant && !inst.gen_lit_pool)
-	    info->addr.offset.imm = inst.reloc.exp.X_add_number;
-	  else
-	    {
-	      set_syntax_error (_("Invalid offset constant"));
-	      goto failure;
-	    }
-	  break;
+	  goto addr_uimm;
 
 	case AARCH64_OPND_ADDR_UIMM12:
 	  po_misc_or_fail (parse_address (&str, info));
+addr_uimm:
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || !info->addr.preind || info->addr.writeback)
 	    {
@@ -8885,8 +8873,13 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
   int idx;
   enum aarch64_op new_op;
   const aarch64_opcode *new_opcode;
+  enum aarch64_opnd target;
 
-  gas_assert (instr->opcode->iclass == ldst_pos);
+  gas_assert (instr->opcode->iclass == ldst_pos
+	      || instr->opcode->iclass == ldst_altbase);
+
+  target = (instr->opcode->iclass == ldst_pos ? AARCH64_OPND_ADDR_SIMM9
+	    : AARCH64_OPND_CAPADDR_SIMM9);
 
   switch (instr->opcode->op)
     {
@@ -8897,17 +8890,19 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
     case OP_STRH_POS: new_op = OP_STURH; break;
     case OP_LDRSH_POS: new_op = OP_LDURSH; break;
     case OP_LDR_POS: new_op = OP_LDUR; break;
-    case OP_LDR_POS_2: new_op = OP_LDUR_2; break;
-    case OP_LDR_POS_3: new_op = OP_LDUR_3; break;
-    case OP_LDR_POS_4: new_op = OP_LDUR_4; break;
     case OP_STR_POS: new_op = OP_STUR; break;
-    case OP_STR_POS_2: new_op = OP_STUR_2; break;
-    case OP_STR_POS_3: new_op = OP_STUR_3; break;
-    case OP_STR_POS_4: new_op = OP_STUR_4; break;
     case OP_LDRF_POS: new_op = OP_LDURV; break;
     case OP_STRF_POS: new_op = OP_STURV; break;
     case OP_LDRSW_POS: new_op = OP_LDURSW; break;
     case OP_PRFM_POS: new_op = OP_PRFUM; break;
+    case OP_LDR_POS_C: new_op = OP_LDUR_C; break;
+    case OP_STR_POS_C: new_op = OP_STUR_C; break;
+    case OP_LDRB_POS_A:new_op = OP_LDURB_A; break;
+    case OP_STRB_POS_A: new_op = OP_STURB_A; break;
+    case OP_LDR_POS_AC: new_op = OP_LDUR_AC; break;
+    case OP_LDR_POS_AX: new_op = OP_LDUR_AX; break;
+    case OP_STR_POS_AC: new_op = OP_STUR_AC; break;
+    case OP_STR_POS_AX: new_op = OP_STUR_AX; break;
     default: new_op = OP_NIL; break;
     }
 
@@ -8922,11 +8917,11 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
 
   aarch64_replace_opcode (instr, new_opcode);
 
-  /* Clear up the ADDR_SIMM9's qualifier; otherwise the
+  /* Clear up the address operand's qualifier; otherwise the
      qualifier matching may fail because the out-of-date qualifier will
      prevent the operand being updated with a new and correct qualifier.  */
   idx = aarch64_operand_index (instr->opcode->operands,
-			       AARCH64_OPND_ADDR_SIMM9);
+			       target);
   gas_assert (idx == 1);
   instr->operands[idx].qualifier = AARCH64_OPND_QLF_NIL;
 
@@ -9131,6 +9126,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
       fix_mov_imm_insn (fixP, buf, new_inst, value);
       break;
 
+    case AARCH64_OPND_CAPADDR_UIMM9:
     case AARCH64_OPND_A64C_ADDR_SIMM9:
     case AARCH64_OPND_A64C_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM7:
@@ -9165,7 +9161,8 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
 	  put_aarch64_insn (buf, new_inst->value);
 	  break;
 	}
-      else if (new_inst->opcode->iclass == ldst_pos
+      else if ((new_inst->opcode->iclass == ldst_pos
+		|| new_inst->opcode->iclass == ldst_altbase)
 	       && try_to_encode_as_unscaled_ldst (new_inst))
 	{
 	  put_aarch64_insn (buf, new_inst->value);

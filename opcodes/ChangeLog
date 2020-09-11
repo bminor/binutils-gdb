@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-tbl.h (aarch64_opcode_table): Change OP of LDUR/STUR
+	instructions.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_addr_uimm): Shift only if
 	F_NOSHIFT is not set.
 	* aarch64-tbl.h (QL2_B_ADDR, QL2_X_ADDR, QL2_H_ADDR): New
