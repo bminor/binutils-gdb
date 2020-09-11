@@ -66,6 +66,18 @@ morello_gc_xc x6, csp
 chkeq csp, c20
 chkeq c19, c20
 
+Label:
+	.macro morello_adrx cd
+	  .irp op, adr, adrp
+	    \op    \cd, Label
+	  .endr
+	.endm
+morello_adrx c0
+
+	.ifdef C64MODE
+	adrdp   c0, #4096
+	.endif
+
 // Three operands (dni)
 
 	.macro morello_addsub_imm cdsp, cnsp

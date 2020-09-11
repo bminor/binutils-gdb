@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-.* <.text>:
+.* <.*>:
 .*:	c2c273e0 	bx	#4
 .*:	d65f03c0 	ret
 .*:	c2c23280 	blr	c20
@@ -71,6 +71,11 @@ Disassembly of section \.text:
 .*:	c2c053e6 	gcvalue	x6, csp
 .*:	c2d4a7e1 	chkeq	csp, c20
 .*:	c2d4a661 	chkeq	c19, c20
+
+.* <Label>:
+.*:	10000000 	adr	x0, .* <Label>
+.*:	90000000 	adrp	x0, .* <.*>
+			.*: R_AARCH64_ADR_PREL_PG_HI21	.*
 .*:	023fc135 	add	c21, c9, #0xff0
 .*:	023ffd35 	add	c21, c9, #0xfff
 .*:	0247f935 	add	c21, c9, #0x1fe, lsl #12

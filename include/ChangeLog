@@ -1,5 +1,9 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_opnd): Add A64C_ADDR_ADRDP.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_op): Add members for altbase LDUR
 	and STUR.  Rename existing LDUR ops.
 

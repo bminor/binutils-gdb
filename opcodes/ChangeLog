@@ -1,5 +1,21 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-dis.c (aarch64_ext_regno): Reject A64 ADR when in
+	C64.
+	(aarch64_ext_imm): Select ADRDP in C64.
+	* aarch64-opc.c (fields): Add a64c_immhi field.
+	(validate_adr_reg_for_feature): New function.
+	(operand_general_constraint_met_p): Use it.
+	(aarch64_print_operand): Add A64C_ADDR_ADRDP.
+	* aarch64-opc.h (aarch64_field_kind): FLD_a64c_immhi.
+	* aarch64-tbl.h (aarch64_opcode_table): Add new instructions.
+	(AARCH64_OPERANDS): Add new operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-tbl.h (aarch64_opcode_table): Change OP of LDUR/STUR
 	instructions.
 	* aarch64-opc-2.c: Regenerate.

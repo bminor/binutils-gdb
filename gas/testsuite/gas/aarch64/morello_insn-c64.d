@@ -1,4 +1,4 @@
-#as: -march=morello+c64
+#as: -march=morello+c64 --defsym C64MODE=1
 #objdump: -dr
 #source: morello_insn.s
 
@@ -7,7 +7,7 @@
 
 Disassembly of section \.text:
 
-.* <.text>:
+.* <.*>:
 .*:	c2c273e0 	bx	#4
 .*:	c2c253c0 	ret	c30
 .*:	c2c23280 	blr	c20
@@ -72,6 +72,12 @@ Disassembly of section \.text:
 .*:	c2c053e6 	gcvalue	x6, csp
 .*:	c2d4a7e1 	chkeq	csp, c20
 .*:	c2d4a661 	chkeq	c19, c20
+
+.* <Label>:
+.*:	10000000 	adr	c0, .* <Label>
+.*:	90800000 	adrp	c0, .* <.*>
+			.*: R_AARCH64_ADR_PREL_PG_HI21	.*
+.*:	b0000000 	adrdp	c0, #0x1000
 .*:	023fc135 	add	c21, c9, #0xff0
 .*:	023ffd35 	add	c21, c9, #0xfff
 .*:	0247f935 	add	c21, c9, #0x1fe, lsl #12
