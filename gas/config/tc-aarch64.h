@@ -122,7 +122,15 @@ enum pointer_auth_key {
     (FIX)->tc_fix_data.opnd = AARCH64_OPND_NIL; }
 
 #define TC_SYMFIELD_TYPE 	unsigned int
-#define AARCH64_GET_FLAG(s)   	(*symbol_get_tc (s))
+#define AARCH64_GET_FLAG(s)	(*symbol_get_tc (s))
+#define AARCH64_SET_FLAG(s,v)	(*symbol_get_tc (s) |= (v))
+#define AARCH64_RESET_FLAG(s,v)	(*symbol_get_tc (s) &= ~(v))
+
+#define AARCH64_FLAG_C64	(1 << 0)	/* C64 function.  */
+
+#define AARCH64_IS_C64(s)	(AARCH64_GET_FLAG (s) & AARCH64_FLAG_C64)
+#define AARCH64_SET_C64(s,t)	((t) ? AARCH64_SET_FLAG (s, AARCH64_FLAG_C64) \
+				 : AARCH64_RESET_FLAG (s, AARCH64_FLAG_C64))
 
 void aarch64_copy_symbol_attributes (symbolS *, symbolS *);
 #ifndef TC_COPY_SYMBOL_ATTRIBUTES
@@ -250,7 +258,7 @@ extern void aarch64_after_parse_args (void);
 #if defined OBJ_ELF || defined OBJ_COFF
 
 # define EXTERN_FORCE_RELOC 			1
-# define tc_fix_adjustable(FIX) 		1
+# define tc_fix_adjustable(f) aarch64_fix_adjustable (f)
 /* Values passed to md_apply_fix don't include the symbol value.  */
 # define MD_APPLY_SYM_VALUE(FIX) 		0
 
@@ -267,6 +275,7 @@ extern void aarch64_frob_label (symbolS *);
 extern void aarch64_frob_section (asection *sec);
 extern int aarch64_data_in_code (void);
 extern char * aarch64_canonicalize_symbol_name (char *);
+extern bool aarch64_fix_adjustable (struct fix *);
 extern void aarch64_adjust_symtab (void);
 extern void aarch64elf_frob_symbol (symbolS *, int *);
 extern void cons_fix_new_aarch64 (fragS *, int, int, expressionS *);

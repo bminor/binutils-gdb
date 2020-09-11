@@ -1,5 +1,14 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Set LSB for C64 symbols.
+	(elfNN_aarch64_output_map_sym, elfNN_aarch64_output_stub_sym):
+	Initialise st_target_internal.
+	(aarch64_elfNN_swap_symbol_in, aarch64_elfNN_swap_symbol_out):
+	New functions.
+	(elfNN_aarch64_size_info): Add them as callbacks.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* cpu-aarch64.c (bfd_is_aarch64_special_symbol_name): Add
 	capability mapping symbol.
 	* elfnn-aarch64.c (elfNN_aarch64_output_map_sym,

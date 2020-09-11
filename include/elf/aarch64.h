@@ -447,4 +447,10 @@ RELOC_NUMBER (R_AARCH64_IRELATIVE, 1032)
 
 END_RELOC_NUMBERS (R_AARCH64_end)
 
+enum aarch64_st_branch_type
+{
+  ST_BRANCH_TO_A64,
+  ST_BRANCH_TO_C64,
+};
+
 #endif /* _ELF_AARCH64_H */

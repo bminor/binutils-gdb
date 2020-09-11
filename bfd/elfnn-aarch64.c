@@ -5896,6 +5896,10 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 						   place, value,
 						   signed_addend,
 						   weak_undef_p);
+
+      if (bfd_r_type == BFD_RELOC_AARCH64_ADR_LO21_PCREL && sym != NULL
+	  && sym->st_target_internal & ST_BRANCH_TO_C64)
+	value |= 1;
       break;
 
     case BFD_RELOC_AARCH64_BRANCH19:
@@ -5934,6 +5938,10 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
 						   place, value,
 						   signed_addend, weak_undef_p);
+      if (bfd_r_type == BFD_RELOC_AARCH64_ADD_LO12 && sym != NULL
+	  && sym->st_target_internal & ST_BRANCH_TO_C64)
+	value |= 1;
+
       break;
 
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
@@ -8362,6 +8370,7 @@ elfNN_aarch64_output_map_sym (output_arch_syminfo *osi,
   sym.st_other = 0;
   sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_NOTYPE);
   sym.st_shndx = osi->sec_shndx;
+  sym.st_target_internal = 0;
   return osi->func (osi->finfo, names[type], &sym, osi->sec, NULL) == 1;
 }
 
@@ -8379,6 +8388,7 @@ elfNN_aarch64_output_stub_sym (output_arch_syminfo *osi, const char *name,
   sym.st_other = 0;
   sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
   sym.st_shndx = osi->sec_shndx;
+  sym.st_target_internal = 0;
   return osi->func (osi->finfo, name, &sym, osi->sec, NULL) == 1;
 }
 
@@ -10011,6 +10021,48 @@ elfNN_aarch64_merge_gnu_properties (struct bfd_link_info *info,
 						 bprop, prop);
 }
 
+/* Demangle c64 function symbols as we read them in.  */
+
+static bool
+aarch64_elfNN_swap_symbol_in (bfd * abfd,
+			      const void *psrc,
+			      const void *pshn,
+			      Elf_Internal_Sym *dst)
+{
+  if (!bfd_elfNN_swap_symbol_in (abfd, psrc, pshn, dst))
+    return false;
+
+  dst->st_target_internal = 0;
+
+  if (ELF_ST_TYPE (dst->st_info) == STT_FUNC
+      || ELF_ST_TYPE (dst->st_info) == STT_GNU_IFUNC)
+    {
+      dst->st_target_internal = dst->st_value & ST_BRANCH_TO_C64;
+      dst->st_value &= ~(bfd_vma) ST_BRANCH_TO_C64;
+    }
+
+  return true;
+}
+
+
+/* Mangle c64 function symbols as we write them out.  */
+
+static void
+aarch64_elfNN_swap_symbol_out (bfd *abfd,
+			       const Elf_Internal_Sym *src,
+			       void *cdst,
+			       void *shndx)
+{
+  Elf_Internal_Sym newsym = *src;
+
+  if ((ELF_ST_TYPE (newsym.st_info) == STT_FUNC
+       || ELF_ST_TYPE (newsym.st_info) == STT_GNU_IFUNC)
+      && newsym.st_shndx != SHN_UNDEF)
+    newsym.st_value |= newsym.st_target_internal;
+
+  bfd_elfNN_swap_symbol_out (abfd, &newsym, cdst, shndx);
+}
+
 /* We use this so we can override certain functions
    (though currently we don't).  */
 
@@ -10033,8 +10085,8 @@ const struct elf_size_info elfNN_aarch64_size_info =
   bfd_elfNN_write_shdrs_and_ehdr,
   bfd_elfNN_checksum_contents,
   bfd_elfNN_write_relocs,
-  bfd_elfNN_swap_symbol_in,
-  bfd_elfNN_swap_symbol_out,
+  aarch64_elfNN_swap_symbol_in,
+  aarch64_elfNN_swap_symbol_out,
   bfd_elfNN_slurp_reloc_table,
   bfd_elfNN_slurp_symbol_table,
   bfd_elfNN_swap_dyn_in,
