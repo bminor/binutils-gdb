@@ -1,5 +1,19 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+	* aarch64-opc.c (fields): Add a64c_index2.
+	(operand_general_constraint_met_p, aarch64_print_operand): Add
+	A64C_ADDR_SIMM7.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_a64c_index2.
+	* aarch64-tbl.h (QL2_A64C_CA_ADDR, QL2_A64C_X_ADDR,
+	QL3_A64C_W_CA_ADDR, QL4_A64C_W_CA_CA_ADDR): New macros.
+	(aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_addr_simple): Fix comment.
 	(aarch64_ins_addr_simm): Support capability address operands.
 	* aarch64-dis.c (aarch64_ext_addr_simple): Fix comment.

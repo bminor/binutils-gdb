@@ -6633,6 +6633,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      break;
 	    }
 
+	case AARCH64_OPND_A64C_ADDR_SIMM7:
 	case AARCH64_OPND_ADDR_SIMM7:
 	  po_misc_or_fail (parse_address (&str, info));
 	  if (info->addr.pcrel || info->addr.offset.is_reg
@@ -7262,7 +7263,9 @@ warn_unpredictable_ldst (aarch64_instruction *instr, char *str)
       if ((aarch64_get_operand_class (opnds[0].type)
 	   == AARCH64_OPND_CLASS_INT_REG)
 	  && (aarch64_get_operand_class (opnds[1].type)
-	      == AARCH64_OPND_CLASS_INT_REG)
+	      == AARCH64_OPND_CLASS_INT_REG
+	      || (aarch64_get_operand_class (opnds[1].type)
+		  == AARCH64_OPND_CLASS_CAP_REG))
 	  && (opnds[0].reg.regno == opnds[1].reg.regno
 	      || opnds[0].reg.regno == opnds[2].reg.regno))
 	as_warn (_("unpredictable: identical transfer and status registers"
@@ -8156,6 +8159,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
       fix_mov_imm_insn (fixP, buf, new_inst, value);
       break;
 
+    case AARCH64_OPND_A64C_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:
