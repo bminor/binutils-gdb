@@ -1,5 +1,10 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfxx-aarch64.c (reencode_ldst_pos_imm): Support loads and
+	stores with alternate base.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_howto_table,
 	elfNN_aarch64_final_link_relocate, elfNN_aarch64_check_relocs,
 	elfNN_aarch64_relocate_section): Add R_MORELLO_CAPINIT and
