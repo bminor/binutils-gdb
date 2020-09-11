@@ -1,3 +1,9 @@
+2020-09-16  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/bp-cmds-sourced-script.c: New file.
+	* gdb.base/bp-cmds-sourced-script.exp: New test.
+	* gdb.base/bp-cmds-sourced-script.gdb: New file.
+
 2020-09-16  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdbserver-support.exp (gdbserver_exit): Make sure we

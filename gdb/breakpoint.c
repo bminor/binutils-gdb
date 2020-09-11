@@ -1229,13 +1229,23 @@ commands_command_1 (const char *arg, int from_tty,
 
   if (arg == NULL || !*arg)
     {
+      /* Argument not explicitly given.  Synthesize it.  */
       if (breakpoint_count - prev_breakpoint_count > 1)
 	new_arg = string_printf ("%d-%d", prev_breakpoint_count + 1,
 				 breakpoint_count);
       else if (breakpoint_count > 0)
 	new_arg = string_printf ("%d", breakpoint_count);
-      arg = new_arg.c_str ();
     }
+  else
+    {
+      /* Create a copy of ARG.  This is needed because the "commands"
+	 command may be coming from a script.  In that case, the read
+	 line buffer is going to be overwritten in the lambda of
+	 'map_breakpoint_numbers' below when reading the next line
+	 before we are are done parsing the breakpoint numbers.  */
+      new_arg = arg;
+    }
+  arg = new_arg.c_str ();
 
   map_breakpoint_numbers
     (arg, [&] (breakpoint *b)
