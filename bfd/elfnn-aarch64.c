@@ -6347,24 +6347,36 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
-      if (globals->root.sgot == NULL)
+      off = symbol_got_offset (input_bfd, h, r_symndx);
+      base_got = globals->root.sgot;
+
+      if (base_got == NULL)
 	BFD_ASSERT (h != NULL);
 
       relative_reloc = false;
       if (h != NULL)
 	{
 	  bfd_vma addend = 0;
+	  bool c64_reloc =
+	    (bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
+	     || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE);
 
 	  /* If a symbol is not dynamic and is not undefined weak, bind it
 	     locally and generate a RELATIVE relocation under PIC mode.
 
 	     NOTE: one symbol may be referenced by several relocations, we
 	     should only generate one RELATIVE relocation for that symbol.
-	     Therefore, check GOT offset mark first.  */
-	  if (h->dynindx == -1
-	      && !h->forced_local
-	      && h->root.type != bfd_link_hash_undefweak
-	      && bfd_link_pic (info)
+	     Therefore, check GOT offset mark first.
+
+	     NOTE2: Symbol references via GOT in C64 static binaries without
+	     PIC should always have relative relocations, so we do that here
+	     early.  */
+	  if (((h->dynindx == -1
+		&& !h->forced_local
+		&& h->root.type != bfd_link_hash_undefweak
+		&& bfd_link_pic (info))
+	       || (!bfd_link_pic (info) && bfd_link_executable (info)
+		   && c64_reloc))
 	      && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    relative_reloc = true;
 
@@ -6374,11 +6386,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  /* Record the GOT entry address which will be used when generating
 	     RELATIVE relocation.  */
 	  if (relative_reloc)
-	    {
-	      got_entry_addr = value;
-	      base_got = globals->root.sgot;
-	      off = h->got.offset & ~1;
-	    }
+	    got_entry_addr = value;
 
 	  if (aarch64_relocation_aginst_gp_p (bfd_r_type))
 	    addend = (globals->root.sgot->output_section->vma
@@ -6405,8 +6413,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    abort ();
 	  }
 
-	off = symbol_got_offset (input_bfd, h, r_symndx);
-	base_got = globals->root.sgot;
 	got_entry_addr = (base_got->output_section->vma
 			  + base_got->output_offset + off);
 
@@ -6446,6 +6452,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  enum elf_aarch64_reloc_type rtype = AARCH64_R (RELATIVE);
 
+	  s = globals->root.srelgot;
+
 	  /* For a C64 relative relocation, also add size and permissions into
 	     the frag.  */
 	  if (bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
@@ -6461,12 +6469,15 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		return ret;
 
 	      rtype = MORELLO_R (RELATIVE);
+
+	      if (bfd_link_executable (info) && !bfd_link_pic (info))
+		s = globals->srelcaps;
+
 	      outrel.r_addend = 0;
 	    }
 	  else
 	    outrel.r_addend = orig_value;
 
-	  s = globals->root.srelgot;
 	  if (s == NULL)
 	    abort ();
 
@@ -8012,6 +8023,11 @@ aarch64_elf_init_got_section (bfd *abfd, struct bfd_link_info *info)
       globals->root.sgot->size += GOT_ENTRY_SIZE (globals);
     }
 
+  /* Track capability initialisation for static non-PIE binaries.  */
+  if (bfd_link_executable (info) && !bfd_link_pic (info)
+      && globals->srelcaps == NULL)
+    globals->srelcaps = globals->root.srelgot;
+
   if (globals->root.igotplt != NULL)
     bfd_set_section_alignment (globals->root.igotplt, align);
 
@@ -9186,6 +9202,8 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    {
 	      htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
+	  else if (bfd_link_executable (info) && !bfd_link_pic (info))
+	    htab->srelcaps->size += RELOC_SIZE (htab);
 	}
       else
 	{
@@ -9525,6 +9543,9 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		      || got_type & GOT_CAP)
 		    htab->root.srelgot->size += RELOC_SIZE (htab);
 		}
+	      /* Static binary; put relocs into srelcaps.  */
+	      else if (bfd_link_executable (info) && (got_type & GOT_CAP))
+		htab->srelcaps->size += RELOC_SIZE (htab);
 	    }
 	  else
 	    {
@@ -9828,6 +9849,25 @@ elfNN_aarch64_always_size_sections (bfd *output_bfd,
 
   if (bfd_link_relocatable (info))
     return true;
+
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+
+  if (bfd_link_executable (info)
+      && !bfd_link_pic (info)
+      && htab->srelcaps
+      && htab->srelcaps->size > 0)
+    {
+      struct elf_link_hash_entry *h;
+
+      h = _bfd_elf_define_linkage_sym (output_bfd, info,
+				       htab->srelcaps,
+				       "__cap_dynrelocs_start");
+      h = _bfd_elf_define_linkage_sym (output_bfd, info,
+				       htab->srelcaps,
+				       "__cap_dynrelocs_end");
+
+      h->root.u.def.value = htab->srelcaps->vma + htab->srelcaps->size;
+    }
 
   tls_sec = elf_hash_table (info)->tls_sec;
 
