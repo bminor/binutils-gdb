@@ -7234,6 +7234,12 @@ ENUMDOC
   the GOT entry for this symbol.  Used in conjunction with
   BFD_RELOC_AARCH64_ADR_GOT_PAGE.  Valid in LP64 ABI only.
 ENUM
+  BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
+ENUMDOC
+  Unsigned 12 bit byte offset for 128 bit load/store from the page of
+  the GOT entry for this symbol.  Used in conjunction with
+  BFD_RELOC_MORELLO_ADR_GOT_PAGE.  Valid in C64 ABI only.
+ENUM
   BFD_RELOC_AARCH64_LD32_GOT_LO12_NC
 ENUMDOC
   Unsigned 12 bit byte offset for 32 bit load/store from the page of
@@ -7546,6 +7552,10 @@ ENUM
   BFD_RELOC_MORELLO_CAPINIT
 ENUMDOC
   Morello Capability initialization.
+ENUM
+  BFD_RELOC_MORELLO_GLOB_DAT
+ENUMDOC
+  Morello Capability global data.
 ENUM
   BFD_RELOC_MORELLO_RELATIVE
 ENUMDOC

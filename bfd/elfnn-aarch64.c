@@ -266,8 +266,9 @@
    elf_aarch64_link_hash_entry.  */
 #define RELOC_SIZE(HTAB) (sizeof (ElfNN_External_Rela))
 
-/* GOT Entry size - 8 bytes in ELF64 and 4 bytes in ELF32.  */
-#define GOT_ENTRY_SIZE			(ARCH_SIZE / 8)
+/* GOT Entry size - 16 bytes in C64, 8 bytes in ELF64 and 4 bytes in ELF32.  */
+#define GOT_ENTRY_SIZE(htab) (ARCH_SIZE >> (3 - htab->c64_rel))
+#define GOT_RESERVED_HEADER_SLOTS	(3)
 #define PLT_ENTRY_SIZE			(32)
 #define PLT_SMALL_ENTRY_SIZE		(16)
 #define PLT_TLSDESC_ENTRY_SIZE		(32)
@@ -283,7 +284,7 @@
 
 #define aarch64_compute_jump_table_size(htab)		\
   (((htab)->root.srelplt == NULL) ? 0			\
-   : (htab)->root.srelplt->reloc_count * GOT_ENTRY_SIZE)
+   : (htab)->root.srelplt->reloc_count * GOT_ENTRY_SIZE (htab))
 
 /* The first entry in a procedure linkage table looks like this
    if the distance between the PLTGOT and the PLT is < 4GB use
@@ -1146,6 +1147,21 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 false,			/* partial_inplace */
 	 0xff8,			/* src_mask */
 	 0xff8,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  /* LD128: GOT offset G(S) & 0xff0  */
+  HOWTO64 (MORELLO_R (LD128_GOT_LO12_NC),	/* type */
+	 4,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (LD128_GOT_LO12_NC),	/* name */
+	 false,			/* partial_inplace */
+	 0xff0,			/* src_mask */
+	 0xff0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* LD32: GOT offset G(S) & 0xffc  */
@@ -2227,7 +2243,21 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 ALL_ONES,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
-  HOWTO64 (MORELLO_R (RELATIVE),	/* type */
+  HOWTO64 (MORELLO_R (GLOB_DAT),/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (GLOB_DAT),	/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (RELATIVE),/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 64,			/* bitsize */
@@ -2732,6 +2762,7 @@ elfNN_aarch64_mkobject (bfd *abfd)
 #define GOT_TLS_GD     2
 #define GOT_TLS_IE     4
 #define GOT_TLSDESC_GD 8
+#define GOT_CAP        16
 
 #define GOT_TLS_GD_ANY_P(type)	((type & GOT_TLS_GD) || (type & GOT_TLSDESC_GD))
 
@@ -2858,6 +2889,7 @@ struct elf_aarch64_link_hash_table
 
   /* Used for capability relocations.  */
   asection *srelcaps;
+  int c64_rel;
 };
 
 /* Create an entry in an AArch64 ELF linker hash table.  */
@@ -4974,6 +5006,7 @@ bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
      workaround.  */
   globals->fix_erratum_843419 = fix_erratum_843419;
   globals->no_apply_dynamic_relocs = no_apply_dynamic_relocs;
+  globals->c64_rel = 0;
 
   BFD_ASSERT (is_aarch64_elf (output_bfd));
   elf_aarch64_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
@@ -5141,7 +5174,6 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
   switch (r_type)
     {
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
-    case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
@@ -5151,6 +5183,10 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       return GOT_NORMAL;
+
+    case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
+    case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
+      return GOT_CAP;
 
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -5964,6 +6000,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+	case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
 	  base_got = globals->root.sgot;
 	  off = h->got.offset;
 
@@ -5982,13 +6019,13 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		{
 		  plt_index = ((h->plt.offset - globals->plt_header_size) /
 			       globals->plt_entry_size);
-		  off = (plt_index + 3) * GOT_ENTRY_SIZE;
+		  off = (plt_index + 3) * GOT_ENTRY_SIZE (globals);
 		  base_got = globals->root.sgotplt;
 		}
 	      else
 		{
 		  plt_index = h->plt.offset / globals->plt_entry_size;
-		  off = plt_index * GOT_ENTRY_SIZE;
+		  off = plt_index * GOT_ENTRY_SIZE (globals);
 		  base_got = globals->root.igotplt;
 		}
 
@@ -6306,6 +6343,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
@@ -6336,7 +6374,11 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  /* Record the GOT entry address which will be used when generating
 	     RELATIVE relocation.  */
 	  if (relative_reloc)
-	    got_entry_addr = value;
+	    {
+	      got_entry_addr = value;
+	      base_got = globals->root.sgot;
+	      off = h->got.offset & ~1;
+	    }
 
 	  if (aarch64_relocation_aginst_gp_p (bfd_r_type))
 	    addend = (globals->root.sgot->output_section->vma
@@ -6344,6 +6386,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
 						       place, value,
 						       addend, weak_undef_p);
+	value |= h->target_internal;
 	}
       else
       {
@@ -6392,6 +6435,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
 						     place, value,
 						     addend, weak_undef_p);
+
+	value |= sym->st_target_internal;
       }
 
       if (relative_reloc)
@@ -6399,13 +6444,34 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  asection *s;
 	  Elf_Internal_Rela outrel;
 
+	  enum elf_aarch64_reloc_type rtype = AARCH64_R (RELATIVE);
+
+	  /* For a C64 relative relocation, also add size and permissions into
+	     the frag.  */
+	  if (bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
+	      || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE)
+	    {
+	      bfd_reloc_status_type ret;
+
+	      ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h,
+				    sym_sec, base_got->contents + off + 8,
+				    orig_value, 0);
+
+	      if (ret != bfd_reloc_continue)
+		return ret;
+
+	      rtype = MORELLO_R (RELATIVE);
+	      outrel.r_addend = 0;
+	    }
+	  else
+	    outrel.r_addend = orig_value;
+
 	  s = globals->root.srelgot;
 	  if (s == NULL)
 	    abort ();
 
 	  outrel.r_offset = got_entry_addr;
-	  outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
-	  outrel.r_addend = orig_value;
+	  outrel.r_info = ELFNN_R_INFO (0, rtype);
 	  elf_append_rela (output_bfd, s, &outrel);
 	}
       break;
@@ -7347,14 +7413,14 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 			 base address when invoke runtime TLS resolver.  */
 		      bfd_put_NN (output_bfd, 0,
 				  globals->root.sgot->contents + off
-				  + GOT_ENTRY_SIZE);
+				  + GOT_ENTRY_SIZE (globals));
 		    }
 		  else if (indx == 0)
 		    {
 		      bfd_put_NN (output_bfd,
 				  relocation - dtpoff_base (info),
 				  globals->root.sgot->contents + off
-				  + GOT_ENTRY_SIZE);
+				  + GOT_ENTRY_SIZE (globals));
 		    }
 		  else
 		    {
@@ -7367,7 +7433,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		      rela.r_offset =
 			(globals->root.sgot->output_section->vma
 			 + globals->root.sgot->output_offset + off
-			 + GOT_ENTRY_SIZE);
+			 + GOT_ENTRY_SIZE (globals));
 
 		      loc = globals->root.srelgot->contents;
 		      loc += globals->root.srelgot->reloc_count++
@@ -7375,7 +7441,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		      bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 		      bfd_put_NN (output_bfd, (bfd_vma) 0,
 				  globals->root.sgot->contents + off
-				  + GOT_ENTRY_SIZE);
+				  + GOT_ENTRY_SIZE (globals));
 		    }
 		}
 	      else
@@ -7385,7 +7451,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		  bfd_put_NN (output_bfd,
 			      relocation - dtpoff_base (info),
 			      globals->root.sgot->contents + off
-			      + GOT_ENTRY_SIZE);
+			      + GOT_ENTRY_SIZE (globals));
 		}
 
 	      symbol_got_offset_mark (input_bfd, h, r_symndx);
@@ -7500,7 +7566,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		  bfd_put_NN (output_bfd, (bfd_vma) 0,
 			      globals->root.sgotplt->contents + off +
 			      globals->sgotplt_jump_table_size +
-			      GOT_ENTRY_SIZE);
+			      GOT_ENTRY_SIZE (globals));
 		}
 
 	      symbol_tlsdesc_got_offset_mark (input_bfd, h, r_symndx);
@@ -7928,6 +7994,40 @@ elfNN_aarch64_allocate_local_symbols (bfd *abfd, unsigned number)
   return true;
 }
 
+/* Initialise the .got section to hold the global offset table.  */
+
+static void
+aarch64_elf_init_got_section (bfd *abfd, struct bfd_link_info *info)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  asection *s;
+  struct elf_aarch64_link_hash_table *globals = elf_aarch64_hash_table (info);
+  unsigned int align = bed->s->log_file_align + globals->c64_rel;
+
+  if (globals->root.sgot != NULL)
+    {
+      bfd_set_section_alignment (globals->root.srelgot,
+				 bed->s->log_file_align);
+      bfd_set_section_alignment (globals->root.sgot, align);
+      globals->root.sgot->size += GOT_ENTRY_SIZE (globals);
+    }
+
+  if (globals->root.igotplt != NULL)
+    bfd_set_section_alignment (globals->root.igotplt, align);
+
+  s = globals->root.sgot;
+
+  if (globals->root.sgotplt != NULL)
+    {
+      bfd_set_section_alignment (globals->root.sgotplt, align);
+      s = globals->root.sgotplt;
+    }
+
+  /* The first bit of the global offset table is the header.  */
+  if (s != NULL)
+    s->size += bed->got_header_size (info);
+}
+
 /* Create the .got section to hold the global offset table.  */
 
 static bool
@@ -7950,17 +8050,14 @@ aarch64_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 					   ? ".rela.got" : ".rel.got"),
 					  (bed->dynamic_sec_flags
 					   | SEC_READONLY));
-  if (s == NULL
-      || !bfd_set_section_alignment (s, bed->s->log_file_align))
+  if (s == NULL)
     return false;
   htab->srelgot = s;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
-  if (s == NULL
-      || !bfd_set_section_alignment (s, bed->s->log_file_align))
+  if (s == NULL)
     return false;
   htab->sgot = s;
-  htab->sgot->size += GOT_ENTRY_SIZE;
 
   if (bed->want_got_sym)
     {
@@ -7978,14 +8075,10 @@ aarch64_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   if (bed->want_got_plt)
     {
       s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
-      if (s == NULL
-	  || !bfd_set_section_alignment (s, bed->s->log_file_align))
+      if (s == NULL)
 	return false;
       htab->sgotplt = s;
     }
-
-  /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size (info);
 
   return true;
 }
@@ -8113,6 +8206,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
 	    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
 	    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+	    case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	    case BFD_RELOC_AARCH64_NN:
@@ -8308,8 +8402,12 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* RR: We probably want to keep a consistency check that
 	     there are no dangling GOT_PAGE relocs.  */
-	case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
 	case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
+	case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
+	  htab->c64_rel = 1;
+	  /* Fall through.  */
+
+	case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
 	case BFD_RELOC_AARCH64_GOT_LD_PREL19:
 	case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
 	case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
@@ -8374,7 +8472,8 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	       is a TLS/non-TLS mismatch, based on the symbol type.
 	       So just combine any TLS types needed.  */
 	    if (old_got_type != GOT_UNKNOWN && old_got_type != GOT_NORMAL
-		&& got_type != GOT_NORMAL)
+		&& got_type != GOT_NORMAL && old_got_type != GOT_CAP
+		&& got_type != GOT_CAP)
 	      got_type |= old_got_type;
 
 	    /* If the symbol is accessed by both IE and GD methods, we
@@ -8384,7 +8483,10 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if ((got_type & GOT_TLS_IE) && GOT_TLS_GD_ANY_P (got_type))
 	      got_type &= ~ (GOT_TLSDESC_GD | GOT_TLS_GD);
 
-	    if (old_got_type != got_type)
+	    /* GOT_CAP has higher precedence due to higher alignment and size
+	       requirements, so do not overwrite it.  XXX This should be
+	       revisited when we add TLS relocations.  */
+	    if (old_got_type != got_type && old_got_type != GOT_CAP)
 	      {
 		if (h != NULL)
 		  elf_aarch64_hash_entry (h)->got_type = got_type;
@@ -9007,7 +9109,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
 	  /* We also need to make an entry in the .got.plt section, which
 	     will be placed in the .got section by the linker script.  */
-	  htab->root.sgotplt->size += GOT_ENTRY_SIZE;
+	  htab->root.sgotplt->size += GOT_ENTRY_SIZE (htab);
 
 	  /* We also need to make an entry in the .rela.plt section.  */
 	  htab->root.srelplt->size += RELOC_SIZE (htab);
@@ -9069,10 +9171,11 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (got_type == GOT_UNKNOWN)
 	{
 	}
-      else if (got_type == GOT_NORMAL)
+      else if (got_type == GOT_NORMAL
+	       || got_type == GOT_CAP)
 	{
 	  h->got.offset = htab->root.sgot->size;
-	  htab->root.sgot->size += GOT_ENTRY_SIZE;
+	  htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
 	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak)
 	      && (bfd_link_pic (info)
@@ -9092,20 +9195,20 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      eh->tlsdesc_got_jump_table_offset =
 		(htab->root.sgotplt->size
 		 - aarch64_compute_jump_table_size (htab));
-	      htab->root.sgotplt->size += GOT_ENTRY_SIZE * 2;
+	      htab->root.sgotplt->size += GOT_ENTRY_SIZE (htab) * 2;
 	      h->got.offset = (bfd_vma) - 2;
 	    }
 
 	  if (got_type & GOT_TLS_GD)
 	    {
 	      h->got.offset = htab->root.sgot->size;
-	      htab->root.sgot->size += GOT_ENTRY_SIZE * 2;
+	      htab->root.sgot->size += GOT_ENTRY_SIZE (htab) * 2;
 	    }
 
 	  if (got_type & GOT_TLS_IE)
 	    {
 	      h->got.offset = htab->root.sgot->size;
-	      htab->root.sgot->size += GOT_ENTRY_SIZE;
+	      htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
 	    }
 
 	  indx = h && h->dynindx != -1 ? h->dynindx : 0;
@@ -9272,7 +9375,7 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
 					       &h->dyn_relocs,
 					       htab->plt_entry_size,
 					       htab->plt_header_size,
-					       GOT_ENTRY_SIZE,
+					       GOT_ENTRY_SIZE (htab),
 					       false);
   return true;
 }
@@ -9300,7 +9403,7 @@ elfNN_aarch64_allocate_local_ifunc_dynrelocs (void **slot, void *inf)
    though !  */
 
 static bool
-elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 				     struct bfd_link_info *info)
 {
   struct elf_aarch64_link_hash_table *htab;
@@ -9325,6 +9428,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
+
+  aarch64_elf_init_got_section (output_bfd, info);
 
   /* Set up .got offsets for local syms, and space for local dynamic
      relocs.  */
@@ -9381,21 +9486,22 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		  locals[i].tlsdesc_got_jump_table_offset =
 		    (htab->root.sgotplt->size
 		     - aarch64_compute_jump_table_size (htab));
-		  htab->root.sgotplt->size += GOT_ENTRY_SIZE * 2;
+		  htab->root.sgotplt->size += GOT_ENTRY_SIZE (htab) * 2;
 		  locals[i].got_offset = (bfd_vma) - 2;
 		}
 
 	      if (got_type & GOT_TLS_GD)
 		{
 		  locals[i].got_offset = htab->root.sgot->size;
-		  htab->root.sgot->size += GOT_ENTRY_SIZE * 2;
+		  htab->root.sgot->size += GOT_ENTRY_SIZE (htab) * 2;
 		}
 
 	      if (got_type & GOT_TLS_IE
-		  || got_type & GOT_NORMAL)
+		  || got_type & GOT_NORMAL
+		  || got_type & GOT_CAP)
 		{
 		  locals[i].got_offset = htab->root.sgot->size;
-		  htab->root.sgot->size += GOT_ENTRY_SIZE;
+		  htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
 		}
 
 	      if (got_type == GOT_UNKNOWN)
@@ -9415,7 +9521,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		    htab->root.srelgot->size += RELOC_SIZE (htab) * 2;
 
 		  if (got_type & GOT_TLS_IE
-		      || got_type & GOT_NORMAL)
+		      || got_type & GOT_NORMAL
+		      || got_type & GOT_CAP)
 		    htab->root.srelgot->size += RELOC_SIZE (htab);
 		}
 	    }
@@ -9466,7 +9573,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  htab->root.splt->size += htab->tlsdesc_plt_entry_size;
 
 	  htab->root.tlsdesc_got = htab->root.sgot->size;
-	  htab->root.sgot->size += GOT_ENTRY_SIZE;
+	  htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
 	}
     }
 
@@ -9636,12 +9743,12 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
   if (plt == htab->root.splt)
     {
       plt_index = (h->plt.offset - htab->plt_header_size) / htab->plt_entry_size;
-      got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
+      got_offset = (plt_index + 3) * GOT_ENTRY_SIZE (htab);
     }
   else
     {
       plt_index = h->plt.offset / htab->plt_entry_size;
-      got_offset = plt_index * GOT_ENTRY_SIZE;
+      got_offset = plt_index * GOT_ENTRY_SIZE (htab);
     }
 
   plt_entry = plt->contents + h->plt.offset;
@@ -9817,8 +9924,11 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	}
     }
 
+  bool is_c64 = elf_aarch64_hash_entry (h)->got_type == GOT_CAP;
+
   if (h->got.offset != (bfd_vma) - 1
-      && elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL
+      && (elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL
+	  || elf_aarch64_hash_entry (h)->got_type == GOT_CAP)
       /* Undefined weak symbol in static PIE resolves to 0 without
 	 any dynamic relocations.  */
       && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
@@ -9868,10 +9978,18 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	    return false;
 
 	  BFD_ASSERT ((h->got.offset & 1) != 0);
-	  rela.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
-	  rela.r_addend = (h->root.u.def.value
-			   + h->root.u.def.section->output_section->vma
-			   + h->root.u.def.section->output_offset);
+	  if (is_c64)
+	    {
+	      rela.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
+	      rela.r_addend = 0;
+	    }
+	  else
+	    {
+	      rela.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
+	      rela.r_addend = (h->root.u.def.value
+			       + h->root.u.def.section->output_section->vma
+			       + h->root.u.def.section->output_offset);
+	    }
 	}
       else
 	{
@@ -9879,7 +9997,9 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	  BFD_ASSERT ((h->got.offset & 1) == 0);
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + h->got.offset);
-	  rela.r_info = ELFNN_R_INFO (h->dynindx, AARCH64_R (GLOB_DAT));
+	  rela.r_info = ELFNN_R_INFO (h->dynindx,
+				      (is_c64 ? MORELLO_R (GLOB_DAT)
+				       : AARCH64_R (GLOB_DAT)));
 	  rela.r_addend = 0;
 	}
 
@@ -9972,7 +10092,7 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   plt_got_2nd_ent = (htab->root.sgotplt->output_section->vma
 		  + htab->root.sgotplt->output_offset
-		  + GOT_ENTRY_SIZE * 2);
+		  + GOT_ENTRY_SIZE (htab) * 2);
 
   plt_base = htab->root.splt->output_section->vma +
     htab->root.splt->output_offset;
@@ -10164,10 +10284,11 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	  /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
 	  bfd_put_NN (output_bfd,
 		      (bfd_vma) 0,
-		      htab->root.sgotplt->contents + GOT_ENTRY_SIZE);
+		      htab->root.sgotplt->contents + GOT_ENTRY_SIZE (htab));
 	  bfd_put_NN (output_bfd,
 		      (bfd_vma) 0,
-		      htab->root.sgotplt->contents + GOT_ENTRY_SIZE * 2);
+		      (htab->root.sgotplt->contents
+		       + GOT_ENTRY_SIZE (htab) * 2));
 	}
 
       if (htab->root.sgot)
@@ -10181,12 +10302,12 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	}
 
       elf_section_data (htab->root.sgotplt->output_section)->
-	this_hdr.sh_entsize = GOT_ENTRY_SIZE;
+	this_hdr.sh_entsize = GOT_ENTRY_SIZE (htab);
     }
 
   if (htab->root.sgot && htab->root.sgot->size > 0)
     elf_section_data (htab->root.sgot->output_section)->this_hdr.sh_entsize
-      = GOT_ENTRY_SIZE;
+      = GOT_ENTRY_SIZE (htab);
 
   /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
   htab_traverse (htab->loc_hash_table,
@@ -10411,13 +10532,29 @@ aarch64_elfNN_swap_symbol_out (bfd *abfd,
   bfd_elfNN_swap_symbol_out (abfd, &newsym, cdst, shndx);
 }
 
+/* Define the size of a GOT element for the generic mid-end.  */
+
+static bfd_vma
+elfNN_aarch64_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
+			    struct bfd_link_info *info,
+			    struct elf_link_hash_entry *h ATTRIBUTE_UNUSED,
+			    bfd *ibfd ATTRIBUTE_UNUSED,
+			    unsigned long symndx ATTRIBUTE_UNUSED)
+{
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+
+  return GOT_ENTRY_SIZE (htab);
+}
+
 /* Define the size of a GOT header, which is the minimum size of the GOT section
    when one is needed.  */
 
 static bfd_vma
-elfNN_aarch64_got_header_size (struct bfd_link_info *info ATTRIBUTE_UNUSED)
+elfNN_aarch64_got_header_size (struct bfd_link_info *info)
 {
-  return GOT_ENTRY_SIZE * 3;
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+
+  return GOT_ENTRY_SIZE (htab) * GOT_RESERVED_HEADER_SLOTS;
 }
 
 /* We use this so we can override certain functions
@@ -10571,6 +10708,9 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_got_header_size		\
   elfNN_aarch64_got_header_size
+
+#define elf_backend_got_elt_size		\
+  elfNN_aarch64_got_elt_size
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1

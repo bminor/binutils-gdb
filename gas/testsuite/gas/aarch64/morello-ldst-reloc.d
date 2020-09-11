@@ -19,3 +19,15 @@ Disassembly of section \.text:
 .* <add>:
 .*:	02000000 	add	c0, c0, #0x0
 			.*: R_AARCH64_ADD_ABS_LO12_NC	ptr
+
+.* <f1>:
+  .*:	90800002 	adrp	c2, 0 <_start>
+			.*: R_MORELLO_ADR_GOT_PAGE	\.data\+0x10
+  .*:	c2400042 	ldr	c2, \[c2\]
+			.*: R_MORELLO_LD128_GOT_LO12_NC	\.data\+0x10
+  .*:	82600042 	ldr	c2, \[x2\]
+			.*: R_MORELLO_LD128_GOT_LO12_NC	\.data\+0x20
+  .*:	f9400042 	ldr	x2, \[c2\]
+			.*: R_AARCH64_LD64_GOT_LO12_NC	\.data\+0x20
+  .*:	82600c42 	ldr	x2, \[x2\]
+			.*: R_AARCH64_LD64_GOT_LO12_NC	\.data\+0x20
