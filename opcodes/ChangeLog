@@ -1,5 +1,23 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_fregsz): New function.
+	(aarch64_ins_addr_simm): Add ldst_altbase to assert.
+	* aarch64-asm.h (ins_fregsz): New function declaration.
+	* aarch64-dis.c (aarch64_ext_fregsz): New function.
+	(aarch64_ext_addr_simm): Disable writeback for ldst_altbase.
+	* aarch64-dis.h (ext_fregsz): New function declaration.
+	* aarch64-opc.c (fields): Add altbase_sf2 and altbase_sf3.
+	(operand_general_constraint_met_p): Add CAPADDR_SIMM9.
+	(aarch64_print_operand): Add CAPADDR_SIMM9, Rsz2, Fsz, St.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_altbase_sf2, FLD_altbase_sf3.
+	* aarch64-tbl.h (aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_regsz): New function.
 	(aarch64_ins_ft): Support altbase loads.
 	(aarch64_ins_addr_uimm12): Rename to aarch64_ins_addr_uimm.

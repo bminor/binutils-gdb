@@ -45,6 +45,7 @@ bfd_boolean aarch64_insert_operand (const aarch64_operand *,
 AARCH64_DECL_OPD_INSERTER (ins_none);
 AARCH64_DECL_OPD_INSERTER (ins_regno);
 AARCH64_DECL_OPD_INSERTER (ins_regsz);
+AARCH64_DECL_OPD_INSERTER (ins_fregsz);
 AARCH64_DECL_OPD_INSERTER (ins_reglane);
 AARCH64_DECL_OPD_INSERTER (ins_reglist);
 AARCH64_DECL_OPD_INSERTER (ins_ldst_reglist);
