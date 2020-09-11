@@ -1590,6 +1590,7 @@ operand_general_constraint_met_p (aarch64_feature_set features,
   switch (aarch64_operands[type].op_class)
     {
     case AARCH64_OPND_CLASS_INT_REG:
+    case AARCH64_OPND_CLASS_CAP_REG:
       /* Check pair reg constraints for cas* instructions.  */
       if (type == AARCH64_OPND_PAIRREG)
 	{
@@ -1610,7 +1611,8 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 	}
 
       /* <Xt> may be optional in some IC and TLBI instructions.  */
-      if (type == AARCH64_OPND_Rt_SYS)
+      if (type == AARCH64_OPND_Rt_SYS
+	  || type == AARCH64_OPND_Cat_SYS)
 	{
 	  assert (idx == 1 && (aarch64_get_operand_class (opnds[0].type)
 			       == AARCH64_OPND_CLASS_SYSTEM));
@@ -2845,6 +2847,33 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 		}
 	    }
 	  break;
+	case AARCH64_OPND_SYSREG_DC:
+	case AARCH64_OPND_SYSREG_IC:
+	    {
+	      enum aarch64_operand_class class;
+
+	      if (!opnds[1].present)
+		break;
+
+	      class = aarch64_get_operand_class(opcode->operands[1]);
+
+	      if (AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_C64)
+		  && class == AARCH64_OPND_CLASS_INT_REG)
+		{
+		  set_other_error (mismatch_detail, 1,
+				   _("capability register expected"));
+		  return 0;
+		}
+
+	      if (!AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_C64)
+		  && class == AARCH64_OPND_CLASS_CAP_REG)
+		{
+		  set_other_error (mismatch_detail, 1,
+				   _("integer register expected"));
+		  return 0;
+		}
+	    }
+	  break;
 	default:
 	  break;
 	}
@@ -3519,6 +3548,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 
   switch (opnd->type)
     {
+      /* The optional-ness of <Xt> in e.g. IC <ic_op>{, <Xt>} is determined by
+	 the <ic_op>, therefore we use opnd->present to override the
+	 generic optional-ness information.  */
+    case AARCH64_OPND_Cat_SYS:
+    case AARCH64_OPND_Rt_SYS:
+      if (opnd->present)
+	snprintf (buf, size, "%s",
+		  get_base_reg_name (features, opnd->reg.regno, 0));
+      break;
+
     case AARCH64_OPND_Rsz:
     case AARCH64_OPND_Rsz2:
     case AARCH64_OPND_Rd:
@@ -3530,21 +3569,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Rs:
     case AARCH64_OPND_Ra:
     case AARCH64_OPND_Rt_LS64:
-    case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_PAIRREG:
     case AARCH64_OPND_SVE_Rm:
-      /* The optional-ness of <Xt> in e.g. IC <ic_op>{, <Xt>} is determined by
-	 the <ic_op>, therefore we use opnd->present to override the
-	 generic optional-ness information.  */
-      if (opnd->type == AARCH64_OPND_Rt_SYS)
-	{
-	  if (!opnd->present)
-	    break;
-	}
       /* Omit the operand, e.g. RET.  */
-      else if (optional_operand_p (opcode, idx)
-	       && (opnd->reg.regno
-		   == get_optional_operand_default_value (opcode)))
+      if (optional_operand_p (opcode, idx)
+	  && (opnd->reg.regno == get_optional_operand_default_value (opcode)))
 	break;
       assert (opnd->qualifier == AARCH64_OPND_QLF_W
 	      || opnd->qualifier == AARCH64_OPND_QLF_X);

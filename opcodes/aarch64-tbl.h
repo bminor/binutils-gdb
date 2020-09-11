@@ -4404,9 +4404,11 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SB_INSN ("sb", 0xd50330ff, 0xffffffff, ic_system, OP0 (), {}, 0),
   CORE_INSN ("sys", 0xd5080000, 0xfff80000, ic_system, 0, OP5 (UIMM3_OP1, CRn, CRm, UIMM3_OP2, Rt), QL_SYS, F_HAS_ALIAS | F_OPD4_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("at",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_AT, Rt), QL_SRC_X, F_ALIAS),
-  CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt), QL_SRC_X, F_ALIAS),
+  CORE_INSN ("dc",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_DC, Rt_SYS), QL_SRC_X, F_ALIAS),
   CORE_INSN ("ic",  0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_IC, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
   CORE_INSN ("tlbi",0xd5080000, 0xfff80000, ic_system, 0, OP2 (SYSREG_TLBI, Rt_SYS), QL_SRC_X, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
+  CORE_INSN ("dc",  0xd5080000, 0xfff80000, a64c, 0, OP2 (SYSREG_DC, Cat_SYS), QL2_SRC_CA, F_ALIAS),
+  CORE_INSN ("ic",  0xd5080000, 0xfff80000, a64c, 0, OP2 (SYSREG_IC, Cat_SYS), QL2_SRC_CA, F_ALIAS | F_OPD1_OPT | F_DEFAULT (0x1F)),
   V8_7_INSN ("wfet", 0xd5031000, 0xffffffe0, ic_system, OP1 (Rd), QL_I1X, F_HAS_ALIAS),
   V8_7_INSN ("wfit", 0xd5031020, 0xffffffe0, ic_system, OP1 (Rd), QL_I1X, F_HAS_ALIAS),
   PREDRES_INSN ("cfp", 0xd50b7380, 0xffffffe0, ic_system, OP2 (SYSREG_SR, Rt), QL_SRC_X, F_ALIAS),
@@ -6334,4 +6336,6 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, addr_simm, "CAPADDR_SIMM9", 0, F(FLD_imm9),		\
       "a capability address with 9-bit signed immediate offset")	\
     Y(IMMEDIATE, imm, "A64C_ADDR_ADRDP", 0,				\
-      F(FLD_a64c_immhi, FLD_immlo), "20-bit data-relative offset")
+      F(FLD_a64c_immhi, FLD_immlo), "20-bit data-relative offset")	\
+    X(CAP_REG, ins_regno, ext_regrt_sysins, "Cat_SYS", 0, F(FLD_Rt),	\
+      "an integer register")

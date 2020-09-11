@@ -6030,6 +6030,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
   switch (type)
     {
     case AARCH64_OPND_Can:
+    case AARCH64_OPND_Cat_SYS:
     case AARCH64_OPND_Rd:
     case AARCH64_OPND_Rn:
     case AARCH64_OPND_Rm:
@@ -6718,6 +6719,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Cad:
 	case AARCH64_OPND_Cat:
 	case AARCH64_OPND_Cat2:
+	case AARCH64_OPND_Cat_SYS:
 	  po_reg_or_fail (REG_TYPE_CA_N_Z);
 	  if (opcode->op == OP_MOV_C_ZR && operands[i] == AARCH64_OPND_Can
 	      && val != 31)

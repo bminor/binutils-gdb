@@ -545,6 +545,7 @@ enum aarch64_opnd
   AARCH64_OPND_CAPADDR_SIMM9,	/* Signed immediate offset with capability base
 				   for altbase instructions.  */
   AARCH64_OPND_A64C_ADDR_ADRDP,	/* Address for A64C ADRDP.  */
+  AARCH64_OPND_Cat_SYS,
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
