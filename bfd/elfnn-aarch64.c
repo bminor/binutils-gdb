@@ -8249,95 +8249,6 @@ elfNN_aarch64_modify_headers (bfd *abfd,
   return _bfd_elf_modify_headers (abfd, info);
 }
 
-/* A structure used to record a list of sections, independently
-   of the next and prev fields in the asection structure.  */
-typedef struct section_list
-{
-  asection *sec;
-  struct section_list *next;
-  struct section_list *prev;
-}
-section_list;
-
-/* Unfortunately we need to keep a list of sections for which
-   an _aarch64_elf_section_data structure has been allocated.  This
-   is because it is possible for functions like elfNN_aarch64_write_section
-   to be called on a section which has had an elf_data_structure
-   allocated for it (and so the used_by_bfd field is valid) but
-   for which the AArch64 extended version of this structure - the
-   _aarch64_elf_section_data structure - has not been allocated.  */
-static section_list *sections_with_aarch64_elf_section_data = NULL;
-
-static void
-record_section_with_aarch64_elf_section_data (asection *sec)
-{
-  struct section_list *entry;
-
-  entry = bfd_malloc (sizeof (*entry));
-  if (entry == NULL)
-    return;
-  entry->sec = sec;
-  entry->next = sections_with_aarch64_elf_section_data;
-  entry->prev = NULL;
-  if (entry->next != NULL)
-    entry->next->prev = entry;
-  sections_with_aarch64_elf_section_data = entry;
-}
-
-static struct section_list *
-find_aarch64_elf_section_entry (asection *sec)
-{
-  struct section_list *entry;
-  static struct section_list *last_entry = NULL;
-
-  /* This is a short cut for the typical case where the sections are added
-     to the sections_with_aarch64_elf_section_data list in forward order and
-     then looked up here in backwards order.  This makes a real difference
-     to the ld-srec/sec64k.exp linker test.  */
-  entry = sections_with_aarch64_elf_section_data;
-  if (last_entry != NULL)
-    {
-      if (last_entry->sec == sec)
-	entry = last_entry;
-      else if (last_entry->next != NULL && last_entry->next->sec == sec)
-	entry = last_entry->next;
-    }
-
-  for (; entry; entry = entry->next)
-    if (entry->sec == sec)
-      break;
-
-  if (entry)
-    /* Record the entry prior to this one - it is the entry we are
-       most likely to want to locate next time.  Also this way if we
-       have been called from
-       unrecord_section_with_aarch64_elf_section_data () we will not
-       be caching a pointer that is about to be freed.  */
-    last_entry = entry->prev;
-
-  return entry;
-}
-
-static void
-unrecord_section_with_aarch64_elf_section_data (asection *sec)
-{
-  struct section_list *entry;
-
-  entry = find_aarch64_elf_section_entry (sec);
-
-  if (entry)
-    {
-      if (entry->prev != NULL)
-	entry->prev->next = entry->next;
-      if (entry->next != NULL)
-	entry->next->prev = entry->prev;
-      if (entry == sections_with_aarch64_elf_section_data)
-	sections_with_aarch64_elf_section_data = entry->next;
-      free (entry);
-    }
-}
-
-
 typedef struct
 {
   void *finfo;
@@ -8535,39 +8446,9 @@ elfNN_aarch64_new_section_hook (bfd *abfd, asection *sec)
       sec->used_by_bfd = sdata;
     }
 
-  record_section_with_aarch64_elf_section_data (sec);
-
   return _bfd_elf_new_section_hook (abfd, sec);
 }
 
-
-static void
-unrecord_section_via_map_over_sections (bfd *abfd ATTRIBUTE_UNUSED,
-					asection *sec,
-					void *ignore ATTRIBUTE_UNUSED)
-{
-  unrecord_section_with_aarch64_elf_section_data (sec);
-}
-
-static bool
-elfNN_aarch64_close_and_cleanup (bfd *abfd)
-{
-  if (abfd->sections)
-    bfd_map_over_sections (abfd,
-			   unrecord_section_via_map_over_sections, NULL);
-
-  return _bfd_elf_close_and_cleanup (abfd);
-}
-
-static bool
-elfNN_aarch64_bfd_free_cached_info (bfd *abfd)
-{
-  if (abfd->sections)
-    bfd_map_over_sections (abfd,
-			   unrecord_section_via_map_over_sections, NULL);
-
-  return _bfd_free_cached_info (abfd);
-}
 
 /* Create dynamic sections. This is different from the ARM backend in that
    the got, plt, gotplt and their relocation sections are all created in the
@@ -10101,12 +9982,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define ELF_MACHINE_CODE		EM_AARCH64
 #define ELF_MAXPAGESIZE			0x10000
 #define ELF_COMMONPAGESIZE		0x1000
-
-#define bfd_elfNN_close_and_cleanup		\
-  elfNN_aarch64_close_and_cleanup
-
-#define bfd_elfNN_bfd_free_cached_info		\
-  elfNN_aarch64_bfd_free_cached_info
 
 #define bfd_elfNN_bfd_is_target_special_symbol	\
   elfNN_aarch64_is_target_special_symbol
