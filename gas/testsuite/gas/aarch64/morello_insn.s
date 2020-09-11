@@ -22,7 +22,7 @@ morello_csp csp
 // Two operands (dn).
 
 	.macro morello_cspcsp cdsp, cnsp
-	  .irp op, cpy, mov, chkss
+	  .irp op, cpy, mov, chkss, clrtag
 	    \op    \cdsp, \cnsp
 	  .endr
 	.endm
@@ -108,10 +108,17 @@ morello_cspcspi6 csp, c16
 morello_cspcspi6 c18, csp
 morello_cspcspi6 csp, csp
 
+	.macro morello_perm cd, cn
+	  .irp perm, r, w, x, rx, wx, rw, rwx, #0, #1, #2, #3, #4, #5, #6, #7
+	    clrperm   \cd, \cn, \perm
+	  .endr
+	.endm
+morello_perm c22, c23
+
 // Three operands (dnm)
 
 	.macro morello_cspcspx cdsp, cnsp, xm
-	  .irp op, bicflgs, eorflgs, orrflgs
+	  .irp op, bicflgs, eorflgs, orrflgs, clrperm
 	    \op   \cdsp, \cnsp, \xm
 	  .endr
 	.endm

@@ -1,5 +1,22 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_perm): New function.
+	* aarch64-asm.h (ins_perm): New function.
+	* aarch64-dis.c (aarch64_ext_perm): New function.
+	* aarch64-dis.h (ext_perm): New function.
+	* aarch64-opc.c (fields): New field perm.
+	(get_perm_str, get_perm_bit): New functions.
+	(aarch64_print_operand): Add PERM.
+	* aarch64-opc.h (aarch64_field_kind): Add perm.
+	* aarch64-tbl.h (QL_I2SAMEQ): New macro.
+	(aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-tbl.h (QL2_A64C_X_CA, QL2_A64C_CA_X, QL2_A64C_X_X,
 	QL3_A64C_X_CA_CA, QL3_A64C_CA_CA_ADDR, QL4_A64C_CSEL): New
 	macros.

@@ -1,5 +1,12 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_operand_class): Add PERM.
+	(aarch64_opnd): Add PERM.
+	(get_perm_bit): New function.
+	(aarch64_opnd_info): New member perm.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add CST_REG, Cam_SP
 	and A64C_IMMV4.
 	(aarch64_insn_class): Add br_sealed.
