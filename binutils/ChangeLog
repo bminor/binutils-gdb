@@ -1,3 +1,14 @@
+2020-09-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 26595
+	* dwarf.c (load_separate_debug_info): Return NULL rather than
+	FALSE in error situations.
+	(load_separate_debug_file): Move code to load debug links to ...
+	(check_for_and_load_links): ... here.  New function.  Load
+	separate debug information pointed to by debuglink and
+	debugaltlink sections.  Recursively scan newly loaded debug
+	information for more links and load them too.
+
 2020-09-09  Alan Modra  <amodra@gmail.com>
 
 	PR 26578

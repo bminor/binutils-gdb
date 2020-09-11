@@ -10459,7 +10459,7 @@ load_separate_debug_info (const char *            main_filename,
     {
       warn (_("Corrupt debuglink section: %s\n"),
 	    xlink->name ? xlink->name : xlink->uncompressed_name);
-      return FALSE;
+      return NULL;
     }
     
   /* Attempt to locate the separate file.
@@ -10619,7 +10619,7 @@ load_separate_debug_info (const char *            main_filename,
     {
       warn (_("failed to open separate debug file: %s\n"), debug_filename);
       free (debug_filename);
-      return FALSE;
+      return NULL;
     }
 
   /* FIXME: We do not check to see if there are any other separate debug info
@@ -10662,6 +10662,52 @@ load_dwo_file (const char * main_filename, const char * name, const char * dir, 
   add_separate_debug_file (separate_filename, separate_handle);
   /* Note - separate_filename will be freed in free_debug_memory().  */
   return separate_handle;
+}
+
+/* Load a debuglink section and/or a debugaltlink section, if either are present.
+   Recursively check the loaded files for more of these sections.
+   FIXME: Should also check for DWO_* entries in the newlu loaded files.  */
+
+static void
+check_for_and_load_links (void * file, const char * filename)
+{
+  void * handle = NULL;
+
+  if (load_debug_section (gnu_debugaltlink, file))
+    {
+      Build_id_data build_id_data;
+
+      handle = load_separate_debug_info (filename,
+					 & debug_displays[gnu_debugaltlink].section,
+					 parse_gnu_debugaltlink,
+					 check_gnu_debugaltlink,
+					 & build_id_data,
+					 file);
+      if (handle)
+	{
+	  assert (handle == first_separate_info->handle);
+	  check_for_and_load_links (first_separate_info->handle,
+				    first_separate_info->filename);
+	}
+    }
+
+  if (load_debug_section (gnu_debuglink, file))
+    {
+      unsigned long crc32;
+
+      handle = load_separate_debug_info (filename,
+					 & debug_displays[gnu_debuglink].section,
+					 parse_gnu_debuglink,
+					 check_gnu_debuglink,
+					 & crc32,
+					 file);
+      if (handle)
+	{
+	  assert (handle == first_separate_info->handle);
+	  check_for_and_load_links (first_separate_info->handle,
+				    first_separate_info->filename);
+	}
+    }
 }
 
 /* Load the separate debug info file(s) attached to FILE, if any exist.
@@ -10739,34 +10785,10 @@ load_separate_debug_files (void * file, const char * filename)
     return FALSE;
 
   /* FIXME: We do not check for the presence of both link sections in the same file.  */
-  /* FIXME: We do not check the separate debug info file to see if it too contains debuglinks.  */
   /* FIXME: We do not check for the presence of multiple, same-name debuglink sections.  */
   /* FIXME: We do not check for the presence of a dwo link as well as a debuglink.  */
 
-  if (load_debug_section (gnu_debugaltlink, file))
-    {
-      Build_id_data build_id_data;
-
-      load_separate_debug_info (filename,
-				& debug_displays[gnu_debugaltlink].section,
-				parse_gnu_debugaltlink,
-				check_gnu_debugaltlink,
-				& build_id_data,
-				file);
-    }
-
-  if (load_debug_section (gnu_debuglink, file))
-    {
-      unsigned long crc32;
-
-      load_separate_debug_info (filename,
-				& debug_displays[gnu_debuglink].section,
-				parse_gnu_debuglink,
-				check_gnu_debuglink,
-				& crc32,
-				file);
-    }
-
+  check_for_and_load_links (file, filename);
   if (first_separate_info != NULL)
     return TRUE;
 
