@@ -1,5 +1,18 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* testsuite/ld-aarch64/emit-relocs-morello-2-a64c.d: New test.
+	* testsuite/ld-aarch64/emit-relocs-morello-2.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-morello-2.s: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-morello-3-a64c.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-morello-3.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-morello-3.s: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-morello-a64c.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-morello.d: Likewise.
+	* testsuite/ld-aarch64/emit-relocs-morello.s: Likewise.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new tests.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* testsuite/ld-aarch64/emit-relocs-morello-1.d: New file.
 	* testsuite/ld-aarch64/emit-relocs-morello-1.s: New test file.
 	* testsuite/ld-aarch64/aarch64-elf.exp: Add it to test runner.
