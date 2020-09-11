@@ -1,5 +1,14 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (parse_operands, fix_insn): Add
+	A64C_ADDR_SIMM9.
+	(try_to_encode_as_unscaled_ldst): Add capability loads.
+	* testsuite/gas/aarch64/morello_ldst-c64.d: Add tests.
+	* testsuite/gas/aarch64/morello_ldst.d: Likewise.
+	* testsuite/gas/aarch64/morello_ldst.s: Likewise.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (encode_ld_lit_ofs_17): New function.
 	(parse_operands, programmer_friendly_fixup, md_apply_fix): Add
 	ADDR_PCREL17.
