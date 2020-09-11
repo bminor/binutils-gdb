@@ -1443,7 +1443,7 @@ tilegx_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   htab->sgot = s;
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   if (bed->want_got_plt)
     {
@@ -2557,7 +2557,8 @@ tilegx_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      || htab->elf.splt->size == 0)
 	  && (htab->elf.sgot == NULL
 	      || (htab->elf.sgot->size
-		  == get_elf_backend_data (output_bfd)->got_header_size)))
+		  == get_elf_backend_data (output_bfd)->
+			got_header_size (info))))
 	htab->elf.sgotplt->size = 0;
     }
 

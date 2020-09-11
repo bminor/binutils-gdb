@@ -829,6 +829,14 @@ elf64_sparc_reloc_type_class (const struct bfd_link_info *info,
     }
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf64_sparc_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 8;
+}
+
 /* Relocations in the 64 bit SPARC ELF ABI are more complex than in
    standard ELF, because R_SPARC_OLO10 has secondary addend in
    ELF64_R_TYPE_DATA field.  This structure is used to redirect the
@@ -963,7 +971,7 @@ const struct elf_size_info elf64_sparc_size_info =
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
-#define elf_backend_got_header_size 8
+#define elf_backend_got_header_size elf64_sparc_got_header_size
 #define elf_backend_want_dynrelro 1
 #define elf_backend_rela_normal 1
 

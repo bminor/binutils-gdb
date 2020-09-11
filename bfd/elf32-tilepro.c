@@ -1228,7 +1228,7 @@ tilepro_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   htab->sgot = s;
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   if (bed->want_got_plt)
     {
@@ -2311,7 +2311,8 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
 	      || htab->splt->size == 0)
 	  && (htab->sgot == NULL
 	      || (htab->sgot->size
-		  == get_elf_backend_data (output_bfd)->got_header_size)))
+		  == get_elf_backend_data (output_bfd)->
+			got_header_size (info))))
 	htab->sgotplt->size = 0;
     }
 
@@ -3719,6 +3720,14 @@ tilepro_additional_program_headers (bfd *abfd,
   return count;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+tilepro_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return GOT_ENTRY_SIZE;
+}
+
 #define ELF_ARCH		bfd_arch_tilepro
 #define ELF_TARGET_ID		TILEPRO_ELF_DATA
 #define ELF_MACHINE_CODE	EM_TILEPRO
@@ -3762,7 +3771,7 @@ tilepro_additional_program_headers (bfd *abfd,
 /* Align PLT mod 64 byte L2 line size. */
 #define elf_backend_plt_alignment 6
 #define elf_backend_want_plt_sym 1
-#define elf_backend_got_header_size GOT_ENTRY_SIZE
+#define elf_backend_got_header_size	     tilepro_elf_got_header_size
 #define elf_backend_want_dynrelro 1
 #define elf_backend_rela_normal 1
 #define elf_backend_default_execstack 0

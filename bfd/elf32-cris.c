@@ -3988,6 +3988,14 @@ elf_cris_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
     }
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_cris_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 /* The elf_backend_got_elt_size worker.  For one symbol, we can have up to
    two GOT entries from three types with two different sizes.  We handle
    it as a single entry, so we can use the regular offset-calculation
@@ -4107,8 +4115,8 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	12
-#define elf_backend_got_elt_size elf_cris_got_elt_size
+#define elf_backend_got_header_size	elf_cris_got_header_size
+#define elf_backend_got_elt_size	elf_cris_got_elt_size
 #define elf_backend_dtrel_excludes_plt	1
 #define elf_backend_want_dynrelro	1
 

@@ -532,7 +532,7 @@
 #define elf_backend_core_find_build_id _bfd_elfNN_core_find_build_id
 #endif
 #ifndef elf_backend_got_header_size
-#define elf_backend_got_header_size	0
+#define elf_backend_got_header_size	_bfd_elf_default_got_header_size
 #endif
 #ifndef elf_backend_got_elt_size
 #define elf_backend_got_elt_size _bfd_elf_default_got_elt_size

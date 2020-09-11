@@ -421,7 +421,7 @@ riscv_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   htab->sgot = s;
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   if (bed->want_got_plt)
     {
@@ -1448,7 +1448,8 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      || htab->elf.splt->size == 0)
 	  && (htab->elf.sgot == NULL
 	      || (htab->elf.sgot->size
-		  == get_elf_backend_data (output_bfd)->got_header_size)))
+		  == get_elf_backend_data (output_bfd)->
+			got_header_size (info))))
 	htab->elf.sgotplt->size = 0;
     }
 
@@ -4952,6 +4953,14 @@ riscv_elf_obj_attrs_arg_type (int tag)
   return (tag & 1) != 0 ? ATTR_TYPE_FLAG_STR_VAL : ATTR_TYPE_FLAG_INT_VAL;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+riscv_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return ARCH_SIZE / 8;
+}
+
 #define TARGET_LITTLE_SYM		riscv_elfNN_vec
 #define TARGET_LITTLE_NAME		"elfNN-littleriscv"
 
@@ -4975,6 +4984,7 @@ riscv_elf_obj_attrs_arg_type (int tag)
 #define elf_backend_plt_sym_val		     riscv_elf_plt_sym_val
 #define elf_backend_grok_prstatus	     riscv_elf_grok_prstatus
 #define elf_backend_grok_psinfo		     riscv_elf_grok_psinfo
+#define elf_backend_got_header_size	     riscv_elf_got_header_size
 #define elf_backend_object_p		     riscv_elf_object_p
 #define elf_info_to_howto_rel		     NULL
 #define elf_info_to_howto		     riscv_info_to_howto_rela
@@ -4989,7 +4999,6 @@ riscv_elf_obj_attrs_arg_type (int tag)
 #define elf_backend_plt_readonly	1
 #define elf_backend_plt_alignment	4
 #define elf_backend_want_plt_sym	1
-#define elf_backend_got_header_size	(ARCH_SIZE / 8)
 #define elf_backend_want_dynrelro	1
 #define elf_backend_rela_normal		1
 #define elf_backend_default_execstack	0

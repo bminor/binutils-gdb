@@ -309,3 +309,11 @@ _bfd_elf_maybe_vxworks_add_dynamic_tags (bfd *output_bfd,
 	      || htab->target_os != is_vxworks
 	      || elf_vxworks_add_dynamic_entries (output_bfd, info)));
 }
+
+/* Determine the size of the header of for the GOT section.  */
+
+bfd_vma
+elf_vxworks_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 4 * 3;
+}
