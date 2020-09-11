@@ -238,6 +238,7 @@ enum aarch64_operand_class
   AARCH64_OPND_CLASS_COND,
   AARCH64_OPND_CLASS_CAP_REG,
   AARCH64_OPND_CLASS_PERM,
+  AARCH64_OPND_CLASS_FORM,
 };
 
 /* Operand code that helps both parsing and coding.
@@ -524,6 +525,7 @@ enum aarch64_opnd
   AARCH64_OPND_A64C_IMM8,	/* IMM8 for BICFLGS.  */
   AARCH64_OPND_A64C_IMM6_EXT,	/* IMM6 for SCBNDS.  */
   AARCH64_OPND_PERM,		/* 3-bit capability permission for e.g. CLRPERM.  */
+  AARCH64_OPND_FORM,		/* 2-bit capability form for e.g. SEAL.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -1142,6 +1144,17 @@ const aarch64_cond* get_inverted_cond (const aarch64_cond *cond);
 
 /* Capability permissions.  */
 aarch64_insn get_perm_bit (const char p);
+
+typedef struct
+{
+  const char *name;
+  aarch64_insn value;
+} aarch64_form;
+
+extern const aarch64_form aarch64_forms[4];
+
+const aarch64_form *get_form_from_value (aarch64_insn value);
+const aarch64_form *get_form_from_str (const char *form, size_t len);
 
 /* Structure representing an operand.  */
 
@@ -1220,6 +1233,7 @@ struct aarch64_opnd_info
 
       const aarch64_cond *cond;
       aarch64_insn perm;
+      const aarch64_form *form;
       /* The encoding of the PSTATE field.  */
       aarch64_insn pstatefield;
       const aarch64_sys_ins_reg *sysins_op;

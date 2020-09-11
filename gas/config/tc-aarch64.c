@@ -7081,6 +7081,21 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  po_misc_or_fail (parse_perms (&str, info));
 	  break;
 
+	case AARCH64_OPND_FORM:
+	    {
+	      char *start = str;
+	      do
+		str++;
+	      while (ISALPHA (*str));
+	      info->form = get_form_from_str (start, str - start);
+	      if (info->form == NULL)
+		{
+		  set_syntax_error (_("invalid form"));
+		  goto failure;
+		}
+	    }
+	  break;
+
 	case AARCH64_OPND_COND:
 	case AARCH64_OPND_COND1:
 	  {

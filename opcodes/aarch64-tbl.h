@@ -4166,6 +4166,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("scoff", 0xc2c06000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
   A64C_INSN ("sctag", 0xc2c08000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
   A64C_INSN ("scvalue", 0xc2c04000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("seal", 0xc2c00800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can, Cam), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("seal", 0xc2c31000, 0xffff9c00, a64c, 0, OP3 (Cad, Can, FORM), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("unseal", 0xc2c04800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can, Cam), QL3_A64C_CA_CA_CA, 0),
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
@@ -6107,4 +6110,5 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     X(IMMEDIATE, ins_aimm, ext_a64c_imm6, "A64C_IMM6_EXT", 0,		\
       F(FLD_a64c_shift, FLD_imm6_2),					\
       "6-bit unsigned immediate")					\
-    Y(PERM, perm, "PERM", 0, F(), "a capability permission")
+    Y(PERM, perm, "PERM", 0, F(), "a capability permission")		\
+    Y(FORM, form, "FORM", 0, F(), "a capability form")

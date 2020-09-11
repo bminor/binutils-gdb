@@ -1274,6 +1274,20 @@ aarch64_ext_perm (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Decode the form operand for e.g. SEAL <Cd>, <Cn>, <form>.  */
+bool
+aarch64_ext_form (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  aarch64_opnd_info *info,
+		  aarch64_insn code, const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  aarch64_insn value;
+  /* form */
+  value = extract_field (FLD_form, code, 0);
+  info->form = get_form_from_value (value);
+  return true;
+}
+
 /* Decode the system register operand for e.g. MRS <Xt>, <systemreg>.  */
 bool
 aarch64_ext_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,

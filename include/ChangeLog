@@ -1,5 +1,14 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/aarch64.h (aarch64_operand_class): Add FORM.
+	(aarch64_opnd): Likewise.
+	(aarch64_form): New struct.
+	(aarch64_forms): New array.
+	(get_form_from_value, get_form_from_str): New functions.
+	(aarch64_opnd_info): New member FORM.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* include/aarch64.h (aarch64_opnd): Add IMM6_EXT.
 
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>

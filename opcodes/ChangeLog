@@ -1,5 +1,22 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_form): New function.
+	* aarch64-asm.h (ins_form): New function declaration.
+	* aarch64-dis.c (aarch64_ext_form): New function.
+	* aarch64-dis.h (ext_form): New function declaraion.
+	* aarch64-opc.c (fields): New field form.
+	(aarch64_forms): Initialise array.
+	(get_form_from_value, get_form_from_str): New functions.
+	(aarch64_print_operand): Add FORM.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_form.
+	* aarch64-tbl.h (aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_aimm): Fix comment.
 	* aarch64-dis.c (aarch64_ext_a64c_imm6): New function.
 	* aarch64-dis.h (ext_a64c_imm6): New function.

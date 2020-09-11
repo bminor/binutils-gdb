@@ -128,6 +128,13 @@ morello_scbnds csp, c16
 morello_scbnds c18, csp
 morello_scbnds csp, csp
 
+	.macro morello_seal cd, cn
+	  .irp form, rb, lb, lpb
+	    seal   \cd, \cn, \form
+	  .endr
+	.endm
+morello_seal c2, c3
+
 // Three operands (dnm)
 
 	.macro morello_cspcspx cdsp, cnsp, xm
@@ -150,7 +157,7 @@ subs x4, c13, c14
 morello_jump_sealed c2, c4
 
 	.macro morello_ccc cd, cn, cm
-	  .irp op, cpytype, cpyvalue
+	  .irp op, cpytype, cpyvalue, seal, unseal
 	    \op    \cd, \cn, \cm
 	  .endr
 	.endm

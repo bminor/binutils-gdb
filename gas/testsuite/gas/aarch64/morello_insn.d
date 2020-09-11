@@ -246,6 +246,9 @@ Disassembly of section \.text:
 .*:	c2d07bff 	scbnds	csp, csp, #0x20, lsl #4
 .*:	c2dffbff 	scbnds	csp, csp, #0x3f, lsl #4
 .*:	c2c27bff 	scbnds	csp, csp, #0x4, lsl #4
+.*:	c2c33062 	seal	c2, c3, rb
+.*:	c2c37062 	seal	c2, c3, lb
+.*:	c2c35062 	seal	c2, c3, lpb
 .*:	c2d928c7 	bicflgs	c7, c6, x25
 .*:	c2d9a8c7 	eorflgs	c7, c6, x25
 .*:	c2d968c7 	orrflgs	c7, c6, x25
@@ -292,6 +295,8 @@ Disassembly of section \.text:
 .*:	c2c4c440 	rets	c29, c2, c4
 .*:	c2cd2482 	cpytype	c2, c4, c13
 .*:	c2cd6482 	cpyvalue	c2, c4, c13
+.*:	c2cd0882 	seal	c2, c4, c13
+.*:	c2cd4882 	unseal	c2, c4, c13
 .*:	c2d9eac0 	cthi	c0, c22, x25
 .*:	c2d9e89f 	cthi	csp, c4, x25
 .*:	c2f91816 	cvt	c22, c0, x25

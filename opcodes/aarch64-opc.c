@@ -356,6 +356,7 @@ const aarch64_field fields[] =
     { 13,  8 },	/* a64c_imm8: BICFLGS imm8.  */
     { 14,  1 },	/* a64c_shift: Shift bit in SCBNDS.  */
     { 13,  3 },	/* perm: permission specifier in clrperm.  */
+    { 13,  2 },	/* form: form specifier in seal.  */
 };
 
 enum aarch64_operand_class
@@ -451,6 +452,32 @@ get_perm_bit (char p)
     }
 
   return 8;
+}
+
+/* Table of all forms.  */
+const aarch64_form aarch64_forms[] =
+{
+  {NULL, 0x0},		/* RESERVED */
+  {"rb", 0x1},
+  {"lpb", 0x2},
+  {"lb", 0x3},
+};
+
+const aarch64_form *
+get_form_from_value (aarch64_insn value)
+{
+  assert (value < sizeof (aarch64_forms) / sizeof (aarch64_form));
+  return &aarch64_forms[(unsigned int) value];
+}
+
+const aarch64_form *
+get_form_from_str (const char *form, size_t len)
+{
+  for (unsigned i = 1; i < sizeof (aarch64_forms) / sizeof (aarch64_form); i++)
+    if (!strncmp (form, aarch64_forms[i].name, len))
+      return &aarch64_forms[i];
+
+  return NULL;
 }
 
 /* Table describing the operand extension/shifting operators; indexed by
@@ -3805,6 +3832,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	  get_perm_str (opnd->perm, perm);
 	  snprintf (buf, size, "%s", perm);
 	}
+      break;
+
+    case AARCH64_OPND_FORM:
+      snprintf (buf, size, "%s", opnd->form->name);
       break;
 
     case AARCH64_OPND_COND:
