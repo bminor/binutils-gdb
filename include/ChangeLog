@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elf/aarch64.h: New relocation R_MORELLO_LD_PREL_LO17.
+	* opcode/aarch64.h (aarch64_opnd): Add ADDR_PCREL17.
+	(aarch64_op): Add OP_LDR_LIT_2.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add A64C_ADDR_SIMM7.
 
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>

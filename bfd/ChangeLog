@@ -1,5 +1,19 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Add
+	LD_PREL_LO17.
+	(elfNN_aarch64_final_link_relocate,
+	elfNN_aarch64_check_relocs): Likewise.
+	* elfxx-aarch64.c (reencode_ld_lit_ofs_17): New function.
+	(_bfd_aarch64_elf_put_addend,
+	_bfd_aarch64_elf_resolve_relocation): Add LD_PREL_LO17.
+	* libbfd.h (bfd_reloc_code_real_names): Add
+	BFD_RELOC_MORELLO_LD_LO17_PCREL.
+	* reloc.c: Add BFD_RELOC_AARCH64_LD_LO17_PCREL.
+	* bfd-in2.h: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elf-bfd.h (bfd_elf_section_data): New member
 	is_target_section_data.
 	* elfnn-aarch64.c (_aarch64_elf_section_data): New member

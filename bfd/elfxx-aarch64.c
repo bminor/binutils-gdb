@@ -84,6 +84,13 @@ reencode_cond_branch_ofs_19 (uint32_t insn, uint32_t ofs)
   return (insn & ~(MASK (19) << 5)) | ((ofs & MASK (19)) << 5);
 }
 
+/* Decode the 17-bit offset of A64C load literal.  */
+static inline uint32_t
+reencode_ld_lit_ofs_17 (uint32_t insn, uint32_t ofs)
+{
+  return (insn & ~(MASK (17) << 5)) | ((ofs & MASK (17)) << 5);
+}
+
 /* Decode the 19-bit offset of load literal.  */
 static inline uint32_t
 reencode_ld_lit_ofs_19 (uint32_t insn, uint32_t ofs)
@@ -220,6 +227,12 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
 
     case BFD_RELOC_AARCH64_TSTBR14:
       contents = reencode_tst_branch_ofs_14 (contents, addend);
+      break;
+
+    case BFD_RELOC_MORELLO_LD_LO17_PCREL:
+      if (old_addend & ((1 << howto->rightshift) - 1))
+	addend++;
+      contents = reencode_ld_lit_ofs_17 (contents, addend);
       break;
 
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
@@ -407,6 +420,7 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
       break;
 
+    case BFD_RELOC_MORELLO_LD_LO17_PCREL:
     case BFD_RELOC_AARCH64_16_PCREL:
     case BFD_RELOC_AARCH64_32_PCREL:
     case BFD_RELOC_AARCH64_64_PCREL:
