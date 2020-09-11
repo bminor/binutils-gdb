@@ -1,5 +1,14 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (process_omitted_operand): Identify Can.
+	(parse_operands): Add CST_REG, Cam_SP
+	and A64C_IMMV4.
+	* testsuite/gas/aarch64/morello_insn.s: Add tests.
+	* testsuite/gas/aarch64/morello_insn.d: Likewise.
+	* testsuite/gas/aarch64/morello_insn-c64.d: Likewise.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Add A64C_IMM8.
 	* testsuite/gas/aarch64/morello_insn.d: Add tests.
 	* testsuite/gas/aarch64/morello_insn-c64.d: Likewise.

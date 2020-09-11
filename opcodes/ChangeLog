@@ -1,5 +1,22 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-dis.c (aarch64_ext_a64c_immv): New function.
+	(aarch64_ext_regno): Set PRESENT flag for A64 RET.
+	* aarch64-dis.h (aarch64_ext_a64c_immv): New function.
+	* aarch64-opc.c (operand_general_constraint_met_p): Add
+	A64C_IMMV4.  Remove ATTRIBUTE_UNUSED.  Reject A64 RET without
+	operand when in C64.
+	(aarch64_match_operands_constraint): Remove ATTRIBUTE_UNUSED.
+	(aarch64_print_operand): Add A64C_IMMV4, Cam_SP and CST_REG.
+	* aarch64-tbl.h (QL1_A64C_CA, QL3_A64C_CA_CA_CA): New macros.
+	(aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-opc.c (fields): Add a64c_imm8.
 	(aarch64_print_operand): Add A64C_IMM8.
 	* aarch64-opc.h (aarch64_field_kind): Add a64c_imm8.
