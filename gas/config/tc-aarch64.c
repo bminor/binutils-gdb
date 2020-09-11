@@ -2112,7 +2112,8 @@ s_tlsdesccall (int ignored ATTRIBUTE_UNUSED)
      the .tlsdesc directive.  */
   frag_grow (4);
   fix_new_aarch64 (frag_now, frag_more (0) - frag_now->fr_literal, 4, &exp, 0,
-		   BFD_RELOC_AARCH64_TLSDESC_CALL);
+		   (IS_C64 ? BFD_RELOC_MORELLO_TLSDESC_CALL
+		    : BFD_RELOC_AARCH64_TLSDESC_CALL));
 
   demand_empty_rest_of_line ();
 }
@@ -2885,7 +2886,7 @@ static struct reloc_table_entry reloc_table[] =
   {"tlsdesc", 0,
    BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21, /* adr_type */
    BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21,
-   0,
+   BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20,
    0,
    0,
    0,
@@ -3222,10 +3223,12 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST8_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
@@ -7603,7 +7606,8 @@ addr_uimm:
 
 	      inst.reloc.type = ldst_lo12_determine_real_reloc_type ();
 	    }
-	  else if (inst.reloc.type == BFD_RELOC_AARCH64_LD_GOT_LO12_NC
+	  else if ((inst.reloc.type == BFD_RELOC_AARCH64_LD_GOT_LO12_NC
+		    || inst.reloc.type == BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC)
 		   && inst.base.operands[0].qualifier == AARCH64_OPND_QLF_CA)
 	    inst.reloc.flags = FIXUP_F_C64;
 
@@ -9648,9 +9652,12 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       break;
 
     case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
-      fixP->fx_r_type = (ilp32_p
-			 ? BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC
-			 : BFD_RELOC_AARCH64_TLSDESC_LD64_LO12);
+      if (fixP->tc_fix_data.c64)
+	fixP->fx_r_type = BFD_RELOC_MORELLO_TLSDESC_LD128_LO12;
+      else if (ilp32_p)
+	fixP->fx_r_type = BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC;
+      else
+	fixP->fx_r_type = BFD_RELOC_AARCH64_TLSDESC_LD64_LO12;
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
@@ -9659,10 +9666,12 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
       break;
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -9757,6 +9766,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
     case BFD_RELOC_AARCH64_TLSDESC_LDR:
     case BFD_RELOC_MORELLO_CAPINIT:
       break;

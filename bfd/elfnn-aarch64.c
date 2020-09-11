@@ -225,10 +225,13 @@
 #define IS_AARCH64_TLS_RELAX_RELOC(R_TYPE)			\
   ((R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADD			\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADD_LO12		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSDESC_CALL		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_CALL		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LD_PREL19		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSDESC_LD128_LO12		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LDR			\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC		\
@@ -251,10 +254,13 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADD			\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADD_LO12		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_CALL		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSDESC_CALL		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LD64_LO12		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSDESC_LD128_LO12		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LDR			\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_LD_PREL19		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC		\
@@ -444,6 +450,19 @@ elfNN_aarch64_tlsdesc_small_plt_bti_entry[PLT_TLSDESC_ENTRY_SIZE] =
   0x63, 0x00, 0x00, 0x11,	/* add w3, w3, 0 */
 #endif
   0x40, 0x00, 0x1f, 0xd6,	/* br x2 */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
+};
+
+static const bfd_byte
+elfNN_aarch64_tlsdesc_small_plt_c64_entry[PLT_TLSDESC_ENTRY_SIZE] =
+{
+  0xe2, 0x8f, 0xbf, 0x62,	/* stp c2, c3, [sp, #-16]! */
+  0x02, 0x00, 0x80, 0x90,	/* adrp c2, 0 */
+  0x03, 0x00, 0x80, 0x90,	/* adrp c3, 0 */
+  0x42, 0x00, 0x40, 0xc2,	/* ldr c2, [c2, #0] */
+  0x63, 0x00, 0x00, 0x02,	/* add c3, c3, 0 */
+  0x40, 0x10, 0xc2, 0xc2,	/* br c2 */
+  0x1f, 0x20, 0x03, 0xd5,	/* nop */
   0x1f, 0x20, 0x03, 0xd5,	/* nop */
 };
 
@@ -2173,6 +2192,51 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0x0,			/* dst_mask */
 	 false),		/* pcrel_offset */
 
+  /* Get to the page for the GOT entry for the symbol
+     (G(S) - P) using an ADRP instruction.  */
+  HOWTO64 (MORELLO_R (TLSDESC_ADR_PAGE20),	/* type */
+	 12,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 20,			/* bitsize */
+	 true,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TLSDESC_ADR_PAGE20),	/* name */
+	 false,			/* partial_inplace */
+	 0xfffff,		/* src_mask */
+	 0xfffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
+
+  /* LD128: GOT offset G(S) & 0xff0.  */
+  HOWTO64 (MORELLO_R (TLSDESC_LD128_LO12),	/* type */
+	 4,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TLSDESC_LD128_LO12),	/* name */
+	 false,			/* partial_inplace */
+	 0xff0,			/* src_mask */
+	 0xff0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (TLSDESC_CALL),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TLSDESC_CALL),	/* name */
+	 false,			/* partial_inplace */
+	 0x0,			/* src_mask */
+	 0x0,			/* dst_mask */
+	 false),		/* pcrel_offset */
+
   HOWTO (AARCH64_R (COPY),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -2376,6 +2440,20 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 MORELLO_R_STR (IRELATIVE),	/* name */
+	 false,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ALL_ONES,		/* dst_mask */
+	 false),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (TLSDESC),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TLSDESC),	/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
@@ -5701,12 +5779,19 @@ aarch64_calculate_got_entry_vma (struct elf_link_hash_entry *h,
 
 static bfd_reloc_code_real_type
 aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
-				      struct elf_link_hash_entry *h)
+				      struct bfd_link_info *info,
+				      struct elf_link_hash_entry *h,
+				      bool morello_reloc)
 {
   bool is_local = h == NULL;
 
   switch (r_type)
     {
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
+      return (is_local || !bfd_link_pic (info)
+	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1
+	      : r_type);
+
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
       return (is_local
@@ -5738,6 +5823,10 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2
 	      : BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1);
 
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
+      return ((is_local || !bfd_link_pie (info)
+	       ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC : r_type));
+
     case BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
       return (is_local
@@ -5758,10 +5847,19 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
 	      ? BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12
 	      : BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19);
 
-    case BFD_RELOC_AARCH64_TLSDESC_ADD:
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
+      return ((is_local || !bfd_link_pie (info))
+	      ? BFD_RELOC_AARCH64_NONE : r_type);
+
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
+      if (morello_reloc && !is_local && bfd_link_pie (info))
+	return r_type;
+      /* Fall through.  */
+    case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
-      /* Instructions with these relocations will become NOPs.  */
+      /* Instructions with these relocations will be fully resolved during the
+         transition into either a NOP in the A64 case or movk and add in
+	 C64.  */
       return BFD_RELOC_AARCH64_NONE;
 
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
@@ -5818,6 +5916,11 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
       return GOT_TLS_GD;
 
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
+      return GOT_TLSDESC_GD | GOT_CAP;
+
     case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
@@ -5848,18 +5951,22 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
 static bool
 aarch64_can_relax_tls (bfd *input_bfd,
 		       struct bfd_link_info *info,
-		       bfd_reloc_code_real_type r_type,
+		       const Elf_Internal_Rela *rel,
 		       struct elf_link_hash_entry *h,
 		       unsigned long r_symndx)
 {
   unsigned int symbol_got_type;
   unsigned int reloc_got_type;
 
-  if (! IS_AARCH64_TLS_RELAX_RELOC (r_type))
+  bfd_reloc_code_real_type bfd_r_type
+    = elfNN_aarch64_bfd_reloc_from_type (input_bfd,
+					 ELFNN_R_TYPE (rel->r_info));
+
+  if (! IS_AARCH64_TLS_RELAX_RELOC (bfd_r_type))
     return false;
 
   symbol_got_type = elfNN_aarch64_symbol_got_type (h, input_bfd, r_symndx);
-  reloc_got_type = aarch64_reloc_got_type (r_type);
+  reloc_got_type = aarch64_reloc_got_type (bfd_r_type);
 
   if (symbol_got_type == GOT_TLS_IE && GOT_TLS_GD_ANY_P (reloc_got_type))
     return true;
@@ -5879,17 +5986,29 @@ aarch64_can_relax_tls (bfd *input_bfd,
 static bfd_reloc_code_real_type
 aarch64_tls_transition (bfd *input_bfd,
 			struct bfd_link_info *info,
-			unsigned int r_type,
+			const Elf_Internal_Rela *rel,
 			struct elf_link_hash_entry *h,
 			unsigned long r_symndx)
 {
   bfd_reloc_code_real_type bfd_r_type
-    = elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type);
+    = elfNN_aarch64_bfd_reloc_from_type (input_bfd,
+					 ELFNN_R_TYPE (rel->r_info));
 
-  if (! aarch64_can_relax_tls (input_bfd, info, bfd_r_type, h, r_symndx))
+  if (! aarch64_can_relax_tls (input_bfd, info, rel, h, r_symndx))
     return bfd_r_type;
 
-  return aarch64_tls_transition_without_check (bfd_r_type, h);
+  bool morello_reloc = (bfd_r_type == BFD_RELOC_AARCH64_TLSDESC_ADD_LO12
+			&& (ELFNN_R_TYPE (rel[1].r_info)
+			    == MORELLO_R (TLSDESC_CALL)));
+
+  /* GD -> IE is not supported for Morello TLSDESC yet.  We do however allow
+     lowering of GD -> LE for static non-pie executables.  XXX It ought to be
+     safe to do this for A64 as well but it is not implemented yet.  */
+  if (h != NULL && morello_reloc && bfd_link_pie (info))
+    return bfd_r_type;
+
+  return aarch64_tls_transition_without_check (bfd_r_type, info, h,
+					       morello_reloc);
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
@@ -6664,6 +6783,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
     case BFD_RELOC_AARCH64_TLSDESC_LDR:
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
       *unresolved_reloc_p = false;
       return bfd_reloc_ok;
 
@@ -7211,10 +7331,12 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
       if (globals->root.sgot == NULL)
 	return bfd_reloc_notsupported;
       value = (symbol_tlsdesc_got_offset (input_bfd, h, r_symndx)
@@ -7402,6 +7524,11 @@ clear_erratum_843419_entry (struct elf_aarch64_link_hash_table *globals,
     }
 }
 
+#define BUILD_MOVZ(_reg, _imm) (movz_R0 \
+				| ((((_imm) >> 16) & 0xffff) << 5) \
+				| (_reg))
+#define BUILD_MOVK(_reg, _imm) (movk_R0 | (((_imm) & 0xffff) << 5) | (_reg))
+
 /* Handle TLS relaxations.  Relaxing is possible for symbols that use
    R_AARCH64_TLSDESC_ADR_{PAGE, LD64_LO12_NC, ADD_LO12_NC} during a static
    link.
@@ -7411,19 +7538,56 @@ clear_erratum_843419_entry (struct elf_aarch64_link_hash_table *globals,
    case of error.  */
 
 static bfd_reloc_status_type
-elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
-			 bfd *input_bfd, asection *input_section,
+elfNN_aarch64_tls_relax (bfd *input_bfd, struct bfd_link_info *info,
+			 asection *input_section,
 			 bfd_byte *contents, Elf_Internal_Rela *rel,
-			 struct elf_link_hash_entry *h)
+			 struct elf_link_hash_entry *h, unsigned long r_symndx)
 {
   bool is_local = h == NULL;
+
   unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
   unsigned long insn;
+  bfd_vma sym_size = 0;
+  struct elf_aarch64_link_hash_table *globals = elf_aarch64_hash_table (info);
 
   BFD_ASSERT (globals && input_bfd && contents && rel);
 
+  if (is_local)
+    {
+      if (h != NULL)
+	sym_size = h->size;
+      else
+	{
+	  Elf_Internal_Sym *sym;
+
+	  sym = bfd_sym_from_r_symndx (&globals->root.sym_cache, input_bfd,
+				       r_symndx);
+	  BFD_ASSERT (sym != NULL);
+	  sym_size = sym->st_size;
+	}
+    }
+
   switch (elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type))
     {
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
+      if (is_local || !bfd_link_pic (info))
+	{
+	  /* GD->LE relaxation:
+	     nop                     =>   movz x1, objsize_hi16
+	     adrp x0, :tlsdesc:var   =>   movz x0, :tprel_g1:var  */
+	  bfd_putl32 (BUILD_MOVZ(1, sym_size), contents + rel->r_offset - 4);
+	  bfd_putl32 (movz_R0, contents + rel->r_offset);
+
+	  /* We have relaxed the adrp into a mov, we may have to clear any
+	     pending erratum fixes.  */
+	  clear_erratum_843419_entry (globals, rel->r_offset, input_section);
+	  return bfd_reloc_continue;
+	}
+      else
+	{
+	  /* GD->IE relaxation: Not implemented.  */
+	  return bfd_reloc_continue;
+	}
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
       if (is_local)
@@ -7592,6 +7756,19 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
       return bfd_reloc_continue;
 
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
+      if (is_local || !bfd_link_pic (info))
+	{
+	  /* GD->LE relaxation:
+	     ldr xd, [x0, #:tlsdesc_lo12:var] => movk x0, :tprel_g0_nc:var  */
+	  bfd_putl32 (movk_R0, contents + rel->r_offset);
+	  return bfd_reloc_continue;
+	}
+      else
+	{
+	  /* GD->IE relaxation: not implemented.  */
+	  return bfd_reloc_continue;
+	}
     case BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC:
       if (is_local)
 	{
@@ -7656,13 +7833,35 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	  return bfd_reloc_continue;
 	}
 
-    case BFD_RELOC_AARCH64_TLSDESC_ADD:
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
+      /* GD->LE relaxation:
+	 blr cd				  =>   add c0, c2, x0  */
+      if (is_local || !bfd_link_pic (info))
+	{
+	  bfd_putl32 (0xc2a06040, contents + rel->r_offset);
+	  return bfd_reloc_ok;
+	}
+      else
+	goto set_nop;
+
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
+      /* GD->LE relaxation:
+	 ldr cd, [c0, #:tlsdesc_lo12:var] => movk x1, objsize_lo16  */
+      if ((is_local || !bfd_link_pic (info))
+	  && ELFNN_R_TYPE (rel[1].r_info) == MORELLO_R (TLSDESC_CALL))
+	{
+	  bfd_putl32 (BUILD_MOVK(1, sym_size), contents + rel->r_offset);
+	  return bfd_reloc_continue;
+	}
+
+      /* Fall through.  */
+    case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
       /* GD->IE/LE relaxation:
 	 add x0, x0, #:tlsdesc_lo12:var	  =>   nop
 	 blr xd				  =>   nop
        */
+set_nop:
       bfd_putl32 (INSN_NOP, contents + rel->r_offset);
       return bfd_reloc_ok;
 
@@ -7947,7 +8146,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	 We call elfNN_aarch64_final_link_relocate unless we're completely
 	 done, i.e., the relaxation produced the final output we want.  */
 
-      relaxed_bfd_r_type = aarch64_tls_transition (input_bfd, info, r_type,
+      relaxed_bfd_r_type = aarch64_tls_transition (input_bfd, info, rel,
 						   h, r_symndx);
       if (relaxed_bfd_r_type != bfd_r_type)
 	{
@@ -7955,8 +8154,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  howto = elfNN_aarch64_howto_from_bfd_reloc (bfd_r_type);
 	  BFD_ASSERT (howto != NULL);
 	  r_type = howto->type;
-	  r = elfNN_aarch64_tls_relax (globals, input_bfd, input_section,
-				       contents, rel, h);
+	  r = elfNN_aarch64_tls_relax (input_bfd, info, input_section,
+				       contents, rel, h, r_symndx);
 	  unresolved_reloc = 0;
 	}
       else
@@ -7979,6 +8178,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 					       relocation, info, sec,
 					       h, &unresolved_reloc,
 					       save_addend, &addend, sym);
+
+      bool c64_rtype = false;
 
       switch (elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type))
 	{
@@ -8133,6 +8334,11 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
+	case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
+	  c64_rtype = true;
+	  /* Fall through.  */
+
 	case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
 	case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
 	case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
@@ -8157,7 +8363,10 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		{
 		  bfd_byte *loc;
 		  Elf_Internal_Rela rela;
-		  rela.r_info = ELFNN_R_INFO (indx, AARCH64_R (TLSDESC));
+
+		  rela.r_info = ELFNN_R_INFO (indx,
+					      (c64_rtype ? MORELLO_R (TLSDESC)
+					       : AARCH64_R (TLSDESC)));
 
 		  rela.r_addend = 0;
 		  rela.r_offset = (globals->root.sgotplt->output_section->vma
@@ -8741,12 +8950,10 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
     {
       struct elf_link_hash_entry *h;
       unsigned int r_symndx;
-      unsigned int r_type;
       bfd_reloc_code_real_type bfd_r_type;
       Elf_Internal_Sym *isym;
 
       r_symndx = ELFNN_R_SYM (rel->r_info);
-      r_type = ELFNN_R_TYPE (rel->r_info);
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
@@ -8790,7 +8997,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
 
       /* Could be done earlier, if h were already available.  */
-      bfd_r_type = aarch64_tls_transition (abfd, info, r_type, h, r_symndx);
+      bfd_r_type = aarch64_tls_transition (abfd, info, rel, h, r_symndx);
 
       if (h != NULL)
 	{
@@ -9038,6 +9245,8 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     there are no dangling GOT_PAGE relocs.  */
 	case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
 	case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
+	case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
+	case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
 	  htab->c64_rel = 1;
 	  /* Fall through.  */
 
@@ -9117,10 +9326,14 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if ((got_type & GOT_TLS_IE) && GOT_TLS_GD_ANY_P (got_type))
 	      got_type &= ~ (GOT_TLSDESC_GD | GOT_TLS_GD);
 
-	    /* GOT_CAP has higher precedence due to higher alignment and size
-	       requirements, so do not overwrite it.  XXX This should be
-	       revisited when we add TLS relocations.  */
-	    if (old_got_type != got_type && old_got_type != GOT_CAP)
+	    /* Prefer the capability reference.  */
+	    if ((old_got_type & GOT_CAP) && (got_type & GOT_NORMAL))
+	      {
+		got_type &= ~GOT_NORMAL;
+		got_type |= GOT_CAP;
+	      }
+
+	    if (old_got_type != got_type)
 	      {
 		if (h != NULL)
 		  elf_aarch64_hash_entry (h)->got_type = got_type;
@@ -9879,7 +10092,10 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	       || h->root.type != bfd_link_hash_undefweak)
 	      && (!bfd_link_executable (info)
 		  || indx != 0
-		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
+		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)
+		  /* On Morello support only TLSDESC_GD to TLSLE relaxation;
+		     for everything else we must emit a dynamic relocation.  */
+		  || got_type & GOT_CAP))
 	    {
 	      if (got_type & GOT_TLSDESC_GD)
 		{
@@ -10927,8 +11143,17 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	  const bfd_byte *entry = elfNN_aarch64_tlsdesc_small_plt_entry;
 	  htab->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
 
+	  unsigned adrp_rtype = BFD_RELOC_AARCH64_ADR_HI21_PCREL;
+	  unsigned ldr_rtype = BFD_RELOC_AARCH64_LDSTNN_LO12;
+
 	  aarch64_plt_type type = elf_aarch64_tdata (output_bfd)->plt_type;
-	  if (type == PLT_BTI || type == PLT_BTI_PAC)
+	  if (htab->c64_rel)
+	    {
+	      entry = elfNN_aarch64_tlsdesc_small_plt_c64_entry;
+	      adrp_rtype = BFD_RELOC_MORELLO_ADR_HI20_PCREL;
+	      ldr_rtype = BFD_RELOC_AARCH64_LDST128_LO12;
+	    }
+	  else if (type == PLT_BTI || type == PLT_BTI_PAC)
 	    {
 	      entry = elfNN_aarch64_tlsdesc_small_plt_bti_entry;
 	    }
@@ -10968,21 +11193,21 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 
 	    /* adrp x2, DT_TLSDESC_GOT */
 	    elf_aarch64_update_plt_entry (output_bfd,
-					  BFD_RELOC_AARCH64_ADR_HI21_PCREL,
+					  adrp_rtype,
 					  plt_entry + 4,
 					  (PG (dt_tlsdesc_got)
 					   - PG (adrp1_addr)));
 
 	    /* adrp x3, 0 */
 	    elf_aarch64_update_plt_entry (output_bfd,
-					  BFD_RELOC_AARCH64_ADR_HI21_PCREL,
+					  adrp_rtype,
 					  plt_entry + 8,
 					  (PG (pltgot_addr)
 					   - PG (adrp2_addr)));
 
 	    /* ldr x2, [x2, #0] */
 	    elf_aarch64_update_plt_entry (output_bfd,
-					  BFD_RELOC_AARCH64_LDSTNN_LO12,
+					  ldr_rtype,
 					  plt_entry + 12,
 					  PG_OFFSET (dt_tlsdesc_got));
 

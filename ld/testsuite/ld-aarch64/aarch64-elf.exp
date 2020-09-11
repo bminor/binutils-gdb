@@ -249,6 +249,9 @@ run_dump_test_lp64 "morello-capinit"
 run_dump_test_lp64 "morello-stubs"
 run_dump_test_lp64 "morello-stubs-static"
 run_dump_test_lp64 "morello-sec-round"
+run_dump_test_lp64 "morello-tlsdesc"
+run_dump_test_lp64 "morello-tlsdesc-static"
+run_dump_test_lp64 "morello-tlsdesc-staticpie"
 
 run_dump_test "reloc-overflow-bad"
 

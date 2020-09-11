@@ -263,11 +263,13 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
       break;
 
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
       break;
 
     case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
     case BFD_RELOC_MORELLO_ADR_HI20_NC_PCREL:
     case BFD_RELOC_MORELLO_ADR_HI20_PCREL:
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
       contents = _bfd_aarch64_reencode_adr_imm (contents, addend, 1);
       break;
 
@@ -315,6 +317,7 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
     case BFD_RELOC_AARCH64_LDST8_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_LDST16_DTPREL_LO12:
@@ -447,6 +450,7 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
     {
     case BFD_RELOC_AARCH64_NONE:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
       break;
 
     case BFD_RELOC_MORELLO_LD_LO17_PCREL:
@@ -543,6 +547,7 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
       break;
 
     case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -575,6 +580,7 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12:
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_LDR:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:

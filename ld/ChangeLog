@@ -1,5 +1,13 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* testsuite/ld-aarch64/morello-tlsdesc.s: New file.
+	* testsuite/ld-aarch64/morello-tlsdesc.d: New test.
+	* testsuite/ld-aarch64/morello-tlsdesc-static.d: New test.
+	* testsuite/ld-aarch64/morello-tlsdesc-staticpie.d: New test.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add them.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* emultempl/aarch64elf.em (elf64_c64_pad_section): New
 	function.
 	(gld${EMULATION_NAME}_after_allocation): Resize C64 sections.

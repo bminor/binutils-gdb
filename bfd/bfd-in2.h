@@ -5947,6 +5947,16 @@ instructions.  */
 /* AArch64 TLS DESC relocation.  */
   BFD_RELOC_AARCH64_TLSDESC_CALL,
 
+/* Morello TLS DESC relocation.  */
+  BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20,
+
+/* bit[11:4] of byte offset to TLS base address, encoded in ldst instructions.  */
+  BFD_RELOC_MORELLO_TLSDESC_LD128_LO12,
+
+/* Relocation to identify the BLR call which performs an indirect call to the
+TLS descriptor function.  */
+  BFD_RELOC_MORELLO_TLSDESC_CALL,
+
 /* AArch64 TLS relocation.  */
   BFD_RELOC_AARCH64_COPY,
 
@@ -5988,6 +5998,9 @@ instructions.  */
 
 /* C64 support for STT_GNU_IFUNC.  */
   BFD_RELOC_MORELLO_IRELATIVE,
+
+/* Morello TLS relocation, identifies the TLS descriptor to be filled.  */
+  BFD_RELOC_MORELLO_TLSDESC,
 
 /* AArch64 pseudo relocation code to mark the end of the AArch64
 relocation enumerators that have direct mapping to ELF reloc codes.
