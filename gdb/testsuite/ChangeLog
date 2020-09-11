@@ -1,3 +1,7 @@
+2020-09-11  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/bp-cmds-execution-x-script.exp: Remove a stale comment.
+
 2020-09-10  Alan Modra  <amodra@gmail.com>
 
 	PR 26597
