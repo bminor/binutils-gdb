@@ -1,5 +1,9 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elf/aarch64.h (aarch64_st_branch_type): New enum.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opcode_encode): Add cpu variant
 	argument.
 

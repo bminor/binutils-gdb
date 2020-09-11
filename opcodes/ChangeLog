@@ -1,5 +1,10 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-dis.c: Include elf/aarch64.h.
+	(get_sym_code_type): Identify C64 functions.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_opcode_encode): Add CPU variant
 	argument.
 	* aarch64-dis.c (map_type): Add MAP_C64.

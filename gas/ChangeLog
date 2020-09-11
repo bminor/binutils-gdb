@@ -1,5 +1,20 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c: Include cpu-aarch64.h.
+	(IS_C64): New macro.
+	(make_mapping_symbol, aarch64_frob_label): Set LSB of C64
+	symbol.
+	(aarch64_adjust_symtab): Mark all C64 functions.
+	(parse_operands): Set LSB when target of ADR is a function.
+	(aarch64_fix_adjustable): New function.
+	* config/tc-aarch64.h (AARCH64_SET_FLAG, AARCH64_RESET_FLAG,
+	AARCH64_FLAG_C64, AARCH64_IS_C64, AARCH64_SET_C64): New
+	macros.
+	(aarch64_fix_adjustable): New function.
+	(tc_fix_adjustable): Use it.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.h (mstate): Add MAP_C64.
 	* config/tc-aarch64.c (make_mapping_symbol): Add capability
 	mapping symbol.
