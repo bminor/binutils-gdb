@@ -56,6 +56,26 @@ Disassembly of section \.text:
 .*:	02c7fbf5 	sub	c21, csp, #0x1fe, lsl #12
 .*:	02800ff5 	sub	c21, csp, #0x3
 .*:	02c003f5 	sub	c21, csp, #0x0, lsl #12
+.*:	c2ffe0c7 	bicflgs	c7, c6, #255
+.*:	c2e000c7 	bicflgs	c7, c6, #0
+.*:	c2ffe0c7 	bicflgs	c7, c6, #255
+.*:	c2e200c7 	bicflgs	c7, c6, #16
+.*:	c2ffe0df 	bicflgs	csp, c6, #255
+.*:	c2e000df 	bicflgs	csp, c6, #0
+.*:	c2ffe0df 	bicflgs	csp, c6, #255
+.*:	c2e200df 	bicflgs	csp, c6, #16
+.*:	c2ffe3e8 	bicflgs	c8, csp, #255
+.*:	c2e003e8 	bicflgs	c8, csp, #0
+.*:	c2ffe3e8 	bicflgs	c8, csp, #255
+.*:	c2e203e8 	bicflgs	c8, csp, #16
+.*:	c2ffe3ff 	bicflgs	csp, csp, #255
+.*:	c2e003ff 	bicflgs	csp, csp, #0
+.*:	c2ffe3ff 	bicflgs	csp, csp, #255
+.*:	c2e203ff 	bicflgs	csp, csp, #16
+.*:	c2d928c7 	bicflgs	c7, c6, x25
+.*:	c2d92be7 	bicflgs	c7, csp, x25
+.*:	c2d928df 	bicflgs	csp, c6, x25
+.*:	c2d92bff 	bicflgs	csp, csp, x25
 .*:	c2a4e131 	add	c17, c9, x4, sxtx
 .*:	c2a4f131 	add	c17, c9, x4, sxtx #4
 .*:	c2a4d131 	add	c17, c9, w4, sxtw #4

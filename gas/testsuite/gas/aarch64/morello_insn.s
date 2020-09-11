@@ -28,6 +28,31 @@ morello_addsub_imm csp, c9
 morello_addsub_imm csp, csp
 morello_addsub_imm c21, csp
 
+	.macro morello_cspcspi8 cdsp, cnsp
+	  .irp op, bicflgs
+		\op   \cdsp, \cnsp, #0xff
+		\op   \cdsp, \cnsp, #0
+		\op   \cdsp, \cnsp, #0xff
+		\op   \cdsp, \cnsp, #0x10
+	  .endr
+	.endm
+morello_cspcspi8 c7, c6
+morello_cspcspi8 csp, c6
+morello_cspcspi8 c8, csp
+morello_cspcspi8 csp, csp
+
+// Three operands (dnm)
+
+	.macro morello_cspcspx cdsp, cnsp, xm
+	  .irp op, bicflgs
+	    \op   \cdsp, \cnsp, \xm
+	  .endr
+	.endm
+morello_cspcspx c7, c6, x25
+morello_cspcspx c7, csp, x25
+morello_cspcspx csp, c6, x25
+morello_cspcspx csp, csp, x25
+
 // Four operands (dnmi)
 
 	.macro morello_add_scalar cspd, cspn, rm
