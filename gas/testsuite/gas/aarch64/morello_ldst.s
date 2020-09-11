@@ -164,6 +164,33 @@ morello_branch_load c2
 morello_branch_load2 csp
 morello_branch_load2 c2
 
+	.macro morello_prfm xnsp
+	  .irp op, prfum
+	    \op    PLDL1KEEP, [\xnsp, #255]
+	    \op    PSTL2STRM, [\xnsp, #-255]
+	    \op    PLDL2STRM, [\xnsp, #0]
+	    \op    PSTL1KEEP, [\xnsp, #16]
+	  .endr
+	.endm
+morello_prfm VAREG
+morello_prfm SP_
+
+// Cache maintenance
+
+	.macro morello_dc ct
+	  .irp op, ivac, isw, csw, cisw, zva, cvac, cvau, cvap, civac
+	    dc \op, \ct
+	  .endr
+	.endm
+morello_dc VAREG
+
+	.macro morello_ic ct
+	  .irp op, ivau
+	    ic \op, \ct
+	  .endr
+	.endm
+morello_ic VAREG
+
 // Alternate base loads and stores.
 
 	.macro morello_ldst_alt_base ct, cnsp

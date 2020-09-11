@@ -1,5 +1,17 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-opc.c (operand_general_constraint_met_p): Expect
+	capability registers for cache operations in C64.
+	(aarch64_print_operand): Print register arguments for cache
+	instructions correctly.
+	* aarch64-tbl.h (aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_sysreg): Adjust for morello
 	MRS/MSR.
 	* aarch64-dis.c (aarch64_ext_sysreg): Likewise.

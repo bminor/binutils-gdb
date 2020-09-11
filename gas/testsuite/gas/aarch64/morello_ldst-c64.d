@@ -214,6 +214,24 @@ Disassembly of section \.text:
 .*:	c2c413e2 	ldpbr	c2, \[csp\]
 .*:	c2c43042 	ldpblr	c2, \[c2\]
 .*:	c2c41042 	ldpbr	c2, \[c2\]
+.*:	f88ff300 	prfum	pldl1keep, \[c24, #255\]
+.*:	f8901313 	prfum	pstl2strm, \[c24, #-255\]
+.*:	f8800303 	prfum	pldl2strm, \[c24\]
+.*:	f8810310 	prfum	pstl1keep, \[c24, #16\]
+.*:	f88ff3e0 	prfum	pldl1keep, \[csp, #255\]
+.*:	f89013f3 	prfum	pstl2strm, \[csp, #-255\]
+.*:	f88003e3 	prfum	pldl2strm, \[csp\]
+.*:	f88103f0 	prfum	pstl1keep, \[csp, #16\]
+.*:	d5087638 	dc	ivac, c24
+.*:	d5087658 	dc	isw, c24
+.*:	d5087a58 	dc	csw, c24
+.*:	d5087e58 	dc	cisw, c24
+.*:	d50b7438 	dc	zva, c24
+.*:	d50b7a38 	dc	cvac, c24
+.*:	d50b7b38 	dc	cvau, c24
+.*:	d50b7c38 	dc	cvap, c24
+.*:	d50b7e38 	dc	civac, c24
+.*:	d50b7538 	ic	ivau, c24
 .*:	425f7d82 	ldar	c2, \[x12\]
 .*:	421f7d82 	stlr	c2, \[x12\]
 .*:	425f7fe2 	ldar	c2, \[sp\]

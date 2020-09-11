@@ -1,5 +1,9 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_opnd): New operand Cat_SYS.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* include/opcode/aarch64.h
 	(aarch64_sys_reg_capreg_supported_p): New function.
 
