@@ -4158,6 +4158,14 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("rets", 0xc2c0c400, 0xffe0fc1f, br_sealed, 0, OP3 (A64C_CST_REG, Can, Cam), QL3_A64C_CA_CA_CA, 0),
   A64C_INSN ("rrlen", 0xc2c71000, 0xfffffc00, a64c, 0, OP2 (Rd, Rn), QL2_A64C_X_X, 0),
   A64C_INSN ("rrmask", 0xc2c73000, 0xfffffc00, a64c, 0, OP2 (Rd, Rn), QL2_A64C_X_X, 0),
+  A64C_INSN ("scbnds", 0xc2c00000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  /* Encode both Scbnds_c_ci_c and Scbnds_c_ci_s into a single instrution.  */
+  A64C_INSN ("scbnds", 0xc2c03800, 0xffe03c00, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_IMM6_EXT), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("scbndse", 0xc2c02000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("scflgs", 0xc2c0e000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("scoff", 0xc2c06000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("sctag", 0xc2c08000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("scvalue", 0xc2c04000, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
@@ -6096,4 +6104,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a 12-bit unsigned immediate with optional left shift of 12 bits")\
     Y(IMMEDIATE, imm, "A64C_IMM8", 0, F(FLD_a64c_imm8),			\
       "8-bit unsigned immediate")					\
+    X(IMMEDIATE, ins_aimm, ext_a64c_imm6, "A64C_IMM6_EXT", 0,		\
+      F(FLD_a64c_shift, FLD_imm6_2),					\
+      "6-bit unsigned immediate")					\
     Y(PERM, perm, "PERM", 0, F(), "a capability permission")

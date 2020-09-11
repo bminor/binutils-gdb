@@ -1,5 +1,9 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* include/aarch64.h (aarch64_opnd): Add IMM6_EXT.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_operand_class): Add PERM.
 	(aarch64_opnd): Add PERM.
 	(get_perm_bit): New function.

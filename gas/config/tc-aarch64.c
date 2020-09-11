@@ -6974,6 +6974,24 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 					      /* skip_p */ 1);
 	  break;
 
+	case AARCH64_OPND_A64C_IMM6_EXT:
+	  po_misc_or_fail (parse_shifter_operand_imm (&str, info,
+						      SHIFTED_ARITH_IMM));
+
+	  /* Try to coerce into shifted form if the immediate is out of
+	     range.  */
+	  if (inst.reloc.exp.X_add_number > 63 && (info->imm.value & 16) == 0
+	      && (inst.reloc.exp.X_add_number >> 4) <= 64
+	      && info->shifter.amount == 0)
+	    {
+	      info->shifter.amount = 4;
+	      info->shifter.kind = AARCH64_MOD_LSL;
+	      info->imm.value = inst.reloc.exp.X_add_number >> 4;
+	    }
+	  else
+	    info->imm.value = inst.reloc.exp.X_add_number;
+	  break;
+
 	case AARCH64_OPND_AIMM:
 	case AARCH64_OPND_A64C_AIMM:
 	  if (opcode->op == OP_ADD || opcode->op == OP_A64C_ADD)

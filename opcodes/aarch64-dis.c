@@ -878,6 +878,18 @@ do_ext_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,
 }
 
 /* Decode arithmetic immediate for e.g.
+     SCBNDS <Cd|CSP>, <Cn|CSP>, #<imm> {, <shift>}.  */
+bool
+aarch64_ext_a64c_imm6 (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		      aarch64_opnd_info *info, const aarch64_insn code,
+		      const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		      aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  return do_ext_aimm (self, info, code, inst, errors, 4, FLD_imm6_2,
+		      FLD_a64c_shift);
+}
+
+/* Decode arithmetic immediate for e.g.
      SUBS <Cd>, <Cn|CSP>, #<imm> {, <shift>}.  */
 bool
 aarch64_ext_a64c_aimm (const aarch64_operand *self ATTRIBUTE_UNUSED,

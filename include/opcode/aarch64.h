@@ -522,6 +522,7 @@ enum aarch64_opnd
 				   BRS/BLRS.  */
   AARCH64_OPND_A64C_AIMM,	/* Add immediate for A64C ADD/SUB.  */
   AARCH64_OPND_A64C_IMM8,	/* IMM8 for BICFLGS.  */
+  AARCH64_OPND_A64C_IMM6_EXT,	/* IMM6 for SCBNDS.  */
   AARCH64_OPND_PERM,		/* 3-bit capability permission for e.g. CLRPERM.  */
 };
 

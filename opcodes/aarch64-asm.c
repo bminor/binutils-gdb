@@ -532,7 +532,7 @@ aarch64_ins_aimm (const aarch64_operand *self, const aarch64_opnd_info *info,
   /* shift */
   aarch64_insn value = info->shifter.amount ? 1 : 0;
   insert_field (self->fields[0], code, value, 0);
-  /* imm12 (unsigned) */
+  /* imm6/imm12 (unsigned) */
   insert_field (self->fields[1], code, info->imm.value, 0);
   return true;
 }

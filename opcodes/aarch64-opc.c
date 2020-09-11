@@ -354,6 +354,7 @@ const aarch64_field fields[] =
 		   type instructions.  */
     { 22,  1 },	/* a64c_shift_ai: Shift bit in immediate ADD/SUB.  */
     { 13,  8 },	/* a64c_imm8: BICFLGS imm8.  */
+    { 14,  1 },	/* a64c_shift: Shift bit in SCBNDS.  */
     { 13,  3 },	/* perm: permission specifier in clrperm.  */
 };
 
@@ -2147,6 +2148,30 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 
       switch (type)
 	{
+	case AARCH64_OPND_A64C_IMM6_EXT:
+	  if (opnd->shifter.amount)
+	    {
+	      if (opnd->shifter.kind != AARCH64_MOD_LSL)
+		{
+		  set_other_error (mismatch_detail, idx,
+				   _("invalid shift operator"));
+		  return 0;
+		}
+	      if (opnd->shifter.amount != 4)
+		{
+		  set_other_error (mismatch_detail, idx,
+				   _("shift amount must be 4"));
+		  return 0;
+		}
+	      if (!value_fit_unsigned_field_p (opnd->imm.value, 6))
+		{
+		  set_other_error (mismatch_detail, idx,
+				   _("immediate out of range"));
+		  return 0;
+		}
+	    }
+	  break;
+
 	case AARCH64_OPND_AIMM:
 	case AARCH64_OPND_A64C_AIMM:
 	  if (opnd->shifter.kind != AARCH64_MOD_LSL)
@@ -3692,6 +3717,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "#0.0");
       break;
 
+    case AARCH64_OPND_A64C_IMM6_EXT:
     case AARCH64_OPND_A64C_AIMM:
     case AARCH64_OPND_LIMM:
     case AARCH64_OPND_AIMM:
