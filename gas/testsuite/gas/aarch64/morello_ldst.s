@@ -195,3 +195,15 @@ morello_alt_uimm x4, ALTVAREG, #4088
 morello_alt_uimm x4, ALTSP, #4088
 morello_alt_uimm w4, ALTVAREG, #2044
 morello_alt_uimm w4, ALTSP, #2044
+
+	.macro morello_alt_imm cnsp
+	  .irp op, ldur, stur
+	    .irp rt, c4, x4, w4, b4, h4, s4, d4, q4
+	      \op    \rt, [\cnsp, #255]
+	      \op    \rt, [\cnsp, #32]
+	      \op    \rt, [\cnsp, #-256]
+	    .endr
+	  .endr
+	.endm
+morello_alt_imm ALTVAREG
+morello_alt_imm ALTSP

@@ -6449,6 +6449,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_Rsz:
+	case AARCH64_OPND_Rsz2:
 	case AARCH64_OPND_Rd:
 	case AARCH64_OPND_Rn:
 	case AARCH64_OPND_Rm:
@@ -6506,6 +6507,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  break;
 
+	case AARCH64_OPND_Fsz:
 	case AARCH64_OPND_Fd:
 	case AARCH64_OPND_Fn:
 	case AARCH64_OPND_Fm:
@@ -6515,6 +6517,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Sd:
 	case AARCH64_OPND_Sn:
 	case AARCH64_OPND_Sm:
+	case AARCH64_OPND_St:
 	case AARCH64_OPND_SVE_VZn:
 	case AARCH64_OPND_SVE_Vd:
 	case AARCH64_OPND_SVE_Vm:
@@ -7374,12 +7377,17 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 					      /* skip_p */ 0);
 	  break;
 
+	case AARCH64_OPND_CAPADDR_SIMM9:
+	  po_misc_or_fail (parse_cap_address (&str, info, opcode->iclass));
+	  goto addr_simm;
+
 	case AARCH64_OPND_A64C_ADDR_SIMM9:
 	case AARCH64_OPND_ADDR_SIMM9:
 	case AARCH64_OPND_ADDR_SIMM9_2:
 	case AARCH64_OPND_ADDR_SIMM11:
 	case AARCH64_OPND_ADDR_SIMM13:
 	  po_misc_or_fail (parse_address (&str, info));
+addr_simm:
 	  if (info->addr.pcrel || info->addr.offset.is_reg
 	      || (!info->addr.preind && !info->addr.postind)
 	      || (operands[i] == AARCH64_OPND_ADDR_SIMM9_2
@@ -8890,8 +8898,12 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
     case OP_LDRSH_POS: new_op = OP_LDURSH; break;
     case OP_LDR_POS: new_op = OP_LDUR; break;
     case OP_LDR_POS_2: new_op = OP_LDUR_2; break;
+    case OP_LDR_POS_3: new_op = OP_LDUR_3; break;
+    case OP_LDR_POS_4: new_op = OP_LDUR_4; break;
     case OP_STR_POS: new_op = OP_STUR; break;
     case OP_STR_POS_2: new_op = OP_STUR_2; break;
+    case OP_STR_POS_3: new_op = OP_STUR_3; break;
+    case OP_STR_POS_4: new_op = OP_STUR_4; break;
     case OP_LDRF_POS: new_op = OP_LDURV; break;
     case OP_STRF_POS: new_op = OP_STURV; break;
     case OP_LDRSW_POS: new_op = OP_LDURSW; break;

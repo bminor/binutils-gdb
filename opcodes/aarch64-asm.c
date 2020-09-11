@@ -597,6 +597,30 @@ aarch64_ins_regsz (const aarch64_operand *self, const aarch64_opnd_info *info,
   return true;
 }
 
+/* Encode SIMD register and an additional field that specifies size.
+   e.g. altbase instructions.  */
+bool
+aarch64_ins_fregsz (const aarch64_operand *self, const aarch64_opnd_info *info,
+		    aarch64_insn *code, const aarch64_inst *inst,
+		    aarch64_operand_error *errors)
+{
+  aarch64_insn value = 0;
+
+  aarch64_ins_regno (self, info, code, inst, errors);
+
+  switch (info->qualifier)
+    {
+    case AARCH64_OPND_QLF_S_B: value = 0; break;
+    case AARCH64_OPND_QLF_S_H: value = 1; break;
+    case AARCH64_OPND_QLF_S_S: value = 2; break;
+    case AARCH64_OPND_QLF_S_D: value = 3; break;
+    default: assert (0);
+    }
+
+  insert_field (self->fields[1], code, value, 0);
+  return true;
+}
+
 /* Encode Ft for e.g. STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}]
    or LDP <Qt1>, <Qt2>, [<Xn|SP>], #<imm>.  */
 bool
@@ -746,7 +770,8 @@ aarch64_ins_addr_simm (const aarch64_operand *self,
 	      && inst->opcode->iclass != ldstnapair_offs
 	      && inst->opcode->iclass != ldstpair_off
 	      && inst->opcode->iclass != ldst_unpriv
-	      && inst->opcode->iclass != br_capaddr);
+	      && inst->opcode->iclass != br_capaddr
+	      && inst->opcode->iclass != ldst_altbase);
       assert (info->addr.preind != info->addr.postind);
       if (info->addr.preind)
 	insert_field (self->fields[1], code, 1, 0);

@@ -1031,6 +1031,34 @@ aarch64_ext_regsz (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Decode SIMD register using an additional field that specifies size.
+   e.g. altbase instructions.  */
+bool
+aarch64_ext_fregsz (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		    aarch64_opnd_info *info,
+		    const aarch64_insn code,
+		    const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		    aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+
+  enum aarch64_opnd_qualifier qualifier;
+  aarch64_insn value = extract_field (self->fields[1], code, 0);
+
+  info->reg.regno = extract_field (self->fields[0], code, 0);
+
+  switch (value)
+    {
+    case 0: qualifier = AARCH64_OPND_QLF_S_B; break;
+    case 1: qualifier = AARCH64_OPND_QLF_S_H; break;
+    case 2: qualifier = AARCH64_OPND_QLF_S_S; break;
+    case 3: qualifier = AARCH64_OPND_QLF_S_D; break;
+    default: return false;
+    }
+  info->qualifier = qualifier;
+
+  return true;
+}
+
 /* Decode Ft for e.g. STR <Qt>, [<Xn|SP>, <R><m>{, <extend> {<amount>}}]
    or LDP <Qt1>, <Qt2>, [<Xn|SP>], #<imm>.  */
 bool
@@ -1194,7 +1222,8 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
       || inst->opcode->iclass == ldstnapair_offs
       || inst->opcode->iclass == ldstpair_off
       || inst->opcode->iclass == ldst_unpriv
-      || inst->opcode->iclass == br_capaddr)
+      || inst->opcode->iclass == br_capaddr
+      || inst->opcode->iclass == ldst_altbase)
     info->addr.writeback = 0;
   else
     {

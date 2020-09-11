@@ -278,6 +278,7 @@ enum aarch64_opnd
   AARCH64_OPND_Sd,	/* AdvSIMD Scalar Sd.  */
   AARCH64_OPND_Sn,	/* AdvSIMD Scalar Sn.  */
   AARCH64_OPND_Sm,	/* AdvSIMD Scalar Sm.  */
+  AARCH64_OPND_St,	/* AdvSIMD Scalar St.  */
 
   AARCH64_OPND_Va,	/* AdvSIMD Vector Va.  */
   AARCH64_OPND_Vd,	/* AdvSIMD Vector Vd.  */
@@ -520,6 +521,8 @@ enum aarch64_opnd
   AARCH64_OPND_Can_SP,		/* Capability register or Cap SP as source. */
   AARCH64_OPND_Cam_SP,		/* Capability register or Cap SP as source. */
   AARCH64_OPND_Rsz,		/* Integer register with a size field.  */
+  AARCH64_OPND_Rsz2,		/* Integer register with a size field.  */
+  AARCH64_OPND_Fsz,		/* SIMD register with a size field.  */
   AARCH64_OPND_A64C_Rm_EXT,	/* Integer Xm extended.  */
   AARCH64_OPND_A64C_IMMV4,	/* Immediate value #4 for BX.  */
   AARCH64_OPND_A64C_CST_REG,	/* Constant capability register c29 for
@@ -539,6 +542,8 @@ enum aarch64_opnd
 				   altbase instructions.  */
   AARCH64_OPND_CAPADDR_REGOFF,	/* Register offset with capability base for
 				   altbase instructions.  */
+  AARCH64_OPND_CAPADDR_SIMM9,	/* Signed immediate offset with capability base
+				   for altbase instructions.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -754,6 +759,10 @@ enum aarch64_op
   OP_LDR_POS,
   OP_STR_POS_2,
   OP_LDR_POS_2,
+  OP_STR_POS_3,
+  OP_LDR_POS_3,
+  OP_STR_POS_4,
+  OP_LDR_POS_4,
   OP_STRF_POS,
   OP_LDRF_POS,
   OP_LDRSW_POS,
@@ -769,6 +778,10 @@ enum aarch64_op
   OP_LDUR,
   OP_LDUR_2,
   OP_STUR_2,
+  OP_LDUR_3,
+  OP_STUR_3,
+  OP_LDUR_4,
+  OP_STUR_4,
   OP_STURV,
   OP_LDURV,
   OP_LDURSW,

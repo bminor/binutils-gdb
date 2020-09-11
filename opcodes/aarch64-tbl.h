@@ -4259,16 +4259,24 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("stlr", 0x421f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, CAPADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
   A64C_INSN ("stlr", 0x423ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
   A64C_INSN ("stlrb", 0x423f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
-  A64C_INSN ("ldr", 0x82600000, 0xffe00c00, ldst_altbase, 0, OP2 (Cat, CAPADDR_UIMM9), QL2_A64C_CA_CAPADDR, 0),
-  A64C_INSN ("ldr", 0x82600800, 0xffe00800, ldst_altbase, 0, OP2 (Rsz, CAPADDR_UIMM9), QL2_A64C_R_CAPADDR, 0),
+  A64C_INSN ("ldr", 0x82600000, 0xffe00c00, ldst_altbase, OP_LDR_POS_3, OP2 (Cat, CAPADDR_UIMM9), QL2_A64C_CA_CAPADDR, 0),
+  A64C_INSN ("ldr", 0x82600800, 0xffe00800, ldst_altbase, OP_LDR_POS_4, OP2 (Rsz, CAPADDR_UIMM9), QL2_A64C_R_CAPADDR, 0),
   A64C_INSN ("ldr", 0xc2e00c00, 0xffe00c00, ldst_altbase, 0, OP2 (Cat, CAPADDR_REGOFF), QL2_A64C_CA_CAPADDR, 0),
   A64C_INSN ("ldr", 0x82e00000, 0xffe00800, ldst_altbase, 0, OP2 (Rsz, CAPADDR_REGOFF), QL2_A64C_R_CAPADDR, 0),
   A64C_INSN ("ldr", 0x82e00800, 0xffe00800, ldst_altbase, 0, OP2 (Ft, CAPADDR_REGOFF), QL2_A64C_FP_CAPADDR, 0),
-  A64C_INSN ("str", 0x82400000, 0xffe00c00, ldst_altbase, 0, OP2 (Cat, CAPADDR_UIMM9), QL2_A64C_CA_CAPADDR, 0),
-  A64C_INSN ("str", 0x82400800, 0xffe00800, ldst_altbase, 0, OP2 (Rsz, CAPADDR_UIMM9), QL2_A64C_R_CAPADDR, 0),
+  A64C_INSN ("str", 0x82400000, 0xffe00c00, ldst_altbase, OP_STR_POS_3, OP2 (Cat, CAPADDR_UIMM9), QL2_A64C_CA_CAPADDR, 0),
+  A64C_INSN ("str", 0x82400800, 0xffe00800, ldst_altbase, OP_STR_POS_4, OP2 (Rsz, CAPADDR_UIMM9), QL2_A64C_R_CAPADDR, 0),
   A64C_INSN ("str", 0xc2e00400, 0xffe00c00, ldst_altbase, 0, OP2 (Cat, CAPADDR_REGOFF), QL2_A64C_CA_CAPADDR, 0),
   A64C_INSN ("str", 0x82a00000, 0xffe00800, ldst_altbase, 0, OP2 (Rsz, CAPADDR_REGOFF), QL2_A64C_R_CAPADDR, 0),
   A64C_INSN ("str", 0x82a00800, 0xffe00800, ldst_altbase, 0, OP2 (Ft, CAPADDR_REGOFF), QL2_A64C_FP_CAPADDR, 0),
+  A64C_INSN ("ldur", 0xe2c00c00, 0xffe00c00, ldst_altbase, OP_LDUR_3, OP2 (Cat, CAPADDR_SIMM9), QL2_A64C_CA_CAPADDR, 0),
+  A64C_INSN ("ldur", 0xe2800400, 0xffa00c00, ldst_altbase, OP_LDUR_4, OP2 (Rsz2, CAPADDR_SIMM9), QL2_A64C_R_CAPADDR, 0),
+  A64C_INSN ("ldur", 0xe2200400, 0xff200c00, ldst_altbase, 0, OP2 (Fsz, CAPADDR_SIMM9), QL_S_2SAME, 0),
+  A64C_INSN ("ldur", 0xe2200c00, 0xffe00c00, ldst_altbase, 0, OP2 (St, CAPADDR_SIMM9), QL_I2SAMEQ, 0),
+  A64C_INSN ("stur", 0xe2800c00, 0xffe00c00, ldst_altbase, OP_STUR_3, OP2 (Cat, CAPADDR_SIMM9), QL2_A64C_CA_CAPADDR, 0),
+  A64C_INSN ("stur", 0xe2800000, 0xffa00c00, ldst_altbase, OP_STUR_4, OP2 (Rsz2, CAPADDR_SIMM9), QL2_A64C_R_CAPADDR, 0),
+  A64C_INSN ("stur", 0xe2200000, 0xff200c00, ldst_altbase, 0, OP2 (Fsz, CAPADDR_SIMM9), QL_S_2SAME, 0),
+  A64C_INSN ("stur", 0xe2200800, 0xffe00c00, ldst_altbase, 0, OP2 (St, CAPADDR_SIMM9), QL_I2SAMEQ, 0),
 
   A64C_INSN ("ret", 0xc2c25000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, F_OPD0_OPT | F_DEFAULT (30)),
   A64C_INSN ("retr", 0xc2c25003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
@@ -5765,6 +5773,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(SISD_REG, regno, "Sd", 0, F(FLD_Rd), "a SIMD scalar register")	\
     Y(SISD_REG, regno, "Sn", 0, F(FLD_Rn), "a SIMD scalar register")	\
     Y(SISD_REG, regno, "Sm", 0, F(FLD_Rm), "a SIMD scalar register")	\
+    Y(SIMD_REG, regno, "St", 0, F(FLD_Rt), "a SIMD scalar register")	\
     Y(SIMD_REG, regno, "Va", 0, F(FLD_Ra), "a SIMD vector register")	\
     Y(SIMD_REG, regno, "Vd", 0, F(FLD_Rd), "a SIMD vector register")	\
     Y(SIMD_REG, regno, "Vn", 0, F(FLD_Rn), "a SIMD vector register")	\
@@ -6218,6 +6227,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a Capability register or a capability stack pointer register")	\
     Y(INT_REG, regsz, "Rsz", 0, F(FLD_Rt, FLD_altbase_sf),		\
       "an integer register")						\
+    Y(INT_REG, regsz, "Rsz2", 0, F(FLD_Rt, FLD_altbase_sf2),		\
+      "an integer register")						\
+    Y(INT_REG, fregsz, "Fsz", 0, F(FLD_Rt, FLD_altbase_sf3),		\
+      "an integer register")						\
     Y(MODIFIED_REG, reg_extended, "A64C_Rm_EXT", 0, F(),		\
       "an integer register with extension")				\
     X(IMMEDIATE, 0, ext_a64c_immv, "A64C_IMMV4", 0, F(), "4")		\
@@ -6249,4 +6262,6 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, addr_uimm, "CAPADDR_UIMM9", 0, F(FLD_Rn, FLD_imm9),	\
       "a capability address with 9-bit unsigned immediate offset")	\
     Y(ADDRESS, addr_regoff, "CAPADDR_REGOFF", 0, F(),			\
-      "a capability address with register offset")
+      "a capability address with register offset")			\
+    Y(ADDRESS, addr_simm, "CAPADDR_SIMM9", 0, F(FLD_imm9),		\
+      "a capability address with 9-bit signed immediate offset")
