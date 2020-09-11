@@ -1,5 +1,18 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.h (mstate): Add MAP_C64.
+	* config/tc-aarch64.c (make_mapping_symbol): Add capability
+	mapping symbol.
+	(MAP_CUR_INSN): New macro.
+	(mapping_state, s_aarch64_inst, md_assemble,
+	aarch64_handle_align, aarch64_init_frag): Use it.
+	(output_operand_error_record, do_encode,
+	try_to_encode_as_unscaled_ldst, fix_mov_imm_insn, fix_insn):
+	Pass CPU_VARIANT to AARCH64_OPCODE_ENCODE.
+	* doc/c-aarch64.texi: Document $c.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (AARCH64_REG_TYPES,
 	get_reg_expected_msg, aarch64_addr_reg_parse, parse_address,
 	reg_names): Add capability registers.

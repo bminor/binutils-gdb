@@ -1,5 +1,24 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_opcode_encode): Add CPU variant
+	argument.
+	* aarch64-dis.c (map_type): Add MAP_C64.
+	(MAYBE_C64): New macro.
+	(determine_disassembling_preference, print_operands): Use it.
+	(aarch64_symbol_is_valid): Test for $c.
+	(get_sym_code_type): Recognise MAP_C64.
+	(select_aarch64_variant): Clear AARCH64_FEATURE_C64.
+	(determine_disassembling_preference, aarch64_opcode_decode):
+	Adjust calls to aarch64_match_operands_constraint.
+	* aarch64-opc.c (get_altbase_reg_name, get_base_reg_name): New
+	functions.
+	(aarch64_print_operand): Use them.
+	(aarch64_match_operands_constraint): Likewise.
+	* aarch64-opc.h (aarch64_match_operands_constraint): Add CPU
+	variant argument.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-opc.c (fields): New capability register fields.
 	(aarch64_opnd_qualifiers): Capability operand qualifiers.
 	(int_reg): Add capability register bank.

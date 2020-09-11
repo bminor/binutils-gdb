@@ -1987,7 +1987,8 @@ convert_to_real (aarch64_inst *inst, const aarch64_opcode *real)
    matched operand qualifier sequence in *QLF_SEQ.  */
 
 bfd_boolean
-aarch64_opcode_encode (const aarch64_opcode *opcode,
+aarch64_opcode_encode (aarch64_feature_set features,
+		       const aarch64_opcode *opcode,
 		       const aarch64_inst *inst_ori, aarch64_insn *code,
 		       aarch64_opnd_qualifier_t *qlf_seq,
 		       aarch64_operand_error *mismatch_detail,
@@ -2009,7 +2010,7 @@ aarch64_opcode_encode (const aarch64_opcode *opcode,
 
   /* Constrain the operands.
      After passing this, the encoding is guaranteed to succeed.  */
-  if (aarch64_match_operands_constraint (inst, mismatch_detail) == 0)
+  if (aarch64_match_operands_constraint (features, inst, mismatch_detail) == 0)
     {
       DEBUG_TRACE ("FAIL since operand constraint not met");
       return 0;

@@ -1,3 +1,10 @@
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* cpu-aarch64.c (bfd_is_aarch64_special_symbol_name): Add
+	capability mapping symbol.
+	* elfnn-aarch64.c (elfNN_aarch64_output_map_sym,
+	is_aarch64_mapping_symbol): Likewise.
+
 2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_link_hash_table): Add last_iplt_index.
