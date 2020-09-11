@@ -806,6 +806,18 @@ aarch64_ins_perm (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+/* Encode the form operand for e.g. SEAL <Cd>, <Cn>, <form>.  */
+bfd_boolean
+aarch64_ins_form (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		  const aarch64_opnd_info *info, aarch64_insn *code,
+		  const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		  aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  /* form */
+  insert_field (FLD_form, code, info->form->value, 0);
+  return TRUE;
+}
+
 /* Encode the system register operand for e.g. MRS <Xt>, <systemreg>.  */
 bfd_boolean
 aarch64_ins_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
