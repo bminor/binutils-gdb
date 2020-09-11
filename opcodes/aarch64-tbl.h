@@ -2389,6 +2389,19 @@
 {				\
   QLF2(CA, CA),			\
 }
+
+#define QL3_A64C_CA_CA_NIL	\
+{				\
+ QLF3(CA, CA, NIL),		\
+}
+
+/* e.g. ADD <Cd|CSP>, <Cn|CSP>, <Xm>{, <extend> {#<amount>}}.  */
+#define QL3_A64C_CA_CA_R	\
+{				\
+  QLF3(CA, CA, X),		\
+  QLF3(CA, CA, W),		\
+}
+
 
 /* Opcode table.  */
 
@@ -4019,6 +4032,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("cpy", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_HAS_ALIAS),
   A64C_INSN ("mov", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_ALIAS | F_P1),
   A64C_INSN ("mov", 0x2a1f03e0, 0x7fffffe0, a64c, OP_MOV_C_ZR, OP2 (Cad, Can), QL2_A64C_CA_CA, F_ALIAS | F_SF | F_P1),
+  A64C_INSN ("add", 0x02000000, 0xff800000, a64c, OP_A64C_ADD, OP3 (Cad_SP, Can_SP, AIMM), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("add", 0xc2a00000, 0xffe00000, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_Rm_EXT), QL3_A64C_CA_CA_R, 0),
+  A64C_INSN ("sub", 0x02800000, 0xff800000, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_AIMM), QL3_A64C_CA_CA_NIL, 0),
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
@@ -5944,4 +5960,9 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(CAP_REG, regno, "Cad_SP", OPD_F_MAYBE_CSP, F(FLD_Cad),		\
       "a Capability register or a capability stack pointer register")	\
     Y(CAP_REG, regno, "Can_SP", OPD_F_MAYBE_CSP, F(FLD_Can),		\
-      "a Capability register or a capability stack pointer register")
+      "a Capability register or a capability stack pointer register")	\
+    Y(MODIFIED_REG, reg_extended, "A64C_Rm_EXT", 0, F(),		\
+      "an integer register with extension")				\
+    X(IMMEDIATE, ins_aimm, ext_a64c_aimm, "A64C_AIMM", 0,		\
+      F(FLD_a64c_shift_ai,FLD_imm12),					\
+      "a 12-bit unsigned immediate with optional left shift of 12 bits")

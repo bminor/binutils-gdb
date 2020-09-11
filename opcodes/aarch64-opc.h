@@ -175,6 +175,7 @@ enum aarch64_field_kind
   FLD_Cas,
   FLD_Cat,
   FLD_Cat2,
+  FLD_a64c_shift_ai,
 };
 
 /* Field description.  */

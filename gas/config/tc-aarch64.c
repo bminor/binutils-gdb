@@ -6412,12 +6412,13 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  po_int_reg_or_fail (REG_TYPE_R_SP);
 	  break;
 
+	case AARCH64_OPND_A64C_Rm_EXT:
 	case AARCH64_OPND_Rm_EXT:
 	case AARCH64_OPND_Rm_SFT:
 	  po_misc_or_fail (parse_shifter_operand
-			   (&str, info, (operands[i] == AARCH64_OPND_Rm_EXT
-					 ? SHIFTED_ARITH_IMM
-					 : SHIFTED_LOGIC_IMM)));
+			   (&str, info, (operands[i] == AARCH64_OPND_Rm_SFT
+					 ? SHIFTED_LOGIC_IMM
+					 : SHIFTED_ARITH_IMM)));
 	  if (!info->shifter.operator_present)
 	    {
 	      /* Default to LSL if not present.  Libopcodes prefers shifter
@@ -6908,7 +6909,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_AIMM:
-	  if (opcode->op == OP_ADD)
+	case AARCH64_OPND_A64C_AIMM:
+	  if (opcode->op == OP_ADD || opcode->op == OP_A64C_ADD)
 	    /* ADD may have relocation types.  */
 	    po_misc_or_fail (parse_shifter_operand_reloc (&str, info,
 							  SHIFTED_ARITH_IMM));
@@ -8821,6 +8823,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
       break;
 
     case AARCH64_OPND_AIMM:
+    case AARCH64_OPND_A64C_AIMM:
       /* ADD or SUB with immediate.
 	 NOTE this assumes we come here with a add/sub shifted reg encoding
 		  3  322|2222|2  2  2 21111 111111

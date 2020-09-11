@@ -514,6 +514,8 @@ enum aarch64_opnd
   AARCH64_OPND_Cad_SP,          /* Capability register or Cap SP as
 				   destination.  */
   AARCH64_OPND_Can_SP,		/* Capability register or Cap SP as source. */
+  AARCH64_OPND_A64C_Rm_EXT,	/* Integer Xm extended.  */
+  AARCH64_OPND_A64C_AIMM,	/* Add immediate for A64C ADD/SUB.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -750,6 +752,7 @@ enum aarch64_op
   OP_ADD,
   OP_B,
   OP_BL,
+  OP_A64C_ADD,
 
   OP_MOVN,
   OP_MOVZ,
