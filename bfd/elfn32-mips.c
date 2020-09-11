@@ -4028,6 +4028,15 @@ elf32_mips_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
     }
 }
 
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_mips_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 4 * MIPS_RESERVED_GOTNO;
+}
+
 /* Depending on the target vector we generate some version of Irix
    executables or "normal" MIPS ELF ABI executables.  */
 static irix_compat_t
@@ -4153,7 +4162,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 					elf_n32_mips_grok_freebsd_prstatus
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
-#define elf_backend_got_header_size	(4 * MIPS_RESERVED_GOTNO)
+#define elf_backend_got_header_size	elf32_mips_got_header_size
 #define elf_backend_want_dynrelro	1
 
 /* MIPS n32 ELF can use a mixture of REL and RELA, but some Relocations

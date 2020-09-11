@@ -3904,6 +3904,14 @@ elf64_hppa_relocate_section (bfd *output_bfd,
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf64_hppa_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
 static const struct bfd_elf_special_section elf64_hppa_special_sections[] =
 {
   { STRING_COMMA_LEN (".tbss"),	 0, SHT_NOBITS, SHF_ALLOC + SHF_WRITE + SHF_HP_TLS },
@@ -4019,7 +4027,7 @@ const struct elf_size_info hppa64_elf_size_info =
 #define elf_backend_want_got_plt	0
 #define elf_backend_plt_readonly	0
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size     0
+#define elf_backend_got_header_size     elf64_hppa_got_header_size
 #define elf_backend_type_change_ok	true
 #define elf_backend_get_symbol_type	elf64_hppa_elf_get_symbol_type
 #define elf_backend_reloc_type_class	elf64_hppa_reloc_type_class

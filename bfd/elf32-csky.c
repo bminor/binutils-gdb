@@ -5304,6 +5304,14 @@ elf32_csky_obj_attrs_handle_unknown (bfd *abfd ATTRIBUTE_UNUSED,
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+csky_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 /* End of external entry points for sizing and building linker stubs.  */
 
 /* CPU-related basic API.  */
@@ -5352,7 +5360,7 @@ elf32_csky_obj_attrs_handle_unknown (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_plt_readonly              1
 #define elf_backend_want_got_sym              1
 #define elf_backend_want_dynrelro             1
-#define elf_backend_got_header_size           12
+#define elf_backend_got_header_size           csky_elf_got_header_size
 #define elf_backend_want_got_plt              1
 
 /* C-SKY coredump support.  */

@@ -5327,6 +5327,14 @@ elf64_alpha_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
       return reloc_class_normal;
     }
 }
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf64_alpha_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
 
 static const struct bfd_elf_special_section elf64_alpha_special_sections[] =
 {
@@ -5501,7 +5509,7 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
-#define elf_backend_got_header_size 0
+#define elf_backend_got_header_size elf64_alpha_got_header_size
 #define elf_backend_dtrel_excludes_plt 1
 
 #include "elf64-target.h"

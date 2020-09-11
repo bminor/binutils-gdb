@@ -3366,6 +3366,13 @@ or1k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+or1k_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
 
 #define ELF_ARCH			bfd_arch_or1k
 #define ELF_MACHINE_CODE		EM_OR1K
@@ -3398,7 +3405,7 @@ or1k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_plt_readonly		1
 #define elf_backend_want_got_plt		1
 #define elf_backend_want_plt_sym		0
-#define elf_backend_got_header_size		12
+#define elf_backend_got_header_size		or1k_elf_got_header_size
 #define elf_backend_dtrel_excludes_plt		1
 #define elf_backend_want_dynrelro		1
 

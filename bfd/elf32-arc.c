@@ -2850,6 +2850,14 @@ const struct elf_size_info arc_elf32_size_info =
 
 #define elf_backend_size_info		arc_elf32_size_info
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_arc_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 /* GDB expects general purpose registers to be in section .reg.  However Linux
    kernel doesn't create this section and instead writes registers to NOTE
    section.  It is up to the binutils to create a pseudo-section .reg from the
@@ -3127,13 +3135,13 @@ arc_elf_relax_section (bfd *abfd, asection *sec,
 
 #define elf_backend_finish_dynamic_sections  elf_arc_finish_dynamic_sections
 #define elf_backend_size_dynamic_sections    elf_arc_size_dynamic_sections
+#define elf_backend_got_header_size	     elf_arc_got_header_size
 
 #define elf_backend_can_gc_sections	1
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_rela_plts_and_copies_p 1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	12
 #define elf_backend_dtrel_excludes_plt	1
 
 #define elf_backend_may_use_rel_p	0

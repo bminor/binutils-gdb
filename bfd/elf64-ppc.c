@@ -81,7 +81,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_want_plt_sym 0
 #define elf_backend_plt_alignment 3
 #define elf_backend_plt_not_loaded 1
-#define elf_backend_got_header_size 8
+#define elf_backend_got_header_size ppc64_elf_got_header_size
 #define elf_backend_want_dynrelro 1
 #define elf_backend_can_gc_sections 1
 #define elf_backend_can_refcount 1
@@ -18330,6 +18330,14 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
     }
 
   return true;
+}
+
+/* Determine the size of the header of for the GOT section.  */
+
+bfd_vma
+ppc64_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 8;
 }
 
 #include "elf64-target.h"

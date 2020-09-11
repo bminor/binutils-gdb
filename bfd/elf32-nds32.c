@@ -13902,6 +13902,14 @@ nds32_elf_unify_tls_model (bfd *inbfd, asection *insec, bfd_byte *incontents,
 }
 
 /* End TLS model conversion.  */
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+nds32_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
 
 #define ELF_ARCH				bfd_arch_nds32
 #define ELF_MACHINE_CODE			EM_NDS32
@@ -13953,7 +13961,7 @@ nds32_elf_unify_tls_model (bfd *inbfd, asection *insec, bfd_byte *incontents,
 #define elf_backend_want_got_plt		1
 #define elf_backend_plt_readonly		1
 #define elf_backend_want_plt_sym		0
-#define elf_backend_got_header_size		12
+#define elf_backend_got_header_size		nds32_elf_got_header_size
 #define elf_backend_may_use_rel_p		1
 #define elf_backend_default_use_rela_p		1
 #define elf_backend_may_use_rela_p		1

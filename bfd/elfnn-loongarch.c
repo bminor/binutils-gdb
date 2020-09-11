@@ -128,7 +128,15 @@ struct loongarch_elf_link_hash_table
 /* #define elf_backend_can_refcount 1 */
 #define elf_backend_want_got_sym 1
 
-#define elf_backend_got_header_size (GOT_ENTRY_SIZE * 1)
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+loongarch_backend_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return GOT_ENTRY_SIZE * 1;
+}
+
+#define elf_backend_got_header_size loongarch_backend_got_header_size
 
 #define elf_backend_want_dynrelro 1
 /* #define elf_backend_rela_normal 1
@@ -440,7 +448,7 @@ loongarch_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   htab->sgot = s;
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   if (bed->want_got_plt)
     {

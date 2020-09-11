@@ -3890,6 +3890,14 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_s390_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 
 #define TARGET_BIG_SYM	s390_elf32_vec
 #define TARGET_BIG_NAME	"elf32-s390"
@@ -3904,7 +3912,7 @@ elf32_s390_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	12
+#define elf_backend_got_header_size	elf_s390_got_header_size
 #define elf_backend_want_dynrelro	1
 #define elf_backend_rela_normal		1
 

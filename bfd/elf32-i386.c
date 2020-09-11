@@ -4400,6 +4400,14 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
   return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_i386_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 #define TARGET_LITTLE_SYM		i386_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-i386"
 #define ELF_ARCH			bfd_arch_i386
@@ -4412,7 +4420,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	12
+#define elf_backend_got_header_size	elf_i386_got_header_size
 #define elf_backend_plt_alignment	4
 #define elf_backend_dtrel_excludes_plt	1
 #define elf_backend_extern_protected_data 1

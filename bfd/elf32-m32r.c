@@ -3635,7 +3635,15 @@ m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
     default:		   return reloc_class_normal;
     }
 }
-
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+m32r_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 #define ELF_ARCH		bfd_arch_m32r
 #define ELF_TARGET_ID		M32R_ELF_DATA
 #define ELF_MACHINE_CODE	EM_M32R
@@ -3673,7 +3681,7 @@ m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 #define elf_backend_want_got_plt 1
 #define elf_backend_plt_readonly 1
 #define elf_backend_want_plt_sym 0
-#define elf_backend_got_header_size 12
+#define elf_backend_got_header_size	m32r_elf_got_header_size
 #define elf_backend_dtrel_excludes_plt	1
 
 #define elf_backend_may_use_rel_p	1

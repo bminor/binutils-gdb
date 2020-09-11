@@ -216,6 +216,14 @@ elf32_sparc_reloc_type_class (const struct bfd_link_info *info,
     }
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_sparc_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 4;
+}
+
 #define TARGET_BIG_SYM	sparc_elf32_vec
 #define TARGET_BIG_NAME	"elf32-sparc"
 #define ELF_ARCH	bfd_arch_sparc
@@ -267,7 +275,7 @@ elf32_sparc_reloc_type_class (const struct bfd_link_info *info,
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0
 #define elf_backend_want_plt_sym 1
-#define elf_backend_got_header_size 4
+#define elf_backend_got_header_size	elf32_sparc_got_header_size
 #define elf_backend_want_dynrelro 1
 #define elf_backend_rela_normal 1
 
@@ -335,7 +343,7 @@ elf32_sparc_vxworks_final_write_processing (bfd *abfd)
 #undef  elf_backend_plt_readonly
 #define elf_backend_plt_readonly		1
 #undef  elf_backend_got_header_size
-#define elf_backend_got_header_size		12
+#define elf_backend_got_header_size		elf_vxworks_got_header_size
 #undef  elf_backend_dtrel_excludes_plt
 #define elf_backend_dtrel_excludes_plt		1
 #undef  elf_backend_add_symbol_hook

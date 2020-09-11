@@ -5235,6 +5235,14 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
   return _bfd_x86_elf_link_setup_gnu_properties (info, &init_table);
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_x86_64_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return GOT_ENTRY_SIZE * 3;
+}
+
 static const struct bfd_elf_special_section
 elf_x86_64_special_sections[]=
 {
@@ -5264,7 +5272,7 @@ elf_x86_64_special_sections[]=
 #define elf_backend_want_got_plt	    1
 #define elf_backend_plt_readonly	    1
 #define elf_backend_want_plt_sym	    0
-#define elf_backend_got_header_size	    (GOT_ENTRY_SIZE*3)
+#define elf_backend_got_header_size	    elf_x86_64_got_header_size
 #define elf_backend_rela_normal		    1
 #define elf_backend_plt_alignment	    4
 #define elf_backend_extern_protected_data   1

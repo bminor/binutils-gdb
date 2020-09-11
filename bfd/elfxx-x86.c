@@ -2215,7 +2215,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	 entries and there is no reference to _GLOBAL_OFFSET_TABLE_.  */
       if ((htab->elf.hgot == NULL
 	   || !htab->got_referenced)
-	  && (htab->elf.sgotplt->size == bed->got_header_size)
+	  && (htab->elf.sgotplt->size == bed->got_header_size (info))
 	  && (htab->elf.splt == NULL
 	      || htab->elf.splt->size == 0)
 	  && (htab->elf.sgot == NULL

@@ -1544,9 +1544,9 @@ struct elf_backend_data
   /* An array of target specific special sections.  */
   const struct bfd_elf_special_section *special_sections;
 
-  /* The size in bytes of the header for the GOT.  This includes the
-     so-called reserved entries on some systems.  */
-  bfd_vma got_header_size;
+  /* The size in bytes of the header for the GOT using configuration in INFO.
+     This includes the so-called reserved entries on some systems.  */
+  bfd_vma (*got_header_size) (struct bfd_link_info * info);
 
   /* The size of the GOT entry for the symbol pointed to by H if non-NULL,
      otherwise by the local symbol with index SYMNDX in IBFD.  */
@@ -2669,6 +2669,9 @@ extern unsigned int _bfd_elf_common_section_index
 
 extern asection *_bfd_elf_common_section
   (asection *);
+
+extern bfd_vma _bfd_elf_default_got_header_size
+(struct bfd_link_info *);
 
 extern bfd_vma _bfd_elf_default_got_elt_size
 (bfd *, struct bfd_link_info *, struct elf_link_hash_entry *, bfd *,

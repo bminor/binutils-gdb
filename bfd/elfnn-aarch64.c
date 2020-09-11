@@ -7985,7 +7985,7 @@ aarch64_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   return true;
 }
@@ -10411,6 +10411,15 @@ aarch64_elfNN_swap_symbol_out (bfd *abfd,
   bfd_elfNN_swap_symbol_out (abfd, &newsym, cdst, shndx);
 }
 
+/* Define the size of a GOT header, which is the minimum size of the GOT section
+   when one is needed.  */
+
+static bfd_vma
+elfNN_aarch64_got_header_size (struct bfd_link_info *info ATTRIBUTE_UNUSED)
+{
+  return GOT_ENTRY_SIZE * 3;
+}
+
 /* We use this so we can override certain functions
    (though currently we don't).  */
 
@@ -10560,6 +10569,9 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_merge_gnu_properties	\
   elfNN_aarch64_merge_gnu_properties
 
+#define elf_backend_got_header_size		\
+  elfNN_aarch64_got_header_size
+
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1
 #define elf_backend_plt_readonly       1
@@ -10571,7 +10583,6 @@ const struct elf_size_info elfNN_aarch64_size_info =
 #define elf_backend_default_use_rela_p 1
 #define elf_backend_rela_normal	       1
 #define elf_backend_dtrel_excludes_plt 1
-#define elf_backend_got_header_size (GOT_ENTRY_SIZE * 3)
 #define elf_backend_default_execstack  0
 #define elf_backend_extern_protected_data 1
 #define elf_backend_hash_symbol elf_aarch64_hash_symbol

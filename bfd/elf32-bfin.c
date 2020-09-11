@@ -3234,7 +3234,7 @@ _bfin_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   /* This is the machine-specific part.  Create and initialize section
      data for the got.  */
@@ -4695,6 +4695,13 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   return true;
 }
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+bfinfdpic_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
 
 /* Set the right machine number for a Blackfin ELF file.  */
 
@@ -5393,6 +5400,14 @@ bfd_bfin_elf32_create_embedded_relocs (bfd *abfd,
   return false;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_bfin_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 {
   { ".l1.text",		8, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
@@ -5452,7 +5467,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 1
 #define elf_backend_want_plt_sym 0
-#define elf_backend_got_header_size	12
+#define elf_backend_got_header_size     elf32_bfin_got_header_size
 #define elf_backend_rela_normal		1
 
 #include "elf32-target.h"
@@ -5465,7 +5480,7 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #define	elf32_bed			elf32_bfinfdpic_bed
 
 #undef elf_backend_got_header_size
-#define elf_backend_got_header_size	0
+#define elf_backend_got_header_size     bfinfdpic_got_header_size
 
 #undef elf_backend_relocate_section
 #define elf_backend_relocate_section	bfinfdpic_relocate_section

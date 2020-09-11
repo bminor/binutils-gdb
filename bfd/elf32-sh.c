@@ -6546,6 +6546,14 @@ sh_elf_encode_eh_address (bfd *abfd,
   return DW_EH_PE_datarel | DW_EH_PE_sdata4;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+sh_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 #if !defined SH_TARGET_ALREADY_DEFINED
 #define TARGET_BIG_SYM		sh_elf32_vec
 #define TARGET_BIG_NAME		"elf32-sh"
@@ -6613,7 +6621,7 @@ sh_elf_encode_eh_address (bfd *abfd,
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	12
+#define elf_backend_got_header_size	sh_elf_got_header_size
 #define elf_backend_dtrel_excludes_plt	1
 
 #define elf_backend_linux_prpsinfo32_ugid16	true

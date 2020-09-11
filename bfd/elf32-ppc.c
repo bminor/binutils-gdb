@@ -10534,7 +10534,7 @@ ppc_elf_vxworks_final_write_processing (bfd *abfd)
 #undef elf_backend_plt_readonly
 #define elf_backend_plt_readonly		1
 #undef elf_backend_got_header_size
-#define elf_backend_got_header_size		12
+#define elf_backend_got_header_size		elf_vxworks_got_header_size
 #undef elf_backend_dtrel_excludes_plt
 #define elf_backend_dtrel_excludes_plt		1
 

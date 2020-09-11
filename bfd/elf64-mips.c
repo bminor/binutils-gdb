@@ -4632,6 +4632,14 @@ elf64_mips_write_core_note (bfd *abfd, char *buf, int *bufsiz, int note_type,
       }
     }
 }
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf64_mips_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 8 * MIPS_RESERVED_GOTNO;
+}
 
 /* ECOFF swapping routines.  These are used when dealing with the
    .mdebug section, which is in the ECOFF debugging format.  */
@@ -4770,7 +4778,7 @@ const struct elf_size_info mips_elf64_size_info =
 #define elf_backend_grok_prstatus	elf64_mips_grok_prstatus
 #define elf_backend_grok_psinfo		elf64_mips_grok_psinfo
 
-#define elf_backend_got_header_size	(8 * MIPS_RESERVED_GOTNO)
+#define elf_backend_got_header_size	elf64_mips_got_header_size
 #define elf_backend_want_dynrelro	1
 
 /* MIPS ELF64 can use a mixture of REL and RELA, but some Relocations

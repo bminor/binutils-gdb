@@ -80,6 +80,13 @@ tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+tilegx_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 4;
+}
 
 #define ELF_ARCH		bfd_arch_tilegx
 #define ELF_TARGET_ID		TILEGX_ELF_DATA
@@ -126,7 +133,7 @@ tilegx_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 /* Align PLT mod 64 byte L2 line size. */
 #define elf_backend_plt_alignment 6
 #define elf_backend_want_plt_sym 1
-#define elf_backend_got_header_size 4
+#define elf_backend_got_header_size	     tilegx_elf_got_header_size
 #define elf_backend_want_dynrelro 1
 #define elf_backend_rela_normal 1
 #define elf_backend_default_execstack 0

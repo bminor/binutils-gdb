@@ -2367,6 +2367,13 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+lm32_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
 
 #define ELF_ARCH		bfd_arch_lm32
 #define ELF_TARGET_ID		LM32_ELF_DATA
@@ -2390,7 +2397,7 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define elf_backend_plt_readonly		1
 #define elf_backend_want_got_plt		1
 #define elf_backend_want_plt_sym		0
-#define elf_backend_got_header_size		12
+#define elf_backend_got_header_size		lm32_elf_got_header_size
 #define elf_backend_dtrel_excludes_plt		1
 #define bfd_elf32_bfd_link_hash_table_create	lm32_elf_link_hash_table_create
 #define elf_backend_check_relocs		lm32_elf_check_relocs

@@ -4214,7 +4214,7 @@ _frv_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   /* This is the machine-specific part.  Create and initialize section
      data for the got.  */
@@ -6758,6 +6758,15 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
   return true;
 }
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+frv_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
 #define ELF_ARCH		bfd_arch_frv
 #define ELF_MACHINE_CODE	EM_CYGNUS_FRV
 #define ELF_MAXPAGESIZE		0x1000
@@ -6783,7 +6792,7 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define bfd_elf32_bfd_print_private_bfd_data	frv_elf_print_private_bfd_data
 
 #define elf_backend_want_got_sym	1
-#define elf_backend_got_header_size	0
+#define elf_backend_got_header_size	frv_elf_got_header_size
 #define elf_backend_want_got_plt	0
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0

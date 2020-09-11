@@ -35,3 +35,4 @@ bool elf_vxworks_add_dynamic_entries (bfd *, struct bfd_link_info *);
 bool elf_vxworks_finish_dynamic_entry (bfd *, Elf_Internal_Dyn *);
 bool _bfd_elf_maybe_vxworks_add_dynamic_tags
   (bfd *, struct bfd_link_info *, bool);
+bfd_vma elf_vxworks_got_header_size (struct bfd_link_info* info);

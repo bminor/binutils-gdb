@@ -4430,6 +4430,14 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
     return type;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_hppa_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 8;
+}
+
 /* Misc BFD support code.  */
 #define bfd_elf32_bfd_is_local_label_name    elf_hppa_is_local_label_name
 #define bfd_elf32_bfd_reloc_type_lookup	     elf_hppa_reloc_type_lookup
@@ -4467,7 +4475,7 @@ elf32_hppa_elf_get_symbol_type (Elf_Internal_Sym *elf_sym, int type)
 #define elf_backend_want_got_plt	     0
 #define elf_backend_plt_readonly	     0
 #define elf_backend_want_plt_sym	     0
-#define elf_backend_got_header_size	     8
+#define elf_backend_got_header_size	     elf32_hppa_got_header_size
 #define elf_backend_want_dynrelro	     1
 #define elf_backend_rela_normal		     1
 #define elf_backend_dtrel_excludes_plt	     1

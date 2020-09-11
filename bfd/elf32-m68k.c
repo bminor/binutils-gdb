@@ -4617,6 +4617,14 @@ elf_m68k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_m68k_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 #define TARGET_BIG_SYM			m68k_elf32_vec
 #define TARGET_BIG_NAME			"elf32-m68k"
 #define ELF_MACHINE_CODE		EM_68K
@@ -4660,7 +4668,7 @@ elf_m68k_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define elf_backend_want_got_plt 1
 #define elf_backend_plt_readonly 1
 #define elf_backend_want_plt_sym 0
-#define elf_backend_got_header_size	12
+#define elf_backend_got_header_size	elf32_m68k_got_header_size
 #define elf_backend_rela_normal		1
 #define elf_backend_dtrel_excludes_plt	1
 

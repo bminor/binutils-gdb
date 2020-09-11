@@ -6000,6 +6000,14 @@ nios2_elf32_can_make_relative_eh_frame (bfd *input_bfd ATTRIBUTE_UNUSED,
   return false;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+nios2_elf32_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 /* Implement elf_backend_special_sections.  */
 const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 {
@@ -6077,7 +6085,7 @@ const struct bfd_elf_special_section elf32_nios2_special_sections[] =
 #define TARGET_BIG_SYM			nios2_elf32_be_vec
 #define TARGET_BIG_NAME			"elf32-bignios2"
 
-#define elf_backend_got_header_size	12
+#define elf_backend_got_header_size	nios2_elf32_got_header_size
 #define elf_backend_default_execstack	0
 
 #include "elf32-target.h"

@@ -3393,6 +3393,14 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+microblaze_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 #define TARGET_LITTLE_SYM      microblaze_elf32_le_vec
 #define TARGET_LITTLE_NAME     "elf32-microblazeel"
 
@@ -3422,7 +3430,7 @@ microblaze_elf_add_symbol_hook (bfd *abfd,
 #define elf_backend_can_refcount		1
 #define elf_backend_want_got_plt		1
 #define elf_backend_plt_readonly		1
-#define elf_backend_got_header_size		12
+#define elf_backend_got_header_size		microblaze_elf_got_header_size
 #define elf_backend_want_dynrelro		1
 #define elf_backend_rela_normal			1
 #define elf_backend_dtrel_excludes_plt		1

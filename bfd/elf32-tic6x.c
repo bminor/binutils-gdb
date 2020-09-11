@@ -1759,7 +1759,7 @@ elf32_tic6x_finish_dynamic_symbol (bfd * output_bfd,
 	 For static executables, we don't reserve anything.  */
 
       plt_index = h->plt.offset / PLT_ENTRY_SIZE - 1;
-      got_section_offset = plt_index + bed->got_header_size / 4;
+      got_section_offset = plt_index + bed->got_header_size (info) / 4;
       got_dp_offset = got_section_offset + htab->params.dsbt_size;
       rela_offset = plt_index * sizeof (Elf32_External_Rela);
 
@@ -4212,6 +4212,14 @@ elf32_tic6x_write_section (bfd *output_bfd,
 
 #define	elf32_bed		elf32_tic6x_bed
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_tic6x_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 8;
+}
+
 #define TARGET_LITTLE_SYM	tic6x_elf32_le_vec
 #define TARGET_LITTLE_NAME	"elf32-tic6x-le"
 #define TARGET_BIG_SYM		tic6x_elf32_be_vec
@@ -4243,7 +4251,7 @@ elf32_tic6x_write_section (bfd *output_bfd,
 #define elf_backend_want_dynrelro	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_rela_normal		1
-#define elf_backend_got_header_size     8
+#define elf_backend_got_header_size     elf32_tic6x_got_header_size
 #define elf_backend_fake_sections       elf32_tic6x_fake_sections
 #define elf_backend_gc_mark_extra_sections elf32_tic6x_gc_mark_extra_sections
 #define elf_backend_create_dynamic_sections \

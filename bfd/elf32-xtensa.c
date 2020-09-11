@@ -11488,6 +11488,14 @@ xtensa_callback_required_dependence (bfd *abfd,
   return ok;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_xtensa_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 4;
+}
+
 /* The default literal sections should always be marked as "code" (i.e.,
    SHF_EXECINSTR).  This is particularly important for the Linux kernel
    module loader so that the literals are not placed after the text.  */
@@ -11517,7 +11525,7 @@ static const struct bfd_elf_special_section elf_xtensa_special_sections[] =
 #define elf_backend_can_gc_sections	1
 #define elf_backend_can_refcount	1
 #define elf_backend_plt_readonly	1
-#define elf_backend_got_header_size	4
+#define elf_backend_got_header_size	elf_xtensa_got_header_size
 #define elf_backend_want_dynbss		0
 #define elf_backend_want_got_plt	1
 #define elf_backend_dtrel_excludes_plt	1

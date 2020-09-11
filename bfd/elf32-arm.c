@@ -9655,7 +9655,8 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
       sgot = htab->root.sgotplt;
       srel = htab->root.srelplt;
 
-      got_header_size = get_elf_backend_data (output_bfd)->got_header_size;
+      got_header_size
+	= get_elf_backend_data (output_bfd)->got_header_size (info);
     }
   BFD_ASSERT (splt != NULL && srel != NULL);
 
@@ -20243,6 +20244,14 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
     sym->flags |= BSF_KEEP;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_arm_backend_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 #undef  elf_backend_copy_special_section_fields
 #define elf_backend_copy_special_section_fields elf32_arm_copy_special_section_fields
 
@@ -20302,6 +20311,7 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_add_symbol_hook		elf32_arm_add_symbol_hook
 #define elf_backend_count_additional_relocs	elf32_arm_count_additional_relocs
 #define elf_backend_symbol_processing		elf32_arm_backend_symbol_processing
+#define elf_backend_got_header_size		elf32_arm_backend_got_header_size
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1
@@ -20314,7 +20324,6 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_default_use_rela_p 0
 #define elf_backend_dtrel_excludes_plt 1
 
-#define elf_backend_got_header_size	12
 #define elf_backend_extern_protected_data 1
 
 #undef	elf_backend_obj_attrs_vendor

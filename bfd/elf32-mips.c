@@ -2495,7 +2495,15 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
   /* Function to read in symbolic data.  */
   _bfd_mips_elf_read_ecoff_info
 };
-
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_mips_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 4 * MIPS_RESERVED_GOTNO;
+}
+
 #define ELF_ARCH			bfd_arch_mips
 #define ELF_TARGET_ID			MIPS_ELF_DATA
 #define ELF_MACHINE_CODE		EM_MIPS
@@ -2550,7 +2558,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_grok_psinfo		elf32_mips_grok_psinfo
 #define elf_backend_ecoff_debug_swap	&mips_elf32_ecoff_debug_swap
 
-#define elf_backend_got_header_size	(4 * MIPS_RESERVED_GOTNO)
+#define elf_backend_got_header_size	elf32_mips_got_header_size
 #define elf_backend_want_dynrelro	1
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	0
@@ -2696,7 +2704,7 @@ mips_vxworks_final_write_processing (bfd *abfd)
 #undef elf_backend_default_use_rela_p
 #define elf_backend_default_use_rela_p		1
 #undef elf_backend_got_header_size
-#define elf_backend_got_header_size		(4 * 3)
+#define elf_backend_got_header_size		elf_vxworks_got_header_size
 #undef elf_backend_dtrel_excludes_plt
 #define elf_backend_dtrel_excludes_plt		1
 

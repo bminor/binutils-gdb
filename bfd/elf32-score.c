@@ -4395,6 +4395,14 @@ elf32_score_new_section_hook (bfd *abfd, asection *sec)
     return s7_elf32_score_new_section_hook (abfd, sec);
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_score_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 4 * SCORE_RESERVED_GOTNO;
+}
+
 
 /* s3_s7: don't need to split.  */
 
@@ -4479,7 +4487,7 @@ _bfd_score_elf_common_definition (Elf_Internal_Sym *sym)
 #define elf_backend_grok_psinfo		  _bfd_score_elf_grok_psinfo
 #define elf_backend_can_gc_sections	  1
 #define elf_backend_want_plt_sym	  0
-#define elf_backend_got_header_size	  (4 * SCORE_RESERVED_GOTNO)
+#define elf_backend_got_header_size       elf32_score_got_header_size
 #define elf_backend_plt_header_size	  0
 #define elf_backend_collect		  true
 #define elf_backend_type_change_ok	  true

@@ -5414,6 +5414,14 @@ elf64_ia64_vms_mkobject (bfd *abfd)
     (abfd, sizeof (struct elf64_ia64_vms_obj_tdata), IA64_ELF_DATA);
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf64_ia64_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
 
 /* Size-dependent data and functions.  */
 static const struct elf_size_info elf64_ia64_vms_size_info = {
@@ -5507,7 +5515,7 @@ static const struct elf_size_info elf64_ia64_vms_size_info = {
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_plt_alignment	5
-#define elf_backend_got_header_size	0
+#define elf_backend_got_header_size	elf64_ia64_got_header_size
 #define elf_backend_want_got_plt	1
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1

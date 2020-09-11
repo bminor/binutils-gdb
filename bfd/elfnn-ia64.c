@@ -4982,6 +4982,14 @@ static void
 ignore_errors (const char *fmt ATTRIBUTE_UNUSED, ...)
 {
 }
+
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elfNN_ia64_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
 
 #define TARGET_LITTLE_SYM		ia64_elfNN_le_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
@@ -5059,7 +5067,7 @@ ignore_errors (const char *fmt ATTRIBUTE_UNUSED, ...)
 #define elf_backend_can_gc_sections	1
 #define elf_backend_want_plt_sym	0
 #define elf_backend_plt_alignment	5
-#define elf_backend_got_header_size	0
+#define elf_backend_got_header_size	elfNN_ia64_got_header_size
 #define elf_backend_want_got_plt	1
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1

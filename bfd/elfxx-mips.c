@@ -9362,7 +9362,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     are reserved.  */
 	  if (htab->root.target_os != is_vxworks)
 	    htab->plt_got_index
-	      += (get_elf_backend_data (dynobj)->got_header_size
+	      += (get_elf_backend_data (dynobj)->got_header_size (info)
 		  / MIPS_ELF_GOT_SIZE (dynobj));
 
 	  /* On VxWorks, also allocate room for the header's

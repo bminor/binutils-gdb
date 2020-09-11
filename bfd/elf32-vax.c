@@ -1847,6 +1847,14 @@ elf_vax_plt_sym_val (bfd_vma i, const asection *plt,
   return plt->vma + (i + 1) * PLT_ENTRY_SIZE;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_vax_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 16;
+}
+
 #define TARGET_LITTLE_SYM		vax_elf32_vec
 #define TARGET_LITTLE_NAME		"elf32-vax"
 #define ELF_MACHINE_CODE		EM_VAX
@@ -1885,7 +1893,7 @@ elf_vax_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	16
+#define elf_backend_got_header_size	elf_vax_got_header_size
 #define elf_backend_rela_normal		1
 #define elf_backend_dtrel_excludes_plt	1
 

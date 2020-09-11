@@ -127,6 +127,14 @@ elf32_wasm32_info_to_howto_rela (bfd *abfd,
   return cache_ptr->howto != NULL;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf32_wasm32_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
+}
+
 #define ELF_ARCH		bfd_arch_wasm32
 #define ELF_TARGET_ID		EM_WEBASSEMBLY
 #define ELF_MACHINE_CODE	EM_WEBASSEMBLY
@@ -152,6 +160,6 @@ elf32_wasm32_info_to_howto_rela (bfd *abfd,
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
-#define elf_backend_got_header_size	0
+#define elf_backend_got_header_size 	elf32_wasm32_got_header_size
 
 #include "elf32-target.h"

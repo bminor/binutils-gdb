@@ -187,7 +187,7 @@ _bfd_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   if (bed->want_got_sym)
     {
@@ -14629,7 +14629,7 @@ bfd_elf_gc_common_finalize_got_offsets (bfd *abfd,
   if (bed->want_got_plt)
     gotoff = 0;
   else
-    gotoff = bed->got_header_size;
+    gotoff = bed->got_header_size (info);
 
   /* Do the local .got entries first.  */
   for (i = info->input_bfds; i; i = i->link.next)
@@ -15063,6 +15063,14 @@ asection *
 _bfd_elf_common_section (asection *sec ATTRIBUTE_UNUSED)
 {
   return bfd_com_section_ptr;
+}
+
+/* Determine the size of the header of for the GOT section.  */
+
+bfd_vma
+_bfd_elf_default_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 0;
 }
 
 bfd_vma

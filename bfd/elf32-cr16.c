@@ -633,7 +633,7 @@ _bfd_cr16_elf_create_got_section (bfd * abfd, struct bfd_link_info * info)
     return false;
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   return true;
 }
@@ -2789,6 +2789,14 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
     }
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+_bfd_cr16_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 /* Definitions for setting CR16 target vector.  */
 #define TARGET_LITTLE_SYM		  cr16_elf32_vec
 #define TARGET_LITTLE_NAME		  "elf32-cr16"
@@ -2835,12 +2843,12 @@ _bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 				   _bfd_cr16_elf_finish_dynamic_sections
 
 #define elf_backend_reloc_type_class   _bfd_cr16_elf_reloc_type_class
+#define elf_backend_got_header_size    _bfd_cr16_elf_got_header_size
 
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	12
 #define elf_backend_dtrel_excludes_plt	1
 
 #include "elf32-target.h"

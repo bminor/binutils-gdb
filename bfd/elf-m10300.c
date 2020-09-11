@@ -765,7 +765,7 @@ _bfd_mn10300_elf_create_got_section (bfd * abfd,
     return false;
 
   /* The first bit of the global offset table is the header.  */
-  s->size += bed->got_header_size;
+  s->size += bed->got_header_size (info);
 
   return true;
 }
@@ -5457,6 +5457,14 @@ mn10300_elf_mkobject (bfd *abfd)
 				  MN10300_ELF_DATA);
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+_bfd_mn10300_elf_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 12;
+}
+
 #define bfd_elf32_mkobject	mn10300_elf_mkobject
 
 #ifndef ELF_ARCH
@@ -5510,11 +5518,12 @@ mn10300_elf_mkobject (bfd *abfd)
   _bfd_mn10300_copy_indirect_symbol
 #define elf_backend_reloc_type_class \
   _bfd_mn10300_elf_reloc_type_class
+#define elf_backend_got_header_size \
+  _bfd_mn10300_elf_got_header_size
 
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	12
 #define elf_backend_dtrel_excludes_plt	1
 
 #include "elf32-target.h"

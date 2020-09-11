@@ -3793,6 +3793,14 @@ elf_s390_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
   return true;
 }
 
+/* Determine the size of the header of for the GOT section.  */
+
+static bfd_vma
+elf_s390_got_header_size (struct bfd_link_info* info ATTRIBUTE_UNUSED)
+{
+  return 24;
+}
+
 bool
 bfd_elf_s390_set_options (struct bfd_link_info *info,
 			  struct s390_elf_params *params)
@@ -3860,7 +3868,7 @@ const struct elf_size_info s390_elf64_size_info =
 #define elf_backend_want_got_plt	1
 #define elf_backend_plt_readonly	1
 #define elf_backend_want_plt_sym	0
-#define elf_backend_got_header_size	24
+#define elf_backend_got_header_size	elf_s390_got_header_size
 #define elf_backend_want_dynrelro	1
 #define elf_backend_rela_normal		1
 

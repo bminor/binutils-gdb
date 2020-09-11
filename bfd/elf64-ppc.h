@@ -109,3 +109,5 @@ bool ppc64_elf_size_stubs
 (struct bfd_link_info *);
 bool ppc64_elf_build_stubs
   (struct bfd_link_info *, char **);
+bfd_vma ppc64_elf_got_header_size
+  (struct bfd_link_info *);
