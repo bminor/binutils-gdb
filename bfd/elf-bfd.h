@@ -1762,6 +1762,11 @@ struct bfd_elf_section_data
      of secondary reloc sections, making lookup easier and faster.  */
   bfd_boolean has_secondary_relocs;
 
+  /* TRUE if this section data is allocated by the target and FALSE otherwise.
+     At the moment this flag is only useful for targets that set it and not for
+     the generic code.  */
+  bfd_boolean is_target_section_data;
+
   /* A pointer used for various section optimizations.  */
   void *sec_info;
 };

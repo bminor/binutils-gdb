@@ -1,5 +1,14 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (FIXUP_F_C64): New macro.
+	(output_inst, parse_operands): Use it.
+	(aarch64_force_relocation, aarch64_fix_adjustable): Defer
+	relocation of branches with different source and targets to
+	the linker.
+	* config/tc-aarch64.h (aarch64_fix): New member c64.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c: Include cpu-aarch64.h.
 	(IS_C64): New macro.
 	(make_mapping_symbol, aarch64_frob_label): Set LSB of C64
