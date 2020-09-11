@@ -529,6 +529,7 @@ enum aarch64_opnd
   AARCH64_OPND_CAPADDR_SIMM7,	/* Immediate offset with capability base for
 				   BLR/BR.  */
   AARCH64_OPND_CAPADDR_SIMPLE,	/* Simple base address with no offset.  */
+  AARCH64_OPND_A64C_ADDR_SIMM7,	/* Address with 7-bit immediate offset.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an

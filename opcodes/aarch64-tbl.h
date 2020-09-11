@@ -2427,6 +2427,17 @@
   QLF2(CA, S_Q),		\
 }
 
+/* LDAPR Ct, [<Xn|SP>] */
+#define QL2_A64C_CA_ADDR	\
+{				\
+  QLF2(CA, S_Q),		\
+}
+
+#define QL2_A64C_X_ADDR		\
+{				\
+  QLF2(X, S_D),			\
+}
+
 #define QL3_A64C_CA_CA_NIL	\
 {				\
  QLF3(CA, CA, NIL),		\
@@ -2459,6 +2470,17 @@
 {				\
   QLF3(CA, CA, S_Q),		\
 }
+
+#define QL3_A64C_W_CA_ADDR	\
+{				\
+  QLF3(W, CA, S_Q),		\
+}
+
+#define QL4_A64C_W_CA_CA_ADDR	\
+{				\
+  QLF4(W, CA, CA, S_Q),		\
+}
+
 /* e.g. CSEL <Cad>, <Can>, <Cam>, <cond>.  */
 #define QL4_A64C_CSEL		\
 {				\
@@ -4163,6 +4185,29 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("gctag", 0xc2c09000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
   A64C_INSN ("gctype", 0xc2c0f000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
   A64C_INSN ("gcvalue", 0xc2c05000, 0xfffffc00, a64c, 0, OP2 (Rd, Can_SP), QL2_A64C_X_CA, 0),
+
+  /* Load capabilities.  */
+  A64C_INSN ("ldapr", 0xa23fc000, 0xfffffc00, ldstexcl, 0, OP2 (Cat, ADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldar", 0x425ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, ADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldaxp", 0x227f8000, 0xffff8000, ldstexcl, 0, OP3 (Cat, Cat2, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("ldaxr", 0x225ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, ADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldxr", 0x225f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, ADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldxp", 0x227f0000, 0xffff8000, ldstexcl, 0, OP3 (Cat, Cat2, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("stxr", 0x22007c00, 0xffe0fc00, ldstexcl, 0, OP3 (Rs, Cat, ADDR_SIMPLE), QL3_A64C_W_CA_ADDR, 0),
+  A64C_INSN ("stlxr", 0x2200fc00, 0xffe0fc00, ldstexcl, 0, OP3 (Rs, Cat, ADDR_SIMPLE), QL3_A64C_W_CA_ADDR, 0),
+  A64C_INSN ("stlr", 0x421ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, ADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("stxp", 0x22200000, 0xffe08000, ldstexcl, 0, OP4 (Rs, Cat, Cat2, ADDR_SIMPLE), QL4_A64C_W_CA_CA_ADDR, 0),
+  A64C_INSN ("stlxp", 0x22208000, 0xffe08000, ldstexcl, 0, OP4 (Rs, Cat, Cat2, ADDR_SIMPLE), QL4_A64C_W_CA_CA_ADDR, 0),
+
+  A64C_INSN ("ldnp", 0x62400000, 0xffc00000, ldstnapair_offs, 0, OP3 (Cat, Cat2, ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("stnp", 0x62000000, 0xffc00000, ldstnapair_offs, 0, OP3 (Cat, Cat2, ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("ldp", 0x42c00000, 0xffc00000, ldstpair_off, 0, OP3 (Cat, Cat2, ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("stp", 0x42800000, 0xffc00000, ldstpair_off, 0, OP3 (Cat, Cat2, ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("ldp", 0x22c00000, 0xbfc00000, ldstpair_indexed, 0, OP3 (Cat, Cat2, A64C_ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
+  A64C_INSN ("stp", 0x22800000, 0xbfc00000, ldstpair_indexed, 0, OP3 (Cat, Cat2, A64C_ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
+
+  A64C_INSN ("ldct", 0xc2c4b000, 0xfffffc00, a64c, 0, OP2 (Rt, ADDR_SIMPLE), QL2_A64C_X_ADDR, 0),
+  A64C_INSN ("stct", 0xc2c49000, 0xfffffc00, a64c, 0, OP2 (Rt, ADDR_SIMPLE), QL2_A64C_X_ADDR, 0),
 
   /* Swap capabilities in memory.  */
   A64C_INSN ("swp", 0xa2208000, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
@@ -6133,4 +6178,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, addr_simm, "CAPADDR_SIMM7", 0, F(FLD_capaddr_simm7),	\
       "a capability based address with 7-bit signed immediate offset")	\
     Y(ADDRESS, addr_simple, "CAPADDR_SIMPLE", 0, F(),			\
-      "a capability address with base register (no offset)")
+      "a capability address with base register (no offset)")		\
+    Y(ADDRESS, addr_simm, "A64C_ADDR_SIMM7", 0,				\
+      F(FLD_imm7,FLD_a64c_index2),					\
+      "an address with 7-bit signed immediate offset")

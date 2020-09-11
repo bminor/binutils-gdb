@@ -358,6 +358,7 @@ const aarch64_field fields[] =
     { 13,  3 },	/* perm: permission specifier in clrperm.  */
     { 13,  2 },	/* form: form specifier in seal.  */
     { 13,  7 },	/* capaddr_simm7: Signed immediate for BLR/BR.  */
+    { 30,  1 },	/* a64c_index2: in ld/st pair inst deciding the pre/post-index.  */
 };
 
 enum aarch64_operand_class
@@ -1740,6 +1741,7 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 	}
       switch (type)
 	{
+	case AARCH64_OPND_A64C_ADDR_SIMM7:
 	case AARCH64_OPND_CAPADDR_SIMM7:
 	case AARCH64_OPND_ADDR_SIMM7:
 	  /* Scaled signed 7 bits immediate offset.  */
@@ -3952,6 +3954,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	(buf, size, opnd, get_cap_reg_name (opnd->addr.base_regno, 1));
       break;
 
+    case AARCH64_OPND_A64C_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:
     case AARCH64_OPND_ADDR_SIMM9_2:

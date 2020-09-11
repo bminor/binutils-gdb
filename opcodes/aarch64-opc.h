@@ -181,6 +181,7 @@ enum aarch64_field_kind
   FLD_perm,
   FLD_form,
   FLD_capaddr_simm7,
+  FLD_a64c_index2,
 };
 
 /* Field description.  */
