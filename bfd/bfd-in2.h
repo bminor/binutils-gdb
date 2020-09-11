@@ -5625,6 +5625,15 @@ offset.  The lowest two bits must be zero and are not stored in the
 instruction, giving a 21 bit signed byte offset.  */
   BFD_RELOC_AARCH64_LD_LO19_PCREL,
 
+/* Morello ADRP instruction, with bits 12 to 31 of a pc-relative page
+offset, giving a 4KB aligned page base address.  */
+  BFD_RELOC_MORELLO_ADR_HI20_PCREL,
+
+/* Morello ADRP instruction, with bits 12 to 31 of a pc-relative page
+offset, giving a 4KB aligned page base address, but with no overflow
+checking.  */
+  BFD_RELOC_MORELLO_ADR_HI20_NC_PCREL,
+
 /* AArch64 ADR instruction, holding a simple 21 bit pc-relative byte offset.  */
   BFD_RELOC_AARCH64_ADR_LO21_PCREL,
 
@@ -5692,6 +5701,11 @@ checking.  */
 part of an ADRP instruction using a 21 bit PC relative value.Used in
 conjunction with BFD_RELOC_AARCH64_LD64_GOT_LO12_NC.  */
   BFD_RELOC_AARCH64_ADR_GOT_PAGE,
+
+/* Get to the page base of the global offset table entry for a symbol as
+part of an ADRP instruction using a 20 bit PC relative value.Used in
+conjunction with BFD_RELOC_MORELLO_LD128_GOT_LO12_NC.  */
+  BFD_RELOC_MORELLO_ADR_GOT_PAGE,
 
 /* Unsigned 12 bit byte offset for 64 bit load/store from the page of
 the GOT entry for this symbol.  Used in conjunction with

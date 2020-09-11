@@ -57,10 +57,10 @@ reencode_add_imm (uint32_t insn, uint32_t imm)
 /* Reencode the IMM field of ADR.  */
 
 uint32_t
-_bfd_aarch64_reencode_adr_imm (uint32_t insn, uint32_t imm)
+_bfd_aarch64_reencode_adr_imm (uint32_t insn, uint32_t imm, uint32_t c64)
 {
-  return (insn & ~((MASK (2) << 29) | (MASK (19) << 5)))
-    | ((imm & MASK (2)) << 29) | ((imm & (MASK (19) << 2)) << 3);
+  return (insn & ~((MASK (2) << 29) | (MASK (19 - c64) << 5)))
+    | ((imm & MASK (2)) << 29) | ((imm & (MASK (19 - c64) << 2)) << 3);
 }
 
 /* Reencode the imm field of ld/st pos immediate.  */
@@ -247,6 +247,12 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
       break;
 
+    case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
+    case BFD_RELOC_MORELLO_ADR_HI20_NC_PCREL:
+    case BFD_RELOC_MORELLO_ADR_HI20_PCREL:
+      contents = _bfd_aarch64_reencode_adr_imm (contents, addend, 1);
+      break;
+
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
@@ -258,7 +264,7 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
-      contents = _bfd_aarch64_reencode_adr_imm (contents, addend);
+      contents = _bfd_aarch64_reencode_adr_imm (contents, addend, 0);
       break;
 
     case BFD_RELOC_AARCH64_ADD_LO12:
@@ -496,6 +502,8 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
       value = value + addend;
       break;
 
+    case BFD_RELOC_MORELLO_ADR_HI20_NC_PCREL:
+    case BFD_RELOC_MORELLO_ADR_HI20_PCREL:
     case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
       if (weak_undef_p)
@@ -507,6 +515,7 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
       value = value + addend - place;
       break;
 
+    case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
