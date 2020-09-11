@@ -3793,7 +3793,10 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 		  != aarch64_get_qualifier_esize (*offset_qualifier)
 		  && (operand->type != AARCH64_OPND_SVE_ADDR_ZX
 		      || *base_qualifier != AARCH64_OPND_QLF_S_S
-		      || *offset_qualifier != AARCH64_OPND_QLF_X))
+		      || *offset_qualifier != AARCH64_OPND_QLF_X)
+		  /* Capabilities can have W as well as X registers as
+		     offsets.  */
+		  && (*base_qualifier != AARCH64_OPND_QLF_CA))
 		{
 		  set_syntax_error (_("offset has different size from base"));
 		  return false;
@@ -3970,6 +3973,24 @@ parse_address (char **str, aarch64_opnd_info *operand)
     base = REG_TYPE_CA_N_SP;
   else
     base = REG_TYPE_R64_SP;
+
+  return parse_address_main (str, operand, &base_qualifier, &offset_qualifier,
+			     base, REG_TYPE_R_Z, SHIFTED_NONE);
+}
+
+/* Parse a base capability address.  Return TRUE on success.  */
+static bool
+parse_cap_address (char **str, aarch64_opnd_info *operand,
+		   enum aarch64_insn_class class)
+{
+  aarch64_opnd_qualifier_t base_qualifier, offset_qualifier;
+  aarch64_reg_type base;
+
+  if (AARCH64_CPU_HAS_FEATURE (cpu_variant, AARCH64_FEATURE_C64)
+      && class != br_capaddr)
+    base = REG_TYPE_R64_SP;
+  else
+    base = REG_TYPE_CA_N_SP;
 
   return parse_address_main (str, operand, &base_qualifier, &offset_qualifier,
 			     base, REG_TYPE_R_Z, SHIFTED_NONE);
@@ -7272,6 +7293,46 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    }
 	  /* Qualifier to be deduced by libopcodes.  */
 	  break;
+
+	case AARCH64_OPND_CAPADDR_SIMPLE:
+	case AARCH64_OPND_CAPADDR_SIMM7:
+	    {
+	      /* A little hack to prevent the address parser from trying to
+		 pretend that a BLR with a register may be a BLR with an
+		 address.  It fails the addressing mode test below, but still
+		 ends up adding a symbol with the name of the register.  */
+	      char *start = str;
+	      po_char_or_fail ('[');
+	      str = start;
+
+	      po_misc_or_fail (parse_cap_address (&str, info, opcode->iclass));
+	      if (info->addr.pcrel || info->addr.offset.is_reg
+		  || (!info->addr.preind && !info->addr.postind)
+		  || info->addr.writeback)
+		{
+		  set_syntax_error (_("invalid addressing mode"));
+		  goto failure;
+		}
+	      if (inst.reloc.type != BFD_RELOC_UNUSED)
+		{
+		  set_syntax_error (_("relocation not allowed"));
+		  goto failure;
+		}
+	      if (inst.reloc.exp.X_op == O_constant && !inst.gen_lit_pool)
+		info->addr.offset.imm = inst.reloc.exp.X_add_number;
+	      else
+		{
+		  set_syntax_error (_("Invalid offset constant"));
+		  goto failure;
+		}
+	      if (info->type == AARCH64_OPND_CAPADDR_SIMPLE
+		  && info->addr.offset.imm != 0)
+		{
+		  set_syntax_error (_("non-zero offset not allowed"));
+		  goto failure;
+		}
+	      break;
+	    }
 
 	case AARCH64_OPND_ADDR_SIMM7:
 	  po_misc_or_fail (parse_address (&str, info));

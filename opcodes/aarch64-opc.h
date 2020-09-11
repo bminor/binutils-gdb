@@ -180,6 +180,7 @@ enum aarch64_field_kind
   FLD_a64c_shift,
   FLD_perm,
   FLD_form,
+  FLD_capaddr_simm7,
 };
 
 /* Field description.  */

@@ -626,7 +626,7 @@ aarch64_ins_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
 			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  /* Rn */
+  /* Rn/Can */
   insert_field (FLD_Rn, code, info->addr.base_regno, 0);
   return true;
 }
@@ -699,12 +699,13 @@ aarch64_ins_addr_simm (const aarch64_operand *self,
 {
   int imm;
 
-  /* Rn */
+  /* Rn/Can */
   insert_field (FLD_Rn, code, info->addr.base_regno, 0);
   /* simm (imm9 or imm7) */
   imm = info->addr.offset.imm;
   if (self->fields[0] == FLD_imm7
-     || info->qualifier == AARCH64_OPND_QLF_imm_tag)
+      || self->fields[0] == FLD_capaddr_simm7
+      || info->qualifier == AARCH64_OPND_QLF_imm_tag)
     /* scaled immediate in ld/st pair instructions..  */
     imm >>= get_logsz (aarch64_get_qualifier_esize (info->qualifier));
   insert_field (self->fields[0], code, imm, 0);
@@ -714,7 +715,8 @@ aarch64_ins_addr_simm (const aarch64_operand *self,
       assert (inst->opcode->iclass != ldst_unscaled
 	      && inst->opcode->iclass != ldstnapair_offs
 	      && inst->opcode->iclass != ldstpair_off
-	      && inst->opcode->iclass != ldst_unpriv);
+	      && inst->opcode->iclass != ldst_unpriv
+	      && inst->opcode->iclass != br_capaddr);
       assert (info->addr.preind != info->addr.postind);
       if (info->addr.preind)
 	insert_field (self->fields[1], code, 1, 0);

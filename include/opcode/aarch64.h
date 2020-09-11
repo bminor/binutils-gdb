@@ -526,6 +526,9 @@ enum aarch64_opnd
   AARCH64_OPND_A64C_IMM6_EXT,	/* IMM6 for SCBNDS.  */
   AARCH64_OPND_PERM,		/* 3-bit capability permission for e.g. CLRPERM.  */
   AARCH64_OPND_FORM,		/* 2-bit capability form for e.g. SEAL.  */
+  AARCH64_OPND_CAPADDR_SIMM7,	/* Immediate offset with capability base for
+				   BLR/BR.  */
+  AARCH64_OPND_CAPADDR_SIMPLE,	/* Simple base address with no offset.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -722,6 +725,7 @@ enum aarch64_insn_class
   bfloat16,
   a64c,
   br_sealed,
+  br_capaddr,
 };
 
 /* Opcode enumerators.  */

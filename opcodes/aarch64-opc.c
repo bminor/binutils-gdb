@@ -357,6 +357,7 @@ const aarch64_field fields[] =
     { 14,  1 },	/* a64c_shift: Shift bit in SCBNDS.  */
     { 13,  3 },	/* perm: permission specifier in clrperm.  */
     { 13,  2 },	/* form: form specifier in seal.  */
+    { 13,  7 },	/* capaddr_simm7: Signed immediate for BLR/BR.  */
 };
 
 enum aarch64_operand_class
@@ -1739,6 +1740,7 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 	}
       switch (type)
 	{
+	case AARCH64_OPND_CAPADDR_SIMM7:
 	case AARCH64_OPND_ADDR_SIMM7:
 	  /* Scaled signed 7 bits immediate offset.  */
 	  /* Get the size of the data element that is accessed, which may be
@@ -3884,6 +3886,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "#0x%" PRIx64, addr);
       break;
 
+    case AARCH64_OPND_CAPADDR_SIMPLE:
+      snprintf (buf, size, "[%s]",
+		get_cap_reg_name (opnd->addr.base_regno, 1));
+      break;
+
     case AARCH64_OPND_ADDR_SIMPLE:
     case AARCH64_OPND_SIMD_ADDR_SIMPLE:
     case AARCH64_OPND_SIMD_ADDR_POST:
@@ -3938,6 +3945,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_register_offset_address
 	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
 	 get_addr_sve_reg_name (opnd->addr.offset.regno, opnd->qualifier));
+      break;
+
+    case AARCH64_OPND_CAPADDR_SIMM7:
+      print_immediate_offset_address
+	(buf, size, opnd, get_cap_reg_name (opnd->addr.base_regno, 1));
       break;
 
     case AARCH64_OPND_ADDR_SIMM7:

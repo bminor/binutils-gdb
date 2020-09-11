@@ -1,5 +1,23 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_addr_simple): Fix comment.
+	(aarch64_ins_addr_simm): Support capability address operands.
+	* aarch64-dis.c (aarch64_ext_addr_simple): Fix comment.
+	(aarch64_ext_addr_simm): Support capability address operands.
+	* aarch64-opc.c (fields): Add capaddr_simm7.
+	(operand_general_constraint_met_p): Add CAPADDR_SIMM7.
+	(aarch64_print_operand): Add CAPADDR_SIMM7 and CAPADDR_SIMPLE.
+	* aarch64-opc.h (aarch64_field_kind): Add FLD_capaddr_simm7.
+	* aarch64-tbl.h (QL1_A64C_CAPADDR, QL2_A64C_CA_CAPADDR): New
+	macros.
+	(aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): New operands.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_form): New function.
 	* aarch64-asm.h (ins_form): New function declaration.
 	* aarch64-dis.c (aarch64_ext_form): New function.

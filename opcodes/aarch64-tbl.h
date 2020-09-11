@@ -2395,6 +2395,12 @@
   QLF1(CA),			\
 }
 
+/* BLR [<Cn|CSP>, #<imm>] */
+#define QL1_A64C_CAPADDR	\
+{				\
+  QLF1(S_Q),			\
+}
+
 #define QL2_A64C_CA_CA		\
 {				\
   QLF2(CA, CA),			\
@@ -2413,6 +2419,12 @@
 #define QL2_A64C_X_X		\
 {				\
   QLF2(X, X),			\
+}
+
+/* LDPBLR Ct, [<Cn|CSP>, #<imm>] */
+#define QL2_A64C_CA_CAPADDR	\
+{				\
+  QLF2(CA, S_Q),		\
 }
 
 #define QL3_A64C_CA_CA_NIL	\
@@ -4103,6 +4115,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("brs", 0xc2c08400, 0xffe0fc1f, br_sealed, 0, OP3 (A64C_CST_REG, Can, Cam), QL3_A64C_CA_CA_CA, 0),
   A64C_INSN ("build", 0xc2c00400, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Cam_SP), QL3_A64C_CA_CA_CA, 0),
   A64C_INSN ("bx", 0xc2c273e0, 0xffffffff, a64c, 0, OP1 (A64C_IMMV4), {}, 0),
+
+  /* Capability load and branch instructions */
+  A64C_INSN ("blr", 0xc2d01001, 0xfff01c1f, br_capaddr, 0, OP1 (CAPADDR_SIMM7), QL1_A64C_CAPADDR, 0),
+  A64C_INSN ("br", 0xc2d01000, 0xfff01c1f, br_capaddr, 0, OP1 (CAPADDR_SIMM7), QL1_A64C_CAPADDR, 0),
+  A64C_INSN ("ldpblr", 0xc2c43000, 0xfffffc00, br_capaddr, 0, OP2 (Cat, CAPADDR_SIMPLE), QL2_A64C_CA_CAPADDR, 0),
+  A64C_INSN ("ldpbr", 0xc2c41000, 0xfffffc00, br_capaddr, 0, OP2 (Cat, CAPADDR_SIMPLE), QL2_A64C_CA_CAPADDR, 0),
 
   /* Compare and swap capabilities.  */
   A64C_INSN ("cas", 0xa2a07c00, 0xffe0fc00, a64c, 0, OP3 (Cas, Cat, ADDR_SIMPLE), QL3_A64C_CA_CA_ADDR, 0),
@@ -6111,4 +6129,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       F(FLD_a64c_shift, FLD_imm6_2),					\
       "6-bit unsigned immediate")					\
     Y(PERM, perm, "PERM", 0, F(), "a capability permission")		\
-    Y(FORM, form, "FORM", 0, F(), "a capability form")
+    Y(FORM, form, "FORM", 0, F(), "a capability form")			\
+    Y(ADDRESS, addr_simm, "CAPADDR_SIMM7", 0, F(FLD_capaddr_simm7),	\
+      "a capability based address with 7-bit signed immediate offset")	\
+    Y(ADDRESS, addr_simple, "CAPADDR_SIMPLE", 0, F(),			\
+      "a capability address with base register (no offset)")

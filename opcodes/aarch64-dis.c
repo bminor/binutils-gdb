@@ -1064,7 +1064,7 @@ aarch64_ext_addr_simple (const aarch64_operand *self ATTRIBUTE_UNUSED,
 			 const aarch64_inst *inst ATTRIBUTE_UNUSED,
 			 aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  /* Rn */
+  /* Rn/Can */
   info->addr.base_regno = extract_field (FLD_Rn, code, 0);
   return true;
 }
@@ -1146,12 +1146,13 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
   aarch64_insn imm;
   info->qualifier = get_expected_qualifier (inst, info->idx);
 
-  /* Rn */
+  /* Rn/Can */
   info->addr.base_regno = extract_field (FLD_Rn, code, 0);
   /* simm (imm9 or imm7)  */
   imm = extract_field (self->fields[0], code, 0);
   info->addr.offset.imm = sign_extend (imm, fields[self->fields[0]].width - 1);
   if (self->fields[0] == FLD_imm7
+      || self->fields[0] == FLD_capaddr_simm7
       || info->qualifier == AARCH64_OPND_QLF_imm_tag)
     /* scaled immediate in ld/st pair instructions.  */
     info->addr.offset.imm *= aarch64_get_qualifier_esize (info->qualifier);
@@ -1159,7 +1160,8 @@ aarch64_ext_addr_simm (const aarch64_operand *self, aarch64_opnd_info *info,
   if (inst->opcode->iclass == ldst_unscaled
       || inst->opcode->iclass == ldstnapair_offs
       || inst->opcode->iclass == ldstpair_off
-      || inst->opcode->iclass == ldst_unpriv)
+      || inst->opcode->iclass == ldst_unpriv
+      || inst->opcode->iclass == br_capaddr)
     info->addr.writeback = 0;
   else
     {
