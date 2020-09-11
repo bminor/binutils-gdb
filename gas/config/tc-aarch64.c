@@ -7155,10 +7155,38 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  }
 	  break;
 
+	  /* ADRP variants.  Clear the value as operand needs to be
+	     relocated.  */
+	case AARCH64_OPND_A64C_ADDR_ADRDP:
+	  if (!AARCH64_CPU_HAS_FEATURE (cpu_variant, AARCH64_FEATURE_C64))
+	    {
+	      as_bad (_("instruction not allowed on this processor"));
+	      goto failure;
+	    }
+	  po_misc_or_fail (parse_immediate_expression (&str, &inst.reloc.exp,
+						       imm_reg_type));
+	  if (inst.reloc.exp.X_op == O_constant && !inst.gen_lit_pool)
+	    {
+	      info->imm.value = inst.reloc.exp.X_add_number;
+	      inst.reloc.type = BFD_RELOC_UNUSED;
+	      if (info->imm.value & 0xfff)
+		goto bad_adrdp;
+
+	      info->imm.value >>= 12;
+	      break;
+	    }
+bad_adrdp:
+	  set_syntax_error
+	    (_("20-bit 4K page aligned integer constant expected"));
+	  goto failure;
+
 	case AARCH64_OPND_ADDR_ADRP:
+	  if (AARCH64_CPU_HAS_FEATURE (cpu_variant, AARCH64_FEATURE_C64))
+	    info->imm.value = 1UL << 20;
+	  else
+	    info->imm.value = 0;
+
 	  po_misc_or_fail (parse_adrp (&str));
-	  /* Clear the value as operand needs to be relocated.  */
-	  info->imm.value = 0;
 	  break;
 
 	case AARCH64_OPND_ADDR_PCREL14:

@@ -186,6 +186,7 @@ enum aarch64_field_kind
   FLD_altbase_sf,
   FLD_altbase_sf2,
   FLD_altbase_sf3,
+  FLD_a64c_immhi,
 };
 
 /* Field description.  */

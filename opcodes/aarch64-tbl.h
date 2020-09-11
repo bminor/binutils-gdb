@@ -2478,6 +2478,12 @@
   QLF2(S_D,S_D),		\
 }
 
+/* e.g. ADRP <Cd>, <label>.  */
+#define QL2_A64C_CA_NIL		\
+{				\
+  QLF2(CA, NIL),		\
+}
+
 #define QL3_A64C_CA_CA_NIL	\
 {				\
  QLF3(CA, CA, NIL),		\
@@ -4152,6 +4158,10 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   /* PC-rel. addressing.  */
   CORE_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_PCREL21), QL_ADRP, 0),
   CORE_INSN ("adrp", 0x90000000, 0x9f000000, pcreladdr, 0, OP2 (Rd, ADDR_ADRP), QL_ADRP, 0),
+  /* Pc-rel. addressing with capabilities.  */
+  A64C_INSN ("adr",  0x10000000, 0x9f000000, pcreladdr, 0, OP2 (Cad, ADDR_PCREL21), QL2_A64C_CA_NIL, 0),
+  A64C_INSN ("adrp", 0x90000000, 0x9f000000, pcreladdr, 0, OP2 (Cad, ADDR_ADRP), QL2_A64C_CA_NIL, 0),
+  A64C_INSN ("adrdp", 0x90000000, 0x9f800000, pcreladdr, 0, OP2 (Cad, A64C_ADDR_ADRDP), QL2_A64C_CA_NIL, 0),
   /* A64C Instructions.  */
   A64C_INSN ("cpy", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_HAS_ALIAS),
   A64C_INSN ("mov", 0xc2c1d000, 0xfffffc00, a64c, 0, OP2 (Cad_SP, Can_SP), QL2_A64C_CA_CA, F_ALIAS | F_P1),
@@ -5911,7 +5921,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(COND, cond, "COND", 0, F(), "a condition")			\
     Y(COND, cond, "COND1", 0, F(),					\
       "one of the standard conditions, excluding AL and NV.")		\
-    X(ADDRESS, 0, ext_imm, "ADDR_ADRP", OPD_F_SEXT, F(FLD_immhi, FLD_immlo),\
+    Y(ADDRESS, imm, "ADDR_ADRP", OPD_F_SEXT, F(FLD_immhi, FLD_immlo),	\
       "21-bit PC-relative address of a 4KB page")			\
     Y(ADDRESS, imm, "ADDR_PCREL14", OPD_F_SEXT | OPD_F_SHIFT_BY_2,	\
       F(FLD_imm14), "14-bit PC-relative address")			\
@@ -6303,4 +6313,6 @@ const struct aarch64_opcode aarch64_opcode_table[] =
     Y(ADDRESS, addr_regoff, "CAPADDR_REGOFF", 0, F(),			\
       "a capability address with register offset")			\
     Y(ADDRESS, addr_simm, "CAPADDR_SIMM9", 0, F(FLD_imm9),		\
-      "a capability address with 9-bit signed immediate offset")
+      "a capability address with 9-bit signed immediate offset")	\
+    Y(IMMEDIATE, imm, "A64C_ADDR_ADRDP", 0,				\
+      F(FLD_a64c_immhi, FLD_immlo), "20-bit data-relative offset")
