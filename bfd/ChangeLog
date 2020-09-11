@@ -1,5 +1,15 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Emit
+	relative C64 relocations for static binaries early.
+	(aarch64_elf_init_got_section): Add capability relocations to
+	SRELCAPS for non-PIE static binaries.
+	(elfNN_aarch64_allocate_dynrelocs): Likewise.
+	(elfNN_aarch64_always_size_sections): Emit
+	__cap_dynrelocs_start and __cap_dynrelocs_end.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (GOT_ENTRY_SIZE): Adjust for C64
 	relocations.  Adjust callers.
 	(GOT_RESERVED_HEADER_SLOTS, GOT_CAP): New macros.
