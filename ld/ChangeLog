@@ -1,5 +1,13 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add test.
+	* testsuite/ld-aarch64/morello-stubs-static.d: New file.
+	* testsuite/ld-aarch64/morello-stubs.d: New file.
+	* testsuite/ld-aarch64/morello-stubs.ld: New file.
+	* testsuite/ld-aarch64/morello-stubs.s: New file.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* testsuite/ld-aarch64/aarch64-elf.exp: Add new tests.
 	* testsuite/ld-aarch64/c64-ifunc-2-local.d: New file.
 	* testsuite/ld-aarch64/c64-ifunc-2.d: New file.

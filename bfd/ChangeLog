@@ -1,5 +1,28 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (STUB_ENTRY_NAME): Add format specifier for
+	veneer type.
+	(C64_MAX_ADRP_IMM, C64_MIN_ADRP_IMM): New macros.
+	(aarch64_branch_reloc_p, c64_valid_for_adrp_p,
+	aarch64_interwork_stub): New functions.
+	(aarch64_c64_branch_stub, c64_aarch64_branch_stub): New stubs.
+	(elf_aarch64_stub_type): New members.
+	(aarch64_type_of_stub): Support C64 stubs.
+	(aarch64_lookup_stub_type_suffix): New function.
+	(elfNN_aarch64_stub_name): Use it.
+	(elfNN_aarch64_get_stub_entry): Add stub_type argument.
+	Adjust callers.  Support C64 stubs.
+	(aarch64_build_one_stub): Likewise.
+	(aarch64_size_one_stub): Likewise.
+	(elfNN_aarch64_size_stubs): Likewise.
+	(elfNN_aarch64_build_stubs): Save and return error if stub
+	building failed.
+	(elfNN_aarch64_final_link_relocate): Emit stubs based on
+	whether source and target of a branch are different.
+	(aarch64_map_one_stub): Emit mapping symbol for C64 stubs.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (elfNN_c64_small_plt0_entry,
 	elfNN_c64_small_plt_entry): New variables.
 	(elfNN_aarch64_howto_table): Add relocations.
