@@ -5607,12 +5607,12 @@ output_operand_error_record (const operand_error_record *record, char *str)
 static void
 output_operand_error_report (char *str, bool non_fatal_only)
 {
-  int largest_error_pos;
-  const char *msg = NULL;
+  int largest_error_pos, largest_error_pos2;
+  const char *msg = NULL, *msg2 = NULL;
   enum aarch64_operand_error_kind kind;
   operand_error_record *curr;
   operand_error_record *head = operand_error_report.head;
-  operand_error_record *record = NULL;
+  operand_error_record *record = NULL, *record2 = NULL;
 
   /* No error to report.  */
   if (head == NULL)
@@ -5650,6 +5650,7 @@ output_operand_error_report (char *str, bool non_fatal_only)
 
   /* Pick up one of errors of KIND to report.  */
   largest_error_pos = -2; /* Index can be -1 which means unknown index.  */
+  largest_error_pos2 = -2; /* Index can be -1 which means unknown index.  */
   for (curr = head; curr != NULL; curr = curr->next)
     {
       /* If we don't want to print non-fatal errors then don't consider them
@@ -5661,14 +5662,37 @@ output_operand_error_report (char *str, bool non_fatal_only)
 	 mismatching operand index.  In the case of multiple errors with
 	 the equally highest operand index, pick up the first one or the
 	 first one with non-NULL error message.  */
-      if (curr->detail.index > largest_error_pos
-	  || (curr->detail.index == largest_error_pos && msg == NULL
-	      && curr->detail.error != NULL))
+      if (AARCH64_CPU_HAS_FEATURE (cpu_variant, *curr->opcode->avariant))
 	{
-	  largest_error_pos = curr->detail.index;
-	  record = curr;
-	  msg = record->detail.error;
+	  if (curr->detail.index > largest_error_pos
+	      || (curr->detail.index == largest_error_pos && msg == NULL
+		  && curr->detail.error != NULL))
+	    {
+	      largest_error_pos = curr->detail.index;
+	      record = curr;
+	      msg = record->detail.error;
+	    }
 	}
+      else
+	{
+	  if (curr->detail.index > largest_error_pos2
+	      || (curr->detail.index == largest_error_pos2 && msg2 == NULL
+		  && curr->detail.error != NULL))
+	    {
+	      largest_error_pos2 = curr->detail.index;
+	      record2 = curr;
+	      msg2 = record2->detail.error;
+	    }
+	}
+    }
+
+  /* No errors in enabled cpu feature variants, look for errors in the disabled
+     ones.  XXX we should do this segregation when prioritizing too.  */
+  if (!record)
+    {
+      largest_error_pos = largest_error_pos2;
+      record = record2;
+      msg = msg2;
     }
 
   /* The way errors are collected in the back-end is a bit non-intuitive.  But

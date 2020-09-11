@@ -83,7 +83,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `bcax z0\.d,z0\.h,z0\.d,z0\.d'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	bcax z0\.d, z0\.d, z0\.d, z0\.d
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `bcax z32\.d,z32\.d,z0\.d,z0\.d'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `bcax z32\.d,z32\.d,z0\.d,z0\.d'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `bcax z0\.d,z0\.d,z32\.d,z0\.d'
 [^ :]+:[0-9]+: Error: operand 4 must be an SVE vector register -- `bcax z0\.d,z0\.d,z0\.d,z32\.d'
 [^ :]+:[0-9]+: Error: operand 2 must be the same register as operand 1 -- `bsl z0\.d,z1\.d,z0\.d,z0\.d'
@@ -792,7 +792,7 @@
 [^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `raddhnt z32\.b,z0\.h,z0\.h'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `raddhnt z0\.b,z32\.h,z0\.h'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `raddhnt z0\.b,z0\.h,z32\.h'
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `rax1 z32\.d,z0\.d,z0\.d'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `rax1 z32\.d,z0\.d,z0\.d'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `rax1 z0\.d,z32\.d,z0\.d'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `rax1 z0\.d,z0\.d,z32\.d'
 [^ :]+:[0-9]+: Error: operand mismatch -- `rax1 z0\.d,z0\.d,z0\.h'
@@ -1068,13 +1068,13 @@
 [^ :]+:[0-9]+: Error: immediate value out of range 0 to 63 at operand 3 -- `sli z0\.d,z0\.d,#64'
 [^ :]+:[0-9]+: Warning: SVE `movprfx' compatible instruction expected -- `sm4e z0\.s,z0\.s,z1\.s'
 [^ :]+:[0-9]+: Error: operand 2 must be the same register as operand 1 -- `sm4e z1\.s,z0\.s,z0\.s'
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sm4e z32\.s,z0\.s,z0\.s'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sm4e z32\.s,z0\.s,z0\.s'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sm4e z0\.s,z32\.s,z0\.s'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `sm4e z0\.s,z0\.s,z32\.s'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sm4e z0\.s,z0\.s,z0\.d'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	sm4e z0\.s, z0\.s, z0\.s
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sm4ekey z32\.s,z0\.s,z0\.s'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sm4ekey z32\.s,z0\.s,z0\.s'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sm4ekey z0\.s,z32\.s,z0\.s'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `sm4ekey z0\.s,z0\.s,z32\.s'
 [^ :]+:[0-9]+: Error: operand mismatch -- `sm4ekey z0\.s,z0\.s,z0\.h'
@@ -1593,7 +1593,7 @@
 [^ :]+:[0-9]+: Info:    	sqrdcmlah z0\.h, z0\.h, z0\.h, #0
 [^ :]+:[0-9]+: Info:    	sqrdcmlah z0\.s, z0\.s, z0\.s, #0
 [^ :]+:[0-9]+: Info:    	sqrdcmlah z0\.d, z0\.d, z0\.d, #0
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlah z32\.h,z0\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlah z32\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlah z0\.h,z32\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `sqrdmlah z0\.h,z0\.h,z8\.h\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqrdmlah z0\.h,z0\.h,z0\.h\[8\]'
@@ -1603,7 +1603,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlah z0\.h,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	sqrdmlah z0\.h, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlah z32\.s,z0\.s,z0\.s\[0\]'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlah z32\.s,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlah z0\.s,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `sqrdmlah z0\.s,z0\.s,z8\.s\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `sqrdmlah z0\.s,z0\.s,z0\.s\[4\]'
@@ -1613,7 +1613,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlah z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	sqrdmlah z0\.h, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlah z32\.d,z0\.d,z0\.d\[0\]'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlah z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlah z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqrdmlah z0\.d,z0\.d,z16\.d\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `sqrdmlah z0\.d,z0\.d,z0\.d\[2\]'
@@ -1623,7 +1623,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlah z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	sqrdmlah z0\.h, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlah z32\.h,z0\.b,z0\.b'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlah z32\.h,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlah z0\.h,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 3 must be an indexed SVE vector register -- `sqrdmlah z0\.h,z0\.b,z32\.b'
 [^ :]+:[0-9]+: Error: unexpected character `x' in element size at operand 3 -- `sqrdmlah z0\.s,z0\.h,z0\.x'
@@ -1634,7 +1634,7 @@
 [^ :]+:[0-9]+: Info:    	sqrdmlah z0\.b, z0\.b, z0\.b
 [^ :]+:[0-9]+: Info:    	sqrdmlah z0\.s, z0\.s, z0\.s
 [^ :]+:[0-9]+: Info:    	sqrdmlah z0\.d, z0\.d, z0\.d
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlsh z32\.h,z0\.h,z0\.h\[0\]'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlsh z32\.h,z0\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlsh z0\.h,z32\.h,z0\.h\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `sqrdmlsh z0\.h,z0\.h,z8\.h\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 7 at operand 3 -- `sqrdmlsh z0\.h,z0\.h,z0\.h\[8\]'
@@ -1644,7 +1644,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlsh z0\.h,z0\.h,z0\.s\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.h, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlsh z32\.s,z0\.s,z0\.s\[0\]'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlsh z32\.s,z0\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlsh z0\.s,z32\.s,z0\.s\[0\]'
 [^ :]+:[0-9]+: Error: z0-z7 expected at operand 3 -- `sqrdmlsh z0\.s,z0\.s,z8\.s\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 3 at operand 3 -- `sqrdmlsh z0\.s,z0\.s,z0\.s\[4\]'
@@ -1654,7 +1654,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlsh z0\.s,z0\.s,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.h, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlsh z32\.d,z0\.d,z0\.d\[0\]'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlsh z32\.d,z0\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlsh z0\.d,z32\.d,z0\.d\[0\]'
 [^ :]+:[0-9]+: Error: z0-z15 expected at operand 3 -- `sqrdmlsh z0\.d,z0\.d,z16\.d\[0\]'
 [^ :]+:[0-9]+: Error: register element index out of range 0 to 1 at operand 3 -- `sqrdmlsh z0\.d,z0\.d,z0\.d\[2\]'
@@ -1664,7 +1664,7 @@
 [^ :]+:[0-9]+: Error: operand mismatch -- `sqrdmlsh z0\.d,z0\.d,z0\.h\[0\]'
 [^ :]+:[0-9]+: Info:    did you mean this\?
 [^ :]+:[0-9]+: Info:    	sqrdmlsh z0\.h, z0\.h, z0\.h\[0\]
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `sqrdmlsh z32\.h,z0\.b,z0\.b'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `sqrdmlsh z32\.h,z0\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 2 must be an SVE vector register -- `sqrdmlsh z0\.h,z32\.b,z0\.b'
 [^ :]+:[0-9]+: Error: operand 3 must be an indexed SVE vector register -- `sqrdmlsh z0\.h,z0\.b,z32\.b'
 [^ :]+:[0-9]+: Error: unexpected character `x' in element size at operand 3 -- `sqrdmlsh z0\.s,z0\.h,z0\.x'
@@ -3319,7 +3319,7 @@
 [^ :]+:[0-9]+: Info:    	xar z0\.s, z0\.s, z0\.s, #1
 [^ :]+:[0-9]+: Info:    	xar z0\.d, z0\.d, z0\.d, #1
 [^ :]+:[0-9]+: Error: operand 2 must be the same register as operand 1 -- `xar z0\.b,z1\.b,z0\.b,#1'
-[^ :]+:[0-9]+: Error: operand 1 must be a SIMD vector register -- `xar z32\.b,z32\.b,z0\.b,#1'
+[^ :]+:[0-9]+: Error: operand 1 must be an SVE vector register -- `xar z32\.b,z32\.b,z0\.b,#1'
 [^ :]+:[0-9]+: Error: operand 3 must be an SVE vector register -- `xar z0\.b,z0\.b,z32\.b,#1'
 [^ :]+:[0-9]+: Error: immediate value out of range 1 to 8 at operand 4 -- `xar z0\.b,z0\.b,z0\.b,#0'
 [^ :]+:[0-9]+: Error: immediate value out of range 1 to 8 at operand 4 -- `xar z0\.b,z0\.b,z0\.b,#9'

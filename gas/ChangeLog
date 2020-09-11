@@ -1,3 +1,10 @@
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* config/tc-aarch64.c (output_operand_error_report): Account
+	for CPU_VARIANT in error messages.
+	* testsuite/gas/aarch64/illegal-sve2.l: Adjust.
+	* testsuite/gas/aarch64/verbose-error.l: Adjust.
+
 2022-01-28  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
