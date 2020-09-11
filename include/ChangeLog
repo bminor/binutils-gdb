@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_opnd): Add CAPADDR_SIMPLE and
+	CAPADDR_SIMM7.
+	(aarch64_insn_class): Add br_capaddr.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/aarch64.h (aarch64_operand_class): Add FORM.
 	(aarch64_opnd): Likewise.
 	(aarch64_form): New struct.

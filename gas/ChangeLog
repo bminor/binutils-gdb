@@ -1,5 +1,16 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (aarch64_addr_reg_parse): Add capability
+	registers.
+	(parse_address_main): Support capability address operands.
+	(parse_cap_address): New function.
+	(parse_operands): Add CAPADDR_SIMPLE and CAPADDR_SIMM7.
+	* testsuite/gas/aarch64/morello_ldst-c64.d: Add tests.
+	* testsuite/gas/aarch64/morello_ldst.d: Likewise.
+	* testsuite/gas/aarch64/morello_ldst.s: Likewise.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Add FORM.
 	* testsuite/gas/aarch64/morello_insn-c64.d: Add tests.
 	* testsuite/gas/aarch64/morello_insn.d: Likewise.
