@@ -246,6 +246,8 @@ run_dump_test_lp64 "emit-relocs-morello-3"
 run_dump_test_lp64 "emit-relocs-morello-3-a64c"
 
 run_dump_test_lp64 "morello-capinit"
+run_dump_test_lp64 "morello-stubs"
+run_dump_test_lp64 "morello-stubs-static"
 
 run_dump_test "reloc-overflow-bad"
 
