@@ -1,5 +1,10 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* include/opcode/aarch64.h
+	(aarch64_sys_reg_capreg_supported_p): New function.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add A64C_ADDR_ADRDP.
 
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>

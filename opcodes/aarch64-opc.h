@@ -173,6 +173,7 @@ enum aarch64_field_kind
   FLD_altbase_sf2,
   FLD_altbase_sf3,
   FLD_a64c_immhi,
+  FLD_a64c_op0,
 };
 
 /* Field description.  */
@@ -251,6 +252,8 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 #undef F_REG_WRITE
 #define F_REG_WRITE	(1 << 4)  /* Register can only be written to but not
 				     read from.  */
+
+#define F_CAPREG	(1 << 5)  /* Needs a capability register.  */
 
 /* HINT operand flags.  */
 #define HINT_OPD_F_NOPRINT	(1 << 0)  /* Should not be printed.  */

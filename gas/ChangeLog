@@ -1,5 +1,13 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (parse_sys_reg): New opcode argument.
+	(parse_operands): Adjust callers.
+	* testsuite/gas/aarch64/morello_insn-c64.d: Add tests.
+	* testsuite/gas/aarch64/morello_insn.d: Likewise.
+	* testsuite/gas/aarch64/morello_insn.s: Likewise.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Add A64C_ADDR_ADRDP.
 	Support 20-bit offset for capability variants.
 	* testsuite/gas/aarch64/morello_insn-c64.d: Add tests.

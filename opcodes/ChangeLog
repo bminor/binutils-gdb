@@ -1,5 +1,25 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_sysreg): Adjust for morello
+	MRS/MSR.
+	* aarch64-dis.c (aarch64_ext_sysreg): Likewise.
+	* aarch64-opc.c (fields): New field a64c_op0.
+	(operand_general_constraint_met_p): Add SYSREG operand
+	validation.
+	(aarch64_print_operand): Print Morello MRS/MSR operands
+	correctly.
+	(SR_MORELLO): New macro.
+	(aarch64_sys_regs): Use it.  Add Morello system registers.
+	(aarch64_sys_reg_capreg_supported_p): New function.
+	* aarch64-opc.h (aarch64_field_kind): New field FLD_a64c_op0.
+	* aarch64-tbl.h (QL2_SRC_CA, QL2_DST_CA): New macros.
+	(aarch64_opcode_table): New instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-dis.c (aarch64_ext_regno): Reject A64 ADR when in
 	C64.
 	(aarch64_ext_imm): Select ADRDP in C64.

@@ -245,3 +245,55 @@ morello_add_scalar csp, csp, 4
 	  .endr
 	.endm
 morello_csel c13, c7, c3
+
+// System register access
+
+mrs     x22, ID_AA64PFR1_EL1
+
+	.macro morello_msx1 xt
+	  .irp sysreg, CCTLR_EL0, CCTLR_EL1, CCTLR_EL12, CCTLR_EL2, CCTLR_EL3, CHCR_EL2, CPACR_EL1, CPACR_EL12, CPTR_EL2, CPTR_EL3, CSCR_EL3,
+	    msr     \sysreg, \xt
+	    mrs     \xt, \sysreg
+	  .endr
+	.endm
+morello_msx1 x19
+
+	.macro morello_msx2 xt
+	  .irp sysreg, ESR_EL1, ESR_EL12, ESR_EL2, ESR_EL3, RSP_EL0, RTPIDR_EL0, TPIDR_EL0, TPIDR_EL1, TPIDR_EL2, TPIDR_EL3
+	    msr     \sysreg, \xt
+	    mrs     \xt, \sysreg
+	  .endr
+	.endm
+morello_msx2 x2
+
+	.macro morello_ms_tp ct
+	  .irp sysreg, RCTPIDR_EL0, CTPIDR_EL0, CTPIDR_EL1, CTPIDR_EL2, CTPIDR_EL3, CTPIDRRO_EL0
+	    msr     \sysreg, \ct
+	    mrs     \ct, \sysreg
+	  .endr
+	.endm
+morello_ms_tp c19
+
+	.macro morello_ms_ddc ct
+	  .irp sysreg, DDC, DDC_EL0, DDC_EL1, DDC_EL2, RDDC_EL0
+	    msr     \sysreg, \ct
+	    mrs     \ct, \sysreg
+	  .endr
+	.endm
+morello_ms_ddc c19
+
+	.macro morello_ms_sp ct
+	  .irp sysreg, RCSP_EL0, CSP_EL0, CSP_EL1, CSP_EL2
+	    msr     \sysreg, \ct
+	    mrs     \ct, \sysreg
+	  .endr
+	.endm
+morello_ms_sp c19
+
+	.macro morello_ms_misc ct
+	  .irp sysreg, CDBGDTR_EL0, CDLR_EL0, CELR_EL1, CELR_EL12, CELR_EL2, CELR_EL3, CID_EL0, CVBAR_EL1, CVBAR_EL12, CVBAR_EL2, CVBAR_EL3
+	    msr     \sysreg, \ct
+	    mrs     \ct, \sysreg
+	  .endr
+	.endm
+morello_ms_misc c19

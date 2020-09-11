@@ -1052,6 +1052,8 @@ extern const aarch64_sys_reg aarch64_pstatefields [];
 extern bfd_boolean aarch64_sys_reg_deprecated_p (const uint32_t);
 extern bfd_boolean aarch64_pstatefield_supported_p (const aarch64_feature_set,
 						    const aarch64_sys_reg *);
+extern bfd_boolean aarch64_sys_reg_capreg_supported_p
+  (enum aarch64_insn_class, const aarch64_sys_reg *);
 
 typedef struct
 {
