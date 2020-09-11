@@ -3384,6 +3384,57 @@ gdb_caching_proc skip_avx512bf16_tests {
     return $skip_avx512bf16_tests
 }
 
+# Run a test on the target to see if it supports avx512fp16.  Return 0 if so,
+# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+
+gdb_caching_proc skip_avx512fp16_tests {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "skip_avx512fp16_tests"
+    if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+        verbose "$me:  target does not support avx512fp16, returning 1" 2
+        return 1
+    }
+
+    # Compile a test program.
+    set src {
+        int main() {
+            asm volatile ("vcvtps2phx %xmm1, %xmm0");
+            return 0;
+        }
+    }
+    if {![gdb_simple_compile $me $src executable]} {
+        return 1
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$obj"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "$me:  avx512fp16 hardware not detected."
+            set skip_avx512fp16_tests 1
+        }
+        -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+            verbose -log "$me:  avx512fp16 hardware detected."
+            set skip_avx512fp16_tests 0
+        }
+        default {
+            warning "\n$me:  default case taken."
+            set skip_avx512fp16_tests 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $skip_avx512fp16_tests" 2
+    return $skip_avx512fp16_tests
+}
+
 # Run a test on the target to see if it supports btrace hardware.  Return 0 if so,
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 

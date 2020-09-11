@@ -3117,6 +3117,7 @@ i386_zmm_type (struct gdbarch *gdbarch)
 	int8_t v64_int8[64];
 	double v8_double[8];
 	float v16_float[16];
+	float16_t v32_half[32];
 	bfloat16_t v32_bfloat16[32];
       };
 #endif
@@ -3127,6 +3128,8 @@ i386_zmm_type (struct gdbarch *gdbarch)
 			       "__gdb_builtin_type_vec512i", TYPE_CODE_UNION);
       append_composite_type_field (t, "v32_bfloat16",
 				   init_vector_type (bt->builtin_bfloat16, 32));
+      append_composite_type_field (t, "v32_half",
+				   init_vector_type (bt->builtin_half, 32));
       append_composite_type_field (t, "v16_float",
 				   init_vector_type (bt->builtin_float, 16));
       append_composite_type_field (t, "v8_double",
@@ -3173,6 +3176,7 @@ i386_ymm_type (struct gdbarch *gdbarch)
 	int8_t v32_int8[32];
 	double v4_double[4];
 	float v8_float[8];
+	float16_t v16_half[16];
 	bfloat16_t v16_bfloat16[16];
       };
 #endif
@@ -3183,6 +3187,8 @@ i386_ymm_type (struct gdbarch *gdbarch)
 			       "__gdb_builtin_type_vec256i", TYPE_CODE_UNION);
       append_composite_type_field (t, "v16_bfloat16",
 				   init_vector_type (bt->builtin_bfloat16, 16));
+      append_composite_type_field (t, "v16_half",
+				   init_vector_type (bt->builtin_half, 16));
       append_composite_type_field (t, "v8_float",
 				   init_vector_type (bt->builtin_float, 8));
       append_composite_type_field (t, "v4_double",
