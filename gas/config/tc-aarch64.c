@@ -6882,6 +6882,9 @@ addr_uimm:
 
 	      inst.reloc.type = ldst_lo12_determine_real_reloc_type ();
 	    }
+	  else if (inst.reloc.type == BFD_RELOC_AARCH64_LD_GOT_LO12_NC
+		   && inst.base.operands[0].qualifier == AARCH64_OPND_QLF_CA)
+	    inst.reloc.flags = FIXUP_F_C64;
 
 	  /* Leave qualifier to be determined by libopcodes.  */
 	  break;
@@ -8747,9 +8750,12 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
-      fixP->fx_r_type = (ilp32_p
-			 ? BFD_RELOC_AARCH64_LD32_GOT_LO12_NC
-			 : BFD_RELOC_AARCH64_LD64_GOT_LO12_NC);
+      if (fixP->tc_fix_data.c64)
+	fixP->fx_r_type = BFD_RELOC_MORELLO_LD128_GOT_LO12_NC;
+      else if (ilp32_p)
+	fixP->fx_r_type = BFD_RELOC_AARCH64_LD32_GOT_LO12_NC;
+      else
+	fixP->fx_r_type = BFD_RELOC_AARCH64_LD64_GOT_LO12_NC;
       gas_assert (!fixP->fx_done);
       gas_assert (seg->use_rela_p);
       break;
@@ -8772,6 +8778,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST8_LO12:
+    case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
       gas_assert (!fixP->fx_done);
@@ -8926,6 +8933,7 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
     case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_LDST128_LO12:
     case BFD_RELOC_AARCH64_LDST16_LO12:
     case BFD_RELOC_AARCH64_LDST32_LO12:

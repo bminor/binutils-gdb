@@ -1,5 +1,13 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (parse_operands): Emit C64 relocations
+	for got_lo12.  Move old relocation checks from...
+	(md_apply_fix): ... here.
+	* testsuite/gas/aarch64/morello-ldst-reloc.d: Add tests.
+	* testsuite/gas/aarch64/morello-ldst-reloc.s: Likewise.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (ldst_lo12_determine_real_reloc_type):
 	Support alternate base loads and stores.
 	(parse_operands): Support relocations for alternate base

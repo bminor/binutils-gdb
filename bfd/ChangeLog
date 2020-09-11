@@ -1,4 +1,38 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* elfnn-aarch64.c (GOT_ENTRY_SIZE): Adjust for C64
+	relocations.  Adjust callers.
+	(GOT_RESERVED_HEADER_SLOTS, GOT_CAP): New macros.
+	(elfNN_aarch64_howto_table): Add R_MORELLO_LD128_GOT_LO12_NC
+	and R_MORELLO_GLOB_DAT.
+	(elf_aarch64_link_hash_table): New member c64_rel.
+	(bfd_elfNN_aarch64_set_options): Initialise it.
+	(cap_meta, c64_get_capsize): New functions.
+	(aarch64_reloc_got_type): Use GOT_CAP.
+	(elfNN_aarch64_final_link_relocate): Add
+	R_MORELLO_LD128_GOT_LO12_NC and R_MORELLO_GLOB_DAT.
+	(aarch64_elf_create_got_section): Move section initialisation
+	into a...
+	(aarch64_elf_init_got_section): ... New function.
+	(elfNN_aarch64_size_dynamic_sections): Call it.
+	(elfNN_aarch64_check_relocs): Add R_MORELLO_LD128_GOT_LO12_NC
+	and R_MORELLO_GLOB_DAT.
+	(elfNN_aarch64_finish_dynamic_symbol): Emit C64 relocations
+	when appropriate.
+	(elfNN_aarch64_got_elt_size): New function.
+	(elfNN_aarch64_got_header_size): Return GOT entry size based
+	on c64_rel.
+	(elf_backend_got_elt_size): New macro.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend,
+	_bfd_aarch64_elf_resolve_relocation): Add
+	BFD_RELOC_MORELLO_LD128_GOT_LO12_NC.
+	* libbfd.h (bfd_reloc_code_real_names): Add
+	BFD_RELOC_MORELLO_GLOB_DAT and
+	BFD_RELOC_MORELLO_LD128_GOT_LO12_NC.
+	* reloc.c: Likewise.
+	* bfd-in2.h: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 	    Tamar Christina  <tamar.christina@arm.com>
 
 	* elf-bfd.h (elf_backend_data): Make got_header_size a

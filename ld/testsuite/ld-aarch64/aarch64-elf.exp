@@ -237,6 +237,7 @@ run_dump_test_lp64 "emit-relocs-558"
 run_dump_test_lp64 "emit-relocs-558-overflow"
 run_dump_test_lp64 "emit-relocs-559"
 run_dump_test_lp64 "emit-relocs-560"
+run_dump_test_lp64 "emit-relocs-morello-1"
 
 run_dump_test_lp64 "morello-capinit"
 

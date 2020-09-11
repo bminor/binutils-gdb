@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* testsuite/ld-aarch64/emit-relocs-morello-1.d: New file.
+	* testsuite/ld-aarch64/emit-relocs-morello-1.s: New test file.
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add it to test runner.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* testsuite/ld-aarch64/aarch64-elf.exp: Add test.
 	* testsuite/ld-aarch64/morello-capinit.d: New file.
 	* testsuite/ld-aarch64/morello-capinit.ld: New file.

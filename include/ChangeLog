@@ -1,5 +1,10 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elf/aarch64.h: New relocations R_MORELLO_LD128_GOT_LO12_NC
+	and R_MORELLO_GLOB_DAT.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elf/aarch64.h (R_MORELLO_CAPINIT, R_MORELLO_RELATIVE): New
 	relocations.
 
