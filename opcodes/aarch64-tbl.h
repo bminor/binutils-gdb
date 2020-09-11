@@ -2390,6 +2390,18 @@
   QLF3(V_4S, V_8H, S_H),	\
 }
 
+/* e.g. MSR <systemreg>, <Xt|Ct>.  */
+#define QL2_SRC_CA		\
+{				\
+  QLF2(NIL,CA),			\
+}
+
+/* e.g. MRS <Xt|Ct>, <systemreg>.  */
+#define QL2_DST_CA		\
+{				\
+  QLF2(CA,NIL),			\
+}
+
 #define QL1_A64C_CA		\
 {				\
   QLF1(CA),			\
@@ -4344,6 +4356,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("seal", 0xc2c00800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can, Cam), QL3_A64C_CA_CA_CA, 0),
   A64C_INSN ("seal", 0xc2c31000, 0xffff9c00, a64c, 0, OP3 (Cad, Can, FORM), QL3_A64C_CA_CA_NIL, 0),
   A64C_INSN ("unseal", 0xc2c04800, 0xffe0fc00, a64c, 0, OP3 (Cad, Can, Cam), QL3_A64C_CA_CA_CA, 0),
+
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
@@ -4356,6 +4369,12 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   SME_INSN ("smstop",  0xd503407f, 0xfffff1ff, sme_stop,  0, OP1 (SME_SM_ZA), {}, F_SYS_WRITE, 0),
   /* System.  */
   CORE_INSN ("msr", 0xd500401f, 0xfff8f01f, ic_system, 0, OP2 (PSTATEFIELD, UIMM4), {}, F_SYS_WRITE),
+
+  /* A64C MRS/MSR.  Keep this after the PSTATEFIELD MSR so that error messages
+     remain the same.   */
+  A64C_INSN ("mrs", 0xc2900000, 0xfff00000, a64c, 0, OP2 (Cat, SYSREG), QL2_DST_CA, F_SYS_READ),
+  A64C_INSN ("msr", 0xc2800000, 0xfff00000, a64c, 0, OP2 (SYSREG, Cat), QL2_SRC_CA, F_SYS_WRITE),
+
   CORE_INSN ("hint",0xd503201f, 0xfffff01f, ic_system, 0, OP1 (UIMM7), {}, F_HAS_ALIAS),
   CORE_INSN ("nop", 0xd503201f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("csdb",0xd503229f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),

@@ -367,6 +367,7 @@ const aarch64_field fields[] =
     { 22,  1 },	/* altbase_sf2: Size bit in altbase LDUR.  */
     { 22,  2 },	/* altbase_sf3: Size bits in altbase SIMD LDUR.  */
     {  5, 18 },	/* a64c_immhi: e.g. in ADRDP.  */
+    { 19,  1 },	/* a64c_op0: in A64C system instructions.  */
 };
 
 enum aarch64_operand_class
@@ -2805,6 +2806,45 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 	      return 0;
 	    }
 	  break;
+	case AARCH64_OPND_SYSREG:
+	    {
+	      bool part_match = false, full_match = false;
+	      unsigned flags = 0;
+	      int regno_idx = idx == 0 ? 1 : 0;
+	      enum aarch64_opnd reg_type = opcode->operands[regno_idx];
+
+	      if (reg_type == AARCH64_OPND_Cat)
+		flags = F_CAPREG;
+
+	      for (i = 0; aarch64_sys_regs[i].name; ++i)
+		if (aarch64_sys_regs[i].value == opnd->sysreg.value)
+		    {
+		      part_match = true;
+		      if ((aarch64_sys_regs[i].flags & F_CAPREG) == flags)
+			{
+			  full_match = true;
+			  break;
+			}
+		    }
+
+	      /* Matching values but mismatched target register.  */
+	      if (part_match && !full_match)
+		{
+		  if (flags & F_CAPREG)
+		    {
+		      set_other_error (mismatch_detail, regno_idx,
+				       _("sysreg expects capability register"));
+		      return 0;
+		    }
+		  else
+		    {
+		      set_other_error (mismatch_detail, regno_idx,
+				       _("sysreg expects integer register"));
+		      return 0;
+		    }
+		}
+	    }
+	  break;
 	default:
 	  break;
 	}
@@ -4124,8 +4164,10 @@ do_print:
 
 	  bool exact_match
 	    = (!(sr->flags & (F_REG_READ | F_REG_WRITE))
-	    || (sr->flags & opnd->sysreg.flags) == opnd->sysreg.flags)
-	    && AARCH64_CPU_HAS_FEATURE (features, sr->features);
+	       || (sr->flags & opnd->sysreg.flags) == opnd->sysreg.flags)
+	    && AARCH64_CPU_HAS_FEATURE (features, sr->features)
+	    && ((sr->flags & F_CAPREG)
+		== (opcode->iclass == a64c ? F_CAPREG : 0));
 
 	  /* Try and find an exact match, But if that fails, return the first
 	     partial match that was found.  */
@@ -4314,6 +4356,7 @@ do_print:
 #define SR_PROFILE(n,e,f) SR_FEAT (n,e,f,PROFILE)
 #define SR_MEMTAG(n,e,f)  SR_FEAT (n,e,f,MEMTAG)
 #define SR_SCXTNUM(n,e,f) SR_FEAT (n,e,f,SCXTNUM)
+#define SR_MORELLO(n,e,f) SR_FEAT (n,e,f,A64C)
 
 #define SR_EXPAND_ELx(f,x) \
   f (x, 1),  \
@@ -5328,6 +5371,43 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_V8_8 ("allint",            CPENC (3,0,C4,C3,0),    0),
   SR_V8_8 ("icc_nmiar1_el1",    CPENC (3,0,C12,C9,5),   F_REG_READ),
 
+  /* A64C system registers.  */
+  SR_MORELLO ("cctlr_el0",	CPENC (3,3,C1,C2,2),	0),
+  SR_MORELLO ("cctlr_el1",	CPENC (3,0,C1,C2,2),	0),
+  SR_MORELLO ("cctlr_el12",	CPENC (3,5,C1,C2,2),	0),
+  SR_MORELLO ("cctlr_el2",	CPENC (3,4,C1,C2,2),	0),
+  SR_MORELLO ("cctlr_el3",	CPENC (3,6,C1,C2,2),	0),
+  SR_MORELLO ("cdbgdtr_el0",	CPENC (2,3,C0,C4,0),	F_CAPREG),
+  SR_MORELLO ("cdlr_el0",	CPENC (3,3,C4,C5,1),	F_CAPREG),
+  SR_MORELLO ("celr_el1",	CPENC (3,0,C4,C0,1),	F_CAPREG),
+  SR_MORELLO ("celr_el12",	CPENC (3,5,C4,C0,1),	F_CAPREG),
+  SR_MORELLO ("celr_el2",	CPENC (3,4,C4,C0,1),	F_CAPREG),
+  SR_MORELLO ("celr_el3",	CPENC (3,6,C4,C0,1),	F_CAPREG),
+  SR_MORELLO ("chcr_el2",	CPENC (3,4,C1,C2,3),	0),
+  SR_MORELLO ("cid_el0",	CPENC (3,3,C13,C0,7),	F_CAPREG),
+  SR_MORELLO ("cscr_el3",	CPENC (3,6,C1,C2,2),	0),
+  SR_MORELLO ("csp_el0",	CPENC (3,0,C4,C1,0),	F_CAPREG),
+  SR_MORELLO ("csp_el1",	CPENC (3,4,C4,C1,0),	F_CAPREG),
+  SR_MORELLO ("csp_el2",	CPENC (3,6,C4,C1,0),	F_CAPREG),
+  SR_MORELLO ("ctpidr_el0",	CPENC (3,3,C13,C0,2),	F_CAPREG),
+  SR_MORELLO ("ctpidr_el1",	CPENC (3,0,C13,C0,4),	F_CAPREG),
+  SR_MORELLO ("ctpidr_el2",	CPENC (3,4,C13,C0,2),	F_CAPREG),
+  SR_MORELLO ("ctpidr_el3",	CPENC (3,6,C13,C0,2),	F_CAPREG),
+  SR_MORELLO ("ctpidrro_el0",	CPENC (3,3,C13,C0,3),	F_CAPREG),
+  SR_MORELLO ("cvbar_el1",	CPENC (3,0,C12,C0,0),	F_CAPREG),
+  SR_MORELLO ("cvbar_el12",	CPENC (3,5,C12,C0,0),	F_CAPREG),
+  SR_MORELLO ("cvbar_el2",	CPENC (3,4,C12,C0,0),	F_CAPREG),
+  SR_MORELLO ("cvbar_el3",	CPENC (3,6,C12,C0,0),	F_CAPREG),
+  SR_MORELLO ("ddc",		CPENC (3,3,C4,C1,1),	F_CAPREG),
+  SR_MORELLO ("ddc_el0",	CPENC (3,0,C4,C1,1),	F_CAPREG),
+  SR_MORELLO ("ddc_el1",	CPENC (3,4,C4,C1,1),	F_CAPREG),
+  SR_MORELLO ("ddc_el2",	CPENC (3,6,C4,C1,1),	F_CAPREG),
+  SR_MORELLO ("rcsp_el0",	CPENC (3,7,C4,C1,3),	F_CAPREG),
+  SR_MORELLO ("rctpidr_el0",	CPENC (3,3,C13,C0,4),	F_CAPREG),
+  SR_MORELLO ("rddc_el0",	CPENC (3,3,C4,C3,1),	F_CAPREG),
+  SR_MORELLO ("rsp_el0",	CPENC (3,7,C4,C1,3),	0),
+  SR_MORELLO ("rtpidr_el0",	CPENC (3,3,C13,C0,4),	0),
+
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
 
@@ -5335,6 +5415,14 @@ bool
 aarch64_sys_reg_deprecated_p (const uint32_t reg_flags)
 {
   return (reg_flags & F_DEPRECATED) != 0;
+}
+
+bool
+aarch64_sys_reg_capreg_supported_p (enum aarch64_insn_class iclass,
+				    const aarch64_sys_reg *reg)
+{
+  unsigned needs_capreg = iclass == a64c ? F_CAPREG : 0;
+  return (reg->flags & F_CAPREG) == needs_capreg;
 }
 
 /* The CPENC below is fairly misleading, the fields

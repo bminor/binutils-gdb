@@ -888,7 +888,8 @@ aarch64_ins_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
 {
    /* If a system instruction check if we have any restrictions on which
       registers it can use.  */
-   if (inst->opcode->iclass == ic_system)
+   if (inst->opcode->iclass == ic_system
+       || inst->opcode->iclass == a64c)
      {
         uint64_t opcode_flags
 	  = inst->opcode->flags & (F_SYS_READ | F_SYS_WRITE);
@@ -918,7 +919,8 @@ aarch64_ins_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
      }
   /* op0:op1:CRn:CRm:op2 */
   insert_fields (code, info->sysreg.value, inst->opcode->mask, 5,
-		 FLD_op2, FLD_CRm, FLD_CRn, FLD_op1, FLD_op0);
+		 FLD_op2, FLD_CRm, FLD_CRn, FLD_op1,
+		 inst->opcode->iclass == a64c ? FLD_a64c_op0 : FLD_op0);
   return true;
 }
 

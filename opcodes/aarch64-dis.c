@@ -1377,14 +1377,34 @@ aarch64_ext_sysreg (const aarch64_operand *self ATTRIBUTE_UNUSED,
 		    const aarch64_inst *inst ATTRIBUTE_UNUSED,
 		    aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
-  /* op0:op1:CRn:CRm:op2 */
-  info->sysreg.value = extract_fields (code, 0, 5, FLD_op0, FLD_op1, FLD_CRn,
-				       FLD_CRm, FLD_op2);
+
+  /* Value is : op0:op1:CRn:CRm:op2.  In Morello we need to add the implicit
+     0x2.  XXX It should be the same for A64 too but there's some interaction
+     with sys/sysl that breaks this on A64.  This should eventually be fixed to
+     harmonize the implementations.  */
+  aarch64_insn val;
+
+  if (inst->opcode->iclass == a64c)
+    {
+      /* Leave space for the operands.  */
+      unsigned shift = 1U << (fields[FLD_a64c_op0].width
+			      + fields[FLD_op1].width + fields[FLD_CRn].width
+			      + fields[FLD_CRm].width + fields[FLD_op2].width);
+
+      val = shift | extract_fields (code, 0, 5, FLD_a64c_op0, FLD_op1, FLD_CRn,
+				    FLD_CRm, FLD_op2);
+    }
+  else
+    val = extract_fields (code, 0, 5, FLD_op0, FLD_op1, FLD_CRn, FLD_CRm, FLD_op2);
+
+  info->sysreg.value = val;
+
   info->sysreg.flags = 0;
 
   /* If a system instruction, check which restrictions should be on the register
      value during decoding, these will be enforced then.  */
-  if (inst->opcode->iclass == ic_system)
+  if (inst->opcode->iclass == ic_system
+      || inst->opcode->iclass == a64c)
     {
       /* Check to see if it's read-only, else check if it's write only.
 	 if it's both or unspecified don't care.  */
