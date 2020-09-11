@@ -1,5 +1,15 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-tbl.h (QL2_A64C_X_CA, QL2_A64C_CA_X, QL2_A64C_X_X,
+	QL3_A64C_X_CA_CA, QL3_A64C_CA_CA_ADDR, QL4_A64C_CSEL): New
+	macros.
+	(aarch64_opcode_table): New instructions.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-dis.c (aarch64_ext_a64c_immv): New function.
 	(aarch64_ext_regno): Set PRESENT flag for A64 RET.
 	* aarch64-dis.h (aarch64_ext_a64c_immv): New function.
