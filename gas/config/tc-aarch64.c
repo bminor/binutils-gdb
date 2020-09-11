@@ -6685,6 +6685,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  info->imm.value = val;
 	  break;
 
+	case AARCH64_OPND_A64C_IMM8:
 	case AARCH64_OPND_CCMP_IMM:
 	case AARCH64_OPND_SIMM5:
 	case AARCH64_OPND_FBITS:

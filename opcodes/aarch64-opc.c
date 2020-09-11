@@ -353,6 +353,7 @@ const aarch64_field fields[] =
     { 10,  5 },  /* Cat2, Capability register in destination for load store pair
 		   type instructions.  */
     { 22,  1 },	/* a64c_shift_ai: Shift bit in immediate ADD/SUB.  */
+    { 13,  8 },	/* a64c_imm8: BICFLGS imm8.  */
 };
 
 enum aarch64_operand_class
@@ -3513,6 +3514,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       snprintf (buf, size, "C%" PRIi64, opnd->imm.value);
       break;
 
+    case AARCH64_OPND_A64C_IMM8:
     case AARCH64_OPND_IDX:
     case AARCH64_OPND_MASK:
     case AARCH64_OPND_IMM:

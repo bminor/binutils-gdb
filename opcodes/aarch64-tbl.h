@@ -2402,6 +2402,12 @@
   QLF3(CA, CA, W),		\
 }
 
+/* e.g. BICFLGS <Cd|CSP>, <Cn|CSP>, <Xm>.  */
+#define QL3_A64C_CA_CA_X	\
+{				\
+  QLF3(CA, CA, X),		\
+}
+
 
 /* Opcode table.  */
 
@@ -4035,6 +4041,8 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("add", 0x02000000, 0xff800000, a64c, OP_A64C_ADD, OP3 (Cad_SP, Can_SP, AIMM), QL3_A64C_CA_CA_NIL, 0),
   A64C_INSN ("add", 0xc2a00000, 0xffe00000, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_Rm_EXT), QL3_A64C_CA_CA_R, 0),
   A64C_INSN ("sub", 0x02800000, 0xff800000, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_AIMM), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("bicflgs", 0xc2e00000, 0xffe01c00, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_IMM8), QL3_A64C_CA_CA_NIL, 0),
+  A64C_INSN ("bicflgs", 0xc2c02800, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
@@ -5965,4 +5973,6 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "an integer register with extension")				\
     X(IMMEDIATE, ins_aimm, ext_a64c_aimm, "A64C_AIMM", 0,		\
       F(FLD_a64c_shift_ai,FLD_imm12),					\
-      "a 12-bit unsigned immediate with optional left shift of 12 bits")
+      "a 12-bit unsigned immediate with optional left shift of 12 bits")\
+    Y(IMMEDIATE, imm, "A64C_IMM8", 0, F(FLD_a64c_imm8),			\
+      "8-bit unsigned immediate")

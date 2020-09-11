@@ -1,5 +1,17 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-opc.c (fields): Add a64c_imm8.
+	(aarch64_print_operand): Add A64C_IMM8.
+	* aarch64-opc.h (aarch64_field_kind): Add a64c_imm8.
+	* aarch64-tbl.h (QL3_A64C_CA_CA_X): New macro.
+	(aarch64_opcode_table): New instructions.
+	(AARCH64_OPERANDS): Add A64C_IMM8.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-dis.c (aarch64_ext_regno, aarch64_ext_reg_extended):
 	Identify capability register class.
 	(do_ext_aimm): New function.
