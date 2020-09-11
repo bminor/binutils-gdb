@@ -342,6 +342,16 @@ const aarch64_field fields[] =
     { 12,  2 }, /* SM3: Indexed element SM3 2 bits index immediate.  */
     { 22,  1 }, /* sz: 1-bit element size select.  */
     { 10,  2 }, /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
+    {  0,  5 }, /* Cad: Capability Destination register.  */
+    {  5,  5 }, /* Can, Capability source register.  */
+    { 16,  5 }, /* Cam, Capability register in load / store and other cap
+		   instructions. */
+    { 16,  5 }, /* Cas, Capability register in some memory / load store
+		   instructions.  */
+    {  0,  5 }, /* Cat, Capability register in load store pair type
+		   instructions.  */
+    { 10,  5 },  /* Cat2, Capability register in destination for load store pair
+		   type instructions.  */
 };
 
 enum aarch64_operand_class
@@ -752,6 +762,7 @@ struct operand_qualifier_data aarch64_opnd_qualifiers[] =
 
   /* Qualifier for scaled immediate for Tag granule (stg,st2g,etc).  */
   {16, 0, 0, "tag", OQK_OPD_VARIANT},
+  {16, 1, 0, "c", OQK_OPD_VARIANT},
 
   /* Qualifiers constraining the value range.
      First 3 fields:
@@ -2899,13 +2910,17 @@ aarch64_operand_index (const enum aarch64_opnd *operands, enum aarch64_opnd oper
     R (24), R (25), R (26), R (27), R (28), R (29), R (30),  FOR31 }
 /* [0][0]  32-bit integer regs with sp   Wn
    [0][1]  64-bit integer regs with sp   Xn  sf=1
+   [0][2]  129-bit cap regs with sp      Cn
    [1][0]  32-bit integer regs with #0   Wn
-   [1][1]  64-bit integer regs with #0   Xn  sf=1 */
-static const char *int_reg[2][2][32] = {
+   [1][1]  64-bit integer regs with #0   Xn  sf=1
+   [1][2]  129-bit cap regs with #0      Cn  */
+static const char *int_reg[2][3][32] = {
 #define R32(X) "w" #X
 #define R64(X) "x" #X
-  { BANK (R32, "wsp"), BANK (R64, "sp") },
-  { BANK (R32, "wzr"), BANK (R64, "xzr") }
+#define CAP(X) "c" #X
+  { BANK (R32, "wsp"), BANK (R64, "sp"), BANK (CAP, "csp") },
+  { BANK (R32, "wzr"), BANK (R64, "xzr"), BANK (CAP, "czr") }
+#undef CAP
 #undef R64
 #undef R32
 };
@@ -2929,17 +2944,25 @@ static inline const char *
 get_int_reg_name (int regno, aarch64_opnd_qualifier_t qualifier, int sp_reg_p)
 {
   const int has_zr = sp_reg_p ? 0 : 1;
-  const int is_64 = aarch64_get_qualifier_esize (qualifier) == 4 ? 0 : 1;
-  return int_reg[has_zr][is_64][regno];
+  const int bank = aarch64_get_qualifier_esize (qualifier) == 4 ? 0 : 1;
+  return int_reg[has_zr][bank][regno];
 }
 
-/* Like get_int_reg_name, but IS_64 is always 1.  */
+/* Like get_int_reg_name, but BANK is always 1.  */
 
 static inline const char *
 get_64bit_int_reg_name (int regno, int sp_reg_p)
 {
   const int has_zr = sp_reg_p ? 0 : 1;
   return int_reg[has_zr][1][regno];
+}
+
+/* Like get_int_reg_name, but BANK is always 2.  */
+static inline const char *
+get_cap_reg_name (int regno, int sp_reg_p)
+{
+  const int has_zr = sp_reg_p ? 0 : 1;
+  return int_reg[has_zr][2][regno];
 }
 
 /* Get the name of the integer offset register in OPND, using the shift type
@@ -3930,6 +3953,20 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_MOPS_WB_Rn:
       snprintf (buf, size, "%s!",
 		get_int_reg_name (opnd->reg.regno, AARCH64_OPND_QLF_X, 0));
+      break;
+
+    case AARCH64_OPND_Cad_SP:
+    case AARCH64_OPND_Can_SP:
+      snprintf (buf, size, "%s", get_cap_reg_name (opnd->reg.regno, 1));
+      break;
+
+    case AARCH64_OPND_Cat:
+    case AARCH64_OPND_Cat2:
+    case AARCH64_OPND_Can:
+    case AARCH64_OPND_Cam:
+    case AARCH64_OPND_Cad:
+    case AARCH64_OPND_Cas:
+      snprintf (buf, size, "%s", get_cap_reg_name (opnd->reg.regno, 0));
       break;
 
     default:

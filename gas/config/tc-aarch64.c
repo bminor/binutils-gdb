@@ -279,6 +279,10 @@ struct reloc_entry
   BASIC_REG_TYPE(FP_S)	/* s[0-31] */	\
   BASIC_REG_TYPE(FP_D)	/* d[0-31] */	\
   BASIC_REG_TYPE(FP_Q)	/* q[0-31] */	\
+  BASIC_REG_TYPE(CA_N)	/* c[0-30] */	\
+  BASIC_REG_TYPE(CA_SP)	/* csp     */ 	\
+  BASIC_REG_TYPE(CA_Z)	/* czr     */ 	\
+  BASIC_REG_TYPE(CA_D)	/* ddc     */ 	\
   BASIC_REG_TYPE(VN)	/* v[0-31] */	\
   BASIC_REG_TYPE(ZN)	/* z[0-31] */	\
   BASIC_REG_TYPE(PN)	/* p[0-15] */	\
@@ -325,6 +329,9 @@ struct reloc_entry
   MULTI_REG_TYPE(R_N, REG_TYPE(R_32) | REG_TYPE(R_64)			\
 		 | REG_TYPE(SP_32) | REG_TYPE(SP_64)			\
 		 | REG_TYPE(Z_32) | REG_TYPE(Z_64))			\
+  /* Typecheck: any capability register (inc CSP) */			\
+  MULTI_REG_TYPE(CA_N_SP, REG_TYPE(CA_N) | REG_TYPE(CA_SP))		\
+  MULTI_REG_TYPE(CA_N_Z, REG_TYPE(CA_N) | REG_TYPE(CA_Z))		\
   /* Pseudo type to mark the end of the enumerator sequence.  */	\
   BASIC_REG_TYPE(MAX)
 
@@ -438,6 +445,18 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
       break;
     case REG_TYPE_PN:
       msg = N_("SVE predicate register expected");
+      break;
+    case REG_TYPE_CA_N:
+      msg = N_("Capability register C0 - C30 expected");
+      break;
+    case REG_TYPE_CA_SP:
+      msg = N_("Capability register CSP expected");
+      break;
+    case REG_TYPE_CA_N_SP:
+      msg = N_("Capability register C0 - C30 or CSP expected");
+      break;
+    case REG_TYPE_CA_Z:
+      msg = N_("Capability register CZR expected");
       break;
     default:
       as_fatal (_("invalid register type %d"), reg_type);
@@ -795,6 +814,11 @@ aarch64_addr_reg_parse (char **ccp, aarch64_reg_type reg_type,
 	  return NULL;
 	}
       str += 2;
+      break;
+
+    case REG_TYPE_CA_N:
+    case REG_TYPE_CA_SP:
+      *qualifier = AARCH64_OPND_QLF_CA;
       break;
 
     default:
@@ -3901,8 +3925,16 @@ static bool
 parse_address (char **str, aarch64_opnd_info *operand)
 {
   aarch64_opnd_qualifier_t base_qualifier, offset_qualifier;
+
+  aarch64_reg_type base;
+
+  if (AARCH64_CPU_HAS_FEATURE (cpu_variant, AARCH64_FEATURE_C64))
+    base = REG_TYPE_CA_N_SP;
+  else
+    base = REG_TYPE_R64_SP;
+
   return parse_address_main (str, operand, &base_qualifier, &offset_qualifier,
-			     REG_TYPE_R64_SP, REG_TYPE_R_Z, SHIFTED_NONE);
+			     base, REG_TYPE_R_Z, SHIFTED_NONE);
 }
 
 /* Parse an address in which SVE vector registers and MUL VL are allowed.
@@ -7005,7 +7037,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    /* Then retry, matching the specific syntax of these addresses.  */
 	    str = start;
 	    po_char_or_fail ('[');
-	    po_reg_or_fail (REG_TYPE_R64_SP);
+	    po_reg_or_fail (AARCH64_CPU_HAS_FEATURE (cpu_variant,
+						     AARCH64_FEATURE_C64)
+			    ? REG_TYPE_CA_N_SP : REG_TYPE_R64_SP);
+
 	    /* Accept optional ", #0".  */
 	    if (operands[i] == AARCH64_OPND_ADDR_SIMPLE
 		&& skip_past_char (&str, ','))
@@ -8163,6 +8198,13 @@ static const reg_entry reg_names[] = {
 
   REGDEF (wzr, 31, Z_32), REGDEF (WZR, 31, Z_32),
   REGDEF (xzr, 31, Z_64), REGDEF (XZR, 31, Z_64),
+
+  /* Capability Registers.  */
+  REGSET31 (c, CA_N), REGSET31 (C, CA_N),
+  REGDEF (csp, 31, CA_SP), REGDEF (CSP, 31, CA_SP),
+  REGDEF (czr, 31, CA_Z), REGDEF (CZR, 31, CA_Z),
+  REGDEF (ddc, 33, CA_D), REGDEF (DDC, 33, CA_D),
+  REGDEF_ALIAS (clr, 30, CA_N), REGDEF_ALIAS (CLR, 30, CA_N),
 
   /* Floating-point single precision registers.  */
   REGSET (s, FP_S), REGSET (S, FP_S),
@@ -9899,6 +9941,7 @@ static const struct aarch64_arch_option_table aarch64_archs[] = {
   {"armv9.1-a",	AARCH64_ARCH_V9_1},
   {"armv9.2-a",	AARCH64_ARCH_V9_2},
   {"armv9.3-a",	AARCH64_ARCH_V9_3},
+  {"morello", AARCH64_ARCH_MORELLO},
   {NULL, AARCH64_ARCH_NONE}
 };
 
@@ -10009,6 +10052,10 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_ARCH_NONE},
   {"hbc",		AARCH64_FEATURE (AARCH64_FEATURE_HBC, 0),
 			AARCH64_ARCH_NONE},
+  {"a64c",		AARCH64_FEATURE (AARCH64_FEATURE_A64C, 0),
+			AARCH64_ARCH_NONE},
+  {"c64",		AARCH64_FEATURE (AARCH64_FEATURE_C64, 0),
+			AARCH64_FEATURE (AARCH64_FEATURE_A64C, 0)},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 

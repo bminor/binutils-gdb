@@ -1,3 +1,18 @@
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* aarch64-opc.c (fields): New capability register fields.
+	(aarch64_opnd_qualifiers): Capability operand qualifiers.
+	(int_reg): Add capability register bank.
+	(get_int_reg_name): Adjust for capability registers.
+	(get_cap_reg_name): New function.
+	(aarch64_print_operand): Support printing capability operands.
+	* aarch64-opc.h (aarch64_field_kind): Add capability operand
+	fields.
+	(OPD_F_MAYBE_CSP): New macro.
+	(operand_maybe_cap_stack_pointer): New function.
+	* aarch64-tbl.h (QL2_A64C_CA_CA, A64C, A64C_INSN): New macros.
+	(aarch64_feature_a64c): New feature set.
+
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure.ac: Handle bfd_amdgcn_arch.

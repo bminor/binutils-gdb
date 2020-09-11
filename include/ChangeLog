@@ -1,3 +1,13 @@
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_A64C,
+	AARCH64_FEATURE_C64): New feature macros.
+	(AARCH64_ARCH_MORELLO): New architecture macro.
+	(aarch64_operand_class): Add AARCH64_OPND_CLASS_CAP_REG.
+	(aarch64_opnd): New capability operands.
+	(aarch64_opnd_qualifier): New capability qualifier.
+	(aarch64_insn_class): Add a64c instruction class.
+
 2022-04-01  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (NT_FREEBSD_X86_SEGBASES): Define.

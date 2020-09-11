@@ -98,6 +98,10 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SME_I64	     (1ULL << 58) /* SME I64.  */
 #define AARCH64_FEATURE_V8_8	     (1ULL << 59) /* Armv8.8 processors.  */
 
+/* Capability extensions.  */
+#define AARCH64_FEATURE_A64C         (1ULL << 60)
+#define AARCH64_FEATURE_C64          (1ULL << 61)
+
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
 
@@ -178,6 +182,13 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_ARCH_V9_3	AARCH64_FEATURE (AARCH64_ARCH_V9_2,	\
 						 AARCH64_ARCH_V9_3_FEATURES)
 
+#define AARCH64_ARCH_MORELLO	AARCH64_FEATURE (AARCH64_ARCH_V8_2,	\
+						 AARCH64_FEATURE_A64C	\
+						 | AARCH64_FEATURE_F16_FML \
+						 | AARCH64_FEATURE_DOTPROD \
+						 | AARCH64_FEATURE_RCPC	\
+						 | AARCH64_FEATURE_SSBS)
+
 #define AARCH64_ARCH_NONE	AARCH64_FEATURE (0, 0)
 #define AARCH64_ANY		AARCH64_FEATURE (-1, 0)	/* Any basic core.  */
 
@@ -225,6 +236,7 @@ enum aarch64_operand_class
   AARCH64_OPND_CLASS_IMMEDIATE,
   AARCH64_OPND_CLASS_SYSTEM,
   AARCH64_OPND_CLASS_COND,
+  AARCH64_OPND_CLASS_CAP_REG,
 };
 
 /* Operand code that helps both parsing and coding.
@@ -489,7 +501,19 @@ enum aarch64_opnd
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
   AARCH64_OPND_MOPS_ADDR_Rd,	/* [Rd]!, in bits [0, 4].  */
   AARCH64_OPND_MOPS_ADDR_Rs,	/* [Rs]!, in bits [16, 20].  */
-  AARCH64_OPND_MOPS_WB_Rn	/* Rn!, in bits [5, 9].  */
+  AARCH64_OPND_MOPS_WB_Rn,	/* Rn!, in bits [5, 9].  */
+
+  AARCH64_OPND_Cad,             /* A capability register as destination.  */
+  AARCH64_OPND_Cam,             /* Capability register as source.  */
+  AARCH64_OPND_Can,             /* Capability register as source.  */
+  AARCH64_OPND_Cas,             /* A capability register.  */
+  AARCH64_OPND_Cat,             /* Capability register destination in load
+				   store instructions.  */
+  AARCH64_OPND_Cat2,            /* Capability register destination 2 in load
+				   store instructions.  */
+  AARCH64_OPND_Cad_SP,          /* Capability register or Cap SP as
+				   destination.  */
+  AARCH64_OPND_Can_SP,		/* Capability register or Cap SP as source. */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -557,6 +581,9 @@ enum aarch64_opnd_qualifier
   /* Used in scaled signed immediate that are scaled by a Tag granule
      like in stg, st2g, etc.   */
   AARCH64_OPND_QLF_imm_tag,
+
+  /* Capability Registers.  */
+  AARCH64_OPND_QLF_CA,
 
   /* Constraint on value.  */
   AARCH64_OPND_QLF_CR,		/* CRn, CRm. */
@@ -681,6 +708,7 @@ enum aarch64_insn_class
   cryptosm4,
   dotproduct,
   bfloat16,
+  a64c,
 };
 
 /* Opcode enumerators.  */
