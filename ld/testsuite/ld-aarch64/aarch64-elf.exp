@@ -382,6 +382,13 @@ run_dump_test_lp64 "ifunc-20"
 run_dump_test_lp64 "ifunc-21"
 run_dump_test_lp64 "ifunc-22"
 
+run_dump_test_lp64 "c64-ifunc-2"
+run_dump_test_lp64 "c64-ifunc-2-local"
+run_dump_test_lp64 "c64-ifunc-3a"
+run_dump_test_lp64 "c64-ifunc-3b"
+run_dump_test_lp64 "c64-ifunc-4"
+run_dump_test_lp64 "c64-ifunc-4a"
+
 run_dump_test "relasz"
 run_dump_test_lp64 "relocs-1027-symbolic-func"
 

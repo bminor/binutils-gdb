@@ -230,16 +230,20 @@ _bfd_aarch64_elf_put_addend (bfd *abfd,
 
   switch (r_type)
     {
+    case BFD_RELOC_MORELLO_CALL26:
+    case BFD_RELOC_MORELLO_JUMP26:
     case BFD_RELOC_AARCH64_CALL26:
     case BFD_RELOC_AARCH64_JUMP26:
       contents = reencode_branch_ofs_26 (contents, addend);
       break;
 
     case BFD_RELOC_AARCH64_BRANCH19:
+    case BFD_RELOC_MORELLO_BRANCH19:
       contents = reencode_cond_branch_ofs_19 (contents, addend);
       break;
 
     case BFD_RELOC_AARCH64_TSTBR14:
+    case BFD_RELOC_MORELLO_TSTBR14:
       contents = reencode_tst_branch_ofs_14 (contents, addend);
       break;
 
@@ -451,6 +455,7 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
     case BFD_RELOC_AARCH64_64_PCREL:
     case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
     case BFD_RELOC_AARCH64_BRANCH19:
+    case BFD_RELOC_MORELLO_BRANCH19:
     case BFD_RELOC_AARCH64_LD_LO19_PCREL:
     case BFD_RELOC_AARCH64_MOVW_PREL_G0:
     case BFD_RELOC_AARCH64_MOVW_PREL_G0_NC:
@@ -465,11 +470,14 @@ _bfd_aarch64_elf_resolve_relocation (bfd *input_bfd,
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
     case BFD_RELOC_AARCH64_TSTBR14:
+    case BFD_RELOC_MORELLO_TSTBR14:
       if (weak_undef_p)
 	value = place;
       value = value + addend - place;
       break;
 
+    case BFD_RELOC_MORELLO_CALL26:
+    case BFD_RELOC_MORELLO_JUMP26:
     case BFD_RELOC_AARCH64_CALL26:
     case BFD_RELOC_AARCH64_JUMP26:
       value = value + addend - place;

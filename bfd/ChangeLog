@@ -1,5 +1,34 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (elfNN_c64_small_plt0_entry,
+	elfNN_c64_small_plt_entry): New variables.
+	(elfNN_aarch64_howto_table): Add relocations.
+	(setup_plt_values): Choose C64 PLT when appropriate.
+	(bfd_elfNN_aarch64_set_options): Defer setup_plt_values
+	call...
+	(elfNN_aarch64_link_setup_gnu_properties) ... from here as
+	well...
+	(elfNN_aarch64_size_dynamic_sections): ... to here.
+	(elfNN_aarch64_final_link_relocate,
+	elfNN_aarch64_check_relocs, elfNN_aarch64_reloc_type_class):
+	Support new relocations.
+	(map_symbol_type): New member AARCH64_MAP_C64.
+	(elfNN_aarch64_output_arch_local_syms): Use it.
+	(aarch64_update_c64_plt_entry): New function.
+	(elfNN_aarch64_create_small_pltn_entry): Use it.
+	(elfNN_aarch64_init_small_plt0_entry): Emit C64 PLT when
+	appropriate.
+	* elfxx-aarch64.c (_bfd_aarch64_elf_put_addend,
+	_bfd_aarch64_elf_resolve_relocation): Add new relocations.
+	* libbfd.h (bfd_reloc_code_real_names): Likewise.
+	* reloc.c: New relocations BFD_RELOC_MORELLO_TSTBR14,
+	BFD_RELOC_MORELLO_BRANCH19, BFD_RELOC_MORELLO_JUMP26,
+	BFD_RELOC_MORELLO_CALL26, BFD_RELOC_MORELLO_JUMP_SLOT and
+	BFD_RELOC_MORELLO_IRELATIVE.
+	* bfd-in2.h: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Emit
 	relative C64 relocations for static binaries early.
 	(aarch64_elf_init_got_section): Add capability relocations to
