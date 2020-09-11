@@ -1,5 +1,14 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (ldst_lo12_determine_real_reloc_type):
+	Support alternate base loads and stores.
+	(parse_operands): Support relocations for alternate base
+	address operands.
+	* testsuite/gas/aarch64/morello-ldst-reloc.d: New file.
+	* testsuite/gas/aarch64/morello-ldst-reloc.s: New file.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (s_aarch64_capinit): New function.
 	(md_pseudo_table): Use it.
 	(md_apply_fix): Add BFD_RELOC_MORELLO_CAPINIT.

@@ -67,7 +67,21 @@ _bfd_aarch64_reencode_adr_imm (uint32_t insn, uint32_t imm, uint32_t c64)
 static inline uint32_t
 reencode_ldst_pos_imm (uint32_t insn, uint32_t imm)
 {
-  return (insn & ~(MASK (12) << 10)) | ((imm & MASK (12)) << 10);
+  uint32_t mask, pos;
+
+  /* Alternate base load/store instructions have a 9-bit offset starting from
+     bit 12.  */
+  if ((insn & 0xf0000000) == 0x80000000)
+    {
+      mask = MASK (9);
+      pos = 12;
+    }
+  else
+    {
+      mask = MASK (12);
+      pos = 10;
+    }
+  return (insn & ~(mask << pos)) | ((imm & mask) << pos);
 }
 
 /* Encode the 26-bit offset of unconditional branch.  */

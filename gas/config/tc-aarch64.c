@@ -6379,7 +6379,8 @@ ldst_lo12_determine_real_reloc_type (void)
 		  == BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12)
 	      || (inst.reloc.type
 		  == BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC));
-  gas_assert (inst.base.opcode->operands[1] == AARCH64_OPND_ADDR_UIMM12);
+  gas_assert (inst.base.opcode->operands[1] == AARCH64_OPND_ADDR_UIMM12
+	      || inst.base.opcode->operands[1] == AARCH64_OPND_CAPADDR_UIMM9);
 
   if (opd1_qlf == AARCH64_OPND_QLF_NIL)
     opd1_qlf =
@@ -7552,11 +7553,6 @@ addr_simm:
 
 	case AARCH64_OPND_CAPADDR_UIMM9:
 	  po_misc_or_fail (parse_cap_address (&str, info, opcode->iclass));
-	  if (inst.reloc.type != BFD_RELOC_UNUSED)
-	    {
-	      set_syntax_error (_("relocation not allowed"));
-	      goto failure;
-	    }
 	  goto addr_uimm;
 
 	case AARCH64_OPND_ADDR_UIMM12:
@@ -7579,7 +7575,18 @@ addr_uimm:
 		       == BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12)
 		   || (inst.reloc.type
 		       == BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC))
-	    inst.reloc.type = ldst_lo12_determine_real_reloc_type ();
+	    {
+	      /* The altbase ldrb instruction does not have enough range to
+		 accommodate a LO12 relocation.  */
+	      if (opcode->flags & F_NOSHIFT && opcode->iclass == ldst_altbase)
+		{
+		  set_syntax_error (_("relocation not allowed"));
+		  goto failure;
+		}
+
+	      inst.reloc.type = ldst_lo12_determine_real_reloc_type ();
+	    }
+
 	  /* Leave qualifier to be determined by libopcodes.  */
 	  break;
 
