@@ -1,5 +1,16 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* elfnn-aarch64.c (section_list,
+	sections_with_aarch64_elf_section_data,
+	record_section_with_aarch64_elf_section_data,
+	find_aarch64_elf_section_entry,
+	unrecord_section_with_aarch64_elf_section_data,
+	unrecord_section_via_map_over_sections,
+	bfd_elfNN_close_and_cleanup, bfd_elfNN_bfd_free_cached_info):
+	Remove.  Adjust all users.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Set LSB for C64 symbols.
 	(elfNN_aarch64_output_map_sym, elfNN_aarch64_output_stub_sym):
 	Initialise st_target_internal.
