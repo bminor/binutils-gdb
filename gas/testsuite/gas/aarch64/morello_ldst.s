@@ -163,3 +163,21 @@ morello_branch_load c2
 	.endm
 morello_branch_load2 csp
 morello_branch_load2 c2
+
+// Alternate base loads and stores.
+
+	.macro morello_ldst_alt_base ct, cnsp
+	  .irp op,ldar, stlr
+	    \op    \ct, [\cnsp]
+	  .endr
+	.endm
+morello_ldst_alt_base c2, ALTVAREG
+morello_ldst_alt_base c2, ALTSP
+
+	.macro morello_ldst_alt_basew wt, cnsp
+	  .irp op, ldarb, ldar, stlrb, stlr
+	    \op    \wt, [\cnsp]
+	  .endr
+	.endm
+morello_ldst_alt_basew w2, ALTVAREG
+morello_ldst_alt_basew w2, ALTSP

@@ -1,5 +1,16 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* aarch64-opc.c (get_altbase_reg_name): New function.
+	(aarch64_print_operand): Use it.  Add Wt.
+	* aarch64-tbl.h (QL2_A64C_W_CAPADDR): New macro.
+	(aarch64_opcode_table): Add instructions.
+	(AARCH64_OPERANDS): New operand.
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Regenerate.
+	* aarch64-opc-2.c: Regenerate.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* aarch64-asm.c (aarch64_ins_addr_simm): Support scaling.
 	* aarch64-dis.c (aarch64_ext_addr_simm): Likewise.
 	* aarch64-opc.c (operand_general_constraint_met_p,

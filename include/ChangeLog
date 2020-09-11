@@ -1,5 +1,9 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_opnd): Add Wt.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add A64C_ADDR_SIMM9.
 	(aarch64_op): Add OP_STR_POS_2, OP_LDR_POS_2, OP_LDUR_2,
 	OP_STUR_2.
