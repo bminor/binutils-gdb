@@ -1,5 +1,31 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* config/tc-aarch64.c (REG_DW_CSP, REG_DW_CLR): New macros.
+	(s_aarch64_cfi_b_key_frame): Adjust for new entry_extras
+	struct.
+	(tc_aarch64_frame_initial_instructions): Adjust for C64.
+	(tc_aarch64_fde_entry_init_extra,
+	tc_aarch64_cfi_startproc_exp): New functions.
+	(tc_aarch64_regname_to_dw2regnum): Support capability
+	registers.
+	* config/tc-aarch64.h (fde_entry): Forward declaration.
+	(eh_entry_extras): New struct.
+	(tc_fde_entry_extras, tc_cie_entry_extras): Use it.
+	(tc_fde_entry_init_extra): Set to
+	tc_aarch64_fde_entry_init_extra.
+	(tc_output_cie_extra): Emit 'C' for C64.
+	(tc_cie_fde_equivalent_extra): Adjust for C64.
+	(tc_cie_entry_init_extra): Likewise.
+	(tc_cfi_startproc_exp): New macro.
+	(tc_aarch64_cfi_startproc_exp,
+	tc_aarch64_fde_entry_init_extra): New function declarations.
+	* dw2gencfi.c (tc_cfi_startproc_exp): New macro.
+	(dot_cfi_startproc): Use it.
+	* testsuite/gas/aarch64/morello-eh.d: New test.
+	* testsuite/gas/aarch64/morello-eh.s: New test.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* config/tc-aarch64.c (parse_operands): Choose C64 branch
 	relocations when appropriate.
 	(md_apply_fix, aarch64_force_relocation,

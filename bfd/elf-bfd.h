@@ -1431,6 +1431,8 @@ struct elf_backend_data
      (bfd *, struct bfd_link_info *, asection *);
   bool (*elf_backend_can_make_lsda_relative_eh_frame)
      (bfd *, struct bfd_link_info *, asection *);
+  bool (*elf_backend_eh_frame_augmentation_char)
+    (char);
 
   /* This function returns an encoding after computing the encoded
      value (and storing it in ENCODED) for the given OFFSET into OSEC,

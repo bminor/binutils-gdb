@@ -11030,6 +11030,14 @@ elfNN_aarch64_got_header_size (struct bfd_link_info *info)
   return GOT_ENTRY_SIZE (htab) * GOT_RESERVED_HEADER_SLOTS;
 }
 
+/* Identify the 'C' in the CIE augmentation string.  */
+
+static bool
+elf64_aarch64_eh_frame_augmentation_char (const char aug)
+{
+  return aug == 'C';
+}
+
 /* We use this so we can override certain functions
    (though currently we don't).  */
 
@@ -11184,6 +11192,9 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_got_elt_size		\
   elfNN_aarch64_got_elt_size
+
+#define elf_backend_eh_frame_augmentation_char	\
+  elf64_aarch64_eh_frame_augmentation_char
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1

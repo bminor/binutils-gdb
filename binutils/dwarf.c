@@ -8112,6 +8112,19 @@ static const char *const dwarf_regnames_aarch64[] =
    "z8",  "z9", "z10", "z11", "z12", "z13", "z14", "z15",
   "z16", "z17", "z18", "z19", "z20", "z21", "z22", "z23",
   "z24", "z25", "z26", "z27", "z28", "z29", "z30", "z31",
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,
+   NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  "c0",  "c1",
+   "c2",  "c3",  "c4",  "c5",  "c6",  "c7",  "c8",  "c9",
+  "c10", "c11", "c12", "c13", "c14", "c15", "c16", "c17",
+  "c18", "c19", "c20", "c21", "c22", "c23", "c24", "c25",
+  "c26", "c27", "c28", "c29", "c30", "csp",  NULL, "ddc",
 };
 
 static void

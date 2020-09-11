@@ -597,6 +597,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
   unsigned int num_cies;
   unsigned int num_entries;
   elf_gc_mark_hook_fn gc_mark_hook;
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   htab = elf_hash_table (info);
   hdr_info = &htab->eh_info;
@@ -623,8 +624,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
      it (it would need to use 64-bit .eh_frame format anyway).  */
   REQUIRE (sec->size == (unsigned int) sec->size);
 
-  ptr_size = (get_elf_backend_data (abfd)
-	      ->elf_backend_eh_frame_address_size (abfd, sec));
+  ptr_size = bed->elf_backend_eh_frame_address_size (abfd, sec);
   REQUIRE (ptr_size != 0);
 
   /* Go through the section contents and work out how many FDEs and
@@ -692,7 +692,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
   buf = ehbuf;
   cie_count = 0;
-  gc_mark_hook = get_elf_backend_data (abfd)->gc_mark_hook;
+  gc_mark_hook = bed->gc_mark_hook;
   while ((bfd_size_type) (buf - ehbuf) != sec->size)
     {
       char *aug;
@@ -840,8 +840,12 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 		    }
 		    break;
 		  default:
-		    /* Unrecognized augmentation. Better bail out.  */
-		    goto free_no_table;
+		    /* Unrecognized augmentation. Better bail out if the target
+		       cannot recognised it.  */
+		    if (bed->elf_backend_eh_frame_augmentation_char == NULL
+			|| (!bed->elf_backend_eh_frame_augmentation_char
+			    (*(aug - 1))))
+		      goto free_no_table;
 		  }
 	    }
 	  this_inf->u.cie.aug_data_len
@@ -850,8 +854,7 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  /* For shared libraries, try to get rid of as many RELATIVE relocs
 	     as possible.  */
 	  if (bfd_link_pic (info)
-	      && (get_elf_backend_data (abfd)
-		  ->elf_backend_can_make_relative_eh_frame
+	      && (bed->elf_backend_can_make_relative_eh_frame
 		  (abfd, info, sec)))
 	    {
 	      if ((cie->fde_encoding & 0x70) == DW_EH_PE_absptr)

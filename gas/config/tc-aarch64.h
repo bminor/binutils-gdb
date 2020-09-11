@@ -52,6 +52,7 @@
    | (((n) >> 24) & 0xff))
 
 struct fix;
+struct fde_entry;
 
 struct aarch64_fix
 {
@@ -87,15 +88,17 @@ enum pointer_auth_key {
   AARCH64_PAUTH_KEY_B
 };
 
+struct eh_entry_extras
+{
+  bool c64;
+  enum pointer_auth_key pauth_key;
+};
+
 /* The extra fields required by AArch64 in fde_entry and cie_entry.  Currently
    only used to store the key used to sign the frame's return address.  */
-#define tc_fde_entry_extras enum pointer_auth_key pauth_key;
-#define tc_cie_entry_extras enum pointer_auth_key pauth_key;
-
-/* The extra initialisation steps needed by AArch64 in alloc_fde_entry.
-   Currently only used to initialise the key used to sign the return
-   address.  */
-#define tc_fde_entry_init_extra(fde) fde->pauth_key = AARCH64_PAUTH_KEY_A;
+#define tc_fde_entry_extras struct eh_entry_extras entry_extras;
+#define tc_cie_entry_extras struct eh_entry_extras entry_extras;
+#define tc_fde_entry_init_extra(fde) tc_aarch64_fde_entry_init_extra(fde);
 
 /* Extra checks required by AArch64 when outputting the current cie_entry.
    Currently only used to output a 'B' if the return address is signed with the
@@ -103,20 +106,31 @@ enum pointer_auth_key {
 #define tc_output_cie_extra(cie) \
     do \
       { \
-	if (cie->pauth_key == AARCH64_PAUTH_KEY_B) \
+	if (cie->entry_extras.pauth_key == AARCH64_PAUTH_KEY_B) \
 	  out_one ('B'); \
+	if (cie->entry_extras.c64) \
+	  out_one ('C'); \
       } \
     while (0)
 
 /* Extra equivalence checks required by AArch64 when selecting the correct cie
    for some fde.  Currently only used to check for quivalence between keys used
-   to sign ther return address.  */
-#define tc_cie_fde_equivalent_extra(cie, fde) (cie->pauth_key == fde->pauth_key)
+   to sign ther return address and whether they are either both A64 or both
+   C64.  */
+#define tc_cie_fde_equivalent_extra(cie, fde) \
+  (cie->entry_extras.pauth_key == fde->entry_extras.pauth_key \
+   && cie->entry_extras.c64 == fde->entry_extras.c64)
 
 /* The extra initialisation steps needed by AArch64 in select_cie_for_fde.
    Currently only used to initialise the key used to sign the return
    address.  */
-#define tc_cie_entry_init_extra(cie, fde) cie->pauth_key = fde->pauth_key;
+#define tc_cie_entry_init_extra(cie, fde) \
+    do \
+      { \
+	cie->entry_extras.pauth_key = fde->entry_extras.pauth_key; \
+	cie->entry_extras.c64 = fde->entry_extras.c64; \
+      } \
+    while (0);
 
 #define TC_FIX_TYPE struct aarch64_fix
 #define TC_INIT_FIX_DATA(FIX) { (FIX)->tc_fix_data.inst = NULL;	\
@@ -248,6 +262,7 @@ struct aarch64_segment_info_type
 /* CFI hooks.  */
 #define tc_regname_to_dw2regnum            tc_aarch64_regname_to_dw2regnum
 #define tc_cfi_frame_initial_instructions  tc_aarch64_frame_initial_instructions
+#define tc_cfi_startproc_exp               tc_aarch64_cfi_startproc_exp
 
 extern void aarch64_after_parse_args (void);
 #define md_after_parse_args() aarch64_after_parse_args ()
@@ -284,6 +299,8 @@ extern void aarch64_init_frag (struct frag *, int);
 extern void aarch64_handle_align (struct frag *);
 extern int tc_aarch64_regname_to_dw2regnum (char *regname);
 extern void tc_aarch64_frame_initial_instructions (void);
+extern bool tc_aarch64_cfi_startproc_exp (const char *);
+void tc_aarch64_fde_entry_init_extra(struct fde_entry *);
 
 #ifdef TE_PE
 
