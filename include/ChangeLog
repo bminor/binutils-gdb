@@ -1,3 +1,39 @@
+2020-09-12 Cooper Qu <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKYV1_ISA_E1): Convert to bfd_uint64_t type.
+	(CSKYV2_ISA_E1): Likewise.
+	(CSKYV2_ISA_1E2>): Likewise.
+	(CSKYV2_ISA_2E3>): Likewise.
+	(CSKYV2_ISA_3E7>): Likewise.
+	(CSKYV2_ISA_7E10): Likewise.
+	(CSKYV2_ISA_3E3R1): Likewise.
+	(CSKYV2_ISA_3E3R2): Likewise.
+	(CSKYV2_ISA_10E60): Likewise.
+	(CSKYV2_ISA_3E3R3): Likewise.
+	(CSKY_ISA_TRUST): Likewise.
+	(CSKY_ISA_CACHE): Likewise.
+	(CSKY_ISA_NVIC): Likewise.
+	(CSKY_ISA_CP): Likewise.
+	(CSKY_ISA_MP): Likewise.
+	(CSKY_ISA_MP_1E2): Likewise.
+	(CSKY_ISA_JAVA): Likewise.
+	(CSKY_ISA_MAC): Likewise.
+	(CSKY_ISA_MAC_DSP): Likewise.
+	(CSKY_ISA_DSP): Likewise.
+	(CSKY_ISA_DSP_1E2): Likewise.
+	(CSKY_ISA_DSP_ENHANCE): Likewise.
+	(CSKY_ISA_DSPE60): Likewise.
+	(CSKY_ISA_FLOAT_E1): Likewise.
+	(CSKY_ISA_FLOAT_1E2): Likewise.
+	(CSKY_ISA_FLOAT_1E3): Likewise.
+	(CSKY_ISA_FLOAT_3E4): Likewise.
+	(CSKY_ISA_FLOAT_7E60): Likewise.
+	(CSKY_ISA_VDSP): Likewise.
+	(CSKY_ISA_VDSP_2): Likewise.
+	(CSKY_ARCH_804): Define.
+	(CSKY_ARCH_805): Define.
+	(CSKY_ARCH_800): Define.
+
 2020-09-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf/common.h (NT_X86_CET): New.

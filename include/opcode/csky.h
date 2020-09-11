@@ -22,46 +22,46 @@
 #include "dis-asm.h"
 
 /* The following bitmasks control instruction set architecture.  */
-#define CSKYV1_ISA_E1       (1L << 0)
-#define CSKYV2_ISA_E1       (1L << 1)
-#define CSKYV2_ISA_1E2      (1L << 2)
-#define CSKYV2_ISA_2E3      (1L << 3)
-#define CSKYV2_ISA_3E7      (1L << 4)
-#define CSKYV2_ISA_7E10     (1L << 5)
-#define CSKYV2_ISA_3E3R1    (1L << 6)
-#define CSKYV2_ISA_3E3R2    (1L << 7)
-#define CSKYV2_ISA_10E60    (1L << 8)
-#define CSKYV2_ISA_3E3R3    (1L << 9)
+#define CSKYV1_ISA_E1       ((bfd_uint64_t)1 << 0)
+#define CSKYV2_ISA_E1       ((bfd_uint64_t)1 << 1)
+#define CSKYV2_ISA_1E2      ((bfd_uint64_t)1 << 2)
+#define CSKYV2_ISA_2E3      ((bfd_uint64_t)1 << 3)
+#define CSKYV2_ISA_3E7      ((bfd_uint64_t)1 << 4)
+#define CSKYV2_ISA_7E10     ((bfd_uint64_t)1 << 5)
+#define CSKYV2_ISA_3E3R1    ((bfd_uint64_t)1 << 6)
+#define CSKYV2_ISA_3E3R2    ((bfd_uint64_t)1 << 7)
+#define CSKYV2_ISA_10E60    ((bfd_uint64_t)1 << 8)
+#define CSKYV2_ISA_3E3R3    ((bfd_uint64_t)1 << 9)
 
-#define CSKY_ISA_TRUST      (1L << 11)
-#define CSKY_ISA_CACHE      (1L << 12)
-#define CSKY_ISA_NVIC       (1L << 13)
-#define CSKY_ISA_CP         (1L << 14)
-#define CSKY_ISA_MP         (1L << 15)
-#define CSKY_ISA_MP_1E2     (1L << 16)
-#define CSKY_ISA_JAVA       (1L << 17)
-#define CSKY_ISA_MAC        (1L << 18)
-#define CSKY_ISA_MAC_DSP    (1L << 19)
+#define CSKY_ISA_TRUST      ((bfd_uint64_t)1 << 11)
+#define CSKY_ISA_CACHE      ((bfd_uint64_t)1 << 12)
+#define CSKY_ISA_NVIC       ((bfd_uint64_t)1 << 13)
+#define CSKY_ISA_CP         ((bfd_uint64_t)1 << 14)
+#define CSKY_ISA_MP         ((bfd_uint64_t)1 << 15)
+#define CSKY_ISA_MP_1E2     ((bfd_uint64_t)1 << 16)
+#define CSKY_ISA_JAVA       ((bfd_uint64_t)1 << 17)
+#define CSKY_ISA_MAC        ((bfd_uint64_t)1 << 18)
+#define CSKY_ISA_MAC_DSP    ((bfd_uint64_t)1 << 19)
 
 /* Base ISA for csky v1 and v2.  */
-#define CSKY_ISA_DSP        (1L << 20)
-#define CSKY_ISA_DSP_1E2    (1L << 21)
-#define CSKY_ISA_DSP_ENHANCE (1L << 22)
-#define CSKY_ISA_DSPE60     (1L << 23)
+#define CSKY_ISA_DSP        ((bfd_uint64_t)1 << 20)
+#define CSKY_ISA_DSP_1E2    ((bfd_uint64_t)1 << 21)
+#define CSKY_ISA_DSP_ENHANCE ((bfd_uint64_t)1 << 22)
+#define CSKY_ISA_DSPE60     ((bfd_uint64_t)1 << 23)
 
 /* Base float instruction (803f & 810f).  */
-#define CSKY_ISA_FLOAT_E1   (1L << 25)
+#define CSKY_ISA_FLOAT_E1   ((bfd_uint64_t)1 << 25)
 /* M_FLOAT support (810f).  */
-#define CSKY_ISA_FLOAT_1E2  (1L << 26)
+#define CSKY_ISA_FLOAT_1E2  ((bfd_uint64_t)1 << 26)
 /* 803 support (803f).  */
-#define CSKY_ISA_FLOAT_1E3  (1L << 27)
+#define CSKY_ISA_FLOAT_1E3  ((bfd_uint64_t)1 << 27)
 /* 807 support (803f & 807f).  */
-#define CSKY_ISA_FLOAT_3E4  (1L << 28)
+#define CSKY_ISA_FLOAT_3E4  ((bfd_uint64_t)1 << 28)
 /* 860 support.  */
-#define CSKY_ISA_FLOAT_7E60 (1LL << 36)
+#define CSKY_ISA_FLOAT_7E60 ((bfd_uint64_t)1 << 36)
 /* Vector DSP support.  */
-#define CSKY_ISA_VDSP       (1L << 29)
-#define CSKY_ISA_VDSP_2     (1L << 30)
+#define CSKY_ISA_VDSP       ((bfd_uint64_t)1 << 29)
+#define CSKY_ISA_VDSP_2     ((bfd_uint64_t)1 << 30)
 
 /* The following bitmasks control cpu architecture for CSKY.  */
 #define CSKY_ABI_V1         (1 << 28)
@@ -74,9 +74,14 @@
 #define CSKY_ARCH_801       0xa
 #define CSKY_ARCH_802       0x10
 #define CSKY_ARCH_803       0x9
+/* 804  use the same arch flag as 803 yet.  */
+#define CSKY_ARCH_804       0x9
+#define CSKY_ARCH_805       0x11
 #define CSKY_ARCH_807       0x6
 #define CSKY_ARCH_810       0x8
 #define CSKY_ARCH_860       0xb
+/* 800 is a special arch supporting all instructions for ABIV2.  */
+#define CSKY_ARCH_800       0x1f
 
 #define CSKY_ARCH_MAC       (1 << 15)
 #define CSKY_ARCH_DSP       (1 << 14)
