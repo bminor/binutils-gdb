@@ -278,6 +278,10 @@ aarch64_ext_regno (const aarch64_operand *self, aarch64_opnd_info *info,
   if (aarch64_get_operand_class (info->type) == AARCH64_OPND_CLASS_CAP_REG)
     info->qualifier = AARCH64_OPND_QLF_CA;
 
+  /* Allow disassembly of A64 RET when encountered in C64 code.  */
+  if (inst->opcode->iclass == branch_reg)
+    info->present = 1;
+
   return true;
 }
 
@@ -696,6 +700,29 @@ aarch64_ext_imm (const aarch64_operand *self, aarch64_opnd_info *info,
 
   info->imm.value = imm;
   return true;
+}
+
+/* Set immediate value #4 when decoding for e.g. BX.  */
+bool
+aarch64_ext_a64c_immv (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		      aarch64_opnd_info *info,
+		      const aarch64_insn code ATTRIBUTE_UNUSED,
+		      const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		      aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  if (info->type == AARCH64_OPND_A64C_IMMV4)
+    {
+      info->imm.value = 4;
+      return true;
+    }
+  if (info->type == AARCH64_OPND_A64C_CST_REG
+      && (inst->opcode->iclass == br_sealed))
+    {
+      info->reg.regno = 29;
+      return true;
+    }
+
+  return false;
 }
 
 /* Decode imm and its shifter for e.g. MOVZ <Wd>, #<imm16>{, LSL #<shift>}.  */

@@ -2385,6 +2385,11 @@
   QLF3(V_4S, V_8H, S_H),	\
 }
 
+#define QL1_A64C_CA		\
+{				\
+  QLF1(CA),			\
+}
+
 #define QL2_A64C_CA_CA		\
 {				\
   QLF2(CA, CA),			\
@@ -2408,6 +2413,10 @@
   QLF3(CA, CA, X),		\
 }
 
+#define QL3_A64C_CA_CA_CA	\
+{				\
+  QLF3(CA, CA, CA),		\
+}
 
 /* Opcode table.  */
 
@@ -4043,6 +4052,19 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("sub", 0x02800000, 0xff800000, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_AIMM), QL3_A64C_CA_CA_NIL, 0),
   A64C_INSN ("bicflgs", 0xc2e00000, 0xffe01c00, a64c, 0, OP3 (Cad_SP, Can_SP, A64C_IMM8), QL3_A64C_CA_CA_NIL, 0),
   A64C_INSN ("bicflgs", 0xc2c02800, 0xffe0fc00, a64c, 0, OP3 (Cad_SP, Can_SP, Rm), QL3_A64C_CA_CA_X, 0),
+  A64C_INSN ("blr", 0xc2c23000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("blrr", 0xc2c23003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("blrs", 0xc2c23002, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("blrs", 0xc2c0a400, 0xffe0fc1f, br_sealed, 0, OP3 (A64C_CST_REG, Can, Cam), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("br", 0xc2c21000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("brr", 0xc2c21003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("brs", 0xc2c21002, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("brs", 0xc2c08400, 0xffe0fc1f, br_sealed, 0, OP3 (A64C_CST_REG, Can, Cam), QL3_A64C_CA_CA_CA, 0),
+  A64C_INSN ("bx", 0xc2c273e0, 0xffffffff, a64c, 0, OP1 (A64C_IMMV4), {}, 0),
+  A64C_INSN ("ret", 0xc2c25000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, F_OPD0_OPT | F_DEFAULT (30)),
+  A64C_INSN ("retr", 0xc2c25003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("rets", 0xc2c25002, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
+  A64C_INSN ("rets", 0xc2c0c400, 0xffe0fc1f, br_sealed, 0, OP3 (A64C_CST_REG, Can, Cam), QL3_A64C_CA_CA_CA, 0),
   /* TME Instructions.  */
   _TME_INSN ("tstart", 0xd5233060, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
@@ -5969,8 +5991,13 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "a Capability register or a capability stack pointer register")	\
     Y(CAP_REG, regno, "Can_SP", OPD_F_MAYBE_CSP, F(FLD_Can),		\
       "a Capability register or a capability stack pointer register")	\
+    Y(CAP_REG, regno, "Cam_SP", OPD_F_MAYBE_CSP, F(FLD_Cam),		\
+      "a Capability register or a capability stack pointer register")	\
     Y(MODIFIED_REG, reg_extended, "A64C_Rm_EXT", 0, F(),		\
       "an integer register with extension")				\
+    X(IMMEDIATE, 0, ext_a64c_immv, "A64C_IMMV4", 0, F(), "4")		\
+    X(CAP_REG, 0, ext_a64c_immv, "A64C_CST_REG", 0, F(),		\
+      "capability register c29")					\
     X(IMMEDIATE, ins_aimm, ext_a64c_aimm, "A64C_AIMM", 0,		\
       F(FLD_a64c_shift_ai,FLD_imm12),					\
       "a 12-bit unsigned immediate with optional left shift of 12 bits")\

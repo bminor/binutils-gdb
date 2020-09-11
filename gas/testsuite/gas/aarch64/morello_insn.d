@@ -7,6 +7,17 @@
 Disassembly of section \.text:
 
 .* <.text>:
+.*:	c2c273e0 	bx	#4
+.*:	d65f03c0 	ret
+.*:	c2c23280 	blr	c20
+.*:	c2c23283 	blrr	c20
+.*:	c2c23282 	blrs	c20
+.*:	c2c21280 	br	c20
+.*:	c2c21283 	brr	c20
+.*:	c2c21282 	brs	c20
+.*:	c2c25280 	ret	c20
+.*:	c2c25283 	retr	c20
+.*:	c2c25282 	rets	c20
 .*:	c2c1d26b 	mov	c11, c19
 .*:	c2c1d26b 	mov	c11, c19
 .*:	c2c1d3eb 	mov	c11, csp
@@ -76,6 +87,9 @@ Disassembly of section \.text:
 .*:	c2d92be7 	bicflgs	c7, csp, x25
 .*:	c2d928df 	bicflgs	csp, c6, x25
 .*:	c2d92bff 	bicflgs	csp, csp, x25
+.*:	c2c4a440 	blrs	c29, c2, c4
+.*:	c2c48440 	brs	c29, c2, c4
+.*:	c2c4c440 	rets	c29, c2, c4
 .*:	c2a4e131 	add	c17, c9, x4, sxtx
 .*:	c2a4f131 	add	c17, c9, x4, sxtx #4
 .*:	c2a4d131 	add	c17, c9, w4, sxtw #4

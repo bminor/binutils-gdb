@@ -514,7 +514,11 @@ enum aarch64_opnd
   AARCH64_OPND_Cad_SP,          /* Capability register or Cap SP as
 				   destination.  */
   AARCH64_OPND_Can_SP,		/* Capability register or Cap SP as source. */
+  AARCH64_OPND_Cam_SP,		/* Capability register or Cap SP as source. */
   AARCH64_OPND_A64C_Rm_EXT,	/* Integer Xm extended.  */
+  AARCH64_OPND_A64C_IMMV4,	/* Immediate value #4 for BX.  */
+  AARCH64_OPND_A64C_CST_REG,	/* Constant capability register c29 for
+				   BRS/BLRS.  */
   AARCH64_OPND_A64C_AIMM,	/* Add immediate for A64C ADD/SUB.  */
   AARCH64_OPND_A64C_IMM8,	/* IMM8 for BICFLGS.  */
 };
@@ -712,6 +716,7 @@ enum aarch64_insn_class
   dotproduct,
   bfloat16,
   a64c,
+  br_sealed,
 };
 
 /* Opcode enumerators.  */

@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_opnd): Add CST_REG, Cam_SP
+	and A64C_IMMV4.
+	(aarch64_insn_class): Add br_sealed.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add A64C_IMM8.
 
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>

@@ -1,3 +1,17 @@
+// Zero/one operands
+
+bx #4
+ret
+
+// Single operand (n)
+
+	.macro morello_jump cn
+	  .irp op, blr, blrr, blrs, br, brr, brs, ret, retr, rets
+	    \op    \cn
+	  .endr
+	.endm
+morello_jump c20
+
 // Two operands (dn).
 
 	.macro morello_cspcsp cdsp, cnsp
@@ -52,6 +66,13 @@ morello_cspcspx c7, c6, x25
 morello_cspcspx c7, csp, x25
 morello_cspcspx csp, c6, x25
 morello_cspcspx csp, csp, x25
+
+	.macro morello_jump_sealed cn, cm
+	  .irp op, blrs, brs, rets
+	    \op   c29, \cn, \cm
+	  .endr
+	.endm
+morello_jump_sealed c2, c4
 
 // Four operands (dnmi)
 
