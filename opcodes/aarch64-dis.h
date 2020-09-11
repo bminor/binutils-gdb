@@ -64,6 +64,7 @@ aarch64_extract_operand (const aarch64_operand *, aarch64_opnd_info *,
 
 AARCH64_DECL_OPD_EXTRACTOR (ext_none);
 AARCH64_DECL_OPD_EXTRACTOR (ext_regno);
+AARCH64_DECL_OPD_EXTRACTOR (ext_regsz);
 AARCH64_DECL_OPD_EXTRACTOR (ext_regno_pair);
 AARCH64_DECL_OPD_EXTRACTOR (ext_regrt_sysins);
 AARCH64_DECL_OPD_EXTRACTOR (ext_reglane);
@@ -87,7 +88,7 @@ AARCH64_DECL_OPD_EXTRACTOR (ext_addr_offset);
 AARCH64_DECL_OPD_EXTRACTOR (ext_addr_regoff);
 AARCH64_DECL_OPD_EXTRACTOR (ext_addr_simm);
 AARCH64_DECL_OPD_EXTRACTOR (ext_addr_simm10);
-AARCH64_DECL_OPD_EXTRACTOR (ext_addr_uimm12);
+AARCH64_DECL_OPD_EXTRACTOR (ext_addr_uimm);
 AARCH64_DECL_OPD_EXTRACTOR (ext_simd_addr_post);
 AARCH64_DECL_OPD_EXTRACTOR (ext_cond);
 AARCH64_DECL_OPD_EXTRACTOR (ext_perm);

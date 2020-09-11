@@ -1,5 +1,11 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.c (aarch64.opnd): add Rsz, CAPADDR_REGOFF,
+	CAPADDR_UIMM9.
+	(aarch64_insn_class): Add ldst_altbase.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.h (aarch64_opnd): Add Wt.
 
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
