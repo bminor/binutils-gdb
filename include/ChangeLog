@@ -1,5 +1,10 @@
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
+	* opcode/aarch64.h (aarch64_op): Add members for altbase LDUR
+	and STUR.  Rename existing LDUR ops.
+
+2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
 	* opcode/aarch64.c (F_NOSHIFT): New flag.
 
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>

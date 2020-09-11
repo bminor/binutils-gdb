@@ -217,3 +217,34 @@ morello_alt_imm ALTSP
 	.endm
 morello_alt_uimmw w4, ALTVAREG
 morello_alt_uimmw w4, ALTSP
+
+// Substitute LDR/STR with negative immediate with LDUR/STUR.
+	.macro morello_uimm_sub xnsp
+	  .irp op, ldr, str
+	    \op    c4, [\xnsp, #-16]
+	    \op    c4, [\xnsp, #-256]
+	  .endr
+	.endm
+morello_uimm_sub VAREG
+morello_uimm_sub SP_
+
+	.macro morello_alt_uimm_sub xnsp
+	  .irp op, ldr, str
+	    .irp reg, c4, x4, w4
+	      \op    \reg, [\xnsp, #-16]
+	      \op    \reg, [\xnsp, #-256]
+	    .endr
+	  .endr
+	.endm
+morello_alt_uimm_sub ALTVAREG
+morello_alt_uimm_sub ALTSP
+
+	.macro morello_alt_uimmb_sub wt, xnsp
+	  .irp op, ldrb, strb
+	    \op    \wt, [\xnsp, #-1]
+	    \op    \wt, [\xnsp, #-16]
+	    \op    \wt, [\xnsp, #-256]
+	  .endr
+	.endm
+morello_alt_uimmb_sub w4, ALTVAREG
+morello_alt_uimmb_sub w4, ALTSP
