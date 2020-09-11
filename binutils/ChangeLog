@@ -1,3 +1,7 @@
+2020-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_note_type): Support NT_X86_CET.
+
 2020-09-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 26595

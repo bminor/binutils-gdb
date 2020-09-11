@@ -1,3 +1,7 @@
+2020-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (NT_X86_CET): New.
+
 2020-09-10  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* opcode/csky.h (CSKY_ARCH_804): Define.
