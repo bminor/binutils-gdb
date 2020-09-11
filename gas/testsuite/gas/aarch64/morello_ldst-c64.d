@@ -50,6 +50,50 @@ Disassembly of section \.text:
 .*:	22221704 	stxp	w2, c4, c5, \[c24\]
 .*:	2222f7e4 	stlxp	w2, c4, c29, \[csp\]
 .*:	222277e4 	stxp	w2, c4, c29, \[csp\]
+.*:	c27fff04 	ldr	c4, \[c24, #65520\]
+.*:	c2400b04 	ldr	c4, \[c24, #32\]
+.*:	c2400304 	ldr	c4, \[c24\]
+.*:	c23fff04 	str	c4, \[c24, #65520\]
+.*:	c2000b04 	str	c4, \[c24, #32\]
+.*:	c2000304 	str	c4, \[c24\]
+.*:	c27fffe4 	ldr	c4, \[csp, #65520\]
+.*:	c2400be4 	ldr	c4, \[csp, #32\]
+.*:	c24003e4 	ldr	c4, \[csp\]
+.*:	c23fffe4 	str	c4, \[csp, #65520\]
+.*:	c2000be4 	str	c4, \[csp, #32\]
+.*:	c20003e4 	str	c4, \[csp\]
+.*:	a24ff304 	ldur	c4, \[c24, #255\]
+.*:	a2501304 	ldur	c4, \[c24, #-255\]
+.*:	a2400304 	ldur	c4, \[c24\]
+.*:	a2410304 	ldur	c4, \[c24, #16\]
+.*:	a24ffb04 	ldtr	c4, \[c24, #255\]
+.*:	a2501b04 	ldtr	c4, \[c24, #-255\]
+.*:	a2400b04 	ldtr	c4, \[c24\]
+.*:	a2410b04 	ldtr	c4, \[c24, #16\]
+.*:	a20ff304 	stur	c4, \[c24, #255\]
+.*:	a2101304 	stur	c4, \[c24, #-255\]
+.*:	a2000304 	stur	c4, \[c24\]
+.*:	a2010304 	stur	c4, \[c24, #16\]
+.*:	a20ffb04 	sttr	c4, \[c24, #255\]
+.*:	a2101b04 	sttr	c4, \[c24, #-255\]
+.*:	a2000b04 	sttr	c4, \[c24\]
+.*:	a2010b04 	sttr	c4, \[c24, #16\]
+.*:	a24ff3e4 	ldur	c4, \[csp, #255\]
+.*:	a25013e4 	ldur	c4, \[csp, #-255\]
+.*:	a24003e4 	ldur	c4, \[csp\]
+.*:	a24103e4 	ldur	c4, \[csp, #16\]
+.*:	a24ffbe4 	ldtr	c4, \[csp, #255\]
+.*:	a2501be4 	ldtr	c4, \[csp, #-255\]
+.*:	a2400be4 	ldtr	c4, \[csp\]
+.*:	a2410be4 	ldtr	c4, \[csp, #16\]
+.*:	a20ff3e4 	stur	c4, \[csp, #255\]
+.*:	a21013e4 	stur	c4, \[csp, #-255\]
+.*:	a20003e4 	stur	c4, \[csp\]
+.*:	a20103e4 	stur	c4, \[csp, #16\]
+.*:	a20ffbe4 	sttr	c4, \[csp, #255\]
+.*:	a2101be4 	sttr	c4, \[csp, #-255\]
+.*:	a2000be4 	sttr	c4, \[csp\]
+.*:	a2010be4 	sttr	c4, \[csp, #16\]
 .*:	42df9704 	ldp	c4, c5, \[c24, #1008\]
 .*:	42e01704 	ldp	c4, c5, \[c24, #-1024\]
 .*:	42c09704 	ldp	c4, c5, \[c24, #16\]
@@ -82,6 +126,30 @@ Disassembly of section \.text:
 .*:	62201be4 	stnp	c4, c6, \[csp, #-1024\]
 .*:	62009be4 	stnp	c4, c6, \[csp, #16\]
 .*:	623f1be4 	stnp	c4, c6, \[csp, #-32\]
+.*:	a2402f04 	ldr	c4, \[c24, #32\]!
+.*:	a2402704 	ldr	c4, \[c24\], #32
+.*:	a2500f04 	ldr	c4, \[c24, #-4096\]!
+.*:	a2500704 	ldr	c4, \[c24\], #-4096
+.*:	a24fff04 	ldr	c4, \[c24, #4080\]!
+.*:	a24ff704 	ldr	c4, \[c24\], #4080
+.*:	a2002f04 	str	c4, \[c24, #32\]!
+.*:	a2002704 	str	c4, \[c24\], #32
+.*:	a2100f04 	str	c4, \[c24, #-4096\]!
+.*:	a2100704 	str	c4, \[c24\], #-4096
+.*:	a20fff04 	str	c4, \[c24, #4080\]!
+.*:	a20ff704 	str	c4, \[c24\], #4080
+.*:	a2402fe4 	ldr	c4, \[csp, #32\]!
+.*:	a24027e4 	ldr	c4, \[csp\], #32
+.*:	a2500fe4 	ldr	c4, \[csp, #-4096\]!
+.*:	a25007e4 	ldr	c4, \[csp\], #-4096
+.*:	a24fffe4 	ldr	c4, \[csp, #4080\]!
+.*:	a24ff7e4 	ldr	c4, \[csp\], #4080
+.*:	a2002fe4 	str	c4, \[csp, #32\]!
+.*:	a20027e4 	str	c4, \[csp\], #32
+.*:	a2100fe4 	str	c4, \[csp, #-4096\]!
+.*:	a21007e4 	str	c4, \[csp\], #-4096
+.*:	a20fffe4 	str	c4, \[csp, #4080\]!
+.*:	a20ff7e4 	str	c4, \[csp\], #4080
 .*:	62c11303 	ldp	c3, c4, \[c24, #32\]!
 .*:	22c11303 	ldp	c3, c4, \[c24\], #32
 .*:	62e01303 	ldp	c3, c4, \[c24, #-1024\]!
@@ -106,6 +174,26 @@ Disassembly of section \.text:
 .*:	22a017e4 	stp	c4, c5, \[csp\], #-1024
 .*:	629f97e4 	stp	c4, c5, \[csp, #1008\]!
 .*:	229f97e4 	stp	c4, c5, \[csp\], #1008
+.*:	a2636b04 	ldr	c4, \[c24, x3\]
+.*:	a2636b04 	ldr	c4, \[c24, x3\]
+.*:	a2635b04 	ldr	c4, \[c24, w3, uxtw #4\]
+.*:	a263db04 	ldr	c4, \[c24, w3, sxtw #4\]
+.*:	a263cb04 	ldr	c4, \[c24, w3, sxtw\]
+.*:	a2236b04 	str	c4, \[c24, x3\]
+.*:	a2236b04 	str	c4, \[c24, x3\]
+.*:	a2235b04 	str	c4, \[c24, w3, uxtw #4\]
+.*:	a223db04 	str	c4, \[c24, w3, sxtw #4\]
+.*:	a223cb04 	str	c4, \[c24, w3, sxtw\]
+.*:	a2636be4 	ldr	c4, \[csp, x3\]
+.*:	a2636be4 	ldr	c4, \[csp, x3\]
+.*:	a2635be4 	ldr	c4, \[csp, w3, uxtw #4\]
+.*:	a263dbe4 	ldr	c4, \[csp, w3, sxtw #4\]
+.*:	a263cbe4 	ldr	c4, \[csp, w3, sxtw\]
+.*:	a2236be4 	str	c4, \[csp, x3\]
+.*:	a2236be4 	str	c4, \[csp, x3\]
+.*:	a2235be4 	str	c4, \[csp, w3, uxtw #4\]
+.*:	a223dbe4 	str	c4, \[csp, w3, sxtw #4\]
+.*:	a223cbe4 	str	c4, \[csp, w3, sxtw\]
 .*:	c2d813e1 	blr	\[csp, #-1024\]
 .*:	c2d7f3e1 	blr	\[csp, #1008\]
 .*:	c2d033e1 	blr	\[csp, #16\]

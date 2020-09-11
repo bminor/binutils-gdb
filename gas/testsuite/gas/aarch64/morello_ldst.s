@@ -69,6 +69,27 @@ morello_stp_base c4, c29, SP_
 
 // Base + immediate offset
 
+	.macro morello_uimm ct, xnsp
+	  .irp op, ldr, str
+	    \op    \ct, [\xnsp, #65520]
+	    \op    \ct, [\xnsp, #32]
+	    \op    \ct, [\xnsp, #0]
+	  .endr
+	.endm
+morello_uimm c4, VAREG
+morello_uimm c4, SP_
+
+	.macro morello_simm ct, xnsp
+	  .irp op, ldur, ldtr, stur, sttr
+	    \op    \ct, [\xnsp, #255]
+	    \op    \ct, [\xnsp, #-255]
+	    \op    \ct, [\xnsp, #0]
+	    \op    \ct, [\xnsp, #16]
+	  .endr
+	.endm
+morello_simm c4, VAREG
+morello_simm c4, SP_
+
 	.macro morello_simm_pair ct, ct2, xnsp
 	  .irp op, ldp, stp, ldnp, stnp
 	    \op    \ct, \ct2, [\xnsp, #1008]
@@ -82,6 +103,19 @@ morello_simm_pair c4, c6, SP_
 
 // Indexed
 
+	.macro morello_index ct, xnsp
+	  .irp op, ldr, str
+	    \op    \ct, [\xnsp, #32]!
+	    \op    \ct, [\xnsp], #32
+	    \op    \ct, [\xnsp, #-4096]!
+	    \op    \ct, [\xnsp], #-4096
+	    \op    \ct, [\xnsp, #4080]!
+	    \op    \ct, [\xnsp], #4080
+	  .endr
+	.endm
+morello_index c4, VAREG
+morello_index c4, SP_
+
 	.macro morello_index_pair ct, ct2, xnsp
 	  .irp op, ldp, stp
 	    \op    \ct, \ct2, [\xnsp, #32]!
@@ -94,6 +128,20 @@ morello_simm_pair c4, c6, SP_
 	.endm
 morello_index_pair c3, c4, VAREG
 morello_index_pair c4, c5, SP_
+
+// Register offset.
+
+	.macro morello_regoff ct, xnsp, off
+	  .irp op, ldr, str
+	    \op    \ct, [\xnsp, x\off]
+	    \op    \ct, [\xnsp, x\off, lsl #0]
+	    \op    \ct, [\xnsp, w\off, uxtw #4]
+	    \op    \ct, [\xnsp, w\off, sxtw #4]
+	    \op    \ct, [\xnsp, w\off, sxtw]
+	  .endr
+	.endm
+morello_regoff c4, VAREG, 3
+morello_regoff c4, SP_, 3
 
 // Branch and Load, Prefetch, etc.
 

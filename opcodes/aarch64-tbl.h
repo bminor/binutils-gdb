@@ -4212,6 +4212,16 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("stp", 0x22800000, 0xbfc00000, ldstpair_indexed, 0, OP3 (Cat, Cat2, A64C_ADDR_SIMM7), QL3_A64C_CA_CA_ADDR, 0),
 
   A64C_INSN ("ldr", 0x82000000, 0xffc00000, loadlit, OP_LDR_LIT_2, OP2 (Cat, ADDR_PCREL17), QL2_A64C_CA_PCREL, 0),
+  A64C_INSN ("ldr", 0xc2400000, 0xffc00000, ldst_pos, OP_LDR_POS_2, OP2 (Cat, ADDR_UIMM12), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("str", 0xc2000000, 0xffc00000, ldst_pos, OP_STR_POS_2, OP2 (Cat, ADDR_UIMM12), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldr", 0xa2400400, 0xffe00400, ldst_imm9, 0, OP2 (Cat, A64C_ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("str", 0xa2000400, 0xffe00400, ldst_imm9, 0, OP2 (Cat, A64C_ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldr", 0xa2600800, 0xffe00c00, ldst_regoff, 0, OP2 (Cat, ADDR_REGOFF), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("str", 0xa2200800, 0xffe00c00, ldst_regoff, 0, OP2 (Cat, ADDR_REGOFF), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldtr", 0xa2400800, 0xffe00c00, ldst_unpriv, 0, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("sttr", 0xa2000800, 0xffe00c00, ldst_unpriv, 0, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("ldur", 0xa2400000, 0xffe00c00, ldst_unscaled, OP_LDUR_2, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
+  A64C_INSN ("stur", 0xa2000000, 0xffe00c00, ldst_unscaled, OP_STUR_2, OP2 (Cat, ADDR_SIMM9), QL2_A64C_CA_ADDR, 0),
 
   A64C_INSN ("ldct", 0xc2c4b000, 0xfffffc00, a64c, 0, OP2 (Rt, ADDR_SIMPLE), QL2_A64C_X_ADDR, 0),
   A64C_INSN ("stct", 0xc2c49000, 0xfffffc00, a64c, 0, OP2 (Rt, ADDR_SIMPLE), QL2_A64C_X_ADDR, 0),
@@ -6182,12 +6192,16 @@ const struct aarch64_opcode aarch64_opcode_table[] =
       "6-bit unsigned immediate")					\
     Y(PERM, perm, "PERM", 0, F(), "a capability permission")		\
     Y(FORM, form, "FORM", 0, F(), "a capability form")			\
-    Y(ADDRESS, addr_simm, "CAPADDR_SIMM7", 0, F(FLD_capaddr_simm7),	\
+    Y(ADDRESS, addr_simm, "CAPADDR_SIMM7", OPD_F_SHIFT_BY_4,		\
+      F(FLD_capaddr_simm7),						\
       "a capability based address with 7-bit signed immediate offset")	\
     Y(ADDRESS, addr_simple, "CAPADDR_SIMPLE", 0, F(),			\
       "a capability address with base register (no offset)")		\
     Y(ADDRESS, addr_simm, "A64C_ADDR_SIMM7", 0,				\
       F(FLD_imm7,FLD_a64c_index2),					\
+      "an address with 7-bit signed immediate offset")			\
+    Y(ADDRESS, addr_simm, "A64C_ADDR_SIMM9", OPD_F_SHIFT_BY_4,		\
+      F(FLD_imm9,FLD_index),					\
       "an address with 7-bit signed immediate offset")			\
     Y(ADDRESS, imm, "ADDR_PCREL17", OPD_F_SEXT | OPD_F_SHIFT_BY_4,	\
       F(FLD_imm17), "17-bit PC-relative address")

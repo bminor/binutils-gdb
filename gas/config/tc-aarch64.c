@@ -7365,6 +7365,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 					      /* skip_p */ 0);
 	  break;
 
+	case AARCH64_OPND_A64C_ADDR_SIMM9:
 	case AARCH64_OPND_ADDR_SIMM9:
 	case AARCH64_OPND_ADDR_SIMM9_2:
 	case AARCH64_OPND_ADDR_SIMM11:
@@ -8857,7 +8858,9 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
     case OP_STRH_POS: new_op = OP_STURH; break;
     case OP_LDRSH_POS: new_op = OP_LDURSH; break;
     case OP_LDR_POS: new_op = OP_LDUR; break;
+    case OP_LDR_POS_2: new_op = OP_LDUR_2; break;
     case OP_STR_POS: new_op = OP_STUR; break;
+    case OP_STR_POS_2: new_op = OP_STUR_2; break;
     case OP_LDRF_POS: new_op = OP_LDURV; break;
     case OP_STRF_POS: new_op = OP_STURV; break;
     case OP_LDRSW_POS: new_op = OP_LDURSW; break;
@@ -9085,6 +9088,7 @@ fix_insn (fixS *fixP, uint32_t flags, offsetT value)
       fix_mov_imm_insn (fixP, buf, new_inst, value);
       break;
 
+    case AARCH64_OPND_A64C_ADDR_SIMM9:
     case AARCH64_OPND_A64C_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:

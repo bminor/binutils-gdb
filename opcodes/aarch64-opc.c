@@ -1772,6 +1772,23 @@ operand_general_constraint_met_p (aarch64_feature_set features,
 	    }
 	  break;
 
+	case AARCH64_OPND_A64C_ADDR_SIMM9:
+	  /* Scaled signed 9 bits immediate offset.  This is currently only
+	     used for cpability load/stores.  */
+	  size = aarch64_get_qualifier_esize (opnd->qualifier);
+	  if (!value_in_range_p (opnd->addr.offset.imm, -256 * size, 255 * size))
+	    {
+	      set_offset_out_of_range_error (mismatch_detail, idx,
+					     -256 * size, 255 * size);
+	      return 0;
+	    }
+	  if (!value_aligned_p (opnd->addr.offset.imm, size))
+	    {
+	      set_unaligned_error (mismatch_detail, idx, size);
+	      return 0;
+	    }
+	  break;
+
 	case AARCH64_OPND_ADDR_SIMM9_2:
 	  /* Unscaled signed 9 bits immediate offset, which has to be negative
 	     or unaligned.  */
@@ -3974,6 +3991,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	(buf, size, opnd, get_cap_reg_name (opnd->addr.base_regno, 1));
       break;
 
+    case AARCH64_OPND_A64C_ADDR_SIMM9:
     case AARCH64_OPND_A64C_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM7:
     case AARCH64_OPND_ADDR_SIMM9:

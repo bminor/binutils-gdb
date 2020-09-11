@@ -703,9 +703,10 @@ aarch64_ins_addr_simm (const aarch64_operand *self,
   insert_field (FLD_Rn, code, info->addr.base_regno, 0);
   /* simm (imm9 or imm7) */
   imm = info->addr.offset.imm;
-  if (self->fields[0] == FLD_imm7
-      || self->fields[0] == FLD_capaddr_simm7
-      || info->qualifier == AARCH64_OPND_QLF_imm_tag)
+  if (operand_need_shift_by_four (self))
+    imm >>= 4;
+  else if (self->fields[0] == FLD_imm7
+	   || info->qualifier == AARCH64_OPND_QLF_imm_tag)
     /* scaled immediate in ld/st pair instructions..  */
     imm >>= get_logsz (aarch64_get_qualifier_esize (info->qualifier));
   insert_field (self->fields[0], code, imm, 0);

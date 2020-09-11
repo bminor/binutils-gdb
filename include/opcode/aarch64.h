@@ -530,6 +530,7 @@ enum aarch64_opnd
 				   BLR/BR.  */
   AARCH64_OPND_CAPADDR_SIMPLE,	/* Simple base address with no offset.  */
   AARCH64_OPND_A64C_ADDR_SIMM7,	/* Address with 7-bit immediate offset.  */
+  AARCH64_OPND_A64C_ADDR_SIMM9,	/* Address with 9-bit immediate offset.  */
   AARCH64_OPND_ADDR_PCREL17,	/* 17-bit PC-relative address for e.g. LDR.  */
 };
 
@@ -743,6 +744,8 @@ enum aarch64_op
   OP_LDRSH_POS,
   OP_STR_POS,
   OP_LDR_POS,
+  OP_STR_POS_2,
+  OP_LDR_POS_2,
   OP_STRF_POS,
   OP_LDRF_POS,
   OP_LDRSW_POS,
@@ -756,6 +759,8 @@ enum aarch64_op
   OP_LDURSH,
   OP_STUR,
   OP_LDUR,
+  OP_LDUR_2,
+  OP_STUR_2,
   OP_STURV,
   OP_LDURV,
   OP_LDURSW,
