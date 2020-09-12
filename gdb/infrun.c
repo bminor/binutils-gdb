@@ -9200,6 +9200,7 @@ infrun_async_inferior_event_handler (gdb_client_data data)
   inferior_event_handler (INF_REG_EVENT);
 }
 
+#if GDB_SELF_TEST
 namespace selftests
 {
 
@@ -9263,6 +9264,8 @@ infrun_thread_ptid_changed ()
 }
 
 } /* namespace selftests */
+
+#endif /* GDB_SELF_TEST */
 
 void _initialize_infrun ();
 void

@@ -1,3 +1,7 @@
+2020-09-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* infrun.c (namespace selftests): Only define #if GDB_SELF_TEST.
+
 2020-09-11  Moritz Riesterer  <moritz.riesterer@intel.com>
 	    Felix Willgerodt  <Felix.Willgerodt@intel.com>
 
