@@ -1,3 +1,10 @@
+2021-01-18  Alan Modra  <amodra@gmail.com>
+
+	PR 26378
+	* ldlang.c (map_input_to_output_sections): Start with a read-only
+	section for data statements.
+	* testsuite/ld-elf/size-2.d: Adjust to suit.
+
 2021-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27193

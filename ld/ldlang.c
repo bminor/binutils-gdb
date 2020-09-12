@@ -4225,7 +4225,7 @@ map_input_to_output_sections
 	      break;
 	    }
 	  if (os->bfd_section == NULL)
-	    init_os (os, flags);
+	    init_os (os, flags | SEC_READONLY);
 	  else
 	    os->bfd_section->flags |= flags;
 	  break;
