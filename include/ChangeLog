@@ -1,3 +1,8 @@
+2020-09-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26391
+	* bfdlink.h (bfd_link_info): Add unique_symbol.
+
 2020-09-11  Felix Willgerodt  <felix.willgerodt@intel.com>
 
 	Sync with GCC

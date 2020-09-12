@@ -1,3 +1,14 @@
+2020-09-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26391
+	* elflink.c (elf_final_link_info): Add local_hash_table.
+	(local_hash_entry): New.
+	(local_hash_newfunc): Likewise.
+	(elf_link_output_symstrtab): Append ".COUNT" to duplicated local
+	symbols.
+	(bfd_elf_final_link): Initialize and free local_hash_table for
+	"-z unique-symbol".
+
 2020-09-10  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Revert

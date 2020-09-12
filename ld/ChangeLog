@@ -1,3 +1,20 @@
+2020-09-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26391
+	* NEWS: Mention "-z unique-symbol".
+	* emultempl/elf.em (gld${EMULATION_NAME}_handle_option): Handle
+	"-z unique-symbol" and "-z nounique-symbol".
+	* ld.texi: Document "-z unique-symbol" and "-z nounique-symbol".
+	* lexsup.c (elf_static_list_options): Add "-z unique-symbol" and
+	"-z nounique-symbol".
+	* testsuite/ld-elf/elf.exp: Add PR ld/26391 tests.
+	* testsuite/ld-elf/pr26391.nd: New file.
+	* testsuite/ld-elf/pr26391.out: Likewise.
+	* testsuite/ld-elf/pr26391a.c: Likewise.
+	* testsuite/ld-elf/pr26391b.c: Likewise.
+	* testsuite/ld-elf/pr26391c.c: Likewise.
+	* testsuite/ld-elf/pr26391d.c: Likewise.
+
 2020-09-11  Jeremy Drake  <sourceware-bugzilla@jdrake.com>
 
 	PR 26588

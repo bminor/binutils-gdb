@@ -2050,6 +2050,10 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
   fprintf (file, _("\
+  -z unique-symbol            Avoid duplicated local symbol names\n"));
+  fprintf (file, _("\
+  -z nounique-symbol          Keep duplicated local symbol names (default)\n"));
+  fprintf (file, _("\
   -z globalaudit              Mark executable requiring global auditing\n"));
 }
 

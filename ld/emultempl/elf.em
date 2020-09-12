@@ -751,6 +751,10 @@ fragment <<EOF
 	  link_info.noexecstack = TRUE;
 	  link_info.execstack = FALSE;
 	}
+      else if (strcmp (optarg, "unique-symbol") == 0)
+	link_info.unique_symbol = TRUE;
+      else if (strcmp (optarg, "nounique-symbol") == 0)
+	link_info.unique_symbol = FALSE;
       else if (strcmp (optarg, "globalaudit") == 0)
 	{
 	  link_info.flags_1 |= DF_1_GLOBAUDIT;
