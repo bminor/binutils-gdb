@@ -36,4 +36,6 @@ main ()
 	count += 1;
       }
   here ();
+
+  return 0;
 }

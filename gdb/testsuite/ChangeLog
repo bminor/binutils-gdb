@@ -1,5 +1,64 @@
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/catch-follow-exec.c (main): Add explicit return
+	statement.
+	* gdb.base/catch-signal.c (main): Likewise.
+	* gdb.base/condbreak-call-false.c (main): Likewise.
+	* gdb.base/consecutive.c (main): Add explicit return
+	statement and return type.
+	* gdb.base/cursal.c (main): Add explicit return statement.
+	* gdb.base/cvexpr.c (main): Likewise.
+	* gdb.base/display.c (main): Add explicit return statement and
+	return type.
+	* gdb.base/dprintf-detach.c (main): Add explicit return statement.
+	* gdb.base/endianity.c (main): Likewise.
+	* gdb.base/execd-prog.c (main): Likewise.
+	* gdb.base/gdb1090.c (main): Likewise.
+	* gdb.base/info_qt.c (main): Likewise.
+	* gdb.base/lineinc.c (main): Likewise.
+	* gdb.base/load-command.c (main): Likewise.
+	* gdb.base/macscp1.c (main): Likewise.
+	* gdb.base/pr10179-a.c (main): Likewise.
+	* gdb.base/quit-live.c (main): Likewise.
+	* gdb.base/scope0.c (main): Likewise.
+	* gdb.base/settings.c (main): Likewise.
+	* gdb.base/stack-checking.c (main): Return int.
+	* gdb.base/varargs.c (main): Add explicit return statement.
+	* gdb.cp/ambiguous.cc (main): Likewise.
+	* gdb.cp/anon-struct.cc (main): Likewise.
+	* gdb.cp/anon-union.cc (main): Likewise.
+	* gdb.cp/bool.cc (main): Likewise.
+	* gdb.cp/bs15503.cc (main): Likewise.
+	* gdb.cp/cplusfuncs.cc (main): Likewise.
+	* gdb.cp/cttiadd.cc (main): Likewise.
+	* gdb.cp/extern-c.cc (main): Likewise.
+	* gdb.cp/filename.cc (main): Likewise.
+	* gdb.cp/formatted-ref.cc (main): Likewise.
+	* gdb.cp/mb-ctor.cc (main): Likewise.
+	* gdb.cp/member-ptr.cc (main): Likewise.
+	* gdb.cp/minsym-fallback-main.cc (main): Likewise.
+	* gdb.cp/overload-const.cc (main): Likewise.
+	* gdb.cp/paren-type.cc (main): Likewise.
+	* gdb.cp/parse-lang.cc (main): Likewise.
+	* gdb.cp/pr-1023.cc (main): Likewise.
+	* gdb.cp/psmang1.cc (main): Likewise.
+	* gdb.cp/readnow-language.cc (main): Likewise.
+	* gdb.cp/ref-params.cc (main): Likewise.
+	* gdb.cp/rvalue-ref-params.cc (main): Likewise.
+	* gdb.cp/virtbase2.cc (main): Likewise.
+	* gdb.dwarf2/dw2-abs-hi-pc.c (main): Likewise.
+	* gdb.dwarf2/dw2-namespaceless-anonymous.c (main): Likewise.
+	* gdb.dwarf2/dw4-toplevel-types.cc (main): Likewise.
+	* gdb.mi/mi-console.c (main): Likewise.
+	* gdb.mi/mi-read-memory.c (main): Likewise.
+	* gdb.modula2/multidim.c (main): Likewise.
+	* gdb.opt/inline-small-func.c (main): Likewise.
+	* gdb.python/py-rbreak.c (main): Likewise.
+	* gdb.stabs/exclfwd1.c (main): Likewise.
+	* gdb.trace/qtro.c (main): Likewise.
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/share-env-with-gdbserver.c (main): Call my_getenv
 	instead of getenv.
 

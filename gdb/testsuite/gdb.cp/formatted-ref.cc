@@ -40,4 +40,5 @@ int main(void)
 
   f1 (s1, e1, i1);
 
+  return 0;
 }

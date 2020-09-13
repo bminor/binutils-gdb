@@ -24,4 +24,6 @@ main ()
 
   while (secs--)
     sleep (1);
+
+  return 0;
 }

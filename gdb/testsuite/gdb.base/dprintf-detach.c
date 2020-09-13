@@ -30,4 +30,6 @@ main (void)
 
   for (i = 0; i < 30; i++)
     function ();
+
+  return 0;
 }

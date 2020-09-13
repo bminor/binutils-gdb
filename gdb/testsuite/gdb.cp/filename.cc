@@ -52,5 +52,5 @@ int main() {
   D* pd = &d;
   d.m();
 
-  /* stop outside */
+  return 0; /* stop outside */
 }

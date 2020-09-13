@@ -46,4 +46,6 @@ main (void)
   struct otherendian o = {3, 2, 7, 23.5, 1.25 + 7.25i, 75};
 
   do_nothing (&o); /* START */
+
+  return 0;
 }

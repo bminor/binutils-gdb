@@ -35,4 +35,6 @@ int main()
   c_func ();
   c_funcs_1 ();
   c_funcs_2 ();
+
+  return 0;
 }

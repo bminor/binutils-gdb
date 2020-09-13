@@ -34,4 +34,6 @@ main ()
 {
   int v0 = 0;
   func1 ();
+
+  return 0;
 }

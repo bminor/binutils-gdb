@@ -69,4 +69,6 @@ int main(void)
   MultiChild& MQR = MQ;
 
   mf2(MQ);			/* Set breakpoint MQ here.  */
+
+  return 0;
 }

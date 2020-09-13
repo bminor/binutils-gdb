@@ -20,4 +20,5 @@ int xxx1= 123;
 int
 main ()
 {
+  return 0;
 }

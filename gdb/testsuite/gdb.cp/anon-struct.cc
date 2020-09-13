@@ -54,4 +54,5 @@ t3 v3;
 
 int main()
 {
+  return 0;
 }

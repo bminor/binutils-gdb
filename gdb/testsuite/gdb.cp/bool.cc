@@ -34,4 +34,6 @@ main ()
 {
   return_true ();
   return_false ();
+
+  return 0;
 }

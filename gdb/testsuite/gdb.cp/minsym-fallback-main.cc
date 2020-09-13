@@ -24,4 +24,6 @@ main ()
 {
   c.f ();
   c ();
+
+  return 0;
 }

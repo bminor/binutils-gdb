@@ -40,10 +40,11 @@ void big_frame ()
   small_frame ();
 }
 
-void
+int
 main ()
 {
   small_frame ();
   medium_frame ();
   big_frame ();
+  return 0;
 }

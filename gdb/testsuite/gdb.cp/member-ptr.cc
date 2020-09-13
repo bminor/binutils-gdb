@@ -230,4 +230,5 @@ int main ()
 
   k += b.s;
   
+  return 0;
 }

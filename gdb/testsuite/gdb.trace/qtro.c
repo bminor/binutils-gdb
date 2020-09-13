@@ -30,4 +30,6 @@ main ()
 {
   subr (1);
   end ();
+
+  return 0;
 }

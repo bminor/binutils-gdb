@@ -18,4 +18,4 @@
 struct X {} x;
 struct Y {} y;
 struct Z {} z;
-int main() {}
+int main() { return 0; }

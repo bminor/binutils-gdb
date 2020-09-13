@@ -427,4 +427,6 @@ int main ()
 
   use (&v_float_func);
   use (&v_double_func);
+
+  return 0;
 }
