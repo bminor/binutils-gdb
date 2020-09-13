@@ -24,6 +24,14 @@
 #include "cgen-mem.h"
 #include "cgen-ops.h"
 
+/* Return the size of REGNO in bytes.  */
+
+static int
+m32rbf_register_size (int regno)
+{
+  return 4;
+}
+
 /* Decode gdb ctrl register number.  */
 
 int
@@ -48,6 +56,10 @@ m32r_decode_gdb_ctrl_regnum (int gdb_regnum)
 int
 m32rbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 {
+  int size = m32rbf_register_size (rn);
+  if (len != size)
+    return -1;
+
   if (rn < 16)
     SETTWI (buf, m32rbf_h_gr_get (current_cpu, rn));
   else
@@ -76,7 +88,7 @@ m32rbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
 	return 0;
       }
 
-  return -1; /*FIXME*/
+  return size;
 }
 
 /* The contents of BUF are in target byte order.  */
@@ -84,6 +96,10 @@ m32rbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
 int
 m32rbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 {
+  int size = m32rbf_register_size (rn);
+  if (len != size)
+    return -1;
+
   if (rn < 16)
     m32rbf_h_gr_set (current_cpu, rn, GETTWI (buf));
   else
@@ -121,7 +137,7 @@ m32rbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
 	return 0;
       }
 
-  return -1; /*FIXME*/
+  return size;
 }
 
 USI

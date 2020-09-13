@@ -1,3 +1,9 @@
+2020-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* m32r.c (m32rbf_register_size): New function.
+	(m32rbf_fetch_register): Use new function.
+	(m32rbf_store_register): Likewise.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Regenerate.
