@@ -26,31 +26,33 @@ if {[build_executable $testfile.exp $testfile \
 # start gdb -- start gdb running, default procedure
 #
 proc dbx_gdb_start { } {
-    global GDB
-    global INTERNAL_GDBFLAGS GDBFLAGS
     global prompt
-    global spawn_id
     global timeout
-    verbose "Spawning $GDB -dbx $INTERNAL_GDBFLAGS $GDBFLAGS"
+    global gdb_spawn_id
 
-    if { [which $GDB] == 0 } then {
-        perror "$GDB does not exist."
-        exit 1
+    save_vars { GDBFLAGS } {
+	append GDBFLAGS " -dbx"
+
+	set res [gdb_spawn]
+	if { $res != 0} {
+	    return $res
+	}
     }
 
     set oldtimeout $timeout
     set timeout [expr "$timeout + 60"]
-    eval "spawn $GDB -dbx $INTERNAL_GDBFLAGS $GDBFLAGS"
     gdb_expect {
         -re ".*\r\n$gdb_prompt $" {
             verbose "GDB initialized."
         }
         -re "$prompt $" {
             perror "GDB never initialized."
+	    unset gdb_spawn_id
             return -1
         }
         timeout         {
             perror "(timeout) GDB never initialized."
+	    unset gdb_spawn_id
             return -1
         }
     }

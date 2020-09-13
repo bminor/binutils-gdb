@@ -226,24 +226,19 @@ proc default_mi_gdb_start { args } {
 	sid_start
     }
 
-    verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS"
-
     if [info exists gdb_spawn_id] {
 	return 0
     }
 
-    if ![is_remote host] {
-	if { [which $GDB] == 0 } then {
-	    perror "$GDB does not exist."
-	    exit 1
+    save_vars { GDBFLAGS } {
+	append GDBFLAGS " $MIFLAGS"
+
+	set res [gdb_spawn]
+	if { $res != 0} {
+	    return $res
 	}
     }
 
-    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS [host_info gdb_opts]"]
-    if { $res < 0 || $res == "" } {
-	perror "Spawning $GDB failed."
-	return 1
-    }
     gdb_expect {
 	-re "~\"GNU.*\r\n~\".*$mi_gdb_prompt$" {
 	    # We have a new format mi startup prompt.  If we are
@@ -252,6 +247,7 @@ proc default_mi_gdb_start { args } {
 	    if { $MIFLAGS == "-i=mi1" } {
 		perror "(mi startup) Got unexpected new mi prompt."
 		remote_close host
+		unset gdb_spawn_id
 		return -1
 	    }
 	    verbose "GDB initialized."
@@ -263,6 +259,7 @@ proc default_mi_gdb_start { args } {
 	    if { $MIFLAGS != "-i=mi1" } {
 		perror "(mi startup) Got unexpected old mi prompt."
 		remote_close host
+		unset gdb_spawn_id
 		return -1
 	    }
 	    verbose "GDB initialized."
@@ -270,22 +267,24 @@ proc default_mi_gdb_start { args } {
 	-re ".*unrecognized option.*for a complete list of options." {
 	    untested "skip mi tests (not compiled with mi support)."
 	    remote_close host
+	    unset gdb_spawn_id
 	    return -1
 	}
 	-re ".*Interpreter `mi' unrecognized." {
 	    untested "skip mi tests (not compiled with mi support)."
 	    remote_close host
+	    unset gdb_spawn_id
 	    return -1
 	}
 	timeout {
 	    perror "(timeout) GDB never initialized after 10 seconds."
 	    remote_close host
+	    unset gdb_spawn_id
 	    return -1
 	}
     }
-    set gdb_spawn_id $res
-    set gdb_main_spawn_id $res
-    set mi_spawn_id $res
+    set gdb_main_spawn_id $gdb_spawn_id
+    set mi_spawn_id $gdb_spawn_id
 
     # FIXME: mi output does not go through pagers, so these can be removed.
     # force the height to "unlimited", so no pagers get used
