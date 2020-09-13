@@ -1625,15 +1625,13 @@ md_begin (void)
   struct csky_macro_info const *macro;
   struct csky_arch_info const *p_arch;
   struct csky_cpu_info const *p_cpu;
-  int flags;
   other_flag = (do_opt_mmp | do_opt_mcp | do_opt_mcache
 		| do_opt_msecurity | do_opt_mhard_float);
   dsp_flag |= do_opt_mdsp | do_opt_medsp;
   isa_flag |= do_opt_mtrust | do_opt_mvdsp;
-  flags = other_flag;
 
   if (dsp_flag)
-    flags |= CSKY_ARCH_DSP;
+    other_flag |= CSKY_ARCH_DSP;
 
   if (mach_flag != 0)
     {
@@ -1654,6 +1652,7 @@ md_begin (void)
 #else
       parse_cpu ("ck810");
 #endif
+      mach_flag |= other_flag;
 #endif
     }
 
