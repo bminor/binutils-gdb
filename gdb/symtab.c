@@ -3323,9 +3323,18 @@ find_pc_line (CORE_ADDR pc, int notcurrent)
   struct obj_section *section;
 
   section = find_pc_overlay (pc);
-  if (pc_in_unmapped_range (pc, section))
-    pc = overlay_mapped_address (pc, section);
-  return find_pc_sect_line (pc, section, notcurrent);
+  if (!pc_in_unmapped_range (pc, section))
+    return find_pc_sect_line (pc, section, notcurrent);
+
+  /* If the original PC was an unmapped address then we translate this to a
+     mapped address in order to lookup the sal.  However, as the user
+     passed us an unmapped address it makes more sense to return a result
+     that has the pc and end fields translated to unmapped addresses.  */
+  pc = overlay_mapped_address (pc, section);
+  symtab_and_line sal = find_pc_sect_line (pc, section, notcurrent);
+  sal.pc = overlay_unmapped_address (sal.pc, section);
+  sal.end = overlay_unmapped_address (sal.end, section);
+  return sal;
 }
 
 /* See symtab.h.  */

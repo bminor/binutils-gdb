@@ -1,3 +1,8 @@
+2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* symtab.c (find_pc_line): Return unmapped addresses when the
+	requested address is also unmapped.
+
 2020-10-05  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove tui/tui-windata.h, add
