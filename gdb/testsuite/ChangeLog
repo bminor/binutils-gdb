@@ -1,5 +1,12 @@
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.dwarf2/ada-linkage-name.c (main): Move to the bottom of the
+	file and add calls to first and second.
+	* gdb.dwarf2/atomic.c (main): Move to the bottom of the file and
+	add call to f.
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.mi/mi-break-qualified.cc: New file.
 	* gdb.mi/mi-break-qualified.exp: New file.
 	* lib/mi-support.exp (mi_create_breakpoint_multi)

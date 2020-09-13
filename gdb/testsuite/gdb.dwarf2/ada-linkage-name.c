@@ -15,13 +15,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-int
-main (void)
-{
-  asm ("main_label: .globl main_label");
-  return 0;
-}
-
 /* First dummy function.  */
 
 int
@@ -37,5 +30,16 @@ int
 second (char *x)
 {
   asm ("second_label: .globl second_label");
+  return 0;
+}
+
+
+int
+main (void)
+{
+  asm ("main_label: .globl main_label");
+
+  first (0);
+  second (0);
   return 0;
 }
