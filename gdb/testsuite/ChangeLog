@@ -1,5 +1,10 @@
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/share-env-with-gdbserver.c (main): Call my_getenv
+	instead of getenv.
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/dbx.exp (dbx_gdb_start): Adjust to use gdb_spawn
 	instead of spawning GDB with remote_spawn.
 	* lib/mi-support.exp (default_mi_gdb_start): Adjust to use

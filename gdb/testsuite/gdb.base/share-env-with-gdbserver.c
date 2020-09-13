@@ -31,7 +31,9 @@ main (int argc, char *argv[])
 {
   /* Call malloc to ensure it is linked in.  */
   char *tmp = malloc (1);
-  const char *myvar = getenv ("GDB_TEST_VAR");
+  /* Similarly call my_getenv instead of getenv directly to make sure
+     the former isn't optimized out.  my_getenv is called by GDB.  */
+  const char *myvar = my_getenv ("GDB_TEST_VAR");
 
   if (myvar != NULL)
     printf ("It worked!  myvar = '%s'\n", myvar);
