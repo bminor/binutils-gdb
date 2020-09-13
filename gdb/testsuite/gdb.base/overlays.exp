@@ -38,7 +38,7 @@ standard_testfile overlays.c ovlymgr.c foo.c bar.c baz.c grbx.c
 
 if {[build_executable $testfile.exp $testfile \
 	 [list $srcfile $srcfile2 $srcfile3 $srcfile4 $srcfile5 $srcfile6] \
-	 {debug ldscript=-Wl,-T$linker_script}] == -1} {
+	 "debug ldscript=-Wl,-T$linker_script"] == -1} {
      untested "failed to compile"
      return -1
 }

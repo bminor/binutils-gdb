@@ -1,3 +1,11 @@
+2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/m32r.ld: Remove SEARCH_DIR line.  Add MEMORY regions,
+	make use of regions throughout.
+	* gdb.base/overlays.exp: Enclose string with variableds in "..",
+	not {...}.
+	* gdb.base/ovlymgr.c: Add 'string.h' and 'stdlib.h' includes.
+
 2020-10-05  Hannes Domani  <ssbssa@yahoo.de>
 
 	* gdb.base/call-sc.c: Fix return struct on stack test case.
