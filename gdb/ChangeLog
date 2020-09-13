@@ -1,3 +1,10 @@
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
+	* linespec.c (classify_mtype, compare_msyms): Delete.
+	(search_minsyms_for_name): Remove classification logic.  Instead
+	filter out trampoline symbols if we also found an external
+	function of the same name.
+
 2020-09-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

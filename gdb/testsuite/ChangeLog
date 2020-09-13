@@ -1,3 +1,13 @@
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
+	* gdb.base/msym-bp-2.c: New.
+	* gdb.base/msym-bp-shl-lib.c: New file.
+	* gdb.base/msym-bp-shl-main-2.c: New file.
+	* gdb.base/msym-bp-shl-main.c: New file.
+	* gdb.base/msym-bp-shl.exp: New file.
+	* gdb.base/msym-bp.c: New file.
+	* gdb.base/msym-bp.exp: New file.
+
 2020-09-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/default.exp: Change $_gdb_major to 11.

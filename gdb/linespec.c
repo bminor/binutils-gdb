@@ -4252,41 +4252,6 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     add_sal_to_sals (self, result, &sal, msymbol->natural_name (), 0);
 }
 
-/* A helper function to classify a minimal_symbol_type according to
-   priority.  */
-
-static int
-classify_mtype (enum minimal_symbol_type t)
-{
-  switch (t)
-    {
-    case mst_file_text:
-    case mst_file_data:
-    case mst_file_bss:
-      /* Intermediate priority.  */
-      return 1;
-
-    case mst_solib_trampoline:
-      /* Lowest priority.  */
-      return 2;
-
-    default:
-      /* Highest priority.  */
-      return 0;
-    }
-}
-
-/* Callback for std::sort that sorts symbols by priority.  */
-
-static bool
-compare_msyms (const bound_minimal_symbol &a, const bound_minimal_symbol &b)
-{
-  enum minimal_symbol_type ta = MSYMBOL_TYPE (a.minsym);
-  enum minimal_symbol_type tb = MSYMBOL_TYPE (b.minsym);
-
-  return classify_mtype (ta) < classify_mtype (tb);
-}
-
 /* Helper for search_minsyms_for_name that adds the symbol to the
    result.  */
 
@@ -4373,24 +4338,53 @@ search_minsyms_for_name (struct collect_info *info,
 	}
     }
 
-  if (!minsyms.empty ())
+  /* Return true if TYPE is a static symbol.  */
+  auto msymbol_type_is_static = [] (enum minimal_symbol_type type)
     {
-      int classification;
-
-      std::sort (minsyms.begin (), minsyms.end (), compare_msyms);
-
-      /* Now the minsyms are in classification order.  So, we walk
-	 over them and process just the minsyms with the same
-	 classification as the very first minsym in the list.  */
-      classification = classify_mtype (MSYMBOL_TYPE (minsyms[0].minsym));
-
-      for (const bound_minimal_symbol &item : minsyms)
+      switch (type)
 	{
-	  if (classify_mtype (MSYMBOL_TYPE (item.minsym)) != classification)
-	    break;
-
-	  info->result.minimal_symbols->push_back (item);
+	case mst_file_text:
+	case mst_file_data:
+	case mst_file_bss:
+	return true;
+	default:
+	return false;
 	}
+    };
+
+  /* Add minsyms to the result set, but filter out trampoline symbols
+     if we also found extern symbols with the same name.  I.e., don't
+     set a breakpoint on both '<foo@plt>' and 'foo', assuming that
+     'foo' is the symbol that the plt resolves to.  */
+  for (const bound_minimal_symbol &item : minsyms)
+    {
+      bool skip = false;
+      if (MSYMBOL_TYPE (item.minsym) == mst_solib_trampoline)
+	{
+	  for (const bound_minimal_symbol &item2 : minsyms)
+	    {
+	      if (&item2 == &item)
+		continue;
+
+	      /* Trampoline symbols can only jump to exported
+		 symbols.  */
+	      if (msymbol_type_is_static (MSYMBOL_TYPE (item2.minsym)))
+		continue;
+
+	      if (strcmp (item.minsym->linkage_name (),
+			  item2.minsym->linkage_name ()) != 0)
+		continue;
+
+	      /* Found a global minsym with the same name as the
+		 trampoline.  Don't create a location for this
+		 trampoline.  */
+	      skip = true;
+	      break;
+	    }
+	}
+
+      if (!skip)
+	info->result.minimal_symbols->push_back (item);
     }
 }
 
