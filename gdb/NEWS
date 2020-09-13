@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 9
+*** Changes since GDB 10
+
+*** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"
   and "org.gnu.gdb.arc.aux".  The old names are still supported but
