@@ -176,6 +176,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
   int pending = 0;
   int enabled = 1;
   int tracepoint = 0;
+  symbol_name_match_type match_type = symbol_name_match_type::WILD;
   enum bptype type_wanted;
   event_location_up location;
   struct breakpoint_ops *ops;
@@ -188,6 +189,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
       HARDWARE_OPT, TEMP_OPT, CONDITION_OPT,
       IGNORE_COUNT_OPT, THREAD_OPT, PENDING_OPT, DISABLE_OPT,
       TRACEPOINT_OPT,
+      QUALIFIED_OPT,
       EXPLICIT_SOURCE_OPT, EXPLICIT_FUNC_OPT,
       EXPLICIT_LABEL_OPT, EXPLICIT_LINE_OPT
     };
@@ -201,6 +203,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
     {"f", PENDING_OPT, 0},
     {"d", DISABLE_OPT, 0},
     {"a", TRACEPOINT_OPT, 0},
+    {"-qualified", QUALIFIED_OPT, 0},
     {"-source" , EXPLICIT_SOURCE_OPT, 1},
     {"-function", EXPLICIT_FUNC_OPT, 1},
     {"-label", EXPLICIT_LABEL_OPT, 1},
@@ -246,6 +249,9 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	  break;
 	case TRACEPOINT_OPT:
 	  tracepoint = 1;
+	  break;
+	case QUALIFIED_OPT:
+	  match_type = symbol_name_match_type::FULL;
 	  break;
 	case EXPLICIT_SOURCE_OPT:
 	  is_explicit = 1;
@@ -333,12 +339,14 @@ mi_cmd_break_insert_1 (int dprintf, const char *command, char **argv, int argc)
 	error (_("-%s-insert: --source option requires --function, --label,"
 		 " or --line"), dprintf ? "dprintf" : "break");
 
+      explicit_loc.func_name_match_type = match_type;
+
       location = new_explicit_location (&explicit_loc);
     }
   else
     {
       location = string_to_event_location_basic (&address, current_language,
-						 symbol_name_match_type::WILD);
+						 match_type);
       if (*address)
 	error (_("Garbage '%s' at end of location"), address);
     }

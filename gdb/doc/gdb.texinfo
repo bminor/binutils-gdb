@@ -30180,7 +30180,7 @@ N.A.
 @subsubheading Synopsis
 
 @smallexample
- -break-insert [ -t ] [ -h ] [ -f ] [ -d ] [ -a ]
+ -break-insert [ -t ] [ -h ] [ -f ] [ -d ] [ -a ] [ --qualified ]
     [ -c @var{condition} ] [ -i @var{ignore-count} ]
     [ -p @var{thread-id} ] [ @var{location} ]
 @end smallexample
@@ -30242,6 +30242,9 @@ Initialize the @var{ignore-count}.
 @item -p @var{thread-id}
 Restrict the breakpoint to the thread with the specified global
 @var{thread-id}.
+@item --qualified
+This option makes @value{GDBN} interpret a function name specified as
+a complete fully-qualified name.
 @end table
 
 @subsubheading Result
@@ -30302,15 +30305,16 @@ times="0"@}]@}
 @subsubheading Synopsis
 
 @smallexample
- -dprintf-insert [ -t ] [ -f ] [ -d ]
+ -dprintf-insert [ -t ] [ -f ] [ -d ] [ --qualified ]
     [ -c @var{condition} ] [ -i @var{ignore-count} ]
     [ -p @var{thread-id} ] [ @var{location} ] [ @var{format} ]
     [ @var{argument} ]
 @end smallexample
 
 @noindent
-If supplied, @var{location} may be specified the same way as for
-the @code{-break-insert} command.  @xref{-break-insert}.
+If supplied, @var{location} and @code{--qualified} may be specified
+the same way as for the @code{-break-insert} command.
+@xref{-break-insert}.
 
 The possible optional parameters of this command are:
 

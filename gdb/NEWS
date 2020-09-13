@@ -3,6 +3,16 @@
 
 *** Changes since GDB 10
 
+* MI changes
+
+ ** '-break-insert --qualified' and '-dprintf-insert --qualified'
+
+    The MI -break-insert and -dprintf-insert commands now support a
+    new "--qualified" option that makes GDB interpret a specified
+    function name as a complete fully-qualified name.  This is the
+    equivalent of the CLI's "break -qualified" and "dprintf
+    -qualified".
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

@@ -1,5 +1,10 @@
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
+	* NEWS: Document "-break-insert --qualified".
+	* mi/mi-cmd-break.c (mi_cmd_break_insert_1): Handle "--qualified".
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
 	* linespec.c (classify_mtype, compare_msyms): Delete.
 	(search_minsyms_for_name): Remove classification logic.  Instead
 	filter out trampoline symbols if we also found an external

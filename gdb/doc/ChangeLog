@@ -1,3 +1,8 @@
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Document
+	"-break-insert --qualified" and "-dprintf-insert --qualified".
+
 2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
 
 	* gdb.texinfo (Synopsys ARC): Document LP_START, LP_END and BTA.

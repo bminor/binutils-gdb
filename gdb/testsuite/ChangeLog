@@ -1,5 +1,15 @@
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.mi/mi-break-qualified.cc: New file.
+	* gdb.mi/mi-break-qualified.exp: New file.
+	* lib/mi-support.exp (mi_create_breakpoint_multi)
+	(mi_make_breakpoint_loc, mi_make_breakpoint_multi): New
+	procedures.
+	(mi_create_breakpoint_1): New, factored out from
+	mi_create_breakpoint.
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.cp/inherit.exp: No longer pass -Wno-deprecated-register.
 	* gdb.cp/misc.exp: No longer pass -Wno-deprecated-register.
 	* gdb.cp/misc.cc (class small, small::method, marker_reg1)

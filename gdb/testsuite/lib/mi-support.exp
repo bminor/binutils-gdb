@@ -1376,6 +1376,15 @@ proc mi_create_breakpoint {location test args} {
     return $bp
 }
 
+# Like mi_create_breakpoint, but creates a breakpoint with multiple
+# locations using mi_make_breakpoint_multi instead.
+
+proc mi_create_breakpoint_multi {location test args} {
+    set bp [eval mi_make_breakpoint_multi $args]
+    mi_gdb_test "222-break-insert $location" "222\\^done,$bp" $test
+    return $bp
+}
+
 # Creates varobj named NAME for EXPRESSION.
 # Name cannot be "-".
 proc mi_create_varobj { name expression testname } {
@@ -2477,36 +2486,39 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
     return "[join $l $joiner]"
 }
 
-# Construct a breakpoint regexp.  This may be used to test the output of
-# -break-insert, -dprintf-insert, or -break-info.
+# Construct a breakpoint location regexp.  This may be used along with
+# mi_make_breakpoint_multi to test the output of -break-insert,
+# -dprintf-insert, or -break-info with breapoints with multiple
+# locations.
 #
-# All arguments for the breakpoint may be specified using the options
-# number, type, disp, enabled, addr, func, file, fullanme, line,
-# thread-groups, cond, evaluated-by, times, ignore, script,
-# and original-location.
+# All arguments for the breakpoint location may be specified using the
+# options number, enabled, addr, func, file, fullname, line and
+# thread-groups.
 #
-# Only if -script and -ignore are given will they appear in the output.
-# Otherwise, this procedure will skip them using ".*".
-#
-# Example: mi_make_breakpoint -number 2 -file ".*/myfile.c" -line 3
-# will return the breakpoint:
-# bkpt={number="2",type=".*",disp=".*",enabled=".*",addr=".*",func=".*",
-#       file=".*/myfile.c",fullname=".*",line="3",thread-groups=\[.*\],
-#       times="0".*original-location=".*"}
+# Example: mi_make_breakpoint_loc -number 2.1 -file ".*/myfile.c" -line 3
+# will return the breakpoint location:
+# {number="2.1",enabled=".*",addr=".*",func=".*",
+#       file=".*/myfile.c",fullname=".*",line="3",thread-groups=\[.*\]}
 
-proc mi_make_breakpoint {args} {
-    parse_args {{number .*} {type .*} {disp .*} {enabled .*} {addr .*}
+proc mi_make_breakpoint_loc {args} {
+    parse_args {{number .*} {enabled .*} {addr .*}
 	{func .*} {file .*} {fullname .*} {line .*}
-	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
-	{script ""} {original-location .*} {cond ""} {evaluated-by ""}}
+	{thread-groups \\\[.*\\\]}}
 
     set attr_list {}
-    foreach attr [list number type disp enabled addr func file \
+    foreach attr [list number enabled addr func file \
 		      fullname line thread-groups] {
 	lappend attr_list $attr [set $attr]
     }
 
-    set result "bkpt={[mi_build_kv_pairs $attr_list]"
+    return "{[mi_build_kv_pairs $attr_list]}"
+}
+
+# Bits shared between mi_make_breakpoint and mi_make_breakpoint_multi.
+
+proc mi_make_breakpoint_1 {attr_list cond evaluated-by times \
+			   ignore script original-location} {
+    set result "bkpt=\\\{[mi_build_kv_pairs $attr_list]"
 
     # There are always exceptions.
 
@@ -2546,7 +2558,88 @@ proc mi_make_breakpoint {args} {
     }
     append result [mi_build_kv_pairs \
 		       [list "original-location" ${original-location}]]
-    append result "}"
+
+    return $result
+}
+
+
+# Construct a breakpoint regexp, for a breakpoint with multiple
+# locations.  This may be used to test the output of -break-insert,
+# -dprintf-insert, or -break-info with breakpoints with multiple
+# locations.
+#
+# All arguments for the breakpoint may be specified using the options
+# number, type, disp, enabled, func, cond, evaluated-by, times,
+# ignore, script and locations.
+#
+# Only if -script and -ignore are given will they appear in the output.
+# Otherwise, this procedure will skip them using ".*".
+#
+# Example: mi_make_breakpoint_multi -number 2 -locations "$loc"
+# will return the breakpoint:
+# bkpt={number="2",type=".*",disp=".*",enabled=".*",addr="<MULTIPLE>",
+#       times="0".*original-location=".*",locations=$loc}
+#
+# You can construct the list of locations with mi_make_breakpoint_loc.
+
+proc mi_make_breakpoint_multi {args} {
+    parse_args {{number .*} {type .*} {disp .*} {enabled .*}
+	{times .*} {ignore 0}
+	{script ""} {original-location .*} {cond ""} {evaluated-by ""}
+	{locations .*}}
+
+    set attr_list {}
+    foreach attr [list number type disp enabled] {
+	lappend attr_list $attr [set $attr]
+    }
+
+    lappend attr_list "addr" "<MULTIPLE>"
+
+    set result [mi_make_breakpoint_1 \
+		    $attr_list $cond ${evaluated-by} $times \
+		    $ignore $script ${original-location}]
+
+    append result ","
+    append result [mi_build_kv_pairs [list "locations" $locations]]
+
+    append result "\\\}"
+    return $result
+}
+
+# Construct a breakpoint regexp.  This may be used to test the output of
+# -break-insert, -dprintf-insert, or -break-info.
+#
+# All arguments for the breakpoint may be specified using the options
+# number, type, disp, enabled, addr, func, file, fullanme, line,
+# thread-groups, cond, evaluated-by, times, ignore, script,
+# and original-location.
+#
+# Only if -script and -ignore are given will they appear in the output.
+# Otherwise, this procedure will skip them using ".*".
+#
+# Example: mi_make_breakpoint -number 2 -file ".*/myfile.c" -line 3
+# will return the breakpoint:
+# bkpt={number="2",type=".*",disp=".*",enabled=".*",addr=".*",func=".*",
+#       file=".*/myfile.c",fullname=".*",line="3",thread-groups=\[.*\],
+#       times="0".*original-location=".*"}
+
+proc mi_make_breakpoint {args} {
+    parse_args {{number .*} {type .*} {disp .*} {enabled .*} {addr .*}
+	{func .*} {file .*} {fullname .*} {line .*}
+	{thread-groups \\\[.*\\\]} {times .*} {ignore 0}
+	{script ""} {original-location .*} {cond ""} {evaluated-by ""}}
+
+    set attr_list {}
+    foreach attr [list number type disp enabled addr func file \
+		      fullname line thread-groups] {
+	lappend attr_list $attr [set $attr]
+    }
+
+    set result [mi_make_breakpoint_1 \
+		    $attr_list $cond ${evaluated-by} $times \
+		    $ignore $script ${original-location}]
+
+    append result "\\\}"
     return $result
 }
 
