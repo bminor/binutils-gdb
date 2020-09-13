@@ -1,5 +1,9 @@
 2020-09-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 10.0.90.DATE-git.
+
+2020-09-13  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 10.0.90 released.
 
 2020-09-13  Joel Brobecker  <brobecker@adacore.com>
