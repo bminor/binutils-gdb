@@ -1,3 +1,7 @@
+2020-09-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* development.sh (development): Set to false.
+
 2020-09-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26391
