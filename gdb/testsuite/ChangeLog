@@ -1,5 +1,17 @@
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.cp/classes.exp: No longer pass -Wno-deprecated-register.
+	(do_tests): Remove "calling method for small class" test.
+	* gdb.cp/classes.cc (class small, small::method, marker_reg1)
+	(register_class): Delete.
+	(main): Don't call register_class.
+	* gdb.cp/call-method-register.exp: New file, based on bits removed
+	from classes.exp.
+	* gdb.cp/call-method-register.cc: New file, based on bits removed
+	from classes.cc.
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/msym-bp-2.c: New.
 	* gdb.base/msym-bp-shl-lib.c: New file.
 	* gdb.base/msym-bp-shl-main-2.c: New file.
