@@ -264,7 +264,7 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	     union as a vector also.  This allows e.g. a union of two
 	     vector types to show up automatically in "info vector".  */
 	  if (TYPE_VECTOR (field_gdb_type))
-	    TYPE_VECTOR (m_type) = 1;
+	    m_type->set_is_vector (true);
 	}
     }
 

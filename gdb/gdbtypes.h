@@ -219,7 +219,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 /* * Identify a vector type.  Gcc is handling this by adding an extra
    attribute to the array type.  We slurp that in as a new flag of a
    type.  This is used only in dwarf2read.c.  */
-#define TYPE_VECTOR(t)		(TYPE_MAIN_TYPE (t)->flag_vector)
+#define TYPE_VECTOR(t)		((t)->is_vector ())
 
 /* * The debugging formats (especially STABS) do not contain enough
    information to represent all Ada types---especially those whose
@@ -824,7 +824,7 @@ struct main_type
   unsigned int m_flag_target_stub : 1;
   unsigned int m_flag_prototyped : 1;
   unsigned int m_flag_varargs : 1;
-  unsigned int flag_vector : 1;
+  unsigned int m_flag_vector : 1;
   unsigned int flag_stub_supported : 1;
   unsigned int flag_gnu_ifunc : 1;
   unsigned int flag_fixed_instance : 1;
@@ -1114,6 +1114,16 @@ struct type
   void set_has_varargs (bool has_varargs)
   {
     this->main_type->m_flag_varargs = has_varargs;
+  }
+
+  bool is_vector () const
+  {
+    return this->main_type->m_flag_vector;
+  }
+
+  void set_is_vector (bool is_vector)
+  {
+    this->main_type->m_flag_vector = is_vector;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's

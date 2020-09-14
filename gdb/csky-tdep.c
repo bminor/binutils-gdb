@@ -266,7 +266,7 @@ csky_vector_type (struct gdbarch *gdbarch)
   append_composite_type_field (t, "u8",
 			       init_vector_type (bt->builtin_int8, 16));
 
-  TYPE_VECTOR (t) = 1;
+  t->set_is_vector (true);
   t->set_name ("builtin_type_vec128i");
 
   return t;

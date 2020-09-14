@@ -1,5 +1,11 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct type) <is_vector, set_is_vector>: New methods.
+	(TYPE_VECTOR): Use type::is_vector, change all write call sites to
+	use type::set_is_vector.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_VARARGS): Remove, replace all
 	uses with type::has_varargs.
 

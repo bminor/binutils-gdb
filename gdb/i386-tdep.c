@@ -3137,7 +3137,7 @@ i386_zmm_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v4_int128",
 				   init_vector_type (bt->builtin_int128, 4));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("builtin_type_vec512i");
       tdep->i386_zmm_type = t;
     }
@@ -3193,7 +3193,7 @@ i386_ymm_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v2_int128",
 				   init_vector_type (bt->builtin_int128, 2));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("builtin_type_vec256i");
       tdep->i386_ymm_type = t;
     }
@@ -3235,7 +3235,7 @@ i386_mmx_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v8_int8",
 				   init_vector_type (bt->builtin_int8, 8));
 
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("builtin_type_vec64i");
       tdep->i386_mmx_type = t;
     }

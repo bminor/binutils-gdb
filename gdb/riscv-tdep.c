@@ -674,7 +674,7 @@ riscv_fpreg_d_type (struct gdbarch *gdbarch)
 			       "__gdb_builtin_type_fpreg_d", TYPE_CODE_UNION);
       append_composite_type_field (t, "float", bt->builtin_float);
       append_composite_type_field (t, "double", bt->builtin_double);
-      TYPE_VECTOR (t) = 1;
+      t->set_is_vector (true);
       t->set_name ("builtin_type_fpreg_d");
       tdep->riscv_fpreg_d_type = t;
     }
