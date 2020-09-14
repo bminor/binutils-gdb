@@ -67,8 +67,9 @@ type_stack::insert (struct expr_builder *pstate, const char *string)
 
   element.piece = tp_space_identifier;
   insert_into (slot, element);
-  element.int_val = address_space_name_to_int (pstate->gdbarch (),
-					       string);
+  element.int_val
+    = address_space_name_to_type_instance_flags (pstate->gdbarch (),
+						 string);
   insert_into (slot, element);
 }
 

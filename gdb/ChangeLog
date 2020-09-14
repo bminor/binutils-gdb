@@ -1,4 +1,18 @@
 2020-09-14  Pedro Alves  <pedro@palves.net>
+
+	* c-typeprint.c (c_type_print_modifier): Adjust to rename.
+	* gdbtypes.c (address_space_name_to_int): Rename to ...
+	(address_space_name_to_type_instance_flags): ... this.
+	(address_space_int_to_name): Rename to ...
+	(address_space_type_instance_flags_to_name): ... this.
+	* gdbtypes.h (address_space_name_to_int): Rename to ...
+	(address_space_name_to_type_instance_flags): ... this.
+	(address_space_int_to_name): Rename to ...
+	(address_space_type_instance_flags_to_name): ... this.
+	* type-stack.c (type_stack::insert): Adjust to rename.
+	* type-stack.h (type_stack::insert): Likewise.
+
+2020-09-14  Pedro Alves  <pedro@palves.net>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* avr-tdep.c (avr_address_class_type_flags): Return

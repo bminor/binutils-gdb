@@ -575,12 +575,12 @@ lookup_function_type_with_arguments (struct type *type,
   return fn;
 }
 
-/* Identify address space identifier by name --
-   return the integer flag defined in gdbtypes.h.  */
+/* Identify address space identifier by name -- return a
+   type_instance_flags.  */
 
 type_instance_flags
-address_space_name_to_int (struct gdbarch *gdbarch,
-			   const char *space_identifier)
+address_space_name_to_type_instance_flags (struct gdbarch *gdbarch,
+					   const char *space_identifier)
 {
   type_instance_flags type_flags;
 
@@ -598,12 +598,12 @@ address_space_name_to_int (struct gdbarch *gdbarch,
     error (_("Unknown address space specifier: \"%s\""), space_identifier);
 }
 
-/* Identify address space identifier by integer flag as defined in 
-   gdbtypes.h -- return the string version of the adress space name.  */
+/* Identify address space identifier by type_instance_flags and return
+   the string version of the adress space name.  */
 
 const char *
-address_space_int_to_name (struct gdbarch *gdbarch,
-			   type_instance_flags space_flag)
+address_space_type_instance_flags_to_name (struct gdbarch *gdbarch,
+					   type_instance_flags space_flag)
 {
   if (space_flag & TYPE_INSTANCE_FLAG_CODE_SPACE)
     return "code";
