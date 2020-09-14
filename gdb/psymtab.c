@@ -53,16 +53,6 @@ static struct partial_symbol *find_pc_sect_psymbol (struct objfile *,
 static struct compunit_symtab *psymtab_to_symtab (struct objfile *objfile,
 						  struct partial_symtab *pst);
 
-
-
-static unsigned long psymbol_hash (const void *addr, int length);
-static int psymbol_compare (const void *addr1, const void *addr2, int length);
-
-psymtab_storage::psymtab_storage ()
-  : psymbol_cache (psymbol_hash, psymbol_compare)
-{
-}
-
 psymtab_storage::~psymtab_storage ()
 {
   partial_symtab *iter = psymtabs;
@@ -1537,13 +1527,10 @@ end_psymtab_common (struct objfile *objfile, struct partial_symtab *pst)
   sort_pst_symbols (objfile, pst);
 }
 
-/* Calculate a hash code for the given partial symbol.  The hash is
-   calculated using the symbol's value, language, domain, class
-   and name.  These are the values which are set by
-   add_psymbol_to_bcache.  */
+/* See psymtab.h.  */
 
-static unsigned long
-psymbol_hash (const void *addr, int length)
+unsigned long
+psymbol_bcache::hash (const void *addr, int length)
 {
   unsigned long h = 0;
   struct partial_symbol *psymbol = (struct partial_symbol *) addr;
@@ -1562,12 +1549,10 @@ psymbol_hash (const void *addr, int length)
   return h;
 }
 
-/* Returns true if the symbol at addr1 equals the symbol at addr2.
-   For the comparison this function uses a symbols value,
-   language, domain, class and name.  */
+/* See psymtab.h.  */
 
-static int
-psymbol_compare (const void *addr1, const void *addr2, int length)
+int
+psymbol_bcache::compare (const void *addr1, const void *addr2, int length)
 {
   struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
   struct partial_symbol *sym2 = (struct partial_symbol *) addr2;

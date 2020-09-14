@@ -1,5 +1,27 @@
 2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* bcache.h (struct bcache) <bcache>: Remove constructor.
+	<m_hash_function, m_compare_function>: Remove.
+	<~bcache>: Make virtual.
+	<compare>: Remove static method, introduce virtual method.
+	<default_hash>: Remove.
+	<hash>: New virtual method.
+	* bcache.c (bcache::expand_hash_table): Update.
+	(bcache::insert): Update.
+	(bcache::hash): New.
+	(bcache::compare): Update comment and parameter names.
+	* gdbtypes.c (types_deeply_equal): Update.
+	* psymtab.h (struct psymbol_bcache): New struct.
+	(class psymtab_storage) <psymtab_storage>: Make default.
+	<psymbol_cache>: Change type to psymbol_bcache.
+	* psymtab.c (psymtab_storage::psymtab_storage): Remove.
+	(psymbol_hash): Change to...
+	(psymbol_bcache::hash): ... this.
+	(psymbol_compare): Change to...
+	(psymbol_bcache::compare): ... this.
+
+2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-nat.c (linux_nat_wait_1): Don't use inferior_ptid when
 	checking for initial lwp.
 

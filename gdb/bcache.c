@@ -113,7 +113,7 @@ bcache::expand_hash_table ()
 	  struct bstring **new_bucket;
 	  next = s->next;
 
-	  new_bucket = &new_buckets[(m_hash_function (&s->d.data, s->length)
+	  new_bucket = &new_buckets[(this->hash (&s->d.data, s->length)
 				     % new_num_buckets)];
 	  s->next = *new_bucket;
 	  *new_bucket = s;
@@ -167,7 +167,7 @@ bcache::insert (const void *addr, int length, bool *added)
   m_total_count++;
   m_total_size += length;
 
-  full_hash = m_hash_function (addr, length);
+  full_hash = this->hash (addr, length);
 
   half_hash = (full_hash >> 16);
   hash_index = full_hash % m_num_buckets;
@@ -180,7 +180,7 @@ bcache::insert (const void *addr, int length, bool *added)
       if (s->half_hash == half_hash)
 	{
 	  if (s->length == length
-	      && m_compare_function (&s->d.data, addr, length))
+	      && this->compare (&s->d.data, addr, length))
 	    return &s->d.data;
 	  else
 	    m_half_hash_miss_count++;
@@ -211,13 +211,20 @@ bcache::insert (const void *addr, int length, bool *added)
 }
 
 
-/* Compare the byte string at ADDR1 of lenght LENGHT to the
-   string at ADDR2.  Return 1 if they are equal.  */
+/* See bcache.h.  */
+
+unsigned long
+bcache::hash (const void *addr, int length)
+{
+  return fast_hash (addr, length, 0);
+}
+
+/* See bcache.h.  */
 
 int
-bcache::compare (const void *addr1, const void *addr2, int length)
+bcache::compare (const void *left, const void *right, int length)
 {
-  return memcmp (addr1, addr2, length) == 0;
+  return memcmp (left, right, length) == 0;
 }
 
 /* Free all the storage associated with BCACHE.  */

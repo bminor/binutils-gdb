@@ -4122,7 +4122,7 @@ types_deeply_equal (struct type *type1, struct type *type2)
   if (type1 == type2)
     return true;
 
-  gdb::bcache cache (nullptr, nullptr);
+  gdb::bcache cache;
   worklist.emplace_back (type1, type2);
   return check_types_worklist (&worklist, &cache);
 }
