@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "block.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -54,6 +55,27 @@ dwarf_gdbarch_types_init (struct gdbarch *gdbarch)
   /* The types themselves are lazily initialized.  */
 
   return types;
+}
+
+/* Ensure that a FRAME is defined, throw an exception otherwise.  */
+
+static void
+ensure_have_frame (frame_info *frame, const char *op_name)
+{
+  if (frame == nullptr)
+    throw_error (GENERIC_ERROR,
+		 _("%s evaluation requires a frame."), op_name);
+}
+
+/* See expr.h.  */
+
+CORE_ADDR
+read_addr_from_reg (frame_info *frame, int reg)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
+
+  return address_from_register (regnum, frame);
 }
 
 /* Return the type used for DWARF operations where the type is
@@ -131,6 +153,47 @@ dwarf_expr_context::fetch (int n)
 	      "stack only has %zu elements on it."),
 	    n, stack.size ());
   return stack[stack.size () - (1 + n)].value;
+}
+
+/* See expr.h.  */
+
+struct value *
+dwarf_expr_context::get_reg_value (struct type *type, int reg)
+{
+  ensure_have_frame (this->frame, "DW_OP_regval_type");
+
+  struct gdbarch *gdbarch = get_frame_arch (this->frame);
+  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
+
+  return value_from_register (type, regnum, this->frame);
+}
+
+/* See expr.h.  */
+
+void
+dwarf_expr_context::get_frame_base (const gdb_byte **start,
+				    size_t * length)
+{
+  ensure_have_frame (this->frame, "DW_OP_fbreg");
+
+  const block *bl = get_frame_block (this->frame, NULL);
+
+  if (bl == NULL)
+    error (_("frame address is not available."));
+
+  /* Use block_linkage_function, which returns a real (not inlined)
+     function, instead of get_frame_function, which may return an
+     inlined function.  */
+  symbol *framefunc = block_linkage_function (bl);
+
+  /* If we found a frame-relative symbol then it was certainly within
+     some function associated with a frame. If we can't find the frame,
+     something has gone wrong.  */
+  gdb_assert (framefunc != NULL);
+
+  func_get_frame_base_dwarf_block (framefunc,
+				   get_frame_address_in_block (this->frame),
+				   start, length);
 }
 
 /* Require that TYPE be an integral type; throw an exception if not.  */
@@ -821,7 +884,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_breg31:
 	  {
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    result = this->read_addr_from_reg (op - DW_OP_breg0);
+	    ensure_have_frame (this->frame, "DW_OP_breg");
+
+	    result = read_addr_from_reg (this->frame, op - DW_OP_breg0);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -830,7 +895,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  {
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    result = this->read_addr_from_reg (reg);
+	    ensure_have_frame (this->frame, "DW_OP_bregx");
+
+	    result = read_addr_from_reg (this->frame, reg);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -857,7 +924,8 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    if (this->location == DWARF_VALUE_MEMORY)
 	      result = fetch_address (0);
 	    else if (this->location == DWARF_VALUE_REGISTER)
-	      result = this->read_addr_from_reg (value_as_long (fetch (0)));
+	      result
+		= read_addr_from_reg (this->frame, value_as_long (fetch (0)));
 	    else
 	      error (_("Not implemented: computing frame "
 		       "base using explicit value operator"));

@@ -186,23 +186,11 @@ struct dwarf_expr_context
   /* We evaluate the expression in the context of this objfile.  */
   dwarf2_per_objfile *per_objfile;
 
-  /* Return the value of register number REGNUM (a DWARF register number),
-     read as an address.  */
-  virtual CORE_ADDR read_addr_from_reg (int regnum) = 0;
-
-  /* Return a value of type TYPE, stored in register number REGNUM
-     of the frame associated to the given BATON.
-
-     REGNUM is a DWARF register number.  */
-  virtual struct value *get_reg_value (struct type *type, int regnum) = 0;
+  /* Frame information used for the evaluation.  */
+  frame_info *frame = nullptr;
 
   /* Read LENGTH bytes at ADDR into BUF.  */
   virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length) = 0;
-
-  /* Return the location expression for the frame base attribute, in
-     START and LENGTH.  The result must be live until the current
-     expression evaluation is complete.  */
-  virtual void get_frame_base (const gdb_byte **start, size_t *length) = 0;
 
   /* Return the CFA for the frame.  */
   virtual CORE_ADDR get_frame_cfa () = 0;
@@ -259,7 +247,22 @@ private:
   void add_piece (ULONGEST size, ULONGEST offset);
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
   void pop ();
+
+  /* Return a value of type TYPE, stored in register number REGNUM
+     in a current context.
+
+     REGNUM is a DWARF register number.  */
+  struct value *get_reg_value (struct type *type, int regnum);
+
+  /* Return the location expression for the frame base attribute, in
+     START and LENGTH.  The result must be live until the current
+     expression evaluation is complete.  */
+  void get_frame_base (const gdb_byte **start, size_t *length);
 };
+
+/* Return the value of register number REG (a DWARF register number),
+   read as an address in a given FRAME.  */
+CORE_ADDR read_addr_from_reg (frame_info *frame, int reg);
 
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);

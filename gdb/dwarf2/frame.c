@@ -192,18 +192,6 @@ dwarf2_frame_state::dwarf2_frame_state (CORE_ADDR pc_, struct dwarf2_cie *cie)
     retaddr_column (cie->return_address_register)
 {
 }
-
-
-/* Helper functions for execute_stack_op.  */
-
-static CORE_ADDR
-read_addr_from_reg (struct frame_info *this_frame, int reg)
-{
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
-
-  return address_from_register (regnum, this_frame);
-}
 
 /* Execute the required actions for both the DW_CFA_restore and
 DW_CFA_restore_extended instructions.  */
@@ -244,29 +232,9 @@ public:
     : dwarf_expr_context (per_objfile)
   {}
 
-  struct frame_info *this_frame;
-
-  CORE_ADDR read_addr_from_reg (int reg) override
-  {
-    return ::read_addr_from_reg (this_frame, reg);
-  }
-
-  struct value *get_reg_value (struct type *type, int reg) override
-  {
-    struct gdbarch *gdbarch = get_frame_arch (this_frame);
-    int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
-
-    return value_from_register (type, regnum, this_frame);
-  }
-
   void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
   {
     read_memory (addr, buf, len);
-  }
-
-  void get_frame_base (const gdb_byte **start, size_t *length) override
-  {
-    invalid ("DW_OP_fbreg");
   }
 
   void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
@@ -324,7 +292,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   dwarf_expr_executor ctx (per_objfile);
   scoped_value_mark free_values;
 
-  ctx.this_frame = this_frame;
+  ctx.frame = this_frame;
   ctx.gdbarch = get_frame_arch (this_frame);
   ctx.addr_size = addr_size;
   ctx.ref_addr_size = -1;
@@ -335,7 +303,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   if (ctx.location == DWARF_VALUE_MEMORY)
     result = ctx.fetch_address (0);
   else if (ctx.location == DWARF_VALUE_REGISTER)
-    result = ctx.read_addr_from_reg (value_as_long (ctx.fetch (0)));
+    result = read_addr_from_reg (this_frame, value_as_long (ctx.fetch (0)));
   else
     {
       /* This is actually invalid DWARF, but if we ever do run across

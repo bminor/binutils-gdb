@@ -696,7 +696,6 @@ public:
     : dwarf_expr_context (per_objfile)
   {}
 
-  struct frame_info *frame;
   struct dwarf2_per_cu_data *per_cu;
   CORE_ADDR obj_address;
 
@@ -822,63 +821,11 @@ public:
     this->eval (data_src, size);
   }
 
-  /* Using the frame specified in BATON, find the location expression
-     describing the frame base.  Return a pointer to it in START and
-     its length in LENGTH.  */
-  void get_frame_base (const gdb_byte **start, size_t * length) override
-  {
-    if (frame == nullptr)
-      error (_("frame address is not available."));
-
-    /* FIXME: cagney/2003-03-26: This code should be using
-       get_frame_base_address(), and then implement a dwarf2 specific
-       this_base method.  */
-    struct symbol *framefunc;
-    const struct block *bl = get_frame_block (frame, NULL);
-
-    if (bl == NULL)
-      error (_("frame address is not available."));
-
-    /* Use block_linkage_function, which returns a real (not inlined)
-       function, instead of get_frame_function, which may return an
-       inlined function.  */
-    framefunc = block_linkage_function (bl);
-
-    /* If we found a frame-relative symbol then it was certainly within
-       some function associated with a frame. If we can't find the frame,
-       something has gone wrong.  */
-    gdb_assert (framefunc != NULL);
-
-    func_get_frame_base_dwarf_block (framefunc,
-				     get_frame_address_in_block (frame),
-				     start, length);
-  }
-
   /* Read memory at ADDR (length LEN) into BUF.  */
 
   void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
   {
     read_memory (addr, buf, len);
-  }
-
-  /* Using the frame specified in BATON, return the value of register
-     REGNUM, treated as a pointer.  */
-  CORE_ADDR read_addr_from_reg (int dwarf_regnum) override
-  {
-    struct gdbarch *gdbarch = get_frame_arch (frame);
-    int regnum = dwarf_reg_to_regnum_or_error (gdbarch, dwarf_regnum);
-
-    return address_from_register (regnum, frame);
-  }
-
-  /* Implement "get_reg_value" callback.  */
-
-  struct value *get_reg_value (struct type *type, int dwarf_regnum) override
-  {
-    struct gdbarch *gdbarch = get_frame_arch (frame);
-    int regnum = dwarf_reg_to_regnum_or_error (gdbarch, dwarf_regnum);
-
-    return value_from_register (type, regnum, frame);
   }
 };
 
@@ -2600,7 +2547,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
     case DWARF_VALUE_MEMORY:
       *valp = ctx.fetch_address (0);
       if (ctx.location == DWARF_VALUE_REGISTER)
-	*valp = ctx.read_addr_from_reg (*valp);
+	*valp = read_addr_from_reg (frame, *valp);
       return 1;
     case DWARF_VALUE_LITERAL:
       *valp = extract_signed_integer (ctx.data, ctx.len,
