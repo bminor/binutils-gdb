@@ -10502,7 +10502,7 @@ dwarf2_compute_name (const char *name,
 					   &cu->comp_unit_obstack, cu,
 					   &value, &bytes, &baton);
 
-		  if (TYPE_NOSIGN (type))
+		  if (type->has_no_signedness ())
 		    /* GDB prints characters as NUMBER 'CHAR'.  If that's
 		       changed, this can use value_print instead.  */
 		    c_printchar (value, type, &buf);

@@ -1015,7 +1015,7 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
 static gcc_type
 compile_cplus_convert_int (compile_cplus_instance *instance, struct type *type)
 {
-  if (TYPE_NOSIGN (type))
+  if (type->has_no_signedness ())
     {
       gdb_assert (TYPE_LENGTH (type) == 1);
       return instance->plugin ().get_char_type ();

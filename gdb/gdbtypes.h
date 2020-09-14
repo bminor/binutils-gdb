@@ -210,12 +210,6 @@ enum type_instance_flag_value : unsigned
 
 DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
-/* * No sign for this type.  In C++, "char", "signed char", and
-   "unsigned char" are distinct types; so we need an extra flag to
-   indicate the absence of a sign!  */
-
-#define TYPE_NOSIGN(t)		((t)->has_no_signedness ())
-
 /* * A compiler may supply dwarf instrumentation
    that indicates the desired endian interpretation of the variable
    differs from the native endian representation. */
@@ -1075,6 +1069,10 @@ struct type
   {
     this->main_type->m_flag_unsigned = is_unsigned;
   }
+
+  /* No sign for this type.  In C++, "char", "signed char", and
+     "unsigned char" are distinct types; so we need an extra flag to
+     indicate the absence of a sign!  */
 
   bool has_no_signedness () const
   {

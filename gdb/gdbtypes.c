@@ -3990,7 +3990,7 @@ check_types_equal (struct type *type1, struct type *type2,
   if (type1->code () != type2->code ()
       || TYPE_LENGTH (type1) != TYPE_LENGTH (type2)
       || type1->is_unsigned () != type2->is_unsigned ()
-      || TYPE_NOSIGN (type1) != TYPE_NOSIGN (type2)
+      || type1->has_no_signedness () != type2->has_no_signedness ()
       || TYPE_ENDIANITY_NOT_DEFAULT (type1) != TYPE_ENDIANITY_NOT_DEFAULT (type2)
       || TYPE_VARARGS (type1) != TYPE_VARARGS (type2)
       || TYPE_VECTOR (type1) != TYPE_VECTOR (type2)
@@ -4264,10 +4264,10 @@ rank_one_type_parm_int (struct type *parm, struct type *arg, struct value *value
 	{
 	  /* Deal with signed, unsigned, and plain chars and
 	     signed and unsigned ints.  */
-	  if (TYPE_NOSIGN (parm))
+	  if (parm->has_no_signedness ())
 	    {
 	      /* This case only for character types.  */
-	      if (TYPE_NOSIGN (arg))
+	      if (arg->has_no_signedness ())
 		return EXACT_MATCH_BADNESS;	/* plain char -> plain char */
 	      else		/* signed/unsigned char -> plain char */
 		return INTEGER_CONVERSION_BADNESS;
@@ -4304,7 +4304,7 @@ rank_one_type_parm_int (struct type *parm, struct type *arg, struct value *value
 		    return INTEGER_CONVERSION_BADNESS;
 		}
 	    }
-	  else if (!TYPE_NOSIGN (arg) && !arg->is_unsigned ())
+	  else if (!arg->has_no_signedness () && !arg->is_unsigned ())
 	    {
 	      if (integer_types_same_name_p (parm->name (),
 					     arg->name ()))
@@ -4387,9 +4387,9 @@ rank_one_type_parm_char (struct type *parm, struct type *arg, struct value *valu
     case TYPE_CODE_CHAR:
       /* Deal with signed, unsigned, and plain chars for C++ and
 	 with int cases falling through from previous case.  */
-      if (TYPE_NOSIGN (parm))
+      if (parm->has_no_signedness ())
 	{
-	  if (TYPE_NOSIGN (arg))
+	  if (arg->has_no_signedness ())
 	    return EXACT_MATCH_BADNESS;
 	  else
 	    return INTEGER_CONVERSION_BADNESS;
@@ -4401,7 +4401,7 @@ rank_one_type_parm_char (struct type *parm, struct type *arg, struct value *valu
 	  else
 	    return INTEGER_PROMOTION_BADNESS;
 	}
-      else if (!TYPE_NOSIGN (arg) && !arg->is_unsigned ())
+      else if (!arg->has_no_signedness () && !arg->is_unsigned ())
 	return EXACT_MATCH_BADNESS;
       else
 	return INTEGER_CONVERSION_BADNESS;
@@ -5068,7 +5068,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_UNSIGNED");
     }
-  if (TYPE_NOSIGN (type))
+  if (type->has_no_signedness ())
     {
       puts_filtered (" TYPE_NOSIGN");
     }

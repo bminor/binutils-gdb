@@ -1,5 +1,10 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_NOSIGN): Remove, replace all uses with
+	type::has_no_signedness.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <has_no_signedness,
 	set_has_no_signedness>: New methods.
 	(TYPE_NOSIGN): Use type::has_no_signedness, change all write

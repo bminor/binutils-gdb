@@ -194,7 +194,7 @@ convert_int (compile_c_instance *context, struct type *type)
 {
   if (context->plugin ().version () >= GCC_C_FE_VERSION_1)
     {
-      if (TYPE_NOSIGN (type))
+      if (type->has_no_signedness ())
 	{
 	  gdb_assert (TYPE_LENGTH (type) == 1);
 	  return context->plugin ().char_type ();
