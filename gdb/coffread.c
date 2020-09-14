@@ -2152,7 +2152,7 @@ coff_read_enum_type (int index, int length, int lastsym,
     }
 
   if (unsigned_enum)
-    TYPE_UNSIGNED (type) = 1;
+    type->set_is_unsigned (true);
 
   return type;
 }

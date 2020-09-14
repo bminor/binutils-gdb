@@ -1072,7 +1072,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		f++;
 	      }
 	    if (unsigned_enum)
-	      TYPE_UNSIGNED (t) = 1;
+	      t->set_is_unsigned (true);
 	  }
 	/* Make this the current type.  */
 	top_stack->cur_type = t;

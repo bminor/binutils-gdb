@@ -289,7 +289,8 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
       m_type = arch_type (m_gdbarch, TYPE_CODE_ENUM, e->size * TARGET_CHAR_BIT,
 			  e->name.c_str ());
 
-      TYPE_UNSIGNED (m_type) = 1;
+      m_type->set_is_unsigned (true);
+
       for (const tdesc_type_field &f : e->fields)
 	{
 	  struct field *fld

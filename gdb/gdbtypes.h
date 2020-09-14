@@ -213,7 +213,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 /* * Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
    the type is signed (unless TYPE_NOSIGN (below) is set).  */
 
-#define TYPE_UNSIGNED(t)	(TYPE_MAIN_TYPE (t)->flag_unsigned)
+#define TYPE_UNSIGNED(t)	((t)->is_unsigned ())
 
 /* * No sign for this type.  In C++, "char", "signed char", and
    "unsigned char" are distinct types; so we need an extra flag to
@@ -855,7 +855,7 @@ struct main_type
      because they packs nicely here.  See the TYPE_* macros for
      documentation about these fields.  */
 
-  unsigned int flag_unsigned : 1;
+  unsigned int m_flag_unsigned : 1;
   unsigned int flag_nosign : 1;
   unsigned int flag_stub : 1;
   unsigned int flag_target_stub : 1;
@@ -1066,6 +1066,16 @@ struct type
   ULONGEST bit_stride () const
   {
     return this->bounds ()->bit_stride ();
+  }
+
+  bool is_unsigned () const
+  {
+    return this->main_type->m_flag_unsigned;
+  }
+
+  void set_is_unsigned (bool is_unsigned)
+  {
+    this->main_type->m_flag_unsigned = is_unsigned;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's

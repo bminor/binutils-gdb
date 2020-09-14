@@ -16568,7 +16568,8 @@ update_enumeration_type_from_children (struct die_info *die,
     }
 
   if (unsigned_enum)
-    TYPE_UNSIGNED (type) = 1;
+    type->set_is_unsigned (true);
+
   if (flag_enum)
     TYPE_FLAG_ENUM (type) = 1;
 }
@@ -16643,9 +16644,12 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct type *underlying_type = TYPE_TARGET_TYPE (type);
       underlying_type = check_typedef (underlying_type);
-      TYPE_UNSIGNED (type) = TYPE_UNSIGNED (underlying_type);
+
+      type->set_is_unsigned (underlying_type->is_unsigned ());
+
       if (TYPE_LENGTH (type) == 0)
 	TYPE_LENGTH (type) = TYPE_LENGTH (underlying_type);
+
       if (TYPE_RAW_ALIGN (type) == 0
 	  && TYPE_RAW_ALIGN (underlying_type) != 0)
 	set_type_align (type, TYPE_RAW_ALIGN (underlying_type));

@@ -43,7 +43,7 @@ adjust_type_signedness (struct type *type)
 {
   if (type != NULL && type->code () == TYPE_CODE_RANGE
       && type->bounds ()->low.const_val () >= 0)
-    TYPE_UNSIGNED (type) = 1;
+    type->set_is_unsigned (true);
 }
 
 /* Assuming TYPE is a simple array type, prints its lower bound on STREAM,

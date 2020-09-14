@@ -3616,7 +3616,7 @@ read_enum_type (const char **pp, struct type *type,
   type->set_code (TYPE_CODE_ENUM);
   TYPE_STUB (type) = 0;
   if (unsigned_enum)
-    TYPE_UNSIGNED (type) = 1;
+    type->set_is_unsigned (true);
   type->set_num_fields (nsyms);
   type->set_fields
     ((struct field *)
@@ -3731,7 +3731,8 @@ read_sun_builtin_type (const char **pp, int typenums[2], struct objfile *objfile
       struct type *type = init_type (objfile, TYPE_CODE_VOID,
 				     TARGET_CHAR_BIT, NULL);
       if (unsigned_type)
-        TYPE_UNSIGNED (type) = 1;
+	type->set_is_unsigned (true);
+
       return type;
     }
 
