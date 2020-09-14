@@ -7,6 +7,7 @@
 	* config/tc-bpf.h (md_single_noop_insn): Define.
 	* config/tc-mmix.h (md_single_noop_insn): Define.
 	* config/tc-or1k.h (md_single_noop_insn): Define.
+	* config/tc-ia64.h (md_single_noop_insn): Define.
 	* config/tc-s12z.c (md_assemble): Preserve the input line pointer,
 	rather than corrupting it.
 	* write.c (relax_segment): Update error message regarding

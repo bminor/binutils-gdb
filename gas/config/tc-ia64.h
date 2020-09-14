@@ -327,3 +327,5 @@ typedef struct unwind_record
 #ifdef TE_VMS
 #define DWARF2_VERSION      (dwarf_level < 3 ? 3  : dwarf_level)
 #endif
+
+#define md_single_noop_insn "nop 0"
