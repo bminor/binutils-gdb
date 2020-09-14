@@ -1650,7 +1650,7 @@ again:
 	type->set_code (code);
 	type->set_name (type_name);
 	INIT_CPLUS_SPECIFIC (type);
-	TYPE_STUB (type) = 1;
+	type->set_is_stub (true);
 
 	add_undefined_type (type, typenums);
 	return type;
@@ -3439,7 +3439,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
 
   INIT_CPLUS_SPECIFIC (type);
   type->set_code (type_code);
-  TYPE_STUB (type) = 0;
+  type->set_is_stub (false);
 
   /* First comes the total size in bytes.  */
 
@@ -3614,7 +3614,7 @@ read_enum_type (const char **pp, struct type *type,
   TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
   set_length_in_type_chain (type);
   type->set_code (TYPE_CODE_ENUM);
-  TYPE_STUB (type) = 0;
+  type->set_is_stub (false);
   if (unsigned_enum)
     type->set_is_unsigned (true);
   type->set_num_fields (nsyms);

@@ -220,7 +220,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    if someone referenced a type that wasn't defined in a source file
    via (struct sir_not_appearing_in_this_film *)).  */
 
-#define TYPE_STUB(t)		(TYPE_MAIN_TYPE (t)->flag_stub)
+#define TYPE_STUB(t)		((t)->is_stub ())
 
 /* * The target type of this type is a stub type, and this type needs
    to be updated if it gets un-stubbed in check_typedef.  Used for
@@ -846,7 +846,7 @@ struct main_type
 
   unsigned int m_flag_unsigned : 1;
   unsigned int m_flag_nosign : 1;
-  unsigned int flag_stub : 1;
+  unsigned int m_flag_stub : 1;
   unsigned int flag_target_stub : 1;
   unsigned int flag_prototyped : 1;
   unsigned int flag_varargs : 1;
@@ -1082,6 +1082,16 @@ struct type
   void set_has_no_signedness (bool has_no_signedness)
   {
     this->main_type->m_flag_nosign = has_no_signedness;
+  }
+
+  bool is_stub () const
+  {
+    return this->main_type->m_flag_stub;
+  }
+
+  void set_is_stub (bool is_stub)
+  {
+    this->main_type->m_flag_stub = is_stub;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's

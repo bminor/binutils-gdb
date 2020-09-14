@@ -1,5 +1,11 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct type) <is_stub, set_is_stub>: New methods.
+	(TYPE_STUB): Use type::is_stub, change all write call sites to
+	use type::set_is_stub.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_NOSIGN): Remove, replace all uses with
 	type::has_no_signedness.
 

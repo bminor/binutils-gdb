@@ -1086,7 +1086,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	   do not create a symbol for it either.  */
 	if (t->num_fields () == 0)
 	  {
-	    TYPE_STUB (t) = 1;
+	    t->set_is_stub (true);
 	    break;
 	  }
 
@@ -4274,7 +4274,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
     {
       *pname = "<undefined>";
       *tpp = init_type (mdebugread_objfile, type_code, 0, NULL);
-      TYPE_STUB (*tpp) = 1;
+      (*tpp)->set_is_stub (true);
       return result;
     }
 

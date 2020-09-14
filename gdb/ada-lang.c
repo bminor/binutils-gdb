@@ -8604,7 +8604,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
                    Consider the case of an array, for instance, where the size
                    of the array is computed from the number of elements in
                    our array multiplied by the size of its element.  */
-                TYPE_STUB (fixed_record_type) = 0;
+		fixed_record_type->set_is_stub (false);
               }
           }
         return fixed_record_type;

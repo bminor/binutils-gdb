@@ -867,7 +867,7 @@ allocate_stub_method (struct type *type)
   mtype = alloc_type_copy (type);
   mtype->set_code (TYPE_CODE_METHOD);
   TYPE_LENGTH (mtype) = 1;
-  TYPE_STUB (mtype) = 1;
+  mtype->set_is_stub (true);
   TYPE_TARGET_TYPE (mtype) = type;
   /* TYPE_SELF_TYPE (mtype) = unknown yet */
   return mtype;
@@ -3033,7 +3033,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
      We want a method (TYPE_CODE_METHOD).  */
   smash_to_method_type (mtype, type, TYPE_TARGET_TYPE (mtype),
 			argtypes, argcount, p[-2] == '.');
-  TYPE_STUB (mtype) = 0;
+  mtype->set_is_stub (false);
   TYPE_FN_FIELD_STUB (f, signature_id) = 0;
 
   xfree (demangled_name);
