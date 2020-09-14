@@ -935,7 +935,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	    {
 	      /* If not a vector register, print it also according to its
 		 natural format.  */
-	      if (TYPE_VECTOR (regtype) == 0)
+	      if (regtype->is_vector () == 0)
 		{
 		  get_user_print_options (&opts);
 		  opts.deref_ref = 1;
@@ -1772,7 +1772,7 @@ static ULONGEST
 riscv_type_align (gdbarch *gdbarch, type *type)
 {
   type = check_typedef (type);
-  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     return std::min (TYPE_LENGTH (type), (ULONGEST) BIGGEST_ALIGNMENT);
 
   /* Anything else will be aligned by the generic code.  */

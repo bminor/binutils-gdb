@@ -263,7 +263,7 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	  /* If any of the children of a union are vectors, flag the
 	     union as a vector also.  This allows e.g. a union of two
 	     vector types to show up automatically in "info vector".  */
-	  if (TYPE_VECTOR (field_gdb_type))
+	  if (field_gdb_type->is_vector ())
 	    m_type->set_is_vector (true);
 	}
     }

@@ -475,7 +475,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
   if (range->bounds ()->high.kind () == PROP_LOCEXPR
       || range->bounds ()->high.kind () == PROP_LOCLIST)
     {
-      if (TYPE_VECTOR (type))
+      if (type->is_vector ())
 	{
 	  const char *s = _("variably-sized vector type is not supported");
 
@@ -499,7 +499,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
 	  count = high_bound + 1;
 	}
 
-      if (TYPE_VECTOR (type))
+      if (type->is_vector ())
 	return instance->plugin ().build_vector_type (element_type, count);
 
       return instance->plugin ().build_array_type (element_type, count);

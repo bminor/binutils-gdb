@@ -133,7 +133,7 @@ c_print_type_1 (struct type *type,
 	      && (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC
 		  || code == TYPE_CODE_METHOD
 		  || (code == TYPE_CODE_ARRAY
-		      && !TYPE_VECTOR (type))
+		      && !type->is_vector ())
 		  || code == TYPE_CODE_MEMBERPTR
 		  || code == TYPE_CODE_METHODPTR
 		  || TYPE_IS_REFERENCE (type))))
@@ -772,7 +772,7 @@ c_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_ARRAY:
       {
 	LONGEST low_bound, high_bound;
-	int is_vector = TYPE_VECTOR (type);
+	int is_vector = type->is_vector ();
 
 	if (passed_a_ptr)
 	  fprintf_filtered (stream, ")");

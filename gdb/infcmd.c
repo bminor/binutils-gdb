@@ -2134,7 +2134,7 @@ default_print_one_register_info (struct ui_file *file,
       common_val_print (val, &format_stream, 0, &opts, current_language);
       /* If not a vector register, print it also according to its
 	 natural format.  */
-      if (print_raw_format && TYPE_VECTOR (regtype) == 0)
+      if (print_raw_format && regtype->is_vector () == 0)
 	{
 	  pad_to_column (format_stream, value_column_2);
 	  get_user_print_options (&opts);

@@ -335,7 +335,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else if (len < 16
 		   && type->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type)
+		   && type->is_vector ()
 		   && opencl_abi)
 	    {
 	      /* OpenCL vectors shorter than 16 bytes are passed as if
@@ -422,7 +422,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else if (len >= 16
 		   && type->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type)
+		   && type->is_vector ()
 		   && opencl_abi)
 	    {
 	      /* OpenCL vectors 16 bytes or longer are passed as if
@@ -451,7 +451,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else if (len == 16
 		   && type->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type)
+		   && type->is_vector ()
 		   && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
 	    {
 	      /* Vector parameter passed in an Altivec register, or
@@ -472,7 +472,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else if (len == 8
 		   && type->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type)
+		   && type->is_vector ()
 		   && tdep->vector_abi == POWERPC_VEC_SPE)
 	    {
 	      /* Vector parameter passed in an e500 register, or when
@@ -509,7 +509,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  /* Structs and large values are put in an
 		     aligned stack slot ...  */
 		  if (type->code () == TYPE_CODE_ARRAY
-		      && TYPE_VECTOR (type)
+		      && type->is_vector ()
 		      && len >= 16)
 		    structoffset = align_up (structoffset, 16);
 		  else
@@ -804,7 +804,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
   /* OpenCL vectors < 16 bytes are returned as distinct
      scalars in f1..f2 or r3..r10.  */
   if (type->code () == TYPE_CODE_ARRAY
-      && TYPE_VECTOR (type)
+      && type->is_vector ()
       && TYPE_LENGTH (type) < 16
       && opencl_abi)
     {
@@ -858,7 +858,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
     }
   /* OpenCL vectors >= 16 bytes are returned in v2..v9.  */
   if (type->code () == TYPE_CODE_ARRAY
-      && TYPE_VECTOR (type)
+      && type->is_vector ()
       && TYPE_LENGTH (type) >= 16
       && opencl_abi)
     {
@@ -880,7 +880,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
     }
   if (TYPE_LENGTH (type) == 16
       && type->code () == TYPE_CODE_ARRAY
-      && TYPE_VECTOR (type)
+      && type->is_vector ()
       && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
     {
       if (readbuf)
@@ -897,7 +897,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
     }
   if (TYPE_LENGTH (type) == 16
       && type->code () == TYPE_CODE_ARRAY
-      && TYPE_VECTOR (type)
+      && type->is_vector ()
       && tdep->vector_abi == POWERPC_VEC_GENERIC)
     {
       /* GCC -maltivec -mabi=no-altivec returns vectors in r3/r4/r5/r6.
@@ -921,7 +921,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
     }
   if (TYPE_LENGTH (type) == 8
       && type->code () == TYPE_CODE_ARRAY
-      && TYPE_VECTOR (type)
+      && type->is_vector ()
       && tdep->vector_abi == POWERPC_VEC_SPE)
     {
       /* The e500 ABI places return values for the 64-bit DSP types
@@ -1101,7 +1101,7 @@ ppc64_aggregate_candidate (struct type *type,
       break;
 
     case TYPE_CODE_ARRAY:
-      if (TYPE_VECTOR (type))
+      if (type->is_vector ())
 	{
 	  if (!*field_type)
 	    *field_type = type;
@@ -1186,7 +1186,7 @@ ppc64_elfv2_abi_homogeneous_aggregate (struct type *type,
      complex types can be elements of homogeneous aggregates.  */
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
-      || (type->code () == TYPE_CODE_ARRAY && !TYPE_VECTOR (type)))
+      || (type->code () == TYPE_CODE_ARRAY && !type->is_vector ()))
     {
       struct type *field_type = NULL;
       LONGEST field_count = ppc64_aggregate_candidate (type, &field_type);
@@ -1428,7 +1428,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
       ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), 0, argpos);
       ppc64_sysv_abi_push_freg (gdbarch, type, val, argpos);
     }
-  else if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
 	   && tdep->vector_abi == POWERPC_VEC_ALTIVEC
 	   && TYPE_LENGTH (type) == 16)
     {
@@ -1436,7 +1436,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
       ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), 16, argpos);
       ppc64_sysv_abi_push_vreg (gdbarch, val, argpos);
     }
-  else if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
 	   && TYPE_LENGTH (type) >= 16)
     {
       /* Non-Altivec vectors are passed by reference.  */
@@ -1520,7 +1520,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 		    || eltype->code () == TYPE_CODE_DECFLOAT)
 		  ppc64_sysv_abi_push_freg (gdbarch, eltype, elval, argpos);
 		else if (eltype->code () == TYPE_CODE_ARRAY
-			 && TYPE_VECTOR (eltype)
+			 && eltype->is_vector ()
 			 && tdep->vector_abi == POWERPC_VEC_ALTIVEC
 			 && TYPE_LENGTH (eltype) == 16)
 		  ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
@@ -1644,7 +1644,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	      ppc64_sysv_abi_push_param (gdbarch, eltype,
 				 	 val + TYPE_LENGTH (eltype), &argpos);
 	    }
-	  else if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
 		   && opencl_abi)
 	    {
 	      /* OpenCL vectors shorter than 16 bytes are passed as if
@@ -1856,7 +1856,7 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 
   /* AltiVec vectors are returned in VRs starting at v2.  */
   if (TYPE_LENGTH (valtype) == 16
-      && valtype->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (valtype)
+      && valtype->code () == TYPE_CODE_ARRAY && valtype->is_vector ()
       && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
     {
       int regnum = tdep->ppc_vr0_regnum + 2 + index;
@@ -1870,7 +1870,7 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 
   /* Short vectors are returned in GPRs starting at r3.  */
   if (TYPE_LENGTH (valtype) <= 8
-      && valtype->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (valtype))
+      && valtype->code () == TYPE_CODE_ARRAY && valtype->is_vector ())
     {
       int regnum = tdep->ppc_gp0_regnum + 3 + index;
       int offset = 0;
@@ -1938,7 +1938,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
   /* OpenCL vectors shorter than 16 bytes are returned as if
      a series of independent scalars; OpenCL vectors 16 bytes
      or longer are returned as if a series of AltiVec vectors.  */
-  if (valtype->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (valtype)
+  if (valtype->code () == TYPE_CODE_ARRAY && valtype->is_vector ()
       && opencl_abi)
     {
       if (TYPE_LENGTH (valtype) < 16)
@@ -1975,7 +1975,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
 
   /* Small character arrays are returned, right justified, in r3.  */
   if (valtype->code () == TYPE_CODE_ARRAY
-      && !TYPE_VECTOR (valtype)
+      && !valtype->is_vector ()
       && TYPE_LENGTH (valtype) <= 8
       && TYPE_TARGET_TYPE (valtype)->code () == TYPE_CODE_INT
       && TYPE_LENGTH (TYPE_TARGET_TYPE (valtype)) == 1)
@@ -1999,7 +1999,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       && (eltype->code () == TYPE_CODE_FLT
 	  || eltype->code () == TYPE_CODE_DECFLOAT
 	  || (eltype->code () == TYPE_CODE_ARRAY
-	      && TYPE_VECTOR (eltype)
+	      && eltype->is_vector ()
 	      && tdep->vector_abi == POWERPC_VEC_ALTIVEC
 	      && TYPE_LENGTH (eltype) == 16)))
     {
@@ -2025,7 +2025,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       && (valtype->code () == TYPE_CODE_STRUCT
 	  || valtype->code () == TYPE_CODE_UNION
 	  || (valtype->code () == TYPE_CODE_ARRAY
-	      && !TYPE_VECTOR (valtype))))
+	      && !valtype->is_vector ())))
     {
       int n_regs = ((TYPE_LENGTH (valtype) + tdep->wordsize - 1)
 		    / tdep->wordsize);

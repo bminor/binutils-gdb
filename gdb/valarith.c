@@ -1440,7 +1440,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
   vector_type = check_typedef (vector_type);
 
   gdb_assert (vector_type->code () == TYPE_CODE_ARRAY
-	      && TYPE_VECTOR (vector_type));
+	      && vector_type->is_vector ());
 
   if (!get_array_bounds (vector_type, &low_bound, &high_bound))
     error (_("Could not determine the vector bounds"));
@@ -1480,9 +1480,9 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
   type2 = check_typedef (value_type (val2));
 
   t1_is_vec = (type1->code () == TYPE_CODE_ARRAY
-	       && TYPE_VECTOR (type1)) ? 1 : 0;
+	       && type1->is_vector ()) ? 1 : 0;
   t2_is_vec = (type2->code () == TYPE_CODE_ARRAY
-	       && TYPE_VECTOR (type2)) ? 1 : 0;
+	       && type2->is_vector ()) ? 1 : 0;
 
   if (!t1_is_vec || !t2_is_vec)
     error (_("Vector operations are only supported among vectors"));
@@ -1525,9 +1525,9 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));
   int t1_is_vec = (type1->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type1));
+		   && type1->is_vector ());
   int t2_is_vec = (type2->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type2));
+		   && type2->is_vector ());
 
   if (!t1_is_vec && !t2_is_vec)
     val = scalar_binop (arg1, arg2, op);
@@ -1767,7 +1767,7 @@ value_pos (struct value *arg1)
   type = check_typedef (value_type (arg1));
 
   if (is_integral_type (type) || is_floating_value (arg1)
-      || (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+      || (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
       || type->code () == TYPE_CODE_COMPLEX)
     return value_from_contents (type, value_contents (arg1));
   else
@@ -1784,7 +1784,7 @@ value_neg (struct value *arg1)
 
   if (is_integral_type (type) || is_floating_type (type))
     return value_binop (value_from_longest (type, 0), arg1, BINOP_SUB);
-  else if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct value *tmp, *val = allocate_value (type);
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
@@ -1826,7 +1826,7 @@ value_complement (struct value *arg1)
 
   if (is_integral_type (type))
     val = value_from_longest (type, ~value_as_long (arg1));
-  else if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct value *tmp;
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));

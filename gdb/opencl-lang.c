@@ -96,7 +96,7 @@ lookup_opencl_vector_type (struct gdbarch *gdbarch, enum type_code code,
     {
       LONGEST lowb, highb;
 
-      if (types[i]->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (types[i])
+      if (types[i]->code () == TYPE_CODE_ARRAY && types[i]->is_vector ()
 	  && get_array_bounds (types[i], &lowb, &highb)
 	  && TYPE_TARGET_TYPE (types[i])->code () == code
 	  && TYPE_TARGET_TYPE (types[i])->is_unsigned () == flag_unsigned
@@ -497,7 +497,7 @@ opencl_logical_not (struct expression *exp, struct value *arg)
   struct type *rettype;
   struct value *ret;
 
-  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
       LONGEST lowb, highb;
@@ -586,8 +586,8 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
   type1 = check_typedef (value_type (val1));
   type2 = check_typedef (value_type (val2));
 
-  t1_is_vec = (type1->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type1));
-  t2_is_vec = (type2->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type2));
+  t1_is_vec = (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ());
+  t2_is_vec = (type2->code () == TYPE_CODE_ARRAY && type2->is_vector ());
 
   if (!t1_is_vec || !t2_is_vec)
     error (_("Vector operations are not supported on scalar types"));
@@ -658,7 +658,7 @@ opencl_value_cast (struct type *type, struct value *arg)
 		|| code2 == TYPE_CODE_DECFLOAT || code2 == TYPE_CODE_ENUM
 		|| code2 == TYPE_CODE_RANGE);
 
-      if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (to_type) && scalar)
+      if (code1 == TYPE_CODE_ARRAY && to_type->is_vector () && scalar)
 	{
 	  struct type *eltype;
 
@@ -688,9 +688,9 @@ opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));
   int t1_is_vec = (type1->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type1));
+		   && type1->is_vector ());
   int t2_is_vec = (type2->code () == TYPE_CODE_ARRAY
-		   && TYPE_VECTOR (type2));
+		   && type2->is_vector ());
 
   if (!t1_is_vec && !t2_is_vec)
     {
@@ -831,8 +831,8 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	  type1 = check_typedef (value_type (arg1));
 	  type2 = check_typedef (value_type (arg2));
 
-	  if ((type1->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
-	      || (type2->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type2)))
+	  if ((type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
+	      || (type2->code () == TYPE_CODE_ARRAY && type2->is_vector ()))
 	    {
 	      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
 
@@ -867,7 +867,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
       (*pos)++;
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       type1 = check_typedef (value_type (arg1));
-      if (type1->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
+      if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
 	{
 	  struct value *arg3, *tmp, *ret;
 	  struct type *eltype2, *type3, *eltype3;
@@ -879,9 +879,9 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	  type2 = check_typedef (value_type (arg2));
 	  type3 = check_typedef (value_type (arg3));
 	  t2_is_vec
-	    = type2->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type2);
+	    = type2->code () == TYPE_CODE_ARRAY && type2->is_vector ();
 	  t3_is_vec
-	    = type3->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type3);
+	    = type3->code () == TYPE_CODE_ARRAY && type3->is_vector ();
 
 	  /* Widen the scalar operand to a vector if necessary.  */
 	  if (t2_is_vec || !t3_is_vec)
@@ -970,7 +970,7 @@ Cannot perform conditional operation on vectors with different sizes"));
 	    return value_from_longest (builtin_type (exp->gdbarch)->
 				       builtin_int, 1);
 	  }
-	else if (type1->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
+	else if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
 	  {
 	    return opencl_component_ref (exp, arg1, &exp->elts[pc + 2].string,
 					 noside);
@@ -1062,7 +1062,7 @@ public:
     if (show > 0)
       {
 	type = check_typedef (type);
-	if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	if (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
 	    && type->name () != NULL)
 	  show = 0;
       }

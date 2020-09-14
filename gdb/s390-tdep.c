@@ -75,7 +75,7 @@ s390_type_align (gdbarch *gdbarch, struct type *t)
 	  return 8;
 
 	case TYPE_CODE_ARRAY:
-	  if (TYPE_VECTOR (t))
+	  if (t->is_vector ())
 	    return 8;
 	  break;
 	}
@@ -1697,7 +1697,7 @@ s390_function_arg_vector (struct type *type)
   /* Structs containing just a vector are passed like a vector.  */
   type = s390_effective_inner_type (type, TYPE_LENGTH (type));
 
-  return type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type);
+  return type->code () == TYPE_CODE_ARRAY && type->is_vector ();
 }
 
 /* Determine whether N is a power of two.  */
@@ -2093,7 +2093,7 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
       break;
     case TYPE_CODE_ARRAY:
       rvc = (gdbarch_tdep (gdbarch)->vector_abi == S390_VECTOR_ABI_128
-	     && TYPE_LENGTH (type) <= 16 && TYPE_VECTOR (type))
+	     && TYPE_LENGTH (type) <= 16 && type->is_vector ())
 	? RETURN_VALUE_REGISTER_CONVENTION
 	: RETURN_VALUE_STRUCT_CONVENTION;
       break;

@@ -416,7 +416,7 @@ value_cast (struct type *type, struct value *arg2)
 
   if (current_language->c_style_arrays
       && type2->code () == TYPE_CODE_ARRAY
-      && !TYPE_VECTOR (type2))
+      && !type2->is_vector ())
     arg2 = value_coerce_array (arg2);
 
   if (type2->code () == TYPE_CODE_FUNC)
@@ -529,11 +529,11 @@ value_cast (struct type *type, struct value *arg2)
 	 minus one, instead of biasing the normal case.  */
       return value_from_longest (to_type, -1);
     }
-  else if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
-	   && code2 == TYPE_CODE_ARRAY && TYPE_VECTOR (type2)
+  else if (code1 == TYPE_CODE_ARRAY && type->is_vector ()
+	   && code2 == TYPE_CODE_ARRAY && type2->is_vector ()
 	   && TYPE_LENGTH (type) != TYPE_LENGTH (type2))
     error (_("Cannot convert between vector values of different sizes"));
-  else if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (type) && scalar
+  else if (code1 == TYPE_CODE_ARRAY && type->is_vector () && scalar
 	   && TYPE_LENGTH (type) != TYPE_LENGTH (type2))
     error (_("can only cast scalar to vector of same size"));
   else if (code1 == TYPE_CODE_VOID)
@@ -854,7 +854,7 @@ value_one (struct type *type)
     {
       val = value_from_longest (type, (LONGEST) 1);
     }
-  else if (type1->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
+  else if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
     {
       struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type1));
       int i;
@@ -1361,7 +1361,7 @@ value_must_coerce_to_target (struct value *val)
   switch (valtype->code ())
     {
     case TYPE_CODE_ARRAY:
-      return TYPE_VECTOR (valtype) ? 0 : 1;
+      return valtype->is_vector () ? 0 : 1;
     case TYPE_CODE_STRING:
       return true;
     default:

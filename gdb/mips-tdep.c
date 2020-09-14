@@ -686,7 +686,7 @@ mips_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int pseudo = regnum / gdbarch_num_regs (gdbarch);
   if (reggroup == all_reggroup)
     return pseudo;
-  vector_p = TYPE_VECTOR (register_type (gdbarch, regnum));
+  vector_p = register_type (gdbarch, regnum)->is_vector ();
   float_p = register_type (gdbarch, regnum)->code () == TYPE_CODE_FLT;
   /* FIXME: cagney/2003-04-13: Can't yet use gdbarch_num_regs
      (gdbarch), as not all architectures are multi-arch.  */

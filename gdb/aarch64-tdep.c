@@ -1393,7 +1393,7 @@ static ULONGEST
 aarch64_type_align (gdbarch *gdbarch, struct type *t)
 {
   t = check_typedef (t);
-  if (t->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
+  if (t->code () == TYPE_CODE_ARRAY && t->is_vector ())
     {
       /* Use the natural alignment for vector types (the same for
 	 scalar type), but the maximum alignment is 128-bit.  */
@@ -1453,7 +1453,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 
     case TYPE_CODE_ARRAY:
       {
-	if (TYPE_VECTOR (type))
+	if (type->is_vector ())
 	  {
 	    if (TYPE_LENGTH (type) != 8 && TYPE_LENGTH (type) != 16)
 	      return -1;
@@ -1760,7 +1760,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
       }
 
     case TYPE_CODE_ARRAY:
-      if (TYPE_VECTOR (arg_type))
+      if (arg_type->is_vector ())
 	return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
 			  value_contents (arg));
       /* fall through.  */

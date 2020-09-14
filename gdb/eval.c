@@ -622,7 +622,7 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
       return 1;
 
     case TYPE_CODE_ARRAY:
-      return TYPE_VECTOR (type) ? 0 : lang->c_style_arrays;
+      return type->is_vector () ? 0 : lang->c_style_arrays;
 
     default:
       return 0;
@@ -3137,7 +3137,7 @@ evaluate_subexp_with_coercion (struct expression *exp,
       var = exp->elts[pc + 2].symbol;
       type = check_typedef (SYMBOL_TYPE (var));
       if (type->code () == TYPE_CODE_ARRAY
-	  && !TYPE_VECTOR (type)
+	  && !type->is_vector ()
 	  && CAST_IS_CONVERSION (exp->language_defn))
 	{
 	  (*pos) += 4;

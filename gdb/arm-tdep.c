@@ -3417,7 +3417,7 @@ static ULONGEST
 arm_type_align (gdbarch *gdbarch, struct type *t)
 {
   t = check_typedef (t);
-  if (t->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
+  if (t->code () == TYPE_CODE_ARRAY && t->is_vector ())
     {
       /* Use the natural alignment for vector types (the same for
 	 scalar type), but the maximum alignment is 64-bit.  */
@@ -3562,7 +3562,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 
     case TYPE_CODE_ARRAY:
       {
-	if (TYPE_VECTOR (t))
+	if (t->is_vector ())
 	  {
 	    /* A 64-bit or 128-bit containerized vector type are VFP
 	       CPRCs.  */
@@ -8017,7 +8017,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
       && TYPE_CODE_ARRAY != code && TYPE_CODE_COMPLEX != code)
     return 0;
 
-  if (TYPE_CODE_ARRAY == code && TYPE_VECTOR (type))
+  if (TYPE_CODE_ARRAY == code && type->is_vector ())
     {
       /* Vector values should be returned using ARM registers if they
 	 are not over 16 bytes.  */

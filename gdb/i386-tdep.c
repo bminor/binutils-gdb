@@ -2636,7 +2636,7 @@ i386_16_byte_align_p (struct type *type)
 {
   type = check_typedef (type);
   if ((type->code () == TYPE_CODE_DECFLOAT
-       || (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)))
+       || (type->code () == TYPE_CODE_ARRAY && type->is_vector ()))
       && TYPE_LENGTH (type) == 16)
     return 1;
   if (type->code () == TYPE_CODE_ARRAY)

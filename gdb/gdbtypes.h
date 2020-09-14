@@ -216,11 +216,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
 
-/* * Identify a vector type.  Gcc is handling this by adding an extra
-   attribute to the array type.  We slurp that in as a new flag of a
-   type.  This is used only in dwarf2read.c.  */
-#define TYPE_VECTOR(t)		((t)->is_vector ())
-
 /* * The debugging formats (especially STABS) do not contain enough
    information to represent all Ada types---especially those whose
    size depends on dynamic quantities.  Therefore, the GNAT Ada
@@ -1115,6 +1110,10 @@ struct type
   {
     this->main_type->m_flag_varargs = has_varargs;
   }
+
+  /* Identify a vector type.  Gcc is handling this by adding an extra
+     attribute to the array type.  We slurp that in as a new flag of a
+     type.  This is used only in dwarf2read.c.  */
 
   bool is_vector () const
   {

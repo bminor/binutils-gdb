@@ -56,7 +56,7 @@ convert_array (compile_c_instance *context, struct type *type)
     {
       gcc_type result;
 
-      if (TYPE_VECTOR (type))
+      if (type->is_vector ())
 	return context->plugin ().error (_("variably-sized vector type"
 					   " is not supported"));
 
@@ -78,7 +78,7 @@ convert_array (compile_c_instance *context, struct type *type)
 	  count = high_bound + 1;
 	}
 
-      if (TYPE_VECTOR (type))
+      if (type->is_vector ())
 	return context->plugin ().build_vector_type (element_type, count);
       return context->plugin ().build_array_type (element_type, count);
     }

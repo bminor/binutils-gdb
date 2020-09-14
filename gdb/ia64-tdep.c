@@ -329,7 +329,7 @@ ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   int raw_p;
   if (group == all_reggroup)
     return 1;
-  vector_p = TYPE_VECTOR (register_type (gdbarch, regnum));
+  vector_p = register_type (gdbarch, regnum)->is_vector ();
   float_p = register_type (gdbarch, regnum)->code () == TYPE_CODE_FLT;
   raw_p = regnum < NUM_IA64_RAW_REGS;
   if (group == float_reggroup)

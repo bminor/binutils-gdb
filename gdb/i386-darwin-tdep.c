@@ -109,7 +109,7 @@ darwin_dwarf_signal_frame_p (struct gdbarch *gdbarch,
 static int
 i386_m128_p (struct type *type)
 {
-  return (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+  return (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
           && TYPE_LENGTH (type) == 16);
 }
 
@@ -124,7 +124,7 @@ i386_darwin_arg_type_alignment (struct type *type)
          aligned to 8-byte boundaries.
      7.  [...]  The caller aligns 128-bit vectors in the parameter area to
          16-byte boundaries.  */
-  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     return TYPE_LENGTH (type);
   /* 4.  The caller places all the fields of structures (or unions) with no
          vector elements in the parameter area.  These structures are 4-byte
