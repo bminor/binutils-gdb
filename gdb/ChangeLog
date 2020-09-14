@@ -1,3 +1,56 @@
+2020-09-14  Pedro Alves  <pedro@palves.net>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* avr-tdep.c (avr_address_class_type_flags): Return
+	type_instance_flags.
+	(avr_address_class_type_flags_to_name): Take a
+	type_instance_flags.
+	(avr_address_class_name_to_type_flags): Return bool and take a
+	type_instance_flags.
+	* d-lang.c (build_d_types): Use type::set_instance_flags.
+	* ft32-tdep.c (ft32_address_class_type_flags): Return
+	type_instance_flags.
+	(ft32_address_class_type_flags_to_name): Take a
+	type_instance_flags.
+	(ft32_address_class_name_to_type_flags): Return bool and take a
+	type_instance_flags.
+	(ft32_gdbarch_init): Use type::set_instance_flags.
+	* eval.c (fake_method::fake_method): Use type::set_instance_flags.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* gdbarch.sh (address_class_type_flags): Use type_instance_flags.
+	(address_class_name_to_type_flags): Use type_instance_flags and
+	bool.
+	* gdbtypes.c (address_space_name_to_int)
+	(address_space_int_to_name, make_qualified_type): Use
+	type_instance_flags.
+	(make_qualified_type): Use type_instance_flags and
+	type::set_instance_flags.
+	(make_type_with_address_space, make_cv_type, make_vector_type)
+	(check_typedef): Use type_instance_flags.
+	(recursive_dump_type): Cast type_instance_flags to unsigned for
+	printing.
+	(copy_type_recursive): Use type::set_instance_flags.
+	(gdbtypes_post_init): Use type::set_instance_flags.
+	* gdbtypes.h (struct type) <instance_flags>: Rename to ...
+	<m_instance_flags>: ... this.
+	<instance_flags, set_instance_flags>: New methods.
+	(TYPE_INSTANCE_FLAGS): Use the instance_flags method.
+	(SET_TYPE_INSTANCE_FLAGS): New.
+	(address_space_name_to_int, address_space_int_to_name)
+	(make_type_with_address_space): Pass flags using
+	type_instance_flags instead of int.
+	* stabsread.c (cleanup_undefined_types_noname): Use
+	type::set_instance_flags.
+	* s390-tdep.c (s390_address_class_type_flags): Return
+	type_instance_flags.
+	(s390_address_class_type_flags_to_name): Take a
+	type_instance_flags.
+	(s390_address_class_name_to_type_flags): Return bool and take a
+	type_instance_flags.
+	* type-stack.c (type_stack::follow_types): Use
+	type_instance_flags.
+	* dwarf2/read.c (read_tag_pointer_type): Use type_instance_flags.
+
 2020-09-14  Tom Tromey  <tromey@adacore.com>
 
 	* x86-tdep.h (x86_in_indirect_branch_thunk): Update.

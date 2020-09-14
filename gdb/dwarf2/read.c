@@ -17296,10 +17296,9 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       if (gdbarch_address_class_type_flags_p (gdbarch))
 	{
-	  int type_flags;
-
-	  type_flags = gdbarch_address_class_type_flags
-			 (gdbarch, byte_size, addr_class);
+	  type_instance_flags type_flags
+	    = gdbarch_address_class_type_flags (gdbarch, byte_size,
+						addr_class);
 	  gdb_assert ((type_flags & ~TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 		      == 0);
 	  type = make_type_with_address_space (type, type_flags);

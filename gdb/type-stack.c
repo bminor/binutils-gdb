@@ -109,7 +109,7 @@ type_stack::follow_types (struct type *follow_type)
   int done = 0;
   int make_const = 0;
   int make_volatile = 0;
-  int make_addr_space = 0;
+  type_instance_flags make_addr_space = 0;
   bool make_restrict = false;
   bool make_atomic = false;
   int array_size;
@@ -128,7 +128,7 @@ type_stack::follow_types (struct type *follow_type)
 	make_volatile = 1;
 	break;
       case tp_space_identifier:
-	make_addr_space = pop_int ();
+	make_addr_space = (enum type_instance_flag_value) pop_int ();
 	break;
       case tp_atomic:
 	make_atomic = true;

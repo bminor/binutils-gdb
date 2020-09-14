@@ -1583,7 +1583,7 @@ s390_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 /* Implement addr_class_type_flags gdbarch method.
    Only used for ABI_LINUX_ZSERIES.  */
 
-static int
+static type_instance_flags
 s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
 {
   if (byte_size == 4)
@@ -1596,7 +1596,8 @@ s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
    Only used for ABI_LINUX_ZSERIES.  */
 
 static const char *
-s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
+s390_address_class_type_flags_to_name (struct gdbarch *gdbarch,
+				       type_instance_flags type_flags)
 {
   if (type_flags & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
     return "mode32";
@@ -1607,18 +1608,18 @@ s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
 /* Implement addr_class_name_to_type_flags gdbarch method.
    Only used for ABI_LINUX_ZSERIES.  */
 
-static int
+static bool
 s390_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 				       const char *name,
-				       int *type_flags_ptr)
+				       type_instance_flags *type_flags_ptr)
 {
   if (strcmp (name, "mode32") == 0)
     {
       *type_flags_ptr = TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
-      return 1;
+      return true;
     }
   else
-    return 0;
+    return false;
 }
 
 /* Inferior function calls.  */

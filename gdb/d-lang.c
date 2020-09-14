@@ -321,10 +321,13 @@ build_d_types (struct gdbarch *gdbarch)
     = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
 		       "real", gdbarch_long_double_format (gdbarch));
 
-  TYPE_INSTANCE_FLAGS (builtin_d_type->builtin_byte)
-    |= TYPE_INSTANCE_FLAG_NOTTEXT;
-  TYPE_INSTANCE_FLAGS (builtin_d_type->builtin_ubyte)
-    |= TYPE_INSTANCE_FLAG_NOTTEXT;
+  builtin_d_type->builtin_byte->set_instance_flags
+    (builtin_d_type->builtin_byte->instance_flags ()
+     | TYPE_INSTANCE_FLAG_NOTTEXT);
+
+  builtin_d_type->builtin_ubyte->set_instance_flags
+    (builtin_d_type->builtin_ubyte->instance_flags ()
+     | TYPE_INSTANCE_FLAG_NOTTEXT);
 
   /* Imaginary and complex types.  */
   builtin_d_type->builtin_ifloat
