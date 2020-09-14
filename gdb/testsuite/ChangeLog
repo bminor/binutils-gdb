@@ -1,3 +1,7 @@
+2020-09-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.rust/traits.exp: Fix PATH warning.
+
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
 	* gdb.base/catch-follow-exec.c (main): Add explicit return
