@@ -1,3 +1,10 @@
+2020-09-14  Pedro Alves  <pedro@palves.net>
+
+	* traits.h (struct nonesuch, struct detector, detected_or)
+	(detected_or_t, is_detected, detected_t, detected_or)
+	(detected_or_t, is_detected_exact, is_detected_convertible): New.
+	* valid-expr.h (CHECK_VALID_EXPR_INT): Use gdb::is_detected_exact.
+
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
 	* eintr.h: New file.
