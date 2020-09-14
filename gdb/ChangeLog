@@ -1,5 +1,10 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_GNU_IFUNC): Remove, replace all
+	uses with type::is_gnu_ifunc.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <is_gnu_ifunc, set_is_gnu_ifunc>: New methods.
 	(TYPE_GNU_IFUNC): Use type::is_gnu_ifunc, change all write call sites to
 	use type::set_is_gnu_ifunc.

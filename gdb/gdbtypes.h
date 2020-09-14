@@ -233,13 +233,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_NOTTEXT(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_NOTTEXT)
 
-/* * Used only for TYPE_CODE_FUNC where it specifies the real function
-   address is returned by this function call.  TYPE_TARGET_TYPE
-   determines the final returned function type to be presented to
-   user.  */
-
-#define TYPE_GNU_IFUNC(t)	((t)->is_gnu_ifunc ())
-
 /* * Type owner.  If TYPE_OBJFILE_OWNED is true, the type is owned by
    the objfile retrieved as TYPE_OBJFILE.  Otherwise, the type is
    owned by an architecture; TYPE_OBJFILE is NULL in this case.  */
@@ -1132,6 +1125,11 @@ struct type
   {
     this->main_type->m_flag_stub_supported = stub_is_supported;
   }
+
+  /* Used only for TYPE_CODE_FUNC where it specifies the real function
+     address is returned by this function call.  TYPE_TARGET_TYPE
+     determines the final returned function type to be presented to
+     user.  */
 
   bool is_gnu_ifunc () const
   {

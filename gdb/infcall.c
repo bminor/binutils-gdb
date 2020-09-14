@@ -275,7 +275,7 @@ find_function_addr (struct value *function,
   if (ftype->code () == TYPE_CODE_FUNC
       || ftype->code () == TYPE_CODE_METHOD)
     {
-      if (TYPE_GNU_IFUNC (ftype))
+      if (ftype->is_gnu_ifunc ())
 	{
 	  CORE_ADDR resolver_addr = funaddr;
 

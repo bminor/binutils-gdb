@@ -735,7 +735,7 @@ evaluate_var_msym_value (enum noside noside,
   CORE_ADDR address;
   type *the_type = find_minsym_type_and_address (msymbol, objfile, &address);
 
-  if (noside == EVAL_AVOID_SIDE_EFFECTS && !TYPE_GNU_IFUNC (the_type))
+  if (noside == EVAL_AVOID_SIDE_EFFECTS && !the_type->is_gnu_ifunc ())
     return value_zero (the_type, not_lval);
   else
     return value_at_lazy (the_type, address);
@@ -793,7 +793,7 @@ eval_call (expression *exp, enum noside noside,
       else if (ftype->code () == TYPE_CODE_FUNC
 	       || ftype->code () == TYPE_CODE_METHOD)
 	{
-	  if (TYPE_GNU_IFUNC (ftype))
+	  if (ftype->is_gnu_ifunc ())
 	    {
 	      CORE_ADDR address = value_address (argvec[0]);
 	      type *resolved_type = find_gnu_ifunc_target_type (address);
