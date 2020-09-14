@@ -79,6 +79,10 @@ struct gdbarch_tdep
      passed to a function.  */
   int struct_value_regnum;
 
+  /* Register in which a pointer value is returned.  In the SVR4 ABI,
+     this is %a0, but in GCC's "embedded" ABI, this is %d0.  */
+  int pointer_result_regnum;
+
   /* Convention for returning structures.  */
   enum struct_return struct_return;
 

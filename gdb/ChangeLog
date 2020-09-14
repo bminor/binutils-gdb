@@ -1,3 +1,20 @@
+2020-09-14  Tom Tromey  <tromey@adacore.com>
+
+	* m68k-tdep.c (m68k_extract_return_value): Use
+	pointer_result_regnum.
+	(m68k_store_return_value): Likewise.
+	(m68k_reg_struct_return_p): Handle vectors and arrays.
+	(m68k_return_value): Handle arrays.
+	(m68k_svr4_return_value): Fix single-element aggregate handling.
+	Handle long double.  Adjust for embedded ABI.
+	(m68k_svr4_init_abi): Set pointer_result_regnum.
+	(m68k_embedded_init_abi): New function.
+	(m68k_gdbarch_init): Handle Tag_GNU_M68K_ABI_FP.
+	(m68k_osabi_sniffer): New function.
+	(_initialize_m68k_tdep): Register osabi sniffer.
+	* m68k-tdep.h (struct gdbarch_tdep) <pointer_result_regnum>: New
+	member.
+
 2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* xml-support.c (xml_fetch_content_from_file): Replace xfree
