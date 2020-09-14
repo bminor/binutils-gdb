@@ -216,18 +216,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
 
-/* * The debugging formats (especially STABS) do not contain enough
-   information to represent all Ada types---especially those whose
-   size depends on dynamic quantities.  Therefore, the GNAT Ada
-   compiler includes extra information in the form of additional type
-   definitions connected by naming conventions.  This flag indicates
-   that the type is an ordinary (unencoded) GDB type that has been
-   created from the necessary run-time information, and does not need
-   further interpretation.  Optionally marks ordinary, fixed-size GDB
-   type.  */
-
-#define TYPE_FIXED_INSTANCE(t) ((t)->is_fixed_instance ())
-
 /* * Not textual.  By default, GDB treats all single byte integers as
    characters (or elements of strings) unless this flag is set.  */
 
@@ -1141,6 +1129,16 @@ struct type
     this->main_type->m_flag_gnu_ifunc = is_gnu_ifunc;
   }
 
+  /* The debugging formats (especially STABS) do not contain enough
+     information to represent all Ada types---especially those whose
+     size depends on dynamic quantities.  Therefore, the GNAT Ada
+     compiler includes extra information in the form of additional type
+     definitions connected by naming conventions.  This flag indicates
+     that the type is an ordinary (unencoded) GDB type that has been
+     created from the necessary run-time information, and does not need
+     further interpretation.  Optionally marks ordinary, fixed-size GDB
+     type.  */
+
   bool is_fixed_instance () const
   {
     return this->main_type->m_flag_fixed_instance;
@@ -1658,7 +1656,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define ADA_TYPE_P(type)					\
   (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_GNAT_STUFF	\
     || (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_NONE	\
-	&& TYPE_FIXED_INSTANCE (type)))
+	&& (type)->is_fixed_instance ()))
 
 #define INIT_FUNC_SPECIFIC(type)					       \
   (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FUNC,			       \

@@ -2938,7 +2938,7 @@ ada_array_bound_from_type (struct type *arr_type, int n, int which)
   else
     type = arr_type;
 
-  if (TYPE_FIXED_INSTANCE (type))
+  if (type->is_fixed_instance ())
     {
       /* The array has already been fixed, so we do not need to
 	 check the parallel ___XA type again.  That encoding has
@@ -8054,7 +8054,7 @@ template_to_static_fixed_type (struct type *type0)
   int f;
 
   /* No need no do anything if the input type is already fixed.  */
-  if (TYPE_FIXED_INSTANCE (type0))
+  if (type0->is_fixed_instance ())
     return type0;
 
   /* Likewise if we already have computed the static approximation.  */
@@ -8207,7 +8207,7 @@ to_fixed_record_type (struct type *type0, const gdb_byte *valaddr,
 {
   struct type *templ_type;
 
-  if (TYPE_FIXED_INSTANCE (type0))
+  if (type0->is_fixed_instance ())
     return type0;
 
   templ_type = dynamic_template_type (type0);
@@ -8363,7 +8363,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   static const char *xa_suffix = "___XA";
 
   type0 = ada_check_typedef (type0);
-  if (TYPE_FIXED_INSTANCE (type0))
+  if (type0->is_fixed_instance ())
     return type0;
 
   constrained_packed_array_p = ada_is_constrained_packed_array_type (type0);
@@ -8683,7 +8683,7 @@ to_static_fixed_type (struct type *type0)
   if (type0 == NULL)
     return NULL;
 
-  if (TYPE_FIXED_INSTANCE (type0))
+  if (type0->is_fixed_instance ())
     return type0;
 
   type0 = ada_check_typedef (type0);

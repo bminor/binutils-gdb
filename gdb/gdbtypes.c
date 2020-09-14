@@ -5099,7 +5099,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_VECTOR");
     }
-  if (TYPE_FIXED_INSTANCE (type))
+  if (type->is_fixed_instance ())
     {
       puts_filtered (" TYPE_FIXED_INSTANCE");
     }

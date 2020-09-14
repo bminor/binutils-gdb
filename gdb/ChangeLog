@@ -1,5 +1,10 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_FIXED_INSTANCE): Remove, replace all
+	uses with type::is_fixed_instance.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <is_fixed_instance,
 	set_is_fixed_instance>: New methods.
 	(TYPE_FIXED_INSTANCE): Use type::is_fixed_instance, change all
