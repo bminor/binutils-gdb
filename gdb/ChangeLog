@@ -1,5 +1,12 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct type) <target_is_stub, set_target_is_stub>:
+	New methods.
+	(TYPE_TARGET_STUB): Use type::is_stub, change all write call
+	sites to use type::set_target_is_stub.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_STUB): Remove, replace all
 	uses with type::is_stub.
 

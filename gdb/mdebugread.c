@@ -1866,7 +1866,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 
       /* TYPE_TARGET_STUB now takes care of the zero TYPE_LENGTH problem.  */
       if (TYPE_LENGTH (*tpp) == 0)
-	TYPE_TARGET_STUB (t) = 1;
+	t->set_target_is_stub (true);
 
       *tpp = t;
       return 4 + off;

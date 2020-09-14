@@ -935,7 +935,7 @@ create_range_type (struct type *result_type, struct type *index_type,
   result_type->set_code (TYPE_CODE_RANGE);
   TYPE_TARGET_TYPE (result_type) = index_type;
   if (index_type->is_stub ())
-    TYPE_TARGET_STUB (result_type) = 1;
+    result_type->set_target_is_stub (true);
   else
     TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
 
@@ -1307,7 +1307,7 @@ create_array_type_with_stride (struct type *result_type,
 
   /* TYPE_TARGET_STUB will take care of zero length arrays.  */
   if (TYPE_LENGTH (result_type) == 0)
-    TYPE_TARGET_STUB (result_type) = 1;
+    result_type->set_target_is_stub (true);
 
   return result_type;
 }
@@ -2875,11 +2875,11 @@ check_typedef (struct type *type)
       else if (type->code () == TYPE_CODE_RANGE)
 	{
 	  TYPE_LENGTH (type) = TYPE_LENGTH (target_type);
-	  TYPE_TARGET_STUB (type) = 0;
+	  type->set_target_is_stub (false);
 	}
       else if (type->code () == TYPE_CODE_ARRAY
 	       && update_static_array_size (type))
-	TYPE_TARGET_STUB (type) = 0;
+	type->set_target_is_stub (false);
     }
 
   type = make_qualified_type (type, instance_flags, NULL);

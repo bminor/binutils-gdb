@@ -776,7 +776,7 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
     {
       range_type->bounds ()->high.set_undefined ();
       TYPE_LENGTH (type) = 0;
-      TYPE_TARGET_STUB (type) = 1;
+      type->set_target_is_stub (true);
     }
   else
     TYPE_LENGTH (type) = ctf_type_size (fp, tid);
@@ -876,7 +876,8 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
     TYPE_TARGET_TYPE (this_type) = target_type;
   else
     TYPE_TARGET_TYPE (this_type) = NULL;
-  TYPE_TARGET_STUB (this_type) = TYPE_TARGET_TYPE (this_type) ? 1 : 0;
+
+  this_type->set_target_is_stub (TYPE_TARGET_TYPE (this_type) != nullptr);
 
   return set_tid_type (objfile, tid, this_type);
 }

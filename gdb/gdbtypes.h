@@ -222,7 +222,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    based on the TYPE_LENGTH of the target type.  Also, set for
    TYPE_CODE_TYPEDEF.  */
 
-#define TYPE_TARGET_STUB(t)	(TYPE_MAIN_TYPE (t)->flag_target_stub)
+#define TYPE_TARGET_STUB(t)	((t)->target_is_stub ())
 
 /* * This is a function type which appears to have a prototype.  We
    need this for function calls in order to tell us if it's necessary
@@ -841,7 +841,7 @@ struct main_type
   unsigned int m_flag_unsigned : 1;
   unsigned int m_flag_nosign : 1;
   unsigned int m_flag_stub : 1;
-  unsigned int flag_target_stub : 1;
+  unsigned int m_flag_target_stub : 1;
   unsigned int flag_prototyped : 1;
   unsigned int flag_varargs : 1;
   unsigned int flag_vector : 1;
@@ -1090,6 +1090,16 @@ struct type
   void set_is_stub (bool is_stub)
   {
     this->main_type->m_flag_stub = is_stub;
+  }
+
+  bool target_is_stub () const
+  {
+    return this->main_type->m_flag_target_stub;
+  }
+
+  void set_target_is_stub (bool target_is_stub)
+  {
+    this->main_type->m_flag_target_stub = target_is_stub;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's

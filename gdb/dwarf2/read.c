@@ -17795,7 +17795,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 
   name = dwarf2_full_name (NULL, die, cu);
   this_type = init_type (objfile, TYPE_CODE_TYPEDEF, 0, name);
-  TYPE_TARGET_STUB (this_type) = 1;
+  this_type->set_target_is_stub (true);
   set_die_type (die, this_type, cu);
   target_type = die_type (die, cu);
   if (target_type != this_type)

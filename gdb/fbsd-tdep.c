@@ -1643,14 +1643,14 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
   pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 			TYPE_LENGTH (int32_type) * TARGET_CHAR_BIT, "__pid_t");
   TYPE_TARGET_TYPE (pid_type) = int32_type;
-  TYPE_TARGET_STUB (pid_type) = 1;
+  pid_type->set_target_is_stub (true);
 
   /* __uid_t */
   uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 			TYPE_LENGTH (uint32_type) * TARGET_CHAR_BIT,
 			"__uid_t");
   TYPE_TARGET_TYPE (uid_type) = uint32_type;
-  TYPE_TARGET_STUB (uid_type) = 1;
+  pid_type->set_target_is_stub (true);
 
   /* _reason */
   reason_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);

@@ -1716,7 +1716,7 @@ again:
 	  }
 	else
 	  {
-	    TYPE_TARGET_STUB (type) = 1;
+	    type->set_target_is_stub (true);
 	    TYPE_TARGET_TYPE (type) = xtype;
 	  }
       }
