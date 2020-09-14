@@ -958,8 +958,8 @@ create_range_type (struct type *result_type, struct type *index_type,
   if (high_bound->kind () == PROP_CONST && high_bound->const_val () < 0)
     result_type->set_is_unsigned (false);
 
-  TYPE_ENDIANITY_NOT_DEFAULT (result_type)
-    = TYPE_ENDIANITY_NOT_DEFAULT (index_type);
+  result_type->set_endianity_is_not_default
+    (index_type->endianity_is_not_default ());
 
   return result_type;
 }

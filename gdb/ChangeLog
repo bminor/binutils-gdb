@@ -1,5 +1,13 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct type) <endianity_is_not_default,
+	set_endianity_is_not_default>: New methods.
+	(TYPE_ENDIANITY_NOT_DEFAULT): Use
+	type::endianity_is_not_default, change all write call sites to
+	use type::set_endianity_is_not_default.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_FIXED_INSTANCE): Remove, replace all
 	uses with type::is_fixed_instance.
 

@@ -214,7 +214,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    that indicates the desired endian interpretation of the variable
    differs from the native endian representation. */
 
-#define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
+#define TYPE_ENDIANITY_NOT_DEFAULT(t) ((t)->endianity_is_not_default ())
 
 /* * Not textual.  By default, GDB treats all single byte integers as
    characters (or elements of strings) unless this flag is set.  */
@@ -798,7 +798,7 @@ struct main_type
   unsigned int m_flag_gnu_ifunc : 1;
   unsigned int m_flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
-  unsigned int flag_endianity_not_default : 1;
+  unsigned int m_flag_endianity_not_default : 1;
 
   /* * True if this type was declared with "class" rather than
      "struct".  */
@@ -1147,6 +1147,16 @@ struct type
   void set_is_fixed_instance (bool is_fixed_instance)
   {
     this->main_type->m_flag_fixed_instance = is_fixed_instance;
+  }
+
+  bool endianity_is_not_default () const
+  {
+    return this->main_type->m_flag_endianity_not_default;
+  }
+
+  void set_endianity_is_not_default (bool endianity_is_not_default)
+  {
+    this->main_type->m_flag_endianity_not_default = endianity_is_not_default;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's
