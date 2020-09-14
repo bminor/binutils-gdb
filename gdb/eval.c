@@ -673,7 +673,7 @@ fake_method::fake_method (type_instance_flags flags,
 	  --num_types;
 	  /* Caller should have ensured this.  */
 	  gdb_assert (num_types == 0);
-	  TYPE_PROTOTYPED (type) = 1;
+	  type->set_is_prototyped (true);
 	}
     }
 

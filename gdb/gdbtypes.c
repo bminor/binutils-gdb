@@ -560,10 +560,10 @@ lookup_function_type_with_arguments (struct type *type,
 	  --nparams;
 	  /* Caller should have ensured this.  */
 	  gdb_assert (nparams == 0);
-	  TYPE_PROTOTYPED (fn) = 1;
+	  fn->set_is_prototyped (true);
 	}
       else
-	TYPE_PROTOTYPED (fn) = 1;
+	fn->set_is_prototyped (true);
     }
 
   fn->set_num_fields (nparams);

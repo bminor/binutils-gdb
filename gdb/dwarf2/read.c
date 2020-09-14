@@ -17665,7 +17665,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   ftype = lookup_function_type (type);
 
   if (prototyped_function_p (die, cu))
-    TYPE_PROTOTYPED (ftype) = 1;
+    ftype->set_is_prototyped (true);
 
   /* Store the calling convention in the type if it's available in
      the subroutine die.  Otherwise set the calling convention to

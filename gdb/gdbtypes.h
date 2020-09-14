@@ -221,7 +221,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    to coerce the args, or to just do the standard conversions.  This
    is used with a short field.  */
 
-#define TYPE_PROTOTYPED(t)	(TYPE_MAIN_TYPE (t)->flag_prototyped)
+#define TYPE_PROTOTYPED(t)	((t)->is_prototyped ())
 
 /* * FIXME drow/2002-06-03:  Only used for methods, but applies as well
    to functions.  */
@@ -834,7 +834,7 @@ struct main_type
   unsigned int m_flag_nosign : 1;
   unsigned int m_flag_stub : 1;
   unsigned int m_flag_target_stub : 1;
-  unsigned int flag_prototyped : 1;
+  unsigned int m_flag_prototyped : 1;
   unsigned int flag_varargs : 1;
   unsigned int flag_vector : 1;
   unsigned int flag_stub_supported : 1;
@@ -1098,6 +1098,16 @@ struct type
   void set_target_is_stub (bool target_is_stub)
   {
     this->main_type->m_flag_target_stub = target_is_stub;
+  }
+
+  bool is_prototyped () const
+  {
+    return this->main_type->m_flag_prototyped;
+  }
+
+  void set_is_prototyped (bool is_prototyped)
+  {
+    this->main_type->m_flag_prototyped = is_prototyped;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's
