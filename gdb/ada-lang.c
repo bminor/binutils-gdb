@@ -2108,7 +2108,7 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
         (*elt_bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
     }
 
-  TYPE_FIXED_INSTANCE (new_type) = 1;
+  new_type->set_is_fixed_instance (true);
   return new_type;
 }
 
@@ -7820,7 +7820,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   rtype->set_fields
    ((struct field *) TYPE_ZALLOC (rtype, nfields * sizeof (struct field)));
   rtype->set_name (ada_type_name (type));
-  TYPE_FIXED_INSTANCE (rtype) = 1;
+  rtype->set_is_fixed_instance (true);
 
   off = 0;
   bit_len = 0;
@@ -8100,7 +8100,7 @@ template_to_static_fixed_type (struct type *type0)
 	      type->set_fields (fields);
 
 	      type->set_name (ada_type_name (type0));
-	      TYPE_FIXED_INSTANCE (type) = 1;
+	      type->set_is_fixed_instance (true);
 	      TYPE_LENGTH (type) = 0;
 	    }
 	  type->field (f).set_type (new_type);
@@ -8151,7 +8151,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   rtype->set_fields (fields);
 
   rtype->set_name (ada_type_name (type));
-  TYPE_FIXED_INSTANCE (rtype) = 1;
+  rtype->set_is_fixed_instance (true);
   TYPE_LENGTH (rtype) = TYPE_LENGTH (type);
 
   branch_type = to_fixed_variant_branch_type
@@ -8223,7 +8223,7 @@ to_fixed_record_type (struct type *type0, const gdb_byte *valaddr,
     }
   else
     {
-      TYPE_FIXED_INSTANCE (type0) = 1;
+      type0->set_is_fixed_instance (true);
       return type0;
     }
 
@@ -8489,7 +8489,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
         TYPE_LENGTH (result)++;
     }
 
-  TYPE_FIXED_INSTANCE (result) = 1;
+  result->set_is_fixed_instance (true);
   return result;
 }
 
