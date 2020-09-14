@@ -64,7 +64,7 @@ enum task_states
 };
 
 /* A short description corresponding to each possible task state.  */
-static const char *task_states[] = {
+static const char * const task_states[] = {
   N_("Unactivated"),
   N_("Runnable"),
   N_("Terminated"),
@@ -86,7 +86,7 @@ static const char *task_states[] = {
 };
 
 /* A longer description corresponding to each possible task state.  */
-static const char *long_task_states[] = {
+static const char * const long_task_states[] = {
   N_("Unactivated"),
   N_("Runnable"),
   N_("Terminated"),

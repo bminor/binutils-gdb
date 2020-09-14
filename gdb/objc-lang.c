@@ -319,7 +319,7 @@ static const struct op_print objc_op_print_tab[] =
     {NULL, OP_NULL, PREC_NULL, 0}
 };
 
-static const char *objc_extensions[] =
+static const char * const objc_extensions[] =
 {
   ".m", NULL
 };

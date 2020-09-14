@@ -315,11 +315,11 @@ static int warning_limit = 2;
    expression evaluation.  */
 static int warnings_issued = 0;
 
-static const char *known_runtime_file_name_patterns[] = {
+static const char * const known_runtime_file_name_patterns[] = {
   ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS NULL
 };
 
-static const char *known_auxiliary_function_name_patterns[] = {
+static const char * const known_auxiliary_function_name_patterns[] = {
   ADA_KNOWN_AUXILIARY_FUNCTION_NAME_PATTERNS NULL
 };
 
@@ -8828,7 +8828,7 @@ ada_to_fixed_value (struct value *val)
 /* Table mapping attribute numbers to names.
    NOTE: Keep up to date with enum ada_attribute definition in ada-lang.h.  */
 
-static const char *attribute_names[] = {
+static const char * const attribute_names[] = {
   "<?>",
 
   "first",
@@ -11503,7 +11503,7 @@ ada_modulus (struct type *type)
    an Ada83 compiler). As such, we do not include Numeric_Error from
    this list of standard exceptions.  */
 
-static const char *standard_exc[] = {
+static const char * const standard_exc[] = {
   "constraint_error",
   "program_error",
   "storage_error",
@@ -13704,7 +13704,7 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
     }
 }
 
-static const char *ada_extensions[] =
+static const char * const ada_extensions[] =
 {
   ".adb", ".ads", ".a", ".ada", ".dg", NULL
 };

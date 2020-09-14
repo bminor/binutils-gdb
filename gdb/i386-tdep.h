@@ -145,21 +145,21 @@ struct gdbarch_tdep
   int xsave_xcr0_offset;
 
   /* Register names.  */
-  const char **register_names;
+  const char * const *register_names;
 
   /* Register number for %ymm0h.  Set this to -1 to indicate the absence
      of upper YMM register support.  */
   int ymm0h_regnum;
 
   /* Upper YMM register names.  Only used for tdesc_numbered_register.  */
-  const char **ymmh_register_names;
+  const char * const *ymmh_register_names;
 
   /* Register number for %ymm16h.  Set this to -1 to indicate the absence
   of support for YMM16-31.  */
   int ymm16h_regnum;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char **ymm16h_register_names;
+  const char * const *ymm16h_register_names;
 
   /* Register number for %bnd0r.  Set this to -1 to indicate the absence
      bound registers.  */
@@ -174,23 +174,23 @@ struct gdbarch_tdep
   int bndcfgu_regnum;
 
   /* MPX register names.  Only used for tdesc_numbered_register.  */
-  const char **mpx_register_names;
+  const char * const *mpx_register_names;
 
   /* Register number for %zmm0h.  Set this to -1 to indicate the absence
      of ZMM_HI256 register support.  */
   int zmm0h_regnum;
 
   /* OpMask register names.  */
-  const char **k_register_names;
+  const char * const *k_register_names;
 
   /* ZMM register names.  Only used for tdesc_numbered_register.  */
-  const char **zmmh_register_names;
+  const char * const *zmmh_register_names;
 
   /* XMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char **xmm_avx512_register_names;
+  const char * const *xmm_avx512_register_names;
 
   /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
-  const char **ymm_avx512_register_names;
+  const char * const *ymm_avx512_register_names;
 
   /* Number of PKEYS registers.  */
   int num_pkeys_regs;
@@ -199,7 +199,7 @@ struct gdbarch_tdep
   int pkru_regnum;
 
   /* PKEYS register names.  */
-  const char **pkeys_register_names;
+  const char * const *pkeys_register_names;
 
   /* Register number for %fsbase.  Set this to -1 to indicate the
      absence of segment base registers.  */

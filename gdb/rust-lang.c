@@ -1902,7 +1902,7 @@ static const struct exp_descriptor exp_descriptor_rust =
   rust_evaluate_subexp
 };
 
-static const char *rust_extensions[] =
+static const char * const rust_extensions[] =
 {
   ".rs", NULL
 };

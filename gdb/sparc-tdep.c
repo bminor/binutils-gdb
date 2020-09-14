@@ -363,11 +363,17 @@ sparc_arg_by_memory_p (const struct type *type)
 #define SPARC32_CP0_REGISTERS \
   "y", "psr", "wim", "tbr", "pc", "npc", "fsr", "csr"
 
-static const char *sparc_core_register_names[] = { SPARC_CORE_REGISTERS };
-static const char *sparc32_fpu_register_names[] = { SPARC32_FPU_REGISTERS };
-static const char *sparc32_cp0_register_names[] = { SPARC32_CP0_REGISTERS };
+static const char * const sparc_core_register_names[] = {
+  SPARC_CORE_REGISTERS
+};
+static const char * const sparc32_fpu_register_names[] = {
+  SPARC32_FPU_REGISTERS
+};
+static const char * const sparc32_cp0_register_names[] = {
+  SPARC32_CP0_REGISTERS
+};
 
-static const char *sparc32_register_names[] =
+static const char * const sparc32_register_names[] =
 {
   SPARC_CORE_REGISTERS,
   SPARC32_FPU_REGISTERS,
@@ -380,7 +386,7 @@ static const char *sparc32_register_names[] =
 /* We provide the aliases %d0..%d30 for the floating registers as
    "psuedo" registers.  */
 
-static const char *sparc32_pseudo_register_names[] =
+static const char * const sparc32_pseudo_register_names[] =
 {
   "d0", "d2", "d4", "d6", "d8", "d10", "d12", "d14",
   "d16", "d18", "d20", "d22", "d24", "d26", "d28", "d30"
@@ -1784,7 +1790,7 @@ static int
 validate_tdesc_registers (const struct target_desc *tdesc,
                           struct tdesc_arch_data *tdesc_data,
                           const char *feature_name,
-                          const char *register_names[],
+                          const char * const register_names[],
                           unsigned int registers_num,
                           unsigned int reg_start)
 {

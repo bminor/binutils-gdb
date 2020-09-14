@@ -471,7 +471,7 @@ operator_check_f (struct expression *exp, int pos,
   return 0;
 }
 
-static const char *f_extensions[] =
+static const char * const f_extensions[] =
 {
   ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
   ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08",

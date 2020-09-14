@@ -764,10 +764,14 @@ sparc64_fprs_type (struct gdbarch *gdbarch)
   "fprs",                                                                 \
   "y"
 
-static const char *sparc64_fpu_register_names[] = { SPARC64_FPU_REGISTERS };
-static const char *sparc64_cp0_register_names[] = { SPARC64_CP0_REGISTERS };
+static const char * const sparc64_fpu_register_names[] = {
+  SPARC64_FPU_REGISTERS
+};
+static const char * const sparc64_cp0_register_names[] = {
+  SPARC64_CP0_REGISTERS
+};
 
-static const char *sparc64_register_names[] =
+static const char * const sparc64_register_names[] =
 {
   SPARC_CORE_REGISTERS,
   SPARC64_FPU_REGISTERS,
@@ -780,7 +784,7 @@ static const char *sparc64_register_names[] =
 /* We provide the aliases %d0..%d62 and %q0..%q60 for the floating
    registers as "psuedo" registers.  */
 
-static const char *sparc64_pseudo_register_names[] =
+static const char * const sparc64_pseudo_register_names[] =
 {
   "cwp", "pstate", "asi", "ccr",
 

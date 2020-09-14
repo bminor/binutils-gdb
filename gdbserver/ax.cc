@@ -65,7 +65,7 @@ enum gdb_agent_op
     gdb_agent_op_last
   };
 
-static const char *gdb_agent_op_names [gdb_agent_op_last] =
+static const char * const gdb_agent_op_names [gdb_agent_op_last] =
   {
     "?undef?"
 #define DEFOP(NAME, SIZE, DATA_SIZE, CONSUMED, PRODUCED, VALUE)  , # NAME

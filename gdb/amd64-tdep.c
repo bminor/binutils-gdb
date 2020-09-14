@@ -59,7 +59,7 @@
 
 /* Register information.  */
 
-static const char *amd64_register_names[] = 
+static const char * const amd64_register_names[] = 
 {
   "rax", "rbx", "rcx", "rdx", "rsi", "rdi", "rbp", "rsp",
 
@@ -77,7 +77,7 @@ static const char *amd64_register_names[] =
   "mxcsr",
 };
 
-static const char *amd64_ymm_names[] = 
+static const char * const amd64_ymm_names[] = 
 {
   "ymm0", "ymm1", "ymm2", "ymm3",
   "ymm4", "ymm5", "ymm6", "ymm7",
@@ -85,7 +85,7 @@ static const char *amd64_ymm_names[] =
   "ymm12", "ymm13", "ymm14", "ymm15"
 };
 
-static const char *amd64_ymm_avx512_names[] =
+static const char * const amd64_ymm_avx512_names[] =
 {
   "ymm16", "ymm17", "ymm18", "ymm19",
   "ymm20", "ymm21", "ymm22", "ymm23",
@@ -93,7 +93,7 @@ static const char *amd64_ymm_avx512_names[] =
   "ymm28", "ymm29", "ymm30", "ymm31"
 };
 
-static const char *amd64_ymmh_names[] = 
+static const char * const amd64_ymmh_names[] = 
 {
   "ymm0h", "ymm1h", "ymm2h", "ymm3h",
   "ymm4h", "ymm5h", "ymm6h", "ymm7h",
@@ -101,7 +101,7 @@ static const char *amd64_ymmh_names[] =
   "ymm12h", "ymm13h", "ymm14h", "ymm15h"
 };
 
-static const char *amd64_ymmh_avx512_names[] =
+static const char * const amd64_ymmh_avx512_names[] =
 {
   "ymm16h", "ymm17h", "ymm18h", "ymm19h",
   "ymm20h", "ymm21h", "ymm22h", "ymm23h",
@@ -109,18 +109,18 @@ static const char *amd64_ymmh_avx512_names[] =
   "ymm28h", "ymm29h", "ymm30h", "ymm31h"
 };
 
-static const char *amd64_mpx_names[] =
+static const char * const amd64_mpx_names[] =
 {
   "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
 };
 
-static const char *amd64_k_names[] =
+static const char * const amd64_k_names[] =
 {
   "k0", "k1", "k2", "k3",
   "k4", "k5", "k6", "k7"
 };
 
-static const char *amd64_zmmh_names[] =
+static const char * const amd64_zmmh_names[] =
 {
   "zmm0h", "zmm1h", "zmm2h", "zmm3h",
   "zmm4h", "zmm5h", "zmm6h", "zmm7h",
@@ -132,7 +132,7 @@ static const char *amd64_zmmh_names[] =
   "zmm28h", "zmm29h", "zmm30h", "zmm31h"
 };
 
-static const char *amd64_zmm_names[] =
+static const char * const amd64_zmm_names[] =
 {
   "zmm0", "zmm1", "zmm2", "zmm3",
   "zmm4", "zmm5", "zmm6", "zmm7",
@@ -144,14 +144,14 @@ static const char *amd64_zmm_names[] =
   "zmm28", "zmm29", "zmm30", "zmm31"
 };
 
-static const char *amd64_xmm_avx512_names[] = {
+static const char * const amd64_xmm_avx512_names[] = {
     "xmm16",  "xmm17",  "xmm18",  "xmm19",
     "xmm20",  "xmm21",  "xmm22",  "xmm23",
     "xmm24",  "xmm25",  "xmm26",  "xmm27",
     "xmm28",  "xmm29",  "xmm30",  "xmm31"
 };
 
-static const char *amd64_pkeys_names[] = {
+static const char * const amd64_pkeys_names[] = {
     "pkru"
 };
 
@@ -298,7 +298,7 @@ amd64_arch_reg_to_regnum (int reg)
 
 /* Register names for byte pseudo-registers.  */
 
-static const char *amd64_byte_names[] =
+static const char * const amd64_byte_names[] =
 {
   "al", "bl", "cl", "dl", "sil", "dil", "bpl", "spl",
   "r8l", "r9l", "r10l", "r11l", "r12l", "r13l", "r14l", "r15l",
@@ -310,7 +310,7 @@ static const char *amd64_byte_names[] =
 
 /* Register names for word pseudo-registers.  */
 
-static const char *amd64_word_names[] =
+static const char * const amd64_word_names[] =
 {
   "ax", "bx", "cx", "dx", "si", "di", "bp", "", 
   "r8w", "r9w", "r10w", "r11w", "r12w", "r13w", "r14w", "r15w"
@@ -318,7 +318,7 @@ static const char *amd64_word_names[] =
 
 /* Register names for dword pseudo-registers.  */
 
-static const char *amd64_dword_names[] =
+static const char * const amd64_dword_names[] =
 {
   "eax", "ebx", "ecx", "edx", "esi", "edi", "ebp", "esp", 
   "r8d", "r9d", "r10d", "r11d", "r12d", "r13d", "r14d", "r15d",

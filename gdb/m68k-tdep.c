@@ -157,7 +157,7 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
   return builtin_type (gdbarch)->builtin_int32;
 }
 
-static const char *m68k_register_names[] = {
+static const char * const m68k_register_names[] = {
     "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
     "a0", "a1", "a2", "a3", "a4", "a5", "fp", "sp",
     "ps", "pc",

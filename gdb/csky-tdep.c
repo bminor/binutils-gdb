@@ -162,7 +162,7 @@ csky_write_pc (regcache *regcache, CORE_ADDR val)
 
 /* C-Sky ABI register names.  */
 
-static const char *csky_register_names[] =
+static const char * const csky_register_names[] =
 {
   /* General registers 0 - 31.  */
   "r0",  "r1",  "r2",  "r3",  "r4",  "r5",  "r6",  "r7",

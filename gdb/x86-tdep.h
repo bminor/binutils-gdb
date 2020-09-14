@@ -24,7 +24,7 @@
    REGISTER_NAMES[LO] (inclusive) to REGISTER_NAMES[HI] (exclusive).  */
 
 extern bool x86_in_indirect_branch_thunk (CORE_ADDR pc,
-					  const char **register_names,
+					  const char * const *register_names,
 					  int lo, int hi);
 
 #endif /* x86-tdep.h */

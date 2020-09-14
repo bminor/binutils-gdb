@@ -355,7 +355,7 @@ nto_elf_osabi_sniffer (bfd *abfd)
   return osabi;
 }
 
-static const char *nto_thread_state_str[] =
+static const char * const nto_thread_state_str[] =
 {
   "DEAD",		/* 0  0x00 */
   "RUNNING",	/* 1  0x01 */

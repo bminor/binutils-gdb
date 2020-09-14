@@ -871,7 +871,7 @@ const struct exp_descriptor exp_descriptor_c =
   evaluate_subexp_c
 };
 
-static const char *c_extensions[] =
+static const char * const c_extensions[] =
 {
   ".c", NULL
 };
@@ -972,7 +972,7 @@ enum cplus_primitive_types {
   nr_cplus_primitive_types
 };
 
-static const char *cplus_extensions[] =
+static const char * const cplus_extensions[] =
 {
   ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
 };
@@ -1170,7 +1170,7 @@ protected:
 
 static cplus_language cplus_language_defn;
 
-static const char *asm_extensions[] =
+static const char * const asm_extensions[] =
 {
   ".s", ".sx", ".S", NULL
 };

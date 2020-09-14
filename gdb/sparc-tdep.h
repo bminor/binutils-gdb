@@ -64,9 +64,9 @@ struct gdbarch_tdep
   int npc_regnum;
 
   /* Register names specific for architecture (sparc32 vs. sparc64) */
-  const char **fpu_register_names;
+  const char * const *fpu_register_names;
   size_t fpu_registers_num;
-  const char **cp0_register_names;
+  const char * const *cp0_register_names;
   size_t cp0_registers_num;
 
   /* Register sets.  */

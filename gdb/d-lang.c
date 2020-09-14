@@ -124,7 +124,7 @@ enum d_primitive_types {
   nr_d_primitive_types
 };
 
-static const char *d_extensions[] =
+static const char * const d_extensions[] =
 {
   ".d", NULL
 };

@@ -578,7 +578,7 @@ enum
 
 /* Generic MIPS.  */
 
-static const char *mips_generic_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
+static const char * const mips_generic_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "sr", "lo", "hi", "bad", "cause", "pc",
   "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
   "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
@@ -589,7 +589,7 @@ static const char *mips_generic_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
 
 /* Names of tx39 registers.  */
 
-static const char *mips_tx39_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
+static const char * const mips_tx39_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "sr", "lo", "hi", "bad", "cause", "pc",
   "", "", "", "", "", "", "", "",
   "", "", "", "", "", "", "", "",
@@ -601,7 +601,7 @@ static const char *mips_tx39_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
 };
 
 /* Names of registers with Linux kernels.  */
-static const char *mips_linux_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
+static const char * const mips_linux_reg_names[NUM_MIPS_PROCESSOR_REGS] = {
   "sr", "lo", "hi", "bad", "cause", "pc",
   "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
   "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
@@ -8049,7 +8049,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum mips_fpu_type fpu_type;
   struct tdesc_arch_data *tdesc_data = NULL;
   int elf_fpu_type = Val_GNU_MIPS_ABI_FP_ANY;
-  const char **reg_names;
+  const char * const *reg_names;
   struct mips_regnum mips_regnum, *regnum;
   enum mips_isa mips_isa;
   int dspacc;

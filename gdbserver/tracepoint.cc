@@ -863,7 +863,7 @@ EXTERN_C_POP
 
 static struct tracepoint *last_tracepoint;
 
-static const char *eval_result_names[] =
+static const char * const eval_result_names[] =
   {
     "terror:in the attic",  /* this should never be reported */
     "terror:empty expression",

@@ -27,7 +27,7 @@
 
 static const char can_use_agent_on[] = "on";
 static const char can_use_agent_off[] = "off";
-static const char *can_use_agent_enum[] =
+static const char * const can_use_agent_enum[] =
 {
   can_use_agent_on,
   can_use_agent_off,

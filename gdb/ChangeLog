@@ -1,3 +1,61 @@
+2020-09-14  Tom Tromey  <tromey@adacore.com>
+
+	* x86-tdep.h (x86_in_indirect_branch_thunk): Update.
+	* x86-tdep.c (x86_is_thunk_register_name)
+	(x86_in_indirect_branch_thunk): Update.
+	* sparc64-tdep.c (sparc64_fpu_register_names)
+	(sparc64_cp0_register_names, sparc64_register_names)
+	(sparc64_pseudo_register_names): Now const.
+	* sparc-tdep.h (struct gdbarch_tdep) <fpu_register_names,
+	cp0_registers_num>: Now const.
+	* sparc-tdep.c (sparc_core_register_names)
+	(sparc32_fpu_register_names, sparc32_cp0_register_names)
+	(sparc32_pseudo_register_names): Now const.
+	(validate_tdesc_registers): Update.
+	* rust-lang.c (rust_extensions): Now const.
+	* p-lang.c (p_extensions): Now const.
+	* objc-lang.c (objc_extensions): Now const.
+	* nto-tdep.c (nto_thread_state_str): Now const.
+	* moxie-tdep.c (moxie_register_names): Now const.
+	* mips-tdep.h (struct gdbarch_tdep) <mips_processor_reg_names>:
+	Now const.
+	* mips-tdep.c (mips_generic_reg_names, mips_tx39_reg_names)
+	(mips_linux_reg_names): Now const.
+	(mips_gdbarch_init): Update.
+	* microblaze-tdep.c (microblaze_register_names): Now const.
+	* m68k-tdep.c (m68k_register_names): Now const.
+	* m32r-tdep.c (m32r_register_names): Now const.
+	* ia64-tdep.c (ia64_register_names): Now const.
+	* i386-tdep.h (struct gdbarch_tdep) <register_names,
+	ymmh_register_names, ymm16h_regnum, mpx_register_names,
+	k_register_names, zmmh_register_names, xmm_avx512_register_names,
+	ymm_avx512_register_names, pkeys_register_names>: Now const.
+	* i386-tdep.c (i386_register_names, i386_zmm_names)
+	(i386_zmmh_names, i386_k_names, i386_ymm_names, i386_ymmh_names)
+	(i386_mpx_names, i386_pkeys_names, i386_bnd_names)
+	(i386_mmx_names, i386_byte_names, i386_word_names): Now const.
+	* f-lang.c (f_extensions): Now const.
+	* d-lang.c (d_extensions): Now const.
+	* csky-tdep.c (csky_register_names): Now const.
+	* charset.c (default_charset_names, charset_enum): Now const.
+	(_initialize_charset): Update.
+	* c-lang.c (c_extensions, cplus_extensions, asm_extensions): Now
+	const.
+	* bsd-uthread.c (bsd_uthread_solib_names): Now const.
+	(bsd_uthread_solib_loaded): Update.
+	(bsd_uthread_state): Now const.
+	* amd64-tdep.c (amd64_register_names, amd64_ymm_names)
+	(amd64_ymm_avx512_names, amd64_ymmh_names)
+	(amd64_ymmh_avx512_names, amd64_mpx_names, amd64_k_names)
+	(amd64_zmmh_names, amd64_zmm_names, amd64_xmm_avx512_names)
+	(amd64_pkeys_names, amd64_byte_names, amd64_word_names)
+	(amd64_dword_names): Now const.
+	* agent.c (can_use_agent_enum): Now const.
+	* ada-tasks.c (task_states, long_task_states): Now const.
+	* ada-lang.c (known_runtime_file_name_patterns)
+	(known_auxiliary_function_name_patterns, attribute_names)
+	(standard_exc, ada_extensions): Now const.
+
 2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* bcache.h (struct bcache) <bcache>: Remove constructor.

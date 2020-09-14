@@ -248,7 +248,7 @@ enum pascal_primitive_types {
   nr_pascal_primitive_types
 };
 
-static const char *p_extensions[] =
+static const char * const p_extensions[] =
 {
   ".pas", ".p", ".pp", NULL
 };

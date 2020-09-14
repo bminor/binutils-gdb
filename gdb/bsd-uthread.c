@@ -269,7 +269,7 @@ bsd_uthread_inferior_created (struct target_ops *ops, int from_tty)
 }
 
 /* Likely candidates for the threads library.  */
-static const char *bsd_uthread_solib_names[] =
+static const char * const bsd_uthread_solib_names[] =
 {
   "/usr/lib/libc_r.so",		/* FreeBSD */
   "/usr/lib/libpthread.so",	/* OpenBSD */
@@ -279,7 +279,7 @@ static const char *bsd_uthread_solib_names[] =
 static void
 bsd_uthread_solib_loaded (struct so_list *so)
 {
-  const char **names = bsd_uthread_solib_names;
+  const char * const *names = bsd_uthread_solib_names;
 
   for (names = bsd_uthread_solib_names; *names; names++)
     {
@@ -488,7 +488,7 @@ bsd_uthread_target::update_thread_list ()
 }
 
 /* Possible states a thread can be in.  */
-static const char *bsd_uthread_state[] =
+static const char * const bsd_uthread_state[] =
 {
   "RUNNING",
   "SIGTHREAD",

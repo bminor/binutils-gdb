@@ -1,3 +1,8 @@
+2020-09-14  Tom Tromey  <tromey@adacore.com>
+
+	* tracepoint.cc (eval_result_names): Now const.
+	* ax.cc (gdb_agent_op_names): Now const.
+
 2020-09-10  Kamil Rytarowski  <n54@gmx.com>
 
 	* netbsd-low.cc: Add.

@@ -271,13 +271,13 @@ show_target_wide_charset_name (struct ui_file *file,
 		      value);
 }
 
-static const char *default_charset_names[] =
+static const char * const default_charset_names[] =
 {
   DEFAULT_CHARSET_NAMES
   0
 };
 
-static const char **charset_enum;
+static const char * const *charset_enum;
 
 
 /* If the target wide character set has big- or little-endian
@@ -1004,7 +1004,7 @@ _initialize_charset ()
   find_charset_names ();
 
   if (charsets.charsets.size () > 1)
-    charset_enum = (const char **) charsets.charsets.data ();
+    charset_enum = (const char * const *) charsets.charsets.data ();
   else
     charset_enum = default_charset_names;
 
