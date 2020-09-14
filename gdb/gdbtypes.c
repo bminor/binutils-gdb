@@ -5103,7 +5103,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_FIXED_INSTANCE");
     }
-  if (TYPE_STUB_SUPPORTED (type))
+  if (type->stub_is_supported ())
     {
       puts_filtered (" TYPE_STUB_SUPPORTED");
     }

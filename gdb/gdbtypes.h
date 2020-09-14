@@ -228,13 +228,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_FIXED_INSTANCE(t) (TYPE_MAIN_TYPE (t)->flag_fixed_instance)
 
-/* * This debug target supports TYPE_STUB(t).  In the unsupported case
-   we have to rely on NFIELDS to be zero etc., see TYPE_IS_OPAQUE().
-   TYPE_STUB(t) with !TYPE_STUB_SUPPORTED(t) may exist if we only
-   guessed the TYPE_STUB(t) value (see dwarfread.c).  */
-
-#define TYPE_STUB_SUPPORTED(t)   ((t)->stub_is_supported ())
-
 /* * Not textual.  By default, GDB treats all single byte integers as
    characters (or elements of strings) unless this flag is set.  */
 
@@ -1125,6 +1118,11 @@ struct type
     this->main_type->m_flag_vector = is_vector;
   }
 
+  /* This debug target supports TYPE_STUB(t).  In the unsupported case
+     we have to rely on NFIELDS to be zero etc., see TYPE_IS_OPAQUE().
+     TYPE_STUB(t) with !TYPE_STUB_SUPPORTED(t) may exist if we only
+     guessed the TYPE_STUB(t) value (see dwarfread.c).  */
+
   bool stub_is_supported () const
   {
     return this->main_type->m_flag_stub_supported;
@@ -1882,7 +1880,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
    && ((thistype)->num_fields () == 0) \
    && (!HAVE_CPLUS_STRUCT (thistype) \
        || TYPE_NFN_FIELDS (thistype) == 0) \
-   && ((thistype)->is_stub () || !TYPE_STUB_SUPPORTED (thistype)))
+   && ((thistype)->is_stub () || !(thistype)->stub_is_supported ()))
 
 /* * A helper macro that returns the name of a type or "unnamed type"
    if the type has no name.  */
