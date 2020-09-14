@@ -5934,10 +5934,12 @@ objfile_type (struct objfile *objfile)
   objfile_type->nodebug_text_symbol
     = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
 		 "<text variable, no debug info>");
+
   objfile_type->nodebug_text_gnu_ifunc_symbol
     = init_type (objfile, TYPE_CODE_FUNC, TARGET_CHAR_BIT,
 		 "<text gnu-indirect-function variable, no debug info>");
-  TYPE_GNU_IFUNC (objfile_type->nodebug_text_gnu_ifunc_symbol) = 1;
+  objfile_type->nodebug_text_gnu_ifunc_symbol->set_is_gnu_ifunc (true);
+
   objfile_type->nodebug_got_plt_symbol
     = init_pointer_type (objfile, gdbarch_addr_bit (gdbarch),
 			 "<text from jump slot in .got.plt, no debug info>",

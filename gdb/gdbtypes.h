@@ -238,7 +238,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    determines the final returned function type to be presented to
    user.  */
 
-#define TYPE_GNU_IFUNC(t)	(TYPE_MAIN_TYPE (t)->flag_gnu_ifunc)
+#define TYPE_GNU_IFUNC(t)	((t)->is_gnu_ifunc ())
 
 /* * Type owner.  If TYPE_OBJFILE_OWNED is true, the type is owned by
    the objfile retrieved as TYPE_OBJFILE.  Otherwise, the type is
@@ -814,7 +814,7 @@ struct main_type
   unsigned int m_flag_varargs : 1;
   unsigned int m_flag_vector : 1;
   unsigned int m_flag_stub_supported : 1;
-  unsigned int flag_gnu_ifunc : 1;
+  unsigned int m_flag_gnu_ifunc : 1;
   unsigned int flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
   unsigned int flag_endianity_not_default : 1;
@@ -1131,6 +1131,16 @@ struct type
   void set_stub_is_supported (bool stub_is_supported)
   {
     this->main_type->m_flag_stub_supported = stub_is_supported;
+  }
+
+  bool is_gnu_ifunc () const
+  {
+    return this->main_type->m_flag_gnu_ifunc;
+  }
+
+  void set_is_gnu_ifunc (bool is_gnu_ifunc)
+  {
+    this->main_type->m_flag_gnu_ifunc = is_gnu_ifunc;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's
