@@ -208,7 +208,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 
 	  /* Define the decl.  */
 	  instance->plugin ().build_decl
-	    ("variable", name.c_str (), kind, sym_type,
+	    ("variable", name.c_str (), kind.raw (), sym_type,
 	     symbol_name.get (), addr, filename, line);
 
 	  /* Pop scope for non-local symbols.  */
@@ -323,7 +323,7 @@ convert_symbol_bmsym (compile_cplus_instance *instance,
   sym_type = instance->convert_type (type);
   instance->plugin ().push_namespace ("");
   instance->plugin ().build_decl
-    ("minsym", msym->natural_name (), kind, sym_type, nullptr, addr,
+    ("minsym", msym->natural_name (), kind.raw (), sym_type, nullptr, addr,
      nullptr, 0);
   instance->plugin ().pop_binding_level ("");
 }

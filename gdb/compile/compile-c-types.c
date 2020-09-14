@@ -254,7 +254,8 @@ convert_qualified (compile_c_instance *context, struct type *type)
   if (TYPE_RESTRICT (type))
     quals |= GCC_QUALIFIER_RESTRICT;
 
-  return context->plugin ().build_qualified_type (unqual_converted, quals);
+  return context->plugin ().build_qualified_type (unqual_converted,
+						  quals.raw ());
 }
 
 /* Convert a complex type to its gcc representation.  */

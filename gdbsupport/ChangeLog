@@ -1,5 +1,28 @@
 2020-09-14  Pedro Alves  <pedro@palves.net>
 
+	* enum-flags.h: Include "traits.h".
+	(DEF_ENUM_FLAGS_TYPE): Declare a function instead of defining a
+	structure.
+	(enum_underlying_type): Update comment.
+	(namespace enum_flags_detail): New.  Move struct zero_type here.
+	(EnumIsUnsigned, EnumIsSigned): New.
+	(class enum_flags): Make most methods constexpr.
+	(operator&=, operator|=, operator^=): Take an enum_flags instead
+	of an enum_type.  Make rvalue ref versions deleted.
+	(operator enum_type()): Delete.
+	(operator&, operator|, operator^, operator~): Delete, moved out of
+	class.
+	(raw()): New method.
+	(is_enum_flags_enum_type_t): Declare.
+	(ENUM_FLAGS_GEN_BINOP, ENUM_FLAGS_GEN_COMPOUND_ASSIGN)
+	(ENUM_FLAGS_GEN_COMP): New.  Use them to reimplement global
+	operators.
+	(operator~): Now constexpr and reimplemented.
+	(operator<<, operator>>): New deleted functions.
+	* valid-expr.h (CHECK_VALID_EXPR_5, CHECK_VALID_EXPR_6): New.
+
+2020-09-14  Pedro Alves  <pedro@palves.net>
+
 	* traits.h (struct nonesuch, struct detector, detected_or)
 	(detected_or_t, is_detected, detected_t, detected_or)
 	(detected_or_t, is_detected_exact, is_detected_convertible): New.

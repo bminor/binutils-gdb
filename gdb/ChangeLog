@@ -1,5 +1,26 @@
 2020-09-14  Pedro Alves  <pedro@palves.net>
 
+	* Makefile.in (SELFTESTS_SRCS): Add
+	unittests/enum-flags-selftests.c.
+	* btrace.c (ftrace_update_caller, ftrace_fixup_calle): Use
+	btrace_function_flags instead of enum btrace_function_flag.
+	* compile/compile-c-types.c (convert_qualified): Use
+	enum_flags::raw.
+	* compile/compile-cplus-symbols.c (convert_one_symbol)
+	(convert_symbol_bmsym):
+	* compile/compile-cplus-types.c (compile_cplus_convert_method)
+	(compile_cplus_convert_struct_or_union_methods)
+	(compile_cplus_instance::convert_qualified_base):
+	* go-exp.y (parse_string_or_char): Add cast to int.
+	* unittests/enum-flags-selftests.c: New file.
+	* record-btrace.c (btrace_thread_flag_to_str): Change parameter's
+	type to btrace_thread_flags from btrace_thread_flag.
+	(record_btrace_cancel_resume, record_btrace_step_thread): Change
+	local's type to btrace_thread_flags from btrace_thread_flag.  Add
+	cast in DEBUG call.
+
+2020-09-14  Pedro Alves  <pedro@palves.net>
+
 	* c-typeprint.c (c_type_print_modifier): Adjust to rename.
 	* gdbtypes.c (address_space_name_to_int): Rename to ...
 	(address_space_name_to_type_instance_flags): ... this.
