@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Added a .nop directive to generate a single no-op instruction in a target
+  neutral manner.  This instruction does have an effect on DWARF line number
+  generation, if that is active.
+
 * Removed --reduce-memory-overheads and --hash-size as gas now
   uses hash tables that can be expand and shrink automatically.
 

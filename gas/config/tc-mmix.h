@@ -228,3 +228,5 @@ extern void mmix_md_do_align (int, char *, int, int);
 
 /* MMIX has global register symbols.  */
 #define TC_GLOBAL_REGISTER_SYMBOL_OK
+
+#define md_single_noop_insn "set $0, $0"

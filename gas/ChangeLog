@@ -1,3 +1,29 @@
+2020-09-14  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (s_nop): New function.  Handles the .nop directive.
+	(potable): Add entry for "nop".
+	(s_nops): Code tidy.
+	* read.h (s_nop): Add prototype.
+	* config/tc-bpf.h (md_single_noop_insn): Define.
+	* config/tc-mmix.h (md_single_noop_insn): Define.
+	* config/tc-or1k.h (md_single_noop_insn): Define.
+	* config/tc-s12z.c (md_assemble): Preserve the input line pointer,
+	rather than corrupting it.
+	* write.c (relax_segment): Update error message regarding
+	non-absolute values passed to .fill and .nops.
+	* NEWS: Mention the new directive.
+	* doc/as.texi: Document the new directive.
+	* doc/internals.texi: Document the new internal macros used to
+	implement the new directive.
+	* testsuite/gas/all/nop.s: New test.
+	* testsuite/gas/all/nop.d: New test control file.
+	* testsuite/gas/all/gas.exp: Run the new test.
+	* testsuite/gas/elf/dwarf-5-nop-for-line-table.s: New test.
+	* testsuite/gas/elf/dwarf-5-nop-for-line-table.d: New test
+	control file.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+	* testsuite/gas/i386/space1.l: Adjust expected output.
+
 2020-09-07  Mark Wielaard  <mark@klomp.org>
 
 	* as.texi (-g): Explicitly mention when .debug_info and .debug_line

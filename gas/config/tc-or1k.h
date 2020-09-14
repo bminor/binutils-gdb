@@ -74,3 +74,5 @@ void or1k_elf_final_processing (void);
 #define tc_cfi_frame_initial_instructions \
     or1k_cfi_frame_initial_instructions
 extern void or1k_cfi_frame_initial_instructions (void);
+
+#define md_single_noop_insn "l.nop"

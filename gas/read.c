@@ -465,6 +465,7 @@ static const pseudo_typeS potable[] = {
   {"noformat", s_ignore, 0},
   {"nolist", listing_list, 0},	/* Turn listing off.  */
   {"nopage", listing_nopage, 0},
+  {"nop", s_nop, 0},
   {"nops", s_nops, 0},
   {"octa", cons, 16},
   {"offset", s_struct, 0},
@@ -3503,6 +3504,38 @@ s_space (int mult)
 }
 
 void
+s_nop (int ignore ATTRIBUTE_UNUSED)
+{
+#ifdef md_flush_pending_output
+  md_flush_pending_output ();
+#endif
+
+#ifdef md_cons_align
+  md_cons_align (1);
+#endif
+
+  SKIP_WHITESPACE ();
+  demand_empty_rest_of_line ();
+
+#ifdef md_emit_single_noop
+  md_emit_single_noop;
+#else
+  char * nop;
+
+#ifndef md_single_noop_insn
+#define md_single_noop_insn "nop"
+#endif
+  /* md_assemble might modify its argument, so
+     we must pass it a string that is writeable.  */
+  if (asprintf (&nop, "%s", md_single_noop_insn) < 0)
+    as_fatal ("%s", xstrerror (errno));
+
+  md_assemble (nop);
+  free (nop);
+#endif
+}
+
+void
 s_nops (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS exp;
@@ -3516,8 +3549,12 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
   md_cons_align (1);
 #endif
 
+  SKIP_WHITESPACE ();
   expression (&exp);
+  /* Note - this expression is tested for an absolute value in
+     write.c:relax_segment().  */
 
+  SKIP_WHITESPACE ();
   if (*input_line_pointer == ',')
     {
       ++input_line_pointer;
@@ -3529,29 +3566,30 @@ s_nops (int ignore ATTRIBUTE_UNUSED)
       val.X_add_number = 0;
     }
 
-  if (val.X_op == O_constant)
+  if (val.X_op != O_constant)
     {
-      if (val.X_add_number < 0)
-	{
-	  as_warn (_("negative nop control byte, ignored"));
-	  val.X_add_number = 0;
-	}
-
-      if (!need_pass_2)
-	{
-	  /* Store the no-op instruction control byte in the first byte
-	     of frag.  */
-	  char *p;
-	  symbolS *sym = make_expr_symbol (&exp);
-	  p = frag_var (rs_space_nop, 1, 1, (relax_substateT) 0,
-			sym, (offsetT) 0, (char *) 0);
-	  *p = val.X_add_number;
-	}
+      as_bad (_("unsupported variable nop control in .nops directive"));
+      val.X_op = O_constant;
+      val.X_add_number = 0;
     }
-  else
-    as_bad (_("unsupported variable nop control in .nops directive"));
+  else if (val.X_add_number < 0)
+    {
+      as_warn (_("negative nop control byte, ignored"));
+      val.X_add_number = 0;
+    }
 
   demand_empty_rest_of_line ();
+
+  if (need_pass_2)
+    /* Ignore this directive if we are going to perform a second pass.  */
+    return;
+
+  /* Store the no-op instruction control byte in the first byte of frag.  */
+  char *p;
+  symbolS *sym = make_expr_symbol (&exp);
+  p = frag_var (rs_space_nop, 1, 1, (relax_substateT) 0,
+		sym, (offsetT) 0, (char *) 0);
+  *p = val.X_add_number;
 }
 
 /* This is like s_space, but the value is a floating point number with
