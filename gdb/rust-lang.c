@@ -779,7 +779,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 
     case TYPE_CODE_FUNC:
       /* Delegate varargs to the C printer.  */
-      if (TYPE_VARARGS (type))
+      if (type->has_varargs ())
 	goto c_printer;
 
       fputs_filtered ("fn ", stream);

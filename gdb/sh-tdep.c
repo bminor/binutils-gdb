@@ -1083,7 +1083,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
      non-vararg argument to be on the stack, no matter how many
      registers have been used so far.  */
   if (sh_is_renesas_calling_convention (func_type)
-      && TYPE_VARARGS (func_type))
+      && func_type->has_varargs ())
     last_reg_arg = func_type->num_fields () - 2;
 
   /* First force sp to a 4-byte alignment.  */
@@ -1224,7 +1224,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
      non-vararg argument to be on the stack, no matter how many
      registers have been used so far.  */
   if (sh_is_renesas_calling_convention (func_type)
-      && TYPE_VARARGS (func_type))
+      && func_type->has_varargs ())
     last_reg_arg = func_type->num_fields () - 2;
 
   /* First force sp to a 4-byte alignment.  */

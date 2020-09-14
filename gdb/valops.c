@@ -2010,7 +2010,7 @@ search_struct_method (const char *name, struct value **arg1p,
 	    while (j >= 0)
 	      {
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
-			      TYPE_VARARGS (TYPE_FN_FIELD_TYPE (f, j)),
+			      TYPE_FN_FIELD_TYPE (f, j)->has_varargs (),
 			      TYPE_FN_FIELD_TYPE (f, j)->num_fields (),
 			      TYPE_FN_FIELD_ARGS (f, j), args))
 		  {

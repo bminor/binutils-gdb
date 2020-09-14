@@ -964,7 +964,7 @@ static gcc_type
 compile_cplus_convert_func (compile_cplus_instance *instance,
 			    struct type *type, bool strip_artificial)
 {
-  int is_varargs = TYPE_VARARGS (type);
+  int is_varargs = type->has_varargs ();
   struct type *target_type = TYPE_TARGET_TYPE (type);
 
   /* Functions with no debug info have no return type.  Ideally we'd

@@ -1495,7 +1495,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 For ABI2FP+, the caller pushes only named arguments in registers
 	 and pushes all unnamed arguments in stack.  */
 
-      if (abi_use_fpr && TYPE_VARARGS (func_type)
+      if (abi_use_fpr && func_type->has_varargs ()
 	  && i >= func_type->num_fields ())
 	goto use_stack;
 

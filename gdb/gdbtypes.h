@@ -216,11 +216,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
 
-/* * FIXME drow/2002-06-03:  Only used for methods, but applies as well
-   to functions.  */
-
-#define TYPE_VARARGS(t)		((t)->has_varargs ())
-
 /* * Identify a vector type.  Gcc is handling this by adding an extra
    attribute to the array type.  We slurp that in as a new flag of a
    type.  This is used only in dwarf2read.c.  */
@@ -1107,6 +1102,9 @@ struct type
   {
     this->main_type->m_flag_prototyped = is_prototyped;
   }
+
+  /* FIXME drow/2002-06-03:  Only used for methods, but applies as well
+     to functions.  */
 
   bool has_varargs () const
   {

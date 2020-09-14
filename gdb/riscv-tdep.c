@@ -2589,7 +2589,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
       arg_type = check_typedef (value_type (arg_value));
 
       riscv_arg_location (gdbarch, info, &call_info, arg_type,
-			  TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
+			  ftype->has_varargs () && i >= ftype->num_fields ());
 
       if (info->type != arg_type)
 	arg_value = value_cast (info->type, arg_value);

@@ -3992,7 +3992,7 @@ check_types_equal (struct type *type1, struct type *type2,
       || type1->is_unsigned () != type2->is_unsigned ()
       || type1->has_no_signedness () != type2->has_no_signedness ()
       || TYPE_ENDIANITY_NOT_DEFAULT (type1) != TYPE_ENDIANITY_NOT_DEFAULT (type2)
-      || TYPE_VARARGS (type1) != TYPE_VARARGS (type2)
+      || type1->has_varargs () != type2->has_varargs ()
       || TYPE_VECTOR (type1) != TYPE_VECTOR (type2)
       || TYPE_NOTTEXT (type1) != TYPE_NOTTEXT (type2)
       || TYPE_INSTANCE_FLAGS (type1) != TYPE_INSTANCE_FLAGS (type2)
@@ -5088,7 +5088,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_PROTOTYPED");
     }
-  if (TYPE_VARARGS (type))
+  if (type->has_varargs ())
     {
       puts_filtered (" TYPE_VARARGS");
     }

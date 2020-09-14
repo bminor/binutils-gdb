@@ -279,7 +279,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 {
   struct field *args = mtype->fields ();
   int nargs = mtype->num_fields ();
-  int varargs = TYPE_VARARGS (mtype);
+  int varargs = mtype->has_varargs ();
   int i;
 
   fprintf_symbol_filtered (stream, prefix,
@@ -591,12 +591,12 @@ c_type_print_args (struct type *type, struct ui_file *stream,
       printed_any = 1;
     }
 
-  if (printed_any && TYPE_VARARGS (type))
+  if (printed_any && type->has_varargs ())
     {
       /* Print out a trailing ellipsis for varargs functions.  Ignore
 	 TYPE_VARARGS if the function has no named arguments; that
 	 represents unprototyped (K&R style) C functions.  */
-      if (printed_any && TYPE_VARARGS (type))
+      if (printed_any && type->has_varargs ())
 	{
 	  fprintf_filtered (stream, ", ");
 	  wrap_here ("    ");

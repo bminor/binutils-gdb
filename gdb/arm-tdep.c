@@ -3694,7 +3694,7 @@ arm_vfp_abi_for_function (struct gdbarch *gdbarch, struct type *func_type)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   /* Variadic functions always use the base ABI.  Assume that functions
      without debug info are not variadic.  */
-  if (func_type && TYPE_VARARGS (check_typedef (func_type)))
+  if (func_type && check_typedef (func_type)->has_varargs ())
     return 0;
   /* The VFP ABI is only supported as a variant of AAPCS.  */
   if (tdep->arm_abi != ARM_ABI_AAPCS)

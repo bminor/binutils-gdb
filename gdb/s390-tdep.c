@@ -1939,7 +1939,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      and arg_state.argp with the size of the parameter area.  */
   for (i = 0; i < nargs; i++)
     s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
-		     TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
+		     ftype->has_varargs () && i >= ftype->num_fields ());
 
   param_area_start = align_down (arg_state.copy - arg_state.argp, 8);
 
@@ -1966,7 +1966,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Write all parameters.  */
   for (i = 0; i < nargs; i++)
     s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
-		     TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
+		     ftype->has_varargs () && i >= ftype->num_fields ());
 
   /* Store return PSWA.  In 31-bit mode, keep addressing mode bit.  */
   if (word_size == 4)
