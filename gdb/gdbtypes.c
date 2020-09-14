@@ -5725,7 +5725,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   builtin_type->builtin_char
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
-  TYPE_NOSIGN (builtin_type->builtin_char) = 1;
+  builtin_type->builtin_char->set_has_no_signedness (true);
   builtin_type->builtin_signed_char
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT,
 			 0, "signed char");
@@ -5884,7 +5884,7 @@ objfile_type (struct objfile *objfile)
   objfile_type->builtin_char
     = init_integer_type (objfile, TARGET_CHAR_BIT,
 			 !gdbarch_char_signed (gdbarch), "char");
-  TYPE_NOSIGN (objfile_type->builtin_char) = 1;
+  objfile_type->builtin_char->set_has_no_signedness (true);
   objfile_type->builtin_signed_char
     = init_integer_type (objfile, TARGET_CHAR_BIT,
 			 0, "signed char");

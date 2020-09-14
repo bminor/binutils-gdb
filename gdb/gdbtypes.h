@@ -214,7 +214,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    "unsigned char" are distinct types; so we need an extra flag to
    indicate the absence of a sign!  */
 
-#define TYPE_NOSIGN(t)		(TYPE_MAIN_TYPE (t)->flag_nosign)
+#define TYPE_NOSIGN(t)		((t)->has_no_signedness ())
 
 /* * A compiler may supply dwarf instrumentation
    that indicates the desired endian interpretation of the variable
@@ -851,7 +851,7 @@ struct main_type
      documentation about these fields.  */
 
   unsigned int m_flag_unsigned : 1;
-  unsigned int flag_nosign : 1;
+  unsigned int m_flag_nosign : 1;
   unsigned int flag_stub : 1;
   unsigned int flag_target_stub : 1;
   unsigned int flag_prototyped : 1;
@@ -1074,6 +1074,16 @@ struct type
   void set_is_unsigned (bool is_unsigned)
   {
     this->main_type->m_flag_unsigned = is_unsigned;
+  }
+
+  bool has_no_signedness () const
+  {
+    return this->main_type->m_flag_nosign;
+  }
+
+  void set_has_no_signedness (bool has_no_signedness)
+  {
+    this->main_type->m_flag_nosign = has_no_signedness;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's

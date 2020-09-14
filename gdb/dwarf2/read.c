@@ -18058,7 +18058,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   if (name && strcmp (name, "char") == 0)
-    TYPE_NOSIGN (type) = 1;
+    type->set_has_no_signedness (true);
 
   maybe_set_alignment (cu, die, type);
 

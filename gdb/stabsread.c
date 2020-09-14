@@ -2066,7 +2066,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       break;
     case 2:
       rettype = init_integer_type (objfile, 8, 0, "char");
-      TYPE_NOSIGN (rettype) = 1;
+      rettype->set_has_no_signedness (true);
       break;
     case 3:
       rettype = init_integer_type (objfile, 16, 0, "short");
@@ -4090,7 +4090,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
     {
       struct type *type = init_integer_type (objfile, TARGET_CHAR_BIT,
 					     0, NULL);
-      TYPE_NOSIGN (type) = 1;
+      type->set_has_no_signedness (true);
       return type;
     }
   /* We used to do this only for subrange of self or subrange of int.  */

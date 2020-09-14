@@ -566,7 +566,7 @@ read_base_type (struct ctf_context *ccp, ctf_id_t tid)
     }
 
   if (name != NULL && strcmp (name, "char") == 0)
-    TYPE_NOSIGN (type) = 1;
+    type->set_has_no_signedness (true);
 
   return set_tid_type (of, tid, type);
 }
