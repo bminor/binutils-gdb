@@ -68,6 +68,16 @@ ensure_have_frame (frame_info *frame, const char *op_name)
 		 _("%s evaluation requires a frame."), op_name);
 }
 
+/* Ensure that a PER_CU is defined and throw an exception otherwise.  */
+
+static void
+ensure_have_per_cu (dwarf2_per_cu_data *per_cu, const char* op_name)
+{
+  if (per_cu == nullptr)
+    throw_error (GENERIC_ERROR,
+		 _("%s evaluation requires a compilation unit."), op_name);
+}
+
 /* See expr.h.  */
 
 CORE_ADDR
@@ -195,6 +205,23 @@ dwarf_expr_context::get_frame_base (const gdb_byte **start,
   func_get_frame_base_dwarf_block (framefunc,
 				   get_frame_address_in_block (this->frame),
 				   start, length);
+}
+
+/* See expr.h.  */
+
+struct type *
+dwarf_expr_context::get_base_type (cu_offset die_cu_off)
+{
+  if (per_cu == nullptr)
+    return builtin_type (this->gdbarch)->builtin_int;
+
+  struct type *result = dwarf2_get_die_type (die_cu_off, this->per_cu,
+					     this->per_objfile);
+
+  if (result == nullptr)
+    error (_("Could not find type for operation"));
+
+  return result;
 }
 
 /* Require that TYPE be an integral type; throw an exception if not.  */
@@ -693,14 +720,20 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
+	  ensure_have_per_cu (this->per_cu, "DW_OP_addrx");
+
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = this->get_addr_index (uoffset);
+	  result = dwarf2_read_addr_index (this->per_cu, this->per_objfile,
+					   uoffset);
 	  result += this->per_objfile->objfile->text_section_offset ();
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 	case DW_OP_GNU_const_index:
+	  ensure_have_per_cu (this->per_cu, "DW_OP_GNU_const_index");
+
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = this->get_addr_index (uoffset);
+	  result = dwarf2_read_addr_index (this->per_cu, this->per_objfile,
+					   uoffset);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
@@ -830,15 +863,14 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_GNU_implicit_pointer:
 	  {
 	    int64_t len;
+	    ensure_have_per_cu (this->per_cu, "DW_OP_implicit_pointer");
 
-	    if (this->ref_addr_size == -1)
-	      error (_("DWARF-2 expression error: DW_OP_implicit_pointer "
-		       "is not allowed in frame context"));
+	    int ref_addr_size = this->per_cu->ref_addr_size ();
 
 	    /* The referred-to DIE of sect_offset kind.  */
-	    this->len = extract_unsigned_integer (op_ptr, this->ref_addr_size,
-						 byte_order);
-	    op_ptr += this->ref_addr_size;
+	    this->len = extract_unsigned_integer (op_ptr, ref_addr_size,
+						  byte_order);
+	    op_ptr += ref_addr_size;
 
 	    /* The byte offset into the data.  */
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &len);
@@ -1004,7 +1036,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	      {
 		op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 		cu_offset type_die_cu_off = (cu_offset) uoffset;
-		type = get_base_type (type_die_cu_off, 0);
+		type = get_base_type (type_die_cu_off);
 	      }
 	    else
 	      type = address_type;
@@ -1327,13 +1359,17 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_GNU_variable_value:
 	  {
+	    ensure_have_per_cu (this->per_cu, "DW_OP_GNU_variable_value");
+	    int ref_addr_size = this->per_cu->ref_addr_size ();
+
 	    sect_offset sect_off
 	      = (sect_offset) extract_unsigned_integer (op_ptr,
-							this->ref_addr_size,
+							ref_addr_size,
 							byte_order);
-	    op_ptr += this->ref_addr_size;
-	    result_val = value_cast (address_type,
-				     this->dwarf_variable_value (sect_off));
+	    op_ptr += ref_addr_size;
+	    result_val = sect_variable_value (sect_off, this->per_cu,
+					      this->per_objfile);
+	    result_val = value_cast (address_type, result_val);
 	  }
 	  break;
 	
@@ -1403,7 +1439,11 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    data = op_ptr;
 	    op_ptr += n;
 
-	    type = get_base_type (type_die_cu_off, n);
+	    type = get_base_type (type_die_cu_off);
+
+	    if (TYPE_LENGTH (type) != n)
+	      error (_("DW_OP_const_type has different sizes for type and data"));
+
 	    result_val = value_from_contents (type, data);
 	  }
 	  break;
@@ -1417,7 +1457,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	    cu_offset type_die_cu_off = (cu_offset) uoffset;
 
-	    type = get_base_type (type_die_cu_off, 0);
+	    type = get_base_type (type_die_cu_off);
 	    result_val = this->get_reg_value (type, reg);
 	  }
 	  break;
@@ -1435,7 +1475,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    if (to_underlying (type_die_cu_off) == 0)
 	      type = address_type;
 	    else
-	      type = get_base_type (type_die_cu_off, 0);
+	      type = get_base_type (type_die_cu_off);
 
 	    result_val = fetch (0);
 	    pop ();

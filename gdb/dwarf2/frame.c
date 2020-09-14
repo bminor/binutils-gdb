@@ -259,16 +259,6 @@ public:
     invalid ("DW_OP_call*");
   }
 
-  struct value *dwarf_variable_value (sect_offset sect_off) override
-  {
-    invalid ("DW_OP_GNU_variable_value");
-  }
-
-  CORE_ADDR get_addr_index (unsigned int index) override
-  {
-    invalid ("DW_OP_addrx or DW_OP_GNU_addr_index");
-  }
-
  private:
 
   void invalid (const char *op) ATTRIBUTE_NORETURN
@@ -290,7 +280,6 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   ctx.frame = this_frame;
   ctx.gdbarch = get_frame_arch (this_frame);
   ctx.addr_size = addr_size;
-  ctx.ref_addr_size = -1;
 
   ctx.push_address (initial, initial_in_stack_memory);
   ctx.eval (exp, len);

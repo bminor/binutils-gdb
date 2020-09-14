@@ -137,10 +137,6 @@ struct dwarf_expr_context
   /* Target address size in bytes.  */
   int addr_size = 0;
 
-  /* DW_FORM_ref_addr size in bytes.  If -1 DWARF is executed from a frame
-     context and operations depending on DW_FORM_ref_addr are not allowed.  */
-  int ref_addr_size = 0;
-
   /* The current depth of dwarf expression recursion, via DW_OP_call*,
      DW_OP_fbreg, DW_OP_push_object_address, etc., and the maximum
      depth we'll tolerate before raising an error.  */
@@ -189,6 +185,9 @@ struct dwarf_expr_context
   /* Frame information used for the evaluation.  */
   frame_info *frame = nullptr;
 
+  /* Compilation unit used for the evaluation.  */
+  dwarf2_per_cu_data *per_cu = nullptr;
+
   /* Read LENGTH bytes at ADDR into BUF.  */
   virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length) = 0;
 
@@ -208,19 +207,6 @@ struct dwarf_expr_context
      subroutine.  */
   virtual void dwarf_call (cu_offset die_cu_off) = 0;
 
-  /* Execute "variable value" operation on the DIE at SECT_OFF.  */
-  virtual struct value *dwarf_variable_value (sect_offset sect_off) = 0;
-
-  /* Return the base type given by the indicated DIE at DIE_CU_OFF.
-     This can throw an exception if the DIE is invalid or does not
-     represent a base type.  SIZE is non-zero if this function should
-     verify that the resulting type has the correct size.  */
-  virtual struct type *get_base_type (cu_offset die_cu_off, int size)
-  {
-    /* Anything will do.  */
-    return builtin_type (this->gdbarch)->builtin_int;
-  }
-
   /* Push on DWARF stack an entry evaluated for DW_TAG_call_site's
      parameter matching KIND and KIND_U at the caller of specified BATON.
      If DEREF_SIZE is not -1 then use DW_AT_call_data_value instead of
@@ -228,10 +214,6 @@ struct dwarf_expr_context
   virtual void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
 					   union call_site_parameter_u kind_u,
 					   int deref_size) = 0;
-
-  /* Return the address indexed by DW_OP_addrx or DW_OP_GNU_addr_index.
-     This can throw an exception if the index is out of range.  */
-  virtual CORE_ADDR get_addr_index (unsigned int index) = 0;
 
   /* Return the `object address' for DW_OP_push_object_address.  */
   virtual CORE_ADDR get_object_address () = 0;
@@ -255,6 +237,11 @@ private:
      START and LENGTH.  The result must be live until the current
      expression evaluation is complete.  */
   void get_frame_base (const gdb_byte **start, size_t *length);
+
+  /* Return the base type given by the indicated DIE at DIE_CU_OFF.
+     This can throw an exception if the DIE is invalid or does not
+     represent a base type.  */
+  struct type *get_base_type (cu_offset die_cu_off);
 };
 
 /* Return the value of register number REG (a DWARF register number),

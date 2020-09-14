@@ -53,6 +53,14 @@ extern void func_get_frame_base_dwarf_block (struct symbol *framefunc,
 					     const gdb_byte **start,
 					     size_t *length);
 
+/* Given section offset SECT_OFF, and compilation unit data
+   PER_CU, execute the "variable value" operation on the DIE
+   found at SECT_OFF.  */
+
+struct value *sect_variable_value (sect_offset sect_off,
+				   dwarf2_per_cu_data *per_cu,
+				   dwarf2_per_objfile *per_objfile);
+
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the context
    of FRAME.  */
