@@ -153,7 +153,7 @@ convert_func (compile_c_instance *context, struct type *type)
   int i;
   gcc_type result, return_type;
   struct gcc_type_array array;
-  int is_varargs = TYPE_VARARGS (type) || !TYPE_PROTOTYPED (type);
+  int is_varargs = TYPE_VARARGS (type) || !type->is_prototyped ();
 
   struct type *target_type = TYPE_TARGET_TYPE (type);
 

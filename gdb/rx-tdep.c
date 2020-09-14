@@ -795,7 +795,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		    {
 		      int p_arg_size = 4;
 
-		      if (TYPE_PROTOTYPED (func_type)
+		      if (func_type->is_prototyped ()
 			  && i < func_type->num_fields ())
 			{
 			  struct type *p_arg_type =

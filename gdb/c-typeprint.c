@@ -604,7 +604,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 	}
     }
   else if (!printed_any
-	   && (TYPE_PROTOTYPED (type) || language == language_cplus))
+	   && (type->is_prototyped () || language == language_cplus))
     fprintf_filtered (stream, "void");
 
   fprintf_filtered (stream, ")");

@@ -216,13 +216,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
 
-/* * This is a function type which appears to have a prototype.  We
-   need this for function calls in order to tell us if it's necessary
-   to coerce the args, or to just do the standard conversions.  This
-   is used with a short field.  */
-
-#define TYPE_PROTOTYPED(t)	((t)->is_prototyped ())
-
 /* * FIXME drow/2002-06-03:  Only used for methods, but applies as well
    to functions.  */
 
@@ -1099,6 +1092,11 @@ struct type
   {
     this->main_type->m_flag_target_stub = target_is_stub;
   }
+
+  /* This is a function type which appears to have a prototype.  We
+     need this for function calls in order to tell us if it's necessary
+     to coerce the args, or to just do the standard conversions.  This
+     is used with a short field.  */
 
   bool is_prototyped () const
   {

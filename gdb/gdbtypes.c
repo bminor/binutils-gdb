@@ -5084,7 +5084,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_TARGET_STUB");
     }
-  if (TYPE_PROTOTYPED (type))
+  if (type->is_prototyped ())
     {
       puts_filtered (" TYPE_PROTOTYPED");
     }

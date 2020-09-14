@@ -1043,7 +1043,7 @@ call_function_by_hand_dummy (struct value *function,
 	  prototyped = 1;
 	}
       else if (i < ftype->num_fields ())
-	prototyped = TYPE_PROTOTYPED (ftype);
+	prototyped = ftype->is_prototyped ();
       else
 	prototyped = 0;
 

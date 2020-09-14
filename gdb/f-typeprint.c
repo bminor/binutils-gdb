@@ -262,7 +262,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	if (passed_a_ptr)
 	  fprintf_filtered (stream, ") ");
 	fprintf_filtered (stream, "(");
-	if (nfields == 0 && TYPE_PROTOTYPED (type))
+	if (nfields == 0 && type->is_prototyped ())
 	  f_print_type (builtin_f_type (get_type_arch (type))->builtin_void,
 			"", stream, -1, 0, 0);
 	else
