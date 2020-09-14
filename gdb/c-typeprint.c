@@ -1118,7 +1118,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       if (type->num_fields () == 0 && TYPE_NFN_FIELDS (type) == 0
 	  && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	{
-	  if (TYPE_STUB (type))
+	  if (type->is_stub ())
 	    fprintfi_filtered (level + 4, stream,
 			       _("%p[<incomplete type>%p]\n"),
 			       metadata_style.style ().ptr (), nullptr);
@@ -1629,7 +1629,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	    fprintf_filtered (stream, "{\n");
 	    if (type->num_fields () == 0)
 	      {
-		if (TYPE_STUB (type))
+		if (type->is_stub ())
 		  fprintfi_filtered (level + 4, stream,
 				     _("%p[<incomplete type>%p]\n"),
 				     metadata_style.style ().ptr (), nullptr);

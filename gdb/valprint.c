@@ -947,7 +947,7 @@ do_val_print (struct value *value, struct ui_file *stream, int recurse,
      only a stub and we can't find and substitute its complete type, then
      print appropriate string and return.  */
 
-  if (TYPE_STUB (real_type))
+  if (real_type->is_stub ())
     {
       fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
       return;

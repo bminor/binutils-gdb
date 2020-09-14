@@ -1363,7 +1363,7 @@ type_to_type_object (struct type *type)
   try
     {
       /* Try not to let stub types leak out to Python.  */
-      if (TYPE_STUB (type))
+      if (type->is_stub ())
 	type = check_typedef (type);
     }
   catch (...)

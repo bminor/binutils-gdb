@@ -1592,7 +1592,7 @@ desc_bounds (struct value *arr)
 	{
 	  struct type *target_type = TYPE_TARGET_TYPE (p_bounds_type);
 
-	  if (TYPE_STUB (target_type))
+	  if (target_type->is_stub ())
 	    p_bounds = value_cast (lookup_pointer_type
 				   (ada_check_typedef (target_type)),
 				   p_bounds);
@@ -5010,13 +5010,13 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
       /* If two symbols have the same name and one of them is a stub type,
          the get rid of the stub.  */
 
-      if (TYPE_STUB (SYMBOL_TYPE ((*syms)[i].symbol))
+      if (SYMBOL_TYPE ((*syms)[i].symbol)->is_stub ()
           && (*syms)[i].symbol->linkage_name () != NULL)
         {
           for (j = 0; j < syms->size (); j++)
             {
               if (j != i
-                  && !TYPE_STUB (SYMBOL_TYPE ((*syms)[j].symbol))
+                  && !SYMBOL_TYPE ((*syms)[j].symbol)->is_stub ()
                   && (*syms)[j].symbol->linkage_name () != NULL
                   && strcmp ((*syms)[i].symbol->linkage_name (),
                              (*syms)[j].symbol->linkage_name ()) == 0)
@@ -8762,7 +8762,7 @@ ada_check_typedef (struct type *type)
 
   type = check_typedef (type);
   if (type == NULL || type->code () != TYPE_CODE_ENUM
-      || !TYPE_STUB (type)
+      || !type->is_stub ()
       || type->name () == NULL)
     return type;
   else

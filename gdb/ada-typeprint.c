@@ -623,7 +623,7 @@ print_selected_record_field_types (struct type *type, struct type *outer_type,
 
   flds = 0;
 
-  if (fld0 > fld1 && TYPE_STUB (type))
+  if (fld0 > fld1 && type->is_stub ())
     return -1;
 
   for (i = fld0; i <= fld1; i += 1)

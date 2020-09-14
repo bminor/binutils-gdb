@@ -216,12 +216,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
 
-/* * This appears in a type's flags word if it is a stub type (e.g.,
-   if someone referenced a type that wasn't defined in a source file
-   via (struct sir_not_appearing_in_this_film *)).  */
-
-#define TYPE_STUB(t)		((t)->is_stub ())
-
 /* * The target type of this type is a stub type, and this type needs
    to be updated if it gets un-stubbed in check_typedef.  Used for
    arrays and ranges, in which TYPE_LENGTH of the array/range gets set
@@ -1084,6 +1078,10 @@ struct type
     this->main_type->m_flag_nosign = has_no_signedness;
   }
 
+  /* This appears in a type's flags word if it is a stub type (e.g.,
+     if someone referenced a type that wasn't defined in a source file
+     via (struct sir_not_appearing_in_this_film *)).  */
+
   bool is_stub () const
   {
     return this->main_type->m_flag_stub;
@@ -1841,7 +1839,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
    && ((thistype)->num_fields () == 0) \
    && (!HAVE_CPLUS_STRUCT (thistype) \
        || TYPE_NFN_FIELDS (thistype) == 0) \
-   && (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))
+   && ((thistype)->is_stub () || !TYPE_STUB_SUPPORTED (thistype)))
 
 /* * A helper macro that returns the name of a type or "unnamed type"
    if the type has no name.  */

@@ -2336,7 +2336,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 			== TYPE_CODE_METHOD);
 
 	  /* If this is just a stub, then we don't have the real name here.  */
-	  if (TYPE_STUB (new_sublist->fn_field.type))
+	  if (new_sublist->fn_field.type->is_stub ())
 	    {
 	      if (!TYPE_SELF_TYPE (new_sublist->fn_field.type))
 		set_type_self_type (new_sublist->fn_field.type, type);
@@ -3429,7 +3429,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
      scribbling on existing structure type objects when new definitions
      appear.  */
   if (! (type->code () == TYPE_CODE_UNDEF
-         || TYPE_STUB (type)))
+         || type->is_stub ()))
     {
       complain_about_struct_wipeout (type);
 
@@ -4453,7 +4453,7 @@ cleanup_undefined_types_1 (void)
 	       as well as in check_typedef to deal with the (legitimate in
 	       C though not C++) case of several types with the same name
 	       in different source files.  */
-	    if (TYPE_STUB (*type))
+	    if ((*type)->is_stub ())
 	      {
 		struct pending *ppt;
 		int i;

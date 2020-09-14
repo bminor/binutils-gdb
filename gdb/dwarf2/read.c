@@ -16640,7 +16640,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
      can tell us the reality.  However, we defer to a local size
      attribute if one exists, because this lets the compiler override
      the underlying type if needed.  */
-  if (TYPE_TARGET_TYPE (type) != NULL && !TYPE_STUB (TYPE_TARGET_TYPE (type)))
+  if (TYPE_TARGET_TYPE (type) != NULL && !TYPE_TARGET_TYPE (type)->is_stub ())
     {
       struct type *underlying_type = TYPE_TARGET_TYPE (type);
       underlying_type = check_typedef (underlying_type);

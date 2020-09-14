@@ -561,7 +561,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  fprintf_filtered (stream, "\n");
 	  if ((type->num_fields () == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
-	      if (TYPE_STUB (type))
+	      if (type->is_stub ())
 		fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
 	      else
 		fprintfi_filtered (level + 4, stream, "<no data fields>\n");

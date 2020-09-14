@@ -330,7 +330,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
     case TYPE_CODE_SET:
       elttype = type->index_type ();
       elttype = check_typedef (elttype);
-      if (TYPE_STUB (elttype))
+      if (elttype->is_stub ())
 	{
 	  fprintf_styled (stream, metadata_style.style (), "<incomplete type>");
 	  break;

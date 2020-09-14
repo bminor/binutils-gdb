@@ -934,7 +934,7 @@ create_range_type (struct type *result_type, struct type *index_type,
     result_type = alloc_type_copy (index_type);
   result_type->set_code (TYPE_CODE_RANGE);
   TYPE_TARGET_TYPE (result_type) = index_type;
-  if (TYPE_STUB (index_type))
+  if (index_type->is_stub ())
     TYPE_TARGET_STUB (result_type) = 1;
   else
     TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
@@ -1388,7 +1388,7 @@ create_set_type (struct type *result_type, struct type *domain_type)
   result_type->set_fields
     ((struct field *) TYPE_ZALLOC (result_type, sizeof (struct field)));
 
-  if (!TYPE_STUB (domain_type))
+  if (!domain_type->is_stub ())
     {
       LONGEST low_bound, high_bound, bit_length;
 
@@ -2837,7 +2837,7 @@ check_typedef (struct type *type)
     }
   /* Otherwise, rely on the stub flag being set for opaque/stubbed
      types.  */
-  else if (TYPE_STUB (type) && !currently_reading_symtab)
+  else if (type->is_stub () && !currently_reading_symtab)
     {
       const char *name = type->name ();
       /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or VAR_DOMAIN
@@ -2868,7 +2868,7 @@ check_typedef (struct type *type)
     {
       struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
-      if (TYPE_STUB (target_type) || TYPE_TARGET_STUB (target_type))
+      if (target_type->is_stub () || TYPE_TARGET_STUB (target_type))
 	{
 	  /* Nothing we can do.  */
 	}
@@ -5076,7 +5076,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_ENDIANITY_NOT_DEFAULT");
     }
-  if (TYPE_STUB (type))
+  if (type->is_stub ())
     {
       puts_filtered (" TYPE_STUB");
     }
