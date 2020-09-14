@@ -1,5 +1,29 @@
 2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* xml-support.h (xml_fetch_another): Change type to be a
+	function_view.
+	(xml_process_xincludes): Remove baton parameter.
+	(xml_fetch_content_from_file): Change baton parameter to
+	dirname.
+	* xml-support.c (struct xinclude_parsing_data)
+	<xinclude_parsing_data>: Remove baton parameter.
+	<fetcher_baton>: Remove.
+	(xinclude_start_include): Adjust.
+	(xml_process_xincludes): Adjust.
+	(xml_fetch_content_from_file): Replace baton parameter with
+	dirname.
+	* xml-syscall.c (syscall_parse_xml): Remove baton parameter.
+	(xml_init_syscalls_info): Use a lambda.
+	* xml-tdesc.c (tdesc_parse_xml): Remove baton parameter.
+	(file_read_description_xml): Use a lambda.
+	(fetch_available_features_from_target): Change baton parameter
+	to target_ops.
+	(target_read_description_xml): Use a lambda.
+	(target_fetch_description_xml): Use a lambda.
+	(string_read_description_xml): Update.
+
+2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbtypes.h (TYPE_ENDIANITY_NOT_DEFAULT): Remove, replace all
 	uses with type::endianity_is_not_default.
 

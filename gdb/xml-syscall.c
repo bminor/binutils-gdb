@@ -287,8 +287,7 @@ static const struct gdb_xml_element syselements[] = {
 };
 
 static struct syscalls_info *
-syscall_parse_xml (const char *document, xml_fetch_another fetcher,
-                   void *fetcher_baton)
+syscall_parse_xml (const char *document, xml_fetch_another fetcher)
 {
   struct syscall_parsing_data data;
   syscalls_info_up sysinfo (new syscalls_info ());
@@ -322,9 +321,13 @@ xml_init_syscalls_info (const char *filename)
   if (!full_file)
     return NULL;
 
-  return syscall_parse_xml (full_file->data (),
-			    xml_fetch_content_from_file,
-			    (void *) ldirname (filename).c_str ());
+  const std::string dirname = ldirname (filename);
+  auto fetch_another = [&dirname] (const char *name)
+    {
+      return xml_fetch_content_from_file (name, dirname.c_str ());
+    };
+
+  return syscall_parse_xml (full_file->data (), fetch_another);
 }
 
 /* Initializes the syscalls_info structure according to the
