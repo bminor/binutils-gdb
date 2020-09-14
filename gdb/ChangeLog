@@ -1,3 +1,8 @@
+2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-nat.c (linux_nat_wait_1): Don't use inferior_ptid when
+	checking for initial lwp.
+
 2020-09-14  Tom Tromey  <tromey@adacore.com>
 
 	* m68k-tdep.c (m68k_extract_return_value): Use

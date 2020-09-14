@@ -3143,14 +3143,13 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
   /* The first time we get here after starting a new inferior, we may
      not have added it to the LWP list yet - this is the earliest
      moment at which we know its PID.  */
-  if (inferior_ptid.is_pid ())
+  if (ptid.is_pid () && find_lwp_pid (ptid) == nullptr)
     {
-      /* Upgrade the main thread's ptid.  */
-      thread_change_ptid (linux_target, inferior_ptid,
-			  ptid_t (inferior_ptid.pid (),
-				  inferior_ptid.pid (), 0));
+      ptid_t lwp_ptid (ptid.pid (), ptid.pid ());
 
-      lp = add_initial_lwp (inferior_ptid);
+      /* Upgrade the main thread's ptid.  */
+      thread_change_ptid (linux_target, ptid, lwp_ptid);
+      lp = add_initial_lwp (lwp_ptid);
       lp->resumed = 1;
     }
 
