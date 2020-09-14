@@ -444,7 +444,7 @@ static void
 gen_sign_extend (struct agent_expr *ax, struct type *type)
 {
   /* Do we need to sign-extend this?  */
-  if (!TYPE_UNSIGNED (type))
+  if (!type->is_unsigned ())
     ax_ext (ax, TYPE_LENGTH (type) * TARGET_CHAR_BIT);
 }
 
@@ -458,7 +458,7 @@ gen_extend (struct agent_expr *ax, struct type *type)
   int bits = TYPE_LENGTH (type) * TARGET_CHAR_BIT;
 
   /* I just had to.  */
-  ((TYPE_UNSIGNED (type) ? ax_zero_ext : ax_ext) (ax, bits));
+  ((type->is_unsigned () ? ax_zero_ext : ax_ext) (ax, bits));
 }
 
 
@@ -871,8 +871,8 @@ type_wider_than (struct type *type1, struct type *type2)
 {
   return (TYPE_LENGTH (type1) > TYPE_LENGTH (type2)
 	  || (TYPE_LENGTH (type1) == TYPE_LENGTH (type2)
-	      && TYPE_UNSIGNED (type1)
-	      && !TYPE_UNSIGNED (type2)));
+	      && type1->is_unsigned ()
+	      && !type2->is_unsigned ()));
 }
 
 
@@ -899,7 +899,7 @@ gen_conversion (struct agent_expr *ax, struct type *from, struct type *to)
      then we need to extend.  */
   else if (TYPE_LENGTH (to) == TYPE_LENGTH (from))
     {
-      if (TYPE_UNSIGNED (from) != TYPE_UNSIGNED (to))
+      if (from->is_unsigned () != to->is_unsigned ())
 	gen_extend (ax, to);
     }
 
@@ -907,7 +907,7 @@ gen_conversion (struct agent_expr *ax, struct type *from, struct type *to)
      we need to zero out any possible sign bits.  */
   else if (TYPE_LENGTH (to) > TYPE_LENGTH (from))
     {
-      if (TYPE_UNSIGNED (to))
+      if (to->is_unsigned ())
 	gen_extend (ax, to);
     }
 }
@@ -1162,8 +1162,7 @@ gen_binop (struct agent_expr *ax, struct axs_value *value,
       || (value2->type->code () != TYPE_CODE_INT))
     error (_("Invalid combination of types in %s."), name);
 
-  ax_simple (ax,
-	     TYPE_UNSIGNED (value1->type) ? op_unsigned : op);
+  ax_simple (ax, value1->type->is_unsigned () ? op_unsigned : op);
   if (may_carry)
     gen_extend (ax, value1->type);	/* catch overflow */
   value->type = value1->type;
@@ -1399,7 +1398,7 @@ gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
     ax_simple (ax, aop_bit_or);
 
   /* Sign- or zero-extend the value as appropriate.  */
-  ((TYPE_UNSIGNED (type) ? ax_zero_ext : ax_ext) (ax, end - start));
+  ((type->is_unsigned () ? ax_zero_ext : ax_ext) (ax, end - start));
 
   /* This is *not* an lvalue.  Ugh.  */
   value->kind = axs_rvalue;

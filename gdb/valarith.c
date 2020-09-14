@@ -883,7 +883,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   else if (is_integral_type (type1))
     {
       *eff_type_x = type2;
-      if (TYPE_UNSIGNED (type1))
+      if (type1->is_unsigned ())
 	target_float_from_ulongest (x, *eff_type_x, value_as_long (arg1));
       else
 	target_float_from_longest (x, *eff_type_x, value_as_long (arg1));
@@ -902,7 +902,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   else if (is_integral_type (type2))
     {
       *eff_type_y = type1;
-      if (TYPE_UNSIGNED (type2))
+      if (type2->is_unsigned ())
 	target_float_from_ulongest (y, *eff_type_y, value_as_long (arg2));
       else
 	target_float_from_longest (y, *eff_type_y, value_as_long (arg2));
@@ -940,9 +940,9 @@ promotion_type (struct type *type1, struct type *type2)
 	result_type = type1;
       else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
 	result_type = type2;
-      else if (TYPE_UNSIGNED (type1))
+      else if (type1->is_unsigned ())
 	result_type = type1;
-      else if (TYPE_UNSIGNED (type2))
+      else if (type2->is_unsigned ())
 	result_type = type2;
       else
 	result_type = type1;
@@ -1162,7 +1162,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       else
 	result_type = promotion_type (type1, type2);
 
-      if (TYPE_UNSIGNED (result_type))
+      if (result_type->is_unsigned ())
 	{
 	  LONGEST v2_signed = value_as_long (arg2);
 	  ULONGEST v1, v2, v = 0;
@@ -1497,7 +1497,7 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 
   if (eltype1->code () != eltype2->code ()
       || elsize != TYPE_LENGTH (eltype2)
-      || TYPE_UNSIGNED (eltype1) != TYPE_UNSIGNED (eltype2)
+      || eltype1->is_unsigned () != eltype2->is_unsigned ()
       || low_bound1 != low_bound2 || high_bound1 != high_bound2)
     error (_("Cannot perform operation on vectors with different types"));
 

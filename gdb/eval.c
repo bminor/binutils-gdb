@@ -500,8 +500,8 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
       const struct builtin_type *builtin = builtin_type (gdbarch);
       unsigned int promoted_len1 = TYPE_LENGTH (type1);
       unsigned int promoted_len2 = TYPE_LENGTH (type2);
-      int is_unsigned1 = TYPE_UNSIGNED (type1);
-      int is_unsigned2 = TYPE_UNSIGNED (type2);
+      int is_unsigned1 = type1->is_unsigned ();
+      int is_unsigned2 = type2->is_unsigned ();
       unsigned int result_len;
       int unsigned_operation;
 

@@ -9499,7 +9499,7 @@ alloc_rust_variant (struct obstack *obstack, struct type *type,
   part->is_unsigned
     = (discriminant_index == -1
        ? false
-       : TYPE_UNSIGNED (type->field (discriminant_index).type ()));
+       : type->field (discriminant_index).type ()->is_unsigned ());
   part->variants = gdb::array_view<variant> (variants, n_variants);
 
   void *storage = obstack_alloc (obstack, sizeof (gdb::array_view<variant_part>));
@@ -15358,7 +15358,7 @@ create_one_variant_part (variant_part &result,
     {
       result.discriminant_index = iter->second;
       result.is_unsigned
-	= TYPE_UNSIGNED (fi->fields[result.discriminant_index].field.type ());
+	= fi->fields[result.discriminant_index].field.type ()->is_unsigned ();
     }
 
   size_t n = builder.variants.size ();
@@ -18355,10 +18355,10 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   negative_mask =
     -((ULONGEST) 1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1));
   if (low.kind () == PROP_CONST
-      && !TYPE_UNSIGNED (base_type) && (low.const_val () & negative_mask))
+      && !base_type->is_unsigned () && (low.const_val () & negative_mask))
     low.set_const_val (low.const_val () | negative_mask);
   if (high.kind () == PROP_CONST
-      && !TYPE_UNSIGNED (base_type) && (high.const_val () & negative_mask))
+      && !base_type->is_unsigned () && (high.const_val () & negative_mask))
     high.set_const_val (high.const_val () | negative_mask);
 
   /* Check for bit and byte strides.  */
@@ -24087,7 +24087,7 @@ dwarf2_cu::addr_type () const
   if (TYPE_LENGTH (addr_type) == addr_size)
     return addr_type;
 
-  addr_type = addr_sized_int_type (TYPE_UNSIGNED (addr_type));
+  addr_type = addr_sized_int_type (addr_type->is_unsigned ());
   return addr_type;
 }
 

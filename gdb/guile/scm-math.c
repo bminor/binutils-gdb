@@ -527,7 +527,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
   if (is_integral_type (type)
       || type->code () == TYPE_CODE_PTR)
     {
-      if (TYPE_UNSIGNED (type))
+      if (type->is_unsigned ())
 	{
 	  ULONGEST max;
 
@@ -573,7 +573,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 static int
 vlscm_integer_fits_p (SCM obj, struct type *type)
 {
-  if (TYPE_UNSIGNED (type))
+  if (type->is_unsigned ())
     {
       ULONGEST max;
 

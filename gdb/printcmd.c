@@ -368,7 +368,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
      a negative signed value (e.g. "print/u (short)-1" should print 65535
      (if shorts are 16 bits) instead of 4294967295).  */
   if (options->format != 'c'
-      && (options->format != 'd' || TYPE_UNSIGNED (type)))
+      && (options->format != 'd' || type->is_unsigned ()))
     {
       if (len < TYPE_LENGTH (type) && byte_order == BFD_ENDIAN_BIG)
 	valaddr += TYPE_LENGTH (type) - len;
@@ -452,7 +452,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
     case 0:
       if (type->code () != TYPE_CODE_FLT)
 	{
-	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
+	  print_decimal_chars (stream, valaddr, len, !type->is_unsigned (),
 			       byte_order);
 	  break;
 	}
@@ -478,7 +478,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	  val_long.emplace (unpack_long (type, valaddr));
 
 	opts.format = 0;
-	if (TYPE_UNSIGNED (type))
+	if (type->is_unsigned ())
 	  type = builtin_type (gdbarch)->builtin_true_unsigned_char;
  	else
 	  type = builtin_type (gdbarch)->builtin_true_char;

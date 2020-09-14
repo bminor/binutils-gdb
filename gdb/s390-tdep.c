@@ -1818,7 +1818,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 	  /* Place value in least significant bits of the register or
 	     memory word and sign- or zero-extend to full word size.
 	     This also applies to a struct or union.  */
-	  val = TYPE_UNSIGNED (type)
+	  val = type->is_unsigned ()
 	    ? extract_unsigned_integer (value_contents (arg),
 					length, byte_order)
 	    : extract_signed_integer (value_contents (arg),
@@ -2046,7 +2046,7 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
       if (out != NULL)
 	regcache->cooked_read_part (S390_R2_REGNUM, word_size - length, length,
 				    out);
-      else if (TYPE_UNSIGNED (type))
+      else if (type->is_unsigned ())
 	regcache_cooked_write_unsigned
 	  (regcache, S390_R2_REGNUM,
 	   extract_unsigned_integer (in, length, byte_order));

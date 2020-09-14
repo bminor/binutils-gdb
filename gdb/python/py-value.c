@@ -1694,7 +1694,7 @@ valpy_int (PyObject *self)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (TYPE_UNSIGNED (type))
+  if (type->is_unsigned ())
     return gdb_py_object_from_ulongest (l).release ();
   else
     return gdb_py_object_from_longest (l).release ();
@@ -1730,7 +1730,7 @@ valpy_long (PyObject *self)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (TYPE_UNSIGNED (type))
+  if (type->is_unsigned ())
     return gdb_py_long_from_ulongest (l);
   else
     return gdb_py_long_from_longest (l);

@@ -462,7 +462,7 @@ value_cast (struct type *type, struct value *arg2)
 	}
 
       /* The only option left is an integral type.  */
-      if (TYPE_UNSIGNED (type2))
+      if (type2->is_unsigned ())
 	return value_from_ulongest (to_type, value_as_long (arg2));
       else
 	return value_from_longest (to_type, value_as_long (arg2));
@@ -1230,7 +1230,7 @@ value_assign (struct value *toval, struct value *fromval)
       LONGEST valmask = (((ULONGEST) 1) << value_bitsize (toval)) - 1;
 
       fieldval &= valmask;
-      if (!TYPE_UNSIGNED (type) 
+      if (!type->is_unsigned () 
 	  && (fieldval & (valmask ^ (valmask >> 1))))
 	fieldval |= ~valmask;
 

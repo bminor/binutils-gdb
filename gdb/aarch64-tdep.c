@@ -1885,7 +1885,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  if (len < 4)
 	    {
 	      /* Promote to 32 bit integer.  */
-	      if (TYPE_UNSIGNED (arg_type))
+	      if (arg_type->is_unsigned ())
 		arg_type = builtin_type (gdbarch)->builtin_uint32;
 	      else
 		arg_type = builtin_type (gdbarch)->builtin_int32;

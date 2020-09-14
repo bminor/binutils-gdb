@@ -929,7 +929,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
   instance->enter_scope (std::move (scope));
 
   gcc_type int_type
-    = instance->plugin ().get_int_type (TYPE_UNSIGNED (type),
+    = instance->plugin ().get_int_type (type->is_unsigned (),
 					TYPE_LENGTH (type), nullptr);
   gcc_type result
     = instance->plugin ().start_enum_type (name.get (), int_type,
@@ -1022,7 +1022,7 @@ compile_cplus_convert_int (compile_cplus_instance *instance, struct type *type)
     }
 
   return instance->plugin ().get_int_type
-    (TYPE_UNSIGNED (type), TYPE_LENGTH (type), type->name ());
+    (type->is_unsigned (), TYPE_LENGTH (type), type->name ());
 }
 
 /* Convert a floating-point type to its gcc representation.  */

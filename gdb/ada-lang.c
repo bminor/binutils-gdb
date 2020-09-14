@@ -701,7 +701,7 @@ umax_of_size (int size)
 static LONGEST
 max_of_type (struct type *t)
 {
-  if (TYPE_UNSIGNED (t))
+  if (t->is_unsigned ())
     return (LONGEST) umax_of_size (TYPE_LENGTH (t));
   else
     return max_of_size (TYPE_LENGTH (t));
@@ -711,7 +711,7 @@ max_of_type (struct type *t)
 static LONGEST
 min_of_type (struct type *t)
 {
-  if (TYPE_UNSIGNED (t)) 
+  if (t->is_unsigned ())
     return 0;
   else
     return min_of_size (TYPE_LENGTH (t));
@@ -2276,7 +2276,7 @@ has_negatives (struct type *type)
     default:
       return 0;
     case TYPE_CODE_INT:
-      return !TYPE_UNSIGNED (type);
+      return !type->is_unsigned ();
     case TYPE_CODE_RANGE:
       return type->bounds ()->low.const_val () - type->bounds ()->bias < 0;
     }
@@ -9354,7 +9354,7 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   if (v2 == 0)
     error (_("second operand of %s must not be zero."), op_string (op));
 
-  if (TYPE_UNSIGNED (type1) || op == BINOP_MOD)
+  if (type1->is_unsigned () || op == BINOP_MOD)
     return value_binop (arg1, arg2, op);
 
   v1 = value_as_long (arg1);
@@ -11444,7 +11444,7 @@ ada_is_modular_type (struct type *type)
 
   return (subranged_type != NULL && type->code () == TYPE_CODE_RANGE
           && subranged_type->code () == TYPE_CODE_INT
-          && TYPE_UNSIGNED (subranged_type));
+          && subranged_type->is_unsigned ());
 }
 
 /* Assuming ada_is_modular_type (TYPE), the modulus of TYPE.  */

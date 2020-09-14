@@ -769,7 +769,7 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
       const gdb_byte *valaddr = value_contents_for_printing (value);
 
       LONGEST val = unpack_long (type, valaddr);
-      if (TYPE_UNSIGNED (type))
+      if (type->is_unsigned ())
 	fprintf_filtered (stream, "%u", (unsigned int) val);
       else
 	fprintf_filtered (stream, "%d", (int) val);

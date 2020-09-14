@@ -827,7 +827,7 @@ push_kind_type (LONGEST val, struct type *type)
 {
   int ival;
 
-  if (TYPE_UNSIGNED (type))
+  if (type->is_unsigned ())
     {
       ULONGEST uval = static_cast <ULONGEST> (val);
       if (uval > INT_MAX)

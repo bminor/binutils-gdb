@@ -381,7 +381,7 @@ m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
     case TYPE_CODE_CHAR:
       if (TYPE_LENGTH (type) < sizeof (LONGEST))
 	{
-	  if (!TYPE_UNSIGNED (type))
+	  if (!type->is_unsigned ())
 	    {
 	      *lowp = -(1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1));
 	      *highp = -*lowp - 1;

@@ -212,7 +212,7 @@ static bool
 rust_u8_type_p (struct type *type)
 {
   return (type->code () == TYPE_CODE_INT
-	  && TYPE_UNSIGNED (type)
+	  && type->is_unsigned ()
 	  && TYPE_LENGTH (type) == 1);
 }
 
@@ -223,7 +223,7 @@ rust_chartype_p (struct type *type)
 {
   return (type->code () == TYPE_CODE_CHAR
 	  && TYPE_LENGTH (type) == 4
-	  && TYPE_UNSIGNED (type));
+	  && type->is_unsigned ());
 }
 
 /* If VALUE represents a trait object pointer, return the underlying
@@ -542,7 +542,7 @@ rust_value_print_inner (struct value *val, struct ui_file *stream,
 
     case TYPE_CODE_INT:
       /* Recognize the unit type.  */
-      if (TYPE_UNSIGNED (type) && TYPE_LENGTH (type) == 0
+      if (type->is_unsigned () && TYPE_LENGTH (type) == 0
 	  && type->name () != NULL && strcmp (type->name (), "()") == 0)
 	{
 	  fputs_filtered ("()", stream);

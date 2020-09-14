@@ -256,7 +256,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 
 		  if (mode != NULL)
 		    {
-		      if (TYPE_UNSIGNED (regtype))
+		      if (regtype->is_unsigned ())
 			fputs_unfiltered ("unsigned ", stream);
 		      fprintf_unfiltered (stream,
 					  "int %s"

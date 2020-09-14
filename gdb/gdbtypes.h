@@ -210,11 +210,6 @@ enum type_instance_flag_value : unsigned
 
 DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
-/* * Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
-   the type is signed (unless TYPE_NOSIGN (below) is set).  */
-
-#define TYPE_UNSIGNED(t)	((t)->is_unsigned ())
-
 /* * No sign for this type.  In C++, "char", "signed char", and
    "unsigned char" are distinct types; so we need an extra flag to
    indicate the absence of a sign!  */
@@ -1067,6 +1062,9 @@ struct type
   {
     return this->bounds ()->bit_stride ();
   }
+
+  /* Unsigned integer type.  If this is not set for a TYPE_CODE_INT,
+     the type is signed (unless TYPE_NOSIGN is set).  */
 
   bool is_unsigned () const
   {

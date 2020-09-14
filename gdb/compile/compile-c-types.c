@@ -130,7 +130,7 @@ convert_enum (compile_c_instance *context, struct type *type)
   gcc_type int_type, result;
   int i;
 
-  int_type = context->plugin ().int_type_v0 (TYPE_UNSIGNED (type),
+  int_type = context->plugin ().int_type_v0 (type->is_unsigned (),
 					     TYPE_LENGTH (type));
 
   result = context->plugin ().build_enum_type (int_type);
@@ -199,12 +199,12 @@ convert_int (compile_c_instance *context, struct type *type)
 	  gdb_assert (TYPE_LENGTH (type) == 1);
 	  return context->plugin ().char_type ();
 	}
-      return context->plugin ().int_type (TYPE_UNSIGNED (type),
+      return context->plugin ().int_type (type->is_unsigned (),
 					  TYPE_LENGTH (type),
 					  type->name ());
     }
   else
-    return context->plugin ().int_type_v0 (TYPE_UNSIGNED (type),
+    return context->plugin ().int_type_v0 (type->is_unsigned (),
 					   TYPE_LENGTH (type));
 }
 

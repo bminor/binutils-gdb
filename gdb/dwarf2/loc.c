@@ -2603,7 +2603,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
 		struct type *type = check_typedef (baton->property_type);
 		if (TYPE_LENGTH (type) < sizeof (CORE_ADDR)
-		    && !TYPE_UNSIGNED (type))
+		    && !type->is_unsigned ())
 		  {
 		    /* If we have a valid return candidate and it's value
 		       is signed, we have to sign-extend the value because

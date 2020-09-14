@@ -5091,7 +5091,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			   || typecode == TYPE_CODE_INT))
 		      || (partial_len < 4
 			  && typecode == TYPE_CODE_INT
-			  && !TYPE_UNSIGNED (arg_type)))
+			  && !arg_type->is_unsigned ()))
 		    regval = extract_signed_integer (val, partial_len,
 						     byte_order);
 		  else

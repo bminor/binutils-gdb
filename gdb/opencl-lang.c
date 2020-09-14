@@ -99,7 +99,7 @@ lookup_opencl_vector_type (struct gdbarch *gdbarch, enum type_code code,
       if (types[i]->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (types[i])
 	  && get_array_bounds (types[i], &lowb, &highb)
 	  && TYPE_TARGET_TYPE (types[i])->code () == code
-	  && TYPE_UNSIGNED (TYPE_TARGET_TYPE (types[i])) == flag_unsigned
+	  && TYPE_TARGET_TYPE (types[i])->is_unsigned () == flag_unsigned
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (types[i])) == el_length
 	  && TYPE_LENGTH (types[i]) == length
 	  && highb - lowb + 1 == n)
@@ -338,7 +338,7 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
       struct type *dst_type =
 	lookup_opencl_vector_type (gdbarch, elm_type->code (),
 				   TYPE_LENGTH (elm_type),
-				   TYPE_UNSIGNED (elm_type), n);
+				   elm_type->is_unsigned (), n);
 
       if (dst_type == NULL)
 	dst_type = init_vector_type (elm_type, n);
@@ -602,7 +602,7 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
   /* Check whether the vector types are compatible.  */
   if (eltype1->code () != eltype2->code ()
       || TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2)
-      || TYPE_UNSIGNED (eltype1) != TYPE_UNSIGNED (eltype2)
+      || eltype1->is_unsigned () != eltype2->is_unsigned ()
       || lowb1 != lowb2 || highb1 != highb2)
     error (_("Cannot perform operation on vectors with different types"));
 
@@ -912,7 +912,7 @@ Cannot perform conditional operation on incompatible types"));
 	  /* Throw an error if the types of arg2 or arg3 are incompatible.  */
 	  if (eltype2->code () != eltype3->code ()
 	      || TYPE_LENGTH (eltype2) != TYPE_LENGTH (eltype3)
-	      || TYPE_UNSIGNED (eltype2) != TYPE_UNSIGNED (eltype3)
+	      || eltype2->is_unsigned () != eltype3->is_unsigned ()
 	      || lowb2 != lowb3 || highb2 != highb3)
 	    error (_("\
 Cannot perform operation on vectors with different types"));
