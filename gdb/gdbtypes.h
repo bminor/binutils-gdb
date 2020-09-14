@@ -216,14 +216,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_ENDIANITY_NOT_DEFAULT(t) (TYPE_MAIN_TYPE (t)->flag_endianity_not_default)
 
-/* * The target type of this type is a stub type, and this type needs
-   to be updated if it gets un-stubbed in check_typedef.  Used for
-   arrays and ranges, in which TYPE_LENGTH of the array/range gets set
-   based on the TYPE_LENGTH of the target type.  Also, set for
-   TYPE_CODE_TYPEDEF.  */
-
-#define TYPE_TARGET_STUB(t)	((t)->target_is_stub ())
-
 /* * This is a function type which appears to have a prototype.  We
    need this for function calls in order to tell us if it's necessary
    to coerce the args, or to just do the standard conversions.  This
@@ -1091,6 +1083,12 @@ struct type
   {
     this->main_type->m_flag_stub = is_stub;
   }
+
+  /* The target type of this type is a stub type, and this type needs
+     to be updated if it gets un-stubbed in check_typedef.  Used for
+     arrays and ranges, in which TYPE_LENGTH of the array/range gets set
+     based on the TYPE_LENGTH of the target type.  Also, set for
+     TYPE_CODE_TYPEDEF.  */
 
   bool target_is_stub () const
   {

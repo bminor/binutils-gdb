@@ -2864,11 +2864,11 @@ check_typedef (struct type *type)
         }
     }
 
-  if (TYPE_TARGET_STUB (type))
+  if (type->target_is_stub ())
     {
       struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
-      if (target_type->is_stub () || TYPE_TARGET_STUB (target_type))
+      if (target_type->is_stub () || target_type->target_is_stub ())
 	{
 	  /* Nothing we can do.  */
 	}
@@ -5080,7 +5080,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_STUB");
     }
-  if (TYPE_TARGET_STUB (type))
+  if (type->target_is_stub ())
     {
       puts_filtered (" TYPE_TARGET_STUB");
     }
