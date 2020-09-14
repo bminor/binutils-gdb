@@ -665,7 +665,7 @@ fake_method::fake_method (type_instance_flags flags,
       if (param_types[num_types - 1] == NULL)
 	{
 	  --num_types;
-	  TYPE_VARARGS (type) = 1;
+	  type->set_has_varargs (true);
 	}
       else if (check_typedef (param_types[num_types - 1])->code ()
 	       == TYPE_CODE_VOID)

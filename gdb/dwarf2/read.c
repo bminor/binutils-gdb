@@ -17707,7 +17707,8 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	  if (child_die->tag == DW_TAG_formal_parameter)
 	    nparams++;
 	  else if (child_die->tag == DW_TAG_unspecified_parameters)
-	    TYPE_VARARGS (ftype) = 1;
+	    ftype->set_has_varargs (true);
+
 	  child_die = child_die->sibling;
 	}
 

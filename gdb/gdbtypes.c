@@ -552,7 +552,7 @@ lookup_function_type_with_arguments (struct type *type,
       if (param_types[nparams - 1] == NULL)
 	{
 	  --nparams;
-	  TYPE_VARARGS (fn) = 1;
+	  fn->set_has_varargs (true);
 	}
       else if (check_typedef (param_types[nparams - 1])->code ()
 	       == TYPE_CODE_VOID)
@@ -1556,7 +1556,7 @@ smash_to_method_type (struct type *type, struct type *self_type,
   type->set_fields (args);
   type->set_num_fields (nargs);
   if (varargs)
-    TYPE_VARARGS (type) = 1;
+    type->set_has_varargs (true);
   TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
 }
 

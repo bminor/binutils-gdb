@@ -1,5 +1,11 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct type) <has_varargs, set_has_varargs>: New methods.
+	(TYPE_VARARGS): Use type::has_varargs, change all write call sites to
+	use type::set_has_varargs.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_PROTOTYPED): Remove, replace all
 	uses with type::is_prototyped.
 

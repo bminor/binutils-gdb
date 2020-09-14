@@ -1142,7 +1142,7 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
   tid = ctf_lookup_by_symbol (ccp->fp, idx);
   ftype = get_tid_type (ccp->of, tid);
   if (finfo.ctc_flags & CTF_FUNC_VARARG)
-    TYPE_VARARGS (ftype) = 1;
+    ftype->set_has_varargs (true);
   ftype->set_num_fields (argc);
 
   /* If argc is 0, it has a "void" type.  */
