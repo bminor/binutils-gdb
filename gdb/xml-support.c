@@ -969,10 +969,10 @@ xml_fetch_content_from_file (const char *filename, const char *dirname)
 
   if (dirname != nullptr && *dirname != '\0')
     {
-      char *fullname = concat (dirname, "/", filename, (char *) NULL);
+      gdb::unique_xmalloc_ptr<char> fullname
+	(concat (dirname, "/", filename, (char *) NULL));
 
-      file = gdb_fopen_cloexec (fullname, FOPEN_RB);
-      xfree (fullname);
+      file = gdb_fopen_cloexec (fullname.get (), FOPEN_RB);
     }
   else
     file = gdb_fopen_cloexec (filename, FOPEN_RB);

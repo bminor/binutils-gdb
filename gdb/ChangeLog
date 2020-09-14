@@ -1,5 +1,10 @@
 2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* xml-support.c (xml_fetch_content_from_file): Replace xfree
+	with gdb::unique_xmalloc_ptr<char>.
+
+2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* xml-support.h (xml_fetch_another): Change type to be a
 	function_view.
 	(xml_process_xincludes): Remove baton parameter.
