@@ -1,3 +1,8 @@
+2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_ENDIANITY_NOT_DEFAULT): Remove, replace all
+	uses with type::endianity_is_not_default.
+
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (struct type) <endianity_is_not_default,

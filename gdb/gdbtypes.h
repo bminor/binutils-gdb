@@ -210,12 +210,6 @@ enum type_instance_flag_value : unsigned
 
 DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
-/* * A compiler may supply dwarf instrumentation
-   that indicates the desired endian interpretation of the variable
-   differs from the native endian representation. */
-
-#define TYPE_ENDIANITY_NOT_DEFAULT(t) ((t)->endianity_is_not_default ())
-
 /* * Not textual.  By default, GDB treats all single byte integers as
    characters (or elements of strings) unless this flag is set.  */
 
@@ -1148,6 +1142,10 @@ struct type
   {
     this->main_type->m_flag_fixed_instance = is_fixed_instance;
   }
+
+  /* A compiler may supply dwarf instrumentation that indicates the desired
+     endian interpretation of the variable differs from the native endian
+     representation. */
 
   bool endianity_is_not_default () const
   {

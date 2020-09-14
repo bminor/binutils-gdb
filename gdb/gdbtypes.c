@@ -3705,7 +3705,7 @@ enum bfd_endian
 type_byte_order (const struct type *type)
 {
   bfd_endian byteorder = gdbarch_byte_order (get_type_arch (type));
-  if (TYPE_ENDIANITY_NOT_DEFAULT (type))
+  if (type->endianity_is_not_default ())
     {
       if (byteorder == BFD_ENDIAN_BIG)
         return BFD_ENDIAN_LITTLE;
@@ -3991,7 +3991,7 @@ check_types_equal (struct type *type1, struct type *type2,
       || TYPE_LENGTH (type1) != TYPE_LENGTH (type2)
       || type1->is_unsigned () != type2->is_unsigned ()
       || type1->has_no_signedness () != type2->has_no_signedness ()
-      || TYPE_ENDIANITY_NOT_DEFAULT (type1) != TYPE_ENDIANITY_NOT_DEFAULT (type2)
+      || type1->endianity_is_not_default () != type2->endianity_is_not_default ()
       || type1->has_varargs () != type2->has_varargs ()
       || type1->is_vector () != type2->is_vector ()
       || TYPE_NOTTEXT (type1) != TYPE_NOTTEXT (type2)
@@ -5072,7 +5072,7 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_NOSIGN");
     }
-  if (TYPE_ENDIANITY_NOT_DEFAULT (type))
+  if (type->endianity_is_not_default ())
     {
       puts_filtered (" TYPE_ENDIANITY_NOT_DEFAULT");
     }
