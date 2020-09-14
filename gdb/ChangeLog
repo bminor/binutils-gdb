@@ -1,5 +1,11 @@
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct type) <stub_is_supported, set_stub_is_supported>: New methods.
+	(TYPE_STUB_SUPPORTED): Use type::stub_is_supported, change all write call sites to
+	use type::set_stub_is_supported.
+
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_VECTOR): Remove, replace all
 	uses with type::is_vector.
 

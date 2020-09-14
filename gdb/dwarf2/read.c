@@ -16084,7 +16084,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       type->set_is_stub (true);
     }
   else
-    TYPE_STUB_SUPPORTED (type) = 1;
+    type->set_stub_is_supported (true);
 
   if (die_is_declaration (die, cu))
     type->set_is_stub (true);
