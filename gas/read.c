@@ -3530,7 +3530,12 @@ s_nop (int ignore ATTRIBUTE_UNUSED)
   if (asprintf (&nop, "%s", md_single_noop_insn) < 0)
     as_fatal ("%s", xstrerror (errno));
 
+  /* Some targets assume that they can update input_line_pointer inside
+     md_assemble, and, worse, that they can leave it assigned to the string
+     pointer that was provided as an argument.  So preserve ilp here.  */
+  char * saved_ilp = input_line_pointer;
   md_assemble (nop);
+  input_line_pointer = saved_ilp;
   free (nop);
 #endif
 }

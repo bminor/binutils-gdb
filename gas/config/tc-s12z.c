@@ -3807,7 +3807,6 @@ md_assemble (char *str)
       return;
     }
 
-  char * saved_ilp = input_line_pointer;
   input_line_pointer = skip_whites (op_end);
 
   size_t i;
@@ -3817,17 +3816,15 @@ md_assemble (char *str)
       if (0 == strcmp (name, opc->name))
 	{
 	  if (opc->parse_operands (opc))
-	    {
-	      input_line_pointer = saved_ilp;
-	      return;
-	    }
+	    return;
 	  continue;
 	}
     }
 
   as_bad (_("Invalid instruction: \"%s\""), str);
   as_bad (_("First invalid token: \"%s\""), fail_line_pointer);
-  input_line_pointer = saved_ilp;
+  while (*input_line_pointer++)
+    ;
 }
 
 
