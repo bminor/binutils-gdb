@@ -264,7 +264,7 @@ salpy_get_pc (PyObject *self, void *closure)
 
   SALPY_REQUIRE_VALID (self, sal);
 
-  return gdb_py_long_from_ulongest (sal->pc);
+  return gdb_py_object_from_ulongest (sal->pc).release ();
 }
 
 /* Implementation of the get method for the 'last' attribute of
@@ -278,7 +278,7 @@ salpy_get_last (PyObject *self, void *closure)
   SALPY_REQUIRE_VALID (self, sal);
 
   if (sal->end > 0)
-    return gdb_py_long_from_ulongest (sal->end - 1);
+    return gdb_py_object_from_ulongest (sal->end - 1).release ();
   else
     Py_RETURN_NONE;
 }

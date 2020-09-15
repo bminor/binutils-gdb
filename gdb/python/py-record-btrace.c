@@ -232,7 +232,7 @@ recpy_bt_insn_pc (PyObject *self, void *closure)
   if (insn == NULL)
     return NULL;
 
-  return gdb_py_long_from_ulongest (insn->pc);
+  return gdb_py_object_from_ulongest (insn->pc).release ();
 }
 
 /* Implementation of RecordInstruction.size [int] for btrace.

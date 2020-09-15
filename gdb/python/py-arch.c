@@ -209,14 +209,23 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	  return NULL;
         }
 
-      if (PyDict_SetItemString (insn_dict.get (), "addr",
-                                gdb_py_long_from_ulongest (pc))
-          || PyDict_SetItemString (insn_dict.get (), "asm",
-                                   PyString_FromString (!stb.empty ()
-							? stb.c_str ()
-							: "<unknown>"))
-          || PyDict_SetItemString (insn_dict.get (), "length",
-                                   PyInt_FromLong (insn_len)))
+      gdbpy_ref<> pc_obj = gdb_py_object_from_ulongest (pc);
+      if (pc_obj == nullptr)
+	return nullptr;
+
+      gdbpy_ref<> asm_obj (PyString_FromString (!stb.empty ()
+						? stb.c_str ()
+						: "<unknown>"));
+      if (asm_obj == nullptr)
+	return nullptr;
+
+      gdbpy_ref<> len_obj = gdb_py_object_from_longest (insn_len);
+      if (len_obj == nullptr)
+	return nullptr;
+
+      if (PyDict_SetItemString (insn_dict.get (), "addr", pc_obj.get ())
+          || PyDict_SetItemString (insn_dict.get (), "asm", asm_obj.get ())
+          || PyDict_SetItemString (insn_dict.get (), "length", len_obj.get ()))
 	return NULL;
 
       pc += insn_len;

@@ -1,5 +1,23 @@
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
+	* python/python-internal.h (gdb_py_long_from_ulongest): Remove
+	defines.
+	* python/py-value.c (valpy_long): Use
+	gdb_py_object_from_ulongest.
+	* python/py-symtab.c (salpy_get_pc): Use
+	gdb_py_object_from_ulongest.
+	(salpy_get_last): Likewise.
+	* python/py-record-btrace.c (recpy_bt_insn_pc): Use
+	gdb_py_object_from_ulongest.
+	* python/py-lazy-string.c (stpy_get_address): Use
+	gdb_py_object_from_ulongest.
+	* python/py-frame.c (frapy_pc): Use gdb_py_object_from_ulongest.
+	* python/py-arch.c (archpy_disassemble): Use
+	gdb_py_object_from_ulongest and gdb_py_object_from_longest.  Fix
+	error handling.
+
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
 	* python/python-internal.h (gdb_py_long_from_longest): Remove
 	defines.
 	* python/py-value.c (valpy_long): Use gdb_py_object_from_longest.

@@ -232,7 +232,7 @@ frapy_pc (PyObject *self, PyObject *args)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return gdb_py_long_from_ulongest (pc);
+  return gdb_py_object_from_ulongest (pc).release ();
 }
 
 /* Implementation of gdb.Frame.read_register (self, register) -> gdb.Value.
