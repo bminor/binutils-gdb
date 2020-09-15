@@ -1,3 +1,8 @@
+2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_INSTANCE_FLAGS): Remove, replace all uses
+	with `type::instance_flags`.
+
 2020-09-14  Michael Mullin  <masmullin@gmail.com>
 
 	* xml-tdesc.c [!defined(HAVE_LIBEXPAT)] (tdesc_parse_xml):

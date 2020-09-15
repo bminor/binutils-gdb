@@ -278,9 +278,9 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 {
   /* If we are converting a qualified type, first convert the
      unqualified type and then apply the qualifiers.  */
-  if ((TYPE_INSTANCE_FLAGS (type) & (TYPE_INSTANCE_FLAG_CONST
-				     | TYPE_INSTANCE_FLAG_VOLATILE
-				     | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
+  if ((type->instance_flags () & (TYPE_INSTANCE_FLAG_CONST
+				  | TYPE_INSTANCE_FLAG_VOLATILE
+				  | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
     return convert_qualified (context, type);
 
   switch (type->code ())

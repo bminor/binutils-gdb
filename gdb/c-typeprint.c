@@ -528,7 +528,7 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
 
   address_space_id
     = address_space_type_instance_flags_to_name (get_type_arch (type),
-						 TYPE_INSTANCE_FLAGS (type));
+						 type->instance_flags ());
   if (address_space_id)
     {
       if (did_print_modifier || need_pre_space)

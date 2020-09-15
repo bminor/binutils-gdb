@@ -630,7 +630,7 @@ make_qualified_type (struct type *type, type_instance_flags new_flags,
   ntype = type;
   do
     {
-      if (TYPE_INSTANCE_FLAGS (ntype) == new_flags)
+      if (ntype->instance_flags () == new_flags)
 	return ntype;
       ntype = TYPE_CHAIN (ntype);
     }
@@ -753,7 +753,7 @@ struct type *
 make_restrict_type (struct type *type)
 {
   return make_qualified_type (type,
-			      (TYPE_INSTANCE_FLAGS (type)
+			      (type->instance_flags ()
 			       | TYPE_INSTANCE_FLAG_RESTRICT),
 			      NULL);
 }
@@ -764,7 +764,7 @@ struct type *
 make_unqualified_type (struct type *type)
 {
   return make_qualified_type (type,
-			      (TYPE_INSTANCE_FLAGS (type)
+			      (type->instance_flags ()
 			       & ~(TYPE_INSTANCE_FLAG_CONST
 				   | TYPE_INSTANCE_FLAG_VOLATILE
 				   | TYPE_INSTANCE_FLAG_RESTRICT)),
@@ -777,7 +777,7 @@ struct type *
 make_atomic_type (struct type *type)
 {
   return make_qualified_type (type,
-			      (TYPE_INSTANCE_FLAGS (type)
+			      (type->instance_flags ()
 			       | TYPE_INSTANCE_FLAG_ATOMIC),
 			      NULL);
 }
@@ -825,7 +825,7 @@ replace_type (struct type *ntype, struct type *type)
 
   /* Assert that the two types have equivalent instance qualifiers.
      This should be true for at least all of our debug readers.  */
-  gdb_assert (TYPE_INSTANCE_FLAGS (ntype) == TYPE_INSTANCE_FLAGS (type));
+  gdb_assert (ntype->instance_flags () == type->instance_flags ());
 }
 
 /* Implement direct support for MEMBER_TYPE in GNU C++.
@@ -2834,9 +2834,7 @@ check_typedef (struct type *type)
 	     move over any other types NEWTYPE refers to, which could
 	     be an unbounded amount of stuff.  */
 	  if (TYPE_OBJFILE (newtype) == TYPE_OBJFILE (type))
-	    type = make_qualified_type (newtype,
-					TYPE_INSTANCE_FLAGS (type),
-					type);
+	    type = make_qualified_type (newtype, type->instance_flags (), type);
 	  else
 	    type = newtype;
 	}
@@ -2862,9 +2860,8 @@ check_typedef (struct type *type)
              with the complete type only if they are in the same
              objfile.  */
 	  if (TYPE_OBJFILE (SYMBOL_TYPE (sym)) == TYPE_OBJFILE (type))
-            type = make_qualified_type (SYMBOL_TYPE (sym),
-					TYPE_INSTANCE_FLAGS (type),
-					type);
+	    type = make_qualified_type (SYMBOL_TYPE (sym),
+					type->instance_flags (), type);
 	  else
 	    type = SYMBOL_TYPE (sym);
         }
@@ -4001,7 +3998,7 @@ check_types_equal (struct type *type1, struct type *type2,
       || type1->has_varargs () != type2->has_varargs ()
       || type1->is_vector () != type2->is_vector ()
       || TYPE_NOTTEXT (type1) != TYPE_NOTTEXT (type2)
-      || TYPE_INSTANCE_FLAGS (type1) != TYPE_INSTANCE_FLAGS (type2)
+      || type1->instance_flags () != type2->instance_flags ()
       || type1->num_fields () != type2->num_fields ())
     return false;
 

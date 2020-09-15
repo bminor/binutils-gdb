@@ -213,7 +213,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 /* * Not textual.  By default, GDB treats all single byte integers as
    characters (or elements of strings) unless this flag is set.  */
 
-#define TYPE_NOTTEXT(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_NOTTEXT)
+#define TYPE_NOTTEXT(t)	(((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_NOTTEXT)
 
 /* * Type owner.  If TYPE_OBJFILE_OWNED is true, the type is owned by
    the objfile retrieved as TYPE_OBJFILE.  Otherwise, the type is
@@ -240,25 +240,25 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 /* * Constant type.  If this is set, the corresponding type has a
    const modifier.  */
 
-#define TYPE_CONST(t) ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CONST) != 0)
+#define TYPE_CONST(t) ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_CONST) != 0)
 
 /* * Volatile type.  If this is set, the corresponding type has a
    volatile modifier.  */
 
 #define TYPE_VOLATILE(t) \
-  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE) != 0)
+  ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_VOLATILE) != 0)
 
 /* * Restrict type.  If this is set, the corresponding type has a
    restrict modifier.  */
 
 #define TYPE_RESTRICT(t) \
-  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT) != 0)
+  ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_RESTRICT) != 0)
 
 /* * Atomic type.  If this is set, the corresponding type has an
    _Atomic modifier.  */
 
 #define TYPE_ATOMIC(t) \
-  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_ATOMIC) != 0)
+  ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_ATOMIC) != 0)
 
 /* * True if this type represents either an lvalue or lvalue reference type.  */
 
@@ -297,10 +297,10 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    is instruction space, and for data objects is data memory.  */
 
 #define TYPE_CODE_SPACE(t) \
-  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CODE_SPACE) != 0)
+  ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_CODE_SPACE) != 0)
 
 #define TYPE_DATA_SPACE(t) \
-  ((TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_DATA_SPACE) != 0)
+  ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_DATA_SPACE) != 0)
 
 /* * Address class flags.  Some environments provide for pointers
    whose size is different from that of a normal pointer or address
@@ -309,13 +309,13 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    target specific ways to represent these different types of address
    classes.  */
 
-#define TYPE_ADDRESS_CLASS_1(t) (TYPE_INSTANCE_FLAGS(t) \
+#define TYPE_ADDRESS_CLASS_1(t) (((t)->instance_flags ()) \
                                  & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
-#define TYPE_ADDRESS_CLASS_2(t) (TYPE_INSTANCE_FLAGS(t) \
+#define TYPE_ADDRESS_CLASS_2(t) (((t)->instance_flags ()) \
 				 & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2)
 #define TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL \
   (TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 | TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2)
-#define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
+#define TYPE_ADDRESS_CLASS_ALL(t) (((t)->instance_flags ()) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
 /* * Information about a single discriminant.  */
@@ -1684,7 +1684,6 @@ extern void allocate_gnat_aux_type (struct type *);
      TYPE_ZALLOC (type,							       \
 		  sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
 
-#define TYPE_INSTANCE_FLAGS(thistype) ((thistype)->instance_flags ())
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type

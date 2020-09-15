@@ -4473,12 +4473,11 @@ cleanup_undefined_types_1 (void)
 
 			if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-			    && (SYMBOL_TYPE (sym)->code () ==
-				(*type)->code ())
-			    && (TYPE_INSTANCE_FLAGS (*type) ==
-				TYPE_INSTANCE_FLAGS (SYMBOL_TYPE (sym)))
+			    && (SYMBOL_TYPE (sym)->code () == (*type)->code ())
+			    && ((*type)->instance_flags ()
+				== SYMBOL_TYPE (sym)->instance_flags ())
 			    && strcmp (sym->linkage_name (), type_name) == 0)
-                          replace_type (*type, SYMBOL_TYPE (sym));
+			  replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }
 	      }
