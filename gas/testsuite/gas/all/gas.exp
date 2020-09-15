@@ -440,6 +440,7 @@ dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/err-*.s $srcdir/$subdir/warn
 dg-finish
 
 # Set $nop_type appropriately to indicate the NOP instruction mnemonic.
+# Note - this code is made obsolete by the new .nops pseudo-op.
 switch -glob $target_triplet {
     bpf-*-* {
         set nop_type 6
@@ -467,3 +468,5 @@ run_dump_test "org-6"
 run_dump_test "fill-1"
 
 gas_test "pr23938.s" "" "" ".xstabs"
+
+run_dump_test "nop"

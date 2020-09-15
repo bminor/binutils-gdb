@@ -3017,7 +3017,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 			|| ! S_IS_DEFINED (symbolP))
 		      {
 			as_bad_where (fragP->fr_file, fragP->fr_line,
-				      _(".space specifies non-absolute value"));
+				      _(".space, .nops or .fill specifies non-absolute value"));
 			/* Prevent repeat of this error message.  */
 			fragP->fr_symbol = 0;
 		      }

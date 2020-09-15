@@ -48,3 +48,4 @@
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
+#define md_single_noop_insn "mov %r1,%r1"

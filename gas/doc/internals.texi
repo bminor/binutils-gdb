@@ -1547,6 +1547,16 @@ The function should return the debug format that is preferred by the CPU
 backend.  This format will be used when generating assembler specific debug
 information.
 
+@item md_emit_single_noop_insn
+@itemx md_single_noop_insn
+These macro facilitate the @var{.nop} directive.  If defined the
+@var{md_emit_single_noop_insn) macro provides code to insert a single no-op
+instruction into the output stream.  If this involves calling @var{md_assemble}
+with a fixed string then the alternative macro @var{md_single_noop_insn} can be
+defined, specifying the string to pass.  If neither of these macros are defined
+then the @var{.nop} directive will call @var{md_assemble} with the string
+@option{nop}.
+
 @item md_allow_local_subtract (@var{left}, @var{right}, @var{section})
 If defined, GAS will call this macro when evaluating an expression which is the
 difference of two symbols defined in the same section.  It takes three

@@ -4459,6 +4459,7 @@ Some machine configurations provide additional directives.
 * MRI::				@code{.mri @var{val}}
 * Noaltmacro::                  @code{.noaltmacro}
 * Nolist::                      @code{.nolist}
+* Nop::                         @code{.nop}
 * Nops::                        @code{.nops @var{size}[, @var{control}]}
 * Octa::                        @code{.octa @var{bignums}}
 * Offset::			@code{.offset @var{loc}}
@@ -6167,22 +6168,31 @@ internal counter (which is zero initially).   @code{.list} increments the
 counter, and @code{.nolist} decrements it.  Assembly listings are
 generated whenever the counter is greater than zero.
 
+@node Nop
+@section @code{.nop}
+
+@cindex @code{nop} directive
+@cindex filling memory with no-op instructions
+This directive emits a single no-op instruction.  It is provided on all
+architectures, allowing the creation of architecture neutral tests involving
+actual code.  The size of the generated instruction is target specific.  The
+instruction does affect the generation of DWARF debug line information.
+
 @node Nops
 @section @code{.nops @var{size}[, @var{control}]}
 
 @cindex @code{nops} directive
 @cindex filling memory with no-op instructions
-This directive emits @var{size} bytes filled with no-op instructions.
-@var{size} is absolute expression, which must be a positve value.
-@var{control} controls how no-op instructions should be generated.  If
-the comma and @var{control} are omitted, @var{control} is assumed to be
-zero.
+This directive emits no-op instructions.  It is specific to the Intel 80386 and
+AMD x86-64 targets.  It takes a @var{size} argument and generates @var{size}
+bytes of no-op instructions.  @var{size} must be absolute and positive.  These
+bytes do not affect the generation of DWARF debug line information.
 
-Note: For Intel 80386 and AMD x86-64 targets, @var{control} specifies
-the size limit of a no-op instruction.  The valid values of @var{control}
-are between 0 and 4 in 16-bit mode, between 0 and 7 when tuning for
-older processors in 32-bit mode, between 0 and 11 in 64-bit mode or when
-tuning for newer processors in 32-bit mode.  When 0 is used, the no-op
+The optional @var{control} argument specifies a size limit for a single no-op
+instruction.  If not provided then a value of 0 is assumed.  The valid values
+of @var{control} are between 0 and 4 in 16-bit mode, between 0 and 7 when
+tuning for older processors in 32-bit mode, between 0 and 11 in 64-bit mode or
+when tuning for newer processors in 32-bit mode.  When 0 is used, the no-op
 instruction size limit is set to the maximum supported size.
 
 @node Octa
