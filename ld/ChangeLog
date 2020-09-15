@@ -1,3 +1,8 @@
+2020-09-16  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (asymbol_from_plugin_symbol): Adjust elf_symbol_from
+	invocation.
+
 2020-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldelf.c (ldelf_after_open): Check bfd_target_elf_flavour first.

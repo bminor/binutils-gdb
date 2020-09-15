@@ -3766,7 +3766,7 @@ s_m68hc11_mark_symbol (int mark)
       SKIP_WHITESPACE ();
 
       bfdsym = symbol_get_bfdsym (symbolP);
-      elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+      elfsym = elf_symbol_from (bfdsym);
 
       gas_assert (elfsym);
 

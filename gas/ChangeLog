@@ -1,3 +1,13 @@
+2020-09-16  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (obj_elf_visibility, elf_frob_symbol): Adjust
+	elf_symbol_from invocation.
+	* config/tc-aarch64.c (s_variant_pcs): Likewise.
+	* config/tc-m68hc11.c (s_m68hc11_mark_symbol): Likewise.
+	* config/tc-ppc.c (ppc_elf_localentry, ppc_force_relocation),
+	(ppc_fix_adjustable): Likewise.
+	* config/tc-xgate.c (xgate_frob_symbol): Likewise.
+
 2020-09-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/cfi/reloc-pe-i386.d: Updated.

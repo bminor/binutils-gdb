@@ -1443,7 +1443,7 @@ is_hidden_symbol (asymbol *sym)
 {
   elf_symbol_type *elf_sym;
 
-  elf_sym = elf_symbol_from (sym->the_bfd, sym);
+  elf_sym = elf_symbol_from (sym);
   if (elf_sym != NULL)
     switch (ELF_ST_VISIBILITY (elf_sym->internal_elf_sym.st_other))
       {

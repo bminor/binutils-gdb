@@ -1,3 +1,8 @@
+2020-09-16  Alan Modra  <amodra@gmail.com>
+
+	* nm.c (print_symbol): Adjust elf_symbol_from invocation.
+	* objcopy.c (is_hidden_symbol): Likewise.
+
 2020-09-15  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release (https): Add a reminder to create a

@@ -482,7 +482,7 @@ obj_elf_visibility (int visibility)
       symbolP = get_sym_from_input_line_and_check ();
 
       bfdsym = symbol_get_bfdsym (symbolP);
-      elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+      elfsym = elf_symbol_from (bfdsym);
 
       gas_assert (elfsym);
 
@@ -2565,8 +2565,7 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	      break;
 	    case visibility_hidden:
 	      bfdsym = symbol_get_bfdsym (symp);
-	      elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym),
-					bfdsym);
+	      elfsym = elf_symbol_from (bfdsym);
 	      elfsym->internal_elf_sym.st_other &= ~3;
 	      elfsym->internal_elf_sym.st_other |= STV_HIDDEN;
 	      break;

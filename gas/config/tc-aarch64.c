@@ -2001,7 +2001,7 @@ s_variant_pcs (int ignored ATTRIBUTE_UNUSED)
   restore_line_pointer (c);
   demand_empty_rest_of_line ();
   bfdsym = symbol_get_bfdsym (sym);
-  elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+  elfsym = elf_symbol_from (bfdsym);
   gas_assert (elfsym);
   elfsym->internal_elf_sym.st_other |= STO_AARCH64_VARIANT_PCS;
 }

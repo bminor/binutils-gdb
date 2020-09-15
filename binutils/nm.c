@@ -899,7 +899,7 @@ print_symbol (bfd *        abfd,
     }
   else
     {
-      info.elfinfo = elf_symbol_from (abfd, sym);
+      info.elfinfo = elf_symbol_from (sym);
       info.coffinfo = coff_symbol_from (sym);
     }
 

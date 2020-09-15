@@ -1007,7 +1007,7 @@ xgate_frob_symbol (symbolS *sym)
   elf_symbol_type *elfsym;
 
   bfdsym = symbol_get_bfdsym (sym);
-  elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+  elfsym = elf_symbol_from (bfdsym);
 
   gas_assert (elfsym);
 

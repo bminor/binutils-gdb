@@ -1,3 +1,7 @@
+2020-09-16  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_symbol_is_valid): Adjust elf_symbol_from invocation.
+
 2020-09-10  Nick Clifton  <nickc@redhat.com>
 
 	* ppc-dis.c (ppc_symbol_is_valid): New function.  Returns false

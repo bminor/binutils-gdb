@@ -415,7 +415,7 @@ asymbol_from_plugin_symbol (bfd *abfd, asymbol *asym,
 
   if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
-      elf_symbol_type *elfsym = elf_symbol_from (abfd, asym);
+      elf_symbol_type *elfsym = elf_symbol_from (asym);
       unsigned char visibility;
 
       if (!elfsym)

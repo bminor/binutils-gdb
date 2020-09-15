@@ -4102,7 +4102,7 @@ ignore_section_sym (bfd *abfd, asymbol *sym)
   if (sym->section == NULL)
     return TRUE;
 
-  type_ptr = elf_symbol_from (abfd, sym);
+  type_ptr = elf_symbol_from (sym);
   return ((type_ptr != NULL
 	   && type_ptr->internal_elf_sym.st_shndx != 0
 	   && bfd_is_abs_section (sym->section))
@@ -8025,8 +8025,8 @@ _bfd_elf_copy_private_symbol_data (bfd *ibfd,
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
 
-  isym = elf_symbol_from (ibfd, isymarg);
-  osym = elf_symbol_from (obfd, osymarg);
+  isym = elf_symbol_from (isymarg);
+  osym = elf_symbol_from (osymarg);
 
   if (isym != NULL
       && isym->internal_elf_sym.st_shndx != 0
@@ -8191,7 +8191,7 @@ swap_out_syms (bfd *abfd,
 	    goto error_return;
 	}
 
-      type_ptr = elf_symbol_from (abfd, syms[idx]);
+      type_ptr = elf_symbol_from (syms[idx]);
 
       if ((flags & BSF_SECTION_SYM) == 0
 	  && bfd_is_com_section (syms[idx]->section))
