@@ -117,9 +117,10 @@ struct piece_closure
   struct frame_id frame_id;
 };
 
-/* See expr.h.  */
+/* Allocate a closure for a value formed from separately-described
+   PIECES.  */
 
-piece_closure *
+static piece_closure *
 allocate_piece_closure (dwarf2_per_cu_data *per_cu,
 			dwarf2_per_objfile *per_objfile,
 			std::vector<dwarf_expr_piece> &&pieces,
@@ -612,7 +613,7 @@ free_pieced_value_closure (value *v)
 }
 
 /* Functions for accessing a variable described by DW_OP_piece.  */
-const struct lval_funcs pieced_value_funcs = {
+static const struct lval_funcs pieced_value_funcs = {
   read_pieced_value,
   write_pieced_value,
   indirect_pieced_value,
@@ -877,6 +878,158 @@ dwarf_expr_context::push_dwarf_reg_entry_value (call_site_parameter_kind kind,
   this->addr_size = this->per_cu->addr_size ();
 
   this->eval (data_src, size);
+}
+
+/* See expr.h.  */
+
+value *
+dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
+				  LONGEST subobj_offset)
+{
+  value *retval = nullptr;
+
+  if (type == nullptr)
+    type = address_type ();
+
+  if (subobj_type == nullptr)
+    subobj_type = type;
+
+  if (this->pieces.size () > 0)
+    {
+      ULONGEST bit_size = 0;
+
+      for (dwarf_expr_piece &piece : this->pieces)
+	bit_size += piece.size;
+      /* Complain if the expression is larger than the size of the
+	 outer type.  */
+      if (bit_size > 8 * TYPE_LENGTH (type))
+	invalid_synthetic_pointer ();
+
+      piece_closure *c
+	= allocate_piece_closure (this->per_cu, this->per_objfile,
+				  std::move (this->pieces), this->frame);
+      retval = allocate_computed_value (subobj_type,
+					&pieced_value_funcs, c);
+      set_value_offset (retval, subobj_offset);
+    }
+  else
+    {
+      switch (this->location)
+	{
+	case DWARF_VALUE_REGISTER:
+	  {
+	    int dwarf_regnum
+	      = longest_to_int (value_as_long (this->fetch (0)));
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (this->gdbarch,
+							   dwarf_regnum);
+
+	    if (subobj_offset != 0)
+	      error (_("cannot use offset on synthetic pointer to register"));
+
+	    gdb_assert (this->frame != NULL);
+
+	    retval = value_from_register (subobj_type, gdb_regnum,
+					  this->frame);
+	    if (value_optimized_out (retval))
+	      {
+		/* This means the register has undefined value / was
+		   not saved.  As we're computing the location of some
+		   variable etc. in the program, not a value for
+		   inspecting a register ($pc, $sp, etc.), return a
+		   generic optimized out value instead, so that we show
+		   <optimized out> instead of <not saved>.  */
+		value *tmp = allocate_value (subobj_type);
+		value_contents_copy (tmp, 0, retval, 0,
+				     TYPE_LENGTH (subobj_type));
+		retval = tmp;
+	      }
+	  }
+	  break;
+
+	case DWARF_VALUE_MEMORY:
+	  {
+	    struct type *ptr_type;
+	    CORE_ADDR address = this->fetch_address (0);
+	    bool in_stack_memory = this->fetch_in_stack_memory (0);
+
+	    /* DW_OP_deref_size (and possibly other operations too) may
+	       create a pointer instead of an address.  Ideally, the
+	       pointer to address conversion would be performed as part
+	       of those operations, but the type of the object to
+	       which the address refers is not known at the time of
+	       the operation.  Therefore, we do the conversion here
+	       since the type is readily available.  */
+
+	    switch (subobj_type->code ())
+	      {
+		case TYPE_CODE_FUNC:
+		case TYPE_CODE_METHOD:
+		  ptr_type = builtin_type (this->gdbarch)->builtin_func_ptr;
+		  break;
+		default:
+		  ptr_type = builtin_type (this->gdbarch)->builtin_data_ptr;
+		  break;
+	      }
+	    address = value_as_address (value_from_pointer (ptr_type, address));
+
+	    retval = value_at_lazy (subobj_type,
+				    address + subobj_offset);
+	    if (in_stack_memory)
+	      set_value_stack (retval, 1);
+	  }
+	  break;
+
+	case DWARF_VALUE_STACK:
+	  {
+	    value *val = this->fetch (0);
+	    size_t n = TYPE_LENGTH (value_type (val));
+	    size_t len = TYPE_LENGTH (subobj_type);
+	    size_t max = TYPE_LENGTH (type);
+
+	    if (subobj_offset + len > max)
+	      invalid_synthetic_pointer ();
+
+	    retval = allocate_value (subobj_type);
+
+	    /* The given offset is relative to the actual object.  */
+	    if (gdbarch_byte_order (this->gdbarch) == BFD_ENDIAN_BIG)
+	      subobj_offset += n - max;
+
+	    memcpy (value_contents_raw (retval),
+		    value_contents_all (val) + subobj_offset, len);
+	  }
+	  break;
+
+	case DWARF_VALUE_LITERAL:
+	  {
+	    size_t n = TYPE_LENGTH (subobj_type);
+
+	    if (subobj_offset + n > this->len)
+	      invalid_synthetic_pointer ();
+
+	    retval = allocate_value (subobj_type);
+	    bfd_byte *contents = value_contents_raw (retval);
+	    memcpy (contents, this->data + subobj_offset, n);
+	  }
+	  break;
+
+	case DWARF_VALUE_OPTIMIZED_OUT:
+	  retval = allocate_optimized_out_value (subobj_type);
+	  break;
+
+	  /* DWARF_VALUE_IMPLICIT_POINTER was converted to a pieced
+	     operation by execute_stack_op.  */
+	case DWARF_VALUE_IMPLICIT_POINTER:
+	  /* DWARF_VALUE_OPTIMIZED_OUT can't occur in this context --
+	     it can only be encountered when making a piece.  */
+	default:
+	  internal_error (__FILE__, __LINE__, _("invalid location type"));
+	}
+    }
+
+  set_value_initialized (retval, this->initialized);
+
+  return retval;
 }
 
 /* Require that TYPE be an integral type; throw an exception if not.  */

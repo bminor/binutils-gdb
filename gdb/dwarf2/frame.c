@@ -229,8 +229,6 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  struct frame_info *this_frame, CORE_ADDR initial,
 		  int initial_in_stack_memory, dwarf2_per_objfile *per_objfile)
 {
-  CORE_ADDR result;
-
   dwarf_expr_context ctx (per_objfile);
   scoped_value_mark free_values;
 
@@ -241,18 +239,13 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   ctx.push_address (initial, initial_in_stack_memory);
   ctx.eval (exp, len);
 
-  if (ctx.location == DWARF_VALUE_MEMORY)
-    result = ctx.fetch_address (0);
-  else if (ctx.location == DWARF_VALUE_REGISTER)
-    result = read_addr_from_reg (this_frame, value_as_long (ctx.fetch (0)));
+  CORE_ADDR result;
+  struct value *result_val = ctx.fetch_result ();
+
+  if (VALUE_LVAL (result_val) == lval_memory)
+    result = value_address (result_val);
   else
-    {
-      /* This is actually invalid DWARF, but if we ever do run across
-	 it somehow, we might as well support it.  So, instead, report
-	 it as unimplemented.  */
-      error (_("\
-Not implemented: computing unwound register using explicit value operator"));
-    }
+    result = value_as_address (result_val);
 
   return result;
 }

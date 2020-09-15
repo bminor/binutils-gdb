@@ -92,7 +92,7 @@ enum debug_loc_kind
 /* Helper function which throws an error if a synthetic pointer is
    invalid.  */
 
-static void
+void
 invalid_synthetic_pointer (void)
 {
   error (_("access outside bounds of object "
@@ -1487,6 +1487,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   try
     {
       ctx.eval (data, size);
+      retval = ctx.fetch_result (type, subobj_type,
+				 subobj_byte_offset);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1509,155 +1511,15 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	throw;
     }
 
-  if (ctx.pieces.size () > 0)
-    {
-      struct piece_closure *c;
-      ULONGEST bit_size = 0;
+  /* We need to clean up all the values that are not needed any more.
+     The problem with a value_ref_ptr class is that it disconnects the
+     RETVAL from the value garbage collection, so we need to make
+     a copy of that value on the stack to keep everything consistent.
+     The value_ref_ptr will clean up after itself at the end of this block.  */
+  value_ref_ptr value_holder = value_ref_ptr::new_reference (retval);
+  free_values.free_to_mark ();
 
-      for (dwarf_expr_piece &piece : ctx.pieces)
-	bit_size += piece.size;
-      /* Complain if the expression is larger than the size of the
-	 outer type.  */
-      if (bit_size > 8 * TYPE_LENGTH (type))
-	invalid_synthetic_pointer ();
-
-      c = allocate_piece_closure (per_cu, per_objfile, std::move (ctx.pieces),
-				  frame);
-      /* We must clean up the value chain after creating the piece
-	 closure but before allocating the result.  */
-      free_values.free_to_mark ();
-      retval = allocate_computed_value (subobj_type,
-					&pieced_value_funcs, c);
-      set_value_offset (retval, subobj_byte_offset);
-    }
-  else
-    {
-      switch (ctx.location)
-	{
-	case DWARF_VALUE_REGISTER:
-	  {
-	    struct gdbarch *arch = get_frame_arch (frame);
-	    int dwarf_regnum
-	      = longest_to_int (value_as_long (ctx.fetch (0)));
-	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, dwarf_regnum);
-
-	    if (subobj_byte_offset != 0)
-	      error (_("cannot use offset on synthetic pointer to register"));
-	    free_values.free_to_mark ();
-	    retval = value_from_register (subobj_type, gdb_regnum, frame);
-	    if (value_optimized_out (retval))
-	      {
-		struct value *tmp;
-
-		/* This means the register has undefined value / was
-		   not saved.  As we're computing the location of some
-		   variable etc. in the program, not a value for
-		   inspecting a register ($pc, $sp, etc.), return a
-		   generic optimized out value instead, so that we show
-		   <optimized out> instead of <not saved>.  */
-		tmp = allocate_value (subobj_type);
-		value_contents_copy (tmp, 0, retval, 0,
-				     TYPE_LENGTH (subobj_type));
-		retval = tmp;
-	      }
-	  }
-	  break;
-
-	case DWARF_VALUE_MEMORY:
-	  {
-	    struct type *ptr_type;
-	    CORE_ADDR address = ctx.fetch_address (0);
-	    bool in_stack_memory = ctx.fetch_in_stack_memory (0);
-
-	    /* DW_OP_deref_size (and possibly other operations too) may
-	       create a pointer instead of an address.  Ideally, the
-	       pointer to address conversion would be performed as part
-	       of those operations, but the type of the object to
-	       which the address refers is not known at the time of
-	       the operation.  Therefore, we do the conversion here
-	       since the type is readily available.  */
-
-	    switch (subobj_type->code ())
-	      {
-		case TYPE_CODE_FUNC:
-		case TYPE_CODE_METHOD:
-		  ptr_type = builtin_type (ctx.gdbarch)->builtin_func_ptr;
-		  break;
-		default:
-		  ptr_type = builtin_type (ctx.gdbarch)->builtin_data_ptr;
-		  break;
-	      }
-	    address = value_as_address (value_from_pointer (ptr_type, address));
-
-	    free_values.free_to_mark ();
-	    retval = value_at_lazy (subobj_type,
-				    address + subobj_byte_offset);
-	    if (in_stack_memory)
-	      set_value_stack (retval, 1);
-	  }
-	  break;
-
-	case DWARF_VALUE_STACK:
-	  {
-	    struct value *value = ctx.fetch (0);
-	    size_t n = TYPE_LENGTH (value_type (value));
-	    size_t len = TYPE_LENGTH (subobj_type);
-	    size_t max = TYPE_LENGTH (type);
-	    gdbarch *objfile_gdbarch = per_objfile->objfile->arch ();
-
-	    if (subobj_byte_offset + len > max)
-	      invalid_synthetic_pointer ();
-
-	    /* Preserve VALUE because we are going to free values back
-	       to the mark, but we still need the value contents
-	       below.  */
-	    value_ref_ptr value_holder = value_ref_ptr::new_reference (value);
-	    free_values.free_to_mark ();
-
-	    retval = allocate_value (subobj_type);
-
-	    /* The given offset is relative to the actual object.  */
-	    if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
-	      subobj_byte_offset += n - max;
-
-	    memcpy (value_contents_raw (retval),
-		    value_contents_all (value) + subobj_byte_offset, len);
-	  }
-	  break;
-
-	case DWARF_VALUE_LITERAL:
-	  {
-	    bfd_byte *contents;
-	    size_t n = TYPE_LENGTH (subobj_type);
-
-	    if (subobj_byte_offset + n > ctx.len)
-	      invalid_synthetic_pointer ();
-
-	    free_values.free_to_mark ();
-	    retval = allocate_value (subobj_type);
-	    contents = value_contents_raw (retval);
-	    memcpy (contents, ctx.data + subobj_byte_offset, n);
-	  }
-	  break;
-
-	case DWARF_VALUE_OPTIMIZED_OUT:
-	  free_values.free_to_mark ();
-	  retval = allocate_optimized_out_value (subobj_type);
-	  break;
-
-	  /* DWARF_VALUE_IMPLICIT_POINTER was converted to a pieced
-	     operation by execute_stack_op.  */
-	case DWARF_VALUE_IMPLICIT_POINTER:
-	  /* DWARF_VALUE_OPTIMIZED_OUT can't occur in this context --
-	     it can only be encountered when making a piece.  */
-	default:
-	  internal_error (__FILE__, __LINE__, _("invalid location type"));
-	}
-    }
-
-  set_value_initialized (retval, ctx.initialized);
-
-  return retval;
+  return value_copy (retval);
 }
 
 /* The exported interface to dwarf2_evaluate_loc_desc_full; it always
@@ -1698,6 +1560,9 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
   dwarf_expr_context ctx (per_objfile);
 
+  struct value *result;
+  scoped_value_mark free_values;
+
   ctx.frame = frame;
   ctx.per_cu = dlbaton->per_cu;
   if (addr_stack != nullptr)
@@ -1715,6 +1580,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   try
     {
       ctx.eval (dlbaton->data, dlbaton->size);
+      result = ctx.fetch_result ();
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1732,29 +1598,20 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 	throw;
     }
 
-  switch (ctx.location)
-    {
-    case DWARF_VALUE_STACK:
-      *is_reference = false;
-      /* FALLTHROUGH */
+  if (value_optimized_out (result))
+    return 0;
 
-    case DWARF_VALUE_REGISTER:
-    case DWARF_VALUE_MEMORY:
-      *valp = ctx.fetch_address (0);
-      if (ctx.location == DWARF_VALUE_REGISTER)
-	*valp = read_addr_from_reg (frame, *valp);
-      return 1;
-    case DWARF_VALUE_LITERAL:
-      *valp = extract_signed_integer (ctx.data, ctx.len,
-				      gdbarch_byte_order (ctx.gdbarch));
-      return 1;
-      /* Unsupported dwarf values.  */
-    case DWARF_VALUE_OPTIMIZED_OUT:
-    case DWARF_VALUE_IMPLICIT_POINTER:
-      break;
+  if (VALUE_LVAL (result) == lval_memory)
+    *valp = value_address (result);
+  else
+    {
+      if (VALUE_LVAL (result) == not_lval)
+	*is_reference = false;
+
+      *valp = value_as_address (result);
     }
 
-  return 0;
+  return 1;
 }
 
 /* See dwarf2loc.h.  */

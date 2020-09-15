@@ -280,6 +280,11 @@ extern int dwarf_reg_to_regnum (struct gdbarch *arch, int dwarf_reg);
 extern int dwarf_reg_to_regnum_or_error (struct gdbarch *arch,
 					 ULONGEST dwarf_reg);
 
+/* Helper function which throws an error if a synthetic pointer is
+   invalid.  */
+
+extern void invalid_synthetic_pointer ();
+
 /* Fetch the value pointed to by a synthetic pointer.  */
 
 extern struct value *indirect_synthetic_pointer

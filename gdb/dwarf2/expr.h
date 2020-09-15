@@ -26,7 +26,6 @@
 #include "gdbtypes.h"
 
 struct dwarf2_per_objfile;
-struct piece_closure;
 
 /* The location of a value.  */
 enum dwarf_value_location
@@ -125,9 +124,13 @@ struct dwarf_expr_context
 
   void push_address (CORE_ADDR value, bool in_stack_memory);
   void eval (const gdb_byte *addr, size_t len);
-  struct value *fetch (int n);
-  CORE_ADDR fetch_address (int n);
-  bool fetch_in_stack_memory (int n);
+
+  /* Fetch the result of the expression evaluation in a form of
+     a struct value, where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET
+     describe the source level representation of that result.  */
+  value *fetch_result (struct type *type = nullptr,
+		       struct type *subobj_type = nullptr,
+		       LONGEST subobj_offset = 0);
 
   /* The stack of values.  */
   std::vector<dwarf_stack_value> stack;
@@ -203,6 +206,9 @@ private:
   void add_piece (ULONGEST size, ULONGEST offset);
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
   void pop ();
+  struct value *fetch (int n);
+  CORE_ADDR fetch_address (int n);
+  bool fetch_in_stack_memory (int n);
 
   /* Return the location expression for the frame base attribute, in
      START and LENGTH.  The result must be live until the current
@@ -300,14 +306,5 @@ extern const gdb_byte *safe_read_sleb128 (const gdb_byte *buf,
 
 extern const gdb_byte *safe_skip_leb128 (const gdb_byte *buf,
 					 const gdb_byte *buf_end);
-
-extern const struct lval_funcs pieced_value_funcs;
-
-/* Allocate a closure for a value formed from separately-described
-   PIECES.  */
-
-piece_closure *allocate_piece_closure
-  (dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
-   std::vector<dwarf_expr_piece> &&pieces, frame_info *frame);
 
 #endif /* dwarf2expr.h */
