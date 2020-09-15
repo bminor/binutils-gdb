@@ -224,6 +224,31 @@ dwarf_expr_context::get_base_type (cu_offset die_cu_off)
   return result;
 }
 
+/* See expr.h.  */
+
+void
+dwarf_expr_context::dwarf_call (cu_offset die_cu_off)
+{
+  ensure_have_per_cu (this->per_cu, "DW_OP_call");
+
+  frame_info *frame = this->frame;
+
+  auto get_pc_from_frame = [frame] ()
+    {
+      ensure_have_frame (frame, "DW_OP_call");
+      return get_frame_address_in_block (frame);
+    };
+
+  dwarf2_locexpr_baton block
+    = dwarf2_fetch_die_loc_cu_off (die_cu_off, this->per_cu, this->per_objfile,
+				   get_pc_from_frame);
+
+  /* DW_OP_call_ref is currently not supported.  */
+  gdb_assert (block.per_cu == this->per_cu);
+
+  this->eval (block.data, block.size);
+}
+
 /* Require that TYPE be an integral type; throw an exception if not.  */
 
 static void
@@ -1269,7 +1294,8 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  returned.  */
 	  result = value_as_long (fetch (0));
 	  pop ();
-	  result = this->get_tls_address (result);
+	  result = target_translate_tls_address (this->per_objfile->objfile,
+						 result);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 

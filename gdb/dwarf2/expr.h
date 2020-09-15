@@ -191,22 +191,6 @@ struct dwarf_expr_context
   /* Read LENGTH bytes at ADDR into BUF.  */
   virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length) = 0;
 
-  /* Return the PC for the frame.  */
-  virtual CORE_ADDR get_frame_pc ()
-  {
-    error (_("%s is invalid in this context"), "DW_OP_implicit_pointer");
-  }
-
-  /* Return the thread-local storage address for
-     DW_OP_GNU_push_tls_address or DW_OP_form_tls_address.  */
-  virtual CORE_ADDR get_tls_address (CORE_ADDR offset) = 0;
-
-  /* Execute DW_AT_location expression for the DWARF expression
-     subroutine in the DIE at DIE_CU_OFF in the CU.  Do not touch
-     STACK while it being passed to and returned from the called DWARF
-     subroutine.  */
-  virtual void dwarf_call (cu_offset die_cu_off) = 0;
-
   /* Push on DWARF stack an entry evaluated for DW_TAG_call_site's
      parameter matching KIND and KIND_U at the caller of specified BATON.
      If DEREF_SIZE is not -1 then use DW_AT_call_data_value instead of
@@ -242,6 +226,12 @@ private:
      This can throw an exception if the DIE is invalid or does not
      represent a base type.  */
   struct type *get_base_type (cu_offset die_cu_off);
+
+  /* Execute DW_AT_location expression for the DWARF expression
+     subroutine in the DIE at DIE_CU_OFF in the CU.  Do not touch
+     STACK while it being passed to and returned from the called DWARF
+     subroutine.  */
+  void dwarf_call (cu_offset die_cu_off);
 };
 
 /* Return the value of register number REG (a DWARF register number),

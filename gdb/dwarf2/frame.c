@@ -249,16 +249,6 @@ public:
     invalid ("DW_OP_push_object_address");
   }
 
-  CORE_ADDR get_tls_address (CORE_ADDR offset) override
-  {
-    invalid ("DW_OP_form_tls_address");
-  }
-
-  void dwarf_call (cu_offset die_offset) override
-  {
-    invalid ("DW_OP_call*");
-  }
-
  private:
 
   void invalid (const char *op) ATTRIBUTE_NORETURN

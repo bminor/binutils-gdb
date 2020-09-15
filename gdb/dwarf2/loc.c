@@ -618,26 +618,6 @@ func_get_frame_base_dwarf_block (struct symbol *framefunc, CORE_ADDR pc,
 	   framefunc->natural_name ());
 }
 
-static void
-per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
-		   dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile)
-{
-  struct dwarf2_locexpr_baton block;
-
-  auto get_frame_pc_from_ctx = [ctx] ()
-    {
-      return ctx->get_frame_pc ();
-    };
-
-  block = dwarf2_fetch_die_loc_cu_off (die_offset, per_cu, per_objfile,
-				       get_frame_pc_from_ctx);
-
-  /* DW_OP_call_ref is currently not supported.  */
-  gdb_assert (block.per_cu == per_cu);
-
-  ctx->eval (block.data, block.size);
-}
-
 /* A helper function to find the definition of NAME and compute its
    value.  Returns nullptr if the name is not found.  */
 
@@ -695,29 +675,6 @@ public:
   {}
 
   CORE_ADDR obj_address;
-
-  /* Helper function for dwarf2_evaluate_loc_desc.  Computes the PC for
-     the frame in BATON.  */
-
-  CORE_ADDR get_frame_pc () override
-  {
-    return get_frame_address_in_block (frame);
-  }
-
-  /* Using the objfile specified in BATON, find the address for the
-     current thread's thread-local storage with offset OFFSET.  */
-  CORE_ADDR get_tls_address (CORE_ADDR offset) override
-  {
-    return target_translate_tls_address (per_objfile->objfile, offset);
-  }
-
-  /* Helper interface of per_cu_dwarf_call for
-     dwarf2_evaluate_loc_desc.  */
-
-  void dwarf_call (cu_offset die_offset) override
-  {
-    per_cu_dwarf_call (this, die_offset, per_cu, per_objfile);
-  }
 
   /* Callback function for get_object_address. Return the address of the VLA
      object.  */
