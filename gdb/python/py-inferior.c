@@ -423,7 +423,7 @@ infpy_get_num (PyObject *self, void *closure)
 
   INFPY_REQUIRE_VALID (inf);
 
-  return PyLong_FromLong (inf->inferior->num);
+  return gdb_py_object_from_longest (inf->inferior->num).release ();
 }
 
 static PyObject *
@@ -433,7 +433,7 @@ infpy_get_pid (PyObject *self, void *closure)
 
   INFPY_REQUIRE_VALID (inf);
 
-  return PyLong_FromLong (inf->inferior->pid);
+  return gdb_py_object_from_longest (inf->inferior->pid).release ();
 }
 
 static PyObject *

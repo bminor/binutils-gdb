@@ -392,7 +392,9 @@ gdbpy_tui_width (PyObject *self, void *closure)
 {
   gdbpy_tui_window *win = (gdbpy_tui_window *) self;
   REQUIRE_WINDOW (win);
-  return PyLong_FromLong (win->window->viewport_width ());
+  gdbpy_ref<> result
+    = gdb_py_object_from_longest (win->window->viewport_width ());
+  return result.release ();
 }
 
 /* Return the height of the TUI window.  */
@@ -401,7 +403,9 @@ gdbpy_tui_height (PyObject *self, void *closure)
 {
   gdbpy_tui_window *win = (gdbpy_tui_window *) self;
   REQUIRE_WINDOW (win);
-  return PyLong_FromLong (win->window->viewport_height ());
+  gdbpy_ref<> result
+    = gdb_py_object_from_longest (win->window->viewport_height ());
+  return result.release ();
 }
 
 /* Return the title of the TUI window.  */

@@ -130,7 +130,9 @@ thpy_get_num (PyObject *self, void *closure)
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  return PyLong_FromLong (thread_obj->thread->per_inf_num);
+  gdbpy_ref<> result
+    = gdb_py_object_from_longest (thread_obj->thread->per_inf_num);
+  return result.release ();
 }
 
 /* Getter for InferiorThread.global_num.  */
@@ -142,7 +144,9 @@ thpy_get_global_num (PyObject *self, void *closure)
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  return PyLong_FromLong (thread_obj->thread->global_num);
+  gdbpy_ref<> result
+    = gdb_py_object_from_longest (thread_obj->thread->global_num);
+  return result.release ();
 }
 
 /* Getter for InferiorThread.ptid  -> (pid, lwp, tid).

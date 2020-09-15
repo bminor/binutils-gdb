@@ -88,7 +88,7 @@ stpy_get_length (PyObject *self, void *closure)
 {
   lazy_string_object *self_string = (lazy_string_object *) self;
 
-  return PyLong_FromLong (self_string->length);
+  return gdb_py_object_from_longest (self_string->length).release ();
 }
 
 static PyObject *

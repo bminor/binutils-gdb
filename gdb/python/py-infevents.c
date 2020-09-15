@@ -104,7 +104,7 @@ create_memory_changed_event_object (CORE_ADDR addr, ssize_t len)
   if (evpy_add_attribute (event.get (), "address", addr_obj.get ()) < 0)
     return NULL;
 
-  gdbpy_ref<> len_obj (PyLong_FromLong (len));
+  gdbpy_ref<> len_obj = gdb_py_object_from_longest (len);
   if (len_obj == NULL)
     return NULL;
 

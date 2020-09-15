@@ -496,7 +496,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
       /* Fall through.  */
     case var_zinteger:
     case var_zuinteger_unlimited:
-      return PyLong_FromLong (* (int *) var);
+      return gdb_py_object_from_longest (* (int *) var).release ();
 
     case var_uinteger:
       {

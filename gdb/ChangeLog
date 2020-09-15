@@ -1,5 +1,23 @@
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
+	* python/python.c (gdbpy_parameter_value): Use
+	gdb_py_object_from_longest.
+	* python/py-type.c (convert_field, typy_range): Use
+	gdb_py_object_from_longest.
+	* python/py-tui.c (gdbpy_tui_width, gdbpy_tui_height): Use
+	gdb_py_object_from_longest.
+	* python/py-lazy-string.c (stpy_get_length): Use
+	gdb_py_object_from_longest.
+	* python/py-infthread.c (thpy_get_num, thpy_get_global_num): Use
+	gdb_py_object_from_longest.
+	* python/py-infevents.c (create_memory_changed_event_object): Use
+	gdb_py_object_from_longest.
+	* python/py-inferior.c (infpy_get_num): Use
+	gdb_py_object_from_longest.
+	(infpy_get_pid): Likewise.
+
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
 	* python/python-internal.h (gdb_py_long_from_ulongest): Remove
 	defines.
 	* python/py-value.c (valpy_long): Use
