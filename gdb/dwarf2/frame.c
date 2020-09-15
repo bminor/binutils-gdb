@@ -232,11 +232,6 @@ public:
     : dwarf_expr_context (per_objfile)
   {}
 
-  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
-  {
-    read_memory (addr, buf, len);
-  }
-
   void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
 				   union call_site_parameter_u kind_u,
 				   int deref_size) override

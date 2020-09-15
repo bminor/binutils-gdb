@@ -192,7 +192,7 @@ struct dwarf_expr_context
   CORE_ADDR obj_address = 0;
 
   /* Read LENGTH bytes at ADDR into BUF.  */
-  virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length) = 0;
+  virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length);
 
   /* Push on DWARF stack an entry evaluated for DW_TAG_call_site's
      parameter matching KIND and KIND_U at the caller of specified BATON.

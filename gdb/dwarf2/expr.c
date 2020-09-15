@@ -249,6 +249,15 @@ dwarf_expr_context::dwarf_call (cu_offset die_cu_off)
   this->eval (block.data, block.size);
 }
 
+/* See expr.h.  */
+
+void
+dwarf_expr_context::read_mem (gdb_byte *buf, CORE_ADDR addr,
+			      size_t length)
+{
+  read_memory (addr, buf, length);
+}
+
 /* Require that TYPE be an integral type; throw an exception if not.  */
 
 static void

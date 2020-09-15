@@ -728,13 +728,6 @@ public:
 
     this->eval (data_src, size);
   }
-
-  /* Read memory at ADDR (length LEN) into BUF.  */
-
-  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
-  {
-    read_memory (addr, buf, len);
-  }
 };
 
 /* See dwarf2loc.h.  */
