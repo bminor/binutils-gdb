@@ -1,5 +1,13 @@
 2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* debuginfod-support.c (debuginfod_client_deleter): New.
+	(debuginfod_client_up): New.
+	(debuginfod_init): Return debuginfod_client_up.
+	(debuginfod_source_query): Adjust.
+	(debuginfod_debuginfo_query): Adjust.
+
+2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* debuginfod-support.c (debuginfod_source_query): Use
 	make_unique_xstrdup.
 

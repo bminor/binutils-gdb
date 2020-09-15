@@ -54,6 +54,19 @@ struct user_data
   bool has_printed;
 };
 
+/* Deleter for a debuginfod_client.  */
+
+struct debuginfod_client_deleter
+{
+  void operator() (debuginfod_client *c)
+  {
+    debuginfod_end (c);
+  }
+};
+
+using debuginfod_client_up
+  = std::unique_ptr<debuginfod_client, debuginfod_client_deleter>;
+
 static int
 progressfn (debuginfod_client *c, long cur, long total)
 {
@@ -79,13 +92,13 @@ progressfn (debuginfod_client *c, long cur, long total)
   return 0;
 }
 
-static debuginfod_client *
+static debuginfod_client_up
 debuginfod_init ()
 {
-  debuginfod_client *c = debuginfod_begin ();
+  debuginfod_client_up c (debuginfod_begin ());
 
   if (c != nullptr)
-    debuginfod_set_progressfn (c, progressfn);
+    debuginfod_set_progressfn (c.get (), progressfn);
 
   return c;
 }
@@ -101,15 +114,15 @@ debuginfod_source_query (const unsigned char *build_id,
   if (getenv (DEBUGINFOD_URLS_ENV_VAR) == NULL)
     return scoped_fd (-ENOSYS);
 
-  debuginfod_client *c = debuginfod_init ();
+  debuginfod_client_up c = debuginfod_init ();
 
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
   user_data data ("source file", srcpath);
 
-  debuginfod_set_user_data (c, &data);
-  scoped_fd fd (debuginfod_find_source (c,
+  debuginfod_set_user_data (c.get (), &data);
+  scoped_fd fd (debuginfod_find_source (c.get (),
 					build_id,
 					build_id_len,
 					srcpath,
@@ -123,7 +136,6 @@ debuginfod_source_query (const unsigned char *build_id,
   else
     *destname = make_unique_xstrdup (srcpath);
 
-  debuginfod_end (c);
   return fd;
 }
 
@@ -138,7 +150,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   if (getenv (DEBUGINFOD_URLS_ENV_VAR) == NULL)
     return scoped_fd (-ENOSYS);
 
-  debuginfod_client *c = debuginfod_init ();
+  debuginfod_client_up c = debuginfod_init ();
 
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
@@ -146,8 +158,9 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   char *dname = nullptr;
   user_data data ("separate debug info for", filename);
 
-  debuginfod_set_user_data (c, &data);
-  scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len, &dname));
+  debuginfod_set_user_data (c.get (), &data);
+  scoped_fd fd (debuginfod_find_debuginfo (c.get (), build_id, build_id_len,
+					   &dname));
 
   if (fd.get () < 0 && fd.get () != -ENOENT)
     printf_filtered (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
@@ -155,7 +168,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 		     styled_string (file_name_style.style (),  filename));
 
   destname->reset (dname);
-  debuginfod_end (c);
+
   return fd;
 }
 #endif
