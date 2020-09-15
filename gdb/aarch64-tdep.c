@@ -3609,6 +3609,15 @@ aarch64_integer_to_address (struct gdbarch *gdbarch,
   return aarch64_pointer_to_address (gdbarch, type, buf);
 }
 
+/* Remove useless bits from addresses in a running program.  This is
+   important for Morello due to the C64 mode having the LSB set.  */
+
+static CORE_ADDR
+aarch64_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
+{
+  return (val & ~1);
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3927,6 +3936,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Set address class hooks for capabilities.  */
   if (feature_capability)
     {
+      /* Address manipulation.  */
+      set_gdbarch_addr_bits_remove (gdbarch, aarch64_addr_bits_remove);
+
       set_gdbarch_address_class_type_flags
 	(gdbarch, aarch64_address_class_type_flags);
       set_gdbarch_address_class_name_to_type_flags
