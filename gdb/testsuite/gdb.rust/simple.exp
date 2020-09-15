@@ -375,5 +375,14 @@ gdb_test "python print(e.type.fields()\[0\].artificial)" "True"
 gdb_test "python print(e.type.fields()\[1\].name)" "Two"
 
 gdb_test "python print(e.type.dynamic)" "False"
-gdb_test "python print(gdb.lookup_type('simple::MoreComplicated').dynamic)" \
-    "True"
+
+# Before LLVM 8, the rust compiler would emit two types named
+# "simple::MoreComplicated" -- the C-like "underlying" enum type and
+# the Rust enum.  lookup_type seems to get the former, which isn't
+# very useful.  With later versions of LLVM, this test works
+# correctly.
+set v [split [rust_llvm_version] .]
+if {[lindex $v 0] >= 8} {
+    gdb_test "python print(gdb.lookup_type('simple::MoreComplicated').dynamic)" \
+	"True"
+}

@@ -1,3 +1,9 @@
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
+	PR rust/26197:
+	* lib/rust-support.exp (rust_llvm_version): New proc.
+	* gdb.rust/simple.exp: Check rust_llvm_version.
+
 2020-09-14  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.rust/traits.exp: Fix PATH warning.
