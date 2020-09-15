@@ -8757,25 +8757,25 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
    to single precision without loss of accuracy.  */
 
 static bfd_boolean
-is_double_a_single (bfd_int64_t v)
+is_double_a_single (bfd_uint64_t v)
 {
-  int exp = (int)((v >> 52) & 0x7FF);
-  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFFULL);
+  int exp = (v >> 52) & 0x7FF;
+  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
-  return (exp == 0 || exp == 0x7FF
-	  || (exp >= 1023 - 126 && exp <= 1023 + 127))
-    && (mantissa & 0x1FFFFFFFl) == 0;
+  return ((exp == 0 || exp == 0x7FF
+	   || (exp >= 1023 - 126 && exp <= 1023 + 127))
+	  && (mantissa & 0x1FFFFFFFL) == 0);
 }
 
 /* Returns a double precision value casted to single precision
    (ignoring the least significant bits in exponent and mantissa).  */
 
 static int
-double_to_single (bfd_int64_t v)
+double_to_single (bfd_uint64_t v)
 {
   unsigned int sign = (v >> 63) & 1;
   int exp = (v >> 52) & 0x7FF;
-  bfd_int64_t mantissa = (v & (bfd_int64_t) 0xFFFFFFFFFFFFFULL);
+  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
   if (exp == 0x7FF)
     exp = 0xFF;
@@ -8848,9 +8848,9 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
       || inst.relocs[0].exp.X_op == O_big)
     {
 #if defined BFD_HOST_64_BIT
-      bfd_int64_t v;
+      bfd_uint64_t v;
 #else
-      offsetT v;
+      valueT v;
 #endif
       if (inst.relocs[0].exp.X_op == O_big)
 	{
@@ -8867,16 +8867,17 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	    l = generic_bignum;
 
 #if defined BFD_HOST_64_BIT
-	  v = ((((bfd_uint64_t) l[3] & LITTLENUM_MASK)
-		<< LITTLENUM_NUMBER_OF_BITS)
-	       | (((bfd_int64_t) l[2] & LITTLENUM_MASK)
-		  << LITTLENUM_NUMBER_OF_BITS)
-	       | (((bfd_uint64_t) l[1] & LITTLENUM_MASK)
-		  << LITTLENUM_NUMBER_OF_BITS)
-	       | (l[0] & LITTLENUM_MASK));
+	  v = l[3] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[2] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[1] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[0] & LITTLENUM_MASK;
 #else
-	  v = ((((valueT) l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-	       | (l[0] & LITTLENUM_MASK));
+	  v = l[1] & LITTLENUM_MASK;
+	  v <<= LITTLENUM_NUMBER_OF_BITS;
+	  v |= l[0] & LITTLENUM_MASK;
 #endif
 	}
       else

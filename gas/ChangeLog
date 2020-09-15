@@ -1,3 +1,11 @@
+2020-09-15  Alan Modra  <amodra@gmail.com>
+
+	PR 26610
+	* config/tc-arm.c (move_or_literal_pool): Correct extraction of
+	bignum.  Use unsigned "v"
+	(is_double_a_single): Make "v" and "mantissa" unsigned.  Formatting.
+	(double_to_single): Likewise.
+
 2020-09-15  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (s_nop): Preserve the input_line_pointer around the call
