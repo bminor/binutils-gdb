@@ -1,3 +1,8 @@
+2020-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/cfi/reloc-pe-i386.d: Updated.
+	* testsuite/gas/i386/x86-64-w64-pcrel.d: Likewise.
+
 2020-09-15  Alan Modra  <amodra@gmail.com>
 
 	PR 26610
