@@ -1,3 +1,8 @@
+2020-09-14  Michael Mullin  <masmullin@gmail.com>
+
+	* xml-tdesc.c [!defined(HAVE_LIBEXPAT)] (tdesc_parse_xml):
+	Remove baton parameter.
+
 2020-09-14  Pedro Alves  <pedro@palves.net>
 
 	* Makefile.in (SELFTESTS_SRCS): Add

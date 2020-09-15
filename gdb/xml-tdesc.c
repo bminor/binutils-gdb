@@ -41,8 +41,7 @@
    an XML parser.  */
 
 static struct target_desc *
-tdesc_parse_xml (const char *document, xml_fetch_another fetcher,
-		 void *fetcher_baton)
+tdesc_parse_xml (const char *document, xml_fetch_another fetcher)
 {
   static int have_warned;
 
