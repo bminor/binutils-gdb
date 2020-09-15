@@ -98,10 +98,6 @@ struct windows_per_inferior : public windows_process_info
   void handle_unload_dll () override;
   bool handle_access_violation (const EXCEPTION_RECORD *rec) override;
 
-
-  int have_saved_context = 0;	/* True if we've saved context from a
-				   cygwin signal.  */
-
   uintptr_t dr[8] {};
 
   int windows_initialization_done = 0;
@@ -140,9 +136,6 @@ struct windows_per_inferior : public windows_process_info
   std::vector<windows_solib> solibs;
 
 #ifdef __CYGWIN__
-  CONTEXT saved_context {};	/* Contains the saved context from a
-				   cygwin signal.  */
-
   /* The starting and ending address of the cygwin1.dll text segment.  */
   CORE_ADDR cygwin_load_start = 0;
   CORE_ADDR cygwin_load_end = 0;
@@ -718,19 +711,6 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 
   if (th->reload_context)
     {
-#ifdef __CYGWIN__
-      if (windows_process.have_saved_context)
-	{
-	  /* Lie about where the program actually is stopped since
-	     cygwin has informed us that we should consider the signal
-	     to have occurred at another location which is stored in
-	     "saved_context.  */
-	  memcpy (&th->context, &windows_process.saved_context,
-		  __COPY_CONTEXT_SIZE);
-	  windows_process.have_saved_context = 0;
-	}
-      else
-#endif
 #ifdef __x86_64__
       if (windows_process.wow64_process)
 	{
@@ -1048,33 +1028,32 @@ windows_per_inferior::handle_output_debug_string
 #ifdef __CYGWIN__
   else
     {
-      /* Got a cygwin signal marker.  A cygwin signal is followed by
-	 the signal number itself and then optionally followed by the
-	 thread id and address to saved context within the DLL.  If
-	 these are supplied, then the given thread is assumed to have
-	 issued the signal and the context from the thread is assumed
-	 to be stored at the given address in the inferior.  Tell gdb
-	 to treat this like a real signal.  */
+      /* Got a cygwin signal marker.  A cygwin signal marker is
+	 followed by the signal number itself, and (since Cygwin 1.7)
+	 the thread id, and the address of a saved context in the
+	 inferior (That context has an IP which is the return address
+	 in "user" code of the cygwin internal signal handling code,
+	 but is not otherwise usable).
+
+	 Tell gdb to treat this like the given thread issued a real
+	 signal.  */
       char *p;
       int sig = strtol (s.get () + sizeof (_CYGWIN_SIGNAL_STRING) - 1, &p, 0);
       gdb_signal gotasig = gdb_signal_from_host (sig);
+      LPCVOID x = 0;
 
       if (gotasig)
 	{
-	  LPCVOID x;
-	  SIZE_T n;
-
 	  ourstatus->set_stopped (gotasig);
 	  retval = strtoul (p, &p, 0);
 	  if (!retval)
 	    retval = current_event.dwThreadId;
-	  else if ((x = (LPCVOID) (uintptr_t) strtoull (p, NULL, 0))
-		   && ReadProcessMemory (handle, x,
-					 &saved_context,
-					 __COPY_CONTEXT_SIZE, &n)
-		   && n == __COPY_CONTEXT_SIZE)
-	    have_saved_context = 1;
+	  else
+	    x = (LPCVOID) (uintptr_t) strtoull (p, NULL, 0);
 	}
+
+      DEBUG_EVENTS ("gdb: cygwin signal %d, thread 0x%x, CONTEXT @ %p",
+		    gotasig, retval, x);
     }
 #endif
 
@@ -1607,7 +1586,6 @@ windows_nat_target::get_windows_debug_event
 
   event_code = windows_process.current_event.dwDebugEventCode;
   ourstatus->set_spurious ();
-  windows_process.have_saved_context = 0;
 
   switch (event_code)
     {
