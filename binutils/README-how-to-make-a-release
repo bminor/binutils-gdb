@@ -499,6 +499,10 @@ looks like this:
      (The email to Davis is so that he can update the GNU Toolchain
      social media).  Something like this:
 
+  9. Create a new Bugzilla entry for the point release.
+     
+        https://sourceware.org/bugzilla/editversions.cgi?product=binutils
+
 ------------------------------------------------------------------------
 Hi Everyone,
 
