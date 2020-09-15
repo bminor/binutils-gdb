@@ -121,7 +121,7 @@ debuginfod_source_query (const unsigned char *build_id,
 		     safe_strerror (-fd.get ()),
 		     styled_string (file_name_style.style (),  srcpath));
   else
-    destname->reset (xstrdup (srcpath));
+    *destname = make_unique_xstrdup (srcpath);
 
   debuginfod_end (c);
   return fd;

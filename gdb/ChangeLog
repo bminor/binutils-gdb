@@ -1,3 +1,8 @@
+2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* debuginfod-support.c (debuginfod_source_query): Use
+	make_unique_xstrdup.
+
 2020-09-14  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (TYPE_INSTANCE_FLAGS): Remove, replace all uses
