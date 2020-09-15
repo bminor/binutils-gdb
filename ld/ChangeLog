@@ -1,3 +1,7 @@
+2020-09-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldelf.c (ldelf_after_open): Check bfd_target_elf_flavour first.
+
 2020-09-15  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/26589
