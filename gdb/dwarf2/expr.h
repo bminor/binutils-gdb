@@ -194,14 +194,6 @@ struct dwarf_expr_context
   /* Read LENGTH bytes at ADDR into BUF.  */
   virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length);
 
-  /* Push on DWARF stack an entry evaluated for DW_TAG_call_site's
-     parameter matching KIND and KIND_U at the caller of specified BATON.
-     If DEREF_SIZE is not -1 then use DW_AT_call_data_value instead of
-     DW_AT_call_value.  */
-  virtual void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
-					   union call_site_parameter_u kind_u,
-					   int deref_size) = 0;
-
   /* Return the `object address' for DW_OP_push_object_address.  */
   virtual CORE_ADDR get_object_address ()
   {
@@ -240,6 +232,14 @@ private:
      STACK while it being passed to and returned from the called DWARF
      subroutine.  */
   void dwarf_call (cu_offset die_cu_off);
+
+  /* Push on DWARF stack an entry evaluated for DW_TAG_call_site's
+     parameter matching KIND and KIND_U at the caller of specified BATON.
+     If DEREF_SIZE is not -1 then use DW_AT_call_data_value instead of
+     DW_AT_call_value.  */
+  void push_dwarf_reg_entry_value (call_site_parameter_kind kind,
+				   call_site_parameter_u kind_u,
+				   int deref_size);
 };
 
 /* Return the value of register number REG (a DWARF register number),

@@ -258,6 +258,56 @@ dwarf_expr_context::read_mem (gdb_byte *buf, CORE_ADDR addr,
   read_memory (addr, buf, length);
 }
 
+/* See expr.h.  */
+
+void
+dwarf_expr_context::push_dwarf_reg_entry_value (call_site_parameter_kind kind,
+						call_site_parameter_u kind_u,
+						int deref_size)
+{
+  ensure_have_per_cu (this->per_cu, "DW_OP_entry_value");
+  ensure_have_frame (this->frame, "DW_OP_entry_value");
+
+  dwarf2_per_cu_data *caller_per_cu;
+  dwarf2_per_objfile *caller_per_objfile;
+  frame_info *caller_frame = get_prev_frame (this->frame);
+  call_site_parameter *parameter
+    = dwarf_expr_reg_to_entry_parameter (this->frame, kind, kind_u,
+					 &caller_per_cu,
+					 &caller_per_objfile);
+  const gdb_byte *data_src
+    = deref_size == -1 ? parameter->value : parameter->data_value;
+  size_t size
+    = deref_size == -1 ? parameter->value_size : parameter->data_value_size;
+
+  /* DEREF_SIZE size is not verified here.  */
+  if (data_src == nullptr)
+    throw_error (NO_ENTRY_VALUE_ERROR,
+		 _("Cannot resolve DW_AT_call_data_value"));
+
+  /* We are about to evaluate an expression in the context of the caller
+     of the current frame.  This evaluation context may be different from
+     the current (callee's) context), so temporarily set the caller's context.
+
+     It is possible for the caller to be from a different objfile from the
+     callee if the call is made through a function pointer.  */
+  scoped_restore save_frame = make_scoped_restore (&this->frame,
+						   caller_frame);
+  scoped_restore save_per_cu = make_scoped_restore (&this->per_cu,
+						    caller_per_cu);
+  scoped_restore save_obj_addr = make_scoped_restore (&this->obj_address,
+						      (CORE_ADDR) 0);
+  scoped_restore save_per_objfile = make_scoped_restore (&this->per_objfile,
+							 caller_per_objfile);
+
+  scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
+  this->gdbarch = this->per_objfile->objfile->arch ();
+  scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
+  this->addr_size = this->per_cu->addr_size ();
+
+  this->eval (data_src, size);
+}
+
 /* Require that TYPE be an integral type; throw an exception if not.  */
 
 static void

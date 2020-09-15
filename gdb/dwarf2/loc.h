@@ -61,6 +61,18 @@ struct value *sect_variable_value (sect_offset sect_off,
 				   dwarf2_per_cu_data *per_cu,
 				   dwarf2_per_objfile *per_objfile);
 
+/* Fetch call_site_parameter from caller matching KIND and KIND_U.
+   FRAME is for callee.
+
+   Function always returns non-NULL, it throws NO_ENTRY_VALUE_ERROR
+   otherwise.  */
+
+struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
+  (struct frame_info *frame, enum call_site_parameter_kind kind,
+   union call_site_parameter_u kind_u, dwarf2_per_cu_data **per_cu_return,
+   dwarf2_per_objfile **per_objfile_return);
+
+
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the context
    of FRAME.  */

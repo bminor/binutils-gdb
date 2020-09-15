@@ -52,13 +52,6 @@ static struct value *dwarf2_evaluate_loc_desc_full
    size_t size, dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
    struct type *subobj_type, LONGEST subobj_byte_offset);
 
-static struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
-    (struct frame_info *frame,
-     enum call_site_parameter_kind kind,
-     union call_site_parameter_u kind_u,
-     dwarf2_per_cu_data **per_cu_return,
-     dwarf2_per_objfile **per_objfile_return);
-
 static struct value *indirect_synthetic_pointer
   (sect_offset die, LONGEST byte_offset,
    dwarf2_per_cu_data *per_cu,
@@ -673,61 +666,6 @@ public:
   dwarf_evaluate_loc_desc (dwarf2_per_objfile *per_objfile)
     : dwarf_expr_context (per_objfile)
   {}
-
-  /* Execute DWARF block of call_site_parameter which matches KIND and
-     KIND_U.  Choose DEREF_SIZE value of that parameter.  Search
-     caller of this objects's frame.
-
-     The caller can be from a different CU - per_cu_dwarf_call
-     implementation can be more simple as it does not support cross-CU
-     DWARF executions.  */
-
-  void push_dwarf_reg_entry_value (enum call_site_parameter_kind kind,
-				   union call_site_parameter_u kind_u,
-				   int deref_size) override
-  {
-    struct frame_info *caller_frame;
-    dwarf2_per_cu_data *caller_per_cu;
-    dwarf2_per_objfile *caller_per_objfile;
-    struct call_site_parameter *parameter;
-    const gdb_byte *data_src;
-    size_t size;
-
-    caller_frame = get_prev_frame (frame);
-
-    parameter = dwarf_expr_reg_to_entry_parameter (frame, kind, kind_u,
-						   &caller_per_cu,
-						   &caller_per_objfile);
-    data_src = deref_size == -1 ? parameter->value : parameter->data_value;
-    size = deref_size == -1 ? parameter->value_size : parameter->data_value_size;
-
-    /* DEREF_SIZE size is not verified here.  */
-    if (data_src == NULL)
-      throw_error (NO_ENTRY_VALUE_ERROR,
-		   _("Cannot resolve DW_AT_call_data_value"));
-
-    /* We are about to evaluate an expression in the context of the caller
-       of the current frame.  This evaluation context may be different from
-       the current (callee's) context), so temporarily set the caller's context.
-
-       It is possible for the caller to be from a different objfile from the
-       callee if the call is made through a function pointer.  */
-    scoped_restore save_frame = make_scoped_restore (&this->frame,
-						     caller_frame);
-    scoped_restore save_per_cu = make_scoped_restore (&this->per_cu,
-						      caller_per_cu);
-    scoped_restore save_obj_addr = make_scoped_restore (&this->obj_address,
-							(CORE_ADDR) 0);
-    scoped_restore save_per_objfile = make_scoped_restore (&this->per_objfile,
-							   caller_per_objfile);
-
-    scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
-    this->gdbarch = this->per_objfile->objfile->arch ();
-    scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
-    this->addr_size = this->per_cu->addr_size ();
-
-    this->eval (data_src, size);
-  }
 };
 
 /* See dwarf2loc.h.  */
@@ -1208,13 +1146,9 @@ call_site_parameter_matches (struct call_site_parameter *parameter,
   return 0;
 }
 
-/* Fetch call_site_parameter from caller matching KIND and KIND_U.
-   FRAME is for callee.
+/* See loc.h.  */
 
-   Function always returns non-NULL, it throws NO_ENTRY_VALUE_ERROR
-   otherwise.  */
-
-static struct call_site_parameter *
+struct call_site_parameter *
 dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
 				   enum call_site_parameter_kind kind,
 				   union call_site_parameter_u kind_u,
