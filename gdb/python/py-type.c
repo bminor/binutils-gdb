@@ -183,8 +183,7 @@ convert_field (struct type *type, int field)
 
       if (type->code () == TYPE_CODE_ENUM)
 	{
-	  arg.reset (gdb_py_long_from_longest (TYPE_FIELD_ENUMVAL (type,
-								   field)));
+	  arg = gdb_py_object_from_longest (TYPE_FIELD_ENUMVAL (type, field));
 	  attrstring = "enumval";
 	}
       else
@@ -192,8 +191,7 @@ convert_field (struct type *type, int field)
 	  if (TYPE_FIELD_LOC_KIND (type, field) == FIELD_LOC_KIND_DWARF_BLOCK)
 	    arg = gdbpy_ref<>::new_reference (Py_None);
 	  else
-	    arg.reset (gdb_py_long_from_longest (TYPE_FIELD_BITPOS (type,
-								    field)));
+	    arg = gdb_py_object_from_longest (TYPE_FIELD_BITPOS (type, field));
 	  attrstring = "bitpos";
 	}
 
@@ -725,7 +723,7 @@ typy_get_sizeof (PyObject *self, void *closure)
 
   if (size_varies)
     Py_RETURN_NONE;
-  return gdb_py_long_from_longest (TYPE_LENGTH (type));
+  return gdb_py_object_from_longest (TYPE_LENGTH (type)).release ();
 }
 
 /* Return the alignment of the type represented by SELF, in bytes.  */

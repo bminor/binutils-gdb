@@ -1,5 +1,15 @@
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
+	* python/python-internal.h (gdb_py_long_from_longest): Remove
+	defines.
+	* python/py-value.c (valpy_long): Use gdb_py_object_from_longest.
+	* python/py-type.c (convert_field, typy_get_sizeof): Use
+	gdb_py_object_from_longest.
+	* python/py-record-btrace.c (btpy_list_index): Use
+	gdb_py_object_from_longest.
+
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
 	* python/python-internal.h (PyInt_FromSsize_t): Remove define.
 	* python/py-record.c (recpy_element_number): Use
 	gdb_py_object_from_longest.

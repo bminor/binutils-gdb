@@ -1733,7 +1733,7 @@ valpy_long (PyObject *self)
   if (type->is_unsigned ())
     return gdb_py_long_from_ulongest (l);
   else
-    return gdb_py_long_from_longest (l);
+    return gdb_py_object_from_longest (l).release ();
 }
 
 /* Implements conversion to float.  */

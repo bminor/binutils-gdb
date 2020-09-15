@@ -556,7 +556,7 @@ btpy_list_index (PyObject *self, PyObject *value)
   if (index < 0)
     return PyErr_Format (PyExc_ValueError, _("Not in list."));
 
-  return gdb_py_long_from_longest (index);
+  return gdb_py_object_from_longest (index).release ();
 }
 
 /* Implementation of BtraceList.count (self, value) -> int.  */
