@@ -242,6 +242,19 @@ void
 dwarf_expr_context::read_mem (gdb_byte *buf, CORE_ADDR addr,
 			      size_t length)
 {
+  if (length == 0)
+    return;
+
+  /* Prefer the passed-in memory, if it exists.  */
+  CORE_ADDR offset = addr - this->obj_address;
+
+  if (offset < this->data_view.size ()
+      && offset + length <= this->data_view.size ())
+    {
+      memcpy (buf, this->data_view.data (), length);
+      return;
+    }
+
   read_memory (addr, buf, length);
 }
 
@@ -1573,8 +1586,11 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_push_object_address:
 	  /* Return the address of the object we are currently observing.  */
-	  result = this->get_object_address ();
-	  result_val = value_from_ulongest (address_type, result);
+	  if (this->data_view.data () == nullptr
+	      && this->obj_address == 0)
+	    error (_("Location address is not set."));
+
+	  result_val = value_from_ulongest (address_type, this->obj_address);
 	  break;
 
 	default:

@@ -2262,45 +2262,6 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 					per_objfile, NULL, 0);
 }
 
-/* A specialization of dwarf_expr_context that is used by
-   dwarf2_locexpr_baton_eval.  This subclass exists to handle the case
-   where a caller of dwarf2_locexpr_baton_eval passes in some data,
-   but with the address being 0.  In this situation, we arrange for
-   memory reads to come from the passed-in buffer.  */
-
-struct evaluate_for_locexpr_baton : public dwarf_expr_context
-{
-  evaluate_for_locexpr_baton (dwarf2_per_objfile *per_objfile)
-    : dwarf_expr_context (per_objfile)
-  {}
-
-  /* The data that was passed in.  */
-  gdb::array_view<const gdb_byte> data_view;
-
-  CORE_ADDR get_object_address () override
-  {
-    if (data_view.data () == nullptr && obj_address == 0)
-      error (_("Location address is not set."));
-    return obj_address;
-  }
-
-  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
-  {
-    if (len == 0)
-      return;
-
-    /* Prefer the passed-in memory, if it exists.  */
-    CORE_ADDR offset = addr - obj_address;
-    if (offset < data_view.size () && offset + len <= data_view.size ())
-      {
-	memcpy (buf, data_view.data (), len);
-	return;
-      }
-
-    read_memory (addr, buf, len);
-  }
-};
-
 /* Evaluates a dwarf expression and stores the result in VAL,
    expecting that the dwarf expression only produces a single
    CORE_ADDR.  FRAME is the frame in which the expression is
@@ -2324,13 +2285,11 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
     return 0;
 
   dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
-  evaluate_for_locexpr_baton ctx (per_objfile);
+  dwarf_expr_context ctx (per_objfile);
 
   ctx.frame = frame;
   ctx.per_cu = dlbaton->per_cu;
-  if (addr_stack == nullptr)
-    ctx.obj_address = 0;
-  else
+  if (addr_stack != nullptr)
     {
       ctx.obj_address = addr_stack->addr;
       ctx.data_view = addr_stack->valaddr;

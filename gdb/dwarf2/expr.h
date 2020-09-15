@@ -191,16 +191,8 @@ struct dwarf_expr_context
   /* Object address used for the evaluation.  */
   CORE_ADDR obj_address = 0;
 
-  /* Read LENGTH bytes at ADDR into BUF.  */
-  virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length);
-
-  /* Return the `object address' for DW_OP_push_object_address.  */
-  virtual CORE_ADDR get_object_address ()
-  {
-    if (obj_address == 0)
-      error (_("Location address is not set."));
-    return obj_address;
-  }
+  /* The data that was passed in.  */
+  gdb::array_view<const gdb_byte> data_view;
 
 private:
 
@@ -234,6 +226,12 @@ private:
   void push_dwarf_reg_entry_value (call_site_parameter_kind kind,
 				   call_site_parameter_u kind_u,
 				   int deref_size);
+
+  /* Read LENGTH bytes at ADDR into BUF.  This method also handles the
+     case where a caller of the evaluator passes in some data,
+     but with the address being 0.  In this situation, we arrange for
+     memory reads to come from the passed-in buffer.  */
+  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length);
 };
 
 /* Return the value of register number REG (a DWARF register number),
