@@ -76,7 +76,7 @@ create_register_changed_event_object (struct frame_info *frame,
   if (evpy_add_attribute (event.get (), "frame", frame_obj.get ()) < 0)
     return NULL;
 
-  gdbpy_ref<> regnum_obj (PyLong_FromLongLong (regnum));
+  gdbpy_ref<> regnum_obj = gdb_py_object_from_longest (regnum);
   if (regnum_obj == NULL)
     return NULL;
 

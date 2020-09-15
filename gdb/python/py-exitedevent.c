@@ -30,7 +30,7 @@ create_exited_event_object (const LONGEST *exit_code, struct inferior *inf)
 
   if (exit_code)
     {
-      gdbpy_ref<> exit_code_obj (PyLong_FromLongLong (*exit_code));
+      gdbpy_ref<> exit_code_obj = gdb_py_object_from_longest (*exit_code);
 
       if (exit_code_obj == NULL)
 	return NULL;

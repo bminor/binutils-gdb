@@ -1,5 +1,12 @@
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
+	* python/py-infevents.c (create_register_changed_event_object):
+	Use gdb_py_object_from_longest.
+	* python/py-exitedevent.c (create_exited_event_object): Use
+	gdb_py_object_from_longest.
+
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
 	* python/python.c (gdbpy_parameter_value): Use
 	gdb_py_object_from_longest.
 	* python/py-type.c (convert_field, typy_range): Use
