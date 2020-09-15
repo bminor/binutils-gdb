@@ -123,7 +123,7 @@ static struct stoken make_stoken (const char *);
    since it is very long and this gives us a way to comment the
    sections.  */
 
-static const char *number_regex_text =
+static const char number_regex_text[] =
   /* subexpression 1: allows use of alternation, otherwise uninteresting */
   "^("
   /* First comes floating point.  */

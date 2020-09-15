@@ -28,7 +28,7 @@ namespace memory_map_tests {
 
 /* A simple valid test input for parse_memory_map.  */
 
-static const char *valid_mem_map = R"(<?xml version="1.0"?>
+static const char valid_mem_map[] = R"(<?xml version="1.0"?>
 <!DOCTYPE memory-map
           PUBLIC "+//IDN gnu.org//DTD GDB Memory Map V1.0//EN"
                  "http://sourceware.org/gdb/gdb-memory-map.dtd">

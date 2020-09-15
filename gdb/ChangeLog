@@ -1,3 +1,12 @@
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
+	* unittests/memory-map-selftests.c (valid_mem_map): Now array.
+	* ui-style.c (ansi_regex_text): Now array.
+	* rust-exp.y (number_regex_text): Now array.
+	* linespec.c (linespec_quote_characters): Now array.
+	* jit.c (jit_break_name, jit_descriptor_name, reader_init_fn_sym):
+	Now arrays.
+
 2020-09-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* debuginfod-support.c (debuginfod_client_deleter): New.

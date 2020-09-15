@@ -45,9 +45,9 @@
 
 static std::string jit_reader_dir;
 
-static const char *const jit_break_name = "__jit_debug_register_code";
+static const char jit_break_name[] = "__jit_debug_register_code";
 
-static const char *const jit_descriptor_name = "__jit_debug_descriptor";
+static const char jit_descriptor_name[] = "__jit_debug_descriptor";
 
 static void jit_inferior_init (struct gdbarch *gdbarch);
 static void jit_inferior_exit_hook (struct inferior *inf);
@@ -173,7 +173,7 @@ struct jit_reader
 static struct jit_reader *loaded_jit_reader = NULL;
 
 typedef struct gdb_reader_funcs * (reader_init_fn_type) (void);
-static const char *reader_init_fn_sym = "gdb_init_reader";
+static const char reader_init_fn_sym[] = "gdb_init_reader";
 
 /* Try to load FILE_NAME as a JIT debug info reader.  */
 

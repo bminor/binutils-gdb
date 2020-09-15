@@ -421,7 +421,7 @@ static bool compare_msymbols (const bound_minimal_symbol &a,
 /* Permitted quote characters for the parser.  This is different from the
    completer's quote characters to allow backward compatibility with the
    previous parser.  */
-static const char *const linespec_quote_characters = "\"\'";
+static const char linespec_quote_characters[] = "\"\'";
 
 /* Lexer functions.  */
 

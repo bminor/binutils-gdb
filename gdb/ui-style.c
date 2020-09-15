@@ -23,7 +23,7 @@
 /* A regular expression that is used for matching ANSI terminal escape
    sequences.  */
 
-static const char *ansi_regex_text =
+static const char ansi_regex_text[] =
   /* Introduction.  */
   "^\033\\["
 #define DATA_SUBEXP 1
