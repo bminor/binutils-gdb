@@ -504,13 +504,13 @@ gdbpy_parameter_value (enum var_types type, void *var)
 
 	if (val == UINT_MAX)
 	  Py_RETURN_NONE;
-	return PyLong_FromUnsignedLong (val);
+	return gdb_py_object_from_ulongest (val).release ();
       }
 
     case var_zuinteger:
       {
 	unsigned int val = * (unsigned int *) var;
-	return PyLong_FromUnsignedLong (val);
+	return gdb_py_object_from_ulongest (val).release ();
       }
     }
 
