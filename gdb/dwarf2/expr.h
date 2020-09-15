@@ -26,6 +26,7 @@
 #include "gdbtypes.h"
 
 struct dwarf2_per_objfile;
+struct piece_closure;
 
 /* The location of a value.  */
 enum dwarf_value_location
@@ -299,5 +300,14 @@ extern const gdb_byte *safe_read_sleb128 (const gdb_byte *buf,
 
 extern const gdb_byte *safe_skip_leb128 (const gdb_byte *buf,
 					 const gdb_byte *buf_end);
+
+extern const struct lval_funcs pieced_value_funcs;
+
+/* Allocate a closure for a value formed from separately-described
+   PIECES.  */
+
+piece_closure *allocate_piece_closure
+  (dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
+   std::vector<dwarf_expr_piece> &&pieces, frame_info *frame);
 
 #endif /* dwarf2expr.h */

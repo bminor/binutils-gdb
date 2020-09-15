@@ -78,6 +78,15 @@ ensure_have_per_cu (dwarf2_per_cu_data *per_cu, const char* op_name)
 		 _("%s evaluation requires a compilation unit."), op_name);
 }
 
+/* Return the number of bytes overlapping a contiguous chunk of N_BITS
+   bits whose first bit is located at bit offset START.  */
+
+static size_t
+bits_to_bytes (ULONGEST start, ULONGEST n_bits)
+{
+  return (start % HOST_CHAR_BIT + n_bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+}
+
 /* See expr.h.  */
 
 CORE_ADDR
@@ -87,6 +96,568 @@ read_addr_from_reg (frame_info *frame, int reg)
   int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
 
   return address_from_register (regnum, frame);
+}
+
+struct piece_closure
+{
+  /* Reference count.  */
+  int refc = 0;
+
+  /* The objfile from which this closure's expression came.  */
+  dwarf2_per_objfile *per_objfile = nullptr;
+
+  /* The CU from which this closure's expression came.  */
+  dwarf2_per_cu_data *per_cu = nullptr;
+
+  /* The pieces describing this variable.  */
+  std::vector<dwarf_expr_piece> pieces;
+
+  /* Frame ID of frame to which a register value is relative, used
+     only by DWARF_VALUE_REGISTER.  */
+  struct frame_id frame_id;
+};
+
+/* See expr.h.  */
+
+piece_closure *
+allocate_piece_closure (dwarf2_per_cu_data *per_cu,
+			dwarf2_per_objfile *per_objfile,
+			std::vector<dwarf_expr_piece> &&pieces,
+			frame_info *frame)
+{
+  piece_closure *c = new piece_closure;
+
+  c->refc = 1;
+  /* We must capture this here due to sharing of DWARF state.  */
+  c->per_objfile = per_objfile;
+  c->per_cu = per_cu;
+  c->pieces = std::move (pieces);
+  if (frame == nullptr)
+    c->frame_id = null_frame_id;
+  else
+    c->frame_id = get_frame_id (frame);
+
+  for (dwarf_expr_piece &piece : c->pieces)
+    if (piece.location == DWARF_VALUE_STACK)
+      value_incref (piece.v.value);
+
+  return c;
+}
+
+/* Read or write a pieced value V.  If FROM != NULL, operate in "write
+   mode": copy FROM into the pieces comprising V.  If FROM == NULL,
+   operate in "read mode": fetch the contents of the (lazy) value V by
+   composing it from its pieces.  */
+
+static void
+rw_pieced_value (value *v, value *from)
+{
+  int i;
+  LONGEST offset = 0, max_offset;
+  gdb_byte *v_contents;
+  const gdb_byte *from_contents;
+  piece_closure *c
+    = (piece_closure *) value_computed_closure (v);
+  gdb::byte_vector buffer;
+  bool bits_big_endian = type_byte_order (value_type (v)) == BFD_ENDIAN_BIG;
+
+  if (from != nullptr)
+    {
+      from_contents = value_contents (from);
+      v_contents = nullptr;
+    }
+  else
+    {
+      if (value_type (v) != value_enclosing_type (v))
+	internal_error (__FILE__, __LINE__,
+			_("Should not be able to create a lazy value with "
+			  "an enclosing type"));
+      v_contents = value_contents_raw (v);
+      from_contents = nullptr;
+    }
+
+  ULONGEST bits_to_skip = 8 * value_offset (v);
+  if (value_bitsize (v))
+    {
+      bits_to_skip += (8 * value_offset (value_parent (v))
+		       + value_bitpos (v));
+      if (from != nullptr
+	  && (type_byte_order (value_type (from))
+	      == BFD_ENDIAN_BIG))
+	{
+	  /* Use the least significant bits of FROM.  */
+	  max_offset = 8 * TYPE_LENGTH (value_type (from));
+	  offset = max_offset - value_bitsize (v);
+	}
+      else
+	max_offset = value_bitsize (v);
+    }
+  else
+    max_offset = 8 * TYPE_LENGTH (value_type (v));
+
+  /* Advance to the first non-skipped piece.  */
+  for (i = 0; i < c->pieces.size () && bits_to_skip >= c->pieces[i].size; i++)
+    bits_to_skip -= c->pieces[i].size;
+
+  for (; i < c->pieces.size () && offset < max_offset; i++)
+    {
+      dwarf_expr_piece *p = &c->pieces[i];
+      size_t this_size_bits, this_size;
+
+      this_size_bits = p->size - bits_to_skip;
+      if (this_size_bits > max_offset - offset)
+	this_size_bits = max_offset - offset;
+
+      switch (p->location)
+	{
+	case DWARF_VALUE_REGISTER:
+	  {
+	    frame_info *frame = frame_find_by_id (c->frame_id);
+	    gdbarch *arch = get_frame_arch (frame);
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
+	    ULONGEST reg_bits = 8 * register_size (arch, gdb_regnum);
+	    int optim, unavail;
+
+	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG
+		&& p->offset + p->size < reg_bits)
+	      {
+		/* Big-endian, and we want less than full size.  */
+		bits_to_skip += reg_bits - (p->offset + p->size);
+	      }
+	    else
+	      bits_to_skip += p->offset;
+
+	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
+	    buffer.resize (this_size);
+
+	    if (from == nullptr)
+	      {
+		/* Read mode.  */
+		if (!get_frame_register_bytes (frame, gdb_regnum,
+					       bits_to_skip / 8,
+					       buffer, &optim, &unavail))
+		  {
+		    if (optim)
+		      mark_value_bits_optimized_out (v, offset,
+						     this_size_bits);
+		    if (unavail)
+		      mark_value_bits_unavailable (v, offset,
+						   this_size_bits);
+		    break;
+		  }
+
+		copy_bitwise (v_contents, offset,
+			      buffer.data (), bits_to_skip % 8,
+			      this_size_bits, bits_big_endian);
+	      }
+	    else
+	      {
+		/* Write mode.  */
+		if (bits_to_skip % 8 != 0 || this_size_bits % 8 != 0)
+		  {
+		    /* Data is copied non-byte-aligned into the register.
+		       Need some bits from original register value.  */
+		    get_frame_register_bytes (frame, gdb_regnum,
+					      bits_to_skip / 8,
+					      buffer, &optim, &unavail);
+		    if (optim)
+		      throw_error (OPTIMIZED_OUT_ERROR,
+				   _("Can't do read-modify-write to "
+				     "update bitfield; containing word "
+				     "has been optimized out"));
+		    if (unavail)
+		      throw_error (NOT_AVAILABLE_ERROR,
+				   _("Can't do read-modify-write to "
+				     "update bitfield; containing word "
+				     "is unavailable"));
+		  }
+
+		copy_bitwise (buffer.data (), bits_to_skip % 8,
+			      from_contents, offset,
+			      this_size_bits, bits_big_endian);
+		put_frame_register_bytes (frame, gdb_regnum,
+					  bits_to_skip / 8,
+					  buffer);
+	      }
+	  }
+	  break;
+
+	case DWARF_VALUE_MEMORY:
+	  {
+	    bits_to_skip += p->offset;
+
+	    CORE_ADDR start_addr = p->v.mem.addr + bits_to_skip / 8;
+
+	    if (bits_to_skip % 8 == 0 && this_size_bits % 8 == 0
+		&& offset % 8 == 0)
+	      {
+		/* Everything is byte-aligned; no buffer needed.  */
+		if (from != nullptr)
+		  write_memory_with_notification (start_addr,
+						  (from_contents
+						   + offset / 8),
+						  this_size_bits / 8);
+		else
+		  read_value_memory (v, offset,
+				     p->v.mem.in_stack_memory,
+				     p->v.mem.addr + bits_to_skip / 8,
+				     v_contents + offset / 8,
+				     this_size_bits / 8);
+		break;
+	      }
+
+	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
+	    buffer.resize (this_size);
+
+	    if (from == nullptr)
+	      {
+		/* Read mode.  */
+		read_value_memory (v, offset,
+				   p->v.mem.in_stack_memory,
+				   p->v.mem.addr + bits_to_skip / 8,
+				   buffer.data (), this_size);
+		copy_bitwise (v_contents, offset,
+			      buffer.data (), bits_to_skip % 8,
+			      this_size_bits, bits_big_endian);
+	      }
+	    else
+	      {
+		/* Write mode.  */
+		if (bits_to_skip % 8 != 0 || this_size_bits % 8 != 0)
+		  {
+		    if (this_size <= 8)
+		      {
+			/* Perform a single read for small sizes.  */
+			read_memory (start_addr, buffer.data (),
+				     this_size);
+		      }
+		    else
+		      {
+			/* Only the first and last bytes can possibly have
+			   any bits reused.  */
+			read_memory (start_addr, buffer.data (), 1);
+			read_memory (start_addr + this_size - 1,
+				     &buffer[this_size - 1], 1);
+		      }
+		  }
+
+		copy_bitwise (buffer.data (), bits_to_skip % 8,
+			      from_contents, offset,
+			      this_size_bits, bits_big_endian);
+		write_memory_with_notification (start_addr,
+						buffer.data (),
+						this_size);
+	      }
+	  }
+	  break;
+
+	case DWARF_VALUE_STACK:
+	  {
+	    if (from != nullptr)
+	      {
+		mark_value_bits_optimized_out (v, offset, this_size_bits);
+		break;
+	      }
+
+	    gdbarch *objfile_gdbarch = c->per_objfile->objfile->arch ();
+	    ULONGEST stack_value_size_bits
+	      = 8 * TYPE_LENGTH (value_type (p->v.value));
+
+	    /* Use zeroes if piece reaches beyond stack value.  */
+	    if (p->offset + p->size > stack_value_size_bits)
+	      break;
+
+	    /* Piece is anchored at least significant bit end.  */
+	    if (gdbarch_byte_order (objfile_gdbarch) == BFD_ENDIAN_BIG)
+	      bits_to_skip += stack_value_size_bits - p->offset - p->size;
+	    else
+	      bits_to_skip += p->offset;
+
+	    copy_bitwise (v_contents, offset,
+			  value_contents_all (p->v.value),
+			  bits_to_skip,
+			  this_size_bits, bits_big_endian);
+	  }
+	  break;
+
+	case DWARF_VALUE_LITERAL:
+	  {
+	    if (from != nullptr)
+	      {
+		mark_value_bits_optimized_out (v, offset, this_size_bits);
+		break;
+	      }
+
+	    ULONGEST literal_size_bits = 8 * p->v.literal.length;
+	    size_t n = this_size_bits;
+
+	    /* Cut off at the end of the implicit value.  */
+	    bits_to_skip += p->offset;
+	    if (bits_to_skip >= literal_size_bits)
+	      break;
+	    if (n > literal_size_bits - bits_to_skip)
+	      n = literal_size_bits - bits_to_skip;
+
+	    copy_bitwise (v_contents, offset,
+			  p->v.literal.data, bits_to_skip,
+			  n, bits_big_endian);
+	  }
+	  break;
+
+	case DWARF_VALUE_IMPLICIT_POINTER:
+	    if (from != nullptr)
+	      {
+		mark_value_bits_optimized_out (v, offset, this_size_bits);
+		break;
+	      }
+
+	  /* These bits show up as zeros -- but do not cause the value to
+	     be considered optimized-out.  */
+	  break;
+
+	case DWARF_VALUE_OPTIMIZED_OUT:
+	  mark_value_bits_optimized_out (v, offset, this_size_bits);
+	  break;
+
+	default:
+	  internal_error (__FILE__, __LINE__, _("invalid location type"));
+	}
+
+      offset += this_size_bits;
+      bits_to_skip = 0;
+    }
+}
+
+static void
+read_pieced_value (value *v)
+{
+  rw_pieced_value (v, nullptr);
+}
+
+static void
+write_pieced_value (value *to, value *from)
+{
+  rw_pieced_value (to, from);
+}
+
+/* An implementation of an lval_funcs method to see whether a value is
+   a synthetic pointer.  */
+
+static int
+check_pieced_synthetic_pointer (const value *value, LONGEST bit_offset,
+				int bit_length)
+{
+  piece_closure *c = (piece_closure *) value_computed_closure (value);
+  int i;
+
+  bit_offset += 8 * value_offset (value);
+  if (value_bitsize (value))
+    bit_offset += value_bitpos (value);
+
+  for (i = 0; i < c->pieces.size () && bit_length > 0; i++)
+    {
+      dwarf_expr_piece *p = &c->pieces[i];
+      size_t this_size_bits = p->size;
+
+      if (bit_offset > 0)
+	{
+	  if (bit_offset >= this_size_bits)
+	    {
+	      bit_offset -= this_size_bits;
+	      continue;
+	    }
+
+	  bit_length -= this_size_bits - bit_offset;
+	  bit_offset = 0;
+	}
+      else
+	bit_length -= this_size_bits;
+
+      if (p->location != DWARF_VALUE_IMPLICIT_POINTER)
+	return 0;
+    }
+
+  return 1;
+}
+
+/* An implementation of an lval_funcs method to indirect through a
+   pointer.  This handles the synthetic pointer case when needed.  */
+
+static value *
+indirect_pieced_value (value *value)
+{
+  piece_closure *c
+    = (piece_closure *) value_computed_closure (value);
+  int i;
+  dwarf_expr_piece *piece = NULL;
+
+  struct type *type = check_typedef (value_type (value));
+  if (type->code () != TYPE_CODE_PTR)
+    return NULL;
+
+  int bit_length = 8 * TYPE_LENGTH (type);
+  LONGEST bit_offset = 8 * value_offset (value);
+  if (value_bitsize (value))
+    bit_offset += value_bitpos (value);
+
+  for (i = 0; i < c->pieces.size () && bit_length > 0; i++)
+    {
+      dwarf_expr_piece *p = &c->pieces[i];
+      size_t this_size_bits = p->size;
+
+      if (bit_offset > 0)
+	{
+	  if (bit_offset >= this_size_bits)
+	    {
+	      bit_offset -= this_size_bits;
+	      continue;
+	    }
+
+	  bit_length -= this_size_bits - bit_offset;
+	  bit_offset = 0;
+	}
+      else
+	bit_length -= this_size_bits;
+
+      if (p->location != DWARF_VALUE_IMPLICIT_POINTER)
+	return NULL;
+
+      if (bit_length != 0)
+	error (_("Invalid use of DW_OP_implicit_pointer"));
+
+      piece = p;
+      break;
+    }
+
+  gdb_assert (piece != NULL && c->per_cu != nullptr);
+  frame_info *frame = get_selected_frame (_("No frame selected."));
+
+  /* This is an offset requested by GDB, such as value subscripts.
+     However, due to how synthetic pointers are implemented, this is
+     always presented to us as a pointer type.  This means we have to
+     sign-extend it manually as appropriate.  Use raw
+     extract_signed_integer directly rather than value_as_address and
+     sign extend afterwards on architectures that would need it
+     (mostly everywhere except MIPS, which has signed addresses) as
+     the later would go through gdbarch_pointer_to_address and thus
+     return a CORE_ADDR with high bits set on architectures that
+     encode address spaces and other things in CORE_ADDR.  */
+  bfd_endian byte_order = gdbarch_byte_order (get_frame_arch (frame));
+  LONGEST byte_offset
+    = extract_signed_integer (value_contents (value),
+			      TYPE_LENGTH (type), byte_order);
+  byte_offset += piece->v.ptr.offset;
+
+  return indirect_synthetic_pointer (piece->v.ptr.die_sect_off,
+				     byte_offset, c->per_cu,
+				     c->per_objfile, frame, type);
+}
+
+/* Implementation of the coerce_ref method of lval_funcs for synthetic C++
+   references.  */
+
+static value *
+coerce_pieced_ref (const value *value)
+{
+  struct type *type = check_typedef (value_type (value));
+
+  if (value_bits_synthetic_pointer (value, value_embedded_offset (value),
+				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+    {
+      const piece_closure *closure
+	= (piece_closure *) value_computed_closure (value);
+      frame_info *frame
+	= get_selected_frame (_("No frame selected."));
+
+      /* gdb represents synthetic pointers as pieced values with a single
+	 piece.  */
+      gdb_assert (closure != NULL);
+      gdb_assert (closure->pieces.size () == 1);
+
+      return indirect_synthetic_pointer
+	(closure->pieces[0].v.ptr.die_sect_off,
+	 closure->pieces[0].v.ptr.offset,
+	 closure->per_cu, closure->per_objfile, frame, type);
+    }
+  else
+    {
+      /* Else: not a synthetic reference; do nothing.  */
+      return NULL;
+    }
+}
+
+static void *
+copy_pieced_value_closure (const value *v)
+{
+  piece_closure *c = (piece_closure *) value_computed_closure (v);
+
+  ++c->refc;
+  return c;
+}
+
+static void
+free_pieced_value_closure (value *v)
+{
+  piece_closure *c = (piece_closure *) value_computed_closure (v);
+
+  --c->refc;
+  if (c->refc == 0)
+    {
+      for (dwarf_expr_piece &p : c->pieces)
+	if (p.location == DWARF_VALUE_STACK)
+	  value_decref (p.v.value);
+
+      delete c;
+    }
+}
+
+/* Functions for accessing a variable described by DW_OP_piece.  */
+const struct lval_funcs pieced_value_funcs = {
+  read_pieced_value,
+  write_pieced_value,
+  indirect_pieced_value,
+  coerce_pieced_ref,
+  check_pieced_synthetic_pointer,
+  copy_pieced_value_closure,
+  free_pieced_value_closure
+};
+
+/* Given context CTX, section offset SECT_OFF, and compilation unit
+   data PER_CU, execute the "variable value" operation on the DIE
+   found at SECT_OFF.  */
+
+static value *
+sect_variable_value (sect_offset sect_off,
+		     dwarf2_per_cu_data *per_cu,
+		     dwarf2_per_objfile *per_objfile)
+{
+  const char *var_name = nullptr;
+  struct type *die_type
+    = dwarf2_fetch_die_type_sect_off (sect_off, per_cu, per_objfile,
+				      &var_name);
+
+  if (die_type == NULL)
+    error (_("Bad DW_OP_GNU_variable_value DIE."));
+
+  /* Note: Things still work when the following test is removed.  This
+     test and error is here to conform to the proposed specification.  */
+  if (die_type->code () != TYPE_CODE_INT
+      && die_type->code () != TYPE_CODE_ENUM
+      && die_type->code () != TYPE_CODE_RANGE
+      && die_type->code () != TYPE_CODE_PTR)
+    error (_("Type of DW_OP_GNU_variable_value DIE must be an integer or pointer."));
+
+  if (var_name != nullptr)
+    {
+      value *result = compute_var_value (var_name);
+      if (result != nullptr)
+	return result;
+    }
+
+  struct type *type = lookup_pointer_type (die_type);
+  frame_info *frame = get_selected_frame (_("No frame selected."));
+  return indirect_synthetic_pointer (sect_off, 0, per_cu, per_objfile, frame,
+				     type, true);
 }
 
 /* Return the type used for DWARF operations where the type is
