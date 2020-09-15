@@ -165,7 +165,7 @@ frapy_type (PyObject *self, PyObject *args)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return PyInt_FromLong (type);
+  return gdb_py_object_from_longest (type).release ();
 }
 
 /* Implementation of gdb.Frame.architecture (self) -> gdb.Architecture.
@@ -209,7 +209,7 @@ frapy_unwind_stop_reason (PyObject *self, PyObject *args)
 
   stop_reason = get_frame_unwind_stop_reason (frame);
 
-  return PyInt_FromLong (stop_reason);
+  return gdb_py_object_from_longest (stop_reason).release ();
 }
 
 /* Implementation of gdb.Frame.pc (self) -> Long.

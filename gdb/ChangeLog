@@ -1,5 +1,31 @@
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
+	* python/python-internal.h (PyInt_FromLong): Remove define.
+	* python/py-value.c (convert_value_from_python): Use
+	gdb_py_object_from_longest.
+	* python/py-type.c (typy_get_code): Use
+	gdb_py_object_from_longest.
+	* python/py-symtab.c (salpy_get_line): Use
+	gdb_py_object_from_longest.
+	* python/py-symbol.c (sympy_get_addr_class, sympy_line): Use
+	gdb_py_object_from_longest.
+	* python/py-record.c (recpy_gap_reason_code): Use
+	gdb_py_object_from_longest.
+	* python/py-record-btrace.c (recpy_bt_insn_size)
+	(recpy_bt_func_level, btpy_list_count): Use
+	gdb_py_object_from_longest.
+	* python/py-infthread.c (gdbpy_create_ptid_object): Use
+	gdb_py_object_from_longest.  Fix error handling.
+	* python/py-framefilter.c (bootstrap_python_frame_filters): Use
+	gdb_py_object_from_longest.
+	* python/py-frame.c (frapy_type, frapy_unwind_stop_reason): Use
+	gdb_py_object_from_longest.
+	* python/py-breakpoint.c (bppy_get_type, bppy_get_number)
+	(bppy_get_thread, bppy_get_task, bppy_get_hit_count)
+	(bppy_get_ignore_count): Use gdb_py_object_from_longest.
+
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
 	* python/python.c (gdbpy_parameter_value): Use
 	gdb_py_object_from_ulongest.
 

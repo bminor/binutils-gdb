@@ -157,7 +157,7 @@ typy_get_code (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
-  return PyInt_FromLong (type->code ());
+  return gdb_py_object_from_longest (type->code ()).release ();
 }
 
 /* Helper function for typy_fields which converts a single field to a

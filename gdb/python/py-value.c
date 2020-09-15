@@ -1860,7 +1860,7 @@ convert_value_from_python (PyObject *obj)
 	      if (PyErr_ExceptionMatches (PyExc_OverflowError))
 		{
 		  gdbpy_err_fetch fetched_error;
-		  gdbpy_ref<> zero (PyInt_FromLong (0));
+		  gdbpy_ref<> zero = gdb_py_object_from_longest (0);
 
 		  /* Check whether obj is positive.  */
 		  if (PyObject_RichCompareBool (obj, zero.get (), Py_GT) > 0)

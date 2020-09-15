@@ -307,10 +307,21 @@ gdbpy_create_ptid_object (ptid_t ptid)
   lwp = ptid.lwp ();
   tid = ptid.tid ();
 
-  PyTuple_SET_ITEM (ret, 0, PyInt_FromLong (pid));
-  PyTuple_SET_ITEM (ret, 1, PyInt_FromLong (lwp));
-  PyTuple_SET_ITEM (ret, 2, PyInt_FromLong (tid));
- 
+  gdbpy_ref<> pid_obj = gdb_py_object_from_longest (pid);
+  if (pid_obj == nullptr)
+    return nullptr;
+  gdbpy_ref<> lwp_obj = gdb_py_object_from_longest (lwp);
+  if (lwp_obj == nullptr)
+    return nullptr;
+  gdbpy_ref<> tid_obj = gdb_py_object_from_longest (tid);
+  if (tid_obj == nullptr)
+    return nullptr;
+
+  /* Note that these steal references, hence the use of 'release'.  */
+  PyTuple_SET_ITEM (ret, 0, pid_obj.release ());
+  PyTuple_SET_ITEM (ret, 1, lwp_obj.release ());
+  PyTuple_SET_ITEM (ret, 2, tid_obj.release ());
+
   return ret;
 }
 

@@ -290,7 +290,7 @@ salpy_get_line (PyObject *self, void *closure)
 
   SALPY_REQUIRE_VALID (self, sal);
 
-  return PyInt_FromLong (sal->line);
+  return gdb_py_object_from_longest (sal->line).release ();
 }
 
 static PyObject *

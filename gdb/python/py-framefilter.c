@@ -1098,11 +1098,11 @@ bootstrap_python_frame_filters (struct frame_info *frame,
   if (sort_func == NULL)
     return NULL;
 
-  gdbpy_ref<> py_frame_low (PyInt_FromLong (frame_low));
+  gdbpy_ref<> py_frame_low = gdb_py_object_from_longest (frame_low);
   if (py_frame_low == NULL)
     return NULL;
 
-  gdbpy_ref<> py_frame_high (PyInt_FromLong (frame_high));
+  gdbpy_ref<> py_frame_high = gdb_py_object_from_longest (frame_high);
   if (py_frame_high == NULL)
     return NULL;
 

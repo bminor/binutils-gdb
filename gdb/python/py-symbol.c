@@ -131,7 +131,7 @@ sympy_get_addr_class (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyInt_FromLong (SYMBOL_CLASS (symbol));
+  return gdb_py_object_from_longest (SYMBOL_CLASS (symbol)).release ();
 }
 
 static PyObject *
@@ -221,7 +221,7 @@ sympy_line (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyInt_FromLong (SYMBOL_LINE (symbol));
+  return gdb_py_object_from_longest (SYMBOL_LINE (symbol)).release ();
 }
 
 /* Implementation of gdb.Symbol.is_valid (self) -> Boolean.

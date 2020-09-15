@@ -464,7 +464,7 @@ recpy_gap_reason_code (PyObject *self, void *closure)
 {
   const recpy_gap_object * const obj = (const recpy_gap_object *) self;
 
-  return PyInt_FromLong (obj->reason_code);
+  return gdb_py_object_from_longest (obj->reason_code).release ();
 }
 
 /* Implementation of RecordGap.error_string [str].  */
