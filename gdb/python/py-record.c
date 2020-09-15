@@ -374,7 +374,7 @@ recpy_element_number (PyObject *self, void* closure)
 {
   const recpy_element_object * const obj = (recpy_element_object *) self;
 
-  return PyInt_FromSsize_t (obj->number);
+  return gdb_py_object_from_longest (obj->number).release ();
 }
 
 /* Implementation of RecordInstruction.__hash__ [int] and
@@ -454,7 +454,7 @@ recpy_gap_number (PyObject *self, void *closure)
 {
   const recpy_gap_object * const obj = (const recpy_gap_object *) self;
 
-  return PyInt_FromSsize_t (obj->number);
+  return gdb_py_object_from_longest (obj->number).release ();
 }
 
 /* Implementation of RecordGap.error_code [int].  */

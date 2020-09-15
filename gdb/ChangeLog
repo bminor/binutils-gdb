@@ -1,5 +1,12 @@
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
+	* python/python-internal.h (PyInt_FromSsize_t): Remove define.
+	* python/py-record.c (recpy_element_number): Use
+	gdb_py_object_from_longest.
+	(recpy_gap_number): Likewise.
+
+2020-09-15  Tom Tromey  <tromey@adacore.com>
+
 	* top.c (ui::ui): Update.
 	(highest_ui_num): Remove.
 	* top.h (struct ui) <num>: Remove.
