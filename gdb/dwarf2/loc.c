@@ -660,14 +660,6 @@ sect_variable_value (sect_offset sect_off,
 				     type, true);
 }
 
-class dwarf_evaluate_loc_desc : public dwarf_expr_context
-{
-public:
-  dwarf_evaluate_loc_desc (dwarf2_per_objfile *per_objfile)
-    : dwarf_expr_context (per_objfile)
-  {}
-};
-
 /* See dwarf2loc.h.  */
 
 unsigned int entry_values_debug = 0;
@@ -2071,7 +2063,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   if (size == 0)
     return allocate_optimized_out_value (subobj_type);
 
-  dwarf_evaluate_loc_desc ctx (per_objfile);
+  dwarf_expr_context ctx (per_objfile);
   ctx.frame = frame;
   ctx.per_cu = per_cu;
   ctx.obj_address = 0;
@@ -2270,16 +2262,16 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 					per_objfile, NULL, 0);
 }
 
-/* A specialization of dwarf_evaluate_loc_desc that is used by
+/* A specialization of dwarf_expr_context that is used by
    dwarf2_locexpr_baton_eval.  This subclass exists to handle the case
    where a caller of dwarf2_locexpr_baton_eval passes in some data,
    but with the address being 0.  In this situation, we arrange for
    memory reads to come from the passed-in buffer.  */
 
-struct evaluate_for_locexpr_baton : public dwarf_evaluate_loc_desc
+struct evaluate_for_locexpr_baton : public dwarf_expr_context
 {
   evaluate_for_locexpr_baton (dwarf2_per_objfile *per_objfile)
-    : dwarf_evaluate_loc_desc (per_objfile)
+    : dwarf_expr_context (per_objfile)
   {}
 
   /* The data that was passed in.  */

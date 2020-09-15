@@ -224,22 +224,6 @@ register %s (#%d) at %s"),
     }
 }
 
-class dwarf_expr_executor : public dwarf_expr_context
-{
-public:
-
-  dwarf_expr_executor (dwarf2_per_objfile *per_objfile)
-    : dwarf_expr_context (per_objfile)
-  {}
-
- private:
-
-  void invalid (const char *op) ATTRIBUTE_NORETURN
-  {
-    error (_("%s is invalid in this context"), op);
-  }
-};
-
 static CORE_ADDR
 execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  struct frame_info *this_frame, CORE_ADDR initial,
@@ -247,7 +231,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 {
   CORE_ADDR result;
 
-  dwarf_expr_executor ctx (per_objfile);
+  dwarf_expr_context ctx (per_objfile);
   scoped_value_mark free_values;
 
   ctx.frame = this_frame;
