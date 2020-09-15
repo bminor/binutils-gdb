@@ -1,3 +1,8 @@
+2020-09-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/26589
+	* testsuite/ld-elf/pr26589.d, testsuite/ld-elf/locref3.s: New test.
+
 2020-09-13  Alan Modra  <amodra@gmail.com>
 
 	PR 26391

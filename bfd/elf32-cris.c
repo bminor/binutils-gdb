@@ -3359,7 +3359,7 @@ cris_elf_check_relocs (bfd *abfd,
 
 	  /* No need to do anything if we're not creating a shared object.  */
 	  if (! bfd_link_pic (info)
-	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
+	      || (h != NULL && UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
 	    break;
 
 	  /* We may need to create a reloc section in the dynobj and made room

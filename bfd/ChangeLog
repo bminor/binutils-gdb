@@ -1,3 +1,9 @@
+2020-09-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	PR ld/26589
+	* elf32-cris.c (cris_elf_check_relocs): Add missing NULL check
+	on argument before calling UNDEFWEAK_NO_DYNAMIC_RELOC.
+
 2020-09-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26391
