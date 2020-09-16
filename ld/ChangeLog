@@ -1,3 +1,8 @@
+2020-09-16  Mikael Pettersson  <mikpelinux@gmail.com>
+
+	* testsuite/ld-elf/shared.exp: Add -Av9 to AFLAGS_PIE on sparc.
+	* testsuite/ld-elf/tls.exp: Add -Av9 to AFLAGS_PIC on sparc.
+
 2020-09-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26583

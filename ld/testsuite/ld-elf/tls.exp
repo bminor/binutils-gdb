@@ -36,7 +36,7 @@ if { ![check_compiler_available] } {
 # This target requires extra GAS options when building PIC/PIE code.
 set AFLAGS_PIC ""
 if [istarget "sparc*-*-*"] {
-    append AFLAGS_PIC " -K PIC"
+    append AFLAGS_PIC " -K PIC -Av9"
 }
 
 run_ld_link_tests [list \
