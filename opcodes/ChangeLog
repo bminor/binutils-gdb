@@ -1,3 +1,8 @@
+2020-09-16  Andrew Burgess <andrew.burgess@embecosm.com>
+
+	* csky-dis.c (csky_get_disassembler): Don't return NULL when there
+	is no BFD.
+
 2020-09-16  Alan Modra  <amodra@gmail.com>
 
 	* ppc-dis.c (ppc_symbol_is_valid): Adjust elf_symbol_from invocation.
