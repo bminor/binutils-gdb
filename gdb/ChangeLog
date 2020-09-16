@@ -1,5 +1,14 @@
 2020-09-16  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c (fbsd_nat_target::wait): Always check for
+	PL_FLAG_EXEC.
+	(fbsd_nat_target::insert_exec_catchpoint)
+	(fbsd_nat_target::remove_exec_catchpoint): Always define.
+	* fbsd-nat.h (fbsd_nat_target::insert_exec_catchpoint)
+	(fbsd_nat_target::remove_exec_catchpoint): Always declare.
+
+2020-09-16  John Baldwin  <jhb@FreeBSD.org>
+
 	* configure.ac: Remove check for kinfo_getvmmap().
 	* configure, config.in: Regenerate.
 	* fbsd-nat.c (fbsd_read_mapping): Remove

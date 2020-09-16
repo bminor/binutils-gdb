@@ -89,10 +89,8 @@ public:
   int remove_vfork_catchpoint (int) override;
 #endif
 
-#ifdef PL_FLAG_EXEC
   int insert_exec_catchpoint (int) override;
   int remove_exec_catchpoint (int) override;
-#endif
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
   int set_syscall_catchpoint (int, bool, int, gdb::array_view<const int>)

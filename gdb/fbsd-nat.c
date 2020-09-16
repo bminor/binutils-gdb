@@ -1335,7 +1335,6 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 #endif
 #endif
 
-#ifdef PL_FLAG_EXEC
 	  if (pl.pl_flags & PL_FLAG_EXEC)
 	    {
 	      ourstatus->kind = TARGET_WAITKIND_EXECD;
@@ -1343,7 +1342,6 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		= xstrdup (pid_to_exec_file (pid));
 	      return wptid;
 	    }
-#endif
 
 #ifdef USE_SIGTRAP_SIGINFO
 	  if (fbsd_handle_debug_trap (this, wptid, pl))
@@ -1508,9 +1506,7 @@ fbsd_nat_target::post_attach (int pid)
   fbsd_add_threads (this, pid);
 }
 
-#ifdef PL_FLAG_EXEC
-/* If the FreeBSD kernel supports PL_FLAG_EXEC, then traced processes
-   will always stop after exec.  */
+/* Traced processes always stop after exec.  */
 
 int
 fbsd_nat_target::insert_exec_catchpoint (int pid)
@@ -1523,7 +1519,6 @@ fbsd_nat_target::remove_exec_catchpoint (int pid)
 {
   return 0;
 }
-#endif
 
 #ifdef HAVE_STRUCT_PTRACE_LWPINFO_PL_SYSCALL_CODE
 int
