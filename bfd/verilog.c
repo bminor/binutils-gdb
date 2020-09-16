@@ -165,12 +165,25 @@ verilog_set_section_contents (bfd *abfd,
 static bfd_boolean
 verilog_write_address (bfd *abfd, bfd_vma address)
 {
-  char buffer[12];
+  char buffer[20];
   char *dst = buffer;
   bfd_size_type wrlen;
 
   /* Write the address.  */
   *dst++ = '@';
+#ifdef BFD64
+  if (address >= (bfd_vma)1 << 32)
+    {
+      TOHEX (dst, (address >> 56));
+      dst += 2;
+      TOHEX (dst, (address >> 48));
+      dst += 2;
+      TOHEX (dst, (address >> 40));
+      dst += 2;
+      TOHEX (dst, (address >> 32));
+      dst += 2;
+    }
+#endif
   TOHEX (dst, (address >> 24));
   dst += 2;
   TOHEX (dst, (address >> 16));
