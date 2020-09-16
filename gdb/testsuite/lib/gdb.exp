@@ -1689,8 +1689,8 @@ proc gdb_assert { condition {message ""} } {
 	set message $condition
     }
 
-    set res [uplevel 1 expr $condition]
-    if {!$res} {
+    set code [catch {uplevel 1 expr $condition} res]
+    if {$code != 0 || !$res} {
 	fail $message
     } else {
 	pass $message

@@ -1,5 +1,10 @@
 2020-09-16  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/26624
+	* lib/gdb.exp (gdb_assert): Catch errors in condition evaluation.
+
+2020-09-16  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26618
 	* gdb.tui/new-layout.exp: Escape unbalanced braces.
 
