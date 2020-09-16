@@ -1,3 +1,9 @@
+2020-09-16  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/26598:
+	* gdb.base/skipcxx.exp: New file.
+	* gdb.base/skipcxx.cc: New file.
+
 2020-09-16  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/26617

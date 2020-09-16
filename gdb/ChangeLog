@@ -1,3 +1,8 @@
+2020-09-16  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/26598:
+	* infrun.c (fill_in_stop_func): Use find_pc_partial_function_sym.
+
 2020-09-16  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_nat_target::wait): Always check for
