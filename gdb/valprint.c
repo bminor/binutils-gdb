@@ -40,6 +40,8 @@
 #include "gdbarch.h"
 #include "cli/cli-style.h"
 #include "count-one-bits.h"
+#include "c-lang.h"
+#include "cp-abi.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -811,6 +813,27 @@ generic_value_print_complex (struct value *val, struct ui_file *stream,
   fprintf_filtered (stream, "%s", decorations->complex_suffix);
 }
 
+/* generic_value_print helper for TYPE_CODE_MEMBERPTR.  */
+
+static void
+generic_value_print_memberptr
+  (struct value *val, struct ui_file *stream,
+   int recurse,
+   const struct value_print_options *options,
+   const struct generic_val_print_decorations *decorations)
+{
+  if (!options->format)
+    {
+      /* Member pointers are essentially specific to C++, and so if we
+	 encounter one, we should print it according to C++ rules.  */
+      struct type *type = check_typedef (value_type (val));
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      cp_print_class_member (valaddr, type, stream, "&");
+    }
+  else
+    generic_value_print (val, stream, recurse, options, decorations);
+}
+
 /* See valprint.h.  */
 
 void
@@ -828,7 +851,8 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_MEMBERPTR:
-      value_print_scalar_formatted (val, options, 0, stream);
+      generic_value_print_memberptr (val, stream, recurse, options,
+				     decorations);
       break;
 
     case TYPE_CODE_PTR:
@@ -914,9 +938,13 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       generic_value_print_complex (val, stream, options, decorations);
       break;
 
+    case TYPE_CODE_METHODPTR:
+      cplus_print_method_ptr (value_contents_for_printing (val), type,
+			      stream);
+      break;
+
     case TYPE_CODE_UNION:
     case TYPE_CODE_STRUCT:
-    case TYPE_CODE_METHODPTR:
     default:
       error (_("Unhandled type code %d in symbol table."),
 	     type->code ());

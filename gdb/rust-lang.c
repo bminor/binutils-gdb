@@ -535,11 +535,6 @@ rust_value_print_inner (struct value *val, struct ui_file *stream,
       }
       goto generic_print;
 
-    case TYPE_CODE_METHODPTR:
-    case TYPE_CODE_MEMBERPTR:
-      c_value_print_inner (val, stream, recurse, &opts);
-      break;
-
     case TYPE_CODE_INT:
       /* Recognize the unit type.  */
       if (type->is_unsigned () && TYPE_LENGTH (type) == 0

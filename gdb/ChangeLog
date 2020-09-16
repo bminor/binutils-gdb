@@ -1,3 +1,13 @@
+2020-09-15  Tom Tromey  <tom@tromey.com>
+
+	* rust-lang.c (rust_value_print_inner): Remove TYPE_CODE_MEMBERPTR
+	and TYPE_CODE_METHODPTR cases.
+	* c-valprint.c (c_value_print_memberptr): Move to valprint.c.
+	(c_value_print_inner): Update.
+	* valprint.c (generic_value_print_memberptr): New function, from
+	c_value_print_memberptr.
+	(generic_value_print): Use it.  Call cplus_print_method_ptr.
+
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
 	* python/python-internal.h (PyInt_FromLong): Remove define.
