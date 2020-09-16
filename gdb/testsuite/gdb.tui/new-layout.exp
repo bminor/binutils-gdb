@@ -42,12 +42,12 @@ gdb_test "tui new-layout example src 1 src 1" \
     "Window \"src\" seen twice in layout"
 gdb_test "tui new-layout example src 1" \
     "New layout does not contain the \"cmd\" window"
-gdb_test "tui new-layout example src 1}" \
-    "Extra '}' in layout specification"
-gdb_test "tui new-layout example {src 1} 1}" \
-    "Extra '}' in layout specification"
-gdb_test "tui new-layout example {src 1" \
-    "Missing '}' in layout specification"
+gdb_test "tui new-layout example src 1\}" \
+    "Extra '\}' in layout specification"
+gdb_test "tui new-layout example {src 1} 1\}" \
+    "Extra '\}' in layout specification"
+gdb_test "tui new-layout example \{src 1" \
+    "Missing '\}' in layout specification"
 
 gdb_test_no_output "tui new-layout example asm 1 status 0 cmd 1"
 
