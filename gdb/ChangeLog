@@ -1,5 +1,10 @@
 2020-09-15  Tom Tromey  <tom@tromey.com>
 
+	* f-valprint.c (f_value_print_inner) <case TYPE_CODE_INT>:
+	Remove.
+
+2020-09-15  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_value_print_inner): Remove TYPE_CODE_MEMBERPTR
 	and TYPE_CODE_METHODPTR cases.
 	* c-valprint.c (c_value_print_memberptr): Move to valprint.c.

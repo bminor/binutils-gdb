@@ -295,19 +295,6 @@ f_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 	}
       break;
 
-    case TYPE_CODE_INT:
-      if (options->format || options->output_format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = (options->format ? options->format
-			 : options->output_format);
-	  value_print_scalar_formatted (val, &opts, 0, stream);
-	}
-      else
-	value_print_scalar_formatted (val, options, 0, stream);
-      break;
-
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       /* Starting from the Fortran 90 standard, Fortran supports derived
@@ -365,6 +352,7 @@ f_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 	}
       break;
 
+    case TYPE_CODE_INT:
     case TYPE_CODE_REF:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_FLAGS:
