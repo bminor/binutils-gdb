@@ -1333,8 +1333,13 @@ extern void
 				 int enabled,
 				 int from_tty);
 
+/* Initialize a new breakpoint of the bp_catchpoint kind.  If TEMP
+   is true, then make the breakpoint temporary.  If COND_STRING is
+   not NULL, then store it in the breakpoint.  OPS, if not NULL, is
+   the breakpoint_ops structure associated to the catchpoint.  */
+
 extern void init_catchpoint (struct breakpoint *b,
-			     struct gdbarch *gdbarch, int tempflag,
+			     struct gdbarch *gdbarch, bool temp,
 			     const char *cond_string,
 			     const struct breakpoint_ops *ops);
 
@@ -1561,9 +1566,14 @@ extern void disable_breakpoints_in_shlibs (void);
 extern bool is_catchpoint (struct breakpoint *b);
 
 /* Shared helper function (MI and CLI) for creating and installing
-   a shared object event catchpoint.  */
-extern void add_solib_catchpoint (const char *arg, int is_load, int is_temp,
-                                  int enabled);
+   a shared object event catchpoint.  If IS_LOAD is true then
+   the events to be caught are load events, otherwise they are
+   unload events.  If IS_TEMP is true the catchpoint is a
+   temporary one.  If ENABLED is true the catchpoint is
+   created in an enabled state.  */
+
+extern void add_solib_catchpoint (const char *arg, bool is_load, bool is_temp,
+				  bool enabled);
 
 /* Create and insert a new software single step breakpoint for the
    current thread.  May be called multiple times; each time will add a

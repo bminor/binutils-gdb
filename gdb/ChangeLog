@@ -1,5 +1,18 @@
 2020-09-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* breakpoint.h (init_catchpoint): Change int parameter to bool.
+	(add_solib_catchpoint): Likewise.
+	* breakpoint.c (struct solib_catchpoint) <is_load>: Change type
+	to bool.
+	(add_solib_catchpoint): Change int parameter/variable to bool.
+	(catch_load_or_unload): Likewise.
+	(init_catchpoint): Likewise.
+	(create_fork_vfork_event_catchpoint): Likewise.
+	(catch_fork_command_1): Likewise.
+	(catch_exec_command_1): Likewise.
+
+2020-09-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdb-gdb.py.in (class StructTypePrettyPrinter) <to_string>:
 	Change instance_flags to m_instance_flags.
 
