@@ -1,3 +1,7 @@
+2020-09-16  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2020-09-15  Tom Tromey  <tom@tromey.com>
 
 	* f-valprint.c (f_value_print_inner) <case TYPE_CODE_INT>:
