@@ -53,11 +53,7 @@
 char *
 fbsd_nat_target::pid_to_exec_file (int pid)
 {
-  ssize_t len;
   static char buf[PATH_MAX];
-  char name[PATH_MAX];
-
-#ifdef KERN_PROC_PATHNAME
   size_t buflen;
   int mib[4];
 
@@ -71,15 +67,6 @@ fbsd_nat_target::pid_to_exec_file (int pid)
        for processes without an associated executable such as kernel
        processes.  */
     return buflen == 0 ? NULL : buf;
-#endif
-
-  xsnprintf (name, PATH_MAX, "/proc/%d/exe", pid);
-  len = readlink (name, buf, PATH_MAX - 1);
-  if (len != -1)
-    {
-      buf[len] = '\0';
-      return buf;
-    }
 
   return NULL;
 }
