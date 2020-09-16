@@ -1,3 +1,8 @@
+2020-10-22  Andrew Burgess <andrew.burgess@embecosm.com>
+
+	* csky-dis.c (csky_get_disassembler): Don't return NULL when there
+	is no BFD.
+
 2020-09-10  Nick Clifton  <nickc@redhat.com>
 
 	* ppc-dis.c (ppc_symbol_is_valid): New function.  Returns false

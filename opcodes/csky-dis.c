@@ -239,23 +239,25 @@ csky_get_disassembler (bfd *abfd)
   obj_attribute *attr;
   const char *sec_name = NULL;
   if (!abfd)
-    return NULL;
-
-  mach_flag = elf_elfheader (abfd)->e_flags;
-
-  sec_name = get_elf_backend_data (abfd)->obj_attrs_section;
-  /* Skip any input that hasn't attribute section.
-     This enables to link object files without attribute section with
-     any others.  */
-  if (bfd_get_section_by_name (abfd, sec_name) != NULL)
-    {
-      attr = elf_known_obj_attributes_proc (abfd);
-      dis_info.isa = attr[Tag_CSKY_ISA_EXT_FLAGS].i;
-      dis_info.isa <<= 32;
-      dis_info.isa |= attr[Tag_CSKY_ISA_FLAGS].i;
-    }
-  else
     dis_info.isa = CSKY_DEFAULT_ISA;
+  else
+    {
+      mach_flag = elf_elfheader (abfd)->e_flags;
+
+      sec_name = get_elf_backend_data (abfd)->obj_attrs_section;
+      /* Skip any input that hasn't attribute section.
+         This enables to link object files without attribute section with
+         any others.  */
+      if (bfd_get_section_by_name (abfd, sec_name) != NULL)
+        {
+          attr = elf_known_obj_attributes_proc (abfd);
+          dis_info.isa = attr[Tag_CSKY_ISA_EXT_FLAGS].i;
+          dis_info.isa <<= 32;
+          dis_info.isa |= attr[Tag_CSKY_ISA_FLAGS].i;
+        }
+      else
+        dis_info.isa = CSKY_DEFAULT_ISA;
+    }
 
    return print_insn_csky;
 }
