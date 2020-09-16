@@ -1,5 +1,10 @@
 2020-09-16  John Baldwin  <jhb@FreeBSD.org>
 
+	* fbsd-nat.c: Always include support for
+	TARGET_OBJECT_SIGNAL_INFO.
+
+2020-09-16  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c (fbsd_nat_target::pid_to_exec_file): Always use
 	sysctl and remove procfs fallback.
 

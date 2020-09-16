@@ -527,17 +527,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   return true;
 }
 
-/*
- * The current layout of siginfo_t on FreeBSD was adopted in SVN
- * revision 153154 which shipped in FreeBSD versions 7.0 and later.
- * Don't bother supporting the older layout on older kernels.  The
- * older format was also never used in core dump notes.
- */
-#if __FreeBSD_version >= 700009
-#define USE_SIGINFO
-#endif
-
-#ifdef USE_SIGINFO
 /* Return the size of siginfo for the current inferior.  */
 
 #ifdef __LP64__
@@ -664,7 +653,6 @@ fbsd_convert_siginfo (siginfo_t *si)
   memcpy(si, &si32, sizeof (si32));
 #endif
 }
-#endif
 
 /* Implement the "xfer_partial" target_ops method.  */
 
@@ -679,7 +667,6 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 
   switch (object)
     {
-#ifdef USE_SIGINFO
     case TARGET_OBJECT_SIGNAL_INFO:
       {
 	struct ptrace_lwpinfo pl;
@@ -710,7 +697,6 @@ fbsd_nat_target::xfer_partial (enum target_object object,
 	*xfered_len = len;
 	return TARGET_XFER_OK;
       }
-#endif
 #ifdef KERN_PROC_AUXV
     case TARGET_OBJECT_AUXV:
       {
