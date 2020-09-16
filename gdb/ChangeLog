@@ -1,5 +1,14 @@
 2020-09-16  John Baldwin  <jhb@FreeBSD.org>
 
+	* configure.ac: Remove check for kinfo_getvmmap().
+	* configure, config.in: Regenerate.
+	* fbsd-nat.c (fbsd_read_mapping): Remove
+	(fbsd_nat_target::find_memory_regions): Remove the procfs version.
+	(fbsd_nat_target::info_proc): Assume kinfo_getfile() and
+	kinfo_get_vmmap() are always present.
+
+2020-09-16  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-nat.c: Always include support for
 	TARGET_OBJECT_SIGNAL_INFO.
 

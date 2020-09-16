@@ -86,9 +86,13 @@ AC_DEFUN([GDB_AC_COMMON], [
 
   AC_CHECK_MEMBERS([struct stat.st_blocks, struct stat.st_blksize])
 
-  AC_SEARCH_LIBS(kinfo_getfile, util util-freebsd,
-    [AC_DEFINE(HAVE_KINFO_GETFILE, 1,
-	      [Define to 1 if your system has the kinfo_getfile function. ])])
+  # On FreeBSD we need libutil for the kinfo_get* functions.  On
+  # GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
+  # Figure out which one to use.
+  AC_SEARCH_LIBS(kinfo_getfile, util util-freebsd)
+
+  # Define HAVE_KINFO_GETFILE if kinfo_getfile is available.
+  AC_CHECK_FUNCS(kinfo_getfile)
 
   # Check for std::thread.  This does not work on some platforms, like
   # mingw and DJGPP.

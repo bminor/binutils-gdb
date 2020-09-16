@@ -474,12 +474,6 @@ AC_SEARCH_LIBS(socketpair, socket)
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 AM_ZLIB
 
-# On FreeBSD we may need libutil for kinfo_getvmmap (used by fbsd-nat.c).
-# On GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
-AC_SEARCH_LIBS(kinfo_getvmmap, util util-freebsd,
-  [AC_DEFINE(HAVE_KINFO_GETVMMAP, 1,
-            [Define to 1 if your system has the kinfo_getvmmap function. ])])
-
 AM_ICONV
 
 # GDB may fork/exec the iconv program to get the list of supported character

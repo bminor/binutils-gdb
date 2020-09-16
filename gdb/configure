@@ -8270,67 +8270,6 @@ fi
 
 
 
-# On FreeBSD we may need libutil for kinfo_getvmmap (used by fbsd-nat.c).
-# On GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kinfo_getvmmap" >&5
-$as_echo_n "checking for library containing kinfo_getvmmap... " >&6; }
-if ${ac_cv_search_kinfo_getvmmap+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_func_search_save_LIBS=$LIBS
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char kinfo_getvmmap ();
-int
-main ()
-{
-return kinfo_getvmmap ();
-  ;
-  return 0;
-}
-_ACEOF
-for ac_lib in '' util util-freebsd; do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_search_kinfo_getvmmap=$ac_res
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext
-  if ${ac_cv_search_kinfo_getvmmap+:} false; then :
-  break
-fi
-done
-if ${ac_cv_search_kinfo_getvmmap+:} false; then :
-
-else
-  ac_cv_search_kinfo_getvmmap=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_kinfo_getvmmap" >&5
-$as_echo "$ac_cv_search_kinfo_getvmmap" >&6; }
-ac_res=$ac_cv_search_kinfo_getvmmap
-if test "$ac_res" != no; then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
-
-$as_echo "#define HAVE_KINFO_GETVMMAP 1" >>confdefs.h
-
-fi
-
-
 
       if test "X$prefix" = "XNONE"; then
     acl_final_prefix="$ac_default_prefix"
@@ -13567,6 +13506,9 @@ _ACEOF
 fi
 
 
+  # On FreeBSD we need libutil for the kinfo_get* functions.  On
+  # GNU/kFreeBSD systems, FreeBSD libutil is renamed to libutil-freebsd.
+  # Figure out which one to use.
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing kinfo_getfile" >&5
 $as_echo_n "checking for library containing kinfo_getfile... " >&6; }
 if ${ac_cv_search_kinfo_getfile+:} false; then :
@@ -13621,9 +13563,20 @@ ac_res=$ac_cv_search_kinfo_getfile
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
-$as_echo "#define HAVE_KINFO_GETFILE 1" >>confdefs.h
+fi
+
+
+  # Define HAVE_KINFO_GETFILE if kinfo_getfile is available.
+  for ac_func in kinfo_getfile
+do :
+  ac_fn_c_check_func "$LINENO" "kinfo_getfile" "ac_cv_func_kinfo_getfile"
+if test "x$ac_cv_func_kinfo_getfile" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_KINFO_GETFILE 1
+_ACEOF
 
 fi
+done
 
 
   # Check for std::thread.  This does not work on some platforms, like

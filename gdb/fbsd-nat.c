@@ -34,12 +34,7 @@
 #include <sys/signal.h>
 #include <sys/sysctl.h>
 #include <sys/user.h>
-#if defined(HAVE_KINFO_GETFILE) || defined(HAVE_KINFO_GETVMMAP)
 #include <libutil.h>
-#endif
-#if !defined(HAVE_KINFO_GETVMMAP)
-#include "gdbsupport/filestuff.h"
-#endif
 
 #include "elf-bfd.h"
 #include "fbsd-nat.h"
@@ -71,7 +66,6 @@ fbsd_nat_target::pid_to_exec_file (int pid)
   return NULL;
 }
 
-#ifdef HAVE_KINFO_GETVMMAP
 /* Iterate over all the memory regions in the current inferior,
    calling FUNC for each memory region.  DATA is passed as the last
    argument to FUNC.  */
@@ -124,77 +118,6 @@ fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
     }
   return 0;
 }
-#else
-static int
-fbsd_read_mapping (FILE *mapfile, unsigned long *start, unsigned long *end,
-		   char *protection)
-{
-  /* FreeBSD 5.1-RELEASE uses a 256-byte buffer.  */
-  char buf[256];
-  int resident, privateresident;
-  unsigned long obj;
-  int ret = EOF;
-
-  /* As of FreeBSD 5.0-RELEASE, the layout is described in
-     /usr/src/sys/fs/procfs/procfs_map.c.  Somewhere in 5.1-CURRENT a
-     new column was added to the procfs map.  Therefore we can't use
-     fscanf since we need to support older releases too.  */
-  if (fgets (buf, sizeof buf, mapfile) != NULL)
-    ret = sscanf (buf, "%lx %lx %d %d %lx %s", start, end,
-		  &resident, &privateresident, &obj, protection);
-
-  return (ret != 0 && ret != EOF);
-}
-
-/* Iterate over all the memory regions in the current inferior,
-   calling FUNC for each memory region.  DATA is passed as the last
-   argument to FUNC.  */
-
-int
-fbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
-				      void *data)
-{
-  pid_t pid = inferior_ptid.pid ();
-  unsigned long start, end, size;
-  char protection[4];
-  int read, write, exec;
-
-  std::string mapfilename = string_printf ("/proc/%ld/map", (long) pid);
-  gdb_file_up mapfile (fopen (mapfilename.c_str (), "r"));
-  if (mapfile == NULL)
-    error (_("Couldn't open %s."), mapfilename.c_str ());
-
-  if (info_verbose)
-    fprintf_filtered (gdb_stdout, 
-		      "Reading memory regions from %s\n", mapfilename.c_str ());
-
-  /* Now iterate until end-of-file.  */
-  while (fbsd_read_mapping (mapfile.get (), &start, &end, &protection[0]))
-    {
-      size = end - start;
-
-      read = (strchr (protection, 'r') != 0);
-      write = (strchr (protection, 'w') != 0);
-      exec = (strchr (protection, 'x') != 0);
-
-      if (info_verbose)
-	{
-	  fprintf_filtered (gdb_stdout, 
-			    "Save segment, %ld bytes at %s (%c%c%c)\n",
-			    size, paddress (target_gdbarch (), start),
-			    read ? 'r' : '-',
-			    write ? 'w' : '-',
-			    exec ? 'x' : '-');
-	}
-
-      /* Invoke the callback function to create the corefile segment.
-	 Pass MODIFIED as true, we do not know the real modification state.  */
-      func (start, size, read, write, exec, 1, data);
-    }
-
-  return 0;
-}
-#endif
 
 /* Fetch the command line for a running process.  */
 
@@ -251,21 +174,15 @@ fbsd_fetch_kinfo_proc (pid_t pid, struct kinfo_proc *kp)
 bool
 fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 {
-#ifdef HAVE_KINFO_GETFILE
   gdb::unique_xmalloc_ptr<struct kinfo_file> fdtbl;
   int nfd = 0;
-#endif
   struct kinfo_proc kp;
   pid_t pid;
   bool do_cmdline = false;
   bool do_cwd = false;
   bool do_exe = false;
-#ifdef HAVE_KINFO_GETFILE
   bool do_files = false;
-#endif
-#ifdef HAVE_KINFO_GETVMMAP
   bool do_mappings = false;
-#endif
   bool do_status = false;
 
   switch (what)
@@ -275,11 +192,9 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       do_cwd = true;
       do_exe = true;
       break;
-#ifdef HAVE_KINFO_GETVMMAP
     case IP_MAPPINGS:
       do_mappings = true;
       break;
-#endif
     case IP_STATUS:
     case IP_STAT:
       do_status = true;
@@ -293,21 +208,15 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
     case IP_CWD:
       do_cwd = true;
       break;
-#ifdef HAVE_KINFO_GETFILE
     case IP_FILES:
       do_files = true;
       break;
-#endif
     case IP_ALL:
       do_cmdline = true;
       do_cwd = true;
       do_exe = true;
-#ifdef HAVE_KINFO_GETFILE
       do_files = true;
-#endif
-#ifdef HAVE_KINFO_GETVMMAP
       do_mappings = true;
-#endif
       do_status = true;
       break;
     default:
@@ -327,10 +236,8 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
     error (_("Invalid arguments."));
 
   printf_filtered (_("process %d\n"), pid);
-#ifdef HAVE_KINFO_GETFILE
   if (do_cwd || do_exe || do_files)
     fdtbl.reset (kinfo_getfile (pid, &nfd));
-#endif
 
   if (do_cmdline)
     {
@@ -343,7 +250,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   if (do_cwd)
     {
       const char *cwd = NULL;
-#ifdef HAVE_KINFO_GETFILE
       struct kinfo_file *kf = fdtbl.get ();
       for (int i = 0; i < nfd; i++, kf++)
 	{
@@ -353,7 +259,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 	      break;
 	    }
 	}
-#endif
       if (cwd != NULL)
 	printf_filtered ("cwd = '%s'\n", cwd);
       else
@@ -362,7 +267,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   if (do_exe)
     {
       const char *exe = NULL;
-#ifdef HAVE_KINFO_GETFILE
       struct kinfo_file *kf = fdtbl.get ();
       for (int i = 0; i < nfd; i++, kf++)
 	{
@@ -372,7 +276,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 	      break;
 	    }
 	}
-#endif
       if (exe == NULL)
 	exe = pid_to_exec_file (pid);
       if (exe != NULL)
@@ -380,7 +283,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       else
 	warning (_("unable to fetch executable path name"));
     }
-#ifdef HAVE_KINFO_GETFILE
   if (do_files)
     {
       struct kinfo_file *kf = fdtbl.get ();
@@ -398,8 +300,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       else
 	warning (_("unable to fetch list of open files"));
     }
-#endif
-#ifdef HAVE_KINFO_GETVMMAP
   if (do_mappings)
     {
       int nvment;
@@ -421,7 +321,6 @@ fbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       else
 	warning (_("unable to fetch virtual memory map"));
     }
-#endif
   if (do_status)
     {
       if (!fbsd_fetch_kinfo_proc (pid, &kp))
