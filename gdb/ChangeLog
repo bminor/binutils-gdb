@@ -1,3 +1,8 @@
+2020-09-16  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c: Assume PT_LWPINFO is always defined.
+	* fbsd-nat.h: Likewise.
+
 2020-09-16  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* breakpoint.c (commands_command_1): Make a copy of the 'arg'

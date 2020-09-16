@@ -831,7 +831,6 @@ fbsd_nat_target::xfer_partial (enum target_object object,
     }
 }
 
-#ifdef PT_LWPINFO
 static bool debug_fbsd_lwp;
 static bool debug_fbsd_nat;
 
@@ -1667,7 +1666,6 @@ fbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
   return 0;
 }
 #endif
-#endif
 
 bool
 fbsd_nat_target::supports_multi_process ()
@@ -1679,7 +1677,6 @@ void _initialize_fbsd_nat ();
 void
 _initialize_fbsd_nat ()
 {
-#ifdef PT_LWPINFO
   add_setshow_boolean_cmd ("fbsd-lwp", class_maintenance,
 			   &debug_fbsd_lwp, _("\
 Set debugging of FreeBSD lwp module."), _("\
@@ -1696,5 +1693,4 @@ Enables printf debugging output."),
 			   NULL,
 			   &show_fbsd_nat_debug,
 			   &setdebuglist, &showdebuglist);
-#endif
 }

@@ -55,7 +55,6 @@ public:
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
 
-#ifdef PT_LWPINFO
   bool thread_alive (ptid_t ptid) override;
   std::string pid_to_str (ptid_t) override;
 
@@ -99,7 +98,6 @@ public:
   int set_syscall_catchpoint (int, bool, int, gdb::array_view<const int>)
     override;
 #endif
-#endif /* PT_LWPINFO */
 
   bool supports_multi_process () override;
 };
