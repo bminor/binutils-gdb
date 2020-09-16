@@ -1133,9 +1133,7 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
      optimized away or compressed by the linker during relaxation, to prevent
      the assembler from computing static offsets across such an instruction.
      This is necessary to get correct EH info.  */
-  if (reloc_type == BFD_RELOC_RISCV_CALL
-      || reloc_type == BFD_RELOC_RISCV_CALL_PLT
-      || reloc_type == BFD_RELOC_RISCV_HI20
+  if (reloc_type == BFD_RELOC_RISCV_HI20
       || reloc_type == BFD_RELOC_RISCV_PCREL_HI20
       || reloc_type == BFD_RELOC_RISCV_TPREL_HI20
       || reloc_type == BFD_RELOC_RISCV_TPREL_ADD)
@@ -1311,8 +1309,13 @@ static void
 riscv_call (int destreg, int tempreg, expressionS *ep,
 	    bfd_reloc_code_real_type reloc)
 {
+  /* Ensure the jalr is emitted to the same frag as the auipc.  */
+  frag_grow (8);
   macro_build (ep, "auipc", "d,u", tempreg, reloc);
   macro_build (NULL, "jalr", "d,s", destreg, tempreg);
+  /* See comment at end of append_insn.  */
+  frag_wane (frag_now);
+  frag_new (0);
 }
 
 /* Load an integer constant into a register.  */
@@ -3031,6 +3034,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       fixP->fx_next = xmemdup (fixP, sizeof (*fixP), sizeof (*fixP));
       fixP->fx_next->fx_addsy = fixP->fx_next->fx_subsy = NULL;
       fixP->fx_next->fx_r_type = BFD_RELOC_RISCV_RELAX;
+      fixP->fx_next->fx_size = 0;
     }
 }
 

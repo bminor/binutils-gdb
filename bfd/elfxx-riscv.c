@@ -69,7 +69,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_32",			/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 64 bit relocation.  */
@@ -99,7 +99,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_RELATIVE",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_COPY,			/* type */
@@ -133,7 +133,7 @@ static reloc_howto_type howto_table[] =
   /* Dynamic TLS relocations.  */
   HOWTO (R_RISCV_TLS_DTPMOD32,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 2,				/* size */
 	 32,				/* bitsize */
 	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
@@ -142,7 +142,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_TLS_DTPMOD32",	/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_DTPMOD64,		/* type */
@@ -161,7 +161,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_DTPREL32,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 2,				/* size */
 	 32,				/* bitsize */
 	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
@@ -170,7 +170,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_TLS_DTPREL32",	/* name */
 	 TRUE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_DTPREL64,		/* type */
@@ -198,7 +198,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_TLS_TPREL32",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_TPREL64,		/* type */
@@ -254,7 +254,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit PC-relative function call (AUIPC/JALR).  */
   HOWTO (R_RISCV_CALL,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 64,				/* bitsize */
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
@@ -270,7 +270,7 @@ static reloc_howto_type howto_table[] =
   /* Like R_RISCV_CALL, but not locally binding.  */
   HOWTO (R_RISCV_CALL_PLT,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 64,				/* bitsize */
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
@@ -466,14 +466,14 @@ static reloc_howto_type howto_table[] =
   /* TLS LE thread pointer usage.  May be relaxed.  */
   HOWTO (R_RISCV_TPREL_ADD,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
-	 32,				/* bitsize */
+	 3,				/* size */
+	 0,				/* bitsize */
 	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TPREL_ADD",		/* name */
-	 TRUE,				/* partial_inplace */
+	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
 	 FALSE),			/* pcrel_offset */
@@ -490,7 +490,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_ADD8",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xff,				/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 16-bit in-place addition, for local label subtraction.  */
@@ -505,7 +505,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_ADD16",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 32-bit in-place addition, for local label subtraction.  */
@@ -520,7 +520,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_ADD32",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 64-bit in-place addition, for local label subtraction.  */
@@ -550,7 +550,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_SUB8",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xff,				/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 16-bit in-place addition, for local label subtraction.  */
@@ -565,7 +565,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_SUB16",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 32-bit in-place addition, for local label subtraction.  */
@@ -580,7 +580,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_SUB32",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 64-bit in-place addition, for local label subtraction.  */
@@ -633,7 +633,7 @@ static reloc_howto_type howto_table[] =
      addend rounded up to the next power of two.  */
   HOWTO (R_RISCV_ALIGN,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 3,				/* size */
 	 0,				/* bitsize */
 	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
@@ -643,13 +643,13 @@ static reloc_howto_type howto_table[] =
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 FALSE),			/* pcrel_offset */
 
   /* 8-bit PC-relative branch offset.  */
   HOWTO (R_RISCV_RVC_BRANCH,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
-	 32,				/* bitsize */
+	 1,				/* size */
+	 16,				/* bitsize */
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
@@ -663,8 +663,8 @@ static reloc_howto_type howto_table[] =
   /* 11-bit PC-relative jump offset.  */
   HOWTO (R_RISCV_RVC_JUMP,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
-	 32,				/* bitsize */
+	 1,				/* size */
+	 16,				/* bitsize */
 	 TRUE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
@@ -678,8 +678,8 @@ static reloc_howto_type howto_table[] =
   /* High 6 bits of 18-bit absolute address.  */
   HOWTO (R_RISCV_RVC_LUI,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
-	 32,				/* bitsize */
+	 1,				/* size */
+	 16,				/* bitsize */
 	 FALSE,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
@@ -807,7 +807,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_SET8",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xff,				/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 16-bit in-place setting, for local label subtraction.  */
@@ -822,7 +822,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_SET16",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 32-bit in-place setting, for local label subtraction.  */
@@ -837,7 +837,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_SET32",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* 32-bit PC relative.  */
@@ -852,7 +852,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_32_PCREL",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 MINUS_ONE,			/* dst_mask */
+	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 };
 

@@ -1,3 +1,12 @@
+2020-09-21  Alan Modra  <amodra@gmail.com>
+
+	PR 26569
+	* elfxx-riscv.c (howto_table): Correct size and bitsize of
+	R_RISCV_RVC_BRANCH, R_RISCV_RVC_JUMP, and R_RISCV_RVC_LUI.
+	Correct size for R_RISCV_TLS_DTPMOD32, R_RISCV_TLS_DTPREL32,
+	R_RISCV_CALL, and R_RISCV_CALL_PLT.  Make R_RISCV_TPREL_ADD and
+	R_RISCV_ALIGN like R_RISCV_NONE.  Correct dst_mask many relocs.
+
 2020-09-17  Mikael Pettersson  <mikpelinux@gmail.com>
 
 	PR ld/18808

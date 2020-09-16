@@ -1,3 +1,11 @@
+2020-09-21  Alan Modra  <amodra@gmail.com>
+
+	PR 26569
+	* config/tc-riscv.c (append_insn): Don't tie off frags at CALL
+	relocs.
+	(riscv_call): Tie them off after the jalr.
+	(md_apply_fix): Zero fx_size of RELAX fixup.
+
 2020-09-018  David Faust  <david.faust@oracle.com>
 
 	* testsuite/gas/bpf/alu-xbpf.d: New file.
