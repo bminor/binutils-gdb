@@ -1,3 +1,14 @@
+2020-09-16  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26617
+	* gdb.dlang/watch-loc.c: Only add .debug_aranges if
+        WITH_DEBUG_SECTIONS is defined.
+	(xstr, str): New macro.
+	(.debug_aranges): Use DMAIN_START_0/1/2 and DMAIN_LENGTH
+	to get start and size of _Dmain.
+	* gdb.dlang/watch-loc.exp: Pass DMAIN_START_0/1/2 and DMAIN_LENGTH
+	using additional_flags.
+
 2020-09-16  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.base/bp-cmds-sourced-script.c: New file.

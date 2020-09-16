@@ -27,6 +27,10 @@ if {![dwarf2_support]} {
 
 standard_testfile watch-loc.c watch-loc-dw.S
 
+lassign [function_range _Dmain ${srcdir}/${subdir}/${srcfile}] \
+    dmain_start dmain_length
+
+
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
@@ -62,8 +66,19 @@ Dwarf::assemble $asm_file {
     }
 }
 
+set dmain_start_list [split $dmain_start]
+set dmain_start_0 [lindex $dmain_start_list 0]
+set dmain_start_1 [lindex $dmain_start_list 1]
+set dmain_start_2 [lindex $dmain_start_list 2]
+
 if { [prepare_for_testing "failed to prepare" ${testfile} \
-          [list $srcfile $asm_file] {nodebug}] } {
+          [list $srcfile $asm_file] \
+	  "nodebug \
+	       additional_flags=-DWITH_DEBUG_SECTIONS \
+	       additional_flags=-DDMAIN_START_0=$dmain_start_0 \
+	       additional_flags=-DDMAIN_START_1=$dmain_start_1 \
+	       additional_flags=-DDMAIN_START_2=$dmain_start_2 \
+	       additional_flags=-DDMAIN_LENGTH=$dmain_length"] } {
     return -1
 }
 
