@@ -1,5 +1,10 @@
 2020-09-16  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdbserver-support.exp (gdbserver_exit): Make sure we
+	get the gdb prompt after issuing "monitor exit".
+
+2020-09-16  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26624
 	* lib/gdb.exp (gdb_assert): Catch errors in condition evaluation.
 

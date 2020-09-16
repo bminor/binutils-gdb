@@ -451,13 +451,20 @@ proc gdbserver_exit { is_mi } {
 	    # We use expect rather than gdb_expect because
 	    # we want to suppress printing exception messages, otherwise,
 	    # remote_expect, invoked by gdb_expect, prints the exceptions.
+	    set have_prompt 0
 	    expect {
 		-i "$gdb_spawn_id" -re "$gdb_prompt $" {
-		    exp_continue
+		    set have_prompt 1
+		    if { [info exists server_spawn_id] } {
+			exp_continue
+		    }
 		}
 		-i "$server_spawn_id" eof {
 		    wait -i $expect_out(spawn_id)
 		    unset server_spawn_id
+		    if { ! $have_prompt } {
+			exp_continue
+		    }
 		}
                timeout {
                    warning "Timed out waiting for EOF in server after $monitor_exit"
