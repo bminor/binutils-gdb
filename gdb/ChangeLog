@@ -1,3 +1,8 @@
+2020-09-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb-gdb.py.in (class StructTypePrettyPrinter) <to_string>:
+	Change instance_flags to m_instance_flags.
+
 2020-09-16  Tom Tromey  <tromey@adacore.com>
 
 	PR gdb/26598:

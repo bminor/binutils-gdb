@@ -113,7 +113,7 @@ class StructTypePrettyPrinter:
         fields.append("reference_type = %s" % self.val['reference_type'])
         fields.append("chain = %s" % self.val['reference_type'])
         fields.append("instance_flags = %s"
-                      % TypeFlagsPrinter(self.val['instance_flags']))
+                      % TypeFlagsPrinter(self.val['m_instance_flags']))
         fields.append("length = %d" % self.val['length'])
         fields.append("main_type = %s" % self.val['main_type'])
         return "\n{" + ",\n ".join(fields) + "}"
