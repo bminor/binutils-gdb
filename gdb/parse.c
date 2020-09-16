@@ -39,7 +39,6 @@
 #include "value.h"
 #include "command.h"
 #include "language.h"
-#include "f-lang.h"
 #include "parser-defs.h"
 #include "gdbcmd.h"
 #include "symfile.h"		/* for overlay functions */

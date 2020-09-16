@@ -1,5 +1,39 @@
 2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.y (f_parse): Rename to...
+	(f_language::parser): ...this.
+	* f-lang.c (f_get_encoding): Rename to...
+	(f_language::get_encoding): ...this.
+	(f_op_print_tab): Rename to...
+	(f_language::op_print_tab): ...this.
+	(exp_descriptor_f): Rename to...
+	(f_language::exp_descriptor_tab): ...this.
+	(class f_language): Moved to f-lang.h.
+	(f_language::language_arch_info): New function, moved out of class
+	declaration.
+	(f_language::search_name_hash): Likewise.
+	(f_language::lookup_symbol_nonlocal): Likewise.
+	(f_language::get_symbol_name_matcher_inner): Likewise.
+	* f-lang.h: Add 'valprint.h' include.
+	(class f_language): Moved here from f-lang.c.
+	* f-typeprint.c (f_type_print_args): Delete commented out
+	declaration.
+	(f_print_typedef): Rename to...
+	(f_language::print_typedef): ...this.
+	(f_print_type): Rename to...
+	(f_language::print_type): ...this.
+	(f_type_print_varspec_prefix): Delete declaration and rename to...
+	(f_language::f_type_print_varspec_prefix): ...this.
+	(f_type_print_varspec_suffix): Delete declaration and rename to...
+	(f_language::f_type_print_varspec_suffix): ...this.
+	(f_type_print_base): Delete declaration and rename to...
+	(f_language::f_type_print_base): ...this.
+	* f-valprint.c (f_value_print_inner): Rename to...
+	(f_language::value_print_inner): ...this.
+	* parse.c: Delete 'f-lang.h' include.
+
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* language.h (language_defn::print_type): Add variable names in
 	declaration, and update header comment.
 

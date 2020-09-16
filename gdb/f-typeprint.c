@@ -33,34 +33,22 @@
 #include "typeprint.h"
 #include "cli/cli-style.h"
 
-#if 0				/* Currently unused.  */
-static void f_type_print_args (struct type *, struct ui_file *);
-#endif
-
-static void f_type_print_varspec_suffix (struct type *, struct ui_file *, int,
-					 int, int, int, bool);
-
-void f_type_print_varspec_prefix (struct type *, struct ui_file *,
-				  int, int);
-
-void f_type_print_base (struct type *, struct ui_file *, int, int);
-
-
-/* See documentation in f-lang.h.  */
+/* See f-lang.h.  */
 
 void
-f_print_typedef (struct type *type, struct symbol *new_symbol,
-		 struct ui_file *stream)
+f_language::print_typedef (struct type *type, struct symbol *new_symbol,
+			   struct ui_file *stream) const
 {
   type = check_typedef (type);
-  f_print_type (type, "", stream, 0, 0, &type_print_raw_options);
+  print_type (type, "", stream, 0, 0, &type_print_raw_options);
 }
 
-/* LEVEL is the depth to indent lines by.  */
+/* See f-lang.h.  */
 
 void
-f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
-	      int show, int level, const struct type_print_options *flags)
+f_language::print_type (struct type *type, const char *varstring,
+			struct ui_file *stream, int show, int level,
+			const struct type_print_options *flags) const
 {
   enum type_code code;
 
@@ -99,17 +87,12 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
    }
 }
 
-/* Print any asterisks or open-parentheses needed before the
-   variable name (to describe its type).
-
-   On outermost call, pass 0 for PASSED_A_PTR.
-   On outermost call, SHOW > 0 means should ignore
-   any typename for TYPE and show its details.
-   SHOW is always zero on recursive calls.  */
+/* See f-lang.h.  */
 
 void
-f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
-			     int show, int passed_a_ptr)
+f_language::f_type_print_varspec_prefix (struct type *type,
+					 struct ui_file *stream,
+					 int show, int passed_a_ptr) const
 {
   if (type == 0)
     return;
@@ -158,19 +141,15 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     }
 }
 
-/* Print any array sizes, function arguments or close parentheses
-   needed after the variable name (to describe its type).
-   Args work like c_type_print_varspec_prefix.
+/* See f-lang.h.  */
 
-   PRINT_RANK_ONLY is true when TYPE is an array which should be printed
-   without the upper and lower bounds being specified, this will occur
-   when the array is not allocated or not associated and so there are no
-   known upper or lower bounds.  */
-
-static void
-f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
-			     int show, int passed_a_ptr, int demangled_args,
-			     int arrayprint_recurse_level, bool print_rank_only)
+void
+f_language::f_type_print_varspec_suffix (struct type *type,
+					 struct ui_file *stream,
+					 int show, int passed_a_ptr,
+					 int demangled_args,
+					 int arrayprint_recurse_level,
+					 bool print_rank_only) const
 {
   /* No static variables are permitted as an error call may occur during
      execution of this function.  */
@@ -263,7 +242,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	  fprintf_filtered (stream, ") ");
 	fprintf_filtered (stream, "(");
 	if (nfields == 0 && type->is_prototyped ())
-	  f_print_type (builtin_f_type (get_type_arch (type))->builtin_void,
+	  print_type (builtin_f_type (get_type_arch (type))->builtin_void,
 			"", stream, -1, 0, 0);
 	else
 	  for (i = 0; i < nfields; i++)
@@ -273,7 +252,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 		  fputs_filtered (", ", stream);
 		  wrap_here ("    ");
 		}
-	      f_print_type (type->field (i).type (), "", stream, -1, 0, 0);
+	      print_type (type->field (i).type (), "", stream, -1, 0, 0);
 	    }
 	fprintf_filtered (stream, ")");
       }
@@ -301,22 +280,11 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     }
 }
 
-/* Print the name of the type (or the ultimate pointer target,
-   function value or array element), or the description of a
-   structure or union.
-
-   SHOW nonzero means don't print this type as just its name;
-   show its real definition even if it has a name.
-   SHOW zero means print just typename or struct tag if there is one
-   SHOW negative means abbreviate structure elements.
-   SHOW is decremented for printing of structure elements.
-
-   LEVEL is the depth to indent by.
-   We increase it for some recursive calls.  */
+/* See f-lang.h.  */
 
 void
-f_type_print_base (struct type *type, struct ui_file *stream, int show,
-		   int level)
+f_language::f_type_print_base (struct type *type, struct ui_file *stream,
+			       int show, int level) const
 {
   int index;
 

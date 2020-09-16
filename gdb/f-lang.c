@@ -44,8 +44,8 @@
 /* Return the encoding that should be used for the character type
    TYPE.  */
 
-static const char *
-f_get_encoding (struct type *type)
+const char *
+f_language::get_encoding (struct type *type)
 {
   const char *encoding;
 
@@ -72,7 +72,7 @@ f_get_encoding (struct type *type)
 
 /* Table of operators and their precedences for printing expressions.  */
 
-static const struct op_print f_op_print_tab[] =
+const struct op_print f_language::op_print_tab[] =
 {
   {"+", BINOP_ADD, PREC_ADD, 0},
   {"+", UNOP_PLUS, PREC_PREFIX, 0},
@@ -701,7 +701,7 @@ operator_check_f (struct expression *exp, int pos,
 }
 
 /* Expression processing for Fortran.  */
-static const struct exp_descriptor exp_descriptor_f =
+const struct exp_descriptor f_language::exp_descriptor_tab =
 {
   print_subexp_f,
   operator_length_f,
@@ -711,268 +711,72 @@ static const struct exp_descriptor exp_descriptor_f =
   evaluate_subexp_f
 };
 
-/* Class representing the Fortran language.  */
+/* See language.h.  */
 
-class f_language : public language_defn
+void
+f_language::language_arch_info (struct gdbarch *gdbarch,
+				struct language_arch_info *lai) const
 {
-public:
-  f_language ()
-    : language_defn (language_fortran)
-  { /* Nothing.  */ }
+  const struct builtin_f_type *builtin = builtin_f_type (gdbarch);
 
-  /* See language.h.  */
+  lai->string_char_type = builtin->builtin_character;
+  lai->primitive_type_vector
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_f_primitive_types + 1,
+			      struct type *);
 
-  const char *name () const override
-  { return "fortran"; }
+  lai->primitive_type_vector [f_primitive_type_character]
+    = builtin->builtin_character;
+  lai->primitive_type_vector [f_primitive_type_logical]
+    = builtin->builtin_logical;
+  lai->primitive_type_vector [f_primitive_type_logical_s1]
+    = builtin->builtin_logical_s1;
+  lai->primitive_type_vector [f_primitive_type_logical_s2]
+    = builtin->builtin_logical_s2;
+  lai->primitive_type_vector [f_primitive_type_logical_s8]
+    = builtin->builtin_logical_s8;
+  lai->primitive_type_vector [f_primitive_type_real]
+    = builtin->builtin_real;
+  lai->primitive_type_vector [f_primitive_type_real_s8]
+    = builtin->builtin_real_s8;
+  lai->primitive_type_vector [f_primitive_type_real_s16]
+    = builtin->builtin_real_s16;
+  lai->primitive_type_vector [f_primitive_type_complex_s8]
+    = builtin->builtin_complex_s8;
+  lai->primitive_type_vector [f_primitive_type_complex_s16]
+    = builtin->builtin_complex_s16;
+  lai->primitive_type_vector [f_primitive_type_void]
+    = builtin->builtin_void;
 
-  /* See language.h.  */
+  lai->bool_type_symbol = "logical";
+  lai->bool_type_default = builtin->builtin_logical_s2;
+}
 
-  const char *natural_name () const override
-  { return "Fortran"; }
+/* See language.h.  */
 
-  /* See language.h.  */
+unsigned int
+f_language::search_name_hash (const char *name) const
+{
+  return cp_search_name_hash (name);
+}
 
-  const std::vector<const char *> &filename_extensions () const override
-  {
-    static const std::vector<const char *> extensions = {
-      ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
-      ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08"
-    };
-    return extensions;
-  }
+/* See language.h.  */
 
-  /* See language.h.  */
-  void language_arch_info (struct gdbarch *gdbarch,
-			   struct language_arch_info *lai) const override
-  {
-    const struct builtin_f_type *builtin = builtin_f_type (gdbarch);
+struct block_symbol
+f_language::lookup_symbol_nonlocal (const char *name,
+				    const struct block *block,
+				    const domain_enum domain) const
+{
+  return cp_lookup_symbol_nonlocal (this, name, block, domain);
+}
 
-    lai->string_char_type = builtin->builtin_character;
-    lai->primitive_type_vector
-      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_f_primitive_types + 1,
-				struct type *);
+/* See language.h.  */
 
-    lai->primitive_type_vector [f_primitive_type_character]
-      = builtin->builtin_character;
-    lai->primitive_type_vector [f_primitive_type_logical]
-      = builtin->builtin_logical;
-    lai->primitive_type_vector [f_primitive_type_logical_s1]
-      = builtin->builtin_logical_s1;
-    lai->primitive_type_vector [f_primitive_type_logical_s2]
-      = builtin->builtin_logical_s2;
-    lai->primitive_type_vector [f_primitive_type_logical_s8]
-      = builtin->builtin_logical_s8;
-    lai->primitive_type_vector [f_primitive_type_real]
-      = builtin->builtin_real;
-    lai->primitive_type_vector [f_primitive_type_real_s8]
-      = builtin->builtin_real_s8;
-    lai->primitive_type_vector [f_primitive_type_real_s16]
-      = builtin->builtin_real_s16;
-    lai->primitive_type_vector [f_primitive_type_complex_s8]
-      = builtin->builtin_complex_s8;
-    lai->primitive_type_vector [f_primitive_type_complex_s16]
-      = builtin->builtin_complex_s16;
-    lai->primitive_type_vector [f_primitive_type_void]
-      = builtin->builtin_void;
-
-    lai->bool_type_symbol = "logical";
-    lai->bool_type_default = builtin->builtin_logical_s2;
-  }
-
-  /* See language.h.  */
-  unsigned int search_name_hash (const char *name) const override
-  {
-    return cp_search_name_hash (name);
-  }
-
-  /* See language.h.  */
-
-  char *demangle_symbol (const char *mangled, int options) const override
-  {
-      /* We could support demangling here to provide module namespaces
-	 also for inferiors with only minimal symbol table (ELF symbols).
-	 Just the mangling standard is not standardized across compilers
-	 and there is no DW_AT_producer available for inferiors with only
-	 the ELF symbols to check the mangling kind.  */
-    return nullptr;
-  }
-
-  /* See language.h.  */
-
-  void print_type (struct type *type, const char *varstring,
-		   struct ui_file *stream, int show, int level,
-		   const struct type_print_options *flags) const override
-  {
-    f_print_type (type, varstring, stream, show, level, flags);
-  }
-
-  /* See language.h.  This just returns default set of word break
-     characters but with the modules separator `::' removed.  */
-
-  const char *word_break_characters (void) const override
-  {
-    static char *retval;
-
-    if (!retval)
-      {
-	char *s;
-
-	retval = xstrdup (language_defn::word_break_characters ());
-	s = strchr (retval, ':');
-	if (s)
-	  {
-	    char *last_char = &s[strlen (s) - 1];
-
-	    *s = *last_char;
-	    *last_char = 0;
-	  }
-      }
-    return retval;
-  }
-
-
-  /* See language.h.  */
-
-  void collect_symbol_completion_matches (completion_tracker &tracker,
-					  complete_symbol_mode mode,
-					  symbol_name_match_type name_match_type,
-					  const char *text, const char *word,
-					  enum type_code code) const override
-  {
-    /* Consider the modules separator :: as a valid symbol name character
-       class.  */
-    default_collect_symbol_completion_matches_break_on (tracker, mode,
-							name_match_type,
-							text, word, ":",
-							code);
-  }
-
-  /* See language.h.  */
-
-  void value_print_inner
-	(struct value *val, struct ui_file *stream, int recurse,
-	 const struct value_print_options *options) const override
-  {
-    return f_value_print_inner (val, stream, recurse, options);
-  }
-
-  /* See language.h.  */
-
-  struct block_symbol lookup_symbol_nonlocal
-	(const char *name, const struct block *block,
-	 const domain_enum domain) const override
-  {
-    return cp_lookup_symbol_nonlocal (this, name, block, domain);
-  }
-
-  /* See language.h.  */
-
-  int parser (struct parser_state *ps) const override
-  {
-    return f_parse (ps);
-  }
-
-  /* See language.h.  */
-
-  void emitchar (int ch, struct type *chtype,
-		 struct ui_file *stream, int quoter) const override
-  {
-    const char *encoding = f_get_encoding (chtype);
-    generic_emit_char (ch, chtype, stream, quoter, encoding);
-  }
-
-  /* See language.h.  */
-
-  void printchar (int ch, struct type *chtype,
-		  struct ui_file *stream) const override
-  {
-    fputs_filtered ("'", stream);
-    LA_EMIT_CHAR (ch, chtype, stream, '\'');
-    fputs_filtered ("'", stream);
-  }
-
-  /* See language.h.  */
-
-  void printstr (struct ui_file *stream, struct type *elttype,
-		 const gdb_byte *string, unsigned int length,
-		 const char *encoding, int force_ellipses,
-		 const struct value_print_options *options) const override
-  {
-    const char *type_encoding = f_get_encoding (elttype);
-
-    if (TYPE_LENGTH (elttype) == 4)
-      fputs_filtered ("4_", stream);
-
-    if (!encoding || !*encoding)
-      encoding = type_encoding;
-
-    generic_printstr (stream, elttype, string, length, encoding,
-		      force_ellipses, '\'', 0, options);
-  }
-
-  /* See language.h.  */
-
-  void print_typedef (struct type *type, struct symbol *new_symbol,
-		      struct ui_file *stream) const override
-  {
-    f_print_typedef (type, new_symbol, stream);
-  }
-
-  /* See language.h.  */
-
-  bool is_string_type_p (struct type *type) const override
-  {
-    type = check_typedef (type);
-    return (type->code () == TYPE_CODE_STRING
-	    || (type->code () == TYPE_CODE_ARRAY
-		&& TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR));
-  }
-
-  /* See language.h.  */
-
-  const char *struct_too_deep_ellipsis () const override
-  { return "(...)"; }
-
-  /* See language.h.  */
-
-  bool c_style_arrays_p () const override
-  { return false; }
-
-  /* See language.h.  */
-
-  bool range_checking_on_by_default () const override
-  { return true; }
-
-  /* See language.h.  */
-
-  enum case_sensitivity case_sensitivity () const override
-  { return case_sensitive_off; }
-
-  /* See language.h.  */
-
-  enum array_ordering array_ordering () const override
-  { return array_column_major; }
-
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_f; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return f_op_print_tab; }
-
-protected:
-
-  /* See language.h.  */
-
-  symbol_name_matcher_ftype *get_symbol_name_matcher_inner
-	(const lookup_name_info &lookup_name) const override
-  {
-    return cp_get_symbol_name_matcher (lookup_name);
-  }
-};
+symbol_name_matcher_ftype *
+f_language::get_symbol_name_matcher_inner
+	(const lookup_name_info &lookup_name) const
+{
+  return cp_get_symbol_name_matcher (lookup_name);
+}
 
 /* Single instance of the Fortran language class.  */
 
