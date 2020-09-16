@@ -4358,14 +4358,16 @@ fill_in_stop_func (struct gdbarch *gdbarch,
   if (!ecs->stop_func_filled_in)
     {
       const block *block;
+      const general_symbol_info *gsi;
 
       /* Don't care about return value; stop_func_start and stop_func_name
 	 will both be 0 if it doesn't work.  */
-      find_pc_partial_function (ecs->event_thread->suspend.stop_pc,
-				&ecs->stop_func_name,
-				&ecs->stop_func_start,
-				&ecs->stop_func_end,
-				&block);
+      find_pc_partial_function_sym (ecs->event_thread->suspend.stop_pc,
+				    &gsi,
+				    &ecs->stop_func_start,
+				    &ecs->stop_func_end,
+				    &block);
+      ecs->stop_func_name = gsi == nullptr ? nullptr : gsi->print_name ();
 
       /* The call to find_pc_partial_function, above, will set
 	 stop_func_start and stop_func_end to the start and end
