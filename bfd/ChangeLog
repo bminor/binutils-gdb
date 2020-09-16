@@ -1,3 +1,11 @@
+2020-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26583
+	* config.bfd (targ64_selvecs, targ_selvecs): Add x86_64_pe_vec
+	to x86_64_pei_vec.
+	* reloc.c: Include "coff/internal.h".
+	(bfd_perform_relocation): Adjust relocation for PE/x86-64 inputs.
+
 2020-09-16  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (elf_symbol_from): Remove unused ABFD parameter.

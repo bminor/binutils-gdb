@@ -51,6 +51,7 @@ SECTION
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "bfdver.h"
+#include "coff/internal.h"
 /*
 DOCDD
 INODE
@@ -903,6 +904,23 @@ space consuming.  For each target:
 	      reloc_entry->addend = relocation;
 	    }
 	}
+    }
+  else if (abfd->xvec->flavour == bfd_target_coff_flavour
+	   && (input_section->output_section->owner->xvec->flavour
+	       == bfd_target_elf_flavour)
+	   && strcmp (abfd->xvec->name, "pe-x86-64") == 0
+	   && strcmp (input_section->output_section->owner->xvec->name,
+		      "elf64-x86-64") == 0)
+    {
+      /* NB: bfd_perform_relocation isn't called to generate PE binary.
+	 _bfd_relocate_contents is called instead.  When linking PE
+	 object files to generate ELF output, _bfd_relocate_contents
+	 isn't called and bfd_perform_relocation is used.  We need to
+	 adjust relocation here.  */
+      relocation -= reloc_entry->addend;
+      if (howto->type >= R_AMD64_PCRLONG_1
+	  && howto->type <= R_AMD64_PCRLONG_5)
+	relocation -= (bfd_vma)(howto->type - R_AMD64_PCRLONG);
     }
 
   /* FIXME: This overflow checking is incomplete, because the value

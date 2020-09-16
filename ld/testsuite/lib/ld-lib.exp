@@ -506,22 +506,34 @@ proc run_ld_link_tests { ldtests args } {
 	# Assemble each file in the test.
 	foreach src_file $src_files {
 	    set fileroot "[file rootname [file tail $src_file]]"
-	    set objfile "tmpdir/$fileroot.o"
-	    lappend objfiles $objfile
 
-	    if { [file extension $src_file] == ".c" } {
-		set as_file "tmpdir/$fileroot.s"
-		if ![ld_compile "$CC -S $CFLAGS $cflags" $srcdir/$subdir/$src_file $as_file] {
+	    if { [file extension $src_file] == ".bz2" } {
+		set objfile tmpdir/[file rootname $src_file]
+		set unbzip2 "system \"bzip2 -dc $srcdir/$subdir/$src_file > $objfile\""
+		send_log "$unbzip2\n"
+		catch "$unbzip2" exec_output
+		if ![string match "" $exec_output] then {
+		    send_log "$exec_output\n"
 		    set is_unresolved 1
 		    break
 		}
 	    } else {
-		set as_file "$srcdir/$subdir/$src_file"
+		set objfile "tmpdir/$fileroot.o"
+		if { [file extension $src_file] == ".c" } {
+		    set as_file "tmpdir/$fileroot.s"
+		    if ![ld_compile "$CC -S $CFLAGS $cflags" $srcdir/$subdir/$src_file $as_file] {
+			set is_unresolved 1
+			break
+		    }
+		} else {
+		    set as_file "$srcdir/$subdir/$src_file"
+		}
+		if ![ld_assemble $as "$as_options $as_file" $objfile] {
+		    set failed 1
+		    break
+		}
 	    }
-	    if ![ld_assemble $as "$as_options $as_file" $objfile] {
-		set failed 1
-		break
-	    }
+	    lappend objfiles $objfile
 	}
 
 	# Catch assembler errors.

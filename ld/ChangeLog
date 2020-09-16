@@ -1,3 +1,28 @@
+2020-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26583
+	* testsuite/ld-x86-64/pe-x86-64-1.od: New file.
+	* testsuite/ld-x86-64/pe-x86-64-1a.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-1b.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-1c.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-2.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-2a.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-2b.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-2c.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-3.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-3a.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-3b.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-3c.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-3d.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-4.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-4a.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-4b.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-4c.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-4d.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64.exp: Likewise.
+	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Handle bz2 binary
+	inputs.
+
 2020-09-16  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c (asymbol_from_plugin_symbol): Adjust elf_symbol_from
