@@ -1,5 +1,9 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/sizeof.c (fill): Add cast.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/share-env-with-gdbserver.c (main): Add cast.
 
 2020-09-17  Pedro Alves  <pedro@palves.net>
