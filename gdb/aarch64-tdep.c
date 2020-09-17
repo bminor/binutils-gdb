@@ -3403,12 +3403,12 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (feature_core == nullptr)
     return nullptr;
 
-  struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
+  tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
 
   /* Validate the description provides the mandatory core R registers
      and allocate their numbers.  */
   for (i = 0; i < ARRAY_SIZE (aarch64_r_register_names); i++)
-    valid_p &= tdesc_numbered_register (feature_core, tdesc_data,
+    valid_p &= tdesc_numbered_register (feature_core, tdesc_data.get (),
 					AARCH64_X0_REGNUM + i,
 					aarch64_r_register_names[i]);
 
@@ -3423,7 +3423,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* Validate the description provides the mandatory V registers
 	 and allocate their numbers.  */
       for (i = 0; i < ARRAY_SIZE (aarch64_v_register_names); i++)
-	valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data,
+	valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (),
 					    AARCH64_V0_REGNUM + i,
 					    aarch64_v_register_names[i]);
 
@@ -3436,7 +3436,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* Validate the description provides the mandatory SVE registers
 	 and allocate their numbers.  */
       for (i = 0; i < ARRAY_SIZE (aarch64_sve_register_names); i++)
-	valid_p &= tdesc_numbered_register (feature_sve, tdesc_data,
+	valid_p &= tdesc_numbered_register (feature_sve, tdesc_data.get (),
 					    AARCH64_SVE_Z0_REGNUM + i,
 					    aarch64_sve_register_names[i]);
 
@@ -3461,7 +3461,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* Validate the descriptor provides the mandatory PAUTH registers and
 	 allocate their numbers.  */
       for (i = 0; i < ARRAY_SIZE (aarch64_pauth_register_names); i++)
-	valid_p &= tdesc_numbered_register (feature_pauth, tdesc_data,
+	valid_p &= tdesc_numbered_register (feature_pauth, tdesc_data.get (),
 					    first_pauth_regnum + i,
 					    aarch64_pauth_register_names[i]);
 
@@ -3470,10 +3470,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   if (!valid_p)
-    {
-      tdesc_data_cleanup (tdesc_data);
-      return nullptr;
-    }
+    return nullptr;
 
   /* AArch64 code is always little-endian.  */
   info.byte_order_for_code = BFD_ENDIAN_LITTLE;
@@ -3554,7 +3551,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdesc_data = tdesc_data;
+  info.tdesc_data = tdesc_data.get ();
   gdbarch_init_osabi (info, gdbarch);
 
   dwarf2_frame_set_init_reg (gdbarch, aarch64_dwarf2_frame_init_reg);
@@ -3583,7 +3580,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_get_pc_address_flags (gdbarch, aarch64_get_pc_address_flags);
 
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   /* Add standard register aliases.  */
   for (i = 0; i < ARRAY_SIZE (aarch64_register_aliases); i++)

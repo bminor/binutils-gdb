@@ -8967,7 +8967,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_list *best_arch;
   enum arm_abi_kind arm_abi = arm_abi_global;
   enum arm_float_model fp_model = arm_fp_model;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   int i;
   bool is_m = false;
   int vfp_register_count = 0;
@@ -9156,29 +9156,26 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       valid_p = 1;
       for (i = 0; i < ARM_SP_REGNUM; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					    arm_register_names[i]);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data.get (),
 						  ARM_SP_REGNUM,
 						  arm_sp_names);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data.get (),
 						  ARM_LR_REGNUM,
 						  arm_lr_names);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data.get (),
 						  ARM_PC_REGNUM,
 						  arm_pc_names);
       if (is_m)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					    ARM_PS_REGNUM, "xpsr");
       else
-	valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					    ARM_PS_REGNUM, "cpsr");
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
       feature = tdesc_find_feature (tdesc,
 				    "org.gnu.gdb.arm.fpa");
@@ -9186,13 +9183,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	{
 	  valid_p = 1;
 	  for (i = ARM_F0_REGNUM; i <= ARM_FPS_REGNUM; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 						arm_register_names[i]);
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	}
       else
 	have_fpa_registers = false;
@@ -9211,25 +9205,22 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  valid_p = 1;
 	  for (i = ARM_WR0_REGNUM; i <= ARM_WR15_REGNUM; i++)
 	    valid_p
-	      &= tdesc_numbered_register (feature, tdesc_data, i,
+	      &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					  iwmmxt_names[i - ARM_WR0_REGNUM]);
 
 	  /* Check for the control registers, but do not fail if they
 	     are missing.  */
 	  for (i = ARM_WC0_REGNUM; i <= ARM_WCASF_REGNUM; i++)
-	    tdesc_numbered_register (feature, tdesc_data, i,
+	    tdesc_numbered_register (feature, tdesc_data.get (), i,
 				     iwmmxt_names[i - ARM_WR0_REGNUM]);
 
 	  for (i = ARM_WCGR0_REGNUM; i <= ARM_WCGR3_REGNUM; i++)
 	    valid_p
-	      &= tdesc_numbered_register (feature, tdesc_data, i,
+	      &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					  iwmmxt_names[i - ARM_WR0_REGNUM]);
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 
 	  have_wmmx_registers = true;
 	}
@@ -9253,7 +9244,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  valid_p = 1;
 	  for (i = 0; i < 32; i++)
 	    {
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  ARM_D0_REGNUM + i,
 						  vfp_double_names[i]);
 	      if (!valid_p)
@@ -9263,13 +9254,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    valid_p = 1;
 
 	  /* Also require FPSCR.  */
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      ARM_FPSCR_REGNUM, "fpscr");
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 
 	  if (tdesc_unnumbered_register (feature, "s0") == 0)
 	    have_vfp_pseudos = true;
@@ -9285,10 +9273,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    {
 	      /* NEON requires 32 double-precision registers.  */
 	      if (i != 32)
-		{
-		  tdesc_data_cleanup (tdesc_data);
-		  return NULL;
-		}
+		return NULL;
 
 	      /* If there are quad registers defined by the stub, use
 		 their type; otherwise (normally) provide them with
@@ -9328,11 +9313,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   if (best_arch != NULL)
-    {
-      if (tdesc_data != NULL)
-	tdesc_data_cleanup (tdesc_data);
-      return best_arch->gdbarch;
-    }
+    return best_arch->gdbarch;
 
   tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -9534,11 +9515,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pseudo_register_write (gdbarch, arm_pseudo_write);
     }
 
-  if (tdesc_data)
+  if (tdesc_data != nullptr)
     {
       set_tdesc_pseudo_register_name (gdbarch, arm_register_name);
 
-      tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+      tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
       /* Override tdesc_register_type to adjust the types of VFP
 	 registers for NEON.  */

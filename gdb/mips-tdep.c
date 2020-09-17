@@ -8047,7 +8047,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum mips_abi mips_abi, found_abi, wanted_abi;
   int i, num_regs;
   enum mips_fpu_type fpu_type;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   int elf_fpu_type = Val_GNU_MIPS_ABI_FP_ANY;
   const char * const *reg_names;
   struct mips_regnum mips_regnum, *regnum;
@@ -8310,73 +8310,58 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       valid_p = 1;
       for (i = MIPS_ZERO_REGNUM; i <= MIPS_RA_REGNUM; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					    mips_gprs[i]);
 
 
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  mips_regnum.lo, "lo");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  mips_regnum.hi, "hi");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  mips_regnum.pc, "pc");
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
       feature = tdesc_find_feature (info.target_desc,
 				    "org.gnu.gdb.mips.cp0");
       if (feature == NULL)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
       valid_p = 1;
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  mips_regnum.badvaddr, "badvaddr");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  MIPS_PS_REGNUM, "status");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  mips_regnum.cause, "cause");
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
       /* FIXME drow/2007-05-17: The FPU should be optional.  The MIPS
 	 backend is not prepared for that, though.  */
       feature = tdesc_find_feature (info.target_desc,
 				    "org.gnu.gdb.mips.fpu");
       if (feature == NULL)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
       valid_p = 1;
       for (i = 0; i < 32; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					    i + mips_regnum.fp0, mips_fprs[i]);
 
-      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					  mips_regnum.fp_control_status,
 					  "fcsr");
       valid_p
-	&= tdesc_numbered_register (feature, tdesc_data,
+	&= tdesc_numbered_register (feature, tdesc_data.get (),
 				    mips_regnum.fp_implementation_revision,
 				    "fir");
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
       num_regs = mips_regnum.fp_implementation_revision + 1;
 
@@ -8389,27 +8374,24 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    {
 	      i = 0;
 	      valid_p = 1;
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  dspacc + i++, "hi1");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  dspacc + i++, "lo1");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  dspacc + i++, "hi2");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  dspacc + i++, "lo2");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  dspacc + i++, "hi3");
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  dspacc + i++, "lo3");
 
-	      valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						  dspctl, "dspctl");
 
 	      if (!valid_p)
-		{
-		  tdesc_data_cleanup (tdesc_data);
-		  return NULL;
-		}
+		return NULL;
 
 	      mips_regnum.dspacc = dspacc;
 	      mips_regnum.dspctl = dspctl;
@@ -8445,8 +8427,6 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (MIPS_FPU_TYPE (arches->gdbarch) != fpu_type)
 	continue;
 
-      if (tdesc_data != NULL)
-	tdesc_data_cleanup (tdesc_data);
       return arches->gdbarch;
     }
 
@@ -8743,7 +8723,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   mips_register_g_packet_guesses (gdbarch);
 
   /* Hook in OS ABI-specific overrides, if they have been registered.  */
-  info.tdesc_data = tdesc_data;
+  info.tdesc_data = tdesc_data.get ();
   gdbarch_init_osabi (info, gdbarch);
 
   /* The hook may have adjusted num_regs, fetch the final value and
@@ -8764,10 +8744,10 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_base_append_sniffer (gdbarch, mips_micro_frame_base_sniffer);
   frame_base_append_sniffer (gdbarch, mips_insn32_frame_base_sniffer);
 
-  if (tdesc_data)
+  if (tdesc_data != nullptr)
     {
       set_tdesc_pseudo_register_type (gdbarch, mips_pseudo_register_type);
-      tdesc_use_registers (gdbarch, info.target_desc, tdesc_data);
+      tdesc_use_registers (gdbarch, info.target_desc, std::move (tdesc_data));
 
       /* Override the normal target description methods to handle our
 	 dual real and pseudo registers.  */

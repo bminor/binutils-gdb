@@ -1898,35 +1898,32 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (tdesc_has_registers (tdesc))
     {
-      struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
+      tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
 
       /* Validate that the descriptor provides the mandatory registers
          and allocate their numbers. */
-      valid_p &= validate_tdesc_registers (tdesc, tdesc_data,
+      valid_p &= validate_tdesc_registers (tdesc, tdesc_data.get (),
                                            "org.gnu.gdb.sparc.cpu",
                                            sparc_core_register_names,
                                            ARRAY_SIZE (sparc_core_register_names),
                                            SPARC_G0_REGNUM);
-      valid_p &= validate_tdesc_registers (tdesc, tdesc_data,
+      valid_p &= validate_tdesc_registers (tdesc, tdesc_data.get (),
                                            "org.gnu.gdb.sparc.fpu",
                                            tdep->fpu_register_names,
                                            tdep->fpu_registers_num,
                                            SPARC_F0_REGNUM);
-      valid_p &= validate_tdesc_registers (tdesc, tdesc_data,
+      valid_p &= validate_tdesc_registers (tdesc, tdesc_data.get (),
                                            "org.gnu.gdb.sparc.cp0",
                                            tdep->cp0_register_names,
                                            tdep->cp0_registers_num,
                                            SPARC_F0_REGNUM
                                            + tdep->fpu_registers_num);
       if (!valid_p)
-        {
-          tdesc_data_cleanup (tdesc_data);
-          return NULL;
-        }
+	return NULL;
 
       /* Target description may have changed. */
-      info.tdesc_data = tdesc_data;
-      tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+      info.tdesc_data = tdesc_data.get ();
+      tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
     }
 
   /* If we have register sets, enable the generic core file support.  */

@@ -2076,7 +2076,7 @@ arc_check_for_hw_loops (const struct target_desc *tdesc,
 
 static bool
 arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
-		struct tdesc_arch_data **tdesc_data)
+		tdesc_arch_data_up *tdesc_data)
 {
   const struct target_desc *tdesc_loc = info.target_desc;
   if (arc_debug)
@@ -2125,15 +2125,15 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
   const arc_register_feature *arc_aux_reg_feature
     = determine_aux_reg_feature_set ();
 
-  struct tdesc_arch_data *tdesc_data_loc = tdesc_data_alloc ();
+  tdesc_arch_data_up tdesc_data_loc = tdesc_data_alloc ();
 
   arc_update_acc_reg_names (info.byte_order);
 
-  bool valid_p = arc_check_tdesc_feature (tdesc_data_loc,
+  bool valid_p = arc_check_tdesc_feature (tdesc_data_loc.get (),
 					  feature_core,
 					  arc_core_reg_feature);
 
-  valid_p &= arc_check_tdesc_feature (tdesc_data_loc,
+  valid_p &= arc_check_tdesc_feature (tdesc_data_loc.get (),
 				      feature_aux,
 				      arc_aux_reg_feature);
 
@@ -2141,12 +2141,11 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
     {
       if (arc_debug)
         debug_printf ("arc: Target description is not valid\n");
-      tdesc_data_cleanup (tdesc_data_loc);
       return false;
     }
 
   *tdesc = tdesc_loc;
-  *tdesc_data = tdesc_data_loc;
+  *tdesc_data = std::move (tdesc_data_loc);
 
   return true;
 }
@@ -2185,7 +2184,7 @@ static struct gdbarch *
 arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   const struct target_desc *tdesc;
-  struct tdesc_arch_data *tdesc_data;
+  tdesc_arch_data_up tdesc_data;
 
   if (arc_debug)
     debug_printf ("arc: Architecture initialization.\n");
@@ -2198,7 +2197,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdb::unique_xmalloc_ptr<struct gdbarch_tdep> tdep
     (XCNEW (struct gdbarch_tdep));
   tdep->jb_pc = -1; /* No longjmp support by default.  */
-  tdep->has_hw_loops = arc_check_for_hw_loops (tdesc, tdesc_data);
+  tdep->has_hw_loops = arc_check_for_hw_loops (tdesc, tdesc_data.get ());
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep.release ());
 
   /* Data types.  */
@@ -2338,7 +2337,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	}
     }
 
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   return gdbarch;
 }

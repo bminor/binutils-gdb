@@ -1130,7 +1130,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch_tdep *tdep = NULL;
   struct gdbarch *gdbarch;
   struct gdbarch_list *best_arch;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   int i;
   enum m68k_flavour flavour = m68k_no_flavour;
   int has_fp = 1;
@@ -1168,14 +1168,11 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       valid_p = 1;
       for (i = 0; i <= M68K_PC_REGNUM; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					    m68k_register_names[i]);
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
       feature = tdesc_find_feature (info.target_desc,
 				    "org.gnu.gdb.coldfire.fp");
@@ -1183,13 +1180,10 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	{
 	  valid_p = 1;
 	  for (i = M68K_FP0_REGNUM; i <= M68K_FPI_REGNUM; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 						m68k_register_names[i]);
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	}
       else
 	has_fp = 0;
@@ -1246,11 +1240,7 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   if (best_arch != NULL)
-    {
-      if (tdesc_data != NULL)
-	tdesc_data_cleanup (tdesc_data);
-      return best_arch->gdbarch;
-    }
+    return best_arch->gdbarch;
 
   tdep = XCNEW (struct gdbarch_tdep);
   gdbarch = gdbarch_alloc (&info, tdep);
@@ -1327,8 +1317,8 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   frame_unwind_append_unwinder (gdbarch, &m68k_frame_unwind);
 
-  if (tdesc_data)
-    tdesc_use_registers (gdbarch, info.target_desc, tdesc_data);
+  if (tdesc_data != nullptr)
+    tdesc_use_registers (gdbarch, info.target_desc, std::move (tdesc_data));
 
   return gdbarch;
 }

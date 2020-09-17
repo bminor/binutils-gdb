@@ -2275,7 +2275,7 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int i;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
 
   if (!tdesc_has_registers (tdesc))
@@ -2297,14 +2297,11 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       valid_p = 1;
       
       for (i = 0; i < NIOS2_NUM_REGS; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
 					    nios2_reg_names[i]);
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
     }
 
   /* Find a candidate among the list of pre-declared architectures.  */
@@ -2384,8 +2381,8 @@ nios2_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Enable inferior call support.  */
   set_gdbarch_push_dummy_call (gdbarch, nios2_push_dummy_call);
 
-  if (tdesc_data)
-    tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  if (tdesc_data != nullptr)
+    tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   return gdbarch;
 }

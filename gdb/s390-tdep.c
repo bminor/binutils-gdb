@@ -7022,8 +7022,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   struct gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
   struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
-  struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
-  info.tdesc_data = tdesc_data;
+  tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
+  info.tdesc_data = tdesc_data.get ();
 
   set_gdbarch_believe_pcc_promotion (gdbarch, 0);
   set_gdbarch_char_signed (gdbarch, 0);
@@ -7149,9 +7149,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->tdesc = tdesc;
 
   /* Check any target description for validity.  */
-  if (!s390_tdesc_valid (tdep, tdesc_data))
+  if (!s390_tdesc_valid (tdep, tdesc_data.get ()))
     {
-      tdesc_data_cleanup (tdesc_data);
       xfree (tdep);
       gdbarch_free (gdbarch);
       return NULL;
@@ -7182,13 +7181,12 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (tmp->vector_abi != tdep->vector_abi)
 	continue;
 
-      tdesc_data_cleanup (tdesc_data);
       xfree (tdep);
       gdbarch_free (gdbarch);
       return arches->gdbarch;
     }
 
-  tdesc_use_registers (gdbarch, tdep->tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdep->tdesc, std::move (tdesc_data));
   set_gdbarch_register_name (gdbarch, s390_register_name);
 
   /* Assign pseudo register numbers.  */

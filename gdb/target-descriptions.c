@@ -779,21 +779,17 @@ tdesc_data_init (struct obstack *obstack)
 /* Similar, but for the temporary copy used during architecture
    initialization.  */
 
-struct tdesc_arch_data *
+tdesc_arch_data_up
 tdesc_data_alloc (void)
 {
-  return new tdesc_arch_data ();
+  return tdesc_arch_data_up (new tdesc_arch_data ());
 }
 
-/* Free something allocated by tdesc_data_alloc, if it is not going
-   to be used (for instance if it was unsuitable for the
-   architecture).  */
+/* See target-descriptions.h.  */
 
 void
-tdesc_data_cleanup (void *data_untyped)
+tdesc_arch_data_deleter::operator() (struct tdesc_arch_data *data) const
 {
-  struct tdesc_arch_data *data = (struct tdesc_arch_data *) data_untyped;
-
   delete data;
 }
 
@@ -1103,7 +1099,7 @@ set_tdesc_pseudo_register_reggroup_p
 void
 tdesc_use_registers (struct gdbarch *gdbarch,
 		     const struct target_desc *target_desc,
-		     struct tdesc_arch_data *early_data,
+		     tdesc_arch_data_up &&early_data,
 		     tdesc_unknown_register_ftype unk_reg_cb)
 {
   int num_regs = gdbarch_num_regs (gdbarch);
@@ -1116,8 +1112,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
   gdb_assert (tdesc_has_registers (target_desc));
 
   data = (struct tdesc_arch_data *) gdbarch_data (gdbarch, tdesc_data);
-  data->arch_regs = early_data->arch_regs;
-  delete early_data;
+  data->arch_regs = std::move (early_data->arch_regs);
 
   /* Build up a set of all registers, so that we can assign register
      numbers where needed.  The hash table expands as necessary, so

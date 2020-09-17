@@ -8430,7 +8430,6 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch_tdep *tdep;
   struct gdbarch *gdbarch;
-  struct tdesc_arch_data *tdesc_data;
   const struct target_desc *tdesc;
   int mm0_regnum;
   int ymm0_regnum;
@@ -8669,7 +8668,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* No segment base registers.  */
   tdep->fsbase_regnum = -1;
 
-  tdesc_data = tdesc_data_alloc ();
+  tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
 
   set_gdbarch_relocate_instruction (gdbarch, i386_relocate_instruction);
 
@@ -8682,12 +8681,11 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in ABI-specific overrides, if they have been registered.
      Note: If INFO specifies a 64 bit arch, this is where we turn
      a 32-bit i386 into a 64-bit amd64.  */
-  info.tdesc_data = tdesc_data;
+  info.tdesc_data = tdesc_data.get ();
   gdbarch_init_osabi (info, gdbarch);
 
-  if (!i386_validate_tdesc_p (tdep, tdesc_data))
+  if (!i386_validate_tdesc_p (tdep, tdesc_data.get ()))
     {
-      tdesc_data_cleanup (tdesc_data);
       xfree (tdep);
       gdbarch_free (gdbarch);
       return NULL;
@@ -8709,7 +8707,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Target description may be changed.  */
   tdesc = tdep->tdesc;
 
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   /* Override gdbarch_register_reggroup_p set in tdesc_use_registers.  */
   set_gdbarch_register_reggroup_p (gdbarch, tdep->register_reggroup_p);

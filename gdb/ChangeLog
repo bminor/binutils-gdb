@@ -1,3 +1,33 @@
+2020-09-17  Tom Tromey  <tromey@adacore.com>
+
+	* tic6x-tdep.c (tic6x_gdbarch_init): Update.
+	* target-descriptions.h (struct tdesc_arch_data_deleter): New.
+	(tdesc_arch_data_up): New typedef.
+	(tdesc_use_registers, tdesc_data_alloc): Update.
+	(tdesc_data_cleanup): Don't declare.
+	* target-descriptions.c (tdesc_data_alloc): Return a
+	tdesc_arch_data_up.
+	(tdesc_arch_data_deleter::operator()): Rename from
+	tdesc_data_cleanup.  Change argument type.
+	(tdesc_use_registers): Change early_data to an rvalue reference.
+	(tdesc_use_registers): Don't use delete.
+	* sparc-tdep.c (sparc32_gdbarch_init): Update.
+	* s390-tdep.c (s390_gdbarch_init): Update.
+	* rx-tdep.c (rx_gdbarch_init): Update.
+	* rs6000-tdep.c (rs6000_gdbarch_init): Update.
+	* riscv-tdep.c (riscv_gdbarch_init): Update.
+	* or1k-tdep.c (or1k_gdbarch_init): Update.
+	* nios2-tdep.c (nios2_gdbarch_init): Update.
+	* nds32-tdep.c (nds32_gdbarch_init): Update.
+	* mips-tdep.c (mips_gdbarch_init): Update.
+	* microblaze-tdep.c (microblaze_gdbarch_init): Update.
+	* m68k-tdep.c (m68k_gdbarch_init): Update.
+	* i386-tdep.c (i386_gdbarch_init): Update.
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* arc-tdep.c (arc_tdesc_init): Update.
+	(arc_gdbarch_init): Update.
+	* aarch64-tdep.c (aarch64_gdbarch_init): Update.
+
 2020-09-17  Hannes Domani  <ssbssa@yahoo.de>
 
 	* windows-nat.c (ctrl_c_handler): Use 32bit DbgUiRemoteBreakin

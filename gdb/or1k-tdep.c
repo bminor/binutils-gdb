@@ -1113,7 +1113,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   const struct bfd_arch_info *binfo;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
 
   /* Find a candidate among the list of pre-declared architectures.  */
@@ -1221,14 +1221,11 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       valid_p = 1;
 
       for (i = 0; i < OR1K_NUM_REGS; i++)
-        valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
+        valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
                                             or1k_reg_names[i]);
 
       if (!valid_p)
-        {
-          tdesc_data_cleanup (tdesc_data);
-          return NULL;
-        }
+	return NULL;
     }
 
   if (tdesc_data != NULL)
@@ -1243,7 +1240,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       reggroup_add (gdbarch, save_reggroup);
       reggroup_add (gdbarch, restore_reggroup);
 
-      tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+      tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
     }
 
   /* Hook in ABI-specific overrides, if they have been registered.  */

@@ -944,7 +944,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   int elf_flags;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
 
   /* Extract the elf_flags if available.  */
@@ -982,15 +982,12 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	{
 	  tdesc_data = tdesc_data_alloc ();
 	  for (int i = 0; i < RX_NUM_REGS; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
-                                            rx_register_names[i]);
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
+						rx_register_names[i]);
 	}
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
     }
 
   gdb_assert(tdesc_data != NULL);
@@ -1000,7 +997,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->elf_flags = elf_flags;
 
   set_gdbarch_num_regs (gdbarch, RX_NUM_REGS);
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   set_gdbarch_pc_regnum (gdbarch, RX_PC_REGNUM);

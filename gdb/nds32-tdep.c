@@ -1955,7 +1955,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
   struct gdbarch_list *best_arch;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
   int elf_abi = E_NDS_ABI_AABI;
   int fpu_freg = -1;
@@ -1988,11 +1988,9 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   tdesc_data = tdesc_data_alloc ();
 
-  if (!nds32_validate_tdesc_p (tdesc, tdesc_data, &fpu_freg, &use_pseudo_fsrs))
-    {
-      tdesc_data_cleanup (tdesc_data);
-      return NULL;
-    }
+  if (!nds32_validate_tdesc_p (tdesc, tdesc_data.get (), &fpu_freg,
+			       &use_pseudo_fsrs))
+    return NULL;
 
   /* Allocate space for the new architecture.  */
   tdep = XCNEW (struct gdbarch_tdep);
@@ -2022,7 +2020,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     num_regs = NDS32_NUM_REGS + num_fdr_map[fpu_freg] + num_fsr_map[fpu_freg];
 
   set_gdbarch_num_regs (gdbarch, num_regs);
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   /* Cache the register number of fs0.  */
   if (fpu_freg != -1)
@@ -2061,7 +2059,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   nds32_add_reggroups (gdbarch);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
-  info.tdesc_data = tdesc_data;
+  info.tdesc_data = tdesc_data.get ();
   gdbarch_init_osabi (info, gdbarch);
 
   /* Override tdesc_register callbacks for system registers.  */

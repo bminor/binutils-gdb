@@ -6138,7 +6138,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int have_htm_tar = 0;
   int tdesc_wordsize = -1;
   const struct target_desc *tdesc = info.target_desc;
-  struct tdesc_arch_data *tdesc_data = NULL;
+  tdesc_arch_data_up tdesc_data;
   int num_pseudoregs = 0;
   int cur_reg;
 
@@ -6235,31 +6235,29 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       valid_p = 1;
       for (i = 0; i < ppc_num_gprs; i++)
-	valid_p &= tdesc_numbered_register (feature, tdesc_data, i, gprs[i]);
-      valid_p &= tdesc_numbered_register (feature, tdesc_data, PPC_PC_REGNUM,
-					  "pc");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data, PPC_LR_REGNUM,
-					  "lr");
-      valid_p &= tdesc_numbered_register (feature, tdesc_data, PPC_XER_REGNUM,
-					  "xer");
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+					    i, gprs[i]);
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+					  PPC_PC_REGNUM, "pc");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+					  PPC_LR_REGNUM, "lr");
+      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+					  PPC_XER_REGNUM, "xer");
 
       /* Allow alternate names for these registers, to accomodate GDB's
 	 historic naming.  */
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data.get (),
 						  PPC_MSR_REGNUM, msr_names);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data.get (),
 						  PPC_CR_REGNUM, cr_names);
-      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data,
+      valid_p &= tdesc_numbered_register_choices (feature, tdesc_data.get (),
 						  PPC_CTR_REGNUM, ctr_names);
 
       if (!valid_p)
-	{
-	  tdesc_data_cleanup (tdesc_data);
-	  return NULL;
-	}
+	return NULL;
 
-      have_mq = tdesc_numbered_register (feature, tdesc_data, PPC_MQ_REGNUM,
-					 "mq");
+      have_mq = tdesc_numbered_register (feature, tdesc_data.get (),
+					 PPC_MQ_REGNUM, "mq");
 
       tdesc_wordsize = tdesc_register_bitsize (feature, "pc") / 8;
       if (wordsize == -1)
@@ -6277,16 +6275,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  };
 	  valid_p = 1;
 	  for (i = 0; i < ppc_num_fprs; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_F0_REGNUM + i, fprs[i]);
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_FPSCR_REGNUM, "fpscr");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_fpu = 1;
 
 	  /* The fpscr register was expanded in isa 2.05 to 64 bits
@@ -6311,19 +6306,16 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  valid_p = 1;
 	  for (i = 0; i < ppc_num_gprs; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_VR0_REGNUM + i,
 						vector_regs[i]);
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_VSCR_REGNUM, "vscr");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_VRSAVE_REGNUM, "vrsave");
 
 	  if (have_spe || !valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_altivec = 1;
 	}
       else
@@ -6347,15 +6339,12 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  valid_p = 1;
 
 	  for (i = 0; i < ppc_num_vshrs; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_VSR0_UPPER_REGNUM + i,
 						vsx_regs[i]);
 
 	  if (!valid_p || !have_fpu || !have_altivec)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 
 	  have_vsx = 1;
 	}
@@ -6392,19 +6381,16 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  valid_p = 1;
 	  for (i = 0; i < ppc_num_gprs; i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_SPE_UPPER_GP0_REGNUM + i,
 						upper_spe[i]);
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_SPE_ACC_REGNUM, "acc");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_SPE_FSCR_REGNUM, "spefscr");
 
 	  if (have_mq || have_fpu || !valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_spe = 1;
 	}
       else
@@ -6416,14 +6402,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (feature != NULL)
 	{
 	  valid_p = 1;
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_PPR_REGNUM, "ppr");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_ppr = 1;
 	}
       else
@@ -6435,14 +6418,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (feature != NULL)
 	{
 	  valid_p = 1;
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_DSCR_REGNUM, "dscr");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_dscr = 1;
 	}
       else
@@ -6454,14 +6434,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (feature != NULL)
 	{
 	  valid_p = 1;
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_TAR_REGNUM, "tar");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_tar = 1;
 	}
       else
@@ -6478,14 +6455,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  valid_p = 1;
 	  for (i = 0; i < ARRAY_SIZE (ebb_regs); i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_BESCR_REGNUM + i,
 						ebb_regs[i]);
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_ebb = 1;
 	}
       else
@@ -6499,27 +6473,24 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	{
 	  valid_p = 1;
 
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_MMCR0_REGNUM,
 					      "mmcr0");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_MMCR2_REGNUM,
 					      "mmcr2");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_SIAR_REGNUM,
 					      "siar");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_SDAR_REGNUM,
 					      "sdar");
-	  valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 					      PPC_SIER_REGNUM,
 					      "sier");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_pmu = 1;
 	}
       else
@@ -6536,14 +6507,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  valid_p = 1;
 	  for (i = 0; i < ARRAY_SIZE (tm_spr_regs); i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_TFHAR_REGNUM + i,
 						tm_spr_regs[i]);
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 
 	  have_htm_spr = 1;
 	}
@@ -6565,14 +6533,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  valid_p = 1;
 
 	  for (i = 0; i < ARRAY_SIZE (cgprs); i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_CR0_REGNUM + i,
 						cgprs[i]);
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 
 	  have_htm_core = 1;
 	}
@@ -6594,15 +6559,12 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  };
 
 	  for (i = 0; i < ARRAY_SIZE (cfprs); i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_CF0_REGNUM + i,
 						cfprs[i]);
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_htm_fpu = 1;
 	}
       else
@@ -6624,15 +6586,12 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  };
 
 	  for (i = 0; i < ARRAY_SIZE (cvmx); i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						PPC_CVR0_REGNUM + i,
 						cvmx[i]);
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_htm_altivec = 1;
 	}
       else
@@ -6654,16 +6613,13 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  };
 
 	  for (i = 0; i < ARRAY_SIZE (cvsx); i++)
-	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
 						(PPC_CVSR0_UPPER_REGNUM
 						 + i),
 						cvsx[i]);
 
 	  if (!valid_p || !have_htm_fpu || !have_htm_altivec)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_htm_vsx = 1;
 	}
       else
@@ -6673,14 +6629,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				    "org.gnu.gdb.power.htm.ppr");
       if (feature != NULL)
 	{
-	  valid_p = tdesc_numbered_register (feature, tdesc_data,
+	  valid_p = tdesc_numbered_register (feature, tdesc_data.get (),
 					     PPC_CPPR_REGNUM, "cppr");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_htm_ppr = 1;
 	}
       else
@@ -6690,14 +6643,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				    "org.gnu.gdb.power.htm.dscr");
       if (feature != NULL)
 	{
-	  valid_p = tdesc_numbered_register (feature, tdesc_data,
+	  valid_p = tdesc_numbered_register (feature, tdesc_data.get (),
 					     PPC_CDSCR_REGNUM, "cdscr");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_htm_dscr = 1;
 	}
       else
@@ -6707,14 +6657,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				    "org.gnu.gdb.power.htm.tar");
       if (feature != NULL)
 	{
-	  valid_p = tdesc_numbered_register (feature, tdesc_data,
+	  valid_p = tdesc_numbered_register (feature, tdesc_data.get (),
 					     PPC_CTAR_REGNUM, "ctar");
 
 	  if (!valid_p)
-	    {
-	      tdesc_data_cleanup (tdesc_data);
-	      return NULL;
-	    }
+	    return NULL;
 	  have_htm_tar = 1;
 	}
       else
@@ -6733,10 +6680,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      supplies a 64-bit description while debugging a 32-bit
      binary.  */
   if (tdesc_wordsize != -1 && tdesc_wordsize != wordsize)
-    {
-      tdesc_data_cleanup (tdesc_data);
-      return NULL;
-    }
+    return NULL;
 
 #ifdef HAVE_ELF
   if (from_elf_exec)
@@ -6872,11 +6816,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (tdep && tdep->vector_abi != vector_abi)
 	continue;
       if (tdep && tdep->wordsize == wordsize)
-	{
-	  if (tdesc_data != NULL)
-	    tdesc_data_cleanup (tdesc_data);
-	  return arches->gdbarch;
-	}
+	return arches->gdbarch;
     }
 
   /* None found, create a new architecture from INFO, whose bfd_arch_info
@@ -7070,7 +7010,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
-  info.tdesc_data = tdesc_data;
+  info.tdesc_data = tdesc_data.get ();
   gdbarch_init_osabi (info, gdbarch);
 
   switch (info.osabi)
@@ -7093,7 +7033,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_tdesc_pseudo_register_type (gdbarch, rs6000_pseudo_register_type);
   set_tdesc_pseudo_register_reggroup_p (gdbarch,
 					rs6000_pseudo_register_reggroup_p);
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   /* Override the normal target description method to make the SPE upper
      halves anonymous.  */

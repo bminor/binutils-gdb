@@ -3320,10 +3320,10 @@ riscv_gdbarch_init (struct gdbarch_info info,
   if (feature_cpu == NULL)
     return NULL;
 
-  struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
+  tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   std::vector<riscv_pending_register_alias> pending_aliases;
 
-  bool valid_p = riscv_check_tdesc_feature (tdesc_data,
+  bool valid_p = riscv_check_tdesc_feature (tdesc_data.get (),
                                             feature_cpu, feature_csr,
                                             &riscv_xreg_feature,
                                             &pending_aliases);
@@ -3345,7 +3345,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
 
   if (feature_fpu != NULL)
     {
-      valid_p &= riscv_check_tdesc_feature (tdesc_data, feature_fpu,
+      valid_p &= riscv_check_tdesc_feature (tdesc_data.get (), feature_fpu,
 					    feature_csr,
                                             &riscv_freg_feature,
                                             &pending_aliases);
@@ -3383,12 +3383,12 @@ riscv_gdbarch_init (struct gdbarch_info info,
     }
 
   if (feature_virtual)
-    riscv_check_tdesc_feature (tdesc_data, feature_virtual, feature_csr,
+    riscv_check_tdesc_feature (tdesc_data.get (), feature_virtual, feature_csr,
                                &riscv_virtual_feature,
                                &pending_aliases);
 
   if (feature_csr)
-    riscv_check_tdesc_feature (tdesc_data, feature_csr, nullptr,
+    riscv_check_tdesc_feature (tdesc_data.get (), feature_csr, nullptr,
                                &riscv_csr_feature,
                                &pending_aliases);
 
@@ -3396,7 +3396,6 @@ riscv_gdbarch_init (struct gdbarch_info info,
     {
       if (riscv_debug_gdbarch)
         fprintf_unfiltered (gdb_stdlog, "Target description is not valid\n");
-      tdesc_data_cleanup (tdesc_data);
       return NULL;
     }
 
@@ -3442,10 +3441,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
     }
 
   if (arches != NULL)
-    {
-      tdesc_data_cleanup (tdesc_data);
-      return arches->gdbarch;
-    }
+    return arches->gdbarch;
 
   /* None found, so create a new architecture from the information provided.  */
   tdep = new (struct gdbarch_tdep);
@@ -3511,7 +3507,8 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_print_registers_info (gdbarch, riscv_print_registers_info);
 
   /* Finalise the target description registers.  */
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data, riscv_tdesc_unknown_reg);
+  tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data),
+		       riscv_tdesc_unknown_reg);
 
   /* Override the register type callback setup by the target description
      mechanism.  This allows us to provide special type for floating point
