@@ -1,5 +1,9 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.python/py-as-string.c: Add cast.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/sizeof.c (fill): Add cast.
 
 2020-09-17  Pedro Alves  <pedro@palves.net>
