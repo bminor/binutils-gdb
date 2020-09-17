@@ -1,5 +1,12 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/watchpoint.c (buf): Make it 31 bytes.
+	(nullptr): Rename to ...
+	(null_ptr): ... this.
+	* gdb.base/watchpoint.exp: Adjust to rename.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/printcmds.c (three, flag_enum_without_zero)
 	(three_not_flag): Add casts.
 
