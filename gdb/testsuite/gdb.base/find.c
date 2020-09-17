@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 /* According to C99 <stdint.h> has to provide these identifiers as
    types, but is also free to define macros shadowing the typedefs.
@@ -54,7 +55,7 @@ static void
 init_bufs ()
 {
   search_buf_size = BUF_SIZE;
-  search_buf = malloc (search_buf_size);
+  search_buf = (char *) malloc (search_buf_size);
   if (search_buf == NULL)
     exit (1);
   memset (search_buf, 'x', search_buf_size);

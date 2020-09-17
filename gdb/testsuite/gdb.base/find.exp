@@ -42,6 +42,9 @@ set two_patterns_found "${newline}2 patterns found\[.\]"
 
 # Test string pattern.
 
+# For when the testcase is built in C++ mode.
+gdb_test_no_output "set print asm-demangle on"
+
 gdb_test_no_output "set *(int32_t*) &int8_search_buf\[10\] = 0x61616161" ""
 
 gdb_test "find &int8_search_buf\[0\], +sizeof(int8_search_buf), 'a', 'a', 'a'" \
