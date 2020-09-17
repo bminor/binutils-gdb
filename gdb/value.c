@@ -2519,22 +2519,19 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
 void
 preserve_values (struct objfile *objfile)
 {
-  htab_t copied_types;
   struct internalvar *var;
 
   /* Create the hash table.  We allocate on the objfile's obstack, since
      it is soon to be deleted.  */
-  copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash (objfile);
 
   for (const value_ref_ptr &item : value_history)
-    preserve_one_value (item.get (), objfile, copied_types);
+    preserve_one_value (item.get (), objfile, copied_types.get ());
 
   for (var = internalvars; var; var = var->next)
-    preserve_one_internalvar (var, objfile, copied_types);
+    preserve_one_internalvar (var, objfile, copied_types.get ());
 
-  preserve_ext_lang_values (objfile, copied_types);
-
-  htab_delete (copied_types);
+  preserve_ext_lang_values (objfile, copied_types.get ());
 }
 
 static void

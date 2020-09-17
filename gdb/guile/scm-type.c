@@ -387,20 +387,17 @@ static void
 save_objfile_types (struct objfile *objfile, void *datum)
 {
   htab_t htab = (htab_t) datum;
-  htab_t copied_types;
 
   if (!gdb_scheme_initialized)
     return;
 
-  copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash (objfile);
 
   if (htab != NULL)
     {
-      htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types);
+      htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types.get ());
       htab_delete (htab);
     }
-
-  htab_delete (copied_types);
 }
 
 /* Administrivia for field smobs.  */

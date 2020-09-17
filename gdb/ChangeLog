@@ -1,5 +1,14 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* value.c (preserve_values): Update.
+	* python/py-type.c (save_objfile_types): Update.
+	* guile/scm-type.c (save_objfile_types): Update.
+	* gdbtypes.h (create_copied_types_hash): Return htab_up.
+	* gdbtypes.c (create_copied_types_hash): Return htab_up.
+	* compile/compile-object-run.c (compile_object_run): Update.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* typeprint.h (class typedef_hash_table) <~typedef_hash_table>:
 	Remove.
 	<m_table>: Now htab_up.

@@ -140,14 +140,12 @@ compile_object_run (struct compile_module *module)
   try
     {
       struct type *func_type = SYMBOL_TYPE (func_sym);
-      htab_t copied_types;
       int current_arg = 0;
       struct value **vargs;
 
       /* OBJFILE may disappear while FUNC_TYPE still will be in use.  */
-      copied_types = create_copied_types_hash (objfile);
-      func_type = copy_type_recursive (objfile, func_type, copied_types);
-      htab_delete (copied_types);
+      htab_up copied_types = create_copied_types_hash (objfile);
+      func_type = copy_type_recursive (objfile, func_type, copied_types.get ());
 
       gdb_assert (func_type->code () == TYPE_CODE_FUNC);
       func_val = value_from_pointer (lookup_pointer_type (func_type),

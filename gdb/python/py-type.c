@@ -1066,7 +1066,6 @@ static void
 save_objfile_types (struct objfile *objfile, void *datum)
 {
   type_object *obj = (type_object *) datum;
-  htab_t copied_types;
 
   if (!gdb_python_initialized)
     return;
@@ -1075,23 +1074,22 @@ save_objfile_types (struct objfile *objfile, void *datum)
      operating on.  */
   gdbpy_enter enter_py (objfile->arch (), current_language);
 
-  copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash (objfile);
 
   while (obj)
     {
       type_object *next = obj->next;
 
-      htab_empty (copied_types);
+      htab_empty (copied_types.get ());
 
-      obj->type = copy_type_recursive (objfile, obj->type, copied_types);
+      obj->type = copy_type_recursive (objfile, obj->type,
+				       copied_types.get ());
 
       obj->next = NULL;
       obj->prev = NULL;
 
       obj = next;
     }
-
-  htab_delete (copied_types);
 }
 
 static void

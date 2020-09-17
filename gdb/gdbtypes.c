@@ -5227,13 +5227,13 @@ type_pair_eq (const void *item_lhs, const void *item_rhs)
    types without duplicates.  We use OBJFILE's obstack, because
    OBJFILE is about to be deleted.  */
 
-htab_t
+htab_up
 create_copied_types_hash (struct objfile *objfile)
 {
-  return htab_create_alloc_ex (1, type_pair_hash, type_pair_eq,
-			       NULL, &objfile->objfile_obstack,
-			       hashtab_obstack_allocate,
-			       dummy_obstack_deallocate);
+  return htab_up (htab_create_alloc_ex (1, type_pair_hash, type_pair_eq,
+					NULL, &objfile->objfile_obstack,
+					hashtab_obstack_allocate,
+					dummy_obstack_deallocate));
 }
 
 /* Recursively copy (deep copy) a dynamic attribute list of a type.  */
