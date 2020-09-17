@@ -84,8 +84,8 @@ void funca(void)
   fb.f = 42;
   fb.s = 19;
 
-  bf = alloca (sizeof (foobar));
-  bf->nothing = alloca (128);
+  bf = (foobar *) alloca (sizeof (foobar));
+  bf->nothing = (char *) alloca (128);
   bf->nothing = "Bar Foo";
   bf->f = 24;
   bf->s = 91;
@@ -112,8 +112,8 @@ int func2(int f)
   fb.f = 84;
   fb.s = 38;
 
-  bf = alloca (sizeof (foobar));
-  bf->nothing = alloca (128);
+  bf = (foobar *) alloca (sizeof (foobar));
+  bf->nothing = (char *) alloca (128);
   bf->nothing = "Elided Bar Foo";
   bf->f = 48;
   bf->s = 182;

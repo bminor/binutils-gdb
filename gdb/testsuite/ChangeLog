@@ -1,5 +1,10 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.python/py-framefilter-mi.c (funca): Add casts.
+	* gdb.python/py-framefilter.c.c (funca, func2): Add casts.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.mi/var-cmd.c (do_anonymous_type_tests): Add cast.
 
 2020-09-17  Pedro Alves  <pedro@palves.net>

@@ -83,8 +83,8 @@ void funca(void)
   fb.f = 42;
   fb.s = 19;
 
-  bf = malloc (sizeof (foobar));
-  bf->nothing = malloc (128);
+  bf = (foobar *) malloc (sizeof (foobar));
+  bf->nothing = (char *) malloc (128);
   bf->nothing = "Bar Foo";
   bf->f = 24;
   bf->s = 91;
