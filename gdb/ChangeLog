@@ -1,5 +1,9 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* target-descriptions.c (tdesc_use_registers): Use htab_up.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* linespec.c (class decode_compound_collector)
 	<~decode_compound_collector>: Remove.
 	<m_unique_syms>: Now htab_up.

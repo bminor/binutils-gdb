@@ -1108,7 +1108,6 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 {
   int num_regs = gdbarch_num_regs (gdbarch);
   struct tdesc_arch_data *data;
-  htab_t reg_hash;
 
   /* We can't use the description for registers if it doesn't describe
      any.  This function should only be called after validating
@@ -1123,11 +1122,12 @@ tdesc_use_registers (struct gdbarch *gdbarch,
   /* Build up a set of all registers, so that we can assign register
      numbers where needed.  The hash table expands as necessary, so
      the initial size is arbitrary.  */
-  reg_hash = htab_create (37, htab_hash_pointer, htab_eq_pointer, NULL);
+  htab_up reg_hash (htab_create (37, htab_hash_pointer, htab_eq_pointer,
+				 NULL));
   for (const tdesc_feature_up &feature : target_desc->features)
     for (const tdesc_reg_up &reg : feature->registers)
       {
-	void **slot = htab_find_slot (reg_hash, reg.get (), INSERT);
+	void **slot = htab_find_slot (reg_hash.get (), reg.get (), INSERT);
 
 	*slot = reg.get ();
 	/* Add reggroup if its new.  */
@@ -1142,7 +1142,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
      architecture.  */
   for (const tdesc_arch_reg &arch_reg : data->arch_regs)
     if (arch_reg.reg != NULL)
-      htab_remove_elt (reg_hash, arch_reg.reg);
+      htab_remove_elt (reg_hash.get (), arch_reg.reg);
 
   /* Assign numbers to the remaining registers and add them to the
      list of registers.  The new numbers are always above gdbarch_num_regs.
@@ -1160,7 +1160,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
     {
       for (const tdesc_feature_up &feature : target_desc->features)
 	for (const tdesc_reg_up &reg : feature->registers)
-	  if (htab_find (reg_hash, reg.get ()) != NULL)
+	  if (htab_find (reg_hash.get (), reg.get ()) != NULL)
 	    {
 	      int regno = unk_reg_cb (gdbarch, feature.get (),
 				      reg->name.c_str (), num_regs);
@@ -1171,7 +1171,7 @@ tdesc_use_registers (struct gdbarch *gdbarch,
 		    data->arch_regs.emplace_back (nullptr, nullptr);
 		  data->arch_regs[regno] = tdesc_arch_reg (reg.get (), NULL);
 		  num_regs = regno + 1;
-		  htab_remove_elt (reg_hash, reg.get ());
+		  htab_remove_elt (reg_hash.get (), reg.get ());
 		}
 	    }
     }
@@ -1183,13 +1183,11 @@ tdesc_use_registers (struct gdbarch *gdbarch,
      unnumbered registers.  */
   for (const tdesc_feature_up &feature : target_desc->features)
     for (const tdesc_reg_up &reg : feature->registers)
-      if (htab_find (reg_hash, reg.get ()) != NULL)
+      if (htab_find (reg_hash.get (), reg.get ()) != NULL)
 	{
 	  data->arch_regs.emplace_back (reg.get (), nullptr);
 	  num_regs++;
 	}
-
-  htab_delete (reg_hash);
 
   /* Update the architecture.  */
   set_gdbarch_num_regs (gdbarch, num_regs);
