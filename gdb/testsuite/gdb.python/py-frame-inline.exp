@@ -54,4 +54,4 @@ gdb_test "python print (gdb.newest_frame())" ".*"
 
 # Regression test to verify that Frame.function works properly for
 # inline frames.
-gdb_test "python print (gdb.newest_frame().function())" "f"
+gdb_test "python print (gdb.newest_frame().function())" "f(\\(\\))?"

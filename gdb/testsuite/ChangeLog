@@ -1,5 +1,10 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.python/py-frame-inline.exp: Adjust to optionally expect a
+	full prototype.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.python/py-as-string.c: Add cast.
 
 2020-09-17  Pedro Alves  <pedro@palves.net>
