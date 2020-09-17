@@ -3453,16 +3453,10 @@ class decode_compound_collector
 {
 public:
   decode_compound_collector ()
+    : m_unique_syms (htab_create_alloc (1, htab_hash_pointer,
+					htab_eq_pointer, NULL,
+					xcalloc, xfree))
   {
-    m_unique_syms = htab_create_alloc (1, htab_hash_pointer,
-				       htab_eq_pointer, NULL,
-				       xcalloc, xfree);
-  }
-
-  ~decode_compound_collector ()
-  {
-    if (m_unique_syms != NULL)
-      htab_delete (m_unique_syms);
   }
 
   /* Return all symbols collected.  */
@@ -3477,7 +3471,7 @@ public:
 private:
   /* A hash table of all symbols we found.  We use this to avoid
      adding any symbol more than once.  */
-  htab_t m_unique_syms;
+  htab_up m_unique_syms;
 
   /* The result vector.  */
   std::vector<block_symbol>  m_symbols;
@@ -3500,7 +3494,7 @@ decode_compound_collector::operator () (block_symbol *bsym)
       && t->code () != TYPE_CODE_NAMESPACE)
     return true; /* Continue iterating.  */
 
-  slot = htab_find_slot (m_unique_syms, sym, INSERT);
+  slot = htab_find_slot (m_unique_syms.get (), sym, INSERT);
   if (!*slot)
     {
       *slot = sym;
@@ -3730,15 +3724,9 @@ class symtab_collector
 {
 public:
   symtab_collector ()
+    : m_symtab_table (htab_create (1, htab_hash_pointer, htab_eq_pointer,
+				   NULL))
   {
-    m_symtab_table = htab_create (1, htab_hash_pointer, htab_eq_pointer,
-				  NULL);
-  }
-
-  ~symtab_collector ()
-  {
-    if (m_symtab_table != NULL)
-      htab_delete (m_symtab_table);
   }
 
   /* Callable as a symbol_found_callback_ftype callback.  */
@@ -3755,7 +3743,7 @@ private:
   std::vector<symtab *> m_symtabs;
 
   /* This is used to ensure the symtabs are unique.  */
-  htab_t m_symtab_table;
+  htab_up m_symtab_table;
 };
 
 bool
@@ -3763,7 +3751,7 @@ symtab_collector::operator () (struct symtab *symtab)
 {
   void **slot;
 
-  slot = htab_find_slot (m_symtab_table, symtab, INSERT);
+  slot = htab_find_slot (m_symtab_table.get (), symtab, INSERT);
   if (!*slot)
     {
       *slot = symtab;

@@ -1,5 +1,15 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* linespec.c (class decode_compound_collector)
+	<~decode_compound_collector>: Remove.
+	<m_unique_syms>: Now htab_up.
+	(decode_compound_collector::operator ()): Update.
+	(class symtab_collector) <~symtab_collector>: Remove.
+	<m_symtab_table>: Now htab_up.
+	(symtab_collector::operator ()): Update.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* filename-seen-cache.c (filename_seen_cache::filename_seen_cache)
 	(filename_seen_cache::clear): Update.
 	(~filename_seen_cache): Remove.
