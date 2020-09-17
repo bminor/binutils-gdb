@@ -2904,7 +2904,25 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	         STT_GNU_IFUNC symbol as STT_FUNC.  */
 	      if (elf_section_type (input_section) == SHT_NOTE)
 		goto skip_ifunc;
-	      abort ();
+
+	      /* Dynamic relocs are not propagated for SEC_DEBUGGING
+		 sections because such sections are not SEC_ALLOC and
+		 thus ld.so will not process them.  */
+	      if ((input_section->flags & SEC_ALLOC) == 0
+		  && (input_section->flags & SEC_DEBUGGING) != 0)
+		continue;
+
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB(%pA+%#" PRIx64 "): "
+		   "unresolvable %s relocation against symbol `%s'"),
+		 input_bfd,
+		 input_section,
+		 (uint64_t) rel->r_offset,
+		 howto->name,
+		 h->root.root.string);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
 	    }
 
 	  plt_sec = htab->elf.splt;

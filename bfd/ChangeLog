@@ -1,3 +1,9 @@
+2020-09-17  Mikael Pettersson  <mikpelinux@gmail.com>
+
+	PR ld/18808
+	* elfxx-sparc.c (_bfd_sparc_elf_relocate_section): Skip IFUNC
+	relocations in debug sections, change abort to _bfd_error_handler.
+
 2020-09-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26583
