@@ -1,5 +1,14 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/prologue.c [__cplusplus] (marker): Explicitly specify
+	linkage name.
+	* gdb.base/prologue.exp: Use print /d.
+	* gdb.base/symbol-alias.exp: Handle C++ output.
+	* gdb.base/symbol-alias2.c: Handle C++ output.
+	[__cplusplus] (func): Explicitly specify linkage name.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.python/py-nested-maps.c (struct key_t): Rename to...
 	(struct my_key_t): ... this.  Adjust all references.
 	(struct value_t): Rename to ...

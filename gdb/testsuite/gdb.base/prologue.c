@@ -20,6 +20,12 @@ int leaf (void)
   return 1;
 }
 
+#ifdef __cplusplus
+/* So that the alias attribute below work without having to figure out
+   this function's mangled name.  */
+int marker (int val) asm ("marker");
+#endif
+
 int marker (int val)
 {
   leaf ();

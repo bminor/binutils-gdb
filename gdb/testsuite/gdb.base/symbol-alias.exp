@@ -27,7 +27,7 @@ if ![runto_main] then {
 
 # Functions.
 foreach f {"func" "func_alias"} {
-    gdb_test "p $f" " = {struct S \\*\\(void\\)} $hex <func>"
+    gdb_test "p $f" " = {(struct )?S \\*\\(void\\)} $hex <func(\\(\\))?>"
     gdb_test "p *${f}()" "= {field1 = 1, field2 = 2}"
 }
 

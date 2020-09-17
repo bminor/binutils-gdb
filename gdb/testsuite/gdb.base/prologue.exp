@@ -59,4 +59,4 @@ set pc1 [find_breakpoint_pc "marker"]
 
 set pc2 [find_breakpoint_pc "other"]
 
-gdb_test "print $pc1 == $pc2" "\\\$$decimal = 1" "same pc from minimal symbol"
+gdb_test "print /d $pc1 == $pc2" "\\\$$decimal = 1" "same pc from minimal symbol"

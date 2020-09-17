@@ -23,6 +23,12 @@ struct S
 
 struct S g_var_s = { 1, 2 };
 
+#ifdef __cplusplus
+/* So that the alias attribute below work without having to figure out
+   this function's mangled name.  */
+static struct S *func (void) asm ("func");
+#endif
+
 static struct S *
 func (void)
 {
