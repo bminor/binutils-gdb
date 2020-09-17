@@ -1,5 +1,9 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/share-env-with-gdbserver.c (main): Add cast.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/prologue.c [__cplusplus] (marker): Explicitly specify
 	linkage name.
 	* gdb.base/prologue.exp: Use print /d.
