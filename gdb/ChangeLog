@@ -1,5 +1,16 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* filename-seen-cache.c (filename_seen_cache::filename_seen_cache)
+	(filename_seen_cache::clear): Update.
+	(~filename_seen_cache): Remove.
+	(filename_seen_cache::seen): Update.
+	* filename-seen-cache.h (class filename_seen_cache) <m_tab>: Now
+	htab_up.
+	<~filename_seen_cache>: Remove.
+	<traverse>: Update.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* completer.c (completion_tracker::discard_completions)
 	(completion_tracker::~completion_tracker)
 	(completion_tracker::maybe_add_completion)

@@ -27,10 +27,10 @@
 /* filename_seen_cache constructor.  */
 
 filename_seen_cache::filename_seen_cache ()
+  : m_tab (htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
+			      filename_hash, filename_eq,
+			      NULL, xcalloc, xfree))
 {
-  m_tab = htab_create_alloc (INITIAL_FILENAME_SEEN_CACHE_SIZE,
-			     filename_hash, filename_eq,
-			     NULL, xcalloc, xfree);
 }
 
 /* See filename-seen-cache.h.  */
@@ -38,14 +38,7 @@ filename_seen_cache::filename_seen_cache ()
 void
 filename_seen_cache::clear ()
 {
-  htab_empty (m_tab);
-}
-
-/* See filename-seen-cache.h.  */
-
-filename_seen_cache::~filename_seen_cache ()
-{
-  htab_delete (m_tab);
+  htab_empty (m_tab.get ());
 }
 
 /* See filename-seen-cache.h.  */
@@ -56,7 +49,7 @@ filename_seen_cache::seen (const char *file)
   void **slot;
 
   /* Is FILE in tab?  */
-  slot = htab_find_slot (m_tab, file, INSERT);
+  slot = htab_find_slot (m_tab.get (), file, INSERT);
   if (*slot != NULL)
     return true;
 
