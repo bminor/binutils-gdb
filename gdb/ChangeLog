@@ -1,3 +1,7 @@
+2020-09-17  Tom Tromey  <tromey@adacore.com>
+
+	* c-exp.y (name_obstack): Now static.
+
 2020-09-17  Chungyi Chi  <demonic@csie.io>
 
 	* riscv-tdep.c (riscv-insn::decode): Fix recorded insn type.

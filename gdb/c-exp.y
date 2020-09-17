@@ -3013,7 +3013,7 @@ static int popping;
 
 /* Temporary storage for c_lex; this holds symbol names as they are
    built up.  */
-auto_obstack name_obstack;
+static auto_obstack name_obstack;
 
 /* Classify a NAME token.  The contents of the token are in `yylval'.
    Updates yylval and returns the new token type.  BLOCK is the block
