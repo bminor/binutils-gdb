@@ -31,4 +31,4 @@ gdb_test "print &foo_array\[1\].a" "= \\(int \\*\\) $hex.*"
 
 # A bug in EVAL_AVOID_SIDE_EFFECTS mode used to yield the following error:
 #    Attempt to take address of value not located in memory.
-gdb_test "print 1 && &foo_array\[1\].a" "= 1"
+gdb_test "print /d 1 && &foo_array\[1\].a" "= 1"

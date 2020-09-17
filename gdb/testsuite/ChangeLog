@@ -1,5 +1,10 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/nested-addr.c (main): Add cast.
+	* gdb.base/nested-addr.exp: Use "print /d".
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/break.exp (func): New.  Use it throughout when
 	expecting a function name.
 

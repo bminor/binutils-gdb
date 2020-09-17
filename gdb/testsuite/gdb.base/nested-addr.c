@@ -28,7 +28,7 @@ static foo *foo_array = NULL;
 int
 main (void)
 {
-  foo_array = calloc (3, sizeof (*foo_array));
+  foo_array = (foo *) calloc (3, sizeof (*foo_array));
   foo_array[1].a = 10;
   foo_array[2].b = 20;
   return 0; /* BREAK */
