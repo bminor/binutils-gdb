@@ -209,7 +209,7 @@ typedef_hash_table::recursively_update (struct type *t)
       struct decl_field *tdef = &TYPE_TYPEDEF_FIELD (t, i);
       void **slot;
 
-      slot = htab_find_slot (m_table, tdef, INSERT);
+      slot = htab_find_slot (m_table.get (), tdef, INSERT);
       /* Only add a given typedef name once.  Really this shouldn't
 	 happen; but it is safe enough to do the updates breadth-first
 	 and thus use the most specific typedef.  */
@@ -242,7 +242,7 @@ typedef_hash_table::add_template_parameters (struct type *t)
       tf->name = TYPE_TEMPLATE_ARGUMENT (t, i)->linkage_name ();
       tf->type = SYMBOL_TYPE (TYPE_TEMPLATE_ARGUMENT (t, i));
 
-      slot = htab_find_slot (m_table, tf, INSERT);
+      slot = htab_find_slot (m_table.get (), tf, INSERT);
       if (*slot == NULL)
 	*slot = tf;
     }
@@ -251,16 +251,9 @@ typedef_hash_table::add_template_parameters (struct type *t)
 /* See typeprint.h.  */
 
 typedef_hash_table::typedef_hash_table ()
+  : m_table (htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
+				NULL, xcalloc, xfree))
 {
-  m_table = htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
-			       NULL, xcalloc, xfree);
-}
-
-/* Free a typedef field table.  */
-
-typedef_hash_table::~typedef_hash_table ()
-{
-  htab_delete (m_table);
 }
 
 /* Helper function for typedef_hash_table::copy.  */
@@ -282,10 +275,10 @@ copy_typedef_hash_element (void **slot, void *nt)
 
 typedef_hash_table::typedef_hash_table (const typedef_hash_table &table)
 {
-  m_table = htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
-			       NULL, xcalloc, xfree);
-  htab_traverse_noresize (table.m_table, copy_typedef_hash_element,
-			  m_table);
+  m_table.reset (htab_create_alloc (10, hash_typedef_field, eq_typedef_field,
+				    NULL, xcalloc, xfree));
+  htab_traverse_noresize (table.m_table.get (), copy_typedef_hash_element,
+			  m_table.get ());
 }
 
 /* Look up the type T in the global typedef hash.  If it is found,
@@ -307,7 +300,7 @@ typedef_hash_table::find_global_typedef (const struct type_print_options *flags,
   tf.name = NULL;
   tf.type = t;
 
-  slot = htab_find_slot (flags->global_typedefs->m_table, &tf, INSERT);
+  slot = htab_find_slot (flags->global_typedefs->m_table.get (), &tf, INSERT);
   if (*slot != NULL)
     {
       new_tf = (struct decl_field *) *slot;
@@ -346,8 +339,8 @@ typedef_hash_table::find_typedef (const struct type_print_options *flags,
 
       tf.name = NULL;
       tf.type = t;
-      found = (struct decl_field *) htab_find (flags->local_typedefs->m_table,
-					       &tf);
+      htab_t table = flags->local_typedefs->m_table.get ();
+      found = (struct decl_field *) htab_find (table, &tf);
 
       if (found != NULL)
 	return found->name;

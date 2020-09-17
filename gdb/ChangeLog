@@ -1,5 +1,18 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* typeprint.h (class typedef_hash_table) <~typedef_hash_table>:
+	Remove.
+	<m_table>: Now htab_up.
+	* typeprint.c (typedef_hash_table::recursively_update)
+	(typedef_hash_table::add_template_parameters)
+	(typedef_hash_table::typedef_hash_table): Update.
+	(typedef_hash_table::~typedef_hash_table): Remove.
+	(typedef_hash_table::typedef_hash_table)
+	(typedef_hash_table::find_global_typedef)
+	(typedef_hash_table::find_typedef): Update.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* target-descriptions.c (tdesc_use_registers): Use htab_up.
 
 2020-09-17  Tom Tromey  <tom@tromey.com>
