@@ -71,6 +71,7 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/gdb_wait.h"
 #include "nat/windows-nat.h"
+#include "gdbsupport/symbol.h"
 
 using namespace windows_nat;
 
@@ -235,6 +236,7 @@ static int saw_create;
 static int open_process_used = 0;
 #ifdef __x86_64__
 static bool wow64_process = false;
+static void *wow64_dbgbreak;
 #endif
 
 /* User options.  */
@@ -1522,9 +1524,36 @@ ctrl_c_handler (DWORD event_type)
   if (!new_console && !attach_flag)
     return TRUE;
 
-  if (!DebugBreakProcess (current_process_handle))
-    warning (_("Could not interrupt program.  "
-	       "Press Ctrl-c in the program console."));
+#ifdef __x86_64__
+  if (wow64_process)
+    {
+      /* Call DbgUiRemoteBreakin of the 32bit ntdll.dll in the target process.
+	 DebugBreakProcess would call the one of the 64bit ntdll.dll, which
+	 can't be correctly handled by gdb.  */
+      if (wow64_dbgbreak == nullptr)
+	{
+	  CORE_ADDR addr;
+	  if (!find_minimal_symbol_address ("ntdll!DbgUiRemoteBreakin",
+					    &addr, 0))
+	    wow64_dbgbreak = (void *) addr;
+	}
+
+      if (wow64_dbgbreak != nullptr)
+	{
+	  HANDLE thread = CreateRemoteThread (current_process_handle, NULL,
+					      0, (LPTHREAD_START_ROUTINE)
+					      wow64_dbgbreak, NULL, 0, NULL);
+	  if (thread)
+	    CloseHandle (thread);
+	}
+    }
+  else
+#endif
+    {
+      if (!DebugBreakProcess (current_process_handle))
+	warning (_("Could not interrupt program.  "
+		   "Press Ctrl-c in the program console."));
+    }
 
   /* Return true to tell that Ctrl-C has been handled.  */
   return TRUE;

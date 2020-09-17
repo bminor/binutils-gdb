@@ -1,3 +1,8 @@
+2020-09-17  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-nat.c (ctrl_c_handler): Use 32bit DbgUiRemoteBreakin
+	for WOW64 processes.
+
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (compute_compunit_symtab_includes): Use htab_up.
