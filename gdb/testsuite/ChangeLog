@@ -1,5 +1,9 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/display.exp: Issue "set print asm-demangle on".
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/find.c: Include <string.h>.
 	(init_bufs): Add cast.
 	* gdb.base/find.exp: Issue "set print asm-demangle on".
