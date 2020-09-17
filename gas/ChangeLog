@@ -1,6 +1,13 @@
 2020-09-15  Nick Clifton  <nickc@redhat.com>
 
 	Import from mainline:
+	2020-09-15  David Faust  <david.faust@oracle.com>
+
+	* config/tc-bpf.h (md_single_noop_insn): Use 'ja 0' for no-op.
+
+2020-09-15  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
 	2020-09-14  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (s_nop): New function.  Handles the .nop directive.
