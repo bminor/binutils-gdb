@@ -1,5 +1,9 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.mi/var-cmd.c (do_anonymous_type_tests): Add cast.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/exprs.c: Replace 'this' with 'self' throughout.
 	* gdb.base/ptype.c: : Replace 'this' with 'self' throughout.
 	(charfoo, intfoo): Define full prototype.

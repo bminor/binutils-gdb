@@ -566,7 +566,7 @@ do_anonymous_type_tests (void)
     };
   } v = {1, {2}, {3}};
 
-  anon = malloc (sizeof (struct anonymous));
+  anon = (struct anonymous *) malloc (sizeof (struct anonymous));
   anon->a = 1;
   anon->b = 2;
   anon->c = (char *) 3;
