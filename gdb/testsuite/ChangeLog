@@ -1,5 +1,14 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.python/py-nested-maps.c (struct key_t): Rename to...
+	(struct my_key_t): ... this.  Adjust all references.
+	(struct value_t): Rename to ...
+	(struct my_value_t): ... this.  Adjust all references.
+	(create_map, add_map_element, create_map_map)
+	(add_map_map_element): Add casts.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.python/py-framefilter-mi.c (funca): Add casts.
 	* gdb.python/py-framefilter.c.c (funca, func2): Add casts.
 
