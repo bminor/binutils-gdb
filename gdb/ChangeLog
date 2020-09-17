@@ -1,3 +1,7 @@
+2020-09-17  Chungyi Chi  <demonic@csie.io>
+
+	* riscv-tdep.c (riscv-insn::decode): Fix recorded insn type.
+
 2020-09-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	* breakpoint.h (init_catchpoint): Change int parameter to bool.

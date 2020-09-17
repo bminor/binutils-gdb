@@ -1472,7 +1472,7 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
       else if (is_c_swsp_insn (ival))
 	decode_css_type_insn (SW, ival, EXTRACT_RVC_SWSP_IMM (ival));
       else if (xlen != 4 && is_c_sdsp_insn (ival))
-	decode_css_type_insn (SW, ival, EXTRACT_RVC_SDSP_IMM (ival));
+	decode_css_type_insn (SD, ival, EXTRACT_RVC_SDSP_IMM (ival));
       /* C_JR and C_MV have the same opcode.  If RS2 is 0, then this is a C_JR.
 	 So must try to match C_JR first as it ahs more bits in mask.  */
       else if (is_c_jr_insn (ival))
