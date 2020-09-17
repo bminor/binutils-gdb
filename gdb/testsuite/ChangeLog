@@ -1,5 +1,12 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/charset.c [__cplusplus] (wchar_t, char16_t, char32_t):
+	Don't define.
+	(utf_32_string): Compile for both C and C++.
+	* gdb.base/charset.exp: Use "print /d".
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/watchpoint.c (buf): Make it 31 bytes.
 	(nullptr): Rename to ...
 	(null_ptr): ... this.
