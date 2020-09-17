@@ -529,13 +529,10 @@ For more information about this security protection see the\n\
 
 struct auto_load_pspace_info
 {
-  auto_load_pspace_info () = default;
-  ~auto_load_pspace_info ();
-
   /* For each program space we keep track of loaded scripts, both when
      specified as file names and as scripts to be executed directly.  */
-  struct htab *loaded_script_files = nullptr;
-  struct htab *loaded_script_texts = nullptr;
+  htab_up loaded_script_files;
+  htab_up loaded_script_texts;
 
   /* Non-zero if we've issued the warning about an auto-load script not being
      supported.  We only want to issue this warning once.  */
@@ -566,14 +563,6 @@ struct loaded_script
 /* Per-program-space data key.  */
 static const struct program_space_key<struct auto_load_pspace_info>
   auto_load_pspace_data;
-
-auto_load_pspace_info::~auto_load_pspace_info ()
-{
-  if (loaded_script_files)
-    htab_delete (loaded_script_files);
-  if (loaded_script_texts)
-    htab_delete (loaded_script_texts);
-}
 
 /* Get the current autoload data.  If none is found yet, add it now.  This
    function always returns a valid object.  */
@@ -621,14 +610,16 @@ init_loaded_scripts_info (struct auto_load_pspace_info *pspace_info)
      Space for each entry is obtained with one malloc so we can free them
      easily.  */
 
-  pspace_info->loaded_script_files = htab_create (31,
-						  hash_loaded_script_entry,
-						  eq_loaded_script_entry,
-						  xfree);
-  pspace_info->loaded_script_texts = htab_create (31,
-						  hash_loaded_script_entry,
-						  eq_loaded_script_entry,
-						  xfree);
+  pspace_info->loaded_script_files.reset
+    (htab_create (31,
+		  hash_loaded_script_entry,
+		  eq_loaded_script_entry,
+		  xfree));
+  pspace_info->loaded_script_texts.reset
+    (htab_create (31,
+		  hash_loaded_script_entry,
+		  eq_loaded_script_entry,
+		  xfree));
 
   pspace_info->unsupported_script_warning_printed = false;
   pspace_info->script_not_found_warning_printed = false;
@@ -660,7 +651,7 @@ maybe_add_script_file (struct auto_load_pspace_info *pspace_info, int loaded,
 		       const char *name, const char *full_path,
 		       const struct extension_language_defn *language)
 {
-  struct htab *htab = pspace_info->loaded_script_files;
+  struct htab *htab = pspace_info->loaded_script_files.get ();
   struct loaded_script **slot, entry;
   int in_hash_table;
 
@@ -708,7 +699,7 @@ maybe_add_script_text (struct auto_load_pspace_info *pspace_info,
 		       int loaded, const char *name,
 		       const struct extension_language_defn *language)
 {
-  struct htab *htab = pspace_info->loaded_script_texts;
+  struct htab *htab = pspace_info->loaded_script_texts.get ();
   struct loaded_script **slot, entry;
   int in_hash_table;
 
@@ -1299,7 +1290,7 @@ auto_load_info_scripts (const char *pattern, int from_tty,
       collect_matching_scripts_data data (&script_files, language);
 
       /* Pass a pointer to scripts as VEC_safe_push can realloc space.  */
-      htab_traverse_noresize (pspace_info->loaded_script_files,
+      htab_traverse_noresize (pspace_info->loaded_script_files.get (),
 			      collect_matching_scripts, &data);
 
       std::sort (script_files.begin (), script_files.end (),
@@ -1311,7 +1302,7 @@ auto_load_info_scripts (const char *pattern, int from_tty,
       collect_matching_scripts_data data (&script_texts, language);
 
       /* Pass a pointer to scripts as VEC_safe_push can realloc space.  */
-      htab_traverse_noresize (pspace_info->loaded_script_texts,
+      htab_traverse_noresize (pspace_info->loaded_script_texts.get (),
 			      collect_matching_scripts, &data);
 
       std::sort (script_texts.begin (), script_texts.end (),

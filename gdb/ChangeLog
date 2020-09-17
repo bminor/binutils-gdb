@@ -1,3 +1,13 @@
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
+	* auto-load.c (struct auto_load_pspace_info)
+	<~auto_load_pspace_info, auto_load_pspace_info>: Remove.
+	<loaded_script_files, loaded_script_texts>: Change type to
+	htab_up.
+	(~auto_load_pspace_info) Remove.
+	(init_loaded_scripts_info, maybe_add_script_file)
+	(maybe_add_script_text, auto_load_info_scripts): Update.
+
 2020-09-17  Tom Tromey  <tromey@adacore.com>
 
 	* c-exp.y (name_obstack): Now static.
