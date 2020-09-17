@@ -1,5 +1,14 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/examine-backward.c (Barrier, TestStrings): Now unsigned
+	char array.
+	(main): Add references to Barrier, TestStrings, TestStringsH and
+	TestStringsW.
+	* gdb.base/examine-backward.exp: Issue "set print asm-demangle on"
+	and expect a full prototype in C++.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/nested-addr.c (main): Add cast.
 	* gdb.base/nested-addr.exp: Use "print /d".
 
