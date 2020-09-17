@@ -119,45 +119,48 @@ struct dwarf_stack_value
    its current state and its callbacks.  */
 struct dwarf_expr_context
 {
-  dwarf_expr_context (dwarf2_per_objfile *per_objfile);
+  dwarf_expr_context (dwarf2_per_objfile *per_objfile,
+		      int addr_size);
   virtual ~dwarf_expr_context () = default;
 
   void push_address (CORE_ADDR value, bool in_stack_memory);
-  void eval (const gdb_byte *addr, size_t len);
 
-  /* Fetch the result of the expression evaluation in a form of
-     a struct value, where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET
-     describe the source level representation of that result.  */
-  value *fetch_result (struct type *type = nullptr,
-		       struct type *subobj_type = nullptr,
-		       LONGEST subobj_offset = 0);
+  /* Evaluate the expression at ADDR (LEN bytes long) in a given PER_CU
+     and FRAME context.  TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET describe
+     the expected struct value representation of the evaluation
+     result.  The ADDR_INFO property can be specified to override the
+     range of memory addresses with the passed in buffer.  */
+  value *evaluate (const gdb_byte *addr, size_t len,
+		   dwarf2_per_cu_data *per_cu, frame_info *frame,
+		   const struct property_addr_info *addr_info = nullptr,
+		   struct type *type = nullptr,
+		   struct type *subobj_type = nullptr,
+		   LONGEST subobj_offset = 0);
 
+private:
   /* The stack of values.  */
-  std::vector<dwarf_stack_value> stack;
-
-  /* Target architecture to use for address operations.  */
-  struct gdbarch *gdbarch = nullptr;
+  std::vector<dwarf_stack_value> m_stack;
 
   /* Target address size in bytes.  */
-  int addr_size = 0;
+  int m_addr_size = 0;
 
   /* The current depth of dwarf expression recursion, via DW_OP_call*,
      DW_OP_fbreg, DW_OP_push_object_address, etc., and the maximum
      depth we'll tolerate before raising an error.  */
-  int recursion_depth = 0, max_recursion_depth = 0x100;
+  int m_recursion_depth = 0, m_max_recursion_depth = 0x100;
 
   /* Location of the value.  */
-  dwarf_value_location location = DWARF_VALUE_MEMORY;
+  dwarf_value_location m_location = DWARF_VALUE_MEMORY;
 
   /* For DWARF_VALUE_LITERAL, the current literal value's length and
      data.  For DWARF_VALUE_IMPLICIT_POINTER, LEN is the offset of the
      target DIE of sect_offset kind.  */
-  ULONGEST len = 0;
-  const gdb_byte *data = nullptr;
+  ULONGEST m_len = 0;
+  const gdb_byte *m_data = nullptr;
 
   /* Initialization status of variable: Non-zero if variable has been
      initialized; zero otherwise.  */
-  int initialized = 0;
+  int m_initialized = 0;
 
   /* A vector of pieces.
 
@@ -181,25 +184,21 @@ struct dwarf_expr_context
      no DW_OP_piece operations have no value to place in a piece's
      'size' field; the size comes from the surrounding data.  So the
      two cases need to be handled separately.)  */
-  std::vector<dwarf_expr_piece> pieces;
+  std::vector<dwarf_expr_piece> m_pieces;
 
   /* We evaluate the expression in the context of this objfile.  */
-  dwarf2_per_objfile *per_objfile;
+  dwarf2_per_objfile *m_per_objfile;
 
   /* Frame information used for the evaluation.  */
-  frame_info *frame = nullptr;
+  frame_info *m_frame = nullptr;
 
   /* Compilation unit used for the evaluation.  */
-  dwarf2_per_cu_data *per_cu = nullptr;
+  dwarf2_per_cu_data *m_per_cu = nullptr;
 
-  /* Object address used for the evaluation.  */
-  CORE_ADDR obj_address = 0;
+  /* Property address info used for the evaluation.  */
+  const struct property_addr_info *m_addr_info = nullptr;
 
-  /* The data that was passed in.  */
-  gdb::array_view<const gdb_byte> data_view;
-
-private:
-
+  void eval (const gdb_byte *addr, size_t len);
   struct type *address_type () const;
   void push (struct value *value, bool in_stack_memory);
   bool stack_empty_p () const;
@@ -209,6 +208,12 @@ private:
   struct value *fetch (int n);
   CORE_ADDR fetch_address (int n);
   bool fetch_in_stack_memory (int n);
+
+  /* Fetch the result of the expression evaluation in a form of
+     a struct value, where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET
+     describe the source level representation of that result.  */
+  value *fetch_result (struct type *type, struct type *subobj_type,
+		       LONGEST subobj_offset);
 
   /* Return the location expression for the frame base attribute, in
      START and LENGTH.  The result must be live until the current

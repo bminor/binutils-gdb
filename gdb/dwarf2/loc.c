@@ -1461,8 +1461,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 			       struct type *subobj_type,
 			       LONGEST subobj_byte_offset)
 {
-  struct value *retval;
-
   if (subobj_type == NULL)
     {
       subobj_type = type;
@@ -1474,21 +1472,15 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   if (size == 0)
     return allocate_optimized_out_value (subobj_type);
 
-  dwarf_expr_context ctx (per_objfile);
-  ctx.frame = frame;
-  ctx.per_cu = per_cu;
-  ctx.obj_address = 0;
+  dwarf_expr_context ctx (per_objfile, per_cu->addr_size ());
 
+  value *retval;
   scoped_value_mark free_values;
-
-  ctx.gdbarch = per_objfile->objfile->arch ();
-  ctx.addr_size = per_cu->addr_size ();
 
   try
     {
-      ctx.eval (data, size);
-      retval = ctx.fetch_result (type, subobj_type,
-				 subobj_byte_offset);
+      retval = ctx.evaluate (data, size, per_cu, frame, nullptr, type,
+			     subobj_type, subobj_byte_offset);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1558,29 +1550,24 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
     return 0;
 
   dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
-  dwarf_expr_context ctx (per_objfile);
+  dwarf2_per_cu_data *per_cu = dlbaton->per_cu;
+  dwarf_expr_context ctx (per_objfile, per_cu->addr_size ());
 
-  struct value *result;
+  value *result;
   scoped_value_mark free_values;
 
-  ctx.frame = frame;
-  ctx.per_cu = dlbaton->per_cu;
-  if (addr_stack != nullptr)
-    {
-      ctx.obj_address = addr_stack->addr;
-      ctx.data_view = addr_stack->valaddr;
-    }
-
-  ctx.gdbarch = per_objfile->objfile->arch ();
-  ctx.addr_size = dlbaton->per_cu->addr_size ();
-
   if (push_initial_value)
-    ctx.push_address (ctx.obj_address, false);
+    {
+      if (addr_stack != nullptr)
+	ctx.push_address (addr_stack->addr, false);
+      else
+	ctx.push_address (0, false);
+    }
 
   try
     {
-      ctx.eval (dlbaton->data, dlbaton->size);
-      result = ctx.fetch_result ();
+      result = ctx.evaluate (dlbaton->data, dlbaton->size,
+			     per_cu, frame, addr_stack);
     }
   catch (const gdb_exception_error &ex)
     {

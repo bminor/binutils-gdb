@@ -668,25 +668,24 @@ sect_variable_value (sect_offset sect_off,
 struct type *
 dwarf_expr_context::address_type () const
 {
-  struct dwarf_gdbarch_types *types
-    = (struct dwarf_gdbarch_types *) gdbarch_data (this->gdbarch,
-						   dwarf_arch_cookie);
+  gdbarch *arch = this->m_per_objfile->objfile->arch ();
+  dwarf_gdbarch_types *types
+    = (dwarf_gdbarch_types *) gdbarch_data (arch, dwarf_arch_cookie);
   int ndx;
 
-  if (this->addr_size == 2)
+  if (this->m_addr_size == 2)
     ndx = 0;
-  else if (this->addr_size == 4)
+  else if (this->m_addr_size == 4)
     ndx = 1;
-  else if (this->addr_size == 8)
+  else if (this->m_addr_size == 8)
     ndx = 2;
   else
     error (_("Unsupported address size in DWARF expressions: %d bits"),
-	   8 * this->addr_size);
+	   8 * this->m_addr_size);
 
   if (types->dw_types[ndx] == NULL)
     types->dw_types[ndx]
-      = arch_integer_type (this->gdbarch,
-			   8 * this->addr_size,
+      = arch_integer_type (arch, 8 * this->m_addr_size,
 			   0, "<signed DWARF address type>");
 
   return types->dw_types[ndx];
@@ -694,8 +693,10 @@ dwarf_expr_context::address_type () const
 
 /* Create a new context for the expression evaluator.  */
 
-dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile)
-: per_objfile (per_objfile)
+dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile,
+					int addr_size)
+: m_addr_size (addr_size),
+  m_per_objfile (per_objfile)
 {
 }
 
@@ -704,7 +705,7 @@ dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile)
 void
 dwarf_expr_context::push (struct value *value, bool in_stack_memory)
 {
-  stack.emplace_back (value, in_stack_memory);
+  this->m_stack.emplace_back (value, in_stack_memory);
 }
 
 /* Push VALUE onto the stack.  */
@@ -720,10 +721,10 @@ dwarf_expr_context::push_address (CORE_ADDR value, bool in_stack_memory)
 void
 dwarf_expr_context::pop ()
 {
-  if (stack.empty ())
+  if (this->m_stack.empty ())
     error (_("dwarf expression stack underflow"));
 
-  stack.pop_back ();
+  this->m_stack.pop_back ();
 }
 
 /* Retrieve the N'th item on the stack.  */
@@ -731,11 +732,11 @@ dwarf_expr_context::pop ()
 struct value *
 dwarf_expr_context::fetch (int n)
 {
-  if (stack.size () <= n)
+  if (this->m_stack.size () <= n)
      error (_("Asked for position %d of stack, "
 	      "stack only has %zu elements on it."),
-	    n, stack.size ());
-  return stack[stack.size () - (1 + n)].value;
+	    n, this->m_stack.size ());
+  return this->m_stack[this->m_stack.size () - (1 + n)].value;
 }
 
 /* See expr.h.  */
@@ -744,9 +745,9 @@ void
 dwarf_expr_context::get_frame_base (const gdb_byte **start,
 				    size_t * length)
 {
-  ensure_have_frame (this->frame, "DW_OP_fbreg");
+  ensure_have_frame (this->m_frame, "DW_OP_fbreg");
 
-  const block *bl = get_frame_block (this->frame, NULL);
+  const block *bl = get_frame_block (this->m_frame, NULL);
 
   if (bl == NULL)
     error (_("frame address is not available."));
@@ -762,7 +763,7 @@ dwarf_expr_context::get_frame_base (const gdb_byte **start,
   gdb_assert (framefunc != NULL);
 
   func_get_frame_base_dwarf_block (framefunc,
-				   get_frame_address_in_block (this->frame),
+				   get_frame_address_in_block (this->m_frame),
 				   start, length);
 }
 
@@ -771,11 +772,11 @@ dwarf_expr_context::get_frame_base (const gdb_byte **start,
 struct type *
 dwarf_expr_context::get_base_type (cu_offset die_cu_off)
 {
-  if (per_cu == nullptr)
-    return builtin_type (this->gdbarch)->builtin_int;
+  if (this->m_per_cu == nullptr)
+    return builtin_type (this->m_per_objfile->objfile->arch ())->builtin_int;
 
-  struct type *result = dwarf2_get_die_type (die_cu_off, this->per_cu,
-					     this->per_objfile);
+  struct type *result = dwarf2_get_die_type (die_cu_off, this->m_per_cu,
+					     this->m_per_objfile);
 
   if (result == nullptr)
     error (_("Could not find type for operation"));
@@ -788,9 +789,9 @@ dwarf_expr_context::get_base_type (cu_offset die_cu_off)
 void
 dwarf_expr_context::dwarf_call (cu_offset die_cu_off)
 {
-  ensure_have_per_cu (this->per_cu, "DW_OP_call");
+  ensure_have_per_cu (this->m_per_cu, "DW_OP_call");
 
-  frame_info *frame = this->frame;
+  frame_info *frame = this->m_frame;
 
   auto get_pc_from_frame = [frame] ()
     {
@@ -799,11 +800,11 @@ dwarf_expr_context::dwarf_call (cu_offset die_cu_off)
     };
 
   dwarf2_locexpr_baton block
-    = dwarf2_fetch_die_loc_cu_off (die_cu_off, this->per_cu, this->per_objfile,
-				   get_pc_from_frame);
+    = dwarf2_fetch_die_loc_cu_off (die_cu_off, this->m_per_cu,
+				   this->m_per_objfile, get_pc_from_frame);
 
   /* DW_OP_call_ref is currently not supported.  */
-  gdb_assert (block.per_cu == this->per_cu);
+  gdb_assert (block.per_cu == this->m_per_cu);
 
   this->eval (block.data, block.size);
 }
@@ -818,13 +819,16 @@ dwarf_expr_context::read_mem (gdb_byte *buf, CORE_ADDR addr,
     return;
 
   /* Prefer the passed-in memory, if it exists.  */
-  CORE_ADDR offset = addr - this->obj_address;
-
-  if (offset < this->data_view.size ()
-      && offset + length <= this->data_view.size ())
+  if (this->m_addr_info != nullptr)
     {
-      memcpy (buf, this->data_view.data (), length);
-      return;
+      CORE_ADDR offset = addr - this->m_addr_info->addr;
+
+      if (offset < this->m_addr_info->valaddr.size ()
+	  && offset + length <= this->m_addr_info->valaddr.size ())
+	{
+	  memcpy (buf, this->m_addr_info->valaddr.data (), length);
+	  return;
+	}
     }
 
   read_memory (addr, buf, length);
@@ -837,14 +841,14 @@ dwarf_expr_context::push_dwarf_reg_entry_value (call_site_parameter_kind kind,
 						call_site_parameter_u kind_u,
 						int deref_size)
 {
-  ensure_have_per_cu (this->per_cu, "DW_OP_entry_value");
-  ensure_have_frame (this->frame, "DW_OP_entry_value");
+  ensure_have_per_cu (this->m_per_cu, "DW_OP_entry_value");
+  ensure_have_frame (this->m_frame, "DW_OP_entry_value");
 
   dwarf2_per_cu_data *caller_per_cu;
   dwarf2_per_objfile *caller_per_objfile;
-  frame_info *caller_frame = get_prev_frame (this->frame);
+  frame_info *caller_frame = get_prev_frame (this->m_frame);
   call_site_parameter *parameter
-    = dwarf_expr_reg_to_entry_parameter (this->frame, kind, kind_u,
+    = dwarf_expr_reg_to_entry_parameter (this->m_frame, kind, kind_u,
 					 &caller_per_cu,
 					 &caller_per_objfile);
   const gdb_byte *data_src
@@ -863,19 +867,17 @@ dwarf_expr_context::push_dwarf_reg_entry_value (call_site_parameter_kind kind,
 
      It is possible for the caller to be from a different objfile from the
      callee if the call is made through a function pointer.  */
-  scoped_restore save_frame = make_scoped_restore (&this->frame,
+  scoped_restore save_frame = make_scoped_restore (&this->m_frame,
 						   caller_frame);
-  scoped_restore save_per_cu = make_scoped_restore (&this->per_cu,
+  scoped_restore save_per_cu = make_scoped_restore (&this->m_per_cu,
 						    caller_per_cu);
-  scoped_restore save_obj_addr = make_scoped_restore (&this->obj_address,
-						      (CORE_ADDR) 0);
-  scoped_restore save_per_objfile = make_scoped_restore (&this->per_objfile,
+  scoped_restore save_addr_info = make_scoped_restore (&this->m_addr_info,
+						       nullptr);
+  scoped_restore save_per_objfile = make_scoped_restore (&this->m_per_objfile,
 							 caller_per_objfile);
 
-  scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
-  this->gdbarch = this->per_objfile->objfile->arch ();
-  scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
-  this->addr_size = this->per_cu->addr_size ();
+  scoped_restore save_addr_size = make_scoped_restore (&this->m_addr_size);
+  this->m_addr_size = this->m_per_cu->addr_size ();
 
   this->eval (data_src, size);
 }
@@ -887,6 +889,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 				  LONGEST subobj_offset)
 {
   value *retval = nullptr;
+  gdbarch *arch = this->m_per_objfile->objfile->arch ();
 
   if (type == nullptr)
     type = address_type ();
@@ -894,11 +897,11 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
   if (subobj_type == nullptr)
     subobj_type = type;
 
-  if (this->pieces.size () > 0)
+  if (this->m_pieces.size () > 0)
     {
       ULONGEST bit_size = 0;
 
-      for (dwarf_expr_piece &piece : this->pieces)
+      for (dwarf_expr_piece &piece : this->m_pieces)
 	bit_size += piece.size;
       /* Complain if the expression is larger than the size of the
 	 outer type.  */
@@ -906,30 +909,29 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	invalid_synthetic_pointer ();
 
       piece_closure *c
-	= allocate_piece_closure (this->per_cu, this->per_objfile,
-				  std::move (this->pieces), this->frame);
+	= allocate_piece_closure (this->m_per_cu, this->m_per_objfile,
+				  std::move (this->m_pieces), this->m_frame);
       retval = allocate_computed_value (subobj_type,
 					&pieced_value_funcs, c);
       set_value_offset (retval, subobj_offset);
     }
   else
     {
-      switch (this->location)
+      switch (this->m_location)
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
 	    int dwarf_regnum
 	      = longest_to_int (value_as_long (this->fetch (0)));
-	    int gdb_regnum = dwarf_reg_to_regnum_or_error (this->gdbarch,
-							   dwarf_regnum);
+	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, dwarf_regnum);
 
 	    if (subobj_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
 
-	    gdb_assert (this->frame != NULL);
+	    gdb_assert (this->m_frame != NULL);
 
 	    retval = value_from_register (subobj_type, gdb_regnum,
-					  this->frame);
+					  this->m_frame);
 	    if (value_optimized_out (retval))
 	      {
 		/* This means the register has undefined value / was
@@ -964,10 +966,10 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	      {
 		case TYPE_CODE_FUNC:
 		case TYPE_CODE_METHOD:
-		  ptr_type = builtin_type (this->gdbarch)->builtin_func_ptr;
+		  ptr_type = builtin_type (arch)->builtin_func_ptr;
 		  break;
 		default:
-		  ptr_type = builtin_type (this->gdbarch)->builtin_data_ptr;
+		  ptr_type = builtin_type (arch)->builtin_data_ptr;
 		  break;
 	      }
 	    address = value_as_address (value_from_pointer (ptr_type, address));
@@ -992,7 +994,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	    retval = allocate_value (subobj_type);
 
 	    /* The given offset is relative to the actual object.  */
-	    if (gdbarch_byte_order (this->gdbarch) == BFD_ENDIAN_BIG)
+	    if (gdbarch_byte_order (arch) == BFD_ENDIAN_BIG)
 	      subobj_offset += n - max;
 
 	    memcpy (value_contents_raw (retval),
@@ -1004,12 +1006,12 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	  {
 	    size_t n = TYPE_LENGTH (subobj_type);
 
-	    if (subobj_offset + n > this->len)
+	    if (subobj_offset + n > this->m_len)
 	      invalid_synthetic_pointer ();
 
 	    retval = allocate_value (subobj_type);
 	    bfd_byte *contents = value_contents_raw (retval);
-	    memcpy (contents, this->data + subobj_offset, n);
+	    memcpy (contents, this->m_data + subobj_offset, n);
 	  }
 	  break;
 
@@ -1027,9 +1029,26 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	}
     }
 
-  set_value_initialized (retval, this->initialized);
+  set_value_initialized (retval, this->m_initialized);
 
   return retval;
+}
+
+/* See expr.h.  */
+
+value *
+dwarf_expr_context::evaluate (const gdb_byte *addr, size_t len,
+			      dwarf2_per_cu_data *per_cu, frame_info *frame,
+			      const struct property_addr_info *addr_info,
+			      struct type *type, struct type *subobj_type,
+			      LONGEST subobj_offset)
+{
+  this->m_per_cu = per_cu;
+  this->m_frame = frame;
+  this->m_addr_info = addr_info;
+
+  eval (addr, len);
+  return fetch_result (type, subobj_type, subobj_offset);
 }
 
 /* Require that TYPE be an integral type; throw an exception if not.  */
@@ -1092,8 +1111,9 @@ get_signed_type (struct gdbarch *gdbarch, struct type *type)
 CORE_ADDR
 dwarf_expr_context::fetch_address (int n)
 {
-  struct value *result_val = fetch (n);
-  enum bfd_endian byte_order = gdbarch_byte_order (this->gdbarch);
+  gdbarch *arch = this->m_per_objfile->objfile->arch ();
+  value *result_val = fetch (n);
+  bfd_endian byte_order = gdbarch_byte_order (arch);
   ULONGEST result;
 
   dwarf_require_integral (value_type (result_val));
@@ -1107,14 +1127,14 @@ dwarf_expr_context::fetch_address (int n)
      extract_unsigned_integer() will not produce a correct
      result.  Make sure we invoke gdbarch_integer_to_address()
      for those architectures which require it.  */
-  if (gdbarch_integer_to_address_p (this->gdbarch))
+  if (gdbarch_integer_to_address_p (arch))
     {
-      gdb_byte *buf = (gdb_byte *) alloca (this->addr_size);
-      struct type *int_type = get_unsigned_type (this->gdbarch,
-						 value_type (result_val));
+      gdb_byte *buf = (gdb_byte *) alloca (this->m_addr_size);
+      type *int_type = get_unsigned_type (arch,
+					  value_type (result_val));
 
-      store_unsigned_integer (buf, this->addr_size, byte_order, result);
-      return gdbarch_integer_to_address (this->gdbarch, int_type, buf);
+      store_unsigned_integer (buf, this->m_addr_size, byte_order, result);
+      return gdbarch_integer_to_address (arch, int_type, buf);
     }
 
   return (CORE_ADDR) result;
@@ -1125,11 +1145,11 @@ dwarf_expr_context::fetch_address (int n)
 bool
 dwarf_expr_context::fetch_in_stack_memory (int n)
 {
-  if (stack.size () <= n)
+  if (this->m_stack.size () <= n)
      error (_("Asked for position %d of stack, "
 	      "stack only has %zu elements on it."),
-	    n, stack.size ());
-  return stack[stack.size () - (1 + n)].in_stack_memory;
+	    n, this->m_stack.size ());
+  return this->m_stack[this->m_stack.size () - (1 + n)].in_stack_memory;
 }
 
 /* Return true if the expression stack is empty.  */
@@ -1137,24 +1157,24 @@ dwarf_expr_context::fetch_in_stack_memory (int n)
 bool
 dwarf_expr_context::stack_empty_p () const
 {
-  return stack.empty ();
+  return m_stack.empty ();
 }
 
 /* Add a new piece to the dwarf_expr_context's piece list.  */
 void
 dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
 {
-  this->pieces.emplace_back ();
-  dwarf_expr_piece &p = this->pieces.back ();
+  this->m_pieces.emplace_back ();
+  dwarf_expr_piece &p = this->m_pieces.back ();
 
-  p.location = this->location;
+  p.location = this->m_location;
   p.size = size;
   p.offset = offset;
 
   if (p.location == DWARF_VALUE_LITERAL)
     {
-      p.v.literal.data = this->data;
-      p.v.literal.length = this->len;
+      p.v.literal.data = this->m_data;
+      p.v.literal.length = this->m_len;
     }
   else if (stack_empty_p ())
     {
@@ -1163,7 +1183,7 @@ dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
 	 a somewhat strange approach, but this lets us avoid setting
 	 the location to DWARF_VALUE_MEMORY in all the individual
 	 cases in the evaluator.  */
-      this->location = DWARF_VALUE_OPTIMIZED_OUT;
+      this->m_location = DWARF_VALUE_OPTIMIZED_OUT;
     }
   else if (p.location == DWARF_VALUE_MEMORY)
     {
@@ -1172,7 +1192,7 @@ dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
     }
   else if (p.location == DWARF_VALUE_IMPLICIT_POINTER)
     {
-      p.v.ptr.die_sect_off = (sect_offset) this->len;
+      p.v.ptr.die_sect_off = (sect_offset) this->m_len;
       p.v.ptr.offset = value_as_long (fetch (0));
     }
   else if (p.location == DWARF_VALUE_REGISTER)
@@ -1188,13 +1208,13 @@ dwarf_expr_context::add_piece (ULONGEST size, ULONGEST offset)
 void
 dwarf_expr_context::eval (const gdb_byte *addr, size_t len)
 {
-  int old_recursion_depth = this->recursion_depth;
+  int old_recursion_depth = this->m_recursion_depth;
 
   execute_stack_op (addr, addr + len);
 
   /* RECURSION_DEPTH becomes invalid if an exception was thrown here.  */
 
-  gdb_assert (this->recursion_depth == old_recursion_depth);
+  gdb_assert (this->m_recursion_depth == old_recursion_depth);
 }
 
 /* Helper to read a uleb128 value or throw an error.  */
@@ -1438,7 +1458,8 @@ void
 dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 				      const gdb_byte *op_end)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (this->gdbarch);
+  gdbarch *arch = this->m_per_objfile->objfile->arch ();
+  bfd_endian byte_order = gdbarch_byte_order (arch);
   /* Old-style "untyped" DWARF values need special treatment in a
      couple of places, specifically DW_OP_mod and DW_OP_shr.  We need
      a special type for these values so we can distinguish them from
@@ -1446,19 +1467,19 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
      values do not need special treatment.  This special type must be
      different (in the `==' sense) from any base type coming from the
      CU.  */
-  struct type *address_type = this->address_type ();
+  type *address_type = this->address_type ();
 
-  this->location = DWARF_VALUE_MEMORY;
-  this->initialized = 1;  /* Default is initialized.  */
+  this->m_location = DWARF_VALUE_MEMORY;
+  this->m_initialized = 1;  /* Default is initialized.  */
 
-  if (this->recursion_depth > this->max_recursion_depth)
+  if (this->m_recursion_depth > this->m_max_recursion_depth)
     error (_("DWARF-2 expression error: Loop detected (%d)."),
-	   this->recursion_depth);
-  this->recursion_depth++;
+	   this->m_recursion_depth);
+  this->m_recursion_depth++;
 
   while (op_ptr < op_end)
     {
-      enum dwarf_location_atom op = (enum dwarf_location_atom) *op_ptr++;
+      dwarf_location_atom op = (dwarf_location_atom) *op_ptr++;
       ULONGEST result;
       /* Assume the value is not in stack memory.
 	 Code that knows otherwise sets this to true.
@@ -1469,7 +1490,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
       bool in_stack_memory = false;
       uint64_t uoffset, reg;
       int64_t offset;
-      struct value *result_val = NULL;
+      value *result_val = NULL;
 
       /* The DWARF expression might have a bug causing an infinite
 	 loop.  In that case, quitting is the only way out.  */
@@ -1515,32 +1536,32 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_addr:
 	  result = extract_unsigned_integer (op_ptr,
-					     this->addr_size, byte_order);
-	  op_ptr += this->addr_size;
+					     this->m_addr_size, byte_order);
+	  op_ptr += this->m_addr_size;
 	  /* Some versions of GCC emit DW_OP_addr before
 	     DW_OP_GNU_push_tls_address.  In this case the value is an
 	     index, not an address.  We don't support things like
 	     branching between the address and the TLS op.  */
 	  if (op_ptr >= op_end || *op_ptr != DW_OP_GNU_push_tls_address)
-	    result += this->per_objfile->objfile->text_section_offset ();
+	    result += this->m_per_objfile->objfile->text_section_offset ();
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
 	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
-	  ensure_have_per_cu (this->per_cu, "DW_OP_addrx");
+	  ensure_have_per_cu (this->m_per_cu, "DW_OP_addrx");
 
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = dwarf2_read_addr_index (this->per_cu, this->per_objfile,
+	  result = dwarf2_read_addr_index (this->m_per_cu, this->m_per_objfile,
 					   uoffset);
-	  result += this->per_objfile->objfile->text_section_offset ();
+	  result += this->m_per_objfile->objfile->text_section_offset ();
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 	case DW_OP_GNU_const_index:
-	  ensure_have_per_cu (this->per_cu, "DW_OP_GNU_const_index");
+	  ensure_have_per_cu (this->m_per_cu, "DW_OP_GNU_const_index");
 
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
-	  result = dwarf2_read_addr_index (this->per_cu, this->per_objfile,
+	  result = dwarf2_read_addr_index (this->m_per_cu, this->m_per_objfile,
 					   uoffset);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
@@ -1634,7 +1655,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	  result = op - DW_OP_reg0;
 	  result_val = value_from_ulongest (address_type, result);
-	  this->location = DWARF_VALUE_REGISTER;
+	  this->m_location = DWARF_VALUE_REGISTER;
 	  break;
 
 	case DW_OP_regx:
@@ -1643,7 +1664,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	  result = reg;
 	  result_val = value_from_ulongest (address_type, result);
-	  this->location = DWARF_VALUE_REGISTER;
+	  this->m_location = DWARF_VALUE_REGISTER;
 	  break;
 
 	case DW_OP_implicit_value:
@@ -1653,9 +1674,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &len);
 	    if (op_ptr + len > op_end)
 	      error (_("DW_OP_implicit_value: too few bytes available."));
-	    this->len = len;
-	    this->data = op_ptr;
-	    this->location = DWARF_VALUE_LITERAL;
+	    this->m_len = len;
+	    this->m_data = op_ptr;
+	    this->m_location = DWARF_VALUE_LITERAL;
 	    op_ptr += len;
 	    dwarf_expr_require_composition (op_ptr, op_end,
 					    "DW_OP_implicit_value");
@@ -1663,7 +1684,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  goto no_push;
 
 	case DW_OP_stack_value:
-	  this->location = DWARF_VALUE_STACK;
+	  this->m_location = DWARF_VALUE_STACK;
 	  dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_stack_value");
 	  goto no_push;
 
@@ -1671,12 +1692,12 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_GNU_implicit_pointer:
 	  {
 	    int64_t len;
-	    ensure_have_per_cu (this->per_cu, "DW_OP_implicit_pointer");
+	    ensure_have_per_cu (this->m_per_cu, "DW_OP_implicit_pointer");
 
-	    int ref_addr_size = this->per_cu->ref_addr_size ();
+	    int ref_addr_size = this->m_per_cu->ref_addr_size ();
 
 	    /* The referred-to DIE of sect_offset kind.  */
-	    this->len = extract_unsigned_integer (op_ptr, ref_addr_size,
+	    this->m_len = extract_unsigned_integer (op_ptr, ref_addr_size,
 						  byte_order);
 	    op_ptr += ref_addr_size;
 
@@ -1685,7 +1706,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    result = (ULONGEST) len;
 	    result_val = value_from_ulongest (address_type, result);
 
-	    this->location = DWARF_VALUE_IMPLICIT_POINTER;
+	    this->m_location = DWARF_VALUE_IMPLICIT_POINTER;
 	    dwarf_expr_require_composition (op_ptr, op_end,
 					    "DW_OP_implicit_pointer");
 	  }
@@ -1725,9 +1746,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_breg31:
 	  {
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    ensure_have_frame (this->frame, "DW_OP_breg");
+	    ensure_have_frame (this->m_frame, "DW_OP_breg");
 
-	    result = read_addr_from_reg (this->frame, op - DW_OP_breg0);
+	    result = read_addr_from_reg (this->m_frame, op - DW_OP_breg0);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -1736,9 +1757,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  {
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    ensure_have_frame (this->frame, "DW_OP_bregx");
+	    ensure_have_frame (this->m_frame, "DW_OP_bregx");
 
-	    result = read_addr_from_reg (this->frame, reg);
+	    result = read_addr_from_reg (this->m_frame, reg);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -1754,19 +1775,19 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	       backup the current stack locally and install a new empty stack,
 	       then reset it afterwards, effectively erasing whatever the
 	       recursive call put there.  */
-	    std::vector<dwarf_stack_value> saved_stack = std::move (stack);
-	    stack.clear ();
+	    std::vector<dwarf_stack_value> saved_stack = std::move (this->m_stack);
+	    this->m_stack.clear ();
 
 	    /* FIXME: cagney/2003-03-26: This code should be using
 	       get_frame_base_address(), and then implement a dwarf2
 	       specific this_base method.  */
 	    this->get_frame_base (&datastart, &datalen);
 	    eval (datastart, datalen);
-	    if (this->location == DWARF_VALUE_MEMORY)
+	    if (this->m_location == DWARF_VALUE_MEMORY)
 	      result = fetch_address (0);
-	    else if (this->location == DWARF_VALUE_REGISTER)
+	    else if (this->m_location == DWARF_VALUE_REGISTER)
 	      result
-		= read_addr_from_reg (this->frame, value_as_long (fetch (0)));
+		= read_addr_from_reg (this->m_frame, value_as_long (fetch (0)));
 	    else
 	      error (_("Not implemented: computing frame "
 		       "base using explicit value operator"));
@@ -1775,9 +1796,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    in_stack_memory = true;
 
 	    /* Restore the content of the original stack.  */
-	    stack = std::move (saved_stack);
+	    this->m_stack = std::move (saved_stack);
 
-	    this->location = DWARF_VALUE_MEMORY;
+	    this->m_location = DWARF_VALUE_MEMORY;
 	  }
 	  break;
 
@@ -1798,13 +1819,13 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  
 	case DW_OP_swap:
 	  {
-	    if (stack.size () < 2)
+	    if (this->m_stack.size () < 2)
 	       error (_("Not enough elements for "
 			"DW_OP_swap.  Need 2, have %zu."),
-		      stack.size ());
+		      this->m_stack.size ());
 
-	    dwarf_stack_value &t1 = stack[stack.size () - 1];
-	    dwarf_stack_value &t2 = stack[stack.size () - 2];
+	    dwarf_stack_value &t1 = this->m_stack[this->m_stack.size () - 1];
+	    dwarf_stack_value &t2 = this->m_stack[this->m_stack.size () - 2];
 	    std::swap (t1, t2);
 	    goto no_push;
 	  }
@@ -1816,15 +1837,17 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_rot:
 	  {
-	    if (stack.size () < 3)
+	    if (this->m_stack.size () < 3)
 	       error (_("Not enough elements for "
 			"DW_OP_rot.  Need 3, have %zu."),
-		      stack.size ());
+		      this->m_stack.size ());
 
-	    dwarf_stack_value temp = stack[stack.size () - 1];
-	    stack[stack.size () - 1] = stack[stack.size () - 2];
-	    stack[stack.size () - 2] = stack[stack.size () - 3];
-	    stack[stack.size () - 3] = temp;
+	    dwarf_stack_value temp = this->m_stack[this->m_stack.size () - 1];
+	    this->m_stack[this->m_stack.size () - 1]
+	      = this->m_stack[this->m_stack.size () - 2];
+	    this->m_stack[this->m_stack.size () - 2]
+	       = this->m_stack[this->m_stack.size () - 3];
+	    this->m_stack[this->m_stack.size () - 3] = temp;
 	    goto no_push;
 	  }
 
@@ -1833,7 +1856,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_deref_type:
 	case DW_OP_GNU_deref_type:
 	  {
-	    int addr_size = (op == DW_OP_deref ? this->addr_size : *op_ptr++);
+	    int addr_size = (op == DW_OP_deref ? this->m_addr_size : *op_ptr++);
 	    gdb_byte *buf = (gdb_byte *) alloca (addr_size);
 	    CORE_ADDR addr = fetch_address (0);
 	    struct type *type;
@@ -1954,8 +1977,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		     math.  */
 		  if (orig_type == address_type)
 		    {
-		      struct type *utype
-			= get_unsigned_type (this->gdbarch, orig_type);
+		      struct type *utype = get_unsigned_type (arch, orig_type);
 
 		      cast_back = 1;
 		      first = value_cast (utype, first);
@@ -1990,7 +2012,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		if (!value_type (first)->is_unsigned ())
 		  {
 		    struct type *utype
-		      = get_unsigned_type (this->gdbarch, value_type (first));
+		      = get_unsigned_type (arch, value_type (first));
 
 		    first = value_cast (utype, first);
 		  }
@@ -2007,7 +2029,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		if (value_type (first)->is_unsigned ())
 		  {
 		    struct type *stype
-		      = get_signed_type (this->gdbarch, value_type (first));
+		      = get_signed_type (arch, value_type (first));
 
 		    first = value_cast (stype, first);
 		  }
@@ -2058,9 +2080,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  break;
 
 	case DW_OP_call_frame_cfa:
-	  ensure_have_frame (this->frame, "DW_OP_call_frame_cfa");
+	  ensure_have_frame (this->m_frame, "DW_OP_call_frame_cfa");
 
-	  result = dwarf2_frame_cfa (this->frame);
+	  result = dwarf2_frame_cfa (this->m_frame);
 	  result_val = value_from_ulongest (address_type, result);
 	  in_stack_memory = true;
 	  break;
@@ -2077,7 +2099,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  returned.  */
 	  result = value_as_long (fetch (0));
 	  pop ();
-	  result = target_translate_tls_address (this->per_objfile->objfile,
+	  result = target_translate_tls_address (this->m_per_objfile->objfile,
 						 result);
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
@@ -2115,10 +2137,10 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    /* Pop off the address/regnum, and reset the location
 	       type.  */
-	    if (this->location != DWARF_VALUE_LITERAL
-		&& this->location != DWARF_VALUE_OPTIMIZED_OUT)
+	    if (this->m_location != DWARF_VALUE_LITERAL
+		&& this->m_location != DWARF_VALUE_OPTIMIZED_OUT)
 	      pop ();
-	    this->location = DWARF_VALUE_MEMORY;
+	    this->m_location = DWARF_VALUE_MEMORY;
 	  }
 	  goto no_push;
 
@@ -2133,10 +2155,10 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    /* Pop off the address/regnum, and reset the location
 	       type.  */
-	    if (this->location != DWARF_VALUE_LITERAL
-		&& this->location != DWARF_VALUE_OPTIMIZED_OUT)
+	    if (this->m_location != DWARF_VALUE_LITERAL
+		&& this->m_location != DWARF_VALUE_OPTIMIZED_OUT)
 	      pop ();
-	    this->location = DWARF_VALUE_MEMORY;
+	    this->m_location = DWARF_VALUE_MEMORY;
 	  }
 	  goto no_push;
 
@@ -2145,7 +2167,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    error (_("DWARF-2 expression error: DW_OP_GNU_uninit must always "
 		   "be the very last op."));
 
-	  this->initialized = 0;
+	  this->m_initialized = 0;
 	  goto no_push;
 
 	case DW_OP_call2:
@@ -2168,16 +2190,16 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_GNU_variable_value:
 	  {
-	    ensure_have_per_cu (this->per_cu, "DW_OP_GNU_variable_value");
-	    int ref_addr_size = this->per_cu->ref_addr_size ();
+	    ensure_have_per_cu (this->m_per_cu, "DW_OP_GNU_variable_value");
+	    int ref_addr_size = this->m_per_cu->ref_addr_size ();
 
 	    sect_offset sect_off
 	      = (sect_offset) extract_unsigned_integer (op_ptr,
 							ref_addr_size,
 							byte_order);
 	    op_ptr += ref_addr_size;
-	    result_val = sect_variable_value (sect_off, this->per_cu,
-					      this->per_objfile);
+	    result_val = sect_variable_value (sect_off, this->m_per_cu,
+					      this->m_per_objfile);
 	    result_val = value_cast (address_type, result_val);
 	  }
 	  break;
@@ -2209,7 +2231,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    if (kind_u.dwarf_reg != -1)
 	      {
 		if (deref_size == -1)
-		  deref_size = this->addr_size;
+		  deref_size = this->m_addr_size;
 		op_ptr += len;
 		this->push_dwarf_reg_entry_value (CALL_SITE_PARAMETER_DWARF_REG,
 						  kind_u, deref_size);
@@ -2264,13 +2286,13 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	    cu_offset type_die_cu_off = (cu_offset) uoffset;
 
-	    ensure_have_frame (this->frame, "DW_OP_regval_type");
+	    ensure_have_frame (this->m_frame, "DW_OP_regval_type");
 
 	    struct type *type = get_base_type (type_die_cu_off);
 	    int regnum
-	      = dwarf_reg_to_regnum_or_error (get_frame_arch (this->frame),
+	      = dwarf_reg_to_regnum_or_error (get_frame_arch (this->m_frame),
 					      reg);
-	    result_val = value_from_register (type, regnum, this->frame);
+	    result_val = value_from_register (type, regnum, this->m_frame);
 	  }
 	  break;
 
@@ -2310,11 +2332,11 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_push_object_address:
 	  /* Return the address of the object we are currently observing.  */
-	  if (this->data_view.data () == nullptr
-	      && this->obj_address == 0)
+	  if (this->m_addr_info == nullptr)
 	    error (_("Location address is not set."));
 
-	  result_val = value_from_ulongest (address_type, this->obj_address);
+	  result_val
+	    = value_from_ulongest (address_type, this->m_addr_info->addr);
 	  break;
 
 	default:
@@ -2331,11 +2353,11 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
   /* To simplify our main caller, if the result is an implicit
      pointer, then make a pieced value.  This is ok because we can't
      have implicit pointers in contexts where pieces are invalid.  */
-  if (this->location == DWARF_VALUE_IMPLICIT_POINTER)
-    add_piece (8 * this->addr_size, 0);
+  if (this->m_location == DWARF_VALUE_IMPLICIT_POINTER)
+    add_piece (8 * this->m_addr_size, 0);
 
-  this->recursion_depth--;
-  gdb_assert (this->recursion_depth >= 0);
+  this->m_recursion_depth--;
+  gdb_assert (this->m_recursion_depth >= 0);
 }
 
 void _initialize_dwarf2expr ();
