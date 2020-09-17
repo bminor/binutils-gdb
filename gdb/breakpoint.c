@@ -13246,8 +13246,8 @@ static int
 ambiguous_names_p (struct bp_location *loc)
 {
   struct bp_location *l;
-  htab_t htab = htab_create_alloc (13, htab_hash_string, streq_hash, NULL,
-				   xcalloc, xfree);
+  htab_up htab (htab_create_alloc (13, htab_hash_string, streq_hash, NULL,
+				   xcalloc, xfree));
 
   for (l = loc; l != NULL; l = l->next)
     {
@@ -13258,19 +13258,15 @@ ambiguous_names_p (struct bp_location *loc)
       if (name == NULL)
 	continue;
 
-      slot = (const char **) htab_find_slot (htab, (const void *) name,
+      slot = (const char **) htab_find_slot (htab.get (), (const void *) name,
 					     INSERT);
       /* NOTE: We can assume slot != NULL here because xcalloc never
 	 returns NULL.  */
       if (*slot != NULL)
-	{
-	  htab_delete (htab);
-	  return 1;
-	}
+	return 1;
       *slot = name;
     }
 
-  htab_delete (htab);
   return 0;
 }
 

@@ -1,5 +1,9 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* breakpoint.c (ambiguous_names_p): Use htab_up.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* auto-load.c (struct auto_load_pspace_info)
 	<~auto_load_pspace_info, auto_load_pspace_info>: Remove.
 	<loaded_script_files, loaded_script_texts>: Change type to
