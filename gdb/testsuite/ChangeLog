@@ -1,5 +1,10 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/break.exp (func): New.  Use it throughout when
+	expecting a function name.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/display.exp: Issue "set print asm-demangle on".
 
 2020-09-17  Pedro Alves  <pedro@palves.net>
