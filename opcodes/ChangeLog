@@ -1,3 +1,37 @@
+2020-09-17 Cooper Qu <<cooper.qu@linux.alibaba.com>>
+
+	opcodes/
+	* csky-dis.c (using_abi): New.
+	(parse_csky_dis_options): New function.
+	(get_gr_name): New function.
+	(get_cr_name): New function.
+	(csky_output_operand): Use get_gr_name and get_cr_name to
+	disassemble and add handle of OPRND_TYPE_IMM5b_LS.
+	(print_insn_csky): Parse disassembler options.
+	* opcodes/csky-opc.h (OPRND_TYPE_IMM5b_LS): New enum.
+	(GENARAL_REG_BANK): Define.
+	(REG_SUPPORT_ALL): Define.
+	(REG_SUPPORT_ALL): New.
+	(ASH): Define.
+	(REG_SUPPORT_A): Define.
+	(REG_SUPPORT_B): Define.
+	(REG_SUPPORT_C): Define.
+	(REG_SUPPORT_D): Define.
+	(REG_SUPPORT_E): Define.
+	(csky_abiv1_general_regs): New.
+	(csky_abiv1_control_regs): New.
+	(csky_abiv2_general_regs): New.
+	(csky_abiv2_control_regs): New.
+	(get_register_name): New function.
+	(get_register_number): New function.
+	(csky_get_general_reg_name): New function.
+	(csky_get_general_regno): New function.
+	(csky_get_control_reg_name): New function.
+	(csky_get_control_regno): New function.
+	(csky_v2_opcodes): Prefer two oprerans format for bclri and
+	bseti, strengthen the operands legality check of addc, zext
+	and sext.
+
 2020-09-23  Lili Cui  <lili.cui@intel.com>
 
 	* i386-dis.c (enum): Add REG_0F38D8_PREFIX_1,

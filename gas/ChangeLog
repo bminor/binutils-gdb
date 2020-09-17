@@ -1,3 +1,33 @@
+20200-09-17 Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (parse_type_ctrlreg): Use function
+	csky_get_control_regno to operand.
+	(csky_get_reg_val): Likewise.
+	(is_reg_sp_with_bracket): Use function csky_get_reg_val
+	to parse operand.
+	(is_reg_sp): Refine.
+	(is_oimm_within_range): Fix, report error when operand
+	is not constant.
+	(parse_type_cpreg): Refine.
+	(parse_type_cpcreg): Refine.
+	(get_operand_value): Add handle of OPRND_TYPE_IMM5b_LS.
+	(md_assemble): Fix no error reporting somtimes when
+	operands number are not fit.
+	(csky_addc64): Refine.
+	(csky_subc64): Refine.
+	(csky_or64): Refine.
+	(v1_work_fpu_fo): Refine.
+	(v1_work_fpu_read): Refine.
+	(v1_work_fpu_writed): Refine.
+	(v1_work_fpu_readd): Refine.
+	(v2_work_addc): New function, strengthen the operands legality
+	check of addc.
+	* gas/testsuite/gas/csky/all.d : Use register number format when
+	disassemble register name by default.
+	* gas/testsuite/gas/csky/cskyv2_all.d : Likewise.
+	* gas/testsuite/gas/csky/trust.d: Likewise.
+	* gas/testsuite/gas/csky/cskyv2_ck860.d : Fix.
+	* gas/testsuite/gas/csky/trust.s : Fix.
 
 2020-09-23  Lili Cui  <lili.cui@intel.com>
 
