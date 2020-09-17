@@ -1,5 +1,9 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (compute_compunit_symtab_includes): Use htab_up.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* value.c (preserve_values): Update.
 	* python/py-type.c (save_objfile_types): Update.
 	* guile/scm-type.c (save_objfile_types): Update.

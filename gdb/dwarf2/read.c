@@ -9857,23 +9857,24 @@ compute_compunit_symtab_includes (dwarf2_per_cu_data *per_cu,
     {
       int len;
       std::vector<compunit_symtab *> result_symtabs;
-      htab_t all_children, all_type_symtabs;
       compunit_symtab *cust = per_objfile->get_symtab (per_cu);
 
       /* If we don't have a symtab, we can just skip this case.  */
       if (cust == NULL)
 	return;
 
-      all_children = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
-					NULL, xcalloc, xfree);
-      all_type_symtabs = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
-					    NULL, xcalloc, xfree);
+      htab_up all_children (htab_create_alloc (1, htab_hash_pointer,
+					       htab_eq_pointer,
+					       NULL, xcalloc, xfree));
+      htab_up all_type_symtabs (htab_create_alloc (1, htab_hash_pointer,
+						   htab_eq_pointer,
+						   NULL, xcalloc, xfree));
 
       for (dwarf2_per_cu_data *ptr : *per_cu->imported_symtabs)
 	{
-	  recursively_compute_inclusions (&result_symtabs, all_children,
-					  all_type_symtabs, ptr, per_objfile,
-					  cust);
+	  recursively_compute_inclusions (&result_symtabs, all_children.get (),
+					  all_type_symtabs.get (), ptr,
+					  per_objfile, cust);
 	}
 
       /* Now we have a transitive closure of all the included symtabs.  */
@@ -9884,9 +9885,6 @@ compute_compunit_symtab_includes (dwarf2_per_cu_data *per_cu,
       memcpy (cust->includes, result_symtabs.data (),
 	      len * sizeof (compunit_symtab *));
       cust->includes[len] = NULL;
-
-      htab_delete (all_children);
-      htab_delete (all_type_symtabs);
     }
 }
 
