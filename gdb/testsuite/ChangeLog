@@ -1,5 +1,10 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.base/printcmds.c (three, flag_enum_without_zero)
+	(three_not_flag): Add casts.
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/examine-backward.c (Barrier, TestStrings): Now unsigned
 	char array.
 	(main): Add references to Barrier, TestStrings, TestStringsH and
