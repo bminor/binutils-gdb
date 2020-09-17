@@ -1,5 +1,9 @@
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
+	* gdb.cp/call-c-1.c (foo) [__cplusplus]: Add extern "C".
+
+2020-09-17  Pedro Alves  <pedro@palves.net>
+
 	* gdb.python/py-frame-inline.exp: Adjust to optionally expect a
 	full prototype.
 
