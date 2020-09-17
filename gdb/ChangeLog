@@ -1,5 +1,17 @@
 2020-09-17  Tom Tromey  <tom@tromey.com>
 
+	* completer.c (completion_tracker::discard_completions)
+	(completion_tracker::~completion_tracker)
+	(completion_tracker::maybe_add_completion)
+	(completion_tracker::remove_completion)
+	(completion_tracker::recompute_lowest_common_denominator)
+	(completion_tracker::build_completion_result): Update.
+	* completer.h (class completion_tracker) <have_completions>:
+	Update.
+	<m_entries_hash>: Now htab_up.
+
+2020-09-17  Tom Tromey  <tom@tromey.com>
+
 	* breakpoint.c (ambiguous_names_p): Use htab_up.
 
 2020-09-17  Tom Tromey  <tom@tromey.com>

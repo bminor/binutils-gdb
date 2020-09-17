@@ -1587,10 +1587,7 @@ completion_tracker::discard_completions ()
   m_lowest_common_denominator_unique = false;
   m_lowest_common_denominator_valid = false;
 
-  /* A null check here allows this function to be used from the
-     constructor.  */
-  if (m_entries_hash != NULL)
-    htab_delete (m_entries_hash);
+  m_entries_hash.reset (nullptr);
 
   /* A callback used by the hash table to compare new entries with existing
      entries.  We can't use the standard streq_hash function here as the
@@ -1618,10 +1615,10 @@ completion_tracker::discard_completions ()
 	return entry->hash_name ();
       };
 
-  m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-				      entry_hash_func, entry_eq_func,
-				      completion_hash_entry::deleter,
-				      xcalloc, xfree);
+  m_entries_hash.reset (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
+					   entry_hash_func, entry_eq_func,
+					   completion_hash_entry::deleter,
+					   xcalloc, xfree));
 }
 
 /* See completer.h.  */
@@ -1629,7 +1626,6 @@ completion_tracker::discard_completions ()
 completion_tracker::~completion_tracker ()
 {
   xfree (m_lowest_common_denominator);
-  htab_delete (m_entries_hash);
 }
 
 /* See completer.h.  */
@@ -1645,11 +1641,12 @@ completion_tracker::maybe_add_completion
   if (max_completions == 0)
     return false;
 
-  if (htab_elements (m_entries_hash) >= max_completions)
+  if (htab_elements (m_entries_hash.get ()) >= max_completions)
     return false;
 
   hashval_t hash = htab_hash_string (name.get ());
-  slot = htab_find_slot_with_hash (m_entries_hash, name.get (), hash, INSERT);
+  slot = htab_find_slot_with_hash (m_entries_hash.get (), name.get (),
+				   hash, INSERT);
   if (*slot == HTAB_EMPTY_ENTRY)
     {
       const char *match_for_lcd_str = NULL;
@@ -1700,10 +1697,10 @@ void
 completion_tracker::remove_completion (const char *name)
 {
   hashval_t hash = htab_hash_string (name);
-  if (htab_find_slot_with_hash (m_entries_hash, name, hash, NO_INSERT)
+  if (htab_find_slot_with_hash (m_entries_hash.get (), name, hash, NO_INSERT)
       != NULL)
     {
-      htab_remove_elt_with_hash (m_entries_hash, name, hash);
+      htab_remove_elt_with_hash (m_entries_hash.get (), name, hash);
       m_lowest_common_denominator_valid = false;
     }
 }
@@ -2144,7 +2141,7 @@ completion_tracker::recompute_lowest_common_denominator ()
 	return 1;
       };
 
-  htab_traverse (m_entries_hash, visitor_func, this);
+  htab_traverse (m_entries_hash.get (), visitor_func, this);
   m_lowest_common_denominator_valid = true;
 }
 
@@ -2227,7 +2224,7 @@ completion_result
 completion_tracker::build_completion_result (const char *text,
 					     int start, int end)
 {
-  size_t element_count = htab_elements (m_entries_hash);
+  size_t element_count = htab_elements (m_entries_hash.get ());
 
   if (element_count == 0)
     return {};
@@ -2294,7 +2291,7 @@ completion_tracker::build_completion_result (const char *text,
 	  };
 
       /* Build the completion list and add a null at the end.  */
-      htab_traverse_noresize (m_entries_hash, func, &builder);
+      htab_traverse_noresize (m_entries_hash.get (), func, &builder);
       match_list[builder.index] = NULL;
 
       return completion_result (match_list, builder.index - 1, false);
