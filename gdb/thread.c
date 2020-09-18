@@ -1946,9 +1946,15 @@ thread_find_command (const char *arg, int from_tty)
   if (tmp != 0)
     error (_("Invalid regexp (%s): %s"), tmp, arg);
 
+  /* We're going to be switching threads.  */
+  scoped_restore_current_thread restore_thread;
+
   update_thread_list ();
+
   for (thread_info *tp : all_threads ())
     {
+      switch_to_inferior_no_thread (tp->inf);
+
       if (tp->name != NULL && re_exec (tp->name))
 	{
 	  printf_filtered (_("Thread %s has name '%s'\n"),
