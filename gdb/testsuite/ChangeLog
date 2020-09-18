@@ -1,3 +1,19 @@
+2020-09-18  Pedro Alves  <pedro@palves.net>
+
+	* gdb.multi/multi-target-continue.exp: New file, factored out from
+	multi-target.exp.
+	* gdb.multi/multi-target-info-inferiors.exp: New file, factored out from
+	multi-target.exp.
+	* gdb.multi/multi-target-interrupt.exp: New file, factored out from
+	multi-target.exp.
+	* gdb.multi/multi-target-no-resumed.exp: New file, factored out from
+	multi-target.exp.
+	* gdb.multi/multi-target-ping-pong-next.exp: New file, factored out from
+	multi-target.exp.
+	* gdb.multi/multi-target.exp.tcl: New file, factored out from
+	multi-target.exp.
+	* gdb.multi/multi-target.exp: Delete.
+
 2020-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/array-slices.exp: Add missing message data.
