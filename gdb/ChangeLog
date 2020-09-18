@@ -1,3 +1,9 @@
+2020-09-18  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26631
+	* thread.c (thread_find_command): Switch inferior before calling
+	target methods.
+
 2020-09-17  Tom Tromey  <tromey@adacore.com>
 
 	* tic6x-tdep.c (tic6x_gdbarch_init): Update.

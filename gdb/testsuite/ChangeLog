@@ -1,5 +1,10 @@
 2020-09-18  Pedro Alves  <pedro@palves.net>
 
+	PR gdb/26631
+	* gdb.multi/multi-target-thread-find.exp: New file.
+
+2020-09-18  Pedro Alves  <pedro@palves.net>
+
 	* gdb.multi/multi-target-continue.exp: New file, factored out from
 	multi-target.exp.
 	* gdb.multi/multi-target-info-inferiors.exp: New file, factored out from
