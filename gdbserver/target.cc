@@ -160,8 +160,8 @@ target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 }
 
 ptid_t
-mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
-	int connected_wait)
+mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
+	target_wait_flags options, int connected_wait)
 {
   ptid_t ret;
 
@@ -220,7 +220,8 @@ target_stop_and_wait (ptid_t ptid)
 /* See target/target.h.  */
 
 ptid_t
-target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
+target_wait (ptid_t ptid, struct target_waitstatus *status,
+	     target_wait_flags options)
 {
   return the_target->wait (ptid, status, options);
 }

@@ -316,7 +316,7 @@ inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 
 ptid_t
 inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 int options)
+			 target_wait_flags options)
 {
   pid_t pid;
   int status, save_errno;

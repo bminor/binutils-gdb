@@ -128,7 +128,7 @@ public:
      no child stop to report, return is
      null_ptid/TARGET_WAITKIND_IGNORE.  */
   virtual ptid_t wait (ptid_t ptid, target_waitstatus *status,
-		       int options) = 0;
+		       target_wait_flags options) = 0;
 
   /* Fetch registers from the inferior process.
 
@@ -663,8 +663,8 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
 #define target_supports_software_single_step() \
   the_target->supports_software_single_step ()
 
-ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
-	       int connected_wait);
+ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
+	       target_wait_flags options, int connected_wait);
 
 /* Prepare to read or write memory from the inferior process.  See the
    corresponding process_stratum_target methods for more details.  */

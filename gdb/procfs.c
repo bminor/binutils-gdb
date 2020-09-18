@@ -105,7 +105,7 @@ public:
   void detach (inferior *inf, int) override;
 
   void resume (ptid_t, int, enum gdb_signal) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -2033,7 +2033,7 @@ procfs_target::store_registers (struct regcache *regcache, int regnum)
 
 ptid_t
 procfs_target::wait (ptid_t ptid, struct target_waitstatus *status,
-		     int options)
+		     target_wait_flags options)
 {
   /* First cut: loosely based on original version 2.1.  */
   procinfo *pi;

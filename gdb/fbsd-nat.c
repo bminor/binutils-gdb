@@ -1166,7 +1166,7 @@ fbsd_handle_debug_trap (fbsd_nat_target *target, ptid_t ptid,
 
 ptid_t
 fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-		       int target_options)
+		       target_wait_flags target_options)
 {
   ptid_t wptid;
 

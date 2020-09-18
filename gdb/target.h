@@ -117,7 +117,7 @@ struct syscall
   };
 
 /* Return a pretty printed form of TARGET_OPTIONS.  */
-extern std::string target_options_to_string (int target_options);
+extern std::string target_options_to_string (target_wait_flags target_options);
 
 /* Possible types of events that the inferior handler will have to
    deal with.  */
@@ -488,7 +488,7 @@ struct target_ops
        current target.  inferior_ptid may also be null_ptid on
        entry.  */
     virtual ptid_t wait (ptid_t, struct target_waitstatus *,
-			 int TARGET_DEBUG_PRINTER (target_debug_print_options))
+			 target_wait_flags options)
       TARGET_DEFAULT_FUNC (default_target_wait);
     virtual void fetch_registers (struct regcache *, int)
       TARGET_DEFAULT_IGNORE ();
@@ -1456,7 +1456,7 @@ extern scoped_restore_tmpl<int> make_scoped_defer_target_commit_resume ();
 extern ptid_t default_target_wait (struct target_ops *ops,
 				   ptid_t ptid,
 				   struct target_waitstatus *status,
-				   int options);
+				   target_wait_flags options);
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 

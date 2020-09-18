@@ -3131,7 +3131,7 @@ filter_exit_event (struct lwp_info *event_child,
 
 static ptid_t
 linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
-		  int target_options)
+		  target_wait_flags target_options)
 {
   sigset_t prev_mask;
   enum resume_kind last_resume_kind;
@@ -3411,7 +3411,7 @@ resume_stopped_resumed_lwps (struct lwp_info *lp, const ptid_t wait_ptid)
 
 ptid_t
 linux_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			int target_options)
+			target_wait_flags target_options)
 {
   ptid_t event_ptid;
 

@@ -131,7 +131,7 @@ struct gdbsim_target final
   void detach (inferior *inf, int) override;
 
   void resume (ptid_t, int, enum gdb_signal) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -927,7 +927,8 @@ gdbsim_cntrl_c (int signo)
 }
 
 ptid_t
-gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
+gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status,
+		     target_wait_flags options)
 {
   struct sim_inferior_data *sim_data;
   static sighandler_t prev_sigint;

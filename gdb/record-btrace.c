@@ -118,7 +118,7 @@ public:
 
   void commit_resume () override;
   void resume (ptid_t, int, enum gdb_signal) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void stop (ptid_t) override;
   void update_thread_list () override;
@@ -2537,12 +2537,13 @@ record_btrace_maybe_mark_async_event
 
 ptid_t
 record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
-			    int options)
+			    target_wait_flags options)
 {
   std::vector<thread_info *> moving;
   std::vector<thread_info *> no_history;
 
-  DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid).c_str (), options);
+  DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid).c_str (),
+	 (unsigned) options);
 
   /* As long as we're not replaying, just forward the request.  */
   if ((::execution_direction != EXEC_REVERSE)

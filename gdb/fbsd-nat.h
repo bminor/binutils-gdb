@@ -69,7 +69,7 @@ public:
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void post_startup_inferior (ptid_t) override;
   void post_attach (int) override;

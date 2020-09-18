@@ -540,7 +540,8 @@ nbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 /* Implement a safe wrapper around waitpid().  */
 
 static pid_t
-nbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+nbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+	   target_wait_flags options)
 {
   pid_t pid;
   int status;
@@ -569,7 +570,7 @@ nbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 
 ptid_t
 nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-		       int target_options)
+		       target_wait_flags target_options)
 {
   pid_t pid = nbsd_wait (ptid, ourstatus, target_options);
   ptid_t wptid = ptid_t (pid);

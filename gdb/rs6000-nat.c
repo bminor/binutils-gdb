@@ -90,7 +90,7 @@ public:
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
 private:
   enum target_xfer_status
@@ -495,7 +495,7 @@ rs6000_nat_target::xfer_partial (enum target_object object,
 
 ptid_t
 rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 int options)
+			 target_wait_flags options)
 {
   pid_t pid;
   int status, save_errno;

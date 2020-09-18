@@ -1,3 +1,18 @@
+2020-09-18  Tom Tromey  <tromey@adacore.com>
+
+	* netbsd-low.h (class netbsd_process_target) <wait>: Update.
+	* netbsd-low.cc (netbsd_waitpid, netbsd_wait)
+	(netbsd_process_target::wait): Change type of target_options.
+	* win32-low.h (class win32_process_target) <wait>: Update.
+	* win32-low.cc (win32_process_target::wait): Update.
+	* target.h (class process_stratum_target) <wait>: Update.
+	(mywait): Update.
+	* target.cc (mywait, target_wait): Change type of "options".
+	* linux-low.h (class linux_process_target) <wait, wait_1>:
+	Update.
+	* linux-low.cc (linux_process_target::wait)
+	(linux_process_target::wait_1): Update.
+
 2020-09-15  Tom Tromey  <tromey@adacore.com>
 
 	* linux-x86-low.cc (xmltarget_i386_linux_no_xml)

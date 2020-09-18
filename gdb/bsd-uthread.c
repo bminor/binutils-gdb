@@ -53,7 +53,7 @@ struct bsd_uthread_target final : public target_ops
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   void resume (ptid_t, int, enum gdb_signal) override;
 
   bool thread_alive (ptid_t ptid) override;
@@ -377,7 +377,7 @@ bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
 
 ptid_t
 bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
-			  int options)
+			  target_wait_flags options)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR addr;

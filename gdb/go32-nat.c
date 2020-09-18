@@ -342,7 +342,7 @@ struct go32_nat_target final : public x86_nat_target<inf_child_target>
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -419,7 +419,7 @@ static char child_cwd[FILENAME_MAX];
 
 ptid_t
 go32_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
-		       int options)
+		       target_wait_flags options)
 {
   int i;
   unsigned char saved_opcode;

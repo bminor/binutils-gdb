@@ -35,7 +35,7 @@ struct inf_ptrace_target : public inf_child_target
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void files_info () override;
 

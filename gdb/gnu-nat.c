@@ -1436,7 +1436,7 @@ static struct inf *waiting_inf;
 
 ptid_t
 gnu_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
-		      int options)
+		      target_wait_flags options)
 {
   struct msg
     {

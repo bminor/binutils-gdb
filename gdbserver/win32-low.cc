@@ -1610,7 +1610,7 @@ get_child_debug_event (DWORD *continue_status,
    Returns the signal which caused the process to stop. */
 ptid_t
 win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
-			    int options)
+			    target_wait_flags options)
 {
   if (cached_status.kind != TARGET_WAITKIND_IGNORE)
     {

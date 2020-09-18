@@ -84,7 +84,7 @@ public:
   strata stratum () const override { return thread_stratum; }
 
   void detach (inferior *, int) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   void resume (ptid_t, int, enum gdb_signal) override;
   void mourn_inferior () override;
   std::string pid_to_str (ptid_t) override;
@@ -425,7 +425,7 @@ sol_thread_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 
 ptid_t
 sol_thread_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 int options)
+			 target_wait_flags options)
 {
   if (ptid.pid () != -1)
     {

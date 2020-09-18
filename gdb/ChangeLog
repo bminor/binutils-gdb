@@ -1,3 +1,69 @@
+2020-09-18  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (struct windows_nat_target) <wait>: Update.
+	(windows_nat_target::wait): Update.
+	* target/wait.h (enum target_wait_flag): New.  Use
+	DEF_ENUM_FLAGS_TYPE.
+	* target/target.h (target_wait): Change type of options.
+	* target.h (target_options_to_string, default_target_wait):
+	Update.
+	(struct target_ops) <wait>: Change type of options.
+	* target.c (target_wait, default_target_wait, do_option): Change
+	type of "options".
+	(target_options_to_string): Likewise.
+	* target-delegates.c: Rebuild.
+	* target-debug.h (target_debug_print_target_wait_flags): Rename
+	from target_debug_print_options.
+	* sol-thread.c (class sol_thread_target) <wait>: Update.
+	(sol_thread_target::wait): Update.
+	* rs6000-nat.c (class rs6000_nat_target) <wait>: Update.
+	(rs6000_nat_target::wait): Update.
+	* remote.c (class remote_target) <wait, wait_ns, wait_as>:
+	Update.
+	(remote_target::wait_ns, remote_target::wait_as): Change type of
+	"options".
+	(remote_target::wait): Update.
+	* remote-sim.c (struct gdbsim_target) <wait>: Update.
+	(gdbsim_target::wait): Update.
+	* record-full.c (class record_full_base_target) <wait>: Update.
+	(record_full_wait_1): Change type of "options".
+	(record_full_base_target::wait): Update.
+	* record-btrace.c (class record_btrace_target) <wait>: Update.
+	(record_btrace_target::wait): Update.
+	* ravenscar-thread.c (struct ravenscar_thread_target) <wait>:
+	Update.
+	(ravenscar_thread_target::wait): Update.
+	* procfs.c (class procfs_target) <wait>: Update.
+	(procfs_target::wait): Update.
+	* obsd-nat.h (class obsd_nat_target) <wait>: Update.
+	* obsd-nat.c (obsd_nat_target::wait): Update.
+	* nto-procfs.c (struct nto_procfs_target) <wait>: Update.
+	(nto_procfs_target::wait): Update.
+	* nbsd-nat.h (struct nbsd_nat_target) <wait>: Update.
+	* nbsd-nat.c (nbsd_wait): Change type of "options".
+	(nbsd_nat_target::wait): Update.
+	* linux-thread-db.c (class thread_db_target) <wait>: Update.
+	(thread_db_target::wait): Update.
+	* linux-nat.h (class linux_nat_target) <wait>: Update.
+	* linux-nat.c (linux_nat_target::wait): Update.
+	(linux_nat_wait_1): Update.
+	* infrun.c (do_target_wait_1, do_target_wait): Change type of
+	"options".
+	* inf-ptrace.h (struct inf_ptrace_target) <wait>: Update.
+	* inf-ptrace.c (inf_ptrace_target::wait): Update.
+	* go32-nat.c (struct go32_nat_target) <wait>: Update.
+	(go32_nat_target::wait): Update.
+	* gnu-nat.h (struct gnu_nat_target) <wait>: Update.
+	* gnu-nat.c (gnu_nat_target::wait): Update.
+	* fbsd-nat.h (class fbsd_nat_target) <wait>: Update.
+	* fbsd-nat.c (fbsd_nat_target::wait): Update.
+	* darwin-nat.h (class darwin_nat_target) <wait>: Update.
+	* darwin-nat.c (darwin_nat_target::wait): Update.
+	* bsd-uthread.c (struct bsd_uthread_target) <wait>: Update.
+	(bsd_uthread_target::wait): Update.
+	* aix-thread.c (class aix_thread_target) <wait>: Update.
+	(aix_thread_target::wait): Update.
+
 2020-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* compile/compile-object-run.c (create_copied_type_recursive): New

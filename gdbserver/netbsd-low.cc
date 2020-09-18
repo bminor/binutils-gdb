@@ -236,9 +236,11 @@ netbsd_store_waitstatus (struct target_waitstatus *ourstatus, int hoststatus)
 /* Implement a safe wrapper around waitpid().  */
 
 static pid_t
-netbsd_waitpid (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+netbsd_waitpid (ptid_t ptid, struct target_waitstatus *ourstatus,
+		target_wait_flags target_options)
 {
   int status;
+  int options = (target_options & TARGET_WNOHANG) ? WNOHANG : 0;
 
   pid_t pid
     = gdb::handle_eintr<int> (-1, ::waitpid, ptid.pid (), &status, options);
@@ -259,7 +261,7 @@ netbsd_waitpid (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 
 static ptid_t
 netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-	     int target_options)
+	     target_wait_flags target_options)
 {
   pid_t pid = netbsd_waitpid (ptid, ourstatus, target_options);
   ptid_t wptid = ptid_t (pid);
@@ -398,7 +400,7 @@ netbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
 ptid_t
 netbsd_process_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			     int target_options)
+			     target_wait_flags target_options)
 {
   while (true)
     {

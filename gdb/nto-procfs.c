@@ -69,7 +69,7 @@ struct nto_procfs_target : public inf_child_target
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -795,7 +795,7 @@ nto_handle_sigint (int signo)
 
 sptid_t
 nto_procfs_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 int options)
+			 target_wait_flags options)
 {
   sigset_t set;
   siginfo_t info;

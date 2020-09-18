@@ -74,7 +74,7 @@ obsd_nat_target::update_thread_list ()
 
 ptid_t
 obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-		       int options)
+		       target_wait_flags options)
 {
   pid_t pid;
   int status, save_errno;

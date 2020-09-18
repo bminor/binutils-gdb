@@ -124,7 +124,7 @@ public:
 
   void detach (inferior *, int) override;
   void resume (ptid_t, int, enum gdb_signal) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -1077,7 +1077,7 @@ aix_thread_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 
 ptid_t
 aix_thread_target::wait (ptid_t ptid, struct target_waitstatus *status,
-			 int options)
+			 target_wait_flags options)
 {
   {
     scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);

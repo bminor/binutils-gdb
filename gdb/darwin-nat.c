@@ -1285,7 +1285,7 @@ darwin_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *status)
 
 ptid_t
 darwin_nat_target::wait (ptid_t ptid, struct target_waitstatus *status,
-			 int options)
+			 target_wait_flags options)
 {
   return wait_1 (ptid, status);
 }

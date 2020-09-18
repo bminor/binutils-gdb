@@ -2948,7 +2948,7 @@ linux_process_target::gdb_catch_this_syscall (lwp_info *event_child)
 
 ptid_t
 linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
-			      int target_options)
+			      target_wait_flags target_options)
 {
   client_state &cs = get_client_state ();
   int w;
@@ -3710,7 +3710,7 @@ async_file_mark (void)
 ptid_t
 linux_process_target::wait (ptid_t ptid,
 			    target_waitstatus *ourstatus,
-			    int target_options)
+			    target_wait_flags target_options)
 {
   ptid_t event_ptid;
 

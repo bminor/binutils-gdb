@@ -3423,7 +3423,7 @@ random_pending_event_thread (inferior *inf, ptid_t waiton_ptid)
 
 static ptid_t
 do_target_wait_1 (inferior *inf, ptid_t ptid,
-		  target_waitstatus *status, int options)
+		  target_waitstatus *status, target_wait_flags options)
 {
   ptid_t event_ptid;
   struct thread_info *tp;
@@ -3546,7 +3546,8 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
    more events.  Polls for events from all inferiors/targets.  */
 
 static bool
-do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
+do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
+		target_wait_flags options)
 {
   int num_inferiors = 0;
   int random_selector;

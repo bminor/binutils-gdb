@@ -225,7 +225,7 @@ public:
 
   void close () override;
   void async (int) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   bool stopped_by_watchpoint () override;
   bool stopped_data_address (CORE_ADDR *) override;
 
@@ -1155,7 +1155,7 @@ record_full_sig_handler (int signo)
 static ptid_t
 record_full_wait_1 (struct target_ops *ops,
 		    ptid_t ptid, struct target_waitstatus *status,
-		    int options)
+		    target_wait_flags options)
 {
   scoped_restore restore_operation_disable
     = record_full_gdb_operation_disable_set ();
@@ -1468,7 +1468,7 @@ record_full_wait_1 (struct target_ops *ops,
 
 ptid_t
 record_full_base_target::wait (ptid_t ptid, struct target_waitstatus *status,
-			       int options)
+			       target_wait_flags options)
 {
   ptid_t return_ptid;
 

@@ -87,7 +87,7 @@ struct ravenscar_thread_target final : public target_ops
 
   strata stratum () const override { return thread_stratum; }
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
   void resume (ptid_t, int, enum gdb_signal) override;
 
   void fetch_registers (struct regcache *, int) override;
@@ -385,7 +385,7 @@ ravenscar_thread_target::resume (ptid_t ptid, int step,
 ptid_t
 ravenscar_thread_target::wait (ptid_t ptid,
 			       struct target_waitstatus *status,
-			       int options)
+			       target_wait_flags options)
 {
   process_stratum_target *beneath
     = as_process_stratum_target (this->beneath ());

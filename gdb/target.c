@@ -2007,7 +2007,8 @@ target_disconnect (const char *args, int from_tty)
 /* See target/target.h.  */
 
 ptid_t
-target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
+target_wait (ptid_t ptid, struct target_waitstatus *status,
+	     target_wait_flags options)
 {
   return current_top_target ()->wait (ptid, status, options);
 }
@@ -2017,7 +2018,7 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 ptid_t
 default_target_wait (struct target_ops *ops,
 		     ptid_t ptid, struct target_waitstatus *status,
-		     int options)
+		     target_wait_flags options)
 {
   status->kind = TARGET_WAITKIND_IGNORE;
   return minus_one_ptid;
@@ -3360,8 +3361,8 @@ str_comma_list_concat_elem (std::string *list, const char *elem)
    OPT is removed from TARGET_OPTIONS.  */
 
 static void
-do_option (int *target_options, std::string *ret,
-	   int opt, const char *opt_str)
+do_option (target_wait_flags *target_options, std::string *ret,
+	   target_wait_flag opt, const char *opt_str)
 {
   if ((*target_options & opt) != 0)
     {
@@ -3373,7 +3374,7 @@ do_option (int *target_options, std::string *ret,
 /* See target.h.  */
 
 std::string
-target_options_to_string (int target_options)
+target_options_to_string (target_wait_flags target_options)
 {
   std::string ret;
 

@@ -422,7 +422,7 @@ public:
 
   void commit_resume () override;
   void resume (ptid_t, int, enum gdb_signal) override;
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -739,9 +739,9 @@ public: /* Remote specific methods.  */
   void add_current_inferior_and_thread (char *wait_status);
 
   ptid_t wait_ns (ptid_t ptid, struct target_waitstatus *status,
-		  int options);
+		  target_wait_flags options);
   ptid_t wait_as (ptid_t ptid, target_waitstatus *status,
-		  int options);
+		  target_wait_flags options);
 
   ptid_t process_stop_reply (struct stop_reply *stop_reply,
 			     target_waitstatus *status);
@@ -7771,7 +7771,8 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 /* The non-stop mode version of target_wait.  */
 
 ptid_t
-remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status, int options)
+remote_target::wait_ns (ptid_t ptid, struct target_waitstatus *status,
+			target_wait_flags options)
 {
   struct remote_state *rs = get_remote_state ();
   struct stop_reply *stop_reply;
@@ -7839,7 +7840,8 @@ first_remote_resumed_thread (remote_target *target)
    STATUS just as `wait' would.  */
 
 ptid_t
-remote_target::wait_as (ptid_t ptid, target_waitstatus *status, int options)
+remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
+			target_wait_flags options)
 {
   struct remote_state *rs = get_remote_state ();
   ptid_t event_ptid = null_ptid;
@@ -7992,7 +7994,8 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status, int options)
    STATUS just as `wait' would.  */
 
 ptid_t
-remote_target::wait (ptid_t ptid, struct target_waitstatus *status, int options)
+remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
+		     target_wait_flags options)
 {
   ptid_t event_ptid;
 

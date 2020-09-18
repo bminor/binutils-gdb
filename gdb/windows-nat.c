@@ -312,7 +312,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   void resume (ptid_t, int , enum gdb_signal) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -1803,7 +1803,7 @@ out:
 /* Wait for interesting events to occur in the target process.  */
 ptid_t
 windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			  int options)
+			  target_wait_flags options)
 {
   int pid = -1;
 

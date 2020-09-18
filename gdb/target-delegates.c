@@ -15,7 +15,7 @@ struct dummy_target : public target_ops
   void disconnect (const char *arg0, int arg1) override;
   void resume (ptid_t arg0, int arg1, enum gdb_signal arg2) override;
   void commit_resume () override;
-  ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2) override;
+  ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_flags arg2) override;
   void fetch_registers (struct regcache *arg0, int arg1) override;
   void store_registers (struct regcache *arg0, int arg1) override;
   void prepare_to_store (struct regcache *arg0) override;
@@ -186,7 +186,7 @@ struct debug_target : public target_ops
   void disconnect (const char *arg0, int arg1) override;
   void resume (ptid_t arg0, int arg1, enum gdb_signal arg2) override;
   void commit_resume () override;
-  ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2) override;
+  ptid_t wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_flags arg2) override;
   void fetch_registers (struct regcache *arg0, int arg1) override;
   void store_registers (struct regcache *arg0, int arg1) override;
   void prepare_to_store (struct regcache *arg0) override;
@@ -461,19 +461,19 @@ debug_target::commit_resume ()
 }
 
 ptid_t
-target_ops::wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2)
+target_ops::wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_flags arg2)
 {
   return this->beneath ()->wait (arg0, arg1, arg2);
 }
 
 ptid_t
-dummy_target::wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2)
+dummy_target::wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_flags arg2)
 {
   return default_target_wait (this, arg0, arg1, arg2);
 }
 
 ptid_t
-debug_target::wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2)
+debug_target::wait (ptid_t arg0, struct target_waitstatus *arg1, target_wait_flags arg2)
 {
   ptid_t result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->wait (...)\n", this->beneath ()->shortname ());
@@ -483,7 +483,7 @@ debug_target::wait (ptid_t arg0, struct target_waitstatus *arg1, int arg2)
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_target_waitstatus_p (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_options (arg2);
+  target_debug_print_target_wait_flags (arg2);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_ptid_t (result);
   fputs_unfiltered ("\n", gdb_stdlog);

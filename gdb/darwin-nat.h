@@ -86,7 +86,7 @@ class darwin_nat_target : public inf_child_target
 
   void detach (inferior *, int) override;
 
-  ptid_t wait (ptid_t, struct target_waitstatus *, int) override;
+  ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
   void mourn_inferior () override;
 
