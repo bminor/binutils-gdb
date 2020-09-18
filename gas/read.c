@@ -2547,7 +2547,7 @@ bss_alloc (symbolS *symbolP, addressT size, unsigned int align)
     symbol_get_frag (symbolP)->fr_symbol = NULL;
 
   symbol_set_frag (symbolP, frag_now);
-  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size, NULL);
+  pfrag = frag_var (rs_org, 1, 1, 0, symbolP, size * OCTETS_PER_BYTE, NULL);
   *pfrag = 0;
 
 #ifdef S_SET_SIZE
