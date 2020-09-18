@@ -1,3 +1,10 @@
+2020-09-18  David Faust  <david.faust@oracle.com>
+
+	* bpf.cpu (insn-op-code-alu): Add SDIV and SMOD.
+	(define-alu-insn-bin, daib): Take ISAs as an argument.
+	(define-alu-instructions): Update calls to daib pmacro with
+	ISAs; add sdiv and smod.
+
 2020-09-08  David Faust  <david.faust@oracle.com>
 
 	* bpf.cpu (define-alu-instructions): Correct semantic operators

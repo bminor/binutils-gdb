@@ -1,3 +1,11 @@
+2020-09-018  David Faust  <david.faust@oracle.com>
+
+	* testsuite/gas/bpf/alu-xbpf.d: New file.
+	* testsuite/gas/bpf/alu-xbpf.s: Likewise.
+	* testsuite/gas/bpf/alu32-xbpf.d: Likewise.
+	* testsuite/gas/bpf/alu32-xbpf.d: Likewise.
+	* testuiste/gas/bpf/bpf.exp: Run new tests.
+
 2020-09-18  Tucker  <tuckkern+sourceware@gmail.com>
 
 	PR 26556

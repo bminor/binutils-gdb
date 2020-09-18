@@ -41,4 +41,7 @@ if {[istarget bpf*-*-*]} {
 
     run_dump_test indcall-1
     run_list_test indcall-bad-1
+
+    run_dump_test alu-xbpf
+    run_dump_test alu32-xbpf
 }

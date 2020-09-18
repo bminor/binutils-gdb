@@ -1,3 +1,10 @@
+2020-09-18  David Faust  <david.faust@oracle.com>
+
+	* bpf-desc.c: Regenerate.
+	* bpf-desc.h: Likewise.
+	* bpf-opc.c: Likewise.
+	* bpf-opc.h: Likewise.
+
 2020-09-16  Andrew Burgess <andrew.burgess@embecosm.com>
 
 	* csky-dis.c (csky_get_disassembler): Don't return NULL when there
