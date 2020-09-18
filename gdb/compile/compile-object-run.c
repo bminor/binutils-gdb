@@ -105,6 +105,16 @@ do_module_cleanup (void *arg, int registers_valid)
   xfree (data);
 }
 
+/* Create a copy of FUNC_TYPE that is independent of OBJFILE.  */
+
+static type *
+create_copied_type_recursive (objfile *objfile, type *func_type)
+{
+  htab_up copied_types = create_copied_types_hash (objfile);
+  func_type = copy_type_recursive (objfile, func_type, copied_types.get ());
+  return func_type;
+}
+
 /* Perform inferior call of MODULE.  This function may throw an error.
    This function may leave files referenced by MODULE on disk until
    the inferior call dummy frame is discarded.  This function may throw errors.
@@ -143,9 +153,10 @@ compile_object_run (struct compile_module *module)
       int current_arg = 0;
       struct value **vargs;
 
-      /* OBJFILE may disappear while FUNC_TYPE still will be in use.  */
-      htab_up copied_types = create_copied_types_hash (objfile);
-      func_type = copy_type_recursive (objfile, func_type, copied_types.get ());
+      /* OBJFILE may disappear while FUNC_TYPE is still in use as a
+	 result of the call to DO_MODULE_CLEANUP below, so we need a copy
+	 that does not depend on the objfile in anyway.  */
+      func_type = create_copied_type_recursive (objfile, func_type);
 
       gdb_assert (func_type->code () == TYPE_CODE_FUNC);
       func_val = value_from_pointer (lookup_pointer_type (func_type),
