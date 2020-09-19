@@ -507,7 +507,7 @@ gdb_bfd_open (const char *name, const char *target, int fd,
    BFD.  */
 
 static void
-free_one_bfd_section (bfd *abfd, asection *sectp, void *ignore)
+free_one_bfd_section (asection *sectp)
 {
   struct gdb_bfd_section_data *sect
     = (struct gdb_bfd_section_data *) bfd_section_userdata (sectp);
@@ -536,7 +536,8 @@ gdb_bfd_close_or_warn (struct bfd *abfd)
   int ret;
   const char *name = bfd_get_filename (abfd);
 
-  bfd_map_over_sections (abfd, free_one_bfd_section, NULL);
+  for (asection *sect : gdb_bfd_sections (abfd))
+    free_one_bfd_section (sect);
 
   ret = bfd_close (abfd);
 

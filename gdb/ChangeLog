@@ -1,5 +1,11 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* gdb_bfd.c (free_one_bfd_section): Remove 'abfd' and 'ignore'
+	parameters.
+	(gdb_bfd_close_or_warn): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* corelow.c (add_to_thread_list): Change parameters.
 	(core_target_open): Use foreach.
 
