@@ -474,8 +474,6 @@ extern bool auto_solib_add;
 
 extern void set_initial_language (void);
 
-extern void find_lowest_section (bfd *, asection *, void *);
-
 extern gdb_bfd_ref_ptr symfile_bfd_open (const char *);
 
 extern int get_section_index (struct objfile *, const char *);

@@ -187,7 +187,6 @@ increment_reading_symtab (void)
 }
 
 /* Remember the lowest-addressed loadable section we've seen.
-   This function is called via bfd_map_over_sections.
 
    In case of equal vmas, the section with the largest size becomes the
    lowest-addressed loadable section.
@@ -195,11 +194,9 @@ increment_reading_symtab (void)
    If the vmas and sizes are equal, the last section is considered the
    lowest-addressed loadable section.  */
 
-void
-find_lowest_section (bfd *abfd, asection *sect, void *obj)
+static void
+find_lowest_section (asection *sect, asection **lowest)
 {
-  asection **lowest = (asection **) obj;
-
   if (0 == (bfd_section_flags (sect) & (SEC_ALLOC | SEC_LOAD)))
     return;
   if (!*lowest)
@@ -335,22 +332,13 @@ init_objfile_sect_indices (struct objfile *objfile)
     }
 }
 
-/* The arguments to place_section.  */
-
-struct place_section_arg
-{
-  section_offsets *offsets;
-  CORE_ADDR lowest;
-};
-
 /* Find a unique offset to use for loadable section SECT if
    the user did not provide an offset.  */
 
 static void
-place_section (bfd *abfd, asection *sect, void *obj)
+place_section (bfd *abfd, asection *sect, section_offsets &offsets,
+	       CORE_ADDR &lowest)
 {
-  struct place_section_arg *arg = (struct place_section_arg *) obj;
-  section_offsets &offsets = *arg->offsets;
   CORE_ADDR start_addr;
   int done;
   ULONGEST align = ((ULONGEST) 1) << bfd_section_alignment (sect);
@@ -364,7 +352,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
     return;
 
   /* Otherwise, let's try to find a place for the section.  */
-  start_addr = (arg->lowest + align - 1) & -align;
+  start_addr = (lowest + align - 1) & -align;
 
   do {
     asection *cur_sec;
@@ -405,7 +393,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
   while (!done);
 
   offsets[gdb_bfd_section_index (abfd, sect)] = start_addr;
-  arg->lowest = start_addr + bfd_section_size (sect);
+  lowest = start_addr + bfd_section_size (sect);
 }
 
 /* Store section_addr_info as prepared (made relative and with SECTINDEX
@@ -500,7 +488,8 @@ addr_info_make_relative (section_addr_info *addrs, bfd *abfd)
   /* Find lowest loadable section to be used as starting point for
      contiguous sections.  */
   lower_sect = NULL;
-  bfd_map_over_sections (abfd, find_lowest_section, &lower_sect);
+  for (asection *iter : gdb_bfd_sections (abfd))
+    find_lowest_section (iter, &lower_sect);
   if (lower_sect == NULL)
     {
       warning (_("no loadable sections found in added symbol-file %s"),
@@ -645,7 +634,6 @@ default_symfile_offsets (struct objfile *objfile,
      small.  */
   if ((bfd_get_file_flags (objfile->obfd) & (EXEC_P | DYNAMIC)) == 0)
     {
-      struct place_section_arg arg;
       bfd *abfd = objfile->obfd;
       asection *cur_sec;
 
@@ -661,9 +649,10 @@ default_symfile_offsets (struct objfile *objfile,
 
 	  /* Pick non-overlapping offsets for sections the user did not
 	     place explicitly.  */
-	  arg.offsets = &objfile->section_offsets;
-	  arg.lowest = 0;
-	  bfd_map_over_sections (objfile->obfd, place_section, &arg);
+	  CORE_ADDR lowest = 0;
+	  for (asection *sect : gdb_bfd_sections (objfile->obfd))
+	    place_section (objfile->obfd, sect, objfile->section_offsets,
+			   lowest);
 
 	  /* Correctly filling in the section offsets is not quite
 	     enough.  Relocatable files have two properties that
@@ -3571,18 +3560,6 @@ simple_overlay_update (struct obj_section *osect)
 	}
 }
 
-/* Set the output sections and output offsets for section SECTP in
-   ABFD.  The relocation code in BFD will read these offsets, so we
-   need to be sure they're initialized.  We map each section to itself,
-   with no offset; this means that SECTP->vma will be honored.  */
-
-static void
-symfile_dummy_outputs (bfd *abfd, asection *sectp, void *dummy)
-{
-  sectp->output_section = sectp;
-  sectp->output_offset = 0;
-}
-
 /* Default implementation for sym_relocate.  */
 
 bfd_byte *
@@ -3600,7 +3577,11 @@ default_symfile_relocate (struct objfile *objfile, asection *sectp,
 
   /* We will handle section offsets properly elsewhere, so relocate as if
      all sections begin at 0.  */
-  bfd_map_over_sections (abfd, symfile_dummy_outputs, NULL);
+  for (asection *sect : gdb_bfd_sections (abfd))
+    {
+      sect->output_section = sect;
+      sect->output_offset = 0;
+    }
 
   return bfd_simple_get_relocated_section_contents (abfd, sectp, buf, NULL);
 }

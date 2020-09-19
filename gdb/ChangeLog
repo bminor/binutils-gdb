@@ -1,5 +1,16 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* symfile.h: (find_lowest_section): Don't declare.
+	* symfile.c (find_lowest_section): Now static.  Change
+	parameters.
+	(struct place_section_arg): Remove.
+	(place_section): Change parameters.
+	(addr_info_make_relative): Use foreach.
+	(symfile_dummy_outputs): Remove.
+	(default_symfile_relocate): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.c (add_to_objfile_sections): Rename from
 	add_to_objfile_sections_full.
 	(add_to_objfile_sections): Remove.
