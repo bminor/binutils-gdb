@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-07-24 10:20+0100\n"
+"POT-Creation-Date: 2020-09-19 11:19+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -739,19 +739,19 @@ msgstr ""
 msgid "bad instruction `%.50s'"
 msgstr ""
 
-#: bpf-desc.c:1671
+#: bpf-desc.c:1687
 #, c-format
 msgid ""
 "internal error: bpf_cgen_rebuild_tables: conflicting insn-chunk-bitsize "
 "values: `%d' vs. `%d'"
 msgstr ""
 
-#: bpf-desc.c:1759
+#: bpf-desc.c:1775
 #, c-format
 msgid "internal error: bpf_cgen_cpu_open: unsupported argument `%d'"
 msgstr ""
 
-#: bpf-desc.c:1778
+#: bpf-desc.c:1794
 #, c-format
 msgid "internal error: bpf_cgen_cpu_open: no endianness specified"
 msgstr ""
@@ -869,12 +869,12 @@ msgstr ""
 msgid "Address 0x%s is out of bounds.\n"
 msgstr ""
 
-#: disassemble.c:840
+#: disassemble.c:848
 #, c-format
 msgid "assertion fail %s:%d"
 msgstr ""
 
-#: disassemble.c:841
+#: disassemble.c:849
 msgid "Please report this bug"
 msgstr ""
 

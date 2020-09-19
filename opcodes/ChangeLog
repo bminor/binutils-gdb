@@ -1,3 +1,10 @@
+2020-09-19  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.35.1 point release.
+
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2020-08-26  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* disassemble.c (enum epbf_isa_attr): Add ISA_XBPFBE, ISA_EBPFMAX.

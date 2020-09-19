@@ -1,3 +1,10 @@
+2020-09-19  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.35.1 point release.
+
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
 2020-09-03  Nick Clifton  <nickc@redhat.com>
 
 	Import from mainline:
