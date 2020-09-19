@@ -8863,9 +8863,10 @@ arm_elf_osabi_sniffer (bfd *abfd)
   if (elfosabi == ELFOSABI_ARM)
     /* GNU tools use this value.  Check note sections in this case,
        as well.  */
-    bfd_map_over_sections (abfd,
-			   generic_elf_osabi_sniff_abi_tag_sections, 
-			   &osabi);
+    {
+      for (asection *sect : gdb_bfd_sections (abfd))
+	generic_elf_osabi_sniff_abi_tag_sections (abfd, sect, &osabi);
+    }
 
   /* Anything else will be handled by the generic ELF sniffer.  */
   return osabi;

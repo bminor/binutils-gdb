@@ -1,5 +1,14 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* osabi.h (generic_elf_osabi_sniff_abi_tag_sections): Update.
+	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Change
+	parameters.
+	(generic_elf_osabi_sniffer): Use foreach.
+	* mips-sde-tdep.c (mips_sde_elf_osabi_sniffer): Use foreach.
+	* arm-tdep.c (arm_elf_osabi_sniffer): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (locate_dwz_sections): Change parameters.
 	(dwarf2_get_dwz_file): Use foreach.
 	(dwarf2_locate_dwo_sections): Change parameters.

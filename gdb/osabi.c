@@ -23,6 +23,7 @@
 #include "arch-utils.h"
 #include "gdbcmd.h"
 #include "command.h"
+#include "gdb_bfd.h"
 
 #include "elf-bfd.h"
 
@@ -439,9 +440,9 @@ check_note (bfd *abfd, asection *sect, char *note, unsigned int *sectsize,
 /* Generic sniffer for ELF flavoured files.  */
 
 void
-generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect, void *obj)
+generic_elf_osabi_sniff_abi_tag_sections (bfd *abfd, asection *sect,
+					  enum gdb_osabi *osabi)
 {
-  enum gdb_osabi *osabi = (enum gdb_osabi *) obj;
   const char *name;
   unsigned int sectsize;
   char *note;
@@ -561,9 +562,8 @@ generic_elf_osabi_sniffer (bfd *abfd)
       /* And likewise ELFOSABI_HPUX.  For some reason the default
 	 value for the EI_OSABI field is ELFOSABI_HPUX for all PA-RISC
 	 targets (with the exception of GNU/Linux).  */
-      bfd_map_over_sections (abfd,
-			     generic_elf_osabi_sniff_abi_tag_sections,
-			     &osabi);
+      for (asection *sect : gdb_bfd_sections (abfd))
+	generic_elf_osabi_sniff_abi_tag_sections (abfd, sect, &osabi);
       break;
 
     case ELFOSABI_FREEBSD:

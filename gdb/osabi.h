@@ -86,8 +86,8 @@ const char *gdbarch_osabi_name (enum gdb_osabi);
 const char *osabi_triplet_regexp (enum gdb_osabi osabi);
 
 /* Helper routine for ELF file sniffers.  This looks at ABI tag note
-   sections to determine the OS ABI from the note.  It should be called
-   via bfd_map_over_sections.  */
-void generic_elf_osabi_sniff_abi_tag_sections (bfd *, asection *, void *);
+   sections to determine the OS ABI from the note.  */
+void generic_elf_osabi_sniff_abi_tag_sections (bfd *, asection *,
+					       enum gdb_osabi *);
 
 #endif /* OSABI_H */
