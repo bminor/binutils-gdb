@@ -589,7 +589,7 @@ language_demangle (const struct language_defn *current_language,
 				const char *mangled, int options)
 {
   if (current_language != NULL)
-    return current_language->demangle (mangled, options);
+    return current_language->demangle_symbol (mangled, options);
   return NULL;
 }
 
@@ -815,7 +815,7 @@ public:
 
   /* See language.h.  */
 
-  char *demangle (const char *mangled, int options) const override
+  char *demangle_symbol (const char *mangled, int options) const override
   {
     /* The auto language just uses the C++ demangler.  */
     return gdb_demangle (mangled, options);

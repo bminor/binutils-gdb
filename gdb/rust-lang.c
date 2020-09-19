@@ -1972,7 +1972,7 @@ public:
 
   /* See language.h.  */
 
-  char *demangle (const char *mangled, int options) const override
+  char *demangle_symbol (const char *mangled, int options) const override
   {
     return gdb_demangle (mangled, options);
   }

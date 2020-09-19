@@ -328,7 +328,7 @@ struct language_defn
   }
 
   /* Return demangled language symbol version of MANGLED, or NULL.  */
-  virtual char *demangle (const char *mangled, int options) const
+  virtual char *demangle_symbol (const char *mangled, int options) const
   {
     return nullptr;
   }
