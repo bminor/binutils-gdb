@@ -1842,16 +1842,6 @@ load_command (const char *arg, int from_tty)
 
 static int validate_download = 0;
 
-/* Callback service function for generic_load (bfd_map_over_sections).  */
-
-static void
-add_section_size_callback (bfd *abfd, asection *asec, void *data)
-{
-  bfd_size_type *sum = (bfd_size_type *) data;
-
-  *sum += bfd_section_size (asec);
-}
-
 /* Opaque data for load_progress.  */
 struct load_progress_data
 {
@@ -1966,12 +1956,12 @@ load_progress (ULONGEST bytes, void *untyped_arg)
 				   totals->total_size);
 }
 
-/* Callback service function for generic_load (bfd_map_over_sections).  */
+/* Service function for generic_load.  */
 
 static void
-load_section_callback (bfd *abfd, asection *asec, void *data)
+load_one_section (bfd *abfd, asection *asec,
+		  struct load_section_data *args)
 {
-  struct load_section_data *args = (struct load_section_data *) data;
   bfd_size_type size = bfd_section_size (asec);
   const char *sect_name = bfd_section_name (asec);
 
@@ -2040,10 +2030,11 @@ generic_load (const char *args, int from_tty)
 	     bfd_errmsg (bfd_get_error ()));
     }
 
-  bfd_map_over_sections (loadfile_bfd.get (), add_section_size_callback,
-			 (void *) &total_progress.total_size);
+  for (asection *asec : gdb_bfd_sections (loadfile_bfd))
+    total_progress.total_size += bfd_section_size (asec);
 
-  bfd_map_over_sections (loadfile_bfd.get (), load_section_callback, &cbdata);
+  for (asection *asec : gdb_bfd_sections (loadfile_bfd))
+    load_one_section (loadfile_bfd.get (), asec, &cbdata);
 
   using namespace std::chrono;
 

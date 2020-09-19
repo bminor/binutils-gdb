@@ -1,5 +1,12 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (add_section_size_callback): Remove.
+	(load_one_section): Rename from load_section_callback.  Change
+	parameters.
+	(generic_load): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* exec.c (add_to_section_table): Remove.
 	(build_section_table): Use foreach.
 
