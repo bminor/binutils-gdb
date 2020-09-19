@@ -176,11 +176,8 @@ elf_symfile_segments (bfd *abfd)
    -kingdon).  */
 
 static void
-elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
+elf_locate_sections (asection *sectp, struct elfinfo *ei)
 {
-  struct elfinfo *ei;
-
-  ei = (struct elfinfo *) eip;
   if (strcmp (sectp->name, ".stab") == 0)
     {
       ei->stabsect = sectp;
@@ -1211,7 +1208,10 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   memset ((char *) &ei, 0, sizeof (ei));
   if (!(objfile->flags & OBJF_READNEVER))
-    bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
+    {
+      for (asection *sect : gdb_bfd_sections (abfd))
+	elf_locate_sections (sect, &ei);
+    }
 
   elf_read_minimal_symbols (objfile, symfile_flags, &ei);
 

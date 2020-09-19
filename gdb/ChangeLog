@@ -1,5 +1,10 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* elfread.c (elf_locate_sections): Change parameters.
+	(elf_symfile_read): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* cli/cli-dump.c (struct callback_data): Remove.
 	(restore_one_section): Rename from restore_section_callback.
 	Change parameters.
