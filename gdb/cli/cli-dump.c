@@ -371,22 +371,14 @@ add_dump_command (const char *name,
     c->doc = concat ("Append ", c->doc + 6, (char *)NULL);
 }
 
-/* Opaque data for restore_section_callback.  */
-struct callback_data {
-  CORE_ADDR load_offset;
-  CORE_ADDR load_start;
-  CORE_ADDR load_end;
-};
-
-/* Function: restore_section_callback.
-
-   Callback function for bfd_map_over_sections.
-   Selectively loads the sections into memory.  */
+/* Selectively loads the sections into memory.  */
 
 static void
-restore_section_callback (bfd *ibfd, asection *isec, void *args)
+restore_one_section (bfd *ibfd, asection *isec,
+		     CORE_ADDR load_offset,
+		     CORE_ADDR load_start,
+		     CORE_ADDR load_end)
 {
-  struct callback_data *data = (struct callback_data *) args;
   bfd_vma sec_start  = bfd_section_vma (isec);
   bfd_size_type size = bfd_section_size (isec);
   bfd_vma sec_end    = sec_start + size;
@@ -399,8 +391,8 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
     return;
 
   /* Does the section overlap with the desired restore range? */
-  if (sec_end <= data->load_start 
-      || (data->load_end > 0 && sec_start >= data->load_end))
+  if (sec_end <= load_start
+      || (load_end > 0 && sec_start >= load_end))
     {
       /* No, no useable data in this section.  */
       printf_filtered (_("skipping section %s...\n"), 
@@ -411,12 +403,12 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
   /* Compare section address range with user-requested
      address range (if any).  Compute where the actual
      transfer should start and end.  */
-  if (sec_start < data->load_start)
-    sec_offset = data->load_start - sec_start;
+  if (sec_start < load_start)
+    sec_offset = load_start - sec_start;
   /* Size of a partial transfer.  */
   sec_load_count -= sec_offset;
-  if (data->load_end > 0 && sec_end > data->load_end)
-    sec_load_count -= sec_end - data->load_end;
+  if (load_end > 0 && sec_end > load_end)
+    sec_load_count -= sec_end - load_end;
 
   /* Get the data.  */
   gdb::byte_vector buf (size);
@@ -429,26 +421,28 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 		   (unsigned long) sec_start, 
 		   (unsigned long) sec_end);
 
-  if (data->load_offset != 0 || data->load_start != 0 || data->load_end != 0)
+  if (load_offset != 0 || load_start != 0 || load_end != 0)
     printf_filtered (" into memory (%s to %s)\n",
 		     paddress (target_gdbarch (),
 			       (unsigned long) sec_start
-			       + sec_offset + data->load_offset), 
+			       + sec_offset + load_offset),
 		     paddress (target_gdbarch (),
 			       (unsigned long) sec_start + sec_offset
-				+ data->load_offset + sec_load_count));
+				+ load_offset + sec_load_count));
   else
     puts_filtered ("\n");
 
   /* Write the data.  */
-  ret = target_write_memory (sec_start + sec_offset + data->load_offset, 
+  ret = target_write_memory (sec_start + sec_offset + load_offset,
 			     &buf[sec_offset], sec_load_count);
   if (ret != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (ret));
 }
 
 static void
-restore_binary_file (const char *filename, struct callback_data *data)
+restore_binary_file (const char *filename, CORE_ADDR load_offset,
+		     CORE_ADDR load_start, CORE_ADDR load_end)
+
 {
   gdb_file_up file = gdb_fopen_cloexec (filename, FOPEN_RB);
   long len;
@@ -466,25 +460,25 @@ restore_binary_file (const char *filename, struct callback_data *data)
   else
     perror_with_name (filename);
 
-  if (len <= data->load_start)
+  if (len <= load_start)
     error (_("Start address is greater than length of binary file %s."), 
 	   filename);
 
   /* Chop off "len" if it exceeds the requested load_end addr.  */
-  if (data->load_end != 0 && data->load_end < len)
-    len = data->load_end;
+  if (load_end != 0 && load_end < len)
+    len = load_end;
   /* Chop off "len" if the requested load_start addr skips some bytes.  */
-  if (data->load_start > 0)
-    len -= data->load_start;
+  if (load_start > 0)
+    len -= load_start;
 
   printf_filtered 
     ("Restoring binary file %s into memory (0x%lx to 0x%lx)\n", 
      filename, 
-     (unsigned long) (data->load_start + data->load_offset),
-     (unsigned long) (data->load_start + data->load_offset + len));
+     (unsigned long) (load_start + load_offset),
+     (unsigned long) (load_start + load_offset + len));
 
   /* Now set the file pos to the requested load start pos.  */
-  if (fseek (file.get (), data->load_start, SEEK_SET) != 0)
+  if (fseek (file.get (), load_start, SEEK_SET) != 0)
     perror_with_name (filename);
 
   /* Now allocate a buffer and read the file contents.  */
@@ -493,8 +487,7 @@ restore_binary_file (const char *filename, struct callback_data *data)
     perror_with_name (filename);
 
   /* Now write the buffer into target memory.  */
-  len = target_write_memory (data->load_start + data->load_offset,
-			     buf.data (), len);
+  len = target_write_memory (load_start + load_offset, buf.data (), len);
   if (len != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (len));
 }
@@ -502,15 +495,14 @@ restore_binary_file (const char *filename, struct callback_data *data)
 static void
 restore_command (const char *args, int from_tty)
 {
-  struct callback_data data;
   int binary_flag = 0;
 
   if (!target_has_execution)
     noprocess ();
 
-  data.load_offset = 0;
-  data.load_start  = 0;
-  data.load_end    = 0;
+  CORE_ADDR load_offset = 0;
+  CORE_ADDR load_start  = 0;
+  CORE_ADDR load_end    = 0;
 
   /* Parse the input arguments.  First is filename (required).  */
   gdb::unique_xmalloc_ptr<char> filename = scan_filename (&args, NULL);
@@ -527,19 +519,20 @@ restore_command (const char *args, int from_tty)
 	}
       /* Parse offset (optional).  */
       if (args != NULL && *args != '\0')
-	data.load_offset = binary_flag ?
-	  parse_and_eval_address (scan_expression (&args, NULL).get ()) :
-	  parse_and_eval_long (scan_expression (&args, NULL).get ());
+	load_offset
+	  = (binary_flag
+	     ? parse_and_eval_address (scan_expression (&args, NULL).get ())
+	     : parse_and_eval_long (scan_expression (&args, NULL).get ()));
       if (args != NULL && *args != '\0')
 	{
 	  /* Parse start address (optional).  */
-	  data.load_start = 
+	  load_start =
 	    parse_and_eval_long (scan_expression (&args, NULL).get ());
 	  if (args != NULL && *args != '\0')
 	    {
 	      /* Parse end address (optional).  */
-	      data.load_end = parse_and_eval_long (args);
-	      if (data.load_end <= data.load_start)
+	      load_end = parse_and_eval_long (args);
+	      if (load_end <= load_start)
 		error (_("Start must be less than end."));
 	    }
 	}
@@ -547,13 +540,14 @@ restore_command (const char *args, int from_tty)
 
   if (info_verbose)
     printf_filtered ("Restore file %s offset 0x%lx start 0x%lx end 0x%lx\n",
-		     filename.get (), (unsigned long) data.load_offset,
-		     (unsigned long) data.load_start, 
-		     (unsigned long) data.load_end);
+		     filename.get (), (unsigned long) load_offset,
+		     (unsigned long) load_start,
+		     (unsigned long) load_end);
 
   if (binary_flag)
     {
-      restore_binary_file (filename.get (), &data);
+      restore_binary_file (filename.get (), load_offset, load_start,
+			   load_end);
     }
   else
     {
@@ -561,7 +555,9 @@ restore_command (const char *args, int from_tty)
       gdb_bfd_ref_ptr ibfd (bfd_openr_or_error (filename.get (), NULL));
 
       /* Process the sections.  */
-      bfd_map_over_sections (ibfd.get (), restore_section_callback, &data);
+      for (asection *sect : gdb_bfd_sections (ibfd))
+	restore_one_section (ibfd.get (), sect, load_offset, load_start,
+			     load_end);
     }
 }
 
