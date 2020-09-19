@@ -1,5 +1,10 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* stap-probe.c (get_stap_base_address_1): Remove.
+	(get_stap_base_address): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* gdb_bfd.c (free_one_bfd_section): Remove 'abfd' and 'ignore'
 	parameters.
 	(gdb_bfd_close_or_warn): Use foreach.

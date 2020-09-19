@@ -1578,19 +1578,6 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   probesp->emplace_back (ret);
 }
 
-/* Helper function which tries to find the base address of the SystemTap
-   base section named STAP_BASE_SECTION_NAME.  */
-
-static void
-get_stap_base_address_1 (bfd *abfd, asection *sect, void *obj)
-{
-  asection **ret = (asection **) obj;
-
-  if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS))
-      && sect->name && !strcmp (sect->name, STAP_BASE_SECTION_NAME))
-    *ret = sect;
-}
-
 /* Helper function which iterates over every section in the BFD file,
    trying to find the base address of the SystemTap base section.
    Returns 1 if found (setting BASE to the proper value), zero otherwise.  */
@@ -1600,7 +1587,10 @@ get_stap_base_address (bfd *obfd, bfd_vma *base)
 {
   asection *ret = NULL;
 
-  bfd_map_over_sections (obfd, get_stap_base_address_1, (void *) &ret);
+  for (asection *sect : gdb_bfd_sections (obfd))
+    if ((sect->flags & (SEC_DATA | SEC_ALLOC | SEC_HAS_CONTENTS))
+	&& sect->name && !strcmp (sect->name, STAP_BASE_SECTION_NAME))
+      ret = sect;
 
   if (ret == NULL)
     {
