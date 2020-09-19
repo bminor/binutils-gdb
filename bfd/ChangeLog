@@ -1,5 +1,9 @@
 2020-09-19  Nick Clifton  <nickc@redhat.com>
 
+	* development.sh (development): Set to true.
+
+2020-09-19  Nick Clifton  <nickc@redhat.com>
+
 	This is the 2.35.1 point release.
 
 	* development.sh (development): Set to false.
