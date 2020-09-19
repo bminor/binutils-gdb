@@ -364,7 +364,7 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 }
 
 static void
-make_output_phdrs (bfd *obfd, asection *osec, void *ignored)
+make_output_phdrs (bfd *obfd, asection *osec)
 {
   int p_flags = 0;
   int p_type = 0;
@@ -531,7 +531,7 @@ objfile_find_memory_regions (struct target_ops *self,
 }
 
 static void
-gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
+gcore_copy_callback (bfd *obfd, asection *osec)
 {
   bfd_size_type size, total_size = bfd_section_size (osec);
   file_ptr offset = 0;
@@ -587,10 +587,12 @@ gcore_memory_sections (bfd *obfd)
     }
 
   /* Record phdrs for section-to-segment mapping.  */
-  bfd_map_over_sections (obfd, make_output_phdrs, NULL);
+  for (asection *sect : gdb_bfd_sections (obfd))
+    make_output_phdrs (obfd, sect);
 
   /* Copy memory region contents.  */
-  bfd_map_over_sections (obfd, gcore_copy_callback, NULL);
+  for (asection *sect : gdb_bfd_sections (obfd))
+    gcore_copy_callback (obfd, sect);
 
   return 1;
 }

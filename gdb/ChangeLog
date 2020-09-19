@@ -1,5 +1,11 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* gcore.c (make_output_phdrs): Remove 'ignored' parameter.
+	(gcore_copy_callback): Likewise.
+	(gcore_memory_sections): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* osabi.h (generic_elf_osabi_sniff_abi_tag_sections): Update.
 	* osabi.c (generic_elf_osabi_sniff_abi_tag_sections): Change
 	parameters.
