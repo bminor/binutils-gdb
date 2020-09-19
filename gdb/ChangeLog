@@ -1,3 +1,9 @@
+2020-09-18  Victor Collod  <vcollod@nvidia.com>
+
+	PR gdb/26635
+	* i386-tdep.c (i386_skip_endbr): Add a helper function to skip endbr.
+	(i386_analyze_prologue): Call i386_skip_endbr.
+
 2020-09-18  Tom Tromey  <tromey@adacore.com>
 
 	* windows-nat.c (struct windows_nat_target) <wait>: Update.
