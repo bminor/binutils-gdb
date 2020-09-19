@@ -2120,10 +2120,8 @@ dwarf2_get_section_info (struct objfile *objfile,
 /* A helper function to find the sections for a .dwz file.  */
 
 static void
-locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
+locate_dwz_sections (bfd *abfd, asection *sectp, dwz_file *dwz_file)
 {
-  struct dwz_file *dwz_file = (struct dwz_file *) arg;
-
   /* Note that we only support the standard ELF names, because .dwz
      is ELF-only (at the time of writing).  */
   if (section_is_p (sectp->name, &dwarf2_elf_names.abbrev))
@@ -2246,8 +2244,8 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd)
   std::unique_ptr<struct dwz_file> result
     (new struct dwz_file (std::move (dwz_bfd)));
 
-  bfd_map_over_sections (result->dwz_bfd.get (), locate_dwz_sections,
-			 result.get ());
+  for (asection *sec : gdb_bfd_sections (result->dwz_bfd))
+    locate_dwz_sections (result->dwz_bfd.get (), sec, result.get ());
 
   gdb_bfd_record_inclusion (per_bfd->obfd, result->dwz_bfd.get ());
   per_bfd->dwz_file = std::move (result);
@@ -11915,9 +11913,9 @@ create_dwp_hash_table (dwarf2_per_objfile *per_objfile,
 
 /* Update SECTIONS with the data from SECTP.
 
-   This function is like the other "locate" section routines that are
-   passed to bfd_map_over_sections, but in this context the sections to
-   read comes from the DWP V1 hash table, not the full ELF section table.
+   This function is like the other "locate" section routines, but in
+   this context the sections to read comes from the DWP V1 hash table,
+   not the full ELF section table.
 
    The result is non-zero for success, or zero if an error was found.  */
 
@@ -12730,9 +12728,9 @@ open_dwo_file (dwarf2_per_objfile *per_objfile,
    size of each of the DWO debugging sections we are interested in.  */
 
 static void
-dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
+dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp,
+			    dwo_sections *dwo_sections)
 {
-  struct dwo_sections *dwo_sections = (struct dwo_sections *) dwo_sections_ptr;
   const struct dwop_section_names *names = &dwop_section_names;
 
   if (section_is_p (sectp->name, &names->abbrev_dwo))
@@ -12819,8 +12817,9 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
   dwo_file->comp_dir = comp_dir;
   dwo_file->dbfd = std::move (dbfd);
 
-  bfd_map_over_sections (dwo_file->dbfd.get (), dwarf2_locate_dwo_sections,
-			 &dwo_file->sections);
+  for (asection *sec : gdb_bfd_sections (dwo_file->dbfd))
+    dwarf2_locate_dwo_sections (dwo_file->dbfd.get (), sec,
+				&dwo_file->sections);
 
   create_cus_hash_table (per_objfile, cu, *dwo_file, dwo_file->sections.info,
 			 dwo_file->cus);
@@ -12849,9 +12848,8 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 
 static void
 dwarf2_locate_common_dwp_sections (bfd *abfd, asection *sectp,
-				   void *dwp_file_ptr)
+				   dwp_file *dwp_file)
 {
-  struct dwp_file *dwp_file = (struct dwp_file *) dwp_file_ptr;
   const struct dwop_section_names *names = &dwop_section_names;
   unsigned int elf_section_nr = elf_section_data (sectp)->this_idx;
 
@@ -13115,9 +13113,9 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
     OBSTACK_CALLOC (&per_objfile->per_bfd->obstack,
 		    dwp_file->num_sections, asection *);
 
-  bfd_map_over_sections (dwp_file->dbfd.get (),
-			 dwarf2_locate_common_dwp_sections,
-			 dwp_file.get ());
+  for (asection *sec : gdb_bfd_sections (dwp_file->dbfd))
+    dwarf2_locate_common_dwp_sections (dwp_file->dbfd.get (), sec,
+				       dwp_file.get ());
 
   dwp_file->cus = create_dwp_hash_table (per_objfile, dwp_file.get (), 0);
 
@@ -13143,15 +13141,15 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
   else
     dwp_file->version = 2;
 
-  if (dwp_file->version == 2)
-    bfd_map_over_sections (dwp_file->dbfd.get (),
-			   dwarf2_locate_v2_dwp_sections,
-			   dwp_file.get ());
-  else if (dwp_file->version == 5)
-    bfd_map_over_sections (dwp_file->dbfd.get (),
-			   dwarf2_locate_v5_dwp_sections,
-			   dwp_file.get ());
-
+  for (asection *sec : gdb_bfd_sections (dwp_file->dbfd))
+    {
+      if (dwp_file->version == 2)
+	dwarf2_locate_v2_dwp_sections (dwp_file->dbfd.get (), sec,
+				       dwp_file.get ());
+      else
+	dwarf2_locate_v5_dwp_sections (dwp_file->dbfd.get (), sec,
+				       dwp_file.get ());
+    }
 
   dwp_file->loaded_cus = allocate_dwp_loaded_cutus_table ();
   dwp_file->loaded_tus = allocate_dwp_loaded_cutus_table ();
