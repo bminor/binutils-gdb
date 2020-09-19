@@ -1,5 +1,12 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.c (add_to_objfile_sections): Rename from
+	add_to_objfile_sections_full.
+	(add_to_objfile_sections): Remove.
+	(build_objfile_section_table): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* stap-probe.c (get_stap_base_address_1): Remove.
 	(get_stap_base_address): Use foreach.
 

@@ -257,13 +257,13 @@ objfile_lookup_static_link (struct objfile *objfile,
 
 
 
-/* Called via bfd_map_over_sections to build up the section table that
-   the objfile references.  The objfile contains pointers to the start
-   of the table (objfile->sections) and to the first location after
-   the end of the table (objfile->sections_end).  */
+/* Build up the section table that the objfile references.  The
+   objfile contains pointers to the start of the table
+   (objfile->sections) and to the first location after the end of the
+   table (objfile->sections_end).  */
 
 static void
-add_to_objfile_sections_full (struct bfd *abfd, struct bfd_section *asect,
+add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 			      struct objfile *objfile, int force)
 {
   struct obj_section *section;
@@ -283,13 +283,6 @@ add_to_objfile_sections_full (struct bfd *abfd, struct bfd_section *asect,
   section->ovly_mapped = 0;
 }
 
-static void
-add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
-			 void *objfilep)
-{
-  add_to_objfile_sections_full (abfd, asect, (struct objfile *) objfilep, 0);
-}
-
 /* Builds a section table for OBJFILE.
 
    Note that the OFFSET and OVLY_MAPPED in each table entry are
@@ -304,14 +297,14 @@ build_objfile_section_table (struct objfile *objfile)
 				      count,
 				      struct obj_section);
   objfile->sections_end = (objfile->sections + count);
-  bfd_map_over_sections (objfile->obfd,
-			 add_to_objfile_sections, (void *) objfile);
+  for (asection *sect : gdb_bfd_sections (objfile->obfd))
+    add_to_objfile_sections (objfile->obfd, sect, objfile, 0);
 
   /* See gdb_bfd_section_index.  */
-  add_to_objfile_sections_full (objfile->obfd, bfd_com_section_ptr, objfile, 1);
-  add_to_objfile_sections_full (objfile->obfd, bfd_und_section_ptr, objfile, 1);
-  add_to_objfile_sections_full (objfile->obfd, bfd_abs_section_ptr, objfile, 1);
-  add_to_objfile_sections_full (objfile->obfd, bfd_ind_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_com_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_und_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_abs_section_ptr, objfile, 1);
+  add_to_objfile_sections (objfile->obfd, bfd_ind_section_ptr, objfile, 1);
 }
 
 /* Given a pointer to an initialized bfd (ABFD) and some flag bits,
