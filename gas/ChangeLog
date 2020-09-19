@@ -1,3 +1,12 @@
+2020-09-19  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+	2020-09-15  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (s_nop): Preserve the input_line_pointer around the call
+	to md_assemble.
+	* config/tc-s12z.c (md_assemble): Revert previous delta.
+
 2020-09-15  Nick Clifton  <nickc@redhat.com>
 
 	Import from mainline:
