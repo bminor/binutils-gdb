@@ -1,5 +1,10 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* exec.c (add_to_section_table): Remove.
+	(build_section_table): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* elfread.c (elf_locate_sections): Change parameters.
 	(elf_symfile_read): Use foreach.
 

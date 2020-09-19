@@ -587,35 +587,6 @@ file_command (const char *arg, int from_tty)
 }
 
 
-/* Locate all mappable sections of a BFD file.
-   table_pp_char is a char * to get it through bfd_map_over_sections;
-   we cast it back to its proper type.  */
-
-static void
-add_to_section_table (bfd *abfd, struct bfd_section *asect,
-		      void *table_pp_char)
-{
-  struct target_section **table_pp = (struct target_section **) table_pp_char;
-  flagword aflag;
-
-  gdb_assert (abfd == asect->owner);
-
-  /* Check the section flags, but do not discard zero-length sections, since
-     some symbols may still be attached to this section.  For instance, we
-     encountered on sparc-solaris 2.10 a shared library with an empty .bss
-     section to which a symbol named "_end" was attached.  The address
-     of this symbol still needs to be relocated.  */
-  aflag = bfd_section_flags (asect);
-  if (!(aflag & SEC_ALLOC))
-    return;
-
-  (*table_pp)->owner = NULL;
-  (*table_pp)->the_bfd_section = asect;
-  (*table_pp)->addr = bfd_section_vma (asect);
-  (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (asect);
-  (*table_pp)++;
-}
-
 /* See exec.h.  */
 
 void
@@ -665,7 +636,26 @@ build_section_table (struct bfd *some_bfd, struct target_section **start,
   xfree (*start);
   *start = XNEWVEC (struct target_section, count);
   *end = *start;
-  bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
+  for (asection *asect : gdb_bfd_sections (some_bfd))
+    {
+      flagword aflag;
+
+      /* Check the section flags, but do not discard zero-length
+	 sections, since some symbols may still be attached to this
+	 section.  For instance, we encountered on sparc-solaris 2.10
+	 a shared library with an empty .bss section to which a symbol
+	 named "_end" was attached.  The address of this symbol still
+	 needs to be relocated.  */
+      aflag = bfd_section_flags (asect);
+      if (!(aflag & SEC_ALLOC))
+	continue;
+
+      (*end)->owner = NULL;
+      (*end)->the_bfd_section = asect;
+      (*end)->addr = bfd_section_vma (asect);
+      (*end)->endaddr = (*end)->addr + bfd_section_size (asect);
+      (*end)++;
+    }
 
   gdb_assert (*end <= *start + count);
 
