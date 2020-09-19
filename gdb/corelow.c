@@ -290,8 +290,6 @@ core_target::build_file_mappings ()
   normalize_mem_ranges (&m_core_unavailable_mappings);
 }
 
-static void add_to_thread_list (bfd *, asection *, void *);
-
 /* An arbitrary identifier for the core inferior.  */
 #define CORELOW_PID 1
 
@@ -322,11 +320,10 @@ core_target::close ()
    extract the list of threads in a core file.  */
 
 static void
-add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
+add_to_thread_list (asection *asect, asection *reg_sect)
 {
   int core_tid;
   int pid, lwpid;
-  asection *reg_sect = (asection *) reg_sect_arg;
   bool fake_pid_p = false;
   struct inferior *inf;
 
@@ -493,8 +490,9 @@ core_target_open (const char *arg, int from_tty)
   /* Build up thread list from BFD sections, and possibly set the
      current thread to the .reg/NN section matching the .reg
      section.  */
-  bfd_map_over_sections (core_bfd, add_to_thread_list,
-			 bfd_get_section_by_name (core_bfd, ".reg"));
+  asection *reg_sect = bfd_get_section_by_name (core_bfd, ".reg");
+  for (asection *sect : gdb_bfd_sections (core_bfd))
+    add_to_thread_list (sect, reg_sect);
 
   if (inferior_ptid == null_ptid)
     {

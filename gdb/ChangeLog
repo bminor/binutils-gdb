@@ -1,5 +1,10 @@
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
+	* corelow.c (add_to_thread_list): Change parameters.
+	(core_target_open): Use foreach.
+
+2020-09-19  Tom Tromey  <tom@tromey.com>
+
 	* gdb_bfd.h (gdb_bfd_sections): New overload.  Fix formatting of
 	existing function.
 
