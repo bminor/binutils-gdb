@@ -1538,6 +1538,24 @@ struct i386_insn i386_frame_setup_skip_insns[] =
   { 0 }
 };
 
+/* Check whether PC points to an endbr32 instruction.  */
+static CORE_ADDR
+i386_skip_endbr (CORE_ADDR pc)
+{
+  static const gdb_byte endbr32[] = { 0xf3, 0x0f, 0x1e, 0xfb };
+
+  gdb_byte buf[sizeof (endbr32)];
+
+  /* Stop there if we can't read the code */
+  if (target_read_code (pc, buf, sizeof (endbr32)))
+    return pc;
+
+  /* If the instruction isn't an endbr32, stop */
+  if (memcmp (buf, endbr32, sizeof (endbr32)) != 0)
+    return pc;
+
+  return pc + sizeof (endbr32);
+}
 
 /* Check whether PC points to a no-op instruction.  */
 static CORE_ADDR
@@ -1815,6 +1833,7 @@ i386_analyze_prologue (struct gdbarch *gdbarch,
 		       CORE_ADDR pc, CORE_ADDR current_pc,
 		       struct i386_frame_cache *cache)
 {
+  pc = i386_skip_endbr (pc);
   pc = i386_skip_noop (pc);
   pc = i386_follow_jump (gdbarch, pc);
   pc = i386_analyze_struct_return (pc, current_pc, cache);
