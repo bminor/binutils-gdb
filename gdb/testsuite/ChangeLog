@@ -1,5 +1,10 @@
 2020-09-20  Pedro Alves  <pedro@palves.net>
 
+	* lib/mi-support.exp (mi_uncatched_gdb_exit) Switch to the main
+	spawn_id before calling remote_close.  Close secondary MI channel.
+
+2020-09-20  Pedro Alves  <pedro@palves.net>
+
 	* gdb.base/testenv.exp (find_env): Bail out if printing 'envp[$i]'
 	fails.
 

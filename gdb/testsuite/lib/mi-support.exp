@@ -89,6 +89,18 @@ proc mi_uncatched_gdb_exit {} {
 	}
     }
 
+    # Switch back to the main spawn id, so that remote_close below
+    # closes it, and not a secondary channel.  Closing a secondary
+    # channel does not make GDB exit.
+    if {$gdb_spawn_id != $gdb_main_spawn_id} {
+	switch_gdb_spawn_id $gdb_main_spawn_id
+    }
+
+    # Close secondary MI channel, if there's one.
+    if {$mi_spawn_id != $gdb_main_spawn_id} {
+	close -i $mi_spawn_id
+    }
+
     if ![is_remote host] {
 	remote_close host
     }
