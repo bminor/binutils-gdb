@@ -1,3 +1,13 @@
+2020-10-02  Nitika Achra  <Nitika.Achra@amd.com>
+
+	* dwarf2/macro.c (dwarf_decode_macro_bytes): Handle DW_MACRO_define_strx
+	and DW_MACRO_undef_strx.
+	(dwarf_decode_macros): Likewise
+	* dwarf2/read.c (dwarf_decode_macros): Pass str_offsets_base in the parameters
+	which is the value of DW_AT_str_offsets_base.
+	 * dwarf2/macro.h (dwarf_decode_macros): Modify the definition to include
+	str_offsets_base.
+
 2020-10-01  Kamil Rytarowski  <n54@gmx.com>
 
 	* i386-tdep.h (i386nbsd_sc_reg_offset): Remove.

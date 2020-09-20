@@ -23900,8 +23900,27 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 
   buildsym_compunit *builder = cu->get_builder ();
 
+  struct dwarf2_section_info *str_offsets_section;
+  struct dwarf2_section_info *str_section;
+  ULONGEST str_offsets_base;
+
+  if (cu->dwo_unit != nullptr)
+    {
+      str_offsets_section = &cu->dwo_unit->dwo_file
+			       ->sections.str_offsets;
+      str_section = &cu->dwo_unit->dwo_file->sections.str;
+      str_offsets_base = cu->header.addr_size;
+    }
+  else
+    {
+      str_offsets_section = &per_objfile->per_bfd->str_offsets;
+      str_section = &per_objfile->per_bfd->str;
+      str_offsets_base = *cu->str_offsets_base;
+    }
+
   dwarf_decode_macros (per_objfile, builder, section, lh,
-		       offset_size, offset, section_is_gnu);
+		       offset_size, offset, str_section, str_offsets_section,
+		       str_offsets_base, section_is_gnu);
 }
 
 /* Return the .debug_loc section to use for CU.

@@ -427,6 +427,9 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 			  const struct dwarf2_section_info *section,
 			  int section_is_gnu, int section_is_dwz,
 			  unsigned int offset_size,
+			  struct dwarf2_section_info *str_section,
+			  struct dwarf2_section_info *str_offsets_section,
+			  ULONGEST str_offsets_base,
 			  htab_t include_hash)
 {
   struct objfile *objfile = per_objfile->objfile;
@@ -561,6 +564,53 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
           }
           break;
 
+	case DW_MACRO_define_strx:
+	case DW_MACRO_undef_strx:
+	  {
+	    unsigned int bytes_read;
+
+	    int line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	    int offset_index = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+
+	    str_offsets_section->read (objfile);
+	    const gdb_byte *info_ptr = (str_offsets_section->buffer
+					+ str_offsets_base
+					+ offset_index * offset_size);
+
+	    const char *macinfo_str = (macinfo_type == DW_MACRO_define_strx ?
+				       "DW_MACRO_define_strx" : "DW_MACRO_undef_strx");
+
+	    if (str_offsets_base + offset_index * offset_size
+		>= str_offsets_section->size)
+	      {
+		complaint (_("%s pointing outside of .debug_str_offsets section "
+			     "[in module %s]"), macinfo_str, objfile_name (objfile));
+		break;
+	      }
+
+	    ULONGEST str_offset = read_offset (abfd, info_ptr, offset_size);
+
+	    const char *body = str_section->read_string (objfile, str_offset,
+							 macinfo_str);
+	    if (current_file == nullptr)
+	      {
+		/* DWARF violation as no main source is present.  */
+		complaint (_("debug info with no main source gives macro %s "
+			     "on line %d: %s"),
+			     macinfo_type == DW_MACRO_define_strx ? _("definition")
+			     : _("undefinition"), line, body);
+		break;
+	      }
+
+	    if (macinfo_type == DW_MACRO_define_strx)
+	      parse_macro_definition (current_file, line, body);
+	    else
+	      macro_undef (current_file, line, body);
+	   }
+	   break;
+
         case DW_MACRO_start_file:
           {
             unsigned int bytes_read;
@@ -671,7 +721,8 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 					  new_mac_ptr, include_mac_end,
 					  current_file, lh, section,
 					  section_is_gnu, is_dwz, offset_size,
-					  include_hash);
+					  str_section, str_offsets_section,
+					  str_offsets_base, include_hash);
 
 		htab_remove_elt (include_hash, (void *) new_mac_ptr);
 	      }
@@ -712,7 +763,9 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 		     buildsym_compunit *builder,
 		     const dwarf2_section_info *section,
 		     const struct line_header *lh, unsigned int offset_size,
-		     unsigned int offset, int section_is_gnu)
+		     unsigned int offset, struct dwarf2_section_info *str_section,
+		     struct dwarf2_section_info *str_offsets_section,
+		     ULONGEST str_offsets_base, int section_is_gnu)
 {
   bfd *abfd;
   const gdb_byte *mac_ptr, *mac_end;
@@ -814,6 +867,17 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 	    mac_ptr += offset_size;
 	  }
 	  break;
+	case DW_MACRO_define_strx:
+	case DW_MACRO_undef_strx:
+	  {
+	    unsigned int bytes_read;
+
+	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	    read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	  }
+	  break;
 
 	case DW_MACRO_import:
 	case DW_MACRO_import_sup:
@@ -861,5 +925,6 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
   *slot = (void *) mac_ptr;
   dwarf_decode_macro_bytes (per_objfile, builder, abfd, mac_ptr, mac_end,
 			    current_file, lh, section, section_is_gnu, 0,
-			    offset_size, include_hash.get ());
+			    offset_size, str_section, str_offsets_section,
+			    str_offsets_base, include_hash.get ());
 }

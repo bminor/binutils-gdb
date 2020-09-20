@@ -28,6 +28,9 @@ extern void dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 				 const struct line_header *lh,
 				 unsigned int offset_size,
 				 unsigned int offset,
+				 dwarf2_section_info *str_section,
+				 dwarf2_section_info *str_offsets_section,
+				 ULONGEST str_offsets_base,
 				 int section_is_gnu);
 
 #endif /* GDB_DWARF2_MACRO_H */
