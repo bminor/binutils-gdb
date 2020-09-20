@@ -68,6 +68,12 @@ proc find_env {varname} {
 	    -re "var: \(\[^\r\n\]*\)\r\n$gdb_prompt $" {
 		set var $expect_out(1,string)
 	    }
+	    -re "$gdb_prompt $" {
+		# If this fails, bail out, otherwise we get stuck in
+		# an infinite loop.  The caller will end up emiting a
+		# FAIL.
+		return "<fail>"
+	    }
 	}
 
 	if {[string match "$varname=*" $var]} {
