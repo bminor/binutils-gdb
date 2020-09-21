@@ -1,3 +1,8 @@
+2020-09-21  Tom Tromey  <tromey@adacore.com>
+
+	* sparc-tdep.c (sparc32_skip_prologue): Use
+	skip_prologue_using_sal.
+
 2020-09-19  Tom Tromey  <tom@tromey.com>
 
 	* symfile.c (add_section_size_callback): Remove.

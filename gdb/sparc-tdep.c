@@ -1127,18 +1127,19 @@ static CORE_ADDR
 sparc32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct symtab_and_line sal;
-  CORE_ADDR func_start, func_end;
+  CORE_ADDR func_addr;
   struct sparc_frame_cache cache;
 
   /* This is the preferred method, find the end of the prologue by
      using the debugging information.  */
-  if (find_pc_partial_function (start_pc, NULL, &func_start, &func_end))
-    {
-      sal = find_pc_line (func_start, 0);
 
-      if (sal.end < func_end
-	  && start_pc <= sal.end)
-	return sal.end;
+  if (find_pc_partial_function (start_pc, NULL, &func_addr, NULL))
+    {
+      CORE_ADDR post_prologue_pc
+	= skip_prologue_using_sal (gdbarch, func_addr);
+
+      if (post_prologue_pc != 0)
+	return std::max (start_pc, post_prologue_pc);
     }
 
   start_pc = sparc_analyze_prologue (gdbarch, start_pc, 0xffffffffUL, &cache);
