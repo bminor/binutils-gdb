@@ -1,3 +1,11 @@
+2020-09-21  Alan Modra  <amodra@gmail.com>
+
+	* rx-dis.c (flag_names): Add missing comma.
+	(register_names, flag_names, double_register_names),
+	(double_register_high_names, double_register_low_names),
+	(double_control_register_names, double_condition_names): Remove
+	trailing commas.
+
 2020-09-18  David Faust  <david.faust@oracle.com>
 
 	* bpf-desc.c: Regenerate.
