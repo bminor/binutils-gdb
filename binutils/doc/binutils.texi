@@ -1404,13 +1404,16 @@ will remove all relocations for sections matching the pattern
 @item -S
 @itemx --strip-all
 Do not copy relocation and symbol information from the source file.
+Also deletes debug sections.
 
 @item -g
 @itemx --strip-debug
 Do not copy debugging symbols or sections from the source file.
 
 @item --strip-unneeded
-Strip all symbols that are not needed for relocation processing.
+Remove all symbols that are not needed for relocation processing in
+addition to debugging symbols and sections stripped by
+@option{--strip-debug}.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
@@ -3387,7 +3390,9 @@ See the description of this option in the @command{objcopy} section
 for more information.
 
 @item --strip-unneeded
-Remove all symbols that are not needed for relocation processing.
+Remove all symbols that are not needed for relocation processing in
+addition to debugging symbols and sections stripped by
+@option{--strip-debug}.
 
 @item -K @var{symbolname}
 @itemx --keep-symbol=@var{symbolname}
