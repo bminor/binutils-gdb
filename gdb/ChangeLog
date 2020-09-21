@@ -1,5 +1,10 @@
 2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* language.h (language_defn::print_type): Add variable names in
+	declaration, and update header comment.
+
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language::demangle): Rename to...
 	(ada_language::demangle_symbol): ...this.
 	* c-lang.c (cplus_language::demangle): Rename to...

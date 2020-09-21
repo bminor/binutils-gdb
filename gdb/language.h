@@ -333,10 +333,14 @@ struct language_defn
     return nullptr;
   }
 
-  /* Print a type using syntax appropriate for this language.  */
+  /* Print TYPE to STREAM using syntax appropriate for this language.
+     LEVEL is the depth to indent lines by.  VARSTRING, if not NULL or the
+     empty string, is the name of a variable and TYPE should be printed in
+     the form of a declaration of a variable named VARSTRING.  */
 
-  virtual void print_type (struct type *, const char *, struct ui_file *, int,
-			   int, const struct type_print_options *) const = 0;
+  virtual void print_type (struct type *type, const char *varstring,
+			   struct ui_file *stream, int show, int level,
+			   const struct type_print_options *flags) const = 0;
 
   /* PC is possibly an unknown languages trampoline.
      If that PC falls in a trampoline belonging to this language, return
