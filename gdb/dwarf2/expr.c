@@ -33,6 +33,8 @@
 #include "gdbsupport/underlying.h"
 #include "gdbarch.h"
 #include "objfiles.h"
+#include "inferior.h"
+#include "observable.h"
 
 /* Cookie for gdbarch data.  */
 
@@ -187,6 +189,86 @@ write_to_register (frame_info *frame, int regnum,
     }
 
   return;
+}
+
+/* Helper for read_from_memory and write_to_memory.  */
+
+static void
+xfer_memory (CORE_ADDR address, gdb_byte *readbuf,
+	     const gdb_byte *writebuf,
+	     size_t length, bool stack, int *unavailable)
+{
+  *unavailable = 0;
+
+  target_object object
+    = stack ? TARGET_OBJECT_STACK_MEMORY : TARGET_OBJECT_MEMORY;
+
+  ULONGEST xfered_total = 0;
+
+  while (xfered_total < length)
+    {
+      ULONGEST xfered_partial;
+
+      enum target_xfer_status status
+	= target_xfer_partial (current_inferior ()->top_target (),
+			       object, NULL,
+			       (readbuf != nullptr
+				? readbuf + xfered_total
+				: nullptr),
+			       (writebuf != nullptr
+				? writebuf + xfered_total
+				: nullptr),
+			       address + xfered_total, length - xfered_total,
+			       &xfered_partial);
+
+      if (status == TARGET_XFER_OK)
+	{
+	  xfered_total += xfered_partial;
+	  QUIT;
+	}
+      else if (status == TARGET_XFER_UNAVAILABLE)
+	{
+	  *unavailable = 1;
+	  return;
+	}
+      else if (status == TARGET_XFER_EOF)
+	memory_error (TARGET_XFER_E_IO, address + xfered_total);
+      else
+	memory_error (status, address + xfered_total);
+    }
+}
+
+/* Read LENGTH bytes of memory contents starting at ADDRESS.
+
+   The data read is copied to a caller-managed buffer BUF.  STACK
+   indicates whether the memory range specified belongs to a stack
+   memory region.
+
+   If the memory is unavailable, the UNAVAILABLE output is set.  */
+
+static void
+read_from_memory (CORE_ADDR address, gdb_byte *buffer,
+		  size_t length, bool stack, int *unavailable)
+{
+  xfer_memory (address, buffer, nullptr, length, stack, unavailable);
+}
+
+/* Write LENGTH bytes of memory contents starting at ADDRESS.
+
+   The data written is copied from a caller-managed buffer buf.  STACK
+   indicates whether the memory range specified belongs to a stack
+   memory region.
+
+   If the memory is unavailable, the UNAVAILABLE output is set.  */
+
+static void
+write_to_memory (CORE_ADDR address, const gdb_byte *buffer,
+		 size_t length, bool stack, int *unavailable)
+{
+  xfer_memory (address, nullptr, buffer, length, stack, unavailable);
+
+  gdb::observers::memory_changed.notify (current_inferior (), address,
+					 length, buffer);
 }
 
 struct piece_closure
@@ -387,66 +469,86 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	    bits_to_skip += p->offset;
 
 	    CORE_ADDR start_addr = p->v.mem.addr + bits_to_skip / 8;
+	    bool in_stack_memory = p->v.mem.in_stack_memory;
+	    int unavail = 0;
 
 	    if (bits_to_skip % 8 == 0 && this_size_bits % 8 == 0
 		&& offset % 8 == 0)
 	      {
 		/* Everything is byte-aligned; no buffer needed.  */
-		if (from != nullptr)
-		  write_memory_with_notification (start_addr,
-						  (from_contents
-						   + offset / 8),
-						  this_size_bits / 8);
+		if (from != NULL)
+		  write_to_memory (start_addr, (from_contents + offset / 8),
+				   this_size_bits / 8, in_stack_memory,
+				   &unavail);
 		else
-		  read_value_memory (v, offset,
-				     p->v.mem.in_stack_memory,
-				     p->v.mem.addr + bits_to_skip / 8,
-				     v_contents + offset / 8,
-				     this_size_bits / 8);
-		break;
-	      }
-
-	    this_size = bits_to_bytes (bits_to_skip, this_size_bits);
-	    buffer.resize (this_size);
-
-	    if (from == nullptr)
-	      {
-		/* Read mode.  */
-		read_value_memory (v, offset,
-				   p->v.mem.in_stack_memory,
-				   p->v.mem.addr + bits_to_skip / 8,
-				   buffer.data (), this_size);
-		copy_bitwise (v_contents, offset,
-			      buffer.data (), bits_to_skip % 8,
-			      this_size_bits, bits_big_endian);
+		  read_from_memory (start_addr, (v_contents + offset / 8),
+				    this_size_bits / 8, in_stack_memory,
+				    &unavail);
 	      }
 	    else
 	      {
-		/* Write mode.  */
-		if (bits_to_skip % 8 != 0 || this_size_bits % 8 != 0)
+		this_size = bits_to_bytes (bits_to_skip, this_size_bits);
+		buffer.resize (this_size);
+
+		if (from == NULL)
 		  {
-		    if (this_size <= 8)
+		    /* Read mode.  */
+		    read_from_memory (start_addr, buffer.data (),
+				      this_size, in_stack_memory,
+				      &unavail);
+		    if (!unavail)
+		      copy_bitwise (v_contents, offset,
+				    buffer.data (), bits_to_skip % 8,
+				    this_size_bits, bits_big_endian);
+		  }
+		else
+		  {
+		    /* Write mode.  */
+		    if (bits_to_skip % 8 != 0 || this_size_bits % 8 != 0)
 		      {
-			/* Perform a single read for small sizes.  */
-			read_memory (start_addr, buffer.data (),
-				     this_size);
+			if (this_size <= 8)
+			  {
+			    /* Perform a single read for small sizes.  */
+			    read_from_memory (start_addr, buffer.data (),
+					      this_size, in_stack_memory,
+					      &unavail);
+			  }
+			else
+			  {
+			    /* Only the first and last bytes can possibly have
+			       any bits reused.  */
+			    read_from_memory (start_addr, buffer.data (),
+					      1, in_stack_memory,
+					      &unavail);
+			    if (!unavail)
+			      read_from_memory (start_addr + this_size - 1,
+						&buffer[this_size - 1], 1,
+						in_stack_memory, &unavail);
+			  }
 		      }
-		    else
+
+		    if (!unavail)
 		      {
-			/* Only the first and last bytes can possibly have
-			   any bits reused.  */
-			read_memory (start_addr, buffer.data (), 1);
-			read_memory (start_addr + this_size - 1,
-				     &buffer[this_size - 1], 1);
+			copy_bitwise (buffer.data (), bits_to_skip % 8,
+				      from_contents, offset,
+				      this_size_bits, bits_big_endian);
+			write_to_memory (start_addr, buffer.data (),
+					 this_size, in_stack_memory,
+					 &unavail);
 		      }
 		  }
+	      }
 
-		copy_bitwise (buffer.data (), bits_to_skip % 8,
-			      from_contents, offset,
-			      this_size_bits, bits_big_endian);
-		write_memory_with_notification (start_addr,
-						buffer.data (),
-						this_size);
+	    if (unavail)
+	      {
+		if (from == NULL)
+		  mark_value_bits_unavailable (v, (offset + bits_to_skip % 8),
+					       this_size_bits);
+		else
+		  throw_error (NOT_AVAILABLE_ERROR,
+			       _("Can't do read-modify-write to "
+				 "update bitfield; containing word "
+				 "is unavailable"));
 	      }
 	  }
 	  break;
