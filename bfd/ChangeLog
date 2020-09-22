@@ -1,5 +1,25 @@
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
+	PR 26656
+	* elf64-ppc.c (plt_stub_size): Add "odd" param.  Use it with
+	size_power10_offset rather than calculating from start of stub.
+	Add size for notoc tls_get_addr_opt stub.
+	(plt_stub_pad): Add "odd" param, pass to plt_stub_size.
+	(build_tls_get_addr_head, build_tls_get_addr_tail): New functions.
+	(build_tls_get_addr_stub): Delete.
+	(ppc_build_one_stub): Use a temp for htab->params->stub_bfd.
+	Emit notoc tls_get_addr_opt stub.  Move eh_frame code to
+	suit.  Adjust code to use bfd_tls_get_addr_head/tail in place
+	of build_tls_get_addr_stub.
+	(ppc_size_one_stub): Size notoc tls_get_addr_opt stub.
+	Adjust plt_stub_size and plt_stub_pad calls.  Correct "odd"
+	when padding stub.  Size eh_frame for notoc stub too.
+	Correct lr_restore value.
+	(ppc64_elf_relocate_section): Don't skip over first insn of
+	notoc tls_get_addr_opt stub.
+
+2020-09-24  Alan Modra  <amodra@gmail.com>
+
 	PR 26655
 	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Rename to..
 	(ppc64_elf_edit): Call params->edit.
