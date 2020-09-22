@@ -72,14 +72,16 @@ struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
 
 /* Evaluate a location description, starting at DATA and with length
    SIZE, to find the current location of variable of TYPE in the context
-   of FRAME.  */
+   of FRAME.  AS_LVAL defines if the resulting struct value is expected to
+   be a value or a location description.  */
 
 struct value *dwarf2_evaluate_loc_desc (struct type *type,
 					struct frame_info *frame,
 					const gdb_byte *data,
 					size_t size,
 					dwarf2_per_cu_data *per_cu,
-					dwarf2_per_objfile *per_objfile);
+					dwarf2_per_objfile *per_objfile,
+					bool as_lval = true);
 
 /* A chain of addresses that might be needed to resolve a dynamic
    property.  */
