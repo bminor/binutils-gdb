@@ -1,3 +1,9 @@
+2020-09-22  Frediano Ziglio  <fziglio@redhat.com>
+
+	* emultempl/pe.em (set_entry_point): Only use the DLL entry point
+	for DLLs.
+	* emultempl/pep.em (set_entry_point): Likewise.
+
 2020-09-16  Mikael Pettersson  <mikpelinux@gmail.com>
 
 	* testsuite/ld-elf/shared.exp: Add -Av9 to AFLAGS_PIE on sparc.

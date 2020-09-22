@@ -537,7 +537,7 @@ set_entry_point (void)
   /* Entry point name for arbitrary subsystem numbers.  */
   static const char default_entry[] = "mainCRTStartup";
 
-  if (bfd_link_pic (&link_info) || dll)
+  if (bfd_link_dll (&link_info) || dll)
     {
       entry = "DllMainCRTStartup";
     }
