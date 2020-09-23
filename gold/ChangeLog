@@ -1,3 +1,8 @@
+2020-09-24  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't skip
+	first insn of __tls_get_addr_opt stub.
+
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc): Add tprel_opt_ and accessors.

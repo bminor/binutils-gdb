@@ -10401,21 +10401,24 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		    value += ent->tocoff_;
 		  if (size == 64
 		      && ent->r2save_
-		      && r_type == elfcpp::R_PPC64_REL24_NOTOC)
+		      && !(gsym != NULL
+			   && target->is_tls_get_addr_opt(gsym)))
 		    {
-		      if (!(target->power10_stubs()
-			    && target->power10_stubs_auto()))
-			value += 4;
-		    }
-		  else if (size == 64
-			   && ent->r2save_
-			   && relnum < reloc_count - 1)
-		    {
-		      Reltype next_rela(preloc + reloc_size);
-		      if (elfcpp::elf_r_type<size>(next_rela.get_r_info())
-			  == elfcpp::R_PPC64_TOCSAVE
-			  && next_rela.get_r_offset() == rela.get_r_offset() + 4)
-			value += 4;
+		      if (r_type == elfcpp::R_PPC64_REL24_NOTOC)
+			{
+			  if (!(target->power10_stubs()
+				&& target->power10_stubs_auto()))
+			    value += 4;
+			}
+		      else if (relnum < reloc_count - 1)
+			{
+			  Reltype next_rela(preloc + reloc_size);
+			  if (elfcpp::elf_r_type<size>(next_rela.get_r_info())
+			      == elfcpp::R_PPC64_TOCSAVE
+			      && (next_rela.get_r_offset()
+				  == rela.get_r_offset() + 4))
+			    value += 4;
+			}
 		    }
 		  localentry0 = ent->localentry0_;
 		  has_stub_value = true;
