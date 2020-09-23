@@ -1,5 +1,13 @@
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-object-run.c (struct do_module_cleanup): Add
+	constructor, destructor.
+	<objfile_name_string>: Don't use struct hack.
+	(do_module_cleanup): Use delete.
+	(compile_object_run): Use new.
+
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-cplus-types.c
 	(compile_cplus_convert_struct_or_union): Use std::vector.
 	(compile_cplus_convert_func): Likewise.

@@ -32,12 +32,23 @@
 
 struct do_module_cleanup
 {
+  do_module_cleanup () = default;
+
+  ~do_module_cleanup ()
+  {
+    delete munmap_list_head;
+    xfree (source_file);
+    xfree (objfile_name_string);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (do_module_cleanup);
+
   /* Boolean to set true upon a call of do_module_cleanup.
      The pointer may be NULL.  */
   int *executedp;
 
   /* .c file OBJFILE was built from.  It needs to be xfree-d.  */
-  char *source_file;
+  char *source_file = nullptr;
 
   /* Copy from struct compile_module.  */
   enum compile_i_scope_types scope;
@@ -48,10 +59,10 @@ struct do_module_cleanup
   CORE_ADDR out_value_addr;
 
   /* Copy from struct compile_module.  */
-  struct munmap_list *munmap_list_head;
+  struct munmap_list *munmap_list_head = nullptr;
 
   /* objfile_name of our objfile.  */
-  char objfile_name_string[1];
+  char *objfile_name_string = nullptr;
 };
 
 /* Cleanup everything after the inferior function dummy frame gets
@@ -96,13 +107,11 @@ do_module_cleanup (void *arg, int registers_valid)
 
   /* Delete the .c file.  */
   unlink (data->source_file);
-  xfree (data->source_file);
-
-  delete data->munmap_list_head;
 
   /* Delete the .o file.  */
   unlink (data->objfile_name_string);
-  xfree (data);
+
+  delete data;
 }
 
 /* Create a copy of FUNC_TYPE that is independent of OBJFILE.  */
@@ -132,11 +141,10 @@ compile_object_run (struct compile_module *module)
   CORE_ADDR regs_addr = module->regs_addr;
   struct objfile *objfile = module->objfile;
 
-  data = (struct do_module_cleanup *) xmalloc (sizeof (*data)
-					       + strlen (objfile_name_s));
+  data = new struct do_module_cleanup;
   data->executedp = &executed;
   data->source_file = xstrdup (module->source_file);
-  strcpy (data->objfile_name_string, objfile_name_s);
+  data->objfile_name_string = xstrdup (objfile_name_s);
   data->scope = module->scope;
   data->scope_data = module->scope_data;
   data->out_value_type = module->out_value_type;
