@@ -1,5 +1,11 @@
 2020-10-01  Kamil Rytarowski  <n54@gmx.com>
 
+	* netbsd-i386-low.cc: Add.
+	* Makefile.in (SFILES): Register "netbsd-i386-low.c".
+	* configure.srv: Add i[34567]86-*-netbsd*.
+
+2020-10-01  Kamil Rytarowski  <n54@gmx.com>
+
 	* netbsd-amd64-low.cc (netbsd_x86_64_arch_setup): Remove.
 	(netbsd_target_regsets): Now const.
 	(the_low_target): Remove.

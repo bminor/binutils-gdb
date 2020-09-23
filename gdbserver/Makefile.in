@@ -194,6 +194,7 @@ SFILES = \
 	$(srcdir)/linux-xtensa-low.cc \
 	$(srcdir)/mem-break.cc \
 	$(srcdir)/netbsd-amd64-low.cc \
+	$(srcdir)/netbsd-i386-low.cc \
 	$(srcdir)/netbsd-low.cc \
 	$(srcdir)/netbsd-low.h \
 	$(srcdir)/proc-service.cc \
