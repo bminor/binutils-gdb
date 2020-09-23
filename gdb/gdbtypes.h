@@ -599,7 +599,8 @@ enum type_specific_kind
   TYPE_SPECIFIC_FLOATFORMAT,
   /* Note: This is used by TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
   TYPE_SPECIFIC_FUNC,
-  TYPE_SPECIFIC_SELF_TYPE
+  TYPE_SPECIFIC_SELF_TYPE,
+  TYPE_SPECIFIC_INT
 };
 
 union type_owner
@@ -764,6 +765,21 @@ union type_specific
      is a member of.  */
 
   struct type *self_type;
+
+  /* * An integer-like scalar type may be stored in just part of its
+     enclosing storage bytes.  This structure describes this
+     situation.  */
+  struct
+  {
+    /* * The bit size of the integer.  This can be 0.  For integers
+       that fill their storage (the ordinary case), this field holds
+       the byte size times 8.  */
+    unsigned short bit_size;
+    /* * The bit offset of the integer.  This is ordinarily 0, and can
+       only be non-zero if the bit size is less than the storage
+       size.  */
+    unsigned short bit_offset;
+  } int_stuff;
 };
 
 /* * Main structure representing a type in GDB.
@@ -1181,6 +1197,31 @@ struct type
 
   /* * Remove dynamic property of kind KIND from this type, if it exists.  */
   void remove_dyn_prop (dynamic_prop_node_kind kind);
+
+  /* * Return true if this is an integer type whose logical (bit) size
+     differs from its storage size; false otherwise.  Always return
+     false for non-integer (i.e., non-TYPE_SPECIFIC_INT) types.  */
+  bool bit_size_differs_p () const
+  {
+    return (main_type->type_specific_field == TYPE_SPECIFIC_INT
+	    && main_type->type_specific.int_stuff.bit_size != 8 * length);
+  }
+
+  /* * Return the logical (bit) size for this integer type.  Only
+     valid for integer (TYPE_SPECIFIC_INT) types.  */
+  unsigned short bit_size () const
+  {
+    gdb_assert (main_type->type_specific_field == TYPE_SPECIFIC_INT);
+    return main_type->type_specific.int_stuff.bit_size;
+  }
+
+  /* * Return the bit offset for this integer type.  Only valid for
+     integer (TYPE_SPECIFIC_INT) types.  */
+  unsigned short bit_offset () const
+  {
+    gdb_assert (main_type->type_specific_field == TYPE_SPECIFIC_INT);
+    return main_type->type_specific.int_stuff.bit_offset;
+  }
 
   /* * Type that is a pointer to this type.
      NULL if no such pointer-to type is known yet.

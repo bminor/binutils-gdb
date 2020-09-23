@@ -18054,6 +18054,26 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 
   type->set_endianity_is_not_default (gdbarch_byte_order (arch) != byte_order);
 
+  if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_INT)
+    {
+      attr = dwarf2_attr (die, DW_AT_bit_size, cu);
+      if (attr != nullptr && DW_UNSND (attr) <= 8 * TYPE_LENGTH (type))
+	{
+	  unsigned real_bit_size = DW_UNSND (attr);
+	  attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
+	  /* Only use the attributes if they make sense together.  */
+	  if (attr == nullptr
+	      || DW_UNSND (attr) + real_bit_size <= 8 * TYPE_LENGTH (type))
+	    {
+	      TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size
+		= real_bit_size;
+	      if (attr != nullptr)
+		TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_offset
+		  = DW_UNSND (attr);
+	    }
+	}
+    }
+
   return set_die_type (die, type, cu);
 }
 

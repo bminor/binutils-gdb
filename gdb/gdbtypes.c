@@ -3194,6 +3194,10 @@ init_integer_type (struct objfile *objfile,
   if (unsigned_p)
     t->set_is_unsigned (true);
 
+  TYPE_SPECIFIC_FIELD (t) = TYPE_SPECIFIC_INT;
+  TYPE_MAIN_TYPE (t)->type_specific.int_stuff.bit_size = bit;
+  TYPE_MAIN_TYPE (t)->type_specific.int_stuff.bit_offset = 0;
+
   return t;
 }
 
@@ -3227,6 +3231,10 @@ init_boolean_type (struct objfile *objfile,
   t = init_type (objfile, TYPE_CODE_BOOL, bit, name);
   if (unsigned_p)
     t->set_is_unsigned (true);
+
+  TYPE_SPECIFIC_FIELD (t) = TYPE_SPECIFIC_INT;
+  TYPE_MAIN_TYPE (t)->type_specific.int_stuff.bit_size = bit;
+  TYPE_MAIN_TYPE (t)->type_specific.int_stuff.bit_offset = 0;
 
   return t;
 }
@@ -5188,6 +5196,16 @@ recursive_dump_type (struct type *type, int spaces)
 	gdb_print_host_address (TYPE_SELF_TYPE (type), gdb_stdout);
 	puts_filtered ("\n");
 	break;
+
+    case TYPE_SPECIFIC_INT:
+      if (type->bit_size_differs_p ())
+	{
+	  unsigned bit_size = type->bit_size ();
+	  unsigned bit_off = type->bit_offset ();
+	  printfi_filtered (spaces, " bit size = %u, bit offset = %u\n",
+			    bit_size, bit_off);
+	}
+      break;
     }
 
   if (spaces == 0)
@@ -5411,6 +5429,12 @@ copy_type_recursive (struct objfile *objfile,
 			  copy_type_recursive (objfile, TYPE_SELF_TYPE (type),
 					       copied_types));
       break;
+    case TYPE_SPECIFIC_INT:
+      TYPE_SPECIFIC_FIELD (new_type) = TYPE_SPECIFIC_INT;
+      TYPE_MAIN_TYPE (new_type)->type_specific.int_stuff
+	= TYPE_MAIN_TYPE (type)->type_specific.int_stuff;
+      break;
+
     default:
       gdb_assert_not_reached ("bad type_specific_kind");
     }

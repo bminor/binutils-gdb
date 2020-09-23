@@ -1,5 +1,24 @@
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
+	PR symtab/25470:
+	* value.c (unpack_long, pack_long, pack_unsigned_long): Handle bit
+	offset and bit size.
+	* printcmd.c (print_scalar_formatted): Handle zero-length
+	integer.
+	(print_scalar_formatted): Use bit_size_differs_p.
+	* gdbtypes.h (enum type_specific_kind) <TYPE_SPECIFIC_INT>: New
+	constant.
+	(union type_specific): <int_stuff>: New member.
+	(struct type) <bit_size_differs_p, bit_size, bit_offset>: New
+	methods.
+	* gdbtypes.c (init_integer_type, init_boolean_type): Initialize
+	TYPE_SPECIFIC_FIELD.
+	(recursive_dump_type, copy_type_recursive): Update.
+	* dwarf2/read.c (read_base_type): Handle DW_AT_bit_size and
+	DW_AT_data_bit_offset.
+
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
 	* utils.h (class gdb_argv): Add move operators.
 	<append>: New methods.
 	* compile/compile.c (build_argc_argv): Remove.

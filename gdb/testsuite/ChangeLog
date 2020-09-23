@@ -1,3 +1,8 @@
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
+	* gdb.dwarf2/intbits.exp: New file.
+	* gdb.dwarf2/intbits.c: New file.
+
 2020-09-20  Pedro Alves  <pedro@palves.net>
 
 	* lib/mi-support.exp (mi_uncatched_gdb_exit) Switch to the main

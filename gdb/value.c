@@ -2776,10 +2776,27 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_MEMBERPTR:
       {
 	LONGEST result;
-	if (nosign)
-	  result = extract_unsigned_integer (valaddr, len, byte_order);
+
+	if (type->bit_size_differs_p ())
+	  {
+	    unsigned bit_off = type->bit_offset ();
+	    unsigned bit_size = type->bit_size ();
+	    if (bit_size == 0)
+	      {
+		/* unpack_bits_as_long doesn't handle this case the
+		   way we'd like, so handle it here.  */
+		result = 0;
+	      }
+	    else
+	      result = unpack_bits_as_long (type, valaddr, bit_off, bit_size);
+	  }
 	else
-	  result = extract_signed_integer (valaddr, len, byte_order);
+	  {
+	    if (nosign)
+	      result = extract_unsigned_integer (valaddr, len, byte_order);
+	    else
+	      result = extract_signed_integer (valaddr, len, byte_order);
+	  }
 	if (code == TYPE_CODE_RANGE)
 	  result += type->bounds ()->bias;
 	return result;
@@ -3339,6 +3356,13 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_BOOL:
     case TYPE_CODE_MEMBERPTR:
+      if (type->bit_size_differs_p ())
+	{
+	  unsigned bit_off = type->bit_offset ();
+	  unsigned bit_size = type->bit_size ();
+	  num &= ((ULONGEST) 1 << bit_size) - 1;
+	  num <<= bit_off;
+	}
       store_signed_integer (buf, len, byte_order, num);
       break;
 
@@ -3381,6 +3405,13 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
     case TYPE_CODE_BOOL:
     case TYPE_CODE_RANGE:
     case TYPE_CODE_MEMBERPTR:
+      if (type->bit_size_differs_p ())
+	{
+	  unsigned bit_off = type->bit_offset ();
+	  unsigned bit_size = type->bit_size ();
+	  num &= ((ULONGEST) 1 << bit_size) - 1;
+	  num <<= bit_off;
+	}
       store_unsigned_integer (buf, len, byte_order, num);
       break;
 

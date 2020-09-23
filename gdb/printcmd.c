@@ -374,6 +374,15 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	valaddr += TYPE_LENGTH (type) - len;
     }
 
+  /* Allow LEN == 0, and in this case, don't assume that VALADDR is
+     valid.  */
+  const gdb_byte zero = 0;
+  if (len == 0)
+    {
+      len = 1;
+      valaddr = &zero;
+    }
+
   if (size != 0 && (options->format == 'x' || options->format == 't'))
     {
       /* Truncate to fit.  */
@@ -404,8 +413,8 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
      long, and then printing the long.  PR cli/16242 suggests changing
      this to using C-style hex float format.
 
-     Biased range types must also be unbiased here; the unbiasing is
-     done by unpack_long.  */
+     Biased range types and sub-word scalar types must also be handled
+     here; the value is correctly computed by unpack_long.  */
   gdb::byte_vector converted_bytes;
   /* Some cases below will unpack the value again.  In the biased
      range case, we want to avoid this, so we store the unpacked value
@@ -418,7 +427,8 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	   || options->format == 'z'
 	   || options->format == 'd'
 	   || options->format == 'u'))
-      || (type->code () == TYPE_CODE_RANGE && type->bounds ()->bias != 0))
+      || (type->code () == TYPE_CODE_RANGE && type->bounds ()->bias != 0)
+      || type->bit_size_differs_p ())
     {
       val_long.emplace (unpack_long (type, valaddr));
       converted_bytes.resize (TYPE_LENGTH (type));
