@@ -52,6 +52,11 @@ struct tui_locator_window : public tui_win_info
     return false;
   }
 
+  bool can_focus () const override
+  {
+    return false;
+  }
+
   void rerender () override;
 
   /* Update the locator, with the provided arguments.
