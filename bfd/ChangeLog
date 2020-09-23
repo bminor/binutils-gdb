@@ -1,5 +1,15 @@
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
+	PR 26655
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Rename to..
+	(ppc64_elf_edit): Call params->edit.
+	(ppc64_elf_tls_setup): Don't call _bfd_elf_tls_setup.  Return a
+	bfd_boolean.
+	* elf64-ppc.h (struct ppc64_elf_params): Add "edit".
+	(ppc64_elf_tls_setup): Update declaration.
+
+2020-09-24  Alan Modra  <amodra@gmail.com>
+
 	Apply from master
 	2020-08-13  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.h (struct ppc64_elf_params): Add no_pcrel_opt.

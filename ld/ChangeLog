@@ -1,5 +1,12 @@
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
+	PR 26655
+	* emultempl/ppc64elf.em (params): Add ppc_edit.
+	(ppc_before_allocation): Split off some edit functions to..
+	(ppc_edit): ..this, new function.
+
+2020-09-24  Alan Modra  <amodra@gmail.com>
+
 	Apply from master
 	2020-08-13  Alan Modra  <amodra@gmail.com>
 	* emultempl/ppc64elf.em (params): Init new field.

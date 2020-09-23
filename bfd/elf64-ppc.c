@@ -114,7 +114,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_adjust_dynamic_symbol     ppc64_elf_adjust_dynamic_symbol
 #define elf_backend_hide_symbol		      ppc64_elf_hide_symbol
 #define elf_backend_maybe_function_sym	      ppc64_elf_maybe_function_sym
-#define elf_backend_always_size_sections      ppc64_elf_func_desc_adjust
+#define elf_backend_always_size_sections      ppc64_elf_edit
 #define elf_backend_size_dynamic_sections     ppc64_elf_size_dynamic_sections
 #define elf_backend_hash_symbol		      ppc64_elf_hash_symbol
 #define elf_backend_init_index_section	      _bfd_elf_init_2_index_sections
@@ -6340,19 +6340,22 @@ static const struct sfpr_def_parms save_res_funcs[] =
   };
 
 /* Called near the start of bfd_elf_size_dynamic_sections.  We use
-   this hook to a) provide some gcc support functions, and b) transfer
-   dynamic linking information gathered so far on function code symbol
-   entries, to their corresponding function descriptor symbol entries.  */
+   this hook to a) run the edit functions in this file, b) provide
+   some gcc support functions, and c) transfer dynamic linking
+   information gathered so far on function code symbol entries, to
+   their corresponding function descriptor symbol entries.  */
 
 static bfd_boolean
-ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
-			    struct bfd_link_info *info)
+ppc64_elf_edit (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
     return FALSE;
+
+  /* Call back into the linker, which then runs the edit functions.  */
+  htab->params->edit ();
 
   /* Provide any missing _save* and _rest* functions.  */
   if (htab->sfpr != NULL)
@@ -7694,9 +7697,11 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Set htab->tls_get_addr and call the generic ELF tls_setup function.  */
+/* Set htab->tls_get_addr and various other info specific to TLS.
+   This needs to run before dynamic symbols are processed in
+   bfd_elf_size_dynamic_sections.  */
 
-asection *
+bfd_boolean
 ppc64_elf_tls_setup (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
@@ -7704,7 +7709,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
-    return NULL;
+    return FALSE;
 
   if (abiversion (info->output_bfd) == 1)
     htab->opd_abi = 1;
@@ -7826,7 +7831,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		      _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 					      opt_fd->dynstr_index);
 		      if (!bfd_elf_link_record_dynamic_symbol (info, opt_fd))
-			return NULL;
+			return FALSE;
 		    }
 		  if (tga_fd != NULL)
 		    {
@@ -7885,7 +7890,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
       && htab->params->no_tls_get_addr_regsave == -1)
     htab->params->no_tls_get_addr_regsave = 0;
 
-  return _bfd_elf_tls_setup (info->output_bfd, info);
+  return TRUE;
 }
 
 /* Return TRUE iff REL is a branch reloc with a global symbol matching
