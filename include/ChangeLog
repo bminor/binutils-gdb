@@ -1,3 +1,12 @@
+2020-09-23  Mark Wielaard  <mark@klomp.org>
+
+	Sync with GCC
+	* dwarf2.def: Add DWARF5 Unit type header encoding macros
+	DW_UT_FIRST, DW_UT and DW_UT_END.
+	* dwarf2.h (enum dwarf_unit_type): Removed and define using
+	DW_UT_FIRST, DW_UT and DW_UT_END macros.
+	(get_DW_UT_name): New function declaration.
+
 2020-09-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26391
