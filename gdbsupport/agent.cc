@@ -138,7 +138,7 @@ static int
 gdb_connect_sync_socket (int pid)
 {
 #ifdef HAVE_SYS_UN_H
-  struct sockaddr_un addr;
+  struct sockaddr_un addr = {};
   int res, fd;
   char path[UNIX_PATH_MAX];
 
