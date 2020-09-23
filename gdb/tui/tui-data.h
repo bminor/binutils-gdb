@@ -99,6 +99,12 @@ public:
     return handle != nullptr;
   }
 
+  /* Return true if this window can accept the focus.  */
+  virtual bool can_focus () const
+  {
+    return true;
+  }
+
   /* Disable output until the next call to doupdate.  */
   void no_refresh ()
   {

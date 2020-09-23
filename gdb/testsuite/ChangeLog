@@ -1,3 +1,8 @@
+2020-09-24  Tom Tromey  <tromey@adacore.com>
+
+	PR tui/26638:
+	* gdb.tui/list.exp: Check output of "focus next".
+
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
 	* gdb.dwarf2/intbits.exp: New file.

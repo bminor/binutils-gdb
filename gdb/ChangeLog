@@ -1,3 +1,12 @@
+2020-09-24  Tom Tromey  <tromey@adacore.com>
+
+	PR tui/26638:
+	* tui/tui-stack.h (struct tui_locator_window) <can_focus>: New
+	method.
+	* tui/tui-data.h (struct tui_win_info) <can_focus>: New method.
+	* tui/tui-data.c (tui_next_win): Exclude non-focusable windows.
+	(tui_prev_win): Rewrite.
+
 2020-09-23  Hannes Domani  <ssbssa@yahoo.de>
 
 	* nat/windows-nat.c (handle_exception): Handle 64bit breakpoints
