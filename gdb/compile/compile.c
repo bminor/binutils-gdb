@@ -820,14 +820,13 @@ void
 eval_compile_command (struct command_line *cmd, const char *cmd_string,
 		      enum compile_i_scope_types scope, void *scope_data)
 {
-  struct compile_module *compile_module;
-
   compile_file_names fnames = compile_to_object (cmd, cmd_string, scope);
 
   gdb::unlinker object_remover (fnames.object_file ());
   gdb::unlinker source_remover (fnames.source_file ());
 
-  compile_module = compile_object_load (fnames, scope, scope_data);
+  compile_module_up compile_module = compile_object_load (fnames, scope,
+							  scope_data);
   if (compile_module == NULL)
     {
       gdb_assert (scope == COMPILE_I_PRINT_ADDRESS_SCOPE);
@@ -840,7 +839,7 @@ eval_compile_command (struct command_line *cmd, const char *cmd_string,
   source_remover.keep ();
   object_remover.keep ();
 
-  compile_object_run (compile_module);
+  compile_object_run (std::move (compile_module));
 }
 
 /* See compile/compile-internal.h.  */

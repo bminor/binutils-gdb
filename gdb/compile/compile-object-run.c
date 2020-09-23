@@ -131,7 +131,7 @@ create_copied_type_recursive (objfile *objfile, type *func_type)
    longer touch MODULE's memory after this function has been called.  */
 
 void
-compile_object_run (struct compile_module *module)
+compile_object_run (compile_module_up &&module)
 {
   struct value *func_val;
   struct do_module_cleanup *data;
@@ -152,8 +152,6 @@ compile_object_run (struct compile_module *module)
   data->munmap_list_head = module->munmap_list_head;
 
   xfree (module->source_file);
-  xfree (module);
-  module = NULL;
 
   try
     {

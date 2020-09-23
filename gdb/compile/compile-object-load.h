@@ -46,6 +46,13 @@ private:
 
 struct compile_module
 {
+  compile_module () = default;
+
+  DISABLE_COPY_AND_ASSIGN (compile_module);
+
+  compile_module &operator= (compile_module &&other) = default;
+  compile_module (compile_module &&other) = default;
+
   /* objfile for the compiled module.  */
   struct objfile *objfile;
 
@@ -77,7 +84,10 @@ struct compile_module
   struct munmap_list *munmap_list_head;
 };
 
-extern struct compile_module *compile_object_load
+/* A unique pointer for a compile_module.  */
+typedef std::unique_ptr<compile_module> compile_module_up;
+
+extern compile_module_up compile_object_load
   (const compile_file_names &fnames,
    enum compile_i_scope_types scope, void *scope_data);
 

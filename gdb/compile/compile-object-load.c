@@ -582,7 +582,7 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
    COMPILE_I_PRINT_ADDRESS_SCOPE when COMPILE_I_PRINT_VALUE_SCOPE
    should have been used instead.  */
 
-struct compile_module *
+compile_module_up
 compile_object_load (const compile_file_names &file_names,
 		     enum compile_i_scope_types scope, void *scope_data)
 {
@@ -594,7 +594,6 @@ compile_object_load (const compile_file_names &file_names,
   long storage_needed;
   asymbol **symbol_table, **symp;
   long number_of_symbols, missing_symbols;
-  struct compile_module *retval;
   struct type *regs_type, *out_value_type = NULL;
   char **matching;
   struct objfile *objfile;
@@ -790,7 +789,7 @@ compile_object_load (const compile_file_names &file_names,
 			    paddress (target_gdbarch (), out_value_addr));
     }
 
-  retval = XNEW (struct compile_module);
+  compile_module_up retval (new struct compile_module);
   retval->objfile = objfile_holder.release ();
   retval->source_file = xstrdup (file_names.source_file ());
   retval->func_sym = func_sym;

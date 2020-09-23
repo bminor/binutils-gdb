@@ -1,5 +1,19 @@
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile.c (eval_compile_command): Update.
+	* compile/compile-object-run.h (compile_object_run): Take a
+	compile_module_up.
+	* compile/compile-object-run.c (compile_object_run): Take a
+	compile_module_up.
+	* compile/compile-object-load.h (struct compile_module): Add
+	constructor, destructor.
+	(compile_module_up): New typedef.
+	(compile_object_load): Return compile_object_up.
+	* compile/compile-object-load.c (compile_object_load): Return
+	compile_module_up.
+
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-object-run.c (struct do_module_cleanup): Add
 	constructor, destructor.
 	<objfile_name_string>: Don't use struct hack.
