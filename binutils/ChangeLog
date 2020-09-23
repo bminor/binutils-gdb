@@ -1,3 +1,13 @@
+2020-11-15  Mark Wielaard  <mark@klomp.org>
+
+	Backport from the mainline:
+	2020-09-23  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf.c (read_and_display_attr_value): Handle DW_FORM_ref_addr
+	for dwarf_version 5 just as version 3 and 4 (only 2 is
+	different).
+	(process_debug_info): Allow DW_UT_partial.
+
 2020-09-19  Nick Clifton  <nickc@redhat.com>
 
 	This is the 2.35.1 point release.

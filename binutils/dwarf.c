@@ -2202,10 +2202,10 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_ref_addr:
       if (dwarf_version == 2)
 	SAFE_BYTE_GET_AND_INC (uvalue, data, pointer_size, end);
-      else if (dwarf_version == 3 || dwarf_version == 4)
+      else if (dwarf_version > 2)
 	SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
       else
-	error (_("Internal error: DWARF version is not 2, 3 or 4.\n"));
+	error (_("Internal error: DW_FORM_ref_addr is not supported in DWARF version 1.\n"));
 
       break;
 
@@ -3419,6 +3419,7 @@ process_debug_info (struct dwarf_section *           section,
 	}
 
       if (compunit.cu_unit_type != DW_UT_compile
+	  && compunit.cu_unit_type != DW_UT_partial
 	  && compunit.cu_unit_type != DW_UT_type)
 	{
 	  warn (_("CU at offset %s contains corrupt or "
