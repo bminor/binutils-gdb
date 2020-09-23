@@ -38,12 +38,6 @@ struct do_module_cleanup
   {
   }
 
-  ~do_module_cleanup ()
-  {
-    delete module->munmap_list_head;
-    xfree (module->source_file);
-  }
-
   DISABLE_COPY_AND_ASSIGN (do_module_cleanup);
 
   /* Boolean to set true upon a call of do_module_cleanup.
@@ -102,7 +96,7 @@ do_module_cleanup (void *arg, int registers_valid)
       }
 
   /* Delete the .c file.  */
-  unlink (data->module->source_file);
+  unlink (data->module->source_file.c_str ());
 
   /* Delete the .o file.  */
   unlink (objfile_name_s.c_str ());

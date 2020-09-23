@@ -29,6 +29,8 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (munmap_list);
 
+  munmap_list &operator= (munmap_list &&) = default;
+
   /* Add a region to the list.  */
   void add (CORE_ADDR addr, CORE_ADDR size);
 
@@ -56,8 +58,8 @@ struct compile_module
   /* objfile for the compiled module.  */
   struct objfile *objfile;
 
-  /* .c file OBJFILE was built from.  It needs to be xfree-d.  */
-  char *source_file;
+  /* .c file OBJFILE was built from.  */
+  std::string source_file;
 
   /* Inferior function GCC_FE_WRAPPER_FUNCTION.  */
   struct symbol *func_sym;
@@ -81,7 +83,7 @@ struct compile_module
   CORE_ADDR out_value_addr;
 
   /* Track inferior memory reserved by inferior mmap.  */
-  struct munmap_list *munmap_list_head;
+  struct munmap_list munmap_list;
 };
 
 /* A unique pointer for a compile_module.  */

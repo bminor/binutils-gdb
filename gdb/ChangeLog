@@ -1,5 +1,25 @@
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-object-run.c (do_module_cleanup)
+	<~do_module_cleanup> :Remove.
+	(do_module_cleanup): Update.
+	* compile/compile-object-load.h (struct munmap_list): Add move
+	assignment operator.
+	<source_file>: Now a std::string.
+	<munmap_list>: Rename.  No longer a pointer.
+	* compile/compile-object-load.c (struct setup_sections_data): Add
+	constructor.
+	<setup_one_section>: Declare.
+	<munmap_list>: Move earlier.
+	<m_bfd>: New member.
+	<m_last_size, m_last_section_first, m_last_prot,
+	m_last_max_alignment>: Rename, add initializers where needed.
+	(setup_sections_data::setup_one_section): Rename from
+	setup_sections.  Update.
+	(compile_object_load): Update.  Don't use bfd_map_over_sections.
+
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-object-run.c (struct do_module_cleanup): Add
 	parameters to constructor.  Update destructor.
 	<source_file, scope, scope_data, out_value_type, out_value_addr,
