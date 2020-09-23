@@ -91,10 +91,6 @@ static int faked_breakpoint = 0;
 /* True if current_process_handle needs to be closed.  */
 static bool open_process_used = false;
 
-#ifdef __x86_64__
-bool wow64_process = false;
-#endif
-
 const struct target_desc *win32_tdesc;
 #ifdef __x86_64__
 const struct target_desc *wow64_win32_tdesc;

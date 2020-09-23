@@ -41,6 +41,7 @@ std::vector<pending_stop> pending_stops;
 EXCEPTION_RECORD siginfo_er;
 
 #ifdef __x86_64__
+bool wow64_process = false;
 bool ignore_first_breakpoint = false;
 #endif
 
@@ -239,6 +240,20 @@ handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
 	     Here we only care about the WX86_BREAKPOINT's.  */
 	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 	  ignore_first_breakpoint = false;
+	}
+      else if (wow64_process)
+	{
+	  /* This breakpoint exception is triggered for WOW64 processes when
+	     reaching an int3 instruction in 64bit code.
+	     gdb checks for int3 in case of SIGTRAP, this fails because
+	     Wow64GetThreadContext can only report the pc of 32bit code, and
+	     gdb lets the target process continue.
+	     So handle it as SIGINT instead, then the target is stopped
+	     unconditionally.  */
+	  DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
+	  rec->ExceptionCode = DBG_CONTROL_C;
+	  ourstatus->value.sig = GDB_SIGNAL_INT;
+	  break;
 	}
 #endif
       /* FALLTHROUGH */

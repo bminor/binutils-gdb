@@ -233,9 +233,6 @@ static std::vector<windows_thread_info *> thread_list;
 /* Counts of things.  */
 static int saw_create;
 static int open_process_used = 0;
-#ifdef __x86_64__
-static bool wow64_process = false;
-#endif
 
 /* User options.  */
 static bool new_console = false;
