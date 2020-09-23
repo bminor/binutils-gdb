@@ -165,6 +165,20 @@ public:
   gdb_argv (const gdb_argv &) = delete;
   gdb_argv &operator= (const gdb_argv &) = delete;
 
+  gdb_argv &operator= (gdb_argv &&other)
+  {
+    freeargv (m_argv);
+    m_argv = other.m_argv;
+    other.m_argv = nullptr;
+    return *this;
+  }
+
+  gdb_argv (gdb_argv &&other)
+  {
+    m_argv = other.m_argv;
+    other.m_argv = nullptr;
+  }
+
   ~gdb_argv ()
   {
     freeargv (m_argv);
@@ -216,6 +230,35 @@ public:
   gdb::array_view<char *> as_array_view ()
   {
     return gdb::array_view<char *> (this->get (), this->count ());
+  }
+
+  /* Append arguments to this array.  */
+  void append (gdb_argv &&other)
+  {
+    int size = count ();
+    int argc = other.count ();
+    m_argv = XRESIZEVEC (char *, m_argv, (size + argc + 1));
+
+    for (int argi = 0; argi < argc; argi++)
+      {
+	/* Transfer ownership of the string.  */
+	m_argv[size++] = other.m_argv[argi];
+	/* Ensure that destruction of OTHER works correctly.  */
+	other.m_argv[argi] = nullptr;
+      }
+    m_argv[size] = nullptr;
+  }
+
+  /* Append arguments to this array.  */
+  void append (const gdb_argv &other)
+  {
+    int size = count ();
+    int argc = other.count ();
+    m_argv = XRESIZEVEC (char *, m_argv, (size + argc + 1));
+
+    for (int argi = 0; argi < argc; argi++)
+      m_argv[size++] = xstrdup (other.m_argv[argi]);
+    m_argv[size] = nullptr;
   }
 
   /* The iterator type.  */

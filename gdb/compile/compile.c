@@ -493,33 +493,18 @@ get_expr_block_and_pc (CORE_ADDR *pc)
   return block;
 }
 
-/* Call buildargv (via gdb_argv), set its result for S into *ARGVP but
-   calculate also the number of parsed arguments into *ARGCP.  If
-   buildargv has returned NULL then *ARGCP is set to zero.  */
-
-static void
-build_argc_argv (const char *s, int *argcp, char ***argvp)
-{
-  gdb_argv args (s);
-
-  *argcp = args.count ();
-  *argvp = args.release ();
-}
-
 /* String for 'set compile-args' and 'show compile-args'.  */
 static char *compile_args;
 
-/* Parsed form of COMPILE_ARGS.  COMPILE_ARGS_ARGV is NULL terminated.  */
-static int compile_args_argc;
-static char **compile_args_argv;
+/* Parsed form of COMPILE_ARGS.  */
+static gdb_argv compile_args_argv;
 
 /* Implement 'set compile-args'.  */
 
 static void
 set_compile_args (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  freeargv (compile_args_argv);
-  build_argc_argv (compile_args, &compile_args_argc, &compile_args_argv);
+  compile_args_argv = gdb_argv (compile_args);
 }
 
 /* Implement 'show compile-args'.  */
@@ -531,21 +516,6 @@ show_compile_args (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Compile command command-line arguments "
 			    "are \"%s\".\n"),
 		    value);
-}
-
-/* Append ARGC and ARGV (as parsed by build_argc_argv) to *ARGCP and *ARGVP.
-   ARGCP+ARGVP can be zero+NULL and also ARGC+ARGV can be zero+NULL.  */
-
-static void
-append_args (int *argcp, char ***argvp, int argc, char **argv)
-{
-  int argi;
-
-  *argvp = XRESIZEVEC (char *, *argvp, (*argcp + argc + 1));
-
-  for (argi = 0; argi < argc; argi++)
-    (*argvp)[(*argcp)++] = xstrdup (argv[argi]);
-  (*argvp)[(*argcp)] = NULL;
 }
 
 /* String for 'set compile-gcc' and 'show compile-gcc'.  */
@@ -586,10 +556,10 @@ get_selected_pc_producer_options (void)
   return cs;
 }
 
-/* Filter out unwanted options from *ARGCP and ARGV.  */
+/* Filter out unwanted options from ARGV.  */
 
 static void
-filter_args (int *argcp, char **argv)
+filter_args (char **argv)
 {
   char **destv;
 
@@ -599,7 +569,6 @@ filter_args (int *argcp, char **argv)
       if (strcmp (*argv, "-fpreprocessed") == 0)
 	{
 	  xfree (*argv);
-	  (*argcp)--;
 	  continue;
 	}
       *destv++ = *argv;
@@ -627,35 +596,26 @@ filter_args (int *argcp, char **argv)
    appended last so as to override any of the arguments automatically
    generated above.  */
 
-static void
-get_args (const compile_instance *compiler, struct gdbarch *gdbarch,
-	  int *argcp, char ***argvp)
+static gdb_argv
+get_args (const compile_instance *compiler, struct gdbarch *gdbarch)
 {
   const char *cs_producer_options;
-  int argc_compiler;
-  char **argv_compiler;
 
-  build_argc_argv (gdbarch_gcc_target_options (gdbarch).c_str (),
-		   argcp, argvp);
+  gdb_argv result (gdbarch_gcc_target_options (gdbarch).c_str ());
 
   cs_producer_options = get_selected_pc_producer_options ();
   if (cs_producer_options != NULL)
     {
-      int argc_producer;
-      char **argv_producer;
+      gdb_argv argv_producer (cs_producer_options);
+      filter_args (argv_producer.get ());
 
-      build_argc_argv (cs_producer_options, &argc_producer, &argv_producer);
-      filter_args (&argc_producer, argv_producer);
-      append_args (argcp, argvp, argc_producer, argv_producer);
-      freeargv (argv_producer);
+      result.append (std::move (argv_producer));
     }
 
-  build_argc_argv (compiler->gcc_target_options ().c_str (),
-		   &argc_compiler, &argv_compiler);
-  append_args (argcp, argvp, argc_compiler, argv_compiler);
-  freeargv (argv_compiler);
+  result.append (gdb_argv (compiler->gcc_target_options ().c_str ()));
+  result.append (compile_args_argv);
 
-  append_args (argcp, argvp, compile_args_argc, compile_args_argv);
+  return result;
 }
 
 /* A helper function suitable for use as the "print_callback" in the
@@ -677,8 +637,6 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 {
   const struct block *expr_block;
   CORE_ADDR trash_pc, expr_pc;
-  int argc;
-  char **argv;
   int ok;
   struct gdbarch *gdbarch = get_current_arch ();
   std::string triplet_rx;
@@ -750,8 +708,9 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     }
 
   /* Set compiler command-line arguments.  */
-  get_args (compiler.get (), gdbarch, &argc, &argv);
-  gdb_argv argv_holder (argv);
+  gdb_argv argv_holder = get_args (compiler.get (), gdbarch);
+  int argc = argv_holder.count ();
+  char **argv = argv_holder.get ();
 
   gdb::unique_xmalloc_ptr<char> error_message;
   error_message.reset (compiler->set_arguments (argc, argv,

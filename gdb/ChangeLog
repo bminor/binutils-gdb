@@ -1,5 +1,18 @@
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
+	* utils.h (class gdb_argv): Add move operators.
+	<append>: New methods.
+	* compile/compile.c (build_argc_argv): Remove.
+	(compile_args_argc): Remove.
+	(compile_args_argv): Change type.
+	(set_compile_args): Simplify.
+	(append_args): Remove.
+	(filter_args): Remove argcp parameter.
+	(get_args): Return gdb_argv.  Simplify.
+	(compile_to_object): Update.
+
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-object-run.c (do_module_cleanup)
 	<~do_module_cleanup> :Remove.
 	(do_module_cleanup): Update.
