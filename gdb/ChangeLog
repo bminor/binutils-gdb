@@ -1,3 +1,7 @@
+2020-10-01  Kamil Rytarowski  <n54@gmx.com>
+
+	* i386-bsd-nat.c: Include "x86-bsd-nat.h".
+
 2020-09-30  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/26683
