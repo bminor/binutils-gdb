@@ -155,22 +155,9 @@ netbsd_x86_64_store_gregset (struct regcache *regcache, const char *buf)
   netbsd_x86_64_supply_gp (AMD64_GS_REGNUM, GS);
 }
 
-/* Implements the netbsd_target_ops.arch_setup routine.  */
-
-static void
-netbsd_x86_64_arch_setup (void)
-{
-  struct target_desc *tdesc
-    = amd64_create_target_description (X86_XSTATE_SSE_MASK, false, false, false);
-
-  init_target_desc (tdesc, amd64_expedite_regs);
-
-  netbsd_tdesc = tdesc;
-}
-
 /* Description of all the x86-netbsd register sets.  */
 
-struct netbsd_regset_info netbsd_target_regsets[] =
+static const struct netbsd_regset_info netbsd_target_regsets[] =
 {
  /* General Purpose Registers.  */
  {PT_GETREGS, PT_SETREGS, sizeof (struct reg),
@@ -179,9 +166,41 @@ struct netbsd_regset_info netbsd_target_regsets[] =
  {0, 0, -1, NULL, NULL }
 };
 
-/* The netbsd_target_ops vector for x86-netbsd.  */
+/* NetBSD target op definitions for the amd64 architecture.  */
 
-struct netbsd_target_ops the_low_target =
+class netbsd_amd64_target : public netbsd_process_target
 {
- netbsd_x86_64_arch_setup,
+protected:
+  const netbsd_regset_info *get_regs_info () override;
+
+  void low_arch_setup () override;
 };
+
+/* Return the information to access registers.  */
+
+const netbsd_regset_info *
+netbsd_amd64_target::get_regs_info ()
+{
+  return netbsd_target_regsets;
+}
+
+/* Architecture-specific setup for the current process.  */
+
+void
+netbsd_amd64_target::low_arch_setup ()
+{
+  target_desc *tdesc
+    = amd64_create_target_description (X86_XSTATE_SSE_MASK, false, false, false);
+
+  init_target_desc (tdesc, amd64_expedite_regs);
+
+  current_process ()->tdesc = tdesc;
+}
+
+/* The singleton target ops object.  */
+
+static netbsd_amd64_target the_netbsd_amd64_target;
+
+/* The NetBSD target ops object.  */
+
+netbsd_process_target *the_netbsd_target = &the_netbsd_amd64_target;

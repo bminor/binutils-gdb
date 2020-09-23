@@ -1,3 +1,20 @@
+2020-10-01  Kamil Rytarowski  <n54@gmx.com>
+
+	* netbsd-amd64-low.cc (netbsd_x86_64_arch_setup): Remove.
+	(netbsd_target_regsets): Now const.
+	(the_low_target): Remove.
+	(class netbsd_amd64_target, the_netbsd_amd64_target)
+	(the_netbsd_target): Add.
+	* netbsd-low.cc (netbsd_process_target::post_create_inferior): Call
+	low_arch_setup ().
+	(netbsd_process_target::fetch_registers)
+	(netbsd_process_target::store_registers, initialize_low): Update.
+	(the_netbsd_target): Remove.
+	* netbsd-low.h (netbsd_target_regsets, netbsd_target_ops)
+	(the_low_target, netbsd_tdesc): Remove.
+	(netbsd_process_target::get_regs_info)
+	(netbsd_process_target::low_arch_setup): Add.
+
 2020-09-23  Hannes Domani  <ssbssa@yahoo.de>
 
 	* win32-low.cc: Remove local wow64_process variable.

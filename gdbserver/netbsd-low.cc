@@ -114,6 +114,8 @@ netbsd_process_target::post_create_inferior ()
 {
   pid_t pid = current_process ()->pid;
   netbsd_nat::enable_proc_events (pid);
+
+  low_arch_setup ();
 }
 
 /* Implement the attach target_ops method.  */
@@ -504,7 +506,7 @@ netbsd_process_target::thread_alive (ptid_t ptid)
 void
 netbsd_process_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  struct netbsd_regset_info *regset = netbsd_target_regsets;
+  const netbsd_regset_info *regset = get_regs_info ();
   ptid_t inferior_ptid = ptid_of (current_thread);
 
   while (regset->size >= 0)
@@ -525,7 +527,7 @@ netbsd_process_target::fetch_registers (struct regcache *regcache, int regno)
 void
 netbsd_process_target::store_registers (struct regcache *regcache, int regno)
 {
-  struct netbsd_regset_info *regset = netbsd_target_regsets;
+  const netbsd_regset_info *regset = get_regs_info ();
   ptid_t inferior_ptid = ptid_of (current_thread);
 
   while (regset->size >= 0)
@@ -1317,13 +1319,8 @@ netbsd_process_target::supports_read_auxv ()
   return true;
 }
 
-/* The NetBSD target ops object.  */
-
-static netbsd_process_target the_netbsd_target;
-
 void
 initialize_low ()
 {
-  set_target_ops (&the_netbsd_target);
-  the_low_target.arch_setup ();
+  set_target_ops (the_netbsd_target);
 }
