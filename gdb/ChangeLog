@@ -1,3 +1,10 @@
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-cplus-types.c
+	(compile_cplus_convert_struct_or_union): Use std::vector.
+	(compile_cplus_convert_func): Likewise.
+	* compile/compile-c-types.c (convert_func): Use std::vector.
+
 2020-09-21  Tom Tromey  <tromey@adacore.com>
 
 	* sparc-tdep.c (sparc32_skip_prologue): Use

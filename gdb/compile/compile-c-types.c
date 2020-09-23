@@ -176,13 +176,13 @@ convert_func (compile_c_instance *context, struct type *type)
   return_type = context->convert_type (target_type);
 
   array.n_elements = type->num_fields ();
-  array.elements = XNEWVEC (gcc_type, type->num_fields ());
+  std::vector<gcc_type> elements (array.n_elements);
+  array.elements = elements.data ();
   for (i = 0; i < type->num_fields (); ++i)
     array.elements[i] = context->convert_type (type->field (i).type ());
 
   result = context->plugin ().build_function_type (return_type,
 						   &array, is_varargs);
-  xfree (array.elements);
 
   return result;
 }

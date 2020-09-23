@@ -848,33 +848,29 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
   gcc_type result;
   if (type->code () == TYPE_CODE_STRUCT)
     {
-      struct gcc_vbase_array bases;
       int num_baseclasses = TYPE_N_BASECLASSES (type);
+      std::vector<gcc_type> elements (num_baseclasses);
+      std::vector<enum gcc_cp_symbol_kind> flags (num_baseclasses);
 
-      memset (&bases, 0, sizeof (bases));
+      struct gcc_vbase_array bases {};
+      bases.elements = elements.data ();
+      bases.flags = flags.data ();
+      bases.n_elements = num_baseclasses;
 
-      if (num_baseclasses > 0)
+      for (int i = 0; i < num_baseclasses; ++i)
 	{
-	  bases.elements = XNEWVEC (gcc_type, num_baseclasses);
-	  bases.flags = XNEWVEC (enum gcc_cp_symbol_kind, num_baseclasses);
-	  bases.n_elements = num_baseclasses;
-	  for (int i = 0; i < num_baseclasses; ++i)
-	    {
-	      struct type *base_type = TYPE_BASECLASS (type, i);
+	  struct type *base_type = TYPE_BASECLASS (type, i);
 
-	      bases.flags[i] = GCC_CP_SYMBOL_BASECLASS
-		| get_field_access_flag (type, i)
-		| (BASETYPE_VIA_VIRTUAL (type, i)
-		   ? GCC_CP_FLAG_BASECLASS_VIRTUAL
-		   : GCC_CP_FLAG_BASECLASS_NOFLAG);
-	      bases.elements[i] = instance->convert_type (base_type);
-	    }
+	  bases.flags[i] = (GCC_CP_SYMBOL_BASECLASS
+			    | get_field_access_flag (type, i)
+			    | (BASETYPE_VIA_VIRTUAL (type, i)
+			       ? GCC_CP_FLAG_BASECLASS_VIRTUAL
+			       : GCC_CP_FLAG_BASECLASS_NOFLAG));
+	  bases.elements[i] = instance->convert_type (base_type);
 	}
 
       result = instance->plugin ().start_class_type
 	(name.get (), resuld, &bases, filename, line);
-      xfree (bases.flags);
-      xfree (bases.elements);
     }
   else
     {
@@ -985,8 +981,8 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
      types.  Those are impossible in C, though.  */
   gcc_type return_type = instance->convert_type (target_type);
 
-  struct gcc_type_array array =
-    { type->num_fields (), XNEWVEC (gcc_type, type->num_fields ()) };
+  std::vector<gcc_type> elements (type->num_fields ());
+  struct gcc_type_array array = { type->num_fields (), elements.data () };
   int artificials = 0;
   for (int i = 0; i < type->num_fields (); ++i)
     {
@@ -1006,7 +1002,6 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
      with some minsyms like printf (compile-cplus.exp has examples).  */
   gcc_type result = instance->plugin ().build_function_type
     (return_type, &array, is_varargs);
-  xfree (array.elements);
   return result;
 }
 
