@@ -30,8 +30,6 @@ extern const struct target_desc *win32_tdesc;
 #ifdef __x86_64__
 extern const struct target_desc *wow64_win32_tdesc;
 
-extern bool wow64_process;
-
 typedef BOOL (WINAPI *winapi_Wow64GetThreadContext) (HANDLE, PWOW64_CONTEXT);
 extern winapi_Wow64GetThreadContext win32_Wow64GetThreadContext;
 #endif

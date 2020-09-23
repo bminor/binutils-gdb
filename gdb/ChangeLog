@@ -1,3 +1,10 @@
+2020-09-23  Hannes Domani  <ssbssa@yahoo.de>
+
+	* nat/windows-nat.c (handle_exception): Handle 64bit breakpoints
+	in WOW64 processes as SIGINT.
+	* nat/windows-nat.h: Make wow64_process a shared variable.
+	* windows-nat.c: Remove static wow64_process variable.
+
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
 	PR symtab/25470:

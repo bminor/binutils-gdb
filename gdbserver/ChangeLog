@@ -1,3 +1,8 @@
+2020-09-23  Hannes Domani  <ssbssa@yahoo.de>
+
+	* win32-low.cc: Remove local wow64_process variable.
+	* win32-low.h: Remove local wow64_process variable.
+
 2020-09-18  Tom Tromey  <tromey@adacore.com>
 
 	* netbsd-low.h (class netbsd_process_target) <wait>: Update.
