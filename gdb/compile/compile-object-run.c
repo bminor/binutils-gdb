@@ -32,13 +32,16 @@
 
 struct do_module_cleanup
 {
-  do_module_cleanup () = default;
+  do_module_cleanup (int *ptr, compile_module_up &&mod)
+    : executedp (ptr),
+      module (std::move (mod))
+  {
+  }
 
   ~do_module_cleanup ()
   {
-    delete munmap_list_head;
-    xfree (source_file);
-    xfree (objfile_name_string);
+    delete module->munmap_list_head;
+    xfree (module->source_file);
   }
 
   DISABLE_COPY_AND_ASSIGN (do_module_cleanup);
@@ -47,22 +50,8 @@ struct do_module_cleanup
      The pointer may be NULL.  */
   int *executedp;
 
-  /* .c file OBJFILE was built from.  It needs to be xfree-d.  */
-  char *source_file = nullptr;
-
-  /* Copy from struct compile_module.  */
-  enum compile_i_scope_types scope;
-  void *scope_data;
-
-  /* Copy from struct compile_module.  */
-  struct type *out_value_type;
-  CORE_ADDR out_value_addr;
-
-  /* Copy from struct compile_module.  */
-  struct munmap_list *munmap_list_head = nullptr;
-
-  /* objfile_name of our objfile.  */
-  char *objfile_name_string = nullptr;
+  /* The compile module.  */
+  compile_module_up module;
 };
 
 /* Cleanup everything after the inferior function dummy frame gets
@@ -80,22 +69,29 @@ do_module_cleanup (void *arg, int registers_valid)
 
       /* This code cannot be in compile_object_run as OUT_VALUE_TYPE
 	 no longer exists there.  */
-      if (data->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
-	  || data->scope == COMPILE_I_PRINT_VALUE_SCOPE)
+      if (data->module->scope == COMPILE_I_PRINT_ADDRESS_SCOPE
+	  || data->module->scope == COMPILE_I_PRINT_VALUE_SCOPE)
 	{
 	  struct value *addr_value;
-	  struct type *ptr_type = lookup_pointer_type (data->out_value_type);
+	  struct type *ptr_type
+	    = lookup_pointer_type (data->module->out_value_type);
 
-	  addr_value = value_from_pointer (ptr_type, data->out_value_addr);
+	  addr_value = value_from_pointer (ptr_type,
+					   data->module->out_value_addr);
 
 	  /* SCOPE_DATA would be stale unless EXECUTEDP != NULL.  */
-	  compile_print_value (value_ind (addr_value), data->scope_data);
+	  compile_print_value (value_ind (addr_value),
+			       data->module->scope_data);
 	}
     }
 
+  /* We have to make a copy of the name so that we can unlink the
+     underlying file -- removing the objfile will cause the name to be
+     freed, so we can't simply keep a reference to it.  */
+  std::string objfile_name_s = objfile_name (data->module->objfile);
   for (objfile *objfile : current_program_space->objfiles ())
     if ((objfile->flags & OBJF_USERLOADED) == 0
-        && (strcmp (objfile_name (objfile), data->objfile_name_string) == 0))
+	&& objfile_name_s == objfile_name (objfile))
       {
 	objfile->unlink ();
 
@@ -106,10 +102,10 @@ do_module_cleanup (void *arg, int registers_valid)
       }
 
   /* Delete the .c file.  */
-  unlink (data->source_file);
+  unlink (data->module->source_file);
 
   /* Delete the .o file.  */
-  unlink (data->objfile_name_string);
+  unlink (objfile_name_s.c_str ());
 
   delete data;
 }
@@ -135,23 +131,12 @@ compile_object_run (compile_module_up &&module)
 {
   struct value *func_val;
   struct do_module_cleanup *data;
-  const char *objfile_name_s = objfile_name (module->objfile);
   int dtor_found, executed = 0;
   struct symbol *func_sym = module->func_sym;
   CORE_ADDR regs_addr = module->regs_addr;
   struct objfile *objfile = module->objfile;
 
-  data = new struct do_module_cleanup;
-  data->executedp = &executed;
-  data->source_file = xstrdup (module->source_file);
-  data->objfile_name_string = xstrdup (objfile_name_s);
-  data->scope = module->scope;
-  data->scope_data = module->scope_data;
-  data->out_value_type = module->out_value_type;
-  data->out_value_addr = module->out_value_addr;
-  data->munmap_list_head = module->munmap_list_head;
-
-  xfree (module->source_file);
+  data = new struct do_module_cleanup (&executed, std::move (module));
 
   try
     {
@@ -178,9 +163,10 @@ compile_object_run (compile_module_up &&module)
 	}
       if (func_type->num_fields () >= 2)
 	{
-	  gdb_assert (data->out_value_addr != 0);
+	  gdb_assert (data->module->out_value_addr != 0);
 	  vargs[current_arg] = value_from_pointer
-	       (func_type->field (current_arg).type (), data->out_value_addr);
+	       (func_type->field (current_arg).type (),
+		data->module->out_value_addr);
 	  ++current_arg;
 	}
       gdb_assert (current_arg == func_type->num_fields ());

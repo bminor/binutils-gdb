@@ -1,5 +1,15 @@
 2020-09-23  Tom Tromey  <tom@tromey.com>
 
+	* compile/compile-object-run.c (struct do_module_cleanup): Add
+	parameters to constructor.  Update destructor.
+	<source_file, scope, scope_data, out_value_type, out_value_addr,
+	munmap_list_head, objfile_name_string>: Remove.
+	<module>: New member.
+	(do_module_cleanup): Update.
+	(compile_object_run): Update.
+
+2020-09-23  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile.c (eval_compile_command): Update.
 	* compile/compile-object-run.h (compile_object_run): Take a
 	compile_module_up.
