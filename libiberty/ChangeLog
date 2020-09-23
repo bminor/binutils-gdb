@@ -1,3 +1,12 @@
+2020-11-15  Mark Wielaard  <mark@klomp.org>
+
+	Backport from the mainline:
+	2020-09-23  Mark Wielaard  <mark@klomp.org>
+
+	Sync with GCC
+	* dwarfnames.c (get_DW_UT_name): Define using DW_UT_FIRST, DW_UT
+	and DW_UT_END.
+
 2020-06-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* bsearch_r.c: New file.
