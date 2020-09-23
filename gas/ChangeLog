@@ -1,3 +1,7 @@
+2020-09-23  Mark Wielaard  <mark@klomp.org>
+
+	* testsuite/gas/elf/dwarf-5-cu.d: Adjust expected output.
+
 2020-09-24  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add Neoverse V1.
