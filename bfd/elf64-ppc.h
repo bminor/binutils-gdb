@@ -27,6 +27,7 @@ struct ppc64_elf_params
   /* Linker call-backs.  */
   asection * (*add_stub_section) (const char *, asection *);
   void (*layout_sections_again) (void);
+  void (*edit) (void);
 
   /* Maximum size of a group of input sections that can be handled by
      one stub section.  A value of +/-1 indicates the bfd back-end
@@ -80,7 +81,7 @@ bfd_boolean ppc64_elf_edit_opd
   (struct bfd_link_info *);
 bfd_boolean ppc64_elf_inline_plt
   (struct bfd_link_info *);
-asection *ppc64_elf_tls_setup
+bfd_boolean ppc64_elf_tls_setup
   (struct bfd_link_info *);
 bfd_boolean ppc64_elf_tls_optimize
   (struct bfd_link_info *);

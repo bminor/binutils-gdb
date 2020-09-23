@@ -32,10 +32,12 @@ fragment <<EOF
 
 static asection *ppc_add_stub_section (const char *, asection *);
 static void ppc_layout_sections_again (void);
+static void ppc_edit (void);
 
 static struct ppc64_elf_params params = { NULL,
 					  &ppc_add_stub_section,
 					  &ppc_layout_sections_again,
+					  &ppc_edit,
 					  1, -1, -1, 0,
 					  ${DEFAULT_PLT_STATIC_CHAIN-0}, -1, 5,
 					  -1, -1, 0, 0, -1, -1, 0};
@@ -294,7 +296,19 @@ ppc_before_allocation (void)
 	    einfo (_("%X%P: inline PLT: %E\n"));
 	}
 
-      if (ppc64_elf_tls_setup (&link_info)
+      if (!ppc64_elf_tls_setup (&link_info))
+	einfo (_("%X%P: TLS problem %E\n"));
+    }
+
+  gld${EMULATION_NAME}_before_allocation ();
+}
+
+static void
+ppc_edit (void)
+{
+  if (stub_file != NULL)
+    {
+      if (elf_hash_table (&link_info)->tls_sec != NULL
 	  && !no_tls_opt)
 	{
 	  /* Size the sections.  This is premature, but we want to know the
@@ -323,8 +337,6 @@ ppc_before_allocation (void)
 	    sort_toc_sections (&toc_os->children, NULL, NULL);
 	}
     }
-
-  gld${EMULATION_NAME}_before_allocation ();
 }
 
 struct hook_stub_info
