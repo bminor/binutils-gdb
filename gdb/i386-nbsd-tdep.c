@@ -55,7 +55,7 @@ static int i386nbsd_r_reg_offset[] =
 };
 
 /* From <machine/signal.h>.  */
-int i386nbsd_sc_reg_offset[] =
+static int i386nbsd_sc_reg_offset[] =
 {
   10 * 4,			/* %eax */
   9 * 4,			/* %ecx */

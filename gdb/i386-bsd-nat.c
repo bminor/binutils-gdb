@@ -344,8 +344,6 @@ void _initialize_i386bsd_nat ();
 void
 _initialize_i386bsd_nat ()
 {
-  int offset;
-
   /* To support the recognition of signal handlers, i386-bsd-tdep.c
      hardcodes some constants.  Inclusion of this file means that we
      are compiling a native debugger, which means that we can use the
@@ -356,8 +354,6 @@ _initialize_i386bsd_nat ()
 #define SC_REG_OFFSET i386fbsd4_sc_reg_offset
 #elif defined (__FreeBSD_version) && __FreeBSD_version >= 300005
 #define SC_REG_OFFSET i386fbsd_sc_reg_offset
-#elif defined (NetBSD) || defined (__NetBSD_Version__)
-#define SC_REG_OFFSET i386nbsd_sc_reg_offset
 #elif defined (OpenBSD)
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
 #endif
@@ -376,7 +372,7 @@ _initialize_i386bsd_nat ()
 
   /* Override the default value for the offset of the program counter
      in the sigcontext structure.  */
-  offset = offsetof (struct sigcontext, sc_pc);
+  int offset = offsetof (struct sigcontext, sc_pc);
 
   if (SC_PC_OFFSET != offset)
     {
