@@ -787,17 +787,6 @@ enum
   MOD_0FE7_PREFIX_2,
   MOD_0FF0_PREFIX_3,
   MOD_0F382A,
-  MOD_VEX_0F3849_X86_64_P_0_W_0,
-  MOD_VEX_0F3849_X86_64_P_2_W_0,
-  MOD_VEX_0F3849_X86_64_P_3_W_0,
-  MOD_VEX_0F384B_X86_64_P_1_W_0,
-  MOD_VEX_0F384B_X86_64_P_2_W_0,
-  MOD_VEX_0F384B_X86_64_P_3_W_0,
-  MOD_VEX_0F385C_X86_64_P_1_W_0,
-  MOD_VEX_0F385E_X86_64_P_0_W_0,
-  MOD_VEX_0F385E_X86_64_P_1_W_0,
-  MOD_VEX_0F385E_X86_64_P_2_W_0,
-  MOD_VEX_0F385E_X86_64_P_3_W_0,
   MOD_0F38DC_PREFIX_1,
   MOD_0F38DD_PREFIX_1,
   MOD_0F38DE_PREFIX_1,
@@ -891,7 +880,18 @@ enum
   MOD_VEX_0F382D,
   MOD_VEX_0F382E,
   MOD_VEX_0F382F,
+  MOD_VEX_0F3849_X86_64_P_0_W_0,
+  MOD_VEX_0F3849_X86_64_P_2_W_0,
+  MOD_VEX_0F3849_X86_64_P_3_W_0,
+  MOD_VEX_0F384B_X86_64_P_1_W_0,
+  MOD_VEX_0F384B_X86_64_P_2_W_0,
+  MOD_VEX_0F384B_X86_64_P_3_W_0,
   MOD_VEX_0F385A,
+  MOD_VEX_0F385C_X86_64_P_1_W_0,
+  MOD_VEX_0F385E_X86_64_P_0_W_0,
+  MOD_VEX_0F385E_X86_64_P_1_W_0,
+  MOD_VEX_0F385E_X86_64_P_2_W_0,
+  MOD_VEX_0F385E_X86_64_P_3_W_0,
   MOD_VEX_0F388C,
   MOD_VEX_0F388E,
   MOD_VEX_0F3A30_L_0,
@@ -8285,57 +8285,6 @@ static const struct dis386 mod_table[][2] = {
     { "movntdqa",	{ XM, Mx }, PREFIX_DATA },
   },
   {
-    /* MOD_VEX_0F3849_X86_64_P_0_W_0 */
-    { VEX_LEN_TABLE (VEX_LEN_0F3849_X86_64_P_0_W_0_M_0) },
-    { REG_TABLE (REG_VEX_0F3849_X86_64_P_0_W_0_M_1) },
-  },
-  {
-    /* MOD_VEX_0F3849_X86_64_P_2_W_0 */
-    { VEX_LEN_TABLE (VEX_LEN_0F3849_X86_64_P_2_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F3849_X86_64_P_3_W_0 */
-    { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3849_X86_64_P_3_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F384B_X86_64_P_1_W_0 */
-    { VEX_LEN_TABLE (VEX_LEN_0F384B_X86_64_P_1_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F384B_X86_64_P_2_W_0 */
-    { VEX_LEN_TABLE (VEX_LEN_0F384B_X86_64_P_2_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F384B_X86_64_P_3_W_0 */
-    { VEX_LEN_TABLE (VEX_LEN_0F384B_X86_64_P_3_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F385C_X86_64_P_1_W_0 */
-    { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F385C_X86_64_P_1_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F385E_X86_64_P_0_W_0 */
-    { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_0_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F385E_X86_64_P_1_W_0 */
-    { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_1_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F385E_X86_64_P_2_W_0 */
-    { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_2_W_0_M_0) },
-  },
-  {
-    /* MOD_VEX_0F385E_X86_64_P_3_W_0 */
-    { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_3_W_0_M_0) },
-  },
-  {
     /* MOD_0F38DC_PREFIX_1 */
     { "aesenc128kl",    { XM, M }, 0 },
     { "loadiwkey",      { XM, EXx }, 0 },
@@ -8777,8 +8726,59 @@ static const struct dis386 mod_table[][2] = {
     { VEX_W_TABLE (VEX_W_0F382F_M_0) },
   },
   {
+    /* MOD_VEX_0F3849_X86_64_P_0_W_0 */
+    { VEX_LEN_TABLE (VEX_LEN_0F3849_X86_64_P_0_W_0_M_0) },
+    { REG_TABLE (REG_VEX_0F3849_X86_64_P_0_W_0_M_1) },
+  },
+  {
+    /* MOD_VEX_0F3849_X86_64_P_2_W_0 */
+    { VEX_LEN_TABLE (VEX_LEN_0F3849_X86_64_P_2_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F3849_X86_64_P_3_W_0 */
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F3849_X86_64_P_3_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F384B_X86_64_P_1_W_0 */
+    { VEX_LEN_TABLE (VEX_LEN_0F384B_X86_64_P_1_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F384B_X86_64_P_2_W_0 */
+    { VEX_LEN_TABLE (VEX_LEN_0F384B_X86_64_P_2_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F384B_X86_64_P_3_W_0 */
+    { VEX_LEN_TABLE (VEX_LEN_0F384B_X86_64_P_3_W_0_M_0) },
+  },
+  {
     /* MOD_VEX_0F385A */
     { VEX_LEN_TABLE (VEX_LEN_0F385A_M_0) },
+  },
+  {
+    /* MOD_VEX_0F385C_X86_64_P_1_W_0 */
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F385C_X86_64_P_1_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F385E_X86_64_P_0_W_0 */
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_0_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F385E_X86_64_P_1_W_0 */
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_1_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F385E_X86_64_P_2_W_0 */
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_2_W_0_M_0) },
+  },
+  {
+    /* MOD_VEX_0F385E_X86_64_P_3_W_0 */
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0F385E_X86_64_P_3_W_0_M_0) },
   },
   {
     /* MOD_VEX_0F388C */

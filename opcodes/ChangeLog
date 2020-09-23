@@ -1,3 +1,8 @@
+2020-09-24  Lili Cui  <lili.cui@intel.com>
+
+	PR 26654
+	*i386-dis.c (enum): Put MOD_VEX_0F38* together.
+
 2020-09-24  Andrew Burgess <andrew.burgess@embecosm.com>
 
 	* csky-dis.c (csky_output_operand): Enclose body of if in curly
