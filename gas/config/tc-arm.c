@@ -31594,6 +31594,11 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("neoverse-n1",    "Neoverse N1",	       ARM_ARCH_V8_2A,
 	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST),
 	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_DOTPROD),
+  ARM_CPU_OPT ("neoverse-n2",	 "Neoverse N2",	       ARM_ARCH_V8_5A,
+	       ARM_FEATURE_CORE_HIGH (ARM_EXT2_FP16_INST
+				    | ARM_EXT2_BF16
+				    | ARM_EXT2_I8MM),
+	       FPU_ARCH_CRYPTO_NEON_VFP_ARMV8_4),
   /* ??? XSCALE is really an architecture.  */
   ARM_CPU_OPT ("xscale",	  NULL,		       ARM_ARCH_XSCALE,
 	       ARM_ARCH_NONE,

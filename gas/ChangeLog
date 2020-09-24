@@ -1,3 +1,8 @@
+2020-09-24  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add Neoverse N2.
+	* doc/c-arm.texi: Document -mcpu=neoverse-n2.
+
 2020-09-24  Lili Cui  <lili.cui@intel.com>
 
 	* NEWS: Add TDX.
