@@ -1,5 +1,13 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-tdep.c: Include arch/aarch64-insn.h.
+	(AARCH64_MORELLO_MAGIC, AARCH64_MORELLO_SIGCONTEXT_SIZE)
+	(AARCH64_MORELLO_SIGCONTEXT_C0_OFFSET): New constants.
+	(aarch64_linux_sigframe_init): Update to handle Morello
+	sigreturn/sigcontext frames.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_addr_bits_remove): New function.
 	(aarch64_gdbarch_init): Register hook.
 
