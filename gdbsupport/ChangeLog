@@ -1,3 +1,7 @@
+2020-09-24  Simon Marchi  <simon.marchi@efficios.com>
+
+	* event-loop.c (struct file_handler): Remove typedef, re-format.
+
 2020-09-16  John Baldwin  <jhb@FreeBSD.org>
 
 	* common.m4 (GDB_AC_COMMON): Refactor checks for kinfo_getfile().

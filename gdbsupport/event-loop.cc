@@ -44,18 +44,29 @@
 /* Information about each file descriptor we register with the event
    loop.  */
 
-typedef struct file_handler
-  {
-    int fd;			/* File descriptor.  */
-    int mask;			/* Events we want to monitor: POLLIN, etc.  */
-    int ready_mask;		/* Events that have been seen since
-				   the last time.  */
-    handler_func *proc;		/* Procedure to call when fd is ready.  */
-    gdb_client_data client_data;	/* Argument to pass to proc.  */
-    int error;			/* Was an error detected on this fd?  */
-    struct file_handler *next_file;	/* Next registered file descriptor.  */
-  }
-file_handler;
+struct file_handler
+{
+  /* File descriptor.  */
+  int fd;
+
+  /* Events we want to monitor: POLLIN, etc.  */
+  int mask;
+
+  /* Events that have been seen since the last time.  */
+  int ready_mask;
+
+  /* Procedure to call when fd is ready.  */
+  handler_func *proc;
+
+  /* Argument to pass to proc.  */
+  gdb_client_data client_data;
+
+  /* Was an error detected on this fd?  */
+  int error;
+
+  /* Next registered file descriptor.  */
+  struct file_handler *next_file;
+};
 
 /* Do we use poll or select ? */
 #ifdef HAVE_POLL
