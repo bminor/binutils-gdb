@@ -847,8 +847,10 @@ csky_output_operand (char *str, struct operand const *oprnd,
       }
     case OPRND_TYPE_REGr4_r7:
       if (IS_CSKY_V1 (mach_flag))
-	sprintf (buf, "%s-%s", get_gr_name (4), get_gr_name (7));
-	strcat (str, buf);
+	{
+	  sprintf (buf, "%s-%s", get_gr_name (4), get_gr_name (7));
+	  strcat (str, buf);
+	}
       break;
     case OPRND_TYPE_CONST1:
       strcat (str, "1");

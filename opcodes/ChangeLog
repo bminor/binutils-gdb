@@ -1,3 +1,8 @@
+2020-09-24  Andrew Burgess <andrew.burgess@embecosm.com>
+
+	* csky-dis.c (csky_output_operand): Enclose body of if in curly
+	braces.
+
 2020-09-24  Lili Cui  <lili.cui@intel.com>
 
 	* i386-dis.c (enum): Add PREFIX_0F01_REG_1_RM_5,
