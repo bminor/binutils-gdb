@@ -104,17 +104,6 @@ ill_formed_expression ()
   error (_("Ill-formed DWARF expression"));
 }
 
-/* See expr.h.  */
-
-CORE_ADDR
-read_addr_from_reg (frame_info *frame, int reg)
-{
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
-
-  return address_from_register (regnum, frame);
-}
-
 /* Read register REGNUM's contents in a given FRAME context.
 
    The data read is offsetted by OFFSET, and the number of bytes read

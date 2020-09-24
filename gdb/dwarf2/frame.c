@@ -193,6 +193,18 @@ dwarf2_frame_state::dwarf2_frame_state (CORE_ADDR pc_, struct dwarf2_cie *cie)
 {
 }
 
+/* Return the value of register number REG (a DWARF register number),
+   read as an address in a given FRAME.  */
+
+static CORE_ADDR
+read_addr_from_reg (frame_info *frame, int reg)
+{
+  gdbarch *arch = get_frame_arch (frame);
+  int regnum = dwarf_reg_to_regnum_or_error (arch, reg);
+
+  return address_from_register (regnum, frame);
+}
+
 /* Execute the required actions for both the DW_CFA_restore and
 DW_CFA_restore_extended instructions.  */
 static void

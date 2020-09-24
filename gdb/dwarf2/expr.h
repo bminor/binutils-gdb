@@ -51,10 +51,6 @@ value *dwarf2_evaluate (const gdb_byte *addr, size_t len, bool as_lval,
    ADDR_SIZE is expected size of the type.  */
 type *address_type (gdbarch *arch, int addr_size);
 
-/* Return the value of register number REG (a DWARF register number),
-   read as an address in a given FRAME.  */
-CORE_ADDR read_addr_from_reg (frame_info *frame, int reg);
-
 /* Check that the current operator is either at the end of an
    expression, or that it is followed by a composition operator or by
    DW_OP_GNU_uninit (which should terminate the expression).  */
