@@ -1,3 +1,9 @@
+2020-09-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 26662
+	* doc/binutils.texi (nm): Document that 'c' is used for small
+	common symbols.
+
 2020-09-21  Ludovic Courtès  <ludo@gnu.org>
 
 	* doc/binutils.texi (objcopy, strip): Say that

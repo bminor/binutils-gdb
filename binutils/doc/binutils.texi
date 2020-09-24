@@ -834,6 +834,7 @@ contains zero-initialized or uninitialized data, although the exact
 behavior is system dependent.
 
 @item C
+@itemx c
 The symbol is common.  Common symbols are uninitialized data.  When
 linking, multiple common symbols may appear with the same name.  If the
 symbol is defined anywhere, the common symbols are treated as undefined
@@ -842,6 +843,8 @@ references.
 For more details on common symbols, see the discussion of
 --warn-common in @ref{Options,,Linker options,ld.info,The GNU linker}.
 @end ifclear
+The lower case @var{c} character is used when the symbol is in a
+special section for small commons.
 
 @item D
 @itemx d
