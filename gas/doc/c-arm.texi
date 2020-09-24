@@ -152,6 +152,7 @@ recognized:
 @code{marvell-whitney},
 @code{neoverse-n1},
 @code{neoverse-n2},
+@code{neoverse-v1},
 @code{xgene1},
 @code{xgene2},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
