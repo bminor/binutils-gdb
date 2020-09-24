@@ -73,6 +73,7 @@ on the target processor.  The following processor names are recognized:
 @code{falkor},
 @code{neoverse-n1},
 @code{neoverse-e1},
+@code{neoverse-v1},
 @code{qdf24xx},
 @code{saphira},
 @code{thunderx},
