@@ -1,3 +1,12 @@
+2020-09-24  Jim Wilson  <jimw@sifive.com>
+
+	PR 26400
+	* config/tc-riscv.c (append_insn): If in absolute section, emit
+	error before add_relaxed_insn call.
+	* testsuite/gas/riscv/absolute-sec.d: New.
+	* testsuite/gas/riscv/absolute-sec.l: New.
+	* testsuite/gas/riscv/absolute-sec.s: New.
+
 2020-09-23  Mark Wielaard  <mark@klomp.org>
 
 	* testsuite/gas/elf/dwarf-5-cu.d: Adjust expected output.

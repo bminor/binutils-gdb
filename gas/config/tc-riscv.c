@@ -1106,6 +1106,13 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 	  int j = reloc_type == BFD_RELOC_RISCV_JMP;
 	  int best_case = riscv_insn_length (ip->insn_opcode);
 	  unsigned worst_case = relaxed_branch_length (NULL, NULL, 0);
+
+	  if (now_seg == absolute_section)
+	    {
+	      as_bad (_("relaxable branches not supported in absolute section"));
+	      return;
+	    }
+
 	  add_relaxed_insn (ip, worst_case, best_case,
 			    RELAX_BRANCH_ENCODE (j, best_case == 2, worst_case),
 			    address_expr->X_add_symbol,
