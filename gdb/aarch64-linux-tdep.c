@@ -52,6 +52,9 @@
 #include "arch-utils.h"
 #include "value.h"
 
+/* For aarch64_debug.  */
+#include "arch/aarch64-insn.h"
+
 #include "gdbsupport/selftest.h"
 
 #include "elf/common.h"
@@ -152,6 +155,7 @@
 #define AARCH64_EXTRA_MAGIC			0x45585401
 #define AARCH64_FPSIMD_MAGIC			0x46508001
 #define AARCH64_SVE_MAGIC			0x53564501
+#define AARCH64_MORELLO_MAGIC			0x4d524c01
 
 /* Defines for the extra_context that follows an AARCH64_EXTRA_MAGIC.  */
 #define AARCH64_EXTRA_DATAP_OFFSET		8
@@ -171,6 +175,23 @@
 #define AARCH64_SVE_CONTEXT_SIZE(vq) \
   (AARCH64_SVE_CONTEXT_FFR_OFFSET (vq) + (vq * 2))
 
+/* Defines for the Morello sigcontext data, which is define in the kernel like
+   so:
+
+   struct morello_context
+   {
+     struct _aarch64_ctx head;
+     __u64 __pad;
+     __kernel_uintcap_t cregs[31];
+     __kernel_uintcap_t csp;
+     __kernel_uintcap_t rcsp;
+     __kernel_uintcap_t pcc;
+   };
+
+*/
+
+#define AARCH64_MORELLO_SIGCONTEXT_SIZE	      (8 + 8 + 34 * 16)
+#define AARCH64_MORELLO_SIGCONTEXT_C0_OFFSET  16
 
 /* Read an aarch64_ctx, returning the magic value, and setting *SIZE to the
    size, or return 0 on error.  */
@@ -302,6 +323,11 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
   bool extra_found = false;
   int num_regs = gdbarch_num_regs (gdbarch);
 
+  if (aarch64_debug)
+    {
+      debug_printf ("\naarch64: Entering aarch64_linux_sigframe_init\n");
+    }
+
   /* Read in the integer registers.  */
 
   for (int i = 0; i < 31; i++)
@@ -353,6 +379,54 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 
 	    if (size >= AARCH64_SVE_CONTEXT_SIZE (vq))
 	      sve_regs = section + AARCH64_SVE_CONTEXT_REGS_OFFSET;
+
+	    section += size;
+	    break;
+	  }
+
+	case AARCH64_MORELLO_MAGIC:
+	  {
+	    if (aarch64_debug)
+	      debug_printf ("aarch64: Found Morello section at %s.\n",
+			    paddress (gdbarch, section));
+
+	    /* Handle Morello sigcontext.  */
+	    if (!tdep->has_capability ())
+	      break;
+
+	    int regno = tdep->cap_reg_base;
+	    CORE_ADDR offset = section + AARCH64_MORELLO_SIGCONTEXT_C0_OFFSET;
+	    int reg_size = C_REGISTER_SIZE;
+
+	    if (aarch64_debug)
+	      {
+		debug_printf ("aarch64: Reading C registers from sigreturn "
+			      "frame.\n");
+	      }
+
+	    for (int i = 0; i < AARCH64_C_REGS_NUM; i++)
+	      {
+		trad_frame_set_reg_addr (this_cache, regno + i,
+					 offset + i * reg_size);
+	      }
+
+	    int pcc_regnum = tdep->cap_reg_base + 31;
+	    int csp_regnum = tdep->cap_reg_base + 32;
+	    int rcsp_regnum = tdep->cap_reg_base + 35;
+
+	    if (aarch64_debug)
+	      {
+		debug_printf ("aarch64: Reading PCC, CSP and RCSP registers "
+			      "from sigreturn frame at %s.\n",
+			      paddress (gdbarch, offset + 31 * reg_size));
+	      }
+
+	    trad_frame_set_reg_addr (this_cache, csp_regnum,
+				     offset + 31 * reg_size);
+	    trad_frame_set_reg_addr (this_cache, rcsp_regnum,
+				     offset + 32 * reg_size);
+	    trad_frame_set_reg_addr (this_cache, pcc_regnum,
+				     offset + 33 * reg_size);
 
 	    section += size;
 	    break;
@@ -445,6 +519,9 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
     }
 
   trad_frame_set_id (this_cache, frame_id_build (sp, func));
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: Exitting aarch64_linux_sigframe_init\n");
 }
 
 static const struct tramp_frame aarch64_linux_rt_sigframe =
