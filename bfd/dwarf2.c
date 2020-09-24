@@ -3404,7 +3404,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
       else
 	{
 	  func = NULL;
-	  if (abbrev->tag == DW_TAG_variable)
+	  if (abbrev->tag == DW_TAG_variable
+	      || abbrev->tag == DW_TAG_member)
 	    {
 	      size_t amt = sizeof (struct varinfo);
 	      var = (struct varinfo *) bfd_zalloc (abfd, amt);
@@ -3516,7 +3517,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		      spec_var = lookup_var_by_offset (attr.u.val,
 						       unit->variable_table);
 		      if (spec_var == NULL)
-			{	
+			{
 			  _bfd_error_handler (_("DWARF error: could not find "
 						"variable specification "
 						"at offset %lx"),

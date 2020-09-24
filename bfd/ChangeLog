@@ -1,3 +1,12 @@
+2020-09-24  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+	2020-08-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 26520
+	* dwarf2.c (scan_unit_for_symbols): Add member entries to the
+	variable table.
+
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
 	PR 26656
