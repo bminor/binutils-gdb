@@ -12622,7 +12622,7 @@ target_specific_reloc_handling (Filedata *           filedata,
 	    if (saved_sym != NULL)
 	      {
 		bfd_vma value;
-		unsigned int reloc_size;
+		unsigned int reloc_size = 0;
 		int leb_ret = 0;
 		switch (reloc_type)
 		  {
@@ -12631,15 +12631,16 @@ target_specific_reloc_handling (Filedata *           filedata,
 		    break;
 		  case 11: /* R_MSP430_GNU_SET_ULEB128 */
 		  case 22: /* R_MSP430X_GNU_SET_ULEB128 */
-		    read_leb128 (start + reloc->r_offset, end, FALSE,
-				 &reloc_size, &leb_ret);
+		    if (reloc->r_offset < (size_t) (end - start))
+		      read_leb128 (start + reloc->r_offset, end, FALSE,
+				   &reloc_size, &leb_ret);
 		    break;
 		  default:
 		    reloc_size = 2;
 		    break;
 		  }
 
-		if (leb_ret != 0)
+		if (leb_ret != 0 || reloc_size == 0 || reloc_size > 8)
 		  error (_("MSP430 ULEB128 field at 0x%lx contains invalid "
 			   "ULEB128 value\n"),
 			 (long) reloc->r_offset);

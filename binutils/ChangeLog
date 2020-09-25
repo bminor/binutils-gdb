@@ -1,3 +1,10 @@
+2020-09-25  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.c (byte_put_little_endian, byte_put_big_endian): Support
+	more field sizes.
+	* readelf.c (target_specific_reloc_handling <MSP430>): Limit
+	allowed reloc_size.  Don't read_leb128 outside of section.
+
 2020-09-23  Mark Wielaard  <mark@klomp.org>
 
 	* dwarf.c (process_debug_info): Print Unit Type for DWARF5.

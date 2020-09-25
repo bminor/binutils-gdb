@@ -67,65 +67,30 @@ void (*byte_put) (unsigned char *, elf_vma, int);
 void
 byte_put_little_endian (unsigned char * field, elf_vma value, int size)
 {
-  switch (size)
+  if (size <= 0 || size > 8)
     {
-    case 8:
-      field[7] = (((value >> 24) >> 24) >> 8) & 0xff;
-      field[6] = ((value >> 24) >> 24) & 0xff;
-      field[5] = ((value >> 24) >> 16) & 0xff;
-      field[4] = ((value >> 24) >> 8) & 0xff;
-      /* Fall through.  */
-    case 4:
-      field[3] = (value >> 24) & 0xff;
-      /* Fall through.  */
-    case 3:
-      field[2] = (value >> 16) & 0xff;
-      /* Fall through.  */
-    case 2:
-      field[1] = (value >> 8) & 0xff;
-      /* Fall through.  */
-    case 1:
-      field[0] = value & 0xff;
-      break;
-
-    default:
       error (_("Unhandled data length: %d\n"), size);
       abort ();
+    }
+  while (size--)
+    {
+      *field++ = value & 0xff;
+      value >>= 8;
     }
 }
 
 void
 byte_put_big_endian (unsigned char * field, elf_vma value, int size)
 {
-  switch (size)
+  if (size <= 0 || size > 8)
     {
-    case 8:
-      field[7] = value & 0xff;
-      field[6] = (value >> 8) & 0xff;
-      field[5] = (value >> 16) & 0xff;
-      field[4] = (value >> 24) & 0xff;
-      value >>= 16;
-      value >>= 16;
-      /* Fall through.  */
-    case 4:
-      field[3] = value & 0xff;
-      value >>= 8;
-      /* Fall through.  */
-    case 3:
-      field[2] = value & 0xff;
-      value >>= 8;
-      /* Fall through.  */
-    case 2:
-      field[1] = value & 0xff;
-      value >>= 8;
-      /* Fall through.  */
-    case 1:
-      field[0] = value & 0xff;
-      break;
-
-    default:
       error (_("Unhandled data length: %d\n"), size);
       abort ();
+    }
+  while (size--)
+    {
+      field[size] = value & 0xff;
+      value >>= 8;
     }
 }
 
