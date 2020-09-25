@@ -1,3 +1,8 @@
+2020-10-05  Alan Hayward  <alan.hayward@arm.com>
+
+	* MAINTAINERS (Responsible Maintainers): Add Luis Machado to
+	AArch64/ARM maintainers.
+
 2020-10-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* NEWS: Mention set/show debug event-loop.

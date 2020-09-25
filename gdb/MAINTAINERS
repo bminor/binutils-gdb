@@ -239,6 +239,7 @@ the native maintainer when resolving ABI issues.
 
 	aarch64		--target=aarch64-elf ,-Werror
 			Alan Hayward		alan.hayward@arm.com
+			Luis Machado		luis.machado@linaro.org
 
 	alpha		--target=alpha-elf ,-Werror
 
@@ -247,6 +248,7 @@ the native maintainer when resolving ABI issues.
 
 	arm		--target=arm-elf ,-Werror
 			Alan Hayward		alan.hayward@arm.com
+			Luis Machado		luis.machado@linaro.org
 
 	avr		--target=avr ,-Werror
 
