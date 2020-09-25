@@ -99,6 +99,29 @@ extern std::string get_standard_temp_dir ();
 
 extern std::string get_standard_config_dir ();
 
+/* Look for FILENAME in the standard configuration directory as returned by
+   GET_STANDARD_CONFIG_DIR and return the path to the file.  No check is
+   performed that the file actually exists or not.
+
+   If FILENAME begins with a '.' then the path returned will remove the
+   leading '.' character, for example passing '.gdbinit' could return the
+   path '/home/username/.config/gdb/gdbinit'.  */
+
+extern std::string get_standard_config_filename (const char *filename);
+
+/* Look for a file called NAME in either the standard config directory or
+   in the users home directory.  If a suitable file is found then *BUF will
+   be filled with the contents of a call to 'stat' on the found file,
+   otherwise *BUF is undefined after this call.
+
+   If NAME starts with a '.' character then, when looking in the standard
+   config directory the file searched for has the '.' removed.  For
+   example, if NAME is '.gdbinit' then on a Linux target GDB might look for
+   '~/.config/gdb/gdbinit' and then '~/.gdbinit'.  */
+
+extern std::string find_gdb_home_config_file (const char *name,
+					      struct stat *buf);
+
 /* Return the file name of the user's shell.  Normally this comes from
    the SHELL environment variable.  */
 

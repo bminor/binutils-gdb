@@ -498,11 +498,26 @@ file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
 
   if (!advice_printed)
     {
-      const char *homedir = getenv ("HOME");
-
-      if (homedir == NULL)
-	homedir = "$HOME";
-      std::string homeinit = string_printf ("%s/%s", homedir, GDBINIT);
+      /* Find the existing home directory config file.  */
+      struct stat buf;
+      std::string home_config = find_gdb_home_config_file (GDBINIT, &buf);
+      if (home_config.empty ())
+	{
+	  /* The user doesn't have an existing home directory config file,
+	     so we should suggest a suitable path for them to use.  */
+	  std::string config_dir_file
+	    = get_standard_config_filename (GDBINIT);
+	  if (!config_dir_file.empty ())
+	    home_config = config_dir_file;
+	  else
+	    {
+	      const char *homedir = getenv ("HOME");
+	      if (homedir == nullptr)
+		homedir = "$HOME";
+	      home_config = (std::string (homedir) + SLASH_STRING
+			     + std::string (GDBINIT));
+	    }
+	}
 
       printf_filtered (_("\
 To enable execution of this file add\n\
@@ -515,7 +530,7 @@ For more information about this security protection see the\n\
 \"Auto-loading safe path\" section in the GDB manual.  E.g., run from the shell:\n\
 \tinfo \"(gdb)Auto-loading safe path\"\n"),
 		       filename_real.get (),
-		       homeinit.c_str (), homeinit.c_str ());
+		       home_config.c_str (), home_config.c_str ());
       advice_printed = 1;
     }
 

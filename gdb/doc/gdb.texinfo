@@ -937,6 +937,7 @@ in sequential order.  The order makes a difference when the
 * File Options::                Choosing files
 * Mode Options::                Choosing modes
 * Startup::                     What @value{GDBN} does during startup
+* Initialization Files::        Initialization Files
 @end menu
 
 @node File Options
@@ -1077,47 +1078,16 @@ batch mode or quiet mode.
 @itemx -n
 @cindex @code{--nx}
 @cindex @code{-n}
-Do not execute commands found in any initialization file.
-There are three init files, loaded in the following order:
-
-@table @code
-@item @file{system.gdbinit}
-This is the system-wide init file.
-Its location is specified with the @code{--with-system-gdbinit}
-configure option (@pxref{System-wide configuration}).
-It is loaded first when @value{GDBN} starts, before command line options
-have been processed.
-@item @file{system.gdbinit.d}
-This is the system-wide init directory.
-Its location is specified with the @code{--with-system-gdbinit-dir}
-configure option (@pxref{System-wide configuration}).
-Files in this directory are loaded in alphabetical order immediately after
-system.gdbinit (if enabled) when @value{GDBN} starts, before command line
-options have been processed.  Files need to have a recognized scripting
-language extension (@file{.py}/@file{.scm}) or be named with a @file{.gdb}
-extension to be interpreted as regular @value{GDBN} commands.  @value{GDBN}
-will not recurse into any subdirectories of this directory.
-@item @file{~/.gdbinit}
-This is the init file in your home directory.
-It is loaded next, after @file{system.gdbinit}, and before
-command options have been processed.
-@item @file{./.gdbinit}
-This is the init file in the current directory.
-It is loaded last, after command line options other than @code{-x} and
-@code{-ex} have been processed.  Command line options @code{-x} and
-@code{-ex} are processed last, after @file{./.gdbinit} has been loaded.
-@end table
-
-For further documentation on startup processing, @xref{Startup}.
-For documentation on how to write command files,
-@xref{Command Files,,Command Files}.
+Do not execute commands found in any initialization files
+(@pxref{Initialization Files}).
 
 @anchor{-nh}
 @item -nh
 @cindex @code{--nh}
-Do not execute commands found in @file{~/.gdbinit}, the init file
-in your home directory.
-@xref{Startup}.
+Do not execute commands found in any home directory initialization
+file (@pxref{Initialization Files,,Home directory initialization
+file}).  The system wide and current directory initialization files
+are still loaded.
 
 @item -quiet
 @itemx -silent
@@ -1327,20 +1297,13 @@ Sets up the command interpreter as specified by the command line
 
 @item
 @cindex init file
-Reads the system-wide @dfn{init file} (if @option{--with-system-gdbinit} was
-used when building @value{GDBN}; @pxref{System-wide configuration,
- ,System-wide configuration and settings}) and the files in the system-wide
-gdbinit directory (if @option{--with-system-gdbinit-dir} was used) and executes
-all the commands in those files.  The files need to be named with a @file{.gdb}
-extension to be interpreted as @value{GDBN} commands, or they can be written
-in a supported scripting language with an appropriate file extension.
+Reads the system wide initialization file and the files from the
+system wide initialization directory, @pxref{System Wide Init Files}.
 
-@anchor{Home Directory Init File}
 @item
-Reads the init file (if any) in your home directory@footnote{On
-DOS/Windows systems, the home directory is the one pointed to by the
-@code{HOME} environment variable.} and executes all the commands in
-that file.
+Reads the initialization file (if any) in your home directory and
+executes all the commands in that file, @pxref{Home Directory Init
+File}.
 
 @anchor{Option -init-eval-command}
 @item
@@ -1353,16 +1316,16 @@ gets loaded.
 @item
 Processes command line options and operands.
 
-@anchor{Init File in the Current Directory during Startup}
 @item
-Reads and executes the commands from init file (if any) in the current
-working directory as long as @samp{set auto-load local-gdbinit} is set to
-@samp{on} (@pxref{Init File in the Current Directory}).
-This is only done if the current directory is
-different from your home directory.  Thus, you can have more than one
-init file, one generic in your home directory, and another, specific
-to the program you are debugging, in the directory where you invoke
-@value{GDBN}.
+Reads and executes the commands from the initialization file (if any)
+in the current working directory as long as @samp{set auto-load
+local-gdbinit} is set to @samp{on} (@pxref{Init File in the Current
+Directory}).  This is only done if the current directory is different
+from your home directory.  Thus, you can have more than one init file,
+one generic in your home directory, and another, specific to the
+program you are debugging, in the directory where you invoke
+@value{GDBN}. @xref{Init File in the Current Directory during
+Startup}.
 
 @item
 If the command line specified a program to debug, or a process to
@@ -1391,26 +1354,115 @@ Reads the command history recorded in the @dfn{history file}.
 files where @value{GDBN} records it.
 @end enumerate
 
-Init files use the same syntax as @dfn{command files} (@pxref{Command
-Files}) and are processed by @value{GDBN} in the same way.  The init
-file in your home directory can set options (such as @samp{set
-complaints}) that affect subsequent processing of command line options
-and operands.  Init files are not executed if you use the @samp{-nx}
-option (@pxref{Mode Options, ,Choosing Modes}).
-
-To display the list of init files loaded by gdb at startup, you
-can use @kbd{gdb --help}.
-
+@node Initialization Files
+@subsection Initialization Files
 @cindex init file name
+
+During startup (@pxref{Startup}) @value{GDBN} will execute commands
+from several initialization files.  These initialization files use the
+same syntax as @dfn{command files} (@pxref{Command Files}) and are
+processed by @value{GDBN} in the same way.
+
+To display the list of initialization files loaded by @value{GDBN} at
+startup, in the order they will be loaded, you can use @kbd{gdb
+--help}.
+
+As the system wide and home directory initialization files are
+processed before most command line options, changes to settings
+(e.g. @samp{set complaints}) can affect subsequent processing of
+command line options and operands.
+
+The following sections describe where @value{GDBN} looks for the
+initialization and the order that the files are searched for.
+
+@anchor{System Wide Init Files}
+@subsubsection System wide initialization files
+
+There are two locations that are searched for system wide
+initialization files.  Both of these locations are always checked:
+
+@table @code
+
+@item @file{system.gdbinit}
+This is a single system-wide initialization file.  Its location is
+specified with the @code{--with-system-gdbinit} configure option
+(@pxref{System-wide configuration}).  It is loaded first when
+@value{GDBN} starts, before command line options have been processed.
+
+@item @file{system.gdbinit.d}
+This is the system-wide initialization directory.  Its location is
+specified with the @code{--with-system-gdbinit-dir} configure option
+(@pxref{System-wide configuration}).  Files in this directory are
+loaded in alphabetical order immediately after @file{system.gdbinit}
+(if enabled) when @value{GDBN} starts, before command line options
+have been processed.  Files need to have a recognized scripting
+language extension (@file{.py}/@file{.scm}) or be named with a
+@file{.gdb} extension to be interpreted as regular @value{GDBN}
+commands.  @value{GDBN} will not recurse into any subdirectories of
+this directory.
+
+@end table
+
+It is possible to prevent the system wide initialization files from
+being loaded using the @samp{-nx} command line option, @pxref{Mode
+Options,,Choosing Modes}.
+
+@anchor{Home Directory Init File}
+@subsubsection Home directory initialization file
+@cindex @file{gdbinit}
 @cindex @file{.gdbinit}
 @cindex @file{gdb.ini}
-The @value{GDBN} init files are normally called @file{.gdbinit}.
-The DJGPP port of @value{GDBN} uses the name @file{gdb.ini}, due to
-the limitations of file names imposed by DOS filesystems.  The Windows
-port of @value{GDBN} uses the standard name, but if it finds a
-@file{gdb.ini} file in your home directory, it warns you about that
-and suggests to rename the file to the standard name.
 
+After loading the system wide initialization files @value{GDBN} will
+look for an initialization file in the users home
+directory@footnote{On DOS/Windows systems, the home directory is the
+one pointed to by the @code{HOME} environment variable.}.  There are a
+number of locations that @value{GDBN} will search in the home
+directory, these locations are searched in order and @value{GDBN} will
+load the first file that it finds, and subsequent locations will not
+be checked.
+
+On non-Apple hosts the locations searched are:
+@table @file
+@item $XDG_CONFIG_HOME/gdb/gdbinit
+@item $HOME/.config/gdb/gdbinit
+@item $HOME/.gdbinit
+@end table
+
+While on Apple hosts the locations searched are:
+@table @file
+@item $HOME/Library/Preferences/gdb/gdbinit
+@item $HOME/.gdbinit
+@end table
+
+It is possible to prevent the home directory initialization file from
+being loaded using the @samp{-nx} or @samp{-nh} command line options,
+@pxref{Mode Options,,Choosing Modes}.
+
+The DJGPP port of @value{GDBN} uses the name @file{gdb.ini} instead of
+@file{.gdbinit} or @file{gdbinit}, due to the limitations of file
+names imposed by DOS filesystems.  The Windows port of @value{GDBN}
+uses the standard name, but if it finds a @file{gdb.ini} file in your
+home directory, it warns you about that and suggests to rename the
+file to the standard name.
+
+@anchor{Init File in the Current Directory during Startup}
+@subsubsection Local directory initialization file
+
+@value{GDBN} will check the current directory for a file called
+@file{.gdbinit}.  It is loaded last, after command line options
+other than @samp{-x} and @samp{-ex} have been processed.  The command
+line options @samp{-x} and @samp{-ex} are processed last, after
+@file{.gdbinit} has been loaded, @pxref{File Options,,Choosing
+Files}.
+
+If the file in the current directory was already loaded as the home
+directory initialization file then it will not be loaded a second
+time.
+
+It is possible to prevent the local directory initialization file from
+being loaded using the @samp{-nx} command line option, @pxref{Mode
+Options,,Choosing Modes}.
 
 @node Quitting GDB
 @section Quitting @value{GDBN}
@@ -46470,7 +46522,8 @@ Execute given @value{GDBN} @var{command}.
 Add @var{directory} to the path to search for source files.
 
 @item -nh
-Do not execute commands from @file{~/.gdbinit}.
+Do not execute commands from @file{~/.config/gdb/gdbinit} or
+@file{~/.gdbinit}.
 
 @item -nx
 @itemx -n
@@ -46895,6 +46948,8 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 @value{SYSTEM_GDBINIT_DIR}/*
 @end ifset
 
+~/.config/gdb/gdbinit
+
 ~/.gdbinit
 
 ./.gdbinit
@@ -46954,11 +47009,11 @@ the @value{GDBN} manual in node @code{System-wide configuration}
 @ref{System-wide configuration}.
 @end ifclear
 
-@item ~/.gdbinit
+@item @file{~/.config/gdb/gdbinit} or @file{~/.gdbinit}
 User initialization file.  It is executed unless user specified
 @value{GDBN} options @code{-nx}, @code{-n} or @code{-nh}.
 
-@item ./.gdbinit
+@item @file{.gdbinit}
 Initialization file for current directory.  It may need to be enabled with
 @value{GDBN} security command @code{set auto-load local-gdbinit}.
 See more in

@@ -15,6 +15,12 @@
 
 * GDB now supports core file debugging for x86_64 Cygwin programs.
 
+* GDB will now look for the .gdbinit file in a config directory before
+  looking for ~/.gdbinit.  The file is searched for in the following
+  locations: $XDG_CONFIG_HOME/gdb/gdbinit, $HOME/.config/gdb/gdbinit,
+  $HOME/.gdbinit.  On Apple hosts the search order is instead:
+  $HOME/Library/Preferences/gdb/gdbinit, $HOME/.gdbinit.
+
 * New commands
 
 set debug event-loop

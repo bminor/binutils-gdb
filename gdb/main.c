@@ -301,8 +301,6 @@ get_init_files (std::vector<std::string> *system_gdbinit,
 	  }
 	}
 
-      const char *homedir = getenv ("HOME");
-
       /* If the .gdbinit file in the current directory is the same as
 	 the $HOME/.gdbinit file, it should not be sourced.  homebuf
 	 and cwdbuf are used in that purpose.  Make sure that the stats
@@ -312,14 +310,7 @@ get_init_files (std::vector<std::string> *system_gdbinit,
       memset (&homebuf, 0, sizeof (struct stat));
       memset (&cwdbuf, 0, sizeof (struct stat));
 
-      if (homedir)
-	{
-	  homeinit = std::string (homedir) + SLASH_STRING + GDBINIT;
-	  if (stat (homeinit.c_str (), &homebuf) != 0)
-	    {
-	      homeinit = "";
-	    }
-	}
+      homeinit = find_gdb_home_config_file (GDBINIT, &homebuf);
 
       if (stat (GDBINIT, &cwdbuf) == 0)
 	{
@@ -328,7 +319,7 @@ get_init_files (std::vector<std::string> *system_gdbinit,
 			 sizeof (struct stat)))
 	    localinit = GDBINIT;
 	}
-      
+
       initialized = 1;
     }
 

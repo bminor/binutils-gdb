@@ -1,3 +1,8 @@
+2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention changes to config file search path.
+	* main.c
+
 2020-11-02  Tom Tromey  <tromey@adacore.com>
 
 	* python/python.c: Consolidate two HAVE_PYTHON blocks.

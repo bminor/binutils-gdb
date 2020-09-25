@@ -1,3 +1,12 @@
+2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Mode Options): Descriptions of initialization files
+	has been moved to 'Initialization Files'.
+	(Startup): Likewise.
+	(Initialization Files): New node.
+	(gdb man): Update to mention alternative file paths.
+	(gdbinit man): Likewise.
+
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.texinfo (Set Breaks): Document the '-force-condition' flag

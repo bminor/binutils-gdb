@@ -23,6 +23,10 @@
 #include "filenames.h"
 #include "gdb_tilde_expand.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #ifdef USE_WIN32API
 #include <windows.h>
 #endif
@@ -293,6 +297,51 @@ get_standard_config_dir ()
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
       return string_printf ("%s/" HOME_CONFIG_DIR "/gdb", abs.get ());
+    }
+
+  return {};
+}
+
+/* See pathstuff.h. */
+
+std::string
+get_standard_config_filename (const char *filename)
+{
+  std::string config_dir = get_standard_config_dir ();
+  if (config_dir != "")
+    {
+      const char *tmp = (*filename == '.') ? (filename + 1) : filename;
+      std::string path = config_dir + SLASH_STRING + std::string (tmp);
+      return path;
+    }
+
+  return {};
+}
+
+/* See pathstuff.h.  */
+
+std::string
+find_gdb_home_config_file (const char *name, struct stat *buf)
+{
+  gdb_assert (name != nullptr);
+  gdb_assert (*name != '\0');
+
+  std::string config_dir_file = get_standard_config_filename (name);
+  if (!config_dir_file.empty ())
+    {
+      if (stat (config_dir_file.c_str (), buf) == 0)
+	return config_dir_file;
+    }
+
+  const char *homedir = getenv ("HOME");
+  if (homedir != nullptr)
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (homedir));
+      std::string path = (std::string (abs.get ()) + SLASH_STRING
+			  + std::string (name));
+      if (stat (path.c_str (), buf) == 0)
+	return path;
     }
 
   return {};
