@@ -1,5 +1,19 @@
 2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR cli/25956
+	* NEWS: Mention new early init files and command line options.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Define GDBEARLYINIT.
+	* main.c (get_earlyinit_files): New function.
+	(enum cmdarg_kind): Add CMDARG_EARLYINIT_FILE and
+	CMDARG_EARLYINIT_COMMAND.
+	(captured_main_1): Add support for new command line flags, and for
+	processing startup files.
+	(print_gdb_help): Include startup files in the output.
+
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* main.c (relocate_gdbinit_path_maybe_in_datadir): Rename to...
 	(relocate_file_path_maybe_in_datadir): ...this.
 	(class gdb_initfile_finder): New class.

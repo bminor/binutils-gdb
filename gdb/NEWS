@@ -48,6 +48,18 @@
   the use of the GNAT encoding (based on information added to the type's
   name following a GNAT-specific format).
 
+* GDB will now load and process commands from ~/.config/gdb/gdbearlyinit
+  or ~/.gdbearlyinit if these files are present.  These files are
+  processed earlier than any of the other initialization files and
+  can affect parts of GDB's startup that previously had already been
+  completed before the initialization files were read, for example
+  styling of the initial GDB greeting.
+
+* GDB now has two new options "--early-init-command" and
+  "--early-init-eval-command" with corresponding short options "-eix"
+  and "-eiex" that allow options (that would normally appear in a
+  gdbearlyinit file) to be passed on the command line.
+
 * New commands
 
 set debug event-loop

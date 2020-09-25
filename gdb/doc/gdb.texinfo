@@ -1040,6 +1040,20 @@ Execute a single @value{GDBN} command before loading the inferior (but
 after loading gdbinit files).
 @xref{Startup}.
 
+@item -early-init-command @var{file}
+@itemx -eix @var{file}
+@cindex @code{--early-init-command}
+@cindex @code{-eix}
+Execute commands from @var{file} very early in the initialization
+process, before any output is produced.  @xref{Startup}.
+
+@item -early-init-eval-command @var{command}
+@itemx -eiex @var{command}
+@cindex @code{--early-init-eval-command}
+@cindex @code{-eiex}
+Execute a single @value{GDBN} command very early in the initialization
+process, before any output is produced.
+
 @item -directory @var{directory}
 @itemx -d @var{directory}
 @cindex @code{--directory}
@@ -1291,6 +1305,23 @@ important when reporting @value{GDBN} bugs (@pxref{GDB Bugs}).
 Here's the description of what @value{GDBN} does during session startup:
 
 @enumerate
+
+@item
+Performs minimal setup required to initialize basic internal state.
+
+@item
+@cindex early initialization file
+Reads commands from the early initialization file (if any) in your
+home directory.  Only a restricted set of commands can be placed into
+an early initialization file, see @ref{Initialization Files}, for
+details.
+
+@item
+Executes commands and command files specified by the @samp{-eiex} and
+@samp{-eix} command line options in their specified order.  Only a
+restricted set of commands can be used with @samp{-eiex} and
+@samp{eix}, see @ref{Initialization Files}, for details.
+
 @item
 Sets up the command interpreter as specified by the command line
 (@pxref{Mode Options, interpreter}).
@@ -1367,13 +1398,82 @@ To display the list of initialization files loaded by @value{GDBN} at
 startup, in the order they will be loaded, you can use @kbd{gdb
 --help}.
 
+@cindex early initialization
+The @dfn{early initialization} file is loaded very early in
+@value{GDBN}'s initialization process, before the interpreter
+(@pxref{Interpreters}) has been initialized, and before the default
+target (@pxref{Targets}) is initialized.  Only @code{set} or
+@code{source} commands should be placed into an early initialization
+file, and the only @code{set} commands that can be used are those that
+control how @value{GDBN} starts up.
+
+Commands that can be placed into an early initialization file will be
+documented as such throughout this manual.  Any command that is not
+documented as being suitable for an early initialization file should
+instead be placed into a general initialization file.  Command files
+passed to @code{--early-init-command} or @code{-eix} are also early
+initialization files, with the same command restrictions.  Only
+commands that can appear in an early initialization file should be
+passed to @code{--early-init-eval-command} or @code{-eiex}.
+
+@cindex general initialization
+In contrast, the @dfn{general initialization} files are processed
+later, after @value{GDBN} has finished its own internal initialization
+process, any valid command can be used in these files.
+
+@cindex initialization file
+Throughout the rest of this document the term @dfn{initialization
+file} refers to one of the general initialization files, not the early
+initialization file.  Any discussion of the early initialization file
+will specifically mention that it is the early initialization file
+being discussed.
+
 As the system wide and home directory initialization files are
 processed before most command line options, changes to settings
 (e.g. @samp{set complaints}) can affect subsequent processing of
 command line options and operands.
 
-The following sections describe where @value{GDBN} looks for the
-initialization and the order that the files are searched for.
+The following sections describe where @value{GDBN} looks for the early
+initialization and initialization files, and the order that the files
+are searched for.
+
+@subsubsection Home directory early initialization files
+
+@value{GDBN} initially looks for an early initialization file in the
+users home directory@footnote{On DOS/Windows systems, the home
+directory is the one pointed to by the @code{HOME} environment
+variable.}.  There are a number of locations that @value{GDBN} will
+search in the home directory, these locations are searched in order
+and @value{GDBN} will load the first file that it finds, and
+subsequent locations will not be checked.
+
+On non-macOS hosts the locations searched are:
+@itemize
+@item
+The file @file{gdb/gdbearlyinit} within the directory pointed to by the
+environment variable @env{XDG_CONFIG_HOME}, if it is defined.
+@item
+The file @file{.config/gdb/gdbearlyinit} within the directory pointed to
+by the environment variable @env{HOME}, if it is defined.
+@item
+The file @file{.gdbearlyinit} within the directory pointed to by the
+environment variable @env{HOME}, if it is defined.
+@end itemize
+
+By contrast, on macOS hosts the locations searched are:
+@itemize
+@item
+The file @file{Library/Preferences/gdb/gdbearlyinit} within the
+directory pointed to by the environment variable @env{HOME}, if it is
+defined.
+@item
+The file @file{.gdbearlyinit} within the directory pointed to by the
+environment variable @env{HOME}, if it is defined.
+@end itemize
+
+It is possible to prevent the home directory early initialization file
+from being loaded using the @samp{-nx} or @samp{-nh} command line
+options, @pxref{Mode Options,,Choosing Modes}.
 
 @anchor{System Wide Init Files}
 @subsubsection System wide initialization files
@@ -25954,11 +26054,10 @@ default, this style's foreground color is magenta and it has bold
 intensity.  The version number is displayed in two places, the output
 of @command{show version}, and when @value{GDBN} starts up.
 
-Currently the version string displayed at startup is printed before
-@value{GDBN} has parsed any command line options, or parsed any
-command files, so there is currently no way to control the styling of
-this string.  However, @value{GDBN}'s @code{--quiet} command line option
-can be used to disable printing of the version string on startup.
+In order to control how @value{GDBN} styles the version number at
+startup, add the @code{set style version} family of commands to the
+early initialization command file (@pxref{Initialization
+Files}).
 
 @item title
 Control the styling of titles.  These are managed with the
@@ -46877,12 +46976,14 @@ Execute given @value{GDBN} @var{command}.
 Add @var{directory} to the path to search for source files.
 
 @item -nh
-Do not execute commands from @file{~/.config/gdb/gdbinit} or
-@file{~/.gdbinit}.
+Do not execute commands from @file{~/.config/gdb/gdbinit},
+@file{~/.gdbinit}, @file{~/.config/gdb/gdbearlyinit}, or
+@file{~/.gdbearlyinit}
 
 @item -nx
 @itemx -n
-Do not execute commands from any @file{.gdbinit} initialization files.
+Do not execute commands from any @file{.gdbinit} or
+@file{.gdbearlyinit} initialization files.
 
 @item -quiet
 @itemx -q

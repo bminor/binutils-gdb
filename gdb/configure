@@ -16778,6 +16778,12 @@ _ACEOF
 
 
 
+cat >>confdefs.h <<_ACEOF
+#define GDBEARLYINIT ".gdbearlyinit"
+_ACEOF
+
+
+
 # Support for --with-sysroot is a copy of GDB_AC_WITH_DIR,
 # except that the argument to --with-sysroot is optional.
 # --with-sysroot (or --with-sysroot=yes) sets the default sysroot path.

@@ -386,6 +386,22 @@ get_init_files (std::vector<std::string> *system_gdbinit,
   *local_gdbinit = init_files->local_file ();
 }
 
+/* Compute the location of the early init file GDB should source and return
+   it in HOME_GDBEARLYINIT.  HOME_GDBEARLYINIT could be returned as an
+   empty string if there is no early init file found.  */
+
+static void
+get_earlyinit_files (std::string *home_gdbearlyinit)
+{
+  /* Cache the file lookup object so we only actually search for the files
+     once.  */
+  static gdb::optional<gdb_initfile_finder> init_files;
+  if (!init_files.has_value ())
+    init_files.emplace (GDBEARLYINIT, nullptr, false, nullptr, false, false);
+
+  *home_gdbearlyinit = init_files->home_file ();
+}
+
 /* Start up the event loop.  This is the entry point to the event loop
    from the command loop.  */
 
@@ -560,7 +576,13 @@ enum cmdarg_kind
   CMDARG_INIT_FILE,
     
   /* Option type -iex.  */
-  CMDARG_INIT_COMMAND
+  CMDARG_INIT_COMMAND,
+
+  /* Option type -sx.  */
+  CMDARG_EARLYINIT_FILE,
+
+  /* Option type -sex.  */
+  CMDARG_EARLYINIT_COMMAND
 };
 
 /* Arguments of --command option and its counterpart.  */
@@ -738,6 +760,8 @@ captured_main_1 (struct captured_main_args *context)
       OPT_WINDOWS,
       OPT_IX,
       OPT_IEX,
+      OPT_EIX,
+      OPT_EIEX,
       OPT_READNOW,
       OPT_READNEVER
     };
@@ -787,6 +811,10 @@ captured_main_1 (struct captured_main_args *context)
       {"init-eval-command", required_argument, 0, OPT_IEX},
       {"ix", required_argument, 0, OPT_IX},
       {"iex", required_argument, 0, OPT_IEX},
+      {"early-init-command", required_argument, 0, OPT_EIX},
+      {"early-init-eval-command", required_argument, 0, OPT_EIEX},
+      {"eix", required_argument, 0, OPT_EIX},
+      {"eiex", required_argument, 0, OPT_EIEX},
 #ifdef GDBTK
       {"tclcommand", required_argument, 0, 'z'},
       {"enable-external-editor", no_argument, 0, 'y'},
@@ -899,6 +927,12 @@ captured_main_1 (struct captured_main_args *context)
 	  case OPT_IEX:
 	    cmdarg_vec.emplace_back (CMDARG_INIT_COMMAND, optarg);
 	    break;
+	  case OPT_EIX:
+	    cmdarg_vec.emplace_back (CMDARG_EARLYINIT_FILE, optarg);
+	    break;
+	  case OPT_EIEX:
+	    cmdarg_vec.emplace_back (CMDARG_EARLYINIT_COMMAND, optarg);
+	    break;
 	  case 'B':
 	    batch_flag = batch_silent = 1;
 	    gdb_stdout = new null_file ();
@@ -1006,6 +1040,18 @@ captured_main_1 (struct captured_main_args *context)
 
   /* Initialize all files.  */
   gdb_init (gdb_program_name);
+
+  /* Process early init files and early init options from the command line.  */
+  if (!inhibit_gdbinit)
+    {
+      std::string home_gdbearlyinit;
+      get_earlyinit_files (&home_gdbearlyinit);
+      if (!home_gdbearlyinit.empty () && !inhibit_home_gdbinit)
+	ret = catch_command_errors (source_script,
+				    home_gdbearlyinit.c_str (), 0);
+    }
+  execute_cmdargs (&cmdarg_vec, CMDARG_EARLYINIT_FILE,
+		   CMDARG_EARLYINIT_COMMAND, &ret);
 
   /* Now that gdb_init has created the initial inferior, we're in
      position to set args for that inferior.  */
@@ -1334,8 +1380,10 @@ print_gdb_help (struct ui_file *stream)
   std::vector<std::string> system_gdbinit;
   std::string home_gdbinit;
   std::string local_gdbinit;
+  std::string home_gdbearlyinit;
 
   get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);
+  get_earlyinit_files (&home_gdbearlyinit);
 
   /* Note: The options in the list below are only approximately sorted
      in the alphabetical order, so as to group closely related options
@@ -1408,6 +1456,17 @@ Other options:\n\n\
   --data-directory=DIR, -D\n\
 		     Set GDB's data-directory to DIR.\n\
 "), stream);
+  fputs_unfiltered (_("\n\
+At startup, GDB reads the following early init files and executes their\n\
+commands:\n\
+"), stream);
+  if (!home_gdbearlyinit.empty ())
+    fprintf_unfiltered (stream, _("\
+   * user-specific early init file: %s\n\
+"), home_gdbearlyinit.c_str ());
+  if (home_gdbearlyinit.empty ())
+    fprintf_unfiltered (stream, _("\
+   None found.\n"));
   fputs_unfiltered (_("\n\
 At startup, GDB reads the following init files and executes their commands:\n\
 "), stream);

@@ -1,3 +1,12 @@
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR cli/25956
+	* gdb.texinfo (File Options): Mention new command line options.
+	(Startup): Discuss when early init files are processed.
+	(Initialization Files): Add description of early init files.
+	(Output Styling): Update description of 'version' style.
+	(gdb man): Mention early init files.
+
 2021-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add missing
