@@ -1663,10 +1663,10 @@
 	sites to use type::set_is_unsigned.
 
 2020-09-14  Fredrik Hederstierna  <fredrik.hederstierna@verisure.com>
-            Adam Renquinha <arenquinha@cimeq.qc.ca>
+	    Adam Renquinha <arenquinha@cimeq.qc.ca>
 
-        * arm-tdep.c (arm_m_exception_cache): Try use correct stack
-        pointer and stack frame offset when unwinding.
+	* arm-tdep.c (arm_m_exception_cache): Try use correct stack
+	pointer and stack frame offset when unwinding.
 
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
