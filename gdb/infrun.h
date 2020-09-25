@@ -37,10 +37,12 @@ void ATTRIBUTE_PRINTF (2, 3) infrun_debug_printf_1
   (const char *func_name, const char *fmt, ...);
 
 #define infrun_debug_printf(fmt, ...) \
-  do { \
-    if (debug_infrun) \
-      infrun_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
-  } while (0)
+  do \
+    { \
+      if (debug_infrun) \
+	infrun_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
 
 /* True if we are debugging displaced stepping.  */
 extern bool debug_displaced;

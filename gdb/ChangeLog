@@ -1,3 +1,8 @@
+2020-09-25  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.h (infrun_debug_printf): Fix formatting.
+	* linux-nat.c (linux_nat_debug_printf): Fix formatting.
+
 2020-09-25  Saagar Jha  <saagar@saagarjha.com>
 
 	* compile/compile-object-load.h (struct munmap_list): Add

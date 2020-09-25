@@ -211,10 +211,12 @@ linux_nat_debug_printf_1 (const char *func_name, const char *fmt, ...)
 }
 
 #define linux_nat_debug_printf(fmt, ...) \
-  do { \
-    if (debug_linux_nat) \
-      linux_nat_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
-  } while (0)
+  do \
+    { \
+      if (debug_linux_nat) \
+	linux_nat_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
 
 struct simple_pid_list
 {
