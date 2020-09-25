@@ -1,3 +1,8 @@
+2020-09-25  Saagar Jha  <saagar@saagarjha.com>
+
+	* compile/compile-object-load.h (struct munmap_list): Add
+	explicitly-defined move constructor.
+
 2020-09-24  Tom Tromey  <tromey@adacore.com>
 
 	PR tui/26638:

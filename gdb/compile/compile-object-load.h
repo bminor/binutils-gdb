@@ -30,6 +30,7 @@ public:
   DISABLE_COPY_AND_ASSIGN (munmap_list);
 
   munmap_list &operator= (munmap_list &&) = default;
+  munmap_list (munmap_list &&) = default;
 
   /* Add a region to the list.  */
   void add (CORE_ADDR addr, CORE_ADDR size);
