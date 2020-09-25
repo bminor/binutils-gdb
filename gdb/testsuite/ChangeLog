@@ -1,3 +1,8 @@
+2020-09-25  Gary Benson <gbenson@redhat.com>
+
+	* lib/gdb.exp (gdb_compile): Pass "-x c++" earlier, and only
+	for .c files.
+
 2020-09-24  Tom Tromey  <tromey@adacore.com>
 
 	PR tui/26638:

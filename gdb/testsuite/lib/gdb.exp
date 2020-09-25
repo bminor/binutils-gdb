@@ -3944,8 +3944,9 @@ proc gdb_compile {source dest type options} {
     # explicitly force C++ language.
     if { [lsearch -exact $options getting_compiler_info] == -1
 	 && [lsearch -exact $options c++] != -1
-	 && [test_compiler_info "clang-*"]} {
-	lappend new_options additional_flags=-x\ c++
+	 && [string match *.c $source] != 0
+	 && [test_compiler_info "clang-*"] } {
+	lappend new_options early_flags=-x\ c++
     }
 
     # Place (and look for) Fortran `.mod` files in the output
