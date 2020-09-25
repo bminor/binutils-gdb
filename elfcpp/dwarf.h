@@ -81,6 +81,11 @@ namespace elfcpp
 #define DW_IDX_DUP(name, value) , name = value
 #define DW_END_IDX };
 
+#define DW_FIRST_UT(name, value) enum dwarf_unit_type { \
+  name = value
+#define DW_UT(name, value) , name = value
+#define DW_END_UT };
+
 #include "dwarf2.def"
 
 #undef DW_FIRST_TAG
@@ -116,6 +121,10 @@ namespace elfcpp
 #undef DW_IDX
 #undef DW_IDX_DUP
 #undef DW_END_IDX
+
+#undef DW_FIRST_UT
+#undef DW_UT
+#undef DW_END_UT
 
 // Frame unwind information.
 

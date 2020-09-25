@@ -1,3 +1,10 @@
+2020-11-16  Mark Wielaard  <mark@klomp.org>
+
+	Backport from the mainline:
+	2020-09-25  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.h (DW_FIRST_UT, DW_UT, DW_END_UT): Define.
+
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.35 branch created.
