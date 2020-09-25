@@ -2565,8 +2565,7 @@ parse_type_ctrlreg (char** oper)
 	}
       else
 	{
-	  crx = csky_get_control_regno (mach_flag & CSKY_ARCH_MASK,
-			  s, &s, &sel);
+	  crx = csky_get_control_regno (mach_flag, s, &s, &sel);
 	  if (crx < 0)
 	    {
 	      SET_ERROR_STRING (ERROR_CREG_ILLEGAL, s);
@@ -2577,8 +2576,7 @@ parse_type_ctrlreg (char** oper)
     }
   else if (i == -1)
     {
-      i = csky_get_control_regno (mach_flag & CSKY_ARCH_MASK,
-				  s, &s, &sel);
+      i = csky_get_control_regno (mach_flag, s, &s, &sel);
       if (i < 0)
 	{
 	  SET_ERROR_STRING (ERROR_CREG_ILLEGAL, s);
@@ -2595,7 +2593,7 @@ csky_get_reg_val (char *str, int *len)
 {
   int regno = 0;
   char *s = str;
-  regno = csky_get_general_regno (mach_flag & CSKY_ARCH_MASK, str, &s);
+  regno = csky_get_general_regno (mach_flag, str, &s);
   *len = (s - str);
   return regno;
 }

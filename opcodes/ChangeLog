@@ -1,7 +1,16 @@
+2020-09-26  Alan Modra  <amodra@gmail.com>
+
+	* csky-opc.h: Formatting.
+	(GENERAL_REG_BANK): Correct spelling.  Update use throughout file.
+	(get_register_name): Mask arch with CSKY_ARCH_MASK for shift,
+	and shift 1u.
+	(get_register_number): Likewise.
+	* csky-dis.c (get_gr_name, get_cr_name): Don't mask mach_flag.
+
 2020-09-24  Lili Cui  <lili.cui@intel.com>
 
 	PR 26654
-	*i386-dis.c (enum): Put MOD_VEX_0F38* together.
+	* i386-dis.c (enum): Put MOD_VEX_0F38* together.
 
 2020-09-24  Andrew Burgess <andrew.burgess@embecosm.com>
 
@@ -28,7 +37,6 @@
 
 2020-09-17 Cooper Qu <<cooper.qu@linux.alibaba.com>>
 
-	opcodes/
 	* csky-dis.c (using_abi): New.
 	(parse_csky_dis_options): New function.
 	(get_gr_name): New function.
@@ -36,7 +44,7 @@
 	(csky_output_operand): Use get_gr_name and get_cr_name to
 	disassemble and add handle of OPRND_TYPE_IMM5b_LS.
 	(print_insn_csky): Parse disassembler options.
-	* opcodes/csky-opc.h (OPRND_TYPE_IMM5b_LS): New enum.
+	* csky-opc.h (OPRND_TYPE_IMM5b_LS): New enum.
 	(GENARAL_REG_BANK): Define.
 	(REG_SUPPORT_ALL): Define.
 	(REG_SUPPORT_ALL): New.
@@ -872,7 +880,7 @@
 	EVEX_W_0F3A1B, EVEX_W_0F3A21, EVEX_W_0F3A23, EVEX_W_0F3A38,
 	EVEX_W_0F3A39, EVEX_W_0F3A3A, EVEX_W_0F3A3B, EVEX_W_0F3A42,
 	EVEX_W_0F3A43, EVEX_W_0F3A70, EVEX_W_0F3A72): ... these
- 	respectively.
+	respectively.
 	(dis386_twobyte, three_byte_table, vex_table, vex_len_table,
 	vex_w_table, mod_table): Replace / remove respective entries.
 	(print_insn): Move up dp->prefix_requirement handling. Handle
@@ -2696,7 +2704,7 @@
 2020-01-16  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	PR 25376
-	* opcodes/arm-dis.c (coprocessor_opcodes): Use CORE_HIGH for MVE bits.
+	* arm-dis.c (coprocessor_opcodes): Use CORE_HIGH for MVE bits.
 	(neon_opcodes): Likewise.
 	(select_arm_features): Make sure we enable MVE bits when selecting
 	armv8.1-m.main.  Make sure we do not enable MVE bits when not selecting
@@ -2750,13 +2758,13 @@
 	* i386-dis.c (print_insn): Initialize the insn info fields, and
 	detect jumps.
 
-2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
+2020-01-13  Claudiu Zissulescu <claziss@gmail.com>
 
 	* arc-opc.c (C_NE): Make it required.
 
-2012-01-13  Claudiu Zissulescu <claziss@gmail.com>
+2020-01-13  Claudiu Zissulescu <claziss@gmail.com>
 
-        * opcode/arc-dis.c (regnames): Correct ACCL/ACCH naming, fix typo
+	* opcode/arc-dis.c (regnames): Correct ACCL/ACCH naming, fix typo
 	reserved register name.
 
 2020-01-13  Alan Modra  <amodra@gmail.com>
@@ -2893,13 +2901,13 @@
 
 	* aarch64-tbl.h (aarch64_opcode_table): Drop 'i' from
 	uzip{1,2}.
-	* opcodes/aarch64-dis-2.c: Re-generate.
+	* aarch64-dis-2.c: Re-generate.
 
 2020-01-03  Jan Beulich  <jbeulich@suse.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Correct 64-bit
 	FMMLA encoding.
-	* opcodes/aarch64-dis-2.c: Re-generate.
+	* aarch64-dis-2.c: Re-generate.
 
 2020-01-02  Sergey Belyashov  <sergey.belyashov@gmail.com>
 

@@ -653,7 +653,7 @@ const struct psrbit cskyv2_psr_bits[] =
   {0, 0, NULL},
 };
 
-#define GENARAL_REG_BANK      0x80000000
+#define GENERAL_REG_BANK      0x80000000
 #define REG_SUPPORT_ALL 0xffffffff
 
 /* CSKY register description.  */
@@ -698,7 +698,7 @@ struct csky_reg_def
 static struct csky_reg_def csky_abiv1_general_regs[] = 
 {
 #define DECLARE_REG(regno, abi_name, support)		\
-  {GENARAL_REG_BANK, regno, "r"#regno, abi_name, support, NULL}
+  {GENERAL_REG_BANK, regno, "r"#regno, abi_name, support, NULL}
 
   DECLARE_REG (0, "sp", REG_SUPPORT_ALL),
   DECLARE_REG (1, NULL, REG_SUPPORT_ALL),
@@ -769,7 +769,7 @@ static struct csky_reg_def csky_abiv2_general_regs[] =
 #undef DECLARE_REG
 #endif
 #define DECLARE_REG(regno, abi_name, support)		\
-  {GENARAL_REG_BANK, regno, "r"#regno, abi_name, support, NULL}
+  {GENERAL_REG_BANK, regno, "r"#regno, abi_name, support, NULL}
 
   DECLARE_REG (0, "a0", REG_SUPPORT_ALL),
   DECLARE_REG (1, "a1", REG_SUPPORT_ALL),
@@ -926,7 +926,7 @@ get_register_name (struct csky_reg_def *reg_table,
     {
       if (reg_table[i].bank == bank
 	  && reg_table[i].regno == regno
-	  && (reg_table[i].arch_flag & (1 << arch)))
+	  && (reg_table[i].arch_flag & (1u << (arch & CSKY_ARCH_MASK))))
 	{
 	  if (is_abi && reg_table[i].abi_name)
 	    return reg_table[i].abi_name;
@@ -957,7 +957,7 @@ get_register_number (struct csky_reg_def *reg_table,
       len = strlen (reg_table[i].name);
       if ((strncasecmp (reg_table[i].name, s, len) == 0)
 	  && !(ISDIGIT (s[len]))
-	  && (reg_table[i].arch_flag & (1 << arch)))
+	  && (reg_table[i].arch_flag & (1u << (arch & CSKY_ARCH_MASK))))
 	{
 	  *end = s + len;
 	  *bank = reg_table[i].bank;
@@ -973,7 +973,7 @@ get_register_number (struct csky_reg_def *reg_table,
       len = strlen (reg_table[i].abi_name);
       if ((strncasecmp (reg_table[i].abi_name, s, len) == 0)
 	  && !(ISALNUM (s[len]))
-	  && (reg_table[i].arch_flag & (1 << arch)))
+	  && (reg_table[i].arch_flag & (1u << (arch & CSKY_ARCH_MASK))))
 	{
 	  *end = s + len;
 	  *bank = reg_table[i].bank;
@@ -990,23 +990,22 @@ csky_get_general_reg_name (int arch, int regno, int is_abi)
 {
   struct csky_reg_def *reg_table;
 
-  if (IS_CSKY_ARCH_V1(arch))
+  if (IS_CSKY_ARCH_V1 (arch))
     reg_table = csky_abiv1_general_regs;
   else
     reg_table = csky_abiv2_general_regs;
 
-  return get_register_name (reg_table, arch,
-			    GENARAL_REG_BANK, regno, is_abi);
+  return get_register_name (reg_table, arch, GENERAL_REG_BANK, regno, is_abi);
 }
 
 /* Return general register's number.  */
 static inline int
-csky_get_general_regno(int arch, char *s, char **end)
+csky_get_general_regno (int arch, char *s, char **end)
 {
   struct csky_reg_def *reg_table;
   int bank = 0;
 
-  if (IS_CSKY_ARCH_V1(arch))
+  if (IS_CSKY_ARCH_V1 (arch))
     reg_table = csky_abiv1_general_regs;
   else
     reg_table = csky_abiv2_general_regs;
@@ -1020,22 +1019,21 @@ csky_get_control_reg_name (int arch, int bank, int regno, int is_abi)
 {
   struct csky_reg_def *reg_table;
 
-  if (IS_CSKY_ARCH_V1(arch))
+  if (IS_CSKY_ARCH_V1 (arch))
     reg_table = csky_abiv1_control_regs;
   else
     reg_table = csky_abiv2_control_regs;
 
-  return get_register_name (reg_table, arch, bank,
-			    regno, is_abi);
+  return get_register_name (reg_table, arch, bank, regno, is_abi);
 }
 
 /* Return control register's number.  */
 static inline int
-csky_get_control_regno(int arch, char *s, char **end, int *bank)
+csky_get_control_regno (int arch, char *s, char **end, int *bank)
 {
   struct csky_reg_def *reg_table;
 
-  if (IS_CSKY_ARCH_V1(arch))
+  if (IS_CSKY_ARCH_V1 (arch))
     reg_table = csky_abiv1_control_regs;
   else
     reg_table = csky_abiv2_control_regs;

@@ -287,14 +287,14 @@ parse_csky_dis_options (const char *opts_in)
 static const char *
 get_gr_name (int regno)
 {
-  return csky_get_general_reg_name (mach_flag & CSKY_ABI_MASK, regno, using_abi);
+  return csky_get_general_reg_name (mach_flag, regno, using_abi);
 }
 
 /* Get control register name.  */
 static const char *
 get_cr_name (unsigned int regno, int bank)
 {
-  return csky_get_control_reg_name (mach_flag & CSKY_ABI_MASK, bank, regno, using_abi);
+  return csky_get_control_reg_name (mach_flag, bank, regno, using_abi);
 }
 
 static int

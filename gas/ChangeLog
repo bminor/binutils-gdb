@@ -1,3 +1,9 @@
+2020-09-26  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-csky.c (parse_type_ctrlreg): Don't mask mach_flag
+	for csky_get_control_regno.
+	(csky_get_reg_val): Likewise when calling csky_get_general_regno.
+
 2020-09-24  Jim Wilson  <jimw@sifive.com>
 
 	PR 26400
@@ -62,12 +68,12 @@
 	(v1_work_fpu_readd): Refine.
 	(v2_work_addc): New function, strengthen the operands legality
 	check of addc.
-	* gas/testsuite/gas/csky/all.d : Use register number format when
+	* testsuite/gas/csky/all.d : Use register number format when
 	disassemble register name by default.
-	* gas/testsuite/gas/csky/cskyv2_all.d : Likewise.
-	* gas/testsuite/gas/csky/trust.d: Likewise.
-	* gas/testsuite/gas/csky/cskyv2_ck860.d : Fix.
-	* gas/testsuite/gas/csky/trust.s : Fix.
+	* testsuite/gas/csky/cskyv2_all.d : Likewise.
+	* testsuite/gas/csky/trust.d: Likewise.
+	* testsuite/gas/csky/cskyv2_ck860.d : Fix.
+	* testsuite/gas/csky/trust.s : Fix.
 
 2020-09-23  Lili Cui  <lili.cui@intel.com>
 
@@ -313,7 +319,7 @@
 	add_line_strp and set symbol offset for DWARF2_LINE_VERSION 5.
 	(out_debug_line): Call out_dir_and_file_list with line_seg and
 	sizeof_offset.
-	* gas/testsuite/gas/elf/dwarf-5-file0.d: Expect indirect line
+	* testsuite/gas/elf/dwarf-5-file0.d: Expect indirect line
 	strings.
 
 2020-09-07  Mark Wielaard  <mark@klomp.org>
@@ -330,7 +336,7 @@
 
 	* dwarf2dbg.c (dwarf2_directive_filename): Initialize with_md5 to
 	FALSE.
-	* gas/testsuite/gas/elf/dwarf-5-file0.s: Add a random bignum.
+	* testsuite/gas/elf/dwarf-5-file0.s: Add a random bignum.
 
 2020-09-01  Mark Wielaard  <mark@klomp.org>
 
@@ -595,7 +601,7 @@
 
 2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
-	* gas/config/tc-csky.c (md_begin): Set attributes.
+	* config/tc-csky.c (md_begin): Set attributes.
 	(isa_flag): Change type to unsigned 64 bits.
 	(struct csky_cpu_info): Likewise.
 	(struct csky_macro_info): Likewise.
@@ -660,14 +666,14 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
 	PR 26501
-	* gas/config/tc-tic54x.c (tic54x_undefined_symbol): Properly treat
+	* config/tc-tic54x.c (tic54x_undefined_symbol): Properly treat
 	misc_symbol_hash entries without values.
 
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
 	PR 26500
-	* tc-tic4x.c (tic4x_inst_make): Don't die on terminating insn
-	with name = "".
+	* config/tc-tic4x.c (tic4x_inst_make): Don't die on terminating
+	insn with name = "".
 
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
@@ -704,14 +710,12 @@
 	(csky_cpus): Add item for CK860.
 	(md_begin): Enable DSP for CK810 and CK807 by default.
 	(md_apply_fix): Fix CKCORE_TLS_IE32 relocation failure.
-	* gas/testsuite/gas/csky/cskyv2_all.d: Change 'sync 0'
-	to 'sync'.
-	* gas/testsuite/gas/csky/cskyv2_all.s: Likewise.
-	* gas/testsuite/gas/csky/cskyv2_ck860.d: New.
-	* gas/testsuite/gas/csky/cskyv2_ck860.s: New.
-	* gas/testsuite/gas/csky/enhance_dsp.d: Change plsli.u16
-	to plsli.16.
-	* gas/testsuite/gas/csky/enhance_dsp.s: Likewise.
+	* testsuite/gas/csky/cskyv2_all.d: Change 'sync 0' to 'sync'.
+	* testsuite/gas/csky/cskyv2_all.s: Likewise.
+	* testsuite/gas/csky/cskyv2_ck860.d: New.
+	* testsuite/gas/csky/cskyv2_ck860.s: New.
+	* testsuite/gas/csky/enhance_dsp.d: Change plsli.u16 to plsli.16.
+	* testsuite/gas/csky/enhance_dsp.s: Likewise.
 
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
@@ -1556,7 +1560,7 @@
 
 2020-08-04  Christian Groessler  <chris@groessler.org>
 
-	* gas/testsuite/gas/z8k/inout.d: Adapt to correct encoding of
+	* testsuite/gas/z8k/inout.d: Adapt to correct encoding of
 	"sout/soutb #imm,reg"
 
 2020-08-04  H.J. Lu  <hongjiu.lu@intel.com>
@@ -1579,7 +1583,7 @@
 
 2020-08-02  Mark Wielaard  <mark@klomp.org>
 
-	* gas/dwarf2dbg.c (out_dir_and_file_list): For DWARF5 emit at
+	* dwarf2dbg.c (out_dir_and_file_list): For DWARF5 emit at
 	least one directory if there is at least one file. Use dirs[1]
 	if dirs[0] is not set, or if there is no dirs[1] the current
 	working directory. Use files[1] filename, when files[0] filename
@@ -1589,10 +1593,10 @@
 
 	* dwarf2dbg.c (out_debug_info): Emit unit type and abbrev offset
 	for DWARF5.
-	* gas/testsuite/gas/elf/dwarf-4-cu.d: New file.
-	* gas/testsuite/gas/elf/dwarf-4-cu.s: Likewise.
-	* gas/testsuite/gas/elf/dwarf-5-cu.d: Likewise.
-	* gas/testsuite/gas/elf/dwarf-5-cu.s: Likewise.
+	* testsuite/gas/elf/dwarf-4-cu.d: New file.
+	* testsuite/gas/elf/dwarf-4-cu.s: Likewise.
+	* testsuite/gas/elf/dwarf-5-cu.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-cu.s: Likewise.
 	* testsuite/gas/elf/elf.exp: Run dwarf-4-cu and dwarf-5-cu.
 
 2020-08-02  Mark Wielaard  <mark@klomp.org>
@@ -2282,7 +2286,8 @@
 
 2020-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* tc-i386.c (build_vex_prefix): Support VEX base opcode length > 1.
+	* config/tc-i386.c (build_vex_prefix): Support VEX base opcode
+	length > 1.
 	(md_assemble): Don't process ImmExt without operands.
 
 2020-06-29  Hans-Peter Nilsson  <hp@bitrange.com>
@@ -2737,8 +2742,8 @@
 
 2020-05-27  Simon Cook  <simon.cook@embecosm.com>
 
-        * config/tc-riscv.c (riscv_init_csr_hash): NULL initilize next
-        pointer when creating struct riscv_csr_extra.
+	* config/tc-riscv.c (riscv_init_csr_hash): NULL initilize next
+	pointer when creating struct riscv_csr_extra.
 
 2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -2921,23 +2926,23 @@
 	-mpriv-spec=1.11.
 	* testsuite/gas/riscv/priv-reg-fail-fext.l: Likewise.  There are some
 	version warnings for the test case.
-	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-01.d: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-02.d: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-rv32-only.d: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9.d: New test case.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9.d: New test case.
 	Check whether the CSR is valid when privilege version 1.9 is choosed.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9.l: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9p1.d: New test case.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9p1.d: New test case.
 	Check whether the CSR is valid when privilege version 1.9.1 is choosed.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9p1.l: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p10.d: New test case.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9p1.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p10.d: New test case.
 	Check whether the CSR is valid when privilege version 1.10 is choosed.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p10.l: Likewise.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p11.d: New test case.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p10.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p11.d: New test case.
 	Check whether the CSR is valid when privilege version 1.11 is choosed.
-	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p11.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p11.l: Likewise.
 	* config/tc-riscv.c (DEFAULT_RISCV_ISA_SPEC): Default configure option
 	setting.  You can set it by configure option --with-priv-spec.
 	(riscv_set_default_priv_spec): New function used to set the default
@@ -3534,7 +3539,7 @@
 	* testsuite/gas/i386/solaris/x86-64-branch-3.d: New file.
 	* testsuite/gas/i386/solaris/x86-64-jump.d: Incorporate changes to
 	testsuite/gas/i386/x86-64-jump.d.
-	* gas/testsuite/gas/i386/solaris/x86-64-mpx-branch-1.d:
+	* testsuite/gas/i386/solaris/x86-64-mpx-branch-1.d:
 	Incorporate changes to
 	gas/testsuite/gas/i386/x86-64-mpx-branch-1.d.
 	* testsuite/gas/i386/solaris/x86-64-mpx-branch-2.d : Incorporate
@@ -4524,7 +4529,7 @@
 
 2020-02-01  Anthony Green  <green@moxielogic.com>
 
-       * config/tc-moxie.c (md_begin): Don't force big-endian mode.
+	* config/tc-moxie.c (md_begin): Don't force big-endian mode.
 
 2020-01-31  Sandra Loosemore  <sandra@codesourcery.com>
 
