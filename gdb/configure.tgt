@@ -761,6 +761,10 @@ xtensa*-*-*linux*)
 	# Target: GNU/Linux Xtensa
 	gdb_target_obs="xtensa-linux-tdep.o symfile-mem.o linux-tdep.o"
 	;;
+z80*)
+	# Target: Z80
+	gdb_target_obs="z80-tdep.o"
+	;;
 
 esac
 
