@@ -33,6 +33,13 @@ if [support_complex_tests] {
     lappend compile_flags "additional_flags=-Wno-psabi"
 }
 
+if { $lang == "c++" && [test_compiler_info clang*] } {
+    # Clang rightly deduces that the static member tests are
+    # tautological comparisons, so we need to inhibit that
+    # particular warning in order to build.
+    lappend compile_flags "additional_flags=-Wno-tautological-compare"
+}
+
 # Given N (0..25), return the corresponding alphabetic letter in upper
 # case.
 

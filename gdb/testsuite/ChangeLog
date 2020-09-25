@@ -1,5 +1,11 @@
 2020-09-25  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/infcall-nested-structs.exp.tcl: Add
+	additional_flags=-Wno-tautological-compare for C++
+	tests when compiling using Clang.
+
+2020-09-25  Gary Benson <gbenson@redhat.com>
+
 	* lib/gdb.exp (gdb_compile): Pass "-x c++" earlier, and only
 	for .c files.
 
