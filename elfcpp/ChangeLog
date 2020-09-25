@@ -1,3 +1,7 @@
+2020-09-25  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.h (DW_FIRST_UT, DW_UT, DW_END_UT): Define.
+
 2020-08-26  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
         * elfcpp.h (enum SHT): New enum SHT_CSKY_ATTRIBUTES.
