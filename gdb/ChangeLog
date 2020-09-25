@@ -1,5 +1,24 @@
 2020-10-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* expprint.c (print_subexp_standard): Change enum range_type to
+	range_flag and rename variables to match.
+	(dump_subexp_body_standard): Likewise.
+	* expression.h (enum range_type): Rename to...
+	(enum range_flag): ...this.
+	(range_types): Rename to...
+	(range_flags): ...this.
+	* f-lang.c (value_f90_subarray): Change enum range_type to
+	range_flag and rename variables to match.
+	* parse.c (operator_length_standard): Likewise.
+	* rust-exp.y (rust_parser::convert_ast_to_expression): Change enum
+	range_type to range_flag.
+	* rust-lang.c (rust_evaluate_funcall): Likewise.
+	(rust_range): Likewise.
+	(rust_compute_range): Likewise.
+	(rust_subscript): Likewise.
+
+2020-10-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* expprint.c (print_subexp_standard): Update to reflect changes to
 	enum range_type.
 	(dump_subexp_body_standard): Likewise.

@@ -185,7 +185,7 @@ extern void dump_prefix_expression (struct expression *, struct ui_file *);
    or inclusive.  So we have six sorts of subrange.  This enumeration
    type is to identify this.  */
 
-enum range_type : unsigned
+enum range_flag : unsigned
 {
   /* This is a standard range.  Both the lower and upper bounds are
      defined, and the bounds are inclusive.  */
@@ -201,6 +201,6 @@ enum range_type : unsigned
   RANGE_HIGH_BOUND_EXCLUSIVE = 1 << 2,
 };
 
-DEF_ENUM_FLAGS_TYPE (enum range_type, range_types);
+DEF_ENUM_FLAGS_TYPE (enum range_flag, range_flags);
 
 #endif /* !defined (EXPRESSION_H) */

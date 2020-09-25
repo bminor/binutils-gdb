@@ -2492,7 +2492,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 
     case OP_RANGE:
       {
-	enum range_type kind = (RANGE_HIGH_BOUND_DEFAULT
+	enum range_flag kind = (RANGE_HIGH_BOUND_DEFAULT
 				| RANGE_LOW_BOUND_DEFAULT);
 
 	if (operation->left.op != NULL)

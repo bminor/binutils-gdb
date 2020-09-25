@@ -774,7 +774,7 @@ operator_length_standard (const struct expression *expr, int endpos,
 {
   int oplen = 1;
   int args = 0;
-  enum range_type range_type;
+  enum range_flag range_flag;
   int i;
 
   if (endpos < 1)
@@ -918,15 +918,15 @@ operator_length_standard (const struct expression *expr, int endpos,
 
     case OP_RANGE:
       oplen = 3;
-      range_type = (enum range_type)
+      range_flag = (enum range_flag)
 	longest_to_int (expr->elts[endpos - 2].longconst);
 
       /* Assume the range has 2 arguments (low bound and high bound), then
 	 reduce the argument count if any bounds are set to default.  */
       args = 2;
-      if (range_type & RANGE_LOW_BOUND_DEFAULT)
+      if (range_flag & RANGE_LOW_BOUND_DEFAULT)
 	--args;
-      if (range_type & RANGE_HIGH_BOUND_DEFAULT)
+      if (range_flag & RANGE_HIGH_BOUND_DEFAULT)
 	--args;
 
       break;

@@ -1065,7 +1065,6 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
 static struct value *
 rust_range (struct expression *exp, int *pos, enum noside noside)
 {
-  enum range_type kind;
   struct value *low = NULL, *high = NULL;
   struct value *addrval, *result;
   CORE_ADDR addr;
@@ -1074,7 +1073,8 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
   struct type *temp_type;
   const char *name;
 
-  kind = (enum range_type) longest_to_int (exp->elts[*pos + 1].longconst);
+  auto kind
+    = (enum range_flag) longest_to_int (exp->elts[*pos + 1].longconst);
   *pos += 3;
 
   if (!(kind & RANGE_LOW_BOUND_DEFAULT))
@@ -1164,7 +1164,7 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
 static void
 rust_compute_range (struct type *type, struct value *range,
 		    LONGEST *low, LONGEST *high,
-		    range_types *kind)
+		    range_flags *kind)
 {
   int i;
 
@@ -1204,7 +1204,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
   struct type *rhstype;
   LONGEST low, high_bound;
   /* Initialized to appease the compiler.  */
-  range_types kind = RANGE_LOW_BOUND_DEFAULT | RANGE_HIGH_BOUND_DEFAULT;
+  range_flags kind = RANGE_LOW_BOUND_DEFAULT | RANGE_HIGH_BOUND_DEFAULT;
   LONGEST high = 0;
   int want_slice = 0;
 

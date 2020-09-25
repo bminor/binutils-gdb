@@ -126,17 +126,17 @@ value_f90_subarray (struct value *array,
   int pc = (*pos) + 1;
   LONGEST low_bound, high_bound;
   struct type *range = check_typedef (value_type (array)->index_type ());
-  enum range_type range_type
-    = (enum range_type) longest_to_int (exp->elts[pc].longconst);
+  enum range_flag range_flag
+    = (enum range_flag) longest_to_int (exp->elts[pc].longconst);
 
   *pos += 3;
 
-  if (range_type & RANGE_LOW_BOUND_DEFAULT)
+  if (range_flag & RANGE_LOW_BOUND_DEFAULT)
     low_bound = range->bounds ()->low.const_val ();
   else
     low_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
 
-  if (range_type & RANGE_HIGH_BOUND_DEFAULT)
+  if (range_flag & RANGE_HIGH_BOUND_DEFAULT)
     high_bound = range->bounds ()->high.const_val ();
   else
     high_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
