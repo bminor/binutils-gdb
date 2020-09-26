@@ -1,3 +1,22 @@
+2020-09-26  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc): Rename power10_stubs_ to
+	power10_relocs_.
+	(Target_powerpc::set_power10_relocs): New accessor.
+	(Target_powerpc::set_power10_stubs): Delete.
+	(Target_powerpc::power10_stubs): Adjust.
+	(Target_powerpc::has_localentry0): New accessor.
+	(ld_0_11): New constant.
+	(glink_eh_frame_fde_64v1, glink_eh_frame_fde_64v2): Adjust.
+	(glink_eh_frame_fde_64v2_localentry0): New.
+	(Output_data_glink::pltresolve_size): Update.
+	(Output_data_glink::add_eh_frame): Use localentry0 version eh_frame.
+	(Output_data_glink::do_write): Move r2 save to start of ELFv2 stub
+	and only emit for has_localentry0.  Don't use r2 in the stub.
+	(Target_powerpc::Scan::local, global): Adjust for
+	set_power10_relocs renaming.
+	(Target_powerpc::scan_relocs): Warn and reset plt_localentry0_.
+
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Don't skip

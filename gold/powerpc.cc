@@ -647,7 +647,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
       glink_(NULL), rela_dyn_(NULL), copy_relocs_(),
       tlsld_got_offset_(-1U),
       stub_tables_(), branch_lookup_table_(), branch_info_(), tocsave_loc_(),
-      power10_stubs_(false), plt_thread_safe_(false), plt_localentry0_(false),
+      power10_relocs_(false), plt_thread_safe_(false), plt_localentry0_(false),
       plt_localentry0_init_(false), has_localentry0_(false),
       has_tls_get_addr_opt_(false),
       tprel_opt_(parameters->options().tls_optimize()),
@@ -1079,16 +1079,18 @@ class Target_powerpc : public Sized_target<size, big_endian>
     sym->set_dynsym_index(-1U);
   }
 
+  void
+  set_power10_relocs()
+  {
+      this->power10_relocs_ = true;
+  }
+
   bool
   power10_stubs() const
-  { return this->power10_stubs_; }
-
-  void
-  set_power10_stubs()
   {
-    if (parameters->options().power10_stubs_enum()
-	!= General_options::POWER10_STUBS_NO)
-      this->power10_stubs_ = true;
+    return (this->power10_relocs_
+	    && (parameters->options().power10_stubs_enum()
+		!= General_options::POWER10_STUBS_NO));
   }
 
   bool
@@ -1105,6 +1107,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
   bool
   plt_localentry0() const
   { return this->plt_localentry0_; }
+
+  bool
+  has_localentry0() const
+  { return this->has_localentry0_; }
 
   void
   set_has_localentry0()
@@ -1705,7 +1711,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   Branches branch_info_;
   Tocsave_loc tocsave_loc_;
 
-  bool power10_stubs_;
+  bool power10_relocs_;
   bool plt_thread_safe_;
   bool plt_localentry0_;
   bool plt_localentry0_init_;
@@ -4190,6 +4196,7 @@ static const uint32_t cmpwi_11_0	= 0x2c0b0000;
 static const uint32_t cror_15_15_15	= 0x4def7b82;
 static const uint32_t cror_31_31_31	= 0x4ffffb82;
 static const uint32_t ld_0_1		= 0xe8010000;
+static const uint32_t ld_0_11		= 0xe80b0000;
 static const uint32_t ld_0_12		= 0xe80c0000;
 static const uint32_t ld_2_1		= 0xe8410000;
 static const uint32_t ld_2_2		= 0xe8420000;
@@ -4572,9 +4579,9 @@ static const unsigned char glink_eh_frame_fde_64v1[] =
   0, 0, 0, 0,				// Replaced with offset to .glink.
   0, 0, 0, 0,				// Replaced with size of .glink.
   0,					// Augmentation size.
-  elfcpp::DW_CFA_advance_loc + 1,
+  elfcpp::DW_CFA_advance_loc + 2,
   elfcpp::DW_CFA_register, 65, 12,
-  elfcpp::DW_CFA_advance_loc + 5,
+  elfcpp::DW_CFA_advance_loc + 4,
   elfcpp::DW_CFA_restore_extended, 65
 };
 
@@ -4584,9 +4591,20 @@ static const unsigned char glink_eh_frame_fde_64v2[] =
   0, 0, 0, 0,				// Replaced with offset to .glink.
   0, 0, 0, 0,				// Replaced with size of .glink.
   0,					// Augmentation size.
-  elfcpp::DW_CFA_advance_loc + 1,
+  elfcpp::DW_CFA_advance_loc + 2,
   elfcpp::DW_CFA_register, 65, 0,
-  elfcpp::DW_CFA_advance_loc + 7,
+  elfcpp::DW_CFA_advance_loc + 2,
+  elfcpp::DW_CFA_restore_extended, 65
+};
+
+static const unsigned char glink_eh_frame_fde_64v2_localentry0[] =
+{
+  0, 0, 0, 0,				// Replaced with offset to .glink.
+  0, 0, 0, 0,				// Replaced with size of .glink.
+  0,					// Augmentation size.
+  elfcpp::DW_CFA_advance_loc + 3,
+  elfcpp::DW_CFA_register, 65, 0,
+  elfcpp::DW_CFA_advance_loc + 2,
   elfcpp::DW_CFA_restore_extended, 65
 };
 
@@ -5525,7 +5543,8 @@ class Output_data_glink : public Output_section_data
   {
     if (size == 64)
       return (8
-	      + (this->targ_->abiversion() < 2 ? 11 * 4 : 14 * 4));
+	      + (this->targ_->abiversion() < 2 ? 11 * 4
+		 : this->targ_->has_localentry0() ? 14 * 4 : 13 * 4));
     return 16 * 4;
   }
 
@@ -5568,6 +5587,12 @@ Output_data_glink<size, big_endian>::add_eh_frame(Layout* layout)
 				     sizeof (Eh_cie<64>::eh_frame_cie),
 				     glink_eh_frame_fde_64v1,
 				     sizeof (glink_eh_frame_fde_64v1));
+      else if (this->targ_->has_localentry0())
+	layout->add_eh_frame_for_plt(this,
+				     Eh_cie<64>::eh_frame_cie,
+				     sizeof (Eh_cie<64>::eh_frame_cie),
+				     glink_eh_frame_fde_64v2_localentry0,
+				     sizeof (glink_eh_frame_fde_64v2));
       else
 	layout->add_eh_frame_for_plt(this,
 				     Eh_cie<64>::eh_frame_cie,
@@ -6798,15 +6823,25 @@ Output_data_glink<size, big_endian>::do_write(Output_file* of)
 	    }
 	  else
 	    {
+	      if (this->targ_->has_localentry0())
+		{
+		  write_insn<big_endian>(p, std_2_1 + 24),	p += 4;
+		}
 	      write_insn<big_endian>(p, mflr_0),		p += 4;
 	      write_insn<big_endian>(p, bcl_20_31),		p += 4;
 	      write_insn<big_endian>(p, mflr_11),		p += 4;
-	      write_insn<big_endian>(p, std_2_1 + 24),		p += 4;
-	      write_insn<big_endian>(p, ld_2_11 + l(-16)),	p += 4;
 	      write_insn<big_endian>(p, mtlr_0),		p += 4;
+	      if (this->targ_->has_localentry0())
+		{
+		  write_insn<big_endian>(p, ld_0_11 + l(-20)),	p += 4;
+		}
+	      else
+		{
+		  write_insn<big_endian>(p, ld_0_11 + l(-16)),	p += 4;
+		}
 	      write_insn<big_endian>(p, sub_12_12_11),		p += 4;
-	      write_insn<big_endian>(p, add_11_2_11),		p += 4;
-	      write_insn<big_endian>(p, addi_0_12 + l(-48)),	p += 4;
+	      write_insn<big_endian>(p, add_11_0_11),		p += 4;
+	      write_insn<big_endian>(p, addi_0_12 + l(-44)),	p += 4;
 	      write_insn<big_endian>(p, ld_12_11 + 0),		p += 4;
 	      write_insn<big_endian>(p, srdi_0_0_2),		p += 4;
 	      write_insn<big_endian>(p, mtctr_12),		p += 4;
@@ -8451,7 +8486,7 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
     case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
     case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
-      target->set_power10_stubs();
+      target->set_power10_relocs();
       break;
     default:
       break;
@@ -9248,7 +9283,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
     case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
     case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
-      target->set_power10_stubs();
+      target->set_power10_relocs();
       break;
     default:
       break;
@@ -9590,6 +9625,13 @@ Target_powerpc<size, big_endian>::scan_relocs(
     needs_special_offset_handling,
     local_symbol_count,
     plocal_symbols);
+
+  if (this->plt_localentry0_ && this->power10_relocs_)
+    {
+      gold_warning(_("--plt-localentry is incompatible with "
+		     "power10 pc-relative code"));
+      this->plt_localentry0_ = false;
+    }
 }
 
 // Functor class for processing the global symbol table.
