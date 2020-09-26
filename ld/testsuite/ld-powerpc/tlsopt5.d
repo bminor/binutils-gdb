@@ -49,12 +49,11 @@ Disassembly of section \.text:
 .*:	(a6 02 08 7c|7c 08 02 a6) 	mflr    r0
 .*:	(05 00 9f 42|42 9f 00 05) 	bcl     .*
 .*:	(a6 02 68 7d|7d 68 02 a6) 	mflr    r11
-.*:	(18 00 41 f8|f8 41 00 18) 	std     r2,24\(r1\)
-.*:	(f0 ff 4b e8|e8 4b ff f0) 	ld      r2,-16\(r11\)
 .*:	(a6 03 08 7c|7c 08 03 a6) 	mtlr    r0
+.*:	(f0 ff 0b e8|e8 0b ff f0) 	ld      r0,-16\(r11\)
 .*:	(50 60 8b 7d|7d 8b 60 50) 	subf    r12,r11,r12
-.*:	(14 5a 62 7d|7d 62 5a 14) 	add     r11,r2,r11
-.*:	(d0 ff 0c 38|38 0c ff d0) 	addi    r0,r12,-48
+.*:	(14 5a 60 7d|7d 60 5a 14) 	add     r11,r0,r11
+.*:	(d4 ff 0c 38|38 0c ff d4) 	addi    r0,r12,-44
 .*:	(00 00 8b e9|e9 8b 00 00) 	ld      r12,0\(r11\)
 .*:	(82 f0 00 78|78 00 f0 82) 	rldicl  r0,r0,62,2
 .*:	(a6 03 89 7d|7d 89 03 a6) 	mtctr   r12
@@ -62,7 +61,7 @@ Disassembly of section \.text:
 .*:	(20 04 80 4e|4e 80 04 20) 	bctr
 
 .* <__tls_get_addr_opt@plt>:
-.*	(c8 ff ff 4b|4b ff ff c8) 	b       .*
+.*	(cc ff ff 4b|4b ff ff cc) 	b       .*
 
 .* <aaaaa@plt>:
-.*:	(c4 ff ff 4b|4b ff ff c4) 	b       .*
+.*:	(c8 ff ff 4b|4b ff ff c8) 	b       .*

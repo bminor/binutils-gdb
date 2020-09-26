@@ -74,12 +74,11 @@ Disassembly of section \.text:
 .*:	(7c 08 02 a6|a6 02 08 7c) 	mflr    r0
 .*:	(42 9f 00 05|05 00 9f 42) 	bcl     .*
 .*:	(7d 68 02 a6|a6 02 68 7d) 	mflr    r11
-.*:	(18 00 41 f8|f8 41 00 18) 	std     r2,24\(r1\)
-.*:	(e8 4b ff f0|f0 ff 4b e8) 	ld      r2,-16\(r11\)
 .*:	(7c 08 03 a6|a6 03 08 7c) 	mtlr    r0
+.*:	(e8 0b ff f0|f0 ff 0b e8) 	ld      r0,-16\(r11\)
 .*:	(7d 8b 60 50|50 60 8b 7d) 	subf    r12,r11,r12
-.*:	(7d 62 5a 14|14 5a 62 7d) 	add     r11,r2,r11
-.*:	(38 0c ff d0|d0 ff 0c 38) 	addi    r0,r12,-48
+.*:	(7d 60 5a 14|14 5a 60 7d) 	add     r11,r0,r11
+.*:	(38 0c ff d4|d4 ff 0c 38) 	addi    r0,r12,-44
 .*:	(e9 8b 00 00|00 00 8b e9) 	ld      r12,0\(r11\)
 .*:	(78 00 f0 82|82 f0 00 78) 	rldicl  r0,r0,62,2
 .*:	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
@@ -87,16 +86,16 @@ Disassembly of section \.text:
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 
 .* <f5@plt>:
-.*:	(4b ff ff c8|c8 ff ff 4b) 	b       .* <__glink_PLTresolve>
+.*:	(4b ff ff cc|cc ff ff 4b) 	b       .* <__glink_PLTresolve>
 
 .* <f3@plt>:
-.*:	(4b ff ff c4|c4 ff ff 4b) 	b       .* <__glink_PLTresolve>
+.*:	(4b ff ff c8|c8 ff ff 4b) 	b       .* <__glink_PLTresolve>
 
 .* <f2@plt>:
-.*:	(4b ff ff c0|c0 ff ff 4b) 	b       .* <__glink_PLTresolve>
+.*:	(4b ff ff c4|c4 ff ff 4b) 	b       .* <__glink_PLTresolve>
 
 .* <f4@plt>:
-.*:	(4b ff ff bc|bc ff ff 4b) 	b       .* <__glink_PLTresolve>
+.*:	(4b ff ff c0|c0 ff ff 4b) 	b       .* <__glink_PLTresolve>
 
 .* <f1@plt>:
-.*:	(4b ff ff b8|b8 ff ff 4b) 	b       .* <__glink_PLTresolve>
+.*:	(4b ff ff bc|bc ff ff 4b) 	b       .* <__glink_PLTresolve>
