@@ -211,9 +211,10 @@ static bfd_vma opd_entry_value
 #define PLD_R12_PC	0x04100000e5800000ULL
 #define PNOP		0x0700000000000000ULL
 
-/* __glink_PLTresolve stub instructions.  We enter with the index in R0.  */
+/* __glink_PLTresolve stub instructions.  We enter with the index in
+   R0 for ELFv1, and the address of a glink branch in R12 for ELFv2.  */
 #define GLINK_PLTRESOLVE_SIZE(htab)			\
-  (8u + (htab->opd_abi ? 11 * 4 : 14 * 4))
+  (8u + (htab->opd_abi ? 11 * 4 : htab->has_plt_localentry0 ? 14 * 4 : 13 * 4))
 					/* 0:				*/
 					/*  .quad plt0-1f		*/
 					/* __glink:			*/
@@ -229,11 +230,14 @@ static bfd_vma opd_entry_value
 					/*  mtctr %12			*/
 					/*  ld %11,16(%11)		*/
 					/*  bctr			*/
-#define MFLR_R0		0x7c0802a6	/*  mflr %r0			*/
-#define MTLR_R0		0x7c0803a6	/*  mtlr %r0			*/
-#define SUB_R12_R12_R11	0x7d8b6050	/*  subf %r12,%r11,%r12		*/
-#define ADDI_R0_R12	0x380c0000	/*  addi %r0,%r12,0		*/
-#define SRDI_R0_R0_2	0x7800f082	/*  rldicl %r0,%r0,62,2		*/
+
+#define MFLR_R0		0x7c0802a6	/* mflr %r0			*/
+#define MTLR_R0		0x7c0803a6	/* mtlr %r0			*/
+#define SUB_R12_R12_R11	0x7d8b6050	/* subf %r12,%r11,%r12		*/
+#define ADDI_R0_R12	0x380c0000	/* addi %r0,%r12,0		*/
+#define SRDI_R0_R0_2	0x7800f082	/* rldicl %r0,%r0,62,2		*/
+#define LD_R0_0R11	0xe80b0000	/* ld %r0,0(%r11)		*/
+#define ADD_R11_R0_R11	0x7d605a14	/* add %r11,%r0,%r11		*/
 
 /* Pad with this.  */
 #define NOP		0x60000000
@@ -7735,6 +7739,19 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
      --plt-localentry can cause trouble.  */
   if (htab->params->plt_localentry0 < 0)
     htab->params->plt_localentry0 = 0;
+  if (htab->params->plt_localentry0 && htab->has_power10_relocs)
+    {
+      /* The issue is that __glink_PLTresolve saves r2, which is done
+	 because glibc ld.so _dl_runtime_resolve restores r2 to support
+	 a glibc plt call optimisation where global entry code is
+	 skipped on calls that resolve to the same binary.  The
+	 __glink_PLTresolve save of r2 is incompatible with code
+	 making tail calls, because the tail call might go via the
+	 resolver and thus overwrite the proper saved r2.  */
+      _bfd_error_handler (_("warning: --plt-localentry is incompatible with "
+			    "power10 pc-relative code"));
+      htab->params->plt_localentry0 = 0;
+    }
   if (htab->params->plt_localentry0
       && elf_link_hash_lookup (&htab->elf, "GLIBC_2.26",
 			       FALSE, FALSE, FALSE) == NULL)
@@ -13870,11 +13887,11 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  /* Augmentation.  */
 	  p += 1;
 
-	  *p++ = DW_CFA_advance_loc + 1;
+	  *p++ = DW_CFA_advance_loc + (htab->has_plt_localentry0 ? 3 : 2);
 	  *p++ = DW_CFA_register;
 	  *p++ = 65;
 	  *p++ = htab->opd_abi ? 12 : 0;
-	  *p++ = DW_CFA_advance_loc + (htab->opd_abi ? 5 : 7);
+	  *p++ = DW_CFA_advance_loc + (htab->opd_abi ? 4 : 2);
 	  *p++ = DW_CFA_restore_extended;
 	  *p++ = 65;
 	  p += ((24 + align - 1) & -align) - 24;
@@ -14470,23 +14487,60 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 	}
       else
 	{
+	  unsigned int insn;
+
+	  /* 0:
+	     .	.quad plt0-1f		# plt0 entry relative to 1:
+	     #
+	     # We get here with r12 initially @ a glink branch
+	     # Load the address of _dl_runtime_resolve from plt0 and
+	     # jump to it, with r0 set to the index of the PLT entry
+	     # to be resolved and r11 the link map.
+	     __glink_PLTresolve:
+	     .	std %r2,24(%r1)		# optional
+	     .	mflr %r0
+	     .	bcl 20,31,1f
+	     1:
+	     .	mflr %r11
+	     .	mtlr %r0
+	     .	ld %r0,(0b-1b)(%r11)
+	     .	sub %r12,%r12,%r11
+	     .	add %r11,%r0,%r11
+	     .	addi %r0,%r12,1b-2f
+	     .	ld %r12,0(%r11)
+	     .	srdi %r0,%r0,2
+	     .	mtctr %r12
+	     .	ld %r11,8(%r11)
+	     .	bctr
+	     2:
+	     .	b __glink_PLTresolve
+	     .	...
+	     .	b __glink_PLTresolve  */
+
+	  if (htab->has_plt_localentry0)
+	    {
+	      bfd_put_32 (htab->glink->owner, STD_R2_0R1 + 24, p);
+	      p += 4;
+	    }
 	  bfd_put_32 (htab->glink->owner, MFLR_R0, p);
 	  p += 4;
 	  bfd_put_32 (htab->glink->owner, BCL_20_31, p);
 	  p += 4;
 	  bfd_put_32 (htab->glink->owner, MFLR_R11, p);
 	  p += 4;
-	  bfd_put_32 (htab->glink->owner, STD_R2_0R1 + 24, p);
-	  p += 4;
-	  bfd_put_32 (htab->glink->owner, LD_R2_0R11 | (-16 & 0xfffc), p);
-	  p += 4;
 	  bfd_put_32 (htab->glink->owner, MTLR_R0, p);
+	  p += 4;
+	  if (htab->has_plt_localentry0)
+	    insn = LD_R0_0R11 | (-20 & 0xfffc);
+	  else
+	    insn = LD_R0_0R11 | (-16 & 0xfffc);
+	  bfd_put_32 (htab->glink->owner, insn, p);
 	  p += 4;
 	  bfd_put_32 (htab->glink->owner, SUB_R12_R12_R11, p);
 	  p += 4;
-	  bfd_put_32 (htab->glink->owner, ADD_R11_R2_R11, p);
+	  bfd_put_32 (htab->glink->owner, ADD_R11_R0_R11, p);
 	  p += 4;
-	  bfd_put_32 (htab->glink->owner, ADDI_R0_R12 | (-48 & 0xffff), p);
+	  bfd_put_32 (htab->glink->owner, ADDI_R0_R12 | (-44 & 0xffff), p);
 	  p += 4;
 	  bfd_put_32 (htab->glink->owner, LD_R12_0R11, p);
 	  p += 4;
