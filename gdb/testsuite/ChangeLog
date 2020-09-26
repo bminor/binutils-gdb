@@ -1,3 +1,9 @@
+2020-09-26  Gareth Rees <grees@undo.io>  (tiny change)
+
+	PR python/26586
+	* gdb.python/python.exp: add test cases for the from_tty
+	argument to gdb.execute.
+
 2020-09-25  Gary Benson <gbenson@redhat.com>
 
 	* gdb.base/infcall-nested-structs.exp.tcl: Add

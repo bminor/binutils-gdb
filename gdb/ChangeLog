@@ -1,3 +1,11 @@
+2020-09-26  Gareth Rees <grees@undo.io>  (tiny change)
+
+	PR python/26586
+	* cli/cli-script.c (execute_control_commands): don't set
+	instream to nullptr here as this breaks the from_tty argument
+	to gdb.execute in Python.
+	(execute_user_command): set instream to nullptr here instead.
+
 2020-09-25  Simon Marchi  <simon.marchi@efficios.com>
 
 	* infrun.h (infrun_debug_printf): Fix formatting.

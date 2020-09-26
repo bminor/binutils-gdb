@@ -392,10 +392,6 @@ execute_cmd_post_hook (struct cmd_list_element *c)
 void
 execute_control_commands (struct command_line *cmdlines, int from_tty)
 {
-  /* Set the instream to 0, indicating execution of a
-     user-defined function.  */
-  scoped_restore restore_instream
-    = make_scoped_restore (&current_ui->instream, nullptr);
   scoped_restore save_async = make_scoped_restore (&current_ui->async, 0);
   scoped_restore save_nesting
     = make_scoped_restore (&command_nest_depth, command_nest_depth + 1);
@@ -463,6 +459,11 @@ execute_user_command (struct cmd_list_element *c, const char *args)
 
   if (user_args_stack.size () > max_user_call_depth)
     error (_("Max user call depth exceeded -- command aborted."));
+
+  /* Set the instream to nullptr, indicating execution of a
+     user-defined function.  */
+  scoped_restore restore_instream
+    = make_scoped_restore (&current_ui->instream, nullptr);
 
   execute_control_commands (cmdlines, 0);
 }
