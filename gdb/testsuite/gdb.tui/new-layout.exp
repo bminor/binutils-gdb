@@ -24,10 +24,12 @@ if {[build_executable "failed to prepare" ${testfile} ${srcfile}] == -1} {
 }
 
 # Make sure TUI is supported before continuing.
-Term::clean_restart 24 80 $testfile
-if {![Term::enter_tui]} {
-    unsupported "TUI not supported"
-    return
+with_test_prefix "initial check" {
+    Term::clean_restart 24 80 $testfile
+    if {![Term::enter_tui]} {
+	unsupported "TUI not supported"
+	return
+    }
 }
 
 Term::clean_restart 24 80 $testfile
