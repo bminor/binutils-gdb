@@ -1,5 +1,11 @@
 2020-09-27  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.c
+	(tui_source_window_base::set_is_exec_point_at): Don't call
+	show_source_line.
+
+2020-09-27  Tom Tromey  <tom@tromey.com>
+
 	* python/py-tui.c (class tui_py_window) <refresh_window>: New
 	method.
 	<erase>: Update.

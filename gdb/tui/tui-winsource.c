@@ -411,7 +411,6 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
         {
           changed = true;
           m_content[i].is_exec_point = new_state;
-          show_source_line (i + 1);
         }
       i++;
     }
