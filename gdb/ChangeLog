@@ -1,3 +1,13 @@
+2020-09-27  Tom Tromey  <tom@tromey.com>
+
+	* python/py-tui.c (class tui_py_window) <refresh_window>: New
+	method.
+	<erase>: Update.
+	<cursor_x, cursor_y>: Remove.
+	<m_inner_window>: New member.
+	(tui_py_window::rerender): Create inner window.
+	(tui_py_window::output): Write to inner window.
+
 2020-09-26  Gareth Rees <grees@undo.io>  (tiny change)
 
 	PR python/26586
