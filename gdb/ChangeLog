@@ -1,6 +1,11 @@
 2020-09-27  Tom Tromey  <tom@tromey.com>
 
 	PR tui/25342:
+	* tui/tui-io.c (tui_puts): Rewrite.  Move earlier.
+
+2020-09-27  Tom Tromey  <tom@tromey.com>
+
+	PR tui/25342:
 	* tui/tui-winsource.c (tui_copy_source_line): Use ISNCTRL.
 
 2020-09-27  Tom Tromey  <tom@tromey.com>

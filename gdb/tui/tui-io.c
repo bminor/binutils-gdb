@@ -435,6 +435,69 @@ tui_write (const char *buf, size_t length)
   tui_puts (copy.c_str ());
 }
 
+/* Print a string in the curses command window.  The output is
+   buffered.  It is up to the caller to refresh the screen if
+   necessary.  */
+
+void
+tui_puts (const char *string, WINDOW *w)
+{
+  if (w == nullptr)
+    w = TUI_CMD_WIN->handle.get ();
+
+  while (true)
+    {
+      const char *next = strpbrk (string, "\n\1\2\033\t");
+
+      /* Print the plain text prefix.  */
+      size_t n_chars = next == nullptr ? strlen (string) : next - string;
+      if (n_chars > 0)
+	waddnstr (w, string, n_chars);
+
+      /* We finished.  */
+      if (next == nullptr)
+	break;
+
+      char c = *next;
+      switch (c)
+	{
+	case '\1':
+	case '\2':
+	  /* Ignore these, they are readline escape-marking
+	     sequences.  */
+	  ++next;
+	  break;
+
+	case '\n':
+	case '\t':
+	  do_tui_putc (w, c);
+	  ++next;
+	  break;
+
+	case '\033':
+	  {
+	    size_t bytes_read = apply_ansi_escape (w, next);
+	    if (bytes_read > 0)
+	      next += bytes_read;
+	    else
+	      {
+		/* Just drop the escape.  */
+		++next;
+	      }
+	  }
+	  break;
+
+	default:
+	  gdb_assert_not_reached ("missing case in tui_puts");
+	}
+
+      string = next;
+    }
+
+  if (TUI_CMD_WIN != nullptr && w == TUI_CMD_WIN->handle.get ())
+    update_cmdwin_start_line ();
+}
+
 static void
 tui_puts_internal (WINDOW *w, const char *string, int *height)
 {
@@ -478,18 +541,6 @@ tui_puts_internal (WINDOW *w, const char *string, int *height)
     update_cmdwin_start_line ();
   if (saw_nl)
     wrefresh (w);
-}
-
-/* Print a string in the curses command window.  The output is
-   buffered.  It is up to the caller to refresh the screen if
-   necessary.  */
-
-void
-tui_puts (const char *string, WINDOW *w)
-{
-  if (w == nullptr)
-    w = TUI_CMD_WIN->handle.get ();
-  tui_puts_internal (w, string, nullptr);
 }
 
 /* Readline callback.
