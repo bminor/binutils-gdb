@@ -1,3 +1,7 @@
+2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* cpu-arm.c: (processors) Add Cortex-X1.
+
 2020-09-28  Alan Modra  <amodra@gmail.com>
 
 	PR 26656

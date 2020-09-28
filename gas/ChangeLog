@@ -1,5 +1,11 @@
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
+	* config/tc-arm.c: (arm_cpus): Add Cortex-X1.
+	* doc/c-arm.texi: Document -mcpu=cortex-x1.
+	* testsuite/gas/arm/cpu-cortex-x1.d: New test.
+
+2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
 	* testsuite/gas/aarch64/etm-ro-invalid.d: New test.
 	* testsuite/gas/aarch64/etm-ro-invalid.l: New test.
 	* testsuite/gas/aarch64/etm-ro-invalid.s: New test.

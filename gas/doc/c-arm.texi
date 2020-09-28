@@ -147,6 +147,7 @@ recognized:
 @code{cortex-m1},
 @code{cortex-m0},
 @code{cortex-m0plus},
+@code{cortex-x1},
 @code{exynos-m1},
 @code{marvell-pj4},
 @code{marvell-whitney},
