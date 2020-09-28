@@ -2347,11 +2347,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_xml_syscall_file_name (gdbarch, "syscalls/aarch64-linux.xml");
   set_gdbarch_get_syscall_number (gdbarch, aarch64_linux_get_syscall_number);
 
-  /* Displaced stepping.  */
-  set_gdbarch_max_insn_length (gdbarch, 4 * AARCH64_DISPLACED_MODIFIED_INSNS);
-  set_gdbarch_displaced_step_copy_insn (gdbarch,
-					aarch64_displaced_step_copy_insn);
-  set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch,
 					    aarch64_displaced_step_hw_singlestep);
 
@@ -2361,6 +2356,18 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     {
       set_gdbarch_report_signal_info (gdbarch,
 				      aarch64_linux_report_signal_info);
+    }
+  else
+    {
+      /* Displaced stepping.  */
+      /* Note: Morello does not support displaced stepping yet because
+	 adjustments to GPR's may not be correct.  This is because GDB can't
+	 make adjustments to the upper 65 bits of the C registers.  */
+      set_gdbarch_max_insn_length (gdbarch,
+				   4 * AARCH64_DISPLACED_MODIFIED_INSNS);
+      set_gdbarch_displaced_step_copy_insn (gdbarch,
+					    aarch64_displaced_step_copy_insn);
+      set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);
     }
 }
 
