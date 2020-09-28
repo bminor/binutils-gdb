@@ -318,8 +318,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 				 const struct symtab_and_line &sal)
 {
   int i;
-  int offset = m_horizontal_offset;
-  int max_lines, line_width;
+  int max_lines;
   CORE_ADDR cur_pc;
   struct tui_locator_window *locator = tui_locator_win_info_ptr ();
   int tab_len = tui_tab_width;
@@ -336,7 +335,6 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 
   /* Window size, excluding highlight box.  */
   max_lines = height - 2;
-  line_width = width - TUI_EXECINFO_SIZE - 2;
 
   /* Get temporary table that will hold all strings (addr & insn).  */
   std::vector<tui_asm_line> asm_lines;
@@ -348,6 +346,7 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 
   /* Now construct each line.  */
   m_content.resize (max_lines);
+  m_max_length = -1;
   for (i = 0; i < max_lines; i++)
     {
       tui_source_element *src = &m_content[i];
@@ -370,7 +369,9 @@ tui_disasm_window::set_contents (struct gdbarch *arch,
 	}
 
       const char *ptr = line.c_str ();
-      src->line = tui_copy_source_line (&ptr, -1, offset, line_width, 0);
+      int line_len;
+      src->line = tui_copy_source_line (&ptr, &line_len);
+      m_max_length = std::max (m_max_length, line_len);
 
       src->line_or_addr.loa = LOA_ADDRESS;
       src->line_or_addr.u.addr = addr;

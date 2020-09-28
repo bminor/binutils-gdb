@@ -1,5 +1,33 @@
 2020-09-27  Tom Tromey  <tom@tromey.com>
 
+	* unittests/tui-selftests.c: Update.
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<extra_margin, show_line_number, refresh_pad>: New methods.
+	<m_max_length, m_pad>: New members.
+	(tui_copy_source_line): Update.
+	* tui/tui-winsource.c (tui_copy_source_line): Remove line_no,
+	first_col, line_width, ndigits parameters.  Add length.
+	(tui_source_window_base::show_source_line): Write to pad.  Line
+	number now 0-based.
+	(tui_source_window_base::refresh_pad): New method.
+	(tui_source_window_base::show_source_content): Write to pad.  Call
+	refresh_pad.
+	(tui_source_window_base::do_scroll_horizontal): Call refresh_pad,
+	not refill.
+	(tui_source_window_base::update_exec_info): Call
+	show_line_number.
+	* tui/tui-source.h (struct tui_source_window) <extra_margin>: New
+	method.
+	<m_digits>: New member.
+	* tui/tui-source.c (tui_source_window::set_contents): Set m_digits
+	and m_max_length.
+	(tui_source_window::show_line_number): New method.
+	* tui/tui-io.h (tui_puts): Fix comment.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents): Set
+	m_max_length.
+
+2020-09-27  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.c
 	(tui_source_window_base::set_is_exec_point_at): Don't call
 	show_source_line.

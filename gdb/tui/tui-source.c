@@ -50,12 +50,9 @@ tui_source_window::set_contents (struct gdbarch *arch,
   if (s == NULL)
     return false;
 
-  int line_width, nlines;
-
-  line_width = width - TUI_EXECINFO_SIZE - 1;
   /* Take hilite (window border) into account, when
      calculating the number of lines.  */
-  nlines = height - 2;
+  int nlines = height - 2;
 
   std::string srclines;
   const std::vector<off_t> *offsets;
@@ -78,15 +75,16 @@ tui_source_window::set_contents (struct gdbarch *arch,
   m_start_line_or_addr.loa = LOA_LINE;
   cur_line_no = m_start_line_or_addr.u.line_no = line_no;
 
-  int digits = 0;
+  m_digits = 7;
   if (compact_source)
     {
       /* Solaris 11+gcc 5.5 has ambiguous overloads of log10, so we
 	 cast to double to get the right one.  */
       double l = log10 ((double) offsets->size ());
-      digits = 1 + (int) l;
+      m_digits = 1 + (int) l;
     }
 
+  m_max_length = -1;
   const char *iter = srclines.c_str ();
   m_content.resize (nlines);
   while (cur_line < nlines)
@@ -95,9 +93,11 @@ tui_source_window::set_contents (struct gdbarch *arch,
 
       std::string text;
       if (*iter != '\0')
-	text = tui_copy_source_line (&iter, cur_line_no,
-				     m_horizontal_offset,
-				     line_width, digits);
+	{
+	  int line_len;
+	  text = tui_copy_source_line (&iter, &line_len);
+	  m_max_length = std::max (m_max_length, line_len);
+	}
 
       /* Set whether element is the execution point
 	 and whether there is a break point on it.  */
@@ -224,4 +224,15 @@ tui_source_window::display_start_addr (struct gdbarch **gdbarch_p,
 
   *gdbarch_p = m_gdbarch;
   find_line_pc (cursal.symtab, m_start_line_or_addr.u.line_no, addr_p);
+}
+
+/* See tui-winsource.h.  */
+
+void
+tui_source_window::show_line_number (int offset) const
+{
+  int lineno = m_content[0].line_or_addr.u.line_no + offset;
+  char text[20];
+  xsnprintf (text, sizeof (text), "%*d ", m_digits - 1, lineno);
+  waddstr (handle.get (), text);
 }

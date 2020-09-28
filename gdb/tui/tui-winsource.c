@@ -65,26 +65,12 @@ tui_display_main ()
 /* See tui-winsource.h.  */
 
 std::string
-tui_copy_source_line (const char **ptr, int line_no, int first_col,
-		      int line_width, int ndigits)
+tui_copy_source_line (const char **ptr, int *length)
 {
   const char *lineptr = *ptr;
 
   /* Init the line with the line number.  */
   std::string result;
-
-  if (line_no > 0)
-    {
-      if (ndigits > 0)
-	result = string_printf ("%*d ", ndigits, line_no);
-      else
-	{
-	  result = string_printf ("%-6d", line_no);
-	  int len = result.size ();
-	  len = len - ((len / tui_tab_width) * tui_tab_width);
-	  result.append (len, ' ');
-	}
-    }
 
   int column = 0;
   char c;
@@ -112,20 +98,10 @@ tui_copy_source_line (const char **ptr, int line_no, int first_col,
 
 	  --column;
 	  for (int j = column % max_tab_len;
-	       j < max_tab_len && column < first_col + line_width;
+	       j < max_tab_len;
 	       column++, j++)
-	    if (column >= first_col)
-	      result.push_back (' ');
+	    result.push_back (' ');
 	};
-
-      /* We have to process all the text in order to pick up all the
-	 escapes.  */
-      if (column <= first_col || column > first_col + line_width)
-	{
-	  if (c == '\t')
-	    process_tab ();
-	  continue;
-	}
 
       if (c == '\n' || c == '\r' || c == '\0')
 	{
@@ -135,11 +111,13 @@ tui_copy_source_line (const char **ptr, int line_no, int first_col,
 	{
 	  result.push_back ('^');
 	  result.push_back (c + 0100);
+	  ++column;
 	}
       else if (c == 0177)
 	{
 	  result.push_back ('^');
 	  result.push_back ('?');
+	  ++column;
 	}
       else if (c == '\t')
 	process_tab ();
@@ -151,6 +129,9 @@ tui_copy_source_line (const char **ptr, int line_no, int first_col,
   if (c == '\r' && *lineptr == '\n')
     ++lineptr;
   *ptr = lineptr;
+
+  if (length != nullptr)
+    *length = column;
 
   return result;
 }
@@ -254,24 +235,31 @@ void
 tui_source_window_base::show_source_line (int lineno)
 {
   struct tui_source_element *line;
-  int x;
 
-  line = &m_content[lineno - 1];
+  line = &m_content[lineno];
   if (line->is_exec_point)
-    tui_set_reverse_mode (handle.get (), true);
+    tui_set_reverse_mode (m_pad.get (), true);
 
-  wmove (handle.get (), lineno, TUI_EXECINFO_SIZE);
-  tui_puts (line->line.c_str (), handle.get ());
+  wmove (m_pad.get (), lineno, 0);
+  tui_puts (line->line.c_str (), m_pad.get ());
   if (line->is_exec_point)
-    tui_set_reverse_mode (handle.get (), false);
+    tui_set_reverse_mode (m_pad.get (), false);
+}
 
-  /* Clear to end of line but stop before the border.  */
-  x = getcurx (handle.get ());
-  while (x + 1 < width)
-    {
-      waddch (handle.get (), ' ');
-      x = getcurx (handle.get ());
-    }
+/* See tui-winsource.h.  */
+
+void
+tui_source_window_base::refresh_pad ()
+{
+  int pad_width = std::max (m_max_length, width);
+  int left_margin = 1 + TUI_EXECINFO_SIZE + extra_margin ();
+  int view_width = width - left_margin - 1;
+  int pad_x = std::min (pad_width - view_width, m_horizontal_offset);
+  /* Ensure that an equal number of scrolls will work if the user
+     scrolled beyond where we clip.  */
+  m_horizontal_offset = pad_x;
+  prefresh (m_pad.get (), 0, pad_x, y + 1, x + left_margin,
+	    y + 1 + m_content.size (), x + left_margin + view_width - 1);
 }
 
 void
@@ -279,10 +267,18 @@ tui_source_window_base::show_source_content ()
 {
   gdb_assert (!m_content.empty ());
 
-  for (int lineno = 1; lineno <= m_content.size (); lineno++)
+  check_and_display_highlight_if_needed ();
+
+  int pad_width = std::max (m_max_length, width);
+  if (m_pad == nullptr || pad_width > getmaxx (m_pad.get ()))
+    m_pad.reset (newpad (m_content.size (), pad_width));
+
+  werase (m_pad.get ());
+  for (int lineno = 0; lineno < m_content.size (); lineno++)
     show_source_line (lineno);
 
-  check_and_display_highlight_if_needed ();
+  refresh_pad ();
+
   refresh_window ();
 }
 
@@ -380,7 +376,7 @@ tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
       if (offset < 0)
 	offset = 0;
       m_horizontal_offset = offset;
-      refill ();
+      refresh_pad ();
     }
 }
 
@@ -519,6 +515,8 @@ tui_source_window_base::update_exec_info ()
 	element[TUI_EXEC_POS] = '>';
 
       mvwaddstr (handle.get (), i + 1, 1, element);
+
+      show_line_number (i);
     }
   refresh_window ();
 }

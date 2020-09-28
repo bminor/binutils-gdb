@@ -27,7 +27,8 @@
 struct ui_out;
 class cli_ui_out;
 
-/* Print the string in the curses command window.  */
+/* Print the string in the given curses window.  If no window is
+   provided, the command window is used.  */
 extern void tui_puts (const char *, WINDOW * = nullptr);
 
 /* Print LENGTH characters from the buffer pointed to by BUF to the
