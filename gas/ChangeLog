@@ -1,5 +1,10 @@
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
+	* config/tc-aarch64.c: (aarch64_cpus): Add Cortex-X1.
+	* doc/c-aarch64.texi: Document -mcpu=cortex-x1.
+
+2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
         * testsuite/gas/aarch64/ete.d: New test.
         * testsuite/gas/aarch64/ete.s: New test.
 
