@@ -1,5 +1,9 @@
 2020-09-28  Alex Coplan  <alex.coplan@arm.com>
 
+	* config/tc-arm.c (arm_cpus): Add FP16 to Neoverse V1.
+
+2020-09-28  Alex Coplan  <alex.coplan@arm.com>
+
 	* config/tc-aarch64.c (aarch64_cpus): Group Neoverse cores together,
 	add missing F16 bit to Neoverse V1.
 
