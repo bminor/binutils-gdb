@@ -3019,6 +3019,8 @@ struct aarch64_displaced_step_data
   unsigned insn_count;
   /* Registers when doing displaced stepping.  */
   struct regcache *regs;
+  /* The gdbarch.  */
+  struct gdbarch *gdbarch;
 
   aarch64_displaced_step_closure *dsc;
 };
@@ -3032,6 +3034,15 @@ aarch64_displaced_step_b (const int is_bl, const int32_t offset,
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
   int64_t new_offset = data->insn_addr - dsd->new_addr + offset;
+  struct gdbarch *gdbarch = dsd->gdbarch;
+
+  if (aarch64_debug)
+    debug_printf ("aarch64_displaced_step_b: Insn address %s, offset %s\n"
+		  "new_offset: %s, new_addr: %s",
+		  paddress (gdbarch, data->insn_addr),
+		  paddress (gdbarch, offset),
+		  paddress (gdbarch, new_offset),
+		  paddress (gdbarch, dsd->new_addr));
 
   if (can_encode_int32 (new_offset, 28))
     {
@@ -3254,6 +3265,7 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   dsd.base.insn_addr = from;
   dsd.new_addr = to;
   dsd.regs = regs;
+  dsd.gdbarch = gdbarch;
   dsd.dsc = dsc.get ();
   dsd.insn_count = 0;
   aarch64_relocate_instruction (insn, &visitor,
@@ -3502,6 +3514,9 @@ aarch64_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
+  if (aarch64_debug)
+    debug_printf ("aarch64: Entering %s\n", __func__);
+
   if (type->length <= 8)
     return signed_pointer_to_address (gdbarch, type, buf);
   else
@@ -3510,6 +3525,9 @@ aarch64_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
 	 the extra information.  */
       return extract_unsigned_integer (buf, 8, byte_order);
     }
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: Exiting %s\n", __func__);
 }
 
 /* Implements the gdbarch_address_to_pointer hook.  */
@@ -3520,6 +3538,9 @@ aarch64_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
+  if (aarch64_debug)
+    debug_printf ("aarch64: Entering %s\n", __func__);
+
   if (type->length <= 8)
     address_to_signed_pointer (gdbarch, type, buf, addr);
   else
@@ -3528,6 +3549,9 @@ aarch64_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
       memset (buf, 0, type->length);
       store_unsigned_integer (buf, 8, byte_order, addr);
     }
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: Exiting %s\n", __func__);
 }
 
 /* Implements the gdbarch_integer_to_address hook.  */
@@ -3536,7 +3560,13 @@ static CORE_ADDR
 aarch64_integer_to_address (struct gdbarch *gdbarch,
 			    struct type *type, const gdb_byte *buf)
 {
+  if (aarch64_debug)
+    debug_printf ("aarch64: Entering %s\n", __func__);
+
   return aarch64_pointer_to_address (gdbarch, type, buf);
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: Exiting %s\n", __func__);
 }
 
 /* Remove useless bits from addresses in a running program.  This is

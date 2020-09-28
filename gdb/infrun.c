@@ -1718,6 +1718,9 @@ displaced_step_prepare_throw (thread_info *tp)
   original = regcache_read_pc (regcache);
 
   copy = gdbarch_displaced_step_location (gdbarch);
+  /* Some architectures like AArch64 Morello have the LSB set for addresses
+     in the text segment (pure capability ABI).  */
+  copy = gdbarch_addr_bits_remove (gdbarch, copy);
   len = gdbarch_max_insn_length (gdbarch);
 
   if (breakpoint_in_range_p (aspace, copy, len))
