@@ -6055,7 +6055,9 @@ display_loclists_list (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (llet, start, 1, section_end);
 
-      if (vstart && llet == DW_LLE_offset_pair)
+      if (vstart && (llet == DW_LLE_offset_pair
+		     || llet == DW_LLE_start_end
+		     || llet == DW_LLE_start_length))
 	{
 	  off = offset + (vstart - *start_ptr);
 
@@ -6076,7 +6078,18 @@ display_loclists_list (struct dwarf_section *section,
 	  break;
 	case DW_LLE_offset_pair:
 	  READ_ULEB (begin, start, section_end);
+	  begin += base_address;
 	  READ_ULEB (end, start, section_end);
+	  end += base_address;
+	  break;
+	case DW_LLE_start_end:
+	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
+	  SAFE_BYTE_GET_AND_INC (end, start, pointer_size, section_end);
+	  break;
+	case DW_LLE_start_length:
+	  SAFE_BYTE_GET_AND_INC (begin, start, pointer_size, section_end);
+	  READ_ULEB (end, start, section_end);
+	  end += begin;
 	  break;
 	case DW_LLE_base_address:
 	  SAFE_BYTE_GET_AND_INC (base_address, start, pointer_size,
@@ -6103,7 +6116,9 @@ display_loclists_list (struct dwarf_section *section,
 	}
       if (llet == DW_LLE_end_of_list)
 	break;
-      if (llet != DW_LLE_offset_pair)
+      if (llet != DW_LLE_offset_pair
+	  && llet != DW_LLE_start_end
+	  && llet != DW_LLE_start_length)
 	continue;
 
       if (start + 2 > section_end)
@@ -6115,8 +6130,8 @@ display_loclists_list (struct dwarf_section *section,
 
       READ_ULEB (length, start, section_end);
 
-      print_dwarf_vma (begin + base_address, pointer_size);
-      print_dwarf_vma (end + base_address, pointer_size);
+      print_dwarf_vma (begin, pointer_size);
+      print_dwarf_vma (end, pointer_size);
 
       putchar ('(');
       need_frame_base = decode_location_expression (start,

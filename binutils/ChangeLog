@@ -1,3 +1,8 @@
+2020-09-29  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf.c (display_loclists_list): Handle DW_LLE_start_end and
+	DW_LLE_start_length. Only add base_address for DW_LLE_offset_pair.
+
 2020-09-25  Alan Modra  <amodra@gmail.com>
 
 	* elfcomm.c (byte_put_little_endian, byte_put_big_endian): Support
