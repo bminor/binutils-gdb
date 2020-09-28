@@ -1,3 +1,12 @@
+2020-09-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/tlsget.d,
+	* testsuite/ld-powerpc/tlsget.s,
+	* testsuite/ld-powerpc/tlsget.wf,
+	* testsuite/ld-powerpc/tlsget2.d.
+	* testsuite/ld-powerpc/tlsget2.wf: New testcases.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
 2020-09-26  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/elfv2so.d,

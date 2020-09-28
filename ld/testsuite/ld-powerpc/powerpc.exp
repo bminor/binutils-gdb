@@ -286,6 +286,12 @@ set ppc64elftests {
     {"TLSdesc4" "-melf64ppc --no-tls-optimize tmpdir/tlsdll.o" "" "-a64"  {tlsdesc4.s}
      {{objdump -dr tlsdesc4.d} {readelf -wf tlsdesc4.wf}}
      "tlsdesc4"}
+    {"tlsget" "-shared --hash-style=both -melf64ppc --plt-align=0" "tmpdir/tlsdll.so" "-a64 -mpower10"  {tlsget.s}
+     {{objdump -dr tlsget.d} {readelf -wf tlsget.wf}}
+     "tlsget.so"}
+    {"tlsget2" "-shared --hash-style=both -melf64ppc --plt-align=0 --power10-stubs=yes" "tmpdir/tlsdll.so" "-a64 -mpower10"  {tlsget.s}
+     {{objdump -dr tlsget2.d} {readelf -wf tlsget2.wf}}
+     "tlsget2.so"}
     {"sym@tocbase" "-shared -melf64ppc" "" "-a64" {symtocbase-1.s symtocbase-2.s}
 	{{objdump -dj.data symtocbase.d}} "symtocbase.so"}
     {"TOC opt" "-melf64ppc" "" "-a64"  {tocopt.s}
