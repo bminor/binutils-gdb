@@ -43,17 +43,18 @@ static handler_func fd_event;
 
 /* Value of scb->async_state: */
 enum {
-  /* >= 0 (TIMER_SCHEDULED) */
-  /* The ID of the currently scheduled timer event.  This state is
-     rarely encountered.  Timer events are one-off so as soon as the
-     event is delivered the state is changed to NOTHING_SCHEDULED.  */
-  FD_SCHEDULED = -1,
+  /* When >= 0, this contains the ID of the currently scheduled timer event.
+     This state is rarely encountered.  Timer events are one-off so as soon as
+     the event is delivered the state is changed to NOTHING_SCHEDULED.  */
+
   /* The fd_event() handler is scheduled.  It is called when ever the
      file descriptor becomes ready.  */
-  NOTHING_SCHEDULED = -2
+  FD_SCHEDULED = -1,
+
   /* Either no task is scheduled (just going into ASYNC mode) or a
      timer event has just gone off and the current state has been
      forced into nothing scheduled.  */
+  NOTHING_SCHEDULED = -2
 };
 
 /* Identify and schedule the next ASYNC task based on scb->async_state
