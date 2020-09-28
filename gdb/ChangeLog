@@ -1,5 +1,10 @@
 2020-09-27  Tom Tromey  <tom@tromey.com>
 
+	PR tui/25342:
+	* tui/tui-winsource.c (tui_copy_source_line): Use ISNCTRL.
+
+2020-09-27  Tom Tromey  <tom@tromey.com>
+
 	* unittests/tui-selftests.c: Update.
 	* tui/tui-winsource.h (struct tui_source_window_base)
 	<extra_margin, show_line_number, refresh_pad>: New methods.

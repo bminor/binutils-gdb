@@ -28,6 +28,7 @@
 #include "source.h"
 #include "objfiles.h"
 #include "filenames.h"
+#include "safe-ctype.h"
 
 #include "tui/tui.h"
 #include "tui/tui-data.h"
@@ -107,7 +108,9 @@ tui_copy_source_line (const char **ptr, int *length)
 	{
 	  /* Nothing.  */
 	}
-      else if (c < 040 && c != '\t')
+      else if (c == '\t')
+	process_tab ();
+      else if (ISCNTRL (c))
 	{
 	  result.push_back ('^');
 	  result.push_back (c + 0100);
@@ -119,8 +122,6 @@ tui_copy_source_line (const char **ptr, int *length)
 	  result.push_back ('?');
 	  ++column;
 	}
-      else if (c == '\t')
-	process_tab ();
       else
 	result.push_back (c);
     }
