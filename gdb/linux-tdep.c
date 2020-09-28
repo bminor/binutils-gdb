@@ -2556,6 +2556,10 @@ linux_displaced_step_location (struct gdbarch *gdbarch)
     throw_error (NOT_SUPPORTED_ERROR,
 		 _("Cannot find AT_ENTRY auxiliary vector entry."));
 
+  /* Some architectures like AArch64 Morello have the LSB set for addresses
+     in the text segment (pure capability ABI).  */
+  addr = gdbarch_addr_bits_remove (gdbarch, addr);
+
   /* Make certain that the address points at real code, and not a
      function descriptor.  */
   addr = gdbarch_convert_from_func_ptr_addr
