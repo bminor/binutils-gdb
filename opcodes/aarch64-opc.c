@@ -4319,6 +4319,12 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE("trbsr_el1",  	CPENC (3,0,C9,C11,3),	0),
   SR_CORE("trbtrg_el1", 	CPENC (3,0,C9,C11,6),	0),
 
+  SR_CORE ("trcextinselr0",	CPENC (2,1,C0,C8,4),	0),
+  SR_CORE ("trcextinselr1",	CPENC (2,1,C0,C9,4),	0),
+  SR_CORE ("trcextinselr2",	CPENC (2,1,C0,C10,4),	0),
+  SR_CORE ("trcextinselr3",	CPENC (2,1,C0,C11,4),	0),
+  SR_CORE ("trcrsr",		CPENC (2,1,C0,C10,0),	0),
+
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
 
