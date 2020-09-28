@@ -11678,6 +11678,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       obfd = htab->params->stub_bfd;
       is_tga = ((stub_entry->stub_type == ppc_stub_plt_call_notoc
 		 || stub_entry->stub_type == ppc_stub_plt_call_both)
+		&& stub_entry->h != NULL
 		&& is_tls_get_addr (&stub_entry->h->elf, htab)
 		&& htab->params->tls_get_addr_opt);
       if (is_tga)
@@ -12188,7 +12189,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     case ppc_stub_plt_call_notoc:
     case ppc_stub_plt_call_both:
       lr_used = 0;
-      if (is_tls_get_addr (&stub_entry->h->elf, htab)
+      if (stub_entry->h != NULL
+	  && is_tls_get_addr (&stub_entry->h->elf, htab)
 	  && htab->params->tls_get_addr_opt)
 	{
 	  lr_used += 7 * 4;
@@ -12258,6 +12260,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	}
       if ((stub_entry->stub_type == ppc_stub_plt_call_notoc
 	   || stub_entry->stub_type == ppc_stub_plt_call_both)
+	  && stub_entry->h != NULL
 	  && is_tls_get_addr (&stub_entry->h->elf, htab)
 	  && htab->params->tls_get_addr_opt)
 	{

@@ -1,3 +1,9 @@
+2020-09-28  Alan Modra  <amodra@gmail.com>
+
+	PR 26656
+	* elf64-ppc.c (ppc_build_one_stub, ppc_size_one_stub): Check for
+	NULL stub_entry->h before calling is_tls_get_addr.
+
 2020-09-26  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (GLINK_PLTRESOLVE_SIZE): Depend on has_plt_localentry0.
