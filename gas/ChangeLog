@@ -1,20 +1,34 @@
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
+	* testsuite/gas/aarch64/etm-ro-invalid.d: New test.
+	* testsuite/gas/aarch64/etm-ro-invalid.l: New test.
+	* testsuite/gas/aarch64/etm-ro-invalid.s: New test.
+	* testsuite/gas/aarch64/etm-ro.s: New test.
+	* testsuite/gas/aarch64/etm-wo-invalid.d: New test.
+	* testsuite/gas/aarch64/etm-wo-invalid.l: New test.
+	* testsuite/gas/aarch64/etm-wo-invalid.s: New test.
+	* testsuite/gas/aarch64/etm-wo.s: New test.
+	* testsuite/gas/aarch64/etm.s: New test.
+	* testsuite/gas/aarch64/sysreg.d: system register s2_1_c0_c3_0
+	disassembled now to trcstatr.
+
+2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
 	* config/tc-aarch64.c: (aarch64_cpus): Add Cortex-X1.
 	* doc/c-aarch64.texi: Document -mcpu=cortex-x1.
 
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
-        * testsuite/gas/aarch64/ete.d: New test.
-        * testsuite/gas/aarch64/ete.s: New test.
+	* testsuite/gas/aarch64/ete.d: New test.
+	* testsuite/gas/aarch64/ete.s: New test.
 
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
-        * testsuite/gas/aarch64/trbe-invalid.d: New test.
-        * testsuite/gas/aarch64/trbe-invalid.l: New test.
-        * testsuite/gas/aarch64/trbe-invalid.s: New test.
-        * testsuite/gas/aarch64/trbe.d: New test.
-        * testsuite/gas/aarch64/trbe.s: New test.
+	* testsuite/gas/aarch64/trbe-invalid.d: New test.
+	* testsuite/gas/aarch64/trbe-invalid.l: New test.
+	* testsuite/gas/aarch64/trbe-invalid.s: New test.
+	* testsuite/gas/aarch64/trbe.d: New test.
+	* testsuite/gas/aarch64/trbe.s: New test.
 
 2020-09-28  Alex Coplan  <alex.coplan@arm.com>
 
