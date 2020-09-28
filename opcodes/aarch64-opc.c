@@ -4311,6 +4311,14 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_V8_R ("prselr_el2",	CPENC (3,4,C6,C2,1),	0),
   SR_V8_R ("vsctlr_el2",	CPENC (3,4,C2,C0,0),	0),
 
+  SR_CORE("trbbaser_el1", 	CPENC (3,0,C9,C11,2),	0),
+  SR_CORE("trbidr_el1", 	CPENC (3,0,C9,C11,7),	F_REG_READ),
+  SR_CORE("trblimitr_el1", 	CPENC (3,0,C9,C11,0),	0),
+  SR_CORE("trbmar_el1", 	CPENC (3,0,C9,C11,4),	0),
+  SR_CORE("trbptr_el1", 	CPENC (3,0,C9,C11,1),	0),
+  SR_CORE("trbsr_el1",  	CPENC (3,0,C9,C11,3),	0),
+  SR_CORE("trbtrg_el1", 	CPENC (3,0,C9,C11,6),	0),
+
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
 

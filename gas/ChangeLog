@@ -1,3 +1,11 @@
+2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+        * testsuite/gas/aarch64/trbe-invalid.d: New test.
+        * testsuite/gas/aarch64/trbe-invalid.l: New test.
+        * testsuite/gas/aarch64/trbe-invalid.s: New test.
+        * testsuite/gas/aarch64/trbe.d: New test.
+        * testsuite/gas/aarch64/trbe.s: New test.
+
 2020-09-28  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add FP16 to Neoverse V1.

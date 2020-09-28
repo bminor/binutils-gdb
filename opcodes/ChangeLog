@@ -1,3 +1,8 @@
+2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+        * aarch64-opc.c: Add TRBE system registers TRBIDR_EL1 , TRBBASER_EL1 ,
+        TRBLIMITR_EL1 , TRBMAR_EL1 , TRBPTR_EL1, TRBSR_EL1 and TRBTRG_EL1.
+
 2020-09-26  Alan Modra  <amodra@gmail.com>
 
 	* csky-opc.h: Formatting.
