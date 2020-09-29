@@ -1,5 +1,14 @@
 2020-09-28  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-main.c (exec_reverse_continue)
+	(mi_cmd_list_target_features): Update.
+	* infrun.c (set_exec_direction_func): Update.
+	* target.c (default_execution_direction): Update.
+	* reverse.c (exec_reverse_once): Update.
+	* target.h (target_can_execute_reverse): Now a function.
+
+2020-09-28  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_get_register)
 	(tui_data_window::show_registers): Update.
 	* thread.c (scoped_restore_current_thread::restore)

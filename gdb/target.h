@@ -2117,8 +2117,11 @@ extern int target_ranged_break_num_registers (void);
 extern int target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask);
 
 /* Target can execute in reverse?  */
-#define target_can_execute_reverse \
-      current_top_target ()->can_execute_reverse ()
+static inline bool
+target_can_execute_reverse ()
+{
+  return current_top_target ()->can_execute_reverse ();
+}
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 

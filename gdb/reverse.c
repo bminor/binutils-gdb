@@ -44,7 +44,7 @@ exec_reverse_once (const char *cmd, const char *args, int from_tty)
     error (_("Already in reverse mode.  Use '%s' or 'set exec-dir forward'."),
 	   cmd);
 
-  if (!target_can_execute_reverse)
+  if (!target_can_execute_reverse ())
     error (_("Target %s does not support this command."), target_shortname);
 
   std::string reverse_command = string_printf ("%s %s", cmd, args ? args : "");
