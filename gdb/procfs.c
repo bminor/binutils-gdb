@@ -3085,7 +3085,7 @@ procfs_target::insert_watchpoint (CORE_ADDR addr, int len,
 				  enum target_hw_bp_type type,
 				  struct expression *cond)
 {
-  if (!target_have_steppable_watchpoint
+  if (!target_have_steppable_watchpoint ()
       && !gdbarch_have_nonsteppable_watchpoint (target_gdbarch ()))
     /* When a hardware watchpoint fires off the PC will be left at
        the instruction following the one which caused the

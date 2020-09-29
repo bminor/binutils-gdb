@@ -2009,8 +2009,11 @@ extern gdb::byte_vector target_thread_info_to_thread_handle
 
 /* Non-zero if we have steppable watchpoints  */
 
-#define target_have_steppable_watchpoint \
-  (current_top_target ()->have_steppable_watchpoint ())
+static inline bool
+target_have_steppable_watchpoint ()
+{
+  return current_top_target ()->have_steppable_watchpoint ();
+}
 
 /* Provide defaults for hardware watchpoint functions.  */
 

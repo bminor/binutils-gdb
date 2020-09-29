@@ -1889,7 +1889,7 @@ displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
   if (signal == GDB_SIGNAL_TRAP
       && !(target_stopped_by_watchpoint ()
 	   && (gdbarch_have_nonsteppable_watchpoint (displaced->step_gdbarch)
-	       || target_have_steppable_watchpoint)))
+	       || target_have_steppable_watchpoint ())))
     {
       /* Fix up the resulting state.  */
       gdbarch_displaced_step_fixup (displaced->step_gdbarch,
@@ -2811,7 +2811,7 @@ thread_still_needs_step_over (struct thread_info *tp)
     what |= STEP_OVER_BREAKPOINT;
 
   if (tp->stepping_over_watchpoint
-      && !target_have_steppable_watchpoint)
+      && !target_have_steppable_watchpoint ())
     what |= STEP_OVER_WATCHPOINT;
 
   return what;
@@ -5933,7 +5933,7 @@ handle_signal_stop (struct execution_control_state *ecs)
   /* If necessary, step over this watchpoint.  We'll be back to display
      it in a moment.  */
   if (stopped_by_watchpoint
-      && (target_have_steppable_watchpoint
+      && (target_have_steppable_watchpoint ()
 	  || gdbarch_have_nonsteppable_watchpoint (gdbarch)))
     {
       /* At this point, we are stopped at an instruction which has
