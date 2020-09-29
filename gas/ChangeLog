@@ -1,3 +1,7 @@
+2020-09-29  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: TRBE, ETE, ETMv4 and Cortex-X1 news updates.
+
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* config/tc-arm.c: (arm_cpus): Add Cortex-X1.

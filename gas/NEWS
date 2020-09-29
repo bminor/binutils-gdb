@@ -1,4 +1,15 @@
 -*- text -*-
+* Add support for ETMv4 (Embedded Trace Macrocell) system registers for
+  AArch64.
+
+* Add support for ETE (Embedded Trace Extension) system registers for AArch64.
+
+* Add support for TRBE (Trace Buffer Extension) system registers for AArch64.
+
+* Add support for Cortex-X1 for AArch64.
+
+* Add support for Cortex-X1 for ARM.
+
 * Add support for Intel TDX instructions.
 
 * Add support for Intel Key Locker instructions.
