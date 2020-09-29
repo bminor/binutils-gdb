@@ -1837,8 +1837,12 @@ extern bool target_has_execution (inferior *inf = nullptr);
 /* Can the target support the debugger control of thread execution?
    Can it lock the thread scheduler?  */
 
-#define target_can_lock_scheduler \
-  (current_top_target ()->get_thread_control_capabilities () & tc_schedlock)
+static inline bool
+target_can_lock_scheduler ()
+{
+  return (current_top_target ()->get_thread_control_capabilities ()
+	  & tc_schedlock) != 0;
+}
 
 /* Controls whether async mode is permitted.  */
 extern bool target_async_permitted;

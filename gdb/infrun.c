@@ -2099,7 +2099,7 @@ show_scheduler_mode (struct ui_file *file, int from_tty,
 static void
 set_schedlock_func (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  if (!target_can_lock_scheduler)
+  if (!target_can_lock_scheduler ())
     {
       scheduler_mode = schedlock_off;
       error (_("Target '%s' cannot support this command."), target_shortname);

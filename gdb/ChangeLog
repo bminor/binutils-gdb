@@ -1,5 +1,10 @@
 2020-09-28  Tom Tromey  <tom@tromey.com>
 
+	* infrun.c (set_schedlock_func): Update.
+	* target.h (target_can_lock_scheduler): Now a function.
+
+2020-09-28  Tom Tromey  <tom@tromey.com>
+
 	* inferior.h (class inferior) <has_execution>: Update.
 	* windows-tdep.c (windows_solib_create_inferior_hook): Update.
 	* valops.c (find_function_in_inferior)
