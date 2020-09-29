@@ -461,7 +461,7 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
      "display/i $pc" always show the correct mode (though if there is
      a symbol table we will not reach here, so it still may not be
      displayed in the mode it will be executed).  */
-  if (target_has_registers)
+  if (target_has_registers ())
     return arm_frame_is_thumb (get_current_frame ());
 
   /* Otherwise we're out of luck; we assume ARM.  */

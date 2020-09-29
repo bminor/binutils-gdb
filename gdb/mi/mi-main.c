@@ -1150,7 +1150,7 @@ mi_cmd_data_write_register_values (const char *command, char **argv, int argc)
     error (_("-data-write-register-values: Usage: -data-write-register-"
 	     "values <format> [<regnum1> <value1>...<regnumN> <valueN>]"));
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("-data-write-register-values: No registers."));
 
   if (!(argc - 1))

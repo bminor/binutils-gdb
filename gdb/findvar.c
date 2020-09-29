@@ -608,7 +608,7 @@ language_defn::read_var_value (struct symbol *var,
   sym_need = symbol_read_needs (var);
   if (sym_need == SYMBOL_NEEDS_FRAME)
     gdb_assert (frame != NULL);
-  else if (sym_need == SYMBOL_NEEDS_REGISTERS && !target_has_registers)
+  else if (sym_need == SYMBOL_NEEDS_REGISTERS && !target_has_registers ())
     error (_("Cannot read `%s' without registers"), var->print_name ());
 
   if (frame != NULL)

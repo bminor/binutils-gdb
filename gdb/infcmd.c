@@ -2208,7 +2208,7 @@ registers_info (const char *addr_exp, int fpregs)
   struct frame_info *frame;
   struct gdbarch *gdbarch;
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("The program has no registers now."));
   frame = get_selected_frame (NULL);
   gdbarch = get_frame_arch (frame);
@@ -2349,7 +2349,7 @@ print_vector_info (struct ui_file *file,
 static void
 info_vector_command (const char *args, int from_tty)
 {
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("The program has no registers now."));
 
   print_vector_info (gdb_stdout, get_selected_frame (NULL), args);
@@ -2887,7 +2887,7 @@ info_float_command (const char *args, int from_tty)
 {
   struct frame_info *frame;
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("The program has no registers now."));
 
   frame = get_selected_frame (NULL);

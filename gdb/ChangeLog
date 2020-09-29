@@ -1,5 +1,32 @@
 2020-09-28  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_get_register)
+	(tui_data_window::show_registers): Update.
+	* thread.c (scoped_restore_current_thread::restore)
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	Update.
+	* regcache-dump.c (regcache_print): Update.
+	* python/py-finishbreakpoint.c (bpfinishpy_detect_out_scope_cb):
+	Update.
+	* mi/mi-main.c (mi_cmd_data_write_register_values): Update.
+	* mep-tdep.c (current_me_module, current_options): Update.
+	* linux-thread-db.c (thread_db_load): Update.
+	* infcmd.c (registers_info, info_vector_command)
+	(info_float_command): Update.
+	* ia64-tdep.c (ia64_frame_prev_register)
+	(ia64_sigtramp_frame_prev_register): Update.
+	* ia64-libunwind-tdep.c (libunwind_frame_prev_register): Update.
+	* gcore.c (derive_stack_segment): Update.
+	* frame.c (get_current_frame, has_stack_frames): Update.
+	* findvar.c (language_defn::read_var_value): Update.
+	* arm-tdep.c (arm_pc_is_thumb): Update.
+	* target.c (target_has_registers): Rename from
+	target_has_registers_1.
+	* target.h (target_has_registers): Remove macro.
+	(target_has_registers): Rename from target_has_registers_1.
+
+2020-09-28  Tom Tromey  <tom@tromey.com>
+
 	* windows-tdep.c (tlb_make_value): Update.
 	* tui/tui-regs.c (tui_data_window::show_registers): Update.
 	* thread.c (scoped_restore_current_thread::restore)

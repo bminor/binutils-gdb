@@ -361,7 +361,7 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b,
           try
             {
               if (b->pspace == current_inferior ()->pspace
-                  && (!target_has_registers
+                  && (!target_has_registers ()
                       || frame_find_by_id (b->frame_id) == NULL))
                 bpfinishpy_out_of_scope (finish_bp);
             }

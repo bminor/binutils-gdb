@@ -190,7 +190,7 @@ target_has_stack ()
 }
 
 int
-target_has_registers_1 (void)
+target_has_registers ()
 {
   for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->has_registers ())

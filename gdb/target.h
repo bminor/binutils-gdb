@@ -1821,8 +1821,7 @@ extern int target_has_stack ();
 
 /* Does the target have registers?  (Exec files don't.)  */
 
-extern int target_has_registers_1 (void);
-#define target_has_registers target_has_registers_1 ()
+extern int target_has_registers ();
 
 /* Does the target have execution?  Can we make it jump (through
    hoops), or pop its stack a few times?  This means that the current

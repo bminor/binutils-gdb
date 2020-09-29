@@ -335,7 +335,7 @@ libunwind_frame_prev_register (struct frame_info *this_frame,
 
   gdb_assert (regnum >= 0);
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("No registers."));
 
   if (uw_regnum < 0)

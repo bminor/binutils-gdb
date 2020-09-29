@@ -236,7 +236,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
   std::unique_ptr<regcache> regs;
   gdbarch *gdbarch;
 
-  if (target_has_registers)
+  if (target_has_registers ())
     gdbarch = get_current_regcache ()->arch ();
   else
     gdbarch = target_gdbarch ();
@@ -257,7 +257,7 @@ regcache_print (const char *args, enum regcache_dump_what what_to_dump)
       {
 	auto dump_pseudo = (what_to_dump == regcache_dump_cooked);
 
-	if (target_has_registers)
+	if (target_has_registers ())
 	  dump.reset (new register_dump_regcache (get_current_regcache (),
 						  dump_pseudo));
 	else

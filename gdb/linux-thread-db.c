@@ -1194,7 +1194,7 @@ thread_db_load (void)
 
   /* Don't attempt to use thread_db on executables not running
      yet.  */
-  if (!target_has_registers)
+  if (!target_has_registers ())
     return false;
 
   /* Don't attempt to use thread_db for remote targets.  */

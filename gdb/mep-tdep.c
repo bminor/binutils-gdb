@@ -844,7 +844,7 @@ mep_pseudo_cr_index (int pseudo)
 static CONFIG_ATTR
 current_me_module (void)
 {
-  if (target_has_registers)
+  if (target_has_registers ())
     {
       ULONGEST regval;
       regcache_cooked_read_unsigned (get_current_regcache (),
@@ -867,7 +867,7 @@ current_me_module (void)
 static unsigned int
 current_options (void)
 {
-  if (target_has_registers)
+  if (target_has_registers ())
     {
       ULONGEST regval;
       regcache_cooked_read_unsigned (get_current_regcache (),

@@ -1913,7 +1913,7 @@ ia64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
 
   gdb_assert (regnum >= 0);
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("No registers."));
 
   if (regnum == gdbarch_sp_regnum (gdbarch))
@@ -2284,7 +2284,7 @@ ia64_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
   gdb_assert (regnum >= 0);
 
-  if (!target_has_registers)
+  if (!target_has_registers ())
     error (_("No registers."));
 
   if (regnum == IA64_IP_REGNUM)
