@@ -170,16 +170,6 @@ show_targetdebug (struct ui_file *file, int from_tty,
 }
 
 int
-target_has_all_memory_1 (void)
-{
-  for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
-    if (t->has_all_memory ())
-      return 1;
-
-  return 0;
-}
-
-int
 target_has_memory_1 (void)
 {
   for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())

@@ -1810,13 +1810,6 @@ extern void default_target_pass_ctrlc (struct target_ops *ops);
      (current_top_target ()->rcmd) (command, outbuf)
 
 
-/* Does the target include all of memory, or only part of it?  This
-   determines whether we look up the target chain for other parts of
-   memory if this target can't satisfy a request.  */
-
-extern int target_has_all_memory_1 (void);
-#define target_has_all_memory target_has_all_memory_1 ()
-
 /* Does the target include memory?  (Dummy targets don't.)  */
 
 extern int target_has_memory_1 (void);

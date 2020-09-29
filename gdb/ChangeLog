@@ -1,3 +1,9 @@
+2020-09-28  Tom Tromey  <tom@tromey.com>
+
+	* target.c (target_has_all_memory_1): Remove.
+	* target.h (target_has_all_memory): Remove define.
+	(target_has_all_memory_1): Don't declare.
+
 2020-09-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ser-base.c: Adjust comments formatting.
