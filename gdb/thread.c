@@ -1407,7 +1407,7 @@ scoped_restore_current_thread::restore ()
       && m_thread->state == THREAD_STOPPED
       && target_has_registers
       && target_has_stack
-      && target_has_memory)
+      && target_has_memory ())
     restore_selected_frame (m_selected_frame_id, m_selected_frame_level);
 }
 
@@ -1441,7 +1441,7 @@ scoped_restore_current_thread::scoped_restore_current_thread ()
       if (m_was_stopped
 	  && target_has_registers
 	  && target_has_stack
-	  && target_has_memory)
+	  && target_has_memory ())
 	{
 	  /* When processing internal events, there might not be a
 	     selected frame.  If we naively call get_selected_frame

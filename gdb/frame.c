@@ -1657,7 +1657,7 @@ get_current_frame (void)
     error (_("No registers."));
   if (!target_has_stack)
     error (_("No stack."));
-  if (!target_has_memory)
+  if (!target_has_memory ())
     error (_("No memory."));
   /* Traceframes are effectively a substitute for the live inferior.  */
   if (get_traceframe_number () < 0)
@@ -1692,7 +1692,7 @@ static struct frame_info *selected_frame;
 bool
 has_stack_frames ()
 {
-  if (!target_has_registers || !target_has_stack || !target_has_memory)
+  if (!target_has_registers || !target_has_stack || !target_has_memory ())
     return false;
 
   /* Traceframes are effectively a substitute for the live inferior.  */
