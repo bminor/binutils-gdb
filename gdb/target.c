@@ -200,8 +200,11 @@ target_has_registers ()
 }
 
 bool
-target_has_execution_1 (inferior *inf)
+target_has_execution (inferior *inf)
 {
+  if (inf == nullptr)
+    inf = current_inferior ();
+
   for (target_ops *t = inf->top_target ();
        t != nullptr;
        t = inf->find_target_beneath (t))
@@ -209,12 +212,6 @@ target_has_execution_1 (inferior *inf)
       return true;
 
   return false;
-}
-
-int
-target_has_execution_current (void)
-{
-  return target_has_execution_1 (current_inferior ());
 }
 
 /* This is used to implement the various target commands.  */
@@ -1914,12 +1911,12 @@ target_preopen (int from_tty)
   if (current_inferior ()->pid != 0)
     {
       if (!from_tty
-	  || !target_has_execution
+	  || !target_has_execution ()
 	  || query (_("A program is being debugged already.  Kill it? ")))
 	{
 	  /* Core inferiors actually should be detached, not
 	     killed.  */
-	  if (target_has_execution)
+	  if (target_has_execution ())
 	    target_kill ();
 	  else
 	    target_detach (current_inferior (), 0);
@@ -3932,7 +3929,7 @@ static void
 set_target_permissions (const char *args, int from_tty,
 			struct cmd_list_element *c)
 {
-  if (target_has_execution)
+  if (target_has_execution ())
     {
       update_target_permissions ();
       error (_("Cannot change this setting while the inferior is running."));

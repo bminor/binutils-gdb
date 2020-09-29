@@ -729,7 +729,7 @@ update_solib_list (int from_tty)
 
   /* We can reach here due to changing solib-search-path or the
      sysroot, before having any inferior.  */
-  if (target_has_execution && inferior_ptid != null_ptid)
+  if (target_has_execution () && inferior_ptid != null_ptid)
     {
       struct inferior *inf = current_inferior ();
 
@@ -1351,7 +1351,7 @@ reload_shared_libraries (const char *ignored, int from_tty,
      Absent this call, if we've just connected to a target and set 
      solib-absolute-prefix or solib-search-path, we'll lose all information
      about ld.so.  */
-  if (target_has_execution)
+  if (target_has_execution ())
     {
       /* Reset or free private data structures not associated with
 	 so_list entries.  */

@@ -390,7 +390,7 @@ record_btrace_target_open (const char *args, int from_tty)
 
   record_preopen ();
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     error (_("The program is not being run."));
 
   for (thread_info *tp : current_inferior ()->non_exited_threads ())

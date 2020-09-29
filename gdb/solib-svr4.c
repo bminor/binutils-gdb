@@ -3014,7 +3014,7 @@ svr4_solib_create_inferior_hook (int from_tty)
 
   /* No point setting a breakpoint in the dynamic linker if we can't
      hit it (e.g., a core file, or a trace file).  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return;
 
   if (!svr4_have_link_map_offsets ())

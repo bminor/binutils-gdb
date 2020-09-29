@@ -947,7 +947,7 @@ record_full_open_1 (const char *name, int from_tty)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_open_1\n");
 
   /* check exec */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     error (_("Process record: the program is not being run."));
   if (non_stop)
     error (_("Process record target can't debug inferior in non-stop mode "

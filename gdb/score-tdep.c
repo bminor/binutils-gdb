@@ -123,7 +123,7 @@ score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *memblock)
   int big;
   int ret;
 
-  if (target_has_execution && memblock != NULL)
+  if (target_has_execution () && memblock != NULL)
     {
       /* Fetch instruction from local MEMBLOCK.  */
       memcpy (buf, memblock, SCORE_INSTLEN);

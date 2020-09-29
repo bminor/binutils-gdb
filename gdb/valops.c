@@ -155,7 +155,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
 	}
       else
 	{
-	  if (!target_has_execution)
+	  if (!target_has_execution ())
 	    error (_("evaluation of this expression "
 		     "requires the target program to be active"));
 	  else
@@ -182,7 +182,7 @@ value_allocate_space_in_inferior (int len)
   val = call_function_by_hand (val, NULL, blocklen);
   if (value_logical_not (val))
     {
-      if (!target_has_execution)
+      if (!target_has_execution ())
 	error (_("No memory available to program now: "
 		 "you need to start the target first"));
       else

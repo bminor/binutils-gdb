@@ -218,7 +218,7 @@ static void
 set_non_stop (const char *args, int from_tty,
 	      struct cmd_list_element *c)
 {
-  if (target_has_execution)
+  if (target_has_execution ())
     {
       non_stop_1 = non_stop;
       error (_("Cannot change this setting while the inferior is running."));
@@ -247,7 +247,7 @@ static void
 set_observer_mode (const char *args, int from_tty,
 		   struct cmd_list_element *c)
 {
-  if (target_has_execution)
+  if (target_has_execution ())
     {
       observer_mode_1 = observer_mode;
       error (_("Cannot change this setting while the inferior is running."));
@@ -2884,7 +2884,7 @@ check_multi_target_resumption (process_stratum_target *resume_target)
 	{
 	  switch_to_inferior_no_thread (inf);
 
-	  if (!target_has_execution)
+	  if (!target_has_execution ())
 	    continue;
 
 	  process_stratum_target *proc_target
@@ -3308,7 +3308,7 @@ typedef void (*for_each_just_stopped_thread_callback_func)
 static void
 for_each_just_stopped_thread (for_each_just_stopped_thread_callback_func func)
 {
-  if (!target_has_execution || inferior_ptid == null_ptid)
+  if (!target_has_execution () || inferior_ptid == null_ptid)
     return;
 
   if (target_is_non_stop_p ())
@@ -8146,7 +8146,7 @@ print_stop_event (struct ui_out *uiout, bool displays)
 void
 maybe_remove_breakpoints (void)
 {
-  if (!breakpoints_should_be_inserted_now () && target_has_execution)
+  if (!breakpoints_should_be_inserted_now () && target_has_execution ())
     {
       if (remove_breakpoints ())
 	{
@@ -8302,7 +8302,7 @@ normal_stop (void)
      informing of a stop.  */
   if (!non_stop
       && previous_inferior_ptid != inferior_ptid
-      && target_has_execution
+      && target_has_execution ()
       && last.kind != TARGET_WAITKIND_SIGNALLED
       && last.kind != TARGET_WAITKIND_EXITED
       && last.kind != TARGET_WAITKIND_NO_RESUMED)
@@ -8407,7 +8407,7 @@ normal_stop (void)
 
   annotate_stopped ();
 
-  if (target_has_execution)
+  if (target_has_execution ())
     {
       if (last.kind != TARGET_WAITKIND_SIGNALLED
 	  && last.kind != TARGET_WAITKIND_EXITED
@@ -8923,7 +8923,7 @@ public:
 
     /* The inferior can be gone if the user types "print exit(0)"
        (and perhaps other times).  */
-    if (target_has_execution)
+    if (target_has_execution ())
       /* NB: The register write goes through to the target.  */
       regcache->restore (registers ());
   }

@@ -786,7 +786,7 @@ call_function_by_hand_dummy (struct value *function,
     error (_("Cannot call functions in the program: "
 	     "may-call-functions is off."));
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     noprocess ();
 
   if (get_traceframe_number () >= 0)
@@ -1353,7 +1353,7 @@ When the function is done executing, GDB will silently stop."),
   /* If the program has exited, or we stopped at a different thread,
      exit and inform the user.  */
 
-  if (! target_has_execution)
+  if (! target_has_execution ())
     {
       const char *name = get_function_name (funaddr,
 					    name_buf, sizeof (name_buf));

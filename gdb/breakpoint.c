@@ -1768,7 +1768,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
      don't try to insert watchpoint.  We don't automatically delete
      such watchpoint, though, since failure to parse expression
      is different from out-of-scope watchpoint.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     {
       /* Without execution, memory can't change.  No use to try and
 	 set watchpoint locations.  The watchpoint will be reset when
@@ -2878,7 +2878,7 @@ update_inserted_breakpoint_locations (void)
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
       if (!gdbarch_has_global_breakpoints (target_gdbarch ())
-	  && (inferior_ptid == null_ptid || !target_has_execution))
+	  && (inferior_ptid == null_ptid || !target_has_execution ()))
 	continue;
 
       val = insert_bp_location (bl, &tmp_error_stream, &disabled_breaks,
@@ -2934,7 +2934,7 @@ insert_breakpoint_locations (void)
 	 if we aren't attached to any process yet, we should still
 	 insert breakpoints.  */
       if (!gdbarch_has_global_breakpoints (target_gdbarch ())
-	  && (inferior_ptid == null_ptid || !target_has_execution))
+	  && (inferior_ptid == null_ptid || !target_has_execution ()))
 	continue;
 
       val = insert_bp_location (bl, &tmp_error_stream, &disabled_breaks,
@@ -4410,7 +4410,7 @@ bpstat_do_actions_1 (bpstat *bsp)
 static thread_info *
 get_bpstat_thread ()
 {
-  if (inferior_ptid == null_ptid || !target_has_execution)
+  if (inferior_ptid == null_ptid || !target_has_execution ())
     return NULL;
 
   thread_info *tp = inferior_thread ();

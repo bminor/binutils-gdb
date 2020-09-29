@@ -237,7 +237,7 @@ add_thread_db_info (void *handle)
 
   /* The workaround works by reading from /proc/pid/status, so it is
      disabled for core files.  */
-  if (target_has_execution)
+  if (target_has_execution ())
     info->need_stale_parent_threads_check = 1;
 
   info->next = thread_db_list;
@@ -531,7 +531,7 @@ thread_db_find_new_threads_silently (thread_info *stopped)
 	 corrupted.  For core files it does not apply, no 'later enumeration'
 	 is possible.  */
 
-      if (!target_has_execution || !inferior_has_bug ("nptl_version", 2, 7))
+      if (!target_has_execution () || !inferior_has_bug ("nptl_version", 2, 7))
 	{
 	  exception_fprintf (gdb_stderr, except,
 			     _("Warning: couldn't activate thread debugging "
@@ -658,7 +658,7 @@ check_thread_db_callback (const td_thrhandle_t *th, void *arg)
   memset (&th2, 23, sizeof (td_thrhandle_t));
   CALL_UNCHECKED (td_ta_map_lwp2thr, th->th_ta_p, ti.ti_lid, &th2);
 
-  if (tdb_testinfo->last_result == TD_ERR && !target_has_execution)
+  if (tdb_testinfo->last_result == TD_ERR && !target_has_execution ())
     {
       /* Some platforms require execution for td_ta_map_lwp2thr.  */
       LOG (_("; can't map_lwp2thr"));
@@ -884,7 +884,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
      td_ta_map_lwp2thr uses ps_get_thread_area, but we can't use that
      currently on core targets, as it uses ptrace directly.  */
-  if (target_has_execution
+  if (target_has_execution ()
       && linux_proc_task_list_dir_exists (inferior_ptid.pid ()))
     info->td_ta_thr_iter_p = NULL;
   else
@@ -1358,7 +1358,7 @@ record_thread (struct thread_db_info *info,
   else
     tp->priv.reset (priv);
 
-  if (target_has_execution)
+  if (target_has_execution ())
     check_thread_signals ();
 
   return tp;

@@ -650,7 +650,7 @@ rs6000_nat_target::xfer_shared_libraries
 
   /* This function assumes that it is being run with a live process.
      Core files are handled via gdbarch.  */
-  gdb_assert (target_has_execution);
+  gdb_assert (target_has_execution ());
 
   if (writebuf)
     return TARGET_XFER_E_IO;

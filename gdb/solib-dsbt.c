@@ -781,7 +781,7 @@ enable_break (void)
   if (exec_bfd == NULL)
     return 0;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return 0;
 
   info = get_dsbt_info ();

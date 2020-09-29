@@ -33,7 +33,7 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "target.h"		/* for target_has_execution */
+#include "target.h"
 #include "gdbcore.h"
 #include "gdbcmd.h"
 #include "frame.h"
@@ -112,7 +112,7 @@ lookup_objc_class (struct gdbarch *gdbarch, const char *classname)
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *classval;
 
-  if (! target_has_execution)
+  if (! target_has_execution ())
     {
       /* Can't call into inferior to lookup class.  */
       return 0;
@@ -141,7 +141,7 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value * function, *selstring;
 
-  if (! target_has_execution)
+  if (! target_has_execution ())
     {
       /* Can't call into inferior to lookup selector.  */
       return 0;
@@ -172,7 +172,7 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
   struct symbol *sym;
   struct type *type;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return 0;		/* Can't call into inferior to create NSString.  */
 
   stringValue[2] = value_string(ptr, len, char_type);

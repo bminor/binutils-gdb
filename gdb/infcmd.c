@@ -64,7 +64,7 @@ static void until_next_command (int);
 static void step_1 (int, int, const char *);
 
 #define ERROR_NO_INFERIOR \
-   if (!target_has_execution) error (_("The program is not being run."));
+   if (!target_has_execution ()) error (_("The program is not being run."));
 
 /* Scratch area where string containing arguments to give to the
    program will be stored by 'set args'.  As soon as anything is
@@ -358,7 +358,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 static void
 kill_if_already_running (int from_tty)
 {
-  if (inferior_ptid != null_ptid && target_has_execution)
+  if (inferior_ptid != null_ptid && target_has_execution ())
     {
       /* Bail out before killing the program if we will not be able to
 	 restart it.  */
@@ -1861,7 +1861,7 @@ info_program_command (const char *args, int from_tty)
   ptid_t ptid;
   process_stratum_target *proc_target;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     {
       printf_filtered (_("The program being debugged is not being run.\n"));
       return;
@@ -2569,7 +2569,7 @@ attach_command (const char *args, int from_tty)
     /* Don't complain if all processes share the same symbol
        space.  */
     ;
-  else if (target_has_execution)
+  else if (target_has_execution ())
     {
       if (query (_("A program is being debugged already.  Kill it? ")))
 	target_kill ();

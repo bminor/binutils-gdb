@@ -497,7 +497,7 @@ restore_command (const char *args, int from_tty)
 {
   int binary_flag = 0;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     noprocess ();
 
   CORE_ADDR load_offset = 0;

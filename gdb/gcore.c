@@ -129,7 +129,7 @@ gcore_command (const char *args, int from_tty)
   gdb::unique_xmalloc_ptr<char> corefilename;
 
   /* No use generating a corefile without a target process.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     noprocess ();
 
   if (args && *args)
@@ -321,7 +321,7 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 
   /* This function depends on being able to call a function in the
      inferior.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return 0;
 
   /* The following code assumes that the link map is arranged as

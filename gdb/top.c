@@ -1677,7 +1677,7 @@ kill_or_detach (inferior *inf, int from_tty)
       switch_to_thread (thread);
 
       /* Leave core files alone.  */
-      if (target_has_execution)
+      if (target_has_execution ())
 	{
 	  if (inf->attach_flag)
 	    target_detach (inf, from_tty);

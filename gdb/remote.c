@@ -4843,7 +4843,7 @@ remote_target::start_remote (int from_tty, int extended_p)
     }
 
   /* If we connected to a live target, do some additional setup.  */
-  if (target_has_execution)
+  if (target_has_execution ())
     {
       if (symfile_objfile) 	/* No use without a symbol-file.  */
 	remote_check_symbols ();
@@ -4946,7 +4946,7 @@ remote_target::remote_check_symbols ()
      but our current inferior is not running, we should not invite the
      remote target to request symbol lookups related to its
      (unrelated) current process.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return;
 
   if (packet_support (PACKET_qSymbol) == PACKET_DISABLE)
@@ -5544,7 +5544,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
   /* If we're connected to a running target, target_preopen will kill it.
      Ask this question first, before target_preopen has a chance to kill
      anything.  */
-  if (curr_remote != NULL && !target_has_execution)
+  if (curr_remote != NULL && !target_has_execution ())
     {
       if (from_tty
 	  && !query (_("Already connected to a remote target.  Disconnect? ")))
@@ -5727,7 +5727,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
   struct remote_state *rs = get_remote_state ();
   int is_fork_parent;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     error (_("No process to detach from."));
 
   target_announce_detach (from_tty);
@@ -10718,7 +10718,8 @@ remote_target::verify_memory (const gdb_byte *data, CORE_ADDR lma, ULONGEST size
 
   /* It doesn't make sense to use qCRC if the remote target is
      connected but not running.  */
-  if (target_has_execution && packet_support (PACKET_qCRC) != PACKET_DISABLE)
+  if (target_has_execution ()
+      && packet_support (PACKET_qCRC) != PACKET_DISABLE)
     {
       enum packet_result result;
 
@@ -10980,7 +10981,7 @@ remote_target::xfer_partial (enum target_object object,
       /* If the remote target is connected but not running, we should
 	 pass this request down to a lower stratum (e.g. the executable
 	 file).  */
-      if (!target_has_execution)
+      if (!target_has_execution ())
 	return TARGET_XFER_EOF;
 
       if (writebuf != NULL)
@@ -11720,7 +11721,7 @@ remote_target::read_description ()
 
   /* Do not try this during initial connection, when we do not know
      whether there is a running but stopped thread.  */
-  if (!target_has_execution || inferior_ptid == null_ptid)
+  if (!target_has_execution () || inferior_ptid == null_ptid)
     return beneath ()->read_description ();
 
   if (!data->guesses.empty ())
@@ -13584,7 +13585,7 @@ remote_target::get_min_fast_tracepoint_insn_len ()
 
   /* If we're not debugging a process yet, the IPA can't be
      loaded.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     return 0;
 
   /* Make sure the remote is pointing at the right process.  */

@@ -1,5 +1,58 @@
 2020-09-28  Tom Tromey  <tom@tromey.com>
 
+	* inferior.h (class inferior) <has_execution>: Update.
+	* windows-tdep.c (windows_solib_create_inferior_hook): Update.
+	* valops.c (find_function_in_inferior)
+	(value_allocate_space_in_inferior): Update.
+	* top.c (kill_or_detach): Update.
+	* target.c (target_preopen, set_target_permissions): Update.
+	(target_has_execution_current): Remove.
+	* sparc64-tdep.c (adi_examine_command, adi_assign_command):
+	Update.
+	* solib.c (update_solib_list, reload_shared_libraries): Update.
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Update.
+	* solib-dsbt.c (enable_break): Update.
+	* score-tdep.c (score7_fetch_inst): Update.
+	* rs6000-nat.c (rs6000_nat_target::xfer_shared_libraries):
+	Update.
+	* remote.c (remote_target::start_remote)
+	(remote_target::remote_check_symbols, remote_target::open_1)
+	(remote_target::remote_detach_1, remote_target::verify_memory)
+	(remote_target::xfer_partial, remote_target::read_description)
+	(remote_target::get_min_fast_tracepoint_insn_len): Update.
+	* record-full.c (record_full_open_1): Update.
+	* record-btrace.c (record_btrace_target_open): Update.
+	* objc-lang.c (lookup_objc_class, lookup_child_selector)
+	(value_nsstring): Update.
+	* linux-thread-db.c (add_thread_db_info)
+	(thread_db_find_new_threads_silently, check_thread_db_callback)
+	(try_thread_db_load_1, record_thread): Update.
+	* linux-tdep.c (linux_info_proc, linux_vsyscall_range_raw):
+	Update.
+	* linux-fork.c (checkpoint_command): Update.
+	* infrun.c (set_non_stop, set_observer_mode)
+	(check_multi_target_resumption, for_each_just_stopped_thread)
+	(maybe_remove_breakpoints, normal_stop)
+	(class infcall_suspend_state): Update.
+	* infcmd.c (ERROR_NO_INFERIOR, kill_if_already_running)
+	(info_program_command, attach_command): Update.
+	* infcall.c (call_function_by_hand_dummy): Update.
+	* inf-loop.c (inferior_event_handler): Update.
+	* gcore.c (gcore_command, derive_heap_segment): Update.
+	* exec.c (exec_file_command): Update.
+	* eval.c (evaluate_subexp): Update.
+	* compile/compile.c (compile_to_object): Update.
+	* cli/cli-dump.c (restore_command): Update.
+	* breakpoint.c (update_watchpoint)
+	(update_inserted_breakpoint_locations)
+	(insert_breakpoint_locations, get_bpstat_thread): Update.
+	* target.h (target_has_execution): Remove macro.
+	(target_has_execution_current): Don't declare.
+	(target_has_execution): Rename from target_has_execution_1.  Add
+	argument default.
+
+2020-09-28  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (exec_reverse_continue)
 	(mi_cmd_list_target_features): Update.
 	* infrun.c (set_exec_direction_func): Update.

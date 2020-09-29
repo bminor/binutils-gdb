@@ -772,7 +772,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
     }
   else
     {
-      if (!target_has_execution)
+      if (!target_has_execution ())
 	error (_("No current process: you must name one."));
       if (current_inferior ()->fake_pid_p)
 	error (_("Can't determine the current process's PID: you must name one."));
@@ -2317,7 +2317,7 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
   /* It doesn't make sense to access the host's /proc when debugging a
      core file.  Instead, look for the PT_LOAD segment that matches
      the vDSO.  */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     {
       long phdrs_size;
       int num_phdrs, i;

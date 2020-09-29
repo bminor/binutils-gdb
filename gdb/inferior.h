@@ -377,7 +377,7 @@ public:
   { return m_target_stack.at (stratum); }
 
   bool has_execution ()
-  { return target_has_execution_1 (this); }
+  { return target_has_execution (this); }
 
   /* Pointer to next inferior in singly-linked list of inferiors.  */
   struct inferior *next = NULL;

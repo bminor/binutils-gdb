@@ -645,7 +645,7 @@ checkpoint_command (const char *args, int from_tty)
   struct fork_info *fp;
   pid_t retpid;
 
-  if (!target_has_execution) 
+  if (!target_has_execution ()) 
     error (_("The program is not being run."));
 
   /* Ensure that the inferior is not multithreaded.  */

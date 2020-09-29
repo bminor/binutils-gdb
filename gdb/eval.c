@@ -68,7 +68,7 @@ evaluate_subexp (struct type *expect_type, struct expression *exp,
   struct value *retval;
 
   gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
-  if (*pos == 0 && target_has_execution
+  if (*pos == 0 && target_has_execution ()
       && exp->language_defn->la_language == language_cplus
       && !thread_stack_temporaries_enabled_p (inferior_thread ()))
     stack_temporaries.emplace (inferior_thread ());

@@ -448,7 +448,7 @@ static void
 adi_examine_command (const char *args, int from_tty)
 {
   /* make sure program is active and adi is available */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     error (_("ADI command requires a live process/thread"));
 
   if (!adi_available ())
@@ -484,7 +484,7 @@ adi_assign_command (const char *args, int from_tty)
     = N_("Usage: adi assign|a[/COUNT] ADDR = VERSION");
 
   /* make sure program is active and adi is available */
-  if (!target_has_execution)
+  if (!target_has_execution ())
     error (_("ADI command requires a live process/thread"));
 
   if (!adi_available ())

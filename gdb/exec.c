@@ -545,7 +545,7 @@ exec_file_attach (const char *filename, int from_tty)
 static void
 exec_file_command (const char *args, int from_tty)
 {
-  if (from_tty && target_has_execution
+  if (from_tty && target_has_execution ()
       && !query (_("A program is being debugged already.\n"
 		   "Are you sure you want to change the file? ")))
     error (_("File not changed."));

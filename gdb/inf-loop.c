@@ -48,7 +48,7 @@ inferior_event_handler (enum inferior_event_type event_type)
 	  /* Unregister the inferior from the event loop.  This is done
 	     so that when the inferior is not running we don't get
 	     distracted by spurious inferior output.  */
-	  if (target_has_execution && target_can_async_p ())
+	  if (target_has_execution () && target_can_async_p ())
 	    target_async (0);
 	}
 

@@ -641,7 +641,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   struct gdbarch *gdbarch = get_current_arch ();
   std::string triplet_rx;
 
-  if (!target_has_execution)
+  if (!target_has_execution ())
     error (_("The program must be running for the compile command to "\
 	     "work."));
 

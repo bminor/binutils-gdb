@@ -1829,16 +1829,10 @@ extern int target_has_registers ();
    whether or not the target is capable of execution, but there are
    also targets which can be current while not executing.  In that
    case this will become true after to_create_inferior or
-   to_attach.  */
+   to_attach.  INF is the inferior to use; nullptr means to use the
+   current inferior.  */
 
-extern bool target_has_execution_1 (inferior *inf);
-
-/* Like target_has_execution_1, but always passes
-   current_inferior().  */
-
-extern int target_has_execution_current (void);
-
-#define target_has_execution target_has_execution_current ()
+extern bool target_has_execution (inferior *inf = nullptr);
 
 /* Can the target support the debugger control of thread execution?
    Can it lock the thread scheduler?  */
