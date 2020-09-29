@@ -999,7 +999,7 @@ ada_build_task_list ()
 {
   struct ada_tasks_inferior_data *data;
 
-  if (!target_has_stack)
+  if (!target_has_stack ())
     error (_("Cannot inspect Ada tasks when program is not running"));
 
   data = get_ada_tasks_inferior_data (current_inferior ());

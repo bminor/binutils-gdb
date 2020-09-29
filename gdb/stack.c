@@ -2001,7 +2001,7 @@ backtrace_command_1 (const frame_print_options &fp_opts,
   int py_start = 0, py_end = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
 
-  if (!target_has_stack)
+  if (!target_has_stack ())
     error (_("No stack."));
 
   if (count_exp)
@@ -3164,7 +3164,7 @@ frame_apply_cmd_completer (struct cmd_list_element *ignore,
 static void
 frame_apply_level_command (const char *cmd, int from_tty)
 {
-  if (!target_has_stack)
+  if (!target_has_stack ())
     error (_("No stack."));
 
   bool level_found = false;
@@ -3212,7 +3212,7 @@ frame_apply_level_command (const char *cmd, int from_tty)
 static void
 frame_apply_all_command (const char *cmd, int from_tty)
 {
-  if (!target_has_stack)
+  if (!target_has_stack ())
     error (_("No stack."));
 
   frame_apply_command_count ("frame apply all", cmd, from_tty,
@@ -3227,7 +3227,7 @@ frame_apply_command (const char* cmd, int from_tty)
   int count;
   struct frame_info *trailing;
 
-  if (!target_has_stack)
+  if (!target_has_stack ())
     error (_("No stack."));
 
   if (cmd == NULL)

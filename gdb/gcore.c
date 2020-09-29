@@ -224,7 +224,7 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
   gdb_assert (top);
 
   /* Can't succeed without stack and registers.  */
-  if (!target_has_stack || !target_has_registers)
+  if (!target_has_stack () || !target_has_registers)
     return 0;
 
   /* Can't succeed without current frame.  */

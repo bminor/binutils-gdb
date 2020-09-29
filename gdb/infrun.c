@@ -8843,7 +8843,7 @@ static struct value *
 siginfo_make_value (struct gdbarch *gdbarch, struct internalvar *var,
 		    void *ignore)
 {
-  if (target_has_stack
+  if (target_has_stack ()
       && inferior_ptid != null_ptid
       && gdbarch_get_siginfo_type_p (gdbarch))
     {
@@ -9078,7 +9078,7 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
   stop_stack_dummy = inf_status->stop_stack_dummy;
   stopped_by_random_signal = inf_status->stopped_by_random_signal;
 
-  if (target_has_stack)
+  if (target_has_stack ())
     {
       /* The point of the try/catch is that if the stack is clobbered,
          walking the stack might encounter a garbage pointer and

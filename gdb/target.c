@@ -180,7 +180,7 @@ target_has_memory ()
 }
 
 int
-target_has_stack_1 (void)
+target_has_stack ()
 {
   for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     if (t->has_stack ())

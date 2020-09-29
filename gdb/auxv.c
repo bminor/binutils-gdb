@@ -576,7 +576,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 static void
 info_auxv_command (const char *cmd, int from_tty)
 {
-  if (! target_has_stack)
+  if (! target_has_stack ())
     error (_("The program has no auxiliary information now."));
   else
     {

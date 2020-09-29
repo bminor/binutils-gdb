@@ -1,5 +1,24 @@
 2020-09-28  Tom Tromey  <tom@tromey.com>
 
+	* windows-tdep.c (tlb_make_value): Update.
+	* tui/tui-regs.c (tui_data_window::show_registers): Update.
+	* thread.c (scoped_restore_current_thread::restore)
+	(scoped_restore_current_thread::scoped_restore_current_thread)
+	(thread_command): Update.
+	* stack.c (backtrace_command_1, frame_apply_level_command)
+	(frame_apply_all_command, frame_apply_command): Update.
+	* infrun.c (siginfo_make_value, restore_infcall_control_state):
+	Update.
+	* gcore.c (derive_stack_segment): Update.
+	* frame.c (get_current_frame, has_stack_frames): Update.
+	* auxv.c (info_auxv_command): Update.
+	* ada-tasks.c (ada_build_task_list): Update.
+	* target.c (target_has_stack): Rename from target_has_stack_1.
+	* target.h (target_has_stack): Remove macro.
+	(target_has_stack): Rename from target_has_stack_1.
+
+2020-09-28  Tom Tromey  <tom@tromey.com>
+
 	* target.c (target_has_memory): Rename from target_has_memory_1.
 	* tui/tui-regs.c (tui_data_window::show_registers): Update.
 	* thread.c (scoped_restore_current_thread::restore)

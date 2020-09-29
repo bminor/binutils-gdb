@@ -1406,7 +1406,7 @@ scoped_restore_current_thread::restore ()
       && m_was_stopped
       && m_thread->state == THREAD_STOPPED
       && target_has_registers
-      && target_has_stack
+      && target_has_stack ()
       && target_has_memory ())
     restore_selected_frame (m_selected_frame_id, m_selected_frame_level);
 }
@@ -1440,7 +1440,7 @@ scoped_restore_current_thread::scoped_restore_current_thread ()
       m_was_stopped = m_thread->state == THREAD_STOPPED;
       if (m_was_stopped
 	  && target_has_registers
-	  && target_has_stack
+	  && target_has_stack ()
 	  && target_has_memory ())
 	{
 	  /* When processing internal events, there might not be a
@@ -1876,7 +1876,7 @@ thread_command (const char *tidstr, int from_tty)
       if (inferior_ptid == null_ptid)
 	error (_("No thread selected"));
 
-      if (target_has_stack)
+      if (target_has_stack ())
 	{
 	  struct thread_info *tp = inferior_thread ();
 

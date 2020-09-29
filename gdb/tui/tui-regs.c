@@ -182,7 +182,7 @@ tui_data_window::show_registers (struct reggroup *group)
   if (group == 0)
     group = general_reggroup;
 
-  if (target_has_registers && target_has_stack && target_has_memory ())
+  if (target_has_registers && target_has_stack () && target_has_memory ())
     {
       show_register_group (group, get_selected_frame (NULL),
 			   group == m_current_group);
