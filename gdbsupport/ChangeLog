@@ -1,3 +1,8 @@
+2020-09-29  Pedro Alves  <pedro@palves.net>
+
+	* valid-expr.h (CHECK_VALID_EXPR_INT): Make archetype a template
+	class instead of an alias template and adjust static_assert.
+
 2020-09-24  Simon Marchi  <simon.marchi@efficios.com>
 
 	* event-loop.c (struct file_handler): Remove typedef, re-format.

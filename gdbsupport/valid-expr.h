@@ -58,10 +58,12 @@
 #define CHECK_VALID_EXPR_INT(TYPENAMES, TYPES, VALID, EXPR_TYPE, EXPR)	\
   namespace CONCAT (check_valid_expr, __LINE__) {			\
 									\
-  template <TYPENAMES>							\
-    using archetype = decltype (EXPR);					\
+  template <TYPENAMES, typename = decltype (EXPR)>			\
+  struct archetype							\
+  {									\
+  };									\
 									\
-  static_assert (gdb::is_detected_exact<EXPR_TYPE,			\
+  static_assert (gdb::is_detected_exact<archetype<TYPES, EXPR_TYPE>,	\
 		 archetype, TYPES>::value == VALID,			\
 		 "");							\
   } /* namespace */

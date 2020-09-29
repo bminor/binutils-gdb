@@ -1,3 +1,9 @@
+2020-09-29  Pedro Alves  <pedro@palves.net>
+
+	* unittests/enum-flags-selftests.c: Check whether __GNUC__ is
+	defined before using '#pragma GCC diagnostic' instead of checking
+	__clang__.
+
 2020-09-28  Tom Tromey  <tom@tromey.com>
 
 	* infrun.c (displaced_step_fixup, thread_still_needs_step_over)

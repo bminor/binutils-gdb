@@ -315,18 +315,28 @@ CHECK_VALID (false, void, EF () != EF2 ())
 CHECK_VALID (false, void, EF () != RE2 ())
 CHECK_VALID (false, void, RE () != EF2 ())
 
-/* On clang, disable -Wenum-compare due to "error: comparison of two
-   values with different enumeration types [-Werror,-Wenum-compare]".
-   clang doesn't suppress -Wenum-compare in SFINAE contexts.  Not a
-   big deal since misuses like these in GDB will be caught by -Werror
-   anyway.  This check is here mainly for completeness.  */
-#if defined __clang__
+/* Disable -Wenum-compare due to:
+
+   Clang:
+
+    "error: comparison of two values with different enumeration types
+    [-Werror,-Wenum-compare]"
+
+   GCC:
+
+    "error: comparison between ‘enum selftests::enum_flags_tests::RE’
+     and ‘enum selftests::enum_flags_tests::RE2’
+     [-Werror=enum-compare]"
+
+   Not a big deal since misuses like these in GDB will be caught by
+   -Werror anyway.  This check is here mainly for completeness.  */
+#if defined __GNUC__
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wenum-compare"
 #endif
 CHECK_VALID (true,  bool, RE () == RE2 ())
 CHECK_VALID (true,  bool, RE () != RE2 ())
-#if defined __clang__
+#if defined __GNUC__
 # pragma GCC diagnostic pop
 #endif
 
