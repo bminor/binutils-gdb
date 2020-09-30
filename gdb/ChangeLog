@@ -1,5 +1,12 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (anonymous_struct_prefix, dwarf2_name)
+	(dump_die_shallow): Use canonical_string_p.
+	* dwarf2/attribute.h (struct attribute) <canonical_string_p>: New
+	method.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (partial_die_info::read)
 	(dwarf2_const_value_attr, anonymous_struct_prefix, )
 	(dwarf2_name, dwarf2_fetch_constant_bytes): Use

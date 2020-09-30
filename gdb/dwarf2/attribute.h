@@ -115,6 +115,16 @@ struct attribute
 
   LONGEST constant_value (int default_value) const;
 
+  /* Return true if this attribute holds a canonical string.  In some
+     cases, like C++ names, gdb will rewrite the name of a DIE to a
+     canonical form.  This makes lookups robust when a name can be
+     spelled different ways (e.g., "signed" or "signed int").  This
+     flag indicates whether the value has been canonicalized.  */
+  bool canonical_string_p () const
+  {
+    return string_is_canonical;
+  }
+
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;
   ENUM_BITFIELD(dwarf_form) form : 15;

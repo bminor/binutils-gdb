@@ -22312,7 +22312,7 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
     return NULL;
 
   /* dwarf2_name had to be already called.  */
-  gdb_assert (DW_STRING_IS_CANONICAL (attr));
+  gdb_assert (attr->canonical_string_p ());
 
   /* Strip the base name, keep any leading namespaces/classes.  */
   base = strrchr (attr_name, ':');
@@ -22638,7 +22638,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
 	  /* Avoid demangling attr_name the second time on a second
 	     call for the same DIE.  */
-	  if (!DW_STRING_IS_CANONICAL (attr))
+	  if (!attr->canonical_string_p ())
 	    {
 	      gdb::unique_xmalloc_ptr<char> demangled
 		(gdb_demangle (attr_name, DMGL_TYPES));
@@ -22664,7 +22664,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       break;
     }
 
-  if (!DW_STRING_IS_CANONICAL (attr))
+  if (!attr->canonical_string_p ())
     {
       DW_STRING (attr) = dwarf2_canonicalize_name (attr_name, cu,
 						   objfile);
@@ -22786,7 +22786,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f, "string: \"%s\" (%s canonicalized)",
 		   DW_STRING (&die->attrs[i])
 		   ? DW_STRING (&die->attrs[i]) : "",
-		   DW_STRING_IS_CANONICAL (&die->attrs[i]) ? "is" : "not");
+		   die->attrs[i].canonical_string_p () ? "is" : "not");
 	  break;
 	case DW_FORM_flag:
 	  if (DW_UNSND (&die->attrs[i]))
