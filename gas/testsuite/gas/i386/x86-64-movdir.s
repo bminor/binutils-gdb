@@ -6,6 +6,9 @@ _start:
 	movdiri %rax, (%rcx)
 	movdir64b (%rcx),%rax
 	movdir64b (%ecx),%eax
+	movdir64b foo(%rip),%rcx
+	movdir64b foo(%rip),%ecx
+	movdir64b foo(%eip),%ecx
 
 	.intel_syntax noprefix
 	movdiri [rcx],eax
@@ -14,3 +17,6 @@ _start:
 	movdiri qword ptr [rcx],rax
 	movdir64b rax,[rcx]
 	movdir64b eax,[ecx]
+	movdir64b rcx,[rip+foo]
+	movdir64b ecx,[rip+foo]
+	movdir64b ecx,[eip+foo]
