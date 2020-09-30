@@ -159,3 +159,26 @@ attribute::constant_value (int default_value) const
       return default_value;
     }
 }
+
+/* See attribute.h.  */
+
+bool
+attribute::form_is_unsigned () const
+{
+  return (form == DW_FORM_ref_addr
+	  || form == DW_FORM_GNU_ref_alt
+	  || form == DW_FORM_data2
+	  || form == DW_FORM_data4
+	  || form == DW_FORM_data8
+	  || form == DW_FORM_sec_offset
+	  || form == DW_FORM_data1
+	  || form == DW_FORM_flag
+	  || form == DW_FORM_flag_present
+	  || form == DW_FORM_udata
+	  || form == DW_FORM_rnglistx
+	  || form == DW_FORM_ref1
+	  || form == DW_FORM_ref2
+	  || form == DW_FORM_ref4
+	  || form == DW_FORM_ref8
+	  || form == DW_FORM_ref_udata);
+}

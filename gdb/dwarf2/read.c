@@ -19692,15 +19692,16 @@ read_attribute_value (const struct die_reader_specs *reader,
     {
     case DW_FORM_ref_addr:
       if (cu->header.version == 2)
-	DW_UNSND (attr) = cu->header.read_address (abfd, info_ptr,
-						   &bytes_read);
+	attr->set_unsigned (cu->header.read_address (abfd, info_ptr,
+						     &bytes_read));
       else
-	DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr,
-						  &bytes_read);
+	attr->set_unsigned (cu->header.read_offset (abfd, info_ptr,
+						    &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_GNU_ref_alt:
-      DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr, &bytes_read);
+      attr->set_unsigned (cu->header.read_offset (abfd, info_ptr,
+						  &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_addr:
@@ -19728,15 +19729,15 @@ read_attribute_value (const struct die_reader_specs *reader,
       attr->set_block (blk);
       break;
     case DW_FORM_data2:
-      DW_UNSND (attr) = read_2_bytes (abfd, info_ptr);
+      attr->set_unsigned (read_2_bytes (abfd, info_ptr));
       info_ptr += 2;
       break;
     case DW_FORM_data4:
-      DW_UNSND (attr) = read_4_bytes (abfd, info_ptr);
+      attr->set_unsigned (read_4_bytes (abfd, info_ptr));
       info_ptr += 4;
       break;
     case DW_FORM_data8:
-      DW_UNSND (attr) = read_8_bytes (abfd, info_ptr);
+      attr->set_unsigned (read_8_bytes (abfd, info_ptr));
       info_ptr += 8;
       break;
     case DW_FORM_data16:
@@ -19747,7 +19748,8 @@ read_attribute_value (const struct die_reader_specs *reader,
       attr->set_block (blk);
       break;
     case DW_FORM_sec_offset:
-      DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr, &bytes_read);
+      attr->set_unsigned (cu->header.read_offset (abfd, info_ptr,
+						  &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_loclistx:
@@ -19812,15 +19814,12 @@ read_attribute_value (const struct die_reader_specs *reader,
       attr->set_block (blk);
       break;
     case DW_FORM_data1:
-      DW_UNSND (attr) = read_1_byte (abfd, info_ptr);
-      info_ptr += 1;
-      break;
     case DW_FORM_flag:
-      DW_UNSND (attr) = read_1_byte (abfd, info_ptr);
+      attr->set_unsigned (read_1_byte (abfd, info_ptr));
       info_ptr += 1;
       break;
     case DW_FORM_flag_present:
-      DW_UNSND (attr) = 1;
+      attr->set_unsigned (1);
       break;
     case DW_FORM_sdata:
       attr->set_signed (read_signed_leb128 (abfd, info_ptr, &bytes_read));
@@ -19830,27 +19829,27 @@ read_attribute_value (const struct die_reader_specs *reader,
       *need_reprocess = true;
       /* FALLTHROUGH */
     case DW_FORM_udata:
-      DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+      attr->set_unsigned (read_unsigned_leb128 (abfd, info_ptr, &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_ref1:
-      DW_UNSND (attr) = (to_underlying (cu->header.sect_off)
-			 + read_1_byte (abfd, info_ptr));
+      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+			   + read_1_byte (abfd, info_ptr)));
       info_ptr += 1;
       break;
     case DW_FORM_ref2:
-      DW_UNSND (attr) = (to_underlying (cu->header.sect_off)
-			 + read_2_bytes (abfd, info_ptr));
+      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+			   + read_2_bytes (abfd, info_ptr)));
       info_ptr += 2;
       break;
     case DW_FORM_ref4:
-      DW_UNSND (attr) = (to_underlying (cu->header.sect_off)
-			 + read_4_bytes (abfd, info_ptr));
+      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+			   + read_4_bytes (abfd, info_ptr)));
       info_ptr += 4;
       break;
     case DW_FORM_ref8:
-      DW_UNSND (attr) = (to_underlying (cu->header.sect_off)
-			 + read_8_bytes (abfd, info_ptr));
+      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+			   + read_8_bytes (abfd, info_ptr)));
       info_ptr += 8;
       break;
     case DW_FORM_ref_sig8:
@@ -19858,8 +19857,9 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:
-      DW_UNSND (attr) = (to_underlying (cu->header.sect_off)
-			 + read_unsigned_leb128 (abfd, info_ptr, &bytes_read));
+      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+			   + read_unsigned_leb128 (abfd, info_ptr,
+						   &bytes_read)));
       info_ptr += bytes_read;
       break;
     case DW_FORM_indirect:
@@ -19942,7 +19942,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       complaint
         (_("Suspicious DW_AT_byte_size value treated as zero instead of %s"),
          hex_string (DW_UNSND (attr)));
-      DW_UNSND (attr) = 0;
+      attr->set_unsigned (0);
     }
 
   return info_ptr;

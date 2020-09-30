@@ -1,5 +1,12 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_attribute_value): Update.
+	* dwarf2/attribute.h (struct attribute) <form_is_unsigned,
+	set_unsigned>: New methods.
+	* dwarf2/attribute.c (attribute::form_is_unsigned): New method.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (get_alignment, read_array_order)
 	(read_attribute_value, dwarf2_const_value_attr)
 	(dump_die_shallow, dwarf2_fetch_constant_bytes): Update.

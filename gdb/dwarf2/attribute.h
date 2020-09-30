@@ -124,6 +124,9 @@ struct attribute
   /* Check if the attribute's form is a string form.  */
   bool form_is_string () const;
 
+  /* Check if the attribute's form is an unsigned integer form.  */
+  bool form_is_unsigned () const;
+
   /* Return DIE offset of this attribute.  Return 0 with complaint if
      the attribute is not of the required kind.  */
 
@@ -188,6 +191,13 @@ struct attribute
   {
     gdb_assert (form == DW_FORM_sdata || form == DW_FORM_implicit_const);
     u.snd = snd;
+  }
+
+  /* Set this attribute to an unsigned integer.  */
+  void set_unsigned (ULONGEST unsnd)
+  {
+    gdb_assert (form_is_unsigned ());
+    u.unsnd = unsnd;
   }
 
 
