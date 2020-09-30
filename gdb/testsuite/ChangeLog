@@ -1,3 +1,11 @@
+2020-09-30  Gary Benson <gbenson@redhat.com>
+
+	* gdb.dwarf2/dw2-double-set-die-type.S (.Ldie_3e0):
+	Convert directive to lowercase.
+	(.Labbrev1_begin): Add missing label.
+	(abbrev code 0x1): Remove DW_AT_stmt_list.
+	(.Ldie_b): Likewise.
+
 2020-09-27  Tom Tromey  <tom@tromey.com>
 
 	* gdb.tui/new-layout.exp: Use with_test_prefix.
