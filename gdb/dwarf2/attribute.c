@@ -222,3 +222,26 @@ attribute::defaulted () const
 	       plongest (value));
   return DW_DEFAULTED_no;
 }
+
+/* See attribute.h.  */
+
+dwarf_virtuality_attribute
+attribute::as_virtuality () const
+{
+  LONGEST value = constant_value (-1);
+
+  switch (value)
+    {
+    case DW_VIRTUALITY_none:
+    case DW_VIRTUALITY_virtual:
+    case DW_VIRTUALITY_pure_virtual:
+      return (dwarf_virtuality_attribute) value;
+    }
+
+  /* If the form was not constant, we already complained in
+     constant_value, so there's no need to complain again.  */
+  if (form_is_constant ())
+    complaint (_("unrecognized DW_AT_virtuality value (%s)"),
+	       plongest (value));
+  return DW_VIRTUALITY_none;
+}

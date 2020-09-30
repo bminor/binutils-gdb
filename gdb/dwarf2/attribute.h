@@ -258,6 +258,11 @@ struct attribute
      returned.  */
   dwarf_defaulted_attribute defaulted () const;
 
+  /* Return the attribute's value as a dwarf_virtuality_attribute
+     constant according to DWARF spec.  An unrecognized value will
+     issue a complaint and return DW_VIRTUALITY_none.  */
+  dwarf_virtuality_attribute as_virtuality () const;
+
   ENUM_BITFIELD(dwarf_attribute) name : 15;
 
   /* A boolean that is used for forms that require reprocessing.  A

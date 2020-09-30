@@ -15021,7 +15021,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
   attr = dwarf2_attr (die, DW_AT_virtuality, cu);
   if (attr != nullptr)
-    new_field->virtuality = DW_UNSND (attr);
+    new_field->virtuality = attr->as_virtuality ();
   else
     new_field->virtuality = DW_VIRTUALITY_none;
 
@@ -15722,7 +15722,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   else
     {
       attr = dwarf2_attr (die, DW_AT_virtuality, cu);
-      if (attr && DW_UNSND (attr))
+      if (attr != nullptr && attr->as_virtuality () != DW_VIRTUALITY_none)
 	{
 	  /* GCC does this, as of 2008-08-25; PR debug/37237.  */
 	  complaint (_("Member function \"%s\" (offset %s) is virtual "
