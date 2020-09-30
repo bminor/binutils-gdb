@@ -1,5 +1,12 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (partial_die_info::read)
+	(dwarf2_const_value_attr, anonymous_struct_prefix, )
+	(dwarf2_name, dwarf2_fetch_constant_bytes): Use
+	attribute::as_string.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/attribute.c (attribute::address): Don't use DW_UNSND or
 	DW_ADDR.
 	(attribute::string): Don't use DW_STRING.

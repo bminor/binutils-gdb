@@ -19017,11 +19017,11 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	      /* These tags always have simple identifiers already; no need
 		 to canonicalize them.  */
 	      canonical_name = 1;
-	      raw_name = DW_STRING (&attr);
+	      raw_name = attr.as_string ();
 	      break;
 	    default:
 	      canonical_name = 0;
-	      raw_name = DW_STRING (&attr);
+	      raw_name = attr.as_string ();
 	      break;
 	    }
 	  break;
@@ -21863,7 +21863,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
     case DW_FORM_GNU_strp_alt:
       /* DW_STRING is already allocated on the objfile obstack, point
 	 directly to it.  */
-      *bytes = (const gdb_byte *) DW_STRING (attr);
+      *bytes = (const gdb_byte *) attr->as_string ();
       break;
     case DW_FORM_block1:
     case DW_FORM_block2:
@@ -22307,21 +22307,22 @@ anonymous_struct_prefix (struct die_info *die, struct dwarf2_cu *cu)
     return NULL;
 
   attr = dw2_linkage_name_attr (die, cu);
-  if (attr == NULL || DW_STRING (attr) == NULL)
+  const char *attr_name = attr->as_string ();
+  if (attr == NULL || attr_name == NULL)
     return NULL;
 
   /* dwarf2_name had to be already called.  */
   gdb_assert (DW_STRING_IS_CANONICAL (attr));
 
   /* Strip the base name, keep any leading namespaces/classes.  */
-  base = strrchr (DW_STRING (attr), ':');
-  if (base == NULL || base == DW_STRING (attr) || base[-1] != ':')
+  base = strrchr (attr_name, ':');
+  if (base == NULL || base == attr_name || base[-1] != ':')
     return "";
 
   struct objfile *objfile = cu->per_objfile->objfile;
   return obstack_strndup (&objfile->per_bfd->storage_obstack,
-			  DW_STRING (attr),
-			  &base[-1] - DW_STRING (attr));
+			  attr_name,
+			  &base[-1] - attr_name);
 }
 
 /* Return the name of the namespace/class that DIE is defined within,
@@ -22588,7 +22589,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
   struct objfile *objfile = cu->per_objfile->objfile;
 
   attr = dwarf2_attr (die, DW_AT_name, cu);
-  if ((!attr || !DW_STRING (attr))
+  const char *attr_name = attr == nullptr ? nullptr : attr->as_string ();
+  if (attr_name == nullptr
       && die->tag != DW_TAG_namespace
       && die->tag != DW_TAG_class_type
       && die->tag != DW_TAG_interface_type
@@ -22606,11 +22608,11 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_enumerator:
       /* These tags always have simple identifiers already; no need
 	 to canonicalize them.  */
-      return DW_STRING (attr);
+      return attr_name;
 
     case DW_TAG_namespace:
-      if (attr != NULL && DW_STRING (attr) != NULL)
-	return DW_STRING (attr);
+      if (attr_name != nullptr)
+	return attr_name;
       return CP_ANONYMOUS_NAMESPACE_STR;
 
     case DW_TAG_class_type:
@@ -22621,25 +22623,25 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	 structures or unions.  These were of the form "._%d" in GCC 4.1,
 	 or simply "<anonymous struct>" or "<anonymous union>" in GCC 4.3
 	 and GCC 4.4.  We work around this problem by ignoring these.  */
-      if (attr && DW_STRING (attr)
-	  && (startswith (DW_STRING (attr), "._")
-	      || startswith (DW_STRING (attr), "<anonymous")))
+      if (attr_name != nullptr
+	  && (startswith (attr_name, "._")
+	      || startswith (attr_name, "<anonymous")))
 	return NULL;
 
       /* GCC might emit a nameless typedef that has a linkage name.  See
 	 http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
-      if (!attr || DW_STRING (attr) == NULL)
+      if (!attr || attr_name == NULL)
 	{
 	  attr = dw2_linkage_name_attr (die, cu);
-	  if (attr == NULL || DW_STRING (attr) == NULL)
+	  if (attr == NULL || attr_name == NULL)
 	    return NULL;
 
-	  /* Avoid demangling DW_STRING (attr) the second time on a second
+	  /* Avoid demangling attr_name the second time on a second
 	     call for the same DIE.  */
 	  if (!DW_STRING_IS_CANONICAL (attr))
 	    {
 	      gdb::unique_xmalloc_ptr<char> demangled
-		(gdb_demangle (DW_STRING (attr), DMGL_TYPES));
+		(gdb_demangle (attr_name, DMGL_TYPES));
 	      if (demangled == nullptr)
 		return nullptr;
 
@@ -22647,13 +22649,14 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	      DW_STRING_IS_CANONICAL (attr) = 1;
 	    }
 
-	  /* Strip any leading namespaces/classes, keep only the base name.
-	     DW_AT_name for named DIEs does not contain the prefixes.  */
-	  const char *base = strrchr (DW_STRING (attr), ':');
-	  if (base && base > DW_STRING (attr) && base[-1] == ':')
+	  /* Strip any leading namespaces/classes, keep only the
+	     base name.  DW_AT_name for named DIEs does not
+	     contain the prefixes.  */
+	  const char *base = strrchr (attr_name, ':');
+	  if (base && base > attr_name && base[-1] == ':')
 	    return &base[1];
 	  else
-	    return DW_STRING (attr);
+	    return attr_name;
 	}
       break;
 
@@ -22663,11 +22666,13 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
   if (!DW_STRING_IS_CANONICAL (attr))
     {
-      DW_STRING (attr) = dwarf2_canonicalize_name (DW_STRING (attr), cu,
+      DW_STRING (attr) = dwarf2_canonicalize_name (attr_name, cu,
 						   objfile);
       DW_STRING_IS_CANONICAL (attr) = 1;
     }
-  return DW_STRING (attr);
+
+  /* We might have changed it just above.  */
+  return attr->as_string ();
 }
 
 /* Return the die that this die in an extension of, or NULL if there
@@ -23177,8 +23182,11 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
     case DW_FORM_GNU_strp_alt:
       /* DW_STRING is already allocated on the objfile obstack, point
 	 directly to it.  */
-      result = (const gdb_byte *) DW_STRING (attr);
-      *len = strlen (DW_STRING (attr));
+      {
+	const char *attr_name = attr->as_string ();
+	result = (const gdb_byte *) attr_name;
+	*len = strlen (attr_name);
+      }
       break;
     case DW_FORM_block1:
     case DW_FORM_block2:
