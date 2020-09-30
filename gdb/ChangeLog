@@ -1,3 +1,7 @@
+2020-09-30  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (handle_variant): Use constant_value.
+
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (lookup_dwo_id, get_type_unit_group)

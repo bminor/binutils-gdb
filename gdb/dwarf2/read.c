@@ -16178,7 +16178,7 @@ handle_variant (struct die_info *die, struct type *type,
   /* In a variant we want to get the discriminant and also add a
      field for our sole member child.  */
   struct attribute *discr = dwarf2_attr (die, DW_AT_discr_value, cu);
-  if (discr == nullptr)
+  if (discr == nullptr || !discr->form_is_constant ())
     {
       discr = dwarf2_attr (die, DW_AT_discr_list, cu);
       if (discr == nullptr || discr->as_block ()->size == 0)
@@ -16187,7 +16187,7 @@ handle_variant (struct die_info *die, struct type *type,
 	variant.discr_list_data = discr->as_block ();
     }
   else
-    variant.discriminant_value = discr->as_unsigned ();
+    variant.discriminant_value = discr->constant_value (0);
 
   for (die_info *variant_child = die->child;
        variant_child != NULL;
