@@ -1,5 +1,19 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_cutu_die_from_dwo): Use OBSTACK_ZALLOC.
+	(read_attribute_reprocess, read_attribute_value): Update.
+	(read_attribute): Clear requires_reprocessing.
+	* dwarf2/attribute.h (struct attribute) <as_unsigned_reprocess,
+	form_requires_reprocessing>: New methods.
+	<string_init>: Clear requires_reprocessing.
+	<set_unsigned_reprocess>: New method.
+	<name>: Shrink by one bit.
+	<requires_reprocessing>: New member.
+	* dwarf2/attribute.c (attribute::form_requires_reprocessing): New
+	method.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_attribute_value): Update.
 	* dwarf2/attribute.h (struct attribute) <form_is_unsigned,
 	set_unsigned>: New methods.

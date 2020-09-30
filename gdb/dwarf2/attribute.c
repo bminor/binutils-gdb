@@ -182,3 +182,17 @@ attribute::form_is_unsigned () const
 	  || form == DW_FORM_ref8
 	  || form == DW_FORM_ref_udata);
 }
+
+/* See attribute.h.  */
+
+bool
+attribute::form_requires_reprocessing () const
+{
+  return (form == DW_FORM_strx1
+	  || form == DW_FORM_strx2
+	  || form == DW_FORM_strx3
+	  || form == DW_FORM_strx4
+	  || form == DW_FORM_GNU_str_index
+	  || form == DW_FORM_addrx
+	  || form == DW_FORM_GNU_addr_index);
+}

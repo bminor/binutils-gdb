@@ -6869,7 +6869,7 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
   else if (stub_comp_dir != NULL)
     {
       /* Reconstruct the comp_dir attribute to simplify the code below.  */
-      comp_dir = XOBNEW (&cu->comp_unit_obstack, struct attribute);
+      comp_dir = OBSTACK_ZALLOC (&cu->comp_unit_obstack, struct attribute);
       comp_dir->name = DW_AT_comp_dir;
       comp_dir->form = DW_FORM_string;
       comp_dir->set_string_noncanonical (stub_comp_dir);
@@ -19640,7 +19640,7 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
     {
       case DW_FORM_addrx:
       case DW_FORM_GNU_addr_index:
-        DW_ADDR (attr) = read_addr_index (cu, DW_UNSND (attr));
+        DW_ADDR (attr) = read_addr_index (cu, attr->as_unsigned_reprocess ());
         break;
       case DW_FORM_loclistx:
 	 DW_UNSND (attr) = read_loclist_index (cu, DW_UNSND (attr));
@@ -19655,7 +19655,7 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
       case DW_FORM_strx4:
       case DW_FORM_GNU_str_index:
 	{
-	  unsigned int str_index = DW_UNSND (attr);
+	  unsigned int str_index = attr->as_unsigned_reprocess ();
 	  gdb_assert (!attr->canonical_string_p ());
 	  if (reader->dwo_file != NULL)
 	    attr->set_string_noncanonical (read_dwo_str_index (reader,
@@ -19879,7 +19879,8 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_addrx:
     case DW_FORM_GNU_addr_index:
       *need_reprocess = true;
-      DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
+      attr->set_unsigned_reprocess (read_unsigned_leb128 (abfd, info_ptr,
+							  &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_strx:
@@ -19916,7 +19917,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	    info_ptr += bytes_read;
 	  }
 	*need_reprocess = true;
-	 DW_UNSND (attr) = str_index;
+	attr->set_unsigned_reprocess (str_index);
 	}
       break;
     default:
@@ -19957,6 +19958,7 @@ read_attribute (const struct die_reader_specs *reader,
 {
   attr->name = abbrev->name;
   attr->string_is_canonical = 0;
+  attr->requires_reprocessing = 0;
   return read_attribute_value (reader, attr, abbrev->form,
 			       abbrev->implicit_const, info_ptr,
 			       need_reprocess);

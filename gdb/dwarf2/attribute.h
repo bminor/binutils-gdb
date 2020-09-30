@@ -73,6 +73,15 @@ struct attribute
     return u.snd;
   }
 
+  /* Return the unsigned value, but only for attributes requiring
+     reprocessing.  */
+  ULONGEST as_unsigned_reprocess () const
+  {
+    gdb_assert (form_requires_reprocessing ());
+    gdb_assert (requires_reprocessing);
+    return u.unsnd;
+  }
+
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
      You may use DW_UNSND (attr) to retrieve such offsets.
@@ -127,6 +136,10 @@ struct attribute
   /* Check if the attribute's form is an unsigned integer form.  */
   bool form_is_unsigned () const;
 
+  /* Check if the attribute's form is a form that requires
+     "reprocessing".  */
+  bool form_requires_reprocessing () const;
+
   /* Return DIE offset of this attribute.  Return 0 with complaint if
      the attribute is not of the required kind.  */
 
@@ -162,6 +175,7 @@ struct attribute
     gdb_assert (form_is_string ());
     u.str = str;
     string_is_canonical = 0;
+    requires_reprocessing = 0;
   }
 
   /* Set the canonical string value for this attribute.  */
@@ -200,8 +214,29 @@ struct attribute
     u.unsnd = unsnd;
   }
 
+  /* Temporarily set this attribute to an unsigned integer.  This is
+     used only for those forms that require reprocessing.  */
+  void set_unsigned_reprocess (ULONGEST unsnd)
+  {
+    gdb_assert (form_requires_reprocessing ());
+    u.unsnd = unsnd;
+    requires_reprocessing = 1;
+  }
 
-  ENUM_BITFIELD(dwarf_attribute) name : 16;
+
+  ENUM_BITFIELD(dwarf_attribute) name : 15;
+
+  /* A boolean that is used for forms that require reprocessing.  A
+     form may require data not directly available in the attribute.
+     E.g., DW_FORM_strx requires the corresponding
+     DW_AT_str_offsets_base.  In this case, the processing for the
+     attribute must be done in two passes.  In the first past, this
+     flag is set and the value is an unsigned.  In the second pass,
+     the unsigned value is turned into the correct value for the form,
+     and this flag is cleared.  This flag is unused for other
+     forms.  */
+  unsigned int requires_reprocessing : 1;
+
   ENUM_BITFIELD(dwarf_form) form : 15;
 
   /* Has u.str already been updated by dwarf2_canonicalize_name?  This
