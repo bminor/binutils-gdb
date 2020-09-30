@@ -1,3 +1,9 @@
+2020-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26675
+	* plugin.c (plugin_notice): Override the IR definition before
+	all LTO symbols have been read for non-ELF targets.
+
 2020-09-30  Jeremy Drake  <sourceware-bugzilla@jdrake.com>
 
 	PR 26588
