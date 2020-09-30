@@ -19850,7 +19850,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += 8;
       break;
     case DW_FORM_ref_sig8:
-      DW_SIGNATURE (attr) = read_8_bytes (abfd, info_ptr);
+      attr->set_signature (read_8_bytes (abfd, info_ptr));
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:
@@ -22093,7 +22093,7 @@ lookup_die_type (struct die_info *die, const struct attribute *attr,
     }
   else if (attr->form == DW_FORM_ref_sig8)
     {
-      ULONGEST signature = DW_SIGNATURE (attr);
+      ULONGEST signature = attr->as_signature ();
 
       return get_signatured_type (die, signature, cu);
     }
@@ -22782,7 +22782,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  break;
 	case DW_FORM_ref_sig8:
 	  fprintf_unfiltered (f, "signature: %s",
-			      hex_string (DW_SIGNATURE (&die->attrs[i])));
+			      hex_string (die->attrs[i].as_signature ()));
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
@@ -23360,7 +23360,7 @@ static struct die_info *
 follow_die_sig (struct die_info *src_die, const struct attribute *attr,
 		struct dwarf2_cu **ref_cu)
 {
-  ULONGEST signature = DW_SIGNATURE (attr);
+  ULONGEST signature = attr->as_signature ();
   struct signatured_type *sig_type;
   struct die_info *die;
 
@@ -23468,7 +23468,7 @@ get_DW_AT_signature_type (struct die_info *die, const struct attribute *attr,
     }
   else if (attr->form == DW_FORM_ref_sig8)
     {
-      return get_signatured_type (die, DW_SIGNATURE (attr), cu);
+      return get_signatured_type (die, attr->as_signature (), cu);
     }
   else
     {

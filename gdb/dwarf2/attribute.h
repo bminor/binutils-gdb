@@ -57,6 +57,14 @@ struct attribute
     return u.blk;
   }
 
+  /* Return the signature.  The attribute must have signature
+     form.  */
+  ULONGEST as_signature () const
+  {
+    gdb_assert (form == DW_FORM_ref_sig8);
+    return u.signature;
+  }
+
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
      You may use DW_UNSND (attr) to retrieve such offsets.
@@ -160,6 +168,13 @@ struct attribute
     u.blk = blk;
   }
 
+  /* Set the signature value for this attribute.  */
+  void set_signature (ULONGEST signature)
+  {
+    gdb_assert (form == DW_FORM_ref_sig8);
+    u.signature = signature;
+  }
+
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;
   ENUM_BITFIELD(dwarf_form) form : 15;
@@ -192,6 +207,5 @@ private:
 #define DW_UNSND(attr)     ((attr)->u.unsnd)
 #define DW_SND(attr)       ((attr)->u.snd)
 #define DW_ADDR(attr)	   ((attr)->u.addr)
-#define DW_SIGNATURE(attr) ((attr)->u.signature)
 
 #endif /* GDB_DWARF2_ATTRIBUTE_H */

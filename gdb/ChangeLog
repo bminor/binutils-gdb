@@ -1,5 +1,14 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_attribute_value, lookup_die_type)
+	(dump_die_shallow, follow_die_sig, get_DW_AT_signature_type):
+	Update.
+	* dwarf2/attribute.h (struct attribute) <as_signature,
+	set_signature>: New methods.
+	(DW_SIGNATURE): Remove.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_call_site_scope)
 	(handle_data_member_location, dwarf2_add_member_fn)
 	(mark_common_block_symbol_computed, attr_to_dynamic_prop)
