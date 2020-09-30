@@ -263,6 +263,10 @@ struct attribute
      issue a complaint and return DW_VIRTUALITY_none.  */
   dwarf_virtuality_attribute as_virtuality () const;
 
+  /* Return the attribute's value as a boolean.  An unrecognized form
+     will issue a complaint and return false.  */
+  bool as_boolean () const;
+
   ENUM_BITFIELD(dwarf_attribute) name : 15;
 
   /* A boolean that is used for forms that require reprocessing.  A

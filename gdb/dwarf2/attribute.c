@@ -245,3 +245,15 @@ attribute::as_virtuality () const
 	       plongest (value));
   return DW_VIRTUALITY_none;
 }
+
+/* See attribute.h.  */
+
+bool
+attribute::as_boolean () const
+{
+  if (form == DW_FORM_flag_present)
+    return true;
+  else if (form == DW_FORM_flag)
+    return u.unsnd != 0;
+  return constant_value (0) != 0;
+}

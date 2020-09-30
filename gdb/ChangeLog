@@ -1,5 +1,14 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_func_scope, prototyped_function_p)
+	(read_subroutine_type, partial_die_info::read)
+	(dwarf2_flag_true_p, new_symbol, dump_die_shallow)
+	(dwarf2_add_member_fn): Update.
+	* dwarf2/attribute.h (struct attribute) <as_boolean>: Declare.
+	* dwarf2/attribute.c (attribute::as_boolean): New method.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_add_field, dwarf2_add_member_fn): Update.
 	* dwarf2/attribute.h (struct attribute) <as_virtuality>: New
 	method.

@@ -13565,7 +13565,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       <= PC_BOUNDS_INVALID)
     {
       attr = dwarf2_attr (die, DW_AT_external, cu);
-      if (!attr || !DW_UNSND (attr))
+      if (attr == nullptr || !attr->as_boolean ())
 	complaint (_("cannot get low and high bounds "
 		     "for subprogram DIE at %s"),
 		   sect_offset_str (die->sect_off));
@@ -15642,7 +15642,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Check for artificial methods.  */
   attr = dwarf2_attr (die, DW_AT_artificial, cu);
-  if (attr && DW_UNSND (attr) != 0)
+  if (attr && attr->as_boolean ())
     fnp->is_artificial = 1;
 
   /* Check for defaulted methods.  */
@@ -15652,7 +15652,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Check for deleted methods.  */
   attr = dwarf2_attr (die, DW_AT_deleted, cu);
-  if (attr != nullptr && DW_UNSND (attr) != 0)
+  if (attr != nullptr && attr->as_boolean ())
     fnp->is_deleted = 1;
 
   fnp->is_constructor = dwarf2_is_constructor (die, cu);
@@ -17591,7 +17591,7 @@ prototyped_function_p (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
 
   attr = dwarf2_attr (die, DW_AT_prototyped, cu);
-  if (attr && (DW_UNSND (attr) != 0))
+  if (attr && attr->as_boolean ())
     return 1;
 
   /* The DWARF standard implies that the DW_AT_prototyped attribute
@@ -17660,7 +17660,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
   /* Record whether the function returns normally to its caller or not
      if the DWARF producer set that information.  */
   attr = dwarf2_attr (die, DW_AT_noreturn, cu);
-  if (attr && (DW_UNSND (attr) != 0))
+  if (attr && attr->as_boolean ())
     TYPE_NO_RETURN (ftype) = 1;
 
   /* We need to add the subroutine type to the die immediately so
@@ -17718,7 +17718,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 		 4.5 does not yet generate.  */
 	      attr = dwarf2_attr (child_die, DW_AT_artificial, cu);
 	      if (attr != nullptr)
-		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = DW_UNSND (attr);
+		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = attr->as_boolean ();
 	      else
 		TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 	      arg_type = die_type (child_die, cu);
@@ -19052,10 +19052,10 @@ partial_die_info::read (const struct die_reader_specs *reader,
             }
 	  break;
 	case DW_AT_external:
-	  is_external = DW_UNSND (&attr);
+	  is_external = attr.as_boolean ();
 	  break;
 	case DW_AT_declaration:
-	  is_declaration = DW_UNSND (&attr);
+	  is_declaration = attr.as_boolean ();
 	  break;
 	case DW_AT_type:
 	  has_type = 1;
@@ -19128,7 +19128,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  break;
 
 	case DW_AT_main_subprogram:
-	  main_subprogram = DW_UNSND (&attr);
+	  main_subprogram = attr.as_boolean ();
 	  break;
 
 	case DW_AT_ranges:
@@ -20301,7 +20301,7 @@ dwarf2_flag_true_p (struct die_info *die, unsigned name, struct dwarf2_cu *cu)
 {
   struct attribute *attr = dwarf2_attr (die, name, cu);
 
-  return (attr && DW_UNSND (attr));
+  return attr != nullptr && attr->as_boolean ();
 }
 
 static int
@@ -21467,7 +21467,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	     finish_block.  */
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 	  attr2 = dwarf2_attr (die, DW_AT_external, cu);
-	  if ((attr2 && (DW_UNSND (attr2) != 0))
+	  if ((attr2 != nullptr && attr2->as_boolean ())
 	      || cu->language == language_ada
 	      || cu->language == language_fortran)
 	    {
@@ -21519,7 +21519,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	      if (!suppress_add)
 		{
-		  if (attr2 && (DW_UNSND (attr2) != 0))
+		  if (attr2 != nullptr && attr2->as_boolean ())
 		    list_to_add = cu->get_builder ()->get_global_symbols ();
 		  else
 		    list_to_add = cu->list_in_scope;
@@ -21547,7 +21547,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		     out, but the variable address is set to null;
 		     do not add such variables into symbol table.  */
 		}
-	      else if (attr2 && (DW_UNSND (attr2) != 0))
+	      else if (attr2 != nullptr && attr2->as_boolean ())
 		{
 		  if (SYMBOL_CLASS (sym) == LOC_STATIC
 		      && (objfile->flags & OBJF_MAINLINE) == 0
@@ -21596,7 +21596,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  if (!suppress_add)
 		    list_to_add = cu->list_in_scope;
 		}
-	      else if (attr2 && (DW_UNSND (attr2) != 0)
+	      else if (attr2 != nullptr && attr2->as_boolean ()
 		       && dwarf2_attr (die, DW_AT_type, cu) != NULL)
 		{
 		  /* A variable with DW_AT_external is never static, but it
@@ -22780,7 +22780,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 			      die->attrs[i].canonical_string_p () ? "is" : "not");
 	  break;
 	case DW_FORM_flag:
-	  if (DW_UNSND (&die->attrs[i]))
+	  if (die->attrs[i].as_boolean ())
 	    fprintf_unfiltered (f, "flag: TRUE");
 	  else
 	    fprintf_unfiltered (f, "flag: FALSE");
