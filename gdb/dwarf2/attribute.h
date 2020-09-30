@@ -98,6 +98,9 @@ struct attribute
 
   bool form_is_block () const;
 
+  /* Check if the attribute's form is a string form.  */
+  bool form_is_string () const;
+
   /* Return DIE offset of this attribute.  Return 0 with complaint if
      the attribute is not of the required kind.  */
 
@@ -122,16 +125,34 @@ struct attribute
      flag indicates whether the value has been canonicalized.  */
   bool canonical_string_p () const
   {
+    gdb_assert (form_is_string ());
     return string_is_canonical;
+  }
+
+  /* Initialize this attribute to hold a non-canonical string
+     value.  */
+  void set_string_noncanonical (const char *str)
+  {
+    gdb_assert (form_is_string ());
+    u.str = str;
+    string_is_canonical = 0;
+  }
+
+  /* Set the canonical string value for this attribute.  */
+  void set_string_canonical (const char *str)
+  {
+    gdb_assert (form_is_string ());
+    u.str = str;
+    string_is_canonical = 1;
   }
 
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;
   ENUM_BITFIELD(dwarf_form) form : 15;
 
-  /* Has DW_STRING already been updated by dwarf2_canonicalize_name?  This
-     field should be in u.str (existing only for DW_STRING) but it is kept
-     here for better struct attribute alignment.  */
+  /* Has u.str already been updated by dwarf2_canonicalize_name?  This
+     field should be in u.str but it is kept here for better struct
+     attribute alignment.  */
   unsigned int string_is_canonical : 1;
 
   union
@@ -154,8 +175,6 @@ private:
 
 /* Get at parts of an attribute structure.  */
 
-#define DW_STRING(attr)    ((attr)->u.str)
-#define DW_STRING_IS_CANONICAL(attr) ((attr)->string_is_canonical)
 #define DW_UNSND(attr)     ((attr)->u.unsnd)
 #define DW_BLOCK(attr)     ((attr)->u.blk)
 #define DW_SND(attr)       ((attr)->u.snd)

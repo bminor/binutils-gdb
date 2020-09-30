@@ -6872,8 +6872,7 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
       comp_dir = XOBNEW (&cu->comp_unit_obstack, struct attribute);
       comp_dir->name = DW_AT_comp_dir;
       comp_dir->form = DW_FORM_string;
-      DW_STRING_IS_CANONICAL (comp_dir) = 0;
-      DW_STRING (comp_dir) = stub_comp_dir;
+      comp_dir->set_string_noncanonical (stub_comp_dir);
     }
 
   /* Set up for reading the DWO CU/TU.  */
@@ -19641,16 +19640,13 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
       case DW_FORM_GNU_str_index:
 	{
 	  unsigned int str_index = DW_UNSND (attr);
+	  gdb_assert (!attr->canonical_string_p ());
 	  if (reader->dwo_file != NULL)
-	    {
-	      DW_STRING (attr) = read_dwo_str_index (reader, str_index);
-	      DW_STRING_IS_CANONICAL (attr) = 0;
-	    }
+	    attr->set_string_noncanonical (read_dwo_str_index (reader,
+							       str_index));
 	  else
-	    {
-	      DW_STRING (attr) = read_stub_str_index (cu, str_index);
-	      DW_STRING_IS_CANONICAL (attr) = 0;
-	    }
+	    attr->set_string_noncanonical (read_stub_str_index (cu,
+								str_index));
 	  break;
 	}
       default:
@@ -19746,17 +19742,17 @@ read_attribute_value (const struct die_reader_specs *reader,
       }
       break;
     case DW_FORM_string:
-      DW_STRING (attr) = read_direct_string (abfd, info_ptr, &bytes_read);
-      DW_STRING_IS_CANONICAL (attr) = 0;
+      attr->set_string_noncanonical (read_direct_string (abfd, info_ptr,
+							 &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_strp:
       if (!cu->per_cu->is_dwz)
 	{
-	  DW_STRING (attr) = read_indirect_string (per_objfile,
-						   abfd, info_ptr, cu_header,
-						   &bytes_read);
-	  DW_STRING_IS_CANONICAL (attr) = 0;
+	  attr->set_string_noncanonical
+	    (read_indirect_string (per_objfile,
+				   abfd, info_ptr, cu_header,
+				   &bytes_read));
 	  info_ptr += bytes_read;
 	  break;
 	}
@@ -19764,9 +19760,9 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_line_strp:
       if (!cu->per_cu->is_dwz)
 	{
-	  DW_STRING (attr) = per_objfile->read_line_string (info_ptr, cu_header,
-							    &bytes_read);
-	  DW_STRING_IS_CANONICAL (attr) = 0;
+	  attr->set_string_noncanonical
+	    (per_objfile->read_line_string (info_ptr, cu_header,
+					    &bytes_read));
 	  info_ptr += bytes_read;
 	  break;
 	}
@@ -19777,8 +19773,8 @@ read_attribute_value (const struct die_reader_specs *reader,
 	LONGEST str_offset = cu_header->read_offset (abfd, info_ptr,
 						     &bytes_read);
 
-	DW_STRING (attr) = dwz->read_string (objfile, str_offset);
-	DW_STRING_IS_CANONICAL (attr) = 0;
+	attr->set_string_noncanonical
+	  (dwz->read_string (objfile, str_offset));
 	info_ptr += bytes_read;
       }
       break;
@@ -19944,6 +19940,7 @@ read_attribute (const struct die_reader_specs *reader,
 		const gdb_byte *info_ptr, bool *need_reprocess)
 {
   attr->name = abbrev->name;
+  attr->string_is_canonical = 0;
   return read_attribute_value (reader, attr, abbrev->form,
 			       abbrev->implicit_const, info_ptr,
 			       need_reprocess);
@@ -21861,7 +21858,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
     case DW_FORM_strx:
     case DW_FORM_GNU_str_index:
     case DW_FORM_GNU_strp_alt:
-      /* DW_STRING is already allocated on the objfile obstack, point
+      /* The string is already allocated on the objfile obstack, point
 	 directly to it.  */
       *bytes = (const gdb_byte *) attr->as_string ();
       break;
@@ -22645,8 +22642,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	      if (demangled == nullptr)
 		return nullptr;
 
-	      DW_STRING (attr) = objfile->intern (demangled.get ());
-	      DW_STRING_IS_CANONICAL (attr) = 1;
+	      attr->set_string_canonical (objfile->intern (demangled.get ()));
 	    }
 
 	  /* Strip any leading namespaces/classes, keep only the
@@ -22665,13 +22661,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   if (!attr->canonical_string_p ())
-    {
-      DW_STRING (attr) = dwarf2_canonicalize_name (attr_name, cu,
-						   objfile);
-      DW_STRING_IS_CANONICAL (attr) = 1;
-    }
-
-  /* We might have changed it just above.  */
+    attr->set_string_canonical (dwarf2_canonicalize_name (attr_name, cu,
+							  objfile));
   return attr->as_string ();
 }
 
@@ -22784,9 +22775,9 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_GNU_str_index:
 	case DW_FORM_GNU_strp_alt:
 	  fprintf_unfiltered (f, "string: \"%s\" (%s canonicalized)",
-		   DW_STRING (&die->attrs[i])
-		   ? DW_STRING (&die->attrs[i]) : "",
-		   die->attrs[i].canonical_string_p () ? "is" : "not");
+			      die->attrs[i].as_string ()
+			      ? die->attrs[i].as_string () : "",
+			      die->attrs[i].canonical_string_p () ? "is" : "not");
 	  break;
 	case DW_FORM_flag:
 	  if (DW_UNSND (&die->attrs[i]))
@@ -23180,7 +23171,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
     case DW_FORM_strx:
     case DW_FORM_GNU_str_index:
     case DW_FORM_GNU_strp_alt:
-      /* DW_STRING is already allocated on the objfile obstack, point
+      /* The string is already allocated on the objfile obstack, point
 	 directly to it.  */
       {
 	const char *attr_name = attr->as_string ();

@@ -1,5 +1,19 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_cutu_die_from_dwo)
+	(read_attribute_reprocess, read_attribute_value, read_attribute)
+	(dwarf2_const_value_attr, dwarf2_name, dump_die_shallow)
+	(dwarf2_fetch_constant_bytes): Update.
+	* dwarf2/attribute.h (struct attribute) <form_is_string>: Declare.
+	<set_string_noncanonical, set_string_canonical>: New methods.
+	<string_is_canonical>: Update comment.
+	<canonical_string_p>: Add assert.
+	(DW_STRING, DW_STRING_IS_CANONICAL): Remove.
+	* dwarf2/attribute.c (attribute::form_is_string): New method.
+	(attribute::string): Use it.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (anonymous_struct_prefix, dwarf2_name)
 	(dump_die_shallow): Use canonical_string_p.
 	* dwarf2/attribute.h (struct attribute) <canonical_string_p>: New

@@ -61,18 +61,26 @@ attribute::as_address () const
 
 /* See attribute.h.  */
 
+bool
+attribute::form_is_string () const
+{
+  return (form == DW_FORM_strp || form == DW_FORM_line_strp
+	  || form == DW_FORM_string
+	  || form == DW_FORM_strx
+	  || form == DW_FORM_strx1
+	  || form == DW_FORM_strx2
+	  || form == DW_FORM_strx3
+	  || form == DW_FORM_strx4
+	  || form == DW_FORM_GNU_str_index
+	  || form == DW_FORM_GNU_strp_alt);
+}
+
+/* See attribute.h.  */
+
 const char *
 attribute::as_string () const
 {
-  if (form == DW_FORM_strp || form == DW_FORM_line_strp
-      || form == DW_FORM_string
-      || form == DW_FORM_strx
-      || form == DW_FORM_strx1
-      || form == DW_FORM_strx2
-      || form == DW_FORM_strx3
-      || form == DW_FORM_strx4
-      || form == DW_FORM_GNU_str_index
-      || form == DW_FORM_GNU_strp_alt)
+  if (form_is_string ())
     return u.str;
   return nullptr;
 }
