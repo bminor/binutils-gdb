@@ -1,3 +1,12 @@
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (partial_die_info::read) <case
+	DW_AT_linkage_name>: Use value_as_string.
+	(dwarf2_string_attr): Use value_as_string.
+	* dwarf2/attribute.h (struct attribute) <value_as_string>: Declare
+	method.
+	* dwarf2/attribute.c (attribute::value_as_string): New method.
+
 2020-09-29  Pedro Alves  <pedro@palves.net>
 
 	* unittests/enum-flags-selftests.c: Check whether __GNUC__ is

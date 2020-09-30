@@ -19031,11 +19031,6 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	     assume they will be the same, and we only store the last
 	     one we see.  */
 	  linkage_name = attr.value_as_string ();
-	  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
-	     See https://github.com/rust-lang/rust/issues/32925.  */
-	  if (cu->language == language_rust && linkage_name != NULL
-	      && strchr (linkage_name, '{') != NULL)
-	    linkage_name = NULL;
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
