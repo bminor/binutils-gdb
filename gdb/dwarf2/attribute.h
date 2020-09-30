@@ -50,6 +50,13 @@ struct attribute
      otherwise return NULL.  */
   const char *as_string () const;
 
+  /* Return the block value.  The attribute must have block form.  */
+  dwarf_block *as_block () const
+  {
+    gdb_assert (form_is_block ());
+    return u.blk;
+  }
+
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
      You may use DW_UNSND (attr) to retrieve such offsets.
@@ -146,6 +153,13 @@ struct attribute
     string_is_canonical = 1;
   }
 
+  /* Set the block value for this attribute.  */
+  void set_block (dwarf_block *blk)
+  {
+    gdb_assert (form_is_block ());
+    u.blk = blk;
+  }
+
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;
   ENUM_BITFIELD(dwarf_form) form : 15;
@@ -176,7 +190,6 @@ private:
 /* Get at parts of an attribute structure.  */
 
 #define DW_UNSND(attr)     ((attr)->u.unsnd)
-#define DW_BLOCK(attr)     ((attr)->u.blk)
 #define DW_SND(attr)       ((attr)->u.snd)
 #define DW_ADDR(attr)	   ((attr)->u.addr)
 #define DW_SIGNATURE(attr) ((attr)->u.signature)

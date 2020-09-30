@@ -94,7 +94,8 @@ attribute::form_is_block () const
 	  || form == DW_FORM_block2
 	  || form == DW_FORM_block4
 	  || form == DW_FORM_block
-	  || form == DW_FORM_exprloc);
+	  || form == DW_FORM_exprloc
+	  || form == DW_FORM_data16);
 }
 
 /* See attribute.h.  */

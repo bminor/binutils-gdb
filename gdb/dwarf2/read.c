@@ -13934,15 +13934,16 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
     }
   SET_FIELD_DWARF_BLOCK (call_site->target, NULL);
-  if (!attr || (attr->form_is_block () && DW_BLOCK (attr)->size == 0))
+  if (!attr || (attr->form_is_block () && attr->as_block ()->size == 0))
     /* Keep NULL DWARF_BLOCK.  */;
   else if (attr->form_is_block ())
     {
       struct dwarf2_locexpr_baton *dlbaton;
+      struct dwarf_block *block = attr->as_block ();
 
       dlbaton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
-      dlbaton->data = DW_BLOCK (attr)->data;
-      dlbaton->size = DW_BLOCK (attr)->size;
+      dlbaton->data = block->data;
+      dlbaton->size = block->size;
       dlbaton->per_objfile = per_objfile;
       dlbaton->per_cu = cu->per_cu;
 
@@ -14052,12 +14053,14 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
+	  struct dwarf_block *block = loc->as_block ();
+
 	  parameter->u.dwarf_reg = dwarf_block_to_dwarf_reg
-	    (DW_BLOCK (loc)->data, &DW_BLOCK (loc)->data[DW_BLOCK (loc)->size]);
+	    (block->data, &block->data[block->size]);
 	  if (parameter->u.dwarf_reg != -1)
 	    parameter->kind = CALL_SITE_PARAMETER_DWARF_REG;
-	  else if (dwarf_block_to_sp_offset (gdbarch, DW_BLOCK (loc)->data,
-				    &DW_BLOCK (loc)->data[DW_BLOCK (loc)->size],
+	  else if (dwarf_block_to_sp_offset (gdbarch, block->data,
+				    &block->data[block->size],
 					     &parameter->u.fb_offset))
 	    parameter->kind = CALL_SITE_PARAMETER_FB_OFFSET;
 	  else
@@ -14083,8 +14086,10 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		     objfile_name (objfile));
 	  continue;
 	}
-      parameter->value = DW_BLOCK (attr)->data;
-      parameter->value_size = DW_BLOCK (attr)->size;
+
+      struct dwarf_block *block = attr->as_block ();
+      parameter->value = block->data;
+      parameter->value_size = block->size;
 
       /* Parameters are not pre-cleared by memset above.  */
       parameter->data_value = NULL;
@@ -14103,8 +14108,9 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		       objfile_name (objfile));
 	  else
 	    {
-	      parameter->data_value = DW_BLOCK (attr)->data;
-	      parameter->data_value_size = DW_BLOCK (attr)->size;
+	      block = attr->as_block ();
+	      parameter->data_value = block->data;
+	      parameter->data_value_size = block->size;
 	    }
 	}
     }
@@ -14914,7 +14920,7 @@ handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
       else if (attr->form_is_section_offset ())
 	dwarf2_complex_location_expr_complaint ();
       else if (attr->form_is_block ())
-	*offset = decode_locdesc (DW_BLOCK (attr), cu);
+	*offset = decode_locdesc (attr->as_block (), cu);
       else
 	dwarf2_complex_location_expr_complaint ();
 
@@ -14945,7 +14951,7 @@ handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
       else if (attr->form_is_block ())
 	{
 	  bool handled;
-	  CORE_ADDR offset = decode_locdesc (DW_BLOCK (attr), cu, &handled);
+	  CORE_ADDR offset = decode_locdesc (attr->as_block (), cu, &handled);
 	  if (handled)
 	    SET_FIELD_BITPOS (*field, offset * bits_per_byte);
 	  else
@@ -14955,8 +14961,8 @@ handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	      struct dwarf2_locexpr_baton *dlbaton
 		= XOBNEW (&objfile->objfile_obstack,
 			  struct dwarf2_locexpr_baton);
-	      dlbaton->data = DW_BLOCK (attr)->data;
-	      dlbaton->size = DW_BLOCK (attr)->size;
+	      dlbaton->data = attr->as_block ()->data;
+	      dlbaton->size = attr->as_block ()->size;
 	      /* When using this baton, we want to compute the address
 		 of the field, not the value.  This is why
 		 is_reference is set to false here.  */
@@ -15684,19 +15690,21 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   attr = dwarf2_attr (die, DW_AT_vtable_elem_location, cu);
   if (attr != nullptr)
     {
-      if (attr->form_is_block () && DW_BLOCK (attr)->size > 0)
+      if (attr->form_is_block () && attr->as_block ()->size > 0)
         {
-	  if (DW_BLOCK (attr)->data[0] == DW_OP_constu)
+	  struct dwarf_block *block = attr->as_block ();
+
+	  if (block->data[0] == DW_OP_constu)
 	    {
 	      /* Old-style GCC.  */
-	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu) + 2;
+	      fnp->voffset = decode_locdesc (block, cu) + 2;
 	    }
-	  else if (DW_BLOCK (attr)->data[0] == DW_OP_deref
-		   || (DW_BLOCK (attr)->size > 1
-		       && DW_BLOCK (attr)->data[0] == DW_OP_deref_size
-		       && DW_BLOCK (attr)->data[1] == cu->header.addr_size))
+	  else if (block->data[0] == DW_OP_deref
+		   || (block->size > 1
+		       && block->data[0] == DW_OP_deref_size
+		       && block->data[1] == cu->header.addr_size))
 	    {
-	      fnp->voffset = decode_locdesc (DW_BLOCK (attr), cu);
+	      fnp->voffset = decode_locdesc (block, cu);
 	      if ((fnp->voffset % cu->header.addr_size) != 0)
 		dwarf2_complex_location_expr_complaint ();
 	      else
@@ -16202,10 +16210,10 @@ handle_variant (struct die_info *die, struct type *type,
   if (discr == nullptr)
     {
       discr = dwarf2_attr (die, DW_AT_discr_list, cu);
-      if (discr == nullptr || DW_BLOCK (discr)->size == 0)
+      if (discr == nullptr || discr->as_block ()->size == 0)
 	variant.default_branch = true;
       else
-	variant.discr_list_data = DW_BLOCK (discr);
+	variant.discr_list_data = discr->as_block ();
     }
   else
     variant.discriminant_value = DW_UNSND (discr);
@@ -16957,7 +16965,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
       baton->size += 1 /* DW_OP_addr */ + cu->header.addr_size;
     }
   else
-    baton->size += DW_BLOCK (member_loc)->size;
+    baton->size += member_loc->as_block ()->size;
 
   ptr = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, baton->size);
   baton->data = ptr;
@@ -16977,8 +16985,9 @@ mark_common_block_symbol_computed (struct symbol *sym,
     {
       /* We have to copy the data here, because DW_OP_call4 will only
 	 use a DW_AT_location attribute.  */
-      memcpy (ptr, DW_BLOCK (member_loc)->data, DW_BLOCK (member_loc)->size);
-      ptr += DW_BLOCK (member_loc)->size;
+      struct dwarf_block *block = member_loc->as_block ();
+      memcpy (ptr, block->data, block->size);
+      ptr += block->size;
     }
 
   *ptr++ = DW_OP_plus;
@@ -18101,8 +18110,10 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       baton->property_type = default_type;
       baton->locexpr.per_cu = cu->per_cu;
       baton->locexpr.per_objfile = per_objfile;
-      baton->locexpr.size = DW_BLOCK (attr)->size;
-      baton->locexpr.data = DW_BLOCK (attr)->data;
+
+      struct dwarf_block *block = attr->as_block ();
+      baton->locexpr.size = block->size;
+      baton->locexpr.data = block->data;
       switch (attr->name)
 	{
 	case DW_AT_string_length:
@@ -18147,8 +18158,9 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 		baton->property_type = die_type (target_die, target_cu);
 		baton->locexpr.per_cu = cu->per_cu;
 		baton->locexpr.per_objfile = per_objfile;
-		baton->locexpr.size = DW_BLOCK (target_attr)->size;
-		baton->locexpr.data = DW_BLOCK (target_attr)->data;
+		struct dwarf_block *block = target_attr->as_block ();
+		baton->locexpr.size = block->size;
+		baton->locexpr.data = block->data;
 		baton->locexpr.is_reference = true;
 		prop->set_locexpr (baton);
 		gdb_assert (prop->baton () != NULL);
@@ -19045,7 +19057,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
           /* Support the .debug_loc offsets.  */
           if (attr.form_is_block ())
             {
-	       d.locdesc = DW_BLOCK (&attr);
+	      d.locdesc = attr.as_block ();
             }
           else if (attr.form_is_section_offset ())
             {
@@ -19701,7 +19713,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += 2;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->set_block (blk);
       break;
     case DW_FORM_block4:
       blk = dwarf_alloc_block (cu);
@@ -19709,7 +19721,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += 4;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->set_block (blk);
       break;
     case DW_FORM_data2:
       DW_UNSND (attr) = read_2_bytes (abfd, info_ptr);
@@ -19728,7 +19740,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       blk->size = 16;
       blk->data = read_n_bytes (abfd, info_ptr, 16);
       info_ptr += 16;
-      DW_BLOCK (attr) = blk;
+      attr->set_block (blk);
       break;
     case DW_FORM_sec_offset:
       DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr, &bytes_read);
@@ -19785,7 +19797,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += bytes_read;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->set_block (blk);
       break;
     case DW_FORM_block1:
       blk = dwarf_alloc_block (cu);
@@ -19793,7 +19805,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += 1;
       blk->data = read_n_bytes (abfd, info_ptr, blk->size);
       info_ptr += blk->size;
-      DW_BLOCK (attr) = blk;
+      attr->set_block (blk);
       break;
     case DW_FORM_data1:
       DW_UNSND (attr) = read_1_byte (abfd, info_ptr);
@@ -21300,7 +21312,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 
   /* A DW_AT_location attribute with no contents indicates that a
      variable has been optimized away.  */
-  if (attr->form_is_block () && DW_BLOCK (attr)->size == 0)
+  if (attr->form_is_block () && attr->as_block ()->size == 0)
     {
       SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
       return;
@@ -21311,32 +21323,36 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
      specified.  If this is just a DW_OP_addr, DW_OP_addrx, or
      DW_OP_GNU_addr_index then mark this symbol as LOC_STATIC.  */
 
-  if (attr->form_is_block ()
-      && ((DW_BLOCK (attr)->data[0] == DW_OP_addr
-	   && DW_BLOCK (attr)->size == 1 + cu_header->addr_size)
-	  || ((DW_BLOCK (attr)->data[0] == DW_OP_GNU_addr_index
-               || DW_BLOCK (attr)->data[0] == DW_OP_addrx)
-	      && (DW_BLOCK (attr)->size
-		  == 1 + leb128_size (&DW_BLOCK (attr)->data[1])))))
+  if (attr->form_is_block ())
     {
-      unsigned int dummy;
+      struct dwarf_block *block = attr->as_block ();
 
-      if (DW_BLOCK (attr)->data[0] == DW_OP_addr)
-	SET_SYMBOL_VALUE_ADDRESS
-	  (sym, cu->header.read_address (objfile->obfd,
-					 DW_BLOCK (attr)->data + 1,
-					 &dummy));
-      else
-	SET_SYMBOL_VALUE_ADDRESS
-	  (sym, read_addr_index_from_leb128 (cu, DW_BLOCK (attr)->data + 1,
+      if ((block->data[0] == DW_OP_addr
+	   && block->size == 1 + cu_header->addr_size)
+	  || ((block->data[0] == DW_OP_GNU_addr_index
+               || block->data[0] == DW_OP_addrx)
+	      && (block->size
+		  == 1 + leb128_size (&block->data[1]))))
+	{
+	  unsigned int dummy;
+
+	  if (block->data[0] == DW_OP_addr)
+	    SET_SYMBOL_VALUE_ADDRESS
+	      (sym, cu->header.read_address (objfile->obfd,
+					     block->data + 1,
 					     &dummy));
-      SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
-      fixup_symbol_section (sym, objfile);
-      SET_SYMBOL_VALUE_ADDRESS
-	(sym,
-	 SYMBOL_VALUE_ADDRESS (sym)
-	 + objfile->section_offsets[SYMBOL_SECTION (sym)]);
-      return;
+	  else
+	    SET_SYMBOL_VALUE_ADDRESS
+	      (sym, read_addr_index_from_leb128 (cu, block->data + 1,
+						 &dummy));
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+	  fixup_symbol_section (sym, objfile);
+	  SET_SYMBOL_VALUE_ADDRESS
+	    (sym,
+	     SYMBOL_VALUE_ADDRESS (sym)
+	     + objfile->section_offsets[SYMBOL_SECTION (sym)]);
+	  return;
+	}
     }
 
   /* NOTE drow/2002-01-30: It might be worthwhile to have a static
@@ -21868,7 +21884,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
     case DW_FORM_block:
     case DW_FORM_exprloc:
     case DW_FORM_data16:
-      blk = DW_BLOCK (attr);
+      blk = attr->as_block ();
       if (TYPE_LENGTH (type) != blk->size)
 	dwarf2_const_value_length_mismatch_complaint (name, blk->size,
 						      TYPE_LENGTH (type));
@@ -22726,11 +22742,11 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_block:
 	case DW_FORM_block1:
 	  fprintf_unfiltered (f, "block: size %s",
-			      pulongest (DW_BLOCK (&die->attrs[i])->size));
+			      pulongest (die->attrs[i].as_block ()->size));
 	  break;
 	case DW_FORM_exprloc:
 	  fprintf_unfiltered (f, "expression: size %s",
-			      pulongest (DW_BLOCK (&die->attrs[i])->size));
+			      pulongest (die->attrs[i].as_block ()->size));
 	  break;
 	case DW_FORM_data16:
 	  fprintf_unfiltered (f, "constant of 16 bytes");
@@ -23067,8 +23083,9 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 		 "is neither DW_FORM_block* nor DW_FORM_exprloc"),
 	       sect_offset_str (sect_off), objfile_name (objfile));
 
-      retval.data = DW_BLOCK (attr)->data;
-      retval.size = DW_BLOCK (attr)->size;
+      struct dwarf_block *block = attr->as_block ();
+      retval.data = block->data;
+      retval.size = block->size;
     }
   retval.per_objfile = per_objfile;
   retval.per_cu = cu->per_cu;
@@ -23185,8 +23202,11 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
     case DW_FORM_block:
     case DW_FORM_exprloc:
     case DW_FORM_data16:
-      result = DW_BLOCK (attr)->data;
-      *len = DW_BLOCK (attr)->size;
+      {
+	struct dwarf_block *block = attr->as_block ();
+	result = block->data;
+	*len = block->size;
+      }
       break;
 
       /* The DW_AT_const_value attributes are supposed to carry the
@@ -24013,8 +24033,9 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
 	     info_buffer for SYM's objfile; right now we never release
 	     that buffer, but when we do clean up properly this may
 	     need to change.  */
-	  baton->size = DW_BLOCK (attr)->size;
-	  baton->data = DW_BLOCK (attr)->data;
+	  struct dwarf_block *block = attr->as_block ();
+	  baton->size = block->size;
+	  baton->data = block->data;
 	}
       else
 	{

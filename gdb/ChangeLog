@@ -1,5 +1,20 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_call_site_scope)
+	(handle_data_member_location, dwarf2_add_member_fn)
+	(mark_common_block_symbol_computed, attr_to_dynamic_prop)
+	(partial_die_info::read, read_attribute_value)
+	(var_decode_location, dwarf2_const_value_attr, dump_die_shallow)
+	(dwarf2_fetch_die_loc_sect_off, dwarf2_fetch_constant_bytes)
+	(dwarf2_symbol_mark_computed): Update.
+	* dwarf2/attribute.h (struct attribute) <as_block, set_block>: New
+	methods.
+	(DW_BLOCK): Remove.
+	* dwarf2/attribute.c (attribute::form_is_block): Add
+	DW_FORM_data16.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_cutu_die_from_dwo)
 	(read_attribute_reprocess, read_attribute_value, read_attribute)
 	(dwarf2_const_value_attr, dwarf2_name, dump_die_shallow)
