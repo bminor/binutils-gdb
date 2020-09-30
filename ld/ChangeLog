@@ -1,3 +1,10 @@
+2020-09-30  Jeremy Drake  <sourceware-bugzilla@jdrake.com>
+
+	PR 26588
+	* emultempl/pe.em (_finish): Generate an import library for DLLs,
+	even if they have no exports.
+	* emultempl/pep.em (_finish): Likewise.
+
 2020-09-28  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsget.d,

@@ -1824,7 +1824,8 @@ gld_${EMULATION_NAME}_finish (void)
     {
       pep_dll_fill_sections (link_info.output_bfd, &link_info);
       if (command_line.out_implib_filename
-          && pep_def_file->num_exports != 0)
+          && (pep_def_file->num_exports != 0
+              || bfd_link_pic (&link_info)))
 	pep_dll_generate_implib (pep_def_file,
 				 command_line.out_implib_filename, &link_info);
     }
