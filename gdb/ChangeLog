@@ -1,3 +1,8 @@
+2020-09-30  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26683
+	* dwarf2/read.c (dwarf2_name): Update attr_name after attr is updated.
+
 2020-09-30  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.c (handle_variant): Use constant_value.

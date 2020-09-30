@@ -22632,6 +22632,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       if (!attr || attr_name == NULL)
 	{
 	  attr = dw2_linkage_name_attr (die, cu);
+	  attr_name = attr == nullptr ? nullptr : attr->as_string ();
 	  if (attr == NULL || attr_name == NULL)
 	    return NULL;
 
@@ -22645,6 +22646,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 		return nullptr;
 
 	      attr->set_string_canonical (objfile->intern (demangled.get ()));
+	      attr_name = attr->as_string ();
 	    }
 
 	  /* Strip any leading namespaces/classes, keep only the
