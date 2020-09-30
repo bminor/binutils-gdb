@@ -82,9 +82,18 @@ struct attribute
     return u.unsnd;
   }
 
+  /* Return the unsigned value.  Requires that the form be an unsigned
+     form, and that reprocessing not be needed.  */
+  ULONGEST as_unsigned () const
+  {
+    gdb_assert (form_is_unsigned ());
+    gdb_assert (!requires_reprocessing);
+    return u.unsnd;
+  }
+
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
-     You may use DW_UNSND (attr) to retrieve such offsets.
+     You may use the as_unsigned method to retrieve such offsets.
 
      Section 7.5.4, "Attribute Encodings", explains that no attribute
      may have a value that belongs to more than one of these classes; it

@@ -1,5 +1,15 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dw2_get_file_names_reader)
+	(dwarf2_build_include_psymtabs, handle_DW_AT_stmt_list)
+	(dwarf2_cu::setup_type_unit_groups, fill_in_loclist_baton)
+	(dwarf2_symbol_mark_computed): Use as_unsigned.
+	* dwarf2/attribute.h (struct attribute) <as_unsigned>: New
+	method.
+	<form_is_section_offset>: Update comment.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_access_attribute): Rename from
 	dwarf2_default_access_attribute.  Look up attribute.
 	(dwarf2_add_field, dwarf2_add_type_defn, dwarf2_add_member_fn):

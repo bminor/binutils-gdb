@@ -3210,11 +3210,11 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   sect_offset line_offset {};
 
   attr = dwarf2_attr (comp_unit_die, DW_AT_stmt_list, cu);
-  if (attr != nullptr)
+  if (attr != nullptr && attr->form_is_unsigned ())
     {
       struct quick_file_names find_entry;
 
-      line_offset = (sect_offset) DW_UNSND (attr);
+      line_offset = (sect_offset) attr->as_unsigned ();
 
       /* We may have already read in this line header (TU line header sharing).
 	 If we have we're done.  */
@@ -6297,8 +6297,8 @@ dwarf2_build_include_psymtabs (struct dwarf2_cu *cu,
   struct attribute *attr;
 
   attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
-  if (attr != nullptr)
-    lh = dwarf_decode_line_header ((sect_offset) DW_UNSND (attr), cu);
+  if (attr != nullptr && attr->form_is_unsigned ())
+    lh = dwarf_decode_line_header ((sect_offset) attr->as_unsigned (), cu);
   if (lh == NULL)
     return;  /* No linetable, so no includes.  */
 
@@ -11004,10 +11004,10 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   gdb_assert (! cu->per_cu->is_debug_types);
 
   attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
-  if (attr == NULL)
+  if (attr == NULL || !attr->form_is_unsigned ())
     return;
 
-  sect_offset line_offset = (sect_offset) DW_UNSND (attr);
+  sect_offset line_offset = (sect_offset) attr->as_unsigned ();
 
   /* The line header hash table is only created if needed (it exists to
      prevent redundant reading of the line table for partial_units).
@@ -11197,9 +11197,9 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
   /* We have to handle the case of both a missing DW_AT_stmt_list or bad
      debug info.  */
   line_header_up lh;
-  if (attr != NULL)
+  if (attr != NULL && attr->form_is_unsigned ())
     {
-      sect_offset line_offset = (sect_offset) DW_UNSND (attr);
+      sect_offset line_offset = (sect_offset) attr->as_unsigned ();
       lh = dwarf_decode_line_header (line_offset, this);
     }
   if (lh == NULL)
@@ -23983,8 +23983,8 @@ fill_in_loclist_baton (struct dwarf2_cu *cu,
   gdb_assert (baton->per_cu);
   /* We don't know how long the location list is, but make sure we
      don't run off the edge of the section.  */
-  baton->size = section->size - DW_UNSND (attr);
-  baton->data = section->buffer + DW_UNSND (attr);
+  baton->size = section->size - attr->as_unsigned ();
+  baton->data = section->buffer + attr->as_unsigned ();
   if (cu->base_address.has_value ())
     baton->base_address = *cu->base_address;
   else
@@ -24004,7 +24004,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
       /* .debug_loc{,.dwo} may not exist at all, or the offset may be outside
 	 the section.  If so, fall through to the complaint in the
 	 other branch.  */
-      && DW_UNSND (attr) < section->get_size (objfile))
+      && attr->as_unsigned () < section->get_size (objfile))
     {
       struct dwarf2_loclist_baton *baton;
 
