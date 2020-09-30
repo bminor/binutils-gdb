@@ -1,3 +1,9 @@
+2020-09-30  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-aarch64.c: Add Cortex-A78 and Cortex-A78AE cores.
+	* doc/c-aarch64.texi: Update docs.
+	* NEWS: Update news.
+
 2020-09-30  Alex Coplan  <alex.coplan@arm.com>
 
 	* NEWS: Mention recent Arm processor support.

@@ -1,4 +1,6 @@
 -*- text -*-
+* Add support for Cortex-A78 and Cortex-A78AE for AArch64.
+
 * Add support for ETMv4 (Embedded Trace Macrocell) system registers for
   AArch64.
 
