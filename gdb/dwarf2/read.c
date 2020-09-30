@@ -6160,12 +6160,12 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_entry_pc, cu);
   if (attr != nullptr)
-    cu->base_address = attr->value_as_address ();
+    cu->base_address = attr->as_address ();
   else
     {
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
-	cu->base_address = attr->value_as_address ();
+	cu->base_address = attr->as_address ();
     }
 }
 
@@ -13829,7 +13829,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		 sect_offset_str (die->sect_off), objfile_name (objfile));
       return;
     }
-  pc = attr->value_as_address () + baseaddr;
+  pc = attr->as_address () + baseaddr;
   pc = gdbarch_adjust_dwarf2_addr (gdbarch, pc);
 
   if (cu->call_site_htab == NULL)
@@ -14568,8 +14568,8 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
         {
-	  low = attr->value_as_address ();
-	  high = attr_high->value_as_address ();
+	  low = attr->as_address ();
+	  high = attr_high->as_address ();
 	  if (cu->header.version >= 4 && attr_high->form_is_constant ())
 	    high += low;
 	}
@@ -14748,8 +14748,8 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
         {
-          CORE_ADDR low = attr->value_as_address ();
-	  CORE_ADDR high = attr_high->value_as_address ();
+	  CORE_ADDR low = attr->as_address ();
+	  CORE_ADDR high = attr_high->as_address ();
 
 	  if (cu->header.version >= 4 && attr_high->form_is_constant ())
 	    high += low;
@@ -19030,15 +19030,15 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  /* Note that both forms of linkage name might appear.  We
 	     assume they will be the same, and we only store the last
 	     one we see.  */
-	  linkage_name = attr.value_as_string ();
+	  linkage_name = attr.as_string ();
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
-	  lowpc = attr.value_as_address ();
+	  lowpc = attr.as_address ();
 	  break;
 	case DW_AT_high_pc:
 	  has_high_pc_attr = 1;
-	  highpc = attr.value_as_address ();
+	  highpc = attr.as_address ();
 	  if (cu->header.version >= 4 && attr.form_is_constant ())
 		high_pc_relative = 1;
 	  break;
@@ -20276,7 +20276,7 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
 
   if (attr != NULL)
     {
-      str = attr->value_as_string ();
+      str = attr->as_string ();
       if (str == nullptr)
         complaint (_("string type expected for attribute %s for "
 		     "DIE at %s in module %s"),
@@ -21453,7 +21453,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    {
 	      CORE_ADDR addr;
 
-	      addr = attr->value_as_address ();
+	      addr = attr->as_address ();
 	      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + baseaddr);
 	      SET_SYMBOL_VALUE_ADDRESS (sym, addr);
 	      SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;

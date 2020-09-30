@@ -32,7 +32,7 @@
 /* See attribute.h.  */
 
 CORE_ADDR
-attribute::value_as_address () const
+attribute::as_address () const
 {
   CORE_ADDR addr;
 
@@ -62,7 +62,7 @@ attribute::value_as_address () const
 /* See attribute.h.  */
 
 const char *
-attribute::value_as_string () const
+attribute::as_string () const
 {
   if (form == DW_FORM_strp || form == DW_FORM_line_strp
       || form == DW_FORM_string

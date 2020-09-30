@@ -44,11 +44,11 @@ struct attribute
 {
   /* Read the given attribute value as an address, taking the
      attribute's form into account.  */
-  CORE_ADDR value_as_address () const;
+  CORE_ADDR as_address () const;
 
   /* If the attribute has a string form, return the string value;
      otherwise return NULL.  */
-  const char *value_as_string () const;
+  const char *as_string () const;
 
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
