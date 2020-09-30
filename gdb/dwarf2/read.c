@@ -14864,12 +14864,25 @@ producer_is_codewarrior (struct dwarf2_cu *cu)
   return cu->producer_is_codewarrior;
 }
 
-/* Return the default accessibility type if it is not overridden by
-   DW_AT_accessibility.  */
+/* Return the accessibility of DIE, as given by DW_AT_accessibility.
+   If that attribute is not available, return the appropriate
+   default.  */
 
 static enum dwarf_access_attribute
-dwarf2_default_access_attribute (struct die_info *die, struct dwarf2_cu *cu)
+dwarf2_access_attribute (struct die_info *die, struct dwarf2_cu *cu)
 {
+  attribute *attr = dwarf2_attr (die, DW_AT_accessibility, cu);
+  if (attr != nullptr)
+    {
+      LONGEST value = attr->constant_value (-1);
+      if (value == DW_ACCESS_public
+	  || value == DW_ACCESS_protected
+	  || value == DW_ACCESS_private)
+	return (dwarf_access_attribute) value;
+      complaint (_("Unhandled DW_AT_accessibility value (%s)"),
+		 plongest (value));
+    }
+
   if (cu->header.version < 3 || producer_is_gxx_lt_4_6 (cu))
     {
       /* The default DWARF 2 accessibility for members is public, the default
@@ -15002,11 +15015,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
   new_field->offset = die->sect_off;
 
-  attr = dwarf2_attr (die, DW_AT_accessibility, cu);
-  if (attr != nullptr)
-    new_field->accessibility = DW_UNSND (attr);
-  else
-    new_field->accessibility = dwarf2_default_access_attribute (die, cu);
+  new_field->accessibility = dwarf2_access_attribute (die, cu);
   if (new_field->accessibility != DW_ACCESS_public)
     fip->non_public_fields = true;
 
@@ -15193,12 +15202,7 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
   fp.type = read_type_die (die, cu);
 
   /* Save accessibility.  */
-  enum dwarf_access_attribute accessibility;
-  struct attribute *attr = dwarf2_attr (die, DW_AT_accessibility, cu);
-  if (attr != NULL)
-    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
-  else
-    accessibility = dwarf2_default_access_attribute (die, cu);
+  dwarf_access_attribute accessibility = dwarf2_access_attribute (die, cu);
   switch (accessibility)
     {
     case DW_ACCESS_public:
@@ -15210,8 +15214,6 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
     case DW_ACCESS_protected:
       fp.is_protected = 1;
       break;
-    default:
-      complaint (_("Unhandled DW_AT_accessibility value (%x)"), accessibility);
     }
 
   if (die->tag == DW_TAG_typedef)
@@ -15568,7 +15570,6 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   struct fn_field *fnp;
   const char *fieldname;
   struct type *this_type;
-  enum dwarf_access_attribute accessibility;
 
   if (cu->language == language_ada)
     error (_("unexpected member function in Ada type"));
@@ -15647,11 +15648,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
      is_volatile is irrelevant, as it is needed by gdb_mangle_name only.  */
 
   /* Get accessibility.  */
-  attr = dwarf2_attr (die, DW_AT_accessibility, cu);
-  if (attr != nullptr)
-    accessibility = (enum dwarf_access_attribute) DW_UNSND (attr);
-  else
-    accessibility = dwarf2_default_access_attribute (die, cu);
+  dwarf_access_attribute accessibility = dwarf2_access_attribute (die, cu);
   switch (accessibility)
     {
     case DW_ACCESS_private:

@@ -1,5 +1,12 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_access_attribute): Rename from
+	dwarf2_default_access_attribute.  Look up attribute.
+	(dwarf2_add_field, dwarf2_add_type_defn, dwarf2_add_member_fn):
+	Update.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (skip_one_die): Update.
 	(read_full_die_1): Change how reprocessing is done.
 	(partial_die_info::read): Update.
