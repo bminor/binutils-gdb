@@ -1,5 +1,21 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (lookup_dwo_id, get_type_unit_group)
+	(read_file_scope, dwarf2_get_pc_bounds)
+	(dwarf2_record_block_ranges, dwarf2_add_field, get_alignment)
+	(read_structure_type, handle_struct_member_die)
+	(read_enumeration_type, read_array_type, read_set_type)
+	(read_tag_pointer_type, read_tag_reference_type)
+	(read_subroutine_type, read_base_type, read_subrange_type)
+	(read_full_die_1, partial_die_info::read)
+	(partial_die_info::read, by, new_symbol)
+	(dwarf2_const_value_data, dwarf2_const_value_attr)
+	(dump_die_shallow, dwarf2_fetch_constant_bytes)
+	(prepare_one_comp_unit): Update.
+	* dwarf2/attribute.h (DW_UNSND): Remove.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_func_scope, prototyped_function_p)
 	(read_subroutine_type, partial_die_info::read)
 	(dwarf2_flag_true_p, new_symbol, dump_die_shallow)

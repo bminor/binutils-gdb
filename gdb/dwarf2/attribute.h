@@ -305,8 +305,4 @@ private:
   void get_ref_die_offset_complaint () const;
 };
 
-/* Get at parts of an attribute structure.  */
-
-#define DW_UNSND(attr)     ((attr)->u.unsnd)
-
 #endif /* GDB_DWARF2_ATTRIBUTE_H */

@@ -6985,9 +6985,9 @@ lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
     return cu->header.signature;
   struct attribute *attr;
   attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_id, cu);
-  if (attr == nullptr)
+  if (attr == nullptr || !attr->form_is_unsigned ())
     return gdb::optional<ULONGEST> ();
-  return DW_UNSND (attr);
+  return attr->as_unsigned ();
 }
 
 /* Subroutine of cutu_reader to simplify it.
@@ -7471,9 +7471,9 @@ get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
 
   /* Do we need to create a new group, or can we use an existing one?  */
 
-  if (stmt_list)
+  if (stmt_list != nullptr && stmt_list->form_is_unsigned ())
     {
-      line_offset = DW_UNSND (stmt_list);
+      line_offset = stmt_list->as_unsigned ();
       ++tu_stats->nr_symtab_sharers;
     }
   else
@@ -11147,19 +11147,19 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_macros, cu);
   if (attr == NULL)
     attr = dwarf2_attr (die, DW_AT_GNU_macros, cu);
-  if (attr && cu->line_header)
+  if (attr != nullptr && attr->form_is_unsigned () && cu->line_header)
     {
       if (dwarf2_attr (die, DW_AT_macro_info, cu))
 	complaint (_("CU refers to both DW_AT_macros and DW_AT_macro_info"));
 
-      dwarf_decode_macros (cu, DW_UNSND (attr), 1);
+      dwarf_decode_macros (cu, attr->as_unsigned (), 1);
     }
   else
     {
       attr = dwarf2_attr (die, DW_AT_macro_info, cu);
-      if (attr && cu->line_header)
+      if (attr != nullptr && attr->form_is_unsigned () && cu->line_header)
 	{
-	  unsigned int macro_offset = DW_UNSND (attr);
+	  unsigned int macro_offset = attr->as_unsigned ();
 
 	  dwarf_decode_macros (cu, macro_offset, 0);
 	}
@@ -14586,7 +14586,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
   else
     {
       attr = dwarf2_attr (die, DW_AT_ranges, cu);
-      if (attr != NULL)
+      if (attr != nullptr && attr->form_is_unsigned ())
 	{
 	  /* DW_AT_rnglists_base does not apply to DIEs from the DWO skeleton.
 	     We take advantage of the fact that DW_AT_ranges does not appear
@@ -14598,7 +14598,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	     either.  */
 	  int need_ranges_base = (die->tag != DW_TAG_compile_unit
 				  && attr->form != DW_FORM_rnglistx);
-	  unsigned int ranges_offset = (DW_UNSND (attr)
+	  unsigned int ranges_offset = (attr->as_unsigned ()
 					+ (need_ranges_base
 					   ? cu->ranges_base
 					   : 0));
@@ -14764,7 +14764,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
     }
 
   attr = dwarf2_attr (die, DW_AT_ranges, cu);
-  if (attr != nullptr)
+  if (attr != nullptr && attr->form_is_unsigned ())
     {
       /* DW_AT_rnglists_base does not apply to DIEs from the DWO skeleton.
 	 We take advantage of the fact that DW_AT_ranges does not appear
@@ -14779,7 +14779,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 
       /* The value of the DW_AT_ranges attribute is the offset of the
          address range list in the .debug_ranges section.  */
-      unsigned long offset = (DW_UNSND (attr)
+      unsigned long offset = (attr->as_unsigned ()
 			      + (need_ranges_base ? cu->ranges_base : 0));
 
       std::vector<blockrange> blockvec;
@@ -15040,7 +15040,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
       if (attr != nullptr)
 	{
-	  FIELD_BITSIZE (*fp) = DW_UNSND (attr);
+	  FIELD_BITSIZE (*fp) = attr->constant_value (0);
 	}
       else
 	{
@@ -15050,7 +15050,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get bit offset of field.  */
       handle_data_member_location (die, cu, fp);
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
-      if (attr != nullptr)
+      if (attr != nullptr && attr->form_is_unsigned ())
 	{
 	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	    {
@@ -15059,7 +15059,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	         anonymous object to the MSB of the field.  We don't
 	         have to do anything special since we don't need to
 	         know the size of the anonymous object.  */
-	      SET_FIELD_BITPOS (*fp, FIELD_BITPOS (*fp) + DW_UNSND (attr));
+	      SET_FIELD_BITPOS (*fp, (FIELD_BITPOS (*fp)
+				      + attr->as_unsigned ()));
 	    }
 	  else
 	    {
@@ -15070,15 +15071,15 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	         the field itself.  The result is the bit offset of
 	         the LSB of the field.  */
 	      int anonymous_size;
-	      int bit_offset = DW_UNSND (attr);
+	      int bit_offset = attr->as_unsigned ();
 
 	      attr = dwarf2_attr (die, DW_AT_byte_size, cu);
-	      if (attr != nullptr)
+	      if (attr != nullptr && attr->form_is_unsigned ())
 		{
 		  /* The size of the anonymous object containing
 		     the bit field is explicit, so use the
 		     indicated size (in bytes).  */
-		  anonymous_size = DW_UNSND (attr);
+		  anonymous_size = attr->as_unsigned ();
 		}
 	      else
 		{
@@ -15845,22 +15846,16 @@ get_alignment (struct dwarf2_cu *cu, struct die_info *die)
       return 0;
     }
 
-  ULONGEST align;
-  if (attr->form == DW_FORM_sdata)
+  LONGEST val = attr->constant_value (0);
+  if (val < 0)
     {
-      LONGEST val = attr->as_signed ();
-      if (val < 0)
-	{
-	  complaint (_("DW_AT_alignment value must not be negative"
-		       " - DIE at %s [in module %s]"),
-		     sect_offset_str (die->sect_off),
-		     objfile_name (cu->per_objfile->objfile));
-	  return 0;
-	}
-      align = val;
+      complaint (_("DW_AT_alignment value must not be negative"
+		   " - DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_objfile->objfile));
+      return 0;
     }
-  else
-    align = DW_UNSND (attr);
+  ULONGEST align = val;
 
   if (align == 0)
     {
@@ -16023,18 +16018,18 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
      the default value DW_CC_normal.  */
   attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
   if (attr != nullptr
-      && is_valid_DW_AT_calling_convention_for_type (DW_UNSND (attr)))
+      && is_valid_DW_AT_calling_convention_for_type (attr->constant_value (0)))
     {
       ALLOCATE_CPLUS_STRUCT_TYPE (type);
       TYPE_CPLUS_CALLING_CONVENTION (type)
-	= (enum dwarf_calling_convention) (DW_UNSND (attr));
+	= (enum dwarf_calling_convention) (attr->constant_value (0));
     }
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
     {
       if (attr->form_is_constant ())
-        TYPE_LENGTH (type) = DW_UNSND (attr);
+        TYPE_LENGTH (type) = attr->constant_value (0);
       else
 	{
 	  struct dynamic_prop prop;
@@ -16192,7 +16187,7 @@ handle_variant (struct die_info *die, struct type *type,
 	variant.discr_list_data = discr->as_block ();
     }
   else
-    variant.discriminant_value = DW_UNSND (discr);
+    variant.discriminant_value = discr->as_unsigned ();
 
   for (die_info *variant_child = die->child;
        variant_child != NULL;
@@ -16589,7 +16584,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
     {
-      TYPE_LENGTH (type) = DW_UNSND (attr);
+      TYPE_LENGTH (type) = attr->constant_value (0);
     }
   else
     {
@@ -16749,7 +16744,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_bit_stride, cu);
   if (attr != NULL)
-    bit_stride = DW_UNSND (attr);
+    bit_stride = attr->constant_value (0);
 
   /* Irix 6.2 native cc creates array types without children for
      arrays with unspecified length.  */
@@ -16815,10 +16810,10 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
      implementation may choose to implement triple vectors using this
      attribute.  */
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
-  if (attr != nullptr)
+  if (attr != nullptr && attr->form_is_unsigned ())
     {
-      if (DW_UNSND (attr) >= TYPE_LENGTH (type))
-	TYPE_LENGTH (type) = DW_UNSND (attr);
+      if (attr->as_unsigned () >= TYPE_LENGTH (type))
+	TYPE_LENGTH (type) = attr->as_unsigned ();
       else
 	complaint (_("DW_AT_byte_size for array type smaller "
 		     "than the total size of elements"));
@@ -16895,8 +16890,8 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
   set_type = create_set_type (NULL, domain_type);
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
-  if (attr != nullptr)
-    TYPE_LENGTH (set_type) = DW_UNSND (attr);
+  if (attr != nullptr && attr->form_is_unsigned ())
+    TYPE_LENGTH (set_type) = attr->as_unsigned ();
 
   maybe_set_alignment (cu, die, set_type);
 
@@ -17252,13 +17247,13 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr_byte_size = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr_byte_size)
-    byte_size = DW_UNSND (attr_byte_size);
+    byte_size = attr_byte_size->constant_value (cu_header->addr_size);
   else
     byte_size = cu_header->addr_size;
 
   attr_address_class = dwarf2_attr (die, DW_AT_address_class, cu);
   if (attr_address_class)
-    addr_class = DW_UNSND (attr_address_class);
+    addr_class = attr_address_class->constant_value (DW_ADDR_none);
   else
     addr_class = DW_ADDR_none;
 
@@ -17362,7 +17357,7 @@ read_tag_reference_type (struct die_info *die, struct dwarf2_cu *cu,
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
     {
-      TYPE_LENGTH (type) = DW_UNSND (attr);
+      TYPE_LENGTH (type) = attr->constant_value (cu_header->addr_size);
     }
   else
     {
@@ -17649,9 +17644,9 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
      the default value DW_CC_normal.  */
   attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
   if (attr != nullptr
-      && is_valid_DW_AT_calling_convention_for_subroutine (DW_UNSND (attr)))
+      && is_valid_DW_AT_calling_convention_for_subroutine (attr->constant_value (0)))
     TYPE_CALLING_CONVENTION (ftype)
-      = (enum dwarf_calling_convention) (DW_UNSND (attr));
+      = (enum dwarf_calling_convention) attr->constant_value (0);
   else if (cu->producer && strstr (cu->producer, "IBM XL C for OpenCL"))
     TYPE_CALLING_CONVENTION (ftype) = DW_CC_GDB_IBM_OpenCL;
   else
@@ -17920,11 +17915,11 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   gdbarch *arch;
 
   attr = dwarf2_attr (die, DW_AT_encoding, cu);
-  if (attr != nullptr)
-    encoding = DW_UNSND (attr);
+  if (attr != nullptr && attr->form_is_constant ())
+    encoding = attr->constant_value (0);
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
-    bits = DW_UNSND (attr) * TARGET_CHAR_BIT;
+    bits = attr->constant_value (0) * TARGET_CHAR_BIT;
   name = dwarf2_name (die, cu);
   if (!name)
     complaint (_("DW_AT_name missing from DW_TAG_base_type"));
@@ -17933,9 +17928,9 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   enum bfd_endian byte_order = gdbarch_byte_order (arch);
 
   attr = dwarf2_attr (die, DW_AT_endianity, cu);
-  if (attr)
+  if (attr != nullptr && attr->form_is_constant ())
     {
-      int endianity = DW_UNSND (attr);
+      int endianity = attr->constant_value (0);
 
       switch (endianity)
 	{
@@ -18045,19 +18040,20 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_INT)
     {
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
-      if (attr != nullptr && DW_UNSND (attr) <= 8 * TYPE_LENGTH (type))
+      if (attr != nullptr && attr->as_unsigned () <= 8 * TYPE_LENGTH (type))
 	{
-	  unsigned real_bit_size = DW_UNSND (attr);
+	  unsigned real_bit_size = attr->as_unsigned ();
 	  attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
 	  /* Only use the attributes if they make sense together.  */
 	  if (attr == nullptr
-	      || DW_UNSND (attr) + real_bit_size <= 8 * TYPE_LENGTH (type))
+	      || (attr->as_unsigned () + real_bit_size
+		  <= 8 * TYPE_LENGTH (type)))
 	    {
 	      TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size
 		= real_bit_size;
 	      if (attr != nullptr)
 		TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_offset
-		  = DW_UNSND (attr);
+		  = attr->as_unsigned ();
 	    }
 	}
     }
@@ -18420,7 +18416,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
-    TYPE_LENGTH (range_type) = DW_UNSND (attr);
+    TYPE_LENGTH (range_type) = attr->constant_value (0);
 
   maybe_set_alignment (cu, die, range_type);
 
@@ -18603,12 +18599,12 @@ read_full_die_1 (const struct die_reader_specs *reader,
     }
 
   struct attribute *attr = die->attr (DW_AT_str_offsets_base);
-  if (attr != nullptr)
-    cu->str_offsets_base = DW_UNSND (attr);
+  if (attr != nullptr && attr->form_is_unsigned ())
+    cu->str_offsets_base = attr->as_unsigned ();
 
   attr = die->attr (DW_AT_loclists_base);
   if (attr != nullptr)
-    cu->loclist_base = DW_UNSND (attr);
+    cu->loclist_base = attr->as_unsigned ();
 
   auto maybe_addr_base = die->addr_base ();
   if (maybe_addr_base.has_value ())
@@ -18616,7 +18612,7 @@ read_full_die_1 (const struct die_reader_specs *reader,
 
   attr = die->attr (DW_AT_rnglists_base);
   if (attr != nullptr)
-    cu->ranges_base = DW_UNSND (attr);
+    cu->ranges_base = attr->as_unsigned ();
 
   if (any_need_reprocess)
     {
@@ -19108,14 +19104,17 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	     Although DWARF now specifies a way to provide this
 	     information, we support this practice for backward
 	     compatibility.  */
-	  if (DW_UNSND (&attr) == DW_CC_program
+	  if (attr.constant_value (0) == DW_CC_program
 	      && cu->language == language_fortran)
 	    main_subprogram = 1;
 	  break;
 	case DW_AT_inline:
-	  if (DW_UNSND (&attr) == DW_INL_inlined
-	      || DW_UNSND (&attr) == DW_INL_declared_inlined)
-	    may_be_inlined = 1;
+	  {
+	    LONGEST value = attr.constant_value (-1);
+	    if (value == DW_INL_inlined
+		|| value == DW_INL_declared_inlined)
+	      may_be_inlined = 1;
+	  }
 	  break;
 
 	case DW_AT_import:
@@ -19143,7 +19142,10 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	       base, either.  */
 	    int need_ranges_base = (tag != DW_TAG_compile_unit
 				    && attr.form != DW_FORM_rnglistx);
-	    unsigned int ranges_offset = (DW_UNSND (&attr)
+	    /* It would be nice to reuse dwarf2_get_pc_bounds here,
+	       but that requires a full DIE, so instead we just
+	       reimplement it.  */
+	    unsigned int ranges_offset = (attr.constant_value (0)
 					  + (need_ranges_base
 					     ? cu->ranges_base
 					     : 0));
@@ -19622,10 +19624,10 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
 					    attr->as_unsigned_reprocess ()));
         break;
       case DW_FORM_loclistx:
-	 DW_UNSND (attr) = read_loclist_index (cu, DW_UNSND (attr));
+	attr->set_address (read_loclist_index (cu, attr->as_unsigned ()));
 	 break;
       case DW_FORM_rnglistx:
-        DW_UNSND (attr) = read_rnglist_index (cu, DW_UNSND (attr), tag);
+	attr->set_address (read_rnglist_index (cu, attr->as_unsigned (), tag));
         break;
       case DW_FORM_strx:
       case DW_FORM_strx1:
@@ -19918,11 +19920,11 @@ read_attribute_value (const struct die_reader_specs *reader,
      treat them as zero by default.  */
   if (attr->name == DW_AT_byte_size
       && form == DW_FORM_data4
-      && DW_UNSND (attr) >= 0xffffffff)
+      && attr->as_unsigned () >= 0xffffffff)
     {
       complaint
         (_("Suspicious DW_AT_byte_size value treated as zero instead of %s"),
-         hex_string (DW_UNSND (attr)));
+         hex_string (attr->as_unsigned ()));
       attr->set_unsigned (0);
     }
 
@@ -21420,16 +21422,15 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			  inlined_func ? DW_AT_call_line : DW_AT_decl_line,
 			  cu);
       if (attr != nullptr)
-	{
-	  SYMBOL_LINE (sym) = DW_UNSND (attr);
-	}
+	SYMBOL_LINE (sym) = attr->constant_value (0);
 
       attr = dwarf2_attr (die,
 			  inlined_func ? DW_AT_call_file : DW_AT_decl_file,
 			  cu);
-      if (attr != nullptr)
+      if (attr != nullptr && attr->form_is_unsigned ())
 	{
-	  file_name_index file_index = (file_name_index) DW_UNSND (attr);
+	  file_name_index file_index
+	    = (file_name_index) attr->as_unsigned ();
 	  struct file_entry *fe;
 
 	  if (cu->line_header != NULL)
@@ -21781,7 +21782,7 @@ dwarf2_const_value_data (const struct attribute *attr, struct obstack *obstack,
   struct objfile *objfile = cu->per_objfile->objfile;
   enum bfd_endian byte_order = bfd_big_endian (objfile->obfd) ?
 				BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
-  LONGEST l = DW_UNSND (attr);
+  LONGEST l = attr->constant_value (0);
 
   if (bits < sizeof (*value) * 8)
     {
@@ -21900,7 +21901,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
       break;
 
     case DW_FORM_udata:
-      *value = DW_UNSND (attr);
+      *value = attr->as_unsigned ();
       break;
 
     default:
@@ -22738,11 +22739,11 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  break;
 	case DW_FORM_ref_addr:
 	  fprintf_unfiltered (f, "ref address: ");
-	  fputs_filtered (hex_string (DW_UNSND (&die->attrs[i])), f);
+	  fputs_filtered (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
 	case DW_FORM_GNU_ref_alt:
 	  fprintf_unfiltered (f, "alt ref address: ");
-	  fputs_filtered (hex_string (DW_UNSND (&die->attrs[i])), f);
+	  fputs_filtered (hex_string (die->attrs[i].as_unsigned ()), f);
 	  break;
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:
@@ -22750,7 +22751,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_ref8:
 	case DW_FORM_ref_udata:
 	  fprintf_unfiltered (f, "constant ref: 0x%lx (adjusted)",
-			      (long) (DW_UNSND (&die->attrs[i])));
+			      (long) (die->attrs[i].as_unsigned ()));
 	  break;
 	case DW_FORM_data1:
 	case DW_FORM_data2:
@@ -22758,11 +22759,11 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_data8:
 	case DW_FORM_udata:
 	  fprintf_unfiltered (f, "constant: %s",
-			      pulongest (DW_UNSND (&die->attrs[i])));
+			      pulongest (die->attrs[i].as_unsigned ()));
 	  break;
 	case DW_FORM_sec_offset:
 	  fprintf_unfiltered (f, "section offset: %s",
-			      pulongest (DW_UNSND (&die->attrs[i])));
+			      pulongest (die->attrs[i].as_unsigned ()));
 	  break;
 	case DW_FORM_ref_sig8:
 	  fprintf_unfiltered (f, "signature: %s",
@@ -23238,7 +23239,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
     case DW_FORM_udata:
       type = die_type (die, cu);
       result = write_constant_as_bytes (obstack, byte_order,
-					type, DW_UNSND (attr), len);
+					type, attr->as_unsigned (), len);
       break;
 
     default:
@@ -24248,7 +24249,7 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
   /* Set the language we're debugging.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_language, cu);
   if (attr != nullptr)
-    set_cu_language (DW_UNSND (attr), cu);
+    set_cu_language (attr->constant_value (0), cu);
   else
     {
       cu->language = pretend_language;
