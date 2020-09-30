@@ -762,8 +762,8 @@ obj_elf_change_section (const char *name,
 	  /* We could be repurposing an undefined symbol here: make sure we
 	     reset sy_value to look like other section symbols in order to avoid
 	     trying to incorrectly resolve this section symbol later on.  */
-	  static const expressionS expr = { .X_op = O_constant };
-	  symbol_set_value_expression (secsym, &expr);
+	  static const expressionS exp = { .X_op = O_constant };
+	  symbol_set_value_expression (secsym, &exp);
 	  symbol_set_bfdsym (secsym, sec->symbol);
 	}
       else

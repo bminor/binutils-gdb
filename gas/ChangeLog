@@ -1,3 +1,9 @@
+2020-09-30  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (obj_elf_change_section): Rename variable to
+	avoid shadowing warning.
+	* symbols.c (symbol_entry_find): Init all symbol_flags fields.
+
 2020-09-29  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* NEWS: TRBE, ETE, ETMv4 and Cortex-X1 news updates.

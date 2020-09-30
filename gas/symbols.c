@@ -196,7 +196,8 @@ static void *
 symbol_entry_find (htab_t table, const char *name)
 {
   hashval_t hash = htab_hash_string (name);
-  symbol_entry_t needle = { { { 0 }, hash, name, 0, 0, 0 } };
+  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+			      hash, name, 0, 0, 0 } };
   return htab_find_with_hash (table, &needle, hash);
 }
 
