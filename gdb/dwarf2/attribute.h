@@ -235,6 +235,12 @@ struct attribute
     requires_reprocessing = 0;
   }
 
+  /* True if this attribute requires reprocessing.  */
+  bool requires_reprocessing_p () const
+  {
+    return requires_reprocessing;
+  }
+
 
   ENUM_BITFIELD(dwarf_attribute) name : 15;
 

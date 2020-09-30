@@ -1304,7 +1304,7 @@ static const struct cu_partial_die_info find_partial_die (sect_offset, int,
 
 static const gdb_byte *read_attribute (const struct die_reader_specs *,
 				       struct attribute *, struct attr_abbrev *,
-				       const gdb_byte *, bool *need_reprocess);
+				       const gdb_byte *);
 
 static void read_attribute_reprocess (const struct die_reader_specs *reader,
 				      struct attribute *attr, dwarf_tag tag);
@@ -8861,9 +8861,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
       /* The only abbrev we care about is DW_AT_sibling.  */
       if (abbrev->attrs[i].name == DW_AT_sibling)
 	{
-	  bool ignored;
-	  read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr,
-			  &ignored);
+	  read_attribute (reader, &attr, &abbrev->attrs[i], info_ptr);
 	  if (attr.form == DW_FORM_ref_addr)
 	    complaint (_("ignoring absolute DW_AT_sibling"));
 	  else
@@ -18617,15 +18615,13 @@ read_full_die_1 (const struct die_reader_specs *reader,
      attributes.  */
   die->num_attrs = abbrev->num_attrs;
 
-  std::vector<int> indexes_that_need_reprocess;
+  bool any_need_reprocess = false;
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
-      bool need_reprocess;
-      info_ptr =
-        read_attribute (reader, &die->attrs[i], &abbrev->attrs[i],
-			info_ptr, &need_reprocess);
-      if (need_reprocess)
-        indexes_that_need_reprocess.push_back (i);
+      info_ptr = read_attribute (reader, &die->attrs[i], &abbrev->attrs[i],
+				 info_ptr);
+      if (die->attrs[i].requires_reprocessing_p ())
+	any_need_reprocess = true;
     }
 
   struct attribute *attr = die->attr (DW_AT_str_offsets_base);
@@ -18644,8 +18640,14 @@ read_full_die_1 (const struct die_reader_specs *reader,
   if (attr != nullptr)
     cu->ranges_base = DW_UNSND (attr);
 
-  for (int index : indexes_that_need_reprocess)
-    read_attribute_reprocess (reader, &die->attrs[index], die->tag);
+  if (any_need_reprocess)
+    {
+      for (i = 0; i < abbrev->num_attrs; ++i)
+	{
+	  if (die->attrs[i].requires_reprocessing_p ())
+	    read_attribute_reprocess (reader, &die->attrs[i], die->tag);
+	}
+    }
   *diep = die;
   return info_ptr;
 }
@@ -19007,13 +19009,11 @@ partial_die_info::read (const struct die_reader_specs *reader,
   for (i = 0; i < abbrev.num_attrs; ++i)
     {
       attribute attr;
-      bool need_reprocess;
-      info_ptr = read_attribute (reader, &attr, &abbrev.attrs[i],
-				 info_ptr, &need_reprocess);
+      info_ptr = read_attribute (reader, &attr, &abbrev.attrs[i], info_ptr);
       /* String and address offsets that need to do the reprocessing have
          already been read at this point, so there is no need to wait until
 	 the loop terminates to do the reprocessing.  */
-      if (need_reprocess)
+      if (attr.requires_reprocessing_p ())
 	read_attribute_reprocess (reader, &attr, tag);
       /* Store the data if it is of an attribute we want to keep in a
          partial symbol table.  */
@@ -19676,8 +19676,7 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
 static const gdb_byte *
 read_attribute_value (const struct die_reader_specs *reader,
 		      struct attribute *attr, unsigned form,
-		      LONGEST implicit_const, const gdb_byte *info_ptr,
-		      bool *need_reprocess)
+		      LONGEST implicit_const, const gdb_byte *info_ptr)
 {
   struct dwarf2_cu *cu = reader->cu;
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
@@ -19686,7 +19685,6 @@ read_attribute_value (const struct die_reader_specs *reader,
   struct comp_unit_head *cu_header = &cu->header;
   unsigned int bytes_read;
   struct dwarf_block *blk;
-  *need_reprocess = false;
 
   attr->form = (enum dwarf_form) form;
   switch (form)
@@ -19756,9 +19754,9 @@ read_attribute_value (const struct die_reader_specs *reader,
       break;
     case DW_FORM_loclistx:
       {
-	 *need_reprocess = true;
-	 DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
-	 info_ptr += bytes_read;
+	attr->set_unsigned_reprocess (read_unsigned_leb128 (abfd, info_ptr,
+							    &bytes_read));
+	info_ptr += bytes_read;
       }
       break;
     case DW_FORM_string:
@@ -19828,8 +19826,12 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += bytes_read;
       break;
     case DW_FORM_rnglistx:
-      *need_reprocess = true;
-      /* FALLTHROUGH */
+      {
+	attr->set_unsigned_reprocess (read_unsigned_leb128 (abfd, info_ptr,
+							    &bytes_read));
+	info_ptr += bytes_read;
+      }
+      break;
     case DW_FORM_udata:
       attr->set_unsigned (read_unsigned_leb128 (abfd, info_ptr, &bytes_read));
       info_ptr += bytes_read;
@@ -19873,14 +19875,13 @@ read_attribute_value (const struct die_reader_specs *reader,
 	  info_ptr += bytes_read;
 	}
       info_ptr = read_attribute_value (reader, attr, form, implicit_const,
-				       info_ptr, need_reprocess);
+				       info_ptr);
       break;
     case DW_FORM_implicit_const:
       attr->set_signed (implicit_const);
       break;
     case DW_FORM_addrx:
     case DW_FORM_GNU_addr_index:
-      *need_reprocess = true;
       attr->set_unsigned_reprocess (read_unsigned_leb128 (abfd, info_ptr,
 							  &bytes_read));
       info_ptr += bytes_read;
@@ -19918,9 +19919,8 @@ read_attribute_value (const struct die_reader_specs *reader,
 	    str_index = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
 	    info_ptr += bytes_read;
 	  }
-	*need_reprocess = true;
 	attr->set_unsigned_reprocess (str_index);
-	}
+      }
       break;
     default:
       error (_("Dwarf Error: Cannot handle %s in DWARF reader [in module %s]"),
@@ -19956,14 +19956,13 @@ read_attribute_value (const struct die_reader_specs *reader,
 static const gdb_byte *
 read_attribute (const struct die_reader_specs *reader,
 		struct attribute *attr, struct attr_abbrev *abbrev,
-		const gdb_byte *info_ptr, bool *need_reprocess)
+		const gdb_byte *info_ptr)
 {
   attr->name = abbrev->name;
   attr->string_is_canonical = 0;
   attr->requires_reprocessing = 0;
   return read_attribute_value (reader, attr, abbrev->form,
-			       abbrev->implicit_const, info_ptr,
-			       need_reprocess);
+			       abbrev->implicit_const, info_ptr);
 }
 
 /* Return pointer to string at .debug_str offset STR_OFFSET.  */

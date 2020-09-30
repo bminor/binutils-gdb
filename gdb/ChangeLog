@@ -1,5 +1,15 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (skip_one_die): Update.
+	(read_full_die_1): Change how reprocessing is done.
+	(partial_die_info::read): Update.
+	(read_attribute_value): Remove need_reprocess parameter.
+	(read_attribute): Likewise.
+	* dwarf2/attribute.h (struct attribute) <requires_reprocessing_p>:
+	New method.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_attribute_reprocess, read_attribute_value)
 	(dwarf2_const_value_attr, dump_die_shallow)
 	(dwarf2_fetch_constant_bytes): Update.
