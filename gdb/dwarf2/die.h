@@ -20,6 +20,8 @@
 #ifndef GDB_DWARF2_DIE_H
 #define GDB_DWARF2_DIE_H
 
+#include "complaints.h"
+
 /* This data structure holds a complete die structure.  */
 struct die_info
 {
@@ -40,10 +42,15 @@ struct die_info
   {
     for (unsigned i = 0; i < num_attrs; ++i)
       if (attrs[i].name == DW_AT_addr_base
-	  || attrs[i].name == DW_AT_GNU_addr_base)
+	   || attrs[i].name == DW_AT_GNU_addr_base)
 	{
-	  /* If both exist, just use the first one.  */
-	  return DW_UNSND (&attrs[i]);
+	  if (attrs[i].form_is_unsigned ())
+	    {
+	      /* If both exist, just use the first one.  */
+	      return attrs[i].as_unsigned ();
+	    }
+	  complaint (_("address base attribute (offset %s) as wrong form"),
+		     sect_offset_str (sect_off));
 	}
     return gdb::optional<ULONGEST> ();
   }
@@ -57,8 +64,13 @@ struct die_info
       if (attrs[i].name == DW_AT_rnglists_base
 	  || attrs[i].name == DW_AT_GNU_ranges_base)
 	{
-	  /* If both exist, just use the first one.  */
-	  return DW_UNSND (&attrs[i]);
+	  if (attrs[i].form_is_unsigned ())
+	    {
+	      /* If both exist, just use the first one.  */
+	      return attrs[i].as_unsigned ();
+	    }
+	  complaint (_("ranges base attribute (offset %s) as wrong form"),
+		     sect_offset_str (sect_off));
 	}
     return 0;
   }

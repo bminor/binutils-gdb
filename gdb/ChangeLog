@@ -1,5 +1,10 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/die.h (struct die_info) <addr_base, ranges_base>: Check
+	the attribute's form.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (is_valid_DW_AT_defaulted): Move to attribute.c.
 	(dwarf2_add_member_fn): Update.
 	* dwarf2/attribute.h (struct attribute) <defaulted>: Declare.
