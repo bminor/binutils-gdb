@@ -1,5 +1,9 @@
 2020-09-30  Alex Coplan  <alex.coplan@arm.com>
 
+	* NEWS: Mention recent Arm processor support.
+
+2020-09-30  Alex Coplan  <alex.coplan@arm.com>
+
 	* config/tc-aarch64.c (aarch64_cpus): Add neoverse-n2.
 	* doc/c-aarch64.texi: Document support for Neoverse N2.
 

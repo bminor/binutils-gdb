@@ -10,6 +10,11 @@
 
 * Add support for Cortex-X1 for ARM.
 
+* Add support for Arm's Cortex-R82, Neoverse V1, and Neoverse N2
+  processors.
+
+* Add support for Armv8-R AArch64.
+
 * Add support for Intel TDX instructions.
 
 * Add support for Intel Key Locker instructions.
