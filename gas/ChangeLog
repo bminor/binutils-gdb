@@ -1,3 +1,16 @@
+2020-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26685
+	* config/tc-i386.c (process_suffix): Check the register operand
+	for the address size prefix if the memory operand is symbol(%rip).
+	* testsuite/gas/i386/x86-64-enqcmd.s: Add tests with RIP-relative
+	addressing.
+	* testsuite/gas/i386/x86-64-movdir.s: Likewise.
+	* testsuite/gas/i386/x86-64-enqcmd-intel.d: Updated.
+	* testsuite/gas/i386/x86-64-enqcmd.d: Likewise.
+	* testsuite/gas/i386/x86-64-movdir-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-movdir.d: Likewise.
+
 2020-09-30  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* config/tc-aarch64.c: Add Cortex-A78 and Cortex-A78AE cores.

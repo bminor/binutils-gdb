@@ -7178,6 +7178,19 @@ process_suffix (void)
 	  unsigned int op;
 	  enum { need_word, need_dword, need_qword } need;
 
+	  /* Check the register operand for the address size prefix if
+	     the memory operand is symbol(%rip).  */
+	  if (i.mem_operands == 1
+	      && i.reg_operands == 1
+	      && i.operands == 2
+	      && i.base_reg
+	      && i.base_reg->reg_num == RegIP
+	      && i.base_reg->reg_type.bitfield.qword
+	      && i.types[1].bitfield.class == Reg
+	      && i.op[1].regs->reg_type.bitfield.dword
+	      && !add_prefix (ADDR_PREFIX_OPCODE))
+	    return 0;
+
 	  if (flag_code == CODE_32BIT)
 	    need = i.prefix[ADDR_PREFIX] ? need_word : need_dword;
 	  else if (i.prefix[ADDR_PREFIX])
