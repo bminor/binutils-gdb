@@ -51,10 +51,10 @@ attribute::as_address () const
 	 as well as update callers to pass in at least the CU's DWARF
 	 version.  This is more overhead than what we're willing to
 	 expand for a pretty rare case.  */
-      addr = DW_UNSND (this);
+      addr = u.unsnd;
     }
   else
-    addr = DW_ADDR (this);
+    addr = u.addr;
 
   return addr;
 }
@@ -73,7 +73,7 @@ attribute::as_string () const
       || form == DW_FORM_strx4
       || form == DW_FORM_GNU_str_index
       || form == DW_FORM_GNU_strp_alt)
-    return DW_STRING (this);
+    return u.str;
   return nullptr;
 }
 
@@ -135,13 +135,13 @@ LONGEST
 attribute::constant_value (int default_value) const
 {
   if (form == DW_FORM_sdata || form == DW_FORM_implicit_const)
-    return DW_SND (this);
+    return u.snd;
   else if (form == DW_FORM_udata
 	   || form == DW_FORM_data1
 	   || form == DW_FORM_data2
 	   || form == DW_FORM_data4
 	   || form == DW_FORM_data8)
-    return DW_UNSND (this);
+    return u.unsnd;
   else
     {
       /* For DW_FORM_data16 see attribute::form_is_constant.  */

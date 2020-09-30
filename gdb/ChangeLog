@@ -1,5 +1,13 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/attribute.c (attribute::address): Don't use DW_UNSND or
+	DW_ADDR.
+	(attribute::string): Don't use DW_STRING.
+	(attribute::get_ref_die_offset): Don't use DW_UNSND.
+	(attribute::constant_value): Don't use DW_UNSND or DW_SND.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_find_base_address, read_call_site_scope)
 	(dwarf2_get_pc_bounds, dwarf2_record_block_ranges)
 	(partial_die_info::read, dwarf2_string_attr, new_symbol): Update.
