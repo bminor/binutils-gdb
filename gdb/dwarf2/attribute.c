@@ -199,3 +199,26 @@ attribute::form_requires_reprocessing () const
 	  || form == DW_FORM_addrx
 	  || form == DW_FORM_GNU_addr_index);
 }
+
+/* See attribute.h.  */
+
+dwarf_defaulted_attribute
+attribute::defaulted () const
+{
+  LONGEST value = constant_value (-1);
+
+  switch (value)
+    {
+    case DW_DEFAULTED_no:
+    case DW_DEFAULTED_in_class:
+    case DW_DEFAULTED_out_of_class:
+      return (dwarf_defaulted_attribute) value;
+    }
+
+  /* If the form was not constant, we already complained in
+     constant_value, so there's no need to complain again.  */
+  if (form_is_constant ())
+    complaint (_("unrecognized DW_AT_defaulted value (%s)"),
+	       plongest (value));
+  return DW_DEFAULTED_no;
+}

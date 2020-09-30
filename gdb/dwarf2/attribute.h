@@ -29,6 +29,7 @@
 
 #include "dwarf2.h"
 #include "gdbtypes.h"
+#include "gdbsupport/gdb_optional.h"
 
 /* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
@@ -250,6 +251,12 @@ struct attribute
     return requires_reprocessing;
   }
 
+  /* Return the value as one of the recognized enum
+     dwarf_defaulted_attribute constants according to DWARF5 spec,
+     Table 7.24.  If the value is incorrect, or if this attribute has
+     the wrong form, then a complaint is issued and DW_DEFAULTED_no is
+     returned.  */
+  dwarf_defaulted_attribute defaulted () const;
 
   ENUM_BITFIELD(dwarf_attribute) name : 15;
 

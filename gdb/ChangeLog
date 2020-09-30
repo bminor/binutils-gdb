@@ -1,5 +1,13 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (is_valid_DW_AT_defaulted): Move to attribute.c.
+	(dwarf2_add_member_fn): Update.
+	* dwarf2/attribute.h (struct attribute) <defaulted>: Declare.
+	* dwarf2/attribute.c (attribute::defaulted): New method, from
+	is_valid_DW_AT_defaulted.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dw2_get_file_names_reader)
 	(dwarf2_build_include_psymtabs, handle_DW_AT_stmt_list)
 	(dwarf2_cu::setup_type_unit_groups, fill_in_loclist_baton)

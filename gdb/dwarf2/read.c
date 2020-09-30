@@ -15538,25 +15538,6 @@ dwarf2_is_constructor (struct die_info *die, struct dwarf2_cu *cu)
 	  && (type_name[len] == '\0' || type_name[len] == '<'));
 }
 
-/* Check if the given VALUE is a recognized enum
-   dwarf_defaulted_attribute constant according to DWARF5 spec,
-   Table 7.24.  */
-
-static bool
-is_valid_DW_AT_defaulted (ULONGEST value)
-{
-  switch (value)
-    {
-    case DW_DEFAULTED_no:
-    case DW_DEFAULTED_in_class:
-    case DW_DEFAULTED_out_of_class:
-      return true;
-    }
-
-  complaint (_("unrecognized DW_AT_defaulted value (%s)"), pulongest (value));
-  return false;
-}
-
 /* Add a member function to the proper fieldlist.  */
 
 static void
@@ -15666,8 +15647,8 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   /* Check for defaulted methods.  */
   attr = dwarf2_attr (die, DW_AT_defaulted, cu);
-  if (attr != nullptr && is_valid_DW_AT_defaulted (DW_UNSND (attr)))
-    fnp->defaulted = (enum dwarf_defaulted_attribute) DW_UNSND (attr);
+  if (attr != nullptr)
+    fnp->defaulted = attr->defaulted ();
 
   /* Check for deleted methods.  */
   attr = dwarf2_attr (die, DW_AT_deleted, cu);
