@@ -1,5 +1,14 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (get_alignment, read_array_order)
+	(read_attribute_value, dwarf2_const_value_attr)
+	(dump_die_shallow, dwarf2_fetch_constant_bytes): Update.
+	* dwarf2/attribute.h (struct attribute) <as_signed, set_signed>:
+	New methods.
+	(DW_SND): Remove.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_attribute_value, lookup_die_type)
 	(dump_die_shallow, follow_die_sig, get_DW_AT_signature_type):
 	Update.

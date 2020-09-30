@@ -65,6 +65,14 @@ struct attribute
     return u.signature;
   }
 
+  /* Return the signed value.  The attribute must have the appropriate
+     form.  */
+  LONGEST as_signed () const
+  {
+    gdb_assert (form == DW_FORM_sdata || form == DW_FORM_implicit_const);
+    return u.snd;
+  }
+
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
      You may use DW_UNSND (attr) to retrieve such offsets.
@@ -175,6 +183,13 @@ struct attribute
     u.signature = signature;
   }
 
+  /* Set this attribute to a signed integer.  */
+  void set_signed (LONGEST snd)
+  {
+    gdb_assert (form == DW_FORM_sdata || form == DW_FORM_implicit_const);
+    u.snd = snd;
+  }
+
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;
   ENUM_BITFIELD(dwarf_form) form : 15;
@@ -205,7 +220,6 @@ private:
 /* Get at parts of an attribute structure.  */
 
 #define DW_UNSND(attr)     ((attr)->u.unsnd)
-#define DW_SND(attr)       ((attr)->u.snd)
 #define DW_ADDR(attr)	   ((attr)->u.addr)
 
 #endif /* GDB_DWARF2_ATTRIBUTE_H */

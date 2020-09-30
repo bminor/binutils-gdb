@@ -15872,7 +15872,7 @@ get_alignment (struct dwarf2_cu *cu, struct die_info *die)
   ULONGEST align;
   if (attr->form == DW_FORM_sdata)
     {
-      LONGEST val = DW_SND (attr);
+      LONGEST val = attr->as_signed ();
       if (val < 0)
 	{
 	  complaint (_("DW_AT_alignment value must not be negative"
@@ -16871,7 +16871,11 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_ordering, cu);
 
   if (attr != nullptr)
-    return (enum dwarf_array_dim_ordering) DW_SND (attr);
+    {
+      LONGEST val = attr->constant_value (-1);
+      if (val == DW_ORD_row_major || val == DW_ORD_col_major)
+	return (enum dwarf_array_dim_ordering) val;
+    }
 
   /* GNU F77 is a special case, as at 08/2004 array type info is the
      opposite order to the dwarf2 specification, but data is still
@@ -19819,7 +19823,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       DW_UNSND (attr) = 1;
       break;
     case DW_FORM_sdata:
-      DW_SND (attr) = read_signed_leb128 (abfd, info_ptr, &bytes_read);
+      attr->set_signed (read_signed_leb128 (abfd, info_ptr, &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_rnglistx:
@@ -19870,7 +19874,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 				       info_ptr, need_reprocess);
       break;
     case DW_FORM_implicit_const:
-      DW_SND (attr) = implicit_const;
+      attr->set_signed (implicit_const);
       break;
     case DW_FORM_addrx:
     case DW_FORM_GNU_addr_index:
@@ -21911,7 +21915,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 
     case DW_FORM_sdata:
     case DW_FORM_implicit_const:
-      *value = DW_SND (attr);
+      *value = attr->as_signed ();
       break;
 
     case DW_FORM_udata:
@@ -22772,7 +22776,6 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_data4:
 	case DW_FORM_data8:
 	case DW_FORM_udata:
-	case DW_FORM_sdata:
 	  fprintf_unfiltered (f, "constant: %s",
 			      pulongest (DW_UNSND (&die->attrs[i])));
 	  break;
@@ -22810,9 +22813,10 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  fprintf_unfiltered (f,
 			      "unexpected attribute form: DW_FORM_indirect");
 	  break;
+	case DW_FORM_sdata:
 	case DW_FORM_implicit_const:
 	  fprintf_unfiltered (f, "constant: %s",
-			      plongest (DW_SND (&die->attrs[i])));
+			      plongest (die->attrs[i].as_signed ()));
 	  break;
 	default:
 	  fprintf_unfiltered (f, "unsupported attribute form: %d.",
@@ -23247,7 +23251,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
     case DW_FORM_implicit_const:
       type = die_type (die, cu);
       result = write_constant_as_bytes (obstack, byte_order,
-					type, DW_SND (attr), len);
+					type, attr->as_signed (), len);
       break;
 
     case DW_FORM_udata:
