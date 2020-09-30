@@ -1,5 +1,17 @@
 2020-09-29  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_attribute_reprocess, read_attribute_value)
+	(dwarf2_const_value_attr, dump_die_shallow)
+	(dwarf2_fetch_constant_bytes): Update.
+	* dwarf2/attribute.h (struct attribute) <form_is_ref>: Update
+	comment.
+	<set_address>: New method.
+	(DW_ADDR): Remove.
+	* dwarf2/attribute.c (attribute::form_is_ref): Update comment.
+	(attribute::as_string, attribute::as_address): Add assert.
+
+2020-09-29  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_cutu_die_from_dwo): Use OBSTACK_ZALLOC.
 	(read_attribute_reprocess, read_attribute_value): Update.
 	(read_attribute): Clear requires_reprocessing.

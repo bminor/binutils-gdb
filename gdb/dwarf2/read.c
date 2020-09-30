@@ -19640,7 +19640,8 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
     {
       case DW_FORM_addrx:
       case DW_FORM_GNU_addr_index:
-        DW_ADDR (attr) = read_addr_index (cu, attr->as_unsigned_reprocess ());
+	attr->set_address (read_addr_index (cu,
+					    attr->as_unsigned_reprocess ()));
         break;
       case DW_FORM_loclistx:
 	 DW_UNSND (attr) = read_loclist_index (cu, DW_UNSND (attr));
@@ -19707,8 +19708,9 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_addr:
       {
 	struct gdbarch *gdbarch = objfile->arch ();
-	DW_ADDR (attr) = cu->header.read_address (abfd, info_ptr, &bytes_read);
-	DW_ADDR (attr) = gdbarch_adjust_dwarf2_addr (gdbarch, DW_ADDR (attr));
+	CORE_ADDR addr = cu->header.read_address (abfd, info_ptr, &bytes_read);
+	addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr);
+	attr->set_address (addr);
 	info_ptr += bytes_read;
       }
       break;
@@ -21871,7 +21873,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 
 	data[0] = DW_OP_addr;
 	store_unsigned_integer (&data[1], cu_header->addr_size,
-				byte_order, DW_ADDR (attr));
+				byte_order, attr->as_address ());
 	data[cu_header->addr_size + 1] = DW_OP_stack_value;
       }
       break;
@@ -22741,7 +22743,7 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	case DW_FORM_addrx:
 	case DW_FORM_GNU_addr_index:
 	  fprintf_unfiltered (f, "address: ");
-	  fputs_filtered (hex_string (DW_ADDR (&die->attrs[i])), f);
+	  fputs_filtered (hex_string (die->attrs[i].as_address ()), f);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:
@@ -23185,7 +23187,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
 
 	*len = cu->header.addr_size;
 	tem = (gdb_byte *) obstack_alloc (obstack, *len);
-	store_unsigned_integer (tem, *len, byte_order, DW_ADDR (attr));
+	store_unsigned_integer (tem, *len, byte_order, attr->as_address ());
 	result = tem;
       }
       break;

@@ -36,6 +36,8 @@ attribute::as_address () const
 {
   CORE_ADDR addr;
 
+  gdb_assert (!requires_reprocessing);
+
   if (form != DW_FORM_addr && form != DW_FORM_addrx
       && form != DW_FORM_GNU_addr_index)
     {
@@ -80,6 +82,7 @@ attribute::form_is_string () const
 const char *
 attribute::as_string () const
 {
+  gdb_assert (!requires_reprocessing);
   if (form_is_string ())
     return u.str;
   return nullptr;

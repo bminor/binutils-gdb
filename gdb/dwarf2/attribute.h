@@ -111,8 +111,9 @@ struct attribute
 
   bool form_is_constant () const;
 
-  /* DW_ADDR is always stored already as sect_offset; despite for the forms
-     besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
+  /* The address is always stored already as sect_offset; despite for
+     the forms besides DW_FORM_ref_addr it is stored as cu_offset in
+     the DWARF file.  */
 
   bool form_is_ref () const
   {
@@ -223,6 +224,17 @@ struct attribute
     requires_reprocessing = 1;
   }
 
+  /* Set this attribute to an address.  */
+  void set_address (CORE_ADDR addr)
+  {
+    gdb_assert (form == DW_FORM_addr
+		|| ((form == DW_FORM_addrx
+		     || form == DW_FORM_GNU_addr_index)
+		    && requires_reprocessing));
+    u.addr = addr;
+    requires_reprocessing = 0;
+  }
+
 
   ENUM_BITFIELD(dwarf_attribute) name : 15;
 
@@ -265,6 +277,5 @@ private:
 /* Get at parts of an attribute structure.  */
 
 #define DW_UNSND(attr)     ((attr)->u.unsnd)
-#define DW_ADDR(attr)	   ((attr)->u.addr)
 
 #endif /* GDB_DWARF2_ATTRIBUTE_H */
