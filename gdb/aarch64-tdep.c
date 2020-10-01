@@ -3667,6 +3667,32 @@ aarch64_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
   return (val & ~1);
 }
 
+/* Given ABFD, try to determine if we are dealing with a symbol file
+   that uses capabilities.
+
+   Return true if the symbol file uses capabilities and false otherwise.  */
+
+static bool
+aarch64_bfd_has_capabilities (bfd *abfd)
+{
+  if (aarch64_debug)
+    debug_printf ("%s: Entering\n", __func__);
+
+  gdb_assert (abfd != nullptr);
+
+  asection *cap_relocs = bfd_get_section_by_name (abfd, "__cap_relocs");
+
+  if (aarch64_debug)
+    debug_printf ("%s: cap_relocs = %s\n", __func__,
+		  cap_relocs == nullptr? "not found" : "found");
+
+  if (cap_relocs != nullptr)
+    return true;
+
+  /* Assume regular non-capability symbol file.  */
+  return false;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3701,6 +3727,18 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     internal_error (__FILE__, __LINE__, _("VQ out of bounds: %s (max %d)"),
 		    pulongest (vq), AARCH64_MAX_SVE_VQ);
 
+  /* If we have a symbol file, try to determine if it uses capabilities or if
+     it is just regular AArch64.  */
+  bool have_capability = false;
+  if (aarch64_current_abi_global == AARCH64_ABI_AUTO && info.abfd != NULL)
+    {
+      if (aarch64_bfd_has_capabilities (info.abfd))
+	{
+	  abi = AARCH64_ABI_AAPCS64_CAP;
+	  have_capability = true;
+	}
+    }
+
   /* If there is already a candidate, use it.  */
   for (gdbarch_list *best_arch = gdbarch_list_lookup_by_info (arches, &info);
        best_arch != nullptr;
@@ -3708,13 +3746,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       aarch64_gdbarch_tdep *tdep
 	= (aarch64_gdbarch_tdep *) gdbarch_tdep (best_arch->gdbarch);
-      if (tdep && tdep->vq == vq)
+      if (tdep && tdep->vq == vq
+	  && tdep->abi == abi)
 	return best_arch->gdbarch;
     }
-
-  /* FIXME-Morello: Put a check in place so we can determine, from ELF, if
-     we are dealing with a capability-enabled binary or not.  */
-  bool have_capability = false;
 
   /* Ensure we always have a target descriptor, and that it is for the given VQ
      value.  */
