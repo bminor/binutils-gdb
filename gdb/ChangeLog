@@ -1,5 +1,17 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c: Include elf-bfd.h.
+	(MSYMBOL_SET_SPECIAL, MSYMBOL_IS_SPECIAL): New constants.
+	(aarch64_mapping_symbol): New struct.
+	(aarch64_mapping_symbol_vec): New typedef.
+	(aarch64_per_bfd): New struct.
+	(aarch64_bfd_data_key): New static global.
+	(aarch64_elf_make_msymbol_special, +aarch64_record_special_symbol): New
+	function.
+	(aarch64_gdbarch_init): Register hooks.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_bfd_has_capabilities): New function.
 	(aarch64_gdbarch_init): Do static ABI check.
 
