@@ -1,5 +1,9 @@
 2020-10-01  Kamil Rytarowski  <n54@gmx.com>
 
+	* i386-tdep.h (i386nbsd_sc_reg_offset): Remove.
+
+2020-10-01  Kamil Rytarowski  <n54@gmx.com>
+
 	* i386-bsd-nat.c (_initialize_i386bsd_nat): Update.
 	* i386-nbsd-tdep.c (i386nbsd_sc_reg_offset): Now static.
 
