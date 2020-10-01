@@ -78,9 +78,11 @@ static void obj_elf_gnu_attribute (int);
 static void obj_elf_tls_common (int);
 static void obj_elf_lcomm (int);
 static void obj_elf_struct (int);
+static void obj_elf_attach_to_group (int);
 
 static const pseudo_typeS elf_pseudo_table[] =
 {
+  {"attach_to_group", obj_elf_attach_to_group, 0},
   {"comm", obj_elf_common, 0},
   {"common", obj_elf_common, 1},
   {"ident", obj_elf_ident, 0},
@@ -1038,6 +1040,28 @@ obj_elf_section_name (void)
     }
   SKIP_WHITESPACE ();
   return name;
+}
+
+static void
+obj_elf_attach_to_group (int dummy ATTRIBUTE_UNUSED)
+{
+  const char * gname = obj_elf_section_name ();
+
+  if (gname == NULL)
+    {
+      as_warn (_("group name not parseable"));
+      return;
+    }
+
+  if (elf_group_name (now_seg))
+    {
+      as_warn (_("section %s already has a group (%s)"),
+	       bfd_section_name (now_seg), elf_group_name (now_seg));
+      return;
+    }
+
+  elf_group_name (now_seg) = xstrdup (gname);
+  elf_section_flags (now_seg) |= SHF_GROUP;
 }
 
 void
