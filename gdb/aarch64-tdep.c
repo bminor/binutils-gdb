@@ -59,12 +59,65 @@
 /* For address/int to pointer conversions.  */
 #include "inferior.h"
 
+#include "elf-bfd.h"
+
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
 #define HA_MAX_NUM_FLDS		4
 
 /* All possible aarch64 target descriptors.  */
 static std::unordered_map <aarch64_features, target_desc *> tdesc_aarch64_map;
+
+/* Macros for setting and testing a bit in a minimal symbol that marks
+   it as C64 function.  The MSB of the minimal symbol's "info" field
+   is used for this purpose.
+
+   MSYMBOL_SET_SPECIAL	Actually sets the "special" bit.
+   MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.  */
+
+#define MSYMBOL_SET_SPECIAL(msym) \
+	MSYMBOL_TARGET_FLAG_1 (msym) = 1
+
+#define MSYMBOL_IS_SPECIAL(msym)  \
+	MSYMBOL_TARGET_FLAG_1 (msym)
+
+struct aarch64_mapping_symbol
+{
+  CORE_ADDR value;
+  char type;
+
+  bool operator< (const aarch64_mapping_symbol &other) const
+  { return this->value < other.value; }
+};
+
+typedef std::vector<aarch64_mapping_symbol> aarch64_mapping_symbol_vec;
+
+struct aarch64_per_bfd
+{
+  explicit aarch64_per_bfd (size_t num_sections)
+  : section_maps (new aarch64_mapping_symbol_vec[num_sections]),
+    section_maps_sorted (new bool[num_sections] ())
+  {}
+
+  DISABLE_COPY_AND_ASSIGN (aarch64_per_bfd);
+
+  /* Information about mapping symbols ($x, $c, $d) in the objfile.
+
+     The format is an array of vectors of aarch64_mapping_symbols, there is one
+     vector for each section of the objfile (the array is index by BFD section
+     index).
+
+     For each section, the vector of aarch64_mapping_symbol is sorted by
+     symbol value (address).  */
+  std::unique_ptr<aarch64_mapping_symbol_vec[]> section_maps;
+
+  /* For each corresponding element of section_maps above, is this vector
+     sorted.  */
+  std::unique_ptr<bool[]> section_maps_sorted;
+};
+
+/* Per-bfd data used for mapping symbols.  */
+static bfd_key<aarch64_per_bfd> aarch64_bfd_data_key;
 
 /* The list of available aarch64 set/show commands.  */
 static struct cmd_list_element *set_aarch64_cmdlist = NULL;
@@ -3693,6 +3746,78 @@ aarch64_bfd_has_capabilities (bfd *abfd)
   return false;
 }
 
+/* Test whether SYM corresponds to an address in C64 code.  If so,
+   set a special bit in MSYM to indicate that it does.  */
+
+static void
+aarch64_elf_make_msymbol_special(asymbol *sym, struct minimal_symbol *msym)
+{
+  if (aarch64_debug)
+    debug_printf ("%s: Entering\n", __func__);
+
+  /* We are interested in symbols that represent functions whose addresses
+     have the LSB set.  */
+  if ((sym->flags & BSF_FUNCTION)
+      && (MSYMBOL_VALUE_RAW_ADDRESS (msym) & 1))
+    {
+      /* Set the special bit and mask off the LSB.  */
+      MSYMBOL_SET_SPECIAL (msym);
+      SET_MSYMBOL_VALUE_ADDRESS (msym, MSYMBOL_VALUE_RAW_ADDRESS (msym) & ~1);
+    }
+
+  if (aarch64_debug)
+    debug_printf ("%s: Symbol %s is %sspecial\n", __func__,
+		  sym->name, MSYMBOL_IS_SPECIAL (msym)? "" : "not ");
+}
+
+/* Record mapping symbols for Morello.  From the documentation, those
+   can be:
+
+   $x or $x.<any...>: Start of a sequence of A64 instructions
+
+   $c or $c.<any...>: Start of a sequence of C64 instructions
+
+   $d or $d.<any...>: Start of a sequence of data items (for example, a literal
+		      pool)
+*/
+
+static void
+aarch64_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
+			       asymbol *sym)
+{
+  if (aarch64_debug)
+    debug_printf ("%s: Entering\n", __func__);
+
+  const char *name = bfd_asymbol_name (sym);
+  struct aarch64_per_bfd *data;
+  struct aarch64_mapping_symbol new_map_sym;
+
+  gdb_assert (name[0] == '$');
+
+  if(aarch64_debug)
+    debug_printf ("%s: Checking symbol %s\n", __func__, name);
+
+  if (name[1] != 'x' && name[1] != 'c' && name[1] != 'd')
+    return;
+
+  data = aarch64_bfd_data_key.get (objfile->obfd);
+  if (data == NULL)
+    data = aarch64_bfd_data_key.emplace (objfile->obfd,
+					 objfile->obfd->section_count);
+  aarch64_mapping_symbol_vec &map
+    = data->section_maps[bfd_asymbol_section (sym)->index];
+
+  new_map_sym.value = sym->value;
+  new_map_sym.type = name[1];
+
+  /* Insert at the end, the vector will be sorted on first use.  */
+  map.push_back (new_map_sym);
+
+  if (aarch64_debug)
+    debug_printf ("%s: Symbol %s recorded as special.\n", __func__,
+		  name);
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -4034,6 +4159,13 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pointer_to_address (gdbarch, aarch64_pointer_to_address);
       set_gdbarch_address_to_pointer (gdbarch, aarch64_address_to_pointer);
       set_gdbarch_integer_to_address (gdbarch, aarch64_integer_to_address);
+
+      /* For marking special symbols indicating a C64 region.  */
+      set_gdbarch_elf_make_msymbol_special (gdbarch,
+					    aarch64_elf_make_msymbol_special);
+      /* For recording mapping symbols.  */
+      set_gdbarch_record_special_symbol (gdbarch,
+					 aarch64_record_special_symbol);
 
       /* Create the Morello register aliases.  */
       /* cip0 and cip1 */
