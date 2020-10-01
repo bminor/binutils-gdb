@@ -188,6 +188,25 @@ static const struct
   {"ip1", AARCH64_X0_REGNUM + 17}
 };
 
+/* A couple register aliases for Morello.  We leave the register numbers
+   undefined because those are assigned dynamically based on the various
+   features a particular system supports.
+
+   We need the static storage so we can pass a register number reference to
+   GDB's hooks.  */
+static struct
+{
+  const char *const name;
+  int regnum;
+} aarch64_morello_register_aliases[] =
+{
+  {"cip0", -1},
+  {"cip1", -1},
+  {"cfp", -1},
+  {"clr", -1},
+  {"c31", -1}
+};
+
 /* The required capability 'C' registers.  */
 static const char *const aarch64_c_register_names[] =
 {
@@ -3980,6 +3999,23 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pointer_to_address (gdbarch, aarch64_pointer_to_address);
       set_gdbarch_address_to_pointer (gdbarch, aarch64_address_to_pointer);
       set_gdbarch_integer_to_address (gdbarch, aarch64_integer_to_address);
+
+      /* Create the Morello register aliases.  */
+      /* cip0 and cip1 */
+      aarch64_morello_register_aliases[0].regnum = tdep->cap_reg_base + 16;
+      aarch64_morello_register_aliases[1].regnum = tdep->cap_reg_base + 17;
+      /* cfp */
+      aarch64_morello_register_aliases[2].regnum = tdep->cap_reg_base + 29;
+      /* clr */
+      aarch64_morello_register_aliases[3].regnum = tdep->cap_reg_base + 30;
+      /* c31 */
+      aarch64_morello_register_aliases[4].regnum = tdep->cap_reg_base + 31;
+
+
+      for (i = 0; i < ARRAY_SIZE (aarch64_morello_register_aliases); i++)
+	user_reg_add (gdbarch, aarch64_morello_register_aliases[i].name,
+		      value_of_aarch64_user_reg,
+		      &aarch64_morello_register_aliases[i].regnum);
     }
 
   return gdbarch;
