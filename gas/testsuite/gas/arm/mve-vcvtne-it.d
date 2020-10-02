@@ -7,3 +7,4 @@
 Disassembly of section .text:
 ^[^>]*> bf18[ 	]+it[ 	]+ne
 ^[^>]*> eefd 6bc8[ 	]+vcvtne.s32.f64[ 	]+s13, d8
+#pass

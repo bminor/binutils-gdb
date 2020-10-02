@@ -1,3 +1,8 @@
+2020-10-02  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/arm/mve-vcvtne-it.d: Allow for padding inserted by
+	PE based targets.
+
 2020-10-01  Nick Clifton  <nickc@redhat.com>
 
 	* config/obj-elf (elf_pseudo_table): Add attach_to_group.
