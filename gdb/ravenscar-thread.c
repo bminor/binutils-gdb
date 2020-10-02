@@ -657,7 +657,7 @@ ravenscar_thread_target::xfer_partial (enum target_object object,
 /* Observer on inferior_created: push ravenscar thread stratum if needed.  */
 
 static void
-ravenscar_inferior_created (struct target_ops *target, int from_tty)
+ravenscar_inferior_created ()
 {
   const char *err_msg;
 

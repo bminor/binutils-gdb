@@ -211,7 +211,7 @@ struct m68k_linux_sigtramp_info
 static int target_is_uclinux;
 
 static void
-m68k_linux_inferior_created (struct target_ops *objfile, int from_tty)
+m68k_linux_inferior_created ()
 {
   /* Record that we will need to re-evaluate whether we are running on a
      uClinux or normal GNU/Linux target (see m68k_linux_get_sigtramp_info).  */

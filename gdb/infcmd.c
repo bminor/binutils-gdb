@@ -279,7 +279,7 @@ strip_bg_char (const char *args, int *bg_char_p)
    should be stopped.  */
 
 void
-post_create_inferior (struct target_ops *target, int from_tty)
+post_create_inferior (int from_tty)
 {
 
   /* Be sure we own the terminal in case write operations are performed.  */ 
@@ -347,7 +347,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
      if the now pushed target supports hardware watchpoints.  */
   breakpoint_re_set ();
 
-  gdb::observers::inferior_created.notify (target, from_tty);
+  gdb::observers::inferior_created.notify ();
 }
 
 /* Kill the inferior if already running.  This function is designed
@@ -520,7 +520,7 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   /* Pass zero for FROM_TTY, because at this point the "run" command
      has done its thing; now we are setting up the running program.  */
-  post_create_inferior (current_top_target (), 0);
+  post_create_inferior (0);
 
   /* Queue a pending event so that the program stops immediately.  */
   if (run_how == RUN_STOP_AT_FIRST_INSN)
@@ -2432,7 +2432,7 @@ setup_inferior (int from_tty)
   /* Take any necessary post-attaching actions for this platform.  */
   target_post_attach (inferior_ptid.pid ());
 
-  post_create_inferior (current_top_target (), from_tty);
+  post_create_inferior (from_tty);
 }
 
 /* What to do after the first program stops after attaching.  */

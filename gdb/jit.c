@@ -1232,7 +1232,7 @@ jit_inferior_init (struct gdbarch *gdbarch)
 /* inferior_created observer.  */
 
 static void
-jit_inferior_created (struct target_ops *ops, int from_tty)
+jit_inferior_created ()
 {
   jit_inferior_created_hook ();
 }

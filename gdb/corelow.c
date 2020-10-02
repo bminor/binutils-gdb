@@ -516,7 +516,7 @@ core_target_open (const char *arg, int from_tty)
   if (exec_bfd == nullptr)
     locate_exec_from_corefile_build_id (core_bfd, from_tty);
 
-  post_create_inferior (target, from_tty);
+  post_create_inferior (from_tty);
 
   /* Now go through the target stack looking for threads since there
      may be a thread_stratum target loaded on top of target core by

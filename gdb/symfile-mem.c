@@ -157,7 +157,7 @@ add_symbol_file_from_memory_command (const char *args, int from_tty)
    This function is called via the inferior_created observer.  */
 
 static void
-add_vsyscall_page (struct target_ops *target, int from_tty)
+add_vsyscall_page ()
 {
   struct mem_range vsyscall_range;
 

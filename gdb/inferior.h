@@ -196,7 +196,7 @@ extern ptid_t gdb_startup_inferior (pid_t pid, int num_traps);
 
 extern void setup_inferior (int from_tty);
 
-extern void post_create_inferior (struct target_ops *, int);
+extern void post_create_inferior (int from_tty);
 
 extern void attach_command (const char *, int);
 

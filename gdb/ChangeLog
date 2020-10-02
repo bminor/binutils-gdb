@@ -1,3 +1,10 @@
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* observable.h <inferior_created>: Remove parameters.  Update all
+	listeners.
+	* inferior.h (post_create_inferior): Remove target parameter.
+	Update all callers.
+
 2020-10-02  Nitika Achra  <Nitika.Achra@amd.com>
 
 	* dwarf2/macro.c (dwarf_decode_macro_bytes): Handle DW_MACRO_define_strx
