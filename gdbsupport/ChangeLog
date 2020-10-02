@@ -1,5 +1,14 @@
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* event-loop.h (debug_event_loop): New variable declaration.
+	(event_loop_debug_printf_1): New function declaration.
+	(event_loop_debug_printf): New macro.
+	* event-loop.cc (debug_event_loop): New variable.
+	(handle_file_event): Add debug print.
+	(event_loop_debug_printf_1): New function.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common-debug.cc (debug_prefixed_vprintf): Move here.
 	* common-debug.h (debug_prefixed_vprintf): Move here.
 

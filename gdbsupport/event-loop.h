@@ -84,11 +84,13 @@ extern void delete_file_handler (int fd);
 
    FD is the file descriptor for the file/stream to be listened to.
 
-   NAME is a user-friendly name for the handler.  */
+   NAME is a user-friendly name for the handler.
+
+   If IS_UI is set, this file descriptor is used for a user interface.  */
 
 extern void add_file_handler (int fd, handler_func *proc,
 			      gdb_client_data client_data,
-			      std::string &&name);
+			      std::string &&name, bool is_ui = false);
 
 extern int create_timer (int milliseconds, 
 			 timer_handler_func *proc, 
@@ -108,5 +110,43 @@ extern int invoke_async_signal_handlers ();
    ready.  */
 
 extern int check_async_event_handlers ();
+
+enum class debug_event_loop_kind
+{
+  OFF,
+
+  /* Print all event-loop related messages, except events from user-interface
+     event sources.  */
+  ALL_EXCEPT_UI,
+
+  /* Print all event-loop related messages.  */
+  ALL,
+};
+
+/* True if we are printing event loop debug statements.  */
+extern debug_event_loop_kind debug_event_loop;
+
+/* Print an "event loop" debug statement.  Should be used through
+   event_loop_debug_printf.  */
+void ATTRIBUTE_PRINTF (2, 3) event_loop_debug_printf_1
+  (const char *func_name, const char *fmt, ...);
+
+#define event_loop_debug_printf(fmt, ...) \
+  do \
+    { \
+      if (debug_event_loop != debug_event_loop_kind::OFF) \
+	event_loop_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
+
+#define event_loop_ui_debug_printf(is_ui, fmt, ...) \
+  do \
+    { \
+      if (debug_event_loop == debug_event_loop_kind::ALL \
+	  || (debug_event_loop == debug_event_loop_kind::ALL_EXCEPT_UI \
+	      && !is_ui)) \
+	event_loop_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
 
 #endif /* EVENT_LOOP_H */

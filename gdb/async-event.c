@@ -157,8 +157,23 @@ create_async_signal_handler (sig_handler_func * proc,
    for some event.  The caller of this function is the interrupt
    handler associated with a signal.  */
 void
-mark_async_signal_handler (async_signal_handler * async_handler_ptr)
+mark_async_signal_handler (async_signal_handler *async_handler_ptr)
 {
+  if (debug_event_loop != debug_event_loop_kind::OFF)
+    {
+      /* This is called by signal handlers, so we print it "by hand" using
+	 the async-signal-safe methods.  */
+      const char head[] = ("[event-loop] mark_async_signal_handler: marking"
+			   "async signal handler `");
+      gdb_stdlog->write_async_safe (head, strlen (head));
+
+      gdb_stdlog->write_async_safe (async_handler_ptr->name,
+				    strlen (async_handler_ptr->name));
+
+      const char tail[] = "`\n";
+      gdb_stdlog->write_async_safe (tail, strlen (tail));
+    }
+
   async_handler_ptr->ready = 1;
   serial_event_set (async_signal_handlers_serial_event);
 }
@@ -168,6 +183,8 @@ mark_async_signal_handler (async_signal_handler * async_handler_ptr)
 void
 clear_async_signal_handler (async_signal_handler *async_handler_ptr)
 {
+  event_loop_debug_printf ("clearing async signal handler `%s`",
+			   async_handler_ptr->name);
   async_handler_ptr->ready = 0;
 }
 
@@ -211,6 +228,8 @@ invoke_async_signal_handlers (void)
       /* Async signal handlers have no connection to whichever was the
 	 current UI, and thus always run on the main one.  */
       current_ui = main_ui;
+      event_loop_debug_printf ("invoking async signal handler `%s`",
+			       async_handler_ptr->name);
       (*async_handler_ptr->proc) (async_handler_ptr->client_data);
     }
 
@@ -274,6 +293,8 @@ create_async_event_handler (async_event_handler_func *proc,
 void
 mark_async_event_handler (async_event_handler *async_handler_ptr)
 {
+  event_loop_debug_printf ("marking async event handler `%s`",
+			   async_handler_ptr->name);
   async_handler_ptr->ready = 1;
 }
 
@@ -282,6 +303,8 @@ mark_async_event_handler (async_event_handler *async_handler_ptr)
 void
 clear_async_event_handler (async_event_handler *async_handler_ptr)
 {
+  event_loop_debug_printf ("clearing async event handler `%s`",
+			   async_handler_ptr->name);
   async_handler_ptr->ready = 0;
 }
 
@@ -300,6 +323,8 @@ check_async_event_handlers ()
       if (async_handler_ptr->ready)
 	{
 	  async_handler_ptr->ready = 0;
+	  event_loop_debug_printf ("invoking async event handler `%s`",
+				   async_handler_ptr->name);
 	  (*async_handler_ptr->proc) (async_handler_ptr->client_data);
 	  return 1;
 	}

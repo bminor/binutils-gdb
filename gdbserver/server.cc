@@ -955,6 +955,8 @@ monitor_show_help (void)
   monitor_output ("    Enable h/w breakpoint/watchpoint debugging messages\n");
   monitor_output ("  set remote-debug <0|1>\n");
   monitor_output ("    Enable remote protocol debugging messages\n");
+  monitor_output ("  set event-loop-debug <0|1>\n");
+  monitor_output ("    Enable event loop debugging messages\n");
   monitor_output ("  set debug-format option1[,option2,...]\n");
   monitor_output ("    Add additional information to debugging messages\n");
   monitor_output ("    Options: all, none");
@@ -1388,6 +1390,16 @@ handle_monitor_command (char *mon, char *own_buf)
     {
       remote_debug = 0;
       monitor_output ("Protocol debug output disabled.\n");
+    }
+  else if (strcmp (mon, "set event-loop-debug 1") == 0)
+    {
+      debug_event_loop = debug_event_loop_kind::ALL;
+      monitor_output ("Event loop debug output enabled.\n");
+    }
+  else if (strcmp (mon, "set event-loop-debug 0") == 0)
+    {
+      debug_event_loop = debug_event_loop_kind::OFF;
+      monitor_output ("Event loop debug output disabled.\n");
     }
   else if (startswith (mon, "set debug-format "))
     {
@@ -3468,6 +3480,7 @@ gdbserver_usage (FILE *stream)
 	   "                            none\n"
 	   "                            timestamp\n"
 	   "  --remote-debug        Enable remote protocol debugging output.\n"
+	   "  --event-loop-debug    Enable event loop debugging output.\n"
 	   "  --disable-packet=OPT1[,OPT2,...]\n"
 	   "                        Disable support for RSP packets or features.\n"
 	   "                          Options:\n"
@@ -3683,6 +3696,8 @@ captured_main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--remote-debug") == 0)
 	remote_debug = 1;
+      else if (strcmp (*next_arg, "--event-loop-debug") == 0)
+	debug_event_loop = debug_event_loop_kind::ALL;
       else if (startswith (*next_arg, "--debug-file="))
 	debug_set_output ((*next_arg) + sizeof ("--debug-file=") -1);
       else if (strcmp (*next_arg, "--disable-packet") == 0)

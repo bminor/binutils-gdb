@@ -1,5 +1,13 @@
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* server.cc (handle_monitor_command): Handle "set
+	debug-event-loop".
+	(captured_main): Handle "--debug-event-loop".
+	(monitor_show_help): Mention new setting.
+	(gdbserver_usage): Mention new flag.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-low.cc (linux_process_target::async): Pass name to
 	add_file_handler.
 	* remote-utils.cc (handle_accept_event): Likewise.

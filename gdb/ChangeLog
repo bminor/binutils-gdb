@@ -1,5 +1,14 @@
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* async-event.c (invoke_async_signal_handlers): Add debug
+	print.
+	(check_async_event_handlers): Likewise.
+	* event-top.c (show_debug_event_loop): New function.
+	(_initialize_event_top): Register "set debug event-loop"
+	setting.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* debug.c (debug_prefixed_vprintf): Move to gdbsupport.
 	* debug.h: Remove.
 	* infrun.c: Include gdbsupport/common-debug.h.

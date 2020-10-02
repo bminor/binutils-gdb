@@ -34,6 +34,10 @@
 #include "gdbsupport/gdb_sys_time.h"
 #include "gdbsupport/gdb_select.h"
 
+/* See event-loop.h.  */
+
+debug_event_loop_kind debug_event_loop;
+
 /* Tell create_file_handler what events we are interested in.
    This is used by the select version of the event loop.  */
 
@@ -63,6 +67,9 @@ struct file_handler
 
   /* User-friendly name of this handler.  Heap-allocated, owned by this.*/
   std::string *name;
+
+  /* If set, this file descriptor is used for a user interface.  */
+  bool is_ui;
 
   /* Was an error detected on this fd?  */
   int error;
@@ -164,7 +171,7 @@ timer_list;
 
 static void create_file_handler (int fd, int mask, handler_func *proc,
 				 gdb_client_data client_data,
-				 std::string &&name);
+				 std::string &&name, bool is_ui);
 static int gdb_wait_for_event (int);
 static int update_wait_timeout (void);
 static int poll_timers (void);
@@ -239,7 +246,7 @@ gdb_do_one_event (void)
 
 void
 add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
-		  std::string &&name)
+		  std::string &&name, bool is_ui)
 {
 #ifdef HAVE_POLL
   struct pollfd fds;
@@ -265,7 +272,8 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
   if (use_poll)
     {
 #ifdef HAVE_POLL
-      create_file_handler (fd, POLLIN, proc, client_data, std::move (name));
+      create_file_handler (fd, POLLIN, proc, client_data, std::move (name),
+			   is_ui);
 #else
       internal_error (__FILE__, __LINE__,
 		      _("use_poll without HAVE_POLL"));
@@ -273,7 +281,7 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
     }
   else
     create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION,
-			 proc, client_data, std::move (name));
+			 proc, client_data, std::move (name), is_ui);
 }
 
 /* Helper for add_file_handler.
@@ -289,7 +297,8 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
 
 static void
 create_file_handler (int fd, int mask, handler_func * proc,
-		     gdb_client_data client_data, std::string &&name)
+		     gdb_client_data client_data, std::string &&name,
+		     bool is_ui)
 {
   file_handler *file_ptr;
 
@@ -358,6 +367,7 @@ create_file_handler (int fd, int mask, handler_func * proc,
   file_ptr->client_data = client_data;
   file_ptr->mask = mask;
   file_ptr->name = new std::string (std::move (name));
+  file_ptr->is_ui = is_ui;
 }
 
 /* Return the next file handler to handle, and advance to the next
@@ -558,7 +568,12 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 
 	  /* If there was a match, then call the handler.  */
 	  if (mask != 0)
-	    (*file_ptr->proc) (file_ptr->error, file_ptr->client_data);
+	    {
+	      event_loop_ui_debug_printf (file_ptr->is_ui,
+					  "invoking fd file handler `%s`",
+					  file_ptr->name->c_str ());
+	      file_ptr->proc (file_ptr->error, file_ptr->client_data);
+	    }
 	}
     }
 }
@@ -896,4 +911,15 @@ poll_timers (void)
     }
 
   return 0;
+}
+
+/* See event-loop.h.  */
+
+void
+event_loop_debug_printf_1 (const char *func_name, const char *fmt, ...)
+{
+  va_list args;
+  va_start (args, fmt);
+  debug_prefixed_vprintf ("event-loop", func_name, fmt, args);
+  va_end (args);
 }
