@@ -139,14 +139,8 @@ skiplist_entry::skiplist_entry (bool file_is_glob,
   if (m_function_is_regexp)
     {
       gdb_assert (!m_function.empty ());
-
-      int flags = REG_NOSUB;
-#ifdef REG_EXTENDED
-      flags |= REG_EXTENDED;
-#endif
-
-      gdb_assert (!m_function.empty ());
-      m_compiled_function_regexp.emplace (m_function.c_str (), flags,
+      m_compiled_function_regexp.emplace (m_function.c_str (),
+					  REG_NOSUB | REG_EXTENDED,
 					  _("regexp"));
     }
 }
