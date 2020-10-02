@@ -576,7 +576,8 @@ tui_initialize_win (void)
 {
 #ifdef SIGWINCH
   tui_sigwinch_token
-    = create_async_signal_handler (tui_async_resize_screen, NULL);
+    = create_async_signal_handler (tui_async_resize_screen, NULL,
+				   "tui-sigwinch");
 
   {
 #ifdef HAVE_SIGACTION

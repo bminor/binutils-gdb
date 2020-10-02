@@ -986,7 +986,7 @@ record_full_open (const char *name, int from_tty)
   /* Register extra event sources in the event loop.  */
   record_full_async_inferior_event_token
     = create_async_event_handler (record_full_async_inferior_event_handler,
-				  NULL);
+				  NULL, "record-full");
 
   record_full_init_record_breakpoints ();
 

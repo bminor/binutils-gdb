@@ -219,7 +219,7 @@ remote_notif_state_allocate (remote_target *remote)
 
   notif_state->get_pending_events_token
     = create_async_event_handler (remote_async_get_pending_events_handler,
-				  notif_state);
+				  notif_state, "remote-notif");
 
   return notif_state;
 }

@@ -9278,7 +9278,8 @@ _initialize_infrun ()
 
   /* Register extra event sources in the event loop.  */
   infrun_async_inferior_event_token
-    = create_async_event_handler (infrun_async_inferior_event_handler, NULL);
+    = create_async_event_handler (infrun_async_inferior_event_handler, NULL,
+				  "infrun");
 
   add_info ("signals", info_signals_command, _("\
 What debugger does when program gets various signals.\n\

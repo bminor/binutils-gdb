@@ -27,8 +27,9 @@ typedef void (sig_handler_func) (gdb_client_data);
 typedef void (async_event_handler_func) (gdb_client_data);
 
 extern struct async_signal_handler *
-  create_async_signal_handler (sig_handler_func *proc, 
-			       gdb_client_data client_data);
+  create_async_signal_handler (sig_handler_func *proc,
+			       gdb_client_data client_data,
+			       const char *name);
 extern void delete_async_signal_handler (struct async_signal_handler **);
 
 /* Call the handler from HANDLER the next time through the event
@@ -48,10 +49,16 @@ extern void clear_async_signal_handler (struct async_signal_handler *handler);
    and set PROC as its callback.  CLIENT_DATA is passed as argument to
    PROC upon its invocation.  Returns a pointer to an opaque structure
    used to mark as ready and to later delete this event source from
-   the event loop.  */
+   the event loop.
+
+   NAME is a user-friendly name for the handler, used in debug statements.  The
+   name is not copied: its lifetime should be at least as long as that of the
+   handler.  */
+
 extern struct async_event_handler *
   create_async_event_handler (async_event_handler_func *proc,
-			      gdb_client_data client_data);
+			      gdb_client_data client_data,
+			      const char *name);
 
 /* Remove the event source pointed by HANDLER_PTR created by
    CREATE_ASYNC_EVENT_HANDLER from the event loop, and release it.  */

@@ -916,10 +916,10 @@ async_init_signals (void)
 
   signal (SIGINT, handle_sigint);
   sigint_token =
-    create_async_signal_handler (async_request_quit, NULL);
+    create_async_signal_handler (async_request_quit, NULL, "sigint");
   signal (SIGTERM, handle_sigterm);
   async_sigterm_token
-    = create_async_signal_handler (async_sigterm_handler, NULL);
+    = create_async_signal_handler (async_sigterm_handler, NULL, "sigterm");
 
   /* If SIGTRAP was set to SIG_IGN, then the SIG_IGN will get passed
      to the inferior and breakpoints will be ignored.  */
@@ -938,23 +938,23 @@ async_init_signals (void)
      to SIG_DFL for us.  */
   signal (SIGQUIT, handle_sigquit);
   sigquit_token =
-    create_async_signal_handler (async_do_nothing, NULL);
+    create_async_signal_handler (async_do_nothing, NULL, "sigquit");
 #endif
 #ifdef SIGHUP
   if (signal (SIGHUP, handle_sighup) != SIG_IGN)
     sighup_token =
-      create_async_signal_handler (async_disconnect, NULL);
+      create_async_signal_handler (async_disconnect, NULL, "sighup");
   else
     sighup_token =
-      create_async_signal_handler (async_do_nothing, NULL);
+      create_async_signal_handler (async_do_nothing, NULL, "sighup");
 #endif
   signal (SIGFPE, handle_sigfpe);
   sigfpe_token =
-    create_async_signal_handler (async_float_handler, NULL);
+    create_async_signal_handler (async_float_handler, NULL, "sigfpe");
 
 #ifdef SIGTSTP
   sigtstp_token =
-    create_async_signal_handler (async_sigtstp_handler, NULL);
+    create_async_signal_handler (async_sigtstp_handler, NULL, "sigtstp");
 #endif
 
   install_handle_sigsegv ();

@@ -1,5 +1,23 @@
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* async-event.h (create_async_signal_handler): Add name
+	parameter.
+	(create_async_event_handler): Likewise.
+	* async-event.c (struct async_signal_handler) <name>: New field.
+	(struct async_event_handler) <name>: New field.
+	(create_async_signal_handler): Assign name.
+	(create_async_event_handler): Assign name.
+	* event-top.c (async_init_signals): Pass name when creating
+	handler.
+	* infrun.c (_initialize_infrun): Likewise.
+	* record-btrace.c (record_btrace_push_target): Likewise.
+	* record-full.c (record_full_open): Likewise.
+	* remote-notif.c (remote_notif_state_allocate): Likewise.
+	* remote.c (remote_target::open_1): Likewise.
+	* tui/tui-win.c (tui_initialize_win): Likewise.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* async-event.c (initialize_async_signal_handlers): Pass name to
 	add_file_handler
 	* event-top.c (ui_register_input_event_handler): Likewise.
