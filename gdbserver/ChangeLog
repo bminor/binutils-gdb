@@ -1,3 +1,9 @@
+2020-10-13  Kamil Rytarowski  <n54@gmx.com>x
+
+	* netbsd-low.cc (netbsd_tdesc): Remove.
+	(netbsd_add_process): Likewise.
+	(netbsd_process_target::create_inferior): Update.
+
 2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* linux-arc-low.cc (arc_linux_read_description): Release the

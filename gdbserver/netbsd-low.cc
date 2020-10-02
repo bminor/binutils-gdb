@@ -43,19 +43,6 @@
 
 int using_threads = 1;
 
-const struct target_desc *netbsd_tdesc;
-
-/* Call add_process with the given parameters, and initialize
-   the process' private data.  */
-
-static void
-netbsd_add_process (int pid, int attached)
-{
-  struct process_info *proc = add_process (pid, attached);
-  proc->tdesc = netbsd_tdesc;
-  proc->priv = nullptr;
-}
-
 /* Callback used by fork_inferior to start tracing the inferior.  */
 
 static void
@@ -100,7 +87,7 @@ netbsd_process_target::create_inferior (const char *program,
 			     get_environ ()->envp (), netbsd_ptrace_fun,
 			     nullptr, nullptr, nullptr, nullptr);
 
-  netbsd_add_process (pid, 0);
+  add_process (pid, 0);
 
   post_fork_inferior (pid, program);
 
