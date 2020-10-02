@@ -1,5 +1,20 @@
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* async-event.c (initialize_async_signal_handlers): Pass name to
+	add_file_handler
+	* event-top.c (ui_register_input_event_handler): Likewise.
+	* linux-nat.c (linux_nat_target::async): Likewise.
+	* run-on-main-thread.c (_initialize_run_on_main_thread):
+	Likewise
+	* ser-base.c (reschedule): Likewise.
+	(ser_base_async): Likewise.
+	* tui/tui-io.c: Likewise.
+	* top.h (struct ui) <num>: New field.
+	* top.c (highest_ui_num): New variable.
+	(ui::ui): Initialize num.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* observable.h <inferior_created>: Remove parameters.  Update all
 	listeners.
 	* inferior.h (post_create_inferior): Remove target parameter.

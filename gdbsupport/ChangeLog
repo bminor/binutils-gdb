@@ -1,3 +1,11 @@
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* event-loop.h (add_file_handler): Add "name" parameter.
+	* event-loop.cc (struct file_handler) <name>: New field.
+	(create_file_handler): Add "name" parameter, assign it to file
+	handler.
+	(add_file_handler): Add "name" parameter.
+
 2020-10-01  Kamil Rytarowski  <n54@gmx.com>
 
 	* agent.cc (gdb_connect_sync_socket): Preinitialize addr with zeros.

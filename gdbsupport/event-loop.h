@@ -78,8 +78,18 @@ typedef void (timer_handler_func) (gdb_client_data);
 
 extern int gdb_do_one_event (void);
 extern void delete_file_handler (int fd);
-extern void add_file_handler (int fd, handler_func *proc, 
-			      gdb_client_data client_data);
+
+/* Add a file handler/descriptor to the list of descriptors we are
+   interested in.
+
+   FD is the file descriptor for the file/stream to be listened to.
+
+   NAME is a user-friendly name for the handler.  */
+
+extern void add_file_handler (int fd, handler_func *proc,
+			      gdb_client_data client_data,
+			      std::string &&name);
+
 extern int create_timer (int milliseconds, 
 			 timer_handler_func *proc, 
 			 gdb_client_data client_data);

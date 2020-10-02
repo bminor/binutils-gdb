@@ -114,7 +114,7 @@ initialize_async_signal_handlers (void)
   async_signal_handlers_serial_event = make_serial_event ();
 
   add_file_handler (serial_event_fd (async_signal_handlers_serial_event),
-		    async_signals_handler, NULL);
+		    async_signals_handler, NULL, "async-signals");
 }
 
 

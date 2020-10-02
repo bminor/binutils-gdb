@@ -524,7 +524,8 @@ stdin_event_handler (int error, gdb_client_data client_data)
 void
 ui_register_input_event_handler (struct ui *ui)
 {
-  add_file_handler (ui->input_fd, stdin_event_handler, ui);
+  add_file_handler (ui->input_fd, stdin_event_handler, ui,
+		    string_printf ("ui-%d", ui->num));
 }
 
 /* See top.h.  */

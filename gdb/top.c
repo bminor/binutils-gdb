@@ -270,10 +270,14 @@ void (*deprecated_call_command_hook) (struct cmd_list_element * c,
 
 void (*deprecated_context_hook) (int id);
 
+/* The highest UI number ever assigned.  */
+static int highest_ui_num;
+
 /* See top.h.  */
 
 ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
   : next (nullptr),
+    num (++highest_ui_num),
     call_readline (nullptr),
     input_handler (nullptr),
     command_editing (0),

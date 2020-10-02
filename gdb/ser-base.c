@@ -83,7 +83,7 @@ reschedule (struct serial *scb)
 	case NOTHING_SCHEDULED:
 	  if (scb->bufcnt == 0)
 	    {
-	      add_file_handler (scb->fd, fd_event, scb);
+	      add_file_handler (scb->fd, fd_event, scb, "serial");
 	      next_state = FD_SCHEDULED;
 	    }
 	  else
@@ -95,7 +95,7 @@ reschedule (struct serial *scb)
 	  if (scb->bufcnt == 0)
 	    {
 	      delete_timer (scb->async_state);
-	      add_file_handler (scb->fd, fd_event, scb);
+	      add_file_handler (scb->fd, fd_event, scb, "serial");
 	      next_state = FD_SCHEDULED;
 	    }
 	  else
@@ -597,7 +597,7 @@ ser_base_async (struct serial *scb,
       reschedule (scb);
 
       if (scb->error_fd != -1)
-	add_file_handler (scb->error_fd, handle_error_fd, scb);
+	add_file_handler (scb->error_fd, handle_error_fd, scb, "serial-error");
     }
   else
     {

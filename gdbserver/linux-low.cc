@@ -6092,7 +6092,8 @@ linux_process_target::async (bool enable)
 
 	  /* Register the event loop handler.  */
 	  add_file_handler (linux_event_pipe[0],
-			    handle_target_event, NULL);
+			    handle_target_event, NULL,
+			    "linux-low");
 
 	  /* Always trigger a linux_wait.  */
 	  async_file_mark ();

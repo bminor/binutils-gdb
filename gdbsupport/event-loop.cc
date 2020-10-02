@@ -61,6 +61,9 @@ struct file_handler
   /* Argument to pass to proc.  */
   gdb_client_data client_data;
 
+  /* User-friendly name of this handler.  Heap-allocated, owned by this.*/
+  std::string *name;
+
   /* Was an error detected on this fd?  */
   int error;
 
@@ -160,7 +163,8 @@ static struct
 timer_list;
 
 static void create_file_handler (int fd, int mask, handler_func *proc,
-				 gdb_client_data client_data);
+				 gdb_client_data client_data,
+				 std::string &&name);
 static int gdb_wait_for_event (int);
 static int update_wait_timeout (void);
 static int poll_timers (void);
@@ -231,13 +235,11 @@ gdb_do_one_event (void)
   return 1;
 }
 
-
+/* See event-loop.h  */
 
-/* Wrapper function for create_file_handler, so that the caller
-   doesn't have to know implementation details about the use of poll
-   vs. select.  */
 void
-add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
+add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
+		  std::string &&name)
 {
 #ifdef HAVE_POLL
   struct pollfd fds;
@@ -263,21 +265,18 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
   if (use_poll)
     {
 #ifdef HAVE_POLL
-      create_file_handler (fd, POLLIN, proc, client_data);
+      create_file_handler (fd, POLLIN, proc, client_data, std::move (name));
 #else
       internal_error (__FILE__, __LINE__,
 		      _("use_poll without HAVE_POLL"));
 #endif
     }
   else
-    create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION, 
-			 proc, client_data);
+    create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION,
+			 proc, client_data, std::move (name));
 }
 
-/* Add a file handler/descriptor to the list of descriptors we are
-   interested in.
-
-   FD is the file descriptor for the file/stream to be listened to.
+/* Helper for add_file_handler.
 
    For the poll case, MASK is a combination (OR) of POLLIN,
    POLLRDNORM, POLLRDBAND, POLLPRI, POLLOUT, POLLWRNORM, POLLWRBAND:
@@ -289,8 +288,8 @@ add_file_handler (int fd, handler_func * proc, gdb_client_data client_data)
    occurs for FD.  CLIENT_DATA is the argument to pass to PROC.  */
 
 static void
-create_file_handler (int fd, int mask, handler_func * proc, 
-		     gdb_client_data client_data)
+create_file_handler (int fd, int mask, handler_func * proc,
+		     gdb_client_data client_data, std::string &&name)
 {
   file_handler *file_ptr;
 
@@ -358,6 +357,7 @@ create_file_handler (int fd, int mask, handler_func * proc,
   file_ptr->proc = proc;
   file_ptr->client_data = client_data;
   file_ptr->mask = mask;
+  file_ptr->name = new std::string (std::move (name));
 }
 
 /* Return the next file handler to handle, and advance to the next
@@ -489,6 +489,8 @@ delete_file_handler (int fd)
 	;
       prev_ptr->next_file = file_ptr->next_file;
     }
+
+  delete file_ptr->name;
   xfree (file_ptr);
 }
 

@@ -921,7 +921,7 @@ tui_initialize_io (void)
   (void) fcntl (tui_readline_pipe[0], F_SETFL, O_NDELAY);
 #endif
 #endif
-  add_file_handler (tui_readline_pipe[0], tui_readline_output, 0);
+  add_file_handler (tui_readline_pipe[0], tui_readline_output, 0, "tui");
 #else
   tui_rl_outstream = stdout;
 #endif

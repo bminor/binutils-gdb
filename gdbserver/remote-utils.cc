@@ -194,7 +194,7 @@ handle_accept_event (int err, gdb_client_data client_data)
   enable_async_notification (remote_desc);
 
   /* Register the event loop handler.  */
-  add_file_handler (remote_desc, handle_serial_event, NULL);
+  add_file_handler (remote_desc, handle_serial_event, NULL, "remote-net");
 
   /* We have a new GDB connection now.  If we were disconnected
      tracing, there's a window where the target could report a stop
@@ -331,7 +331,7 @@ remote_open (const char *name)
       enable_async_notification (remote_desc);
 
       /* Register the event loop handler.  */
-      add_file_handler (remote_desc, handle_serial_event, NULL);
+      add_file_handler (remote_desc, handle_serial_event, NULL, "remote-stdio");
     }
 #ifndef USE_WIN32API
   else if (port_str == NULL)
@@ -372,7 +372,8 @@ remote_open (const char *name)
       enable_async_notification (remote_desc);
 
       /* Register the event loop handler.  */
-      add_file_handler (remote_desc, handle_serial_event, NULL);
+      add_file_handler (remote_desc, handle_serial_event, NULL,
+			"remote-device");
     }
 #endif /* USE_WIN32API */
   else
@@ -398,7 +399,8 @@ remote_open (const char *name)
       fflush (stderr);
 
       /* Register the event loop handler.  */
-      add_file_handler (listen_desc, handle_accept_event, NULL);
+      add_file_handler (listen_desc, handle_accept_event, NULL,
+			"remote-listen");
     }
 }
 

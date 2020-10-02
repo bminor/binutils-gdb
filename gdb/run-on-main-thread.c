@@ -94,5 +94,6 @@ void
 _initialize_run_on_main_thread ()
 {
   runnable_event = make_serial_event ();
-  add_file_handler (serial_event_fd (runnable_event), run_events, nullptr);
+  add_file_handler (serial_event_fd (runnable_event), run_events, nullptr,
+		    "run-on-main-thread");
 }

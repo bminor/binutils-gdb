@@ -65,6 +65,9 @@ struct ui
   /* Pointer to next in singly-linked list.  */
   struct ui *next;
 
+  /* Convenient handle (UI number).  Unique across all UIs.  */
+  int num;
+
   /* The UI's command line buffer.  This is to used to accumulate
      input until we have a whole command line.  */
   struct buffer line_buffer;
