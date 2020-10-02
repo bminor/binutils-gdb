@@ -131,6 +131,8 @@ recognized:
 @code{cortex-a76},
 @code{cortex-a76ae},
 @code{cortex-a77},
+@code{cortex-a78},
+@code{cortex-a78ae},
 @code{ares},
 @code{cortex-r4},
 @code{cortex-r4f},
