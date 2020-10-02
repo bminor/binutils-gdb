@@ -1,3 +1,8 @@
+2020-10-02  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add Neoverse V1.
+	* doc/c-aarch64.texi: Document Neoverse V1 support.
+
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
