@@ -1,5 +1,12 @@
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* debug.c (debug_prefixed_vprintf): Move to gdbsupport.
+	* debug.h: Remove.
+	* infrun.c: Include gdbsupport/common-debug.h.
+	* linux-nat.c: Likewise.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* async-event.h (create_async_signal_handler): Add name
 	parameter.
 	(create_async_event_handler): Likewise.

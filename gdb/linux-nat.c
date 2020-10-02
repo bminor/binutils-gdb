@@ -68,7 +68,7 @@
 #include "gdbsupport/fileio.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/gdb-sigmask.h"
-#include "debug.h"
+#include "gdbsupport/common-debug.h"
 
 /* This comment documents high-level logic of this file.
 

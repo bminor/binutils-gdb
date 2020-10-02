@@ -35,3 +35,14 @@ debug_printf (const char *fmt, ...)
   debug_vprintf (fmt, ap);
   va_end (ap);
 }
+
+/* See gdbsupport/common-debug.h.  */
+
+void
+debug_prefixed_vprintf (const char *module, const char *func, const char *format,
+			va_list args)
+{
+  debug_printf ("[%s] %s: ", module, func);
+  debug_vprintf (format, args);
+  debug_printf ("\n");
+}

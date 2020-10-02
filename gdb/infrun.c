@@ -70,7 +70,7 @@
 #include "gdbsupport/selftest.h"
 #include "scoped-mock-context.h"
 #include "test-target.h"
-#include "debug.h"
+#include "gdbsupport/common-debug.h"
 
 /* Prototypes for local functions */
 

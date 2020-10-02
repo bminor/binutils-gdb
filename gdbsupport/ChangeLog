@@ -1,5 +1,10 @@
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common-debug.cc (debug_prefixed_vprintf): Move here.
+	* common-debug.h (debug_prefixed_vprintf): Move here.
+
+2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* event-loop.h (add_file_handler): Add "name" parameter.
 	* event-loop.cc (struct file_handler) <name>: New field.
 	(create_file_handler): Add "name" parameter, assign it to file
