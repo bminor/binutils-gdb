@@ -2867,13 +2867,6 @@ procfs_target::create_inferior (const char *exec_file,
   procfs_init_inferior (pid);
 }
 
-/* An observer for the "inferior_created" event.  */
-
-static void
-procfs_inferior_created (struct target_ops *ops, int from_tty)
-{
-}
-
 /* Callback for update_thread_list.  Calls "add_thread".  */
 
 static int
@@ -3470,8 +3463,6 @@ void _initialize_procfs ();
 void
 _initialize_procfs ()
 {
-  gdb::observers::inferior_created.attach (procfs_inferior_created);
-
   add_com ("proc-trace-entry", no_class, proc_trace_sysentry_cmd,
 	   _("Give a trace of entries into the syscall."));
   add_com ("proc-trace-exit", no_class, proc_trace_sysexit_cmd,

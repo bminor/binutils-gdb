@@ -1,3 +1,9 @@
+2020-10-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* aix-thread.c (aix_thread_inferior_created): Remove parameters.
+	* procfs.c (procfs_inferior_created): Remove.
+	(_initialize_procfs): Don't register procfs_inferior_created.
+
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* async-event.c (invoke_async_signal_handlers): Add debug
