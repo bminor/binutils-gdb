@@ -14102,7 +14102,8 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 			|| (elf_section_data (o)->this_hdr.sh_type
 			    == SHT_FINI_ARRAY)))
 		|| (elf_section_data (o)->this_hdr.sh_type == SHT_NOTE
-		    && elf_next_in_group (o) == NULL )))
+		    && elf_next_in_group (o) == NULL
+		    && elf_linked_to_section (o) == NULL)))
 	  {
 	    if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
 	      return FALSE;

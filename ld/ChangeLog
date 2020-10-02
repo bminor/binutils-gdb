@@ -1,3 +1,10 @@
+2020-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 26681
+	* testsuite/ld-elf/pr26681.s: New test.
+	* testsuite/ld-elf/pr26681.d: New test driver.
+	* testsuite/ld-elf/pr26681.l: New test output.
+
 2020-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26675

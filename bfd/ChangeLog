@@ -1,3 +1,9 @@
+2020-10-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 26681
+	* elflink.c (bfd_elf_gc_sections): Do not arbitrarily keep note
+	sections which are linked to another section.
+
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* cpu-arm.c: (processors) Add Cortex-X1.
