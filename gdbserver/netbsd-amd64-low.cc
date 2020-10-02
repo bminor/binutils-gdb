@@ -159,11 +159,11 @@ netbsd_x86_64_store_gregset (struct regcache *regcache, const char *buf)
 
 static const struct netbsd_regset_info netbsd_target_regsets[] =
 {
- /* General Purpose Registers.  */
- {PT_GETREGS, PT_SETREGS, sizeof (struct reg),
-  netbsd_x86_64_fill_gregset, netbsd_x86_64_store_gregset},
- /* End of list marker.  */
- {0, 0, -1, NULL, NULL }
+  /* General Purpose Registers.  */
+  {PT_GETREGS, PT_SETREGS, sizeof (struct reg),
+   netbsd_x86_64_fill_gregset, netbsd_x86_64_store_gregset},
+  /* End of list marker.  */
+  {0, 0, -1, NULL, NULL }
 };
 
 /* NetBSD target op definitions for the amd64 architecture.  */

@@ -577,7 +577,7 @@ netbsd_process_target::request_interrupt ()
 {
   ptid_t inferior_ptid = ptid_of (get_first_thread ());
 
-  ::kill (inferior_ptid.pid(), SIGINT);
+  ::kill (inferior_ptid.pid (), SIGINT);
 }
 
 /* Read the AUX Vector for the specified PID, wrapping the ptrace(2) call
@@ -836,7 +836,7 @@ get_dynamic (netbsd_process_target *target, const pid_t pid)
   CORE_ADDR relocation = -1;
   for (int i = 0; relocation == -1 && i < num_phdr; i++)
     {
-      phdr_type *const p = (phdr_type *) (phdr_buf.data() + i * phdr_size);
+      phdr_type *const p = (phdr_type *) (phdr_buf.data () + i * phdr_size);
 
       if (p->p_type == PT_PHDR)
 	relocation = phdr_memaddr - p->p_vaddr;
