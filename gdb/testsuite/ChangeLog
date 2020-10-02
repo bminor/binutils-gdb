@@ -1,3 +1,7 @@
+2020-10-02  Gary Benson <gbenson@redhat.com>
+
+	* README: Fix "paralell".
+
 2020-09-30  Gary Benson <gbenson@redhat.com>
 
 	* gdb.dwarf2/dw2-double-set-die-type.S (.Ldie_3e0):
