@@ -9,6 +9,8 @@ _start:
 	movdir64b foo(%rip),%rcx
 	movdir64b foo(%rip),%ecx
 	movdir64b foo(%eip),%ecx
+	movdir64b foo, %ecx
+	movdir64b 0x12345678, %ecx
 
 	.intel_syntax noprefix
 	movdiri [rcx],eax
@@ -20,3 +22,5 @@ _start:
 	movdir64b rcx,[rip+foo]
 	movdir64b ecx,[rip+foo]
 	movdir64b ecx,[eip+foo]
+	movdir64b ecx,ds:foo
+	movdir64b ecx,ds:0x12345678

@@ -1,3 +1,32 @@
+2020-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26685
+	* config/tc-i386.c (process_suffix): Also check the register
+	operand for the address size prefix if the memory operand has
+	no real registers.
+	* testsuite/gas/i386/enqcmd-16bit.d: New file.
+	* testsuite/gas/i386/enqcmd-16bit.s: Likewise.
+	* testsuite/gas/i386/movdir-16bit.d: Likewise.
+	* testsuite/gas/i386/movdir-16bit.s: Likewise.
+	* testsuite/gas/i386/enqcmd.s: Add tests with symbol and DISP.
+	* testsuite/gas/i386/x86-64-enqcmd.s: Likewise.
+	* testsuite/gas/i386/x86-64-movdir.s: Likewise.
+	* testsuite/gas/i386/movdir.s: Add tests with symbol and DISP.
+	Remove the .code16 test.
+	* testsuite/gas/i386/i386.exp: Run movdir-16bit and enqcmd-16bit.
+	* testsuite/gas/i386/x86-64-enqcmd-intel.d: Updated.
+	* testsuite/gas/i386/x86-64-enqcmd.d: Likewise.
+	* testsuite/gas/i386/x86-64-movdir-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-movdir.d: Likewise.
+	* testsuite/gas/i386/enqcmd-intel.d: Likewise.
+	* testsuite/gas/i386/enqcmd.d: Likewise.
+	* testsuite/gas/i386/movdir-intel.d: Likewise.
+	* testsuite/gas/i386/movdir.d: Likewise.
+	* testsuite/gas/i386/x86-64-enqcmd-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-enqcmd.d: Likewise.
+	* testsuite/gas/i386/x86-64-movdir-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-movdir.d: Likewise.
+
 2020-10-02  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/arm/mve-vcvtne-it.d: Allow for padding inserted by
