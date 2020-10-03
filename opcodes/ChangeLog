@@ -1,3 +1,8 @@
+2020-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26685
+	* i386-dis.c (mod_table): Replace Gv with Gdq on movdiri.
+
 2020-10-07  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (OP_E_memory): Revert previous change.

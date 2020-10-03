@@ -13,6 +13,10 @@ _start:
 	enqcmds foo(%rip),%rcx
 	enqcmds foo(%rip),%ecx
 	enqcmds foo(%eip),%ecx
+	enqcmd foo, %ecx
+	enqcmd 0x12345678, %ecx
+	enqcmds foo, %ecx
+	enqcmds 0x12345678, %ecx
 
 	.intel_syntax noprefix
 	enqcmd rax,[rcx]
@@ -25,3 +29,7 @@ _start:
 	enqcmds rcx,[rip+foo]
 	enqcmds ecx,[rip+foo]
 	enqcmds ecx,[eip+foo]
+	enqcmd ecx,ds:foo
+	enqcmd ecx,ds:0x12345678
+	enqcmds ecx,ds:foo
+	enqcmds ecx,ds:0x12345678

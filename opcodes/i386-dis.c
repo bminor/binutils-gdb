@@ -10496,7 +10496,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F38F9_PREFIX_0 */
-    { "movdiri",	{ Ev, Gv }, PREFIX_OPCODE },
+    { "movdiri",	{ Ev, Gdq }, PREFIX_OPCODE },
   },
   {
     /* MOD_62_32BIT */
