@@ -1,5 +1,9 @@
 2020-10-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb.texinfo (Debugging Output): Add set/show debug event-loop.
+
+2020-10-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdb.texinfo (Debugging Output): Add empty lines, fix typo.
 
 2020-09-13  Pedro Alves  <pedro@palves.net>

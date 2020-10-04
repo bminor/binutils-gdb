@@ -1,3 +1,7 @@
+2020-10-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* NEWS: Mention set/show debug event-loop.
+
 2020-10-02  Tom Tromey  <tromey@adacore.com>
 
 	* skip.c (skiplist_entry::skiplist_entry): Unconditionally use

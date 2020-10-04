@@ -26481,6 +26481,16 @@ default is off.
 Displays the current state of displaying @value{GDBN} event debugging
 info.
 
+@item set debug event-loop
+@cindex event-loop debugging
+Controls output of debugging info about the event loop.  The possible
+values are @samp{off}, @samp{all} (shows all debugging info) and
+@samp{all-except-ui} (shows all debugging info except those about
+UI-related events).
+@item show debug event-loop
+Shows the current state of displaying debugging info about the event
+loop.
+
 @item set debug expression
 @cindex expression debugging info
 Turns on or off display of debugging info about @value{GDBN}
