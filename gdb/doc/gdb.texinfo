@@ -26388,6 +26388,7 @@ asynchronous command finishes its execution.  The default is off.
 @item show exec-done-display
 Displays the current setting of asynchronous command completion
 notification.
+
 @kindex set debug
 @cindex ARM AArch64
 @item set debug aarch64
@@ -26397,24 +26398,28 @@ The default is off.
 @item show debug aarch64
 Displays the current state of displaying debugging messages related to
 ARM AArch64.
+
 @cindex gdbarch debugging info
 @cindex architecture debugging info
 @item set debug arch
 Turns on or off display of gdbarch debugging info.  The default is off
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
+
 @item set debug aix-solib
 @cindex AIX shared library debugging
 Control display of debugging messages from the AIX shared library
 support module.  The default is off.
-@item show debug aix-thread
+@item show debug aix-solib
 Show the current state of displaying AIX shared library debugging messages.
+
 @item set debug aix-thread
 @cindex AIX threads
 Display debugging messages about inner workings of the AIX thread
 module.
 @item show debug aix-thread
 Show the current state of AIX thread debugging info display.
+
 @item set debug check-physname
 @cindex physname
 Check the results of the ``physname'' computation.  When reading DWARF
@@ -26425,6 +26430,7 @@ When enabled, this setting causes @value{GDBN} to compute the names
 both ways and display any discrepancies.
 @item show debug check-physname
 Show the current state of ``physname'' checking.
+
 @item set debug coff-pe-read
 @cindex COFF/PE exported symbols
 Control display of debugging messages related to reading of COFF/PE
@@ -26432,6 +26438,7 @@ exported symbols.  The default is off.
 @item show debug coff-pe-read
 Displays the current state of displaying debugging messages related to
 reading of COFF/PE exported symbols.
+
 @item set debug dwarf-die
 @cindex DWARF DIEs
 Dump DWARF DIEs after they are read in.
@@ -26439,6 +26446,7 @@ The value is the number of nesting levels to print.
 A value of zero turns off the display.
 @item show debug dwarf-die
 Show the current state of DWARF DIE debugging.
+
 @item set debug dwarf-line
 @cindex DWARF Line Tables
 Turns on or off display of debugging messages related to reading
@@ -26447,6 +26455,7 @@ A value of 1 provides basic information.
 A value greater than 1 provides more verbose information.
 @item show debug dwarf-line
 Show the current state of DWARF line table debugging.
+
 @item set debug dwarf-read
 @cindex DWARF Reading
 Turns on or off display of debugging messages related to reading
@@ -26455,6 +26464,7 @@ A value of 1 provides basic information.
 A value greater than 1 provides more verbose information.
 @item show debug dwarf-read
 Show the current state of DWARF reader debugging.
+
 @item set debug displaced
 @cindex displaced stepping debugging info
 Turns on or off display of @value{GDBN} debugging info for the
@@ -26462,6 +26472,7 @@ displaced stepping support.  The default is off.
 @item show debug displaced
 Displays the current state of displaying @value{GDBN} debugging info
 related to displaced stepping.
+
 @item set debug event
 @cindex event debugging info
 Turns on or off display of @value{GDBN} event debugging info.  The
@@ -26469,6 +26480,7 @@ default is off.
 @item show debug event
 Displays the current state of displaying @value{GDBN} event debugging
 info.
+
 @item set debug expression
 @cindex expression debugging info
 Turns on or off display of debugging info about @value{GDBN}
@@ -26476,16 +26488,19 @@ expression parsing.  The default is off.
 @item show debug expression
 Displays the current state of displaying debugging info about
 @value{GDBN} expression parsing.
+
 @item set debug fbsd-lwp
 @cindex FreeBSD LWP debug messages
 Turns on or off debugging messages from the FreeBSD LWP debug support.
 @item show debug fbsd-lwp
 Show the current state of FreeBSD LWP debugging messages.
+
 @item set debug fbsd-nat
 @cindex FreeBSD native target debug messages
 Turns on or off debugging messages from the FreeBSD native target.
 @item show debug fbsd-nat
 Show the current state of FreeBSD native target debugging messages.
+
 @item set debug frame
 @cindex frame debugging info
 Turns on or off display of @value{GDBN} frame debugging info.  The
@@ -26493,11 +26508,13 @@ default is off.
 @item show debug frame
 Displays the current state of displaying @value{GDBN} frame debugging
 info.
+
 @item set debug gnu-nat
 @cindex @sc{gnu}/Hurd debug messages
 Turn on or off debugging messages from the @sc{gnu}/Hurd debug support.
 @item show debug gnu-nat
 Show the current state of @sc{gnu}/Hurd debugging messages.
+
 @item set debug infrun
 @cindex inferior debugging info
 Turns on or off display of @value{GDBN} debugging info for running the inferior.
@@ -26505,22 +26522,26 @@ The default is off.  @file{infrun.c} contains GDB's runtime state machine used
 for implementing operations such as single-stepping the inferior.
 @item show debug infrun
 Displays the current state of @value{GDBN} inferior debugging.
+
 @item set debug jit
 @cindex just-in-time compilation, debugging messages
 Turn on or off debugging messages from JIT debug support.
 @item show debug jit
 Displays the current state of @value{GDBN} JIT debugging.
+
 @item set debug lin-lwp
 @cindex @sc{gnu}/Linux LWP debug messages
 @cindex Linux lightweight processes
 Turn on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
+
 @item set debug linux-namespaces
 @cindex @sc{gnu}/Linux namespaces debug messages
 Turn on or off debugging messages from the Linux namespaces debug support.
 @item show debug linux-namespaces
 Show the current state of Linux namespaces debugging messages.
+
 @item set debug mach-o
 @cindex Mach-O symbols processing
 Control display of debugging messages related to Mach-O symbols
@@ -26528,18 +26549,21 @@ processing.  The default is off.
 @item show debug mach-o
 Displays the current state of displaying debugging messages related to
 reading of COFF/PE exported symbols.
+
 @item set debug notification
 @cindex remote async notification debugging info
 Turn on or off debugging messages about remote async notification.
 The default is off.
 @item show debug notification
 Displays the current state of remote async notification debugging messages.
+
 @item set debug observer
 @cindex observer debugging info
 Turns on or off display of @value{GDBN} observer debugging.  This
 includes info such as the notification of observable events.
 @item show debug observer
 Displays the current state of observer debugging.
+
 @item set debug overload
 @cindex C@t{++} overload debugging info
 Turns on or off display of @value{GDBN} C@t{++} overload debugging
@@ -26548,6 +26572,7 @@ is off.
 @item show debug overload
 Displays the current state of displaying @value{GDBN} C@t{++} overload
 debugging info.
+
 @cindex expression parser, debugging info
 @cindex debug expression parser
 @item set debug parser
@@ -26557,6 +26582,7 @@ parser.  @xref{Tracing, , Tracing Your Parser, bison, Bison}, for
 details.  The default is off.
 @item show debug parser
 Show the current state of expression parser debugging.
+
 @cindex packets, reporting on stdout
 @cindex serial connections, debugging
 @cindex debug remote protocol
@@ -26593,12 +26619,14 @@ default is off.
 @item show debug serial
 Displays the current state of displaying @value{GDBN} serial debugging
 info.
+
 @item set debug solib-frv
 @cindex FR-V shared-library debugging
 Turn on or off debugging messages for FR-V shared-library code.
 @item show debug solib-frv
 Display the current state of FR-V shared-library code debugging
 messages.
+
 @item set debug symbol-lookup
 @cindex symbol lookup
 Turns on or off display of debugging messages related to symbol lookup.
@@ -26607,12 +26635,14 @@ A value of 1 provides basic information.
 A value greater than 1 provides more verbose information.
 @item show debug symbol-lookup
 Show the current state of symbol lookup debugging messages.
+
 @item set debug symfile
 @cindex symbol file functions
 Turns on or off display of debugging messages related to symbol file functions.
 The default is off.  @xref{Files}.
 @item show debug symfile
 Show the current state of symbol file debugging messages.
+
 @item set debug symtab-create
 @cindex symbol table creation
 Turns on or off display of debugging messages related to symbol table creation.
@@ -26621,6 +26651,7 @@ A value of 1 provides basic information.
 A value greater than 1 provides more verbose information.
 @item show debug symtab-create
 Show the current state of symbol table creation debugging.
+
 @item set debug target
 @cindex target debugging info
 Turns on or off display of @value{GDBN} target debugging info. This info
@@ -26630,6 +26661,7 @@ value of large memory transfers.
 @item show debug target
 Displays the current state of displaying @value{GDBN} target debugging
 info.
+
 @item set debug timestamp
 @cindex timestamping debugging info
 Turns on or off display of timestamps with @value{GDBN} debugging info.
@@ -26638,6 +26670,7 @@ message.
 @item show debug timestamp
 Displays the current state of displaying timestamps with @value{GDBN}
 debugging info.
+
 @item set debug varobj
 @cindex variable object debugging info
 Turns on or off display of @value{GDBN} variable object debugging
@@ -26645,6 +26678,7 @@ info. The default is off.
 @item show debug varobj
 Displays the current state of displaying @value{GDBN} variable object
 debugging info.
+
 @item set debug xml
 @cindex XML parser debugging
 Turn on or off debugging messages for built-in XML parsers.
