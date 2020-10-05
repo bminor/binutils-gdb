@@ -371,7 +371,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
         break;
       case TYPE_CODE_ARRAY:
 	/* __m128, __m128i and __m128d are returned via XMM0.  */
-	if (TYPE_VECTOR (type) && len == 16)
+	if (type->is_vector () && len == 16)
 	  {
 	    enum type_code code = TYPE_TARGET_TYPE (type)->code ();
 	    if (code == TYPE_CODE_INT || code == TYPE_CODE_FLT)

@@ -1,3 +1,8 @@
+2020-10-05  Simon Marchi  <simon.marchi@efficios.com>
+
+	* amd64-windows-tdep.c (amd64_windows_return_value): Use
+	type::is_vector instead of TYPE_VECTOR.
+
 2020-10-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* auto-load.c (auto_load_objfile_script_1): Don't use
