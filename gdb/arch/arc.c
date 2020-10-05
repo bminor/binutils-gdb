@@ -35,7 +35,7 @@
 #endif
 
 STATIC_IN_GDB target_desc *
-arc_create_target_description (const struct arc_gdbarch_features &features)
+arc_create_target_description (const struct arc_arch_features &features)
 {
   /* Create a new target description.  */
   target_desc *tdesc = allocate_target_description ();
@@ -84,10 +84,10 @@ arc_create_target_description (const struct arc_gdbarch_features &features)
 #ifndef GDBSERVER
 
 /* Wrapper used by std::unordered_map to generate hash for features set.  */
-struct arc_gdbarch_features_hasher
+struct arc_arch_features_hasher
 {
   std::size_t
-  operator() (const arc_gdbarch_features &features) const noexcept
+  operator() (const arc_arch_features &features) const noexcept
   {
     return features.hash ();
   }
@@ -95,14 +95,14 @@ struct arc_gdbarch_features_hasher
 
 /* Cache of previously created target descriptions, indexed by the hash
    of the features set used to create them.  */
-static std::unordered_map<arc_gdbarch_features,
+static std::unordered_map<arc_arch_features,
 			  const target_desc_up,
-			  arc_gdbarch_features_hasher> arc_tdesc_cache;
+			  arc_arch_features_hasher> arc_tdesc_cache;
 
 /* See arch/arc.h.  */
 
 const target_desc *
-arc_lookup_target_description (const struct arc_gdbarch_features &features)
+arc_lookup_target_description (const struct arc_arch_features &features)
 {
   /* Lookup in the cache first.  If found, return the pointer from the
      "target_desc_up" type which is a "unique_ptr".  This should be fine
