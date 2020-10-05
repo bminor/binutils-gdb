@@ -1,3 +1,8 @@
+2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regnerate.
+	* configure.ac (AC_CONFIG_AUX_DIR): Update.
+
 2009-08-22  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

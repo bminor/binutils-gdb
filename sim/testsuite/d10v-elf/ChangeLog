@@ -1,3 +1,8 @@
+2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regnerate.
+	* configure.ac (AC_CONFIG_AUX_DIR): Update.
+
 2015-03-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (RUNFLAGS_FOR_TARGET): Set to --environment operating.

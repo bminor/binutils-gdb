@@ -9,7 +9,7 @@ AC_INIT(Makefile.in)
 
 CC=${CC-cc}
 AC_SUBST(CC)
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../../..)
+AC_CONFIG_AUX_DIR(../../..)
 AC_CANONICAL_SYSTEM
 
 AC_SUBST(target_cpu)

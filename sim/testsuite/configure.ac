@@ -8,7 +8,7 @@ AC_INIT(common/bits-tst.c)
 
 CC=${CC-cc}
 AC_SUBST(CC)
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/../..)
+AC_CONFIG_AUX_DIR(../..)
 AC_CANONICAL_SYSTEM
 
 # Configure sub-directory for appropriate targets

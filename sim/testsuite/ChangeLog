@@ -1,3 +1,8 @@
+2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regnerate.
+	* configure.ac (AC_CONFIG_AUX_DIR): Update.
+
 2020-09-08  David Faust  <david.faust@oracle.com>
 
 	* sim/bpf/alu.s: Correct div and mod tests.
