@@ -1526,11 +1526,11 @@ HFILES_NO_SRCDIR = \
 	tui/tui-hooks.h \
 	tui/tui-io.h \
 	tui/tui-layout.h \
+	tui/tui-out.h \
 	tui/tui-regs.h \
 	tui/tui-source.h \
 	tui/tui-stack.h \
 	tui/tui-win.h \
-	tui/tui-windata.h \
 	tui/tui-wingeneral.h \
 	tui/tui-winsource.h \
 	x86-tdep.h

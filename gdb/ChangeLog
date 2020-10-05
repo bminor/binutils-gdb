@@ -1,5 +1,10 @@
 2020-10-05  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Remove tui/tui-windata.h, add
+	tui/tui-out.h.
+
+2020-10-05  Simon Marchi  <simon.marchi@efficios.com>
+
 	* amd64-windows-tdep.c (amd64_windows_return_value): Use
 	type::is_vector instead of TYPE_VECTOR.
 
