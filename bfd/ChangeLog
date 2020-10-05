@@ -1,3 +1,13 @@
+2020-10-06  Brandon Bergren  <bdragon@FreeBSD.org>
+
+	* config.bfd: Add powerpc64le-*-freebsd*.
+	* configure.ac: Add powerpc_elf64_fbsd_le_vec.
+	* elf64-ppc.c (TARGET_LITTLE_SYM, TARGET_LITTLE_NAME): Define for
+	freebsd.
+	* targets.c (powerpc_elf64_fbsd_le_vec): Declare.
+	(_bfd_target_vector): Add it.
+	* configure: Regenerate.
+
 2020-10-05  Kamil Rytarowski  <n54@gmx.com>
 
 	* config.bfd (aarch64-*-netbsd*, aarch64_be-*-netbsd*): Add target.

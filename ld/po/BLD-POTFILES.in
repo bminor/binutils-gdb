@@ -177,6 +177,7 @@ eelf64btsmip.c
 eelf64btsmip_fbsd.c
 eelf64hppa.c
 eelf64lppc.c
+eelf64lppc_fbsd.c
 eelf64lriscv.c
 eelf64lriscv_lp64.c
 eelf64lriscv_lp64f.c

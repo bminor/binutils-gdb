@@ -17717,7 +17717,9 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 /* FreeBSD support */
 
 #undef  TARGET_LITTLE_SYM
+#define TARGET_LITTLE_SYM powerpc_elf64_fbsd_le_vec
 #undef  TARGET_LITTLE_NAME
+#define TARGET_LITTLE_NAME "elf64-powerpcle-freebsd"
 
 #undef  TARGET_BIG_SYM
 #define TARGET_BIG_SYM	powerpc_elf64_fbsd_vec

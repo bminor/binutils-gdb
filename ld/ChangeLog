@@ -1,3 +1,12 @@
+2020-10-06  Brandon Bergren  <bdragon@FreeBSD.org>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eelf64lppc_fbsd.c.
+	Include $(DEPDIR)/eelf64lppc_fbsd.Pc.
+	* configure.tgt: Add powerpc64le-*-freebsd*.
+	* emulparams/elf64lppc_fbsd.sh: New file.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
 2020-10-05  T.K. Chia  <u1049321969@caramail.com>
 
 	PR gas/26694
