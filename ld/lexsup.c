@@ -735,6 +735,20 @@ parse_args (unsigned argc, char **argv)
 	  optind = last_optind;
 	  optc = getopt_long (argc, argv, "-", really_longopts, &longind);
 	}
+      /* Attempt to detect grouped short options,  eg: "-non-start".
+	 Accepting such options is error prone as it is not clear if the user
+	 intended "-n -o n-start" or "--non-start".  */
+      else if (longind == 0  /* This is a short option.  */
+	       && optc > 32  /* It is a valid option.  */
+        /* The character is not the second character of argv[last_optind].  */
+	       && optc != argv[last_optind][1])
+	{
+	  if (optarg)
+	    einfo (_("%F%P: Error: unable to disambiguate: %s (did you mean -%s ?)\n"),
+		   argv[last_optind], argv[last_optind]);
+	  else
+	    einfo (_("%P: Warning: grouped short command line options are deprecated: %s\n"), argv[last_optind]);
+	}
 
       if (ldemul_handle_option (optc))
 	continue;
