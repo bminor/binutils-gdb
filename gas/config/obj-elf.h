@@ -104,11 +104,11 @@ struct elf_obj_sy
    field.  */
 struct elf_section_match
 {
-  const char *group_name;
-  const char *linked_to_symbol_name;
-  unsigned int info;
-  unsigned int section_id;
-  flagword flags;
+  const char *   group_name;
+  const char *   linked_to_symbol_name;
+  unsigned int   info;
+  unsigned int   section_id;
+  flagword       flags;
 };
 
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy

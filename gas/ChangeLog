@@ -1,3 +1,17 @@
+2020-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 26253
+	* config/obj-elf.c (obj_elf_section): Accept a numeric value for
+	the "o" section flag.  Interpret it as a section index.  Allow an
+	index of zero.
+	* doc/as.texi: Document the new behaviour.
+	* NEWS: Mention the new feature.  Tidy entries.
+	* testsuite/gas/elf/sh-link-zero.s: New test.
+	* testsuite/gas/elf/sh-link-zero.d: New test driver.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+	* testsuite/gas/elf/section21.l: Updated expected assembler
+	output.
+
 2020-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26685

@@ -1,21 +1,12 @@
 -*- text -*-
-* Add support for Cortex-A78 and Cortex-A78AE for ARM.
+* When setting the link order attribute of ELF sections, it is now possible to
+  use a numeric section index instead of symbol name.
 
-* Add support for Cortex-A78 and Cortex-A78AE for AArch64.
+* Add support for Cortex-A78, Cortex-A78AE and Cortex-X1 for AArch64 and ARM.
+  Add support for Cortex-R82, Neoverse V1, and Neoverse N2 for ARM.
 
-* Add support for ETMv4 (Embedded Trace Macrocell) system registers for
-  AArch64.
-
-* Add support for ETE (Embedded Trace Extension) system registers for AArch64.
-
-* Add support for TRBE (Trace Buffer Extension) system registers for AArch64.
-
-* Add support for Cortex-X1 for AArch64.
-
-* Add support for Cortex-X1 for ARM.
-
-* Add support for Arm's Cortex-R82, Neoverse V1, and Neoverse N2
-  processors.
+* Add support for ETMv4 (Embedded Trace Macrocell), ETE (Embedded Trace
+  Extension) and TRBE (Trace Buffer Extension) system registers for AArch64.
 
 * Add support for Armv8-R AArch64.
 

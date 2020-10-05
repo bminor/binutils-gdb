@@ -6728,11 +6728,14 @@ If @var{flags} contains the @code{o} flag, then the @var{type} argument
 must be present along with an additional field like this:
 
 @smallexample
-.section @var{name},"@var{flags}"o,@@@var{type},@var{SymbolName}
+.section @var{name},"@var{flags}"o,@@@var{type},@var{SymbolName}|@var{SectionIndex}
 @end smallexample
 
 The @var{SymbolName} field specifies the symbol name which the section
-references.
+references.  Alternatively a numeric @var{SectionIndex} can be provided.  This
+is not generally a good idea as section indicies are rarely known at assembly
+time, but the facility is provided for testing purposes.  An index of zero is
+allowed.  It indicates that the linked-to section has already been discarded.
 
 Note: If both the @var{M} and @var{o} flags are present, then the fields
 for the Merge flag should come first, like this:

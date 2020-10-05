@@ -848,16 +848,14 @@ _bfd_elf_setup_sections (bfd *abfd)
       if ((this_hdr->sh_flags & SHF_LINK_ORDER) != 0)
 	{
 	  unsigned int elfsec = this_hdr->sh_link;
-	  /* FIXME: The old Intel compiler and old strip/objcopy may
-	     not set the sh_link or sh_info fields.  Hence we could
-	     get the situation where elfsec is 0.  */
+	  /* An sh_link value of 0 is now allowed.  It indicates that linked
+	     to section has already been discarded, but that the current
+	     section has been retained for some other reason.  This linking
+	     section is still a candidate for later garbage collection
+	     however.  */
 	  if (elfsec == 0)
 	    {
-	      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-	      bed->link_order_error_handler
-		/* xgettext:c-format */
-		(_("%pB: warning: sh_link not set for section `%pA'"),
-		 abfd, s);
+	      elf_linked_to_section (s) = NULL;
 	    }
 	  else
 	    {
@@ -3888,6 +3886,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
       if ((d->this_hdr.sh_flags & SHF_LINK_ORDER) != 0)
 	{
 	  s = elf_linked_to_section (sec);
+	  /* We can now have a NULL linked section pointer.
+	     This happens when the sh_link field is 0, which is done
+	     when a linked to section is discarded but the linking
+	     section has been retained for some reason.  */
 	  if (s)
 	    {
 	      /* Check discarded linkonce section.  */
@@ -3922,20 +3924,6 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		}
 	      s = s->output_section;
 	      d->this_hdr.sh_link = elf_section_data (s)->this_idx;
-	    }
-	  else
-	    {
-	      /* PR 290:
-		 The Intel C compiler generates SHT_IA_64_UNWIND with
-		 SHF_LINK_ORDER.  But it doesn't set the sh_link or
-		 sh_info fields.  Hence we could get the situation
-		 where s is NULL.  */
-	      const struct elf_backend_data *bed
-		= get_elf_backend_data (abfd);
-	      bed->link_order_error_handler
-		/* xgettext:c-format */
-		(_("%pB: warning: sh_link not set for section `%pA'"),
-		 abfd, sec);
 	    }
 	}
 

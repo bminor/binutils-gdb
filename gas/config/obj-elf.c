@@ -519,8 +519,10 @@ struct section_stack
 
 static struct section_stack *section_stack;
 
+/* Return TRUE iff SEC matches the section info INF.  */
+
 static bfd_boolean
-get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
+get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 {
   struct elf_section_match *match = (struct elf_section_match *) inf;
   const char *gname = match->group_name;
@@ -602,7 +604,7 @@ obj_elf_change_section (const char *name,
   previous_section = now_seg;
   previous_subsection = now_subseg;
 
-  old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section,
+  old_sec = bfd_get_section_by_name_if (stdoutput, name, get_section_by_match,
 					(void *) match_p);
   if (old_sec)
     {
@@ -1076,6 +1078,7 @@ obj_elf_section (int push)
   int linkonce;
   subsegT new_subsection = -1;
   struct elf_section_match match;
+  unsigned long linked_to_section_index = -1UL;
 
   if (flag_mri)
     {
@@ -1215,15 +1218,24 @@ obj_elf_section (int push)
 
 	  if ((attr & SHF_LINK_ORDER) != 0 && *input_line_pointer == ',')
 	    {
-	      char c;
-	      unsigned int length;
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
-	      c = get_symbol_name (& beg);
-	      (void) restore_line_pointer (c);
-	      length = input_line_pointer - beg;
-	      if (length)
-		match.linked_to_symbol_name = xmemdup0 (beg, length);
+	      /* Check for a numeric section index, rather than a symbol name.  */
+	      if (ISDIGIT (* input_line_pointer))
+		{
+		  linked_to_section_index = strtoul (input_line_pointer, & input_line_pointer, 0);
+		}
+	      else
+		{
+		  char c;
+		  unsigned int length;
+
+		  c = get_symbol_name (& beg);
+		  (void) restore_line_pointer (c);
+		  length = input_line_pointer - beg;
+		  if (length)
+		    match.linked_to_symbol_name = xmemdup0 (beg, length);
+		}
 	    }
 
 	  if ((attr & SHF_GROUP) != 0 && is_clone)
@@ -1231,6 +1243,7 @@ obj_elf_section (int push)
 	      as_warn (_("? section flag ignored with G present"));
 	      is_clone = FALSE;
 	    }
+
 	  if ((attr & SHF_GROUP) != 0 && *input_line_pointer == ',')
 	    {
 	      ++input_line_pointer;
@@ -1289,6 +1302,7 @@ obj_elf_section (int push)
 	  if (*input_line_pointer == ',')
 	    {
 	      char *save = input_line_pointer;
+
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
 	      if (strncmp (input_line_pointer, "unique", 6) == 0)
@@ -1393,6 +1407,13 @@ obj_elf_section (int push)
       elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_mbind;
     }
   elf_section_flags (now_seg) |= gnu_attr;
+
+  if (linked_to_section_index != -1UL)
+    {
+      elf_section_flags (now_seg) |= SHF_LINK_ORDER;
+      elf_section_data (now_seg)->this_hdr.sh_link = linked_to_section_index;
+      /* FIXME: Should we perform some sanity checking on the section index ?  */
+    }
 
   if (push && new_subsection != -1)
     subseg_set (now_seg, new_subsection);

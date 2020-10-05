@@ -1,3 +1,10 @@
+2020-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 26253
+	* elf.c (_bfd_elf_setup_sections): Do not complain about an
+	sh_link value of zero when the SLF_LINK_ORDER flag is set.
+	(assign_section_numbers): Likewise.
+
 2020-10-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 26681
