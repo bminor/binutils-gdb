@@ -1,5 +1,10 @@
 2020-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/26704
+	* i386-dis.c (putop): Always display suffix for %LQ in 64bit.
+
+2020-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/26705
 	* i386-dis.c (print_insn): Clear modrm if not needed.
 	(putop): Check need_modrm for modrm.mod != 3.  Don't check

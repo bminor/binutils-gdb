@@ -1,5 +1,14 @@
 2020-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/26704
+	* testsuite/gas/i386/noreg64-data16.d: Expect sysretl instead of
+	sysret.
+	* testsuite/gas/i386/noreg64.d: Likewise.
+	* testsuite/gas/i386/x86-64-intel64.d: Likewise.
+	* testsuite/gas/i386/x86-64-opcode.d: Likewise.
+
+2020-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/26705
 	* testsuite/gas/i386/x86-64-suffix.s: Add "mov %rsp,%rbp" before
 	sysretq.

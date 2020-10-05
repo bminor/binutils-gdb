@@ -10870,7 +10870,7 @@ putop (const char *in_template, int sizeflag)
 		  USED_REX (REX_W);
 		  *obufp++ = 'q';
 		}
-	      else if((address_mode == mode_64bit && need_modrm && cond)
+	      else if((address_mode == mode_64bit && cond)
 		      || (sizeflag & SUFFIX_ALWAYS))
 		*obufp++ = intel_syntax? 'd' : 'l';
 	    }
