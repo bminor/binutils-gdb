@@ -8776,10 +8776,13 @@ output_interseg_jump (void)
   else
     fix_new_exp (frag_now, p - frag_now->fr_literal, size,
 		 i.op[1].imms, 0, reloc (size, 0, 0, i.reloc[1]));
-  if (i.op[0].imms->X_op != O_constant)
-    as_bad (_("can't handle non absolute segment in `%s'"),
-	    i.tm.name);
-  md_number_to_chars (p + size, (valueT) i.op[0].imms->X_add_number, 2);
+
+  p += size;
+  if (i.op[0].imms->X_op == O_constant)
+    md_number_to_chars (p, (valueT) i.op[0].imms->X_add_number, 2);
+  else
+    fix_new_exp (frag_now, p - frag_now->fr_literal, 2,
+		 i.op[0].imms, 0, reloc (2, 0, 0, i.reloc[0]));
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)

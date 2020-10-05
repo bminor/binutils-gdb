@@ -1,3 +1,16 @@
+2020-10-05  T.K. Chia  <u1049321969@caramail.com>
+
+	PR gas/26694
+	* testsuite/ld-i386/ljmp.s,
+	* testsuite/ld-i386/ljmp1.d,
+	* testsuite/ld-i386/ljmp1.s,
+	* testsuite/ld-i386/ljmp2.d,
+	* testsuite/ld-i386/ljmp2.s,
+	* testsuite/ld-x86-64/ljmp1.d,
+	* testsuite/ld-x86-64/ljmp2.d: New testcases.
+	* testsuite/ld-i386/i386.exp,
+	* testsuite/ld-x86-64/x86-64.exp: Run them.
+
 2020-10-05  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (parse_args): Generate an error or warning message when

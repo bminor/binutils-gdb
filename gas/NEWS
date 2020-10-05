@@ -1,4 +1,7 @@
 -*- text -*-
+
+* Support non-absolute segment values for i386 lcall and ljmp.
+
 * When setting the link order attribute of ELF sections, it is now possible to
   use a numeric section index instead of symbol name.
 
