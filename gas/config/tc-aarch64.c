@@ -9011,8 +9011,12 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
 			      AARCH64_FEATURE_CRC), "APM X-Gene 2"},
   {"cortex-r82", AARCH64_ARCH_V8_R, "Cortex-R82"},
   {"cortex-x1", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
-                AARCH64_FEATURE_DOTPROD | AARCH64_FEATURE_PROFILE),
-  "Cortex-X1"},
+                AARCH64_FEATURE_F16
+                | AARCH64_FEATURE_RCPC
+                | AARCH64_FEATURE_DOTPROD
+                | AARCH64_FEATURE_SSBS
+                | AARCH64_FEATURE_PROFILE),
+                "Cortex-X1"},
   {"generic", AARCH64_ARCH_V8, NULL},
 
   {NULL, AARCH64_ARCH_NONE, NULL}
