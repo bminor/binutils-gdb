@@ -1,3 +1,7 @@
+2020-10-05  Kamil Rytarowski  <n54@gmx.com>
+
+	* config.bfd (aarch64-*-netbsd*, aarch64_be-*-netbsd*): Add target.
+
 2020-10-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 26253
