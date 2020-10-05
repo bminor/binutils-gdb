@@ -1,3 +1,7 @@
+2020-10-05  Samanta Navarro  <ferivoz@riseup.net>
+
+	* doc/binutils.texi: Fix spelling mistakes.
+
 2020-09-29  Mark Wielaard  <mark@klomp.org>
 
 	* dwarf.c (display_loclists_list): Handle DW_LLE_start_end and

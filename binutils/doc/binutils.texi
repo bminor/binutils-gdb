@@ -983,7 +983,7 @@ Do not demangle low-level symbol names.  This is the default.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -1345,7 +1345,7 @@ otherwise copy it.  For example:
   --only-section=.text.* --only-section=!.text.foo
 @end smallexample
 
-will copy all sectinos maching '.text.*' but not the section
+will copy all sectinos matching '.text.*' but not the section
 '.text.foo'.
 
 @item -R @var{sectionpattern}
@@ -2258,7 +2258,7 @@ for more information on demangling.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -2760,7 +2760,7 @@ where the number inside the square brackets is the number of the entry
 in the symbol table, the @var{sec} number is the section number, the
 @var{fl} value are the symbol's flag bits, the @var{ty} number is the
 symbol's type, the @var{scl} number is the symbol's storage class and
-the @var{nx} value is the number of auxilary entries associated with
+the @var{nx} value is the number of auxiliary entries associated with
 the symbol.  The last two fields are the symbol's value and its name.
 
 The other common output format, usually seen with ELF based files,
@@ -2771,7 +2771,7 @@ looks like this:
 00000000 g       .text  00000000 fred
 @end smallexample
 
-Here the first number is the symbol's value (sometimes refered to as
+Here the first number is the symbol's value (sometimes referred to as
 its address).  The next field is actually a set of characters and
 spaces indicating the flag bits that are set on the symbol.  These
 characters are described below.  Next is the section with which the
@@ -3677,7 +3677,7 @@ output.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -3900,7 +3900,7 @@ prefixed with @samp{(inlined by)}.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.
@@ -4843,7 +4843,7 @@ Do not demangle low-level symbol names.  This is the default.
 @itemx --no-recursion-limit
 Enables or disables a limit on the amount of recursion performed
 whilst demangling strings.  Since the name mangling formats allow for
-an inifinite level of recursion it is possible to create strings whose
+an infinite level of recursion it is possible to create strings whose
 decoding will exhaust the amount of stack space available on the host
 machine, triggering a memory fault.  The limit tries to prevent this
 from happening by restricting recursion to 2048 levels of nesting.

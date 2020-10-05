@@ -972,7 +972,7 @@ This option selects the core processor variant.
 @item -EB | -EL
 Select either big-endian (-EB) or little-endian (-EL) output.
 @item -mcode-density
-Enable Code Density extenssion instructions.
+Enable Code Density extension instructions.
 @end table
 @end ifset
 

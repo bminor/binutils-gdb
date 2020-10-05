@@ -1,3 +1,7 @@
+2020-10-05  Samanta Navarro  <ferivoz@riseup.net>
+
+	* m32r.cpu: Fix spelling mistakes.
+
 2020-09-18  David Faust  <david.faust@oracle.com>
 
 	* bpf.cpu (insn-op-code-alu): Add SDIV and SMOD.

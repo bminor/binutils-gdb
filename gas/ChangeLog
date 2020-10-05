@@ -1,3 +1,8 @@
+2020-10-05  Samanta Navarro  <ferivoz@riseup.net>
+
+	* doc/as.texi: Fix spelling mistakes.
+	* doc/c-wasm32.texi: Likewise.
+
 2020-10-05  T.K. Chia  <u1049321969@caramail.com>
 
 	PR gas/26694

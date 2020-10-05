@@ -1,3 +1,9 @@
+2020-10-05  Samanta Navarro  <ferivoz@riseup.net>
+
+	* cgen-asm.c: Fix spelling mistakes.
+	* cgen-dis.c: Fix spelling mistakes.
+	* tic30-dis.c: Fix spelling mistakes.
+
 2020-10-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26704
