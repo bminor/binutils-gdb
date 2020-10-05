@@ -1,3 +1,10 @@
+2020-10-07  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arch/arc.h: Rename "arc_gdbarch_features" to
+	"arc_arch_features".
+	* arc-tdep.h: Likewise.
+	* arc-tdep.c: Likewise.
+
 2020-10-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* infcmd.c (attach_command): Remove the redundant call to
