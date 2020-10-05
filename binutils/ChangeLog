@@ -1,3 +1,9 @@
+2020-10-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 26698
+	* windmc.c (mc_unify_path): Fix typo checking character at end of
+	pathname.
+
 2020-10-05  Samanta Navarro  <ferivoz@riseup.net>
 
 	* doc/binutils.texi: Fix spelling mistakes.

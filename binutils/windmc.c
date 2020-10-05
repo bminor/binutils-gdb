@@ -924,7 +924,7 @@ mc_unify_path (const char *path)
   hsz = xmalloc (strlen (path) + 2);
   strcpy (hsz, path);
   end = hsz + strlen (hsz);
-  if (hsz[-1] != '/' && hsz[-1] != '\\')
+  if (end[-1] != '/' && end[-1] != '\\')
     strcpy (end, "/");
   while ((end = strchr (hsz, '\\')) != NULL)
     *end = '/';
