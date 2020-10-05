@@ -1,3 +1,7 @@
+2020-10-05  Kamil Rytarowski  <n54@gmx.com>
+
+	* configure.tgt (aarch64*-*-netbsd*): Add target.
+
 2020-10-05  Samanta Navarro  <ferivoz@riseup.net>
 
 	* doc/as.texi: Fix spelling mistakes.
