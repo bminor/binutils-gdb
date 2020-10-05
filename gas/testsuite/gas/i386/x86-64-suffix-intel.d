@@ -18,11 +18,13 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	cf                   	iretd  
 [ 	]*[a-f0-9]+:	48 cf                	iretq  
 [ 	]*[a-f0-9]+:	0f 07                	sysretd 
+[ 	]*[a-f0-9]+:	48 89 e5             	mov    rbp,rsp
 [ 	]*[a-f0-9]+:	48 0f 07             	sysretq 
 [ 	]*[a-f0-9]+:	66 cf                	iretw  
 [ 	]*[a-f0-9]+:	cf                   	iretd  
 [ 	]*[a-f0-9]+:	cf                   	iretd  
 [ 	]*[a-f0-9]+:	48 cf                	iretq  
 [ 	]*[a-f0-9]+:	0f 07                	sysretd 
+[ 	]*[a-f0-9]+:	48 89 e5             	mov    rbp,rsp
 [ 	]*[a-f0-9]+:	48 0f 07             	sysretq 
 #pass

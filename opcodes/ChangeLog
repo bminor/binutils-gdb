@@ -1,3 +1,10 @@
+2020-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26705
+	* i386-dis.c (print_insn): Clear modrm if not needed.
+	(putop): Check need_modrm for modrm.mod != 3.  Don't check
+	need_modrm for modrm.mod == 3.
+
 2020-09-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* aarch64-opc.c: Added ETMv4 system registers TRCACATRn, TRCACVRn,

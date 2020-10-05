@@ -9927,7 +9927,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
       FETCH_DATA (info, codep + 1);
       threebyte = *codep;
       dp = &dis386_twobyte[threebyte];
-      need_modrm = twobyte_has_modrm[*codep];
+      need_modrm = twobyte_has_modrm[threebyte];
       codep++;
     }
   else
@@ -9954,6 +9954,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
       modrm.reg = (*codep >> 3) & 7;
       modrm.rm = *codep & 7;
     }
+  else
+    memset (&modrm, 0, sizeof (modrm));
 
   need_vex = 0;
   memset (&vex, 0, sizeof (vex));
@@ -10644,7 +10646,8 @@ putop (const char *in_template, int sizeflag)
 	case 'A':
 	  if (intel_syntax)
 	    break;
-	  if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
+	  if ((need_modrm && modrm.mod != 3)
+	      || (sizeflag & SUFFIX_ALWAYS))
 	    *obufp++ = 'b';
 	  break;
 	case 'B':
@@ -10796,7 +10799,7 @@ putop (const char *in_template, int sizeflag)
 	case 'P':
 	  if (l == 0)
 	    {
-	      if (((need_modrm && modrm.mod == 3) || !cond)
+	      if ((modrm.mod == 3 || !cond)
 		  && !(sizeflag & SUFFIX_ALWAYS))
 		break;
 	  /* Fall through.  */
@@ -10840,7 +10843,8 @@ putop (const char *in_template, int sizeflag)
 	      if (intel_syntax && !alt)
 		break;
 	      USED_REX (REX_W);
-	      if (modrm.mod != 3 || (sizeflag & SUFFIX_ALWAYS))
+	      if ((need_modrm && modrm.mod != 3)
+		  || (sizeflag & SUFFIX_ALWAYS))
 		{
 		  if (rex & REX_W)
 		    *obufp++ = 'q';

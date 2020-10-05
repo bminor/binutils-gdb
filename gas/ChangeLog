@@ -1,3 +1,11 @@
+2020-10-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26705
+	* testsuite/gas/i386/x86-64-suffix.s: Add "mov %rsp,%rbp" before
+	sysretq.
+	* testsuite/gas/i386/x86-64-suffix-intel.d: Updated.
+	* testsuite/gas/i386/x86-64-suffix.d: Likewise.
+
 2020-10-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 26253
