@@ -190,6 +190,7 @@ Disassembly of section \.text:
 .*:	d5033edf 	isb	#0xe
 .*:	d5033fdf 	isb
 .*:	d5033fdf 	isb
+.*:	d5033fdf 	isb
 .*:	d503309f 	ssbb
 .*:	d503349f 	pssbb
 .*:	d8000000 	prfm	pldl1keep, 0 <LABEL1>

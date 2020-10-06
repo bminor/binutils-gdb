@@ -1,3 +1,11 @@
+2020-10-06  Alex Coplan  <alex.coplan@arm.com>
+
+	PR 26699
+	* config/tc-aarch64.c (asm_barrier_opt): Delete.
+	(parse_barrier): Fix bogus type punning.
+	* testsuite/gas/aarch64/system.d: Update disassembly.
+	* testsuite/gas/aarch64/system.s: Add isb sy test.
+
 2020-10-06  Sergey Belyashav  <sergey.belyashov@gmail.com>
 
 	PR 26692
