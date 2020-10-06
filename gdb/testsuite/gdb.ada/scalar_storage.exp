@@ -34,5 +34,5 @@ if ![runto "storage.adb:$bp_location" ] then {
   return
 }
 
-gdb_test "print V_LE" "= \\(value => 126\\)"
-gdb_test "print V_BE" "= \\(value => 126\\)"
+gdb_test "print V_LE" "= \\(value => 126, another_value => 12\\)"
+gdb_test "print V_BE" "= \\(value => 126, another_value => 12\\)"

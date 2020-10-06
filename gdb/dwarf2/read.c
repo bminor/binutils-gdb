@@ -15050,7 +15050,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get bit offset of field.  */
       handle_data_member_location (die, cu, fp);
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
-      if (attr != nullptr && attr->form_is_unsigned ())
+      if (attr != nullptr && attr->form_is_constant ())
 	{
 	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	    {
@@ -15060,7 +15060,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	         have to do anything special since we don't need to
 	         know the size of the anonymous object.  */
 	      SET_FIELD_BITPOS (*fp, (FIELD_BITPOS (*fp)
-				      + attr->as_unsigned ()));
+				      + attr->constant_value (0)));
 	    }
 	  else
 	    {
@@ -15071,15 +15071,15 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	         the field itself.  The result is the bit offset of
 	         the LSB of the field.  */
 	      int anonymous_size;
-	      int bit_offset = attr->as_unsigned ();
+	      int bit_offset = attr->constant_value (0);
 
 	      attr = dwarf2_attr (die, DW_AT_byte_size, cu);
-	      if (attr != nullptr && attr->form_is_unsigned ())
+	      if (attr != nullptr && attr->form_is_constant ())
 		{
 		  /* The size of the anonymous object containing
 		     the bit field is explicit, so use the
 		     indicated size (in bytes).  */
-		  anonymous_size = attr->as_unsigned ();
+		  anonymous_size = attr->constant_value (0);
 		}
 	      else
 		{
