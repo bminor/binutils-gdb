@@ -1,3 +1,9 @@
+2020-10-06  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/list-ambiguous0.c (ambiguous_var): Add
+	__attribute__ ((used)).
+	* gdb.base/list-ambiguous1.c (ambiguous_var): Likewise.
+
 2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/m32r.ld: Remove SEARCH_DIR line.  Add MEMORY regions,

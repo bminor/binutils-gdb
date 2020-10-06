@@ -25,7 +25,7 @@
 
 static void __attribute__ ((used)) ambiguous_fun (void) {}
 
-static int ambiguous_var;
+static int __attribute__ ((used)) ambiguous_var;
 
 
 
