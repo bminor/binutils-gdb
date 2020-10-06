@@ -1,5 +1,10 @@
 2020-10-06  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/list0.c (unused): Add __attribute__ ((used)).
+	* gdb.base/list1.c (unused): Likewise.
+
+2020-10-06  Gary Benson <gbenson@redhat.com>
+
 	* gdb.base/list-ambiguous0.c (ambiguous_var): Add
 	__attribute__ ((used)).
 	* gdb.base/list-ambiguous1.c (ambiguous_var): Likewise.
