@@ -1,3 +1,8 @@
+2020-10-06  Michael Forney  <mforney@mforney.org>
+
+	* Makefile.in (HAVE_NATIVE_GCORE_HOST): Add for gcore.1
+	install condition.
+
 2020-10-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.texinfo (Debugging Output): Add set/show debug event-loop.
