@@ -3283,7 +3283,7 @@ init_complex_type (const char *name, struct type *target_type)
 
   if (TYPE_MAIN_TYPE (target_type)->flds_bnds.complex_type == nullptr)
     {
-      if (name == nullptr)
+      if (name == nullptr && target_type->name () != nullptr)
 	{
 	  char *new_name
 	    = (char *) TYPE_ALLOC (target_type,
