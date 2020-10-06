@@ -1705,6 +1705,15 @@ using the linker command language from a script (@pxref{Assignments}).
 @emph{Note:} there should be no white space between @var{symbol}, the
 equals sign (``@key{=}''), and @var{expression}.
 
+The linker processes @samp{--defsym} arguments and @samp{-T} arguments
+in order, placing @samp{--defsym} before @samp{-T} will define the
+symbol before the linker script from @samp{-T} is processed, while
+placing @samp{--defsym} after @samp{-T} will define the symbol after
+the linker script has been processed.  This difference has
+consequences for expressions within the linker script that use the
+@samp{--defsym} symbols, which order is correct will depend on what
+you are trying to achieve.
+
 @cindex demangling, from command line
 @kindex --demangle[=@var{style}]
 @kindex --no-demangle
