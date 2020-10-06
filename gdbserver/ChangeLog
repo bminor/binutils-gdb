@@ -1,3 +1,7 @@
+2020-10-06  Shahab Vahedi  <shahab@synopsys.com>
+
+	* regcache.cc (register_data): Remove unused "fetch" argument.
+
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* server.cc (handle_monitor_command): Handle "set
