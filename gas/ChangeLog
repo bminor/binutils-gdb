@@ -1,3 +1,8 @@
+2020-10-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/sh-link-zero.s: Don't start directives in
+	first column.  Don't use numeric labels.
+
 2020-10-05  Kamil Rytarowski  <n54@gmx.com>
 
 	* configure.tgt (aarch64*-*-netbsd*): Add target.
