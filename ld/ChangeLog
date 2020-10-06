@@ -1,5 +1,15 @@
 2020-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-i386/property-3.r: Updated for Fedora binary
+	annotation plugin for GCC.
+	* testsuite/ld-i386/property-4.r: Likewise.
+	* testsuite/ld-i386/property-5.r: Likewise.
+	* testsuite/ld-x86-64/property-3.r: Likewise.
+	* testsuite/ld-x86-64/property-4.r: Likewise.
+	* testsuite/ld-x86-64/property-5.r: Likewise.
+
+2020-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/26711
 	* testsuite/ld-i386/i386.exp: Run ld/26711 tests.
 	* testsuite/ld-x86-64/x86-64.exp: Likewise.
