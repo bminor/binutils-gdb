@@ -2488,15 +2488,19 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	abort ();
       if (aprop != NULL && bprop != NULL)
 	{
-	  features = 0;
-	  if (htab->params->ibt)
-	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-	  if (htab->params->shstk)
-	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
 	  number = aprop->u.number;
-	  /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
-	     GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
-	  aprop->u.number = (number & bprop->u.number) | features;
+	  aprop->u.number = number & bprop->u.number;
+	  if (pr_type == GNU_PROPERTY_X86_FEATURE_1_AND)
+	    {
+	      features = 0;
+	      if (htab->params->ibt)
+		features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+	      if (htab->params->shstk)
+		features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
+		 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
+	      aprop->u.number |= features;
+	    }
 	  updated = number != (unsigned int) aprop->u.number;
 	  /* Remove the property if all feature bits are cleared.  */
 	  if (aprop->u.number == 0)
@@ -2508,10 +2512,13 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	     have them.  Set IBT and SHSTK properties for -z ibt and -z
 	     shstk if needed.  */
 	  features = 0;
-	  if (htab->params->ibt)
-	    features = GNU_PROPERTY_X86_FEATURE_1_IBT;
-	  if (htab->params->shstk)
-	    features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+	  if (pr_type == GNU_PROPERTY_X86_FEATURE_1_AND)
+	    {
+	      if (htab->params->ibt)
+		features = GNU_PROPERTY_X86_FEATURE_1_IBT;
+	      if (htab->params->shstk)
+		features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+	    }
 	  if (features)
 	    {
 	      if (aprop != NULL)
