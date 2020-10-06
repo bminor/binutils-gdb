@@ -1,3 +1,7 @@
+2020-10-22  Hannes Domani  <ssbssa@yahoo.de>
+
+	* gdbtypes.c (init_complex_type): Check target type name.
+
 2020-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target-debug.h (target_debug_print_struct_target_ops_p):
