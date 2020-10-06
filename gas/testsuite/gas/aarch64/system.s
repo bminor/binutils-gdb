@@ -44,6 +44,7 @@
 	all_barriers	op=isb, from=0, to=15
 
 	isb
+	isb sy
 	ssbb
 	pssbb
 
