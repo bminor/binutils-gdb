@@ -1,3 +1,15 @@
+2020-10-06  Sergey Belyashav  <sergey.belyashov@gmail.com>
+
+	PR 26692
+	* config/tc-z80.c (md_begin): Ensure that xpressions are empty
+	before using them.
+	(unify_indexed): Likewise.
+	(z80_start_line_hook): Improve hash sign handling when SDCC
+	compatibility mode enabled.
+	(md_parse_exp_not_indexed): Improve indirect addressing
+	detection.
+	(md_pseudo_table): Accept hd64 as an alias of z810.
+
 2020-10-06  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/elf/sh-link-zero.s: Don't start directives in

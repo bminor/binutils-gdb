@@ -492,6 +492,9 @@ md_begin (void)
   unsigned int i, j, k;
   char buf[BUFLEN];
 
+  memset (&reg, 0, sizeof (reg));
+  memset (&nul, 0, sizeof (nul));
+
   if (ins_ok & INS_EZ80)   /* if select EZ80 cpu then */
     listing_lhs_width = 6; /* use 6 bytes per line in the listing */
 
@@ -612,9 +615,16 @@ z80_start_line_hook (void)
 	      return 1;
 	    }
 	  break;
-	case '#':
-	  if (sdcc_compat)
-	    *p = (*skip_space (p + 1) == '(') ? '+' : ' ';
+	case '#': /* force to use next expression as immediate value in SDCC */
+	  if (!sdcc_compat)
+	   break;
+	  if (ISSPACE(p[1]) && *skip_space (p + 1) == '(')
+	    { /* ld a,# (expr)... -> ld a,0+(expr)... */
+	      *p++ = '0';
+	      *p = '+';
+	    }
+	  else /* ld a,#(expr)... -> ld a,+(expr); ld a,#expr -> ld a, expr */
+	    *p = (p[1] == '(') ? '+' : ' ';
 	  break;
 	}
     }
@@ -871,6 +881,7 @@ parse_exp_not_indexed (const char *s, expressionS *op)
   int indir;
   int make_shift = -1;
 
+  memset (op, 0, sizeof (*op));
   p = skip_space (s);
   if (sdcc_compat && (*p == '<' || *p == '>'))
     {
@@ -887,7 +898,11 @@ parse_exp_not_indexed (const char *s, expressionS *op)
       p = skip_space (p);
     }
 
-  op->X_md = indir = is_indir (p);
+  if (make_shift == -1)
+    indir = is_indir (p);
+  else
+    indir = 0;
+  op->X_md = indir;
   if (indir && (ins_ok & INS_GBZ80))
     { /* check for instructions like ld a,(hl+), ld (hl-),a */
       p = skip_space (p+1);
@@ -950,10 +965,9 @@ unify_indexed (expressionS *op)
   if (O_subtract == op->X_op)
     {
       expressionS minus;
+      memset (&minus, 0, sizeof (minus));
       minus.X_op = O_uminus;
-      minus.X_add_number = 0;
       minus.X_add_symbol = op->X_op_symbol;
-      minus.X_op_symbol = 0;
       op->X_op_symbol = make_expr_symbol (&minus);
       op->X_op = O_add;
     }
@@ -966,7 +980,6 @@ unify_indexed (expressionS *op)
       add.X_op = O_symbol;
       add.X_add_number = op->X_add_number;
       add.X_add_symbol = op->X_op_symbol;
-      add.X_op_symbol = 0;
       op->X_add_symbol = make_expr_symbol (&add);
     }
   else
@@ -3444,6 +3457,7 @@ const pseudo_typeS md_pseudo_table[] =
   { ".r800", set_inss, INS_R800},
   { ".set", s_set, 0},
   { ".z180", set_inss, INS_Z180},
+  { ".hd64", set_inss, INS_Z180},
   { ".z80", set_inss, INS_Z80},
   { ".z80n", set_inss, INS_Z80N},
   { "db" , emit_data, 1},
