@@ -1,3 +1,19 @@
+2020-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26711
+	* testsuite/ld-i386/i386.exp: Run ld/26711 tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr26711-1.d: Likewise.
+	* testsuite/ld-i386/pr26711-2.d: Likewise.
+	* testsuite/ld-i386/pr26711-3.d: Likewise.
+	* testsuite/ld-x86-64/pr26711-1-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr26711-1.d: Likewise.
+	* testsuite/ld-x86-64/pr26711-2-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr26711-2.d: Likewise.
+	* testsuite/ld-x86-64/pr26711-3-x32.d: Likewise.
+	* testsuite/ld-x86-64/pr26711-3.d: Likewise.
+	* testsuite/ld-x86-64/pr26711.s: Likewise.
+
 2020-10-06  Brandon Bergren  <bdragon@FreeBSD.org>
 
 	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eelf64lppc_fbsd.c.

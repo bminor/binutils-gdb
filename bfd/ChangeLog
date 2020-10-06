@@ -1,3 +1,9 @@
+2020-10-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26711
+	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Merge -z ibt
+	and -z shstk only with GNU_PROPERTY_X86_FEATURE_1_AND.
+
 2020-10-06  Brandon Bergren  <bdragon@FreeBSD.org>
 
 	* config.bfd: Add powerpc64le-*-freebsd*.
