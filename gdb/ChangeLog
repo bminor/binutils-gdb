@@ -1,5 +1,9 @@
 2020-10-22  Hannes Domani  <ssbssa@yahoo.de>
 
+	* stabsread.c (read_member_functions): Remove gdb_assert.
+
+2020-10-22  Hannes Domani  <ssbssa@yahoo.de>
+
 	* gdbtypes.c (init_complex_type): Check target type name.
 
 2020-10-22  Simon Marchi  <simon.marchi@polymtl.ca>

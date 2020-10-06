@@ -2331,9 +2331,6 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 	  /* These are methods, not functions.  */
 	  if (new_sublist->fn_field.type->code () == TYPE_CODE_FUNC)
 	    new_sublist->fn_field.type->set_code (TYPE_CODE_METHOD);
-	  else
-	    gdb_assert (new_sublist->fn_field.type->code ()
-			== TYPE_CODE_METHOD);
 
 	  /* If this is just a stub, then we don't have the real name here.  */
 	  if (new_sublist->fn_field.type->is_stub ())
