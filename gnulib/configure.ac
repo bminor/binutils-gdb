@@ -56,6 +56,8 @@ AC_CHECK_TOOL(AR, ar)
 # Checks for libraries.  #
 # ---------------------- #
 
+AC_CONFIG_FILES(Makefile.gnulib.inc)
+
 AC_OUTPUT(Makefile import/Makefile,
 [
 case x$CONFIG_HEADERS in

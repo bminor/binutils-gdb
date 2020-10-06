@@ -114,8 +114,7 @@ ustinc = @ustinc@
 
 # gnulib
 GNULIB_BUILDDIR = ../gnulib
-LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
-INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
+include $(GNULIB_BUILDDIR)/Makefile.gnulib.inc
 
 # Where is the INTL library?  Typically in ../intl.
 INTL = @LIBINTL@
@@ -360,8 +359,8 @@ gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY) \
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		$(CXXFLAGS) \
 		-o gdbserver$(EXEEXT) $(OBS) $(GDBSUPPORT) $(LIBGNU) \
-		$(LIBIBERTY) $(INTL) $(GDBSERVER_LIBS) $(XM_CLIBS) \
-		$(WIN32APILIBS)
+		$(LIBGNU_EXTRA_LIBS) $(LIBIBERTY) $(INTL) \
+		$(GDBSERVER_LIBS) $(XM_CLIBS) $(WIN32APILIBS)
 
 gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY) \
 		$(INTL_DEPS) $(GDBSUPPORT)
@@ -369,8 +368,8 @@ gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY) \
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		$(CXXFLAGS) \
 		-o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) $(XM_CLIBS) \
-		$(GDBSUPPORT) $(LIBGNU) $(LIBIBERTY) $(INTL) \
-		$(WIN32APILIBS)
+		$(GDBSUPPORT) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) \
+		$(LIBIBERTY) $(INTL) $(WIN32APILIBS)
 
 IPA_OBJS = \
 	alloc-ipa.o \

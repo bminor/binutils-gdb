@@ -1,3 +1,8 @@
+2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in: Include Makefile.gnulib.inc.  Don't define LIBGNU
+	or INCGNU.  Make use of LIBGNU_EXTRA_LIBS when linking.
+
 2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* linux-low.cc (linux_process_target::handle_extended_wait):

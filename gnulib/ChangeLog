@@ -1,3 +1,10 @@
+2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.gnulib.inc.in: New file.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Install the new file.
+
 2020-09-08  Tom Tromey  <tromey@adacore.com>
 
 	PR win32/25302:

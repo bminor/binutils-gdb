@@ -30802,6 +30802,9 @@ fi
 # Checks for libraries.  #
 # ---------------------- #
 
+ac_config_files="$ac_config_files Makefile.gnulib.inc"
+
+
 ac_config_files="$ac_config_files Makefile import/Makefile"
 
 ac_config_commands="$ac_config_commands default"
@@ -31634,6 +31637,7 @@ do
   case $ac_config_target in
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.in" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
+    "Makefile.gnulib.inc") CONFIG_FILES="$CONFIG_FILES Makefile.gnulib.inc" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "import/Makefile") CONFIG_FILES="$CONFIG_FILES import/Makefile" ;;
     "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;

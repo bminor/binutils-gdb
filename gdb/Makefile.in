@@ -243,8 +243,7 @@ GDBFLAGS =
 
 # Helper code from gnulib.
 GNULIB_BUILDDIR = ../gnulib
-LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
-INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
+include $(GNULIB_BUILDDIR)/Makefile.gnulib.inc
 
 SUPPORT = ../gdbsupport
 LIBSUPPORT = $(SUPPORT)/libgdbsupport.a
@@ -632,7 +631,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
 	$(XM_CLIBS) $(GDBTKLIBS) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
-	$(WIN32LIBS) $(LIBGNU) $(LIBICONV) \
+	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
 	$(LIBMPFR) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
 	$(DEBUGINFOD_LIBS)
 CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
