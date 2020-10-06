@@ -138,12 +138,12 @@ alpha*-*-linux*)
 alpha*-*-netbsd* | alpha*-*-knetbsd*-gnu)
 	# Target: NetBSD/alpha
 	gdb_target_obs="alpha-mdebug-tdep.o alpha-bsd-tdep.o \
-			alpha-nbsd-tdep.o"
+			alpha-netbsd-tdep.o"
 	;;
 alpha*-*-openbsd*)
 	# Target: OpenBSD/alpha
 	gdb_target_obs="alpha-mdebug-tdep.o alpha-bsd-tdep.o \
-			alpha-nbsd-tdep.o alpha-obsd-tdep.o nbsd-tdep.o"
+			alpha-netbsd-tdep.o alpha-obsd-tdep.o nbsd-tdep.o"
 	;;
 
 am33_2.0*-*-linux*)
@@ -177,7 +177,7 @@ arm*-*-freebsd*)
 	;;
 arm*-*-netbsd* | arm*-*-knetbsd*-gnu)
 	# Target: NetBSD/arm
-	gdb_target_obs="arm-nbsd-tdep.o"
+	gdb_target_obs="arm-netbsd-tdep.o"
 	;;
 arm*-*-openbsd*)
 	# Target: OpenBSD/arm
@@ -256,7 +256,7 @@ hppa*-*-linux*)
 	;;
 hppa*-*-netbsd*)
 	# Target: NetBSD/hppa
-	gdb_target_obs="hppa-bsd-tdep.o hppa-nbsd-tdep.o solib-svr4.o"
+	gdb_target_obs="hppa-bsd-tdep.o hppa-netbsd-tdep.o solib-svr4.o"
 	;;
 hppa*-*-openbsd*)
 	# Target: OpenBSD/hppa
@@ -281,7 +281,7 @@ i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
 	;;
 i[34567]86-*-netbsd* | i[34567]86-*-knetbsd*-gnu)
 	# Target: NetBSD/i386
-	gdb_target_obs="i386-bsd-tdep.o i386-nbsd-tdep.o "
+	gdb_target_obs="i386-bsd-tdep.o i386-netbsd-tdep.o "
 	;;
 i[34567]86-*-openbsd*)
 	# Target: OpenBSD/i386
@@ -418,7 +418,7 @@ mips*-*-linux*)
 	;;
 mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 	# Target: MIPS running NetBSD
-	gdb_target_obs="mips-tdep.o mips-nbsd-tdep.o"
+	gdb_target_obs="mips-tdep.o mips-netbsd-tdep.o"
 	gdb_sim=../sim/mips/libsim.a
 	;;
 mips*-*-freebsd*)
@@ -495,7 +495,7 @@ powerpc*-*-freebsd*)
 
 powerpc-*-netbsd* | powerpc-*-knetbsd*-gnu)
 	# Target: NetBSD/powerpc
-	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppc-nbsd-tdep.o \
+	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppc-netbsd-tdep.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	gdb_sim=../sim/ppc/libsim.a
 	;;
@@ -581,12 +581,12 @@ sh*-*-linux*)
 	;;
 sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
 	# Target: NetBSD/sh
-	gdb_target_obs="sh-tdep.o sh-nbsd-tdep.o"
+	gdb_target_obs="sh-tdep.o sh-netbsd-tdep.o"
 	gdb_sim=../sim/sh/libsim.a
 	;;
 sh*-*-openbsd*)
 	# Target: OpenBSD/sh
-	gdb_target_obs="sh-tdep.o sh-nbsd-tdep.o"
+	gdb_target_obs="sh-tdep.o sh-netbsd-tdep.o"
 	;;
 sh*)
 	# Target: Embedded Renesas Super-H processor
@@ -620,25 +620,25 @@ sparc*-*-freebsd* | sparc*-*-kfreebsd*-gnu)
 	;;
 sparc-*-netbsd* | sparc-*-knetbsd*-gnu)
 	# Target: NetBSD/sparc
-	gdb_target_obs="sparc-tdep.o sparc-nbsd-tdep.o \
+	gdb_target_obs="sparc-tdep.o sparc-netbsd-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc64-*-netbsd* | sparc64-*-knetbsd*-gnu)
 	# Target: NetBSD/sparc64
-	gdb_target_obs="sparc64-tdep.o sparc64-nbsd-tdep.o sparc-tdep.o \
-			sparc-nbsd-tdep.o \
+	gdb_target_obs="sparc64-tdep.o sparc64-netbsd-tdep.o sparc-tdep.o \
+			sparc-netbsd-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-openbsd*)
 	# Target: OpenBSD/sparc
-	gdb_target_obs="sparc-tdep.o sparc-nbsd-tdep.o sparc-obsd-tdep.o \
+	gdb_target_obs="sparc-tdep.o sparc-netbsd-tdep.o sparc-obsd-tdep.o \
 			nbsd-tdep.o bsd-uthread.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc64-*-openbsd*)
 	# Target: OpenBSD/sparc64
-	gdb_target_obs="sparc64-tdep.o sparc64-nbsd-tdep.o sparc64-obsd-tdep.o \
-			sparc-tdep.o sparc-nbsd-tdep.o sparc-obsd-tdep.o \
+	gdb_target_obs="sparc64-tdep.o sparc64-netbsd-tdep.o sparc64-obsd-tdep.o \
+			sparc-tdep.o sparc-netbsd-tdep.o sparc-obsd-tdep.o \
 			nbsd-tdep.o bsd-uthread.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
@@ -746,7 +746,7 @@ x86_64-*-mingw* | x86_64-*-cygwin*)
         ;;
 x86_64-*-netbsd* | x86_64-*-knetbsd*-gnu)
 	# Target: NetBSD/amd64
-	gdb_target_obs="amd64-nbsd-tdep.o ${i386_tobjs}"
+	gdb_target_obs="amd64-netbsd-tdep.o ${i386_tobjs}"
 	;;
 x86_64-*-openbsd*)
 	# Target: OpenBSD/amd64

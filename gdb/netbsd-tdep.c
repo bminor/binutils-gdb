@@ -22,7 +22,7 @@
 #include "defs.h"
 #include "auxv.h"
 #include "solib-svr4.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 #include "gdbarch.h"
 #include "objfiles.h"
 #include "xml-syscall.h"

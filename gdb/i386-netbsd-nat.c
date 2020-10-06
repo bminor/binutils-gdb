@@ -31,7 +31,7 @@
 #include <machine/frame.h>
 #include <machine/pcb.h>
 
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 #include "bsd-kvm.h"
 
 static int

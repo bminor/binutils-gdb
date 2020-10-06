@@ -34,10 +34,10 @@
 #include "regcache.h"
 
 #include "ppc-tdep.h"
-#include "ppc-nbsd-tdep.h"
+#include "ppc-netbsd-tdep.h"
 #include "bsd-kvm.h"
 #include "inf-ptrace.h"
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 
 struct ppc_nbsd_nat_target final : public nbsd_nat_target
 {

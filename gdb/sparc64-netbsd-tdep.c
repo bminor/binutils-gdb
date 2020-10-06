@@ -31,7 +31,7 @@
 #include "trad-frame.h"
 
 #include "sparc64-tdep.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 
 /* From <machine/reg.h>.  */
 const struct sparc_gregmap sparc64nbsd_gregmap =

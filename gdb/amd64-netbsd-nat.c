@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "target.h"
 
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 #include "amd64-tdep.h"
 #include "amd64-bsd-nat.h"
 #include "amd64-nat.h"

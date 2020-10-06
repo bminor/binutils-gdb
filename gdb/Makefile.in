@@ -678,14 +678,14 @@ ALL_64_TARGET_OBS = \
 	alpha-bsd-tdep.o \
 	alpha-linux-tdep.o \
 	alpha-mdebug-tdep.o \
-	alpha-nbsd-tdep.o \
+	alpha-netbsd-tdep.o \
 	alpha-obsd-tdep.o \
 	alpha-tdep.o \
 	amd64-darwin-tdep.o \
 	amd64-dicos-tdep.o \
 	amd64-fbsd-tdep.o \
 	amd64-linux-tdep.o \
-	amd64-nbsd-tdep.o \
+	amd64-netbsd-tdep.o \
 	amd64-obsd-tdep.o \
 	amd64-sol2-tdep.o \
 	amd64-tdep.o \
@@ -699,7 +699,7 @@ ALL_64_TARGET_OBS = \
 	mips64-obsd-tdep.o \
 	sparc64-fbsd-tdep.o \
 	sparc64-linux-tdep.o \
-	sparc64-nbsd-tdep.o \
+	sparc64-netbsd-tdep.o \
 	sparc64-obsd-tdep.o \
 	sparc64-sol2-tdep.o \
 	sparc64-tdep.o
@@ -720,7 +720,7 @@ ALL_TARGET_OBS = \
 	arm-bsd-tdep.o \
 	arm-fbsd-tdep.o \
 	arm-linux-tdep.o \
-	arm-nbsd-tdep.o \
+	arm-netbsd-tdep.o \
 	arm-obsd-tdep.o \
 	arm-pikeos-tdep.o \
 	arm-symbian-tdep.o \
@@ -744,7 +744,7 @@ ALL_TARGET_OBS = \
 	h8300-tdep.o \
 	hppa-bsd-tdep.o \
 	hppa-linux-tdep.o \
-	hppa-nbsd-tdep.o \
+	hppa-netbsd-tdep.o \
 	hppa-obsd-tdep.o \
 	hppa-tdep.o \
 	i386-bsd-tdep.o \
@@ -754,7 +754,7 @@ ALL_TARGET_OBS = \
 	i386-gnu-tdep.o \
 	i386-go32-tdep.o \
 	i386-linux-tdep.o \
-	i386-nbsd-tdep.o \
+	i386-netbsd-tdep.o \
 	i386-nto-tdep.o \
 	i386-obsd-tdep.o \
 	i386-sol2-tdep.o \
@@ -777,14 +777,14 @@ ALL_TARGET_OBS = \
 	microblaze-tdep.o \
 	mips-fbsd-tdep.o \
 	mips-linux-tdep.o \
-	mips-nbsd-tdep.o \
+	mips-netbsd-tdep.o \
 	mips-sde-tdep.o \
 	mips-tdep.o \
 	mn10300-linux-tdep.o \
 	mn10300-tdep.o \
 	moxie-tdep.o \
 	msp430-tdep.o \
-	nbsd-tdep.o \
+	netbsd-tdep.o \
 	nds32-tdep.o \
 	nios2-linux-tdep.o \
 	nios2-tdep.o \
@@ -794,7 +794,7 @@ ALL_TARGET_OBS = \
 	or1k-tdep.o \
 	ppc-fbsd-tdep.o \
 	ppc-linux-tdep.o \
-	ppc-nbsd-tdep.o \
+	ppc-netbsd-tdep.o \
 	ppc-obsd-tdep.o \
 	ppc-ravenscar-thread.o \
 	ppc-sysv-tdep.o \
@@ -814,7 +814,7 @@ ALL_TARGET_OBS = \
 	s390-tdep.o \
 	score-tdep.o \
 	sh-linux-tdep.o \
-	sh-nbsd-tdep.o \
+	sh-netbsd-tdep.o \
 	sh-tdep.o \
 	sol2-tdep.o \
 	solib-aix.o \
@@ -823,7 +823,7 @@ ALL_TARGET_OBS = \
 	solib-frv.o \
 	solib-svr4.o \
 	sparc-linux-tdep.o \
-	sparc-nbsd-tdep.o \
+	sparc-netbsd-tdep.o \
 	sparc-obsd-tdep.o \
 	sparc-ravenscar-thread.o \
 	sparc-sol2-tdep.o \
@@ -834,7 +834,7 @@ ALL_TARGET_OBS = \
 	tilegx-linux-tdep.o \
 	tilegx-tdep.o \
 	v850-tdep.o \
-	vax-nbsd-tdep.o \
+	vax-netbsd-tdep.o \
 	vax-tdep.o \
 	windows-tdep.o \
 	x86-tdep.o \
@@ -1224,7 +1224,7 @@ HFILES_NO_SRCDIR = \
 	arc-tdep.h \
 	arch-utils.h \
 	arm-linux-tdep.h \
-	arm-nbsd-tdep.h \
+	arm-netbsd-tdep.h \
 	arm-tdep.h \
 	async-event.h \
 	auto-load.h \
@@ -1342,12 +1342,12 @@ HFILES_NO_SRCDIR = \
 	memrange.h \
 	microblaze-tdep.h \
 	mips-linux-tdep.h \
-	mips-nbsd-tdep.h \
+	mips-netbsd-tdep.h \
 	mips-tdep.h \
 	mn10300-tdep.h \
 	moxie-tdep.h \
-	nbsd-nat.h \
-	nbsd-tdep.h \
+	netbsd-nat.h \
+	netbsd-tdep.h \
 	nds32-tdep.h \
 	nios2-tdep.h \
 	nto-tdep.h \
@@ -1361,7 +1361,7 @@ HFILES_NO_SRCDIR = \
 	parser-defs.h \
 	ppc-fbsd-tdep.h \
 	ppc-linux-tdep.h \
-	ppc-nbsd-tdep.h \
+	ppc-netbsd-tdep.h \
 	ppc-obsd-tdep.h \
 	ppc-ravenscar-thread.h \
 	ppc-tdep.h \
@@ -2124,7 +2124,7 @@ ALLDEPFILES = \
 	alpha-linux-nat.c \
 	alpha-linux-tdep.c \
 	alpha-mdebug-tdep.c \
-	alpha-nbsd-tdep.c \
+	alpha-netbsd-tdep.c \
 	alpha-obsd-tdep.c \
 	alpha-tdep.c \
 	amd64-bsd-nat.c \
@@ -2135,8 +2135,8 @@ ALLDEPFILES = \
 	amd64-linux-nat.c \
 	amd64-linux-tdep.c \
 	amd64-nat.c \
-	amd64-nbsd-nat.c \
-	amd64-nbsd-tdep.c \
+	amd64-netbsd-nat.c \
+	amd64-netbsd-tdep.c \
 	amd64-obsd-nat.c \
 	amd64-obsd-tdep.c \
 	amd64-sol2-tdep.c \
@@ -2150,8 +2150,8 @@ ALLDEPFILES = \
 	arm-linux.c \
 	arm-linux-nat.c \
 	arm-linux-tdep.c \
-	arm-nbsd-nat.c \
-	arm-nbsd-tdep.c \
+	arm-netbsd-nat.c \
+	arm-netbsd-tdep.c \
 	arm-obsd-tdep.c \
 	arm-symbian-tdep.c \
 	arm-tdep.c \
@@ -2175,8 +2175,8 @@ ALLDEPFILES = \
 	hppa-bsd-tdep.c \
 	hppa-linux-nat.c \
 	hppa-linux-tdep.c \
-	hppa-nbsd-nat.c \
-	hppa-nbsd-tdep.c \
+	hppa-netbsd-nat.c \
+	hppa-netbsd-tdep.c \
 	hppa-obsd-nat.c \
 	hppa-obsd-tdep.c \
 	hppa-tdep.c \
@@ -2191,8 +2191,8 @@ ALLDEPFILES = \
 	i386-gnu-tdep.c \
 	i386-linux-nat.c \
 	i386-linux-tdep.c \
-	i386-nbsd-nat.c \
-	i386-nbsd-tdep.c \
+	i386-netbsd-nat.c \
+	i386-netbsd-tdep.c \
 	i386-obsd-nat.c \
 	i386-obsd-tdep.c \
 	i386-sol2-nat.c \
@@ -2226,15 +2226,15 @@ ALLDEPFILES = \
 	mips-fbsd-tdep.c \
 	mips-linux-nat.c \
 	mips-linux-tdep.c \
-	mips-nbsd-nat.c \
-	mips-nbsd-tdep.c \
+	mips-netbsd-nat.c \
+	mips-netbsd-tdep.c \
 	mips-sde-tdep.c \
 	mips-tdep.c \
 	mips64-obsd-nat.c \
 	mips64-obsd-tdep.c \
 	msp430-tdep.c \
-	nbsd-nat.c \
-	nbsd-tdep.c \
+	netbsd-nat.c \
+	netbsd-tdep.c \
 	nds32-tdep.c \
 	nios2-linux-tdep.c \
 	nios2-tdep.c \
@@ -2245,8 +2245,8 @@ ALLDEPFILES = \
 	ppc-fbsd-tdep.c \
 	ppc-linux-nat.c \
 	ppc-linux-tdep.c \
-	ppc-nbsd-nat.c \
-	ppc-nbsd-tdep.c \
+	ppc-netbsd-nat.c \
+	ppc-netbsd-tdep.c \
 	ppc-obsd-nat.c \
 	ppc-obsd-tdep.c \
 	ppc-ravenscar-thread.c \
@@ -2275,8 +2275,8 @@ ALLDEPFILES = \
 	ser-pipe.c \
 	ser-tcp.c \
 	ser-uds.c \
-	sh-nbsd-nat.c \
-	sh-nbsd-tdep.c \
+	sh-netbsd-nat.c \
+	sh-netbsd-tdep.c \
 	sh-tdep.c \
 	sol2-tdep.c \
 	solib-aix.c \
@@ -2284,8 +2284,8 @@ ALLDEPFILES = \
 	sparc-linux-nat.c \
 	sparc-linux-tdep.c \
 	sparc-nat.c \
-	sparc-nbsd-nat.c \
-	sparc-nbsd-tdep.c \
+	sparc-netbsd-nat.c \
+	sparc-netbsd-tdep.c \
 	sparc-obsd-tdep.c \
 	sparc-ravenscar-thread.c \
 	sparc-sol2-nat.c \
@@ -2296,8 +2296,8 @@ ALLDEPFILES = \
 	sparc64-linux-nat.c \
 	sparc64-linux-tdep.c \
 	sparc64-nat.c \
-	sparc64-nbsd-nat.c \
-	sparc64-nbsd-tdep.c \
+	sparc64-netbsd-nat.c \
+	sparc64-netbsd-tdep.c \
 	sparc64-obsd-nat.c \
 	sparc64-obsd-tdep.c \
 	sparc64-sol2-tdep.c \
@@ -2307,7 +2307,7 @@ ALLDEPFILES = \
 	tilegx-tdep.c \
 	v850-tdep.c \
 	vax-bsd-nat.c \
-	vax-nbsd-tdep.c \
+	vax-netbsd-tdep.c \
 	vax-tdep.c \
 	windows-nat.c \
 	windows-tdep.c \

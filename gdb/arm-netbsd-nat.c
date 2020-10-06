@@ -31,10 +31,10 @@
 #include <machine/frame.h>
 
 #include "arm-tdep.h"
-#include "arm-nbsd-tdep.h"
+#include "arm-netbsd-tdep.h"
 #include "aarch32-tdep.h"
 #include "inf-ptrace.h"
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 
 class arm_netbsd_nat_target final : public nbsd_nat_target
 {

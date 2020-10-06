@@ -31,7 +31,7 @@ void alphabsd_supply_fpreg (struct regcache *, const char *, int);
 void alphabsd_fill_fpreg (const struct regcache *, char *, int);
 
 
-/* Functions exported from alpha-nbsd-tdep.c.  */
+/* Functions exported from alpha-netbsd-tdep.c.  */
 
 /* Iterate over supported core file register note sections. */
 void alphanbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,

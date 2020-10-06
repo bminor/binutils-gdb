@@ -124,7 +124,7 @@ extern const struct sparc_fpregmap sparc64_sol2_fpregmap;
 /* Register offsets for FreeBSD/sparc64.  */
 extern const struct sparc_gregmap sparc64fbsd_gregmap;
 
-/* Functions and variables exported from sparc64-nbsd-tdep.c.  */
+/* Functions and variables exported from sparc64-netbsd-tdep.c.  */
 
 /* Register offsets for NetBSD/sparc64.  */
 extern const struct sparc_gregmap sparc64nbsd_gregmap;

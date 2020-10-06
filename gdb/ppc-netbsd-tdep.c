@@ -28,7 +28,7 @@
 #include "tramp-frame.h"
 
 #include "ppc-tdep.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 #include "ppc-tdep.h"
 #include "solib-svr4.h"
 
@@ -199,7 +199,7 @@ _initialize_ppcnbsd_tdep ()
 			  ppcnbsd_init_abi);
 
   /* Avoid initializing the register offsets again if they were
-     already initialized by ppcnbsd-nat.c.  */
+     already initialized by ppc-netbsd-nat.c.  */
   if (ppcnbsd_reg_offsets.pc_offset == 0)
     {
       /* General-purpose registers.  */

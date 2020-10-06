@@ -30,7 +30,7 @@
 
 #include "m68k-tdep.h"
 #include "inf-ptrace.h"
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 
 struct m68k_bsd_nat_target final : public nbsd_nat_target
 {

@@ -26,7 +26,7 @@
 
 #include "amd64-tdep.h"
 #include "gdbsupport/x86-xstate.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 #include "solib-svr4.h"
 
 /* Support for signal handlers.  */

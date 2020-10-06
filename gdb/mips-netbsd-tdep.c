@@ -27,8 +27,8 @@
 #include "value.h"
 #include "osabi.h"
 
-#include "nbsd-tdep.h"
-#include "mips-nbsd-tdep.h"
+#include "netbsd-tdep.h"
+#include "mips-netbsd-tdep.h"
 #include "mips-tdep.h"
 
 #include "solib-svr4.h"

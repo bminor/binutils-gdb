@@ -30,7 +30,7 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 #include "solib-svr4.h"
 
 /* From <machine/reg.h>.  */

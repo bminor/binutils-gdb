@@ -28,7 +28,7 @@
 
 #include "sh-tdep.h"
 #include "inf-ptrace.h"
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 #include "regcache.h"
 
 struct sh_nbsd_nat_target final : public nbsd_nat_target

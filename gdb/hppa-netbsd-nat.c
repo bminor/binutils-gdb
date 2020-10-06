@@ -28,7 +28,7 @@
 #include "hppa-tdep.h"
 #include "inf-ptrace.h"
 
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 
 class hppa_nbsd_nat_target final : public nbsd_nat_target
 {

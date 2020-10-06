@@ -59,4 +59,4 @@ struct nbsd_nat_target : public inf_ptrace_target
   void dumpcore (const char *filename) override;
 };
 
-#endif /* nbsd-nat.h */
+#endif /* netbsd-nat.h */

@@ -26,7 +26,7 @@
 #include "alpha-tdep.h"
 #include "alpha-bsd-tdep.h"
 #include "inf-ptrace.h"
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>

@@ -29,7 +29,7 @@
 
 #include "alpha-tdep.h"
 #include "alpha-bsd-tdep.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 #include "solib-svr4.h"
 #include "target.h"
 

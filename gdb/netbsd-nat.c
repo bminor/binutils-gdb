@@ -19,10 +19,10 @@
 
 #include "defs.h"
 
-#include "nbsd-nat.h"
+#include "netbsd-nat.h"
 #include "nat/netbsd-nat.h"
 #include "gdbthread.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 #include "inferior.h"
 #include "gdbarch.h"
 

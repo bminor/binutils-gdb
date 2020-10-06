@@ -29,7 +29,7 @@
 #include <machine/reg.h>
 
 #include "mips-tdep.h"
-#include "mips-nbsd-tdep.h"
+#include "mips-netbsd-tdep.h"
 #include "inf-ptrace.h"
 
 class mips_nbsd_nat_target final : public inf_ptrace_target

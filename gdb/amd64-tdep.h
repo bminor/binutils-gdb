@@ -139,7 +139,7 @@ extern const struct regset amd64_fpregset;
 /* Variables exported from amd64-linux-tdep.c.  */
 extern int amd64_linux_gregset_reg_offset[];
 
-/* Variables exported from amd64-nbsd-tdep.c.  */
+/* Variables exported from amd64-netbsd-tdep.c.  */
 extern int amd64nbsd_r_reg_offset[];
 
 /* Variables exported from amd64-obsd-tdep.c.  */

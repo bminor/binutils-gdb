@@ -32,7 +32,7 @@
 #include "gdbarch.h"
 
 #include "sparc-tdep.h"
-#include "nbsd-tdep.h"
+#include "netbsd-tdep.h"
 
 /* Macros to extract fields from SPARC instructions.  */
 #define X_RS1(i) (((i) >> 14) & 0x1f)
