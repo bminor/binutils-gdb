@@ -1,5 +1,11 @@
 2020-10-07  Tom Tromey  <tromey@adacore.com>
 
+	* unittests/search-memory-selftests.c: New file.
+	* Makefile.in (SELFTESTS_SRCS): Add
+	unittests/search-memory-selftests.c.
+
+2020-10-07  Tom Tromey  <tromey@adacore.com>
+
 	PR gdb/16930:
 	* findcmd.c (_initialize_mem_search): Mention that the range is
 	inclusive.
