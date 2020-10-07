@@ -1260,7 +1260,7 @@ class General_options
 		 "output sections"),
 	      N_("(PowerPC only) Each output section has its own stubs"));
 
-  DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x4000,
+  DEFINE_uint(split_stack_adjust_size, options::TWO_DASHES, '\0', 0x100000,
 	      N_("Stack size when -fsplit-stack function calls non-split"),
 	      N_("SIZE"));
 

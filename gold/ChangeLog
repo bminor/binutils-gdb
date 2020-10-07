@@ -1,3 +1,7 @@
+2020-10-08  Alan Modra  <amodra@gmail.com>
+
+	* options.h (split_stack_adjust_size): Default to 0x100000.
+
 2020-09-26  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc): Rename power10_stubs_ to
