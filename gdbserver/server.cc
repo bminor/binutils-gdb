@@ -1056,11 +1056,8 @@ handle_search_memory (char *own_buf, int packet_len)
 
   pattern = (gdb_byte *) malloc (packet_len);
   if (pattern == NULL)
-    {
-      error ("Unable to allocate memory to perform the search");
-      strcpy (own_buf, "E00");
-      return;
-    }
+    error ("Unable to allocate memory to perform the search");
+
   if (decode_search_memory_packet (own_buf + cmd_name_len,
 				   packet_len - cmd_name_len,
 				   &start_addr, &search_space_len,
@@ -1068,8 +1065,6 @@ handle_search_memory (char *own_buf, int packet_len)
     {
       free (pattern);
       error ("Error in parsing qSearch:memory packet");
-      strcpy (own_buf, "E00");
-      return;
     }
 
   auto read_memory = [] (CORE_ADDR addr, gdb_byte *result, size_t len)

@@ -1,5 +1,9 @@
 2020-10-07  Tom Tromey  <tromey@adacore.com>
 
+	* server.cc (handle_search_memory): Remove dead code.
+
+2020-10-07  Tom Tromey  <tromey@adacore.com>
+
 	* server.cc (handle_search_memory_1): Remove.
 	(handle_search_memory): Use simple_search_memory.
 
