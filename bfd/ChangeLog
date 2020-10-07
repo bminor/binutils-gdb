@@ -1,3 +1,39 @@
+2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c: Include "objalloc.h" since we need objalloc_alloc.
+	(riscv_elf_link_hash_table): Add loc_hash_table and loc_hash_memory
+	for local STT_GNU_IFUNC symbols.
+	(riscv_elf_got_plt_val): Removed.
+	(riscv_elf_local_htab_hash, riscv_elf_local_htab_eq): New functions.
+	Use to compare local hash entries.
+	(riscv_elf_get_local_sym_hash): New function.  Find a hash entry for
+	local symbol, and create a new one if needed.
+	(riscv_elf_link_hash_table_free): New function.  Destroy an riscv
+	elf linker hash table.
+	(riscv_elf_link_hash_table_create): Create hash table for local ifunc.
+	(riscv_elf_check_relocs): Create a fake global symbol to track the
+	local ifunc symbol.  Add support to check and handle the relocations
+	reference to ifunc symbols.
+	(allocate_dynrelocs): Let allocate_ifunc_dynrelocs and
+	allocate_local_ifunc_dynrelocs to handle the ifunc symbols if they
+	are defined and referenced in a non-shared object.
+	(allocate_ifunc_dynrelocs): New function.  Allocate space in .plt,
+	.got and associated reloc sections for ifunc dynamic relocs.
+	(allocate_local_ifunc_dynrelocs): Likewise, but for local ifunc
+	dynamic relocs.
+	(riscv_elf_relocate_section): Add support to handle the relocation
+	referenced to ifunc symbols.
+	(riscv_elf_size_dynamic_sections): Updated.
+	(riscv_elf_adjust_dynamic_symbol): Updated.
+	(riscv_elf_finish_dynamic_symbol): Finish up the ifunc handling,
+	including fill the PLT and GOT entries for ifunc symbols.
+	(riscv_elf_finish_local_dynamic_symbol): New function.  Called by
+	riscv_elf_finish_dynamic_symbol to handle the local ifunc symbols.
+	(_bfd_riscv_relax_section): Don't do the relaxation for ifunc.
+	* elfxx-riscv.c: Add R_RISCV_IRELATIVE.
+	* configure.ac: Link elf-ifunc.lo to use the generic ifunc support.
+	* configure: Regenerated.
+
 2020-10-16  Alan Modra  <amodra@gmail.com>
 
 	* elf32-arc.c (replace_func): Correct return type.

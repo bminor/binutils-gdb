@@ -1,3 +1,7 @@
+2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elf/riscv.h: Add R_RISCV_IRELATIVE to 58.
+
 2020-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703

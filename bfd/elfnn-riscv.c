@@ -31,6 +31,7 @@
 #include "elfxx-riscv.h"
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
+#include "objalloc.h"
 
 /* Internal relocations used exclusively by the relaxation pass.  */
 #define R_RISCV_DELETE (R_RISCV_max + 1)
@@ -115,6 +116,10 @@ struct riscv_elf_link_hash_table
 
   /* The max alignment of output sections.  */
   bfd_vma max_alignment;
+
+  /* Used by local STT_GNU_IFUNC symbols.  */
+  htab_t loc_hash_table;
+  void * loc_hash_memory;
 };
 
 
@@ -153,16 +158,12 @@ riscv_elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
 
 #define GOT_ENTRY_SIZE RISCV_ELF_WORD_BYTES
 
+/* Reserve two entries of GOTPLT for ld.so, one is used for PLT resolver,
+   the other is used for link map.  Other targets also reserve one more
+   entry used for runtime profile?  */
 #define GOTPLT_HEADER_SIZE (2 * GOT_ENTRY_SIZE)
 
 #define sec_addr(sec) ((sec)->output_section->vma + (sec)->output_offset)
-
-static bfd_vma
-riscv_elf_got_plt_val (bfd_vma plt_index, struct bfd_link_info *info)
-{
-  return sec_addr (riscv_elf_hash_table (info)->elf.sgotplt)
-	 + GOTPLT_HEADER_SIZE + (plt_index * GOT_ENTRY_SIZE);
-}
 
 #if ARCH_SIZE == 32
 # define MATCH_LREG MATCH_LW
@@ -265,6 +266,86 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
   return entry;
 }
 
+/* Compute a hash of a local hash entry.  We use elf_link_hash_entry
+  for local symbol so that we can handle local STT_GNU_IFUNC symbols
+  as global symbol.  We reuse indx and dynstr_index for local symbol
+  hash since they aren't used by global symbols in this backend.  */
+
+static hashval_t
+riscv_elf_local_htab_hash (const void *ptr)
+{
+  struct elf_link_hash_entry *h = (struct elf_link_hash_entry *) ptr;
+  return ELF_LOCAL_SYMBOL_HASH (h->indx, h->dynstr_index);
+}
+
+/* Compare local hash entries.  */
+
+static int
+riscv_elf_local_htab_eq (const void *ptr1, const void *ptr2)
+{
+  struct elf_link_hash_entry *h1 = (struct elf_link_hash_entry *) ptr1;
+  struct elf_link_hash_entry *h2 = (struct elf_link_hash_entry *) ptr2;
+
+  return h1->indx == h2->indx && h1->dynstr_index == h2->dynstr_index;
+}
+
+/* Find and/or create a hash entry for local symbol.  */
+
+static struct elf_link_hash_entry *
+riscv_elf_get_local_sym_hash (struct riscv_elf_link_hash_table *htab,
+			      bfd *abfd, const Elf_Internal_Rela *rel,
+			      bfd_boolean create)
+{
+  struct riscv_elf_link_hash_entry eh, *ret;
+  asection *sec = abfd->sections;
+  hashval_t h = ELF_LOCAL_SYMBOL_HASH (sec->id,
+				       ELFNN_R_SYM (rel->r_info));
+  void **slot;
+
+  eh.elf.indx = sec->id;
+  eh.elf.dynstr_index = ELFNN_R_SYM (rel->r_info);
+  slot = htab_find_slot_with_hash (htab->loc_hash_table, &eh, h,
+				   create ? INSERT : NO_INSERT);
+
+  if (!slot)
+    return NULL;
+
+  if (*slot)
+    {
+      ret = (struct riscv_elf_link_hash_entry *) *slot;
+      return &ret->elf;
+    }
+
+  ret = (struct riscv_elf_link_hash_entry *)
+	objalloc_alloc ((struct objalloc *) htab->loc_hash_memory,
+			sizeof (struct riscv_elf_link_hash_entry));
+  if (ret)
+    {
+      memset (ret, 0, sizeof (*ret));
+      ret->elf.indx = sec->id;
+      ret->elf.dynstr_index = ELFNN_R_SYM (rel->r_info);
+      ret->elf.dynindx = -1;
+      *slot = ret;
+    }
+  return &ret->elf;
+}
+
+/* Destroy a RISC-V elf linker hash table.  */
+
+static void
+riscv_elf_link_hash_table_free (bfd *obfd)
+{
+  struct riscv_elf_link_hash_table *ret
+    = (struct riscv_elf_link_hash_table *) obfd->link.hash;
+
+  if (ret->loc_hash_table)
+    htab_delete (ret->loc_hash_table);
+  if (ret->loc_hash_memory)
+    objalloc_free ((struct objalloc *) ret->loc_hash_memory);
+
+  _bfd_elf_link_hash_table_free (obfd);
+}
+
 /* Create a RISC-V ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -286,6 +367,20 @@ riscv_elf_link_hash_table_create (bfd *abfd)
     }
 
   ret->max_alignment = (bfd_vma) -1;
+
+  /* Create hash table for local ifunc.  */
+  ret->loc_hash_table = htab_try_create (1024,
+					 riscv_elf_local_htab_hash,
+					 riscv_elf_local_htab_eq,
+					 NULL);
+  ret->loc_hash_memory = objalloc_create ();
+  if (!ret->loc_hash_table || !ret->loc_hash_memory)
+    {
+      riscv_elf_link_hash_table_free (abfd);
+      return NULL;
+    }
+  ret->elf.root.hash_table_free = riscv_elf_link_hash_table_free;
+
   return &ret->elf.root;
 }
 
@@ -477,6 +572,9 @@ bad_static_reloc (bfd *abfd, unsigned r_type, struct elf_link_hash_entry *h)
 {
   reloc_howto_type * r = riscv_elf_rtype_to_howto (abfd, r_type);
 
+  /* We propably can improve the information to tell users that they
+     should be recompile the code with -fPIC or -fPIE, just like what
+     x86 does.  */
   (*_bfd_error_handler)
     (_("%pB: relocation %s against `%s' can not be used when making a shared "
        "object; recompile with -fPIC"),
@@ -526,13 +624,64 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
 
       if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
+	{
+	  /* A local symbol.  */
+	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
+							  abfd, r_symndx);
+	  if (isym == NULL)
+	    return FALSE;
+
+	  /* Check relocation against local STT_GNU_IFUNC symbol.  */
+	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+	    {
+	      h = riscv_elf_get_local_sym_hash (htab, abfd, rel, TRUE);
+	      if (h == NULL)
+		return FALSE;
+
+	      /* Fake STT_GNU_IFUNC global symbol.  */
+	      h->root.root.string = bfd_elf_sym_name (abfd, symtab_hdr,
+						      isym, NULL);
+	      h->type = STT_GNU_IFUNC;
+	      h->def_regular = 1;
+	      h->ref_regular = 1;
+	      h->forced_local = 1;
+	      h->root.type = bfd_link_hash_defined;
+	    }
+	  else
+	    h = NULL;
+	}
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	}
+
+      if (h != NULL)
+	{
+	  switch (r_type)
+	    {
+	    case R_RISCV_32:
+	    case R_RISCV_64:
+	    case R_RISCV_CALL:
+	    case R_RISCV_CALL_PLT:
+	    case R_RISCV_HI20:
+	    case R_RISCV_GOT_HI20:
+	    case R_RISCV_PCREL_HI20:
+	      /* Create the ifunc sections, iplt and ipltgot, for static
+		 executables.  */
+	      if (h->type == STT_GNU_IFUNC
+		  && !_bfd_elf_create_ifunc_sections (htab->elf.dynobj, info))
+		return FALSE;
+	      break;
+
+	    default:
+	      break;
+	    }
+
+	  /* It is referenced by a non-shared object.  */
+	  h->ref_regular = 1;
 	}
 
       switch (r_type)
@@ -574,12 +723,26 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  h->plt.refcount += 1;
 	  break;
 
+	case R_RISCV_PCREL_HI20:
+	  if (h != NULL
+	      && h->type == STT_GNU_IFUNC)
+	    {
+	      h->non_got_ref = 1;
+	      h->pointer_equality_needed = 1;
+
+	      /* We don't use the PCREL_HI20 in the data section,
+		 so we always need the plt when it refers to
+		 ifunc symbol.  */
+	      h->plt.refcount += 1;
+	    }
+	  /* Fall through.  */
+
 	case R_RISCV_JAL:
 	case R_RISCV_BRANCH:
 	case R_RISCV_RVC_BRANCH:
 	case R_RISCV_RVC_JUMP:
-	case R_RISCV_PCREL_HI20:
-	  /* In shared libraries, these relocs are known to bind locally.  */
+	  /* In shared libraries and pie, these relocs are known
+	     to bind locally.  */
 	  if (bfd_link_pic (info))
 	    break;
 	  goto static_reloc;
@@ -604,15 +767,23 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* Fall through.  */
 
 	static_reloc:
-	  /* This reloc might not bind locally.  */
-	  if (h != NULL)
-	    h->non_got_ref = 1;
 
-	  if (h != NULL && !bfd_link_pic (info))
+	  if (h != NULL
+	      && (!bfd_link_pic (info)
+		  || h->type == STT_GNU_IFUNC))
 	    {
-	      /* We may need a .plt entry if the function this reloc
-		 refers to is in a shared lib.  */
-	      h->plt.refcount += 1;
+	      /* This reloc might not bind locally.  */
+	      h->non_got_ref = 1;
+	      h->pointer_equality_needed = 1;
+
+	      if (!h->def_regular
+		  || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
+		{
+		  /* We may need a .plt entry if the symbol is a function
+		     defined in a shared lib or is a function referenced
+		     from the code or read-only section.  */
+		  h->plt.refcount += 1;
+		}
 	    }
 
 	  /* If we are creating a shared library, and this is a reloc
@@ -635,21 +806,28 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     If on the other hand, we are creating an executable, we
 	     may need to keep relocations for symbols satisfied by a
 	     dynamic library if we manage to avoid copy relocs for the
-	     symbol.  */
+	     symbol.
+
+	     Generate dynamic pointer relocation against STT_GNU_IFUNC
+	     symbol in the non-code section (R_RISCV_32/R_RISCV_64).  */
 	  reloc_howto_type * r = riscv_elf_rtype_to_howto (abfd, r_type);
 
 	  if ((bfd_link_pic (info)
 	       && (sec->flags & SEC_ALLOC) != 0
-	       && ((r != NULL && ! r->pc_relative)
+	       && ((r != NULL && !r->pc_relative)
 		   || (h != NULL
-		       && (! info->symbolic
+		       && (!info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (!bfd_link_pic (info)
 		  && (sec->flags & SEC_ALLOC) != 0
 		  && h != NULL
 		  && (h->root.type == bfd_link_hash_defweak
-		      || !h->def_regular)))
+		      || !h->def_regular))
+	      || (!bfd_link_pic (info)
+		  && h != NULL
+		  && h->type == STT_GNU_IFUNC
+		  && (sec->flags & SEC_CODE) == 0))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
@@ -786,9 +964,10 @@ riscv_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (h->type == STT_FUNC || h->type == STT_GNU_IFUNC || h->needs_plt)
     {
       if (h->plt.refcount <= 0
-	  || SYMBOL_CALLS_LOCAL (info, h)
-	  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      && h->root.type == bfd_link_hash_undefweak))
+	  || (h->type != STT_GNU_IFUNC
+	      && (SYMBOL_CALLS_LOCAL (info, h)
+		  || (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
+		      && h->root.type == bfd_link_hash_undefweak))))
 	{
 	  /* This case can occur if we saw a R_RISCV_CALL_PLT reloc in an
 	     input file, but the symbol was never referred to by a dynamic
@@ -901,8 +1080,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   htab = riscv_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
-  if (htab->elf.dynamic_sections_created
-      && h->plt.refcount > 0)
+  /* Since STT_GNU_IFUNC symbols must go through PLT, we handle them
+     in the allocate_ifunc_dynrelocs and allocate_local_ifunc_dynrelocs,
+     if they are defined and referenced in a non-shared object.  */
+  if (h->type == STT_GNU_IFUNC
+      && h->def_regular)
+    return TRUE;
+  else if (htab->elf.dynamic_sections_created
+	   && h->plt.refcount > 0)
     {
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
@@ -1088,6 +1273,55 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+/* Allocate space in .plt, .got and associated reloc sections for
+   ifunc dynamic relocs.  */
+
+static bfd_boolean
+allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
+			  void *inf)
+{
+  struct bfd_link_info *info;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  if (h->root.type == bfd_link_hash_warning)
+    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+  info = (struct bfd_link_info *) inf;
+
+  /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
+     here if it is defined and referenced in a non-shared object.  */
+  if (h->type == STT_GNU_IFUNC
+      && h->def_regular)
+    return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
+					       &h->dyn_relocs,
+					       PLT_ENTRY_SIZE,
+					       PLT_HEADER_SIZE,
+					       GOT_ENTRY_SIZE,
+					       TRUE);
+  return TRUE;
+}
+
+/* Allocate space in .plt, .got and associated reloc sections for
+   local ifunc dynamic relocs.  */
+
+static bfd_boolean
+allocate_local_ifunc_dynrelocs (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h
+    = (struct elf_link_hash_entry *) *slot;
+
+  if (h->type != STT_GNU_IFUNC
+      || !h->def_regular
+      || !h->ref_regular
+      || !h->forced_local
+      || h->root.type != bfd_link_hash_defined)
+    abort ();
+
+  return allocate_ifunc_dynrelocs (h, inf);
+}
+
 static bfd_boolean
 riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
@@ -1178,9 +1412,17 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	}
     }
 
-  /* Allocate global sym .plt and .got entries, and space for global
-     sym dynamic relocs.  */
+  /* Allocate .plt and .got entries and space dynamic relocs for
+     global symbols.  */
   elf_link_hash_traverse (&htab->elf, allocate_dynrelocs, info);
+
+  /* Allocate .plt and .got entries and space dynamic relocs for
+     global ifunc symbols.  */
+  elf_link_hash_traverse (&htab->elf, allocate_ifunc_dynrelocs, info);
+
+  /* Allocate .plt and .got entries and space dynamic relocs for
+     local ifunc symbols.  */
+  htab_traverse (htab->loc_hash_table, allocate_local_ifunc_dynrelocs, info);
 
   if (htab->elf.sgotplt)
     {
@@ -1213,6 +1455,8 @@ riscv_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       if (s == htab->elf.splt
 	  || s == htab->elf.sgot
 	  || s == htab->elf.sgotplt
+	  || s == htab->elf.iplt
+	  || s == htab->elf.igotplt
 	  || s == htab->elf.sdynbss
 	  || s == htab->elf.sdynrelro
 	  || s == htab->sdyntdata)
@@ -1645,7 +1889,6 @@ riscv_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *relend;
   riscv_pcrel_relocs pcrel_relocs;
   bfd_boolean ret = FALSE;
-  asection *sreloc = elf_section_data (input_section)->sreloc;
   struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (input_bfd);
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
@@ -1664,7 +1907,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       asection *sec;
       bfd_vma relocation;
       bfd_reloc_status_type r = bfd_reloc_ok;
-      const char *name;
+      const char *name = NULL;
       bfd_vma off, ie_off;
       bfd_boolean unresolved_reloc, is_ie = FALSE;
       bfd_vma pc = sec_addr (input_section) + rel->r_offset;
@@ -1689,6 +1932,19 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  sym = local_syms + r_symndx;
 	  sec = local_sections[r_symndx];
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
+
+	  /* Relocate against local STT_GNU_IFUNC symbol.  */
+	  if (!bfd_link_relocatable (info)
+	      && ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+	    {
+	      h = riscv_elf_get_local_sym_hash (htab, input_bfd, rel, FALSE);
+	      if (h == NULL)
+		abort ();
+
+	      /* Set STT_GNU_IFUNC symbol value.  */
+	      h->root.u.def.value = sym->st_value;
+	      h->root.u.def.section = sec;
+	    }
 	}
       else
 	{
@@ -1717,6 +1973,235 @@ riscv_elf_relocate_section (bfd *output_bfd,
       if (bfd_link_relocatable (info))
 	continue;
 
+      /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
+	 it here if it is defined in a non-shared object.  */
+      if (h != NULL
+	  && h->type == STT_GNU_IFUNC
+	  && h->def_regular)
+	{
+	  asection *plt, *base_got;
+
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    {
+	      /* If this is a SHT_NOTE section without SHF_ALLOC, treat
+		 STT_GNU_IFUNC symbol as STT_FUNC.  */
+	      if (elf_section_type (input_section) == SHT_NOTE)
+		goto skip_ifunc;
+
+	      /* Dynamic relocs are not propagated for SEC_DEBUGGING
+		 sections because such sections are not SEC_ALLOC and
+		 thus ld.so will not process them.  */
+	      if ((input_section->flags & SEC_DEBUGGING) != 0)
+		continue;
+
+	      abort ();
+	    }
+	  else if (h->plt.offset == (bfd_vma) -1
+		   /* The following relocation may not need the .plt entries
+		      when all references to a STT_GNU_IFUNC symbols are done
+		      via GOT or static function pointers.  */
+		   && r_type != R_RISCV_32
+		   && r_type != R_RISCV_64
+		   && r_type != R_RISCV_HI20
+		   && r_type != R_RISCV_GOT_HI20
+		   && r_type != R_RISCV_LO12_I
+		   && r_type != R_RISCV_LO12_S)
+	    goto bad_ifunc_reloc;
+
+	  /* STT_GNU_IFUNC symbol must go through PLT.  */
+	  plt = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
+	  relocation = plt->output_section->vma
+		       + plt->output_offset
+		       + h->plt.offset;
+
+	  switch (r_type)
+	    {
+	    case R_RISCV_32:
+	    case R_RISCV_64:
+	      if (rel->r_addend != 0)
+		{
+		  if (h->root.root.string)
+		    name = h->root.root.string;
+		  else
+		    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, NULL);
+
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%pB: relocation %s against STT_GNU_IFUNC "
+		       "symbol `%s' has non-zero addend: %" PRId64),
+		     input_bfd, howto->name, name, (int64_t) rel->r_addend);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+
+		/* Generate dynamic relocation only when there is a non-GOT
+		   reference in a shared object or there is no PLT.  */
+		if ((bfd_link_pic (info) && h->non_got_ref)
+		    || h->plt.offset == (bfd_vma) -1)
+		  {
+		    Elf_Internal_Rela outrel;
+		    asection *sreloc;
+
+		    /* Need a dynamic relocation to get the real function
+		       address.  */
+		    outrel.r_offset = _bfd_elf_section_offset (output_bfd,
+							       info,
+							       input_section,
+							       rel->r_offset);
+		    if (outrel.r_offset == (bfd_vma) -1
+			|| outrel.r_offset == (bfd_vma) -2)
+		      abort ();
+
+		    outrel.r_offset += input_section->output_section->vma
+				       + input_section->output_offset;
+
+		    if (h->dynindx == -1
+			|| h->forced_local
+			|| bfd_link_executable (info))
+		      {
+			info->callbacks->minfo
+			  (_("Local IFUNC function `%s' in %pB\n"),
+			   h->root.root.string,
+			   h->root.u.def.section->owner);
+
+			/* This symbol is resolved locally.  */
+			outrel.r_info = ELFNN_R_INFO (0, R_RISCV_IRELATIVE);
+			outrel.r_addend = h->root.u.def.value
+			  + h->root.u.def.section->output_section->vma
+			  + h->root.u.def.section->output_offset;
+		      }
+		    else
+		      {
+			outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
+			outrel.r_addend = 0;
+		      }
+
+		    /* Dynamic relocations are stored in
+		       1. .rela.ifunc section in PIC object.
+		       2. .rela.got section in dynamic executable.
+		       3. .rela.iplt section in static executable.  */
+		    if (bfd_link_pic (info))
+		      sreloc = htab->elf.irelifunc;
+		    else if (htab->elf.splt != NULL)
+		      sreloc = htab->elf.srelgot;
+		    else
+		      sreloc = htab->elf.irelplt;
+
+		    riscv_elf_append_rela (output_bfd, sreloc, &outrel);
+
+		    /* If this reloc is against an external symbol, we
+		       do not want to fiddle with the addend.  Otherwise,
+		       we need to include the symbol value so that it
+		       becomes an addend for the dynamic reloc.  For an
+		       internal symbol, we have updated addend.  */
+		    continue;
+		  }
+		goto do_relocation;
+
+	      case R_RISCV_GOT_HI20:
+		base_got = htab->elf.sgot;
+		off = h->got.offset;
+
+		if (base_got == NULL)
+		  abort ();
+
+		if (off == (bfd_vma) -1)
+		  {
+		    bfd_vma plt_idx;
+
+		    /* We can't use h->got.offset here to save state, or
+		       even just remember the offset, as finish_dynamic_symbol
+		       would use that as offset into .got.  */
+
+		    if (htab->elf.splt != NULL)
+		      {
+			plt_idx = (h->plt.offset - PLT_HEADER_SIZE)
+				  / PLT_ENTRY_SIZE;
+			off = GOTPLT_HEADER_SIZE + (plt_idx * GOT_ENTRY_SIZE);
+			base_got = htab->elf.sgotplt;
+		      }
+		    else
+		      {
+			plt_idx = h->plt.offset / PLT_ENTRY_SIZE;
+			off = plt_idx * GOT_ENTRY_SIZE;
+			base_got = htab->elf.igotplt;
+		      }
+
+		    if (h->dynindx == -1
+			|| h->forced_local
+			|| info->symbolic)
+		      {
+			/* This references the local definition.  We must
+			   initialize this entry in the global offset table.
+			   Since the offset must always be a multiple of 8,
+			   we use the least significant bit to record
+			   whether we have initialized it already.
+
+			   When doing a dynamic link, we create a .rela.got
+			   relocation entry to initialize the value.  This
+			   is done in the finish_dynamic_symbol routine.   */
+			if ((off & 1) != 0)
+			  off &= ~1;
+			else
+			  {
+			    bfd_put_NN (output_bfd, relocation,
+					base_got->contents + off);
+			    /* Note that this is harmless for the case,
+			       as -1 | 1 still is -1.  */
+			    h->got.offset |= 1;
+			  }
+		      }
+		  }
+
+		relocation = base_got->output_section->vma
+			     + base_got->output_offset + off;
+
+		r_type = ELFNN_R_TYPE (rel->r_info);
+		howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
+		if (howto == NULL)
+		  r = bfd_reloc_notsupported;
+		else if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
+						       relocation, FALSE))
+		  r = bfd_reloc_overflow;
+		goto do_relocation;
+
+	      case R_RISCV_CALL:
+	      case R_RISCV_CALL_PLT:
+	      case R_RISCV_HI20:
+	      case R_RISCV_LO12_I:
+	      case R_RISCV_LO12_S:
+		goto do_relocation;
+
+	      case R_RISCV_PCREL_HI20:
+		r_type = ELFNN_R_TYPE (rel->r_info);
+		howto = riscv_elf_rtype_to_howto (input_bfd, r_type);
+		if (howto == NULL)
+		  r = bfd_reloc_notsupported;
+		else if (!riscv_record_pcrel_hi_reloc (&pcrel_relocs, pc,
+						       relocation, FALSE))
+		  r = bfd_reloc_overflow;
+		goto do_relocation;
+
+	    default:
+ bad_ifunc_reloc:
+	      if (h->root.root.string)
+		name = h->root.root.string;
+	      else
+		/* The entry of local ifunc is fake in global hash table,
+		   we should find the name by the original local symbol.  */
+		name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, NULL);
+
+	      _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("%pB: relocation %s against STT_GNU_IFUNC "
+		 "symbol `%s' isn't supported"), input_bfd,
+	       howto->name, name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return FALSE;
+	    }
+	}
+
+ skip_ifunc:
       if (h != NULL)
 	name = h->root.root.string;
       else
@@ -2013,6 +2498,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		      || h->root.type == bfd_link_hash_undefined)))
 	    {
 	      Elf_Internal_Rela outrel;
+	      asection *sreloc;
 	      bfd_boolean skip_static_relocation, skip_dynamic_relocation;
 
 	      /* When generating a shared object, these relocations
@@ -2042,6 +2528,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 		  outrel.r_addend = relocation + rel->r_addend;
 		}
 
+	      sreloc = elf_section_data (input_section)->sreloc;
 	      riscv_elf_append_rela (output_bfd, sreloc, &outrel);
 	      if (skip_static_relocation)
 		continue;
@@ -2216,6 +2703,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  r = bfd_reloc_notsupported;
 	}
 
+ do_relocation:
       if (r == bfd_reloc_ok)
 	r = perform_relocation (howto, rel, relocation, input_section,
 				input_bfd, contents);
@@ -2299,23 +2787,58 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
     {
       /* We've decided to create a PLT entry for this symbol.  */
       bfd_byte *loc;
-      bfd_vma i, header_address, plt_idx, got_address;
+      bfd_vma i, header_address, plt_idx, got_offset, got_address;
       uint32_t plt_entry[PLT_ENTRY_INSNS];
       Elf_Internal_Rela rela;
+      asection *plt, *gotplt, *relplt;
 
-      BFD_ASSERT (h->dynindx != -1);
+      /* When building a static executable, use .iplt, .igot.plt and
+	 .rela.iplt sections for STT_GNU_IFUNC symbols.  */
+      if (htab->elf.splt != NULL)
+        {
+          plt = htab->elf.splt;
+          gotplt = htab->elf.sgotplt;
+          relplt = htab->elf.srelplt;
+        }
+      else
+        {
+          plt = htab->elf.iplt;
+          gotplt = htab->elf.igotplt;
+          relplt = htab->elf.irelplt;
+        }
+
+      /* This symbol has an entry in the procedure linkage table.  Set
+         it up.  */
+      if ((h->dynindx == -1
+	   && !((h->forced_local || bfd_link_executable (info))
+		&& h->def_regular
+		&& h->type == STT_GNU_IFUNC))
+	  || plt == NULL
+	  || gotplt == NULL
+	  || relplt == NULL)
+	return FALSE;
 
       /* Calculate the address of the PLT header.  */
-      header_address = sec_addr (htab->elf.splt);
+      header_address = sec_addr (plt);
 
-      /* Calculate the index of the entry.  */
-      plt_idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+      /* Calculate the index of the entry and the offset of .got.plt entry.
+	 For static executables, we don't reserve anything.  */
+      if (plt == htab->elf.splt)
+	{
+	  plt_idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
+	  got_offset = GOTPLT_HEADER_SIZE + (plt_idx * GOT_ENTRY_SIZE);
+	}
+      else
+	{
+	  plt_idx = h->plt.offset / PLT_ENTRY_SIZE;
+	  got_offset = plt_idx * GOT_ENTRY_SIZE;
+	}
 
       /* Calculate the address of the .got.plt entry.  */
-      got_address = riscv_elf_got_plt_val (plt_idx, info);
+      got_address = sec_addr (gotplt) + got_offset;
 
       /* Find out where the .plt entry should go.  */
-      loc = htab->elf.splt->contents + h->plt.offset;
+      loc = plt->contents + h->plt.offset;
 
       /* Fill in the PLT entry itself.  */
       if (! riscv_make_plt_entry (output_bfd, got_address,
@@ -2327,16 +2850,37 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	bfd_put_32 (output_bfd, plt_entry[i], loc + 4*i);
 
       /* Fill in the initial value of the .got.plt entry.  */
-      loc = htab->elf.sgotplt->contents
-	    + (got_address - sec_addr (htab->elf.sgotplt));
-      bfd_put_NN (output_bfd, sec_addr (htab->elf.splt), loc);
+      loc = gotplt->contents + (got_address - sec_addr (gotplt));
+      bfd_put_NN (output_bfd, sec_addr (plt), loc);
 
-      /* Fill in the entry in the .rela.plt section.  */
       rela.r_offset = got_address;
-      rela.r_addend = 0;
-      rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_JUMP_SLOT);
 
-      loc = htab->elf.srelplt->contents + plt_idx * sizeof (ElfNN_External_Rela);
+      if (h->dynindx == -1
+	  || ((bfd_link_executable (info)
+	       || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	      && h->def_regular
+	      && h->type == STT_GNU_IFUNC))
+	{
+	  info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
+				  h->root.root.string,
+				  h->root.u.def.section->owner);
+
+	  /* If an STT_GNU_IFUNC symbol is locally defined, generate
+	     R_RISCV_IRELATIVE instead of R_RISCV_JUMP_SLOT.  */
+	  asection *sec = h->root.u.def.section;
+	  rela.r_info = ELFNN_R_INFO (0, R_RISCV_IRELATIVE);
+	  rela.r_addend = h->root.u.def.value
+			  + sec->output_section->vma
+			  + sec->output_offset;
+	}
+      else
+	{
+	  /* Fill in the entry in the .rela.plt section.  */
+	  rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_JUMP_SLOT);
+	  rela.r_addend = 0;
+	}
+
+      loc = relplt->contents + plt_idx * sizeof (ElfNN_External_Rela);
       bed->s->swap_reloca_out (output_bfd, &rela, loc);
 
       if (!h->def_regular)
@@ -2369,13 +2913,73 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       rela.r_offset = sec_addr (sgot) + (h->got.offset &~ (bfd_vma) 1);
 
+      /* Handle the ifunc symbol in GOT entry.  */
+      if (h->def_regular
+	  && h->type == STT_GNU_IFUNC)
+	{
+	  if (h->plt.offset == (bfd_vma) -1)
+	    {
+	      /* STT_GNU_IFUNC is referenced without PLT.  */
+	      if (htab->elf.splt == NULL)
+		{
+		  /* use .rel[a].iplt section to store .got relocations
+		     in static executable.  */
+		  srela = htab->elf.irelplt;
+		}
+	      if (SYMBOL_REFERENCES_LOCAL (info, h))
+		{
+		  info->callbacks->minfo (_("Local IFUNC function `%s' in %pB\n"),
+					  h->root.root.string,
+					  h->root.u.def.section->owner);
+
+		  rela.r_info = ELFNN_R_INFO (0, R_RISCV_IRELATIVE);
+		  rela.r_addend = (h->root.u.def.value
+				   + h->root.u.def.section->output_section->vma
+				   + h->root.u.def.section->output_offset);
+		}
+	      else
+		{
+		  /* Generate R_RISCV_NN.  */
+		  BFD_ASSERT((h->got.offset & 1) == 0);
+		  BFD_ASSERT (h->dynindx != -1);
+		  rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_NN);
+		  rela.r_addend = 0;
+		}
+	    }
+	  else if (bfd_link_pic (info))
+	    {
+	      /* Generate R_RISCV_NN.  */
+	      BFD_ASSERT((h->got.offset & 1) == 0);
+	      BFD_ASSERT (h->dynindx != -1);
+	      rela.r_info = ELFNN_R_INFO (h->dynindx, R_RISCV_NN);
+	      rela.r_addend = 0;
+	    }
+	  else
+	    {
+	      asection *plt;
+
+	      if (!h->pointer_equality_needed)
+		abort ();
+
+	      /* For non-shared object, we can't use .got.plt, which
+		 contains the real function address if we need pointer
+		 equality.  We load the GOT entry with the PLT entry.  */
+	      plt = htab->elf.splt ? htab->elf.splt : htab->elf.iplt;
+	      bfd_put_NN (output_bfd, (plt->output_section->vma
+				       + plt->output_offset
+				       + h->plt.offset),
+			  htab->elf.sgot->contents
+			  + (h->got.offset & ~(bfd_vma) 1));
+	      return TRUE;
+	    }
+	}
       /* If this is a local symbol reference, we just want to emit a RELATIVE
 	 reloc.  This can happen if it is a -Bsymbolic link, or a pie link, or
 	 the symbol was forced to be local because of a version file.
 	 The entry in the global offset table will already have been
 	 initialized in the relocate_section function.  */
-      if (bfd_link_pic (info)
-	  && SYMBOL_REFERENCES_LOCAL (info, h))
+      else if (bfd_link_pic (info)
+	       && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  asection *sec = h->root.u.def.section;
@@ -2421,6 +3025,18 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
+}
+
+/* Finish up local dynamic symbol handling.  We set the contents of
+   various dynamic sections here.  */
+
+static bfd_boolean
+riscv_elf_finish_local_dynamic_symbol (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h = (struct elf_link_hash_entry *) *slot;
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+  return riscv_elf_finish_dynamic_symbol (info->output_bfd, info, h, NULL);
 }
 
 /* Finish up the dynamic sections.  */
@@ -2548,6 +3164,11 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
 
       elf_section_data (output_section)->this_hdr.sh_entsize = GOT_ENTRY_SIZE;
     }
+
+  /* Fill PLT and GOT entries for local STT_GNU_IFUNC symbols.  */
+  htab_traverse (htab->loc_hash_table,
+		 riscv_elf_finish_local_dynamic_symbol,
+		 info);
 
   return TRUE;
 }
@@ -4052,6 +4673,12 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  reserve_size = (isym->st_size - rel->r_addend) > isym->st_size
 	    ? 0 : isym->st_size - rel->r_addend;
 
+	  /* Relocate against local STT_GNU_IFUNC symbol.  we have created
+	     a fake global symbol entry for this, so deal with the local ifunc
+	     as a global.  */
+	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
+	    continue;
+
 	  if (isym->st_shndx == SHN_UNDEF)
 	    sym_sec = sec, symval = rel->r_offset;
 	  else
@@ -4081,6 +4708,10 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* Disable the relaxation for ifunc.  */
+	  if (h != NULL && h->type == STT_GNU_IFUNC)
+	    continue;
 
 	  if (h->root.type == bfd_link_hash_undefweak
 	      && (relax_func == _bfd_riscv_relax_lui

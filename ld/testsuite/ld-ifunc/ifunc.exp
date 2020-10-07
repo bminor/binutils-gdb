@@ -39,7 +39,6 @@ if { ![is_elf_format] || ![supports_gnu_osabi]
      || [istarget nds32*-*-*]
      || [istarget nios2-*-*]
      || [istarget or1k-*-*]
-     || [istarget riscv*-*-*]
      || [istarget score*-*-*]
      || [istarget sh*-*-*]
      || [istarget tic6x-*-*]
@@ -736,7 +735,8 @@ run_ld_link_exec_tests [list \
 if { [isnative]
      && !([istarget "powerpc-*-*"]
            || [istarget "aarch64*-*-*"]
-           || [istarget "sparc*-*-*"]) } {
+           || [istarget "sparc*-*-*"]
+           || [istarget "riscv*-*-*"]) } {
 run_ld_link_exec_tests [list \
     [list \
 	"Run pr23169a" \

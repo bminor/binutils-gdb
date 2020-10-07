@@ -854,6 +854,21 @@ static reloc_howto_type howto_table[] =
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
 	 FALSE),			/* pcrel_offset */
+
+  /* Relocation against a local ifunc symbol in a shared object.  */
+  HOWTO (R_RISCV_IRELATIVE,		/* type */
+	 0,				/* rightshift */
+	 2,				/* size */
+	 32,				/* bitsize */
+	 FALSE,				/* pc_relative */
+	 0,				/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,		/* special_function */
+	 "R_RISCV_IRELATIVE",		/* name */
+	 FALSE,				/* partial_inplace */
+	 0,				/* src_mask */
+	 0xffffffff,			/* dst_mask */
+	 FALSE),			/* pcrel_offset */
 };
 
 /* A mapping from BFD reloc types to RISC-V ELF reloc types.  */

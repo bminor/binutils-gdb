@@ -19,6 +19,47 @@
 # MA 02110-1301, USA.
 #
 
+# target: rv32 or rv64.
+# output: Which output you want?  (exe, pie, .so)
+proc run_dump_test_ifunc { name target output} {
+    set asflags ""
+    set ldflags "-z nocombreloc"
+
+    switch -- $output {
+	exe {
+	    set ext "exe"
+	}
+	pie {
+	    set ext "pie"
+	    set ldflags "$ldflags -pie"
+	}
+	pic {
+	    set ext "so"
+	    set ldflags "$ldflags -shared"
+	}
+    }
+
+    switch -- $target {
+	rv32 {
+	    set asflags "$asflags -march=rv32i -mabi=ilp32"
+	    set ldflags "$ldflags -melf32lriscv"
+	}
+	rv64 {
+	    set asflags "$asflags -march=rv64i -mabi=lp64 -defsym __64_bit__=1"
+	    set ldflags "$ldflags -melf64lriscv"
+	}
+    }
+
+    run_ld_link_tests [list \
+	[list "$name ($target-$output)" \
+	      "$ldflags" "" \
+	      "$asflags" \
+	      [list "$name.s"] \
+	      [concat [list "readelf -rW $name-$output.rd"] \
+		      [list "objdump -dw $name.d"]] \
+	      "$name-$target.$ext"]]
+}
+
 if [istarget "riscv*-*-*"] {
     run_dump_test "call-relax"
     run_dump_test "c-lui"
@@ -88,4 +129,74 @@ if [istarget "riscv*-*-*"] {
 	    {} "lib-nopic-01a.so" }
     }
     run_dump_test "lib-nopic-01b"
+
+    # IFUNC testcases.
+    # Check IFUNC by single type relocs.
+    run_dump_test_ifunc "ifunc-reloc-call-01" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-call-01" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-call-01" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-call-02" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-call-02" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-call-02" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-data" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-data" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-data" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-got" rv32 exe
+    run_dump_test_ifunc "ifunc-reloc-got" rv32 pie
+    run_dump_test_ifunc "ifunc-reloc-got" rv32 pic
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv64 exe
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv64 pie
+    run_dump_test_ifunc "ifunc-reloc-pcrel" rv64 pic
+    run_dump_test_ifunc "ifunc-reloc-data" rv64 exe
+    run_dump_test_ifunc "ifunc-reloc-data" rv64 pie
+    run_dump_test_ifunc "ifunc-reloc-data" rv64 pic
+    run_dump_test_ifunc "ifunc-reloc-got" rv64 exe
+    run_dump_test_ifunc "ifunc-reloc-got" rv64 pie
+    run_dump_test_ifunc "ifunc-reloc-got" rv64 pic
+    # Check the IFUNC PLT and non-PLT relocs.
+    run_dump_test_ifunc "ifunc-nonplt" rv32 exe
+    run_dump_test_ifunc "ifunc-nonplt" rv32 pie
+    run_dump_test_ifunc "ifunc-nonplt" rv32 pic
+    run_dump_test_ifunc "ifunc-plt-01" rv32 exe
+    run_dump_test_ifunc "ifunc-plt-01" rv32 pie
+    run_dump_test_ifunc "ifunc-plt-01" rv32 pic
+    run_dump_test_ifunc "ifunc-plt-02" rv32 exe
+    run_dump_test_ifunc "ifunc-plt-02" rv32 pie
+    run_dump_test_ifunc "ifunc-plt-02" rv32 pic
+    run_dump_test_ifunc "ifunc-nonplt" rv64 exe
+    run_dump_test_ifunc "ifunc-nonplt" rv64 pie
+    run_dump_test_ifunc "ifunc-nonplt" rv64 pic
+    run_dump_test_ifunc "ifunc-plt-01" rv64 exe
+    run_dump_test_ifunc "ifunc-plt-01" rv64 pie
+    run_dump_test_ifunc "ifunc-plt-01" rv64 pic
+    run_dump_test_ifunc "ifunc-plt-02" rv64 exe
+    run_dump_test_ifunc "ifunc-plt-02" rv64 pie
+    run_dump_test_ifunc "ifunc-plt-02" rv64 pic
+
+    # Setup shared libraries.
+    run_ld_link_tests {
+       { "Build shared library for IFUNC non-PLT caller"
+	 "-shared" "" "" {ifunc-seperate-caller-nonplt.s}
+	 {} "ifunc-seperate-caller.so" }
+       { "Build shared library for IFUNC PLT caller"
+	 "-shared" "" "" {ifunc-seperate-caller-plt.s}
+	 {} "ifunc-seperate-caller.so" }
+       { "Build shared library for IFUNC resolver"
+	 "-shared" "" "" {ifunc-seperate-resolver.s}
+	 {} "ifunc-seperate-resolver.so" }
+    }
+    # The IFUNC resolver and caller are in the seperate modules.
+    # If IFUNC resolver and caller are linked to the same module,
+    # then the result are the same as the run_dump_test_ifunc.
+    run_dump_test "ifunc-seperate-nonplt-exe"
+    run_dump_test "ifunc-seperate-nonplt-pie"
+    run_dump_test "ifunc-seperate-nonplt-pic"
+    run_dump_test "ifunc-seperate-plt-exe"
+    run_dump_test "ifunc-seperate-plt-pie"
+    run_dump_test "ifunc-seperate-plt-pic"
+    run_dump_test "ifunc-seperate-pcrel-pie"
+    run_dump_test "ifunc-seperate-pcrel-pic"
 }
