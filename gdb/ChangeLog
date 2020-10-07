@@ -1,3 +1,9 @@
+2020-10-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.in (COMPILE): Add CXXFLAGS.
+	(INTERNAL_CFLAGS_BASE): Remove CXXFLAGS.
+	(check-headers): Add CXXFLAGS.
+
 2020-10-07  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* arc-linux-tdep.h: New file.
