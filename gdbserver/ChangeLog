@@ -1,5 +1,10 @@
 2020-10-07  Kamil Rytarowski  <n54@gmx.com>
 
+	* netbsd-low.cc (netbsd_process_target::read_memory)
+	(netbsd_process_target::write_memory): Update.
+
+2020-10-07  Kamil Rytarowski  <n54@gmx.com>
+
 	* netbsd-aarch64-low.cc: Add.
 	* Makefile.in (SFILES): Register "netbsd-aarch64-low.c".
 	* configure.srv: Add aarch64*-*-netbsd*.

@@ -764,6 +764,29 @@ nbsd_nat_target::xfer_partial (enum target_object object,
 	*xfered_len = len;
 	return TARGET_XFER_OK;
       }
+    case TARGET_OBJECT_MEMORY:
+      {
+	size_t xfered;
+	int res;
+	if (writebuf != nullptr)
+	  res = netbsd_nat::write_memory (pid, writebuf, offset, len, &xfered);
+	else
+	  res = netbsd_nat::read_memory (pid, readbuf, offset, len, &xfered);
+	if (res != 0)
+	  {
+	    if (res == EACCES)
+	      fprintf_unfiltered (gdb_stderr, "Cannot %s process at %s (%s). "
+				  "Is PaX MPROTECT active? See security(7), "
+				  "sysctl(7), paxctl(8)\n",
+				  (writebuf ? "write to" : "read from"),
+				  pulongest (offset), safe_strerror (errno));
+	    return TARGET_XFER_E_IO;
+	  }
+	if (xfered == 0)
+	  return TARGET_XFER_EOF;
+	*xfered_len = (ULONGEST) xfered;
+	return TARGET_XFER_OK;
+      }
     default:
       return inf_ptrace_target::xfer_partial (object, annex,
 					      readbuf, writebuf, offset,

@@ -556,36 +556,8 @@ int
 netbsd_process_target::read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
 				    int size)
 {
-  struct ptrace_io_desc io;
-  io.piod_op = PIOD_READ_D;
-  io.piod_len = size;
-
   pid_t pid = current_process ()->pid;
-
-  int bytes_read = 0;
-
-  if (size == 0)
-    {
-      /* Zero length write always succeeds.  */
-      return 0;
-    }
-  do
-    {
-      io.piod_offs = (void *)(memaddr + bytes_read);
-      io.piod_addr = myaddr + bytes_read;
-
-      int rv = ptrace (PT_IO, pid, &io, 0);
-      if (rv == -1)
-	return errno;
-      if (io.piod_len == 0)
-	return 0;
-
-      bytes_read += io.piod_len;
-      io.piod_len = size - bytes_read;
-    }
-  while (bytes_read < size);
-
-  return 0;
+  return netbsd_nat::read_memory (pid, myaddr, memaddr, size, nullptr);
 }
 
 /* Implement the write_memory target_ops method.  */
@@ -594,37 +566,8 @@ int
 netbsd_process_target::write_memory (CORE_ADDR memaddr,
 				     const unsigned char *myaddr, int size)
 {
-  struct ptrace_io_desc io;
-  io.piod_op = PIOD_WRITE_D;
-  io.piod_len = size;
-
   pid_t pid = current_process ()->pid;
-
-  int bytes_written = 0;
-
-  if (size == 0)
-    {
-      /* Zero length write always succeeds.  */
-      return 0;
-    }
-
-  do
-    {
-      io.piod_addr = (void *)(myaddr + bytes_written);
-      io.piod_offs = (void *)(memaddr + bytes_written);
-
-      int rv = ptrace (PT_IO, pid, &io, 0);
-      if (rv == -1)
-	return errno;
-      if (io.piod_len == 0)
-	return 0;
-
-      bytes_written += io.piod_len;
-      io.piod_len = size - bytes_written;
-    }
-  while (bytes_written < size);
-
-  return 0;
+  return netbsd_nat::write_memory (pid, myaddr, memaddr, size, nullptr);
 }
 
 /* Implement the request_interrupt target_ops method.  */

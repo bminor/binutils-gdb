@@ -1,3 +1,9 @@
+2020-10-07  Kamil Rytarowski  <n54@gmx.com>
+
+	* nat/netbsd-nat.c (write_memory, read_memory): Add.
+	* nat/netbsd-nat.h (write_memory, read_memory): Likewise.
+	* nbsd-nat.c (nbsd_nat_target::xfer_partial): Update.
+
 2020-10-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* break-catch-sig.c (signal_catch_counts): Make a static arrray.
