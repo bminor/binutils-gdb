@@ -1,5 +1,21 @@
 2020-10-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ldlang.c (lang_process): Add extra call to
+	lang_do_memory_regions, and pass parameter.
+	(lang_do_memory_regions): Add parameter, only define origin and
+	length when requested.  Reindent.
+	* testsuite/ld-scripts/provide-10.d: New file.
+	* testsuite/ld-scripts/provide-10.map: New file.
+	* testsuite/ld-scripts/provide-11.d: New file.
+	* testsuite/ld-scripts/provide-11.map: New file.
+	* testsuite/ld-scripts/provide-12.d: New file.
+	* testsuite/ld-scripts/provide-12.map: New file.
+	* testsuite/ld-scripts/provide-9.d: New file.
+	* testsuite/ld-scripts/provide-9.map: New file.
+	* testsuite/ld-scripts/provide-9.t: New file.
+
+2020-10-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ld.texi (Options): Extend the description of --defsym.
 
 2020-10-16  Nick Clifton  <nickc@redhat.com>

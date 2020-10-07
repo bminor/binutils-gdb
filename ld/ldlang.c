@@ -98,7 +98,7 @@ static void lang_record_phdrs (void);
 static void lang_do_version_exports_section (void);
 static void lang_finalize_version_expr_head
   (struct bfd_elf_version_expr_head *);
-static void lang_do_memory_regions (void);
+static void lang_do_memory_regions (bfd_boolean);
 
 /* Exported variables.  */
 const char *output_target;
@@ -7909,13 +7909,22 @@ lang_process (void)
   if (!bfd_section_already_linked_table_init ())
     einfo (_("%F%P: can not create hash table: %E\n"));
 
+  /* A first pass through the memory regions ensures that if any region
+     references a symbol for its origin or length then this symbol will be
+     added to the symbol table.  Having these symbols in the symbol table
+     means that when we call open_input_bfds PROVIDE statements will
+     trigger to provide any needed symbols.  The regions origins and
+     lengths are not assigned as a result of this call.  */
+  lang_do_memory_regions (FALSE);
+
   /* Create a bfd for each input file.  */
   current_target = default_target;
   lang_statement_iteration++;
   open_input_bfds (statement_list.head, OPEN_BFD_NORMAL);
-  /* open_input_bfds also handles assignments, so we can give values
-     to symbolic origin/length now.  */
-  lang_do_memory_regions ();
+
+  /* Now that open_input_bfds has processed assignments and provide
+     statements we can give values to symbolic origin/length now.  */
+  lang_do_memory_regions (TRUE);
 
 #if BFD_SUPPORTS_PLUGINS
   if (link_info.lto_plugin_active)
@@ -9373,10 +9382,16 @@ lang_do_version_exports_section (void)
 			   lang_new_vers_node (greg, lreg), NULL);
 }
 
-/* Evaluate LENGTH and ORIGIN parts of MEMORY spec */
+/* Evaluate LENGTH and ORIGIN parts of MEMORY spec.  This is initially
+   called with UPDATE_REGIONS_P set to FALSE, in this case no errors are
+   thrown, however, references to symbols in the origin and length fields
+   will be pushed into the symbol table, this allows PROVIDE statements to
+   then provide these symbols.  This function is called a second time with
+   UPDATE_REGIONS_P set to TRUE, this time the we update the actual region
+   data structures, and throw errors if missing symbols are encountered.  */
 
 static void
-lang_do_memory_regions (void)
+lang_do_memory_regions (bfd_boolean update_regions_p)
 {
   lang_memory_region_type *r = lang_memory_region_list;
 
@@ -9385,24 +9400,30 @@ lang_do_memory_regions (void)
       if (r->origin_exp)
 	{
 	  exp_fold_tree_no_dot (r->origin_exp);
-	  if (expld.result.valid_p)
-	    {
-	      r->origin = expld.result.value;
-	      r->current = r->origin;
-	    }
-	  else
-	    einfo (_("%F%P: invalid origin for memory region %s\n"),
-		   r->name_list.name);
+          if (update_regions_p)
+            {
+              if (expld.result.valid_p)
+                {
+                  r->origin = expld.result.value;
+                  r->current = r->origin;
+                }
+              else
+                einfo (_("%P: invalid origin for memory region %s\n"),
+                       r->name_list.name);
+            }
 	}
       if (r->length_exp)
 	{
 	  exp_fold_tree_no_dot (r->length_exp);
-	  if (expld.result.valid_p)
-	    r->length = expld.result.value;
-	  else
-	    einfo (_("%F%P: invalid length for memory region %s\n"),
-		   r->name_list.name);
-	}
+          if (update_regions_p)
+            {
+              if (expld.result.valid_p)
+                r->length = expld.result.value;
+              else
+                einfo (_("%P: invalid length for memory region %s\n"),
+                       r->name_list.name);
+            }
+        }
     }
 }
 
