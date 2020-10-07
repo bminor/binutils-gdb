@@ -1,5 +1,11 @@
 2020-10-07  Kamil Rytarowski  <n54@gmx.com>
 
+	* netbsd-low.cc (get_dynamic, get_r_debug, read_one_ptr)
+	(netbsd_qxfer_libraries_svr4): Remove "target" argument and update.
+	(netbsd_process_target::qxfer_libraries_svr4): Update.
+
+2020-10-07  Kamil Rytarowski  <n54@gmx.com>
+
 	* netbsd-low.cc: Fix whitespace formatting.
 	* netbsd-amd64-low.cc: Likewise.
 

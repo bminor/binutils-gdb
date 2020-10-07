@@ -814,7 +814,7 @@ int get_phdr_phnum_from_proc_auxv (const pid_t pid,
 
 template <typename T>
 static CORE_ADDR
-get_dynamic (netbsd_process_target *target, const pid_t pid)
+get_dynamic (const pid_t pid)
 {
   typedef typename std::conditional<sizeof(T) == sizeof(int64_t),
 				    Elf64_Phdr, Elf32_Phdr>::type phdr_type;
@@ -828,7 +828,8 @@ get_dynamic (netbsd_process_target *target, const pid_t pid)
   std::vector<unsigned char> phdr_buf;
   phdr_buf.resize (num_phdr * phdr_size);
 
-  if (target->read_memory (phdr_memaddr, phdr_buf.data (), phdr_buf.size ()))
+  if (netbsd_nat::read_memory (pid, phdr_buf.data (), phdr_memaddr,
+			       phdr_buf.size (), nullptr))
     return 0;
 
   /* Compute relocation: it is expected to be 0 for "regular" executables,
@@ -875,7 +876,7 @@ get_dynamic (netbsd_process_target *target, const pid_t pid)
 
 template <typename T>
 static CORE_ADDR
-get_r_debug (netbsd_process_target *target, const int pid)
+get_r_debug (const pid_t pid)
 {
   typedef typename std::conditional<sizeof(T) == sizeof(int64_t),
 				    Elf64_Dyn, Elf32_Dyn>::type dyn_type;
@@ -883,11 +884,12 @@ get_r_debug (netbsd_process_target *target, const int pid)
   unsigned char buf[sizeof (dyn_type)];  /* The larger of the two.  */
   CORE_ADDR map = -1;
 
-  CORE_ADDR dynamic_memaddr = get_dynamic<T> (target, pid);
+  CORE_ADDR dynamic_memaddr = get_dynamic<T> (pid);
   if (dynamic_memaddr == 0)
     return map;
 
-  while (target->read_memory (dynamic_memaddr, buf, dyn_size) == 0)
+  while (netbsd_nat::read_memory (pid, buf, dynamic_memaddr, dyn_size, nullptr)
+	 == 0)
     {
       dyn_type *const dyn = (dyn_type *) buf;
 #if defined DT_MIPS_RLD_MAP
@@ -900,8 +902,8 @@ get_r_debug (netbsd_process_target *target, const int pid)
 
       if (dyn->d_tag == DT_MIPS_RLD_MAP)
 	{
-	  if (read_memory (dyn->d_un.d_val,
-			   rld_map.buf, sizeof (rld_map.buf)) == 0)
+	  if (netbsd_nat::read_memory (pid, rld_map.buf, dyn->d_un.d_val,
+				       sizeof (rld_map.buf), nullptr) == 0)
 	    return rld_map.map;
 	  else
 	    break;
@@ -923,8 +925,7 @@ get_r_debug (netbsd_process_target *target, const int pid)
 /* Read one pointer from MEMADDR in the inferior.  */
 
 static int
-read_one_ptr (netbsd_process_target *target, CORE_ADDR memaddr, CORE_ADDR *ptr,
-	      int ptr_size)
+read_one_ptr (const pid_t pid, CORE_ADDR memaddr, CORE_ADDR *ptr, int ptr_size)
 {
   /* Go through a union so this works on either big or little endian
      hosts, when the inferior's pointer size is smaller than the size
@@ -938,7 +939,7 @@ read_one_ptr (netbsd_process_target *target, CORE_ADDR memaddr, CORE_ADDR *ptr,
     unsigned char uc;
   } addr;
 
-  int ret = target->read_memory (memaddr, &addr.uc, ptr_size);
+  int ret = netbsd_nat::read_memory (pid, &addr.uc, memaddr, ptr_size, nullptr);
   if (ret == 0)
     {
       if (ptr_size == sizeof (CORE_ADDR))
@@ -955,8 +956,7 @@ read_one_ptr (netbsd_process_target *target, CORE_ADDR memaddr, CORE_ADDR *ptr,
 
 template <typename T>
 int
-netbsd_qxfer_libraries_svr4 (netbsd_process_target *target,
-			     const pid_t pid, const char *annex,
+netbsd_qxfer_libraries_svr4 (const pid_t pid, const char *annex,
 			     unsigned char *readbuf,
 			     unsigned const char *writebuf,
 			     CORE_ADDR offset, int len)
@@ -1042,7 +1042,7 @@ netbsd_qxfer_libraries_svr4 (netbsd_process_target *target,
 
   if (lm_addr == 0)
     {
-      CORE_ADDR r_debug = get_r_debug<T> (target, pid);
+      CORE_ADDR r_debug = get_r_debug<T> (pid);
 
       /* We failed to find DT_DEBUG.  Such situation will not change
 	 for this inferior - do not retry it.  Report it to GDB as
@@ -1053,7 +1053,7 @@ netbsd_qxfer_libraries_svr4 (netbsd_process_target *target,
       if (r_debug != 0)
 	{
 	  CORE_ADDR map_offset = r_debug + lmo->r_map_offset;
-	  if (read_one_ptr (target, map_offset, &lm_addr, ptr_size) != 0)
+	  if (read_one_ptr (pid, map_offset, &lm_addr, ptr_size) != 0)
 	    warning ("unable to read r_map from %s",
 		     core_addr_to_string (map_offset));
 	}
@@ -1062,15 +1062,15 @@ netbsd_qxfer_libraries_svr4 (netbsd_process_target *target,
   std::string document = "<library-list-svr4 version=\"1.0\"";
 
   while (lm_addr
-	 && read_one_ptr (target, lm_addr + lmo->l_name_offset,
+	 && read_one_ptr (pid, lm_addr + lmo->l_name_offset,
 			  &l_name, ptr_size) == 0
-	 && read_one_ptr (target, lm_addr + lmo->l_addr_offset,
+	 && read_one_ptr (pid, lm_addr + lmo->l_addr_offset,
 			  &l_addr, ptr_size) == 0
-	 && read_one_ptr (target, lm_addr + lmo->l_ld_offset,
+	 && read_one_ptr (pid, lm_addr + lmo->l_ld_offset,
 			  &l_ld, ptr_size) == 0
-	 && read_one_ptr (target, lm_addr + lmo->l_prev_offset,
+	 && read_one_ptr (pid, lm_addr + lmo->l_prev_offset,
 			  &l_prev, ptr_size) == 0
-	 && read_one_ptr (target, lm_addr + lmo->l_next_offset,
+	 && read_one_ptr (pid, lm_addr + lmo->l_next_offset,
 			  &l_next, ptr_size) == 0)
     {
       if (lm_prev != l_prev)
@@ -1096,7 +1096,8 @@ netbsd_qxfer_libraries_svr4 (netbsd_process_target *target,
 	  /* Not checking for error because reading may stop before
 	     we've got PATH_MAX worth of characters.  */
 	  libname[0] = '\0';
-	  target->read_memory (l_name, libname, sizeof (libname) - 1);
+	  netbsd_nat::read_memory (pid, libname, l_name, sizeof (libname) - 1,
+				   nullptr);
 	  libname[sizeof (libname) - 1] = '\0';
 	  if (libname[0] != '\0')
 	    {
@@ -1187,10 +1188,10 @@ netbsd_process_target::qxfer_libraries_svr4 (const char *annex,
   bool is_elf64 = elf_64_file_p (netbsd_nat::pid_to_exec_file (pid));
 
   if (is_elf64)
-    return netbsd_qxfer_libraries_svr4<int64_t> (this, pid, annex, readbuf,
+    return netbsd_qxfer_libraries_svr4<int64_t> (pid, annex, readbuf,
 						 writebuf, offset, len);
   else
-    return netbsd_qxfer_libraries_svr4<int32_t> (this, pid, annex, readbuf,
+    return netbsd_qxfer_libraries_svr4<int32_t> (pid, annex, readbuf,
 						 writebuf, offset, len);
 }
 
