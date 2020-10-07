@@ -2619,7 +2619,6 @@ attach_command (const char *args, int from_tty)
   /* Set up execution context to know that we should return from
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
-  clear_proceed_status (0);
 
   inferior->needs_setup = 1;
 
