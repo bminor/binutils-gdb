@@ -1,3 +1,10 @@
+2020-10-07  Tom Tromey  <tromey@adacore.com>
+
+	* Makefile.in: Rebuild.
+	* Makefile.am (libgdbsupport_a_SOURCES): Add search.cc.
+	* search.h: New file.
+	* search.cc: New file.
+
 2020-10-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* event-loop.h (debug_event_loop): New variable declaration.

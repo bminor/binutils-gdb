@@ -2129,14 +2129,6 @@ extern const struct target_desc *target_read_description (struct target_ops *);
 #define target_get_ada_task_ptid(lwp, tid) \
      (current_top_target ()->get_ada_task_ptid) (lwp,tid)
 
-/* Utility implementation of searching memory.  */
-extern int simple_search_memory (struct target_ops* ops,
-                                 CORE_ADDR start_addr,
-                                 ULONGEST search_space_len,
-                                 const gdb_byte *pattern,
-                                 ULONGEST pattern_len,
-                                 CORE_ADDR *found_addrp);
-
 /* Main entry point for searching memory.  */
 extern int target_search_memory (CORE_ADDR start_addr,
                                  ULONGEST search_space_len,

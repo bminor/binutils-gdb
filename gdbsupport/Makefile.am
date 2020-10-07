@@ -65,6 +65,7 @@ libgdbsupport_a_SOURCES = \
     run-time-clock.cc \
     safe-strerror.cc \
     scoped_mmap.cc \
+    search.cc \
     signals.cc \
     signals-state-save-restore.cc \
     tdesc.cc \

@@ -75,6 +75,7 @@
 #include "gdbsupport/scoped_restore.h"
 #include "gdbsupport/environ.h"
 #include "gdbsupport/byte-vector.h"
+#include "gdbsupport/search.h"
 #include <algorithm>
 #include <unordered_map>
 #include "async-event.h"
@@ -11186,6 +11187,12 @@ remote_target::search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
   int found;
   ULONGEST found_addr;
 
+  auto read_memory = [=] (CORE_ADDR addr, gdb_byte *result, size_t len)
+    {
+      return (target_read (this, TARGET_OBJECT_MEMORY, NULL, result, addr, len)
+	      == len);
+    };
+
   /* Don't go to the target if we don't have to.  This is done before
      checking packet_config_support to avoid the possibility that a
      success for this edge case means the facility works in
@@ -11205,7 +11212,7 @@ remote_target::search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
     {
       /* Target doesn't provided special support, fall back and use the
 	 standard support (copy memory and do the search here).  */
-      return simple_search_memory (this, start_addr, search_space_len,
+      return simple_search_memory (read_memory, start_addr, search_space_len,
 				   pattern, pattern_len, found_addrp);
     }
 
@@ -11237,7 +11244,7 @@ remote_target::search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
 	 supported.  If so, fall back to the simple way.  */
       if (packet_config_support (packet) == PACKET_DISABLE)
 	{
-	  return simple_search_memory (this, start_addr, search_space_len,
+	  return simple_search_memory (read_memory, start_addr, search_space_len,
 				       pattern, pattern_len, found_addrp);
 	}
       return -1;
