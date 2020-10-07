@@ -67,6 +67,8 @@ show debug event-loop
 
 * New features in the GDB remote stub, GDBserver
 
+  ** GDBserver is now supported on ARC GNU/Linux.
+
   ** GDBserver is now supported on RISC-V GNU/Linux.
 
   ** GDBserver no longer supports these host triplets:

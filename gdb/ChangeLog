@@ -1,3 +1,7 @@
+2020-10-08  Shahab Vahedi  <shahab@synopsys.com>
+
+	* NEWS: Mention ARC support in GDBserver.
+
 2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arch/aarch32.c (aarch32_create_target_description): Release
