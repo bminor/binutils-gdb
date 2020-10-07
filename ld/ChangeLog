@@ -1,5 +1,14 @@
 2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
 
+	* testsuite/ld-riscv-elf/ifunc-plt-got-overwrite.s: New testcase.
+	* testsuite/ld-riscv-elf/ifunc-plt-got-overwrite.d: Likewise.
+	* testsuite/ld-riscv-elf/ifunc-plt-got-overwrite-exe.rd: Likewise.
+	* testsuite/ld-riscv-elf/ifunc-plt-got-overwrite-pic.rd: Likewise.
+	* testsuite/ld-riscv-elf/ifunc-plt-got-overwrite-pie.rd: Likewise.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+
+2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
+
 	* emulparams/elf32lriscv-defs.sh: Add IREL_IN_PLT.
 	* testsuite/ld-ifunc/ifunc.exp: Enable ifunc tests for RISC-V.
 	* testsuite/ld-riscv-elf/ld-riscv-elf.exp (run_dump_test_ifunc):

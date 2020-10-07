@@ -1,5 +1,14 @@
 2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfnn-riscv.c (riscv_elf_link_hash_table): Add last_iplt_index.
+	(riscv_elf_size_dynamic_sections): Initialize the last_iplt_index.
+	(riscv_elf_relocate_section): Use riscv_elf_append_rela.
+	(riscv_elf_finish_dynamic_symbol): If the use_elf_append_rela is
+	false, then we should add the dynamic relocs from the last of
+	the .rela.iplt, and don't use the riscv_elf_append_rela to add.
+
+2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfnn-riscv.c: Include "objalloc.h" since we need objalloc_alloc.
 	(riscv_elf_link_hash_table): Add loc_hash_table and loc_hash_memory
 	for local STT_GNU_IFUNC symbols.
