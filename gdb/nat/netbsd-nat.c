@@ -238,7 +238,7 @@ write_memory (pid_t pid, unsigned const char *writebuf, CORE_ADDR offset,
 	      return errno;
 	    }
 	  if (io.piod_len == 0)
-	    return 0;
+	    break;
 
 	  bytes_written += io.piod_len;
 	  io.piod_len = len - bytes_written;
@@ -276,7 +276,7 @@ read_memory (pid_t pid, unsigned char *readbuf, CORE_ADDR offset,
 	  if (rv == -1)
 	    return errno;
 	  if (io.piod_len == 0)
-	    return 0;
+	    break;
 
 	  bytes_read += io.piod_len;
 	  io.piod_len = len - bytes_read;
