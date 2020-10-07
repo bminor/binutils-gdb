@@ -1,3 +1,8 @@
+2020-10-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* break-catch-sig.c (signal_catch_counts): Make a static arrray.
+	(_initialize_break_catch_sig): Don't allocate array.
+
 2020-10-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* symtab.c (find_pc_line): Return unmapped addresses when the

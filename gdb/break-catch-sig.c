@@ -60,7 +60,7 @@ static struct breakpoint_ops signal_catchpoint_ops;
 
 /* Count of each signal.  */
 
-static unsigned int *signal_catch_counts;
+static unsigned int signal_catch_counts[GDB_SIGNAL_LAST];
 
 
 
@@ -429,8 +429,6 @@ void
 _initialize_break_catch_sig ()
 {
   initialize_signal_catchpoint_ops ();
-
-  signal_catch_counts = XCNEWVEC (unsigned int, GDB_SIGNAL_LAST);
 
   add_catch_command ("signal", _("\
 Catch signals by their names and/or numbers.\n\
