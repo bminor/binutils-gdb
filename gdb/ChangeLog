@@ -1,5 +1,11 @@
 2020-10-07  Tom Tromey  <tromey@adacore.com>
 
+	PR gdb/16930:
+	* findcmd.c (_initialize_mem_search): Mention that the range is
+	inclusive.
+
+2020-10-07  Tom Tromey  <tromey@adacore.com>
+
 	* target.h (simple_search_memory): Don't declare.
 	* target.c (simple_search_memory): Move to gdbsupport.
 	(default_search_memory): Update.
