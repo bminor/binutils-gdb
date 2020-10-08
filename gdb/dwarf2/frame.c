@@ -97,6 +97,9 @@ struct dwarf2_cie
   /* True if an 'S' augmentation existed.  */
   unsigned char signal_frame;
 
+  /* True if a 'C' augmentation was specified.  */
+  unsigned char pure_cap;
+
   /* The version recorded in the CIE.  */
   unsigned char version;
 
@@ -1838,6 +1841,15 @@ decode_frame_entry_1 (struct gdbarch *gdbarch,
 	  else if (*augmentation == 'S')
 	    {
 	      cie->signal_frame = 1;
+	      augmentation++;
+	    }
+
+	  /* "C" indicates that the default unwind rules for this CIE should be
+	     initialized in accordance with the pure capability procedure call
+	     standard.  */
+	  else if (*augmentation == 'C')
+	    {
+	      cie->pure_cap = 1;
 	      augmentation++;
 	    }
 
