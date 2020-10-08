@@ -159,6 +159,19 @@ maintenance print core-file-backed-mappings
   Prints file-backed mappings loaded from a core file's note section.
   Output is expected to be similar to that of "info proc mappings".
 
+set debug fortran-array-slicing on|off
+show debug fortran-array-slicing
+  Print debugging when taking slices of Fortran arrays.
+
+set fortran repack-array-slices on|off
+show fortran repack-array-slices
+  When taking slices from Fortran arrays and strings, if the slice is
+  non-contiguous within the original value then, when this option is
+  on, the new value will be repacked into a single contiguous value.
+  When this option is off, then the value returned will consist of a
+  descriptor that describes the slice within the memory of the
+  original parent value.
+
 * Changed commands
 
 alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]

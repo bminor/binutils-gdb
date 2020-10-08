@@ -36,8 +36,35 @@
 #include "c-lang.h"
 #include "target-float.h"
 #include "gdbarch.h"
+#include "gdbcmd.h"
+#include "f-array-walker.h"
 
 #include <math.h>
+
+/* Whether GDB should repack array slices created by the user.  */
+static bool repack_array_slices = false;
+
+/* Implement 'show fortran repack-array-slices'.  */
+static void
+show_repack_array_slices (struct ui_file *file, int from_tty,
+			  struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Repacking of Fortran array slices is %s.\n"),
+		    value);
+}
+
+/* Debugging of Fortran's array slicing.  */
+static bool fortran_array_slicing_debug = false;
+
+/* Implement 'show debug fortran-array-slicing'.  */
+static void
+show_fortran_array_slicing_debug (struct ui_file *file, int from_tty,
+				  struct cmd_list_element *c,
+				  const char *value)
+{
+  fprintf_filtered (file, _("Debugging of Fortran array slicing is %s.\n"),
+		    value);
+}
 
 /* Local functions */
 
@@ -101,57 +128,6 @@ const struct op_print f_language::op_print_tab[] =
 };
 
 
-/* Called from fortran_value_subarray to take a slice of an array or a
-   string.  ARRAY is the array or string to be accessed.  EXP, POS, and
-   NOSIDE are as for evaluate_subexp_standard.  Return a value that is a
-   slice of the array.  */
-
-static struct value *
-value_f90_subarray (struct value *array,
-		    struct expression *exp, int *pos, enum noside noside)
-{
-  int pc = (*pos) + 1;
-  LONGEST low_bound, high_bound, stride;
-  struct type *range = check_typedef (value_type (array)->index_type ());
-  enum range_flag range_flag
-    = (enum range_flag) longest_to_int (exp->elts[pc].longconst);
-
-  *pos += 3;
-
-  if (range_flag & RANGE_LOW_BOUND_DEFAULT)
-    low_bound = range->bounds ()->low.const_val ();
-  else
-    low_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-
-  if (range_flag & RANGE_HIGH_BOUND_DEFAULT)
-    high_bound = range->bounds ()->high.const_val ();
-  else
-    high_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-
-  if (range_flag & RANGE_HAS_STRIDE)
-    stride = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-  else
-    stride = 1;
-
-  if (stride != 1)
-    error (_("Fortran array strides are not currently supported"));
-
-  return value_slice (array, low_bound, high_bound - low_bound + 1);
-}
-
-/* Helper for skipping all the arguments in an undetermined argument list.
-   This function was designed for use in the OP_F77_UNDETERMINED_ARGLIST
-   case of evaluate_subexp_standard as multiple, but not all, code paths
-   require a generic skip.  */
-
-static void
-skip_undetermined_arglist (int nargs, struct expression *exp, int *pos,
-			   enum noside noside)
-{
-  for (int i = 0; i < nargs; ++i)
-    evaluate_subexp (nullptr, exp, pos, noside);
-}
-
 /* Return the number of dimensions for a Fortran array or string.  */
 
 int
@@ -176,6 +152,145 @@ calc_f77_array_dims (struct type *array_type)
   return ndimen;
 }
 
+/* A class used by FORTRAN_VALUE_SUBARRAY when repacking Fortran array
+   slices.  This is a base class for two alternative repacking mechanisms,
+   one for when repacking from a lazy value, and one for repacking from a
+   non-lazy (already loaded) value.  */
+class fortran_array_repacker_base_impl
+  : public fortran_array_walker_base_impl
+{
+public:
+  /* Constructor, DEST is the value we are repacking into.  */
+  fortran_array_repacker_base_impl (struct value *dest)
+    : m_dest (dest),
+      m_dest_offset (0)
+  { /* Nothing.  */ }
+
+  /* When we start processing the inner most dimension, this is where we
+     will be creating values for each element as we load them and then copy
+     them into the M_DEST value.  Set a value mark so we can free these
+     temporary values.  */
+  void start_dimension (bool inner_p)
+  {
+    if (inner_p)
+      {
+	gdb_assert (m_mark == nullptr);
+	m_mark = value_mark ();
+      }
+  }
+
+  /* When we finish processing the inner most dimension free all temporary
+     value that were created.  */
+  void finish_dimension (bool inner_p, bool last_p)
+  {
+    if (inner_p)
+      {
+	gdb_assert (m_mark != nullptr);
+	value_free_to_mark (m_mark);
+	m_mark = nullptr;
+      }
+  }
+
+protected:
+  /* Copy the contents of array element ELT into M_DEST at the next
+     available offset.  */
+  void copy_element_to_dest (struct value *elt)
+  {
+    value_contents_copy (m_dest, m_dest_offset, elt, 0,
+			 TYPE_LENGTH (value_type (elt)));
+    m_dest_offset += TYPE_LENGTH (value_type (elt));
+  }
+
+  /* The value being written to.  */
+  struct value *m_dest;
+
+  /* The byte offset in M_DEST at which the next element should be
+     written.  */
+  LONGEST m_dest_offset;
+
+  /* Set with a call to VALUE_MARK, and then reset after calling
+     VALUE_FREE_TO_MARK.  */
+  struct value *m_mark = nullptr;
+};
+
+/* A class used by FORTRAN_VALUE_SUBARRAY when repacking Fortran array
+   slices.  This class is specialised for repacking an array slice from a
+   lazy array value, as such it does not require the parent array value to
+   be loaded into GDB's memory; the parent value could be huge, while the
+   slice could be tiny.  */
+class fortran_lazy_array_repacker_impl
+  : public fortran_array_repacker_base_impl
+{
+public:
+  /* Constructor.  TYPE is the type of the slice being loaded from the
+     parent value, so this type will correctly reflect the strides required
+     to find all of the elements from the parent value.  ADDRESS is the
+     address in target memory of value matching TYPE, and DEST is the value
+     we are repacking into.  */
+  explicit fortran_lazy_array_repacker_impl (struct type *type,
+					     CORE_ADDR address,
+					     struct value *dest)
+    : fortran_array_repacker_base_impl (dest),
+      m_addr (address)
+  { /* Nothing.  */ }
+
+  /* Create a lazy value in target memory representing a single element,
+     then load the element into GDB's memory and copy the contents into the
+     destination value.  */
+  void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
+  {
+    copy_element_to_dest (value_at_lazy (elt_type, m_addr + elt_off));
+  }
+
+private:
+  /* The address in target memory where the parent value starts.  */
+  CORE_ADDR m_addr;
+};
+
+/* A class used by FORTRAN_VALUE_SUBARRAY when repacking Fortran array
+   slices.  This class is specialised for repacking an array slice from a
+   previously loaded (non-lazy) array value, as such it fetches the
+   element values from the contents of the parent value.  */
+class fortran_array_repacker_impl
+  : public fortran_array_repacker_base_impl
+{
+public:
+  /* Constructor.  TYPE is the type for the array slice within the parent
+     value, as such it has stride values as required to find the elements
+     within the original parent value.  ADDRESS is the address in target
+     memory of the value matching TYPE.  BASE_OFFSET is the offset from
+     the start of VAL's content buffer to the start of the object of TYPE,
+     VAL is the parent object from which we are loading the value, and
+     DEST is the value into which we are repacking.  */
+  explicit fortran_array_repacker_impl (struct type *type, CORE_ADDR address,
+					LONGEST base_offset,
+					struct value *val, struct value *dest)
+    : fortran_array_repacker_base_impl (dest),
+      m_base_offset (base_offset),
+      m_val (val)
+  {
+    gdb_assert (!value_lazy (val));
+  }
+
+  /* Extract an element of ELT_TYPE at offset (M_BASE_OFFSET + ELT_OFF)
+     from the content buffer of M_VAL then copy this extracted value into
+     the repacked destination value.  */
+  void process_element (struct type *elt_type, LONGEST elt_off, bool last_p)
+  {
+    struct value *elt
+      = value_from_component (m_val, elt_type, (elt_off + m_base_offset));
+    copy_element_to_dest (elt);
+  }
+
+private:
+  /* The offset into the content buffer of M_VAL to the start of the slice
+     being extracted.  */
+  LONGEST m_base_offset;
+
+  /* The parent value from which we are extracting a slice.  */
+  struct value *m_val;
+};
+
 /* Called from evaluate_subexp_standard to perform array indexing, and
    sub-range extraction, for Fortran.  As well as arrays this function
    also handles strings as they can be treated like arrays of characters.
@@ -187,51 +302,394 @@ static struct value *
 fortran_value_subarray (struct value *array, struct expression *exp,
 			int *pos, int nargs, enum noside noside)
 {
-  if (exp->elts[*pos].opcode == OP_RANGE)
-    return value_f90_subarray (array, exp, pos, noside);
+  type *original_array_type = check_typedef (value_type (array));
+  bool is_string_p = original_array_type->code () == TYPE_CODE_STRING;
 
-  if (noside == EVAL_SKIP)
+  /* Perform checks for ARRAY not being available.  The somewhat overly
+     complex logic here is just to keep backward compatibility with the
+     errors that we used to get before FORTRAN_VALUE_SUBARRAY was
+     rewritten.  Maybe a future task would streamline the error messages we
+     get here, and update all the expected test results.  */
+  if (exp->elts[*pos].opcode != OP_RANGE)
     {
-      skip_undetermined_arglist (nargs, exp, pos, noside);
-      /* Return the dummy value with the correct type.  */
-      return array;
+      if (type_not_associated (original_array_type))
+	error (_("no such vector element (vector not associated)"));
+      else if (type_not_allocated (original_array_type))
+	error (_("no such vector element (vector not allocated)"));
+    }
+  else
+    {
+      if (type_not_associated (original_array_type))
+	error (_("array not associated"));
+      else if (type_not_allocated (original_array_type))
+	error (_("array not allocated"));
     }
 
-  LONGEST subscript_array[MAX_FORTRAN_DIMS];
-  int ndimensions = 1;
-  struct type *type = check_typedef (value_type (array));
-
-  if (nargs > MAX_FORTRAN_DIMS)
-    error (_("Too many subscripts for F77 (%d Max)"), MAX_FORTRAN_DIMS);
-
-  ndimensions = calc_f77_array_dims (type);
-
+  /* First check that the number of dimensions in the type we are slicing
+     matches the number of arguments we were passed.  */
+  int ndimensions = calc_f77_array_dims (original_array_type);
   if (nargs != ndimensions)
     error (_("Wrong number of subscripts"));
 
-  gdb_assert (nargs > 0);
+  /* This will be initialised below with the type of the elements held in
+     ARRAY.  */
+  struct type *inner_element_type;
 
-  /* Now that we know we have a legal array subscript expression let us
-     actually find out where this element exists in the array.  */
+  /* Extract the types of each array dimension from the original array
+     type.  We need these available so we can fill in the default upper and
+     lower bounds if the user requested slice doesn't provide that
+     information.  Additionally unpacking the dimensions like this gives us
+     the inner element type.  */
+  std::vector<struct type *> dim_types;
+  {
+    dim_types.reserve (ndimensions);
+    struct type *type = original_array_type;
+    for (int i = 0; i < ndimensions; ++i)
+      {
+	dim_types.push_back (type);
+	type = TYPE_TARGET_TYPE (type);
+      }
+    /* TYPE is now the inner element type of the array, we start the new
+       array slice off as this type, then as we process the requested slice
+       (from the user) we wrap new types around this to build up the final
+       slice type.  */
+    inner_element_type = type;
+  }
 
-  /* Take array indices left to right.  */
-  for (int i = 0; i < nargs; i++)
+  /* As we analyse the new slice type we need to understand if the data
+     being referenced is contiguous.  Do decide this we must track the size
+     of an element at each dimension of the new slice array.  Initially the
+     elements of the inner most dimension of the array are the same inner
+     most elements as the original ARRAY.  */
+  LONGEST slice_element_size = TYPE_LENGTH (inner_element_type);
+
+  /* Start off assuming all data is contiguous, this will be set to false
+     if access to any dimension results in non-contiguous data.  */
+  bool is_all_contiguous = true;
+
+  /* The TOTAL_OFFSET is the distance in bytes from the start of the
+     original ARRAY to the start of the new slice.  This is calculated as
+     we process the information from the user.  */
+  LONGEST total_offset = 0;
+
+  /* A structure representing information about each dimension of the
+     resulting slice.  */
+  struct slice_dim
+  {
+    /* Constructor.  */
+    slice_dim (LONGEST l, LONGEST h, LONGEST s, struct type *idx)
+      : low (l),
+	high (h),
+	stride (s),
+	index (idx)
+    { /* Nothing.  */ }
+
+    /* The low bound for this dimension of the slice.  */
+    LONGEST low;
+
+    /* The high bound for this dimension of the slice.  */
+    LONGEST high;
+
+    /* The byte stride for this dimension of the slice.  */
+    LONGEST stride;
+
+    struct type *index;
+  };
+
+  /* The dimensions of the resulting slice.  */
+  std::vector<slice_dim> slice_dims;
+
+  /* Process the incoming arguments.   These arguments are in the reverse
+     order to the array dimensions, that is the first argument refers to
+     the last array dimension.  */
+  if (fortran_array_slicing_debug)
+    debug_printf ("Processing array access:\n");
+  for (int i = 0; i < nargs; ++i)
     {
-      /* Evaluate each subscript; it must be a legal integer in F77.  */
-      value *arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+      /* For each dimension of the array the user will have either provided
+	 a ranged access with optional lower bound, upper bound, and
+	 stride, or the user will have supplied a single index.  */
+      struct type *dim_type = dim_types[ndimensions - (i + 1)];
+      if (exp->elts[*pos].opcode == OP_RANGE)
+	{
+	  int pc = (*pos) + 1;
+	  enum range_flag range_flag = (enum range_flag) exp->elts[pc].longconst;
+	  *pos += 3;
 
-      /* Fill in the subscript array.  */
-      subscript_array[i] = value_as_long (arg2);
+	  LONGEST low, high, stride;
+	  low = high = stride = 0;
+
+	  if ((range_flag & RANGE_LOW_BOUND_DEFAULT) == 0)
+	    low = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
+	  else
+	    low = f77_get_lowerbound (dim_type);
+	  if ((range_flag & RANGE_HIGH_BOUND_DEFAULT) == 0)
+	    high = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
+	  else
+	    high = f77_get_upperbound (dim_type);
+	  if ((range_flag & RANGE_HAS_STRIDE) == RANGE_HAS_STRIDE)
+	    stride = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
+	  else
+	    stride = 1;
+
+	  if (stride == 0)
+	    error (_("stride must not be 0"));
+
+	  /* Get information about this dimension in the original ARRAY.  */
+	  struct type *target_type = TYPE_TARGET_TYPE (dim_type);
+	  struct type *index_type = dim_type->index_type ();
+	  LONGEST lb = f77_get_lowerbound (dim_type);
+	  LONGEST ub = f77_get_upperbound (dim_type);
+	  LONGEST sd = index_type->bit_stride ();
+	  if (sd == 0)
+	    sd = TYPE_LENGTH (target_type) * 8;
+
+	  if (fortran_array_slicing_debug)
+	    {
+	      debug_printf ("|-> Range access\n");
+	      std::string str = type_to_string (dim_type);
+	      debug_printf ("|   |-> Type: %s\n", str.c_str ());
+	      debug_printf ("|   |-> Array:\n");
+	      debug_printf ("|   |   |-> Low bound: %ld\n", lb);
+	      debug_printf ("|   |   |-> High bound: %ld\n", ub);
+	      debug_printf ("|   |   |-> Bit stride: %ld\n", sd);
+	      debug_printf ("|   |   |-> Byte stride: %ld\n", sd / 8);
+	      debug_printf ("|   |   |-> Type size: %ld\n",
+			    TYPE_LENGTH (dim_type));
+	      debug_printf ("|   |   '-> Target type size: %ld\n",
+			    TYPE_LENGTH (target_type));
+	      debug_printf ("|   |-> Accessing:\n");
+	      debug_printf ("|   |   |-> Low bound: %ld\n",
+			    low);
+	      debug_printf ("|   |   |-> High bound: %ld\n",
+			    high);
+	      debug_printf ("|   |   '-> Element stride: %ld\n",
+			    stride);
+	    }
+
+	  /* Check the user hasn't asked for something invalid.  */
+	  if (high > ub || low < lb)
+	    error (_("array subscript out of bounds"));
+
+	  /* Calculate what this dimension of the new slice array will look
+	     like.  OFFSET is the byte offset from the start of the
+	     previous (more outer) dimension to the start of this
+	     dimension.  E_COUNT is the number of elements in this
+	     dimension.  REMAINDER is the number of elements remaining
+	     between the last included element and the upper bound.  For
+	     example an access '1:6:2' will include elements 1, 3, 5 and
+	     have a remainder of 1 (element #6).  */
+	  LONGEST lowest = std::min (low, high);
+	  LONGEST offset = (sd / 8) * (lowest - lb);
+	  LONGEST e_count = std::abs (high - low) + 1;
+	  e_count = (e_count + (std::abs (stride) - 1)) / std::abs (stride);
+	  LONGEST new_low = 1;
+	  LONGEST new_high = new_low + e_count - 1;
+	  LONGEST new_stride = (sd * stride) / 8;
+	  LONGEST last_elem = low + ((e_count - 1) * stride);
+	  LONGEST remainder = high - last_elem;
+	  if (low > high)
+	    {
+	      offset += std::abs (remainder) * TYPE_LENGTH (target_type);
+	      if (stride > 0)
+		error (_("incorrect stride and boundary combination"));
+	    }
+	  else if (stride < 0)
+	    error (_("incorrect stride and boundary combination"));
+
+	  /* Is the data within this dimension contiguous?  It is if the
+	     newly computed stride is the same size as a single element of
+	     this dimension.  */
+	  bool is_dim_contiguous = (new_stride == slice_element_size);
+	  is_all_contiguous &= is_dim_contiguous;
+
+	  if (fortran_array_slicing_debug)
+	    {
+	      debug_printf ("|   '-> Results:\n");
+	      debug_printf ("|       |-> Offset = %ld\n", offset);
+	      debug_printf ("|       |-> Elements = %ld\n", e_count);
+	      debug_printf ("|       |-> Low bound = %ld\n", new_low);
+	      debug_printf ("|       |-> High bound = %ld\n", new_high);
+	      debug_printf ("|       |-> Byte stride = %ld\n", new_stride);
+	      debug_printf ("|       |-> Last element = %ld\n", last_elem);
+	      debug_printf ("|       |-> Remainder = %ld\n", remainder);
+	      debug_printf ("|       '-> Contiguous = %s\n",
+			    (is_dim_contiguous ? "Yes" : "No"));
+	    }
+
+	  /* Figure out how big (in bytes) an element of this dimension of
+	     the new array slice will be.  */
+	  slice_element_size = std::abs (new_stride * e_count);
+
+	  slice_dims.emplace_back (new_low, new_high, new_stride,
+				   index_type);
+
+	  /* Update the total offset.  */
+	  total_offset += offset;
+	}
+      else
+	{
+	  /* There is a single index for this dimension.  */
+	  LONGEST index
+	    = value_as_long (evaluate_subexp_with_coercion (exp, pos, noside));
+
+	  /* Get information about this dimension in the original ARRAY.  */
+	  struct type *target_type = TYPE_TARGET_TYPE (dim_type);
+	  struct type *index_type = dim_type->index_type ();
+	  LONGEST lb = f77_get_lowerbound (dim_type);
+	  LONGEST ub = f77_get_upperbound (dim_type);
+	  LONGEST sd = index_type->bit_stride () / 8;
+	  if (sd == 0)
+	    sd = TYPE_LENGTH (target_type);
+
+	  if (fortran_array_slicing_debug)
+	    {
+	      debug_printf ("|-> Index access\n");
+	      std::string str = type_to_string (dim_type);
+	      debug_printf ("|   |-> Type: %s\n", str.c_str ());
+	      debug_printf ("|   |-> Array:\n");
+	      debug_printf ("|   |   |-> Low bound: %ld\n", lb);
+	      debug_printf ("|   |   |-> High bound: %ld\n", ub);
+	      debug_printf ("|   |   |-> Byte stride: %ld\n", sd);
+	      debug_printf ("|   |   |-> Type size: %ld\n", TYPE_LENGTH (dim_type));
+	      debug_printf ("|   |   '-> Target type size: %ld\n",
+			    TYPE_LENGTH (target_type));
+	      debug_printf ("|   '-> Accessing:\n");
+	      debug_printf ("|       '-> Index: %ld\n", index);
+	    }
+
+	  /* If the array has actual content then check the index is in
+	     bounds.  An array without content (an unbound array) doesn't
+	     have a known upper bound, so don't error check in that
+	     situation.  */
+	  if (index < lb
+	      || (dim_type->index_type ()->bounds ()->high.kind () != PROP_UNDEFINED
+		  && index > ub)
+	      || (VALUE_LVAL (array) != lval_memory
+		  && dim_type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED))
+	    {
+	      if (type_not_associated (dim_type))
+		error (_("no such vector element (vector not associated)"));
+	      else if (type_not_allocated (dim_type))
+		error (_("no such vector element (vector not allocated)"));
+	      else
+		error (_("no such vector element"));
+	    }
+
+	  /* Calculate using the type stride, not the target type size.  */
+	  LONGEST offset = sd * (index - lb);
+	  total_offset += offset;
+	}
     }
 
-  /* Internal type of array is arranged right to left.  */
-  for (int i = nargs; i > 0; i--)
-    {
-      struct type *array_type = check_typedef (value_type (array));
-      LONGEST index = subscript_array[i - 1];
+  if (noside == EVAL_SKIP)
+    return array;
 
-      array = value_subscripted_rvalue (array, index,
-					f77_get_lowerbound (array_type));
+  /* Build a type that represents the new array slice in the target memory
+     of the original ARRAY, this type makes use of strides to correctly
+     find only those elements that are part of the new slice.  */
+  struct type *array_slice_type = inner_element_type;
+  for (const auto &d : slice_dims)
+    {
+      /* Create the range.  */
+      dynamic_prop p_low, p_high, p_stride;
+
+      p_low.set_const_val (d.low);
+      p_high.set_const_val (d.high);
+      p_stride.set_const_val (d.stride);
+
+      struct type *new_range
+	= create_range_type_with_stride ((struct type *) NULL,
+					 TYPE_TARGET_TYPE (d.index),
+					 &p_low, &p_high, 0, &p_stride,
+					 true);
+      array_slice_type
+	= create_array_type (nullptr, array_slice_type, new_range);
+    }
+
+  if (fortran_array_slicing_debug)
+    {
+      debug_printf ("'-> Final result:\n");
+      debug_printf ("    |-> Type: %s\n",
+		    type_to_string (array_slice_type).c_str ());
+      debug_printf ("    |-> Total offset: %ld\n", total_offset);
+      debug_printf ("    |-> Base address: %s\n",
+		    core_addr_to_string (value_address (array)));
+      debug_printf ("    '-> Contiguous = %s\n",
+		    (is_all_contiguous ? "Yes" : "No"));
+    }
+
+  /* Should we repack this array slice?  */
+  if (!is_all_contiguous && (repack_array_slices || is_string_p))
+    {
+      /* Build a type for the repacked slice.  */
+      struct type *repacked_array_type = inner_element_type;
+      for (const auto &d : slice_dims)
+	{
+	  /* Create the range.  */
+	  dynamic_prop p_low, p_high, p_stride;
+
+	  p_low.set_const_val (d.low);
+	  p_high.set_const_val (d.high);
+	  p_stride.set_const_val (TYPE_LENGTH (repacked_array_type));
+
+	  struct type *new_range
+	    = create_range_type_with_stride ((struct type *) NULL,
+					     TYPE_TARGET_TYPE (d.index),
+					     &p_low, &p_high, 0, &p_stride,
+					     true);
+	  repacked_array_type
+	    = create_array_type (nullptr, repacked_array_type, new_range);
+	}
+
+      /* Now copy the elements from the original ARRAY into the packed
+	 array value DEST.  */
+      struct value *dest = allocate_value (repacked_array_type);
+      if (value_lazy (array)
+	  || (total_offset + TYPE_LENGTH (array_slice_type)
+	      > TYPE_LENGTH (check_typedef (value_type (array)))))
+	{
+	  fortran_array_walker<fortran_lazy_array_repacker_impl> p
+	    (array_slice_type, value_address (array) + total_offset, dest);
+	  p.walk ();
+	}
+      else
+	{
+	  fortran_array_walker<fortran_array_repacker_impl> p
+	    (array_slice_type, value_address (array) + total_offset,
+	     total_offset, array, dest);
+	  p.walk ();
+	}
+      array = dest;
+    }
+  else
+    {
+      if (VALUE_LVAL (array) == lval_memory)
+	{
+	  /* If the value we're taking a slice from is not yet loaded, or
+	     the requested slice is outside the values content range then
+	     just create a new lazy value pointing at the memory where the
+	     contents we're looking for exist.  */
+	  if (value_lazy (array)
+	      || (total_offset + TYPE_LENGTH (array_slice_type)
+		  > TYPE_LENGTH (check_typedef (value_type (array)))))
+	    array = value_at_lazy (array_slice_type,
+				   value_address (array) + total_offset);
+	  else
+	    array = value_from_contents_and_address (array_slice_type,
+						     (value_contents (array)
+						      + total_offset),
+						     (value_address (array)
+						      + total_offset));
+	}
+      else if (!value_lazy (array))
+	{
+	  const void *valaddr = value_contents (array) + total_offset;
+	  array = allocate_value (array_slice_type);
+	  memcpy (value_contents_raw (array), valaddr, TYPE_LENGTH (array_slice_type));
+	}
+      else
+	error (_("cannot subscript arrays that are not in memory"));
     }
 
   return array;
@@ -840,11 +1298,50 @@ builtin_f_type (struct gdbarch *gdbarch)
   return (const struct builtin_f_type *) gdbarch_data (gdbarch, f_type_data);
 }
 
+/* Command-list for the "set/show fortran" prefix command.  */
+static struct cmd_list_element *set_fortran_list;
+static struct cmd_list_element *show_fortran_list;
+
 void _initialize_f_language ();
 void
 _initialize_f_language ()
 {
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
+
+  add_basic_prefix_cmd ("fortran", no_class,
+			_("Prefix command for changing Fortran-specific settings."),
+			&set_fortran_list, "set fortran ", 0, &setlist);
+
+  add_show_prefix_cmd ("fortran", no_class,
+		       _("Generic command for showing Fortran-specific settings."),
+		       &show_fortran_list, "show fortran ", 0, &showlist);
+
+  add_setshow_boolean_cmd ("repack-array-slices", class_vars,
+			   &repack_array_slices, _("\
+Enable or disable repacking of non-contiguous array slices."), _("\
+Show whether non-contiguous array slices are repacked."), _("\
+When the user requests a slice of a Fortran array then we can either return\n\
+a descriptor that describes the array in place (using the original array data\n\
+in its existing location) or the original data can be repacked (copied) to a\n\
+new location.\n\
+\n\
+When the content of the array slice is contiguous within the original array\n\
+then the result will never be repacked, but when the data for the new array\n\
+is non-contiguous within the original array repacking will only be performed\n\
+when this setting is on."),
+			   NULL,
+			   show_repack_array_slices,
+			   &set_fortran_list, &show_fortran_list);
+
+  /* Debug Fortran's array slicing logic.  */
+  add_setshow_boolean_cmd ("fortran-array-slicing", class_maintenance,
+			   &fortran_array_slicing_debug, _("\
+Set debugging of Fortran array slicing."), _("\
+Show debugging of Fortran array slicing."), _("\
+When on, debugging of Fortran array slicing is enabled."),
+			    NULL,
+			    show_fortran_array_slicing_debug,
+			    &setdebuglist, &showdebuglist);
 }
 
 /* Ensures that function argument VALUE is in the appropriate form to
@@ -894,4 +1391,57 @@ fortran_preserve_arg_pointer (struct value *arg, struct type *type)
   if (value_type (arg)->code () == TYPE_CODE_PTR)
     return value_type (arg);
   return type;
+}
+
+/* See f-lang.h.  */
+
+CORE_ADDR
+fortran_adjust_dynamic_array_base_address_hack (struct type *type,
+						CORE_ADDR address)
+{
+  gdb_assert (type->code () == TYPE_CODE_ARRAY);
+
+  int ndimensions = calc_f77_array_dims (type);
+  LONGEST total_offset = 0;
+
+  /* Walk through each of the dimensions of this array type and figure out
+     if any of the dimensions are "backwards", that is the base address
+     for this dimension points to the element at the highest memory
+     address and the stride is negative.  */
+  struct type *tmp_type = type;
+  for (int i = 0 ; i < ndimensions; ++i)
+    {
+      /* Grab the range for this dimension and extract the lower and upper
+	 bounds.  */
+      tmp_type = check_typedef (tmp_type);
+      struct type *range_type = tmp_type->index_type ();
+      LONGEST lowerbound, upperbound, stride;
+      if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
+	error ("failed to get range bounds");
+
+      /* Figure out the stride for this dimension.  */
+      struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (tmp_type));
+      stride = tmp_type->index_type ()->bounds ()->bit_stride ();
+      if (stride == 0)
+	stride = type_length_units (elt_type);
+      else
+	{
+	  struct gdbarch *arch = get_type_arch (elt_type);
+	  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+	  stride /= (unit_size * 8);
+	}
+
+      /* If this dimension is "backward" then figure out the offset
+	 adjustment required to point to the element at the lowest memory
+	 address, and add this to the total offset.  */
+      LONGEST offset = 0;
+      if (stride < 0 && lowerbound < upperbound)
+	offset = (upperbound - lowerbound) * stride;
+      total_offset += offset;
+      tmp_type = TYPE_TARGET_TYPE (tmp_type);
+    }
+
+  /* Adjust the address of this object and return it.  */
+  address += total_offset;
+  return address;
 }

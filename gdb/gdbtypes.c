@@ -39,6 +39,7 @@
 #include "dwarf2/loc.h"
 #include "gdbcore.h"
 #include "floatformat.h"
+#include "f-lang.h"
 #include <algorithm>
 #include "gmp-utils.h"
 
@@ -2639,7 +2640,16 @@ resolve_dynamic_type_internal (struct type *type,
   prop = TYPE_DATA_LOCATION (resolved_type);
   if (prop != NULL
       && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
-    prop->set_const_val (value);
+    {
+      /* Start of Fortran hack.  See comment in f-lang.h for what is going
+	 on here.*/
+      if (current_language->la_language == language_fortran
+	  && resolved_type->code () == TYPE_CODE_ARRAY)
+	value = fortran_adjust_dynamic_array_base_address_hack (resolved_type,
+								value);
+      /* End of Fortran hack.  */
+      prop->set_const_val (value);
+    }
 
   return resolved_type;
 }

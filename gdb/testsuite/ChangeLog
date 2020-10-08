@@ -1,5 +1,15 @@
 2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/array-slices-bad.exp: New file.
+	* gdb.fortran/array-slices-bad.f90: New file.
+	* gdb.fortran/array-slices-sub-slices.exp: New file.
+	* gdb.fortran/array-slices-sub-slices.f90: New file.
+	* gdb.fortran/array-slices.exp: Rewrite tests.
+	* gdb.fortran/array-slices.f90: Rewrite tests.
+	* gdb.fortran/vla-sizeof.exp: Correct expected results.
+
+2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/completion.exp: Add new completion tests.
 
 2020-11-18  Simon Marchi  <simon.marchi@polymtl.ca>

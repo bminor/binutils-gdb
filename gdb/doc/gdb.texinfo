@@ -17041,6 +17041,29 @@ This command prints the values contained in the Fortran @code{COMMON}
 block whose name is @var{common-name}.  With no argument, the names of
 all @code{COMMON} blocks visible at the current program location are
 printed.
+@cindex arrays slices (Fortran)
+@kindex set fortran repack-array-slices
+@kindex show fortran repack-array-slices
+@item set fortran repack-array-slices [on|off]
+@item show fortran repack-array-slices
+When taking a slice from an array, a Fortran compiler can choose to
+either produce an array descriptor that describes the slice in place,
+or it may repack the slice, copying the elements of the slice into a
+new region of memory.
+
+When this setting is on, then @value{GDBN} will also repack array
+slices in some situations.  When this setting is off, then
+@value{GDBN} will create array descriptors for slices that reference
+the original data in place.
+
+@value{GDBN} will never repack an array slice if the data for the
+slice is contiguous within the original array.
+
+@value{GDBN} will always repack string slices if the data for the
+slice is non-contiguous within the original string as @value{GDBN}
+does not support printing non-contiguous strings.
+
+The default for this setting is @code{off}.
 @end table
 
 @node Pascal
@@ -26632,6 +26655,15 @@ Show the current state of FreeBSD LWP debugging messages.
 Turns on or off debugging messages from the FreeBSD native target.
 @item show debug fbsd-nat
 Show the current state of FreeBSD native target debugging messages.
+
+@item set debug fortran-array-slicing
+@cindex fortran array slicing debugging info
+Turns on or off display of @value{GDBN} Fortran array slicing
+debugging info.  The default is off.
+
+@item show debug fortran-array-slicing
+Displays the current state of displaying @value{GDBN} Fortran array
+slicing debugging info.
 
 @item set debug frame
 @cindex frame debugging info

@@ -1,5 +1,37 @@
 2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add f-array-walker.h.
+	* NEWS: Mention new options.
+	* f-array-walker.h: New file.
+	* f-lang.c: Include 'gdbcmd.h' and 'f-array-walker.h'.
+	(repack_array_slices): New static global.
+	(show_repack_array_slices): New function.
+	(fortran_array_slicing_debug): New static global.
+	(show_fortran_array_slicing_debug): New function.
+	(value_f90_subarray): Delete.
+	(skip_undetermined_arglist): Delete.
+	(class fortran_array_repacker_base_impl): New class.
+	(class fortran_lazy_array_repacker_impl): New class.
+	(class fortran_array_repacker_impl): New class.
+	(fortran_value_subarray): Complete rewrite.
+	(set_fortran_list): New static global.
+	(show_fortran_list): Likewise.
+	(_initialize_f_language): Register new commands.
+	(fortran_adjust_dynamic_array_base_address_hack): New function.
+	* f-lang.h (fortran_adjust_dynamic_array_base_address_hack):
+	Declare.
+	* f-valprint.c: Include 'f-array-walker.h'.
+	(class fortran_array_printer_impl): New class.
+	(f77_print_array_1): Delete.
+	(f77_print_array): Delete.
+	(fortran_print_array): New.
+	(f_value_print_inner): Update to call fortran_print_array.
+	* gdbtypes.c: Include 'f-lang.h'.
+	(resolve_dynamic_type_internal): Call
+	fortran_adjust_dynamic_array_base_address_hack.
+
+2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* breakpoint.c (struct watch_options): New struct.
 	(watch_option_defs): New static global.
 	(make_watch_options_def_group): New function.
