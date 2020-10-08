@@ -45,7 +45,7 @@ match 'lea.*-0x200\(%rsp\),' split_x86_64_1.stdout
 match 'stc' split_x86_64_2.stdout
 match 'call.*__morestack_non_split>?$' split_x86_64_2.stdout
 nomatch 'call.*__morestack>?$' split_x86_64_2.stdout
-match 'lea.*-0x4200\(%rsp\),' split_x86_64_2.stdout
+match 'lea.*-0x100200\(%rsp\),' split_x86_64_2.stdout
 
 match 'failed to match' split_x86_64_3.stdout
 
