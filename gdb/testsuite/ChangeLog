@@ -1,3 +1,8 @@
+2020-10-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/mixed-lang-stack.exp (run_tests): Update expected
+	output of backtrace.
+
 2020-10-09  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/scalar_storage/storage.adb (Another_Range): New type.

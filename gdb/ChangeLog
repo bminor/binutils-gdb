@@ -1,3 +1,8 @@
+2020-10-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* frame.c (inside_main_func): Check full symbols as well as
+	minimal symbols.
+
 2020-10-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (advance_wild_match): Rewrite the function's

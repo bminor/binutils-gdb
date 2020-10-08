@@ -2295,19 +2295,33 @@ inside_main_func (frame_info *this_frame)
   if (symfile_objfile == nullptr)
     return false;
 
+  CORE_ADDR sym_addr;
+  const char *name = main_name ();
   bound_minimal_symbol msymbol
-    = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
+    = lookup_minimal_symbol (name, NULL, symfile_objfile);
   if (msymbol.minsym == nullptr)
-    return false;
+    {
+      /* In some language (for example Fortran) there will be no minimal
+	 symbol with the name of the main function.  In this case we should
+	 search the full symbols to see if we can find a match.  */
+      struct block_symbol bs = lookup_symbol (name, NULL, VAR_DOMAIN, 0);
+      if (bs.symbol == nullptr)
+	return false;
 
-  /* Make certain that the code, and not descriptor, address is
-     returned.  */
-  CORE_ADDR maddr
+      const struct block *block = SYMBOL_BLOCK_VALUE (bs.symbol);
+      gdb_assert (block != nullptr);
+      sym_addr = BLOCK_START (block);
+    }
+  else
+    sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+
+  /* Convert any function descriptor addresses into the actual function
+     code address.  */
+  sym_addr
     = gdbarch_convert_from_func_ptr_addr (get_frame_arch (this_frame),
-					  BMSYMBOL_VALUE_ADDRESS (msymbol),
-					  current_top_target ());
+					  sym_addr, current_top_target ());
 
-  return maddr == get_frame_func (this_frame);
+  return sym_addr == get_frame_func (this_frame);
 }
 
 /* Test whether THIS_FRAME is inside the process entry point function.  */

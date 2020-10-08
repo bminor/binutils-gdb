@@ -73,8 +73,7 @@ proc run_tests { lang } {
 		 "#6\\s+$hex in mixed_func_1c \\(\[^\r\n\]+\\) at \[^\r\n\]+" \
 		 "#7\\s+$hex in mixed_func_1b \\($1b_args\\) at \[^\r\n\]+" \
 		 "#8\\s+$hex in mixed_func_1a \\(\\) at \[^\r\n\]+" \
-		 "#9\\s+$hex in mixed_stack_main \\(\\) at \[^\r\n\]+" \
-		 "#10\\s+$hex in main \\(\[^\r\n\]+\\) at .*" ]
+		 "#9\\s+$hex in mixed_stack_main \\(\\) at \[^\r\n\]+" ]
 	gdb_test "bt -frame-arguments all" $bt_stack
 
 	# Check the language for frame #0.
