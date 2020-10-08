@@ -571,7 +571,7 @@ tui_redisplay_readline (void)
   if (tui_current_key_mode == TUI_SINGLE_KEY_MODE)
     prompt = "";
   else
-    prompt = rl_display_prompt;
+    prompt = "% ";
   
   c_pos = -1;
   c_line = -1;

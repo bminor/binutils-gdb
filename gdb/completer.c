@@ -124,6 +124,9 @@ struct gdb_completer_state
 /* The current completion state.  */
 static gdb_completer_state current_completion;
 
+__attribute__((__weak__, __common__))
+int rl_sort_completion_matches;
+
 /* An enumeration of the various things a user might attempt to
    complete for a location.  If you change this, remember to update
    the explicit_options array below too.  */
