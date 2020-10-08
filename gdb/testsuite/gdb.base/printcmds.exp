@@ -1005,6 +1005,11 @@ gdb_test "print sizeof (\$cvar)" " = 4"
 # Similarly, printf of a string convenience var should work without a target.
 test_printf_convenience_var "no target"
 
+# Test void results.
+gdb_test "p (void)10" " = void"
+gdb_test "p/x (void)10" " = void"
+gdb_test "p \$abcd" " = void"
+
 # GDB used to complete the explicit location options even when
 # printing expressions.
 gdb_test_no_output "complete p -function"

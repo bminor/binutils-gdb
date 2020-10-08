@@ -311,6 +311,7 @@ print_formatted (struct value *val, int size,
     }
 
   if (options->format == 0 || options->format == 's'
+      || type->code () == TYPE_CODE_VOID
       || type->code () == TYPE_CODE_REF
       || type->code () == TYPE_CODE_ARRAY
       || type->code () == TYPE_CODE_STRING

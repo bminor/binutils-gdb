@@ -1,3 +1,9 @@
+2020-10-09  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR exp/26714
+	* printcmd.c (print_formatted): Handle void results as
+	unformatted prints.
+
 2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arch/aarch32.c (aarch32_create_target_description): Release the

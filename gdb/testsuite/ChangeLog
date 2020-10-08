@@ -1,3 +1,8 @@
+2020-10-09  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR exp/26714
+	* gdb.base/printcmds.exp: Add tests for void results.
+
 2020-10-09  Jan Vrany  <jan.vrany@labware.com>
 
 	* gdb.mi/mi-cmd-param-changed.exp: Check that notification is
