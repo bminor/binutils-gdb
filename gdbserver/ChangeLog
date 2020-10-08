@@ -1,5 +1,10 @@
 2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* linux-arc-low.cc (arc_linux_read_description): Release the
+	unique_ptr returned from arc_create_target_description.
+
+2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* Makefile.in: Include Makefile.gnulib.inc.  Don't define LIBGNU
 	or INCGNU.  Make use of LIBGNU_EXTRA_LIBS when linking.
 

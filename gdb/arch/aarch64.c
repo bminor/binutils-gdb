@@ -29,23 +29,23 @@
 target_desc *
 aarch64_create_target_description (uint64_t vq, bool pauth_p)
 {
-  target_desc *tdesc = allocate_target_description ().release ();
+  target_desc_up tdesc = allocate_target_description ();
 
 #ifndef IN_PROCESS_AGENT
-  set_tdesc_architecture (tdesc, "aarch64");
+  set_tdesc_architecture (tdesc.get (), "aarch64");
 #endif
 
   long regnum = 0;
 
-  regnum = create_feature_aarch64_core (tdesc, regnum);
+  regnum = create_feature_aarch64_core (tdesc.get (), regnum);
 
   if (vq == 0)
-    regnum = create_feature_aarch64_fpu (tdesc, regnum);
+    regnum = create_feature_aarch64_fpu (tdesc.get (), regnum);
   else
-    regnum = create_feature_aarch64_sve (tdesc, regnum, vq);
+    regnum = create_feature_aarch64_sve (tdesc.get (), regnum, vq);
 
   if (pauth_p)
-    regnum = create_feature_aarch64_pauth (tdesc, regnum);
+    regnum = create_feature_aarch64_pauth (tdesc.get (), regnum);
 
-  return tdesc;
+  return tdesc.release ();
 }

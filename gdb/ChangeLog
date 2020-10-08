@@ -1,5 +1,24 @@
 2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arch/aarch32.c (aarch32_create_target_description): Release the
+	target_desc_up as late as possible.
+	* arch/aarch64.c (aarch64_create_target_description): Likewise.
+	* arch/amd64.c (amd64_create_target_description): Likewise.
+	* arch/arc.c (arc_create_target_description): Return a
+	target_desc_up, don't release it.
+	* arch/arc.h (arc_create_target_description): Update declaration.
+	(arc_lookup_target_description): Move target_desc_up into the
+	cache, and return a borrowed pointer.
+	* arch/arm.c (arm_create_target_description): Release the
+	target_desc_up as late as possible.
+	* arch/i386.c (i386_create_target_description): Likewise.
+	* arch/riscv.h (riscv_create_target_description): Update
+	declaration to match definition.
+	* arch/tic6x.c (tic6x_create_target_description): Release the
+	target_desc_up as late as possible.
+
+2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* Makefile.in: Include Makefile.gnulib.inc.  Don't define LIBGNU
 	or INCGNU.  Make use of LIBGNU_EXTRA_LIBS when linking.
 

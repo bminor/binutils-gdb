@@ -72,7 +72,7 @@ struct riscv_gdbarch_features
    This is only used directly from the gdbserver where the created target
    description is modified after it is return.  */
 
-target_desc *riscv_create_target_description
+target_desc_up riscv_create_target_description
 	(const struct riscv_gdbarch_features features);
 
 #else

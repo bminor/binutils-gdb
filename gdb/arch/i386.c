@@ -35,39 +35,39 @@
 target_desc *
 i386_create_target_description (uint64_t xcr0, bool is_linux, bool segments)
 {
-  target_desc *tdesc = allocate_target_description ().release ();
+  target_desc_up tdesc = allocate_target_description ();
 
 #ifndef IN_PROCESS_AGENT
-  set_tdesc_architecture (tdesc, "i386");
+  set_tdesc_architecture (tdesc.get (), "i386");
   if (is_linux)
-    set_tdesc_osabi (tdesc, "GNU/Linux");
+    set_tdesc_osabi (tdesc.get (), "GNU/Linux");
 #endif
 
   long regnum = 0;
 
   if (xcr0 & X86_XSTATE_X87)
-    regnum = create_feature_i386_32bit_core (tdesc, regnum);
+    regnum = create_feature_i386_32bit_core (tdesc.get (), regnum);
 
   if (xcr0 & X86_XSTATE_SSE)
-    regnum = create_feature_i386_32bit_sse (tdesc, regnum);
+    regnum = create_feature_i386_32bit_sse (tdesc.get (), regnum);
 
   if (is_linux)
-    regnum = create_feature_i386_32bit_linux (tdesc, regnum);
+    regnum = create_feature_i386_32bit_linux (tdesc.get (), regnum);
 
   if (segments)
-    regnum = create_feature_i386_32bit_segments (tdesc, regnum);
+    regnum = create_feature_i386_32bit_segments (tdesc.get (), regnum);
 
   if (xcr0 & X86_XSTATE_AVX)
-    regnum = create_feature_i386_32bit_avx (tdesc, regnum);
+    regnum = create_feature_i386_32bit_avx (tdesc.get (), regnum);
 
   if (xcr0 & X86_XSTATE_MPX)
-    regnum = create_feature_i386_32bit_mpx (tdesc, regnum);
+    regnum = create_feature_i386_32bit_mpx (tdesc.get (), regnum);
 
   if (xcr0 & X86_XSTATE_AVX512)
-    regnum = create_feature_i386_32bit_avx512 (tdesc, regnum);
+    regnum = create_feature_i386_32bit_avx512 (tdesc.get (), regnum);
 
   if (xcr0 & X86_XSTATE_PKRU)
-    regnum = create_feature_i386_32bit_pkeys (tdesc, regnum);
+    regnum = create_feature_i386_32bit_pkeys (tdesc.get (), regnum);
 
-  return tdesc;
+  return tdesc.release ();
 }

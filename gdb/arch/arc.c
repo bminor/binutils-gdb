@@ -34,11 +34,11 @@
 #define STATIC_IN_GDB
 #endif
 
-STATIC_IN_GDB target_desc *
+STATIC_IN_GDB target_desc_up
 arc_create_target_description (const struct arc_arch_features &features)
 {
   /* Create a new target description.  */
-  target_desc *tdesc = allocate_target_description ().release ();
+  target_desc_up tdesc = allocate_target_description ();
 
 #ifndef IN_PROCESS_AGENT
   std::string arch_name;
@@ -57,7 +57,7 @@ arc_create_target_description (const struct arc_arch_features &features)
       gdb_assert_not_reached (msg.c_str ());
     }
 
-  set_tdesc_architecture (tdesc, arch_name.c_str ());
+  set_tdesc_architecture (tdesc.get (), arch_name.c_str ());
 #endif
 
   long regnum = 0;
@@ -65,12 +65,12 @@ arc_create_target_description (const struct arc_arch_features &features)
   switch (features.isa)
     {
     case ARC_ISA_ARCV1:
-      regnum = create_feature_arc_v1_core (tdesc, regnum);
-      regnum = create_feature_arc_v1_aux (tdesc, regnum);
+      regnum = create_feature_arc_v1_core (tdesc.get (), regnum);
+      regnum = create_feature_arc_v1_aux (tdesc.get (), regnum);
       break;
     case ARC_ISA_ARCV2:
-      regnum = create_feature_arc_v2_core (tdesc, regnum);
-      regnum = create_feature_arc_v2_aux (tdesc, regnum);
+      regnum = create_feature_arc_v2_core (tdesc.get (), regnum);
+      regnum = create_feature_arc_v2_aux (tdesc.get (), regnum);
       break;
     default:
       std::string msg = string_printf
@@ -111,12 +111,15 @@ arc_lookup_target_description (const struct arc_arch_features &features)
   if (it != arc_tdesc_cache.end ())
     return it->second.get ();
 
-  target_desc *tdesc = arc_create_target_description (features);
+  target_desc_up tdesc = arc_create_target_description (features);
 
-  /* Add the newly created target description to the repertoire.  */
-  arc_tdesc_cache.emplace (features, tdesc);
 
-  return tdesc;
+  /* Add to the cache, and return a pointer borrowed from the
+     target_desc_up.  This is safe as the cache (and the pointers
+     contained within it) are not deleted until GDB exits.  */
+  target_desc *ptr = tdesc.get ();
+  arc_tdesc_cache.emplace (features, std::move (tdesc));
+  return ptr;
 }
 
 #endif /* !GDBSERVER */
