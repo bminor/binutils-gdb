@@ -500,17 +500,34 @@ generic_value_print_capability (struct value *val, struct ui_file *stream,
 				const struct value_print_options *options)
 {
   struct type *type = check_typedef (value_type (val));
-  int length = TYPE_LENGTH (type);
+  /* Account for the tag bit in the length.  */
+  int length = TYPE_LENGTH (type) + 1;
   const gdb_byte *contents = value_contents_for_printing (val).data ();
   enum bfd_endian byte_order = type_byte_order (type);
+  bool tag = false;
+
+  switch (VALUE_LVAL (val))
+    {
+      case lval_register:
+	if (value_tagged (val))
+	  tag = value_tag (val);
+	break;
+      case lval_memory:
+	/* TODO-Morello: Add hook that reads capabilities from memory.  We
+	   should use those here to fetch the tag from a memory location.  */
+	tag = true;
+	break;
+      default:
+	break;
+    }
 
   if (options->format && options->format == 'x')
-      print_hex_chars (stream, contents, length, byte_order, 0);
+    print_hex_chars (stream, contents, length, byte_order, 0);
   else
     {
       uint128_t dummy_cap;
       memcpy (&dummy_cap, contents, length);
-      capability cap (dummy_cap, false);
+      capability cap (dummy_cap, tag);
       fprintf_filtered (stream, "%s", cap.to_str ().c_str ());
     }
 

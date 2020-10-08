@@ -3818,6 +3818,72 @@ aarch64_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 		  name);
 }
 
+/* Implements the gdbarch_register_has_tag hook.  */
+
+static bool
+aarch64_register_has_tag (struct gdbarch *gdbarch,
+			  readable_regcache *regcache,
+			  int regnum)
+{
+  if (aarch64_debug)
+    debug_printf ("%s: Entering\n", __func__);
+
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  /* Only Morello's registers have tags.  */
+  if (!tdep->has_capability ())
+    return false;
+
+  /* The last two registers of the C register set don't have tags.  */
+  if (regnum < tdep->cap_reg_base ||
+      regnum > tdep->cap_reg_last - 2)
+    return false;
+
+  if (aarch64_debug)
+    debug_printf ("%s: regnum %d\n", __func__, regnum);
+
+  return true;
+}
+
+/* Implements the gdbarch_register_tag hook.  */
+
+static bool
+aarch64_register_tag (struct gdbarch *gdbarch,
+		      readable_regcache *regcache,
+		      int regnum)
+{
+  if (aarch64_debug)
+    debug_printf ("%s: Entering\n", __func__);
+
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  /* Only Morello's registers have tags.  */
+  if (!tdep->has_capability ())
+    return false;
+
+  /* The last two registers of the C register set don't have tags.  */
+  if (regnum < tdep->cap_reg_base ||
+      regnum > tdep->cap_reg_last - 2)
+    return false;
+
+  /* Find the proper bit within the tag_map.  */
+  int shift = regnum - tdep->cap_reg_base;
+  ULONGEST tag_map = 0;
+
+  /* Fetch the tag_map register.  */
+  regcache->cooked_read (tdep->cap_reg_last - 1, &tag_map);
+
+  if (aarch64_debug)
+    debug_printf ("%s: regnum %d, shift %d, tag bit %ld, tag_map %lx\n",
+		  __func__, regnum, shift,
+		  (tag_map >> shift) & 1, tag_map);
+
+  if (((tag_map >> shift) & 1) == 0)
+    return false;
+
+  return true;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -4166,6 +4232,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* For recording mapping symbols.  */
       set_gdbarch_record_special_symbol (gdbarch,
 					 aarch64_record_special_symbol);
+
+      /* For fetching register tag information.  */
+      set_gdbarch_register_has_tag (gdbarch, aarch64_register_has_tag);
+      set_gdbarch_register_tag (gdbarch, aarch64_register_tag);
 
       /* Create the Morello register aliases.  */
       /* cip0 and cip1 */

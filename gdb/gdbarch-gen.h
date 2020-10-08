@@ -1658,3 +1658,17 @@ extern void set_gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, gdbarch_g
 typedef void (gdbarch_read_core_file_mappings_ftype) (struct gdbarch *gdbarch, struct bfd *cbfd, read_core_file_mappings_pre_loop_ftype pre_loop_cb, read_core_file_mappings_loop_ftype loop_cb);
 extern void gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd, read_core_file_mappings_pre_loop_ftype pre_loop_cb, read_core_file_mappings_loop_ftype loop_cb);
 extern void set_gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, gdbarch_read_core_file_mappings_ftype *read_core_file_mappings);
+
+/* Returns true if register COOKEDNUM has a tag and false otherwise.
+   The default is to always return false. */
+
+typedef bool (gdbarch_register_has_tag_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern bool gdbarch_register_has_tag (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern void set_gdbarch_register_has_tag (struct gdbarch *gdbarch, gdbarch_register_has_tag_ftype *register_has_tag);
+
+/* Returns true if the register tag bit is 1 and false otherwise.
+   The default is to always return false. */
+
+typedef bool (gdbarch_register_tag_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern bool gdbarch_register_tag (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern void set_gdbarch_register_tag (struct gdbarch *gdbarch, gdbarch_register_tag_ftype *register_tag);

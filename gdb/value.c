@@ -181,6 +181,7 @@ struct value
       initialized (1),
       stack (0),
       is_zero (false),
+      tagged (0),
       type (type_),
       enclosing_type (type_)
   {
@@ -234,6 +235,9 @@ struct value
   /* True if this is a zero value, created by 'value_zero'; false
      otherwise.  */
   bool is_zero : 1;
+
+  /* Whether the value has a tag bit.  */
+  unsigned int tagged : 1;
 
   /* Location of value (if lval).  */
   union
@@ -342,6 +346,9 @@ struct value
   struct type *enclosing_type;
   LONGEST embedded_offset = 0;
   LONGEST pointed_to_offset = 0;
+
+  /* The tag value, if tagged.  */
+  bool tag;
 
   /* Actual contents of the value.  Target byte-order.
 
@@ -1354,6 +1361,10 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
 					  length * unit_size);
   copy (src_contents, dst_contents);
 
+  /* Copy the tagged and tag metadata.  */
+  set_value_tagged (dst, value_tagged (src));
+  set_value_tag (dst, value_tag (src));
+
   /* Copy the meta-data, adjusted.  */
   src_bit_offset = src_offset * unit_size * HOST_CHAR_BIT;
   dst_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
@@ -1406,6 +1417,18 @@ void
 set_value_stack (struct value *value, int val)
 {
   value->stack = val;
+}
+
+int
+value_tagged (const struct value *value)
+{
+  return value->tagged;
+}
+
+void
+set_value_tagged (struct value *value, int val)
+{
+  value->tagged = val;
 }
 
 gdb::array_view<const gdb_byte>
@@ -1521,6 +1544,18 @@ void
 set_value_pointed_to_offset (struct value *value, LONGEST val)
 {
   value->pointed_to_offset = val;
+}
+
+bool
+value_tag (const struct value *value)
+{
+  return value->tag;
+}
+
+void
+set_value_tag (struct value *value, bool tag)
+{
+  value->tag = tag;
 }
 
 const struct lval_funcs *
@@ -1727,6 +1762,8 @@ value_copy (const value *arg)
   val->stack = arg->stack;
   val->is_zero = arg->is_zero;
   val->initialized = arg->initialized;
+  val->tagged = arg->tagged;
+  val->tag = arg->tag;
   val->unavailable = arg->unavailable;
   val->optimized_out = arg->optimized_out;
 

@@ -300,4 +300,14 @@ extern void default_read_core_file_mappings
    struct bfd *cbfd,
    read_core_file_mappings_pre_loop_ftype pre_loop_cb,
    read_core_file_mappings_loop_ftype loop_cb);
+
+/* Default implementation of gdbarch_register_has_tag.  */
+extern bool default_register_has_tag (struct gdbarch *gdbarch,
+				      readable_regcache *regcache,
+				      int cookednum);
+
+/* Default implementation of gdbarch_register_tag.  */
+extern bool default_register_tag (struct gdbarch *gdbarch,
+				  readable_regcache *regcache,
+				  int cookednum);
 #endif /* ARCH_UTILS_H */

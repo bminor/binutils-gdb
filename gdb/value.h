@@ -241,6 +241,9 @@ extern void set_value_pointed_to_offset (struct value *value, LONGEST val);
 extern LONGEST value_embedded_offset (const struct value *value);
 extern void set_value_embedded_offset (struct value *value, LONGEST val);
 
+extern bool value_tag (const struct value *value);
+extern void set_value_tag (struct value *value, bool tag);
+
 /* For lval_computed values, this structure holds functions used to
    retrieve and set the value (or portions of the value).
 
@@ -340,6 +343,9 @@ extern void set_value_lazy (struct value *value, int val);
 
 extern int value_stack (const struct value *);
 extern void set_value_stack (struct value *value, int val);
+
+extern int value_tagged (const struct value *);
+extern void set_value_tagged (struct value *value, int val);
 
 /* Throw an error complaining that the value has been optimized
    out.  */

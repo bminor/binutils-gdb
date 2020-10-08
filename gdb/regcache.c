@@ -750,6 +750,14 @@ readable_regcache::cooked_read_value (int regnum)
 	mark_value_bytes_unavailable (result, 0,
 				      TYPE_LENGTH (value_type (result)));
 
+      if (gdbarch_register_has_tag (m_descr->gdbarch, this, regnum))
+	{
+	  set_value_tagged (result, 1);
+
+	  bool tag = gdbarch_register_tag (m_descr->gdbarch, this, regnum);
+	  set_value_tag (result, tag);
+	}
+
       return result;
     }
   else

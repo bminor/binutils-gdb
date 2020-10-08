@@ -142,6 +142,20 @@ using read_core_file_mappings_loop_ftype =
 
 #include "gdbarch-gen.h"
 
+/* Returns true if register COOKEDNUM has a tag and false otherwise.
+   The default is to always return false. */
+
+typedef bool (gdbarch_register_has_tag_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern bool gdbarch_register_has_tag (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern void set_gdbarch_register_has_tag (struct gdbarch *gdbarch, gdbarch_register_has_tag_ftype *register_has_tag);
+
+/* Returns true if the register tag bit is 1 and false otherwise.
+   The default is to always return false. */
+
+typedef bool (gdbarch_register_tag_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern bool gdbarch_register_tag (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern void set_gdbarch_register_tag (struct gdbarch *gdbarch, gdbarch_register_tag_ftype *register_tag);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
