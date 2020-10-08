@@ -1,3 +1,7 @@
+2020-10-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/array-slices.exp: Add a new test.
+
 2020-10-21  Gary Benson <gbenson@redhat.com>
 
 	* gdb.mi/mi-fullname-deleted.exp: Fix substituted

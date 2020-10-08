@@ -1120,11 +1120,15 @@ dump_subexp_body_standard (struct expression *exp,
 	fputs_filtered ("..", stream);
 	if (!(range_flag & RANGE_HIGH_BOUND_DEFAULT))
 	  fputs_filtered ("EXP", stream);
+	if (range_flag & RANGE_HAS_STRIDE)
+	  fputs_filtered (":EXP", stream);
 	fputs_filtered ("'", stream);
 
 	if (!(range_flag & RANGE_LOW_BOUND_DEFAULT))
 	  elt = dump_subexp (exp, stream, elt);
 	if (!(range_flag & RANGE_HIGH_BOUND_DEFAULT))
+	  elt = dump_subexp (exp, stream, elt);
+	if (range_flag & RANGE_HAS_STRIDE)
 	  elt = dump_subexp (exp, stream, elt);
       }
       break;

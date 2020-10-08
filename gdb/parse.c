@@ -924,6 +924,8 @@ operator_length_standard (const struct expression *expr, int endpos,
       /* Assume the range has 2 arguments (low bound and high bound), then
 	 reduce the argument count if any bounds are set to default.  */
       args = 2;
+      if (range_flag & RANGE_HAS_STRIDE)
+	++args;
       if (range_flag & RANGE_LOW_BOUND_DEFAULT)
 	--args;
       if (range_flag & RANGE_HIGH_BOUND_DEFAULT)

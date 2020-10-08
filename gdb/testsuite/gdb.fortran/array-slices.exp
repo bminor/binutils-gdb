@@ -69,3 +69,19 @@ foreach result $array_contents msg $message_strings {
 }
 
 gdb_continue_to_breakpoint "continue to Final Breakpoint"
+
+# Next test that asking for an array with stride at the CLI gives an
+# error.
+clean_restart ${testfile}
+
+if ![fortran_runto_main] then {
+    perror "couldn't run to main"
+    continue
+}
+
+gdb_breakpoint "show"
+gdb_continue_to_breakpoint "show"
+gdb_test "up" ".*"
+gdb_test "p array (1:10:2, 1:10:2)" \
+    "Fortran array strides are not currently supported" \
+    "using array stride gives an error"

@@ -124,7 +124,7 @@ value_f90_subarray (struct value *array,
 		    struct expression *exp, int *pos, enum noside noside)
 {
   int pc = (*pos) + 1;
-  LONGEST low_bound, high_bound;
+  LONGEST low_bound, high_bound, stride;
   struct type *range = check_typedef (value_type (array)->index_type ());
   enum range_flag range_flag
     = (enum range_flag) longest_to_int (exp->elts[pc].longconst);
@@ -140,6 +140,14 @@ value_f90_subarray (struct value *array,
     high_bound = range->bounds ()->high.const_val ();
   else
     high_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
+
+  if (range_flag & RANGE_HAS_STRIDE)
+    stride = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
+  else
+    stride = 1;
+
+  if (stride != 1)
+    error (_("Fortran array strides are not currently supported"));
 
   return value_slice (array, low_bound, high_bound - low_bound + 1);
 }
