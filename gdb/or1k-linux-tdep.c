@@ -27,9 +27,10 @@
 #include "trad-frame.h"
 #include "gdbarch.h"
 
-/* Define the general register mapping.  The kernel puts the PC at offset 0,
-   gdb puts it at offset 32.  Register x0 is always 0 and can be ignored.
-   Registers x1 to x31 are in the same place.  */
+/* Define the general register mapping.  The kernel and GDB put registers
+   r1 to r31 in the same place.  The NPC register is stored at index 32 in
+   linux and 33 in GDB, in GDB 32 is for PPC which is not popupated from linux.
+   Register r0 is always 0 and can be ignored.  */
 
 static const struct regcache_map_entry or1k_linux_gregmap[] =
 {
