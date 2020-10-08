@@ -1384,6 +1384,7 @@ HFILES_NO_SRCDIR = \
 	objfiles.h \
 	obsd-nat.h \
 	obsd-tdep.h \
+	or1k-linux-tdep.h \
 	osabi.h \
 	osdata.h \
 	p-lang.h \
@@ -2262,6 +2263,7 @@ ALLDEPFILES = \
 	nios2-tdep.c \
 	obsd-nat.c \
 	obsd-tdep.c \
+	or1k-linux-nat.c \
 	posix-hdep.c \
 	ppc-fbsd-nat.c \
 	ppc-fbsd-tdep.c \

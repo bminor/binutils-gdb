@@ -27,6 +27,8 @@
 #include "trad-frame.h"
 #include "gdbarch.h"
 
+#include "features/or1k-linux.c"
+
 /* Define the general register mapping.  The kernel and GDB put registers
    r1 to r31 in the same place.  The NPC register is stored at index 32 in
    linux and 33 in GDB, in GDB 32 is for PPC which is not popupated from linux.
@@ -170,4 +172,7 @@ _initialize_or1k_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_or1k, 0, GDB_OSABI_LINUX,
 			  or1k_linux_init_abi);
+
+  /* Initialize the standard target descriptions.  */
+  initialize_tdesc_or1k_linux ();
 }

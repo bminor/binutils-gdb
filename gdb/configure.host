@@ -130,6 +130,8 @@ mips*-*-netbsdaout* | mips*-*-knetbsd*-gnu)
 mips*-*-freebsd*)	gdb_host=fbsd ;;
 mips64*-*-openbsd*)	gdb_host=obsd64 ;;
 
+or1k-*-linux*)		gdb_host=linux ;;
+
 powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
 			gdb_host=aix ;;
 powerpc*-*-freebsd*)	gdb_host=fbsd ;;
