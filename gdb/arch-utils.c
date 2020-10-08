@@ -1052,6 +1052,24 @@ default_read_core_file_mappings (struct gdbarch *gdbarch,
 {
 }
 
+/* See arch-utils.h.  */
+bool
+default_register_has_tag (struct gdbarch *gdbarch,
+			  readable_regcache *regcache,
+			  int cookednum)
+{
+  return false;
+}
+
+/* See arch-utils.h.  */
+bool
+default_register_tag (struct gdbarch *gdbarch,
+		      readable_regcache *regcache,
+		      int cookednum)
+{
+  return false;
+}
+
 void _initialize_gdbarch_utils ();
 void
 _initialize_gdbarch_utils ()

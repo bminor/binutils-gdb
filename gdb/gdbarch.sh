@@ -1196,6 +1196,13 @@ f;std::string;get_pc_address_flags;frame_info *frame, CORE_ADDR pc;frame, pc;;de
 # Read core file mappings
 m;void;read_core_file_mappings;struct bfd *cbfd,gdb::function_view<void (ULONGEST count)> pre_loop_cb,gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename, const void *other)> loop_cb;cbfd, pre_loop_cb, loop_cb;;default_read_core_file_mappings;;0
 
+# Returns true if register COOKEDNUM has a tag and false otherwise.
+# The default is to always return false.
+m;bool;register_has_tag;readable_regcache *regcache, int cookednum;regcache, cookednum;;default_register_has_tag;;0
+# Returns true if the register tag bit is 1 and false otherwise.
+# The default is to always return false.
+m;bool;register_tag;readable_regcache *regcache, int cookednum;regcache, cookednum;;default_register_tag;;0
+
 EOF
 }
 

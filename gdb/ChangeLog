@@ -1,5 +1,28 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_register_has_tag, aarch64_register_tag): New
+	functions.
+	(aarch64_gdbarch_init): Register hooks.
+	* arch-utils.c (default_register_has_tag, default_register_tag): New
+	functions.
+	* arch-utils.h (default_register_has_tag, default_register_tag): New
+	prototypes.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Likewise.
+	* gdbarch.sh (register_has_tag, register_tag): New gdbarch hooks.
+	* regcache.c (readable_regcache::cooked_read_value): Fetch the tag
+	metadata from registers.
+	* valprint.c (generic_value_print_capability): Display register tags.
+	* value.c (struct value) <tagged, tag>: New fields.
+	(value_contents_copy_raw): Handle tags.
+	(value_tagged, set_value_tagged, value_tag, set_value_tag): New
+	functions.
+	(value_copy): Handle tags.
+	* value.h (value_tagged, set_value_tagged, value_tag)
+	(set_value_tag): New prototypes.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c: Include elf-bfd.h.
 	(MSYMBOL_SET_SPECIAL, MSYMBOL_IS_SPECIAL): New constants.
 	(aarch64_mapping_symbol): New struct.

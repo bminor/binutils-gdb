@@ -178,6 +178,7 @@ struct value
       lazy (1),
       initialized (1),
       stack (0),
+      tagged (0),
       type (type_),
       enclosing_type (type_)
   {
@@ -227,6 +228,9 @@ struct value
   /* If value is from the stack.  If this is set, read_stack will be
      used instead of read_memory to enable extra caching.  */
   unsigned int stack : 1;
+
+  /* Whether the value has a tag bit.  */
+  unsigned int tagged : 1;
 
   /* Location of value (if lval).  */
   union
@@ -335,6 +339,9 @@ struct value
   struct type *enclosing_type;
   LONGEST embedded_offset = 0;
   LONGEST pointed_to_offset = 0;
+
+  /* The tag value, if tagged.  */
+  bool tag;
 
   /* Actual contents of the value.  Target byte-order.  NULL or not
      valid if lazy is nonzero.  */
@@ -1331,6 +1338,10 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
 	  value_contents_all_raw (src) + src_offset * unit_size,
 	  length * unit_size);
 
+  /* Copy the tagged and tag metadata.  */
+  set_value_tagged (dst, value_tagged (src));
+  set_value_tag (dst, value_tag (src));
+
   /* Copy the meta-data, adjusted.  */
   src_bit_offset = src_offset * unit_size * HOST_CHAR_BIT;
   dst_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
@@ -1383,6 +1394,18 @@ void
 set_value_stack (struct value *value, int val)
 {
   value->stack = val;
+}
+
+int
+value_tagged (const struct value *value)
+{
+  return value->tagged;
+}
+
+void
+set_value_tagged (struct value *value, int val)
+{
+  value->tagged = val;
 }
 
 const gdb_byte *
@@ -1487,6 +1510,18 @@ void
 set_value_pointed_to_offset (struct value *value, LONGEST val)
 {
   value->pointed_to_offset = val;
+}
+
+bool
+value_tag (const struct value *value)
+{
+  return value->tag;
+}
+
+void
+set_value_tag (struct value *value, bool tag)
+{
+  value->tag = tag;
 }
 
 const struct lval_funcs *
@@ -1690,6 +1725,8 @@ value_copy (struct value *arg)
   val->embedded_offset = value_embedded_offset (arg);
   val->pointed_to_offset = arg->pointed_to_offset;
   val->modifiable = arg->modifiable;
+  val->tagged = arg->tagged;
+  val->tag = arg->tag;
   if (!value_lazy (val))
     {
       memcpy (value_contents_all_raw (val), value_contents_all_raw (arg),

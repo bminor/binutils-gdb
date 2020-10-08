@@ -1664,6 +1664,20 @@ typedef void (gdbarch_read_core_file_mappings_ftype) (struct gdbarch *gdbarch, s
 extern void gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd,gdb::function_view<void (ULONGEST count)> pre_loop_cb,gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename, const void *other)> loop_cb);
 extern void set_gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, gdbarch_read_core_file_mappings_ftype *read_core_file_mappings);
 
+/* Returns true if register COOKEDNUM has a tag and false otherwise.
+   The default is to always return false. */
+
+typedef bool (gdbarch_register_has_tag_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern bool gdbarch_register_has_tag (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern void set_gdbarch_register_has_tag (struct gdbarch *gdbarch, gdbarch_register_has_tag_ftype *register_has_tag);
+
+/* Returns true if the register tag bit is 1 and false otherwise.
+   The default is to always return false. */
+
+typedef bool (gdbarch_register_tag_ftype) (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern bool gdbarch_register_tag (struct gdbarch *gdbarch, readable_regcache *regcache, int cookednum);
+extern void set_gdbarch_register_tag (struct gdbarch *gdbarch, gdbarch_register_tag_ftype *register_tag);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

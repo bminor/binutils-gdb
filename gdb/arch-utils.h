@@ -292,4 +292,14 @@ extern void default_read_core_file_mappings (struct gdbarch *gdbarch,
 								      const char *filename,
 								      const void *other)>
 					       loop_cb);
+
+/* Default implementation of gdbarch_register_has_tag.  */
+extern bool default_register_has_tag (struct gdbarch *gdbarch,
+				      readable_regcache *regcache,
+				      int cookednum);
+
+/* Default implementation of gdbarch_register_tag.  */
+extern bool default_register_tag (struct gdbarch *gdbarch,
+				  readable_regcache *regcache,
+				  int cookednum);
 #endif /* ARCH_UTILS_H */
