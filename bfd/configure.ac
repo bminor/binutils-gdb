@@ -21,6 +21,35 @@ m4_include([version.m4])
 AC_INIT([bfd], BFD_VERSION)
 AC_CONFIG_SRCDIR([libbfd.c])
 
+if test -n "$CONFIG_SITE"; then
+  # We do not want a PATH search for config.site.
+  case $CONFIG_SITE in #((
+    -*)  ac_site_file1=./$CONFIG_SITE;;
+    */*) ac_site_file1=$CONFIG_SITE;;
+    *)   ac_site_file1=./$CONFIG_SITE;;
+  esac
+elif test "x$prefix" != xNONE; then
+  ac_site_file1=$prefix/share/config.site
+  ac_site_file2=$prefix/etc/config.site
+else
+  ac_site_file1=$ac_default_prefix/share/config.site
+  ac_site_file2=$ac_default_prefix/etc/config.site
+fi
+for ac_site_file in "$ac_site_file1" "$ac_site_file2"
+do
+  test "x$ac_site_file" = xNONE && continue
+  if test /dev/null != "$ac_site_file" && test -r "$ac_site_file"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: loading site script $ac_site_file" >&5
+$as_echo "$as_me: loading site script $ac_site_file" >&6;}
+    sed 's/^/| /' "$ac_site_file" >&5
+    . "$ac_site_file" \
+      || { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error $? "failed to load site script $ac_site_file
+See \`config.log' for more details" "$LINENO" 5; }
+  fi
+done
+
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 

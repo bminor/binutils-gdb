@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Program to fetch python compilation parameters.
 # Copied from python-config of the 2.7 release.
 

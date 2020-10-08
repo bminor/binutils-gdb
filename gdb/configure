@@ -14,7 +14,7 @@
 
 # Be more Bourne compatible
 DUALCASE=1; export DUALCASE # for MKS sh
-if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then :
+if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null ; then :
   emulate sh
   NULLCMD=:
   # Pre-4.2 versions of Zsh do word splitting on ${1+"$@"}, which
@@ -72,8 +72,8 @@ fi
 # The user is always right.
 if test "${PATH_SEPARATOR+set}" != set; then
   PATH_SEPARATOR=:
-  (PATH='/bin;/bin'; FPATH=$PATH; sh -c :) >/dev/null 2>&1 && {
-    (PATH='/bin:/bin'; FPATH=$PATH; sh -c :) >/dev/null 2>&1 ||
+  (PATH='/bin;/bin'; FPATH=$PATH; sh -c :) >/dev/null  && {
+    (PATH='/bin:/bin'; FPATH=$PATH; sh -c :) >/dev/null  ||
       PATH_SEPARATOR=';'
   }
 fi
@@ -117,7 +117,7 @@ fi
 # trigger a bug in pdksh 5.2.14.
 for as_var in BASH_ENV ENV MAIL MAILPATH
 do eval test x\${$as_var+set} = xset \
-  && ( (unset $as_var) || exit 1) >/dev/null 2>&1 && unset $as_var || :
+  && ( (unset $as_var) || exit 1) >/dev/null  && unset $as_var || :
 done
 PS1='$ '
 PS2='> '
@@ -130,7 +130,7 @@ LANGUAGE=C
 export LANGUAGE
 
 # CDPATH.
-(unset CDPATH) >/dev/null 2>&1 && unset CDPATH
+(unset CDPATH) >/dev/null  && unset CDPATH
 
 # Use a proper internal environment variable to ensure we don't fall
   # into an infinite loop, continuously re-executing ourselves.
@@ -142,7 +142,7 @@ export LANGUAGE
 # Preserve -v and -x to the replacement shell.
 BASH_ENV=/dev/null
 ENV=/dev/null
-(unset BASH_ENV) >/dev/null 2>&1 && unset BASH_ENV ENV
+(unset BASH_ENV) >/dev/null  && unset BASH_ENV ENV
 case $- in # ((((
   *v*x* | *x*v* ) as_opts=-vx ;;
   *v* ) as_opts=-v ;;
@@ -158,7 +158,7 @@ as_fn_exit 255
   # We don't want this to propagate to other subprocesses.
           { _as_can_reexec=; unset _as_can_reexec;}
 if test "x$CONFIG_SHELL" = x; then
-  as_bourne_compatible="if test -n \"\${ZSH_VERSION+set}\" && (emulate sh) >/dev/null 2>&1; then :
+  as_bourne_compatible="if test -n \"\${ZSH_VERSION+set}\" && (emulate sh) >/dev/null ; then :
   emulate sh
   NULLCMD=:
   # Pre-4.2 versions of Zsh do word splitting on \${1+\"\$@\"}, which
@@ -243,7 +243,7 @@ IFS=$as_save_IFS
 # Preserve -v and -x to the replacement shell.
 BASH_ENV=/dev/null
 ENV=/dev/null
-(unset BASH_ENV) >/dev/null 2>&1 && unset BASH_ENV ENV
+(unset BASH_ENV) >/dev/null  && unset BASH_ENV ENV
 case $- in # ((((
   *v*x* | *x*v* ) as_opts=-vx ;;
   *v* ) as_opts=-v ;;
@@ -416,20 +416,20 @@ as_fn_error ()
   as_fn_exit $as_status
 } # as_fn_error
 
-if expr a : '\(a\)' >/dev/null 2>&1 &&
+if expr a : '\(a\)' >/dev/null  &&
    test "X`expr 00001 : '.*\(...\)'`" = X001; then
   as_expr=expr
 else
   as_expr=false
 fi
 
-if (basename -- /) >/dev/null 2>&1 && test "X`basename -- / 2>&1`" = "X/"; then
+if (basename -- /) >/dev/null  && test "X`basename -- / `" = "X/"; then
   as_basename=basename
 else
   as_basename=false
 fi
 
-if (as_dir=`dirname -- /` && test "X$as_dir" = X/) >/dev/null 2>&1; then
+if (as_dir=`dirname -- /` && test "X$as_dir" = X/) >/dev/null ; then
   as_dirname=dirname
 else
   as_dirname=false
@@ -2004,7 +2004,7 @@ case "(($ac_try" in
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>&5
+  (eval "$ac_link") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; } && { ac_try='./conftest$ac_exeext'
@@ -2014,7 +2014,7 @@ $as_echo "$ac_try_echo"; } >&5
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
+  (eval "$ac_try") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; }; then :
@@ -2749,7 +2749,7 @@ trap 'exit_status=$?
     echo
     # The following way of writing the cache mishandles newlines in values,
 (
-  for ac_var in `(set) 2>&1 | sed -n '\''s/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'\''`; do
+  for ac_var in `(set)  | sed -n '\''s/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'\''`; do
     eval ac_val=\$$ac_var
     case $ac_val in #(
     *${as_nl}*)
@@ -2764,8 +2764,8 @@ $as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
       esac ;;
     esac
   done
-  (set) 2>&1 |
-    case $as_nl`(ac_space='\'' '\''; set) 2>&1` in #(
+  (set)  |
+    case $as_nl`(ac_space='\'' '\''; set) ` in #(
     *${as_nl}ac_space=\ *)
       sed -n \
 	"s/'\''/'\''\\\\'\'''\''/g;
@@ -3380,7 +3380,7 @@ case "(($ac_try" in
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link_default") 2>&5
+  (eval "$ac_link_default") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then :
@@ -3450,7 +3450,7 @@ case "(($ac_try" in
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>&5
+  (eval "$ac_link") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then :
@@ -3506,7 +3506,7 @@ case "(($ac_try" in
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>&5
+  (eval "$ac_link") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
@@ -3517,7 +3517,7 @@ $as_echo "$ac_try_echo"; } >&5
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_try") 2>&5
+  (eval "$ac_try") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; }; then
@@ -3563,7 +3563,7 @@ case "(($ac_try" in
 esac
 eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
 $as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_compile") 2>&5
+  (eval "$ac_compile") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then :
@@ -4217,7 +4217,7 @@ do
       as_fn_executable_p "$ac_path_GREP" || continue
 # Check for GNU ac_path_GREP and select it if it is found.
   # Check for GNU $ac_path_GREP
-case `"$ac_path_GREP" --version 2>&1` in
+case `"$ac_path_GREP" --version ` in
 *GNU*)
   ac_cv_path_GREP="$ac_path_GREP" ac_path_GREP_found=:;;
 *)
@@ -4230,7 +4230,7 @@ case `"$ac_path_GREP" --version 2>&1` in
     cp "conftest.in" "conftest.nl"
     $as_echo 'GREP' >> "conftest.nl"
     "$ac_path_GREP" -e 'GREP$' -e '-(cannot match)-' < "conftest.nl" >"conftest.out" 2>/dev/null || break
-    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    diff "conftest.out" "conftest.nl" >/dev/null  || break
     as_fn_arith $ac_count + 1 && ac_count=$as_val
     if test $ac_count -gt ${ac_path_GREP_max-0}; then
       # Best one so far, save it but keep looking for a better one
@@ -4266,7 +4266,7 @@ $as_echo_n "checking for egrep... " >&6; }
 if ${ac_cv_path_EGREP+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-  if echo a | $GREP -E '(a|b)' >/dev/null 2>&1
+  if echo a | $GREP -E '(a|b)' >/dev/null 
    then ac_cv_path_EGREP="$GREP -E"
    else
      if test -z "$EGREP"; then
@@ -4283,7 +4283,7 @@ do
       as_fn_executable_p "$ac_path_EGREP" || continue
 # Check for GNU ac_path_EGREP and select it if it is found.
   # Check for GNU $ac_path_EGREP
-case `"$ac_path_EGREP" --version 2>&1` in
+case `"$ac_path_EGREP" --version ` in
 *GNU*)
   ac_cv_path_EGREP="$ac_path_EGREP" ac_path_EGREP_found=:;;
 *)
@@ -4296,7 +4296,7 @@ case `"$ac_path_EGREP" --version 2>&1` in
     cp "conftest.in" "conftest.nl"
     $as_echo 'EGREP' >> "conftest.nl"
     "$ac_path_EGREP" 'EGREP$' < "conftest.nl" >"conftest.out" 2>/dev/null || break
-    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    diff "conftest.out" "conftest.nl" >/dev/null  || break
     as_fn_arith $ac_count + 1 && ac_count=$as_val
     if test $ac_count -gt ${ac_path_EGREP_max-0}; then
       # Best one so far, save it but keep looking for a better one
@@ -4362,8 +4362,8 @@ if test $ac_cv_header_stdc = yes; then
 #include <string.h>
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "memchr" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "memchr" >/dev/null ; then :
 
 else
   ac_cv_header_stdc=no
@@ -4379,8 +4379,8 @@ if test $ac_cv_header_stdc = yes; then
 #include <stdlib.h>
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "free" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "free" >/dev/null ; then :
 
 else
   ac_cv_header_stdc=no
@@ -4548,7 +4548,7 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 # Make sure we can run config.sub.
-$SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
+$SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null  ||
   as_fn_error $? "cannot run $SHELL $ac_aux_dir/config.sub" "$LINENO" 5
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking build system type" >&5
@@ -6318,10 +6318,10 @@ else
        depfile=sub/conftest.Po tmpdepfile=sub/conftest.TPo \
        $SHELL ./depcomp $depcc -c -o sub/conftest.${OBJEXT-o} sub/conftest.c"
     echo "| $depcmd" | sed -e 's/  */ /g' >&5
-    if env $depcmd > conftest.err 2>&1 &&
-       grep sub/conftst6.h sub/conftest.Po >>conftest.err 2>&1 &&
-       grep sub/conftest.${OBJEXT-o} sub/conftest.Po >>conftest.err 2>&1 &&
-       ${MAKE-make} -s -f confmf >>conftest.err 2>&1; then
+    if env $depcmd > conftest.err  &&
+       grep sub/conftst6.h sub/conftest.Po >>conftest.err  &&
+       grep sub/conftest.${OBJEXT-o} sub/conftest.Po >>conftest.err  &&
+       ${MAKE-make} -s -f confmf >>conftest.err ; then
       # icc doesn't choke on unknown options, it will just issue warnings
       # or remarks (even with -Werror).  So we grep stderr for any message
       # that says an option was ignored or not supported.
@@ -6330,7 +6330,7 @@ else
       # The diagnosis changed in icc 8.0:
       #   icc: Command line remark: option '-MP' not supported
       if (grep 'ignoring option' conftest.err ||
-          grep 'not supported' conftest.err) >/dev/null 2>&1; then :; else
+          grep 'not supported' conftest.err) >/dev/null ; then :; else
         am_cv_CC_dependencies_compiler_type=$depmode
 	$as_echo "$as_me:$LINENO: success" >&5
         break
@@ -6468,7 +6468,7 @@ if ${gdb_cv_have_makeinfo_click+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   echo '@clicksequence{a @click{} b}' >conftest.texinfo
-  if eval "$MAKEINFO conftest.texinfo >&5 2>&5"; then
+  if eval "$MAKEINFO conftest.texinfo >&5 "; then
     gdb_cv_have_makeinfo_click=yes
   else
     gdb_cv_have_makeinfo_click=no
@@ -7049,7 +7049,7 @@ if test -n "$DEBUGINFOD_CFLAGS"; then
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libdebuginfod >= 0.179\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "libdebuginfod >= 0.179") 2>&5
+  ($PKG_CONFIG --exists --print-errors "libdebuginfod >= 0.179") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
@@ -7066,7 +7066,7 @@ if test -n "$DEBUGINFOD_LIBS"; then
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
     { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libdebuginfod >= 0.179\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "libdebuginfod >= 0.179") 2>&5
+  ($PKG_CONFIG --exists --print-errors "libdebuginfod >= 0.179") 
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
@@ -7115,9 +7115,9 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        DEBUGINFOD_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libdebuginfod >= 0.179" 2>&1`
+	        DEBUGINFOD_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libdebuginfod >= 0.179" `
         else
-	        DEBUGINFOD_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libdebuginfod >= 0.179" 2>&1`
+	        DEBUGINFOD_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libdebuginfod >= 0.179" `
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$DEBUGINFOD_PKG_ERRORS" >&5
@@ -7511,11 +7511,11 @@ case $as_dir/ in #((
       for ac_exec_ext in '' $ac_executable_extensions; do
 	if as_fn_executable_p "$as_dir/$ac_prog$ac_exec_ext"; then
 	  if test $ac_prog = install &&
-	    grep dspmsg "$as_dir/$ac_prog$ac_exec_ext" >/dev/null 2>&1; then
+	    grep dspmsg "$as_dir/$ac_prog$ac_exec_ext" >/dev/null ; then
 	    # AIX install.  It has an incompatible calling convention.
 	    :
 	  elif test $ac_prog = install &&
-	    grep pwplus "$as_dir/$ac_prog$ac_exec_ext" >/dev/null 2>&1; then
+	    grep pwplus "$as_dir/$ac_prog$ac_exec_ext" >/dev/null ; then
 	    # program-specific install script used by HP pwplus--don't use.
 	    :
 	  else
@@ -8300,7 +8300,7 @@ if test "${PATH_SEPARATOR+set}" != set; then
   echo "#! /bin/sh" >conf$$.sh
   echo  "exit 0"   >>conf$$.sh
   chmod +x conf$$.sh
-  if (PATH="/nonexistent;."; conf$$.sh) >/dev/null 2>&1; then
+  if (PATH="/nonexistent;."; conf$$.sh) >/dev/null ; then
     PATH_SEPARATOR=';'
   else
     PATH_SEPARATOR=:
@@ -8315,9 +8315,9 @@ $as_echo_n "checking for ld used by GCC... " >&6; }
   case $host in
   *-*-mingw*)
     # gcc leaves a trailing carriage return which upsets mingw
-    ac_prog=`($CC -print-prog-name=ld) 2>&5 | tr -d '\015'` ;;
+    ac_prog=`($CC -print-prog-name=ld)  | tr -d '\015'` ;;
   *)
-    ac_prog=`($CC -print-prog-name=ld) 2>&5` ;;
+    ac_prog=`($CC -print-prog-name=ld) ` ;;
   esac
   case $ac_prog in
     # Accept absolute paths.
@@ -8325,7 +8325,7 @@ $as_echo_n "checking for ld used by GCC... " >&6; }
       re_direlt='/[^/][^/]*/\.\./'
       # Canonicalize the path of ld
       ac_prog=`echo $ac_prog| sed 's%\\\\%/%g'`
-      while echo $ac_prog | grep "$re_direlt" > /dev/null 2>&1; do
+      while echo $ac_prog | grep "$re_direlt" > /dev/null ; do
 	ac_prog=`echo $ac_prog| sed "s%$re_direlt%/%"`
       done
       test -z "$LD" && LD="$ac_prog"
@@ -8358,7 +8358,7 @@ else
       # Check to see if the program is GNU ld.  I'd rather use --version,
       # but apparently some GNU ld's only accept -v.
       # Break only if it was the GNU/non-GNU ld that we prefer.
-      if "$acl_cv_path_LD" -v 2>&1 < /dev/null | egrep '(GNU|with BFD)' > /dev/null; then
+      if "$acl_cv_path_LD" -v  < /dev/null | egrep '(GNU|with BFD)' > /dev/null; then
 	test "$with_gnu_ld" != no && break
       else
 	test "$with_gnu_ld" != yes && break
@@ -8386,7 +8386,7 @@ if ${acl_cv_prog_gnu_ld+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   # I'd rather use --version here, but apparently some GNU ld's only accept -v.
-if $LD -v 2>&1 </dev/null | egrep '(GNU|with BFD)' 1>&5; then
+if $LD -v  </dev/null | egrep '(GNU|with BFD)' 1>&5; then
   acl_cv_prog_gnu_ld=yes
 else
   acl_cv_prog_gnu_ld=no
@@ -10725,21 +10725,21 @@ fi
     # We have a python program to use, but it may be too old.
     # Don't flag an error for --with-python=auto (the default).
     have_python_config=yes
-    python_includes=`${python_prog} ${srcdir}/python/python-config.py --includes`
+    python_includes=`${python_prog}-config --includes`
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
         as_fn_error $? "failure running python-config --includes" "$LINENO" 5
       fi
     fi
-    python_libs=`${python_prog} ${srcdir}/python/python-config.py --ldflags`
+    python_libs="`${python_prog}-config --ldflags` -lpython3.9"
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
         as_fn_error $? "failure running python-config --ldflags" "$LINENO" 5
       fi
     fi
-    python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
+    python_prefix=`${python_prog}-config --exec-prefix`
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
@@ -11496,7 +11496,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_guild_program_name" >&5
 $as_echo "$ac_cv_guild_program_name" >&6; }
 
-  if ! "$ac_cv_guild_program_name" --version >&5 2>&5; then
+  if ! "$ac_cv_guild_program_name" --version >&5 ; then
     as_fn_error $? "'$ac_cv_guild_program_name' appears to be unusable" "$LINENO" 5
   fi
 
@@ -11526,7 +11526,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_guild_program_name" >&5
 $as_echo "$ac_cv_guild_program_name" >&6; }
 
-  if ! "$ac_cv_guild_program_name" --version >&5 2>&5; then
+  if ! "$ac_cv_guild_program_name" --version >&5 ; then
     as_fn_error $? "'$ac_cv_guild_program_name' appears to be unusable" "$LINENO" 5
   fi
 
@@ -11552,7 +11552,7 @@ if ${ac_cv_guild_ok+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   echo "$ac_cv_guild_program_name compile $GUILD_TARGET_FLAG -o conftest.go $srcdir/guile/lib/gdb/support.scm" >&5
-     if "$ac_cv_guild_program_name" compile $GUILD_TARGET_FLAG -o conftest.go "$srcdir/guile/lib/gdb/support.scm" >&5 2>&5; then
+     if "$ac_cv_guild_program_name" compile $GUILD_TARGET_FLAG -o conftest.go "$srcdir/guile/lib/gdb/support.scm" >&5 ; then
        ac_cv_guild_ok=yes
      else
        ac_cv_guild_ok=no
@@ -11705,8 +11705,8 @@ if test $ac_cv_header_stdc = yes; then
 #include <string.h>
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "memchr" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "memchr" >/dev/null ; then :
 
 else
   ac_cv_header_stdc=no
@@ -11722,8 +11722,8 @@ if test $ac_cv_header_stdc = yes; then
 #include <stdlib.h>
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "free" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "free" >/dev/null ; then :
 
 else
   ac_cv_header_stdc=no
@@ -12584,7 +12584,7 @@ do
       as_fn_executable_p "$ac_path_SED" || continue
 # Check for GNU ac_path_SED and select it if it is found.
   # Check for GNU $ac_path_SED
-case `"$ac_path_SED" --version 2>&1` in
+case `"$ac_path_SED" --version ` in
 *GNU*)
   ac_cv_path_SED="$ac_path_SED" ac_path_SED_found=:;;
 *)
@@ -12597,7 +12597,7 @@ case `"$ac_path_SED" --version 2>&1` in
     cp "conftest.in" "conftest.nl"
     $as_echo '' >> "conftest.nl"
     "$ac_path_SED" -f conftest.sed < "conftest.nl" >"conftest.out" 2>/dev/null || break
-    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    diff "conftest.out" "conftest.nl" >/dev/null  || break
     as_fn_arith $ac_count + 1 && ac_count=$as_val
     if test $ac_count -gt ${ac_path_SED_max-0}; then
       # Best one so far, save it but keep looking for a better one
@@ -12666,8 +12666,8 @@ if test $ac_cv_header_stdc = yes; then
 #include <string.h>
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "memchr" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "memchr" >/dev/null ; then :
 
 else
   ac_cv_header_stdc=no
@@ -12683,8 +12683,8 @@ if test $ac_cv_header_stdc = yes; then
 #include <stdlib.h>
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "free" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "free" >/dev/null ; then :
 
 else
   ac_cv_header_stdc=no
@@ -12856,8 +12856,8 @@ wenotbecray
 #endif
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "webecray" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "webecray" >/dev/null ; then :
   ac_cv_os_cray=yes
 else
   ac_cv_os_cray=no
@@ -13716,8 +13716,8 @@ case $host_os in
 #            endif
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "AX_PTHREAD_ZOS_MISSING" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "AX_PTHREAD_ZOS_MISSING" >/dev/null ; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: IBM z/OS requires -D_OPEN_THREADS or -D_UNIX03_THREADS to enable pthreads support." >&5
 $as_echo "$as_me: WARNING: IBM z/OS requires -D_OPEN_THREADS or -D_UNIX03_THREADS to enable pthreads support." >&2;}
 fi
@@ -13786,8 +13786,8 @@ else
 #            endif
 
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "AX_PTHREAD_CC_IS_CLANG" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "AX_PTHREAD_CC_IS_CLANG" >/dev/null ; then :
   ax_cv_PTHREAD_CLANG=yes
 fi
 rm -f conftest*
@@ -16714,8 +16714,8 @@ else
 lose
 #endif
 _ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "^lose$" >/dev/null 2>&1; then :
+if (eval "$ac_cpp conftest.$ac_ext")  |
+  $EGREP "^lose$" >/dev/null ; then :
   gdb_cv_os_cygwin=yes
 else
   gdb_cv_os_cygwin=no
@@ -19466,7 +19466,7 @@ _ACEOF
 # Ultrix sh set writes to stderr and can't be redirected directly,
 # and sets the high bit in the cache file unless we assign to the vars.
 (
-  for ac_var in `(set) 2>&1 | sed -n 's/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'`; do
+  for ac_var in `(set)  | sed -n 's/^\([a-zA-Z_][a-zA-Z0-9_]*\)=.*/\1/p'`; do
     eval ac_val=\$$ac_var
     case $ac_val in #(
     *${as_nl}*)
@@ -19482,8 +19482,8 @@ $as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
     esac
   done
 
-  (set) 2>&1 |
-    case $as_nl`(ac_space=' '; set) 2>&1` in #(
+  (set)  |
+    case $as_nl`(ac_space=' '; set) ` in #(
     *${as_nl}ac_space=\ *)
       # `set' does not quote correctly, so add quotes: double-quote
       # substitution turns \\\\ into \\, and sed turns \\ into \.
@@ -19506,7 +19506,7 @@ $as_echo "$as_me: WARNING: cache variable $ac_var contains a newline" >&2;} ;;
      t end
      s/^\([^=]*\)=\(.*\)$/\1=${\1=\2}/
      :end' >>confcache
-if diff "$cache_file" confcache >/dev/null 2>&1; then :; else
+if diff "$cache_file" confcache >/dev/null ; then :; else
   if test -w "$cache_file"; then
     if test "x$cache_file" != "x/dev/null"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: updating cache $cache_file" >&5
@@ -19595,7 +19595,7 @@ cat >>$CONFIG_STATUS <<\_ASEOF || as_write_fail=1
 
 # Be more Bourne compatible
 DUALCASE=1; export DUALCASE # for MKS sh
-if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then :
+if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null ; then :
   emulate sh
   NULLCMD=:
   # Pre-4.2 versions of Zsh do word splitting on ${1+"$@"}, which
@@ -19653,8 +19653,8 @@ fi
 # The user is always right.
 if test "${PATH_SEPARATOR+set}" != set; then
   PATH_SEPARATOR=:
-  (PATH='/bin;/bin'; FPATH=$PATH; sh -c :) >/dev/null 2>&1 && {
-    (PATH='/bin:/bin'; FPATH=$PATH; sh -c :) >/dev/null 2>&1 ||
+  (PATH='/bin;/bin'; FPATH=$PATH; sh -c :) >/dev/null  && {
+    (PATH='/bin:/bin'; FPATH=$PATH; sh -c :) >/dev/null  ||
       PATH_SEPARATOR=';'
   }
 fi
@@ -19698,7 +19698,7 @@ fi
 # trigger a bug in pdksh 5.2.14.
 for as_var in BASH_ENV ENV MAIL MAILPATH
 do eval test x\${$as_var+set} = xset \
-  && ( (unset $as_var) || exit 1) >/dev/null 2>&1 && unset $as_var || :
+  && ( (unset $as_var) || exit 1) >/dev/null  && unset $as_var || :
 done
 PS1='$ '
 PS2='> '
@@ -19711,7 +19711,7 @@ LANGUAGE=C
 export LANGUAGE
 
 # CDPATH.
-(unset CDPATH) >/dev/null 2>&1 && unset CDPATH
+(unset CDPATH) >/dev/null  && unset CDPATH
 
 
 # as_fn_error STATUS ERROR [LINENO LOG_FD]
@@ -19793,20 +19793,20 @@ else
 fi # as_fn_arith
 
 
-if expr a : '\(a\)' >/dev/null 2>&1 &&
+if expr a : '\(a\)' >/dev/null  &&
    test "X`expr 00001 : '.*\(...\)'`" = X001; then
   as_expr=expr
 else
   as_expr=false
 fi
 
-if (basename -- /) >/dev/null 2>&1 && test "X`basename -- / 2>&1`" = "X/"; then
+if (basename -- /) >/dev/null  && test "X`basename -- / `" = "X/"; then
   as_basename=basename
 else
   as_basename=false
 fi
 
-if (as_dir=`dirname -- /` && test "X$as_dir" = X/) >/dev/null 2>&1; then
+if (as_dir=`dirname -- /` && test "X$as_dir" = X/) >/dev/null ; then
   as_dirname=dirname
 else
   as_dirname=false
@@ -20374,7 +20374,7 @@ cat >>"\$ac_tmp/subs1.awk" <<_ACAWK &&
 _ACAWK
 _ACEOF
 cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
-if sed "s/$ac_cr//" < /dev/null > /dev/null 2>&1; then
+if sed "s/$ac_cr//" < /dev/null > /dev/null ; then
   sed "s/$ac_cr\$//; s/$ac_cr/$ac_cs_awk_cr/g"
 else
   cat
@@ -20745,7 +20745,7 @@ which seems to be undefined.  Please make sure it is defined" >&2;}
       && eval '$AWK -f "$ac_tmp/defines.awk"' "$ac_file_inputs"
     } >"$ac_tmp/config.h" \
       || as_fn_error $? "could not create $ac_file" "$LINENO" 5
-    if diff "$ac_file" "$ac_tmp/config.h" >/dev/null 2>&1; then
+    if diff "$ac_file" "$ac_tmp/config.h" >/dev/null ; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: $ac_file is unchanged" >&5
 $as_echo "$as_me: $ac_file is unchanged" >&6;}
     else

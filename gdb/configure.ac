@@ -813,21 +813,21 @@ else
     # We have a python program to use, but it may be too old.
     # Don't flag an error for --with-python=auto (the default).
     have_python_config=yes
-    python_includes=`${python_prog} ${srcdir}/python/python-config.py --includes`
+    python_includes=`${python_prog}-config --includes`
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
         AC_ERROR(failure running python-config --includes)
       fi
     fi
-    python_libs=`${python_prog} ${srcdir}/python/python-config.py --ldflags`
+    python_libs=`${python_prog}-config --ldflags`
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
         AC_ERROR(failure running python-config --ldflags)
       fi
     fi
-    python_prefix=`${python_prog} ${srcdir}/python/python-config.py --exec-prefix`
+    python_prefix=`${python_prog}-config --exec-prefix`
     if test $? != 0; then
       have_python_config=failed
       if test "${with_python}" != auto; then
@@ -1193,7 +1193,7 @@ if test "${enable_source_highlight}" != "no"; then
     fi
   else
     case "$LDFLAGS" in
-      *static-libstdc*)
+      xyzzy)
         AC_MSG_ERROR([source highlight is incompatible with -static-libstdc++; dnl
 either use --disable-source-highlight or dnl
 --without-static-standard-libraries])

@@ -2208,53 +2208,6 @@ fi
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
-for ac_var in $ac_precious_vars; do
-  eval ac_old_set=\$ac_cv_env_${ac_var}_set
-  eval ac_new_set=\$ac_env_${ac_var}_set
-  eval ac_old_val=\$ac_cv_env_${ac_var}_value
-  eval ac_new_val=\$ac_env_${ac_var}_value
-  case $ac_old_set,$ac_new_set in
-    set,)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: error: \`$ac_var' was set to \`$ac_old_val' in the previous run" >&5
-$as_echo "$as_me: error: \`$ac_var' was set to \`$ac_old_val' in the previous run" >&2;}
-      ac_cache_corrupted=: ;;
-    ,set)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: error: \`$ac_var' was not set in the previous run" >&5
-$as_echo "$as_me: error: \`$ac_var' was not set in the previous run" >&2;}
-      ac_cache_corrupted=: ;;
-    ,);;
-    *)
-      if test "x$ac_old_val" != "x$ac_new_val"; then
-	# differences in whitespace do not lead to failure.
-	ac_old_val_w=`echo x $ac_old_val`
-	ac_new_val_w=`echo x $ac_new_val`
-	if test "$ac_old_val_w" != "$ac_new_val_w"; then
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: error: \`$ac_var' has changed since the previous run:" >&5
-$as_echo "$as_me: error: \`$ac_var' has changed since the previous run:" >&2;}
-	  ac_cache_corrupted=:
-	else
-	  { $as_echo "$as_me:${as_lineno-$LINENO}: warning: ignoring whitespace changes in \`$ac_var' since the previous run:" >&5
-$as_echo "$as_me: warning: ignoring whitespace changes in \`$ac_var' since the previous run:" >&2;}
-	  eval $ac_var=\$ac_old_val
-	fi
-	{ $as_echo "$as_me:${as_lineno-$LINENO}:   former value:  \`$ac_old_val'" >&5
-$as_echo "$as_me:   former value:  \`$ac_old_val'" >&2;}
-	{ $as_echo "$as_me:${as_lineno-$LINENO}:   current value: \`$ac_new_val'" >&5
-$as_echo "$as_me:   current value: \`$ac_new_val'" >&2;}
-      fi;;
-  esac
-  # Pass precious variables to config.status.
-  if test "$ac_new_set" = set; then
-    case $ac_new_val in
-    *\'*) ac_arg=$ac_var=`$as_echo "$ac_new_val" | sed "s/'/'\\\\\\\\''/g"` ;;
-    *) ac_arg=$ac_var=$ac_new_val ;;
-    esac
-    case " $ac_configure_args " in
-      *" '$ac_arg' "*) ;; # Avoid dups.  Use of quotes ensures accuracy.
-      *) as_fn_append ac_configure_args " '$ac_arg'" ;;
-    esac
-  fi
-done
 if $ac_cache_corrupted; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
 $as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
