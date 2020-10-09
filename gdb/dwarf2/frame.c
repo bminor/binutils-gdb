@@ -249,11 +249,6 @@ public:
     invalid ("DW_OP_push_object_address");
   }
 
-  CORE_ADDR get_frame_cfa () override
-  {
-    invalid ("DW_OP_call_frame_cfa");
-  }
-
   CORE_ADDR get_tls_address (CORE_ADDR offset) override
   {
     invalid ("DW_OP_form_tls_address");

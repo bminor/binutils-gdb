@@ -699,14 +699,6 @@ public:
   struct dwarf2_per_cu_data *per_cu;
   CORE_ADDR obj_address;
 
-  /* Helper function for dwarf2_evaluate_loc_desc.  Computes the CFA for
-     the frame in BATON.  */
-
-  CORE_ADDR get_frame_cfa () override
-  {
-    return dwarf2_frame_cfa (frame);
-  }
-
   /* Helper function for dwarf2_evaluate_loc_desc.  Computes the PC for
      the frame in BATON.  */
 

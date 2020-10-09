@@ -29,6 +29,7 @@
 #include "dwarf2/expr.h"
 #include "dwarf2/loc.h"
 #include "dwarf2/read.h"
+#include "frame.h"
 #include "gdbsupport/underlying.h"
 #include "gdbarch.h"
 
@@ -1217,7 +1218,9 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  break;
 
 	case DW_OP_call_frame_cfa:
-	  result = this->get_frame_cfa ();
+	  ensure_have_frame (this->frame, "DW_OP_call_frame_cfa");
+
+	  result = dwarf2_frame_cfa (this->frame);
 	  result_val = value_from_ulongest (address_type, result);
 	  in_stack_memory = true;
 	  break;
