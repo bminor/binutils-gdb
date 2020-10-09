@@ -1,5 +1,12 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_prologue_prev_register): Use LR or CLR
+	depending on the request.
+	(aarch64_dwarf_reg_to_regnum): Redirect CLR to LR temporarily.
+	* aarch64-tdep.h (AARCH64_DWARF_CLR): New constant.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_prologue_prev_register): Handle the PCC and
 	CSP registers. Remove the LSB.
 	(aarch64_dwarf2_prev_register): Handle CSP, PCC and remove the LSB
