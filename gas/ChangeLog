@@ -1,3 +1,8 @@
+2020-10-09  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add Neoverse V1.
+	* doc/c-arm.texi: Document Neoverse V1 support.
+
 2020-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26685
