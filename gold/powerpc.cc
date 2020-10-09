@@ -1884,6 +1884,19 @@ is_plt16_reloc(unsigned int r_type)
 	  || (size == 64 && r_type == elfcpp::R_PPC64_PLT16_LO_DS));
 }
 
+// GOT_TYPE_STANDARD (ie. not TLS) GOT relocs
+inline bool
+is_got_reloc(unsigned int r_type)
+{
+  return (r_type == elfcpp::R_POWERPC_GOT16
+	  || r_type == elfcpp::R_POWERPC_GOT16_LO
+	  || r_type == elfcpp::R_POWERPC_GOT16_HI
+	  || r_type == elfcpp::R_POWERPC_GOT16_HA
+	  || r_type == elfcpp::R_PPC64_GOT16_DS
+	  || r_type == elfcpp::R_PPC64_GOT16_LO_DS
+	  || r_type == elfcpp::R_PPC64_GOT_PCREL34);
+}
+
 // If INSN is an opcode that may be used with an @tls operand, return
 // the transformed insn for TLS optimisation, otherwise return 0.  If
 // REG is non-zero only match an insn with RB or RA equal to REG.
@@ -10381,6 +10394,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
        ? gsym->use_plt_offset(Scan::get_reference_flags(r_type, target))
        : object->local_has_plt_offset(r_sym));
   if (has_plt_offset
+      && !is_got_reloc(r_type)
       && !is_plt16_reloc<size>(r_type)
       && r_type != elfcpp::R_PPC64_PLT_PCREL34
       && r_type != elfcpp::R_PPC64_PLT_PCREL34_NOTOC
@@ -10523,13 +10537,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       elfcpp::Swap<32, big_endian>::writeval(iview + 1, pnop & 0xffffffff);
       r_type = elfcpp::R_POWERPC_NONE;
     }
-  else if (r_type == elfcpp::R_POWERPC_GOT16
-	   || r_type == elfcpp::R_POWERPC_GOT16_LO
-	   || r_type == elfcpp::R_POWERPC_GOT16_HI
-	   || r_type == elfcpp::R_POWERPC_GOT16_HA
-	   || r_type == elfcpp::R_PPC64_GOT16_DS
-	   || r_type == elfcpp::R_PPC64_GOT16_LO_DS
-	   || r_type == elfcpp::R_PPC64_GOT_PCREL34)
+  else if (is_got_reloc(r_type))
     {
       if (gsym != NULL)
 	{

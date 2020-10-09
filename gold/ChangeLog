@@ -1,3 +1,9 @@
+2020-10-09  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (is_got_reloc): New function.
+	(Target_powerpc::Relocate::relocate): Use it here, exclude GOT
+	relocs when looking for stubs.
+
 2020-10-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/split_i386.sh: Updated for --split-stack-adjust-size
