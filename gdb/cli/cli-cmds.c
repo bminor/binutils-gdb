@@ -1395,14 +1395,18 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
   else
 #endif
     {
-      printf_filtered ("Dump of assembler code ");
+      printf_filtered (_("Dump of assembler code "));
       if (name != NULL)
-	printf_filtered ("for function %s:\n", name);
+	printf_filtered (_("for function %ps:\n"),
+			 styled_string (function_name_style.style (), name));
       if (block == nullptr || BLOCK_CONTIGUOUS_P (block))
         {
 	  if (name == NULL)
-	    printf_filtered ("from %s to %s:\n",
-			     paddress (gdbarch, low), paddress (gdbarch, high));
+	    printf_filtered (_("from %ps to %ps:\n"),
+			     styled_string (address_style.style (),
+					    paddress (gdbarch, low)),
+			     styled_string (address_style.style (),
+					    paddress (gdbarch, high)));
 
 	  /* Dump the specified range.  */
 	  gdb_disassembly (gdbarch, current_uiout, flags, -1, low, high);
@@ -1413,14 +1417,16 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 	    {
 	      CORE_ADDR range_low = BLOCK_RANGE_START (block, i);
 	      CORE_ADDR range_high = BLOCK_RANGE_END (block, i);
-	      printf_filtered (_("Address range %s to %s:\n"),
-			       paddress (gdbarch, range_low),
-			       paddress (gdbarch, range_high));
+	      printf_filtered (_("Address range %ps to %ps:\n"),
+			       styled_string (address_style.style (),
+					      paddress (gdbarch, range_low)),
+			       styled_string (address_style.style (),
+					      paddress (gdbarch, range_high)));
 	      gdb_disassembly (gdbarch, current_uiout, flags, -1,
 			       range_low, range_high);
 	    }
 	}
-      printf_filtered ("End of assembler dump.\n");
+      printf_filtered (_("End of assembler dump.\n"));
     }
 }
 

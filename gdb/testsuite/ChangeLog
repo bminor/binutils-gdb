@@ -1,3 +1,7 @@
+2020-10-08  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/style.exp: Check that "main"'s name is styled.
+
 2020-10-07  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/find.exp: Rename some tests.

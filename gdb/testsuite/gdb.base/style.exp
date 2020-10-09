@@ -91,9 +91,12 @@ save_vars { env(TERM) } {
 	    "Defined at $base_file_expr:$macro_line\r\n#define SOME_MACRO 23"
     }
 
+    set main [style main function]
     set func [style some_called_function function]
     # Somewhere should see the call to the function.
-    gdb_test "disassemble main" "[style $hex address].*$func.*"
+    gdb_test "disassemble main" \
+	[concat "Dump of assembler code for function $main:.*" \
+	     "[style $hex address].*$func.*"]
 
     set ifield [style int_field variable]
     set sfield [style string_field variable]

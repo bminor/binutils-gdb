@@ -1,3 +1,8 @@
+2020-10-08  Tom Tromey  <tom@tromey.com>
+
+	* cli/cli-cmds.c (print_disassembly): Style function name and
+	addresses.  Add _() wrappers.
+
 2020-10-08  Shahab Vahedi  <shahab@synopsys.com>
 
 	* NEWS: Mention ARC support in GDBserver.
