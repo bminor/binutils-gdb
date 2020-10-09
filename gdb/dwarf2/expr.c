@@ -168,19 +168,6 @@ dwarf_expr_context::fetch (int n)
 
 /* See expr.h.  */
 
-struct value *
-dwarf_expr_context::get_reg_value (struct type *type, int reg)
-{
-  ensure_have_frame (this->frame, "DW_OP_regval_type");
-
-  struct gdbarch *gdbarch = get_frame_arch (this->frame);
-  int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
-
-  return value_from_register (type, regnum, this->frame);
-}
-
-/* See expr.h.  */
-
 void
 dwarf_expr_context::get_frame_base (const gdb_byte **start,
 				    size_t * length)
@@ -1536,14 +1523,17 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_regval_type:
 	case DW_OP_GNU_regval_type:
 	  {
-	    struct type *type;
-
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	    cu_offset type_die_cu_off = (cu_offset) uoffset;
 
-	    type = get_base_type (type_die_cu_off);
-	    result_val = this->get_reg_value (type, reg);
+	    ensure_have_frame (this->frame, "DW_OP_regval_type");
+
+	    struct type *type = get_base_type (type_die_cu_off);
+	    int regnum
+	      = dwarf_reg_to_regnum_or_error (get_frame_arch (this->frame),
+					      reg);
+	    result_val = value_from_register (type, regnum, this->frame);
 	  }
 	  break;
 
