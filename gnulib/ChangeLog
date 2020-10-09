@@ -1,3 +1,15 @@
+2020-10-09  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB PR build/26607
+	* patches/0002-stat-fstat-windows-older-vista: New patch.
+	* patches/0003-stat-fstat-windows-old-mingw: New patch.
+	* update-gnulib.sh: Update to use the two new patches above.
+	* import/m4/fstat.m4: Update after applying patches above.
+	* import/m4/stat.m4: Ditto.
+	* import/stat-w32.c: Ditto.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2020-09-08  Tom Tromey  <tromey@adacore.com>
 
 	PR win32/25302:

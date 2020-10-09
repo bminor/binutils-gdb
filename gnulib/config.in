@@ -693,6 +693,9 @@
 /* Define to 1 if the system has the type `sa_family_t'. */
 #undef HAVE_SA_FAMILY_T
 
+/* Define to 1 if you have the <sdkddkver.h> header file. */
+#undef HAVE_SDKDDKVER_H
+
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
 

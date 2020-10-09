@@ -174,6 +174,12 @@ apply_patches ()
 }
 
 apply_patches "patches/0001-use-windows-stat"
+# The following two patches are specific imports of two commits
+# already in gnulib's master. We import those patches individually
+# because we want to avoid doing a standard gnulib update, which
+# would be too disruptive for a release branch.
+apply_patches "patches/0002-stat-fstat-windows-older-vista"
+apply_patches "patches/0003-stat-fstat-windows-old-mingw"
 
 # Regenerate all necessary files...
 aclocal &&
