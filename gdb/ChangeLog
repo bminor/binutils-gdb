@@ -1,3 +1,8 @@
+2020-10-09  Jan Vrany  <jan.vrany@labware.com>
+
+	* source.c (directory_command): Notify observers that "directories"
+	parameter has changed.
+
 2020-10-08  Tom Tromey  <tom@tromey.com>
 
 	* cli/cli-cmds.c (print_disassembly): Style function name and

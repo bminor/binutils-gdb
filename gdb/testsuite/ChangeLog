@@ -1,3 +1,8 @@
+2020-10-09  Jan Vrany  <jan.vrany@labware.com>
+
+	* gdb.mi/mi-cmd-param-changed.exp: Check that notification is
+	is emmited for both 'set directories' and 'directory' commands.
+
 2020-10-08  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/style.exp: Check that "main"'s name is styled.

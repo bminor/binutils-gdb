@@ -446,6 +446,7 @@ init_source_path (void)
 static void
 directory_command (const char *dirname, int from_tty)
 {
+  bool value_changed = false;
   dont_repeat ();
   /* FIXME, this goes to "delete dir"...  */
   if (dirname == 0)
@@ -454,15 +455,21 @@ directory_command (const char *dirname, int from_tty)
 	{
 	  xfree (source_path);
 	  init_source_path ();
+	  value_changed = true;
 	}
     }
   else
     {
       mod_path (dirname, &source_path);
       forget_cached_source_info ();
+      value_changed = true;
     }
-  if (from_tty)
-    show_directories_1 ((char *) 0, from_tty);
+  if (value_changed)
+    {
+      gdb::observers::command_param_changed.notify ("directories", source_path);
+      if (from_tty)
+	show_directories_1 ((char *) 0, from_tty);
+    }
 }
 
 /* Add a path given with the -d command line switch.

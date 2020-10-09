@@ -102,6 +102,17 @@ proc test_command_param_changed { } {
 	    ".*=cmd-param-changed,param=\"check type\",value=\"on\".*\\^done" \
 	    "\"set ch type on\""
 
+	# Notification is emitted for both 'set directories' and 'directory'.
+	mi_gdb_test "set directories \$cdir:\$cwd:/tmp" \
+	    ".*=cmd-param-changed,param=\"directories\",value=\".*\".*\\^done" \
+	    "\"set directories \$cdir:\$cwd:/tmp\""
+	mi_gdb_test "directory /usr/src/gdb" \
+	    ".*=cmd-param-changed,param=\"directories\",value=\".*\".*\\^done" \
+	    "\"directory /usr/src/gdb\""
+	mi_gdb_test "directory" \
+	    ".*=cmd-param-changed,param=\"directories\",value=\".*\".*\\^done" \
+	    "\"directory\""
+
 	mi_gdb_exit
     }
 }
