@@ -1,5 +1,19 @@
 2020-10-09  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Powerpc_relobj::do_relocate_sections): Don't do
+	local entry offset optimisation for lplt_section.
+	(Target_powerpc::Branch_info::make_stub): Don't add local
+	entry offset to long branch dest passed to
+	add_long_branch_entry.  Do pass st_other bits.
+	(Stub_table::Branch_stub_ent): Add "other_" field.
+	(Stub_table::add_long_branch_entry): Add "other" param, and
+	save.
+	(Stub_table::branch_stub_size): Adjust long branch offset.
+	(Stub_table::do_write): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
+2020-10-09  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (is_got_reloc): New function.
 	(Target_powerpc::Relocate::relocate): Use it here, exclude GOT
 	relocs when looking for stubs.
