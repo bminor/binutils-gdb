@@ -1280,20 +1280,48 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
-     frame's prologue, not the next frame's resume location.  */
+     frame's prologue, not the next frame's resume location.
+
+     We do the same for PCC and CLR.  */
   if (prev_regnum == AARCH64_PC_REGNUM || prev_regnum == pcc_regnum)
     {
       CORE_ADDR lr;
       struct gdbarch *gdbarch = get_frame_arch (this_frame);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-      lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
+      /* Fetch LR or CLR depending on the ABI.  */
+      int lr_regnum;
+      if (prev_regnum == AARCH64_PC_REGNUM)
+	lr_regnum = AARCH64_LR_REGNUM;
+      else
+	lr_regnum = tdep->cap_reg_base + 30;
+
+      struct value *lr_value = frame_unwind_register_value (this_frame,
+							    lr_regnum);
+
+      /* Extract only the bottom 8 bytes of CLR.  This truncates the capability
+	 to 8 bytes.  For LR, this gets us the whole register.  */
+      lr = extract_unsigned_integer (value_contents_all (lr_value).data (), 8,
+				     byte_order);
 
       if (tdep->has_pauth ()
 	  && cache->saved_regs[tdep->pauth_ra_state_regnum].is_value ())
 	lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
 
+      /* Remove any potential LSB's in the address.  */
       lr = gdbarch_addr_bits_remove (gdbarch, lr);
-      return frame_unwind_got_constant (this_frame, prev_regnum, lr);
+
+      struct value *lr_value_adjusted
+	  = frame_unwind_got_constant (this_frame, prev_regnum, lr);
+
+      /* Copy the capability tag over, if it exists.  */
+      if (prev_regnum == pcc_regnum && value_tagged (lr_value))
+	{
+	  set_value_tagged (lr_value_adjusted, 1);
+	  set_value_tag (lr_value_adjusted, value_tag (lr_value));
+	}
+
+      return lr_value_adjusted;
     }
 
   /* SP is generally not saved to the stack, but this frame is
@@ -2416,6 +2444,10 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
   if (tdep->has_capability ())
     {
+      /* FIXME-Morello: Redirect CLR to LR for now.  */
+      if (reg == AARCH64_DWARF_CLR)
+	return AARCH64_LR_REGNUM;
+
       if (reg >= AARCH64_DWARF_C0 && reg <= AARCH64_DWARF_C0 + 30)
 	return tdep->cap_reg_base + (reg - AARCH64_DWARF_C0);
 
