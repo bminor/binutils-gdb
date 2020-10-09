@@ -1,3 +1,43 @@
+2020-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26703
+	* config/tc-i386.c (xstate): Add xstate_mask.
+	(md_assemble): Check i.types[j], instead of i.tm.operand_types[j],
+	for xstate.  Set xstate_mask, instead of xstate_zmm, for RegMask.
+	(output_insn): Update for GNU_PROPERTY_X86_ISA_1_V[234].  Update
+	xstate for mask register and VSIB.
+	* testsuite/gas/i386/i386.exp: Run more GNU_PROPERTY tests.
+	* testsuite/gas/i386/property-1.s: Updated to the current
+	GNU_PROPERTY_X86_ISA_1_USED value.
+	* testsuite/gas/i386/property-2.s: Only keep cmove.
+	* testsuite/gas/i386/property-3.s: Changed to addsubpd.
+	* testsuite/gas/i386/property-1.d: Updated.
+	* testsuite/gas/i386/property-2.d: Likewise.
+	* testsuite/gas/i386/property-3.d: Likewise.
+	* testsuite/gas/i386/property-4.d: Likewise.
+	* testsuite/gas/i386/property-5.d: Likewise.
+	* testsuite/gas/i386/property-6.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-2.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-4.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-6.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-7.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-8.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-9.d: Likewise.
+	* testsuite/gas/i386/property-11.d: New file.
+	* testsuite/gas/i386/property-11.s: Likewise.
+	* testsuite/gas/i386/property-12.d: Likewise.
+	* testsuite/gas/i386/property-12.s: Likewise.
+	* testsuite/gas/i386/property-13.d: Likewise.
+	* testsuite/gas/i386/property-13.s: Likewise.
+	* testsuite/gas/i386/x86-64-property-11.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-12.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-13.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-14.d: Likewise.
+	* testsuite/gas/i386/x86-64-property-14.s: Likewise.
+
 2020-10-06  Alex Coplan  <alex.coplan@arm.com>
 
 	PR 26699

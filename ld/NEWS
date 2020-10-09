@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -z x86-64-v[234] to the x86 ELF linker to mark x86-64-v[234] ISA
+  level as needed.
+
 * Add -z unique-symbol to avoid duplicated local symbol names.
 
 * The creation of PE format DLLs now defaults to using a more secure set of DLL

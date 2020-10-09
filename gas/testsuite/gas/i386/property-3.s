@@ -1,2 +1,2 @@
 	.text
-	cvtpi2ps (%eax), %xmm0
+	addsubpd (%eax), %xmm0

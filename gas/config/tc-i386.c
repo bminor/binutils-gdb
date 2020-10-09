@@ -374,7 +374,9 @@ struct _i386_insn
 	/* Use ZMM state.  */
 	xstate_zmm = 1 << 3 | xstate_ymm,
 	/* Use TMM state.  */
-	xstate_tmm = 1 << 4
+	xstate_tmm = 1 << 4,
+	/* Use MASK state.  */
+	xstate_mask = 1 << 5
       } xstate;
 
     /* Has GOTPC or TLS relocation.  */
@@ -4860,7 +4862,7 @@ md_assemble (char *line)
   for (j = 0; j < i.operands; j++)
     {
       i.types[j] = operand_type_and (i.types[j], i.tm.operand_types[j]);
-      switch (i.tm.operand_types[j].bitfield.class)
+      switch (i.types[j].bitfield.class)
 	{
 	default:
 	  break;
@@ -4868,16 +4870,16 @@ md_assemble (char *line)
 	  i.xstate |= xstate_mmx;
 	  break;
 	case RegMask:
-	  i.xstate |= xstate_zmm;
+	  i.xstate |= xstate_mask;
 	  break;
 	case RegSIMD:
-	  if (i.tm.operand_types[j].bitfield.tmmword)
+	  if (i.types[j].bitfield.tmmword)
 	    i.xstate |= xstate_tmm;
-	  else if (i.tm.operand_types[j].bitfield.zmmword)
+	  else if (i.types[j].bitfield.zmmword)
 	    i.xstate |= xstate_zmm;
-	  else if (i.tm.operand_types[j].bitfield.ymmword)
+	  else if (i.types[j].bitfield.ymmword)
 	    i.xstate |= xstate_ymm;
-	  else if (i.tm.operand_types[j].bitfield.xmmword)
+	  else if (i.types[j].bitfield.xmmword)
 	    i.xstate |= xstate_xmm;
 	  break;
 	}
@@ -9167,56 +9169,51 @@ output_insn (void)
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (IS_ELF && x86_used_note && now_seg != absolute_section)
     {
-      if (i.tm.cpu_flags.bitfield.cpucmov)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_CMOV;
-      if (i.tm.cpu_flags.bitfield.cpusse)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE;
-      if (i.tm.cpu_flags.bitfield.cpusse2)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE2;
-      if (i.tm.cpu_flags.bitfield.cpusse3)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE3;
-      if (i.tm.cpu_flags.bitfield.cpussse3)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSSE3;
-      if (i.tm.cpu_flags.bitfield.cpusse4_1)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE4_1;
-      if (i.tm.cpu_flags.bitfield.cpusse4_2)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_SSE4_2;
-      if (i.tm.cpu_flags.bitfield.cpuavx)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX;
-      if (i.tm.cpu_flags.bitfield.cpuavx2)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX2;
-      if (i.tm.cpu_flags.bitfield.cpufma)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_FMA;
-      if (i.tm.cpu_flags.bitfield.cpuavx512f)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512F;
-      if (i.tm.cpu_flags.bitfield.cpuavx512cd)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512CD;
-      if (i.tm.cpu_flags.bitfield.cpuavx512er)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512ER;
-      if (i.tm.cpu_flags.bitfield.cpuavx512pf)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512PF;
-      if (i.tm.cpu_flags.bitfield.cpuavx512vl)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512VL;
-      if (i.tm.cpu_flags.bitfield.cpuavx512dq)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512DQ;
-      if (i.tm.cpu_flags.bitfield.cpuavx512bw)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512BW;
-      if (i.tm.cpu_flags.bitfield.cpuavx512_4fmaps)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_4FMAPS;
-      if (i.tm.cpu_flags.bitfield.cpuavx512_4vnniw)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_4VNNIW;
-      if (i.tm.cpu_flags.bitfield.cpuavx512_bitalg)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_BITALG;
-      if (i.tm.cpu_flags.bitfield.cpuavx512ifma)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_IFMA;
-      if (i.tm.cpu_flags.bitfield.cpuavx512vbmi)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_VBMI;
-      if (i.tm.cpu_flags.bitfield.cpuavx512_vbmi2)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_VBMI2;
-      if (i.tm.cpu_flags.bitfield.cpuavx512_vnni)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_VNNI;
-      if (i.tm.cpu_flags.bitfield.cpuavx512_bf16)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_AVX512_BF16;
+      if ((i.xstate & xstate_tmm) == xstate_tmm
+	  || i.tm.cpu_flags.bitfield.cpuamx_tile)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_TMM;
+
+      if (i.tm.cpu_flags.bitfield.cpusse3
+	  || i.tm.cpu_flags.bitfield.cpussse3
+	  || i.tm.cpu_flags.bitfield.cpusse4_1
+	  || i.tm.cpu_flags.bitfield.cpusse4_2
+	  || i.tm.cpu_flags.bitfield.cpucx16
+	  || i.tm.cpu_flags.bitfield.cpupopcnt
+	  /* LAHF-SAHF insns in 64-bit mode.  */
+	  || (flag_code == CODE_64BIT
+	      && (i.tm.base_opcode | 1) == 0x9f))
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V2;
+      if (i.tm.cpu_flags.bitfield.cpuavx
+	  || i.tm.cpu_flags.bitfield.cpuavx2
+	  /* Any VEX encoded insns execpt for CpuAVX512F, CpuAVX512BW,
+	     CpuAVX512DQ, LPW, TBM and AMX.  */
+	  || (i.tm.opcode_modifier.vex
+	      && !i.tm.cpu_flags.bitfield.cpuavx512f
+	      && !i.tm.cpu_flags.bitfield.cpuavx512bw
+	      && !i.tm.cpu_flags.bitfield.cpuavx512dq
+	      && !i.tm.cpu_flags.bitfield.cpulwp
+	      && !i.tm.cpu_flags.bitfield.cputbm
+	      && !(x86_feature_2_used & GNU_PROPERTY_X86_FEATURE_2_TMM))
+	  || i.tm.cpu_flags.bitfield.cpuf16c
+	  || i.tm.cpu_flags.bitfield.cpufma
+	  || i.tm.cpu_flags.bitfield.cpulzcnt
+	  || i.tm.cpu_flags.bitfield.cpumovbe
+	  || i.tm.cpu_flags.bitfield.cpuxsave
+	  || i.tm.cpu_flags.bitfield.cpuxsavec
+	  || i.tm.cpu_flags.bitfield.cpuxsaveopt
+	  || i.tm.cpu_flags.bitfield.cpuxsaves)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V3;
+      if (i.tm.cpu_flags.bitfield.cpuavx512f
+	  || i.tm.cpu_flags.bitfield.cpuavx512bw
+	  || i.tm.cpu_flags.bitfield.cpuavx512dq
+	  || i.tm.cpu_flags.bitfield.cpuavx512vl
+	  /* Any EVEX encoded insns except for AVX512ER, AVX512PF and
+	     VNNIW.  */
+	  || (i.tm.opcode_modifier.evex
+	      && !i.tm.cpu_flags.bitfield.cpuavx512er
+	      && !i.tm.cpu_flags.bitfield.cpuavx512pf
+	      && !i.tm.cpu_flags.bitfield.cpuavx512_4vnniw))
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V4;
 
       if (i.tm.cpu_flags.bitfield.cpu8087
 	  || i.tm.cpu_flags.bitfield.cpu287
@@ -9228,6 +9225,15 @@ output_insn (void)
 	  || i.tm.base_opcode == 0xf77 /* emms */
 	  || i.tm.base_opcode == 0xf0e /* femms */)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
+      if (i.index_reg)
+	{
+	  if (i.index_reg->reg_type.bitfield.zmmword)
+	    i.xstate |= xstate_zmm;
+	  else if (i.index_reg->reg_type.bitfield.ymmword)
+	    i.xstate |= xstate_ymm;
+	  else if (i.index_reg->reg_type.bitfield.xmmword)
+	    i.xstate |= xstate_xmm;
+	}
       if ((i.xstate & xstate_xmm)
 	  || i.tm.cpu_flags.bitfield.cpuwidekl
 	  || i.tm.cpu_flags.bitfield.cpukl)
@@ -9236,6 +9242,8 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
       if ((i.xstate & xstate_zmm) == xstate_zmm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
+      if (i.mask || (i.xstate & xstate_mask) == xstate_mask)
+	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MASK;
       if (i.tm.cpu_flags.bitfield.cpufxsr)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;
       if (i.tm.cpu_flags.bitfield.cpuxsave)
@@ -9244,10 +9252,6 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT;
       if (i.tm.cpu_flags.bitfield.cpuxsavec)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEC;
-
-      if ((i.xstate & xstate_tmm) == xstate_tmm
-	  || i.tm.cpu_flags.bitfield.cpuamx_tile)
-	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_TMM;
     }
 #endif
 

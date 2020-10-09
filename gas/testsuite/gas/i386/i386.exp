@@ -645,6 +645,9 @@ if [gas_32_check] then {
 	run_dump_test "property-5"
 	run_dump_test "property-6"
 	run_dump_test "property-10"
+	run_dump_test "property-11"
+	run_dump_test "property-12"
+	run_dump_test "property-13"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "align-branch-3"
@@ -1254,6 +1257,10 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-property-8"
 	run_dump_test "x86-64-property-9"
 	run_dump_test "x86-64-property-10"
+	run_dump_test "x86-64-property-11"
+	run_dump_test "x86-64-property-12"
+	run_dump_test "x86-64-property-13"
+	run_dump_test "x86-64-property-14"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"

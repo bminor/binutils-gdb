@@ -2337,6 +2337,8 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 {
   unsigned int number, features;
   bfd_boolean updated = FALSE;
+  const struct elf_backend_data *bed;
+  struct elf_x86_link_hash_table *htab;
   unsigned int pr_type = aprop != NULL ? aprop->pr_type : bprop->pr_type;
 
   if (pr_type == GNU_PROPERTY_X86_COMPAT_ISA_1_USED
@@ -2366,10 +2368,32 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	   || (pr_type >= GNU_PROPERTY_X86_UINT32_OR_LO
 	       && pr_type <= GNU_PROPERTY_X86_UINT32_OR_HI))
     {
+      features = 0;
+      if (pr_type == GNU_PROPERTY_X86_ISA_1_NEEDED)
+	{
+	  bed = get_elf_backend_data (info->output_bfd);
+	  htab = elf_x86_hash_table (info, bed->target_id);
+	  switch (htab->params->isa_level)
+	    {
+	    case 0:
+	      break;
+	    case 2:
+	      features = GNU_PROPERTY_X86_ISA_1_V2;
+	      break;
+	    case 3:
+	      features = GNU_PROPERTY_X86_ISA_1_V3;
+	      break;
+	    case 4:
+	      features = GNU_PROPERTY_X86_ISA_1_V4;
+	      break;
+	    default:
+	      abort ();
+	    }
+	}
       if (aprop != NULL && bprop != NULL)
 	{
 	  number = aprop->u.number;
-	  aprop->u.number = number | bprop->u.number;
+	  aprop->u.number = number | bprop->u.number | features;
 	  /* Remove the property if all bits are empty.  */
 	  if (aprop->u.number == 0)
 	    {
@@ -2384,6 +2408,7 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	  /* Only one of APROP and BPROP can be NULL.  */
 	  if (aprop != NULL)
 	    {
+	      aprop->u.number |= features;
 	      if (aprop->u.number == 0)
 		{
 		  /* Remove APROP if all bits are empty.  */
@@ -2396,6 +2421,7 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	      /* Return TRUE if APROP is NULL and all bits of BPROP
 		 aren't empty to indicate that BPROP should be added
 		 to ABFD.  */
+	      bprop->u.number |= features;
 	      updated = bprop->u.number != 0;
 	    }
 	}
@@ -2409,10 +2435,8 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 	 2. If APROP is NULL, remove x86 feature.
 	 3. Otherwise, do nothing.
        */
-      const struct elf_backend_data *bed
-	= get_elf_backend_data (info->output_bfd);
-      struct elf_x86_link_hash_table *htab
-	= elf_x86_hash_table (info, bed->target_id);
+      bed = get_elf_backend_data (info->output_bfd);
+      htab = elf_x86_hash_table (info, bed->target_id);
       if (!htab)
 	abort ();
       if (aprop != NULL && bprop != NULL)
@@ -2490,7 +2514,7 @@ _bfd_x86_elf_link_setup_gnu_properties
   asection *sec, *pltsec;
   bfd *dynobj;
   bfd_boolean use_ibt_plt;
-  unsigned int plt_alignment, features;
+  unsigned int plt_alignment, features, isa_level;
   struct elf_x86_link_hash_table *htab;
   bfd *pbfd;
   bfd *ebfd = NULL;
@@ -2532,6 +2556,24 @@ _bfd_x86_elf_link_setup_gnu_properties
   if (!(htab->params->cet_report & (cet_report_ibt | cet_report_shstk)))
     htab->params->cet_report = cet_report_none;
 
+  switch (htab->params->isa_level)
+    {
+    case 0:
+      isa_level = 0;
+      break;
+    case 2:
+      isa_level = GNU_PROPERTY_X86_ISA_1_V2;
+      break;
+    case 3:
+      isa_level = GNU_PROPERTY_X86_ISA_1_V3;
+      break;
+    case 4:
+      isa_level = GNU_PROPERTY_X86_ISA_1_V4;
+      break;
+    default:
+      abort ();
+    }
+
   if (ebfd != NULL)
     {
       prop = NULL;
@@ -2543,6 +2585,16 @@ _bfd_x86_elf_link_setup_gnu_properties
 					GNU_PROPERTY_X86_FEATURE_1_AND,
 					4);
 	  prop->u.number |= features;
+	  prop->pr_kind = property_number;
+	}
+
+      if (isa_level)
+	{
+	  /* If ISA level is set, add GNU_PROPERTY_X86_ISA_1_NEEDED.  */
+	  prop = _bfd_elf_get_property (ebfd,
+					GNU_PROPERTY_X86_ISA_1_NEEDED,
+					4);
+	  prop->u.number |= isa_level;
 	  prop->pr_kind = property_number;
 	}
 

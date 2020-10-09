@@ -422,6 +422,7 @@ run_dump_test "property-x86-3"
 run_dump_test "property-x86-4a"
 run_dump_test "property-x86-4b"
 run_dump_test "property-x86-5"
+run_dump_test "property-x86-6"
 run_dump_test "property-x86-ibt1a"
 run_dump_test "property-x86-ibt1b"
 run_dump_test "property-x86-ibt2"
@@ -475,6 +476,9 @@ run_dump_test "pr26263"
 run_dump_test "pr26711-1"
 run_dump_test "pr26711-2"
 run_dump_test "pr26711-3"
+run_dump_test "property-x86-isa1"
+run_dump_test "property-x86-isa2"
+run_dump_test "property-x86-isa3"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]

@@ -1,3 +1,40 @@
+2020-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26703
+	* readelf.c (decode_x86_compat_2_isa): New function.
+	(decode_x86_isa): Updated for new X86_ISA_1_XXX bits.
+	(decode_x86_feature_1): Handle GNU_PROPERTY_X86_FEATURE_2_MASK.
+	(print_gnu_property_note): Handle X86_COMPAT_2_ISA_1_USED,
+	and X86_COMPAT_2_ISA_1_NEEDED.
+	* testsuite/binutils-all/i386/pr21231b.s: Updated to the current
+	GNU_PROPERTY_X86_ISA_1_USED and GNU_PROPERTY_X86_ISA_1_NEEDED
+	values.
+	* testsuite/binutils-all/x86-64/pr21231b.s: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a.s: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b.s: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c.s: Likewise.
+	* testsuite/binutils-all/i386/empty.d: Updated.
+	* testsuite/binutils-all/i386/ibt.d: Likewise.
+	* testsuite/binutils-all/i386/pr21231a.d: Likewise.
+	* testsuite/binutils-all/i386/pr21231b.d: Likewise.
+	* testsuite/binutils-all/i386/shstk.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/empty.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/ibt.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr21231a.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr21231b.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/shstk.d: Likewise.
+
 2020-10-06  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_object): Compare input and output sections by

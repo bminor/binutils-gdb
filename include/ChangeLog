@@ -1,3 +1,19 @@
+2020-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26703
+	* elf/common.h (GNU_PROPERTY_X86_ISA_1_USED): Renamed to ...
+	(GNU_PROPERTY_X86_COMPAT_2_ISA_1_USED): This.
+	(GNU_PROPERTY_X86_ISA_1_NEEDED): Renamed to ...
+	(GNU_PROPERTY_X86_COMPAT_2_ISA_1_NEEDED): This.
+	(GNU_PROPERTY_X86_ISA_1_XXX): Renamed to ...
+	(GNU_PROPERTY_X86_COMPAT_2_ISA_1_XXX): This.
+	(GNU_PROPERTY_X86_ISA_1_NEEDED): New.
+	(GNU_PROPERTY_X86_ISA_1_USED): Likewise.
+	(GNU_PROPERTY_X86_ISA_1_V2): Likewise.
+	(GNU_PROPERTY_X86_ISA_1_V3): Likewise.
+	(GNU_PROPERTY_X86_ISA_1_V4): Likewise.
+	(GNU_PROPERTY_X86_FEATURE_2_MASK): Likewise.
+
 2020-09-23  Mark Wielaard  <mark@klomp.org>
 
 	Sync with GCC

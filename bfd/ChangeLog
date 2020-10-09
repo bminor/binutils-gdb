@@ -1,3 +1,12 @@
+2020-10-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26703
+	* elf-linker-x86.h (elf_linker_x86_params): Add isa_level.
+	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Merge
+	GNU_PROPERTY_X86_ISA_1_V[234].
+	(_bfd_x86_elf_link_setup_gnu_properties): Generate
+	GNU_PROPERTY_X86_ISA_1_V[234] for -z x86-64-v[234].
+
 2020-10-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26711

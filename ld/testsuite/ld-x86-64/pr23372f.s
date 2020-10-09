@@ -17,7 +17,7 @@
 	.p2align 2
 .endif
 	/* GNU_PROPERTY_X86_ISA_1_NEEDED */
-	.long 0xc0008000	/* pr_type.  */
+	.long 0xc0008002	/* pr_type.  */
 	.long 3f - 2f		/* pr_datasz.  */
 2:
 	.long 0x0

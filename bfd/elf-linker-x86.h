@@ -55,6 +55,9 @@ struct elf_linker_x86_params
   /* TRUE if --dynamic-linker is passed at command-line.  */
   unsigned int has_dynamic_linker : 1;
 
+  /* X86-64 ISA level needed.  */
+  unsigned int isa_level;
+
   /* Report missing IBT and SHSTK properties.  */
   enum elf_x86_cet_report cet_report;
 
