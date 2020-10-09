@@ -2767,8 +2767,6 @@ Powerpc_relobj<size, big_endian>::do_relocate_sections(
 	    if (this->local_has_plt_offset(i))
 	      {
 		Address value = this->local_symbol_value(i, 0);
-		if (size == 64)
-		  value += ppc64_local_entry_offset(i);
 		size_t off = this->local_plt_offset(i);
 		elfcpp::Swap<size, big_endian>::writeval(oview + off, value);
 		modified = true;
@@ -3539,6 +3537,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
       from += (this->object_->output_section(this->shndx_)->address()
 	       + this->offset_);
       Address to;
+      unsigned int other;
       if (gsym != NULL)
 	{
 	  switch (gsym->source())
@@ -3566,8 +3565,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	  to = symtab->compute_final_value<size>(gsym, &status);
 	  if (status != Symbol_table::CFVS_OK)
 	    return true;
-	  if (size == 64)
-	    to += this->object_->ppc64_local_entry_offset(gsym);
+	  other = gsym->nonvis() >> 3;
 	}
       else
 	{
@@ -3584,8 +3582,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	      || !symval.has_output_value())
 	    return true;
 	  to = symval.value(this->object_, 0);
-	  if (size == 64)
-	    to += this->object_->ppc64_local_entry_offset(this->r_sym_);
+	  other = this->object_->st_other(this->r_sym_) >> 5;
 	}
       if (!(size == 32 && this->r_type_ == elfcpp::R_PPC_PLTREL24))
 	to += this->addend_;
@@ -3598,7 +3595,11 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 					 &to, &dest_shndx))
 	    return true;
 	}
-      Address delta = to - from;
+      unsigned int local_ent = 0;
+      if (size == 64
+	  && this->r_type_ != elfcpp::R_PPC64_REL24_NOTOC)
+	local_ent = elfcpp::ppc64_decode_local_entry(other);
+      Address delta = to + local_ent - from;
       if (delta + max_branch_offset >= 2 * max_branch_offset
 	  || (size == 64
 	      && this->r_type_ == elfcpp::R_PPC64_REL24_NOTOC
@@ -3620,7 +3621,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 			   && gsym->output_data() == target->savres_section());
 	  ok = stub_table->add_long_branch_entry(this->object_,
 						 this->r_type_,
-						 from, to, save_res);
+						 from, to, other, save_res);
 	}
     }
   if (!ok)
@@ -4688,7 +4689,7 @@ class Stub_table : public Output_relaxed_input_section
   {
     Branch_stub_ent(unsigned int off, bool notoc, bool save_res)
       : off_(off), iter_(0), notoc_(notoc), toc_(0), save_res_(save_res),
-	tocoff_(0)
+	other_(0), tocoff_(0)
     { }
 
     unsigned int off_;
@@ -4696,6 +4697,7 @@ class Stub_table : public Output_relaxed_input_section
     unsigned int notoc_ : 1;
     unsigned int toc_ : 1;
     unsigned int save_res_ : 1;
+    unsigned int other_ : 3;
     unsigned int tocoff_ : 8;
   };
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
@@ -4762,7 +4764,7 @@ class Stub_table : public Output_relaxed_input_section
   // Add a long branch stub.
   bool
   add_long_branch_entry(const Powerpc_relobj<size, big_endian>*,
-			unsigned int, Address, Address, bool);
+			unsigned int, Address, Address, unsigned int, bool);
 
   const Branch_stub_ent*
   find_long_branch_entry(const Powerpc_relobj<size, big_endian>*,
@@ -5282,6 +5284,7 @@ Stub_table<size, big_endian>::add_long_branch_entry(
     unsigned int r_type,
     Address from,
     Address to,
+    unsigned int other,
     bool save_res)
 {
   Branch_stub_key key(object, to);
@@ -5301,6 +5304,8 @@ Stub_table<size, big_endian>::add_long_branch_entry(
 	this->need_resize_ = true;
       p.first->second.toc_ = true;
     }
+  if (p.first->second.other_ == 0)
+    p.first->second.other_ = other;
   gold_assert(save_res == p.first->second.save_res_);
   if (p.second || (this->resizing_ && !p.first->second.iter_))
     {
@@ -6198,6 +6203,7 @@ Stub_table<size, big_endian>::branch_stub_size(
 	}
     }
 
+  off += elfcpp::ppc64_decode_local_entry(p->second.other_);
   if (off + (1 << 25) < 2 << 25)
     return bytes + 4;
   if (!this->targ_->power10_stubs()
@@ -6377,6 +6383,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		}
 	      if (bs->second.toc_)
 		{
+		  delta += elfcpp::ppc64_decode_local_entry(bs->second.other_);
 		  if (delta + (1 << 25) >= 2 << 25)
 		    {
 		      Address brlt_addr
@@ -6410,6 +6417,8 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	    }
 	  else
 	    {
+	      if (!bs->second.notoc_)
+		delta += elfcpp::ppc64_decode_local_entry(bs->second.other_);
 	      if (bs->second.notoc_ || delta + (1 << 25) >= 2 << 25)
 		{
 		  unsigned char* startp = p;
@@ -6640,6 +6649,8 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	  p = oview + off;
 	  Address loc = this->stub_address() + off;
 	  Address delta = bs->first.dest_ - loc;
+	  if (!bs->second.notoc_)
+	    delta += elfcpp::ppc64_decode_local_entry(bs->second.other_);
 	  if (bs->second.notoc_)
 	    {
 	      unsigned char* startp = p;
@@ -11039,14 +11050,15 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		|| r_type == elfcpp::R_POWERPC_PLT16_HA)))
 	addend = rela.get_r_addend();
       value = psymval->value(object, addend);
+      unsigned int local_ent = 0;
       if (size == 64 && is_branch_reloc<size>(r_type))
 	{
 	  if (target->abiversion() >= 2)
 	    {
 	      if (gsym != NULL)
-		value += object->ppc64_local_entry_offset(gsym);
+		local_ent = object->ppc64_local_entry_offset(gsym);
 	      else
-		value += object->ppc64_local_entry_offset(r_sym);
+		local_ent = object->ppc64_local_entry_offset(r_sym);
 	    }
 	  else
 	    {
@@ -11055,9 +11067,9 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 					&value, &dest_shndx);
 	    }
 	}
-      Address max_branch_offset = max_branch_delta<size>(r_type);
-      if (max_branch_offset != 0
-	  && (value - address + max_branch_offset >= 2 * max_branch_offset
+      Address max_branch = max_branch_delta<size>(r_type);
+      if (max_branch != 0
+	  && (value + local_ent - address + max_branch >= 2 * max_branch
 	      || (size == 64
 		  && r_type == elfcpp::R_PPC64_REL24_NOTOC
 		  && (gsym != NULL
@@ -11082,12 +11094,15 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 			       + ent->off_);
 		      if (size == 64
 			  && r_type != elfcpp::R_PPC64_REL24_NOTOC)
-			value += ent->tocoff_;
+			value += (elfcpp::ppc64_decode_local_entry(ent->other_)
+				  + ent->tocoff_);
 		    }
 		  has_stub_value = true;
 		}
 	    }
 	}
+      if (!has_stub_value)
+	value += local_ent;
     }
 
   switch (r_type)

@@ -1,3 +1,8 @@
+2020-10-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (write_plt_relocs_for_local_syms): Don't do local
+	entry offset optimisation.
+
 2020-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26711
