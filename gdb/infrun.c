@@ -2149,6 +2149,14 @@ user_visible_resume_ptid (int step)
 	 mode.  */
       resume_ptid = inferior_ptid;
     }
+  else if (inferior_ptid != null_ptid
+	   && inferior_thread ()->control.in_cond_eval)
+    {
+      /* The inferior thread is evaluating a BP condition.  Other threads
+	 might be stopped or running and we do not want to change their
+	 state, thus, resume only the current thread.  */
+      resume_ptid = inferior_ptid;
+    }
   else if (!sched_multi && target_supports_multi_process ())
     {
       /* Resume all threads of the current process (and none of other
@@ -2861,7 +2869,7 @@ schedlock_applies (struct thread_info *tp)
    pending events.  */
 
 static void
-maybe_set_commit_resumed_all_targets ()
+maybe_set_commit_resumed_all_targets (bool force_p)
 {
   scoped_restore_current_thread restore_thread;
 
@@ -2890,7 +2898,7 @@ maybe_set_commit_resumed_all_targets ()
 	 status to report, handle it before requiring the target to
 	 commit its resumed threads: handling the status might lead to
 	 resuming more threads.  */
-      if (proc_target->has_resumed_with_pending_wait_status ())
+      if (!force_p && proc_target->has_resumed_with_pending_wait_status ())
 	{
 	  infrun_debug_printf ("not requesting commit-resumed for target %s, a"
 			       " thread has a pending waitstatus",
@@ -2900,7 +2908,7 @@ maybe_set_commit_resumed_all_targets ()
 
       switch_to_inferior_no_thread (inf);
 
-      if (target_has_pending_events ())
+      if (!force_p && target_has_pending_events ())
 	{
 	  infrun_debug_printf ("not requesting commit-resumed for target %s, "
 			       "target has pending events",
@@ -2993,7 +3001,7 @@ scoped_disable_commit_resumed::reset ()
     {
       /* This is the outermost instance, re-enable
          COMMIT_RESUMED_STATE on the targets where it's possible.  */
-      maybe_set_commit_resumed_all_targets ();
+      maybe_set_commit_resumed_all_targets (false);
     }
   else
     {
@@ -3026,7 +3034,7 @@ scoped_disable_commit_resumed::reset_and_commit ()
 /* See infrun.h.  */
 
 scoped_enable_commit_resumed::scoped_enable_commit_resumed
-  (const char *reason)
+  (const char *reason, bool force_p)
   : m_reason (reason),
     m_prev_enable_commit_resumed (enable_commit_resumed)
 {
@@ -3038,7 +3046,7 @@ scoped_enable_commit_resumed::scoped_enable_commit_resumed
 
       /* Re-enable COMMIT_RESUMED_STATE on the targets where it's
 	 possible.  */
-      maybe_set_commit_resumed_all_targets ();
+      maybe_set_commit_resumed_all_targets (force_p);
 
       maybe_call_commit_resumed_all_targets ();
     }
@@ -3752,10 +3760,11 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
      polling the rest of the inferior list starting from that one in a
      circular fashion until the whole list is polled once.  */
 
-  auto inferior_matches = [&wait_ptid] (inferior *inf)
+  ptid_t wait_ptid_pid {wait_ptid.pid ()};
+  auto inferior_matches = [&wait_ptid_pid] (inferior *inf)
     {
       return (inf->process_target () != NULL
-	      && ptid_t (inf->pid).matches (wait_ptid));
+	      && ptid_t (inf->pid).matches (wait_ptid_pid));
     };
 
   /* First see how many matching inferiors we have.  */
@@ -4171,7 +4180,17 @@ fetch_inferior_event ()
        the event.  */
     scoped_disable_commit_resumed disable_commit_resumed ("handling event");
 
-    if (!do_target_wait (minus_one_ptid, &ecs, TARGET_WNOHANG))
+    /* Is the current thread performing an inferior function call as part
+       of a breakpoint condition evaluation?  */
+    bool in_cond_eval = (inferior_ptid != null_ptid
+			 && inferior_thread ()->control.in_cond_eval);
+
+    /* If the thread is in the middle of the condition evaluation, wait for
+       an event from the current thread, otherwise, wait for an event from
+       any thread.  */
+    ptid_t waiton_ptid = in_cond_eval ? inferior_ptid : minus_one_ptid;
+
+    if (!do_target_wait (waiton_ptid, &ecs, TARGET_WNOHANG))
       {
 	infrun_debug_printf ("do_target_wait returned no event");
 	disable_commit_resumed.reset_and_commit ();
@@ -4223,7 +4242,12 @@ fetch_inferior_event ()
 	    bool should_notify_stop = true;
 	    bool proceeded = false;
 
-	    stop_all_threads_if_all_stop_mode ();
+	    /* If the thread that stopped just completed an inferior
+	       function call as part of a condition evaluation, then we
+	       don't want to stop all the other threads.  */
+	    if (ecs.event_thread == nullptr
+		|| !ecs.event_thread->control.in_cond_eval)
+	      stop_all_threads_if_all_stop_mode ();
 
 	    clean_up_just_stopped_threads_fsms (&ecs);
 
@@ -4238,7 +4262,7 @@ fetch_inferior_event ()
 		  proceeded = normal_stop ();
 	      }
 
-	    if (!proceeded)
+	    if (!proceeded && !in_cond_eval)
 	      {
 		inferior_event_handler (INF_EXEC_COMPLETE);
 		cmd_done = 1;

@@ -641,6 +641,12 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 
       proceed (real_pc, GDB_SIGNAL_0);
 
+      /* Enable commit resume, but pass true for the force flag.  This
+	 ensures any thread we set running in proceed will actually be
+	 committed to the target, even if some other thread in the current
+	 target has a pending event.  */
+      scoped_enable_commit_resumed enable ("infcall", true);
+
       infrun_debug_show_threads ("non-exited threads after proceed for inferior-call",
 				 all_non_exited_threads ());
 
