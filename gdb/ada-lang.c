@@ -186,7 +186,7 @@ static int equiv_types (struct type *, struct type *);
 
 static int is_name_suffix (const char *);
 
-static int advance_wild_match (const char **, const char *, int);
+static int advance_wild_match (const char **, const char *, char);
 
 static bool wild_match (const char *name, const char *patn);
 
@@ -5921,18 +5921,18 @@ is_valid_name_for_wild_match (const char *name0)
   return 1;
 }
 
-/* Advance *NAMEP to next occurrence of TARGET0 in the string NAME0
-   that could start a simple name.  Assumes that *NAMEP points into
-   the string beginning at NAME0.  */
+/* Advance *NAMEP to next occurrence in the string NAME0 of the TARGET0
+   character which could start a simple name.  Assumes that *NAMEP points
+   somewhere inside the string beginning at NAME0.  */
 
 static int
-advance_wild_match (const char **namep, const char *name0, int target0)
+advance_wild_match (const char **namep, const char *name0, char target0)
 {
   const char *name = *namep;
 
   while (1)
     {
-      int t0, t1;
+      char t0, t1;
 
       t0 = *name;
       if (t0 == '_')
