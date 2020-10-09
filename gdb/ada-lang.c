@@ -918,33 +918,21 @@ const struct ada_opname_map ada_opname_table[] = {
   {NULL, NULL}
 };
 
-/* The "encoded" form of DECODED, according to GNAT conventions.  The
-   result is valid until the next call to ada_encode.  If
+/* The "encoded" form of DECODED, according to GNAT conventions.  If
    THROW_ERRORS, throw an error if invalid operator name is found.
-   Otherwise, return NULL in that case.  */
+   Otherwise, return the empty string in that case.  */
 
-static char *
+static std::string
 ada_encode_1 (const char *decoded, bool throw_errors)
 {
-  static char *encoding_buffer = NULL;
-  static size_t encoding_buffer_size = 0;
-  const char *p;
-  int k;
-
   if (decoded == NULL)
-    return NULL;
+    return {};
 
-  GROW_VECT (encoding_buffer, encoding_buffer_size,
-             2 * strlen (decoded) + 10);
-
-  k = 0;
-  for (p = decoded; *p != '\0'; p += 1)
+  std::string encoding_buffer;
+  for (const char *p = decoded; *p != '\0'; p += 1)
     {
       if (*p == '.')
-        {
-          encoding_buffer[k] = encoding_buffer[k + 1] = '_';
-          k += 2;
-        }
+	encoding_buffer.append ("__");
       else if (*p == '"')
         {
           const struct ada_opname_map *mapping;
@@ -958,27 +946,21 @@ ada_encode_1 (const char *decoded, bool throw_errors)
 	      if (throw_errors)
 		error (_("invalid Ada operator name: %s"), p);
 	      else
-		return NULL;
+		return {};
 	    }
-          strcpy (encoding_buffer + k, mapping->encoded);
-          k += strlen (mapping->encoded);
+	  encoding_buffer.append (mapping->encoded);
           break;
         }
       else
-        {
-          encoding_buffer[k] = *p;
-          k += 1;
-        }
+	encoding_buffer.push_back (*p);
     }
 
-  encoding_buffer[k] = '\0';
   return encoding_buffer;
 }
 
-/* The "encoded" form of DECODED, according to GNAT conventions.
-   The result is valid until the next call to ada_encode.  */
+/* The "encoded" form of DECODED, according to GNAT conventions.  */
 
-char *
+std::string
 ada_encode (const char *decoded)
 {
   return ada_encode_1 (decoded, true);
@@ -6384,7 +6366,7 @@ type_from_tag (struct value *tag)
   gdb::unique_xmalloc_ptr<char> type_name = ada_tag_name (tag);
 
   if (type_name != NULL)
-    return ada_find_any_type (ada_encode (type_name.get ()));
+    return ada_find_any_type (ada_encode (type_name.get ()).c_str ());
   return NULL;
 }
 
@@ -13613,10 +13595,8 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
       if (!m_encoded_p)
 	{
 	  const char *folded = ada_fold_name (user_name);
-	  const char *encoded = ada_encode_1 (folded, false);
-	  if (encoded != NULL)
-	    m_encoded_name = encoded;
-	  else
+	  m_encoded_name = ada_encode_1 (folded, false);
+	  if (m_encoded_name.empty ())
 	    m_encoded_name = gdb::to_string (user_name);
 	}
       else

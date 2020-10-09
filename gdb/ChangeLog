@@ -1,3 +1,12 @@
+2020-10-09  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.h (ada_encode): Return std::string.
+	* ada-lang.c (ada_encode_1): Return std::string.
+	(ada_encode): Likewise.
+	(type_from_tag, ada_lookup_name_info::ada_lookup_name_info):
+	Update.
+	* ada-exp.y (block_lookup, write_var_or_type): Update.
+
 2020-10-09  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR exp/26714

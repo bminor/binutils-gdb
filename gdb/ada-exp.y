@@ -953,13 +953,17 @@ block_lookup (const struct block *context, const char *raw_name)
   struct symtab *symtab;
   const struct block *result = NULL;
 
+  std::string name_storage;
   if (raw_name[0] == '\'')
     {
       raw_name += 1;
       name = raw_name;
     }
   else
-    name = ada_encode (raw_name);
+    {
+      name_storage = ada_encode (raw_name);
+      name = name_storage.c_str ();
+    }
 
   nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
 
@@ -1201,9 +1205,10 @@ write_var_or_type (struct parser_state *par_state,
   if (block == NULL)
     block = par_state->expression_context_block;
 
-  encoded_name = ada_encode (name0.ptr);
-  name_len = strlen (encoded_name);
-  encoded_name = obstack_strndup (&temp_parse_space, encoded_name, name_len);
+  std::string name_storage = ada_encode (name0.ptr);
+  name_len = name_storage.size ();
+  encoded_name = obstack_strndup (&temp_parse_space, name_storage.c_str (),
+				  name_len);
   for (depth = 0; depth < MAX_RENAMING_CHAIN_LENGTH; depth += 1)
     {
       int tail_index;
