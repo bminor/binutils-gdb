@@ -244,11 +244,6 @@ public:
     invalid ("DW_OP_entry_value");
   }
 
-  CORE_ADDR get_object_address () override
-  {
-    invalid ("DW_OP_push_object_address");
-  }
-
  private:
 
   void invalid (const char *op) ATTRIBUTE_NORETURN

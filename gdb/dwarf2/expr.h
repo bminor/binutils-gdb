@@ -188,6 +188,9 @@ struct dwarf_expr_context
   /* Compilation unit used for the evaluation.  */
   dwarf2_per_cu_data *per_cu = nullptr;
 
+  /* Object address used for the evaluation.  */
+  CORE_ADDR obj_address = 0;
+
   /* Read LENGTH bytes at ADDR into BUF.  */
   virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length) = 0;
 
@@ -200,7 +203,12 @@ struct dwarf_expr_context
 					   int deref_size) = 0;
 
   /* Return the `object address' for DW_OP_push_object_address.  */
-  virtual CORE_ADDR get_object_address () = 0;
+  virtual CORE_ADDR get_object_address ()
+  {
+    if (obj_address == 0)
+      error (_("Location address is not set."));
+    return obj_address;
+  }
 
 private:
 

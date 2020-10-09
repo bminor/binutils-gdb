@@ -674,18 +674,6 @@ public:
     : dwarf_expr_context (per_objfile)
   {}
 
-  CORE_ADDR obj_address;
-
-  /* Callback function for get_object_address. Return the address of the VLA
-     object.  */
-
-  CORE_ADDR get_object_address () override
-  {
-    if (obj_address == 0)
-      error (_("Location address is not set."));
-    return obj_address;
-  }
-
   /* Execute DWARF block of call_site_parameter which matches KIND and
      KIND_U.  Choose DEREF_SIZE value of that parameter.  Search
      caller of this objects's frame.
