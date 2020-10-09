@@ -151,6 +151,7 @@ recognized:
 @code{marvell-pj4},
 @code{marvell-whitney},
 @code{neoverse-n1},
+@code{neoverse-n2},
 @code{neoverse-v1},
 @code{xgene1},
 @code{xgene2},
