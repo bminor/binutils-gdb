@@ -406,7 +406,8 @@ extern void maybe_call_commit_resumed_all_targets ();
 
 struct scoped_enable_commit_resumed
 {
-  explicit scoped_enable_commit_resumed (const char *reason);
+  explicit scoped_enable_commit_resumed (const char *reason,
+					 bool force_p = false);
   ~scoped_enable_commit_resumed ();
 
   DISABLE_COPY_AND_ASSIGN (scoped_enable_commit_resumed);
