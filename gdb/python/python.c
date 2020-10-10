@@ -1,6 +1,6 @@
 /* General python/gdb code
 
-   Copyright (C) 2008-2020 Free Software Foundation, Inc.
+   Copyright (C) 2008-2019 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -194,6 +194,8 @@ const struct extension_language_ops python_extension_ops =
   gdbpy_colorize,
 };
 
+void toggle_completion_func(bool want_py_completion);
+
 /* Architecture and language to be used in callbacks from
    the Python interpreter.  */
 struct gdbarch *python_gdbarch;
@@ -207,6 +209,8 @@ gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
   /* We should not ever enter Python unless initialized.  */
   if (!gdb_python_initialized)
     error (_("Python not initialized"));
+  
+  toggle_completion_func(true);
 
   m_previous_active = set_active_ext_lang (&extension_language_python);
 
@@ -217,6 +221,8 @@ gdbpy_enter::gdbpy_enter  (struct gdbarch *gdbarch,
 
   /* Save it and ensure ! PyErr_Occurred () afterwards.  */
   m_error.emplace ();
+  
+  toggle_completion_func(true);
 }
 
 gdbpy_enter::~gdbpy_enter ()
@@ -228,7 +234,8 @@ gdbpy_enter::~gdbpy_enter ()
       gdbpy_print_stack ();
       warning (_("internal error: Unhandled Python exception"));
     }
-
+  toggle_completion_func(false);
+  
   m_error->restore ();
 
   python_gdbarch = m_gdbarch;
@@ -236,6 +243,8 @@ gdbpy_enter::~gdbpy_enter ()
 
   restore_active_ext_lang (m_previous_active);
   PyGILState_Release (m_state);
+  
+  toggle_completion_func(false);
 }
 
 /* A helper class to save and restore the GIL, but without touching

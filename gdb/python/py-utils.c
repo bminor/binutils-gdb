@@ -306,7 +306,7 @@ gdb_py_object_from_longest (LONGEST l)
       && (l > PyInt_GetMax () || l < (- (LONGEST) PyInt_GetMax ()) - 1))
     return gdbpy_ref<> (PyLong_FromLongLong (l));
 #endif
-  return gdbpy_ref<> (PyInt_FromLong (l));
+  return gdbpy_ref<> (PyLong_FromLong(l));
 #endif
 }
 
@@ -331,7 +331,7 @@ gdb_py_object_from_ulongest (ULONGEST l)
   if (l > PyInt_GetMax ())
     return gdbpy_ref<> (PyLong_FromUnsignedLong (l));
 
-  return gdbpy_ref<> (PyInt_FromLong (l));
+  return gdbpy_ref<> (PyLong_FromLong(l));
 #endif
 }
 

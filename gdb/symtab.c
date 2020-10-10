@@ -5339,7 +5339,7 @@ completion_list_add_symbol (completion_tracker &tracker,
       gdb::unique_xmalloc_ptr<char> str
 	= cp_canonicalize_string_no_typedefs (sym->natural_name ());
       if (str != nullptr)
-	tracker.remove_completion (str.get ());
+	    ;     ; // tracker.remove_completion (str.get ());
     }
 }
 

@@ -7696,18 +7696,121 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
     case DW_TAG_partial_unit:
       this_cu->unit_type = DW_UT_partial;
       break;
-    default:
-      abort ();
-    }
+    case DW_TAG_padding: // 0
+      this_cu->unit_type = 0;
+      break;
+    case DW_TAG_array_type: // 1
+    case DW_TAG_class_type: // 2
+    case DW_TAG_entry_point: // 3
+    case DW_TAG_enumeration_type: // 4
+    case DW_TAG_formal_parameter: // 5
+    case DW_TAG_imported_declaration: // 8
+    case DW_TAG_label: // 10
+    case DW_TAG_lexical_block: // 11
+    case DW_TAG_member: // 13
+    case DW_TAG_pointer_type: // 15
+    case DW_TAG_reference_type: // 16
+    case DW_TAG_string_type: // 18
+    case DW_TAG_structure_type: // 19
+    case DW_TAG_subroutine_type: // 21
+    case DW_TAG_typedef: // 22
+    case DW_TAG_union_type: // 23
+    case DW_TAG_unspecified_parameters: // 24
+    case DW_TAG_variant: // 25
+    case DW_TAG_common_block: // 26
+    case DW_TAG_common_inclusion: // 27
+    case DW_TAG_inheritance: // 28
+    case DW_TAG_inlined_subroutine: // 29
+    case DW_TAG_module: // 30
+    case DW_TAG_ptr_to_member_type: // 31
+    case DW_TAG_set_type: // 32
+    case DW_TAG_subrange_type: // 33
+    case DW_TAG_with_stmt: // 34
+    case DW_TAG_access_declaration: // 35
+    case DW_TAG_base_type: // 36
+    case DW_TAG_catch_block: // 37
+    case DW_TAG_const_type: // 38
+    case DW_TAG_constant: // 39
+    case DW_TAG_enumerator: // 40
+    case DW_TAG_file_type: // 41
+    case DW_TAG_friend: // 42
+    case DW_TAG_namelist: // 43
+    case DW_TAG_namelist_item: // 44
+    case DW_TAG_packed_type: // 45
+    case DW_TAG_subprogram: // 46
+    case DW_TAG_template_type_param: // 47
+    case DW_TAG_template_value_param: // 48
+    case DW_TAG_thrown_type: // 49
+    case DW_TAG_try_block: // 50
+    case DW_TAG_variant_part: // 51
+    case DW_TAG_variable: // 52
+    case DW_TAG_volatile_type: // 53
+    case DW_TAG_dwarf_procedure: // 54
+    case DW_TAG_restrict_type: // 55
+    case DW_TAG_interface_type: // 56
+    case DW_TAG_namespace: // 57
+    case DW_TAG_imported_module: // 58
+    case DW_TAG_unspecified_type: // 59
+      this_cu->unit_type = DW_UT_type;
+      break;
+    case DW_TAG_imported_unit: // 61
+      this_cu->unit_type = DW_UT_compile;
+      break;
+    case DW_TAG_condition: // 63
+    case DW_TAG_shared_type: // 64
+      this_cu->unit_type = DW_UT_type;
+      break;
+    case DW_TAG_type_unit: // 65
+      this_cu->unit_type = DW_UT_skeleton;
+      break;
+    case DW_TAG_rvalue_reference_type: // 66
+    case DW_TAG_template_alias: // 67
+    case DW_TAG_coarray_type: // 68
+    case DW_TAG_generic_subrange: // 69
+    case DW_TAG_dynamic_type: // 70
+    case DW_TAG_atomic_type: // 71
+    case DW_TAG_call_site: // 72
+    case DW_TAG_call_site_parameter: // 73
+      this_cu->unit_type = DW_UT_type;
+      break;
+    case DW_TAG_skeleton_unit: // 74
+      this_cu->unit_type = DW_UT_skeleton;
+      break;
+    case DW_TAG_immutable_type: // 75
+    case DW_TAG_lo_user: // 16512
+    case DW_TAG_hi_user: // 65535
+    case DW_TAG_MIPS_loop: // 16513
+    case DW_TAG_HP_array_descriptor: // 16528
+    case DW_TAG_HP_Bliss_field: // 16529
+    case DW_TAG_HP_Bliss_field_set: // 16530
+    case DW_TAG_format_label: // 16641
+    case DW_TAG_function_template: // 16642
+    case DW_TAG_class_template: // 16643
+    case DW_TAG_GNU_BINCL: // 16644
+    case DW_TAG_GNU_EINCL: // 16645
+    case DW_TAG_GNU_template_template_param: // 16646
+    case DW_TAG_GNU_template_parameter_pack: // 16647
+    case DW_TAG_GNU_formal_parameter_pack: // 16648
+    case DW_TAG_GNU_call_site: // 16649
+    case DW_TAG_GNU_call_site_parameter: // 16650
+    case DW_TAG_upc_shared_type: // 34661
+    case DW_TAG_upc_strict_type: // 34662
+    case DW_TAG_upc_relaxed_type: // 34663
+    case DW_TAG_PGI_kanji_type: // 40960
+    case DW_TAG_PGI_interface_block: // 40992
+      break;
+      default:
+  abort ();
+}
 
-  if (reader.dummy_p)
-    {
-      /* Nothing.  */
-    }
-  else if (this_cu->is_debug_types)
-    build_type_psymtabs_reader (&reader, reader.info_ptr,
+if (reader.dummy_p)
+{
+  /* Nothing.  */
+}
+else if (this_cu->is_debug_types)
+build_type_psymtabs_reader (&reader, reader.info_ptr,
 				reader.comp_unit_die);
-  else if (want_partial_unit
+else if (want_partial_unit
 	   || reader.comp_unit_die->tag != DW_TAG_partial_unit)
     process_psymtab_comp_unit_reader (&reader, reader.info_ptr,
 				      reader.comp_unit_die,

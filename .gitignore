@@ -62,3 +62,8 @@ stamp-*
 /mpc*
 /gmp*
 /isl*
+
+*.bak
+*.mod
+*.orig
+*.rej

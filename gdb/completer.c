@@ -1,5 +1,5 @@
 /* Line completion stuff for GDB, the GNU debugger.
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2019 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,66 +45,6 @@
 
 #include "completer.h"
 
-/* See completer.h.  */
-
-class completion_tracker::completion_hash_entry
-{
-public:
-  /* Constructor.  */
-  completion_hash_entry (gdb::unique_xmalloc_ptr<char> name,
-			 gdb::unique_xmalloc_ptr<char> lcd)
-    : m_name (std::move (name)),
-      m_lcd (std::move (lcd))
-  {
-    /* Nothing.  */
-  }
-
-  /* Returns a pointer to the lowest common denominator string.  This
-     string will only be valid while this hash entry is still valid as the
-     string continues to be owned by this hash entry and will be released
-     when this entry is deleted.  */
-  char *get_lcd () const
-  {
-    return m_lcd.get ();
-  }
-
-  /* Get, and release the name field from this hash entry.  This can only
-     be called once, after which the name field is no longer valid.  This
-     should be used to pass ownership of the name to someone else.  */
-  char *release_name ()
-  {
-    return m_name.release ();
-  }
-
-  /* Return true of the name in this hash entry is STR.  */
-  bool is_name_eq (const char *str) const
-  {
-    return strcmp (m_name.get (), str) == 0;
-  }
-
-  /* Return the hash value based on the name of the entry.  */
-  hashval_t hash_name () const
-  {
-    return htab_hash_string (m_name.get ());
-  }
-
-  /* A static function that can be passed to the htab hash system to be
-     used as a callback that deletes an item from the hash.  */
-  static void deleter (void *arg)
-  {
-    completion_hash_entry *entry = (completion_hash_entry *) arg;
-    delete entry;
-  }
-
-private:
-
-  /* The symbol name stored in this hash entry.  */
-  gdb::unique_xmalloc_ptr<char> m_name;
-
-  /* The lowest common denominator string computed for this hash entry.  */
-  gdb::unique_xmalloc_ptr<char> m_lcd;
-};
-
 /* Misc state that needs to be tracked across several different
    readline completer entry point calls, all related to a single
    completion invocation.  */
@@ -123,9 +63,6 @@ struct gdb_completer_state
 
 /* The current completion state.  */
 static gdb_completer_state current_completion;
-
-__attribute__((__weak__, __common__))
-int rl_sort_completion_matches;
 
 /* An enumeration of the various things a user might attempt to
    complete for a location.  If you change this, remember to update
@@ -158,7 +95,7 @@ enum explicit_location_match_type
    but it does affect how much stuff M-? lists.
    (2) If one of the matches contains a word break character, readline
    will quote it.  That's why we switch between
-   current_language->word_break_characters () and
+   current_language->word_break_characters() and
    gdb_completer_command_word_break_characters.  I'm not sure when
    we need this behavior (perhaps for funky characters in C++ 
    symbols?).  */
@@ -170,7 +107,11 @@ enum explicit_location_match_type
    readline library sees one in any of the current completion strings,
    it thinks that the string needs to be quoted and automatically
    supplies a leading quote.  */
-static const char gdb_completer_command_word_break_characters[] =
+const char gdb_completer_command_word_break_characters_gdb[] =
+" \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,";
+const char gdb_completer_command_word_break_characters_py[] =
+" \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
+static char gdb_completer_command_word_break_characters[] =
 " \t\n!@#$%^&*()+=|~`}{[]\"';:?/><,";
 
 /* When completing on file names, we remove from the list of word
@@ -239,14 +180,15 @@ filename_completer (struct cmd_list_element *ignore,
       tracker.add_completion
 	(make_completion_match_str (std::move (p_rl), text, word));
     }
-#if 0
+
   /* There is no way to do this just long enough to affect quote
      inserting without also affecting the next completion.  This
      should be fixed in readline.  FIXME.  */
   /* Ensure that readline does the right thing
      with respect to inserting quotes.  */
-  rl_completer_word_break_characters = "";
-#endif
+  rl_completer_word_break_characters
+    = gdb_completer_command_word_break_characters;
+
 }
 
 /* The corresponding completer_handle_brkchars
@@ -290,6 +232,57 @@ struct gdb_rl_completion_word_info
   const char *basic_quote_characters;
 };
 
+
+// BEGIN INSERTED toggle_completion_func fragment
+#define _POSIX_THREADS
+#include "../gnulib/config.h"
+#include "python.h"
+#include "pystate.h"
+#include "object.h"
+#include "readline/readline.h"
+#include "dlfcn.h"
+
+extern char ** (*completion_matches_p)(char* text, void(*on_completion)()) = 0;
+/* A more flexible constructor that saves the "begidx" and "endidx"
+ * before calling the normal completer */
+
+
+void *saved_cmp_func = 0;
+
+
+void toggle_completion_func(bool want_py_completion) {
+    if ( ! saved_cmp_func &&
+         rl_attempted_completion_function &&
+         rl_attempted_completion_function
+           != gdb_rl_attempted_completion_function)
+    {
+      saved_cmp_func = rl_attempted_completion_function;
+    }
+
+    if (!saved_cmp_func) {
+      rl_completer_word_break_characters 
+//        = gdb_completer_command_word_break_characters
+          = gdb_completer_command_word_break_characters_gdb;
+      return;
+    }
+    
+    if (want_py_completion) {
+        rl_attempted_completion_function = saved_cmp_func;
+        rl_completer_word_break_characters 
+          //= gdb_completer_command_word_break_characters;
+            = gdb_completer_command_word_break_characters_py;
+    } else {
+        rl_attempted_completion_function 
+          = gdb_rl_attempted_completion_function;
+        rl_completer_word_break_characters 
+          //= gdb_completer_command_word_break_characters;
+            = gdb_completer_command_word_break_characters_gdb;
+    }
+}
+
+// END INSERTED toggle_completion_func fragment
+
+
 static const char *
 gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
 			     int *qc, int *dp,
@@ -315,7 +308,7 @@ gdb_rl_find_completion_word (struct gdb_rl_completion_word_info *info,
   found_quote = delimiter = 0;
   quote_char = '\0';
 
-  brkchars = info->word_break_characters;
+  brkchars =  rl_completer_word_break_characters ; //info->word_break_c haracters;
 
   if (info->quote_characters != NULL)
     {
@@ -451,7 +444,8 @@ const char *
 advance_to_expression_complete_word_point (completion_tracker &tracker,
 					   const char *text)
 {
-  const char *brk_chars = current_language->word_break_characters ();
+  const char *brk_chars = gdb_completer_command_word_break_characters;
+    // current_language->word_break_characters ();
   return advance_to_completion_word (tracker, brk_chars, text);
 }
 
@@ -470,7 +464,6 @@ advance_to_filename_complete_word_point (completion_tracker &tracker,
 bool
 completion_tracker::completes_to_completion_word (const char *word)
 {
-  recompute_lowest_common_denominator ();
   if (m_lowest_common_denominator_unique)
     {
       const char *lcd = m_lowest_common_denominator;
@@ -576,7 +569,7 @@ complete_files_symbols (completion_tracker &tracker,
 	  colon = p;
 	  symbol_start = p + 1;
 	}
-      else if (strchr (current_language->word_break_characters (), *p))
+      else if (strchr (current_language->word_break_characters(), *p))
 	symbol_start = p + 1;
     }
 
@@ -1093,7 +1086,7 @@ add_struct_fields (struct type *type, completion_list &output,
   const char *type_name = NULL;
 
   type = check_typedef (type);
-  for (i = 0; i < type->num_fields (); ++i)
+  for (i = 0; i < (type)->num_fields(); ++i)
     {
       if (i < TYPE_N_BASECLASSES (type))
 	add_struct_fields (TYPE_BASECLASS (type, i),
@@ -1106,16 +1099,16 @@ add_struct_fields (struct type *type, completion_list &output,
 			     fieldname, namelen))
 		output.emplace_back (xstrdup (TYPE_FIELD_NAME (type, i)));
 	    }
-	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION)
+	  else if (type->fields()[i].type()->code() == TYPE_CODE_UNION)
 	    {
 	      /* Recurse into anonymous unions.  */
-	      add_struct_fields (type->field (i).type (),
+	      add_struct_fields (type->fields()[i].type(),
 				 output, fieldname, namelen);
 	    }
 	}
     }
 
-  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
+  for (i = type->num_fields() - 1; i >= 0; --i)
     {
       const char *name = TYPE_FN_FIELDLIST_NAME (type, i);
 
@@ -1123,7 +1116,7 @@ add_struct_fields (struct type *type, completion_list &output,
 	{
 	  if (!computed_type_name)
 	    {
-	      type_name = type->name ();
+	      type_name = type->name();
 	      computed_type_name = 1;
 	    }
 	  /* Omit constructors from the completion list.  */
@@ -1134,6 +1127,38 @@ add_struct_fields (struct type *type, completion_list &output,
 }
 
 /* See completer.h.  */
+
+static const char *get_error_name(const enum errors err) {
+  switch (err) {
+    case GDB_NO_ERROR: return "GDB_NO_ERROR";
+    case GENERIC_ERROR: return "GENERIC_ERROR";
+    case NOT_FOUND_ERROR: return "NOT_FOUND_ERROR";
+    case TLS_NO_LIBRARY_SUPPORT_ERROR: return "TLS_NO_LIBRARY_SUPPORT_ERROR";
+    case TLS_LOAD_MODULE_NOT_FOUND_ERROR: return "TLS_LOAD_MODULE_NOT_FOUND_ERROR";
+    case TLS_NOT_ALLOCATED_YET_ERROR: return "TLS_NOT_ALLOCATED_YET_ERROR";
+    case TLS_GENERIC_ERROR: return "TLS_GENERIC_ERROR";
+    case XML_PARSE_ERROR: return "XML_PARSE_ERROR";
+    case MEMORY_ERROR: return "MEMORY_ERROR";
+    case NOT_AVAILABLE_ERROR: return "NOT_AVAILABLE_ERROR";
+    case OPTIMIZED_OUT_ERROR: return "OPTIMIZED_OUT_ERROR";
+    case NO_ENTRY_VALUE_ERROR: return "NO_ENTRY_VALUE_ERROR";
+    case TARGET_CLOSE_ERROR: return "TARGET_CLOSE_ERROR";
+    case UNDEFINED_COMMAND_ERROR: return "UNDEFINED_COMMAND_ERROR";
+    case NOT_SUPPORTED_ERROR: return "NOT_SUPPORTED_ERROR";
+    case MAX_COMPLETIONS_REACHED_ERROR: return "MAX_COMPLETIONS_REACHED_ERROR";
+    default: return "(invalid enum errors value)";
+  }
+}
+
+static const char *get_return_reason_name(const enum return_reason reason) {
+  switch (reason) {
+    case RETURN_QUIT: return "RETURN_QUIT";
+    case RETURN_ERROR: return "RETURN_ERROR";
+    default: return "(invalid enum return_reason value)";
+  }
+}
+
+
 
 void
 complete_expression (completion_tracker &tracker,
@@ -1151,6 +1176,16 @@ complete_expression (completion_tracker &tracker,
     }
   catch (const gdb_exception_error &except)
     {
+      fprintf(
+        stderr,
+        "parse_expression_for_completion threw an exception (reason = %s)"
+        "parsing text \"%s\": "
+        "gdb_exception_error: %s: \"%s\"\n",
+        get_return_reason_name(except.reason),
+        text,
+        get_error_name(except.error),
+        except.message
+      );
       return;
     }
 
@@ -1159,13 +1194,13 @@ complete_expression (completion_tracker &tracker,
       for (;;)
 	{
 	  type = check_typedef (type);
-	  if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+	  if (type->code() != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	    break;
 	  type = TYPE_TARGET_TYPE (type);
 	}
 
-      if (type->code () == TYPE_CODE_UNION
-	  || type->code () == TYPE_CODE_STRUCT)
+      if (type->code() == TYPE_CODE_UNION
+	  || type->code() == TYPE_CODE_STRUCT)
 	{
 	  completion_list result;
 
@@ -1202,7 +1237,7 @@ expression_completer (struct cmd_list_element *ignore,
 void
 set_rl_completer_word_break_characters (const char *break_chars)
 {
-  rl_completer_word_break_characters = (char *) break_chars;
+  //rl_completer_word_break_characters = (char *) break_chars;
 }
 
 /* Complete on symbols.  */
@@ -1351,7 +1386,7 @@ complete_line_internal_1 (completion_tracker &tracker,
      strings, which leaves out the '-' and '.' character used in some
      commands.  */
   set_rl_completer_word_break_characters
-    (current_language->word_break_characters ());
+    (current_language->word_break_characters());
 
   /* Decide whether to complete on a list of gdb commands or on
      symbols.  */
@@ -1388,7 +1423,7 @@ complete_line_internal_1 (completion_tracker &tracker,
     }
   else
     {
-      c = lookup_cmd_1 (&p, cmdlist, &result_list, NULL, ignore_help_classes);
+      c = lookup_cmd_1 (&p, cmdlist, &result_list, nullptr /* default_args */, ignore_help_classes);
     }
 
   /* Move p up to the next interesting thing.  */
@@ -1576,7 +1611,9 @@ int max_completions = 200;
 
 completion_tracker::completion_tracker ()
 {
-  discard_completions ();
+  m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
+				      htab_hash_string, streq_hash,
+				      NULL, xcalloc, xfree);
 }
 
 /* See completer.h.  */
@@ -1588,40 +1625,13 @@ completion_tracker::discard_completions ()
   m_lowest_common_denominator = NULL;
 
   m_lowest_common_denominator_unique = false;
-  m_lowest_common_denominator_valid = false;
 
-  m_entries_hash.reset (nullptr);
+  m_entries_vec.clear ();
 
-  /* A callback used by the hash table to compare new entries with existing
-     entries.  We can't use the standard streq_hash function here as the
-     key to our hash is just a single string, while the values we store in
-     the hash are a struct containing multiple strings.  */
-  static auto entry_eq_func
-    = [] (const void *first, const void *second) -> int
-      {
-	/* The FIRST argument is the entry already in the hash table, and
-	   the SECOND argument is the new item being inserted.  */
-	const completion_hash_entry *entry
-	  = (const completion_hash_entry *) first;
-	const char *name_str = (const char *) second;
-
-	return entry->is_name_eq (name_str);
-      };
-
-  /* Callback used by the hash table to compute the hash value for an
-     existing entry.  This is needed when expanding the hash table.  */
-  static auto entry_hash_func
-    = [] (const void *arg) -> hashval_t
-      {
-	const completion_hash_entry *entry
-	  = (const completion_hash_entry *) arg;
-	return entry->hash_name ();
-      };
-
-  m_entries_hash.reset (htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-					   entry_hash_func, entry_eq_func,
-					   completion_hash_entry::deleter,
-					   xcalloc, xfree));
+  htab_delete (m_entries_hash);
+  m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
+				      htab_hash_string, streq_hash,
+				      NULL, xcalloc, xfree);
 }
 
 /* See completer.h.  */
@@ -1629,6 +1639,7 @@ completion_tracker::discard_completions ()
 completion_tracker::~completion_tracker ()
 {
   xfree (m_lowest_common_denominator);
+  htab_delete (m_entries_hash);
 }
 
 /* See completer.h.  */
@@ -1644,12 +1655,10 @@ completion_tracker::maybe_add_completion
   if (max_completions == 0)
     return false;
 
-  if (htab_elements (m_entries_hash.get ()) >= max_completions)
+  if (htab_elements (m_entries_hash) >= max_completions)
     return false;
 
-  hashval_t hash = htab_hash_string (name.get ());
-  slot = htab_find_slot_with_hash (m_entries_hash.get (), name.get (),
-				   hash, INSERT);
+  slot = htab_find_slot (m_entries_hash, name.get (), INSERT);
   if (*slot == HTAB_EMPTY_ENTRY)
     {
       const char *match_for_lcd_str = NULL;
@@ -1663,12 +1672,10 @@ completion_tracker::maybe_add_completion
       gdb::unique_xmalloc_ptr<char> lcd
 	= make_completion_match_str (match_for_lcd_str, text, word);
 
-      size_t lcd_len = strlen (lcd.get ());
-      *slot = new completion_hash_entry (std::move (name), std::move (lcd));
+      recompute_lowest_common_denominator (std::move (lcd));
 
-      m_lowest_common_denominator_valid = false;
-      m_lowest_common_denominator_max_length
-	= std::max (m_lowest_common_denominator_max_length, lcd_len);
+      *slot = name.get ();
+      m_entries_vec.push_back (std::move (name));
     }
 
   return true;
@@ -1692,20 +1699,6 @@ completion_tracker::add_completions (completion_list &&list)
 {
   for (auto &candidate : list)
     add_completion (std::move (candidate));
-}
-
-/* See completer.h.  */
-
-void
-completion_tracker::remove_completion (const char *name)
-{
-  hashval_t hash = htab_hash_string (name);
-  if (htab_find_slot_with_hash (m_entries_hash.get (), name, hash, NO_INSERT)
-      != NULL)
-    {
-      htab_remove_elt_with_hash (m_entries_hash.get (), name, hash);
-      m_lowest_common_denominator_valid = false;
-    }
 }
 
 /* Helper for the make_completion_match_str overloads.  Returns NULL
@@ -2088,23 +2081,23 @@ completion_find_completion_word (completion_tracker &tracker, const char *text,
 /* See completer.h.  */
 
 void
-completion_tracker::recompute_lcd_visitor (completion_hash_entry *entry)
+completion_tracker::recompute_lowest_common_denominator
+  (gdb::unique_xmalloc_ptr<char> &&new_match_up)
 {
-  if (!m_lowest_common_denominator_valid)
+  if (m_lowest_common_denominator == NULL)
     {
-      /* This is the first lowest common denominator that we are
-	 considering, just copy it in.  */
-      strcpy (m_lowest_common_denominator, entry->get_lcd ());
+      /* We don't have a lowest common denominator yet, so simply take
+	 the whole NEW_MATCH_UP as being it.  */
+      m_lowest_common_denominator = new_match_up.release ();
       m_lowest_common_denominator_unique = true;
-      m_lowest_common_denominator_valid = true;
     }
   else
     {
-      /* Find the common denominator between the currently-known lowest
-	 common denominator and NEW_MATCH_UP.  That becomes the new lowest
-	 common denominator.  */
+      /* Find the common denominator between the currently-known
+	 lowest common denominator and NEW_MATCH_UP.  That becomes the
+	 new lowest common denominator.  */
       size_t i;
-      const char *new_match = entry->get_lcd ();
+      const char *new_match = new_match_up.get ();
 
       for (i = 0;
 	   (new_match[i] != '\0'
@@ -2117,35 +2110,6 @@ completion_tracker::recompute_lcd_visitor (completion_hash_entry *entry)
 	  m_lowest_common_denominator_unique = false;
 	}
     }
-}
-
-/* See completer.h.  */
-
-void
-completion_tracker::recompute_lowest_common_denominator ()
-{
-  /* We've already done this.  */
-  if (m_lowest_common_denominator_valid)
-    return;
-
-  /* Resize the storage to ensure we have enough space, the plus one gives
-     us space for the trailing null terminator we will include.  */
-  m_lowest_common_denominator
-    = (char *) xrealloc (m_lowest_common_denominator,
-			 m_lowest_common_denominator_max_length + 1);
-
-  /* Callback used to visit each entry in the m_entries_hash.  */
-  auto visitor_func
-    = [] (void **slot, void *info) -> int
-      {
-	completion_tracker *obj = (completion_tracker *) info;
-	completion_hash_entry *entry = (completion_hash_entry *) *slot;
-	obj->recompute_lcd_visitor (entry);
-	return 1;
-      };
-
-  htab_traverse (m_entries_hash.get (), visitor_func, this);
-  m_lowest_common_denominator_valid = true;
 }
 
 /* See completer.h.  */
@@ -2227,17 +2191,16 @@ completion_result
 completion_tracker::build_completion_result (const char *text,
 					     int start, int end)
 {
-  size_t element_count = htab_elements (m_entries_hash.get ());
+  completion_list &list = m_entries_vec;	/* The completions.  */
 
-  if (element_count == 0)
+  if (list.empty ())
     return {};
 
   /* +1 for the LCD, and +1 for NULL termination.  */
-  char **match_list = XNEWVEC (char *, 1 + element_count + 1);
+  char **match_list = XNEWVEC (char *, 1 + list.size () + 1);
 
   /* Build replacement word, based on the LCD.  */
 
-  recompute_lowest_common_denominator ();
   match_list[0]
     = expand_preserving_ws (text, end - start,
 			    m_lowest_common_denominator);
@@ -2264,40 +2227,13 @@ completion_tracker::build_completion_result (const char *text,
     }
   else
     {
-      /* State object used while building the completion list.  */
-      struct list_builder
-      {
-	list_builder (char **ml)
-	  : match_list (ml),
-	    index (1)
-	{ /* Nothing.  */ }
+      int ix;
 
-	/* The list we are filling.  */
-	char **match_list;
+      for (ix = 0; ix < list.size (); ++ix)
+	match_list[ix + 1] = list[ix].release ();
+      match_list[ix + 1] = NULL;
 
-	/* The next index in the list to write to.  */
-	int index;
-      };
-      list_builder builder (match_list);
-
-      /* Visit each entry in m_entries_hash and add it to the completion
-	 list, updating the builder state object.  */
-      auto func
-	= [] (void **slot, void *info) -> int
-	  {
-	    completion_hash_entry *entry = (completion_hash_entry *) *slot;
-	    list_builder *state = (list_builder *) info;
-
-	    state->match_list[state->index] = entry->release_name ();
-	    state->index++;
-	    return 1;
-	  };
-
-      /* Build the completion list and add a null at the end.  */
-      htab_traverse_noresize (m_entries_hash.get (), func, &builder);
-      match_list[builder.index] = NULL;
-
-      return completion_result (match_list, builder.index - 1, false);
+      return completion_result (match_list, list.size (), false);
     }
 }
 
@@ -2327,11 +2263,15 @@ completion_result::~completion_result ()
 
 /* See completer.h  */
 
-completion_result::completion_result (completion_result &&rhs) noexcept
-  : match_list (rhs.match_list),
-    number_matches (rhs.number_matches)
+completion_result::completion_result (completion_result &&rhs)
 {
+  if (this == &rhs)
+    return;
+
+  reset_match_list ();
+  match_list = rhs.match_list;
   rhs.match_list = NULL;
+  number_matches = rhs.number_matches;
   rhs.number_matches = 0;
 }
 
@@ -2451,6 +2391,16 @@ gdb_rl_attempted_completion_function (const char *text, int start, int end)
     }
   catch (const gdb_exception &ex)
     {
+      fprintf(
+        stderr,
+        "gdb_rl_attempted_completion_function_throw "
+        "threw an exception (reason = %s) parsing text \"%s\": "
+        "gdb_exception: %s: \"%s\"\n",
+        get_return_reason_name(ex.reason),
+        text,
+        get_error_name(ex.error),
+        ex.message
+      );
     }
 
   return NULL;
@@ -2473,7 +2423,7 @@ skip_quoted_chars (const char *str, const char *quotechars,
     quotechars = gdb_completer_quote_characters;
 
   if (breakchars == NULL)
-    breakchars = current_language->word_break_characters ();
+    breakchars = current_language->word_break_characters();
 
   for (scan = str; *scan != '\0'; scan++)
     {
@@ -2971,7 +2921,7 @@ gdb_display_match_list_1 (char **matches, int len, int max,
 	   0 < len <= limit  implies  count = 1. */
 
   /* Sort the items if they are not already sorted. */
-  if (rl_ignore_completion_duplicates == 0 && rl_sort_completion_matches)
+  if (rl_ignore_completion_duplicates == 0 && 0)
     qsort (matches + 1, len, sizeof (char *), (QSFUNC *)_rl_qsort_string_compare);
 
   displayer->crlf (displayer);
