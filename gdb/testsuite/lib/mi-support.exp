@@ -1023,28 +1023,41 @@ proc mi_run_with_cli {args} {
     return [eval mi_run_cmd_full 0 $args]
 }
 
-#
-# Just like run-to-main but works with the MI interface
-#
+# Starts fresh GDB binary and loads an optional executable into GDB.
+# Usage: mi_clean_restart [executable]
+# EXECUTABLE is the basename of the binary.
+# Return -1 if starting gdb or loading the executable failed.
 
-proc mi_run_to_main { } {
-    global suppress_flag
-    if { $suppress_flag } {
+proc mi_clean_restart { args } {
+    global srcdir
+    global subdir
+    global errcnt
+    global warncnt
+
+    if { [llength $args] > 1 } {
+	error "bad number of args: [llength $args]"
+    }
+
+    gdb_exit
+
+    # This is a clean restart, so reset error and warning count.
+    set errcnt 0
+    set warncnt 0
+
+    if {[mi_gdb_start]} {
 	return -1
     }
 
-    global srcdir
-    global subdir
-    global binfile
-    global srcfile
-
-    mi_delete_breakpoints
     mi_gdb_reinitialize_dir $srcdir/$subdir
-    mi_gdb_load ${binfile}
 
-    mi_runto_main
+    if { [llength $args] >= 1 } {
+	set executable [lindex $args 0]
+	set binfile [standard_output_file ${executable}]
+	return [mi_gdb_load ${binfile}]
+    }
+
+    return 0
 }
-
 
 # Just like gdb's "runto" proc, it will run the target to a given
 # function.  The big difference here between mi_runto and mi_execute_to

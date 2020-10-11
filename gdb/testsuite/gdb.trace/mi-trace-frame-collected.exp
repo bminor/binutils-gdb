@@ -41,10 +41,8 @@ gdb_exit
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
-if [mi_gdb_start] {
-    return
-}
-mi_run_to_main
+mi_clean_restart $binfile
+mi_runto_main
 
 mi_gdb_test "-break-insert end" \
     "\\^done,bkpt=\{number=\"${decimal}\",type=\"breakpoint\".*\"\}" \

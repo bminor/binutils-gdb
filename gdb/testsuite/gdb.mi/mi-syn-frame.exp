@@ -32,9 +32,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-mi_gdb_exit
-mi_gdb_start
-mi_run_to_main
+mi_clean_restart $binfile
+
+mi_runto_main
 
 mi_create_breakpoint "foo" \
     "insert breakpoint foo" \

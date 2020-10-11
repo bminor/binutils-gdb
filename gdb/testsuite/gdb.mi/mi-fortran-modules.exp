@@ -26,12 +26,9 @@ if {[prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-gdb_exit
-if {[mi_gdb_start]} {
-    continue
-}
+mi_clean_restart $binfile
 
-mi_run_to_main
+mi_runto_main
 
 
 # Patterns to skip optional system modules that appear with later versions of GFortran.
