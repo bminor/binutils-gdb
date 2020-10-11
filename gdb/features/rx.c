@@ -1,5 +1,5 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
-  Original: rx.xml.tmp */
+  Original: rx.xml */
 
 #include "defs.h"
 #include "osabi.h"

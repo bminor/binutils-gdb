@@ -38716,8 +38716,8 @@ checksum.
 Print the entire architecture configuration.  The optional argument
 @var{file} names the file where the output goes.
 
-@kindex maint print c-tdesc @r{[}@var{file}@r{]}
-@item maint print c-tdesc
+@kindex maint print c-tdesc
+@item maint print c-tdesc @r{[}-single-feature@r{]} @r{[}@var{file}@r{]}
 Print the target description (@pxref{Target Descriptions}) as
 a C source file.  By default, the target description is for the current
 target, but if the optional argument @var{file} is provided, that file
@@ -38726,6 +38726,11 @@ document, of the form described in @ref{Target Description Format}.
 The created source file is built into @value{GDBN} when @value{GDBN} is
 built again.  This command is used by developers after they add or
 modify XML target descriptions.
+
+When the optional flag @samp{-single-feature} is provided then the
+target description being processed (either the default, or from
+@var{file}) must only contain a single feature.  The source file
+produced is different in this case.
 
 @kindex maint print xml-tdesc
 @item maint print xml-tdesc  @r{[}@var{file}@r{]}

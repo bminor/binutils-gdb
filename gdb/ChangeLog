@@ -1,3 +1,22 @@
+2020-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* features/Makefile (XMLTOC): Add rx.xml.
+	(FEATURE_XMLFILES): Remove rx.xml.
+	(FEATURE_CFILES rule): Pass '-single-feature' flag.
+	* features/rx.c: Regenerate.
+	* features/rx.xml: Wrap in `target` tags, and reindent.
+	* target-descriptions.c (struct maint_print_c_tdesc_options): New
+	structure.
+	(maint_print_c_tdesc_opt_def): New typedef.
+	(maint_print_c_tdesc_opt_defs): New static global.
+	(make_maint_print_c_tdesc_options_def_group): New function.
+	(maint_print_c_tdesc_cmd): Make use of command line flags, only
+	print single feature C file for target descriptions containing a
+	single feature.
+	(maint_print_c_tdesc_cmd_completer): New function.
+	(_initialize_target_descriptions): Update call to register command
+	completer, and include command line flag in help text.
+
 2020-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_dwarf_reg_to_regnum): Decode DWARF CSR

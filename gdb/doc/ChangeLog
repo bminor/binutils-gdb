@@ -1,3 +1,8 @@
+2020-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Maintenance Commands): Update description of 'maint
+	print c-tdesc'.
+
 2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Mode Options): Descriptions of initialization files

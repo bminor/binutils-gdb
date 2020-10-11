@@ -1731,11 +1731,44 @@ tdesc_get_features_xml (const target_desc *tdesc)
   return tdesc->xmltarget;
 }
 
+/* Data structures and functions to setup the option flags for 'maintenance
+   print c-tdesc command.  */
+
+struct maint_print_c_tdesc_options
+{
+  /* True when the '-single-feature' flag was passed.  */
+  bool single_feature = false;
+};
+
+using maint_print_c_tdesc_opt_def
+  = gdb::option::flag_option_def<maint_print_c_tdesc_options>;
+
+static const gdb::option::option_def maint_print_c_tdesc_opt_defs[] = {
+  maint_print_c_tdesc_opt_def {
+    "single-feature",
+    [] (maint_print_c_tdesc_options *opt) { return &opt->single_feature; },
+    N_("Print C description of just a single feature.")
+  },
+};
+
+static inline gdb::option::option_def_group
+make_maint_print_c_tdesc_options_def_group (maint_print_c_tdesc_options *opts)
+{
+  return {{maint_print_c_tdesc_opt_defs}, opts};
+}
+
+/* Implement 'maintenance print c-tdesc' command.  */
+
 static void
 maint_print_c_tdesc_cmd (const char *args, int from_tty)
 {
   const struct target_desc *tdesc;
   const char *filename;
+
+  maint_print_c_tdesc_options opts;
+  auto grp = make_maint_print_c_tdesc_options_def_group (&opts);
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp);
 
   if (args == NULL)
     {
@@ -1768,15 +1801,12 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
   /* Print c files for target features instead of target descriptions,
      because c files got from target features are more flexible than the
      counterparts.  */
-  if (startswith (filename_after_features.c_str (), "i386/32bit-")
-      || startswith (filename_after_features.c_str (), "i386/64bit-")
-      || startswith (filename_after_features.c_str (), "i386/x32-core.xml")
-      || startswith (filename_after_features.c_str (), "riscv/")
-      || startswith (filename_after_features.c_str (), "tic6x-")
-      || startswith (filename_after_features.c_str (), "aarch64")
-      || startswith (filename_after_features.c_str (), "arm/")
-      || startswith (filename_after_features.c_str (), "arc/"))
+  if (opts.single_feature)
     {
+      if (tdesc->features.size () != 1)
+	error (_("only target descriptions with 1 feature can be used "
+		 "with -single-feature option"));
+
       print_c_feature v (filename_after_features);
 
       tdesc->accept (v);
@@ -1787,6 +1817,22 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
 
       tdesc->accept (v);
     }
+}
+
+/* Completer for the "backtrace" command.  */
+
+static void
+maint_print_c_tdesc_cmd_completer (struct cmd_list_element *ignore,
+				   completion_tracker &tracker,
+				   const char *text, const char *word)
+{
+  auto grp = make_maint_print_c_tdesc_options_def_group (nullptr);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, grp))
+    return;
+
+  word = advance_to_filename_complete_word_point (tracker, text);
+  filename_completer (ignore, tracker, text, word);
 }
 
 /* Implement the maintenance print xml-tdesc command.  */
@@ -1951,10 +1997,25 @@ Unset the file to read for an XML target description.\n\
 When unset, GDB will read the description from the target."),
 	   &tdesc_unset_cmdlist);
 
-  cmd = add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd, _("\
-Print the current target description as a C source file."),
-	   &maintenanceprintlist);
-  set_cmd_completer (cmd, filename_completer);
+  auto grp = make_maint_print_c_tdesc_options_def_group (nullptr);
+  static std::string help_text
+    = gdb::option::build_help (_("\
+Print the current target description as a C source file.\n\
+Usage: maintenance print c-tdesc [OPTION] [FILENAME]\n\
+\n\
+Options:\n\
+%OPTIONS%\n\
+\n\
+When FILENAME is not provided then print the current target\n\
+description, otherwise an XML target description is read from\n\
+FILENAME and printed as a C function.\n\
+\n\
+When '-single-feature' is used then the target description should\n\
+contain a single feature and the generated C code will only create\n\
+that feature within an already existing target_desc object."), grp);
+  cmd = add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd,
+		 help_text.c_str (), &maintenanceprintlist);
+  set_cmd_completer_handle_brkchars (cmd, maint_print_c_tdesc_cmd_completer);
 
   cmd = add_cmd ("xml-tdesc", class_maintenance, maint_print_xml_tdesc_cmd, _("\
 Print the current target description as an XML file."),
