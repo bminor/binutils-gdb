@@ -31,17 +31,14 @@ if {[prepare_for_testing "failed to prepare" $exefile $srcfile {debug c++}]} {
     return -1
 }
 
-gdb_exit
-if {[mi_gdb_start]} {
-    continue
-}
+mi_clean_restart $binfile
 
 # Turn off the pending breakpoint queries.
 mi_gdb_test "-interpreter-exec console \"set breakpoint pending off\"" \
   {=cmd-param-changed,param=\"breakpoint pending\",.*\^done} \
   "-interpreter-exec console \"set breakpoint pending off\""
 
-mi_run_to_main
+mi_runto_main
 
 # Run to a location in the file.
 set bp_location [gdb_get_line_number "set breakpoint here"]

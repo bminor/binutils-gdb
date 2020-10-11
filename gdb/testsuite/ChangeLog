@@ -1,5 +1,11 @@
 2020-10-13  Pedro Alves  <pedro@palves.net>
 
+	* lib/mi-support.exp (mi_clean_restart): New.
+	(mi_run_to_main): Delete.
+	All callers adjust to use mi_clean_restart / mi_runto_main.
+
+2020-10-13  Pedro Alves  <pedro@palves.net>
+
 	* config/monitor.exp: Use "list -q".
 	* gdb.arch/gdb1558.exp: Use "break -q".
 	* gdb.arch/i386-permbkpt.exp: Use "break -q".

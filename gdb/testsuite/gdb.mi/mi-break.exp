@@ -272,7 +272,7 @@ proc test_breakpoint_commands {} {
 	"\\^done,[mi_make_breakpoint_table [list $bp_no_script]]" \
         "breakpoint commands: check that commands are cleared"
 
-    mi_run_to_main
+    mi_runto_main
 
     mi_create_breakpoint "basics.c:callee2" \
 	"breakpoint commands: insert breakpoint at basics.c:callee2, again" \

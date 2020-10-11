@@ -28,12 +28,11 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 proc test_command_param_changed { } {
     global scheduler_locking_supported
+    global binfile
 
     with_test_prefix "cmd param" {
-	if [mi_gdb_start] {
-	    return
-	}
-	mi_run_to_main
+	mi_clean_restart $binfile
+	mi_runto_main
 
 	if { $scheduler_locking_supported } {
 	    foreach opt { "on" "off" "step" } {

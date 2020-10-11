@@ -33,12 +33,9 @@ if {[prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-gdb_exit
-if {[mi_gdb_start]} {
-    continue
-}
+mi_clean_restart $binfile
 
-mi_run_to_main
+mi_runto_main
 
 set qstr "\"\[^\"\]+\""
 set fun_re "\{line=\"$decimal\",name=${qstr},type=${qstr},description=${qstr}\}"
