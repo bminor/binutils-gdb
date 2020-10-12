@@ -1,3 +1,14 @@
+2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
+
+	* emulparams/cskyelf.sh (TEXT_START_ADDR): Change to 0x60000000.
+	(DATA_ADDR) : Define.
+	(OTHER_SYMBOLS) : Define.
+	(OTHER_BSS_SYMBOLS) : Set symbol __sbss__.
+	(OTHER_BSS_END_SYMBOLS) : Set symbol __ebss__.
+	* ld/emulparams/cskyelf_linux.sh : Don't include cskyelf.sh.
+	* testsuite/ld-csky/data.d : Fix '/s*' to match spaces.
+	* testsuite/ld-csky/hilo16.d : Likewise.
+
 2020-10-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/config/default.exp (plug_opt): Set only if compiler
