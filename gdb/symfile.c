@@ -212,21 +212,18 @@ find_lowest_section (asection *sect, asection **lowest)
    an existing section table.  */
 
 section_addr_info
-build_section_addr_info_from_section_table (const struct target_section *start,
-                                            const struct target_section *end)
+build_section_addr_info_from_section_table (const target_section_table &table)
 {
-  const struct target_section *stp;
-
   section_addr_info sap;
 
-  for (stp = start; stp != end; stp++)
+  for (const target_section &stp : table.sections)
     {
-      struct bfd_section *asect = stp->the_bfd_section;
+      struct bfd_section *asect = stp.the_bfd_section;
       bfd *abfd = asect->owner;
 
       if (bfd_section_flags (asect) & (SEC_ALLOC | SEC_LOAD)
-	  && sap.size () < end - start)
-	sap.emplace_back (stp->addr,
+	  && sap.size () < table.sections.size ())
+	sap.emplace_back (stp.addr,
 			  bfd_section_name (asect),
 			  gdb_bfd_section_index (abfd, asect));
     }

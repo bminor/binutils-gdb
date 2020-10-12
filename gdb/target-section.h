@@ -42,12 +42,11 @@ struct target_section
   void *owner;
 };
 
-/* Holds an array of target sections.  Defined by [SECTIONS..SECTIONS_END[.  */
+/* Holds an array of target sections.  */
 
 struct target_section_table
 {
-  struct target_section *sections;
-  struct target_section *sections_end;
+  std::vector<struct target_section> sections;
 };
 
 #endif /* GDB_TARGET_SECTION_H */

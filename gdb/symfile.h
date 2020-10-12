@@ -27,6 +27,7 @@
 #include "objfile-flags.h"
 #include "gdb_bfd.h"
 #include "gdbsupport/function-view.h"
+#include "target-section.h"
 
 /* Opaque declarations.  */
 struct target_section;
@@ -451,10 +452,7 @@ extern std::string find_separate_debug_file_by_debuglink (struct objfile *);
    existing section table.  */
 
 extern section_addr_info
-   build_section_addr_info_from_section_table (const struct target_section
-					       *start,
-					       const struct target_section
-					       *end);
+    build_section_addr_info_from_section_table (const target_section_table &table);
 
 			/*   Variables   */
 

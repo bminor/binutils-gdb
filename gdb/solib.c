@@ -532,7 +532,6 @@ static int
 solib_map_sections (struct so_list *so)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
-  struct target_section *p;
 
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so->so_name));
   gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
@@ -553,27 +552,29 @@ solib_map_sections (struct so_list *so)
     error (_("Shared library file name is too long."));
   strcpy (so->so_name, bfd_get_filename (so->abfd));
 
-  if (build_section_table (so->abfd, &so->sections, &so->sections_end))
+  if (so->sections == nullptr)
+    so->sections = new target_section_table;
+  if (build_section_table (so->abfd, so->sections))
     {
       error (_("Can't find the file sections in `%s': %s"),
 	     bfd_get_filename (so->abfd), bfd_errmsg (bfd_get_error ()));
     }
 
-  for (p = so->sections; p < so->sections_end; p++)
+  for (target_section &p : so->sections->sections)
     {
       /* Relocate the section binding addresses as recorded in the shared
          object's file by the base address to which the object was actually
          mapped.  */
-      ops->relocate_section_addresses (so, p);
+      ops->relocate_section_addresses (so, &p);
 
       /* If the target didn't provide information about the address
 	 range of the shared object, assume we want the location of
 	 the .text section.  */
       if (so->addr_low == 0 && so->addr_high == 0
-	  && strcmp (p->the_bfd_section->name, ".text") == 0)
+	  && strcmp (p.the_bfd_section->name, ".text") == 0)
 	{
-	  so->addr_low = p->addr;
-	  so->addr_high = p->endaddr;
+	  so->addr_low = p.addr;
+	  so->addr_high = p.endaddr;
 	}
     }
 
@@ -581,7 +582,7 @@ solib_map_sections (struct so_list *so)
      section tables.  Do this immediately after mapping the object so
      that later nodes in the list can query this object, as is needed
      in solib-osf.c.  */
-  add_target_sections (so, so->sections, so->sections_end);
+  add_target_sections (so, *so->sections);
 
   return 1;
 }
@@ -600,11 +601,8 @@ clear_so (struct so_list *so)
 {
   const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
-  if (so->sections)
-    {
-      xfree (so->sections);
-      so->sections = so->sections_end = NULL;
-    }
+  delete so->sections;
+  so->sections = NULL;
 
   gdb_bfd_unref (so->abfd);
   so->abfd = NULL;
@@ -683,8 +681,7 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 	  if (so->objfile == NULL)
 	    {
 	      section_addr_info sap
-		= build_section_addr_info_from_section_table (so->sections,
-							      so->sections_end);
+		= build_section_addr_info_from_section_table (*so->sections);
 	      so->objfile = symbol_file_add_from_bfd (so->abfd, so->so_name,
 						      flags, &sap,
 						      OBJF_SHARED, NULL);
@@ -1120,10 +1117,8 @@ bool
 solib_contains_address_p (const struct so_list *const solib,
 			  CORE_ADDR address)
 {
-  struct target_section *p;
-
-  for (p = solib->sections; p < solib->sections_end; p++)
-    if (p->addr <= address && address < p->endaddr)
+  for (target_section &p : solib->sections->sections)
+    if (p.addr <= address && address < p.endaddr)
       return true;
 
   return false;

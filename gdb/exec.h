@@ -37,8 +37,7 @@ struct objfile;
 /* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
    Returns 0 if OK, 1 on error.  */
 
-extern int build_section_table (struct bfd *, struct target_section **,
-				struct target_section **);
+extern int build_section_table (struct bfd *, struct target_section_table *);
 
 /* Remove all entries from TABLE.  */
 
@@ -86,8 +85,7 @@ extern enum target_xfer_status
   section_table_xfer_memory_partial (gdb_byte *,
 				     const gdb_byte *,
 				     ULONGEST, ULONGEST, ULONGEST *,
-				     struct target_section *,
-				     struct target_section *,
+				     const target_section_table &,
 				     gdb::function_view<bool
 				       (const struct target_section *)> match_cb
 				         = nullptr);
@@ -111,8 +109,7 @@ extern void remove_target_sections (void *owner);
    current set of target sections.  */
 
 extern void add_target_sections (void *owner,
-				 struct target_section *sections,
-				 struct target_section *sections_end);
+				 const target_section_table &sections);
 
 /* Add the sections of OBJFILE to the current set of target sections.
  * OBJFILE owns the new target sections.  */

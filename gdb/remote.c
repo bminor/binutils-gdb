@@ -8896,22 +8896,21 @@ remote_target::remote_xfer_live_readonly_partial (gdb_byte *readbuf,
   if (secp != NULL
       && (bfd_section_flags (secp->the_bfd_section) & SEC_READONLY))
     {
-      struct target_section *p;
       ULONGEST memend = memaddr + len;
 
       table = target_get_section_table (this);
 
-      for (p = table->sections; p < table->sections_end; p++)
+      for (target_section &p : table->sections)
 	{
-	  if (memaddr >= p->addr)
+	  if (memaddr >= p.addr)
 	    {
-	      if (memend <= p->endaddr)
+	      if (memend <= p.endaddr)
 		{
 		  /* Entire transfer is within this section.  */
 		  return remote_read_bytes_1 (memaddr, readbuf, len, unit_size,
 					      xfered_len);
 		}
-	      else if (memaddr >= p->endaddr)
+	      else if (memaddr >= p.endaddr)
 		{
 		  /* This section ends before the transfer starts.  */
 		  continue;
@@ -8919,7 +8918,7 @@ remote_target::remote_xfer_live_readonly_partial (gdb_byte *readbuf,
 	      else
 		{
 		  /* This section overlaps the transfer.  Just do half.  */
-		  len = p->endaddr - memaddr;
+		  len = p.endaddr - memaddr;
 		  return remote_read_bytes_1 (memaddr, readbuf, len, unit_size,
 					      xfered_len);
 		}

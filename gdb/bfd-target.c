@@ -35,7 +35,6 @@ class target_bfd : public target_ops
 {
 public:
   explicit target_bfd (struct bfd *bfd);
-  ~target_bfd () override;
 
   const target_info &info () const override
   { return target_bfd_target_info; }
@@ -76,8 +75,7 @@ target_bfd::xfer_partial (target_object object,
       {
 	return section_table_xfer_memory_partial (readbuf, writebuf,
 						  offset, len, xfered_len,
-						  m_table.sections,
-						  m_table.sections_end);
+						  m_table);
       }
     default:
       return TARGET_XFER_E_IO;
@@ -93,14 +91,7 @@ target_bfd::get_section_table ()
 target_bfd::target_bfd (struct bfd *abfd)
   : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd))
 {
-  m_table.sections = NULL;
-  m_table.sections_end = NULL;
-  build_section_table (abfd, &m_table.sections, &m_table.sections_end);
-}
-
-target_bfd::~target_bfd ()
-{
-  xfree (m_table.sections);
+  build_section_table (abfd, &m_table);
 }
 
 target_ops *

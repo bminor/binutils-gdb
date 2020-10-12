@@ -591,7 +591,6 @@ scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
   Elf32_External_Dyn *x_dynp_32;
   Elf64_External_Dyn *x_dynp_64;
   struct bfd_section *sect;
-  struct target_section *target_section;
 
   if (abfd == NULL)
     return 0;
@@ -608,14 +607,15 @@ scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
   if (sect == NULL)
     return 0;
 
-  for (target_section = current_target_sections->sections;
-       target_section < current_target_sections->sections_end;
-       target_section++)
-    if (sect == target_section->the_bfd_section)
-      break;
-  if (target_section < current_target_sections->sections_end)
-    dyn_addr = target_section->addr;
-  else
+  bool found = false;
+  for (target_section &target_section : current_target_sections->sections)
+    if (sect == target_section.the_bfd_section)
+      {
+	dyn_addr = target_section.addr;
+	found = true;
+	break;
+      }
+  if (!found)
     {
       /* ABFD may come from OBJFILE acting only as a symbol file without being
 	 loaded into the target (see add_symbol_file_command).  This case is

@@ -1,5 +1,54 @@
 2020-10-12  Tom Tromey  <tom@tromey.com>
 
+	* target.c (target_section_by_addr, memory_xfer_partial_1):
+	Update.
+	* target-section.h (struct target_section_table): Use
+	std::vector.
+	* symfile.h (build_section_addr_info_from_section_table): Take a
+	target_section_table.
+	* symfile.c (build_section_addr_info_from_section_table): Take a
+	target_section_table.
+	* solist.h (struct so_list) <sections>: Change type.
+	<sections_end>: Remove.
+	* solib.c (solib_map_sections, clear_so, solib_read_symbols)
+	(solib_contains_address_p): Update.
+	* solib-svr4.c (scan_dyntag): Update.
+	* solib-dsbt.c (scan_dyntag): Update.
+	* remote.c (remote_target::remote_xfer_live_readonly_partial):
+	Update.
+	* record-full.c (record_full_core_start, record_full_core_end):
+	Remove.
+	(record_full_core_sections): New global.
+	(record_full_core_open_1, record_full_core_target::xfer_partial):
+	Update.
+	* exec.h (build_section_table, section_table_xfer_memory_partial)
+	(add_target_sections): Take a target_section_table.
+	* exec.c (exec_file_attach, clear_section_table): Update.
+	(resize_section_table): Remove.
+	(build_section_table, add_target_sections): Take a
+	target_section_table.
+	(add_target_sections_of_objfile, remove_target_sections)
+	(exec_on_vfork): Update.
+	(section_table_available_memory): Take a target_section_table.
+	(section_table_read_available_memory): Update.
+	(section_table_xfer_memory_partial): Take a target_section_table.
+	(print_section_info, set_section_command)
+	(exec_set_section_address, exec_target::has_memory): Update.
+	* corelow.c (class core_target) <m_core_section_table,
+	m_core_file_mappings>: Remove braces.
+	<~core_target>: Remove.
+	(core_target::core_target): Update.
+	(core_target::~core_target): Remove.
+	(core_target::build_file_mappings)
+	(core_target::xfer_memory_via_mappings)
+	(core_target::xfer_partial, core_target::info_proc_mappings):
+	Update.
+	* bfd-target.c (target_bfd::xfer_partial): Update.
+	(target_bfd::target_bfd): Update.
+	(target_bfd::~target_bfd): Remove.
+
+2020-10-12  Tom Tromey  <tom@tromey.com>
+
 	* target.h (struct target_section, struct target_section_table):
 	Move to target-section.h.
 	* target-section.h: New file.

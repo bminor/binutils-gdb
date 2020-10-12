@@ -824,15 +824,14 @@ struct target_section *
 target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 {
   struct target_section_table *table = target_get_section_table (target);
-  struct target_section *secp;
 
   if (table == NULL)
     return NULL;
 
-  for (secp = table->sections; secp < table->sections_end; secp++)
+  for (target_section &secp : table->sections)
     {
-      if (addr >= secp->addr && addr < secp->endaddr)
-	return secp;
+      if (addr >= secp.addr && addr < secp.endaddr)
+	return &secp;
     }
   return NULL;
 }
@@ -979,9 +978,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
-						    table->sections,
-						    table->sections_end,
-						    match_cb);
+						    *table, match_cb);
 	}
     }
 
@@ -998,8 +995,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	  table = target_get_section_table (ops);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
-						    table->sections,
-						    table->sections_end);
+						    *table);
 	}
     }
 

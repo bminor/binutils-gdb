@@ -67,7 +67,6 @@ class core_target final : public process_stratum_target
 {
 public:
   core_target ();
-  ~core_target () override;
 
   const target_info &info () const override
   { return core_target_info; }
@@ -126,11 +125,11 @@ private: /* per-core data */
      shared library bfds.  The core bfd sections are an implementation
      detail of the core target, just like ptrace is for unix child
      targets.  */
-  target_section_table m_core_section_table {};
+  target_section_table m_core_section_table;
 
   /* File-backed address space mappings: some core files include
      information about memory mapped files.  */
-  target_section_table m_core_file_mappings {};
+  target_section_table m_core_file_mappings;
 
   /* Unavailable mappings.  These correspond to pathnames which either
      weren't found or could not be opened.  Knowing these addresses can
@@ -162,19 +161,11 @@ core_target::core_target ()
 	   bfd_get_filename (core_bfd));
 
   /* Find the data section */
-  if (build_section_table (core_bfd,
-			   &m_core_section_table.sections,
-			   &m_core_section_table.sections_end))
+  if (build_section_table (core_bfd, &m_core_section_table))
     error (_("\"%s\": Can't find sections: %s"),
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
 
   build_file_mappings ();
-}
-
-core_target::~core_target ()
-{
-  xfree (m_core_section_table.sections);
-  xfree (m_core_file_mappings.sections);
 }
 
 /* Construct the target_section_table for file-backed mappings if
@@ -202,12 +193,9 @@ core_target::build_file_mappings ()
   gdbarch_read_core_file_mappings (m_core_gdbarch, core_bfd,
 
     /* After determining the number of mappings, read_core_file_mappings
-       will invoke this lambda which allocates target_section storage for
-       the mappings.  */
-    [&] (ULONGEST count)
+       will invoke this lambda.  */
+    [&] (ULONGEST)
       {
-	m_core_file_mappings.sections = XNEWVEC (struct target_section, count);
-	m_core_file_mappings.sections_end = m_core_file_mappings.sections;
       },
 
     /* read_core_file_mappings will invoke this lambda for each mapping
@@ -280,11 +268,12 @@ core_target::build_file_mappings ()
 	bfd_set_section_alignment (sec, 2);
 
 	/* Set target_section fields.  */
-	struct target_section *ts = m_core_file_mappings.sections_end++;
-	ts->addr = start;
-	ts->endaddr = end;
-	ts->owner = nullptr;
-	ts->the_bfd_section = sec;
+	m_core_file_mappings.sections.emplace_back ();
+	target_section &ts = m_core_file_mappings.sections.back ();
+	ts.addr = start;
+	ts.endaddr = end;
+	ts.owner = nullptr;
+	ts.the_bfd_section = sec;
       });
 
   normalize_mem_ranges (&m_core_unavailable_mappings);
@@ -759,8 +748,7 @@ core_target::xfer_memory_via_mappings (gdb_byte *readbuf,
   xfer_status = (section_table_xfer_memory_partial
 		   (readbuf, writebuf,
 		    offset, len, xfered_len,
-		    m_core_file_mappings.sections,
-		    m_core_file_mappings.sections_end));
+		    m_core_file_mappings));
 
   if (xfer_status == TARGET_XFER_OK || m_core_unavailable_mappings.empty ())
     return xfer_status;
@@ -818,8 +806,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	xfer_status = section_table_xfer_memory_partial
 			(readbuf, writebuf,
 			 offset, len, xfered_len,
-			 m_core_section_table.sections,
-			 m_core_section_table.sections_end,
+			 m_core_section_table,
 			 has_contents_cb);
 	if (xfer_status == TARGET_XFER_OK)
 	  return TARGET_XFER_OK;
@@ -829,7 +816,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	   or the like) as this should provide a more accurate
 	   result.  If not, check the stratum beneath us, which should
 	   be the file stratum.  */
-	if (m_core_file_mappings.sections != nullptr)
+	if (!m_core_file_mappings.sections.empty ())
 	  xfer_status = xfer_memory_via_mappings (readbuf, writebuf, offset,
 						  len, xfered_len);
 	else
@@ -848,8 +835,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	xfer_status = section_table_xfer_memory_partial
 			(readbuf, writebuf,
 			 offset, len, xfered_len,
-			 m_core_section_table.sections,
-			 m_core_section_table.sections_end,
+			 m_core_section_table,
 			 no_contents_cb);
 
 	return xfer_status;
@@ -1114,7 +1100,7 @@ get_current_core_target ()
 void
 core_target::info_proc_mappings (struct gdbarch *gdbarch)
 {
-  if (m_core_file_mappings.sections != m_core_file_mappings.sections_end)
+  if (!m_core_file_mappings.sections.empty ())
     {
       printf_filtered (_("Mapped address spaces:\n\n"));
       if (gdbarch_addr_bit (gdbarch) == 32)
@@ -1133,14 +1119,12 @@ core_target::info_proc_mappings (struct gdbarch *gdbarch)
 	}
     }
 
-  for (const struct target_section *tsp = m_core_file_mappings.sections;
-       tsp < m_core_file_mappings.sections_end;
-       tsp++)
+  for (const target_section &tsp : m_core_file_mappings.sections)
     {
-      ULONGEST start = tsp->addr;
-      ULONGEST end = tsp->endaddr;
-      ULONGEST file_ofs = tsp->the_bfd_section->filepos;
-      const char *filename = bfd_get_filename (tsp->the_bfd_section->owner);
+      ULONGEST start = tsp.addr;
+      ULONGEST end = tsp.endaddr;
+      ULONGEST file_ofs = tsp.the_bfd_section->filepos;
+      const char *filename = bfd_get_filename (tsp.the_bfd_section->owner);
 
       if (gdbarch_addr_bit (gdbarch) == 32)
 	printf_filtered ("\t%10s %10s %10s %10s %s\n",
