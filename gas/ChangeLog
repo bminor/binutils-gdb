@@ -1,10 +1,13 @@
 2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
 
+	* config/tc-csky.c (md_begin): Add version flag in eflag.
+
+2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
+
 	* config/tc-csky.c (get_operand_value): Add handler for
 	OPRND_TYPE_IMM5b_VSH and OPRND_TYPE_VREG_WITH_INDEX.
 	* testsuite/gas/csky/csky_vdsp.d : Fix the disassembling for
 	vector register.
-
 
 2020-10-26  Lili Cui  <lili.cui@intel.com>
 

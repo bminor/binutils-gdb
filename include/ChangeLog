@@ -1,3 +1,9 @@
+2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
+
+	* opcode/csky.h (CSKY_VERSION_V1): New, currently used.
+	(CSKY_VERSION_V2): New.
+	(CSKY_VERSION_V3): New.
+
 2020-10-21  Tom Tromey  <tromey@adacore.com>
 
 	* ctf-api.h (_CTF_ERRORS): New macro.

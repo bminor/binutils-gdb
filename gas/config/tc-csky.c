@@ -1852,7 +1852,7 @@ md_begin (void)
     str_hash_insert (csky_macros_hash,
 		     v2_lrw_macro_opcode.name, &v2_lrw_macro_opcode, 0);
   /* Set e_flag to ELF Head.  */
-  bfd_set_private_flags (stdoutput, mach_flag & ~(0xffff));
+  bfd_set_private_flags (stdoutput, mach_flag | CSKY_VERSION_V1);
   /* Set bfd_mach to bfd backend data.  */
   bfd_set_arch_mach (stdoutput, bfd_arch_csky, bfd_mach_flag);
 
