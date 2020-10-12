@@ -1,5 +1,15 @@
 2020-10-12  Tom Tromey  <tom@tromey.com>
 
+	* solib.c (solib_map_sections): Update.
+	* record-full.c (record_full_core_open_1): Update.
+	* exec.h (build_section_table): Return a target_section_table.
+	* exec.c (exec_file_attach): Update.
+	(build_section_table): Return a target_section_table.
+	* corelow.c (core_target::core_target): Update.
+	* bfd-target.c (target_bfd::target_bfd): Update.
+
+2020-10-12  Tom Tromey  <tom@tromey.com>
+
 	* target.c (target_section_by_addr, memory_xfer_partial_1):
 	Update.
 	* target-section.h (struct target_section_table): Use

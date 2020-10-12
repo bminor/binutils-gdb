@@ -554,11 +554,7 @@ solib_map_sections (struct so_list *so)
 
   if (so->sections == nullptr)
     so->sections = new target_section_table;
-  if (build_section_table (so->abfd, so->sections))
-    {
-      error (_("Can't find the file sections in `%s': %s"),
-	     bfd_get_filename (so->abfd), bfd_errmsg (bfd_get_error ()));
-    }
+  *so->sections = build_section_table (so->abfd);
 
   for (target_section &p : so->sections->sections)
     {

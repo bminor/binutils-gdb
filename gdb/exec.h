@@ -34,10 +34,9 @@ struct objfile;
 #define exec_bfd_mtime current_program_space->ebfd_mtime
 #define exec_filename current_program_space->pspace_exec_filename
 
-/* Builds a section table, given args BFD, SECTABLE_PTR, SECEND_PTR.
-   Returns 0 if OK, 1 on error.  */
+/* Builds a section table, given args BFD.  */
 
-extern int build_section_table (struct bfd *, struct target_section_table *);
+extern target_section_table build_section_table (struct bfd *);
 
 /* Remove all entries from TABLE.  */
 

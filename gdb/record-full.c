@@ -923,13 +923,7 @@ record_full_core_open_1 (const char *name, int from_tty)
   for (i = 0; i < regnum; i ++)
     record_full_core_regbuf->raw_supply (i, *regcache);
 
-  if (build_section_table (core_bfd, &record_full_core_sections))
-    {
-      delete record_full_core_regbuf;
-      record_full_core_regbuf = NULL;
-      error (_("\"%s\": Can't find sections: %s"),
-	     bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
-    }
+  record_full_core_sections = build_section_table (core_bfd);
 
   push_target (&record_full_core_ops);
   record_full_restore ();

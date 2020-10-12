@@ -89,9 +89,9 @@ target_bfd::get_section_table ()
 }
 
 target_bfd::target_bfd (struct bfd *abfd)
-  : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd))
+  : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd)),
+    m_table (build_section_table (abfd))
 {
-  build_section_table (abfd, &m_table);
 }
 
 target_ops *

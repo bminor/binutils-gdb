@@ -413,7 +413,6 @@ exec_file_attach (const char *filename, int from_tty)
       int load_via_target = 0;
       const char *scratch_pathname, *canonical_pathname;
       int scratch_chan;
-      target_section_table sections;
       char **matching;
 
       if (is_target_filename (filename))
@@ -503,15 +502,7 @@ exec_file_attach (const char *filename, int from_tty)
 		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 	}
 
-      if (build_section_table (exec_bfd, &sections))
-	{
-	  /* Make sure to close exec_bfd, or else "run" might try to use
-	     it.  */
-	  exec_close ();
-	  error (_("\"%ps\": can't find the file sections: %s"),
-		 styled_string (file_name_style.style (), scratch_pathname),
-		 bfd_errmsg (bfd_get_error ()));
-	}
+      target_section_table sections = build_section_table (exec_bfd);
 
       exec_bfd_mtime = bfd_get_mtime (exec_bfd);
 
@@ -594,13 +585,13 @@ clear_section_table (struct target_section_table *table)
   table->sections.clear ();
 }
 
-/* Builds a section table, given args BFD, TABLE.
-   Returns 0 if OK, 1 on error.  */
+/* Builds a section table, given args BFD, TABLE.  */
 
-int
-build_section_table (struct bfd *some_bfd, target_section_table *table)
+target_section_table
+build_section_table (struct bfd *some_bfd)
 {
-  table->sections.clear ();
+  target_section_table table;
+
   for (asection *asect : gdb_bfd_sections (some_bfd))
     {
       flagword aflag;
@@ -615,16 +606,15 @@ build_section_table (struct bfd *some_bfd, target_section_table *table)
       if (!(aflag & SEC_ALLOC))
 	continue;
 
-      table->sections.emplace_back ();
-      target_section &sect = table->sections.back ();
+      table.sections.emplace_back ();
+      target_section &sect = table.sections.back ();
       sect.owner = NULL;
       sect.the_bfd_section = asect;
       sect.addr = bfd_section_vma (asect);
       sect.endaddr = sect.addr + bfd_section_size (asect);
     }
 
-  /* We could realloc the table, but it probably loses for most files.  */
-  return 0;
+  return table;
 }
 
 /* Add the sections array defined by [SECTIONS..SECTIONS_END[ to the

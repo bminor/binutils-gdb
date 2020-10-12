@@ -161,9 +161,7 @@ core_target::core_target ()
 	   bfd_get_filename (core_bfd));
 
   /* Find the data section */
-  if (build_section_table (core_bfd, &m_core_section_table))
-    error (_("\"%s\": Can't find sections: %s"),
-	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
+  m_core_section_table = build_section_table (core_bfd);
 
   build_file_mappings ();
 }
