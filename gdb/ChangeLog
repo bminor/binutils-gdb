@@ -1,5 +1,9 @@
 2020-10-12  Tom Tromey  <tom@tromey.com>
 
+	* exec.c (add_target_sections_of_objfile): Simplify.
+
+2020-10-12  Tom Tromey  <tom@tromey.com>
+
 	* solib.c (solib_map_sections): Update.
 	* record-full.c (record_full_core_open_1): Update.
 	* exec.h (build_section_table): Return a target_section_table.

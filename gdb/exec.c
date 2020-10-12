@@ -661,22 +661,10 @@ add_target_sections_of_objfile (struct objfile *objfile)
 {
   struct target_section_table *table = current_target_sections;
   struct obj_section *osect;
-  unsigned count = 0;
 
-  if (objfile == NULL)
-    return;
+  gdb_assert (objfile != nullptr);
 
   /* Compute the number of sections to add.  */
-  ALL_OBJFILE_OSECTIONS (objfile, osect)
-    {
-      if (bfd_section_size (osect->the_bfd_section) == 0)
-	continue;
-      count++;
-    }
-
-  if (count == 0)
-    return;
-
   ALL_OBJFILE_OSECTIONS (objfile, osect)
     {
       if (bfd_section_size (osect->the_bfd_section) == 0)
