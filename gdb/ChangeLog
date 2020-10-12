@@ -1,3 +1,9 @@
+2020-10-12  Tom Tromey  <tom@tromey.com>
+
+	* target.h (struct target_section, struct target_section_table):
+	Move to target-section.h.
+	* target-section.h: New file.
+
 2020-10-12  Pedro Alves  <pedro@palves.net>
 
 	PR exp/26602

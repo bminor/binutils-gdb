@@ -44,6 +44,7 @@ struct inferior;
 #include "breakpoint.h" /* For enum bptype.  */
 #include "gdbsupport/scoped_restore.h"
 #include "gdbsupport/refcounted-object.h"
+#include "target-section.h"
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -2404,33 +2405,6 @@ extern bool target_is_pushed (target_ops *t);
 
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);
-
-/* Struct target_section maps address ranges to file sections.  It is
-   mostly used with BFD files, but can be used without (e.g. for handling
-   raw disks, or files not in formats handled by BFD).  */
-
-struct target_section
-  {
-    CORE_ADDR addr;		/* Lowest address in section */
-    CORE_ADDR endaddr;		/* 1+highest address in section */
-
-    struct bfd_section *the_bfd_section;
-
-    /* The "owner" of the section.
-       It can be any unique value.  It is set by add_target_sections
-       and used by remove_target_sections.
-       For example, for executables it is a pointer to exec_bfd and
-       for shlibs it is the so_list pointer.  */
-    void *owner;
-  };
-
-/* Holds an array of target sections.  Defined by [SECTIONS..SECTIONS_END[.  */
-
-struct target_section_table
-{
-  struct target_section *sections;
-  struct target_section *sections_end;
-};
 
 /* Return the "section" containing the specified address.  */
 struct target_section *target_section_by_addr (struct target_ops *target,
