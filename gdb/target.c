@@ -812,7 +812,7 @@ target_read_string (CORE_ADDR memaddr, int len, int *bytes_read)
   return gdb::unique_xmalloc_ptr<char> ((char *) buffer.release ());
 }
 
-struct target_section_table *
+target_section_table *
 target_get_section_table (struct target_ops *target)
 {
   return target->get_section_table ();
@@ -823,12 +823,12 @@ target_get_section_table (struct target_ops *target)
 struct target_section *
 target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 {
-  struct target_section_table *table = target_get_section_table (target);
+  target_section_table *table = target_get_section_table (target);
 
   if (table == NULL)
     return NULL;
 
-  for (target_section &secp : table->sections)
+  for (target_section &secp : *table)
     {
       if (addr >= secp.addr && addr < secp.endaddr)
 	return &secp;
@@ -965,8 +965,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
       if (pc_in_unmapped_range (memaddr, section))
 	{
-	  struct target_section_table *table
-	    = target_get_section_table (ops);
+	  target_section_table *table = target_get_section_table (ops);
 	  const char *section_name = section->the_bfd_section->name;
 
 	  memaddr = overlay_mapped_address (memaddr, section);
@@ -986,13 +985,12 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
   if (readbuf != NULL && trust_readonly)
     {
       struct target_section *secp;
-      struct target_section_table *table;
 
       secp = target_section_by_addr (ops, memaddr);
       if (secp != NULL
 	  && (bfd_section_flags (secp->the_bfd_section) & SEC_READONLY))
 	{
-	  table = target_get_section_table (ops);
+	  target_section_table *table = target_get_section_table (ops);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
 						    *table);

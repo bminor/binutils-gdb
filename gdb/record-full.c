@@ -2138,7 +2138,7 @@ record_full_core_target::xfer_partial (enum target_object object,
     {
       if (record_full_gdb_operation_disable || !writebuf)
 	{
-	  for (target_section &p : record_full_core_sections.sections)
+	  for (target_section &p : record_full_core_sections)
 	    {
 	      if (offset >= p.addr)
 		{

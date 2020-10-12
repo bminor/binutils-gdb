@@ -106,7 +106,7 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_ui_file_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_target_section_table_p(X)	\
+#define target_debug_print_target_section_table_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_async_callback_ftype_p(X) \
   target_debug_do_print (host_address_to_string (X))

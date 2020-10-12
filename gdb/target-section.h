@@ -44,9 +44,6 @@ struct target_section
 
 /* Holds an array of target sections.  */
 
-struct target_section_table
-{
-  std::vector<struct target_section> sections;
-};
+using target_section_table = std::vector<target_section>;
 
 #endif /* GDB_TARGET_SECTION_H */

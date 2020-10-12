@@ -1,5 +1,37 @@
 2020-10-12  Tom Tromey  <tom@tromey.com>
 
+	* target.h (struct target_ops) <get_section_table>: Update.
+	(target_get_section_table): Update.
+	* target.c (target_get_section_table, target_section_by_addr)
+	(memory_xfer_partial_1): Update.
+	* target-section.h (target_section_table): Now an alias.
+	* target-delegates.c: Rebuild.
+	* target-debug.h (target_debug_print_target_section_table_p):
+	Rename from target_debug_print_struct_target_section_table_p.
+	* symfile.c (build_section_addr_info_from_section_table): Update.
+	* solib.c (solib_map_sections, solib_contains_address_p): Update.
+	* solib-svr4.c (scan_dyntag): Update.
+	* solib-dsbt.c (scan_dyntag): Update.
+	* remote.c (remote_target::remote_xfer_live_readonly_partial):
+	Update.
+	* record-full.c (record_full_core_target::xfer_partial): Update.
+	* progspace.h (struct program_space) <target_sections>: Update.
+	* exec.h (print_section_info): Update.
+	* exec.c (exec_target::close, build_section_table)
+	(add_target_sections, add_target_sections_of_objfile)
+	(remove_target_sections, exec_on_vfork)
+	(section_table_available_memory)
+	(section_table_xfer_memory_partial)
+	(exec_target::get_section_table, exec_target::xfer_partial)
+	(print_section_info, set_section_command)
+	(exec_set_section_address, exec_target::has_memory): Update.
+	* corelow.c (core_target::build_file_mappings)
+	(core_target::xfer_partial, core_target::info_proc_mappings)
+	(core_target::info_proc_mappings): Update.
+	* bfd-target.c (class target_bfd): Update
+
+2020-10-12  Tom Tromey  <tom@tromey.com>
+
 	* progspace.c (program_space::~program_space): Don't call
 	clear_section_table.
 	* exec.h (clear_section_table): Don't declare.

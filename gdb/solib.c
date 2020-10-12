@@ -556,7 +556,7 @@ solib_map_sections (struct so_list *so)
     so->sections = new target_section_table;
   *so->sections = build_section_table (so->abfd);
 
-  for (target_section &p : so->sections->sections)
+  for (target_section &p : *so->sections)
     {
       /* Relocate the section binding addresses as recorded in the shared
          object's file by the base address to which the object was actually
@@ -1113,7 +1113,7 @@ bool
 solib_contains_address_p (const struct so_list *const solib,
 			  CORE_ADDR address)
 {
-  for (target_section &p : solib->sections->sections)
+  for (target_section &p : *solib->sections)
     if (p.addr <= address && address < p.endaddr)
       return true;
 

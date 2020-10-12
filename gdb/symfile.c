@@ -216,13 +216,13 @@ build_section_addr_info_from_section_table (const target_section_table &table)
 {
   section_addr_info sap;
 
-  for (const target_section &stp : table.sections)
+  for (const target_section &stp : table)
     {
       struct bfd_section *asect = stp.the_bfd_section;
       bfd *abfd = asect->owner;
 
       if (bfd_section_flags (asect) & (SEC_ALLOC | SEC_LOAD)
-	  && sap.size () < table.sections.size ())
+	  && sap.size () < table.size ())
 	sap.emplace_back (stp.addr,
 			  bfd_section_name (asect),
 			  gdb_bfd_section_index (abfd, asect));

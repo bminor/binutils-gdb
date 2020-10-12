@@ -115,7 +115,7 @@ extern void add_target_sections_of_objfile (struct objfile *objfile);
    special cased --- it's filename is omitted; if it is the executable
    file, its entry point is printed.  */
 
-extern void print_section_info (struct target_section_table *table,
+extern void print_section_info (target_section_table *table,
 				bfd *abfd);
 
 extern void exec_close (void);

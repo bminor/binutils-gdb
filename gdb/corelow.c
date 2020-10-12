@@ -266,8 +266,8 @@ core_target::build_file_mappings ()
 	bfd_set_section_alignment (sec, 2);
 
 	/* Set target_section fields.  */
-	m_core_file_mappings.sections.emplace_back ();
-	target_section &ts = m_core_file_mappings.sections.back ();
+	m_core_file_mappings.emplace_back ();
+	target_section &ts = m_core_file_mappings.back ();
 	ts.addr = start;
 	ts.endaddr = end;
 	ts.owner = nullptr;
@@ -814,7 +814,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	   or the like) as this should provide a more accurate
 	   result.  If not, check the stratum beneath us, which should
 	   be the file stratum.  */
-	if (!m_core_file_mappings.sections.empty ())
+	if (!m_core_file_mappings.empty ())
 	  xfer_status = xfer_memory_via_mappings (readbuf, writebuf, offset,
 						  len, xfered_len);
 	else
@@ -1098,7 +1098,7 @@ get_current_core_target ()
 void
 core_target::info_proc_mappings (struct gdbarch *gdbarch)
 {
-  if (!m_core_file_mappings.sections.empty ())
+  if (!m_core_file_mappings.empty ())
     {
       printf_filtered (_("Mapped address spaces:\n\n"));
       if (gdbarch_addr_bit (gdbarch) == 32)
@@ -1117,7 +1117,7 @@ core_target::info_proc_mappings (struct gdbarch *gdbarch)
 	}
     }
 
-  for (const target_section &tsp : m_core_file_mappings.sections)
+  for (const target_section &tsp : m_core_file_mappings)
     {
       ULONGEST start = tsp.addr;
       ULONGEST end = tsp.endaddr;

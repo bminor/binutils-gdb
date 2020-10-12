@@ -325,7 +325,7 @@ struct program_space
 
   /* The set of target sections matching the sections mapped into
      this program space.  Managed by both exec_ops and solib.c.  */
-  struct target_section_table target_sections {};
+  target_section_table target_sections;
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */

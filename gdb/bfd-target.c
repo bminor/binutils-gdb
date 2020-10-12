@@ -59,7 +59,7 @@ private:
   /* The section table build from the ALLOC sections in BFD.  Note
      that we can't rely on extracting the BFD from a random section in
      the table, since the table can be legitimately empty.  */
-  struct target_section_table m_table;
+  target_section_table m_table;
 };
 
 target_xfer_status
