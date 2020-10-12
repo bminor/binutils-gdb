@@ -44,7 +44,7 @@ if { ![runto main] } then {
    return
 }
 
-if [gdb_test "show arch" ".*currently powerpc:common.*" "checking for PPC arch"] {
+if [gdb_test "show arch" ".*powerpc:common.*" "checking for PPC arch"] {
     return -1
 }
 

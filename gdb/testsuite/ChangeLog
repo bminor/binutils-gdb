@@ -1,3 +1,12 @@
+2020-10-13  Alan Modra  <amodra@gmail.com>
+
+	* gdb.arch/arm-disassembler-options.exp: Adjust expected
+	"target architecture" output.
+	* gdb.arch/powerpc-d128-regs.exp: Likewise.
+	* gdb.arch/powerpc-disassembler-options.exp: Likewise.
+	* gdb.arch/ppc64-symtab-cordic.exp: Likewise.
+	* gdb.arch/s390-disassembler-options.exp: Likewise.
+
 2020-10-12  Pedro Alves  <pedro@palves.net>
 
 	PR exp/26602
