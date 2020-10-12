@@ -154,7 +154,6 @@ program_space::~program_space ()
   clear_symtab_users (SYMFILE_DEFER_BP_RESET);
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
     free_address_space (this->aspace);
-  clear_section_table (&this->target_sections);
   clear_program_space_solib_cache (this);
     /* Discard any data modules have associated with the PSPACE.  */
   program_space_free_data (this);

@@ -1,5 +1,13 @@
 2020-10-12  Tom Tromey  <tom@tromey.com>
 
+	* progspace.c (program_space::~program_space): Don't call
+	clear_section_table.
+	* exec.h (clear_section_table): Don't declare.
+	* exec.c (exec_target::close): Update.
+	(clear_section_table): Remove.
+
+2020-10-12  Tom Tromey  <tom@tromey.com>
+
 	* exec.c (add_target_sections_of_objfile): Simplify.
 
 2020-10-12  Tom Tromey  <tom@tromey.com>

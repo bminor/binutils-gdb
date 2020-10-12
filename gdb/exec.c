@@ -183,7 +183,7 @@ exec_target::close ()
   for (struct program_space *ss : program_spaces)
     {
       set_current_program_space (ss);
-      clear_section_table (current_target_sections);
+      current_target_sections->sections.clear ();
       exec_close ();
     }
 }
@@ -576,14 +576,6 @@ file_command (const char *arg, int from_tty)
     deprecated_file_changed_hook (arg);
 }
 
-
-/* See exec.h.  */
-
-void
-clear_section_table (struct target_section_table *table)
-{
-  table->sections.clear ();
-}
 
 /* Builds a section table, given args BFD, TABLE.  */
 

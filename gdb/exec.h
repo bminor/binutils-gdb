@@ -38,10 +38,6 @@ struct objfile;
 
 extern target_section_table build_section_table (struct bfd *);
 
-/* Remove all entries from TABLE.  */
-
-extern void clear_section_table (struct target_section_table *table);
-
 /* The current inferior is a child vforked and its program space is
    shared with its parent.  This pushes the exec target on the
    current/child inferior's target stack if there are sections in the
