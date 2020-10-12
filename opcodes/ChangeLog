@@ -1,5 +1,9 @@
 2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
 
+	* csky-opc.h (csky_v2_opcodes): Change plsl.u16 to plsl.16.
+
+2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
+
 	* csky-dis.c (csky_output_operand): Add handler for
 	OPRND_TYPE_IMM5b_VSH and OPRND_TYPE_VREG_WITH_INDEX.
 	* csky-opc.h (OPRND_TYPE_VREG_WITH_INDEX): New enum.

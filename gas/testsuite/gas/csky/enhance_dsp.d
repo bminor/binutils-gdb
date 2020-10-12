@@ -110,7 +110,7 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*f8e3d302\s*plsri\.u16\.r\s*r2,\s*r3,\s*8
 \s*[0-9a-f]*:\s*f883d342\s*plsr\.u16\.r\s*r2,\s*r3,\s*r4
 \s*[0-9a-f]*:\s*f8e3d402\s*plsli\.16\s*r2,\s*r3,\s*8
-\s*[0-9a-f]*:\s*fa03d442\s*plsl\.u16\s*r2,\s*r3,\s*r16
+\s*[0-9a-f]*:\s*fa03d442\s*plsl\.16\s*r2,\s*r3,\s*r16
 \s*[0-9a-f]*:\s*f8e3d502\s*plsli\.u16\.s\s*r2,\s*r3,\s*8
 \s*[0-9a-f]*:\s*f8e3d582\s*plsli\.s16\.s\s*r2,\s*r3,\s*8
 \s*[0-9a-f]*:\s*f883d542\s*plsl\.u16\.s\s*r2,\s*r3,\s*r4

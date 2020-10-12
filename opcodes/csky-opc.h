@@ -5782,7 +5782,7 @@ const struct csky_opcode csky_v2_opcodes[] =
 			(16_20, AREG, OPRND_SHIFT_0_BIT),
 			(21_25, OIMM4b, OPRND_SHIFT_0_BIT)),
 	  CSKY_ISA_DSP_ENHANCE),
-    OP32 ("plsl.u16",
+    OP32 ("plsl.16",
 	  OPCODE_INFO3 (0xf800d440,
 			(0_4, AREG, OPRND_SHIFT_0_BIT),
 			(16_20, AREG, OPRND_SHIFT_0_BIT),
