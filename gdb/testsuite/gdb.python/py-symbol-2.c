@@ -15,7 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see  <http://www.gnu.org/licenses/>.  */
 
-static int rr = 99;		/* line of other rr */
+static int __attribute__ ((used)) rr = 99;	/* line of other rr */
 
 void
 function_in_other_file (void)

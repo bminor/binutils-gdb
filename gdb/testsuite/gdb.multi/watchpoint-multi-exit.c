@@ -21,7 +21,7 @@
 #include <sys/wait.h>
 
 /* GDB sets watchpoint here.  */
-static volatile int globalvar;
+static volatile int __attribute__ ((used)) globalvar;
 
 /* Whether it's expected that the child exits with a signal, vs
    exiting normally.  GDB sets this.  */

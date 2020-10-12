@@ -22,7 +22,7 @@ extern int global_i2;
 extern float global_f2;
 
 static int global_i1;
-static float global_f1;
+static float __attribute__ ((used)) global_f1;
 
 typedef int my_int_t;
 

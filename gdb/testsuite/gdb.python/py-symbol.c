@@ -34,7 +34,7 @@ class SimpleClass
 };
 
 namespace {
-  int anon = 10;
+  int __attribute__ ((used)) anon = 10;
 };
 #endif
 
@@ -43,7 +43,7 @@ extern void function_in_other_file (void);
 #endif
 
 int qq = 72;			/* line of qq */
-static int rr = 42;		/* line of rr */
+static int __attribute__ ((used)) rr = 42;	/* line of rr */
 
 int func (int arg)
 {

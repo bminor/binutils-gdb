@@ -16,7 +16,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 int global_var = 42;
-static int static_var = 50;
+static int __attribute__ ((used)) static_var = 50;
 
 int
 main ()

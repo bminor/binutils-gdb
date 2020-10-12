@@ -1,3 +1,20 @@
+2020-10-12  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/msym-bp.c (foo): Add __attribute__ ((used)).
+	* gdb.base/msym-bp-2.c (foo): Likewise.
+	* gdb.base/msym-lang.c (foo): Likewise.
+	* gdb.base/msym-lang-main.c (foo): Likewise.
+	* gdb.base/symtab-search-order-1.c (static_global): Likewise.
+	* gdb.guile/scm-pretty-print.c (eval_func): Likewise.
+	* gdb.mi/mi-sym-info-1.c (global_f1): Likewise.
+	* gdb.mi/mi-sym-info-2.c (global_f1, var1, var2): Likewise.
+	* gdb.multi/watchpoint-multi-exit.c (globalvar): Likewise.
+	* gdb.python/py-as-string.c (enum_valid, enum_invalid): Likewise.
+	* gdb.python/py-objfile.c (static_var): Likewise.
+	* gdb.python/py-symbol.c (rr): Likewise.
+	* gdb.python/py-symbol-2.c (anon, rr): Likewise.
+	* gdb.mi/mi-sym-info.exp (lineno1, lineno2): Updated.
+
 2020-10-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/mixed-lang-stack.exp (run_tests): Update expected

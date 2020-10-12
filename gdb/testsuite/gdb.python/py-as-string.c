@@ -22,8 +22,8 @@ enum EnumType {
   ENUM_VALUE_D,
 };
 
-static enum EnumType enum_valid = ENUM_VALUE_B;
-static enum EnumType enum_invalid = (enum EnumType) 20;
+static enum EnumType __attribute__ ((used)) enum_valid = ENUM_VALUE_B;
+static enum EnumType __attribute__ ((used)) enum_invalid = (enum EnumType) 20;
 
 int
 main ()
