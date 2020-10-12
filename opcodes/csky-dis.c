@@ -415,6 +415,15 @@ csky_output_operand (char *str, struct operand const *oprnd,
       strcat (str, buf);
       ret = 0;
       break;
+    case OPRND_TYPE_IMM5b_VSH:
+      {
+	char num[128];
+	value = ((value & 0x1) << 4) | (value >> 1);
+	sprintf (num, "%d", (int)value);
+	strcat (str, num);
+	ret = 0;
+	break;
+      }
     case OPRND_TYPE_MSB2SIZE:
     case OPRND_TYPE_LSB2SIZE:
       {
@@ -837,11 +846,19 @@ csky_output_operand (char *str, struct operand const *oprnd,
       else if ((value & 0x3) == 0x3)
 	strcat (str, "3");
       break;
-    case OPRND_TYPE_FREG_WITH_INDEX:
+    case OPRND_TYPE_VREG_WITH_INDEX:
       {
 	unsigned freg_val = value & 0xf;
 	unsigned index_val = (value >> 4) & 0xf;
 	sprintf (buf, "vr%d[%d]", freg_val, index_val);
+	strcat(str, buf);
+	break;
+      }
+    case OPRND_TYPE_FREG_WITH_INDEX:
+      {
+	unsigned freg_val = value & 0xf;
+	unsigned index_val = (value >> 4) & 0xf;
+	sprintf (buf, "fr%d[%d]", freg_val, index_val);
 	strcat(str, buf);
 	break;
       }

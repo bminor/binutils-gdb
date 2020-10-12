@@ -3673,6 +3673,17 @@ get_operand_value (struct csky_opcode_info *op,
 	}
       return TRUE;
 
+    case OPRND_TYPE_IMM5b_VSH:
+    /* For vshri.T and vshli.T.  */
+      if (is_imm_within_range (oper, 0, 31))
+	{
+	  int val = csky_insn.val[csky_insn.idx - 1];
+	  val =  (val << 1) | (val >> 4);
+	  val &= 0x1f;
+	  csky_insn.val[csky_insn.idx - 1] = val;
+	  return TRUE;
+	}
+      return FALSE;
       case OPRND_TYPE_IMM8b_BMASKI:
       /* For csky v2 bmask, which will transfer to 16bits movi.  */
 	if (is_imm_within_range (oper, 1, 8))
@@ -4240,6 +4251,7 @@ get_operand_value (struct csky_opcode_info *op,
     case OPRND_TYPE_AREG_WITH_LSHIFT_FPU:
       return is_reg_lshift_illegal (oper, 1);
     case OPRND_TYPE_FREG_WITH_INDEX:
+    case OPRND_TYPE_VREG_WITH_INDEX:
       if (parse_type_freg (oper, 0))
 	{
 	  if (**oper == '[')
