@@ -52366,6 +52366,8 @@ configure-stage3-libctf: maybe-all-stage3-libiconv
 configure-stage4-libctf: maybe-all-stage4-libiconv
 configure-stageprofile-libctf: maybe-all-stageprofile-libiconv
 configure-stagefeedback-libctf: maybe-all-stagefeedback-libiconv
+distclean-gnulib: maybe-distclean-gdb
+distclean-gnulib: maybe-distclean-gdbserver
 all-bison: maybe-all-build-texinfo
 all-flex: maybe-all-build-bison
 all-flex: maybe-all-m4

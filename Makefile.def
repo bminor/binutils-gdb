@@ -548,6 +548,12 @@ dependencies = { module=configure-libctf; on=all-intl; };
 dependencies = { module=configure-libctf; on=all-zlib; };
 dependencies = { module=configure-libctf; on=all-libiconv; };
 
+// The Makefiles in gdb and gdbserver pull in a file that configure
+// generates in the gnulib directory, so distclean gnulib only after
+// gdb and gdbserver.
+dependencies = { module=distclean-gnulib; on=distclean-gdb; };
+dependencies = { module=distclean-gnulib; on=distclean-gdbserver; };
+
 // Warning, these are not well tested.
 dependencies = { module=all-bison; on=all-intl; };
 dependencies = { module=all-bison; on=all-build-texinfo; };

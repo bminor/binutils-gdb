@@ -1,3 +1,9 @@
+2020-10-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in: Rebuild.
+	* Makefile.def: Make distclean-gnulib depend on distclean-gdb and
+	distclean-gdbserver.
+
 2020-07-24  Aaron Merey  <amerey@redhat.com>
 
 	* configure: Rebuild.
