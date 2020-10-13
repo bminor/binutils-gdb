@@ -3533,6 +3533,11 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
 
   /* But if we don't find one, we'll have to wait.  */
 
+  /* We can't ask a non-async target to do a non-blocking wait, so this will be
+     a blocking wait.  */
+  if (!target_can_async_p ())
+    options &= ~TARGET_WNOHANG;
+
   if (deprecated_target_wait_hook)
     event_ptid = deprecated_target_wait_hook (ptid, status, options);
   else

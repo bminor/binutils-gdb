@@ -1,3 +1,9 @@
+2020-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26642
+	* gdb.base/maint-target-async-off.c: New test.
+	* gdb.base/maint-target-async-off.exp: New test.
+
 2020-10-13  Alan Modra  <amodra@gmail.com>
 
 	* gdb.arch/powerpc-altivec.s,

@@ -1992,7 +1992,12 @@ ptid_t
 target_wait (ptid_t ptid, struct target_waitstatus *status,
 	     target_wait_flags options)
 {
-  return current_top_target ()->wait (ptid, status, options);
+  target_ops *target = current_top_target ();
+
+  if (!target->can_async_p ())
+    gdb_assert ((options & TARGET_WNOHANG) == 0);
+
+  return target->wait (ptid, status, options);
 }
 
 /* See target.h.  */

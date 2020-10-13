@@ -1,3 +1,11 @@
+2020-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26642
+	* infrun.c (do_target_wait_1): Clear TARGET_WNOHANG if the
+	target can't do async.
+	* target.c (target_wait): Assert that we don't pass
+	TARGET_WNOHANG to a target that can't async.
+
 2020-10-13  Kamil Rytarowski  <n54@gmx.com>
 
 	* Makefile.in (ALL_64_TARGET_OBS, ALL_TARGET_OBS)
