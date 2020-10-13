@@ -3992,12 +3992,6 @@ Target_x86_64<size>::Scan::local_reloc_may_be_function_pointer(
   unsigned int r_type,
   const elfcpp::Sym<size, false>&)
 {
-  // When building a shared library, do not fold any local symbols as it is
-  // not possible to distinguish pointer taken versus a call by looking at
-  // the relocation types.
-  if (parameters->options().shared())
-    return true;
-
   return possible_function_pointer_reloc(src_obj, src_indx,
                                          reloc.get_r_offset(), r_type);
 }
@@ -4017,16 +4011,8 @@ Target_x86_64<size>::Scan::global_reloc_may_be_function_pointer(
   Output_section* ,
   const elfcpp::Rela<size, false>& reloc,
   unsigned int r_type,
-  Symbol* gsym)
+  Symbol*)
 {
-  // When building a shared library, do not fold symbols whose visibility
-  // is hidden, internal or protected.
-  if (parameters->options().shared()
-      && (gsym->visibility() == elfcpp::STV_INTERNAL
-	  || gsym->visibility() == elfcpp::STV_PROTECTED
-	  || gsym->visibility() == elfcpp::STV_HIDDEN))
-    return true;
-
   return possible_function_pointer_reloc(src_obj, src_indx,
                                          reloc.get_r_offset(), r_type);
 }

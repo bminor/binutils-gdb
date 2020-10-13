@@ -61,9 +61,17 @@ int bar_glob()
   return 2;
 }
 
+static int
+bar_static()
+{
+  return 2;
+}
+
 int main()
 {
   int (*p)() = foo_glob;
+  (void)p;
+  p = bar_static;
   (void)p;
   foo_static();
   foo_prot();

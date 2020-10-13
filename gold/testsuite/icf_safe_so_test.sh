@@ -83,7 +83,7 @@ END {
 
 arch_specific_safe_fold()
 {
-    if grep -q -e "Intel 80386" -e "ARM" -e "PowerPC" $1;
+    if grep -q -e "Advanced Micro Devices X86-64" -e "Intel 80386" -e "ARM" -e "PowerPC" $1;
     then
 	shift
 	shift

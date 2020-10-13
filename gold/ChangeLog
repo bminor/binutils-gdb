@@ -1,5 +1,17 @@
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/21452
+	* x86_64.cc (Scan::local_reloc_may_be_function_pointer): Remove
+	check for shared library.
+	(Scan::global_reloc_may_be_function_pointer): Remove check for
+	shared library and symbol visibility.
+	* testsuite/icf_safe_so_test.cc (bar_static): New function.
+	(main): Take function address of bar_static and use it.
+	* testsuite/icf_safe_so_test.sh (arch_specific_safe_fold): Also
+	check fold on x86-64.  Check bar_static isn't folded.
+
+2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* icf.cc (Icf::find_identical_sections): Skip zero-sized sections.
 
 2020-10-09  Alan Modra  <amodra@gmail.com>
