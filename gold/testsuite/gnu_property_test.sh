@@ -53,7 +53,27 @@ check_count()
     fi
 }
 
+check_alignment ()
+{
+    if egrep -q "Class:[ \t]+ELF64" "$1"
+    then
+	align=8
+    else
+	align=4
+    fi
+    if ! egrep -q ".note.gnu.property[ \t]+NOTE.*$align$" "$1"
+    then
+	echo "Wrong .note.gnu.property alignment in $1:"
+	egrep ".note.gnu.property[ \t]+NOTE.*$align" "$1"
+	exit 1
+    fi
+}
+
+check_alignment gnu_property_test.stdout
+
 check_count gnu_property_test.stdout "GNU\s*0x[0-9a-f]*\s*NT_GNU_PROPERTY_TYPE_0" 1
+
+check_count gnu_property_test.stdout "^  NOTE" 2
 
 check gnu_property_test.stdout "stack size: 0x111100"
 check gnu_property_test.stdout "no copy on protected"

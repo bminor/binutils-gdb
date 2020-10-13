@@ -2062,12 +2062,15 @@ Layout::attach_allocated_section_to_segment(const Target* target,
   // segment.
   if (os->type() == elfcpp::SHT_NOTE)
     {
+      uint64_t os_align = os->addralign();
+
       // See if we already have an equivalent PT_NOTE segment.
       for (p = this->segment_list_.begin();
 	   p != segment_list_.end();
 	   ++p)
 	{
 	  if ((*p)->type() == elfcpp::PT_NOTE
+	      && (*p)->align() == os_align
 	      && (((*p)->flags() & elfcpp::PF_W)
 		  == (seg_flags & elfcpp::PF_W)))
 	    {
@@ -2081,6 +2084,7 @@ Layout::attach_allocated_section_to_segment(const Target* target,
 	  Output_segment* oseg = this->make_output_segment(elfcpp::PT_NOTE,
 							   seg_flags);
 	  oseg->add_output_section_to_nonload(os, seg_flags);
+	  oseg->set_align(os_align);
 	}
     }
 
@@ -3184,6 +3188,10 @@ Layout::create_note(const char* name, int note_type,
 #else
   const int size = 32;
 #endif
+  // The NT_GNU_PROPERTY_TYPE_0 note is aligned to the pointer size.
+  const int addralign = ((note_type == elfcpp::NT_GNU_PROPERTY_TYPE_0
+			 ? parameters->target().get_size()
+			 : size) / 8);
 
   // The contents of the .note section.
   size_t namesz = strlen(name) + 1;
@@ -3247,7 +3255,7 @@ Layout::create_note(const char* name, int note_type,
     return NULL;
 
   Output_section_data* posd = new Output_data_const_buffer(buffer, notehdrsz,
-							   size / 8,
+							   addralign,
 							   "** note header");
   os->add_output_section_data(posd);
 
@@ -3705,6 +3713,11 @@ Layout::segment_precedes(const Output_segment* seg1,
     {
       if (type1 != type2)
 	return type1 < type2;
+      uint64_t align1 = seg1->align();
+      uint64_t align2 = seg2->align();
+      // Place segments with larger alignments first.
+      if (align1 != align2)
+	return align1 > align2;
       gold_assert(flags1 != flags2
 		  || this->script_options_->saw_phdrs_clause());
       return flags1 < flags2;

@@ -3306,9 +3306,9 @@ check_SCRIPTS += gnu_property_test.sh
 check_DATA += gnu_property_test.stdout
 MOSTLYCLEANFILES += gnu_property_test
 gnu_property_test.stdout: gnu_property_test
-	$(TEST_READELF) -n $< >$@
+	$(TEST_READELF) -lhSWn $< >$@
 gnu_property_test: gcctestdir/ld gnu_property_a.o gnu_property_b.o gnu_property_c.o
-	gcctestdir/ld -o $@ gnu_property_a.o gnu_property_b.o gnu_property_c.o
+	gcctestdir/ld --build-id -o $@ gnu_property_a.o gnu_property_b.o gnu_property_c.o
 gnu_property_main.o: gnu_property_main.c
 	$(COMPILE) -c -o $@ $<
 gnu_property_a.o: gnu_property_a.S

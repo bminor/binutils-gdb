@@ -4113,6 +4113,7 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
   : vaddr_(0),
     paddr_(0),
     memsz_(0),
+    align_(0),
     max_align_(0),
     min_p_align_(0),
     offset_(0),

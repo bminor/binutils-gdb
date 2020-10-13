@@ -1,5 +1,27 @@
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/22914
+	PR gold/23535
+	* layout.cc (Layout::attach_allocated_section_to_segment): Place
+	a note section in a PT_NOTE segment with the same alignment.  Set
+	the alignment of the PT_NOTE segment from the alignment of the
+	note section.
+	(Layout::create_note): Align the NT_GNU_PROPERTY_TYPE_0 note to 8
+	bytes for 64-bit ELF.
+	(Layout::segment_precedes): Place segments with larger alignments
+	first.
+	* output.cc (Output_segment::Output_segment): Initialize align_.
+	* output.h (Output_segment): Add align, set_align and align_.
+	* testsuite/Makefile.am (gnu_property_test.stdout): Pass -lhSWn
+	to $(TEST_READELF).
+	(gnu_property_test): Pass --build-id to ld.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/gnu_property_test.sh (check_alignment): New.
+	Use check_alignment to check the NT_GNU_PROPERTY_TYPE_0 note
+	alignment.  Verify that there are 2 PT_NOTE segments.
+
+2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/21452
 	* x86_64.cc (Scan::local_reloc_may_be_function_pointer): Remove
 	check for shared library.
