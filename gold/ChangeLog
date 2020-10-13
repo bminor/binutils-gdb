@@ -1,5 +1,35 @@
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* x86_64.cc (Target_x86_64::Target_x86_64): Initialize
+	feature_2_used_, feature_2_needed_ and object_feature_2_used_.
+	(Target_x86_64::feature_2_used_): New data member.
+	(Target_x86_64::feature_2_needed_): Likewise.
+	(Target_x86_64::object_isa_1_used_): Likewise.
+	(Target_x86_64::record_gnu_property): Support
+	GNU_PROPERTY_X86_COMPAT_ISA_1_USED,
+	GNU_PROPERTY_X86_COMPAT_ISA_1_NEEDED,
+	GNU_PROPERTY_X86_COMPAT_2_ISA_1_USED,
+	GNU_PROPERTY_X86_COMPAT_2_ISA_1_NEEDED,
+	GNU_PROPERTY_X86_FEATURE_2_USED and
+	GNU_PROPERTY_X86_FEATURE_2_NEEDED.
+	(Target_x86_64::merge_gnu_properties): Merge FEATURE_2_USED bits.
+	Initialize object_feature_2_used_.
+	(Target_x86_64::do_finalize_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_2_USED and
+	GNU_PROPERTY_X86_FEATURE_2_NEEDED.
+	* testsuite/gnu_property_a.S (GNU_PROPERTY_X86_ISA_1_USED): Set
+	to 0xc0010002.
+	(GNU_PROPERTY_X86_ISA_1_NEEDED): Set to 0xc0008002.
+	* testsuite/gnu_property_b.S (GNU_PROPERTY_X86_ISA_1_USED): Set
+	to 0xc0010002.
+	(GNU_PROPERTY_X86_ISA_1_NEEDED): Set to 0xc0008002.
+	* testsuite/gnu_property_c.S (GNU_PROPERTY_X86_ISA_1_USED): Set
+	to 0xc0010002.
+	(GNU_PROPERTY_X86_ISA_1_NEEDED): Set to 0xc0008002.
+	* testsuite/gnu_property_test.sh: Updated.
+
+2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/22914
 	PR gold/23535
 	* layout.cc (Layout::attach_allocated_section_to_segment): Place
