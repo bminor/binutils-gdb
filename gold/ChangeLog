@@ -1,5 +1,18 @@
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/23539
+	* configure.ac: Check for GCC 9 or later and for -fcf-protection.
+	* configure: Regenerated.
+	* testsuite/Makefile.am (check_PROGRAMS): Skip incremental_test_2,
+	incremental_test_3, incremental_test_4, incremental_test_5,
+	incremental_copy_test, incremental_common_test_1 and
+	incremental_comdat_test_1 for -fcf-protection.  Also Skip
+	incremental_copy_test and incremental_comdat_test_1 for GCC 9 or
+	later.
+	* testsuite/Makefile.in: Regenerated.
+
+2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/23503
 	* testsuite/Makefile.am (justsyms_lib): Pass
 	-T $(srcdir)/justsyms_lib.t to gold.

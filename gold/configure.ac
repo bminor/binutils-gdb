@@ -372,6 +372,26 @@ dnl Whether we can test -mcmodel=medium.
 AM_CONDITIONAL(MCMODEL_MEDIUM,
 [test "$target_cpu" = "x86_64" -a "$have_mcmodel_medium" = "yes" -a "$gold_cv_prog_gcc41" = "yes"])
 
+dnl Test for gcc 9 or later.  Some incremental tests fail with GCC 9 or
+dnl later.
+AC_CACHE_CHECK([for gcc >= 9], [gold_cv_prog_gcc9],
+[AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#if !defined __GNUC__ || __GNUC__ < 9
+error
+#endif
+])], [gold_cv_prog_gcc9=yes], [gold_cv_prog_gcc9=no])])
+AM_CONDITIONAL(GCC9, [test "$gold_cv_prog_gcc9" = "yes"])
+
+dnl Test for -fcf-protection on x86-64.  Some incremental tests fail with
+dnl -fcf-protection.
+AC_CACHE_CHECK([for -fcf-protection], [gold_cv_cflags_cf_protection],
+[AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#if !defined __x86_64__ || !defined __CET__
+error
+#endif
+])], [gold_cv_cflags_cf_protection=yes], [gold_cv_cflags_cf_protection=no])])
+AM_CONDITIONAL(CFLAGS_CF_PROTECTION, [test "$gold_cv_cflags_cf_protection" = "yes"])
+
 AC_CACHE_CHECK([whether $CC supports -fmerge-constants],
 	       [gold_cv_merge_constants], [
 save_CFLAGS="$CFLAGS"

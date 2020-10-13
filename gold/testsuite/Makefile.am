@@ -3199,7 +3199,9 @@ two_file_test_2_ndebug.o: two_file_test_2.cc
 two_file_test_main_ndebug.o: two_file_test_main.cc
 	$(CXXCOMPILE) -O0 -g0 -c -o $@ $<
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_2
+endif
 MOSTLYCLEANFILES += two_file_test_tmp_2.o
 incremental_test_2: two_file_test_1_v1_ndebug.o two_file_test_1_ndebug.o two_file_test_1b_ndebug.o \
 		    two_file_test_2_ndebug.o two_file_test_main_ndebug.o gcctestdir/ld
@@ -3209,7 +3211,9 @@ incremental_test_2: two_file_test_1_v1_ndebug.o two_file_test_1_ndebug.o two_fil
 	cp -f two_file_test_1_ndebug.o two_file_test_tmp_2.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie two_file_test_tmp_2.o two_file_test_1b_ndebug.o two_file_test_2_ndebug.o two_file_test_main_ndebug.o
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_3
+endif
 MOSTLYCLEANFILES += two_file_test_tmp_3.o
 incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
@@ -3219,7 +3223,9 @@ incremental_test_3: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 	cp -f two_file_test_1b.o two_file_test_tmp_3.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie two_file_test_1.o two_file_test_tmp_3.o two_file_test_2.o two_file_test_main.o
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_4
+endif
 MOSTLYCLEANFILES += incremental_test_4.base two_file_test_tmp_4.o
 incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
@@ -3230,7 +3236,9 @@ incremental_test_4: two_file_test_1.o two_file_test_1b.o two_file_test_2_v1.o \
 	cp -f two_file_test_2.o two_file_test_tmp_4.o
 	$(CXXLINK) -Wl,--incremental-update,--incremental-base=incremental_test_4.base -Wl,-z,norelro,-no-pie two_file_test_1.o two_file_test_1b.o two_file_test_tmp_4.o two_file_test_main.o
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_test_5
+endif
 MOSTLYCLEANFILES += two_file_test_5.a
 incremental_test_5: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 		    two_file_test_2.o two_file_test_main.o gcctestdir/ld
@@ -3256,7 +3264,11 @@ incremental_test_6: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 	$(TEST_AR) rc two_file_test_6.a two_file_test_1.o two_file_test_tmp_6.o two_file_test_2.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
 
+if !CFLAGS_CF_PROTECTION
+if !GCC9
 check_PROGRAMS += incremental_copy_test
+endif
+endif
 incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test_v1.o copy_test_tmp.o
 	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
@@ -3264,7 +3276,9 @@ incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test.o copy_test_tmp.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie -Wl,-R,. -Wl,--no-as-needed copy_test_tmp.o copy_test_1.so copy_test_2.so
 
+if !CFLAGS_CF_PROTECTION
 check_PROGRAMS += incremental_common_test_1
+endif
 incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
 	cp -f common_test_1_v1.o common_test_1_tmp.o
 	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie common_test_1_tmp.o
@@ -3276,7 +3290,11 @@ common_test_1_v1.o: common_test_1_v1.c
 common_test_1_v2.o: common_test_1_v2.c
 	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 
+if !CFLAGS_CF_PROTECTION
+if !GCC9
 check_PROGRAMS += incremental_comdat_test_1
+endif
+endif
 incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
 	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o
 	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie incr_comdat_test_1.o incr_comdat_test_1_tmp.o
