@@ -1,7 +1,6 @@
-/* script_test_10.t -- test section order for gold.
+/* justsyms_lib.t -- test --just-symbols for gold.
 
-   Copyright (C) 2010-2020 Free Software Foundation, Inc.
-   Written by Viktor Kutuzov <vkutuzov@accesssoftek.com>.
+   Copyright (C) 2018 Free Software Foundation, Inc.
 
    This file is part of gold.
 
@@ -23,13 +22,7 @@
 SECTIONS
 {
   .text : { *(.text) }
-  .sec0 : { *(.sec0) }
-  .sec1 : { *(.sec1) }
-  .sec2 : { *(.sec2) }
-  .secz : { *(.secz) }
-  .sec3 : { *(.sec3) }
   .data : { *(.data) }
   .bss : { *(.bss) }
   /DISCARD/ : { *(.note.gnu.property) }
 }
-

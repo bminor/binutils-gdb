@@ -2044,7 +2044,7 @@ MOSTLYCLEANFILES += justsyms_lib
 justsyms_lib.o: justsyms_lib.c
 	$(COMPILE) -c -o $@ $<
 justsyms_lib: justsyms_lib.o gcctestdir/ld
-	gcctestdir/ld -o $@ -z norelro -Ttext=0x1000200 -Tdata=0x2000000 -e exported_func justsyms_lib.o
+	gcctestdir/ld -o $@ -z norelro -T $(srcdir)/justsyms_lib.t -Ttext=0x1000200 -Tdata=0x2000000 -e exported_func justsyms_lib.o
 
 check_PROGRAMS += binary_test
 MOSTLYCLEANFILES += binary.txt

@@ -1,5 +1,14 @@
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/23503
+	* testsuite/Makefile.am (justsyms_lib): Pass
+	-T $(srcdir)/justsyms_lib.t to gold.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/justsyms_lib.t: New file.
+	* testsuite/script_test_10.t: Discard .note.gnu.property section.
+
+2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* x86_64.cc (Target_x86_64::Target_x86_64): Initialize
 	feature_2_used_, feature_2_needed_ and object_feature_2_used_.
 	(Target_x86_64::feature_2_used_): New data member.
