@@ -1,3 +1,7 @@
+2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* icf.cc (Icf::find_identical_sections): Skip zero-sized sections.
+
 2020-10-09  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relobj::do_relocate_sections): Don't do
