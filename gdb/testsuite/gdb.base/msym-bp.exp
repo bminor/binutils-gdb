@@ -60,8 +60,8 @@ proc test {debug} {
 		    "in foo at .*msym-bp-2.c:$decimal"
 	    } else {
 		test_info_break_2 \
-		    "<foo\\+$decimal>" \
-		    "<foo\\+$decimal>"
+		    "<foo(\\+$decimal)?>" \
+		    "<foo(\\+$decimal)?>"
 	    }
 	}
     }

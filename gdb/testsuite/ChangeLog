@@ -1,3 +1,9 @@
+2020-10-22  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.base/msym-bp-shl.exp (test_break): Adjust pattern to not
+	expected an offset from the function.
+	* gdb.base/msym-bp.exp (test): Likewise.
+
 2020-10-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/array-slices.exp: Add a new test.

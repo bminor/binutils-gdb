@@ -72,7 +72,7 @@ proc test {debug} {
 	} else {
 	    test_info_break_2 \
 		"<foo@plt.*>" \
-		"<foo\\+$decimal>"
+		"<foo(\\+$decimal)?>"
 	}
     }
 
@@ -96,8 +96,8 @@ proc test {debug} {
 		"in foo at .*msym-bp-shl-lib.c:$decimal"
 	} else {
 	    test_info_break_2 \
-		"<foo\\+$decimal>" \
-		"<foo\\+$decimal>"
+		"<foo(\\+$decimal)?>" \
+		"<foo(\\+$decimal)?>"
 	}
     }
 }
