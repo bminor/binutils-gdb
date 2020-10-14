@@ -1113,6 +1113,9 @@ bool
 solib_contains_address_p (const struct so_list *const solib,
 			  CORE_ADDR address)
 {
+  if (solib->sections == nullptr)
+    return false;
+
   for (target_section &p : *solib->sections)
     if (p.addr <= address && address < p.endaddr)
       return true;

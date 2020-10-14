@@ -1,3 +1,9 @@
+2020-10-14  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/26733
+	* solib.c (solib_contains_address_p): Handle
+	'solib->sections == nullptr'.
+
 2020-10-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26642
