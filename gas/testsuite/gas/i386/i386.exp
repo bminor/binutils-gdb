@@ -1094,6 +1094,7 @@ if [gas_64_check] then {
     run_dump_test "x86-64-pconfig-intel"
     run_dump_test "x86-64-waitpkg"
     run_dump_test "x86-64-waitpkg-intel"
+    run_dump_test "x86-64-uintr"
     run_dump_test "x86-64-cldemote"
     run_dump_test "x86-64-cldemote-intel"
     run_dump_test "x86-64-movdir"

@@ -1,3 +1,13 @@
+2020-10-14  Lili Cui  <lili.cui@intel.com>
+
+	* NEWS: Add Intel UINTR.
+	* config/tc-i386.c (cpu_arch): Add .uintr.
+	(cpu_noarch): Likewise.
+	* doc/c-i386.texi: Document .uintr and nouintr.
+	* testsuite/gas/i386/i386.exp: Run UINTR tests.
+	* testsuite/gas/i386/x86-64-uintr.d: Likewise.
+	* testsuite/gas/i386/x86-64-uintr.s: Likewise.
+
 2020-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (load_insn_p): Check opcodeprefix == 0 for

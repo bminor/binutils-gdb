@@ -961,6 +961,10 @@ enum
   PREFIX_0F01_REG_5_MOD_3_RM_0,
   PREFIX_0F01_REG_5_MOD_3_RM_1,
   PREFIX_0F01_REG_5_MOD_3_RM_2,
+  PREFIX_0F01_REG_5_MOD_3_RM_4,
+  PREFIX_0F01_REG_5_MOD_3_RM_5,
+  PREFIX_0F01_REG_5_MOD_3_RM_6,
+  PREFIX_0F01_REG_5_MOD_3_RM_7,
   PREFIX_0F01_REG_7_MOD_3_RM_2,
   PREFIX_0F09,
   PREFIX_0F10,
@@ -1189,7 +1193,12 @@ enum
   X86_64_VEX_0F3849,
   X86_64_VEX_0F384B,
   X86_64_VEX_0F385C,
-  X86_64_VEX_0F385E
+  X86_64_VEX_0F385E,
+  X86_64_0F01_REG_5_MOD_3_RM_4_PREFIX_1,
+  X86_64_0F01_REG_5_MOD_3_RM_5_PREFIX_1,
+  X86_64_0F01_REG_5_MOD_3_RM_6_PREFIX_1,
+  X86_64_0F01_REG_5_MOD_3_RM_7_PREFIX_1,
+  X86_64_0FC7_REG_6_MOD_3_PREFIX_1
 };
 
 enum
@@ -3158,6 +3167,30 @@ static const struct dis386 prefix_table[][4] = {
     { "saveprevssp",	{ Skip_MODRM }, PREFIX_OPCODE },
   },
 
+  /* PREFIX_0F01_REG_5_MOD_3_RM_4 */
+  {
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_5_MOD_3_RM_4_PREFIX_1) },
+  },
+
+  /* PREFIX_0F01_REG_5_MOD_3_RM_5 */
+  {
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_5_MOD_3_RM_5_PREFIX_1) },
+  },
+
+  /* PREFIX_0F01_REG_5_MOD_3_RM_6 */
+  {
+    { "rdpkru", { Skip_MODRM }, 0 },
+    { X86_64_TABLE (X86_64_0F01_REG_5_MOD_3_RM_6_PREFIX_1) },
+  },
+
+  /* PREFIX_0F01_REG_5_MOD_3_RM_7 */
+  {
+    { "wrpkru",	{ Skip_MODRM }, 0 },
+    { X86_64_TABLE (X86_64_0F01_REG_5_MOD_3_RM_7_PREFIX_1) },
+  },
+
   /* PREFIX_0F01_REG_7_MOD_3_RM_2 */
   {
     { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
@@ -3546,7 +3579,7 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0FC7_REG_6_MOD_3 */
   {
     { "rdrand",	{ Ev }, 0 },
-    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0FC7_REG_6_MOD_3_PREFIX_1) },
     { "rdrand",	{ Ev }, 0 }
   },
 
@@ -4306,6 +4339,36 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { PREFIX_TABLE (PREFIX_VEX_0F385E_X86_64) },
+  },
+
+  /* X86_64_0F01_REG_5_MOD_3_RM_4_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "uiret",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_5_MOD_3_RM_5_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "testui",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_5_MOD_3_RM_6_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "clui",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_5_MOD_3_RM_7_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "stui",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0FC7_REG_6_MOD_3_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "senduipi",	{ Eq }, 0 },
   },
 };
 
@@ -8874,10 +8937,10 @@ static const struct dis386 rm_table[][8] = {
     { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_1) },
     { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_2) },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "rdpkru",		{ Skip_MODRM }, 0 },
-    { "wrpkru",		{ Skip_MODRM }, 0 },
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_4) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_5) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_6) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_7) },
   },
   {
     /* RM_0F01_REG_7_MOD_3 */

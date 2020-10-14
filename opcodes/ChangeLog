@@ -1,3 +1,26 @@
+2020-10-14  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (enum): Add
+	PREFIX_MOD_3_0F01_REG_5_RM_4,
+	PREFIX_MOD_3_0F01_REG_5_RM_5,
+	PREFIX_MOD_3_0F01_REG_5_RM_6,
+	PREFIX_MOD_3_0F01_REG_5_RM_7,
+	X86_64_0F01_REG_5_MOD_3_RM_4_PREFIX_1,
+	X86_64_0F01_REG_5_MOD_3_RM_5_PREFIX_1,
+	X86_64_0F01_REG_5_MOD_3_RM_6_PREFIX_1,
+	X86_64_0F01_REG_5_MOD_3_RM_7_PREFIX_1,
+	X86_64_0FC7_REG_6_MOD_3_PREFIX_1.
+	(prefix_table): New instructions (see prefixes above).
+	(rm_table): Likewise
+	* i386-gen.c (cpu_flag_init): Add CPU_UINTR_FLAGS,
+	CPU_ANY_UINTR_FLAGS.
+	(cpu_flags): Add CpuUINTR.
+	* i386-opc.h (enum): Add CpuUINTR.
+	(i386_cpu_flags): Add cpuuintr.
+	* i386-opc.tbl: Add UINTR insns.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2020-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (process_i386_opcode_modifier): Return 1 for

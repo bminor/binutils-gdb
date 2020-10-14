@@ -4146,3 +4146,13 @@ seamops, 0, 0x0f01ce, None, 3, CpuTDX|Cpu64, Prefix_0X66|No_bSuf|No_wSuf|No_lSuf
 seamcall, 0, 0x0f01cf, None, 3, CpuTDX|Cpu64, Prefix_0X66|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // TDX instructions end.
+
+// UINTR instructions.
+
+uiret, 0, 0x0f01ec, None, 3, CpuUINTR|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+clui, 0, 0x0f01ee, None, 3, CpuUINTR|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+stui, 0, 0x0f01ef, None, 3, CpuUINTR|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+testui, 0, 0x0f01ed, None, 3, CpuUINTR|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+senduipi, 1, 0x0fc7, 0x6, 2, CpuUINTR|Cpu64, Prefix_0XF3|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64 }
+
+// UINTR instructions end.

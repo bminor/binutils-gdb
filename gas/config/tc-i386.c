@@ -1240,6 +1240,8 @@ static const arch_entry cpu_arch[] =
     CPU_KL_FLAGS, 0 },
   { STRING_COMMA_LEN (".widekl"), PROCESSOR_UNKNOWN,
     CPU_WIDEKL_FLAGS, 0 },
+  { STRING_COMMA_LEN (".uintr"), PROCESSOR_UNKNOWN,
+    CPU_UINTR_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1292,6 +1294,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("notsxldtrk"), CPU_ANY_TSXLDTRK_FLAGS },
   { STRING_COMMA_LEN ("nokl"), CPU_ANY_KL_FLAGS },
   { STRING_COMMA_LEN ("nowidekl"), CPU_ANY_WIDEKL_FLAGS },
+  { STRING_COMMA_LEN ("nouintr"), CPU_ANY_UINTR_FLAGS },
 };
 
 #ifdef I386COFF

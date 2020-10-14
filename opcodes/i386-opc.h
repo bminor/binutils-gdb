@@ -243,6 +243,8 @@ enum
   CpuPCONFIG,
   /* WAITPKG instructions required */
   CpuWAITPKG,
+  /* UINTR instructions required */
+  CpuUINTR,
   /* CLDEMOTE instruction required */
   CpuCLDEMOTE,
   /* MOVDIRI instruction support required */
@@ -394,6 +396,7 @@ typedef union i386_cpu_flags
       unsigned int cpuwbnoinvd:1;
       unsigned int cpupconfig:1;
       unsigned int cpuwaitpkg:1;
+      unsigned int cpuuintr:1;
       unsigned int cpucldemote:1;
       unsigned int cpumovdiri:1;
       unsigned int cpumovdir64b:1;
