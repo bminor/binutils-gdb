@@ -1534,19 +1534,42 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
     {
       int curr_len = register_size (gdbarch, regnum) - offset;
 
+      struct value *value = frame_unwind_register_value (frame->next,
+							 regnum);
+
       if (curr_len > len)
 	curr_len = len;
 
       const gdb_byte *myaddr = buffer.data ();
-      if (curr_len == register_size (gdbarch, regnum))
+
+      /*  Computed value is a special case.  The computed callback
+	  mechanism requires a strut value argument, so we need to
+	  make one.  */
+      if (value != nullptr && VALUE_LVAL (value) == lval_computed)
+	{
+	  const lval_funcs *funcs = value_computed_funcs (value);
+
+	  if (funcs->write == nullptr)
+	    error (_("Attempt to assign to an unmodifiable value."));
+
+	  type * reg_type = register_type (gdbarch, regnum);
+
+	  struct value *from_value = allocate_value (reg_type);
+	  memcpy (value_contents_raw (from_value), myaddr,
+		  TYPE_LENGTH (reg_type));
+
+	  set_value_offset (value, offset);
+
+	  funcs->write (value, from_value);
+	  release_value (from_value);
+	}
+      else if (curr_len == register_size (gdbarch, regnum))
 	{
 	  put_frame_register (frame, regnum, myaddr);
 	}
       else
 	{
-	  struct value *value = frame_unwind_register_value (frame->next,
-							     regnum);
-	  gdb_assert (value != NULL);
+	  gdb_assert (value != nullptr);
 
 	  memcpy ((char *) value_contents_writeable (value).data () + offset,
 		  myaddr, curr_len);

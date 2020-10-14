@@ -236,16 +236,17 @@ register %s (#%d) at %s"),
     }
 }
 
-static CORE_ADDR
+static value *
 execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  struct frame_info *this_frame, CORE_ADDR initial,
-		  int initial_in_stack_memory, dwarf2_per_objfile *per_objfile)
+		  int initial_in_stack_memory, dwarf2_per_objfile *per_objfile,
+		  struct type* type = nullptr, bool as_lval = true)
 {
   scoped_value_mark free_values;
-  struct type *type = address_type (per_objfile->objfile->arch (),
-				    addr_size);
+  struct type *init_type = address_type (per_objfile->objfile->arch (),
+					 addr_size);
 
-  value *init_value = value_at_lazy (type, initial);
+  value *init_value = value_at_lazy (init_type, initial);
   std::vector<value *> init_values;
 
   set_value_stack (init_value, initial_in_stack_memory);
@@ -255,10 +256,15 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
     = dwarf2_evaluate (exp, len, true, per_objfile, nullptr,
 		       this_frame, addr_size, &init_values, nullptr);
 
-  if (VALUE_LVAL (result_val) == lval_memory)
-    return value_address (result_val);
-  else
-    return value_as_address (result_val);
+  /* We need to clean up all the values that are not needed any more.
+     The problem with a value_ref_ptr class is that it disconnects the
+     RETVAL from the value garbage collection, so we need to make
+     a copy of that value on the stack to keep everything consistent.
+     The value_ref_ptr will clean up after itself at the end of this block.  */
+  value_ref_ptr value_holder = value_ref_ptr::new_reference (result_val);
+  free_values.free_to_mark ();
+
+  return value_copy (result_val);
 }
 
 
@@ -989,10 +995,14 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  break;
 
 	case CFA_EXP:
-	  cache->cfa =
-	    execute_stack_op (fs.regs.cfa_exp, fs.regs.cfa_exp_len,
-			      cache->addr_size, this_frame, 0, 0,
-			      cache->per_objfile);
+	  {
+	    struct value *value
+	      = execute_stack_op (fs.regs.cfa_exp, fs.regs.cfa_exp_len,
+				  cache->addr_size, this_frame, 0, 0,
+				  cache->per_objfile);
+	    cache->cfa = value_address (value);
+	  }
+
 	  break;
 
 	default:
@@ -1190,24 +1200,22 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
       return frame_unwind_got_register (this_frame, regnum, realnum);
 
     case DWARF2_FRAME_REG_SAVED_EXP:
-      addr = execute_stack_op (cache->reg[regnum].loc.exp.start,
+      return execute_stack_op (cache->reg[regnum].loc.exp.start,
 			       cache->reg[regnum].loc.exp.len,
-			       cache->addr_size,
-			       this_frame, cache->cfa, 1,
-			       cache->per_objfile);
-      return frame_unwind_got_memory (this_frame, regnum, addr);
+			       cache->addr_size, this_frame,
+			       cache->cfa, 1, cache->per_objfile,
+			       register_type (gdbarch, regnum));
 
     case DWARF2_FRAME_REG_SAVED_VAL_OFFSET:
       addr = cache->cfa + cache->reg[regnum].loc.offset;
       return frame_unwind_got_constant (this_frame, regnum, addr);
 
     case DWARF2_FRAME_REG_SAVED_VAL_EXP:
-      addr = execute_stack_op (cache->reg[regnum].loc.exp.start,
+      return execute_stack_op (cache->reg[regnum].loc.exp.start,
 			       cache->reg[regnum].loc.exp.len,
-			       cache->addr_size,
-			       this_frame, cache->cfa, 1,
-			       cache->per_objfile);
-      return frame_unwind_got_constant (this_frame, regnum, addr);
+			       cache->addr_size, this_frame,
+			       cache->cfa, 1, cache->per_objfile,
+			       register_type (gdbarch, regnum), false);
 
     case DWARF2_FRAME_REG_UNSPECIFIED:
       /* GCC, in its infinite wisdom decided to not provide unwind
