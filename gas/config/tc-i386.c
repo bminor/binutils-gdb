@@ -1242,6 +1242,8 @@ static const arch_entry cpu_arch[] =
     CPU_WIDEKL_FLAGS, 0 },
   { STRING_COMMA_LEN (".uintr"), PROCESSOR_UNKNOWN,
     CPU_UINTR_FLAGS, 0 },
+  { STRING_COMMA_LEN (".hreset"), PROCESSOR_UNKNOWN,
+    CPU_HRESET_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1295,6 +1297,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("nokl"), CPU_ANY_KL_FLAGS },
   { STRING_COMMA_LEN ("nowidekl"), CPU_ANY_WIDEKL_FLAGS },
   { STRING_COMMA_LEN ("nouintr"), CPU_ANY_UINTR_FLAGS },
+  { STRING_COMMA_LEN ("nohreset"), CPU_ANY_HRESET_FLAGS },
 };
 
 #ifdef I386COFF

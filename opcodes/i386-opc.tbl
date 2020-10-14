@@ -4156,3 +4156,9 @@ testui, 0, 0x0f01ed, None, 3, CpuUINTR|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSu
 senduipi, 1, 0x0fc7, 0x6, 2, CpuUINTR|Cpu64, Prefix_0XF3|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64 }
 
 // UINTR instructions end.
+
+// HRESET instructions.
+
+hreset, 1, 0x0f3af0c0, None, 4, CpuHRESET, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8 }
+
+// HRESET instructions end.

@@ -1,4 +1,25 @@
 2020-10-14  Lili Cui  <lili.cui@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PREFIX_0F3A0F): New.
+	(MOD_0F3A0F_PREFIX_1): Likewise.
+	(REG_0F3A0F_PREFIX_1_MOD_3): Likewise.
+	(RM_0F3A0F_P_1_MOD_3_REG_0): Likewise.
+	(prefix_table): Add PREFIX_0F3A0F.
+	(mod_table): Add MOD_0F3A0F_PREFIX_1.
+	(reg_table): Add REG_0F3A0F_PREFIX_1_MOD_3.
+	(rm_table): Add RM_0F3A0F_P_1_MOD_3_REG_0.
+	* i386-gen.c (cpu_flag_init): Add HRESET_FLAGS,
+	CPU_ANY_HRESET_FLAGS.
+	(cpu_flags): Add CpuHRESET.
+	(output_i386_opcode): Allow 4 byte base_opcode.
+	* i386-opc.h (enum): Add CpuHRESET.
+	(i386_cpu_flags): Add cpuhreset.
+	* i386-opc.tbl: Add Intel HRESET instruction.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
+2020-10-14  Lili Cui  <lili.cui@intel.com>
 
 	* i386-dis.c (enum): Add
 	PREFIX_MOD_3_0F01_REG_5_RM_4,

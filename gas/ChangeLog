@@ -1,5 +1,16 @@
 2020-10-14  Lili Cui  <lili.cui@intel.com>
 
+	* NEWS: Add Intel HRESET.
+	* config/tc-i386.c (cpu_arch): Add .hreset.
+	(cpu_noarch): Likewise.
+	* doc/c-i386.texi: Document .hreset, nohreset.
+	* testsuite/gas/i386/i386.exp: Run HRESET tests.
+	* testsuite/gas/i386/hreset.d: New file.
+	* testsuite/gas/i386/x86-64-hreset.d: Likewise.
+	* testsuite/gas/i386/hreset.s: Likewise.
+
+2020-10-14  Lili Cui  <lili.cui@intel.com>
+
 	* NEWS: Add Intel UINTR.
 	* config/tc-i386.c (cpu_arch): Add .uintr.
 	(cpu_noarch): Likewise.

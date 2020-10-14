@@ -692,6 +692,7 @@ enum
   REG_0F1C_P_0_MOD_0,
   REG_0F1E_P_1_MOD_3,
   REG_0F38D8_PREFIX_1,
+  REG_0F3A0F_PREFIX_1_MOD_3,
   REG_0F71,
   REG_0F72,
   REG_0F73,
@@ -799,6 +800,7 @@ enum
   MOD_0F38F9,
   MOD_0F38FA_PREFIX_1,
   MOD_0F38FB_PREFIX_1,
+  MOD_0F3A0F_PREFIX_1,
   MOD_62_32BIT,
   MOD_C4_32BIT,
   MOD_C5_32BIT,
@@ -944,6 +946,7 @@ enum
   RM_0F01_REG_5_MOD_3,
   RM_0F01_REG_7_MOD_3,
   RM_0F1E_P_1_MOD_3_REG_7,
+  RM_0F3A0F_P_1_MOD_3_REG_0,
   RM_0FAE_REG_6_MOD_3_P_0,
   RM_0FAE_REG_7_MOD_3,
   RM_VEX_0F3849_X86_64_P_0_W_0_M_1_R_0
@@ -1037,6 +1040,7 @@ enum
   PREFIX_0F38F8,
   PREFIX_0F38FA,
   PREFIX_0F38FB,
+  PREFIX_0F3A0F,
   PREFIX_VEX_0F10,
   PREFIX_VEX_0F11,
   PREFIX_VEX_0F12,
@@ -2927,6 +2931,10 @@ static const struct dis386 reg_table[][8] = {
     { "aesencwide256kl",	{ M }, 0 },
     { "aesdecwide256kl",	{ M }, 0 },
   },
+  /* REG_0F3A0F_PREFIX_1_MOD_3 */
+  {
+    { RM_TABLE (RM_0F3A0F_P_1_MOD_3_REG_0) },
+  },
   /* REG_0F71 */
   {
     { Bad_Opcode },
@@ -3711,6 +3719,12 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { MOD_TABLE (MOD_0F38FB_PREFIX_1) },
+  },
+
+  /* PREFIX_0F3A0F */
+  {
+    { Bad_Opcode },
+    { MOD_TABLE (MOD_0F3A0F_PREFIX_1)},
   },
 
   /* PREFIX_VEX_0F10 */
@@ -4938,7 +4952,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* f0 */
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F3A0F) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -8399,6 +8413,11 @@ static const struct dis386 mod_table[][2] = {
     { "encodekey256", { Gd, Ed }, 0 },
   },
   {
+    /* MOD_0F3A0F_PREFIX_1 */
+    { Bad_Opcode },
+    { REG_TABLE (REG_0F3A0F_PREFIX_1_MOD_3) },
+  },
+  {
     /* MOD_62_32BIT */
     { "bound{S|}",	{ Gv, Ma }, 0 },
     { EVEX_TABLE (EVEX_0F) },
@@ -8961,6 +8980,10 @@ static const struct dis386 rm_table[][8] = {
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
+  },
+  {
+    /* RM_0F3A0F_P_1_MOD_3_REG_0 */
+    { "hreset",		{ Skip_MODRM, Ib }, 0 },
   },
   {
     /* RM_0FAE_REG_6_MOD_3 */

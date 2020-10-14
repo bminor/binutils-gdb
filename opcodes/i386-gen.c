@@ -329,6 +329,8 @@ static initializer cpu_flag_init[] =
     "CpuKL" },
   { "CPU_WIDEKL_FLAGS",
     "CpuWideKL" },
+  { "CPU_HRESET_FLAGS",
+    "CpuHRESET"},
   { "CPU_ANY_X87_FLAGS",
     "CPU_ANY_287_FLAGS|Cpu8087" },
   { "CPU_ANY_287_FLAGS",
@@ -423,6 +425,8 @@ static initializer cpu_flag_init[] =
     "CpuKL|CpuWideKL" },
   { "CPU_ANY_WIDEKL_FLAGS",
     "CpuWideKL" },
+  { "CPU_ANY_HRESET_FLAGS",
+    "CpuHRESET" },
 };
 
 static initializer operand_type_init[] =
@@ -656,6 +660,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuTSXLDTRK),
   BITFIELD (CpuKL),
   BITFIELD (CpuWideKL),
+  BITFIELD (CpuHRESET),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif
@@ -1425,6 +1430,8 @@ output_i386_opcode (FILE *table, const char *name, char *str,
       unsigned long int opcode = strtoul (base_opcode, &end, 0);
       switch (length)
 	{
+	case 4:
+	  break;
 	case 3:
 	  if ((opcode >> 24) != 0)
 	    fail (_("%s: %s: (base_opcode >> 24) != 0: %s\n"),
