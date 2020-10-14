@@ -1,3 +1,8 @@
+2020-10-14  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* breakpoint.c (handle_jit_event): Add an argument, change how
+	`jit_event_handler` is called.
+
 2020-10-17  Tom Tromey  <tom@tromey.com>
 
 	* xcoffread.c (xcoff_end_psymtab): Use partial_symtab::empty.
