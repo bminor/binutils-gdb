@@ -561,6 +561,16 @@ enum
 #define VEXW1	2
 #define VEXWIG	3
   VexW,
+  /* Regular opcode prefix:
+     0: None
+     1: Add 0x66 opcode prefix.
+     2: Add 0xf2 opcode prefix.
+     3: Add 0xf3 opcode prefix.
+   */
+#define PREFIX_NONE	0
+#define PREFIX_0X66	1
+#define PREFIX_0XF2	2
+#define PREFIX_0XF3	3
   /* VEX opcode prefix:
      0: VEX 0x0F opcode prefix.
      1: VEX 0x0F38 opcode prefix.
@@ -575,7 +585,7 @@ enum
 #define XOP08		3
 #define XOP09		4
 #define XOP0A		5
-  VexOpcode,
+  OpcodePrefix,
   /* number of VEX source operands:
      0: <= 2 source operands.
      1: 2 XOP source operands.
@@ -720,7 +730,7 @@ typedef struct i386_opcode_modifier
   unsigned int vex:2;
   unsigned int vexvvvv:2;
   unsigned int vexw:2;
-  unsigned int vexopcode:3;
+  unsigned int opcodeprefix:3;
   unsigned int vexsources:2;
   unsigned int sib:3;
   unsigned int sse2avx:1;

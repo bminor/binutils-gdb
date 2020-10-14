@@ -695,7 +695,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Vex),
   BITFIELD (VexVVVV),
   BITFIELD (VexW),
-  BITFIELD (VexOpcode),
+  BITFIELD (OpcodePrefix),
   BITFIELD (VexSources),
   BITFIELD (SIB),
   BITFIELD (SSE2AVX),

@@ -3588,7 +3588,7 @@ build_vex_prefix (const insn_template *t)
       && i.dir_encoding == dir_encoding_default
       && i.operands == i.reg_operands
       && operand_type_equal (&i.types[0], &i.types[i.operands - 1])
-      && i.tm.opcode_modifier.vexopcode == VEX0F
+      && i.tm.opcode_modifier.opcodeprefix == VEX0F
       && (i.tm.opcode_modifier.load || i.tm.opcode_modifier.d)
       && i.rex == REX_B)
     {
@@ -3633,7 +3633,7 @@ build_vex_prefix (const insn_template *t)
       union i386_op temp_op;
       i386_operand_type temp_type;
 
-      gas_assert (i.tm.opcode_modifier.vexopcode == VEX0F);
+      gas_assert (i.tm.opcode_modifier.opcodeprefix == VEX0F);
       gas_assert (!i.tm.opcode_modifier.sae);
       gas_assert (operand_type_equal (&i.types[i.operands - 2],
                                       &i.types[i.operands - 3]));
@@ -3704,7 +3704,7 @@ build_vex_prefix (const insn_template *t)
   /* Use 2-byte VEX prefix if possible.  */
   if (w == 0
       && i.vec_encoding != vex_encoding_vex3
-      && i.tm.opcode_modifier.vexopcode == VEX0F
+      && i.tm.opcode_modifier.opcodeprefix == VEX0F
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
       /* 2-byte VEX prefix.  */
@@ -3727,7 +3727,7 @@ build_vex_prefix (const insn_template *t)
 
       i.vex.length = 3;
 
-      switch (i.tm.opcode_modifier.vexopcode)
+      switch (i.tm.opcode_modifier.opcodeprefix)
 	{
 	case VEX0F:
 	  m = 0x1;
@@ -3779,8 +3779,7 @@ is_evex_encoding (const insn_template *t)
 static INLINE bfd_boolean
 is_any_vex_encoding (const insn_template *t)
 {
-  return t->opcode_modifier.vex || t->opcode_modifier.vexopcode
-	 || is_evex_encoding (t);
+  return t->opcode_modifier.vex || is_evex_encoding (t);
 }
 
 /* Build the EVEX prefix.  */
@@ -3842,7 +3841,7 @@ build_evex_prefix (void)
   i.vex.bytes[0] = 0x62;
 
   /* mmmm bits.  */
-  switch (i.tm.opcode_modifier.vexopcode)
+  switch (i.tm.opcode_modifier.opcodeprefix)
     {
     case VEX0F:
       m = 1;
@@ -4403,7 +4402,7 @@ load_insn_p (void)
       /* vldmxcsr.  */
       if (i.tm.base_opcode == 0xae
 	  && i.tm.opcode_modifier.vex
-	  && i.tm.opcode_modifier.vexopcode == VEX0F
+	  && i.tm.opcode_modifier.opcodeprefix == VEX0F
 	  && i.tm.extension_opcode == 2)
 	return 1;
     }
@@ -9374,33 +9373,49 @@ output_insn (void)
 	 don't need the explicit prefix.  */
       if (!i.tm.opcode_modifier.vex && !i.tm.opcode_modifier.evex)
 	{
-	  switch (i.tm.opcode_length)
+	  switch (i.tm.opcode_modifier.opcodeprefix)
 	    {
-	    case 3:
-	      if (i.tm.base_opcode & 0xff000000)
+	    case PREFIX_0X66:
+	      add_prefix (0x66);
+	      break;
+	    case PREFIX_0XF2:
+	      add_prefix (0xf2);
+	      break;
+	    case PREFIX_0XF3:
+	      add_prefix (0xf3);
+	      break;
+	    case PREFIX_NONE:
+	      switch (i.tm.opcode_length)
 		{
-		  prefix = (i.tm.base_opcode >> 24) & 0xff;
-		  if (!i.tm.cpu_flags.bitfield.cpupadlock
-		      || prefix != REPE_PREFIX_OPCODE
-		      || (i.prefix[REP_PREFIX] != REPE_PREFIX_OPCODE))
-		    add_prefix (prefix);
+		case 3:
+		  if (i.tm.base_opcode & 0xff000000)
+		    {
+		      prefix = (i.tm.base_opcode >> 24) & 0xff;
+		      if (!i.tm.cpu_flags.bitfield.cpupadlock
+			  || prefix != REPE_PREFIX_OPCODE
+			  || (i.prefix[REP_PREFIX] != REPE_PREFIX_OPCODE))
+			add_prefix (prefix);
+		    }
+		  break;
+		case 2:
+		  if ((i.tm.base_opcode & 0xff0000) != 0)
+		    {
+		      prefix = (i.tm.base_opcode >> 16) & 0xff;
+		      add_prefix (prefix);
+		    }
+		  break;
+		case 1:
+		  break;
+		case 0:
+		  /* Check for pseudo prefixes.  */
+		  as_bad_where (insn_start_frag->fr_file,
+				insn_start_frag->fr_line,
+				_("pseudo prefix without instruction"));
+		  return;
+		default:
+		  abort ();
 		}
 	      break;
-	    case 2:
-	      if ((i.tm.base_opcode & 0xff0000) != 0)
-		{
-		  prefix = (i.tm.base_opcode >> 16) & 0xff;
-		  add_prefix (prefix);
-		}
-	      break;
-	    case 1:
-	      break;
-	    case 0:
-	      /* Check for pseudo prefixes.  */
-	      as_bad_where (insn_start_frag->fr_file,
-			    insn_start_frag->fr_line,
-			     _("pseudo prefix without instruction"));
-	      return;
 	    default:
 	      abort ();
 	    }

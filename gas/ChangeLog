@@ -1,3 +1,11 @@
+2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_vex_prefix): Replace vexopcode with
+	opcodeprefix.
+	(build_evex_prefix): Likewise.
+	(is_any_vex_encoding): Don't check vexopcode.
+	(output_insn): Handle opcodeprefix.
+
 2020-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703
