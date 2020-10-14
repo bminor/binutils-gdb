@@ -1180,6 +1180,8 @@ static const arch_entry cpu_arch[] =
     CPU_AVX512_VNNI_FLAGS, 0 },
   { STRING_COMMA_LEN (".avx512_bitalg"), PROCESSOR_UNKNOWN,
     CPU_AVX512_BITALG_FLAGS, 0 },
+  { STRING_COMMA_LEN (".avx_vnni"), PROCESSOR_UNKNOWN,
+    CPU_AVX_VNNI_FLAGS, 0 },
   { STRING_COMMA_LEN (".clzero"), PROCESSOR_UNKNOWN,
     CPU_CLZERO_FLAGS, 0 },
   { STRING_COMMA_LEN (".mwaitx"), PROCESSOR_UNKNOWN,
@@ -1280,6 +1282,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512_vbmi2"), CPU_ANY_AVX512_VBMI2_FLAGS },
   { STRING_COMMA_LEN ("noavx512_vnni"), CPU_ANY_AVX512_VNNI_FLAGS },
   { STRING_COMMA_LEN ("noavx512_bitalg"), CPU_ANY_AVX512_BITALG_FLAGS },
+  { STRING_COMMA_LEN ("noavx_vnni"), CPU_ANY_AVX_VNNI_FLAGS },
   { STRING_COMMA_LEN ("noibt"), CPU_ANY_IBT_FLAGS },
   { STRING_COMMA_LEN ("noshstk"), CPU_ANY_SHSTK_FLAGS },
   { STRING_COMMA_LEN ("noamx_int8"), CPU_ANY_AMX_INT8_FLAGS },
@@ -1970,7 +1973,14 @@ cpu_flags_match (const insn_template *t)
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{
-	  if (x.bitfield.cpuavx)
+	  if (x.bitfield.cpuvex_prefix)
+	    {
+	      /* We need to check a few extra flags with VEX_PREFIX.  */
+	      if (i.vec_encoding == vex_encoding_vex
+		  || i.vec_encoding == vex_encoding_vex3)
+		match |= CPU_FLAGS_ARCH_MATCH;
+	    }
+	  else if (x.bitfield.cpuavx)
 	    {
 	      /* We need to check a few extra flags with AVX.  */
 	      if (cpu.bitfield.cpuavx

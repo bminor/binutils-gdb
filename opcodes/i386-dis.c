@@ -1513,6 +1513,10 @@ enum
   VEX_W_0F384B_X86_64_P_1,
   VEX_W_0F384B_X86_64_P_2,
   VEX_W_0F384B_X86_64_P_3,
+  VEX_W_0F3850,
+  VEX_W_0F3851,
+  VEX_W_0F3852,
+  VEX_W_0F3853,
   VEX_W_0F3858,
   VEX_W_0F3859,
   VEX_W_0F385A_M_0_L_0,
@@ -1800,6 +1804,7 @@ struct dis386 {
    "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
 	   register operands and no broadcast.
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
+   "XV" => print "{vex3}" pseudo prefix
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
 	   being false, or no operand at all in 64bit mode, or if suffix_always
 	   is true.
@@ -6233,10 +6238,10 @@ static const struct dis386 vex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 50 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F3850) },
+    { VEX_W_TABLE (VEX_W_0F3851) },
+    { VEX_W_TABLE (VEX_W_0F3852) },
+    { VEX_W_TABLE (VEX_W_0F3853) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7766,6 +7771,22 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F384B_X86_64_P_3 */
     { MOD_TABLE (MOD_VEX_0F384B_X86_64_P_3_W_0) },
+  },
+  {
+    /* VEX_W_0F3850 */
+    { "%XV vpdpbusd",	{ XM, Vex, EXx }, 0 },
+  },
+  {
+    /* VEX_W_0F3851 */
+    { "%XV vpdpbusds",	{ XM, Vex, EXx }, 0 },
+  },
+  {
+    /* VEX_W_0F3852 */
+    { "%XV vpdpwssd",	{ XM, Vex, EXx }, 0 },
+  },
+  {
+    /* VEX_W_0F3853 */
+    { "%XV vpdpwssds",	{ XM, Vex, EXx }, 0 },
   },
   {
     /* VEX_W_0F3858 */
@@ -11020,9 +11041,19 @@ putop (const char *in_template, int sizeflag)
 	case 'V':
 	  if (l == 0)
 	    abort ();
-	  else if (l == 1 && last[0] == 'L')
+	  else if (l == 1
+		   && (last[0] == 'L' || last[0] == 'X'))
 	    {
-	      if (rex & REX_W)
+	      if (last[0] == 'X')
+		{
+		  *obufp++ = '{';
+		  *obufp++ = 'v';
+		  *obufp++ = 'e';
+		  *obufp++ = 'x';
+		  *obufp++ = '3';
+		  *obufp++ = '}';
+		}
+	      else if (rex & REX_W)
 		{
 		  *obufp++ = 'a';
 		  *obufp++ = 'b';

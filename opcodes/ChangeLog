@@ -1,3 +1,30 @@
+2020-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+	    Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (PREFIX_VEX_0F3850): New.
+	(PREFIX_VEX_0F3851): Likewise.
+	(PREFIX_VEX_0F3852): Likewise.
+	(PREFIX_VEX_0F3853): Likewise.
+	(VEX_W_0F3850_P_2): Likewise.
+	(VEX_W_0F3851_P_2): Likewise.
+	(VEX_W_0F3852_P_2): Likewise.
+	(VEX_W_0F3853_P_2): Likewise.
+	(prefix_table): Add PREFIX_VEX_0F3850, PREFIX_VEX_0F3851,
+	PREFIX_VEX_0F3852 and PREFIX_VEX_0F3853.
+	(vex_table): Add VEX_W_0F3850_P_2, VEX_W_0F3851_P_2,
+	VEX_W_0F3852_P_2 and VEX_W_0F3853_P_2.
+	(putop): Add support for "XV" to print "{vex3}" pseudo prefix.
+	* i386-gen.c (cpu_flag_init): Clear the CpuAVX_VNNI bit in
+	CPU_UNKNOWN_FLAGS.  Add CPU_AVX_VNNI_FLAGS and
+	CPU_ANY_AVX_VNNI_FLAGS.
+	(cpu_flags): Add CpuAVX_VNNI and CpuVEX_PREFIX.
+	* i386-opc.h (CpuAVX_VNNI): New.
+	(CpuVEX_PREFIX): Likewise.
+	(i386_cpu_flags): Add cpuavx_vnni and cpuvex_prefix.
+	* i386-opc.tbl: Add Intel AVX VNNI instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2020-10-14  Lili Cui  <lili.cui@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

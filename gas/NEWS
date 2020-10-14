@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel AVX VNNI instructions.
+
 * Add support for Intel HRESET instruction.
 
 * Add support for Intel UINTR instructions.

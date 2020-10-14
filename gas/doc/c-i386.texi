@@ -212,6 +212,7 @@ accept various extension mnemonics.  For example,
 @code{avx512_vp2intersect},
 @code{tdx},
 @code{avx512_bf16},
+@code{avx_vnni},
 @code{noavx512f},
 @code{noavx512cd},
 @code{noavx512er},
@@ -230,6 +231,7 @@ accept various extension mnemonics.  For example,
 @code{noavx512_vp2intersect},
 @code{notdx},
 @code{noavx512_bf16},
+@code{noavx_vnni},
 @code{noenqcmd},
 @code{noserialize},
 @code{notsxldtrk},
@@ -860,6 +862,10 @@ prefix which generates REX prefix unconditionally.
 @item
 @samp{@{nooptimize@}} -- disable instruction size optimization.
 @end itemize
+
+Mnemonics of Intel VNNI instructions are encoded with the EVEX prefix
+by default.  The pseudo @samp{@{vex@}} prefix can be used to encode
+mnemonics of Intel VNNI instructions with the VEX prefix.
 
 @cindex conversion instructions, i386
 @cindex i386 conversion instructions
@@ -1509,7 +1515,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.avx512vbmi} @tab @samp{.avx512_4fmaps} @tab @samp{.avx512_4vnniw}
 @item @samp{.avx512_vpopcntdq} @tab @samp{.avx512_vbmi2} @tab @samp{.avx512_vnni}
 @item @samp{.avx512_bitalg} @tab @samp{.avx512_bf16} @tab @samp{.avx512_vp2intersect}
-@item @samp{.tdx}
+@item @samp{.tdx} @tab @samp{.avx_vnni}
 @item @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite} @tab @item @samp{.ibt}
 @item @samp{.wbnoinvd} @tab @samp{.pconfig} @tab @samp{.waitpkg} @tab @samp{.cldemote}
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}

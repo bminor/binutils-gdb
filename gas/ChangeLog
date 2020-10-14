@@ -1,3 +1,17 @@
+2020-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+	    Lili Cui  <lili.cui@intel.com>
+
+	* NEWS: Add Intel AVX VNNI.
+	* config/tc-i386.c (cpu_arch): Add .avx_vnni and noavx_vnni.
+	(cpu_flags_match): Support CpuVEX_PREFIX.
+	* doc/c-i386.texi: Document .avx_vnni, noavx_vnni and how to
+	encode Intel VNNI instructions with VEX prefix.
+	* testsuite/gas/i386/avx-vnni.d: New file.
+	* testsuite/gas/i386/avx-vnni.s: Likewise.
+	* testsuite/gas/i386/x86-64-avx-vnni.d: Likewise.
+	* testsuite/gas/i386/x86-64-avx-vnni.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run AVX VNNI tests.
+
 2020-10-14  Lili Cui  <lili.cui@intel.com>
 
 	* NEWS: Add Intel HRESET.
