@@ -5441,9 +5441,8 @@ bpstat_stop_status (const address_space *aspace,
 }
 
 static void
-handle_jit_event (void)
+handle_jit_event (CORE_ADDR address)
 {
-  struct frame_info *frame;
   struct gdbarch *gdbarch;
 
   infrun_debug_printf ("handling bp_jit_event");
@@ -5452,11 +5451,15 @@ handle_jit_event (void)
      breakpoint_re_set.  */
   target_terminal::ours_for_output ();
 
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
-  objfile *jiter = symbol_objfile (get_frame_function (frame));
-
-  jit_event_handler (gdbarch, jiter);
+  gdbarch = get_frame_arch (get_current_frame ());
+  /* This event is caused by a breakpoint set in `jit_breakpoint_re_set`,
+     thus it is expected that its objectfile can be found through
+     minimal symbol lookup.  If it doesn't work (and assert fails), it
+     most likely means that `jit_breakpoint_re_set` was changes and this
+     function needs to be updated too.  */
+  bound_minimal_symbol jit_bp_sym = lookup_minimal_symbol_by_pc (address);
+  gdb_assert (jit_bp_sym.objfile != nullptr);
+  jit_event_handler (gdbarch, jit_bp_sym.objfile);
 
   target_terminal::inferior ();
 }
@@ -5657,7 +5660,7 @@ bpstat_run_callbacks (bpstat bs_head)
       switch (b->type)
 	{
 	case bp_jit_event:
-	  handle_jit_event ();
+	  handle_jit_event (bs->bp_location_at->address);
 	  break;
 	case bp_gnu_ifunc_resolver:
 	  gnu_ifunc_resolver_stop (b);
