@@ -1,3 +1,10 @@
+2020-10-14  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26732
+	* gdb.ada/mi_catch_ex.exp: Do mi_delete_breakpoints before running
+	scenario 2.
+	* gdb.ada/mi_catch_ex_hand.exp: Same.
+
 2020-10-13  Pedro Alves  <pedro@palves.net>
 
 	* lib/mi-support.exp (mi_clean_restart): New.
