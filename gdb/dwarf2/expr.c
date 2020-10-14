@@ -3308,7 +3308,6 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    else
 	      result = op - DW_OP_reg0;
 
-	    dwarf_expr_require_composition (op_ptr, op_end, "DW_OP_reg");
 	    push (make_unique<dwarf_register> (arch, result));
 	    break;
 	  }
@@ -3324,8 +3323,6 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		    (arch, gdb::array_view<const gdb_byte> (op_ptr, len),
 		     BFD_ENDIAN_UNKNOWN));
 	    op_ptr += len;
-	    dwarf_expr_require_composition (op_ptr, op_end,
-					    "DW_OP_implicit_value");
 	    break;
 	  }
 
@@ -3337,9 +3334,6 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    push (make_unique<dwarf_implicit>
 		    (arch, value->contents (),
 		     type_byte_order (value->type ())));
-
-	    dwarf_expr_require_composition (op_ptr, op_end,
-					    "DW_OP_stack_value");
 	    break;
 	  }
 
@@ -3364,8 +3358,6 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 						       this->m_per_cu,
 						       this->m_addr_size,
 						       die_offset, len));
-	    dwarf_expr_require_composition (op_ptr, op_end,
-					    "DW_OP_implicit_pointer");
 	    break;
 	  }
 
