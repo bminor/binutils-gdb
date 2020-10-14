@@ -3296,6 +3296,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_reg31:
 	case DW_OP_regx:
 	  {
+	    ensure_have_frame (this->m_frame, "DW_OP_reg");
 	    ULONGEST result;
 
 	    if (op == DW_OP_regx)
