@@ -1161,11 +1161,12 @@ adjust_broadcast_modifier (char **opnd)
   return bcst_type;
 }
 
-static void
+static int
 process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 {
   char *str, *next, *last;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
+  unsigned int regular_encoding = 1;
 
   active_isstring = 0;
 
@@ -1184,9 +1185,22 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 	    {
 	      int val = 1;
 	      if (strcasecmp(str, "Broadcast") == 0)
+		{
 		  val = adjust_broadcast_modifier (opnd);
+		  regular_encoding = 0;
+		}
+	      else if (strcasecmp(str, "Vex") == 0
+		       || strncasecmp(str, "Vex=", 4) == 0
+		       || strcasecmp(str, "EVex") == 0
+		       || strncasecmp(str, "EVex=", 5) == 0
+		       || strncasecmp(str, "Disp8MemShift=", 14) == 0
+		       || strncasecmp(str, "Masking=", 8) == 0
+		       || strcasecmp(str, "SAE") == 0
+		       || strcasecmp(str, "IsPrefix") == 0)
+		regular_encoding = 0;
+
 	      set_bitfield (str, modifiers, val, ARRAY_SIZE (modifiers),
-			  lineno);
+			    lineno);
 	      if (strcasecmp(str, "IsString") == 0)
 		active_isstring = 1;
 
@@ -1215,6 +1229,8 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 		 filename, lineno);
     }
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
+
+  return regular_encoding;
 }
 
 enum stage {
@@ -1396,7 +1412,40 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 
   process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
 
-  process_i386_opcode_modifier (table, opcode_modifier, operand_types, lineno);
+  if (process_i386_opcode_modifier (table, opcode_modifier,
+				    operand_types, lineno))
+    {
+      char *end;
+      unsigned long int length = strtoul (opcode_length, &end, 0);
+      unsigned long int opcode = strtoul (base_opcode, &end, 0);
+      switch (length)
+	{
+	case 3:
+	  if ((opcode >> 24) != 0)
+	    fail (_("%s: %s: (base_opcode >> 24) != 0: %s\n"),
+		  filename, name, base_opcode);
+	  break;
+	case 2:
+	  if ((opcode >> 16) != 0)
+	    fail (_("%s: %s: (base_opcode >> 16) != 0: %s\n"),
+		  filename, name, base_opcode);
+	  break;
+	case 1:
+	  if ((opcode >> 8) != 0)
+	    fail (_("%s: %s: (base_opcode >> 8) != 0: %s\n"),
+		  filename, name, base_opcode);
+	  break;
+	case 0:
+	  if (opcode != 0)
+	    fail (_("%s: %s: base_opcode != 0: %s\n"),
+		  filename, name, base_opcode);
+	  break;
+	default:
+	  fail (_("%s: %s: invalid opcode length: %s\n"),
+		filename, name, opcode_length);
+	  break;
+	}
+    }
 
   fprintf (table, "    { ");
 

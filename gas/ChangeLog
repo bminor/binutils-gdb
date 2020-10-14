@@ -1,3 +1,13 @@
+2020-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (load_insn_p): Check opcodeprefix == 0 for
+	base_opcode == 0xfc7.
+	(match_template): Likewise.
+	(process_suffix): Check opcodeprefix == PREFIX_0XF2 for CRC32.
+	(check_byte_reg): Likewise.
+	(output_insn): Don't add the 0xf3 prefix twice for PadLock
+	instructions.  Don't add prefix from non-VEX/EVEX base_opcode.
+
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_vex_prefix): Replace vexopcode with

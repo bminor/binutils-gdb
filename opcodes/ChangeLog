@@ -1,3 +1,13 @@
+2020-10-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (process_i386_opcode_modifier): Return 1 for
+	non-VEX/EVEX/prefix encoding.
+	(output_i386_opcode): Fail if non-VEX/EVEX/prefix base_opcode
+	has a prefix byte.
+	* i386-opc.tbl: Replace the prefix byte in non-VEX/EVEX
+	base_opcode with PREFIX_0X66, PREFIX_0XF2 or PREFIX_0XF3.
+	* i386-tbl.h: Regenerated.
+
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Replace VexOpcode with
