@@ -813,10 +813,16 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	   core file provided mappings (e.g. from .note.linuxcore.file
 	   or the like) as this should provide a more accurate
 	   result.  If not, check the stratum beneath us, which should
-	   be the file stratum.  */
-	if (!m_core_file_mappings.empty ())
-	  xfer_status = xfer_memory_via_mappings (readbuf, writebuf, offset,
-						  len, xfered_len);
+	   be the file stratum.
+
+	   We also check unavailable mappings due to Docker/AUFS driver
+	   issues.  */
+	if (!m_core_file_mappings.empty ()
+	    || !m_core_unavailable_mappings.empty ())
+	  {
+	    xfer_status = xfer_memory_via_mappings (readbuf, writebuf, offset,
+						    len, xfered_len);
+	  }
 	else
 	  xfer_status = this->beneath ()->xfer_partial (object, annex, readbuf,
 							writebuf, offset, len,

@@ -1,3 +1,8 @@
+2020-10-22  Luis Machado  <luis.machado@linaro.org>
+
+	* corelow.c (core_target::xfer_partial): Also check for an empty
+	m_core_unavailable_mappings vector.
+
 2020-10-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* expprint.c (dump_subexp_body_standard): Print RANGE_HAS_STRIDE.
