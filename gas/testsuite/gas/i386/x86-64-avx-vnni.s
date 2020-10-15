@@ -4,10 +4,8 @@
 	\mnemonic	 %xmm12, %xmm4, %xmm2
 	{evex} \mnemonic %xmm12, %xmm4, %xmm2
 	{vex}  \mnemonic %xmm12, %xmm4, %xmm2
-	{vex2} \mnemonic %xmm12, %xmm4, %xmm2
 	{vex3} \mnemonic %xmm12, %xmm4, %xmm2
 	{vex}  \mnemonic (%rcx), %xmm4, %xmm2
-	{vex2} \mnemonic (%rcx), %xmm4, %xmm2
 	{vex3} \mnemonic (%rcx), %xmm4, %xmm2
 	\mnemonic	 %xmm22, %xmm4, %xmm2
 .endm

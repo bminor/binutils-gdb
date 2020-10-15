@@ -3906,11 +3906,11 @@ vpshrdw, 4, 0x6672, None, 1, CpuAVX512_VBMI2, Modrm|Masking=3|OpcodePrefix=2|Vex
 
 // AVX_VNNI instructions
 
-vpdpbusd, 3, 0x6650, None, 1, CpuAVX_VNNI|CpuVEX_PREFIX, Modrm|Vex|OpcodePrefix=1|VexVVVV=1|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpdpwssd, 3, 0x6652, None, 1, CpuAVX_VNNI|CpuVEX_PREFIX, Modrm|Vex|OpcodePrefix=1|VexVVVV=1|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpbusd, 3, 0x6650, None, 1, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|OpcodePrefix=1|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwssd, 3, 0x6652, None, 1, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|OpcodePrefix=1|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 
-vpdpbusds, 3, 0x6651, None, 1, CpuAVX_VNNI|CpuVEX_PREFIX, Modrm|Vex|OpcodePrefix=1|VexVVVV=1|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpdpwssds, 3, 0x6653, None, 1, CpuAVX_VNNI|CpuVEX_PREFIX, Modrm|Vex|OpcodePrefix=1|VexVVVV=1|VexW=1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpbusds, 3, 0x6651, None, 1, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|OpcodePrefix=1|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwssds, 3, 0x6653, None, 1, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|OpcodePrefix=1|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 
 // AVX_VNNI instructions end
 

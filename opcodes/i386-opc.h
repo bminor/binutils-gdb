@@ -214,8 +214,6 @@ enum
   CpuTDX,
   /* Intel AVX VNNI Instructions support required.  */
   CpuAVX_VNNI,
-  /* Intel AVX Instructions support via {vex} prefix required.  */
-  CpuVEX_PREFIX,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -387,7 +385,6 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512_vp2intersect:1;
       unsigned int cputdx:1;
       unsigned int cpuavx_vnni:1;
-      unsigned int cpuvex_prefix:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
@@ -534,6 +531,8 @@ enum
   NoRex64,
   /* deprecated fp insn, gets a warning */
   Ugh,
+  /* Intel AVX Instructions support via {vex} prefix */
+  PseudoVexPrefix,
   /* insn has VEX prefix:
 	1: 128bit VEX prefix (or operand dependent).
 	2: 256bit VEX prefix.
@@ -739,6 +738,7 @@ typedef struct i386_opcode_modifier
   unsigned int immext:1;
   unsigned int norex64:1;
   unsigned int ugh:1;
+  unsigned int pseudovexprefix:1;
   unsigned int vex:2;
   unsigned int vexvvvv:2;
   unsigned int vexw:2;

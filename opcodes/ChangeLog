@@ -1,3 +1,14 @@
+2020-10-16  Lili Cui  <lili.cui@intel.com>
+
+	* i386-opc.tbl: Rename CpuVEX_PREFIX to PseudoVexPrefix
+	and move it from cpu_flags to opcode_modifiers.
+	Use VexW0 and VexVVVV in the AVX-VNNI instructions.
+	* i386-gen.c: Likewise.
+	* i386-opc.h: Likewise.
+	* i386-opc.h: Likewise.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2020-10-14  H.J. Lu  <hongjiu.lu@intel.com>
 	    Lili Cui  <lili.cui@intel.com>
 

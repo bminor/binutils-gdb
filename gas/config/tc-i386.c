@@ -1973,14 +1973,7 @@ cpu_flags_match (const insn_template *t)
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{
-	  if (x.bitfield.cpuvex_prefix)
-	    {
-	      /* We need to check a few extra flags with VEX_PREFIX.  */
-	      if (i.vec_encoding == vex_encoding_vex
-		  || i.vec_encoding == vex_encoding_vex3)
-		match |= CPU_FLAGS_ARCH_MATCH;
-	    }
-	  else if (x.bitfield.cpuavx)
+	  if (x.bitfield.cpuavx)
 	    {
 	      /* We need to check a few extra flags with AVX.  */
 	      if (cpu.bitfield.cpuavx
@@ -6263,6 +6256,13 @@ match_template (char mnem_suffix)
       /* Check processor support.  */
       i.error = unsupported;
       if (cpu_flags_match (t) != CPU_FLAGS_PERFECT_MATCH)
+	continue;
+
+      /* Check Pseudo Prefix.  */
+      i.error = unsupported;
+      if (t->opcode_modifier.pseudovexprefix
+	  && !(i.vec_encoding == vex_encoding_vex
+	      || i.vec_encoding == vex_encoding_vex3))
 	continue;
 
       /* Check AT&T mnemonic.   */
