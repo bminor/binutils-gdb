@@ -16091,14 +16091,16 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
-	      if ((insn & (0x3fu << 26 | 0x3)) == 58u << 26 /* ld */)
+	      if (r_type == R_PPC64_GOT16_LO_DS
+		  && (insn & (0x3fu << 26 | 0x3)) == 58u << 26 /* ld */)
 		{
 		  insn += (14u << 26) - (58u << 26);
 		  bfd_put_32 (input_bfd, insn, contents + (rel->r_offset & ~3));
 		  r_type = R_PPC64_TOC16_LO;
 		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 		}
-	      else if ((insn & (0x3fu << 26)) == 15u << 26 /* addis */)
+	      else if (r_type == R_PPC64_GOT16_HA
+		       && (insn & (0x3fu << 26)) == 15u << 26 /* addis */)
 		{
 		  r_type = R_PPC64_TOC16_HA;
 		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
