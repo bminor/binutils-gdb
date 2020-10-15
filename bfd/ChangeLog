@@ -1,5 +1,13 @@
 2020-10-16  Alan Modra  <amodra@gmail.com>
 
+	* elf32-cr16.c: Formatting.
+	(cr16_elf_final_link_relocate): Sign extend rather than clumsy
+	"add or subtract" of offset value.  Simplify range checks.  Move
+	common code out of "if" branches.  Don't refetch insn fields
+	needlessly.
+
+2020-10-16  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): Tighten sanity check
 	on R_PPC64_GOT_LO_DS and R_PPC64_GOT_HA instructions.
 
