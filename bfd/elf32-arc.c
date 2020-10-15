@@ -391,17 +391,17 @@ static const struct arc_reloc_map arc_reloc_map[] =
 
 #undef ARC_RELOC_HOWTO
 
-typedef ATTRIBUTE_UNUSED bfd_vma (*replace_func) (unsigned, int ATTRIBUTE_UNUSED);
+typedef ATTRIBUTE_UNUSED unsigned (*replace_func) (unsigned, int ATTRIBUTE_UNUSED);
 
 #define ARC_RELOC_HOWTO(TYPE, VALUE, SIZE, BITSIZE, RELOC_FUNCTION, OVERFLOW, FORMULA) \
   case TYPE: \
-    func = (void *) RELOC_FUNCTION; \
+    func = RELOC_FUNCTION; \
     break;
 
 static replace_func
 get_replace_function (bfd *abfd, unsigned int r_type)
 {
-  void *func = NULL;
+  replace_func func = NULL;
 
   switch (r_type)
     {
@@ -411,7 +411,7 @@ get_replace_function (bfd *abfd, unsigned int r_type)
   if (func == replace_bits24 && bfd_big_endian (abfd))
     func = replace_bits24_be;
 
-  return (replace_func) func;
+  return func;
 }
 #undef ARC_RELOC_HOWTO
 

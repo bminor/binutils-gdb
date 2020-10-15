@@ -1,5 +1,11 @@
 2020-10-16  Alan Modra  <amodra@gmail.com>
 
+	* elf32-arc.c (replace_func): Correct return type.
+	(get_replace_function): Use a replace_func function pointer rather
+	than void*.  Update associated ARC_RELOC_HOWTO define.
+
+2020-10-16  Alan Modra  <amodra@gmail.com>
+
 	* elf32-cr16.c: Formatting.
 	(cr16_elf_final_link_relocate): Sign extend rather than clumsy
 	"add or subtract" of offset value.  Simplify range checks.  Move
