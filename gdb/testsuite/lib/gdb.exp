@@ -565,6 +565,10 @@ proc gdb_breakpoint { function args } {
 		return 0
 	}
 	eof {
+		perror "GDB process no longer exists"
+		global gdb_spawn_id
+		set wait_status [wait -i $gdb_spawn_id]
+		verbose -log "GDB process exited with wait status $wait_status"
 		if { $print_fail } {
 			fail "$test_name (eof)"
 		}
