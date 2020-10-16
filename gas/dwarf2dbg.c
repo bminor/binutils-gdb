@@ -211,7 +211,6 @@ struct file_entry
 {
   const char *   filename;
   unsigned int   dir;
-  bfd_boolean    auto_assigned;
   unsigned char  md5[NUM_MD5_BYTES];
 };
 
@@ -219,6 +218,7 @@ struct file_entry
 static struct file_entry *files;
 static unsigned int files_in_use;
 static unsigned int files_allocated;
+static unsigned int num_of_auto_assigned;
 
 /* Table of directories used by .debug_line.  */
 static char **       dirs = NULL;
@@ -633,7 +633,7 @@ get_directory_table_entry (const char *  dirname,
 }
 
 static bfd_boolean
-assign_file_to_slot (unsigned long i, const char *file, unsigned int dir, bfd_boolean auto_assign)
+assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
 {
   if (i >= files_allocated)
     {
@@ -653,7 +653,6 @@ assign_file_to_slot (unsigned long i, const char *file, unsigned int dir, bfd_bo
 
   files[i].filename = file;
   files[i].dir = dir;
-  files[i].auto_assigned = auto_assign;
   memset (files[i].md5, 0, NUM_MD5_BYTES);
 
   if (files_in_use < i + 1)
@@ -717,8 +716,10 @@ allocate_filenum (const char * pathname)
 	return i;
       }
 
-  if (!assign_file_to_slot (i, file, dir, TRUE))
+  if (!assign_file_to_slot (i, file, dir))
     return -1;
+
+  num_of_auto_assigned++;
 
   last_used = i;
   last_used_dir_len = dir_len;
@@ -792,30 +793,15 @@ allocate_filename_to_slot (const char *  dirname,
 	}
 
     fail:
-      /* If NUM was previously allocated automatically then
-	 choose another slot for it, so that we can reuse NUM.  */
-      if (files[num].auto_assigned)
-	{
-	  /* Find an unused slot.  */
-	  for (i = 1; i < files_in_use; ++i)
-	    if (files[i].filename == NULL)
-	      break;
-	  if (! assign_file_to_slot (i, files[num].filename, files[num].dir, TRUE))
-	    return FALSE;
-	  files[num].filename = NULL;
-	}
-      else
-	{
-	  as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
-		  num,
-		  dir == NULL ? "" : dir,
-		  dir == NULL ? "" : "/",
-		  files[num].filename,
-		  dirname == NULL ? "" : dirname,
-		  dirname == NULL ? "" : "/",
-		  filename);
-	  return FALSE;
-	}
+      as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
+	      num,
+	      dir == NULL ? "" : dir,
+	      dir == NULL ? "" : "/",
+	      files[num].filename,
+	      dirname == NULL ? "" : dirname,
+	      dirname == NULL ? "" : "/",
+	      filename);
+      return FALSE;
     }
 
   if (dirname == NULL)
@@ -833,7 +819,7 @@ allocate_filename_to_slot (const char *  dirname,
   d = get_directory_table_entry (dirname, dirlen, num == 0);
   i = num;
 
-  if (! assign_file_to_slot (i, file, d, FALSE))
+  if (! assign_file_to_slot (i, file, d))
     return FALSE;
 
   if (with_md5)
@@ -1030,6 +1016,7 @@ dwarf2_directive_filename (void)
   char *filename;
   const char * dirname = NULL;
   int filename_len;
+  unsigned int i;
 
   /* Continue to accept a bare string and pass it off.  */
   SKIP_WHITESPACE ();
@@ -1094,6 +1081,18 @@ dwarf2_directive_filename (void)
     {
       as_bad (_("file number %lu is too big"), (unsigned long) num);
       return NULL;
+    }
+
+  if (num_of_auto_assigned)
+    {
+      /* Clear slots auto-assigned before the first .file <NUMBER>
+	 directive was seen.  */
+      if (files_in_use != (num_of_auto_assigned + 1))
+	abort ();
+      for (i = 1; i < files_in_use; i++)
+	files[i].filename = NULL;
+      files_in_use = 0;
+      num_of_auto_assigned = 0;
     }
 
   if (! allocate_filename_to_slot (dirname, filename, (unsigned int) num,
