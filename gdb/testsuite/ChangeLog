@@ -1,5 +1,10 @@
 2020-10-17  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/26317
+	* gdb.dwarf2/dw2-main-no-line-number.exp: New file.
+
+2020-10-17  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (standard_testfile): Also treat args starting with '-'
 	as suffix.
 	* gdb.dwarf2/atomic.c: Rename to ...

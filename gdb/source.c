@@ -306,7 +306,12 @@ select_source_symtab (struct symtab *s)
   if (bsym.symbol != nullptr && SYMBOL_CLASS (bsym.symbol) == LOC_BLOCK)
     {
       symtab_and_line sal = find_function_start_sal (bsym.symbol, true);
-      loc->set (sal.symtab, std::max (sal.line - (lines_to_list - 1), 1));
+      if (sal.symtab == NULL)
+	/* We couldn't find the location of `main', possibly due to missing
+	   line number info, fall back to line 1 in the corresponding file.  */
+	loc->set (symbol_symtab (bsym.symbol), 1);
+      else
+	loc->set (sal.symtab, std::max (sal.line - (lines_to_list - 1), 1));
       return;
     }
 
