@@ -20,7 +20,7 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-standard_testfile dw2-bad-mips-linkage-name.c dw2-bad-mips-linkage-name.S
+standard_testfile .c .S
 
 # Set up the DWARF for the test.
 

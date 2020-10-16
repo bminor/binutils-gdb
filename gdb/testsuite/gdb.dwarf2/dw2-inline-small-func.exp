@@ -39,8 +39,8 @@ if !$gcc_compiled {
     return 0
 }
 
-standard_testfile dw2-inline-small-func-lbls.c dw2-inline-small-func.S \
-    dw2-inline-small-func.c dw2-inline-small-func.h
+standard_testfile -lbls.c .S \
+    .c .h
 
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {

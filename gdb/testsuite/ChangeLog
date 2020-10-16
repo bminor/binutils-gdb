@@ -1,3 +1,76 @@
+2020-10-17  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (standard_testfile): Also treat args starting with '-'
+	as suffix.
+	* gdb.dwarf2/atomic.c: Rename to ...
+	* gdb.dwarf2/atomic-type.c: ... this.
+	* gdb.dwarf2/dw2-ranges2.c: Rename to ...
+	* gdb.dwarf2/dw2-ranges-2.c: ... this.
+	* gdb.dwarf2/dw2-ranges3.c: Rename to ...
+	* gdb.dwarf2/dw2-ranges-3.c: ... this.
+	* gdb.dwarf2/fission-mix2.c: Rename to ...
+	* gdb.dwarf2/fission-mix-2.c: ... this.
+	* gdb.dwarf2/ada-linkage-name.exp: Use more suffix args for
+	standard_testfile.
+	* gdb.dwarf2/ada-valprint-error.exp: Same.
+	* gdb.dwarf2/arr-stride.exp: Same.
+	* gdb.dwarf2/arr-subrange.exp: Same.
+	* gdb.dwarf2/atomic-type.exp: Same.
+	* gdb.dwarf2/bad-regnum.exp: Same.
+	* gdb.dwarf2/break-inline-psymtab.exp: Same.
+	* gdb.dwarf2/clang-debug-names-2.exp: Same.
+	* gdb.dwarf2/clang-debug-names.exp: Same.
+	* gdb.dwarf2/comp-unit-lang.exp: Same.
+	* gdb.dwarf2/corrupt.exp: Same.
+	* gdb.dwarf2/count.exp: Same.
+	* gdb.dwarf2/cpp-linkage-name.exp: Same.
+	* gdb.dwarf2/data-loc.exp: Same.
+	* gdb.dwarf2/dw2-align.exp: Same.
+	* gdb.dwarf2/dw2-bad-elf.exp: Same.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: Same.
+	* gdb.dwarf2/dw2-bad-unresolved.exp: Same.
+	* gdb.dwarf2/dw2-case-insensitive.exp: Same.
+	* gdb.dwarf2/dw2-cp-infcall-ref-static.exp: Same.
+	* gdb.dwarf2/dw2-ifort-parameter.exp: Same.
+	* gdb.dwarf2/dw2-inline-many-frames.exp: Same.
+	* gdb.dwarf2/dw2-inline-param.exp: Same.
+	* gdb.dwarf2/dw2-inline-small-func.exp: Same.
+	* gdb.dwarf2/dw2-inline-stepping.exp: Same.
+	* gdb.dwarf2/dw2-is-stmt-2.exp: Same.
+	* gdb.dwarf2/dw2-is-stmt.exp: Same.
+	* gdb.dwarf2/dw2-line-number-zero.exp: Same.
+	* gdb.dwarf2/dw2-namespaceless-anonymous.exp: Same.
+	* gdb.dwarf2/dw2-opt-structptr.exp: Same.
+	* gdb.dwarf2/dw2-param-error.exp: Same.
+	* gdb.dwarf2/dw2-ranges-base.exp: Same.
+	* gdb.dwarf2/dw2-ranges.exp: Same.
+	* gdb.dwarf2/dw2-unusual-field-names.exp: Same.
+	* gdb.dwarf2/dw2-vendor-extended-opcode.exp: Same.
+	* gdb.dwarf2/dw4-sig-types.exp: Same.
+	* gdb.dwarf2/dynarr-ptr.exp: Same.
+	* gdb.dwarf2/enum-type.exp: Same.
+	* gdb.dwarf2/fission-mix.exp: Same.
+	* gdb.dwarf2/formdata16.exp: Same.
+	* gdb.dwarf2/implptrconst.exp: Same.
+	* gdb.dwarf2/implptrpiece.exp: Same.
+	* gdb.dwarf2/info-locals-optimized-out.exp: Same.
+	* gdb.dwarf2/main-subprogram.exp: Same.
+	* gdb.dwarf2/method-ptr.exp: Same.
+	* gdb.dwarf2/missing-sig-type.exp: Same.
+	* gdb.dwarf2/nonvar-access.exp: Same.
+	* gdb.dwarf2/opaque-type-lookup.exp: Same.
+	* gdb.dwarf2/shortpiece.exp: Same.
+	* gdb.dwarf2/staticvirtual.exp: Same.
+	* gdb.dwarf2/subrange.exp: Same.
+	* gdb.dwarf2/symtab-producer.exp: Same.
+	* gdb.dwarf2/typedef-void-finish.exp: Same.
+	* gdb.dwarf2/var-access.exp: Same.
+	* gdb.dwarf2/variant.exp: Same.
+	* gdb.dwarf2/void-type.exp: Same.
+	* gdb.dwarf2/dw2-ranges-psym.exp: Same.  Use main.c instead of
+	dw2-ranges-main.c.
+	* gdb.dwarf2/dw2-ranges-main.c: Remove.
+
 2020-10-16  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_breakpoint): Remove mention of "passfail".

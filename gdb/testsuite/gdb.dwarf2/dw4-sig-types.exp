@@ -15,7 +15,7 @@
 
 # Test dwarf4 signatured types (DW_TAG_type_unit).
 
-standard_testfile .cc dw4-sig-types-b.cc
+standard_testfile .cc -b.cc
 
 # This test is intended for targets which support DWARF-4.
 # Since we pass an explicit -gdwarf-4 -fdebug-types-section to the compiler,

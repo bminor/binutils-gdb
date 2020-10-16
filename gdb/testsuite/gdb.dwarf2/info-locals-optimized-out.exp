@@ -22,7 +22,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile .c ${gdb_test_file_name}-dw.S
+standard_testfile .c -dw.S
 
 # Make some DWARF for the test.
 

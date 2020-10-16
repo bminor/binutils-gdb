@@ -20,7 +20,7 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-standard_testfile dw2-bad-unresolved.c dw2-bad-unresolved-2.S
+standard_testfile .c -2.S
 
 # Set up the DWARF for the test.
 # The key part of this is the definition of variable "var" having no location.

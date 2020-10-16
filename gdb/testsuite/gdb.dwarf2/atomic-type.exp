@@ -19,7 +19,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile atomic.c atomic-type-dw.S
+standard_testfile .c -dw.S
 
 # Make some DWARF for the test.
 

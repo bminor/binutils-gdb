@@ -23,7 +23,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile ada-linkage-name.c ada-linkage-name-debug.S
+standard_testfile .c -debug.S
 
 # Set up the DWARF for the test.
 

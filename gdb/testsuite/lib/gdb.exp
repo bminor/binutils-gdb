@@ -5277,7 +5277,7 @@ proc cached_file { filename txt {executable 0}} {
 # Without any arguments, the .exp file's base name is used to
 # compute the source file name.  The ".c" extension is added in this case.
 # If ARGS is not empty, each entry is a source file specification.
-# If the specification starts with a ".", it is treated as a suffix
+# If the specification starts with a "." or "-", it is treated as a suffix
 # to append to the .exp file's base name.
 # If the specification is the empty string, it is treated as if it
 # were ".c".
@@ -5324,8 +5324,11 @@ proc standard_testfile {args} {
 	# Handle an extension.
 	if {$arg == ""} {
 	    set arg $testfile.c
-	} elseif {[string range $arg 0 0] == "."} {
-	    set arg $testfile$arg
+	} else {
+	    set first [string range $arg 0 0]
+	    if { $first == "." || $first == "-" } {
+		set arg $testfile$arg
+	    }
 	}
 
 	set $varname $arg

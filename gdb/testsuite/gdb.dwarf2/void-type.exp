@@ -31,7 +31,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile void-type.c void-type.S
+standard_testfile .c .S
 
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]

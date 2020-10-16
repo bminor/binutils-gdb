@@ -31,7 +31,7 @@ if !$gcc_compiled {
     return 0
 }
 
-standard_testfile dw2-ranges-main.c dw2-ranges-psym.c dw2-ranges-psym-dw.S
+standard_testfile main.c .c -dw.S
 
 # We need to know the size of integer and address types in order to
 # write some of the debugging info we'd like to generate.

@@ -19,7 +19,7 @@ if {![dwarf2_support]} {
     return 0  
 }
 
-standard_testfile .c dw2-case-insensitive-debug.S
+standard_testfile .c -debug.S
 
 if [is_ilp32_target] {
     set ptrbits 32

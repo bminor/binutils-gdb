@@ -34,7 +34,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile dw2-bad-elf.c dw2-bad-elf-other.S dw2-bad-elf-dwarf.S
+standard_testfile .c -other.S -dwarf.S
 
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile3]

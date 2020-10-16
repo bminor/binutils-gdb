@@ -20,7 +20,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile clang-debug-names.c clang-debug-names-debug.S
+standard_testfile .c -debug.S
 
 lassign [function_range main ${srcdir}/${subdir}/${srcfile}] \
     main_start main_length

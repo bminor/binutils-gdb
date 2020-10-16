@@ -21,7 +21,7 @@ if {![dwarf2_support]} {
 
 if { [skip_cplus_tests] } { continue }
 
-standard_testfile main.c missing-sig-type-dw4.S
+standard_testfile main.c -dw4.S
 
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]

@@ -28,7 +28,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile dw2-opt-structptr.c dw2-opt-structptr-dw.S
+standard_testfile .c -dw.S
 
 # Generate a test program with dwarf information showing the variable
 # 'ptr', a pointer-to-struct, as optimized out.  The dwarf will also

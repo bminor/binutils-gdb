@@ -24,7 +24,7 @@ if {![dwarf2_support]} {
 # This test can also only be run when we have python support in gdb,
 # but that test can only be done after gdb has started, below.
 
-standard_testfile main.c symtab-producer-dw.S
+standard_testfile main.c -dw.S
 
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]

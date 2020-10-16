@@ -20,11 +20,11 @@ if ![dwarf2_support] {
     return 0  
 }
 
-standard_testfile fission-mix.c fission-mix2.c
+standard_testfile .c -2.c
 set objfile [standard_output_file ${testfile}.o]
 set objfile2 [standard_output_file ${testfile}2.o]
 
-# Compile fission-mix.c without Fission and fission-mix2.c with Fission.
+# Compile fission-mix.c without Fission and fission-mix-2.c with Fission.
 if { [gdb_compile ${srcdir}/${subdir}/${srcfile} $objfile object {debug}] != "" } {
     return -1
 }
