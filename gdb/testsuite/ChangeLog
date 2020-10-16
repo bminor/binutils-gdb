@@ -1,5 +1,9 @@
 2020-10-16  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (gdb_breakpoint): Remove mention of "passfail".
+
+2020-10-16  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (gdb_breakpoint): Handle eof as in gdb_test_multiple.
 
 2020-10-14  Tom de Vries  <tdevries@suse.de>

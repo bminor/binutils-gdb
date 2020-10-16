@@ -491,7 +491,7 @@ proc gdb_starti_cmd { {inferior_args {}} } {
 
 # Set a breakpoint at FUNCTION.  If there is an additional argument it is
 # a list of options; the supported options are allow-pending, temporary,
-# message, no-message, passfail and qualified.
+# message, no-message and qualified.
 # The result is 1 for success, 0 for failure.
 #
 # Note: The handling of message vs no-message is messed up, but it's based
