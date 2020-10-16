@@ -1,6 +1,22 @@
+2020-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25878
+	PR gas/26740
+	* dwarf2dbg.c (file_entry): Remove auto_assigned.
+	(assign_file_to_slot): Remove the auto_assign argument.
+	(allocate_filenum): Updated.
+	(allocate_filename_to_slot): Reuse the input file entry in the
+	file table.
+	(dwarf2_where): Replace as_where with as_where_physical.
+	* testsuite/gas/i386/dwarf5-line-1.d: New file.
+	* testsuite/gas/i386/dwarf5-line-1.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run dwarf5-line-1.
+
 2020-10-16  Lili Cui  <lili.cui@intel.com>
 
-	* config/tc-i386.c: Move Pseudo Prefix check to match_template.
+	* config/tc-i386.c (cpu_flags_match): Move Pseudo Prefix check
+	to ...
+	(match_template): Here.
 	* testsuite/gas/i386/avx-vnni-inval.l: New file.
 	* testsuite/gas/i386/avx-vnni-inval.s: Likewise.
 	* testsuite/gas/i386/avx-vnni.d: Delete invalid {vex2} test.

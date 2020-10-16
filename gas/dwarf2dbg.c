@@ -211,7 +211,6 @@ struct file_entry
 {
   const char *   filename;
   unsigned int   dir;
-  bfd_boolean    auto_assigned;
   unsigned char  md5[NUM_MD5_BYTES];
 };
 
@@ -633,7 +632,7 @@ get_directory_table_entry (const char *  dirname,
 }
 
 static bfd_boolean
-assign_file_to_slot (unsigned long i, const char *file, unsigned int dir, bfd_boolean auto_assign)
+assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
 {
   if (i >= files_allocated)
     {
@@ -653,7 +652,6 @@ assign_file_to_slot (unsigned long i, const char *file, unsigned int dir, bfd_bo
 
   files[i].filename = file;
   files[i].dir = dir;
-  files[i].auto_assigned = auto_assign;
   memset (files[i].md5, 0, NUM_MD5_BYTES);
 
   if (files_in_use < i + 1)
@@ -717,7 +715,7 @@ allocate_filenum (const char * pathname)
 	return i;
       }
 
-  if (!assign_file_to_slot (i, file, dir, TRUE))
+  if (!assign_file_to_slot (i, file, dir))
     return -1;
 
   last_used = i;
@@ -792,18 +790,12 @@ allocate_filename_to_slot (const char *  dirname,
 	}
 
     fail:
-      /* If NUM was previously allocated automatically then
-	 choose another slot for it, so that we can reuse NUM.  */
-      if (files[num].auto_assigned)
-	{
-	  /* Find an unused slot.  */
-	  for (i = 1; i < files_in_use; ++i)
-	    if (files[i].filename == NULL)
-	      break;
-	  if (! assign_file_to_slot (i, files[num].filename, files[num].dir, TRUE))
-	    return FALSE;
-	  files[num].filename = NULL;
-	}
+      /* Reuse NUM if it is 1 and was assigned to the input file before
+	 the first .file <NUMBER> directive was seen.  */
+      file = as_where_physical (&i);
+      file = get_basename (file);
+      if (num == 1 && filename_cmp (file, files[num].filename) == 0)
+	files[num].filename = NULL;
       else
 	{
 	  as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
@@ -833,7 +825,7 @@ allocate_filename_to_slot (const char *  dirname,
   d = get_directory_table_entry (dirname, dirlen, num == 0);
   i = num;
 
-  if (! assign_file_to_slot (i, file, d, FALSE))
+  if (! assign_file_to_slot (i, file, d))
     return FALSE;
 
   if (with_md5)
@@ -902,7 +894,7 @@ dwarf2_where (struct dwarf2_line_info *line)
       const char *filename;
 
       memset (line, 0, sizeof (*line));
-      filename = as_where (&line->line);
+      filename = as_where_physical (&line->line);
       line->filenum = allocate_filenum (filename);
       /* FIXME: We should check the return value from allocate_filenum.  */
       line->column = 0;
