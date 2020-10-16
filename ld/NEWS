@@ -1,5 +1,10 @@
 -*- text -*-
 
+* Add --error-handling-script=<NAME> command line option to allow a helper
+  script to be invoked when an undefined symbol or a missing library is
+  encountered.  This option can be suppressed via the configure time
+  switch: --enable-error-handling-script=no.
+
 * Add -z x86-64-v[234] to the x86 ELF linker to mark x86-64-v[234] ISA
   level as needed.
 

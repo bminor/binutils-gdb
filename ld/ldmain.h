@@ -37,6 +37,9 @@ extern int g_switch_value;
 extern const char *output_filename;
 extern struct bfd_link_info link_info;
 extern int overflow_cutoff_limit;
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+extern char *error_handling_script;
+#endif
 
 #define RELAXATION_DISABLED_BY_DEFAULT	\
   (link_info.disable_target_specific_optimizations < 0)

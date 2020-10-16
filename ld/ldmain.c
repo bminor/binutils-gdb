@@ -1382,6 +1382,10 @@ warning_find_reloc (bfd *abfd, asection *sec, void *iarg)
   free (relpp);
 }
 
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+char * error_handling_script = NULL;
+#endif
+
 /* This is called when an undefined symbol is found.  */
 
 static void
@@ -1419,6 +1423,40 @@ undefined_symbol (struct bfd_link_info *info,
       error_name = xstrdup (name);
     }
 
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+  if (error_handling_script != NULL
+      && error_count < MAX_ERRORS_IN_A_ROW)
+    {
+      char *        argv[4];
+      const char *  res;
+      int           status, err;
+
+      argv[0] = error_handling_script;
+      argv[1] = "missing-symbol";
+      argv[2] = (char *) name;
+      argv[3] = NULL;
+      
+      if (verbose)
+	einfo (_("%P: About to run error handling script '%s' with arguments: '%s' '%s'\n"),
+	       argv[0], argv[1], argv[2]);
+
+      res = pex_one (PEX_SEARCH, error_handling_script, argv,
+		     N_("error handling script"),
+		     NULL /* Send stdout to random, temp file.  */,
+		     NULL /* Write to stderr.  */,
+		     &status, &err);
+      if (res != NULL)
+	{
+	  einfo (_("%P: Failed to run error handling script '%s', reason: "),
+		 error_handling_script);
+	  /* FIXME: We assume here that errrno == err.  */
+	  perror (res);
+	}
+      /* We ignore the return status of the script and
+	 carry on to issue the normal error message.  */
+    }
+#endif /* SUPPORT_ERROR_HANDLING_SCRIPT */
+  
   if (section != NULL)
     {
       if (error_count < MAX_ERRORS_IN_A_ROW)

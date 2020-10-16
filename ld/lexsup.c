@@ -386,6 +386,11 @@ static const struct ld_option ld_options[] =
   { {"allow-multiple-definition", no_argument, NULL,
      OPTION_ALLOW_MULTIPLE_DEFINITION},
     '\0', NULL, N_("Allow multiple definitions"), TWO_DASHES },
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+  { {"error-handling-script", required_argument, NULL,
+     OPTION_ERROR_HANDLING_SCRIPT},
+    '\0', N_("SCRIPT"), N_("Provide a script to help with undefined symbol errors"), TWO_DASHES},
+#endif
   { {"no-undefined-version", no_argument, NULL, OPTION_NO_UNDEFINED_VERSION},
     '\0', NULL, N_("Disallow undefined version"), TWO_DASHES },
   { {"default-symver", no_argument, NULL, OPTION_DEFAULT_SYMVER},
@@ -1043,6 +1048,15 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_ALLOW_MULTIPLE_DEFINITION:
 	  link_info.allow_multiple_definition = TRUE;
 	  break;
+
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+	case OPTION_ERROR_HANDLING_SCRIPT:
+	  /* FIXME: Should we warn if the script is being overridden by another ?
+	     Or maybe they should be chained together ?  */
+	  error_handling_script = optarg;
+	  break;
+#endif
+
 	case OPTION_NO_UNDEFINED_VERSION:
 	  link_info.allow_undefined_version = FALSE;
 	  break;

@@ -461,6 +461,39 @@ ldfile_open_file (lang_input_statement_type *entry)
 	       && IS_ABSOLUTE_PATH (entry->local_sym_name))
 	    einfo (_("%P: cannot find %s inside %s\n"),
 		   entry->local_sym_name, ld_sysroot);
+#if SUPPORT_ERROR_HANDLING_SCRIPT
+	  else if (error_handling_script != NULL)
+	    {
+	      char *        argv[4];
+	      const char *  res;
+	      int           status, err;
+
+	      argv[0] = error_handling_script;
+	      argv[1] = "missing-lib";
+	      argv[2] = (char *) entry->local_sym_name;
+	      argv[3] = NULL;
+      
+	      if (verbose)
+		einfo (_("%P: About to run error handling script '%s' with arguments: '%s' '%s'\n"),
+		       argv[0], argv[1], argv[2]);
+
+	      res = pex_one (PEX_SEARCH, error_handling_script, argv,
+			     N_("error handling script"),
+			     NULL /* Send stdout to random, temp file.  */,
+			     NULL /* Write to stderr.  */,
+			     &status, &err);
+	      if (res != NULL)
+		{
+		  einfo (_("%P: Failed to run error handling script '%s', reason: "),
+			 error_handling_script);
+		  /* FIXME: We assume here that errrno == err.  */
+		  perror (res);
+		}
+	      else /* We ignore the return status of the script
+		      and always print the error message.  */
+		einfo (_("%P: cannot find %s\n"), entry->local_sym_name);
+	    }
+#endif
 	  else
 	    einfo (_("%P: cannot find %s\n"), entry->local_sym_name);
 
@@ -479,6 +512,7 @@ ldfile_open_file (lang_input_statement_type *entry)
 		  break;
 		}
 	    }
+
 	  entry->flags.missing_file = TRUE;
 	  input_flags.missing_file = TRUE;
 	}

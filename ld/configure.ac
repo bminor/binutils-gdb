@@ -195,6 +195,16 @@ AC_ARG_ENABLE(separate-code,
   no) ac_default_ld_z_separate_code=0 ;;
 esac])
 
+# Decide if --error-handling-script should be supported.
+ac_support_error_handling_script=unset
+AC_ARG_ENABLE(error-handling-script,
+	      AS_HELP_STRING([--enable-error-handling-script],
+	      [enable/disable support for the --error-handling-script option]),
+[case "${enableval}" in
+  yes) ac_support_error_handling_script=1 ;;
+  no)  ac_support_error_handling_script=0 ;;
+esac])
+
 # Decide which "--hash-style" to use by default
 # Provide a configure time option to override our default.
 AC_ARG_ENABLE([default-hash-style],
@@ -488,6 +498,13 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
   $ac_default_ld_z_separate_code,
   [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
+
+if test "${ac_support_error_handling_script}" = unset; then
+  ac_support_error_handling_script=1
+fi
+AC_DEFINE_UNQUOTED(SUPPORT_ERROR_HANDLING_SCRIPT,
+  $ac_support_error_handling_script,
+  [Define to 1 if you want to support the --error-handling-script command line option.])
 
 AC_DEFINE_UNQUOTED([DEFAULT_EMIT_SYSV_HASH],
   [$ac_default_emit_sysv_hash],

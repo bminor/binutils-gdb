@@ -1,3 +1,22 @@
+2020-10-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 26626
+	* ldmain.c (undefined_symbol): If an error handlign script is
+	available, call it.
+	* ldfile.c  (error_handling_script): Declare.
+	(ldfile_open_file): If a library cannot be found and an error
+	handling script is available, call it.
+	* ldmain.h  (error_handling_script): Prototype.
+	* ldlex.h (OPTION_ERROR_HANDLING_SCRIPT): Define.
+	* lexsup.c (ld_options): Add --error-handling-script.
+	(parse_args): Add support for --errror-handling-script.
+	* ld.texi: Document the new feature.
+	* configure.ac: Add --error-handling-script option to disable
+	support for the new feature.
+	* NEWS: Mention the new feature.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/ld-riscv-elf/ifunc-plt-got-overwrite.s: New testcase.
