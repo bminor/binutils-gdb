@@ -790,24 +790,15 @@ allocate_filename_to_slot (const char *  dirname,
 	}
 
     fail:
-      /* Reuse NUM if it is 1 and was assigned to the input file before
-	 the first .file <NUMBER> directive was seen.  */
-      file = as_where_physical (&i);
-      file = get_basename (file);
-      if (num == 1 && filename_cmp (file, files[num].filename) == 0)
-	files[num].filename = NULL;
-      else
-	{
-	  as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
-		  num,
-		  dir == NULL ? "" : dir,
-		  dir == NULL ? "" : "/",
-		  files[num].filename,
-		  dirname == NULL ? "" : dirname,
-		  dirname == NULL ? "" : "/",
-		  filename);
-	  return FALSE;
-	}
+      as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
+	      num,
+	      dir == NULL ? "" : dir,
+	      dir == NULL ? "" : "/",
+	      files[num].filename,
+	      dirname == NULL ? "" : dirname,
+	      dirname == NULL ? "" : "/",
+	      filename);
+      return FALSE;
     }
 
   if (dirname == NULL)
@@ -894,7 +885,7 @@ dwarf2_where (struct dwarf2_line_info *line)
       const char *filename;
 
       memset (line, 0, sizeof (*line));
-      filename = as_where_physical (&line->line);
+      filename = as_where (&line->line);
       line->filenum = allocate_filenum (filename);
       /* FIXME: We should check the return value from allocate_filenum.  */
       line->column = 0;
@@ -1086,6 +1077,20 @@ dwarf2_directive_filename (void)
     {
       as_bad (_("file number %lu is too big"), (unsigned long) num);
       return NULL;
+    }
+
+  if (files_in_use == 2)
+    {
+      /* Clear the slot 1 if it was assigned to the input file before
+	 the first .file <NUMBER> directive was seen.  */
+      unsigned int lineno;
+      const char *file = as_where (&lineno);
+      file = get_basename (file);
+      if (filename_cmp (file, files[1].filename) == 0)
+	{
+	  files[1].filename = NULL;
+	  files_in_use = 0;
+	}
     }
 
   if (! allocate_filename_to_slot (dirname, filename, (unsigned int) num,
