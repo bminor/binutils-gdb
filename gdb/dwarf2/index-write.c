@@ -539,14 +539,12 @@ symbol_kind (struct partial_symbol *psym)
 static void
 write_psymbols (struct mapped_symtab *symtab,
 		std::unordered_set<partial_symbol *> &psyms_seen,
-		struct partial_symbol **psymp,
-		int count,
+		const std::vector<partial_symbol *> &symbols,
 		offset_type cu_index,
 		int is_static)
 {
-  for (; count-- > 0; ++psymp)
+  for (partial_symbol *psym : symbols)
     {
-      struct partial_symbol *psym = *psymp;
       const char *name = psym->ginfo.search_name ();
 
       if (psym->ginfo.language () == language_ada)
@@ -618,17 +616,11 @@ write_one_signatured_type (void **slot, void *d)
   struct signatured_type *entry = (struct signatured_type *) *slot;
   partial_symtab *psymtab = entry->per_cu.v.psymtab;
 
-  write_psymbols (info->symtab,
-		  info->psyms_seen,
-		  (info->objfile->partial_symtabs->global_psymbols.data ()
-		   + psymtab->globals_offset),
-		  psymtab->n_global_syms, info->cu_index,
+  write_psymbols (info->symtab, info->psyms_seen,
+		  psymtab->global_psymbols, info->cu_index,
 		  0);
-  write_psymbols (info->symtab,
-		  info->psyms_seen,
-		  (info->objfile->partial_symtabs->static_psymbols.data ()
-		   + psymtab->statics_offset),
-		  psymtab->n_static_syms, info->cu_index,
+  write_psymbols (info->symtab, info->psyms_seen,
+		  psymtab->static_psymbols, info->cu_index,
 		  1);
 
   info->types_list.append_uint (8, BFD_ENDIAN_LITTLE,
@@ -654,8 +646,8 @@ recursively_count_psymbols (partial_symtab *psymtab,
       recursively_count_psymbols (psymtab->dependencies[i],
 				  psyms_seen);
 
-  psyms_seen += psymtab->n_global_syms;
-  psyms_seen += psymtab->n_static_syms;
+  psyms_seen += psymtab->global_psymbols.size ();
+  psyms_seen += psymtab->static_psymbols.size ();
 }
 
 /* Recurse into all "included" dependencies and write their symbols as
@@ -676,17 +668,11 @@ recursively_write_psymbols (struct objfile *objfile,
 				  psymtab->dependencies[i],
 				  symtab, psyms_seen, cu_index);
 
-  write_psymbols (symtab,
-		  psyms_seen,
-		  (objfile->partial_symtabs->global_psymbols.data ()
-		   + psymtab->globals_offset),
-		  psymtab->n_global_syms, cu_index,
+  write_psymbols (symtab, psyms_seen,
+		  psymtab->global_psymbols, cu_index,
 		  0);
-  write_psymbols (symtab,
-		  psyms_seen,
-		  (objfile->partial_symtabs->static_psymbols.data ()
-		   + psymtab->statics_offset),
-		  psymtab->n_static_syms, cu_index,
+  write_psymbols (symtab, psyms_seen,
+		  psymtab->static_psymbols, cu_index,
 		  1);
 }
 
@@ -912,14 +898,10 @@ public:
 	recursively_write_psymbols
 	  (objfile, psymtab->dependencies[i], psyms_seen, cu_index);
 
-    write_psymbols (psyms_seen,
-		    (objfile->partial_symtabs->global_psymbols.data ()
-		     + psymtab->globals_offset),
-		    psymtab->n_global_syms, cu_index, false, unit_kind::cu);
-    write_psymbols (psyms_seen,
-		    (objfile->partial_symtabs->static_psymbols.data ()
-		     + psymtab->statics_offset),
-		    psymtab->n_static_syms, cu_index, true, unit_kind::cu);
+    write_psymbols (psyms_seen, psymtab->global_psymbols,
+		    cu_index, false, unit_kind::cu);
+    write_psymbols (psyms_seen, psymtab->static_psymbols,
+		    cu_index, true, unit_kind::cu);
   }
 
   /* Return number of bytes the .debug_names section will have.  This
@@ -1251,13 +1233,11 @@ private:
 
   /* Call insert for all partial symbols and mark them in PSYMS_SEEN.  */
   void write_psymbols (std::unordered_set<partial_symbol *> &psyms_seen,
-		       struct partial_symbol **psymp, int count, int cu_index,
-		       bool is_static, unit_kind kind)
+		       const std::vector<partial_symbol *> &symbols,
+		       int cu_index, bool is_static, unit_kind kind)
   {
-    for (; count-- > 0; ++psymp)
+    for (partial_symbol *psym : symbols)
       {
-	struct partial_symbol *psym = *psymp;
-
 	/* Only add a given psymbol once.  */
 	if (psyms_seen.insert (psym).second)
 	  insert (psym, cu_index, is_static, kind);
@@ -1272,16 +1252,10 @@ private:
   {
     partial_symtab *psymtab = entry->per_cu.v.psymtab;
 
-    write_psymbols (info->psyms_seen,
-		    (info->objfile->partial_symtabs->global_psymbols.data ()
-		     + psymtab->globals_offset),
-		    psymtab->n_global_syms, info->cu_index, false,
-		    unit_kind::tu);
-    write_psymbols (info->psyms_seen,
-		    (info->objfile->partial_symtabs->static_psymbols.data ()
-		     + psymtab->statics_offset),
-		    psymtab->n_static_syms, info->cu_index, true,
-		    unit_kind::tu);
+    write_psymbols (info->psyms_seen, psymtab->global_psymbols,
+		    info->cu_index, false, unit_kind::tu);
+    write_psymbols (info->psyms_seen, psymtab->static_psymbols,
+		    info->cu_index, true, unit_kind::tu);
 
     info->types_list.append_uint (dwarf5_offset_size (), m_dwarf5_byte_order,
 				  to_underlying (entry->per_cu.sect_off));

@@ -1,5 +1,50 @@
 2020-10-17  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_end_psymtab): Use partial_symtab::empty.
+	(scan_xcoff_symtab): Update.
+	* psymtab.h (class psymtab_storage) <global_psymbols,
+	static_psymbols, current_global_psymbols,
+	current_static_psymbols>: Remove.
+	* psymtab.c (require_partial_symbols, find_pc_sect_psymbol)
+	(match_partial_symbol, lookup_partial_symbol): Update.
+	(print_partial_symbols): Change parameters.
+	(dump_psymtab, recursively_search_psymtabs)
+	(psym_fill_psymbol_map, psym_find_compunit_symtab_by_address)
+	(sort_pst_symbols, partial_symtab::partial_symtab): Update.
+	(concat): Remove.
+	(end_psymtab_common): Simplify.
+	(append_psymbol_to_list): Change parameters.
+	(partial_symtabs::add_psymbol): Rename from add_psymbol_to_list.
+	(init_psymbol_list): Simplify.
+	(maintenance_info_psymtabs, maintenance_check_psymtabs): Update.
+	* psympriv.h (struct partial_symtab) <empty>: New method.
+	<globals_offset, n_global_syms, statics_offset, n_static_syms>:
+	Remove.
+	<global_psymbols, static_psymbols>: New members.
+	<add_psymbol>: New methods.
+	(add_psymbol_to_list): Don't declare.
+	(psymbol_placement): Move earlier.
+	* mdebugread.c (parse_partial_symbols): Update.
+	(handle_psymbol_enumerators): Change parameters.
+	(mdebug_expand_psymtab): Update.
+	* dwarf2/read.c (process_psymtab_comp_unit_reader)
+	(add_partial_symbol): Update.
+	* dwarf2/index-write.c (write_psymbols): Change parameters.
+	(write_one_signatured_type): Update.
+	(recursively_count_psymbols): Update.
+	(recursively_write_psymbols): Update.
+	(class debug_names) <recursively_write_psymbols>: Update.
+	<write_psymbols>: Change parameters.
+	<write_one_signatured_type>: Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	(dbx_end_psymtab): Use partial_symtab::empty.
+	* ctfread.c (struct ctf_context) <pst>: New member.
+	(create_partial_symtab): Set it.
+	(ctf_psymtab_type_cb, ctf_psymtab_var_cb): Update.
+	(scan_partial_symbols): Use the psymtab's context.  Update.
+
+2020-10-17  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (generic_value_print): Remove comment.
 	* m2-valprint.c (m2_value_print_inner): Remove comment.
 	* gdbtypes.c (create_range_type): Set TYPE_UNSIGNED from base

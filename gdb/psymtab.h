@@ -137,18 +137,6 @@ public:
 
   psymbol_bcache psymbol_cache;
 
-  /* Vectors of all partial symbols read in from file.  The actual data
-     is stored in the objfile_obstack.  */
-
-  std::vector<partial_symbol *> global_psymbols;
-  std::vector<partial_symbol *> static_psymbols;
-
-  /* Stack of vectors of partial symbols, using during psymtab
-     initialization.  */
-
-  std::vector<std::vector<partial_symbol *>*> current_global_psymbols;
-  std::vector<std::vector<partial_symbol *>*> current_static_psymbols;
-
 private:
 
   /* The obstack where allocations are made.  This is lazily allocated

@@ -92,6 +92,15 @@ enum psymtab_search_status
     PST_SEARCHED_AND_NOT_FOUND
   };
 
+/* Specify whether a partial psymbol should be allocated on the global
+   list or the static list.  */
+
+enum class psymbol_placement
+{
+  STATIC,
+  GLOBAL
+};
+
 /* Each source file that has not been fully read in is represented by
    a partial_symtab.  This contains the information on where in the
    executable the debugging symbols for a specific file are, and a
@@ -196,6 +205,48 @@ struct partial_symtab
     text_high_valid = 1;
   }
 
+  /* Return true if this symtab is empty -- meaning that it contains
+     no symbols.  It may still have dependencies.  */
+  bool empty () const
+  {
+    return global_psymbols.empty () && static_psymbols.empty ();
+  }
+
+  /* Add a symbol to this partial symbol table of OBJFILE.
+
+     If COPY_NAME is true, make a copy of NAME, otherwise use the passed
+     reference.
+
+     THECLASS is the type of symbol.
+
+     SECTION is the index of the section of OBJFILE in which the symbol is found.
+
+     WHERE determines whether the symbol goes in the list of static or global
+     partial symbols.
+
+     COREADDR is the address of the symbol.  For partial symbols that don't have
+     an address, zero is passed.
+
+     LANGUAGE is the language from which the symbol originates.  This will
+     influence, amongst other things, how the symbol name is demangled. */
+
+  void add_psymbol (gdb::string_view name,
+		    bool copy_name, domain_enum domain,
+		    enum address_class theclass,
+		    short section,
+		    psymbol_placement where,
+		    CORE_ADDR coreaddr,
+		    enum language language,
+		    struct objfile *objfile);
+
+  /* Add a symbol to this partial symbol table of OBJFILE.  The psymbol
+     must be fully constructed, and the names must be set and intern'd
+     as appropriate.  */
+
+  void add_psymbol (const partial_symbol &psym,
+		    psymbol_placement where,
+		    struct objfile *objfile);
+
 
   /* Chain of all existing partial symtabs.  */
 
@@ -269,22 +320,18 @@ struct partial_symtab
 
   /* Global symbol list.  This list will be sorted after readin to
      improve access.  Binary search will be the usual method of
-     finding a symbol within it.  globals_offset is an integer offset
-     within global_psymbols[].  */
+     finding a symbol within it.  */
 
-  int globals_offset = 0;
-  int n_global_syms = 0;
+  std::vector<partial_symbol *> global_psymbols;
 
   /* Static symbol list.  This list will *not* be sorted after readin;
      to find a symbol in it, exhaustive search must be used.  This is
      reasonable because searches through this list will eventually
      lead to either the read in of a files symbols for real (assumed
      to take a *lot* of time; check) or an error (and we don't care
-     how long errors take).  This is an offset and size within
-     static_psymbols[].  */
+     how long errors take).  */
 
-  int statics_offset = 0;
-  int n_static_syms = 0;
+  std::vector<partial_symbol *> static_psymbols;
 
   /* True iff objfile->psymtabs_addrmap is properly populated for this
      partial_symtab.  For discontiguous overlapping psymtabs is the only usable
@@ -388,50 +435,6 @@ struct legacy_psymtab : public standard_psymtab
 
   void *read_symtab_private = nullptr;
 };
-
-/* Specify whether a partial psymbol should be allocated on the global
-   list or the static list.  */
-
-enum class psymbol_placement
-{
-  STATIC,
-  GLOBAL
-};
-
-/* Add a symbol to the partial symbol table of OBJFILE.
-
-   If COPY_NAME is true, make a copy of NAME, otherwise use the passed
-   reference.
-
-   THECLASS is the type of symbol.
-
-   SECTION is the index of the section of OBJFILE in which the symbol is found.
-
-   WHERE determines whether the symbol goes in the list of static or global
-   partial symbols of OBJFILE.
-
-   COREADDR is the address of the symbol.  For partial symbols that don't have
-   an address, zero is passed.
-
-   LANGUAGE is the language from which the symbol originates.  This will
-   influence, amongst other things, how the symbol name is demangled. */
-
-extern void add_psymbol_to_list (gdb::string_view name,
-				 bool copy_name, domain_enum domain,
-				 enum address_class theclass,
-				 short section,
-				 psymbol_placement where,
-				 CORE_ADDR coreaddr,
-				 enum language language,
-				 struct objfile *objfile);
-
-/* Add a symbol to the partial symbol table of OBJFILE.  The psymbol
-   must be fully constructed, and the names must be set and intern'd
-   as appropriate.  */
-
-extern void add_psymbol_to_list (const partial_symbol &psym,
-				 psymbol_placement where,
-				 struct objfile *objfile);
 
 /* Initialize storage for partial symbols.  If partial symbol storage
    has already been initialized, this does nothing.  TOTAL_SYMBOLS is

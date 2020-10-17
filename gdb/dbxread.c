@@ -1460,21 +1460,21 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	  switch (p[1])
 	    {
 	    case 'S':
-	      add_psymbol_to_list (gdb::string_view (sym_name, sym_len), true,
-				   VAR_DOMAIN, LOC_STATIC,
-				   data_sect_index,
-				   psymbol_placement::STATIC,
-				   nlist.n_value, psymtab_language, objfile);
+	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				VAR_DOMAIN, LOC_STATIC,
+				data_sect_index,
+				psymbol_placement::STATIC,
+				nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	    case 'G':
 	      /* The addresses in these entries are reported to be
 		 wrong.  See the code that reads 'G's for symtabs.  */
-	      add_psymbol_to_list (gdb::string_view (sym_name, sym_len), true,
-				   VAR_DOMAIN, LOC_STATIC,
-				   data_sect_index,
-				   psymbol_placement::GLOBAL,
-				   nlist.n_value, psymtab_language, objfile);
+	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				VAR_DOMAIN, LOC_STATIC,
+				data_sect_index,
+				psymbol_placement::GLOBAL,
+				nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	    case 'T':
@@ -1488,17 +1488,17 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		  || (p == namestring + 1
 		      && namestring[0] != ' '))
 		{
-		  add_psymbol_to_list (gdb::string_view (sym_name, sym_len),
-				       true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
-				       psymbol_placement::STATIC,
-				       0, psymtab_language, objfile);
+		  pst->add_psymbol (gdb::string_view (sym_name, sym_len),
+				    true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
+				    psymbol_placement::STATIC,
+				    0, psymtab_language, objfile);
 		  if (p[2] == 't')
 		    {
 		      /* Also a typedef with the same name.  */
-		      add_psymbol_to_list (gdb::string_view (sym_name, sym_len),
-					   true, VAR_DOMAIN, LOC_TYPEDEF, -1,
-					   psymbol_placement::STATIC,
-					   0, psymtab_language, objfile);
+		      pst->add_psymbol (gdb::string_view (sym_name, sym_len),
+					true, VAR_DOMAIN, LOC_TYPEDEF, -1,
+					psymbol_placement::STATIC,
+					0, psymtab_language, objfile);
 		      p += 1;
 		    }
 		}
@@ -1507,10 +1507,10 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	    case 't':
 	      if (p != namestring)	/* a name is there, not just :T...  */
 		{
-		  add_psymbol_to_list (gdb::string_view (sym_name, sym_len),
-				       true, VAR_DOMAIN, LOC_TYPEDEF, -1,
-				       psymbol_placement::STATIC,
-				       0, psymtab_language, objfile);
+		  pst->add_psymbol (gdb::string_view (sym_name, sym_len),
+				    true, VAR_DOMAIN, LOC_TYPEDEF, -1,
+				    psymbol_placement::STATIC,
+				    0, psymtab_language, objfile);
 		}
 	    check_enum:
 	      /* If this is an enumerated type, we need to
@@ -1568,10 +1568,10 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 			;
 		      /* Note that the value doesn't matter for
 			 enum constants in psymtabs, just in symtabs.  */
-		      add_psymbol_to_list (gdb::string_view (p, q - p), true,
-					   VAR_DOMAIN, LOC_CONST, -1,
-					   psymbol_placement::STATIC, 0,
-					   psymtab_language, objfile);
+		      pst->add_psymbol (gdb::string_view (p, q - p), true,
+					VAR_DOMAIN, LOC_CONST, -1,
+					psymbol_placement::STATIC, 0,
+					psymtab_language, objfile);
 		      /* Point past the name.  */
 		      p = q;
 		      /* Skip over the value.  */
@@ -1586,10 +1586,10 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 
 	    case 'c':
 	      /* Constant, e.g. from "const" in Pascal.  */
-	      add_psymbol_to_list (gdb::string_view (sym_name, sym_len), true,
-				   VAR_DOMAIN, LOC_CONST, -1,
-				   psymbol_placement::STATIC, 0,
-				   psymtab_language, objfile);
+	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				VAR_DOMAIN, LOC_CONST, -1,
+				psymbol_placement::STATIC, 0,
+				psymtab_language, objfile);
 	      continue;
 
 	    case 'f':
@@ -1641,11 +1641,11 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
-	      add_psymbol_to_list (gdb::string_view (sym_name, sym_len), true,
-				   VAR_DOMAIN, LOC_BLOCK,
-				   SECT_OFF_TEXT (objfile),
-				   psymbol_placement::STATIC,
-				   nlist.n_value, psymtab_language, objfile);
+	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				VAR_DOMAIN, LOC_BLOCK,
+				SECT_OFF_TEXT (objfile),
+				psymbol_placement::STATIC,
+				nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	      /* Global functions were ignored here, but now they
@@ -1700,11 +1700,11 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
-	      add_psymbol_to_list (gdb::string_view (sym_name, sym_len), true,
-				   VAR_DOMAIN, LOC_BLOCK,
-				   SECT_OFF_TEXT (objfile),
-				   psymbol_placement::GLOBAL,
-				   nlist.n_value, psymtab_language, objfile);
+	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				VAR_DOMAIN, LOC_BLOCK,
+				SECT_OFF_TEXT (objfile),
+				psymbol_placement::GLOBAL,
+				nlist.n_value, psymtab_language, objfile);
 	      continue;
 
 	      /* Two things show up here (hopefully); static symbols of
@@ -2043,8 +2043,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 
   if (num_includes == 0
       && number_dependencies == 0
-      && pst->n_global_syms == 0
-      && pst->n_static_syms == 0
+      && pst->empty ()
       && has_line_numbers == 0)
     {
       /* Throw away this psymtab, it's empty.  */

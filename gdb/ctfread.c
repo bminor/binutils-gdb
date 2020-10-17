@@ -115,6 +115,7 @@ struct ctf_context
 {
   ctf_file_t *fp;
   struct objfile *of;
+  partial_symtab *pst;
   struct buildsym_compunit *builder;
 };
 
@@ -1320,6 +1321,8 @@ create_partial_symtab (const char *name,
   ccx = XOBNEW (&objfile->objfile_obstack, struct ctf_context);
   ccx->fp = cfp;
   ccx->of = objfile;
+  ccx->pst = pst;
+  ccx->builder = nullptr;
   pst->context = ccx;
 
   return pst;
@@ -1377,7 +1380,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 	return 0;
     }
 
-    add_psymbol_to_list (name.get (), true,
+  ccp->pst->add_psymbol (name.get (), true,
 			 domain, aclass, section,
 			 psymbol_placement::GLOBAL,
 			 0, language_c, ccp->of);
@@ -1392,10 +1395,10 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
 {
   struct ctf_context *ccp = (struct ctf_context *) arg;
 
-  add_psymbol_to_list (name, true,
-		       VAR_DOMAIN, LOC_STATIC, -1,
-		       psymbol_placement::GLOBAL,
-		       0, language_c, ccp->of);
+  ccp->pst->add_psymbol (name, true,
+			 VAR_DOMAIN, LOC_STATIC, -1,
+			 psymbol_placement::GLOBAL,
+			 0, language_c, ccp->of);
   return 0;
 }
 
@@ -1405,19 +1408,17 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
 static void
 scan_partial_symbols (ctf_file_t *cfp, struct objfile *of)
 {
-  struct ctf_context ccx;
   bfd *abfd = of->obfd;
   const char *name = bfd_get_filename (abfd);
   ctf_psymtab *pst = create_partial_symtab (name, cfp, of);
 
-  ccx.fp = cfp;
-  ccx.of = of;
+  struct ctf_context *ccx = pst->context;
 
-  if (ctf_type_iter (cfp, ctf_psymtab_type_cb, &ccx) == CTF_ERR)
+  if (ctf_type_iter (cfp, ctf_psymtab_type_cb, ccx) == CTF_ERR)
     complaint (_("ctf_type_iter scan_partial_symbols failed - %s"),
 	       ctf_errmsg (ctf_errno (cfp)));
 
-  if (ctf_variable_iter (cfp, ctf_psymtab_var_cb, &ccx) == CTF_ERR)
+  if (ctf_variable_iter (cfp, ctf_psymtab_var_cb, ccx) == CTF_ERR)
     complaint (_("ctf_variable_iter scan_partial_symbols failed - %s"),
 	       ctf_errmsg (ctf_errno (cfp)));
 
@@ -1457,10 +1458,10 @@ scan_partial_symbols (ctf_file_t *cfp, struct objfile *of)
       else
 	aclass = LOC_TYPEDEF;
 
-      add_psymbol_to_list (tname.get (), true,
-			   tdomain, aclass, -1,
-			   psymbol_placement::STATIC,
-			   0, language_c, of);
+      pst->add_psymbol (tname.get (), true,
+			tdomain, aclass, -1,
+			psymbol_placement::STATIC,
+			0, language_c, of);
     }
 
   end_psymtab_common (of, pst);

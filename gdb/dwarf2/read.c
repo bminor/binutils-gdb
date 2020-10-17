@@ -7667,7 +7667,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 			sect_offset_str (per_cu->sect_off),
 			paddress (gdbarch, pst->text_low (objfile)),
 			paddress (gdbarch, pst->text_high (objfile)),
-			pst->n_global_syms, pst->n_static_syms);
+			(int) pst->global_psymbols.size (),
+			(int) pst->static_psymbols.size ());
 }
 
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
@@ -8640,7 +8641,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 					    &objfile->objfile_obstack);
 	  psymbol.ginfo.set_linkage_name (pdi->linkage_name);
 	}
-      add_psymbol_to_list (psymbol, *where, objfile);
+      cu->per_cu->v.psymtab->add_psymbol (psymbol, *where, objfile);
     }
 }
 
