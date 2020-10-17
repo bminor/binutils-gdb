@@ -893,16 +893,6 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_RANGE:
-      /* FIXME: create_static_range_type does not set the unsigned bit in a
-         range type (I think it probably should copy it from the
-         target type), so we won't print values which are too large to
-         fit in a signed integer correctly.  */
-      /* FIXME: Doesn't handle ranges of enums correctly.  (Can't just
-         print with the target type, though, because the size of our
-         type and the target type might differ).  */
-
-      /* FALLTHROUGH */
-
     case TYPE_CODE_INT:
       generic_value_print_int (val, stream, options);
       break;
