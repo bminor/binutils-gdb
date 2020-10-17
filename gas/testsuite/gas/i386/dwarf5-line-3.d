@@ -1,6 +1,6 @@
 #as: -g -gdwarf-5
 #readelf: -wl
-#name: DWARF5 .debug_line 2
+#name: DWARF5 .debug_line 3
 
 Raw dump of debug contents of section \.z?debug_line:
 
@@ -37,8 +37,8 @@ Raw dump of debug contents of section \.z?debug_line:
 
  The File Name Table \(offset 0x.*, lines 2, columns 2\):
   Entry	Dir	Name
-  0	0	\(indirect line string, offset: 0x.*\): dwarf5-line-2.S
-  1	0	\(indirect line string, offset: 0x.*\): dwarf5-line-2.S
+  0	0	\(indirect line string, offset: 0x.*\): dwarf5-line-3.S
+  1	0	\(indirect line string, offset: 0x.*\): dwarf5-line-3.S
 
  Line Number Statements:
   \[0x.*\]  Extended opcode 2: set Address to 0x0
