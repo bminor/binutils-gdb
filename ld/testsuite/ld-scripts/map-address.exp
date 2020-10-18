@@ -27,7 +27,7 @@ if {![ld_assemble $as $srcdir/$subdir/sizeof.s tmpdir/map-address.o]} {
 }
 
 if {![ld_link $ld tmpdir/map-address \
-	 "-T $srcdir/$subdir/map-address.t \
+	 "$LDFLAGS -T $srcdir/$subdir/map-address.t \
 	  tmpdir/map-address.o \
 	  -Map tmpdir/map-address.map"]} {
     fail $testname
@@ -49,7 +49,7 @@ if {[regexp_diff \
 set testname "map to directory"
 
 if {![ld_link $ld tmpdir/map-address \
-	 "-T $srcdir/$subdir/map-address.t \
+	 "$LDFLAGS -T $srcdir/$subdir/map-address.t \
 	  tmpdir/map-address.o \
 	  -Map tmpdir --output fred"]} {
     fail $testname

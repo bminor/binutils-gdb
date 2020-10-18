@@ -1,3 +1,19 @@
+2020-10-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/config/default.exp: Provide dummy libraries for
+	alpha-dec-vms.
+	(compiler_supports): New proc.  Use it for compiler tests.
+	* testsuite/lib/ld-lib.exp (default_ld_assemble): Don't die if
+	subdir not set.
+	(run_ld_link_tests): Pass LDFLAGS to ld.
+	* testsuite/ld-checks/checks.exp (section_check): Likewise.
+	* testsuite/ld-scripts/assert.exp: Likewise.
+	* testsuite/ld-scripts/extern.exp: Likewise.
+	* testsuite/ld-scripts/log2.exp: Likewise.
+	* testsuite/ld-scripts/map-address.exp: Likewise.
+	* testsuite/ld-scripts/script.exp: Likewise.
+	* testsuite/ld-scripts/sizeof.exp: Likewise.
+
 2020-10-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ldlang.c (lang_process): Add extra call to

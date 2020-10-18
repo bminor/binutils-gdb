@@ -21,7 +21,7 @@
 # Written by Nick Clifton (nickc@cygnus.com)
 
 proc section_check {} {
-    global ld_flags
+    global LDFLAGS
     global as
     global ld
     global srcdir
@@ -33,7 +33,7 @@ proc section_check {} {
     }
     set test "check sections 1"
 
-    set ldflags "--check-sections -e foo"
+    set ldflags "$LDFLAGS --check-sections -e foo"
 
     if { ![ld_assemble $as $srcdir/$subdir/asm.s tmpdir/asm.o]} {
 	unresolved $test
@@ -50,7 +50,7 @@ proc section_check {} {
 
     # Change the linker flags so that our "buggy" linker
     # script is used.
-    set ldflags "--check-sections -T $srcdir/$subdir/script -e foo"
+    set ldflags "$LDFLAGS --check-sections -T $srcdir/$subdir/script -e foo"
 
     # Perform the equivalent of invoking ld_link
     # except that we need to massage the output further.

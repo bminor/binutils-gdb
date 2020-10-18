@@ -182,15 +182,13 @@ proc extract_symbol_test { testfile testname } {
 }
 
 # PE targets need to set the image base to 0 to avoid complications from nm.
-set flags ""
 set old_LDFLAGS $LDFLAGS
 if { [is_pecoff_format] } then {
-    set flags "--image-base 0"
-    set LDFLAGS "$LDFLAGS --image-base 0"
+    append LDFLAGS " --image-base 0"
 } elseif { [is_xcoff_format] } then {
-    set flags "-bnogc"
-    set LDFLAGS "$LDFLAGS -bnogc"
+    append LDFLAGS " -bnogc"
 }
+set flags $LDFLAGS
 
 if ![ld_link $ld tmpdir/script "$flags -T $srcdir/$subdir/script.t tmpdir/script.o"] {
     fail $testname

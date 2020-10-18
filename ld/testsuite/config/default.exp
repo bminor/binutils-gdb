@@ -312,304 +312,108 @@ if { ![info exists LD_CLASS] } then {
     }
 }
 
-# Set PLT_CFLAGS to "-fplt" if target compiler supports it.
+# Compiler tests
+proc compiler_supports { flag args } {
+    if { [check_compiler_available] } {
+	global CC
+	set flags ""
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+	set fn "cs[pid].c"
+	set f [open $fn "w"]
+	if { [llength $args] > 0 } {
+	    puts $f [lindex $args 0]
+	} else {
+	    puts $f "int main (void) { return 0; }"
+	}
+	close $f
+	set rfn [remote_download host $fn]
+	set avail [run_host_cmd_yesno "$CC" "$flags $flag $rfn -o /dev/null"]
+	remote_file host delete $rfn
+	file delete $fn
+	return $avail
+    }
+    return 0
+}
 
 if { ![info exists PLT_CFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports -fplt
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/plt[pid]"
-	set src ${basename}.c
-	set output ${basename}.o
-	set f [open $src "w"]
-	puts $f ""
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set plt_available [run_host_cmd_yesno "$CC" "$flags -c -fplt $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $plt_available == 1 } then {
-	    set PLT_CFLAGS "-fplt"
-	} else {
-	    set PLT_CFLAGS ""
-	}
-    } else {
-	set PLT_CFLAGS ""
+    set PLT_CFLAGS ""
+    if [compiler_supports "-c -fplt"] {
+	set PLT_CFLAGS "-fplt"
     }
 }
-
-# Set NOPIE_CFLAGS to "-fno-PIE" and NOPIE_LDFLAGS to "-no-pie" if
-# target compiler supports them.
 
 if { ![info exists NOPIE_CFLAGS] || ![info exists NOPIE_LDFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports -fno-PIE -no-pie.
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/nopie[pid]"
-	set src ${basename}.c
-	set output ${basename}
-	set f [open $src "w"]
-	puts $f "int main (void) { return 0; }"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set nopie_available [run_host_cmd_yesno "$CC" "$flags -fno-PIE -no-pie $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $nopie_available == 1 } then {
-	    set NOPIE_CFLAGS "-fno-PIE"
-	    set NOPIE_LDFLAGS "-no-pie"
-	} else {
-	    set NOPIE_CFLAGS ""
-	    set NOPIE_LDFLAGS ""
-	}
-    } else {
-	set NOPIE_CFLAGS ""
-	set NOPIE_LDFLAGS ""
+    set NOPIE_CFLAGS ""
+    set NOPIE_LDFLAGS ""
+    if [compiler_supports "-fno-PIE -no-pie"] {
+	set NOPIE_CFLAGS "-fno-PIE"
+	set NOPIE_LDFLAGS "-no-pie"
     }
 }
-
-# Set NOCF_PROTECTION_CFLAGS to "-fcf-protection=none" if target compiler
-# supports it.
 
 if { ![info exists NOCF_PROTECTION_CFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports -fcf-protection=none.
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/available[pid]"
-	set src ${basename}.c
-	set output ${basename}
-	set f [open $src "w"]
-	puts $f "int main (void) { return 0; }"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set available [run_host_cmd_yesno "$CC" "$flags -fcf-protection=none $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $available == 1 } then {
-	    set NOCF_PROTECTION_CFLAGS "-fcf-protection=none"
-	} else {
-	    set NOCF_PROTECTION_CFLAGS ""
-	}
-    } else {
-	set NOCF_PROTECTION_CFLAGS ""
+    set NOCF_PROTECTION_CFLAGS ""
+    if [compiler_supports "-fcf-protection=none"] {
+	set NOCF_PROTECTION_CFLAGS "-fcf-protection=none"
     }
 }
-
-# Set GNU2_CFLAGS to "-mtls-dialect=gnu2" if target compiler supports it.
 
 if { ![info exists GNU2_CFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports -mtls-dialect=gnu2
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/gnu2[pid]"
-	set src ${basename}.c
-	set output ${basename}.o
-	set f [open $src "w"]
-	puts $f "__thread int yyy = 100;"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set gnu2_available [run_host_cmd_yesno "$CC" "$flags -c -mtls-dialect=gnu2 $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $gnu2_available == 1 } then {
-	    set GNU2_CFLAGS "-mtls-dialect=gnu2"
-	} else {
-	    set GNU2_CFLAGS ""
-	}
-    } else {
-	set GNU2_CFLAGS ""
+    set GNU2_CFLAGS ""
+    if [compiler_supports "-c -mtls-dialect=gnu2" "__thread int y = 1;"] {
+	set GNU2_CFLAGS "-mtls-dialect=gnu2"
     }
 }
-
-# Set INT128_CFLAGS to "-DHAS_INT128" if target compiler supports __int128.
 
 if { ![info exists INT128_CFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports __int128.
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/int128[pid]"
-	set src ${basename}.c
-	set output ${basename}.o
-	set f [open $src "w"]
-	puts $f "__int128 a = 42;"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set int128_available [run_host_cmd_yesno "$CC" "$flags -c $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $int128_available == 1 } then {
-	    set INT128_CFLAGS "-DHAS_INT128"
-	} else {
-	    set INT128_CFLAGS ""
-	}
-    } else {
-	set INT128_CFLAGS ""
+    set INT128_CFLAGS ""
+    if [compiler_supports "-c" "__int128 a = 42;"] {
+	set INT128_CFLAGS "-DHAS_INT128"
     }
 }
-
-# Set STATIC_LDFLAGS to "-static" if target compiler supports it.
 
 if { ![info exists STATIC_LDFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports -static.
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/static[pid]"
-	set src ${basename}.c
-	set output ${basename}
-	set f [open $src "w"]
-	puts $f "int main (void) { return 0; }"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set static_available [run_host_cmd_yesno "$CC" "-static $flags $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $static_available == 1 } then {
-	    set STATIC_LDFLAGS "-static"
-	} else {
-	    set STATIC_LDFLAGS ""
-	}
-    } else {
-	set STATIC_LDFLAGS ""
+    set STATIC_LDFLAGS ""
+    if [compiler_supports "-static"] {
+	set STATIC_LDFLAGS "-static"
     }
 }
-
-# Set STATIC_PIE_LDFLAGS to "-static-pie" if target compiler supports it.
 
 if { ![info exists STATIC_PIE_LDFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports -static-pie.
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/static[pid]"
-	set src ${basename}.c
-	set output ${basename}
-	set f [open $src "w"]
-	puts $f "int main (void) { return 0; }"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set static_available [run_host_cmd_yesno "$CC" "-static-pie $flags $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $static_available == 1 } then {
-	    set STATIC_PIE_LDFLAGS "-static-pie"
-	} else {
-	    set STATIC_PIE_LDFLAGS ""
-	}
-    } else {
-	set STATIC_PIE_LDFLAGS ""
+    set STATIC_PIE_LDFLAGS ""
+    if [compiler_supports "-static-pie"] {
+	set STATIC_PIE_LDFLAGS "-static-pie"
     }
 }
 
-# Set NOSANITIZE_CFLAGS to "-fno-sanitize=all" if target compiler
-# supports it.
-
 if { ![info exists NOSANITIZE_CFLAGS] } then {
-    if { [check_compiler_available] } {
-	# Check if gcc supports -fno-sanitize=all.
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/available[pid]"
-	set src ${basename}.c
-	set output ${basename}
-	set f [open $src "w"]
-	puts $f "int main (void) { return 0; }"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set available [run_host_cmd_yesno "$CC" "$flags -fno-sanitize=all $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-
-	if { $available == 1 } then {
-	    set NOSANITIZE_CFLAGS "-fno-sanitize=all"
-	} else {
-	    set NOSANITIZE_CFLAGS ""
-	}
-    } else {
-	set NOSANITIZE_CFLAGS ""
+    set NOSANITIZE_CFLAGS ""
+    if [compiler_supports "-fno-sanitize=all"] {
+	set NOSANITIZE_CFLAGS "-fno-sanitize=all"
     }
+}
+
+# Provide dummy libraries that alpha-vms-ld always loads
+if { [istarget alpha*-*-*vms*] } {
+    set src tmpdir/empty.s
+    set f [open $src "w"]
+    close $f
+    if { [ld_assemble $as $src tmpdir/empty.o]
+	 && ![ld_link $LD tmpdir/empty tmpdir/empty.o]
+	 && [regsub -all {[^\n]*: cannot find -l([^\n]*)} $exec_output {tmpdir/lib\1.a } missing_libs] } {
+	regsub -all {\$} $missing_libs {\\\$} missing_libs
+	for { set i 0 } { $i < [llength $missing_libs] } { incr i } {
+	    set f [lindex $missing_libs $i]
+	    verbose -log "creating dummy $f"
+	    ar_simple_create $ar {} $f tmpdir/empty.o
+	}
+	append LDFLAGS " -Ltmpdir"
+	unset i missing_libs
+    }
+    unset f src
 }

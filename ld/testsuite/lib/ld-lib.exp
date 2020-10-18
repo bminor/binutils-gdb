@@ -305,7 +305,10 @@ proc default_ld_assemble { as in_flags source object } {
 
     if ![info exists ASFLAGS] { set ASFLAGS "" }
 
-    set flags "[big_or_little_endian] -I$srcdir/$subdir"
+    set flags [big_or_little_endian]
+    if [info exists subdir] {
+	append flags " -I$srcdir/$subdir"
+    }
     set exec_output [run_host_cmd "$as" "$flags $in_flags $ASFLAGS -o $object $source"]
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
@@ -450,6 +453,7 @@ proc ar_simple_create { ar aropts target objects } {
 #
 proc run_ld_link_tests { ldtests args } {
     global ld
+    global LDFLAGS
     global as
     global nm
     global ar
@@ -463,9 +467,9 @@ proc run_ld_link_tests { ldtests args } {
     global runtests
     global exec_output
 
-    set ld_extra_opt ""
+    set ld_extra_opt $LDFLAGS
     if [check_relro_support] {
-	set ld_extra_opt "-z norelro"
+	append ld_extra_opt " -z norelro"
     }
 
     foreach testitem $ldtests {
