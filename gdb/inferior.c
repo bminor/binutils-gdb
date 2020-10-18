@@ -38,11 +38,6 @@
 #include "gdbsupport/buildargv.h"
 #include "cli/cli-style.h"
 
-/* Keep a registry of per-inferior data-pointers required by other GDB
-   modules.  */
-
-DEFINE_REGISTRY (inferior, REGISTRY_ACCESS_FIELD)
-
 intrusive_list<inferior> inferior_list;
 static int highest_inferior_num;
 
@@ -76,18 +71,14 @@ inferior::~inferior ()
   inferior *inf = this;
 
   m_continuations.clear ();
-  inferior_free_data (inf);
   target_desc_info_free (inf->tdesc_info);
 }
 
 inferior::inferior (int pid_)
   : num (++highest_inferior_num),
     pid (pid_),
-    environment (gdb_environ::from_host_environ ()),
-    registry_data ()
+    environment (gdb_environ::from_host_environ ())
 {
-  inferior_alloc_data (this);
-
   m_target_stack.push (get_dummy_target ());
 }
 

@@ -1370,12 +1370,12 @@ dwarf2_frame_cfa (struct frame_info *this_frame)
 
 /* We store the frame data on the BFD.  This is only done if it is
    independent of the address space and so can be shared.  */
-static const struct bfd_key<comp_unit> dwarf2_frame_bfd_data;
+static const registry<bfd>::key<comp_unit> dwarf2_frame_bfd_data;
 
 /* If any BFD sections require relocations (note; really should be if
    any debug info requires relocations), then we store the frame data
    on the objfile instead, and do not share it.  */
-const struct objfile_key<comp_unit> dwarf2_frame_objfile_data;
+static const registry<objfile>::key<comp_unit> dwarf2_frame_objfile_data;
 
 
 /* Pointer encoding helper functions.  */

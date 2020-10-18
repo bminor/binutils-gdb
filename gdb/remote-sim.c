@@ -178,7 +178,7 @@ private:
 
 static struct gdbsim_target gdbsim_ops;
 
-static inferior_key<sim_inferior_data> sim_inferior_data_key;
+static const registry<inferior>::key<sim_inferior_data> sim_inferior_data_key;
 
 /* Flag indicating the "open" status of this module.  It's set to 1
    in gdbsim_open() and 0 in gdbsim_close().  */

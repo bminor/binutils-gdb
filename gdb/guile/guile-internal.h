@@ -28,6 +28,7 @@
 #include "extension-priv.h"
 #include "symtab.h"
 #include "libguile.h"
+#include "objfiles.h"
 
 struct block;
 struct frame_info;
@@ -272,7 +273,6 @@ struct eqable_gdb_smob
 #undef GDB_SMOB_HEAD
 
 struct objfile;
-struct objfile_data;
 
 /* A predicate that returns non-zero if an object is a particular kind
    of gsmob.  */

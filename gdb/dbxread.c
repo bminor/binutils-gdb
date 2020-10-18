@@ -57,7 +57,7 @@
 
 /* Key for dbx-associated data.  */
 
-objfile_key<dbx_symfile_info> dbx_objfile_data_key;
+const registry<objfile>::key<dbx_symfile_info> dbx_objfile_data_key;
 
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */

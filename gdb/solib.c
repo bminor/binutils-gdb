@@ -529,7 +529,8 @@ typedef std::unordered_map<std::string, std::string> soname_build_id_map;
 
 /* Key used to associate a soname_build_id_map to a core file bfd.  */
 
-static const struct bfd_key<soname_build_id_map> cbfd_soname_build_id_data_key;
+static const struct registry<bfd>::key<soname_build_id_map>
+     cbfd_soname_build_id_data_key;
 
 /* See solib.h.  */
 

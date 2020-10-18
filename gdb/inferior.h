@@ -595,7 +595,7 @@ public:
   displaced_step_inferior_state displaced_step_state;
 
   /* Per inferior data-pointers required by other GDB modules.  */
-  REGISTRY_FIELDS;
+  registry<inferior> registry_fields;
 
 private:
   /* The inferior's target stack.  */
@@ -614,11 +614,6 @@ private:
      this inferior.  */
   std::string m_cwd;
 };
-
-/* Keep a registry of per-inferior data-pointers required by other GDB
-   modules.  */
-
-DECLARE_REGISTRY (inferior);
 
 /* Add an inferior to the inferior list, print a message that a new
    inferior is found, and return the pointer to the new inferior.

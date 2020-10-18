@@ -166,7 +166,7 @@ struct ada_tasks_pspace_data
 };
 
 /* Key to our per-program-space data.  */
-static const struct program_space_key<ada_tasks_pspace_data>
+static const registry<program_space>::key<ada_tasks_pspace_data>
   ada_tasks_pspace_data_handle;
 
 /* The kind of data structure used by the runtime to store the list
@@ -242,7 +242,7 @@ struct ada_tasks_inferior_data
 };
 
 /* Key to our per-inferior data.  */
-static const struct inferior_key<ada_tasks_inferior_data>
+static const registry<inferior>::key<ada_tasks_inferior_data>
   ada_tasks_inferior_data_handle;
 
 /* Return a string with TASKNO followed by the task name if TASK_INFO

@@ -123,7 +123,7 @@ struct arm_per_bfd
 };
 
 /* Per-bfd data used for mapping symbols.  */
-static bfd_key<arm_per_bfd> arm_bfd_data_key;
+static const registry<bfd>::key<arm_per_bfd> arm_bfd_data_key;
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
 static struct cmd_list_element *setarmcmdlist = NULL;
@@ -2407,7 +2407,7 @@ struct arm_exidx_data
 };
 
 /* Per-BFD key to store exception handling information.  */
-static const struct bfd_key<arm_exidx_data> arm_exidx_data_key;
+static const registry<bfd>::key<arm_exidx_data> arm_exidx_data_key;
 
 static struct obj_section *
 arm_obj_section_from_vma (struct objfile *objfile, bfd_vma vma)

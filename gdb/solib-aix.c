@@ -80,7 +80,8 @@ struct solib_aix_inferior_data
 };
 
 /* Key to our per-inferior data.  */
-static inferior_key<solib_aix_inferior_data> solib_aix_inferior_data_handle;
+static const registry<inferior>::key<solib_aix_inferior_data>
+  solib_aix_inferior_data_handle;
 
 /* Return this module's data for the given inferior.
    If none is found, add a zero'ed one now.  */

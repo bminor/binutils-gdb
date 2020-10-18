@@ -37,8 +37,7 @@ struct objfile;
 struct inferior;
 struct exec;
 struct address_space;
-struct program_space_data;
-struct address_space_data;
+struct program_space;
 struct so_list;
 
 typedef std::list<std::unique_ptr<objfile>> objfile_list;
@@ -372,7 +371,7 @@ struct program_space
   std::vector<std::string> deleted_solibs;
 
   /* Per pspace data-pointers required by other GDB modules.  */
-  REGISTRY_FIELDS {};
+  registry<program_space> registry_fields;
 
 private:
   /* The set of target sections matching the sections mapped into
@@ -387,7 +386,6 @@ struct address_space
 {
   /* Create a new address space object, and add it to the list.  */
   address_space ();
-  ~address_space ();
   DISABLE_COPY_AND_ASSIGN (address_space);
 
   /* Returns the integer address space id of this address space.  */
@@ -397,7 +395,7 @@ struct address_space
   }
 
   /* Per aspace data-pointers required by other GDB modules.  */
-  REGISTRY_FIELDS {};
+  registry<address_space> registry_fields;
 
 private:
   int m_num;
@@ -456,15 +454,5 @@ extern struct address_space *maybe_new_address_space (void);
    target description, to fixup the program/address spaces
    mappings.  */
 extern void update_address_spaces (void);
-
-/* Keep a registry of per-pspace data-pointers required by other GDB
-   modules.  */
-
-DECLARE_REGISTRY (program_space);
-
-/* Keep a registry of per-aspace data-pointers required by other GDB
-   modules.  */
-
-DECLARE_REGISTRY (address_space);
 
 #endif

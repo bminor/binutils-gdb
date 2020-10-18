@@ -43,24 +43,11 @@ static int highest_address_space_num;
 
 
 
-/* Keep a registry of per-program_space data-pointers required by other GDB
-   modules.  */
-
-DEFINE_REGISTRY (program_space, REGISTRY_ACCESS_FIELD)
-
-/* Keep a registry of per-address_space data-pointers required by other GDB
-   modules.  */
-
-DEFINE_REGISTRY (address_space, REGISTRY_ACCESS_FIELD)
-
-
-
 /* Create a new address space object, and add it to the list.  */
 
 address_space::address_space ()
   : m_num (++highest_address_space_num)
 {
-  address_space_alloc_data (this);
 }
 
 /* Maybe create a new address space object, and add it to the list, or
@@ -79,11 +66,6 @@ maybe_new_address_space (void)
     }
 
   return new address_space ();
-}
-
-address_space::~address_space ()
-{
-  address_space_free_data (this);
 }
 
 /* Start counting over from scratch.  */
@@ -115,8 +97,6 @@ program_space::program_space (address_space *aspace_)
   : num (++last_program_space_num),
     aspace (aspace_)
 {
-  program_space_alloc_data (this);
-
   program_spaces.push_back (this);
 }
 
@@ -140,8 +120,6 @@ program_space::~program_space ()
   clear_symtab_users (SYMFILE_DEFER_BP_RESET);
   if (!gdbarch_has_shared_address_space (target_gdbarch ()))
     delete this->aspace;
-    /* Discard any data modules have associated with the PSPACE.  */
-  program_space_free_data (this);
 }
 
 /* See progspace.h.  */

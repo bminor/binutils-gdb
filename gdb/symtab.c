@@ -121,7 +121,7 @@ struct main_info
 
 /* Program space key for finding name and language of "main".  */
 
-static const program_space_key<main_info> main_progspace_key;
+static const registry<program_space>::key<main_info> main_progspace_key;
 
 /* The default symbol cache size.
    There is no extra cpu cost for large N (except when flushing the cache,
@@ -251,7 +251,7 @@ struct symbol_cache
 
 /* Program space key for finding its symbol cache.  */
 
-static const program_space_key<symbol_cache> symbol_cache_key;
+static const registry<program_space>::key<symbol_cache> symbol_cache_key;
 
 /* When non-zero, print debugging messages related to symtab creation.  */
 unsigned int symtab_create_debug = 0;

@@ -50,7 +50,26 @@ struct symbol_object {
       }							\
   } while (0)
 
-static const struct objfile_data *sympy_objfile_data_key;
+/* A deleter that is used when an objfile is about to be freed.  */
+struct symbol_object_deleter
+{
+  void operator() (symbol_object *obj)
+  {
+    while (obj)
+      {
+	symbol_object *next = obj->next;
+
+	obj->symbol = NULL;
+	obj->next = NULL;
+	obj->prev = NULL;
+
+	obj = next;
+      }
+  }
+};
+
+static const registry<objfile>::key<symbol_object, symbol_object_deleter>
+     sympy_objfile_data_key;
 
 static PyObject *
 sympy_str (PyObject *self)
@@ -307,11 +326,10 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
     {
       struct objfile *objfile = symbol->objfile ();
 
-      obj->next = ((symbol_object *)
-		   objfile_data (objfile, sympy_objfile_data_key));
+      obj->next = sympy_objfile_data_key.get (objfile);
       if (obj->next)
 	obj->next->prev = obj;
-      set_objfile_data (objfile, sympy_objfile_data_key, obj);
+      sympy_objfile_data_key.set (objfile, obj);
     }
   else
     obj->next = NULL;
@@ -350,10 +368,7 @@ sympy_dealloc (PyObject *obj)
   else if (sym_obj->symbol != NULL
 	   && sym_obj->symbol->is_objfile_owned ()
 	   && sym_obj->symbol->symtab () != NULL)
-    {
-      set_objfile_data (sym_obj->symbol->objfile (),
-			sympy_objfile_data_key, sym_obj->next);
-    }
+    sympy_objfile_data_key.set (sym_obj->symbol->objfile (), sym_obj->next);
   if (sym_obj->next)
     sym_obj->next->prev = sym_obj->prev;
   sym_obj->symbol = NULL;
@@ -594,38 +609,6 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
     }
 
   return return_list.release ();
-}
-
-/* This function is called when an objfile is about to be freed.
-   Invalidate the symbol as further actions on the symbol would result
-   in bad data.  All access to obj->symbol should be gated by
-   SYMPY_REQUIRE_VALID which will raise an exception on invalid
-   symbols.  */
-static void
-del_objfile_symbols (struct objfile *objfile, void *datum)
-{
-  symbol_object *obj = (symbol_object *) datum;
-  while (obj)
-    {
-      symbol_object *next = obj->next;
-
-      obj->symbol = NULL;
-      obj->next = NULL;
-      obj->prev = NULL;
-
-      obj = next;
-    }
-}
-
-void _initialize_py_symbol ();
-void
-_initialize_py_symbol ()
-{
-  /* Register an objfile "free" callback so we can properly
-     invalidate symbol when an object file that is about to be
-     deleted.  */
-  sympy_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, del_objfile_symbols);
 }
 
 int

@@ -81,7 +81,30 @@ static SCM tyscm_next_field_x_proc;
 /* Keywords used in argument passing.  */
 static SCM block_keyword;
 
-static const struct objfile_data *tyscm_objfile_data_key;
+static int tyscm_copy_type_recursive (void **slot, void *info);
+
+/* Called when an objfile is about to be deleted.
+   Make a copy of all types associated with OBJFILE.  */
+
+struct tyscm_deleter
+{
+  void operator() (htab_t htab)
+  {
+    if (!gdb_scheme_initialized)
+      return;
+
+    htab_up copied_types = create_copied_types_hash ();
+
+    if (htab != NULL)
+      {
+	htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types.get ());
+	htab_delete (htab);
+      }
+  }
+};
+
+static const registry<objfile>::key<htab, tyscm_deleter>
+     tyscm_objfile_data_key;
 
 /* Hash table to uniquify global (non-objfile-owned) types.  */
 static htab_t global_types_map;
@@ -158,12 +181,12 @@ tyscm_type_map (struct type *type)
   if (objfile == NULL)
     return global_types_map;
 
-  htab = (htab_t) objfile_data (objfile, tyscm_objfile_data_key);
+  htab = tyscm_objfile_data_key.get (objfile);
   if (htab == NULL)
     {
       htab = gdbscm_create_eqable_gsmob_ptr_map (tyscm_hash_type_smob,
 						 tyscm_eq_type_smob);
-      set_objfile_data (objfile, tyscm_objfile_data_key, htab);
+      tyscm_objfile_data_key.set (objfile, htab);
     }
 
   return htab;
@@ -345,19 +368,16 @@ tyscm_scm_to_type (SCM t_scm)
   return t_smob->type;
 }
 
-/* Helper function for save_objfile_types to make a deep copy of the type.  */
+/* Helper function to make a deep copy of the type.  */
 
 static int
 tyscm_copy_type_recursive (void **slot, void *info)
 {
   type_smob *t_smob = (type_smob *) *slot;
   htab_t copied_types = (htab_t) info;
-  struct objfile *objfile = t_smob->type->objfile_owner ();
   htab_t htab;
   eqable_gdb_smob **new_slot;
   type_smob t_smob_for_lookup;
-
-  gdb_assert (objfile != NULL);
 
   htab_empty (copied_types);
   t_smob->type = copy_type_recursive (t_smob->type, copied_types);
@@ -380,25 +400,6 @@ tyscm_copy_type_recursive (void **slot, void *info)
   return 1;
 }
 
-/* Called when OBJFILE is about to be deleted.
-   Make a copy of all types associated with OBJFILE.  */
-
-static void
-save_objfile_types (struct objfile *objfile, void *datum)
-{
-  htab_t htab = (htab_t) datum;
-
-  if (!gdb_scheme_initialized)
-    return;
-
-  htab_up copied_types = create_copied_types_hash ();
-
-  if (htab != NULL)
-    {
-      htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types.get ());
-      htab_delete (htab);
-    }
-}
 
 /* Administrivia for field smobs.  */
 
@@ -1509,14 +1510,4 @@ Internal function to assist the type fields iterator."));
 
   global_types_map = gdbscm_create_eqable_gsmob_ptr_map (tyscm_hash_type_smob,
 							 tyscm_eq_type_smob);
-}
-
-void _initialize_scm_type ();
-void
-_initialize_scm_type ()
-{
-  /* Register an objfile "free" callback so we can properly copy types
-     associated with the objfile when it's about to be deleted.  */
-  tyscm_objfile_data_key
-    = register_objfile_data_with_cleanup (save_objfile_types, NULL);
 }

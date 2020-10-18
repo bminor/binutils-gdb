@@ -3327,7 +3327,7 @@ struct breakpoint_objfile_data
   std::vector<probe *> exception_probes;
 };
 
-static const struct objfile_key<breakpoint_objfile_data>
+static const registry<objfile>::key<breakpoint_objfile_data>
   breakpoint_objfile_key;
 
 /* Minimal symbol not found sentinel.  */

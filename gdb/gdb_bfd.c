@@ -112,13 +112,15 @@ struct gdb_bfd_data
   std::vector<gdb_bfd_ref_ptr> included_bfds;
 
   /* The registry.  */
-  REGISTRY_FIELDS = {};
+  registry<bfd> registry_fields;
 };
 
-#define GDB_BFD_DATA_ACCESSOR(ABFD) \
-  ((struct gdb_bfd_data *) bfd_usrdata (ABFD))
-
-DEFINE_REGISTRY (bfd, GDB_BFD_DATA_ACCESSOR)
+registry<bfd> *
+registry_accessor<bfd>::get (bfd *abfd)
+{
+  struct gdb_bfd_data *gdata = (struct gdb_bfd_data *) bfd_usrdata (abfd);
+  return &gdata->registry_fields;
+}
 
 /* A hash table storing all the BFDs maintained in the cache.  */
 
@@ -498,7 +500,6 @@ gdb_bfd_init_data (struct bfd *abfd, struct stat *st)
 
   gdata = new gdb_bfd_data (abfd, st);
   bfd_set_usrdata (abfd, gdata);
-  bfd_alloc_data (abfd);
 
   /* This is the first we've seen it, so add it to the hash table.  */
   slot = htab_find_slot (all_bfds, abfd, INSERT);
@@ -725,7 +726,6 @@ gdb_bfd_unref (struct bfd *abfd)
 	htab_clear_slot (gdb_bfd_cache, slot);
     }
 
-  bfd_free_data (abfd);
   delete gdata;
   bfd_set_usrdata (abfd, NULL);  /* Paranoia.  */
 

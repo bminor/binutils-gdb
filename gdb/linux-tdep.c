@@ -236,7 +236,7 @@ struct linux_info
 };
 
 /* Per-inferior data key.  */
-static const struct inferior_key<linux_info> linux_inferior_data;
+static const registry<inferior>::key<linux_info> linux_inferior_data;
 
 /* Frees whatever allocated space there is to be freed and sets INF's
    linux cache data pointer to NULL.  */

@@ -164,7 +164,7 @@ struct dsbt_info
 };
 
 /* Per-program-space data key.  */
-static program_space_key<dsbt_info> solib_dsbt_pspace_data;
+static const registry<program_space>::key<dsbt_info> solib_dsbt_pspace_data;
 
 /* Get the current dsbt data.  If none is found yet, add it now.  This
    function always returns a valid object.  */

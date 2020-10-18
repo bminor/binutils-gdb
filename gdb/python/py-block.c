@@ -77,9 +77,33 @@ struct block_syms_iterator_object {
       }									\
   } while (0)
 
+/* This is called when an objfile is about to be freed.
+   Invalidate the block as further actions on the block would result
+   in bad data.  All access to obj->symbol should be gated by
+   BLPY_REQUIRE_VALID which will raise an exception on invalid
+   blocks.  */
+struct blpy_deleter
+{
+  void operator() (block_object *obj)
+  {
+    while (obj)
+      {
+	block_object *next = obj->next;
+
+	obj->block = NULL;
+	obj->objfile = NULL;
+	obj->next = NULL;
+	obj->prev = NULL;
+
+	obj = next;
+      }
+  }
+};
+
 extern PyTypeObject block_syms_iterator_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("block_syms_iterator_object");
-static const struct objfile_data *blpy_objfile_data_key;
+static const registry<objfile>::key<block_object, blpy_deleter>
+     blpy_objfile_data_key;
 
 static PyObject *
 blpy_iter (PyObject *self)
@@ -269,10 +293,7 @@ blpy_dealloc (PyObject *obj)
   if (block->prev)
     block->prev->next = block->next;
   else if (block->objfile)
-    {
-      set_objfile_data (block->objfile, blpy_objfile_data_key,
-			block->next);
-    }
+    blpy_objfile_data_key.set (block->objfile, block->next);
   if (block->next)
     block->next->prev = block->prev;
   block->block = NULL;
@@ -293,11 +314,10 @@ set_block (block_object *obj, const struct block *block,
   if (objfile)
     {
       obj->objfile = objfile;
-      obj->next = ((block_object *)
-		   objfile_data (objfile, blpy_objfile_data_key));
+      obj->next = blpy_objfile_data_key.get (objfile);
       if (obj->next)
 	obj->next->prev = obj;
-      set_objfile_data (objfile, blpy_objfile_data_key, obj);
+      blpy_objfile_data_key.set (objfile, obj);
     }
   else
     obj->next = NULL;
@@ -402,40 +422,6 @@ blpy_iter_is_valid (PyObject *self, PyObject *args)
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
-}
-
-/* This function is called when an objfile is about to be freed.
-   Invalidate the block as further actions on the block would result
-   in bad data.  All access to obj->symbol should be gated by
-   BLPY_REQUIRE_VALID which will raise an exception on invalid
-   blocks.  */
-static void
-del_objfile_blocks (struct objfile *objfile, void *datum)
-{
-  block_object *obj = (block_object *) datum;
-
-  while (obj)
-    {
-      block_object *next = obj->next;
-
-      obj->block = NULL;
-      obj->objfile = NULL;
-      obj->next = NULL;
-      obj->prev = NULL;
-
-      obj = next;
-    }
-}
-
-void _initialize_py_block ();
-void
-_initialize_py_block ()
-{
-  /* Register an objfile "free" callback so we can properly
-     invalidate blocks when an object file is about to be
-     deleted.  */
-  blpy_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, del_objfile_blocks);
 }
 
 int

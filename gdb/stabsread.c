@@ -2016,8 +2016,8 @@ again:
 /* RS/6000 xlc/dbx combination uses a set of builtin types, starting from -1.
    Return the proper type node for a given builtin type number.  */
 
-static const struct objfile_key<struct type *,
-				gdb::noop_deleter<struct type *>>
+static const registry<objfile>::key<struct type *,
+				    gdb::noop_deleter<struct type *>>
   rs6000_builtin_type_data;
 
 static struct type *

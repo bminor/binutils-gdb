@@ -26,7 +26,13 @@
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/next-iterator.h"
 
-DECLARE_REGISTRY (bfd);
+/* A registry adaptor for BFD.  This arranges to store the registry in
+   gdb's per-BFD data, which is stored as the bfd_usrdata.  */
+template<>
+struct registry_accessor<bfd>
+{
+  static registry<bfd> *get (bfd *abfd);
+};
 
 /* If supplied a path starting with this sequence, gdb_bfd_open will
    open BFDs using target fileio operations.  */

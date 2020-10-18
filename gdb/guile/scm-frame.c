@@ -74,7 +74,37 @@ static scm_t_bits frame_smob_tag;
 /* Keywords used in argument passing.  */
 static SCM block_keyword;
 
-static const struct inferior_data *frscm_inferior_data_key;
+/* This is called when an inferior is about to be freed.
+   Invalidate the frame as further actions on the frame could result
+   in bad data.  All access to the frame should be gated by
+   frscm_get_frame_smob_arg_unsafe which will raise an exception on
+   invalid frames.  */
+struct frscm_deleter
+{
+  /* Helper function for frscm_del_inferior_frames to mark the frame
+     as invalid.  */
+
+  static int
+  frscm_mark_frame_invalid (void **slot, void *info)
+  {
+    frame_smob *f_smob = (frame_smob *) *slot;
+
+    f_smob->inferior = NULL;
+    return 1;
+  }
+
+  void operator() (htab_t htab)
+  {
+    if (htab != NULL)
+      {
+	htab_traverse_noresize (htab, frscm_mark_frame_invalid, NULL);
+	htab_delete (htab);
+      }
+  }
+};
+
+static const registry<inferior>::key<htab, frscm_deleter>
+    frscm_inferior_data_key;
 
 /* Administrivia for frame smobs.  */
 
@@ -117,13 +147,13 @@ frscm_eq_frame_smob (const void *ap, const void *bp)
 static htab_t
 frscm_inferior_frame_map (struct inferior *inferior)
 {
-  htab_t htab = (htab_t) inferior_data (inferior, frscm_inferior_data_key);
+  htab_t htab = frscm_inferior_data_key.get (inferior);
 
   if (htab == NULL)
     {
       htab = gdbscm_create_eqable_gsmob_ptr_map (frscm_hash_frame_smob,
 						 frscm_eq_frame_smob);
-      set_inferior_data (inferior, frscm_inferior_data_key, htab);
+      frscm_inferior_data_key.set (inferior, htab);
     }
 
   return htab;
@@ -346,35 +376,6 @@ frscm_frame_smob_to_frame (frame_smob *f_smob)
   return frame;
 }
 
-/* Helper function for frscm_del_inferior_frames to mark the frame
-   as invalid.  */
-
-static int
-frscm_mark_frame_invalid (void **slot, void *info)
-{
-  frame_smob *f_smob = (frame_smob *) *slot;
-
-  f_smob->inferior = NULL;
-  return 1;
-}
-
-/* This function is called when an inferior is about to be freed.
-   Invalidate the frame as further actions on the frame could result
-   in bad data.  All access to the frame should be gated by
-   frscm_get_frame_smob_arg_unsafe which will raise an exception on
-   invalid frames.  */
-
-static void
-frscm_del_inferior_frames (struct inferior *inferior, void *datum)
-{
-  htab_t htab = (htab_t) datum;
-
-  if (htab != NULL)
-    {
-      htab_traverse_noresize (htab, frscm_mark_frame_invalid, NULL);
-      htab_delete (htab);
-    }
-}
 
 /* Frame methods.  */
 
@@ -1169,14 +1170,4 @@ gdbscm_initialize_frames (void)
   gdbscm_define_functions (frame_functions, 1);
 
   block_keyword = scm_from_latin1_keyword ("block");
-}
-
-void _initialize_scm_frame ();
-void
-_initialize_scm_frame ()
-{
-  /* Register an inferior "free" callback so we can properly
-     invalidate frames when an inferior file is about to be deleted.  */
-  frscm_inferior_data_key
-    = register_inferior_data_with_cleanup (NULL, frscm_del_inferior_frames);
 }

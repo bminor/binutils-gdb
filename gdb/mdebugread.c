@@ -1354,8 +1354,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 /* Basic types.  */
 
-static const struct objfile_key<struct type *,
-				gdb::noop_deleter<struct type *>>
+static const registry<objfile>::key<struct type *,
+				    gdb::noop_deleter<struct type *>>
   basic_type_data;
 
 static struct type *

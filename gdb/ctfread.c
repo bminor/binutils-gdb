@@ -87,7 +87,7 @@
 #include "ctf.h"
 #include "ctf-api.h"
 
-static const struct objfile_key<htab, htab_deleter> ctf_tid_key;
+static const registry<objfile>::key<htab, htab_deleter> ctf_tid_key;
 
 struct ctf_fp_info
 {
@@ -107,7 +107,7 @@ ctf_fp_info::~ctf_fp_info ()
   ctf_close (arc);
 }
 
-static const objfile_key<ctf_fp_info> ctf_dict_key;
+static const registry<objfile>::key<ctf_fp_info> ctf_dict_key;
 
 /* A CTF context consists of a file pointer and an objfile pointer.  */
 
@@ -243,7 +243,7 @@ set_tid_type (struct objfile *of, ctf_id_t tid, struct type *typ)
 {
   htab_t htab;
 
-  htab = (htab_t) ctf_tid_key.get (of);
+  htab = ctf_tid_key.get (of);
   if (htab == NULL)
     {
       htab = htab_create_alloc (1, tid_and_type_hash,
@@ -271,7 +271,7 @@ get_tid_type (struct objfile *of, ctf_id_t tid)
   struct ctf_tid_and_type *slot, ids;
   htab_t htab;
 
-  htab = (htab_t) ctf_tid_key.get (of);
+  htab = ctf_tid_key.get (of);
   if (htab == NULL)
     return nullptr;
 

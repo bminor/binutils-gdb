@@ -147,7 +147,7 @@ struct xcoff_symfile_info
 
 /* Key for XCOFF-associated data.  */
 
-static const struct objfile_key<xcoff_symfile_info> xcoff_objfile_data_key;
+static const registry<objfile>::key<xcoff_symfile_info> xcoff_objfile_data_key;
 
 /* Convenience macro to access the per-objfile XCOFF data.  */
 

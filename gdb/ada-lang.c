@@ -334,7 +334,7 @@ struct ada_inferior_data
 };
 
 /* Our key to this module's inferior data.  */
-static const struct inferior_key<ada_inferior_data> ada_inferior_data;
+static const registry<inferior>::key<ada_inferior_data> ada_inferior_data;
 
 /* Return our inferior data for the given inferior (INF).
 
@@ -376,7 +376,8 @@ struct ada_pspace_data
 };
 
 /* Key to our per-program-space data.  */
-static const struct program_space_key<ada_pspace_data> ada_pspace_data_handle;
+static const registry<program_space>::key<ada_pspace_data>
+  ada_pspace_data_handle;
 
 /* Return this module's data for the given program space (PSPACE).
    If not is found, add a zero'ed one now.

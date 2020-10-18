@@ -55,7 +55,20 @@ struct objfile_object
 extern PyTypeObject objfile_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("objfile_object");
 
-static const struct objfile_data *objfpy_objfile_data_key;
+/* Clear the OBJFILE pointer in an Objfile object and remove the
+   reference.  */
+struct objfpy_deleter
+{
+  void operator() (objfile_object *obj)
+  {
+    gdbpy_enter enter_py;
+    gdbpy_ref<objfile_object> object (obj);
+    object->objfile = nullptr;
+  }
+};
+
+static const registry<objfile>::key<objfile_object, objfpy_deleter>
+     objfpy_objfile_data_key;
 
 /* Require that OBJF be a valid objfile.  */
 #define OBJFPY_REQUIRE_VALID(obj)				\
@@ -668,16 +681,6 @@ gdbpy_lookup_objfile (PyObject *self, PyObject *args, PyObject *kw)
 
 
 
-/* Clear the OBJFILE pointer in an Objfile object and remove the
-   reference.  */
-static void
-py_free_objfile (struct objfile *objfile, void *datum)
-{
-  gdbpy_enter enter_py (objfile->arch ());
-  gdbpy_ref<objfile_object> object ((objfile_object *) datum);
-  object->objfile = NULL;
-}
-
 /* Return a new reference to the Python object of type Objfile
    representing OBJFILE.  If the object has already been created,
    return it.  Otherwise, create it.  Return NULL and set the Python
@@ -687,7 +690,7 @@ gdbpy_ref<>
 objfile_to_objfile_object (struct objfile *objfile)
 {
   PyObject *result
-    = ((PyObject *) objfile_data (objfile, objfpy_objfile_data_key));
+    = (PyObject *) objfpy_objfile_data_key.get (objfile);
   if (result == NULL)
     {
       gdbpy_ref<objfile_object> object
@@ -698,19 +701,11 @@ objfile_to_objfile_object (struct objfile *objfile)
 	return NULL;
 
       object->objfile = objfile;
-      set_objfile_data (objfile, objfpy_objfile_data_key, object.get ());
+      objfpy_objfile_data_key.set (objfile, object.get ());
       result = (PyObject *) object.release ();
     }
 
   return gdbpy_ref<>::new_reference (result);
-}
-
-void _initialize_py_objfile ();
-void
-_initialize_py_objfile ()
-{
-  objfpy_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, py_free_objfile);
 }
 
 int

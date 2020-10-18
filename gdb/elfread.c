@@ -69,7 +69,7 @@ typedef std::vector<std::unique_ptr<probe>> elfread_data;
 
 /* Per-BFD data for probe info.  */
 
-static const struct bfd_key<elfread_data> probe_key;
+static const registry<bfd>::key<elfread_data> probe_key;
 
 /* Minimal symbols located at the GOT entries for .plt - that is the real
    pointer where the given entry will jump to.  It gets updated by the real
@@ -646,7 +646,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 
 /* The data pointer is htab_t for gnu_ifunc_record_cache_unchecked.  */
 
-static const struct objfile_key<htab, htab_deleter>
+static const registry<objfile>::key<htab, htab_deleter>
   elf_objfile_gnu_ifunc_cache_data;
 
 /* Map function names to CORE_ADDR in elf_objfile_gnu_ifunc_cache_data.  */

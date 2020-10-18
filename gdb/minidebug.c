@@ -28,7 +28,7 @@
 
 /* We stash a reference to the .gnu_debugdata BFD on the enclosing
    BFD.  */
-static const bfd_key<gdb_bfd_ref_ptr> gnu_debug_key;
+static const registry<bfd>::key<gdb_bfd_ref_ptr> gnu_debug_key;
 
 #include <lzma.h>
 

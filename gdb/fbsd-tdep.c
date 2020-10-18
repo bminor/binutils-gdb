@@ -520,7 +520,7 @@ struct fbsd_pspace_data
 };
 
 /* Per-program-space data for FreeBSD architectures.  */
-static const struct program_space_key<fbsd_pspace_data>
+static const registry<program_space>::key<fbsd_pspace_data>
   fbsd_pspace_data_handle;
 
 static struct fbsd_pspace_data *

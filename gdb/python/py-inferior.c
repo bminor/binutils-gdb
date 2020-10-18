@@ -60,7 +60,35 @@ struct inferior_object
 extern PyTypeObject inferior_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("inferior_object");
 
-static const struct inferior_data *infpy_inf_data_key;
+/* Deleter to clean up when an inferior is removed.  */
+struct infpy_deleter
+{
+  void operator() (inferior_object *obj)
+  {
+    struct threadlist_entry *th_entry, *th_tmp;
+
+    if (!gdb_python_initialized)
+      return;
+
+    gdbpy_enter enter_py;
+    gdbpy_ref<inferior_object> inf_obj (obj);
+
+    inf_obj->inferior = NULL;
+
+    /* Deallocate threads list.  */
+    for (th_entry = inf_obj->threads; th_entry != NULL;)
+      {
+	th_tmp = th_entry;
+	th_entry = th_entry->next;
+	delete th_tmp;
+      }
+
+    inf_obj->nthreads = 0;
+  }
+};
+
+static const registry<inferior>::key<inferior_object, infpy_deleter>
+     infpy_inf_data_key;
 
 /* Require that INFERIOR be a valid inferior ID.  */
 #define INFPY_REQUIRE_VALID(Inferior)				\
@@ -221,7 +249,7 @@ inferior_to_inferior_object (struct inferior *inferior)
 {
   inferior_object *inf_obj;
 
-  inf_obj = (inferior_object *) inferior_data (inferior, infpy_inf_data_key);
+  inf_obj = infpy_inf_data_key.get (inferior);
   if (!inf_obj)
     {
       inf_obj = PyObject_New (inferior_object, &inferior_object_type);
@@ -234,7 +262,7 @@ inferior_to_inferior_object (struct inferior *inferior)
 
       /* PyObject_New initializes the new object with a refcount of 1.  This
 	 counts for the reference we are keeping in the inferior data.  */
-      set_inferior_data (inferior, infpy_inf_data_key, inf_obj);
+      infpy_inf_data_key.set (inferior, inf_obj);
     }
 
   /* We are returning a new reference.  */
@@ -795,32 +823,6 @@ infpy_dealloc (PyObject *obj)
   Py_TYPE (obj)->tp_free (obj);
 }
 
-/* Clear the INFERIOR pointer in an Inferior object and clear the
-   thread list.  */
-static void
-py_free_inferior (struct inferior *inf, void *datum)
-{
-  struct threadlist_entry *th_entry, *th_tmp;
-
-  if (!gdb_python_initialized)
-    return;
-
-  gdbpy_enter enter_py;
-  gdbpy_ref<inferior_object> inf_obj ((inferior_object *) datum);
-
-  inf_obj->inferior = NULL;
-
-  /* Deallocate threads list.  */
-  for (th_entry = inf_obj->threads; th_entry != NULL;)
-    {
-      th_tmp = th_entry;
-      th_entry = th_entry->next;
-      delete th_tmp;
-    }
-
-  inf_obj->nthreads = 0;
-}
-
 /* Implementation of gdb.selected_inferior() -> gdb.Inferior.
    Returns the current inferior object.  */
 
@@ -829,14 +831,6 @@ gdbpy_selected_inferior (PyObject *self, PyObject *args)
 {
   return ((PyObject *)
 	  inferior_to_inferior_object (current_inferior ()).release ());
-}
-
-void _initialize_py_inferior ();
-void
-_initialize_py_inferior ()
-{
-  infpy_inf_data_key =
-    register_inferior_data_with_cleanup (NULL, py_free_inferior);
 }
 
 int

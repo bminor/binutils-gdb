@@ -57,11 +57,6 @@
 #include <algorithm>
 #include <vector>
 
-/* Keep a registry of per-objfile data-pointers required by other GDB
-   modules.  */
-
-DEFINE_REGISTRY (objfile, REGISTRY_ACCESS_FIELD)
-
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info.  */
 
@@ -85,7 +80,7 @@ struct objfile_pspace_info
 };
 
 /* Per-program-space data key.  */
-static const struct program_space_key<objfile_pspace_info>
+static const registry<program_space>::key<objfile_pspace_info>
   objfiles_pspace_data;
 
 objfile_pspace_info::~objfile_pspace_info ()
@@ -112,7 +107,7 @@ get_objfile_pspace_data (struct program_space *pspace)
 
 /* Per-BFD data key.  */
 
-static const struct bfd_key<objfile_per_bfd_storage> objfiles_bfd_data;
+static const registry<bfd>::key<objfile_per_bfd_storage> objfiles_bfd_data;
 
 objfile_per_bfd_storage::~objfile_per_bfd_storage ()
 {
@@ -328,8 +323,6 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
   obstack_init (&objfile_obstack);
-
-  objfile_alloc_data (this);
 
   std::string name_holder;
   if (name == NULL)
@@ -562,10 +555,6 @@ objfile::~objfile ()
 
   if (sf != NULL)
     (*sf->sym_finish) (this);
-
-  /* Discard any data modules have associated with the objfile.  The function
-     still may reference obfd.  */
-  objfile_free_data (this);
 
   if (obfd)
     gdb_bfd_unref (obfd);

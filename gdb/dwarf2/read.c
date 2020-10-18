@@ -124,7 +124,8 @@ static bool check_physname = false;
 static bool use_deprecated_index_sections = false;
 
 /* This is used to store the data that is always per objfile.  */
-static const objfile_key<dwarf2_per_objfile> dwarf2_objfile_data_key;
+static const registry<objfile>::key<dwarf2_per_objfile>
+     dwarf2_objfile_data_key;
 
 /* These are used to store the dwarf2_per_bfd objects.
 
@@ -134,8 +135,9 @@ static const objfile_key<dwarf2_per_objfile> dwarf2_objfile_data_key;
    Other objfiles are not going to share a dwarf2_per_bfd with any other
    objfiles, so they'll have their own version kept in the _objfile_data_key
    version.  */
-static const struct bfd_key<dwarf2_per_bfd> dwarf2_per_bfd_bfd_data_key;
-static const struct objfile_key<dwarf2_per_bfd> dwarf2_per_bfd_objfile_data_key;
+static const registry<bfd>::key<dwarf2_per_bfd> dwarf2_per_bfd_bfd_data_key;
+static const registry<objfile>::key<dwarf2_per_bfd>
+  dwarf2_per_bfd_objfile_data_key;
 
 /* The "aclass" indices for various kinds of computed DWARF symbols.  */
 

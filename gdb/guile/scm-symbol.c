@@ -49,7 +49,37 @@ static SCM block_keyword;
 static SCM domain_keyword;
 static SCM frame_keyword;
 
-static const struct objfile_data *syscm_objfile_data_key;
+/* This is called when an objfile is about to be freed.
+   Invalidate the symbol as further actions on the symbol would result
+   in bad data.  All access to s_smob->symbol should be gated by
+   syscm_get_valid_symbol_smob_arg_unsafe which will raise an exception on
+   invalid symbols.  */
+struct syscm_deleter
+{
+  /* Helper function for syscm_del_objfile_symbols to mark the symbol
+     as invalid.  */
+
+  static int
+  syscm_mark_symbol_invalid (void **slot, void *info)
+  {
+    symbol_smob *s_smob = (symbol_smob *) *slot;
+
+    s_smob->symbol = NULL;
+    return 1;
+  }
+
+  void operator() (htab_t htab)
+  {
+    if (htab != NULL)
+      {
+	htab_traverse_noresize (htab, syscm_mark_symbol_invalid, NULL);
+	htab_delete (htab);
+      }
+  }
+};
+
+static const registry<objfile>::key<htab, syscm_deleter>
+     syscm_objfile_data_key;
 static struct gdbarch_data *syscm_gdbarch_data_key;
 
 struct syscm_gdbarch_data
@@ -105,12 +135,12 @@ syscm_get_symbol_map (struct symbol *symbol)
     {
       struct objfile *objfile = symbol->objfile ();
 
-      htab = (htab_t) objfile_data (objfile, syscm_objfile_data_key);
+      htab = syscm_objfile_data_key.get (objfile);
       if (htab == NULL)
 	{
 	  htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
 						     syscm_eq_symbol_smob);
-	  set_objfile_data (objfile, syscm_objfile_data_key, htab);
+	  syscm_objfile_data_key.set (objfile, htab);
 	}
     }
   else
@@ -291,35 +321,6 @@ syscm_get_valid_symbol_arg_unsafe (SCM self, int arg_pos,
   return s_smob->symbol;
 }
 
-/* Helper function for syscm_del_objfile_symbols to mark the symbol
-   as invalid.  */
-
-static int
-syscm_mark_symbol_invalid (void **slot, void *info)
-{
-  symbol_smob *s_smob = (symbol_smob *) *slot;
-
-  s_smob->symbol = NULL;
-  return 1;
-}
-
-/* This function is called when an objfile is about to be freed.
-   Invalidate the symbol as further actions on the symbol would result
-   in bad data.  All access to s_smob->symbol should be gated by
-   syscm_get_valid_symbol_smob_arg_unsafe which will raise an exception on
-   invalid symbols.  */
-
-static void
-syscm_del_objfile_symbols (struct objfile *objfile, void *datum)
-{
-  htab_t htab = (htab_t) datum;
-
-  if (htab != NULL)
-    {
-      htab_traverse_noresize (htab, syscm_mark_symbol_invalid, NULL);
-      htab_delete (htab);
-    }
-}
 
 /* Symbol methods.  */
 
@@ -823,11 +824,6 @@ void _initialize_scm_symbol ();
 void
 _initialize_scm_symbol ()
 {
-  /* Register an objfile "free" callback so we can properly
-     invalidate symbols when an object file is about to be deleted.  */
-  syscm_objfile_data_key
-    = register_objfile_data_with_cleanup (NULL, syscm_del_objfile_symbols);
-
   /* Arch-specific symbol data.  */
   syscm_gdbarch_data_key
     = gdbarch_data_register_post_init (syscm_init_arch_symbols);

@@ -61,7 +61,7 @@ struct coff_symfile_info
 
 /* Key for COFF-associated data.  */
 
-static const struct objfile_key<coff_symfile_info> coff_objfile_data_key;
+static const registry<objfile>::key<coff_symfile_info> coff_objfile_data_key;
 
 /* Translate an external name string into a user-visible name.  */
 #define	EXTERNAL_NAME(string, abfd) \
