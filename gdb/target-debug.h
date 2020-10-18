@@ -89,7 +89,7 @@
 #define target_debug_print_LONGEST_p(X)		\
   target_debug_do_print (phex (*(X), 0))
 #define target_debug_print_struct_address_space_p(X)	\
-  target_debug_do_print (plongest (address_space_num (X)))
+  target_debug_do_print (plongest ((X)->num ()))
 #define target_debug_print_struct_bp_target_info_p(X)	\
   target_debug_do_print (core_addr_to_string ((X)->placed_address))
 #define target_debug_print_struct_expression_p(X)	\
