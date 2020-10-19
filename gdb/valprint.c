@@ -1827,43 +1827,6 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
     }
 }
 
-/* VALADDR points to a char integer of LEN bytes.
-   Print it out in appropriate language form on stream.
-   Omit any leading zero chars.  */
-
-void
-print_char_chars (struct ui_file *stream, struct type *type,
-		  const gdb_byte *valaddr,
-		  unsigned len, enum bfd_endian byte_order)
-{
-  const gdb_byte *p;
-
-  if (byte_order == BFD_ENDIAN_BIG)
-    {
-      p = valaddr;
-      while (p < valaddr + len - 1 && *p == 0)
-	++p;
-
-      while (p < valaddr + len)
-	{
-	  LA_EMIT_CHAR (*p, type, stream, '\'');
-	  ++p;
-	}
-    }
-  else
-    {
-      p = valaddr + len - 1;
-      while (p > valaddr && *p == 0)
-	--p;
-
-      while (p >= valaddr)
-	{
-	  LA_EMIT_CHAR (*p, type, stream, '\'');
-	  --p;
-	}
-    }
-}
-
 /* Print function pointer with inferior address ADDRESS onto stdio
    stream STREAM.  */
 
