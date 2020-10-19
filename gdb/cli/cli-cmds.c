@@ -2614,9 +2614,9 @@ Use \"help aliases\" to list all user defined aliases and their default args.\n\
 \n\
 Examples:\n\
 Make \"spe\" an alias of \"set print elements\":\n\
-  alias spe set print elements\n\
+  alias spe = set print elements\n\
 Make \"elms\" an alias of \"elements\" in the \"set print\" command:\n\
-  alias -a set print elms set print elements\n\
+  alias -a set print elms = set print elements\n\
 Make \"btf\" an alias of \"backtrace -full -past-entry -past-main\" :\n\
   alias btf = backtrace -full -past-entry -past-main\n\
 Make \"wLapPeu\" an alias of 2 nested \"with\":\n\
