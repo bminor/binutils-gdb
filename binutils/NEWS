@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Readelf can now display the contents of LTO symbol table sections when asked
+  to do so via the --lto-syms command line option.
+
 * Readelf now accepts the -C command line option to enable the demangling of
   symbol names.  In addition the --demangle=<style>, --no-demangle,
   --recurse-limit and --no-recurse-limit options are also now availale.

@@ -216,6 +216,7 @@ static bfd_boolean show_name = FALSE;
 static bfd_boolean do_dynamic = FALSE;
 static bfd_boolean do_syms = FALSE;
 static bfd_boolean do_dyn_syms = FALSE;
+static bfd_boolean do_lto_syms = FALSE;
 static bfd_boolean do_reloc = FALSE;
 static bfd_boolean do_sections = FALSE;
 static bfd_boolean do_section_groups = FALSE;
@@ -4483,6 +4484,7 @@ enum long_option_values
 {
   OPTION_DEBUG_DUMP = 512,
   OPTION_DYN_SYMS,
+  OPTION_LTO_SYMS,
   OPTION_DWARF_DEPTH,
   OPTION_DWARF_START,
   OPTION_DWARF_CHECK,
@@ -4538,6 +4540,7 @@ static struct option options[] =
   {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
   {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
   {"dyn-syms",	       no_argument, 0, OPTION_DYN_SYMS},
+  {"lto-syms",         no_argument, 0, OPTION_LTO_SYMS},
   {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
   {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
@@ -4570,6 +4573,7 @@ usage (FILE * stream)
   -s --syms              Display the symbol table\n\
      --symbols           An alias for --syms\n\
      --dyn-syms          Display the dynamic symbol table\n\
+     --lto-syms          Display LTO symbol tables\n\
   -C --demangle[=STYLE]  Decode low-level symbol names into user-level names\n\
                           The STYLE, if specified, can be `auto' (the default),\n\
                           `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
@@ -4809,7 +4813,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case 'w':
 	  do_dump = TRUE;
-	  if (optarg == 0)
+	  if (optarg == NULL)
 	    {
 	      do_debugging = TRUE;
 	      dwarf_select_sections_all ();
@@ -4822,7 +4826,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case OPTION_DEBUG_DUMP:
 	  do_dump = TRUE;
-	  if (optarg == 0)
+	  if (optarg == NULL)
 	    do_debugging = TRUE;
 	  else
 	    {
@@ -4865,6 +4869,9 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case OPTION_DYN_SYMS:
 	  do_dyn_syms = TRUE;
+	  break;
+	case OPTION_LTO_SYMS:
+	  do_lto_syms = TRUE;
 	  break;
 #ifdef SUPPORT_DISASSEMBLY
 	case 'i':
@@ -4922,7 +4929,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
       && !do_segments && !do_header && !do_dump && !do_version
       && !do_histogram && !do_debugging && !do_arch && !do_notes
       && !do_section_groups && !do_archive_index
-      && !do_dyn_syms)
+      && !do_dyn_syms && !do_lto_syms)
     {
       if (do_checks)
 	{
@@ -4931,6 +4938,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  do_segments = do_header = do_dump = do_version = TRUE;
 	  do_histogram = do_debugging = do_arch = do_notes = TRUE;
 	  do_section_groups = do_archive_index = do_dyn_syms = TRUE;
+	  do_lto_syms = TRUE;
 	}
       else
 	usage (stderr);
@@ -12179,7 +12187,256 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
 	  si, printable_section_name (filedata, section), section->sh_info);
 }
 
+static const char *
+get_lto_kind (unsigned int kind)
+{
+  switch (kind)
+    {
+    case 0: return "DEF";
+    case 1: return "WEAKDEF";
+    case 2: return "UNDEF";
+    case 3: return "WEAKUNDEF";
+    case 4: return "COMMON";
+    default:
+      break;
+    }
+
+  static char buffer[30];
+  error (_("Unknown LTO symbol definition encountered: %u\n"), kind);
+  sprintf (buffer, "<unknown: %u>", kind);
+  return buffer;
+}
+
+static const char *
+get_lto_visibility (unsigned int visibility)
+{
+  switch (visibility)
+    {
+    case 0: return "DEFAULT";
+    case 1: return "PROTECTED";
+    case 2: return "INTERNAL";
+    case 3: return "HIDDEN";
+    default:
+      break;
+    }
+
+  static char buffer[30];
+  error (_("Unknown LTO symbol visibility encountered: %u\n"), visibility);
+  sprintf (buffer, "<unknown: %u>", visibility);
+  return buffer;
+}
+
+static const char *
+get_lto_sym_type (unsigned int sym_type)
+{
+  switch (sym_type)
+    {
+    case 0: return "UNKNOWN";
+    case 1: return "FUNCTION";
+    case 2: return "VARIABLE";
+    default:
+      break;
+    }
+
+  static char buffer[30];
+  error (_("Unknown LTO symbol type encountered: %u\n"), sym_type);
+  sprintf (buffer, "<unknown: %u>", sym_type);
+  return buffer;
+}
+
+/* Display an LTO format symbol table.
+   FIXME: The format of LTO symbol tables is not formalized.
+   So this code could need changing in the future.  */
+
+static bfd_boolean
+display_lto_symtab (Filedata *           filedata,
+		    Elf_Internal_Shdr *  section)
+{
+  if (section->sh_size == 0)
+    {
+      printf (_("\nLTO Symbol table '%s' is empty!\n"),
+	      printable_section_name (filedata, section));
+      return TRUE;
+    }
+
+  if (section->sh_size > filedata->file_size)
+    {
+      error (_("Section %s has an invalid sh_size of 0x%lx\n"),
+	     printable_section_name (filedata, section),
+	     (unsigned long) section->sh_size);
+      return FALSE;
+    }
+
+  void * alloced_data = get_data (NULL, filedata, section->sh_offset,
+				  section->sh_size, 1, _("LTO symbols"));
+  if (alloced_data == NULL)
+    return FALSE;
+
+  /* Look for extended data for the symbol table.  */
+  Elf_Internal_Shdr * ext;
+  void * ext_data_orig = NULL;
+  char * ext_data = NULL;
+  char * ext_data_end = NULL;
+  char * ext_name = NULL;
+
+  if (asprintf (& ext_name, ".gnu.lto_.ext_symtab.%s",
+		SECTION_NAME (section) + strlen (".gnu.lto_.symtab.")) > 0
+      && ext_name != NULL /* Paranoia.  */
+      && (ext = find_section (filedata, ext_name)) != NULL)
+    {
+      if (ext->sh_size < 3)
+	error (_("LTO Symbol extension table '%s' is empty!\n"),
+	       printable_section_name (filedata, ext));
+      else
+	{
+	  ext_data_orig = ext_data = get_data (NULL, filedata, ext->sh_offset,
+					       ext->sh_size, 1,
+					       _("LTO ext symbol data"));
+	  if (ext_data != NULL)
+	    {
+	      ext_data_end = ext_data + ext->sh_size;
+	      if (* ext_data++ != 1)
+		error (_("Unexpected version number in symbol extension table\n"));
+	    }
+	}
+    }
+  
+  const unsigned char * data = (const unsigned char *) alloced_data;
+  const unsigned char * end = data + section->sh_size;
+
+  if (ext_data_orig != NULL)
+    {
+      if (do_wide)
+	printf (_("\nLTO Symbol table '%s' and extension table '%s' contain:\n"),
+		printable_section_name (filedata, section),
+		printable_section_name (filedata, ext));
+      else
+	{
+	  printf (_("\nLTO Symbol table '%s'\n"),
+		  printable_section_name (filedata, section));
+	  printf (_(" and extension table '%s' contain:\n"),
+		  printable_section_name (filedata, ext));
+	}
+    }
+  else
+    printf (_("\nLTO Symbol table '%s' contains:\n"),
+	    printable_section_name (filedata, section));
+    
+
+  /* FIXME: Add a wide version.  */
+  if (ext_data_orig != NULL) 
+    printf (_("  Comdat_Key       Kind  Visibility     Size      Slot      Type  Section Name\n"));
+  else
+    printf (_("  Comdat_Key       Kind  Visibility     Size      Slot Name\n"));
+
+  /* FIXME: We do not handle style prefixes.  */
+
+  while (data < end)
+    {
+      const unsigned char * sym_name = data;
+      data += strnlen ((const char *) sym_name, end - data) + 1;
+      if (data >= end)
+	goto fail;
+
+      const unsigned char * comdat_key = data;
+      data += strnlen ((const char *) comdat_key, end - data) + 1;
+      if (data >= end)
+	goto fail;
+
+      if (data + 2 + 8 + 4 > end)
+	goto fail;
+
+      unsigned int kind = *data++;
+      unsigned int visibility = *data++;
+
+      elf_vma size = byte_get (data, 8);
+      data += 8;
+
+      elf_vma slot = byte_get (data, 4);
+      data += 4;
+
+      if (ext_data != NULL)
+	{
+	  if (ext_data < (ext_data_end - 1))
+	    {
+	      unsigned int sym_type = * ext_data ++;
+	      unsigned int sec_kind = * ext_data ++;
+
+	      printf ("  %10s %10s %11s %08lx  %08lx %9s %08lx _",
+		      * comdat_key == 0 ? "-" : (char *) comdat_key,
+		      get_lto_kind (kind),
+		      get_lto_visibility (visibility),
+		      (long) size,
+		      (long) slot,
+		      get_lto_sym_type (sym_type),
+		      (long) sec_kind);
+	      print_symbol (6, (const char *) sym_name);
+	    }
+	  else
+	    {
+	      error (_("Ran out of LTO symbol extension data\n"));
+	      ext_data = NULL;
+	      /* FIXME: return FAIL result ?  */
+	    }
+	}
+      else
+	{
+	  printf ("  %10s %10s %11s %08lx  %08lx _",
+		  * comdat_key == 0 ? "-" : (char *) comdat_key,
+		  get_lto_kind (kind),
+		  get_lto_visibility (visibility),
+		  (long) size,
+		  (long) slot);
+	  print_symbol (21, (const char *) sym_name);
+	}
+      putchar ('\n');
+    }
+
+  if (ext_data != NULL && ext_data < ext_data_end)
+    {
+      error (_("Data remains in the LTO symbol extension table\n"));
+      goto fail;
+    }
+
+  free (alloced_data);
+  free (ext_data_orig);
+  free (ext_name);
+  return TRUE;
+  
+ fail:
+  error (_("Buffer overrun encountered whilst decoding LTO symbol table\n"));
+  free (alloced_data);
+  free (ext_data_orig);
+  free (ext_name);
+  return FALSE;
+}
+
+/* Display LTO symbol tables.  */
+
+static bfd_boolean
+process_lto_symbol_tables (Filedata * filedata)
+{
+  Elf_Internal_Shdr * section;
+  unsigned int i;
+  bfd_boolean res = TRUE;
+
+  if (!do_lto_syms)
+    return TRUE;
+
+  if (filedata->section_headers == NULL)
+    return TRUE;
+
+  for (i = 0, section = filedata->section_headers;
+       i < filedata->file_header.e_shnum;
+       i++, section++)
+    if (CONST_STRNEQ (SECTION_NAME (section), ".gnu.lto_.symtab"))
+      res &= display_lto_symtab (filedata, section);
+
+  return res; 
+}
+
 /* Dump the symbol table.  */
+
 static bfd_boolean
 process_symbol_table (Filedata * filedata)
 {
@@ -20604,6 +20861,9 @@ process_object (Filedata * filedata)
   if (! process_symbol_table (filedata))
     res = FALSE;
 
+  if (! process_lto_symbol_tables (filedata))
+    res = FALSE;
+  
   if (! process_syminfo (filedata))
     res = FALSE;
 

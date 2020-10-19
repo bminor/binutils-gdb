@@ -1,3 +1,21 @@
+2020-10-19  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (do_lto_syms): New local.
+	(long_option_values): Add OPTION_LTO_SYMS.
+	(options): Add --lto-syms.
+	(usage): Mention the new option.
+	(parse_args): Parse the new option.
+	(get_lto_kind): New function.
+	(get_lto_visibility): New function.
+	(get_lto_sym_type): New function.
+	(display_lto_symtab): New function - displays the contents of an
+	LTo symbol table section.
+	(process_lto_symbol_tables): New functions.  Calls
+	dipslay_lto_symtab on any LTO symbol table section.
+	(process_object_file): Call process_lto_symbol_tables.
+	* doc/binutils.texi: Document the new option.
+	* NEWS: Mention the new feature.
+
 2020-10-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703

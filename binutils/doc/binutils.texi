@@ -4707,7 +4707,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-t}|@option{--section-details}]
         [@option{-e}|@option{--headers}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
-        [@option{--dyn-syms}]
+        [@option{--dyn-syms}|@option{--lto-syms}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
         [@option{-n}|@option{--notes}]
@@ -4824,6 +4824,10 @@ displayed as a suffix preceded by two @@ characters.  For example
 Displays the entries in dynamic symbol table section of the file, if it
 has one.  The output format is the same as the format used by the
 @option{--syms} option.
+
+@item --lto-syms
+@cindex LTO symbol table
+Displays the contents of any LTO symbol tables in the file.
 
 @item -C
 @itemx --demangle[=@var{style}]
