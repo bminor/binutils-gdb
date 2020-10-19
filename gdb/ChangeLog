@@ -1,5 +1,13 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_analyze_prologue): Handle C registers and
+	a64c instructions.
+	(aarch64_scan_prologue): Add debugging output.
+	* prologue-value.c (pv_area::find_reg): Don't match the register size
+	exactly, but check if the area size is at least the size of a register.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_prologue_prev_register): Use LR or CLR
 	depending on the request.
 	(aarch64_dwarf_reg_to_regnum): Redirect CLR to LR temporarily.
