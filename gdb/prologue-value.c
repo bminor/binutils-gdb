@@ -503,7 +503,7 @@ pv_area::find_reg (struct gdbarch *gdbarch, int reg, CORE_ADDR *offset_p)
 	if (e->value.kind == pvk_register
 	    && e->value.reg == reg
 	    && e->value.k == 0
-	    && e->size == register_size (gdbarch, reg))
+	    && e->size >= register_size (gdbarch, reg))
 	  {
 	    if (offset_p)
 	      *offset_p = e->offset;

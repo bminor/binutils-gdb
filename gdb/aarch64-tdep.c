@@ -451,6 +451,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 			  abstract_instruction_reader& reader)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int i;
 
   /* Whether the stack has been set.  This should be true when we notice a SP
@@ -461,6 +462,9 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
   /* Track X registers and D registers in prologue.  */
   pv_t regs[AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT];
 
+  if (aarch64_debug)
+    debug_printf ("aarch64: Entering %s\n", __func__);
+
   for (i = 0; i < AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT; i++)
     regs[i] = pv_register (i, 0);
   pv_area stack (AARCH64_SP_REGNUM, gdbarch_addr_bit (gdbarch));
@@ -470,76 +474,133 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       uint32_t insn;
       aarch64_inst inst;
 
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s Reading instruction at %s\n", __func__,
+		      paddress (gdbarch, start));
       insn = reader.read (start, 4, byte_order_for_code);
 
       if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
 	break;
 
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s Fetched instruction %s\n", __func__,
+		      paddress (gdbarch, insn));
+
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s iclass = %d, op = %d, name = %s\n", __func__,
+		      inst.opcode->iclass, inst.opcode->op, inst.opcode->name);
+
       if (inst.opcode->iclass == addsub_imm
-	  && (inst.opcode->op == OP_ADD
+	  && ((inst.opcode->op == OP_ADD
+	      || inst.opcode->op == OP_A64C_ADD)
 	      || strcmp ("sub", inst.opcode->name) == 0))
 	{
 	  unsigned rd = inst.operands[0].reg.regno;
 	  unsigned rn = inst.operands[1].reg.regno;
 
-	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 3);
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd_SP);
-	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rn_SP);
-	  gdb_assert (inst.operands[2].type == AARCH64_OPND_AIMM);
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s addsub_imm: rd = %d, rn = %d\n",
+			  __func__, rd, rn);
 
-	  if (inst.opcode->op == OP_ADD)
+	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 3);
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd_SP
+		      || inst.operands[0].type == AARCH64_OPND_Cad_SP);
+	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rn_SP
+		      || inst.operands[1].type == AARCH64_OPND_Can_SP);
+	  gdb_assert (inst.operands[2].type == AARCH64_OPND_AIMM
+		      || inst.operands[2].type == AARCH64_OPND_A64C_AIMM);
+
+	  if (inst.opcode->op == OP_ADD || inst.opcode->op == OP_A64C_ADD)
 	    {
 	      regs[rd] = pv_add_constant (regs[rn],
 					  inst.operands[2].imm.value);
+
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s regs[%d] = regs[%d] + %ld\n",
+			      __func__, rd, rn, inst.operands[2].imm.value);
 	    }
 	  else
 	    {
 	      regs[rd] = pv_add_constant (regs[rn],
 					  -inst.operands[2].imm.value);
+
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s regs[%d] = regs[%d] - %ld\n",
+			      __func__, rd, rn, inst.operands[2].imm.value);
 	    }
 
 	  /* Did we move SP to FP?  */
 	  if (rn == AARCH64_SP_REGNUM && rd == AARCH64_FP_REGNUM)
 	    seen_stack_set = true;
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s End of addsub_imm. moved sp to fp? %s\n",
+			   __func__, seen_stack_set? "yes":"no");
 	}
       else if (inst.opcode->iclass == pcreladdr
 	       && inst.operands[1].type == AARCH64_OPND_ADDR_ADRP)
 	{
 	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 2);
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd);
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd
+		      || inst.operands[0].type == AARCH64_OPND_Cad);
 
 	  regs[inst.operands[0].reg.regno] = pv_unknown ();
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s pcreladdr: register = %d\n", __func__,
+			  inst.operands[0].reg.regno);
 	}
       else if (inst.opcode->iclass == branch_imm)
 	{
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s branch_imm\n", __func__);
 	  /* Stop analysis on branch.  */
 	  break;
 	}
       else if (inst.opcode->iclass == condbranch)
 	{
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s condbranch\n", __func__);
 	  /* Stop analysis on branch.  */
 	  break;
 	}
       else if (inst.opcode->iclass == branch_reg)
 	{
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s branch_reg\n", __func__);
 	  /* Stop analysis on branch.  */
 	  break;
 	}
       else if (inst.opcode->iclass == compbranch)
 	{
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s compbranch\n", __func__);
 	  /* Stop analysis on branch.  */
 	  break;
 	}
-      else if (inst.opcode->op == OP_MOVZ)
+      else if (inst.opcode->op == OP_MOVZ
+	       || (inst.opcode->iclass == a64c
+		   && strcmp (inst.opcode->name, "cpy") == 0))
 	{
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd);
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd
+		      || (inst.operands[0].type == AARCH64_OPND_Cad_SP
+			  && inst.operands[1].type == AARCH64_OPND_Can_SP));
+
+	  bool is_fp_or_sp = false;
+	  if (inst.operands[0].reg.regno == AARCH64_FP_REGNUM
+	      && inst.operands[1].reg.regno == AARCH64_SP_REGNUM)
+	    is_fp_or_sp = true;
 
 	  /* If this shows up before we set the stack, keep going.  Otherwise
-	     stop the analysis.  */
-	  if (seen_stack_set)
+	     stop the analysis if we're not dealing with SP or FP.  */
+	  if (seen_stack_set && !is_fp_or_sp)
 	    break;
 
 	  regs[inst.operands[0].reg.regno] = pv_unknown ();
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s OP_MOVZ: register = %d\n", __func__,
+			  inst.operands[0].reg.regno);
 	}
       else if (inst.opcode->iclass == log_shift
 	       && strcmp (inst.opcode->name, "orr") == 0)
@@ -548,12 +609,16 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  unsigned rn = inst.operands[1].reg.regno;
 	  unsigned rm = inst.operands[2].reg.regno;
 
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s log_shift: rd = %d, rn = %d, rm = %d\n",
+			  __func__, rd, rn, rm);
+
 	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd);
 	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rn);
 	  gdb_assert (inst.operands[2].type == AARCH64_OPND_Rm_SFT);
 
 	  if (inst.operands[2].shifter.amount == 0
-	      && rn == AARCH64_SP_REGNUM)
+	      && (rn == AARCH64_SP_REGNUM))
 	    regs[rd] = regs[rm];
 	  else
 	    {
@@ -564,15 +629,21 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      break;
 	    }
 	}
-      else if (inst.opcode->op == OP_STUR)
+      else if (inst.opcode->op == OP_STUR || inst.opcode->op == OP_STUR_C)
 	{
 	  unsigned rt = inst.operands[0].reg.regno;
 	  unsigned rn = inst.operands[1].addr.base_regno;
 	  int size = aarch64_get_qualifier_esize (inst.operands[0].qualifier);
 
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s OP_STUR: rt = %d, rn = %d\n", __func__,
+			  rt, rn);
+
 	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 2);
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt);
-	  gdb_assert (inst.operands[1].type == AARCH64_OPND_ADDR_SIMM9);
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt
+		      || inst.operands[0].type == AARCH64_OPND_Cat);
+	  gdb_assert (inst.operands[1].type == AARCH64_OPND_ADDR_SIMM9
+		      || inst.operands[1].type == AARCH64_OPND_A64C_ADDR_SIMM9);
 	  gdb_assert (!inst.operands[1].addr.offset.is_reg);
 
 	  stack.store
@@ -582,6 +653,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  /* Are we storing with SP as a base?  */
 	  if (rn == AARCH64_SP_REGNUM)
 	    seen_stack_set = true;
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s End of OP_STUR. moved sp to fp? %s\n",
+			  __func__, seen_stack_set? "yes":"no");
 	}
       else if ((inst.opcode->iclass == ldstpair_off
 		|| (inst.opcode->iclass == ldstpair_indexed
@@ -595,11 +670,18 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  int32_t imm = inst.operands[2].addr.offset.imm;
 	  int size = aarch64_get_qualifier_esize (inst.operands[0].qualifier);
 
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s ldstpair-off: rn = %d, imm = %d"
+			  " size = %d\n", __func__, rn, imm, size);
+
+	  gdb_assert ((inst.operands[0].type == AARCH64_OPND_Rt
+		       || inst.operands[0].type == AARCH64_OPND_Cat)
 		      || inst.operands[0].type == AARCH64_OPND_Ft);
-	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rt2
+	  gdb_assert ((inst.operands[1].type == AARCH64_OPND_Rt2
+		       || inst.operands[1].type == AARCH64_OPND_Cat2)
 		      || inst.operands[1].type == AARCH64_OPND_Ft2);
-	  gdb_assert (inst.operands[2].type == AARCH64_OPND_ADDR_SIMM7);
+	  gdb_assert (inst.operands[2].type == AARCH64_OPND_ADDR_SIMM7
+		      || inst.operands[2].type == AARCH64_OPND_A64C_ADDR_SIMM7);
 	  gdb_assert (!inst.operands[2].addr.offset.is_reg);
 
 	  /* If recording this store would invalidate the store area
@@ -608,33 +690,56 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  if (stack.store_would_trash (pv_add_constant (regs[rn], imm)))
 	    break;
 
-	  if (stack.store_would_trash (pv_add_constant (regs[rn], imm + 8)))
+	  if (stack.store_would_trash (pv_add_constant (regs[rn], imm + size)))
 	    break;
 
 	  rt1 = inst.operands[0].reg.regno;
 	  rt2 = inst.operands[1].reg.regno;
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s ldstpair-off: rt1 = %d, rt2 = %d\n",
+			  __func__, rt1, rt2);
+
 	  if (inst.operands[0].type == AARCH64_OPND_Ft)
 	    {
 	      rt1 += AARCH64_X_REGISTER_COUNT;
 	      rt2 += AARCH64_X_REGISTER_COUNT;
 	    }
 
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s ldstpair-off: rt1 = %d, rt2 = %d\n",
+			  __func__, rt1, rt2);
+
 	  stack.store (pv_add_constant (regs[rn], imm), size, regs[rt1]);
 	  stack.store (pv_add_constant (regs[rn], imm + size), size, regs[rt2]);
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s ldstpair-off: Stored %d at %d + %d\n",
+			  __func__, rt1, rn, imm);
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s ldstpair-off: Stored %d at %d + %d"
+			  " + %d\n", __func__, rt2, rn, imm, size);
 
 	  if (inst.operands[2].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
 
 	  /* Ignore the instruction that allocates stack space and sets
 	     the SP.  */
-	  if (rn == AARCH64_SP_REGNUM && !inst.operands[2].addr.writeback)
+	  if ((rn == AARCH64_SP_REGNUM)
+	      && !inst.operands[2].addr.writeback)
 	    seen_stack_set = true;
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s End of ldstpair-off: moved sp to fp?"
+			  " %s\n", __func__, seen_stack_set? "yes":"no");
 	}
       else if ((inst.opcode->iclass == ldst_imm9 /* Signed immediate.  */
 		|| (inst.opcode->iclass == ldst_pos /* Unsigned immediate.  */
 		    && (inst.opcode->op == OP_STR_POS
-			|| inst.opcode->op == OP_STRF_POS)))
-	       && inst.operands[1].addr.base_regno == AARCH64_SP_REGNUM
+			|| inst.opcode->op == OP_STRF_POS
+			|| inst.opcode->op == OP_STR_POS_C)))
+	       && (inst.operands[1].addr.base_regno == AARCH64_SP_REGNUM)
 	       && strcmp ("str", inst.opcode->name) == 0)
 	{
 	  /* STR (immediate) */
@@ -642,8 +747,13 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  int32_t imm = inst.operands[1].addr.offset.imm;
 	  unsigned int rn = inst.operands[1].addr.base_regno;
 	  int size = aarch64_get_qualifier_esize (inst.operands[0].qualifier);
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rt
+	  gdb_assert ((inst.operands[0].type == AARCH64_OPND_Rt
+		       || inst.operands[0].type == AARCH64_OPND_Cat)
 		      || inst.operands[0].type == AARCH64_OPND_Ft);
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s ldst_imm9 str: rt = %d, rn = %d,"
+			  " imm = %d\n", __func__, rt, rn, imm);
 
 	  if (inst.operands[0].type == AARCH64_OPND_Ft)
 	    rt += AARCH64_X_REGISTER_COUNT;
@@ -655,17 +765,24 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  /* Are we storing with SP as a base?  */
 	  if (rn == AARCH64_SP_REGNUM)
 	    seen_stack_set = true;
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s End of ldst_imm9 str: moved sp to fp?"
+			  " %s\n", __func__, seen_stack_set? "yes":"no");
 	}
       else if (inst.opcode->iclass == testbranch)
 	{
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s testbranch\n", __func__);
 	  /* Stop analysis on branch.  */
 	  break;
 	}
       else if (inst.opcode->iclass == ic_system)
 	{
-	  aarch64_gdbarch_tdep *tdep
-	    = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 	  int ra_state_val = 0;
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s ic_system\n", __func__);
 
 	  if (insn == 0xd503233f /* paciasp.  */
 	      || insn == 0xd503237f  /* pacibsp.  */)
@@ -728,12 +845,51 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       cache->framesize = 0;
     }
 
+  if (aarch64_debug)
+    debug_printf ("aarch64: %s frame reg is %d, frame size is %s\n", __func__,
+		  cache->framereg, core_addr_to_string_nz (cache->framesize));
+
+
   for (i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
     {
       CORE_ADDR offset;
 
       if (stack.find_reg (gdbarch, i, &offset))
-	cache->saved_regs[i].set_addr (offset);
+	{
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s Register X%d found at offset %s\n",
+			  __func__, i, core_addr_to_string_nz (offset));
+	  cache->saved_regs[i].set_addr (offset);
+	}
+    }
+
+  if (tdep->has_capability ())
+    {
+      int pcc_regnum = tdep->cap_reg_base + 31;
+      int csp_regnum = tdep->cap_reg_base + 32;
+
+      /* Also save the C registers.  */
+      for (i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
+	{
+	  CORE_ADDR offset;
+
+	  if (stack.find_reg (gdbarch, i, &offset))
+	    {
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s Register C%d found at offset %s\n",
+			      __func__, i, core_addr_to_string_nz (offset));
+
+	      /* FIXME-Morello: We should really invert CSP/PCC to make them
+		 match the order of the X registers.  Then we wouldn't need
+		 this conditional block.  */
+	      if (i == AARCH64_SP_REGNUM)
+		cache->saved_regs[csp_regnum].set_addr (offset);
+	      else if (i == AARCH64_PC_REGNUM)
+		cache->saved_regs[pcc_regnum].set_addr (offset);
+	      else
+		cache->saved_regs[tdep->cap_reg_base + i].set_addr (offset);
+	    }
+	}
     }
 
   for (i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
@@ -1114,6 +1270,9 @@ static void
 aarch64_scan_prologue (struct frame_info *this_frame,
 		       struct aarch64_prologue_cache *cache)
 {
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
   CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
@@ -1142,12 +1301,18 @@ aarch64_scan_prologue (struct frame_info *this_frame,
 	  prologue_end = sal.end;
 	}
 
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s Found function... \n", __func__);
+
       prologue_end = std::min (prologue_end, prev_pc);
       aarch64_analyze_prologue (gdbarch, prologue_start, prologue_end, cache);
     }
   else
     {
       CORE_ADDR frame_loc;
+
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s Function not found... \n", __func__);
 
       frame_loc = get_frame_register_unsigned (this_frame, AARCH64_FP_REGNUM);
       if (frame_loc == 0)
@@ -3706,7 +3871,7 @@ aarch64_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   if (aarch64_debug)
-    debug_printf ("aarch64: Entering %s\n", __func__);
+    debug_printf ("aarch64: entering %s\n", __func__);
 
   if (type->length <= 8)
     return signed_pointer_to_address (gdbarch, type, buf);
