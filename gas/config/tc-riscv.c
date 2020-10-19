@@ -91,6 +91,14 @@ static enum riscv_priv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 static unsigned xlen = 0; /* width of an x-register */
 static unsigned abi_xlen = 0; /* width of a pointer in the ABI */
 static bfd_boolean rve_abi = FALSE;
+enum float_abi {
+  FLOAT_ABI_DEFAULT = -1,
+  FLOAT_ABI_SOFT,
+  FLOAT_ABI_SINGLE,
+  FLOAT_ABI_DOUBLE,
+  FLOAT_ABI_QUAD
+};
+static enum float_abi float_abi = FLOAT_ABI_DEFAULT;
 
 #define LOAD_ADDRESS_INSN (abi_xlen == 64 ? "ld" : "lw")
 #define ADD32_INSN (xlen == 64 ? "addiw" : "addi")
@@ -309,6 +317,50 @@ riscv_set_arch (const char *s)
 
   riscv_release_subset_list (&riscv_subsets);
   riscv_parse_subset (&rps, s);
+}
+
+/* Indicate -mabi= option is explictly set.  */
+static bfd_boolean explicit_mabi = FALSE;
+
+static void
+riscv_set_abi (unsigned new_xlen, enum float_abi new_float_abi, bfd_boolean rve)
+{
+  abi_xlen = new_xlen;
+  float_abi = new_float_abi;
+  rve_abi = rve;
+}
+
+/* If the -mabi option isn't set, then we set the abi according to the arch
+   string.  Otherwise, check if there are conflicts between architecture
+   and abi setting.  */
+
+static void
+riscv_set_abi_by_arch (void)
+{
+  if (!explicit_mabi)
+    {
+      if (riscv_subset_supports ("q"))
+	riscv_set_abi (xlen, FLOAT_ABI_QUAD, FALSE);
+      else if (riscv_subset_supports ("d"))
+	riscv_set_abi (xlen, FLOAT_ABI_DOUBLE, FALSE);
+      else
+	riscv_set_abi (xlen, FLOAT_ABI_SOFT, FALSE);
+    }
+  else
+    {
+      gas_assert (abi_xlen != 0 && xlen != 0 && float_abi != FLOAT_ABI_DEFAULT);
+      if (abi_xlen > xlen)
+	as_bad ("can't have %d-bit ABI on %d-bit ISA", abi_xlen, xlen);
+      else if (abi_xlen < xlen)
+	as_bad ("%d-bit ABI not yet supported on %d-bit ISA", abi_xlen, xlen);
+    }
+
+  /* Update the EF_RISCV_FLOAT_ABI field of elf_flags.  */
+  elf_flags &= ~EF_RISCV_FLOAT_ABI;
+  elf_flags |= float_abi << 1;
+
+  if (rve_abi)
+    elf_flags |= EF_RISCV_RVE;
 }
 
 /* Handle of the OPCODE hash table.  */
@@ -2542,6 +2594,7 @@ md_assemble (char *str)
   if (!start_assemble)
     {
       start_assemble = TRUE;
+      riscv_set_abi_by_arch ();
 
       /* Set the default_priv_spec according to the priv attributes.  */
       if (!riscv_set_default_priv_spec (NULL))
@@ -2613,23 +2666,6 @@ struct option md_longopts[] =
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
-enum float_abi {
-  FLOAT_ABI_DEFAULT = -1,
-  FLOAT_ABI_SOFT,
-  FLOAT_ABI_SINGLE,
-  FLOAT_ABI_DOUBLE,
-  FLOAT_ABI_QUAD
-};
-static enum float_abi float_abi = FLOAT_ABI_DEFAULT;
-
-static void
-riscv_set_abi (unsigned new_xlen, enum float_abi new_float_abi, bfd_boolean rve)
-{
-  abi_xlen = new_xlen;
-  float_abi = new_float_abi;
-  rve_abi = rve;
-}
-
 int
 md_parse_option (int c, const char *arg)
 {
@@ -2670,6 +2706,7 @@ md_parse_option (int c, const char *arg)
 	riscv_set_abi (64, FLOAT_ABI_QUAD, FALSE);
       else
 	return 0;
+      explicit_mabi = TRUE;
       break;
 
     case OPTION_RELAX:
@@ -2753,36 +2790,6 @@ riscv_after_parse_args (void)
      according to DEFAULT_PRIV_SPEC.  */
   if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
     riscv_set_default_priv_spec (DEFAULT_RISCV_PRIV_SPEC);
-
-  /* Infer ABI from ISA if not specified on command line.  */
-  if (abi_xlen == 0)
-    abi_xlen = xlen;
-  else if (abi_xlen > xlen)
-    as_bad ("can't have %d-bit ABI on %d-bit ISA", abi_xlen, xlen);
-  else if (abi_xlen < xlen)
-    as_bad ("%d-bit ABI not yet supported on %d-bit ISA", abi_xlen, xlen);
-
-  if (float_abi == FLOAT_ABI_DEFAULT)
-    {
-      riscv_subset_t *subset;
-
-      /* Assume soft-float unless D extension is present.  */
-      float_abi = FLOAT_ABI_SOFT;
-
-      for (subset = riscv_subsets.head; subset != NULL; subset = subset->next)
-	{
-	  if (strcasecmp (subset->name, "D") == 0)
-	    float_abi = FLOAT_ABI_DOUBLE;
-	  if (strcasecmp (subset->name, "Q") == 0)
-	    float_abi = FLOAT_ABI_QUAD;
-	}
-    }
-
-  if (rve_abi)
-    elf_flags |= EF_RISCV_RVE;
-
-  /* Insert float_abi into the EF_RISCV_FLOAT_ABI field of elf_flags.  */
-  elf_flags |= float_abi * (EF_RISCV_FLOAT_ABI & ~(EF_RISCV_FLOAT_ABI << 1));
 
   /* If the CIE to be produced has not been overridden on the command line,
      then produce version 3 by default.  This allows us to use the full
@@ -3514,6 +3521,7 @@ tc_riscv_regname_to_dw2regnum (char *regname)
 void
 riscv_elf_final_processing (void)
 {
+  riscv_set_abi_by_arch ();
   elf_elfheader (stdoutput)->e_flags |= elf_flags;
 }
 

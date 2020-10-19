@@ -1,3 +1,35 @@
+2020-11-09  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (explicit_mabi): New boolean to indicate if
+	the -mabi= option is explictly set.
+	(md_parse_option): Set explicit_mabi to TRUE if -mabi is set.
+	(riscv_set_abi_by_arch): New function.  If the -mabi option isn't
+	set, then we set the abi according to the architecture string.
+	Otherwise, check if there are conflicts between architecture
+	and abi setting.
+	(riscv_after_parse_args): Move the abi setting to md_assemble nad
+	riscv_elf_final_processing.
+	(md_assemble): Call the riscv_set_abi_by_arch when we set the
+	start_assemble to TRUE.
+	(riscv_elf_final_processing): Likewise, in case the file without
+	any instruction.
+	* testsuite/gas/riscv/mabi-attr-01.s: New testcase.
+	* testsuite/gas/riscv/mabi-attr-02.s: Likewise.
+	* testsuite/gas/riscv/mabi-attr-03.s: Likewise.
+	* testsuite/gas/riscv/mabi-fail-01.d: Likewise.
+	* testsuite/gas/riscv/mabi-fail-01.l: Likewise.
+	* testsuite/gas/riscv/mabi-fail-02.d: Likewise.
+	* testsuite/gas/riscv/mabi-fail-02.l: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-attr-01a.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-attr-01b.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-attr-02a.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-attr-02b.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-attr-03a.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-attr-03b.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-march-01.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-march-02.d: Likewise.
+	* testsuite/gas/riscv/mabi-noabi-march-03.d: Likewise.
+
 2020-11-04  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* testsuite/gas/aarch64/armv8-ras-1_1-invalid.d: New test.
