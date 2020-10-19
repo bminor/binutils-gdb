@@ -1,5 +1,10 @@
 2020-10-19  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* thread.c (_initialize_thread): Fine-tune the help text of
+	'info threads'.
+
+2020-10-19  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* frame.c: Remove the unused 'uinteger_option_def' type alias.
 
 2020-10-14  Mihails Strasuns  <mihails.strasuns@intel.com>

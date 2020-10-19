@@ -2183,11 +2183,11 @@ _initialize_thread ()
     = gdb::option::build_help (_("\
 Display currently known threads.\n\
 Usage: info threads [OPTION]... [ID]...\n\
+If ID is given, it is a space-separated list of IDs of threads to display.\n\
+Otherwise, all threads are displayed.\n\
 \n\
 Options:\n\
-%OPTIONS%\
-If ID is given, it is a space-separated list of IDs of threads to display.\n\
-Otherwise, all threads are displayed."),
+%OPTIONS%"),
 			       info_threads_opts);
 
   c = add_info ("threads", info_threads_command, info_threads_help.c_str ());
