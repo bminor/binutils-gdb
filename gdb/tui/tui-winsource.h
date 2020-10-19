@@ -171,6 +171,8 @@ public:
   /* Erase the source content.  */
   virtual void erase_source_content () = 0;
 
+  void refresh_window () override;
+
   /* Return the start address and gdbarch.  */
   virtual void display_start_addr (struct gdbarch **gdbarch_p,
 				   CORE_ADDR *addr_p) = 0;
@@ -178,9 +180,6 @@ public:
 private:
 
   void show_source_content ();
-
-  /* Re-display the pad in the window.  */
-  void refresh_pad ();
 
   /* Called when the user "set style enabled" setting is changed.  */
   void style_changed ();

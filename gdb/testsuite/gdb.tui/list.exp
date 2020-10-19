@@ -40,3 +40,5 @@ Term::check_contents "list -q main" "21 *return 0"
 # to ensure that GDB has a valid idea of what is currently focused.
 Term::command "focus next"
 Term::check_contents "focus next" "Focus set to cmd window"
+# PR tui/26719 - switching focus would clear the source window.
+Term::check_contents "source is still visible" "21 *return 0"

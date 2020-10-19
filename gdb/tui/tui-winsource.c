@@ -250,8 +250,10 @@ tui_source_window_base::show_source_line (int lineno)
 /* See tui-winsource.h.  */
 
 void
-tui_source_window_base::refresh_pad ()
+tui_source_window_base::refresh_window ()
 {
+  tui_win_info::refresh_window ();
+
   int pad_width = std::max (m_max_length, width);
   int left_margin = 1 + TUI_EXECINFO_SIZE + extra_margin ();
   int view_width = width - left_margin - 1;
@@ -277,8 +279,6 @@ tui_source_window_base::show_source_content ()
   werase (m_pad.get ());
   for (int lineno = 0; lineno < m_content.size (); lineno++)
     show_source_line (lineno);
-
-  refresh_pad ();
 
   refresh_window ();
 }
@@ -377,7 +377,7 @@ tui_source_window_base::do_scroll_horizontal (int num_to_scroll)
       if (offset < 0)
 	offset = 0;
       m_horizontal_offset = offset;
-      refresh_pad ();
+      refresh_window ();
     }
 }
 

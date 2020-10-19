@@ -1,3 +1,13 @@
+2020-10-19  Tom Tromey  <tromey@adacore.com>
+
+	PR tui/26719
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<refresh_window>: Rename from refresh_pad.
+	* tui/tui-winsource.c (tui_source_window_base::refresh_window):
+	Rename from refresh_pad.
+	(tui_source_window_base::show_source_content)
+	(tui_source_window_base::do_scroll_horizontal): Update.
+
 2020-10-19  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* thread.c (_initialize_thread): Fine-tune the help text of
