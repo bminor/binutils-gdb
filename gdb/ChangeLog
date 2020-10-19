@@ -1,3 +1,7 @@
+2020-10-19  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* frame.c: Remove the unused 'uinteger_option_def' type alias.
+
 2020-10-14  Mihails Strasuns  <mihails.strasuns@intel.com>
 
 	* breakpoint.c (handle_jit_event): Add an argument, change how
