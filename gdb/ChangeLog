@@ -1,5 +1,13 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-tdep.c (aarch64_linux_cregmap)
+	(aarch64_linux_cregset): New structs.
+	(aarch64_linux_iterate_over_regset_sections): Check for capability
+	registers.
+	(aarch64_linux_init_abi): Initialize C register set numbers.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_analyze_prologue): Handle C registers and
 	a64c instructions.
 	(aarch64_scan_prologue): Add debugging output.
