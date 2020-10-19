@@ -2022,7 +2022,8 @@ dump_literals (int isforce)
 	emit_expr (& p->e, 4);
 
       if (p->e.X_op == O_big)
-	i += ((p->e.X_add_number  * CHARS_PER_LITTLENUM) >> 2);
+	i += (p->e.X_add_number & 1) +
+	  ((p->e.X_add_number  * CHARS_PER_LITTLENUM) >> 2);
       else
 	i += (p->isdouble ? 2 : 1);
     }
