@@ -1,5 +1,9 @@
 2020-10-20  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/pr13961.S: Remove superfluous end-of-siblings marker.
+
+2020-10-20  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/arr-stride.c: Remove.
 	* gdb.dwarf2/arr-stride.exp: Use main.c.
 	* gdb.dwarf2/arr-subrange.c: Remove.
