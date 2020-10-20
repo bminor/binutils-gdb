@@ -1477,7 +1477,7 @@ step_over_info_valid_p (void)
 
 displaced_step_closure::~displaced_step_closure () = default;
 
-/* Get the displaced stepping state of process PID.  */
+/* Get the displaced stepping state of inferior INF.  */
 
 static displaced_step_inferior_state *
 get_displaced_stepping_state (inferior *inf)

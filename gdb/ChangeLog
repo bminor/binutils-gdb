@@ -1,3 +1,7 @@
+2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.c (get_displaced_stepping_state): Fix comment.
+
 2020-10-20  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* cli/cli-cmds.c (_initialize_cli_cmds): Fix alias command help.
