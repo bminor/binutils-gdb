@@ -1,5 +1,32 @@
 2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* infrun.c (currently_stepping): Change int to bool
+	(maybe_software_singlestep): Likewise.
+	(show_stop_on_solib_events): Likewise.
+	(stepping_past_nonsteppable_watchpoint): Likewise.
+	(displaced_step_in_progress_any_inferior): Likewise.
+	(displaced_step_in_progress_thread): Likewise.
+	(keep_going_stepped_thread): Likewise.
+	(thread_still_needs_step_over): Likewise.
+	(start_step_over): Likewise.
+	(do_target_resume): Likewise.
+	(resume_1): Likewise.
+	(clear_proceed_status): Likewise.
+	(thread_still_needs_step_over_bp): Likewise.
+	(proceed): Likewise.
+	(switch_back_to_stepped_thread): Likewise.
+	(adjust_pc_after_break): Likewise.
+	(stepped_in_from): Likewise.
+	(handle_stop_requested): Likewise.
+	(handle_syscall_event): Likewise.
+	(handle_no_resumed): Likewise.
+	(handle_inferior_event): Likewise.
+	(finish_step_over): Likewise.
+	(handle_signal_stop): Likewise.
+	(process_event_stop_test): Likewise.
+
+2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* infrun.c (get_displaced_stepping_state): Fix comment.
 
 2020-10-20  Andreas Schwab  <schwab@linux-m68k.org>
