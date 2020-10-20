@@ -1,3 +1,8 @@
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
+	* aarch64-tbl.h (aarch64_opcode_table): Update iclass field
+	for add/sub
+
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
 	* aarch64-dis.c (get_sym_code_type): Fix C64 PLT disassembly.
