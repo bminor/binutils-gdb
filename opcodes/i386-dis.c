@@ -969,6 +969,8 @@ enum
   PREFIX_0F01_REG_5_MOD_3_RM_6,
   PREFIX_0F01_REG_5_MOD_3_RM_7,
   PREFIX_0F01_REG_7_MOD_3_RM_2,
+  PREFIX_0F01_REG_7_MOD_3_RM_6,
+  PREFIX_0F01_REG_7_MOD_3_RM_7,
   PREFIX_0F09,
   PREFIX_0F10,
   PREFIX_0F11,
@@ -1202,6 +1204,9 @@ enum
   X86_64_0F01_REG_5_MOD_3_RM_5_PREFIX_1,
   X86_64_0F01_REG_5_MOD_3_RM_6_PREFIX_1,
   X86_64_0F01_REG_5_MOD_3_RM_7_PREFIX_1,
+  X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1,
+  X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3,
+  X86_64_0F01_REG_7_MOD_3_RM_7_PREFIX_1,
   X86_64_0FC7_REG_6_MOD_3_PREFIX_1
 };
 
@@ -3210,6 +3215,22 @@ static const struct dis386 prefix_table[][4] = {
     { "mcommit",	{ Skip_MODRM }, 0 },
   },
 
+  /* PREFIX_0F01_REG_7_MOD_3_RM_6 */
+  {
+    { "invlpgb",        { Skip_MODRM }, 0 },
+    { X86_64_TABLE (X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1) },
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3) },
+  },
+
+  /* PREFIX_0F01_REG_7_MOD_3_RM_7 */
+  {
+    { "tlbsync",        { Skip_MODRM }, 0 },
+    { X86_64_TABLE (X86_64_0F01_REG_7_MOD_3_RM_7_PREFIX_1) },
+    { Bad_Opcode },
+    { "pvalidate",      { Skip_MODRM }, 0 },
+  },
+
   /* PREFIX_0F09 */
   {
     { "wbinvd",   { XX }, 0 },
@@ -4382,6 +4403,24 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { "stui",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "rmpadjust",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3 */
+  {
+    { Bad_Opcode },
+    { "rmpupdate",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_7_MOD_3_RM_7_PREFIX_1 */
+  {
+    { Bad_Opcode },
+    { "psmash",	{ Skip_MODRM }, 0 },
   },
 
   /* X86_64_0FC7_REG_6_MOD_3_PREFIX_1 */
@@ -8990,6 +9029,8 @@ static const struct dis386 rm_table[][8] = {
     { "mwaitx",		{ { OP_Mwait, eBX_reg } }, PREFIX_OPCODE },
     { "clzero",		{ Skip_MODRM }, 0  },
     { "rdpru",		{ Skip_MODRM }, 0  },
+    { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_6) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_7) },
   },
   {
     /* RM_0F1E_P_1_MOD_3_REG_7 */

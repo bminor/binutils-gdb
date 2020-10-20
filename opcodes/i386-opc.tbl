@@ -3960,6 +3960,19 @@ vpclmulhqhqdq, 3, 0x6644, 0x11, 1, CpuVPCLMULQDQ|CpuAVX512F, Modrm|OpcodePrefix=
 
 // AVX512 + VPCLMULQDQ instructions end
 
+// INVLPGB instructions
+
+invlpgb, 0, 0xf01fe, None, 3, CpuINVLPGB, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+invlpgb, 2, 0xf01fe, None, 3, CpuINVLPGB, AddrPrefixOpReg, { Acc|Word|Dword|Qword, RegD|Dword }
+
+// INVLPGB instructions end
+
+// TLBSYNC instructions
+
+tlbsync, 0, 0xf01ff, None, 3, CpuTLBSYNC, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// TLBSYNC instructions end
+
 // CLZERO instructions
 
 clzero, 0, 0xf01fc, None, 3, CpuCLZERO, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
@@ -4091,6 +4104,19 @@ vp2intersectq, 3, 0xf268, None, 1, CpuAVX512_VP2INTERSECT, Modrm|OpcodePrefix|Ve
 mcommit, 0, 0x0f01fa, None, 3, CpuMCOMMIT, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // MCOMMIT instruction end
+
+// SNP instructions
+
+psmash, 0, 0xf01ff, None, 3, CpuSNP|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+psmash, 1, 0xf01ff, None, 3, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF3, { Acc|Dword|Qword }
+pvalidate, 0, 0xf01ff, None, 3, CpuSNP, Prefix_0XF2|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+pvalidate, 1, 0xf01ff, None, 3, CpuSNP, AddrPrefixOpReg|Prefix_0XF2, { Acc|Word|Dword|Qword }
+rmpupdate, 0, 0xf01fe, None, 3, CpuSNP|Cpu64, Prefix_0XF2|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+rmpupdate, 1, 0xf01fe, None, 3, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF2, { Acc|Dword|Qword }
+rmpadjust, 0, 0xf01fe, None, 3, CpuSNP|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+rmpadjust, 1, 0xf01fe, None, 3, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF3, { Acc|Dword|Qword }
+
+// SNP instructions end
 
 // RDPRU instruction
 

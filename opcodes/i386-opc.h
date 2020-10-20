@@ -271,6 +271,12 @@ enum
   CpuWideKL,
   /* HRESET instruction required */
   CpuHRESET,
+  /* INVLPGB instructions required */
+  CpuINVLPGB,
+  /* TLBSYNC instructions required */
+  CpuTLBSYNC,
+  /* SNP instructions required */
+  CpuSNP,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -414,6 +420,9 @@ typedef union i386_cpu_flags
       unsigned int cpukl:1;
       unsigned int cpuwidekl:1;
       unsigned int cpuhreset:1;
+      unsigned int cpuinvlpgb:1;
+      unsigned int cputlbsync:1;
+      unsigned int cpusnp:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused

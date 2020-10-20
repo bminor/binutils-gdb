@@ -1,3 +1,16 @@
+2020-10-20  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
+
+	* i386-dis.c (rm_table): Add tlbsync, snp, invlpgb.
+	* i386-gen.c (cpu_flag_init): Add new CPU_INVLPGB_FLAGS,
+	CPU_TLBSYNC_FLAGS, and CPU_SNP_FLAGS.
+	Add CPU_ZNVER3_FLAGS.
+	(cpu_flags): Add CpuINVLPGB, CpuTLBSYNC, CpuSNP.
+	* i386-opc.h: Add CpuINVLPGB, CpuTLBSYNC, CpuSNP.
+	* i386-opc.tbl: Add invlpgb, tlbsync, psmash, pvalidate,
+	rmpupdate, rmpadjust.
+	* i386-init.h: Re-generated.
+	* i386-tbl.h: Re-generated.
+
 2020-10-16  Lili Cui  <lili.cui@intel.com>
 
 	* i386-opc.tbl: Rename CpuVEX_PREFIX to PseudoVexPrefix

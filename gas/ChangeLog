@@ -1,3 +1,24 @@
+2020-10-20  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add CPU_ZNVER3_FLAGS flags.
+	(i386_align_code): Add PROCESSOR_ZNVER cases.
+	* doc/c-i386.texi: Add znver3, snp, invlpgb and tlbsync.
+	* gas/i386/i386.exp: Add new znver3 test cases.
+	* gas/i386/arch-14-znver3.d: New.
+	* gas/i386/arch-14.d: New.
+	* gas/i386/arch-14.s: New.
+	* gas/i386/invlpgb.d: New.
+	* gas/i386/invlpgb64.d: New.
+	* gas/i386/invlpgb.s: New.
+	* gas/i386/snp.d: New.
+	* gas/i386/snp64.d: New.
+	* gas/i386/snp.s: New.
+	* gas/i386/tlbsync.d: New.
+	* gas/i386/tlbsync.s: New.
+	* gas/i386/x86-64-arch-4-znver3.d: New.
+	* gas/i386/x86-64-arch-4.d: New.
+	* gas/i386/x86-64-arch-4.s: New.
+
 2020-10-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25878

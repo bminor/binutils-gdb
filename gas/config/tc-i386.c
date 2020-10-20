@@ -1014,6 +1014,8 @@ static const arch_entry cpu_arch[] =
     CPU_ZNVER1_FLAGS, 0 },
   { STRING_COMMA_LEN ("znver2"), PROCESSOR_ZNVER,
     CPU_ZNVER2_FLAGS, 0 },
+  { STRING_COMMA_LEN ("znver3"), PROCESSOR_ZNVER,
+    CPU_ZNVER3_FLAGS, 0 },
   { STRING_COMMA_LEN ("btver1"), PROCESSOR_BT,
     CPU_BTVER1_FLAGS, 0 },
   { STRING_COMMA_LEN ("btver2"), PROCESSOR_BT,

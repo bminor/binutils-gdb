@@ -125,6 +125,7 @@ processor names are recognized:
 @code{bdver4},
 @code{znver1},
 @code{znver2},
+@code{znver3},
 @code{btver1},
 @code{btver2},
 @code{generic32} and
@@ -285,6 +286,9 @@ accept various extension mnemonics.  For example,
 @code{3dnowa},
 @code{sse4a},
 @code{sse5},
+@code{snp},
+@code{invlpgb},
+@code{tlbsync},
 @code{svme} and
 @code{padlock}.
 Note that rather than extending a basic instruction set, the extension
@@ -1496,8 +1500,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{corei7} @tab @samp{l1om} @tab @samp{k1om} @tab @samp{iamcu}
 @item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
 @item @samp{amdfam10} @tab @samp{bdver1} @tab @samp{bdver2} @tab @samp{bdver3}
-@item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{btver1}
-@item @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
+@item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{znver3}
+@item @samp{btver1} @tab @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
 @item @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
 @item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @tab @samp{.sse4a}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
@@ -1526,7 +1530,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
-@item @samp{.mcommit} @tab @samp{.sev_es}
+@item @samp{.mcommit} @tab @samp{.sev_es} @tab @samp{.snp} @tab @samp{.invlpgb}
+@item @samp{.tlbsync}
 @end multitable
 
 Apart from the warning, there are only two other effects on
