@@ -19,14 +19,14 @@
 
 /* A node or item of varobj, composed of the name and the value.  */
 
-typedef struct varobj_item
+struct varobj_item
 {
   /* Name of this item.  */
   std::string name;
 
   /* Value of this item.  */
   struct value *value;
-} varobj_item;
+};
 
 struct varobj_iter_ops;
 

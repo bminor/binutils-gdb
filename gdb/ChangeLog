@@ -1,3 +1,7 @@
+2020-10-20  Tom Tromey  <tom@tromey.com>
+
+	* varobj-iter.h (struct varobj_item): Remove typedef.
+
 2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (currently_stepping): Change int to bool
