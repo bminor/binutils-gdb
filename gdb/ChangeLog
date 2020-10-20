@@ -1,5 +1,13 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* c-lang.c (c_printchar): Rename to...
+	(language_defn::printchar): ...this.
+	* c-lang.h (c_printchar): Delete declaration.
+	* language.c (language_defn::printchar): Delete this
+	implementation.  Is now implemented in c-lang.c.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2/read.c (dwarf2_compute_name): Call methods on C++
 	language object instead of calling global functions directly.
 

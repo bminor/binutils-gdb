@@ -678,15 +678,6 @@ language_defn::emitchar (int ch, struct type *chtype,
 /* See language.h.  */
 
 void
-language_defn::printchar (int ch, struct type *chtype,
-			  struct ui_file * stream) const
-{
-  c_printchar (ch, chtype, stream);
-}
-
-/* See language.h.  */
-
-void
 language_defn::printstr (struct ui_file *stream, struct type *elttype,
 			 const gdb_byte *string, unsigned int length,
 			 const char *encoding, int force_ellipses,

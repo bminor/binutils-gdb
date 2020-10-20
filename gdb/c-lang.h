@@ -95,8 +95,6 @@ extern struct value *evaluate_subexp_c (struct type *expect_type,
 					int *pos,
 					enum noside noside);
 
-extern void c_printchar (int, struct type *, struct ui_file *);
-
 extern void c_printstr (struct ui_file * stream,
 			struct type *elttype,
 			const gdb_byte *string,
