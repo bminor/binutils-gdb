@@ -155,7 +155,7 @@ public:
 		  struct ui_file *stream) const override
   {
     fputs_filtered ("'", stream);
-    LA_EMIT_CHAR (ch, chtype, stream, '\'');
+    emitchar (ch, chtype, stream, '\'');
     fputs_filtered ("'", stream);
   }
 

@@ -1,5 +1,14 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* c-lang.c (language_defn::printchar): Call emitchar, not
+	LA_EMIT_CHAR.
+	* f-lang.h (f_language::printchar): Likewise.
+	* language.h (LA_EMIT_CHAR): Delete macro.
+	* rust-lang.c (rust_language::printchar): Call emitchar, not
+	LA_EMIT_CHAR.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* c-lang.c (c_printchar): Rename to...
 	(language_defn::printchar): ...this.
 	* c-lang.h (c_printchar): Delete declaration.

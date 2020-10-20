@@ -775,8 +775,6 @@ extern enum language set_language (enum language);
 #define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \
   (current_language->printstr (stream, elttype, string, length, \
 			       encoding, force_ellipses,options))
-#define LA_EMIT_CHAR(ch, type, stream, quoter) \
-  (current_language->emitchar (ch, type, stream, quoter))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,

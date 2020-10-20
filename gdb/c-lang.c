@@ -178,7 +178,7 @@ language_defn::printchar (int c, struct type *type,
     }
 
   fputc_filtered ('\'', stream);
-  LA_EMIT_CHAR (c, type, stream, '\'');
+  emitchar (c, type, stream, '\'');
   fputc_filtered ('\'', stream);
 }
 
