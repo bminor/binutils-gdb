@@ -38,7 +38,7 @@
 
 #include "dis-asm.h"
 
-int
+bool
 default_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
 				      struct displaced_step_closure *closure)
 {

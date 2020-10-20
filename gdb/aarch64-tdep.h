@@ -117,7 +117,7 @@ void aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 				   CORE_ADDR from, CORE_ADDR to,
 				   struct regcache *regs);
 
-int aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
-					  struct displaced_step_closure *closure);
+bool aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
+					   displaced_step_closure *closure);
 
 #endif /* aarch64-tdep.h */

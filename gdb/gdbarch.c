@@ -3986,7 +3986,7 @@ set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch,
   gdbarch->displaced_step_copy_insn = displaced_step_copy_insn;
 }
 
-int
+bool
 gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, struct displaced_step_closure *closure)
 {
   gdb_assert (gdbarch != NULL);

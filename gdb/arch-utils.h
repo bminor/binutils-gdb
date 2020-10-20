@@ -75,7 +75,7 @@ struct bp_manipulation_endian
   BREAK_INSN_LITTLE, BREAK_INSN_BIG>
 
 /* Default implementation of gdbarch_displaced_hw_singlestep.  */
-extern int
+extern bool
   default_displaced_step_hw_singlestep (struct gdbarch *,
 					struct displaced_step_closure *);
 

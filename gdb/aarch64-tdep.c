@@ -3269,11 +3269,11 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 
 /* Implement the "displaced_step_hw_singlestep" gdbarch method.  */
 
-int
+bool
 aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
 				      struct displaced_step_closure *closure)
 {
-  return 1;
+  return true;
 }
 
 /* Get the correct target description for the given VQ value.

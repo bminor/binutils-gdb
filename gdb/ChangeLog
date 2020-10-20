@@ -1,5 +1,19 @@
 2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbarch.sh (displaced_step_hw_singlestep): Return bool.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+	* aarch64-tdep.c (aarch64_displaced_step_hw_singlestep): Return
+	bool.
+	* aarch64-tdep.h (aarch64_displaced_step_hw_singlestep):
+	Likewise.
+	* arch-utils.h (default_displaced_step_hw_singlestep): Likewise.
+	* arch-utils.c (default_displaced_step_hw_singlestep): Likewise.
+	* rs6000-tdep.c (ppc_displaced_step_hw_singlestep): Likewise.
+	* s390-tdep.c (s390_displaced_step_hw_singlestep): Likewise.
+
+2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbarch.sh: Make generated predicates return bool.
 	* gdbarch.c: Re-generate.
 	* gdbarch.h: Re-generate.
