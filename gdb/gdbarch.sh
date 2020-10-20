@@ -1388,7 +1388,7 @@ do
     if class_is_predicate_p
     then
 	printf "\n"
-	printf "extern int gdbarch_%s_p (struct gdbarch *gdbarch);\n" "$function"
+	printf "extern bool gdbarch_%s_p (struct gdbarch *gdbarch);\n" "$function"
     fi
     if class_is_variable_p
     then
@@ -2063,7 +2063,7 @@ do
     if class_is_predicate_p
     then
 	printf "\n"
-	printf "int\n"
+	printf "bool\n"
 	printf "gdbarch_%s_p (struct gdbarch *gdbarch)\n" "$function"
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"

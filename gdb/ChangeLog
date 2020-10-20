@@ -1,3 +1,9 @@
+2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh: Make generated predicates return bool.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+
 2020-10-20  Tom Tromey  <tom@tromey.com>
 
 	* varobj-iter.h (struct varobj_item): Remove typedef.
