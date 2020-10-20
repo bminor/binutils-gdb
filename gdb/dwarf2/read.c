@@ -10549,6 +10549,7 @@ dwarf2_compute_name (const char *name,
 	      struct attribute *attr;
 	      struct die_info *child;
 	      int first = 1;
+	      const language_defn *cplus_lang = language_def (cu->language);
 
 	      die->building_fullname = 1;
 
@@ -10583,8 +10584,8 @@ dwarf2_compute_name (const char *name,
 
 		  if (child->tag == DW_TAG_template_type_param)
 		    {
-		      c_print_type (type, "", &buf, -1, 0, cu->language,
-				    &type_print_raw_options);
+		      cplus_lang->print_type (type, "", &buf, -1, 0,
+					      &type_print_raw_options);
 		      continue;
 		    }
 
@@ -10604,7 +10605,7 @@ dwarf2_compute_name (const char *name,
 		  if (type->has_no_signedness ())
 		    /* GDB prints characters as NUMBER 'CHAR'.  If that's
 		       changed, this can use value_print instead.  */
-		    c_printchar (value, type, &buf);
+		    cplus_lang->printchar (value, type, &buf);
 		  else
 		    {
 		      struct value_print_options opts;

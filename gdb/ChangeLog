@@ -1,5 +1,10 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2/read.c (dwarf2_compute_name): Call methods on C++
+	language object instead of calling global functions directly.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* valprint.c (print_char_chars): Delete definition.
 	* valprint.h (print_char_chars): Delete declaration.
 
