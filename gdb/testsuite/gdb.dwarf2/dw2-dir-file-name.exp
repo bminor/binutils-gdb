@@ -22,7 +22,7 @@ if {![dwarf2_support]} {
 # This test has hard-wired assumptions that host and build filenames are
 # the same, and assumes POSIX pathname syntax.
 if { [is_remote host] || [ishost *-*-mingw*] } {
-    unsupported "dw2-dir-file-name.exp can only run on local host"
+    unsupported "can only run on local host"
     return 0
 }
 

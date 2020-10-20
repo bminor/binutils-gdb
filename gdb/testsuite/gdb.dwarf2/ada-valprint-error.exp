@@ -29,7 +29,7 @@ standard_testfile .c -dw.S
 # specifically for this testcase, might as well use that.
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
-    untested ${testfile}.exp
+    untested "failed to compile"
     return -1
 }
 
