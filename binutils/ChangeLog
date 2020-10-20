@@ -1,3 +1,7 @@
+2020-10-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* MAINTAINERS (RISC-V): Add myself as RISC-V co-maintainer.
+
 2020-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (do_lto_syms): New local.
