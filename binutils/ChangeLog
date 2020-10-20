@@ -1,3 +1,18 @@
+2020-10-20  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c: Delete whitespace at end of line throughout.
+	(SECTION_NAME, SECTION_NAME_VALID): New.
+	(SECTION_NAME_PRINT): Rename from SECTION_NAME.  Formatting.
+	(printable_section_name, dump_relocations): Use SECTION_NAME_PRINT.
+	(process_section_headers, process_section_groups): Likewise.
+	(shdr_to_ctf_sect): Likewise.
+	(find_section, find_section_in_set): Use SECTION_NAME_VALID.
+	(ia64_process_unwind, hppa_process_unwind): Likewise.
+	(display_debug_section, initialise_dumps_byname): Likewise.
+	(process_lto_symbol_tables): Likewise.  Check trailing period of
+	lto symbol table names.
+	(display_lto_symtab): Use sizeof instead of strlen.
+
 2020-10-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* MAINTAINERS (RISC-V): Add myself as RISC-V co-maintainer.

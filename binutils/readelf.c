@@ -335,11 +335,19 @@ static const char * get_symbol_version_string
 
 #define UNKNOWN -1
 
-#define SECTION_NAME(X)						\
-  ((X) == NULL ? _("<none>")					\
-   : filedata->string_table == NULL ? _("<no-strings>")		\
-   : ((X)->sh_name >= filedata->string_table_length ? _("<corrupt>")	\
-  : filedata->string_table + (X)->sh_name))
+#define SECTION_NAME(X) \
+  (filedata->string_table + (X)->sh_name)
+
+#define SECTION_NAME_VALID(X) \
+  ((X) != NULL								\
+   && filedata->string_table != NULL					\
+   && (X)->sh_name < filedata->string_table_length)
+
+#define SECTION_NAME_PRINT(X) \
+  ((X) == NULL ? _("<none>")						\
+   : filedata->string_table == NULL ? _("<no-strings>")			\
+   : (X)->sh_name >= filedata->string_table_length ? _("<corrupt>")	\
+   : filedata->string_table + (X)->sh_name)
 
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
 
@@ -669,7 +677,7 @@ printable_section_name (Filedata * filedata, const Elf_Internal_Shdr * sec)
 {
 #define MAX_PRINT_SEC_NAME_LEN 128
   static char  sec_name_buf [MAX_PRINT_SEC_NAME_LEN + 1];
-  const char * name = SECTION_NAME (sec);
+  const char * name = SECTION_NAME_PRINT (sec);
   char *       buf = sec_name_buf;
   char         c;
   unsigned int remaining = MAX_PRINT_SEC_NAME_LEN;
@@ -731,7 +739,8 @@ find_section (Filedata * filedata, const char * name)
     return NULL;
 
   for (i = 0; i < filedata->file_header.e_shnum; i++)
-    if (streq (SECTION_NAME (filedata->section_headers + i), name))
+    if (SECTION_NAME_VALID (filedata->section_headers + i)
+	&& streq (SECTION_NAME (filedata->section_headers + i), name))
       return filedata->section_headers + i;
 
   return NULL;
@@ -797,7 +806,8 @@ find_section_in_set (Filedata * filedata, const char * name, unsigned int * set)
 	  if (i >= filedata->file_header.e_shnum)
 	    continue; /* FIXME: Should we issue an error message ?  */
 
-	  if (streq (SECTION_NAME (filedata->section_headers + i), name))
+	  if (SECTION_NAME_VALID (filedata->section_headers + i)
+	      && streq (SECTION_NAME (filedata->section_headers + i), name))
 	    return filedata->section_headers + i;
 	}
     }
@@ -1729,7 +1739,8 @@ dump_relocations (Filedata *          filedata,
 		  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION)
 		    {
 		      if (psym->st_shndx < filedata->file_header.e_shnum)
-			sec_name = SECTION_NAME (filedata->section_headers + psym->st_shndx);
+			sec_name = SECTION_NAME_PRINT (filedata->section_headers
+						       + psym->st_shndx);
 		      else if (psym->st_shndx == SHN_ABS)
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
@@ -4034,7 +4045,7 @@ get_segment_type (Filedata * filedata, unsigned long p_type)
     case PT_OPENBSD_RANDOMIZE: return "OPENBSD_RANDOMIZE";
     case PT_OPENBSD_WXNEEDED: return "OPENBSD_WXNEEDED";
     case PT_OPENBSD_BOOTDATA: return "OPENBSD_BOOTDATA";
-      
+
     default:
       if ((p_type >= PT_LOPROC) && (p_type <= PT_HIPROC))
 	{
@@ -4915,7 +4926,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	case OPTION_WITH_SYMBOL_VERSIONS:
 	  /* Ignored for backward compatibility.  */
 	  break;
-	  
+
 	default:
 	  /* xgettext:c-format */
 	  error (_("Invalid option '-%c'\n"), c);
@@ -6394,7 +6405,7 @@ process_section_headers (Filedata * filedata)
        i < filedata->file_header.e_shnum;
        i++, section++)
     {
-      char * name = SECTION_NAME (section);
+      char * name = SECTION_NAME_PRINT (section);
 
       /* Run some sanity checks on the headers and
 	 possibly fill in some file data as well.  */
@@ -6730,7 +6741,7 @@ process_section_headers (Filedata * filedata)
       if (do_section_details)
 	printf ("%s\n      ", printable_section_name (filedata, section));
       else
-	print_symbol (-17, SECTION_NAME (section));
+	print_symbol (-17, SECTION_NAME_PRINT (section));
 
       printf (do_wide ? " %-15s " : " %-15.15s ",
 	      get_section_type_name (filedata, section->sh_type));
@@ -7127,7 +7138,8 @@ process_section_groups (Filedata * filedata)
 		  continue;
 		}
 
-	      group_name = SECTION_NAME (filedata->section_headers + sym->st_shndx);
+	      group_name = SECTION_NAME_PRINT (filedata->section_headers
+					       + sym->st_shndx);
 	      strtab_sec = NULL;
 	      free (strtab);
 	      strtab = NULL;
@@ -8055,7 +8067,8 @@ ia64_process_unwind (Filedata * filedata)
 		{
 		  sec = filedata->section_headers + g->section_index;
 
-		  if (streq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info))
+		  if (SECTION_NAME_VALID (sec)
+		      && streq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info))
 		    break;
 		}
 
@@ -8063,14 +8076,19 @@ ia64_process_unwind (Filedata * filedata)
 		i = filedata->file_header.e_shnum;
 	    }
 	}
-      else if (strneq (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind_once, len))
+      else if (SECTION_NAME_VALID (unwsec)
+	       && strneq (SECTION_NAME (unwsec),
+			  ELF_STRING_ia64_unwind_once, len))
 	{
 	  /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.ia64unwi.FOO.  */
 	  len2 = sizeof (ELF_STRING_ia64_unwind_info_once) - 1;
 	  suffix = SECTION_NAME (unwsec) + len;
-	  for (i = 0, sec = filedata->section_headers; i < filedata->file_header.e_shnum;
+	  for (i = 0, sec = filedata->section_headers;
+	       i < filedata->file_header.e_shnum;
 	       ++i, ++sec)
-	    if (strneq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info_once, len2)
+	    if (SECTION_NAME_VALID (sec)
+		&& strneq (SECTION_NAME (sec),
+			   ELF_STRING_ia64_unwind_info_once, len2)
 		&& streq (SECTION_NAME (sec) + len2, suffix))
 	      break;
 	}
@@ -8081,11 +8099,14 @@ ia64_process_unwind (Filedata * filedata)
 	  len = sizeof (ELF_STRING_ia64_unwind) - 1;
 	  len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
 	  suffix = "";
-	  if (strneq (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind, len))
+	  if (SECTION_NAME_VALID (unwsec)
+	      && strneq (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind, len))
 	    suffix = SECTION_NAME (unwsec) + len;
-	  for (i = 0, sec = filedata->section_headers; i < filedata->file_header.e_shnum;
+	  for (i = 0, sec = filedata->section_headers;
+	       i < filedata->file_header.e_shnum;
 	       ++i, ++sec)
-	    if (strneq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info, len2)
+	    if (SECTION_NAME_VALID (sec)
+		&& strneq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info, len2)
 		&& streq (SECTION_NAME (sec) + len2, suffix))
 	      break;
 	}
@@ -8468,7 +8489,8 @@ hppa_process_unwind (Filedata * filedata)
 			   &aux.strtab, &aux.strtab_size))
 	    return FALSE;
 	}
-      else if (streq (SECTION_NAME (sec), ".PARISC.unwind"))
+      else if (SECTION_NAME_VALID (sec)
+	       && streq (SECTION_NAME (sec), ".PARISC.unwind"))
 	unwsec = sec;
     }
 
@@ -8477,7 +8499,8 @@ hppa_process_unwind (Filedata * filedata)
 
   for (i = 0, sec = filedata->section_headers; i < filedata->file_header.e_shnum; ++i, ++sec)
     {
-      if (streq (SECTION_NAME (sec), ".PARISC.unwind"))
+      if (SECTION_NAME_VALID (sec)
+	  && streq (SECTION_NAME (sec), ".PARISC.unwind"))
 	{
 	  unsigned long num_unwind = sec->sh_size / 16;
 
@@ -12116,7 +12139,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
   enum versioned_symbol_info sym_info;
   unsigned short vna_other;
   Elf_Internal_Sym *psym = symtab + si;
-  
+
   printf ("%6ld: ", si);
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
@@ -12148,7 +12171,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
 				  || section->sh_type == SHT_DYNSYM),
 				 strtab, strtab_size, si,
 				 psym, &sym_info, &vna_other);
-  
+
   int len_avail = 21;
   if (! do_wide && version_string != NULL)
     {
@@ -12163,7 +12186,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
     }
 
   print_symbol (len_avail, sstr);
-    
+
   if (version_string)
     {
       if (sym_info == symbol_undefined)
@@ -12280,7 +12303,7 @@ display_lto_symtab (Filedata *           filedata,
   char * ext_name = NULL;
 
   if (asprintf (& ext_name, ".gnu.lto_.ext_symtab.%s",
-		SECTION_NAME (section) + strlen (".gnu.lto_.symtab.")) > 0
+		SECTION_NAME (section) + sizeof (".gnu.lto_.symtab.") - 1) > 0
       && ext_name != NULL /* Paranoia.  */
       && (ext = find_section (filedata, ext_name)) != NULL)
     {
@@ -12300,7 +12323,7 @@ display_lto_symtab (Filedata *           filedata,
 	    }
 	}
     }
-  
+
   const unsigned char * data = (const unsigned char *) alloced_data;
   const unsigned char * end = data + section->sh_size;
 
@@ -12321,10 +12344,10 @@ display_lto_symtab (Filedata *           filedata,
   else
     printf (_("\nLTO Symbol table '%s' contains:\n"),
 	    printable_section_name (filedata, section));
-    
+
 
   /* FIXME: Add a wide version.  */
-  if (ext_data_orig != NULL) 
+  if (ext_data_orig != NULL)
     printf (_("  Comdat_Key       Kind  Visibility     Size      Slot      Type  Section Name\n"));
   else
     printf (_("  Comdat_Key       Kind  Visibility     Size      Slot Name\n"));
@@ -12402,7 +12425,7 @@ display_lto_symtab (Filedata *           filedata,
   free (ext_data_orig);
   free (ext_name);
   return TRUE;
-  
+
  fail:
   error (_("Buffer overrun encountered whilst decoding LTO symbol table\n"));
   free (alloced_data);
@@ -12429,10 +12452,11 @@ process_lto_symbol_tables (Filedata * filedata)
   for (i = 0, section = filedata->section_headers;
        i < filedata->file_header.e_shnum;
        i++, section++)
-    if (CONST_STRNEQ (SECTION_NAME (section), ".gnu.lto_.symtab"))
+    if (SECTION_NAME_VALID (section)
+	&& CONST_STRNEQ (SECTION_NAME (section), ".gnu.lto_.symtab."))
       res &= display_lto_symtab (filedata, section);
 
-  return res; 
+  return res;
 }
 
 /* Dump the symbol table.  */
@@ -14508,7 +14532,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *  section,
 static ctf_sect_t *
 shdr_to_ctf_sect (ctf_sect_t *buf, Elf_Internal_Shdr *shdr, Filedata *filedata)
 {
-  buf->cts_name = SECTION_NAME (shdr);
+  buf->cts_name = SECTION_NAME_PRINT (shdr);
   buf->cts_size = shdr->sh_size;
   buf->cts_entsize = shdr->sh_entsize;
 
@@ -15071,7 +15095,7 @@ free_debug_section (enum dwarf_section_display_enum debug)
 static bfd_boolean
 display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * filedata)
 {
-  char * name = SECTION_NAME (section);
+  char * name = SECTION_NAME_VALID (section) ? SECTION_NAME (section) : "";
   const char * print_name = printable_section_name (filedata, section);
   bfd_size_type length;
   bfd_boolean result = TRUE;
@@ -15160,7 +15184,8 @@ initialise_dumps_byname (Filedata * filedata)
       bfd_boolean any = FALSE;
 
       for (i = 0; i < filedata->file_header.e_shnum; i++)
-	if (streq (SECTION_NAME (filedata->section_headers + i), cur->name))
+	if (SECTION_NAME_VALID (filedata->section_headers + i)
+	    && streq (SECTION_NAME (filedata->section_headers + i), cur->name))
 	  {
 	    request_dump_bynumber (&filedata->dump, i, cur->type);
 	    any = TRUE;
@@ -20863,7 +20888,7 @@ process_object (Filedata * filedata)
 
   if (! process_lto_symbol_tables (filedata))
     res = FALSE;
-  
+
   if (! process_syminfo (filedata))
     res = FALSE;
 
