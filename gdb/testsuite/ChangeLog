@@ -1,3 +1,13 @@
+2020-10-20  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dw2-error.exp: Use $gdb_test_file_name.
+	* gdb.dwarf2/dw2-line-number-zero.exp: Same.
+	* gdb.dwarf2/dw2-main-no-line-number.exp: Same.
+	* gdb.dwarf2/dw2-ranges-base.exp: Same.
+	* gdb.dwarf2/dw2-ranges.exp: Same.
+	* gdb.dwarf2/dw2-vendor-extended-opcode.exp: Same.
+	* gdb.dwarf2/var-access.exp: Same.
+
 2020-10-19  Tom Tromey  <tromey@adacore.com>
 
 	PR tui/26719

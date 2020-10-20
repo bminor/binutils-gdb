@@ -18,11 +18,9 @@
 
 load_lib dwarf.exp
 
-set testname [file rootname [file tail [info script]]]
-
 # This test can only be run on targets which support DWARF-2 and use gas.
 if {![dwarf2_support]} {
-    verbose "Skipping $testname test."
+    verbose "Skipping $gdb_test_file_name."
     return 0
 }
 
@@ -31,7 +29,7 @@ if [get_compiler_info] {
     return -1
 }
 if !$gcc_compiled {
-    verbose "Skipping $testname test."
+    verbose "Skipping $gdb_test_file_name."
     return 0
 }
 

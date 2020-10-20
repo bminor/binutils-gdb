@@ -16,7 +16,7 @@ load_lib dwarf.exp
 
 # This test can only be run on targets which support DWARF-2 and use gas.
 if {![dwarf2_support]} {
-    verbose "Skipping dw2-vendor-extended-opcode test."
+    verbose "Skipping $gdb_test_file_name."
     return 0
 }
 
@@ -25,7 +25,7 @@ if [get_compiler_info] {
     return -1
 }
 if !$gcc_compiled {
-    verbose "Skipping dw2-vendor-extended-opcode test."
+    verbose "Skipping $gdb_test_file_name."
     return 0
 }
 

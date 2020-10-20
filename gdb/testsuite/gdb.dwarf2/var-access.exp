@@ -40,7 +40,7 @@ if { [is_aarch64_target] } {
 } elseif { [is_amd64_regs_target] } {
     set regname {rax rdx}
 } else {
-    verbose "Skipping tests for accessing DWARF-described variables."
+    verbose "Skipping $gdb_test_file_name."
     return
 }
 
