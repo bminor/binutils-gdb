@@ -34,7 +34,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile .c -other.S -dwarf.S
+standard_testfile main.c -other.S -dwarf.S
 
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile3]

@@ -22,7 +22,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile .c -1.S -2.c
+standard_testfile main.c -1.S -2.c
 
 # Create the DWARF.
 set asm_file [standard_output_file $srcfile2]

@@ -1,5 +1,28 @@
 2020-10-20  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/arr-stride.c: Remove.
+	* gdb.dwarf2/arr-stride.exp: Use main.c.
+	* gdb.dwarf2/arr-subrange.c: Remove.
+	* gdb.dwarf2/arr-subrange.exp: Use main.c.
+	* gdb.dwarf2/bad-regnum.c: Remove.
+	* gdb.dwarf2/bad-regnum.exp: Use main.c.
+	* gdb.dwarf2/corrupt.c: Remove.
+	* gdb.dwarf2/corrupt.exp: Use main.c.
+	* gdb.dwarf2/dw2-bad-elf.c: Remove.
+	* gdb.dwarf2/dw2-bad-elf.exp: Use main.c.
+	* gdb.dwarf2/dw2-icycle.c: Remove.
+	* gdb.dwarf2/dw2-icycle.exp: Use main.c.
+	* gdb.dwarf2/formdata16.c: Remove.
+	* gdb.dwarf2/formdata16.exp: Use main.c.
+	* gdb.dwarf2/implptrconst.c: Remove.
+	* gdb.dwarf2/implptrconst.exp: Use main.c.
+	* gdb.dwarf2/info-locals-optimized-out.c: Remove.
+	* gdb.dwarf2/info-locals-optimized-out.exp: Use main.c.
+	* gdb.dwarf2/opaque-type-lookup.c: Remove.
+	* gdb.dwarf2/opaque-type-lookup.exp: Use main.c.
+
+2020-10-20  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/ada-valprint-error.exp: Remove redundant mention of .exp
 	file.
 	* gdb.dwarf2/dw2-dir-file-name.exp: Same.

@@ -22,7 +22,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile .c .S
+standard_testfile main.c .S
 
 # Make the DWARF used for the test.
 #
