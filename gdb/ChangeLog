@@ -1,5 +1,30 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* go-exp.y (go_parse): Rename to...
+	(go_language::parser): ...this.
+	* go-lang.c (go_demangle): Rename to...
+	(go_language::demangle_symbol): ...this.
+	(go_language::expression_ops): Implementation moved here out of
+	class declaration.
+	(go_op_print_tab): Rename to...
+	(go_language::op_print_tab): ...this, update comment.
+	(class go_language): Declaration moved to go-lang.h.
+	(go_language::language_arch_info): Implementation moved here out
+	of class declaration.
+	* go-lang.h (go_parse): Delete declaration.
+	(go_demangle): Delete declaration.
+	(go_print_type): Delete declaration.
+	(go_value_print_inner): Delete declaration.
+	(class go_language): Declaration moved here from go-lang.c.
+	* go-typeprint.c (go_print_type): Rename to...
+	(go_language::print_type): ...this.
+	* go-valprint.c (go_value_print_inner): Rename to...
+	(go_language::value_print_inner): ...this.
+	* symtab.c (demangle_for_lookup): Call demangle_symbol method on
+	the go_language object.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* c-lang.c (language_defn::printchar): Call emitchar, not
 	LA_EMIT_CHAR.
 	* f-lang.h (f_language::printchar): Likewise.

@@ -334,7 +334,7 @@ unpack_mangled_go_symbol (const char *mangled_name,
    thus not too much effort is currently put into it.  */
 
 char *
-go_demangle (const char *mangled_name, int options)
+go_language::demangle_symbol (const char *mangled_name, int options) const
 {
   struct obstack tempbuf;
   char *result;
@@ -384,6 +384,14 @@ go_demangle (const char *mangled_name, int options)
   obstack_free (&tempbuf, NULL);
   xfree (name_buf);
   return result;
+}
+
+/* See language.h.  */
+
+const struct exp_descriptor *
+go_language::expression_ops () const
+{
+  return &exp_descriptor_c;
 }
 
 /* Given a Go symbol, return its package or NULL if unknown.
@@ -444,11 +452,11 @@ go_block_package_name (const struct block *block)
   return NULL;
 }
 
-/* Table mapping opcodes into strings for printing operators
-   and precedences of the operators.
+/* See go-lang.h.
+
    TODO(dje): &^ ?  */
 
-static const struct op_print go_op_print_tab[] =
+const struct op_print go_language::op_print_tab[] =
 {
   {",", BINOP_COMMA, PREC_COMMA, 0},
   {"=", BINOP_ASSIGN, PREC_ASSIGN, 1},
@@ -482,125 +490,43 @@ static const struct op_print go_op_print_tab[] =
   {NULL, OP_NULL, PREC_SUFFIX, 0}
 };
 
-/* Class representing the Go language.  */
+/* See language.h.  */
 
-class go_language : public language_defn
+void
+go_language::language_arch_info (struct gdbarch *gdbarch,
+				 struct language_arch_info *lai) const
 {
-public:
-  go_language ()
-    : language_defn (language_go)
-  { /* Nothing.  */ }
+  const struct builtin_go_type *builtin = builtin_go_type (gdbarch);
 
-  /* See language.h.  */
-
-  const char *name () const override
-  { return "go"; }
-
-  /* See language.h.  */
-
-  const char *natural_name () const override
-  { return "Go"; }
-
-  /* See language.h.  */
-  void language_arch_info (struct gdbarch *gdbarch,
-			   struct language_arch_info *lai) const override
+  /* Helper function to allow shorter lines below.  */
+  auto add  = [&] (struct type * t) -> struct type *
   {
-    const struct builtin_go_type *builtin = builtin_go_type (gdbarch);
+    lai->add_primitive_type (t);
+    return t;
+  };
 
-    /* Helper function to allow shorter lines below.  */
-    auto add  = [&] (struct type * t) -> struct type *
-    {
-      lai->add_primitive_type (t);
-      return t;
-    };
+  add (builtin->builtin_void);
+  add (builtin->builtin_char);
+  add (builtin->builtin_bool);
+  add (builtin->builtin_int);
+  add (builtin->builtin_uint);
+  add (builtin->builtin_uintptr);
+  add (builtin->builtin_int8);
+  add (builtin->builtin_int16);
+  add (builtin->builtin_int32);
+  add (builtin->builtin_int64);
+  add (builtin->builtin_uint8);
+  add (builtin->builtin_uint16);
+  add (builtin->builtin_uint32);
+  add (builtin->builtin_uint64);
+  add (builtin->builtin_float32);
+  add (builtin->builtin_float64);
+  add (builtin->builtin_complex64);
+  add (builtin->builtin_complex128);
 
-    add (builtin->builtin_void);
-    add (builtin->builtin_char);
-    add (builtin->builtin_bool);
-    add (builtin->builtin_int);
-    add (builtin->builtin_uint);
-    add (builtin->builtin_uintptr);
-    add (builtin->builtin_int8);
-    add (builtin->builtin_int16);
-    add (builtin->builtin_int32);
-    add (builtin->builtin_int64);
-    add (builtin->builtin_uint8);
-    add (builtin->builtin_uint16);
-    add (builtin->builtin_uint32);
-    add (builtin->builtin_uint64);
-    add (builtin->builtin_float32);
-    add (builtin->builtin_float64);
-    add (builtin->builtin_complex64);
-    add (builtin->builtin_complex128);
-
-    lai->set_string_char_type (builtin->builtin_char);
-    lai->set_bool_type (builtin->builtin_bool, "bool");
-  }
-
-  /* See language.h.  */
-  bool sniff_from_mangled_name (const char *mangled,
-				char **demangled) const override
-  {
-    *demangled = go_demangle (mangled, 0);
-    return *demangled != NULL;
-  }
-
-  /* See language.h.  */
-
-  char *demangle_symbol (const char *mangled, int options) const override
-  {
-    return go_demangle (mangled, options);
-  }
-
-  /* See language.h.  */
-
-  void print_type (struct type *type, const char *varstring,
-		   struct ui_file *stream, int show, int level,
-		   const struct type_print_options *flags) const override
-  {
-    go_print_type (type, varstring, stream, show, level, flags);
-  }
-
-  /* See language.h.  */
-
-  void value_print_inner
-	(struct value *val, struct ui_file *stream, int recurse,
-	 const struct value_print_options *options) const override
-  {
-    return go_value_print_inner (val, stream, recurse, options);
-  }
-
-  /* See language.h.  */
-
-  int parser (struct parser_state *ps) const override
-  {
-    return go_parse (ps);
-  }
-
-  /* See language.h.  */
-
-  bool is_string_type_p (struct type *type) const override
-  {
-    type = check_typedef (type);
-    return (type->code () == TYPE_CODE_STRUCT
-	    && go_classify_struct_type (type) == GO_TYPE_STRING);
-  }
-
-  /* See language.h.  */
-
-  bool store_sym_names_in_linkage_form_p () const override
-  { return true; }
-
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_c; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return go_op_print_tab; }
-};
+  lai->set_string_char_type (builtin->builtin_char);
+  lai->set_bool_type (builtin->builtin_bool, "bool");
+}
 
 /* Single instance of the Go language class.  */
 

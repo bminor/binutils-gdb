@@ -87,8 +87,9 @@ print_go_string (struct type *type,
 /* See go-lang.h.  */
 
 void
-go_value_print_inner (struct value *val, struct ui_file *stream,
-		      int recurse, const struct value_print_options *options)
+go_language::value_print_inner (struct value *val, struct ui_file *stream,
+				int recurse,
+				const struct value_print_options *options) const
 {
   struct type *type = check_typedef (value_type (val));
 

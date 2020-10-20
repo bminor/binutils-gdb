@@ -1843,7 +1843,8 @@ demangle_for_lookup (const char *name, enum language lang,
     }
   else if (lang == language_go)
     {
-      char *demangled_name = go_demangle (name, 0);
+      char *demangled_name
+	= language_def (language_go)->demangle_symbol (name, 0);
       if (demangled_name != NULL)
 	return storage.set_malloc_ptr (demangled_name);
     }
