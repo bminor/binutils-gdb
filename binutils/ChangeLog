@@ -1,6 +1,20 @@
 2020-11-15  Mark Wielaard  <mark@klomp.org>
 
 	Backport from the mainline:
+	2020-10-21  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (skip_attr_bytes): Accept DWARF versions higher than 4
+	when processing the DW_FORM_ref_addr form.
+	Skip bytes in DW_FORM_block and DW_FORM_exprloc forms.
+	Handle DW_FORM_indirect.
+	(get_type_signedness): Allow a limited amount of recursion.
+	Do not attempt to decode types that use the DW_FORM_ref_addr form.
+	(read_and_display_attr_value): 	Do not attempt to decode types
+	that use the DW_FORM_ref_addr form.
+
+2020-11-15  Mark Wielaard  <mark@klomp.org>
+
+	Backport from the mainline:
 	2020-11-11  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* dwarf.c (display_debug_rnglists_list): Only bias the
