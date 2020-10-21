@@ -1,3 +1,8 @@
+2020-10-21  Gary Benson <gbenson@redhat.com>
+
+	* gdb.mi/mi-fullname-deleted.exp: Fix substituted
+	fullname test with Clang.  Also expand comments generally.
+
 2020-10-20  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/pr13961.S: Remove superfluous end-of-siblings marker.
