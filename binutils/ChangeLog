@@ -1,3 +1,14 @@
+2020-10-21  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (skip_attr_bytes): Accept DWARF versions higher than 4
+	when processing the DW_FORM_ref_addr form.
+	Skip bytes in DW_FORM_block and DW_FORM_exprloc forms.
+	Handle DW_FORM_indirect.
+	(get_type_signedness): Allow a limited amount of recursion.
+	Do not attempt to decode types that use the DW_FORM_ref_addr form.
+	(read_and_display_attr_value): 	Do not attempt to decode types
+	that use the DW_FORM_ref_addr form.
+
 2020-10-20  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c: Delete whitespace at end of line throughout.
