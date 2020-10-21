@@ -158,68 +158,79 @@ typedef struct ctf_snapshot_id
    a straight integral -1 also use ctf_errno().  */
 #define	CTF_ERR	((ctf_id_t) -1L)
 
-#define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
+/* This macro holds information about all the available ctf errors.
+   It is used to form both an enum holding all the error constants,
+   and also the error strings themselves.  To use, define _CTF_FIRST
+   and _CTF_ITEM to expand as you like, then mention the macro name.
+   See the enum after this for an example.  */
+#define _CTF_ERRORS \
+  _CTF_FIRST (ECTF_FMT, "File is not in CTF or ELF format.")	\
+  _CTF_ITEM (ECTF_BFDERR, "BFD error.")				\
+  _CTF_ITEM (ECTF_CTFVERS, "CTF dict version is too new for libctf.") \
+  _CTF_ITEM (ECTF_BFD_AMBIGUOUS, "Ambiguous BFD target.")	\
+  _CTF_ITEM (ECTF_SYMTAB, "Symbol table uses invalid entry size.") \
+  _CTF_ITEM (ECTF_SYMBAD, "Symbol table data buffer is not valid.") \
+  _CTF_ITEM (ECTF_STRBAD, "String table data buffer is not valid.") \
+  _CTF_ITEM (ECTF_CORRUPT, "File data structure corruption detected.") \
+  _CTF_ITEM (ECTF_NOCTFDATA, "File does not contain CTF data.") \
+  _CTF_ITEM (ECTF_NOCTFBUF, "Buffer does not contain CTF data.") \
+  _CTF_ITEM (ECTF_NOSYMTAB, "Symbol table information is not available.") \
+  _CTF_ITEM (ECTF_NOPARENT, "The parent CTF dictionary is unavailable.") \
+  _CTF_ITEM (ECTF_DMODEL, "Data model mismatch.") \
+  _CTF_ITEM (ECTF_LINKADDEDLATE, "File added to link too late.") \
+  _CTF_ITEM (ECTF_ZALLOC, "Failed to allocate (de)compression buffer.") \
+  _CTF_ITEM (ECTF_DECOMPRESS, "Failed to decompress CTF data.") \
+  _CTF_ITEM (ECTF_STRTAB, "External string table is not available.") \
+  _CTF_ITEM (ECTF_BADNAME, "String name offset is corrupt.") \
+  _CTF_ITEM (ECTF_BADID, "Invalid type identifier.") \
+  _CTF_ITEM (ECTF_NOTSOU, "Type is not a struct or union.") \
+  _CTF_ITEM (ECTF_NOTENUM, "Type is not an enum.") \
+  _CTF_ITEM (ECTF_NOTSUE, "Type is not a struct, union, or enum.") \
+  _CTF_ITEM (ECTF_NOTINTFP, "Type is not an integer, float, or enum.") \
+  _CTF_ITEM (ECTF_NOTARRAY, "Type is not an array.") \
+  _CTF_ITEM (ECTF_NOTREF, "Type does not reference another type.") \
+  _CTF_ITEM (ECTF_NAMELEN, "Buffer is too small to hold type name.") \
+  _CTF_ITEM (ECTF_NOTYPE, "No type found corresponding to name.") \
+  _CTF_ITEM (ECTF_SYNTAX, "Syntax error in type name.") \
+  _CTF_ITEM (ECTF_NOTFUNC, "Symbol table entry or type is not a function.") \
+  _CTF_ITEM (ECTF_NOFUNCDAT, "No function information available for function.") \
+  _CTF_ITEM (ECTF_NOTDATA, "Symbol table entry does not refer to a data object.") \
+  _CTF_ITEM (ECTF_NOTYPEDAT, "No type information available for symbol.") \
+  _CTF_ITEM (ECTF_NOLABEL, "No label found corresponding to name.") \
+  _CTF_ITEM (ECTF_NOLABELDATA, "File does not contain any labels.") \
+  _CTF_ITEM (ECTF_NOTSUP, "Feature not supported.") \
+  _CTF_ITEM (ECTF_NOENUMNAM, "Enum element name not found.") \
+  _CTF_ITEM (ECTF_NOMEMBNAM, "Member name not found.") \
+  _CTF_ITEM (ECTF_RDONLY, "CTF container is read-only.") \
+  _CTF_ITEM (ECTF_DTFULL, "CTF type is full (no more members allowed).") \
+  _CTF_ITEM (ECTF_FULL, "CTF container is full.") \
+  _CTF_ITEM (ECTF_DUPLICATE, "Duplicate member or variable name.") \
+  _CTF_ITEM (ECTF_CONFLICT, "Conflicting type is already defined.") \
+  _CTF_ITEM (ECTF_OVERROLLBACK, "Attempt to roll back past a ctf_update.") \
+  _CTF_ITEM (ECTF_COMPRESS, "Failed to compress CTF data.") \
+  _CTF_ITEM (ECTF_ARCREATE, "Error creating CTF archive.") \
+  _CTF_ITEM (ECTF_ARNNAME, "Name not found in CTF archive.") \
+  _CTF_ITEM (ECTF_SLICEOVERFLOW, "Overflow of type bitness or offset in slice.") \
+  _CTF_ITEM (ECTF_DUMPSECTUNKNOWN, "Unknown section number in dump.") \
+  _CTF_ITEM (ECTF_DUMPSECTCHANGED, "Section changed in middle of dump.") \
+  _CTF_ITEM (ECTF_NOTYET, "Feature not yet implemented.") \
+  _CTF_ITEM (ECTF_INTERNAL, "Internal error: assertion failure.") \
+  _CTF_ITEM (ECTF_NONREPRESENTABLE, "Type not representable in CTF.") \
+  _CTF_ITEM (ECTF_NEXT_END, "End of iteration.") \
+  _CTF_ITEM (ECTF_NEXT_WRONGFUN, "Wrong iteration function called.") \
+  _CTF_ITEM (ECTF_NEXT_WRONGFP, "Iteration entity changed in mid-iterate.") \
+  _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf.") \
+  _CTF_ITEM (ECTF_NEEDSBFD, "This feature needs a libctf with BFD support.")
 
+#define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
 enum
   {
-   ECTF_FMT = ECTF_BASE, /* File is not in CTF or ELF format.  */
-   ECTF_BFDERR,		/* BFD error.  */
-   ECTF_CTFVERS,	/* CTF dict version is too new for libctf.  */
-   ECTF_BFD_AMBIGUOUS,	/* Ambiguous BFD target.  */
-   ECTF_SYMTAB,		/* Symbol table uses invalid entry size.  */
-   ECTF_SYMBAD,		/* Symbol table data buffer is not valid.  */
-   ECTF_STRBAD,		/* String table data buffer is not valid.  */
-   ECTF_CORRUPT,	/* File data structure corruption detected.  */
-   ECTF_NOCTFDATA,	/* File does not contain CTF data.  */
-   ECTF_NOCTFBUF,	/* Buffer does not contain CTF data.  */
-   ECTF_NOSYMTAB,	/* Symbol table information is not available.  */
-   ECTF_NOPARENT,	/* The parent CTF dictionary is unavailable.  */
-   ECTF_DMODEL,		/* Data model mismatch.  */
-   ECTF_LINKADDEDLATE,	/* File added to link too late.  */
-   ECTF_ZALLOC,		/* Failed to allocate (de)compression buffer.  */
-   ECTF_DECOMPRESS,	/* Failed to decompress CTF data.  */
-   ECTF_STRTAB,		/* External string table is not available.  */
-   ECTF_BADNAME,	/* String name offset is corrupt.  */
-   ECTF_BADID,		/* Invalid type identifier.  */
-   ECTF_NOTSOU,		/* Type is not a struct or union.  */
-   ECTF_NOTENUM,	/* Type is not an enum.  */
-   ECTF_NOTSUE,		/* Type is not a struct, union, or enum.  */
-   ECTF_NOTINTFP,	/* Type is not an integer, float, or enum.  */
-   ECTF_NOTARRAY,	/* Type is not an array.  */
-   ECTF_NOTREF,		/* Type does not reference another type.  */
-   ECTF_NAMELEN,	/* Buffer is too small to hold type name.  */
-   ECTF_NOTYPE,		/* No type found corresponding to name.  */
-   ECTF_SYNTAX,		/* Syntax error in type name.  */
-   ECTF_NOTFUNC,	/* Symbol table entry or type is not a function.  */
-   ECTF_NOFUNCDAT,	/* No function information available for function.  */
-   ECTF_NOTDATA,	/* Symbol table entry does not refer to a data object.  */
-   ECTF_NOTYPEDAT,	/* No type information available for symbol.  */
-   ECTF_NOLABEL,	/* No label found corresponding to name.  */
-   ECTF_NOLABELDATA,	/* File does not contain any labels.  */
-   ECTF_NOTSUP,		/* Feature not supported.  */
-   ECTF_NOENUMNAM,	/* Enum element name not found.  */
-   ECTF_NOMEMBNAM,	/* Member name not found.  */
-   ECTF_RDONLY,		/* CTF container is read-only.  */
-   ECTF_DTFULL,		/* CTF type is full (no more members allowed).  */
-   ECTF_FULL,		/* CTF container is full.  */
-   ECTF_DUPLICATE,	/* Duplicate member or variable name.  */
-   ECTF_CONFLICT,	/* Conflicting type is already defined.  */
-   ECTF_OVERROLLBACK,	/* Attempt to roll back past a ctf_update.  */
-   ECTF_COMPRESS,	/* Failed to compress CTF data.  */
-   ECTF_ARCREATE,	/* Error creating CTF archive.  */
-   ECTF_ARNNAME,	/* Name not found in CTF archive.  */
-   ECTF_SLICEOVERFLOW,	/* Overflow of type bitness or offset in slice.  */
-   ECTF_DUMPSECTUNKNOWN, /* Unknown section number in dump.  */
-   ECTF_DUMPSECTCHANGED, /* Section changed in middle of dump.  */
-   ECTF_NOTYET,		/* Feature not yet implemented.  */
-   ECTF_INTERNAL,	/* Internal error: assertion failure.  */
-   ECTF_NONREPRESENTABLE, /* Type not representable in CTF.  */
-   ECTF_NEXT_END,	/* End of iteration.  */
-   ECTF_NEXT_WRONGFUN,	/* Wrong iteration function called.  */
-   ECTF_NEXT_WRONGFP,	/* Iteration entity changed in mid-iterate.  */
-   ECTF_FLAGS,		/* CTF header contains flags unknown to libctf.  */
-   ECTF_NEEDSBFD	/* This feature needs a libctf with BFD support.  */
+#define _CTF_FIRST(NAME, STR) NAME = ECTF_BASE
+#define _CTF_ITEM(NAME, STR) , NAME
+_CTF_ERRORS
+#undef _CTF_ITEM
+#undef _CTF_FIRST
   };
 
 #define ECTF_NERR (ECTF_NEEDSBFD - ECTF_BASE + 1) /* Count of CTF errors.  */

@@ -1,3 +1,15 @@
+2020-10-21  Tom Tromey  <tromey@adacore.com>
+
+	* mkerrors.sed: Remove.
+	* ctf-error.c (_CTF_FIRST): New define.
+	(_CTF_ITEM): Define this, not _CTF_STR.
+	(_ctf_errlist, _ctf_erridx): Use _CTF_ERRORS.
+	(ERRSTRFIELD): Rewrite.
+	(ERRSTRFIELD1): Remove.
+	* Makefile.in: Rebuild.
+	* Makefile.am (BUILT_SOURCES): Remove.
+	(ctf-error.h): Remove.
+
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-subr.c (open_errors): New list.
