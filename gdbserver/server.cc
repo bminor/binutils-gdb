@@ -829,8 +829,10 @@ handle_general_set (char *own_buf)
       else
 	{
 	  /* We don't know what this mode is, so complain to GDB.  */
-	  sprintf (own_buf, "E.Unknown thread-events mode requested: %s\n",
-		   mode);
+	  std::string err
+	    = string_printf ("E.Unknown thread-events mode requested: %s\n",
+			     mode);
+	  strcpy (own_buf, err.c_str ());
 	  return;
 	}
 
