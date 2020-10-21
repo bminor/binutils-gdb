@@ -1500,8 +1500,7 @@ displaced_step_in_progress_any_inferior ()
   return false;
 }
 
-/* Return true if thread represented by PTID is doing a displaced
-   step.  */
+/* Return true if THREAD is doing a displaced step.  */
 
 static bool
 displaced_step_in_progress_thread (thread_info *thread)
@@ -1511,7 +1510,7 @@ displaced_step_in_progress_thread (thread_info *thread)
   return get_displaced_stepping_state (thread->inf)->step_thread == thread;
 }
 
-/* Return true if process PID has a thread doing a displaced step.  */
+/* Return true if INF has a thread doing a displaced step.  */
 
 static bool
 displaced_step_in_progress (inferior *inf)

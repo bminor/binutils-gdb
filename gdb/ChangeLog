@@ -1,3 +1,8 @@
+2020-10-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.c (displaced_step_in_progress_thread): Fix comment.
+	(displaced_step_in_progress): Fix comment.
+
 2020-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbarch.sh (make_corefile_notes): Return unique pointer.
