@@ -80,8 +80,8 @@ write_gcore_file_1 (bfd *obfd)
   if (!gdbarch_make_corefile_notes_p (target_gdbarch ()))
     note_data.reset (target_make_corefile_notes (obfd, &note_size));
   else
-    note_data.reset (gdbarch_make_corefile_notes (target_gdbarch (), obfd,
-						  &note_size));
+    note_data = gdbarch_make_corefile_notes (target_gdbarch (), obfd,
+					     &note_size);
 
   if (note_data == NULL || note_size == 0)
     error (_("Target does not support core file generation."));

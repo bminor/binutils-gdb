@@ -3700,7 +3700,7 @@ gdbarch_make_corefile_notes_p (struct gdbarch *gdbarch)
   return gdbarch->make_corefile_notes != NULL;
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 {
   gdb_assert (gdbarch != NULL);

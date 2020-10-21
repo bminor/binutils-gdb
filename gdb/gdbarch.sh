@@ -715,7 +715,7 @@ F;CORE_ADDR;fetch_pointer_argument;struct frame_info *frame, int argi, struct ty
 M;void;iterate_over_regset_sections;iterate_over_regset_sections_cb *cb, void *cb_data, const struct regcache *regcache;cb, cb_data, regcache
 
 # Create core file notes
-M;char *;make_corefile_notes;bfd *obfd, int *note_size;obfd, note_size
+M;gdb::unique_xmalloc_ptr<char>;make_corefile_notes;bfd *obfd, int *note_size;obfd, note_size
 
 # Find core file memory regions
 M;int;find_memory_regions;find_memory_region_ftype func, void *data;func, data

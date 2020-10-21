@@ -1548,12 +1548,12 @@ linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
 
 /* Write the file mapping data to the core file, if possible.  OBFD is
    the output BFD.  NOTE_DATA is the current note data, and NOTE_SIZE
-   is a pointer to the note size.  Returns the new NOTE_DATA and
-   updates NOTE_SIZE.  */
+   is a pointer to the note size.  Updates NOTE_DATA and NOTE_SIZE.  */
 
-static char *
+static void
 linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
-				    char *note_data, int *note_size)
+				    gdb::unique_xmalloc_ptr<char> &note_data,
+				    int *note_size)
 {
   struct linux_make_mappings_data mapping_data;
   struct type *long_type
@@ -1590,13 +1590,12 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
       obstack_grow (&data_obstack, obstack_base (&filename_obstack),
 		    size);
 
-      note_data = elfcore_write_note (obfd, note_data, note_size,
-				      "CORE", NT_FILE,
-				      obstack_base (&data_obstack),
-				      obstack_object_size (&data_obstack));
+      note_data.reset (elfcore_write_note
+			 (obfd, note_data.release (),
+			  note_size, "CORE", NT_FILE,
+			  obstack_base (&data_obstack),
+			  obstack_object_size (&data_obstack)));
     }
-
-  return note_data;
 }
 
 /* Structure for passing information from
@@ -1605,14 +1604,26 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
 
 struct linux_collect_regset_section_cb_data
 {
+  linux_collect_regset_section_cb_data (struct gdbarch *gdbarch,
+					const struct regcache *regcache,
+					bfd *obfd,
+					gdb::unique_xmalloc_ptr<char> &note_data,
+					int *note_size,
+					unsigned long lwp,
+					gdb_signal stop_signal)
+    : gdbarch (gdbarch), regcache (regcache), obfd (obfd),
+      note_data (note_data), note_size (note_size), lwp (lwp),
+      stop_signal (stop_signal)
+  {}
+
   struct gdbarch *gdbarch;
   const struct regcache *regcache;
   bfd *obfd;
-  char *note_data;
+  gdb::unique_xmalloc_ptr<char> &note_data;
   int *note_size;
   unsigned long lwp;
   enum gdb_signal stop_signal;
-  int abort_iteration;
+  bool abort_iteration = false;
 };
 
 /* Callback for iterate_over_regset_sections that records a single
@@ -1645,47 +1656,44 @@ linux_collect_regset_section_cb (const char *sect_name, int supply_size,
 
   /* PRSTATUS still needs to be treated specially.  */
   if (strcmp (sect_name, ".reg") == 0)
-    data->note_data = (char *) elfcore_write_prstatus
-      (data->obfd, data->note_data, data->note_size, data->lwp,
-       gdb_signal_to_host (data->stop_signal), buf.data ());
+    data->note_data.reset (elfcore_write_prstatus
+			     (data->obfd, data->note_data.release (),
+			      data->note_size, data->lwp,
+			      gdb_signal_to_host (data->stop_signal),
+			      buf.data ()));
   else
-    data->note_data = (char *) elfcore_write_register_note
-      (data->obfd, data->note_data, data->note_size,
-       sect_name, buf.data (), collect_size);
+    data->note_data.reset (elfcore_write_register_note
+			   (data->obfd, data->note_data.release (),
+			    data->note_size, sect_name, buf.data (),
+			    collect_size));
 
   if (data->note_data == NULL)
-    data->abort_iteration = 1;
+    data->abort_iteration = true;
 }
 
 /* Records the thread's register state for the corefile note
    section.  */
 
-static char *
+static void
 linux_collect_thread_registers (const struct regcache *regcache,
 				ptid_t ptid, bfd *obfd,
-				char *note_data, int *note_size,
+				gdb::unique_xmalloc_ptr<char> &note_data,
+				int *note_size,
 				enum gdb_signal stop_signal)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct linux_collect_regset_section_cb_data data;
-
-  data.gdbarch = gdbarch;
-  data.regcache = regcache;
-  data.obfd = obfd;
-  data.note_data = note_data;
-  data.note_size = note_size;
-  data.stop_signal = stop_signal;
-  data.abort_iteration = 0;
 
   /* For remote targets the LWP may not be available, so use the TID.  */
-  data.lwp = ptid.lwp ();
-  if (!data.lwp)
-    data.lwp = ptid.tid ();
+  long lwp = ptid.lwp ();
+  if (lwp == 0)
+    lwp = ptid.tid ();
+
+  linux_collect_regset_section_cb_data data (gdbarch, regcache, obfd, note_data,
+					     note_size, lwp, stop_signal);
 
   gdbarch_iterate_over_regset_sections (gdbarch,
 					linux_collect_regset_section_cb,
 					&data, regcache);
-  return data.note_data;
 }
 
 /* Fetch the siginfo data for the specified thread, if it exists.  If
@@ -1718,9 +1726,16 @@ linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
 
 struct linux_corefile_thread_data
 {
+  linux_corefile_thread_data (struct gdbarch *gdbarch, bfd *obfd,
+			      gdb::unique_xmalloc_ptr<char> &note_data,
+			      int *note_size, gdb_signal stop_signal)
+    : gdbarch (gdbarch), obfd (obfd), note_data (note_data),
+      note_size (note_size), stop_signal (stop_signal)
+  {}
+
   struct gdbarch *gdbarch;
   bfd *obfd;
-  char *note_data;
+  gdb::unique_xmalloc_ptr<char> &note_data;
   int *note_size;
   enum gdb_signal stop_signal;
 };
@@ -1740,20 +1755,22 @@ linux_corefile_thread (struct thread_info *info,
   target_fetch_registers (regcache, -1);
   gdb::byte_vector siginfo_data = linux_get_siginfo_data (info, args->gdbarch);
 
-  args->note_data = linux_collect_thread_registers
-    (regcache, info->ptid, args->obfd, args->note_data,
-     args->note_size, args->stop_signal);
+  linux_collect_thread_registers (regcache, info->ptid, args->obfd,
+				  args->note_data, args->note_size,
+				  args->stop_signal);
 
   /* Don't return anything if we got no register information above,
      such a core file is useless.  */
   if (args->note_data != NULL)
-    if (!siginfo_data.empty ())
-      args->note_data = elfcore_write_note (args->obfd,
-					    args->note_data,
-					    args->note_size,
-					    "CORE", NT_SIGINFO,
-					    siginfo_data.data (),
-					    siginfo_data.size ());
+    {
+      if (!siginfo_data.empty ())
+	args->note_data.reset (elfcore_write_note (args->obfd,
+						   args->note_data.release (),
+						   args->note_size,
+						   "CORE", NT_SIGINFO,
+						   siginfo_data.data (),
+						   siginfo_data.size ()));
+    }
 }
 
 /* Fill the PRPSINFO structure with information about the process being
@@ -1971,12 +1988,11 @@ find_signalled_thread ()
 /* Build the note section for a corefile, and return it in a malloc
    buffer.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 {
-  struct linux_corefile_thread_data thread_args;
   struct elf_internal_linux_prpsinfo prpsinfo;
-  char *note_data = NULL;
+  gdb::unique_xmalloc_ptr<char> note_data;
 
   if (! gdbarch_iterate_over_regset_sections_p (gdbarch))
     return NULL;
@@ -1984,13 +2000,13 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   if (linux_fill_prpsinfo (&prpsinfo))
     {
       if (gdbarch_ptr_bit (gdbarch) == 64)
-	note_data = elfcore_write_linux_prpsinfo64 (obfd,
-						    note_data, note_size,
-						    &prpsinfo);
+	note_data.reset (elfcore_write_linux_prpsinfo64 (obfd,
+							 note_data.release (),
+							 note_size, &prpsinfo));
       else
-	note_data = elfcore_write_linux_prpsinfo32 (obfd,
-						    note_data, note_size,
-						    &prpsinfo);
+	note_data.reset (elfcore_write_linux_prpsinfo32 (obfd,
+							 note_data.release (),
+							 note_size, &prpsinfo));
     }
 
   /* Thread register information.  */
@@ -2007,15 +2023,14 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
      "First thread" is what tools use to infer the signalled
      thread.  */
   thread_info *signalled_thr = find_signalled_thread ();
-
-  thread_args.gdbarch = gdbarch;
-  thread_args.obfd = obfd;
-  thread_args.note_data = note_data;
-  thread_args.note_size = note_size;
+  gdb_signal stop_signal;
   if (signalled_thr != nullptr)
-    thread_args.stop_signal = signalled_thr->suspend.stop_signal;
+    stop_signal = signalled_thr->suspend.stop_signal;
   else
-    thread_args.stop_signal = GDB_SIGNAL_0;
+    stop_signal = GDB_SIGNAL_0;
+
+  linux_corefile_thread_data thread_args (gdbarch, obfd, note_data, note_size,
+					  stop_signal);
 
   if (signalled_thr != nullptr)
     linux_corefile_thread (signalled_thr, &thread_args);
@@ -2027,7 +2042,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
       linux_corefile_thread (thr, &thread_args);
     }
 
-  note_data = thread_args.note_data;
   if (!note_data)
     return NULL;
 
@@ -2036,17 +2050,16 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     target_read_alloc (current_top_target (), TARGET_OBJECT_AUXV, NULL);
   if (auxv && !auxv->empty ())
     {
-      note_data = elfcore_write_note (obfd, note_data, note_size,
-				      "CORE", NT_AUXV, auxv->data (),
-				      auxv->size ());
+      note_data.reset (elfcore_write_note (obfd, note_data.release (),
+					   note_size, "CORE", NT_AUXV,
+					   auxv->data (), auxv->size ()));
 
       if (!note_data)
 	return NULL;
     }
 
   /* File mappings.  */
-  note_data = linux_make_mappings_corefile_notes (gdbarch, obfd,
-						  note_data, note_size);
+  linux_make_mappings_corefile_notes (gdbarch, obfd, note_data, note_size);
 
   return note_data;
 }

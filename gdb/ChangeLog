@@ -1,3 +1,30 @@
+2020-10-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (make_corefile_notes): Return unique pointer.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+	* gcore.c (write_gcore_file_1): Adjust.
+	* fbsd-tdep.c (struct fbsd_collect_regset_section_cb_data): Add
+	constructor.
+	<note_data>: Change type to unique pointer.
+	<abort_iteration>: Change type to bool.
+	(fbsd_collect_regset_section_cb): Adjust to unique pointer.
+	(fbsd_collect_thread_registers): Return void, adjust.
+	(struct fbsd_corefile_thread_data): Add construtor.
+	<note_data>: Change type to unique pointer.
+	(fbsd_corefile_thread): Adjust.
+	(fbsd_make_corefile_notes): Return unique pointer, adjust.
+	* linux-tdep.c (linux_make_mappings_corefile_notes): Change type
+	to unique pointer, adjust.
+	(struct linux_collect_regset_section_cb_data): Add constructor.
+	<note_data>: Change type to unique pointer.
+	<abort_iteration>: Change type to bool.
+	(linux_collect_thread_registers): Return void, adjust.
+	(struct linux_corefile_thread_data): Add constructor.
+	<note_data>: Change type to unique pointer.
+	(linux_corefile_thread): Adjust.
+	(linux_make_corefile_notes): Return unique pointer, adjust.
+
 2020-10-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbarch.sh (displaced_step_hw_singlestep): Return bool.

@@ -912,8 +912,8 @@ extern void set_gdbarch_iterate_over_regset_sections (struct gdbarch *gdbarch, g
 
 extern bool gdbarch_make_corefile_notes_p (struct gdbarch *gdbarch);
 
-typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
-extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
+typedef gdb::unique_xmalloc_ptr<char> (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
+extern gdb::unique_xmalloc_ptr<char> gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
 
 /* Find core file memory regions */
