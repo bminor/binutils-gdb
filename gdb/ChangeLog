@@ -1,3 +1,12 @@
+2020-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26693
+	* dwarf2/read.c (load_full_comp_unit): Add existing_cu
+	parameter.
+	(load_cu): Pass existing CU.
+	(process_imported_unit_die): Likewise.
+	(follow_die_offset): Likewise.
+
 2020-10-22  Luis Machado  <luis.machado@linaro.org>
 
 	* corelow.c (core_target::xfer_partial): Also check for an empty

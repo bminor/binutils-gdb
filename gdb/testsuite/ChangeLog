@@ -1,3 +1,8 @@
+2020-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26693
+	* gdb.dwarf2/template-specification-full-name.exp: New test.
+
 2020-10-22  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.base/msym-bp-shl.exp (test_break): Adjust pattern to not
