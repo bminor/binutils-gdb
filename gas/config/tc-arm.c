@@ -5936,7 +5936,15 @@ parse_address_main (char **str, int i, int group_relocations,
 
   if (skip_past_char (&p, '[') == FAIL)
     {
-      if (skip_past_char (&p, '=') == FAIL)
+      if (group_type == GROUP_MVE
+	  && (reg = arm_reg_parse (&p, REG_TYPE_RN)) != FAIL)
+	{
+	  /* [r0-r15] expected as argument but receiving r0-r15 without
+	     [] brackets.  */
+	  inst.error = BAD_SYNTAX;
+	  return PARSE_OPERAND_FAIL;
+	}
+      else if (skip_past_char (&p, '=') == FAIL)
 	{
 	  /* Bare address - translate to PC-relative offset.  */
 	  inst.relocs[0].pc_rel = 1;
