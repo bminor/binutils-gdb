@@ -1784,12 +1784,45 @@ set_value_component_location (struct value *component,
 	component->location.computed.closure = funcs->copy_closure (whole);
     }
 
-  /* If type has a dynamic resolved location property
-     update it's value address.  */
+  /* If the WHOLE value has a dynamically resolved location property then
+     update the address of the COMPONENT.  */
   type = value_type (whole);
   if (NULL != TYPE_DATA_LOCATION (type)
       && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
     set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
+
+  /* Similarly, if the COMPONENT value has a dynamically resolved location
+     property then update its address.  */
+  type = value_type (component);
+  if (NULL != TYPE_DATA_LOCATION (type)
+      && TYPE_DATA_LOCATION_KIND (type) == PROP_CONST)
+    {
+      /* If the COMPONENT has a dynamic location, and is an
+	 lval_internalvar_component, then we change it to a lval_memory.
+
+	 Usually a component of an internalvar is created non-lazy, and has
+	 its content immediately copied from the parent internalvar.
+	 However, for components with a dynamic location, the content of
+	 the component is not contained within the parent, but is instead
+	 accessed indirectly.  Further, the component will be created as a
+	 lazy value.
+
+	 By changing the type of the component to lval_memory we ensure
+	 that value_fetch_lazy can successfully load the component.
+
+         This solution isn't ideal, but a real fix would require values to
+         carry around both the parent value contents, and the contents of
+         any dynamic fields within the parent.  This is a substantial
+         change to how values work in GDB.  */
+      if (VALUE_LVAL (component) == lval_internalvar_component)
+	{
+	  gdb_assert (value_lazy (component));
+	  VALUE_LVAL (component) = lval_memory;
+	}
+      else
+	gdb_assert (VALUE_LVAL (component) == lval_memory);
+      set_value_address (component, TYPE_DATA_LOCATION_ADDR (type));
+    }
 }
 
 /* Access to the value history.  */

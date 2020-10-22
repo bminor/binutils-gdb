@@ -1,3 +1,8 @@
+2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* value.c (set_value_component_location): Adjust the VALUE_LVAL
+	for internalvar components that have a dynamic location.
+
 2021-01-08  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/26881

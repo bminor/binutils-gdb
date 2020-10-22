@@ -1,5 +1,10 @@
 2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/intvar-dynamic-types.exp: New file.
+	* gdb.fortran/intvar-dynamic-types.f90: New file.
+
+2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/intvar-array.exp: New file.
 	* gdb.fortran/intvar-array.f90: New file.
 
