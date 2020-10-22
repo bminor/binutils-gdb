@@ -50,6 +50,8 @@
 #include "arch/arm.h"
 #include "arch/arm-get-next-pcs.h"
 #include "arm-tdep.h"
+#include "none-tdep.h"
+#include "arm-none-tdep.h"
 #include "gdb/sim-arm.h"
 
 #include "elf-bfd.h"
@@ -9452,6 +9454,11 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Virtual tables.  */
   set_gdbarch_vbit_in_delta (gdbarch, 1);
+
+  /* Default none core file support, can be overridden by osabi.  */
+  none_init_corefile (info, gdbarch);
+  set_gdbarch_iterate_over_regset_sections (gdbarch,
+                                            arm_none_iterate_over_regset_sections);
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

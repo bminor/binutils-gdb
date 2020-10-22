@@ -721,6 +721,7 @@ ALL_TARGET_OBS = \
 	arm-fbsd-tdep.o \
 	arm-linux-tdep.o \
 	arm-netbsd-tdep.o \
+	arm-none-tdep.o \
 	arm-obsd-tdep.o \
 	arm-pikeos-tdep.o \
 	arm-symbian-tdep.o \
@@ -788,6 +789,7 @@ ALL_TARGET_OBS = \
 	nds32-tdep.o \
 	nios2-linux-tdep.o \
 	nios2-tdep.o \
+	none-tdep.o \
 	nto-tdep.o \
 	obsd-tdep.o \
 	or1k-linux-tdep.o \
@@ -1225,6 +1227,7 @@ HFILES_NO_SRCDIR = \
 	arch-utils.h \
 	arm-linux-tdep.h \
 	arm-netbsd-tdep.h \
+	arm-none-tdep.h \
 	arm-tdep.h \
 	async-event.h \
 	auto-load.h \
@@ -1350,6 +1353,7 @@ HFILES_NO_SRCDIR = \
 	netbsd-tdep.h \
 	nds32-tdep.h \
 	nios2-tdep.h \
+	none-tdep.h \
 	nto-tdep.h \
 	objc-lang.h \
 	objfiles.h \
@@ -2152,6 +2156,7 @@ ALLDEPFILES = \
 	arm-linux-tdep.c \
 	arm-netbsd-nat.c \
 	arm-netbsd-tdep.c \
+	arm-none-tdep.c \
 	arm-obsd-tdep.c \
 	arm-symbian-tdep.c \
 	arm-tdep.c \
@@ -2238,6 +2243,7 @@ ALLDEPFILES = \
 	nds32-tdep.c \
 	nios2-linux-tdep.c \
 	nios2-tdep.c \
+	none-tdep.c \
 	obsd-nat.c \
 	obsd-tdep.c \
 	posix-hdep.c \
