@@ -1,5 +1,12 @@
 2020-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-plugin/lto.exp (plug_opt): Moved to ...
+	* testsuite/config/default.exp (plug_opt): Here.  New.
+	* testsuite/ld-bootstrap/bootstrap.exp: Skip when linker is
+	compiled with -fprofile-generate=.
+
+2020-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/config/default.exp (NOLTO_CFLAGS): New.
 	* ld/testsuite/ld-elfcomm/elfcomm.exp: Add $NOLTO_CFLAGS to CC.
 	* testsuite/ld-elfvers/vers.exp: Likewise.

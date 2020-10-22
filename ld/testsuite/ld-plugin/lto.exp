@@ -41,22 +41,6 @@ proc restore_notify { } {
   set CXXFLAGS "$saved_CXXFLAGS"
 }
 
-set plugin_names {
-    liblto_plugin.so
-    liblto_plugin-0.dll
-    cyglto_plugin-0.dll
-}
-set plug_opt ""
-foreach plug $plugin_names {
-    set plug_so [run_host_cmd $CC "--print-prog-name $plug"]
-    if { $plug_so eq $plug } then {
-	set plug_so [run_host_cmd $CC "--print-file-name $plug"]
-    }
-    if { $plug_so ne $plug } then {
-	set plug_opt "--plugin $plug_so"
-	break
-    }
-}
 set lto_fat ""
 set lto_no_fat ""
 if { [check_lto_fat_available] } {

@@ -29,7 +29,13 @@ if ![isnative] {
     return
 }
 
-# Determine if plugin support is present.
+# Skip for -fprofile-generate=.
+catch "exec $nm $plug_opt $OFILES" exec_output
+send_log "foo: $exec_output"
+if { [ string match "*__gcov_*" $exec_output ] } {
+    return
+}
+
 remote_exec host "$nm --help" "" "/dev/null" "plugin-support"
 set tmp [file_contents "plugin-support"]
 regexp ".*\(--plugin\).*\n" $tmp foo plugins
