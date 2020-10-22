@@ -1,3 +1,7 @@
+2020-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* po/es.po: Remove the duplicated entry.
+
 2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
 
 	* po/es.po: Fix printf format.
