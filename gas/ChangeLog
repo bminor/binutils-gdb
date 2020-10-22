@@ -1,3 +1,12 @@
+2020-10-21  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	PR target/26763
+	* config/tc-arm.c (parse_address_main): Add new MVE addressing mode
+	check.
+	* testsuite/gas/arm/mve-vldr-vstr-bad.d: New test.
+	* testsuite/gas/arm/mve-vldr-vstr-bad.l: Likewise.
+	* testsuite/gas/arm/mve-vldr-vstr-bad.s: Likewise.
+
 2020-10-09  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add Neoverse N2.
