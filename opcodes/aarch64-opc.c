@@ -4541,6 +4541,19 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("trclar",        CPENC (2,1,C7,C12,6), F_REG_WRITE),
   SR_CORE ("trcoslar",      CPENC (2,1,C1,C0,4),  F_REG_WRITE),
 
+  SR_CORE ("csrcr_el0",     CPENC (2,3,C8,C0,0),  0),
+  SR_CORE ("csrptr_el0",    CPENC (2,3,C8,C0,1),  0),
+  SR_CORE ("csridr_el0",    CPENC (2,3,C8,C0,2),  F_REG_READ),
+  SR_CORE ("csrptridx_el0", CPENC (2,3,C8,C0,3),  F_REG_READ),
+  SR_CORE ("csrcr_el1",     CPENC (2,0,C8,C0,0),  0),
+  SR_CORE ("csrcr_el12",    CPENC (2,5,C8,C0,0),  0),
+  SR_CORE ("csrptr_el1",    CPENC (2,0,C8,C0,1),  0),
+  SR_CORE ("csrptr_el12",   CPENC (2,5,C8,C0,1),  0),
+  SR_CORE ("csrptridx_el1", CPENC (2,0,C8,C0,3),  F_REG_READ),
+  SR_CORE ("csrcr_el2",     CPENC (2,4,C8,C0,0),  0),
+  SR_CORE ("csrptr_el2",    CPENC (2,4,C8,C0,1),  0),
+  SR_CORE ("csrptridx_el2", CPENC (2,4,C8,C0,3),  F_REG_READ),
+
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
 
