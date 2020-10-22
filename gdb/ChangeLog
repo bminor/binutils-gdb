@@ -1,3 +1,8 @@
+2020-10-22  Tom de Vries  <tdevries@suse.de>
+
+	* block.c (find_block_in_blockvector): Make sure the returned block
+	contains pc.
+
 2020-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26693
