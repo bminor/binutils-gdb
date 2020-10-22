@@ -82,6 +82,7 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
     set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $xflags $t_tempfile $t_copyfile"]
 
     if ![string equal "" $got] then {
+	send_log "$got\n"
 	fail "objcopy $type ($testname)"
     } else {
 	send_log "cmp $t_tempfile $t_copyfile\n"
