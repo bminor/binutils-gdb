@@ -719,7 +719,7 @@ struct target_ops
     virtual int find_memory_regions (find_memory_region_ftype func, void *data)
       TARGET_DEFAULT_FUNC (dummy_find_memory_regions);
     /* make_corefile_notes support method for gcore */
-    virtual char *make_corefile_notes (bfd *, int *)
+    virtual gdb::unique_xmalloc_ptr<char> make_corefile_notes (bfd *, int *)
       TARGET_DEFAULT_FUNC (dummy_make_corefile_notes);
     /* get_bookmark support method for bookmarks */
     virtual gdb_byte *get_bookmark (const char *, int)

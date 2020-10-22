@@ -78,7 +78,7 @@ write_gcore_file_1 (bfd *obfd)
      generation should be converted to gdbarch_make_corefile_notes; at that
      point, the target vector method can be removed.  */
   if (!gdbarch_make_corefile_notes_p (target_gdbarch ()))
-    note_data.reset (target_make_corefile_notes (obfd, &note_size));
+    note_data = target_make_corefile_notes (obfd, &note_size);
   else
     note_data = gdbarch_make_corefile_notes (target_gdbarch (), obfd,
 					     &note_size);

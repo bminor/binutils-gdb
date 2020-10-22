@@ -1,3 +1,24 @@
+2020-10-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* target.h (struct target_ops) <make_corefile_notes>:
+	Change return type to unique pointer.
+	* target.c (dummy_make_corefile_notes): Likewise.
+	* exec.c (struct exec_target) <make_corefile_notes>:
+	Likewise.
+	(exec_target::make_corefile_notes): Likewise.
+	* procfs.c (class procfs_target) <make_corefile_notes>:
+	Likewise.
+	(procfs_do_thread_registers): Adjust to unique pointer.
+	(struct procfs_corefile_thread_data): Add constructor.
+	<note_data>: Change type to unique pointer.
+	(procfs_corefile_thread_callback): Adjust to unique pointer.
+	(procfs_target::make_corefile_notes): Change return type to
+	unique pointer.
+	* target-delegates.c: Re-generate.
+	* gcore.c (write_gcore_file_1): Adjust.
+	* target-debug.h (target_debug_print_gdb_unique_xmalloc_ptr_char):
+	New.
+
 2020-10-22  Tom de Vries  <tdevries@suse.de>
 
 	* block.c (find_block_in_blockvector): Make sure the returned block

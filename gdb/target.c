@@ -89,8 +89,8 @@ static int dummy_find_memory_regions (struct target_ops *self,
 				      find_memory_region_ftype ignore1,
 				      void *ignore2);
 
-static char *dummy_make_corefile_notes (struct target_ops *self,
-					bfd *ignore1, int *ignore2);
+static gdb::unique_xmalloc_ptr<char> dummy_make_corefile_notes
+  (struct target_ops *self, bfd *ignore1, int *ignore2);
 
 static std::string default_pid_to_str (struct target_ops *ops, ptid_t ptid);
 
@@ -3058,7 +3058,7 @@ dummy_find_memory_regions (struct target_ops *self,
 }
 
 /* Error-catcher for target_make_corefile_notes.  */
-static char *
+static gdb::unique_xmalloc_ptr<char>
 dummy_make_corefile_notes (struct target_ops *self,
 			   bfd *ignore1, int *ignore2)
 {
