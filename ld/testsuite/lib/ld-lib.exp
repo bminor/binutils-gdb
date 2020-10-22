@@ -499,6 +499,11 @@ proc run_ld_link_tests { ldtests args } {
 	set maybe_failed 0
 	set ld_output ""
 
+	# Add -fno-lto.  LTO should be tested explicitly by $cflags.
+	if {[check_lto_available]} {
+	    set cflags "-fno-lto $cflags"
+	}
+
 #	verbose -log "Testname is $testname"
 #	verbose -log "ld_options is $ld_options"
 #	verbose -log "ld_after is $ld_after"

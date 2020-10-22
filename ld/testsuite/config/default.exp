@@ -398,6 +398,13 @@ if { ![info exists NOSANITIZE_CFLAGS] } then {
     }
 }
 
+if { ![info exists NOLTO_CFLAGS] } then {
+    set NOLTO_CFLAGS ""
+    if [compiler_supports "-fno-lto"] {
+	set NOLTO_CFLAGS "-fno-lto"
+    }
+}
+
 # Provide dummy libraries that alpha-vms-ld always loads
 if { [istarget alpha*-*-*vms*] } {
     set src tmpdir/empty.s

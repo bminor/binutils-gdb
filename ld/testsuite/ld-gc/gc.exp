@@ -23,7 +23,7 @@ if ![check_gc_sections_available] {
     return
 }
 
-set cflags "-ffunction-sections -fdata-sections $NOSANITIZE_CFLAGS"
+set cflags "-ffunction-sections -fdata-sections $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
 set objfile "tmpdir/gc.o"
 
 if { [istarget powerpc*-*-*] && ![istarget powerpc64*-*-*] } {

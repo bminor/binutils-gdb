@@ -1,3 +1,19 @@
+2020-10-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/config/default.exp (NOLTO_CFLAGS): New.
+	* ld/testsuite/ld-elfcomm/elfcomm.exp: Add $NOLTO_CFLAGS to CC.
+	* testsuite/ld-elfvers/vers.exp: Likewise.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	* testsuite/ld-gc/gc.exp: Likewise.
+	* testsuite/ld-plugin/plugin.exp: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Likewise.
+	* testsuite/ld-selective/selective.exp: Likewise.
+	* testsuite/ld-undefined/undefined.exp: Likewise.
+	* testsuite/ld-srec/srec.exp: Add $NOLTO_CFLAGS to CC.  Override
+	CXXFLAGS.
+	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Prepend -fno-lto
+	to cflags.
+
 2020-10-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/config/default.exp: Provide dummy libraries for

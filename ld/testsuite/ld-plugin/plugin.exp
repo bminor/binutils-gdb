@@ -94,7 +94,7 @@ set failed_compile 0
 set _ ""
 set plugin_nm_output ""
 set old_CFLAGS "$CFLAGS"
-append CFLAGS " $NOSANITIZE_CFLAGS"
+append CFLAGS " $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
 
 if { $can_compile && \
 	(![ld_compile "$CC $CFLAGS" $srcdir/$subdir/main.c tmpdir/main.o] \
