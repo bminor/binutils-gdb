@@ -1485,7 +1485,7 @@ emit_insn0 (struct arc_insn *insn, char *where, bfd_boolean relax)
   size_t total_len;
 
   pr_debug ("Emit insn : 0x%llx\n", insn->insn);
-  pr_debug ("\tLength  : 0x%d\n", insn->len);
+  pr_debug ("\tLength  : %d\n", insn->len);
   pr_debug ("\tLong imm: 0x%lx\n", insn->limm);
 
   /* Write out the instruction.  */

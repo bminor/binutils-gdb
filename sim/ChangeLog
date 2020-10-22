@@ -1,3 +1,8 @@
+2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
+
+	* arm/armos.c (SWIread): Fix printf format.
+	* ppc/emul_netbsd.c (do_sigprocmask): Fix printf format.
+
 2020-09-08  David Faust  <david.faust@oracle.com>
 
 	* bpf/sem-be.c: Regenerate.

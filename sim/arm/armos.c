@@ -293,8 +293,8 @@ SWIread (ARMul_State * state, ARMword f, ARMword ptr, ARMword len)
     {
       sim_callback->printf_filtered
 	(sim_callback,
-	 "sim: Unable to read 0x%ulx bytes - out of memory\n",
-	 len);
+	 "sim: Unable to read 0x%lx bytes - out of memory\n",
+	 (long)len);
       return;
     }
 

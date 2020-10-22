@@ -1,3 +1,7 @@
+2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
+
+	* po/es.po: Fix printf format.
+
 2020-10-16  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_link_hash_table): Add last_iplt_index.

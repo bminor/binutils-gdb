@@ -1,3 +1,7 @@
+2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
+
+	* config/tc-arc.c (emit_insn0): Fix printf format.
+
 2020-10-20  Ganesh Gopalasubramanian  <Ganesh.Gopalasubramanian@amd.com>
 
 	* config/tc-i386.c (cpu_arch): Add CPU_ZNVER3_FLAGS flags.

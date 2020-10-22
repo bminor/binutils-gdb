@@ -650,7 +650,7 @@ do_sigprocmask(os_emul_data *emul,
 #endif
 
   if (WITH_TRACE && ppc_trace[trace_os_emul])
-    printf_filtered ("%ld, 0x%ld, 0x%ld", (long)how, (long)set, (long)oset);
+    printf_filtered ("%ld, 0x%lx, 0x%lx", (long)how, (long)set, (long)oset);
 
   emul_write_status(processor, 0, 0);
   cpu_registers(processor)->gpr[4] = set;

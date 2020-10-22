@@ -1,3 +1,8 @@
+2020-10-22  Dr. David Alan Gilbert  <dgilbert@redhat.com>
+
+	* windmc.c (write_header_define): Fix printf format.
+	(write_header): Likewise.
+
 2020-10-21  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (skip_attr_bytes): Accept DWARF versions higher than 4

@@ -377,7 +377,7 @@ write_header_define (FILE *fp, const unichar *sym_name, rc_uint_type vid, const 
       if (nl != NULL)
 	{
 	  if (mcset_out_values_are_decimal)
-	    fprintf (fp, "//\n// MessageId: 0x%lu\n//\n", (unsigned long) vid);
+	    fprintf (fp, "//\n// MessageId: %lu\n//\n", (unsigned long) vid);
 	  else
 	    fprintf (fp, "//\n// MessageId: 0x%lx\n//\n", (unsigned long) vid);
 	}
@@ -392,7 +392,7 @@ write_header_define (FILE *fp, const unichar *sym_name, rc_uint_type vid, const 
       (tdef ? "(" : ""), (tdef ? tdef : ""), (tdef ? ")" : ""),
     (unsigned long) vid);
   else
-    fprintf (fp, "#define %s %s%s%s 0x%lu\n\n", sym,
+    fprintf (fp, "#define %s %s%s%s %lu\n\n", sym,
       (tdef ? "(" : ""), (tdef ? tdef : ""), (tdef ? ")" : ""),
     (unsigned long) vid);
 }
@@ -872,7 +872,7 @@ write_header (FILE *fp)
 		fprintf (fp, "#define %s 0x%lx\n", convert_unicode_to_ACP (key->sval),
 			 (unsigned long) key->nval);
 	      else
-		fprintf (fp, "#define %s 0x%lu\n", convert_unicode_to_ACP (key->sval),
+		fprintf (fp, "#define %s %lu\n", convert_unicode_to_ACP (key->sval),
 			 (unsigned long) key->nval);
 	    }
 	}
@@ -892,7 +892,7 @@ write_header (FILE *fp)
 		fprintf (fp, "#define %s 0x%lx\n", convert_unicode_to_ACP (key->sval),
 			 (unsigned long) key->nval);
 	      else
-		fprintf (fp, "#define %s 0x%lu\n", convert_unicode_to_ACP (key->sval),
+		fprintf (fp, "#define %s %lu\n", convert_unicode_to_ACP (key->sval),
 			 (unsigned long) key->nval);
 	    }
 	}
