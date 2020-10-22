@@ -44,8 +44,6 @@
 #define target_debug_do_print(E)			\
   fputs_unfiltered ((E), gdb_stdlog);
 
-#define target_debug_print_struct_target_ops_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_enum_target_object(X)	\
   target_debug_do_print (plongest (X))
 #define target_debug_print_CORE_ADDR(X)		\
@@ -108,8 +106,6 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_target_section_table_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_async_callback_ftype_p(X) \
-  target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_void_p(X) \
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_find_memory_region_ftype(X) \
@@ -123,8 +119,6 @@
 #define target_debug_print_const_struct_target_desc_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_bp_location_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_trace_state_variable_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_const_trace_state_variable_r(X)	\
   target_debug_do_print (host_address_to_string (&X))
@@ -140,18 +134,12 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_static_tracepoint_marker_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_struct_traceframe_info_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_btrace_target_info_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_VEC__btrace_block_s__pp(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_const_struct_frame_unwind_p(X)	\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_struct_btrace_data_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_enum_btrace_format(X)	\
-  target_debug_do_print (plongest (X))
 #define target_debug_print_enum_record_method(X)	\
   target_debug_do_print (plongest (X))
 #define target_debug_print_const_struct_btrace_config_p(X)	\
@@ -176,13 +164,9 @@
   target_debug_do_print (host_address_to_string (inf))
 #define target_debug_print_record_print_flags(X) \
   target_debug_do_print (plongest (X))
-#define target_debug_print_enum_info_proc_what(X) \
-  target_debug_do_print (plongest (X))
 #define target_debug_print_thread_control_capabilities(X) \
   target_debug_do_print (plongest (X))
 #define target_debug_print_thread_info_p(X)	\
-  target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_thread_info_pp(X)		\
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_std_string(X) \
   target_debug_do_print ((X).c_str ())

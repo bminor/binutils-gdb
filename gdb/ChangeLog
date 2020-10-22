@@ -1,3 +1,15 @@
+2020-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target-debug.h (target_debug_print_struct_target_ops_p):
+	Remove.
+	(target_debug_print_async_callback_ftype_p): Remove.
+	(target_debug_print_struct_trace_state_variable_p): Remove.
+	(target_debug_print_struct_traceframe_info_p): Remove.
+	(target_debug_print_VEC__btrace_block_s__pp): Remove.
+	(target_debug_print_enum_btrace_format): Remove.
+	(target_debug_print_enum_info_proc_what): Remove.
+	(target_debug_print_thread_info_pp): Remove.
+
 2020-10-22  Simon Marchi  <simon.marchi@efficios.com>
 
 	* target.h (struct target_ops) <make_corefile_notes>:
