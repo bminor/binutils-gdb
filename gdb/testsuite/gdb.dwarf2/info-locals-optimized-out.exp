@@ -28,13 +28,13 @@ standard_testfile main.c -dw.S
 
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
-    global dwarf_regnum regname
+    global dwarf_regnum regname srcfile
 
     set buf_var [gdb_target_symbol buf]
 
     cu {} {
 	DW_TAG_compile_unit {
-		{DW_AT_name info-locals-optimized-out.c}
+		{DW_AT_name $srcfile}
 		{DW_AT_comp_dir /tmp}
 	} {
 	    declare_labels int_type_label

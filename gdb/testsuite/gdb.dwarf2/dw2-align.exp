@@ -30,7 +30,7 @@ Dwarf::assemble $asm_file {
     cu {} {
 	DW_TAG_compile_unit {
                 {DW_AT_language @DW_LANG_C_plus_plus}
-                {DW_AT_name     dw2-align.c}
+                {DW_AT_name     $srcfile}
                 {DW_AT_comp_dir /tmp}
         } {
 	    declare_labels itype ptype

@@ -35,6 +35,8 @@ standard_testfile .S
 
 set dwarf_asm [standard_output_file dwarf-asm.S]
 Dwarf::assemble $dwarf_asm {
+    global srcfile
+
     declare_labels foo_subprogram bar_subprogram
     declare_labels stmt_list
 
@@ -43,7 +45,7 @@ Dwarf::assemble $dwarf_asm {
 
     cu { addr_size 4 } {
 	DW_TAG_compile_unit {
-	    {DW_AT_name file1.txt}
+	    {DW_AT_name $srcfile}
 	    {DW_AT_stmt_list $stmt_list DW_FORM_sec_offset}
 	    {DW_AT_language @DW_LANG_C99}
 	    {DW_AT_low_pc __cu_low_pc DW_FORM_addr}

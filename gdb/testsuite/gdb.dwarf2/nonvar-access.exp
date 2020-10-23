@@ -27,9 +27,11 @@ standard_testfile main.c -dw.S
 set asm_file [standard_output_file $srcfile2]
 
 Dwarf::assemble $asm_file {
+    global srcfile
+
     cu {} {
 	compile_unit {
-	    {DW_AT_name main.c}
+	    {DW_AT_name $srcfile}
 	} {
 	    declare_labels int_type_label char_type_label \
 		struct_s_label struct_t_label array_a9_label \

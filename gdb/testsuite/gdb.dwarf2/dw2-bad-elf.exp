@@ -39,7 +39,7 @@ standard_testfile main.c -other.S -dwarf.S
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile3]
 Dwarf::assemble $asm_file {
-    global srcdir subdir srcfile
+    global srcdir subdir srcfile srcfile2
 
     declare_labels ranges_label_1 ranges_label_2 L1 L2
 
@@ -52,7 +52,7 @@ Dwarf::assemble $asm_file {
     cu {} {
 	DW_TAG_compile_unit {
 	    {DW_AT_language @DW_LANG_C}
-	    {DW_AT_name     dw2-bad-elf.c}
+	    {DW_AT_name     $srcfile}
 	    {DW_AT_comp_dir ${srcdir}/${subdir}}
 	    {stmt_list $L1 DW_FORM_sec_offset}
 	    {ranges ${ranges_label_1} DW_FORM_sec_offset}
@@ -80,7 +80,7 @@ Dwarf::assemble $asm_file {
     cu {} {
 	DW_TAG_compile_unit {
 	    {DW_AT_language @DW_LANG_C}
-	    {DW_AT_name     dw2-bad-elf-other.c}
+	    {DW_AT_name     $srcfile2}
 	    {DW_AT_comp_dir ${srcdir}/${subdir}}
 	    {stmt_list $L2 DW_FORM_sec_offset}
 	    {ranges ${ranges_label_2} DW_FORM_sec_offset}

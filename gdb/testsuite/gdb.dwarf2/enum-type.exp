@@ -24,10 +24,12 @@ standard_testfile main.c -dw.S
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
+    global srcfile
+
     cu {} {
 	DW_TAG_compile_unit {
                 {DW_AT_language @DW_LANG_C}
-                {DW_AT_name     enum-type-dw.c}
+                {DW_AT_name     $srcfile}
                 {DW_AT_comp_dir /tmp}
         } {
 	    declare_labels integer_label uinteger_label

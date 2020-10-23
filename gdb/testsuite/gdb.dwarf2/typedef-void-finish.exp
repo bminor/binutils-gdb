@@ -29,11 +29,13 @@ standard_testfile void-type.c .S
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
+    global srcfile
+
     cu {} {
 	DW_TAG_compile_unit {
 	        {DW_AT_producer "GNU C 8.1"}
                 {DW_AT_language @DW_LANG_C}
-                {DW_AT_name     void-type.c}
+                {DW_AT_name     $srcfile}
                 {DW_AT_comp_dir /tmp}
         } {
 	    declare_labels main_type void_typedef

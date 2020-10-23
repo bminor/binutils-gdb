@@ -1,3 +1,26 @@
+2020-10-23  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/ada-linkage-name.exp: Use $srcfile for DW_AT_name of CU.
+	* gdb.dwarf2/atomic-type.exp: Same.
+	* gdb.dwarf2/bad-regnum.exp: Same.
+	* gdb.dwarf2/cpp-linkage-name.exp: Same.
+	* gdb.dwarf2/dw2-align.exp: Same.
+	* gdb.dwarf2/dw2-bad-elf.exp: Same.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: Same.
+	* gdb.dwarf2/dw2-bad-unresolved.exp: Same.
+	* gdb.dwarf2/dw2-namespaceless-anonymous.exp: Same.
+	* gdb.dwarf2/dw2-opt-structptr.exp: Same.
+	* gdb.dwarf2/dw2-unusual-field-names.exp: Same.
+	* gdb.dwarf2/enum-type.exp: Same.
+	* gdb.dwarf2/frame-inlined-in-outer-frame.exp: Same.
+	* gdb.dwarf2/info-locals-optimized-out.exp: Same.
+	* gdb.dwarf2/main-subprogram.exp: Same.
+	* gdb.dwarf2/missing-type-name.exp: Same.
+	* gdb.dwarf2/nonvar-access.exp: Same.
+	* gdb.dwarf2/typedef-void-finish.exp: Same.
+	* gdb.dwarf2/var-access.exp: Same.
+	* gdb.dwarf2/void-type.exp: Same.
+
 2020-10-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26693

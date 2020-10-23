@@ -62,7 +62,7 @@ proc run_test { field_name } {
 	cu {} {
 	    DW_TAG_compile_unit {
                 {DW_AT_language @DW_LANG_C}
-                {DW_AT_name     dw2-unusual-field-names.c}
+                {DW_AT_name     $srcfile}
                 {DW_AT_comp_dir /tmp}
 	    } {
 		declare_labels itype ptype stype
