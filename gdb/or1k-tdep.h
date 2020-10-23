@@ -52,4 +52,9 @@
 #define OR1K_NUM_TAP_RECORDS         8
 #define OR1K_FRAME_RED_ZONE_SIZE     2536
 
+/* Single step based on where the current instruction will take us.  */
+extern std::vector<CORE_ADDR> or1k_software_single_step
+  (struct regcache *regcache);
+
+
 #endif /* OR1K_TDEP_H */

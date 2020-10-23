@@ -346,33 +346,16 @@ constexpr gdb_byte or1k_break_insn[] = {0x21, 0x00, 0x00, 0x01};
 
 typedef BP_MANIPULATION (or1k_break_insn) or1k_breakpoint;
 
-/* Implement the single_step_through_delay gdbarch method.  */
-
 static int
-or1k_single_step_through_delay (struct gdbarch *gdbarch,
-				struct frame_info *this_frame)
+or1k_delay_slot_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  ULONGEST val;
-  CORE_ADDR ppc;
-  CORE_ADDR npc;
-  CGEN_FIELDS tmp_fields;
   const CGEN_INSN *insn;
-  struct regcache *regcache = get_current_regcache ();
+  CGEN_FIELDS tmp_fields;
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
-  /* Get the previous and current instruction addresses.  If they are not
-    adjacent, we cannot be in a delay slot.  */
-  regcache_cooked_read_unsigned (regcache, OR1K_PPC_REGNUM, &val);
-  ppc = (CORE_ADDR) val;
-  regcache_cooked_read_unsigned (regcache, OR1K_NPC_REGNUM, &val);
-  npc = (CORE_ADDR) val;
-
-  if (0x4 != (npc - ppc))
-    return 0;
 
   insn = cgen_lookup_insn (tdep->gdb_cgen_cpu_desc,
 			   NULL,
-			   or1k_fetch_instruction (gdbarch, ppc),
+			   or1k_fetch_instruction (gdbarch, pc),
 			   NULL, 32, &tmp_fields, 0);
 
   /* NULL here would mean the last instruction was not understood by cgen.
@@ -388,6 +371,51 @@ or1k_single_step_through_delay (struct gdbarch *gdbarch,
 	  || (CGEN_INSN_NUM (insn) == OR1K_INSN_L_JALR)
 	  || (CGEN_INSN_NUM (insn) == OR1K_INSN_L_BNF)
 	  || (CGEN_INSN_NUM (insn) == OR1K_INSN_L_BF));
+}
+
+/* Implement the single_step_through_delay gdbarch method.  */
+
+static int
+or1k_single_step_through_delay (struct gdbarch *gdbarch,
+				struct frame_info *this_frame)
+{
+  ULONGEST val;
+  CORE_ADDR ppc;
+  CORE_ADDR npc;
+  struct regcache *regcache = get_current_regcache ();
+
+  /* Get the previous and current instruction addresses.  If they are not
+    adjacent, we cannot be in a delay slot.  */
+  regcache_cooked_read_unsigned (regcache, OR1K_PPC_REGNUM, &val);
+  ppc = (CORE_ADDR) val;
+  regcache_cooked_read_unsigned (regcache, OR1K_NPC_REGNUM, &val);
+  npc = (CORE_ADDR) val;
+
+  if (0x4 != (npc - ppc))
+    return 0;
+
+  return or1k_delay_slot_p (gdbarch, ppc);
+}
+
+/* or1k_software_single_step() is called just before we want to resume
+   the inferior, if we want to single-step it but there is no hardware
+   or kernel single-step support (OpenRISC on GNU/Linux for example).  We
+   find the target of the coming instruction skipping over delay slots
+   and breakpoint it.  */
+
+std::vector<CORE_ADDR>
+or1k_software_single_step (struct regcache *regcache)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  CORE_ADDR pc, next_pc;
+
+  pc = regcache_read_pc (regcache);
+  next_pc = pc + 4;
+
+  if (or1k_delay_slot_p (gdbarch, pc))
+    next_pc += 4;
+
+  return {next_pc};
 }
 
 /* Name for or1k general registers.  */
