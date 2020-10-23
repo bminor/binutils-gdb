@@ -247,11 +247,10 @@ proc get_func_info { name {options {debug}} } {
 #   and DW_FORM_ref4 is used.  See 'new_label' and 'define_label'.
 # * If VALUE starts with the "%" character, then it is a label
 #   reference too, but DW_FORM_ref_addr is used.
-# * Otherwise, VALUE is taken to be a string and DW_FORM_string is
-#   used.  In order to prevent bugs where a numeric value is given but
-#   no form is specified, it is an error if the value looks like a number
-#   (using Tcl's "string is integer") and no form is provided.
-# More form-guessing functionality may be added.
+# * Otherwise, if the attribute name has a default form (f.i. DW_FORM_addr for
+#   DW_AT_low_pc), then that one is used.
+# * Otherwise, an error is reported.  Either specify a form explicitly, or
+#   add a default for the the attribute name in _default_form.
 #
 # CHILDREN is just Tcl code that can be used to define child DIEs.  It
 # is evaluated in the caller's context.
@@ -590,9 +589,25 @@ namespace eval Dwarf {
 	    }
 
 	    default {
+		return ""
+	    }
+	}
+    }
+
+    proc _default_form { attr } {
+	switch -exact -- $attr {
+	    DW_AT_low_pc  {
+		return DW_FORM_addr
+	    }
+	    DW_AT_producer -
+	    DW_AT_comp_dir -
+	    DW_AT_linkage_name -
+	    DW_AT_MIPS_linkage_name -
+	    DW_AT_name {
 		return DW_FORM_string
 	    }
 	}
+	return ""
     }
 
     # Map NAME to its canonical form.
@@ -692,11 +707,13 @@ namespace eval Dwarf {
 			_guess_form $attr_value attr_value
 		    }
 		} else {
-		    # If the value looks like an integer, a form is required.
-		    if [string is integer $attr_value] {
-			error "Integer value requires a form"
-		    }
 		    set attr_form [_guess_form $attr_value attr_value]
+		    if { $attr_form eq "" } {
+			set attr_form [_default_form $attr_name]
+		    }
+		    if { $attr_form eq "" } {
+			error "No form for $attr_name $attr_value"
+		    }
 		}
 		set attr_form [_map_name $attr_form _FORM]
 

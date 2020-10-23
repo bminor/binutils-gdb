@@ -1,5 +1,13 @@
 2020-10-23  Tom de Vries  <tdevries@suse.de>
 
+	* lib/dwarf.exp (Dwarf::_guess_form): Return "" by default instead of
+	DW_FORM_string.
+	(Dwarf::_default_form): New proc.
+	(Dwarf::_handle_DW_TAG): Use _default_form.  Error out if no form was
+	guessed.
+
+2020-10-23  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/ada-linkage-name.exp: Use $srcfile for DW_AT_name of CU.
 	* gdb.dwarf2/atomic-type.exp: Same.
 	* gdb.dwarf2/bad-regnum.exp: Same.
