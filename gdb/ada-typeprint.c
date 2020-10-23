@@ -967,9 +967,6 @@ ada_print_type (struct type *type0, const char *varstring,
       return;
     }
 
-  if (show > 0)
-    type = ada_check_typedef (type);
-
   if (is_var_decl && type->code () != TYPE_CODE_FUNC)
     fprintf_filtered (stream, "%.*s: ",
 		      ada_name_prefix_len (varstring), varstring);
