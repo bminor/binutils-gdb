@@ -1,5 +1,9 @@
 2020-10-24  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 10.1 released.
+
+2020-10-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set GDB version number to 10.1.
 
 2020-10-22  Hannes Domani  <ssbssa@yahoo.de>
