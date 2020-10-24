@@ -29,7 +29,14 @@ AC_GNU_SOURCE
 AC_SYS_LARGEFILE
 AM_PROG_INSTALL_STRIP
 
-AC_CANONICAL_SYSTEM
+# Set build, build_cpu, build_vendor and build_os.
+AC_CANONICAL_BUILD
+
+# Set host, host_cpu, host_vendor, and host_os.
+AC_CANONICAL_HOST
+
+# Set target, target_cpu, target_vendor, and target_os.
+AC_CANONICAL_TARGET
 
 AC_PROG_INSTALL
 AC_CHECK_TOOL(AR, ar)
