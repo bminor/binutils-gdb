@@ -49,7 +49,6 @@ static const char jit_break_name[] = "__jit_debug_register_code";
 
 static const char jit_descriptor_name[] = "__jit_debug_descriptor";
 
-static void jit_inferior_init (struct gdbarch *gdbarch);
 static void jit_inferior_exit_hook (struct inferior *inf);
 
 /* An unwinder is registered for every gdbarch.  This key is used to
@@ -221,7 +220,7 @@ jit_reader_load_command (const char *args, int from_tty)
 
   loaded_jit_reader = jit_reader_load (file.get ());
   reinit_frame_cache ();
-  jit_inferior_created_hook ();
+  jit_inferior_created_hook (current_inferior ());
 }
 
 /* Provides the jit-reader-unload command.  */
@@ -1178,20 +1177,22 @@ jit_prepend_unwinder (struct gdbarch *gdbarch)
 /* Register any already created translations.  */
 
 static void
-jit_inferior_init (struct gdbarch *gdbarch)
+jit_inferior_init (inferior *inf)
 {
   struct jit_descriptor descriptor;
   struct jit_code_entry cur_entry;
   CORE_ADDR cur_entry_addr;
+  struct gdbarch *gdbarch = inf->gdbarch;
+  program_space *pspace = inf->pspace;
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog, "jit_inferior_init\n");
 
   jit_prepend_unwinder (gdbarch);
 
-  jit_breakpoint_re_set_internal (gdbarch, current_program_space);
+  jit_breakpoint_re_set_internal (gdbarch, pspace);
 
-  for (objfile *jiter : current_program_space->objfiles ())
+  for (objfile *jiter : pspace->objfiles ())
     {
       if (jiter->jiter_data == nullptr)
 	continue;
@@ -1229,20 +1230,12 @@ jit_inferior_init (struct gdbarch *gdbarch)
     }
 }
 
-/* inferior_created observer.  */
-
-static void
-jit_inferior_created (inferior *inf)
-{
-  jit_inferior_created_hook ();
-}
-
-/* Exported routine to call when an inferior has been created.  */
+/* See jit.h.  */
 
 void
-jit_inferior_created_hook (void)
+jit_inferior_created_hook (inferior *inf)
 {
-  jit_inferior_init (target_gdbarch ());
+  jit_inferior_init (inf);
 }
 
 /* Exported routine to call to re-set the jit breakpoints,
@@ -1343,7 +1336,7 @@ _initialize_jit ()
 			     show_jit_debug,
 			     &setdebuglist, &showdebuglist);
 
-  gdb::observers::inferior_created.attach (jit_inferior_created);
+  gdb::observers::inferior_created.attach (jit_inferior_created_hook);
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook);
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted);
 

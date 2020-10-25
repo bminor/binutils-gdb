@@ -1,3 +1,15 @@
+2020-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (jit_reader_load_command): Pass current inferior.
+	(jit_inferior_init): Change parameter type to inferior, use it.
+	(jit_inferior_created): Remove.
+	(jit_inferior_created_hook): Pass inferior parameter down.
+	(_initialize_jit): Use jit_inferior_created_hook instead of
+	jit_inferior_created.
+	* jit.h (jit_inferior_created_hook): Add inferior parameter.
+	* infrun.c (follow_exec): Pass inferior to
+	jit_inferior_created_hook.
+
 2020-10-24  Simon Marchi  <simon.marchi@efficios.com>
 
 	* linux-thread-db.c (check_pid_namespace_match): Add inferior

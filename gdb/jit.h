@@ -20,6 +20,7 @@
 #ifndef JIT_H
 #define JIT_H
 
+struct inferior;
 struct objfile;
 struct minimal_symbol;
 
@@ -107,7 +108,7 @@ struct jited_objfile_data
    already JITed code.  If it has already found the symbols, then it
    doesn't try again.  */
 
-extern void jit_inferior_created_hook (void);
+extern void jit_inferior_created_hook (inferior *inf);
 
 /* Re-establish the jit breakpoint(s).  */
 

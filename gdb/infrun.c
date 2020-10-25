@@ -1236,7 +1236,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
 
   solib_create_inferior_hook (0);
 
-  jit_inferior_created_hook ();
+  jit_inferior_created_hook (inf);
 
   breakpoint_re_set ();
 
