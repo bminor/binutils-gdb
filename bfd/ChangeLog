@@ -1,3 +1,8 @@
+2020-10-25  Alan Modra  <amodra@gmail.com>
+
+	* vms-misc.c (_bfd_vms_save_counted_string): Count length byte
+	towards maxlen.
+
 2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
 
 	* po/es.po: Fix printf format.

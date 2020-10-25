@@ -163,9 +163,12 @@ _bfd_vms_save_sized_string (bfd *abfd, unsigned char *str, size_t size)
 char *
 _bfd_vms_save_counted_string (bfd *abfd, unsigned char *ptr, size_t maxlen)
 {
-  unsigned int len = *ptr++;
+  unsigned int len;
 
-  if (len > maxlen)
+  if (maxlen == 0)
+    return NULL;
+  len = *ptr++;
+  if (len >  maxlen - 1)
     return NULL;
   return _bfd_vms_save_sized_string (abfd, ptr, len);
 }
