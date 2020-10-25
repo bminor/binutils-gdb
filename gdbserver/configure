@@ -2713,6 +2713,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 
@@ -4243,7 +4244,6 @@ $as_echo "$ac_cv_safe_to_define___extensions__" >&6; }
   $as_echo "#define _POSIX_PTHREAD_SEMANTICS 1" >>confdefs.h
 
   $as_echo "#define _TANDEM_SOURCE 1" >>confdefs.h
-
 
 
 # Check whether --enable-largefile was given.
@@ -9653,6 +9653,7 @@ int
 main ()
 {
 
+
   ;
   return 0;
 }
@@ -9660,11 +9661,14 @@ _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; };
+
 $as_echo "#define HAVE_UST 1" >>confdefs.h
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }; ustlibs= ; ustinc=
+$as_echo "no" >&6; }
+     ustlibs= ; ustinc=
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   CFLAGS="$saved_CFLAGS"
@@ -10314,8 +10318,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdbsrv_cv_have_ptrace_getregs=yes
 else
   gdbsrv_cv_have_ptrace_getregs=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_ptrace_getregs" >&5
@@ -10346,8 +10352,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdbsrv_cv_have_ptrace_getfpxregs=yes
 else
   gdbsrv_cv_have_ptrace_getfpxregs=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_ptrace_getfpxregs" >&5
@@ -10513,11 +10521,11 @@ main ()
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
   found="-Wl,--dynamic-list"
-		 RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'
+       RDYNAMIC='-Wl,--dynamic-list=$(srcdir)/proc-service.list'
 else
   RDYNAMIC="-rdynamic"
-		 LDFLAGS="$old_LDFLAGS $RDYNAMIC"
-		 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+       LDFLAGS="$old_LDFLAGS $RDYNAMIC"
+       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
@@ -10532,10 +10540,12 @@ if ac_fn_c_try_link "$LINENO"; then :
   found="-rdynamic"
 else
   found="no"
-			      RDYNAMIC=""
+	  RDYNAMIC=""
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
@@ -10571,8 +10581,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdbsrv_cv_have_td_version=yes
 else
   gdbsrv_cv_have_td_version=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_td_version" >&5
 $as_echo "$gdbsrv_cv_have_td_version" >&6; }
@@ -10619,14 +10631,15 @@ $as_echo_n "checking whether the target supports __sync_*_compare_and_swap... " 
 if ${gdbsrv_cv_have_sync_builtins+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
 main ()
 {
-int foo, bar; bar = __sync_val_compare_and_swap(&foo, 0, 1);
+int foo, bar;
+	 bar = __sync_val_compare_and_swap(&foo, 0, 1);
+
   ;
   return 0;
 }
@@ -10635,9 +10648,11 @@ if ac_fn_c_try_link "$LINENO"; then :
   gdbsrv_cv_have_sync_builtins=yes
 else
   gdbsrv_cv_have_sync_builtins=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdbsrv_cv_have_sync_builtins" >&5
 $as_echo "$gdbsrv_cv_have_sync_builtins" >&6; }
