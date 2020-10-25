@@ -1286,7 +1286,7 @@ thread_db_new_objfile (struct objfile *objfile)
 }
 
 static void
-check_pid_namespace_match (void)
+check_pid_namespace_match (inferior *inf)
 {
   /* Check is only relevant for local targets targets.  */
   if (target_can_run ())
@@ -1296,7 +1296,7 @@ check_pid_namespace_match (void)
 	 child's thread list, we'll mistakenly think it has no threads
 	 since the thread PID fields won't match the PID we give to
 	 libthread_db.  */
-      if (!linux_ns_same (inferior_ptid.pid (), LINUX_NS_PID))
+      if (!linux_ns_same (inf->pid, LINUX_NS_PID))
 	{
 	  warning (_ ("Target and debugger are in different PID "
 		      "namespaces; thread lists and other data are "
@@ -1312,7 +1312,7 @@ check_pid_namespace_match (void)
 static void
 thread_db_inferior_created (inferior *inf)
 {
-  check_pid_namespace_match ();
+  check_pid_namespace_match (inf);
   check_for_thread_db ();
 }
 

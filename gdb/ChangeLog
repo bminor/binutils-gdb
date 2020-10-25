@@ -1,5 +1,11 @@
 2020-10-24  Simon Marchi  <simon.marchi@efficios.com>
 
+	* linux-thread-db.c (check_pid_namespace_match): Add inferior
+	parameter and use it.
+	(thread_db_inferior_created): Pass inferior argument.
+
+2020-10-24  Simon Marchi  <simon.marchi@efficios.com>
+
 	* aix-thread.c (aix_thread_inferior_created): Add inferior
 	parameter.
 	* bsd-uthread.c (bsd_uthread_inferior_created): Likewise.
