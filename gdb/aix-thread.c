@@ -1015,7 +1015,7 @@ new_objfile (struct objfile *objfile)
 /* Attach to process specified by ARGS.  */
 
 static void
-aix_thread_inferior_created ()
+aix_thread_inferior_created (inferior *inf)
 {
   pd_enable ();
 }

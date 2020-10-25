@@ -347,7 +347,7 @@ post_create_inferior (int from_tty)
      if the now pushed target supports hardware watchpoints.  */
   breakpoint_re_set ();
 
-  gdb::observers::inferior_created.notify ();
+  gdb::observers::inferior_created.notify (current_inferior ());
 }
 
 /* Kill the inferior if already running.  This function is designed

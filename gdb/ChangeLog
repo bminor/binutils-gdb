@@ -1,3 +1,17 @@
+2020-10-24  Simon Marchi  <simon.marchi@efficios.com>
+
+	* aix-thread.c (aix_thread_inferior_created): Add inferior
+	parameter.
+	* bsd-uthread.c (bsd_uthread_inferior_created): Likewise.
+	* dummy-frame.c (cleanup_dummy_frames): Likewise.
+	* jit.c (jit_inferior_created): Likewise.
+	* linux-thread-db.c (thread_db_inferior_created): Likewise.
+	* m68k-linux-tdep.c (m68k_linux_inferior_created): Likewise.
+	* observable.h (inferior_created): Likewise.
+	* ravenscar-thread.c (ravenscar_inferior_created): Likewise.
+	* symfile-mem.c (add_vsyscall_page): Likewise.
+	* infcmd.c (post_create_inferior): Pass inferior argument.
+
 2020-10-24  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 10.1 released.

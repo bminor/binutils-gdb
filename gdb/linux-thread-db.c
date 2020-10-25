@@ -1310,7 +1310,7 @@ check_pid_namespace_match (void)
    This handles the case of debugging statically linked executables.  */
 
 static void
-thread_db_inferior_created ()
+thread_db_inferior_created (inferior *inf)
 {
   check_pid_namespace_match ();
   check_for_thread_db ();

@@ -263,7 +263,7 @@ bsd_uthread_deactivate (void)
 }
 
 static void
-bsd_uthread_inferior_created ()
+bsd_uthread_inferior_created (inferior *inf)
 {
   bsd_uthread_activate (NULL);
 }

@@ -273,7 +273,7 @@ find_dummy_frame_dtor (dummy_frame_dtor_ftype *dtor, void *dtor_data)
    them up at least once whenever we start a new inferior.  */
 
 static void
-cleanup_dummy_frames ()
+cleanup_dummy_frames (inferior *inf)
 {
   while (dummy_frame_stack != NULL)
     remove_dummy_frame (&dummy_frame_stack);
