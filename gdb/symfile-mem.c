@@ -53,6 +53,7 @@
 #include "auxv.h"
 #include "elf/common.h"
 #include "gdb_bfd.h"
+#include "inferior.h"
 
 /* Verify parameters of target_read_memory_bfd and target_read_memory are
    compatible.  */
@@ -161,7 +162,7 @@ add_vsyscall_page (inferior *inf)
 {
   struct mem_range vsyscall_range;
 
-  if (gdbarch_vsyscall_range (target_gdbarch (), &vsyscall_range))
+  if (gdbarch_vsyscall_range (inf->gdbarch, &vsyscall_range))
     {
       struct bfd *bfd;
 

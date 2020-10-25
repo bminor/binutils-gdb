@@ -1,5 +1,10 @@
 2020-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* symfile-mem.c (add_vsyscall_page): Use inferior parameter
+	instead of target_gdbarch.
+
+2020-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (jit_reader_load_command): Pass current inferior.
 	(jit_inferior_init): Change parameter type to inferior, use it.
 	(jit_inferior_created): Remove.
