@@ -1,3 +1,8 @@
+2020-10-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* acinclude.m4: Update ptrace.m4 path.
+	* ptrace.m4: Moved to gdbsupport.
+
 2020-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* symfile-mem.c (add_vsyscall_page): Use inferior parameter

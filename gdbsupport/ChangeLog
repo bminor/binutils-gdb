@@ -1,3 +1,9 @@
+2020-10-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* Makefile.in: Re-generate.
+	* acinclude.m4: Update ptrace.m4 path.
+	* ptrace.m4: Move here.
+
 2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tdesc.h (allocate_target_description): Update return type.

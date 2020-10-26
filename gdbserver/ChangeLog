@@ -1,3 +1,7 @@
+2020-10-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* acinclude.m4: Update ptrace.m4 path.
+
 2020-10-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* config.in: Re-generate.

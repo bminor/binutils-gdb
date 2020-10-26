@@ -27,7 +27,7 @@ dnl For libiberty_INIT.
 m4_include(../gdb/libiberty.m4)
 
 dnl For GDB_AC_PTRACE.
-m4_include(../gdb/ptrace.m4)
+m4_include(../gdbsupport/ptrace.m4)
 
 m4_include(../gdb/ax_cxx_compile_stdcxx.m4)
 
