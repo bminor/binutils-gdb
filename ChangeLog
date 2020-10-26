@@ -1,3 +1,7 @@
+2020-10-26  Andreas Rammhold <andreas@rammhold.de>
+
+	* src-release.sh: Use sha256sum instead of md5sum.
+
 2020-10-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* Makefile.in: Rebuild.

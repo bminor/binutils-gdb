@@ -26,7 +26,7 @@ BZIPPROG=bzip2
 GZIPPROG=gzip
 LZIPPROG=lzip
 XZPROG=xz
-MD5PROG=md5sum
+SHA256PROG=sha256sum
 MAKE=make
 CC=gcc
 CXX=g++
@@ -168,15 +168,15 @@ do_proto_toplev()
 
 CVS_NAMES='-name CVS -o -name .cvsignore'
 
-# Add an md5sum to the built tarball
-do_md5sum()
+# Add a sha256sum to the built tarball
+do_sha256sum()
 {
-    echo "==> Adding md5 checksum to top-level directory"
+    echo "==> Adding sha256 checksum to top-level directory"
     (cd proto-toplev && find * -follow \( $CVS_NAMES \) -prune \
 	-o -type f -print \
-	| xargs $MD5PROG > ../md5.new)
-    rm -f proto-toplev/md5.sum
-    mv md5.new proto-toplev/md5.sum
+	| xargs $SHA256PROG > ../sha256.new)
+    rm -f proto-toplev/sha256.sum
+    mv sha256.new proto-toplev/sha256.sum
 }
 
 # Build the release tarball
@@ -276,7 +276,7 @@ tar_compress()
     verdir=${5:-$tool}
     ver=$(getver $verdir)
     do_proto_toplev $package $ver $tool "$support_files"
-    do_md5sum
+    do_sha256sum
     do_tar $package $ver
     do_compress $package $ver "$compressors"
 }
@@ -290,7 +290,7 @@ gdb_tar_compress()
     compressors=$4
     ver=$(getver $tool)
     do_proto_toplev $package $ver $tool "$support_files"
-    do_md5sum
+    do_sha256sum
     do_djunpack $package $ver
     do_tar $package $ver
     do_compress $package $ver "$compressors"

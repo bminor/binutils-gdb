@@ -1,3 +1,7 @@
+2020-10-26  Andreas Rammhold <andreas@rammhold.de>
+
+	* README-how-to-make-a-release: Use sha256sum instead of md5sum.
+
 2020-10-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 26795

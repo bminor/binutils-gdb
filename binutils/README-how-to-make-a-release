@@ -124,7 +124,7 @@ How to perform a release.
 
           cd <branch-sources>
           scp binutils-<OLD_VERSION>.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org md5sum ~ftp/pub/binutils/snapshots/binutils-<OLD_VERSION>.90.tar.xz
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-<OLD_VERSION>.90.tar.xz
 
      e. Clean up the source directory again.
 
@@ -364,7 +364,7 @@ Cheers
       David Edelsohn <dje.gcc@gmail.com> announcing the new release.
       Sign the email and include the checksum:
 
-          md5sum binutils-2.3x.tar.*
+          sha256sum binutils-2.3x.tar.*
 
       (The email to Davis is so that he can update the GNU Toolchain
       social media).  Something like this:
