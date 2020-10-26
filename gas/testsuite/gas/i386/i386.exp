@@ -619,6 +619,7 @@ if [gas_32_check] then {
 	run_dump_test "dwarf2-line-2"
 	run_dump_test "dwarf2-line-3"
 	run_dump_test "dwarf2-line-4"
+	run_dump_test "dwarf4-line-1"
 	run_dump_test "dwarf5-line-1"
 	run_dump_test "dwarf5-line-2"
 	run_dump_test "dwarf5-line-3"

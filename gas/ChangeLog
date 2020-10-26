@@ -1,3 +1,14 @@
+2020-10-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26778
+	* * dwarf2dbg.c (num_of_auto_assigned): New.
+	(allocate_filenum): Increment num_of_auto_assigned.
+	(dwarf2_directive_filename): Clear the slots auto-assigned
+	before the first .file <NUMBER> directive was seen.
+	* testsuite/gas/i386/dwarf4-line-1.d: New file.
+	* testsuite/gas/i386/dwarf4-line-1.s: Likewise.
+	* testsuite/gas/i386/i386.exp: Run dwarf4-line-1.
+
 2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (dump_literals): Fix the literal dump

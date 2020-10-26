@@ -218,6 +218,7 @@ struct file_entry
 static struct file_entry *files;
 static unsigned int files_in_use;
 static unsigned int files_allocated;
+static unsigned int num_of_auto_assigned;
 
 /* Table of directories used by .debug_line.  */
 static char **       dirs = NULL;
@@ -718,6 +719,8 @@ allocate_filenum (const char * pathname)
   if (!assign_file_to_slot (i, file, dir))
     return -1;
 
+  num_of_auto_assigned++;
+
   last_used = i;
   last_used_dir_len = dir_len;
 
@@ -1013,6 +1016,7 @@ dwarf2_directive_filename (void)
   char *filename;
   const char * dirname = NULL;
   int filename_len;
+  unsigned int i;
 
   /* Continue to accept a bare string and pass it off.  */
   SKIP_WHITESPACE ();
@@ -1079,18 +1083,16 @@ dwarf2_directive_filename (void)
       return NULL;
     }
 
-  if (files_in_use == 2)
+  if (num_of_auto_assigned)
     {
-      /* Clear the slot 1 if it was assigned to the input file before
-	 the first .file <NUMBER> directive was seen.  */
-      unsigned int lineno;
-      const char *file = as_where (&lineno);
-      file = get_basename (file);
-      if (filename_cmp (file, files[1].filename) == 0)
-	{
-	  files[1].filename = NULL;
-	  files_in_use = 0;
-	}
+      /* Clear slots auto-assigned before the first .file <NUMBER>
+	 directive was seen.  */
+      if (files_in_use != (num_of_auto_assigned + 1))
+	abort ();
+      for (i = 1; i < files_in_use; i++)
+	files[i].filename = NULL;
+      files_in_use = 0;
+      num_of_auto_assigned = 0;
     }
 
   if (! allocate_filename_to_slot (dirname, filename, (unsigned int) num,
