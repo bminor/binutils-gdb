@@ -9929,6 +9929,8 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
   cu->language = pretend_language;
   cu->language_defn = language_def (cu->language);
 
+  dwarf2_find_base_address (cu->dies, cu);
+
   /* Do line number decoding in read_file_scope () */
   process_die (cu->dies, cu);
 

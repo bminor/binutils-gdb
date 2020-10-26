@@ -1,3 +1,8 @@
+2020-10-26  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (process_full_comp_unit): Call
+	dwarf2_find_base_address.
+
 2020-10-26  Tom Tromey  <tromey@adacore.com>
 
 	* gdbtypes.c (create_range_type): Revert previous patch.  Add
