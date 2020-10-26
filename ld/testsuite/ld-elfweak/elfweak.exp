@@ -268,13 +268,14 @@ proc build_lib {test libname objs dynsymexp} {
     global srcdir
     global subdir
     global NOSANITIZE_CFLAGS
+    global NOLTO_CFLAGS
 
     set files ""
     foreach obj $objs {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_link "$CC $NOSANITIZE_CFLAGS" $tmpdir/$libname.so "$shared $files"]} {
+    if {![ld_link "$CC $NOSANITIZE_CFLAGS $NOLTO_CFLAGS" $tmpdir/$libname.so "$shared $files"]} {
 	fail $test
 	return
     }
@@ -295,13 +296,14 @@ proc build_exec { test execname objs flags dat dynsymexp symexp} {
     global subdir
     global exec_output
     global NOSANITIZE_CFLAGS
+    global NOLTO_CFLAGS
 
     set files ""
     foreach obj $objs {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_link $CC $tmpdir/$execname "$flags $NOSANITIZE_CFLAGS $files"]} {
+    if {![ld_link $CC $tmpdir/$execname "$flags $NOSANITIZE_CFLAGS $NOLTO_CFLAGS $files"]} {
 	fail "$test"
 	return
     }
@@ -356,8 +358,9 @@ if {[check_lto_available]} {
    append cc_cmd " -fno-lto"
 }
 
-# Disable all sanitizers.
-append cc_cmd " $NOSANITIZE_CFLAGS"
+# Disable all sanitizers and LTO.
+set saved_CFLAGS "$CFLAGS"
+set CFLAGS "$CFLAGS $NOSANITIZE_CFLAGS $NOLTO_CFLAGS"
 
 # Old version of GCC for MIPS default to enabling -fpic
 # and get confused if it is used on the command line.
@@ -438,10 +441,12 @@ run_dump_test $srcdir/$subdir/size2
 
 if {![ld_compile "$cc_cmd $CFLAGS $picflag" $srcdir/$subdir/alias.c $tmpdir/alias.o]
     || ![ld_link $cc_cmd $tmpdir/alias.so "$shared $tmpdir/alias.o"]
-    || ![ld_compile "$cc_cmd $CFLAGS $NOSANITIZE_CFLAGS" $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
+    || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/aliasmain.c $tmpdir/aliasmain.o]
     || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/weakref1.c $tmpdir/weakref1.o]
     || ![ld_compile "$cc_cmd $CFLAGS" $srcdir/$subdir/weakref2.c $tmpdir/weakref2.o]} then {
     unresolved "ELF weak (alias)"
 } else {
     build_exec "ELF weak (alias)" alias "aliasmain.o weakref1.o weakref2.o alias.so" "-Wl,-rpath=.,--no-as-needed" alias "" ""
 }
+
+set CFLAGS "$saved_CFLAGS"
