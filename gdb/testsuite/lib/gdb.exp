@@ -124,7 +124,13 @@ set BUILD_DATA_DIRECTORY "[pwd]/../data-directory"
 # INTERNAL_GDBFLAGS contains flags that the testsuite requires.
 global INTERNAL_GDBFLAGS
 if ![info exists INTERNAL_GDBFLAGS] {
-    set INTERNAL_GDBFLAGS "-nw -nx -data-directory $BUILD_DATA_DIRECTORY"
+    set INTERNAL_GDBFLAGS \
+	[join [list \
+		   "-nw" \
+		   "-nx" \
+		   "-data-directory $BUILD_DATA_DIRECTORY" \
+		   {-iex "set height 0"} \
+		   {-iex "set width 0"}]]
 }
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.

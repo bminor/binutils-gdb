@@ -1,5 +1,9 @@
 2020-10-26  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (INTERNAL_GDBFLAGS): Set heigth and width.
+
+2020-10-26  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/dw2-objfile-overlap-inner.S: Specify default base address
 	for CU.
 	* gdb.dwarf2/dw2-objfile-overlap-outer.S: Same.
