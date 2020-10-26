@@ -14232,13 +14232,14 @@ if ${gdb_cv_func_sigsetjmp+:} false; then :
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-
-  #include <setjmp.h>
-
+#include <setjmp.h>
 int
 main ()
 {
-sigjmp_buf env; while (! sigsetjmp (env, 1)) siglongjmp (env, 1);
+sigjmp_buf env;
+           while (! sigsetjmp (env, 1))
+             siglongjmp (env, 1);
+
   ;
   return 0;
 }
@@ -14247,8 +14248,10 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_sigsetjmp=yes
 else
   gdb_cv_func_sigsetjmp=no
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_sigsetjmp" >&5
 $as_echo "$gdb_cv_func_sigsetjmp" >&6; }
