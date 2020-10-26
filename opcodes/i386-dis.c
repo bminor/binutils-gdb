@@ -11091,7 +11091,6 @@ putop (const char *in_template, int sizeflag)
 		  *obufp++ = 'v';
 		  *obufp++ = 'e';
 		  *obufp++ = 'x';
-		  *obufp++ = '3';
 		  *obufp++ = '}';
 		}
 	      else if (rex & REX_W)

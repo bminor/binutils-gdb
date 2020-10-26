@@ -1,3 +1,7 @@
+2020-10-26  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c: Change "XV" to print "{vex}" pseudo prefix. 
+
 2020-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* po/es.po: Remove the duplicated entry.
