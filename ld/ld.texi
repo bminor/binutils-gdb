@@ -1140,6 +1140,10 @@ Omit debugger symbol information (but not all symbols) from the output file.
 Omit (or do not omit) global symbols defined in discarded sections.
 Enabled by default.
 
+@kindex -plugin-save-temps
+@item -plugin-save-temps
+Store the plugin ``temporary'' intermediate files permanently.
+
 @kindex -t
 @kindex --trace
 @cindex input files, displaying

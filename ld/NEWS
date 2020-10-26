@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add -plugin-save-temps to store plugin intermediate files permanently.
+
 Changes in 2.42:
 
 * Add -z mark-plt/-z nomark-plt options to x86-64 ELF linker to mark PLT

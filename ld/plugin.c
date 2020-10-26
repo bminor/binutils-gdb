@@ -1367,14 +1367,17 @@ plugin_call_cleanup (void)
     {
       if (curplug->cleanup_handler && !curplug->cleanup_done)
 	{
-	  enum ld_plugin_status rv;
-	  curplug->cleanup_done = true;
-	  called_plugin = curplug;
-	  rv = (*curplug->cleanup_handler) ();
-	  called_plugin = NULL;
-	  if (rv != LDPS_OK)
-	    info_msg (_("%P: %s: error in plugin cleanup: %d (ignored)\n"),
-		      curplug->name, rv);
+	  if (!config.plugin_save_temps)
+	    {
+	      enum ld_plugin_status rv;
+	      curplug->cleanup_done = true;
+	      called_plugin = curplug;
+	      rv = (*curplug->cleanup_handler) ();
+	      called_plugin = NULL;
+	      if (rv != LDPS_OK)
+		info_msg (_("%P: %s: error in plugin cleanup: %d (ignored)\n"),
+			  curplug->name, rv);
+	    }
 	  dlclose (curplug->dlhandle);
 	}
       curplug = curplug->next;

@@ -300,6 +300,9 @@ typedef struct
   /* The size of the hash table to use.  */
   unsigned long hash_table_size;
 
+  /* If set, store plugin intermediate files permanently.  */
+  bool plugin_save_temps;
+
   /* If set, print discarded sections in map file output.  */
   bool print_map_discarded;
 
