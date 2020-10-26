@@ -1938,9 +1938,9 @@ If this option is provided then the linker will invoke
 @var{scriptname} whenever an error is encountered.  Currently however
 only two kinds of error are supported: missing symbols and missing
 libraries.  Two arguments will be passed to script: the keyword
-``missing-symbol'' or `missing-lib'' and the @var{name} of the 
-missing symbol or library.  The intention is that the script will
-provide suggestions to the user as to where the symbol or library
+``undefined-symbol'' or `missing-lib'' and the @var{name} of the 
+undefined symbol or missing library.  The intention is that the script
+will provide suggestions to the user as to where the symbol or library
 might be found.  After the script has finished then the normal linker
 error message will be displayed.
 

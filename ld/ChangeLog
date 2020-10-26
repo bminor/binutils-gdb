@@ -1,3 +1,10 @@
+2020-10-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 26626
+	* ldmain.c (undefined_symbol): Use the keyword undefined-symbol
+	when invoking the error handling script for undefined symbols.
+	* ld.texi: Update documentation.
+
 2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
 
 	* emulparams/cskyelf.sh (TEXT_START_ADDR): Change to 0x60000000.

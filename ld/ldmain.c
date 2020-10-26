@@ -1432,7 +1432,7 @@ undefined_symbol (struct bfd_link_info *info,
       int           status, err;
 
       argv[0] = error_handling_script;
-      argv[1] = "missing-symbol";
+      argv[1] = "undefined-symbol";
       argv[2] = (char *) name;
       argv[3] = NULL;
       
