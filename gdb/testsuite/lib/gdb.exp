@@ -5213,7 +5213,7 @@ proc standard_output_file {basename} {
 
 proc standard_output_file_with_gdb_instance {basename} {
     global gdb_instances
-    set count [expr $gdb_instances - 1 ]
+    set count $gdb_instances
 
     if {$count == 0} {
       return [standard_output_file $basename]
@@ -7216,8 +7216,10 @@ proc gdb_stdin_log_write { message {type standard} } {
         }
     }
 
-    #Write to the log
+    # Write to the log and make sure the output is there, even in case
+    # of crash.
     puts -nonewline $in_file "$message"
+    flush $in_file
 }
 
 # Write the command line used to invocate gdb to the cmd file.

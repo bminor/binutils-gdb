@@ -206,6 +206,12 @@ proc default_mi_gdb_start { args } {
     global MIFLAGS
     global FORCE_SEPARATE_MI_TTY
 
+    # Keep track of the number of times GDB has been launched.
+    global gdb_instances
+    incr gdb_instances
+
+    gdb_stdin_log_init
+
     if {[info exists FORCE_SEPARATE_MI_TTY]} {
 	set separate_mi_pty $FORCE_SEPARATE_MI_TTY
     } else {

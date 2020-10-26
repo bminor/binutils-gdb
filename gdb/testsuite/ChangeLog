@@ -1,3 +1,11 @@
+2020-10-26  Tom Tromey  <tom@tromey.com>
+
+	* lib/mi-support.exp (default_mi_gdb_start): Call
+	gdb_stdin_log_init.
+	* lib/gdb.exp (standard_output_file_with_gdb_instance): Don't
+	subtract one from gdb_instances.
+	(gdb_stdin_log_write): Flush in_file.
+
 2020-10-26  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/enqueued-cu-base-addr.exp: New file.
