@@ -256,10 +256,10 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
     {
 #ifdef HAVE_POLL
       /* Check to see if poll () is usable.  If not, we'll switch to
-         use select.  This can happen on systems like
-         m68k-motorola-sys, `poll' cannot be used to wait for `stdin'.
-         On m68k-motorola-sysv, tty's are not stream-based and not
-         `poll'able.  */
+	 use select.  This can happen on systems like
+	 m68k-motorola-sys, `poll' cannot be used to wait for `stdin'.
+	 On m68k-motorola-sysv, tty's are not stream-based and not
+	 `poll'able.  */
       fds.fd = fd;
       fds.events = POLLIN;
       if (poll (&fds, 1, 0) == 1 && (fds.revents & POLLNVAL))
@@ -423,7 +423,7 @@ delete_file_handler (int fd)
     {
 #ifdef HAVE_POLL
       /* Create a new poll_fds array by copying every fd's information
-         but the one we want to get rid of.  */
+	 but the one we want to get rid of.  */
 
       new_poll_fds = (struct pollfd *) 
 	xmalloc ((gdb_notifier.num_fds - 1) * sizeof (struct pollfd));

@@ -34,10 +34,10 @@
 /* *INDENT-OFF* */
 /* Layout of a stack frame on the alpha:
 
-                |				|
+		|				|
  pdr members:	|  7th ... nth arg,		|
-                |  `pushed' by caller.		|
-                |				|
+		|  `pushed' by caller.		|
+		|				|
 ----------------|-------------------------------|<--  old_sp == vfp
    ^  ^  ^  ^	|				|
    |  |  |  |	|				|
@@ -72,7 +72,7 @@
    |            |  called procedure.		|
    v            |  				|
    -------------|-------------------------------|<-- sp
-                |				|
+		|				|
 */
 /* *INDENT-ON* */
 
@@ -117,7 +117,7 @@ find_proc_desc (CORE_ADDR pc)
       proc_desc = (struct mdebug_extra_func_info *) SYMBOL_VALUE_BYTES (sym);
 
       /* Correct incorrect setjmp procedure descriptor from the library
-         to make backtrace through setjmp work.  */
+	 to make backtrace through setjmp work.  */
       if (proc_desc->pdr.pcreg == 0
 	  && strcmp (sh_name, "setjmp") == 0)
 	{
@@ -154,7 +154,7 @@ alpha_mdebug_after_prologue (CORE_ADDR pc,
   if (proc_desc)
     {
       /* If function is frameless, then we need to do it the hard way.  I
-         strongly suspect that frameless always means prologueless...  */
+	 strongly suspect that frameless always means prologueless...  */
       if (alpha_mdebug_frameless (proc_desc))
 	return 0;
     }
@@ -308,8 +308,8 @@ alpha_mdebug_max_frame_size_exceeded (struct mdebug_extra_func_info *proc_desc)
 
 static int
 alpha_mdebug_frame_sniffer (const struct frame_unwind *self,
-                            struct frame_info *this_frame,
-                            void **this_cache)
+			    struct frame_info *this_frame,
+			    void **this_cache)
 {
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct mdebug_extra_func_info *proc_desc;

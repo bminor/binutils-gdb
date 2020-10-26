@@ -215,14 +215,14 @@ void
 _initialize_i386_windows_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
-                                  i386_windows_osabi_sniffer);
+				  i386_windows_osabi_sniffer);
 
   /* Cygwin uses elf core dumps.  */
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
-                                  i386_cygwin_core_osabi_sniffer);
+				  i386_cygwin_core_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_WINDOWS,
-                          i386_windows_init_abi);
+			  i386_windows_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_CYGWIN,
 			  i386_cygwin_init_abi);
 }

@@ -583,7 +583,7 @@ skiplist_entry::skip_function_p (const char *function_name) const
   if (m_function_is_regexp)
     {
       if (debug_skip)
-        fprintf_unfiltered (gdb_stdlog,
+	fprintf_unfiltered (gdb_stdlog,
 			    "skip: checking if function %s matches regex %s...",
 			    function_name, m_function.c_str ());
 
@@ -594,7 +594,7 @@ skiplist_entry::skip_function_p (const char *function_name) const
   else
     {
       if (debug_skip)
-        fprintf_unfiltered (gdb_stdlog,
+	fprintf_unfiltered (gdb_stdlog,
 			    ("skip: checking if function %s matches non-regex "
 			     "%s..."),
 			    function_name, m_function.c_str ());
@@ -676,7 +676,7 @@ FILE-SPEC is one of:\n\
 FUNCTION-SPEC is one of:\n\
        -fu|-function FUNCTION-NAME\n\
        -rfu|-rfunction FUNCTION-NAME-REGULAR-EXPRESSION"),
-                  &skiplist, "skip ", 1, &cmdlist);
+		  &skiplist, "skip ", 1, &cmdlist);
 
   c = add_cmd ("file", class_breakpoint, skip_file_command, _("\
 Ignore a file while stepping.\n\

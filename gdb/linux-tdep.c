@@ -410,7 +410,7 @@ read_mapping (const char *line,
 	      ULONGEST *addr, ULONGEST *endaddr,
 	      const char **permissions, size_t *permissions_len,
 	      ULONGEST *offset,
-              const char **device, size_t *device_len,
+	      const char **device, size_t *device_len,
 	      ULONGEST *inode,
 	      const char **filename)
 {
@@ -843,9 +843,9 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 			   "Start Addr",
 			   "  End Addr",
 			   "      Size", "    Offset", "objfile");
-            }
+	    }
 	  else
-            {
+	    {
 	      printf_filtered ("  %18s %18s %10s %10s %s\n",
 			   "Start Addr",
 			   "  End Addr",
@@ -867,8 +867,8 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 			    &inode, &mapping_filename);
 
 	      if (gdbarch_addr_bit (gdbarch) == 32)
-	        {
-	          printf_filtered ("\t%10s %10s %10s %10s %s\n",
+		{
+		  printf_filtered ("\t%10s %10s %10s %10s %s\n",
 				   paddress (gdbarch, addr),
 				   paddress (gdbarch, endaddr),
 				   hex_string (endaddr - addr),
@@ -876,14 +876,14 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 				   *mapping_filename ? mapping_filename : "");
 		}
 	      else
-	        {
-	          printf_filtered ("  %18s %18s %10s %10s %s\n",
+		{
+		  printf_filtered ("  %18s %18s %10s %10s %s\n",
 				   paddress (gdbarch, addr),
 				   paddress (gdbarch, endaddr),
 				   hex_string (endaddr - addr),
 				   hex_string (offset),
 				   *mapping_filename ? mapping_filename : "");
-	        }
+		}
 	    }
 	}
       else
@@ -1067,9 +1067,9 @@ static void
 linux_read_core_file_mappings (struct gdbarch *gdbarch,
 			       struct bfd *cbfd,
 			       gdb::function_view<void (ULONGEST count)>
-			         pre_loop_cb,
+				 pre_loop_cb,
 			       gdb::function_view<void (int num,
-			                                ULONGEST start,
+							ULONGEST start,
 							ULONGEST end,
 							ULONGEST file_ofs,
 							const char *filename,
@@ -1133,7 +1133,7 @@ linux_read_core_file_mappings (struct gdbarch *gdbarch,
   for (int i = 0; i < count; i++)
     {
       if (f >= descend)
-        {
+	{
 	  warning (_("malformed note - filename area is too small"));
 	  return;
 	}
@@ -1152,7 +1152,7 @@ linux_read_core_file_mappings (struct gdbarch *gdbarch,
       ULONGEST end = bfd_get (addr_size_bits, core_bfd, descdata);
       descdata += addr_size;
       ULONGEST file_ofs
-        = bfd_get (addr_size_bits, core_bfd, descdata) * page_size;
+	= bfd_get (addr_size_bits, core_bfd, descdata) * page_size;
       descdata += addr_size;
       char * filename = filenames;
       filenames += strlen ((char *) filenames) + 1;
@@ -1186,7 +1186,7 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 	  }
       },
     [=] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
-         const char *filename, const void *other)
+	 const char *filename, const void *other)
       {
 	if (gdbarch_addr_bit (gdbarch) == 32)
 	  printf_filtered ("\t%10s %10s %10s %10s %s\n",
@@ -1424,9 +1424,9 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
 	  if (has_anonymous)
 	    should_dump_p = should_dump_mapping_p (filterflags, &v, priv,
-					           mapping_anon_p,
+						   mapping_anon_p,
 						   mapping_file_p,
-					           filename, addr, offset);
+						   filename, addr, offset);
 	  else
 	    {
 	      /* Older Linux kernels did not support the "Anonymous:" counter.

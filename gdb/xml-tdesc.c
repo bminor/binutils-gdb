@@ -373,7 +373,7 @@ tdesc_start_field (struct gdb_xml_parser *parser,
       tdesc_type_with_fields *t = data->current_type;
 
       /* Older versions of gdb can't handle elided end values.
-         Stick with that for now, to help ensure backward compatibility.
+	 Stick with that for now, to help ensure backward compatibility.
 	 E.g., If a newer gdbserver is talking to an older gdb.  */
       if (end == -1)
 	gdb_xml_error (parser, _("Missing end value"));

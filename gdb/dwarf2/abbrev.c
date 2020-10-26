@@ -165,12 +165,12 @@ abbrev_table::read (struct objfile *objfile,
       abbrev_table->add_abbrev (cur_abbrev);
 
       /* Get next abbreviation.
-         Under Irix6 the abbreviations for a compilation unit are not
-         always properly terminated with an abbrev number of 0.
-         Exit loop if we encounter an abbreviation which we have
-         already read (which means we are about to read the abbreviations
-         for the next compile unit) or if the end of the abbreviation
-         table is reached.  */
+	 Under Irix6 the abbreviations for a compilation unit are not
+	 always properly terminated with an abbrev number of 0.
+	 Exit loop if we encounter an abbreviation which we have
+	 already read (which means we are about to read the abbreviations
+	 for the next compile unit) or if the end of the abbreviation
+	 table is reached.  */
       if ((unsigned int) (abbrev_ptr - section->buffer) >= section->size)
 	break;
       abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);

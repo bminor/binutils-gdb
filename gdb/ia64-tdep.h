@@ -219,7 +219,7 @@ struct ia64_infcall_ops
   /* Store the argument stored in BUF into the appropriate location
      given the BSP and the SLOTNUM.  */
   void (*store_argument_in_slot) (struct regcache *regcache, CORE_ADDR bsp,
-                                  int slotnum, gdb_byte *buf);
+				  int slotnum, gdb_byte *buf);
 
   /* For targets where we cannot call the function directly, store
      the address of the function we want to call at the location

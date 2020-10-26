@@ -920,7 +920,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       val = value_contents (arg);
 
       /* Copy the argument to general registers or the stack in
-         register-sized pieces.  */
+	 register-sized pieces.  */
       if (argreg < first_arg_on_stack)
 	{
 	  if (len <= 4)
@@ -960,10 +960,10 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      || typecode == TYPE_CODE_UNION)
 		    {
 		      /* For a 5-8 byte structure or union in big-endian, the
-		         first byte occupies byte 3 (the MSB) of the upper (odd)
-		         register and the remaining bytes fill the decreasingly
-		         significant bytes.  5-7 byte structures or unions have
-		         padding in the LSBs of the lower (even) register.  */
+			 first byte occupies byte 3 (the MSB) of the upper (odd)
+			 register and the remaining bytes fill the decreasingly
+			 significant bytes.  5-7 byte structures or unions have
+			 padding in the LSBs of the lower (even) register.  */
 		      if (byte_order == BFD_ENDIAN_BIG)
 			{
 			  regcache->cooked_write (arg_regs[argreg] + 1, val);
@@ -980,7 +980,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  else
 		    {
 		      /* The argument is being passed by value in a pair of
-		         registers.  */
+			 registers.  */
 		      ULONGEST regval = extract_unsigned_integer (val, len,
 								  byte_order);
 

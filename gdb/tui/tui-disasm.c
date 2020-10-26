@@ -278,22 +278,22 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	}
 
       /* Scan forward disassembling one instruction at a time until
-         the last visible instruction of the window matches the pc.
-         We keep the disassembled instructions in the 'lines' window
-         and shift it downward (increasing its addresses).  */
+	 the last visible instruction of the window matches the pc.
+	 We keep the disassembled instructions in the 'lines' window
+	 and shift it downward (increasing its addresses).  */
       int pos = max_lines - 1;
       if (last_addr < pc)
-        do
-          {
-            pos++;
-            if (pos >= max_lines)
-              pos = 0;
+	do
+	  {
+	    pos++;
+	    if (pos >= max_lines)
+	      pos = 0;
 
 	    CORE_ADDR old_next_addr = next_addr;
 	    std::vector<tui_asm_line> single_asm_line;
 	    next_addr = tui_disassemble (gdbarch, single_asm_line,
 					 next_addr, 1);
-            /* If there are some problems while disassembling exit.  */
+	    /* If there are some problems while disassembling exit.  */
 	    if (next_addr <= old_next_addr)
 	      return pc;
 	    gdb_assert (single_asm_line.size () == 1);
@@ -301,7 +301,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
 	  } while (next_addr <= pc);
       pos++;
       if (pos >= max_lines)
-         pos = 0;
+	 pos = 0;
       new_low = asm_lines[pos].addr;
 
       /* When scrolling backward the addresses should move backward, or at

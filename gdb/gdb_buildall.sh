@@ -39,7 +39,7 @@ Options:
   -e <regexp>    Regular expression for selecting the targets to build.
   --force        Force rebuild.
   -j <makejobs>  Run <makejobs> in parallel.  Passed to make.
-                 On a single cpu machine, 2 is recommended.
+		 On a single cpu machine, 2 is recommended.
  Arguments:
    <srcdir>       Source code directory.
    <builddir>     Build directory.
@@ -66,9 +66,9 @@ do
       makejobs="-j $1"
       ;;
       --clean )
-        # Shall the build directory be deleted after processing?
-        clean=true
-        ;;
+	# Shall the build directory be deleted after processing?
+	clean=true
+	;;
     -e )
       # A regular expression for selecting targets
       shift

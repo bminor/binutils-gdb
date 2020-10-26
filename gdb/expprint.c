@@ -348,9 +348,9 @@ print_subexp_standard (struct expression *exp, int *pos,
       if ((int) prec > (int) PREC_COMMA)
 	fputs_filtered ("(", stream);
       /* Print the subexpressions, forcing parentheses
-         around any binary operations within them.
-         This is more parentheses than are strictly necessary,
-         but it looks clearer.  */
+	 around any binary operations within them.
+	 This is more parentheses than are strictly necessary,
+	 but it looks clearer.  */
       print_subexp (exp, pos, stream, PREC_HYPER);
       fputs_filtered (" ? ", stream);
       print_subexp (exp, pos, stream, PREC_HYPER);
@@ -642,8 +642,8 @@ print_subexp_standard (struct expression *exp, int *pos,
     {
       /* Binary operator.  */
       /* Print left operand.
-         If operator is right-associative,
-         increment precedence for this operand.  */
+	 If operator is right-associative,
+	 increment precedence for this operand.  */
       print_subexp (exp, pos, stream,
 		    (enum precedence) ((int) myprec + assoc));
       /* Print the operator itself.  */
@@ -654,8 +654,8 @@ print_subexp_standard (struct expression *exp, int *pos,
       else
 	fprintf_filtered (stream, " %s ", op_str);
       /* Print right operand.
-         If operator is left-associative,
-         increment precedence for this operand.  */
+	 If operator is left-associative,
+	 increment precedence for this operand.  */
       print_subexp (exp, pos, stream,
 		    (enum precedence) ((int) myprec + !assoc));
     }

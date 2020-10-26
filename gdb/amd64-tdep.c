@@ -652,7 +652,7 @@ static void
 amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 {
   /* 1. If the size of an object is larger than two eightbytes, or it has
-        unaligned fields, it has class memory.  */
+	unaligned fields, it has class memory.  */
   if (TYPE_LENGTH (type) > 16 || amd64_has_unaligned_fields (type))
     {
       theclass[0] = theclass[1] = AMD64_MEMORY;
@@ -663,9 +663,9 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
   theclass[0] = theclass[1] = AMD64_NO_CLASS;
 
   /* 3. Each field of an object is classified recursively so that
-        always two fields are considered. The resulting class is
-        calculated according to the classes of the fields in the
-        eightbyte: */
+	always two fields are considered. The resulting class is
+	calculated according to the classes of the fields in the
+	eightbyte: */
 
   if (type->code () == TYPE_CODE_ARRAY)
     {
@@ -798,8 +798,8 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
   if (theclass[0] == AMD64_MEMORY)
     {
       /* As indicated by the comment above, the ABI guarantees that we
-         can always find the return value just after the function has
-         returned.  */
+	 can always find the return value just after the function has
+	 returned.  */
 
       if (readbuf)
 	{
@@ -813,7 +813,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* 8. If the class is COMPLEX_X87, the real part of the value is
-        returned in %st0 and the imaginary part in %st1.  */
+	returned in %st0 and the imaginary part in %st1.  */
   if (theclass[0] == AMD64_COMPLEX_X87)
     {
       if (readbuf)
@@ -854,7 +854,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 
 	case AMD64_SSE:
 	  /* 4. If the class is SSE, the next available SSE register
-             of the sequence %xmm0, %xmm1 is used.  */
+	     of the sequence %xmm0, %xmm1 is used.  */
 	  regnum = sse_regnum[sse_reg++];
 	  break;
 
@@ -868,7 +868,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 
 	case AMD64_X87:
 	  /* 6. If the class is X87, the value is returned on the X87
-             stack in %st0 as 80-bit x87 number.  */
+	     stack in %st0 as 80-bit x87 number.  */
 	  regnum = AMD64_ST0_REGNUM;
 	  if (writebuf)
 	    i387_return_value (gdbarch, regcache);
@@ -876,7 +876,7 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 
 	case AMD64_X87UP:
 	  /* 7. If the class is X87UP, the value is returned together
-             with the previous X87 value in %st0.  */
+	     with the previous X87 value in %st0.  */
 	  gdb_assert (i > 0 && theclass[0] == AMD64_X87);
 	  regnum = AMD64_ST0_REGNUM;
 	  offset = 8;
@@ -950,7 +950,7 @@ if (return_method == return_method_struct)
       amd64_classify (type, theclass);
 
       /* Calculate the number of integer and SSE registers needed for
-         this argument.  */
+	 this argument.  */
       for (j = 0; j < 2; j++)
 	{
 	  if (theclass[j] == AMD64_INTEGER)
@@ -960,7 +960,7 @@ if (return_method == return_method_struct)
 	}
 
       /* Check whether enough registers are available, and if the
-         argument should be passed in registers at all.  */
+	 argument should be passed in registers at all.  */
       if (integer_reg + needed_integer_regs > ARRAY_SIZE (integer_regnum)
 	  || sse_reg + needed_sse_regs > ARRAY_SIZE (sse_regnum)
 	  || (needed_integer_regs == 0 && needed_sse_regs == 0))
@@ -2414,13 +2414,13 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
   if (op == 0x55)		/* pushq %rbp */
     {
       /* Take into account that we've executed the `pushq %rbp' that
-         starts this instruction sequence.  */
+	 starts this instruction sequence.  */
       cache->saved_regs[AMD64_RBP_REGNUM] = 0;
       cache->sp_offset += 8;
 
       /* If that's all, return now.  */
       if (current_pc <= pc + 1)
-        return current_pc;
+	return current_pc;
 
       read_code (pc + 1, buf, 3);
 
@@ -2506,7 +2506,7 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
     {
       /* 0x0f 0x29 0b??000101 movaps %xmmreg?,-0x??(%rbp) */
       if (buf[offset] != 0x0f || buf[offset + 1] != 0x29
-          || (buf[offset + 2] & 0x3f) != (xmmreg << 3 | 0x5))
+	  || (buf[offset + 2] & 0x3f) != (xmmreg << 3 | 0x5))
 	return pc;
 
       /* 0b01?????? */
@@ -2548,13 +2548,13 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
       struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
       /* LLVM backend (Clang/Flang) always emits a line note before the
-         prologue and another one after.  We trust clang to emit usable
-         line notes.  */
+	 prologue and another one after.  We trust clang to emit usable
+	 line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
 	      && producer_is_llvm (COMPUNIT_PRODUCER (cust))))
-        return std::max (start_pc, post_prologue_pc);
+	return std::max (start_pc, post_prologue_pc);
     }
 
   amd64_init_frame_cache (&cache);

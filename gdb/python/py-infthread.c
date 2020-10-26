@@ -286,7 +286,7 @@ thpy_thread_handle (PyObject *self, PyObject *args)
     }
 
   PyObject *object = PyBytes_FromStringAndSize ((const char *) hv.data (),
-				                hv.size());
+						hv.size());
   return object;
 }
 

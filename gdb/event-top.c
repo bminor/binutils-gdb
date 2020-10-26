@@ -415,8 +415,8 @@ display_gdb_prompt (const char *new_prompt)
   else
     {
       /* Don't use a _filtered function here.  It causes the assumed
-         character position to be off, since the newline we read from
-         the user is not accounted for.  */
+	 character position to be off, since the newline we read from
+	 the user is not accounted for.  */
       fprintf_unfiltered (gdb_stdout, "%s", actual_gdb_prompt.c_str ());
       gdb_flush (gdb_stdout);
     }
@@ -676,8 +676,8 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
   if (server_command)
     {
       /* Note that we don't call `save_command_line'.  Between this
-         and the check in dont_repeat, this insures that repeating
-         will still do the right thing.  */
+	 and the check in dont_repeat, this insures that repeating
+	 will still do the right thing.  */
       return cmd + strlen (SERVER_COMMAND_PREFIX);
     }
 
@@ -816,7 +816,7 @@ gdb_readline_no_editing_callback (gdb_client_data client_data)
   while (1)
     {
       /* Read from stdin if we are executing a user defined command.
-         This is the right thing for prompt_for_continue, at least.  */
+	 This is the right thing for prompt_for_continue, at least.  */
       c = fgetc (ui->instream != NULL ? ui->instream : ui->stdin_stream);
 
       if (c == EOF)

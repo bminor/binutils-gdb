@@ -67,7 +67,7 @@ unloaded_dll (const char *name, CORE_ADDR base_addr)
   else
     {
       /* DLL has been found so remove the entry and free associated
-         resources.  */
+	 resources.  */
       all_dlls.erase (iter);
       dlls_changed = 1;
     }

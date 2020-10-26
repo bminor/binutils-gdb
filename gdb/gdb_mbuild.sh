@@ -31,7 +31,7 @@ usage()
 Usage: gdb_mbuild.sh [ <options> ... ] <srcdir> <builddir>
  Options:
    -j <makejobs>  Run <makejobs> in parallel.  Passed to make.
-	          On a single cpu machine, 2 is recommended.
+		  On a single cpu machine, 2 is recommended.
    -k             Keep going.  Do not stop after the first build fails.
    --keep         Keep builds.  Do not remove each build when finished.
    -e <regexp>    Regular expression for selecting the targets to build.
@@ -79,7 +79,7 @@ do
 	keepgoing=-k
 	;;
     --keep )
-        keep=true
+	keep=true
 	;;
     -e )
 	# A regular expression for selecting targets

@@ -117,7 +117,7 @@ frame_unwind_append_unwinder (struct gdbarch *gdbarch,
 
 static int
 frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
-                          const struct frame_unwind *unwinder)
+			  const struct frame_unwind *unwinder)
 {
   int res = 0;
 
@@ -180,13 +180,13 @@ frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
   unwinder_from_target = target_get_unwinder ();
   if (unwinder_from_target != NULL
       && frame_unwind_try_unwinder (this_frame, this_cache,
-                                   unwinder_from_target))
+				   unwinder_from_target))
     return;
 
   unwinder_from_target = target_get_tailcall_unwinder ();
   if (unwinder_from_target != NULL
       && frame_unwind_try_unwinder (this_frame, this_cache,
-                                   unwinder_from_target))
+				   unwinder_from_target))
     return;
 
   for (entry = table->list; entry != NULL; entry = entry->next)

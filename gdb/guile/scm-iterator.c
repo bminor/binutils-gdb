@@ -35,8 +35,8 @@
      (let ((next! (lambda (iter)
 		    (let ((l (iterator-progress iter)))
 		      (if (eq? l '())
-		          end-marker
-		          (begin
+			  end-marker
+			  (begin
 			    (set-iterator-progress! iter (cdr l))
 			    (car l)))))))
        (make-iterator l l next!)))

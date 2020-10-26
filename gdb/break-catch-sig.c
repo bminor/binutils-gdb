@@ -228,7 +228,7 @@ signal_catchpoint_print_one (struct breakpoint *b,
 
       bool first = true;
       for (gdb_signal iter : c->signals_to_be_caught)
-        {
+	{
 	  const char *name = signal_to_name_or_int (iter);
 
 	  if (!first)
@@ -236,7 +236,7 @@ signal_catchpoint_print_one (struct breakpoint *b,
 	  first = false;
 
 	  text += name;
-        }
+	}
       uiout->field_string ("what", text.c_str ());
     }
   else
@@ -260,16 +260,16 @@ signal_catchpoint_print_mention (struct breakpoint *b)
   if (!c->signals_to_be_caught.empty ())
     {
       if (c->signals_to_be_caught.size () > 1)
-        printf_filtered (_("Catchpoint %d (signals"), b->number);
+	printf_filtered (_("Catchpoint %d (signals"), b->number);
       else
-        printf_filtered (_("Catchpoint %d (signal"), b->number);
+	printf_filtered (_("Catchpoint %d (signal"), b->number);
 
       for (gdb_signal iter : c->signals_to_be_caught)
-        {
+	{
 	  const char *name = signal_to_name_or_int (iter);
 
 	  printf_filtered (" %s", name);
-        }
+	}
       printf_filtered (")");
     }
   else if (c->catch_all)

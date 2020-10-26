@@ -383,7 +383,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	{
 	  scope_component comp
 	    = {
-	        decl_name (type->name ()).get (),
+		decl_name (type->name ()).get (),
 		lookup_symbol (type->name (), block (), VAR_DOMAIN, nullptr)
 	      };
 	  scope.push_back (comp);

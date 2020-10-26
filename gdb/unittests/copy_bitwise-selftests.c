@@ -70,7 +70,7 @@ check_copy_bitwise (const gdb_byte *dest, unsigned int dest_offset,
 
      We should end up with:
       buf:         00001100
-                   DDDDSSDD (D=dest, S=source)
+		   DDDDSSDD (D=dest, S=source)
   */
   bits_to_str (expected, dest, 0, len, msb0);
   bits_to_str (expected + dest_offset, source, source_offset, nbits, msb0);

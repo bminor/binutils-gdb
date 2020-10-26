@@ -106,8 +106,8 @@ static int bookmark_count;
 
 #define ALL_BOOKMARKS_SAFE(B,TMP)           \
      for ((B) = bookmark_chain;             \
-          (B) ? ((TMP) = (B)->next, 1) : 0; \
-          (B) = (TMP))
+	  (B) ? ((TMP) = (B)->next, 1) : 0; \
+	  (B) = (TMP))
 
 /* save_bookmark_command -- implement "bookmark" command.
    Call target method to get a bookmark identifier.

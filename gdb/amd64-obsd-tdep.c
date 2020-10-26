@@ -106,11 +106,11 @@ amd64obsd_sigcontext_addr (struct frame_info *this_frame)
   /* The %rsp register points at `struct sigcontext' upon entry of a
      signal trampoline.  The relevant part of the trampoline is
 
-        call    *%rax
-        movq    %rsp, %rdi
-        pushq   %rdi
-        movq    $SYS_sigreturn,%rax
-        int     $0x80
+	call    *%rax
+	movq    %rsp, %rdi
+	pushq   %rdi
+	movq    $SYS_sigreturn,%rax
+	int     $0x80
 
      (see /usr/src/sys/arch/amd64/amd64/locore.S).  The `pushq'
      instruction clobbers %rsp, but its value is saved in `%rdi'.  */
@@ -238,7 +238,7 @@ amd64obsd_supply_uthread (struct regcache *regcache,
       sp = read_memory_unsigned_integer (sp_addr, 8, byte_order);
 
       /* Adjust the stack pointer such that it looks as if we just
-         returned from _thread_machdep_switch.  */
+	 returned from _thread_machdep_switch.  */
       offset = amd64obsd_uthread_reg_offset[AMD64_RIP_REGNUM] + 8;
       store_unsigned_integer (buf, 8, byte_order, sp + offset);
       regcache->raw_supply (AMD64_RSP_REGNUM, buf);
@@ -250,7 +250,7 @@ amd64obsd_supply_uthread (struct regcache *regcache,
 	  && (regnum == -1 || regnum == i))
 	{
 	  /* Fetch stack pointer from thread structure (if we didn't
-             do so already).  */
+	     do so already).  */
 	  if (sp == 0)
 	    sp = read_memory_unsigned_integer (sp_addr, 8, byte_order);
 
@@ -279,7 +279,7 @@ amd64obsd_collect_uthread (const struct regcache *regcache,
       int offset;
 
       /* Calculate the stack pointer (frame pointer) that will be
-         stored into the thread structure.  */
+	 stored into the thread structure.  */
       offset = amd64obsd_uthread_reg_offset[AMD64_RIP_REGNUM] + 8;
       regcache->raw_collect (AMD64_RSP_REGNUM, buf);
       sp = extract_unsigned_integer (buf, 8, byte_order) - offset;
@@ -288,7 +288,7 @@ amd64obsd_collect_uthread (const struct regcache *regcache,
       write_memory_unsigned_integer (sp_addr, 8, byte_order, sp);
 
       /* The stack pointer was (potentially) modified.  Make sure we
-         build a proper stack frame.  */
+	 build a proper stack frame.  */
       regnum = -1;
     }
 
@@ -298,7 +298,7 @@ amd64obsd_collect_uthread (const struct regcache *regcache,
 	  && (regnum == -1 || regnum == i))
 	{
 	  /* Fetch stack pointer from thread structure (if we didn't
-             calculate it already).  */
+	     calculate it already).  */
 	  if (sp == 0)
 	    sp = read_memory_unsigned_integer (sp_addr, 8, byte_order);
 

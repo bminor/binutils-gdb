@@ -126,8 +126,8 @@ remove_catch_syscall (struct bp_location *bl, enum remove_bp_reason reason)
 	  if (iter >= inf_data->syscalls_counts.size ())
 	    /* Shouldn't happen.  */
 	    continue;
-          --inf_data->syscalls_counts[iter];
-        }
+	  --inf_data->syscalls_counts[iter];
+	}
     }
 
   return target_set_syscall_catchpoint (inferior_ptid.pid (),
@@ -252,20 +252,20 @@ print_one_catch_syscall (struct breakpoint *b,
       char *text = xstrprintf ("%s", "");
 
       for (int iter : c->syscalls_to_be_caught)
-        {
-          char *previous_text = text;
-          struct syscall s;
-          get_syscall_by_number (gdbarch, iter, &s);
+	{
+	  char *previous_text = text;
+	  struct syscall s;
+	  get_syscall_by_number (gdbarch, iter, &s);
 
-          if (s.name != NULL)
-            text = xstrprintf ("%s%s, ", text, s.name);
-          else
-            text = xstrprintf ("%s%d, ", text, iter);
+	  if (s.name != NULL)
+	    text = xstrprintf ("%s%s, ", text, s.name);
+	  else
+	    text = xstrprintf ("%s%d, ", text, iter);
 
-          /* We have to xfree previous_text because xstrprintf dynamically
+	  /* We have to xfree previous_text because xstrprintf dynamically
 	     allocates new space for text on every call.  */
 	  xfree (previous_text);
-        }
+	}
       /* Remove the last comma.  */
       text[strlen (text) - 2] = '\0';
       uiout->field_string ("what", text);
@@ -292,25 +292,25 @@ print_mention_catch_syscall (struct breakpoint *b)
   if (!c->syscalls_to_be_caught.empty ())
     {
       if (c->syscalls_to_be_caught.size () > 1)
-        printf_filtered (_("Catchpoint %d (syscalls"), b->number);
+	printf_filtered (_("Catchpoint %d (syscalls"), b->number);
       else
-        printf_filtered (_("Catchpoint %d (syscall"), b->number);
+	printf_filtered (_("Catchpoint %d (syscall"), b->number);
 
       for (int iter : c->syscalls_to_be_caught)
-        {
-          struct syscall s;
-          get_syscall_by_number (gdbarch, iter, &s);
+	{
+	  struct syscall s;
+	  get_syscall_by_number (gdbarch, iter, &s);
 
-          if (s.name != NULL)
-            printf_filtered (" '%s' [%d]", s.name, s.number);
-          else
-            printf_filtered (" %d", s.number);
-        }
+	  if (s.name != NULL)
+	    printf_filtered (" '%s' [%d]", s.name, s.number);
+	  else
+	    printf_filtered (" %d", s.number);
+	}
       printf_filtered (")");
     }
   else
     printf_filtered (_("Catchpoint %d (any syscall)"),
-                     b->number);
+		     b->number);
 }
 
 /* Implement the "print_recreate" breakpoint_ops method for syscall
@@ -352,7 +352,7 @@ syscall_catchpoint_p (struct breakpoint *b)
 
 static void
 create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter,
-                                 const struct breakpoint_ops *ops)
+				 const struct breakpoint_ops *ops)
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
@@ -524,7 +524,7 @@ catching_syscall_number (int syscall_number)
 static void
 catch_syscall_completer (struct cmd_list_element *cmd,
 			 completion_tracker &tracker,
-                         const char *text, const char *word)
+			 const char *text, const char *word)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   gdb::unique_xmalloc_ptr<const char *> group_list;

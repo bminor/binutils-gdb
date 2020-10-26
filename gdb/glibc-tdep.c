@@ -64,7 +64,7 @@ glibc_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
       
       /* This is the name used in older versions.  */
       if (! fixup.minsym)
-        fixup = lookup_minimal_symbol ("fixup", NULL, resolver.objfile);
+	fixup = lookup_minimal_symbol ("fixup", NULL, resolver.objfile);
 
       if (fixup.minsym && BMSYMBOL_VALUE_ADDRESS (fixup) == pc)
 	return frame_unwind_caller_pc (get_current_frame ());

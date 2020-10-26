@@ -2043,7 +2043,7 @@ rust_parser::convert_params_to_types (rust_op_vector *params)
   if (params != nullptr)
     {
       for (const rust_op *op : *params)
-        result.push_back (convert_ast_to_type (op));
+	result.push_back (convert_ast_to_type (op));
     }
 
   return result;

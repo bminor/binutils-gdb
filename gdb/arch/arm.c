@@ -119,7 +119,7 @@ arm_instruction_changes_pc (uint32_t this_instr)
       case 0xd:
       case 0xe:
 	/* Coprocessor register transfer.  */
-        if (bits (this_instr, 12, 15) == 15)
+	if (bits (this_instr, 12, 15) == 15)
 	  error (_("Invalid update to pc in instruction"));
 	return 0;
       default:

@@ -186,7 +186,7 @@ show_output_radix (struct ui_file *file, int from_tty,
 
 static void
 show_print_array_indexes (struct ui_file *file, int from_tty,
-		          struct cmd_list_element *c, const char *value)
+			  struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Printing of array indexes is %s.\n"), value);
 }
@@ -919,8 +919,8 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 
     case TYPE_CODE_UNDEF:
       /* This happens (without TYPE_STUB set) on systems which don't use
-         dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
-         and no complete type for struct foo in that file.  */
+	 dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
+	 and no complete type for struct foo in that file.  */
       fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
       break;
 
@@ -1677,7 +1677,7 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	  /* Take low nibble and bump our pointer "p".  */
 
 	  digits[0] += LOW_NIBBLE (*p);
-          if (byte_order == BFD_ENDIAN_BIG)
+	  if (byte_order == BFD_ENDIAN_BIG)
 	    p++;
 	  else
 	    p--;
@@ -1861,7 +1861,7 @@ print_function_pointer_address (const struct value_print_options *options,
     
 void  
 maybe_print_array_index (struct type *index_type, LONGEST index,
-                         struct ui_file *stream,
+			 struct ui_file *stream,
 			 const struct value_print_options *options)
 {
   if (!options->print_array_indexes)
@@ -1900,10 +1900,10 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   if (get_array_bounds (type, &low_bound, &high_bound))
     {
       /* The array length should normally be HIGH_BOUND - LOW_BOUND +
-         1.  But we have to be a little extra careful, because some
-         languages such as Ada allow LOW_BOUND to be greater than
-         HIGH_BOUND for empty arrays.  In that situation, the array
-         length is just zero, not negative!  */
+	 1.  But we have to be a little extra careful, because some
+	 languages such as Ada allow LOW_BOUND to be greater than
+	 HIGH_BOUND for empty arrays.  In that situation, the array
+	 length is just zero, not negative!  */
       if (low_bound > high_bound)
 	len = 0;
       else
@@ -1939,7 +1939,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	}
       wrap_here (n_spaces (2 + 2 * recurse));
       maybe_print_array_index (index_type, i + low_bound,
-                               stream, options);
+			       stream, options);
 
       rep1 = i + 1;
       reps = 1;
@@ -2751,8 +2751,8 @@ val_print_string (struct type *elttype, const char *encoding,
       gdb_byte *peekbuf;
 
       /* We didn't find a NUL terminator we were looking for.  Attempt
-         to peek at the next character.  If not successful, or it is not
-         a null byte, then force ellipsis to be printed.  */
+	 to peek at the next character.  If not successful, or it is not
+	 a null byte, then force ellipsis to be printed.  */
 
       peekbuf = (gdb_byte *) alloca (width);
 
@@ -2763,8 +2763,8 @@ val_print_string (struct type *elttype, const char *encoding,
   else if ((len >= 0 && err != 0) || (len > bytes_read / width))
     {
       /* Getting an error when we have a requested length, or fetching less
-         than the number of characters actually requested, always make us
-         print ellipsis.  */
+	 than the number of characters actually requested, always make us
+	 print ellipsis.  */
       force_ellipsis = 1;
     }
 

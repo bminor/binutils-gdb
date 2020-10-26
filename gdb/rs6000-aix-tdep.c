@@ -84,7 +84,7 @@ aix_sighandle_frame_cache (struct frame_info *this_frame,
   (*this_cache) = this_trad_cache;
 
   base = get_frame_register_unsigned (this_frame,
-                                      gdbarch_sp_regnum (gdbarch));
+				      gdbarch_sp_regnum (gdbarch));
   base_orig = base;
 
   if (tdep->wordsize == 4)
@@ -111,10 +111,10 @@ aix_sighandle_frame_cache (struct frame_info *this_frame,
 
   if (tdep->wordsize == 4)
     trad_frame_set_reg_addr (this_trad_cache, tdep->ppc_lr_regnum,
-                             base_orig + 0x38 + 52 + 8);
+			     base_orig + 0x38 + 52 + 8);
   else
     trad_frame_set_reg_addr (this_trad_cache, tdep->ppc_lr_regnum,
-                             base_orig + 0x70 + 320);
+			     base_orig + 0x70 + 320);
 
   trad_frame_set_id (this_trad_cache, frame_id_build (base, func));
   trad_frame_set_this_base (this_trad_cache, base);
@@ -379,7 +379,7 @@ rs6000_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      memcpy (word,
 		      ((char *) value_contents (arg)) + argbytes,
 		      (len - argbytes) > reg_size
-		        ? reg_size : len - argbytes);
+			? reg_size : len - argbytes);
 	      regcache->cooked_write (tdep->ppc_gp0_regnum + 3 + ii, word);
 	      ++ii, argbytes += reg_size;
 
@@ -442,16 +442,16 @@ ran_out_of_registers_for_arguments:
       sp -= space;
 
       /* This is another instance we need to be concerned about
-         securing our stack space.  If we write anything underneath %sp
-         (r1), we might conflict with the kernel who thinks he is free
-         to use this area.  So, update %sp first before doing anything
-         else.  */
+	 securing our stack space.  If we write anything underneath %sp
+	 (r1), we might conflict with the kernel who thinks he is free
+	 to use this area.  So, update %sp first before doing anything
+	 else.  */
 
       regcache_raw_write_signed (regcache,
 				 gdbarch_sp_regnum (gdbarch), sp);
 
       /* If the last argument copied into the registers didn't fit there 
-         completely, push the rest of it into stack.  */
+	 completely, push the rest of it into stack.  */
 
       if (argbytes)
 	{
@@ -472,7 +472,7 @@ ran_out_of_registers_for_arguments:
 
 
 	  /* Float types should be passed in fpr's, as well as in the
-             stack.  */
+	     stack.  */
 	  if (type->code () == TYPE_CODE_FLT && f_argno < 13)
 	    {
 
@@ -671,21 +671,21 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
       struct obj_section *pc_section;
 
       try
-        {
-          pc = read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
-        }
+	{
+	  pc = read_memory_unsigned_integer (addr, tdep->wordsize, byte_order);
+	}
       catch (const gdb_exception_error &e)
-        {
-          /* An error occured during reading.  Probably a memory error
-             due to the section not being loaded yet.  This address
-             cannot be a function descriptor.  */
-          return addr;
-        }
+	{
+	  /* An error occured during reading.  Probably a memory error
+	     due to the section not being loaded yet.  This address
+	     cannot be a function descriptor.  */
+	  return addr;
+	}
 
       pc_section = find_pc_section (pc);
 
       if (pc_section && (pc_section->the_bfd_section->flags & SEC_CODE))
-        return pc;
+	return pc;
     }
 
   return addr;
@@ -731,7 +731,7 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 
       if (ext_op == 16)		/* br conditional register */
 	{
-          dest = regcache_raw_get_unsigned (regcache, tdep->ppc_lr_regnum) & ~3;
+	  dest = regcache_raw_get_unsigned (regcache, tdep->ppc_lr_regnum) & ~3;
 
 	  /* If we are about to return from a signal handler, dest is
 	     something like 0x3c90.  The current frame is a signal handler
@@ -749,14 +749,14 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 
       else if (ext_op == 528)	/* br cond to count reg */
 	{
-          dest = regcache_raw_get_unsigned (regcache,
+	  dest = regcache_raw_get_unsigned (regcache,
 					    tdep->ppc_ctr_regnum) & ~3;
 
 	  /* If we are about to execute a system call, dest is something
 	     like 0x22fc or 0x3b00.  Upon completion the system call
 	     will return to the address in the link register.  */
 	  if (dest < AIX_TEXT_SEGMENT_BASE)
-            dest = regcache_raw_get_unsigned (regcache,
+	    dest = regcache_raw_get_unsigned (regcache,
 					      tdep->ppc_lr_regnum) & ~3;
 	}
       else
@@ -878,11 +878,11 @@ struct ld_info_desc
 #define pinfo(type,member)                  \
   {                                         \
     struct type ldi = {0};                  \
-                                            \
+					    \
     printf ("  {%d, %d},\t/* %s */\n",      \
-            offsetof (struct type, member), \
-            sizeof (ldi.member),            \
-            #member);                       \
+	    offsetof (struct type, member), \
+	    sizeof (ldi.member),            \
+	    #member);                       \
   }                                         \
   while (0)
 
@@ -1087,7 +1087,7 @@ rs6000_aix_ld_info_to_xml (struct gdbarch *gdbarch, const gdb_byte *ldi_buf,
   else
     {
       if (len > len_avail - offset)
-        len = len_avail - offset;
+	len = len_avail - offset;
       memcpy (readbuf, buf + offset, len);
     }
 
@@ -1182,15 +1182,15 @@ void
 _initialize_rs6000_aix_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_rs6000,
-                                  bfd_target_xcoff_flavour,
-                                  rs6000_aix_osabi_sniffer);
+				  bfd_target_xcoff_flavour,
+				  rs6000_aix_osabi_sniffer);
   gdbarch_register_osabi_sniffer (bfd_arch_powerpc,
-                                  bfd_target_xcoff_flavour,
-                                  rs6000_aix_osabi_sniffer);
+				  bfd_target_xcoff_flavour,
+				  rs6000_aix_osabi_sniffer);
 
   gdbarch_register_osabi (bfd_arch_rs6000, 0, GDB_OSABI_AIX,
-                          rs6000_aix_init_osabi);
+			  rs6000_aix_init_osabi);
   gdbarch_register_osabi (bfd_arch_powerpc, 0, GDB_OSABI_AIX,
-                          rs6000_aix_init_osabi);
+			  rs6000_aix_init_osabi);
 }
 

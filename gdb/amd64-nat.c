@@ -129,7 +129,7 @@ amd64_collect_native_gregset (const struct regcache *regcache,
       num_regs = amd64_native_gregset32_num_regs;
 
       /* Make sure %eax, %ebx, %ecx, %edx, %esi, %edi, %ebp, %esp and
-         %eip get zero-extended to 64 bits.  */
+	 %eip get zero-extended to 64 bits.  */
       for (i = 0; i <= I386_EIP_REGNUM; i++)
 	{
 	  if (regnum == -1 || regnum == i)

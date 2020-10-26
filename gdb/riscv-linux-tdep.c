@@ -66,9 +66,9 @@ static const struct regset riscv_linux_fregset =
 
 static void
 riscv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
-                                          iterate_over_regset_sections_cb *cb,
-                                          void *cb_data,
-                                          const struct regcache *regcache)
+					  iterate_over_regset_sections_cb *cb,
+					  void *cb_data,
+					  const struct regcache *regcache)
 {
   cb (".reg", (32 * riscv_isa_xlen (gdbarch)), (32 * riscv_isa_xlen (gdbarch)),
       &riscv_linux_gregset, NULL, cb_data);
@@ -176,7 +176,7 @@ riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, riscv_linux_iterate_over_regset_sections);

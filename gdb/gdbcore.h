@@ -106,13 +106,13 @@ extern void write_memory_with_notification (CORE_ADDR memaddr,
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
 extern void write_memory_unsigned_integer (CORE_ADDR addr, int len,
-                                           enum bfd_endian byte_order,
+					   enum bfd_endian byte_order,
 					   ULONGEST value);
 
 /* Store VALUE at ADDR in the inferior as a LEN-byte unsigned integer.  */
 extern void write_memory_signed_integer (CORE_ADDR addr, int len,
-                                         enum bfd_endian byte_order,
-                                         LONGEST value);
+					 enum bfd_endian byte_order,
+					 LONGEST value);
 
 /* Hook for `exec_file_command' command to call.  */
 

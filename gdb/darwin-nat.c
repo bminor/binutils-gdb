@@ -176,7 +176,7 @@ inferior_debug (int level, const char *fmt, ...)
 
 void
 mach_check_error (kern_return_t ret, const char *file,
-                  unsigned int line, const char *func)
+		  unsigned int line, const char *func)
 {
   if (ret == KERN_SUCCESS)
     return;
@@ -241,8 +241,8 @@ darwin_ptrace (const char *name,
     ret = 0;
 
   inferior_debug (4, _("ptrace (%s, %d, 0x%lx, %d): %d (%s)\n"),
-                  name, pid, (unsigned long) arg3, arg4, ret,
-                  (ret != 0) ? safe_strerror (errno) : _("no error"));
+		  name, pid, (unsigned long) arg3, arg4, ret,
+		  (ret != 0) ? safe_strerror (errno) : _("no error"));
   return ret;
 }
 
@@ -940,19 +940,19 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
       darwin_suspend_inferior (inf);
 
       if (tid == 0)
-        darwin_resume_inferior_threads (inf, step, nsignal);
+	darwin_resume_inferior_threads (inf, step, nsignal);
       else
-        {
-          darwin_thread_t *thread;
+	{
+	  darwin_thread_t *thread;
 
-          /* Suspend threads of the task.  */
-          darwin_suspend_inferior_threads (inf);
+	  /* Suspend threads of the task.  */
+	  darwin_suspend_inferior_threads (inf);
 
-          /* Resume the selected thread.  */
-          thread = darwin_find_thread (inf, tid);
-          gdb_assert (thread);
-          darwin_resume_thread (inf, thread, step, nsignal);
-        }
+	  /* Resume the selected thread.  */
+	  thread = darwin_find_thread (inf, tid);
+	  gdb_assert (thread);
+	  darwin_resume_thread (inf, thread, step, nsignal);
+	}
 
       /* Resume the task.  */
       darwin_resume_inferior (inf);
@@ -1432,10 +1432,10 @@ darwin_restore_exception_ports (darwin_inferior *inf)
   for (i = 0; i < inf->exception_info.count; i++)
     {
       kret = task_set_exception_ports
-        (inf->task, inf->exception_info.masks[i], inf->exception_info.ports[i],
+	(inf->task, inf->exception_info.masks[i], inf->exception_info.ports[i],
 	 inf->exception_info.behaviors[i], inf->exception_info.flavors[i]);
       if (kret != KERN_SUCCESS)
-        return kret;
+	return kret;
     }
 
   return KERN_SUCCESS;
@@ -1508,21 +1508,21 @@ darwin_nat_target::kill ()
   if (res == 0)
     {
       /* On MacOS version Sierra, the darwin_restore_exception_ports call
-         does not work as expected.
-         When the kill function is called, the SIGKILL signal is received
-         by gdb whereas it should have been received by the kernel since
-         the exception ports have been restored.
-         This behavior is not the expected one thus gdb does not reply to
-         the received SIGKILL message. This situation leads to a "busy"
-         resource from the kernel point of view and the inferior is never
-         released, causing it to remain as a zombie process, even after
+	 does not work as expected.
+	 When the kill function is called, the SIGKILL signal is received
+	 by gdb whereas it should have been received by the kernel since
+	 the exception ports have been restored.
+	 This behavior is not the expected one thus gdb does not reply to
+	 the received SIGKILL message. This situation leads to a "busy"
+	 resource from the kernel point of view and the inferior is never
+	 released, causing it to remain as a zombie process, even after
 	 GDB exits.
-         To work around this, we mark all the threads of the inferior as
-         signaled thus darwin_decode_message function knows that the kill
-         signal was sent by gdb and will take the appropriate action
-         (cancel signal and reply to the signal message).  */
+	 To work around this, we mark all the threads of the inferior as
+	 signaled thus darwin_decode_message function knows that the kill
+	 signal was sent by gdb and will take the appropriate action
+	 (cancel signal and reply to the signal message).  */
       for (darwin_thread_t *thread : priv->threads)
-        thread->signaled = 1;
+	thread->signaled = 1;
 
       darwin_resume_inferior (inf);
 
@@ -1775,7 +1775,7 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
   if (res != 0)
     {
       fprintf_unfiltered
-        (gdb_stderr, "Cannot initialize attribute for posix_spawn\n");
+	(gdb_stderr, "Cannot initialize attribute for posix_spawn\n");
       return;
     }
 
@@ -1813,7 +1813,7 @@ may_have_sip ()
     {
       unsigned long ver = strtoul (str, NULL, 10);
       if (ver >= 16)
-        return true;
+	return true;
     }
   return false;
 }
@@ -2024,7 +2024,7 @@ darwin_nat_target::attach (const char *args, int from_tty)
 
   if (pid == 0 || ::kill (pid, 0) < 0)
     error (_("Can't attach to process %d: %s (%d)"),
-           pid, safe_strerror (errno), errno);
+	   pid, safe_strerror (errno), errno);
 
   inf = current_inferior ();
   inferior_appeared (inf, pid);
@@ -2327,10 +2327,10 @@ darwin_nat_target::xfer_partial (enum target_object object, const char *annex,
 #ifdef TASK_DYLD_INFO_COUNT
     case TARGET_OBJECT_DARWIN_DYLD_INFO:
       if (writebuf != NULL || readbuf == NULL)
-        {
-          /* Support only read.  */
-          return TARGET_XFER_E_IO;
-        }
+	{
+	  /* Support only read.  */
+	  return TARGET_XFER_E_IO;
+	}
       return darwin_read_dyld_info (priv->task, offset, readbuf, len,
 				    xfered_len);
 #endif
@@ -2434,7 +2434,7 @@ darwin_nat_target::get_ada_task_ptid (long lwp, long thread)
     }
 
   vm_deallocate (gdb_task, (vm_address_t) names,
-                 names_count * sizeof (mach_port_t));
+		 names_count * sizeof (mach_port_t));
 
   if (res)
     return ptid_t (current_inferior ()->pid, 0, res);

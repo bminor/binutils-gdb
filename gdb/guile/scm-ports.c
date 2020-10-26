@@ -269,7 +269,7 @@ ioscm_input_waiting (SCM port)
       {
 	/* Guile doesn't export SIGINT hooks like Python does.
 	   For now pass EINTR to scm_syserror, that's what fports.c does.  */
-        scm_syserror (FUNC_NAME);
+	scm_syserror (FUNC_NAME);
       }
     return num_found > 0 && FD_ISSET (fdes, &input_fds);
   }

@@ -100,9 +100,9 @@ struct dwarf2_per_bfd
      for (i = 0; i < (dwarf2_per_bfd->n_comp_units
 		      + dwarf2_per_bfd->n_type_units); ++i)
        {
-         dwarf2_per_cu_data *per_cu = dwarf2_per_bfd->get_cutu (i);
+	 dwarf2_per_cu_data *per_cu = dwarf2_per_bfd->get_cutu (i);
 
-         ...;
+	 ...;
        }
   */
   dwarf2_per_cu_data *get_cutu (int index);

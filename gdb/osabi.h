@@ -65,7 +65,7 @@ void gdbarch_register_osabi_sniffer (enum bfd_architecture,
    ABI for each architecture and machine type combination.  */
 void gdbarch_register_osabi (enum bfd_architecture, unsigned long,
 			     enum gdb_osabi,
-                             void (*)(struct gdbarch_info,
+			     void (*)(struct gdbarch_info,
 				      struct gdbarch *));
 
 /* Lookup the OS ABI corresponding to the specified BFD.  */

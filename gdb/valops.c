@@ -353,7 +353,7 @@ value_cast (struct type *type, struct value *arg2)
   if (TYPE_IS_REFERENCE (check_typedef (type)))
     {
       /* We dereference type; then we recurse and finally
-         we generate value of the given reference.  Nothing wrong with 
+	 we generate value of the given reference.  Nothing wrong with 
 	 that.  */
       struct type *t1 = check_typedef (type);
       struct type *dereftype = check_typedef (TYPE_TARGET_TYPE (t1));
@@ -475,17 +475,17 @@ value_cast (struct type *type, struct value *arg2)
       LONGEST longest;
 
       /* When we cast pointers to integers, we mustn't use
-         gdbarch_pointer_to_address to find the address the pointer
-         represents, as value_as_long would.  GDB should evaluate
-         expressions just as the compiler would --- and the compiler
-         sees a cast as a simple reinterpretation of the pointer's
-         bits.  */
+	 gdbarch_pointer_to_address to find the address the pointer
+	 represents, as value_as_long would.  GDB should evaluate
+	 expressions just as the compiler would --- and the compiler
+	 sees a cast as a simple reinterpretation of the pointer's
+	 bits.  */
       if (code2 == TYPE_CODE_PTR)
-        longest = extract_unsigned_integer
+	longest = extract_unsigned_integer
 		    (value_contents (arg2), TYPE_LENGTH (type2),
 		     type_byte_order (type2));
       else
-        longest = value_as_long (arg2);
+	longest = value_as_long (arg2);
       return value_from_longest (to_type, convert_to_boolean ?
 				 (LONGEST) (longest ? 1 : 0) : longest);
     }
@@ -611,7 +611,7 @@ value_reinterpret_cast (struct type *type, struct value *arg)
 
   if (is_ref)
     result = value_cast (type, value_ref (value_ind (result),
-                                          type->code ()));
+					  type->code ()));
 
   return result;
 }
@@ -1045,7 +1045,7 @@ value_assign (struct value *toval, struct value *fromval)
 	const gdb_byte *dest_buffer;
 	CORE_ADDR changed_addr;
 	int changed_len;
-        gdb_byte buffer[sizeof (LONGEST)];
+	gdb_byte buffer[sizeof (LONGEST)];
 
 	if (value_bitsize (toval))
 	  {
@@ -1555,7 +1555,7 @@ value_ind (struct value *arg1)
       struct type *enc_type;
 
       /* We may be pointing to something embedded in a larger object.
-         Get the real type of the enclosing object.  */
+	 Get the real type of the enclosing object.  */
       enc_type = check_typedef (value_enclosing_type (arg1));
       enc_type = TYPE_TARGET_TYPE (enc_type);
 
@@ -1756,8 +1756,8 @@ typecmp (int staticp, int varargs, int nargs,
 	 ARM.  */
 
       /* We should be doing much hairier argument matching (see
-         section 13.2 of the ARM), but as a quick kludge, just check
-         for the same type code.  */
+	 section 13.2 of the ARM), but as a quick kludge, just check
+	 for the same type code.  */
       if (t1[i].type ()->code () != value_type (t2[i])->code ())
 	return i + 1;
     }
@@ -1947,8 +1947,8 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
       struct value *v = NULL;
       struct type *basetype = check_typedef (TYPE_BASECLASS (type, i));
       /* If we are looking for baseclasses, this is what we get when
-         we hit them.  But it could happen that the base part's member
-         name is not yet filled in.  */
+	 we hit them.  But it could happen that the base part's member
+	 name is not yet filled in.  */
       int found_baseclass = (m_looking_for_baseclass
 			     && TYPE_BASECLASS_NAME (type, i) != NULL
 			     && (strcmp_iw (m_name,
@@ -2247,13 +2247,13 @@ value_struct_elt (struct value **argp, struct value **args,
       /* if there are no arguments ...do this...  */
 
       /* Try as a field first, because if we succeed, there is less
-         work to be done.  */
+	 work to be done.  */
       v = search_struct_field (name, *argp, t, 0);
       if (v)
 	return v;
 
       /* C++: If it was not found as a data field, then try to
-         return it as a pointer to a method.  */
+	 return it as a pointer to a method.  */
       v = search_struct_method (name, argp, args, 0, 
 				static_memfuncp, t);
 
@@ -2280,8 +2280,8 @@ value_struct_elt (struct value **argp, struct value **args,
   else if (v == 0)
     {
       /* See if user tried to invoke data as function.  If so, hand it
-         back.  If it's not callable (i.e., a pointer to function),
-         gdb should give an error.  */
+	 back.  If it's not callable (i.e., a pointer to function),
+	 gdb should give an error.  */
       v = search_struct_field (name, *argp, t, 0);
       /* If we found an ordinary field, then it is not a method call.
 	 So, treat it as if it were a static member function.  */
@@ -2291,7 +2291,7 @@ value_struct_elt (struct value **argp, struct value **args,
 
   if (!v)
     throw_error (NOT_FOUND_ERROR,
-                 _("Structure has no component named %s."), name);
+		 _("Structure has no component named %s."), name);
   return v;
 }
 
@@ -2603,7 +2603,7 @@ find_overload_match (gdb::array_view<value *> args,
       value_find_oload_method_list (&temp, name, 0, &methods,
 				    &xmethods, &basetype, &boffset);
       /* If this is a method only search, and no methods were found
-         the search has failed.  */
+	 the search has failed.  */
       if (method == METHOD && methods.empty () && xmethods.empty ())
 	error (_("Couldn't find method %s%s%s"),
 	       obj_type_name,
@@ -2698,27 +2698,27 @@ find_overload_match (gdb::array_view<value *> args,
       const char *qualified_name = NULL;
 
       /* If the overload match is being search for both as a method
-         and non member function, the first argument must now be
-         dereferenced.  */
+	 and non member function, the first argument must now be
+	 dereferenced.  */
       if (method == BOTH)
 	args[0] = value_ind (args[0]);
 
       if (fsym)
-        {
-          qualified_name = fsym->natural_name ();
+	{
+	  qualified_name = fsym->natural_name ();
 
-          /* If we have a function with a C++ name, try to extract just
+	  /* If we have a function with a C++ name, try to extract just
 	     the function part.  Do not try this for non-functions (e.g.
 	     function pointers).  */
-          if (qualified_name
-              && (check_typedef (SYMBOL_TYPE (fsym))->code ()
+	  if (qualified_name
+	      && (check_typedef (SYMBOL_TYPE (fsym))->code ()
 		  == TYPE_CODE_FUNC))
-            {
+	    {
 	      temp_func = cp_func_name (qualified_name);
 
 	      /* If cp_func_name did not remove anything, the name of the
-	         symbol did not include scope or argument types - it was
-	         probably a C-style function.  */
+		 symbol did not include scope or argument types - it was
+		 probably a C-style function.  */
 	      if (temp_func != nullptr)
 		{
 		  if (strcmp (temp_func.get (), qualified_name) == 0)
@@ -2726,8 +2726,8 @@ find_overload_match (gdb::array_view<value *> args,
 		  else
 		    func_name = temp_func.get ();
 		}
-            }
-        }
+	    }
+	}
       else
 	{
 	  func_name = name;
@@ -2738,17 +2738,17 @@ find_overload_match (gdb::array_view<value *> args,
 	 not a function at all.  Just return the same symbol.  Do the
 	 same if cp_func_name fails for some reason.  */
       if (func_name == NULL)
-        {
+	{
 	  *symp = fsym;
-          return 0;
-        }
+	  return 0;
+	}
 
       func_oload_champ = find_oload_champ_namespace (args,
-                                                     func_name,
-                                                     qualified_name,
-                                                     &functions,
-                                                     &func_badness,
-                                                     no_adl);
+						     func_name,
+						     qualified_name,
+						     &functions,
+						     &func_badness,
+						     no_adl);
 
       if (func_oload_champ >= 0)
 	func_match_quality = classify_oload_match (func_badness,
@@ -2758,8 +2758,8 @@ find_overload_match (gdb::array_view<value *> args,
   /* Did we find a match ?  */
   if (method_oload_champ == -1 && func_oload_champ == -1)
     throw_error (NOT_FOUND_ERROR,
-                 _("No symbol \"%s\" in current context."),
-                 name);
+		 _("No symbol \"%s\" in current context."),
+		 name);
 
   /* If we have found both a method match and a function
      match, find out which one is better, and calculate match
@@ -2767,7 +2767,7 @@ find_overload_match (gdb::array_view<value *> args,
   if (method_oload_champ >= 0 && func_oload_champ >= 0)
     {
       switch (compare_badness (func_badness, method_badness))
-        {
+	{
 	  case 0: /* Top two contenders are equally good.  */
 	    /* FIXME: GDB does not support the general ambiguous case.
 	     All candidates should be collected and presented the
@@ -2791,7 +2791,7 @@ find_overload_match (gdb::array_view<value *> args,
 	  default:
 	    error (_("Internal error: unexpected overload comparison result"));
 	    break;
-        }
+	}
     }
   else
     {
@@ -3079,7 +3079,7 @@ find_oload_champ (gdb::array_view<value *> args,
 	}
 
       /* Compare parameter types to supplied argument types.  Skip
-         THIS for static methods.  */
+	 THIS for static methods.  */
       bv = rank_function (parm_types,
 			  args.slice (static_offset));
 
@@ -3168,14 +3168,14 @@ classify_oload_match (const badness_vector &oload_champ_bv,
   for (ix = 1; ix <= nargs - static_offset; ix++)
     {
       /* If this conversion is as bad as INCOMPATIBLE_TYPE_BADNESS
-         or worse return INCOMPATIBLE.  */
+	 or worse return INCOMPATIBLE.  */
       if (compare_ranks (oload_champ_bv[ix],
-                         INCOMPATIBLE_TYPE_BADNESS) <= 0)
+			 INCOMPATIBLE_TYPE_BADNESS) <= 0)
 	return INCOMPATIBLE;	/* Truly mismatched types.  */
       /* Otherwise If this conversion is as bad as
-         NS_POINTER_CONVERSION_BADNESS or worse return NON_STANDARD.  */
+	 NS_POINTER_CONVERSION_BADNESS or worse return NON_STANDARD.  */
       else if (compare_ranks (oload_champ_bv[ix],
-                              NS_POINTER_CONVERSION_BADNESS) <= 0)
+			      NS_POINTER_CONVERSION_BADNESS) <= 0)
 	worst = NON_STANDARD;	/* Non-standard type conversions
 				   needed.  */
     }
@@ -3321,7 +3321,7 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 	{
 	  if (compare_ranks (rank_one_type (t1->field (start + i).type (),
 					    t2->field (i).type (), NULL),
-	                     EXACT_MATCH_BADNESS) != 0)
+			     EXACT_MATCH_BADNESS) != 0)
 	    return 0;
 	}
 
@@ -3346,21 +3346,21 @@ get_baseclass_offset (struct type *vt, struct type *cls,
     {
       struct type *t = vt->field (i).type ();
       if (types_equal (t, cls))
-        {
-          if (BASETYPE_VIA_VIRTUAL (vt, i))
-            {
+	{
+	  if (BASETYPE_VIA_VIRTUAL (vt, i))
+	    {
 	      const gdb_byte *adr = value_contents_for_printing (v);
 	      *boffs = baseclass_offset (vt, i, adr, value_offset (v),
 					 value_as_long (v), v);
 	      *isvirt = true;
-            }
-          else
+	    }
+	  else
 	    *isvirt = false;
-          return true;
-        }
+	  return true;
+	}
 
       if (get_baseclass_offset (check_typedef (t), cls, v, boffs, isvirt))
-        {
+	{
 	  if (*isvirt == false)	/* Add non-virtual base offset.  */
 	    {
 	      const gdb_byte *adr = value_contents_for_printing (v);
@@ -3446,15 +3446,15 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		      bool isvirt = false;
 		      if (get_baseclass_offset (domain, curtype, v, &boff,
 						&isvirt))
-		        mem_offset += boff;
+			mem_offset += boff;
 		      else
-		        {
-		          struct type *p = check_typedef (value_type (this_v));
-		          p = check_typedef (TYPE_TARGET_TYPE (p));
-		          if (get_baseclass_offset (p, curtype, this_v,
+			{
+			  struct type *p = check_typedef (value_type (this_v));
+			  p = check_typedef (TYPE_TARGET_TYPE (p));
+			  if (get_baseclass_offset (p, curtype, this_v,
 						    &boff, &isvirt))
-		            mem_offset += boff;
-		        }
+			    mem_offset += boff;
+			}
 		    }
 		  tmp = lookup_pointer_type (TYPE_TARGET_TYPE (type));
 		  result = value_from_pointer (tmp,
@@ -3689,16 +3689,16 @@ value_rtti_indirect_type (struct value *v, int *full,
     {
 
       try
-        {
+	{
 	  target = value_ind (v);
-        }
+	}
       catch (const gdb_exception_error &except)
 	{
 	  if (except.error == MEMORY_ERROR)
 	    {
 	      /* value_ind threw a memory error. The pointer is NULL or
-	         contains an uninitialized value: we can't determine any
-	         type.  */
+		 contains an uninitialized value: we can't determine any
+		 type.  */
 	      return NULL;
 	    }
 	  throw;
@@ -3716,11 +3716,11 @@ value_rtti_indirect_type (struct value *v, int *full,
       real_type = make_cv_type (TYPE_CONST (target_type),
 				TYPE_VOLATILE (target_type), real_type, NULL);
       if (TYPE_IS_REFERENCE (type))
-        real_type = lookup_reference_type (real_type, type->code ());
+	real_type = lookup_reference_type (real_type, type->code ());
       else if (type->code () == TYPE_CODE_PTR)
-        real_type = lookup_pointer_type (real_type);
+	real_type = lookup_pointer_type (real_type);
       else
-        internal_error (__FILE__, __LINE__, _("Unexpected value type."));
+	internal_error (__FILE__, __LINE__, _("Unexpected value type."));
 
       /* Copy qualifiers to the pointer/reference.  */
       real_type = make_cv_type (TYPE_CONST (type), TYPE_VOLATILE (type),

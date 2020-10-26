@@ -488,7 +488,7 @@ pwd_command (const char *args, int from_tty)
 
   if (cwd == NULL)
     error (_("Error finding name of working directory: %s"),
-           safe_strerror (errno));
+	   safe_strerror (errno));
 
   if (strcmp (cwd.get (), current_directory) != 0)
     printf_unfiltered (_("Working directory %ps\n (canonically %ps).\n"),
@@ -532,7 +532,7 @@ cd_command (const char *dir, int from_tty)
   if (IS_DIR_SEPARATOR (dir[len - 1]))
     {
       /* Remove the trailing slash unless this is a root directory
-         (including a drive letter on non-Unix systems).  */
+	 (including a drive letter on non-Unix systems).  */
       if (!(len == 1)		/* "/" */
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
 	  && !(len == 3 && dir[1] == ':') /* "d:/" */
@@ -571,7 +571,7 @@ cd_command (const char *dir, int from_tty)
 	  if (found_real_path)
 	    {
 	      /* Search backwards for the directory just before the "/.."
-	         and obliterate it and the "/..".  */
+		 and obliterate it and the "/..".  */
 	      char *q = p;
 
 	      while (q != current_directory && !IS_DIR_SEPARATOR (q[-1]))
@@ -716,7 +716,7 @@ source_script_with_search (const char *file, int from_tty, int search_path)
   if (!opened)
     {
       /* The script wasn't found, or was otherwise inaccessible.
-         If the source command was invoked interactively, throw an
+	 If the source command was invoked interactively, throw an
 	 error.  Otherwise (e.g. if it was invoked by a script),
 	 just emit a warning, rather than cause an error.  */
       if (from_tty)
@@ -971,40 +971,40 @@ edit_command (const char *arg, int from_tty)
       sal = sals[0];
 
       if (*arg1)
-        error (_("Junk at end of line specification."));
+	error (_("Junk at end of line specification."));
 
       /* If line was specified by address, first print exactly which
-         line, and which file.  In this case, sal.symtab == 0 means
-         address is outside of all known source files, not that user
-         failed to give a filename.  */
+	 line, and which file.  In this case, sal.symtab == 0 means
+	 address is outside of all known source files, not that user
+	 failed to give a filename.  */
       if (*arg == '*')
-        {
+	{
 	  struct gdbarch *gdbarch;
 
-          if (sal.symtab == 0)
+	  if (sal.symtab == 0)
 	    error (_("No source file for address %s."),
 		   paddress (get_current_arch (), sal.pc));
 
 	  gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
-          sym = find_pc_function (sal.pc);
-          if (sym)
+	  sym = find_pc_function (sal.pc);
+	  if (sym)
 	    printf_filtered ("%s is in %s (%s:%d).\n",
 			     paddress (gdbarch, sal.pc),
 			     sym->print_name (),
 			     symtab_to_filename_for_display (sal.symtab),
 			     sal.line);
-          else
+	  else
 	    printf_filtered ("%s is at %s:%d.\n",
 			     paddress (gdbarch, sal.pc),
 			     symtab_to_filename_for_display (sal.symtab),
 			     sal.line);
-        }
+	}
 
       /* If what was given does not imply a symtab, it must be an
-         undebuggable symbol which means no source code.  */
+	 undebuggable symbol which means no source code.  */
 
       if (sal.symtab == 0)
-        error (_("No line number known for %s."), arg);
+	error (_("No line number known for %s."), arg);
     }
 
   if ((editor = getenv ("EDITOR")) == NULL)
@@ -1110,7 +1110,7 @@ pipe_command (const char *arg, int from_tty)
 
   if (exit_status < 0)
     error (_("shell command \"%s\" failed: %s"), shell_command,
-           safe_strerror (errno));
+	   safe_strerror (errno));
   exit_status_set_internal_vars (exit_status);
 }
 
@@ -1400,7 +1400,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 	printf_filtered (_("for function %ps:\n"),
 			 styled_string (function_name_style.style (), name));
       if (block == nullptr || BLOCK_CONTIGUOUS_P (block))
-        {
+	{
 	  if (name == NULL)
 	    printf_filtered (_("from %ps to %ps:\n"),
 			     styled_string (address_style.style (),
@@ -1412,7 +1412,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 	  gdb_disassembly (gdbarch, current_uiout, flags, -1, low, high);
 	}
       else
-        {
+	{
 	  for (int i = 0; i < BLOCK_NRANGES (block); i++)
 	    {
 	      CORE_ADDR range_low = BLOCK_RANGE_START (block, i);

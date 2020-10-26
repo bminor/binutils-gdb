@@ -47,8 +47,8 @@ dwarf2_macro_malformed_definition_complaint (const char *arg1)
 static struct macro_source_file *
 macro_start_file (buildsym_compunit *builder,
 		  int file, int line,
-                  struct macro_source_file *current_file,
-                  const struct line_header *lh)
+		  struct macro_source_file *current_file,
+		  const struct line_header *lh)
 {
   /* File name relative to the compilation directory of this source file.  */
   gdb::unique_xmalloc_ptr<char> file_name = lh->file_file_name (file);
@@ -80,7 +80,7 @@ consume_improper_spaces (const char *p, const char *body)
 		 body);
 
       while (*p == ' ')
-        p++;
+	p++;
     }
 
   return p;
@@ -89,20 +89,20 @@ consume_improper_spaces (const char *p, const char *body)
 
 static void
 parse_macro_definition (struct macro_source_file *file, int line,
-                        const char *body)
+			const char *body)
 {
   const char *p;
 
   /* The body string takes one of two forms.  For object-like macro
      definitions, it should be:
 
-        <macro name> " " <definition>
+	<macro name> " " <definition>
 
      For function-like macro definitions, it should be:
 
-        <macro name> "() " <definition>
+	<macro name> "() " <definition>
      or
-        <macro name> "(" <arg name> ( "," <arg name> ) * ") " <definition>
+	<macro name> "(" <arg name> ( "," <arg name> ) * ") " <definition>
 
      Spaces may appear only where explicitly indicated, and in the
      <definition>.
@@ -132,12 +132,12 @@ parse_macro_definition (struct macro_source_file *file, int line,
       const char *replacement;
 
       if (*p == ' ')
-        replacement = body + name_len + 1;
+	replacement = body + name_len + 1;
       else
-        {
+	{
 	  dwarf2_macro_malformed_definition_complaint (body);
-          replacement = body + name_len;
-        }
+	  replacement = body + name_len;
+	}
 
       macro_define_object (file, line, name.c_str (), replacement);
     }
@@ -155,68 +155,68 @@ parse_macro_definition (struct macro_source_file *file, int line,
 
       /* Parse the formal argument list.  */
       while (*p && *p != ')')
-        {
-          /* Find the extent of the current argument name.  */
-          const char *arg_start = p;
+	{
+	  /* Find the extent of the current argument name.  */
+	  const char *arg_start = p;
 
-          while (*p && *p != ',' && *p != ')' && *p != ' ')
-            p++;
+	  while (*p && *p != ',' && *p != ')' && *p != ' ')
+	    p++;
 
-          if (! *p || p == arg_start)
+	  if (! *p || p == arg_start)
 	    dwarf2_macro_malformed_definition_complaint (body);
-          else
-            {
-              /* Make sure argv has room for the new argument.  */
-              if (argc >= argv_size)
-                {
-                  argv_size *= 2;
-                  argv = XRESIZEVEC (char *, argv, argv_size);
-                }
+	  else
+	    {
+	      /* Make sure argv has room for the new argument.  */
+	      if (argc >= argv_size)
+		{
+		  argv_size *= 2;
+		  argv = XRESIZEVEC (char *, argv, argv_size);
+		}
 
-              argv[argc++] = savestring (arg_start, p - arg_start);
-            }
+	      argv[argc++] = savestring (arg_start, p - arg_start);
+	    }
 
-          p = consume_improper_spaces (p, body);
+	  p = consume_improper_spaces (p, body);
 
-          /* Consume the comma, if present.  */
-          if (*p == ',')
-            {
-              p++;
+	  /* Consume the comma, if present.  */
+	  if (*p == ',')
+	    {
+	      p++;
 
-              p = consume_improper_spaces (p, body);
-            }
-        }
+	      p = consume_improper_spaces (p, body);
+	    }
+	}
 
       if (*p == ')')
-        {
-          p++;
+	{
+	  p++;
 
-          if (*p == ' ')
-            /* Perfectly formed definition, no complaints.  */
-            macro_define_function (file, line, name.c_str (),
-                                   argc, (const char **) argv,
-                                   p + 1);
-          else if (*p == '\0')
-            {
-              /* Complain, but do define it.  */
+	  if (*p == ' ')
+	    /* Perfectly formed definition, no complaints.  */
+	    macro_define_function (file, line, name.c_str (),
+				   argc, (const char **) argv,
+				   p + 1);
+	  else if (*p == '\0')
+	    {
+	      /* Complain, but do define it.  */
 	      dwarf2_macro_malformed_definition_complaint (body);
-              macro_define_function (file, line, name.c_str (),
-                                     argc, (const char **) argv,
-                                     p);
-            }
-          else
-            /* Just complain.  */
+	      macro_define_function (file, line, name.c_str (),
+				     argc, (const char **) argv,
+				     p);
+	    }
+	  else
+	    /* Just complain.  */
 	    dwarf2_macro_malformed_definition_complaint (body);
-        }
+	}
       else
-        /* Just complain.  */
+	/* Just complain.  */
 	dwarf2_macro_malformed_definition_complaint (body);
 
       {
-        int i;
+	int i;
 
-        for (i = 0; i < argc; i++)
-          xfree (argv[i]);
+	for (i = 0; i < argc; i++)
+	  xfree (argv[i]);
       }
       xfree (argv);
     }
@@ -477,16 +477,16 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	case 0:
 	  break;
 
-        case DW_MACRO_define:
-        case DW_MACRO_undef:
+	case DW_MACRO_define:
+	case DW_MACRO_undef:
 	case DW_MACRO_define_strp:
 	case DW_MACRO_undef_strp:
 	case DW_MACRO_define_sup:
 	case DW_MACRO_undef_sup:
-          {
-            unsigned int bytes_read;
-            int line;
-            const char *body;
+	  {
+	    unsigned int bytes_read;
+	    int line;
+	    const char *body;
 	    int is_define;
 
 	    line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
@@ -522,7 +522,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	    is_define = (macinfo_type == DW_MACRO_define
 			 || macinfo_type == DW_MACRO_define_strp
 			 || macinfo_type == DW_MACRO_define_sup);
-            if (! current_file)
+	    if (! current_file)
 	      {
 		/* DWARF violation as no main source is present.  */
 		complaint (_("debug info with no main source gives macro %s "
@@ -561,8 +561,8 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 			    || macinfo_type == DW_MACRO_undef_sup);
 		macro_undef (current_file, line, body);
 	      }
-          }
-          break;
+	  }
+	  break;
 
 	case DW_MACRO_define_strx:
 	case DW_MACRO_undef_strx:
@@ -611,15 +611,15 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	   }
 	   break;
 
-        case DW_MACRO_start_file:
-          {
-            unsigned int bytes_read;
-            int line, file;
+	case DW_MACRO_start_file:
+	  {
+	    unsigned int bytes_read;
+	    int line, file;
 
-            line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-            mac_ptr += bytes_read;
-            file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
-            mac_ptr += bytes_read;
+	    line = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
+	    file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
+	    mac_ptr += bytes_read;
 
 	    if ((line == 0 && !at_commandline)
 		|| (line != 0 && at_commandline))
@@ -637,45 +637,45 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	    else
 	      current_file = macro_start_file (builder, file, line,
 					       current_file, lh);
-          }
-          break;
+	  }
+	  break;
 
-        case DW_MACRO_end_file:
-          if (! current_file)
+	case DW_MACRO_end_file:
+	  if (! current_file)
 	    complaint (_("macro debug info has an unmatched "
 			 "`close_file' directive"));
-          else
-            {
-              current_file = current_file->included_by;
-              if (! current_file)
-                {
-                  enum dwarf_macro_record_type next_type;
+	  else
+	    {
+	      current_file = current_file->included_by;
+	      if (! current_file)
+		{
+		  enum dwarf_macro_record_type next_type;
 
-                  /* GCC circa March 2002 doesn't produce the zero
-                     type byte marking the end of the compilation
-                     unit.  Complain if it's not there, but exit no
-                     matter what.  */
+		  /* GCC circa March 2002 doesn't produce the zero
+		     type byte marking the end of the compilation
+		     unit.  Complain if it's not there, but exit no
+		     matter what.  */
 
-                  /* Do we at least have room for a macinfo type byte?  */
-                  if (mac_ptr >= mac_end)
-                    {
+		  /* Do we at least have room for a macinfo type byte?  */
+		  if (mac_ptr >= mac_end)
+		    {
 		      section->overflow_complaint ();
-                      return;
-                    }
+		      return;
+		    }
 
-                  /* We don't increment mac_ptr here, so this is just
-                     a look-ahead.  */
-                  next_type
+		  /* We don't increment mac_ptr here, so this is just
+		     a look-ahead.  */
+		  next_type
 		    = (enum dwarf_macro_record_type) read_1_byte (abfd,
 								  mac_ptr);
-                  if (next_type != 0)
+		  if (next_type != 0)
 		    complaint (_("no terminating 0-type entry for "
 				 "macros in `.debug_macinfo' section"));
 
-                  return;
-                }
-            }
-          break;
+		  return;
+		}
+	    }
+	  break;
 
 	case DW_MACRO_import:
 	case DW_MACRO_import_sup:
@@ -729,7 +729,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	  }
 	  break;
 
-        case DW_MACINFO_vendor_ext:
+	case DW_MACINFO_vendor_ext:
 	  if (!section_is_gnu)
 	    {
 	      unsigned int bytes_read;
@@ -753,7 +753,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	  if (mac_ptr == NULL)
 	    return;
 	  break;
-        }
+	}
       DIAGNOSTIC_POP
     } while (macinfo_type != 0);
 }
@@ -802,12 +802,12 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
     {
       /* Do we at least have room for a macinfo type byte?  */
       if (mac_ptr >= mac_end)
-        {
+	{
 	  /* Complaint is printed during the second pass as GDB will probably
 	     stop the first pass earlier upon finding
 	     DW_MACINFO_start_file.  */
 	  break;
-        }
+	}
 
       macinfo_type = (enum dwarf_macro_record_type) read_1_byte (abfd, mac_ptr);
       mac_ptr++;
@@ -817,10 +817,10 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
       DIAGNOSTIC_PUSH
       DIAGNOSTIC_IGNORE_SWITCH_DIFFERENT_ENUM_TYPES
       switch (macinfo_type)
-        {
-          /* A zero macinfo type indicates the end of the macro
-             information.  */
-        case 0:
+	{
+	  /* A zero macinfo type indicates the end of the macro
+	     information.  */
+	case 0:
 	  break;
 
 	case DW_MACRO_define:

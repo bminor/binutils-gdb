@@ -1232,7 +1232,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       const struct ecoff_debug_swap *swap;
 
       /* .mdebug section, presumably holding ECOFF debugging
-         information.  */
+	 information.  */
       swap = get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
       if (swap)
 	elfmdebug_build_psymtabs (objfile, swap, ei.mdebugsect);
@@ -1242,7 +1242,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       asection *str_sect;
 
       /* Stab sections have an associated string table that looks like
-         a separate section.  */
+	 a separate section.  */
       str_sect = bfd_get_section_by_name (abfd, ".stabstr");
 
       /* FIXME should probably warn about a stab section without a stabstr.  */

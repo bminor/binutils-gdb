@@ -873,7 +873,7 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 		read_inferior_memory (tem, str, j);
 	      str[j] = 0;
 
-              printf (current_substring, (char *) str);
+	      printf (current_substring, (char *) str);
 	    }
 	    break;
 
@@ -882,7 +882,7 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	    {
 	      long long val = args[i];
 
-              printf (current_substring, val);
+	      printf (current_substring, val);
 	      break;
 	    }
 #else

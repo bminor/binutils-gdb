@@ -197,20 +197,20 @@ tui_rl_command_key (int count, int key)
   for (i = 0; tui_commands[i].cmd; i++)
     {
       if (tui_commands[i].key == key)
-        {
-          /* Insert the command in the readline buffer.
-             Avoid calling the gdb command here since it creates
-             a possible recursion on readline if prompt_for_continue
-             is called (See PR 9584).  The command will also appear
-             in the readline history which turns out to be better.  */
-          rl_insert_text (tui_commands[i].cmd);
-          rl_newline (1, '\n');
+	{
+	  /* Insert the command in the readline buffer.
+	     Avoid calling the gdb command here since it creates
+	     a possible recursion on readline if prompt_for_continue
+	     is called (See PR 9584).  The command will also appear
+	     in the readline history which turns out to be better.  */
+	  rl_insert_text (tui_commands[i].cmd);
+	  rl_newline (1, '\n');
 
-          /* Switch to gdb command mode while executing the command.
-             This way the gdb's continue prompty will be displayed.  */
-          tui_set_key_mode (TUI_ONE_COMMAND_MODE);
-          return 0;
-        }
+	  /* Switch to gdb command mode while executing the command.
+	     This way the gdb's continue prompty will be displayed.  */
+	  tui_set_key_mode (TUI_ONE_COMMAND_MODE);
+	  return 0;
+	}
     }
   return 0;
 }
@@ -235,7 +235,7 @@ tui_rl_next_keymap (int notused1, int notused2)
     tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   tui_set_key_mode (tui_current_key_mode == TUI_COMMAND_MODE
-                    ? TUI_SINGLE_KEY_MODE : TUI_COMMAND_MODE);
+		    ? TUI_SINGLE_KEY_MODE : TUI_COMMAND_MODE);
   return 0;
 }
 
@@ -261,7 +261,7 @@ tui_set_key_mode (enum tui_key_mode mode)
 {
   tui_current_key_mode = mode;
   rl_set_keymap (mode == TUI_SINGLE_KEY_MODE
-                 ? tui_keymap : tui_readline_standard_keymap);
+		 ? tui_keymap : tui_readline_standard_keymap);
   tui_show_locator_content ();
 }
 
@@ -307,11 +307,11 @@ tui_ensure_readline_initialized ()
       int j;
 
       for (j = 0; tui_commands[j].cmd; j++)
-        if (tui_commands[j].key == i)
-          break;
+	if (tui_commands[j].key == i)
+	  break;
 
       if (tui_commands[j].cmd)
-        continue;
+	continue;
 
       rl_bind_key_in_map (i, tui_rl_command_mode, tui_keymap);
     }
@@ -440,7 +440,7 @@ tui_enable (void)
   else
     {
      /* Save the current gdb setting of the terminal.
-        Curses will restore this state when endwin() is called.  */
+	Curses will restore this state when endwin() is called.  */
      def_shell_mode ();
      clearok (stdscr, TRUE);
    }

@@ -60,25 +60,25 @@ gnuv3_is_operator_name (const char *name)
    struct gdb_gnu_v3_abi_vtable {
 
      / * An array of virtual call and virtual base offsets.  The real
-         length of this array depends on the class hierarchy; we use
-         negative subscripts to access the elements.  Yucky, but
-         better than the alternatives.  * /
+	 length of this array depends on the class hierarchy; we use
+	 negative subscripts to access the elements.  Yucky, but
+	 better than the alternatives.  * /
      ptrdiff_t vcall_and_vbase_offsets[0];
 
      / * The offset from a virtual pointer referring to this table
-         to the top of the complete object.  * /
+	 to the top of the complete object.  * /
      ptrdiff_t offset_to_top;
 
      / * The type_info pointer for this class.  This is really a
-         std::type_info *, but GDB doesn't really look at the
-         type_info object itself, so we don't bother to get the type
-         exactly right.  * /
+	 std::type_info *, but GDB doesn't really look at the
+	 type_info object itself, so we don't bother to get the type
+	 exactly right.  * /
      void *type_info;
 
      / * Virtual table pointers in objects point here.  * /
 
      / * Virtual function pointers.  Like the vcall/vbase array, the
-         real length of this table depends on the class hierarchy.  * /
+	 real length of this table depends on the class hierarchy.  * /
      void (*virtual_functions[0]) ();
 
    };
@@ -195,7 +195,7 @@ vtable_address_point_offset (struct gdbarch *gdbarch)
     = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
 
   return (TYPE_FIELD_BITPOS (vtable_type, vtable_field_virtual_functions)
-          / TARGET_CHAR_BIT);
+	  / TARGET_CHAR_BIT);
 }
 
 
@@ -290,7 +290,7 @@ gnuv3_get_vtable (struct gdbarch *gdbarch,
 
 static struct type *
 gnuv3_rtti_type (struct value *value,
-                 int *full_p, LONGEST *top_p, int *using_enc_p)
+		 int *full_p, LONGEST *top_p, int *using_enc_p)
 {
   struct gdbarch *gdbarch;
   struct type *values_type = check_typedef (value_type (value));
@@ -321,7 +321,7 @@ gnuv3_rtti_type (struct value *value,
   /* Find the linker symbol for this vtable.  */
   vtable_symbol
     = lookup_minimal_symbol_by_pc (value_address (vtable)
-                                   + value_embedded_offset (vtable)).minsym;
+				   + value_embedded_offset (vtable)).minsym;
   if (! vtable_symbol)
     return NULL;
   
@@ -367,8 +367,8 @@ gnuv3_rtti_type (struct value *value,
 
   if (full_p)
     *full_p = (- offset_to_top == value_embedded_offset (value)
-               && (TYPE_LENGTH (value_enclosing_type (value))
-                   >= TYPE_LENGTH (run_time_type)));
+	       && (TYPE_LENGTH (value_enclosing_type (value))
+		   >= TYPE_LENGTH (run_time_type)));
   if (top_p)
     *top_p = - offset_to_top;
   return run_time_type;
@@ -390,7 +390,7 @@ gnuv3_get_virtual_fn (struct gdbarch *gdbarch, struct value *container,
 
   /* Fetch the appropriate function pointer from the vtable.  */
   vfn = value_subscript (value_field (vtable, vtable_field_virtual_functions),
-                         vtable_index);
+			 vtable_index);
 
   /* If this architecture uses function descriptors directly in the vtable,
      then the address of the vtable entry is actually a "function pointer"
@@ -411,7 +411,7 @@ gnuv3_get_virtual_fn (struct gdbarch *gdbarch, struct value *container,
 
 static struct value *
 gnuv3_virtual_fn_field (struct value **value_p,
-                        struct fn_field *f, int j,
+			struct fn_field *f, int j,
 			struct type *vfn_base, int offset)
 {
   struct type *values_type = check_typedef (value_type (*value_p));

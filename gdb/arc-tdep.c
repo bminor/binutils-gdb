@@ -675,35 +675,35 @@ arc_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
    The stack grows downward, so SP points below FP in memory; SP always
    points to the last used word on the stack, not the first one.
 
-                      |                       |   |
-                      |      arg word N       |   | caller's
-                      |           :           |   | frame
-                      |      arg word 10      |   |
-                      |      arg word 9       |   |
-          old SP ---> +-----------------------+ --+
-                      |                       |   |
-                      |      callee-saved     |   |
-                      |       registers       |   |
-                      |  including fp, blink  |   |
-                      |                       |   | callee's
-          new FP ---> +-----------------------+   | frame
-                      |                       |   |
-                      |         local         |   |
-                      |       variables       |   |
-                      |                       |   |
-                      |       register        |   |
-                      |      spill area       |   |
-                      |                       |   |
-                      |     outgoing args     |   |
-                      |                       |   |
-          new SP ---> +-----------------------+ --+
-                      |                       |
-                      |         unused        |
-                      |                       |
-                                  |
-                                  |
-                                  V
-                              downwards
+		      |                       |   |
+		      |      arg word N       |   | caller's
+		      |           :           |   | frame
+		      |      arg word 10      |   |
+		      |      arg word 9       |   |
+	  old SP ---> +-----------------------+ --+
+		      |                       |   |
+		      |      callee-saved     |   |
+		      |       registers       |   |
+		      |  including fp, blink  |   |
+		      |                       |   | callee's
+	  new FP ---> +-----------------------+   | frame
+		      |                       |   |
+		      |         local         |   |
+		      |       variables       |   |
+		      |                       |   |
+		      |       register        |   |
+		      |      spill area       |   |
+		      |                       |   |
+		      |     outgoing args     |   |
+		      |                       |   |
+	  new SP ---> +-----------------------+ --+
+		      |                       |
+		      |         unused        |
+		      |                       |
+				  |
+				  |
+				  V
+			      downwards
 
    The list of arguments to be passed to a function is considered to be a
    sequence of _N_ words (as though all the parameters were stored in order in
@@ -1958,7 +1958,7 @@ determine_core_reg_feature_set (const unsigned long mach)
       return &arc_v2_core_reg_feature;
     default:
       gdb_assert_not_reached
-        ("Unknown machine type to determine the core feature set.");
+	("Unknown machine type to determine the core feature set.");
     }
 }
 
@@ -1974,8 +1974,8 @@ determine_aux_reg_feature_set ()
 /* Update accumulator register names (ACCH/ACCL) for r58 and r59 in the
    register sets.  The endianness determines the assignment:
 
-        ,------.------.
-        | acch | accl |
+	,------.------.
+	| acch | accl |
    ,----|------+------|
    | LE | r59  | r58  |
    | BE | r58  | r59  |
@@ -2139,7 +2139,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
   if (!valid_p)
     {
       if (arc_debug)
-        debug_printf ("arc: Target description is not valid\n");
+	debug_printf ("arc: Target description is not valid\n");
       return false;
     }
 

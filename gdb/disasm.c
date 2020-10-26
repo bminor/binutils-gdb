@@ -176,14 +176,14 @@ line_is_less_than (const deprecated_dis_line_entry &mle1,
       if (mle1.start_pc != mle2.start_pc)
 	val = mle1.start_pc < mle2.start_pc;
     else
-        val = mle1.line < mle2.line;
+	val = mle1.line < mle2.line;
     }
   else
     {
       if (mle1.line != mle2.line)
 	val = mle1.line < mle2.line;
       else
-        val = mle1.start_pc < mle2.start_pc;
+	val = mle1.start_pc < mle2.start_pc;
     }
   return val;
 }
@@ -238,7 +238,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
     std::string name, filename;
     bool omit_fname = ((flags & DISASSEMBLY_OMIT_FNAME) != 0);
     if (!build_address_symbolic (gdbarch, pc, false, omit_fname, &name,
-                                 &offset, &filename, &line, &unmapped))
+				 &offset, &filename, &line, &unmapped))
       {
 	/* We don't care now about line, filename and unmapped.  But we might in
 	   the future.  */
@@ -460,7 +460,7 @@ do_mixed_source_and_assembly_deprecated
 				   how_many, flags, NULL);
 
       /* When we've reached the end of the mle array, or we've seen the last
-         assembly range for this source line, close out the list/tuple.  */
+	 assembly range for this source line, close out the list/tuple.  */
       if (i == (newlines - 1) || mle[i + 1].line > mle[i].line)
 	{
 	  inner_list_emitter.reset ();

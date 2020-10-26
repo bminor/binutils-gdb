@@ -172,7 +172,7 @@ const struct tramp_frame ppcnbsd2_sigtramp =
 
 static void
 ppcnbsd_init_abi (struct gdbarch_info info,
-                  struct gdbarch *gdbarch)
+		  struct gdbarch *gdbarch)
 {
   nbsd_init_abi (info, gdbarch);
 

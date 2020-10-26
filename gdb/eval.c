@@ -479,7 +479,7 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
       int unsigned_operation;
 
       /* Determine type length and signedness after promotion for
-         both operands.  */
+	 both operands.  */
       if (promoted_len1 < TYPE_LENGTH (builtin->builtin_int))
 	{
 	  is_unsigned1 = 0;
@@ -1354,11 +1354,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (regno == -1)
 	  error (_("Register $%s not available."), name);
 
-        /* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
-           a value with the appropriate register type.  Unfortunately,
-           we don't have easy access to the type of user registers.
-           So for these registers, we fetch the register value regardless
-           of the evaluation mode.  */
+	/* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
+	   a value with the appropriate register type.  Unfortunately,
+	   we don't have easy access to the type of user registers.
+	   So for these registers, we fetch the register value regardless
+	   of the evaluation mode.  */
 	if (noside == EVAL_AVOID_SIDE_EFFECTS
 	    && regno < gdbarch_num_cooked_regs (exp->gdbarch))
 	  val = value_zero (register_type (exp->gdbarch, regno), not_lval);
@@ -1487,8 +1487,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	      range_low = range_high = value_as_long (elem_val);
 
 	      /* Check types of elements to avoid mixture of elements from
-	         different types. Also check if type of element is "compatible"
-	         with element type of powerset.  */
+		 different types. Also check if type of element is "compatible"
+		 with element type of powerset.  */
 	      if (range_low_type->code () == TYPE_CODE_RANGE)
 		range_low_type = TYPE_TARGET_TYPE (range_low_type);
 	      if (range_high_type->code () == TYPE_CODE_RANGE)
@@ -1740,7 +1740,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  }
 
 	/* If we found a method with symbol information, check to see
-           if it returns a struct.  Otherwise assume it doesn't.  */
+	   if it returns a struct.  Otherwise assume it doesn't.  */
 
 	if (method)
 	  {
@@ -1873,7 +1873,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_COMPLEX:
       /* We have a complex number, There should be 2 floating 
-         point numbers that compose it.  */
+	 point numbers that compose it.  */
       (*pos) += 2;
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
@@ -1900,7 +1900,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	return eval_skip_value (exp);
 
       /* Check to see if operator '->' has been overloaded.  If so replace
-         arg1 with the value returned by evaluating operator->().  */
+	 arg1 with the value returned by evaluating operator->().  */
       while (unop_user_defined_p (op, arg1))
 	{
 	  struct value *value = NULL;
@@ -1924,21 +1924,21 @@ evaluate_subexp_standard (struct type *expect_type,
 	 with rtti type in order to continue on with successful
 	 lookup of member / method only available in the rtti type.  */
       {
-        struct type *arg_type = value_type (arg1);
-        struct type *real_type;
-        int full, using_enc;
-        LONGEST top;
+	struct type *arg_type = value_type (arg1);
+	struct type *real_type;
+	int full, using_enc;
+	LONGEST top;
 	struct value_print_options opts;
 
 	get_user_print_options (&opts);
-        if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
-            && (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
-          {
-            real_type = value_rtti_indirect_type (arg1, &full, &top,
+	if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
+	    && (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
+	  {
+	    real_type = value_rtti_indirect_type (arg1, &full, &top,
 						  &using_enc);
-            if (real_type)
-                arg1 = value_cast (real_type, arg1);
-          }
+	    if (real_type)
+		arg1 = value_cast (real_type, arg1);
+	  }
       }
 
       arg3 = value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
@@ -2208,8 +2208,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    {
 	      /* If the user attempts to subscript something that has no target
-	         type (like a plain int variable for example), then report this
-	         as an error.  */
+		 type (like a plain int variable for example), then report this
+		 as an error.  */
 
 	      type = TYPE_TARGET_TYPE (check_typedef (value_type (arg1)));
 	      if (type != NULL)
@@ -2416,7 +2416,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	return eval_skip_value (exp);
       type = check_typedef (value_type (arg2));
       if (type->code () != TYPE_CODE_INT
-          && type->code () != TYPE_CODE_ENUM)
+	  && type->code () != TYPE_CODE_ENUM)
 	error (_("Non-integral right operand for \"@\" operator."));
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
@@ -2712,14 +2712,14 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_TYPE:
       /* The value is not supposed to be used.  This is here to make it
-         easier to accommodate expressions that contain types.  */
+	 easier to accommodate expressions that contain types.  */
       (*pos) += 2;
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	return allocate_value (exp->elts[pc + 1].type);
       else
-        error (_("Attempt to use a type name as an expression"));
+	error (_("Attempt to use a type name as an expression"));
 
     case OP_TYPEOF:
     case OP_DECLTYPE:
@@ -2757,7 +2757,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  return result;
 	}
       else
-        error (_("Attempt to use a type as an expression"));
+	error (_("Attempt to use a type as an expression"));
 
     case OP_TYPEID:
       {
@@ -2777,13 +2777,13 @@ evaluate_subexp_standard (struct type *expect_type,
 
     default:
       /* Removing this case and compiling with gcc -Wall reveals that
-         a lot of cases are hitting this case.  Some of these should
-         probably be removed from expression.h; others are legitimate
-         expressions which are (apparently) not fully implemented.
+	 a lot of cases are hitting this case.  Some of these should
+	 probably be removed from expression.h; others are legitimate
+	 expressions which are (apparently) not fully implemented.
 
-         If there are any cases landing here which mean a user error,
-         then they should be separate cases, with more descriptive
-         error messages.  */
+	 If there are any cases landing here which mean a user error,
+	 then they should be separate cases, with more descriptive
+	 error messages.  */
 
       error (_("GDB does not (yet) know how to "
 	       "evaluate that kind of expression"));
@@ -2985,9 +2985,9 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
   switch (op)
     {
       /* This case is handled specially
-         so that we avoid creating a value for the result type.
-         If the result type is very big, it's desirable not to
-         create a value unnecessarily.  */
+	 so that we avoid creating a value for the result type.
+	 If the result type is very big, it's desirable not to
+	 create a value unnecessarily.  */
     case UNOP_IND:
       (*pos)++;
       val = evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
@@ -3019,8 +3019,8 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	  val = evaluate_subexp (nullptr, exp, pos, EVAL_NORMAL);
 	  type = value_type (val);
 	  if (type->code () == TYPE_CODE_ARRAY
-              && is_dynamic_type (type->index_type ())
-              && type->bounds ()->high.kind () == PROP_UNDEFINED)
+	      && is_dynamic_type (type->index_type ())
+	      && type->bounds ()->high.kind () == PROP_UNDEFINED)
 	    return allocate_optimized_out_value (size_type);
 	}
       else

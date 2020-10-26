@@ -208,7 +208,7 @@ link_callbacks_multiple_definition (struct bfd_link_info *link_info,
 
 static void
 link_callbacks_warning (struct bfd_link_info *link_info, const char *xwarning,
-                        const char *symbol, bfd *abfd, asection *section,
+			const char *symbol, bfd *abfd, asection *section,
 			bfd_vma address)
 {
   warning (_("Compiled module \"%s\" section \"%s\": warning: %s"),
@@ -621,7 +621,7 @@ compile_object_load (const compile_file_names &file_names,
   gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget));
   if (abfd == NULL)
     error (_("\"%s\": could not open as compiled module: %s"),
-          filename.get (), bfd_errmsg (bfd_get_error ()));
+	  filename.get (), bfd_errmsg (bfd_get_error ()));
 
   if (!bfd_check_format_matches (abfd.get (), bfd_object, &matching))
     error (_("\"%s\": not in loadable format: %s"),

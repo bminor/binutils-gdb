@@ -917,7 +917,7 @@ time_from_time_t (char *time, int maxlen, TIME_T seconds)
       time_t t = (time_t) seconds;
 
       /* Per the ctime_r manpage, this buffer needs to be at least 26
-         characters long.  */
+	 characters long.  */
       char buf[30];
       const char *time_str = ctime_r (&t, buf);
       strncpy (time, time_str, maxlen);

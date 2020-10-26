@@ -127,7 +127,7 @@ rs6000_lynx178_push_dummy_call (struct gdbarch *gdbarch,
 	      memcpy (word,
 		      ((char *) value_contents (arg)) + argbytes,
 		      (len - argbytes) > reg_size
-		        ? reg_size : len - argbytes);
+			? reg_size : len - argbytes);
 	      regcache->cooked_write (tdep->ppc_gp0_regnum + 3 + ii, word);
 	      ++ii, argbytes += reg_size;
 
@@ -191,16 +191,16 @@ ran_out_of_registers_for_arguments:
       sp -= space;
 
       /* This is another instance we need to be concerned about
-         securing our stack space.  If we write anything underneath %sp
-         (r1), we might conflict with the kernel who thinks he is free
-         to use this area.  So, update %sp first before doing anything
-         else.  */
+	 securing our stack space.  If we write anything underneath %sp
+	 (r1), we might conflict with the kernel who thinks he is free
+	 to use this area.  So, update %sp first before doing anything
+	 else.  */
 
       regcache_raw_write_signed (regcache,
 				 gdbarch_sp_regnum (gdbarch), sp);
 
       /* If the last argument copied into the registers didn't fit there
-         completely, push the rest of it into stack.  */
+	 completely, push the rest of it into stack.  */
 
       if (argbytes)
 	{
@@ -221,7 +221,7 @@ ran_out_of_registers_for_arguments:
 
 
 	  /* Float types should be passed in fpr's, as well as in the
-             stack.  */
+	     stack.  */
 	  if (type->code () == TYPE_CODE_FLT && f_argno < 13)
 	    {
 
@@ -411,9 +411,9 @@ void
 _initialize_rs6000_lynx178_tdep ()
 {
   gdbarch_register_osabi_sniffer (bfd_arch_rs6000,
-                                  bfd_target_xcoff_flavour,
-                                  rs6000_lynx178_osabi_sniffer);
+				  bfd_target_xcoff_flavour,
+				  rs6000_lynx178_osabi_sniffer);
   gdbarch_register_osabi (bfd_arch_rs6000, 0, GDB_OSABI_LYNXOS178,
-                          rs6000_lynx178_init_osabi);
+			  rs6000_lynx178_init_osabi);
 }
 

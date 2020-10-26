@@ -133,7 +133,7 @@ get_section_vmas (bfd *abfd, asection *sectp, void *context)
   if (sectix != PE_SECTION_INDEX_INVALID)
     {
       /* Data within the section start at rva_start in the pe and at
-         bfd_get_section_vma() within memory.  Store the offset.  */
+	 bfd_get_section_vma() within memory.  Store the offset.  */
 
       sections[sectix].vma_offset
 	= bfd_section_vma (sectp) - sections[sectix].rva_start;
@@ -549,7 +549,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
       /* Pointer to the function address vector.  */
       /* This is relative to ordinal value. */
       unsigned long func_rva = pe_as32 (erva + exp_funcbase +
-                                        ordinal * 4);
+					ordinal * 4);
 
       /* Find this symbol's section in our own array.  */
       int sectix = 0;

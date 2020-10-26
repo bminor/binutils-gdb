@@ -138,7 +138,7 @@ sparc_is_annulled_branch_insn (CORE_ADDR pc)
       OP2=5: Branch on FP Condition Codes with Prediction (FBfcc).
       OP2=6: Branch on FP Condition Codes (FBcc).
       OP2=3 && Bit28=0:
-             Branch on Integer Register with Prediction (BPr).
+	     Branch on Integer Register with Prediction (BPr).
 
      This leaves out ILLTRAP (OP2=0), SETHI/NOP (OP2=4) and the V8
      coprocessor branch instructions (Op2=7).  */
@@ -406,8 +406,8 @@ sparc32_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
     return sparc32_pseudo_register_names[regnum];
 
   internal_error (__FILE__, __LINE__,
-                  _("sparc32_pseudo_register_name: bad register number %d"),
-                  regnum);
+		  _("sparc32_pseudo_register_name: bad register number %d"),
+		  regnum);
 }
 
 /* Return the name of register REGNUM.  */
@@ -493,8 +493,8 @@ sparc32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
     return builtin_type (gdbarch)->builtin_double;
 
   internal_error (__FILE__, __LINE__,
-                  _("sparc32_pseudo_register_type: bad register number %d"),
-                  regnum);
+		  _("sparc32_pseudo_register_type: bad register number %d"),
+		  regnum);
 }
 
 /* Return the GDB type object for the "standard" data type of data in
@@ -639,7 +639,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
 	  sp -= len;
 
 	  /* Use doubleword alignment for these values.  That's always
-             correct, and wasting a few bytes shouldn't be a problem.  */
+	     correct, and wasting a few bytes shouldn't be a problem.  */
 	  sp &= ~0x7;
 
 	  write_memory (sp, value_contents (args[i]), len);
@@ -679,12 +679,12 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
       gdb_byte buf[4];
 
       if (len < 4)
-        {
-          memset (buf, 0, 4 - len);
-          memcpy (buf + 4 - len, valbuf, len);
-          valbuf = buf;
-          len = 4;
-        }
+	{
+	  memset (buf, 0, 4 - len);
+	  memcpy (buf + 4 - len, valbuf, len);
+	  valbuf = buf;
+	  len = 4;
+	}
 
       gdb_assert (len == 4 || len == 8);
 
@@ -793,20 +793,20 @@ sparc_skip_stack_check (const CORE_ADDR start_pc)
   /* With GCC, all stack checking sequences begin with the same two
      instructions, plus an optional one in the case of a probing loop:
 
-         sethi <some immediate>, %g1
-         sub %sp, %g1, %g1
+	 sethi <some immediate>, %g1
+	 sub %sp, %g1, %g1
 
      or:
 
-         sethi <some immediate>, %g1
-         sethi <some immediate>, %g4
-         sub %sp, %g1, %g1
+	 sethi <some immediate>, %g1
+	 sethi <some immediate>, %g4
+	 sub %sp, %g1, %g1
 
      or:
 
-         sethi <some immediate>, %g1
-         sub %sp, %g1, %g1
-         sethi <some immediate>, %g4
+	 sethi <some immediate>, %g1
+	 sub %sp, %g1, %g1
+	 sethi <some immediate>, %g4
 
      If the optional instruction is found (setting g4), assume that a
      probing loop will follow.  */
@@ -829,7 +829,7 @@ sparc_skip_stack_check (const CORE_ADDR start_pc)
 
   /* sub %sp, %g1, %g1 */
   if (!(X_OP (insn) == 2 && X_OP3 (insn) == 0x4 && !X_I(insn)
-        && X_RD (insn) == 1 && X_RS1 (insn) == 14 && X_RS2 (insn) == 1))
+	&& X_RD (insn) == 1 && X_RS1 (insn) == 14 && X_RS2 (insn) == 1))
     return start_pc;
 
   insn = sparc_fetch_instruction (pc);
@@ -844,8 +844,8 @@ sparc_skip_stack_check (const CORE_ADDR start_pc)
     }
 
   /* First possible sequence:
-         [first two instructions above]
-         clr [%g1 - some immediate]  */
+	 [first two instructions above]
+	 clr [%g1 - some immediate]  */
 
   /* clr [%g1 - some immediate]  */
   if (X_OP (insn) == 3 && X_OP3(insn) == 0x4 && X_I(insn)
@@ -856,96 +856,96 @@ sparc_skip_stack_check (const CORE_ADDR start_pc)
     }
 
   /* Second possible sequence: A small number of probes.
-         [first two instructions above]
-         clr [%g1]
-         add   %g1, -<some immediate>, %g1
-         clr [%g1]
-         [repeat the two instructions above any (small) number of times]
-         clr [%g1 - some immediate]  */
+	 [first two instructions above]
+	 clr [%g1]
+	 add   %g1, -<some immediate>, %g1
+	 clr [%g1]
+	 [repeat the two instructions above any (small) number of times]
+	 clr [%g1 - some immediate]  */
 
   /* clr [%g1] */
   else if (X_OP (insn) == 3 && X_OP3(insn) == 0x4 && !X_I(insn)
       && X_RS1 (insn) == 1 && X_RD (insn) == 0)
     {
       while (1)
-        {
-          /* add %g1, -<some immediate>, %g1 */
-          insn = sparc_fetch_instruction (pc);
-          pc = pc + 4;
-          if (!(X_OP (insn) == 2  && X_OP3(insn) == 0 && X_I(insn)
-                && X_RS1 (insn) == 1 && X_RD (insn) == 1))
-            break;
+	{
+	  /* add %g1, -<some immediate>, %g1 */
+	  insn = sparc_fetch_instruction (pc);
+	  pc = pc + 4;
+	  if (!(X_OP (insn) == 2  && X_OP3(insn) == 0 && X_I(insn)
+		&& X_RS1 (insn) == 1 && X_RD (insn) == 1))
+	    break;
 
-          /* clr [%g1] */
-          insn = sparc_fetch_instruction (pc);
-          pc = pc + 4;
-          if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && !X_I(insn)
-                && X_RD (insn) == 0 && X_RS1 (insn) == 1))
-            return start_pc;
-        }
+	  /* clr [%g1] */
+	  insn = sparc_fetch_instruction (pc);
+	  pc = pc + 4;
+	  if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && !X_I(insn)
+		&& X_RD (insn) == 0 && X_RS1 (insn) == 1))
+	    return start_pc;
+	}
 
       /* clr [%g1 - some immediate] */
       if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && X_I(insn)
-            && X_RS1 (insn) == 1 && X_RD (insn) == 0))
-        return start_pc;
+	    && X_RS1 (insn) == 1 && X_RD (insn) == 0))
+	return start_pc;
 
       /* We found a valid stack-check sequence, return the new PC.  */
       return pc;
     }
   
   /* Third sequence: A probing loop.
-         [first three instructions above]
-         sub  %g1, %g4, %g4
-         cmp  %g1, %g4
-         be  <disp>
-         add  %g1, -<some immediate>, %g1
-         ba  <disp>
-         clr  [%g1]
+	 [first three instructions above]
+	 sub  %g1, %g4, %g4
+	 cmp  %g1, %g4
+	 be  <disp>
+	 add  %g1, -<some immediate>, %g1
+	 ba  <disp>
+	 clr  [%g1]
 
      And an optional last probe for the remainder:
 
-         clr [%g4 - some immediate]  */
+	 clr [%g4 - some immediate]  */
 
   if (probing_loop)
     {
       /* sub  %g1, %g4, %g4 */
       if (!(X_OP (insn) == 2 && X_OP3 (insn) == 0x4 && !X_I(insn)
-            && X_RD (insn) == 4 && X_RS1 (insn) == 1 && X_RS2 (insn) == 4))
-        return start_pc;
+	    && X_RD (insn) == 4 && X_RS1 (insn) == 1 && X_RS2 (insn) == 4))
+	return start_pc;
 
       /* cmp  %g1, %g4 */
       insn = sparc_fetch_instruction (pc);
       pc = pc + 4;
       if (!(X_OP (insn) == 2 && X_OP3 (insn) == 0x14 && !X_I(insn)
-            && X_RD (insn) == 0 && X_RS1 (insn) == 1 && X_RS2 (insn) == 4))
-        return start_pc;
+	    && X_RD (insn) == 0 && X_RS1 (insn) == 1 && X_RS2 (insn) == 4))
+	return start_pc;
 
       /* be  <disp> */
       insn = sparc_fetch_instruction (pc);
       pc = pc + 4;
       if (!(X_OP (insn) == 0 && X_COND (insn) == 0x1))
-        return start_pc;
+	return start_pc;
 
       /* add  %g1, -<some immediate>, %g1 */
       insn = sparc_fetch_instruction (pc);
       pc = pc + 4;
       if (!(X_OP (insn) == 2  && X_OP3(insn) == 0 && X_I(insn)
-            && X_RS1 (insn) == 1 && X_RD (insn) == 1))
-        return start_pc;
+	    && X_RS1 (insn) == 1 && X_RD (insn) == 1))
+	return start_pc;
 
       /* ba  <disp> */
       insn = sparc_fetch_instruction (pc);
       pc = pc + 4;
       if (!(X_OP (insn) == 0 && X_COND (insn) == 0x8))
-        return start_pc;
+	return start_pc;
 
       /* clr  [%g1] (st %g0, [%g1] or st %g0, [%g1+0]) */
       insn = sparc_fetch_instruction (pc);
       pc = pc + 4;
       if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4
-            && X_RD (insn) == 0 && X_RS1 (insn) == 1
+	    && X_RD (insn) == 0 && X_RS1 (insn) == 1
 	    && (!X_I(insn) || X_SIMM13 (insn) == 0)))
-        return start_pc;
+	return start_pc;
 
       /* We found a valid stack-check sequence, return the new PC.  */
 
@@ -953,8 +953,8 @@ sparc_skip_stack_check (const CORE_ADDR start_pc)
       insn = sparc_fetch_instruction (pc);
       pc = pc + 4;
       if (!(X_OP (insn) == 3 && X_OP3(insn) == 0x4 && X_I(insn)
-            && X_RS1 (insn) == 4 && X_RD (insn) == 0))
-        return pc - 4;
+	    && X_RS1 (insn) == 4 && X_RD (insn) == 0))
+	return pc - 4;
       else
 	return pc;
     }
@@ -1210,15 +1210,15 @@ sparc_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (cache->frameless_p)
     {
       /* This function is frameless, so %fp (%i6) holds the frame
-         pointer for our calling frame.  Use %sp (%o6) as this frame's
-         base address.  */
+	 pointer for our calling frame.  Use %sp (%o6) as this frame's
+	 base address.  */
       cache->base =
-        get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
+	get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
     }
   else
     {
       /* For normal frames, %fp (%i6) holds the frame pointer, the
-         base address for the current stack frame.  */
+	 base address for the current stack frame.  */
       cache->base =
 	get_frame_register_unsigned (this_frame, SPARC_FP_REGNUM);
     }
@@ -1267,18 +1267,18 @@ sparc32_frame_cache (struct frame_info *this_frame, void **this_cache)
   else
     {
       /* There is no debugging information for this function to
-         help us determine whether this function returns a struct
-         or not.  So we rely on another heuristic which is to check
-         the instruction at the return address and see if this is
-         an "unimp" instruction.  If it is, then it is a struct-return
-         function.  */
+	 help us determine whether this function returns a struct
+	 or not.  So we rely on another heuristic which is to check
+	 the instruction at the return address and see if this is
+	 an "unimp" instruction.  If it is, then it is a struct-return
+	 function.  */
       CORE_ADDR pc;
       int regnum =
 	(cache->copied_regs_mask & 0x80) ? SPARC_I7_REGNUM : SPARC_O7_REGNUM;
 
       pc = get_frame_register_unsigned (this_frame, regnum) + 8;
       if (sparc_is_unimp_insn (pc))
-        cache->struct_return_p = 1;
+	cache->struct_return_p = 1;
     }
 
   return cache;
@@ -1328,12 +1328,12 @@ sparc32_frame_prev_register (struct frame_info *this_frame,
 
     if (wcookie != 0 && !cache->frameless_p && regnum == SPARC_I7_REGNUM)
       {
-        CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
-        ULONGEST i7;
+	CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
+	ULONGEST i7;
 
-        /* Read the value in from memory.  */
-        i7 = get_frame_memory_unsigned (this_frame, addr, 4);
-        return frame_unwind_got_constant (this_frame, regnum, i7 ^ wcookie);
+	/* Read the value in from memory.  */
+	i7 = get_frame_memory_unsigned (this_frame, addr, 4);
+	return frame_unwind_got_constant (this_frame, regnum, i7 ^ wcookie);
       }
   }
 
@@ -1662,7 +1662,7 @@ sparc_analyze_control_transfer (struct regcache *regcache,
   else if (X_OP (insn) == 0 && X_OP2 (insn) == 5)
     {
       /* Branch on Floating-Point Condition Codes with Prediction
-         (FBPfcc).  */
+	 (FBPfcc).  */
       branch_p = 1;
       offset = 4 * X_DISP19 (insn);
     }
@@ -1789,11 +1789,11 @@ sparc_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 static int
 validate_tdesc_registers (const struct target_desc *tdesc,
-                          struct tdesc_arch_data *tdesc_data,
-                          const char *feature_name,
-                          const char * const register_names[],
-                          unsigned int registers_num,
-                          unsigned int reg_start)
+			  struct tdesc_arch_data *tdesc_data,
+			  const char *feature_name,
+			  const char * const register_names[],
+			  unsigned int registers_num,
+			  unsigned int reg_start)
 {
   int valid_p = 1;
   const struct tdesc_feature *feature;
@@ -1804,8 +1804,8 @@ validate_tdesc_registers (const struct target_desc *tdesc,
 
   for (unsigned int i = 0; i < registers_num; i++)
     valid_p &= tdesc_numbered_register (feature, tdesc_data,
-                                        reg_start + i,
-                                        register_names[i]);
+					reg_start + i,
+					register_names[i]);
 
   return valid_p;
 }
@@ -1902,23 +1902,23 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
 
       /* Validate that the descriptor provides the mandatory registers
-         and allocate their numbers. */
+	 and allocate their numbers. */
       valid_p &= validate_tdesc_registers (tdesc, tdesc_data.get (),
-                                           "org.gnu.gdb.sparc.cpu",
-                                           sparc_core_register_names,
-                                           ARRAY_SIZE (sparc_core_register_names),
-                                           SPARC_G0_REGNUM);
+					   "org.gnu.gdb.sparc.cpu",
+					   sparc_core_register_names,
+					   ARRAY_SIZE (sparc_core_register_names),
+					   SPARC_G0_REGNUM);
       valid_p &= validate_tdesc_registers (tdesc, tdesc_data.get (),
-                                           "org.gnu.gdb.sparc.fpu",
-                                           tdep->fpu_register_names,
-                                           tdep->fpu_registers_num,
-                                           SPARC_F0_REGNUM);
+					   "org.gnu.gdb.sparc.fpu",
+					   tdep->fpu_register_names,
+					   tdep->fpu_registers_num,
+					   SPARC_F0_REGNUM);
       valid_p &= validate_tdesc_registers (tdesc, tdesc_data.get (),
-                                           "org.gnu.gdb.sparc.cp0",
-                                           tdep->cp0_register_names,
-                                           tdep->cp0_registers_num,
-                                           SPARC_F0_REGNUM
-                                           + tdep->fpu_registers_num);
+					   "org.gnu.gdb.sparc.cp0",
+					   tdep->cp0_register_names,
+					   tdep->cp0_registers_num,
+					   SPARC_F0_REGNUM
+					   + tdep->fpu_registers_num);
       if (!valid_p)
 	return NULL;
 
@@ -2122,7 +2122,7 @@ sparc32_supply_gregset (const struct sparc_gregmap *gregmap,
   if ((regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
     {
       /* Not all of the register set variants include Locals and
-         Inputs.  For those that don't, we read them off the stack.  */
+	 Inputs.  For those that don't, we read them off the stack.  */
       if (gregmap->r_l0_offset == -1)
 	{
 	  ULONGEST sp;
@@ -2180,7 +2180,7 @@ sparc32_collect_gregset (const struct sparc_gregmap *gregmap,
   if ((regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM) || regnum == -1)
     {
       /* Not all of the register set variants include Locals and
-         Inputs.  For those that don't, we read them off the stack.  */
+	 Inputs.  For those that don't, we read them off the stack.  */
       if (gregmap->r_l0_offset != -1)
 	{
 	  int offset = gregmap->r_l0_offset;

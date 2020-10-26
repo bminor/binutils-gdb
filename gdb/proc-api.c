@@ -187,7 +187,7 @@ write_with_trace (int fd, void *varg, size_t len, char *file, int line)
 		 "write (PCSSIG) ");
 	proc_prettyfprint_signal (procfs_file ? procfs_file : stdout,
 				  arg[1] ? ((siginfo_t *) &arg[1])->si_signo 
-				         : 0, 
+					 : 0, 
 				  0);
 	fprintf (procfs_file ? procfs_file : stdout, "\n");
 	break;

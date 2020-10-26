@@ -515,7 +515,7 @@ supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 
 ps_err_e
 ps_get_thread_area (struct ps_prochandle *ph,
-                    lwpid_t lwpid, int idx, void **base)
+		    lwpid_t lwpid, int idx, void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;
@@ -619,18 +619,18 @@ arm_linux_get_hwbp_cap (void)
 	  info.bp_count = (gdb_byte)(val & 0xff);
 
       if (info.wp_count > MAX_WPTS)
-        {
-          warning (_("arm-linux-gdb supports %d hardware watchpoints but target \
-                      supports %d"), MAX_WPTS, info.wp_count);
-          info.wp_count = MAX_WPTS;
-        }
+	{
+	  warning (_("arm-linux-gdb supports %d hardware watchpoints but target \
+		      supports %d"), MAX_WPTS, info.wp_count);
+	  info.wp_count = MAX_WPTS;
+	}
 
       if (info.bp_count > MAX_BPTS)
-        {
-          warning (_("arm-linux-gdb supports %d hardware breakpoints but target \
-                      supports %d"), MAX_BPTS, info.bp_count);
-          info.bp_count = MAX_BPTS;
-        }
+	{
+	  warning (_("arm-linux-gdb supports %d hardware breakpoints but target \
+		      supports %d"), MAX_BPTS, info.bp_count);
+	  info.bp_count = MAX_BPTS;
+	}
 	  available = (info.arch != 0);
 	}
     }
@@ -717,7 +717,7 @@ struct arm_linux_hw_breakpoint
    The Linux vector is indexed as follows:
       -((i << 1) + 2): Control register for watchpoint i.
       -((i << 1) + 1): Address register for watchpoint i.
-                    0: Information register.
+		    0: Information register.
        ((i << 1) + 1): Address register for breakpoint i.
        ((i << 1) + 2): Control register for breakpoint i.
 
@@ -963,7 +963,7 @@ update_registers_callback (struct lwp_info *lwp, int watch, int index)
    =1) BPT for thread TID.  */
 static void
 arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt, 
-                                 int watchpoint)
+				 int watchpoint)
 {
   int pid;
   ptid_t pid_ptid;
@@ -987,14 +987,14 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
   for (i = 0; i < count; ++i)
     if (!arm_hwbp_control_is_enabled (bpts[i].control))
       {
-        bpts[i] = *bpt;
-        iterate_over_lwps (pid_ptid,
+	bpts[i] = *bpt;
+	iterate_over_lwps (pid_ptid,
 			   [=] (struct lwp_info *info)
 			   {
 			     return update_registers_callback (info, watchpoint,
 							       i);
 			   });
-        break;
+	break;
       }
 
   gdb_assert (i != count);
@@ -1004,7 +1004,7 @@ arm_linux_insert_hw_breakpoint1 (const struct arm_linux_hw_breakpoint* bpt,
    (WATCHPOINT = 1) BPT for thread TID.  */
 static void
 arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt, 
-                                 int watchpoint)
+				 int watchpoint)
 {
   int pid;
   gdb_byte count, i;
@@ -1028,14 +1028,14 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
   for (i = 0; i < count; ++i)
     if (arm_linux_hw_breakpoint_equal (bpt, bpts + i))
       {
-        bpts[i].control = arm_hwbp_control_disable (bpts[i].control);
+	bpts[i].control = arm_hwbp_control_disable (bpts[i].control);
 	iterate_over_lwps (pid_ptid,
 			   [=] (struct lwp_info *info)
 			   {
 			     return update_registers_callback (info, watchpoint,
 							       i);
 			   });
-        break;
+	break;
       }
 
   gdb_assert (i != count);
@@ -1241,35 +1241,35 @@ arm_linux_nat_target::low_prepare_to_resume (struct lwp_info *lwp)
   for (i = 0; i < arm_linux_get_hw_breakpoint_count (); i++)
     if (arm_lwp_info->bpts_changed[i])
       {
-        errno = 0;
-        if (arm_hwbp_control_is_enabled (bpts[i].control))
-          if (ptrace (PTRACE_SETHBPREGS, pid,
-              (PTRACE_TYPE_ARG3) ((i << 1) + 1), &bpts[i].address) < 0)
-            perror_with_name (_("Unexpected error setting breakpoint"));
+	errno = 0;
+	if (arm_hwbp_control_is_enabled (bpts[i].control))
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+	      (PTRACE_TYPE_ARG3) ((i << 1) + 1), &bpts[i].address) < 0)
+	    perror_with_name (_("Unexpected error setting breakpoint"));
 
-        if (bpts[i].control != 0)
-          if (ptrace (PTRACE_SETHBPREGS, pid,
-              (PTRACE_TYPE_ARG3) ((i << 1) + 2), &bpts[i].control) < 0)
-            perror_with_name (_("Unexpected error setting breakpoint"));
+	if (bpts[i].control != 0)
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+	      (PTRACE_TYPE_ARG3) ((i << 1) + 2), &bpts[i].control) < 0)
+	    perror_with_name (_("Unexpected error setting breakpoint"));
 
-        arm_lwp_info->bpts_changed[i] = 0;
+	arm_lwp_info->bpts_changed[i] = 0;
       }
 
   for (i = 0; i < arm_linux_get_hw_watchpoint_count (); i++)
     if (arm_lwp_info->wpts_changed[i])
       {
-        errno = 0;
-        if (arm_hwbp_control_is_enabled (wpts[i].control))
-          if (ptrace (PTRACE_SETHBPREGS, pid,
-              (PTRACE_TYPE_ARG3) -((i << 1) + 1), &wpts[i].address) < 0)
-            perror_with_name (_("Unexpected error setting watchpoint"));
+	errno = 0;
+	if (arm_hwbp_control_is_enabled (wpts[i].control))
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+	      (PTRACE_TYPE_ARG3) -((i << 1) + 1), &wpts[i].address) < 0)
+	    perror_with_name (_("Unexpected error setting watchpoint"));
 
-        if (wpts[i].control != 0)
-          if (ptrace (PTRACE_SETHBPREGS, pid,
-              (PTRACE_TYPE_ARG3) -((i << 1) + 2), &wpts[i].control) < 0)
-            perror_with_name (_("Unexpected error setting watchpoint"));
+	if (wpts[i].control != 0)
+	  if (ptrace (PTRACE_SETHBPREGS, pid,
+	      (PTRACE_TYPE_ARG3) -((i << 1) + 2), &wpts[i].control) < 0)
+	    perror_with_name (_("Unexpected error setting watchpoint"));
 
-        arm_lwp_info->wpts_changed[i] = 0;
+	arm_lwp_info->wpts_changed[i] = 0;
       }
 }
 

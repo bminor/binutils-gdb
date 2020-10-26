@@ -349,7 +349,7 @@ cmd_record_save (const char *args, int from_tty)
     {
       /* Default recfile name is "gdb_record.PID".  */
       xsnprintf (recfilename_buffer, sizeof (recfilename_buffer),
-                "gdb_record.%d", inferior_ptid.pid ());
+		"gdb_record.%d", inferior_ptid.pid ());
       recfilename = recfilename_buffer;
     }
 
@@ -813,13 +813,13 @@ Default filename is 'gdb_record.PROCESS_ID'."),
 
   add_cmd ("delete", class_obscure, cmd_record_delete,
 	   _("Delete the rest of execution log and start recording it anew."),
-           &record_cmdlist);
+	   &record_cmdlist);
   add_alias_cmd ("d", "delete", class_obscure, 1, &record_cmdlist);
   add_alias_cmd ("del", "delete", class_obscure, 1, &record_cmdlist);
 
   add_cmd ("stop", class_obscure, cmd_record_stop,
 	   _("Stop the record/replay target."),
-           &record_cmdlist);
+	   &record_cmdlist);
   add_alias_cmd ("s", "stop", class_obscure, 1, &record_cmdlist);
 
   add_prefix_cmd ("goto", class_obscure, cmd_record_goto, _("\
@@ -854,7 +854,7 @@ If the second argument is preceded by '+' or '-', it specifies the distance \
 from the first argument.\n\
 The number of instructions to disassemble can be defined with \"set record \
 instruction-history-size\"."),
-           &record_cmdlist);
+	   &record_cmdlist);
 
   add_cmd ("function-call-history", class_obscure, cmd_record_call_history, _("\
 Prints the execution history at function granularity.\n\
@@ -874,7 +874,7 @@ If the second argument is preceded by '+' or '-', it specifies the distance \
 from the first argument.\n\
 The number of functions to print can be defined with \"set record \
 function-call-history-size\"."),
-           &record_cmdlist);
+	   &record_cmdlist);
 
   /* Sync command control variables.  */
   record_insn_history_size_setshow_var = record_insn_history_size;

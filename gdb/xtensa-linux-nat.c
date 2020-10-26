@@ -313,7 +313,7 @@ xtensa_linux_nat_target::store_registers (struct regcache *regcache,
 
 ps_err_e
 ps_get_thread_area (struct ps_prochandle *ph,
-                    lwpid_t lwpid, int idx, void **base)
+		    lwpid_t lwpid, int idx, void **base)
 {
   xtensa_elf_gregset_t regs;
 

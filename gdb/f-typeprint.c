@@ -59,7 +59,7 @@ f_language::print_type (struct type *type, const char *varstring,
 	 will print just a type name.  */
       || ((show > 0
 	   || type->name () == 0)
-          && (code == TYPE_CODE_FUNC
+	  && (code == TYPE_CODE_FUNC
 	      || code == TYPE_CODE_METHOD
 	      || code == TYPE_CODE_ARRAY
 	      || ((code == TYPE_CODE_PTR
@@ -79,7 +79,7 @@ f_language::print_type (struct type *type, const char *varstring,
       fputs_filtered (varstring, stream);
 
       /* For demangled function names, we have the arglist as part of the name,
-         so don't print an additional pair of ()'s.  */
+	 so don't print an additional pair of ()'s.  */
 
       demangled_args = (*varstring != '\0'
 			&& varstring[strlen (varstring) - 1] == ')');
@@ -136,7 +136,7 @@ f_language::f_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
       /* These types need no prefix.  They are listed here so that
-         gcc -Wall will reveal any types that haven't been handled.  */
+	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
     }
 }
@@ -197,7 +197,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	{
 	  LONGEST lower_bound = f77_get_lowerbound (type);
 	  if (lower_bound != 1)	/* Not the default.  */
-            fprintf_filtered (stream, "%s:", plongest (lower_bound));
+	    fprintf_filtered (stream, "%s:", plongest (lower_bound));
 
 	  /* Make sure that, if we have an assumed size array, we
 	       print out a warning and print the upperbound as '*'.  */
@@ -208,7 +208,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	    {
 	      LONGEST upper_bound = f77_get_upperbound (type);
 
-              fputs_filtered (plongest (upper_bound), stream);
+	      fputs_filtered (plongest (upper_bound), stream);
 	    }
 	}
 
@@ -275,7 +275,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
       /* These types do not need a suffix.  They are listed so that
-         gcc -Wall will report types that may not have been considered.  */
+	 gcc -Wall will report types that may not have been considered.  */
       break;
     }
 }
@@ -364,8 +364,8 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
     case TYPE_CODE_CHAR:
     case TYPE_CODE_INT:
       /* There may be some character types that attempt to come
-         through as TYPE_CODE_INT since dbxstclass.h is so
-         C-oriented, we must change these to "character" from "char".  */
+	 through as TYPE_CODE_INT since dbxstclass.h is so
+	 C-oriented, we must change these to "character" from "char".  */
 
       if (strcmp (type->name (), "char") == 0)
 	fprintfi_filtered (level, stream, "character");
@@ -398,7 +398,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 	fprintfi_filtered (level, stream, "Type ");
       fputs_filtered (type->name (), stream);
       /* According to the definition,
-         we only print structure elements in case show > 0.  */
+	 we only print structure elements in case show > 0.  */
       if (show > 0)
 	{
 	  fputs_filtered ("\n", stream);
@@ -425,9 +425,9 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
     default_case:
     default:
       /* Handle types not explicitly handled by the other cases,
-         such as fundamental types.  For these, just print whatever
-         the type name is, as recorded in the type itself.  If there
-         is no type name, then complain.  */
+	 such as fundamental types.  For these, just print whatever
+	 the type name is, as recorded in the type itself.  If there
+	 is no type name, then complain.  */
       if (type->name () != NULL)
 	fprintfi_filtered (level, stream, "%s", type->name ());
       else

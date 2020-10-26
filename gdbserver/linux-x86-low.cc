@@ -432,7 +432,7 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
   if (register_size (regcache->tdesc, 0) == 4)
     {
       void *ptr = ((gdb_byte *) buf
-                   + i386_regmap[find_regno (regcache->tdesc, "eax")]);
+		   + i386_regmap[find_regno (regcache->tdesc, "eax")]);
 
       *(int64_t *) ptr = *(int32_t *) ptr;
     }

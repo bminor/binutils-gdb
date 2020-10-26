@@ -55,11 +55,11 @@ getregs_supplies (struct gdbarch *gdbarch, int regnum)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   return ((regnum >= tdep->ppc_gp0_regnum
-           && regnum < tdep->ppc_gp0_regnum + ppc_num_gprs)
-          || regnum == tdep->ppc_lr_regnum
-          || regnum == tdep->ppc_cr_regnum
-          || regnum == tdep->ppc_xer_regnum
-          || regnum == tdep->ppc_ctr_regnum
+	   && regnum < tdep->ppc_gp0_regnum + ppc_num_gprs)
+	  || regnum == tdep->ppc_lr_regnum
+	  || regnum == tdep->ppc_cr_regnum
+	  || regnum == tdep->ppc_xer_regnum
+	  || regnum == tdep->ppc_ctr_regnum
 	  || regnum == gdbarch_pc_regnum (gdbarch));
 }
 
@@ -83,7 +83,7 @@ getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
   gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
   return ((regnum >= tdep->ppc_fp0_regnum
-           && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs)
+	   && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs)
 	  || regnum == tdep->ppc_fpscr_regnum);
 }
 
@@ -99,7 +99,7 @@ ppc_nbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
-        perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_("Couldn't get registers"));
 
       ppc_supply_gregset (&ppcnbsd_gregset, regcache,
 			  regnum, &regs, sizeof regs);

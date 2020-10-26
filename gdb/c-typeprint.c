@@ -151,7 +151,7 @@ c_print_type_1 (struct type *type,
 	fputs_styled (varstring, variable_name_style.style (), stream);
 
       /* For demangled function names, we have the arglist as part of
-         the name, so don't print an additional pair of ()'s.  */
+	 the name, so don't print an additional pair of ()'s.  */
       if (local_name == NULL)
 	{
 	  demangled_args = strchr (varstring, '(') != NULL;
@@ -466,7 +466,7 @@ c_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
       /* These types need no prefix.  They are listed here so that
-         gcc -Wall will reveal any types that haven't been handled.  */
+	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
     default:
       error (_("type not handled in c_type_print_varspec_prefix()"));
@@ -845,8 +845,8 @@ c_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_NAMESPACE:
     case TYPE_CODE_DECFLOAT:
       /* These types do not need a suffix.  They are listed so that
-         gcc -Wall will report types that may not have been
-         considered.  */
+	 gcc -Wall will report types that may not have been
+	 considered.  */
       break;
     default:
       error (_("type not handled in c_type_print_varspec_suffix()"));
@@ -1553,10 +1553,10 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
       if (TYPE_DECLARED_CLASS (type))
 	fprintf_filtered (stream, "class ");
       /* Print the tag name if it exists.
-         The aCC compiler emits a spurious 
-         "{unnamed struct}"/"{unnamed union}"/"{unnamed enum}"
-         tag for unnamed struct/union/enum's, which we don't
-         want to print.  */
+	 The aCC compiler emits a spurious 
+	 "{unnamed struct}"/"{unnamed union}"/"{unnamed enum}"
+	 tag for unnamed struct/union/enum's, which we don't
+	 want to print.  */
       if (type->name () != NULL
 	  && !startswith (type->name (), "{unnamed"))
 	{
@@ -1690,9 +1690,9 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 
     default:
       /* Handle types not explicitly handled by the other cases, such
-         as fundamental types.  For these, just print whatever the
-         type name is, as recorded in the type itself.  If there is no
-         type name, then complain.  */
+	 as fundamental types.  For these, just print whatever the
+	 type name is, as recorded in the type itself.  If there is no
+	 type name, then complain.  */
       if (type->name () != NULL)
 	{
 	  c_type_print_modifier (type, stream, 0, 1, language);

@@ -241,7 +241,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
       const char *s;
 
       /* We can have multiple .stab sections if linked with
-         --split-by-reloc.  */
+	 --split-by-reloc.  */
       for (s = name + sizeof ".stab" - 1; *s != '\0'; s++)
 	if (!isdigit (*s))
 	  break;
@@ -610,10 +610,10 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       bfd_map_over_sections (abfd, find_linenos, (void *) info);
 
       val = init_lineno (abfd, info->min_lineno_offset,
-                         info->max_lineno_offset - info->min_lineno_offset,
+			 info->max_lineno_offset - info->min_lineno_offset,
 			 &linetab_storage);
       if (val < 0)
-        error (_("\"%s\": error reading line numbers."), filename);
+	error (_("\"%s\": error reading line numbers."), filename);
     }
 
   /* Now read the string table, all at once.  */
@@ -659,7 +659,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 		  int lead = bfd_get_symbol_leading_char (objfile->obfd);
 		  struct bound_minimal_symbol found;
 
-                  if (lead != '\0' && *name1 == lead)
+		  if (lead != '\0' && *name1 == lead)
 		    name1 += 1;
 
 		  found = lookup_minimal_symbol (name1, NULL, objfile);
@@ -688,7 +688,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	}
 
       /* FIXME: dubious.  Why can't we use something normal like
-         bfd_get_section_contents?  */
+	 bfd_get_section_contents?  */
       bfd_seek (abfd, abfd->where, 0);
 
       stabstrsize = bfd_section_size (info->stabstrsect);
@@ -1039,7 +1039,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	      /* Value contains address of first non-init type
 		 code.  */
 	      /* main_aux.x_sym.x_misc.x_lnsz.x_lnno
-	         contains line number of '{' }.  */
+		 contains line number of '{' }.  */
 	      if (cs->c_naux != 1)
 		complaint (_("`.bf' symbol %d has no aux entry"),
 			   cs->c_symnum);
@@ -1047,7 +1047,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	      fcn_first_line_addr = cs->c_value;
 
 	      /* Might want to check that locals are 0 and
-	         context_stack_depth is zero, and complain if not.  */
+		 context_stack_depth is zero, and complain if not.  */
 
 	      depth = 0;
 	      newobj = push_context (depth, fcn_start_addr);
@@ -1061,9 +1061,9 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	      if (!within_function)
 		error (_("Bad coff function information."));
 	      /* The value of .ef is the address of epilogue code;
-	         not useful for gdb.  */
+		 not useful for gdb.  */
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
-	         contains number of lines to '}' */
+		 contains number of lines to '}' */
 
 	      if (outermost_context_p ())
 		{	/* We attempted to pop an empty context stack.  */
@@ -1095,12 +1095,12 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		  fcn_last_line = main_aux.x_sym.x_misc.x_lnsz.x_lnno;
 		}
 	      /* fcn_first_line is the line number of the opening '{'.
-	         Do not record it - because it would affect gdb's idea
-	         of the line number of the first statement of the
-	         function - except for one-line functions, for which
-	         it is also the line number of all the statements and
-	         of the closing '}', and for which we do not have any
-	         other statement-line-number.  */
+		 Do not record it - because it would affect gdb's idea
+		 of the line number of the first statement of the
+		 function - except for one-line functions, for which
+		 it is also the line number of all the statements and
+		 of the closing '}', and for which we do not have any
+		 other statement-line-number.  */
 	      if (fcn_last_line == 1)
 		record_line (get_current_subfile (), fcn_first_line,
 			     gdbarch_addr_bits_remove (gdbarch,
@@ -1214,7 +1214,7 @@ read_one_sym (struct coff_symbol *cs,
 			    sym->n_type, sym->n_sclass,
 			    0, cs->c_naux, (char *) aux);
       /* If more than one aux entry, read past it (only the first aux
-         is important).  */
+	 is important).  */
       for (i = 1; i < cs->c_naux; i++)
 	{
 	  bytes = bfd_bread (temp_aux, local_auxesz, nlist_bfd_global);
@@ -1317,7 +1317,7 @@ getsymname (struct internal_syment *symbol_entry)
   if (symbol_entry->_n._n_n._n_zeroes == 0)
     {
       /* FIXME: Probably should be detecting corrupt symbol files by
-         seeing whether offset points to within the stringtab.  */
+	 seeing whether offset points to within the stringtab.  */
       result = stringtab + symbol_entry->_n._n_n._n_offset;
     }
   else
@@ -1486,9 +1486,9 @@ patch_opaque_types (struct symtab *s)
   ALL_BLOCK_SYMBOLS (b, iter, real_sym)
     {
       /* Find completed typedefs to use to fix opaque ones.
-         Remove syms from the chain when their types are stored,
-         but search the whole chain, as there may be several syms
-         from different files with the same name.  */
+	 Remove syms from the chain when their types are stored,
+	 but search the whole chain, as there may be several syms
+	 from different files with the same name.  */
       if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF
 	  && SYMBOL_DOMAIN (real_sym) == VAR_DOMAIN
 	  && SYMBOL_TYPE (real_sym)->code () == TYPE_CODE_PTR

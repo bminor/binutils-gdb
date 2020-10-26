@@ -243,14 +243,14 @@ public:
 
      a) The thread ID (Id).  This consists of the pair of:
 
-        - the number of the thread's inferior and,
+	- the number of the thread's inferior and,
 
-        - the thread's thread number in its inferior, aka, the
-          per-inferior thread number.  This number is unique in the
-          inferior but not unique between inferiors.
+	- the thread's thread number in its inferior, aka, the
+	  per-inferior thread number.  This number is unique in the
+	  inferior but not unique between inferiors.
 
      b) The global ID (GId).  This is a a single integer unique
-        between all inferiors.
+	between all inferiors.
 
      E.g.:
 

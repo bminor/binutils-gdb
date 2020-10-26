@@ -96,7 +96,7 @@ pascal_main_name (void)
    but this does not happen for Free Pascal nor for GPC.  */
 int
 is_pascal_string_type (struct type *type,int *length_pos,
-                       int *length_size, int *string_pos,
+		       int *length_size, int *string_pos,
 		       struct type **char_type,
 		       const char **arrayname)
 {
@@ -109,19 +109,19 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
 	  && TYPE_FIELD_NAME (type, 1)
 	  && strcmp (TYPE_FIELD_NAME (type, 1), "st") == 0)
-        {
-          if (length_pos)
+	{
+	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 0) / TARGET_CHAR_BIT;
-          if (length_size)
+	  if (length_size)
 	    *length_size = TYPE_LENGTH (type->field (0).type ());
-          if (string_pos)
+	  if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
-          if (char_type)
+	  if (char_type)
 	    *char_type = TYPE_TARGET_TYPE (type->field (1).type ());
  	  if (arrayname)
 	    *arrayname = TYPE_FIELD_NAME (type, 1);
-         return 2;
-        };
+	 return 2;
+	};
       /* GNU pascal strings.  */
       /* Three fields: Capacity, length and schema$ or _p_schema.  */
       if (type->num_fields () == 3
@@ -129,15 +129,15 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "Capacity") == 0
 	  && TYPE_FIELD_NAME (type, 1)
 	  && strcmp (TYPE_FIELD_NAME (type, 1), "length") == 0)
-        {
+	{
 	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
 	  if (length_size)
 	    *length_size = TYPE_LENGTH (type->field (1).type ());
 	  if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
-          /* FIXME: how can I detect wide chars in GPC ??  */
-          if (char_type)
+	  /* FIXME: how can I detect wide chars in GPC ??  */
+	  if (char_type)
 	    {
 	      *char_type = TYPE_TARGET_TYPE (type->field (2).type ());
 
@@ -146,8 +146,8 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	    }
  	  if (arrayname)
 	    *arrayname = TYPE_FIELD_NAME (type, 2);
-         return 3;
-        };
+	 return 3;
+	};
     }
   return 0;
 }
@@ -285,7 +285,7 @@ public:
     lai->string_char_type = builtin->builtin_char;
     lai->primitive_type_vector
       = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_pascal_primitive_types + 1,
-                              struct type *);
+			      struct type *);
     lai->primitive_type_vector [pascal_primitive_type_int]
       = builtin->builtin_int;
     lai->primitive_type_vector [pascal_primitive_type_long]

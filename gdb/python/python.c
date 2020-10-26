@@ -380,7 +380,7 @@ python_run_simple_file (FILE *file, const char *filename)
   if (return_value == nullptr)
     {
       /* Use PyErr_PrintEx instead of gdbpy_print_stack to better match the
-         behavior of the non-Windows codepath.  */
+	 behavior of the non-Windows codepath.  */
       PyErr_PrintEx(0);
     }
 
@@ -1208,20 +1208,20 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
   try
     {
       switch (stream_type)
-        {
-        case 1:
-          {
+	{
+	case 1:
+	  {
 	    fprintf_filtered (gdb_stderr, "%s", arg);
 	    break;
-          }
-        case 2:
-          {
+	  }
+	case 2:
+	  {
 	    fprintf_filtered (gdb_stdlog, "%s", arg);
 	    break;
-          }
-        default:
-          fprintf_filtered (gdb_stdout, "%s", arg);
-        }
+	  }
+	default:
+	  fprintf_filtered (gdb_stdout, "%s", arg);
+	}
     }
   catch (const gdb_exception &except)
     {
@@ -2142,7 +2142,7 @@ struct PyModuleDef python_GdbModuleDef =
 /* Define all the event objects.  */
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \
   PyTypeObject name##_event_object_type		    \
-        CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object") \
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object") \
     = { \
       PyVarObject_HEAD_INIT (NULL, 0)				\
       "gdb." py_name,                             /* tp_name */ \

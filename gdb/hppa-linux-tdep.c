@@ -88,8 +88,8 @@ static struct insn_pattern hppa_sigtramp[] = {
    matched.  */
 static int
 insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
-                     struct insn_pattern *pattern,
-                     unsigned int *insn)
+		     struct insn_pattern *pattern,
+		     unsigned int *insn)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
@@ -102,9 +102,9 @@ insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
       target_read_memory (npc, buf, 4);
       insn[i] = extract_unsigned_integer (buf, 4, byte_order);
       if ((insn[i] & pattern[i].mask) == pattern[i].data)
-        npc += 4;
+	npc += 4;
       else
-        return 0;
+	return 0;
     }
   return 1;
 }
@@ -158,7 +158,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (insns_match_pattern (gdbarch, sp + pcoffs[attempt],
 			       hppa_sigtramp, dummy))
 	{
-          offs = sfoffs[attempt];
+	  offs = sfoffs[attempt];
 	  break;
 	}
     }
@@ -175,7 +175,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
       else
       {
-        return 0;
+	return 0;
       }
     }
 
@@ -523,7 +523,7 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 }
 
 void _initialize_hppa_linux_tdep ();

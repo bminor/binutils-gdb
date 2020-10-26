@@ -32,9 +32,9 @@ line_header::add_include_dir (const char *include_dir)
     {
       size_t new_size;
       if (version >= 5)
-        new_size = m_include_dirs.size ();
+	new_size = m_include_dirs.size ();
       else
-        new_size = m_include_dirs.size () + 1;
+	new_size = m_include_dirs.size () + 1;
       fprintf_unfiltered (gdb_stdlog, "Adding dir %zu: %s\n",
 			  new_size, include_dir);
     }
@@ -51,9 +51,9 @@ line_header::add_file_name (const char *name,
     {
       size_t new_size;
       if (version >= 5)
-        new_size = file_names_size ();
+	new_size = file_names_size ();
       else
-        new_size = file_names_size () + 1;
+	new_size = file_names_size () + 1;
       fprintf_unfiltered (gdb_stdlog, "Adding file %zu: %s\n",
 			  new_size, name);
     }
@@ -82,15 +82,15 @@ line_header::file_file_name (int file) const
   else
     {
       /* The compiler produced a bogus file number.  We can at least
-         record the macro definitions made in the file, even if we
-         won't be able to find the file by name.  */
+	 record the macro definitions made in the file, even if we
+	 won't be able to find the file by name.  */
       char fake_name[80];
 
       xsnprintf (fake_name, sizeof (fake_name),
 		 "<bad macro file number %d>", file);
 
       complaint (_("bad file number in macro information (%d)"),
-                 file);
+		 file);
 
       return make_unique_xstrdup (fake_name);
     }

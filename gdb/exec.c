@@ -404,7 +404,7 @@ exec_file_attach (const char *filename, int from_tty)
   if (!filename)
     {
       if (from_tty)
-        printf_unfiltered (_("No executable file now.\n"));
+	printf_unfiltered (_("No executable file now.\n"));
 
       set_gdbarch_from_file (NULL);
     }
@@ -543,16 +543,16 @@ exec_file_command (const char *args, int from_tty)
   if (args)
     {
       /* Scan through the args and pick up the first non option arg
-         as the filename.  */
+	 as the filename.  */
 
       gdb_argv built_argv (args);
       char **argv = built_argv.get ();
 
       for (; (*argv != NULL) && (**argv == '-'); argv++)
-        {;
-        }
+	{;
+	}
       if (*argv == NULL)
-        error (_("No executable file name was specified"));
+	error (_("No executable file name was specified"));
 
       gdb::unique_xmalloc_ptr<char> filename (tilde_expand (*argv));
       exec_file_attach (filename.get (), from_tty);
@@ -866,7 +866,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
       if (match_cb != nullptr && !match_cb (&p))
 	continue;		/* not the section we need.  */
       if (memaddr >= p.addr)
-        {
+	{
 	  if (memend <= p.endaddr)
 	    {
 	      /* Entire transfer is within this section.  */
@@ -912,7 +912,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 	      else
 		return TARGET_XFER_EOF;
 	    }
-        }
+	}
     }
 
   return TARGET_XFER_EOF;		/* We can't help.  */

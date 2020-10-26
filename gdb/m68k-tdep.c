@@ -435,8 +435,8 @@ m68k_return_value (struct gdbarch *gdbarch, struct value *function,
       || (code == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12))
     {
       /* The default on m68k is to return structures in static memory.
-         Consequently a function must return the address where we can
-         find the return value.  */
+	 Consequently a function must return the address where we can
+	 find the return value.  */
 
       if (readbuf)
 	{

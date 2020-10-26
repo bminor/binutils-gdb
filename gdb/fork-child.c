@@ -165,8 +165,8 @@ Show the wrapper for running programs."), NULL,
 			    &setlist, &showlist);
 
   add_cmd ("exec-wrapper", class_run, unset_exec_wrapper_command,
-           _("Disable use of an execution wrapper."),
-           &unsetlist);
+	   _("Disable use of an execution wrapper."),
+	   &unsetlist);
 
   add_setshow_boolean_cmd ("startup-with-shell", class_support,
 			   &startup_with_shell, _("\

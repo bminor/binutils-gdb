@@ -201,8 +201,8 @@ enum
 #endif
 
 #define CONTEXT_DEBUGGER_DR CONTEXT_FULL | CONTEXT_FLOATING_POINT \
-        | CONTEXT_SEGMENTS | CONTEXT_DEBUG_REGISTERS \
-        | CONTEXT_EXTENDED_REGISTERS
+	| CONTEXT_SEGMENTS | CONTEXT_DEBUG_REGISTERS \
+	| CONTEXT_EXTENDED_REGISTERS
 
 static uintptr_t dr[8];
 static int debug_registers_changed;
@@ -1620,7 +1620,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       /* Record the existence of this thread.  */
       thread_id = current_event.dwThreadId;
       windows_add_thread
-        (ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
+	(ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
 	 current_event.u.CreateThread.hThread,
 	 current_event.u.CreateThread.lpThreadLocalBase,
 	 false /* main_thread_p */);
@@ -1650,7 +1650,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       /* Add the main thread.  */
       windows_add_thread
-        (ptid_t (current_event.dwProcessId,
+	(ptid_t (current_event.dwProcessId,
 		 current_event.dwThreadId, 0),
 	 current_event.u.CreateProcessInfo.hThread,
 	 current_event.u.CreateProcessInfo.lpThreadLocalBase,
@@ -2413,7 +2413,7 @@ clear_win32_environment (char **env)
       mbstowcs (copy, env[i], len);
       equalpos = wcschr (copy, L'=');
       if (equalpos)
-        *equalpos = L'\0';
+	*equalpos = L'\0';
       SetEnvironmentVariableW (copy, NULL);
     }
   xfree (copy);
@@ -3610,7 +3610,7 @@ _initialize_loadable ()
 #endif
       GPA (hm, GetModuleInformation);
       GetModuleFileNameEx = (GetModuleFileNameEx_ftype *)
-        GetProcAddress (hm, GetModuleFileNameEx_name);
+	GetProcAddress (hm, GetModuleFileNameEx_name);
     }
 
   if (!EnumProcessModules || !GetModuleInformation || !GetModuleFileNameEx)

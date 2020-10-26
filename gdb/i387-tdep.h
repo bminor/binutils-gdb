@@ -170,5 +170,5 @@ extern void i387_return_value (struct gdbarch *gdbarch,
 /* Set all bnd registers to the INIT state.  INIT state means
    all memory range can be accessed.  */
 extern void i387_reset_bnd_regs (struct gdbarch *gdbarch,
-			         struct regcache *regcache);
+				 struct regcache *regcache);
 #endif /* i387-tdep.h */

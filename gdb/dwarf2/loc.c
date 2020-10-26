@@ -1590,7 +1590,7 @@ value_of_dwarf_block_entry (struct type *type, struct frame_info *frame,
 
   if (dwarf_block_to_fb_offset (block, block + block_len, &kind_u.fb_offset))
     return value_of_dwarf_reg_entry (type, frame, CALL_SITE_PARAMETER_FB_OFFSET,
-                                     kind_u);
+				     kind_u);
 
   /* This can normally happen - throw NO_ENTRY_VALUE_ERROR to get the message
      suppressed during normal operation.  The expression can be arbitrary if
@@ -3556,7 +3556,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	case DW_OP_nop:
 	  break;
 
-        case DW_OP_piece:
+	case DW_OP_piece:
 	case DW_OP_bit_piece:
 	  {
 	    uint64_t size;
@@ -3565,7 +3565,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	      error (_("Cannot translate empty pieces to agent expressions"));
 	    previous_piece = op_ptr - 1;
 
-            op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
 	    if (op == DW_OP_piece)
 	      {
 		size *= 8;
@@ -3857,7 +3857,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
      64-bit LE machine):
 
      DW_AT_location    : 10 byte block: 3 4 0 0 0 0 0 0 0 e0
-                        (DW_OP_addr: 4; DW_OP_GNU_push_tls_address)
+			(DW_OP_addr: 4; DW_OP_GNU_push_tls_address)
 
      0x3 is the encoding for DW_OP_addr, which has an operand as long
      as the size of an address on the target machine (here is 8
@@ -3889,7 +3889,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 
   /* With -gsplit-dwarf a TLS variable can also look like this:
      DW_AT_location    : 3 byte block: fc 4 e0
-                        (DW_OP_GNU_const_index: 4;
+			(DW_OP_GNU_const_index: 4;
 			 DW_OP_GNU_push_tls_address)  */
   else if (data + 3 <= end
 	   && data + 1 + (leb128_size = skip_leb128 (data + 1, end)) < end
@@ -4166,7 +4166,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  fprintf_filtered (stream, " offset %s", phex_nz (ul, offset_size));
 	  break;
 
-        case DW_OP_piece:
+	case DW_OP_piece:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  fprintf_filtered (stream, " %s (bytes)", pulongest (ul));
 	  break;

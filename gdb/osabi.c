@@ -613,7 +613,7 @@ set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
       int i;
 
       for (i = 1; i < GDB_OSABI_INVALID; i++)
-        {
+	{
 	  enum gdb_osabi osabi = (enum gdb_osabi) i;
 
 	  if (strcmp (set_osabi_string, gdbarch_osabi_name (osabi)) == 0)

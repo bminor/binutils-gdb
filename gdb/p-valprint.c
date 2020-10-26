@@ -184,9 +184,9 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	 pointed to, unless pointer is null.  */
       if (((TYPE_LENGTH (elttype) == 1
 	   && (elttype->code () == TYPE_CODE_INT
-               || elttype->code () == TYPE_CODE_CHAR))
-           || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
-               && elttype->code () == TYPE_CODE_CHAR))
+	       || elttype->code () == TYPE_CODE_CHAR))
+	   || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
+	       && elttype->code () == TYPE_CODE_CHAR))
 	  && (options->format == 0 || options->format == 's')
 	  && addr != 0)
 	{
@@ -313,8 +313,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	}
       else
 	{
-          if (is_pascal_string_type (type, &length_pos, &length_size,
-                                     &string_pos, &char_type, NULL))
+	  if (is_pascal_string_type (type, &length_pos, &length_size,
+				     &string_pos, &char_type, NULL))
 	    {
 	      len = extract_unsigned_integer (valaddr + length_pos,
 					      length_size, byte_order);
@@ -419,7 +419,7 @@ pascal_value_print (struct value *val, struct ui_file *stream,
       || type->code () == TYPE_CODE_REF)
     {
       /* Hack:  remove (char *) for char strings.  Their
-         type is indicated by the quoted string anyway.  */
+	 type is indicated by the quoted string anyway.  */
       if (type->code () == TYPE_CODE_PTR
 	  && type->name () == NULL
 	  && TYPE_TARGET_TYPE (type)->name () != NULL
@@ -490,7 +490,7 @@ pascal_object_is_vtbl_member (struct type *type)
 	      || type->code () == TYPE_CODE_PTR)	/* If using thunks.  */
 	    {
 	      /* Virtual functions tables are full of pointers
-	         to virtual functions.  */
+		 to virtual functions.  */
 	      return pascal_object_is_vtbl_ptr_type (type);
 	    }
 	}
@@ -601,7 +601,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 	      struct value *v;
 
 	      /* Bitfields require special handling, especially due to byte
-	         order problems.  */
+		 order problems.  */
 	      if (TYPE_FIELD_IGNORE (type, i))
 		{
 		  fputs_styled ("<optimized out or zero length>",
@@ -698,8 +698,8 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
   if (dont_print_vb == 0)
     {
       /* If we're at top level, carve out a completely fresh
-         chunk of the obstack and use that until this particular
-         invocation returns.  */
+	 chunk of the obstack and use that until this particular
+	 invocation returns.  */
       /* Bump up the high-water mark.  Now alpha is omega.  */
       obstack_finish (&dont_print_vb_obstack);
     }
@@ -769,7 +769,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
 	}
       fputs_filtered ("<", stream);
       /* Not sure what the best notation is in the case where there is no
-         baseclass name.  */
+	 baseclass name.  */
 
       fputs_filtered (basename ? basename : "", stream);
       fputs_filtered ("> = ", stream);
@@ -792,10 +792,10 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
   if (dont_print_vb == 0)
     {
       /* Free the space used to deal with the printing
-         of this type from top level.  */
+	 of this type from top level.  */
       obstack_free (&dont_print_vb_obstack, last_dont_print);
       /* Reset watermark so that we can continue protecting
-         ourselves from whatever we were protecting ourselves.  */
+	 ourselves from whatever we were protecting ourselves.  */
       dont_print_vb_obstack = tmp_obstack;
     }
 }

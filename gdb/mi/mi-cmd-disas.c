@@ -44,11 +44,11 @@
    always required:
 
    MODE: 0 -- disassembly.
-         1 -- disassembly and source (with deprecated source-centric view).
-         2 -- disassembly and opcodes.
-         3 -- disassembly, source-centric and opcodes.
-         4 -- disassembly, and source (with pc-centric view).
-         5 -- disassembly, source (pc-centric) and opcodes.  */
+	 1 -- disassembly and source (with deprecated source-centric view).
+	 2 -- disassembly and opcodes.
+	 3 -- disassembly, source-centric and opcodes.
+	 4 -- disassembly, and source (with pc-centric view).
+	 5 -- disassembly, source (pc-centric) and opcodes.  */
 
 void
 mi_cmd_disassemble (const char *command, char **argv, int argc)
@@ -138,7 +138,7 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
      required) OR start_addr + end_addr OR addr.  */
 
   if (!(
-          ( line_seen &&  file_seen &&              !start_seen && !end_seen
+	  ( line_seen &&  file_seen &&              !start_seen && !end_seen
 								&& !addr_seen)
 
        || (!line_seen && !file_seen && !num_seen &&  start_seen &&  end_seen
@@ -197,8 +197,8 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   else if (addr_seen)
     {
       if (find_pc_partial_function (addr, NULL, &low, &high) == 0)
-        error (_("-data-disassemble: "
-                 "No function contains specified address"));
+	error (_("-data-disassemble: "
+		 "No function contains specified address"));
     }
 
   gdb_disassembly (gdbarch, uiout,

@@ -129,17 +129,17 @@
 #ifdef PTRACE_TYPE_ARG5
 # ifdef HAVE_PTRACE64
 #  define ptrace(request, pid, addr, data) \
-          ptrace64 (request, pid, addr, data, 0)
+	  ptrace64 (request, pid, addr, data, 0)
 #  undef PTRACE_TYPE_ARG3
 #  define PTRACE_TYPE_ARG3 long long
 # else
 #  define ptrace(request, pid, addr, data) \
-          ptrace (request, pid, addr, data, 0)
+	  ptrace (request, pid, addr, data, 0)
 # endif
 #else
 /* Wrapper that avoids adding a pointless cast to all callers.  */
 # define ptrace(request, pid, addr, data) \
-         ptrace ((PTRACE_TYPE_ARG1) request, pid, addr, data)
+	 ptrace ((PTRACE_TYPE_ARG1) request, pid, addr, data)
 #endif
 
 #endif /* NAT_GDB_PTRACE_H */

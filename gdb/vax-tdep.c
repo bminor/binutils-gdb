@@ -211,8 +211,8 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
       || type->code () == TYPE_CODE_ARRAY)
     {
       /* The default on VAX is to return structures in static memory.
-         Consequently a function must return the address where we can
-         find the return value.  */
+	 Consequently a function must return the address where we can
+	 find the return value.  */
 
       if (readbuf)
 	{
@@ -353,9 +353,9 @@ vax_frame_cache (struct frame_info *this_frame, void **this_cache)
       ULONGEST numarg;
 
       /* This is a procedure with Stack Argument List.  Adjust the
-         stack address for the arguments that were pushed onto the
-         stack.  The return instruction will automatically pop the
-         arguments from the stack.  */
+	 stack address for the arguments that were pushed onto the
+	 stack.  The return instruction will automatically pop the
+	 arguments from the stack.  */
       numarg = get_frame_memory_unsigned (this_frame, addr, 1);
       addr += 4 + numarg * 4;
     }

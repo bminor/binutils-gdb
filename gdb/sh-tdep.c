@@ -93,11 +93,11 @@ sh_is_renesas_calling_convention (struct type *func_type)
       func_type = check_typedef (func_type);
 
       if (func_type->code () == TYPE_CODE_PTR)
-        func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
+	func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
 
       if (func_type->code () == TYPE_CODE_FUNC
-          && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GNU_renesas_sh)
-        val = 1;
+	  && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GNU_renesas_sh)
+	val = 1;
     }
 
   if (sh_active_calling_convention == sh_cc_renesas)
@@ -618,12 +618,12 @@ sh_analyze_prologue (struct gdbarch *gdbarch,
 	}
       else if (IS_MOVI20 (inst)
 	       && (pc + 2 < limit_pc))
-        {
+	{
 	  if (sav_reg < 0)
 	    {
 	      reg = GET_TARGET_REG (inst);
 	      if (reg < 14)
-	        {
+		{
 		  sav_reg = reg;
 		  sav_offset = GET_SOURCE_REG (inst) << 16;
 		  /* MOVI20 is a 32 bit instruction!  */
@@ -735,7 +735,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       post_prologue_pc = skip_prologue_using_sal (gdbarch, func_addr);
       if (post_prologue_pc != 0)
-        return std::max (pc, post_prologue_pc);
+	return std::max (pc, post_prologue_pc);
     }
 
   /* Can't determine prologue from the symbol table, need to examine
@@ -1105,7 +1105,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
-         This also differs in different ABIs.  */
+	 This also differs in different ABIs.  */
       pass_on_stack = 0;
 
       /* Find out the next register to use for a floating point value.  */
@@ -1129,7 +1129,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 	{
 	  if ((treat_as_flt && flt_argreg > FLOAT_ARGLAST_REGNUM)
 	      || (!treat_as_flt && (argreg > ARGLAST_REGNUM
-	                            || pass_on_stack))
+				    || pass_on_stack))
 	      || argnum > last_reg_arg)
 	    {
 	      /* The data goes entirely on the stack, 4-byte aligned.  */
@@ -1143,15 +1143,15 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 	      reg_size = register_size (gdbarch, flt_argreg);
 	      regval = extract_unsigned_integer (val, reg_size, byte_order);
 	      /* In little endian mode, float types taking two registers
-	         (doubles on sh4, long doubles on sh2e, sh3e and sh4) must
+		 (doubles on sh4, long doubles on sh2e, sh3e and sh4) must
 		 be stored swapped in the argument registers.  The below
 		 code first writes the first 32 bits in the next but one
 		 register, increments the val and len values accordingly
 		 and then proceeds as normal by writing the second 32 bits
 		 into the next register.  */
 	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE
-	          && TYPE_LENGTH (type) == 2 * reg_size)
-	        {
+		  && TYPE_LENGTH (type) == 2 * reg_size)
+		{
 		  regcache_cooked_write_unsigned (regcache, flt_argreg + 1,
 						  regval);
 		  val += reg_size;
@@ -1259,7 +1259,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
 	      || argnum > last_reg_arg)
 	    {
 	      /* The remainder of the data goes entirely on the stack,
-	         4-byte aligned.  */
+		 4-byte aligned.  */
 	      reg_size = (len + 3) & ~3;
 	      write_memory (sp + stack_offset, val, reg_size);
 	      stack_offset += reg_size;
@@ -1559,7 +1559,7 @@ sh_littlebyte_bigword_type (struct gdbarch *gdbarch)
   if (tdep->sh_littlebyte_bigword_type == NULL)
     tdep->sh_littlebyte_bigword_type
       = arch_float_type (gdbarch, -1, "builtin_type_sh_littlebyte_bigword",
-                         floatformats_ieee_double_littlebyte_bigword);
+			 floatformats_ieee_double_littlebyte_bigword);
 
   return tdep->sh_littlebyte_bigword_type;
 }
@@ -1697,14 +1697,14 @@ sh_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
   if (reg_nr == PSEUDO_BANK_REGNUM)
     {
       /* When the bank register is written to, the whole register bank
-         is switched and all values in the bank registers must be read
+	 is switched and all values in the bank registers must be read
 	 from the target/sim again.  We're just invalidating the regcache
 	 so that a re-read happens next time it's necessary.  */
       int bregnum;
 
       regcache->raw_write (BANK_REGNUM, buffer);
       for (bregnum = R0_BANK0_REGNUM; bregnum < MACLB_REGNUM; ++bregnum)
-        regcache->invalidate (bregnum);
+	regcache->invalidate (bregnum);
     }
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
     {
@@ -1760,25 +1760,25 @@ sh_sh2a_register_sim_regno (struct gdbarch *gdbarch, int nr)
   switch (nr)
     {
       case TBR_REGNUM:
-        return SIM_SH_TBR_REGNUM;
+	return SIM_SH_TBR_REGNUM;
       case IBNR_REGNUM:
-        return SIM_SH_IBNR_REGNUM;
+	return SIM_SH_IBNR_REGNUM;
       case IBCR_REGNUM:
-        return SIM_SH_IBCR_REGNUM;
+	return SIM_SH_IBCR_REGNUM;
       case BANK_REGNUM:
-        return SIM_SH_BANK_REGNUM;
+	return SIM_SH_BANK_REGNUM;
       case MACLB_REGNUM:
-        return SIM_SH_BANK_MACL_REGNUM;
+	return SIM_SH_BANK_MACL_REGNUM;
       case GBRB_REGNUM:
-        return SIM_SH_BANK_GBR_REGNUM;
+	return SIM_SH_BANK_GBR_REGNUM;
       case PRB_REGNUM:
-        return SIM_SH_BANK_PR_REGNUM;
+	return SIM_SH_BANK_PR_REGNUM;
       case IVNB_REGNUM:
-        return SIM_SH_BANK_IVN_REGNUM;
+	return SIM_SH_BANK_IVN_REGNUM;
       case MACHB_REGNUM:
-        return SIM_SH_BANK_MACH_REGNUM;
+	return SIM_SH_BANK_MACH_REGNUM;
       default:
-        break;
+	break;
     }
   return legacy_register_sim_regno (gdbarch, nr);
 }
@@ -1792,7 +1792,7 @@ sh_sh2a_register_sim_regno (struct gdbarch *gdbarch, int nr)
 
 static void
 sh_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
-                          struct dwarf2_frame_state_reg *reg,
+			  struct dwarf2_frame_state_reg *reg,
 			  struct frame_info *this_frame)
 {
   /* Mark the PC as the destination for the return address.  */
@@ -1906,12 +1906,12 @@ sh_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (!cache->uses_fp)
     {
       /* We didn't find a valid frame, which means that CACHE->base
-         currently holds the frame pointer for our calling frame.  If
-         we're at the start of a function, or somewhere half-way its
-         prologue, the function's frame probably hasn't been fully
-         setup yet.  Try to reconstruct the base address for the stack
-         frame by looking at the stack pointer.  For truly "frameless"
-         functions this might work too.  */
+	 currently holds the frame pointer for our calling frame.  If
+	 we're at the start of a function, or somewhere half-way its
+	 prologue, the function's frame probably hasn't been fully
+	 setup yet.  Try to reconstruct the base address for the stack
+	 frame by looking at the stack pointer.  For truly "frameless"
+	 functions this might work too.  */
       cache->base = get_frame_register_unsigned
 		     (this_frame, gdbarch_sp_regnum (gdbarch));
     }
@@ -1949,7 +1949,7 @@ sh_frame_prev_register (struct frame_info *this_frame,
 
   if (regnum < SH_NUM_REGS && cache->saved_regs[regnum] != -1)
     return frame_unwind_got_memory (this_frame, regnum,
-                                    cache->saved_regs[regnum]);
+				    cache->saved_regs[regnum]);
 
   return frame_unwind_got_register (this_frame, regnum, regnum);
 }
@@ -2007,7 +2007,7 @@ sh_make_stub_cache (struct frame_info *this_frame)
 
 static void
 sh_stub_this_id (struct frame_info *this_frame, void **this_cache,
-                 struct frame_id *this_id)
+		 struct frame_id *this_id)
 {
   struct sh_frame_cache *cache;
 
@@ -2020,8 +2020,8 @@ sh_stub_this_id (struct frame_info *this_frame, void **this_cache,
 
 static int
 sh_stub_unwind_sniffer (const struct frame_unwind *self,
-                        struct frame_info *this_frame,
-                        void **this_prologue_cache)
+			struct frame_info *this_frame,
+			void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
 
@@ -2058,9 +2058,9 @@ sh_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       ULONGEST inst;
       /* The sh epilogue is max. 14 bytes long.  Give another 14 bytes
-         for a nop and some fixed data (e.g. big offsets) which are
-         unfortunately also treated as part of the function (which
-         means, they are below func_end.  */
+	 for a nop and some fixed data (e.g. big offsets) which are
+	 unfortunately also treated as part of the function (which
+	 means, they are below func_end.  */
       CORE_ADDR addr = func_end - 28;
       if (addr < func_addr + 4)
 	addr = func_addr + 4;
@@ -2075,8 +2075,8 @@ sh_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return 0;
 
       /* At this point we should find a mov.l @r15+,r14 instruction,
-         either before or after the rts.  If not, then the function has
-         probably no "normal" epilogue and we bail out here.  */
+	 either before or after the rts.  If not, then the function has
+	 probably no "normal" epilogue and we bail out here.  */
       inst = read_memory_unsigned_integer (addr - 2, 2, byte_order);
       if (IS_RESTORE_FP (read_memory_unsigned_integer (addr - 2, 2,
 						       byte_order)))
@@ -2109,7 +2109,7 @@ sh_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
 
       /* Now check for FP adjustments, using add #imm,r14 or add rX, r14
-         instructions.  */
+	 instructions.  */
       while (addr > func_addr + 4
 	     && (IS_ADD_REG_TO_FP (inst) || IS_ADD_IMM_FP (inst)))
 	{
@@ -2118,10 +2118,10 @@ sh_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
 
       /* On SH2a check if the previous instruction was perhaps a MOVI20.
-         That's allowed for the epilogue.  */
+	 That's allowed for the epilogue.  */
       if ((gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh2a
-           || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh2a_nofpu)
-          && addr > func_addr + 6
+	   || gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_sh2a_nofpu)
+	  && addr > func_addr + 6
 	  && IS_MOVI20 (read_memory_unsigned_integer (addr - 4, 2,
 						      byte_order)))
 	addr -= 4;

@@ -2807,7 +2807,7 @@ resume (struct thread_resume *actions, size_t num_actions)
 	}
 
       if (cs.last_status.kind != TARGET_WAITKIND_EXITED
-          && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED
+	  && cs.last_status.kind != TARGET_WAITKIND_SIGNALLED
 	  && cs.last_status.kind != TARGET_WAITKIND_NO_RESUMED)
 	current_thread->last_status = cs.last_status;
 
@@ -2820,8 +2820,8 @@ resume (struct thread_resume *actions, size_t num_actions)
       disable_async_io ();
 
       if (cs.last_status.kind == TARGET_WAITKIND_EXITED
-          || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
-        target_mourn_inferior (cs.last_ptid);
+	  || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)
+	target_mourn_inferior (cs.last_ptid);
     }
 }
 
@@ -3829,11 +3829,11 @@ captured_main (int argc, char *argv[])
 	      - If --once was specified, we're done.
 
 	      - If not in extended-remote mode, and we're no longer
-	        debugging anything, simply exit: GDB has disconnected
-	        after processing the last process exit.
+		debugging anything, simply exit: GDB has disconnected
+		after processing the last process exit.
 
 	      - Otherwise, close the connection and reopen it at the
-	        top of the loop.  */
+		top of the loop.  */
 	  if (run_once || (!extended_protocol && !target_running ()))
 	    throw_quit ("Quit");
 

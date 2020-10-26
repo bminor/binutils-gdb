@@ -628,7 +628,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
   if (record_debug > 1)
     fprintf_unfiltered (gdb_stdlog, "Process record: moxie_process_record "
-			            "addr = 0x%s\n",
+				    "addr = 0x%s\n",
 			paddress (target_gdbarch (), addr));
 
   inst = (uint16_t) moxie_process_readu (addr, buf, 2, byte_order);

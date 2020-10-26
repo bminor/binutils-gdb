@@ -57,7 +57,7 @@
 #define DW2_GDB_INDEX_SYMBOL_KIND_SET_VALUE(cu_index, value) \
   do { \
     gdb_assert ((value) >= GDB_INDEX_SYMBOL_KIND_TYPE \
-                && (value) <= GDB_INDEX_SYMBOL_KIND_OTHER); \
+		&& (value) <= GDB_INDEX_SYMBOL_KIND_OTHER); \
     GDB_INDEX_SYMBOL_KIND_SET_VALUE((cu_index), (value)); \
   } while (0)
 
@@ -594,7 +594,7 @@ write_psymbols (struct mapped_symtab *symtab,
 struct signatured_type_index_data
 {
   signatured_type_index_data (data_buf &types_list_,
-                              std::unordered_set<partial_symbol *> &psyms_seen_)
+			      std::unordered_set<partial_symbol *> &psyms_seen_)
     : types_list (types_list_), psyms_seen (psyms_seen_)
   {}
 
@@ -941,7 +941,7 @@ public:
   {
   public:
     write_one_signatured_type_data (debug_names &nametable_,
-                                    signatured_type_index_data &&info_)
+				    signatured_type_index_data &&info_)
     : nametable (nametable_), info (std::move (info_))
     {}
     debug_names &nametable;
@@ -1069,7 +1069,7 @@ private:
     symbol_value (int dwarf_tag_, int cu_index_, bool is_static_,
 		  unit_kind kind_)
       : dwarf_tag (dwarf_tag_), cu_index (cu_index_), is_static (is_static_),
-        kind (kind_)
+	kind (kind_)
     {}
 
     bool

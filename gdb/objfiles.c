@@ -525,26 +525,26 @@ objfile::~objfile ()
       child = separate_debug_objfile_backlink->separate_debug_objfile;
 
       if (child == this)
-        {
-          /* THIS is the first child.  */
-          separate_debug_objfile_backlink->separate_debug_objfile =
-            separate_debug_objfile_link;
-        }
+	{
+	  /* THIS is the first child.  */
+	  separate_debug_objfile_backlink->separate_debug_objfile =
+	    separate_debug_objfile_link;
+	}
       else
-        {
-          /* Find THIS in the list.  */
-          while (1)
-            {
-              if (child->separate_debug_objfile_link == this)
-                {
-                  child->separate_debug_objfile_link =
-                    separate_debug_objfile_link;
-                  break;
-                }
-              child = child->separate_debug_objfile_link;
-              gdb_assert (child);
-            }
-        }
+	{
+	  /* Find THIS in the list.  */
+	  while (1)
+	    {
+	      if (child->separate_debug_objfile_link == this)
+		{
+		  child->separate_debug_objfile_link =
+		    separate_debug_objfile_link;
+		  break;
+		}
+	      child = child->separate_debug_objfile_link;
+	      gdb_assert (child);
+	    }
+	}
     }
 
   /* Remove any references to this objfile in the global value
@@ -1236,7 +1236,7 @@ find_pc_section (CORE_ADDR pc)
 			  &pspace_info->num_sections);
 
       /* Don't need updates to section map until objfiles are added,
-         removed or relocated.  */
+	 removed or relocated.  */
       pspace_info->new_objfiles_available = 0;
       pspace_info->section_map_dirty = 0;
     }

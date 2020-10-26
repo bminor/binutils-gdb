@@ -119,7 +119,7 @@ find_process (Func func)
       next++;
 
       if (func (*cur))
-        return *cur;
+	return *cur;
 
       cur = next;
     }

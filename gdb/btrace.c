@@ -62,7 +62,7 @@ static void btrace_add_pc (struct thread_info *tp);
   do									\
     {									\
       if (record_debug != 0)						\
-        fprintf_unfiltered (gdb_stdlog,					\
+	fprintf_unfiltered (gdb_stdlog,					\
 			    "[btrace] " msg "\n", ##args);		\
     }									\
   while (0)

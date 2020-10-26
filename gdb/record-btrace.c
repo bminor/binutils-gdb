@@ -212,7 +212,7 @@ static struct cmd_list_element *set_record_btrace_cpu_cmdlist;
   do									\
     {									\
       if (record_debug != 0)						\
-        fprintf_unfiltered (gdb_stdlog,					\
+	fprintf_unfiltered (gdb_stdlog,					\
 			    "[record-btrace] " msg "\n", ##args);	\
     }									\
   while (0)
@@ -798,7 +798,7 @@ btrace_insn_history (struct ui_out *uiout,
   gdb_pretty_print_disassembler disasm (gdbarch, uiout);
 
   for (btrace_insn_iterator it = *begin; btrace_insn_cmp (&it, end) != 0;
-         btrace_insn_next (&it, 1))
+	 btrace_insn_next (&it, 1))
     {
       const struct btrace_insn *insn;
 

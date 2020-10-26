@@ -635,9 +635,9 @@ gdbscm_canonicalize_command_name (const char *name, int want_trailing_space)
      One of the COMPLETE_* constants defined in the gdb module.
      A procedure of three arguments: (lambda (self text word) ...).
        Its result is one of:
-         A list of strings.
-         A <gdb:iterator> object that returns the set of possible completions,
-         ending with #f.
+	 A list of strings.
+	 A <gdb:iterator> object that returns the set of possible completions,
+	 ending with #f.
 	 TODO(dje): Once PR 16699 is fixed, add support for returning
 	 a COMPLETE_* constant.
    If not specified, then completion is not supported for this command.

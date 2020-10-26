@@ -162,8 +162,8 @@ fd_event (int error, void *context)
   else if (scb->bufcnt == 0)
     {
       /* Prime the input FIFO.  The readchar() function is used to
-         pull characters out of the buffer.  See also
-         generic_readchar().  */
+	 pull characters out of the buffer.  See also
+	 generic_readchar().  */
       int nr;
 
       do
@@ -222,8 +222,8 @@ ser_base_wait_for (struct serial *scb, int timeout)
       int nfds;
 
       /* NOTE: Some OS's can scramble the READFDS when the select()
-         call fails (ex the kernel with Red Hat 5.2).  Initialize all
-         arguments before each call.  */
+	 call fails (ex the kernel with Red Hat 5.2).  Initialize all
+	 arguments before each call.  */
 
       tv.tv_sec = timeout;
       tv.tv_usec = 0;
@@ -350,11 +350,11 @@ do_ser_base_readchar (struct serial *scb, int timeout)
   while (1)
     {
       /* N.B. The UI may destroy our world (for instance by calling
-         remote_stop,) in which case we want to get out of here as
-         quickly as possible.  It is not safe to touch scb, since
-         someone else might have freed it.  The
-         deprecated_ui_loop_hook signals that we should exit by
-         returning 1.  */
+	 remote_stop,) in which case we want to get out of here as
+	 quickly as possible.  It is not safe to touch scb, since
+	 someone else might have freed it.  The
+	 deprecated_ui_loop_hook signals that we should exit by
+	 returning 1.  */
 
       if (deprecated_ui_loop_hook)
 	{
@@ -364,15 +364,15 @@ do_ser_base_readchar (struct serial *scb, int timeout)
 
       status = ser_base_wait_for (scb, delta);
       if (timeout > 0)
-        timeout -= delta;
+	timeout -= delta;
 
       /* If we got a character or an error back from wait_for, then we can 
-         break from the loop before the timeout is completed.  */
+	 break from the loop before the timeout is completed.  */
       if (status != SERIAL_TIMEOUT)
 	break;
 
       /* If we have exhausted the original timeout, then generate
-         a SERIAL_TIMEOUT, and pass it out of the loop.  */
+	 a SERIAL_TIMEOUT, and pass it out of the loop.  */
       else if (timeout == 0)
 	{
 	  status = SERIAL_TIMEOUT;
@@ -397,7 +397,7 @@ do_ser_base_readchar (struct serial *scb, int timeout)
   if (status <= 0)
     {
       if (status == 0)
-        return SERIAL_EOF;
+	return SERIAL_EOF;
       else
 	/* Got an error from read.  */
 	return SERIAL_ERROR;	

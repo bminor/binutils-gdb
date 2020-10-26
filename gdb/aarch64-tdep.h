@@ -105,7 +105,7 @@ struct gdbarch_tdep
 const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
-                               struct regcache *regcache, CORE_ADDR addr);
+			       struct regcache *regcache, CORE_ADDR addr);
 
 displaced_step_closure_up
   aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,

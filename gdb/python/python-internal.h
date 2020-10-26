@@ -338,9 +338,9 @@ typedef struct gdbpy_breakpoint_object
 #define BPPY_REQUIRE_VALID(Breakpoint)                                  \
     do {                                                                \
       if ((Breakpoint)->bp == NULL)                                     \
-        return PyErr_Format (PyExc_RuntimeError,                        \
-                             _("Breakpoint %d is invalid."),            \
-                             (Breakpoint)->number);                     \
+	return PyErr_Format (PyExc_RuntimeError,                        \
+			     _("Breakpoint %d is invalid."),            \
+			     (Breakpoint)->number);                     \
     } while (0)
 
 /* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
@@ -348,11 +348,11 @@ typedef struct gdbpy_breakpoint_object
 #define BPPY_SET_REQUIRE_VALID(Breakpoint)                              \
     do {                                                                \
       if ((Breakpoint)->bp == NULL)                                     \
-        {                                                               \
-          PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
-                        (Breakpoint)->number);                          \
-          return -1;                                                    \
-        }                                                               \
+	{                                                               \
+	  PyErr_Format (PyExc_RuntimeError, _("Breakpoint %d is invalid."), \
+			(Breakpoint)->number);                          \
+	  return -1;                                                    \
+	}                                                               \
     } while (0)
 
 
@@ -675,7 +675,7 @@ extern const struct language_defn *python_language;
     if (Exception.reason < 0)			\
       {						\
 	gdbpy_convert_exception (Exception);	\
-        return NULL;				\
+	return NULL;				\
       }						\
   } while (0)
 
@@ -684,7 +684,7 @@ extern const struct language_defn *python_language;
 #define GDB_PY_SET_HANDLE_EXCEPTION(Exception)				\
     do {								\
       if (Exception.reason < 0)						\
-        {								\
+	{								\
 	  gdbpy_convert_exception (Exception);				\
 	  return -1;							\
 	}								\

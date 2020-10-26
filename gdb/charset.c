@@ -247,7 +247,7 @@ show_target_charset_name (struct ui_file *file, int from_tty,
   if (!strcmp (value, "auto"))
     fprintf_filtered (file,
 		      _("The target character set is \"auto; "
-		        "currently %s\".\n"),
+			"currently %s\".\n"),
 		      gdbarch_auto_charset (get_current_arch ()));
   else
     fprintf_filtered (file, _("The target character set is \"%s\".\n"),
@@ -264,7 +264,7 @@ show_target_wide_charset_name (struct ui_file *file,
   if (!strcmp (value, "auto"))
     fprintf_filtered (file,
 		      _("The target wide character set is \"auto; "
-		        "currently %s\".\n"),
+			"currently %s\".\n"),
 		      gdbarch_auto_wide_charset (get_current_arch ()));
   else
     fprintf_filtered (file, _("The target wide character set is \"%s\".\n"),

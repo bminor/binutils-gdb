@@ -471,17 +471,17 @@ gdbscm_value_referenced_value (SCM self)
       struct value *res_val;
 
       switch (check_typedef (value_type (value))->code ())
-        {
-        case TYPE_CODE_PTR:
-          res_val = value_ind (value);
-          break;
-        case TYPE_CODE_REF:
-          res_val = coerce_ref (value);
-          break;
-        default:
-          error (_("Trying to get the referenced value from a value which is"
+	{
+	case TYPE_CODE_PTR:
+	  res_val = value_ind (value);
+	  break;
+	case TYPE_CODE_REF:
+	  res_val = coerce_ref (value);
+	  break;
+	default:
+	  error (_("Trying to get the referenced value from a value which is"
 		   " neither a pointer nor a reference"));
-        }
+	}
 
       return vlscm_scm_from_value (res_val);
     });
@@ -1404,8 +1404,8 @@ characters to be replaced with \"?\".  The default is \"error\".\n\
 If LENGTH is provided, only fetch string to the length provided.\n\
 \n\
   Arguments: <gdb:value>\n\
-             [#:encoding encoding] [#:errors \"error\"|\"substitute\"]\n\
-             [#:length length]" },
+	     [#:encoding encoding] [#:errors \"error\"|\"substitute\"]\n\
+	     [#:length length]" },
 
   { "value->lazy-string", 1, 0, 1,
     as_a_scm_t_subr (gdbscm_value_to_lazy_string),

@@ -192,8 +192,8 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
       len -= block;
 
       /* Check terminal AT_NULL.  This function is being called
-         indefinitely being extended its READBUF until it returns EOF
-         (0).  */
+	 indefinitely being extended its READBUF until it returns EOF
+	 (0).  */
 
       while (block >= auxv_pair_size)
 	{

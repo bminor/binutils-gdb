@@ -278,7 +278,7 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
       }
 
       /* Note: If you change this, be sure to also update the
-         documentation.  */
+	 documentation.  */
       
       fprintf_unfiltered (file, "\n");
 

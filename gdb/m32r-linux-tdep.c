@@ -244,7 +244,7 @@ m32r_linux_sigtramp_frame_cache (struct frame_info *this_frame,
   if (addr == 0)
     {
       /* If this is a RT signal trampoline, adjust SIGCONTEXT_ADDR
-         accordingly.  */
+	 accordingly.  */
       addr = m32r_linux_rt_sigtramp_start (cache->pc, this_frame);
       if (addr)
 	sigcontext_addr += 128;
@@ -468,7 +468,7 @@ m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 }
 
 void _initialize_m32r_linux_tdep ();

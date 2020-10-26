@@ -248,7 +248,7 @@ alphanbsd_sigcontext_addr (struct frame_info *frame)
 
 static void
 alphanbsd_init_abi (struct gdbarch_info info,
-                    struct gdbarch *gdbarch)
+		    struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -288,5 +288,5 @@ _initialize_alphanbsd_tdep ()
      traditional a.out-style core dump format before NetBSD 1.6, but
      we don't support those.  */
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_NETBSD,
-                          alphanbsd_init_abi);
+			  alphanbsd_init_abi);
 }

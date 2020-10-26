@@ -169,7 +169,7 @@ frv_linux_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc,
 
 static LONGEST
 frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
-                               CORE_ADDR *sc_addr_cache_ptr)
+			       CORE_ADDR *sc_addr_cache_ptr)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -410,7 +410,7 @@ static const struct regcache_map_entry frv_linux_fpregmap[] =
 
 static void 
 frv_linux_supply_gregset (const struct regset *regset,
-                          struct regcache *regcache,
+			  struct regcache *regcache,
 			  int regnum, const void *gregs, size_t len)
 {
   int regi;

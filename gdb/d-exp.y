@@ -511,7 +511,7 @@ PrimaryExpression:
 		{ write_dollar_variable (pstate, $1); }
 |	NAME_OR_INT
 		{ YYSTYPE val;
-                  parse_number (pstate, $1.ptr, $1.length, 0, &val);
+		  parse_number (pstate, $1.ptr, $1.length, 0, &val);
 		  write_exp_elt_opcode (pstate, OP_LONG);
 		  write_exp_elt_type (pstate, val.typed_val_int.type);
 		  write_exp_elt_longcst (pstate,
@@ -793,7 +793,7 @@ parse_number (struct parser_state *ps, const char *p,
 	  if (base > 10 && c >= 'a' && c <= 'f')
 	    {
 	      if (found_suffix)
-	        return ERROR;
+		return ERROR;
 	      n += i = c - 'a' + 10;
 	    }
 	  else if (c == 'l' && long_p == 0)
@@ -1080,7 +1080,7 @@ lex_one_token (struct parser_state *par_state)
       else if (saw_structop)
 	return COMPLETE;
       else
-        return 0;
+	return 0;
 
     case ' ':
     case '\t':
@@ -1269,9 +1269,9 @@ lex_one_token (struct parser_state *par_state)
       const char *p = tokstart + namelen + 1;
 
       while (*p == ' ' || *p == '\t')
-        p++;
+	p++;
       if (*p >= '0' && *p <= '9')
-        return 0;
+	return 0;
     }
 
   pstate->lexptr += namelen;
@@ -1488,7 +1488,7 @@ yylex (void)
 	  if (next.token == IDENTIFIER && last_was_dot)
 	    {
 	      /* Update the partial name we are constructing.  */
-              obstack_grow_str (&name_obstack, ".");
+	      obstack_grow_str (&name_obstack, ".");
 	      obstack_grow (&name_obstack, next.value.sval.ptr,
 			    next.value.sval.length);
 
@@ -1568,7 +1568,7 @@ yylex (void)
 	  if (context_type != NULL)
 	    {
 	      /* We don't want to put a leading "." into the name.  */
-              obstack_grow_str (&name_obstack, ".");
+	      obstack_grow_str (&name_obstack, ".");
 	    }
 	  obstack_grow (&name_obstack, next.value.sval.ptr,
 			next.value.sval.length);

@@ -297,7 +297,7 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
       /* These types need no prefix.  They are listed here so that
-         gcc -Wall will reveal any types that haven't been handled.  */
+	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
     default:
       error (_("type not handled in pascal_type_print_varspec_prefix()"));
@@ -323,10 +323,10 @@ pascal_print_func_args (struct type *type, struct ui_file *stream,
 	  wrap_here ("    ");
 	}
       /*  Can we find if it is a var parameter ??
-         if ( TYPE_FIELD(type, i) == )
-         {
-         fprintf_filtered (stream, "var ");
-         } */
+	 if ( TYPE_FIELD(type, i) == )
+	 {
+	 fprintf_filtered (stream, "var ");
+	 } */
       pascal_print_type (type->field (i).type (), ""	/* TYPE_FIELD_NAME
 							   seems invalid!  */
 			 ,stream, -1, 0, flags);
@@ -430,7 +430,7 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
       /* These types do not need a suffix.  They are listed so that
-         gcc -Wall will report types that may not have been considered.  */
+	 gcc -Wall will report types that may not have been considered.  */
       break;
     default:
       error (_("type not handled in pascal_type_print_varspec_suffix()"));
@@ -501,26 +501,26 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
       /* case TYPE_CODE_FUNC:
-         case TYPE_CODE_METHOD: */
+	 case TYPE_CODE_METHOD: */
       pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level,
 			      flags);
       break;
 
     case TYPE_CODE_ARRAY:
       /* pascal_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
-	                                   stream, 0, 0);
-         pascal_type_print_base (TYPE_TARGET_TYPE (type),
-	                         stream, show, level);
-         pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type),
-	                                   stream, 0, 0, 0); */
+					   stream, 0, 0);
+	 pascal_type_print_base (TYPE_TARGET_TYPE (type),
+				 stream, show, level);
+	 pascal_type_print_varspec_suffix (TYPE_TARGET_TYPE (type),
+					   stream, 0, 0, 0); */
       pascal_print_type (TYPE_TARGET_TYPE (type), NULL, stream, 0, 0, flags);
       break;
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
       /*
-         pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
-         only after args !!  */
+	 pascal_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	 only after args !!  */
       break;
     case TYPE_CODE_STRUCT:
       if (type->name () != NULL)
@@ -586,7 +586,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		continue;
 
 	      /* If this is a pascal object or class we can print the
-	         various section labels.  */
+		 various section labels.  */
 
 	      if (HAVE_CPLUS_STRUCT (type))
 		{
@@ -651,8 +651,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      const char *method_name = TYPE_FN_FIELDLIST_NAME (type, i);
 
 	      /* this is GNU C++ specific
-	         how can we know constructor/destructor?
-	         It might work for GNU pascal.  */
+		 how can we know constructor/destructor?
+		 It might work for GNU pascal.  */
 	      for (j = 0; j < len2; j++)
 		{
 		  const char *physname = TYPE_FN_FIELD_PHYSNAME (f, j);
@@ -746,7 +746,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    fputs_filtered (" ", stream);
 	}
       /* enum is just defined by
-         type enume_name = (enum_member1,enum_member2,...)  */
+	 type enume_name = (enum_member1,enum_member2,...)  */
       fprintf_filtered (stream, " = ");
       wrap_here ("    ");
       if (show < 0)
@@ -815,9 +815,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 
     default:
       /* Handle types not explicitly handled by the other cases,
-         such as fundamental types.  For these, just print whatever
-         the type name is, as recorded in the type itself.  If there
-         is no type name, then complain.  */
+	 such as fundamental types.  For these, just print whatever
+	 the type name is, as recorded in the type itself.  If there
+	 is no type name, then complain.  */
       if (type->name () != NULL)
 	{
 	  fputs_filtered (type->name (), stream);
