@@ -42,6 +42,7 @@ inner:
 	/* CU die */
 	.uleb128 1				/* Abbrev: DW_TAG_compile_unit */
 	.4byte	.Lline1_begin			/* DW_AT_stmt_list */
+	.4byte  0				/* DW_AT_low_pc */
 	.4byte	.Ldebug_ranges			/* DW_AT_ranges */
 	.ascii	"inner.c\0"			/* DW_AT_name */
         .ascii  "/tmp\0"			/* DW_AT_comp_dir */
@@ -77,6 +78,8 @@ inner:
 	.byte		1			/* has_children */
 	.uleb128	0x10			/* DW_AT_stmt_list */
 	.uleb128	0x6			/* DW_FORM_data4 */
+	.uleb128	0x11			/* DW_AT_low_pc */
+	.uleb128	0x1			/* DW_FORM_addr */
 	.uleb128	0x55			/* DW_AT_ranges */
 	.uleb128	0x6			/* DW_FORM_data4 */
 	.uleb128	0x3			/* DW_AT_name */
