@@ -1,5 +1,10 @@
 2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
 
+	* config/tc-csky.c (dump_literals): Fix the literal dump
+	of big vector constant.
+
+2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
+
 	* testsuite/gas/csky/enhance_dsp.s : Change plsl.u16 to plsl.16.
 	* testsuite/gas/csky/enhance_dsp.d : Change plsl.u16 to plsl.16.
 
