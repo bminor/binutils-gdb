@@ -1,3 +1,8 @@
+2020-10-26  Tom Tromey  <tromey@adacore.com>
+
+	* gdbtypes.c (create_range_type): Revert previous patch.  Add
+	comment.
+
 2020-10-26  Pedro Alves  <pedro@palves.net>
 
 	* nat/linux-waitpid.c: Include "gdbsupport/eintr.h".

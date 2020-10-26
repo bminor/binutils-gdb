@@ -1,3 +1,10 @@
+2020-10-26  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/unsigned_range/foo.adb: New file.
+	* gdb.ada/unsigned_range/pack.adb: New file.
+	* gdb.ada/unsigned_range/pack.ads: New file.
+	* gdb.ada/unsigned_range.exp: New file.
+
 2020-10-26  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (INTERNAL_GDBFLAGS): Set heigth and width.
