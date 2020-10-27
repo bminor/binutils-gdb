@@ -232,3 +232,11 @@ gdb_test "complete cond 1" "cond 1"
 gdb_test "set variable \$var = 1"
 gdb_test "complete cond \$v" "cond \\\$var"
 gdb_test "complete cond 1 values\[0\].a" "cond 1 values.0..a_field"
+
+set cond_completion "condition ($decimal|-force)"
+gdb_test "complete condition " "($cond_completion\r\n)+$cond_completion"
+gdb_test "complete cond -" "cond -force"
+
+# If '-force' is already given, it should not be suggested again.
+set cond_completion "cond -force $decimal"
+gdb_test "complete cond -force " "($cond_completion\r\n)+$cond_completion"

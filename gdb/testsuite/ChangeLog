@@ -1,3 +1,8 @@
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/condbreak.exp: Update the completion tests to
+	consider the '-force' flag.
+
 2020-10-27  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/list-ambiguous-readnow.exp: New file.

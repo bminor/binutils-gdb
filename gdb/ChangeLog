@@ -1,3 +1,11 @@
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* breakpoint.c (struct condition_command_opts): New struct.
+	(condition_command_option_defs): New static global.
+	(make_condition_command_options_def_group): New function.
+	(condition_completer): Update to consider the '-force' flag.
+	(condition_command): Use gdb::option for the '-force' flag.
+
 2020-10-27  Tom de Vries  <tdevries@suse.de>
 
 	* symtab.c (find_pc_sect_compunit_symtab): Include STATIC_BLOCK

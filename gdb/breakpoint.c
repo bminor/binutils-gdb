@@ -975,17 +975,49 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
   gdb::observers::breakpoint_modified.notify (b);
 }
 
+/* The options for the "condition" command.  */
+
+struct condition_command_opts
+{
+  /* For "-force".  */
+  bool force_condition = false;
+};
+
+static const gdb::option::option_def condition_command_option_defs[] = {
+
+  gdb::option::flag_option_def<condition_command_opts> {
+    "force",
+    [] (condition_command_opts *opts) { return &opts->force_condition; },
+    N_("Set the condition even if it is invalid for all current locations."),
+  },
+
+};
+
+/* Create an option_def_group for the "condition" options, with
+   CC_OPTS as context.  */
+
+static inline gdb::option::option_def_group
+make_condition_command_options_def_group (condition_command_opts *cc_opts)
+{
+  return {{condition_command_option_defs}, cc_opts};
+}
+
 /* Completion for the "condition" command.  */
 
 static void
 condition_completer (struct cmd_list_element *cmd,
 		     completion_tracker &tracker,
-		     const char *text, const char *word)
+		     const char *text, const char * /*word*/)
 {
-  const char *space;
+  bool has_no_arguments = (*text == '\0');
+  condition_command_opts cc_opts;
+  const auto group = make_condition_command_options_def_group (&cc_opts);
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group))
+    return;
 
   text = skip_spaces (text);
-  space = skip_to_space (text);
+  const char *space = skip_to_space (text);
   if (*space == '\0')
     {
       int len;
@@ -993,11 +1025,19 @@ condition_completer (struct cmd_list_element *cmd,
 
       if (text[0] == '$')
 	{
+	  tracker.advance_custom_word_point_by (1);
 	  /* We don't support completion of history indices.  */
 	  if (!isdigit (text[1]))
 	    complete_internalvar (tracker, &text[1]);
 	  return;
 	}
+
+      /* Suggest the "-force" flag if no arguments are given.  If
+	 arguments were passed, they either already include the flag,
+	 or we are beyond the point of suggesting it because it's
+	 positionally the first argument.  */
+      if (has_no_arguments)
+	gdb::option::complete_on_all_options (tracker, group);
 
       /* We're completing the breakpoint number.  */
       len = strlen (text);
@@ -1015,8 +1055,11 @@ condition_completer (struct cmd_list_element *cmd,
       return;
     }
 
-  /* We're completing the expression part.  */
-  text = skip_spaces (space);
+  /* We're completing the expression part.  Skip the breakpoint num.  */
+  const char *exp_start = skip_spaces (space);
+  tracker.advance_custom_word_point_by (exp_start - text);
+  text = exp_start;
+  const char *word = advance_to_expression_complete_word_point (tracker, text);
   expression_completer (cmd, tracker, text, word);
 }
 
@@ -1035,15 +1078,10 @@ condition_command (const char *arg, int from_tty)
   p = arg;
 
   /* Check if the "-force" flag was passed.  */
-  bool force = false;
-  const char *tok = skip_spaces (p);
-  const char *end_tok = skip_to_space (tok);
-  int toklen = end_tok - tok;
-  if (toklen >= 1 && strncmp (tok, "-force", toklen) == 0)
-    {
-      force = true;
-      p = end_tok + 1;
-    }
+  condition_command_opts cc_opts;
+  const auto group = make_condition_command_options_def_group (&cc_opts);
+  gdb::option::process_options
+    (&p, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
 
   bnum = get_number (&p);
   if (bnum == 0)
@@ -1064,7 +1102,7 @@ condition_command (const char *arg, int from_tty)
 		     " a %s stop condition defined for this breakpoint."),
 		   ext_lang_capitalized_name (extlang));
 	  }
-	set_breakpoint_condition (b, p, from_tty, force);
+	set_breakpoint_condition (b, p, from_tty, cc_opts.force_condition);
 
 	if (is_breakpoint (b))
 	  update_global_location_list (UGLL_MAY_INSERT);
@@ -15617,13 +15655,19 @@ Type a line containing \"end\" to indicate the end of them.\n\
 Give \"silent\" as the first line to make the breakpoint silent;\n\
 then no output is printed when it is hit, except what the commands print."));
 
-  c = add_com ("condition", class_breakpoint, condition_command, _("\
+  const auto cc_opts = make_condition_command_options_def_group (nullptr);
+  static std::string condition_command_help
+    = gdb::option::build_help (_("\
 Specify breakpoint number N to break only if COND is true.\n\
-Usage is `condition [-force] N COND', where N is an integer and COND\n\
+Usage is `condition [OPTION] N COND', where N is an integer and COND\n\
 is an expression to be evaluated whenever breakpoint N is reached.\n\
-With the \"-force\" flag, the condition is defined even when it is\n\
-invalid for all current locations."));
-  set_cmd_completer (c, condition_completer);
+\n\
+Options:\n\
+%OPTIONS%"), cc_opts);
+
+  c = add_com ("condition", class_breakpoint, condition_command,
+	       condition_command_help.c_str ());
+  set_cmd_completer_handle_brkchars (c, condition_completer);
 
   c = add_com ("tbreak", class_breakpoint, tbreak_command, _("\
 Set a temporary breakpoint.\n\
