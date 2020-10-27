@@ -1,3 +1,9 @@
+2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Craig Blackmore   <craig.blackmore@embecosm.com>
+
+	* riscv-tdep.c (riscv_frame_cache): Read the frame base register
+	as an unsigned value.
+
 2020-11-01  Tom Tromey  <tom@tromey.com>
 
 	* dbxread.c (dbx_end_psymtab): Update.
