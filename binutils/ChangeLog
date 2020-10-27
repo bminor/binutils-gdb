@@ -1,3 +1,30 @@
+2020-10-27  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (struct abbrev_list): New structure.  Used to collect
+	lists of abbreviation sets.
+	(struct abbrev_map): New structure.  Used to map CU offsets to
+	abbreviation offsets.
+	(record_abbrev_list): New function.  A new entry to an
+	abbreviation list.
+	(free_all_abbrevs): Update to free abbreviation lists.
+	(new_abbrev_list): New function.  Start a new abbreviation
+	list.
+	(find_abbrev_list_by_abbrev_offset): New function.
+	(find_abbrev_map_by_offset): New function.
+	(add_abbrev): Add abbrev_list parameter.
+	(add_abbrev_attr): Likewise.
+	(process_abbrev_section): Rename to process_abbrev_set and add
+	list parameter.
+	(get_type_abbrev_from_form): New function.  Attempts to decode the
+	forms used by DW_AT_type attributes.
+	(get_type_signedness): Display type names if operating in wide
+	mode.  Use get_type_abbrev_from_form.
+	(read_and_display_attr_value): Use get_type_abbrev_from_form.
+	(process_debug_info): Pre-parse the CU headers to collate all the
+	abbrevs before starting the main scan.
+	(process_debug_abbrev): Do not free any loaded abbrevs.
+	(free_debug_memory): Free the abbrev maps.
+
 2020-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/binutils-all/objcopy.exp (objcopy_test): Report

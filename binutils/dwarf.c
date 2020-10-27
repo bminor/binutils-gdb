@@ -849,101 +849,204 @@ fetch_indexed_value (dwarf_vma offset, dwarf_vma bytes)
 /* FIXME:  There are better and more efficient ways to handle
    these structures.  For now though, I just want something that
    is simple to implement.  */
+/* Records a single attribute in an abbrev.  */
 typedef struct abbrev_attr
 {
-  unsigned long attribute;
-  unsigned long form;
-  bfd_signed_vma implicit_const;
-  struct abbrev_attr *next;
+  unsigned long          attribute;
+  unsigned long          form;
+  bfd_signed_vma         implicit_const;
+  struct abbrev_attr *   next;
 }
 abbrev_attr;
 
+/* Records a single abbrev.  */
 typedef struct abbrev_entry
 {
-  unsigned long entry;
-  unsigned long tag;
-  int children;
-  struct abbrev_attr *first_attr;
-  struct abbrev_attr *last_attr;
-  struct abbrev_entry *next;
+  unsigned long          number;
+  unsigned long          tag;
+  int                    children;
+  struct abbrev_attr *   first_attr;
+  struct abbrev_attr *   last_attr;
+  struct abbrev_entry *  next;
 }
 abbrev_entry;
 
-static abbrev_entry *first_abbrev = NULL;
-static abbrev_entry *last_abbrev = NULL;
+/* Records a set of abbreviations.  */
+typedef struct abbrev_list
+{
+  abbrev_entry *        first_abbrev;
+  abbrev_entry *        last_abbrev;
+  dwarf_vma             abbrev_offset;
+  struct abbrev_list *  next;
+  unsigned char *       start_of_next_abbrevs;
+}
+abbrev_list;
+
+/* Records all the abbrevs found so far.  */
+static struct abbrev_list * abbrev_lists = NULL;
+
+typedef struct abbrev_map
+{
+  dwarf_vma      start;
+  dwarf_vma      end;
+  abbrev_list *  list;
+} abbrev_map;
+
+/* Maps between CU offsets and abbrev sets.  */
+static abbrev_map *   cu_abbrev_map = NULL;
+static unsigned long  num_abbrev_map_entries = 0;
+static unsigned long  next_free_abbrev_map_entry = 0;
+
+#define INITIAL_NUM_ABBREV_MAP_ENTRIES 8
+#define ABBREV_MAP_ENTRIES_INCREMENT   8
 
 static void
-free_abbrevs (void)
+record_abbrev_list_for_cu (dwarf_vma start, dwarf_vma end, abbrev_list * list)
 {
-  abbrev_entry *abbrv;
-
-  for (abbrv = first_abbrev; abbrv;)
+  if (cu_abbrev_map == NULL)
     {
-      abbrev_entry *next_abbrev = abbrv->next;
-      abbrev_attr *attr;
-
-      for (attr = abbrv->first_attr; attr;)
-	{
-	  abbrev_attr *next_attr = attr->next;
-
-	  free (attr);
-	  attr = next_attr;
-	}
-
-      free (abbrv);
-      abbrv = next_abbrev;
+      num_abbrev_map_entries = INITIAL_NUM_ABBREV_MAP_ENTRIES;
+      cu_abbrev_map = xmalloc (num_abbrev_map_entries * sizeof (* cu_abbrev_map));
+    }
+  else if (next_free_abbrev_map_entry == num_abbrev_map_entries)
+    {
+      num_abbrev_map_entries += ABBREV_MAP_ENTRIES_INCREMENT;
+      cu_abbrev_map = xrealloc (cu_abbrev_map, num_abbrev_map_entries * sizeof (* cu_abbrev_map));
     }
 
-  last_abbrev = first_abbrev = NULL;
+  cu_abbrev_map[next_free_abbrev_map_entry].start = start;
+  cu_abbrev_map[next_free_abbrev_map_entry].end = end;
+  cu_abbrev_map[next_free_abbrev_map_entry].list = list;
+  next_free_abbrev_map_entry ++;
 }
 
 static void
-add_abbrev (unsigned long number, unsigned long tag, int children)
+free_all_abbrevs (void)
 {
-  abbrev_entry *entry;
+  abbrev_list *  list;
 
-  entry = (abbrev_entry *) malloc (sizeof (*entry));
-  if (entry == NULL)
-    /* ugg */
-    return;
+  for (list = abbrev_lists; list != NULL;)
+    {
+      abbrev_list *   next = list->next;
+      abbrev_entry *  abbrv;
 
-  entry->entry      = number;
+      for (abbrv = list->first_abbrev; abbrv != NULL;)
+	{
+	  abbrev_entry *  next_abbrev = abbrv->next;
+	  abbrev_attr *   attr;
+
+	  for (attr = abbrv->first_attr; attr;)
+	    {
+	      abbrev_attr *next_attr = attr->next;
+
+	      free (attr);
+	      attr = next_attr;
+	    }
+
+	  free (abbrv);
+	  abbrv = next_abbrev;
+	}
+
+      free (list);
+      list = next;
+    }
+
+  abbrev_lists = NULL;
+}
+
+static abbrev_list *
+new_abbrev_list (dwarf_vma abbrev_offset)
+{
+  abbrev_list * list = (abbrev_list *) xcalloc (sizeof * list, 1);
+
+  list->abbrev_offset = abbrev_offset;
+
+  list->next = abbrev_lists;
+  abbrev_lists = list;
+
+  return list;
+}
+
+static abbrev_list *
+find_abbrev_list_by_abbrev_offset (dwarf_vma abbrev_offset)
+{
+  abbrev_list * list;
+
+  for (list = abbrev_lists; list != NULL; list = list->next)
+    if (list->abbrev_offset == abbrev_offset)
+      return list;
+
+  return NULL;
+}
+
+/* Find the abbreviation map for the CU that includes OFFSET.
+   OFFSET is an absolute offset from the start of the .debug_info section.  */
+/* FIXME: This function is going to slow down readelf & objdump.
+   Consider using a better algorithm to mitigate this effect.  */
+
+static  abbrev_map *
+find_abbrev_map_by_offset (dwarf_vma offset)
+{
+  unsigned long i;
+
+  for (i = 0; i < next_free_abbrev_map_entry; i++)
+    if (cu_abbrev_map[i].start <= offset
+	&& cu_abbrev_map[i].end > offset)
+      return cu_abbrev_map + i;
+
+  return NULL;	
+}
+
+static void
+add_abbrev (unsigned long  number,
+	    unsigned long  tag,
+	    int            children,
+	    abbrev_list *  list)
+{
+  abbrev_entry *  entry;
+
+  entry = (abbrev_entry *) xmalloc (sizeof (*entry));
+
+  entry->number     = number;
   entry->tag        = tag;
   entry->children   = children;
   entry->first_attr = NULL;
   entry->last_attr  = NULL;
   entry->next       = NULL;
 
-  if (first_abbrev == NULL)
-    first_abbrev = entry;
-  else
-    last_abbrev->next = entry;
+  assert (list != NULL);
 
-  last_abbrev = entry;
+  if (list->first_abbrev == NULL)
+    list->first_abbrev = entry;
+  else
+    list->last_abbrev->next = entry;
+
+  list->last_abbrev = entry;
 }
 
 static void
-add_abbrev_attr (unsigned long attribute, unsigned long form,
-		 bfd_signed_vma implicit_const)
+add_abbrev_attr (unsigned long   attribute,
+		 unsigned long   form,
+		 bfd_signed_vma  implicit_const,
+		 abbrev_list *   list)
 {
   abbrev_attr *attr;
 
-  attr = (abbrev_attr *) malloc (sizeof (*attr));
-  if (attr == NULL)
-    /* ugg */
-    return;
+  attr = (abbrev_attr *) xmalloc (sizeof (*attr));
 
   attr->attribute = attribute;
   attr->form      = form;
   attr->implicit_const = implicit_const;
   attr->next      = NULL;
 
-  if (last_abbrev->first_attr == NULL)
-    last_abbrev->first_attr = attr;
-  else
-    last_abbrev->last_attr->next = attr;
+  assert (list != NULL && list->last_abbrev != NULL);
 
-  last_abbrev->last_attr = attr;
+  if (list->last_abbrev->first_attr == NULL)
+    list->last_abbrev->first_attr = attr;
+  else
+    list->last_abbrev->last_attr->next = attr;
+
+  list->last_abbrev->last_attr = attr;
 }
 
 /* Processes the (partial) contents of a .debug_abbrev section.
@@ -952,11 +1055,10 @@ add_abbrev_attr (unsigned long attribute, unsigned long form,
    an abbreviation set was found.  */
 
 static unsigned char *
-process_abbrev_section (unsigned char *start, unsigned char *end)
+process_abbrev_set (unsigned char *        start,
+		    const unsigned char *  end,
+		    abbrev_list *          list)
 {
-  if (first_abbrev != NULL)
-    return NULL;
-
   while (start < end)
     {
       unsigned long entry;
@@ -966,7 +1068,7 @@ process_abbrev_section (unsigned char *start, unsigned char *end)
 
       READ_ULEB (entry, start, end);
 
-      /* A single zero is supposed to end the section according
+      /* A single zero is supposed to end the set according
 	 to the standard.  If there's more, then signal that to
 	 the caller.  */
       if (start == end)
@@ -980,7 +1082,7 @@ process_abbrev_section (unsigned char *start, unsigned char *end)
 
       children = *start++;
 
-      add_abbrev (entry, tag, children);
+      add_abbrev (entry, tag, children, list);
 
       do
 	{
@@ -1003,7 +1105,7 @@ process_abbrev_section (unsigned char *start, unsigned char *end)
 		break;
 	    }
 
-	  add_abbrev_attr (attribute, form, implicit_const);
+	  add_abbrev_attr (attribute, form, implicit_const, list);
 	}
       while (attribute != 0);
     }
@@ -1969,35 +2071,122 @@ skip_attr_bytes (unsigned long          form,
   return data;
 }
 
-/* Return IS_SIGNED set to TRUE if the type at
-   DATA can be determined to be a signed type.  */
+/* Given form FORM with value UVALUE, locate and return the abbreviation
+   associated with it.  */
+
+static abbrev_entry *
+get_type_abbrev_from_form (unsigned long                 form,
+			   unsigned long                 uvalue,
+			   dwarf_vma                     cu_offset,
+			   const struct dwarf_section *  section,
+			   unsigned long *               abbrev_num_return,
+			   unsigned char **              data_return,
+			   unsigned long *               cu_offset_return)
+{
+  unsigned long   abbrev_number;
+  abbrev_map *    map;
+  abbrev_entry *  entry;
+  unsigned char * data;
+
+  if (abbrev_num_return != NULL)
+    * abbrev_num_return = 0;
+  if (data_return != NULL)
+    * data_return = NULL;
+
+  switch (form)
+    {
+    case DW_FORM_GNU_ref_alt:
+      /* FIXME: We are unable to handle this form at the moment.  */
+      return NULL;
+
+    case DW_FORM_ref_addr:
+      if (uvalue >= section->size)
+	{
+	  warn (_("Unable to resolve ref_addr form: uvalue %lx > section size %lx (%s)\n"),
+		uvalue, (long) section->size, section->name);
+	  return NULL;
+	}
+      break;
+
+    case DW_FORM_ref1:
+    case DW_FORM_ref2:
+    case DW_FORM_ref4:
+    case DW_FORM_ref_udata:
+      if (uvalue + cu_offset > section->size)
+	{
+	  warn (_("Unable to resolve ref form: uvalue %lx + cu_offset %lx > section size %lx\n"),
+		uvalue, (long) cu_offset, (long) section->size);
+	  return NULL;
+	}
+      uvalue += cu_offset;
+      break;
+
+      /* FIXME: Are there other DW_FORMs that can be used by types ?  */
+
+    default:
+      warn (_("Unexpected form %lx encountered whilst finding abbreviation for type\n"), form);
+      return NULL;
+    }
+
+  data = (unsigned char *) section->start + uvalue;
+  map = find_abbrev_map_by_offset (uvalue);
+  
+  if (map == NULL)
+    {
+      warn (_("Unable to find abbreviations for CU offset %#lx\n"), uvalue);
+      return NULL;
+    }
+  if (map->list == NULL)
+    {
+      warn (_("Empty abbreviation list encountered for CU offset %lx\n"), uvalue);
+      return NULL;
+    }
+
+  if (cu_offset_return != NULL)
+    {
+      if (form == DW_FORM_ref_addr)
+	* cu_offset_return = map->start;
+      else
+	* cu_offset_return = cu_offset;
+    }
+	
+  READ_ULEB (abbrev_number, data, section->start + section->size);
+
+  for (entry = map->list->first_abbrev; entry != NULL; entry = entry->next)
+    if (entry->number == abbrev_number)
+      break;
+  
+  if (abbrev_num_return != NULL)
+    * abbrev_num_return = abbrev_number;
+
+  if (data_return != NULL)
+    * data_return = data;
+
+  if (entry == NULL)
+    warn (_("Unable to find entry for abbreviation %lu\n"), abbrev_number);
+
+  return entry;
+}
+
+/* Return IS_SIGNED set to TRUE if the type using abbreviation ENTRY
+   can be determined to be a signed type.  The data for ENTRY can be
+   found starting at DATA.  */
 
 static void
-get_type_signedness (unsigned char *        start,
+get_type_signedness (abbrev_entry *         entry,
+		     const struct dwarf_section * section,
 		     unsigned char *        data,
 		     unsigned const char *  end,
+		     dwarf_vma              cu_offset,
 		     dwarf_vma              pointer_size,
 		     dwarf_vma              offset_size,
 		     int                    dwarf_version,
 		     bfd_boolean *          is_signed,
 		     unsigned int	    nesting)
 {
-  unsigned long   abbrev_number;
-  abbrev_entry *  entry;
   abbrev_attr *   attr;
 
   * is_signed = FALSE;
-
-  READ_ULEB (abbrev_number, data, end);
-
-  for (entry = first_abbrev;
-       entry != NULL && entry->entry != abbrev_number;
-       entry = entry->next)
-    continue;
-
-  if (entry == NULL)
-    /* FIXME: Issue a warning ?  */
-    return;
 
 #define MAX_NESTING 20
   if (nesting > MAX_NESTING)
@@ -2011,6 +2200,7 @@ get_type_signedness (unsigned char *        start,
        attr != NULL && attr->attribute;
        attr = attr->next)
     {
+      unsigned char * orig_data = data;
       dwarf_vma uvalue = 0;
 
       data = skip_attr_bytes (attr->form, data, end, pointer_size,
@@ -2020,21 +2210,38 @@ get_type_signedness (unsigned char *        start,
 
       switch (attr->attribute)
 	{
-#if 0 /* FIXME: It would be nice to print the name of the type,
-	 but this would mean updating a lot of binutils tests.  */
+	case DW_AT_linkage_name:
 	case DW_AT_name:
-	  if (attr->form == DW_FORM_strp)
-	    printf ("%s", fetch_indirect_string (uvalue));
+	  if (do_wide)
+	    {
+	      if (attr->form == DW_FORM_strp)
+		printf (", %s", fetch_indirect_string (uvalue));
+	      else if (attr->form == DW_FORM_string)
+		printf (", %s", orig_data);
+	    }
 	  break;
-#endif
+
 	case DW_AT_type:
 	  /* Recurse.  */
-	  if (uvalue >= (size_t) (end - start))
-	    return;
-	  /* We cannot correctly process DW_FORM_ref_addr at the moment.  */
-	  if (attr->form != DW_FORM_ref_addr)
-	    get_type_signedness (start, start + uvalue, end, pointer_size,
-				 offset_size, dwarf_version, is_signed, nesting + 1);
+	  {
+	    abbrev_entry *  type_abbrev;
+	    unsigned char * type_data;
+	    unsigned long   type_cu_offset;
+
+	    type_abbrev = get_type_abbrev_from_form (attr->form,
+						     uvalue,
+						     cu_offset,
+						     section,
+						     NULL /* abbrev num return */,
+						     & type_data,
+						     & type_cu_offset);
+	    if (type_abbrev == NULL)
+	      break;
+
+	    get_type_signedness (type_abbrev, section, type_data, end, type_cu_offset,
+				 pointer_size, offset_size, dwarf_version,
+				 is_signed, nesting + 1);
+	  }
 	  break;
 
 	case DW_AT_encoding:
@@ -2276,12 +2483,12 @@ read_and_display_attr_value (unsigned long           attribute,
     {
     case DW_FORM_ref_addr:
       if (!do_loc)
-	printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x",uvalue));
+	printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x", uvalue));
       break;
 
     case DW_FORM_GNU_ref_alt:
       if (!do_loc)
-	printf ("%c<alt 0x%s>", delimiter, dwarf_vmatoa ("x",uvalue));
+	printf ("%c<alt 0x%s>", delimiter, dwarf_vmatoa ("x", uvalue));
       /* FIXME: Follow the reference...  */
       break;
 
@@ -2667,11 +2874,18 @@ read_and_display_attr_value (unsigned long           attribute,
 	  && uvalue < (size_t) (end - start))
 	{
 	  bfd_boolean is_signed = FALSE;
-
-	  /* We cannot correctly process DW_FORM_ref_addr at the moment.  */
-	  if (form != DW_FORM_ref_addr)
-	    get_type_signedness (start, start + uvalue, end, pointer_size,
-				 offset_size, dwarf_version, & is_signed, 0);
+	  abbrev_entry *  type_abbrev;
+	  unsigned char * type_data;
+	  unsigned long   type_cu_offset;
+	  
+	  type_abbrev = get_type_abbrev_from_form (form, uvalue, cu_offset,
+						   section, NULL, & type_data, & type_cu_offset);
+	  if (type_abbrev != NULL)
+	    {
+	      get_type_signedness (type_abbrev, section, type_data, end, type_cu_offset,
+				   pointer_size, offset_size, dwarf_version,
+				   & is_signed, 0);
+	    }
 	  level_type_signed[level] = is_signed;
 	}
       break;
@@ -2993,40 +3207,22 @@ read_and_display_attr_value (unsigned long           attribute,
 
     case DW_AT_import:
       {
-	if (form == DW_FORM_ref_sig8
-	    || form == DW_FORM_GNU_ref_alt)
-	  break;
+	unsigned long abbrev_number;
+	abbrev_entry *entry;
 
-	if (form == DW_FORM_ref1
-	    || form == DW_FORM_ref2
-	    || form == DW_FORM_ref4
-	    || form == DW_FORM_ref_udata)
-	  uvalue += cu_offset;
-
-	if (uvalue >= section->size)
-	  warn (_("Offset %s used as value for DW_AT_import attribute of DIE at offset 0x%lx is too big.\n"),
-		dwarf_vmatoa ("x", uvalue),
-		(unsigned long) (orig_data - section->start));
+	entry = get_type_abbrev_from_form (form, uvalue, cu_offset,
+					   section, & abbrev_number, NULL, NULL);
+	if (entry == NULL)
+	  {
+	    if (form != DW_FORM_GNU_ref_alt)
+	      warn (_("Offset %s used as value for DW_AT_import attribute of DIE at offset 0x%lx is too big.\n"),
+		    dwarf_vmatoa ("x", uvalue),
+		    (unsigned long) (orig_data - section->start));
+	  }
 	else
 	  {
-	    unsigned long abbrev_number;
-	    abbrev_entry *entry;
-	    unsigned char *p = section->start + uvalue;
-
-	    READ_ULEB (abbrev_number, p, end);
-
 	    printf (_("\t[Abbrev Number: %ld"), abbrev_number);
-	    /* Don't look up abbrev for DW_FORM_ref_addr, as it very often will
-	       use different abbrev table, and we don't track .debug_info chunks
-	       yet.  */
-	    if (form != DW_FORM_ref_addr)
-	      {
-		for (entry = first_abbrev; entry != NULL; entry = entry->next)
-		  if (entry->entry == abbrev_number)
-		    break;
-		if (entry != NULL)
-		  printf (" (%s)", get_TAG_name (entry->tag));
-	      }
+	    printf (" (%s)", get_TAG_name (entry->tag));
 	    printf ("]");
 	  }
       }
@@ -3245,8 +3441,98 @@ process_debug_info (struct dwarf_section *           section,
 
   if (!do_loc && dwarf_start_die == 0)
     introduce (section, FALSE);
+
+  free_all_abbrevs ();
+  free (cu_abbrev_map);
+  cu_abbrev_map = NULL;
+  next_free_abbrev_map_entry = 0;
   
-  for (section_begin = start, unit = 0; start < end; unit++)
+  /* In order to be able to resolve DW_FORM_ref_attr forms we need
+     to load *all* of the abbrevs for all CUs in this .debug_info
+     section.  This does effectively mean that we (partially) read
+     every CU header twice.  */
+  for (section_begin = start; start < end;)
+    {
+      DWARF2_Internal_CompUnit  compunit;
+      unsigned char *           hdrptr;
+      dwarf_vma                 cu_offset;
+      unsigned int              offset_size;
+      unsigned int              initial_length_size;
+      struct cu_tu_set *        this_set;
+      abbrev_list *             list;
+
+      hdrptr = start;
+
+      SAFE_BYTE_GET_AND_INC (compunit.cu_length, hdrptr, 4, end);
+
+      if (compunit.cu_length == 0xffffffff)
+	{
+	  SAFE_BYTE_GET_AND_INC (compunit.cu_length, hdrptr, 8, end);
+	  offset_size = 8;
+	  initial_length_size = 12;
+	}
+      else
+	{
+	  offset_size = 4;
+	  initial_length_size = 4;
+	}
+
+      SAFE_BYTE_GET_AND_INC (compunit.cu_version, hdrptr, 2, end);
+
+      cu_offset = start - section_begin;
+
+      this_set = find_cu_tu_set_v2 (cu_offset, do_types);
+
+      if (compunit.cu_version < 5)
+	{
+	  compunit.cu_unit_type = DW_UT_compile;
+	  /* Initialize it due to a false compiler warning.  */
+	  compunit.cu_pointer_size = -1;
+	}
+      else
+	{
+	  SAFE_BYTE_GET_AND_INC (compunit.cu_unit_type, hdrptr, 1, end);
+	  do_types = (compunit.cu_unit_type == DW_UT_type);
+
+	  SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end);
+	}
+
+      SAFE_BYTE_GET_AND_INC (compunit.cu_abbrev_offset, hdrptr, offset_size, end);
+
+      list = find_abbrev_list_by_abbrev_offset (compunit.cu_abbrev_offset);
+      if (list == NULL)
+	{
+	  dwarf_vma        abbrev_base;
+	  size_t           abbrev_size;
+	  unsigned char *  next;
+
+	  if (this_set == NULL)
+	    {
+	      abbrev_base = 0;
+	      abbrev_size = debug_displays [abbrev_sec].section.size;
+	    }
+	  else
+	    {
+	      abbrev_base = this_set->section_offsets [DW_SECT_ABBREV];
+	      abbrev_size = this_set->section_sizes [DW_SECT_ABBREV];
+	    }
+
+	  list = new_abbrev_list (compunit.cu_abbrev_offset);
+	  next = process_abbrev_set
+	    (((unsigned char *) debug_displays [abbrev_sec].section.start
+	      + abbrev_base + compunit.cu_abbrev_offset),
+	     ((unsigned char *) debug_displays [abbrev_sec].section.start
+	      + abbrev_base + abbrev_size),
+	     list);
+	  list->start_of_next_abbrevs = next;
+	}
+		       
+      start = section_begin + cu_offset + compunit.cu_length
+	+ initial_length_size;
+      record_abbrev_list_for_cu (cu_offset, start - section_begin, list);
+    }
+
+  for (start = section_begin, unit = 0; start < end; unit++)
     {
       DWARF2_Internal_CompUnit compunit;
       unsigned char *hdrptr;
@@ -3262,6 +3548,7 @@ process_debug_info (struct dwarf_section *           section,
       struct cu_tu_set *this_set;
       dwarf_vma abbrev_base;
       size_t abbrev_size;
+      abbrev_list * list = NULL;
 
       hdrptr = start;
 
@@ -3439,8 +3726,6 @@ process_debug_info (struct dwarf_section *           section,
 	  continue;
 	}
 
-      free_abbrevs ();
-
       /* Process the abbrevs used by this compilation unit.  */
       if (compunit.cu_abbrev_offset >= abbrev_size)
 	warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"),
@@ -3453,11 +3738,22 @@ process_debug_info (struct dwarf_section *           section,
 	      (unsigned long) abbrev_base + abbrev_size,
 	      (unsigned long) debug_displays [abbrev_sec].section.size);
       else
-	process_abbrev_section
-	  (((unsigned char *) debug_displays [abbrev_sec].section.start
-	    + abbrev_base + compunit.cu_abbrev_offset),
-	   ((unsigned char *) debug_displays [abbrev_sec].section.start
-	    + abbrev_base + abbrev_size));
+	{
+	  list = find_abbrev_list_by_abbrev_offset (compunit.cu_abbrev_offset);
+	  if (list == NULL)
+	    {
+	      unsigned char * next;
+
+	      list = new_abbrev_list (compunit.cu_abbrev_offset);
+	      next = process_abbrev_set
+		(((unsigned char *) debug_displays [abbrev_sec].section.start
+		  + abbrev_base + compunit.cu_abbrev_offset),
+		 ((unsigned char *) debug_displays [abbrev_sec].section.start
+		  + abbrev_base + abbrev_size),
+		 list);
+	      list->start_of_next_abbrevs = next;
+	    }
+	}
 
       level = 0;
       last_level = level;
@@ -3537,10 +3833,12 @@ process_debug_info (struct dwarf_section *           section,
 
 	  /* Scan through the abbreviation list until we reach the
 	     correct entry.  */
-	  for (entry = first_abbrev;
-	       entry && entry->entry != abbrev_number;
-	       entry = entry->next)
+	  if (list == NULL)
 	    continue;
+
+	  for (entry = list->first_abbrev; entry != NULL; entry = entry->next)
+	    if (entry->number == abbrev_number)
+	      break;
 
 	  if (entry == NULL)
 	    {
@@ -5763,30 +6061,37 @@ display_debug_abbrev (struct dwarf_section *section,
 {
   abbrev_entry *entry;
   unsigned char *start = section->start;
-  unsigned char *end = start + section->size;
+  const unsigned char *end = start + section->size;
 
   introduce (section, FALSE);
 
   do
     {
-      unsigned char *last;
+      abbrev_list *    list;
+      dwarf_vma        offset;
 
-      free_abbrevs ();
+      offset = start - section->start;
+      list = find_abbrev_list_by_abbrev_offset (offset);
+      if (list == NULL)
+	{
+	  list = new_abbrev_list (offset);
+	  start = process_abbrev_set (start, end, list);
+	  list->start_of_next_abbrevs = start;
+	}
+      else
+	start = list->start_of_next_abbrevs;
 
-      last = start;
-      start = process_abbrev_section (start, end);
-
-      if (first_abbrev == NULL)
+      if (list->first_abbrev == NULL)
 	continue;
 
-      printf (_("  Number TAG (0x%lx)\n"), (long) (last - section->start));
+      printf (_("  Number TAG (0x%lx)\n"), (long) offset);
 
-      for (entry = first_abbrev; entry; entry = entry->next)
+      for (entry = list->first_abbrev; entry; entry = entry->next)
 	{
 	  abbrev_attr *attr;
 
 	  printf ("   %ld      %s    [%s]\n",
-		  entry->entry,
+		  entry->number,
 		  get_TAG_name (entry->tag),
 		  entry->children ? _("has children") : _("no children"));
 
@@ -10828,8 +11133,12 @@ free_debug_memory (void)
 {
   unsigned int i;
 
-  free_abbrevs ();
+  free_all_abbrevs ();
 
+  free (cu_abbrev_map);
+  cu_abbrev_map = NULL;
+  next_free_abbrev_map_entry = 0;
+  
   for (i = 0; i < max; i++)
     free_debug_section ((enum dwarf_section_display_enum) i);
 
