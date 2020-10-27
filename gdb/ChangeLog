@@ -1,3 +1,7 @@
+2020-10-27  Tom de Vries  <tdevries@suse.de>
+
+	* symtab.c (find_pc_sect_compunit_symtab): Use early continue.
+
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* breakpoint.h (set_breakpoint_condition): Add a new bool parameter.

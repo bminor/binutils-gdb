@@ -2883,7 +2883,7 @@ struct compunit_symtab *
 find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 {
   struct compunit_symtab *best_cust = NULL;
-  CORE_ADDR distance = 0;
+  CORE_ADDR best_cust_range = 0;
   struct bound_minimal_symbol msymbol;
 
   /* If we know that this is not a text address, return failure.  This is
@@ -2914,56 +2914,62 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
     {
       for (compunit_symtab *cust : obj_file->compunits ())
 	{
-	  const struct block *b;
-	  const struct blockvector *bv;
+	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (cust);
+	  const struct block *global_block
+	    = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	  CORE_ADDR start = BLOCK_START (global_block);
+	  CORE_ADDR end = BLOCK_END (global_block);
+	  bool in_range_p = start <= pc && pc < end;
+	  if (!in_range_p)
+	    continue;
 
-	  bv = COMPUNIT_BLOCKVECTOR (cust);
-	  b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-
-	  if (BLOCK_START (b) <= pc
-	      && BLOCK_END (b) > pc
-	      && (distance == 0
-		  || BLOCK_END (b) - BLOCK_START (b) < distance))
+	  CORE_ADDR range = end - start;
+	  if (best_cust != nullptr
+	      && range >= best_cust_range)
+	    /* Cust doesn't have a smaller range than best_cust, skip it.  */
+	    continue;
+	
+	  /* For an objfile that has its functions reordered,
+	     find_pc_psymtab will find the proper partial symbol table
+	     and we simply return its corresponding symtab.  */
+	  /* In order to better support objfiles that contain both
+	     stabs and coff debugging info, we continue on if a psymtab
+	     can't be found.  */
+	  if ((obj_file->flags & OBJF_REORDERED) && obj_file->sf)
 	    {
-	      /* For an objfile that has its functions reordered,
-		 find_pc_psymtab will find the proper partial symbol table
-		 and we simply return its corresponding symtab.  */
-	      /* In order to better support objfiles that contain both
-		 stabs and coff debugging info, we continue on if a psymtab
-		 can't be found.  */
-	      if ((obj_file->flags & OBJF_REORDERED) && obj_file->sf)
-		{
-		  struct compunit_symtab *result;
+	      struct compunit_symtab *result;
 
-		  result
-		    = obj_file->sf->qf->find_pc_sect_compunit_symtab (obj_file,
-								      msymbol,
-								      pc,
-								      section,
-								      0);
-		  if (result != NULL)
-		    return result;
-		}
-	      if (section != 0)
-		{
-		  struct block_iterator iter;
-		  struct symbol *sym = NULL;
-
-		  ALL_BLOCK_SYMBOLS (b, iter, sym)
-		    {
-		      fixup_symbol_section (sym, obj_file);
-		      if (matching_obj_sections (SYMBOL_OBJ_SECTION (obj_file,
-								     sym),
-						 section))
-			break;
-		    }
-		  if (sym == NULL)
-		    continue;		/* No symbol in this symtab matches
-					   section.  */
-		}
-	      distance = BLOCK_END (b) - BLOCK_START (b);
-	      best_cust = cust;
+	      result
+		= obj_file->sf->qf->find_pc_sect_compunit_symtab (obj_file,
+								  msymbol,
+								  pc,
+								  section,
+								  0);
+	      if (result != NULL)
+		return result;
 	    }
+
+	  if (section != 0)
+	    {
+	      struct symbol *sym = NULL;
+	      struct block_iterator iter;
+
+	      ALL_BLOCK_SYMBOLS (global_block, iter, sym)
+		{
+		  fixup_symbol_section (sym, obj_file);
+		  if (matching_obj_sections (SYMBOL_OBJ_SECTION (obj_file,
+								 sym),
+					     section))
+		    break;
+		}
+	      if (sym == NULL)
+		continue;		/* No symbol in this symtab matches
+					   section.  */
+	    }
+
+	  /* Cust is best found sofar, save it.  */
+	  best_cust = cust;
+	  best_cust_range = range;
 	}
     }
 
