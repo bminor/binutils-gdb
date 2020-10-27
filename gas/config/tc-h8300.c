@@ -146,8 +146,10 @@ pint (int arg ATTRIBUTE_UNUSED)
 static void
 h8300_elf_section (int push)
 {
-  static const char * known_data_sections [] = { ".rodata", ".tdata", ".tbss" };
-  static const char * known_data_prefixes [] = { ".debug", ".zdebug", ".gnu.warning" };
+  static const char * known_data_sections []
+    = { ".rodata", ".tdata", ".tbss", ".gnu_object_only" };
+  static const char * known_data_prefixes []
+    = { ".debug", ".zdebug", ".gnu.warning" };
   char * saved_ilp = input_line_pointer;
   const char * name;
 
