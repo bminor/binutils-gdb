@@ -1,3 +1,8 @@
+2020-10-27  Gary Benson <gbenson@redhat.com>
+
+	* gdb.mi/mi-fortran-modules.exp: Check skip_fortran_tests.
+	* gdb.mi/mi-vla-fortran.exp: Likewise.  Also fix a comment.
+
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.base/condbreak.exp: Update the completion tests to

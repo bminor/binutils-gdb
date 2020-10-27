@@ -13,8 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Verify that, using the MI, we can evaluate a simple C Variable Length
-# Array (VLA).
+# Verify that, using the MI, we can evaluate a simple Fortran Variable
+# Length Array (VLA).
+
+if { [skip_fortran_tests] } { return -1 }
 
 load_lib mi-support.exp
 load_lib fortran.exp
