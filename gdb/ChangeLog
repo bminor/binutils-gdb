@@ -1,5 +1,10 @@
 2020-10-27  Tom de Vries  <tdevries@suse.de>
 
+	* symtab.c (find_pc_sect_compunit_symtab): Include STATIC_BLOCK
+	symbols in section check.
+
+2020-10-27  Tom de Vries  <tdevries@suse.de>
+
 	* symtab.c (find_pc_sect_compunit_symtab): Use early continue.
 
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>

@@ -2954,13 +2954,19 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	      struct symbol *sym = NULL;
 	      struct block_iterator iter;
 
-	      ALL_BLOCK_SYMBOLS (global_block, iter, sym)
+	      for (int b_index = GLOBAL_BLOCK;
+		   b_index <= STATIC_BLOCK && sym == NULL;
+		   ++b_index)
 		{
-		  fixup_symbol_section (sym, obj_file);
-		  if (matching_obj_sections (SYMBOL_OBJ_SECTION (obj_file,
-								 sym),
-					     section))
-		    break;
+		  const struct block *b = BLOCKVECTOR_BLOCK (bv, b_index);
+		  ALL_BLOCK_SYMBOLS (b, iter, sym)
+		    {
+		      fixup_symbol_section (sym, obj_file);
+		      if (matching_obj_sections (SYMBOL_OBJ_SECTION (obj_file,
+								     sym),
+						 section))
+			break;
+		    }
 		}
 	      if (sym == NULL)
 		continue;		/* No symbol in this symtab matches
