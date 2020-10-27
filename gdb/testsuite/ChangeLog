@@ -1,3 +1,8 @@
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/condbreak-multi-context.cc: New file.
+	* gdb.base/condbreak-multi-context.exp: New file.
+
 2020-10-26  Tom Tromey  <tom@tromey.com>
 
 	* lib/mi-support.exp (default_mi_gdb_start): Call

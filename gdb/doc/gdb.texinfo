@@ -4278,6 +4278,46 @@ value is nonzero---that is, if @var{cond} evaluates as true.
 above (or no argument) specifying where to break.  @xref{Conditions,
 ,Break Conditions}, for more information on breakpoint conditions.
 
+The breakpoint may be mapped to multiple locations.  If the breakpoint
+condition @var{cond} is invalid at some but not all of the locations,
+the locations for which the condition is invalid are disabled.  For
+example, @value{GDBN} reports below that two of the three locations
+are disabled.
+
+@smallexample
+(@value{GDBP}) break func if a == 10
+warning: failed to validate condition at location 0x11ce, disabling:
+  No symbol "a" in current context.
+warning: failed to validate condition at location 0x11b6, disabling:
+  No symbol "a" in current context.
+Breakpoint 1 at 0x11b6: func. (3 locations)
+@end smallexample
+
+Locations that are disabled because of the condition are denoted by an
+uppercase @code{N} in the output of the @code{info breakpoints}
+command:
+
+@smallexample
+(@value{GDBP}) info breakpoints
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   <MULTIPLE>
+        stop only if a == 10
+1.1                         N*  0x00000000000011b6 in ...
+1.2                         y   0x00000000000011c2 in ...
+1.3                         N*  0x00000000000011ce in ...
+(*): Breakpoint condition is invalid at this location.
+@end smallexample
+
+If the breakpoint condition @var{cond} is invalid in the context of
+@emph{all} the locations of the breakpoint, @value{GDBN} refuses to
+define the breakpoint.  For example, if variable @code{foo} is an
+undefined variable:
+
+@smallexample
+(@value{GDBP}) break func if foo
+No symbol "foo" in current context.
+@end smallexample
+
 @kindex tbreak
 @item tbreak @var{args}
 Set a breakpoint enabled only for one stop.  The @var{args} are the

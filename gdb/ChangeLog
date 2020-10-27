@@ -1,3 +1,26 @@
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* breakpoint.h (class bp_location) <disabled_by_cond>: New field.
+	* breakpoint.c (set_breakpoint_location_condition): New function.
+	(set_breakpoint_condition): Disable a breakpoint location if parsing
+	the condition string gives an error.
+	(should_be_inserted): Update to consider the 'disabled_by_cond' field.
+	(build_target_condition_list): Ditto.
+	(build_target_command_list): Ditto.
+	(build_bpstat_chain): Ditto.
+	(print_one_breakpoint_location): Ditto.
+	(print_one_breakpoint): Ditto.
+	(breakpoint_1): Ditto.
+	(bp_location::bp_location): Ditto.
+	(locations_are_equal): Ditto.
+	(update_breakpoint_locations): Ditto.
+	(enable_disable_bp_num_loc): Ditto.
+	(init_breakpoint_sal): Use set_breakpoint_location_condition.
+	(find_condition_and_thread_for_sals): New static function.
+	(create_breakpoint): Call find_condition_and_thread_for_sals.
+	(location_to_sals): Call find_condition_and_thread_for_sals instead
+	of find_condition_and_thread.
+
 2020-10-26  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c (process_full_comp_unit): Call

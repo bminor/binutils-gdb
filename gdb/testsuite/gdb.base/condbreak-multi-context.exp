@@ -1,0 +1,230 @@
+# Copyright 2020 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test defining a conditional breakpoint that applies to multiple
+# locations with different contexts (e.g. different set of local vars).
+
+standard_testfile .cc
+
+if {[prepare_for_testing "failed to prepare" ${binfile} ${srcfile}]} {
+    return
+}
+
+set warning "warning: failed to validate condition"
+set fill "\[^\r\n\]*"
+
+# Check that breakpoints are as expected.
+
+proc test_info_break {suffix} {
+    global bpnum1 bpnum2 fill
+
+    set bp_hit_info "${fill}(\r\n${fill}breakpoint already hit 1 time)?"
+
+    gdb_test "info break ${bpnum1} ${bpnum2}" \
+	[multi_line \
+	     "Num${fill}" \
+	     "${bpnum1}${fill}breakpoint${fill}keep y${fill}MULTIPLE${fill}" \
+	     "${fill}stop only if a == 10${bp_hit_info}" \
+	     "${bpnum1}.1${fill}N\\*${fill}Base::func${fill}" \
+	     "${bpnum1}.2${fill}y${fill}A::func${fill}" \
+	     "${bpnum1}.3${fill}N\\*${fill}C::func${fill}" \
+	     "${bpnum2}${fill}breakpoint${fill}keep y${fill}MULTIPLE${fill}" \
+	     "${fill}stop only if c == 30${bp_hit_info}" \
+	     "${bpnum2}.1${fill}N\\*${fill}Base::func${fill}" \
+	     "${bpnum2}.2${fill}N\\*${fill}A::func${fill}" \
+	     "${bpnum2}.3${fill}y${fill}C::func${fill}" \
+	     "\\(\\*\\): Breakpoint condition is invalid at this location."] \
+	"info break $suffix"
+}
+
+# Scenario 1: Define breakpoints conditionally, using the "break N if
+# cond" syntax.  Run the program, check that we hit those locations
+# only.
+
+with_test_prefix "scenario 1" {
+    # Define the conditional breakpoints.
+    gdb_test "break func if a == 10" \
+	[multi_line \
+	     "${warning} at location 1, disabling:" \
+	     "  No symbol \"a\" in current context." \
+	     "${warning} at location 3, disabling:" \
+	     "  No symbol \"a\" in current context." \
+	     "Breakpoint $decimal at $fill .3 locations."] \
+	"define bp with condition a == 10"
+    set bpnum1 [get_integer_valueof "\$bpnum" 0 "get bpnum1"]
+
+    gdb_test "break func if c == 30" \
+	[multi_line \
+	     ".*${warning} at location 1, disabling:" \
+	     "  No symbol \"c\" in current context." \
+	     ".*${warning} at location 2, disabling:" \
+	     "  No symbol \"c\" in current context." \
+	     ".*Breakpoint $decimal at $fill .3 locations."] \
+	"define bp with condition c == 30"
+    set bpnum2 [get_integer_valueof "\$bpnum" 0 "get bpnum2"]
+
+    test_info_break 1
+
+    # Do not use runto_main, it deletes all breakpoints.
+    gdb_run_cmd
+
+    # Check our conditional breakpoints.
+    gdb_test "" ".*Breakpoint \[0-9\]+, A::func .*" \
+	"run until A::func"
+    gdb_test "print a" " = 10"
+
+    gdb_test "continue" "Continuing.*Breakpoint \[0-9\]+, C::func .*" \
+	"run until C::func"
+    gdb_test "print c" " = 30"
+
+    # No more hits!
+    gdb_continue_to_end
+
+    test_info_break 2
+}
+
+# Start GDB with two breakpoints and define the conditions separately.
+
+proc setup_bps {} {
+    global srcfile binfile srcfile2
+    global bpnum1 bpnum2 bp_location warning
+
+    clean_restart ${binfile}
+
+    # Define the breakpoints.
+    gdb_breakpoint "func"
+    set bpnum1 [get_integer_valueof "\$bpnum" 0 "get bpnum1"]
+
+    gdb_breakpoint "func"
+    set bpnum2 [get_integer_valueof "\$bpnum" 0 "get bpnum2"]
+
+    # Defining a condition on 'a' disables 2 locations.
+    gdb_test "cond $bpnum1 a == 10" \
+	[multi_line \
+	     "$warning at location ${bpnum1}.1, disabling:" \
+	     "  No symbol \"a\" in current context." \
+	     "$warning at location ${bpnum1}.3, disabling:" \
+	     "  No symbol \"a\" in current context."]
+
+    # Defining a condition on 'c' disables 2 locations.
+    gdb_test "cond $bpnum2 c == 30" \
+	[multi_line \
+	     "$warning at location ${bpnum2}.1, disabling:" \
+	     "  No symbol \"c\" in current context." \
+	     "$warning at location ${bpnum2}.2, disabling:" \
+	     "  No symbol \"c\" in current context."]
+}
+
+# Scenario 2: Define breakpoints unconditionally, and then define
+# conditions using the "cond N <cond>" syntax.  Expect that the
+# locations where <cond> is not evaluatable are disabled.  Run the
+# program, check that we hit the enabled locations only.
+
+with_test_prefix "scenario 2" {
+    setup_bps
+
+    test_info_break 1
+
+    # Do not use runto_main, it deletes all breakpoints.
+    gdb_run_cmd
+
+    # Check that we hit enabled locations only.
+    gdb_test "" ".*Breakpoint \[0-9\]+, A::func .*" \
+	"run until A::func"
+    gdb_test "print a" " = 10"
+
+    gdb_test "continue" "Continuing.*Breakpoint \[0-9\]+, C::func .*" \
+	"run until C::func"
+    gdb_test "print c" " = 30"
+
+    # No more hits!
+    gdb_continue_to_end
+
+    test_info_break 2
+}
+
+# Test the breakpoint location enabled states.
+
+proc check_bp_locations {bpnum states msg} {
+    global fill
+
+    set expected  ".*${bpnum}.1${fill} [lindex $states 0] ${fill}\r\n"
+    append expected "${bpnum}.2${fill} [lindex $states 1] ${fill}\r\n"
+    append expected "${bpnum}.3${fill} [lindex $states 2] ${fill}"
+    if {[lsearch $states N*] >= 0} {
+	append expected "\r\n\\(\\*\\): Breakpoint condition is invalid at this location."
+    }
+
+    gdb_test "info break $bpnum" $expected "check bp $bpnum $msg"
+}
+
+# Scenario 3: Apply misc. checks on the already-defined breakpoints.
+
+with_test_prefix "scenario 3" {
+    setup_bps
+
+    gdb_test "cond $bpnum1 c == 30" \
+	[multi_line \
+	     "${warning} at location ${bpnum1}.1, disabling:" \
+	     "  No symbol \"c\" in current context." \
+	     "${warning} at location ${bpnum1}.2, disabling:" \
+	     "  No symbol \"c\" in current context." \
+	     "Breakpoint ${bpnum1}'s condition is now valid at location 3, enabling."] \
+	"change the condition of bp 1"
+    check_bp_locations $bpnum1 {N* N* y} "after changing the condition"
+
+    gdb_test "cond $bpnum1" \
+	[multi_line \
+	     "Breakpoint ${bpnum1}'s condition is now valid at location 1, enabling." \
+	     "Breakpoint ${bpnum1}'s condition is now valid at location 2, enabling." \
+	     "Breakpoint ${bpnum1} now unconditional."] \
+	"reset the condition of bp 1"
+    check_bp_locations $bpnum1 {y y y} "after resetting the condition"
+
+    gdb_test_no_output "disable ${bpnum2}.2"
+    check_bp_locations $bpnum2 {N* N* y} "after disabling loc 2"
+
+    gdb_test "cond $bpnum2" ".*" "reset the condition of bp 2"
+    check_bp_locations $bpnum2 {y n y} "loc 2 should remain disabled"
+
+    gdb_test_no_output "disable ${bpnum2}.3"
+    check_bp_locations $bpnum2 {y n n} "after disabling loc 3"
+
+    gdb_test "cond $bpnum2 c == 30" \
+	[multi_line \
+	     "${warning} at location ${bpnum2}.1, disabling:" \
+	     "  No symbol \"c\" in current context."] \
+	"re-define a condition"
+    check_bp_locations $bpnum2 {N* N* n} "loc 3 should remain disabled"
+
+    gdb_test "enable ${bpnum2}.1" \
+	"Breakpoint ${bpnum2}'s condition is invalid at location 1, cannot enable." \
+	"reject enabling a location that is disabled-by-cond"
+    check_bp_locations $bpnum2 {N* N* n} "after enable attempt"
+
+    gdb_test "cond $bpnum2 garbage" \
+	"No symbol \"garbage\" in current context." \
+	"reject condition if bad for all locations"
+
+    gdb_test_no_output "delete $bpnum1"
+
+    # Do not use runto_main, it deletes all breakpoints.
+    gdb_breakpoint "main"
+    gdb_run_cmd
+    gdb_test "" ".*reakpoint .*, main .*${srcfile}.*" "start"
+
+    # The second BP's locations are all disabled.  No more hits!
+    gdb_continue_to_end
+}

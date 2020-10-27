@@ -387,6 +387,12 @@ public:
   /* Is this particular location enabled.  */
   bool enabled = false;
   
+  /* Is this particular location disabled because the condition
+     expression is invalid at this location.  For a location to be
+     reported as enabled, the ENABLED field above has to be true *and*
+     the DISABLED_BY_COND field has to be false.  */
+  bool disabled_by_cond = false;
+
   /* True if this breakpoint is now inserted.  */
   bool inserted = false;
 
