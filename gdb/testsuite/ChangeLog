@@ -1,3 +1,8 @@
+2020-10-27  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.cp/psymtab-parameter.exp: Don't expect unexpanded CU for
+	-readnow.
+
 2020-10-14  Gary Benson <gbenson@redhat.com>
 
 	* gdb.python/py-format-string.exp (test_deref_refs): Treat
