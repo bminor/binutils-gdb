@@ -1,3 +1,9 @@
+2020-10-27  Nick Clifton  <nickc@redhat.com>
+
+	* elf64-hppa.c (elf_hppa_final_link_relocate): Check that the
+	symbol's section is being output before adding its offset to the
+	addend when processing R_PARISC_SECREL32.
+
 2020-10-25  Alan Modra  <amodra@gmail.com>
 
 	* vms-misc.c (_bfd_vms_save_counted_string): Count length byte
