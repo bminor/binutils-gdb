@@ -509,7 +509,7 @@ proc test_deref_refs {} {
   if { $current_lang == "c++" } {
     check_var_with_bool_opt "deref_refs" "a_point_t_ref"
     check_var_with_bool_opt "deref_refs" "a_base_ref" \
-      "${default_ref_regexp}: \\{_vptr\\.Base = ${default_pointer_regexp} <vtable for Deriv\\+16>, a = 42, static a_static_member = 2019\\}"
+	"${default_ref_regexp}: \\{_vptr\[.\$\]Base = ${default_pointer_regexp} <vtable for Deriv\\+16>, a = 42, static a_static_member = 2019\\}"
   }
 }
 
@@ -905,7 +905,7 @@ proc test_mixed {} {
 
     check_format_string "a_base_ref" \
       "deref_refs=True, static_members=False" \
-      "${default_ref_regexp}: \\{_vptr\\.Base = ${default_pointer_regexp} <vtable for Deriv\\+16>, a = 42\\}"
+      "${default_ref_regexp}: \\{_vptr\[.\$\]Base = ${default_pointer_regexp} <vtable for Deriv\\+16>, a = 42\\}"
   }
 }
 

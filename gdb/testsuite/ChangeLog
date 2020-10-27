@@ -1,3 +1,9 @@
+2020-10-14  Gary Benson <gbenson@redhat.com>
+
+	* gdb.python/py-format-string.exp (test_deref_refs): Treat
+	"_vptr$Base" as correct, in addition to "_vptr.Base".
+	(test_mixed): Likewise.
+
 2020-10-27  Gary Benson <gbenson@redhat.com>
 
 	* gdb.mi/mi-fortran-modules.exp: Check skip_fortran_tests.
