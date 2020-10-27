@@ -1,5 +1,26 @@
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* breakpoint.h (set_breakpoint_condition): Add a new bool parameter.
+	* breakpoint.c: Update the help text of the 'condition' and 'break'
+	commands.
+	(set_breakpoint_condition): Take a new bool parameter
+	to control whether condition definition should be forced even when
+	the condition expression is invalid in all of the current locations.
+	(condition_command): Update the call to 'set_breakpoint_condition'.
+	(find_condition_and_thread): Take the "-force-condition" flag into
+	account.
+	* linespec.c (linespec_keywords): Add "-force-condition" as an
+	element.
+	(FORCE_KEYWORD_INDEX): New #define.
+	(linespec_lexer_lex_keyword): Update to consider "-force-condition"
+	as a keyword.
+	* ada-lang.c (create_ada_exception_catchpoint): Ditto.
+	* guile/scm-breakpoint.c (gdbscm_set_breakpoint_condition_x): Ditto.
+	* python/py-breakpoint.c (bppy_set_condition): Ditto.
+	* NEWS: Mention the changes to the 'break' and 'condition' commands.
+
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* breakpoint.h (class bp_location) <disabled_by_cond>: New field.
 	* breakpoint.c (set_breakpoint_location_condition): New function.
 	(set_breakpoint_condition): Disable a breakpoint location if parsing

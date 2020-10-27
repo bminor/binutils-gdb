@@ -461,7 +461,7 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
 
   try
     {
-      set_breakpoint_condition (self_bp->bp, exp, 0);
+      set_breakpoint_condition (self_bp->bp, exp, 0, false);
     }
   catch (gdb_exception &ex)
     {

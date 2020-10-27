@@ -228,3 +228,28 @@ with_test_prefix "scenario 3" {
     # The second BP's locations are all disabled.  No more hits!
     gdb_continue_to_end
 }
+
+# Scenario 4: Test the '-force'/'-force-condition' flag.
+
+with_test_prefix "force" {
+    clean_restart ${binfile}
+
+    gdb_breakpoint "func"
+    # Pick a condition that is invalid at every location.
+    set bpnum1 [get_integer_valueof "\$bpnum" 0 "get bpnum1"]
+    gdb_test "cond -force $bpnum1 foo" \
+	[multi_line \
+	     "${warning} at location ${bpnum1}.1, disabling:" \
+	     "  No symbol \"foo\" in current context." \
+	     "${warning} at location ${bpnum1}.2, disabling:" \
+	     "  No symbol \"foo\" in current context." \
+	     "${warning} at location ${bpnum1}.3, disabling:" \
+	     "  No symbol \"foo\" in current context."] \
+	"force the condition of bp 1"
+    check_bp_locations $bpnum1 {N* N* N*} "after forcing the condition"
+
+    # Now with the 'break' command.
+    gdb_breakpoint "func -force-condition if baz"
+    set bpnum2 [get_integer_valueof "\$bpnum" 0 "get bpnum2"]
+    check_bp_locations $bpnum2 {N* N* N*} "set using the break command"
+}

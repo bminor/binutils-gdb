@@ -21,6 +21,28 @@ set debug event-loop
 show debug event-loop
   Control the display of debug output about GDB's event loop.
 
+* Changed commands
+
+break [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]
+      [-force-condition] [if CONDITION]
+  This command would previously refuse setting a breakpoint if the
+  CONDITION expression is invalid at a location.  It now accepts and
+  defines the breakpoint if there is at least one location at which
+  the CONDITION is valid.  The locations for which the CONDITION is
+  invalid, are automatically disabled.  If CONDITION is invalid at all
+  of the locations, setting the breakpoint is still rejected.  However,
+  the '-force-condition' flag can be used in this case for forcing GDB to
+  define the breakpoint, making all the current locations automatically
+  disabled.  This may be useful if the user knows the condition will
+  become meaningful at a future location, e.g. due to a shared library
+  load.
+
+condition [-force] N COND
+  The behavior of this command is changed the same way for the 'break'
+  command as explained above.  The '-force' flag can be used to force
+  GDB into defining the condition even when COND is invalid for all the
+  current locations of breakpoint N.
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

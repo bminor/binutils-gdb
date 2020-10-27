@@ -12684,7 +12684,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
   c->excep_string = excep_string;
   create_excep_cond_exprs (c.get (), ex_kind);
   if (!cond_string.empty ())
-    set_breakpoint_condition (c.get (), cond_string.c_str (), from_tty);
+    set_breakpoint_condition (c.get (), cond_string.c_str (), from_tty, false);
   install_breakpoint (0, std::move (c), 1);
 }
 

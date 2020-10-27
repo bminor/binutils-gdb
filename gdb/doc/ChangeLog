@@ -1,5 +1,12 @@
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gdb.texinfo (Set Breaks): Document the '-force-condition' flag
+	of the 'break'command.
+	* gdb.texinfo (Conditions): Document the '-force' flag of the
+	'condition' command.
+
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* gdb.texinfo (Set Breaks): Document disabling of breakpoint
 	locations for which the breakpoint condition is invalid.
 

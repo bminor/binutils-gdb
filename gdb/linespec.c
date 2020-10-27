@@ -72,7 +72,7 @@ enum class linespec_complete_what
   /* An expression.  E.g., "break foo if EXPR", or "break *EXPR".  */
   EXPRESSION,
 
-  /* A linespec keyword ("if"/"thread"/"task").
+  /* A linespec keyword ("if"/"thread"/"task"/"-force-condition").
      E.g., "break func threa<tab>".  */
   KEYWORD,
 };
@@ -254,8 +254,9 @@ typedef enum ls_token_type linespec_token_type;
 
 /* List of keywords.  This is NULL-terminated so that it can be used
    as enum completer.  */
-const char * const linespec_keywords[] = { "if", "thread", "task", NULL };
+const char * const linespec_keywords[] = { "if", "thread", "task", "-force-condition", NULL };
 #define IF_KEYWORD_INDEX 0
+#define FORCE_KEYWORD_INDEX 3
 
 /* A token of the linespec lexer  */
 
@@ -486,11 +487,22 @@ linespec_lexer_lex_keyword (const char *p)
 	    {
 	      int j;
 
+	      /* Special case: "-force" is always followed by an "if".  */
+	      if (i == FORCE_KEYWORD_INDEX)
+		{
+		  p += len;
+		  p = skip_spaces (p);
+		  int nextlen = strlen (linespec_keywords[IF_KEYWORD_INDEX]);
+		  if (!(strncmp (p, linespec_keywords[IF_KEYWORD_INDEX], nextlen) == 0
+			&& isspace (p[nextlen])))
+		    return NULL;
+		}
+
 	      /* Special case: "if" ALWAYS stops the lexer, since it
 		 is not possible to predict what is going to appear in
 		 the condition, which can only be parsed after SaLs have
 		 been found.  */
-	      if (i != IF_KEYWORD_INDEX)
+	      else if (i != IF_KEYWORD_INDEX)
 		{
 		  p += len;
 		  p = skip_spaces (p);

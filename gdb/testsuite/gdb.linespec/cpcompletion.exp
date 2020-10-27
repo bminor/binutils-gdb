@@ -836,12 +836,14 @@ proc_with_prefix function-labels {} {
 }
 
 # Test that completion after a function name offers keyword
-# (if/task/thread) matches in linespec mode, and also the explicit
-# location options in explicit locations mode.
+# (if/task/thread/-force-condition) matches in linespec mode, and also
+# the explicit location options in explicit locations mode.
 
 proc_with_prefix keywords-after-function {} {
     set explicit_list \
-	[concat $completion::explicit_opts_list $completion::keyword_list]
+	[lsort [concat \
+		    $completion::explicit_opts_list \
+		    $completion::keyword_list]]
 
     # Test without a source file, with a known source file, and with
     # and unknown source file.
@@ -865,7 +867,9 @@ proc_with_prefix keywords-after-function {} {
 
 proc_with_prefix keywords-after-label {} {
     set explicit_list \
-	[concat $completion::explicit_opts_list $completion::keyword_list]
+	[lsort [concat \
+		    $completion::explicit_opts_list \
+		    $completion::keyword_list]]
 
     foreach_location_labels \
 	{ "" "cpls.cc" } \

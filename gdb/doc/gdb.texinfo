@@ -4318,6 +4318,30 @@ undefined variable:
 No symbol "foo" in current context.
 @end smallexample
 
+@item break @dots{} -force-condition if @var{cond}
+There may be cases where the condition @var{cond} is invalid at all
+the current locations, but the user knows that it will be valid at a
+future location; for example, because of a library load.  In such
+cases, by using the @code{-force-condition} keyword before @samp{if},
+@value{GDBN} can be forced to define the breakpoint with the given
+condition expression instead of refusing it.
+
+@smallexample
+(@value{GDBP}) break func -force-condition if foo
+warning: failed to validate condition at location 1, disabling:
+  No symbol "foo" in current context.
+warning: failed to validate condition at location 2, disabling:
+  No symbol "foo" in current context.
+warning: failed to validate condition at location 3, disabling:
+  No symbol "foo" in current context.
+Breakpoint 1 at 0x1158: test.c:18. (3 locations)
+@end smallexample
+
+This causes all the present locations where the breakpoint would
+otherwise be inserted, to be disabled, as seen in the example above.
+However, if there exist locations at which the condition is valid, the
+@code{-force-condition} keyword has no effect.
+
 @kindex tbreak
 @item tbreak @var{args}
 Set a breakpoint enabled only for one stop.  The @var{args} are the
@@ -5502,6 +5526,12 @@ No symbol "foo" in current context.
 not actually evaluate @var{expression} at the time the @code{condition}
 command (or a command that sets a breakpoint with a condition, like
 @code{break if @dots{}}) is given, however.  @xref{Expressions, ,Expressions}.
+
+@item condition -force @var{bnum} @var{expression}
+When the @code{-force} flag is used, define the condition even if
+@var{expression} is invalid at all the current locations of breakpoint
+@var{bnum}.  This is similar to the @code{-force-condition} option
+of the @code{break} command.
 
 @item condition @var{bnum}
 Remove the condition from breakpoint number @var{bnum}.  It becomes

@@ -1,5 +1,14 @@
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gdb.base/condbreak-multi-context.exp: Expand to test forcing
+	the condition.
+	* gdb.linespec/cpcompletion.exp: Update to consider the
+	'-force-condition' keyword.
+	* gdb.linespec/explicit.exp: Ditto.
+	* lib/completion-support.exp: Ditto.
+
+2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* gdb.base/condbreak-multi-context.cc: New file.
 	* gdb.base/condbreak-multi-context.exp: New file.
 

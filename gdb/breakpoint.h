@@ -1627,9 +1627,11 @@ extern int breakpoints_should_be_inserted_now (void);
    in our opinion won't ever trigger.  */
 extern void breakpoint_retire_moribund (void);
 
-/* Set break condition of breakpoint B to EXP.  */
+/* Set break condition of breakpoint B to EXP.
+   If FORCE, define the condition even if it is invalid in
+   all of the breakpoint locations.  */
 extern void set_breakpoint_condition (struct breakpoint *b, const char *exp,
-				      int from_tty);
+				      int from_tty, bool force);
 
 /* Checks if we are catching syscalls or not.
    Returns 0 if not, greater than 0 if we are.  */
