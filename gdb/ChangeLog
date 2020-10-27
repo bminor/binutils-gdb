@@ -1,5 +1,9 @@
 2020-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* m32c-tdep.c: Remove unused includes.
+
+2020-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* xtensa-tdep.c: Remove includes.
 
 2020-10-27  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>

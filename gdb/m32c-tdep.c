@@ -18,31 +18,23 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "elf-bfd.h"
-#include "elf/m32c.h"
 #include "gdb/sim-m32c.h"
-#include "dis-asm.h"
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "arch-utils.h"
 #include "frame.h"
 #include "frame-unwind.h"
-#include "dwarf2/frame.h"
-#include "dwarf2/expr.h"
 #include "symtab.h"
 #include "gdbcore.h"
 #include "value.h"
 #include "reggroups.h"
 #include "prologue-value.h"
-#include "target.h"
 #include "objfiles.h"
 
 
 /* The m32c tdep structure.  */
 
 static struct reggroup *m32c_dma_reggroup;
-
-struct m32c_reg;
 
 /* The type of a function that moves the value of REG between CACHE or
    BUF --- in either direction.  */
