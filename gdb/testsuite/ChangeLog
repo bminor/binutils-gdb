@@ -1,5 +1,9 @@
 2020-10-27  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/multi-forks.exp: Use exp_continue to fix timeout.
+
+2020-10-27  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/maint.exp: Update for -readnow.
 
 2020-10-27  Tom de Vries  <tdevries@suse.de>
