@@ -1085,8 +1085,11 @@ srec_write_symbols (bfd *abfd)
       for (i = 0; i < count; i++)
 	{
 	  asymbol *s = table[i];
+
 	  if (! bfd_is_local_label (abfd, s)
-	      && (s->flags & BSF_DEBUGGING) == 0)
+	      && (s->flags & BSF_DEBUGGING) == 0
+	      && s->section != NULL
+	      && s->section->output_section != NULL)
 	    {
 	      /* Just dump out non debug symbols.  */
 	      char buf[43], *p;

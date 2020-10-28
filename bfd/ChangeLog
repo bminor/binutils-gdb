@@ -1,3 +1,9 @@
+2020-10-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 26774
+	* srec.c (srec_write_symbols): Do not emit symbols in sections
+	that have been removed from the output.
+
 2020-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* elf64-hppa.c (elf_hppa_final_link_relocate): Check that the
