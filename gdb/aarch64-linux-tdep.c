@@ -410,10 +410,6 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 					 offset + i * reg_size);
 	      }
 
-	    int pcc_regnum = tdep->cap_reg_base + 31;
-	    int csp_regnum = tdep->cap_reg_base + 32;
-	    int rcsp_regnum = tdep->cap_reg_base + 35;
-
 	    if (aarch64_debug)
 	      {
 		debug_printf ("aarch64: Reading PCC, CSP and RCSP registers "
@@ -421,11 +417,11 @@ aarch64_linux_sigframe_init (const struct tramp_frame *self,
 			      paddress (gdbarch, offset + 31 * reg_size));
 	      }
 
-	    trad_frame_set_reg_addr (this_cache, csp_regnum,
+	    trad_frame_set_reg_addr (this_cache, tdep->cap_reg_csp,
 				     offset + 31 * reg_size);
-	    trad_frame_set_reg_addr (this_cache, rcsp_regnum,
+	    trad_frame_set_reg_addr (this_cache, tdep->cap_reg_rcsp,
 				     offset + 32 * reg_size);
-	    trad_frame_set_reg_addr (this_cache, pcc_regnum,
+	    trad_frame_set_reg_addr (this_cache, tdep->cap_reg_pcc,
 				     offset + 33 * reg_size);
 
 	    section += size;

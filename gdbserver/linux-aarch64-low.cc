@@ -326,8 +326,8 @@ aarch64_store_cregset (struct regcache *regcache, const void *buf)
     supply_register (regcache, regno, &cregset->cregs[i]);
 
   /* Fetch the other registers.  */
-  supply_register (regcache, regno++, &cregset->pcc);
   supply_register (regcache, regno++, &cregset->csp);
+  supply_register (regcache, regno++, &cregset->pcc);
   supply_register (regcache, regno++, &cregset->ddc);
   supply_register (regcache, regno++, &cregset->ctpidr);
   supply_register (regcache, regno++, &cregset->rcsp);

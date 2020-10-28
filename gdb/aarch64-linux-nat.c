@@ -515,8 +515,8 @@ fetch_cregs_from_thread (struct regcache *regcache)
     regcache->raw_supply (regno, &cregset.cregs[i]);
 
   /* Fetch the other registers.  */
-  regcache->raw_supply (regno++, &cregset.pcc);
   regcache->raw_supply (regno++, &cregset.csp);
+  regcache->raw_supply (regno++, &cregset.pcc);
   regcache->raw_supply (regno++, &cregset.ddc);
   regcache->raw_supply (regno++, &cregset.ctpidr);
   regcache->raw_supply (regno++, &cregset.rcsp);

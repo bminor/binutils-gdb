@@ -268,8 +268,8 @@ static const char *const aarch64_c_register_names[] =
   "c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7",
   "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15",
   "c16", "c17", "c18", "c19", "c20", "c21", "c22", "c23",
-  "c24", "c25", "c26", "c27", "c28", "c29", "c30", "pcc",
-  "csp", "ddc", "ctpidr", "rcsp", "rddc", "rctpidr", "cid",
+  "c24", "c25", "c26", "c27", "c28", "c29", "c30", "csp",
+  "pcc", "ddc", "ctpidr", "rcsp", "rddc", "rctpidr", "cid",
   "tag_map", "cctlr"
 };
 
@@ -865,9 +865,6 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
   if (tdep->has_capability ())
     {
-      int pcc_regnum = tdep->cap_reg_base + 31;
-      int csp_regnum = tdep->cap_reg_base + 32;
-
       /* Also save the C registers.  */
       for (i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
 	{
@@ -879,15 +876,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 		debug_printf ("aarch64: %s Register C%d found at offset %s\n",
 			      __func__, i, core_addr_to_string_nz (offset));
 
-	      /* FIXME-Morello: We should really invert CSP/PCC to make them
-		 match the order of the X registers.  Then we wouldn't need
-		 this conditional block.  */
-	      if (i == AARCH64_SP_REGNUM)
-		cache->saved_regs[csp_regnum].set_addr (offset);
-	      else if (i == AARCH64_PC_REGNUM)
-		cache->saved_regs[pcc_regnum].set_addr (offset);
-	      else
-		cache->saved_regs[tdep->cap_reg_base + i].set_addr (offset);
+	      cache->saved_regs[tdep->cap_reg_base + i].set_addr (offset);
 	    }
 	}
     }
@@ -1442,16 +1431,12 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
   aarch64_gdbarch_tdep *tdep
     = (aarch64_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
 
-  int pcc_regnum = -1;
-  if (tdep->has_capability ())
-    pcc_regnum = tdep->cap_reg_base + 31;
-
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
      frame's prologue, not the next frame's resume location.
 
      We do the same for PCC and CLR.  */
-  if (prev_regnum == AARCH64_PC_REGNUM || prev_regnum == pcc_regnum)
+  if (prev_regnum == AARCH64_PC_REGNUM || prev_regnum == tdep->cap_reg_pcc)
     {
       CORE_ADDR lr;
       struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1462,7 +1447,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
       if (prev_regnum == AARCH64_PC_REGNUM)
 	lr_regnum = AARCH64_LR_REGNUM;
       else
-	lr_regnum = tdep->cap_reg_base + 30;
+	lr_regnum = tdep->cap_reg_clr;
 
       struct value *lr_value = frame_unwind_register_value (this_frame,
 							    lr_regnum);
@@ -1483,7 +1468,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 	  = frame_unwind_got_constant (this_frame, prev_regnum, lr);
 
       /* Copy the capability tag over, if it exists.  */
-      if (prev_regnum == pcc_regnum && value_tagged (lr_value))
+      if (prev_regnum == tdep->cap_reg_pcc && value_tagged (lr_value))
 	{
 	  set_value_tagged (lr_value_adjusted, 1);
 	  set_value_tag (lr_value_adjusted, value_tag (lr_value));
@@ -1507,11 +1492,8 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 	 |          |
 	 |          |<- SP
 	 +----------+  */
-  int csp_regnum = -1;
-  if (tdep->has_capability ())
-    csp_regnum = tdep->cap_reg_base + 32;
 
-  if (prev_regnum == AARCH64_SP_REGNUM || prev_regnum == csp_regnum)
+  if (prev_regnum == AARCH64_SP_REGNUM || prev_regnum == tdep->cap_reg_csp)
     return frame_unwind_got_constant (this_frame, prev_regnum,
 				      cache->prev_sp);
 
@@ -1653,20 +1635,41 @@ static struct value *
 aarch64_dwarf2_prev_register (struct frame_info *this_frame,
 			      void **this_cache, int regnum)
 {
-  gdbarch *arch = get_frame_arch (this_frame);
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (arch);
-  CORE_ADDR lr;
+  gdbarch *gdbarch = get_frame_arch (this_frame);
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  int pcc_regnum = -1;
-  if (tdep->has_capability ())
-    pcc_regnum = tdep->cap_reg_base + 31;
-
-  if (regnum == AARCH64_PC_REGNUM || regnum == pcc_regnum)
+  if (regnum == AARCH64_PC_REGNUM || regnum == tdep->cap_reg_pcc)
     {
-      lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
+      /* Fetch LR or CLR depending on the ABI.  */
+      int lr_regnum;
+      if (regnum == AARCH64_PC_REGNUM)
+	lr_regnum = AARCH64_LR_REGNUM;
+      else
+	lr_regnum = tdep->cap_reg_clr;
+
+      struct value *lr_value = frame_unwind_register_value (this_frame,
+							     lr_regnum);
+
+      /* Extract only the bottom 8 bytes of CLR.  This truncates the capability
+	 to 8 bytes.  For LR, this gets us the whole register.  */
+      CORE_ADDR lr
+	= extract_unsigned_integer (value_contents_all (lr_value).data (), 8,
+				    gdbarch_byte_order (gdbarch));
+
       lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
-      lr = gdbarch_addr_bits_remove (arch, lr);
-      return frame_unwind_got_constant (this_frame, regnum, lr);
+      lr = gdbarch_addr_bits_remove (gdbarch, lr);
+
+      struct value *lr_value_adjusted
+	= frame_unwind_got_constant (this_frame, regnum, lr);
+
+      /* Copy the capability tag over, if it exists.  */
+      if (regnum == tdep->cap_reg_pcc && value_tagged (lr_value))
+	{
+	  set_value_tagged (lr_value_adjusted, 1);
+	  set_value_tag (lr_value_adjusted, value_tag (lr_value));
+	}
+
+      return lr_value_adjusted;
     }
 
   internal_error (__FILE__, __LINE__, _("Unexpected register %d"), regnum);
@@ -1683,23 +1686,15 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct frame_info *this_frame)
 {
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  int pcc_regnum = -1;
-  int csp_regnum = -1;
 
-  if (tdep->has_capability ())
-    {
-      pcc_regnum = tdep->cap_reg_base + 31;
-      csp_regnum = tdep->cap_reg_base + 32;
-    }
-
-  if (regnum == AARCH64_PC_REGNUM || regnum == pcc_regnum)
+  if (regnum == AARCH64_PC_REGNUM || regnum == tdep->cap_reg_pcc)
     {
       reg->how = DWARF2_FRAME_REG_FN;
       reg->loc.fn = aarch64_dwarf2_prev_register;
       return;
     }
 
-  if (regnum == AARCH64_SP_REGNUM || regnum == csp_regnum)
+  if (regnum == AARCH64_SP_REGNUM || regnum == tdep->cap_reg_csp)
     {
       reg->how = DWARF2_FRAME_REG_CFA;
       return;
@@ -2630,7 +2625,7 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 	return tdep->cap_reg_base + (reg - AARCH64_DWARF_C0);
 
       if (reg == AARCH64_DWARF_CSP)
-	return tdep->cap_reg_base + 32;
+	return tdep->cap_reg_csp;
     }
 
   return -1;
@@ -4326,8 +4321,13 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->mte_reg_base = first_mte_regnum;
   tdep->tls_regnum = tls_regnum;
 
+  /* Initialize the capability register numbers.  */
   tdep->cap_reg_base = first_cap_regnum;
   tdep->cap_reg_last = last_cap_regnum;
+  tdep->cap_reg_clr = (first_cap_regnum == -1)? -1 : first_cap_regnum + 30;
+  tdep->cap_reg_csp = (first_cap_regnum == -1)? -1 : first_cap_regnum + 31;
+  tdep->cap_reg_pcc = (first_cap_regnum == -1)? -1 : first_cap_regnum + 32;
+  tdep->cap_reg_rcsp = (first_cap_regnum == -1)? -1 : first_cap_regnum + 35;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
