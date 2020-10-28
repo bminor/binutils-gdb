@@ -2395,6 +2395,8 @@ static const aarch64_feature_set aarch64_feature_sve2bitperm =
   AARCH64_FEATURE (AARCH64_FEATURE_SVE2 | AARCH64_FEATURE_SVE2_BITPERM, 0);
 static const aarch64_feature_set aarch64_feature_v8_6 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_6, 0);
+static const aarch64_feature_set aarch64_feature_v8_7 =
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_7, 0);
 static const aarch64_feature_set aarch64_feature_i8mm =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_2 | AARCH64_FEATURE_I8MM, 0);
 static const aarch64_feature_set aarch64_feature_i8mm_sve =
@@ -2453,6 +2455,7 @@ static const aarch64_feature_set aarch64_feature_v8_r =
 #define F64MM_SVE     &aarch64_feature_f64mm_sve
 #define I8MM      &aarch64_feature_i8mm
 #define ARMV8_R	  &aarch64_feature_v8_r
+#define ARMV8_7	  &aarch64_feature_v8_7
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }

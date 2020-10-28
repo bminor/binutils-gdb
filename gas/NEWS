@@ -19,7 +19,7 @@
   Extension) and BRBE (Branch Record Buffer Extension) system registers for
   AArch64.
 
-* Add support for Armv8-R AArch64.
+* Add support for Armv8-R and Armv8.7-A AArch64.
 
 * Add support for Intel TDX instructions.
 
