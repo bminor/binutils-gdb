@@ -2410,6 +2410,8 @@ static const aarch64_feature_set aarch64_feature_f64mm_sve =
        | AARCH64_FEATURE_SVE, 0);
 static const aarch64_feature_set aarch64_feature_v8_r =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_R, 0);
+static const aarch64_feature_set aarch64_feature_csre =
+  AARCH64_FEATURE (AARCH64_FEATURE_CSRE, 0);
 
 
 #define CORE		&aarch64_feature_v8
@@ -2456,6 +2458,7 @@ static const aarch64_feature_set aarch64_feature_v8_r =
 #define I8MM      &aarch64_feature_i8mm
 #define ARMV8_R	  &aarch64_feature_v8_r
 #define ARMV8_7	  &aarch64_feature_v8_7
+#define CSRE	  &aarch64_feature_csre
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2563,6 +2566,9 @@ static const aarch64_feature_set aarch64_feature_v8_r =
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8_R, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define V8_7_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8_7, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define _CSRE_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, CSRE, OPS, QUALS, FLAGS, 0, 0, NULL }
+
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3833,6 +3839,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
   _TME_INSN ("tcommit", 0xd503307f, 0xffffffff, 0, 0, OP0 (), {}, 0),
   _TME_INSN ("ttest", 0xd5233160, 0xffffffe0, 0, 0, OP1 (Rd), QL_I1X, 0),
   _TME_INSN ("tcancel", 0xd4600000, 0xffe0001f, 0, 0, OP1 (TME_UIMM16), QL_IMM_NIL, 0),
+  /* CSRE Instructions.  */
+  _CSRE_INSN ("csr", 0xd50b721f, 0xffffffff, 0, OP1 (CSRE_CSR), {}, 0),
   /* System.  */
   CORE_INSN ("msr", 0xd500401f, 0xfff8f01f, ic_system, 0, OP2 (PSTATEFIELD, UIMM4), {}, F_SYS_WRITE),
   CORE_INSN ("hint",0xd503201f, 0xfffff01f, ic_system, 0, OP1 (UIMM7), {}, F_HAS_ALIAS),

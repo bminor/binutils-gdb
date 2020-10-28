@@ -4036,6 +4036,29 @@ parse_barrier_psb (char **str,
   return 0;
 }
 
+/* Parse an operand for CSR (CSRE instruction).  */
+
+static int
+parse_csr_operand (char **str)
+{
+  char *p, *q;
+
+  p = q = *str;
+  while (ISALPHA (*q))
+    q++;
+
+  /* Instruction has only one operand PDEC which encodes Rt field of the
+     operation to 0b11111.  */
+  if (strcasecmp(p, "pdec"))
+  {
+    set_syntax_error (_("CSR instruction accepts only PDEC"));
+    return PARSE_FAIL;
+  }
+
+  *str = q;
+  return 0;
+}
+
 /* Parse an operand for BTI.  Set *HINT_OPT to the hint-option record
    return 0 if successful.  Otherwise return PARSE_FAIL.  */
 
@@ -6749,6 +6772,12 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    goto failure;
 	  break;
 
+	case AARCH64_OPND_CSRE_CSR:
+	  val = parse_csr_operand (&str);
+	  if (val == PARSE_FAIL)
+	    goto failure;
+	  break;
+
 	default:
 	  as_fatal (_("unhandled operand code %d"), operands[i]);
 	}
@@ -9171,6 +9200,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0)},
   {"f64mm",		AARCH64_FEATURE (AARCH64_FEATURE_F64MM, 0),
 			AARCH64_FEATURE (AARCH64_FEATURE_SVE, 0)},
+  {"csre",		AARCH64_FEATURE (AARCH64_FEATURE_CSRE, 0),
+			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 
