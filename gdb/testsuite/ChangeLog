@@ -1,5 +1,9 @@
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/relocate.exp: Update regexp for -readnow.
+
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/dw2-error.exp: Mark failure break in main as known with
 	-readnow.
 
