@@ -1,5 +1,10 @@
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.ada/exec_changed.exp: Add KFAILs for -readnow.
+	* gdb.base/reread.exp: Same.
+
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (readnow): Handle arg.
 	* gdb.rust/traits.exp: Add KFAILs for -readnow.
 
