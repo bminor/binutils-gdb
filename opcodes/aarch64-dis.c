@@ -1293,6 +1293,21 @@ aarch64_ext_barrier (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+/* Decode the memory barrier option operand for DSB <option>nXS|#<imm>.  */
+
+bfd_boolean
+aarch64_ext_barrier_dsb_nxs (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		     aarch64_opnd_info *info,
+		     aarch64_insn code,
+		     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  /* For the DSB nXS barrier variant immediate is encoded in 2-bit field.  */
+  aarch64_insn field = extract_field (FLD_CRm_dsb_nxs, code, 0);
+  info->barrier = aarch64_barrier_dsb_nxs_options + field;
+  return TRUE;
+}
+
 /* Decode the prefetch operation option operand for e.g.
      PRFM <prfop>, [<Xn|SP>{, #<pimm>}].  */
 

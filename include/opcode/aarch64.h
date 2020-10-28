@@ -317,6 +317,7 @@ enum aarch64_opnd
   AARCH64_OPND_SYSREG_TLBI,	/* System register <tlbi_op> operand.  */
   AARCH64_OPND_SYSREG_SR,	/* System register RCTX operand.  */
   AARCH64_OPND_BARRIER,		/* Barrier operand.  */
+  AARCH64_OPND_BARRIER_DSB_NXS,	/* Barrier operand for DSB nXS variant.  */
   AARCH64_OPND_BARRIER_ISB,	/* Barrier operand for ISB.  */
   AARCH64_OPND_PRFOP,		/* Prefetch operation.  */
   AARCH64_OPND_BARRIER_PSB,	/* Barrier operand for PSB.  */
@@ -949,6 +950,7 @@ struct aarch64_name_value_pair
 
 extern const struct aarch64_name_value_pair aarch64_operand_modifiers [];
 extern const struct aarch64_name_value_pair aarch64_barrier_options [16];
+extern const struct aarch64_name_value_pair aarch64_barrier_dsb_nxs_options [4];
 extern const struct aarch64_name_value_pair aarch64_prfops [32];
 extern const struct aarch64_name_value_pair aarch64_hint_options [];
 

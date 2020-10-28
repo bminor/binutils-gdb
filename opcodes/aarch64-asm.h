@@ -71,6 +71,7 @@ AARCH64_DECL_OPD_INSERTER (ins_sysreg);
 AARCH64_DECL_OPD_INSERTER (ins_pstatefield);
 AARCH64_DECL_OPD_INSERTER (ins_sysins_op);
 AARCH64_DECL_OPD_INSERTER (ins_barrier);
+AARCH64_DECL_OPD_INSERTER (ins_barrier_dsb_nxs);
 AARCH64_DECL_OPD_INSERTER (ins_hint);
 AARCH64_DECL_OPD_INSERTER (ins_prfop);
 AARCH64_DECL_OPD_INSERTER (ins_reg_extended);

@@ -328,6 +328,7 @@ const aarch64_field fields[] =
     { 12,  1 }, /* rotate3: FCADD immediate rotate.  */
     { 12,  2 }, /* SM3: Indexed element SM3 2 bits index immediate.  */
     { 22,  1 }, /* sz: 1-bit element size select.  */
+    { 10,  2 }, /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
 };
 
 enum aarch64_operand_class
@@ -464,6 +465,14 @@ const struct aarch64_name_value_pair aarch64_barrier_options[16] =
     { "ld",    0xd },
     { "st",    0xe },
     { "sy",    0xf },
+};
+
+const struct aarch64_name_value_pair aarch64_barrier_dsb_nxs_options[4] =
+{                       /*  CRm<3:2>  #imm  */
+    { "oshnxs", 16 },    /*    00       16   */
+    { "nshnxs", 20 },    /*    01       20   */
+    { "ishnxs", 24 },    /*    10       24   */
+    { "synxs",  28 },    /*    11       28   */
 };
 
 /* Table describing the operands supported by the aliases of the HINT
@@ -3750,6 +3759,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_BARRIER:
+    case AARCH64_OPND_BARRIER_DSB_NXS:
       snprintf (buf, size, "%s", opnd->barrier->name);
       break;
 

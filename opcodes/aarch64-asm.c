@@ -876,6 +876,21 @@ aarch64_ins_barrier (const aarch64_operand *self ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+/* Encode the memory barrier option operand for DSB <option>nXS|#<imm>.  */
+
+bfd_boolean
+aarch64_ins_barrier_dsb_nxs (const aarch64_operand *self ATTRIBUTE_UNUSED,
+		     const aarch64_opnd_info *info, aarch64_insn *code,
+		     const aarch64_inst *inst ATTRIBUTE_UNUSED,
+		     aarch64_operand_error *errors ATTRIBUTE_UNUSED)
+{
+  /* For the DSB nXS barrier variant: is a 5-bit unsigned immediate,
+     encoded in CRm<3:2>.  */
+  aarch64_insn value = (info->barrier->value >> 2) - 4;
+  insert_field (FLD_CRm_dsb_nxs, code, value, 0);
+  return TRUE;
+}
+
 /* Encode the prefetch operation option operand for e.g.
      PRFM <prfop>, [<Xn|SP>{, #<pimm>}].  */
 

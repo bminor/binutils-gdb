@@ -2561,6 +2561,8 @@ static const aarch64_feature_set aarch64_feature_v8_r =
   { NAME, OPCODE, MASK, CLASS, 0, F32MM_SVE, OPS, QUALS, FLAGS, CONSTRAINTS, TIED, NULL }
 #define V8_R_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, ARMV8_R, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define V8_7_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, ARMV8_7, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3853,6 +3855,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
   CORE_INSN ("tsb", 0xd503225f, 0xffffffff, ic_system, 0, OP1 (BARRIER_PSB), {}, F_ALIAS),
   CORE_INSN ("clrex", 0xd503305f, 0xfffff0ff, ic_system, 0, OP1 (UIMM4), {}, F_OPD0_OPT | F_DEFAULT (0xF)),
   CORE_INSN ("dsb", 0xd503309f, 0xfffff0ff, ic_system, 0, OP1 (BARRIER), {}, F_HAS_ALIAS),
+  V8_7_INSN ("dsb", 0xd503323f, 0xfffff3ff, ic_system, OP1 (BARRIER_DSB_NXS), {}, F_HAS_ALIAS),
   V8_R_INSN ("dfb", 0xd5033c9f, 0xffffffff, ic_system, OP0 (), {}, F_ALIAS),
   CORE_INSN ("ssbb", 0xd503309f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
   CORE_INSN ("pssbb", 0xd503349f, 0xffffffff, ic_system, 0, OP0 (), {}, F_ALIAS),
@@ -5323,6 +5326,8 @@ struct aarch64_opcode aarch64_opcode_table[] =
       "a Speculation Restriction option name (RCTX)")			\
     Y(SYSTEM, barrier, "BARRIER", 0, F(),				\
       "a barrier option name")						\
+    Y(SYSTEM, barrier_dsb_nxs, "BARRIER_DSB_NXS", 0, F(),				\
+      "the DSB nXS option qualifier name SY, ISH, NSH, OSH or an optional 5-bit unsigned immediate")	\
     Y(SYSTEM, barrier, "BARRIER_ISB", 0, F(),				\
       "the ISB option name SY or an optional 4-bit unsigned immediate")	\
     Y(SYSTEM, prfop, "PRFOP", 0, F(),					\
