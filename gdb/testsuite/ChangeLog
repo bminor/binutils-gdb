@@ -1,5 +1,11 @@
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/26772
+	* gdb.dwarf2/dw2-ranges-overlap.c: New test.
+	* gdb.dwarf2/dw2-ranges-overlap.exp: New file.
+
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (gdb_file_cmd): Set gdb_file_cmd_msg.
 	* gdb.cp/nsalias.exp: Set complaints limit before file cmd.  Expect
 	complaint during file command for -readnow.

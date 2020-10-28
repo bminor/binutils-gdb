@@ -2923,6 +2923,14 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	  if (!in_range_p)
 	    continue;
 
+	  if (BLOCKVECTOR_MAP (bv))
+	    {
+	      if (addrmap_find (BLOCKVECTOR_MAP (bv), pc) == nullptr)
+		continue;
+
+	      return cust;
+	    }
+
 	  CORE_ADDR range = end - start;
 	  if (best_cust != nullptr
 	      && range >= best_cust_range)

@@ -1,3 +1,9 @@
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26772
+	* symtab.c (find_pc_sect_compunit_symtab): In case there's an address
+	map, check it in the "best match" loop.
+
 2020-10-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* m32c-tdep.c: Remove unused includes.
