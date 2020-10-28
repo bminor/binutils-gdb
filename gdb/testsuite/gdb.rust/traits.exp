@@ -43,5 +43,13 @@ if {![runto ${srcfile}:$line]} {
     return -1
 }
 
+set readnow_p [readnow $binfile]
+
+if { $readnow_p } {
+    setup_kfail "gdb/26799" *-*-*
+}
 gdb_test "print *td" " = 23.5"
+if { $readnow_p } {
+    setup_kfail "gdb/26799" *-*-*
+}
 gdb_test "print *tu" " = 23"

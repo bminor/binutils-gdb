@@ -1,5 +1,10 @@
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (readnow): Handle arg.
+	* gdb.rust/traits.exp: Add KFAILs for -readnow.
+
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/relocate.exp: Update regexp for -readnow.
 
 2020-10-28  Tom de Vries  <tdevries@suse.de>

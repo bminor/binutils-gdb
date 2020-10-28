@@ -7318,8 +7318,13 @@ gdb_caching_proc supports_fcf_protection {
 
 # Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
 
-proc readnow { } {
-    set cmd "maint print objfiles"
+proc readnow { args } {
+    if { [llength $args] == 1 } {
+	set re [lindex $args 0]
+    } else {
+	set re ""
+    }
+    set cmd "maint print objfiles $re"
     gdb_test_multiple $cmd "" {
 	-re -wrap "\r\n.gdb_index: faked for \"readnow\"\r\n.*" {
 	    return 1
