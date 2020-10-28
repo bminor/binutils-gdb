@@ -1,0 +1,26 @@
+The Morello [1] architecture is a prototype implementation of the capability-based
+CHERI [2] architecture in AArch64, intended to promote research into capability
+architectures and their deployment.
+
+This branch contains binutils and gdb support for Morello.
+The ABI-related parts of the work are in alpha state and are likely to change.
+
+As Morello is a prototype architecture we intend to maintain the toolchain
+components on a branch rather than integrate it into master.
+To report bugs please use the GitLab mirror set up at:
+https://git.morello-project.org/morello-gnu-toolchain/binutils-gdb
+
+Please send any patches or start discussions on the gnu-morello [3] list.
+
+Maintainers for the branch are:
+* GDB: Luis Machado <luis.machado@linaro.org>
+* Binutils: Matthew Malcomson <matthew.malcomson@arm.com>
+* Binutils: Kyrylo Tkachov <kyrylo.tkachov@arm.com>
+
+To contribute patches to the branch please submit them to gnu-morello@op-lists.linaro.org
+CC'ing the appropriate maintainers above.
+
+[1] https://developer.arm.com/architectures/cpu-architecture/a-profile/morello
+[2] https://www.cl.cam.ac.uk/research/security/ctsrd/cheri/
+[3] https://op-lists.linaro.org/mailman/listinfo/gnu-morello
+
