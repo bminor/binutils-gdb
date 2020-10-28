@@ -1,5 +1,10 @@
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/dw2-error.exp: Mark failure break in main as known with
+	-readnow.
+
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/26772
 	* gdb.dwarf2/dw2-ranges-overlap.c: New test.
 	* gdb.dwarf2/dw2-ranges-overlap.exp: New file.

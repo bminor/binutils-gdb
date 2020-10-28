@@ -44,5 +44,14 @@ gdb_test "file $binfile" \
     {Reading symbols.*Dwarf Error: wrong version in compilation unit header \(is 153, should be 2, 3, 4 or 5\).*} \
     "file $testfile"
 
+# We can't use proc readnow, because the PR makes it return 0.
+gdb_test_multiple "maint print objfiles $binfile" "" {
+    -re "^maint print objfiles \[^\r\n\]*\r\n$gdb_prompt $" {
+	setup_kfail "gdb/26797" *-*-*
+    }
+    -re -wrap "" {
+    }
+}
+
 # Now check that we can still break given the minimal symbol.
 gdb_test "break -q main" "Breakpoint $decimal.*"
