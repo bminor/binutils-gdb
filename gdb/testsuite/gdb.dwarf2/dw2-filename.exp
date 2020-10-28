@@ -40,4 +40,4 @@ gdb_test "interpreter-exec mi -file-list-exec-source-files" \
          ".*{file=\"file1\\.txt\",fullname=\".+file1\\.txt\"}.*"
 
 # And `info sources' should return the fullname incl. the directories.
-gdb_test "info sources" {[/\\]file1\.txt}
+gdb_test "info sources" {[/]file1\.txt.*}
