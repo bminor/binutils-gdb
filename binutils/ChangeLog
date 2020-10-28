@@ -1,3 +1,8 @@
+2020-10-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 26795
+	* elfedit.c (process_archive): Remove spurious call to free().
+
 2020-10-27  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (struct abbrev_list): New structure.  Used to collect

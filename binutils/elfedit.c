@@ -655,7 +655,6 @@ process_archive (const char * file_name, FILE * file,
 
           fclose (member_file);
           free (member_file_name);
-	  free (qualified_name);
         }
       else if (is_thin_archive)
         {
