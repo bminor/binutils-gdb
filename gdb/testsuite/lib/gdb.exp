@@ -1803,6 +1803,9 @@ proc default_gdb_exit {} {
 #            compiled in
 #   fail     file was not loaded
 #
+# This procedure also set the global variable GDB_FILE_CMD_MSG to the
+# output of the file command in case of success.
+#
 # I tried returning this information as part of the return value,
 # but ran into a mess because of the many re-implementations of
 # gdb_load in config/*.exp.
@@ -1820,7 +1823,7 @@ proc gdb_file_cmd { arg } {
 
     # Set whether debug info was found.
     # Default to "fail".
-    global gdb_file_cmd_debug_info
+    global gdb_file_cmd_debug_info gdb_file_cmd_msg
     set gdb_file_cmd_debug_info "fail"
 
     if [is_remote host] {
@@ -1850,18 +1853,21 @@ proc gdb_file_cmd { arg } {
     set new_symbol_table 0
     set basename [file tail $arg]
     gdb_expect 120 {
-	-re "Reading symbols from.*LZMA support was disabled.*$gdb_prompt $" {
+	-re "(Reading symbols from.*LZMA support was disabled.*$gdb_prompt $)" {
 	    verbose "\t\tLoaded $arg into $GDB; .gnu_debugdata found but no LZMA available"
+	    set gdb_file_cmd_msg $expect_out(1,string)
 	    set gdb_file_cmd_debug_info "lzma"
 	    return 0
 	}
-	-re "Reading symbols from.*no debugging symbols found.*$gdb_prompt $" {
+	-re "(Reading symbols from.*no debugging symbols found.*$gdb_prompt $)" {
 	    verbose "\t\tLoaded $arg into $GDB with no debugging symbols"
+	    set gdb_file_cmd_msg $expect_out(1,string)
 	    set gdb_file_cmd_debug_info "nodebug"
 	    return 0
 	}
-        -re "Reading symbols from.*$gdb_prompt $" {
+        -re "(Reading symbols from.*$gdb_prompt $)" {
             verbose "\t\tLoaded $arg into $GDB"
+	    set gdb_file_cmd_msg $expect_out(1,string)
 	    set gdb_file_cmd_debug_info "debug"
 	    return 0
         }
