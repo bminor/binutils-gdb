@@ -1,5 +1,9 @@
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.python/py-symbol.exp: Add KFAILs for -readnow.
+
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/exec_changed.exp: Add KFAILs for -readnow.
 	* gdb.base/reread.exp: Same.
 
