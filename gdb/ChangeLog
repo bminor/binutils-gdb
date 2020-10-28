@@ -1,5 +1,71 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* p-exp.y (exp): Update call to pascal_is_string_type.
+	(pascal_parse): Rename to...
+	(pascal_language::parser): ...this.
+	* p-lang.c (is_pascal_string_type): Rename to...
+	(pascal_is_string_type): ...this.
+	(pascal_one_char): Rename to...
+	(pascal_language::print_one_char): ...this.
+	(pascal_printchar): Rename to...
+	(pascal_language::printchar): ...this.  Update call to
+	print_one_char member function.
+	(pascal_op_print_tab): Rename to...
+	(pascal_language::op_print_tab): ...this.
+	(class pascal_language): Moved to p-lang.h.
+	(pascal_language::language_arch_info): Function implementation
+	moved out of class declaration.
+	(pascal_language::printstr): Likewise.
+	* p-lang.h (pascal_parse): Delete declaration.
+	(pascal_is_string_type): Declare.
+	(pascal_print_type): Delete declaration.
+	(pascal_print_typedef): Delete declaration.
+	(pascal_value_print_inner): Delete declaration.
+	(pascal_value_print): Delete declaration.
+	(pascal_type_print_method_args): Delete declaration.
+	(is_pascal_string_type): Delete declaration.
+	(pascal_printchar): Delete declaration.
+	(pascal_builtin_types): Delete declaration.
+	(pascal_type_print_base): Delete declaration.
+	(pascal_type_print_varspec_prefix): Delete declaration.
+	(class pascal_language): Moved here from p-lang.c.
+	* p-typeprint.c (pascal_type_print_varspec_suffix): Delete
+	declaration.
+	(pascal_type_print_derivation_info): Delete declaration.
+	(pascal_print_type): Rename to...
+	(pascal_language::print_type): ...this.  Update calls to member
+	functions.
+	(pascal_print_typedef): Rename to...
+	(pascal_language::print_typedef): ...this.  Update calls to member
+	functions.
+	(pascal_type_print_derivation_info): Rename to...
+	(pascal_language::type_print_derivation_info): ...this.
+	(pascal_type_print_method_args): Rename to...
+	(pascal_language::type_print_method_args): ...this.
+	(pascal_type_print_varspec_prefix): Rename to...
+	(pascal_language::type_print_varspec_prefix): ...this.  Update
+	calls to member functions.
+	(pascal_print_func_args): Rename to...
+	(pascal_language::print_func_args): ...this.  Update calls to
+	member functions.
+	(pascal_type_print_func_varspec_suffix): Rename to...
+	(pascal_language::type_print_func_varspec_suffix): ...this.
+	Update calls to member functions.
+	(pascal_type_print_varspec_suffix): Rename to...
+	(pascal_language::type_print_varspec_suffix): ...this.  Update
+	calls to member functions.
+	(pascal_type_print_base): Rename to...
+	(pascal_language::type_print_base): ...this.  Update calls to
+	member functions.
+	* p-valprint.c (pascal_value_print_inner): Rename to...
+	(pascal_language::value_print_inner): ...this.  Update calls to
+	member functions.
+	(pascal_value_print): Rename to...
+	(pascal_language::value_print): ...this.  Update calls to member
+	functions.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* go-exp.y (go_parse): Rename to...
 	(go_language::parser): ...this.
 	* go-lang.c (go_demangle): Rename to...

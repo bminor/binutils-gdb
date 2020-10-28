@@ -301,10 +301,9 @@ exp	:	field_exp COMPLETE
 exp	:	exp '['
 			/* We need to save the current_type value.  */
 			{ const char *arrayname;
-			  int arrayfieldindex;
-			  arrayfieldindex = is_pascal_string_type (
-				current_type, NULL, NULL,
-				NULL, NULL, &arrayname);
+			  int arrayfieldindex
+			    = pascal_is_string_type (current_type, NULL, NULL,
+						     NULL, NULL, &arrayname);
 			  if (arrayfieldindex)
 			    {
 			      struct stoken stringsval;
@@ -1727,8 +1726,10 @@ yylex (void)
   }
 }
 
+/* See language.h.  */
+
 int
-pascal_parse (struct parser_state *par_state)
+pascal_language::parser (struct parser_state *par_state) const
 {
   /* Setting up the parser state.  */
   scoped_restore pstate_restore = make_scoped_restore (&pstate);

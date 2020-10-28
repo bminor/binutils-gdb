@@ -64,9 +64,9 @@ static const struct generic_val_print_decorations p_decorations =
 /* See p-lang.h.  */
 
 void
-pascal_value_print_inner (struct value *val, struct ui_file *stream,
-			  int recurse,
-			  const struct value_print_options *options)
+pascal_language::value_print_inner (struct value *val,
+				    struct ui_file *stream, int recurse,
+				    const struct value_print_options *options) const
 
 {
   struct type *type = check_typedef (value_type (val));
@@ -200,8 +200,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	 as GDB does not recognize stabs pascal strings
 	 Pascal strings are mapped to records
 	 with lowercase names PM.  */
-      if (is_pascal_string_type (elttype, &length_pos, &length_size,
-				 &string_pos, &char_type, NULL)
+      if (pascal_is_string_type (elttype, &length_pos, &length_size,
+				 &string_pos, &char_type, NULL) > 0
 	  && addr != 0)
 	{
 	  ULONGEST string_length;
@@ -313,8 +313,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	}
       else
 	{
-	  if (is_pascal_string_type (type, &length_pos, &length_size,
-				     &string_pos, &char_type, NULL))
+          if (pascal_is_string_type (type, &length_pos, &length_size,
+				     &string_pos, &char_type, NULL) > 0)
 	    {
 	      len = extract_unsigned_integer (valaddr + length_pos,
 					      length_size, byte_order);
@@ -402,8 +402,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 
 
 void
-pascal_value_print (struct value *val, struct ui_file *stream,
-		    const struct value_print_options *options)
+pascal_language::value_print (struct value *val, struct ui_file *stream,
+			      const struct value_print_options *options) const
 {
   struct type *type = value_type (val);
   struct value_print_options opts = *options;
@@ -499,9 +499,7 @@ pascal_object_is_vtbl_member (struct type *type)
   return 0;
 }
 
-/* Mutually recursive subroutines of pascal_object_print_value and
-   pascal_value_print to print out a structure's fields:
-   pascal_object_print_value_fields and pascal_object_print_value.
+/* Helper function for print pascal objects.
 
    VAL, STREAM, RECURSE, and OPTIONS have the same meanings as in
    pascal_object_print_value and c_value_print.
