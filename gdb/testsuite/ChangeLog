@@ -1,5 +1,9 @@
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.cp/nsalias.exp: Fix typo in test name.
+
+2020-10-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/dw2-filename.exp: Update regexp for -readnow.
 
 2020-10-28  Tom de Vries  <tdevries@suse.de>

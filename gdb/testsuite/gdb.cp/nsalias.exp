@@ -319,4 +319,4 @@ clean_restart ${testfile}-r
 gdb_test_no_output "set complaints 1"
 gdb_test "print N100::x" \
     ".* has too many recursively imported declarations.*" \
-    "compaint for too many recursively imported declarations"
+    "complaint for too many recursively imported declarations"
