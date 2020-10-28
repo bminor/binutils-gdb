@@ -38,8 +38,8 @@
   <reg name="c28" bitsize="128" type="uintcap" group="general"/>
   <reg name="c29" bitsize="128" type="uintcap" group="general"/>
   <reg name="c30" bitsize="128" type="uintcap" group="general"/>
-  <reg name="pcc" bitsize="128" type="uintcap" group="general"/>
   <reg name="csp" bitsize="128" type="uintcap" group="general"/>
+  <reg name="pcc" bitsize="128" type="uintcap" group="general"/>
   <reg name="ddc" bitsize="128" type="uintcap" group="system"/>
   <reg name="ctpidr" bitsize="128" type="uintcap" group="system"/>
   <reg name="rcsp" bitsize="128" type="uintcap" group="general"/>

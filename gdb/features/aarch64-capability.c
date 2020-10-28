@@ -41,8 +41,8 @@ create_feature_aarch64_capability (struct target_desc *result, long regnum)
   tdesc_create_reg (feature, "c28", regnum++, 1, "general", 128, "uintcap");
   tdesc_create_reg (feature, "c29", regnum++, 1, "general", 128, "uintcap");
   tdesc_create_reg (feature, "c30", regnum++, 1, "general", 128, "uintcap");
-  tdesc_create_reg (feature, "pcc", regnum++, 1, "general", 128, "uintcap");
   tdesc_create_reg (feature, "csp", regnum++, 1, "general", 128, "uintcap");
+  tdesc_create_reg (feature, "pcc", regnum++, 1, "general", 128, "uintcap");
   tdesc_create_reg (feature, "ddc", regnum++, 1, "system", 128, "uintcap");
   tdesc_create_reg (feature, "ctpidr", regnum++, 1, "system", 128, "uintcap");
   tdesc_create_reg (feature, "rcsp", regnum++, 1, "system", 128, "uintcap");

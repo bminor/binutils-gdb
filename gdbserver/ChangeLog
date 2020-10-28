@@ -1,3 +1,7 @@
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
+	* linux-aarch64-low.cc (aarch64_store_cregset): Invert pcc/csp.
+
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
 	* linux-aarch64-low.c: arch/aarch64-cap-linux.h.

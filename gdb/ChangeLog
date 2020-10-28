@@ -1,5 +1,22 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-nat.c (fetch_cregs_from_thread): Invert pcc/csp
+	order.
+	* aarch64-linux-tdep.c (aarch64_linux_sigframe_init): Likewise.
+	* aarch64-tdep.c (aarch64_c_register_names): Likewise.
+	(aarch64_analyze_prologue): Remove code to handle csp/pcc ordering
+	issues.
+	(aarch64_prologue_prev_register): Use new tdep fields.
+	(aarch64_dwarf2_prev_register): Use new tdep fields and handle lr/clr.
+	(aarch64_dwarf2_frame_init_reg): Use new tdep fields.
+	(aarch64_gdbarch_init): Initialize the new tdep fields.
+	* aarch64-tdep.h (gdbarch_tdep) <cap_reg_clr, cap_reg_csp>
+	<cap_reg_pcc, cap_reg_rcsp>: New fields
+	* features/aarch64-capability.c: Regenerate.
+	* features/aarch64-capability.xml: Invert pcc/csp.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_prologue_prev_register): Guard use of
 	C registers.
 	(aarch64_dwarf2_prev_register): Likewise.
