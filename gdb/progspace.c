@@ -280,13 +280,10 @@ set_current_program_space (struct program_space *pspace)
 
 /* Returns true iff there's no inferior bound to PSPACE.  */
 
-int
-program_space_empty_p (struct program_space *pspace)
+bool
+program_space::empty ()
 {
-  if (find_inferior_for_program_space (pspace) != NULL)
-      return 0;
-
-  return 1;
+  return find_inferior_for_program_space (this) == nullptr;
 }
 
 /* Prints the list of program spaces and their details on UIOUT.  If

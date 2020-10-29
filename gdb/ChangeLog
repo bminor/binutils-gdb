@@ -1,5 +1,13 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* inferior.c (delete_inferior): Update.
+	* progspace.c (program_space::empty): Rename from
+	program_space_empty_p.  Return bool.
+	* progspace.h (struct program_space) <empty>: New method.
+	(program_space_empty_p): Don't declare.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* progspace.c (program_space::~program_space): Don't call
 	clear_program_space_solib_cache.
 	(program_space::clear_solib_cache): Rename from

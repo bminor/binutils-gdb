@@ -175,7 +175,7 @@ delete_inferior (struct inferior *todel)
   gdb::observers::inferior_removed.notify (inf);
 
   /* If this program space is rendered useless, remove it. */
-  if (program_space_empty_p (inf->pspace))
+  if (inf->pspace->empty ())
     delete inf->pspace;
 
   delete inf;

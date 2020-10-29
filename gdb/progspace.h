@@ -293,6 +293,10 @@ struct program_space
      later be printed.  */
   void clear_solib_cache ();
 
+  /* Returns true iff there's no inferior bound to this program
+     space.  */
+  bool empty ();
+
   /* Unique ID number.  */
   int num = 0;
 
@@ -382,9 +386,6 @@ extern std::vector<struct program_space *>program_spaces;
 
 /* The current program space.  This is always non-null.  */
 extern struct program_space *current_program_space;
-
-/* Returns true iff there's no inferior bound to PSPACE.  */
-extern int program_space_empty_p (struct program_space *pspace);
 
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
