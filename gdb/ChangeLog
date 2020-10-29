@@ -1,5 +1,11 @@
 2020-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbarch.sh (displaced_step_hw_singlestep): Adjust
+	documentation.
+	* gdbarch.h: Re-generate.
+
+2020-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbarch.sh (displaced_step_hw_singlestep): Remove closure
 	parameter.
 	* aarch64-tdep.c (aarch64_displaced_step_hw_singlestep):
