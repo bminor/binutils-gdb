@@ -279,13 +279,13 @@ struct program_space
   /* Return the exec BFD for this program space.  */
   bfd *exec_bfd () const
   {
-    return ebfd;
+    return ebfd.get ();
   }
 
   /* Set the exec BFD for this program space to ABFD.  */
-  void set_exec_bfd (bfd *abfd)
+  void set_exec_bfd (gdb_bfd_ref_ptr &&abfd)
   {
-    ebfd = abfd;
+    ebfd = std::move (abfd);
   }
 
   /* Unique ID number.  */
@@ -295,7 +295,7 @@ struct program_space
      managed by the exec target.  */
 
   /* The BFD handle for the main executable.  */
-  bfd *ebfd = NULL;
+  gdb_bfd_ref_ptr ebfd;
   /* The last-modified time, from when the exec was brought in.  */
   long ebfd_mtime = 0;
   /* Similar to bfd_get_filename (exec_bfd) but in original form given

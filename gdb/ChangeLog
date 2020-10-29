@@ -1,5 +1,14 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* exec.c (exec_file_attach): Update.
+	* progspace.c (program_space::exec_close): Update.
+	* progspace.h (struct program_space) <ebfd>: Now a
+	gdb_bfd_ref_ptr.
+	<set_exec_bfd>: Change argument type.
+	<exec_bfd>: Update.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* windows-tdep.c (windows_solib_create_inferior_hook): Update.
 	* symfile.c (reread_symbols): Update.
 	* symfile-mem.c (add_symbol_file_from_memory_command)

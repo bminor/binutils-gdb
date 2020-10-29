@@ -228,13 +228,11 @@ program_space::solibs () const
 void
 program_space::exec_close ()
 {
-  if (ebfd)
+  if (ebfd != nullptr)
     {
-      gdb_bfd_unref (ebfd);
-
       /* Removing target sections may close the exec_ops target.
 	 Clear ebfd before doing so to prevent recursion.  */
-      ebfd = NULL;
+      ebfd.reset (nullptr);
       ebfd_mtime = 0;
 
       remove_target_sections (&ebfd);

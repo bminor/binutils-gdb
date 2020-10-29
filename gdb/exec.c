@@ -453,7 +453,7 @@ exec_file_attach (const char *filename, int from_tty)
 			      FOPEN_RUB, scratch_chan);
       else
 	temp = gdb_bfd_open (canonical_pathname, gnutarget, scratch_chan);
-      current_program_space->set_exec_bfd (temp.release ());
+      current_program_space->set_exec_bfd (std::move (temp));
 
       if (!current_program_space->exec_bfd ())
 	{
