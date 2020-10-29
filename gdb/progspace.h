@@ -284,9 +284,9 @@ struct program_space
   /* The last-modified time, from when the exec was brought in.  */
   long ebfd_mtime = 0;
   /* Similar to bfd_get_filename (exec_bfd) but in original form given
-     by user, without symbolic links and pathname resolved.
-     It needs to be freed by xfree.  It is not NULL iff EBFD is not NULL.  */
-  char *pspace_exec_filename = NULL;
+     by user, without symbolic links and pathname resolved.  It is not
+     NULL iff EBFD is not NULL.  */
+  gdb::unique_xmalloc_ptr<char> exec_filename;
 
   /* Binary file diddling handle for the core file.  */
   gdb_bfd_ref_ptr cbfd;

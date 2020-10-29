@@ -144,8 +144,8 @@ validate_files (void)
 const char *
 get_exec_file (int err)
 {
-  if (exec_filename)
-    return exec_filename;
+  if (current_program_space->exec_filename != nullptr)
+    return current_program_space->exec_filename.get ();
   if (!err)
     return NULL;
 

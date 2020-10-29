@@ -415,7 +415,7 @@ void
 print_selected_inferior (struct ui_out *uiout)
 {
   struct inferior *inf = current_inferior ();
-  const char *filename = inf->pspace->pspace_exec_filename;
+  const char *filename = inf->pspace->exec_filename.get ();
 
   if (filename == NULL)
     filename = _("<noexec>");
@@ -518,8 +518,8 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
       std::string conn = uiout_field_connection (inf->process_target ());
       uiout->field_string ("connection-id", conn.c_str ());
 
-      if (inf->pspace->pspace_exec_filename != NULL)
-	uiout->field_string ("exec", inf->pspace->pspace_exec_filename);
+      if (inf->pspace->exec_filename != nullptr)
+	uiout->field_string ("exec", inf->pspace->exec_filename.get ());
       else
 	uiout->field_skip ("exec");
 

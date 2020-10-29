@@ -1,5 +1,19 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (struct program_space) <exec_filename>: Rename from
+	pspace_exec_filename.  Now a unique_xmalloc_ptr.
+	* inferior.c (print_selected_inferior): Update.
+	(print_inferior): Update.
+	* mi/mi-main.c (print_one_inferior): Update.
+	* exec.h (exec_filename): Remove macro.
+	* corefile.c (get_exec_file): Update.
+	* exec.c (exec_close): Update.
+	(exec_file_attach): Update.
+	* progspace.c (clone_program_space): Update.
+	(print_program_space): Update.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* target-section.h (struct target_section): Add constructor.
 	* exec.c (build_section_table, add_target_sections_of_objfile):
 	Update.

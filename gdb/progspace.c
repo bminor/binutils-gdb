@@ -233,8 +233,8 @@ clone_program_space (struct program_space *dest, struct program_space *src)
 
   set_current_program_space (dest);
 
-  if (src->pspace_exec_filename != NULL)
-    exec_file_attach (src->pspace_exec_filename, 0);
+  if (src->exec_filename != NULL)
+    exec_file_attach (src->exec_filename.get (), 0);
 
   if (src->symfile_object_file != NULL)
     symbol_file_add_main (objfile_name (src->symfile_object_file),
@@ -315,8 +315,8 @@ print_program_space (struct ui_out *uiout, int requested)
 
       uiout->field_signed ("id", pspace->num);
 
-      if (pspace->pspace_exec_filename)
-	uiout->field_string ("exec", pspace->pspace_exec_filename);
+      if (pspace->exec_filename != nullptr)
+	uiout->field_string ("exec", pspace->exec_filename.get ());
       else
 	uiout->field_skip ("exec");
 

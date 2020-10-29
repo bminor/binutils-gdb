@@ -649,10 +649,10 @@ print_one_inferior (struct inferior *inferior, bool recurse,
       if (inferior->pid != 0)
 	uiout->field_signed ("pid", inferior->pid);
 
-      if (inferior->pspace->pspace_exec_filename != NULL)
+      if (inferior->pspace->exec_filename != nullptr)
 	{
 	  uiout->field_string ("executable",
-			       inferior->pspace->pspace_exec_filename);
+			       inferior->pspace->exec_filename.get ());
 	}
 
       if (inferior->pid != 0)

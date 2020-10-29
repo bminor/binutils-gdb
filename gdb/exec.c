@@ -167,8 +167,7 @@ exec_close (void)
 
       remove_target_sections (&exec_bfd);
 
-      xfree (exec_filename);
-      exec_filename = NULL;
+      current_program_space->exec_filename.reset (nullptr);
     }
 }
 
@@ -486,11 +485,13 @@ exec_file_attach (const char *filename, int from_tty)
 
       /* gdb_realpath_keepfile resolves symlinks on the local
 	 filesystem and so cannot be used for "target:" files.  */
-      gdb_assert (exec_filename == NULL);
+      gdb_assert (current_program_space->exec_filename == nullptr);
       if (load_via_target)
-	exec_filename = xstrdup (bfd_get_filename (exec_bfd));
+	current_program_space->exec_filename
+	  = make_unique_xstrdup (bfd_get_filename (exec_bfd));
       else
-	exec_filename = gdb_realpath_keepfile (scratch_pathname).release ();
+	current_program_space->exec_filename
+	  = gdb_realpath_keepfile (scratch_pathname);
 
       if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
 	{
