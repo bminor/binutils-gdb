@@ -1,5 +1,14 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* solib.c (solib_map_sections): Update.
+	* exec.c (program_space::add_target_sections): Now a method.
+	(exec_file_attach): Update.
+	* exec.h (add_target_sections): Don't declare.
+	* progspace.h (struct program_space) <add_target_sections>:
+	Declare.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* progspace.h (struct program_space) <remove_target_sections>:
 	Declare.
 	* exec.c (program_space::remove_target_sections): Now a method.

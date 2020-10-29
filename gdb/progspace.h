@@ -300,6 +300,11 @@ struct program_space
   /* Remove all target sections owned by OWNER.  */
   void remove_target_sections (void *owner);
 
+  /* Add the sections array defined by SECTIONS to the
+     current set of target sections.  */
+  void add_target_sections (void *owner,
+			    const target_section_table &sections);
+
   /* Unique ID number.  */
   int num = 0;
 

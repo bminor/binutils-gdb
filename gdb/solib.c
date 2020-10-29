@@ -578,7 +578,7 @@ solib_map_sections (struct so_list *so)
      section tables.  Do this immediately after mapping the object so
      that later nodes in the list can query this object, as is needed
      in solib-osf.c.  */
-  add_target_sections (so, *so->sections);
+  current_program_space->add_target_sections (so, *so->sections);
 
   return 1;
 }

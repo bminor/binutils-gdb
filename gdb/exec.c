@@ -497,7 +497,8 @@ exec_file_attach (const char *filename, int from_tty)
       /* Add the executable's sections to the current address spaces'
 	 list of sections.  This possibly pushes the exec_ops
 	 target.  */
-      add_target_sections (&current_program_space->ebfd, sections);
+      current_program_space->add_target_sections (&current_program_space->ebfd,
+						  sections);
 
       /* Tell display code (if any) about the changed file name.  */
       if (deprecated_exec_file_display_hook)
@@ -594,28 +595,25 @@ build_section_table (struct bfd *some_bfd)
    current set of target sections.  */
 
 void
-add_target_sections (void *owner,
-		     const target_section_table &sections)
+program_space::add_target_sections (void *owner,
+				    const target_section_table &sections)
 {
-  target_section_table *table = &current_program_space->target_sections;
-
   if (!sections.empty ())
     {
       for (const target_section &s : sections)
 	{
-	  table->push_back (s);
-	  table->back ().owner = owner;
+	  target_sections.push_back (s);
+	  target_sections.back ().owner = owner;
 	}
 
       scoped_restore_current_pspace_and_thread restore_pspace_thread;
-      program_space *curr_pspace = current_program_space;
 
       /* If these are the first file sections we can provide memory
 	 from, push the file_stratum target.  Must do this in all
 	 inferiors sharing the program space.  */
       for (inferior *inf : all_inferiors ())
 	{
-	  if (inf->pspace != curr_pspace)
+	  if (inf->pspace != this)
 	    continue;
 
 	  if (inf->target_is_pushed (&exec_ops))
