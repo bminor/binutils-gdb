@@ -628,9 +628,8 @@ program_space::add_target_sections (void *owner,
 /* Add the sections of OBJFILE to the current set of target sections.  */
 
 void
-add_target_sections_of_objfile (struct objfile *objfile)
+program_space::add_target_sections (struct objfile *objfile)
 {
-  target_section_table *table = &current_program_space->target_sections;
   struct obj_section *osect;
 
   gdb_assert (objfile != nullptr);
@@ -641,9 +640,9 @@ add_target_sections_of_objfile (struct objfile *objfile)
       if (bfd_section_size (osect->the_bfd_section) == 0)
 	continue;
 
-      table->emplace_back (obj_section_addr (osect),
-			   obj_section_endaddr (osect),
-			   osect->the_bfd_section, (void *) objfile);
+      target_sections.emplace_back (obj_section_addr (osect),
+				    obj_section_endaddr (osect),
+				    osect->the_bfd_section, (void *) objfile);
     }
 }
 

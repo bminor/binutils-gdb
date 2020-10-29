@@ -2323,7 +2323,7 @@ add_symbol_file_command (const char *args, int from_tty)
   if (seen_offset)
     set_objfile_default_section_offset (objf, section_addrs, offset);
 
-  add_target_sections_of_objfile (objf);
+  current_program_space->add_target_sections (objf);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */

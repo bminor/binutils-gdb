@@ -305,6 +305,10 @@ struct program_space
   void add_target_sections (void *owner,
 			    const target_section_table &sections);
 
+  /* Add the sections of OBJFILE to the current set of target
+     sections.  They are given OBJFILE as the "owner".  */
+  void add_target_sections (struct objfile *objfile);
+
   /* Unique ID number.  */
   int num = 0;
 

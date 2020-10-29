@@ -92,11 +92,6 @@ extern enum target_xfer_status
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);
 
-/* Add the sections of OBJFILE to the current set of target sections.
- * OBJFILE owns the new target sections.  */
-
-extern void add_target_sections_of_objfile (struct objfile *objfile);
-
 /* Prints info about all sections defined in the TABLE.  ABFD is
    special cased --- it's filename is omitted; if it is the executable
    file, its entry point is printed.  */

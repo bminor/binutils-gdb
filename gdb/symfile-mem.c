@@ -122,7 +122,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   objf = symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
 				   add_flags, &sai, OBJF_SHARED, NULL);
 
-  add_target_sections_of_objfile (objf);
+  current_program_space->add_target_sections (objf);
 
   /* This might change our ideas about frames already looked at.  */
   reinit_frame_cache ();
