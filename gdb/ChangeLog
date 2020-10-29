@@ -1,5 +1,10 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* progspace.c (program_space::~program_space): Don't call
+	exec_close.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* exec.c (exec_target::close): Don't change current program
 	space.
 

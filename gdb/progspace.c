@@ -147,7 +147,6 @@ program_space::~program_space ()
 
   breakpoint_program_space_exit (this);
   no_shared_libraries (NULL, 0);
-  exec_close ();
   free_all_objfiles ();
   /* Defer breakpoint re-set because we don't want to create new
      locations for this pspace which we're tearing down.  */
