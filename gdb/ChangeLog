@@ -1,5 +1,10 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* exec.c (exec_target::close): Don't change current program
+	space.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (add_symbol_file_command): Update.
 	* exec.c (program_space::add_target_sections): Rename.
 	* symfile-mem.c (symbol_file_add_from_memory): Update.

@@ -154,11 +154,8 @@ exec_target_open (const char *args, int from_tty)
 void
 exec_target::close ()
 {
-  scoped_restore_current_program_space restore_pspace;
-
   for (struct program_space *ss : program_spaces)
     {
-      set_current_program_space (ss);
       ss->target_sections.clear ();
       ss->exec_close ();
     }
