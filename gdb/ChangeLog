@@ -1,5 +1,10 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* gcore.c (default_gcore_mach): Remove.
+	(create_gcore_bfd): Update.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* progspace.c (program_space::exec_close): New method, from
 	exec_close in exec.c.
 	* exec.c (exec_close): Move to progspace.c.
