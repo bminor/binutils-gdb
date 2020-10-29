@@ -266,12 +266,7 @@ core_target::build_file_mappings ()
 	bfd_set_section_alignment (sec, 2);
 
 	/* Set target_section fields.  */
-	m_core_file_mappings.emplace_back ();
-	target_section &ts = m_core_file_mappings.back ();
-	ts.addr = start;
-	ts.endaddr = end;
-	ts.owner = nullptr;
-	ts.the_bfd_section = sec;
+	m_core_file_mappings.emplace_back (start, end, sec);
       });
 
   normalize_mem_ranges (&m_core_unavailable_mappings);

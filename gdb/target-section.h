@@ -26,6 +26,15 @@
 
 struct target_section
 {
+  target_section (CORE_ADDR addr_, CORE_ADDR end_, struct bfd_section *sect_,
+		  void *owner_ = nullptr)
+    : addr (addr_),
+      endaddr (end_),
+      the_bfd_section (sect_),
+      owner (owner_)
+  {
+  }
+
   /* Lowest address in section.  */
   CORE_ADDR addr;
   /* Highest address in section, plus 1.  */

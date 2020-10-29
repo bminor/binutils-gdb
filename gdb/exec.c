@@ -598,12 +598,9 @@ build_section_table (struct bfd *some_bfd)
       if (!(aflag & SEC_ALLOC))
 	continue;
 
-      table.emplace_back ();
-      target_section &sect = table.back ();
-      sect.owner = NULL;
-      sect.the_bfd_section = asect;
-      sect.addr = bfd_section_vma (asect);
-      sect.endaddr = sect.addr + bfd_section_size (asect);
+      table.emplace_back (bfd_section_vma (asect),
+			  bfd_section_vma (asect) + bfd_section_size (asect),
+			  asect);
     }
 
   return table;
@@ -662,12 +659,9 @@ add_target_sections_of_objfile (struct objfile *objfile)
       if (bfd_section_size (osect->the_bfd_section) == 0)
 	continue;
 
-      table->emplace_back ();
-      target_section &ts = table->back ();
-      ts.addr = obj_section_addr (osect);
-      ts.endaddr = obj_section_endaddr (osect);
-      ts.the_bfd_section = osect->the_bfd_section;
-      ts.owner = (void *) objfile;
+      table->emplace_back (obj_section_addr (osect),
+			   obj_section_endaddr (osect),
+			   osect->the_bfd_section, (void *) objfile);
     }
 }
 

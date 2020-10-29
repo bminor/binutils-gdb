@@ -1,3 +1,10 @@
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
+	* target-section.h (struct target_section): Add constructor.
+	* exec.c (build_section_table, add_target_sections_of_objfile):
+	Update.
+	* corelow.c (core_target::build_file_mappings): Update.
+
 2020-10-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	PR gdb/19318
