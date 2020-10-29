@@ -159,7 +159,7 @@ exec_target::close ()
   for (struct program_space *ss : program_spaces)
     {
       set_current_program_space (ss);
-      current_target_sections->clear ();
+      ss->target_sections.clear ();
       ss->exec_close ();
     }
 }
@@ -591,7 +591,7 @@ void
 add_target_sections (void *owner,
 		     const target_section_table &sections)
 {
-  target_section_table *table = current_target_sections;
+  target_section_table *table = &current_program_space->target_sections;
 
   if (!sections.empty ())
     {
@@ -626,7 +626,7 @@ add_target_sections (void *owner,
 void
 add_target_sections_of_objfile (struct objfile *objfile)
 {
-  target_section_table *table = current_target_sections;
+  target_section_table *table = &current_program_space->target_sections;
   struct obj_section *osect;
 
   gdb_assert (objfile != nullptr);
@@ -649,7 +649,7 @@ add_target_sections_of_objfile (struct objfile *objfile)
 void
 remove_target_sections (void *owner)
 {
-  target_section_table *table = current_target_sections;
+  target_section_table *table = &current_program_space->target_sections;
 
   gdb_assert (owner != NULL);
 
@@ -893,7 +893,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 target_section_table *
 exec_target::get_section_table ()
 {
-  return current_target_sections;
+  return &current_program_space->target_sections;
 }
 
 enum target_xfer_status
@@ -991,7 +991,7 @@ void
 exec_target::files_info ()
 {
   if (exec_bfd)
-    print_section_info (current_target_sections, exec_bfd);
+    print_section_info (&current_program_space->target_sections, exec_bfd);
   else
     puts_filtered (_("\t<no file loaded>\n"));
 }
@@ -1015,7 +1015,7 @@ set_section_command (const char *args, int from_tty)
   /* Parse out new virtual address.  */
   secaddr = parse_and_eval_address (args);
 
-  for (target_section &p : *current_target_sections)
+  for (target_section &p : current_program_space->target_sections)
     {
       if (!strncmp (secname, bfd_section_name (p.the_bfd_section), seclen)
 	  && bfd_section_name (p.the_bfd_section)[seclen] == '\0')
@@ -1041,7 +1041,7 @@ set_section_command (const char *args, int from_tty)
 void
 exec_set_section_address (const char *filename, int index, CORE_ADDR address)
 {
-  for (target_section &p : *current_target_sections)
+  for (target_section &p : current_program_space->target_sections)
     {
       if (filename_cmp (filename,
 			bfd_get_filename (p.the_bfd_section->owner)) == 0
@@ -1058,7 +1058,7 @@ exec_target::has_memory ()
 {
   /* We can provide memory if we have any file/target sections to read
      from.  */
-  return !current_target_sections->empty ();
+  return !current_program_space->target_sections.empty ();
 }
 
 gdb::unique_xmalloc_ptr<char>

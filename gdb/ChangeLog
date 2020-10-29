@@ -1,5 +1,17 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (current_target_sections): Remove macro.
+	* solib-svr4.c (scan_dyntag): Update.
+	* solib-dsbt.c (scan_dyntag): Update.
+	* exec.c (exec_target::close): Update.
+	(add_target_sections, add_target_sections_of_objfile)
+	(remove_target_sections, exec_target::get_section_table)
+	(exec_target::files_info, set_section_command)
+	(exec_set_section_address, exec_target::has_memory)
+	(exec_target::has_memory): Update.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* source-cache.c (source_cache::get_plain_source_lines): Use
 	current_program_space.
 	* corefile.c (reopen_exec_file): Use current_program_space.

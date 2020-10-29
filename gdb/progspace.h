@@ -365,10 +365,6 @@ struct address_space
 
 #define symfile_objfile current_program_space->symfile_object_file
 
-/* The set of target sections matching the sections mapped into the
-   current program space.  */
-#define current_target_sections (&current_program_space->target_sections)
-
 /* The list of all program spaces.  There's always at least one.  */
 extern std::vector<struct program_space *>program_spaces;
 
