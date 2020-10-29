@@ -288,6 +288,11 @@ struct program_space
     ebfd = std::move (abfd);
   }
 
+  /* Reset saved solib data at the start of an solib event.  This lets
+     us properly collect the data when calling solib_add, so it can then
+     later be printed.  */
+  void clear_solib_cache ();
+
   /* Unique ID number.  */
   int num = 0;
 
@@ -434,11 +439,6 @@ extern int address_space_num (struct address_space *aspace);
    target description, to fixup the program/address spaces
    mappings.  */
 extern void update_address_spaces (void);
-
-/* Reset saved solib data at the start of an solib event.  This lets
-   us properly collect the data when calling solib_add, so it can then
-   later be printed.  */
-extern void clear_program_space_solib_cache (struct program_space *);
 
 /* Keep a registry of per-pspace data-pointers required by other GDB
    modules.  */

@@ -1252,7 +1252,7 @@ handle_solib_event (void)
   if (ops->handle_event != NULL)
     ops->handle_event ();
 
-  clear_program_space_solib_cache (current_inferior ()->pspace);
+  current_inferior ()->pspace->clear_solib_cache ();
 
   /* Check for any newly added shared libraries if we're supposed to
      be adding them automatically.  Switch terminal for any messages

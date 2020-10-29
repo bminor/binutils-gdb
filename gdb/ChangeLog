@@ -1,5 +1,16 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* progspace.c (program_space::~program_space): Don't call
+	clear_program_space_solib_cache.
+	(program_space::clear_solib_cache): Rename from
+	clear_solib_cache.
+	* solib.c (handle_solib_event): Update.
+	* progspace.h (struct program_space) <clear_solib_cache>: New
+	method.
+	(clear_program_space_solib_cache): Don't declare.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* windows-tdep.c (windows_solib_create_inferior_hook): Update.
 	* target.c (info_target_command): Update.
 	* symfile.c (syms_from_objfile_1, finish_new_objfile)
