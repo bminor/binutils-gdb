@@ -552,7 +552,7 @@ lm_base (void)
     return info->lm_base_cache;
 
   got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
-				   symfile_objfile);
+				   current_program_space->symfile_object_file);
 
   if (got_sym.minsym != 0)
     {
@@ -909,21 +909,22 @@ dsbt_relocate_main_executable (void)
   info->main_executable_lm_info = new lm_info_dsbt;
   info->main_executable_lm_info->map = ldm;
 
-  section_offsets new_offsets (symfile_objfile->section_offsets.size ());
+  objfile *objf = current_program_space->symfile_object_file;
+  section_offsets new_offsets (objf->section_offsets.size ());
   changed = 0;
 
-  ALL_OBJFILE_OSECTIONS (symfile_objfile, osect)
+  ALL_OBJFILE_OSECTIONS (objf, osect)
     {
       CORE_ADDR orig_addr, addr, offset;
       int osect_idx;
       int seg;
 
-      osect_idx = osect - symfile_objfile->sections;
+      osect_idx = osect - objf->sections;
 
       /* Current address of section.  */
       addr = obj_section_addr (osect);
       /* Offset from where this section started.  */
-      offset = symfile_objfile->section_offsets[osect_idx];
+      offset = objf->section_offsets[osect_idx];
       /* Original address prior to any past relocations.  */
       orig_addr = addr - offset;
 
@@ -943,10 +944,10 @@ dsbt_relocate_main_executable (void)
     }
 
   if (changed)
-    objfile_relocate (symfile_objfile, new_offsets);
+    objfile_relocate (objf, new_offsets);
 
-  /* Now that symfile_objfile has been relocated, we can compute the
-     GOT value and stash it away.  */
+  /* Now that OBJF has been relocated, we can compute the GOT value
+     and stash it away.  */
 }
 
 /* When gdb starts up the inferior, it nurses it along (through the

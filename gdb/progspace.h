@@ -372,11 +372,6 @@ struct address_space
   REGISTRY_FIELDS;
 };
 
-/* The object file that the main symbol table was loaded from (e.g. the
-   argument to the "symbol-file" or "file" command).  */
-
-#define symfile_objfile current_program_space->symfile_object_file
-
 /* The list of all program spaces.  There's always at least one.  */
 extern std::vector<struct program_space *>program_spaces;
 

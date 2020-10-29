@@ -2292,13 +2292,14 @@ frame_debug_got_null_frame (struct frame_info *this_frame,
 static bool
 inside_main_func (frame_info *this_frame)
 {
-  if (symfile_objfile == nullptr)
+  if (current_program_space->symfile_object_file == nullptr)
     return false;
 
   CORE_ADDR sym_addr;
   const char *name = main_name ();
   bound_minimal_symbol msymbol
-    = lookup_minimal_symbol (name, NULL, symfile_objfile);
+    = lookup_minimal_symbol (name, NULL,
+			     current_program_space->symfile_object_file);
   if (msymbol.minsym == nullptr)
     {
       /* In some language (for example Fortran) there will be no minimal

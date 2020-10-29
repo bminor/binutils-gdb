@@ -462,12 +462,13 @@ solib_aix_solib_create_inferior_hook (int from_tty)
     }
 
   lm_info_aix &exec_info = (*library_list)[0];
-  if (symfile_objfile != NULL)
+  if (current_program_space->symfile_object_file != NULL)
     {
-      section_offsets offsets
-	= solib_aix_get_section_offsets (symfile_objfile, &exec_info);
+      objfile *objf = current_program_space->symfile_object_file;
+      section_offsets offsets = solib_aix_get_section_offsets (objf,
+							       &exec_info);
 
-      objfile_relocate (symfile_objfile, offsets);
+      objfile_relocate (objf, offsets);
     }
 }
 

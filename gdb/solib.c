@@ -729,7 +729,8 @@ update_solib_list (int from_tty)
       /* If we are attaching to a running process for which we
 	 have not opened a symbol file, we may be able to get its
 	 symbols now!  */
-      if (inf->attach_flag && symfile_objfile == NULL)
+      if (inf->attach_flag
+	  && current_program_space->symfile_object_file == NULL)
 	{
 	  try
 	    {

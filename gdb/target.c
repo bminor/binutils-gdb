@@ -1828,9 +1828,12 @@ info_target_command (const char *args, int from_tty)
 {
   int has_all_mem = 0;
 
-  if (symfile_objfile != NULL)
-    printf_unfiltered (_("Symbols from \"%s\".\n"),
-		       objfile_name (symfile_objfile));
+  if (current_program_space->symfile_object_file != NULL)
+    {
+      objfile *objf = current_program_space->symfile_object_file;
+      printf_unfiltered (_("Symbols from \"%s\".\n"),
+			 objfile_name (objf));
+    }
 
   for (target_ops *t = current_top_target (); t != NULL; t = t->beneath ())
     {

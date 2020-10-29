@@ -539,7 +539,7 @@ darwin_solib_create_inferior_hook (int from_tty)
       load_addr = darwin_read_exec_load_addr_at_init (info);
     }
 
-  if (load_addr != 0 && symfile_objfile != NULL)
+  if (load_addr != 0 && current_program_space->symfile_object_file != NULL)
     {
       CORE_ADDR vmaddr;
 
@@ -548,7 +548,8 @@ darwin_solib_create_inferior_hook (int from_tty)
 
       /* Relocate.  */
       if (vmaddr != load_addr)
-	objfile_rebase (symfile_objfile, load_addr - vmaddr);
+	objfile_rebase (current_program_space->symfile_object_file,
+			load_addr - vmaddr);
     }
 
   /* Set solib notifier (to reload list of shared libraries).  */

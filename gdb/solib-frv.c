@@ -287,7 +287,7 @@ lm_base (void)
     return lm_base_cache;
 
   got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
-                                   symfile_objfile);
+                                   current_program_space->symfile_object_file);
   if (got_sym.minsym == 0)
     {
       if (solib_frv_debug)
@@ -717,7 +717,7 @@ enable_break (void)
   asection *interp_sect;
   CORE_ADDR entry_point;
 
-  if (symfile_objfile == NULL)
+  if (current_program_space->symfile_object_file == NULL)
     {
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
@@ -784,21 +784,22 @@ frv_relocate_main_executable (void)
   main_executable_lm_info = new lm_info_frv;
   main_executable_lm_info->map = ldm;
 
-  section_offsets new_offsets (symfile_objfile->section_offsets.size ());
+  objfile *objf = current_program_space->symfile_object_file;
+  section_offsets new_offsets (objf->section_offsets.size ());
   changed = 0;
 
-  ALL_OBJFILE_OSECTIONS (symfile_objfile, osect)
+  ALL_OBJFILE_OSECTIONS (objf, osect)
     {
       CORE_ADDR orig_addr, addr, offset;
       int osect_idx;
       int seg;
       
-      osect_idx = osect - symfile_objfile->sections;
+      osect_idx = osect - objf->sections;
 
       /* Current address of section.  */
       addr = obj_section_addr (osect);
       /* Offset from where this section started.  */
-      offset = symfile_objfile->section_offsets[osect_idx];
+      offset = objf->section_offsets[osect_idx];
       /* Original address prior to any past relocations.  */
       orig_addr = addr - offset;
 
@@ -818,10 +819,10 @@ frv_relocate_main_executable (void)
     }
 
   if (changed)
-    objfile_relocate (symfile_objfile, new_offsets);
+    objfile_relocate (objf, new_offsets);
 
-  /* Now that symfile_objfile has been relocated, we can compute the
-     GOT value and stash it away.  */
+  /* Now that OBJF has been relocated, we can compute the GOT value
+     and stash it away.  */
   main_executable_lm_info->got_value = main_got ();
 }
 
@@ -894,8 +895,8 @@ main_got (void)
 {
   struct bound_minimal_symbol got_sym;
 
-  got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_",
-				   NULL, symfile_objfile);
+  objfile *objf = current_program_space->symfile_object_file;
+  got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL, objf);
   if (got_sym.minsym == 0)
     return 0;
 
@@ -955,8 +956,9 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
     name = sym->linkage_name ();
 
   /* Check the main executable.  */
+  objfile *objf = current_program_space->symfile_object_file;
   addr = find_canonical_descriptor_in_load_object
-           (entry_point, got_value, name, symfile_objfile->obfd,
+           (entry_point, got_value, name, objf->obfd,
 	    main_executable_lm_info);
 
   /* If descriptor not found via main executable, check each load object
@@ -1110,7 +1112,7 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
     solib_add (0, 0, 1);
 
   /* frv_current_sos() will set main_lm_addr for the main executable.  */
-  if (objfile == symfile_objfile)
+  if (objfile == current_program_space->symfile_object_file)
     return main_lm_addr;
 
   /* The other link map addresses may be found by examining the list

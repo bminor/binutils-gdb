@@ -1323,7 +1323,8 @@ nto_procfs_target::create_inferior (const char *exec_file,
   target_terminal::init ();
 
   if (current_program_space->exec_bfd () != NULL
-      || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
+      || (current_program_space->symfile_object_file != NULL
+	  && current_program_space->symfile_object_file->obfd != NULL))
     solib_create_inferior_hook (0);
 }
 

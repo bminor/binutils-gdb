@@ -1,5 +1,34 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* windows-tdep.c (windows_solib_create_inferior_hook): Update.
+	* target.c (info_target_command): Update.
+	* symfile.c (syms_from_objfile_1, finish_new_objfile)
+	(symbol_file_clear, reread_symbols): Update.
+	* symfile-mem.c (add_symbol_file_from_memory_command): Update.
+	* stabsread.c (scan_file_globals): Update.
+	* solib.c (update_solib_list): Update.
+	* solib-svr4.c (elf_locate_base, open_symbol_file_object)
+	(svr4_fetch_objfile_link_map, enable_break)
+	(svr4_relocate_main_executable)
+	(svr4_iterate_over_objfiles_in_search_order): Update.
+	* solib-frv.c (lm_base, enable_break)
+	(frv_relocate_main_executable): Update.
+	(main_got, frv_fdpic_find_canonical_descriptor): Update.
+	(frv_fetch_objfile_link_map): Update.
+	* solib-dsbt.c (lm_base, dsbt_relocate_main_executable): Update.
+	* solib-darwin.c (darwin_solib_create_inferior_hook): Update.
+	* solib-aix.c (solib_aix_solib_create_inferior_hook): Update.
+	* remote.c (remote_target::get_offsets): Update.
+	(remote_target::start_remote)
+	(extended_remote_target::post_attach): Update.
+	* objfiles.c (entry_point_address_query): Update.
+	* nto-procfs.c (nto_procfs_target::create_inferior): Update.
+	* minsyms.c (get_symbol_leading_char): Update.
+	* frame.c (inside_main_func): Update.
+	* progspace.h (symfile_objfile): Remove macro.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* exec.c (exec_file_attach): Update.
 	* progspace.c (program_space::exec_close): Update.
 	* progspace.h (struct program_space) <ebfd>: Now a

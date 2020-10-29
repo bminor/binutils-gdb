@@ -143,8 +143,8 @@ add_symbol_file_from_memory_command (const char *args, int from_tty)
   addr = parse_and_eval_address (args);
 
   /* We need some representative bfd to know the target we are looking at.  */
-  if (symfile_objfile != NULL)
-    templ = symfile_objfile->obfd;
+  if (current_program_space->symfile_object_file != NULL)
+    templ = current_program_space->symfile_object_file->obfd;
   else
     templ = current_program_space->exec_bfd ();
   if (templ == NULL)

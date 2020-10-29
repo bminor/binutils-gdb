@@ -1008,8 +1008,12 @@ get_symbol_leading_char (bfd *abfd)
 {
   if (abfd != NULL)
     return bfd_get_symbol_leading_char (abfd);
-  if (symfile_objfile != NULL && symfile_objfile->obfd != NULL)
-    return bfd_get_symbol_leading_char (symfile_objfile->obfd);
+  if (current_program_space->symfile_object_file != NULL)
+    {
+      objfile *objf = current_program_space->symfile_object_file;
+      if (objf->obfd != NULL)
+	return bfd_get_symbol_leading_char (objf->obfd);
+    }
   return 0;
 }
 

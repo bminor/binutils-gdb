@@ -4518,8 +4518,9 @@ scan_file_globals (struct objfile *objfile)
      If we are scanning the symbols for a shared library, try to resolve
      them from the minimal symbols of the main executable first.  */
 
-  if (symfile_objfile && objfile != symfile_objfile)
-    resolve_objfile = symfile_objfile;
+  if (current_program_space->symfile_object_file
+      && objfile != current_program_space->symfile_object_file)
+    resolve_objfile = current_program_space->symfile_object_file;
   else
     resolve_objfile = objfile;
 

@@ -373,12 +373,12 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
 int
 entry_point_address_query (CORE_ADDR *entry_p)
 {
-  if (symfile_objfile == NULL || !symfile_objfile->per_bfd->ei.entry_point_p)
+  objfile *objf = current_program_space->symfile_object_file;
+  if (objf == NULL || !objf->per_bfd->ei.entry_point_p)
     return 0;
 
-  int idx = symfile_objfile->per_bfd->ei.the_bfd_section_index;
-  *entry_p = (symfile_objfile->per_bfd->ei.entry_point
-	      + symfile_objfile->section_offsets[idx]);
+  int idx = objf->per_bfd->ei.the_bfd_section_index;
+  *entry_p = objf->per_bfd->ei.entry_point + objf->section_offsets[idx];
 
   return 1;
 }

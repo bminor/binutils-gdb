@@ -806,7 +806,8 @@ elf_locate_base (void)
 
   /* This may be a static executable.  Look for the symbol
      conventionally named _r_debug, as a last resort.  */
-  msymbol = lookup_minimal_symbol ("_r_debug", NULL, symfile_objfile);
+  msymbol = lookup_minimal_symbol ("_r_debug", NULL,
+				   current_program_space->symfile_object_file);
   if (msymbol.minsym != NULL)
     return BMSYMBOL_VALUE_ADDRESS (msymbol);
 
@@ -971,7 +972,7 @@ open_symbol_file_object (int from_tty)
   if (from_tty)
     add_flags |= SYMFILE_VERBOSE;
 
-  if (symfile_objfile)
+  if (current_program_space->symfile_object_file)
     if (!query (_("Attempt to reload symbols from process? ")))
       return 0;
 
@@ -1544,7 +1545,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
     solib_add (NULL, 0, auto_solib_add);
 
   /* svr4_current_sos() will set main_lm_addr for the main executable.  */
-  if (objfile == symfile_objfile)
+  if (objfile == current_program_space->symfile_object_file)
     return info->main_lm_addr;
 
   /* If OBJFILE is a separate debug object file, look for the
@@ -2465,9 +2466,10 @@ enable_break (struct svr4_info *info, int from_tty)
   /* Scan through the lists of symbols, trying to look up the symbol and
      set a breakpoint there.  Terminate loop when we/if we succeed.  */
 
+  objfile *objf = current_program_space->symfile_object_file;
   for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
     {
-      msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
+      msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
       if ((msymbol.minsym != NULL)
 	  && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	{
@@ -2485,7 +2487,7 @@ enable_break (struct svr4_info *info, int from_tty)
     {
       for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
-	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
+	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
 	  if ((msymbol.minsym != NULL)
 	      && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	    {
@@ -2981,11 +2983,12 @@ svr4_relocate_main_executable (void)
   /* Even DISPLACEMENT 0 is a valid new difference of in-memory vs. in-file
      addresses.  */
 
-  if (symfile_objfile)
+  objfile *objf = current_program_space->symfile_object_file;
+  if (objf)
     {
-      section_offsets new_offsets (symfile_objfile->section_offsets.size (),
+      section_offsets new_offsets (objf->section_offsets.size (),
 				   displacement);
-      objfile_relocate (symfile_objfile, new_offsets);
+      objfile_relocate (objf, new_offsets);
     }
   else if (current_program_space->exec_bfd ())
     {
@@ -3246,7 +3249,7 @@ svr4_iterate_over_objfiles_in_search_order
       if (current_objfile->separate_debug_objfile_backlink != nullptr)
         current_objfile = current_objfile->separate_debug_objfile_backlink;
 
-      if (current_objfile == symfile_objfile)
+      if (current_objfile == current_program_space->symfile_object_file)
 	abfd = current_program_space->exec_bfd ();
       else
 	abfd = current_objfile->obfd;
