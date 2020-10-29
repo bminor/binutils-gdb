@@ -547,6 +547,8 @@ detach_inferior_command (const char *args, int from_tty)
   if (!args || !*args)
     error (_("Requires argument (inferior id(s) to detach)"));
 
+  scoped_restore_current_thread restore_thread;
+
   number_or_range_parser parser (args);
   while (!parser.finished ())
     {
@@ -583,6 +585,8 @@ kill_inferior_command (const char *args, int from_tty)
 {
   if (!args || !*args)
     error (_("Requires argument (inferior id(s) to kill)"));
+
+  scoped_restore_current_thread restore_thread;
 
   number_or_range_parser parser (args);
   while (!parser.finished ())

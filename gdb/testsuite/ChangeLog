@@ -1,3 +1,9 @@
+2020-10-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/kill-detach-inferiors-cmd.exp: Check that 'kill
+	inferiors' and 'detach inferiors' do not change the current
+	inferior.
+
 2020-10-29  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.threads/tls.exp: Fix DUPLICATEs.
