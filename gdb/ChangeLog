@@ -1,5 +1,14 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* progspace.c (program_space::exec_close): New method, from
+	exec_close in exec.c.
+	* exec.c (exec_close): Move to progspace.c.
+	(exec_target::close, exec_file_attach): Update.
+	* progspace.h (struct program_space) <exec_close>: Declare
+	method.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* progspace.h (struct program_space) <exec_filename>: Rename from
 	pspace_exec_filename.  Now a unique_xmalloc_ptr.
 	* inferior.c (print_selected_inferior): Update.

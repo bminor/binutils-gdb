@@ -117,8 +117,6 @@ extern void add_target_sections_of_objfile (struct objfile *objfile);
 extern void print_section_info (target_section_table *table,
 				bfd *abfd);
 
-extern void exec_close (void);
-
 /* Helper function that attempts to open the symbol file at EXEC_FILE_HOST.
    If successful, it proceeds to add the symbol file as the main symbol file.
 

@@ -223,6 +223,26 @@ program_space::solibs () const
   return next_adapter<struct so_list> (this->so_list);
 }
 
+/* See progspace.h.  */
+
+void
+program_space::exec_close ()
+{
+  if (ebfd)
+    {
+      gdb_bfd_unref (ebfd);
+
+      /* Removing target sections may close the exec_ops target.
+	 Clear exec_bfd before doing so to prevent recursion.  */
+      ebfd = NULL;
+      ebfd_mtime = 0;
+
+      remove_target_sections (&ebfd);
+
+      exec_filename.reset (nullptr);
+    }
+}
+
 /* Copies program space SRC to DEST.  Copies the main executable file,
    and the main symbol file.  Returns DEST.  */
 

@@ -148,29 +148,6 @@ exec_target_open (const char *args, int from_tty)
   exec_file_attach (args, from_tty);
 }
 
-/* Close and clear exec_bfd.  If we end up with no target sections to
-   read memory from, this unpushes the exec_ops target.  */
-
-void
-exec_close (void)
-{
-  if (exec_bfd)
-    {
-      bfd *abfd = exec_bfd;
-
-      gdb_bfd_unref (abfd);
-
-      /* Removing target sections may close the exec_ops target.
-	 Clear exec_bfd before doing so to prevent recursion.  */
-      exec_bfd = NULL;
-      exec_bfd_mtime = 0;
-
-      remove_target_sections (&exec_bfd);
-
-      current_program_space->exec_filename.reset (nullptr);
-    }
-}
-
 /* This is the target_close implementation.  Clears all target
    sections and closes all executable bfds from all program spaces.  */
 
@@ -183,7 +160,7 @@ exec_target::close ()
     {
       set_current_program_space (ss);
       current_target_sections->clear ();
-      exec_close ();
+      ss->exec_close ();
     }
 }
 
@@ -396,7 +373,7 @@ exec_file_attach (const char *filename, int from_tty)
   gdb_bfd_ref_ptr exec_bfd_holder = gdb_bfd_ref_ptr::new_reference (exec_bfd);
 
   /* Remove any previous exec file.  */
-  exec_close ();
+  current_program_space->exec_close ();
 
   /* Now open and digest the file the user requested, if any.  */
 
@@ -497,7 +474,7 @@ exec_file_attach (const char *filename, int from_tty)
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
-	  exec_close ();
+	  current_program_space->exec_close ();
 	  error (_("\"%ps\": not in executable format: %s"),
 		 styled_string (file_name_style.style (), scratch_pathname),
 		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());

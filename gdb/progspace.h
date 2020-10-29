@@ -272,6 +272,9 @@ struct program_space
      for (so_list *so : pspace->solibs ()) { ... }  */
   next_adapter<struct so_list> solibs () const;
 
+  /* Close and clear exec_bfd.  If we end up with no target sections
+     to read memory from, this unpushes the exec_ops target.  */
+  void exec_close ();
 
   /* Unique ID number.  */
   int num = 0;
