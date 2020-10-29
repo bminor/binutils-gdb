@@ -1268,8 +1268,15 @@ group_signature (asection *group)
 static bfd_boolean
 is_dwo_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 {
-  const char *name = bfd_section_name (sec);
-  int len = strlen (name);
+  const char *name;
+  int len;
+
+  if (sec == NULL || (name = bfd_section_name (sec)) == NULL)
+    return FALSE;
+
+  len = strlen (name);
+  if (len < 5)
+    return FALSE;
 
   return strncmp (name + len - 4, ".dwo", 4) == 0;
 }

@@ -1,3 +1,9 @@
+2020-10-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 26805
+	* objcopy.c (is_dwo_section): Check for missing or short section
+	names.
+
 2020-10-26  Andreas Rammhold <andreas@rammhold.de>
 
 	* README-how-to-make-a-release: Use sha256sum instead of md5sum.
