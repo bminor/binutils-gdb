@@ -1,3 +1,19 @@
+2020-10-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26808
+	* dwarf.c (abbrev_list): Add abbrev_base.
+	(new_abbrev_list): Add an abbrev_base argument and record it.
+	(find_abbrev_list_by_abbrev_offset): Add an abbrev_base argument
+	and match it.
+	(process_debug_info): Pass abbrev_base to new_abbrev_list and
+	find_abbrev_list_by_abbrev_offset.
+	(display_debug_abbrev): Pass 0 abbrev_base to new_abbrev_list
+	and find_abbrev_list_by_abbrev_offset.
+	* testsuite/binutils-all/x86-64/pr26808.dump: New file.
+	* testsuite/binutils-all/x86-64/pr26808.dwp.bz2: Likewise.
+	* testsuite/binutils-all/x86-64/x86-64.exp: Run PR binutils/26808
+	test.
+
 2020-10-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 26805

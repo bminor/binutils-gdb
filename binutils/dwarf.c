@@ -876,6 +876,7 @@ typedef struct abbrev_list
 {
   abbrev_entry *        first_abbrev;
   abbrev_entry *        last_abbrev;
+  dwarf_vma             abbrev_base;
   dwarf_vma             abbrev_offset;
   struct abbrev_list *  next;
   unsigned char *       start_of_next_abbrevs;
@@ -955,10 +956,11 @@ free_all_abbrevs (void)
 }
 
 static abbrev_list *
-new_abbrev_list (dwarf_vma abbrev_offset)
+new_abbrev_list (dwarf_vma abbrev_base, dwarf_vma abbrev_offset)
 {
   abbrev_list * list = (abbrev_list *) xcalloc (sizeof * list, 1);
 
+  list->abbrev_base = abbrev_base;
   list->abbrev_offset = abbrev_offset;
 
   list->next = abbrev_lists;
@@ -968,12 +970,14 @@ new_abbrev_list (dwarf_vma abbrev_offset)
 }
 
 static abbrev_list *
-find_abbrev_list_by_abbrev_offset (dwarf_vma abbrev_offset)
+find_abbrev_list_by_abbrev_offset (dwarf_vma abbrev_base,
+				   dwarf_vma abbrev_offset)
 {
   abbrev_list * list;
 
   for (list = abbrev_lists; list != NULL; list = list->next)
-    if (list->abbrev_offset == abbrev_offset)
+    if (list->abbrev_base == abbrev_base
+	&& list->abbrev_offset == abbrev_offset)
       return list;
 
   return NULL;
@@ -3455,6 +3459,8 @@ process_debug_info (struct dwarf_section *           section,
     {
       DWARF2_Internal_CompUnit  compunit;
       unsigned char *           hdrptr;
+      dwarf_vma                 abbrev_base;
+      size_t                    abbrev_size;
       dwarf_vma                 cu_offset;
       unsigned int              offset_size;
       unsigned int              initial_length_size;
@@ -3499,25 +3505,25 @@ process_debug_info (struct dwarf_section *           section,
 
       SAFE_BYTE_GET_AND_INC (compunit.cu_abbrev_offset, hdrptr, offset_size, end);
 
-      list = find_abbrev_list_by_abbrev_offset (compunit.cu_abbrev_offset);
+      if (this_set == NULL)
+	{
+	  abbrev_base = 0;
+	  abbrev_size = debug_displays [abbrev_sec].section.size;
+	}
+      else
+	{
+	  abbrev_base = this_set->section_offsets [DW_SECT_ABBREV];
+	  abbrev_size = this_set->section_sizes [DW_SECT_ABBREV];
+	}
+
+      list = find_abbrev_list_by_abbrev_offset (abbrev_base,
+						compunit.cu_abbrev_offset);
       if (list == NULL)
 	{
-	  dwarf_vma        abbrev_base;
-	  size_t           abbrev_size;
 	  unsigned char *  next;
 
-	  if (this_set == NULL)
-	    {
-	      abbrev_base = 0;
-	      abbrev_size = debug_displays [abbrev_sec].section.size;
-	    }
-	  else
-	    {
-	      abbrev_base = this_set->section_offsets [DW_SECT_ABBREV];
-	      abbrev_size = this_set->section_sizes [DW_SECT_ABBREV];
-	    }
-
-	  list = new_abbrev_list (compunit.cu_abbrev_offset);
+	  list = new_abbrev_list (abbrev_base,
+				  compunit.cu_abbrev_offset);
 	  next = process_abbrev_set
 	    (((unsigned char *) debug_displays [abbrev_sec].section.start
 	      + abbrev_base + compunit.cu_abbrev_offset),
@@ -3739,12 +3745,14 @@ process_debug_info (struct dwarf_section *           section,
 	      (unsigned long) debug_displays [abbrev_sec].section.size);
       else
 	{
-	  list = find_abbrev_list_by_abbrev_offset (compunit.cu_abbrev_offset);
+	  list = find_abbrev_list_by_abbrev_offset (abbrev_base,
+						    compunit.cu_abbrev_offset);
 	  if (list == NULL)
 	    {
 	      unsigned char * next;
 
-	      list = new_abbrev_list (compunit.cu_abbrev_offset);
+	      list = new_abbrev_list (abbrev_base,
+				      compunit.cu_abbrev_offset);
 	      next = process_abbrev_set
 		(((unsigned char *) debug_displays [abbrev_sec].section.start
 		  + abbrev_base + compunit.cu_abbrev_offset),
@@ -6071,10 +6079,10 @@ display_debug_abbrev (struct dwarf_section *section,
       dwarf_vma        offset;
 
       offset = start - section->start;
-      list = find_abbrev_list_by_abbrev_offset (offset);
+      list = find_abbrev_list_by_abbrev_offset (0, offset);
       if (list == NULL)
 	{
-	  list = new_abbrev_list (offset);
+	  list = new_abbrev_list (0, offset);
 	  start = process_abbrev_set (start, end, list);
 	  list->start_of_next_abbrevs = start;
 	}
