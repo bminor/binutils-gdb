@@ -1,3 +1,11 @@
+2020-10-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 26809
+	* elf.c (_bfd_elf_slurp_secondary_reloc_section): Use the correct
+	sized reloc reading function.
+	(_bfd_elf_write_secondary_reloc_section): Use the correct sized
+	reloc writing function.
+
 2020-10-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 26774

@@ -12632,7 +12632,10 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *      abfd,
 	      bfd_boolean res;
 	      Elf_Internal_Rela rela;
 
-	      ebd->s->swap_reloca_in (abfd, native_reloc, & rela);
+	      if (entsize == ebd->s->sizeof_rel)
+		ebd->s->swap_reloc_in (abfd, native_reloc, & rela);
+	      else /* entsize == ebd->s->sizeof_rela */
+		ebd->s->swap_reloca_in (abfd, native_reloc, & rela);
 
 	      /* The address of an ELF reloc is section relative for an object
 		 file, and absolute for an executable file or shared library.
@@ -12823,6 +12826,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	  int          last_sym_idx;
 	  unsigned int reloc_count;
 	  unsigned int idx;
+	  unsigned int entsize;
 	  arelent *    src_irel;
 	  bfd_byte *   dst_rela;
 
@@ -12837,7 +12841,8 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	      continue;
 	    }
 
-	  if (hdr->sh_entsize == 0)
+	  entsize = hdr->sh_entsize;
+	  if (entsize == 0)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
@@ -12847,8 +12852,19 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	      result = FALSE;
 	      continue;
 	    }
+	  else if (entsize != ebd->s->sizeof_rel
+		   && entsize != ebd->s->sizeof_rela)
+	    {
+	      _bfd_error_handler
+		/* xgettext:c-format */
+		(_("%pB(%pA): error: secondary reloc section has non-standard sized entries"),
+		 abfd, relsec);
+	      bfd_set_error (bfd_error_bad_value);
+	      result = FALSE;
+	      continue;
+	    }
 
-	  reloc_count = hdr->sh_size / hdr->sh_entsize;
+	  reloc_count = hdr->sh_size / entsize;
 	  if (reloc_count <= 0)
 	    {
 	      _bfd_error_handler
@@ -12883,7 +12899,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	      continue;
 	    }
 
-	  for (idx = 0; idx < reloc_count; idx++, dst_rela += hdr->sh_entsize)
+	  for (idx = 0; idx < reloc_count; idx++, dst_rela += entsize)
 	    {
 	      Elf_Internal_Rela src_rela;
 	      arelent *ptr;
@@ -12959,7 +12975,11 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	      else
 		src_rela.r_info = r_info (n, ptr->howto->type);
 	      src_rela.r_addend = ptr->addend;
-	      ebd->s->swap_reloca_out (abfd, &src_rela, dst_rela);
+
+	      if (entsize == ebd->s->sizeof_rel)
+		ebd->s->swap_reloc_out (abfd, &src_rela, dst_rela);
+	      else /* entsize == ebd->s->sizeof_rela */
+		ebd->s->swap_reloca_out (abfd, &src_rela, dst_rela);
 	    }
 	}
     }
