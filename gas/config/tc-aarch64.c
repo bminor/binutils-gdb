@@ -6714,7 +6714,11 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    {
 	      /* Regular barriers accept options CRm (C0-C15).
 	         DSB nXS barrier variant accepts values > 15.  */
-	      po_imm_or_fail (0, 15);
+	      if (val < 0 || val > 15)
+	      {
+	        set_syntax_error (_("the specified option is not accepted in DSB"));
+	        goto failure;
+	      }
 	    }
 	  /* This is an extension to accept a 0..15 immediate.  */
 	  if (val == PARSE_FAIL)
