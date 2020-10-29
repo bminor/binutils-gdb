@@ -27,3 +27,34 @@ foreach t $test_list {
     verbose [file rootname $t]
     run_dump_test [file rootname $t]
 }
+
+set t $srcdir/$subdir/pr26808.dwp.bz2
+# We need to strip the ".bz2", but can leave the dirname.
+set test $subdir/[file tail $t]
+set testname [file rootname $test]
+verbose $testname
+if {[catch "system \"bzip2 -dc $t > $tempfile\""] != 0} {
+  untested "bzip2 -dc ($testname)"
+} else {
+    send_log "$READELF -wi $tempfile > tmpdir/pr26808.out 2> /dev/null\n"
+    verbose "$READELF -wi $tempfile > tmpdir/pr26808.out 2> /dev/null" 1
+    set got [catch "system \"$READELF -wi $tempfile > tmpdir/pr26808.out 2> /dev/null\""]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]]} then {
+	fail $testname
+    } else {
+	send_log "cmp tmpdir/pr26808.out $srcdir/$subdir/pr26808.dump\n"
+	verbose "cmp tmpdir/pr26808.out $srcdir/$subdir/pr26808.dump" 1
+	set status [remote_exec build cmp "tmpdir/pr26808.out $srcdir/$subdir/pr26808.dump"]
+	set exec_output [lindex $status 1]
+	set exec_output [prune_warnings $exec_output]
+
+	if [string match "" $exec_output] then {
+	    pass "readelf -wi ($testname)"
+	} else {
+	    send_log "$exec_output\n"
+	    verbose "$exec_output" 1
+	    fail "readelf -wi ($testname)"
+	}
+    }
+}
