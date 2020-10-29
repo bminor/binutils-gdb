@@ -482,7 +482,7 @@ exec_file_attach (const char *filename, int from_tty)
 
       target_section_table sections = build_section_table (exec_bfd);
 
-      exec_bfd_mtime = bfd_get_mtime (exec_bfd);
+      current_program_space->ebfd_mtime = bfd_get_mtime (exec_bfd);
 
       validate_files ();
 

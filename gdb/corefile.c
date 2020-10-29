@@ -115,7 +115,9 @@ reopen_exec_file (void)
   std::string filename = bfd_get_filename (exec_bfd);
   res = stat (filename.c_str (), &st);
 
-  if (res == 0 && exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
+  if (res == 0
+      && current_program_space->ebfd_mtime
+      && current_program_space->ebfd_mtime != st.st_mtime)
     exec_file_attach (filename.c_str (), 0);
   else
     /* If we accessed the file since last opening it, close it now;

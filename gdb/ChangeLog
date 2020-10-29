@@ -1,5 +1,13 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* source-cache.c (source_cache::get_plain_source_lines): Use
+	current_program_space.
+	* corefile.c (reopen_exec_file): Use current_program_space.
+	* exec.c (exec_file_attach): Use current_program_space.
+	* exec.h (exec_bfd_mtime): Remove.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* gcore.c (default_gcore_mach): Remove.
 	(create_gcore_bfd): Update.
 

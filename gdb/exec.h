@@ -31,7 +31,6 @@ struct bfd;
 struct objfile;
 
 #define exec_bfd current_program_space->ebfd
-#define exec_bfd_mtime current_program_space->ebfd_mtime
 
 /* Builds a section table, given args BFD.  */
 
