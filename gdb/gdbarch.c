@@ -3987,13 +3987,13 @@ set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch,
 }
 
 bool
-gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, struct displaced_step_closure *closure)
+gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->displaced_step_hw_singlestep != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_displaced_step_hw_singlestep called\n");
-  return gdbarch->displaced_step_hw_singlestep (gdbarch, closure);
+  return gdbarch->displaced_step_hw_singlestep (gdbarch);
 }
 
 void

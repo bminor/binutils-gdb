@@ -587,8 +587,7 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 /* Implement displaced_step_hw_singlestep gdbarch method.  */
 
 static bool
-s390_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
-				   struct displaced_step_closure *closure)
+s390_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
   return true;
 }

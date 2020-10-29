@@ -1044,8 +1044,8 @@ extern void set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, gdbar
    The default implementation returns false on all targets that
    provide a gdbarch_software_single_step routine, and true otherwise. */
 
-typedef bool (gdbarch_displaced_step_hw_singlestep_ftype) (struct gdbarch *gdbarch, struct displaced_step_closure *closure);
-extern bool gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, struct displaced_step_closure *closure);
+typedef bool (gdbarch_displaced_step_hw_singlestep_ftype) (struct gdbarch *gdbarch);
+extern bool gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch);
 extern void set_gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, gdbarch_displaced_step_hw_singlestep_ftype *displaced_step_hw_singlestep);
 
 /* Fix up the state resulting from successfully single-stepping a

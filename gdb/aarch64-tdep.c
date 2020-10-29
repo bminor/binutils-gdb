@@ -3270,8 +3270,7 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 /* Implement the "displaced_step_hw_singlestep" gdbarch method.  */
 
 bool
-aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
-				      struct displaced_step_closure *closure)
+aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
   return true;
 }

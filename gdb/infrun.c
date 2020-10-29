@@ -2459,15 +2459,11 @@ resume_1 (enum gdb_signal sig)
 	}
       else if (prepared > 0)
 	{
-	  struct displaced_step_inferior_state *displaced;
-
 	  /* Update pc to reflect the new address from which we will
 	     execute instructions due to displaced stepping.  */
 	  pc = regcache_read_pc (get_thread_regcache (tp));
 
-	  displaced = get_displaced_stepping_state (tp->inf);
-	  step = gdbarch_displaced_step_hw_singlestep
-	    (gdbarch, displaced->step_closure.get ());
+	  step = gdbarch_displaced_step_hw_singlestep (gdbarch);
 	}
     }
 

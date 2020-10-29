@@ -1,3 +1,23 @@
+2020-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (displaced_step_hw_singlestep): Remove closure
+	parameter.
+	* aarch64-tdep.c (aarch64_displaced_step_hw_singlestep):
+	Likewise.
+	* aarch64-tdep.h (aarch64_displaced_step_hw_singlestep):
+	Likewise.
+	* arch-utils.c (default_displaced_step_hw_singlestep):
+	Likewise.
+	* arch-utils.h (default_displaced_step_hw_singlestep):
+	Likewise.
+	* rs6000-tdep.c (ppc_displaced_step_hw_singlestep):
+	Likewise.
+	* s390-tdep.c (s390_displaced_step_hw_singlestep):
+	Likewise.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+	* infrun.c (resume_1): Adjust.
+
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
 	* progspace.c (program_space::~program_space): Don't call

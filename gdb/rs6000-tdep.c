@@ -995,8 +995,7 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 /* Always use hardware single-stepping to execute the
    displaced instruction.  */
 static bool
-ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch,
-				  struct displaced_step_closure *closure)
+ppc_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
 {
   return true;
 }
