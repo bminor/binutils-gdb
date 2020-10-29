@@ -1,5 +1,12 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* progspace.h (struct program_space) <remove_target_sections>:
+	Declare.
+	* exec.c (program_space::remove_target_sections): Now a method.
+	* exec.h (remove_target_sections): Don't declare.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* inferior.c (delete_inferior): Update.
 	* progspace.c (program_space::empty): Rename from
 	program_space_empty_p.  Return bool.

@@ -297,6 +297,9 @@ struct program_space
      space.  */
   bool empty ();
 
+  /* Remove all target sections owned by OWNER.  */
+  void remove_target_sections (void *owner);
+
   /* Unique ID number.  */
   int num = 0;
 

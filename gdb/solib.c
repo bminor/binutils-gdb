@@ -824,7 +824,7 @@ update_solib_list (int from_tty)
 
 	  /* Some targets' section tables might be referring to
 	     sections from so->abfd; remove them.  */
-	  remove_target_sections (gdb);
+	  current_program_space->remove_target_sections (gdb);
 
 	  free_so (gdb);
 	  gdb = *gdb_link;
@@ -1175,7 +1175,7 @@ clear_solib (void)
 
       current_program_space->so_list = so->next;
       gdb::observers::solib_unloaded.notify (so);
-      remove_target_sections (so);
+      current_program_space->remove_target_sections (so);
       free_so (so);
     }
 
@@ -1295,7 +1295,7 @@ reload_shared_libraries_1 (int from_tty)
 	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (so))
 	    so->objfile->unlink ();
-	  remove_target_sections (so);
+	  current_program_space->remove_target_sections (so);
 	  clear_so (so);
 	}
 

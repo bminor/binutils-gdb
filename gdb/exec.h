@@ -92,10 +92,6 @@ extern enum target_xfer_status
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);
 
-/* Remove all target sections owned by OWNER.  */
-
-extern void remove_target_sections (void *owner);
-
 /* Add the sections array defined by [SECTIONS..SECTIONS_END[ to the
    current set of target sections.  */
 

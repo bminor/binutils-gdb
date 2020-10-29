@@ -653,34 +653,28 @@ add_target_sections_of_objfile (struct objfile *objfile)
    OWNER must be the same value passed to add_target_sections.  */
 
 void
-remove_target_sections (void *owner)
+program_space::remove_target_sections (void *owner)
 {
-  target_section_table *table = &current_program_space->target_sections;
-
   gdb_assert (owner != NULL);
 
-  auto it = std::remove_if (table->begin (),
-			    table->end (),
+  auto it = std::remove_if (target_sections.begin (),
+			    target_sections.end (),
 			    [&] (target_section &sect)
 			    {
 			      return sect.owner == owner;
 			    });
-  table->erase (it, table->end ());
+  target_sections.erase (it, target_sections.end ());
 
   /* If we don't have any more sections to read memory from,
      remove the file_stratum target from the stack of each
      inferior sharing the program space.  */
-  if (table->empty ())
+  if (target_sections.empty ())
     {
       scoped_restore_current_pspace_and_thread restore_pspace_thread;
-      program_space *curr_pspace = current_program_space;
 
       for (inferior *inf : all_inferiors ())
 	{
-	  if (inf->pspace != curr_pspace)
-	    continue;
-
-	  if (!inf->pspace->target_sections.empty ())
+	  if (inf->pspace != this)
 	    continue;
 
 	  switch_to_inferior_no_thread (inf);
