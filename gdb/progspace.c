@@ -233,7 +233,7 @@ program_space::exec_close ()
       gdb_bfd_unref (ebfd);
 
       /* Removing target sections may close the exec_ops target.
-	 Clear exec_bfd before doing so to prevent recursion.  */
+	 Clear ebfd before doing so to prevent recursion.  */
       ebfd = NULL;
       ebfd_mtime = 0;
 
@@ -471,7 +471,7 @@ initialize_progspace (void)
      _initialize_foo routines may need to install their per-pspace
      data keys.  We can only allocate a progspace when all those
      modules have done that.  Do this before
-     initialize_current_architecture, because that accesses exec_bfd,
-     which in turn dereferences current_program_space.  */
+     initialize_current_architecture, because that accesses the ebfd
+     of current_program_space.  */
   current_program_space = new program_space (new_address_space ());
 }

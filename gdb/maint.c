@@ -380,14 +380,16 @@ print_bfd_section_info_maybe_relocated (bfd *abfd, asection *asect,
 static void
 maintenance_info_sections (const char *arg, int from_tty)
 {
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     {
       bool allobj = false;
 
       printf_filtered (_("Exec file:\n"));
-      printf_filtered ("    `%s', ", bfd_get_filename (exec_bfd));
+      printf_filtered ("    `%s', ",
+		       bfd_get_filename (current_program_space->exec_bfd ()));
       wrap_here ("        ");
-      printf_filtered (_("file type %s.\n"), bfd_get_target (exec_bfd));
+      printf_filtered (_("file type %s.\n"),
+		       bfd_get_target (current_program_space->exec_bfd ()));
 
       /* Only this function cares about the 'ALLOBJ' argument;
 	 if 'ALLOBJ' is the only argument, discard it rather than
@@ -404,7 +406,7 @@ maintenance_info_sections (const char *arg, int from_tty)
 	  if (allobj)
 	    printf_filtered (_("  Object file: %s\n"),
 			     bfd_get_filename (ofile->obfd));
-	  else if (ofile->obfd != exec_bfd)
+	  else if (ofile->obfd != current_program_space->exec_bfd ())
 	    continue;
 
 	  int section_count = gdb_bfd_count_sections (ofile->obfd);

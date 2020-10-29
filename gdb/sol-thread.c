@@ -794,7 +794,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, psaddr_t addr,
 #if defined (__sparcv9)
   /* For Sparc64 cross Sparc32, make sure the address has not been
      accidentally sign-extended (or whatever) to beyond 32 bits.  */
-  if (bfd_get_arch_size (exec_bfd) == 32)
+  if (bfd_get_arch_size (current_program_space->exec_bfd ()) == 32)
     addr &= 0xffffffff;
 #endif
 
@@ -950,9 +950,9 @@ ps_lsetfpregs (struct ps_prochandle *ph, lwpid_t lwpid,
 ps_err_e
 ps_pdmodel (struct ps_prochandle *ph, int *data_model)
 {
-  if (exec_bfd == 0)
+  if (current_program_space->exec_bfd () == 0)
     *data_model = PR_MODEL_UNKNOWN;
-  else if (bfd_get_arch_size (exec_bfd) == 32)
+  else if (bfd_get_arch_size (current_program_space->exec_bfd ()) == 32)
     *data_model = PR_MODEL_ILP32;
   else
     *data_model = PR_MODEL_LP64;

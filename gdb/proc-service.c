@@ -42,7 +42,8 @@
 static CORE_ADDR
 ps_addr_to_core_addr (psaddr_t addr)
 {
-  if (exec_bfd && bfd_get_sign_extend_vma (exec_bfd))
+  if (current_program_space->exec_bfd ()
+      && bfd_get_sign_extend_vma (current_program_space->exec_bfd ()))
     return (intptr_t) addr;
   else
     return (uintptr_t) addr;
@@ -53,7 +54,8 @@ ps_addr_to_core_addr (psaddr_t addr)
 static psaddr_t
 core_addr_to_ps_addr (CORE_ADDR addr)
 {
-  if (exec_bfd && bfd_get_sign_extend_vma (exec_bfd))
+  if (current_program_space->exec_bfd ()
+      && bfd_get_sign_extend_vma (current_program_space->exec_bfd ()))
     return (psaddr_t) (intptr_t) addr;
   else
     return (psaddr_t) (uintptr_t) addr;

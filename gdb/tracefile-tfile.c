@@ -25,7 +25,7 @@
 #include "regcache.h"
 #include "inferior.h"
 #include "gdbthread.h"
-#include "exec.h" /* exec_bfd */
+#include "exec.h"
 #include "completer.h"
 #include "filenames.h"
 #include "remote.h"

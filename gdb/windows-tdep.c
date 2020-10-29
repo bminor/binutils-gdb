@@ -914,7 +914,8 @@ windows_solib_create_inferior_hook (int from_tty)
   /* Rebase executable if the base address changed because of ASLR.  */
   if (symfile_objfile != nullptr && exec_base != 0)
     {
-      CORE_ADDR vmaddr = pe_data (exec_bfd)->pe_opthdr.ImageBase;
+      CORE_ADDR vmaddr
+	= pe_data (current_program_space->exec_bfd ())->pe_opthdr.ImageBase;
       if (vmaddr != exec_base)
 	objfile_rebase (symfile_objfile, exec_base - vmaddr);
     }

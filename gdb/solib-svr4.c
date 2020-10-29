@@ -554,20 +554,22 @@ read_program_header (int type, int *p_arch_size, CORE_ADDR *base_addr)
 static gdb::optional<gdb::byte_vector>
 find_program_interpreter (void)
 {
-  /* If we have an exec_bfd, use its section table.  */
-  if (exec_bfd
-      && bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
+  /* If we have a current exec_bfd, use its section table.  */
+  if (current_program_space->exec_bfd ()
+      && (bfd_get_flavour (current_program_space->exec_bfd ())
+	  == bfd_target_elf_flavour))
    {
      struct bfd_section *interp_sect;
 
-     interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
+     interp_sect = bfd_get_section_by_name (current_program_space->exec_bfd (),
+					    ".interp");
      if (interp_sect != NULL)
       {
 	int sect_size = bfd_section_size (interp_sect);
 
 	gdb::byte_vector buf (sect_size);
-	bfd_get_section_contents (exec_bfd, interp_sect, buf.data (), 0,
-				  sect_size);
+	bfd_get_section_contents (current_program_space->exec_bfd (),
+				  interp_sect, buf.data (), 0, sect_size);
 	return buf;
       }
    }
@@ -762,7 +764,8 @@ elf_locate_base (void)
   /* Look for DT_MIPS_RLD_MAP first.  MIPS executables use this
      instead of DT_DEBUG, although they sometimes contain an unused
      DT_DEBUG.  */
-  if (scan_dyntag (DT_MIPS_RLD_MAP, exec_bfd, &dyn_ptr, NULL)
+  if (scan_dyntag (DT_MIPS_RLD_MAP, current_program_space->exec_bfd (),
+		   &dyn_ptr, NULL)
       || scan_dyntag_auxv (DT_MIPS_RLD_MAP, &dyn_ptr, NULL))
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
@@ -780,7 +783,8 @@ elf_locate_base (void)
   /* Then check DT_MIPS_RLD_MAP_REL.  MIPS executables now use this form
      because of needing to support PIE.  DT_MIPS_RLD_MAP will also exist
      in non-PIE.  */
-  if (scan_dyntag (DT_MIPS_RLD_MAP_REL, exec_bfd, &dyn_ptr, &dyn_ptr_addr)
+  if (scan_dyntag (DT_MIPS_RLD_MAP_REL, current_program_space->exec_bfd (),
+		   &dyn_ptr, &dyn_ptr_addr)
       || scan_dyntag_auxv (DT_MIPS_RLD_MAP_REL, &dyn_ptr, &dyn_ptr_addr))
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
@@ -796,7 +800,7 @@ elf_locate_base (void)
     }
 
   /* Find DT_DEBUG.  */
-  if (scan_dyntag (DT_DEBUG, exec_bfd, &dyn_ptr, NULL)
+  if (scan_dyntag (DT_DEBUG, current_program_space->exec_bfd (), &dyn_ptr, NULL)
       || scan_dyntag_auxv (DT_DEBUG, &dyn_ptr, NULL))
     return dyn_ptr;
 
@@ -1399,7 +1403,9 @@ svr4_current_sos_direct (struct svr4_info *info)
 
   /* Assume that everything is a library if the dynamic loader was loaded
      late by a static executable.  */
-  if (exec_bfd && bfd_get_section_by_name (exec_bfd, ".dynamic") == NULL)
+  if (current_program_space->exec_bfd ()
+      && bfd_get_section_by_name (current_program_space->exec_bfd (),
+				  ".dynamic") == NULL)
     ignore_first = 0;
   else
     ignore_first = 1;
@@ -2564,27 +2570,30 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
      a call to gdbarch_convert_from_func_ptr_addr.  */
   CORE_ADDR entry_point, exec_displacement;
 
-  if (exec_bfd == NULL)
+  if (current_program_space->exec_bfd () == NULL)
     return 0;
 
   /* Therefore for ELF it is ET_EXEC and not ET_DYN.  Both shared libraries
      being executed themselves and PIE (Position Independent Executable)
      executables are ET_DYN.  */
 
-  if ((bfd_get_file_flags (exec_bfd) & DYNAMIC) == 0)
+  if ((bfd_get_file_flags (current_program_space->exec_bfd ()) & DYNAMIC) == 0)
     return 0;
 
   if (target_auxv_search (current_top_target (), AT_ENTRY, &entry_point) <= 0)
     return 0;
 
-  exec_displacement = entry_point - bfd_get_start_address (exec_bfd);
+  exec_displacement
+    = entry_point - bfd_get_start_address (current_program_space->exec_bfd ());
 
   /* Verify the EXEC_DISPLACEMENT candidate complies with the required page
      alignment.  It is cheaper than the program headers comparison below.  */
 
-  if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
+  if (bfd_get_flavour (current_program_space->exec_bfd ())
+      == bfd_target_elf_flavour)
     {
-      const struct elf_backend_data *elf = get_elf_backend_data (exec_bfd);
+      const struct elf_backend_data *elf
+	= get_elf_backend_data (current_program_space->exec_bfd ());
 
       /* p_align of PT_LOAD segments does not specify any alignment but
 	 only congruency of addresses:
@@ -2601,7 +2610,8 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
      looking at a different file than the one used by the kernel - for
      instance, "gdb program" connected to "gdbserver :PORT ld.so program".  */
 
-  if (bfd_get_flavour (exec_bfd) == bfd_target_elf_flavour)
+  if (bfd_get_flavour (current_program_space->exec_bfd ())
+      == bfd_target_elf_flavour)
     {
       /* Be optimistic and return 0 only if GDB was able to verify the headers
 	 really do not match.  */
@@ -2610,7 +2620,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
       gdb::optional<gdb::byte_vector> phdrs_target
 	= read_program_header (-1, &arch_size, NULL);
       gdb::optional<gdb::byte_vector> phdrs_binary
-	= read_program_headers_from_bfd (exec_bfd);
+	= read_program_headers_from_bfd (current_program_space->exec_bfd ());
       if (phdrs_target && phdrs_binary)
 	{
 	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
@@ -2629,14 +2639,16 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	     content offset for the verification purpose.  */
 
 	  if (phdrs_target->size () != phdrs_binary->size ()
-	      || bfd_get_arch_size (exec_bfd) != arch_size)
+	      || bfd_get_arch_size (current_program_space->exec_bfd ()) != arch_size)
 	    return 0;
 	  else if (arch_size == 32
 		   && phdrs_target->size () >= sizeof (Elf32_External_Phdr)
 	           && phdrs_target->size () % sizeof (Elf32_External_Phdr) == 0)
 	    {
-	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
-	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
+	      Elf_Internal_Ehdr *ehdr2
+		= elf_tdata (current_program_space->exec_bfd ())->elf_header;
+	      Elf_Internal_Phdr *phdr2
+		= elf_tdata (current_program_space->exec_bfd ())->phdr;
 	      CORE_ADDR displacement = 0;
 	      int i;
 
@@ -2736,6 +2748,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		    }
 
 		  /* prelink can convert .plt SHT_NOBITS to SHT_PROGBITS.  */
+		  bfd *exec_bfd = current_program_space->exec_bfd ();
 		  plt2_asect = bfd_get_section_by_name (exec_bfd, ".plt");
 		  if (plt2_asect)
 		    {
@@ -2770,8 +2783,10 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		   && phdrs_target->size () >= sizeof (Elf64_External_Phdr)
 	           && phdrs_target->size () % sizeof (Elf64_External_Phdr) == 0)
 	    {
-	      Elf_Internal_Ehdr *ehdr2 = elf_tdata (exec_bfd)->elf_header;
-	      Elf_Internal_Phdr *phdr2 = elf_tdata (exec_bfd)->phdr;
+	      Elf_Internal_Ehdr *ehdr2
+		= elf_tdata (current_program_space->exec_bfd ())->elf_header;
+	      Elf_Internal_Phdr *phdr2
+		= elf_tdata (current_program_space->exec_bfd ())->phdr;
 	      CORE_ADDR displacement = 0;
 	      int i;
 
@@ -2870,7 +2885,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		    }
 
 		  /* prelink can convert .plt SHT_NOBITS to SHT_PROGBITS.  */
-		  plt2_asect = bfd_get_section_by_name (exec_bfd, ".plt");
+		  plt2_asect
+		    = bfd_get_section_by_name (current_program_space->exec_bfd (),
+					       ".plt");
 		  if (plt2_asect)
 		    {
 		      int content2;
@@ -2883,8 +2900,9 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		      filesz = extract_unsigned_integer (buf_filesz_p, 8,
 							 byte_order);
 
-		      /* PLT2_ASECT is from on-disk file (exec_bfd) while
-			 FILESZ is from the in-memory image.  */
+		      /* PLT2_ASECT is from on-disk file (current
+			 exec_bfd) while FILESZ is from the in-memory
+			 image.  */
 		      if (content2)
 			filesz += bfd_section_size (plt2_asect);
 		      else
@@ -2914,7 +2932,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
       printf_unfiltered (_("Using PIE (Position Independent Executable) "
 			   "displacement %s for \"%s\".\n"),
 			 paddress (target_gdbarch (), exec_displacement),
-			 bfd_get_filename (exec_bfd));
+			 bfd_get_filename (current_program_space->exec_bfd ()));
     }
 
   *displacementp = exec_displacement;
@@ -2969,10 +2987,11 @@ svr4_relocate_main_executable (void)
 				   displacement);
       objfile_relocate (symfile_objfile, new_offsets);
     }
-  else if (exec_bfd)
+  else if (current_program_space->exec_bfd ())
     {
       asection *asect;
 
+      bfd *exec_bfd = current_program_space->exec_bfd ();
       for (asect = exec_bfd->sections; asect != NULL; asect = asect->next)
 	exec_set_section_address (bfd_get_filename (exec_bfd), asect->index,
 				  bfd_section_vma (asect) + displacement);
@@ -3228,7 +3247,7 @@ svr4_iterate_over_objfiles_in_search_order
         current_objfile = current_objfile->separate_debug_objfile_backlink;
 
       if (current_objfile == symfile_objfile)
-	abfd = exec_bfd;
+	abfd = current_program_space->exec_bfd ();
       else
 	abfd = current_objfile->obfd;
 

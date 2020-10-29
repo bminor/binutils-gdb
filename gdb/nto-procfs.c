@@ -728,7 +728,7 @@ nto_procfs_target::attach (const char *args, int from_tty)
 void
 nto_procfs_target::post_attach (pid_t pid)
 {
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     solib_create_inferior_hook (0);
 }
 
@@ -1322,7 +1322,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
     push_target (ops);
   target_terminal::init ();
 
-  if (exec_bfd != NULL
+  if (current_program_space->exec_bfd () != NULL
       || (symfile_objfile != NULL && symfile_objfile->obfd != NULL))
     solib_create_inferior_hook (0);
 }

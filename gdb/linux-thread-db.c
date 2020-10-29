@@ -1800,8 +1800,8 @@ thread_db_target::get_thread_local_address (ptid_t ptid,
 
       /* Cast assuming host == target.  Joy.  */
       /* Do proper sign extension for the target.  */
-      gdb_assert (exec_bfd);
-      return (bfd_get_sign_extend_vma (exec_bfd) > 0
+      gdb_assert (current_program_space->exec_bfd ());
+      return (bfd_get_sign_extend_vma (current_program_space->exec_bfd ()) > 0
 	      ? (CORE_ADDR) (intptr_t) address
 	      : (CORE_ADDR) (uintptr_t) address);
     }

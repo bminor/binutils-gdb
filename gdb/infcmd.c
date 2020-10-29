@@ -308,7 +308,7 @@ post_create_inferior (int from_tty)
 	throw;
     }
 
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     {
       const unsigned solib_add_generation
 	= current_program_space->solib_add_generation;

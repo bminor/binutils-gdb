@@ -276,6 +276,18 @@ struct program_space
      to read memory from, this unpushes the exec_ops target.  */
   void exec_close ();
 
+  /* Return the exec BFD for this program space.  */
+  bfd *exec_bfd () const
+  {
+    return ebfd;
+  }
+
+  /* Set the exec BFD for this program space to ABFD.  */
+  void set_exec_bfd (bfd *abfd)
+  {
+    ebfd = abfd;
+  }
+
   /* Unique ID number.  */
   int num = 0;
 

@@ -68,7 +68,7 @@ source_cache::get_plain_source_lines (struct symtab *s,
   time_t mtime = 0;
   if (SYMTAB_OBJFILE (s) != NULL && SYMTAB_OBJFILE (s)->obfd != NULL)
     mtime = SYMTAB_OBJFILE (s)->mtime;
-  else if (exec_bfd)
+  else if (current_program_space->exec_bfd ())
     mtime = current_program_space->ebfd_mtime;
 
   if (mtime && mtime < st.st_mtime)

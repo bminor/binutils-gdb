@@ -211,7 +211,8 @@ get_sim_inferior_data (struct inferior *inf, int sim_instance_needed)
   if (sim_instance_needed == SIM_INSTANCE_NEEDED
       && (sim_data == NULL || sim_data->gdbsim_desc == NULL))
     {
-      sim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, sim_argv);
+      sim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback,
+			   current_program_space->exec_bfd (), sim_argv);
       if (sim_desc == NULL)
 	error (_("Unable to create simulator instance for inferior %d."),
 	       inf->num);
@@ -620,7 +621,7 @@ gdbsim_target::create_inferior (const char *exec_file,
   char *arg_buf;
   const char *args = allargs.c_str ();
 
-  if (exec_file == 0 || exec_bfd == 0)
+  if (exec_file == 0 || current_program_space->exec_bfd () == 0)
     warning (_("No executable file specified."));
   if (!sim_data->program_loaded)
     warning (_("No program loaded."));
@@ -648,7 +649,8 @@ gdbsim_target::create_inferior (const char *exec_file,
       built_argv.reset (arg_buf);
     }
 
-  if (sim_create_inferior (sim_data->gdbsim_desc, exec_bfd,
+  if (sim_create_inferior (sim_data->gdbsim_desc,
+			   current_program_space->exec_bfd (),
 			   built_argv.get (), env)
       != SIM_RC_OK)
     error (_("Unable to create sim inferior."));
@@ -738,7 +740,8 @@ gdbsim_target_open (const char *args, int from_tty)
   sim_argv = argv.release ();
 
   init_callbacks ();
-  gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback, exec_bfd, sim_argv);
+  gdbsim_desc = sim_open (SIM_OPEN_DEBUG, &gdb_callback,
+			  current_program_space->exec_bfd (), sim_argv);
 
   if (gdbsim_desc == 0)
     {
@@ -1104,13 +1107,13 @@ gdbsim_target::files_info ()
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NEEDED);
   const char *file = "nothing";
 
-  if (exec_bfd)
-    file = bfd_get_filename (exec_bfd);
+  if (current_program_space->exec_bfd ())
+    file = bfd_get_filename (current_program_space->exec_bfd ());
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbsim_files_info: file \"%s\"\n", file);
 
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     {
       fprintf_unfiltered (gdb_stdlog, "\tAttached to %s running program %s\n",
 			  target_shortname, file);

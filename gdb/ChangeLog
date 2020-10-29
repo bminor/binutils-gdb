@@ -1,5 +1,48 @@
 2020-10-29  Tom Tromey  <tom@tromey.com>
 
+	* windows-tdep.c (windows_solib_create_inferior_hook): Update.
+	* symfile.c (reread_symbols): Update.
+	* symfile-mem.c (add_symbol_file_from_memory_command)
+	(add_vsyscall_page): Update.
+	* source-cache.c (source_cache::get_plain_source_lines): Update.
+	* solib-svr4.c (find_program_interpreter, elf_locate_base)
+	(svr4_current_sos_direct, svr4_exec_displacement)
+	(svr4_relocate_main_executable): Update.
+	(svr4_iterate_over_objfiles_in_search_order): Update.
+	* solib-frv.c (enable_break2, enable_break): Update.
+	* solib-dsbt.c (lm_base, enable_break): Update.
+	* solib-darwin.c (find_program_interpreter)
+	(darwin_solib_create_inferior_hook): Update.
+	* sol-thread.c (rw_common, ps_pdmodel): Update.
+	* rs6000-nat.c (rs6000_nat_target::create_inferior): Update.
+	* remote.c (compare_sections_command)
+	(remote_target::trace_set_readonly_regions): Update.
+	* remote-sim.c (get_sim_inferior_data)
+	(gdbsim_target::create_inferior, gdbsim_target::create_inferior): Update.
+	(gdbsim_target_open, gdbsim_target::files_info): Update.
+	* exec.h (exec_bfd): Remove macro.
+	* progspace.c (initialize_progspace): Update.
+	* proc-service.c (ps_addr_to_core_addr, core_addr_to_ps_addr):
+	Update.
+	* nto-procfs.c (nto_procfs_target::post_attach)
+	(nto_procfs_target::create_inferior): Update.
+	* maint.c (maintenance_info_sections): Update.
+	* linux-thread-db.c (thread_db_target::get_thread_local_address):
+	Update.
+	* infcmd.c (post_create_inferior): Update.
+	* gcore.c (default_gcore_arch, default_gcore_target): Update.
+	(objfile_find_memory_regions): Update.
+	* exec.c (validate_exec_file, exec_file_attach)
+	(exec_read_partial_read_only, print_section_info): Update.
+	* corelow.c (core_target_open): Update.
+	* corefile.c (reopen_exec_file, validate_files): Update.
+	* arm-tdep.c (gdb_print_insn_arm): Update.
+	* arch-utils.c (gdbarch_update_p, default_print_insn): Update.
+	* progspace.h (struct program_space) <exec_bfd, set_exec_bfd>: New
+	methods.
+
+2020-10-29  Tom Tromey  <tom@tromey.com>
+
 	* progspace.h (current_target_sections): Remove macro.
 	* solib-svr4.c (scan_dyntag): Update.
 	* solib-dsbt.c (scan_dyntag): Update.

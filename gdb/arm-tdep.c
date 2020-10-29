@@ -7756,9 +7756,10 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
   /* GDB is able to get bfd_mach from the exe_bfd, info->mach is
      accurate, so mark USER_SPECIFIED_MACHINE_TYPE bit.  Otherwise,
      opcodes/arm-dis.c:print_insn reset info->mach, and it will trigger
-     the assert on the mismatch of info->mach and bfd_get_mach (exec_bfd)
-     in default_print_insn.  */
-  if (exec_bfd != NULL)
+     the assert on the mismatch of info->mach and
+     bfd_get_mach (current_program_space->exec_bfd ()) in
+     default_print_insn.  */
+  if (current_program_space->exec_bfd () != NULL)
     info->flags |= USER_SPECIFIED_MACHINE_TYPE;
 
   return default_print_insn (memaddr, info);

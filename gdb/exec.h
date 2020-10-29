@@ -30,8 +30,6 @@ struct target_ops;
 struct bfd;
 struct objfile;
 
-#define exec_bfd current_program_space->ebfd
-
 /* Builds a section table, given args BFD.  */
 
 extern target_section_table build_section_table (struct bfd *);

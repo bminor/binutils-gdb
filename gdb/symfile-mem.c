@@ -146,7 +146,7 @@ add_symbol_file_from_memory_command (const char *args, int from_tty)
   if (symfile_objfile != NULL)
     templ = symfile_objfile->obfd;
   else
-    templ = exec_bfd;
+    templ = current_program_space->exec_bfd ();
   if (templ == NULL)
     error (_("Must use symbol-file or exec-file "
 	     "before add-symbol-file-from-memory."));
@@ -168,8 +168,8 @@ add_vsyscall_page (inferior *inf)
 
       if (core_bfd != NULL)
 	bfd = core_bfd;
-      else if (exec_bfd != NULL)
-	bfd = exec_bfd;
+      else if (current_program_space->exec_bfd () != NULL)
+	bfd = current_program_space->exec_bfd ();
       else
        /* FIXME: cagney/2004-05-06: Should not require an existing
 	  BFD when trying to create a run-time BFD of the VSYSCALL

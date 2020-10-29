@@ -240,7 +240,8 @@ validate_exec_file (int from_tty)
   reopen_exec_file ();
   current_exec_file = get_exec_file (0);
 
-  const bfd_build_id *exec_file_build_id = build_id_bfd_get (exec_bfd);
+  const bfd_build_id *exec_file_build_id
+    = build_id_bfd_get (current_program_space->exec_bfd ());
   if (exec_file_build_id != nullptr)
     {
       /* Prepend the target prefix, to force gdb_bfd_open to open the
@@ -367,10 +368,11 @@ exec_file_locate_attach (int pid, int defer_bp_reset, int from_tty)
 void
 exec_file_attach (const char *filename, int from_tty)
 {
-  /* First, acquire a reference to the current exec_bfd.  We release
+  /* First, acquire a reference to the exec_bfd.  We release
      this at the end of the function; but acquiring it now lets the
      BFD cache return it if this call refers to the same file.  */
-  gdb_bfd_ref_ptr exec_bfd_holder = gdb_bfd_ref_ptr::new_reference (exec_bfd);
+  gdb_bfd_ref_ptr exec_bfd_holder
+    = gdb_bfd_ref_ptr::new_reference (current_program_space->exec_bfd ());
 
   /* Remove any previous exec file.  */
   current_program_space->exec_close ();
@@ -451,9 +453,9 @@ exec_file_attach (const char *filename, int from_tty)
 			      FOPEN_RUB, scratch_chan);
       else
 	temp = gdb_bfd_open (canonical_pathname, gnutarget, scratch_chan);
-      exec_bfd = temp.release ();
+      current_program_space->set_exec_bfd (temp.release ());
 
-      if (!exec_bfd)
+      if (!current_program_space->exec_bfd ())
 	{
 	  error (_("\"%ps\": could not open as an executable file: %s."),
 		 styled_string (file_name_style.style (), scratch_pathname),
@@ -465,12 +467,14 @@ exec_file_attach (const char *filename, int from_tty)
       gdb_assert (current_program_space->exec_filename == nullptr);
       if (load_via_target)
 	current_program_space->exec_filename
-	  = make_unique_xstrdup (bfd_get_filename (exec_bfd));
+	  = (make_unique_xstrdup
+	     (bfd_get_filename (current_program_space->exec_bfd ())));
       else
 	current_program_space->exec_filename
 	  = gdb_realpath_keepfile (scratch_pathname);
 
-      if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
+      if (!bfd_check_format_matches (current_program_space->exec_bfd (),
+				     bfd_object, &matching))
 	{
 	  /* Make sure to close exec_bfd, or else "run" might try to use
 	     it.  */
@@ -480,18 +484,20 @@ exec_file_attach (const char *filename, int from_tty)
 		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 	}
 
-      target_section_table sections = build_section_table (exec_bfd);
+	  target_section_table sections
+	  = build_section_table (current_program_space->exec_bfd ());
 
-      current_program_space->ebfd_mtime = bfd_get_mtime (exec_bfd);
+      current_program_space->ebfd_mtime
+	= bfd_get_mtime (current_program_space->exec_bfd ());
 
       validate_files ();
 
-      set_gdbarch_from_file (exec_bfd);
+      set_gdbarch_from_file (current_program_space->exec_bfd ());
 
       /* Add the executable's sections to the current address spaces'
 	 list of sections.  This possibly pushes the exec_ops
 	 target.  */
-      add_target_sections (&exec_bfd, sections);
+      add_target_sections (&current_program_space->ebfd, sections);
 
       /* Tell display code (if any) about the changed file name.  */
       if (deprecated_exec_file_display_hook)
@@ -701,13 +707,13 @@ exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
   /* It's unduly pedantic to refuse to look at the executable for
      read-only pieces; so do the equivalent of readonly regions aka
      QTro packet.  */
-  if (exec_bfd != NULL)
+  if (current_program_space->exec_bfd () != NULL)
     {
       asection *s;
       bfd_size_type size;
       bfd_vma vma;
 
-      for (s = exec_bfd->sections; s; s = s->next)
+      for (s = current_program_space->exec_bfd ()->sections; s; s = s->next)
 	{
 	  if ((s->flags & SEC_LOAD) == 0
 	      || (s->flags & SEC_READONLY) == 0)
@@ -723,7 +729,7 @@ exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
 	      if (amt > len)
 		amt = len;
 
-	      amt = bfd_get_section_contents (exec_bfd, s,
+	      amt = bfd_get_section_contents (current_program_space->exec_bfd (), s,
 					      readbuf, offset - vma, amt);
 
 	      if (amt == 0)
@@ -925,7 +931,7 @@ print_section_info (target_section_table *t, bfd *abfd)
 				  bfd_get_filename (abfd)));
   wrap_here ("        ");
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
-  if (abfd == exec_bfd)
+  if (abfd == current_program_space->exec_bfd ())
     {
       /* gcc-3.4 does not like the initialization in
 	 <p == t->sections_end>.  */
@@ -990,8 +996,9 @@ print_section_info (target_section_table *t, bfd *abfd)
 void
 exec_target::files_info ()
 {
-  if (exec_bfd)
-    print_section_info (&current_program_space->target_sections, exec_bfd);
+  if (current_program_space->exec_bfd ())
+    print_section_info (&current_program_space->target_sections,
+			current_program_space->exec_bfd ());
   else
     puts_filtered (_("\t<no file loaded>\n"));
 }

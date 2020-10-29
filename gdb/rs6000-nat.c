@@ -581,11 +581,12 @@ rs6000_nat_target::create_inferior (const char *exec_file,
      Blindly calling rs6000_gdbarch_init used to work in older versions of
      GDB, as rs6000_gdbarch_init incorrectly used the previous tdep to
      determine the wordsize.  */
-  if (exec_bfd)
+  if (current_program_space->exec_bfd ())
     {
       const struct bfd_arch_info *exec_bfd_arch_info;
 
-      exec_bfd_arch_info = bfd_get_arch_info (exec_bfd);
+      exec_bfd_arch_info
+	= bfd_get_arch_info (current_program_space->exec_bfd ());
       if (arch == exec_bfd_arch_info->arch)
 	return;
     }
@@ -594,7 +595,7 @@ rs6000_nat_target::create_inferior (const char *exec_file,
 
   gdbarch_info_init (&info);
   info.bfd_arch_info = bfd_get_arch_info (&abfd);
-  info.abfd = exec_bfd;
+  info.abfd = current_program_space->exec_bfd ();
 
   if (!gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__,

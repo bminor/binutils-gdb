@@ -562,7 +562,7 @@ lm_base (void)
 			    "lm_base: get addr %x by _GLOBAL_OFFSET_TABLE_.\n",
 			    (unsigned int) addr);
     }
-  else if (scan_dyntag (DT_PLTGOT, exec_bfd, &addr))
+  else if (scan_dyntag (DT_PLTGOT, current_program_space->exec_bfd (), &addr))
     {
       struct int_elf32_dsbt_loadmap *ldm;
 
@@ -778,7 +778,7 @@ enable_break (void)
   asection *interp_sect;
   struct dsbt_info *info;
 
-  if (exec_bfd == NULL)
+  if (current_program_space->exec_bfd () == NULL)
     return 0;
 
   if (!target_has_execution ())
@@ -793,7 +793,8 @@ enable_break (void)
 
   /* Find the .interp section; if not found, warn the user and drop
      into the old breakpoint at symbol code.  */
-  interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
+  interp_sect = bfd_get_section_by_name (current_program_space->exec_bfd (),
+					 ".interp");
   if (interp_sect)
     {
       unsigned int interp_sect_size;
@@ -806,8 +807,8 @@ enable_break (void)
 	 the contents specify the dynamic linker this program uses.  */
       interp_sect_size = bfd_section_size (interp_sect);
       buf = (char *) alloca (interp_sect_size);
-      bfd_get_section_contents (exec_bfd, interp_sect,
-				buf, 0, interp_sect_size);
+      bfd_get_section_contents (current_program_space->exec_bfd (),
+				interp_sect, buf, 0, interp_sect_size);
 
       /* Now we need to figure out where the dynamic linker was
 	 loaded so that we can load its symbols and place a breakpoint
