@@ -1,3 +1,13 @@
+2020-11-02  Tom Tromey  <tromey@adacore.com>
+
+	* Makefile.in (ALL_64_TARGET_OBS): Add amd64-ravenscar-thread.o.
+	(ALLDEPFILES): Add amd64-ravenscar-thread.c.
+	(HFILES_NO_SRCDIR): Add amd64-ravenscar-thread.h.
+	* amd64-ravenscar-thread.c: New file.
+	* amd64-ravenscar-thread.h: New file.
+	* amd64-tdep.c (amd64_init_abi): Register ravenscar ops.
+	* configure.tgt (amd64_tobjs): Add ravenscar objects.
+
 2020-11-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* main.c (execute_cmdargs): New function.

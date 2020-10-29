@@ -49,6 +49,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "osabi.h"
 #include "x86-tdep.h"
+#include "amd64-ravenscar-thread.h"
 
 /* Note that the AMD64 architecture was previously known as x86-64.
    The latter is (forever) engraved into the canonical system name as
@@ -3256,6 +3257,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 
   set_gdbarch_in_indirect_branch_thunk (gdbarch,
 					amd64_in_indirect_branch_thunk);
+
+  register_amd64_ravenscar_ops (gdbarch);
 }
 
 /* Initialize ARCH for x86-64, no osabi.  */

@@ -39,7 +39,8 @@ esac
 
 x86_tobjs="x86-tdep.o"
 i386_tobjs="i386-tdep.o arch/i386.o i387-tdep.o ${x86_tobjs}"
-amd64_tobjs="amd64-tdep.o arch/amd64.o ${x86_tobjs}"
+amd64_tobjs="ravenscar-thread.o amd64-ravenscar-thread.o \
+    amd64-tdep.o arch/amd64.o ${x86_tobjs}"
 
 # Here are three sections to get a list of target specific object
 # files according to target triplet $TARG.

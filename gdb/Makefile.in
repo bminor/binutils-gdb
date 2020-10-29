@@ -687,6 +687,7 @@ ALL_64_TARGET_OBS = \
 	amd64-linux-tdep.o \
 	amd64-netbsd-tdep.o \
 	amd64-obsd-tdep.o \
+	amd64-ravenscar-thread.o \
 	amd64-sol2-tdep.o \
 	amd64-tdep.o \
 	amd64-windows-tdep.o \
@@ -1219,6 +1220,7 @@ HFILES_NO_SRCDIR = \
 	amd64-darwin-tdep.h \
 	amd64-linux-tdep.h \
 	amd64-nat.h \
+	amd64-ravenscar-thread.h \
 	amd64-tdep.h \
 	annotate.h \
 	arc-tdep.h \
@@ -2139,6 +2141,7 @@ ALLDEPFILES = \
 	amd64-netbsd-tdep.c \
 	amd64-obsd-nat.c \
 	amd64-obsd-tdep.c \
+	amd64-ravenscar-thread.c \
 	amd64-sol2-tdep.c \
 	amd64-tdep.c \
 	arc-tdep.c \
