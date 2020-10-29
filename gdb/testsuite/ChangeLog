@@ -1,3 +1,7 @@
+2020-10-29  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.threads/tls.exp: Fix DUPLICATEs.
+
 2020-10-28  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.python/py-symbol.exp: Add KFAILs for -readnow.
