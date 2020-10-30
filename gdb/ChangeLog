@@ -1,5 +1,17 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_address_class_type_flags)
+	(aarch64_address_class_type_flags_to_name)
+	(aarch64_address_class_name_to_type_flags): Use
+	TYPE_INSTANCE_FLAG_CAPABILITY instead of
+	TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1.
+	* gdbtypes.h (TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL): Include
+	TYPE_INSTANCE_FLAG_CAPABILITY.
+	* printcmd.c (print_scalar_formatted): Don't truncate capability
+	pointers.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-linux-nat.c (fetch_cregs_from_thread): Invert pcc/csp
 	order.
 	* aarch64-linux-tdep.c (aarch64_linux_sigframe_init): Likewise.
