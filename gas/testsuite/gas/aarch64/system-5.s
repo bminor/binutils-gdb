@@ -32,3 +32,37 @@
     wfet x28
     wfet x29
     wfet x30
+
+/* Wait For Interrupt with Timeout.  */
+
+    wfit x0
+    wfit x1
+    wfit x2
+    wfit x3
+    wfit x4
+    wfit x5
+    wfit x6
+    wfit x7
+    wfit x8
+    wfit x9
+    wfit x10
+    wfit x11
+    wfit x12
+    wfit x13
+    wfit x14
+    wfit x15
+    wfit x16
+    wfit x17
+    wfit x18
+    wfit x19
+    wfit x20
+    wfit x21
+    wfit x22
+    wfit x23
+    wfit x24
+    wfit x25
+    wfit x26
+    wfit x27
+    wfit x28
+    wfit x29
+    wfit x30

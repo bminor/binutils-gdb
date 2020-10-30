@@ -21,7 +21,7 @@
 
 * Add support for Armv8-R and Armv8.7-A AArch64.
 
-* Add support for DSB memory nXS barrier and WFET instruction for Armv8.7
+* Add support for DSB memory nXS barrier, WFET and WFIT instruction for Armv8.7
   AArch64.
 
 * Add support for +csre feature for -march. Add CSR PDEC instruction for CSRE

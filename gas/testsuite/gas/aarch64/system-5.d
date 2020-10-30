@@ -1,4 +1,4 @@
-#name: WFET (Wait For Event with Timeout) instruction
+#name: WFET and WFIT instructions
 #objdump: -dr
 
 .*:     file format .*
@@ -37,3 +37,34 @@ Disassembly of section \.text:
 .*:	d503101c 	wfet	x28
 .*:	d503101d 	wfet	x29
 .*:	d503101e 	wfet	x30
+.*:	d5031020 	wfit	x0
+.*:	d5031021 	wfit	x1
+.*:	d5031022 	wfit	x2
+.*:	d5031023 	wfit	x3
+.*:	d5031024 	wfit	x4
+.*:	d5031025 	wfit	x5
+.*:	d5031026 	wfit	x6
+.*:	d5031027 	wfit	x7
+.*:	d5031028 	wfit	x8
+.*:	d5031029 	wfit	x9
+.*:	d503102a 	wfit	x10
+.*:	d503102b 	wfit	x11
+.*:	d503102c 	wfit	x12
+.*:	d503102d 	wfit	x13
+.*:	d503102e 	wfit	x14
+.*:	d503102f 	wfit	x15
+.*:	d5031030 	wfit	x16
+.*:	d5031031 	wfit	x17
+.*:	d5031032 	wfit	x18
+.*:	d5031033 	wfit	x19
+.*:	d5031034 	wfit	x20
+.*:	d5031035 	wfit	x21
+.*:	d5031036 	wfit	x22
+.*:	d5031037 	wfit	x23
+.*:	d5031038 	wfit	x24
+.*:	d5031039 	wfit	x25
+.*:	d503103a 	wfit	x26
+.*:	d503103b 	wfit	x27
+.*:	d503103c 	wfit	x28
+.*:	d503103d 	wfit	x29
+.*:	d503103e 	wfit	x30
