@@ -1,3 +1,12 @@
+2020-11-02  Alan Modra  <amodra@gmail.com>
+
+	PR 15146
+	PR 26314
+	PR 26530
+	PR 26806
+	* elflink.c (elf_link_add_object_symbols): Don't set def/ref flags
+	for plugin syms.  Do allow plugin syms to mark as-needed libs.
+
 2020-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703

@@ -403,6 +403,18 @@ set lto_link_elf_tests [list \
   [list {lto-18d.o} \
    {} {-flto -O2} \
    {lto-18d.c} {} {}] \
+  [list {liblto-19.a} \
+   "$plug_opt" {-flto -O2 -fPIC} \
+   {lto-19a.c} {} {liblto-19.a}] \
+  [list {compile lto-19b.c} \
+   "$plug_opt" {-flto -O2 -fPIC} \
+   {lto-19b.c} {} {} {c}] \
+  [list {liblto-19.so} \
+   {-shared tmpdir/lto-19b.o tmpdir/liblto-19.a} {-O2 -fPIC} \
+   {dummy.c} {} {liblto-19.so}] \
+  [list {pr26806.so} \
+   {-shared} {-fpic -O2 -flto} \
+   {pr26806.c} {{nm {-D} pr26806.d}} {pr26806.so}] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
@@ -584,6 +596,10 @@ set lto_run_elf_shared_tests [list \
    {-static -flto -fuse-linker-plugin} {} \
    {lto-18a.c} {lto-18-4.exe} {lto-18.out} {-flto -O2} {c} {} \
    { -Ltmpdir -llto-18b -llto-18c tmpdir/lto-18d.o}] \
+  [list {lto-19} \
+   {-Wl,--as-needed,-R,tmpdir} {} \
+   {lto-19c.c} {lto-19.exe} {pass.out} {-flto -O2} {c} {} \
+   {tmpdir/liblto-19.so tmpdir/liblto-19.a}] \
 ]
 
 # LTO run-time tests for ELF

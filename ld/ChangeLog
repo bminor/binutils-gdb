@@ -1,3 +1,14 @@
+2020-11-02  Alan Modra  <amodra@gmail.com>
+
+	PR 26806
+	* testsuite/ld-plugin/lto-19.h,
+	* testsuite/ld-plugin/lto-19a.c,
+	* testsuite/ld-plugin/lto-19b.c,
+	* testsuite/ld-plugin/lto-19c.c: New test.
+	* testsuite/ld-plugin/pr26806.c,
+	* testsuite/ld-plugin/pr26806.d: New test.
+	* testsuite/ld-plugin/lto.exp: Run them.
+
 2020-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703
