@@ -424,7 +424,7 @@ public:
   /* See language.h.  */
 
   const struct op_print *opcode_print_table () const override
-  { return c_op_print_tab; }
+  { return objc_op_print_tab; }
 };
 
 /* Single instance of the class representing the Objective-C language.  */

@@ -1,5 +1,10 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* objc-lang.c (objc_language::opcode_print_table): Return
+	objc_op_print_tab.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* p-exp.y (exp): Update call to pascal_is_string_type.
 	(pascal_parse): Rename to...
 	(pascal_language::parser): ...this.
