@@ -825,12 +825,9 @@ i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   write_memory (to, buf, len);
 
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
-                          paddress (gdbarch, from), paddress (gdbarch, to));
-      displaced_step_dump_bytes (gdb_stdlog, buf, len);
-    }
+  displaced_debug_printf ("%s->%s: %s",
+                          paddress (gdbarch, from), paddress (gdbarch, to),
+			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
   return displaced_step_closure_up (closure.release ());
@@ -859,12 +856,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
   /* The start of the insn, needed in case we see some prefixes.  */
   gdb_byte *insn_start = insn;
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog,
-                        "displaced: fixup (%s, %s), "
-                        "insn = 0x%02x 0x%02x ...\n",
-                        paddress (gdbarch, from), paddress (gdbarch, to),
-			insn[0], insn[1]);
+  displaced_debug_printf ("fixup (%s, %s), insn = 0x%02x 0x%02x ...",
+			  paddress (gdbarch, from), paddress (gdbarch, to),
+			  insn[0], insn[1]);
 
   /* The list of issues to contend with here is taken from
      resume_execution in arch/i386/kernel/kprobes.c, Linux 2.6.20.
@@ -918,13 +912,8 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
 	     Presumably this is a kernel bug.
 	     i386_displaced_step_copy_insn ensures its a nop,
 	     we add one to the length for it.  */
-          && orig_eip != to + (insn - insn_start) + insn_len + 1)
-        {
-          if (debug_displaced)
-            fprintf_unfiltered (gdb_stdlog,
-                                "displaced: syscall changed %%eip; "
-                                "not relocating\n");
-        }
+	  && orig_eip != to + (insn - insn_start) + insn_len + 1)
+	displaced_debug_printf ("syscall changed %%eip; not relocating");
       else
         {
           ULONGEST eip = (orig_eip - insn_offset) & 0xffffffffUL;
@@ -935,12 +924,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
 
           regcache_cooked_write_unsigned (regs, I386_EIP_REGNUM, eip);
 
-          if (debug_displaced)
-            fprintf_unfiltered (gdb_stdlog,
-                                "displaced: "
-                                "relocated %%eip from %s to %s\n",
-                                paddress (gdbarch, orig_eip),
-				paddress (gdbarch, eip));
+	  displaced_debug_printf ("relocated %%eip from %s to %s",
+				  paddress (gdbarch, orig_eip),
+				  paddress (gdbarch, eip));
         }
     }
 
@@ -963,11 +949,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
       retaddr = (retaddr - insn_offset) & 0xffffffffUL;
       write_memory_unsigned_integer (esp, retaddr_len, byte_order, retaddr);
 
-      if (debug_displaced)
-        fprintf_unfiltered (gdb_stdlog,
-                            "displaced: relocated return addr at %s to %s\n",
-                            paddress (gdbarch, esp),
-                            paddress (gdbarch, retaddr));
+      displaced_debug_printf ("relocated return addr at %s to %s",
+			      paddress (gdbarch, esp),
+			      paddress (gdbarch, retaddr));
     }
 }
 
@@ -1019,12 +1003,9 @@ i386_relocate_instruction (struct gdbarch *gdbarch,
       newrel = (oldloc - *to) + rel32;
       store_signed_integer (insn + 1, 4, byte_order, newrel);
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Adjusted insn rel32=%s at %s to"
-			    " rel32=%s at %s\n",
-			    hex_string (rel32), paddress (gdbarch, oldloc),
-			    hex_string (newrel), paddress (gdbarch, *to));
+      displaced_debug_printf ("adjusted insn rel32=%s at %s to rel32=%s at %s",
+			      hex_string (rel32), paddress (gdbarch, oldloc),
+			      hex_string (newrel), paddress (gdbarch, *to));
 
       /* Write the adjusted jump into its displaced location.  */
       append_insns (to, 5, insn);
@@ -1044,12 +1025,9 @@ i386_relocate_instruction (struct gdbarch *gdbarch,
       rel32 = extract_signed_integer (insn + offset, 4, byte_order);
       newrel = (oldloc - *to) + rel32;
       store_signed_integer (insn + offset, 4, byte_order, newrel);
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Adjusted insn rel32=%s at %s to"
-			    " rel32=%s at %s\n",
-			    hex_string (rel32), paddress (gdbarch, oldloc),
-			    hex_string (newrel), paddress (gdbarch, *to));
+      displaced_debug_printf ("adjusted insn rel32=%s at %s to rel32=%s at %s",
+			      hex_string (rel32), paddress (gdbarch, oldloc),
+			      hex_string (newrel), paddress (gdbarch, *to));
     }
 
   /* Write the adjusted instructions into their displaced

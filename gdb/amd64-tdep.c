@@ -1438,11 +1438,10 @@ fixup_riprel (struct gdbarch *gdbarch, amd64_displaced_step_closure *dsc,
 
   regcache_cooked_write_unsigned (regs, tmp_regno, rip_base);
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: %%rip-relative addressing used.\n"
-			"displaced: using temp reg %d, old value %s, new value %s\n",
-			dsc->tmp_regno, paddress (gdbarch, dsc->tmp_save),
-			paddress (gdbarch, rip_base));
+  displaced_debug_printf ("%%rip-relative addressing used.");
+  displaced_debug_printf ("using temp reg %d, old value %s, new value %s",
+			  dsc->tmp_regno, paddress (gdbarch, dsc->tmp_save),
+			  paddress (gdbarch, rip_base));
 }
 
 static void
@@ -1504,12 +1503,9 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   write_memory (to, buf, len);
 
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
-			  paddress (gdbarch, from), paddress (gdbarch, to));
-      displaced_step_dump_bytes (gdb_stdlog, buf, len);
-    }
+  displaced_debug_printf ("copy %s->%s: %s",
+			  paddress (gdbarch, from), paddress (gdbarch, to),
+			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
   return displaced_step_closure_up (dsc.release ());
@@ -1685,20 +1681,16 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
   gdb_byte *insn = dsc->insn_buf.data ();
   const struct amd64_insn *insn_details = &dsc->insn_details;
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog,
-			"displaced: fixup (%s, %s), "
-			"insn = 0x%02x 0x%02x ...\n",
-			paddress (gdbarch, from), paddress (gdbarch, to),
-			insn[0], insn[1]);
+  displaced_debug_printf ("fixup (%s, %s), insn = 0x%02x 0x%02x ...",
+			  paddress (gdbarch, from), paddress (gdbarch, to),
+			  insn[0], insn[1]);
 
   /* If we used a tmp reg, restore it.	*/
 
   if (dsc->tmp_used)
     {
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: restoring reg %d to %s\n",
-			    dsc->tmp_regno, paddress (gdbarch, dsc->tmp_save));
+      displaced_debug_printf ("restoring reg %d to %s",
+			      dsc->tmp_regno, paddress (gdbarch, dsc->tmp_save));
       regcache_cooked_write_unsigned (regs, dsc->tmp_regno, dsc->tmp_save);
     }
 
@@ -1743,12 +1735,7 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 	     Presumably this is a kernel bug.
 	     Fixup ensures its a nop, we add one to the length for it.  */
 	  && orig_rip != to + insn_len + 1)
-	{
-	  if (debug_displaced)
-	    fprintf_unfiltered (gdb_stdlog,
-				"displaced: syscall changed %%rip; "
-				"not relocating\n");
-	}
+	displaced_debug_printf ("syscall changed %%rip; not relocating");
       else
 	{
 	  ULONGEST rip = orig_rip - insn_offset;
@@ -1759,12 +1746,9 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
 
 	  regcache_cooked_write_unsigned (regs, AMD64_RIP_REGNUM, rip);
 
-	  if (debug_displaced)
-	    fprintf_unfiltered (gdb_stdlog,
-				"displaced: "
-				"relocated %%rip from %s to %s\n",
-				paddress (gdbarch, orig_rip),
-				paddress (gdbarch, rip));
+	  displaced_debug_printf ("relocated %%rip from %s to %s",
+				  paddress (gdbarch, orig_rip),
+				  paddress (gdbarch, rip));
 	}
     }
 
@@ -1787,12 +1771,9 @@ amd64_displaced_step_fixup (struct gdbarch *gdbarch,
       retaddr = (retaddr - insn_offset) & 0xffffffffffffffffULL;
       write_memory_unsigned_integer (rsp, retaddr_len, byte_order, retaddr);
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "displaced: relocated return addr at %s "
-			    "to %s\n",
-			    paddress (gdbarch, rsp),
-			    paddress (gdbarch, retaddr));
+      displaced_debug_printf ("relocated return addr at %s to %s",
+			      paddress (gdbarch, rsp),
+			      paddress (gdbarch, retaddr));
     }
 }
 
@@ -1910,12 +1891,9 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
       newrel = (oldloc - *to) + rel32;
       store_signed_integer (insn + 1, 4, byte_order, newrel);
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Adjusted insn rel32=%s at %s to"
-			    " rel32=%s at %s\n",
-			    hex_string (rel32), paddress (gdbarch, oldloc),
-			    hex_string (newrel), paddress (gdbarch, *to));
+      displaced_debug_printf ("adjusted insn rel32=%s at %s to rel32=%s at %s",
+			      hex_string (rel32), paddress (gdbarch, oldloc),
+			      hex_string (newrel), paddress (gdbarch, *to));
 
       /* Write the adjusted jump into its displaced location.  */
       append_insns (to, 5, insn);
@@ -1939,12 +1917,9 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
       rel32 = extract_signed_integer (insn + offset, 4, byte_order);
       newrel = (oldloc - *to) + rel32;
       store_signed_integer (insn + offset, 4, byte_order, newrel);
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Adjusted insn rel32=%s at %s to"
-			    " rel32=%s at %s\n",
-			    hex_string (rel32), paddress (gdbarch, oldloc),
-			    hex_string (newrel), paddress (gdbarch, *to));
+      displaced_debug_printf ("adjusted insn rel32=%s at %s to rel32=%s at %s",
+			      hex_string (rel32), paddress (gdbarch, oldloc),
+			      hex_string (newrel), paddress (gdbarch, *to));
     }
 
   /* Write the adjusted instruction into its displaced location.  */

@@ -957,15 +957,11 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 		    && apparent_pc < (dsc->scratch_base
 				      + ARM_DISPLACED_MODIFIED_INSNS * 4 + 4));
 
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: PC is apparently %.8lx after "
-			  "SVC step ", (unsigned long) apparent_pc);
-      if (within_scratch)
-        fprintf_unfiltered (gdb_stdlog, "(within scratch space)\n");
-      else
-        fprintf_unfiltered (gdb_stdlog, "(outside scratch space)\n");
-    }
+  displaced_debug_printf ("PC is apparently %.8lx after SVC step %s",
+			  (unsigned long) apparent_pc,
+			  (within_scratch
+			   ? "(within scratch space)"
+			   : "(outside scratch space)"));
 
   if (within_scratch)
     displaced_write_reg (regs, dsc, ARM_PC_REGNUM,
@@ -991,16 +987,12 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
     {
       struct symtab_and_line sal;
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: found "
-			    "sigreturn/rt_sigreturn SVC call.  PC in "
-			    "frame = %lx\n",
-			    (unsigned long) get_frame_pc (frame));
+      displaced_debug_printf ("found sigreturn/rt_sigreturn SVC call.  "
+			      "PC in frame = %lx",
+			      (unsigned long) get_frame_pc (frame));
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog, "displaced: unwind pc = %lx.  "
-			    "Setting momentary breakpoint.\n",
-			    (unsigned long) return_to);
+      displaced_debug_printf ("unwind pc = %lx.  Setting momentary breakpoint.",
+			      (unsigned long) return_to);
 
       gdb_assert (inferior_thread ()->control.step_resume_breakpoint
 		  == NULL);
@@ -1025,13 +1017,12 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 	     breakpoint set above.  */
 	  insert_breakpoints ();
 	}
-      else if (debug_displaced)
-	fprintf_unfiltered (gdb_stderr, "displaced: couldn't find previous "
-			    "frame to set momentary breakpoint for "
-			    "sigreturn/rt_sigreturn\n");
+      else
+	displaced_debug_printf ("couldn't find previous frame to set momentary "
+				"breakpoint for sigreturn/rt_sigreturn");
     }
-  else if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: found SVC call\n");
+  else
+    displaced_debug_printf ("found SVC call");
 
   /* Preparation: If we detect sigreturn, set momentary breakpoint at resume
 		  location, else nothing.
@@ -1115,9 +1106,8 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
      stop at the return location.  */
   if (from > 0xffff0000)
     {
-      if (debug_displaced)
-        fprintf_unfiltered (gdb_stdlog, "displaced: detected kernel helper "
-			    "at %.8lx\n", (unsigned long) from);
+      displaced_debug_printf ("detected kernel helper at %.8lx",
+			      (unsigned long) from);
 
       arm_catch_kernel_helper_return (gdbarch, from, to, regs, dsc.get ());
     }

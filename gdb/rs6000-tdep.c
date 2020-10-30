@@ -874,25 +874,17 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
   /* Assume all atomic sequences start with a Load and Reserve instruction.  */
   if (IS_LOAD_AND_RESERVE_INSN (insn))
     {
-      if (debug_displaced)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "displaced: can't displaced step "
-			      "atomic sequence at %s\n",
+      displaced_debug_printf ("can't displaced step atomic sequence at %s",
 			      paddress (gdbarch, from));
-	}
 
       return NULL;
     }
 
   write_memory (to, buf, len);
 
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
-                          paddress (gdbarch, from), paddress (gdbarch, to));
-      displaced_step_dump_bytes (gdb_stdlog, buf, len);
-    }
+  displaced_debug_printf ("copy %s->%s: %s",
+                          paddress (gdbarch, from), paddress (gdbarch, to),
+			  displaced_step_dump_bytes (buf, len).c_str ());;
 
   /* This is a work around for a problem with g++ 4.8.  */
   return displaced_step_closure_up (closure.release ());
@@ -917,11 +909,8 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 
   opcode = insn & BRANCH_MASK;
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog,
-			"displaced: (ppc) fixup (%s, %s)\n",
-			paddress (gdbarch, from), paddress (gdbarch, to));
-
+  displaced_debug_printf ("(ppc) fixup (%s, %s)",
+			  paddress (gdbarch, from), paddress (gdbarch, to));
 
   /* Handle PC-relative branch instructions.  */
   if (opcode == B_INSN || opcode == BC_INSN || opcode == BXL_INSN)
@@ -942,13 +931,11 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 	  if (!(insn & 0x2))
 	    {
 	      /* PC-relative addressing is being used in the branch.  */
-	      if (debug_displaced)
-		fprintf_unfiltered
-		  (gdb_stdlog,
-		   "displaced: (ppc) branch instruction: %s\n"
-		   "displaced: (ppc) adjusted PC from %s to %s\n",
-		   paddress (gdbarch, insn), paddress (gdbarch, current_pc),
-		   paddress (gdbarch, from + offset));
+	      displaced_debug_printf ("(ppc) branch instruction: %s",
+				      paddress (gdbarch, insn));
+	      displaced_debug_printf ("(ppc) adjusted PC from %s to %s",
+				      paddress (gdbarch, current_pc),
+				      paddress (gdbarch, from + offset));
 
 	      regcache_cooked_write_unsigned (regs,
 					      gdbarch_pc_regnum (gdbarch),
@@ -975,10 +962,8 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
 	  regcache_cooked_write_unsigned (regs,
 					  gdbarch_tdep (gdbarch)->ppc_lr_regnum,
 					  from + PPC_INSN_SIZE);
-	  if (debug_displaced)
-		fprintf_unfiltered (gdb_stdlog,
-				    "displaced: (ppc) adjusted LR to %s\n",
-				    paddress (gdbarch, from + PPC_INSN_SIZE));
+	  displaced_debug_printf ("(ppc) adjusted LR to %s",
+				  paddress (gdbarch, from + PPC_INSN_SIZE));
 
 	}
     }

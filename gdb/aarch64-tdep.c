@@ -3177,12 +3177,10 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 	 relocated instruction(s) there.  */
       for (i = 0; i < dsd.insn_count; i++)
 	{
-	  if (debug_displaced)
-	    {
-	      debug_printf ("displaced: writing insn ");
-	      debug_printf ("%.8x", dsd.insn_buf[i]);
-	      debug_printf (" at %s\n", paddress (gdbarch, to + i * 4));
-	    }
+	  displaced_debug_printf ("writing insn %.8x at %s",
+				  dsd.insn_buf[i],
+				  paddress (gdbarch, to + i * 4));
+
 	  write_memory_unsigned_integer (to + i * 4, 4, byte_order_for_code,
 					 (ULONGEST) dsd.insn_buf[i]);
 	}
@@ -3210,15 +3208,13 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 
   regcache_cooked_read_unsigned (regs, AARCH64_PC_REGNUM, &pc);
 
-  if (debug_displaced)
-    debug_printf ("Displaced: PC after stepping: %s (was %s).\n",
-		  paddress (gdbarch, pc), paddress (gdbarch, to));
+  displaced_debug_printf ("PC after stepping: %s (was %s).",
+			  paddress (gdbarch, pc), paddress (gdbarch, to));
 
   if (dsc->cond)
     {
-      if (debug_displaced)
-	debug_printf ("Displaced: [Conditional] pc_adjust before: %d\n",
-		      dsc->pc_adjust);
+      displaced_debug_printf ("[Conditional] pc_adjust before: %d",
+			      dsc->pc_adjust);
 
       if (pc - to == 8)
 	{
@@ -3232,16 +3228,13 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
       else
 	gdb_assert_not_reached ("Unexpected PC value after displaced stepping");
 
-      if (debug_displaced)
-	debug_printf ("Displaced: [Conditional] pc_adjust after: %d\n",
-		      dsc->pc_adjust);
+      displaced_debug_printf ("[Conditional] pc_adjust after: %d",
+			      dsc->pc_adjust);
     }
 
-  if (debug_displaced)
-    debug_printf ("Displaced: %s PC by %d\n",
-		  dsc->pc_adjust? "adjusting" : "not adjusting",
-		  dsc->pc_adjust);
-
+  displaced_debug_printf ("%s PC by %d",
+			  dsc->pc_adjust ? "adjusting" : "not adjusting",
+			  dsc->pc_adjust);
 
   if (dsc->pc_adjust != 0)
     {
@@ -3251,17 +3244,13 @@ aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
 	 took place.  */
       if ((pc - to) == 0)
 	{
-	  if (debug_displaced)
-	    debug_printf ("Displaced: PC did not move. Discarding PC "
-			  "adjustment.\n");
+	  displaced_debug_printf ("PC did not move. Discarding PC adjustment.");
 	  dsc->pc_adjust = 0;
 	}
 
-      if (debug_displaced)
-	{
-	  debug_printf ("Displaced: fixup: set PC to %s:%d\n",
-			paddress (gdbarch, from), dsc->pc_adjust);
-	}
+      displaced_debug_printf ("fixup: set PC to %s:%d",
+			      paddress (gdbarch, from), dsc->pc_adjust);
+
       regcache_cooked_write_unsigned (regs, AARCH64_PC_REGNUM,
 				      from + dsc->pc_adjust);
     }

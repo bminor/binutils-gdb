@@ -47,6 +47,19 @@ void ATTRIBUTE_PRINTF (2, 3) infrun_debug_printf_1
 /* True if we are debugging displaced stepping.  */
 extern bool debug_displaced;
 
+/* Print a "displaced" debug statement.  Should be used through
+   displaced_debug_printf.  */
+void ATTRIBUTE_PRINTF (2, 3) displaced_debug_printf_1
+  (const char *func_name, const char *fmt, ...);
+
+#define displaced_debug_printf(fmt, ...) \
+  do \
+    { \
+      if (debug_displaced) \
+	displaced_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
+
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 extern int stop_on_solib_events;
@@ -229,9 +242,8 @@ extern void update_signals_program_target (void);
    $_exitsignal.  */
 extern void clear_exit_convenience_vars (void);
 
-/* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
-extern void displaced_step_dump_bytes (struct ui_file *file,
-				       const gdb_byte *buf, size_t len);
+/* Dump LEN bytes at BUF in hex to a string and return it.  */
+extern std::string displaced_step_dump_bytes (const gdb_byte *buf, size_t len);
 
 extern struct displaced_step_closure *get_displaced_step_closure_by_addr
     (CORE_ADDR addr);

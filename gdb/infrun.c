@@ -179,6 +179,16 @@ show_debug_infrun (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Inferior debugging is %s.\n"), value);
 }
 
+/* See infrun.h.  */
+
+void
+displaced_debug_printf_1 (const char *func_name, const char *fmt, ...)
+{
+  va_list ap;
+  va_start (ap, fmt);
+  debug_prefixed_vprintf ("displaced", func_name, fmt, ap);
+  va_end (ap);
+}
 
 /* Support for disabling address space randomization.  */
 
@@ -1629,17 +1639,22 @@ displaced_step_reset (displaced_step_inferior_state *displaced)
 
 using displaced_step_reset_cleanup = FORWARD_SCOPE_EXIT (displaced_step_reset);
 
-/* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
-void
-displaced_step_dump_bytes (struct ui_file *file,
-                           const gdb_byte *buf,
-                           size_t len)
-{
-  int i;
+/* See infrun.h.  */
 
-  for (i = 0; i < len; i++)
-    fprintf_unfiltered (file, "%02x ", buf[i]);
-  fputs_unfiltered ("\n", file);
+std::string
+displaced_step_dump_bytes (const gdb_byte *buf, size_t len)
+{
+  std::string ret;
+
+  for (size_t i = 0; i < len; i++)
+    {
+      if (i == 0)
+	ret += string_printf ("%02x", buf[i]);
+      else
+	ret += string_printf (" %02x", buf[i]);
+    }
+
+  return ret;
 }
 
 /* Prepare to single-step, using displaced stepping.
@@ -1692,21 +1707,15 @@ displaced_step_prepare_throw (thread_info *tp)
       /* Already waiting for a displaced step to finish.  Defer this
 	 request and place in queue.  */
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "displaced: deferring step of %s\n",
-			    target_pid_to_str (tp->ptid).c_str ());
+      displaced_debug_printf ("deferring step of %s",
+			      target_pid_to_str (tp->ptid).c_str ());
 
       thread_step_over_chain_enqueue (tp);
       return 0;
     }
   else
-    {
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "displaced: stepping %s now\n",
+    displaced_debug_printf ("stepping %s now",
 			    target_pid_to_str (tp->ptid).c_str ());
-    }
 
   displaced_step_reset (displaced);
 
@@ -1730,12 +1739,8 @@ displaced_step_prepare_throw (thread_info *tp)
 	 in the scratch pad range (after initial startup) anyway, but
 	 the former is unacceptable.  Simply punt and fallback to
 	 stepping over this breakpoint in-line.  */
-      if (debug_displaced)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "displaced: breakpoint set in scratch pad.  "
-			      "Stepping over breakpoint in-line instead.\n");
-	}
+      displaced_debug_printf ("breakpoint set in scratch pad.  "
+			      "Stepping over breakpoint in-line instead.");
 
       return -1;
     }
@@ -1748,14 +1753,11 @@ displaced_step_prepare_throw (thread_info *tp)
 		 _("Error accessing memory address %s (%s) for "
 		   "displaced-stepping scratch space."),
 		 paddress (gdbarch, copy), safe_strerror (status));
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: saved %s: ",
-			  paddress (gdbarch, copy));
-      displaced_step_dump_bytes (gdb_stdlog,
-				 displaced->step_saved_copy.data (),
-				 len);
-    };
+
+  displaced_debug_printf ("saved %s: %s",
+			  paddress (gdbarch, copy),
+			  displaced_step_dump_bytes
+			    (displaced->step_saved_copy.data (), len).c_str ());
 
   displaced->step_closure
     = gdbarch_displaced_step_copy_insn (gdbarch, original, copy, regcache);
@@ -1783,9 +1785,7 @@ displaced_step_prepare_throw (thread_info *tp)
     cleanup.release ();
   }
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to %s\n",
-			paddress (gdbarch, copy));
+  displaced_debug_printf ("displaced pc to %s", paddress (gdbarch, copy));
 
   return 1;
 }
@@ -1850,11 +1850,11 @@ displaced_step_restore (struct displaced_step_inferior_state *displaced,
 
   write_memory_ptid (ptid, displaced->step_copy,
 		     displaced->step_saved_copy.data (), len);
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog, "displaced: restored %s %s\n",
-			target_pid_to_str (ptid).c_str (),
-			paddress (displaced->step_gdbarch,
-				  displaced->step_copy));
+
+  displaced_debug_printf ("restored %s %s",
+			  target_pid_to_str (ptid).c_str (),
+			  paddress (displaced->step_gdbarch,
+				    displaced->step_copy));
 }
 
 /* If we displaced stepped an instruction successfully, adjust
@@ -2593,10 +2593,11 @@ resume_1 (enum gdb_signal sig)
       CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
       gdb_byte buf[4];
 
-      fprintf_unfiltered (gdb_stdlog, "displaced: run %s: ",
-			  paddress (resume_gdbarch, actual_pc));
       read_memory (actual_pc, buf, sizeof (buf));
-      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
+      displaced_debug_printf ("run %s: %s",
+			      paddress (resume_gdbarch, actual_pc),
+			      displaced_step_dump_bytes
+				(buf, sizeof (buf)).c_str ());
     }
 
   if (tp->control.may_range_step)
@@ -5354,12 +5355,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    /* Read PC value of parent process.  */
 	    parent_pc = regcache_read_pc (regcache);
 
-	    if (debug_displaced)
-	      fprintf_unfiltered (gdb_stdlog,
-				  "displaced: write child pc from %s to %s\n",
-				  paddress (gdbarch,
-					    regcache_read_pc (child_regcache)),
-				  paddress (gdbarch, parent_pc));
+	    displaced_debug_printf ("write child pc from %s to %s",
+				    paddress (gdbarch,
+					      regcache_read_pc (child_regcache)),
+				    paddress (gdbarch, parent_pc));
 
 	    regcache_write_pc (child_regcache, parent_pc);
 	  }

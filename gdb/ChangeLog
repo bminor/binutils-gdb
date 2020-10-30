@@ -1,3 +1,14 @@
+2020-10-30  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.h (displaced_debug_printf): New macro.  Replace
+	displaced debug prints throughout to use it.
+	(displaced_debug_printf_1): New declaration.
+	(displaced_step_dump_bytes): Return string, remove ui_file
+	parameter, update all callers.
+	* infrun.c (displaced_debug_printf_1): New function.
+	(displaced_step_dump_bytes): Return string, remove ui_file
+	parameter
+
 2020-10-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* rs6000-tdep.c (rs6000_dwarf2_reg_to_regnum): Return -1 for

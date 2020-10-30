@@ -454,13 +454,8 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 	{
 	  /* Let the core fall back to stepping over the breakpoint
 	     in-line.  */
-	  if (debug_displaced)
-	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "displaced: can't displaced step "
-				  "RIL instruction: offset %s out of range\n",
-				  plongest (offset));
-	    }
+	  displaced_debug_printf ("can't displaced step RIL instruction: offset "
+				  "%s out of range", plongest (offset));
 
 	  return NULL;
 	}
@@ -470,12 +465,9 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   write_memory (to, buf, len);
 
-  if (debug_displaced)
-    {
-      fprintf_unfiltered (gdb_stdlog, "displaced: copy %s->%s: ",
-			  paddress (gdbarch, from), paddress (gdbarch, to));
-      displaced_step_dump_bytes (gdb_stdlog, buf, len);
-    }
+  displaced_debug_printf ("copy %s->%s: %s",
+			  paddress (gdbarch, from), paddress (gdbarch, to),
+			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
   return displaced_step_closure_up (closure.release ());
@@ -511,11 +503,9 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
       amode &= 0x80000000;
     }
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog,
-			"displaced: (s390) fixup (%s, %s) pc %s len %d amode 0x%x\n",
-			paddress (gdbarch, from), paddress (gdbarch, to),
-			paddress (gdbarch, pc), insnlen, (int) amode);
+  displaced_debug_printf ("(s390) fixup (%s, %s) pc %s len %d amode 0x%x",
+			  paddress (gdbarch, from), paddress (gdbarch, to),
+			  paddress (gdbarch, pc), insnlen, (int) amode);
 
   /* Handle absolute branch and save instructions.  */
   int op_basr_p = is_rr (insn, op_basr, &r1, &r2);
@@ -578,10 +568,8 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
   else
     regcache_write_pc (regs, pc - to + from);
 
-  if (debug_displaced)
-    fprintf_unfiltered (gdb_stdlog,
-			"displaced: (s390) pc is now %s\n",
-			paddress (gdbarch, regcache_read_pc (regs)));
+  displaced_debug_printf ("(s390) pc is now %s",
+			  paddress (gdbarch, regcache_read_pc (regs)));
 }
 
 /* Implement displaced_step_hw_singlestep gdbarch method.  */
