@@ -1,3 +1,7 @@
+2020-10-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* rs6000-tdep.c (rs6000_dwarf2_reg_to_regnum): Return -1 for
+
 2020-10-30  Tom Tromey  <tromey@adacore.com>
 
 	* Makefile.in (stamp-init): Depend on config.status.

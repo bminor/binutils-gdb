@@ -3240,9 +3240,10 @@ rs6000_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
         return tdep->ppc_vrsave_regnum;
       case 612:
         return tdep->ppc_spefscr_regnum;
-      default:
-        return num;
       }
+
+  /* Unknown DWARF register number.  */
+  return -1;
 }
 
 /* Translate a .eh_frame register to DWARF register, or adjust a
