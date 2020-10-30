@@ -1,3 +1,53 @@
+2020-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-exp.y (find_primitive_type): Make parameter const.
+	* ada-lang.c (enum ada_primitive_types): Delete.
+	(ada_language::language_arch_info): Update.
+	* c-lang.c (enum c_primitive_types): Delete.
+	(c_language_arch_info): Update.
+	(enum cplus_primitive_types): Delete.
+	(cplus_language::language_arch_info): Update.
+	* d-lang.c (enum d_primitive_types): Delete.
+	(d_language::language_arch_info): Update.
+	* f-lang.c (enum f_primitive_types): Delete.
+	(f_language::language_arch_info): Update.
+	* go-lang.c (enum go_primitive_types): Delete.
+	(go_language::language_arch_info): Update.
+	* language.c (auto_or_unknown_language::language_arch_info):
+	Update.
+	(language_gdbarch_post_init): Use obstack_new, use array indexing.
+	(language_string_char_type): Add header comment, call function in
+	language_arch_info.
+	(language_bool_type): Likewise
+	(language_arch_info::bool_type): Define.
+	(language_lookup_primitive_type_1): Delete.
+	(language_lookup_primitive_type): Rewrite as a templated function
+	to call function in language_arch_info, then instantiate twice.
+	(language_arch_info::type_and_symbol::alloc_type_symbol): Define.
+	(language_arch_info::lookup_primitive_type_and_symbol): Define.
+	(language_arch_info::lookup_primitive_type): Define twice with
+	different signatures.
+	(language_arch_info::lookup_primitive_type_as_symbol): Define.
+	(language_lookup_primitive_type_as_symbol): Rewrite to call a
+	member function in language_arch_info.
+	* language.h (language_arch_info): Complete rewrite.
+	(language_lookup_primitive_type): Make templated.
+	* m2-lang.c (enum m2_primitive_types): Delete.
+	(m2_language::language_arch_info): Update.
+	* opencl-lang.c (OCL_P_TYPE): Delete.
+	(enum opencl_primitive_types): Delete.
+	(opencl_type_data): Delete.
+	(builtin_opencl_type): Delete.
+	(lookup_opencl_vector_type): Update.
+	(opencl_language::language_arch_info): Update, lots of content
+	moved from...
+	(build_opencl_types): ...here.  This function is now deleted.
+	(_initialize_opencl_language): Delete.
+	* p-lang.c (enum pascal_primitive_types): Delete.
+	(pascal_language::language_arch_info): Update.
+	* rust-lang.c (enum rust_primitive_types): Delete.
+	(rust_language::language_arch_info): Update.
+
 2020-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.c (dw2_do_instantiate_symtab): Fix call to

@@ -89,23 +89,129 @@ enum macro_expansion
 
 struct language_arch_info
 {
-  /* Its primitive types.  This is a vector ended by a NULL pointer.
-     These types can be specified by name in parsing types in
-     expressions, regardless of whether the program being debugged
-     actually defines such a type.  */
-  struct type **primitive_type_vector;
+  /* A default constructor.  */
+  language_arch_info () = default;
 
-  /* Symbol wrappers around primitive_type_vector, so that the symbol lookup
-     machinery can return them.  */
-  struct symbol **primitive_type_symbols;
+  DISABLE_COPY_AND_ASSIGN (language_arch_info);
+
+  /* Set the default boolean type to be TYPE.  If NAME is not nullptr then
+     before using TYPE a symbol called NAME will be looked up, and the type
+     of this symbol will be used instead.  Should only be called once when
+     performing setup for a particular language in combination with a
+     particular gdbarch.  */
+  void set_bool_type (struct type *type, const char *name = nullptr)
+  {
+    gdb_assert (m_bool_type_default == nullptr);
+    gdb_assert (m_bool_type_name == nullptr);
+    gdb_assert (type != nullptr);
+    m_bool_type_default = type;
+    m_bool_type_name = name;
+  }
+
+  /* Set the type to be used for characters within a string.  Should only
+     be called once when performing setup for a particular language in
+     combination with a particular gdbarch.  */
+  void set_string_char_type (struct type *type)
+  {
+    gdb_assert (m_string_char_type == nullptr);
+    gdb_assert (type != nullptr);
+    m_string_char_type = type;
+  }
+
+  /* Return the type for characters within a string.  */
+  struct type *string_char_type () const
+  { return m_string_char_type; }
+
+  /* Return the type to be used for booleans.  */
+  struct type *bool_type () const;
+
+  /* Add TYPE to the list of primitive types for this particular language,
+     with this OS/ABI combination.  */
+  void add_primitive_type (struct type *type)
+  {
+    gdb_assert (type != nullptr);
+    primitive_types_and_symbols.push_back (type_and_symbol (type));
+  }
+
+  /* Lookup a primitive type called NAME.  Will return nullptr if no
+     matching type is found.  */
+  struct type *lookup_primitive_type (const char *name);
+
+  /* Lookup a primitive type for which FILTER returns true.  Will return
+     nullptr if no matching type is found.  */
+  struct type *lookup_primitive_type
+	(std::function<bool (struct type *)> filter);
+
+  /* Lookup a primitive type called NAME and return the type as a symbol.
+     LANG is the language for which type is being looked up.  */
+  struct symbol *lookup_primitive_type_as_symbol (const char *name,
+						  enum language lang);
+private:
+
+  /* A structure storing a type and a corresponding symbol.  The type is
+     defined at construction time, while the symbol is lazily created only
+     when asked for, but is then cached for future use.  */
+  struct type_and_symbol
+  {
+    /* Constructor.  */
+    explicit type_and_symbol (struct type *type)
+      : m_type (type)
+    { /* Nothing.  */ }
+
+    /* Default move constructor.  */
+    type_and_symbol (type_and_symbol&&) = default;
+
+    DISABLE_COPY_AND_ASSIGN (type_and_symbol);
+
+    /* Return the type from this object.  */
+    struct type *type () const
+    { return m_type; }
+
+    /* Create and return a symbol wrapping M_TYPE from this object.  */
+    struct symbol *symbol (enum language lang)
+    {
+      if (m_symbol == nullptr)
+	m_symbol = alloc_type_symbol (lang, m_type);
+      return m_symbol;
+    }
+
+  private:
+    /* The type primitive type.  */
+    struct type *m_type = nullptr;
+
+    /* A symbol wrapping M_TYPE, only created when first asked for.  */
+    struct symbol *m_symbol = nullptr;
+
+    /* Helper function for type lookup as a symbol.  Create the symbol
+       corresponding to type TYPE in language LANG.  */
+    static struct symbol *alloc_type_symbol (enum language lang,
+					     struct type *type);
+  };
+
+  /* Lookup a type_and_symbol entry from the primitive_types_and_symbols
+     vector for a type matching NAME.  Return a pointer to the
+     type_and_symbol object from the vector.  This will return nullptr if
+     there is no type matching NAME found.  */
+  type_and_symbol *lookup_primitive_type_and_symbol (const char *name);
+
+  /* Vector of the primitive types added through add_primitive_type.  These
+     types can be specified by name in parsing types in expressions,
+     regardless of whether the program being debugged actually defines such
+     a type.
+
+     Within the vector each type is paired with a lazily created symbol,
+     which can be fetched by the symbol lookup machinery, should they be
+     needed.  */
+  std::vector<type_and_symbol> primitive_types_and_symbols;
 
   /* Type of elements of strings.  */
-  struct type *string_char_type;
+  struct type *m_string_char_type = nullptr;
 
   /* Symbol name of type to use as boolean type, if defined.  */
-  const char *bool_type_symbol;
+  const char *m_bool_type_name = nullptr;
+
   /* Otherwise, this is the default boolean builtin type.  */
-  struct type *bool_type_default;
+  struct type *m_bool_type_default = nullptr;
 };
 
 /* In a language (particularly C++) a function argument of an aggregate
@@ -601,18 +707,27 @@ extern enum language_mode
   }
 language_mode;
 
+/* Return the type that should be used for booleans for language L in
+   GDBARCH.  */
+
 struct type *language_bool_type (const struct language_defn *l,
 				 struct gdbarch *gdbarch);
+
+/* Return the type that should be used for characters within a string for
+   language L in GDBARCH.  */
 
 struct type *language_string_char_type (const struct language_defn *l,
 					struct gdbarch *gdbarch);
 
-/* Look up type NAME in language L, and return its definition for architecture
-   GDBARCH.  Returns NULL if not found.  */
+/* Look up a type from the set of OS/ABI specific types defined in GDBARCH
+   for language L.  ARG is used for selecting the matching type, and is
+   passed through to the corresponding lookup_primitive_type member
+   function inside the language_arch_info class.  */
 
+template<typename T>
 struct type *language_lookup_primitive_type (const struct language_defn *l,
 					     struct gdbarch *gdbarch,
-					     const char *name);
+					     T arg);
 
 /* Wrapper around language_lookup_primitive_type to return the
    corresponding symbol.  */

@@ -97,22 +97,6 @@ const struct op_print f_language::op_print_tab[] =
   {NULL, OP_NULL, PREC_REPEAT, 0}
 };
 
-enum f_primitive_types {
-  f_primitive_type_character,
-  f_primitive_type_logical,
-  f_primitive_type_logical_s1,
-  f_primitive_type_logical_s2,
-  f_primitive_type_logical_s8,
-  f_primitive_type_integer,
-  f_primitive_type_integer_s2,
-  f_primitive_type_real,
-  f_primitive_type_real_s8,
-  f_primitive_type_real_s16,
-  f_primitive_type_complex_s8,
-  f_primitive_type_complex_s16,
-  f_primitive_type_void,
-  nr_f_primitive_types
-};
 
 /* Called from fortran_value_subarray to take a slice of an array or a
    string.  ARRAY is the array or string to be accessed.  EXP, POS, and
@@ -720,36 +704,26 @@ f_language::language_arch_info (struct gdbarch *gdbarch,
 {
   const struct builtin_f_type *builtin = builtin_f_type (gdbarch);
 
-  lai->string_char_type = builtin->builtin_character;
-  lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_f_primitive_types + 1,
-			      struct type *);
+  /* Helper function to allow shorter lines below.  */
+  auto add  = [&] (struct type * t)
+  {
+    lai->add_primitive_type (t);
+  };
 
-  lai->primitive_type_vector [f_primitive_type_character]
-    = builtin->builtin_character;
-  lai->primitive_type_vector [f_primitive_type_logical]
-    = builtin->builtin_logical;
-  lai->primitive_type_vector [f_primitive_type_logical_s1]
-    = builtin->builtin_logical_s1;
-  lai->primitive_type_vector [f_primitive_type_logical_s2]
-    = builtin->builtin_logical_s2;
-  lai->primitive_type_vector [f_primitive_type_logical_s8]
-    = builtin->builtin_logical_s8;
-  lai->primitive_type_vector [f_primitive_type_real]
-    = builtin->builtin_real;
-  lai->primitive_type_vector [f_primitive_type_real_s8]
-    = builtin->builtin_real_s8;
-  lai->primitive_type_vector [f_primitive_type_real_s16]
-    = builtin->builtin_real_s16;
-  lai->primitive_type_vector [f_primitive_type_complex_s8]
-    = builtin->builtin_complex_s8;
-  lai->primitive_type_vector [f_primitive_type_complex_s16]
-    = builtin->builtin_complex_s16;
-  lai->primitive_type_vector [f_primitive_type_void]
-    = builtin->builtin_void;
+  add (builtin->builtin_character);
+  add (builtin->builtin_logical);
+  add (builtin->builtin_logical_s1);
+  add (builtin->builtin_logical_s2);
+  add (builtin->builtin_logical_s8);
+  add (builtin->builtin_real);
+  add (builtin->builtin_real_s8);
+  add (builtin->builtin_real_s16);
+  add (builtin->builtin_complex_s8);
+  add (builtin->builtin_complex_s16);
+  add (builtin->builtin_void);
 
-  lai->bool_type_symbol = "logical";
-  lai->bool_type_default = builtin->builtin_logical_s2;
+  lai->set_string_char_type (builtin->builtin_character);
+  lai->set_bool_type (builtin->builtin_logical_s2, "logical");
 }
 
 /* See language.h.  */

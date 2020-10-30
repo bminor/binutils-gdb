@@ -1026,7 +1026,7 @@ select_possible_type_sym (const std::vector<struct block_symbol> &syms)
 }
 
 static struct type*
-find_primitive_type (struct parser_state *par_state, char *name)
+find_primitive_type (struct parser_state *par_state, const char *name)
 {
   struct type *type;
   type = language_lookup_primitive_type (par_state->language (),

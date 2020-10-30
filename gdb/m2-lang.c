@@ -161,16 +161,6 @@ const struct op_print m2_language::op_print_tab[] =
   {NULL, OP_NULL, PREC_BUILTIN_FUNCTION, 0}
 };
 
-/* The built-in types of Modula-2.  */
-
-enum m2_primitive_types {
-  m2_primitive_type_char,
-  m2_primitive_type_int,
-  m2_primitive_type_card,
-  m2_primitive_type_real,
-  m2_primitive_type_bool,
-  nr_m2_primitive_types
-};
 
 const struct exp_descriptor m2_language::exp_descriptor_modula2 =
 {
@@ -194,24 +184,20 @@ m2_language::language_arch_info (struct gdbarch *gdbarch,
 {
   const struct builtin_m2_type *builtin = builtin_m2_type (gdbarch);
 
-  lai->string_char_type = builtin->builtin_char;
-  lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_m2_primitive_types + 1,
-			      struct type *);
+  /* Helper function to allow shorter lines below.  */
+  auto add  = [&] (struct type * t)
+  {
+    lai->add_primitive_type (t);
+  };
 
-  lai->primitive_type_vector [m2_primitive_type_char]
-    = builtin->builtin_char;
-  lai->primitive_type_vector [m2_primitive_type_int]
-    = builtin->builtin_int;
-  lai->primitive_type_vector [m2_primitive_type_card]
-    = builtin->builtin_card;
-  lai->primitive_type_vector [m2_primitive_type_real]
-    = builtin->builtin_real;
-  lai->primitive_type_vector [m2_primitive_type_bool]
-    = builtin->builtin_bool;
+  add (builtin->builtin_char);
+  add (builtin->builtin_int);
+  add (builtin->builtin_card);
+  add (builtin->builtin_real);
+  add (builtin->builtin_bool);
 
-  lai->bool_type_symbol = "BOOLEAN";
-  lai->bool_type_default = builtin->builtin_bool;
+  lai->set_string_char_type (builtin->builtin_char);
+  lai->set_bool_type (builtin->builtin_bool, "BOOLEAN");
 }
 
 /* See languge.h.  */

@@ -13595,24 +13595,6 @@ static const struct op_print ada_op_print_tab[] = {
   {NULL, OP_NULL, PREC_SUFFIX, 0}
 };
 
-enum ada_primitive_types {
-  ada_primitive_type_int,
-  ada_primitive_type_long,
-  ada_primitive_type_short,
-  ada_primitive_type_char,
-  ada_primitive_type_float,
-  ada_primitive_type_double,
-  ada_primitive_type_void,
-  ada_primitive_type_long_long,
-  ada_primitive_type_long_double,
-  ada_primitive_type_natural,
-  ada_primitive_type_positive,
-  ada_primitive_type_system_address,
-  ada_primitive_type_storage_offset,
-  nr_ada_primitive_types
-};
-
-
 				/* Language vector */
 
 static const struct exp_descriptor ada_exp_descriptor = {
@@ -13838,63 +13820,51 @@ public:
   {
     const struct builtin_type *builtin = builtin_type (gdbarch);
 
-    lai->primitive_type_vector
-      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_ada_primitive_types + 1,
-				struct type *);
+    /* Helper function to allow shorter lines below.  */
+    auto add = [&] (struct type *t)
+    {
+      lai->add_primitive_type (t);
+    };
 
-    lai->primitive_type_vector [ada_primitive_type_int]
-      = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
-			   0, "integer");
-    lai->primitive_type_vector [ada_primitive_type_long]
-      = arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
-			   0, "long_integer");
-    lai->primitive_type_vector [ada_primitive_type_short]
-      = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch),
-			   0, "short_integer");
-    lai->string_char_type
-      = lai->primitive_type_vector [ada_primitive_type_char]
-      = arch_character_type (gdbarch, TARGET_CHAR_BIT, 0, "character");
-    lai->primitive_type_vector [ada_primitive_type_float]
-      = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-			 "float", gdbarch_float_format (gdbarch));
-    lai->primitive_type_vector [ada_primitive_type_double]
-      = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
-			 "long_float", gdbarch_double_format (gdbarch));
-    lai->primitive_type_vector [ada_primitive_type_long_long]
-      = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
-			   0, "long_long_integer");
-    lai->primitive_type_vector [ada_primitive_type_long_double]
-      = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
-			 "long_long_float", gdbarch_long_double_format (gdbarch));
-    lai->primitive_type_vector [ada_primitive_type_natural]
-      = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
-			   0, "natural");
-    lai->primitive_type_vector [ada_primitive_type_positive]
-      = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
-			   0, "positive");
-    lai->primitive_type_vector [ada_primitive_type_void]
-      = builtin->builtin_void;
+    add (arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+			    0, "integer"));
+    add (arch_integer_type (gdbarch, gdbarch_long_bit (gdbarch),
+			    0, "long_integer"));
+    add (arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch),
+			    0, "short_integer"));
+    struct type *char_type = arch_character_type (gdbarch, TARGET_CHAR_BIT,
+						  0, "character");
+    lai->set_string_char_type (char_type);
+    add (char_type);
+    add (arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
+			  "float", gdbarch_float_format (gdbarch)));
+    add (arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
+			  "long_float", gdbarch_double_format (gdbarch)));
+    add (arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch),
+			    0, "long_long_integer"));
+    add (arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
+			  "long_long_float",
+			  gdbarch_long_double_format (gdbarch)));
+    add (arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+			    0, "natural"));
+    add (arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch),
+			    0, "positive"));
+    add (builtin->builtin_void);
 
-    lai->primitive_type_vector [ada_primitive_type_system_address]
+    struct type *system_addr_ptr
       = lookup_pointer_type (arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
 					"void"));
-    lai->primitive_type_vector [ada_primitive_type_system_address]
-      ->set_name ("system__address");
+    system_addr_ptr->set_name ("system__address");
+    add (system_addr_ptr);
 
     /* Create the equivalent of the System.Storage_Elements.Storage_Offset
        type.  This is a signed integral type whose size is the same as
        the size of addresses.  */
-    {
-      unsigned int addr_length = TYPE_LENGTH
-	(lai->primitive_type_vector [ada_primitive_type_system_address]);
+    unsigned int addr_length = TYPE_LENGTH (system_addr_ptr);
+    add (arch_integer_type (gdbarch, addr_length * HOST_CHAR_BIT, 0,
+			    "storage_offset"));
 
-      lai->primitive_type_vector [ada_primitive_type_storage_offset]
-	= arch_integer_type (gdbarch, addr_length * HOST_CHAR_BIT, 0,
-			     "storage_offset");
-    }
-
-    lai->bool_type_symbol = NULL;
-    lai->bool_type_default = builtin->builtin_bool;
+    lai->set_bool_type (builtin->builtin_bool);
   }
 
   /* See language.h.  */

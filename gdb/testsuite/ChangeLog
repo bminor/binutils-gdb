@@ -1,3 +1,7 @@
+2020-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/types.exp: Add more tests.
+
 2020-11-12  Tom Tromey  <tom@tromey.com>
 
 	PR rust/26799:

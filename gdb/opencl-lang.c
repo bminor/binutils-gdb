@@ -28,49 +28,6 @@
 #include "c-lang.h"
 #include "gdbarch.h"
 
-/* This macro generates enum values from a given type.  */
-
-#define OCL_P_TYPE(TYPE)\
-  opencl_primitive_type_##TYPE,\
-  opencl_primitive_type_##TYPE##2,\
-  opencl_primitive_type_##TYPE##3,\
-  opencl_primitive_type_##TYPE##4,\
-  opencl_primitive_type_##TYPE##8,\
-  opencl_primitive_type_##TYPE##16
-
-enum opencl_primitive_types {
-  OCL_P_TYPE (char),
-  OCL_P_TYPE (uchar),
-  OCL_P_TYPE (short),
-  OCL_P_TYPE (ushort),
-  OCL_P_TYPE (int),
-  OCL_P_TYPE (uint),
-  OCL_P_TYPE (long),
-  OCL_P_TYPE (ulong),
-  OCL_P_TYPE (half),
-  OCL_P_TYPE (float),
-  OCL_P_TYPE (double),
-  opencl_primitive_type_bool,
-  opencl_primitive_type_unsigned_char,
-  opencl_primitive_type_unsigned_short,
-  opencl_primitive_type_unsigned_int,
-  opencl_primitive_type_unsigned_long,
-  opencl_primitive_type_size_t,
-  opencl_primitive_type_ptrdiff_t,
-  opencl_primitive_type_intptr_t,
-  opencl_primitive_type_uintptr_t,
-  opencl_primitive_type_void,
-  nr_opencl_primitive_types
-};
-
-static struct gdbarch_data *opencl_type_data;
-
-static struct type **
-builtin_opencl_type (struct gdbarch *gdbarch)
-{
-  return (struct type **) gdbarch_data (gdbarch, opencl_type_data);
-}
-
 /* Returns the corresponding OpenCL vector type from the given type code,
    the length of the element type, the unsigned flag and the amount of
    elements (N).  */
@@ -80,10 +37,7 @@ lookup_opencl_vector_type (struct gdbarch *gdbarch, enum type_code code,
 			   unsigned int el_length, unsigned int flag_unsigned,
 			   int n)
 {
-  int i;
   unsigned int length;
-  struct type *type = NULL;
-  struct type **types = builtin_opencl_type (gdbarch);
 
   /* Check if n describes a valid OpenCL vector size (2, 3, 4, 8, 16).  */
   if (n != 2 && n != 3 && n != 4 && n != 8 && n != 16)
@@ -92,24 +46,20 @@ lookup_opencl_vector_type (struct gdbarch *gdbarch, enum type_code code,
   /* Triple vectors have the size of a quad vector.  */
   length = (n == 3) ?  el_length * 4 : el_length * n;
 
-  for (i = 0; i < nr_opencl_primitive_types; i++)
-    {
-      LONGEST lowb, highb;
+  std::function<bool (struct type *)> filter = [&] (struct type *type)
+  {
+    LONGEST lowb, highb;
 
-      if (types[i]->code () == TYPE_CODE_ARRAY && types[i]->is_vector ()
-	  && get_array_bounds (types[i], &lowb, &highb)
-	  && TYPE_TARGET_TYPE (types[i])->code () == code
-	  && TYPE_TARGET_TYPE (types[i])->is_unsigned () == flag_unsigned
-	  && TYPE_LENGTH (TYPE_TARGET_TYPE (types[i])) == el_length
-	  && TYPE_LENGTH (types[i]) == length
-	  && highb - lowb + 1 == n)
-	{
-	  type = types[i];
-	  break;
-	}
-    }
-
-  return type;
+    return (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
+	    && get_array_bounds (type, &lowb, &highb)
+	    && TYPE_TARGET_TYPE (type)->code () == code
+	    && TYPE_TARGET_TYPE (type)->is_unsigned () == flag_unsigned
+	    && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == el_length
+	    && TYPE_LENGTH (type) == length
+	    && highb - lowb + 1 == n);
+  };
+  const struct language_defn *lang = language_def (language_opencl);
+  return language_lookup_primitive_type (lang, gdbarch, filter);
 }
 
 /* Returns nonzero if the array ARR contains duplicates within
@@ -1026,17 +976,77 @@ public:
   void language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai) const override
   {
-    struct type **types = builtin_opencl_type (gdbarch);
+    /* Helper function to allow shorter lines below.  */
+    auto add  = [&] (struct type * t) -> struct type *
+    {
+      lai->add_primitive_type (t);
+      return t;
+    };
 
-    /* Copy primitive types vector from gdbarch.  */
-    lai->primitive_type_vector = types;
+/* Helper macro to create strings.  */
+#define OCL_STRING(S) #S
+
+/* This macro allocates and assigns the type struct pointers
+   for the vector types.  */
+#define BUILD_OCL_VTYPES(TYPE, ELEMENT_TYPE)			\
+    do								\
+      {								\
+	struct type *tmp;					\
+	tmp = add (init_vector_type (ELEMENT_TYPE, 2));		\
+	tmp->set_name (OCL_STRING(TYPE ## 2));			\
+	tmp = add (init_vector_type (ELEMENT_TYPE, 3));		\
+	tmp->set_name (OCL_STRING(TYPE ## 3));			\
+	TYPE_LENGTH (tmp) = 4 * TYPE_LENGTH (ELEMENT_TYPE);	\
+	tmp = add (init_vector_type (ELEMENT_TYPE, 4));		\
+	tmp->set_name (OCL_STRING(TYPE ## 4));			\
+	tmp = add (init_vector_type (ELEMENT_TYPE, 8));		\
+	tmp->set_name (OCL_STRING(TYPE ## 8));			\
+	tmp = init_vector_type (ELEMENT_TYPE, 16);		\
+	tmp->set_name (OCL_STRING(TYPE ## 16));			\
+      }								\
+    while (false)
+
+    struct type *el_type, *char_type, *int_type;
+
+    char_type = el_type = add (arch_integer_type (gdbarch, 8, 0, "char"));
+    BUILD_OCL_VTYPES (char, el_type);
+    el_type = add (arch_integer_type (gdbarch, 8, 1, "uchar"));
+    BUILD_OCL_VTYPES (uchar, el_type);
+    el_type = add (arch_integer_type (gdbarch, 16, 0, "short"));
+    BUILD_OCL_VTYPES (short, el_type);
+    el_type = add (arch_integer_type (gdbarch, 16, 1, "ushort"));
+    BUILD_OCL_VTYPES (ushort, el_type);
+    int_type = el_type = add (arch_integer_type (gdbarch, 32, 0, "int"));
+    BUILD_OCL_VTYPES (int, el_type);
+    el_type = add (arch_integer_type (gdbarch, 32, 1, "uint"));
+    BUILD_OCL_VTYPES (uint, el_type);
+    el_type = add (arch_integer_type (gdbarch, 64, 0, "long"));
+    BUILD_OCL_VTYPES (long, el_type);
+    el_type = add (arch_integer_type (gdbarch, 64, 1, "ulong"));
+    BUILD_OCL_VTYPES (ulong, el_type);
+    el_type = add (arch_float_type (gdbarch, 16, "half", floatformats_ieee_half));
+    BUILD_OCL_VTYPES (half, el_type);
+    el_type = add (arch_float_type (gdbarch, 32, "float", floatformats_ieee_single));
+    BUILD_OCL_VTYPES (float, el_type);
+    el_type = add (arch_float_type (gdbarch, 64, "double", floatformats_ieee_double));
+    BUILD_OCL_VTYPES (double, el_type);
+
+    add (arch_boolean_type (gdbarch, 8, 1, "bool"));
+    add (arch_integer_type (gdbarch, 8, 1, "unsigned char"));
+    add (arch_integer_type (gdbarch, 16, 1, "unsigned short"));
+    add (arch_integer_type (gdbarch, 32, 1, "unsigned int"));
+    add (arch_integer_type (gdbarch, 64, 1, "unsigned long"));
+    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "size_t"));
+    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "ptrdiff_t"));
+    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "intptr_t"));
+    add (arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "uintptr_t"));
+    add (arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void"));
 
     /* Type of elements of strings.  */
-    lai->string_char_type = types [opencl_primitive_type_char];
+    lai->set_string_char_type (char_type);
 
     /* Specifies the return type of logical and relational operations.  */
-    lai->bool_type_symbol = "int";
-    lai->bool_type_default = types [opencl_primitive_type_int];
+    lai->set_bool_type (int_type, "int");
   }
 
   /* See language.h.  */
@@ -1078,97 +1088,3 @@ public:
 /* Single instance of the OpenCL language class.  */
 
 static opencl_language opencl_language_defn;
-
-static void *
-build_opencl_types (struct gdbarch *gdbarch)
-{
-  struct type **types
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_opencl_primitive_types + 1,
-			      struct type *);
-
-/* Helper macro to create strings.  */
-#define OCL_STRING(S) #S
-/* This macro allocates and assigns the type struct pointers
-   for the vector types.  */
-#define BUILD_OCL_VTYPES(TYPE)\
-  types[opencl_primitive_type_##TYPE##2] \
-    = init_vector_type (types[opencl_primitive_type_##TYPE], 2); \
-  types[opencl_primitive_type_##TYPE##2]->set_name (OCL_STRING(TYPE ## 2)); \
-  types[opencl_primitive_type_##TYPE##3] \
-    = init_vector_type (types[opencl_primitive_type_##TYPE], 3); \
-  types[opencl_primitive_type_##TYPE##3]->set_name (OCL_STRING(TYPE ## 3)); \
-  TYPE_LENGTH (types[opencl_primitive_type_##TYPE##3]) \
-    = 4 * TYPE_LENGTH (types[opencl_primitive_type_##TYPE]); \
-  types[opencl_primitive_type_##TYPE##4] \
-    = init_vector_type (types[opencl_primitive_type_##TYPE], 4); \
-  types[opencl_primitive_type_##TYPE##4]->set_name (OCL_STRING(TYPE ## 4)); \
-  types[opencl_primitive_type_##TYPE##8] \
-    = init_vector_type (types[opencl_primitive_type_##TYPE], 8); \
-  types[opencl_primitive_type_##TYPE##8]->set_name (OCL_STRING(TYPE ## 8)); \
-  types[opencl_primitive_type_##TYPE##16] \
-    = init_vector_type (types[opencl_primitive_type_##TYPE], 16); \
-  types[opencl_primitive_type_##TYPE##16]->set_name (OCL_STRING(TYPE ## 16))
-
-  types[opencl_primitive_type_char]
-    = arch_integer_type (gdbarch, 8, 0, "char");
-  BUILD_OCL_VTYPES (char);
-  types[opencl_primitive_type_uchar]
-    = arch_integer_type (gdbarch, 8, 1, "uchar");
-  BUILD_OCL_VTYPES (uchar);
-  types[opencl_primitive_type_short]
-    = arch_integer_type (gdbarch, 16, 0, "short");
-  BUILD_OCL_VTYPES (short);
-  types[opencl_primitive_type_ushort]
-    = arch_integer_type (gdbarch, 16, 1, "ushort");
-  BUILD_OCL_VTYPES (ushort);
-  types[opencl_primitive_type_int]
-    = arch_integer_type (gdbarch, 32, 0, "int");
-  BUILD_OCL_VTYPES (int);
-  types[opencl_primitive_type_uint]
-    = arch_integer_type (gdbarch, 32, 1, "uint");
-  BUILD_OCL_VTYPES (uint);
-  types[opencl_primitive_type_long]
-    = arch_integer_type (gdbarch, 64, 0, "long");
-  BUILD_OCL_VTYPES (long);
-  types[opencl_primitive_type_ulong]
-    = arch_integer_type (gdbarch, 64, 1, "ulong");
-  BUILD_OCL_VTYPES (ulong);
-  types[opencl_primitive_type_half]
-    = arch_float_type (gdbarch, 16, "half", floatformats_ieee_half);
-  BUILD_OCL_VTYPES (half);
-  types[opencl_primitive_type_float]
-    = arch_float_type (gdbarch, 32, "float", floatformats_ieee_single);
-  BUILD_OCL_VTYPES (float);
-  types[opencl_primitive_type_double]
-    = arch_float_type (gdbarch, 64, "double", floatformats_ieee_double);
-  BUILD_OCL_VTYPES (double);
-  types[opencl_primitive_type_bool]
-    = arch_boolean_type (gdbarch, 8, 1, "bool");
-  types[opencl_primitive_type_unsigned_char]
-    = arch_integer_type (gdbarch, 8, 1, "unsigned char");
-  types[opencl_primitive_type_unsigned_short]
-    = arch_integer_type (gdbarch, 16, 1, "unsigned short");
-  types[opencl_primitive_type_unsigned_int]
-    = arch_integer_type (gdbarch, 32, 1, "unsigned int");
-  types[opencl_primitive_type_unsigned_long]
-    = arch_integer_type (gdbarch, 64, 1, "unsigned long");
-  types[opencl_primitive_type_size_t]
-    = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "size_t");
-  types[opencl_primitive_type_ptrdiff_t]
-    = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "ptrdiff_t");
-  types[opencl_primitive_type_intptr_t]
-    = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 0, "intptr_t");
-  types[opencl_primitive_type_uintptr_t]
-    = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch), 1, "uintptr_t");
-  types[opencl_primitive_type_void]
-    = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
-
-  return types;
-}
-
-void _initialize_opencl_language ();
-void
-_initialize_opencl_language ()
-{
-  opencl_type_data = gdbarch_data_register_post_init (build_opencl_types);
-}

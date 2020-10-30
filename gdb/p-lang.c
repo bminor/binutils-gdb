@@ -227,26 +227,6 @@ const struct op_print pascal_op_print_tab[] =
   {NULL, OP_NULL, PREC_PREFIX, 0}
 };
 
-enum pascal_primitive_types {
-  pascal_primitive_type_int,
-  pascal_primitive_type_long,
-  pascal_primitive_type_short,
-  pascal_primitive_type_char,
-  pascal_primitive_type_float,
-  pascal_primitive_type_double,
-  pascal_primitive_type_void,
-  pascal_primitive_type_long_long,
-  pascal_primitive_type_signed_char,
-  pascal_primitive_type_unsigned_char,
-  pascal_primitive_type_unsigned_short,
-  pascal_primitive_type_unsigned_int,
-  pascal_primitive_type_unsigned_long,
-  pascal_primitive_type_unsigned_long_long,
-  pascal_primitive_type_long_double,
-  pascal_primitive_type_complex,
-  pascal_primitive_type_double_complex,
-  nr_pascal_primitive_types
-};
 
 /* Class representing the Pascal language.  */
 
@@ -282,47 +262,32 @@ public:
   {
     const struct builtin_type *builtin = builtin_type (gdbarch);
 
-    lai->string_char_type = builtin->builtin_char;
-    lai->primitive_type_vector
-      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_pascal_primitive_types + 1,
-			      struct type *);
-    lai->primitive_type_vector [pascal_primitive_type_int]
-      = builtin->builtin_int;
-    lai->primitive_type_vector [pascal_primitive_type_long]
-      = builtin->builtin_long;
-    lai->primitive_type_vector [pascal_primitive_type_short]
-      = builtin->builtin_short;
-    lai->primitive_type_vector [pascal_primitive_type_char]
-      = builtin->builtin_char;
-    lai->primitive_type_vector [pascal_primitive_type_float]
-      = builtin->builtin_float;
-    lai->primitive_type_vector [pascal_primitive_type_double]
-      = builtin->builtin_double;
-    lai->primitive_type_vector [pascal_primitive_type_void]
-      = builtin->builtin_void;
-    lai->primitive_type_vector [pascal_primitive_type_long_long]
-      = builtin->builtin_long_long;
-    lai->primitive_type_vector [pascal_primitive_type_signed_char]
-      = builtin->builtin_signed_char;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_char]
-      = builtin->builtin_unsigned_char;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_short]
-      = builtin->builtin_unsigned_short;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_int]
-      = builtin->builtin_unsigned_int;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_long]
-      = builtin->builtin_unsigned_long;
-    lai->primitive_type_vector [pascal_primitive_type_unsigned_long_long]
-      = builtin->builtin_unsigned_long_long;
-    lai->primitive_type_vector [pascal_primitive_type_long_double]
-      = builtin->builtin_long_double;
-    lai->primitive_type_vector [pascal_primitive_type_complex]
-      = builtin->builtin_complex;
-    lai->primitive_type_vector [pascal_primitive_type_double_complex]
-      = builtin->builtin_double_complex;
+    /* Helper function to allow shorter lines below.  */
+    auto add  = [&] (struct type * t)
+    {
+      lai->add_primitive_type (t);
+    };
 
-    lai->bool_type_symbol = "boolean";
-    lai->bool_type_default = builtin->builtin_bool;
+    add (builtin->builtin_int);
+    add (builtin->builtin_long);
+    add (builtin->builtin_short);
+    add (builtin->builtin_char);
+    add (builtin->builtin_float);
+    add (builtin->builtin_double);
+    add (builtin->builtin_void);
+    add (builtin->builtin_long_long);
+    add (builtin->builtin_signed_char);
+    add (builtin->builtin_unsigned_char);
+    add (builtin->builtin_unsigned_short);
+    add (builtin->builtin_unsigned_int);
+    add (builtin->builtin_unsigned_long);
+    add (builtin->builtin_unsigned_long_long);
+    add (builtin->builtin_long_double);
+    add (builtin->builtin_complex);
+    add (builtin->builtin_double_complex);
+
+    lai->set_string_char_type (builtin->builtin_char);
+    lai->set_bool_type (builtin->builtin_bool, "boolean");
   }
 
   /* See language.h.  */

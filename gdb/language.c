@@ -797,10 +797,8 @@ public:
   void language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai) const override
   {
-    lai->string_char_type = builtin_type (gdbarch)->builtin_char;
-    lai->bool_type_default = builtin_type (gdbarch)->builtin_int;
-    lai->primitive_type_vector = GDBARCH_OBSTACK_CALLOC (gdbarch, 1,
-						       struct type *);
+    lai->set_string_char_type (builtin_type (gdbarch)->builtin_char);
+    lai->set_bool_type (builtin_type (gdbarch)->builtin_int);
   }
 
   /* See language.h.  */
@@ -985,18 +983,18 @@ struct language_gdbarch
 static void *
 language_gdbarch_post_init (struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *l;
-
-  l = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct language_gdbarch);
+  struct language_gdbarch *l
+    = obstack_new<struct language_gdbarch> (gdbarch_obstack (gdbarch));
   for (const auto &lang : language_defn::languages)
     {
       gdb_assert (lang != nullptr);
-      lang->language_arch_info (gdbarch,
-				l->arch_info + lang->la_language);
+      lang->language_arch_info (gdbarch, &l->arch_info[lang->la_language]);
     }
 
   return l;
 }
+
+/* See language.h.  */
 
 struct type *
 language_string_char_type (const struct language_defn *la,
@@ -1004,9 +1002,10 @@ language_string_char_type (const struct language_defn *la,
 {
   struct language_gdbarch *ld
     = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
-
-  return ld->arch_info[la->la_language].string_char_type;
+  return ld->arch_info[la->la_language].string_char_type ();
 }
+
+/* See language.h.  */
 
 struct type *
 language_bool_type (const struct language_defn *la,
@@ -1014,73 +1013,41 @@ language_bool_type (const struct language_defn *la,
 {
   struct language_gdbarch *ld
     = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
-
-  if (ld->arch_info[la->la_language].bool_type_symbol)
-    {
-      struct symbol *sym;
-
-      sym = lookup_symbol (ld->arch_info[la->la_language].bool_type_symbol,
-			   NULL, VAR_DOMAIN, NULL).symbol;
-      if (sym)
-	{
-	  struct type *type = SYMBOL_TYPE (sym);
-
-	  if (type && type->code () == TYPE_CODE_BOOL)
-	    return type;
-	}
-    }
-
-  return ld->arch_info[la->la_language].bool_type_default;
-}
-
-/* Helper function for primitive type lookup.  */
-
-static struct type **
-language_lookup_primitive_type_1 (const struct language_arch_info *lai,
-				  const char *name)
-{
-  struct type **p;
-
-  for (p = lai->primitive_type_vector; (*p) != NULL; p++)
-    {
-      if (strcmp ((*p)->name (), name) == 0)
-	return p;
-    }
-  return NULL;
+  return ld->arch_info[la->la_language].bool_type ();
 }
 
 /* See language.h.  */
 
 struct type *
-language_lookup_primitive_type (const struct language_defn *la,
-				struct gdbarch *gdbarch,
-				const char *name)
+language_arch_info::bool_type () const
 {
-  struct language_gdbarch *ld =
-    (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
-  struct type **typep;
+  if (m_bool_type_name != nullptr)
+    {
+      struct symbol *sym;
 
-  typep = language_lookup_primitive_type_1 (&ld->arch_info[la->la_language],
-					    name);
-  if (typep == NULL)
-    return NULL;
-  return *typep;
+      sym = lookup_symbol (m_bool_type_name, NULL, VAR_DOMAIN, NULL).symbol;
+      if (sym != nullptr)
+	{
+	  struct type *type = SYMBOL_TYPE (sym);
+	  if (type != nullptr && type->code () == TYPE_CODE_BOOL)
+	    return type;
+	}
+    }
+
+  return m_bool_type_default;
 }
 
-/* Helper function for type lookup as a symbol.
-   Create the symbol corresponding to type TYPE in language LANG.  */
+/* See language.h.  */
 
-static struct symbol *
-language_alloc_type_symbol (enum language lang, struct type *type)
+struct symbol *
+language_arch_info::type_and_symbol::alloc_type_symbol
+	(enum language lang, struct type *type)
 {
   struct symbol *symbol;
   struct gdbarch *gdbarch;
-
   gdb_assert (!TYPE_OBJFILE_OWNED (type));
-
   gdbarch = TYPE_OWNER (type).gdbarch;
   symbol = new (gdbarch_obstack (gdbarch)) struct symbol ();
-
   symbol->m_name = type->name ();
   symbol->set_language (lang, nullptr);
   symbol->owner.arch = gdbarch;
@@ -1089,40 +1056,87 @@ language_alloc_type_symbol (enum language lang, struct type *type)
   SYMBOL_TYPE (symbol) = type;
   SYMBOL_DOMAIN (symbol) = VAR_DOMAIN;
   SYMBOL_ACLASS_INDEX (symbol) = LOC_TYPEDEF;
-
   return symbol;
 }
 
-/* Initialize the primitive type symbols of language LD.
-   The primitive type vector must have already been initialized.  */
+/* See language.h.  */
 
-static void
-language_init_primitive_type_symbols (struct language_arch_info *lai,
-				      const struct language_defn *la,
-				      struct gdbarch *gdbarch)
+language_arch_info::type_and_symbol *
+language_arch_info::lookup_primitive_type_and_symbol (const char *name)
 {
-  int n;
-
-  gdb_assert (lai->primitive_type_vector != NULL);
-
-  for (n = 0; lai->primitive_type_vector[n] != NULL; ++n)
-    continue;
-
-  lai->primitive_type_symbols
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, n + 1, struct symbol *);
-
-  for (n = 0; lai->primitive_type_vector[n] != NULL; ++n)
+  for (struct type_and_symbol &tas : primitive_types_and_symbols)
     {
-      lai->primitive_type_symbols[n]
-	= language_alloc_type_symbol (la->la_language,
-				      lai->primitive_type_vector[n]);
+      if (strcmp (tas.type ()->name (), name) == 0)
+	return &tas;
     }
 
-  /* Note: The result of symbol lookup is normally a symbol *and* the block
-     it was found in.  Builtin types don't live in blocks.  We *could* give
-     them one, but there is no current need so to keep things simple symbol
-     lookup is extended to allow for BLOCK_FOUND to be NULL.  */
+  return nullptr;
 }
+
+/* See language.h.  */
+
+struct type *
+language_arch_info::lookup_primitive_type (const char *name)
+{
+  type_and_symbol *tas = lookup_primitive_type_and_symbol (name);
+  if (tas != nullptr)
+    return tas->type ();
+  return nullptr;
+}
+
+/* See language.h.  */
+
+struct type *
+language_arch_info::lookup_primitive_type
+	(std::function<bool (struct type *)> filter)
+{
+  for (struct type_and_symbol &tas : primitive_types_and_symbols)
+    {
+      if (filter (tas.type ()))
+	return tas.type ();
+    }
+
+  return nullptr;
+}
+
+/* See language.h.  */
+
+struct symbol *
+language_arch_info::lookup_primitive_type_as_symbol (const char *name,
+						     enum language lang)
+{
+  type_and_symbol *tas = lookup_primitive_type_and_symbol (name);
+  if (tas != nullptr)
+    return tas->symbol (lang);
+  return nullptr;
+}
+
+/* See language.h.  */
+
+template<typename T>
+struct type *
+language_lookup_primitive_type (const struct language_defn *la,
+				struct gdbarch *gdbarch,
+				T arg)
+{
+  struct language_gdbarch *ld =
+    (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
+  return ld->arch_info[la->la_language].lookup_primitive_type (arg);
+}
+
+/* Template instantiation.  */
+
+template struct type *
+language_lookup_primitive_type (const struct language_defn *la,
+				struct gdbarch *gdbarch,
+				const char *arg);
+
+/* Template instantiation.  */
+
+template struct type *
+language_lookup_primitive_type (const struct language_defn *la,
+				struct gdbarch *gdbarch,
+				std::function<bool (struct type *)> arg);
 
 /* See language.h.  */
 
@@ -1134,33 +1148,24 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
   struct language_gdbarch *ld
     = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
   struct language_arch_info *lai = &ld->arch_info[la->la_language];
-  struct type **typep;
-  struct symbol *sym;
 
   if (symbol_lookup_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "language_lookup_primitive_type_as_symbol"
-			  " (%s, %s, %s)",
-			  la->name (), host_address_to_string (gdbarch), name);
-    }
+    fprintf_unfiltered (gdb_stdlog,
+			"language_lookup_primitive_type_as_symbol"
+			" (%s, %s, %s)",
+			la->name (), host_address_to_string (gdbarch), name);
 
-  typep = language_lookup_primitive_type_1 (lai, name);
-  if (typep == NULL)
-    {
-      if (symbol_lookup_debug)
-	fprintf_unfiltered (gdb_stdlog, " = NULL\n");
-      return NULL;
-    }
-
-  /* The set of symbols is lazily initialized.  */
-  if (lai->primitive_type_symbols == NULL)
-    language_init_primitive_type_symbols (lai, la, gdbarch);
-
-  sym = lai->primitive_type_symbols[typep - lai->primitive_type_vector];
+  struct symbol *sym
+    = lai->lookup_primitive_type_as_symbol (name, la->la_language);
 
   if (symbol_lookup_debug)
     fprintf_unfiltered (gdb_stdlog, " = %s\n", host_address_to_string (sym));
+
+  /* Note: The result of symbol lookup is normally a symbol *and* the block
+     it was found in.  Builtin types don't live in blocks.  We *could* give
+     them one, but there is no current need so to keep things simple symbol
+     lookup is extended to allow for BLOCK_FOUND to be NULL.  */
+
   return sym;
 }
 

@@ -482,28 +482,6 @@ static const struct op_print go_op_print_tab[] =
   {NULL, OP_NULL, PREC_SUFFIX, 0}
 };
 
-enum go_primitive_types {
-  go_primitive_type_void,
-  go_primitive_type_char,
-  go_primitive_type_bool,
-  go_primitive_type_int,
-  go_primitive_type_uint,
-  go_primitive_type_uintptr,
-  go_primitive_type_int8,
-  go_primitive_type_int16,
-  go_primitive_type_int32,
-  go_primitive_type_int64,
-  go_primitive_type_uint8,
-  go_primitive_type_uint16,
-  go_primitive_type_uint32,
-  go_primitive_type_uint64,
-  go_primitive_type_float32,
-  go_primitive_type_float64,
-  go_primitive_type_complex64,
-  go_primitive_type_complex128,
-  nr_go_primitive_types
-};
-
 /* Class representing the Go language.  */
 
 class go_language : public language_defn
@@ -529,51 +507,34 @@ public:
   {
     const struct builtin_go_type *builtin = builtin_go_type (gdbarch);
 
-    lai->string_char_type = builtin->builtin_char;
+    /* Helper function to allow shorter lines below.  */
+    auto add  = [&] (struct type * t) -> struct type *
+    {
+      lai->add_primitive_type (t);
+      return t;
+    };
 
-    lai->primitive_type_vector
-      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_go_primitive_types + 1,
-				struct type *);
+    add (builtin->builtin_void);
+    add (builtin->builtin_char);
+    add (builtin->builtin_bool);
+    add (builtin->builtin_int);
+    add (builtin->builtin_uint);
+    add (builtin->builtin_uintptr);
+    add (builtin->builtin_int8);
+    add (builtin->builtin_int16);
+    add (builtin->builtin_int32);
+    add (builtin->builtin_int64);
+    add (builtin->builtin_uint8);
+    add (builtin->builtin_uint16);
+    add (builtin->builtin_uint32);
+    add (builtin->builtin_uint64);
+    add (builtin->builtin_float32);
+    add (builtin->builtin_float64);
+    add (builtin->builtin_complex64);
+    add (builtin->builtin_complex128);
 
-    lai->primitive_type_vector [go_primitive_type_void]
-      = builtin->builtin_void;
-    lai->primitive_type_vector [go_primitive_type_char]
-      = builtin->builtin_char;
-    lai->primitive_type_vector [go_primitive_type_bool]
-      = builtin->builtin_bool;
-    lai->primitive_type_vector [go_primitive_type_int]
-      = builtin->builtin_int;
-    lai->primitive_type_vector [go_primitive_type_uint]
-      = builtin->builtin_uint;
-    lai->primitive_type_vector [go_primitive_type_uintptr]
-      = builtin->builtin_uintptr;
-    lai->primitive_type_vector [go_primitive_type_int8]
-      = builtin->builtin_int8;
-    lai->primitive_type_vector [go_primitive_type_int16]
-      = builtin->builtin_int16;
-    lai->primitive_type_vector [go_primitive_type_int32]
-      = builtin->builtin_int32;
-    lai->primitive_type_vector [go_primitive_type_int64]
-      = builtin->builtin_int64;
-    lai->primitive_type_vector [go_primitive_type_uint8]
-      = builtin->builtin_uint8;
-    lai->primitive_type_vector [go_primitive_type_uint16]
-      = builtin->builtin_uint16;
-    lai->primitive_type_vector [go_primitive_type_uint32]
-      = builtin->builtin_uint32;
-    lai->primitive_type_vector [go_primitive_type_uint64]
-      = builtin->builtin_uint64;
-    lai->primitive_type_vector [go_primitive_type_float32]
-      = builtin->builtin_float32;
-    lai->primitive_type_vector [go_primitive_type_float64]
-      = builtin->builtin_float64;
-    lai->primitive_type_vector [go_primitive_type_complex64]
-      = builtin->builtin_complex64;
-    lai->primitive_type_vector [go_primitive_type_complex128]
-      = builtin->builtin_complex128;
-
-    lai->bool_type_symbol = "bool";
-    lai->bool_type_default = builtin->builtin_bool;
+    lai->set_string_char_type (builtin->builtin_char);
+    lai->set_bool_type (builtin->builtin_bool, "bool");
   }
 
   /* See language.h.  */
