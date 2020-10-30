@@ -3866,6 +3866,12 @@ fetch_inferior_event ()
      the main console.  */
   scoped_restore save_ui = make_scoped_restore (&current_ui, main_ui);
 
+  /* Temporarily disable pagination.  Otherwise, the user would be
+     given an option to press 'q' to quit, which would cause an early
+     exit and could leave GDB in a half-baked state.  */
+  scoped_restore save_pagination
+    = make_scoped_restore (&pagination_enabled, false);
+
   /* End up with readline processing input, if necessary.  */
   {
     SCOPE_EXIT { reinstall_readline_callback_handler_cleanup (); };

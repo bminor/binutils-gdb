@@ -1,3 +1,12 @@
+2020-10-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/paginate-after-ctrl-c-running.exp: Update with no pagination
+	behavior.
+	* gdb.base/paginate-bg-execution.exp: Ditto.
+	* gdb.base/paginate-inferior-exit.exp: Ditto.
+	* gdb.base/double-prompt-target-event-error.c: Remove.
+	* gdb.base/double-prompt-target-event-error.exp: Remove.
+
 2020-10-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.base/kill-detach-inferiors-cmd.exp: Check that 'kill
