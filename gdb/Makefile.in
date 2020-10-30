@@ -1833,7 +1833,7 @@ INIT_FILES = \
 	      $(COMMON_OBS))))
 
 init.c: stamp-init; @true
-stamp-init: $(INIT_FILES)
+stamp-init: $(INIT_FILES) config.status
 	@$(ECHO_INIT_C) echo "Making init.c"
 	@rm -f init.c-tmp init.l-tmp
 	@touch init.c-tmp
