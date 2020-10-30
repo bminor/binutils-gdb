@@ -1419,10 +1419,12 @@ Do not report unresolved symbol references from regular object files,
 either when creating an executable, or when creating a shared library.
 This option is the inverse of @samp{-z defs}.
 
+@item x86-64-baseline
 @item x86-64-v2
 @item x86-64-v3
 @itemx x86-64-v4
 Specify the x86-64 ISA level needed in .note.gnu.property section.
+@option{x86-64-baseline} generates @code{GNU_PROPERTY_X86_ISA_1_BASELINE}.
 @option{x86-64-v2} generates @code{GNU_PROPERTY_X86_ISA_1_V2}.
 @option{x86-64-v3} generates @code{GNU_PROPERTY_X86_ISA_1_V3}.
 @option{x86-64-v4} generates @code{GNU_PROPERTY_X86_ISA_1_V4}.

@@ -2561,6 +2561,9 @@ _bfd_x86_elf_link_setup_gnu_properties
     case 0:
       isa_level = 0;
       break;
+    case 1:
+      isa_level = GNU_PROPERTY_X86_ISA_1_BASELINE;
+      break;
     case 2:
       isa_level = GNU_PROPERTY_X86_ISA_1_V2;
       break;

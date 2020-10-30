@@ -5,8 +5,8 @@
   encountered.  This option can be suppressed via the configure time
   switch: --enable-error-handling-script=no.
 
-* Add -z x86-64-v[234] to the x86 ELF linker to mark x86-64-v[234] ISA
-  level as needed.
+* Add -z x86-64-{baseline|v[234]} to the x86 ELF linker to mark
+  x86-64-{baseline|v[234]} ISA level as needed.
 
 * Add -z unique-symbol to avoid duplicated local symbol names.
 

@@ -9199,48 +9199,6 @@ output_insn (void)
 	  || i.tm.cpu_flags.bitfield.cpuamx_tile)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_TMM;
 
-      if (i.tm.cpu_flags.bitfield.cpusse3
-	  || i.tm.cpu_flags.bitfield.cpussse3
-	  || i.tm.cpu_flags.bitfield.cpusse4_1
-	  || i.tm.cpu_flags.bitfield.cpusse4_2
-	  || i.tm.cpu_flags.bitfield.cpucx16
-	  || i.tm.cpu_flags.bitfield.cpupopcnt
-	  /* LAHF-SAHF insns in 64-bit mode.  */
-	  || (flag_code == CODE_64BIT
-	      && (i.tm.base_opcode | 1) == 0x9f))
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V2;
-      if (i.tm.cpu_flags.bitfield.cpuavx
-	  || i.tm.cpu_flags.bitfield.cpuavx2
-	  /* Any VEX encoded insns execpt for CpuAVX512F, CpuAVX512BW,
-	     CpuAVX512DQ, LPW, TBM and AMX.  */
-	  || (i.tm.opcode_modifier.vex
-	      && !i.tm.cpu_flags.bitfield.cpuavx512f
-	      && !i.tm.cpu_flags.bitfield.cpuavx512bw
-	      && !i.tm.cpu_flags.bitfield.cpuavx512dq
-	      && !i.tm.cpu_flags.bitfield.cpulwp
-	      && !i.tm.cpu_flags.bitfield.cputbm
-	      && !(x86_feature_2_used & GNU_PROPERTY_X86_FEATURE_2_TMM))
-	  || i.tm.cpu_flags.bitfield.cpuf16c
-	  || i.tm.cpu_flags.bitfield.cpufma
-	  || i.tm.cpu_flags.bitfield.cpulzcnt
-	  || i.tm.cpu_flags.bitfield.cpumovbe
-	  || i.tm.cpu_flags.bitfield.cpuxsave
-	  || i.tm.cpu_flags.bitfield.cpuxsavec
-	  || i.tm.cpu_flags.bitfield.cpuxsaveopt
-	  || i.tm.cpu_flags.bitfield.cpuxsaves)
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V3;
-      if (i.tm.cpu_flags.bitfield.cpuavx512f
-	  || i.tm.cpu_flags.bitfield.cpuavx512bw
-	  || i.tm.cpu_flags.bitfield.cpuavx512dq
-	  || i.tm.cpu_flags.bitfield.cpuavx512vl
-	  /* Any EVEX encoded insns except for AVX512ER, AVX512PF and
-	     VNNIW.  */
-	  || (i.tm.opcode_modifier.evex
-	      && !i.tm.cpu_flags.bitfield.cpuavx512er
-	      && !i.tm.cpu_flags.bitfield.cpuavx512pf
-	      && !i.tm.cpu_flags.bitfield.cpuavx512_4vnniw))
-	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V4;
-
       if (i.tm.cpu_flags.bitfield.cpu8087
 	  || i.tm.cpu_flags.bitfield.cpu287
 	  || i.tm.cpu_flags.bitfield.cpu387
@@ -9278,6 +9236,56 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT;
       if (i.tm.cpu_flags.bitfield.cpuxsavec)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XSAVEC;
+
+      if (x86_feature_2_used
+	  || i.tm.cpu_flags.bitfield.cpucmov
+	  || i.tm.cpu_flags.bitfield.cpusyscall
+	  || (i.tm.base_opcode == 0xfc7
+	      && i.tm.opcode_modifier.opcodeprefix == 0
+	      && i.tm.extension_opcode == 1) /* cmpxchg8b */)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_BASELINE;
+      if (i.tm.cpu_flags.bitfield.cpusse3
+	  || i.tm.cpu_flags.bitfield.cpussse3
+	  || i.tm.cpu_flags.bitfield.cpusse4_1
+	  || i.tm.cpu_flags.bitfield.cpusse4_2
+	  || i.tm.cpu_flags.bitfield.cpucx16
+	  || i.tm.cpu_flags.bitfield.cpupopcnt
+	  /* LAHF-SAHF insns in 64-bit mode.  */
+	  || (flag_code == CODE_64BIT
+	      && (i.tm.base_opcode | 1) == 0x9f))
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V2;
+      if (i.tm.cpu_flags.bitfield.cpuavx
+	  || i.tm.cpu_flags.bitfield.cpuavx2
+	  /* Any VEX encoded insns execpt for CpuAVX512F, CpuAVX512BW,
+	     CpuAVX512DQ, LPW, TBM and AMX.  */
+	  || (i.tm.opcode_modifier.vex
+	      && !i.tm.cpu_flags.bitfield.cpuavx512f
+	      && !i.tm.cpu_flags.bitfield.cpuavx512bw
+	      && !i.tm.cpu_flags.bitfield.cpuavx512dq
+	      && !i.tm.cpu_flags.bitfield.cpulwp
+	      && !i.tm.cpu_flags.bitfield.cputbm
+	      && !(x86_feature_2_used & GNU_PROPERTY_X86_FEATURE_2_TMM))
+	  || i.tm.cpu_flags.bitfield.cpuf16c
+	  || i.tm.cpu_flags.bitfield.cpufma
+	  || i.tm.cpu_flags.bitfield.cpulzcnt
+	  || i.tm.cpu_flags.bitfield.cpumovbe
+	  || i.tm.cpu_flags.bitfield.cpuxsaves
+	  || (x86_feature_2_used
+	      & (GNU_PROPERTY_X86_FEATURE_2_XSAVE
+		 | GNU_PROPERTY_X86_FEATURE_2_XSAVEOPT
+		 | GNU_PROPERTY_X86_FEATURE_2_XSAVEC)) != 0)
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V3;
+      if (i.tm.cpu_flags.bitfield.cpuavx512f
+	  || i.tm.cpu_flags.bitfield.cpuavx512bw
+	  || i.tm.cpu_flags.bitfield.cpuavx512dq
+	  || i.tm.cpu_flags.bitfield.cpuavx512vl
+	  /* Any EVEX encoded insns except for AVX512ER, AVX512PF and
+	     VNNIW.  */
+	  || (i.tm.opcode_modifier.evex
+	      && !i.tm.cpu_flags.bitfield.cpuavx512er
+	      && !i.tm.cpu_flags.bitfield.cpuavx512pf
+	      && !i.tm.cpu_flags.bitfield.cpuavx512_4vnniw))
+	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V4;
     }
 #endif
 

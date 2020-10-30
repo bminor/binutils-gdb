@@ -1,3 +1,11 @@
+2020-10-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26703
+	* elf/common.h (GNU_PROPERTY_X86_ISA_1_BASELINE): New.
+	(GNU_PROPERTY_X86_ISA_1_V2): Uppdated.
+	(GNU_PROPERTY_X86_ISA_1_V3): Likewise.
+	(GNU_PROPERTY_X86_ISA_1_V4): Likewise.
+
 2020-10-26  Cooper Qu <cooper.qu@linux.alibaba.com>
 
 	* opcode/csky.h (CSKY_VERSION_V1): New, currently used.

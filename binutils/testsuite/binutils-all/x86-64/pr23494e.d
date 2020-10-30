@@ -10,4 +10,4 @@ Displaying notes found in: .note.gnu.property
       Properties: stack size: 0xffffffff
 	x86 ISA needed: <unknown: 20>, <unknown: 80>
 	x86 feature used: x86
-	x86 ISA used: x86-64-v3, <unknown: 8>, <unknown: 20>, <unknown: 80>
+	x86 ISA used: x86-64-v2, x86-64-v4, <unknown: 20>, <unknown: 80>

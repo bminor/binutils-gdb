@@ -5,4 +5,4 @@ Displaying notes found in: .note.gnu.property
       Properties: stack size: 0x800000
 	no copy on protected 
 	x86 feature used: x86
-	x86 ISA used: x86-64-baseline
+	x86 ISA used: 
