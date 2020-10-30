@@ -673,6 +673,10 @@ private:
   frame_id m_selected_frame_id;
   int m_selected_frame_level;
   bool m_was_stopped;
+  /* Save/restore the language as well, because selecting a frame
+     changes the current language to the frame's language if "set
+     language auto".  */
+  enum language m_lang;
 };
 
 /* Returns a pointer into the thread_info corresponding to

@@ -317,17 +317,15 @@ frame_stash_invalidate (void)
 /* See frame.h  */
 scoped_restore_selected_frame::scoped_restore_selected_frame ()
 {
-  m_fid = get_frame_id (get_selected_frame (NULL));
+  m_lang = current_language->la_language;
+  save_selected_frame (&m_fid, &m_level);
 }
 
 /* See frame.h  */
 scoped_restore_selected_frame::~scoped_restore_selected_frame ()
 {
-  frame_info *frame = frame_find_by_id (m_fid);
-  if (frame == NULL)
-    warning (_("Unable to restore previously selected frame."));
-  else
-    select_frame (frame);
+  restore_selected_frame (m_fid, m_level);
+  set_language (m_lang);
 }
 
 /* Flag to control debugging.  */
@@ -1685,9 +1683,62 @@ get_current_frame (void)
 }
 
 /* The "selected" stack frame is used by default for local and arg
-   access.  May be zero, for no selected frame.  */
+   access.
 
+   The "single source of truth" for the selected frame is the
+   SELECTED_FRAME_ID / SELECTED_FRAME_LEVEL pair.
+
+   Frame IDs can be saved/restored across reinitializing the frame
+   cache, while frame_info pointers can't (frame_info objects are
+   invalidated).  If we know the corresponding frame_info object, it
+   is cached in SELECTED_FRAME.
+
+   If SELECTED_FRAME_ID / SELECTED_FRAME_LEVEL are null_frame_id / -1,
+   and the target has stack and is stopped, the selected frame is the
+   current (innermost) frame.  This means that SELECTED_FRAME_LEVEL is
+   never 0 and SELECTED_FRAME_ID is never the ID of the innermost
+   frame.
+
+   If SELECTED_FRAME_ID / SELECTED_FRAME_LEVEL are null_frame_id / -1,
+   and the target has no stack or is executing, then there's no
+   selected frame.  */
+static frame_id selected_frame_id = null_frame_id;
+static int selected_frame_level = -1;
+
+/* The cached frame_info object pointing to the selected frame.
+   Looked up on demand by get_selected_frame.  */
 static struct frame_info *selected_frame;
+
+/* See frame.h.  */
+
+void
+save_selected_frame (frame_id *frame_id, int *frame_level)
+  noexcept
+{
+  *frame_id = selected_frame_id;
+  *frame_level = selected_frame_level;
+}
+
+/* See frame.h.  */
+
+void
+restore_selected_frame (frame_id frame_id, int frame_level)
+  noexcept
+{
+  /* save_selected_frame never returns level == 0, so we shouldn't see
+     it here either.  */
+  gdb_assert (frame_level != 0);
+
+  /* FRAME_ID can be null_frame_id only IFF frame_level is -1.  */
+  gdb_assert ((frame_level == -1 && !frame_id_p (frame_id))
+	      || (frame_level != -1 && frame_id_p (frame_id)));
+
+  selected_frame_id = frame_id;
+  selected_frame_level = frame_level;
+
+  /* Will be looked up later by get_selected_frame.  */
+  selected_frame = nullptr;
+}
 
 bool
 has_stack_frames ()
@@ -1716,9 +1767,7 @@ has_stack_frames ()
   return true;
 }
 
-/* Return the selected frame.  Always non-NULL (unless there isn't an
-   inferior sufficient for creating a frame) in which case an error is
-   thrown.  */
+/* See frame.h.  */
 
 struct frame_info *
 get_selected_frame (const char *message)
@@ -1727,21 +1776,11 @@ get_selected_frame (const char *message)
     {
       if (message != NULL && !has_stack_frames ())
 	error (("%s"), message);
-      /* Hey!  Don't trust this.  It should really be re-finding the
-	 last selected frame of the currently selected thread.  This,
-	 though, is better than nothing.  */
-      select_frame (get_current_frame ());
+
+      lookup_selected_frame (selected_frame_id, selected_frame_level);
     }
   /* There is always a frame.  */
   gdb_assert (selected_frame != NULL);
-  return selected_frame;
-}
-
-/* If there is a selected frame, return it.  Otherwise, return NULL.  */
-
-struct frame_info *
-get_selected_frame_if_set (void)
-{
   return selected_frame;
 }
 
@@ -1757,12 +1796,42 @@ deprecated_safe_get_selected_frame (void)
   return get_selected_frame (NULL);
 }
 
-/* Select frame FI (or NULL - to invalidate the current frame).  */
+/* Select frame FI (or NULL - to invalidate the selected frame).  */
 
 void
 select_frame (struct frame_info *fi)
 {
   selected_frame = fi;
+  selected_frame_level = frame_relative_level (fi);
+  if (selected_frame_level == 0)
+    {
+      /* Treat the current frame especially -- we want to always
+	 save/restore it without warning, even if the frame ID changes
+	 (see lookup_selected_frame).  E.g.:
+
+	  // The current frame is selected, the target had just stopped.
+	  {
+	    scoped_restore_selected_frame restore_frame;
+	    some_operation_that_changes_the_stack ();
+	  }
+	  // scoped_restore_selected_frame's dtor runs, but the
+	  // original frame_id can't be found.  No matter whether it
+	  // is found or not, we still end up with the now-current
+	  // frame selected.  Warning in lookup_selected_frame in this
+	  // case seems pointless.
+
+	 Also get_frame_id may access the target's registers/memory,
+	 and thus skipping get_frame_id optimizes the common case.
+
+	 Saving the selected frame this way makes get_selected_frame
+	 and restore_current_frame return/re-select whatever frame is
+	 the innermost (current) then.  */
+      selected_frame_level = -1;
+      selected_frame_id = null_frame_id;
+    }
+  else
+    selected_frame_id = get_frame_id (fi);
+
   /* NOTE: cagney/2002-05-04: FI can be NULL.  This occurs when the
      frame is being invalidated.  */
 

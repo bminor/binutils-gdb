@@ -1325,20 +1325,26 @@ switch_to_thread (process_stratum_target *proc_target, ptid_t ptid)
   switch_to_thread (thr);
 }
 
-static void
-restore_selected_frame (struct frame_id a_frame_id, int frame_level)
+/* See frame.h.  */
+
+void
+lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
 {
   struct frame_info *frame = NULL;
   int count;
 
-  /* This means there was no selected frame.  */
+  /* This either means there was no selected frame, or the selected
+     frame was the current frame.  In either case, select the current
+     frame.  */
   if (frame_level == -1)
     {
-      select_frame (NULL);
+      select_frame (get_current_frame ());
       return;
     }
 
-  gdb_assert (frame_level >= 0);
+  /* select_frame never saves 0 in SELECTED_FRAME_LEVEL, so we
+     shouldn't see it here.  */
+  gdb_assert (frame_level > 0);
 
   /* Restore by level first, check if the frame id is the same as
      expected.  If that fails, try restoring by frame id.  If that
@@ -1409,64 +1415,28 @@ scoped_restore_current_thread::restore ()
       && target_has_stack ()
       && target_has_memory ())
     restore_selected_frame (m_selected_frame_id, m_selected_frame_level);
+
+  set_language (m_lang);
 }
 
 scoped_restore_current_thread::~scoped_restore_current_thread ()
 {
   if (!m_dont_restore)
-    {
-      try
-	{
-	  restore ();
-	}
-      catch (const gdb_exception &ex)
-	{
-	  /* We're in a dtor, there's really nothing else we can do
-	     but swallow the exception.  */
-	}
-    }
+    restore ();
 }
 
 scoped_restore_current_thread::scoped_restore_current_thread ()
 {
   m_inf = inferior_ref::new_reference (current_inferior ());
 
+  m_lang = current_language->la_language;
+
   if (inferior_ptid != null_ptid)
     {
       m_thread = thread_info_ref::new_reference (inferior_thread ());
 
-      struct frame_info *frame;
-
       m_was_stopped = m_thread->state == THREAD_STOPPED;
-      if (m_was_stopped
-	  && target_has_registers ()
-	  && target_has_stack ()
-	  && target_has_memory ())
-	{
-	  /* When processing internal events, there might not be a
-	     selected frame.  If we naively call get_selected_frame
-	     here, then we can end up reading debuginfo for the
-	     current frame, but we don't generally need the debuginfo
-	     at this point.  */
-	  frame = get_selected_frame_if_set ();
-	}
-      else
-	frame = NULL;
-
-      try
-	{
-	  m_selected_frame_id = get_frame_id (frame);
-	  m_selected_frame_level = frame_relative_level (frame);
-	}
-      catch (const gdb_exception_error &ex)
-	{
-	  m_selected_frame_id = null_frame_id;
-	  m_selected_frame_level = -1;
-
-	  /* Better let this propagate.  */
-	  if (ex.error == TARGET_CLOSE_ERROR)
-	    throw;
-	}
+      save_selected_frame (&m_selected_frame_id, &m_selected_frame_level);
     }
 }
 

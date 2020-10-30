@@ -1,3 +1,42 @@
+2020-10-30  Pedro Alves  <pedro@palves.net>
+
+	* blockframe.c (block_innermost_frame): Use get_selected_frame.
+	* frame.c
+	(scoped_restore_selected_frame::scoped_restore_selected_frame):
+	Use save_selected_frame.  Save language as well.
+	(scoped_restore_selected_frame::~scoped_restore_selected_frame):
+	Use restore_selected_frame, and restore language as well.
+	(selected_frame_id, selected_frame_level): New.
+	(selected_frame): Update comments.
+	(save_selected_frame, restore_selected_frame): New.
+	(get_selected_frame): Use lookup_selected_frame.
+	(get_selected_frame_if_set): Delete.
+	(select_frame): Record selected_frame_level and selected_frame_id.
+	* frame.h (scoped_restore_selected_frame) <m_level, m_lang>: New
+	fields.
+	(get_selected_frame): Make 'message' parameter optional.
+	(get_selected_frame_if_set): Delete declaration.
+	(select_frame): Update comments.
+	(save_selected_frame, restore_selected_frame)
+	(lookup_selected_frame): Declare.
+	* gdbthread.h (scoped_restore_current_thread) <m_lang>: New field.
+	* infrun.c (struct infcall_control_state) <selected_frame_level>:
+	New field.
+	(save_infcall_control_state): Use save_selected_frame.
+	(restore_selected_frame): Delete.
+	(restore_infcall_control_state): Use restore_selected_frame.
+	* stack.c (select_frame_command_core, frame_command_core): Use
+	get_selected_frame.
+	* thread.c (restore_selected_frame): Rename to ...
+	(lookup_selected_frame): ... this and make extern.  Select the
+	current frame if the frame level is -1.
+	(scoped_restore_current_thread::restore): Also restore the
+	language.
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	Don't try/catch.
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	Save the language as well.  Use save_selected_frame.
+
 2020-10-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbarch.sh (displaced_step_hw_singlestep): Adjust

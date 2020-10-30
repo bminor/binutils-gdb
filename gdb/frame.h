@@ -186,8 +186,14 @@ public:
 
 private:
 
-  /* The ID of the previously selected frame.  */
+  /* The ID and level of the previously selected frame.  */
   struct frame_id m_fid;
+  int m_level;
+
+  /* Save/restore the language as well, because selecting a frame
+     changes the current language to the frame's language if "set
+     language auto".  */
+  enum language m_lang;
 };
 
 /* Methods for constructing and comparing Frame IDs.  */
@@ -316,23 +322,48 @@ extern bool has_stack_frames ();
    modifies the target invalidating the frame cache).  */
 extern void reinit_frame_cache (void);
 
-/* On demand, create the selected frame and then return it.  If the
-   selected frame can not be created, this function prints then throws
-   an error.  When MESSAGE is non-NULL, use it for the error message,
+/* Return the selected frame.  Always returns non-NULL.  If there
+   isn't an inferior sufficient for creating a frame, an error is
+   thrown.  When MESSAGE is non-NULL, use it for the error message,
    otherwise use a generic error message.  */
 /* FIXME: cagney/2002-11-28: At present, when there is no selected
    frame, this function always returns the current (inner most) frame.
    It should instead, when a thread has previously had its frame
    selected (but not resumed) and the frame cache invalidated, find
    and then return that thread's previously selected frame.  */
-extern struct frame_info *get_selected_frame (const char *message);
+extern struct frame_info *get_selected_frame (const char *message = nullptr);
 
-/* If there is a selected frame, return it.  Otherwise, return NULL.  */
-extern struct frame_info *get_selected_frame_if_set (void);
-
-/* Select a specific frame.  NULL, apparently implies re-select the
-   inner most frame.  */
+/* Select a specific frame.  NULL implies re-select the inner most
+   frame.  */
 extern void select_frame (struct frame_info *);
+
+/* Save the frame ID and frame level of the selected frame in FRAME_ID
+   and FRAME_LEVEL, to be restored later with restore_selected_frame.
+
+   This is preferred over getting the same info out of
+   get_selected_frame directly because this function does not create
+   the selected-frame's frame_info object if it hasn't been created
+   yet, and thus is more efficient and doesn't throw.  */
+extern void save_selected_frame (frame_id *frame_id, int *frame_level)
+  noexcept;
+
+/* Restore selected frame as saved with save_selected_frame.
+
+   Does not try to find the corresponding frame_info object.  Instead
+   the next call to get_selected_frame will look it up and cache the
+   result.
+
+   This function does not throw.  It is designed to be safe to called
+   from the destructors of RAII types.  */
+extern void restore_selected_frame (frame_id frame_id, int frame_level)
+  noexcept;
+
+/* Lookup the frame_info object for the selected frame FRAME_ID /
+   FRAME_LEVEL and cache the result.
+
+   If FRAME_LEVEL > 0 and the originally selected frame isn't found,
+   warn and select the innermost (current) frame.  */
+extern void lookup_selected_frame (frame_id frame_id, int frame_level);
 
 /* Given a FRAME, return the next (more inner, younger) or previous
    (more outer, older) frame.  */

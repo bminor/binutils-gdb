@@ -9003,8 +9003,10 @@ struct infcall_control_state
   enum stop_stack_kind stop_stack_dummy = STOP_NONE;
   int stopped_by_random_signal = 0;
 
-  /* ID if the selected frame when the inferior function call was made.  */
+  /* ID and level of the selected frame when the inferior function
+     call was made.  */
   struct frame_id selected_frame_id {};
+  int selected_frame_level = -1;
 };
 
 /* Save all of the information associated with the inferior<==>gdb
@@ -9033,25 +9035,10 @@ save_infcall_control_state ()
   inf_status->stop_stack_dummy = stop_stack_dummy;
   inf_status->stopped_by_random_signal = stopped_by_random_signal;
 
-  inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
+  save_selected_frame (&inf_status->selected_frame_id,
+		       &inf_status->selected_frame_level);
 
   return inf_status;
-}
-
-static void
-restore_selected_frame (const frame_id &fid)
-{
-  frame_info *frame = frame_find_by_id (fid);
-
-  /* If inf_status->selected_frame_id is NULL, there was no previously
-     selected frame.  */
-  if (frame == NULL)
-    {
-      warning (_("Unable to restore previously selected frame."));
-      return;
-    }
-
-  select_frame (frame);
 }
 
 /* Restore inferior session state to INF_STATUS.  */
@@ -9081,21 +9068,8 @@ restore_infcall_control_state (struct infcall_control_state *inf_status)
 
   if (target_has_stack ())
     {
-      /* The point of the try/catch is that if the stack is clobbered,
-         walking the stack might encounter a garbage pointer and
-         error() trying to dereference it.  */
-      try
-	{
-	  restore_selected_frame (inf_status->selected_frame_id);
-	}
-      catch (const gdb_exception_error &ex)
-	{
-	  exception_fprintf (gdb_stderr, ex,
-			     "Unable to restore previously selected frame:\n");
-	  /* Error in restoring the selected frame.  Select the
-	     innermost frame.  */
-	  select_frame (get_current_frame ());
-	}
+      restore_selected_frame (inf_status->selected_frame_id,
+			      inf_status->selected_frame_level);
     }
 
   delete inf_status;

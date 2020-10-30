@@ -464,14 +464,10 @@ find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
 struct frame_info *
 block_innermost_frame (const struct block *block)
 {
-  struct frame_info *frame;
-
   if (block == NULL)
     return NULL;
 
-  frame = get_selected_frame_if_set ();
-  if (frame == NULL)
-    frame = get_current_frame ();
+  frame_info *frame = get_selected_frame ();
   while (frame != NULL)
     {
       const struct block *frame_block = get_frame_block (frame, NULL);

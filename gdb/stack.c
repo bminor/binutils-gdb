@@ -1842,9 +1842,9 @@ trailing_outermost_frame (int count)
 static void
 select_frame_command_core (struct frame_info *fi, bool ignored)
 {
-  struct frame_info *prev_frame = get_selected_frame_if_set ();
+  frame_info *prev_frame = get_selected_frame ();
   select_frame (fi);
-  if (get_selected_frame_if_set () != prev_frame)
+  if (get_selected_frame () != prev_frame)
     gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
 }
 
@@ -1863,10 +1863,9 @@ select_frame_for_mi (struct frame_info *fi)
 static void
 frame_command_core (struct frame_info *fi, bool ignored)
 {
-  struct frame_info *prev_frame = get_selected_frame_if_set ();
-
+  frame_info *prev_frame = get_selected_frame ();
   select_frame (fi);
-  if (get_selected_frame_if_set () != prev_frame)
+  if (get_selected_frame () != prev_frame)
     gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
   else
     print_selected_thread_frame (current_uiout, USER_SELECTED_FRAME);
