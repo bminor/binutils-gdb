@@ -3834,7 +3834,7 @@ aarch64_address_class_type_flags (int byte_size, int dwarf2_addr_class)
      __capability qualifier, meaning a capability for Morello.  */
 
   if (dwarf2_addr_class == 1)
-    return TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
+    return TYPE_INSTANCE_FLAG_CAPABILITY;
   return 0;
 }
 
@@ -3846,7 +3846,7 @@ static const char*
 aarch64_address_class_type_flags_to_name (struct gdbarch *gdbarch,
 					  type_instance_flags type_flags)
 {
-  if (type_flags & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
+  if (type_flags & TYPE_INSTANCE_FLAG_CAPABILITY)
     return "__capability";
   else
     return NULL;
@@ -3863,7 +3863,7 @@ aarch64_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 {
   if (strcmp (name, "__capability") == 0)
     {
-      *type_flags_ptr = TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
+      *type_flags_ptr = TYPE_INSTANCE_FLAG_CAPABILITY;
       return true;
     }
   else
