@@ -1,3 +1,7 @@
+2020-10-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gnu_property_test.sh: Updated.
+
 2020-10-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (bootstrap-test): Skip for LTO build.
