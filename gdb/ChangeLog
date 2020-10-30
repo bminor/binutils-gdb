@@ -1,5 +1,35 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* rust-exp.y (rust_parse): Rename to...
+	(rust_language::parser): ...this.
+	* rust-lang.c (-rust_printstr): Rename to...
+	(rust_language::printstr): ...this.
+	(rust_value_print_inner): Delete declaration.
+	(val_print_struct): Rename to...
+	(rust_language::val_print_struct): ...this.  Update calls to
+	member functions.
+	(rust_print_enum): Rename to...
+	(rust_language::print_enum): ...this.  Update calls to member
+	functions.
+	(rust_value_print_inner): Rename to...
+	(rust_language::value_print_inner): ...this.  Update calls to
+	member functions.
+	(exp_descriptor_rust): Rename to...
+	(rust_language::exp_descriptor_tab): ...this.
+	(class rust_language): Move to rust-lang.h.
+	(rust_language::language_arch_info): Implementation moved to here
+	from class declaration.
+	(rust_language::print_type): Likewise.
+	(rust_language::emitchar): Likewise.
+	(rust_language::is_string_type_p): Likewise.
+	* rust-lang.h: Add 'demangle.h', 'language.h', 'value.h', and
+	'c-lang.h' includes.
+	(rust_parse): Delete declaration.
+	(class rust_language): Class declaration moved here from
+	rust-lang.c.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* objc-lang.c (objc_language::opcode_print_table): Return
 	objc_op_print_tab.
 

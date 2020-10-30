@@ -2540,7 +2540,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 /* The parser as exposed to gdb.  */
 
 int
-rust_parse (struct parser_state *state)
+rust_language::parser (struct parser_state *state) const
 {
   int result;
 
