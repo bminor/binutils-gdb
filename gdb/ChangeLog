@@ -4,6 +4,10 @@
 
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* acinclude.m4: Modernize.
 	* configure: Re-generate.
 

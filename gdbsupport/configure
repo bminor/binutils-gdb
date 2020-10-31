@@ -10017,11 +10017,12 @@ if ${gdb_cv_func_ptrace_ret+:} false; then :
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
-$gdb_ptrace_headers
+ $gdb_ptrace_headers
 int
 main ()
 {
 extern long ptrace (enum __ptrace_request, ...);
+
   ;
   return 0;
 }
@@ -10036,6 +10037,7 @@ int
 main ()
 {
 extern int ptrace ();
+
   ;
   return 0;
 }
@@ -10074,6 +10076,7 @@ int
 main ()
 {
 extern long ptrace (enum __ptrace_request, ...);
+
   ;
   return 0;
 }
@@ -10092,6 +10095,7 @@ int
 main ()
 {
 extern $gdb_cv_func_ptrace_ret ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4);
+
   ;
   return 0;
 }
@@ -10111,6 +10115,7 @@ int
 main ()
 {
 extern $gdb_cv_func_ptrace_ret ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4, $gdb_arg5);
+
   ;
   return 0;
 }
