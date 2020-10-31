@@ -34,7 +34,12 @@ extern unsigned int debug_infrun;
 /* Print an "infrun" debug statement.  */
 
 #define infrun_debug_printf(fmt, ...) \
-  debug_prefixed_printf ("infrun", __func__, fmt, ##__VA_ARGS__)
+  do \
+    { \
+      if (debug_infrun) \
+	debug_prefixed_printf ("infrun", __func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
 
 /* True if we are debugging displaced stepping.  */
 extern bool debug_displaced;
@@ -42,7 +47,12 @@ extern bool debug_displaced;
 /* Print a "displaced" debug statement.  */
 
 #define displaced_debug_printf(fmt, ...) \
-  debug_prefixed_printf ("displaced", __func__, fmt, ##__VA_ARGS__)
+  do \
+    { \
+      if (debug_displaced) \
+	debug_prefixed_printf ("displaced", __func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
 
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */

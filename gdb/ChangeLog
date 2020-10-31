@@ -1,3 +1,10 @@
+2020-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* infrun.h (infrun_debug_printf): Add check of debug_infrun flag.
+	(debug_prefixed_printf): Add check of debug_displaced flag.
+	* linux-nat.c (linux_nat_debug_printf): Add check of
+	debug_linux_nat flag.
+
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (infrun_debug_printf_1): Remove.
