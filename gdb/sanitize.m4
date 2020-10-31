@@ -34,7 +34,11 @@ if test "x$enable_ubsan" = xyes; then
   dnl A link check is required because it is possible to install gcc
   dnl without libubsan, leading to link failures when compiling with
   dnl -fsanitize=undefined.
-  AC_TRY_LINK([],[],enable_ubsan=yes,enable_ubsan=no)
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([], [])],
+    [enable_ubsan=yes],
+    [enable_ubsan=no]
+  )
   CXXFLAGS="$saved_CXXFLAGS"
   AC_MSG_RESULT($enable_ubsan)
   if test "x$enable_ubsan" = xyes; then
