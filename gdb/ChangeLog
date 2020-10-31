@@ -1,3 +1,10 @@
+2020-11-16  Pedro Alves  <pedro@palves.net>
+
+	* frame.c (get_prev_frame): Move get_frame_id call from here ...
+	(get_prev_frame_always_1): ... to here.
+	* inline-frame.c (inline_frame_this_id): Mention
+	get_prev_frame_always_1 in comment.
+
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* valarith.c (fixed_point_binop): Add BINOP_EQUAL and BINOP_LESS

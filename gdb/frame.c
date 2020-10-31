@@ -2200,6 +2200,23 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
   if (get_frame_type (this_frame) == INLINE_FRAME)
     return get_prev_frame_if_no_cycle (this_frame);
 
+  /* If this_frame is the current frame, then compute and stash its
+     frame id prior to fetching and computing the frame id of the
+     previous frame.  Otherwise, the cycle detection code in
+     get_prev_frame_if_no_cycle() will not work correctly.  When
+     get_frame_id() is called later on, an assertion error will be
+     triggered in the event of a cycle between the current frame and
+     its previous frame.
+
+     Note we do this after the INLINE_FRAME check above.  That is
+     because the inline frame's frame id computation needs to fetch
+     the frame id of its previous real stack frame.  I.e., we need to
+     avoid recursion in that case.  This is OK since we're sure the
+     inline frame won't create a cycle with the real stack frame.  See
+     inline_frame_this_id.  */
+  if (this_frame->level == 0)
+    get_frame_id (this_frame);
+
   /* Check that this frame is unwindable.  If it isn't, don't try to
      unwind to the prev frame.  */
   this_frame->stop_reason
@@ -2492,16 +2509,6 @@ get_prev_frame (struct frame_info *this_frame)
      something should be calling get_selected_frame() or
      get_current_frame().  */
   gdb_assert (this_frame != NULL);
-  
-  /* If this_frame is the current frame, then compute and stash
-     its frame id prior to fetching and computing the frame id of the
-     previous frame.  Otherwise, the cycle detection code in
-     get_prev_frame_if_no_cycle() will not work correctly.  When
-     get_frame_id() is called later on, an assertion error will
-     be triggered in the event of a cycle between the current
-     frame and its previous frame.  */
-  if (this_frame->level == 0)
-    get_frame_id (this_frame);
 
   frame_pc_p = get_frame_pc_if_available (this_frame, &frame_pc);
 

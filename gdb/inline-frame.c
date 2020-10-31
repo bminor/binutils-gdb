@@ -161,7 +161,8 @@ inline_frame_this_id (struct frame_info *this_frame,
      real frame's this_id method.  So we must call
      get_prev_frame_always.  Because we are inlined into some
      function, there must be previous frames, so this is safe - as
-     long as we're careful not to create any cycles.  */
+     long as we're careful not to create any cycles.  See related
+     comments in get_prev_frame_always_1.  */
   *this_id = get_frame_id (get_prev_frame_always (this_frame));
 
   /* We need a valid frame ID, so we need to be based on a valid
