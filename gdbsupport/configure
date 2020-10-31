@@ -10044,17 +10044,22 @@ if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_ptrace_ret='int'
 else
   gdb_cv_func_ptrace_ret='long'
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_ptrace_ret" >&5
 $as_echo "$gdb_cv_func_ptrace_ret" >&6; }
 
+
 cat >>confdefs.h <<_ACEOF
 #define PTRACE_TYPE_RET $gdb_cv_func_ptrace_ret
 _ACEOF
+
 
 # Check argument types.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking types of arguments for ptrace" >&5
@@ -10062,7 +10067,6 @@ $as_echo_n "checking types of arguments for ptrace... " >&6; }
 if ${gdb_cv_func_ptrace_args+:} false; then :
   $as_echo_n "(cached) " >&6
 else
-
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $gdb_ptrace_headers
@@ -10077,64 +10081,61 @@ _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_ptrace_args='enum __ptrace_request,int,long,long'
 else
-
-for gdb_arg1 in 'int' 'long'; do
- for gdb_arg2 in 'pid_t' 'int' 'long'; do
-  for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
-   for gdb_arg4 in 'int' 'long' 'void *'; do
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  for gdb_arg1 in 'int' 'long'; do
+	for gdb_arg2 in 'pid_t' 'int' 'long'; do
+	  for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
+	    for gdb_arg4 in 'int' 'long' 'void *'; do
+	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $gdb_ptrace_headers
 int
 main ()
 {
-
-extern $gdb_cv_func_ptrace_ret
-  ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4);
-
+extern $gdb_cv_func_ptrace_ret ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4);
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
   gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4";
-    break 4;
+		 break 4;
+
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    for gdb_arg5 in 'int *' 'int' 'long'; do
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+	      for gdb_arg5 in 'int *' 'int' 'long'; do
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $gdb_ptrace_headers
 int
 main ()
 {
-
-extern $gdb_cv_func_ptrace_ret
-  ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4, $gdb_arg5);
-
+extern $gdb_cv_func_ptrace_ret ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4, $gdb_arg5);
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-
-gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4,$gdb_arg5";
-    break 5;
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-    done
-   done
-  done
- done
-done
-# Provide a safe default value.
-: ${gdb_cv_func_ptrace_args='int,int,long,long'}
+  gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4,$gdb_arg5";
+		   break 5;
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	      done
+	    done
+	  done
+	done
+      done
+      # Provide a safe default value.
+      : ${gdb_cv_func_ptrace_args='int,int,long,long'}
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_func_ptrace_args" >&5
 $as_echo "$gdb_cv_func_ptrace_args" >&6; }
+
 ac_save_IFS=$IFS; IFS=','
 set dummy `echo "$gdb_cv_func_ptrace_args" | sed 's/\*/\*/g'`
 IFS=$ac_save_IFS

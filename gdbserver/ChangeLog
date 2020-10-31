@@ -1,5 +1,9 @@
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* configure.ac: Modernize.
 	* configure: Re-generate.
 

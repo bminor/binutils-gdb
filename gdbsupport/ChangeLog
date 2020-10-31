@@ -1,5 +1,10 @@
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* configure: Re-generate.
+	* ptrace.m4: Re-indent.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* aclocal.m4: Re-generate.
 	* configure: Re-generate.
 	* configure.ac: Remove AM_PROG_CC_STDC.
