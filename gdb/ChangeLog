@@ -1,5 +1,11 @@
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* acinclude.m4 (AM_PROG_CC_STDC): Remove.
+	* configure: Re-generate.
+	* configure.ac: Remove AM_PROG_CC_STDC.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* configure.ac: Use AC_CANONICAL_{BUILD,HOST,TARGET} instead of
 	AC_CANONICAL_SYSTEM.
 	* configure: Re-generate.
