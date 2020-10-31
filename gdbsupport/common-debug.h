@@ -41,6 +41,12 @@ extern void debug_vprintf (const char *format, va_list ap)
 /* Print a debug statement prefixed with the module and function name, and
    with a newline at the end.  */
 
+extern void ATTRIBUTE_PRINTF (3, 4) debug_prefixed_printf
+  (const char *module, const char *func, const char *format, ...);
+
+/* Print a debug statement prefixed with the module and function name, and
+   with a newline at the end.  */
+
 extern void ATTRIBUTE_PRINTF (3, 0) debug_prefixed_vprintf
   (const char *module, const char *func, const char *format, va_list args);
 

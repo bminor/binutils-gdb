@@ -912,14 +912,3 @@ poll_timers (void)
 
   return 0;
 }
-
-/* See event-loop.h.  */
-
-void
-event_loop_debug_printf_1 (const char *func_name, const char *fmt, ...)
-{
-  va_list args;
-  va_start (args, fmt);
-  debug_prefixed_vprintf ("event-loop", func_name, fmt, args);
-  va_end (args);
-}

@@ -1,5 +1,17 @@
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* infrun.c (infrun_debug_printf_1): Remove.
+	(displaced_debug_printf_1): Remove.
+	(stop_all_threads): Use debug_prefixed_printf.
+	* infrun.h (infrun_debug_printf_1): Remove.
+	(infrun_debug_printf): Use debug_prefixed_printf.
+	(displaced_debug_printf_1): Remove.
+	(displaced_debug_printf): Use debug_prefixed_printf.
+	* linux-nat.c (linux_nat_debug_printf_1): Remove.
+	(linux_nat_debug_printf): Use debug_prefixed_printf.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* configure: Re-generate.
 	* sanitize.m4: Replace AC_TRY_LINK with AC_LINK_IFELSE +
 	AC_LANG_PROGRAM.

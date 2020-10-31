@@ -1,5 +1,14 @@
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* common-debug.cc (debug_prefixed_printf): New.
+	* common-debug.h (debug_prefixed_printf): New declaration.
+	* event-loop.cc (event_loop_debug_printf_1): Remove.
+	* event-loop.h (event_loop_debug_printf_1): Remove.
+	(event_loop_debug_printf): Use debug_prefixed_printf.
+	(event_loop_ui_debug_printf): Use debug_prefixed_printf.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* common.m4: Replace AC_TRY_COMPILE with AC_COMPILE_IFELSE +
 	AC_LANG_PROGRAM.
 	* configure: Re-generate.

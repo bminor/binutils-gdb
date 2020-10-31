@@ -199,24 +199,10 @@ show_debug_linux_nat (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Print a debug statement.  Should be used through linux_nat_debug_printf.  */
-
-static void ATTRIBUTE_PRINTF (2, 3)
-linux_nat_debug_printf_1 (const char *func_name, const char *fmt, ...)
-{
-  va_list ap;
-  va_start (ap, fmt);
-  debug_prefixed_vprintf ("linux-nat", func_name, fmt, ap);
-  va_end (ap);
-}
+/* Print a linux-nat debug statement.  */
 
 #define linux_nat_debug_printf(fmt, ...) \
-  do \
-    { \
-      if (debug_linux_nat) \
-	linux_nat_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
-    } \
-  while (0)
+  debug_prefixed_printf ("linux-nat", __func__, fmt, ##__VA_ARGS__)
 
 struct simple_pid_list
 {

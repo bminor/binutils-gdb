@@ -39,8 +39,21 @@ debug_printf (const char *fmt, ...)
 /* See gdbsupport/common-debug.h.  */
 
 void
-debug_prefixed_vprintf (const char *module, const char *func, const char *format,
-			va_list args)
+debug_prefixed_printf (const char *module, const char *func,
+		       const char *format, ...)
+{
+  va_list ap;
+
+  va_start (ap, format);
+  debug_prefixed_vprintf (module, func, format, ap);
+  va_end (ap);
+}
+
+/* See gdbsupport/common-debug.h.  */
+
+void
+debug_prefixed_vprintf (const char *module, const char *func,
+			const char *format, va_list args)
 {
   debug_printf ("[%s] %s: ", module, func);
   debug_vprintf (format, args);

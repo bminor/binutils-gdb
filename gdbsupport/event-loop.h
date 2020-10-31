@@ -126,18 +126,18 @@ enum class debug_event_loop_kind
 /* True if we are printing event loop debug statements.  */
 extern debug_event_loop_kind debug_event_loop;
 
-/* Print an "event loop" debug statement.  Should be used through
-   event_loop_debug_printf.  */
-void ATTRIBUTE_PRINTF (2, 3) event_loop_debug_printf_1
-  (const char *func_name, const char *fmt, ...);
+/* Print an "event loop" debug statement.  */
 
 #define event_loop_debug_printf(fmt, ...) \
   do \
     { \
       if (debug_event_loop != debug_event_loop_kind::OFF) \
-	event_loop_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
+	debug_prefixed_printf ("event-loop", __func__, fmt, ##__VA_ARGS__); \
     } \
   while (0)
+
+/* Print an "event loop" debug statement that is know to come from a UI-related
+   event (e.g. calling the event handler for the fd of the CLI).  */
 
 #define event_loop_ui_debug_printf(is_ui, fmt, ...) \
   do \
@@ -145,7 +145,7 @@ void ATTRIBUTE_PRINTF (2, 3) event_loop_debug_printf_1
       if (debug_event_loop == debug_event_loop_kind::ALL \
 	  || (debug_event_loop == debug_event_loop_kind::ALL_EXCEPT_UI \
 	      && !is_ui)) \
-	event_loop_debug_printf_1 (__func__, fmt, ##__VA_ARGS__); \
+	debug_prefixed_printf ("event-loop", __func__, fmt, ##__VA_ARGS__); \
     } \
   while (0)
 

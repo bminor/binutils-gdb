@@ -105,17 +105,6 @@ static int infrun_is_async = -1;
 /* See infrun.h.  */
 
 void
-infrun_debug_printf_1 (const char *func_name, const char *fmt, ...)
-{
-  va_list ap;
-  va_start (ap, fmt);
-  debug_prefixed_vprintf ("infrun", func_name, fmt, ap);
-  va_end (ap);
-}
-
-/* See infrun.h.  */
-
-void
 infrun_async (int enable)
 {
   if (infrun_is_async != enable)
@@ -177,17 +166,6 @@ show_debug_infrun (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Inferior debugging is %s.\n"), value);
-}
-
-/* See infrun.h.  */
-
-void
-displaced_debug_printf_1 (const char *func_name, const char *fmt, ...)
-{
-  va_list ap;
-  va_start (ap, fmt);
-  debug_prefixed_vprintf ("displaced", func_name, fmt, ap);
-  va_end (ap);
 }
 
 /* Support for disabling address space randomization.  */
@@ -4667,10 +4645,10 @@ stop_all_threads (void)
 	  target_thread_events (false);
 	}
 
-      /* Use infrun_debug_printf_1 directly to get a meaningful function
+      /* Use debug_prefixed_printf directly to get a meaningful function
          name.  */
       if (debug_infrun)
-	infrun_debug_printf_1 ("stop_all_threads", "done");
+	debug_prefixed_printf ("infrun", "stop_all_threads", "done");
     };
 
   /* Request threads to stop, and then wait for the stops.  Because
