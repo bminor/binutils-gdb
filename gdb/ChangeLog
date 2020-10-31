@@ -1,3 +1,9 @@
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Use AC_CANONICAL_{BUILD,HOST,TARGET} instead of
+	AC_CANONICAL_SYSTEM.
+	* configure: Re-generate.
+
 2020-10-30  Simon Marchi  <simon.marchi@efficios.com>
 
 	* infrun.h (displaced_debug_printf): New macro.  Replace

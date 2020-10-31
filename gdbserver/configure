@@ -4588,6 +4588,7 @@ fi
 INSTALL_STRIP_PROGRAM="\$(install_sh) -c -s"
 
 
+# Set build, build_cpu, build_vendor and build_os.
 # Make sure we can run config.sub.
 $SHELL "$ac_aux_dir/config.sub" sun4 >/dev/null 2>&1 ||
   as_fn_error $? "cannot run $SHELL $ac_aux_dir/config.sub" "$LINENO" 5
@@ -4626,6 +4627,8 @@ IFS=$ac_save_IFS
 case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
 
 
+
+# Set host, host_cpu, host_vendor, and host_os.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
 $as_echo_n "checking host system type... " >&6; }
 if ${ac_cv_host+:} false; then :
@@ -4659,6 +4662,8 @@ IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
+
+# Set target, target_cpu, target_vendor, and target_os.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking target system type" >&5
 $as_echo_n "checking target system type... " >&6; }
 if ${ac_cv_target+:} false; then :
@@ -4698,7 +4703,6 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
-
 
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or

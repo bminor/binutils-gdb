@@ -2728,6 +2728,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 ac_config_headers="$ac_config_headers config.h:config.in"
 
+
+# Set build, build_cpu, build_vendor and build_os.
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
   if test -f "$ac_dir/install-sh"; then
@@ -2795,6 +2797,8 @@ IFS=$ac_save_IFS
 case $build_os in *\ *) build_os=`echo "$build_os" | sed 's/ /-/g'`;; esac
 
 
+
+# Set host, host_cpu, host_vendor, and host_os.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking host system type" >&5
 $as_echo_n "checking host system type... " >&6; }
 if ${ac_cv_host+:} false; then :
@@ -2828,6 +2832,8 @@ IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
+
+# Set target, target_cpu, target_vendor, and target_os.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking target system type" >&5
 $as_echo_n "checking target system type... " >&6; }
 if ${ac_cv_target+:} false; then :

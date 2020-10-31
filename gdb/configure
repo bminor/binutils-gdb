@@ -5249,6 +5249,15 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
+# Set build, build_cpu, build_vendor and build_os.
+
+
+# Set host, host_cpu, host_vendor, and host_os.
+
+
+# Set target, target_cpu, target_vendor, and target_os.
+
+
 test "$program_prefix" != NONE &&
   program_transform_name="s&^&$program_prefix&;$program_transform_name"
 # Use a double $ so make ignores it.

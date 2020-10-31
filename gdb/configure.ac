@@ -33,7 +33,16 @@ AM_PROG_CC_STDC
 AM_PROG_INSTALL_STRIP
 
 AC_CONFIG_AUX_DIR(..)
-AC_CANONICAL_SYSTEM
+
+# Set build, build_cpu, build_vendor and build_os.
+AC_CANONICAL_BUILD
+
+# Set host, host_cpu, host_vendor, and host_os.
+AC_CANONICAL_HOST
+
+# Set target, target_cpu, target_vendor, and target_os.
+AC_CANONICAL_TARGET
+
 AC_ARG_PROGRAM
 
 # We require a C++11 compiler.  Check if one is available, and if
