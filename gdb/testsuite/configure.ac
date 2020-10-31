@@ -16,7 +16,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_INIT(gdb.base)
+AC_INIT
+AC_CONFIG_SRCDIR([gdb.base])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST

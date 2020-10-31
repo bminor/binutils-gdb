@@ -1,3 +1,8 @@
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure.ac: Split AC_INIT into AC_INIT and AC_CONFIG_SRCDIR.
+	* configure: Re-generate.
+
 2020-10-30  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.arch/amd64-disp-step-avx.exp: Update displaced step debug
