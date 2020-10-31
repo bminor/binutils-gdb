@@ -16563,13 +16563,14 @@ $as_echo_n "checking compiler warning flags... " >&6; }
 	      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 struct scoped_restore_base {};
-                 struct scoped_restore_tmpl : public scoped_restore_base {
-		   ~scoped_restore_tmpl() {}
-		 };
+		    struct scoped_restore_tmpl : public scoped_restore_base {
+		      ~scoped_restore_tmpl() {}
+		    };
 int
 main ()
 {
 const scoped_restore_base &b = scoped_restore_tmpl();
+
   ;
   return 0;
 }
