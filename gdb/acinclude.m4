@@ -98,13 +98,22 @@ dnl to use a different cache variable name in this macro if it is invoked
 dnl in a different context somewhere else.
 dnl gcc_AC_CHECK_DECL(SYMBOL,
 dnl 	[ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND [, INCLUDES]]])
-AC_DEFUN([gcc_AC_CHECK_DECL],
-[AC_MSG_CHECKING([whether $1 is declared])
-AC_CACHE_VAL(gcc_cv_have_decl_$1,
-[AC_TRY_COMPILE([$4],
-[#ifndef $1
-char *(*pfn) = (char *(*)) $1 ;
-#endif], eval "gcc_cv_have_decl_$1=yes", eval "gcc_cv_have_decl_$1=no")])
+AC_DEFUN(
+  [gcc_AC_CHECK_DECL],
+  [AC_MSG_CHECKING([whether $1 is declared])
+   AC_CACHE_VAL(
+     [gcc_cv_have_decl_$1],
+     [AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM(
+	   [$4],
+	   [#ifndef $1
+	    char *(*pfn) = (char *(*)) $1 ;
+	    #endif]
+	 )],
+	[eval "gcc_cv_have_decl_$1=yes"],
+	[eval "gcc_cv_have_decl_$1=no"]
+      )]
+   )
 if eval "test \"`echo '$gcc_cv_have_decl_'$1`\" = yes"; then
   AC_MSG_RESULT(yes) ; ifelse([$2], , :, [$2])
 else
@@ -159,7 +168,7 @@ AC_DEFUN([CY_AC_TCL_PRIVATE_HEADERS], [
   fi
 
   if test x"${private_dir}" = x; then
-    AC_ERROR(could not find private Tcl headers)
+    AC_MSG_ERROR(could not find private Tcl headers)
   else
     TCL_PRIVATE_INCLUDE="-I${private_dir}"
     AC_MSG_RESULT(${private_dir})
@@ -180,7 +189,7 @@ AC_DEFUN([CY_AC_TK_PRIVATE_HEADERS], [
   fi
 
   if test x"${private_dir}" = x; then
-    AC_ERROR(could not find Tk private headers)
+    AC_MSG_ERROR(could not find Tk private headers)
   else
     TK_PRIVATE_INCLUDE="-I${private_dir}"
     AC_MSG_RESULT(${private_dir})
@@ -251,13 +260,20 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
   LIBS="-lbfd -liberty -lz $intl $LIBS"
-  AC_CACHE_CHECK([$1], [$2],
-  [AC_TRY_LINK(
-  [#include <stdlib.h>
-  #include "bfd.h"
-  #include "$4"
-  ],
-  [return $3;], [[$2]=yes], [[$2]=no])])
+  AC_CACHE_CHECK(
+    [$1],
+    [$2],
+    [AC_LINK_IFELSE(
+       [AC_LANG_PROGRAM(
+	  [#include <stdlib.h>
+	   #include "bfd.h"
+	   #include "$4"],
+	  [return $3;]
+	)],
+       [[$2]=yes],
+       [[$2]=no]
+     )]
+  )
   CFLAGS=$OLD_CFLAGS
   LDFLAGS=$OLD_LDFLAGS
   LIBS=$OLD_LIBS])
