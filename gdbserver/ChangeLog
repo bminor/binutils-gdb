@@ -1,5 +1,11 @@
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* acinclude.m4: Replace AC_TRY_COMPILE with AC_COMPILE_IFELSE +
+	AC_LANG_PROGRAM.
+	* configure: Re-generate.
+
+2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* configure: Re-generate.
 
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
