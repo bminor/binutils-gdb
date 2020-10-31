@@ -50,7 +50,7 @@ AC_DEFUN([GDB_AC_COMMON], [
 		   poll.h sys/poll.h sys/select.h)
 
   AC_FUNC_MMAP
-  AC_FUNC_VFORK
+  AC_FUNC_FORK
   AC_CHECK_FUNCS([fdwalk getrlimit pipe pipe2 poll socketpair sigaction \
 		  ptrace64 sbrk setns sigaltstack sigprocmask \
 		  setpgid setpgrp getrusage getauxval])
