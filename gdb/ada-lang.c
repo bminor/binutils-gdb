@@ -9172,7 +9172,8 @@ unwrap_value (struct value *val)
 static struct value *
 cast_from_gnat_encoded_fixed_point_type (struct type *type, struct value *arg)
 {
-  struct value *scale = gnat_encoded_fixed_point_scaling_factor (value_type (arg));
+  struct value *scale
+    = gnat_encoded_fixed_point_scaling_factor (value_type (arg));
   arg = value_cast (value_type (scale), arg);
 
   arg = value_binop (arg, scale, BINOP_MUL);
