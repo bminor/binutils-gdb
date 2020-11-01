@@ -436,12 +436,6 @@ struct legacy_psymtab : public standard_psymtab
   void *read_symtab_private = nullptr;
 };
 
-/* Initialize storage for partial symbols.  If partial symbol storage
-   has already been initialized, this does nothing.  TOTAL_SYMBOLS is
-   an estimate of how many symbols there will be.  */
-
-extern void init_psymbol_list (struct objfile *objfile, int total_symbols);
-
 extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
 
 /* Used when recording partial symbol tables.  On destruction,

@@ -1,3 +1,11 @@
+2020-11-01  Tom Tromey  <tom@tromey.com>
+
+	* dbxread.c (dbx_symfile_read): Update.
+	* dwarf2/read.c (dwarf2_build_psymtabs): Update.
+	* xcoffread.c (xcoff_initial_scan): Update.
+	* psympriv.h (init_psymbol_list): Don't declare.
+	* psymtab.c (init_psymbol_list): Remove.
+
 2020-11-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (gnat_encoded_fixed_point_type_info): Renames

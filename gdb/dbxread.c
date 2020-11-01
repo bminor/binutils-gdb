@@ -535,9 +535,6 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   if (val < 0)
     perror_with_name (objfile_name (objfile));
 
-  /* Size the symbol table.  */
-  init_psymbol_list (objfile, DBX_SYMCOUNT (objfile));
-
   symbol_size = DBX_SYMBOL_SIZE (objfile);
   symbol_table_offset = DBX_SYMTAB_OFFSET (objfile);
 

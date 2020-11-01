@@ -6119,8 +6119,6 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       return;
     }
 
-  init_psymbol_list (objfile, 1024);
-
   try
     {
       /* This isn't really ideal: all the data we allocate on the
