@@ -248,6 +248,10 @@ struct partial_symtab
 		    struct objfile *objfile);
 
 
+  /* Indicate that this partial symtab is complete.  */
+
+  void end ();
+
   /* Chain of all existing partial symtabs.  */
 
   struct partial_symtab *next = nullptr;
@@ -435,8 +439,6 @@ struct legacy_psymtab : public standard_psymtab
 
   void *read_symtab_private = nullptr;
 };
-
-extern void end_psymtab_common (struct partial_symtab *);
 
 /* Used when recording partial symbol tables.  On destruction,
    discards any partial symbol tables that have been built.  However,

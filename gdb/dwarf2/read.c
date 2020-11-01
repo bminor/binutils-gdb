@@ -7634,7 +7634,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 						  best_highpc + baseaddr)
 		      - baseaddr);
 
-  end_psymtab_common (pst);
+  pst->end ();
 
   if (!cu->per_cu->imported_symtabs_empty ())
     {
@@ -7760,7 +7760,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   highpc = (CORE_ADDR) 0;
   scan_partial_symbols (first_die, &lowpc, &highpc, 0, cu);
 
-  end_psymtab_common (pst);
+  pst->end ();
 }
 
 /* Struct used to sort TUs by their abbreviation table offset.  */

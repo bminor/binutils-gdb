@@ -1,5 +1,18 @@
 2020-11-01  Tom Tromey  <tom@tromey.com>
 
+	* dbxread.c (dbx_end_psymtab): Update.
+	* dwarf2/read.c (process_psymtab_comp_unit_reader)
+	(build_type_psymtabs_reader): Update.
+	* xcoffread.c (xcoff_end_psymtab): Update.
+	* ctfread.c (scan_partial_symbols): Update.
+	* psymtab.c (sort_pst_symbols): Remove.
+	(partial_symtab::end): Rename from end_psymtab_common.  Inline
+	sort_pst_symbols.
+	* psympriv.h (struct partial_symtab) <end>: New method.
+	(end_psymtab_common): Don't declare.
+
+2020-11-01  Tom Tromey  <tom@tromey.com>
+
 	* symmisc.c (count_psyms): New function.
 	(print_objfile_statistics): Use it.
 	* psymtab.c (append_psymbol_to_list): Remove.

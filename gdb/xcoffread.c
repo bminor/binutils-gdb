@@ -2000,7 +2000,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
     first_fun_line_offset;
   first_fun_line_offset = 0;
 
-  end_psymtab_common (pst);
+  pst->end ();
 
   pst->number_of_dependencies = number_dependencies;
   if (number_dependencies)
