@@ -1523,17 +1523,6 @@ add_psymbol_to_bcache (const partial_symbol &psymbol, struct objfile *objfile,
 	  (&psymbol, sizeof (struct partial_symbol), added));
 }
 
-/* Helper function, adds partial symbol to the given partial symbol list.  */
-
-static void
-append_psymbol_to_list (std::vector<partial_symbol *> &list,
-			struct partial_symbol *psym,
-			struct objfile *objfile)
-{
-  list.push_back (psym);
-  OBJSTAT (objfile, n_psyms++);
-}
-
 /* See psympriv.h.  */
 
 void
@@ -1555,7 +1544,7 @@ partial_symtab::add_psymbol (const partial_symbol &psymbol,
     = (where == psymbol_placement::STATIC
        ? static_psymbols
        : global_psymbols);
-  append_psymbol_to_list (list, psym, objfile);
+  list.push_back (psym);
 }
 
 /* See psympriv.h.  */

@@ -194,9 +194,6 @@ struct obj_section
 
 struct objstats
 {
-  /* Number of partial symbols read.  */
-  int n_psyms = 0;
-
   /* Number of full symbols read.  */
   int n_syms = 0;
 

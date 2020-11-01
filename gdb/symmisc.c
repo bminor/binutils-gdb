@@ -39,6 +39,7 @@
 #include "readline/tilde.h"
 
 #include "psymtab.h"
+#include "psympriv.h"
 
 /* Unfortunately for debugging, stderr is usually a macro.  This is painful
    when calling functions that take FILE *'s from the debugger.
@@ -73,6 +74,20 @@ print_symbol_bcache_statistics (void)
       }
 }
 
+/* Count the number of partial symbols in OBJFILE.  */
+
+static int
+count_psyms (struct objfile *objfile)
+{
+  int count = 0;
+  for (partial_symtab *pst : objfile->psymtabs ())
+    {
+      count += pst->global_psymbols.size ();
+      count += pst->static_psymbols.size ();
+    }
+  return count;
+}
+
 void
 print_objfile_statistics (void)
 {
@@ -89,9 +104,11 @@ print_objfile_statistics (void)
 	if (objfile->per_bfd->n_minsyms > 0)
 	  printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
 			   objfile->per_bfd->n_minsyms);
-	if (OBJSTAT (objfile, n_psyms) > 0)
+
+	int n_psyms = count_psyms (objfile);
+	if (n_psyms > 0)
 	  printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
-			   OBJSTAT (objfile, n_psyms));
+			   n_psyms);
 	if (OBJSTAT (objfile, n_syms) > 0)
 	  printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
 			   OBJSTAT (objfile, n_syms));

@@ -1,5 +1,13 @@
 2020-11-01  Tom Tromey  <tom@tromey.com>
 
+	* symmisc.c (count_psyms): New function.
+	(print_objfile_statistics): Use it.
+	* psymtab.c (append_psymbol_to_list): Remove.
+	(partial_symtab::add_psymbol): Inline append_psymbol_to_list.
+	* objfiles.h (struct objstats) <n_psyms>: Remove.
+
+2020-11-01  Tom Tromey  <tom@tromey.com>
+
 	* dbxread.c (dbx_end_psymtab): Update.
 	* dwarf2/read.c (process_psymtab_comp_unit_reader): Update.
 	(build_type_psymtabs_reader): Update.
