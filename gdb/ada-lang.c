@@ -9170,9 +9170,9 @@ unwrap_value (struct value *val)
 }
 
 static struct value *
-cast_from_fixed (struct type *type, struct value *arg)
+cast_from_gnat_encoded_fixed_point_type (struct type *type, struct value *arg)
 {
-  struct value *scale = ada_scaling_factor (value_type (arg));
+  struct value *scale = gnat_encoded_fixed_point_scaling_factor (value_type (arg));
   arg = value_cast (value_type (scale), arg);
 
   arg = value_binop (arg, scale, BINOP_MUL);
@@ -9180,14 +9180,14 @@ cast_from_fixed (struct type *type, struct value *arg)
 }
 
 static struct value *
-cast_to_fixed (struct type *type, struct value *arg)
+cast_to_gnat_encoded_fixed_point_type (struct type *type, struct value *arg)
 {
   if (type == value_type (arg))
     return arg;
 
-  struct value *scale = ada_scaling_factor (type);
+  struct value *scale = gnat_encoded_fixed_point_scaling_factor (type);
   if (ada_is_gnat_encoded_fixed_point_type (value_type (arg)))
-    arg = cast_from_fixed (value_type (scale), arg);
+    arg = cast_from_gnat_encoded_fixed_point_type (value_type (scale), arg);
   else
     arg = value_cast (value_type (scale), arg);
 
@@ -9735,10 +9735,10 @@ ada_value_cast (struct type *type, struct value *arg2)
     return arg2;
 
   if (ada_is_gnat_encoded_fixed_point_type (type))
-    return cast_to_fixed (type, arg2);
+    return cast_to_gnat_encoded_fixed_point_type (type, arg2);
 
   if (ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
-    return cast_from_fixed (type, arg2);
+    return cast_from_gnat_encoded_fixed_point_type (type, arg2);
 
   return value_cast (type, arg2);
 }
@@ -10138,7 +10138,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	  /* Nothing.  */
 	}
       else if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1)))
-        arg2 = cast_to_fixed (value_type (arg1), arg2);
+        arg2 = cast_to_gnat_encoded_fixed_point_type (value_type (arg1), arg2);
       else if (ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
         error
           (_("Fixed-point values must be assigned to fixed-point variables"));
@@ -10216,9 +10216,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         {
           type = builtin_type (exp->gdbarch)->builtin_double;
           if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1)))
-            arg1 = cast_from_fixed (type, arg1);
+            arg1 = cast_from_gnat_encoded_fixed_point_type (type, arg1);
           if (ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
-            arg2 = cast_from_fixed (type, arg2);
+            arg2 = cast_from_gnat_encoded_fixed_point_type (type, arg2);
           binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
           return ada_value_binop (arg1, arg2, op);
         }
@@ -11188,7 +11188,7 @@ gnat_encoded_fixed_point_delta (struct type *type)
    the scaling factor ('SMALL value) associated with the type.  */
 
 struct value *
-ada_scaling_factor (struct type *type)
+gnat_encoded_fixed_point_scaling_factor (struct type *type)
 {
   const char *encoding = gnat_encoded_fixed_type_info (type);
   struct type *scale_type = ada_scaling_type (type);

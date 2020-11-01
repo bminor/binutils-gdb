@@ -345,7 +345,7 @@ static void
 print_gnat_encoded_fixed_point_type (struct type *type, struct ui_file *stream)
 {
   struct value *delta = gnat_encoded_fixed_point_delta (type);
-  struct value *small = ada_scaling_factor (type);
+  struct value *small = gnat_encoded_fixed_point_scaling_factor (type);
 
   if (delta == nullptr)
     fprintf_filtered (stream, "delta ??");

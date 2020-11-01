@@ -287,7 +287,7 @@ extern int ada_is_system_address_type (struct type *);
 
 extern struct value *gnat_encoded_fixed_point_delta (struct type *);
 
-extern struct value *ada_scaling_factor (struct type *);
+extern struct value *gnat_encoded_fixed_point_scaling_factor (struct type *);
 
 extern int ada_which_variant_applies (struct type *, struct value *);
 

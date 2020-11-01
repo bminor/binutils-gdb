@@ -1,3 +1,17 @@
+2020-11-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (cast_from_gnat_encoded_fixed_point_type): Renames
+	cast_from_fixed.  Update all callers.
+	(cast_to_gnat_encoded_fixed_point_type): Renames cast_to_fixed.
+	Update all callers.
+	(gnat_encoded_fixed_point_scaling_factor): Renames ada_scaling_factor.
+	Update all callers.
+	* ada-lang.h (gnat_encoded_fixed_point_scaling_factor): Renames
+	ada_scaling_factor.
+	* ada-typeprint.c: Replace call to ada_scaling_factor by call
+	to print_gnat_encoded_fixed_point_type.
+	* ada-valprint.c: Likewise.
+
 2020-10-31  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* infrun.h (infrun_debug_printf): Add check of debug_infrun flag.

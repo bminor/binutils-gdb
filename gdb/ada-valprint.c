@@ -773,7 +773,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 
   if (ada_is_gnat_encoded_fixed_point_type (type))
     {
-      struct value *scale = ada_scaling_factor (type);
+      struct value *scale = gnat_encoded_fixed_point_scaling_factor (type);
       val = value_cast (value_type (scale), val);
       val = value_binop (val, scale, BINOP_MUL);
 
