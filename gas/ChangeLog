@@ -1,3 +1,8 @@
+2020-11-03  Christian Eggers  <ceggers@gmx.de>
+
+	* config/obj-elf (elf_frob_symbol): Fix symbol value calculation
+	for versioned symbol aliases.
+
 2020-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703

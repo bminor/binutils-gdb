@@ -2588,7 +2588,8 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 		 because we are in the middle of the final loop.  */
 	      S_SET_VALUE (symp2,
 			   (S_GET_VALUE (symp)
-			    - symbol_get_frag (symp)->fr_address));
+			    - (symbol_get_frag (symp)->fr_address
+			       / OCTETS_PER_BYTE)));
 
 	      symbol_set_frag (symp2, symbol_get_frag (symp));
 
