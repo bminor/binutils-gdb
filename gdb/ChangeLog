@@ -1,5 +1,16 @@
 2020-11-01  Tom Tromey  <tom@tromey.com>
 
+	* dbxread.c (dbx_end_psymtab): Update.
+	* dwarf2/read.c (process_psymtab_comp_unit_reader): Update.
+	(build_type_psymtabs_reader): Update.
+	* xcoffread.c (xcoff_end_psymtab): Update.
+	* ctfread.c (scan_partial_symbols): Update.
+	* psympriv.h (end_psymtab_common): Update.
+	* psymtab.c (end_psymtab_common): Remove objfile parameter.
+	(sort_pst_symbols): Likewise.
+
+2020-11-01  Tom Tromey  <tom@tromey.com>
+
 	* dbxread.c (dbx_symfile_read): Update.
 	* dwarf2/read.c (dwarf2_build_psymtabs): Update.
 	* xcoffread.c (xcoff_initial_scan): Update.

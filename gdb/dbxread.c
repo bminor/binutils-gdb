@@ -2004,7 +2004,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 
   /* End of kludge for patching Solaris textlow and texthigh.  */
 
-  end_psymtab_common (objfile, pst);
+  end_psymtab_common (pst);
 
   pst->number_of_dependencies = number_dependencies;
   if (number_dependencies)

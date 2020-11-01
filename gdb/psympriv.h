@@ -436,7 +436,7 @@ struct legacy_psymtab : public standard_psymtab
   void *read_symtab_private = nullptr;
 };
 
-extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
+extern void end_psymtab_common (struct partial_symtab *);
 
 /* Used when recording partial symbol tables.  On destruction,
    discards any partial symbol tables that have been built.  However,

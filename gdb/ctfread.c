@@ -1464,7 +1464,7 @@ scan_partial_symbols (ctf_file_t *cfp, struct objfile *of)
 			0, language_c, of);
     }
 
-  end_psymtab_common (of, pst);
+  end_psymtab_common (pst);
 }
 
 /* Read CTF debugging information from a BFD section.  This is

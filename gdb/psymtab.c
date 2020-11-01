@@ -1431,7 +1431,7 @@ const struct quick_symbol_functions psym_functions =
 
 
 static void
-sort_pst_symbols (struct objfile *objfile, struct partial_symtab *pst)
+sort_pst_symbols (struct partial_symtab *pst)
 {
   /* Sort the global list; don't sort the static list.  */
   std::sort (pst->global_psymbols.begin (),
@@ -1458,12 +1458,12 @@ partial_symtab::partial_symtab (const char *filename,
 /* Perform "finishing up" operations of a partial symtab.  */
 
 void
-end_psymtab_common (struct objfile *objfile, struct partial_symtab *pst)
+end_psymtab_common (struct partial_symtab *pst)
 {
   pst->global_psymbols.shrink_to_fit ();
   pst->static_psymbols.shrink_to_fit ();
 
-  sort_pst_symbols (objfile, pst);
+  sort_pst_symbols (pst);
 }
 
 /* See psymtab.h.  */
