@@ -1,3 +1,9 @@
+2020-11-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/fixed_points/fixed_points.adb: Replace use of
+	System.Min_Int and System.Max_Int with smaller hardcoded
+	constants.
+
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* configure.ac: Split AC_INIT into AC_INIT and AC_CONFIG_SRCDIR.

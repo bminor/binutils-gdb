@@ -25,8 +25,7 @@ procedure Fixed_Points is
 
    type Base_Fixed_Point_Type is
      delta 1.0 / 16.0
-       range (System.Min_Int / 2) * 1.0 / 16.0 ..
-       (System.Max_Int / 2) * 1.0 / 16.0;
+     range -2147483648 * 1.0 / 16.0 ..  2147483647 * 1.0 / 16.0;
 
    subtype Fixed_Point_Subtype is
      Base_Fixed_Point_Type range -50.0 .. 50.0;
