@@ -3960,9 +3960,20 @@ proc gdb_compile {source dest type options} {
     # explicitly force C++ language.
     if { [lsearch -exact $options getting_compiler_info] == -1
 	 && [lsearch -exact $options c++] != -1
-	 && [string match *.c $source] != 0
-	 && [test_compiler_info "clang-*"] } {
-	lappend new_options early_flags=-x\ c++
+	 && [string match *.c $source] != 0 } {
+
+	# gdb_compile cannot handle this combination of options, the
+	# result is a command like "clang -x c++ foo.c bar.so -o baz"
+	# which tells Clang to treat bar.so as C++.  The solution is
+	# to call gdb_compile twice--once to compile, once to link--
+	# either directly, or via build_executable_from_specs.
+	if { [lsearch $options shlib=*] != -1 } {
+	    error "incompatible gdb_compile options"
+	}
+
+	if {[test_compiler_info "clang-*"]} {
+	    lappend new_options early_flags=-x\ c++
+	}
     }
 
     # Place (and look for) Fortran `.mod` files in the output

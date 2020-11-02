@@ -1,5 +1,11 @@
 2020-11-02  Gary Benson <gbenson@redhat.com>
 
+	* lib/gdb.exp (gdb_compile): Inhibit passing "-x c++"
+	for .c files compiled as C++ with Clang if any shared
+	libraries are specified.
+
+2020-11-02  Gary Benson <gbenson@redhat.com>
+
 	* lib/attributes.h: New header.
 	* gdb.base/backtrace.c: Include the above. Replace
 	__attribute__(noclone)) with ATTRIBUTE_NOCLONE.
