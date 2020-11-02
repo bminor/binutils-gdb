@@ -1,3 +1,8 @@
+2020-11-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/step-over-no-symbols.exp (test_step_over): Replace
+	integer format test with regexp.
+
 2020-11-02  Gary Benson <gbenson@redhat.com>
 
 	* gdb.base/print-file-var.exp (test): Separate compiler and

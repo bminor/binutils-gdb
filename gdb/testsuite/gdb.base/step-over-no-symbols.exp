@@ -78,8 +78,8 @@ proc test_step_over { displaced } {
 
     set after_addr [get_pc "get after PC"]
 
-    gdb_assert {{[string is integer -strict $before_addr] \
-		 && [string is integer -strict $after_addr] \
+    gdb_assert {{[regexp "^${hex}$" $before_addr] \
+		 && [regexp "^${hex}$" $after_addr] \
 		 && $before_addr != $after_addr}} "advanced"
 }
 
