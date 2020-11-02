@@ -18,9 +18,11 @@
 /* The version of this test-case with f1 tagged with noinline only is equivalent
    to gcc/testsuite/gcc.dg/guality/vla-1.c.  */
 
+#include "../lib/attributes.h"
+
 int
 #ifdef NOCLONE
-__attribute__((noinline, noclone))
+__attribute__((noinline)) ATTRIBUTE_NOCLONE
 #else
 __attribute__((noinline))
 #endif

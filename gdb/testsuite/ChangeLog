@@ -1,3 +1,11 @@
+2020-11-02  Gary Benson <gbenson@redhat.com>
+
+	* lib/attributes.h: New header.
+	* gdb.base/backtrace.c: Include the above. Replace
+	__attribute__(noclone)) with ATTRIBUTE_NOCLONE.
+	* gdb.base/infcall-nested-structs.c: Likewise.
+	* gdb.base/vla-optimized-out.c: Likewise.
+
 2020-11-02  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/fission-multi-cu.S: Remove .debug_line.dwo section.

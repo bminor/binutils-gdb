@@ -1,6 +1,6 @@
-/* This testcase is part of GDB, the GNU debugger.
+/* This file is part of GDB, the GNU debugger.
 
-   Copyright 2019-2020 Free Software Foundation, Inc.
+   Copyright (C) 2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,28 +15,26 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "../lib/attributes.h"
+/* Compatibility macro for __attribute__((noclone)).  */
 
-int __attribute__((noinline)) ATTRIBUTE_NOCLONE
-baz ()
-{
-  return 0;	/* Break here.  */
-}
+#ifndef ATTRIBUTES_H
+#define ATTRIBUTES_H
 
-int __attribute__((noinline)) ATTRIBUTE_NOCLONE
-bar ()
-{
-  return baz ();
-}
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int __attribute__((noinline)) ATTRIBUTE_NOCLONE
-foo ()
-{
-  return bar ();
-}
+#ifdef __has_attribute
+# if !__has_attribute (noclone)
+#  define ATTRIBUTE_NOCLONE
+# endif
+#endif
+#ifndef ATTRIBUTE_NOCLONE
+# define ATTRIBUTE_NOCLONE __attribute__((noclone))
+#endif
 
-int
-main ()
-{
-  return foo ();
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* ATTRIBUTES_H */
