@@ -106,10 +106,6 @@ int gdb_python_initialized;
 
 extern PyMethodDef python_GdbMethods[];
 
-#ifdef IS_PY3K
-extern struct PyModuleDef python_GdbModuleDef;
-#endif
-
 PyObject *gdb_module;
 PyObject *gdb_python_module;
 
@@ -1625,6 +1621,19 @@ finalize_python (void *ignore)
 }
 
 #ifdef IS_PY3K
+static struct PyModuleDef python_GdbModuleDef =
+{
+  PyModuleDef_HEAD_INIT,
+  "_gdb",
+  NULL,
+  -1,
+  python_GdbMethods,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
 /* This is called via the PyImport_AppendInittab mechanism called
    during initialization, to make the built-in _gdb module known to
    Python.  */
@@ -1639,18 +1648,6 @@ init__gdb_module (void)
 static bool
 do_start_initialization ()
 {
-#ifdef IS_PY3K
-  size_t progsize, count;
-  /* Python documentation indicates that the memory given
-     to Py_SetProgramName cannot be freed.  However, it seems that
-     at least Python 3.7.4 Py_SetProgramName takes a copy of the
-     given program_name.  Making progname_copy static and not release
-     the memory avoids a leak report for Python versions that duplicate
-     program_name, and respect the requirement of Py_SetProgramName
-     for Python versions that do not duplicate program_name.  */
-  static wchar_t *progname_copy;
-#endif
-
 #ifdef WITH_PYTHON_PATH
   /* Work around problem where python gets confused about where it is,
      and then can't find its libraries, etc.
@@ -1662,11 +1659,20 @@ do_start_initialization ()
     (concat (ldirname (python_libdir.c_str ()).c_str (), SLASH_STRING, "bin",
 	      SLASH_STRING, "python", (char *) NULL));
 #ifdef IS_PY3K
+  /* Python documentation indicates that the memory given
+     to Py_SetProgramName cannot be freed.  However, it seems that
+     at least Python 3.7.4 Py_SetProgramName takes a copy of the
+     given program_name.  Making progname_copy static and not release
+     the memory avoids a leak report for Python versions that duplicate
+     program_name, and respect the requirement of Py_SetProgramName
+     for Python versions that do not duplicate program_name.  */
+  static wchar_t *progname_copy;
+
   std::string oldloc = setlocale (LC_ALL, NULL);
   setlocale (LC_ALL, "");
-  progsize = strlen (progname.get ());
+  size_t progsize = strlen (progname.get ());
   progname_copy = XNEWVEC (wchar_t, progsize + 1);
-  count = mbstowcs (progname_copy, progname.get (), progsize + 1);
+  size_t count = mbstowcs (progname_copy, progname.get (), progsize + 1);
   if (count == (size_t) -1)
     {
       fprintf (stderr, "Could not convert python path to string\n");
@@ -1976,12 +1982,6 @@ gdbpy_initialized (const struct extension_language_defn *extlang)
   return gdb_python_initialized;
 }
 
-#endif /* HAVE_PYTHON */
-
-
-
-#ifdef HAVE_PYTHON
-
 PyMethodDef python_GdbMethods[] =
 {
   { "history", gdbpy_history, METH_VARARGS,
@@ -2123,21 +2123,6 @@ Register a TUI window constructor." },
 
   {NULL, NULL, 0, NULL}
 };
-
-#ifdef IS_PY3K
-struct PyModuleDef python_GdbModuleDef =
-{
-  PyModuleDef_HEAD_INIT,
-  "_gdb",
-  NULL,
-  -1,
-  python_GdbMethods,
-  NULL,
-  NULL,
-  NULL,
-  NULL
-};
-#endif
 
 /* Define all the event objects.  */
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base) \

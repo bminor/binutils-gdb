@@ -1,3 +1,9 @@
+2020-11-02  Tom Tromey  <tromey@adacore.com>
+
+	* python/python.c: Consolidate two HAVE_PYTHON blocks.
+	(python_GdbModuleDef): Move earlier.  Now static.
+	(do_start_initialization): Consolidate some IS_PY3K blocks.
+
 2020-11-02  Simon Marchi  <simon.marchi@efficios.com>
 
 	* aarch64-linux-tdep.c: Fix indentation.
