@@ -1337,8 +1337,8 @@ cpname_state::parse_number (const char *p, int len, int parsed_float,
       char c;
 
       /* The GDB lexer checks the result of scanf at this point.  Not doing
-         this leaves our error checking slightly weaker but only for invalid
-         data.  */
+	 this leaves our error checking slightly weaker but only for invalid
+	 data.  */
 
       /* See if it has `f' or `l' suffix (float or long double).  */
 
@@ -1696,7 +1696,7 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	  }
 	toktype = state->parse_number (tokstart, p - tokstart, got_dot|got_e,
 				       lvalp);
-        if (toktype == ERROR)
+	if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 
@@ -1804,7 +1804,7 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
     {
     case 16:
       if (strncmp (tokstart, "reinterpret_cast", 16) == 0)
-        return REINTERPRET_CAST;
+	return REINTERPRET_CAST;
       break;
     case 12:
       if (strncmp (tokstart, "construction vtable for ", 24) == 0)
@@ -1813,11 +1813,11 @@ yylex (YYSTYPE *lvalp, cpname_state *state)
 	  return CONSTRUCTION_VTABLE;
 	}
       if (strncmp (tokstart, "dynamic_cast", 12) == 0)
-        return DYNAMIC_CAST;
+	return DYNAMIC_CAST;
       break;
     case 11:
       if (strncmp (tokstart, "static_cast", 11) == 0)
-        return STATIC_CAST;
+	return STATIC_CAST;
       break;
     case 9:
       HANDLE_SPECIAL ("covariant return thunk to ", DEMANGLE_COMPONENT_COVARIANT_THUNK);

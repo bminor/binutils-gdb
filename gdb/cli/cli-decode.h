@@ -89,7 +89,7 @@ struct cmd_list_element
     /* The user needs to be warned that this is a deprecated command.
        The user should only be warned the first time a command is
        used.  */
-        
+	
     unsigned int deprecated_warn_user : 1;
 
     /* When functions are deprecated at compile time (this is the way

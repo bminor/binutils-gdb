@@ -684,7 +684,7 @@ unpack (const gdb_exception &exc)
     if (exception.reason < 0)				\
       {							\
 	gdbscm_throw_gdb_exception (exception);		\
-        /*NOTREACHED */					\
+	/*NOTREACHED */					\
       }							\
   } while (0)
 

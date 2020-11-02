@@ -976,19 +976,19 @@ exp     :	NSSTRING	/* ObjC NextStep NSString constant
 
 /* C++.  */
 exp     :       TRUEKEYWORD
-                        { write_exp_elt_opcode (pstate, OP_LONG);
-                          write_exp_elt_type (pstate,
+			{ write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate,
 					  parse_type (pstate)->builtin_bool);
-                          write_exp_elt_longcst (pstate, (LONGEST) 1);
-                          write_exp_elt_opcode (pstate, OP_LONG); }
+			  write_exp_elt_longcst (pstate, (LONGEST) 1);
+			  write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
 exp     :       FALSEKEYWORD
-                        { write_exp_elt_opcode (pstate, OP_LONG);
-                          write_exp_elt_type (pstate,
+			{ write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate,
 					  parse_type (pstate)->builtin_bool);
-                          write_exp_elt_longcst (pstate, (LONGEST) 0);
-                          write_exp_elt_opcode (pstate, OP_LONG); }
+			  write_exp_elt_longcst (pstate, (LONGEST) 0);
+			  write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
 /* end of C++.  */
@@ -1159,7 +1159,7 @@ variable:	name_not_typename
 			  else if ($1.is_a_field_of_this)
 			    {
 			      /* C++: it hangs off of `this'.  Must
-			         not inadvertently convert from a method call
+				 not inadvertently convert from a method call
 				 to data ref.  */
 			      pstate->block_tracker->update (sym);
 			      write_exp_elt_opcode (pstate, OP_THIS);
@@ -1528,9 +1528,9 @@ typebase
 						       $2.length);
 			  $$ = NULL;
 			}
-                /* It appears that this rule for templates is never
-                   reduced; template recognition happens by lookahead
-                   in the token processing code in yylex. */
+		/* It appears that this rule for templates is never
+		   reduced; template recognition happens by lookahead
+		   in the token processing code in yylex. */
 	|	TEMPLATE name '<' type '>'
 			{ $$ = lookup_template_type
 			    (copy_name($2).c_str (), $4,
@@ -1973,7 +1973,7 @@ parse_number (struct parser_state *par_state,
       if (!parse_float (p, len,
 			putithere->typed_val_float.type,
 			putithere->typed_val_float.val))
-        return ERROR;
+	return ERROR;
 
       if (imaginary_p)
 	putithere->typed_val_float.type
@@ -2631,7 +2631,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	= macro_expand_next (&pstate->lexptr, *expression_macro_scope);
 
       if (expanded != nullptr)
-        scan_macro_expansion (expanded.get ());
+	scan_macro_expansion (expanded.get ());
     }
 
   pstate->prev_lexptr = pstate->lexptr;
@@ -2671,16 +2671,16 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
     {
     case 0:
       /* If we were just scanning the result of a macro expansion,
-         then we need to resume scanning the original text.
+	 then we need to resume scanning the original text.
 	 If we're parsing for field name completion, and the previous
 	 token allows such completion, return a COMPLETE token.
-         Otherwise, we were already scanning the original text, and
-         we're really done.  */
+	 Otherwise, we were already scanning the original text, and
+	 we're really done.  */
       if (scanning_macro_expansion ())
-        {
-          finished_macro_expansion ();
-          goto retry;
-        }
+	{
+	  finished_macro_expansion ();
+	  goto retry;
+	}
       else if (saw_name_at_eof)
 	{
 	  saw_name_at_eof = 0;
@@ -2689,7 +2689,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
       else if (par_state->parse_completion && saw_structop)
 	return COMPLETE;
       else
-        return 0;
+	return 0;
 
     case ' ':
     case '\t':
@@ -2716,8 +2716,8 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 
     case ',':
       if (pstate->comma_terminates
-          && paren_depth == 0
-          && ! scanning_macro_expansion ())
+	  && paren_depth == 0
+	  && ! scanning_macro_expansion ())
 	return 0;
       pstate->lexptr++;
       return c;
@@ -2786,7 +2786,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	  }
 	toktype = parse_number (par_state, tokstart, p - tokstart,
 				got_dot | got_e | got_p, &yylval);
-        if (toktype == ERROR)
+	if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 
@@ -2969,7 +2969,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 			       pstate->expression_context_block,
 			       VAR_DOMAIN,
 			       (par_state->language ()->la_language
-			        == language_cplus ? &is_a_field_of_this
+				== language_cplus ? &is_a_field_of_this
 				: NULL)).symbol
 		!= NULL)
 	      {

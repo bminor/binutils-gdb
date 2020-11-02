@@ -210,7 +210,7 @@ legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
     *frame_regnum = gdbarch_deprecated_fp_regnum (gdbarch);
   else if (gdbarch_sp_regnum (gdbarch) >= 0
 	   && gdbarch_sp_regnum (gdbarch)
-	        < gdbarch_num_regs (gdbarch))
+		< gdbarch_num_regs (gdbarch))
     *frame_regnum = gdbarch_sp_regnum (gdbarch);
   else
     /* Should this be an internal error?  I guess so, it is reflecting
@@ -1038,11 +1038,11 @@ default_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
 /* See arch-utils.h.  */
 void
 default_read_core_file_mappings (struct gdbarch *gdbarch,
-                                 struct bfd *cbfd,
+				 struct bfd *cbfd,
 				 gdb::function_view<void (ULONGEST count)>
 				   pre_loop_cb,
 				 gdb::function_view<void (int num,
-				                          ULONGEST start,
+							  ULONGEST start,
 							  ULONGEST end,
 							  ULONGEST file_ofs,
 							  const char *filename,

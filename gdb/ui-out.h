@@ -216,10 +216,10 @@ class ui_out
        uiout->field_signed(), uiout_>field_string() etc. calls when
        the formatted message is translatable.  E.g.:
 
-         uiout->message (_("\nWatchpoint %pF deleted because the program has "
-                         "left the block in\n"
-                         "which its expression is valid.\n"),
-                         signed_field ("wpnum", b->number));
+	 uiout->message (_("\nWatchpoint %pF deleted because the program has "
+			 "left the block in\n"
+			 "which its expression is valid.\n"),
+			 signed_field ("wpnum", b->number));
 
      - '%p[' - output the following text in a specified style.
        '%p]' - output the following text in the default style.

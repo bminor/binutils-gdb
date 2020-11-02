@@ -682,15 +682,15 @@ parse_number (struct parser_state *par_state,
 	}
       /* Default type for floating-point literals is float64.  */
       else
-        {
+	{
 	  putithere->typed_val_float.type
 	    = builtin_go_types->builtin_float64;
-        }
+	}
 
       if (!parse_float (p, len,
 			putithere->typed_val_float.type,
 			putithere->typed_val_float.val))
-        return ERROR;
+	return ERROR;
       return FLOAT;
     }
 
@@ -806,7 +806,7 @@ parse_number (struct parser_state *par_state,
       && (un >> (gdbarch_int_bit (par_state->gdbarch ()) - 2)) == 0)
     {
       high_bit
-        = ((ULONGEST)1) << (gdbarch_int_bit (par_state->gdbarch ()) - 1);
+	= ((ULONGEST)1) << (gdbarch_int_bit (par_state->gdbarch ()) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -1053,7 +1053,7 @@ lex_one_token (struct parser_state *par_state)
       else if (saw_structop)
 	return COMPLETE;
       else
-        return 0;
+	return 0;
 
     case ' ':
     case '\t':
@@ -1077,7 +1077,7 @@ lex_one_token (struct parser_state *par_state)
 
     case ',':
       if (pstate->comma_terminates
-          && paren_depth == 0)
+	  && paren_depth == 0)
 	return 0;
       par_state->lexptr++;
       return c;
@@ -1139,7 +1139,7 @@ lex_one_token (struct parser_state *par_state)
 	  }
 	toktype = parse_number (par_state, tokstart, p - tokstart,
 				got_dot|got_e, &yylval);
-        if (toktype == ERROR)
+	if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 

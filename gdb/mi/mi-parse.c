@@ -305,9 +305,9 @@ mi_parse (const char *cmd, char **token)
       /* See if --all is the last token in the input.  */
       if (strcmp (chp, "--all") == 0)
 	{
-          parse->all = 1;
-          chp += strlen (chp);
-        }
+	  parse->all = 1;
+	  chp += strlen (chp);
+	}
       if (strncmp (chp, "--thread-group ", tgs) == 0)
 	{
 	  char *endp;

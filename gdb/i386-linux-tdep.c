@@ -409,11 +409,11 @@ i386_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
       sig_code = parse_and_eval_long ("$_siginfo.si_code\n");
 
       lower_bound
-        = parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._lower");
+	= parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._lower");
       upper_bound
-        = parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._upper");
+	= parse_and_eval_long ("$_siginfo._sifields._sigfault._addr_bnd._upper");
       access
-        = parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
+	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
     }
   catch (const gdb_exception &exception)
     {
@@ -467,7 +467,7 @@ i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
   if (syscall_gdb < 0)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %s\n"), 
+			   "support syscall number %s\n"), 
 			 plongest (syscall_native));
       return -1;
     }
@@ -497,8 +497,8 @@ i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
 
 static int
 i386_linux_record_signal (struct gdbarch *gdbarch,
-                          struct regcache *regcache,
-                          enum gdb_signal signal)
+			  struct regcache *regcache,
+			  enum gdb_signal signal)
 {
   ULONGEST esp;
 
@@ -1052,7 +1052,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   /* Core file support.  */
   set_gdbarch_iterate_over_regset_sections
@@ -1062,15 +1062,15 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,
-                                        i386_linux_displaced_step_copy_insn);
+					i386_linux_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, i386_displaced_step_fixup);
   set_gdbarch_displaced_step_location (gdbarch,
-                                       linux_displaced_step_location);
+				       linux_displaced_step_location);
 
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_I386);
   set_gdbarch_get_syscall_number (gdbarch,
-                                  i386_linux_get_syscall_number);
+				  i386_linux_get_syscall_number);
 
   set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
   set_gdbarch_report_signal_info (gdbarch, i386_linux_report_signal_info);

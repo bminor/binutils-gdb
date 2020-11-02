@@ -207,12 +207,12 @@ linux_ns_same (pid_t pid, enum linux_ns_type type)
    - TYPE (enum mnsh_msg_type, always sent) - the message type.
    - INT1 and
    - INT2 (int, always sent, though not always used) - two
-           values whose meaning is message-type-dependent.
+	   values whose meaning is message-type-dependent.
 	   See enum mnsh_msg_type documentation below.
    - FD (int, optional, sent using SCM_RIGHTS) - an open file
-         descriptor.
+	 descriptor.
    - BUF (unstructured data, optional) - some data with message-
-          type-dependent meaning.
+	  type-dependent meaning.
 
    Note that the helper process is the child of a call to fork,
    so all code in the helper must be async-signal-safe.  */

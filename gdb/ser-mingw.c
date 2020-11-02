@@ -881,21 +881,21 @@ pipe_windows_open (struct serial *scb, const char *name)
     const char *err_msg
       = pex_run (ps->pex, PEX_SEARCH | PEX_BINARY_INPUT | PEX_BINARY_OUTPUT
 		 | PEX_STDERR_TO_PIPE,
-                 argv[0], argv.get (), NULL, NULL,
-                 &err);
+		 argv[0], argv.get (), NULL, NULL,
+		 &err);
 
     if (err_msg)
       {
-        /* Our caller expects us to return -1, but all they'll do with
-           it generally is print the message based on errno.  We have
-           all the same information here, plus err_msg provided by
-           pex_run, so we just raise the error here.  */
-        if (err)
-          error (_("error starting child process '%s': %s: %s"),
-                 name, err_msg, safe_strerror (err));
-        else
-          error (_("error starting child process '%s': %s"),
-                 name, err_msg);
+	/* Our caller expects us to return -1, but all they'll do with
+	   it generally is print the message based on errno.  We have
+	   all the same information here, plus err_msg provided by
+	   pex_run, so we just raise the error here.  */
+	if (err)
+	  error (_("error starting child process '%s': %s: %s"),
+		 name, err_msg, safe_strerror (err));
+	else
+	  error (_("error starting child process '%s': %s"),
+		 name, err_msg);
       }
   }
 

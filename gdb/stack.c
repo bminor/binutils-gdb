@@ -528,7 +528,7 @@ read_frame_local (struct symbol *sym, struct frame_info *frame,
 void
 read_frame_arg (const frame_print_options &fp_opts,
 		symbol *sym, frame_info *frame,
-	        struct frame_arg *argp, struct frame_arg *entryargp)
+		struct frame_arg *argp, struct frame_arg *entryargp)
 {
   struct value *val = NULL, *entryval = NULL;
   char *val_error = NULL, *entryval_error = NULL;
@@ -757,7 +757,7 @@ print_frame_args (const frame_print_options &fp_opts,
       struct symbol *sym;
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
-        {
+	{
 	  struct frame_arg arg, entryarg;
 
 	  QUIT;
@@ -842,22 +842,22 @@ print_frame_args (const frame_print_options &fp_opts,
 		     Reasons for using the LOC_ARG:
 
 		     (1) Because find_saved_registers may be slow for
-		         remote debugging.
+			 remote debugging.
 
 		     (2) Because registers are often re-used and stack
-		         slots rarely (never?) are.  Therefore using
-		         the stack slot is much less likely to print
-		         garbage.
+			 slots rarely (never?) are.  Therefore using
+			 the stack slot is much less likely to print
+			 garbage.
 
 		     Reasons why we might want to use the LOC_REGISTER:
 
 		     (1) So that the backtrace prints the same value
-		         as "print foo".  I see no compelling reason
-		         why this needs to be the case; having the
-		         backtrace print the value which was passed
-		         in, and "print foo" print the value as
-		         modified within the called function, makes
-		         perfect sense to me.
+			 as "print foo".  I see no compelling reason
+			 why this needs to be the case; having the
+			 backtrace print the value which was passed
+			 in, and "print foo" print the value as
+			 modified within the called function, makes
+			 perfect sense to me.
 
 		     Additional note: It might be nice if "info args"
 		     displayed both values.
@@ -954,7 +954,7 @@ show_disassemble_next_line (struct ui_file *file, int from_tty,
   fprintf_filtered (file,
 		    _("Debugger's willingness to use "
 		      "disassemble-next-line is %s.\n"),
-                    value);
+		    value);
 }
 
 /* Use TRY_CATCH to catch the exception from the gdb_disassembly
@@ -1019,7 +1019,7 @@ get_user_print_what_frame_info (gdb::optional<enum print_what> *what)
 {
   *what
     = print_frame_info_to_print_what
-        (user_frame_print_options.print_frame_info);
+	(user_frame_print_options.print_frame_info);
 }
 
 /* Print information about frame FRAME.  The output is format according
@@ -1059,35 +1059,35 @@ print_frame_info (const frame_print_options &fp_opts,
 			    gdbarch, get_frame_pc (frame));
 
       /* Do this regardless of SOURCE because we don't have any source
-         to list for this frame.  */
+	 to list for this frame.  */
       if (print_level)
-        {
-          uiout->text ("#");
-          uiout->field_fmt_signed (2, ui_left, "level",
+	{
+	  uiout->text ("#");
+	  uiout->field_fmt_signed (2, ui_left, "level",
 				   frame_relative_level (frame));
-        }
+	}
       if (uiout->is_mi_like_p ())
-        {
-          annotate_frame_address ();
+	{
+	  annotate_frame_address ();
 	  print_pc (uiout, gdbarch, frame, get_frame_pc (frame));
-          annotate_frame_address_end ();
-        }
+	  annotate_frame_address_end ();
+	}
 
       if (get_frame_type (frame) == DUMMY_FRAME)
-        {
-          annotate_function_call ();
-          uiout->field_string ("func", "<function called from gdb>",
+	{
+	  annotate_function_call ();
+	  uiout->field_string ("func", "<function called from gdb>",
 			       metadata_style.style ());
 	}
       else if (get_frame_type (frame) == SIGTRAMP_FRAME)
-        {
+	{
 	  annotate_signal_handler_caller ();
-          uiout->field_string ("func", "<signal handler called>",
+	  uiout->field_string ("func", "<signal handler called>",
 			       metadata_style.style ());
-        }
+	}
       else if (get_frame_type (frame) == ARCH_FRAME)
-        {
-          uiout->field_string ("func", "<cross-architecture call>",
+	{
+	  uiout->field_string ("func", "<cross-architecture call>",
 			       metadata_style.style ());
 	}
       uiout->text ("\n");
@@ -1761,7 +1761,7 @@ info_frame_command_core (struct frame_info *fi, bool selected_frame_p)
 	  int realnum;
 
 	  /* Find out the location of the saved register without
-             fetching the corresponding value.  */
+	     fetching the corresponding value.  */
 	  frame_register_unwind (fi, i, &optimized, &unavailable,
 				 &lval, &addr, &realnum, NULL);
 	  /* For moment, only display registers that were saved on the
@@ -2709,9 +2709,9 @@ down_silently_base (const char *count_exp)
   if (count != 0 && count_exp == NULL)
     {
       /* We only do this if COUNT_EXP is not specified.  That way
-         "down" means to really go down (and let me know if that is
-         impossible), but "down 9999" can be used to mean go all the
-         way down without getting an error.  */
+	 "down" means to really go down (and let me know if that is
+	 impossible), but "down 9999" can be used to mean go all the
+	 way down without getting an error.  */
 
       error (_("Bottom (innermost) frame selected; you cannot go down."));
     }
@@ -2761,11 +2761,11 @@ return_command (const char *retval_exp, int from_tty)
       struct type *return_type = NULL;
 
       /* Compute the return value.  Should the computation fail, this
-         call throws an error.  */
+	 call throws an error.  */
       return_value = evaluate_expression (retval_expr.get ());
 
       /* Cast return value to the return type of the function.  Should
-         the cast fail, this call throws an error.  */
+	 the cast fail, this call throws an error.  */
       if (thisfun != NULL)
 	return_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (thisfun));
       if (return_type == NULL)
@@ -2781,7 +2781,7 @@ return_command (const char *retval_exp, int from_tty)
       return_value = value_cast (return_type, return_value);
 
       /* Make sure the value is fully evaluated.  It may live in the
-         stack frame we're about to pop.  */
+	 stack frame we're about to pop.  */
       if (value_lazy (return_value))
 	value_fetch_lazy (return_value);
 
@@ -2791,10 +2791,10 @@ return_command (const char *retval_exp, int from_tty)
       rv_conv = RETURN_VALUE_REGISTER_CONVENTION;
       if (return_type->code () == TYPE_CODE_VOID)
 	/* If the return-type is "void", don't try to find the
-           return-value's location.  However, do still evaluate the
-           return expression so that, even when the expression result
-           is discarded, side effects such as "return i++" still
-           occur.  */
+	   return-value's location.  However, do still evaluate the
+	   return expression so that, even when the expression result
+	   is discarded, side effects such as "return i++" still
+	   occur.  */
 	return_value = NULL;
       else if (thisfun != NULL)
 	{
@@ -2974,15 +2974,15 @@ make_frame_apply_options_def_group (qcs_flags *flags,
    frame apply -3 info frame    Apply 'info frame' to outermost 3 frames.
    frame apply all x/i $pc      Apply 'x/i $pc' cmd to all frames.
    frame apply all -s p local_var_no_idea_in_which_frame
-                If a frame has a local variable called
-                local_var_no_idea_in_which_frame, print frame
-                and value of local_var_no_idea_in_which_frame.
+		If a frame has a local variable called
+		local_var_no_idea_in_which_frame, print frame
+		and value of local_var_no_idea_in_which_frame.
    frame apply all -s -q p local_var_no_idea_in_which_frame
-                Same as before, but only print the variable value.
+		Same as before, but only print the variable value.
    frame apply level 2-5 0 4-7 -s p i = i + 1
-                Adds 1 to the variable i in the specified frames.
-                Note that i will be incremented twice in
-                frames 4 and 5.  */
+		Adds 1 to the variable i in the specified frames.
+		Note that i will be incremented twice in
+		frames 4 and 5.  */
 
 /* Apply a GDB command to COUNT stack frames, starting at TRAILING.
    CMD starts with 0 or more qcs flags followed by the GDB command to apply.
@@ -3339,11 +3339,11 @@ Same as the `down' command, but does not print anything.\n\
 This is useful in command scripts."));
 
   add_prefix_cmd ("frame", class_stack,
-                  &frame_cmd.base_command, _("\
+		  &frame_cmd.base_command, _("\
 Select and print a stack frame.\n\
 With no argument, print the selected stack frame.  (See also \"info frame\").\n\
 A single numerical argument specifies the frame to select."),
-                  &frame_cmd_list, "frame ", 1, &cmdlist);
+		  &frame_cmd_list, "frame ", 1, &cmdlist);
   add_com_alias ("f", "frame", class_stack, 1);
 
 #define FRAME_APPLY_OPTION_HELP "\
@@ -3585,7 +3585,7 @@ pretty-printers for that value."),
   deprecate_cmd (cmd, "set print raw-frame-arguments");
 
   add_setshow_auto_boolean_cmd ("disassemble-next-line", class_stack,
-			        &disassemble_next_line, _("\
+				&disassemble_next_line, _("\
 Set whether to disassemble next source line or insn when execution stops."),
 				_("\
 Show whether to disassemble next source line or insn when execution stops."),
@@ -3599,9 +3599,9 @@ If AUTO, display disassembly of next instruction only if the source line\n\
 cannot be displayed.\n\
 If OFF (which is the default), never display the disassembly of the next\n\
 source line."),
-			        NULL,
-			        show_disassemble_next_line,
-			        &setlist, &showlist);
+				NULL,
+				show_disassemble_next_line,
+				&setlist, &showlist);
   disassemble_next_line = AUTO_BOOLEAN_FALSE;
 
   gdb::option::add_setshow_cmds_for_options

@@ -280,7 +280,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				      byte_order);
 
       /* First num_arg_regs parameters are passed by registers, 
-         and the rest are passed on the stack.  */
+	 and the rest are passed on the stack.  */
       if (i < num_arg_regs)
 	regcache_cooked_write_unsigned (regcache, first_arg_reg + i, val);
       else
@@ -328,7 +328,7 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
   else
     {
       /* Aggregate types greater than a single register are returned
-         in memory.  FIXME: Unless they are only 2 regs?.  */
+	 in memory.  FIXME: Unless they are only 2 regs?.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
       return_buffer = l;
       read_memory (return_buffer, valbuf, TYPE_LENGTH (type));

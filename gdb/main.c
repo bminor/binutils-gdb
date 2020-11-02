@@ -137,7 +137,7 @@ set_gdb_data_directory (const char *new_datadir)
   if (!IS_ABSOLUTE_PATH (gdb_datadir.c_str ()))
     {
       gdb::unique_xmalloc_ptr<char> abs_datadir
-        = gdb_abspath (gdb_datadir.c_str ());
+	= gdb_abspath (gdb_datadir.c_str ());
 
       gdb_datadir = abs_datadir.get ();
     }
@@ -786,7 +786,7 @@ captured_main_1 (struct captured_main_args *context)
 	    break;
 	  case OPT_WINDOWS:
 	    /* FIXME: cagney/2003-03-01: Not sure if this option is
-               actually useful, and if it is, what it should do.  */
+	       actually useful, and if it is, what it should do.  */
 #ifdef GDBTK
 	    /* --windows is equivalent to -i=insight.  */
 	    xfree (interpreter_p);
@@ -880,7 +880,7 @@ captured_main_1 (struct captured_main_args *context)
 	      else
 		baud_rate = rate;
 	    }
-            break;
+	    break;
 	  case 'l':
 	    {
 	      int timeout;
@@ -1024,7 +1024,7 @@ captured_main_1 (struct captured_main_args *context)
   if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
     {
       /* Print all the junk at the top, with trailing "..." if we are
-         about to read a symbol file (possibly slowly).  */
+	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
@@ -1045,7 +1045,7 @@ captured_main_1 (struct captured_main_args *context)
   if (!quiet && !current_interp_named_p (INTERP_MI1))
     {
       /* Print all the junk at the top, with trailing "..." if we are
-         about to read a symbol file (possibly slowly).  */
+	 about to read a symbol file (possibly slowly).  */
       print_gdb_version (gdb_stdout, true);
       if (symarg)
 	printf_filtered ("..");
@@ -1115,8 +1115,8 @@ captured_main_1 (struct captured_main_args *context)
       && strcmp (execarg, symarg) == 0)
     {
       /* The exec file and the symbol-file are the same.  If we can't
-         open it, better only print one error message.
-         catch_command_errors returns non-zero on success!  */
+	 open it, better only print one error message.
+	 catch_command_errors returns non-zero on success!  */
       ret = catch_command_errors (exec_file_attach, execarg,
 				  !batch_flag);
       if (ret != 0)
@@ -1316,13 +1316,13 @@ Selection of debuggee and its files:\n\n\
 Initial commands and command files:\n\n\
   --command=FILE, -x Execute GDB commands from FILE.\n\
   --init-command=FILE, -ix\n\
-                     Like -x but execute commands before loading inferior.\n\
+		     Like -x but execute commands before loading inferior.\n\
   --eval-command=COMMAND, -ex\n\
-                     Execute a single GDB command.\n\
-                     May be used multiple times and in conjunction\n\
-                     with --command.\n\
+		     Execute a single GDB command.\n\
+		     May be used multiple times and in conjunction\n\
+		     with --command.\n\
   --init-eval-command=COMMAND, -iex\n\
-                     Like -ex but before loading inferior.\n\
+		     Like -ex but before loading inferior.\n\
   --nh               Do not read ~/.gdbinit.\n\
   --nx               Do not read any .gdbinit files in any directory.\n\n\
 "), stream);
@@ -1330,7 +1330,7 @@ Initial commands and command files:\n\n\
 Output and user interface control:\n\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --interpreter=INTERP\n\
-                     Select a specific interpreter / user interface\n\
+		     Select a specific interpreter / user interface\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
   -w                 Use the GUI interface.\n\
   --nw               Do not use the GUI interface.\n\
@@ -1343,14 +1343,14 @@ Output and user interface control:\n\n\
   fputs_unfiltered (_("\
   --dbx              DBX compatibility mode.\n\
   -q, --quiet, --silent\n\
-                     Do not print version number on startup.\n\n\
+		     Do not print version number on startup.\n\n\
 "), stream);
   fputs_unfiltered (_("\
 Operating modes:\n\n\
   --batch            Exit after processing options.\n\
   --batch-silent     Like --batch, but suppress all gdb stdout output.\n\
   --return-child-result\n\
-                     GDB exit code will be the child's exit code.\n\
+		     GDB exit code will be the child's exit code.\n\
   --configuration    Print details about GDB configuration and then exit.\n\
   --help             Print this message and then exit.\n\
   --version          Print version information and then exit.\n\n\
@@ -1360,7 +1360,7 @@ Remote debugging options:\n\n\
 Other options:\n\n\
   --cd=DIR           Change current directory to DIR.\n\
   --data-directory=DIR, -D\n\
-                     Set GDB's data-directory to DIR.\n\
+		     Set GDB's data-directory to DIR.\n\
 "), stream);
   fputs_unfiltered (_("\n\
 At startup, GDB reads the following init files and executes their commands:\n\
@@ -1369,7 +1369,7 @@ At startup, GDB reads the following init files and executes their commands:\n\
     {
       std::string output;
       for (size_t idx = 0; idx < system_gdbinit.size (); ++idx)
-        {
+	{
 	  output += system_gdbinit[idx];
 	  if (idx < system_gdbinit.size () - 1)
 	    output += ", ";

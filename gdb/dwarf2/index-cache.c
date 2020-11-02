@@ -144,11 +144,11 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 	}
 
       if (debug_index_cache)
-        printf_unfiltered ("index cache: writing index cache for objfile %s\n",
+	printf_unfiltered ("index cache: writing index cache for objfile %s\n",
 			   objfile_name (obj));
 
       /* Write the index itself to the directory, using the build id as the
-         filename.  */
+	 filename.  */
       write_psymtabs_to_index (per_objfile, m_dir.c_str (),
 			       build_id_str.c_str (), dwz_build_id_ptr,
 			       dw_index_kind::GDB_INDEX);
@@ -198,7 +198,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
   try
     {
       if (debug_index_cache)
-        printf_unfiltered ("index cache: trying to read %s\n",
+	printf_unfiltered ("index cache: trying to read %s\n",
 			   filename.c_str ());
 
       /* Try to map that file.  */

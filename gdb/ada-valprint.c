@@ -76,10 +76,10 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
   while (index_type->code () == TYPE_CODE_RANGE)
     {
       /* We need to know what the base type is, in order to do the
-         appropriate check below.  Otherwise, if this is a subrange
-         of an enumerated type, where the underlying value of the
-         first element is typically 0, we might test the low bound
-         against the wrong value.  */
+	 appropriate check below.  Otherwise, if this is a subrange
+	 of an enumerated type, where the underlying value of the
+	 first element is typically 0, we might test the low bound
+	 against the wrong value.  */
       index_type = TYPE_TARGET_TYPE (index_type);
     }
 
@@ -140,10 +140,10 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
       len = 1;
     else if (low > high)
       {
-        /* The array length should normally be HIGH_POS - LOW_POS + 1.
-           But in Ada we allow LOW_POS to be greater than HIGH_POS for
-           empty arrays.  In that situation, the array length is just zero,
-           not negative!  */
+	/* The array length should normally be HIGH_POS - LOW_POS + 1.
+	   But in Ada we allow LOW_POS to be greater than HIGH_POS for
+	   empty arrays.  In that situation, the array length is just zero,
+	   not negative!  */
 	len = 0;
       }
     else
@@ -291,7 +291,7 @@ char_at (const gdb_byte *string, int i, int type_len,
     return string[i];
   else
     return (int) extract_unsigned_integer (string + type_len * i,
-                                           type_len, byte_order);
+					   type_len, byte_order);
 }
 
 /* Print a floating-point value of type TYPE, pointed to in GDB by
@@ -462,7 +462,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
   for (i = 0; i < length && things_printed < options->print_max; i += 1)
     {
       /* Position of the character we are examining
-         to see whether it is repeated.  */
+	 to see whether it is repeated.  */
       unsigned int rep1;
       /* Number of repetitions we have detected so far.  */
       unsigned int reps;
@@ -1126,7 +1126,7 @@ ada_value_print (struct value *val0, struct ui_file *stream,
   if (type->code () == TYPE_CODE_PTR)
     {
       /* Hack:  don't print (char *) for char strings.  Their
-         type is indicated by the quoted string anyway.  */
+	 type is indicated by the quoted string anyway.  */
       if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) != sizeof (char)
 	  || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_INT
 	  || TYPE_TARGET_TYPE (type)->is_unsigned ())
@@ -1142,7 +1142,7 @@ ada_value_print (struct value *val0, struct ui_file *stream,
 	 access type (this is encoded by the compiler as a typedef to
 	 a fat pointer - hence the check against TYPE_CODE_TYPEDEF).  */
       if (type->code () == TYPE_CODE_TYPEDEF)
-        {
+	{
 	  fprintf_filtered (stream, "(");
 	  type_print (type, "", stream, -1);
 	  fprintf_filtered (stream, ") ");

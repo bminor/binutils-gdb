@@ -523,7 +523,7 @@ Please switch to another checkpoint before deleting the current one"));
       || (parent != NULL && parent->state == THREAD_STOPPED))
     {
       if (inferior_call_waitpid (pptid, ptid.pid ()))
-        warning (_("Unable to wait pid %s"),
+	warning (_("Unable to wait pid %s"),
 		 target_pid_to_str (ptid).c_str ());
     }
 }

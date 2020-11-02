@@ -112,6 +112,6 @@ extern void add_using_directive (struct using_direct **using_directives,
 				 const char *declaration,
 				 const std::vector<const char *> &excludes,
 				 int copy_names,
-                                 struct obstack *obstack);
+				 struct obstack *obstack);
 
 #endif /* NAMESPACE_H */

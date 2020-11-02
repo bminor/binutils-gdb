@@ -438,10 +438,10 @@ print_children (PyObject *printer, const char *hint,
 	 3. Other.  Always print a ",".  */
       if (i == 0)
 	{
-         if (is_py_none)
-           fputs_filtered ("{", stream);
-         else
-           fputs_filtered (" = {", stream);
+	 if (is_py_none)
+	   fputs_filtered ("{", stream);
+	 else
+	   fputs_filtered (" = {", stream);
        }
 
       else if (! is_map || i % 2 == 0)

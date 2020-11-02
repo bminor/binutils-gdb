@@ -105,7 +105,7 @@ solib_aix_parse_libraries (const char *library)
     {
       have_warned = 1;
       warning (_("Can not parse XML library list; XML support was disabled "
-                 "at compile time"));
+		 "at compile time"));
     }
 
   return {};
@@ -153,8 +153,8 @@ library_list_start_library (struct gdb_xml_parser *parser,
 
 static void
 library_list_start_list (struct gdb_xml_parser *parser,
-                         const struct gdb_xml_element *element,
-                         void *user_data,
+			 const struct gdb_xml_element *element,
+			 void *user_data,
 			 std::vector<gdb_xml_value> &attributes)
 {
   char *version
@@ -162,8 +162,8 @@ library_list_start_list (struct gdb_xml_parser *parser,
 
   if (strcmp (version, "1.0") != 0)
     gdb_xml_error (parser,
-                   _("Library list has unsupported version \"%s\""),
-                   version);
+		   _("Library list has unsupported version \"%s\""),
+		   version);
 }
 
 /* The allowed elements and attributes for an AIX library list
@@ -520,12 +520,12 @@ solib_aix_current_sos (void)
 
       /* Add it to the list.  */
       if (!start)
-        last = start = new_solib;
+	last = start = new_solib;
       else
-        {
-          last->next = new_solib;
-          last = new_solib;
-        }
+	{
+	  last->next = new_solib;
+	  last = new_solib;
+	}
     }
 
   return start;
@@ -745,7 +745,7 @@ _initialize_solib_aix ()
 Control the debugging traces for the solib-aix module."), _("\
 Show whether solib-aix debugging traces are enabled."), _("\
 When on, solib-aix debugging traces are enabled."),
-                            NULL,
-                            show_solib_aix_debug,
-                            &setdebuglist, &showdebuglist);
+			    NULL,
+			    show_solib_aix_debug,
+			    &setdebuglist, &showdebuglist);
 }

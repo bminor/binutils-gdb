@@ -1018,12 +1018,12 @@ The new inferior ID must be currently known."),
 	   &cmdlist);
 
   add_setshow_boolean_cmd ("inferior-events", no_class,
-         &print_inferior_events, _("\
+	 &print_inferior_events, _("\
 Set printing of inferior events (such as inferior start and exit)."), _("\
 Show printing of inferior events (such as inferior start and exit)."), NULL,
-         NULL,
-         show_print_inferior_events,
-         &setprintlist, &showprintlist);
+	 NULL,
+	 show_print_inferior_events,
+	 &setprintlist, &showprintlist);
 
   create_internalvar_type_lazy ("_inferior", &inferior_funcs, NULL);
 }

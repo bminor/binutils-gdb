@@ -571,10 +571,10 @@ match_partial_symbol (struct objfile *objfile,
       do_linear_search = 0;
 
       /* Binary search.  This search is guaranteed to end with center
-         pointing at the earliest partial symbol whose name might be
-         correct.  At that point *all* partial symbols with an
-         appropriate name will be checked against the correct
-         domain.  */
+	 pointing at the earliest partial symbol whose name might be
+	 correct.  At that point *all* partial symbols with an
+	 appropriate name will be checked against the correct
+	 domain.  */
 
       bottom = start;
       top = start + length - 1;
@@ -651,10 +651,10 @@ lookup_partial_symbol (struct objfile *objfile,
       do_linear_search = 0;
 
       /* Binary search.  This search is guaranteed to end with center
-         pointing at the earliest partial symbol whose name might be
-         correct.  At that point *all* partial symbols with an
-         appropriate name will be checked against the correct
-         domain.  */
+	 pointing at the earliest partial symbol whose name might be
+	 correct.  At that point *all* partial symbols with an
+	 appropriate name will be checked against the correct
+	 domain.  */
 
       bottom = start;
       top = start + length - 1;
@@ -1491,14 +1491,14 @@ psymbol_bcache::compare (const void *addr1, const void *addr2, int length)
   struct partial_symbol *sym2 = (struct partial_symbol *) addr2;
 
   return (memcmp (&sym1->ginfo.value, &sym2->ginfo.value,
-                  sizeof (sym1->ginfo.value)) == 0
+		  sizeof (sym1->ginfo.value)) == 0
 	  && sym1->ginfo.language () == sym2->ginfo.language ()
-          && sym1->domain == sym2->domain
-          && sym1->aclass == sym2->aclass
+	  && sym1->domain == sym2->domain
+	  && sym1->aclass == sym2->aclass
 	  /* Note that psymbol names are interned via
 	     compute_and_set_names, so there's no need to compare the
 	     contents of the name here.  */
-          && sym1->ginfo.linkage_name () == sym2->ginfo.linkage_name ());
+	  && sym1->ginfo.linkage_name () == sym2->ginfo.linkage_name ());
 }
 
 /* Helper function, initialises partial symbol structure and stashes

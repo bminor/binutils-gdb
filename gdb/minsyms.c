@@ -718,13 +718,13 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
       CORE_ADDR pc = pc_in;
 
       /* If this objfile has a minimal symbol table, go search it
-         using a binary search.  */
+	 using a binary search.  */
 
       if (objfile->per_bfd->minimal_symbol_count > 0)
 	{
 	  int best_zero_sized = -1;
 
-          msymbol = objfile->per_bfd->msymbols.get ();
+	  msymbol = objfile->per_bfd->msymbols.get ();
 	  lo = 0;
 	  hi = objfile->per_bfd->minimal_symbol_count - 1;
 
@@ -766,8 +766,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		}
 
 	      /* If we have multiple symbols at the same address, we want
-	         hi to point to the last one.  That way we can find the
-	         right symbol if it has an index greater than hi.  */
+		 hi to point to the last one.  That way we can find the
+		 right symbol if it has an index greater than hi.  */
 	      while (hi < objfile->per_bfd->minimal_symbol_count - 1
 		     && (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
 			 == MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi + 1])))
@@ -906,8 +906,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		}
 
 	      /* The minimal symbol indexed by hi now is the best one in this
-	         objfile's minimal symbol table.  See if it is the best one
-	         overall.  */
+		 objfile's minimal symbol table.  See if it is the best one
+		 overall.  */
 
 	      if (hi >= 0
 		  && ((best_symbol == NULL) ||
@@ -1136,7 +1136,7 @@ minimal_symbol_reader::record_full (gdb::string_view name,
 
   if (symtab_create_debug >= 2)
     printf_unfiltered ("Recording minsym:  %-21s  %18s  %4d  %.*s\n",
-               mst_str (ms_type), hex_string (address), section,
+	       mst_str (ms_type), hex_string (address), section,
 	       (int) name.size (), name.data ());
 
   if (m_msym_bunch_index == BUNCH_SIZE)
@@ -1346,9 +1346,9 @@ minimal_symbol_reader::install ()
 	}
 
       /* Allocate enough space, into which we will gather the bunches
-         of new and existing minimal symbols, sort them, and then
-         compact out the duplicate entries.  Once we have a final
-         table, we will give back the excess space.  */
+	 of new and existing minimal symbols, sort them, and then
+	 compact out the duplicate entries.  Once we have a final
+	 table, we will give back the excess space.  */
 
       alloc_count = m_msym_count + m_objfile->per_bfd->minimal_symbol_count;
       gdb::unique_xmalloc_ptr<minimal_symbol>
@@ -1363,10 +1363,10 @@ minimal_symbol_reader::install ()
 		* sizeof (struct minimal_symbol));
 
       /* Walk through the list of minimal symbol bunches, adding each symbol
-         to the new contiguous array of symbols.  Note that we start with the
-         current, possibly partially filled bunch (thus we use the current
-         msym_bunch_index for the first bunch we copy over), and thereafter
-         each bunch is full.  */
+	 to the new contiguous array of symbols.  Note that we start with the
+	 current, possibly partially filled bunch (thus we use the current
+	 msym_bunch_index for the first bunch we copy over), and thereafter
+	 each bunch is full.  */
 
       mcount = m_objfile->per_bfd->minimal_symbol_count;
 
@@ -1383,7 +1383,7 @@ minimal_symbol_reader::install ()
       std::sort (msymbols, msymbols + mcount, minimal_symbol_is_less_than);
 
       /* Compact out any duplicates, and free up whatever space we are
-         no longer using.  */
+	 no longer using.  */
 
       mcount = compact_minimal_symbols (msymbols, mcount, m_objfile);
       msym_holder.reset (XRESIZEVEC (struct minimal_symbol,
@@ -1391,8 +1391,8 @@ minimal_symbol_reader::install ()
 				     mcount));
 
       /* Attach the minimal symbol table to the specified objfile.
-         The strings themselves are also located in the storage_obstack
-         of this objfile.  */
+	 The strings themselves are also located in the storage_obstack
+	 of this objfile.  */
 
       if (m_objfile->per_bfd->minimal_symbol_count != 0)
 	clear_minimal_symbol_hash_tables (m_objfile);
@@ -1443,7 +1443,7 @@ minimal_symbol_reader::install ()
 	     }
 	   {
 	     /* To limit how long we hold the lock, we only acquire it here
-	        and not while we demangle the names above.  */
+		and not while we demangle the names above.  */
 #if CXX_STD_THREAD
 	     std::lock_guard<std::mutex> guard (demangled_mutex);
 #endif

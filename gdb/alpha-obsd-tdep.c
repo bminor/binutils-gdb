@@ -131,5 +131,5 @@ void
 _initialize_alphaobsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_alpha, 0, GDB_OSABI_OPENBSD,
-                          alphaobsd_init_abi);
+			  alphaobsd_init_abi);
 }

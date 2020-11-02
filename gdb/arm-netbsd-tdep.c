@@ -167,5 +167,5 @@ void
 _initialize_arm_netbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_arm, 0, GDB_OSABI_NETBSD,
-                          arm_netbsd_elf_init_abi);
+			  arm_netbsd_elf_init_abi);
 }

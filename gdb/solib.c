@@ -224,14 +224,14 @@ solib_find_1 (const char *in_pathname, int *fd, bool is_solib)
 	 may need to glue them with a directory separator.  Cases to
 	 consider:
 
-        | sysroot         | separator | in_pathname    |
-        |-----------------+-----------+----------------|
-        | /some/dir       | /         | c:/foo/bar.dll |
-        | /some/dir       |           | /foo/bar.dll   |
-        | target:         |           | c:/foo/bar.dll |
-        | target:         |           | /foo/bar.dll   |
-        | target:some/dir | /         | c:/foo/bar.dll |
-        | target:some/dir |           | /foo/bar.dll   |
+	| sysroot         | separator | in_pathname    |
+	|-----------------+-----------+----------------|
+	| /some/dir       | /         | c:/foo/bar.dll |
+	| /some/dir       |           | /foo/bar.dll   |
+	| target:         |           | c:/foo/bar.dll |
+	| target:         |           | /foo/bar.dll   |
+	| target:some/dir | /         | c:/foo/bar.dll |
+	| target:some/dir |           | /foo/bar.dll   |
 
 	IOW, we don't need to add a separator if IN_PATHNAME already
 	has one, or when the sysroot is exactly "target:".
@@ -559,8 +559,8 @@ solib_map_sections (struct so_list *so)
   for (target_section &p : *so->sections)
     {
       /* Relocate the section binding addresses as recorded in the shared
-         object's file by the base address to which the object was actually
-         mapped.  */
+	 object's file by the base address to which the object was actually
+	 mapped.  */
       ops->relocate_section_addresses (so, &p);
 
       /* If the target didn't provide information about the address
@@ -796,8 +796,8 @@ update_solib_list (int from_tty)
 	}
 
       /* If the shared object appears on the inferior's list too, then
-         it's still loaded, so we don't need to do anything.  Delete
-         it from the inferior's list, and leave it on GDB's list.  */
+	 it's still loaded, so we don't need to do anything.  Delete
+	 it from the inferior's list, and leave it on GDB's list.  */
       if (i)
 	{
 	  *i_link = i->next;
@@ -960,18 +960,18 @@ solib_add (const char *pattern, int from_tty, int readsyms)
     symfile_add_flags add_flags = SYMFILE_DEFER_BP_RESET;
 
     if (from_tty)
-        add_flags |= SYMFILE_VERBOSE;
+	add_flags |= SYMFILE_VERBOSE;
 
     for (struct so_list *gdb : current_program_space->solibs ())
       if (! pattern || re_exec (gdb->so_name))
 	{
-          /* Normally, we would read the symbols from that library
-             only if READSYMS is set.  However, we're making a small
-             exception for the pthread library, because we sometimes
-             need the library symbols to be loaded in order to provide
-             thread support (x86-linux for instance).  */
-          const int add_this_solib =
-            (readsyms || libpthread_solib_p (gdb));
+	  /* Normally, we would read the symbols from that library
+	     only if READSYMS is set.  However, we're making a small
+	     exception for the pthread library, because we sometimes
+	     need the library symbols to be loaded in order to provide
+	     thread support (x86-linux for instance).  */
+	  const int add_this_solib =
+	    (readsyms || libpthread_solib_p (gdb));
 
 	  any_matches = true;
 	  if (add_this_solib)
@@ -1451,11 +1451,11 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 	      symaddr = sym->value;
 
 	      /* Some ELF targets fiddle with addresses of symbols they
-	         consider special.  They use minimal symbols to do that
-	         and this is needed for correct breakpoint placement,
-	         but we do not have full data here to build a complete
-	         minimal symbol, so just set the address and let the
-	         targets cope with that.  */
+		 consider special.  They use minimal symbols to do that
+		 and this is needed for correct breakpoint placement,
+		 but we do not have full data here to build a complete
+		 minimal symbol, so just set the address and let the
+		 targets cope with that.  */
 	      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
 		  && gdbarch_elf_make_msymbol_special_p (gdbarch))
 		{

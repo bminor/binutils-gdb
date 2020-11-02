@@ -48,7 +48,7 @@
    we print this instead.  */
 #define RAW_FUNCTION_ADDRESS_FORMAT "at 0x%s"
 #define RAW_FUNCTION_ADDRESS_SIZE (sizeof (RAW_FUNCTION_ADDRESS_FORMAT) \
-                                   + 2 * sizeof (CORE_ADDR))
+				   + 2 * sizeof (CORE_ADDR))
 
 /* NOTE: cagney/2003-04-16: What's the future of this code?
 
@@ -198,8 +198,8 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
 	    type = builtin->builtin_int;
 	}
       /* Currently all target ABIs require at least the width of an integer
-         type for an argument.  We may have to conditionalize the following
-         type coercion for future targets.  */
+	 type for an argument.  We may have to conditionalize the following
+	 type coercion for future targets.  */
       if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin->builtin_int))
 	type = builtin->builtin_int;
       break;
@@ -217,8 +217,8 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
       break;
     case TYPE_CODE_ARRAY:
       /* Arrays are coerced to pointers to their first element, unless
-         they are vectors, in which case we want to leave them alone,
-         because they are passed by value.  */
+	 they are vectors, in which case we want to leave them alone,
+	 because they are passed by value.  */
       if (current_language->c_style_arrays_p ())
 	if (!type->is_vector ())
 	  type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
@@ -306,7 +306,7 @@ find_function_addr (struct value *function,
   else if (ftype->code () == TYPE_CODE_INT)
     {
       /* Handle the case of functions lacking debugging info.
-         Their values are characters since their addresses are char.  */
+	 Their values are characters since their addresses are char.  */
       if (TYPE_LENGTH (ftype) == 1)
 	funaddr = value_as_address (value_addr (function));
       else
@@ -903,8 +903,8 @@ call_function_by_hand_dummy (struct value *function,
 	 do is add FRAME_ALIGN() to the architecture vector.  If that
 	 fails, try dummy_id().
 
-         If the ABI specifies a "Red Zone" (see the doco) the code
-         below will quietly trash it.  */
+	 If the ABI specifies a "Red Zone" (see the doco) the code
+	 below will quietly trash it.  */
       sp = old_sp;
 
     /* Skip over the stack temporaries that might have been generated during
@@ -914,7 +914,7 @@ call_function_by_hand_dummy (struct value *function,
 	struct value *lastval;
 
 	lastval = get_last_thread_stack_temporary (call_thread.get ());
-        if (lastval != NULL)
+	if (lastval != NULL)
 	  {
 	    CORE_ADDR lastval_addr = value_address (lastval);
 
@@ -1327,13 +1327,13 @@ call_function_by_hand_dummy (struct value *function,
   if (e.reason < 0)
     {
       const char *name = get_function_name (funaddr,
-                                            name_buf, sizeof (name_buf));
+					    name_buf, sizeof (name_buf));
 
       discard_infcall_control_state (inf_status.release ());
 
       /* We could discard the dummy frame here if the program exited,
-         but it will get garbage collected the next time the program is
-         run anyway.  */
+	 but it will get garbage collected the next time the program is
+	 run anyway.  */
 
       switch (e.reason)
 	{
@@ -1363,8 +1363,8 @@ When the function is done executing, GDB will silently stop."),
       discard_infcall_control_state (inf_status.release ());
 
       /* We could discard the dummy frame here given that the program exited,
-         but it will get garbage collected the next time the program is
-         run anyway.  */
+	 but it will get garbage collected the next time the program is
+	 run anyway.  */
 
       error (_("The program being debugged exited while in a function "
 	       "called from GDB.\n"

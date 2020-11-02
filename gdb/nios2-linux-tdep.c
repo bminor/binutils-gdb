@@ -229,7 +229,7 @@ nios2_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 					 svr4_ilp32_fetch_link_map_offsets);
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
   /* Core file support.  */
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, nios2_iterate_over_regset_sections);

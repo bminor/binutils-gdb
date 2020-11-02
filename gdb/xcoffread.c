@@ -450,7 +450,7 @@ arrange_linetable (struct linetable *oldLineTb)
 	  ++function_count;
 
 	  /* If the function was compiled with XLC, we may have to add an
-             extra line entry later.  Reserve space for that.  */
+	     extra line entry later.  Reserve space for that.  */
 	  if (ii + 1 < oldLineTb->nitems
 	      && oldLineTb->item[ii].pc != oldLineTb->item[ii + 1].pc)
 	    extra_lines++;
@@ -465,7 +465,7 @@ arrange_linetable (struct linetable *oldLineTb)
   else if (function_count > 1)
     std::sort (fentry, fentry + function_count,
 	       [] (const linetable_entry &lte1, const linetable_entry& lte2)
-	        { return lte1.pc < lte2.pc; });
+		{ return lte1.pc < lte2.pc; });
 
   /* Allocate a new line table.  */
   newLineTb = (struct linetable *)
@@ -487,7 +487,7 @@ arrange_linetable (struct linetable *oldLineTb)
   for (ii = 0; ii < function_count; ++ii)
     {
       /* If the function was compiled with XLC, we may have to add an
-         extra line to cover the function prologue.  */
+	 extra line to cover the function prologue.  */
       jj = fentry[ii].line;
       if (jj + 1 < oldLineTb->nitems
 	  && oldLineTb->item[jj].pc != oldLineTb->item[jj + 1].pc)
@@ -542,11 +542,11 @@ record_include_begin (struct coff_symbol *cs)
   if (inclDepth)
     {
       /* In xcoff, we assume include files cannot be nested (not in .c files
-         of course, but in corresponding .s files.).  */
+	 of course, but in corresponding .s files.).  */
 
       /* This can happen with old versions of GCC.
-         GCC 2.3.3-930426 does not exhibit this on a test case which
-         a user said produced the message for him.  */
+	 GCC 2.3.3-930426 does not exhibit this on a test case which
+	 a user said produced the message for him.  */
       complaint (_("Nested C_BINCL symbols"));
     }
   ++inclDepth;
@@ -659,8 +659,8 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 
 	  if (strcmp (inclTable[ii].name, get_last_source_file ()) == 0)
 	    {
-              /* The entry in the include table refers to the main source
-                 file.  Add the lines to the main subfile.  */
+	      /* The entry in the include table refers to the main source
+		 file.  Add the lines to the main subfile.  */
 
 	      main_source_baseline = inclTable[ii].funStartLine;
 	      enter_line_range
@@ -687,7 +687,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	}
 
       /* All the include files' line have been processed at this point.  Now,
-         enter remaining lines of the main file, if any left.  */
+	 enter remaining lines of the main file, if any left.  */
       if (offset < max_offset + 1 - linesz)
 	{
 	  enter_line_range (&main_subfile, offset, 0, start, end,
@@ -703,7 +703,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
       lv = main_subfile.line_vector;
 
       /* Line numbers are not necessarily ordered.  xlc compilation will
-         put static function to the end.  */
+	 put static function to the end.  */
 
       struct subfile *current_subfile = get_current_subfile ();
       lineTb = arrange_linetable (lv);
@@ -728,7 +728,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
   for (ii = 0; ii < inclIndx; ++ii)
     {
       if (inclTable[ii].subfile != ((struct subfile *) &main_subfile)
-          && (inclTable[ii].subfile)->line_vector)	/* Useless if!!!
+	  && (inclTable[ii].subfile)->line_vector)	/* Useless if!!!
 							   FIXMEmgo */
 	{
 	  struct linetable *lineTb, *lv;
@@ -815,9 +815,9 @@ aix_process_linenos (struct objfile *objfile)
 /* Enter a given range of lines into the line vector.
    can be called in the following two ways:
    enter_line_range (subfile, beginoffset, endoffset,
-                     startaddr, 0, firstLine)  or
+		     startaddr, 0, firstLine)  or
    enter_line_range (subfile, beginoffset, 0, 
-                     startaddr, endaddr, firstLine)
+		     startaddr, endaddr, firstLine)
 
    endoffset points to the last line table entry that we should pay
    attention to.  */
@@ -971,7 +971,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
       complaint (_("Unexpected symbol continuation"));
 
       /* Return something which points to '\0' and hope the symbol reading
-         code does something reasonable.  */
+	 code does something reasonable.  */
       retval = "";
     }
   else if (symbol.n_sclass & 0x80)
@@ -985,7 +985,7 @@ xcoff_next_symbol_text (struct objfile *objfile)
       complaint (_("Unexpected symbol continuation"));
 
       /* Return something which points to '\0' and hope the symbol reading
-         code does something reasonable.  */
+	 code does something reasonable.  */
       retval = "";
     }
   return retval;
@@ -1054,10 +1054,10 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
       /* READ_ONE_SYMBOL (symbol, cs, symname_alloced); */
       /* read one symbol into `cs' structure.  After processing the
-         whole symbol table, only string table will be kept in memory,
-         symbol table and debug section of xcoff will be freed.  Thus
-         we can mark symbols with names in string table as
-         `alloced'.  */
+	 whole symbol table, only string table will be kept in memory,
+	 symbol table and debug section of xcoff will be freed.  Thus
+	 we can mark symbols with names in string table as
+	 `alloced'.  */
       {
 	int ii;
 
@@ -1203,15 +1203,15 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 		    {
 
 		      /* A program csect is seen.  We have to allocate one
-		         symbol table for each program csect.  Normally gdb
-		         prefers one symtab for each source file.  In case
-		         of AIX, one source file might include more than one
-		         [PR] csect, and they don't have to be adjacent in
-		         terms of the space they occupy in memory.  Thus, one
-		         single source file might get fragmented in the
-		         memory and gdb's file start and end address
-		         approach does not work!  GCC (and I think xlc) seem
-		         to put all the code in the unnamed program csect.  */
+			 symbol table for each program csect.  Normally gdb
+			 prefers one symtab for each source file.  In case
+			 of AIX, one source file might include more than one
+			 [PR] csect, and they don't have to be adjacent in
+			 terms of the space they occupy in memory.  Thus, one
+			 single source file might get fragmented in the
+			 memory and gdb's file start and end address
+			 approach does not work!  GCC (and I think xlc) seem
+			 to put all the code in the unnamed program csect.  */
 
 		      if (last_csect_name)
 			{
@@ -1228,7 +1228,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 			}
 
 		      /* If this is the very first csect seen,
-		         basically `__start'.  */
+			 basically `__start'.  */
 		      if (just_started)
 			{
 			  first_object_file_end
@@ -1380,9 +1380,9 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 				    0, cs->c_naux, &main_aux);
 
 	      /* The value of .ef is the address of epilogue code;
-	         not useful for gdb.  */
+		 not useful for gdb.  */
 	      /* { main_aux.x_sym.x_misc.x_lnsz.x_lnno
-	         contains number of lines to '}' */
+		 contains number of lines to '}' */
 
 	      if (outermost_context_p ())
 		{	/* We attempted to pop an empty context stack.  */
@@ -1512,9 +1512,9 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
       cur_src_end_addr = file_end_addr;
       cust = end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
       /* When reading symbols for the last C_FILE of the objfile, try
-         to make sure that we set pst->compunit_symtab to the symtab for the
-         file, not to the _globals_ symtab.  I'm not sure whether this
-         actually works right or when/if it comes up.  */
+	 to make sure that we set pst->compunit_symtab to the symtab for the
+	 file, not to the _globals_ symtab.  I'm not sure whether this
+	 actually works right or when/if it comes up.  */
       if (pst->compunit_symtab == NULL)
 	pst->compunit_symtab = cust;
       end_stabs ();
@@ -1542,7 +1542,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   if (cs->c_secnum < 0)
     {
       /* The value is a register number, offset within a frame, etc.,
-         and does not get relocated.  */
+	 and does not get relocated.  */
       off = 0;
       sec = -1;
     }
@@ -1564,8 +1564,8 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   if (ISFCN (cs->c_type))
     {
       /* At this point, we don't know the type of the function.  This
-         will be patched with the type from its stab entry later on in
-         patch_block_stabs (), unless the file was compiled without -g.  */
+	 will be patched with the type from its stab entry later on in
+	 patch_block_stabs (), unless the file was compiled without -g.  */
 
       sym->set_linkage_name (SYMNAME_ALLOC (name, symname_alloced));
       SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
@@ -1849,7 +1849,7 @@ xcoff_read_symtab (legacy_psymtab *self, struct objfile *objfile)
       self->expand_psymtab (objfile);
 
       /* Match with global symbols.  This only needs to be done once,
-         after all of the symtabs and dependencies have been read in.   */
+	 after all of the symtabs and dependencies have been read in.   */
       scan_file_globals (objfile);
     }
 }
@@ -2023,7 +2023,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       ((struct symloc *) subpst->read_symtab_private)->numsyms = 0;
 
       /* We could save slight bits of space by only making one of these,
-         shared by the entire set of include files.  FIXME-someday.  */
+	 shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies =
 	objfile->partial_symtabs->allocate_dependencies (1);
       subpst->dependencies[0] = pst;
@@ -2039,7 +2039,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
     {
       /* Throw away this psymtab, it's empty.  */
       /* Empty psymtabs happen as a result of header files which don't have
-         any symbols in them.  There can be a lot of them.  */
+	 any symbols in them.  There can be a lot of them.  */
 
       objfile->partial_symtabs->discard_psymtab (pst);
 
@@ -2062,7 +2062,7 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
   if (symbol->n_zeroes)
     {
       /* If it's exactly E_SYMNMLEN characters long it isn't
-         '\0'-terminated.  */
+	 '\0'-terminated.  */
       if (symbol->n_name[E_SYMNMLEN - 1] != '\0')
 	{
 	  /* FIXME: wastes memory for symbols which we don't end up putting

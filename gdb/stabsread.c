@@ -148,7 +148,7 @@ static int attach_fields_to_type (struct stab_field_info *, struct type *,
 				  struct objfile *);
 
 static struct type *read_struct_type (const char **, struct type *,
-                                      enum type_code,
+				      enum type_code,
 				      struct objfile *);
 
 static struct type *read_array_type (const char **, struct type *,
@@ -182,7 +182,7 @@ static void
 reg_value_complaint (int regnum, int num_regs, const char *sym)
 {
   complaint (_("bad register number %d (max %d) in symbol %s"),
-             regnum, num_regs - 1, sym);
+	     regnum, num_regs - 1, sym);
 }
 
 static void
@@ -281,7 +281,7 @@ dbx_lookup_type (int typenums[2], struct objfile *objfile)
 	}
 
       /* Type is defined outside of header files.
-         Find it in this object file's type vector.  */
+	 Find it in this object file's type vector.  */
       if (index >= type_vector_length)
 	{
 	  old_len = type_vector_length;
@@ -397,7 +397,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
   if (stabs)
     {
       /* for all the stab entries, find their corresponding symbols and 
-         patch their types!  */
+	 patch their types!  */
 
       for (ii = 0; ii < stabs->count; ++ii)
 	{
@@ -413,16 +413,16 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	  if (!sym)
 	    {
 	      /* FIXME-maybe: it would be nice if we noticed whether
-	         the variable was defined *anywhere*, not just whether
-	         it is defined in this compilation unit.  But neither
-	         xlc or GCC seem to need such a definition, and until
-	         we do psymtabs (so that the minimal symbols from all
-	         compilation units are available now), I'm not sure
-	         how to get the information.  */
+		 the variable was defined *anywhere*, not just whether
+		 it is defined in this compilation unit.  But neither
+		 xlc or GCC seem to need such a definition, and until
+		 we do psymtabs (so that the minimal symbols from all
+		 compilation units are available now), I'm not sure
+		 how to get the information.  */
 
 	      /* On xcoff, if a global is defined and never referenced,
-	         ld will remove it from the executable.  There is then
-	         a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
+		 ld will remove it from the executable.  There is then
+		 a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
 	      sym = new (&objfile->objfile_obstack) symbol;
 	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
@@ -614,7 +614,7 @@ symbol_reference_defined (const char **string)
   else
     {
       /* Must be a reference.  Either the symbol has already been defined,
-         or this is a forward reference to it.  */
+	 or this is a forward reference to it.  */
       *string = p;
       return -1;
     }
@@ -692,7 +692,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
   if (processing_gcc_compilation)
     {
       /* GCC 2.x puts the line number in desc.  SunOS apparently puts in the
-         number of bytes occupied by a type or object, which we ignore.  */
+	 number of bytes occupied by a type or object, which we ignore.  */
       SYMBOL_LINE (sym) = desc;
     }
   else
@@ -776,11 +776,11 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     {
     case 'c':
       /* c is a special case, not followed by a type-number.
-         SYMBOL:c=iVALUE for an integer constant symbol.
-         SYMBOL:c=rVALUE for a floating constant symbol.
-         SYMBOL:c=eTYPE,INTVALUE for an enum constant symbol.
-         e.g. "b:c=e6,0" for "const b = blob1"
-         (where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
+	 SYMBOL:c=iVALUE for an integer constant symbol.
+	 SYMBOL:c=rVALUE for a floating constant symbol.
+	 SYMBOL:c=eTYPE,INTVALUE for an enum constant symbol.
+	 e.g. "b:c=e6,0" for "const b = blob1"
+	 (where type 6 is defined by "blobs:t6=eblob1:0,blob2:1,;").  */
       if (*p != '=')
 	{
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
@@ -947,17 +947,17 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     process_function_types:
       /* Function result types are described as the result type in stabs.
-         We need to convert this to the function-returning-type-X type
-         in GDB.  E.g. "int" is converted to "function returning int".  */
+	 We need to convert this to the function-returning-type-X type
+	 in GDB.  E.g. "int" is converted to "function returning int".  */
       if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_FUNC)
 	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
 
       /* All functions in C++ have prototypes.  Stabs does not offer an
-         explicit way to identify prototyped or unprototyped functions,
-         but both GCC and Sun CC emit stabs for the "call-as" type rather
-         than the "declared-as" type for unprototyped functions, so
-         we treat all functions as if they were prototyped.  This is used
-         primarily for promotion when calling the function from GDB.  */
+	 explicit way to identify prototyped or unprototyped functions,
+	 but both GCC and Sun CC emit stabs for the "call-as" type rather
+	 than the "declared-as" type for unprototyped functions, so
+	 we treat all functions as if they were prototyped.  This is used
+	 primarily for promotion when calling the function from GDB.  */
       SYMBOL_TYPE (sym)->set_is_prototyped (true);
 
       /* fall into process_prototype_types.  */
@@ -988,17 +988,17 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      struct type *ptype;
 
 	      /* A type number of zero indicates the start of varargs.
-	         FIXME: GDB currently ignores vararg functions.  */
+		 FIXME: GDB currently ignores vararg functions.  */
 	      if (p[0] == '0' && p[1] == '\0')
 		break;
 	      ptype = read_type (&p, objfile);
 
 	      /* The Sun compilers mark integer arguments, which should
-	         be promoted to the width of the calling conventions, with
-	         a type which references itself.  This type is turned into
-	         a TYPE_CODE_VOID type by read_type, and we have to turn
-	         it back into builtin_int here.
-	         FIXME: Do we need a new builtin_promoted_int_arg ?  */
+		 be promoted to the width of the calling conventions, with
+		 a type which references itself.  This type is turned into
+		 a TYPE_CODE_VOID type by read_type, and we have to turn
+		 it back into builtin_int here.
+		 FIXME: Do we need a new builtin_promoted_int_arg ?  */
 	      if (ptype->code () == TYPE_CODE_VOID)
 		ptype = objfile_type (objfile)->builtin_int;
 	      ftype->field (nparams).set_type (ptype);
@@ -1019,16 +1019,16 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'G':
       /* For a class G (global) symbol, it appears that the
-         value is not correct.  It is necessary to search for the
-         corresponding linker definition to find the value.
-         These definitions appear at the end of the namelist.  */
+	 value is not correct.  It is necessary to search for the
+	 corresponding linker definition to find the value.
+	 These definitions appear at the end of the namelist.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       /* Don't add symbol references to global_sym_chain.
-         Symbol references don't have valid names and wont't match up with
-         minimal symbols when the global_sym_chain is relocated.
-         We'll fixup symbol references when we fixup the defining symbol.  */
+	 Symbol references don't have valid names and wont't match up with
+	 minimal symbols when the global_sym_chain is relocated.
+	 We'll fixup symbol references when we fixup the defining symbol.  */
       if (sym->linkage_name () && sym->linkage_name ()[0] != '#')
 	{
 	  i = hashname (sym->linkage_name ());
@@ -1039,8 +1039,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       break;
 
       /* This case is faked by a conditional above,
-         when there is no code letter in the dbx data.
-         Dbx data never actually contains 'l'.  */
+	 when there is no code letter in the dbx data.
+	 Dbx data never actually contains 'l'.  */
     case 's':
     case 'l':
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
@@ -1101,8 +1101,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'P':
       /* acc seems to use P to declare the prototypes of functions that
-         are referenced by this file.  gdb is not prepared to deal
-         with this extra information.  FIXME, it ought to.  */
+	 are referenced by this file.  gdb is not prepared to deal
+	 with this extra information.  FIXME, it ought to.  */
       if (type == N_FUN)
 	{
 	  SYMBOL_TYPE (sym) = read_type (&p, objfile);
@@ -1186,26 +1186,26 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 't':
       /* In Ada, there is no distinction between typedef and non-typedef;
-         any type declaration implicitly has the equivalent of a typedef,
-         and thus 't' is in fact equivalent to 'Tt'.
+	 any type declaration implicitly has the equivalent of a typedef,
+	 and thus 't' is in fact equivalent to 'Tt'.
 
-         Therefore, for Ada units, we check the character immediately
-         before the 't', and if we do not find a 'T', then make sure to
-         create the associated symbol in the STRUCT_DOMAIN ('t' definitions
-         will be stored in the VAR_DOMAIN).  If the symbol was indeed
-         defined as 'Tt' then the STRUCT_DOMAIN symbol will be created
-         elsewhere, so we don't need to take care of that.
-         
-         This is important to do, because of forward references:
-         The cleanup of undefined types stored in undef_types only uses
-         STRUCT_DOMAIN symbols to perform the replacement.  */
+	 Therefore, for Ada units, we check the character immediately
+	 before the 't', and if we do not find a 'T', then make sure to
+	 create the associated symbol in the STRUCT_DOMAIN ('t' definitions
+	 will be stored in the VAR_DOMAIN).  If the symbol was indeed
+	 defined as 'Tt' then the STRUCT_DOMAIN symbol will be created
+	 elsewhere, so we don't need to take care of that.
+	 
+	 This is important to do, because of forward references:
+	 The cleanup of undefined types stored in undef_types only uses
+	 STRUCT_DOMAIN symbols to perform the replacement.  */
       synonym = (sym->language () == language_ada && p[-2] != 'T');
 
       /* Typedef */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
 
       /* For a nameless type, we don't want a create a symbol, thus we
-         did not use `sym'.  Return without further processing.  */
+	 did not use `sym'.  Return without further processing.  */
       if (nameless)
 	return NULL;
 
@@ -1213,9 +1213,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       /* C++ vagaries: we may have a type which is derived from
-         a base type which did not have its name defined when the
-         derived class was output.  We fill in the derived class's
-         base part member's name here in that case.  */
+	 a base type which did not have its name defined when the
+	 derived class was output.  We fill in the derived class's
+	 base part member's name here in that case.  */
       if (SYMBOL_TYPE (sym)->name () != NULL)
 	if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_STRUCT
 	     || SYMBOL_TYPE (sym)->code () == TYPE_CODE_UNION)
@@ -1236,29 +1236,29 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      || SYMBOL_TYPE (sym)->code () == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
-	         foo" or "function returning foo", we better not set
-	         the TYPE_NAME.  If the program contains "typedef char
-	         *caddr_t;", we don't want all variables of type char
-	         * to print as caddr_t.  This is not just a
-	         consequence of GDB's type management; PCC and GCC (at
-	         least through version 2.4) both output variables of
-	         either type char * or caddr_t with the type number
-	         defined in the 't' symbol for caddr_t.  If a future
-	         compiler cleans this up it GDB is not ready for it
-	         yet, but if it becomes ready we somehow need to
-	         disable this check (without breaking the PCC/GCC2.4
-	         case).
+		 foo" or "function returning foo", we better not set
+		 the TYPE_NAME.  If the program contains "typedef char
+		 *caddr_t;", we don't want all variables of type char
+		 * to print as caddr_t.  This is not just a
+		 consequence of GDB's type management; PCC and GCC (at
+		 least through version 2.4) both output variables of
+		 either type char * or caddr_t with the type number
+		 defined in the 't' symbol for caddr_t.  If a future
+		 compiler cleans this up it GDB is not ready for it
+		 yet, but if it becomes ready we somehow need to
+		 disable this check (without breaking the PCC/GCC2.4
+		 case).
 
-	         Sigh.
+		 Sigh.
 
-	         Fortunately, this check seems not to be necessary
-	         for anything except pointers or functions.  */
-              /* ezannoni: 2000-10-26.  This seems to apply for
+		 Fortunately, this check seems not to be necessary
+		 for anything except pointers or functions.  */
+	      /* ezannoni: 2000-10-26.  This seems to apply for
 		 versions of gcc older than 2.8.  This was the original
 		 problem: with the following code gdb would tell that
 		 the type for name1 is caddr_t, and func is char().
 
-	         typedef char *caddr_t;
+		 typedef char *caddr_t;
 		 char *name2;
 		 struct x
 		 {
@@ -1281,26 +1281,26 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       add_symbol_to_list (sym, get_file_symbols ());
 
       if (synonym)
-        {
-          /* Create the STRUCT_DOMAIN clone.  */
-          struct symbol *struct_sym = new (&objfile->objfile_obstack) symbol;
+	{
+	  /* Create the STRUCT_DOMAIN clone.  */
+	  struct symbol *struct_sym = new (&objfile->objfile_obstack) symbol;
 
-          *struct_sym = *sym;
-          SYMBOL_ACLASS_INDEX (struct_sym) = LOC_TYPEDEF;
-          SYMBOL_VALUE (struct_sym) = valu;
-          SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
-          if (SYMBOL_TYPE (sym)->name () == 0)
+	  *struct_sym = *sym;
+	  SYMBOL_ACLASS_INDEX (struct_sym) = LOC_TYPEDEF;
+	  SYMBOL_VALUE (struct_sym) = valu;
+	  SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
+	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    SYMBOL_TYPE (sym)->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 			 (char *) NULL));
-          add_symbol_to_list (struct_sym, get_file_symbols ());
-        }
+	  add_symbol_to_list (struct_sym, get_file_symbols ());
+	}
 
       break;
 
     case 'T':
       /* Struct, union, or enum tag.  For GNU C++, this can be be followed
-         by 't' which means we are typedef'ing it as well.  */
+	 by 't' which means we are typedef'ing it as well.  */
       synonym = *p == 't';
 
       if (synonym)
@@ -1309,7 +1309,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
  
       /* For a nameless type, we don't want a create a symbol, thus we
-         did not use `sym'.  Return without further processing.  */
+	 did not use `sym'.  Return without further processing.  */
       if (nameless)
 	return NULL;
 
@@ -1370,9 +1370,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
     case 'X':
       /* This is used by Sun FORTRAN for "function result value".
-         Sun claims ("dbx and dbxtool interfaces", 2nd ed)
-         that Pascal uses it too, but when I tried it Pascal used
-         "x:3" (local symbol) instead.  */
+	 Sun claims ("dbx and dbxtool interfaces", 2nd ed)
+	 that Pascal uses it too, but when I tried it Pascal used
+	 "x:3" (local symbol) instead.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_ACLASS_INDEX (sym) = LOC_LOCAL;
       SYMBOL_VALUE (sym) = valu;
@@ -1397,7 +1397,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       && SYMBOL_IS_ARGUMENT (sym))
     {
       /* We have to convert LOC_REGISTER to LOC_REGPARM_ADDR (for
-         variables passed in a register).  */
+	 variables passed in a register).  */
       if (SYMBOL_CLASS (sym) == LOC_REGISTER)
 	SYMBOL_ACLASS_INDEX (sym) = LOC_REGPARM_ADDR;
       /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
@@ -1499,30 +1499,30 @@ read_type (const char **pp, struct objfile *objfile)
 	return error_type (pp, objfile);
 
       if (**pp != '=')
-        {
-          /* Type is not being defined here.  Either it already
-             exists, or this is a forward reference to it.
-             dbx_alloc_type handles both cases.  */
-          type = dbx_alloc_type (typenums, objfile);
+	{
+	  /* Type is not being defined here.  Either it already
+	     exists, or this is a forward reference to it.
+	     dbx_alloc_type handles both cases.  */
+	  type = dbx_alloc_type (typenums, objfile);
 
-          /* If this is a forward reference, arrange to complain if it
-             doesn't get patched up by the time we're done
-             reading.  */
-          if (type->code () == TYPE_CODE_UNDEF)
-            add_undefined_type (type, typenums);
+	  /* If this is a forward reference, arrange to complain if it
+	     doesn't get patched up by the time we're done
+	     reading.  */
+	  if (type->code () == TYPE_CODE_UNDEF)
+	    add_undefined_type (type, typenums);
 
-          return type;
-        }
+	  return type;
+	}
 
       /* Type is being defined here.  */
       /* Skip the '='.
-         Also skip the type descriptor - we get it below with (*pp)[-1].  */
+	 Also skip the type descriptor - we get it below with (*pp)[-1].  */
       (*pp) += 2;
     }
   else
     {
       /* 'typenums=' not present, type is anonymous.  Read and return
-         the definition, but don't put it in the type vector.  */
+	 the definition, but don't put it in the type vector.  */
       typenums[0] = typenums[1] = -1;
       (*pp)++;
     }
@@ -1619,9 +1619,9 @@ again:
 	  *pp = p + 1;
 	}
 
-        /* If this type has already been declared, then reuse the same
-           type, rather than allocating a new one.  This saves some
-           memory.  */
+	/* If this type has already been declared, then reuse the same
+	   type, rather than allocating a new one.  This saves some
+	   memory.  */
 
 	for (ppt = *get_file_symbols (); ppt; ppt = ppt->next)
 	  for (i = 0; i < ppt->nsyms; i++)
@@ -1635,8 +1635,8 @@ again:
 		{
 		  obstack_free (&objfile->objfile_obstack, type_name);
 		  type = SYMBOL_TYPE (sym);
-	          if (typenums[0] != -1)
-	            *dbx_lookup_type (typenums, objfile) = type;
+		  if (typenums[0] != -1)
+		    *dbx_lookup_type (typenums, objfile) = type;
 		  return type;
 		}
 	    }
@@ -1671,10 +1671,10 @@ again:
       (*pp)--;
 
       /* We deal with something like t(1,2)=(3,4)=... which
-         the Lucid compiler and recent gcc versions (post 2.7.3) use.  */
+	 the Lucid compiler and recent gcc versions (post 2.7.3) use.  */
 
       /* Allocate and enter the typedef type first.
-         This handles recursive types.  */
+	 This handles recursive types.  */
       type = dbx_alloc_type (typenums, objfile);
       type->set_code (TYPE_CODE_TYPEDEF);
       {
@@ -1695,22 +1695,22 @@ again:
 	       here as well.  Once a type pointed to has been created it
 	       should not be modified.
 
-               Well, it's not *absolutely* wrong.  Constructing recursive
-               types (trees, linked lists) necessarily entails modifying
-               types after creating them.  Constructing any loop structure
-               entails side effects.  The Dwarf 2 reader does handle this
-               more gracefully (it never constructs more than once
-               instance of a type object, so it doesn't have to copy type
-               objects wholesale), but it still mutates type objects after
-               other folks have references to them.
+	       Well, it's not *absolutely* wrong.  Constructing recursive
+	       types (trees, linked lists) necessarily entails modifying
+	       types after creating them.  Constructing any loop structure
+	       entails side effects.  The Dwarf 2 reader does handle this
+	       more gracefully (it never constructs more than once
+	       instance of a type object, so it doesn't have to copy type
+	       objects wholesale), but it still mutates type objects after
+	       other folks have references to them.
 
-               Keep in mind that this circularity/mutation issue shows up
-               at the source language level, too: C's "incomplete types",
-               for example.  So the proper cleanup, I think, would be to
-               limit GDB's type smashing to match exactly those required
-               by the source language.  So GDB could have a
-               "complete_this_type" function, but never create unnecessary
-               copies of a type otherwise.  */
+	       Keep in mind that this circularity/mutation issue shows up
+	       at the source language level, too: C's "incomplete types",
+	       for example.  So the proper cleanup, I think, would be to
+	       limit GDB's type smashing to match exactly those required
+	       by the source language.  So GDB could have a
+	       "complete_this_type" function, but never create unnecessary
+	       copies of a type otherwise.  */
 	    replace_type (type, xtype);
 	    type->set_name (NULL);
 	  }
@@ -1723,11 +1723,11 @@ again:
       break;
 
       /* In the following types, we must be sure to overwrite any existing
-         type that the typenums refer to, rather than allocating a new one
-         and making the typenums point to the new one.  This is because there
-         may already be pointers to the existing type (if it had been
-         forward-referenced), and we must change it to a pointer, function,
-         reference, or whatever, *in-place*.  */
+	 type that the typenums refer to, rather than allocating a new one
+	 and making the typenums point to the new one.  This is because there
+	 may already be pointers to the existing type (if it had been
+	 forward-referenced), and we must change it to a pointer, function,
+	 reference, or whatever, *in-place*.  */
 
     case '*':			/* Pointer to another type */
       type1 = read_type (pp, objfile);
@@ -1737,7 +1737,7 @@ again:
     case '&':			/* Reference to another type */
       type1 = read_type (pp, objfile);
       type = make_reference_type (type1, dbx_lookup_type (typenums, objfile),
-                                  TYPE_CODE_REF);
+				  TYPE_CODE_REF);
       break;
 
     case 'f':			/* Function returning another type */
@@ -1747,76 +1747,76 @@ again:
 
     case 'g':                   /* Prototyped function.  (Sun)  */
       {
-        /* Unresolved questions:
+	/* Unresolved questions:
 
-           - According to Sun's ``STABS Interface Manual'', for 'f'
-           and 'F' symbol descriptors, a `0' in the argument type list
-           indicates a varargs function.  But it doesn't say how 'g'
-           type descriptors represent that info.  Someone with access
-           to Sun's toolchain should try it out.
+	   - According to Sun's ``STABS Interface Manual'', for 'f'
+	   and 'F' symbol descriptors, a `0' in the argument type list
+	   indicates a varargs function.  But it doesn't say how 'g'
+	   type descriptors represent that info.  Someone with access
+	   to Sun's toolchain should try it out.
 
-           - According to the comment in define_symbol (search for
-           `process_prototype_types:'), Sun emits integer arguments as
-           types which ref themselves --- like `void' types.  Do we
-           have to deal with that here, too?  Again, someone with
-           access to Sun's toolchain should try it out and let us
-           know.  */
+	   - According to the comment in define_symbol (search for
+	   `process_prototype_types:'), Sun emits integer arguments as
+	   types which ref themselves --- like `void' types.  Do we
+	   have to deal with that here, too?  Again, someone with
+	   access to Sun's toolchain should try it out and let us
+	   know.  */
 
-        const char *type_start = (*pp) - 1;
-        struct type *return_type = read_type (pp, objfile);
-        struct type *func_type
-          = make_function_type (return_type,
+	const char *type_start = (*pp) - 1;
+	struct type *return_type = read_type (pp, objfile);
+	struct type *func_type
+	  = make_function_type (return_type,
 				dbx_lookup_type (typenums, objfile));
-        struct type_list {
-          struct type *type;
-          struct type_list *next;
-        } *arg_types = 0;
-        int num_args = 0;
+	struct type_list {
+	  struct type *type;
+	  struct type_list *next;
+	} *arg_types = 0;
+	int num_args = 0;
 
-        while (**pp && **pp != '#')
-          {
-            struct type *arg_type = read_type (pp, objfile);
-            struct type_list *newobj = XALLOCA (struct type_list);
-            newobj->type = arg_type;
-            newobj->next = arg_types;
-            arg_types = newobj;
-            num_args++;
-          }
-        if (**pp == '#')
-          ++*pp;
-        else
-          {
+	while (**pp && **pp != '#')
+	  {
+	    struct type *arg_type = read_type (pp, objfile);
+	    struct type_list *newobj = XALLOCA (struct type_list);
+	    newobj->type = arg_type;
+	    newobj->next = arg_types;
+	    arg_types = newobj;
+	    num_args++;
+	  }
+	if (**pp == '#')
+	  ++*pp;
+	else
+	  {
 	    complaint (_("Prototyped function type didn't "
 			 "end arguments with `#':\n%s"),
 		       type_start);
-          }
+	  }
 
-        /* If there is just one argument whose type is `void', then
-           that's just an empty argument list.  */
-        if (arg_types
-            && ! arg_types->next
-            && arg_types->type->code () == TYPE_CODE_VOID)
-          num_args = 0;
+	/* If there is just one argument whose type is `void', then
+	   that's just an empty argument list.  */
+	if (arg_types
+	    && ! arg_types->next
+	    && arg_types->type->code () == TYPE_CODE_VOID)
+	  num_args = 0;
 
 	func_type->set_fields
 	  ((struct field *) TYPE_ALLOC (func_type,
 					num_args * sizeof (struct field)));
-        memset (func_type->fields (), 0, num_args * sizeof (struct field));
-        {
-          int i;
-          struct type_list *t;
+	memset (func_type->fields (), 0, num_args * sizeof (struct field));
+	{
+	  int i;
+	  struct type_list *t;
 
-          /* We stuck each argument type onto the front of the list
-             when we read it, so the list is reversed.  Build the
-             fields array right-to-left.  */
-          for (t = arg_types, i = num_args - 1; t; t = t->next, i--)
-            func_type->field (i).set_type (t->type);
-        }
-        func_type->set_num_fields (num_args);
+	  /* We stuck each argument type onto the front of the list
+	     when we read it, so the list is reversed.  Build the
+	     fields array right-to-left.  */
+	  for (t = arg_types, i = num_args - 1; t; t = t->next, i--)
+	    func_type->field (i).set_type (t->type);
+	}
+	func_type->set_num_fields (num_args);
 	func_type->set_is_prototyped (true);
 
-        type = func_type;
-        break;
+	type = func_type;
+	break;
       }
 
     case 'k':			/* Const qualifier on some type (Sun) */
@@ -1881,7 +1881,7 @@ again:
 
 	    default:
 	      /* Ignore unrecognized type attributes, so future compilers
-	         can invent new ones.  */
+		 can invent new ones.  */
 	      break;
 	    }
 	  ++*pp;
@@ -1959,19 +1959,19 @@ again:
     case 's':			/* Struct type */
     case 'u':			/* Union type */
       {
-        enum type_code type_code = TYPE_CODE_UNDEF;
-        type = dbx_alloc_type (typenums, objfile);
-        switch (type_descriptor)
-          {
-          case 's':
-            type_code = TYPE_CODE_STRUCT;
-            break;
-          case 'u':
-            type_code = TYPE_CODE_UNION;
-            break;
-          }
-        type = read_struct_type (pp, type, type_code, objfile);
-        break;
+	enum type_code type_code = TYPE_CODE_UNDEF;
+	type = dbx_alloc_type (typenums, objfile);
+	switch (type_descriptor)
+	  {
+	  case 's':
+	    type_code = TYPE_CODE_STRUCT;
+	    break;
+	  case 'u':
+	    type_code = TYPE_CODE_UNION;
+	    break;
+	  }
+	type = read_struct_type (pp, type, type_code, objfile);
+	break;
       }
 
     case 'a':			/* Array type */
@@ -2058,10 +2058,10 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
     {
     case 1:
       /* The size of this and all the other types are fixed, defined
-         by the debugging format.  If there is a type called "int" which
-         is other than 32 bits, then it should use a new negative type
-         number (or avoid negative type numbers for that case).
-         See stabs.texinfo.  */
+	 by the debugging format.  If there is a type called "int" which
+	 is other than 32 bits, then it should use a new negative type
+	 number (or avoid negative type numbers for that case).
+	 See stabs.texinfo.  */
       rettype = init_integer_type (objfile, 32, 0, "int");
       break;
     case 2:
@@ -2107,8 +2107,8 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       break;
     case 14:
       /* This is an IEEE double on the RS/6000, and different machines with
-         different sizes for "long double" should use different negative
-         type numbers.  See stabs.texinfo.  */
+	 different sizes for "long double" should use different negative
+	 type numbers.  See stabs.texinfo.  */
       rettype = init_float_type (objfile, 64, "long double",
 				 floatformats_ieee_double);
       break;
@@ -2244,8 +2244,8 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
   while (**pp != ';')
     {
       /* We should be positioned at the start of the function name.
-         Scan forward to find the first ':' and if it is not the
-         first of a "::" delimiter, then this is not a member function.  */
+	 Scan forward to find the first ':' and if it is not the
+	 first of a "::" delimiter, then this is not a member function.  */
       p = *pp;
       while (*p != ':')
 	{
@@ -2547,13 +2547,13 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 
 	     So, to summarize what we expect and handle here:
 
-	        Given         Given          Real         Real       Action
+		Given         Given          Real         Real       Action
 	     method name     physname      physname   method name
 
 	     __opi            [none]     __opi__3Foo  operator int    opname
-	                                                         [now or later]
+								 [now or later]
 	     Foo              _._3Foo       _._3Foo      ~Foo      separate and
-	                                                               rename
+								       rename
 	     operator i     _ZN3FoocviEv _ZN3FoocviEv operator int    demangle
 	     __comp_ctor  _ZN3FooC1ERKS_ _ZN3FooC1ERKS_   Foo         demangle
 	  */
@@ -2698,9 +2698,9 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
       *pp = p + 1;
 
       /* At this point, *pp points to something like "22:23=*22...",
-         where the type number before the ':' is the "context" and
-         everything after is a regular type definition.  Lookup the
-         type, find it's name, and construct the field name.  */
+	 where the type number before the ':' is the "context" and
+	 everything after is a regular type definition.  Lookup the
+	 type, find it's name, and construct the field name.  */
 
       context = read_type (pp, objfile);
 
@@ -2738,7 +2738,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	}
 
       /* At this point, *pp points to the ':'.  Skip it and read the
-         field type.  */
+	 field type.  */
 
       p = ++(*pp);
       if (p[-1] != ':')
@@ -2768,8 +2768,8 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
     {
       invalid_cpp_abbrev_complaint (*pp);
       /* We have no idea what syntax an unrecognized abbrev would have, so
-         better return 0.  If we returned 1, we would need to at least advance
-         *pp to avoid an infinite loop.  */
+	 better return 0.  If we returned 1, we would need to at least advance
+	 *pp to avoid an infinite loop.  */
       return 0;
     }
   return 1;
@@ -2852,18 +2852,18 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
       && FIELD_BITSIZE (fip->list->field) == 0)
     {
       /* This can happen in two cases: (1) at least for gcc 2.4.5 or so,
-         it is a field which has been optimized out.  The correct stab for
-         this case is to use VISIBILITY_IGNORE, but that is a recent
-         invention.  (2) It is a 0-size array.  For example
-         union { int num; char str[0]; } foo.  Printing _("<no value>" for
-         str in "p foo" is OK, since foo.str (and thus foo.str[3])
-         will continue to work, and a 0-size array as a whole doesn't
-         have any contents to print.
+	 it is a field which has been optimized out.  The correct stab for
+	 this case is to use VISIBILITY_IGNORE, but that is a recent
+	 invention.  (2) It is a 0-size array.  For example
+	 union { int num; char str[0]; } foo.  Printing _("<no value>" for
+	 str in "p foo" is OK, since foo.str (and thus foo.str[3])
+	 will continue to work, and a 0-size array as a whole doesn't
+	 have any contents to print.
 
-         I suspect this probably could also happen with gcc -gstabs (not
-         -gstabs+) for static fields, and perhaps other C++ extensions.
-         Hopefully few people use -gstabs with gdb, since it is intended
-         for dbx compatibility.  */
+	 I suspect this probably could also happen with gcc -gstabs (not
+	 -gstabs+) for static fields, and perhaps other C++ extensions.
+	 Hopefully few people use -gstabs with gdb, since it is intended
+	 for dbx compatibility.  */
 
       /* Ignore this field.  */
       fip->list->visibility = VISIBILITY_IGNORE;
@@ -2871,9 +2871,9 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
   else
     {
       /* Detect an unpacked field and mark it as such.
-         dbx gives a bit size for all fields.
-         Note that forward refs cannot be packed,
-         and treat enums as if they had the width of ints.  */
+	 dbx gives a bit size for all fields.
+	 Note that forward refs cannot be packed,
+	 and treat enums as if they had the width of ints.  */
 
       struct type *field_type = check_typedef (fip->list->field.type ());
 
@@ -2949,9 +2949,9 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
       p = *pp;
 
       /* If is starts with CPLUS_MARKER it is a special abbreviation,
-         unless the CPLUS_MARKER is followed by an underscore, in
-         which case it is just the name of an anonymous type, which we
-         should handle like any other type name.  */
+	 unless the CPLUS_MARKER is followed by an underscore, in
+	 which case it is just the name of an anonymous type, which we
+	 should handle like any other type name.  */
 
       if (is_cplus_marker (p[0]) && p[1] != '_')
 	{
@@ -2961,9 +2961,9 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
 	}
 
       /* Look for the ':' that separates the field name from the field
-         values.  Data members are delimited by a single ':', while member
-         functions are delimited by a pair of ':'s.  When we hit the member
-         functions (if any), terminate scan loop and return.  */
+	 values.  Data members are delimited by a single ':', while member
+	 functions are delimited by a pair of ':'s.  When we hit the member
+	 functions (if any), terminate scan loop and return.  */
 
       while (*p != ':' && *p != '\0')
 	{
@@ -2982,8 +2982,8 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
   if (p[0] == ':' && p[1] == ':')
     {
       /* (the deleted) chill the list of fields: the last entry (at
-         the head) is a partially constructed entry which we now
-         scrub.  */
+	 the head) is a partially constructed entry which we now
+	 scrub.  */
       fip->list = fip->list->next;
     }
   return 1;
@@ -3116,8 +3116,8 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
       }
 
       /* The last piece of baseclass information is the type of the
-         base class.  Read it, and remember it's type name as this
-         field's name.  */
+	 base class.  Read it, and remember it's type name as this
+	 field's name.  */
 
       newobj->field.set_type (read_type (pp, objfile));
       newobj->field.name = newobj->field.type ()->name ();
@@ -3341,12 +3341,12 @@ complain_about_struct_wipeout (struct type *type)
     {
       name = type->name ();
       switch (type->code ())
-        {
-        case TYPE_CODE_STRUCT: kind = "struct "; break;
-        case TYPE_CODE_UNION:  kind = "union ";  break;
-        case TYPE_CODE_ENUM:   kind = "enum ";   break;
-        default: kind = "";
-        }
+	{
+	case TYPE_CODE_STRUCT: kind = "struct "; break;
+	case TYPE_CODE_UNION:  kind = "union ";  break;
+	case TYPE_CODE_ENUM:   kind = "enum ";   break;
+	default: kind = "";
+	}
     }
   else
     {
@@ -3365,8 +3365,8 @@ complain_about_struct_wipeout (struct type *type)
    for instance the following scenario where we have the following two
    stabs entries:
 
-        .stabs  "t:p(0,21)=*(0,22)=k(0,23)=xsdummy:",160,0,28,-24
-        .stabs  "dummy:T(0,23)=s16x:(0,1),0,3[...]"
+	.stabs  "t:p(0,21)=*(0,22)=k(0,23)=xsdummy:",160,0,28,-24
+	.stabs  "dummy:T(0,23)=s16x:(0,1),0,3[...]"
 
    A stubbed version of type dummy is created while processing the first
    stabs entry.  The length of that type is initially set to zero, since
@@ -3389,7 +3389,7 @@ set_length_in_type_chain (struct type *type)
       if (TYPE_LENGTH(ntype) == 0)
 	TYPE_LENGTH (ntype) = TYPE_LENGTH (type);
       else
-        complain_about_struct_wipeout (ntype);
+	complain_about_struct_wipeout (ntype);
       ntype = TYPE_CHAIN (ntype);
     }
 }
@@ -3410,7 +3410,7 @@ set_length_in_type_chain (struct type *type)
 
 static struct type *
 read_struct_type (const char **pp, struct type *type, enum type_code type_code,
-                  struct objfile *objfile)
+		  struct objfile *objfile)
 {
   struct stab_field_info fi;
 
@@ -3426,7 +3426,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
      scribbling on existing structure type objects when new definitions
      appear.  */
   if (! (type->code () == TYPE_CODE_UNDEF
-         || type->is_stub ()))
+	 || type->is_stub ()))
     {
       complain_about_struct_wipeout (type);
 
@@ -3855,9 +3855,9 @@ read_huge_number (const char **pp, int end, int *bits,
   while ((c = *p++) >= '0' && c < ('0' + radix))
     {
       if (n <= upper_limit)
-        {
-          if (twos_complement_representation)
-            {
+	{
+	  if (twos_complement_representation)
+	    {
 	      /* Octal, signed, twos complement representation.  In
 		 this case, n is the corresponding absolute value.  */
 	      if (n == 0)
@@ -3866,24 +3866,24 @@ read_huge_number (const char **pp, int end, int *bits,
 
 		  n = -sn;
 		}
-              else
-                {
-                  n *= radix;
-                  n -= c - '0';
-                }
-            }
-          else
-            {
-              /* unsigned representation */
-              n *= radix;
-              n += c - '0';		/* FIXME this overflows anyway.  */
-            }
-        }
+	      else
+		{
+		  n *= radix;
+		  n -= c - '0';
+		}
+	    }
+	  else
+	    {
+	      /* unsigned representation */
+	      n *= radix;
+	      n += c - '0';		/* FIXME this overflows anyway.  */
+	    }
+	}
       else
-        overflow = 1;
+	overflow = 1;
 
       /* This depends on large values being output in octal, which is
-         what GCC does.  */
+	 what GCC does.  */
       if (radix == 8)
 	{
 	  if (nbits == 0)
@@ -3936,8 +3936,8 @@ read_huge_number (const char **pp, int end, int *bits,
 	}
 
       /* -0x7f is the same as 0x80.  So deal with it by adding one to
-         the number of bits.  Two's complement represention octals
-         can't have a '-' in front.  */
+	 the number of bits.  Two's complement represention octals
+	 can't have a '-' in front.  */
       if (sign == -1 && !twos_complement_representation)
 	++nbits;
       if (bits)
@@ -3955,7 +3955,7 @@ read_huge_number (const char **pp, int end, int *bits,
 
 static struct type *
 read_range_type (const char **pp, int typenums[2], int type_size,
-                 struct objfile *objfile)
+		 struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();
   const char *orig_pp = *pp;
@@ -4003,16 +4003,16 @@ read_range_type (const char **pp, int typenums[2], int type_size,
       int nbits = 0;
 
       /* If a type size attribute has been specified, the bounds of
-         the range should fit in this size.  If the lower bounds needs
-         more bits than the upper bound, then the type is signed.  */
+	 the range should fit in this size.  If the lower bounds needs
+	 more bits than the upper bound, then the type is signed.  */
       if (n2bits <= type_size && n3bits <= type_size)
-        {
-          if (n2bits == type_size && n2bits > n3bits)
-            got_signed = 1;
-          else
-            got_unsigned = 1;
-          nbits = type_size;
-        }
+	{
+	  if (n2bits == type_size && n2bits > n3bits)
+	    got_signed = 1;
+	  else
+	    got_unsigned = 1;
+	  nbits = type_size;
+	}
       /* Range from 0 to <large number> is an unsigned large integral type.  */
       else if ((n2bits == 0 && n2 == 0) && n3bits != 0)
 	{
@@ -4020,8 +4020,8 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 	  nbits = n3bits;
 	}
       /* Range from <large number> to <large number>-1 is a large signed
-         integral type.  Take care of the case where <large number> doesn't
-         fit in a long but <large number>-1 does.  */
+	 integral type.  Take care of the case where <large number> doesn't
+	 fit in a long but <large number>-1 does.  */
       else if ((n2bits != 0 && n3bits != 0 && n2bits == n3bits + 1)
 	       || (n2bits != 0 && n3bits == 0
 		   && (n2bits == sizeof (long) * HOST_CHAR_BIT)
@@ -4094,16 +4094,16 @@ read_range_type (const char **pp, int typenums[2], int type_size,
   else if (n2 == 0)
     {
       /* -1 is used for the upper bound of (4 byte) "unsigned int" and
-         "unsigned long", and we already checked for that,
-         so don't need to test for it here.  */
+	 "unsigned long", and we already checked for that,
+	 so don't need to test for it here.  */
 
       if (n3 < 0)
 	/* n3 actually gives the size.  */
 	return init_integer_type (objfile, -n3 * TARGET_CHAR_BIT, 1, NULL);
 
       /* Is n3 == 2**(8n)-1 for some integer n?  Then it's an
-         unsigned n-byte integer.  But do require n to be a power of
-         two; we don't want 3- and 5-byte integers flying around.  */
+	 unsigned n-byte integer.  But do require n to be a power of
+	 two; we don't want 3- and 5-byte integers flying around.  */
       {
 	int bytes;
 	unsigned long bits;
@@ -4145,7 +4145,7 @@ handle_true_range:
   if (index_type == NULL)
     {
       /* Does this actually ever happen?  Is that why we are worrying
-         about dealing with it rather than just calling error_type?  */
+	 about dealing with it rather than just calling error_type?  */
 
       complaint (_("base type %d of range type is not defined"), rangenums[1]);
 
@@ -4390,14 +4390,14 @@ cleanup_undefined_types_noname (struct objfile *objfile)
 
       type = dbx_lookup_type (nat.typenums, objfile);
       if (nat.type != *type && (*type)->code () != TYPE_CODE_UNDEF)
-        {
-          /* The instance flags of the undefined type are still unset,
-             and needs to be copied over from the reference type.
-             Since replace_type expects them to be identical, we need
-             to set these flags manually before hand.  */
-          nat.type->set_instance_flags ((*type)->instance_flags ());
-          replace_type (nat.type, *type);
-        }
+	{
+	  /* The instance flags of the undefined type are still unset,
+	     and needs to be copied over from the reference type.
+	     Since replace_type expects them to be identical, we need
+	     to set these flags manually before hand.  */
+	  nat.type->set_instance_flags ((*type)->instance_flags ());
+	  replace_type (nat.type, *type);
+	}
     }
 
   noname_undefs_length = 0;
@@ -4427,7 +4427,7 @@ cleanup_undefined_types_1 (void)
      It is important to check the instance flags, because we have seen
      examples where the debug info contained definitions such as:
 
-         "foo_t:t30=B31=xefoo_t:"
+	 "foo_t:t30=B31=xefoo_t:"
 
      In this case, we have created an undefined type named "foo_t" whose
      instance flags is null (when processing "xefoo_t"), and then created
@@ -4484,7 +4484,7 @@ cleanup_undefined_types_1 (void)
 	default:
 	  {
 	    complaint (_("forward-referenced types left unresolved, "
-                       "type code %d."),
+		       "type code %d."),
 		       (*type)->code ());
 	  }
 	  break;
@@ -4527,7 +4527,7 @@ scan_file_globals (struct objfile *objfile)
   while (1)
     {
       /* Avoid expensive loop through all minimal symbols if there are
-         no unresolved symbols.  */
+	 no unresolved symbols.  */
       for (hash = 0; hash < HASHSIZE; hash++)
 	{
 	  if (global_sym_chain[hash])

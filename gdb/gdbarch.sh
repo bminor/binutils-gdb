@@ -189,7 +189,7 @@ do
 	#   hiding something from the ``struct info'' object
 	# m -> multi-arch function
 	#   hiding a multi-arch function (parameterised with the architecture)
-        # M -> multi-arch function + predicate
+	# M -> multi-arch function + predicate
 	#   hiding a multi-arch function + predicate to test function validity
 
     returntype ) : ;;
@@ -1530,8 +1530,8 @@ typedef void (gdbarch_dump_tdep_ftype) (struct gdbarch *gdbarch, struct ui_file 
 extern void register_gdbarch_init (enum bfd_architecture architecture, gdbarch_init_ftype *);
 
 extern void gdbarch_register (enum bfd_architecture architecture,
-                              gdbarch_init_ftype *,
-                              gdbarch_dump_tdep_ftype *);
+			      gdbarch_init_ftype *,
+			      gdbarch_dump_tdep_ftype *);
 
 
 /* Return a freshly allocated, NULL terminated, array of the valid
@@ -1706,7 +1706,7 @@ static void alloc_gdbarch_data (struct gdbarch *);
 unsigned int gdbarch_debug = GDBARCH_DEBUG;
 static void
 show_gdbarch_debug (struct ui_file *file, int from_tty,
-                    struct cmd_list_element *c, const char *value)
+		    struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Architecture debugging is %s.\\n"), value);
 }
@@ -1844,7 +1844,7 @@ printf "\n"
 cat <<EOF
 struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
-               struct gdbarch_tdep *tdep)
+	       struct gdbarch_tdep *tdep)
 {
   struct gdbarch *gdbarch;
 
@@ -1980,8 +1980,8 @@ done
 cat <<EOF
   if (!log.empty ())
     internal_error (__FILE__, __LINE__,
-                    _("verify_gdbarch: the following are invalid ...%s"),
-                    log.c_str ());
+		    _("verify_gdbarch: the following are invalid ...%s"),
+		    log.c_str ());
 }
 EOF
 
@@ -2000,8 +2000,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_nm_file = GDB_NM_FILE;
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: GDB_NM_FILE = %s\\n",
-                      gdb_nm_file);
+		      "gdbarch_dump: GDB_NM_FILE = %s\\n",
+		      gdb_nm_file);
 EOF
 function_list | sort '-t;' -k 3 | while do_read
 do
@@ -2026,13 +2026,13 @@ do
 		print="core_addr_to_string_nz (gdbarch->${function})"
 		;;
 	    :* )
-	        fmt="%s"
+		fmt="%s"
 		print="plongest (gdbarch->${function})"
 		;;
 	    * )
-	        fmt="%s"
+		fmt="%s"
 		;;
-        esac
+	esac
 	printf "  fprintf_unfiltered (file,\n"
 	printf "                      \"gdbarch_dump: %s = %s\\\\n\",\n" "$function" "$fmt"
 	printf "                      %s);\n" "$print"
@@ -2065,7 +2065,7 @@ do
 	printf "bool\n"
 	printf "gdbarch_%s_p (struct gdbarch *gdbarch)\n" "$function"
 	printf "{\n"
-        printf "  gdb_assert (gdbarch != NULL);\n"
+	printf "  gdb_assert (gdbarch != NULL);\n"
 	printf "  return %s;\n" "$predicate"
 	printf "}\n"
     fi
@@ -2080,7 +2080,7 @@ do
 	  printf "gdbarch_%s (struct gdbarch *gdbarch, %s)\n" "$function" "$formal"
 	fi
 	printf "{\n"
-        printf "  gdb_assert (gdbarch != NULL);\n"
+	printf "  gdb_assert (gdbarch != NULL);\n"
 	printf "  gdb_assert (gdbarch->%s != NULL);\n" "$function"
 	if class_is_predicate_p && test -n "${predefault}"
 	then
@@ -2104,7 +2104,7 @@ do
 	    else
 		params="${actual}"
 	    fi
-        fi
+	fi
        	if [ "x${returntype}" = "xvoid" ]
 	then
 	  printf "  gdbarch->%s (%s);\n" "$function" "$params"
@@ -2125,7 +2125,7 @@ do
 	printf "%s\n" "$returntype"
 	printf "gdbarch_%s (struct gdbarch *gdbarch)\n" "$function"
 	printf "{\n"
-        printf "  gdb_assert (gdbarch != NULL);\n"
+	printf "  gdb_assert (gdbarch != NULL);\n"
 	if [ "x${invalid_p}" = "x0" ]
 	then
 	    printf "  /* Skip verify of %s, invalid_p == 0 */\n" "$function"
@@ -2155,7 +2155,7 @@ do
 	printf "%s\n" "$returntype"
 	printf "gdbarch_%s (struct gdbarch *gdbarch)\n" "$function"
 	printf "{\n"
-        printf "  gdb_assert (gdbarch != NULL);\n"
+	printf "  gdb_assert (gdbarch != NULL);\n"
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_%s called\\\\n\");\n" "$function"
 	printf "  return gdbarch->%s;\n" "$function"
@@ -2312,13 +2312,13 @@ gdbarch_printable_names (void)
       const struct bfd_arch_info *ap;
       ap = bfd_lookup_arch (rego->bfd_architecture, 0);
       if (ap == NULL)
-        internal_error (__FILE__, __LINE__,
-                        _("gdbarch_architecture_names: multi-arch unknown"));
+	internal_error (__FILE__, __LINE__,
+			_("gdbarch_architecture_names: multi-arch unknown"));
       do
-        {
-          append_name (&arches, &nr_arches, ap->printable_name);
-          ap = ap->next;
-        }
+	{
+	  append_name (&arches, &nr_arches, ap->printable_name);
+	  ap = ap->next;
+	}
       while (ap != NULL);
     }
   append_name (&arches, &nr_arches, NULL);
@@ -2328,7 +2328,7 @@ gdbarch_printable_names (void)
 
 void
 gdbarch_register (enum bfd_architecture bfd_architecture,
-                  gdbarch_init_ftype *init,
+		  gdbarch_init_ftype *init,
 		  gdbarch_dump_tdep_ftype *dump_tdep)
 {
   struct gdbarch_registration **curr;
@@ -2339,9 +2339,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   if (bfd_arch_info == NULL)
     {
       internal_error (__FILE__, __LINE__,
-                      _("gdbarch: Attempt to register "
+		      _("gdbarch: Attempt to register "
 			"unknown architecture (%d)"),
-                      bfd_architecture);
+		      bfd_architecture);
     }
   /* Check that we haven't seen this architecture before.  */
   for (curr = &gdbarch_registry;
@@ -2350,9 +2350,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
 	internal_error (__FILE__, __LINE__,
-                        _("gdbarch: Duplicate registration "
+			_("gdbarch: Duplicate registration "
 			  "of architecture (%s)"),
-	                bfd_arch_info->printable_name);
+			bfd_arch_info->printable_name);
     }
   /* log it */
   if (gdbarch_debug)
@@ -2380,7 +2380,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 
 struct gdbarch_list *
 gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
-                             const struct gdbarch_info *info)
+			     const struct gdbarch_info *info)
 {
   for (; arches != NULL; arches = arches->next)
     {
@@ -2550,9 +2550,9 @@ _initialize_gdbarch ()
 Set architecture debugging."), _("\\
 Show architecture debugging."), _("\\
 When non-zero, architecture debugging is enabled."),
-                            NULL,
-                            show_gdbarch_debug,
-                            &setdebuglist, &showdebuglist);
+			    NULL,
+			    show_gdbarch_debug,
+			    &setdebuglist, &showdebuglist);
 }
 EOF
 

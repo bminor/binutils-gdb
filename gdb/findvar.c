@@ -362,7 +362,7 @@ symbol_read_needs (struct symbol *sym)
   switch (SYMBOL_CLASS (sym))
     {
       /* All cases listed explicitly so that gcc -Wall will detect it if
-         we failed to consider one.  */
+	 we failed to consider one.  */
     case LOC_COMPUTED:
       gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
 
@@ -380,8 +380,8 @@ symbol_read_needs (struct symbol *sym)
 
     case LOC_LABEL:
       /* Getting the address of a label can be done independently of the block,
-         even if some *uses* of that address wouldn't work so well without
-         the right frame.  */
+	 even if some *uses* of that address wouldn't work so well without
+	 the right frame.  */
 
     case LOC_BLOCK:
     case LOC_CONST_BYTES:
@@ -729,7 +729,7 @@ language_defn::read_var_value (struct symbol *var,
 
 	    if (regval == NULL)
 	      error (_("Value of register variable not available for `%s'."),
-	             var->print_name ());
+		     var->print_name ());
 
 	    addr = value_as_address (regval);
 	  }
@@ -739,7 +739,7 @@ language_defn::read_var_value (struct symbol *var,
 
 	    if (regval == NULL)
 	      error (_("Value of register variable not available for `%s'."),
-	             var->print_name ());
+		     var->print_name ());
 	    return regval;
 	  }
       }
@@ -826,7 +826,7 @@ read_var_value (struct symbol *var, const struct block *var_block,
 
 struct value *
 default_value_from_register (struct gdbarch *gdbarch, struct type *type,
-                             int regnum, struct frame_id frame_id)
+			     int regnum, struct frame_id frame_id)
 {
   int len = TYPE_LENGTH (type);
   struct value *value = allocate_value (type);
@@ -890,7 +890,7 @@ read_frame_register_value (struct value *value, struct frame_info *frame)
       int reg_len = type_length_units (value_type (regval)) - reg_offset;
 
       /* If the register length is larger than the number of bytes
-         remaining to copy, then only copy the appropriate bytes.  */
+	 remaining to copy, then only copy the appropriate bytes.  */
       if (reg_len > len)
 	reg_len = len;
 
@@ -917,12 +917,12 @@ value_from_register (struct type *type, int regnum, struct frame_info *frame)
       int optim, unavail, ok;
 
       /* The ISA/ABI need to something weird when obtaining the
-         specified value from this register.  It might need to
-         re-order non-adjacent, starting with REGNUM (see MIPS and
-         i386).  It might need to convert the [float] register into
-         the corresponding [integer] type (see Alpha).  The assumption
-         is that gdbarch_register_to_value populates the entire value
-         including the location.  */
+	 specified value from this register.  It might need to
+	 re-order non-adjacent, starting with REGNUM (see MIPS and
+	 i386).  It might need to convert the [float] register into
+	 the corresponding [integer] type (see Alpha).  The assumption
+	 is that gdbarch_register_to_value populates the entire value
+	 including the location.  */
       v = allocate_value (type);
       VALUE_LVAL (v) = lval_register;
       VALUE_NEXT_FRAME_ID (v) = get_frame_id (get_next_frame_sentinel_okay (frame));

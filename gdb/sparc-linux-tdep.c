@@ -444,7 +444,7 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   /* Make sure we can single-step over signal return system calls.  */
   tdep->step_trap = sparc32_linux_step_trap;
@@ -457,7 +457,7 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_SPARC32);
   set_gdbarch_get_syscall_number (gdbarch,
-                                  sparc32_linux_get_syscall_number);
+				  sparc32_linux_get_syscall_number);
 
   set_gdbarch_gdb_signal_from_target (gdbarch,
 				      sparc32_linux_gdb_signal_from_target);

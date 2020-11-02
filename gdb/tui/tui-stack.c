@@ -116,14 +116,14 @@ tui_locator_window::make_status_line () const
      The +1 are for a space separator between fields.
      The -1 are to take into account the \0 counted by sizeof.  */
   proc_width = (status_size
-                - (target_width + 1)
-                - (pid_width + 1)
-                - (sizeof (PROC_PREFIX) - 1 + 1)
-                - (sizeof (LINE_PREFIX) - 1 + line_width + 1)
-                - (sizeof (PC_PREFIX) - 1 + pc_width + 1)
-                - (tui_current_key_mode == TUI_SINGLE_KEY_MODE
-                   ? (sizeof (SINGLE_KEY) - 1 + 1)
-                   : 0));
+		- (target_width + 1)
+		- (pid_width + 1)
+		- (sizeof (PROC_PREFIX) - 1 + 1)
+		- (sizeof (LINE_PREFIX) - 1 + line_width + 1)
+		- (sizeof (PC_PREFIX) - 1 + pc_width + 1)
+		- (tui_current_key_mode == TUI_SINGLE_KEY_MODE
+		   ? (sizeof (SINGLE_KEY) - 1 + 1)
+		   : 0));
 
   /* If there is no room to print the function name, try by removing
      some fields.  */
@@ -132,22 +132,22 @@ tui_locator_window::make_status_line () const
       proc_width += target_width + 1;
       target_width = 0;
       if (proc_width < MIN_PROC_WIDTH)
-        {
-          proc_width += pid_width + 1;
-          pid_width = 0;
-          if (proc_width <= MIN_PROC_WIDTH)
-            {
-              proc_width += pc_width + sizeof (PC_PREFIX) - 1 + 1;
-              pc_width = 0;
-              if (proc_width < 0)
-                {
-                  proc_width += line_width + sizeof (LINE_PREFIX) - 1 + 1;
-                  line_width = 0;
-                  if (proc_width < 0)
-                    proc_width = 0;
-                }
-            }
-        }
+	{
+	  proc_width += pid_width + 1;
+	  pid_width = 0;
+	  if (proc_width <= MIN_PROC_WIDTH)
+	    {
+	      proc_width += pc_width + sizeof (PC_PREFIX) - 1 + 1;
+	      pc_width = 0;
+	      if (proc_width < 0)
+		{
+		  proc_width += line_width + sizeof (LINE_PREFIX) - 1 + 1;
+		  line_width = 0;
+		  if (proc_width < 0)
+		    proc_width = 0;
+		}
+	    }
+	}
     }
 
   /* Now create the locator line from the string version of the
@@ -170,10 +170,10 @@ tui_locator_window::make_status_line () const
   if (proc_width > 0)
     {
       if (proc_name.size () > proc_width)
-        string.printf ("%s%*.*s* ", PROC_PREFIX,
+	string.printf ("%s%*.*s* ", PROC_PREFIX,
 		       1 - proc_width, proc_width - 1, proc_name.c_str ());
       else
-        string.printf ("%s%*.*s ", PROC_PREFIX,
+	string.printf ("%s%*.*s ", PROC_PREFIX,
 		       -proc_width, proc_width, proc_name.c_str ());
     }
 

@@ -506,7 +506,7 @@ gnu_nat_target::proc_trace (struct proc *proc, int set)
   if (set)
     {
       /* XXX We don't get the exception unless the thread has its own
-         exception port????  */
+	 exception port????  */
       if (proc->exc_port == MACH_PORT_NULL)
 	proc_steal_exc_port (proc, proc->inf->event_port);
       THREAD_STATE_SET_TRACED (state);
@@ -578,7 +578,7 @@ gnu_nat_target::make_proc (struct inf *inf, mach_port_t port, int tid)
 	proc_steal_exc_port (proc, inf->event_port);
       else
 	/* Just clear thread exception ports -- they default to the
-           task one.  */
+	   task one.  */
 	proc_steal_exc_port (proc, MACH_PORT_NULL);
     }
 
@@ -825,9 +825,9 @@ gnu_nat_target::inf_validate_task_sc (struct inf *inf)
   if (inf->task->cur_sc < pi->taskinfo.suspend_count && suspend_count == -1)
     {
       /* The proc server might have suspended the task while stopping
-         it.  This happens when the task is handling a traced signal.
-         Refetch the suspend count.  The proc server should be
-         finished stopping the task by now.  */
+	 it.  This happens when the task is handling a traced signal.
+	 Refetch the suspend count.  The proc server should be
+	 finished stopping the task by now.  */
       suspend_count = pi->taskinfo.suspend_count;
       goto retry;
     }
@@ -929,7 +929,7 @@ gnu_nat_target::inf_update_suspends (struct inf *inf)
       inf->running = thread_running && task_running;
 
       /* Once any thread has executed some code, we can't depend on the
-         threads list any more.  */
+	 threads list any more.  */
       if (inf->running)
 	inf->threads_up_to_date = 0;
 
@@ -2116,7 +2116,7 @@ gnu_nat_target::create_inferior (const char *exec_file,
     push_target (this);
 
   pid = fork_inferior (exec_file, allargs, env, gnu_ptrace_me,
-                       NULL, NULL, NULL, NULL);
+		       NULL, NULL, NULL, NULL);
 
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the

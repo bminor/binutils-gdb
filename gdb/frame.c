@@ -601,7 +601,7 @@ compute_frame_id (struct frame_info *fi)
   catch (const gdb_exception &ex)
     {
       /* On error, revert the frame id status to not computed.  If the frame
-         cache generation changed, the frame object doesn't exist anymore, so
+	 cache generation changed, the frame object doesn't exist anymore, so
 	 don't touch it.  */
       if (get_frame_cache_generation () == entry_generation)
 	fi->this_id.p = frame_id_status::NOT_COMPUTED;
@@ -677,7 +677,7 @@ const struct frame_id outer_frame_id = { 0, 0, 0, FID_STACK_OUTER, 0, 1, 0 };
 
 struct frame_id
 frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
-                        CORE_ADDR special_addr)
+			CORE_ADDR special_addr)
 {
   struct frame_id id = null_frame_id;
 
@@ -1048,7 +1048,7 @@ get_frame_func_if_available (frame_info *this_frame, CORE_ADDR *pc)
       CORE_ADDR addr_in_block;
 
       /* Make certain that this, and not the adjacent, function is
-         found.  */
+	 found.  */
       if (!get_frame_address_in_block_if_available (this_frame, &addr_in_block))
 	{
 	  next_frame->prev_func.status = CC_UNAVAILABLE;
@@ -2329,9 +2329,9 @@ get_prev_frame_always (struct frame_info *this_frame)
 	      size_t size;
 
 	      /* The error needs to live as long as the frame does.
-	         Allocate using stack local STOP_STRING then assign the
-	         pointer to the frame, this allows the STOP_STRING on the
-	         frame to be of type 'const char *'.  */
+		 Allocate using stack local STOP_STRING then assign the
+		 pointer to the frame, this allows the STOP_STRING on the
+		 frame to be of type 'const char *'.  */
 	      size = ex.message->size () + 1;
 	      stop_string = (char *) frame_obstack_zalloc (size);
 	      memcpy (stop_string, ex.what (), size);

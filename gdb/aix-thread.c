@@ -397,7 +397,7 @@ pdc_read_regs (pthdb_user_t user,
   
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "pdc_read_regs tid=%d flags=%s\n",
-                        (int) tid, hex_string (flags));
+			(int) tid, hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -463,7 +463,7 @@ pdc_write_regs (pthdb_user_t user,
 
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, "pdc_write_regs tid=%d flags=%s\n",
-                        (int) tid, hex_string (flags));
+			(int) tid, hex_string (flags));
 
   /* General-purpose registers.  */
   if (flags & PTHDB_FLAG_GPRS)
@@ -549,7 +549,7 @@ pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog,
-                        "pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)\n",
+			"pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)\n",
 			user, len, (long) bufp);
   *bufp = xmalloc (len);
   if (debug_aix_thread)
@@ -589,7 +589,7 @@ pdc_dealloc (pthdb_user_t user, void *buf)
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
 			"pdc_free (user = %ld, buf = 0x%lx)\n", user,
-                        (long) buf);
+			(long) buf);
   xfree (buf);
   return PDC_SUCCESS;
 }
@@ -709,7 +709,7 @@ get_signaled_thread (void)
   while (1)
   {
     if (getthrds (inferior_ptid.pid (), &thrinf, 
-          	  sizeof (thrinf), &ktid, 1) != 1)
+	  	  sizeof (thrinf), &ktid, 1) != 1)
       break;
 
     if (thrinf.ti_cursig == SIGTRAP)
@@ -1231,7 +1231,7 @@ fetch_regs_user_thread (struct regcache *regcache, pthdb_pthread_t pdtid)
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
     error (_("aix-thread: fetch_registers: pthdb_pthread_context returned %s"),
-           pd_status2str (status));
+	   pd_status2str (status));
 
   /* General-purpose registers.  */
 
@@ -1292,7 +1292,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
   /* General-purpose registers.  */
   if (regno == -1
       || (tdep->ppc_gp0_regnum <= regno
-          && regno < tdep->ppc_gp0_regnum + ppc_num_gprs))
+	  && regno < tdep->ppc_gp0_regnum + ppc_num_gprs))
     {
       if (arch64)
 	{
@@ -1314,8 +1314,8 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 
   if (ppc_floating_point_unit_p (gdbarch)
       && (regno == -1
-          || (regno >= tdep->ppc_fp0_regnum
-              && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
+	  || (regno >= tdep->ppc_fp0_regnum
+	      && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
     {
       if (!ptrace32 (PTT_READ_FPRS, tid, (uintptr_t) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
@@ -1514,7 +1514,7 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
   status = pthdb_pthread_context (pd_session, pdtid, &ctx);
   if (status != PTHDB_SUCCESS)
     error (_("aix-thread: store_registers: pthdb_pthread_context returned %s"),
-           pd_status2str (status));
+	   pd_status2str (status));
 
   /* Collect general-purpose register values from the regcache.  */
 
@@ -1573,7 +1573,7 @@ store_regs_user_thread (const struct regcache *regcache, pthdb_pthread_t pdtid)
   if (status != PTHDB_SUCCESS)
     error (_("aix-thread: store_registers: "
 	     "pthdb_pthread_setcontext returned %s"),
-           pd_status2str (status));
+	   pd_status2str (status));
 }
 
 /* Store register REGNO if != -1 or all registers otherwise into
@@ -1599,12 +1599,12 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
   if (debug_aix_thread)
     fprintf_unfiltered (gdb_stdlog, 
 			"store_regs_kernel_thread tid=%lx regno=%d\n",
-                        (long) tid, regno);
+			(long) tid, regno);
 
   /* General-purpose registers.  */
   if (regno == -1
       || (tdep->ppc_gp0_regnum <= regno
-          && regno < tdep->ppc_gp0_regnum + ppc_num_fprs))
+	  && regno < tdep->ppc_gp0_regnum + ppc_num_fprs))
     {
       if (arch64)
 	{
@@ -1626,8 +1626,8 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 
   if (ppc_floating_point_unit_p (gdbarch)
       && (regno == -1
-          || (regno >= tdep->ppc_fp0_regnum
-              && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
+	  || (regno >= tdep->ppc_fp0_regnum
+	      && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
     {
       /* Pre-fetch: some regs may not be in the cache.  */
       ptrace32 (PTT_READ_FPRS, tid, (uintptr_t) fprs, 0, NULL);

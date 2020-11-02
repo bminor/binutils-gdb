@@ -1849,7 +1849,7 @@ fbsd_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
 
 static int
 fbsd_gdb_signal_to_target (struct gdbarch *gdbarch,
-                enum gdb_signal signal)
+		enum gdb_signal signal)
 {
   switch (signal)
     {

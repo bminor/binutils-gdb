@@ -588,7 +588,7 @@ sol_thread_target::xfer_partial (enum target_object object,
   if (inferior_ptid.tid_p () || !target_thread_alive (inferior_ptid))
     {
       /* It's either a thread or an LWP that isn't alive.  Any live
-         LWP will do so use the first available.
+	 LWP will do so use the first available.
 
 	 NOTE: We don't need to call switch_to_thread; we're just
 	 reading memory.  */
@@ -784,7 +784,7 @@ rw_common (int dowrite, const struct ps_prochandle *ph, psaddr_t addr,
   if (inferior_ptid.tid_p () || !target_thread_alive (inferior_ptid))
     {
       /* It's either a thread or an LWP that isn't alive.  Any live
-         LWP will do so use the first available.
+	 LWP will do so use the first available.
 
 	 NOTE: We don't need to call switch_to_thread; we're just
 	 reading memory.  */
@@ -1137,10 +1137,10 @@ sol_thread_target::get_ada_task_ptid (long lwp, long thread)
   if (thread_info == NULL)
     {
       /* The list of threads is probably not up to date.  Find any
-         thread that is missing from the list, and try again.  */
+	 thread that is missing from the list, and try again.  */
       update_thread_list ();
       thread_info = iterate_over_threads (thread_db_find_thread_from_tid,
-                                          &thread);
+					  &thread);
     }
 
   gdb_assert (thread_info != NULL);

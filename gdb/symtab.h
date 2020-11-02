@@ -472,7 +472,7 @@ struct general_symbol_info
   void compute_and_set_names (gdb::string_view linkage_name, bool copy_name,
 			      struct objfile_per_bfd_storage *per_bfd,
 			      gdb::optional<hashval_t> hash
-			        = gdb::optional<hashval_t> ());
+				= gdb::optional<hashval_t> ());
 
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
@@ -1114,7 +1114,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       subclass (SYMBOL_NONE)
     {
       /* We can't use an initializer list for members of a base class, and
-         general_symbol_info needs to stay a POD type.  */
+	 general_symbol_info needs to stay a POD type.  */
       m_name = nullptr;
       value.ivalue = 0;
       language_specific.obstack = nullptr;
@@ -1122,7 +1122,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       ada_mangled = 0;
       section = -1;
       /* GCC 4.8.5 (on CentOS 7) does not correctly compile class-
-         initialization of unions, so we initialize it manually here.  */
+	 initialization of unions, so we initialize it manually here.  */
       owner.symtab = nullptr;
     }
 
@@ -1414,18 +1414,18 @@ struct symtab
    This is recorded as:
 
    objfile -> foo.c(cu) -> bar.c(cu) -> NULL
-                |            |
-                v            v
-              foo.c        bar.c
-                |            |
-                v            v
-              foo1.h       foo1.h
-                |            |
-                v            v
-              foo2.h       bar.h
-                |            |
-                v            v
-               NULL         NULL
+		|            |
+		v            v
+	      foo.c        bar.c
+		|            |
+		v            v
+	      foo1.h       foo1.h
+		|            |
+		v            v
+	      foo2.h       bar.h
+		|            |
+		v            v
+	       NULL         NULL
 
    where "foo.c(cu)" and "bar.c(cu)" are struct compunit_symtab objects,
    and the files foo.c, etc. are struct symtab objects.  */
@@ -2126,7 +2126,7 @@ public:
 private:
   /* The kind of symbols are we searching for.
      VARIABLES_DOMAIN - Search all symbols, excluding functions, type
-                        names, and constants (enums).
+			names, and constants (enums).
      FUNCTIONS_DOMAIN - Search all functions..
      TYPES_DOMAIN     - Search all type names.
      MODULES_DOMAIN   - Search all Fortran modules.

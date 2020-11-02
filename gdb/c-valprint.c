@@ -493,9 +493,9 @@ c_value_print (struct value *val, struct ui_file *stream,
       struct type *original_type = value_type (val);
 
       /* Hack:  remove (char *) for char strings.  Their
-         type is indicated by the quoted string anyway.
-         (Don't use c_textual_element_type here; quoted strings
-         are always exactly (char *), (wchar_t *), or the like.  */
+	 type is indicated by the quoted string anyway.
+	 (Don't use c_textual_element_type here; quoted strings
+	 are always exactly (char *), (wchar_t *), or the like.  */
       if (original_type->code () == TYPE_CODE_PTR
 	  && original_type->name () == NULL
 	  && TYPE_TARGET_TYPE (original_type)->name () != NULL

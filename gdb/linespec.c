@@ -918,10 +918,10 @@ linespec_lexer_lex_one (linespec_parser *parser)
 
 	case '+': case '-':
 	case '0': case '1': case '2': case '3': case '4':
-        case '5': case '6': case '7': case '8': case '9':
-           if (!linespec_lexer_lex_number (parser, &(parser->lexer.current)))
+	case '5': case '6': case '7': case '8': case '9':
+	   if (!linespec_lexer_lex_number (parser, &(parser->lexer.current)))
 	     parser->lexer.current = linespec_lexer_lex_string (parser);
-          break;
+	  break;
 
 	case ':':
 	  /* If we have a scope operator, lex the input as a string.
@@ -1249,8 +1249,8 @@ find_methods (struct type *t, enum language t_lang, const char *name,
       t = check_typedef (t);
 
       /* Loop over each method name.  At this level, all overloads of a name
-         are counted as a single name.  There is an inner loop which loops over
-         each overload.  */
+	 are counted as a single name.  There is an inner loop which loops over
+	 each overload.  */
 
       for (method_counter = TYPE_NFN_FIELDS (t) - 1;
 	   method_counter >= 0;
@@ -1694,12 +1694,12 @@ undefined_label_error (const char *function, const char *label)
 {
   if (function != NULL)
     throw_error (NOT_FOUND_ERROR,
-                _("No label \"%s\" defined in function \"%s\"."),
-                label, function);
+		_("No label \"%s\" defined in function \"%s\"."),
+		label, function);
   else
     throw_error (NOT_FOUND_ERROR,
-                _("No label \"%s\" defined in current function."),
-                label);
+		_("No label \"%s\" defined in current function."),
+		label);
 }
 
 /* Throw a source file not found error.  */
@@ -1886,7 +1886,7 @@ linespec_parse_basic (linespec_parser *parser)
 	    = new std::vector<block_symbol> (std::move (symbols));
 	  PARSER_RESULT (parser)->minimal_symbols
 	    = new std::vector<bound_minimal_symbol>
-	        (std::move (minimal_symbols));
+		(std::move (minimal_symbols));
 	  PARSER_EXPLICIT (parser)->function_name = name.release ();
 	}
       else
@@ -2484,7 +2484,7 @@ convert_explicit_location_to_sals (struct linespec_state *self,
    label_name_spec -> STRING
    function_name_spec -> STRING
    offset_spec -> NUMBER
-               -> '+' NUMBER
+	       -> '+' NUMBER
 	       -> '-' NUMBER
 
    This may all be followed by several keywords such as "if EXPR",
@@ -3353,7 +3353,7 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
   if (*default_symtab == 0)
     {
       /* Use whatever we have for the default source line.  We don't use
-         get_current_or_default_symtab_and_line as it can recurse and call
+	 get_current_or_default_symtab_and_line as it can recurse and call
 	 us back!  */
       struct symtab_and_line cursal = 
 	get_current_source_symtab_and_line ();
@@ -3789,7 +3789,7 @@ collect_symtabs_from_filename (const char *file,
   if (search_pspace == NULL)
     {
       for (struct program_space *pspace : program_spaces)
-        {
+	{
 	  if (pspace->executing_startup)
 	    continue;
 

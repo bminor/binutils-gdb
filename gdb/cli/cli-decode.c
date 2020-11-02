@@ -354,11 +354,11 @@ update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
       /* We must recursively update the prefix field to cover
 	 e.g.  'info auto-load libthread-db' where the creation
 	 order was:
-           libthread-db
-           auto-load
-           info
+	   libthread-db
+	   auto-load
+	   info
 	 In such a case, when 'auto-load' was created by do_add_cmd,
-         the 'libthread-db' prefix field could not be updated, as the
+	 the 'libthread-db' prefix field could not be updated, as the
 	 'auto-load' command was not yet reachable by
 	    lookup_cmd_for_prefixlist (list, cmdlist)
 	    that searches from the top level 'cmdlist'.  */
@@ -450,7 +450,7 @@ add_show_prefix_cmd (const char *name, enum command_class theclass,
 
 struct cmd_list_element *
 add_prefix_cmd_suppress_notification
-               (const char *name, enum command_class theclass,
+	       (const char *name, enum command_class theclass,
 		cmd_const_cfunc_ftype *fun,
 		const char *doc, struct cmd_list_element **prefixlist,
 		const char *prefixname, int allow_unknown,
@@ -1260,16 +1260,16 @@ help_cmd (const char *command, struct ui_file *stream)
 
   if (c->hook_pre || c->hook_post)
     fprintf_filtered (stream,
-                      "\nThis command has a hook (or hooks) defined:\n");
+		      "\nThis command has a hook (or hooks) defined:\n");
 
   if (c->hook_pre)
     fprintf_filtered (stream,
-                      "\tThis command is run after  : %s (pre hook)\n",
-                    c->hook_pre->name);
+		      "\tThis command is run after  : %s (pre hook)\n",
+		    c->hook_pre->name);
   if (c->hook_post)
     fprintf_filtered (stream,
-                      "\tThis command is run before : %s (post hook)\n",
-                    c->hook_post->name);
+		      "\tThis command is run before : %s (post hook)\n",
+		    c->hook_post->name);
 }
 
 /*
@@ -1352,7 +1352,7 @@ help_all (struct ui_file *stream)
   for (c = cmdlist; c; c = c->next)
     {
       if (c->abbrev_flag)
-        continue;
+	continue;
       /* If this is a class name, print all of the commands in the
 	 class.  */
 
@@ -1370,7 +1370,7 @@ help_all (struct ui_file *stream)
   for (c = cmdlist; c; c = c->next)
     {
       if (c->abbrev_flag)
-        continue;
+	continue;
 
       if (c->theclass == no_class)
 	{
@@ -1496,7 +1496,7 @@ help_cmd_list (struct cmd_list_element *list, enum command_class theclass,
 	  || (theclass == c->theclass && c->func != NULL))
 	{
 	  /* show C when
-             - showing all commands
+	     - showing all commands
 	     - showing all classes and C is a help class
 	     - showing commands of THECLASS and C is not the help class  */
 
@@ -1748,9 +1748,9 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 	  if (result_list != nullptr)
 	    if (!*result_list)
 	      /* This used to say *result_list = *found->prefixlist.
-	         If that was correct, need to modify the documentation
-	         at the top of this function to clarify what is
-	         supposed to be going on.  */
+		 If that was correct, need to modify the documentation
+		 at the top of this function to clarify what is
+		 supposed to be going on.  */
 	      *result_list = found;
 	  /* For ambiguous commands, do not return any default_args args.  */
 	  if (default_args != nullptr)
@@ -1840,7 +1840,7 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
   else if (c == CMD_LIST_AMBIGUOUS)
     {
       /* Ambigous.  Local values should be off prefixlist or called
-         values.  */
+	 values.  */
       int local_allow_unknown = (last_list ? last_list->allow_unknown :
 				 allow_unknown);
       const char *local_cmdtype = last_list ? last_list->prefixname : cmdtype;
@@ -1890,10 +1890,10 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
   else
     {
       if (c->type == set_cmd && **line != '\0' && !isspace (**line))
-        error (_("Argument must be preceded by space."));
+	error (_("Argument must be preceded by space."));
 
       /* We've got something.  It may still not be what the caller
-         wants (if this command *needs* a subcommand).  */
+	 wants (if this command *needs* a subcommand).  */
       while (**line == ' ' || **line == '\t')
 	(*line)++;
 

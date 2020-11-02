@@ -228,7 +228,7 @@ filename_completer (struct cmd_list_element *ignore,
 	 will loop indefinitely.  */
       subsequent_name = 1;
       /* Like emacs, don't complete on old versions.  Especially
-         useful in the "source" command.  */
+	 useful in the "source" command.  */
       const char *p = p_rl.get ();
       if (p[strlen (p) - 1] == '~')
 	continue;
@@ -2650,8 +2650,8 @@ gdb_printable_part (char *pathname)
   else if (temp[1] == '\0')
     {
       for (x = temp - 1; x > pathname; x--)
-        if (*x == '/')
-          break;
+	if (*x == '/')
+	  break;
       return ((*x == '/') ? x + 1 : pathname);
     }
   else
@@ -2753,15 +2753,15 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
   while (*s)
     {
       if (CTRL_CHAR (*s))
-        {
-          displayer->putch (displayer, '^');
-          displayer->putch (displayer, UNCTRL (*s));
-          printed_len += 2;
-          s++;
+	{
+	  displayer->putch (displayer, '^');
+	  displayer->putch (displayer, UNCTRL (*s));
+	  printed_len += 2;
+	  s++;
 #if defined (HANDLE_MULTIBYTE)
 	  memset (&ps, 0, sizeof (mbstate_t));
 #endif
-        }
+	}
       else if (*s == RUBOUT)
 	{
 	  displayer->putch (displayer, '^');

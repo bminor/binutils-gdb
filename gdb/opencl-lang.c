@@ -123,10 +123,10 @@ array_has_dups (int *arr, int n)
   for (i = 0; i < n; i++)
     {
       for (j = i + 1; j < n; j++)
-        {
-          if (arr[i] == arr[j])
-            return 1;
-        }
+	{
+	  if (arr[i] == arr[j])
+	    return 1;
+	}
     }
 
   return 0;
@@ -327,9 +327,9 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
   if (n == 1)
     {
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        ret = value_zero (elm_type, not_lval);
+	ret = value_zero (elm_type, not_lval);
       else
-        ret = value_subscript (val, indices[0]);
+	ret = value_subscript (val, indices[0]);
     }
   else
     {
@@ -423,14 +423,14 @@ opencl_component_ref (struct expression *exp, struct value *val, char *comps,
       dst_len = (src_len == 3) ? 2 : src_len / 2;
 
       for (i = 0; i < dst_len; i++)
-        indices[i] = i*2+1;
+	indices[i] = i*2+1;
     }
   else if (strncasecmp (comps, "s", 1) == 0)
     {
 #define HEXCHAR_TO_INT(C) ((C >= '0' && C <= '9') ? \
-                           C-'0' : ((C >= 'A' && C <= 'F') ? \
-                           C-'A'+10 : ((C >= 'a' && C <= 'f') ? \
-                           C-'a'+10 : -1)))
+			   C-'0' : ((C >= 'A' && C <= 'F') ? \
+			   C-'A'+10 : ((C >= 'a' && C <= 'f') ? \
+			   C-'a'+10 : -1)))
 
       dst_len = strlen (comps);
       /* Skip the s/S-prefix.  */

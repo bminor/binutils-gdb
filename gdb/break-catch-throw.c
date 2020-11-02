@@ -544,19 +544,19 @@ _initialize_break_catch_throw ()
   add_catch_command ("catch", _("\
 Catch an exception, when caught."),
 		     catch_catch_command,
-                     NULL,
+		     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("throw", _("\
 Catch an exception, when thrown."),
 		     catch_throw_command,
-                     NULL,
+		     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
   add_catch_command ("rethrow", _("\
 Catch an exception, when rethrown."),
 		     catch_rethrow_command,
-                     NULL,
+		     NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
 

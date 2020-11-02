@@ -3452,10 +3452,10 @@ remote_target::remote_get_threadlist (int startflag, threadref *nextthread,
       /* FIXME: This is a good reason to drop the packet.  */
       /* Possibly, there is a duplicate response.  */
       /* Possibilities :
-         retransmit immediatly - race conditions
-         retransmit after timeout - yes
-         exit
-         wait for packet, then exit
+	 retransmit immediatly - race conditions
+	 retransmit after timeout - yes
+	 exit
+	 wait for packet, then exit
        */
       warning (_("HMM: threadlist did not echo arg thread, dropping it."));
       return 0;			/* I choose simply exiting.  */
@@ -3586,7 +3586,7 @@ struct threads_listing_context
   {
     auto match_ptid = [&] (const thread_item &item)
       {
-        return item.ptid == ptid;
+	return item.ptid == ptid;
       };
 
     auto it = std::remove_if (this->items.begin (),
@@ -3631,8 +3631,8 @@ remote_target::remote_current_thread (ptid_t oldpid)
 
       result = read_ptid (&rs->buf[2], &obuf);
       if (*obuf != '\0' && remote_debug)
-        fprintf_unfiltered (gdb_stdlog,
-	                    "warning: garbage in qC reply\n");
+	fprintf_unfiltered (gdb_stdlog,
+			    "warning: garbage in qC reply\n");
 
       return result;
     }
@@ -4747,7 +4747,7 @@ remote_target::start_remote (int from_tty, int extended_p)
 	      
 	      if (remote_debug)
 		fprintf_unfiltered (gdb_stdlog,
-		                    "warning: couldn't determine remote "
+				    "warning: couldn't determine remote "
 				    "current thread; picking first in list.\n");
 
 	      for (thread_info *tp : all_non_exited_threads (this,
@@ -8095,7 +8095,7 @@ remote_target::send_g_packet ()
   getpkt (&rs->buf, 0);
   if (packet_check_result (rs->buf) == PACKET_ERROR)
     error (_("Could not read registers; remote failure reply '%s'"),
-           rs->buf.data ());
+	   rs->buf.data ());
 
   /* We can get out of synch in various cases.  If the first character
      in the buffer is not a hex character, assume that has happened
@@ -8170,11 +8170,11 @@ remote_target::process_g_packet (struct regcache *regcache)
 	}
 
       /* Looks valid enough, we can assume this is the correct length
-         for a 'g' packet.  It's important not to adjust
-         rsa->sizeof_g_packet if we have truncated registers otherwise
-         this "if" won't be run the next time the method is called
-         with a packet of the same size and one of the internal errors
-         below will trigger instead.  */
+	 for a 'g' packet.  It's important not to adjust
+	 rsa->sizeof_g_packet if we have truncated registers otherwise
+	 this "if" won't be run the next time the method is called
+	 with a packet of the same size and one of the internal errors
+	 below will trigger instead.  */
       rsa->sizeof_g_packet = sizeof_g_packet;
     }
 
@@ -8515,7 +8515,7 @@ remote_address_masked (CORE_ADDR addr)
       && address_size < (sizeof (ULONGEST) * 8))
     {
       /* Only create a mask when that mask can safely be constructed
-         in a ULONGEST variable.  */
+	 in a ULONGEST variable.  */
       ULONGEST mask = 1;
 
       mask = (mask << address_size) - 1;
@@ -8712,7 +8712,7 @@ remote_target::remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
       *p++ = ',';
 
       /* Append the length and retain its location and size.  It may need to be
-         adjusted once the packet body has been created.  */
+	 adjusted once the packet body has been created.  */
       plen = p;
       plenlen = hexnumstr (p, (ULONGEST) todo_units);
       p += plenlen;
@@ -9306,7 +9306,7 @@ remote_target::putpkt_binary (const char *buf, int cnt)
       /* If this is a no acks version of the remote protocol, send the
 	 packet and move on.  */
       if (rs->noack_mode)
-        break;
+	break;
 
       /* Read until either a timeout occurs (-2) or '+' is read.
 	 Handle any notification that arrives in the mean time.  */
@@ -9348,7 +9348,7 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 	      break;		/* Retransmit buffer.  */
 	    case '$':
 	      {
-	        if (remote_debug)
+		if (remote_debug)
 		  fprintf_unfiltered (gdb_stdlog,
 				      "Packet instead of Ack, ignoring it\n");
 		/* It's probably an old response sent because an ACK
@@ -9416,10 +9416,10 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 
 #if 0
       /* This is wrong.  If doing a long backtrace, the user should be
-         able to get out next time we call QUIT, without anything as
-         violent as interrupt_query.  If we want to provide a way out of
-         here without getting to the next QUIT, it should be based on
-         hitting ^C twice as in remote_wait.  */
+	 able to get out next time we call QUIT, without anything as
+	 violent as interrupt_query.  If we want to provide a way out of
+	 here without getting to the next QUIT, it should be based on
+	 hitting ^C twice as in remote_wait.  */
       if (quit_flag)
 	{
 	  quit_flag = 0;
@@ -9537,7 +9537,7 @@ remote_target::read_frame (gdb::char_vector *buf_p)
 
 	    pktcsum = (fromhex (check_0) << 4) | fromhex (check_1);
 	    if (csum == pktcsum)
-              return bc;
+	      return bc;
 
 	    if (remote_debug)
 	      {
@@ -9549,11 +9549,11 @@ remote_target::read_frame (gdb::char_vector *buf_p)
 				    pktcsum, csum, str.c_str ());
 	      }
 	    /* Number of characters in buffer ignoring trailing
-               NULL.  */
+	       NULL.  */
 	    return -1;
 	  }
 	case '*':		/* Run length encoding.  */
-          {
+	  {
 	    int repeat;
 
  	    csum += c;
@@ -10651,11 +10651,11 @@ remote_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
     {
     case PACKET_ERROR:
       if (rs->buf[1] == '.')
-        {
-          message = strchr (&rs->buf[2], '.');
-          if (message)
-            error (_("Remote failure reply: %s"), message + 1);
-        }
+	{
+	  message = strchr (&rs->buf[2], '.');
+	  if (message)
+	    error (_("Remote failure reply: %s"), message + 1);
+	}
       return -1;
     case PACKET_UNKNOWN:
       return -1;
@@ -11072,7 +11072,7 @@ remote_target::xfer_partial (enum target_object object,
       gdb_assert (rs->remote_desc);
       return remote_read_qxfer
 	("osdata", annex, readbuf, offset, len, xfered_len,
-        &remote_protocol_packets[PACKET_qXfer_osdata]);
+	&remote_protocol_packets[PACKET_qXfer_osdata]);
 
     case TARGET_OBJECT_THREADS:
       gdb_assert (annex == NULL);
@@ -11099,7 +11099,7 @@ remote_target::xfer_partial (enum target_object object,
     case TARGET_OBJECT_BTRACE:
       return remote_read_qxfer ("btrace", annex, readbuf, offset, len,
 				xfered_len,
-        &remote_protocol_packets[PACKET_qXfer_btrace]);
+	&remote_protocol_packets[PACKET_qXfer_btrace]);
 
     case TARGET_OBJECT_BTRACE_CONF:
       return remote_read_qxfer ("btrace-conf", annex, readbuf, offset,
@@ -11301,14 +11301,14 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
       QUIT;			/* Allow user to bail out with ^C.  */
       rs->buf[0] = '\0';
       if (getpkt_sane (&rs->buf, 0) == -1)
-        { 
-          /* Timeout.  Continue to (try to) read responses.
-             This is better than stopping with an error, assuming the stub
-             is still executing the (long) monitor command.
-             If needed, the user can interrupt gdb using C-c, obtaining
-             an effect similar to stop on timeout.  */
-          continue;
-        }
+	{ 
+	  /* Timeout.  Continue to (try to) read responses.
+	     This is better than stopping with an error, assuming the stub
+	     is still executing the (long) monitor command.
+	     If needed, the user can interrupt gdb using C-c, obtaining
+	     an effect similar to stop on timeout.  */
+	  continue;
+	}
       buf = rs->buf.data ();
       if (buf[0] == '\0')
 	error (_("Target does not support this command."));
@@ -12407,47 +12407,47 @@ remote_fileio_errno_to_host (int errnum)
   switch (errnum)
     {
       case FILEIO_EPERM:
-        return EPERM;
+	return EPERM;
       case FILEIO_ENOENT:
-        return ENOENT;
+	return ENOENT;
       case FILEIO_EINTR:
-        return EINTR;
+	return EINTR;
       case FILEIO_EIO:
-        return EIO;
+	return EIO;
       case FILEIO_EBADF:
-        return EBADF;
+	return EBADF;
       case FILEIO_EACCES:
-        return EACCES;
+	return EACCES;
       case FILEIO_EFAULT:
-        return EFAULT;
+	return EFAULT;
       case FILEIO_EBUSY:
-        return EBUSY;
+	return EBUSY;
       case FILEIO_EEXIST:
-        return EEXIST;
+	return EEXIST;
       case FILEIO_ENODEV:
-        return ENODEV;
+	return ENODEV;
       case FILEIO_ENOTDIR:
-        return ENOTDIR;
+	return ENOTDIR;
       case FILEIO_EISDIR:
-        return EISDIR;
+	return EISDIR;
       case FILEIO_EINVAL:
-        return EINVAL;
+	return EINVAL;
       case FILEIO_ENFILE:
-        return ENFILE;
+	return ENFILE;
       case FILEIO_EMFILE:
-        return EMFILE;
+	return EMFILE;
       case FILEIO_EFBIG:
-        return EFBIG;
+	return EFBIG;
       case FILEIO_ENOSPC:
-        return ENOSPC;
+	return ENOSPC;
       case FILEIO_ESPIPE:
-        return ESPIPE;
+	return ESPIPE;
       case FILEIO_EROFS:
-        return EROFS;
+	return EROFS;
       case FILEIO_ENOSYS:
-        return ENOSYS;
+	return ENOSYS;
       case FILEIO_ENAMETOOLONG:
-        return ENAMETOOLONG;
+	return ENAMETOOLONG;
     }
   return -1;
 }
@@ -13534,7 +13534,7 @@ remote_target::set_disconnected_tracing (int val)
       if (*reply == '\0')
 	error (_("Target does not support this command."));
       if (strcmp (reply, "OK") != 0)
-        error (_("Bogus reply from target: %s"), reply);
+	error (_("Bogus reply from target: %s"), reply);
     }
   else if (val)
     warning (_("Target does not support disconnected tracing."));
@@ -13629,7 +13629,7 @@ remote_target::set_trace_buffer_size (LONGEST val)
       if (val < 0)
 	{
 	  *buf++ = '-';
-          buf += hexnumstr (buf, (ULONGEST) -val);
+	  buf += hexnumstr (buf, (ULONGEST) -val);
 	}
       else
 	buf += hexnumstr (buf, (ULONGEST) val);
@@ -13754,7 +13754,7 @@ remote_target::btrace_sync_conf (const btrace_config *conf)
     {
       pos = buf;
       pos += xsnprintf (pos, endbuf - pos, "%s=0x%x", packet->name,
-                        conf->bts.size);
+			conf->bts.size);
 
       putpkt (buf);
       getpkt (&rs->buf, 0);
@@ -13776,7 +13776,7 @@ remote_target::btrace_sync_conf (const btrace_config *conf)
     {
       pos = buf;
       pos += xsnprintf (pos, endbuf - pos, "%s=0x%x", packet->name,
-                        conf->pt.size);
+			conf->pt.size);
 
       putpkt (buf);
       getpkt (&rs->buf, 0);
@@ -14110,12 +14110,12 @@ remote_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
       remote_thread_info *priv = get_remote_thread_info (tp);
 
       if (tp->inf == inf && priv != NULL)
-        {
+	{
 	  if (handle_len != priv->thread_handle.size ())
 	    error (_("Thread handle size mismatch: %d vs %zu (from remote)"),
-	           handle_len, priv->thread_handle.size ());
+		   handle_len, priv->thread_handle.size ());
 	  if (memcmp (thread_handle, priv->thread_handle.data (),
-	              handle_len) == 0)
+		      handle_len) == 0)
 	    return tp;
 	}
     }
@@ -14615,16 +14615,16 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			 "qXfer:memory-map:read", "memory-map", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_osdata],
-                        "qXfer:osdata:read", "osdata", 0);
+			"qXfer:osdata:read", "osdata", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_threads],
 			 "qXfer:threads:read", "threads", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_siginfo_read],
-                         "qXfer:siginfo:read", "read-siginfo-object", 0);
+			 "qXfer:siginfo:read", "read-siginfo-object", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_siginfo_write],
-                         "qXfer:siginfo:write", "write-siginfo-object", 0);
+			 "qXfer:siginfo:write", "write-siginfo-object", 0);
 
   add_packet_config_cmd
     (&remote_protocol_packets[PACKET_qXfer_traceframe_info],
@@ -14723,7 +14723,7 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 			 "InstallInTrace", "install-in-trace", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_statictrace_read],
-                         "qXfer:statictrace:read", "read-sdata-object", 0);
+			 "qXfer:statictrace:read", "read-sdata-object", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_fdpic],
 			 "qXfer:fdpic:read", "read-fdpic-loadmap", 0);
@@ -14759,10 +14759,10 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
        "multiprocess-feature", "multiprocess-feature", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_swbreak_feature],
-                         "swbreak-feature", "swbreak-feature", 0);
+			 "swbreak-feature", "swbreak-feature", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_hwbreak_feature],
-                         "hwbreak-feature", "hwbreak-feature", 0);
+			 "hwbreak-feature", "hwbreak-feature", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_fork_event_feature],
 			 "fork-event-feature", "fork-event-feature", 0);

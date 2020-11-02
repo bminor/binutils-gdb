@@ -345,8 +345,8 @@ gdbpy_register_tui_window (PyObject *self, PyObject *args, PyObject *kw)
 #define REQUIRE_WINDOW(Window)					\
     do {							\
       if ((Window)->window == nullptr)				\
-        return PyErr_Format (PyExc_RuntimeError,		\
-                             _("TUI window is invalid."));	\
+	return PyErr_Format (PyExc_RuntimeError,		\
+			     _("TUI window is invalid."));	\
     } while (0)
 
 /* Python function which checks the validity of a TUI window

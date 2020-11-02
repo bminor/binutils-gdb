@@ -1048,7 +1048,7 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
       inferior *inf = find_inferior_ptid (this, ptid);
 
       for (thread_info *tp : inf->non_exited_threads ())
-        {
+	{
 	  int request;
 
 	  if (tp->ptid.lwp () == ptid.lwp ())

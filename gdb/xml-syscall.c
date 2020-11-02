@@ -232,8 +232,8 @@ syscall_create_syscall_desc (struct syscalls_info *syscalls_info,
 /* Handle the start of a <syscall> element.  */
 static void
 syscall_start_syscall (struct gdb_xml_parser *parser,
-                       const struct gdb_xml_element *element,
-                       void *user_data,
+		       const struct gdb_xml_element *element,
+		       void *user_data,
 		       std::vector<gdb_xml_value> &attributes)
 {
   struct syscall_parsing_data *data = (struct syscall_parsing_data *) user_data;
@@ -246,16 +246,16 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
   for (const gdb_xml_value &attr : attributes)
     {
       if (strcmp (attr.name, "name") == 0)
-        name = (char *) attr.value.get ();
+	name = (char *) attr.value.get ();
       else if (strcmp (attr.name, "number") == 0)
-        number = * (ULONGEST *) attr.value.get ();
+	number = * (ULONGEST *) attr.value.get ();
       else if (strcmp (attr.name, "alias") == 0)
-        alias = (char *) attr.value.get ();
+	alias = (char *) attr.value.get ();
       else if (strcmp (attr.name, "groups") == 0)
-        groups = (char *) attr.value.get ();
+	groups = (char *) attr.value.get ();
       else
-        internal_error (__FILE__, __LINE__,
-                        _("Unknown attribute name '%s'."), attr.name);
+	internal_error (__FILE__, __LINE__,
+			_("Unknown attribute name '%s'."), attr.name);
     }
 
   gdb_assert (name);
@@ -424,7 +424,7 @@ xml_get_syscalls_by_name (struct gdbarch *gdbarch, const char *syscall_name,
 
 static const char *
 xml_get_syscall_name (struct gdbarch *gdbarch,
-                      int syscall_number)
+		      int syscall_number)
 {
   struct syscalls_info *syscalls_info = gdbarch_syscalls_info (gdbarch);
 

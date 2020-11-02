@@ -316,7 +316,7 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
     {
       pid = inferior_ptid.pid ();
       if (pid == 0)
-        error (_("No current process: you must name one."));
+	error (_("No current process: you must name one."));
     }
   else if (built_argv.count () == 1 && isdigit (built_argv[0][0]))
     pid = strtol (built_argv[0], NULL, 10);
@@ -477,23 +477,23 @@ nbsd_resume(nbsd_nat_target *target, ptid_t ptid, int step,
       inferior *inf = find_inferior_ptid (target, ptid);
 
       for (thread_info *tp : inf->non_exited_threads ())
-        {
-          if (tp->ptid.lwp () == ptid.lwp ())
-            request = PT_RESUME;
-          else
-            request = PT_SUSPEND;
+	{
+	  if (tp->ptid.lwp () == ptid.lwp ())
+	    request = PT_RESUME;
+	  else
+	    request = PT_SUSPEND;
 
-          if (ptrace (request, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
-            perror_with_name (("ptrace"));
-        }
+	  if (ptrace (request, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
+	    perror_with_name (("ptrace"));
+	}
     }
   else
     {
       /* If ptid is a wildcard, resume all matching threads (they won't run
-         until the process is continued however).  */
+	 until the process is continued however).  */
       for (thread_info *tp : all_non_exited_threads (target, ptid))
-        if (ptrace (PT_RESUME, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
-          perror_with_name (("ptrace"));
+	if (ptrace (PT_RESUME, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
+	  perror_with_name (("ptrace"));
     }
 
   if (step)
@@ -723,8 +723,8 @@ nbsd_nat_target::remove_exec_catchpoint (int pid)
 
 int
 nbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
-                                         int any_count,
-                                         gdb::array_view<const int> syscall_counts)
+					 int any_count,
+					 gdb::array_view<const int> syscall_counts)
 {
   /* Ignore the arguments.  inf-ptrace.c will use PT_SYSCALL which
      will catch all system call entries and exits.  The system calls

@@ -1748,8 +1748,8 @@ typedef void (gdbarch_dump_tdep_ftype) (struct gdbarch *gdbarch, struct ui_file 
 extern void register_gdbarch_init (enum bfd_architecture architecture, gdbarch_init_ftype *);
 
 extern void gdbarch_register (enum bfd_architecture architecture,
-                              gdbarch_init_ftype *,
-                              gdbarch_dump_tdep_ftype *);
+			      gdbarch_init_ftype *,
+			      gdbarch_dump_tdep_ftype *);
 
 
 /* Return a freshly allocated, NULL terminated, array of the valid

@@ -400,15 +400,15 @@ tui_source_window_base::set_is_exec_point_at (struct tui_line_or_address l)
 
       if (content_loa.loa == l.loa
 	  && ((l.loa == LOA_LINE && content_loa.u.line_no == l.u.line_no)
-              || (l.loa == LOA_ADDRESS && content_loa.u.addr == l.u.addr)))
-        new_state = true;
+	      || (l.loa == LOA_ADDRESS && content_loa.u.addr == l.u.addr)))
+	new_state = true;
       else
 	new_state = false;
       if (new_state != m_content[i].is_exec_point)
-        {
-          changed = true;
-          m_content[i].is_exec_point = new_state;
-        }
+	{
+	  changed = true;
+	  m_content[i].is_exec_point = new_state;
+	}
       i++;
     }
   if (changed)
@@ -447,14 +447,14 @@ tui_source_window_base::update_breakpoint_info
 
       line = &m_content[i];
       if (current_only && !line->is_exec_point)
-         continue;
+	 continue;
 
       /* Scan each breakpoint to see if the current line has something to
-         do with it.  Identify enable/disabled breakpoints as well as
-         those that we already hit.  */
+	 do with it.  Identify enable/disabled breakpoints as well as
+	 those that we already hit.  */
       tui_bp_flags mode = 0;
       iterate_over_breakpoints ([&] (breakpoint *bp) -> bool
-        {
+	{
 	  struct bp_location *loc;
 
 	  if (bp == being_deleted)
@@ -477,12 +477,12 @@ tui_source_window_base::update_breakpoint_info
 		}
 	    }
 	  return false;
-        });
+	});
       if (line->break_mode != mode)
-        {
-          line->break_mode = mode;
-          need_refresh = true;
-        }
+	{
+	  line->break_mode = mode;
+	  need_refresh = true;
+	}
     }
   return need_refresh;
 }

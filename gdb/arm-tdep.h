@@ -194,7 +194,7 @@ struct arm_displaced_step_closure : public displaced_step_closure
     struct
     {
       /* If non-NULL, override generic SVC handling (e.g. for a particular
-         OS).  */
+	 OS).  */
       int (*copy_svc_os) (struct gdbarch *gdbarch, struct regcache *regs,
 			  arm_displaced_step_closure *dsc);
     } svc;
@@ -273,7 +273,7 @@ extern int arm_psr_thumb_bit (struct gdbarch *);
 extern int arm_pc_is_thumb (struct gdbarch *, CORE_ADDR);
 
 extern int arm_process_record (struct gdbarch *gdbarch, 
-                               struct regcache *regcache, CORE_ADDR addr);
+			       struct regcache *regcache, CORE_ADDR addr);
 /* Functions exported from arm-bsd-tdep.h.  */
 
 /* Return the appropriate register set for the core section identified

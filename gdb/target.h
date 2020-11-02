@@ -2131,10 +2131,10 @@ extern const struct target_desc *target_read_description (struct target_ops *);
 
 /* Main entry point for searching memory.  */
 extern int target_search_memory (CORE_ADDR start_addr,
-                                 ULONGEST search_space_len,
-                                 const gdb_byte *pattern,
-                                 ULONGEST pattern_len,
-                                 CORE_ADDR *found_addrp);
+				 ULONGEST search_space_len,
+				 const gdb_byte *pattern,
+				 ULONGEST pattern_len,
+				 CORE_ADDR *found_addrp);
 
 /* Target file operations.  */
 

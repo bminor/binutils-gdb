@@ -757,7 +757,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = arg_type->code ();
       /* The EABI passes structures that do not fit in a register by
-         reference.  In all other cases, pass the structure by value.  */
+	 reference.  In all other cases, pass the structure by value.  */
       if ((TYPE_CODE_STRUCT == typecode) || (TYPE_CODE_UNION == typecode)
 	  || (len > bpw * 2))
 	{
@@ -974,8 +974,8 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
 	  else
 	    {
 	      /* We are past this point, so the stack pointer of the prev
-	         frame is frame_size greater than the stack pointer of this
-	         frame.  */
+		 frame is frame_size greater than the stack pointer of this
+		 frame.  */
 	      trad_frame_set_reg_value (info, OR1K_SP_REGNUM,
 					this_sp + frame_size);
 	    }
@@ -1008,7 +1008,7 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
 	      inst = or1k_fetch_instruction (gdbarch, addr);
 
 	      /* If we have got this far, the stack pointer of the previous
-	         frame is the frame pointer of this frame.  */
+		 frame is the frame pointer of this frame.  */
 	      trad_frame_set_reg_realreg (info, OR1K_SP_REGNUM,
 					  OR1K_FP_REGNUM);
 	    }
@@ -1047,7 +1047,7 @@ or1k_frame_cache (struct frame_info *this_frame, void **prologue_cache)
 	      inst = or1k_fetch_instruction (gdbarch, addr);
 
 	      /* The register in the previous frame can be found at this
-	         location in this frame.  */
+		 location in this frame.  */
 	      trad_frame_set_reg_addr (info, rb, this_sp + simm);
 	    }
 	  else
@@ -1214,15 +1214,15 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       feature = tdesc_find_feature (tdesc, "org.gnu.gdb.or1k.group0");
       if (feature == NULL)
-        return NULL;
+	return NULL;
 
       tdesc_data = tdesc_data_alloc ();
 
       valid_p = 1;
 
       for (i = 0; i < OR1K_NUM_REGS; i++)
-        valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
-                                            or1k_reg_names[i]);
+	valid_p &= tdesc_numbered_register (feature, tdesc_data.get (), i,
+					    or1k_reg_names[i]);
 
       if (!valid_p)
 	return NULL;

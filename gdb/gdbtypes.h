@@ -310,7 +310,7 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    classes.  */
 
 #define TYPE_ADDRESS_CLASS_1(t) (((t)->instance_flags ()) \
-                                 & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
+				 & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
 #define TYPE_ADDRESS_CLASS_2(t) (((t)->instance_flags ()) \
 				 & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2)
 #define TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL \
@@ -2141,9 +2141,9 @@ extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
 
 #define TYPE_ALLOC(t,size)                                              \
   (obstack_alloc ((TYPE_OBJFILE_OWNED (t)                               \
-                   ? &TYPE_OBJFILE (t)->objfile_obstack                 \
-                   : gdbarch_obstack (TYPE_OWNER (t).gdbarch)),         \
-                  size))
+		   ? &TYPE_OBJFILE (t)->objfile_obstack                 \
+		   : gdbarch_obstack (TYPE_OWNER (t).gdbarch)),         \
+		  size))
 
 
 /* See comment on TYPE_ALLOC.  */
@@ -2245,7 +2245,7 @@ extern struct type *lookup_rvalue_reference_type (struct type *);
 
 
 extern struct type *make_reference_type (struct type *, struct type **,
-                                         enum type_code);
+					 enum type_code);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
 

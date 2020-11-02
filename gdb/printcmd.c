@@ -446,7 +446,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
     {
       type = float_type_from_length (type);
       if (type->code () != TYPE_CODE_FLT)
-        format = 0;
+	format = 0;
     }
 
   switch (format)
@@ -547,7 +547,7 @@ print_address_symbolic (struct gdbarch *gdbarch, CORE_ADDR addr,
   int line = 0;
 
   if (build_address_symbolic (gdbarch, addr, do_demangle, false, &name,
-                              &offset, &filename, &line, &unmapped))
+			      &offset, &filename, &line, &unmapped))
     return 0;
 
   fputs_filtered (leadin, stream);
@@ -660,7 +660,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	   3) The symbol address is not identical to that of the address
 	      under consideration.  */
       if (symbol == NULL ||
-           (!prefer_sym_over_minsym
+	   (!prefer_sym_over_minsym
 	    && BMSYMBOL_VALUE_ADDRESS (msymbol) == addr
 	    && name_location != addr))
 	{
@@ -780,7 +780,7 @@ print_address_demangle (const struct value_print_options *opts,
 
 static CORE_ADDR
 find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
-                           int inst_count, int *inst_read)
+			   int inst_count, int *inst_read)
 {
   /* The vector PCS is used to store instruction addresses within
      a pc range.  */
@@ -803,28 +803,28 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
       pcs.clear ();
       sal = find_pc_sect_line (loop_start, NULL, 1);
       if (sal.line <= 0)
-        {
-          /* We reach here when line info is not available.  In this case,
-             we print a message and just exit the loop.  The return value
-             is calculated after the loop.  */
-          printf_filtered (_("No line number information available "
-                             "for address "));
-          wrap_here ("  ");
-          print_address (gdbarch, loop_start - 1, gdb_stdout);
-          printf_filtered ("\n");
-          break;
-        }
+	{
+	  /* We reach here when line info is not available.  In this case,
+	     we print a message and just exit the loop.  The return value
+	     is calculated after the loop.  */
+	  printf_filtered (_("No line number information available "
+			     "for address "));
+	  wrap_here ("  ");
+	  print_address (gdbarch, loop_start - 1, gdb_stdout);
+	  printf_filtered ("\n");
+	  break;
+	}
 
       loop_end = loop_start;
       loop_start = sal.pc;
 
       /* This loop pushes instruction addresses in the range from
-         LOOP_START to LOOP_END.  */
+	 LOOP_START to LOOP_END.  */
       for (p = loop_start; p < loop_end;)
-        {
+	{
 	  pcs.push_back (p);
-          p += gdb_insn_length (gdbarch, p);
-        }
+	  p += gdb_insn_length (gdbarch, p);
+	}
 
       inst_count -= pcs.size ();
       *inst_read += pcs.size ();
@@ -837,14 +837,14 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
      the reason below.
      Let's assume the following instruction addresses and run 'x/-4i 0x400e'.
        Line X of File
-          0x4000
-          0x4001
-          0x4005
+	  0x4000
+	  0x4001
+	  0x4005
        Line Y of File
-          0x4009
-          0x400c
+	  0x4009
+	  0x400c
        => 0x400e
-          0x4011
+	  0x4011
      find_instruction_backward is called with INST_COUNT = 4 and expected to
      return 0x4001.  When we reach here, INST_COUNT is set to -1 because
      it was subtracted by 2 (from Line Y) and 3 (from Line X).  The value
@@ -870,7 +870,7 @@ find_instruction_backward (struct gdbarch *gdbarch, CORE_ADDR addr,
 
 static int
 read_memory_backward (struct gdbarch *gdbarch,
-                      CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+		      CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   int errcode;
   int nread;      /* Number of bytes actually read.  */
@@ -888,16 +888,16 @@ read_memory_backward (struct gdbarch *gdbarch,
       memaddr += len;
       myaddr += len;
       for (nread = 0; nread < len; ++nread)
-        {
-          errcode = target_read_memory (--memaddr, --myaddr, 1);
-          if (errcode != 0)
-            {
-              /* The read was unsuccessful, so exit the loop.  */
-              printf_filtered (_("Cannot access memory at address %s\n"),
-                               paddress (gdbarch, memaddr));
-              break;
-            }
-        }
+	{
+	  errcode = target_read_memory (--memaddr, --myaddr, 1);
+	  if (errcode != 0)
+	    {
+	      /* The read was unsuccessful, so exit the loop.  */
+	      printf_filtered (_("Cannot access memory at address %s\n"),
+			       paddress (gdbarch, memaddr));
+	      break;
+	    }
+	}
     }
   return nread;
 }
@@ -922,9 +922,9 @@ integer_is_zero (const gdb_byte *x, int len)
 
 static CORE_ADDR
 find_string_backward (struct gdbarch *gdbarch,
-                      CORE_ADDR addr, int count, int char_size,
-                      const struct value_print_options *options,
-                      int *strings_counted)
+		      CORE_ADDR addr, int count, int char_size,
+		      const struct value_print_options *options,
+		      int *strings_counted)
 {
   const int chunk_size = 0x20;
   int read_error = 0;
@@ -942,25 +942,25 @@ find_string_backward (struct gdbarch *gdbarch,
 
       addr -= chars_to_read * char_size;
       chars_read = read_memory_backward (gdbarch, addr, buffer.data (),
-                                         chars_to_read * char_size);
+					 chars_to_read * char_size);
       chars_read /= char_size;
       read_error = (chars_read == chars_to_read) ? 0 : 1;
       /* Searching for '\0' from the end of buffer in backward direction.  */
       for (i = 0; i < chars_read && count > 0 ; ++i, ++chars_counted)
-        {
-          int offset = (chars_to_read - i - 1) * char_size;
+	{
+	  int offset = (chars_to_read - i - 1) * char_size;
 
-          if (integer_is_zero (&buffer[offset], char_size)
-              || chars_counted == options->print_max)
-            {
-              /* Found '\0' or reached print_max.  As OFFSET is the offset to
-                 '\0', we add CHAR_SIZE to return the start address of
-                 a string.  */
-              --count;
-              string_start_addr = addr + offset + char_size;
-              chars_counted = 0;
-            }
-        }
+	  if (integer_is_zero (&buffer[offset], char_size)
+	      || chars_counted == options->print_max)
+	    {
+	      /* Found '\0' or reached print_max.  As OFFSET is the offset to
+		 '\0', we add CHAR_SIZE to return the start address of
+		 a string.  */
+	      --count;
+	      string_start_addr = addr + offset + char_size;
+	      chars_counted = 0;
+	    }
+	}
     }
 
   /* Update STRINGS_COUNTED with the actual number of loaded strings.  */
@@ -969,7 +969,7 @@ find_string_backward (struct gdbarch *gdbarch,
   if (read_error != 0)
     {
       /* In error case, STRING_START_ADDR is pointing to the string that
-         was last successfully loaded.  Rewind the partially loaded string.  */
+	 was last successfully loaded.  Rewind the partially loaded string.  */
       string_start_addr -= chars_counted * char_size;
     }
 
@@ -1040,15 +1040,15 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
       else if (size == 'w')
 	char_type = builtin_type (next_gdbarch)->builtin_char32;
       if (char_type)
-        val_type = char_type;
+	val_type = char_type;
       else
-        {
+	{
 	  if (size != '\0' && size != 'b')
 	    warning (_("Unable to display strings with "
 		       "size '%c', using 'b' instead."), size);
 	  size = 'b';
 	  val_type = builtin_type (next_gdbarch)->builtin_int8;
-        }
+	}
     }
 
   maxelts = 8;
@@ -1064,32 +1064,32 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   if (count < 0)
     {
       /* This is the negative repeat count case.
-         We rewind the address based on the given repeat count and format,
-         then examine memory from there in forward direction.  */
+	 We rewind the address based on the given repeat count and format,
+	 then examine memory from there in forward direction.  */
 
       count = -count;
       if (format == 'i')
-        {
-          next_address = find_instruction_backward (gdbarch, addr, count,
-                                                    &count);
-        }
+	{
+	  next_address = find_instruction_backward (gdbarch, addr, count,
+						    &count);
+	}
       else if (format == 's')
-        {
-          next_address = find_string_backward (gdbarch, addr, count,
-                                               TYPE_LENGTH (val_type),
-                                               &opts, &count);
-        }
+	{
+	  next_address = find_string_backward (gdbarch, addr, count,
+					       TYPE_LENGTH (val_type),
+					       &opts, &count);
+	}
       else
-        {
-          next_address = addr - count * TYPE_LENGTH (val_type);
-        }
+	{
+	  next_address = addr - count * TYPE_LENGTH (val_type);
+	}
 
       /* The following call to print_formatted updates next_address in every
-         iteration.  In backward case, we store the start address here
-         and update next_address with it before exiting the function.  */
+	 iteration.  In backward case, we store the start address here
+	 and update next_address with it before exiting the function.  */
       addr_rewound = (format == 's'
-                      ? next_address - TYPE_LENGTH (val_type)
-                      : next_address);
+		      ? next_address - TYPE_LENGTH (val_type)
+		      : next_address);
       need_to_update_next_address = 1;
     }
 
@@ -1682,15 +1682,15 @@ x_command (const char *exp, int from_tty)
     {
       expression_up expr = parse_expression (exp);
       /* Cause expression not to be there any more if this command is
-         repeated with Newline.  But don't clobber a user-defined
-         command's definition.  */
+	 repeated with Newline.  But don't clobber a user-defined
+	 command's definition.  */
       if (from_tty)
 	set_repeat_arguments ("");
       val = evaluate_expression (expr.get ());
       if (TYPE_IS_REFERENCE (value_type (val)))
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
-         pointers to functions.  This makes "x/i main" work.  */
+	 pointers to functions.  This makes "x/i main" work.  */
       if (value_type (val)->code () == TYPE_CODE_FUNC
 	   && VALUE_LVAL (val) == lval_memory)
 	next_address = value_address (val);
@@ -1717,7 +1717,7 @@ x_command (const char *exp, int from_tty)
   if (last_examine_value != nullptr)
     {
       /* Make last address examined available to the user as $_.  Use
-         the correct pointer type.  */
+	 the correct pointer type.  */
       struct type *pointer_type
 	= lookup_pointer_type (value_type (last_examine_value.get ()));
       set_internalvar (lookup_internalvar ("_"),
@@ -1952,7 +1952,7 @@ do_one_display (struct display *d)
       annotate_display_value ();
 
       try
-        {
+	{
 	  struct value *val;
 	  CORE_ADDR addr;
 
@@ -1991,7 +1991,7 @@ do_one_display (struct display *d)
       opts.raw = d->format.raw;
 
       try
-        {
+	{
 	  struct value *val;
 
 	  val = evaluate_expression (d->exp.get ());
@@ -2583,7 +2583,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 	      DIAGNOSTIC_PUSH
 	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
 	      fprintf_filtered (stream, current_substring,
-                                obstack_base (&output));
+				obstack_base (&output));
 	      DIAGNOSTIC_POP
 	    }
 	    break;
@@ -2594,7 +2594,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      DIAGNOSTIC_PUSH
 	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-              fprintf_filtered (stream, current_substring, val);
+	      fprintf_filtered (stream, current_substring, val);
 	      DIAGNOSTIC_POP
 	      break;
 	    }
@@ -2607,7 +2607,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      DIAGNOSTIC_PUSH
 	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-              fprintf_filtered (stream, current_substring, val);
+	      fprintf_filtered (stream, current_substring, val);
 	      DIAGNOSTIC_POP
 	      break;
 	    }
@@ -2617,7 +2617,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      DIAGNOSTIC_PUSH
 	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-              fprintf_filtered (stream, current_substring, val);
+	      fprintf_filtered (stream, current_substring, val);
 	      DIAGNOSTIC_POP
 	      break;
 	    }
@@ -2627,7 +2627,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      DIAGNOSTIC_PUSH
 	      DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL
-              fprintf_filtered (stream, current_substring, val);
+	      fprintf_filtered (stream, current_substring, val);
 	      DIAGNOSTIC_POP
 	      break;
 	    }

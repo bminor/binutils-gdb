@@ -179,7 +179,7 @@ rx_get_opcode_byte (void *handle)
 
 static void
 rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
-                     enum rx_frame_type frame_type,
+		     enum rx_frame_type frame_type,
 		     struct rx_prologue *result)
 {
   CORE_ADDR pc, next_pc;
@@ -202,14 +202,14 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   if (frame_type == RX_FRAME_TYPE_FAST_INTERRUPT)
     {
       /* This code won't do anything useful at present, but this is
-         what happens for fast interrupts.  */
+	 what happens for fast interrupts.  */
       reg[RX_BPSW_REGNUM] = reg[RX_PSW_REGNUM];
       reg[RX_BPC_REGNUM] = reg[RX_PC_REGNUM];
     }
   else
     {
       /* When an exception occurs, the PSW is saved to the interrupt stack
-         first.  */
+	 first.  */
       if (frame_type == RX_FRAME_TYPE_EXCEPTION)
 	{
 	  reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
@@ -217,7 +217,7 @@ rx_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
 	}
 
       /* The call instruction (or an exception/interrupt) has saved the return
-          address on the stack.  */
+	  address on the stack.  */
       reg[RX_SP_REGNUM] = pv_add_constant (reg[RX_SP_REGNUM], -4);
       stack.store (reg[RX_SP_REGNUM], 4, reg[RX_PC_REGNUM]);
 
@@ -395,7 +395,7 @@ rx_analyze_frame_prologue (struct frame_info *this_frame,
       stop_addr = get_frame_pc (this_frame);
 
       /* If we couldn't find any function containing the PC, then
-         just initialize the prologue cache, but don't do anything.  */
+	 just initialize the prologue cache, but don't do anything.  */
       if (!func_start)
 	stop_addr = func_start;
 
@@ -451,7 +451,7 @@ rx_frame_type (struct frame_info *this_frame, void **this_cache)
       else if (opc.id == RXO_rtfi)
 	return RX_FRAME_TYPE_FAST_INTERRUPT;
       else if (opc.id == RXO_rte)
-        return RX_FRAME_TYPE_EXCEPTION;
+	return RX_FRAME_TYPE_EXCEPTION;
 
       pc += bytes_read;
     }
@@ -492,7 +492,7 @@ rx_frame_base (struct frame_info *this_frame, void **this_cache)
 
 static void
 rx_frame_this_id (struct frame_info *this_frame, void **this_cache,
-                  struct frame_id *this_id)
+		  struct frame_id *this_id)
 {
   *this_id = frame_id_build (rx_frame_base (this_frame, this_cache),
 			     get_frame_func (this_frame));
@@ -502,7 +502,7 @@ rx_frame_this_id (struct frame_info *this_frame, void **this_cache,
 
 static struct value *
 rx_frame_prev_register (struct frame_info *this_frame, void **this_cache,
-                        int regnum)
+			int regnum)
 {
   enum rx_frame_type frame_type = rx_frame_type (this_frame, this_cache);
   struct rx_prologue *p
@@ -512,21 +512,21 @@ rx_frame_prev_register (struct frame_info *this_frame, void **this_cache,
   if (regnum == RX_SP_REGNUM)
     {
       if (frame_type == RX_FRAME_TYPE_EXCEPTION)
-        {
+	{
 	  struct value *psw_val;
 	  CORE_ADDR psw;
 
 	  psw_val = rx_frame_prev_register (this_frame, this_cache,
-	                                    RX_PSW_REGNUM);
+					    RX_PSW_REGNUM);
 	  psw = extract_unsigned_integer (value_contents_all (psw_val), 4, 
 					  gdbarch_byte_order (
 					    get_frame_arch (this_frame)));
 
 	  if ((psw & 0x20000 /* U bit */) != 0)
 	    return rx_frame_prev_register (this_frame, this_cache,
-	                                   RX_USP_REGNUM);
+					   RX_USP_REGNUM);
 
-          /* Fall through for the case where U bit is zero.  */
+	  /* Fall through for the case where U bit is zero.  */
 	}
 
       return frame_unwind_got_constant (this_frame, regnum, frame_base);
@@ -535,11 +535,11 @@ rx_frame_prev_register (struct frame_info *this_frame, void **this_cache,
   if (frame_type == RX_FRAME_TYPE_FAST_INTERRUPT)
     {
       if (regnum == RX_PC_REGNUM)
-        return rx_frame_prev_register (this_frame, this_cache,
-	                               RX_BPC_REGNUM);
+	return rx_frame_prev_register (this_frame, this_cache,
+				       RX_BPC_REGNUM);
       if (regnum == RX_PSW_REGNUM)
-        return rx_frame_prev_register (this_frame, this_cache,
-	                               RX_BPSW_REGNUM);
+	return rx_frame_prev_register (this_frame, this_cache,
+				       RX_BPSW_REGNUM);
     }
 
   /* If prologue analysis says we saved this register somewhere,
@@ -568,14 +568,14 @@ static int
 exception_frame_p (enum rx_frame_type frame_type)
 {
   return (frame_type == RX_FRAME_TYPE_EXCEPTION
-          || frame_type == RX_FRAME_TYPE_FAST_INTERRUPT);
+	  || frame_type == RX_FRAME_TYPE_FAST_INTERRUPT);
 }
 
 /* Common code used by both normal and exception frame sniffers.  */
 
 static int
 rx_frame_sniffer_common (const struct frame_unwind *self,
-                         struct frame_info *this_frame,
+			 struct frame_info *this_frame,
 			 void **this_cache,
 			 int (*sniff_p)(enum rx_frame_type) )
 {
@@ -586,15 +586,15 @@ rx_frame_sniffer_common (const struct frame_unwind *self,
       enum rx_frame_type frame_type = rx_frame_type (this_frame, this_cache);
 
       if (sniff_p (frame_type))
-        {
+	{
 	  /* The call below will fill in the cache, including the frame
 	     type.  */
 	  (void) rx_analyze_frame_prologue (this_frame, frame_type, this_cache);
 
 	  return 1;
-        }
+	}
       else
-        return 0;
+	return 0;
     }
   else
     {
@@ -608,22 +608,22 @@ rx_frame_sniffer_common (const struct frame_unwind *self,
 
 static int
 rx_frame_sniffer (const struct frame_unwind *self,
-                  struct frame_info *this_frame,
+		  struct frame_info *this_frame,
 		  void **this_cache)
 {
   return rx_frame_sniffer_common (self, this_frame, this_cache,
-                                  normal_frame_p);
+				  normal_frame_p);
 }
 
 /* Frame sniffer for exception frames.  */
 
 static int
 rx_exception_sniffer (const struct frame_unwind *self,
-                             struct frame_info *this_frame,
+			     struct frame_info *this_frame,
 			     void **this_cache)
 {
   return rx_frame_sniffer_common (self, this_frame, this_cache,
-                                  exception_frame_p);
+				  exception_frame_p);
 }
 
 /* Data structure for normal code using instruction-based prologue
@@ -733,8 +733,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 					   byte_order) == struct_addr)
 	    {
 	      /* This argument represents the address at which C++ (and
-	         possibly other languages) store their return value.
-	         Put this value in R15.  */
+		 possibly other languages) store their return value.
+		 Put this value in R15.  */
 	      if (write_pass)
 		regcache_cooked_write_unsigned (regcache, RX_R15_REGNUM,
 						struct_addr);
@@ -750,8 +750,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      && arg_reg <= RX_R4_REGNUM - 1)
 		    {
 		      /* If argument registers are going to be used to pass
-		         an 8 byte scalar, the ABI specifies that two registers
-		         must be available.  */
+			 an 8 byte scalar, the ABI specifies that two registers
+			 must be available.  */
 		      if (write_pass)
 			{
 			  regcache_cooked_write_unsigned (regcache, arg_reg,
@@ -816,7 +816,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else
 	    {
 	      /* Argument is a struct or union.  Pass as much of the struct
-	         in registers, if possible.  Pass the rest on the stack.  */
+		 in registers, if possible.  Pass the rest on the stack.  */
 	      while (arg_size > 0)
 		{
 		  if (i < num_register_candidate_args

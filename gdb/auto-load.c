@@ -364,7 +364,7 @@ filename_is_in_pattern_1 (char *filename, char *pattern)
   for (;;)
     {
       /* Trim trailing slashes ("/").  PATTERN also has slashes trimmed the
-         same way so they will match.  */
+	 same way so they will match.  */
       while (filename_len && IS_DIR_SEPARATOR (filename[filename_len - 1]))
 	filename_len--;
       filename[filename_len] = '\0';

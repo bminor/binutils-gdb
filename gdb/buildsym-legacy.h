@@ -63,7 +63,7 @@ extern struct block *finish_block (struct symbol *symbol,
 				   CORE_ADDR end);
 
 extern void record_block_range (struct block *,
-                                CORE_ADDR start, CORE_ADDR end_inclusive);
+				CORE_ADDR start, CORE_ADDR end_inclusive);
 
 extern void start_subfile (const char *name);
 

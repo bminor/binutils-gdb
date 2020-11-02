@@ -526,7 +526,7 @@ whatis_exp (const char *exp, int show)
     {
       if (((type->code () == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
 	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
-        real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
+	real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
       else if (type->code () == TYPE_CODE_STRUCT)
 	real_type = value_rtti_type (val, &full, &top, &using_enc);
     }
@@ -554,7 +554,7 @@ whatis_exp (const char *exp, int show)
       printf_filtered ("/* real type = ");
       type_print (real_type, "", gdb_stdout, -1);
       if (! full)
-        printf_filtered (" (incomplete object)");
+	printf_filtered (" (incomplete object)");
       printf_filtered (" */\n");    
     }
 

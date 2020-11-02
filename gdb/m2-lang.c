@@ -74,8 +74,8 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
 	goto nosideret;
       /* If the user attempts to subscript something that is not an
-         array or pointer type (like a plain int variable for example),
-         then report this as an error.  */
+	 array or pointer type (like a plain int variable for example),
+	 then report this as an error.  */
 
       arg1 = coerce_ref (arg1);
       type = check_typedef (value_type (arg1));

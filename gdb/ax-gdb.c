@@ -327,8 +327,8 @@ gen_trace_static_fields (struct agent_expr *ax,
 	    {
 	    case axs_lvalue_memory:
 	      {
-	        /* Initialize the TYPE_LENGTH if it is a typedef.  */
-	        check_typedef (value.type);
+		/* Initialize the TYPE_LENGTH if it is a typedef.  */
+		check_typedef (value.type);
 		ax_const_l (ax, TYPE_LENGTH (value.type));
 		ax_simple (ax, aop_trace);
 	      }
@@ -396,10 +396,10 @@ gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
 	  else
 	    {
 	      /* There's no point in trying to use a trace_quick bytecode
-	         here, since "trace_quick SIZE pop" is three bytes, whereas
-	         "const8 SIZE trace" is also three bytes, does the same
-	         thing, and the simplest code which generates that will also
-	         work correctly for objects with large sizes.  */
+		 here, since "trace_quick SIZE pop" is three bytes, whereas
+		 "const8 SIZE trace" is also three bytes, does the same
+		 thing, and the simplest code which generates that will also
+		 work correctly for objects with large sizes.  */
 	      ax_const_l (ax, TYPE_LENGTH (value->type));
 	      ax_simple (ax, aop_trace);
 	    }
@@ -487,7 +487,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
     case TYPE_CODE_CHAR:
     case TYPE_CODE_BOOL:
       /* It's a scalar value, so we know how to dereference it.  How
-         many bytes long is it?  */
+	 many bytes long is it?  */
       switch (TYPE_LENGTH (type))
 	{
 	case 8 / TARGET_CHAR_BIT:
@@ -685,16 +685,16 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
 
     case LOC_REGISTER:
       /* Don't generate any code at all; in the process of treating
-         this as an lvalue or rvalue, the caller will generate the
-         right code.  */
+	 this as an lvalue or rvalue, the caller will generate the
+	 right code.  */
       value->kind = axs_lvalue_register;
       value->u.reg
 	= SYMBOL_REGISTER_OPS (var)->register_number (var, ax->gdbarch);
       break;
 
       /* A lot like LOC_REF_ARG, but the pointer lives directly in a
-         register, not on the stack.  Simpler than LOC_REGISTER
-         because it's just like any other case where the thing
+	 register, not on the stack.  Simpler than LOC_REGISTER
+	 because it's just like any other case where the thing
 	 has a real address.  */
     case LOC_REGPARM_ADDR:
       ax_reg (ax,
@@ -794,10 +794,10 @@ require_rvalue (struct agent_expr *ax, struct axs_value *value)
 
     case axs_lvalue_register:
       /* There's nothing on the stack, but value->u.reg is the
-         register number containing the value.
+	 register number containing the value.
 
-         When we add floating-point support, this is going to have to
-         change.  What about SPARC register pairs, for example?  */
+	 When we add floating-point support, this is going to have to
+	 change.  What about SPARC register pairs, for example?  */
       ax_reg (ax, value->u.reg);
       gen_extend (ax, value->type);
       break;
@@ -840,7 +840,7 @@ gen_usual_unary (struct agent_expr *ax, struct axs_value *value)
       break;
 
       /* Arrays get converted to a pointer to their first element, and
-         are no longer an lvalue.  */
+	 are no longer an lvalue.  */
     case TYPE_CODE_ARRAY:
       {
 	struct type *elements = TYPE_TARGET_TYPE (value->type);
@@ -853,7 +853,7 @@ gen_usual_unary (struct agent_expr *ax, struct axs_value *value)
       break;
 
       /* Don't try to convert structures and unions to rvalues.  Let the
-         consumer signal an error.  */
+	 consumer signal an error.  */
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       return;
@@ -947,10 +947,10 @@ gen_usual_arithmetic (struct agent_expr *ax, struct axs_value *value1,
       && value2->type->code () == TYPE_CODE_INT)
     {
       /* The ANSI integral promotions seem to work this way: Order the
-         integer types by size, and then by signedness: an n-bit
-         unsigned type is considered "wider" than an n-bit signed
-         type.  Promote to the "wider" of the two types, and always
-         promote at least to int.  */
+	 integer types by size, and then by signedness: an n-bit
+	 unsigned type is considered "wider" than an n-bit signed
+	 type.  Promote to the "wider" of the two types, and always
+	 promote at least to int.  */
       struct type *target = max_type (builtin_type (ax->gdbarch)->builtin_int,
 				      max_type (value1->type, value2->type));
 
@@ -958,8 +958,8 @@ gen_usual_arithmetic (struct agent_expr *ax, struct axs_value *value1,
       gen_conversion (ax, value2->type, target);
 
       /* Deal with value1, not on the top of the stack.  Don't
-         generate the `swap' instructions if we're not actually going
-         to do anything.  */
+	 generate the `swap' instructions if we're not actually going
+	 to do anything.  */
       if (is_nontrivial_conversion (value1->type, target))
 	{
 	  ax_simple (ax, aop_swap);
@@ -1009,7 +1009,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
       /* It's implementation-defined, and I'll bet this is what GCC
-         does.  */
+	 does.  */
       break;
 
     case TYPE_CODE_ARRAY:
@@ -1021,10 +1021,10 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
     case TYPE_CODE_ENUM:
     case TYPE_CODE_BOOL:
       /* We don't have to worry about the size of the value, because
-         all our integral values are fully sign-extended, and when
-         casting pointers we can do anything we like.  Is there any
-         way for us to know what GCC actually does with a cast like
-         this?  */
+	 all our integral values are fully sign-extended, and when
+	 casting pointers we can do anything we like.  Is there any
+	 way for us to know what GCC actually does with a cast like
+	 this?  */
       break;
 
     case TYPE_CODE_INT:
@@ -1033,9 +1033,9 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
 
     case TYPE_CODE_VOID:
       /* We could pop the value, and rely on everyone else to check
-         the type and notice that this value doesn't occupy a stack
-         slot.  But for now, leave the value on the stack, and
-         preserve the "value == stack element" assumption.  */
+	 the type and notice that this value doesn't occupy a stack
+	 slot.  But for now, leave the value on the stack, and
+	 preserve the "value == stack element" assumption.  */
       break;
 
     default:
@@ -1321,7 +1321,7 @@ gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
       int op_size = 8 << op;
 
       /* The stack at this point, from bottom to top, contains zero or
-         more fragments, then the address.  */
+	 more fragments, then the address.  */
 
       /* Does this fetch fit within the bitfield?  */
       if (offset + op_size <= bound_end)
@@ -1725,7 +1725,7 @@ gen_repeat (struct expression *exp, union exp_element **pc,
        all we need to do is frob the type of the lvalue.  */
     {
       /* FIXME-type-allocation: need a way to free this type when we are
-         done with it.  */
+	 done with it.  */
       struct type *array
 	= lookup_array_range_type (value1.type, 0, length - 1);
 
@@ -1976,17 +1976,17 @@ gen_expr (struct expression *exp, union exp_element **pc,
       break;
 
       /* Note that we need to be a little subtle about generating code
-         for comma.  In C, we can do some optimizations here because
-         we know the left operand is only being evaluated for effect.
-         However, if the tracing kludge is in effect, then we always
-         need to evaluate the left hand side fully, so that all the
-         variables it mentions get traced.  */
+	 for comma.  In C, we can do some optimizations here because
+	 we know the left operand is only being evaluated for effect.
+	 However, if the tracing kludge is in effect, then we always
+	 need to evaluate the left hand side fully, so that all the
+	 variables it mentions get traced.  */
     case BINOP_COMMA:
       (*pc)++;
       gen_expr (exp, pc, ax, &value1);
       /* Don't just dispose of the left operand.  We might be tracing,
-         in which case we want to emit code to trace it if it's an
-         lvalue.  */
+	 in which case we want to emit code to trace it if it's an
+	 lvalue.  */
       gen_traced_pop (ax, &value1);
       gen_expr (exp, pc, ax, value);
       /* It's the consumer's responsibility to trace the right operand.  */
@@ -2194,8 +2194,8 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case UNOP_SIZEOF:
       (*pc)++;
       /* Notice that gen_sizeof handles its own operand, unlike most
-         of the other unary operator functions.  This is because we
-         have to throw away the code we generate.  */
+	 of the other unary operator functions.  This is because we
+	 have to throw away the code we generate.  */
       gen_sizeof (exp, pc, ax, value,
 		  builtin_type (ax->gdbarch)->builtin_int);
       break;
@@ -2583,7 +2583,7 @@ agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
   if (!eval)
     {
       if (*exp == '/')
-        exp = decode_agent_options (exp, &trace_string);
+	exp = decode_agent_options (exp, &trace_string);
     }
 
   agent_expr_up agent;
@@ -2640,7 +2640,7 @@ agent_command_1 (const char *exp, int eval)
 			NULL, NULL);
       exp = skip_spaces (exp);
       if (exp[0] == ',')
-        {
+	{
 	  exp++;
 	  exp = skip_spaces (exp);
 	}

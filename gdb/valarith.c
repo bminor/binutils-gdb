@@ -120,7 +120,7 @@ value_ptrdiff (struct value *arg1, struct value *arg2)
   if (sz == 0) 
     {
       warning (_("Type size unknown, assuming 1. "
-               "Try casting to a known type, or void *."));
+	       "Try casting to a known type, or void *."));
       sz = 1;
     }
 
@@ -209,11 +209,11 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
       || (VALUE_LVAL (array) != lval_memory && array_upper_bound_undefined))
     {
       if (type_not_associated (array_type))
-        error (_("no such vector element (vector not associated)"));
+	error (_("no such vector element (vector not associated)"));
       else if (type_not_allocated (array_type))
-        error (_("no such vector element (vector not allocated)"));
+	error (_("no such vector element (vector not allocated)"));
       else
-        error (_("no such vector element"));
+	error (_("no such vector element"));
     }
 
   if (is_dynamic_type (elt_type))
@@ -295,16 +295,16 @@ unop_user_defined_p (enum exp_opcode op, struct value *arg1)
 
 static struct value *
 value_user_defined_cpp_op (gdb::array_view<value *> args, char *oper,
-                           int *static_memfuncp, enum noside noside)
+			   int *static_memfuncp, enum noside noside)
 {
 
   struct symbol *symp = NULL;
   struct value *valp = NULL;
 
   find_overload_match (args, oper, BOTH /* could be method */,
-                       &args[0] /* objp */,
-                       NULL /* pass NULL symbol since symbol is unknown */,
-                       &valp, &symp, static_memfuncp, 0, noside);
+		       &args[0] /* objp */,
+		       NULL /* pass NULL symbol since symbol is unknown */,
+		       &valp, &symp, static_memfuncp, 0, noside);
 
   if (valp)
     return valp;
@@ -312,8 +312,8 @@ value_user_defined_cpp_op (gdb::array_view<value *> args, char *oper,
   if (symp)
     {
       /* This is a non member function and does not
-         expect a reference as its first argument
-         rather the explicit structure.  */
+	 expect a reference as its first argument
+	 rather the explicit structure.  */
       args[0] = value_ind (args[0]);
       return value_of_variable (symp, 0);
     }
@@ -519,7 +519,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 				    argvec.slice (1, 2 - static_memfuncp));
     }
   throw_error (NOT_FOUND_ERROR,
-               _("member function %s not found"), tstr);
+	       _("member function %s not found"), tstr);
 }
 
 /* We know that arg1 is a structure, so try to find a unary user
@@ -633,7 +633,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 				    argvec.slice (1, nargs));
     }
   throw_error (NOT_FOUND_ERROR,
-               _("member function %s not found"), tstr);
+	       _("member function %s not found"), tstr);
 }
 
 
@@ -696,7 +696,7 @@ value_concat (struct value *arg1, struct value *arg2)
   if (type1->code () == TYPE_CODE_INT)
     {
       /* We have a repeat count.  Validate the second value and then
-         construct a value repeated that many times.  */
+	 construct a value repeated that many times.  */
       if (type2->code () == TYPE_CODE_STRING
 	  || type2->code () == TYPE_CODE_CHAR)
 	{
@@ -1126,14 +1126,14 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
 	case BINOP_BITWISE_XOR:
 	  v = v1 ^ v2;
-          break;
-              
-        case BINOP_EQUAL:
-          v = v1 == v2;
-          break;
-          
-        case BINOP_NOTEQUAL:
-          v = v1 != v2;
+	  break;
+	      
+	case BINOP_EQUAL:
+	  v = v1 == v2;
+	  break;
+	  
+	case BINOP_NOTEQUAL:
+	  v = v1 != v2;
 	  break;
 
 	default:
@@ -1193,7 +1193,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    case BINOP_EXP:
-              v = uinteger_pow (v1, v2_signed);
+	      v = uinteger_pow (v1, v2_signed);
 	      break;
 
 	    case BINOP_REM:
@@ -1205,7 +1205,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
 	    case BINOP_MOD:
 	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
-	         v1 mod 0 has a defined value, v1.  */
+		 v1 mod 0 has a defined value, v1.  */
 	      if (v2 == 0)
 		{
 		  v = v1;
@@ -1258,9 +1258,9 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      v = v1 == v2;
 	      break;
 
-            case BINOP_NOTEQUAL:
-              v = v1 != v2;
-              break;
+	    case BINOP_NOTEQUAL:
+	      v = v1 != v2;
+	      break;
 
 	    case BINOP_LESS:
 	      v = v1 < v2;
@@ -1315,10 +1315,10 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 		v = v1 / v2;
 	      else
 		error (_("Division by zero"));
-              break;
+	      break;
 
 	    case BINOP_EXP:
-              v = integer_pow (v1, v2);
+	      v = integer_pow (v1, v2);
 	      break;
 
 	    case BINOP_REM:
@@ -1330,7 +1330,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
 	    case BINOP_MOD:
 	      /* Knuth 1.2.4, integer only.  Note that unlike the C '%' op,
-	         X mod 0 has a defined value, X.  */
+		 X mod 0 has a defined value, X.  */
 	      if (v2 == 0)
 		{
 		  v = v1;
@@ -1387,9 +1387,9 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      v = v1 == v2;
 	      break;
 
-            case BINOP_NOTEQUAL:
-              v = v1 != v2;
-              break;
+	    case BINOP_NOTEQUAL:
+	      v = v1 != v2;
+	      break;
 
 	    case BINOP_LESS:
 	      v = v1 < v2;
@@ -1595,11 +1595,11 @@ value_strcmp (struct value *arg1, struct value *arg2)
   for (i = 0; i < len; i++)
     {
       if (s1[i] < s2[i])
-        return -1;
+	return -1;
       else if (s1[i] > s2[i])
-        return 1;
+	return 1;
       else
-        continue;
+	continue;
     }
 
   if (len1 < len2)
@@ -1838,11 +1838,11 @@ value_complement (struct value *arg1)
 
       val = allocate_value (type);
       for (i = 0; i < high_bound - low_bound + 1; i++)
-        {
-          tmp = value_complement (value_subscript (arg1, i));
-          memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
-                  value_contents_all (tmp), TYPE_LENGTH (eltype));
-        }
+	{
+	  tmp = value_complement (value_subscript (arg1, i));
+	  memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
+		  value_contents_all (tmp), TYPE_LENGTH (eltype));
+	}
     }
   else if (type->code () == TYPE_CODE_COMPLEX)
     {

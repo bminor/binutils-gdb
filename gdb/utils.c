@@ -315,13 +315,13 @@ internal_vproblem (struct internal_problem *problem,
 	abort_with_message (msg);
       default:
 	dejavu = 3;
-        /* Newer GLIBC versions put the warn_unused_result attribute
-           on write, but this is one of those rare cases where
-           ignoring the return value is correct.  Casting to (void)
-           does not fix this problem.  This is the solution suggested
-           at http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509.  */
+	/* Newer GLIBC versions put the warn_unused_result attribute
+	   on write, but this is one of those rare cases where
+	   ignoring the return value is correct.  Casting to (void)
+	   does not fix this problem.  This is the solution suggested
+	   at http://gcc.gnu.org/bugzilla/show_bug.cgi?id=25509.  */
 	if (write (STDERR_FILENO, msg, sizeof (msg)) != sizeof (msg))
-          abort (); /* ARI: abort */
+	  abort (); /* ARI: abort */
 	exit (1);
       }
   }
@@ -370,7 +370,7 @@ internal_vproblem (struct internal_problem *problem,
       if (!confirm || !filtered_printing_initialized ())
 	quit_p = 1;
       else
-        quit_p = query (_("%s\nQuit this debugging session? "),
+	quit_p = query (_("%s\nQuit this debugging session? "),
 			reason.c_str ());
     }
   else if (problem->should_quit == internal_problem_yes)
@@ -640,7 +640,7 @@ quit (void)
 #else
   if (job_control
       /* If there is no terminal switching for this target, then we can't
-         possibly get screwed by the lack of job control.  */
+	 possibly get screwed by the lack of job control.  */
       || !target_supports_terminal_ours ())
     throw_quit ("Quit");
   else
@@ -875,15 +875,15 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
       if (answer >= 'a')
 	answer -= 040;
       /* Check answer.  For the non-default, the user must specify
-         the non-default explicitly.  */
+	 the non-default explicitly.  */
       if (answer == not_def_answer)
 	{
 	  retval = !def_value;
 	  break;
 	}
       /* Otherwise, if a default was specified, the user may either
-         specify the required input or have it default by entering
-         nothing.  */
+	 specify the required input or have it default by entering
+	 nothing.  */
       if (answer == def_answer
 	  || (defchar != '\0' && answer == '\0'))
 	{
@@ -1259,8 +1259,8 @@ init_page_info (void)
       chars_per_line = cols;
 
       /* Readline should have fetched the termcap entry for us.
-         Only try to use tgetnum function if rl_get_screen_size
-         did not return a useful value. */
+	 Only try to use tgetnum function if rl_get_screen_size
+	 did not return a useful value. */
       if (((rows <= 0) && (tgetnum ((char *) "li") < 0))
 	/* Also disable paging if inside Emacs.  $EMACS was used
 	   before Emacs v25.1, $INSIDE_EMACS is used since then.  */
@@ -1726,8 +1726,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	    {
 	      wrap_buffer.push_back ('\t');
 	      /* Shifting right by 3 produces the number of tab stops
-	         we have already passed, and then adding one and
-	         shifting left 3 advances to the next tab stop.  */
+		 we have already passed, and then adding one and
+		 shifting left 3 advances to the next tab stop.  */
 	      chars_printed = ((chars_printed >> 3) + 1) << 3;
 	      lineptr++;
 	    }
@@ -3147,7 +3147,7 @@ substitute_path_component (char **stringp, const char *from, const char *to)
 
       if ((s == string || IS_DIR_SEPARATOR (s[-1])
 	   || s[-1] == DIRNAME_SEPARATOR)
-          && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
+	  && (s[from_len] == '\0' || IS_DIR_SEPARATOR (s[from_len])
 	      || s[from_len] == DIRNAME_SEPARATOR))
 	{
 	  char *string_new;

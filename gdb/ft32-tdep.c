@@ -144,7 +144,7 @@ ft32_store_return_value (struct type *type, struct regcache *regcache,
 
 static ULONGEST
 ft32_fetch_instruction (CORE_ADDR a, int *isize,
-		        enum bfd_endian byte_order)
+			enum bfd_endian byte_order)
 {
   unsigned int sc[2];
   ULONGEST inst;

@@ -146,9 +146,9 @@ mipsnbsd_supply_reg (struct regcache *regcache, const char *regs, int regno)
 	  if (gdbarch_cannot_fetch_register (gdbarch, i))
 	    regcache->raw_supply (i, NULL);
 	  else
-            regcache->raw_supply
+	    regcache->raw_supply
 	      (i, regs + (i * mips_isa_regsize (gdbarch)));
-        }
+	}
     }
 }
 
@@ -180,7 +180,7 @@ mipsnbsd_supply_fpreg (struct regcache *regcache,
 	  if (gdbarch_cannot_fetch_register (gdbarch, i))
 	    regcache->raw_supply (i, NULL);
 	  else
-            regcache->raw_supply (i,
+	    regcache->raw_supply (i,
 				 fpregs
 				 + ((i - gdbarch_fp0_regnum (gdbarch))
 				    * mips_isa_regsize (gdbarch)));
@@ -352,7 +352,7 @@ mipsnbsd_lp64_fetch_link_map_offsets (void)
 
 static void
 mipsnbsd_init_abi (struct gdbarch_info info,
-                   struct gdbarch *gdbarch)
+		   struct gdbarch *gdbarch)
 {
   nbsd_init_abi (info, gdbarch);
 

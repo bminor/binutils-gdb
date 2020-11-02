@@ -709,7 +709,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	  
 	  /* Fetch the load module address for this objfile.  */
 	  lm_addr = gdbarch_fetch_tls_load_module_address (gdbarch,
-	                                                   objfile);
+							   objfile);
 
 	  if (gdbarch_get_thread_local_address_p (gdbarch))
 	    addr = gdbarch_get_thread_local_address (gdbarch, ptid, lm_addr,
@@ -718,7 +718,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	    addr = target->get_thread_local_address (ptid, lm_addr, offset);
 	}
       /* If an error occurred, print TLS related messages here.  Otherwise,
-         throw the error to some higher catcher.  */
+	 throw the error to some higher catcher.  */
       catch (const gdb_exception &ex)
 	{
 	  int objfile_is_library = (objfile->flags & OBJF_SHARED);
@@ -732,36 +732,36 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	    case TLS_LOAD_MODULE_NOT_FOUND_ERROR:
 	      if (objfile_is_library)
 		error (_("Cannot find shared library `%s' in dynamic"
-		         " linker's load module list"), objfile_name (objfile));
+			 " linker's load module list"), objfile_name (objfile));
 	      else
 		error (_("Cannot find executable file `%s' in dynamic"
-		         " linker's load module list"), objfile_name (objfile));
+			 " linker's load module list"), objfile_name (objfile));
 	      break;
 	    case TLS_NOT_ALLOCATED_YET_ERROR:
 	      if (objfile_is_library)
 		error (_("The inferior has not yet allocated storage for"
-		         " thread-local variables in\n"
-		         "the shared library `%s'\n"
-		         "for %s"),
+			 " thread-local variables in\n"
+			 "the shared library `%s'\n"
+			 "for %s"),
 		       objfile_name (objfile),
 		       target_pid_to_str (ptid).c_str ());
 	      else
 		error (_("The inferior has not yet allocated storage for"
-		         " thread-local variables in\n"
-		         "the executable `%s'\n"
-		         "for %s"),
+			 " thread-local variables in\n"
+			 "the executable `%s'\n"
+			 "for %s"),
 		       objfile_name (objfile),
 		       target_pid_to_str (ptid).c_str ());
 	      break;
 	    case TLS_GENERIC_ERROR:
 	      if (objfile_is_library)
 		error (_("Cannot find thread-local storage for %s, "
-		         "shared library %s:\n%s"),
+			 "shared library %s:\n%s"),
 		       target_pid_to_str (ptid).c_str (),
 		       objfile_name (objfile), ex.what ());
 	      else
 		error (_("Cannot find thread-local storage for %s, "
-		         "executable file %s:\n%s"),
+			 "executable file %s:\n%s"),
 		       target_pid_to_str (ptid).c_str (),
 		       objfile_name (objfile), ex.what ());
 	      break;
@@ -913,7 +913,7 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
 	break;
 
       /* Don't continue past targets which have all the memory.
-         At one time, this code was necessary to read data from
+	 At one time, this code was necessary to read data from
 	 executables / shared libraries when data for the requested
 	 addresses weren't available in the core file.  But now the
 	 core target handles this case itself.  */
@@ -3643,18 +3643,18 @@ flash_erase_command (const char *cmd, int from_tty)
     {
       /* Is this a flash memory region?  */
       if (m.attrib.mode == MEM_FLASH)
-        {
-          found_flash_region = true;
-          target_flash_erase (m.lo, m.hi - m.lo);
+	{
+	  found_flash_region = true;
+	  target_flash_erase (m.lo, m.hi - m.lo);
 
 	  ui_out_emit_tuple tuple_emitter (current_uiout, "erased-regions");
 
-          current_uiout->message (_("Erasing flash memory region at address "));
-          current_uiout->field_core_addr ("address", gdbarch, m.lo);
-          current_uiout->message (", size = ");
-          current_uiout->field_string ("size", hex_string (m.hi - m.lo));
-          current_uiout->message ("\n");
-        }
+	  current_uiout->message (_("Erasing flash memory region at address "));
+	  current_uiout->field_core_addr ("address", gdbarch, m.lo);
+	  current_uiout->message (", size = ");
+	  current_uiout->field_string ("size", hex_string (m.hi - m.lo));
+	  current_uiout->message ("\n");
+	}
     }
 
   /* Did we do any flash operations?  If so, we need to finalize them.  */
@@ -3897,8 +3897,8 @@ result in significant performance improvement for remote targets."),
 	   _("Send a command to the remote monitor (remote targets only)."));
 
   add_cmd ("target-stack", class_maintenance, maintenance_print_target_stack,
-           _("Print the name of each layer of the internal target stack."),
-           &maintenanceprintlist);
+	   _("Print the name of each layer of the internal target stack."),
+	   &maintenanceprintlist);
 
   add_setshow_boolean_cmd ("target-async", no_class,
 			   &target_async_permitted_1, _("\
@@ -3975,7 +3975,7 @@ Otherwise, any attempt to interrupt or stop will be ignored."),
 			   &setlist, &showlist);
 
   add_com ("flash-erase", no_class, flash_erase_command,
-           _("Erase all flash memory regions."));
+	   _("Erase all flash memory regions."));
 
   add_setshow_boolean_cmd ("auto-connect-native-target", class_support,
 			   &auto_connect_native_target, _("\

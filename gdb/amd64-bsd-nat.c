@@ -144,12 +144,12 @@ amd64bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (gdb_ptrace (PT_GETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-        perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_("Couldn't get registers"));
 
       amd64_collect_native_gregset (regcache, &regs, regnum);
 
       if (gdb_ptrace (PT_SETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-        perror_with_name (_("Couldn't write registers"));
+	perror_with_name (_("Couldn't write registers"));
 
       if (regnum != -1)
 	return;

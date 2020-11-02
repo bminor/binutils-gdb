@@ -461,8 +461,8 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       break;
     case N_SETV:
       /* I don't think this type actually exists; since a N_SETV is the result
-         of going over many .o files, it doesn't make sense to have one
-         file local.  */
+	 of going over many .o files, it doesn't make sense to have one
+	 file local.  */
       ms_type = mst_file_data;
       section = SECT_OFF_DATA (objfile);
       break;
@@ -478,9 +478,9 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       ms_type = mst_file_data;
 
       /* Check for __DYNAMIC, which is used by Sun shared libraries. 
-         Record it as global even if it's local, not global, so
-         lookup_minimal_symbol can find it.  We don't check symbol_leading_char
-         because for SunOS4 it always is '_'.  */
+	 Record it as global even if it's local, not global, so
+	 lookup_minimal_symbol can find it.  We don't check symbol_leading_char
+	 because for SunOS4 it always is '_'.  */
       if (name[8] == 'C' && strcmp ("__DYNAMIC", name) == 0)
 	ms_type = mst_data;
 
@@ -627,8 +627,8 @@ dbx_symfile_init (struct objfile *objfile)
   if (STRING_TABLE_OFFSET == 0)
     {
       /* It appears that with the existing bfd code, STRING_TABLE_OFFSET
-         will never be zero, even when there is no string table.  This
-         would appear to be a bug in bfd.  */
+	 will never be zero, even when there is no string table.  This
+	 would appear to be a bug in bfd.  */
       DBX_STRINGTAB_SIZE (objfile) = 0;
       DBX_STRINGTAB (objfile) = NULL;
     }
@@ -762,7 +762,7 @@ fill_symbuf (bfd *sym_bfd)
     {
       nbytes = sizeof (symbuf);
       if (nbytes > symbuf_left)
-        nbytes = symbuf_left;
+	nbytes = symbuf_left;
       memcpy (symbuf, stabs_data + symbuf_read, nbytes);
     }
   else if (symbuf_sections == NULL)
@@ -910,8 +910,8 @@ find_stab_function (const char *namestring, const char *filename,
   if (msym.minsym == NULL)
     {
       /* Sun Fortran appends an underscore to the minimal symbol name,
-         try again with an appended underscore if the minimal symbol
-         was not found.  */
+	 try again with an appended underscore if the minimal symbol
+	 was not found.  */
       p[n] = '_';
       p[n + 1] = 0;
       msym = lookup_minimal_symbol (p, filename, objfile);
@@ -1066,15 +1066,15 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
       OBJSTAT (objfile, n_stabs++);
 
       /* Ok.  There is a lot of code duplicated in the rest of this
-         switch statement (for efficiency reasons).  Since I don't
-         like duplicating code, I will do my penance here, and
-         describe the code which is duplicated:
+	 switch statement (for efficiency reasons).  Since I don't
+	 like duplicating code, I will do my penance here, and
+	 describe the code which is duplicated:
 
-         *) The assignment to namestring.
-         *) The call to strchr.
-         *) The addition of a partial symbol the two partial
-         symbol lists.  This last is a large section of code, so
-         I've imbedded it in the following macro.  */
+	 *) The assignment to namestring.
+	 *) The call to strchr.
+	 *) The addition of a partial symbol the two partial
+	 symbol lists.  This last is a large section of code, so
+	 I've imbedded it in the following macro.  */
 
       switch (nlist.n_type)
 	{
@@ -1275,8 +1275,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	      {
 		/* Save the directory name SOs locally, then save it into
 		   the psymtab when it's created below.  */
-	        dirname_nso = namestring;
-	        continue;		
+		dirname_nso = namestring;
+		continue;		
 	      }
 
 	    /* Some other compilers (C++ ones in particular) emit useless
@@ -1993,9 +1993,9 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
   else
     {
       /* If we know our own starting text address, then walk through all other
-         psymtabs for this objfile, and if any didn't know their ending text
-         address, set it to our starting address.  Take care to not set our
-         own ending address to our starting address.  */
+	 psymtabs for this objfile, and if any didn't know their ending text
+	 address, set it to our starting address.  Take care to not set our
+	 own ending address to our starting address.  */
 
       for (partial_symtab *p1 : objfile->psymtabs ())
 	if (!p1->text_high_valid && p1->text_low_valid && p1 != pst)
@@ -2028,7 +2028,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 	LDSYMLEN (subpst) = 0;
 
       /* We could save slight bits of space by only making one of these,
-         shared by the entire set of include files.  FIXME-someday.  */
+	 shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies =
 	objfile->partial_symtabs->allocate_dependencies (1);
       subpst->dependencies[0] = pst;
@@ -2045,10 +2045,10 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
     {
       /* Throw away this psymtab, it's empty.  */
       /* Empty psymtabs happen as a result of header files which don't have
-         any symbols in them.  There can be a lot of them.  But this check
-         is wrong, in that a psymtab with N_SLINE entries but nothing else
-         is not empty, but we don't realize that.  Fixing that without slowing
-         things down might be tricky.  */
+	 any symbols in them.  There can be a lot of them.  But this check
+	 is wrong, in that a psymtab with N_SLINE entries but nothing else
+	 is not empty, but we don't realize that.  Fixing that without slowing
+	 things down might be tricky.  */
 
       objfile->partial_symtabs->discard_psymtab (pst);
 
@@ -2110,7 +2110,7 @@ dbx_read_symtab (legacy_psymtab *self, struct objfile *objfile)
       }
 
       /* Match with global symbols.  This only needs to be done once,
-         after all of the symtabs and dependencies have been read in.   */
+	 after all of the symtabs and dependencies have been read in.   */
       scan_file_globals (objfile);
     }
 }
@@ -2182,8 +2182,8 @@ read_ofile_symtab (struct objfile *objfile, legacy_psymtab *pst)
   else
     {
       /* The N_SO starting this symtab is the first symbol, so we
-         better not check the symbol before it.  I'm not this can
-         happen, but it doesn't hurt to check for it.  */
+	 better not check the symbol before it.  I'm not this can
+	 happen, but it doesn't hurt to check for it.  */
       stabs_seek (sym_offset);
       processing_gcc_compilation = 0;
     }
@@ -2231,7 +2231,7 @@ read_ofile_symtab (struct objfile *objfile, legacy_psymtab *pst)
 			      PST_LANGUAGE (pst));
 	}
       /* We skip checking for a new .o or -l file; that should never
-         happen in this routine.  */
+	 happen in this routine.  */
       else if (type == N_TEXT)
 	{
 	  /* I don't think this code will ever be executed, because
@@ -2362,9 +2362,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
   if (get_last_source_file () == NULL && type != (unsigned char) N_SO)
     {
       /* Ignore any symbols which appear before an N_SO symbol.
-         Currently no one puts symbols there, but we should deal
-         gracefully with the case.  A complain()t might be in order,
-         but this should not be an error ().  */
+	 Currently no one puts symbols there, but we should deal
+	 gracefully with the case.  A complain()t might be in order,
+	 but this should not be an error ().  */
       return;
     }
 
@@ -2427,7 +2427,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
     case N_LBRAC:
       /* This "symbol" just indicates the start of an inner lexical
-         context within a function.  */
+	 context within a function.  */
 
       /* Ignore extra outermost context from SunPRO cc and acc.  */
       if (n_opt_found && desc == 1)
@@ -2440,7 +2440,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
     case N_RBRAC:
       /* This "symbol" just indicates the end of an inner lexical
-         context that was started with N_LBRAC.  */
+	 context that was started with N_LBRAC.  */
 
       /* Ignore extra outermost context from SunPRO cc and acc.  */
       if (n_opt_found && desc == 1)
@@ -2506,15 +2506,15 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
     case N_FN:
     case N_FN_SEQ:
       /* This kind of symbol indicates the start of an object file.
-         Relocate for dynamic loading.  */
+	 Relocate for dynamic loading.  */
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
       break;
 
     case N_SO:
       /* This type of symbol indicates the start of data for one
-         source file.  Finish the symbol table of the previous source
-         file (if any) and start accumulating a new symbol table.
-         Relocate for dynamic loading.  */
+	 source file.  Finish the symbol table of the previous source
+	 file (if any) and start accumulating a new symbol table.
+	 Relocate for dynamic loading.  */
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
 
       n_opt_found = 0;
@@ -2535,7 +2535,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	}
 
       /* Null name means this just marks the end of text for this .o
-         file.  Don't start a new symtab in this case.  */
+	 file.  Don't start a new symtab in this case.  */
       if (*name == '\000')
 	break;
 
@@ -2548,9 +2548,9 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
     case N_SOL:
       /* This type of symbol indicates the start of data for a
-         sub-source-file, one whose contents were copied or included
-         in the compilation of the main source file (whose name was
-         given in the N_SO symbol).  Relocate for dynamic loading.  */
+	 sub-source-file, one whose contents were copied or included
+	 in the compilation of the main source file (whose name was
+	 given in the N_SO symbol).  Relocate for dynamic loading.  */
       valu += section_offsets[SECT_OFF_TEXT (objfile)];
       start_subfile (name);
       break;
@@ -2571,11 +2571,11 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
     case N_SLINE:
       /* This type of "symbol" really just records one line-number --
-         core-address correspondence.  Enter it in the line list for
-         this symbol table.  */
+	 core-address correspondence.  Enter it in the line list for
+	 this symbol table.  */
 
       /* Relocate for dynamic loading and for ELF acc
-         function-relative symbols.  */
+	 function-relative symbols.  */
       valu += function_start_offset;
 
       /* GCC 2.95.3 emits the first N_SLINE stab somewhere in the
@@ -2615,22 +2615,22 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       break;
 
       /* The following symbol types need to have the appropriate
-         offset added to their value; then we process symbol
-         definitions in the name.  */
+	 offset added to their value; then we process symbol
+	 definitions in the name.  */
 
     case N_STSYM:		/* Static symbol in data segment.  */
     case N_LCSYM:		/* Static symbol in BSS segment.  */
     case N_ROSYM:		/* Static symbol in read-only data segment.  */
       /* HORRID HACK DEPT.  However, it's Sun's furgin' fault.
-         Solaris 2's stabs-in-elf makes *most* symbols relative but
-         leaves a few absolute (at least for Solaris 2.1 and version
-         2.0.1 of the SunPRO compiler).  N_STSYM and friends sit on
-         the fence.  .stab "foo:S...",N_STSYM is absolute (ld
-         relocates it) .stab "foo:V...",N_STSYM is relative (section
-         base subtracted).  This leaves us no choice but to search for
-         the 'S' or 'V'...  (or pass the whole section_offsets stuff
-         down ONE MORE function call level, which we really don't want
-         to do).  */
+	 Solaris 2's stabs-in-elf makes *most* symbols relative but
+	 leaves a few absolute (at least for Solaris 2.1 and version
+	 2.0.1 of the SunPRO compiler).  N_STSYM and friends sit on
+	 the fence.  .stab "foo:S...",N_STSYM is absolute (ld
+	 relocates it) .stab "foo:V...",N_STSYM is relative (section
+	 base subtracted).  This leaves us no choice but to search for
+	 the 'S' or 'V'...  (or pass the whole section_offsets stuff
+	 down ONE MORE function call level, which we really don't want
+	 to do).  */
       {
 	const char *p;
 
@@ -2656,7 +2656,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	      }
 	  }
 	/* Since it's not the kludge case, re-dispatch to the right
-           handler.  */
+	   handler.  */
 	switch (type)
 	  {
 	  case N_STSYM:
@@ -2692,8 +2692,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       goto define_a_symbol;
 
       /* The following symbol types we don't know how to process.
-         Handle them in a "default" way, but complain to people who
-         care.  */
+	 Handle them in a "default" way, but complain to people who
+	 care.  */
     default:
     case N_CATCH:		/* Exception handler catcher.  */
     case N_EHDECL:		/* Exception handler name.  */
@@ -2712,7 +2712,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
     define_a_symbol:
       /* These symbol types don't need the address field relocated,
-         since it is either unused, or is absolute.  */
+	 since it is either unused, or is absolute.  */
     case N_GSYM:		/* Global variable.  */
     case N_NSYMS:		/* Number of symbols (Ultrix).  */
     case N_NOMAP:		/* No map?  (Ultrix).  */
@@ -2737,7 +2737,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	    case 'f':
 	    case 'F':
 	      /* Deal with the SunPRO 3.0 compiler which omits the
-	         address from N_FUN symbols.  */
+		 address from N_FUN symbols.  */
 	      if (type == N_FUN
 		  && valu == section_offsets[SECT_OFF_TEXT (objfile)]
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
@@ -2789,8 +2789,8 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       break;
 
       /* We use N_OPT to carry the gcc2_compiled flag.  Sun uses it
-         for a bunch of other flags, too.  Someday we may parse their
-         flags; for now we ignore theirs and hope they'll ignore ours.  */
+	 for a bunch of other flags, too.  Someday we may parse their
+	 flags; for now we ignore theirs and hope they'll ignore ours.  */
     case N_OPT:			/* Solaris 2: Compiler options.  */
       if (name)
 	{
@@ -2821,7 +2821,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
     case N_PATCH:		/* Solaris 2: Patch Run Time Checker.  */
       /* N_UNDF:                   Solaris 2: File separator mark.  */
       /* N_UNDF: -- we will never encounter it, since we only process
-         one file's symbols at once.  */
+	 one file's symbols at once.  */
     case N_ENDM:		/* Solaris 2: End of module.  */
     case N_ALIAS:		/* SunPro F77: alias name, ignore for now.  */
       break;
@@ -2836,17 +2836,17 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
   if (name[0] == '#')
     {
       /* Initialize symbol reference names and determine if this is a
-         definition.  If a symbol reference is being defined, go ahead
-         and add it.  Otherwise, just return.  */
+	 definition.  If a symbol reference is being defined, go ahead
+	 and add it.  Otherwise, just return.  */
 
       const char *s = name;
       int refnum;
 
       /* If this stab defines a new reference ID that is not on the
-         reference list, then put it on the reference list.
+	 reference list, then put it on the reference list.
 
-         We go ahead and advance NAME past the reference, even though
-         it is not strictly necessary at this time.  */
+	 We go ahead and advance NAME past the reference, even though
+	 it is not strictly necessary at this time.  */
       refnum = symbol_reference_defined (&s);
       if (refnum >= 0)
 	if (!ref_search (refnum))

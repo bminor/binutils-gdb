@@ -199,7 +199,7 @@ core_target::build_file_mappings ()
     /* read_core_file_mappings will invoke this lambda for each mapping
        that it finds.  */
     [&] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
-         const char *filename, const void *other)
+	 const char *filename, const void *other)
       {
 	/* Architecture-specific read_core_mapping methods are expected to
 	   weed out non-file-backed mappings.  */
@@ -226,7 +226,7 @@ core_target::build_file_mappings ()
 	      }
 
 	    bfd = bfd_map[filename] = bfd_openr (expanded_fname.get (),
-	                                         "binary");
+						 "binary");
 
 	    if (bfd == nullptr || !bfd_check_format (bfd, bfd_object))
 	      {
@@ -287,7 +287,7 @@ core_target::close ()
       exit_inferior_silent (current_inferior ());
 
       /* Clear out solib state while the bfd is still open.  See
-         comments in clear_solib in solib.c.  */
+	 comments in clear_solib in solib.c.  */
       clear_solib ();
 
       current_program_space->cbfd.reset (nullptr);
@@ -435,8 +435,8 @@ core_target_open (const char *arg, int from_tty)
     {
       /* Do it after the err msg */
       /* FIXME: should be checking for errors from bfd_close (for one
-         thing, on error it does not free all the storage associated
-         with the bfd).  */
+	 thing, on error it does not free all the storage associated
+	 with the bfd).  */
       error (_("\"%s\" is not a core dump: %s"),
 	     filename.get (), bfd_errmsg (bfd_get_error ()));
     }
@@ -760,7 +760,7 @@ core_target::xfer_memory_via_mappings (gdb_byte *readbuf,
   for (const auto &mr : m_core_unavailable_mappings)
     {
       if (address_in_mem_range (memaddr, &mr))
-        {
+	{
 	  if (!address_in_mem_range (memend, &mr))
 	    len = mr.start + mr.length - memaddr;
 
@@ -1167,7 +1167,7 @@ _initialize_corelow ()
 {
   add_target (core_target_info, core_target_open, filename_completer);
   add_cmd ("core-file-backed-mappings", class_maintenance,
-           maintenance_print_core_file_backed_mappings,
+	   maintenance_print_core_file_backed_mappings,
 	   _("Print core file's file-backed mappings."),
 	   &maintenanceprintlist);
 }

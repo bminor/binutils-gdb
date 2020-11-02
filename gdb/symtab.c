@@ -637,7 +637,7 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   else if (physname[0] == 't' || physname[0] == 'Q')
     {
       /* The physname for template and qualified methods already includes
-         the class name.  */
+	 the class name.  */
       xsnprintf (buf, sizeof (buf), "__%s%s", const_prefix, volatile_prefix);
       newname = NULL;
       len = 0;
@@ -848,7 +848,7 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
   if (language () == language_ada)
     {
       /* In Ada, we do the symbol lookups using the mangled name, so
-         we can save some space by not storing the demangled name.  */
+	 we can save some space by not storing the demangled name.  */
       if (!copy_name)
 	m_name = linkage_name.data ();
       else
@@ -867,7 +867,7 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
   if (!hash.has_value ())
     hash = hash_demangled_name_entry (&entry);
   slot = ((struct demangled_name_entry **)
-          htab_find_slot_with_hash (per_bfd->demangled_names_hash.get (),
+	  htab_find_slot_with_hash (per_bfd->demangled_names_hash.get (),
 				    &entry, *hash, INSERT));
 
   /* The const_cast is safe because the only reason it is already
@@ -887,8 +887,8 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
       || (language () == language_go && (*slot)->demangled == nullptr))
     {
       /* A 0-terminated copy of the linkage name.  Callers must set COPY_NAME
-         to true if the string might not be nullterminated.  We have to make
-         this copy because demangling needs a nullterminated string.  */
+	 to true if the string might not be nullterminated.  We have to make
+	 this copy because demangling needs a nullterminated string.  */
       gdb::string_view linkage_name_copy;
       if (copy_name)
 	{
@@ -2137,14 +2137,14 @@ lookup_local_symbol (const char *name,
 	return (struct block_symbol) {sym, block};
 
       if (language == language_cplus || language == language_fortran)
-        {
-          struct block_symbol blocksym
+	{
+	  struct block_symbol blocksym
 	    = cp_lookup_symbol_imports_or_template (scope, name, block,
 						    domain);
 
-          if (blocksym.symbol != NULL)
-            return blocksym;
-        }
+	  if (blocksym.symbol != NULL)
+	    return blocksym;
+	}
 
       if (BLOCK_FUNCTION (block) != NULL && block_inlined_p (block))
 	break;
@@ -2206,7 +2206,7 @@ lookup_global_symbol_from_objfile (struct objfile *main_objfile,
   for (objfile *objfile : main_objfile->separate_debug_objfiles ())
     {
       struct block_symbol result
-        = lookup_symbol_in_objfile (objfile, block_index, name, domain);
+	= lookup_symbol_in_objfile (objfile, block_index, name, domain);
 
       if (result.symbol != nullptr)
 	return result;
@@ -3196,7 +3196,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	       fatally.  */
 	    if (BMSYMBOL_VALUE_ADDRESS (mfunsym) == pc)
 	      internal_error (__FILE__, __LINE__,
-	        _("Infinite recursion detected in find_pc_sect_line;"
+		_("Infinite recursion detected in find_pc_sect_line;"
 		  "please file a bug report"));
 
 	    return find_pc_line (BMSYMBOL_VALUE_ADDRESS (mfunsym), 0);
@@ -3242,7 +3242,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       item = l->item;		/* Get first line info.  */
 
       /* Is this file's first line closer than the first lines of other files?
-         If so, record this file, and its first line, as best alternate.  */
+	 If so, record this file, and its first line, as best alternate.  */
       if (item->pc > pc && (!alt || item->pc < alt->pc))
 	alt = item;
 
@@ -3259,14 +3259,14 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	prev = item - 1;		/* Found a matching item.  */
 
       /* At this point, prev points at the line whose start addr is <= pc, and
-         item points at the next line.  If we ran off the end of the linetable
-         (pc >= start of the last line), then prev == item.  If pc < start of
-         the first line, prev will not be set.  */
+	 item points at the next line.  If we ran off the end of the linetable
+	 (pc >= start of the last line), then prev == item.  If pc < start of
+	 the first line, prev will not be set.  */
 
       /* Is this file's best line closer than the best in the other files?
-         If so, record this file, and its best line, as best so far.  Don't
-         save prev if it represents the end of a function (i.e. line number
-         0) instead of a real line.  */
+	 If so, record this file, and its best line, as best so far.  Don't
+	 save prev if it represents the end of a function (i.e. line number
+	 0) instead of a real line.  */
 
       if (prev && prev->line && (!best || prev->pc > best->pc))
 	{
@@ -3400,15 +3400,15 @@ find_line_symtab (struct symtab *sym_tab, int line,
   if (best_index < 0 || !exact)
     {
       /* Didn't find an exact match.  So we better keep looking for
-         another symtab with the same name.  In the case of xcoff,
-         multiple csects for one source file (produced by IBM's FORTRAN
-         compiler) produce multiple symtabs (this is unavoidable
-         assuming csects can be at arbitrary places in memory and that
-         the GLOBAL_BLOCK of a symtab has a begin and end address).  */
+	 another symtab with the same name.  In the case of xcoff,
+	 multiple csects for one source file (produced by IBM's FORTRAN
+	 compiler) produce multiple symtabs (this is unavoidable
+	 assuming csects can be at arbitrary places in memory and that
+	 the GLOBAL_BLOCK of a symtab has a begin and end address).  */
 
       /* BEST is the smallest linenumber > LINE so far seen,
-         or 0 if none has been seen so far.
-         BEST_INDEX and BEST_LINETABLE identify the item for it.  */
+	 or 0 if none has been seen so far.
+	 BEST_INDEX and BEST_LINETABLE identify the item for it.  */
       int best;
 
       if (best_index >= 0)
@@ -3804,7 +3804,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   else
     {
       struct bound_minimal_symbol msymbol
-        = lookup_minimal_symbol_by_pc_section (sal->pc, sal->section);
+	= lookup_minimal_symbol_by_pc_section (sal->pc, sal->section);
 
       if (msymbol.minsym == NULL)
 	return;
@@ -3845,7 +3845,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       /* Skip "first line" of function (which is actually its prologue).  */
       pc += gdbarch_deprecated_function_start_offset (gdbarch);
       if (gdbarch_skip_entrypoint_p (gdbarch))
-        pc = gdbarch_skip_entrypoint (gdbarch, pc);
+	pc = gdbarch_skip_entrypoint (gdbarch, pc);
       if (skip)
 	pc = gdbarch_skip_prologue_noexcept (gdbarch, pc);
 
@@ -4754,16 +4754,16 @@ global_symbol_searcher::search () const
       const char *symbol_name_regexp = m_symbol_name_regexp;
 
       /* Make sure spacing is right for C++ operators.
-         This is just a courtesy to make the matching less sensitive
-         to how many spaces the user leaves between 'operator'
-         and <TYPENAME> or <OPERATOR>.  */
+	 This is just a courtesy to make the matching less sensitive
+	 to how many spaces the user leaves between 'operator'
+	 and <TYPENAME> or <OPERATOR>.  */
       const char *opend;
       const char *opname = operator_chars (symbol_name_regexp, &opend);
 
       if (*opname)
 	{
 	  int fix = -1;		/* -1 means ok; otherwise number of
-                                    spaces needed.  */
+				    spaces needed.  */
 
 	  if (isalpha (*opname) || *opname == '_' || *opname == '$')
 	    {
@@ -5662,7 +5662,7 @@ default_collect_symbol_completion_matches_break_on
 	      quote_found = '\0';
 	    else if (*p == '\\' && p[1] == quote_found)
 	      /* A backslash followed by the quote character
-	         doesn't end the string.  */
+		 doesn't end the string.  */
 	      ++p;
 	  }
 	else if (*p == '\'' || *p == '"')
@@ -5676,7 +5676,7 @@ default_collect_symbol_completion_matches_break_on
       sym_text = quote_pos + 1;
     else if (quote_found == '"')
       /* A double-quoted string is never a symbol, nor does it make sense
-         to complete it any other way.  */
+	 to complete it any other way.  */
       {
 	return;
       }
@@ -5897,7 +5897,7 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
 	      quote_found = '\0';
 	    else if (*p == '\\' && p[1] == quote_found)
 	      /* A backslash followed by the quote character
-	         doesn't end the string.  */
+		 doesn't end the string.  */
 	      ++p;
 	  }
 	else if (*p == '\'' || *p == '"')
@@ -5911,7 +5911,7 @@ collect_file_symbol_completion_matches (completion_tracker &tracker,
       sym_text = quote_pos + 1;
     else if (quote_found == '"')
       /* A double-quoted string is never a symbol, nor does it make sense
-         to complete it any other way.  */
+	 to complete it any other way.  */
       {
 	return;
       }
@@ -6848,12 +6848,12 @@ The -q flag suppresses printing some header information."),
 	   _("Set a breakpoint for all functions matching REGEXP."));
 
   add_setshow_enum_cmd ("multiple-symbols", no_class,
-                        multiple_symbols_modes, &multiple_symbols_mode,
-                        _("\
+			multiple_symbols_modes, &multiple_symbols_mode,
+			_("\
 Set how the debugger handles ambiguities in expressions."), _("\
 Show how the debugger handles ambiguities in expressions."), _("\
 Valid values are \"ask\", \"all\", \"cancel\", and the default is \"all\"."),
-                        NULL, NULL, &setlist, &showlist);
+			NULL, NULL, &setlist, &showlist);
 
   add_setshow_boolean_cmd ("basenames-may-differ", class_obscure,
 			   &basenames_may_differ, _("\

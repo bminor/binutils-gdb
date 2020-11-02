@@ -972,7 +972,7 @@ nto_procfs_target::xfer_partial (enum target_object object,
 	    return TARGET_XFER_E_IO;
 
 	  err = devctl (ctl_fd, DCMD_PROC_INFO, &procinfo,
-		        sizeof procinfo, 0);
+			sizeof procinfo, 0);
 	  if (err != EOK)
 	    return TARGET_XFER_E_IO;
 
@@ -1316,7 +1316,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
     {
       /* FIXME: expected warning?  */
       /* warning( "Failed to set Kill-on-Last-Close flag: errno = %d(%s)\n",
-         errn, safe_strerror(errn) ); */
+	 errn, safe_strerror(errn) ); */
     }
   if (!target_is_pushed (ops))
     push_target (ops);
@@ -1451,7 +1451,7 @@ nto_procfs_target::pass_signals
     {
       int target_signo = gdb_signal_from_host (signo);
       if (target_signo < pass_signals.size () && pass_signals[target_signo])
-        sigdelset (&run.trace, signo);
+	sigdelset (&run.trace, signo);
     }
 }
 

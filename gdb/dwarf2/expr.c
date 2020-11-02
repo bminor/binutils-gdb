@@ -859,8 +859,8 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    stack.clear ();
 
 	    /* FIXME: cagney/2003-03-26: This code should be using
-               get_frame_base_address(), and then implement a dwarf2
-               specific this_base method.  */
+	       get_frame_base_address(), and then implement a dwarf2
+	       specific this_base method.  */
 	    this->get_frame_base (&datastart, &datalen);
 	    eval (datastart, datalen);
 	    if (this->location == DWARF_VALUE_MEMORY)
@@ -1040,7 +1040,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		break;
 	      case DW_OP_div:
 		result_val = value_binop (first, second, BINOP_DIV);
-                break;
+		break;
 	      case DW_OP_minus:
 		result_val = value_binop (first, second, BINOP_SUB);
 		break;
@@ -1100,7 +1100,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		   with.  */
 		if (value_type (result_val) != value_type (second))
 		  result_val = value_cast (value_type (second), result_val);
-                break;
+		break;
 	      case DW_OP_shra:
 		dwarf_require_integral (value_type (first));
 		dwarf_require_integral (value_type (second));
@@ -1202,38 +1202,38 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_nop:
 	  goto no_push;
 
-        case DW_OP_piece:
-          {
-            uint64_t size;
+	case DW_OP_piece:
+	  {
+	    uint64_t size;
 
-            /* Record the piece.  */
-            op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
+	    /* Record the piece.  */
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
 	    add_piece (8 * size, 0);
 
-            /* Pop off the address/regnum, and reset the location
+	    /* Pop off the address/regnum, and reset the location
 	       type.  */
 	    if (this->location != DWARF_VALUE_LITERAL
 		&& this->location != DWARF_VALUE_OPTIMIZED_OUT)
 	      pop ();
-            this->location = DWARF_VALUE_MEMORY;
-          }
-          goto no_push;
+	    this->location = DWARF_VALUE_MEMORY;
+	  }
+	  goto no_push;
 
 	case DW_OP_bit_piece:
 	  {
 	    uint64_t size, uleb_offset;
 
-            /* Record the piece.  */
+	    /* Record the piece.  */
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &size);
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uleb_offset);
 	    add_piece (size, uleb_offset);
 
-            /* Pop off the address/regnum, and reset the location
+	    /* Pop off the address/regnum, and reset the location
 	       type.  */
 	    if (this->location != DWARF_VALUE_LITERAL
 		&& this->location != DWARF_VALUE_OPTIMIZED_OUT)
 	      pop ();
-            this->location = DWARF_VALUE_MEMORY;
+	    this->location = DWARF_VALUE_MEMORY;
 	  }
 	  goto no_push;
 
@@ -1267,7 +1267,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  {
 	    sect_offset sect_off
 	      = (sect_offset) extract_unsigned_integer (op_ptr,
-	                                                this->ref_addr_size,
+							this->ref_addr_size,
 							byte_order);
 	    op_ptr += this->ref_addr_size;
 	    result_val = value_cast (address_type,

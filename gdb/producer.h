@@ -43,9 +43,9 @@ extern int producer_is_gcc (const char *producer, int *major, int *minor);
 
      Public release:
        "Intel(R) Fortran Intel(R) 64 Compiler XE for applications
-        running on Intel(R) 64, Version 14.0.1.074 Build 20130716";
-        "Intel(R) C++ Intel(R) 64 Compiler XE for applications
-        running on Intel(R) 64, Version 14.0.1.074 Build 20130716";
+	running on Intel(R) 64, Version 14.0.1.074 Build 20130716";
+	"Intel(R) C++ Intel(R) 64 Compiler XE for applications
+	running on Intel(R) 64, Version 14.0.1.074 Build 20130716";
 
     Internal releases:
       "Intel(R) C++ Intel(R) 64 Compiler for applications

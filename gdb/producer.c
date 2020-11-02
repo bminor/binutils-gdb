@@ -61,9 +61,9 @@ producer_is_gcc (const char *producer, int *major, int *minor)
       */
       cs = &producer[strlen ("GNU ")];
       while (*cs && !isspace (*cs))
-        cs++;
+	cs++;
       if (*cs && isspace (*cs))
-        cs++;
+	cs++;
       if (sscanf (cs, "%d.%d", major, minor) == 2)
 	return 1;
     }
@@ -131,7 +131,7 @@ bool
 producer_is_llvm (const char *producer)
 {
   return ((producer != NULL) && (startswith (producer, "clang ")
-                                 || startswith (producer, " F90 Flang ")));
+				 || startswith (producer, " F90 Flang ")));
 }
 
 #if defined GDB_SELF_TEST

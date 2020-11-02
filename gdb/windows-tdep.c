@@ -1066,7 +1066,7 @@ section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
       bfd_vma name_va = dir_entry->name_rva;
 
       /* If the name's virtual address is smaller than the section's virtual
-         address, there's a problem.  */
+	 address, there's a problem.  */
       if (name_va < idata_section_va || name_va >= idata_section_end_va)
 	{
 	  warning (_("\

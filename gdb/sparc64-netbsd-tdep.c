@@ -168,7 +168,7 @@ sparc64nbsd_sigcontext_frame_cache (struct frame_info *this_frame,
       cache->pc = sparc64nbsd_sigtramp_start;
 
       /* Since we couldn't find the frame's function, the cache was
-         initialized under the assumption that we're frameless.  */
+	 initialized under the assumption that we're frameless.  */
       sparc_record_save_insn (cache);
       addr = get_frame_register_unsigned (this_frame, SPARC_FP_REGNUM);
       if (addr & 1)

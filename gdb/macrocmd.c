@@ -54,8 +54,8 @@ macro_expand_command (const char *exp, int from_tty)
      evaluated, just its value.  */
   if (! exp || ! *exp)
     error (_("You must follow the `macro expand' command with the"
-           " expression you\n"
-           "want to expand."));
+	   " expression you\n"
+	   "want to expand."));
 
   gdb::unique_xmalloc_ptr<macro_scope> ms = default_macro_scope ();
 
@@ -82,8 +82,8 @@ macro_expand_once_command (const char *exp, int from_tty)
      see the expression expanded one level at a time.  */
   if (! exp || ! *exp)
     error (_("You must follow the `macro expand-once' command with"
-           " the expression\n"
-           "you want to expand."));
+	   " the expression\n"
+	   "you want to expand."));
 
   gdb::unique_xmalloc_ptr<macro_scope> ms = default_macro_scope ();
 
@@ -105,8 +105,8 @@ macro_expand_once_command (const char *exp, int from_tty)
     the splay tree so that it can be safely used while iterating.  */
 static void
 show_pp_source_pos (struct ui_file *stream,
-                    struct macro_source_file *file,
-                    int line)
+		    struct macro_source_file *file,
+		    int line)
 {
   std::string fullname = macro_source_fullname (file);
   fprintf_filtered (stream, "%ps:%d\n",
@@ -184,8 +184,8 @@ info_macro_command (const char *args, int from_tty)
 	  || strncmp (arg_start, "-all", p - arg_start) == 0)
 	show_all_macros_named = 1;
       else if (strncmp (arg_start, "--", p - arg_start) == 0)
-          /* Our macro support seems rather C specific but this would
-             seem necessary for languages allowing - in macro names.
+	  /* Our macro support seems rather C specific but this would
+	     seem necessary for languages allowing - in macro names.
 	     e.g. Scheme's (defmacro ->foo () "bar\n")  */
 	processing_args = 0;
       else
@@ -228,12 +228,12 @@ info_macro_command (const char *args, int from_tty)
 	  print_macro_definition (name, d, file, line);
 	}
       else
-        {
-          fprintf_filtered (gdb_stdout,
-                            "The symbol `%s' has no definition as a C/C++"
-                            " preprocessor macro\n"
-                            "at ", name);
-          show_pp_source_pos (gdb_stdout, ms->file, ms->line);
+	{
+	  fprintf_filtered (gdb_stdout,
+			    "The symbol `%s' has no definition as a C/C++"
+			    " preprocessor macro\n"
+			    "at ", name);
+	  show_pp_source_pos (gdb_stdout, ms->file, ms->line);
 	}
     }
 }

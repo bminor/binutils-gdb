@@ -872,7 +872,7 @@ solib_svr4_r_map (struct svr4_info *info)
   try
     {
       addr = read_memory_typed_address (info->debug_base + lmo->r_map_offset,
-                                        ptr_type);
+					ptr_type);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1318,10 +1318,10 @@ svr4_read_so_list (svr4_info *info, CORE_ADDR lm, CORE_ADDR prev_lm,
 	}
 
       /* For SVR4 versions, the first entry in the link map is for the
-         inferior executable, so we must ignore it.  For some versions of
-         SVR4, it has no name.  For others (Solaris 2.3 for example), it
-         does have a name, so we can no longer use a missing name to
-         decide when to ignore it.  */
+	 inferior executable, so we must ignore it.  For some versions of
+	 SVR4, it has no name.  For others (Solaris 2.3 for example), it
+	 does have a name, so we can no longer use a missing name to
+	 decide when to ignore it.  */
       if (ignore_first && li->l_prev == 0)
 	{
 	  first_l_name = li->l_name;
@@ -2312,17 +2312,17 @@ enable_break (struct svr4_info *info, int from_tty)
       sym_addr = 0;
 
       /* Now we need to figure out where the dynamic linker was
-         loaded so that we can load its symbols and place a breakpoint
-         in the dynamic linker itself.
+	 loaded so that we can load its symbols and place a breakpoint
+	 in the dynamic linker itself.
 
-         This address is stored on the stack.  However, I've been unable
-         to find any magic formula to find it for Solaris (appears to
-         be trivial on GNU/Linux).  Therefore, we have to try an alternate
-         mechanism to find the dynamic linker's base address.  */
+	 This address is stored on the stack.  However, I've been unable
+	 to find any magic formula to find it for Solaris (appears to
+	 be trivial on GNU/Linux).  Therefore, we have to try an alternate
+	 mechanism to find the dynamic linker's base address.  */
 
       gdb_bfd_ref_ptr tmp_bfd;
       try
-        {
+	{
 	  tmp_bfd = solib_bfd_open (interp_name);
 	}
       catch (const gdb_exception &ex)
@@ -2333,12 +2333,12 @@ enable_break (struct svr4_info *info, int from_tty)
 	goto bkpt_at_symbol;
 
       /* Now convert the TMP_BFD into a target.  That way target, as
-         well as BFD operations can be used.  target_bfd_reopen
-         acquires its own reference.  */
+	 well as BFD operations can be used.  target_bfd_reopen
+	 acquires its own reference.  */
       tmp_bfd_target = target_bfd_reopen (tmp_bfd.get ());
 
       /* On a running target, we can get the dynamic linker's base
-         address from the shared library table.  */
+	 address from the shared library table.  */
       for (struct so_list *so : current_program_space->solibs ())
 	{
 	  if (svr4_same_1 (interp_name, so->so_original_name))
@@ -2351,7 +2351,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
 
       /* If we were not able to find the base address of the loader
-         from our so_list, then try using the AT_BASE auxilliary entry.  */
+	 from our so_list, then try using the AT_BASE auxilliary entry.  */
       if (!load_addr_found)
 	if (target_auxv_search (current_top_target (), AT_BASE, &load_addr) > 0)
 	  {
@@ -2385,9 +2385,9 @@ enable_break (struct svr4_info *info, int from_tty)
 	 the current pc (which should point at the entry point for the
 	 dynamic linker) and subtracting the offset of the entry point.
 
-         This is more fragile than the previous approaches, but is a good
-         fallback method because it has actually been working well in
-         most cases.  */
+	 This is more fragile than the previous approaches, but is a good
+	 fallback method because it has actually been working well in
+	 most cases.  */
       if (!load_addr_found)
 	{
 	  struct regcache *regcache
@@ -2407,7 +2407,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
 
       /* Record the relocated start and end address of the dynamic linker
-         text and plt section for svr4_in_dynsym_resolve_code.  */
+	 text and plt section for svr4_in_dynsym_resolve_code.  */
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
@@ -2444,8 +2444,8 @@ enable_break (struct svr4_info *info, int from_tty)
 						       tmp_bfd_target);
 
       /* We're done with both the temporary bfd and target.  Closing
-         the target closes the underlying bfd, because it holds the
-         only remaining reference.  */
+	 the target closes the underlying bfd, because it holds the
+	 only remaining reference.  */
       target_close (tmp_bfd_target);
 
       if (sym_addr != 0)
@@ -2456,11 +2456,11 @@ enable_break (struct svr4_info *info, int from_tty)
 	}
 
       /* For whatever reason we couldn't set a breakpoint in the dynamic
-         linker.  Warn and drop into the old code.  */
+	 linker.  Warn and drop into the old code.  */
     bkpt_at_symbol:
       warning (_("Unable to find dynamic linker breakpoint function.\n"
-               "GDB will be unable to debug shared library initializers\n"
-               "and track explicitly loaded dynamic code."));
+	       "GDB will be unable to debug shared library initializers\n"
+	       "and track explicitly loaded dynamic code."));
     }
 
   /* Scan through the lists of symbols, trying to look up the symbol and
@@ -2645,7 +2645,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	    return 0;
 	  else if (arch_size == 32
 		   && phdrs_target->size () >= sizeof (Elf32_External_Phdr)
-	           && phdrs_target->size () % sizeof (Elf32_External_Phdr) == 0)
+		   && phdrs_target->size () % sizeof (Elf32_External_Phdr) == 0)
 	    {
 	      Elf_Internal_Ehdr *ehdr2
 		= elf_tdata (current_program_space->exec_bfd ())->elf_header;
@@ -2687,7 +2687,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  }
 
 	      /* Now compare program headers from the target and the binary
-	         with optional DISPLACEMENT.  */
+		 with optional DISPLACEMENT.  */
 
 	      for (i = 0;
 		   i < phdrs_target->size () / sizeof (Elf32_External_Phdr);
@@ -2783,7 +2783,7 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	    }
 	  else if (arch_size == 64
 		   && phdrs_target->size () >= sizeof (Elf64_External_Phdr)
-	           && phdrs_target->size () % sizeof (Elf64_External_Phdr) == 0)
+		   && phdrs_target->size () % sizeof (Elf64_External_Phdr) == 0)
 	    {
 	      Elf_Internal_Ehdr *ehdr2
 		= elf_tdata (current_program_space->exec_bfd ())->elf_header;
@@ -3086,7 +3086,7 @@ svr4_truncate_ptr (CORE_ADDR addr)
 
 static void
 svr4_relocate_section_addresses (struct so_list *so,
-                                 struct target_section *sec)
+				 struct target_section *sec)
 {
   bfd *abfd = sec->the_bfd_section->owner;
 
@@ -3123,7 +3123,7 @@ solib_svr4_init (struct obstack *obstack)
 
 void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
-                                       struct link_map_offsets *(*flmo) (void))
+				       struct link_map_offsets *(*flmo) (void))
 {
   struct solib_svr4_ops *ops
     = (struct solib_svr4_ops *) gdbarch_data (gdbarch, solib_svr4_data);
@@ -3247,7 +3247,7 @@ svr4_iterate_over_objfiles_in_search_order
       bfd *abfd;
 
       if (current_objfile->separate_debug_objfile_backlink != nullptr)
-        current_objfile = current_objfile->separate_debug_objfile_backlink;
+	current_objfile = current_objfile->separate_debug_objfile_backlink;
 
       if (current_objfile == current_program_space->symfile_object_file)
 	abfd = current_program_space->exec_bfd ();

@@ -460,7 +460,7 @@ extern void i386_svr4_init_abi (struct gdbarch_info, struct gdbarch *);
 extern int i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg);
 
 extern int i386_process_record (struct gdbarch *gdbarch,
-                                struct regcache *regcache, CORE_ADDR addr);
+				struct regcache *regcache, CORE_ADDR addr);
 extern const struct target_desc *i386_target_description (uint64_t xcr0,
 							  bool segments);
 

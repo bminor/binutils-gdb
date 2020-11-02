@@ -121,8 +121,8 @@ ranges_contain (const std::vector<range> &ranges, LONGEST offset,
      care for (this is a range afterall), we need to check if the
      _previous_ range overlaps the I range.  E.g.,
 
-         R
-         |---|
+	 R
+	 |---|
        |---|    |---|  |------| ... |--|
        0        1      2            N
 
@@ -136,8 +136,8 @@ ranges_contain (const std::vector<range> &ranges, LONGEST offset,
      Then we need to check if the I range overlaps the I range itself.
      E.g.,
 
-              R
-              |---|
+	      R
+	      |---|
        |---|    |---|  |-------| ... |--|
        0        1      2             N
 
@@ -506,8 +506,8 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
 
 	  R
 	 |-...-|
-	         |--|       |---|  |------| ... |--|
-	         0          1      2            N
+		 |--|       |---|  |------| ... |--|
+		 0          1      2            N
 
 	 I=0
 
@@ -521,8 +521,8 @@ insert_into_bit_range_vector (std::vector<range> *vectorp,
 
 	  R
 	 |------------------------|
-	         |--|       |---|  |------| ... |--|
-	         0          1      2            N
+		 |--|       |---|  |------| ... |--|
+		 0          1      2            N
 
 	 I=0
 
@@ -659,7 +659,7 @@ find_first_range_overlap (const std::vector<range> *ranges, int pos,
      PTR + (OFFSET_BITS / TARGET_CHAR_BIT)
    to:
      PTR + ((OFFSET_BITS + LENGTH_BITS + TARGET_CHAR_BIT - 1)
-            / TARGET_CHAR_BIT)  */
+	    / TARGET_CHAR_BIT)  */
 static int
 memcmp_with_bit_offsets (const gdb_byte *ptr1, size_t offset1_bits,
 			 const gdb_byte *ptr2, size_t offset2_bits,
@@ -1055,8 +1055,8 @@ allocate_repeat_value (struct type *type, int count)
 
 struct value *
 allocate_computed_value (struct type *type,
-                         const struct lval_funcs *funcs,
-                         void *closure)
+			 const struct lval_funcs *funcs,
+			 void *closure)
 {
   struct value *v = allocate_value_lazy (type);
 
@@ -1184,23 +1184,23 @@ value_actual_type (struct value *value, int resolve_simple_types,
 	  && (check_typedef (TYPE_TARGET_TYPE (result))->code ()
 	      == TYPE_CODE_STRUCT)
 	  && !value_optimized_out (value))
-        {
-          struct type *real_type;
+	{
+	  struct type *real_type;
 
-          real_type = value_rtti_indirect_type (value, NULL, NULL, NULL);
-          if (real_type)
-            {
-              if (real_type_found)
-                *real_type_found = 1;
-              result = real_type;
-            }
-        }
+	  real_type = value_rtti_indirect_type (value, NULL, NULL, NULL);
+	  if (real_type)
+	    {
+	      if (real_type_found)
+		*real_type_found = 1;
+	      result = real_type;
+	    }
+	}
       else if (resolve_simple_types)
-        {
-          if (real_type_found)
-            *real_type_found = 1;
-          result = value_enclosing_type (value);
-        }
+	{
+	  if (real_type_found)
+	    *real_type_found = 1;
+	  result = value_enclosing_type (value);
+	}
     }
 
   return result;
@@ -1704,7 +1704,7 @@ value_copy (struct value *arg)
       const struct lval_funcs *funcs = val->location.computed.funcs;
 
       if (funcs->copy_closure)
-        val->location.computed.closure = funcs->copy_closure (val);
+	val->location.computed.closure = funcs->copy_closure (val);
     }
   return val;
 }
@@ -1781,7 +1781,7 @@ set_value_component_location (struct value *component,
       const struct lval_funcs *funcs = whole->location.computed.funcs;
 
       if (funcs->copy_closure)
-        component->location.computed.closure = funcs->copy_closure (whole);
+	component->location.computed.closure = funcs->copy_closure (whole);
     }
 
   /* If type has a dynamic resolved location property
@@ -1853,7 +1853,7 @@ show_values (const char *num_exp, int from_tty)
   if (num_exp)
     {
       /* "show values +" should print from the stored position.
-         "show values <exp>" should print around value number <exp>.  */
+	 "show values <exp>" should print around value number <exp>.  */
       if (num_exp[0] != '+' || num_exp[1] != '\0')
 	num = parse_and_eval_long (num_exp) - 5;
     }
@@ -2300,11 +2300,11 @@ set_internalvar (struct internalvar *var, struct value *val)
       new_data.value = release_value (copy).release ();
 
       /* Internal variables which are created from values with a dynamic
-         location don't need the location property of the origin anymore.
-         The resolved dynamic location is used prior then any other address
-         when accessing the value.
-         If we keep it, we would still refer to the origin value.
-         Remove the location property in case it exist.  */
+	 location don't need the location property of the origin anymore.
+	 The resolved dynamic location is used prior then any other address
+	 when accessing the value.
+	 If we keep it, we would still refer to the origin value.
+	 Remove the location property in case it exist.  */
       value_type (new_data.value)->remove_dyn_prop (DYN_PROP_DATA_LOCATION);
 
       break;
@@ -2810,7 +2810,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
       /* Assume a CORE_ADDR can fit in a LONGEST (for now).  Not sure
-         whether we want this to be true eventually.  */
+	 whether we want this to be true eventually.  */
       return extract_typed_address (valaddr, type);
 
     default:
@@ -3015,14 +3015,14 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       /* We expect an already resolved data location.  */
       gdb_assert (PROP_CONST == TYPE_DATA_LOCATION_KIND (type));
       /* For dynamic data types defer memory allocation
-         until we actual access the value.  */
+	 until we actual access the value.  */
       v = allocate_value_lazy (type);
     }
   else
     {
       /* Plain old data member */
       offset += (TYPE_FIELD_BITPOS (arg_type, fieldno)
-	         / (HOST_CHAR_BIT * unit_size));
+		 / (HOST_CHAR_BIT * unit_size));
 
       /* Lazy register values with offsets are not supported.  */
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
@@ -3110,7 +3110,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 					value_addr (*arg1p)));
 
       /* Move the `this' pointer according to the offset.
-         VALUE_OFFSET (*arg1p) += offset; */
+	 VALUE_OFFSET (*arg1p) += offset; */
     }
 
   return v;
@@ -3311,7 +3311,7 @@ modify_field (struct type *type, gdb_byte *addr,
   if (0 != (fieldval & ~mask))
     {
       /* FIXME: would like to include fieldval in the message, but
-         we don't have a sprintf_longest.  */
+	 we don't have a sprintf_longest.  */
       warning (_("Value does not fit in %s bits."), plongest (bitsize));
 
       /* Truncate it, otherwise adjoining fields may be corrupted.  */

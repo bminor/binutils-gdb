@@ -189,7 +189,7 @@ nios2_target::low_breakpoint_at (CORE_ADDR where)
 
 ps_err_e
 ps_get_thread_area (struct ps_prochandle *ph,
-                    lwpid_t lwpid, int idx, void **base)
+		    lwpid_t lwpid, int idx, void **base)
 {
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;

@@ -138,41 +138,41 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	 to be done first to ensure we do not lose information in the
 	 conversion process.  */
       if (PyLong_Check (end_obj))
-        end = PyLong_AsUnsignedLongLong (end_obj);
+	end = PyLong_AsUnsignedLongLong (end_obj);
 #if PY_MAJOR_VERSION == 2
       else if (PyInt_Check (end_obj))
-        /* If the end_pc value is specified without a trailing 'L', end_obj will
-           be an integer and not a long integer.  */
-        end = PyInt_AsLong (end_obj);
+	/* If the end_pc value is specified without a trailing 'L', end_obj will
+	   be an integer and not a long integer.  */
+	end = PyInt_AsLong (end_obj);
 #endif
       else
-        {
-          PyErr_SetString (PyExc_TypeError,
-                           _("Argument 'end_pc' should be a (long) integer."));
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("Argument 'end_pc' should be a (long) integer."));
 
-          return NULL;
-        }
+	  return NULL;
+	}
 
       if (end < start)
-        {
-          PyErr_SetString (PyExc_ValueError,
-                           _("Argument 'end_pc' should be greater than or "
-                             "equal to the argument 'start_pc'."));
+	{
+	  PyErr_SetString (PyExc_ValueError,
+			   _("Argument 'end_pc' should be greater than or "
+			     "equal to the argument 'start_pc'."));
 
-          return NULL;
-        }
+	  return NULL;
+	}
     }
   if (count_obj)
     {
       count = PyInt_AsLong (count_obj);
       if (PyErr_Occurred () || count < 0)
-        {
-          PyErr_SetString (PyExc_TypeError,
-                           _("Argument 'count' should be an non-negative "
-                             "integer."));
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("Argument 'count' should be an non-negative "
+			     "integer."));
 
-          return NULL;
-        }
+	  return NULL;
+	}
     }
 
   gdbpy_ref<> result_list (PyList_New (0));
@@ -200,14 +200,14 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
       string_file stb;
 
       try
-        {
-          insn_len = gdb_print_insn (gdbarch, pc, &stb, NULL);
-        }
+	{
+	  insn_len = gdb_print_insn (gdbarch, pc, &stb, NULL);
+	}
       catch (const gdb_exception &except)
-        {
+	{
 	  gdbpy_convert_exception (except);
 	  return NULL;
-        }
+	}
 
       gdbpy_ref<> pc_obj = gdb_py_object_from_ulongest (pc);
       if (pc_obj == nullptr)
@@ -224,8 +224,8 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 	return nullptr;
 
       if (PyDict_SetItemString (insn_dict.get (), "addr", pc_obj.get ())
-          || PyDict_SetItemString (insn_dict.get (), "asm", asm_obj.get ())
-          || PyDict_SetItemString (insn_dict.get (), "length", len_obj.get ()))
+	  || PyDict_SetItemString (insn_dict.get (), "asm", asm_obj.get ())
+	  || PyDict_SetItemString (insn_dict.get (), "length", len_obj.get ()))
 	return NULL;
 
       pc += insn_len;

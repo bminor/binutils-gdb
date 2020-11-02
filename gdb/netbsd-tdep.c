@@ -238,7 +238,7 @@ nbsd_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
 
 static int
 nbsd_gdb_signal_to_target (struct gdbarch *gdbarch,
-                enum gdb_signal signal)
+		enum gdb_signal signal)
 {
   switch (signal)
     {

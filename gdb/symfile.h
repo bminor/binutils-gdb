@@ -236,9 +236,9 @@ struct quick_symbol_functions
      strcmp_iw_ordered(x,y) == 0 --> MATCH(x,y) == 0.  ORDERED_COMPARE,
      if non-null, must be an ordering relation compatible with
      strcmp_iw_ordered in the sense that
-            strcmp_iw_ordered(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0
+	    strcmp_iw_ordered(x,y) == 0 --> ORDERED_COMPARE(x,y) == 0
      and 
-            strcmp_iw_ordered(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
+	    strcmp_iw_ordered(x,y) <= 0 --> ORDERED_COMPARE(x,y) <= 0
      (allowing strcmp_iw_ordered(x,y) < 0 while ORDERED_COMPARE(x, y) == 0).
      CALLBACK returns true to indicate that the scan should continue, or
      false to indicate that the scan should be terminated.  */
@@ -414,7 +414,7 @@ extern symfile_segment_data_up default_symfile_segments (bfd *abfd);
    do anything special.  */
 
 extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
-                                           asection *sectp, bfd_byte *buf);
+					   asection *sectp, bfd_byte *buf);
 
 extern struct symtab *allocate_symtab (struct compunit_symtab *, const char *)
   ATTRIBUTE_NONNULL (1);
@@ -441,7 +441,7 @@ extern struct objfile *symbol_file_add (const char *, symfile_add_flags,
 
 extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, symfile_add_flags,
 						 section_addr_info *,
-                                                 objfile_flags, struct objfile *parent);
+						 objfile_flags, struct objfile *parent);
 
 extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
 				      struct objfile *);
@@ -600,7 +600,7 @@ struct dwarf2_debug_sections {
 };
 
 extern int dwarf2_has_info (struct objfile *,
-                            const struct dwarf2_debug_sections *,
+			    const struct dwarf2_debug_sections *,
 			    bool = false);
 
 /* Dwarf2 sections that can be accessed by dwarf2_get_section_info.  */
@@ -610,7 +610,7 @@ enum dwarf2_section_enum {
 };
 
 extern void dwarf2_get_section_info (struct objfile *,
-                                     enum dwarf2_section_enum,
+				     enum dwarf2_section_enum,
 				     asection **, const gdb_byte **,
 				     bfd_size_type *);
 

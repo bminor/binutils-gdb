@@ -1013,8 +1013,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	    }
 	}
       if (out->is_mi_like_p ())
-        out->field_string ("arch",
-                           (gdbarch_bfd_arch_info (gdbarch))->printable_name);
+	out->field_string ("arch",
+			   (gdbarch_bfd_arch_info (gdbarch))->printable_name);
     }
 
   bool source_print

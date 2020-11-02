@@ -207,7 +207,7 @@ i386obsd_supply_uthread (struct regcache *regcache,
       sp = read_memory_unsigned_integer (sp_addr, 4, byte_order);
 
       /* Adjust the stack pointer such that it looks as if we just
-         returned from _thread_machdep_switch.  */
+	 returned from _thread_machdep_switch.  */
       offset = i386obsd_uthread_reg_offset[I386_EIP_REGNUM] + 4;
       store_unsigned_integer (buf, 4, byte_order, sp + offset);
       regcache->raw_supply (I386_ESP_REGNUM, buf);
@@ -219,7 +219,7 @@ i386obsd_supply_uthread (struct regcache *regcache,
 	  && (regnum == -1 || regnum == i))
 	{
 	  /* Fetch stack pointer from thread structure (if we didn't
-             do so already).  */
+	     do so already).  */
 	  if (sp == 0)
 	    sp = read_memory_unsigned_integer (sp_addr, 4, byte_order);
 
@@ -248,7 +248,7 @@ i386obsd_collect_uthread (const struct regcache *regcache,
       int offset;
 
       /* Calculate the stack pointer (frame pointer) that will be
-         stored into the thread structure.  */
+	 stored into the thread structure.  */
       offset = i386obsd_uthread_reg_offset[I386_EIP_REGNUM] + 4;
       regcache->raw_collect (I386_ESP_REGNUM, buf);
       sp = extract_unsigned_integer (buf, 4, byte_order) - offset;
@@ -257,7 +257,7 @@ i386obsd_collect_uthread (const struct regcache *regcache,
       write_memory_unsigned_integer (sp_addr, 4, byte_order, sp);
 
       /* The stack pointer was (potentially) modified.  Make sure we
-         build a proper stack frame.  */
+	 build a proper stack frame.  */
       regnum = -1;
     }
 
@@ -267,7 +267,7 @@ i386obsd_collect_uthread (const struct regcache *regcache,
 	  && (regnum == -1 || regnum == i))
 	{
 	  /* Fetch stack pointer from thread structure (if we didn't
-             calculate it already).  */
+	     calculate it already).  */
 	  if (sp == 0)
 	    sp = read_memory_unsigned_integer (sp_addr, 4, byte_order);
 

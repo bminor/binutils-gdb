@@ -241,7 +241,7 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   /* Core file support. */
   set_gdbarch_iterate_over_regset_sections

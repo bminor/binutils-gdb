@@ -115,7 +115,7 @@ thread_alive (ptid_t ptid)
   auto fn
     = [=] (const struct kinfo_lwp *kl)
       {
-        return kl->l_lid == lwp;
+	return kl->l_lid == lwp;
       };
 
   return netbsd_thread_lister (pid, fn);

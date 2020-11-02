@@ -844,7 +844,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 			printf_filtered ("    blockvector"
 					 " ((struct blockvector *) %s)\n",
 					 host_address_to_string
-				         (COMPUNIT_BLOCKVECTOR (cust)));
+					 (COMPUNIT_BLOCKVECTOR (cust)));
 			printf_filtered ("    user"
 					 " ((struct compunit_symtab *) %s)\n",
 					 cust->user != nullptr

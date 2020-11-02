@@ -112,7 +112,7 @@ tui_register_format (struct frame_info *frame, int regnum)
    changed with respect to the previous call.  */
 static void
 tui_get_register (struct frame_info *frame,
-                  struct tui_data_item_window *data, 
+		  struct tui_data_item_window *data, 
 		  int regnum, bool *changedp)
 {
   if (changedp)
@@ -436,7 +436,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
     first_line = line_from_reg_element_no (first_element_no);
   else
     { /* Calculate the first line from the element number which is in
-        the general data content.  */
+	the general data content.  */
     }
 
   if (first_line >= 0)
@@ -514,7 +514,7 @@ tui_reg_next (struct reggroup *current_group, struct gdbarch *gdbarch)
     {
       group = reggroup_next (gdbarch, current_group);
       if (group == NULL)
-        group = reggroup_next (gdbarch, NULL);
+	group = reggroup_next (gdbarch, NULL);
     }
   return group;
 }

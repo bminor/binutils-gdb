@@ -1106,8 +1106,8 @@ go32_sysinfo (const char *arg, int from_tty)
       /* CPUID with EAX = 0 returns the Vendor ID.  */
 #if 0
       /* Ideally we would use x86_cpuid(), but it needs someone to run
-         native tests first to make sure things actually work.  They should.
-         http://sourceware.org/ml/gdb-patches/2013-05/msg00164.html  */
+	 native tests first to make sure things actually work.  They should.
+	 http://sourceware.org/ml/gdb-patches/2013-05/msg00164.html  */
       unsigned int eax, ebx, ecx, edx;
 
       if (x86_cpuid (0, &eax, &ebx, &ecx, &edx))
@@ -1259,8 +1259,8 @@ go32_sysinfo (const char *arg, int from_tty)
 	    }
 	}
       xsnprintf (cpu_string, sizeof (cpu_string), "%s%s Model %d Stepping %d",
-	         intel_p ? "Pentium" : (amd_p ? "AMD" : (hygon_p ? "Hygon" : "ix86")),
-	         cpu_brand, cpu_model, cpuid_eax & 0xf);
+		 intel_p ? "Pentium" : (amd_p ? "AMD" : (hygon_p ? "Hygon" : "ix86")),
+		 cpu_brand, cpu_model, cpuid_eax & 0xf);
       printfi_filtered (31, "%s\n", cpu_string);
       if (((cpuid_edx & (6 | (0x0d << 23))) != 0)
 	  || ((cpuid_edx & 1) == 0)

@@ -198,16 +198,16 @@ print_range_bound (struct type *type, const char *bounds, int *n,
   if (ada_scan_number (bounds, *n, &B, n))
     {
       /* STABS decodes all range types which bounds are 0 .. -1 as
-         unsigned integers (ie. the type code is TYPE_CODE_INT, not
-         TYPE_CODE_RANGE).  Unfortunately, ada_print_scalar() relies
-         on the unsigned flag to determine whether the bound should
-         be printed as a signed or an unsigned value.  This causes
-         the upper bound of the 0 .. -1 range types to be printed as
-         a very large unsigned number instead of -1.
-         To workaround this stabs deficiency, we replace the TYPE by NULL
-         to indicate default output when we detect that the bound is negative,
-         and the type is a TYPE_CODE_INT.  The bound is negative when
-         'm' is the last character of the number scanned in BOUNDS.  */
+	 unsigned integers (ie. the type code is TYPE_CODE_INT, not
+	 TYPE_CODE_RANGE).  Unfortunately, ada_print_scalar() relies
+	 on the unsigned flag to determine whether the bound should
+	 be printed as a signed or an unsigned value.  This causes
+	 the upper bound of the 0 .. -1 range types to be printed as
+	 a very large unsigned number instead of -1.
+	 To workaround this stabs deficiency, we replace the TYPE by NULL
+	 to indicate default output when we detect that the bound is negative,
+	 and the type is a TYPE_CODE_INT.  The bound is negative when
+	 'm' is the last character of the number scanned in BOUNDS.  */
       if (bounds[*n - 1] == 'm' && type->code () == TYPE_CODE_INT)
 	type = NULL;
       ada_print_scalar (type, B, stream);
@@ -1071,7 +1071,7 @@ ada_print_type (struct type *type0, const char *varstring,
 
 void
 ada_print_typedef (struct type *type, struct symbol *new_symbol,
-                   struct ui_file *stream)
+		   struct ui_file *stream)
 {
   type = ada_check_typedef (type);
   ada_print_type (type, "", stream, 0, 0, &type_print_raw_options);

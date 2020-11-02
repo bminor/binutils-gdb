@@ -88,8 +88,8 @@ specify_exec_file_hook (void (*hook) (const char *))
 	}
 
       /* Grow the hook array by one and add the new hook to the end.
-         Yes, it's inefficient to grow it by one each time but since
-         this is hardly ever called it's not a big deal.  */
+	 Yes, it's inefficient to grow it by one each time but since
+	 this is hardly ever called it's not a big deal.  */
       exec_file_hook_count++;
       new_array = (hook_type *)
 	xrealloc (exec_file_extra_hooks,

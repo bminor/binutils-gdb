@@ -746,10 +746,10 @@ tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   if (find_pc_partial_function (start_pc, NULL, &func_start, NULL))
     {
       CORE_ADDR post_prologue_pc
-        = skip_prologue_using_sal (gdbarch, func_start);
+	= skip_prologue_using_sal (gdbarch, func_start);
 
       if (post_prologue_pc != 0)
-        return std::max (start_pc, post_prologue_pc);
+	return std::max (start_pc, post_prologue_pc);
     }
 
   /* Don't straddle a section boundary.  */
@@ -834,7 +834,7 @@ tilegx_write_pc (struct regcache *regcache, CORE_ADDR pc)
      within GDB.  In all other cases the system call will not be
      restarted.  */
   regcache_cooked_write_unsigned (regcache, TILEGX_FAULTNUM_REGNUM,
-                                  INT_SWINT_1_SIGRETURN);
+				  INT_SWINT_1_SIGRETURN);
 }
 
 /* 64-bit pattern for a { bpt ; nop } bundle.  */
@@ -938,7 +938,7 @@ tilegx_cannot_reference_register (struct gdbarch *gdbarch, int regno)
   if (regno >= 0 && regno < TILEGX_NUM_EASY_REGS)
     return 0;
   else if (regno == TILEGX_PC_REGNUM
-           || regno == TILEGX_FAULTNUM_REGNUM)
+	   || regno == TILEGX_FAULTNUM_REGNUM)
     return 0;
   else
     return 1;

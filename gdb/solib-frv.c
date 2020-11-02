@@ -105,7 +105,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Fetch initial portion of the loadmap.  */
   if (target_read_memory (ldmaddr, (gdb_byte *) &ext_ldmbuf_partial,
-                          sizeof ext_ldmbuf_partial))
+			  sizeof ext_ldmbuf_partial))
     {
       /* Problem reading the target's memory.  */
       return NULL;
@@ -113,7 +113,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Extract the version.  */
   version = extract_unsigned_integer (ext_ldmbuf_partial.version,
-                                      sizeof ext_ldmbuf_partial.version,
+				      sizeof ext_ldmbuf_partial.version,
 				      byte_order);
   if (version != 0)
     {
@@ -123,7 +123,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Extract the number of segments.  */
   nsegs = extract_unsigned_integer (ext_ldmbuf_partial.nsegs,
-                                    sizeof ext_ldmbuf_partial.nsegs,
+				    sizeof ext_ldmbuf_partial.nsegs,
 				    byte_order);
 
   if (nsegs <= 0)
@@ -131,7 +131,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Allocate space for the complete (external) loadmap.  */
   ext_ldmbuf_size = sizeof (struct ext_elf32_fdpic_loadmap)
-               + (nsegs - 1) * sizeof (struct ext_elf32_fdpic_loadseg);
+	       + (nsegs - 1) * sizeof (struct ext_elf32_fdpic_loadseg);
   ext_ldmbuf = (struct ext_elf32_fdpic_loadmap *) xmalloc (ext_ldmbuf_size);
 
   /* Copy over the portion of the loadmap that's already been read.  */
@@ -139,8 +139,8 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Read the rest of the loadmap from the target.  */
   if (target_read_memory (ldmaddr + sizeof ext_ldmbuf_partial,
-                          (gdb_byte *) ext_ldmbuf + sizeof ext_ldmbuf_partial,
-                          ext_ldmbuf_size - sizeof ext_ldmbuf_partial))
+			  (gdb_byte *) ext_ldmbuf + sizeof ext_ldmbuf_partial,
+			  ext_ldmbuf_size - sizeof ext_ldmbuf_partial))
     {
       /* Couldn't read rest of the loadmap.  */
       xfree (ext_ldmbuf);
@@ -150,7 +150,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
   /* Allocate space into which to put information extract from the
      external loadsegs.  I.e, allocate the internal loadsegs.  */
   int_ldmbuf_size = sizeof (struct int_elf32_fdpic_loadmap)
-               + (nsegs - 1) * sizeof (struct int_elf32_fdpic_loadseg);
+	       + (nsegs - 1) * sizeof (struct int_elf32_fdpic_loadseg);
   int_ldmbuf = (struct int_elf32_fdpic_loadmap *) xmalloc (int_ldmbuf_size);
 
   /* Place extracted information in internal structs.  */
@@ -160,15 +160,15 @@ fetch_loadmap (CORE_ADDR ldmaddr)
     {
       int_ldmbuf->segs[seg].addr
 	= extract_unsigned_integer (ext_ldmbuf->segs[seg].addr,
-	                            sizeof (ext_ldmbuf->segs[seg].addr),
+				    sizeof (ext_ldmbuf->segs[seg].addr),
 				    byte_order);
       int_ldmbuf->segs[seg].p_vaddr
 	= extract_unsigned_integer (ext_ldmbuf->segs[seg].p_vaddr,
-	                            sizeof (ext_ldmbuf->segs[seg].p_vaddr),
+				    sizeof (ext_ldmbuf->segs[seg].p_vaddr),
 				    byte_order);
       int_ldmbuf->segs[seg].p_memsz
 	= extract_unsigned_integer (ext_ldmbuf->segs[seg].p_memsz,
-	                            sizeof (ext_ldmbuf->segs[seg].p_memsz),
+				    sizeof (ext_ldmbuf->segs[seg].p_memsz),
 				    byte_order);
     }
 
@@ -287,12 +287,12 @@ lm_base (void)
     return lm_base_cache;
 
   got_sym = lookup_minimal_symbol ("_GLOBAL_OFFSET_TABLE_", NULL,
-                                   current_program_space->symfile_object_file);
+				   current_program_space->symfile_object_file);
   if (got_sym.minsym == 0)
     {
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "lm_base: _GLOBAL_OFFSET_TABLE_ not found.\n");
+			    "lm_base: _GLOBAL_OFFSET_TABLE_ not found.\n");
       return 0;
     }
 
@@ -407,7 +407,7 @@ frv_current_sos (void)
 
 	  if (solib_frv_debug)
 	    fprintf_unfiltered (gdb_stdlog, "current_sos: name = %s\n",
-	                        name_buf.get ());
+				name_buf.get ());
 	  
 	  if (name_buf == nullptr)
 	    warning (_("Can't read pathname for link map entry."));
@@ -458,14 +458,14 @@ frv_in_dynsym_resolve_code (CORE_ADDR pc)
 
 static CORE_ADDR
 displacement_from_map (struct int_elf32_fdpic_loadmap *map,
-                       CORE_ADDR addr)
+		       CORE_ADDR addr)
 {
   int seg;
 
   for (seg = 0; seg < map->nsegs; seg++)
     {
       if (map->segs[seg].p_vaddr <= addr
-          && addr < map->segs[seg].p_vaddr + map->segs[seg].p_memsz)
+	  && addr < map->segs[seg].p_vaddr + map->segs[seg].p_memsz)
 	{
 	  return map->segs[seg].addr - map->segs[seg].p_vaddr;
 	}
@@ -481,7 +481,7 @@ static void
 enable_break_failure_warning (void)
 {
   warning (_("Unable to find dynamic linker breakpoint function.\n"
-           "GDB will be unable to debug shared library initializers\n"
+	   "GDB will be unable to debug shared library initializers\n"
 	   "and track explicitly loaded dynamic code."));
 }
 
@@ -543,26 +543,26 @@ enable_break2 (void)
       struct int_elf32_fdpic_loadmap *ldm;
 
       /* Read the contents of the .interp section into a local buffer;
-         the contents specify the dynamic linker this program uses.  */
+	 the contents specify the dynamic linker this program uses.  */
       interp_sect_size = bfd_section_size (interp_sect);
       buf = (char *) alloca (interp_sect_size);
       bfd_get_section_contents (current_program_space->exec_bfd (),
 				interp_sect, buf, 0, interp_sect_size);
 
       /* Now we need to figure out where the dynamic linker was
-         loaded so that we can load its symbols and place a breakpoint
-         in the dynamic linker itself.
+	 loaded so that we can load its symbols and place a breakpoint
+	 in the dynamic linker itself.
 
-         This address is stored on the stack.  However, I've been unable
-         to find any magic formula to find it for Solaris (appears to
-         be trivial on GNU/Linux).  Therefore, we have to try an alternate
-         mechanism to find the dynamic linker's base address.  */
+	 This address is stored on the stack.  However, I've been unable
+	 to find any magic formula to find it for Solaris (appears to
+	 be trivial on GNU/Linux).  Therefore, we have to try an alternate
+	 mechanism to find the dynamic linker's base address.  */
 
       gdb_bfd_ref_ptr tmp_bfd;
       try
-        {
-          tmp_bfd = solib_bfd_open (buf);
-        }
+	{
+	  tmp_bfd = solib_bfd_open (buf);
+	}
       catch (const gdb_exception &ex)
 	{
 	}
@@ -574,7 +574,7 @@ enable_break2 (void)
 	}
 
       status = frv_fdpic_loadmap_addresses (target_gdbarch (),
-                                            &interp_loadmap_addr, 0);
+					    &interp_loadmap_addr, 0);
       if (status < 0)
 	{
 	  warning (_("Unable to determine dynamic linker loadmap address."));
@@ -584,20 +584,20 @@ enable_break2 (void)
 
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: interp_loadmap_addr = %s\n",
+			    "enable_break: interp_loadmap_addr = %s\n",
 			    hex_string_custom (interp_loadmap_addr, 8));
 
       ldm = fetch_loadmap (interp_loadmap_addr);
       if (ldm == NULL)
 	{
 	  warning (_("Unable to load dynamic linker loadmap at address %s."),
-	           hex_string_custom (interp_loadmap_addr, 8));
+		   hex_string_custom (interp_loadmap_addr, 8));
 	  enable_break_failure_warning ();
 	  return 0;
 	}
 
       /* Record the relocated start and end address of the dynamic linker
-         text and plt section for svr4_in_dynsym_resolve_code.  */
+	 text and plt section for svr4_in_dynsym_resolve_code.  */
       interp_sect = bfd_get_section_by_name (tmp_bfd.get (), ".text");
       if (interp_sect)
 	{
@@ -646,33 +646,33 @@ enable_break2 (void)
 	{
 	  warning (_("Unable to fetch contents of _dl_debug_addr "
 		     "(at address %s) from dynamic linker"),
-	           hex_string_custom (addr, 8));
+		   hex_string_custom (addr, 8));
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       if (solib_frv_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: _dl_debug_addr[0..3] = %s\n",
-	                    hex_string_custom (addr, 8));
+			    "enable_break: _dl_debug_addr[0..3] = %s\n",
+			    hex_string_custom (addr, 8));
 
       /* If it's zero, then the ldso hasn't initialized yet, and so
-         there are no shared libs yet loaded.  */
+	 there are no shared libs yet loaded.  */
       if (addr == 0)
 	{
 	  if (solib_frv_debug)
 	    fprintf_unfiltered (gdb_stdlog,
-	                        "enable_break: ldso not yet initialized\n");
+				"enable_break: ldso not yet initialized\n");
 	  /* Do not warn, but mark to run again.  */
 	  return 0;
 	}
 
       /* Fetch the r_brk field.  It's 8 bytes from the start of
-         _dl_debug_addr.  */
+	 _dl_debug_addr.  */
       if (target_read_memory (addr + 8, addr_buf, sizeof addr_buf) != 0)
 	{
 	  warning (_("Unable to fetch _dl_debug_addr->r_brk "
 		     "(at address %s) from dynamic linker"),
-	           hex_string_custom (addr + 8, 8));
+		   hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
 	  return 0;
 	}
@@ -683,7 +683,7 @@ enable_break2 (void)
 	{
 	  warning (_("Unable to fetch _dl_debug_addr->.r_brk entry point "
 		     "(at address %s) from dynamic linker"),
-	           hex_string_custom (addr, 8));
+		   hex_string_custom (addr, 8));
 	  enable_break_failure_warning ();
 	  return 0;
 	}
@@ -693,7 +693,7 @@ enable_break2 (void)
       xfree (ldm);
 
       /* Remove all the solib event breakpoints.  Their addresses
-         may have changed since the last time we ran the program.  */
+	 may have changed since the last time we ran the program.  */
       remove_solib_event_breakpoints ();
 
       /* Now (finally!) create the solib breakpoint.  */
@@ -767,7 +767,7 @@ frv_relocate_main_executable (void)
   struct obj_section *osect;
 
   status = frv_fdpic_loadmap_addresses (target_gdbarch (),
-                                        &interp_addr, &exec_addr);
+					&interp_addr, &exec_addr);
 
   if (status < 0 || (exec_addr == 0 && interp_addr == 0))
     {
@@ -867,7 +867,7 @@ frv_free_so (struct so_list *so)
 
 static void
 frv_relocate_section_addresses (struct so_list *so,
-                                 struct target_section *sec)
+				 struct target_section *sec)
 {
   int seg;
   lm_info_frv *li = (lm_info_frv *) so->lm_info;
@@ -876,7 +876,7 @@ frv_relocate_section_addresses (struct so_list *so,
   for (seg = 0; seg < map->nsegs; seg++)
     {
       if (map->segs[seg].p_vaddr <= sec->addr
-          && sec->addr < map->segs[seg].p_vaddr + map->segs[seg].p_memsz)
+	  && sec->addr < map->segs[seg].p_vaddr + map->segs[seg].p_memsz)
 	{
 	  CORE_ADDR displ = map->segs[seg].addr - map->segs[seg].p_vaddr;
 
@@ -958,7 +958,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
   /* Check the main executable.  */
   objfile *objf = current_program_space->symfile_object_file;
   addr = find_canonical_descriptor_in_load_object
-           (entry_point, got_value, name, objf->obfd,
+	   (entry_point, got_value, name, objf->obfd,
 	    main_executable_lm_info);
 
   /* If descriptor not found via main executable, check each load object
@@ -1052,7 +1052,7 @@ find_canonical_descriptor_in_load_object
       rel = lm->dyn_relocs[i];
 
       /* Relocs of interest are those which meet the following
-         criteria:
+	 criteria:
 
 	   - the names match (assuming the caller could provide
 	     a name which matches ``entry_point'').
@@ -1068,7 +1068,7 @@ find_canonical_descriptor_in_load_object
 	 this address (which is a GOT entry) to obtain a descriptor
 	 address.  */
       if ((name == 0 || strcmp (name, (*rel->sym_ptr_ptr)->name) == 0)
-          && rel->howto->type == R_FRV_FUNCDESC)
+	  && rel->howto->type == R_FRV_FUNCDESC)
 	{
 	  gdb_byte buf [FRV_PTR_SIZE];
 

@@ -264,7 +264,7 @@ frapy_read_register (PyObject *self, PyObject *args)
       val = value_of_register (regnum, frame);
 
       if (val == NULL)
-        PyErr_SetString (PyExc_ValueError, _("Can't read register."));
+	PyErr_SetString (PyExc_ValueError, _("Can't read register."));
     }
   catch (const gdb_exception &except)
     {

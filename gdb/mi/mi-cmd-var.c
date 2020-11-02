@@ -706,11 +706,11 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	    }
 	  uiout->field_string ("in_scope", "true");
 	  break;
-        case VAROBJ_NOT_IN_SCOPE:
-          uiout->field_string ("in_scope", "false");
+	case VAROBJ_NOT_IN_SCOPE:
+	  uiout->field_string ("in_scope", "false");
 	  break;
-        case VAROBJ_INVALID:
-          uiout->field_string ("in_scope", "invalid");
+	case VAROBJ_INVALID:
+	  uiout->field_string ("in_scope", "invalid");
  	  break;
 	}
 

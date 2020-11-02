@@ -366,7 +366,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	type = value_type (arg1);
 	if (type->code () != value_type (arg2)->code ())
 	  error (_("non-matching types for parameters to MODULO ()"));
-        /* MODULO(A, P) = A - FLOOR (A / P) * P */
+	/* MODULO(A, P) = A - FLOOR (A / P) * P */
 	switch (type->code ())
 	  {
 	  case TYPE_CODE_INT:
@@ -408,16 +408,16 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       type = value_type (arg1);
 
       switch (type->code ())
-        {
-          case TYPE_CODE_STRUCT:
-          case TYPE_CODE_UNION:
-          case TYPE_CODE_MODULE:
-          case TYPE_CODE_FUNC:
-            error (_("argument to kind must be an intrinsic type"));
-        }
+	{
+	  case TYPE_CODE_STRUCT:
+	  case TYPE_CODE_UNION:
+	  case TYPE_CODE_MODULE:
+	  case TYPE_CODE_FUNC:
+	    error (_("argument to kind must be an intrinsic type"));
+	}
 
       if (!TYPE_TARGET_TYPE (type))
-        return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+	return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
 				   TYPE_LENGTH (type));
       return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
 				 TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
@@ -425,11 +425,11 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
     case OP_F77_UNDETERMINED_ARGLIST:
       /* Remember that in F77, functions, substring ops and array subscript
-         operations cannot be disambiguated at parse time.  We have made
-         all array subscript operations, substring operations as well as
-         function calls come here and we now have to discover what the heck
-         this thing actually was.  If it is a function, we process just as
-         if we got an OP_FUNCALL.  */
+	 operations cannot be disambiguated at parse time.  We have made
+	 all array subscript operations, substring operations as well as
+	 function calls come here and we now have to discover what the heck
+	 this thing actually was.  If it is a function, we process just as
+	 if we got an OP_FUNCALL.  */
       int nargs = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 2;
 

@@ -281,7 +281,7 @@ hppa_linux_nat_target::fetch_registers (struct regcache *regcache, int regno)
       for (regno = 0;
 	   regno < gdbarch_num_regs (regcache->arch ());
 	   regno++)
-        fetch_register (regcache, regno);
+	fetch_register (regcache, regno);
     }
   else 
     {

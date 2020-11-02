@@ -1,3 +1,18 @@
+2020-11-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* ax.cc: Fix indentation.
+	* dll.cc: Fix indentation.
+	* inferiors.h: Fix indentation.
+	* linux-low.cc: Fix indentation.
+	* linux-nios2-low.cc: Fix indentation.
+	* linux-ppc-ipa.cc: Fix indentation.
+	* linux-ppc-low.cc: Fix indentation.
+	* linux-x86-low.cc: Fix indentation.
+	* linux-xtensa-low.cc: Fix indentation.
+	* regcache.cc: Fix indentation.
+	* server.cc: Fix indentation.
+	* tracepoint.cc: Fix indentation.
+
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* acinclude.m4: Replace AC_TRY_COMPILE with AC_COMPILE_IFELSE +

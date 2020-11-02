@@ -589,7 +589,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
 
       /* Some targets cannot read TIE register files.  */
       else if (type == xtRegisterTypeTieRegfile)
-        {
+	{
 	  /* Use 'fetch' to get register?  */
 	  if (flags & xtTargetFlagsUseFetchStore)
 	    {
@@ -662,7 +662,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
       /* On most targets, we cannot write registers
 	 of type "Unknown" or "Unmapped".  */
       if (type == xtRegisterTypeUnmapped || type == xtRegisterTypeUnknown)
-        {
+	{
 	  if ((flags & xtTargetFlagsNonVisibleRegs) == 0)
 	    {
 	      warning (_("cannot write register %s"),
@@ -673,7 +673,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 
       /* Some targets cannot read TIE register files.  */
       else if (type == xtRegisterTypeTieRegfile)
-        {
+	{
 	  /* Use 'store' to get register?  */
 	  if (flags & xtTargetFlagsUseFetchStore)
 	    {
@@ -692,7 +692,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 
       /* We can always write mapped registers.  */
       else if (type == xtRegisterTypeMapped || type == xtRegisterTypeTieState)
-        {
+	{
 	  xtensa_register_write_masked (regcache, reg, buffer);
 	  return;
 	}
@@ -1129,7 +1129,7 @@ xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
   for (ia = start_addr, bt = ia; ia < current_pc ; ia += ilen)
     {
       if (ia + xtensa_isa_maxlength (isa) > bt)
-        {
+	{
 	  ba = ia;
 	  bt = (ba + XTENSA_ISA_BSZ) < current_pc
 	    ? ba + XTENSA_ISA_BSZ : current_pc;
@@ -1321,7 +1321,7 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	    {
 	      /* Set A4...A7/A11.  */
 	      /* Get the SP of the frame previous to the previous one.
-	         To achieve this, we have to dereference SP twice.  */
+		 To achieve this, we have to dereference SP twice.  */
 	      sp = (CORE_ADDR) read_memory_integer (sp - 12, 4, byte_order);
 	      sp = (CORE_ADDR) read_memory_integer (sp - 12, 4, byte_order);
 	      sp -= cache->wd.callsize * 4;
@@ -1446,7 +1446,7 @@ xtensa_frame_prev_register (struct frame_info *this_frame,
       /* Convert A-register numbers to AR-register numbers,
 	 if we deal with A-register.  */
       if (regnum >= gdbarch_tdep (gdbarch)->a0_base
-          && regnum <= gdbarch_tdep (gdbarch)->a0_base + 15)
+	  && regnum <= gdbarch_tdep (gdbarch)->a0_base + 15)
 	regnum = arreg_number (gdbarch, regnum, cache->wd.wb);
 
       /* Check, if we deal with AR-register saved on stack.  */
@@ -1612,7 +1612,7 @@ xtensa_store_return_value (struct type *type,
 			   gdbarch_tdep (gdbarch)->a0_base + 2 + callsize, wb);
 
       DEBUGTRACE ("[xtensa_store_return_value] callsize %d wb %d\n",
-              callsize, (int) wb);
+	      callsize, (int) wb);
     }
   else
     {
@@ -1711,7 +1711,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 		 (int) sp, (int) return_method, (int) struct_addr);
 
       for (int i = 0; i < nargs; i++)
-        {
+	{
 	  struct value *arg = args[i];
 	  struct type *arg_type = check_typedef (value_type (arg));
 	  fprintf_unfiltered (gdb_stdlog, "%2d: %s %3s ", i,
@@ -2000,7 +2000,7 @@ call0_ret (CORE_ADDR start_pc, CORE_ADDR finish_pc)
   for (ia = start_pc, bt = ia; ia < finish_pc ; ia += ilen)
     {
       if (ia + xtensa_isa_maxlength (isa) > bt)
-        {
+	{
 	  ba = ia;
 	  bt = (ba + XTENSA_ISA_BSZ) < finish_pc
 	    ? ba + XTENSA_ISA_BSZ : finish_pc;
@@ -2186,12 +2186,12 @@ call0_track_op (struct gdbarch *gdbarch, xtensa_c0reg_t dst[], xtensa_c0reg_t sr
       /* 3 operands: dst, src1, src2.  */
       gdb_assert (nods == 3); 
       if      (src[odv[1]].fr_reg == C0_CONST)
-        {
+	{
 	  dst[odv[0]].fr_reg = src[odv[2]].fr_reg;
 	  dst[odv[0]].fr_ofs = src[odv[2]].fr_ofs + src[odv[1]].fr_ofs;
 	}
       else if (src[odv[2]].fr_reg == C0_CONST)
-        {
+	{
 	  dst[odv[0]].fr_reg = src[odv[1]].fr_reg;
 	  dst[odv[0]].fr_ofs = src[odv[1]].fr_ofs + src[odv[2]].fr_ofs;
 	}
@@ -2219,12 +2219,12 @@ call0_track_op (struct gdbarch *gdbarch, xtensa_c0reg_t dst[], xtensa_c0reg_t sr
 	  /* else fall through.  */
 	}
       if      (src[odv[1]].fr_reg == C0_CONST)
-        {
+	{
 	  dst[odv[0]].fr_reg = src[odv[2]].fr_reg;
 	  dst[odv[0]].fr_ofs = src[odv[2]].fr_ofs & src[odv[1]].fr_ofs;
 	}
       else if (src[odv[2]].fr_reg == C0_CONST)
-        {
+	{
 	  dst[odv[0]].fr_reg = src[odv[1]].fr_reg;
 	  dst[odv[0]].fr_ofs = src[odv[1]].fr_ofs & src[odv[2]].fr_ofs;
 	}
@@ -2234,7 +2234,7 @@ call0_track_op (struct gdbarch *gdbarch, xtensa_c0reg_t dst[], xtensa_c0reg_t sr
       /* 3 operands: dst, src1, src2.  */
       gdb_assert (nods == 3);
       if      (src[odv[2]].fr_reg == C0_CONST)
-        {
+	{
 	  dst[odv[0]].fr_reg = src[odv[1]].fr_reg;
 	  dst[odv[0]].fr_ofs = src[odv[1]].fr_ofs - src[odv[2]].fr_ofs;
 	}
@@ -2288,7 +2288,7 @@ call0_track_op (struct gdbarch *gdbarch, xtensa_c0reg_t dst[], xtensa_c0reg_t sr
 	  &&  src[odv[0]].fr_reg >= 0	     /* Value is from a register.  */
 	  &&  src[odv[0]].fr_ofs == 0	     /* Value hasn't been modified.  */
 	  &&  src[src[odv[0]].fr_reg].to_stk == C0_NOSTK) /* First time.  */
-        {
+	{
 	  /* ISA encoding guarantees alignment.  But, check it anyway.  */
 	  gdb_assert ((odv[2] & 3) == 0);
 	  dst[src[odv[0]].fr_reg].to_stk = src[odv[1]].fr_ofs + odv[2];
@@ -2399,11 +2399,11 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
   for (ia = start, bt = ia; ia < body_pc ; ia += ilen)
     {
       /* (Re)fill instruction buffer from memory if necessary, but do not
-         read memory beyond PC to be sure we stay within text section
+	 read memory beyond PC to be sure we stay within text section
 	 (this protection only works if a non-zero pc is supplied).  */
 
       if (ia + xtensa_isa_maxlength (isa) > bt)
-        {
+	{
 	  ba = ia;
 	  bt = (ba + XTENSA_ISA_BSZ) < body_pc ? ba + XTENSA_ISA_BSZ : body_pc;
 	  if (target_read_memory (ba, ibuf, bt - ba) != 0 )
@@ -2433,14 +2433,14 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
 	}
 
       /* Analyze a bundle or a single instruction, using a snapshot of 
-         the register tracking info as input for the entire bundle so that
+	 the register tracking info as input for the entire bundle so that
 	 register changes do not take effect within this bundle.  */
 
       for (j = 0; j < nregs; ++j)
 	rtmp[j] = cache->c0.c0_rt[j];
 
       for (is = 0; is < islots; ++is)
-        {
+	{
 	  /* Decode a slot and classify the opcode.  */
 
 	  fail = xtensa_format_get_slot (isa, ifmt, is, ins, slot);
@@ -2576,7 +2576,7 @@ call0_frame_cache (struct frame_info *this_frame,
   if (body_pc <= pc)
     {
       /* Prologue analysis was successful up to the PC.
-         It includes the cases when PC == START_PC.  */
+	 It includes the cases when PC == START_PC.  */
       c0_hasfp = cache->c0.c0_rt[C0_FP].fr_reg == C0_SP;
       /* c0_hasfp == true means there is a frame pointer because
 	 we analyzed the prologue and found that cache->c0.c0_rt[C0_FP]
@@ -2782,7 +2782,7 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
   while (insn_num++ < XTENSA_MAX_WINDOW_INTERRUPT_HANDLER_LEN)
     {
       if (ia + xtensa_isa_maxlength (isa) > bt)
-        {
+	{
 	  ba = ia;
 	  bt = (ba + XTENSA_ISA_BSZ);
 	  if (target_read_memory (ba, ibuf, bt - ba) != 0)

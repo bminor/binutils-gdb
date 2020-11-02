@@ -210,7 +210,7 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	}
 
       /* loop_continue to jump to the start of a while loop, print it
-         and continue. */
+	 and continue. */
       if (list->control_type == continue_control)
 	{
 	  uiout->field_string (NULL, "loop_continue");
@@ -544,7 +544,7 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
       print_command_trace ("loop_continue");
 
       /* Return for "continue", and "break" so we can either
-         continue the loop at the top, or break out.  */
+	 continue the loop at the top, or break out.  */
       ret = cmd->control_type;
       break;
 
@@ -552,7 +552,7 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
       print_command_trace ("loop_break");
 
       /* Return for "continue", and "break" so we can either
-         continue the loop at the top, or break out.  */
+	 continue the loop at the top, or break out.  */
       ret = cmd->control_type;
       break;
 
@@ -1147,7 +1147,7 @@ recurse_read_control_structure (gdb::function_view<const char * ()> read_next_li
       child_tail = next;
 
       /* If the latest line is another control structure, then recurse
-         on it.  */
+	 on it.  */
       if (multi_line_command_p (next->control_type))
 	{
 	  control_level++;
@@ -1485,20 +1485,20 @@ do_define_command (const char *comname, int from_tty,
   if (hookc)
     {
       switch (hook_type)
-        {
-        case CMD_PRE_HOOK:
-          hookc->hook_pre  = newc;  /* Target gets hooked.  */
-          newc->hookee_pre = hookc; /* We are marked as hooking target cmd.  */
-          break;
-        case CMD_POST_HOOK:
-          hookc->hook_post  = newc;  /* Target gets hooked.  */
-          newc->hookee_post = hookc; /* We are marked as hooking
+	{
+	case CMD_PRE_HOOK:
+	  hookc->hook_pre  = newc;  /* Target gets hooked.  */
+	  newc->hookee_pre = hookc; /* We are marked as hooking target cmd.  */
+	  break;
+	case CMD_POST_HOOK:
+	  hookc->hook_post  = newc;  /* Target gets hooked.  */
+	  newc->hookee_post = hookc; /* We are marked as hooking
 					target cmd.  */
-          break;
-        default:
-          /* Should never come here as hookc would be 0.  */
+	  break;
+	default:
+	  /* Should never come here as hookc would be 0.  */
 	  internal_error (__FILE__, __LINE__, _("bad switch"));
-        }
+	}
     }
 }
 

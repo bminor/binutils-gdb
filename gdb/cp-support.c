@@ -735,8 +735,8 @@ cp_class_name_from_physname (const char *physname)
       case DEMANGLE_COMPONENT_RESTRICT_THIS:
       case DEMANGLE_COMPONENT_VOLATILE_THIS:
       case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
-        ret_comp = d_left (ret_comp);
-        break;
+	ret_comp = d_left (ret_comp);
+	break;
       default:
 	done = 1;
 	break;
@@ -763,8 +763,8 @@ cp_class_name_from_physname (const char *physname)
       case DEMANGLE_COMPONENT_QUAL_NAME:
       case DEMANGLE_COMPONENT_LOCAL_NAME:
 	prev_comp = cur_comp;
-        cur_comp = d_right (cur_comp);
-        break;
+	cur_comp = d_right (cur_comp);
+	break;
       case DEMANGLE_COMPONENT_TEMPLATE:
       case DEMANGLE_COMPONENT_NAME:
       case DEMANGLE_COMPONENT_CTOR:
@@ -811,11 +811,11 @@ unqualified_name_from_comp (struct demangle_component *comp)
       {
       case DEMANGLE_COMPONENT_QUAL_NAME:
       case DEMANGLE_COMPONENT_LOCAL_NAME:
-        ret_comp = d_right (ret_comp);
-        break;
+	ret_comp = d_right (ret_comp);
+	break;
       case DEMANGLE_COMPONENT_TYPED_NAME:
-        ret_comp = d_left (ret_comp);
-        break;
+	ret_comp = d_left (ret_comp);
+	break;
       case DEMANGLE_COMPONENT_TEMPLATE:
 	gdb_assert (last_template == NULL);
 	last_template = ret_comp;
@@ -828,8 +828,8 @@ unqualified_name_from_comp (struct demangle_component *comp)
       case DEMANGLE_COMPONENT_RESTRICT_THIS:
       case DEMANGLE_COMPONENT_VOLATILE_THIS:
       case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
-        ret_comp = d_left (ret_comp);
-        break;
+	ret_comp = d_left (ret_comp);
+	break;
       case DEMANGLE_COMPONENT_NAME:
       case DEMANGLE_COMPONENT_CTOR:
       case DEMANGLE_COMPONENT_DTOR:
@@ -936,8 +936,8 @@ cp_remove_params_1 (const char *demangled_name, bool require_params)
       case DEMANGLE_COMPONENT_RESTRICT_THIS:
       case DEMANGLE_COMPONENT_VOLATILE_THIS:
       case DEMANGLE_COMPONENT_VENDOR_TYPE_QUAL:
-        ret_comp = d_left (ret_comp);
-        break;
+	ret_comp = d_left (ret_comp);
+	break;
       default:
 	done = true;
 	break;
@@ -1337,8 +1337,8 @@ add_symbol_overload_list_adl_namespace (struct type *type,
 
   while (type->code () == TYPE_CODE_PTR
 	 || TYPE_IS_REFERENCE (type)
-         || type->code () == TYPE_CODE_ARRAY
-         || type->code () == TYPE_CODE_TYPEDEF)
+	 || type->code () == TYPE_CODE_ARRAY
+	 || type->code () == TYPE_CODE_TYPEDEF)
     {
       if (type->code () == TYPE_CODE_TYPEDEF)
 	type = check_typedef (type);
@@ -1415,12 +1415,12 @@ add_symbol_overload_list_using (const char *func_name,
 	if (current->searched)
 	  continue;
 
-        /* If this is a namespace alias or imported declaration ignore
+	/* If this is a namespace alias or imported declaration ignore
 	   it.  */
-        if (current->alias != NULL || current->declaration != NULL)
-          continue;
+	if (current->alias != NULL || current->declaration != NULL)
+	  continue;
 
-        if (strcmp (the_namespace, current->import_dest) == 0)
+	if (strcmp (the_namespace, current->import_dest) == 0)
 	  {
 	    /* Mark this import as searched so that the recursive call
 	       does not search it again.  */
@@ -1628,7 +1628,7 @@ gdb_demangle (const char *name, int options)
   if (catch_demangler_crashes)
     {
       /* The signal handler may keep the signal blocked when we longjmp out
-         of it.  If we have sigprocmask, we can use it to unblock the signal
+	 of it.  If we have sigprocmask, we can use it to unblock the signal
 	 afterwards and we can avoid the performance overhead of saving the
 	 signal mask just in case the signal gets triggered.  Otherwise, just
 	 tell sigsetjmp to save the mask.  */
@@ -1647,7 +1647,7 @@ gdb_demangle (const char *name, int options)
   if (catch_demangler_crashes)
     {
       if (crash_signal != 0)
-        {
+	{
 #ifdef HAVE_SIGPROCMASK
 	  /* If we got the signal, SIGSEGV may still be blocked; restore it.  */
 	  sigset_t segv_sig_set;
@@ -1659,15 +1659,15 @@ gdb_demangle (const char *name, int options)
 	  /* If there was a failure, we can't report it here, because
 	     we might be in a background thread.  Instead, arrange for
 	     the reporting to happen on the main thread.  */
-          std::string copy = name;
-          run_on_main_thread ([=] ()
-            {
-              report_failed_demangle (copy.c_str (), core_dump_allowed,
-                                      crash_signal);
-            });
+	  std::string copy = name;
+	  run_on_main_thread ([=] ()
+	    {
+	      report_failed_demangle (copy.c_str (), core_dump_allowed,
+				      crash_signal);
+	    });
 
-          result = NULL;
-        }
+	  result = NULL;
+	}
     }
 #endif
 

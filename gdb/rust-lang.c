@@ -344,13 +344,13 @@ val_print_struct (struct value *val, struct ui_file *stream, int recurse,
   if (!is_tuple)
     {
       if (type->name () != NULL)
-        fprintf_filtered (stream, "%s", type->name ());
+	fprintf_filtered (stream, "%s", type->name ());
 
       if (type->num_fields () == 0)
-        return;
+	return;
 
       if (type->name () != NULL)
-        fputs_filtered (" ", stream);
+	fputs_filtered (" ", stream);
     }
 
   if (is_tuple || is_tuple_struct)
@@ -365,27 +365,27 @@ val_print_struct (struct value *val, struct ui_file *stream, int recurse,
   for (i = 0; i < type->num_fields (); ++i)
     {
       if (field_is_static (&type->field (i)))
-        continue;
+	continue;
 
       if (!first_field)
-        fputs_filtered (",", stream);
+	fputs_filtered (",", stream);
 
       if (options->prettyformat)
-        {
+	{
 	  fputs_filtered ("\n", stream);
 	  print_spaces_filtered (2 + 2 * recurse, stream);
-        }
+	}
       else if (!first_field)
-        fputs_filtered (" ", stream);
+	fputs_filtered (" ", stream);
 
       first_field = 0;
 
       if (!is_tuple && !is_tuple_struct)
-        {
+	{
 	  fputs_styled (TYPE_FIELD_NAME (type, i),
 			variable_name_style.style (), stream);
 	  fputs_filtered (": ", stream);
-        }
+	}
 
       rust_value_print_inner (value_field (val, i), stream, recurse + 1,
 			      &opts);
@@ -753,11 +753,11 @@ rust_internal_print_type (struct type *type, const char *varstring,
       && type->name () != NULL)
     {
       /* Rust calls the unit type "void" in its debuginfo,
-         but we don't want to print it as that.  */
+	 but we don't want to print it as that.  */
       if (type->code () == TYPE_CODE_VOID)
-        fputs_filtered ("()", stream);
+	fputs_filtered ("()", stream);
       else
-        fputs_filtered (type->name (), stream);
+	fputs_filtered (type->name (), stream);
       return;
     }
 
@@ -792,11 +792,11 @@ rust_internal_print_type (struct type *type, const char *varstring,
       fputs_filtered (")", stream);
       /* If it returns unit, we can omit the return type.  */
       if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
-        {
-          fputs_filtered (" -> ", stream);
-          rust_internal_print_type (TYPE_TARGET_TYPE (type), "", stream,
+	{
+	  fputs_filtered (" -> ", stream);
+	  rust_internal_print_type (TYPE_TARGET_TYPE (type), "", stream,
 				    -1, 0, flags, false, podata);
-        }
+	}
       break;
 
     case TYPE_CODE_ARRAY:
@@ -1511,14 +1511,14 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case STRUCTOP_ANONYMOUS:
       {
-        /* Anonymous field access, i.e. foo.1.  */
-        struct value *lhs;
-        int pc, field_number, nfields;
-        struct type *type;
+	/* Anonymous field access, i.e. foo.1.  */
+	struct value *lhs;
+	int pc, field_number, nfields;
+	struct type *type;
 
-        pc = (*pos)++;
-        field_number = longest_to_int (exp->elts[pc + 1].longconst);
-        (*pos) += 2;
+	pc = (*pos)++;
+	field_number = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 2;
 	lhs = evaluate_subexp (nullptr, exp, pos, noside);
 
 	type = value_type (lhs);
@@ -1584,18 +1584,18 @@ tuple structs, and tuple-like enum variants"));
 
     case STRUCTOP_STRUCT:
       {
-        struct value *lhs;
-        struct type *type;
-        int tem, pc;
+	struct value *lhs;
+	struct type *type;
+	int tem, pc;
 
-        pc = (*pos)++;
-        tem = longest_to_int (exp->elts[pc + 1].longconst);
-        (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
+	pc = (*pos)++;
+	tem = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
 	lhs = evaluate_subexp (nullptr, exp, pos, noside);
 
 	const char *field_name = &exp->elts[pc + 2].string;
-        type = value_type (lhs);
-        if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
+	type = value_type (lhs);
+	if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
 	  {
 	    gdb::array_view<const gdb_byte> view (value_contents (lhs),
 						  TYPE_LENGTH (type));

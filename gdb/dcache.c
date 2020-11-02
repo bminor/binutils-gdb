@@ -324,7 +324,7 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 	reg_len = region->hi - memaddr;
 
       /* Skip non-readable regions.  The cache attribute can be ignored,
-         since we may be loading this for a stack access.  */
+	 since we may be loading this for a stack access.  */
       if (region->attrib.mode == MEM_WO)
 	{
 	  memaddr += reg_len;
@@ -401,7 +401,7 @@ dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr)
       db = dcache_alloc (dcache, addr);
 
       if (!dcache_read_line (dcache, db))
-         return 0;
+	 return 0;
     }
 
   *ptr = db->data[XFORM (dcache, addr)];
@@ -597,7 +597,7 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
       if (linestart == exp || i < 0)
 	{
 	  printf_filtered (_("Usage: info dcache [LINENUMBER]\n"));
-          return;
+	  return;
 	}
 
       dcache_print_line (dcache, i);

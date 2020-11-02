@@ -728,15 +728,15 @@ arm_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 
 static const struct target_desc *
 arm_linux_core_read_description (struct gdbarch *gdbarch,
-                                 struct target_ops *target,
-                                 bfd *abfd)
+				 struct target_ops *target,
+				 bfd *abfd)
 {
   CORE_ADDR arm_hwcap = linux_get_hwcap (target);
 
   if (arm_hwcap & HWCAP_VFP)
     {
       /* NEON implies VFPv3-D32 or no-VFP unit.  Say that we only support
-         Neon with VFPv3-D32.  */
+	 Neon with VFPv3-D32.  */
       if (arm_hwcap & HWCAP_NEON)
 	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
@@ -850,12 +850,12 @@ arm_linux_get_syscall_number (struct gdbarch *gdbarch,
 
       if (svc_operand)
 	{
-          /* OABI */
+	  /* OABI */
 	  svc_number = svc_operand - 0x900000;
 	}
       else
 	{
-          /* EABI */
+	  /* EABI */
 	  regcache_cooked_read_unsigned (regs, 7, &svc_number);
 	}
     }
@@ -1028,7 +1028,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 		  location, else nothing.
      Insn: unmodified svc.
      Cleanup: if pc lands in scratch space, pc <- insn_addr + insn_size
-              else leave pc alone.  */
+	      else leave pc alone.  */
 
 
   dsc->cleanup = &arm_linux_cleanup_svc;
@@ -1077,7 +1077,7 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
   dsc->wrote_to_pc = 1;
 
   /* Preparation: tmp[0] <- r14
-                  r14 <- <scratch space>+4
+		  r14 <- <scratch space>+4
 		  *(<scratch space>+8) <- from
      Insn: ldr pc, [r14, #4]
      Cleanup: r14 <- tmp[0], pc <- tmp[0].  */
@@ -1634,7 +1634,7 @@ arm_all_but_pc_registers_record (struct regcache *regcache)
   for (i = 0; i < ARM_PC_REGNUM; i++)
     {
       if (record_full_arch_list_add_reg (regcache, ARM_A1_REGNUM + i))
-        return -1;
+	return -1;
     }
 
   if (record_full_arch_list_add_reg (regcache, ARM_PS_REGNUM))
@@ -1656,8 +1656,8 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
   if (syscall_gdb == gdb_sys_no_syscall)
     {
       printf_unfiltered (_("Process record and replay target doesn't "
-                           "support syscall number %s\n"),
-                           plongest (svc_number));
+			   "support syscall number %s\n"),
+			   plongest (svc_number));
       return -1;
     }
 
@@ -1670,7 +1670,7 @@ arm_linux_syscall_record (struct regcache *regcache, unsigned long svc_number)
    }
 
   ret = record_linux_system_call (syscall_gdb, regcache,
-                                  &arm_linux_record_tdep);
+				  &arm_linux_record_tdep);
   if (ret != 0)
     return ret;
 
@@ -1762,7 +1762,7 @@ arm_linux_init_abi (struct gdbarch_info info,
     default:
       internal_error
 	(__FILE__, __LINE__,
-         _("arm_linux_init_abi: Floating point model not supported"));
+	 _("arm_linux_init_abi: Floating point model not supported"));
       break;
     }
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;
@@ -1779,7 +1779,7 @@ arm_linux_init_abi (struct gdbarch_info info,
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                             svr4_fetch_objfile_link_map);
+					     svr4_fetch_objfile_link_map);
 
   tramp_frame_prepend_unwinder (gdbarch,
 				&arm_linux_sigreturn_tramp_frame);

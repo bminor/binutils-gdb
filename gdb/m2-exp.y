@@ -162,7 +162,7 @@ type_exp:	type
 /* Expressions */
 
 exp     :       exp '^'   %prec UNARY
-                        { write_exp_elt_opcode (pstate, UNOP_IND); }
+			{ write_exp_elt_opcode (pstate, UNOP_IND); }
 	;
 
 exp	:	'-'
@@ -295,11 +295,11 @@ set	:	'{' arglist '}'
 
 /* Modula-2 array subscript notation [a,b,c...].  */
 exp     :       exp '['
-                        /* This function just saves the number of arguments
+			/* This function just saves the number of arguments
 			   that follow in the list.  It is *not* specific to
 			   function types */
-                        { pstate->start_arglist(); }
-                non_empty_arglist ']'  %prec DOT
+			{ pstate->start_arglist(); }
+		non_empty_arglist ']'  %prec DOT
 			{
 			  gdb_assert (pstate->arglist_len > 0);
 			  write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
@@ -332,12 +332,12 @@ arglist	:	arglist ',' exp   %prec ABOVE_COMMA
 	;
 
 non_empty_arglist
-        :       exp
-                        { pstate->arglist_len = 1; }
+	:       exp
+			{ pstate->arglist_len = 1; }
 	;
 
 non_empty_arglist
-        :       non_empty_arglist ',' exp %prec ABOVE_COMMA
+	:       non_empty_arglist ',' exp %prec ABOVE_COMMA
      	       	    	{ pstate->arglist_len++; }
      	;
 
@@ -349,7 +349,7 @@ exp	:	'{' type '}' exp  %prec UNARY
 	;
 
 exp     :       type '(' exp ')' %prec UNARY
-                        { write_exp_elt_opcode (pstate, UNOP_CAST);
+			{ write_exp_elt_opcode (pstate, UNOP_CAST);
 			  write_exp_elt_type (pstate, $1);
 			  write_exp_elt_opcode (pstate, UNOP_CAST); }
 	;
@@ -375,8 +375,8 @@ exp	:	exp '/' exp
 	;
 
 exp     :       exp DIV exp
-                        { write_exp_elt_opcode (pstate, BINOP_INTDIV); }
-        ;
+			{ write_exp_elt_opcode (pstate, BINOP_INTDIV); }
+	;
 
 exp	:	exp MOD exp
 			{ write_exp_elt_opcode (pstate, BINOP_REM); }
@@ -396,8 +396,8 @@ exp	:	exp '=' exp
 
 exp	:	exp NOTEQUAL exp
 			{ write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
-        |       exp '#' exp
-                        { write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
+	|       exp '#' exp
+			{ write_exp_elt_opcode (pstate, BINOP_NOTEQUAL); }
 	;
 
 exp	:	exp LEQ exp
@@ -908,7 +908,7 @@ yylex (void)
 	    break;
 	}
 	toktype = parse_number (p - tokstart);
-        if (toktype == ERROR)
+	if (toktype == ERROR)
 	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 

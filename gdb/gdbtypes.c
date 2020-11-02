@@ -405,7 +405,7 @@ lookup_pointer_type (struct type *type)
 
 struct type *
 make_reference_type (struct type *type, struct type **typeptr,
-                      enum type_code refcode)
+		      enum type_code refcode)
 {
   struct type *ntype;	/* New type */
   struct type **reftype;
@@ -414,7 +414,7 @@ make_reference_type (struct type *type, struct type **typeptr,
   gdb_assert (refcode == TYPE_CODE_REF || refcode == TYPE_CODE_RVALUE_REF);
 
   ntype = (refcode == TYPE_CODE_REF ? TYPE_REFERENCE_TYPE (type)
-           : TYPE_RVALUE_REFERENCE_TYPE (type));
+	   : TYPE_RVALUE_REFERENCE_TYPE (type));
 
   if (ntype)
     {
@@ -444,7 +444,7 @@ make_reference_type (struct type *type, struct type **typeptr,
 
   TYPE_TARGET_TYPE (ntype) = type;
   reftype = (refcode == TYPE_CODE_REF ? &TYPE_REFERENCE_TYPE (type)
-             : &TYPE_RVALUE_REFERENCE_TYPE (type));
+	     : &TYPE_RVALUE_REFERENCE_TYPE (type));
 
   *reftype = ntype;
 
@@ -590,7 +590,7 @@ address_space_name_to_type_instance_flags (struct gdbarch *gdbarch,
   else if (!strcmp (space_identifier, "data"))
     return TYPE_INSTANCE_FLAG_DATA_SPACE;
   else if (gdbarch_address_class_name_to_type_flags_p (gdbarch)
-           && gdbarch_address_class_name_to_type_flags (gdbarch,
+	   && gdbarch_address_class_name_to_type_flags (gdbarch,
 							space_identifier,
 							&type_flags))
     return type_flags;
@@ -610,7 +610,7 @@ address_space_type_instance_flags_to_name (struct gdbarch *gdbarch,
   else if (space_flag & TYPE_INSTANCE_FLAG_DATA_SPACE)
     return "data";
   else if ((space_flag & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
-           && gdbarch_address_class_type_flags_to_name_p (gdbarch))
+	   && gdbarch_address_class_type_flags_to_name_p (gdbarch))
     return gdbarch_address_class_type_flags_to_name (gdbarch, space_flag);
   else
     return NULL;
@@ -1048,7 +1048,7 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
     {
     case TYPE_CODE_RANGE:
       /* This function currently only works for ranges with two defined,
-         constant bounds.  */
+	 constant bounds.  */
       if (type->bounds ()->low.kind () != PROP_CONST
 	  || type->bounds ()->high.kind () != PROP_CONST)
 	return -1;
@@ -1106,8 +1106,8 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
     case TYPE_CODE_CHAR:
       *lowp = 0;
       /* This round-about calculation is to avoid shifting by
-         TYPE_LENGTH (type) * TARGET_CHAR_BIT, which will not work
-         if TYPE_LENGTH (type) == sizeof (LONGEST).  */
+	 TYPE_LENGTH (type) * TARGET_CHAR_BIT, which will not work
+	 if TYPE_LENGTH (type) == sizeof (LONGEST).  */
       *highp = 1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1);
       *highp = (*highp - 1) | *highp;
       return 0;
@@ -1172,13 +1172,13 @@ discrete_position (struct type *type, LONGEST val, LONGEST *pos)
       int i;
 
       for (i = 0; i < type->num_fields (); i += 1)
-        {
-          if (val == TYPE_FIELD_ENUMVAL (type, i))
+	{
+	  if (val == TYPE_FIELD_ENUMVAL (type, i))
 	    {
 	      *pos = i;
 	      return 1;
 	    }
-        }
+	}
       /* Invalid enumeration value.  */
       return 0;
     }
@@ -1305,11 +1305,11 @@ create_array_type_with_stride (struct type *result_type,
   if (!update_static_array_size (result_type))
     {
       /* This type is dynamic and its length needs to be computed
-         on demand.  In the meantime, avoid leaving the TYPE_LENGTH
-         undefined by setting it to zero.  Although we are not expected
-         to trust TYPE_LENGTH in this case, setting the size to zero
-         allows us to avoid allocating objects of random sizes in case
-         we accidently do.  */
+	 on demand.  In the meantime, avoid leaving the TYPE_LENGTH
+	 undefined by setting it to zero.  Although we are not expected
+	 to trust TYPE_LENGTH in this case, setting the size to zero
+	 allows us to avoid allocating objects of random sizes in case
+	 we accidently do.  */
       TYPE_LENGTH (result_type) = 0;
     }
 
@@ -1923,7 +1923,7 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
       int i;
 
       /* We must start at zero in case the first (and only) baseclass
-         is virtual (and hence we cannot share the table pointer).  */
+	 is virtual (and hence we cannot share the table pointer).  */
       for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
 	{
 	  struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
@@ -2214,7 +2214,7 @@ resolve_dynamic_array_or_string (struct type *type,
     bit_stride = TYPE_FIELD_BITSIZE (type, 0);
 
   return create_array_type_with_stride (type, elt_type, range_type, NULL,
-                                        bit_stride);
+					bit_stride);
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
@@ -2655,7 +2655,7 @@ type::dyn_prop (dynamic_prop_node_kind prop_kind) const
   while (node != NULL)
     {
       if (node->prop_kind == prop_kind)
-        return &node->prop;
+	return &node->prop;
       node = node->next;
     }
   return NULL;
@@ -2851,7 +2851,7 @@ check_typedef (struct type *type)
     {
       const char *name = type->name ();
       /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or VAR_DOMAIN
-         as appropriate?  */
+	 as appropriate?  */
       struct symbol *sym;
 
       if (name == NULL)
@@ -2861,16 +2861,16 @@ check_typedef (struct type *type)
 	}
       sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0).symbol;
       if (sym)
-        {
-          /* Same as above for opaque types, we can replace the stub
-             with the complete type only if they are in the same
-             objfile.  */
+	{
+	  /* Same as above for opaque types, we can replace the stub
+	     with the complete type only if they are in the same
+	     objfile.  */
 	  if (TYPE_OBJFILE (SYMBOL_TYPE (sym)) == TYPE_OBJFILE (type))
 	    type = make_qualified_type (SYMBOL_TYPE (sym),
 					type->instance_flags (), type);
 	  else
 	    type = SYMBOL_TYPE (sym);
-        }
+	}
     }
 
   if (type->target_is_stub ())
@@ -3010,7 +3010,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 	  if (depth <= 0 && (*p == ',' || *p == ')'))
 	    {
 	      /* Avoid parsing of ellipsis, they will be handled below.
-	         Also avoid ``void'' as above.  */
+		 Also avoid ``void'' as above.  */
 	      if (strncmp (argtypetext, "...", p - argtypetext) != 0
 		  && strncmp (argtypetext, "void", p - argtypetext) != 0)
 		{
@@ -3115,14 +3115,14 @@ set_type_code (struct type *type, enum type_code code)
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
       case TYPE_CODE_NAMESPACE:
-        INIT_CPLUS_SPECIFIC (type);
-        break;
+	INIT_CPLUS_SPECIFIC (type);
+	break;
       case TYPE_CODE_FLT:
-        TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
-        break;
+	TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FLOATFORMAT;
+	break;
       case TYPE_CODE_FUNC:
 	INIT_FUNC_SPECIFIC (type);
-        break;
+	break;
     }
 }
 
@@ -3569,7 +3569,7 @@ int
 class_or_union_p (const struct type *t)
 {
   return (t->code () == TYPE_CODE_STRUCT
-          || t->code () == TYPE_CODE_UNION);
+	  || t->code () == TYPE_CODE_UNION);
 }
 
 /* A helper function which returns true if types A and B represent the
@@ -3725,7 +3725,7 @@ type_byte_order (const struct type *type)
   if (type->endianity_is_not_default ())
     {
       if (byteorder == BFD_ENDIAN_BIG)
-        return BFD_ENDIAN_LITTLE;
+	return BFD_ENDIAN_LITTLE;
       else
 	{
 	  gdb_assert (byteorder == BFD_ENDIAN_LITTLE);
@@ -3927,7 +3927,7 @@ types_equal (struct type *a, struct type *b)
   if (a->code () == TYPE_CODE_PTR
       || a->code () == TYPE_CODE_REF)
     return types_equal (TYPE_TARGET_TYPE (a),
-                        TYPE_TARGET_TYPE (b));
+			TYPE_TARGET_TYPE (b));
 
   /* Well, damnit, if the names are exactly the same, I'll say they
      are exactly the same.  This happens when we generate method
@@ -4626,10 +4626,10 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
 
   if (TYPE_IS_REFERENCE (arg))
     return (sum_ranks (rank_one_type (parm, TYPE_TARGET_TYPE (arg), NULL),
-                       REFERENCE_SEE_THROUGH_BADNESS));
+		       REFERENCE_SEE_THROUGH_BADNESS));
   if (TYPE_IS_REFERENCE (parm))
     return (sum_ranks (rank_one_type (TYPE_TARGET_TYPE (parm), arg, NULL),
-                       REFERENCE_SEE_THROUGH_BADNESS));
+		       REFERENCE_SEE_THROUGH_BADNESS));
   if (overload_debug)
   /* Debugging only.  */
     fprintf_filtered (gdb_stderr,
@@ -5193,7 +5193,7 @@ recursive_dump_type (struct type *type, int spaces)
 
       case TYPE_SPECIFIC_FUNC:
 	printfi_filtered (spaces, "calling_convention %d\n",
-                          TYPE_CALLING_CONVENTION (type));
+			  TYPE_CALLING_CONVENTION (type));
 	/* tail_call_list is not printed.  */
 	break;
 
@@ -5385,7 +5385,7 @@ copy_type_recursive (struct objfile *objfile,
   if (type->code () == TYPE_CODE_RANGE)
     {
       range_bounds *bounds
-        = ((struct range_bounds *) TYPE_ALLOC
+	= ((struct range_bounds *) TYPE_ALLOC
 	   (new_type, sizeof (struct range_bounds)));
 
       *bounds = *type->bounds ();

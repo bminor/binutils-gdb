@@ -843,9 +843,9 @@ stap_parse_register_operand (struct stap_parse_info *p)
    A single operand can be:
 
       - an unary operation (e.g., `-5', `~2', or even with subexpressions
-        like `-(2 + 1)')
+	like `-(2 + 1)')
       - a register displacement, which will be treated as a register
-        operand (e.g., `-4(%eax)' on x86)
+	operand (e.g., `-4(%eax)' on x86)
       - a numeric constant, or
       - a register operand (see function `stap_parse_register_operand')
 

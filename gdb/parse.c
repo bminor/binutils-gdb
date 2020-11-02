@@ -1074,25 +1074,25 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (language_mode == language_mode_auto && block != NULL)
     {
       /* Find the language associated to the given context block.
-         Default to the current language if it can not be determined.
+	 Default to the current language if it can not be determined.
 
-         Note that using the language corresponding to the current frame
-         can sometimes give unexpected results.  For instance, this
-         routine is often called several times during the inferior
-         startup phase to re-parse breakpoint expressions after
-         a new shared library has been loaded.  The language associated
-         to the current frame at this moment is not relevant for
-         the breakpoint.  Using it would therefore be silly, so it seems
-         better to rely on the current language rather than relying on
-         the current frame language to parse the expression.  That's why
-         we do the following language detection only if the context block
-         has been specifically provided.  */
+	 Note that using the language corresponding to the current frame
+	 can sometimes give unexpected results.  For instance, this
+	 routine is often called several times during the inferior
+	 startup phase to re-parse breakpoint expressions after
+	 a new shared library has been loaded.  The language associated
+	 to the current frame at this moment is not relevant for
+	 the breakpoint.  Using it would therefore be silly, so it seems
+	 better to rely on the current language rather than relying on
+	 the current frame language to parse the expression.  That's why
+	 we do the following language detection only if the context block
+	 has been specifically provided.  */
       struct symbol *func = block_linkage_function (block);
 
       if (func != NULL)
-        lang = language_def (func->language ());
+	lang = language_def (func->language ());
       if (lang == NULL || lang->la_language == language_unknown)
-        lang = current_language;
+	lang = current_language;
     }
   else
     lang = current_language;

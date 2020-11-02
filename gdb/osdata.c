@@ -35,7 +35,7 @@ osdata_parse (const char *xml)
     {
       have_warned = 1;
       warning (_("Can not parse XML OS data; XML support was disabled "
-                "at compile time"));
+		"at compile time"));
     }
 
   return NULL;
@@ -54,8 +54,8 @@ struct osdata_parsing_data
 
 static void
 osdata_start_osdata (struct gdb_xml_parser *parser,
-                        const struct gdb_xml_element *element,
-                        void *user_data,
+			const struct gdb_xml_element *element,
+			void *user_data,
 			std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
@@ -71,8 +71,8 @@ osdata_start_osdata (struct gdb_xml_parser *parser,
 
 static void
 osdata_start_item (struct gdb_xml_parser *parser,
-                  const struct gdb_xml_element *element,
-                  void *user_data,
+		  const struct gdb_xml_element *element,
+		  void *user_data,
 		  std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
@@ -83,8 +83,8 @@ osdata_start_item (struct gdb_xml_parser *parser,
 
 static void
 osdata_start_column (struct gdb_xml_parser *parser,
-                    const struct gdb_xml_element *element,
-                    void *user_data,
+		    const struct gdb_xml_element *element,
+		    void *user_data,
 		    std::vector<gdb_xml_value> &attributes)
 {
   struct osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
@@ -98,8 +98,8 @@ osdata_start_column (struct gdb_xml_parser *parser,
 
 static void
 osdata_end_column (struct gdb_xml_parser *parser,
-                  const struct gdb_xml_element *element,
-                  void *user_data, const char *body_text)
+		  const struct gdb_xml_element *element,
+		  void *user_data, const char *body_text)
 {
   osdata_parsing_data *data = (struct osdata_parsing_data *) user_data;
   struct osdata *osdata = data->osdata.get ();
@@ -253,7 +253,7 @@ info_osdata (const char *type)
 	  snprintf (col_name, 32, "col%d", ix);
 	  uiout->table_header (10, ui_left,
 			       col_name, last->columns[ix].name.c_str ());
-        }
+	}
     }
 
   uiout->table_body ();
@@ -278,7 +278,7 @@ info_osdata (const char *type)
 	     }
 	 }
 
-         uiout->text ("\n");
+	 uiout->text ("\n");
        }
     }
 }
@@ -294,5 +294,5 @@ void
 _initialize_osdata ()
 {
   add_info ("os", info_osdata_command,
-           _("Show OS data ARG."));
+	   _("Show OS data ARG."));
 }

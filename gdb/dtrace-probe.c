@@ -462,8 +462,8 @@ dtrace_process_dof_probe (struct objfile *objfile,
       int probe_argc = DOF_UINT (dof, probe->dofpr_nargc);
 
       /* Store argument type descriptions.  A description of the type
-         of the argument is in the (J+1)th null-terminated string
-         starting at 'strtab' + 'probe->dofpr_nargv'.  */
+	 of the argument is in the (J+1)th null-terminated string
+	 starting at 'strtab' + 'probe->dofpr_nargv'.  */
       std::vector<struct dtrace_probe_arg> args;
       p = strtab + DOF_UINT (dof, probe->dofpr_nargv);
       for (j = 0; j < probe_argc; j++)
@@ -481,7 +481,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 	  /* Try to parse a type expression from the type string.  If
 	     this does not work then we set the type to `long
 	     int'.  */
-          struct type *type = builtin_type (gdbarch)->builtin_long;
+	  struct type *type = builtin_type (gdbarch)->builtin_long;
 
 	  try
 	    {
@@ -856,8 +856,8 @@ dtrace_static_probe_ops::get_probes
 	     extract the information of any probe defined into it.  */
 	  if (bfd_malloc_and_get_section (abfd, sect, &dof) && dof != NULL)
 	    dtrace_process_dof (sect, objfile, probesp,
-			        (struct dtrace_dof_hdr *) dof);
-         else
+				(struct dtrace_dof_hdr *) dof);
+	 else
 	    complaint (_("could not obtain the contents of"
 			 "section '%s' in objfile `%s'."),
 		       bfd_section_name (sect), bfd_get_filename (abfd));

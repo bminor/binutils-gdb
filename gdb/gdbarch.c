@@ -53,7 +53,7 @@ static void alloc_gdbarch_data (struct gdbarch *);
 unsigned int gdbarch_debug = GDBARCH_DEBUG;
 static void
 show_gdbarch_debug (struct ui_file *file, int from_tty,
-                    struct cmd_list_element *c, const char *value)
+		    struct cmd_list_element *c, const char *value)
 {
   fprintf_filtered (file, _("Architecture debugging is %s.\n"), value);
 }
@@ -358,7 +358,7 @@ struct gdbarch
 
 struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
-               struct gdbarch_tdep *tdep)
+	       struct gdbarch_tdep *tdep)
 {
   struct gdbarch *gdbarch;
 
@@ -723,8 +723,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of read_core_file_mappings, invalid_p == 0 */
   if (!log.empty ())
     internal_error (__FILE__, __LINE__,
-                    _("verify_gdbarch: the following are invalid ...%s"),
-                    log.c_str ());
+		    _("verify_gdbarch: the following are invalid ...%s"),
+		    log.c_str ());
 }
 
 
@@ -739,8 +739,8 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_nm_file = GDB_NM_FILE;
 #endif
   fprintf_unfiltered (file,
-                      "gdbarch_dump: GDB_NM_FILE = %s\n",
-                      gdb_nm_file);
+		      "gdbarch_dump: GDB_NM_FILE = %s\n",
+		      gdb_nm_file);
   fprintf_unfiltered (file,
                       "gdbarch_dump: addr_bit = %s\n",
                       plongest (gdbarch->addr_bit));
@@ -5351,13 +5351,13 @@ gdbarch_printable_names (void)
       const struct bfd_arch_info *ap;
       ap = bfd_lookup_arch (rego->bfd_architecture, 0);
       if (ap == NULL)
-        internal_error (__FILE__, __LINE__,
-                        _("gdbarch_architecture_names: multi-arch unknown"));
+	internal_error (__FILE__, __LINE__,
+			_("gdbarch_architecture_names: multi-arch unknown"));
       do
-        {
-          append_name (&arches, &nr_arches, ap->printable_name);
-          ap = ap->next;
-        }
+	{
+	  append_name (&arches, &nr_arches, ap->printable_name);
+	  ap = ap->next;
+	}
       while (ap != NULL);
     }
   append_name (&arches, &nr_arches, NULL);
@@ -5367,7 +5367,7 @@ gdbarch_printable_names (void)
 
 void
 gdbarch_register (enum bfd_architecture bfd_architecture,
-                  gdbarch_init_ftype *init,
+		  gdbarch_init_ftype *init,
 		  gdbarch_dump_tdep_ftype *dump_tdep)
 {
   struct gdbarch_registration **curr;
@@ -5378,9 +5378,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   if (bfd_arch_info == NULL)
     {
       internal_error (__FILE__, __LINE__,
-                      _("gdbarch: Attempt to register "
+		      _("gdbarch: Attempt to register "
 			"unknown architecture (%d)"),
-                      bfd_architecture);
+		      bfd_architecture);
     }
   /* Check that we haven't seen this architecture before.  */
   for (curr = &gdbarch_registry;
@@ -5389,9 +5389,9 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
 	internal_error (__FILE__, __LINE__,
-                        _("gdbarch: Duplicate registration "
+			_("gdbarch: Duplicate registration "
 			  "of architecture (%s)"),
-	                bfd_arch_info->printable_name);
+			bfd_arch_info->printable_name);
     }
   /* log it */
   if (gdbarch_debug)
@@ -5419,7 +5419,7 @@ register_gdbarch_init (enum bfd_architecture bfd_architecture,
 
 struct gdbarch_list *
 gdbarch_list_lookup_by_info (struct gdbarch_list *arches,
-                             const struct gdbarch_info *info)
+			     const struct gdbarch_info *info)
 {
   for (; arches != NULL; arches = arches->next)
     {
@@ -5589,7 +5589,7 @@ _initialize_gdbarch ()
 Set architecture debugging."), _("\
 Show architecture debugging."), _("\
 When non-zero, architecture debugging is enabled."),
-                            NULL,
-                            show_gdbarch_debug,
-                            &setdebuglist, &showdebuglist);
+			    NULL,
+			    show_gdbarch_debug,
+			    &setdebuglist, &showdebuglist);
 }

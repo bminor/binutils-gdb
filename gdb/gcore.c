@@ -384,10 +384,10 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
   if (read == 0 && write == 0 && exec == 0 && modified == 0)
     {
       if (info_verbose)
-        {
-          fprintf_filtered (gdb_stdout, "Ignore segment, %s bytes at %s\n",
-                            plongest (size), paddress (target_gdbarch (), vaddr));
-        }
+	{
+	  fprintf_filtered (gdb_stdout, "Ignore segment, %s bytes at %s\n",
+			    plongest (size), paddress (target_gdbarch (), vaddr));
+	}
 
       return 0;
     }

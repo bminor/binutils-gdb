@@ -1132,7 +1132,7 @@ Return the frame's symtab-and-line <gdb:sal> object." },
 Return the value of the symbol in the frame.\n\
 \n\
   Arguments: <gdb:frame> <gdb:symbol>\n\
-         Or: <gdb:frame> string [#:block <gdb:block>]" },
+	 Or: <gdb:frame> string [#:block <gdb:block>]" },
 
   { "frame-read-register", 2, 0, 0,
     as_a_scm_t_subr (gdbscm_frame_read_register),

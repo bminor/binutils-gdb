@@ -95,14 +95,14 @@ alpha_bsd_nat_target::store_registers (struct regcache *regcache, int regno)
     {
       struct reg gregs;
       if (ptrace (PT_GETREGS, regcache->ptid ().pid (),
-                  (PTRACE_TYPE_ARG3) &gregs, lwp) == -1)
-        perror_with_name (_("Couldn't get registers"));
+		  (PTRACE_TYPE_ARG3) &gregs, lwp) == -1)
+	perror_with_name (_("Couldn't get registers"));
 
       alphabsd_fill_reg (regcache, (char *) &gregs, regno);
 
       if (ptrace (PT_SETREGS, regcache->ptid ().pid (),
-                  (PTRACE_TYPE_ARG3) &gregs, lwp) == -1)
-        perror_with_name (_("Couldn't write registers"));
+		  (PTRACE_TYPE_ARG3) &gregs, lwp) == -1)
+	perror_with_name (_("Couldn't write registers"));
 
       if (regno != -1)
 	return;

@@ -2736,7 +2736,7 @@ select_event_lwp (struct lwp_info **orig_lp)
   if (event_thread == NULL)
     {
       /* No single-stepping LWP.  Select one at random, out of those
-         which have had events.  */
+	 which have had events.  */
 
       event_thread = find_thread_in_random ([&] (thread_info *thread)
 	{

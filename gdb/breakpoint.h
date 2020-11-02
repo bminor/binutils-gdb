@@ -1542,7 +1542,7 @@ extern void breakpoint_set_task (struct breakpoint *b, int task);
 extern void mark_breakpoints_out (void);
 
 extern struct breakpoint *create_jit_event_breakpoint (struct gdbarch *,
-                                                       CORE_ADDR);
+						       CORE_ADDR);
 
 extern struct breakpoint *create_solib_event_breakpoint (struct gdbarch *,
 							 CORE_ADDR);

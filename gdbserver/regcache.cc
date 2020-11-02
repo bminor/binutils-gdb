@@ -437,8 +437,8 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
 
   if (size > (int) sizeof (ULONGEST))
     error (_("That operation is not available on integers of more than"
-            "%d bytes."),
-          (int) sizeof (ULONGEST));
+	    "%d bytes."),
+	  (int) sizeof (ULONGEST));
 
   *val = 0;
   collect_register (regcache, regnum, val);

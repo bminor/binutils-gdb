@@ -213,8 +213,8 @@ type_exp:	type
 	;
 
 exp     :       '(' exp ')'
-        		{ }
-        ;
+			{ }
+	;
 
 /* Expressions, not including the comma operator.  */
 exp	:	'*' exp    %prec UNARY
@@ -351,8 +351,8 @@ subrange:	':' ':' exp	%prec ABOVE_COMMA
 	;
 
 complexnum:     exp ',' exp 
-                	{ }                          
-        ;
+			{ }                          
+	;
 
 exp	:	'(' complexnum ')'
 			{ write_exp_elt_opcode (pstate, OP_COMPLEX);
@@ -369,10 +369,10 @@ exp	:	'(' type ')' exp  %prec UNARY
 	;
 
 exp     :       exp '%' name
-                        { write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
-                          write_exp_string (pstate, $3);
-                          write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
-        ;
+			{ write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
+	;
 
 /* Binary operators in order of decreasing precedence.  */
 
@@ -510,7 +510,7 @@ exp     :       BOOLEAN_LITERAL
 			  write_exp_elt_longcst (pstate, (LONGEST) $1);
 			  write_exp_elt_opcode (pstate, OP_BOOL);
 			}
-        ;
+	;
 
 exp	:	STRING_LITERAL
 			{
@@ -553,7 +553,7 @@ variable:	name_not_typename
 
 
 type    :       ptype
-        ;
+	;
 
 ptype	:	typebase
 	|	typebase abs_decl
@@ -1205,7 +1205,7 @@ yylex (void)
     case '8':
     case '9':
       {
-        /* It's a number.  */
+	/* It's a number.  */
 	int got_dot = 0, got_e = 0, got_d = 0, toktype;
 	const char *p = tokstart;
 	int hex = input_radix > 10;
@@ -1246,8 +1246,8 @@ yylex (void)
 	toktype = parse_number (pstate, tokstart, p - tokstart,
 				got_dot|got_e|got_d,
 				&yylval);
-        if (toktype == ERROR)
-          {
+	if (toktype == ERROR)
+	  {
 	    char *err_copy = (char *) alloca (p - tokstart + 1);
 	    
 	    memcpy (err_copy, tokstart, p - tokstart);

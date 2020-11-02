@@ -220,7 +220,7 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 	{
 	  have_ptrace_xmmregs = 0;
 #endif
-          if (gdb_ptrace (PT_GETFPREGS, ptid,
+	  if (gdb_ptrace (PT_GETFPREGS, ptid,
 			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't get floating point status"));
 
@@ -244,12 +244,12 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
       struct reg regs;
 
       if (gdb_ptrace (PT_GETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-        perror_with_name (_("Couldn't get registers"));
+	perror_with_name (_("Couldn't get registers"));
 
       i386bsd_collect_gregset (regcache, &regs, regnum);
 
       if (gdb_ptrace (PT_SETREGS, ptid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
-        perror_with_name (_("Couldn't write registers"));
+	perror_with_name (_("Couldn't write registers"));
 
       if (regnum != -1)
 	return;
@@ -319,23 +319,23 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 
 	  if (gdb_ptrace (PT_SETXMMREGS, ptid,
 			  (PTRACE_TYPE_ARG3) xmmregs, 0) == -1)
-            perror_with_name (_("Couldn't write XMM registers"));
+	    perror_with_name (_("Couldn't write XMM registers"));
 	}
       else
 	{
 	  have_ptrace_xmmregs = 0;
 #endif
-          if (gdb_ptrace (PT_GETFPREGS, ptid,
+	  if (gdb_ptrace (PT_GETFPREGS, ptid,
 			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't get floating point status"));
 
-          i387_collect_fsave (regcache, regnum, &fpregs);
+	  i387_collect_fsave (regcache, regnum, &fpregs);
 
-          if (gdb_ptrace (PT_SETFPREGS, ptid,
+	  if (gdb_ptrace (PT_SETFPREGS, ptid,
 			  (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	    perror_with_name (_("Couldn't write floating point status"));
 #ifdef HAVE_PT_GETXMMREGS
-        }
+	}
 #endif
     }
 }

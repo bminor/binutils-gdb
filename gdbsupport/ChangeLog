@@ -1,3 +1,14 @@
+2020-11-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* common-exceptions.h: Fix indentation.
+	* event-loop.cc: Fix indentation.
+	* fileio.cc: Fix indentation.
+	* filestuff.cc: Fix indentation.
+	* gdb-dlfcn.cc: Fix indentation.
+	* gdb_string_view.h: Fix indentation.
+	* job-control.cc: Fix indentation.
+	* signals.cc: Fix indentation.
+
 2020-10-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common-debug.cc (debug_prefixed_printf): New.

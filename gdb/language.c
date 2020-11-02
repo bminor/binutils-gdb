@@ -155,7 +155,7 @@ set_language_command (const char *ignore,
 	  if (lang->la_language == language_auto)
 	    {
 	      /* Enter auto mode.  Set to the current frame's language, if
-                 known, or fallback to the initial language.  */
+		 known, or fallback to the initial language.  */
 	      language_mode = language_mode_auto;
 	      try
 		{
@@ -446,7 +446,7 @@ range_error (const char *string,...)
       break;
     case range_check_off:
       /* FIXME: cagney/2002-01-30: Should this function print anything
-         when range error is off?  */
+	 when range error is off?  */
       vfprintf_filtered (gdb_stderr, string, args);
       fprintf_filtered (gdb_stderr, "\n");
       break;

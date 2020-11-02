@@ -85,17 +85,17 @@ enum ada_renaming_category
     ADA_NOT_RENAMING,
 
     /* For symbols declared
-         Foo : TYPE renamed OBJECT;  */
+	 Foo : TYPE renamed OBJECT;  */
     ADA_OBJECT_RENAMING,
 
     /* For symbols declared
-         Foo : exception renames EXCEPTION;  */
+	 Foo : exception renames EXCEPTION;  */
     ADA_EXCEPTION_RENAMING,
     /* For packages declared
-          package Foo renames PACKAGE; */
+	  package Foo renames PACKAGE; */
     ADA_PACKAGE_RENAMING,
     /* For subprograms declared
-          SUBPROGRAM_SPEC renames SUBPROGRAM;
+	  SUBPROGRAM_SPEC renames SUBPROGRAM;
        (Currently not used).  */
     ADA_SUBPROGRAM_RENAMING
   };
@@ -152,14 +152,14 @@ struct ada_task_info
 extern void ada_ensure_varsize_limit (const struct type *type);
 
 extern int ada_get_field_index (const struct type *type,
-                                const char *field_name,
-                                int maybe_missing);
+				const char *field_name,
+				int maybe_missing);
 
 extern int ada_parse (struct parser_state *);    /* Defined in ada-exp.y */
 
-                        /* Defined in ada-typeprint.c */
+			/* Defined in ada-typeprint.c */
 extern void ada_print_type (struct type *, const char *, struct ui_file *, int,
-                            int, const struct type_print_options *);
+			    int, const struct type_print_options *);
 
 extern void ada_print_typedef (struct type *type, struct symbol *new_symbol,
 			       struct ui_file *stream);
@@ -172,7 +172,7 @@ extern void ada_value_print_inner (struct value *, struct ui_file *, int,
 extern void ada_value_print (struct value *, struct ui_file *,
 			     const struct value_print_options *);
 
-                                /* Defined in ada-lang.c */
+				/* Defined in ada-lang.c */
 
 extern void ada_emit_char (int, struct type *, struct ui_file *, int, int);
 
@@ -183,12 +183,12 @@ extern void ada_printstr (struct ui_file *, struct type *, const gdb_byte *,
 			  const struct value_print_options *);
 
 struct value *ada_convert_actual (struct value *actual,
-                                  struct type *formal_type0);
+				  struct type *formal_type0);
 
 extern bool ada_is_access_to_unconstrained_array (struct type *type);
 
 extern struct value *ada_value_subscript (struct value *, int,
-                                          struct value **);
+					  struct value **);
 
 extern void ada_fixup_array_indexes_type (struct type *index_desc_type);
 
@@ -219,7 +219,7 @@ extern const char *ada_decode_symbol (const struct general_symbol_info *);
 extern std::string ada_decode (const char*);
 
 extern int ada_lookup_symbol_list (const char *, const struct block *,
-                                   domain_enum,
+				   domain_enum,
 				   std::vector<struct block_symbol> *);
 
 extern struct block_symbol ada_lookup_symbol (const char *,
@@ -247,8 +247,8 @@ extern int ada_is_constrained_packed_array_type (struct type *);
 
 extern struct value *ada_value_primitive_packed_val (struct value *,
 						     const gdb_byte *,
-                                                     long, int, int,
-                                                     struct type *);
+						     long, int, int,
+						     struct type *);
 
 extern struct type *ada_coerce_to_simple_array_type (struct type *);
 
@@ -293,7 +293,7 @@ extern int ada_which_variant_applies (struct type *, struct value *);
 
 extern struct type *ada_to_fixed_type (struct type *, const gdb_byte *,
 				       CORE_ADDR, struct value *,
-                                       int check_tag);
+				       int check_tag);
 
 extern struct value *ada_to_fixed_value (struct value *val);
 
@@ -308,7 +308,7 @@ extern int ada_name_prefix_len (const char *);
 extern const char *ada_type_name (struct type *);
 
 extern struct type *ada_find_parallel_type (struct type *,
-                                            const char *suffix);
+					    const char *suffix);
 
 extern bool get_int_var_value (const char *, LONGEST &value);
 

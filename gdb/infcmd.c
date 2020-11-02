@@ -131,7 +131,7 @@ get_inferior_args (void)
   if (current_inferior ()->argc != 0)
     {
       gdb::array_view<char * const> args (current_inferior ()->argv,
-                                          current_inferior ()->argc);
+					  current_inferior ()->argc);
       std::string n = construct_inferior_arguments (args);
       set_inferior_args (n.c_str ());
     }
@@ -1896,7 +1896,7 @@ info_program_command (const char *args, int from_tty)
   else if (stat != 0)
     {
       /* There may be several breakpoints in the same place, so this
-         isn't as strange as it seems.  */
+	 isn't as strange as it seems.  */
       while (stat != 0)
 	{
 	  if (stat < 0)
@@ -1972,14 +1972,14 @@ set_environment_command (const char *arg, int from_tty)
   if (p != 0 && val != 0)
     {
       /* We have both a space and an equals.  If the space is before the
-         equals, walk forward over the spaces til we see a nonspace 
-         (possibly the equals).  */
+	 equals, walk forward over the spaces til we see a nonspace 
+	 (possibly the equals).  */
       if (p > val)
 	while (*val == ' ')
 	  val++;
 
       /* Now if the = is after the char following the spaces,
-         take the char following the spaces.  */
+	 take the char following the spaces.  */
       if (p > val)
 	p = val - 1;
     }
@@ -2024,7 +2024,7 @@ unset_environment_command (const char *var, int from_tty)
   if (var == 0)
     {
       /* If there is no argument, delete all environment variables.
-         Ask for confirmation if reading from the terminal.  */
+	 Ask for confirmation if reading from the terminal.  */
       if (!from_tty || query (_("Delete all environment variables? ")))
 	current_inferior ()->environment.clear ();
     }
@@ -2091,7 +2091,7 @@ default_print_one_register_info (struct ui_file *file,
     {
       value_column_1 = 15,
       /* Give enough room for "0x", 16 hex digits and two spaces in
-         preceding column.  */
+	 preceding column.  */
       value_column_2 = value_column_1 + 2 + 16 + 2,
     };
 
@@ -2170,7 +2170,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
   for (i = 0; i < numregs; i++)
     {
       /* Decide between printing all regs, non-float / vector regs, or
-         specific reg.  */
+	 specific reg.  */
       if (regnum == -1)
 	{
 	  if (print_all)
@@ -2191,7 +2191,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	}
 
       /* If the register name is empty, it is undefined for this
-         processor, so don't display anything.  */
+	 processor, so don't display anything.  */
       if (gdbarch_register_name (gdbarch, i) == NULL
 	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
@@ -2229,7 +2229,7 @@ registers_info (const char *addr_exp, int fpregs)
       addr_exp = skip_spaces (addr_exp);
 
       /* Discard any leading ``$''.  Check that there is something
-         resembling a register following it.  */
+	 resembling a register following it.  */
       if (addr_exp[0] == '$')
 	addr_exp++;
       if (isspace ((*addr_exp)) || (*addr_exp) == '\0')

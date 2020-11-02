@@ -219,7 +219,7 @@ get_ipa_tdesc (int idx)
 #endif
     default:
       internal_error (__FILE__, __LINE__,
-                     "unknown ipa tdesc index: %d", idx);
+		     "unknown ipa tdesc index: %d", idx);
 #ifdef __powerpc64__
       return tdesc_powerpc_64l;
 #else

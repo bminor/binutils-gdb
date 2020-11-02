@@ -850,19 +850,19 @@ try_thread_db_load_1 (struct thread_db_info *info)
 	fprintf_unfiltered (gdb_stdlog, _("td_ta_new failed: %s\n"),
 			    thread_db_err_str (err));
       else
-        switch (err)
-          {
-            case TD_NOLIBTHREAD:
+	switch (err)
+	  {
+	    case TD_NOLIBTHREAD:
 #ifdef THREAD_DB_HAS_TD_VERSION
-            case TD_VERSION:
+	    case TD_VERSION:
 #endif
-              /* The errors above are not unexpected and silently ignored:
-                 they just mean we haven't found correct version of
-                 libthread_db yet.  */
-              break;
-            default:
-              warning (_("td_ta_new failed: %s"), thread_db_err_str (err));
-          }
+	      /* The errors above are not unexpected and silently ignored:
+		 they just mean we haven't found correct version of
+		 libthread_db yet.  */
+	      break;
+	    default:
+	      warning (_("td_ta_new failed: %s"), thread_db_err_str (err));
+	  }
       return false;
     }
 
@@ -918,8 +918,8 @@ try_thread_db_load_1 (struct thread_db_info *info)
   else if (thread_db_find_new_threads_silently (inferior_thread ()) != 0)
     {
       /* Even if libthread_db initializes, if the thread list is
-         corrupted, we'd not manage to list any threads.  Better reject this
-         thread_db, and fall back to at least listing LWPs.  */
+	 corrupted, we'd not manage to list any threads.  Better reject this
+	 thread_db, and fall back to at least listing LWPs.  */
       return false;
     }
 
@@ -997,13 +997,13 @@ try_thread_db_load (const char *library, bool check_auto_load_safe)
 
       td_init = dlsym (handle, "td_init");
       if (td_init != NULL)
-        {
-          const char *const libpath = dladdr_to_soname (td_init);
+	{
+	  const char *const libpath = dladdr_to_soname (td_init);
 
-          if (libpath != NULL)
-            fprintf_unfiltered (gdb_stdlog, _("Host %s resolved to: %s.\n"),
-                               library, libpath);
-        }
+	  if (libpath != NULL)
+	    fprintf_unfiltered (gdb_stdlog, _("Host %s resolved to: %s.\n"),
+			       library, libpath);
+	}
     }
 
   info = add_thread_db_info (handle);
@@ -1701,7 +1701,7 @@ thread_db_target::thread_handle_to_thread_info (const gdb_byte *thread_handle,
       thread_db_thread_info *priv = get_thread_db_thread_info (tp);
 
       if (priv != NULL && handle_tid == priv->tid)
-        return tp;
+	return tp;
     }
 
   return NULL;
@@ -1789,14 +1789,14 @@ thread_db_target::get_thread_local_address (ptid_t ptid,
 	  /* Now, if libthread_db provided the initialization image's
 	     address, we *could* try to build a non-lvalue value from
 	     the initialization image.  */
-        throw_error (TLS_NOT_ALLOCATED_YET_ERROR,
-                     _("TLS not allocated yet"));
+	throw_error (TLS_NOT_ALLOCATED_YET_ERROR,
+		     _("TLS not allocated yet"));
 #endif
 
       /* Something else went wrong.  */
       if (err != TD_OK)
-        throw_error (TLS_GENERIC_ERROR,
-                     (("%s")), thread_db_err_str (err));
+	throw_error (TLS_GENERIC_ERROR,
+		     (("%s")), thread_db_err_str (err));
 
       /* Cast assuming host == target.  Joy.  */
       /* Do proper sign extension for the target.  */

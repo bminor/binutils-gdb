@@ -395,13 +395,13 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
     {
       long value;
       if (gdb_py_int_as_long (pyo_reg_id, &value) && (int) value == value)
-        {
+	{
 	  if (user_reg_map_regnum_to_name (gdbarch, value) != NULL)
 	    {
 	      *reg_num = (int) value;
 	      return true;
 	    }
-        }
+	}
     }
   /* The register could be a gdb.RegisterDescriptor object.  */
   else if (PyObject_IsInstance (pyo_reg_id,

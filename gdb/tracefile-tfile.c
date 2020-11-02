@@ -696,7 +696,7 @@ tfile_target::trace_find (enum trace_find_type type, int num,
   if (num == -1)
     {
       if (tpp)
-        *tpp = -1;
+	*tpp = -1;
       return -1;
     }
 
@@ -714,7 +714,7 @@ tfile_target::trace_find (enum trace_find_type type, int num,
 	break;
       tfile_read ((gdb_byte *) &data_size, 4);
       data_size = (unsigned int) extract_unsigned_integer
-                                     ((gdb_byte *) &data_size, 4,
+				     ((gdb_byte *) &data_size, 4,
 				      gdbarch_byte_order (target_gdbarch ()));
       offset += 4;
 
@@ -831,10 +831,10 @@ traceframe_walk_blocks (walk_blocks_callback_func callback,
 	case 'M':
 	  lseek (trace_fd, cur_offset + pos + 8, SEEK_SET);
 	  tfile_read ((gdb_byte *) &mlen, 2);
-          mlen = (unsigned short)
-                extract_unsigned_integer ((gdb_byte *) &mlen, 2,
-                                          gdbarch_byte_order
-                                              (target_gdbarch ()));
+	  mlen = (unsigned short)
+		extract_unsigned_integer ((gdb_byte *) &mlen, 2,
+					  gdbarch_byte_order
+					      (target_gdbarch ()));
 	  lseek (trace_fd, mlen, SEEK_CUR);
 	  pos += (8 + 2 + mlen);
 	  break;
@@ -987,7 +987,7 @@ tfile_target::xfer_partial (enum target_object object,
 		amt = len;
 
 	      if (maddr != offset)
-	        lseek (trace_fd, offset - maddr, SEEK_CUR);
+		lseek (trace_fd, offset - maddr, SEEK_CUR);
 	      tfile_read (readbuf, amt);
 	      *xfered_len = amt;
 	      return TARGET_XFER_OK;

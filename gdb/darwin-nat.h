@@ -117,7 +117,7 @@ private:
   ptid_t wait_1 (ptid_t, struct target_waitstatus *);
   void check_new_threads (inferior *inf);
   int decode_exception_message (mach_msg_header_t *hdr,
-			        inferior **pinf,
+				inferior **pinf,
 				darwin_thread_t **pthread);
   ptid_t decode_message (mach_msg_header_t *hdr,
 			 darwin_thread_t **pthread,

@@ -370,7 +370,7 @@ bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
   else
     {
       /* Updating the thread that is currently running; pass the
-         request to the layer beneath.  */
+	 request to the layer beneath.  */
       beneath ()->store_registers (regcache, regnum);
     }
 }
@@ -401,9 +401,9 @@ bsd_uthread_target::wait (ptid_t ptid, struct target_waitstatus *status,
       gdb_byte buf[4];
 
       /* FIXME: For executables linked statically with the threads
-         library, we end up here before the program has actually been
-         executed.  In that case ADDR will be garbage since it has
-         been read from the wrong virtual memory image.  */
+	 library, we end up here before the program has actually been
+	 executed.  In that case ADDR will be garbage since it has
+	 been read from the wrong virtual memory image.  */
       if (target_read_memory (addr, buf, 4) == 0)
 	{
 	  ULONGEST magic = extract_unsigned_integer (buf, 4, byte_order);

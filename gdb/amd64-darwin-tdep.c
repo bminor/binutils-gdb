@@ -121,5 +121,5 @@ void
 _initialize_amd64_darwin_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64,
-                          GDB_OSABI_DARWIN, x86_darwin_init_abi_64);
+			  GDB_OSABI_DARWIN, x86_darwin_init_abi_64);
 }
