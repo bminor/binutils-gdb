@@ -1,5 +1,11 @@
 2020-11-02  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/print-file-var.exp (test): Separate compiler and
+	linker options, and build using build_executable_from_specs
+	to accommodate this.
+
+2020-11-02  Gary Benson <gbenson@redhat.com>
+
 	* lib/gdb.exp (gdb_compile): Inhibit passing "-x c++"
 	for .c files compiled as C++ with Clang if any shared
 	libraries are specified.

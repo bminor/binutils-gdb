@@ -56,22 +56,24 @@ proc test {hidden dlopen version_id_main lang} {
 	return -1
     }
 
-    set main_opts [list debug shlib=${libobj1} $lang]
+    set main_opts [list debug $lang]
+    set link_opts [list debug shlib=${libobj1}]
 
     if {$dlopen} {
-	lappend main_opts "shlib_load" \
-	    "additional_flags=-DSHLIB_NAME=\"$libobj2\""
+	lappend main_opts "additional_flags=-DSHLIB_NAME=\"$libobj2\""
+	lappend link_opts "shlib_load"
     } else {
-	lappend main_opts "shlib=${libobj2}"
+	lappend link_opts "shlib=${libobj2}"
     }
 
     lappend main_opts "additional_flags=-DVERSION_ID_MAIN=$version_id_main"
 
-    if { [gdb_compile "${srcdir}/${subdir}/${main}.c" \
-	      [standard_output_file ${executable}] \
-	      executable \
+    if { [build_executable_from_specs ${main} \
+	      $executable \
+	      $link_opts \
+	      ${main}.c \
 	      $main_opts]
-	 != ""} {
+	 != 0 } {
 	return -1
     }
 
