@@ -508,6 +508,12 @@ basic_pie_test.o: basic_test.cc
 basic_pie_test: basic_pie_test.o gcctestdir/ld
 	$(CXXLINK) -pie basic_pie_test.o
 
+if THREADS
+check_PROGRAMS += basic_threads_test
+basic_threads_test: basic_test.o gcctestdir/ld
+	$(CXXLINK) -Wl,--threads basic_test.o
+endif
+
 check_PROGRAMS += constructor_test
 constructor_test_SOURCES = constructor_test.cc
 constructor_test_DEPENDENCIES = gcctestdir/ld

@@ -212,6 +212,7 @@ File_read::open(const Task* task, const std::string& name)
       gold_debug(DEBUG_FILES, "Attempt to open %s succeeded",
 		 this->name_.c_str());
       this->token_.add_writer(task);
+      file_counts_initialize_lock.initialize();
       Hold_optional_lock hl(file_counts_lock);
       record_file_read(this->name_);
     }
