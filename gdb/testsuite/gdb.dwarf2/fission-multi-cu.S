@@ -311,20 +311,6 @@ main:                                   # @main
 	.byte	0                       # EOM(1)
 	.byte	0                       # EOM(2)
 	.byte	0                       # EOM(3)
-	.section	.debug_line.dwo,"",@progbits
-.Ltmp4:
-	.long	(.Ltmp5-.Ltmp4)-4
-	.short	2
-	.long	(.Ltmp6-.Ltmp4)-10
-	.byte	1
-	.byte	1
-	.byte	-5
-	.byte	14
-	.byte	1
-	.byte	0
-	.byte	0
-.Ltmp6:
-.Ltmp5:
 	.section	.debug_addr,"",@progbits
 	.quad	.Lfunc_begin0
 	.quad	.Lfunc_begin1

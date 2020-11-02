@@ -1,3 +1,7 @@
+2020-11-02  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/fission-multi-cu.S: Remove .debug_line.dwo section.
+
 2020-11-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/fixed_points/fixed_points.adb: Replace use of
