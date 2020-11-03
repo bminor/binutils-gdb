@@ -1,3 +1,8 @@
+2020-11-03  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::tocsave_loc): Return a pointer.
+	(Target_powerpc::Relocate::relocate): Avoid -Wdangling-gsl error.
+
 2020-11-03  Nick Gasson  <nick.gasson@arm.com>
 
 	PR 26827

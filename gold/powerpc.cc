@@ -757,10 +757,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
   }
 
   // Accessor
-  const Tocsave_loc
+  const Tocsave_loc*
   tocsave_loc() const
   {
-    return this->tocsave_loc_;
+    return &this->tocsave_loc_;
   }
 
   void
@@ -11946,8 +11946,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  loc.object = relinfo->object;
 	  loc.shndx = relinfo->data_shndx;
 	  loc.offset = rela.get_r_offset();
-	  Tocsave_loc::const_iterator p = target->tocsave_loc().find(loc);
-	  if (p != target->tocsave_loc().end())
+	  const Tocsave_loc *tocsave = target->tocsave_loc();
+	  if (tocsave->find(loc) != tocsave->end())
 	    {
 	      // If we've generated plt calls using this tocsave, then
 	      // the nop needs to be changed to save r2.
