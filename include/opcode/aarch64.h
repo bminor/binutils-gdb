@@ -52,6 +52,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V8_R	     (1ULL << 12) /* Armv8-R processors.  */
 #define AARCH64_FEATURE_V8_7	     (1ULL << 13) /* Armv8.7 processors.  */
 #define AARCH64_FEATURE_CSRE	     (1ULL << 14) /* CSRE feature.  */
+#define AARCH64_FEATURE_LS64	     (1ULL << 15) /* Atomic 64-byte load/store.  */
 #define AARCH64_FEATURE_FP	     (1ULL << 17) /* FP instructions.  */
 #define AARCH64_FEATURE_SIMD	     (1ULL << 18) /* SIMD instructions.  */
 #define AARCH64_FEATURE_CRC	     (1ULL << 19) /* CRC instructions.  */
@@ -131,7 +132,8 @@ typedef uint32_t aarch64_insn;
 						 | AARCH64_FEATURE_BFLOAT16 \
 						 | AARCH64_FEATURE_I8MM)
 #define AARCH64_ARCH_V8_7	AARCH64_FEATURE (AARCH64_ARCH_V8_6,	\
-						 AARCH64_FEATURE_V8_7)
+						 AARCH64_FEATURE_V8_7	\
+						 | AARCH64_FEATURE_LS64)
 #define AARCH64_ARCH_V8_R	(AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
 						 AARCH64_FEATURE_V8_R)	\
 			      & ~(AARCH64_FEATURE_V8_A | AARCH64_FEATURE_LOR))

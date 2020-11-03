@@ -1,3 +1,8 @@
+2020-11-03  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_LS64): New +ls64 feature flag.
+	(AARCH64_ARCH_V8_7): Add LS64 as part of Armv8.7-a.
+
 2020-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703

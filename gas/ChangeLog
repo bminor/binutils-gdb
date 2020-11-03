@@ -1,3 +1,12 @@
+2020-11-03  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Update docs.
+	* config/tc-aarch64.c: Add +ls64 feature to -march flags set.
+	* testsuite/gas/aarch64/ls64-invalid.d: New test.
+	* testsuite/gas/aarch64/ls64-invalid.l: New test.
+	* testsuite/gas/aarch64/ls64-invalid.s: New test.
+	* testsuite/gas/aarch64/ls64.s: New test.
+
 2020-11-03  Christian Eggers  <ceggers@gmx.de>
 
 	* config/obj-elf (elf_frob_symbol): Fix symbol value calculation
