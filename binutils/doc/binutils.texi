@@ -170,7 +170,7 @@ in the section entitled ``GNU Free Documentation License''.
 @c man title ar create, modify, and extract from archives
 
 @smallexample
-ar [-]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [-]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 ar -M [ <mri-script ]
 @end smallexample
 
@@ -196,7 +196,9 @@ characters (typical of formats related to coff).
 @cindex libraries
 @command{ar} is considered a binary utility because archives of this sort
 are most often used as @dfn{libraries} holding commonly needed
-subroutines.
+subroutines.  Since libraries often will depend on other libraries,
+@command{ar} can also record the dependencies of a library when the
+@option{--record-libdeps} option is specified.
 
 @cindex symbol index
 @command{ar} creates an index to the symbols defined in relocatable
@@ -254,7 +256,7 @@ program.
 
 @smallexample
 @c man begin SYNOPSIS ar
-ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
+ar [@option{-X32_64}] [@option{-}]@var{p}[@var{mod}] [@option{--plugin} @var{name}] [@option{--target} @var{bfdname}] [@option{--output} @var{dirname}] [@option{--record-libdeps} @var{libdeps}] [@var{relpos}] [@var{count}] @var{archive} [@var{member}@dots{}]
 @c man end
 @end smallexample
 
@@ -448,9 +450,14 @@ member must be present as the @var{relpos} argument, before the
 @var{archive} specification.  (same as @samp{b}).
 
 @item l
-This modifier is accepted but not used.
+@c This modifier was accepted but not used.
 @c whaffor ar l modifier??? presumably compat; with
 @c what???---doc@@cygnus.com, 25jan91
+Specify dependencies of this library.  The dependencies must immediately
+follow this option character, must use the same syntax as the linker
+command line, and must be specified within a single argument.  I.e., if
+multiple items are needed, they must be quoted to form a single command
+line argument.  For example @samp{L "-L/usr/local/lib -lmydep1 -lmydep2"}
 
 @item N
 Uses the @var{count} parameter.  This is used if there are multiple
@@ -591,6 +598,10 @@ option is not specified then the current directory will be used.
 Note - although the presence of this option does imply a @option{x} 
 extraction operation that option must still be included on the command
 line.
+
+@item --record-libdeps @var{libdeps}
+The @option{--record-libdeps} option is identical to the @option{l} modifier,
+just handled in long form.
 
 @end table
 @c man end

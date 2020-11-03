@@ -1,5 +1,10 @@
 -*- text -*-
 
+* The ar tool's previously unused l modifier is now used for specifying
+  dependencies of a static library. The arguments of this option
+  (or --record-libdeps long form option) will be stored verbatim in the
+  __.LIBDEP member of the archive, which the linker may read at link time.
+
 * Readelf can now display the contents of LTO symbol table sections when asked
   to do so via the --lto-syms command line option.
 

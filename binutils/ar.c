@@ -138,6 +138,11 @@ static bfd_boolean full_pathname = FALSE;
 /* Whether to create a "thin" archive (symbol index only -- no files).  */
 static bfd_boolean make_thin_archive = FALSE;
 
+#define LIBDEPS	"__.LIBDEP"
+/* Text to store in the __.LIBDEP archive element for the linker to use.  */
+static char * libdeps = NULL;
+static bfd *  libdeps_bfd = NULL;
+
 static int show_version = 0;
 
 static int show_help = 0;
@@ -166,6 +171,7 @@ static struct option long_options[] =
   {"target", required_argument, NULL, OPTION_TARGET},
   {"version", no_argument, &show_version, 1},
   {"output", required_argument, NULL, OPTION_OUTPUT},
+  {"record-libdeps", required_argument, NULL, 'l'},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -329,6 +335,7 @@ usage (int help)
   fprintf (s, _(" generic modifiers:\n"));
   fprintf (s, _("  [c]          - do not warn if the library had to be created\n"));
   fprintf (s, _("  [s]          - create an archive index (cf. ranlib)\n"));
+  fprintf (s, _("  [l <text> ]  - specify the dependencies of this library\n"));
   fprintf (s, _("  [S]          - do not build a symbol table\n"));
   fprintf (s, _("  [T]          - make a thin archive\n"));
   fprintf (s, _("  [v]          - be verbose\n"));
@@ -336,6 +343,7 @@ usage (int help)
   fprintf (s, _("  @<file>      - read options from <file>\n"));
   fprintf (s, _("  --target=BFDNAME - specify the target object format as BFDNAME\n"));
   fprintf (s, _("  --output=DIRNAME - specify the output directory for extraction operations\n"));
+  fprintf (s, _("  --record-libdeps=<text> - specify the dependencies of this library\n"));
 #if BFD_SUPPORTS_PLUGINS
   fprintf (s, _(" optional:\n"));
   fprintf (s, _("  --plugin <p> - load the specified plugin\n"));
@@ -487,7 +495,7 @@ decode_options (int argc, char **argv)
       argv = new_argv;
     }
 
-  while ((c = getopt_long (argc, argv, "hdmpqrtxlcoOVsSuvabiMNfPTDU",
+  while ((c = getopt_long (argc, argv, "hdmpqrtxl:coOVsSuvabiMNfPTDU",
 			   long_options, NULL)) != EOF)
     {
       switch (c)
@@ -535,6 +543,9 @@ decode_options (int argc, char **argv)
           operation = extract;
           break;
         case 'l':
+          if (libdeps != NULL)
+            fatal (_("libdeps specified more than once"));
+          libdeps = optarg;
           break;
         case 'c':
           silent_create = 1;
@@ -846,6 +857,49 @@ main (int argc, char **argv)
 
       if (operation == extract && bfd_is_thin_archive (arch))
 	fatal (_("`x' cannot be used on thin archives."));
+
+      if (libdeps != NULL)
+	{
+	  char **new_files;
+	  bfd_size_type reclen = strlen (libdeps) + 1;
+
+	  /* Create a bfd to contain the dependencies.
+	     It inherits its type from arch, but we must set the type to
+	     "binary" otherwise bfd_bwrite() will fail.  After writing, we
+	     must set the type back to "plugin" otherwise adding it to the
+	     archive will fail.  */
+	  libdeps_bfd = bfd_create (LIBDEPS, arch);
+	  if (libdeps_bfd == NULL)
+	    fatal (_("Cannot create libdeps record."));
+
+	  if (bfd_find_target ("binary", libdeps_bfd) == NULL)
+	    fatal (_("Cannot set libdeps record type to binary."));
+
+	  if (! bfd_set_format (libdeps_bfd, bfd_object))
+	    fatal (_("Cannot set libdeps object format."));
+
+	  if (! bfd_make_writable (libdeps_bfd))
+	    fatal (_("Cannot make libdeps object writable."));
+
+	  if (bfd_bwrite (libdeps, reclen, libdeps_bfd) != reclen)
+	    fatal (_("Cannot write libdeps record."));
+
+	  if (! bfd_make_readable (libdeps_bfd))
+	    fatal (_("Cannot make libdeps object readable."));
+
+	  if (bfd_find_target ("plugin", libdeps_bfd) == NULL)
+	    fatal (_("Cannot reset libdeps record type."));
+
+	  /* Append our libdeps record to the list of files
+	     being operated on.  */
+	  new_files = xmalloc ((file_count + 2) * sizeof (char *));
+	  for (i = 0; i < file_count; i++)
+	    new_files[i] = files[i];
+	  new_files[i++] = LIBDEPS;
+	  file_count = i;
+	  files = new_files;
+	  files[i] = NULL;
+	}
 
       switch (operation)
 	{
@@ -1432,6 +1486,7 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 				normalize (bfd_get_filename (current), arch)) == 0
 		  && current->arelt_data != NULL)
 		{
+		  bfd_boolean replaced;
 		  if (newer_only)
 		    {
 		      struct stat fsbuf, asbuf;
@@ -1453,8 +1508,19 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
 
 		  after_bfd = get_pos_bfd (&arch->archive_next, pos_after,
 					   bfd_get_filename (current));
-		  if (ar_emul_replace (after_bfd, *files_to_move,
-				       target, verbose))
+		  if (libdeps_bfd != NULL
+		      && FILENAME_CMP (normalize (*files_to_move, arch),
+				       LIBDEPS) == 0)
+		    {
+		      replaced = ar_emul_replace_bfd (after_bfd, libdeps_bfd,
+						      verbose);
+		    }
+		  else
+		    {
+		      replaced = ar_emul_replace (after_bfd, *files_to_move,
+						  target, verbose);
+		    }
+		  if (replaced)
 		    {
 		      /* Snip out this entry from the chain.  */
 		      *current_ptr = (*current_ptr)->archive_next;
@@ -1470,9 +1536,17 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
       /* Add to the end of the archive.  */
       after_bfd = get_pos_bfd (&arch->archive_next, pos_end, NULL);
 
-      if (ar_emul_append (after_bfd, *files_to_move, target,
-			  verbose, make_thin_archive))
-	changed = TRUE;
+      if (libdeps_bfd != NULL
+	  && FILENAME_CMP (normalize (*files_to_move, arch), LIBDEPS) == 0)
+        {
+	  changed |= ar_emul_append_bfd (after_bfd, libdeps_bfd,
+					 verbose, make_thin_archive);
+	}
+      else
+        {
+	  changed |= ar_emul_append (after_bfd, *files_to_move, target,
+				     verbose, make_thin_archive);
+	}
 
     next_file:;
 

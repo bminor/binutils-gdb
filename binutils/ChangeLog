@@ -1,3 +1,23 @@
+2020-11-03  Howard Chu  <hyc@symas.com>
+
+	* ar.c (long_options): Add --record-libdeps.
+	(usage): Mention the new option.
+	(decode_options): Handle the new option.
+	(replace_members): If necessary, create a bfd to hold the libdeps
+	description.
+	* binemul.c (ar_emul_append_bfd): New function.
+	(ar_emul_replace_bfd): New function.
+	(ar_emul_default_append): Replace file_name and target arguments
+	with new_bfd argument.
+	(ar_emul_default_replace): Likewise.
+	* binemul.h: Update prototypes.
+	(struct bin_emulation_xfer_struct): Update fields.
+	* doc/binutils.texi: Document the new option.
+	* NEWS: Mention the new feature.
+	* emul_aix.c (ar_emul_aix_append): Update.
+	(ar_emul_aix_replace): Likewise.
+	* testsuite/binutils-all/ar.exp: Add test of new feature.
+
 2020-10-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26703

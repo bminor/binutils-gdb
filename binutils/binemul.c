@@ -42,8 +42,23 @@ bfd_boolean
 ar_emul_append (bfd **after_bfd, char *file_name, const char *target,
 		bfd_boolean verbose, bfd_boolean flatten)
 {
+  bfd *new_bfd;
+
+  new_bfd = bfd_openr (file_name, target);
+  AR_EMUL_ELEMENT_CHECK (new_bfd, file_name);
   if (bin_dummy_emulation.ar_append)
-    return bin_dummy_emulation.ar_append (after_bfd, file_name, target,
+    return bin_dummy_emulation.ar_append (after_bfd, new_bfd,
+					  verbose, flatten);
+
+  return FALSE;
+}
+
+bfd_boolean
+ar_emul_append_bfd (bfd **after_bfd, bfd *new_bfd,
+		bfd_boolean verbose, bfd_boolean flatten)
+{
+  if (bin_dummy_emulation.ar_append)
+    return bin_dummy_emulation.ar_append (after_bfd, new_bfd,
 					  verbose, flatten);
 
   return FALSE;
@@ -93,14 +108,9 @@ do_ar_emul_append (bfd **after_bfd, bfd *new_bfd,
 }
 
 bfd_boolean
-ar_emul_default_append (bfd **after_bfd, char *file_name,
-			const char *target, bfd_boolean verbose,
-			bfd_boolean flatten)
+ar_emul_default_append (bfd **after_bfd, bfd *new_bfd,
+			bfd_boolean verbose, bfd_boolean flatten)
 {
-  bfd *new_bfd;
-
-  new_bfd = bfd_openr (file_name, target);
-  AR_EMUL_ELEMENT_CHECK (new_bfd, file_name);
   return do_ar_emul_append (after_bfd, new_bfd, verbose, flatten, any_ok);
 }
 
@@ -108,23 +118,34 @@ bfd_boolean
 ar_emul_replace (bfd **after_bfd, char *file_name, const char *target,
 		 bfd_boolean verbose)
 {
-  if (bin_dummy_emulation.ar_replace)
-    return bin_dummy_emulation.ar_replace (after_bfd, file_name,
-					   target, verbose);
-
-  return FALSE;
-}
-
-bfd_boolean
-ar_emul_default_replace (bfd **after_bfd, char *file_name,
-			 const char *target, bfd_boolean verbose)
-{
   bfd *new_bfd;
 
   new_bfd = bfd_openr (file_name, target);
   AR_EMUL_ELEMENT_CHECK (new_bfd, file_name);
 
-  AR_EMUL_REPLACE_PRINT_VERBOSE (verbose, file_name);
+  if (bin_dummy_emulation.ar_replace)
+    return bin_dummy_emulation.ar_replace (after_bfd, new_bfd,
+					   verbose);
+
+  return FALSE;
+}
+
+bfd_boolean
+ar_emul_replace_bfd (bfd **after_bfd, bfd *new_bfd,
+		 bfd_boolean verbose)
+{
+  if (bin_dummy_emulation.ar_replace)
+    return bin_dummy_emulation.ar_replace (after_bfd, new_bfd,
+					   verbose);
+
+  return FALSE;
+}
+
+bfd_boolean
+ar_emul_default_replace (bfd **after_bfd, bfd *new_bfd,
+			 bfd_boolean verbose)
+{
+  AR_EMUL_REPLACE_PRINT_VERBOSE (verbose, bfd_get_filename (new_bfd));
 
   new_bfd->archive_next = *after_bfd;
   *after_bfd = new_bfd;
