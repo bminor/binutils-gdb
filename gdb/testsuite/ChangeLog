@@ -1,3 +1,10 @@
+2020-11-03  Tom de Vries  <tdevries@suse.de>
+
+	* lib/dwarf.exp (Dwarf::_handle_DW_TAG): Improve attribute list
+	terminator comments.
+	(Dwarf::cu, Dwarf::tu): Remove superfluous abbreviation table
+	terminator.
+
 2020-11-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/step-over-no-symbols.exp (test_step_over): Replace
