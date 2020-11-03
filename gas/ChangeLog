@@ -25,6 +25,36 @@
 	* testsuite/gas/i386/x86-64-property-11.d: Likewise.
 	* testsuite/gas/i386/x86-64-property-12.d: Likewise.
 
+2020-10-30  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Update docs.
+	* testsuite/gas/aarch64/system-5.d: Update test with WFIT insn.
+	* testsuite/gas/aarch64/system-5.s: Update test with WFIT insn.
+
+2020-10-28  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Check for C0-C15 value of DSB
+	immediate string operand.
+	* testsuite/gas/aarch64/system-4.d: Update test.
+	* testsuite/gas/aarch64/system-4.s: Update test.
+
+2020-10-27  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Update docs.
+	* config/tc-aarch64.c (parse_csr_operand): New operand parser.
+	(parse_operands): Call to CSR operand parser.
+	* testsuite/gas/aarch64/csre_csr-invalid.d: New test.
+	* testsuite/gas/aarch64/csre_csr-invalid.l: New test.
+	* testsuite/gas/aarch64/csre_csr-invalid.s: New test.
+	* testsuite/gas/aarch64/csre_csr.d: New test.
+	* testsuite/gas/aarch64/csre_csr.s: New test.
+
+2020-10-27  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Update docs.
+	* testsuite/gas/aarch64/system-5.d: New test.
+	* testsuite/gas/aarch64/system-5.s: New test.
+
 2020-10-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26778
@@ -62,6 +92,19 @@
 	* testsuite/gas/i386/avx-vnni.d: Change psuedo prefix from
 	{vex3} to {vex}
 	* testsuite/gas/i386/x86-64-avx-vnni.d: Likewise.
+
+2020-10-23  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Docs update.
+	* config/tc-aarch64.c (parse_operands): Add
+	AARCH64_OPND_BARRIER_DSB_NXS handler.
+	(md_begin): Add content of aarch64_barrier_dsb_nxs_options to
+	aarch64_barrier_opt_hsh hash.
+	* testsuite/gas/aarch64/system-4-invalid.d: New test.
+	* testsuite/gas/aarch64/system-4-invalid.l: New test.
+	* testsuite/gas/aarch64/system-4-invalid.s: New test.
+	* testsuite/gas/aarch64/system-4.d: New test.
+	* testsuite/gas/aarch64/system-4.s: New test.
 
 2020-10-21  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
@@ -128,6 +171,19 @@
 	* testsuite/gas/i386/dwarf5-line-3.s: Likewise.
 	* testsuite/gas/i386/i386.exp: Run dwarf5-line-2 and
 	dwarf5-line-3.
+
+gas/ChangeLog:
+
+2020-10-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Docs update.
+	* config/tc-aarch64.c (armv8.7-a): New arch.
+	* doc/c-aarch64.texi (-march=armv8.7-a): Update docs.
+
+2020-10-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* testsuite/gas/aarch64/sysreg-6.d: New test.
+	* testsuite/gas/aarch64/sysreg-6.s: New test.
 
 2020-10-16  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -251,6 +307,24 @@
 	* testsuite/gas/i386/x86-64-property-14.d: Likewise.
 	* testsuite/gas/i386/x86-64-property-14.s: Likewise.
 
+2020-10-08  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Docs update.
+	* testsuite/gas/aarch64/brbe-invalid.d: New test.
+	* testsuite/gas/aarch64/brbe-invalid.l: New test.
+	* testsuite/gas/aarch64/brbe-invalid.s: New test.
+	* testsuite/gas/aarch64/brbe.d: New test.
+	* testsuite/gas/aarch64/brbe.s: New test.
+
+2020-10-08  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Docs update.
+	* testsuite/gas/aarch64/csre-invalid.d: New test.
+	* testsuite/gas/aarch64/csre-invalid.l: New test.
+	* testsuite/gas/aarch64/csre-invalid.s: New test.
+	* testsuite/gas/aarch64/csre.d: New test.
+	* testsuite/gas/aarch64/csre.s: New test.
+
 2020-10-06  Alex Coplan  <alex.coplan@arm.com>
 
 	PR 26699
@@ -275,6 +349,10 @@
 
 	* testsuite/gas/elf/sh-link-zero.s: Don't start directives in
 	first column.  Don't use numeric labels.
+
+2020-10-05  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-arm.c: Update Cortex-X1 feature flags.
 
 2020-10-05  Kamil Rytarowski  <n54@gmx.com>
 
@@ -328,6 +406,10 @@
 	* testsuite/gas/elf/elf.exp: Run the new test.
 	* testsuite/gas/elf/section21.l: Updated expected assembler
 	output.
+
+2020-10-05  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-aarch64.c: Update Cortex-X1 feature flags.
 
 2020-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -411,6 +493,14 @@
 	* config/obj-elf.c (obj_elf_change_section): Rename variable to
 	avoid shadowing warning.
 	* symbols.c (symbol_entry_find): Init all symbol_flags fields.
+
+2020-09-30  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-arm.c: Add cortex-a78 and cortex-a78ae cores.
+	* doc/c-arm.texi: Update docs.
+	* NEWS: Update news.
+	* testsuite/gas/arm/cpu-cortex-a78.d: New test.
+	* testsuite/gas/arm/cpu-cortex-a78ae.d: New test.
 
 2020-09-29  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
