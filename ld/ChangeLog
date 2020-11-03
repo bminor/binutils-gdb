@@ -1,3 +1,8 @@
+2020-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/x86-64-level.sh
+	(PARSE_AND_LIST_ARGS_CASE_Z_X86_64_LEVEL): Fix indentation.
+
 2020-11-02  Alan Modra  <amodra@gmail.com>
 
 	PR 26806
