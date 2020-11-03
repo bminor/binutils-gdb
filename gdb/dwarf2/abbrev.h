@@ -85,9 +85,11 @@ struct abbrev_table
      This is used as a sanity check when the table is used.  */
   const sect_offset sect_off;
 
+  struct dwarf2_section_info *section;
+
 private:
 
-  explicit abbrev_table (sect_offset off);
+  abbrev_table (sect_offset off, struct dwarf2_section_info *sect);
 
   DISABLE_COPY_AND_ASSIGN (abbrev_table);
 

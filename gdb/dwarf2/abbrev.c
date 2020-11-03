@@ -58,8 +58,9 @@ eq_abbrev (const void *lhs, const void *rhs)
    dies from a section we read in all abbreviations and install them
    in a hash table.  */
 
-abbrev_table::abbrev_table (sect_offset off)
+abbrev_table::abbrev_table (sect_offset off, struct dwarf2_section_info *sect)
   : sect_off (off),
+    section (sect),
     m_abbrevs (htab_create_alloc (20, hash_abbrev, eq_abbrev,
 				  nullptr, xcalloc, xfree))
 {
@@ -85,7 +86,7 @@ abbrev_table::read (struct dwarf2_section_info *section,
   const gdb_byte *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
 
-  abbrev_table_up abbrev_table (new struct abbrev_table (sect_off));
+  abbrev_table_up abbrev_table (new struct abbrev_table (sect_off, section));
   struct obstack *obstack = &abbrev_table->m_abbrev_obstack;
 
   /* Caller must ensure this.  */

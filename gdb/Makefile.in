@@ -1044,6 +1044,7 @@ COMMON_SFILES = \
 	displaced-stepping.c \
 	dummy-frame.c \
 	dwarf2/abbrev.c \
+	dwarf2/abbrev-cache.c \
 	dwarf2/attribute.c \
 	dwarf2/comp-unit-head.c \
 	dwarf2/cu.c \
