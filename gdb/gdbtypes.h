@@ -2360,10 +2360,10 @@ struct builtin_type
   struct type *builtin_uintcap_t;
 
   /* Data address capability.  */
-  struct type *builtin_data_addr_capability;
+  struct type *builtin_data_capability;
 
   /* Code address capability.  */
-  struct type *builtin_code_addr_capability;
+  struct type *builtin_code_capability;
 
   /* Special-purpose types.  */
 

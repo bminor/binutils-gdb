@@ -4369,6 +4369,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_bit (gdbarch, 64);
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 64);
+  /* Regardless of the ABI, capabilities are always 128-bit.  */
+  set_gdbarch_capability_bit (gdbarch, 128);
   set_gdbarch_char_signed (gdbarch, 0);
   set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);

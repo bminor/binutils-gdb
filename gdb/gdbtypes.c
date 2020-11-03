@@ -6239,15 +6239,26 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   /* Capability types.  */
   builtin_type->builtin_intcap_t
-    = arch_capability_type (gdbarch, 128, 0, "__intcap_t");
+    = arch_capability_type (gdbarch, gdbarch_capability_bit (gdbarch), 0,
+			    "__intcap_t");
   builtin_type->builtin_uintcap_t
-    = arch_capability_type (gdbarch, 128, 1, "__uintcap_t");
+    = arch_capability_type (gdbarch, gdbarch_capability_bit (gdbarch), 1,
+			    "__uintcap_t");
 
   /* Capability pointer types.  */
-  builtin_type->builtin_data_addr_capability
-    = lookup_pointer_type (builtin_type->builtin_void);
-  builtin_type->builtin_code_addr_capability
-    = lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
+  builtin_type->builtin_data_capability
+    = arch_pointer_type (gdbarch, gdbarch_capability_bit (gdbarch), "",
+			 builtin_type->builtin_void);
+  builtin_type->builtin_data_capability->set_instance_flags
+    (builtin_type->builtin_data_capability->instance_flags ()
+     | TYPE_INSTANCE_FLAG_CAPABILITY);
+
+  builtin_type->builtin_code_capability
+    = arch_pointer_type (gdbarch, gdbarch_capability_bit (gdbarch), "",
+			 lookup_function_type (builtin_type->builtin_void));
+  builtin_type->builtin_code_capability->set_instance_flags
+    (builtin_type->builtin_code_capability->instance_flags ()
+     | TYPE_INSTANCE_FLAG_CAPABILITY);
 
   /* This type represents a GDB internal function.  */
   builtin_type->internal_fn
