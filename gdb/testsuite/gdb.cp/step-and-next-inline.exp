@@ -38,7 +38,7 @@ proc do_test { use_header } {
 
     set options {c++ debug nowarnings optimize=-O2}
     if { [supports_statement_frontiers] } {
-	lappend options -gstatement-frontiers
+	lappend options additional_flags=-gstatement-frontiers
     }
     if { $use_header } {
 	lappend options additional_flags=-DUSE_NEXT_INLINE_H

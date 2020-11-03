@@ -1,3 +1,7 @@
+2020-12-31  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* gdb.cp/step-and-next-inline.exp: Fix test case.
+
 2020-12-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.python/py-frame-args.exp: De-duplicate test names.
