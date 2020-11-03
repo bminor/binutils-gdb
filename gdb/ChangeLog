@@ -5,6 +5,30 @@
 	(aarch64_address_class_name_to_type_flags): Use
 	TYPE_INSTANCE_FLAG_CAPABILITY instead of
 	TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1.
+	(aarch64_gdbarch_init): Set capability size to 128.
+	* features/aarch64-capability.c: Regenerate.
+	* features/aarch64-capability.xml: Update C register types.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (code_capability_bit, data_capability)
+	(dwarf2_capability_size): Remove.
+	* gdbtypes.c (gdbtypes_post_init): Initialize data_capability and
+	code_capability types.
+	* gdbtypes.h (TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL): Include
+	TYPE_INSTANCE_FLAG_CAPABILITY in the list of address classes.
+	(struct builtin_type) <builtin_data_addr_capability>: Rename to
+	builtin_data_capability.
+	(struct builtin_type) <builtin_code_addr_capability>: Rename to
+	builtin_code_capability.
+	* target-descriptions.c (make_gdb_type): Update type names.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
+	* aarch64-tdep.c (aarch64_address_class_type_flags)
+	(aarch64_address_class_type_flags_to_name)
+	(aarch64_address_class_name_to_type_flags): Use
+	TYPE_INSTANCE_FLAG_CAPABILITY instead of
+	TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1.
 	* gdbtypes.h (TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL): Include
 	TYPE_INSTANCE_FLAG_CAPABILITY.
 	* printcmd.c (print_scalar_formatted): Don't truncate capability

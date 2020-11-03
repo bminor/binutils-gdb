@@ -385,17 +385,8 @@ v;int;dwarf2_addr_size;;;sizeof (void*);0;gdbarch_ptr_bit (gdbarch) / TARGET_CHA
 # For capability-based targets, the capability representation will likely
 # differ from regular pointers. We can have a code capability and a data
 # capability.
-# code_capability is the size of a capability on the target
-v;int;code_capability_bit;;;8 * sizeof (void*);gdbarch->int_bit;;0
-# data_capability is the size of a target capability as represented in gdb
-v;int;data_capability_bit;;;8 * sizeof (void*);0;gdbarch_ptr_bit (gdbarch);
 # capability_bit is the size of a target capability as represented in gdb
 v;int;capability_bit;;;8 * sizeof (void*);0;gdbarch_ptr_bit (gdbarch);
-
-# Note that dwarf2_capability_size only needs to be redefined by a target if the
-# GCC back-end defines a DWARF2_CAPABILITY_SIZE other than the target pointer
-# size, and if Dwarf versions < 4 need to be supported.
-v;int;dwarf2_capability_size;;;sizeof (void*);0;gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
 
 # One if \`char' acts like \`signed char', zero if \`unsigned char'.
 v;int;char_signed;;;1;-1;1

@@ -1,3 +1,8 @@
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
+	* tdesc.cc (tdesc_predefined_types): Update type names for
+	capabilities.
+
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
 	* tdesc.cc (tdesc_predefined_types): Add new capability types.
