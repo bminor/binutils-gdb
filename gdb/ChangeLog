@@ -1,5 +1,9 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_value_slice_from_ptr): Use bit size.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (read_array_type): Only apply stride to innermost
 	array.
 

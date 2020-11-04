@@ -2828,9 +2828,11 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
       base_low_pos = base_low;
     }
 
-  base = value_as_address (array_ptr)
-    + ((low_pos - base_low_pos)
-       * TYPE_LENGTH (TYPE_TARGET_TYPE (type0)));
+  ULONGEST stride = TYPE_FIELD_BITSIZE (slice_type, 0) / 8;
+  if (stride == 0)
+    stride = TYPE_LENGTH (TYPE_TARGET_TYPE (type0));
+
+  base = value_as_address (array_ptr) + (low_pos - base_low_pos) * stride;
   return value_at_lazy (slice_type, base);
 }
 
