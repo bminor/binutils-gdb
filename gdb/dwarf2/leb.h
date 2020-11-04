@@ -57,14 +57,7 @@ read_2_signed_bytes (bfd *abfd, const gdb_byte *buf)
 static inline unsigned int
 read_3_bytes (bfd *abfd, const gdb_byte *buf)
 {
-  unsigned int result = 0;
-  for (int i = 0; i < 3; ++i)
-    {
-      unsigned char byte = bfd_get_8 (abfd, buf);
-      buf++;
-      result |= ((unsigned int) byte << (i * 8));
-    }
-  return result;
+  return bfd_get_24 (abfd, buf);
 }
 
 static inline unsigned int
