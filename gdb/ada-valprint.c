@@ -711,36 +711,6 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
 	    eltlen, options);
 }
 
-/* Implement Ada val_print-ing for GNAT arrays (Eg. fat pointers,
-   thin pointers, etc).  */
-
-static void
-ada_val_print_gnat_array (struct value *val,
-			  struct ui_file *stream, int recurse,
-			  const struct value_print_options *options)
-{
-  scoped_value_mark free_values;
-
-  struct type *type = ada_check_typedef (value_type (val));
-
-  /* If this is a reference, coerce it now.  This helps taking care
-     of the case where ADDRESS is meaningless because original_value
-     was not an lval.  */
-  val = coerce_ref (val);
-  if (type->code () == TYPE_CODE_TYPEDEF)  /* array access type.  */
-    val = ada_coerce_to_simple_array_ptr (val);
-  else
-    val = ada_coerce_to_simple_array (val);
-  if (val == NULL)
-    {
-      gdb_assert (type->code () == TYPE_CODE_TYPEDEF);
-      fprintf_filtered (stream, "0x0");
-    }
-  else
-    common_val_print (val, stream, recurse, options,
-		      language_def (language_ada));
-}
-
 /* Implement Ada value_print'ing for the case where TYPE is a
    TYPE_CODE_PTR.  */
 
@@ -1028,11 +998,21 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
       || (ada_is_constrained_packed_array_type (type)
 	  && type->code () != TYPE_CODE_PTR))
     {
-      ada_val_print_gnat_array (val, stream, recurse, options);
-      return;
+      /* If this is a reference, coerce it now.  This helps taking
+	 care of the case where ADDRESS is meaningless because
+	 original_value was not an lval.  */
+      val = coerce_ref (val);
+      val = ada_get_decoded_value (val);
+      if (val == nullptr)
+	{
+	  gdb_assert (type->code () == TYPE_CODE_TYPEDEF);
+	  fprintf_filtered (stream, "0x0");
+	  return;
+	}
     }
+  else
+    val = ada_to_fixed_value (val);
 
-  val = ada_to_fixed_value (val);
   type = value_type (val);
   struct type *saved_type = type;
 

@@ -170,8 +170,6 @@ static long decode_packed_array_bitsize (struct type *);
 
 static struct value *decode_constrained_packed_array (struct value *);
 
-static int ada_is_packed_array_type  (struct type *);
-
 static int ada_is_unconstrained_packed_array_type (struct type *);
 
 static struct value *value_subscript_packed (struct value *, int,
@@ -1965,7 +1963,7 @@ ada_coerce_to_simple_array_type (struct type *type)
 /* Non-zero iff TYPE represents a standard GNAT packed-array type.  */
 
 static int
-ada_is_packed_array_type  (struct type *type)
+ada_is_gnat_encoded_packed_array_type  (struct type *type)
 {
   if (type == NULL)
     return 0;
@@ -1982,7 +1980,7 @@ ada_is_packed_array_type  (struct type *type)
 int
 ada_is_constrained_packed_array_type (struct type *type)
 {
-  return ada_is_packed_array_type (type)
+  return ada_is_gnat_encoded_packed_array_type (type)
     && !ada_is_array_descriptor_type (type);
 }
 
@@ -1992,8 +1990,26 @@ ada_is_constrained_packed_array_type (struct type *type)
 static int
 ada_is_unconstrained_packed_array_type (struct type *type)
 {
-  return ada_is_packed_array_type (type)
-    && ada_is_array_descriptor_type (type);
+  if (!ada_is_array_descriptor_type (type))
+    return 0;
+
+  if (ada_is_gnat_encoded_packed_array_type (type))
+    return 1;
+
+  /* If we saw GNAT encodings, then the above code is sufficient.
+     However, with minimal encodings, we will just have a thick
+     pointer instead.  */
+  if (is_thick_pntr (type))
+    {
+      type = desc_base_type (type);
+      /* The structure's first field is a pointer to an array, so this
+	 fetches the array type.  */
+      type = TYPE_TARGET_TYPE (type->field (0).type ());
+      /* Now we can see if the array elements are packed.  */
+      return TYPE_FIELD_BITSIZE (type, 0) > 0;
+    }
+
+  return 0;
 }
 
 /* Given that TYPE encodes a packed array type (constrained or unconstrained),
@@ -2020,7 +2036,15 @@ decode_packed_array_bitsize (struct type *type)
     return 0;
 
   tail = strstr (raw_name, "___XP");
-  gdb_assert (tail != NULL);
+  if (tail == nullptr)
+    {
+      gdb_assert (is_thick_pntr (type));
+      /* The structure's first field is a pointer to an array, so this
+	 fetches the array type.  */
+      type = TYPE_TARGET_TYPE (type->field (0).type ());
+      /* Now we can see if the array elements are packed.  */
+      return TYPE_FIELD_BITSIZE (type, 0);
+    }
 
   if (sscanf (tail + sizeof ("___XP") - 1, "%ld", &bits) != 1)
     {

@@ -1,5 +1,22 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (recognize_bound_expression)
+	(quirk_ada_thick_pointer): New functions.
+	(read_array_type): Call quirk_ada_thick_pointer.
+	(set_die_type): Add "skip_data_location" parameter.
+	(quirk_ada_thick_pointer): New function.
+	(process_structure_scope): Call quirk_ada_thick_pointer.
+	* ada-lang.c (ada_is_unconstrained_packed_array_type)
+	(decode_packed_array_bitsize): Handle thick pointers without
+	parallel types.
+	(ada_is_gnat_encoded_packed_array_type): Rename from
+	ada_is_packed_array_type.
+	(ada_is_constrained_packed_array_type): Update.
+	* ada-valprint.c (ada_val_print_gnat_array): Remove.
+	(ada_value_print_1): Use ada_get_decoded_value.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (recursively_update_array_bitsize): New function.
 	(decode_constrained_packed_array_type): Call it.
 

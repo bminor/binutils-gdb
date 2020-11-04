@@ -1,5 +1,37 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/O2_float_param.exp: Test different -fgnat-encodings
+	values.
+	* gdb.ada/access_to_unbounded_array.exp: Test different
+	-fgnat-encodings values.
+	* gdb.ada/big_packed_array.exp: Test different -fgnat-encodings
+	values.
+	* gdb.ada/arr_enum_idx_w_gap.exp: Test different -fgnat-encodings
+	values.
+	* gdb.ada/array_ptr_renaming.exp: Test different -fgnat-encodings
+	values.
+	* gdb.ada/array_of_variable_length.exp: Test different
+	-fgnat-encodings values.
+	* gdb.ada/arrayparam.exp: Test different -fgnat-encodings values.
+	* gdb.ada/arrayptr.exp: Test different -fgnat-encodings values.
+	* gdb.ada/frame_arg_lang.exp: Revert -fgnat-encodings=minimal
+	change.
+	* gdb.ada/mi_string_access.exp: Test different -fgnat-encodings
+	values.
+	* gdb.ada/mod_from_name.exp: Test different -fgnat-encodings values.
+	* gdb.ada/out_of_line_in_inlined.exp: Test different
+	-fgnat-encodings values.
+	* gdb.ada/packed_array.exp: Test different -fgnat-encodings
+	values.
+	* gdb.ada/pckd_arr_ren.exp: Test different -fgnat-encodings
+	values.
+	* gdb.ada/unc_arr_ptr_in_var_rec.exp: Test different
+	-fgnat-encodings values.
+	* gdb.ada/variant_record_packed_array.exp: Test different
+	-fgnat-encodings values.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/enum_idx_packed.exp: Add tests.
 	* gdb.ada/enum_idx_packed/foo.adb: Add variables.
 	* gdb.ada/enum_idx_packed/pck.adb: Add functions.

@@ -1373,6 +1373,9 @@ static void dwarf2_const_value_attr (const struct attribute *attr,
 				     const gdb_byte **bytes,
 				     struct dwarf2_locexpr_baton **baton);
 
+static struct type *read_subrange_index_type (struct die_info *die,
+					      struct dwarf2_cu *cu);
+
 static struct type *die_type (struct die_info *, struct dwarf2_cu *);
 
 static int need_gnat_info (struct dwarf2_cu *);
@@ -1598,7 +1601,7 @@ static void prepare_one_comp_unit (struct dwarf2_cu *cu,
 				   enum language pretend_language);
 
 static struct type *set_die_type (struct die_info *, struct type *,
-				  struct dwarf2_cu *);
+				  struct dwarf2_cu *, bool = false);
 
 static void create_all_comp_units (dwarf2_per_objfile *per_objfile);
 
@@ -15833,6 +15836,48 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   smash_to_methodptr_type (type, new_type);
 }
 
+/* While some versions of GCC will generate complicated DWARF for an
+   array (see quirk_ada_thick_pointer), more recent versions were
+   modified to emit an explicit thick pointer structure.  However, in
+   this case, the array still has DWARF expressions for its ranges,
+   and these must be ignored.  */
+
+static void
+quirk_ada_thick_pointer_struct (struct die_info *die, struct dwarf2_cu *cu,
+				struct type *type)
+{
+  gdb_assert (cu->language == language_ada);
+
+  /* Check for a structure with two children.  */
+  if (type->code () != TYPE_CODE_STRUCT || type->num_fields () != 2)
+    return;
+
+  /* Check for P_ARRAY and P_BOUNDS members.  */
+  if (TYPE_FIELD_NAME (type, 0) == NULL
+      || strcmp (TYPE_FIELD_NAME (type, 0), "P_ARRAY") != 0
+      || TYPE_FIELD_NAME (type, 1) == NULL
+      || strcmp (TYPE_FIELD_NAME (type, 1), "P_BOUNDS") != 0)
+    return;
+
+  /* Make sure we're looking at a pointer to an array.  */
+  if (type->field (0).type ()->code () != TYPE_CODE_PTR)
+    return;
+  struct type *ary_type = TYPE_TARGET_TYPE (type->field (0).type ());
+
+  while (ary_type->code () == TYPE_CODE_ARRAY)
+    {
+      /* The Ada code already knows how to handle these types, so all
+	 that we need to do is turn the bounds into static bounds.  */
+      struct type *index_type = ary_type->index_type ();
+
+      index_type->bounds ()->low.set_const_val (1);
+      index_type->bounds ()->high.set_const_val (0);
+
+      /* Handle multi-dimensional arrays.  */
+      ary_type = TYPE_TARGET_TYPE (ary_type);
+    }
+}
+
 /* If the DIE has a DW_AT_alignment attribute, return its value, doing
    appropriate error checking and issuing complaints if there is a
    problem.  */
@@ -16408,6 +16453,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   quirk_gcc_member_function_pointer (type, objfile);
   if (cu->language == language_rust && die->tag == DW_TAG_union_type)
     cu->rust_unions.push_back (type);
+  else if (cu->language == language_ada)
+    quirk_ada_thick_pointer_struct (die, cu, type);
 
   /* NOTE: carlton/2004-03-16: GCC 3.4 (or at least one of its
      snapshots) has been known to create a die giving a declaration
@@ -16704,6 +16751,263 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
   new_symbol (die, this_type, cu);
 }
 
+/* Helper function for quirk_ada_thick_pointer that examines a bounds
+   expression for an index type and finds the corresponding field
+   offset in the hidden "P_BOUNDS" structure.  Returns true on success
+   and updates *FIELD, false if it fails to recognize an
+   expression.  */
+
+static bool
+recognize_bound_expression (struct die_info *die, enum dwarf_attribute name,
+			    int *bounds_offset, struct field *field,
+			    struct dwarf2_cu *cu)
+{
+  struct attribute *attr = dwarf2_attr (die, name, cu);
+  if (attr == nullptr || !attr->form_is_block ())
+    return false;
+
+  const struct dwarf_block *block = attr->as_block ();
+  const gdb_byte *start = block->data;
+  const gdb_byte *end = block->data + block->size;
+
+  /* The expression to recognize generally looks like:
+
+     (DW_OP_push_object_address; DW_OP_plus_uconst: 8; DW_OP_deref;
+     DW_OP_plus_uconst: 4; DW_OP_deref_size: 4)
+
+     However, the second "plus_uconst" may be missing:
+
+     (DW_OP_push_object_address; DW_OP_plus_uconst: 8; DW_OP_deref;
+     DW_OP_deref_size: 4)
+
+     This happens when the field is at the start of the structure.
+
+     Also, the final deref may not be sized:
+
+     (DW_OP_push_object_address; DW_OP_plus_uconst: 4; DW_OP_deref;
+     DW_OP_deref)
+
+     This happens when the size of the index type happens to be the
+     same as the architecture's word size.  This can occur with or
+     without the second plus_uconst.  */
+
+  if (end - start < 2)
+    return false;
+  if (*start++ != DW_OP_push_object_address)
+    return false;
+  if (*start++ != DW_OP_plus_uconst)
+    return false;
+
+  uint64_t this_bound_off;
+  start = gdb_read_uleb128 (start, end, &this_bound_off);
+  if (start == nullptr || (int) this_bound_off != this_bound_off)
+    return false;
+  /* Update *BOUNDS_OFFSET if needed, or alternatively verify that it
+     is consistent among all bounds.  */
+  if (*bounds_offset == -1)
+    *bounds_offset = this_bound_off;
+  else if (*bounds_offset != this_bound_off)
+    return false;
+
+  if (start == end || *start++ != DW_OP_deref)
+    return false;
+
+  int offset = 0;
+  if (start ==end)
+    return false;
+  else if (*start == DW_OP_deref_size || *start == DW_OP_deref)
+    {
+      /* This means an offset of 0.  */
+    }
+  else if (*start++ != DW_OP_plus_uconst)
+    return false;
+  else
+    {
+      /* The size is the parameter to DW_OP_plus_uconst.  */
+      uint64_t val;
+      start = gdb_read_uleb128 (start, end, &val);
+      if (start == nullptr)
+	return false;
+      if ((int) val != val)
+	return false;
+      offset = val;
+    }
+
+  if (start == end)
+    return false;
+
+  uint64_t size;
+  if (*start == DW_OP_deref_size)
+    {
+      start = gdb_read_uleb128 (start + 1, end, &size);
+      if (start == nullptr)
+	return false;
+    }
+  else if (*start == DW_OP_deref)
+    {
+      size = cu->header.addr_size;
+      ++start;
+    }
+  else
+    return false;
+
+  SET_FIELD_BITPOS (*field, 8 * offset);
+  if (size != TYPE_LENGTH (field->type ()))
+    FIELD_BITSIZE (*field) = 8 * size;
+
+  return true;
+}
+
+/* With -fgnat-encodings=minimal, gcc will emit some unusual DWARF for
+   some kinds of Ada arrays:
+
+   <1><11db>: Abbrev Number: 7 (DW_TAG_array_type)
+      <11dc>   DW_AT_name        : (indirect string, offset: 0x1bb8): string
+      <11e0>   DW_AT_data_location: 2 byte block: 97 6
+	  (DW_OP_push_object_address; DW_OP_deref)
+      <11e3>   DW_AT_type        : <0x1173>
+      <11e7>   DW_AT_sibling     : <0x1201>
+   <2><11eb>: Abbrev Number: 8 (DW_TAG_subrange_type)
+      <11ec>   DW_AT_type        : <0x1206>
+      <11f0>   DW_AT_lower_bound : 6 byte block: 97 23 8 6 94 4
+	  (DW_OP_push_object_address; DW_OP_plus_uconst: 8; DW_OP_deref;
+	   DW_OP_deref_size: 4)
+      <11f7>   DW_AT_upper_bound : 8 byte block: 97 23 8 6 23 4 94 4
+	  (DW_OP_push_object_address; DW_OP_plus_uconst: 8; DW_OP_deref;
+	   DW_OP_plus_uconst: 4; DW_OP_deref_size: 4)
+
+   This actually represents a "thick pointer", which is a structure
+   with two elements: one that is a pointer to the array data, and one
+   that is a pointer to another structure; this second structure holds
+   the array bounds.
+
+   This returns a new type on success, or nullptr if this didn't
+   recognize the type.  */
+
+static struct type *
+quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
+			 struct type *type)
+{
+  struct attribute *attr = dwarf2_attr (die, DW_AT_data_location, cu);
+  /* So far we've only seen this with block form.  */
+  if (attr == nullptr || !attr->form_is_block ())
+    return nullptr;
+
+  /* Note that this will fail if the structure layout is changed by
+     the compiler.  However, we have no good way to recognize some
+     other layout, because we don't know what expression the compiler
+     might choose to emit should this happen.  */
+  struct dwarf_block *blk = attr->as_block ();
+  if (blk->size != 2
+      || blk->data[0] != DW_OP_push_object_address
+      || blk->data[1] != DW_OP_deref)
+    return nullptr;
+
+  int bounds_offset = -1;
+  int max_align = -1;
+  std::vector<struct field> range_fields;
+  for (struct die_info *child_die = die->child;
+       child_die;
+       child_die = child_die->sibling)
+    {
+      if (child_die->tag == DW_TAG_subrange_type)
+	{
+	  struct type *underlying = read_subrange_index_type (child_die, cu);
+
+	  int this_align = type_align (underlying);
+	  if (this_align > max_align)
+	    max_align = this_align;
+
+	  range_fields.emplace_back ();
+	  range_fields.emplace_back ();
+
+	  struct field &lower = range_fields[range_fields.size () - 2];
+	  struct field &upper = range_fields[range_fields.size () - 1];
+
+	  lower.set_type (underlying);
+	  FIELD_ARTIFICIAL (lower) = 1;
+
+	  upper.set_type (underlying);
+	  FIELD_ARTIFICIAL (upper) = 1;
+
+	  if (!recognize_bound_expression (child_die, DW_AT_lower_bound,
+					   &bounds_offset, &lower, cu)
+	      || !recognize_bound_expression (child_die, DW_AT_upper_bound,
+					      &bounds_offset, &upper, cu))
+	    return nullptr;
+	}
+    }
+
+  /* This shouldn't really happen, but double-check that we found
+     where the bounds are stored.  */
+  if (bounds_offset == -1)
+    return nullptr;
+
+  struct objfile *objfile = cu->per_objfile->objfile;
+  for (int i = 0; i < range_fields.size (); i += 2)
+    {
+      char name[20];
+
+      /* Set the name of each field in the bounds.  */
+      xsnprintf (name, sizeof (name), "LB%d", i / 2);
+      FIELD_NAME (range_fields[i]) = objfile->intern (name);
+      xsnprintf (name, sizeof (name), "UB%d", i / 2);
+      FIELD_NAME (range_fields[i + 1]) = objfile->intern (name);
+    }
+
+  struct type *bounds = alloc_type (objfile);
+  bounds->set_code (TYPE_CODE_STRUCT);
+
+  bounds->set_num_fields (range_fields.size ());
+  bounds->set_fields
+    ((struct field *) TYPE_ALLOC (bounds, (bounds->num_fields ()
+					   * sizeof (struct field))));
+  memcpy (bounds->fields (), range_fields.data (),
+	  bounds->num_fields () * sizeof (struct field));
+
+  int last_fieldno = range_fields.size () - 1;
+  int bounds_size = (TYPE_FIELD_BITPOS (bounds, last_fieldno) / 8
+		     + TYPE_LENGTH (bounds->field (last_fieldno).type ()));
+  TYPE_LENGTH (bounds) = align_up (bounds_size, max_align);
+
+  /* Rewrite the existing array type in place.  Specifically, we
+     remove any dynamic properties we might have read, and we replace
+     the index types.  */
+  struct type *iter = type;
+  for (int i = 0; i < range_fields.size (); i += 2)
+    {
+      gdb_assert (iter->code () == TYPE_CODE_ARRAY);
+      iter->main_type->dyn_prop_list = nullptr;
+      iter->set_index_type
+	(create_static_range_type (NULL, bounds->field (i).type (), 1, 0));
+      iter = TYPE_TARGET_TYPE (iter);
+    }
+
+  struct type *result = alloc_type (objfile);
+  result->set_code (TYPE_CODE_STRUCT);
+
+  result->set_num_fields (2);
+  result->set_fields
+    ((struct field *) TYPE_ZALLOC (result, (result->num_fields ()
+					    * sizeof (struct field))));
+
+  /* The names are chosen to coincide with what the compiler does with
+     -fgnat-encodings=all, which the Ada code in gdb already
+     understands.  */
+  TYPE_FIELD_NAME (result, 0) = "P_ARRAY";
+  result->field (0).set_type (lookup_pointer_type (type));
+
+  TYPE_FIELD_NAME (result, 1) = "P_BOUNDS";
+  result->field (1).set_type (lookup_pointer_type (bounds));
+  SET_FIELD_BITPOS (result->field (1), 8 * bounds_offset);
+
+  result->set_name (type->name ());
+  TYPE_LENGTH (result) = (TYPE_LENGTH (result->field (0).type ())
+			  + TYPE_LENGTH (result->field (1).type ()));
+
+  return result;
+}
+
 /* Extract all information from a DW_TAG_array_type DIE and put it in
    the DIE's type field.  For now, this only handles one dimensional
    arrays.  */
@@ -16833,8 +17137,16 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
   maybe_set_alignment (cu, die, type);
 
+  struct type *replacement_type = nullptr;
+  if (cu->language == language_ada)
+    {
+      replacement_type = quirk_ada_thick_pointer (die, cu, type);
+      if (replacement_type != nullptr)
+	type = replacement_type;
+    }
+
   /* Install the type in the die.  */
-  set_die_type (die, type, cu);
+  set_die_type (die, type, cu, replacement_type != nullptr);
 
   /* set_die_type should be already done.  */
   set_descriptive_type (type, die, cu);
@@ -24431,7 +24743,8 @@ per_cu_offset_and_type_eq (const void *item_lhs, const void *item_rhs)
      * Make the type as complete as possible before fetching more types.  */
 
 static struct type *
-set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
+	      bool skip_data_location)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct dwarf2_per_cu_offset_and_type **slot, ofs;
@@ -24474,9 +24787,12 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
     }
 
   /* Read DW_AT_data_location and set in type.  */
-  attr = dwarf2_attr (die, DW_AT_data_location, cu);
-  if (attr_to_dynamic_prop (attr, die, cu, &prop, cu->addr_type ()))
-    type->add_dyn_prop (DYN_PROP_DATA_LOCATION, prop);
+  if (!skip_data_location)
+    {
+      attr = dwarf2_attr (die, DW_AT_data_location, cu);
+      if (attr_to_dynamic_prop (attr, die, cu, &prop, cu->addr_type ()))
+	type->add_dyn_prop (DYN_PROP_DATA_LOCATION, prop);
+    }
 
   if (per_objfile->die_type_hash == NULL)
     per_objfile->die_type_hash
