@@ -118,4 +118,7 @@ foreach_with_prefix scenario {all minimal} {
 	setup_kfail "minimal encodings" *-*-*
     }
     gdb_test "print multi_multi(2)" " = $matrix"
+
+    gdb_test "print multi_access.all" \
+	" = \\(\\(8, 13, 21, 34, 55\\), \\(1, 1, 2, 3, 5\\)\\)"
 }

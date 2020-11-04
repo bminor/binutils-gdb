@@ -17,6 +17,7 @@ with System;
 package Pck is
    type Color is (Black, Red, Green, Blue, White);
    type Strength is (None, Low, Medium, High);
+   type Short is new Natural range 0 .. 2 ** 8 - 1;
 
    type Full_Table is array (Color) of Boolean;
    pragma Pack (Full_Table);
@@ -42,6 +43,10 @@ package Pck is
    pragma Pack (Multi_Multi_Table);
    function New_Multi_Multi_Table (L1, H1, L2, H2, L3, H3: Positive)
       return Multi_Multi_Table;
+
+   type Multi_Dimension is array (Boolean, Color) of Short;
+   pragma Pack (Multi_Dimension);
+   type Multi_Dimension_Access is access all Multi_Dimension;
 
    procedure Do_Nothing (A : System.Address);
 end Pck;

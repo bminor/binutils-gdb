@@ -1,5 +1,13 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/enum_idx_packed.exp: Add test.
+	* gdb.ada/enum_idx_packed/foo.adb (Multi_Access):
+	New variable.
+	* gdb.ada/enum_idx_packed/pck.ads (Short)
+	(Multi_Dimension, Multi_Dimension_Access): New types.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/enum_idx_packed.exp: Test two forms of -fgnat-encodings.
 
 2020-11-04  Tom Tromey  <tromey@adacore.com>

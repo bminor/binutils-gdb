@@ -17097,15 +17097,23 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
       int i = 0;
 
       while (i < range_types.size ())
-	type = create_array_type_with_stride (NULL, type, range_types[i++],
-					      byte_stride_prop, bit_stride);
+	{
+	  type = create_array_type_with_stride (NULL, type, range_types[i++],
+						byte_stride_prop, bit_stride);
+	  bit_stride = 0;
+	  byte_stride_prop = nullptr;
+	}
     }
   else
     {
       size_t ndim = range_types.size ();
       while (ndim-- > 0)
-	type = create_array_type_with_stride (NULL, type, range_types[ndim],
-					      byte_stride_prop, bit_stride);
+	{
+	  type = create_array_type_with_stride (NULL, type, range_types[ndim],
+						byte_stride_prop, bit_stride);
+	  bit_stride = 0;
+	  byte_stride_prop = nullptr;
+	}
     }
 
   /* Understand Dwarf2 support for vector types (like they occur on

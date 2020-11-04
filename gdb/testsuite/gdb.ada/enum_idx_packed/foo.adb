@@ -22,6 +22,10 @@ procedure Foo is
    Small : Small_Table := New_Small_Table (Low => Red, High => Green);
    Multi : Multi_Table := New_Multi_Table (Red, Green, Low, Medium);
    Multi_Multi : Multi_Multi_Table := New_Multi_Multi_Table (1, 2, 1, 7, 1, 10);
+   Multi_Access : Multi_Dimension_Access
+     := new Multi_Dimension'(True => (1, 1, 2, 3, 5),
+                             False => (8, 13, 21, 34, 55));
+
 begin
    Do_Nothing (Full'Address);  -- STOP
    Do_Nothing (Primary'Address);
@@ -29,4 +33,5 @@ begin
    Do_Nothing (Small'Address);
    Do_Nothing (Multi'Address);
    Do_Nothing (Multi_Multi'Address);
+   Do_Nothing (Multi_Access'Address);
 end Foo;
