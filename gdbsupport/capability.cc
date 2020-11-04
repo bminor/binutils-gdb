@@ -529,7 +529,7 @@ std::string
 capability::to_str (void)
 {
   /* The printing format is the following:
-     {tag = %d, address = 0x%016x, attributes = {[%s], otype = 0x%04x,
+     {tag = %d, address = 0x%016x, permissions = {[%s], otype = 0x%04x,
       [range = [0x%016x - 0x%016x)}}
   */
   std::string cap_str ("");
@@ -566,7 +566,7 @@ capability::to_str (void)
 
   /* Assemble the capability string.  */
   cap_str += "{tag = " + tag_str + ", address = " + val_str + ", "
-	     + "attributes = {" + perm_str + " ";
+	     + "permissions = {" + perm_str + " ";
 
   if (is_sealed ())
     cap_str += "otype = " + otype_str + ", ";
