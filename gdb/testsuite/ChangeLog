@@ -1,5 +1,9 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/mod_from_name.exp: Test printing slice.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/O2_float_param.exp: Test different -fgnat-encodings
 	values.
 	* gdb.ada/access_to_unbounded_array.exp: Test different

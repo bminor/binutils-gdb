@@ -1,5 +1,10 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_is_any_packed_array_type): New function.
+	(ada_evaluate_subexp) <case TERNOP_SLICE>: Use it.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (recognize_bound_expression)
 	(quirk_ada_thick_pointer): New functions.
 	(read_array_type): Call quirk_ada_thick_pointer.

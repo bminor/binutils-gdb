@@ -2012,6 +2012,17 @@ ada_is_unconstrained_packed_array_type (struct type *type)
   return 0;
 }
 
+/* Return true if TYPE is a (Gnat-encoded) constrained packed array
+   type, or if it is an ordinary (non-Gnat-encoded) packed array.  */
+
+static bool
+ada_is_any_packed_array_type (struct type *type)
+{
+  return (ada_is_constrained_packed_array_type (type)
+	  || (type->code () == TYPE_CODE_ARRAY
+	      && TYPE_FIELD_BITSIZE (type, 0) % 8 != 0));
+}
+
 /* Given that TYPE encodes a packed array type (constrained or unconstrained),
    return the size of its elements in bits.  */
 
@@ -10609,7 +10620,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	  TYPE_TARGET_TYPE (value_type (array)) =
 	    ada_aligned_type (TYPE_TARGET_TYPE (value_type (array)));
 
-	if (ada_is_constrained_packed_array_type (value_type (array)))
+	if (ada_is_any_packed_array_type (value_type (array)))
 	  error (_("cannot slice a packed array"));
 
 	/* If this is a reference to an array or an array lvalue,
