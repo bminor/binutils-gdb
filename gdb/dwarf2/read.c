@@ -8575,6 +8575,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  where = psymbol_placement::STATIC;
 	}
       break;
+    case DW_TAG_array_type:
     case DW_TAG_typedef:
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
@@ -10202,7 +10203,6 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
        read them on-demand through read_type_die.  */
     case DW_TAG_subroutine_type:
     case DW_TAG_set_type:
-    case DW_TAG_array_type:
     case DW_TAG_pointer_type:
     case DW_TAG_ptr_to_member_type:
     case DW_TAG_reference_type:
@@ -10210,6 +10210,13 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_string_type:
       break;
 
+    case DW_TAG_array_type:
+      /* We only need to handle this case for Ada -- in other
+	 languages, it's normal for the compiler to emit a typedef
+	 instead.  */
+      if (cu->language != language_ada)
+	break;
+      /* FALLTHROUGH */
     case DW_TAG_base_type:
     case DW_TAG_subrange_type:
     case DW_TAG_typedef:
@@ -18984,20 +18991,27 @@ read_full_die (const struct die_reader_specs *reader,
    symbol for.  */
 
 static int
-is_type_tag_for_partial (int tag)
+is_type_tag_for_partial (int tag, enum language lang)
 {
   switch (tag)
     {
 #if 0
     /* Some types that would be reasonable to generate partial symbols for,
-       that we don't at present.  */
-    case DW_TAG_array_type:
+       that we don't at present.  Note that normally this does not
+       matter, mainly because C compilers don't give names to these
+       types, but instead emit DW_TAG_typedef.  */
     case DW_TAG_file_type:
     case DW_TAG_ptr_to_member_type:
     case DW_TAG_set_type:
     case DW_TAG_string_type:
     case DW_TAG_subroutine_type:
 #endif
+
+      /* GNAT may emit an array with a name, but no typedef, so we
+	 need to make a symbol in this case.  */
+    case DW_TAG_array_type:
+      return lang == language_ada;
+
     case DW_TAG_base_type:
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
@@ -19091,7 +19105,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	 later variables referencing them via DW_AT_specification (for
 	 static members).  */
       if (!load_all
-	  && !is_type_tag_for_partial (abbrev->tag)
+	  && !is_type_tag_for_partial (abbrev->tag, cu->language)
 	  && abbrev->tag != DW_TAG_constant
 	  && abbrev->tag != DW_TAG_enumerator
 	  && abbrev->tag != DW_TAG_subprogram
@@ -19135,6 +19149,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  && pdi.is_declaration == 0
 	  && ((pdi.tag == DW_TAG_typedef && !pdi.has_children)
 	      || pdi.tag == DW_TAG_base_type
+	      || pdi.tag == DW_TAG_array_type
 	      || pdi.tag == DW_TAG_subrange_type))
 	{
 	  if (building_psymtab && pdi.raw_name != NULL)
@@ -22028,6 +22043,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  list_to_add = cu->list_in_scope;
 	  break;
+	case DW_TAG_array_type:
 	case DW_TAG_base_type:
 	case DW_TAG_subrange_type:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;

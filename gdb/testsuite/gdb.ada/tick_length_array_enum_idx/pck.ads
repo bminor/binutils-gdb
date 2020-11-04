@@ -21,6 +21,9 @@ package Pck is
    type Primary_Table is array (Color range Red .. Blue) of Boolean;
    type Variable_Table is array (Color range <>) of Boolean;
 
+   type Full_PT is array (Color) of Boolean;
+   pragma Pack (Full_PT);
+
    function New_Variable_Table (Low: Color; High: Color) return Variable_Table;
 
    procedure Do_Nothing (A : System.Address);

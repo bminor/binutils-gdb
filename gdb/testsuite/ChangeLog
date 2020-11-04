@@ -1,5 +1,13 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/tick_length_array_enum_idx.exp: Add ptype test.
+	* gdb.ada/tick_length_array_enum_idx/foo_n207_004.adb
+	(PT_Full): New variable.
+	* gdb.ada/tick_length_array_enum_idx/pck.adb
+	(Full_PT): New type.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/array_of_variant.exp: New file.
 	* gdb.ada/array_of_variant/p.adb: New file.
 	* gdb.ada/array_of_variant/pck.ads: New file.

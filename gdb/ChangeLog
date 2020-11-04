@@ -1,5 +1,12 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (add_partial_symbol, process_die):
+	Handle DW_TAG_array_type.
+	(is_type_tag_for_partial): Add "lang" parameter.
+	(load_partial_dies, new_symbol): Handle DW_TAG_array_type.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_value_slice_from_ptr): Use bit size.
 
 2020-11-04  Tom Tromey  <tromey@adacore.com>
