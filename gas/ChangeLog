@@ -1,3 +1,16 @@
+2020-11-04  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* testsuite/gas/aarch64/armv8-ras-1_1-invalid.d: New test.
+	* testsuite/gas/aarch64/armv8-ras-1_1-invalid.l: New test.
+	* testsuite/gas/aarch64/armv8-ras-1_1-invalid.s: New test.
+	* testsuite/gas/aarch64/armv8-ras-1_1.d: New test.
+	* testsuite/gas/aarch64/armv8-ras-1_1.s: New test.
+	* testsuite/gas/aarch64/illegal-ras-1.d: Remove.
+	* testsuite/gas/aarch64/illegal-ras-1.l: Remove.
+	* testsuite/gas/aarch64/illegal-ras-1.s: Remove.
+	* testsuite/gas/aarch64/illegal-sysreg-2.d: Remove.
+	* testsuite/gas/aarch64/illegal-sysreg-2.l: Remove.
+
 2020-11-03  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* NEWS: Update docs.

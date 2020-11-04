@@ -1,3 +1,8 @@
+2020-11-04  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* opcode/aarch64.h (AARCH64_ARCH_V8): Add RAS to Armv8-A.
+	(AARCH64_ARCH_V8_2): Remove RAS from Armv8.2-A set.
+
 2020-11-03  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_LS64): New +ls64 feature flag.
