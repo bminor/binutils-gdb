@@ -1006,7 +1006,11 @@ ada_print_type (struct type *type0, const char *varstring,
 	break;
       case TYPE_CODE_PTR:
       case TYPE_CODE_TYPEDEF:
-	fprintf_filtered (stream, "access ");
+	/* An __XVL field is not truly a pointer, so don't print
+	   "access" in this case.  */
+	if (type->code () != TYPE_CODE_PTR
+	    || strstr (varstring, "___XVL") == nullptr)
+	  fprintf_filtered (stream, "access ");
 	ada_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level,
 			flags);
 	break;
