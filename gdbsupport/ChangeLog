@@ -1,5 +1,10 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* capability.cc (capability::to_str): Rename "attributes" to
+	"permissions".
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* tdesc.cc (tdesc_predefined_types): Update type names for
 	capabilities.
 
