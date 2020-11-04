@@ -1,5 +1,10 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* valops.c (value_cast): Handle casting from capabilities and
+	capability pointers.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_address_class_type_flags)
 	(aarch64_address_class_type_flags_to_name)
 	(aarch64_address_class_name_to_type_flags): Use
