@@ -1040,20 +1040,31 @@ read_value_memory (struct value *val, LONGEST bit_offset,
   ULONGEST xfered_total = 0;
   struct gdbarch *arch = get_value_arch (val);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
+  bool big_endian = type_byte_order (value_type (val)) == BFD_ENDIAN_BIG;
   enum target_object object;
+  size_t extended_length
+    = length + (bit_offset + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+  gdb_byte *buffer_ptr = buffer;
+  gdb::byte_vector temp_buffer;
+
+  if (bit_offset)
+    {
+      temp_buffer.resize (extended_length);
+      buffer_ptr = temp_buffer.data ();
+    }
 
   object = stack ? TARGET_OBJECT_STACK_MEMORY : TARGET_OBJECT_MEMORY;
 
-  while (xfered_total < length)
+  while (xfered_total < extended_length)
     {
       enum target_xfer_status status;
       ULONGEST xfered_partial;
 
       status = target_xfer_partial (current_inferior ()->top_target (),
 				    object, NULL,
-				    buffer + xfered_total * unit_size, NULL,
+				    buffer_ptr + xfered_total * unit_size, NULL,
 				    memaddr + xfered_total,
-				    length - xfered_total,
+				    extended_length - xfered_total,
 				    &xfered_partial);
 
       if (status == TARGET_XFER_OK)
@@ -1070,6 +1081,10 @@ read_value_memory (struct value *val, LONGEST bit_offset,
       xfered_total += xfered_partial;
       QUIT;
     }
+
+  if (bit_offset)
+    copy_bitwise (buffer, 0, temp_buffer.data (),
+		  bit_offset, length * HOST_CHAR_BIT, big_endian);
 }
 
 /* Store the contents of FROMVAL into the location of TOVAL.
@@ -1141,7 +1156,7 @@ value_assign (struct value *toval, struct value *fromval)
 	const gdb_byte *dest_buffer;
 	CORE_ADDR changed_addr;
 	int changed_len;
-	gdb_byte buffer[sizeof (LONGEST)];
+	gdb::byte_vector buffer;
 
 	if (value_bitsize (toval))
 	  {
@@ -1167,10 +1182,26 @@ value_assign (struct value *toval, struct value *fromval)
 		       "don't fit in a %d bit word."),
 		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
-	    read_memory (changed_addr, buffer, changed_len);
-	    modify_field (type, buffer, value_as_long (fromval),
+	    buffer.resize (changed_len);
+
+	    read_memory (changed_addr, buffer.data (), changed_len);
+	    modify_field (type, buffer.data (), value_as_long (fromval),
 			  value_bitpos (toval), value_bitsize (toval));
-	    dest_buffer = buffer;
+	    dest_buffer = buffer.data ();
+	  }
+	else if (value_bitpos (toval))
+	  {
+	    int bitpos = value_bitpos (toval);
+	    bool big_endian = type_byte_order (type) == BFD_ENDIAN_BIG;
+	    changed_addr = value_address (toval);
+	    changed_len = TYPE_LENGTH (type)
+			  + (bitpos + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+	    buffer.resize (changed_len);
+	    read_memory (changed_addr, buffer.data (), changed_len);
+	    copy_bitwise (buffer.data (), bitpos,
+			  value_contents (fromval).data (), 0,
+			  TYPE_LENGTH (type) * HOST_CHAR_BIT, big_endian);
+	    dest_buffer = buffer.data();
 	  }
 	else
 	  {
@@ -1186,7 +1217,6 @@ value_assign (struct value *toval, struct value *fromval)
     case lval_register:
       {
 	struct frame_info *frame;
-	struct gdbarch *gdbarch;
 	int value_reg;
 
 	/* Figure out which frame this register value is in.  The value
@@ -1204,29 +1234,41 @@ value_assign (struct value *toval, struct value *fromval)
 	if (!frame)
 	  error (_("Value being assigned to is no longer active."));
 
-	gdbarch = get_frame_arch (frame);
+	gdbarch *arch = get_frame_arch (frame);
+	LONGEST bitpos = value_bitpos (toval);
+	LONGEST bitsize = value_bitsize (toval);
+	LONGEST offset = value_offset (toval);
 
-	if (value_bitsize (toval))
+	if (bitpos || bitsize)
 	  {
-	    struct value *parent = value_parent (toval);
-	    LONGEST offset = value_offset (parent) + value_offset (toval);
-	    size_t changed_len;
-	    gdb_byte buffer[sizeof (LONGEST)];
+	    int changed_len;
+	    bool big_endian = type_byte_order (type) == BFD_ENDIAN_BIG;
+
+	    if (bitsize)
+	      {
+		offset += value_offset (value_parent (toval));
+
+		changed_len = (bitpos + bitsize + HOST_CHAR_BIT - 1)
+			      / HOST_CHAR_BIT;
+
+		if (changed_len > (int) sizeof (LONGEST))
+		  error (_("Can't handle bitfields which "
+			   "don't fit in a %d bit word."),
+			   (int) sizeof (LONGEST) * HOST_CHAR_BIT);
+	      }
+	    else
+	      {
+		changed_len = TYPE_LENGTH (type)
+			      + (bitpos + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+
+		bitsize = TYPE_LENGTH (type) * HOST_CHAR_BIT;
+	      }
+
+	    gdb::byte_vector buffer (changed_len);
 	    int optim, unavail;
 
-	    changed_len = (value_bitpos (toval)
-			   + value_bitsize (toval)
-			   + HOST_CHAR_BIT - 1)
-			  / HOST_CHAR_BIT;
-
-	    if (changed_len > sizeof (LONGEST))
-	      error (_("Can't handle bitfields which "
-		       "don't fit in a %d bit word."),
-		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
-
 	    if (!get_frame_register_bytes (frame, value_reg, offset,
-					   {buffer, changed_len},
-					   &optim, &unavail))
+					   buffer, &optim, &unavail))
 	      {
 		if (optim)
 		  throw_error (OPTIMIZED_OUT_ERROR,
@@ -1236,23 +1278,21 @@ value_assign (struct value *toval, struct value *fromval)
 			       _("value is not available"));
 	      }
 
-	    modify_field (type, buffer, value_as_long (fromval),
-			  value_bitpos (toval), value_bitsize (toval));
+	    copy_bitwise (buffer.data (), bitpos,
+			  value_contents (fromval).data (),
+			  0, bitsize, big_endian);
 
-	    put_frame_register_bytes (frame, value_reg, offset,
-				      {buffer, changed_len});
+	    put_frame_register_bytes (frame, value_reg, offset, buffer);
 	  }
 	else
 	  {
-	    if (gdbarch_convert_register_p (gdbarch, VALUE_REGNUM (toval),
-					    type))
+	    if (gdbarch_convert_register_p (arch, VALUE_REGNUM (toval), type))
 	      {
 		/* If TOVAL is a special machine register requiring
 		   conversion of program values to a special raw
 		   format.  */
-		gdbarch_value_to_register (gdbarch, frame,
-					   VALUE_REGNUM (toval), type,
-					   value_contents (fromval).data ());
+		gdbarch_value_to_register (arch, frame, VALUE_REGNUM (toval),
+					   type, value_contents (fromval).data ());
 	      }
 	    else
 	      {
@@ -1260,8 +1300,7 @@ value_assign (struct value *toval, struct value *fromval)
 		  = gdb::make_array_view (value_contents (fromval).data (),
 					  TYPE_LENGTH (type));
 		put_frame_register_bytes (frame, value_reg,
-					  value_offset (toval),
-					  contents);
+					  offset, contents);
 	      }
 	  }
 
@@ -1363,21 +1402,22 @@ value_assign (struct value *toval, struct value *fromval)
 struct value *
 value_repeat (struct value *arg1, int count)
 {
-  struct value *val;
-
   if (VALUE_LVAL (arg1) != lval_memory)
     error (_("Only values in memory can be extended with '@'."));
   if (count < 1)
     error (_("Invalid number %d of repetitions."), count);
 
-  val = allocate_repeat_value (value_enclosing_type (arg1), count);
+  value *val
+    = allocate_repeat_value (value_enclosing_type (arg1), count);
 
   VALUE_LVAL (val) = lval_memory;
   set_value_address (val, value_address (arg1));
+  set_value_bitpos (val, value_bitpos (arg1));
+  type *enclosing_type = value_enclosing_type (val);
 
-  read_value_memory (val, 0, value_stack (val), value_address (val),
-		     value_contents_all_raw (val).data (),
-		     type_length_units (value_enclosing_type (val)));
+  read_value_memory (val, value_bitpos (val), value_stack (val),
+		     value_address (val), value_contents_all_raw (val).data (),
+		     type_length_units (enclosing_type));
 
   return val;
 }
@@ -1726,7 +1766,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
     {
       val = allocate_value (arraytype);
       for (idx = 0; idx < nelem; idx++)
-	value_contents_copy (val, idx * typelength, elemvec[idx], 0,
+	value_contents_copy (val, idx * typelength, elemvec[idx], 0, 0,
 			     typelength);
       return val;
     }
@@ -1736,7 +1776,8 @@ value_array (int lowbound, int highbound, struct value **elemvec)
 
   val = allocate_value (arraytype);
   for (idx = 0; idx < nelem; idx++)
-    value_contents_copy (val, idx * typelength, elemvec[idx], 0, typelength);
+    value_contents_copy (val, idx * typelength, elemvec[idx], 0, 0,
+			 typelength);
   return val;
 }
 
@@ -4005,7 +4046,7 @@ value_slice (struct value *array, int lowbound, int length)
     else
       {
 	slice = allocate_value (slice_type);
-	value_contents_copy (slice, 0, array, offset,
+	value_contents_copy (slice, 0, array, offset, 0,
 			     type_length_units (slice_type));
       }
 

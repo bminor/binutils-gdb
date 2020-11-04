@@ -1093,6 +1093,7 @@ dwarf_memory::to_gdb_value (frame_info *frame, struct type *type,
     = value_as_address (value_from_pointer (ptr_type, m_offset));
   value *retval = value_at_lazy (subobj_type, address + subobj_offset);
   set_value_stack (retval, m_stack);
+  set_value_bitpos (retval, m_bit_suboffset);
   return retval;
 }
 
@@ -1270,6 +1271,9 @@ dwarf_register::to_gdb_value (frame_info *frame, struct type *type,
   else
     set_value_offset (retval, (retval_offset + m_offset) / unit_size);
 
+  set_value_bitpos (retval,
+		    m_bit_suboffset + (m_offset % unit_size) * HOST_CHAR_BIT);
+
   /* Get the data.  */
   read_frame_register_value (retval, frame);
 
@@ -1281,7 +1285,7 @@ dwarf_register::to_gdb_value (frame_info *frame, struct type *type,
 	 return a generic optimized out value instead, so that we show
 	 <optimized out> instead of <not saved>.  */
       value *temp = allocate_value (subobj_type);
-      value_contents_copy (temp, 0, retval, 0, TYPE_LENGTH (subobj_type));
+      value_contents_copy (temp, 0, retval, 0, 0, TYPE_LENGTH (subobj_type));
       retval = temp;
     }
 
@@ -4012,6 +4016,40 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	     currently observing.  */
 	  push (make_unique<dwarf_memory> (arch, this->m_addr_info->addr));
 	  break;
+
+	case DW_OP_LLVM_offset:
+	  {
+	    dwarf_value_up value = to_value (pop (), address_type);
+	    dwarf_require_integral (value->type ());
+	    dwarf_location_up location = to_location (pop (), arch);
+
+	    location->add_bit_offset (value->to_long () * HOST_CHAR_BIT);
+	    push (std::move (location));
+	    break;
+	  }
+
+	case DW_OP_LLVM_offset_constu:
+	  {
+	    uint64_t uoffset;
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
+	    ULONGEST result = uoffset;
+	    dwarf_location_up location = to_location (pop (), arch);
+
+	    location->add_bit_offset (result * HOST_CHAR_BIT);
+	    push (std::move (location));
+	    break;
+	  }
+
+	case DW_OP_LLVM_bit_offset:
+	  {
+	    dwarf_value_up value = to_value (pop (), address_type);
+	    dwarf_require_integral (value->type ());
+	    dwarf_location_up location = to_location (pop (), arch);
+
+	    location->add_bit_offset (value->to_long ());
+	    push (std::move (location));
+	    break;
+	  }
 
 	default:
 	  error (_("Unhandled dwarf expression opcode 0x%x"), op);

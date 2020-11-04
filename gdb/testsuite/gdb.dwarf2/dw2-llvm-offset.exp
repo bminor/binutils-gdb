@@ -1,0 +1,328 @@
+# Copyright 2017-2021 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test DWARF operation that allow adding byte and bit offset to any
+# location description.
+#
+# In particular, the test uses memory and register location
+# descriptions (both as standalone and parts of the composite
+# location), and applies different byte and bit offsets to them.
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+if {![dwarf2_support]} {
+    return 0
+}
+
+# Choose suitable integer registers for the test.
+
+set dwarf_regnum 0
+
+if { [is_aarch64_target] } {
+    set regname x0
+} elseif { [is_aarch32_target]
+	   || [istarget "s390*-*-*" ]
+	   || [istarget "powerpc*-*-*"]
+	   || [istarget "rs6000*-*-aix*"] } {
+    set regname r0
+} elseif { [is_x86_like_target] } {
+    set regname eax
+} elseif { [is_amd64_regs_target] } {
+    set regname rax
+} else {
+    verbose "Skipping ${gdb_test_file_name}."
+    return
+}
+
+standard_testfile var-access.c ${gdb_test_file_name}-dw.S
+
+# Make some DWARF for the test.
+
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    global dwarf_regnum regname srcdir subdir srcfile
+    set buf_var [gdb_target_symbol buf]
+
+    set main_result [function_range main ${srcdir}/${subdir}/${srcfile}]
+    set main_start [lindex $main_result 0]
+    set main_length [lindex $main_result 1]
+
+    cu {} {
+	DW_TAG_compile_unit {
+	    {DW_AT_name var-access.c}
+	    {DW_AT_comp_dir /tmp}
+	} {
+	    declare_labels char_type_label int_type_label
+	    declare_labels array_size_4_type_label array_size_8_type_label
+
+	    # define char type.
+	    char_type_label: DW_TAG_base_type {
+		{DW_AT_name "char"}
+		{DW_AT_encoding @DW_ATE_signed}
+		{DW_AT_byte_size 1 DW_FORM_sdata}
+	    }
+
+	    # define int type.
+	    int_type_label: DW_TAG_base_type {
+		{DW_AT_name "int"}
+		{DW_AT_encoding @DW_ATE_signed}
+		{DW_AT_byte_size 4 DW_FORM_sdata}
+	    }
+
+	    # define 4 byte size array type.
+	    array_size_4_type_label: DW_TAG_array_type {
+		{DW_AT_type :$char_type_label}
+	    } {
+		DW_TAG_subrange_type {
+		    {DW_AT_type :$int_type_label}
+		    {DW_AT_upper_bound 3 DW_FORM_udata}
+		}
+	    }
+
+	    # define 8 byte size array type.
+	    array_size_8_type_label: DW_TAG_array_type {
+		{DW_AT_type :$char_type_label}
+	    } {
+		DW_TAG_subrange_type {
+		    {DW_AT_type :$int_type_label}
+		    {DW_AT_upper_bound 7 DW_FORM_udata}
+		}
+	    }
+
+	    DW_TAG_subprogram {
+		{DW_AT_name main}
+		{DW_AT_low_pc $main_start addr}
+		{DW_AT_high_pc $main_length data8}
+	    } {
+		# define original buf variable.
+		DW_TAG_variable {
+		    {DW_AT_name buf}
+		    {DW_AT_type :$array_size_4_type_label}
+		    {DW_AT_location {
+			DW_OP_addr $buf_var
+		    } SPECIAL_expr}
+		}
+
+		# defined a variable located in
+		# a third byte of the buf variable.
+		DW_TAG_variable {
+		    {DW_AT_name buf_byte_3}
+		    {DW_AT_type :$char_type_label}
+		    {DW_AT_location {
+			DW_OP_addr $buf_var
+			DW_OP_LLVM_offset_constu 2
+		    } SPECIAL_expr}
+		    {external 1 flag}
+		}
+
+		# defined a variable located in a second byte
+		# of the buf variable with a bit offset of one.
+		DW_TAG_variable {
+		    {DW_AT_name buf_byte_2_bit_1}
+		    {DW_AT_type :$char_type_label}
+		    {DW_AT_location {
+			DW_OP_addr $buf_var
+			DW_OP_lit9
+			DW_OP_LLVM_bit_offset
+		    } SPECIAL_expr}
+		    {external 1 flag}
+		}
+
+		# defined a variable located in a
+		# third byte of the REGNAME register.
+		DW_TAG_variable {
+		    {DW_AT_name reg_byte_3}
+		    {DW_AT_type :$char_type_label}
+		    {DW_AT_location {
+			DW_OP_regx $dwarf_regnum
+			DW_OP_lit2
+			DW_OP_LLVM_offset
+		    } SPECIAL_expr}
+		    {external 1 flag}
+		}
+
+		# defined a variable located in a second byte of
+		# the REGNAME register with a bit offset of one.
+		DW_TAG_variable {
+		    {DW_AT_name reg_byte_2_bit_1}
+		    {DW_AT_type :$char_type_label}
+		    {DW_AT_location {
+			DW_OP_regx $dwarf_regnum
+			DW_OP_lit1
+			DW_OP_LLVM_offset
+			DW_OP_lit1
+			DW_OP_LLVM_bit_offset
+		    } SPECIAL_expr}
+		    {external 1 flag}
+		}
+
+		# Define an array variable spread in different
+		# pieces of buf variable and REGNAME register.
+		DW_TAG_variable {
+		    {DW_AT_name mix_array}
+		    {DW_AT_type :$array_size_8_type_label}
+		    {DW_AT_location {
+
+			# a byte piece located in a
+			# fourth byte of the buf variable.
+			DW_OP_addr $buf_var
+			DW_OP_LLVM_offset_constu 3
+			DW_OP_piece 0x1
+
+			# a byte piece located in a
+			# third byte of the buf variable.
+			DW_OP_addr $buf_var
+			DW_OP_lit2
+			DW_OP_LLVM_offset
+			DW_OP_piece 0x1
+
+			# a byte piece located in a second byte of
+			# the buf variable with a bit offset of one.
+			DW_OP_addr $buf_var
+			DW_OP_lit1
+			DW_OP_LLVM_offset
+			DW_OP_lit1
+			DW_OP_LLVM_bit_offset
+			DW_OP_piece 0x1
+
+			# a four bit piece located in a first byte
+			# of the buf variable with a bit offset of one.
+			DW_OP_addr $buf_var
+			DW_OP_LLVM_offset_constu 0
+			DW_OP_bit_piece 0x4 0x1
+
+			# a four bit piece located in a first byte of
+			# the buf variable with a bit offset of eight.
+			DW_OP_addr $buf_var
+			DW_OP_lit1
+			DW_OP_LLVM_bit_offset
+			DW_OP_LLVM_offset_constu 0
+			DW_OP_bit_piece 0x4 0x7
+
+			# a byte piece located in a fourth
+			# byte of the REGNAME register.
+			DW_OP_regx $dwarf_regnum
+			DW_OP_LLVM_offset_constu 3
+			DW_OP_piece 0x1
+
+			# a byte piece located in a third
+			# byte of the REGNAME register.
+			DW_OP_regx $dwarf_regnum
+			DW_OP_lit2
+			DW_OP_LLVM_offset
+			DW_OP_piece 0x1
+
+			# a byte piece located in a second byte of the
+			# REGNAME register with a bit offset of one.
+			DW_OP_regx $dwarf_regnum
+			DW_OP_lit1
+			DW_OP_LLVM_offset
+			DW_OP_lit1
+			DW_OP_LLVM_bit_offset
+			DW_OP_piece 0x1
+
+			# a four bit piece located in a first byte of
+			# the REGNAME register with a bit offset of one.
+			DW_OP_regx $dwarf_regnum
+			DW_OP_LLVM_offset_constu 0
+			DW_OP_bit_piece 0x4 0x1
+
+			# a four bit piece located in a first byte of the
+			# REGNAME register with a bit offset of eight.
+			DW_OP_regx $dwarf_regnum
+			DW_OP_lit1
+			DW_OP_LLVM_bit_offset
+			DW_OP_LLVM_offset_constu 0
+			DW_OP_bit_piece 0x4 0x7
+
+		    } SPECIAL_expr}
+		    {external 1 flag}
+		}
+	    }
+	}
+    }
+}
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} \
+     [list $srcfile $asm_file] {nodebug}] } {
+    return -1
+}
+
+if ![runto_main] {
+    return -1
+}
+
+# Determine byte order.
+set endian [get_endianness]
+
+if { $endian != "little" } then {
+    verbose "Skipping ${gdb_test_file_name}."
+    return
+}
+
+gdb_test_no_output "set var \$$regname = 0x04030201" "init reg"
+gdb_test_no_output "set var *\(\(unsigned int *\) buf\) = 0x04030201" \
+		   "init buf"
+
+gdb_test "print/x buf_byte_3" " = 0x3" "buf_byte_3 == 0x3"
+gdb_test "print/x buf_byte_2_bit_1" " = 0x81" \
+	 "print buf_byte_2_bit_1"
+gdb_test "print/x reg_byte_3" " = 0x3" "reg_byte_3 == 0x3"
+gdb_test "print/x reg_byte_2_bit_1" " = 0x81" \
+	 "print reg_byte_2_bit_1"
+
+gdb_test_no_output "set var buf_byte_3 = 0x4" "init buf_byte_3 to 0x4"
+gdb_test "print/x buf_byte_3" " = 0x4" "buf_byte_3 == 0x4"
+
+gdb_test_no_output "set var buf_byte_2_bit_1 = 0x4" \
+		   "init buf_byte_2_bit_1 to 0x4"
+gdb_test "print/x buf_byte_2_bit_1" " = 0x4" "buf_byte_2_bit_1 == 0x4"
+
+gdb_test "print/x buf" " = \\{0x1, 0x8, 0x4, 0x4\\}" "buf print"
+
+gdb_test_no_output "set var reg_byte_3 = 0x4" "init reg_byte_3 to 0x4"
+gdb_test "print/x reg_byte_3" " = 0x4" "reg_byte_3 == 0x4"
+
+gdb_test_no_output "set var reg_byte_2_bit_1 = 0x4" \
+		   "init reg_byte_2_bit_1 to 0x4"
+gdb_test "print/x reg_byte_2_bit_1" " = 0x4" "reg_byte_2_bit_1 == 0x4"
+
+gdb_test "print/x \$$regname" " = 0x4040801" "\$$regname print"
+
+gdb_test_no_output "set var \$$regname = 0x04030201" "reset reg"
+gdb_test_no_output "set var *\(\(unsigned int *\) buf\) = 0x04030201" \
+		   "reset buf"
+
+gdb_test "print/x mix_array" \
+	 " = \\{0x4, 0x3, 0x81, 0x20, 0x4, 0x3, 0x81, 0x20\\}" \
+	 "mix_array print"
+
+gdb_test_no_output "set var mix_array\[1\] = 0x4" \
+		   "set mix_array second byte"
+gdb_test_no_output "set var mix_array\[2\] = 0x4" \
+		   "set mix_array third byte"
+gdb_test_no_output "set var mix_array\[5\] = 0x4" \
+		   "set mix_array fifth byte"
+gdb_test_no_output "set var mix_array\[6\] = 0x4" \
+		   "set mix_array sixth byte"
+
+gdb_test "print/x mix_array" \
+	 " = \\{0x4, 0x4, 0x4, 0x80, 0x4, 0x4, 0x4, 0x80\\}" \
+	 "mix_array second print"
+
+gdb_test "print/x buf" " = \\{0x1, 0x8, 0x4, 0x4\\}" "buf second print"
+
+gdb_test "print/x \$$regname" " = 0x4040801" "\$$regname second print"

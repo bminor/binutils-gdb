@@ -1497,8 +1497,9 @@ get_frame_register_bytes (frame_info *frame, int regnum,
 	      return false;
 	    }
 
-	  memcpy (myaddr, value_contents_all (value).data () + offset,
-		  curr_len);
+	  memcpy (myaddr,
+		  value_contents_all (value).data ()
+		    + value_offset (value) + offset, curr_len);
 	  release_value (value);
 	}
 
@@ -1532,10 +1533,19 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
   /* Copy the data.  */
   while (len > 0)
     {
-      int curr_len = register_size (gdbarch, regnum) - offset;
-
       struct value *value = frame_unwind_register_value (frame->next,
 							 regnum);
+      /* Need to account the unwind register offset too.  */
+      offset += value == NULL ? 0 : value_offset (value);
+
+      if (offset >= register_size (gdbarch, regnum))
+	{
+	  offset -= register_size (gdbarch, regnum);
+	  regnum++;
+	  continue;
+	}
+
+      int curr_len = register_size (gdbarch, regnum) - offset;
 
       if (curr_len > len)
 	curr_len = len;
@@ -1555,7 +1565,7 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
 	  type * reg_type = register_type (gdbarch, regnum);
 
 	  struct value *from_value = allocate_value (reg_type);
-	  memcpy (value_contents_raw (from_value), myaddr,
+	  memcpy (value_contents_raw (from_value).data (), myaddr,
 		  TYPE_LENGTH (reg_type));
 
 	  set_value_offset (value, offset);

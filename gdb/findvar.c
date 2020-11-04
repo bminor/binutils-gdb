@@ -869,6 +869,7 @@ read_frame_register_value (struct value *value, struct frame_info *frame)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   LONGEST offset = 0;
   LONGEST reg_offset = value_offset (value);
+  LONGEST bit_offset = value_bitpos (value);
   int regnum = VALUE_REGNUM (value);
   int len = type_length_units (check_typedef (value_type (value)));
 
@@ -892,7 +893,8 @@ read_frame_register_value (struct value *value, struct frame_info *frame)
       if (reg_len > len)
 	reg_len = len;
 
-      value_contents_copy (value, offset, regval, reg_offset, reg_len);
+      value_contents_copy (value, offset, regval, reg_offset,
+			   bit_offset, reg_len);
 
       offset += reg_len;
       len -= reg_len;

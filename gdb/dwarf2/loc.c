@@ -1924,6 +1924,8 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 	case DW_OP_nop:
 	case DW_OP_GNU_uninit:
 	case DW_OP_push_object_address:
+	case DW_OP_LLVM_offset:
+	case DW_OP_LLVM_bit_offset:
 	  break;
 
 	case DW_OP_form_tls_address:
@@ -1941,6 +1943,7 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 	case DW_OP_constu:
 	case DW_OP_plus_uconst:
 	case DW_OP_piece:
+	case DW_OP_LLVM_offset_constu:
 	  op_ptr = safe_skip_leb128 (op_ptr, expr_end);
 	  break;
 
@@ -3656,6 +3659,11 @@ disassemble_dwarf_expression (struct ui_file *stream,
 					 gdbarch_byte_order (arch));
 	  data += offset_size;
 	  fprintf_filtered (stream, " offset %s", phex_nz (ul, offset_size));
+	  break;
+
+	case DW_OP_LLVM_offset_constu:
+	  data = safe_read_uleb128 (data, end, &ul);
+	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
 	}
 

@@ -357,6 +357,12 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  (*info)[offset].label = 1;
 	  break;
 
+	case DW_OP_LLVM_offset:
+	case DW_OP_LLVM_bit_offset:
+	  --stack_depth;
+	  break;
+
+	case DW_OP_LLVM_offset_constu:
 	case DW_OP_nop:
 	  break;
 

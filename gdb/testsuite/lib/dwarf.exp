@@ -1221,6 +1221,10 @@ namespace eval Dwarf {
 		    _op .sleb128 [lindex $line 1]
 		}
 
+		DW_OP_LLVM_offset_constu {
+		    _op .uleb128 [lindex $line 1]
+		}
+
 		default {
 		    if {[llength $line] > 1} {
 			error "Unimplemented: operands in location for $opcode"

@@ -161,7 +161,7 @@ fortran_bounds_all_dims (bool lbound_p,
       gdb_assert (dst_offset + TYPE_LENGTH (value_type (v))
 		  <= TYPE_LENGTH (value_type (result)));
       gdb_assert (TYPE_LENGTH (value_type (v)) == elm_len);
-      value_contents_copy (result, dst_offset, v, 0, elm_len);
+      value_contents_copy (result, dst_offset, v, 0, 0, elm_len);
 
       /* Peel another dimension of the array.  */
       array_type = TYPE_TARGET_TYPE (array_type);
@@ -289,7 +289,7 @@ protected:
      available offset.  */
   void copy_element_to_dest (struct value *elt)
   {
-    value_contents_copy (m_dest, m_dest_offset, elt, 0,
+    value_contents_copy (m_dest, m_dest_offset, elt, 0, 0,
 			 TYPE_LENGTH (value_type (elt)));
     m_dest_offset += TYPE_LENGTH (value_type (elt));
   }
@@ -736,7 +736,7 @@ fortran_array_shape (struct gdbarch *gdbarch, const language_defn *lang,
       gdb_assert (dst_offset + TYPE_LENGTH (value_type (v))
 		  <= TYPE_LENGTH (value_type (result)));
       gdb_assert (TYPE_LENGTH (value_type (v)) == elm_len);
-      value_contents_copy (result, dst_offset, v, 0, elm_len);
+      value_contents_copy (result, dst_offset, v, 0, 0, elm_len);
 
       /* Peel another dimension of the array.  */
       val_type = TYPE_TARGET_TYPE (val_type);
