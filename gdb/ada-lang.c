@@ -2139,6 +2139,35 @@ decode_constrained_packed_array_type (struct type *type)
   return constrained_packed_array_type (shadow_type, &bits);
 }
 
+/* Helper function for decode_constrained_packed_array.  Set the field
+   bitsize on a series of packed arrays.  Returns the number of
+   elements in TYPE.  */
+
+static LONGEST
+recursively_update_array_bitsize (struct type *type)
+{
+  gdb_assert (type->code () == TYPE_CODE_ARRAY);
+
+  LONGEST low, high;
+  if (get_discrete_bounds (type->index_type (), &low, &high) < 0
+      || low > high)
+    return 0;
+  LONGEST our_len = high - low + 1;
+
+  struct type *elt_type = TYPE_TARGET_TYPE (type);
+  if (elt_type->code () == TYPE_CODE_ARRAY)
+    {
+      LONGEST elt_len = recursively_update_array_bitsize (elt_type);
+      LONGEST elt_bitsize = elt_len * TYPE_FIELD_BITSIZE (elt_type, 0);
+      TYPE_FIELD_BITSIZE (type, 0) = elt_bitsize;
+
+      TYPE_LENGTH (type) = ((our_len * elt_bitsize + HOST_CHAR_BIT - 1)
+			    / HOST_CHAR_BIT);
+    }
+
+  return our_len;
+}
+
 /* Given that ARR is a struct value *indicating a GNAT constrained packed
    array, returns a simple array that denotes that array.  Its type is a
    standard GDB array type except that the BITSIZEs of the array
@@ -2167,6 +2196,18 @@ decode_constrained_packed_array (struct value *arr)
       error (_("can't unpack array"));
       return NULL;
     }
+
+  /* Decoding the packed array type could not correctly set the field
+     bitsizes for any dimension except the innermost, because the
+     bounds may be variable and were not passed to that function.  So,
+     we further resolve the array bounds here and then update the
+     sizes.  */
+  const gdb_byte *valaddr = value_contents_for_printing (arr);
+  CORE_ADDR address = value_address (arr);
+  gdb::array_view<const gdb_byte> view
+    = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+  type = resolve_dynamic_type (type, view, address);
+  recursively_update_array_bitsize (type);
 
   if (type_byte_order (value_type (arr)) == BFD_ENDIAN_BIG
       && ada_is_modular_type (value_type (arr)))

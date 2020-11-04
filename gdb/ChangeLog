@@ -1,5 +1,10 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (recursively_update_array_bitsize): New function.
+	(decode_constrained_packed_array_type): Call it.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (to_fixed_array_type): Error if
 	decode_constrained_packed_array_type returns NULL.
 

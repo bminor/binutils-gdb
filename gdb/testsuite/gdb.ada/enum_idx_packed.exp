@@ -28,7 +28,55 @@ clean_restart ${testfile}
 set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
+gdb_test "ptype full" \
+    "type = array \\(black \\.\\. white\\) of boolean <packed: 1-bit elements>"
+
 gdb_test "print full" " = \\(false, true, false, true, false\\)"
 
 gdb_test "print full'first" " = black"
 
+gdb_test "ptype primary" \
+    "type = array \\(red \\.\\. blue\\) of boolean <packed: 1-bit elements>"
+
+gdb_test "print primary" " = \\(red => false, true, false\\)"
+
+gdb_test "print primary'first" " = red"
+
+gdb_test "ptype cold" \
+    "type = array \\(green \\.\\. blue\\) of boolean <packed: 1-bit elements>"
+
+gdb_test "print cold" " = \\(green => false, true\\)"
+
+gdb_test "print cold'first" " = green"
+
+# Note the bounds values are still not correctly displayed.  So we get
+# the enum equivalent of "1 .. 0" (empty range) as the array ranges.
+# Accept that for now.
+gdb_test "ptype small" \
+    "array \\(red \\.\\. green\\) of boolean <packed: 1-bit elements>"
+
+gdb_test "print small" " = \\(red => false, true\\)"
+
+gdb_test "print small'first" " = red"
+
+gdb_test "ptype multi" \
+    "array \\(red \\.\\. green, low .. medium\\) of boolean <packed: 1-bit elements>"
+
+gdb_test "print multi" \
+    " = \\(red => \\(low => true, false\\), \\(low => true, false\\)\\)"
+
+gdb_test "print multi'first" " = red"
+
+set base "\\(true, false, true, false, true, false, true, false, true, false\\)"
+set matrix "\\("
+foreach x {1 2 3 4 5 6 7} {
+    if {$x > 1} {
+	append matrix ", "
+    }
+    append matrix $base
+}
+append matrix "\\)"
+
+gdb_test "print multi_multi" " = \\($matrix, $matrix\\)"
+gdb_test "print multi_multi(1,3)" " = $base"
+gdb_test "print multi_multi(2)" " = $matrix"

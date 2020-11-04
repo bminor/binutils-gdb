@@ -1,3 +1,11 @@
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/enum_idx_packed.exp: Add tests.
+	* gdb.ada/enum_idx_packed/foo.adb: Add variables.
+	* gdb.ada/enum_idx_packed/pck.adb: Add functions.
+	* gdb.ada/enum_idx_packed/pck.ads: Add types, function
+	declarations.
+
 2020-11-03  Tom de Vries  <tdevries@suse.de>
 
 	* lib/dwarf.exp (Dwarf::_handle_DW_TAG): Improve attribute list

@@ -17,8 +17,16 @@ with Pck; use Pck;
 
 procedure Foo is
    Full : Full_Table := (False, True, False, True, False);
+   Primary : Primary_Table := (False, True, False);
+   Cold : Cold_Table := (False, True);
+   Small : Small_Table := New_Small_Table (Low => Red, High => Green);
+   Multi : Multi_Table := New_Multi_Table (Red, Green, Low, Medium);
+   Multi_Multi : Multi_Multi_Table := New_Multi_Multi_Table (1, 2, 1, 7, 1, 10);
 begin
    Do_Nothing (Full'Address);  -- STOP
+   Do_Nothing (Primary'Address);
+   Do_Nothing (Cold'Address);
+   Do_Nothing (Small'Address);
+   Do_Nothing (Multi'Address);
+   Do_Nothing (Multi_Multi'Address);
 end Foo;
-
-
