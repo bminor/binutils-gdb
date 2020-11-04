@@ -17,6 +17,8 @@ with Pck; use Pck;
 
 procedure Foo is
    SA : Simple_Array := (1, 2, 3, 4);
+   VA : Variant_Access := New_Variant (Size => 3);
 begin
    Update_Small (SA (3));  -- STOP
+   Update_Small (VA.T (1));
 end Foo;

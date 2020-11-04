@@ -1,5 +1,16 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/set_pckd_arr_elt.exp: Also test
+	-fgnat-encodings=minimal.  Add tests.
+	* gdb.ada/set_pckd_arr_elt/foo.adb (Foo): Add VA variable.
+	Call Update_Small a second time.
+	* gdb.ada/set_pckd_arr_elt/pck.adb (New_Variant): New function.
+	* gdb.ada/set_pckd_arr_elt/pck.ads (Buffer, Variant)
+	(Variant_Access): New types.
+	(New_Variant): Declare.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/mod_from_name.exp: Test printing slice.
 
 2020-11-04  Tom Tromey  <tromey@adacore.com>

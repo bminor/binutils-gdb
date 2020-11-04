@@ -1,5 +1,9 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_value_struct_elt): Resolve dynamic type.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_is_any_packed_array_type): New function.
 	(ada_evaluate_subexp) <case TERNOP_SLICE>: Use it.
 

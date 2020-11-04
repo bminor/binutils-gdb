@@ -18,5 +18,19 @@ package Pck is
    type Simple_Array is array (1 .. 4) of Small;
    pragma Pack (Simple_Array);
 
+   type Buffer is array (Integer range <>) of Small;
+   pragma Pack (Buffer);
+
+   type Variant (Size : Integer := 1) is
+   record
+      A : Small;
+      T : Buffer (1 .. Size);
+   end record;
+   pragma Pack (Variant);
+
+   type Variant_Access is access all Variant;
+
+   function New_Variant (Size : Integer) return Variant_Access;
+
    procedure Update_Small (S : in out Small);
 end Pck;

@@ -4396,6 +4396,10 @@ ada_value_struct_elt (struct value *arg, const char *name, int no_err)
       t1 = ada_to_fixed_type (ada_get_base_type (t1), NULL,
 			      address, NULL, check_tag);
 
+      /* Resolve the dynamic type as well.  */
+      arg = value_from_contents_and_address (t1, nullptr, address);
+      t1 = value_type (arg);
+
       if (find_struct_field (name, t1, 0,
 			     &field_type, &byte_offset, &bit_offset,
 			     &bit_size, NULL))
