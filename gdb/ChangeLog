@@ -1,5 +1,10 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (to_fixed_array_type): Error if
+	decode_constrained_packed_array_type returns NULL.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/leb.h (read_3_bytes): Use bfd_get_24.
 
 2020-11-02  Tom Tromey  <tromey@adacore.com>

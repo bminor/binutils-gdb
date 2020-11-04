@@ -8350,7 +8350,11 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 
   constrained_packed_array_p = ada_is_constrained_packed_array_type (type0);
   if (constrained_packed_array_p)
-    type0 = decode_constrained_packed_array_type (type0);
+    {
+      type0 = decode_constrained_packed_array_type (type0);
+      if (type0 == nullptr)
+	error (_("could not decode constrained packed array type"));
+    }
 
   index_type_desc = ada_find_parallel_type (type0, xa_suffix);
 
