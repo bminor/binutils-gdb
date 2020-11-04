@@ -1,5 +1,9 @@
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/enum_idx_packed.exp: Test two forms of -fgnat-encodings.
+
+2020-11-04  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/set_pckd_arr_elt.exp: Also test
 	-fgnat-encodings=minimal.  Add tests.
 	* gdb.ada/set_pckd_arr_elt/foo.adb (Foo): Add VA variable.

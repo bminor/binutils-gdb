@@ -1241,6 +1241,20 @@ update_static_array_size (struct type *type)
 	TYPE_LENGTH (type) =
 	  TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
 
+      /* If this array's element is itself an array with a bit stride,
+	 then we want to update this array's bit stride to reflect the
+	 size of the sub-array.  Otherwise, we'll end up using the
+	 wrong size when trying to find elements of the outer
+	 array.  */
+      if (element_type->code () == TYPE_CODE_ARRAY
+	  && TYPE_LENGTH (element_type) != 0
+	  && TYPE_FIELD_BITSIZE (element_type, 0) != 0
+	  && get_array_bounds (element_type, &low_bound, &high_bound) >= 0
+	  && high_bound >= low_bound)
+	TYPE_FIELD_BITSIZE (type, 0)
+	  = ((high_bound - low_bound + 1)
+	     * TYPE_FIELD_BITSIZE (element_type, 0));
+
       return true;
     }
 
