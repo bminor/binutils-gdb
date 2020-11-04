@@ -955,7 +955,20 @@ ada_print_type (struct type *type0, const char *varstring,
 		const struct type_print_options *flags)
 {
   struct type *type = ada_check_typedef (ada_get_base_type (type0));
-  char *type_name = decoded_type_name (type0);
+  /* If we can decode the original type name, use it.  However, there
+     are cases where the original type is an internally-generated type
+     with a name that can't be decoded (and whose encoded name might
+     not actually bear any relation to the type actually declared in
+     the sources). In that case, try using the name of the base type
+     in its place.
+
+     Note that we looked at the possibility of always using the name
+     of the base type. This does not always work, unfortunately, as
+     there are situations where it's the base type which has an
+     internally-generated name.  */
+  const char *type_name = decoded_type_name (type0);
+  if (type_name == nullptr)
+    type_name = decoded_type_name (type);
   int is_var_decl = (varstring != NULL && varstring[0] != '\0');
 
   if (type == NULL)
