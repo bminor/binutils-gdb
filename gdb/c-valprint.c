@@ -326,13 +326,19 @@ static void
 c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
 		   const struct value_print_options *options)
 {
+  struct type *type = check_typedef (value_type (val));
+
+  /* If we have a pointer to a capability, handle it as a capability.  */
+  if (options->format == 0 && (type->code () == TYPE_CODE_PTR
+			      && TYPE_CAPABILITY (type)))
+    generic_value_print_capability (val, stream, options);
+
   if (options->format && options->format != 's')
     {
       value_print_scalar_formatted (val, options, 0, stream);
       return;
     }
 
-  struct type *type = check_typedef (value_type (val));
   struct gdbarch *arch = get_type_arch (type);
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
@@ -461,6 +467,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_CHAR:
+    case TYPE_CODE_CAPABILITY:
     default:
       generic_value_print (val, stream, recurse, options, &c_decorations);
       break;

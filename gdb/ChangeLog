@@ -1,5 +1,15 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* c-valprint.c (c_value_print_ptr): Adjust to print capability
+	pointers as capabilities.
+	(c_value_print_inner): Handle TYPE_CODE_CAPABILITY.
+	* findvar.c (extract_integer): Truncate scalars instead of erroring out.
+	* valprint.c (generic_value_print_capability): Make non-static and
+	print additional space.
+	* valprint.h (generic_value_print_capability): New prototype.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* valprint.c (generic_value_print_capability): Use compact form.
 
 2020-11-11  Luis Machado  <luis.machado@arm.com>
