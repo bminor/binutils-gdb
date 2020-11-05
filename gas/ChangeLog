@@ -1,3 +1,8 @@
+2020-11-05  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add neoverse-n2.
+	* doc/c-aarch64.texi: Document support for Neoverse N2.
+
 2020-10-21  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	PR target/26763
