@@ -1,5 +1,9 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* valprint.c (generic_value_print_capability): Use compact form.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* valops.c (value_cast): Handle casting from capabilities and
 	capability pointers.
 

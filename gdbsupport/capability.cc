@@ -76,6 +76,31 @@ static const char *cap_perms_strings[] =
   "Load"
 };
 
+/* Short version of permission string names, indexed by bit number from
+   permissions
+   Valid bits are 0 through 17.  */
+static const char *cap_short_perms_strings[] =
+{
+  "G",
+  "E",
+  "U0",
+  "U1",
+  "U2",
+  "U3",
+  "MLd",
+  "CID",
+  "BrUn",
+  "Sys",
+  "Un",
+  "Sl",
+  "StLoC",
+  "StC",
+  "LdC",
+  "X",
+  "St",
+  "Ld"
+};
+
 /* Returns a capability, derived from the input capability, with base address
    set to the value of the input capability and the length set to a given
    value.  If precise bounds setting is not possible, either the bounds are
@@ -523,10 +548,13 @@ capability::set_offset (uint64_t offset)
   set_value (get_base () + offset);
 }
 
-/* Returns a string representation of the capability.  */
+/* Returns a string representation of the capability.
+
+   If COMPACT is true, use a less verbose form.  Otherwise print
+   the more verbose version.  */
 
 std::string
-capability::to_str (void)
+capability::to_str (bool compact)
 {
   /* The printing format is the following:
      {tag = %d, address = 0x%016x, permissions = {[%s], otype = 0x%04x,
@@ -549,7 +577,11 @@ capability::to_str (void)
     if (check_permissions (1 << i))
       {
 	perm_str += " ";
-	perm_str += cap_perms_strings [i];
+
+	if (compact)
+	  perm_str += cap_short_perms_strings[i];
+	else
+	  perm_str += cap_perms_strings[i];
       }
 
   perm_str += " ]";
@@ -581,7 +613,7 @@ capability::to_str (void)
 void
 capability::print (void)
 {
-  printf ("%s", to_str ().c_str ());
+  printf ("%s", to_str (true).c_str ());
 }
 
 /* UNIT TESTS - Exercise all the methods and primitives.  Some of the tests

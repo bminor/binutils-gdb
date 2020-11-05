@@ -1,5 +1,14 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* capability.cc (cap_short_perms_strings): New static global.
+	(capability::to_str): New argument COMPACT. Print contents based
+	on the new argument.
+	(capability::print): Update calls.
+	* capability.h (capability::to_str): Update prototype and
+	documentation.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* capability.cc (capability::to_str): Rename "attributes" to
 	"permissions".
 
