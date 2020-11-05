@@ -544,9 +544,12 @@ public:
 
   /* Printing functions.  */
 
-  /* Returns a string representation of the capability.  */
+  /* Returns a string representation of the capability.
 
-  std::string to_str (void);
+     If COMPACT is true, use a less verbose form.  Otherwise print
+     the more verbose version.  */
+
+  std::string to_str (bool compact);
 
   /* Print the capability.  */
 
