@@ -242,6 +242,10 @@ extern void generic_printstr (struct ui_file *stream, struct type *type,
 			      int quote_char, int c_style_terminator,
 			      const struct value_print_options *options);
 
+extern void generic_value_print_capability (struct value *val,
+					   struct ui_file *stream,
+					   const struct value_print_options *options);
+
 /* Run the "output" command.  ARGS and FROM_TTY are the usual
    arguments passed to all command implementations, except ARGS is
    const.  */

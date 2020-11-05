@@ -495,7 +495,7 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
 
 /* generic_value_print helper for TYPE_CODE_CAPABILITY.  */
 
-static void
+void
 generic_value_print_capability (struct value *val, struct ui_file *stream,
 				const struct value_print_options *options)
 {
@@ -528,7 +528,7 @@ generic_value_print_capability (struct value *val, struct ui_file *stream,
       uint128_t dummy_cap;
       memcpy (&dummy_cap, contents, length);
       capability cap (dummy_cap, tag);
-      fprintf_filtered (stream, "%s", cap.to_str (true).c_str ());
+      fprintf_filtered (stream, "%s ", cap.to_str (true).c_str ());
     }
 
   return;

@@ -36,7 +36,11 @@
 
 /* Basic byte-swapping routines.  All 'extract' functions return a
    host-format integer from a target-format integer at ADDR which is
-   LEN bytes long.  */
+   LEN bytes long.
+
+   FIXME-Morello: This is a temporary hack to address GDB's inability to cope
+   with 128-bit scalar types.  Instead of erroring out and giving up, just
+   truncate the scalar to the size of T.  */
 
 #if TARGET_CHAR_BIT != 8 || HOST_CHAR_BIT != 8
   /* 8 bit characters are a pretty safe assumption these days, so we
@@ -51,11 +55,7 @@ T
 extract_integer (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order)
 {
   typename std::make_unsigned<T>::type retval = 0;
-
-  if (buf.size () > (int) sizeof (T))
-    error (_("\
-That operation is not available on integers of more than %d bytes."),
-	   (int) sizeof (T));
+  size_t len = (buf.size () > sizeof (T)) ? sizeof (T) : buf.size ();
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */
@@ -69,12 +69,12 @@ That operation is not available on integers of more than %d bytes."),
 	  retval = ((LONGEST) buf[i] ^ 0x80) - 0x80;
 	  ++i;
 	}
-      for (; i < buf.size (); ++i)
+      for (; i < len; ++i)
 	retval = (retval << 8) | buf[i];
     }
   else
     {
-      ssize_t i = buf.size () - 1;
+      ssize_t i = len - 1;
 
       if (std::is_signed<T>::value)
 	{
