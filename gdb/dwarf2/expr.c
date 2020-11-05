@@ -4051,6 +4051,10 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    break;
 	  }
 
+	case DW_OP_LLVM_undefined:
+	  push (make_unique<dwarf_undefined> (arch));
+	  break;
+
 	default:
 	  error (_("Unhandled dwarf expression opcode 0x%x"), op);
 	}
