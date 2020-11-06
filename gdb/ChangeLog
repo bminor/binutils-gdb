@@ -1,3 +1,10 @@
+2020-11-06  Romain Geissler  <romain.geissler@amadeus.com>
+
+	PR python/26832
+	* configure: Regenerate.
+	* configure.ac: Check for python modules ctypes instead of
+	itertools.
+
 2020-11-06  Pedro Alves  <pedro@palves.net>
 
 	* macroexp.c (struct macro_buffer): Split in two classes.  Add

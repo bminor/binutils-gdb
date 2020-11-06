@@ -16076,7 +16076,7 @@ main ()
 {
 int err;
           Py_Initialize ();
-          err = PyRun_SimpleString ("import itertools\n");
+          err = PyRun_SimpleString ("import ctypes\n");
           Py_Finalize ();
           return err == 0 ? 0 : 1;
   ;

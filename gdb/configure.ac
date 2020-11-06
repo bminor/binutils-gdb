@@ -1686,7 +1686,7 @@ if test "${gdb_native}" = yes; then
          [#include "Python.h"],
          [int err;
           Py_Initialize ();
-          err = PyRun_SimpleString ("import itertools\n");
+          err = PyRun_SimpleString ("import ctypes\n");
           Py_Finalize ();
           return err == 0 ? 0 : 1;])],
        [dynamic_list=true], [], [true])
