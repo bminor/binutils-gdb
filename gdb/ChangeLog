@@ -1,5 +1,12 @@
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_dwarf_reg_to_regnum): Don't return LR
+	for CLR.
+	(aarch64_gdbarch_init): Set pc to PCC and sp to CSP for pure cap
+	ABI.
+
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
 	* c-valprint.c (c_value_print_ptr): Adjust to print capability
 	pointers as capabilities.
 	(c_value_print_inner): Handle TYPE_CODE_CAPABILITY.
