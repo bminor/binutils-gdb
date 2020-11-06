@@ -1656,6 +1656,34 @@ proc gdb_test_stdio {command inferior_pattern {gdb_pattern ""} {message ""}} {
     return $res
 }
 
+# Wrapper around gdb_test_multiple to be used when testing expression
+# evaluation while 'set debug expression 1' is in effect.
+# Looks for some patterns that indicates the expression was rejected.
+#
+# CMD is the command to execute, which should include an expression
+# that GDB will need to parse.
+#
+# OUTPUT is the expected output pattern.
+#
+# TESTNAME is the name to be used for the test, defaults to CMD if not
+# given.
+proc gdb_test_debug_expr { cmd output {testname "" }} {
+    global gdb_prompt
+
+    if { ${testname} == "" } {
+	set testname $cmd
+    }
+
+    gdb_test_multiple $cmd $testname {
+	-re ".*Invalid expression.*\r\n$gdb_prompt $" {
+	    fail $gdb_test_name
+	}
+	-re ".*\[\r\n\]$output\r\n$gdb_prompt $" {
+	    pass $gdb_test_name
+	}
+    }
+}
+
 # get_print_expr_at_depths EXP OUTPUTS
 #
 # Used for testing 'set print max-depth'.  Prints the expression EXP

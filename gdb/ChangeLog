@@ -1,3 +1,11 @@
+2020-11-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* expprint.c (print_subexp_funcall): Increment expression position
+	after reading argument count.
+	* f-lang.c (print_subexp_f): Skip over opcode before calling
+	common function.
+	(dump_subexp_body_f): Likewise.
+
 2020-11-06  Romain Geissler  <romain.geissler@amadeus.com>
 
 	PR python/26832

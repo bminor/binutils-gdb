@@ -614,6 +614,7 @@ print_subexp_f (struct expression *exp, int *pos,
       return;
 
     case OP_F77_UNDETERMINED_ARGLIST:
+      (*pos)++;
       print_subexp_funcall (exp, pos, stream);
       return;
     }
@@ -660,7 +661,7 @@ dump_subexp_body_f (struct expression *exp,
       break;
 
     case OP_F77_UNDETERMINED_ARGLIST:
-      return dump_subexp_body_funcall (exp, stream, elt);
+      return dump_subexp_body_funcall (exp, stream, elt + 1);
     }
 
   elt += oplen;

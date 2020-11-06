@@ -1,3 +1,17 @@
+2020-11-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/debug-expr.c: Add extra function to allow for an
+	additional test.
+	* gdb.base/debug-expr.exp (test_debug_expr): Delete, replace calls
+	to this proc with gdb_test_debug_expr.  Add an extra test.
+	* gdb.cp/debug-expr.exp (test_debug_expr): Delete, replace calls
+	to this proc with gdb_test_debug_expr, give the tests names
+	* gdb.dlang/debug-expr.exp (test_debug_expr): Delete, replace
+	calls to this proc with gdb_test_debug_expr, give the tests names
+	* gdb.fortran/debug-expr.exp: New file.
+	* gdb.fortran/debug-expr.f90: New file.
+	* lib/gdb.exp (gdb_test_debug_expr): New proc.
+
 2020-11-06  Simon Marchi  <simon.marchi@efficios.com>
 
 	* lib/dwarf.exp (ranges): Handle "base" and "range" as

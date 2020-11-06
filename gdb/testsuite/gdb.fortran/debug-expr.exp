@@ -1,4 +1,4 @@
-# Copyright 2012-2020 Free Software Foundation, Inc.
+# Copyright 2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -13,7 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test "set debug expr 1" on c expressions.
+# Test "set debug expr 1" on Fortran expressions.
+
+if { [skip_fortran_tests] } { return -1 }
 
 # Test relies on checking gdb debug output. Do not run if gdb debug is
 # enabled as any debug will be redirected to the log.
@@ -22,33 +24,20 @@ if [gdb_debug_enabled] {
     return 0
 }
 
-standard_testfile .c
+standard_testfile .f90
+load_lib fortran.exp
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}]} {
     return -1
 }
 
-if ![runto_main] {
+if ![fortran_runto_main] {
     fail "run to main"
     return -1
 }
 
-for { set i 0 } { $i < 4 } { incr i } {
-    gdb_test_no_output "set variable array\[$i\] = $i"
-}
+gdb_breakpoint [gdb_get_line_number "Break Here"]
+gdb_continue_to_breakpoint "Break Here"
 
 gdb_test_no_output "set debug expression 1"
-
-# This caused gdb to segfault.
-gdb_test_debug_expr "print /x {char\[4\]} array" \
-    "\[$\]$decimal = \\{0x0, 0x1, 0x2, 0x3\\}"
-
-# This caused gdb to output garbage and possibly segfault
-gdb_test_debug_expr "print \"hello\"" \
-    ".*OP_STRING\[^\r\n\]*Language-specific string type: 0.*\[\r\n\]\\$$decimal = \"hello\"" \
-    "string evaluation with debug expr"
-
-# An expression using a function call.
-gdb_test_debug_expr "print call_me ( &val )" \
-    ".*OP_FUNCALL\[^\r\n\]*Number of args: 1.*\[\r\n\]\\$$decimal = 0.*" \
-    "function call expression"
+gdb_test_debug_expr "print obj%three(1)%two(1)%one(1)%i" "\\\$$decimal = 1"

@@ -60,8 +60,8 @@ void
 print_subexp_funcall (struct expression *exp, int *pos,
 		      struct ui_file *stream)
 {
-  (*pos) += 2;
   unsigned nargs = longest_to_int (exp->elts[*pos].longconst);
+  (*pos) += 2;
   print_subexp (exp, pos, stream, PREC_SUFFIX);
   fputs_filtered (" (", stream);
   for (unsigned tem = 0; tem < nargs; tem++)
