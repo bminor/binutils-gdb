@@ -1866,10 +1866,34 @@ Print a summary of all target-specific options on the standard output and exit.
 @kindex -Map=@var{mapfile}
 @item -Map=@var{mapfile}
 Print a link map to the file @var{mapfile}.  See the description of the
-@option{-M} option, above.  Specifying a directory as @var{mapfile}
-causes the linker map to be written into a file inside the directory.
-The name of the file is based upon the @var{output} filename with
-@code{.map} appended.
+@option{-M} option, above.  If @var{mapfile} is just the character
+@code{-} then the map will be written to stdout.
+
+Specifying a directory as @var{mapfile} causes the linker map to be
+written as a file inside the directory.  Normally name of the file
+inside the directory is computed as the basename of the @var{output}
+file with @code{.map} appended.   If however the special character
+@code{%} is used then this will be replaced by the full path of the
+output file.  Additionally if there are any characters after the
+@var{%} symbol then @code{.map} will no longer be appended.
+
+@smallexample
+ -o foo.exe -Map=bar                  [Creates ./bar]
+ -o ../dir/foo.exe -Map=bar           [Creates ./bar]
+ -o foo.exe -Map=../dir               [Creates ../dir/foo.exe.map]
+ -o ../dir2/foo.exe -Map=../dir       [Creates ../dir/foo.exe.map]
+ -o foo.exe -Map=%                    [Creates ./foo.exe.map]
+ -o ../dir/foo.exe -Map=%             [Creates ../dir/foo.exe.map]
+ -o foo.exe -Map=%.bar                [Creates ./foo.exe.bar]
+ -o ../dir/foo.exe -Map=%.bar         [Creates ../dir/foo.exe.bar]
+ -o ../dir2/foo.exe -Map=../dir/%     [Creates ../dir/../dir2/foo.exe.map]
+ -o ../dir2/foo.exe -Map=../dir/%.bar [Creates ../dir/../dir2/foo.exe.bar]
+@end smallexample
+
+It is an error to specify more than one @code{%} character.
+
+If the map file already exists then it will be overwritten by this
+operation.
 
 @cindex memory usage
 @kindex --no-keep-memory

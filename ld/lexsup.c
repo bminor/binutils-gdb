@@ -22,8 +22,10 @@
 #include "bfd.h"
 #include "bfdver.h"
 #include "libiberty.h"
+#include "filenames.h"
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include "safe-ctype.h"
 #include "getopt.h"
 #include "bfdlink.h"
@@ -1700,10 +1702,30 @@ parse_args (unsigned argc, char **argv)
   /* Run a couple of checks on the map filename.  */
   if (config.map_filename)
     {
+      char * new_name = NULL;
+      char * percent;
+      int    res = 0;
+
       if (config.map_filename[0] == 0)
 	{
 	  einfo (_("%P: no file/directory name provided for map output; ignored\n"));
 	  config.map_filename = NULL;
+	}
+      else if (strcmp (config.map_filename, "-") == 0)
+	; /* Write to stdout.  Handled in main().  */
+      else if ((percent = strchr (config.map_filename, '%')) != NULL)
+	{
+	  /* FIXME: Check for a second % character and issue an error ?  */
+
+	  /* Construct a map file by replacing the % character with the (full)
+	     output filename.  If the % character was the last character in
+	     the original map filename then add a .map extension.  */
+	  percent[0] = 0;
+	  res = asprintf (&new_name, "%s%s%s", config.map_filename,
+			  output_filename,
+			  percent[1] ? percent + 1 : ".map");
+
+	  /* FIXME: Should we ensure that any directory components in new_name exist ?  */
 	}
       else
 	{
@@ -1711,24 +1733,38 @@ parse_args (unsigned argc, char **argv)
 
 	  /* If the map filename is actually a directory then create
 	     a file inside it, based upon the output filename.  */
-	  if (stat (config.map_filename, &s) >= 0
-	      && S_ISDIR (s.st_mode))
+	  if (stat (config.map_filename, &s) < 0)
 	    {
-	      char * new_name;
-
-	      /* FIXME: This is a (trivial) memory leak.  */
-	      if (asprintf (&new_name, "%s/%s.map",
-			    config.map_filename, output_filename) < 0)
-		{
-		  /* If this alloc fails then something is probably very
-		     wrong.  Better to halt now rather than continue on
-		     into more problems.  */
-		  einfo (_("%P%F: cannot create name for linker map file: %E\n"));
-		  new_name = NULL;
-		}
-
-	      config.map_filename = new_name;
+	      if (errno != ENOENT)
+		einfo (_("%P: cannot stat linker map file: %E\n"));
 	    }
+	  else if (S_ISDIR (s.st_mode))
+	    {
+	      char lastc = config.map_filename[strlen (config.map_filename) - 1];
+	      res = asprintf (&new_name, "%s%s%s.map",
+			      config.map_filename,
+			      IS_DIR_SEPARATOR (lastc) ? "" : "/",
+			      lbasename (output_filename));
+	    }
+	  else if (! S_ISREG (s.st_mode))
+	    {
+	      einfo (_("%P: linker map file is not a regular file\n"));
+	      config.map_filename = NULL;
+	    }
+	  /* else FIXME: Check write permission ?  */
+	}
+
+      if (res < 0)
+	{
+	  /* If the asprintf failed then something is probably very
+	     wrong.  Better to halt now rather than continue on
+	     into more problems.  */
+	  einfo (_("%P%F: cannot create name for linker map file: %E\n"));
+	}
+      else if (new_name != NULL)
+	{
+	  /* This is a trivial memory leak.  */
+	  config.map_filename = new_name;
 	}
     }
 

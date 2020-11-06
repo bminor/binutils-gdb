@@ -1,5 +1,15 @@
 2020-11-06  Nick Clifton  <nickc@redhat.com>
 
+	* lexsup.c (parse_args): Add more checks of the mapfile.  If it is
+	a directory use the basename of the output file as the file
+	component.  If the % character is present, replace it with the
+	full output filepath.
+	* testsuite/ld-scripts/map-address.exp: Add test of %
+	functionality.
+	* ld.texi: Document the new behaviour.
+
+2020-11-06  Nick Clifton  <nickc@redhat.com>
+
 	* po/sr.po: Updated Serbian translation.
 
 2020-11-03  Nick Clifton  <nickc@redhat.com>
