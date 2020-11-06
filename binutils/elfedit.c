@@ -20,6 +20,7 @@
 
 #include "config.h"
 #include "sysdep.h"
+#include "libiberty.h"
 #include <assert.h>
 
 #if __GNUC__ >= 2
@@ -893,23 +894,39 @@ static struct option options[] =
 ATTRIBUTE_NORETURN static void
 usage (FILE *stream, int exit_status)
 {
+  unsigned int i;
+  char *osabi;
+
+  for (i = 0; i < ARRAY_SIZE (osabis); i++)
+    if (i == 0)
+      osabi = concat (osabis[i].name, NULL);
+    else
+      osabi = concat (osabi, "|", osabis[i].name, NULL);
+
   fprintf (stream, _("Usage: %s <option(s)> elffile(s)\n"),
 	   program_name);
   fprintf (stream, _(" Update the ELF header of ELF files\n"));
   fprintf (stream, _(" The options are:\n"));
   fprintf (stream, _("\
-  --input-mach <machine>      Set input machine type to <machine>\n\
-  --output-mach <machine>     Set output machine type to <machine>\n\
-  --input-type <type>         Set input file type to <type>\n\
-  --output-type <type>        Set output file type to <type>\n\
-  --input-osabi <osabi>       Set input OSABI to <osabi>\n\
-  --output-osabi <osabi>      Set output OSABI to <osabi>\n"));
+  --input-mach [none|i386|iamcu|l1om|k1om|x86_64]\n\
+                              Set input machine type\n\
+  --output-mach [none|i386|iamcu|l1om|k1om|x86_64]\n\
+                              Set output machine type\n\
+  --input-type [none|rel|exec|dyn]\n\
+                              Set input file type\n\
+  --output-type [none|rel|exec|dyn]\n\
+                              Set output file type\n\
+  --input-osabi [%s]\n\
+                              Set input OSABI\n\
+  --output-osabi [%s]\n\
+                              Set output OSABI\n"),
+	   osabi, osabi);
 #ifdef HAVE_MMAP
   fprintf (stream, _("\
-  --enable-x86-feature <feature>\n\
-                              Enable x86 feature <feature>\n\
-  --disable-x86-feature <feature>\n\
-                              Disable x86 feature <feature>\n"));
+  --enable-x86-feature [ibt|shstk]\n\
+                              Enable x86 feature\n\
+  --disable-x86-feature [ibt|shstk]\n\
+                              Disable x86 feature\n"));
 #endif
   fprintf (stream, _("\
   -h --help                   Display this information\n\
@@ -918,6 +935,7 @@ usage (FILE *stream, int exit_status)
 	   program_name);
   if (REPORT_BUGS_TO[0] && exit_status == 0)
     fprintf (stream, _("Report bugs to %s\n"), REPORT_BUGS_TO);
+  free (osabi);
   exit (exit_status);
 }
 
