@@ -1,3 +1,10 @@
+2020-11-06  Romain Geissler  <romain.geissler@amadeus.com>
+
+	PR python/26832
+	* configure: Regenerate.
+	* configure.ac: Check for python modules ctypes instead of
+	itertools.
+
 2020-10-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 10.1.90.DATE-git.
