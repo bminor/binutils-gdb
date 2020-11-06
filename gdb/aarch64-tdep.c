@@ -2617,10 +2617,6 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
   if (tdep->has_capability ())
     {
-      /* FIXME-Morello: Redirect CLR to LR for now.  */
-      if (reg == AARCH64_DWARF_CLR)
-	return AARCH64_LR_REGNUM;
-
       if (reg >= AARCH64_DWARF_C0 && reg <= AARCH64_DWARF_C0 + 30)
 	return tdep->cap_reg_base + (reg - AARCH64_DWARF_C0);
 
@@ -4440,6 +4436,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Set address class hooks for capabilities.  */
   if (feature_capability)
     {
+      set_gdbarch_sp_regnum (gdbarch, tdep->cap_reg_csp);
+      set_gdbarch_pc_regnum (gdbarch, tdep->cap_reg_pcc);
+
       /* Address manipulation.  */
       set_gdbarch_addr_bits_remove (gdbarch, aarch64_addr_bits_remove);
 
