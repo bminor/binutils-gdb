@@ -1,3 +1,16 @@
+2020-11-06  Pedro Alves  <pedro@palves.net>
+
+	* macroexp.c (struct macro_buffer): Split in two classes.  Add
+	uses adjusted.
+	(struct shared_macro_buffer): New, factored out from struct
+	macro_buffer.
+	(struct growable_macro_buffer): New, factored out from struct
+	macro_buffer.
+	(set_token, get_comment, get_identifier, get_pp_number)
+	(get_character_constant, get_string_literal, get_punctuator)
+	(get_next_token_for_substitution): Constify parameters.
+	(substitute_args): Constify locals.
+
 2020-11-05  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (read_cutu_die_from_dwo)
