@@ -6926,9 +6926,9 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
       dwo_unit->length = cu->header.get_length ();
     }
 
+  dwo_abbrev_section->read (objfile);
   *result_dwo_abbrev_table
-    = abbrev_table::read (objfile, dwo_abbrev_section,
-			  cu->header.abbrev_sect_off);
+    = abbrev_table::read (dwo_abbrev_section, cu->header.abbrev_sect_off);
   init_cu_die_reader (result_reader, cu, section, dwo_unit->dwo_file,
 		      result_dwo_abbrev_table->get ());
 
@@ -7216,9 +7216,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
     gdb_assert (cu->header.abbrev_sect_off == abbrev_table->sect_off);
   else
     {
+      abbrev_section->read (objfile);
       m_abbrev_table_holder
-	= abbrev_table::read (objfile, abbrev_section,
-			      cu->header.abbrev_sect_off);
+	= abbrev_table::read (abbrev_section, cu->header.abbrev_sect_off);
       abbrev_table = m_abbrev_table_holder.get ();
     }
 
@@ -7360,9 +7360,9 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
       return;
     }
 
+  abbrev_section->read (objfile);
   m_abbrev_table_holder
-    = abbrev_table::read (objfile, abbrev_section,
-			  m_new_cu->header.abbrev_sect_off);
+    = abbrev_table::read (abbrev_section, m_new_cu->header.abbrev_sect_off);
 
   init_cu_die_reader (this, m_new_cu.get (), section, dwo_file,
 		      m_abbrev_table_holder.get ());
@@ -7862,9 +7862,9 @@ build_type_psymtabs_1 (dwarf2_per_objfile *per_objfile)
 	  || tu.abbrev_offset != abbrev_offset)
 	{
 	  abbrev_offset = tu.abbrev_offset;
+	  per_objfile->per_bfd->abbrev.read (per_objfile->objfile);
 	  abbrev_table =
-	    abbrev_table::read (per_objfile->objfile,
-				&per_objfile->per_bfd->abbrev, abbrev_offset);
+	    abbrev_table::read (&per_objfile->per_bfd->abbrev, abbrev_offset);
 	  ++tu_stats->nr_uniq_abbrev_tables;
 	}
 

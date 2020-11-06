@@ -55,8 +55,11 @@ typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
 
 struct abbrev_table
 {
-  static abbrev_table_up read (struct objfile *objfile,
-			       struct dwarf2_section_info *section,
+  /* Read an abbrev table from the indicated section, at the given
+     offset.  The caller is responsible for ensuring that the section
+     has already been read.  */
+
+  static abbrev_table_up read (struct dwarf2_section_info *section,
 			       sect_offset sect_off);
 
   /* Look up an abbrev in the table.
