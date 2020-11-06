@@ -107,12 +107,12 @@ Dwarf::assemble $asm_file {
 
     ranges {is_64 [is_64_target]} {
 	ranges_label_1: sequence {
-	    {base [lindex $main_result 0]}
-	    {range 0 [lindex $main_result 1]}
+	    base [lindex $main_result 0]
+	    range 0 [lindex $main_result 1]
 	}
 	ranges_label_2: sequence {
-	    {base some_func}
-	    {range 0 64}
+	    base some_func
+	    range 0 64
 	}
     }
 

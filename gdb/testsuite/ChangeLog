@@ -1,3 +1,16 @@
+2020-11-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/dwarf.exp (ranges): Handle "base" and "range" as
+	proceduresu.
+	* gdb.dwarf/dw2-bad-elf.exp: Adjust.
+	* gdb.dwarf2/dw2-inline-many-frames.exp: Adjust.
+	* gdb.dwarf2/dw2-inline-stepping.exp: Adjust.
+	* gdb.dwarf2/dw2-ranges-base.exp: Adjust.
+	* gdb.dwarf2/dw2-ranges-func.exp: Adjust.
+	* gdb.dwarf2/dw2-ranges-overlap.exp: Adjust.
+	* gdb.dwarf2/dw2-ranges-psym.exp: Adjust.
+	* gdb.dwarf2/enqueued-cu-base-addr.exp: Adjust.
+
 2020-11-04  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/funcall_ref.exp: Update.

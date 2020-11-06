@@ -1247,41 +1247,36 @@ namespace eval Dwarf {
 	set section ".debug_ranges"
 	_section $section
 
-	proc sequence {{ranges {}}} {
+	proc sequence { body } {
 	    variable _debug_ranges_64_bit
 
 	    # Emit the sequence of addresses.
-	    set base ""
-	    foreach range $ranges {
-		set range [uplevel 1 "subst \"$range\""]
-		set type [lindex $range 0]
-		switch -exact -- $type {
-		    base {
-			set base [lrange $range 1 end]
 
-			if { $_debug_ranges_64_bit } then {
-			    _op .8byte 0xffffffffffffffff "Base Marker"
-			    _op .8byte $base "Base Address"
-			} else {
-			    _op .4byte 0xffffffff "Base Marker"
-			    _op .4byte $base "Base Address"
-			}
-		    }
-		    range {
-			set start [lindex $range 1]
-			set end [lrange $range 2 end]
+	    proc base { addr } {
+		variable _debug_ranges_64_bit
 
-			if { $_debug_ranges_64_bit } then {
-			    _op .8byte $start "Start Address"
-			    _op .8byte $end "End Address"
-			} else {
-			    _op .4byte $start "Start Address"
-			    _op .4byte $end "End Address"
-			}
-		    }
-		    default { error "unknown range type: $type " }
+		if { $_debug_ranges_64_bit } then {
+		    _op .8byte 0xffffffffffffffff "Base Marker"
+		    _op .8byte $addr "Base Address"
+		} else {
+		    _op .4byte 0xffffffff "Base Marker"
+		    _op .4byte $addr "Base Address"
 		}
 	    }
+
+	    proc range { start end } {
+		variable _debug_ranges_64_bit
+
+		if { $_debug_ranges_64_bit } then {
+		    _op .8byte $start "Start Address"
+		    _op .8byte $end "End Address"
+		} else {
+		    _op .4byte $start "Start Address"
+		    _op .4byte $end "End Address"
+		}
+	    }
+
+	    uplevel $body
 
 	    # End of the sequence.
 	    if { $_debug_ranges_64_bit } then {

@@ -122,8 +122,8 @@ Dwarf::assemble $asm_file {
 
     ranges {is_64 [is_64_target]} {
 	ranges_label: sequence {
-	    {range {${main_start}} ${main_end}}
-	    {range {${bar_start}} ${bar_end}}
+	    range ${main_start} ${main_end}
+	    range ${bar_start} ${bar_end}
 	}
     }
 }
