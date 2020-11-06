@@ -1,3 +1,8 @@
+2020-11-06  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_PAC): Add new feature.
+	(AARCH64_ARCH_V8_3): Add back PAC to Armv8.3-A.
+
 2020-11-04  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* opcode/aarch64.h (AARCH64_ARCH_V8): Add RAS to Armv8-A.
