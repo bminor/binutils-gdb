@@ -1,3 +1,8 @@
+2020-11-09  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* Makefile.am (development.exp): Fix regexp.
+	* Makefile.in: Regenerate.
+
 2020-11-09  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (explicit_mabi): New boolean to indicate if
