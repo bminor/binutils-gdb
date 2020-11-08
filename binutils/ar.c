@@ -866,7 +866,7 @@ main (int argc, char **argv)
 	  /* Create a bfd to contain the dependencies.
 	     It inherits its type from arch, but we must set the type to
 	     "binary" otherwise bfd_bwrite() will fail.  After writing, we
-	     must set the type back to "plugin" otherwise adding it to the
+	     must set the type back to default otherwise adding it to the
 	     archive will fail.  */
 	  libdeps_bfd = bfd_create (LIBDEPS, arch);
 	  if (libdeps_bfd == NULL)
@@ -887,7 +887,7 @@ main (int argc, char **argv)
 	  if (! bfd_make_readable (libdeps_bfd))
 	    fatal (_("Cannot make libdeps object readable."));
 
-	  if (bfd_find_target ("plugin", libdeps_bfd) == NULL)
+	  if (bfd_find_target (plugin_target, libdeps_bfd) == NULL)
 	    fatal (_("Cannot reset libdeps record type."));
 
 	  /* Append our libdeps record to the list of files
