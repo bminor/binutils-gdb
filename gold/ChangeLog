@@ -1,3 +1,11 @@
+2020-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/26200
+	* plugin.cc (Plugin_manager::claim_file): Don't share Plugin_list
+	iterator.
+	(Plugin_manager::all_symbols_read): Likewise.
+	(Plugin_manager::cleanup): Likewise.
+
 2020-11-03  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::tocsave_loc): Return a pointer.
