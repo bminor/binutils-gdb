@@ -1,3 +1,8 @@
+2020-11-09  Alan Modra  <amodra@gmail.com>
+
+	* elfedit (usage): Avoid false positive "may be used uninitialised".
+	Don't leak memory.
+
 2020-11-09  Howard Chu  <hyc@symas.com>
 
 	* ar.c (main): Use plugin_target rather than "target" when

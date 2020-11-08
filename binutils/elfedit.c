@@ -895,13 +895,10 @@ ATTRIBUTE_NORETURN static void
 usage (FILE *stream, int exit_status)
 {
   unsigned int i;
-  char *osabi;
+  char *osabi = concat (osabis[0].name, NULL);
 
-  for (i = 0; i < ARRAY_SIZE (osabis); i++)
-    if (i == 0)
-      osabi = concat (osabis[i].name, NULL);
-    else
-      osabi = concat (osabi, "|", osabis[i].name, NULL);
+  for (i = 1; i < ARRAY_SIZE (osabis); i++)
+    osabi = reconcat (osabi, "|", osabis[i].name, NULL);
 
   fprintf (stream, _("Usage: %s <option(s)> elffile(s)\n"),
 	   program_name);
