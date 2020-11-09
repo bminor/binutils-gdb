@@ -1,3 +1,8 @@
+2020-11-09  Denys Zagorui  <dzagorui@cisco.com>
+
+	* config/obj-elf (obj_elf_init_stab_section): Improve
+	reproducibility for stabs debugging data format
+
 2020-11-09  Spencer E. Olson  <olsonse@umich.edu>
 
 	* testsuite/gas/pru/misc.s: Add tests for lmbd (left-most bit
