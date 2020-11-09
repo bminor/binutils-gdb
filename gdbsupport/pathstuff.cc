@@ -23,10 +23,6 @@
 #include "filenames.h"
 #include "gdb_tilde_expand.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #ifdef USE_WIN32API
 #include <windows.h>
 #endif

@@ -22,6 +22,10 @@
 
 #include "gdbsupport/byte-vector.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 /* Path utilities.  */
 
 /* Return the real path of FILENAME, expanding all the symbolic links.

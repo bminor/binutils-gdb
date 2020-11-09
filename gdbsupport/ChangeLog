@@ -1,3 +1,9 @@
+2020-11-10  Tom Tromey  <tromey@adacore.com>
+
+	PR build/26848:
+	* pathstuff.h: Move include block here...
+	* pathstuff.cc: ... from here.
+
 2020-11-02  Tom Tromey  <tom@tromey.com>
 
 	* pathstuff.h (get_standard_config_dir): Declare.
