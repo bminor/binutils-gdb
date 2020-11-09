@@ -1,3 +1,9 @@
+2020-11-09  Spencer E. Olson  <olsonse@umich.edu>
+
+	* testsuite/gas/pru/misc.s: Add tests for lmbd (left-most bit
+	detect).
+	* testsuite/gas/pru/misc.d: Update expected disassembly.
+
 2020-11-09  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* config/tc-aarch64.c: Fix comment.

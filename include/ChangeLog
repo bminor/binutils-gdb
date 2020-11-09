@@ -1,3 +1,7 @@
+2020-11-09  Spencer E. Olson  <olsonse@umich.edu>
+
+	* opcode/pru.h: Add LMBD (left-most bit detect) opcode index.
+
 2020-11-09  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* opcode/aarch64.h (enum aarch64_opnd): Add new operand AARCH64_OPND_Rt_LS64.

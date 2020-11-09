@@ -771,6 +771,22 @@ resolve_reloc_expr_symbols (void)
     }
 }
 
+static bfd_boolean
+is_dwo_section (asection *sec)
+{
+  const char *name;
+  int len;
+
+  if (sec == NULL || (name = bfd_section_name (sec)) == NULL)
+    return FALSE;
+
+  len = strlen (name);
+  if (len < 5)
+    return FALSE;
+
+  return strncmp (name + len - 4, ".dwo", 4) == 0;
+}
+
 /* This pass over fixups decides whether symbols can be replaced with
    section symbols.  */
 
@@ -898,6 +914,14 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	print_fixup (fixp);
 #endif
       }
+
+  /* PR 26841: DWO sections are not supposed to have relocations.  */
+  if (is_dwo_section (sec) && seginfo->fix_root != NULL)
+    {
+      as_bad (_("DWO section '%s' contains unresolved expressions - this is not allowed"),
+	      bfd_section_name (sec));
+      seginfo->fix_root = NULL; /* FIXME: Memory leak ?  */
+    }
 
   dump_section_relocs (abfd, sec, stderr);
 }

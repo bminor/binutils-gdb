@@ -121,6 +121,8 @@ const struct pru_opcode pru_opcodes[] =
    OP_MATCH_JAL, OP_MASK_FMT2_OP | OP_MASK_SUBOP, 0, unsigned_immed16_overflow},
   { "ldi", prui_ldi, "d,W",
    OP_MATCH_LDI, OP_MASK_FMT2_OP | OP_MASK_SUBOP, 0, unsigned_immed16_overflow},
+  { "lmbd", prui_lmbd, "d,s,b",
+   OP_MATCH_LMBD, OP_MASK_FMT2_OP | OP_MASK_SUBOP, 0, unsigned_immed8_overflow},
   { "halt", prui_halt, "",
    OP_MATCH_HALT, OP_MASK_FMT2_OP | OP_MASK_SUBOP, 0, no_overflow},
   { "slp", prui_slp, "w",
