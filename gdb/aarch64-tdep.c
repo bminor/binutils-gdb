@@ -1441,7 +1441,10 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 
   aarch64_gdbarch_tdep *tdep
     = (aarch64_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
-  int pcc_regnum = tdep->cap_reg_base + 31;
+
+  int pcc_regnum = -1;
+  if (tdep->has_capability ())
+    pcc_regnum = tdep->cap_reg_base + 31;
 
   /* If we are asked to unwind the PC, then we need to return the LR
      instead.  The prologue may save PC, but it will point into this
@@ -1504,7 +1507,9 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 	 |          |
 	 |          |<- SP
 	 +----------+  */
-  int csp_regnum = tdep->cap_reg_base + 32;
+  int csp_regnum = -1;
+  if (tdep->has_capability ())
+    csp_regnum = tdep->cap_reg_base + 32;
 
   if (prev_regnum == AARCH64_SP_REGNUM || prev_regnum == csp_regnum)
     return frame_unwind_got_constant (this_frame, prev_regnum,
@@ -1652,7 +1657,9 @@ aarch64_dwarf2_prev_register (struct frame_info *this_frame,
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (arch);
   CORE_ADDR lr;
 
-  int pcc_regnum = tdep->cap_reg_base + 31;
+  int pcc_regnum = -1;
+  if (tdep->has_capability ())
+    pcc_regnum = tdep->cap_reg_base + 31;
 
   if (regnum == AARCH64_PC_REGNUM || regnum == pcc_regnum)
     {
@@ -1676,8 +1683,14 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct frame_info *this_frame)
 {
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  int pcc_regnum = tdep->cap_reg_base + 31;
-  int csp_regnum = tdep->cap_reg_base + 32;
+  int pcc_regnum = -1;
+  int csp_regnum = -1;
+
+  if (tdep->has_capability ())
+    {
+      pcc_regnum = tdep->cap_reg_base + 31;
+      csp_regnum = tdep->cap_reg_base + 32;
+    }
 
   if (regnum == AARCH64_PC_REGNUM || regnum == pcc_regnum)
     {
