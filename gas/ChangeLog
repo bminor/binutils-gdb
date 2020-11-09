@@ -1,3 +1,11 @@
+2020-11-09  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-aarch64.c (process_omitted_operand): Add AARCH64_OPND_Rt_LS64.
+	(parse_operands): Parse Rt range for AARCH64_OPND_Rt_LS64.
+	* testsuite/gas/aarch64/ls64-invalid.l: Update test.
+	* testsuite/gas/aarch64/ls64-invalid.s: Update test.
+	* testsuite/gas/aarch64/ls64.s: Update test.
+
 2020-11-09  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* Makefile.am (development.exp): Fix regexp.

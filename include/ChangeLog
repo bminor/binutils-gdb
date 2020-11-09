@@ -1,3 +1,7 @@
+2020-11-09  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* opcode/aarch64.h (enum aarch64_opnd): Add new operand AARCH64_OPND_Rt_LS64.
+
 2020-11-06  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_PAC): Add new feature.

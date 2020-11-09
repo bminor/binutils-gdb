@@ -3174,6 +3174,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Rt2:
     case AARCH64_OPND_Rs:
     case AARCH64_OPND_Ra:
+    case AARCH64_OPND_Rt_LS64:
     case AARCH64_OPND_Rt_SYS:
     case AARCH64_OPND_PAIRREG:
     case AARCH64_OPND_SVE_Rm:

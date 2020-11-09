@@ -30,6 +30,7 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_INT_REG, "Rm", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rm}, "an integer register"},
   {AARCH64_OPND_CLASS_INT_REG, "Rt", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rt}, "an integer register"},
   {AARCH64_OPND_CLASS_INT_REG, "Rt2", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rt2}, "an integer register"},
+  {AARCH64_OPND_CLASS_INT_REG, "Rt_LS64", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rt}, "an integer register"},
   {AARCH64_OPND_CLASS_INT_REG, "Rt_SP", OPD_F_MAYBE_SP | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rt}, "an integer or stack pointer register"},
   {AARCH64_OPND_CLASS_INT_REG, "Rs", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rs}, "an integer register"},
   {AARCH64_OPND_CLASS_INT_REG, "Ra", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Ra}, "an integer register"},

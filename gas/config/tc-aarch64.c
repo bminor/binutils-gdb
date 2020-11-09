@@ -5276,6 +5276,7 @@ process_omitted_operand (enum aarch64_opnd type, const aarch64_opcode *opcode,
     case AARCH64_OPND_Rm:
     case AARCH64_OPND_Rt:
     case AARCH64_OPND_Rt2:
+    case AARCH64_OPND_Rt_LS64:
     case AARCH64_OPND_Rt_SP:
     case AARCH64_OPND_Rs:
     case AARCH64_OPND_Ra:
@@ -5645,10 +5646,25 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_Rt2:
 	case AARCH64_OPND_Rs:
 	case AARCH64_OPND_Ra:
+	case AARCH64_OPND_Rt_LS64:
 	case AARCH64_OPND_Rt_SYS:
 	case AARCH64_OPND_PAIRREG:
 	case AARCH64_OPND_SVE_Rm:
 	  po_int_reg_or_fail (REG_TYPE_R_Z);
+
+	  /* In LS64 load/store instructions Rt register number is .  */
+	  if (operands[i] == AARCH64_OPND_Rt_LS64)
+	  {
+	    /* We've already checked if this is valid register.
+	       This will check if register number (Rt) is not undefined for LS64
+	       instructions:
+	       if Rt<4:3> == '11' || Rt<0> == '1' then UNDEFINED.  */
+	    if ((info->reg.regno & 0x18) == 0x18 || (info->reg.regno & 0x01) == 0x01)
+	    {
+	      set_syntax_error (_("invalid Rt register number in 64-byte load/store"));
+	      goto failure;
+	    }
+	  }
 	  break;
 
 	case AARCH64_OPND_Rd_SP:
