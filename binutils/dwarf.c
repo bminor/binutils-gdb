@@ -702,7 +702,7 @@ fetch_indirect_string (dwarf_vma offset)
     ret = (const unsigned char *)
       _("<no NUL byte at end of .debug_str section>");
 
-  return ret; 
+  return ret;
 }
 
 static const unsigned char *
@@ -795,7 +795,7 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
     }
 
   index_offset = idx * offset_size;
-      
+
   if (this_set != NULL)
     index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
 
@@ -1859,7 +1859,7 @@ fetch_alt_indirect_string (dwarf_vma offset)
 
       return ret;
     }
-  
+
   warn (_("DW_FORM_GNU_strp_alt offset (%s) too big or no string sections available\n"),
 	dwarf_vmatoa ("x", offset));
   return _("<offset is too big>");
@@ -2134,7 +2134,7 @@ get_type_abbrev_from_form (unsigned long                 form,
 
   data = (unsigned char *) section->start + uvalue;
   map = find_abbrev_map_by_offset (uvalue);
-  
+
   if (map == NULL)
     {
       warn (_("Unable to find abbreviations for CU offset %#lx\n"), uvalue);
@@ -2159,7 +2159,7 @@ get_type_abbrev_from_form (unsigned long                 form,
   for (entry = map->list->first_abbrev; entry != NULL; entry = entry->next)
     if (entry->number == abbrev_number)
       break;
-  
+
   if (abbrev_num_return != NULL)
     * abbrev_num_return = abbrev_number;
 
@@ -2303,7 +2303,7 @@ display_discr_list (unsigned long          form,
       printf ("[default]");
       return;
     }
-  
+
   switch (form)
     {
     case DW_FORM_block:
@@ -2329,7 +2329,7 @@ display_discr_list (unsigned long          form,
   bfd_boolean is_signed =
     (level > 0 && level <= MAX_CU_NESTING)
     ? level_type_signed [level - 1] : FALSE;
-    
+
   printf ("(");
   while (uvalue)
     {
@@ -2409,6 +2409,17 @@ read_and_display_attr_value (unsigned long           attribute,
     {
       warn (_("Corrupt attribute\n"));
       return data;
+    }
+
+  if (do_wide && ! do_loc)
+    {
+      /* PR 26847: Display the name of the form.  */
+      const char * name = get_FORM_name (form);
+
+      /* For convenience we skip the DW_FORM_ prefix to the name.  */
+      if (name[0] == 'D')
+	name += 8; /* strlen ("DW_FORM_")  */
+      printf ("%c(%s)", delimiter, name);
     }
 
   switch (form)
@@ -2492,7 +2503,13 @@ read_and_display_attr_value (unsigned long           attribute,
 
     case DW_FORM_GNU_ref_alt:
       if (!do_loc)
-	printf ("%c<alt 0x%s>", delimiter, dwarf_vmatoa ("x", uvalue));
+	{
+	  if (do_wide)
+	    /* We have already printed the form name.  */
+	    printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x", uvalue));
+	  else
+	    printf ("%c<alt 0x%s>", delimiter, dwarf_vmatoa ("x", uvalue));
+	}
       /* FIXME: Follow the reference...  */
       break;
 
@@ -2620,16 +2637,32 @@ read_and_display_attr_value (unsigned long           attribute,
 
     case DW_FORM_strp:
       if (!do_loc)
-	printf (_("%c(indirect string, offset: 0x%s): %s"), delimiter,
-		dwarf_vmatoa ("x", uvalue),
-		fetch_indirect_string (uvalue));
+	{
+	  if (do_wide)
+	    /* We have already displayed the form name.  */
+	    printf (_("%c(offset: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indirect_string (uvalue));
+	  else
+	    printf (_("%c(indirect string, offset: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indirect_string (uvalue));
+	}
       break;
 
     case DW_FORM_line_strp:
       if (!do_loc)
-	printf (_("%c(indirect line string, offset: 0x%s): %s"), delimiter,
-		dwarf_vmatoa ("x", uvalue),
-		fetch_indirect_line_string (uvalue));
+	{
+	  if (do_wide)
+	    /* We have already displayed the form name.  */
+	    printf (_("%c(offset: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indirect_line_string (uvalue));
+	  else
+	    printf (_("%c(indirect line string, offset: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indirect_line_string (uvalue));
+	}
       break;
 
     case DW_FORM_GNU_str_index:
@@ -2638,18 +2671,30 @@ read_and_display_attr_value (unsigned long           attribute,
 	  const char * suffix = strrchr (section->name, '.');
 	  bfd_boolean  dwo = (suffix && strcmp (suffix, ".dwo") == 0) ? TRUE : FALSE;
 
-	  printf (_("%c(indexed string: 0x%s): %s"), delimiter,
-		  dwarf_vmatoa ("x", uvalue),
-		  fetch_indexed_string (uvalue, this_set, offset_size, dwo));
+	  if (do_wide)
+	    /* We have already displayed the form name.  */
+	    printf (_("%c(offset: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indexed_string (uvalue, this_set, offset_size, dwo));
+	  else
+	    printf (_("%c(indexed string: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indexed_string (uvalue, this_set, offset_size, dwo));
 	}
       break;
 
     case DW_FORM_GNU_strp_alt:
       if (!do_loc)
 	{
-	  printf (_("%c(alt indirect string, offset: 0x%s) %s"), delimiter,
-		  dwarf_vmatoa ("x", uvalue),
-		  fetch_alt_indirect_string (uvalue));
+	  if (do_wide)
+	    /* We have already displayed the form name.  */
+	    printf (_("%c(offset: 0x%s) %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_alt_indirect_string (uvalue));
+	  else
+	    printf (_("%c(alt indirect string, offset: 0x%s) %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_alt_indirect_string (uvalue));
 	}
       break;
 
@@ -2664,17 +2709,30 @@ read_and_display_attr_value (unsigned long           attribute,
 	  char buf[64];
 
 	  SAFE_BYTE_GET64 (data, &high_bits, &uvalue, end);
-	  printf ("%csignature: 0x%s", delimiter,
-		  dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
+	  if (do_wide)
+	    /* We have already displayed the form name.  */
+	    printf ("%c: 0x%s", delimiter,
+		    dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
+	  else
+	    printf ("%csignature: 0x%s", delimiter,
+		    dwarf_vmatoa64 (high_bits, uvalue, buf, sizeof (buf)));
 	}
       data += 8;
       break;
 
     case DW_FORM_GNU_addr_index:
       if (!do_loc)
-	printf (_("%c(addr_index: 0x%s): %s"), delimiter,
-		dwarf_vmatoa ("x", uvalue),
-		fetch_indexed_value (uvalue * pointer_size, pointer_size));
+	{
+	  if (do_wide)
+	    /* We have already displayed the form name.  */
+	    printf (_("%c(index: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indexed_value (uvalue * pointer_size, pointer_size));
+	  else
+	    printf (_("%c(addr_index: 0x%s): %s"), delimiter,
+		    dwarf_vmatoa ("x", uvalue),
+		    fetch_indexed_value (uvalue * pointer_size, pointer_size));
+	}
       break;
 
     default:
@@ -2819,7 +2877,7 @@ read_and_display_attr_value (unsigned long           attribute,
 		break;
 	      }
 	  break;
-	      
+
 	case DW_AT_comp_dir:
 	  /* FIXME: Also extract a build-id in a CU/TU.  */
 	  if (need_dwo_info)
@@ -2846,7 +2904,7 @@ read_and_display_attr_value (unsigned long           attribute,
 		break;
 	      }
 	  break;
-	      
+
 	case DW_AT_GNU_dwo_id:
 	  if (need_dwo_info)
 	    switch (form)
@@ -2861,7 +2919,7 @@ read_and_display_attr_value (unsigned long           attribute,
 		break;
 	      }
 	  break;
-	      
+
 	default:
 	  break;
 	}
@@ -2881,7 +2939,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	  abbrev_entry *  type_abbrev;
 	  unsigned char * type_data;
 	  unsigned long   type_cu_offset;
-	  
+
 	  type_abbrev = get_type_abbrev_from_form (form, uvalue, cu_offset,
 						   section, NULL, & type_data, & type_cu_offset);
 	  if (type_abbrev != NULL)
@@ -2893,7 +2951,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	  level_type_signed[level] = is_signed;
 	}
       break;
-      
+
     case DW_AT_inline:
       printf ("\t");
       switch (uvalue)
@@ -3145,7 +3203,7 @@ read_and_display_attr_value (unsigned long           attribute,
       printf ("\t");
       display_discr_list (form, uvalue, data, end, level);
       break;
-      
+
     case DW_AT_frame_base:
       have_frame_base = 1;
       /* Fall through.  */
@@ -3334,7 +3392,7 @@ introduce (struct dwarf_section * section, bfd_boolean raw)
 	printf (_("Contents of the %s section:\n\n"), section->name);
     }
 }
-  
+
 /* Process the contents of a .debug_info section.
    If do_loc is TRUE then we are scanning for location lists and dwo tags
    and we do not want to display anything to the user.
@@ -3434,7 +3492,7 @@ process_debug_info (struct dwarf_section *           section,
       load_debug_section_with_follow (str_index_dwo, file);
       load_debug_section_with_follow (debug_addr, file);
     }
-  
+
   load_debug_section_with_follow (abbrev_sec, file);
   if (debug_displays [abbrev_sec].section.start == NULL)
     {
@@ -3450,7 +3508,7 @@ process_debug_info (struct dwarf_section *           section,
   free (cu_abbrev_map);
   cu_abbrev_map = NULL;
   next_free_abbrev_map_entry = 0;
-  
+
   /* In order to be able to resolve DW_FORM_ref_attr forms we need
      to load *all* of the abbrevs for all CUs in this .debug_info
      section.  This does effectively mean that we (partially) read
@@ -3532,7 +3590,7 @@ process_debug_info (struct dwarf_section *           section,
 	     list);
 	  list->start_of_next_abbrevs = next;
 	}
-		       
+
       start = section_begin + cu_offset + compunit.cu_length
 	+ initial_length_size;
       record_abbrev_list_for_cu (cu_offset, start - section_begin, list);
@@ -4123,7 +4181,7 @@ display_formatted_table (unsigned char *                   data,
   dwarf_vma data_count, datai;
   unsigned int namepass, last_entry = 0;
   const char * table_name = is_dir ? N_("Directory Table") : N_("File Name Table");
-  
+
   SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
   if (do_checks && format_count > 5)
     warn (_("Unexpectedly large number of columns in the %s (%u)\n"),
@@ -4166,7 +4224,7 @@ display_formatted_table (unsigned char *                   data,
 	  format_count);
 
   printf (_("  Entry"));
-  /* Delay displaying name as the last entry for better screen layout.  */ 
+  /* Delay displaying name as the last entry for better screen layout.  */
   for (namepass = 0; namepass < 2; namepass++)
     {
       format = format_start;
@@ -4207,7 +4265,7 @@ display_formatted_table (unsigned char *                   data,
       unsigned char *datapass = data;
 
       printf ("  %d", last_entry++);
-      /* Delay displaying name as the last entry for better screen layout.  */ 
+      /* Delay displaying name as the last entry for better screen layout.  */
       for (namepass = 0; namepass < 2; namepass++)
 	{
 	  format = format_start;
@@ -7369,7 +7427,6 @@ display_debug_ranges_list (unsigned char *start, unsigned char *finish,
 	break;
       SAFE_SIGNED_BYTE_GET_AND_INC (end, start, pointer_size, finish);
 
-      
       printf ("    %8.8lx ", offset);
 
       if (begin == 0 && end == 0)
@@ -9705,7 +9762,7 @@ display_debug_links (struct dwarf_section *  section,
     The .gun_debugaltlink section is formatted as:
       (c-string)  Filename.
       (binary)    Build-ID.  */
-  
+
   filename =  section->start;
   filelen = strnlen ((const char *) filename, section->size);
   if (filelen == section->size)
@@ -10399,7 +10456,7 @@ load_cu_tu_indexes (void *file)
   if (cu_tu_indexes_read == -1)
     {
       cu_tu_indexes_read = TRUE;
-  
+
       if (load_debug_section_with_follow (dwp_cu_index, file))
 	if (! process_cu_tu_index (&debug_displays [dwp_cu_index].section, 0))
 	  cu_tu_indexes_read = FALSE;
@@ -10643,7 +10700,6 @@ parse_gnu_debuglink (struct dwarf_section * section, void * data)
      The CRC value is stored after the filename, aligned up to 4 bytes.  */
   name = (const char *) section->start;
 
-  
   crc_offset = strnlen (name, section->size) + 1;
   crc_offset = (crc_offset + 3) & ~3;
   if (crc_offset + 4 > section->size)
@@ -10801,12 +10857,12 @@ load_separate_debug_info (const char *            main_filename,
 	    xlink->name ? xlink->name : xlink->uncompressed_name);
       return NULL;
     }
-    
+
   /* Attempt to locate the separate file.
      This should duplicate the logic in bfd/opncls.c:find_separate_debug_file().  */
 
   canon_dir = lrealpath (main_filename);
-  
+
   for (canon_dirlen = strlen (canon_dir); canon_dirlen > 0; canon_dirlen--)
     if (IS_DIR_SEPARATOR (canon_dir[canon_dirlen - 1]))
       break;
@@ -11134,7 +11190,7 @@ load_separate_debug_files (void * file, const char * filename)
 
   do_follow_links = 0;
   return FALSE;
-}  
+}
 
 void
 free_debug_memory (void)
@@ -11146,7 +11202,7 @@ free_debug_memory (void)
   free (cu_abbrev_map);
   cu_abbrev_map = NULL;
   next_free_abbrev_map_entry = 0;
-  
+
   for (i = 0; i < max; i++)
     free_debug_section ((enum dwarf_section_display_enum) i);
 
@@ -11178,7 +11234,7 @@ free_debug_memory (void)
       free ((void *) d);
     }
   first_separate_info = NULL;
-  
+
   free_dwo_info ();
 }
 
