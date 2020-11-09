@@ -1,5 +1,9 @@
 2020-11-09  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
+	* aarch64-opc.c: Add ACCDATA_EL1 system register
+
+2020-11-09  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
 	* aarch64-opc.c (aarch64_print_operand): Support operand AARCH64_OPND_Rt_LS64
 	print.
 	* aarch64-tbl.h (struct aarch64_opcode): Update _LS64_INSN instructions with

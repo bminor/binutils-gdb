@@ -56,3 +56,8 @@
 	st64bv0 x0, x18, [x2]
 	st64bv0 x0, x20, [x2]
 	st64bv0 x0, x22, [x2]
+
+.arch armv8-a
+/* Accelerator Data system register.  */
+	mrs x0, accdata_el1
+	msr accdata_el1, x0

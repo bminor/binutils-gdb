@@ -5652,7 +5652,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_Rm:
 	  po_int_reg_or_fail (REG_TYPE_R_Z);
 
-	  /* In LS64 load/store instructions Rt register number is .  */
+	  /* In LS64 load/store instructions Rt register number must be even
+	     and <=22.  */
 	  if (operands[i] == AARCH64_OPND_Rt_LS64)
 	  {
 	    /* We've already checked if this is valid register.
