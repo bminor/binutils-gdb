@@ -3252,7 +3252,7 @@ alpha_vms_write_exec (bfd *abfd)
   bfd_putl32 (16, eihd.virt_mem_block_size);
   bfd_putl32 (0, eihd.ext_fixup_off);
   bfd_putl32 (0, eihd.noopt_psect_off);
-  bfd_putl32 (-1, eihd.alias);
+  bfd_putl16 (-1, eihd.alias);
 
   /* Alloc EIHA.  */
   eiha = (struct vms_eiha *)((char *) &eihd + PRIV (file_pos));

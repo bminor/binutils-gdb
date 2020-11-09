@@ -1,5 +1,9 @@
 2020-11-09  Alan Modra  <amodra@gmail.com>
 
+	* vms-alpha.c (alpha_vms_write_exec): Write 16 bits to eihd.alias.
+
+2020-11-09  Alan Modra  <amodra@gmail.com>
+
 	* archive.c (bfd_ar_hdr_from_filesystem): Use bfd_set_input_error
 	when stat of archive member fails.
 	* coff-rs6000.c (xcoff_write_archive_contents_old),
