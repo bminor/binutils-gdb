@@ -1,3 +1,11 @@
+2020-11-09  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (bfd_ar_hdr_from_filesystem): Use bfd_set_input_error
+	when stat of archive member fails.
+	* coff-rs6000.c (xcoff_write_archive_contents_old),
+	(xcoff_write_archive_contents_big): Likewise, and handle in-memory
+	bfd.
+
 2020-11-03  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (bfd_section_from_shdr): Free sections_being_created.

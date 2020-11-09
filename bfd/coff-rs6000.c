@@ -2096,11 +2096,23 @@ xcoff_write_archive_contents_old (bfd *abfd)
 	  struct xcoff_ar_hdr *ahdrp;
 	  struct stat s;
 
-	  if (stat (bfd_get_filename (sub), &s) != 0)
+	  if ((sub->flags & BFD_IN_MEMORY) != 0)
 	    {
-	      bfd_set_error (bfd_error_system_call);
+	      /* Assume we just "made" the member, and fake it.  */
+	      struct bfd_in_memory *bim
+		= (struct bfd_in_memory *) sub->iostream;
+	      time (&s.st_mtime);
+	      s.st_uid = getuid ();
+	      s.st_gid = getgid ();
+	      s.st_mode = 0644;
+	      s.st_size = bim->size;
+	    }
+	  else if (stat (bfd_get_filename (sub), &s) != 0)
+	    {
+	      bfd_set_input_error (sub, bfd_error_system_call);
 	      return FALSE;
 	    }
+
 	  if ((abfd->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
 	    {
 	      s.st_mtime = 0;
@@ -2320,14 +2332,23 @@ xcoff_write_archive_contents_big (bfd *abfd)
 	  struct xcoff_ar_hdr_big *ahdrp;
 	  struct stat s;
 
-	  /* XXX This should actually be a call to stat64 (at least on
-	     32-bit machines).
-	     XXX This call will fail if the original object is not found.  */
-	  if (stat (bfd_get_filename (current_bfd), &s) != 0)
+	  if ((current_bfd->flags & BFD_IN_MEMORY) != 0)
 	    {
-	      bfd_set_error (bfd_error_system_call);
+	      /* Assume we just "made" the member, and fake it.  */
+	      struct bfd_in_memory *bim
+		= (struct bfd_in_memory *) current_bfd->iostream;
+	      time (&s.st_mtime);
+	      s.st_uid = getuid ();
+	      s.st_gid = getgid ();
+	      s.st_mode = 0644;
+	      s.st_size = bim->size;
+	    }
+	  else if (stat (bfd_get_filename (current_bfd), &s) != 0)
+	    {
+	      bfd_set_input_error (current_bfd, bfd_error_system_call);
 	      return FALSE;
 	    }
+
 	  if ((abfd->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
 	    {
 	      s.st_mtime = 0;
