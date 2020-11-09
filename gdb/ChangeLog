@@ -1,3 +1,12 @@
+2020-11-11  Luis Machado  <luis.machado@arm.com>
+
+	* aarch64-tdep.c (aarch64_prologue_prev_register): Guard use of
+	C registers.
+	(aarch64_dwarf2_prev_register): Likewise.
+	(aarch64_dwarf2_frame_init_reg): Likewise.
+	* aarch64-linux-nat.c
+	(aarch64_linux_nat_target::store_registers): Likewise.
+
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
 	* aarch64-linux-tdep.c (aarch64_linux_cregmap)
