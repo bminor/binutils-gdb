@@ -1,3 +1,8 @@
+2020-11-10  Tom Tromey  <tom@tromey.com>
+
+	* objc-lang.h (value_nsstring): Update.
+	* objc-lang.c (value_nsstring): Make "ptr" const.
+
 2020-11-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* expprint.c (print_subexp_funcall): Increment expression position

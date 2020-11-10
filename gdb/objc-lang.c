@@ -164,7 +164,7 @@ lookup_child_selector (struct gdbarch *gdbarch, const char *selname)
 }
 
 struct value * 
-value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
+value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
 {
   struct type *char_type = builtin_type (gdbarch)->builtin_char;
   struct value *stringValue[3];

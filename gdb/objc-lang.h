@@ -39,7 +39,7 @@ extern const char *find_imps (const char *method,
 			      std::vector<const char *> *symbol_names);
 
 extern struct value *value_nsstring (struct gdbarch *gdbarch,
-				     char *ptr, int len);
+				     const char *ptr, int len);
 
 /* for parsing Objective C */
 extern void start_msglist (void);
