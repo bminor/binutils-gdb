@@ -42,7 +42,7 @@ proc vla_optimized_out {exe_suffix options} {
 	"printed optimized out vla"
 
     gdb_test "p sizeof (a)" \
-	" = $sizeof_result" \
+	" = ($sizeof_result)" \
 	"printed size of optimized out vla"
 
     # At lower optimisation levels, the upper bound of the array is

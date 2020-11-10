@@ -1,5 +1,10 @@
 2020-11-10  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/vla-optimized-out.exp (p sizeof (a)): Wrap supplied
+	regexp fragment in parentheses to prevent false matching.
+
+2020-11-10  Gary Benson <gbenson@redhat.com>
+
 	* gdb.base/vla-optimized-out.c (f1): Add __attribute__ ((weak)).
 
 2020-11-10  Gary Benson <gbenson@redhat.com>
