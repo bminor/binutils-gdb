@@ -1,5 +1,10 @@
 2020-11-10  Tom Tromey  <tom@tromey.com>
 
+	* value.h (internalvar_name): Update.
+	* value.c (internalvar_name): Make return type const.
+
+2020-11-10  Tom Tromey  <tom@tromey.com>
+
 	* ax-gdb.c (gen_struct_elt_for_reference, gen_namespace_elt)
 	(gen_maybe_namespace_elt, gen_aggregate_elt_ref, gen_expr): Use
 	const.

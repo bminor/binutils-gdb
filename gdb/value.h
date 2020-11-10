@@ -1122,7 +1122,7 @@ extern void print_variable_and_value (const char *name,
 extern void typedef_print (struct type *type, struct symbol *news,
 			   struct ui_file *stream);
 
-extern char *internalvar_name (const struct internalvar *var);
+extern const char *internalvar_name (const struct internalvar *var);
 
 extern void preserve_values (struct objfile *);
 
