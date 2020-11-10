@@ -23,7 +23,7 @@ procedure Bias is
 
    type Repeat_Count_T is range 1 .. 2 ** 6;
    for Repeat_Count_T'Size use 6;
-   X : Repeat_Count_T := 64;
+   X : Repeat_Count_T := 60;
    X1 : Repeat_Count_T := 1;
 
    type Char_Range is range 65 .. 68;

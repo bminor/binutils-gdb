@@ -1,3 +1,8 @@
+2020-11-10  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/bias.exp: Update.
+	* gdb.ada/bias/bias.adb (X): Change value.
+
 2020-11-10  Gary Benson <gbenson@redhat.com>
 
 	* gdb.base/vla-optimized-out.exp (p sizeof (a)): Wrap supplied
