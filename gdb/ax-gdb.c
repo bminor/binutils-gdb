@@ -1537,10 +1537,10 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value,
 
 static int
 gen_namespace_elt (struct agent_expr *ax, struct axs_value *value,
-		   const struct type *curtype, char *name);
+		   const struct type *curtype, const char *name);
 static int
 gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
-			 const struct type *curtype, char *name);
+			 const struct type *curtype, const char *name);
 
 static void
 gen_static_field (struct agent_expr *ax, struct axs_value *value,
@@ -1577,7 +1577,7 @@ gen_static_field (struct agent_expr *ax, struct axs_value *value,
 
 static int
 gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
-			      struct type *type, char *fieldname)
+			      struct type *type, const char *fieldname)
 {
   struct type *t = type;
   int i;
@@ -1622,7 +1622,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 
 static int
 gen_namespace_elt (struct agent_expr *ax, struct axs_value *value,
-		   const struct type *curtype, char *name)
+		   const struct type *curtype, const char *name)
 {
   int found = gen_maybe_namespace_elt (ax, value, curtype, name);
 
@@ -1641,7 +1641,7 @@ gen_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 
 static int
 gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
-			 const struct type *curtype, char *name)
+			 const struct type *curtype, const char *name)
 {
   const char *namespace_name = curtype->name ();
   struct block_symbol sym;
@@ -1665,7 +1665,7 @@ gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 
 static int
 gen_aggregate_elt_ref (struct agent_expr *ax, struct axs_value *value,
-		       struct type *type, char *field)
+		       struct type *type, const char *field)
 {
   switch (type->code ())
     {
@@ -1919,7 +1919,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       if ((*pc)[0].opcode == OP_INTERNALVAR)
 	{
-	  char *name = internalvar_name ((*pc)[1].internalvar);
+	  const char *name = internalvar_name ((*pc)[1].internalvar);
 	  struct trace_state_variable *tsv;
 
 	  (*pc) += 3;
@@ -1946,7 +1946,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       (*pc)++;
       if ((*pc)[0].opcode == OP_INTERNALVAR)
 	{
-	  char *name = internalvar_name ((*pc)[1].internalvar);
+	  const char *name = internalvar_name ((*pc)[1].internalvar);
 	  struct trace_state_variable *tsv;
 
 	  (*pc) += 3;
@@ -2204,7 +2204,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case STRUCTOP_PTR:
       {
 	int length = (*pc)[1].longconst;
-	char *name = &(*pc)[2].string;
+	const char *name = &(*pc)[2].string;
 
 	(*pc) += 4 + BYTES_TO_EXP_ELEM (length + 1);
 	gen_expr (exp, pc, ax, value);
@@ -2249,7 +2249,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
       {
 	struct type *type = (*pc)[1].type;
 	int length = longest_to_int ((*pc)[2].longconst);
-	char *name = &(*pc)[3].string;
+	const char *name = &(*pc)[3].string;
 	int found;
 
 	found = gen_aggregate_elt_ref (ax, value, type, name);
