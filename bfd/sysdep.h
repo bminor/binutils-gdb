@@ -223,4 +223,12 @@ size_t strnlen (const char *, size_t);
 # define N_(String) (String)
 #endif
 
+#ifndef HAVE_GETUID
+#define getuid() 0
+#endif
+
+#ifndef HAVE_GETGID
+#define getgid() 0
+#endif
+
 #endif /* ! defined (BFD_SYSDEP_H) */

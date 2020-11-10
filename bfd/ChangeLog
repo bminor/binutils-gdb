@@ -1,3 +1,8 @@
+2020-11-11  Tom Tromey  <tromey@adacore.com>
+
+	* archive.c (getuid, getgid): Move...
+	* sysdep.h (getuid, getgid): ...here.
+
 2020-11-09  Alan Modra  <amodra@gmail.com>
 
 	* vms-alpha.c (alpha_vms_write_exec): Write 16 bits to eihd.alias.

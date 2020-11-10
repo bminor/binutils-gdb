@@ -1842,14 +1842,6 @@ hpux_uid_gid_encode (char str[6], long int id)
 }
 #endif	/* HPUX_LARGE_AR_IDS */
 
-#ifndef HAVE_GETUID
-#define getuid() 0
-#endif
-
-#ifndef HAVE_GETGID
-#define getgid() 0
-#endif
-
 /* Takes a filename, returns an arelt_data for it, or NULL if it can't
    make one.  The filename must refer to a filename in the filesystem.
    The filename field of the ar_hdr will NOT be initialized.  If member
