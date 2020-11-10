@@ -1,3 +1,8 @@
+2020-11-10  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (skip_attr_bytes): Correctly handle DW_FORM_ref8.
+	(get_type_abbrev_from_form): Accept DW_FORM_ref8.
+
 2020-11-09  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* Makefile.am (development.exp): Fix regexp.
