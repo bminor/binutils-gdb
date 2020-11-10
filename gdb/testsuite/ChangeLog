@@ -1,5 +1,9 @@
 2020-11-10  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/vla-optimized-out.c (f1): Add __attribute__ ((weak)).
+
+2020-11-10  Gary Benson <gbenson@redhat.com>
+
 	* gdb.cp/step-and-next-inline.exp: Only require
 	-gstatement-frontiers when building with GCC.
 	Only setup KFAIL's for GCC issues when using

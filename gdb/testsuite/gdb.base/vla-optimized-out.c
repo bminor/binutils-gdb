@@ -22,9 +22,9 @@
 
 int
 #ifdef NOCLONE
-__attribute__((noinline)) ATTRIBUTE_NOCLONE
+__attribute__((noinline,weak)) ATTRIBUTE_NOCLONE
 #else
-__attribute__((noinline))
+__attribute__((noinline,weak))
 #endif
 f1 (int i)
 {
