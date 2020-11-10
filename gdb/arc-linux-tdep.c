@@ -461,6 +461,18 @@ arc_linux_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
 }
 
+/* Populate REGCACHE with register REGNUM from BUF.  */
+
+static void
+supply_register (struct regcache *regcache, int regnum, const gdb_byte *buf)
+{
+  /* Skip non-existing registers.  */
+  if ((arc_linux_core_reg_offsets[regnum] == ARC_OFFSET_NO_REGISTER))
+    return;
+
+  regcache->raw_supply (regnum, buf + arc_linux_core_reg_offsets[regnum]);
+}
+
 void
 arc_linux_supply_gregset (const struct regset *regset,
 			  struct regcache *regcache,
@@ -471,9 +483,14 @@ arc_linux_supply_gregset (const struct regset *regset,
 
   const bfd_byte *buf = (const bfd_byte *) gregs;
 
-  for (int reg = 0; reg <= ARC_LAST_REGNUM; reg++)
-      if (arc_linux_core_reg_offsets[reg] != ARC_OFFSET_NO_REGISTER)
-	regcache->raw_supply (reg, buf + arc_linux_core_reg_offsets[reg]);
+  /* regnum == -1 means writing all the registers.  */
+  if (regnum == -1)
+    for (int reg = 0; reg <= ARC_LAST_REGNUM; reg++)
+      supply_register (regcache, reg, buf);
+  else if (regnum <= ARC_LAST_REGNUM)
+    supply_register (regcache, regnum, buf);
+  else
+    gdb_assert_not_reached ("Invalid regnum in arc_linux_supply_gregset.");
 }
 
 void
@@ -484,9 +501,12 @@ arc_linux_supply_v2_regset (const struct regset *regset,
   const bfd_byte *buf = (const bfd_byte *) v2_regs;
 
   /* user_regs_arcv2 is defined in linux arch/arc/include/uapi/asm/ptrace.h.  */
-  regcache->raw_supply (ARC_R30_REGNUM, buf);
-  regcache->raw_supply (ARC_R58_REGNUM, buf + REGOFF (1));
-  regcache->raw_supply (ARC_R59_REGNUM, buf + REGOFF (2));
+  if (regnum == -1 || regnum == ARC_R30_REGNUM)
+    regcache->raw_supply (ARC_R30_REGNUM, buf);
+  if (regnum == -1 || regnum == ARC_R58_REGNUM)
+    regcache->raw_supply (ARC_R58_REGNUM, buf + REGOFF (1));
+  if (regnum == -1 || regnum == ARC_R59_REGNUM)
+    regcache->raw_supply (ARC_R59_REGNUM, buf + REGOFF (2));
 }
 
 /* Populate BUF with register REGNUM from the REGCACHE.  */
@@ -544,9 +564,12 @@ arc_linux_collect_v2_regset (const struct regset *regset,
 {
   bfd_byte *buf = (bfd_byte *) v2_regs;
 
-  regcache->raw_collect (ARC_R30_REGNUM, buf);
-  regcache->raw_collect (ARC_R58_REGNUM, buf + REGOFF (1));
-  regcache->raw_collect (ARC_R59_REGNUM, buf + REGOFF (2));
+  if (regnum == -1 || regnum == ARC_R30_REGNUM)
+    regcache->raw_collect (ARC_R30_REGNUM, buf);
+  if (regnum == -1 || regnum == ARC_R58_REGNUM)
+    regcache->raw_collect (ARC_R58_REGNUM, buf + REGOFF (1));
+  if (regnum == -1 || regnum == ARC_R59_REGNUM)
+    regcache->raw_collect (ARC_R59_REGNUM, buf + REGOFF (2));
 }
 
 /* Linux regset definitions.  */

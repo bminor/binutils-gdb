@@ -1,3 +1,9 @@
+2020-12-22  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-linux-tdep.c (supply_register): New.
+	(arc_linux_supply_gregset, arc_linux_supply_v2_regset,
+	arc_linux_collect_v2_regset): Consider REGNUM.
+
 2020-12-22  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* arc-linux-tdep.c (arc_linux_sc_reg_offsets): New static variable.
