@@ -2025,6 +2025,21 @@ skip_attr_bytes (unsigned long          form,
       break;
 
     case DW_FORM_ref8:
+      {
+	dwarf_vma high_bits;
+
+	SAFE_BYTE_GET64 (data, &high_bits, &uvalue, end);
+	data += 8;
+	if (sizeof (uvalue) > 4)
+	  uvalue += high_bits << 32;
+	else if (high_bits != 0)
+	  {
+	    /* FIXME: What to do ?  */
+	    return NULL;
+	  }
+	break;
+      }
+
     case DW_FORM_data8:
     case DW_FORM_ref_sig8:
       data += 8;
@@ -2115,6 +2130,7 @@ get_type_abbrev_from_form (unsigned long                 form,
     case DW_FORM_ref1:
     case DW_FORM_ref2:
     case DW_FORM_ref4:
+    case DW_FORM_ref8:
     case DW_FORM_ref_udata:
       if (uvalue + cu_offset > section->size)
 	{
