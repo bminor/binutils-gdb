@@ -1,3 +1,8 @@
+2020-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* server.cc (gdbserver_usage): Add missing option to usage text.
+	(gdbserver_show_disableable): Likewise.
+
 2020-11-02  Simon Marchi  <simon.marchi@efficios.com>
 
 	* ax.cc: Fix indentation.

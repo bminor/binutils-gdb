@@ -3380,7 +3380,7 @@ gdbserver_usage (FILE *stream)
 	   "  --disable-packet=OPT1[,OPT2,...]\n"
 	   "                        Disable support for RSP packets or features.\n"
 	   "                          Options:\n"
-	   "                            vCont, Tthread, qC, qfThreadInfo and \n"
+	   "                            vCont, T, Tthread, qC, qfThreadInfo and \n"
 	   "                            threads (disable all threading packets).\n"
 	   "\n"
 	   "For more information, consult the GDB manual (available as on-line \n"
@@ -3398,7 +3398,8 @@ gdbserver_show_disableable (FILE *stream)
 	   "  qfThreadInfo\tThread listing\n"
 	   "  Tthread     \tPassing the thread specifier in the "
 	   "T stop reply packet\n"
-	   "  threads     \tAll of the above\n");
+	   "  threads     \tAll of the above\n"
+	   "  T           \tAll 'T' packets\n");
 }
 
 /* Start up the event loop.  This is the entry point to the event
