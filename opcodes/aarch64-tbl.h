@@ -2421,7 +2421,7 @@ static const aarch64_feature_set aarch64_feature_v8_r =
 static const aarch64_feature_set aarch64_feature_csre =
   AARCH64_FEATURE (AARCH64_FEATURE_CSRE, 0);
 static const aarch64_feature_set aarch64_feature_ls64 =
-  AARCH64_FEATURE (AARCH64_FEATURE_V8_7 | AARCH64_FEATURE_LS64, 0);
+  AARCH64_FEATURE (AARCH64_FEATURE_V8_6 | AARCH64_FEATURE_LS64, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp

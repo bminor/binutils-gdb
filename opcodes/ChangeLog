@@ -1,3 +1,7 @@
+2020-11-11  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-tbl.h: Enable -march=armv8.6-a+ls64.
+
 2020-11-09  Spencer E. Olson  <olsonse@umich.edu>
 
 	* pru-opc.c: Add opcode description for LMBD (left-most bit

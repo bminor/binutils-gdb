@@ -1,3 +1,7 @@
+2020-11-11  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* testsuite/gas/aarch64/ls64.s: Update test.
+
 2020-11-09  Denys Zagorui  <dzagorui@cisco.com>
 
 	* config/obj-elf (obj_elf_init_stab_section): Improve
