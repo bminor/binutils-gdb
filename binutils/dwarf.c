@@ -7532,8 +7532,15 @@ display_debug_rnglists_list (unsigned char *start, unsigned char *finish,
       if (rlet == DW_RLE_base_address)
 	continue;
 
-      print_dwarf_vma (begin + base_address, pointer_size);
-      print_dwarf_vma (end + base_address, pointer_size);
+      /* Only a DW_RLE_offset_pair needs the base address added.  */
+      if (rlet == DW_RLE_offset_pair)
+	{
+	  begin += base_address;
+	  end += base_address;
+	}
+
+      print_dwarf_vma (begin, pointer_size);
+      print_dwarf_vma (end, pointer_size);
 
       if (begin == end)
 	fputs (_("(start == end)"), stdout);
