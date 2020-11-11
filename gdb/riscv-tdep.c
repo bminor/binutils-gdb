@@ -3150,6 +3150,9 @@ riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg < RISCV_DWARF_REGNUM_F31)
     return RISCV_FIRST_FP_REGNUM + (reg - RISCV_DWARF_REGNUM_F0);
 
+  else if (reg >= RISCV_DWARF_FIRST_CSR && reg <= RISCV_DWARF_LAST_CSR)
+    return RISCV_FIRST_CSR_REGNUM + (reg - RISCV_DWARF_FIRST_CSR);
+
   return -1;
 }
 
