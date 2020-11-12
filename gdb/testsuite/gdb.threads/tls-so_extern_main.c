@@ -25,6 +25,8 @@ tls_ptr (void *p)
 {
    so_extern = &so_extern;
    so_extern2 = &so_extern2; /* break here to check result */
+
+   return NULL;
 }
 
 int

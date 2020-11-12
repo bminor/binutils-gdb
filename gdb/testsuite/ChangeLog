@@ -1,3 +1,8 @@
+2020-11-12  Gary Benson <gbenson@redhat.com>
+
+	* gdb.threads/tls-so_extern_main.c (tls_ptr): Add missing return
+	statement.
+
 2020-11-11  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.base/continue-after-aborted-step-over.exp: Add "breakpoint
