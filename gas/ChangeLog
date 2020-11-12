@@ -1,3 +1,12 @@
+2020-11-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 26850
+	* dwarf2dbg.c
+	* testsuite/gas/elf/dwarf2-20.s: New test.
+	* testsuite/gas/elf/dwarf2-20.d: New test driver.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+	* testsuite/gas/elf/warn-2.s
+
 2020-11-11  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* testsuite/gas/aarch64/ls64.s: Update test.

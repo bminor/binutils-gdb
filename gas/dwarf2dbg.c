@@ -504,6 +504,18 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
 {
   struct line_subseg *lss;
   struct line_entry *e;
+  flagword need_flags = SEC_ALLOC | SEC_LOAD | SEC_CODE;
+
+  /* PR 26850: Do not record LOCs in non-executable, non-allocated,
+     or non-loaded sections.  */
+  if ((now_seg->flags & need_flags) != need_flags)
+    {
+      if (! SEG_NORMAL (now_seg))
+	/* FIXME: Add code to suppress multiple warnings ?  */
+	as_warn ("dwarf line number information for %s ignored",
+		 segment_name (now_seg));
+      return;
+    }
 
   e = XNEW (struct line_entry);
   e->next = NULL;
@@ -2341,11 +2353,10 @@ out_debug_line (segT line_seg)
 
   /* For each section, emit a statement program.  */
   for (s = all_segs; s; s = s->next)
+    /* Paranoia - this check should have already have
+       been handled in dwarf2_gen_line_info_1().  */
     if (SEG_NORMAL (s->seg))
       process_entries (s->seg, s->head->head);
-    else
-      as_warn ("dwarf line number information for %s ignored",
-	       segment_name (s->seg));
 
   if (flag_dwarf_sections)
     /* We have to switch to the special .debug_line_end section
@@ -2739,7 +2750,6 @@ dwarf2_init (void)
   if (flag_dwarf_cie_version == -1)
     flag_dwarf_cie_version = 1;
 }
-
 
 /* Finish the dwarf2 debug sections.  We emit .debug.line if there
    were any .file/.loc directives, or --gdwarf2 was given, and if the
