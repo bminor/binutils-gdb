@@ -1,3 +1,11 @@
+2020-11-12  Nick Clifton  <nickc@redhat.com>
+
+	* m32r-sim.h (m32rbf_h_accum_get_handler): Always provide a
+	prototype for this function.
+	(m32rbf_h_accum_set_handler): Likewise.
+	(m32r2f_h_accums_get_handler): Prototype.
+	(m32r2f_h_accums_set_handler): Prototype.
+
 2020-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* m32r.c (m32rbf_register_size): New function.
