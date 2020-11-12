@@ -1,11 +1,13 @@
 2020-11-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 26850
-	* dwarf2dbg.c
+	* dwarf2dbg.c (dwarf2_gen_line_info_1): Do not record lines in
+	sections that are not executable or not loadable.
+	(out_debug_line): Move warning message into dwarf2_gen_line_info_1.
 	* testsuite/gas/elf/dwarf2-20.s: New test.
 	* testsuite/gas/elf/dwarf2-20.d: New test driver.
 	* testsuite/gas/elf/elf.exp: Run the new test.
-	* testsuite/gas/elf/warn-2.s
+	* testsuite/gas/elf/warn-2.s: Use the .nop directive.
 
 2020-11-11  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
