@@ -319,8 +319,10 @@ static void
 collect_register (const struct regcache *regcache, struct gdbarch *gdbarch,
 		  int regnum, gdb_byte *buf)
 {
+  int offset;
+
   /* Skip non-existing registers.  */
-  if ((arc_linux_core_reg_offsets[regnum] == ARC_OFFSET_NO_REGISTER))
+  if (arc_linux_core_reg_offsets[regnum] == ARC_OFFSET_NO_REGISTER)
     return;
 
   /* The address where the execution has stopped is in pseudo-register
@@ -332,8 +334,10 @@ collect_register (const struct regcache *regcache, struct gdbarch *gdbarch,
      the program will continue at the address after the current instruction.
      */
   if (regnum == gdbarch_pc_regnum (gdbarch))
-    regnum = ARC_ERET_REGNUM;
-  regcache->raw_collect (regnum, buf + arc_linux_core_reg_offsets[regnum]);
+    offset = arc_linux_core_reg_offsets[ARC_ERET_REGNUM];
+  else
+    offset = arc_linux_core_reg_offsets[regnum];
+  regcache->raw_collect (regnum, buf + offset);
 }
 
 void
