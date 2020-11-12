@@ -1,3 +1,9 @@
+2020-11-12  Dimitar Dimitrov  <dimitar@dinux.eu>
+
+	* pru.h (RS1SEL): New macro.
+	(RS1_WIDTH): New macro.
+	* pru.isa: Describe the LMBD instruction.
+
 2019-09-23  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* Makefile.in: New file.

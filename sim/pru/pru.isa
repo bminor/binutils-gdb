@@ -247,3 +247,18 @@ INSTRUCTION (iloop,
 		LOOP_IN_PROGRESS = 1;
 		PC++;
 	     })
+
+INSTRUCTION (lmbd,
+	     {
+	     int lmbd_i;
+
+	     OP2 = (IO ? IMM8 : RS2);
+
+	     for (lmbd_i = RS1_WIDTH - 1; lmbd_i >= 0; lmbd_i--)
+	       {
+		 if (!(((RS1 >> lmbd_i) ^ OP2) & 1))
+		   break;
+	       }
+	     RD = (lmbd_i < 0) ? 32 : lmbd_i;
+	     PC++;
+	     })
