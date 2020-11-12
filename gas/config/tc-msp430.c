@@ -690,6 +690,9 @@ static bfd_boolean upper_data_region_in_use = FALSE;
 /* The default is to use the lower region only.  */
 static bfd_boolean lower_data_region_only = TRUE;
 
+/* Deprecated option, silently ignore it for compatibility with GCC <= 10.  */
+#define OPTION_MOVE_DATA 'd'
+
 enum
 {
   OPTION_SILICON_ERRATA = OPTION_MD_BASE,
@@ -1465,6 +1468,10 @@ md_parse_option (int c, const char * arg)
       do_unknown_interrupt_nops = FALSE;
       return 1;
 
+    case OPTION_MOVE_DATA:
+      /* Silently ignored.  */
+      return 1;
+
     case OPTION_DATA_REGION:
       if (strcmp (arg, "upper") == 0
 	  || strcmp (arg, "either") == 0)
@@ -1750,6 +1757,7 @@ struct option md_longopts[] =
   {"my", no_argument, NULL, OPTION_WARN_INTR_NOPS},
   {"mu", no_argument, NULL, OPTION_UNKNOWN_INTR_NOPS},
   {"mU", no_argument, NULL, OPTION_NO_UNKNOWN_INTR_NOPS},
+  {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {"mdata-region", required_argument, NULL, OPTION_DATA_REGION},
   {NULL, no_argument, NULL, 0}
 };

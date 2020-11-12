@@ -1,3 +1,12 @@
+2020-11-12  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (OPTION_MOVE_DATA): Define.
+	(md_parse_option): Ignore OPTION_MOVE_DATA.
+	(md_longopts): Handle -md option.
+	* testsuite/gas/msp430/msp430.exp: Run new test.
+	* testsuite/gas/msp430/empty.s: New test.
+	* testsuite/gas/msp430/ignore-md.d: New test.
+
 2020-11-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 26850
