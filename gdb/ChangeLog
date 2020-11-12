@@ -1,5 +1,10 @@
 2020-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.c (dw2_do_instantiate_symtab): Fix typo in
+	comment.
+
+2020-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (dwarf_read_debug_printf,
 	dwarf_read_debug_printf_v): New macros, use throughout the file.
 

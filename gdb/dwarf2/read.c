@@ -2421,7 +2421,7 @@ load_cu (dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
   return cu;
 }
 
-/* Read in the symbols for PER_CU in the context of DWARF"_PER_OBJFILE.  */
+/* Read in the symbols for PER_CU in the context of PER_OBJFILE.  */
 
 static void
 dw2_do_instantiate_symtab (dwarf2_per_cu_data *per_cu,
