@@ -93,6 +93,26 @@
    This is in contrast to the low level DIE reading of dwarf_die_debug.  */
 static unsigned int dwarf_read_debug = 0;
 
+/* Print a "dwarf-read" debug statement if dwarf_read_debug is >= 1.  */
+
+#define dwarf_read_debug_printf(fmt, ...) \
+  do \
+    { \
+      if (dwarf_read_debug >= 1) \
+	debug_prefixed_printf ("dwarf-read", __func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
+
+/* Print a "dwarf-read" debug statement if dwarf_read_debug is >= 2.  */
+
+#define dwarf_read_debug_printf_v(fmt, ...) \
+  do \
+    { \
+      if (dwarf_read_debug >= 2) \
+	debug_prefixed_printf ("dwarf-read", __func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
+
 /* When non-zero, dump DIEs after they are read in.  */
 static unsigned int dwarf_die_debug = 0;
 
@@ -6376,10 +6396,9 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 		    ? &dwo_file->sections.abbrev
 		    : &per_objfile->per_bfd->abbrev);
 
-  if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "Reading %s for %s:\n",
-			section->get_name (),
-			abbrev_section->get_file_name ());
+  dwarf_read_debug_printf ("Reading %s for %s:",
+			   section->get_name (),
+			   abbrev_section->get_file_name ());
 
   section->read (objfile);
   info_ptr = section->buffer;
@@ -6491,10 +6510,9 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 	}
       *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
 
-      if (dwarf_read_debug > 1)
-	fprintf_unfiltered (gdb_stdlog, "  offset %s, signature %s\n",
-			    sect_offset_str (sect_off),
-			    hex_string (header.signature));
+      dwarf_read_debug_printf_v ("  offset %s, signature %s",
+				 sect_offset_str (sect_off),
+				 hex_string (header.signature));
 
       info_ptr += length;
     }
@@ -7662,16 +7680,14 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
      and build a psymtab for each of them.  */
   dwarf2_build_include_psymtabs (cu, comp_unit_die, pst);
 
-  if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"Psymtab for %s unit @%s: %s - %s"
-			", %d global, %d static syms\n",
-			per_cu->is_debug_types ? "type" : "comp",
-			sect_offset_str (per_cu->sect_off),
-			paddress (gdbarch, pst->text_low (objfile)),
-			paddress (gdbarch, pst->text_high (objfile)),
-			(int) pst->global_psymbols.size (),
-			(int) pst->static_psymbols.size ());
+  dwarf_read_debug_printf ("Psymtab for %s unit @%s: %s - %s"
+			   ", %d global, %d static syms",
+			   per_cu->is_debug_types ? "type" : "comp",
+			   sect_offset_str (per_cu->sect_off),
+			   paddress (gdbarch, pst->text_low (objfile)),
+			   paddress (gdbarch, pst->text_high (objfile)),
+			   (int) pst->global_psymbols.size (),
+			   (int) pst->static_psymbols.size ());
 }
 
 /* Subroutine of dwarf2_build_psymtabs_hard to simplify it.
@@ -7837,8 +7853,7 @@ build_type_psymtabs_1 (dwarf2_per_objfile *per_objfile)
 	  [IWBN if DWO skeletons had DW_AT_stmt_list]
 	call FUNC  */
 
-  if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "Building type unit groups ...\n");
+  dwarf_read_debug_printf ("Building type unit groups ...");
 
   /* Sort in a separate table to maintain the order of all_type_units
      for .gdb_index: TU indices directly index all_type_units.  */
@@ -7883,19 +7898,19 @@ print_tu_stats (dwarf2_per_objfile *per_objfile)
 {
   struct tu_stats *tu_stats = &per_objfile->per_bfd->tu_stats;
 
-  fprintf_unfiltered (gdb_stdlog, "Type unit statistics:\n");
-  fprintf_unfiltered (gdb_stdlog, "  %zu TUs\n",
-		      per_objfile->per_bfd->all_type_units.size ());
-  fprintf_unfiltered (gdb_stdlog, "  %d uniq abbrev tables\n",
-		      tu_stats->nr_uniq_abbrev_tables);
-  fprintf_unfiltered (gdb_stdlog, "  %d symtabs from stmt_list entries\n",
-		      tu_stats->nr_symtabs);
-  fprintf_unfiltered (gdb_stdlog, "  %d symtab sharers\n",
-		      tu_stats->nr_symtab_sharers);
-  fprintf_unfiltered (gdb_stdlog, "  %d type units without a stmt_list\n",
-		      tu_stats->nr_stmt_less_type_units);
-  fprintf_unfiltered (gdb_stdlog, "  %d all_type_units reallocs\n",
-		      tu_stats->nr_all_type_units_reallocs);
+  dwarf_read_debug_printf ("Type unit statistics:");
+  dwarf_read_debug_printf ("  %zu TUs",
+			   per_objfile->per_bfd->all_type_units.size ());
+  dwarf_read_debug_printf ("  %d uniq abbrev tables",
+			   tu_stats->nr_uniq_abbrev_tables);
+  dwarf_read_debug_printf ("  %d symtabs from stmt_list entries",
+			   tu_stats->nr_symtabs);
+  dwarf_read_debug_printf ("  %d symtab sharers",
+			   tu_stats->nr_symtab_sharers);
+  dwarf_read_debug_printf ("  %d type units without a stmt_list",
+			   tu_stats->nr_stmt_less_type_units);
+  dwarf_read_debug_printf ("  %d all_type_units reallocs",
+			   tu_stats->nr_all_type_units_reallocs);
 }
 
 /* Traversal function for build_type_psymtabs.  */
@@ -8040,11 +8055,8 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 {
   struct objfile *objfile = per_objfile->objfile;
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "Building psymtabs of objfile %s ...\n",
-			  objfile_name (objfile));
-    }
+  dwarf_read_debug_printf ("Building psymtabs of objfile %s ...",
+			   objfile_name (objfile));
 
   scoped_restore restore_reading_psyms
     = make_scoped_restore (&per_objfile->per_bfd->reading_partial_symbols,
@@ -8087,7 +8099,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 			      build_type_psymtab_dependencies, per_objfile);
     }
 
-  if (dwarf_read_debug)
+  if (dwarf_read_debug > 0)
     print_tu_stats (per_objfile);
 
   set_partial_user (per_objfile);
@@ -8098,9 +8110,8 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
   /* At this point we want to keep the address map.  */
   save_psymtabs_addrmap.release ();
 
-  if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "Done building psymtabs of %s\n",
-			objfile_name (objfile));
+  dwarf_read_debug_printf ("Done building psymtabs of %s",
+			   objfile_name (objfile));
 }
 
 /* Load the partial DIEs for a secondary CU into memory.
@@ -8137,10 +8148,9 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
   const gdb_byte *info_ptr;
   struct objfile *objfile = per_objfile->objfile;
 
-  if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "Reading %s for %s\n",
-			section->get_name (),
-			section->get_file_name ());
+  dwarf_read_debug_printf ("Reading %s for %s",
+			   section->get_name (),
+			   section->get_file_name ());
 
   section->read (objfile);
 
@@ -9106,12 +9116,8 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
 static void
 process_queue (dwarf2_per_objfile *per_objfile)
 {
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Expanding one or more symtabs of objfile %s ...\n",
-			  objfile_name (per_objfile->objfile));
-    }
+  dwarf_read_debug_printf ("Expanding one or more symtabs of objfile %s ...",
+			   objfile_name (per_objfile->objfile));
 
   /* The queue starts out with one item, but following a DIE reference
      may load a new CU, adding it to the end of the queue.  */
@@ -9150,7 +9156,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
 		}
 
 	      if (dwarf_read_debug >= debug_print_threshold)
-		fprintf_unfiltered (gdb_stdlog, "Expanding symtab of %s\n", buf);
+		dwarf_read_debug_printf ("Expanding symtab of %s", buf);
 
 	      if (per_cu->is_debug_types)
 		process_full_type_unit (cu, item.pretend_language);
@@ -9158,7 +9164,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
 		process_full_comp_unit (cu, item.pretend_language);
 
 	      if (dwarf_read_debug >= debug_print_threshold)
-		fprintf_unfiltered (gdb_stdlog, "Done expanding %s\n", buf);
+		dwarf_read_debug_printf ("Done expanding %s", buf);
 	    }
 	}
 
@@ -9166,11 +9172,8 @@ process_queue (dwarf2_per_objfile *per_objfile)
       per_objfile->per_bfd->queue.pop ();
     }
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "Done expanding symtabs of %s.\n",
-			  objfile_name (per_objfile->objfile));
-    }
+  dwarf_read_debug_printf ("Done expanding symtabs of %s.",
+			   objfile_name (per_objfile->objfile));
 }
 
 /* Read in full symbols for PST, and anything it depends on.  */
@@ -11469,10 +11472,9 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
   dwo_unit->sect_off = sect_off;
   dwo_unit->length = cu->per_cu->length;
 
-  if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "  offset %s, dwo_id %s\n",
-			sect_offset_str (sect_off),
-			hex_string (dwo_unit->signature));
+  dwarf_read_debug_printf ("  offset %s, dwo_id %s",
+			   sect_offset_str (sect_off),
+			   hex_string (dwo_unit->signature));
 }
 
 /* Create the dwo_units for the CUs in a DWO_FILE.
@@ -11493,12 +11495,9 @@ create_cus_hash_table (dwarf2_per_objfile *per_objfile,
   if (info_ptr == NULL)
     return;
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "Reading %s for %s:\n",
-			  section.get_name (),
-			  section.get_file_name ());
-    }
+  dwarf_read_debug_printf ("Reading %s for %s:",
+			   section.get_name (),
+			   section.get_file_name ());
 
   end_ptr = info_ptr + section.size;
   while (info_ptr < end_ptr)
@@ -12030,13 +12029,9 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_objfile *per_objfile,
 
   gdb_assert (dwp_file->version == 1);
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "Reading %s %s/%s in DWP V1 file: %s\n",
-			  kind,
-			  pulongest (unit_index), hex_string (signature),
-			  dwp_file->name);
-    }
+  dwarf_read_debug_printf ("Reading %s %s/%s in DWP V1 file: %s",
+			   kind, pulongest (unit_index), hex_string (signature),
+			   dwp_file->name);
 
   /* Fetch the sections of this DWO unit.
      Put a limit on the number of sections we look for so that bad data
@@ -12115,11 +12110,9 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_objfile *per_objfile,
   /* Create one if necessary.  */
   if (*dwo_file_slot == NULL)
     {
-      if (dwarf_read_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "Creating virtual DWO: %s\n",
-			      virtual_dwo_name.c_str ());
-	}
+      dwarf_read_debug_printf ("Creating virtual DWO: %s",
+			       virtual_dwo_name.c_str ());
+
       dwo_file = new struct dwo_file;
       dwo_file->dwo_name = per_objfile->objfile->intern (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
@@ -12142,11 +12135,9 @@ create_dwo_unit_in_dwp_v1 (dwarf2_per_objfile *per_objfile,
     }
   else
     {
-      if (dwarf_read_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "Using existing virtual DWO: %s\n",
-			      virtual_dwo_name.c_str ());
-	}
+      dwarf_read_debug_printf ("Using existing virtual DWO: %s",
+			       virtual_dwo_name.c_str ());
+
       dwo_file = (struct dwo_file *) *dwo_file_slot;
     }
 
@@ -12227,13 +12218,9 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_objfile *per_objfile,
 
   gdb_assert (dwp_file->version == 2);
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "Reading %s %s/%s in DWP V2 file: %s\n",
-			  kind,
-			  pulongest (unit_index), hex_string (signature),
-			  dwp_file->name);
-    }
+  dwarf_read_debug_printf ("Reading %s %s/%s in DWP V2 file: %s",
+			   kind, pulongest (unit_index), hex_string (signature),
+			   dwp_file->name);
 
   /* Fetch the section offsets of this DWO unit.  */
 
@@ -12308,11 +12295,9 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_objfile *per_objfile,
   /* Create one if necessary.  */
   if (*dwo_file_slot == NULL)
     {
-      if (dwarf_read_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "Creating virtual DWO: %s\n",
-			      virtual_dwo_name.c_str ());
-	}
+      dwarf_read_debug_printf ("Creating virtual DWO: %s",
+			       virtual_dwo_name.c_str ());
+
       dwo_file = new struct dwo_file;
       dwo_file->dwo_name = per_objfile->objfile->intern (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
@@ -12353,11 +12338,9 @@ create_dwo_unit_in_dwp_v2 (dwarf2_per_objfile *per_objfile,
     }
   else
     {
-      if (dwarf_read_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "Using existing virtual DWO: %s\n",
-			      virtual_dwo_name.c_str ());
-	}
+      dwarf_read_debug_printf ("Using existing virtual DWO: %s",
+			       virtual_dwo_name.c_str ());
+
       dwo_file = (struct dwo_file *) *dwo_file_slot;
     }
 
@@ -12401,13 +12384,9 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_objfile *per_objfile,
 
   gdb_assert (dwp_file->version == 5);
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "Reading %s %s/%s in DWP V5 file: %s\n",
-			  kind,
-			  pulongest (unit_index), hex_string (signature),
-			  dwp_file->name);
-    }
+  dwarf_read_debug_printf ("Reading %s %s/%s in DWP V5 file: %s",
+			   kind, pulongest (unit_index), hex_string (signature),
+			   dwp_file->name);
 
   /* Fetch the section offsets of this DWO unit.  */
 
@@ -12488,11 +12467,9 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_objfile *per_objfile,
   /* Create one if necessary.  */
   if (*dwo_file_slot == NULL)
     {
-      if (dwarf_read_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "Creating virtual DWO: %s\n",
-			      virtual_dwo_name.c_str ());
-	}
+      dwarf_read_debug_printf ("Creating virtual DWO: %s",
+			       virtual_dwo_name.c_str ());
+
       dwo_file = new struct dwo_file;
       dwo_file->dwo_name = per_objfile->objfile->intern (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
@@ -12538,11 +12515,9 @@ create_dwo_unit_in_dwp_v5 (dwarf2_per_objfile *per_objfile,
     }
   else
     {
-      if (dwarf_read_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "Using existing virtual DWO: %s\n",
-			      virtual_dwo_name.c_str ());
-	}
+      dwarf_read_debug_printf ("Using existing virtual DWO: %s",
+			       virtual_dwo_name.c_str ());
+
       dwo_file = (struct dwo_file *) *dwo_file_slot;
     }
 
@@ -12822,8 +12797,8 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
   gdb_bfd_ref_ptr dbfd = open_dwo_file (per_objfile, dwo_name, comp_dir);
   if (dbfd == NULL)
     {
-      if (dwarf_read_debug)
-	fprintf_unfiltered (gdb_stdlog, "DWO file not found: %s\n", dwo_name);
+      dwarf_read_debug_printf ("DWO file not found: %s", dwo_name);
+
       return NULL;
     }
 
@@ -12851,8 +12826,7 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
 				    rcuh_kind::TYPE);
     }
 
-  if (dwarf_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "DWO file found: %s\n", dwo_name);
+  dwarf_read_debug_printf ("DWO file found: %s", dwo_name);
 
   return dwo_file.release ();
 }
@@ -13114,8 +13088,8 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
 
   if (dbfd == NULL)
     {
-      if (dwarf_read_debug)
-	fprintf_unfiltered (gdb_stdlog, "DWP file not found: %s\n", dwp_name.c_str ());
+      dwarf_read_debug_printf ("DWP file not found: %s", dwp_name.c_str ());
+
       return std::unique_ptr<dwp_file> ();
     }
 
@@ -13169,14 +13143,10 @@ open_and_init_dwp_file (dwarf2_per_objfile *per_objfile)
   dwp_file->loaded_cus = allocate_dwp_loaded_cutus_table ();
   dwp_file->loaded_tus = allocate_dwp_loaded_cutus_table ();
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "DWP file found: %s\n", dwp_file->name);
-      fprintf_unfiltered (gdb_stdlog,
-			  "    %s CUs, %s TUs\n",
-			  pulongest (dwp_file->cus ? dwp_file->cus->nr_units : 0),
-			  pulongest (dwp_file->tus ? dwp_file->tus->nr_units : 0));
-    }
+  dwarf_read_debug_printf ("DWP file found: %s", dwp_file->name);
+  dwarf_read_debug_printf ("    %s CUs, %s TUs",
+			   pulongest (dwp_file->cus ? dwp_file->cus->nr_units : 0),
+			   pulongest (dwp_file->tus ? dwp_file->tus->nr_units : 0));
 
   return dwp_file;
 }
@@ -13240,13 +13210,10 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 
 	  if (dwo_cutu != NULL)
 	    {
-	      if (dwarf_read_debug)
-		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "Virtual DWO %s %s found: @%s\n",
-				      kind, hex_string (signature),
-				      host_address_to_string (dwo_cutu));
-		}
+	      dwarf_read_debug_printf ("Virtual DWO %s %s found: @%s",
+				       kind, hex_string (signature),
+				       host_address_to_string (dwo_cutu));
+
 	      return dwo_cutu;
 	    }
 	}
@@ -13290,12 +13257,10 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 
 	  if (dwo_cutu != NULL)
 	    {
-	      if (dwarf_read_debug)
-		{
-		  fprintf_unfiltered (gdb_stdlog, "DWO %s %s(%s) found: @%s\n",
-				      kind, dwo_name, hex_string (signature),
-				      host_address_to_string (dwo_cutu));
-		}
+	      dwarf_read_debug_printf ("DWO %s %s(%s) found: @%s",
+				       kind, dwo_name, hex_string (signature),
+				       host_address_to_string (dwo_cutu));
+
 	      return dwo_cutu;
 	    }
 	}
@@ -13305,11 +13270,8 @@ lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
      someone deleted the DWO/DWP file, or the search path isn't set up
      correctly to find the file.  */
 
-  if (dwarf_read_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "DWO %s %s(%s) not found\n",
-			  kind, dwo_name, hex_string (signature));
-    }
+  dwarf_read_debug_printf ("DWO %s %s(%s) not found",
+			   kind, dwo_name, hex_string (signature));
 
   /* This is a warning and not a complaint because it can be caused by
      pilot error (e.g., user accidentally deleting the DWO).  */

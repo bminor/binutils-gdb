@@ -1,3 +1,8 @@
+2020-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (dwarf_read_debug_printf,
+	dwarf_read_debug_printf_v): New macros, use throughout the file.
+
 2020-11-12  Shahab Vahedi  <shahab@synopsys.com>
 
 	* arc-linux-tdep.c (collect_register): Populate "eret" by
