@@ -3024,30 +3024,53 @@ find_pc_compunit_symtab (CORE_ADDR pc)
 struct symbol *
 find_symbol_at_address (CORE_ADDR address)
 {
+  /* A helper function to search a given symtab for a symbol matching
+     ADDR.  */
+  auto search_symtab = [] (compunit_symtab *symtab, CORE_ADDR addr) -> symbol *
+    {
+      const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (symtab);
+
+      for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
+	{
+	  const struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	  struct block_iterator iter;
+	  struct symbol *sym;
+
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
+	    {
+	      if (SYMBOL_CLASS (sym) == LOC_STATIC
+		  && SYMBOL_VALUE_ADDRESS (sym) == addr)
+		return sym;
+	    }
+	}
+      return nullptr;
+    };
+
   for (objfile *objfile : current_program_space->objfiles ())
     {
+      /* If this objfile doesn't have "quick" functions, then it may
+	 have been read with -readnow, in which case we need to search
+	 the symtabs directly.  */
       if (objfile->sf == NULL
 	  || objfile->sf->qf->find_compunit_symtab_by_address == NULL)
-	continue;
-
-      struct compunit_symtab *symtab
-	= objfile->sf->qf->find_compunit_symtab_by_address (objfile, address);
-      if (symtab != NULL)
 	{
-	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (symtab);
-
-	  for (int i = GLOBAL_BLOCK; i <= STATIC_BLOCK; ++i)
+	  for (compunit_symtab *symtab : objfile->compunits ())
 	    {
-	      const struct block *b = BLOCKVECTOR_BLOCK (bv, i);
-	      struct block_iterator iter;
-	      struct symbol *sym;
-
-	      ALL_BLOCK_SYMBOLS (b, iter, sym)
-		{
-		  if (SYMBOL_CLASS (sym) == LOC_STATIC
-		      && SYMBOL_VALUE_ADDRESS (sym) == address)
-		    return sym;
-		}
+	      struct symbol *sym = search_symtab (symtab, address);
+	      if (sym != nullptr)
+		return sym;
+	    }
+	}
+      else
+	{
+	  struct compunit_symtab *symtab
+	    = objfile->sf->qf->find_compunit_symtab_by_address (objfile,
+								address);
+	  if (symtab != NULL)
+	    {
+	      struct symbol *sym = search_symtab (symtab, address);
+	      if (sym != nullptr)
+		return sym;
 	    }
 	}
     }

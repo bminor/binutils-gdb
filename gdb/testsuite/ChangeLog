@@ -1,3 +1,8 @@
+2020-11-12  Tom Tromey  <tom@tromey.com>
+
+	PR rust/26799:
+	* gdb.rust/traits.exp: Remove kfails.
+
 2020-11-12  Gary Benson <gbenson@redhat.com>
 
 	* gdb.threads/tls-so_extern_main.c (tls_ptr): Add missing return

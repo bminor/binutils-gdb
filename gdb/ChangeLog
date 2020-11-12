@@ -1,3 +1,9 @@
+2020-11-12  Tom Tromey  <tom@tromey.com>
+
+	PR rust/26799:
+	* symtab.c (find_symbol_at_address): Search symtabs if no psymtabs
+	exist.
+
 2020-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* features/Makefile (XMLTOC): Add rx.xml.
