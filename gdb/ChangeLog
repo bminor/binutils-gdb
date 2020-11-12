@@ -1,5 +1,10 @@
 2020-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.c (dw2_do_instantiate_symtab): Fix call to
+	dwarf2_queue_guard.
+
+2020-11-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (dw2_do_instantiate_symtab): Fix typo in
 	comment.
 

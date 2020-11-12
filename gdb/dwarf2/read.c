@@ -2435,7 +2435,7 @@ dw2_do_instantiate_symtab (dwarf2_per_cu_data *per_cu,
   /* The destructor of dwarf2_queue_guard frees any entries left on
      the queue.  After this point we're guaranteed to leave this function
      with the dwarf queue empty.  */
-  dwarf2_queue_guard q_guard (dwarf2_per_objfile);
+  dwarf2_queue_guard q_guard (per_objfile);
 
   if (!per_objfile->symtab_set_p (per_cu))
     {
