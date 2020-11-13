@@ -67,6 +67,7 @@ typedef struct dwo_info
 {
   dwo_type          type;
   const char *      value;
+  dwarf_vma         cu_offset;
   struct dwo_info * next;
 } dwo_info;
 
@@ -1892,32 +1893,33 @@ get_AT_name (unsigned long attribute)
 }
 
 static void
-add_dwo_info (const char * field, dwo_type type)
+add_dwo_info (const char * value, dwarf_vma cu_offset, dwo_type type)
 {
   dwo_info * dwinfo = xmalloc (sizeof * dwinfo);
 
-  dwinfo->type = type;
-  dwinfo->value = field;
-  dwinfo->next = first_dwo_info;
+  dwinfo->type   = type;
+  dwinfo->value  = value;
+  dwinfo->cu_offset = cu_offset;
+  dwinfo->next   = first_dwo_info;
   first_dwo_info = dwinfo;
 }
 
 static void
-add_dwo_name (const char * name)
+add_dwo_name (const char * name, dwarf_vma cu_offset)
 {
-  add_dwo_info (name, DWO_NAME);
+  add_dwo_info (name, cu_offset, DWO_NAME);
 }
 
 static void
-add_dwo_dir (const char * dir)
+add_dwo_dir (const char * dir, dwarf_vma cu_offset)
 {
-  add_dwo_info (dir, DWO_DIR);
+  add_dwo_info (dir, cu_offset, DWO_DIR);
 }
 
 static void
-add_dwo_id (const char * id)
+add_dwo_id (const char * id, dwarf_vma cu_offset)
 {
-  add_dwo_info (id, DWO_ID);
+  add_dwo_info (id, cu_offset, DWO_ID);
 }
 
 static void
@@ -2876,16 +2878,16 @@ read_and_display_attr_value (unsigned long           attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_strp:
-		add_dwo_name ((const char *) fetch_indirect_string (uvalue));
+		add_dwo_name ((const char *) fetch_indirect_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_strp_alt:
-		add_dwo_name ((const char *) fetch_alt_indirect_string (uvalue));
+		add_dwo_name ((const char *) fetch_alt_indirect_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_str_index:
-		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, FALSE));
+		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, FALSE), cu_offset);
 		break;
 	      case DW_FORM_string:
-		add_dwo_name ((const char *) orig_data);
+		add_dwo_name ((const char *) orig_data, cu_offset);
 		break;
 	      default:
 		warn (_("Unsupported form (%s) for attribute %s\n"),
@@ -2900,19 +2902,19 @@ read_and_display_attr_value (unsigned long           attribute,
 	    switch (form)
 	      {
 	      case DW_FORM_strp:
-		add_dwo_dir ((const char *) fetch_indirect_string (uvalue));
+		add_dwo_dir ((const char *) fetch_indirect_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_strp_alt:
-		add_dwo_dir (fetch_alt_indirect_string (uvalue));
+		add_dwo_dir (fetch_alt_indirect_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_line_strp:
-		add_dwo_dir ((const char *) fetch_indirect_line_string (uvalue));
+		add_dwo_dir ((const char *) fetch_indirect_line_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_str_index:
-		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, FALSE));
+		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, FALSE), cu_offset);
 		break;
 	      case DW_FORM_string:
-		add_dwo_dir ((const char *) orig_data);
+		add_dwo_dir ((const char *) orig_data, cu_offset);
 		break;
 	      default:
 		warn (_("Unsupported form (%s) for attribute %s\n"),
@@ -2927,7 +2929,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	      {
 	      case DW_FORM_data8:
 		/* FIXME: Record the length of the ID as well ?  */
-		add_dwo_id ((const char *) (data - 8));
+		add_dwo_id ((const char *) (data - 8), cu_offset);
 		break;
 	      default:
 		warn (_("Unsupported form (%s) for attribute %s\n"),
@@ -11148,18 +11150,50 @@ load_separate_debug_files (void * file, const char * filename)
     {
       free_dwo_info ();
 
-      if (process_debug_info (& debug_displays[info].section, file, abbrev, TRUE, FALSE))
+      if (process_debug_info (& debug_displays[info].section, file, abbrev,
+			      TRUE, FALSE))
 	{
 	  bfd_boolean introduced = FALSE;
 	  dwo_info *   dwinfo;
 	  const char * dir = NULL;
 	  const char * id = NULL;
+	  const char * name = NULL;
 
 	  for (dwinfo = first_dwo_info; dwinfo != NULL; dwinfo = dwinfo->next)
 	    {
+	      /* Accumulate NAME, DIR and ID fields.  */
 	      switch (dwinfo->type)
 		{
 		case DWO_NAME:
+		  if (name != NULL)
+		    warn (_("Multiple DWO_NAMEs encountered for the same CU\n"));
+		  name = dwinfo->value;
+		  break;
+
+		case DWO_DIR:
+		  /* There can be multiple DW_AT_comp_dir entries in a CU,
+		     so do not complain.  */
+		  dir = dwinfo->value;
+		  break;
+
+		case DWO_ID:
+		  if (id != NULL)
+		    warn (_("multiple DWO_IDs encountered for the same CU\n"));
+		  id = dwinfo->value;
+		  break;
+
+		default:
+		  error (_("Unexpected DWO INFO type"));
+		  break;
+		}
+
+	      /* If we have reached the end of our list, or we are changing
+		 CUs, then display the information that we have accumulated
+		 so far.  */
+	      if (name != NULL
+		  && (dwinfo->next == NULL
+		      || dwinfo->next->cu_offset != dwinfo->cu_offset))
+		{
 		  if (do_debug_links)
 		    {
 		      if (! introduced)
@@ -11169,30 +11203,19 @@ load_separate_debug_files (void * file, const char * filename)
 			  introduced = TRUE;
 			}
 
-		      printf (_("  Name:      %s\n"), dwinfo->value);
+		      printf (_("  Name:      %s\n"), name);
 		      printf (_("  Directory: %s\n"), dir ? dir : _("<not-found>"));
 		      if (id != NULL)
 			display_data (printf (_("  ID:       ")), (unsigned char *) id, 8);
 		      else
-			printf (_("  ID: <unknown>\n"));
+			printf (_("  ID:        <not specified>\n"));
 		      printf ("\n\n");
 		    }
 
 		  if (do_follow_links)
-		    load_dwo_file (filename, dwinfo->value, dir, id);
-		  break;
+		    load_dwo_file (filename, name, dir, id);
 
-		case DWO_DIR:
-		  dir = dwinfo->value;
-		  break;
-
-		case DWO_ID:
-		  id = dwinfo->value;
-		  break;
-
-		default:
-		  error (_("Unexpected DWO INFO type"));
-		  break;
+		  name = dir = id = NULL;
 		}
 	    }
 	}

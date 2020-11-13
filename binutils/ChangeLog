@@ -1,3 +1,20 @@
+2020-11-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 26829
+	* dwarf.c (struct dwo_info): Add cu_offset field.
+	(add_dwo_info): Add cu_offset parameter.  Record in new dwo_info
+	struct.
+	(add_dwo_name): Add cu_offset field.
+	(add_dwo_dir): Add cu_offset field.
+	(add_dwo_id): Add cu_offset field.
+	(read_and_display_attr_value): Pass cu_offset to dwo recording
+	functions.
+	(load_separate_debug_files): Accumulate name, dir and id values
+	and display once for each CU.
+	* testsuite/binutils-all/dwo.sL Use a separate CU for the second
+	dwo link.
+	* testsuite/binutils-all/readelf.k2: Update expected output.
+
 2020-11-11  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* dwarf.c (display_debug_rnglists_list): Only bias the
