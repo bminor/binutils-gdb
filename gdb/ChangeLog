@@ -1,3 +1,17 @@
+2020-11-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26835
+	* arm-tdep.c (class arm_instruction_reader): New.
+	(target_arm_instruction_reader): New.
+	(arm_analyze_prologue): Add instruction reader parameter and use
+	it.  Use arm_expand_immediate.
+	(class target_arm_instruction_reader): Adjust.
+	(arm_skip_prologue): Adjust.
+	(arm_expand_immediate): New.
+	(arm_scan_prologue): Adjust.
+	(arm_analyze_prologue_test): New.
+	(class test_arm_instruction_reader): New.
+
 2020-11-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-lang.c (fortran_argument_convert): Add declaration.  Add

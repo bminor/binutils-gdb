@@ -285,10 +285,34 @@ struct arm_prologue_cache
   struct trad_frame_saved_reg *saved_regs;
 };
 
-static CORE_ADDR arm_analyze_prologue (struct gdbarch *gdbarch,
-				       CORE_ADDR prologue_start,
-				       CORE_ADDR prologue_end,
-				       struct arm_prologue_cache *cache);
+namespace {
+
+/* Abstract class to read ARM instructions from memory.  */
+
+class arm_instruction_reader
+{
+public:
+  /* Read a 4 bytes instruction bytes from memory using the BYTE_ORDER
+     endianness.  */
+  virtual uint32_t read (CORE_ADDR memaddr, bfd_endian byte_order) const = 0;
+};
+
+/* Read instructions from target memory.  */
+
+class target_arm_instruction_reader : public arm_instruction_reader
+{
+public:
+  uint32_t read (CORE_ADDR memaddr, bfd_endian byte_order) const override
+  {
+    return read_code_unsigned_integer (memaddr, 4, byte_order);
+  }
+};
+
+} /* namespace */
+
+static CORE_ADDR arm_analyze_prologue
+  (struct gdbarch *gdbarch, CORE_ADDR prologue_start, CORE_ADDR prologue_end,
+   struct arm_prologue_cache *cache, const arm_instruction_reader &insn_reader);
 
 /* Architecture version for displaced stepping.  This effects the behaviour of
    certain instructions, and really should not be hard-wired.  */
@@ -1383,8 +1407,9 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	    analyzed_limit = thumb_analyze_prologue (gdbarch, func_addr,
 						     post_prologue_pc, NULL);
 	  else
-	    analyzed_limit = arm_analyze_prologue (gdbarch, func_addr,
-						   post_prologue_pc, NULL);
+	    analyzed_limit
+	      = arm_analyze_prologue (gdbarch, func_addr, post_prologue_pc,
+				      NULL, target_arm_instruction_reader ());
 
 	  if (analyzed_limit != post_prologue_pc)
 	    return func_addr;
@@ -1409,7 +1434,8 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (arm_pc_is_thumb (gdbarch, pc))
     return thumb_analyze_prologue (gdbarch, pc, limit_pc, NULL);
   else
-    return arm_analyze_prologue (gdbarch, pc, limit_pc, NULL);
+    return arm_analyze_prologue (gdbarch, pc, limit_pc, NULL,
+				 target_arm_instruction_reader ());
 }
 
 /* *INDENT-OFF* */
@@ -1485,6 +1511,26 @@ arm_instruction_restores_sp (unsigned int insn)
   return 0;
 }
 
+/* Implement immediate value decoding, as described in section A5.2.4
+   (Modified immediate constants in ARM instructions) of the ARM Architecture
+   Reference Manual (ARMv7-A and ARMv7-R edition).  */
+
+static uint32_t
+arm_expand_immediate (uint32_t imm)
+{
+  /* Immediate values are 12 bits long.  */
+  gdb_assert ((imm & 0xfffff000) == 0);
+
+  uint32_t unrotated_value = imm & 0xff;
+  uint32_t rotate_amount = (imm & 0xf00) >> 7;
+
+  if (rotate_amount == 0)
+    return unrotated_value;
+
+  return ((unrotated_value >> rotate_amount)
+	  | (unrotated_value << (32 - rotate_amount)));
+}
+
 /* Analyze an ARM mode prologue starting at PROLOGUE_START and
    continuing no further than PROLOGUE_END.  If CACHE is non-NULL,
    fill it in.  Return the first address not recognized as a prologue
@@ -1498,7 +1544,8 @@ arm_instruction_restores_sp (unsigned int insn)
 static CORE_ADDR
 arm_analyze_prologue (struct gdbarch *gdbarch,
 		      CORE_ADDR prologue_start, CORE_ADDR prologue_end,
-		      struct arm_prologue_cache *cache)
+		      struct arm_prologue_cache *cache,
+		      const arm_instruction_reader &insn_reader)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int regno;
@@ -1524,8 +1571,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
        current_pc < prologue_end;
        current_pc += 4)
     {
-      unsigned int insn
-	= read_code_unsigned_integer (current_pc, 4, byte_order_for_code);
+      uint32_t insn = insn_reader.read (current_pc, byte_order_for_code);
 
       if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
@@ -1535,20 +1581,16 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
       else if ((insn & 0xfff00000) == 0xe2800000	/* add Rd, Rn, #n */
 	       && pv_is_register (regs[bits (insn, 16, 19)], ARM_SP_REGNUM))
 	{
-	  unsigned imm = insn & 0xff;                   /* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
+	  uint32_t imm = arm_expand_immediate (insn & 0xfff);
 	  int rd = bits (insn, 12, 15);
-	  imm = (imm >> rot) | (imm << (32 - rot));
 	  regs[rd] = pv_add_constant (regs[bits (insn, 16, 19)], imm);
 	  continue;
 	}
       else if ((insn & 0xfff00000) == 0xe2400000	/* sub Rd, Rn, #n */
 	       && pv_is_register (regs[bits (insn, 16, 19)], ARM_SP_REGNUM))
 	{
-	  unsigned imm = insn & 0xff;                   /* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;           /* rotate amount */
+	  uint32_t imm = arm_expand_immediate (insn & 0xfff);
 	  int rd = bits (insn, 12, 15);
-	  imm = (imm >> rot) | (imm << (32 - rot));
 	  regs[rd] = pv_add_constant (regs[bits (insn, 16, 19)], -imm);
 	  continue;
 	}
@@ -1604,16 +1646,12 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	}
       else if ((insn & 0xfffff000) == 0xe24cb000)	/* sub fp, ip #n */
 	{
-	  unsigned imm = insn & 0xff;			/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
-	  imm = (imm >> rot) | (imm << (32 - rot));
+	  uint32_t imm = arm_expand_immediate (insn & 0xfff);
 	  regs[ARM_FP_REGNUM] = pv_add_constant (regs[ARM_IP_REGNUM], -imm);
 	}
       else if ((insn & 0xfffff000) == 0xe24dd000)	/* sub sp, sp #n */
 	{
-	  unsigned imm = insn & 0xff;			/* immediate value */
-	  unsigned rot = (insn & 0xf00) >> 7;		/* rotate amount */
-	  imm = (imm >> rot) | (imm << (32 - rot));
+	  uint32_t imm = arm_expand_immediate(insn & 0xfff);
 	  regs[ARM_SP_REGNUM] = pv_add_constant (regs[ARM_SP_REGNUM], -imm);
 	}
       else if ((insn & 0xffff7fff) == 0xed6d0103	/* stfe f?,
@@ -1841,7 +1879,8 @@ arm_scan_prologue (struct frame_info *this_frame,
   if (prev_pc < prologue_end)
     prologue_end = prev_pc;
 
-  arm_analyze_prologue (gdbarch, prologue_start, prologue_end, cache);
+  arm_analyze_prologue (gdbarch, prologue_start, prologue_end, cache,
+			target_arm_instruction_reader ());
 }
 
 static struct arm_prologue_cache *
@@ -9492,6 +9531,7 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 namespace selftests
 {
 static void arm_record_test (void);
+static void arm_analyze_prologue_test ();
 }
 #endif
 
@@ -9618,6 +9658,7 @@ vfp - VFP co-processor."),
 
 #if GDB_SELF_TEST
   selftests::register_test ("arm-record", selftests::arm_record_test);
+  selftests::register_test ("arm_analyze_prologue", selftests::arm_analyze_prologue_test);
 #endif
 
 }
@@ -13254,6 +13295,61 @@ arm_record_test (void)
     SELF_CHECK (arm_record.arm_regs[0] == 7);
   }
 }
+
+/* Instruction reader from manually cooked instruction sequences.  */
+
+class test_arm_instruction_reader : public arm_instruction_reader
+{
+public:
+  explicit test_arm_instruction_reader (gdb::array_view<const uint32_t> insns)
+    : m_insns (insns)
+  {}
+
+  uint32_t read (CORE_ADDR memaddr, enum bfd_endian byte_order) const override
+  {
+    SELF_CHECK (memaddr % 4 == 0);
+    SELF_CHECK (memaddr / 4 < m_insns.size ());
+
+    return m_insns[memaddr / 4];
+  }
+
+private:
+  const gdb::array_view<const uint32_t> m_insns;
+};
+
+static void
+arm_analyze_prologue_test ()
+{
+  for (bfd_endian endianness : {BFD_ENDIAN_LITTLE, BFD_ENDIAN_BIG})
+    {
+      struct gdbarch_info info;
+      gdbarch_info_init (&info);
+      info.byte_order = endianness;
+      info.byte_order_for_code = endianness;
+      info.bfd_arch_info = bfd_scan_arch ("arm");
+
+      struct gdbarch *gdbarch = gdbarch_find_by_info (info);
+
+      SELF_CHECK (gdbarch != NULL);
+
+      /* The "sub" instruction contains an immediate value rotate count of 0,
+	 which resulted in a 32-bit shift of a 32-bit value, caught by
+	 UBSan.  */
+      const uint32_t insns[] = {
+	  0xe92d4ff0, /* push    {r4, r5, r6, r7, r8, r9, sl, fp, lr} */
+	  0xe1a05000, /* mov     r5, r0 */
+	  0xe5903020, /* ldr     r3, [r0, #32] */
+	  0xe24dd044, /* sub     sp, sp, #68     ; 0x44 */
+      };
+
+      test_arm_instruction_reader mem_reader (insns);
+      arm_prologue_cache cache;
+      cache.saved_regs = trad_frame_alloc_saved_regs (gdbarch);
+
+      arm_analyze_prologue (gdbarch, 0, sizeof (insns) - 1, &cache, mem_reader);
+    }
+}
+
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
