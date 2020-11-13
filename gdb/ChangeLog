@@ -1,5 +1,13 @@
 2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR fortran/26155
+	* f-lang.c (fortran_argument_convert): Delete declaration.
+	(fortran_prepare_argument): New function.
+	(evaluate_subexp_f): Move logic to new function
+	fortran_prepare_argument.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.y (f77_keywords): Add 'associated'.
 	* f-lang.c (fortran_associated): New function.
 	(evaluate_subexp_f): Handle FORTRAN_ASSOCIATED.

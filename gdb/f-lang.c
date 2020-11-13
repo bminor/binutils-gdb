@@ -68,8 +68,10 @@ show_fortran_array_slicing_debug (struct ui_file *file, int from_tty,
 
 /* Local functions */
 
-static struct value *fortran_argument_convert (struct value *value,
-					       bool is_artificial);
+static value *fortran_prepare_argument (struct expression *exp, int *pos,
+					int arg_num, bool is_internal_call_p,
+					struct type *func_type,
+					enum noside noside);
 
 /* Return the encoding that should be used for the character type
    TYPE.  */
@@ -1278,22 +1280,11 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	    int tem = 1;
 	    for (; tem <= nargs; tem++)
 	      {
-		argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
-		/* Arguments in Fortran are passed by address.  Coerce the
-		   arguments here rather than in value_arg_coerce as
-		   otherwise the call to malloc to place the non-lvalue
-		   parameters in target memory is hit by this Fortran
-		   specific logic.  This results in malloc being called
-		   with a pointer to an integer followed by an attempt to
-		   malloc the arguments to malloc in target memory.
-		   Infinite recursion ensues.  */
-		if (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC)
-		  {
-		    bool is_artificial
-		      = TYPE_FIELD_ARTIFICIAL (value_type (arg1), tem - 1);
-		    argvec[tem] = fortran_argument_convert (argvec[tem],
-							    is_artificial);
-		  }
+		bool is_internal_func = (code == TYPE_CODE_INTERNAL_FUNCTION);
+		argvec[tem]
+		  = fortran_prepare_argument (exp, pos, (tem - 1),
+					      is_internal_func,
+					      value_type (arg1), noside);
 	      }
 	    argvec[tem] = 0;	/* signal end of arglist */
 	    if (noside == EVAL_SKIP)
@@ -1778,6 +1769,59 @@ fortran_argument_convert (struct value *value, bool is_artificial)
 	return value_addr (value); /* Program variables, e.g. arrays.  */
     }
     return value;
+}
+
+/* Prepare (and return) an argument value ready for an inferior function
+   call to a Fortran function.  EXP and POS are the expressions describing
+   the argument to prepare.  ARG_NUM is the argument number being
+   prepared, with 0 being the first argument and so on.  FUNC_TYPE is the
+   type of the function being called.
+
+   IS_INTERNAL_CALL_P is true if this is a call to a function of type
+   TYPE_CODE_INTERNAL_FUNCTION, otherwise this parameter is false.
+
+   NOSIDE has its usual meaning for expression parsing (see eval.c).
+
+   Arguments in Fortran are normally passed by address, we coerce the
+   arguments here rather than in value_arg_coerce as otherwise the call to
+   malloc (to place the non-lvalue parameters in target memory) is hit by
+   this Fortran specific logic.  This results in malloc being called with a
+   pointer to an integer followed by an attempt to malloc the arguments to
+   malloc in target memory.  Infinite recursion ensues.  */
+
+static value *
+fortran_prepare_argument (struct expression *exp, int *pos,
+                         int arg_num, bool is_internal_call_p,
+                         struct type *func_type, enum noside noside)
+{
+  if (is_internal_call_p)
+    return evaluate_subexp_with_coercion (exp, pos, noside);
+
+  bool is_artificial = ((arg_num >= func_type->num_fields ())
+			? true
+			: TYPE_FIELD_ARTIFICIAL (func_type, arg_num));
+
+  /* If this is an artificial argument, then either, this is an argument
+     beyond the end of the known arguments, or possibly, there are no known
+     arguments (maybe missing debug info).
+
+     For these artificial arguments, if the user has prefixed it with '&'
+     (for address-of), then lets always allow this to succeed, even if the
+     argument is not actually in inferior memory.  This will allow the user
+     to pass arguments to a Fortran function even when there's no debug
+     information.
+
+     As we already pass the address of non-artificial arguments, all we
+     need to do if skip the UNOP_ADDR operator in the expression and mark
+     the argument as non-artificial.  */
+  if (is_artificial && exp->elts[*pos].opcode == UNOP_ADDR)
+    {
+      (*pos)++;
+      is_artificial = false;
+    }
+
+  struct value *arg_val = evaluate_subexp_with_coercion (exp, pos, noside);
+  return fortran_argument_convert (arg_val, is_artificial);
 }
 
 /* See f-lang.h.  */
