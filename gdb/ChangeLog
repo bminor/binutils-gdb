@@ -1,3 +1,9 @@
+2020-11-13  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/23034
+	* elfread.c (elf_symfile_segments): Output a BFD file name
+	for the "Loadable section ... outside of ELF segments" warning.
+
 2020-11-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26835
