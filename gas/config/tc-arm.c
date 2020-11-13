@@ -26518,14 +26518,14 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT  & fpu_vfp_ext_v1
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
- mnCEF(vmla,     _vmla,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mac_maybe_scalar),
- mnCEF(vmul,     _vmul,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mul),
 
  mcCE(fcpyd,	eb00b40, 2, (RVD, RVD),	      vfp_dp_rd_rm),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_vfp_ext_v1xd
 
+ mnCEF(vmla,     _vmla,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mac_maybe_scalar),
+ mnCEF(vmul,     _vmul,    3, (RNSDQMQ, oRNSDQMQ, RNSDQ_RNSC_MQ_RR), neon_mul),
  MNCE(vmov,   0,	1, (VMOV),	      neon_mov),
  mcCE(fmrs,	e100a10, 2, (RR, RVS),	      vfp_reg_from_sp),
  mcCE(fmsr,	e000a10, 2, (RVS, RR),	      vfp_sp_from_reg),
