@@ -1,3 +1,10 @@
+2020-11-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-lang.c (fortran_argument_convert): Add declaration.  Add
+	header comment, taken from f-lang.h.  Make static.
+	* f-lang.h (f77_get_dynamic_array_length): Delete declaration.
+	(fortran_argument_convert): Delete declaration.
+
 2020-11-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ada-exp.y (find_primitive_type): Make parameter const.

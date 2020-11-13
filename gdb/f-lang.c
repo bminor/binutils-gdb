@@ -41,6 +41,9 @@
 
 /* Local functions */
 
+static struct value *fortran_argument_convert (struct value *value,
+					       bool is_artificial);
+
 /* Return the encoding that should be used for the character type
    TYPE.  */
 
@@ -844,9 +847,21 @@ _initialize_f_language ()
   f_type_data = gdbarch_data_register_post_init (build_fortran_types);
 }
 
-/* See f-lang.h.  */
+/* Ensures that function argument VALUE is in the appropriate form to
+   pass to a Fortran function.  Returns a possibly new value that should
+   be used instead of VALUE.
 
-struct value *
+   When IS_ARTIFICIAL is true this indicates an artificial argument,
+   e.g. hidden string lengths which the GNU Fortran argument passing
+   convention specifies as being passed by value.
+
+   When IS_ARTIFICIAL is false, the argument is passed by pointer.  If the
+   value is already in target memory then return a value that is a pointer
+   to VALUE.  If VALUE is not in memory (e.g. an integer literal), allocate
+   space in the target, copy VALUE in, and return a pointer to the in
+   memory copy.  */
+
+static struct value *
 fortran_argument_convert (struct value *value, bool is_artificial)
 {
   if (!is_artificial)
