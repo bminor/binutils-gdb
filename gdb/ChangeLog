@@ -1,5 +1,11 @@
 2020-11-13  Keith Seitz  <keiths@redhat.com>
 
+	https://bugzilla.redhat.com/show_bug.cgi?id=1553086
+	* elfread.c (elf_symfile_segments): Omit "Loadable section ...
+	outside of ELF segments" warning for debugin
+
+2020-11-13  Keith Seitz  <keiths@redhat.com>
+
 	PR gdb/23034
 	* elfread.c (elf_symfile_segments): Output a BFD file name
 	for the "Loadable section ... outside of ELF segments" warning.
