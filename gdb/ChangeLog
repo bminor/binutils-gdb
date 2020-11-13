@@ -1,3 +1,13 @@
+2020-11-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR cli/26879
+	* f-exp.y (COMPLETE): New token.
+	(exp): Two new rules for tab-completion.
+	(saw_name_at_eof): New static global.
+	(last_was_structop): Likewise.
+	(yylex): Set new variables, and return COMPLETE token at the end
+	of the input stream in some cases.
+
 2020-11-14  Tom Tromey  <tom@tromey.com>
 
 	* infrun.c (fetch_inferior_event): Use "bool" for should_stop.

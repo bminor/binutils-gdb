@@ -1,3 +1,9 @@
+2020-11-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR cli/26879
+	* gdb.fortran/completion.exp: New file.
+	* gdb.fortran/completion.f90: New file.
+
 2020-11-12  Joseph Myers  <joseph@codesourcery.com>
 
 	* lib/gdb.exp (gdb_file_cmd): Check for case where $arg.exe exists

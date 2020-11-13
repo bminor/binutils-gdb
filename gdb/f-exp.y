@@ -149,6 +149,7 @@ static int parse_number (struct parser_state *, const char *, int,
 %token <lval> BOOLEAN_LITERAL
 %token <ssym> NAME 
 %token <tsym> TYPENAME
+%token <voidval> COMPLETE
 %type <sval> name
 %type <ssym> name_not_typename
 
@@ -373,6 +374,22 @@ exp     :       exp '%' name
 			  write_exp_string (pstate, $3);
 			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
 	;
+
+exp     :       exp '%' name COMPLETE
+			{ pstate->mark_struct_expression ();
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+			  write_exp_string (pstate, $3);
+			  write_exp_elt_opcode (pstate, STRUCTOP_STRUCT); }
+	;
+
+exp     :       exp '%' COMPLETE
+			{ struct stoken s;
+			  pstate->mark_struct_expression ();
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR);
+			  s.ptr = "";
+			  s.length = 0;
+			  write_exp_string (pstate, s);
+			  write_exp_elt_opcode (pstate, STRUCTOP_PTR); }
 
 /* Binary operators in order of decreasing precedence.  */
 
@@ -1100,6 +1117,15 @@ match_string_literal (void)
     }
 }
 
+/* This is set if a NAME token appeared at the very end of the input
+   string, with no whitespace separating the name from the EOF.  This
+   is used only when parsing to do field name completion.  */
+static bool saw_name_at_eof;
+
+/* This is set if the previously-returned token was a structure
+   operator '%'.  */
+static bool last_was_structop;
+
 /* Read one token, getting characters through lexptr.  */
 
 static int
@@ -1109,7 +1135,10 @@ yylex (void)
   int namelen;
   unsigned int token;
   const char *tokstart;
-  
+  bool saw_structop = last_was_structop;
+
+  last_was_structop = false;
+
  retry:
  
   pstate->prev_lexptr = pstate->lexptr;
@@ -1156,6 +1185,13 @@ yylex (void)
   switch (c = *tokstart)
     {
     case 0:
+      if (saw_name_at_eof)
+	{
+	  saw_name_at_eof = false;
+	  return COMPLETE;
+	}
+      else if (pstate->parse_completion && saw_structop)
+	return COMPLETE;
       return 0;
       
     case ' ':
@@ -1257,12 +1293,14 @@ yylex (void)
 	pstate->lexptr = p;
 	return toktype;
       }
-      
+
+    case '%':
+      last_was_structop = true;
+      /* Fall through.  */
     case '+':
     case '-':
     case '*':
     case '/':
-    case '%':
     case '|':
     case '&':
     case '^':
@@ -1374,7 +1412,10 @@ yylex (void)
 	    return NAME_OR_INT;
 	  }
       }
-    
+
+    if (pstate->parse_completion && *pstate->lexptr == '\0')
+      saw_name_at_eof = true;
+
     /* Any other kind of symbol */
     yylval.ssym.sym = result;
     yylval.ssym.is_a_field_of_this = false;
@@ -1391,6 +1432,8 @@ f_language::parser (struct parser_state *par_state) const
 							parser_debug);
   gdb_assert (par_state != NULL);
   pstate = par_state;
+  last_was_structop = false;
+  saw_name_at_eof = false;
   paren_depth = 0;
 
   struct type_stack stack;
