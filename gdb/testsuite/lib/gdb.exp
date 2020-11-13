@@ -1846,6 +1846,11 @@ proc gdb_file_cmd { arg } {
     global GDB
     global last_loaded_file
 
+    # GCC for Windows target may create foo.exe given "-o foo".
+    if { ![file exists $arg] && [file exists "$arg.exe"] } {
+	set arg "$arg.exe"
+    }
+
     # Save this for the benefit of gdbserver-support.exp.
     set last_loaded_file $arg
 
