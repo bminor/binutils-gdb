@@ -1,3 +1,10 @@
+2020-12-01  Sergio Durigan Junior  <sergiodj@sergiodj.net>
+
+	* dwarf2/read.c (dwz_search_other_debugdirs): New function.
+	(dwarf2_get_dwz_file): Convert 'filename' to a
+	std::string.  Use dwz_search_other_debugdirs to search for DWZ
+	files in the debug-file-directories provided by the user as well.
+
 2020-12-01  Tom Tromey  <tom@tromey.com>
 
 	* parse.c (expr_builder::expr_builder): Initialize expout.

@@ -2185,12 +2185,100 @@ locate_dwz_sections (bfd *abfd, asection *sectp, dwz_file *dwz_file)
     }
 }
 
+/* Attempt to find a .dwz file (whose full path is represented by
+   FILENAME) in all of the specified debug file directories provided.
+
+   Return the equivalent gdb_bfd_ref_ptr of the .dwz file found, or
+   nullptr if it could not find anything.  */
+
+static gdb_bfd_ref_ptr
+dwz_search_other_debugdirs (std::string &filename, bfd_byte *buildid,
+			    size_t buildid_len)
+{
+  /* Let's assume that the path represented by FILENAME has the
+     "/.dwz/" subpath in it.  This is what (most) GNU/Linux
+     distributions do, anyway.  */
+  size_t dwz_pos = filename.find ("/.dwz/");
+
+  if (dwz_pos == std::string::npos)
+    return nullptr;
+
+  /* This is an obvious assertion, but it's here more to educate
+     future readers of this code that FILENAME at DWZ_POS *must*
+     contain a directory separator.  */
+  gdb_assert (IS_DIR_SEPARATOR (filename[dwz_pos]));
+
+  gdb_bfd_ref_ptr dwz_bfd;
+  std::vector<gdb::unique_xmalloc_ptr<char>> debugdir_vec
+    = dirnames_to_char_ptr_vec (debug_file_directory);
+
+  for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
+    {
+      /* The idea is to iterate over the
+	 debug file directories provided by the user and
+	 replace the hard-coded path in the "filename" by each
+	 debug-file-directory.
+
+	 For example, suppose that filename is:
+
+	   /usr/lib/debug/.dwz/foo.dwz
+
+	 And suppose that we have "$HOME/bar" as the
+	 debug-file-directory.  We would then adjust filename
+	 to look like:
+
+	   $HOME/bar/.dwz/foo.dwz
+
+	 which would hopefully allow us to find the alt debug
+	 file.  */
+      std::string ddir = debugdir.get ();
+
+      if (ddir.empty ())
+	continue;
+
+      /* Make sure the current debug-file-directory ends with a
+	 directory separator.  This is needed because, if FILENAME
+	 contains something like "/usr/lib/abcde/.dwz/foo.dwz" and
+	 DDIR is "/usr/lib/abc", then could wrongfully skip it
+	 below.  */
+      if (!IS_DIR_SEPARATOR (ddir.back ()))
+	ddir += SLASH_STRING;
+
+      /* Check whether the beginning of FILENAME is DDIR.  If it is,
+	 then we are dealing with a file which we already attempted to
+	 open before, so we just skip it and continue processing the
+	 remaining debug file directories.  */
+      if (filename.size () > ddir.size ()
+	  && filename.compare (0, ddir.size (), ddir) == 0)
+	continue;
+
+      /* Replace FILENAME's default debug-file-directory with
+	 DDIR.  */
+      std::string new_filename = ddir + &filename[dwz_pos + 1];
+
+      dwz_bfd = gdb_bfd_open (new_filename.c_str (), gnutarget);
+
+      if (dwz_bfd == nullptr)
+	continue;
+
+      if (!build_id_verify (dwz_bfd.get (), buildid_len, buildid))
+	{
+	  dwz_bfd.reset (nullptr);
+	  continue;
+	}
+
+      /* Found it.  */
+      break;
+    }
+
+  return dwz_bfd;
+}
+
 /* See dwarf2read.h.  */
 
 struct dwz_file *
 dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd)
 {
-  const char *filename;
   bfd_size_type buildid_len_arg;
   size_t buildid_len;
   bfd_byte *buildid;
@@ -2214,21 +2302,19 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd)
 
   buildid_len = (size_t) buildid_len_arg;
 
-  filename = data.get ();
+  std::string filename = data.get ();
 
-  std::string abs_storage;
-  if (!IS_ABSOLUTE_PATH (filename))
+  if (!IS_ABSOLUTE_PATH (filename.c_str ()))
     {
       gdb::unique_xmalloc_ptr<char> abs
 	= gdb_realpath (bfd_get_filename (per_bfd->obfd));
 
-      abs_storage = ldirname (abs.get ()) + SLASH_STRING + filename;
-      filename = abs_storage.c_str ();
+      filename = ldirname (abs.get ()) + SLASH_STRING + filename;
     }
 
   /* First try the file name given in the section.  If that doesn't
      work, try to use the build-id instead.  */
-  gdb_bfd_ref_ptr dwz_bfd (gdb_bfd_open (filename, gnutarget));
+  gdb_bfd_ref_ptr dwz_bfd (gdb_bfd_open (filename.c_str (), gnutarget));
   if (dwz_bfd != NULL)
     {
       if (!build_id_verify (dwz_bfd.get (), buildid_len, buildid))
@@ -2237,6 +2323,13 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd)
 
   if (dwz_bfd == NULL)
     dwz_bfd = build_id_to_debug_bfd (buildid_len, buildid);
+
+  if (dwz_bfd == nullptr)
+    {
+      /* If the user has provided us with different
+	 debug file directories, we can try them in order.  */
+      dwz_bfd = dwz_search_other_debugdirs (filename, buildid, buildid_len);
+    }
 
   if (dwz_bfd == nullptr)
     {
