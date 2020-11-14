@@ -29,7 +29,7 @@ Disassembly of section .text:
   3a:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   3d:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   40:	ff d0                	call   \*%rax
-  42:	2e 2e 2e 2e 2e 89 75 f4 	cs cs cs cs mov %esi,%cs:-0xc\(%rbp\)
+  42:	2e 2e 2e 2e 2e 89 75 f4 	cs cs cs cs cs mov %esi,-0xc\(%rbp\)
   4a:	55                   	push   %rbp
   4b:	55                   	push   %rbp
   4c:	64 89 04 25 01 00 00 00 	mov    %eax,%fs:0x1
@@ -38,7 +38,7 @@ Disassembly of section .text:
   5a:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   5d:	89 75 f4             	mov    %esi,-0xc\(%rbp\)
   60:	e8 [0-9a-f ]+       	call   .*
-  65:	2e 2e 2e 2e 2e 89 75 f4 	cs cs cs cs mov %esi,%cs:-0xc\(%rbp\)
+  65:	2e 2e 2e 2e 2e 89 75 f4 	cs cs cs cs cs mov %esi,-0xc\(%rbp\)
   6d:	2e 2e 55             	cs cs push %rbp
   70:	55                   	push   %rbp
   71:	55                   	push   %rbp

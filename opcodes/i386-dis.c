@@ -9141,22 +9141,34 @@ ckprefix (void)
 	case 0x2e:
 	  prefixes |= PREFIX_CS;
 	  last_seg_prefix = i;
-	  active_seg_prefix = PREFIX_CS;
+
+	  if (address_mode != mode_64bit)
+	    active_seg_prefix = PREFIX_CS;
+
 	  break;
 	case 0x36:
 	  prefixes |= PREFIX_SS;
 	  last_seg_prefix = i;
-	  active_seg_prefix = PREFIX_SS;
+
+	  if (address_mode != mode_64bit)
+	    active_seg_prefix = PREFIX_SS;
+
 	  break;
 	case 0x3e:
 	  prefixes |= PREFIX_DS;
 	  last_seg_prefix = i;
-	  active_seg_prefix = PREFIX_DS;
+
+	  if (address_mode != mode_64bit)
+	    active_seg_prefix = PREFIX_DS;
+
 	  break;
 	case 0x26:
 	  prefixes |= PREFIX_ES;
 	  last_seg_prefix = i;
-	  active_seg_prefix = PREFIX_ES;
+
+	  if (address_mode != mode_64bit)
+	    active_seg_prefix = PREFIX_ES;
+
 	  break;
 	case 0x64:
 	  prefixes |= PREFIX_FS;
@@ -13656,7 +13668,10 @@ static void
 NOTRACK_Fixup (int bytemode ATTRIBUTE_UNUSED,
 	       int sizeflag ATTRIBUTE_UNUSED)
 {
-  if (active_seg_prefix == PREFIX_DS
+
+  /* Since active_seg_prefix is not set in 64-bit mode, check whether
+     we've seen a PREFIX_DS.  */
+  if ((prefixes & PREFIX_DS) != 0
       && (address_mode != mode_64bit || last_data_prefix < 0))
     {
       /* NOTRACK prefix is only valid on indirect branch instructions.

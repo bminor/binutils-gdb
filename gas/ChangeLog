@@ -1,3 +1,41 @@
+2020-11-14  Borislav Petkov  <bp@suse.de>
+
+	* testsuite/gas/i386/x86-64-segovr.d: Adjust regexes.
+	* testsuite/gas/i386/x86-64-nops.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-1-g64.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-1-core2.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-1-k8.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-2.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-4.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-4-core2.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-4-k8.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-5-k8.d: Likewise.
+	* testsuite/gas/i386/x86-64-nops-7.d: Likewise.
+	* testsuite/gas/i386/x86-64-nop-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1a.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1b.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1c.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1d.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-1g.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-2c.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-6.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-7.d: Likewise.
+	* testsuite/gas/i386/x86-64-align-branch-8.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-1-core2.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-1-k8.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-1.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-2.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-3.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-4-core2.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-4-k8.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-4.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-5-k8.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops-5.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-nops.d:: Likewise.
+
 2020-11-12  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* config/tc-msp430.c (OPTION_MOVE_DATA): Define.

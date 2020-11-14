@@ -1,3 +1,10 @@
+2020-11-14  Borislav Petkov  <bp@suse.de>
+
+	* i386-dis.c (ckprefix): Do not assign active_seg_prefix in
+	64-bit addressing mode.
+	(NOTRACK_Fixup): Test prefixes for PREFIX_DS, instead of
+	active_seg_prefix.
+
 2020-11-11  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* aarch64-tbl.h: Enable -march=armv8.6-a+ls64.

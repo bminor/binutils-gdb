@@ -1,3 +1,9 @@
+2020-11-14  Borislav Petkov  <bp@suse.de>
+
+	* testsuite/ld-x86-64/pe-x86-64-4.od: Adjust regexes.
+	* testsuite/ld-x86-64/tlsld3.dd: Likewise.
+	* testsuite/ld-x86-64/tlsld4.dd: Likewise.
+
 2020-11-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26869
