@@ -1,3 +1,7 @@
+2020-11-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-tdep.c (class arm_instruction_reader) <read>: Fix comment.
+
 2020-11-13  Tom Tromey  <tom@tromey.com>
 
 	* c-lang.c (convert_ucn, convert_octal, convert_hex)

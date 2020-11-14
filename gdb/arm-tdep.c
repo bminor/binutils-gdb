@@ -292,8 +292,7 @@ namespace {
 class arm_instruction_reader
 {
 public:
-  /* Read a 4 bytes instruction bytes from memory using the BYTE_ORDER
-     endianness.  */
+  /* Read a 4 bytes instruction from memory using the BYTE_ORDER endianness.  */
   virtual uint32_t read (CORE_ADDR memaddr, bfd_endian byte_order) const = 0;
 };
 
