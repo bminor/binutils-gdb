@@ -398,8 +398,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
    OUTPUT.  LENGTH is the maximum length of the UCN, either 4 or 8.
    Returns a pointer to just after the final digit of the UCN.  */
 
-static char *
-convert_ucn (char *p, char *limit, const char *dest_charset,
+static const char *
+convert_ucn (const char *p, const char *limit, const char *dest_charset,
 	     struct obstack *output, int length)
 {
   unsigned long result = 0;
@@ -440,9 +440,9 @@ emit_numeric_character (struct type *type, unsigned long value,
    farther than LIMIT.  The result is written to OUTPUT.  Returns a
    pointer to just after the final digit of the escape sequence.  */
 
-static char *
-convert_octal (struct type *type, char *p, 
-	       char *limit, struct obstack *output)
+static const char *
+convert_octal (struct type *type, const char *p,
+	       const char *limit, struct obstack *output)
 {
   int i;
   unsigned long value = 0;
@@ -465,9 +465,9 @@ convert_octal (struct type *type, char *p,
    than LIMIT.  The result is written to OUTPUT.  Returns a pointer to
    just after the final digit of the escape sequence.  */
 
-static char *
-convert_hex (struct type *type, char *p,
-	     char *limit, struct obstack *output)
+static const char *
+convert_hex (struct type *type, const char *p,
+	     const char *limit, struct obstack *output)
 {
   unsigned long value = 0;
 
@@ -496,9 +496,9 @@ convert_hex (struct type *type, char *p,
    written to OUTPUT.  Returns a pointer to just past the final
    character of the escape sequence.  */
 
-static char *
+static const char *
 convert_escape (struct type *type, const char *dest_charset,
-		char *p, char *limit, struct obstack *output)
+		const char *p, const char *limit, struct obstack *output)
 {
   /* Skip the backslash.  */
   ADVANCE;
@@ -550,16 +550,16 @@ convert_escape (struct type *type, const char *dest_charset,
    and TYPE is the type of target character to use.  */
 
 static void
-parse_one_string (struct obstack *output, char *data, int len,
+parse_one_string (struct obstack *output, const char *data, int len,
 		  const char *dest_charset, struct type *type)
 {
-  char *limit;
+  const char *limit;
 
   limit = data + len;
 
   while (data < limit)
     {
-      char *p = data;
+      const char *p = data;
 
       /* Look for next escape, or the end of the input.  */
       while (p < limit && *p != '\\')
@@ -567,7 +567,7 @@ parse_one_string (struct obstack *output, char *data, int len,
       /* If we saw a run of characters, convert them all.  */
       if (p > data)
 	convert_between_encodings (host_charset (), dest_charset,
-				   (gdb_byte *) data, p - data, 1,
+				   (const gdb_byte *) data, p - data, 1,
 				   output, translit_none);
       /* If we saw an escape, convert it.  */
       if (p < limit)

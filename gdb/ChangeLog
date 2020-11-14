@@ -1,3 +1,8 @@
+2020-11-13  Tom Tromey  <tom@tromey.com>
+
+	* c-lang.c (convert_ucn, convert_octal, convert_hex)
+	(convert_escape, parse_one_string): Constify.
+
 2020-11-13  Keith Seitz  <keiths@redhat.com>
 
 	https://bugzilla.redhat.com/show_bug.cgi?id=1553086
