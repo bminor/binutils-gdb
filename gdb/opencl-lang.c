@@ -327,8 +327,8 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
 /* OpenCL vector component access.  */
 
 static struct value *
-opencl_component_ref (struct expression *exp, struct value *val, char *comps,
-		      enum noside noside)
+opencl_component_ref (struct expression *exp, struct value *val,
+		      const char *comps, enum noside noside)
 {
   LONGEST lowb, highb;
   int src_len;

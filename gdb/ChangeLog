@@ -1,3 +1,7 @@
+2020-11-14  Tom Tromey  <tom@tromey.com>
+
+	* opencl-lang.c (opencl_component_ref): Make "comps" const.
+
 2020-11-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* arm-tdep.c (class arm_instruction_reader) <read>: Fix comment.
