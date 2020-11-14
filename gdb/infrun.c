@@ -3914,7 +3914,7 @@ fetch_inferior_event ()
     if (!ecs->wait_some_more)
       {
 	struct inferior *inf = find_inferior_ptid (ecs->target, ecs->ptid);
-	int should_stop = 1;
+	bool should_stop = true;
 	struct thread_info *thr = ecs->event_thread;
 
 	delete_just_stopped_threads_infrun_breakpoints ();
