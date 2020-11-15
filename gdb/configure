@@ -10469,6 +10469,9 @@ $as_echo "$LIBGMP" >&6; }
 
 
 
+if test "$HAVE_LIBGMP" != yes; then
+  as_fn_error $? "GMP is missing or unusable" "$LINENO" 5
+fi
 
 
 # Check whether --with-mpfr was given.

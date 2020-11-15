@@ -1,5 +1,11 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.ac: Generate an error if a usable GMP library
+	could not be found.
+	* configure: Regenerate.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Add support for --with-libgmp-prefix.
 	* Makefile.in (LIBGMP): New variable.
 	(CLIBS): Include $(LIBGMP).
