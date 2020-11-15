@@ -203,6 +203,9 @@ LIBXXHASH = @LIBXXHASH@
 # Where is libipt?  This will be empty if libipt was not available.
 LIBIPT = @LIBIPT@
 
+# Where is libgmp?
+LIBGMP = @LIBGMP@
+
 # Where is libmpfr?  This will be empty if libmpfr was not available.
 LIBMPFR = @LIBMPFR@
 
@@ -632,7 +635,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(LIBCTF) $(BFD) $(ZLIB) \
 	@LIBS@ @GUILE_LIBS@ @PYTHON_LIBS@ \
 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
 	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
-	$(LIBMPFR) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
+	$(LIBMPFR) $(LIBGMP) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
 	$(DEBUGINFOD_LIBS)
 CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \

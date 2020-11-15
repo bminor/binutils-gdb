@@ -229,6 +229,9 @@
 /* Define if you have the expat library. */
 #undef HAVE_LIBEXPAT
 
+/* Define if you have the gmp library. */
+#undef HAVE_LIBGMP
+
 /* Define to 1 if you have the `libiconvlist' function. */
 #undef HAVE_LIBICONVLIST
 

@@ -1,3 +1,10 @@
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: Add support for --with-libgmp-prefix.
+	* Makefile.in (LIBGMP): New variable.
+	(CLIBS): Include $(LIBGMP).
+	* configure, config.in: Regenerate
+
 2020-11-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR cli/26879
