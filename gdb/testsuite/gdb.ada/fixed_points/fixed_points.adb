@@ -14,6 +14,7 @@
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 with System;
+with Pck; use Pck;
 
 procedure Fixed_Points is
 
@@ -59,4 +60,7 @@ begin
    Subtype_Object := 1.0/16.0;
    New_Type_Object := 1.0/16.0;
    Overprecise_Object := Overprecise_Fixed_Point'Small * 2;
+   Do_Nothing (FP1_Var'Address);
+   Do_Nothing (FP2_Var'Address);
+   Do_Nothing (FP3_Var'Address);
 end Fixed_Points;

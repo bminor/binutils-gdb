@@ -1027,6 +1027,9 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
       deprecated_set_value_type (val, type);
     }
 
+  if (is_fixed_point_type (type))
+    type = fixed_point_type_base_type (type);
+
   switch (type->code ())
     {
     default:

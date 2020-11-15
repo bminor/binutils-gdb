@@ -794,6 +794,31 @@ generic_val_print_float (struct type *type, struct ui_file *stream,
   print_floating (valaddr, type, stream);
 }
 
+/* generic_val_print helper for TYPE_CODE_FIXED_POINT.  */
+
+static void
+generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
+			       const struct value_print_options *options)
+{
+  if (options->format)
+    value_print_scalar_formatted (val, options, 0, stream);
+  else
+    {
+      struct type *type = value_type (val);
+
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      gdb_mpf f;
+
+      f.read_fixed_point (valaddr, TYPE_LENGTH (type),
+			  type_byte_order (type), type->is_unsigned (),
+			  fixed_point_scaling_factor (type));
+
+      const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11Fg" : "%.17Fg";
+      gdb::unique_xmalloc_ptr<char> str = gmp_string_asprintf (fmt, f.val);
+      fprintf_filtered (stream, "%s", str.get ());
+    }
+}
+
 /* generic_value_print helper for TYPE_CODE_COMPLEX.  */
 
 static void
@@ -844,6 +869,10 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
   struct type *type = value_type (val);
 
   type = check_typedef (type);
+
+  if (is_fixed_point_type (type))
+    type = fixed_point_type_base_type (type);
+
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
@@ -907,6 +936,10 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 	value_print_scalar_formatted (val, options, 0, stream);
       else
 	generic_val_print_float (type, stream, val, options);
+      break;
+
+    case TYPE_CODE_FIXED_POINT:
+      generic_val_print_fixed_point (val, stream, options);
       break;
 
     case TYPE_CODE_VOID:

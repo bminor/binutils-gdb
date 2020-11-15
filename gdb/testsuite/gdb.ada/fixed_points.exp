@@ -49,3 +49,14 @@ gdb_test "print Overprecise_Object" \
 
 gdb_test "ptype Overprecise_Object" \
          "= delta 0.135791"
+
+# FP*_Var...
+
+gdb_test "print fp1_var" \
+         " = 0.25"
+
+gdb_test "print fp2_var" \
+         " = -0.01"
+
+gdb_test "print fp3_var" \
+         " = 0.1"

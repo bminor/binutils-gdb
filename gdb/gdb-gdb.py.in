@@ -229,6 +229,11 @@ class StructMainTypePrettyPrinter:
             # tail_call_list is not printed.
         elif type_specific_kind == "TYPE_SPECIFIC_SELF_TYPE":
             img = "self_type = %s" % type_specific['self_type']
+        elif type_specific_kind == "TYPE_SPECIFIC_FIXED_POINT":
+            # The scaling factor is an opaque structure, so we cannot
+            # decode its value from Python (not without insider knowledge).
+            img = ('scaling_factor: <opaque> (call __gmpz_dump with '
+                   ' _mp_num and _mp_den fields if needed)')
         else:
             img = ("type_specific = ??? (unknown type_secific_kind: %s)"
                    % type_specific_kind)

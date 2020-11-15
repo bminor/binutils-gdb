@@ -2758,6 +2758,9 @@ value_as_address (struct value *val)
 LONGEST
 unpack_long (struct type *type, const gdb_byte *valaddr)
 {
+  if (is_fixed_point_type (type))
+    type = fixed_point_type_base_type (type);
+
   enum bfd_endian byte_order = type_byte_order (type);
   enum type_code code = type->code ();
   int len = TYPE_LENGTH (type);
@@ -2805,6 +2808,17 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_FLT:
     case TYPE_CODE_DECFLOAT:
       return target_float_to_longest (valaddr, type);
+
+    case TYPE_CODE_FIXED_POINT:
+      {
+	gdb_mpq vq;
+	vq.read_fixed_point (valaddr, len, byte_order, nosign,
+			     fixed_point_scaling_factor (type));
+
+	gdb_mpz vz;
+	mpz_tdiv_q (vz.val, mpq_numref (vq.val), mpq_denref (vq.val));
+	return vz.as_integer<LONGEST> ();
+      }
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:

@@ -1,5 +1,38 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-valprint.c (ada_value_print_1): Add fixed-point type handling.
+	* dwarf2/read.c (get_dwarf2_rational_constant)
+	(get_dwarf2_unsigned_rational_constant, finish_fixed_point_type)
+	(has_zero_over_zero_small_attribute): New functions.
+	read_base_type, set_die_type): Add fixed-point type handling.
+	* gdb-gdb.py.in: Add fixed-point type handling.
+	* gdbtypes.c: #include "gmp-utils.h".
+	(create_range_type, set_type_code): Add fixed-point type handling.
+	(init_fixed_point_type): New function.
+	(is_integral_type, is_scalar_type): Add fixed-point type handling.
+	(print_fixed_point_type_info): New function.
+	(recursive_dump_type, copy_type_recursive): Add fixed-point type
+	handling.
+	(fixed_point_type_storage): New typedef.
+	(fixed_point_objfile_key): New static global.
+	(allocate_fixed_point_type_info, is_fixed_point_type): New functions.
+	(fixed_point_type_base_type, fixed_point_scaling_factor): New
+	functions.
+	* gdbtypes.h: #include "gmp-utils.h".
+	(enum type_code) <TYPE_SPECIFIC_FIXED_POINT>: New enum.
+	(union type_specific) <fixed_point_info>: New field.
+	(struct fixed_point_type_info): New struct.
+	(INIT_FIXED_POINT_SPECIFIC, TYPE_FIXED_POINT_INFO): New macros.
+	(init_fixed_point_type, is_fixed_point_type)
+	(fixed_point_type_base_type, fixed_point_scaling_factor)
+	(allocate_fixed_point_type_info): Add declarations.
+	* valprint.c (generic_val_print_fixed_point): New function.
+	(generic_value_print): Add fixed-point type handling.
+	* value.c (value_as_address, unpack_long): Add fixed-point type
+	handling.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* utils.h (uinteger_pow): Add declaration.
 	* utils.c (uinteger_pow): Moved here (without changes)...
 	* valarith.c (uinteger_pow): ... from here.

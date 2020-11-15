@@ -40,6 +40,7 @@
 #include "gdbcore.h"
 #include "floatformat.h"
 #include <algorithm>
+#include "gmp-utils.h"
 
 /* Initialize BADNESS constants.  */
 
@@ -950,6 +951,8 @@ create_range_type (struct type *result_type, struct type *index_type,
 
   result_type->set_bounds (bounds);
 
+  if (index_type->code () == TYPE_CODE_FIXED_POINT)
+    result_type->set_is_unsigned (index_type->is_unsigned ());
   /* Note that the signed-ness of a range type can't simply be copied
      from the underlying type.  Consider a case where the underlying
      type is 'int', but the range type can hold 0..65535, and where
@@ -957,7 +960,7 @@ create_range_type (struct type *result_type, struct type *index_type,
      case, if we copy the underlying type's sign, then reading some
      range values will cause an unwanted sign extension.  So, we have
      some heuristics here instead.  */
-  if (low_bound->kind () == PROP_CONST && low_bound->const_val () >= 0)
+  else if (low_bound->kind () == PROP_CONST && low_bound->const_val () >= 0)
     result_type->set_is_unsigned (true);
   /* Ada allows the declaration of range types whose upper bound is
      less than the lower bound, so checking the lower bound is not
@@ -3136,6 +3139,9 @@ set_type_code (struct type *type, enum type_code code)
 	break;
       case TYPE_CODE_FUNC:
 	INIT_FUNC_SPECIFIC (type);
+        break;
+      case TYPE_CODE_FIXED_POINT:
+	INIT_FIXED_POINT_SPECIFIC (type);
 	break;
     }
 }
@@ -3352,6 +3358,24 @@ init_pointer_type (struct objfile *objfile,
   return t;
 }
 
+/* Allocate a TYPE_CODE_FIXED_POINT type structure associated with OBJFILE.
+   BIT is the pointer type size in bits.
+   UNSIGNED_P should be nonzero if the type is unsigned.
+   NAME is the type name.  */
+
+struct type *
+init_fixed_point_type (struct objfile *objfile,
+		       int bit, int unsigned_p, const char *name)
+{
+  struct type *t;
+
+  t = init_type (objfile, TYPE_CODE_FIXED_POINT, bit, name);
+  if (unsigned_p)
+    t->set_is_unsigned (true);
+
+  return t;
+}
+
 /* See gdbtypes.h.  */
 
 unsigned
@@ -3498,6 +3522,7 @@ is_integral_type (struct type *t)
   t = check_typedef (t);
   return
     ((t != NULL)
+     && !is_fixed_point_type (t)
      && ((t->code () == TYPE_CODE_INT)
 	 || (t->code () == TYPE_CODE_ENUM)
 	 || (t->code () == TYPE_CODE_FLAGS)
@@ -3522,6 +3547,9 @@ int
 is_scalar_type (struct type *type)
 {
   type = check_typedef (type);
+
+  if (is_fixed_point_type (type))
+    return 0; /* Implemented as a scalar, but more like a floating point.  */
 
   switch (type->code ())
     {
@@ -4887,6 +4915,16 @@ print_gnat_stuff (struct type *type, int spaces)
     }
 }
 
+/* Print the contents of the TYPE's type_specific union, assuming that
+   its type-specific kind is TYPE_SPECIFIC_FIXED_POINT.  */
+
+static void
+print_fixed_point_type_info (struct type *type, int spaces)
+{
+  printfi_filtered (spaces + 2, "scaling factor: %s\n",
+		    fixed_point_scaling_factor (type).str ().get ());
+}
+
 static struct obstack dont_print_type_obstack;
 
 /* Print the dynamic_prop PROP.  */
@@ -5024,6 +5062,9 @@ recursive_dump_type (struct type *type, int spaces)
       break;
     case TYPE_CODE_NAMESPACE:
       printf_filtered ("(TYPE_CODE_NAMESPACE)");
+      break;
+    case TYPE_CODE_FIXED_POINT:
+      printf_filtered ("(TYPE_CODE_FIXED_POINT)");
       break;
     default:
       printf_filtered ("(UNKNOWN TYPE CODE)");
@@ -5214,6 +5255,12 @@ recursive_dump_type (struct type *type, int spaces)
       case TYPE_SPECIFIC_SELF_TYPE:
 	printfi_filtered (spaces, "self_type ");
 	gdb_print_host_address (TYPE_SELF_TYPE (type), gdb_stdout);
+	puts_filtered ("\n");
+	break;
+
+      case TYPE_SPECIFIC_FIXED_POINT:
+	printfi_filtered (spaces, "fixed_point_info ");
+	print_fixed_point_type_info (type, spaces);
 	puts_filtered ("\n");
 	break;
 
@@ -5448,6 +5495,11 @@ copy_type_recursive (struct objfile *objfile,
       set_type_self_type (new_type,
 			  copy_type_recursive (objfile, TYPE_SELF_TYPE (type),
 					       copied_types));
+      break;
+    case TYPE_SPECIFIC_FIXED_POINT:
+      INIT_FIXED_POINT_SPECIFIC (new_type);
+      TYPE_FIXED_POINT_INFO (new_type)->scaling_factor
+	= TYPE_FIXED_POINT_INFO (type)->scaling_factor;
       break;
     case TYPE_SPECIFIC_INT:
       TYPE_SPECIFIC_FIELD (new_type) = TYPE_SPECIFIC_INT;
@@ -5751,6 +5803,85 @@ append_composite_type_field (struct type *t, const char *name,
 {
   append_composite_type_field_aligned (t, name, field, 0);
 }
+
+
+
+/* We manage the lifetimes of fixed_point_type_info objects by
+   attaching them to the objfile.  Currently, these objects are
+   modified during construction, and GMP does not provide a way to
+   hash the contents of an mpq_t; so it's a bit of a pain to hash-cons
+   them.  If we did do this, they could be moved to the per-BFD and
+   shared across objfiles.  */
+typedef std::vector<std::unique_ptr<fixed_point_type_info>>
+    fixed_point_type_storage;
+
+/* Key used for managing the storage of fixed-point type info.  */
+static const struct objfile_key<fixed_point_type_storage>
+    fixed_point_objfile_key;
+
+/* See gdbtypes.h.  */
+
+fixed_point_type_info *
+allocate_fixed_point_type_info (struct type *type)
+{
+  std::unique_ptr<fixed_point_type_info> up (new fixed_point_type_info);
+  fixed_point_type_info *result;
+
+  if (TYPE_OBJFILE_OWNED (type))
+    {
+      fixed_point_type_storage *storage
+	= fixed_point_objfile_key.get (TYPE_OBJFILE (type));
+      if (storage == nullptr)
+	storage = fixed_point_objfile_key.emplace (TYPE_OBJFILE (type));
+      result = up.get ();
+      storage->push_back (std::move (up));
+    }
+  else
+    {
+      /* We just leak the memory, because that's what we do generally
+	 for non-objfile-attached types.  */
+      result = up.release ();
+    }
+
+  return result;
+}
+
+/* See gdbtypes.h.  */
+
+bool
+is_fixed_point_type (struct type *type)
+{
+  while (check_typedef (type)->code () == TYPE_CODE_RANGE)
+    type = TYPE_TARGET_TYPE (check_typedef (type));
+  type = check_typedef (type);
+
+  return type->code () == TYPE_CODE_FIXED_POINT;
+}
+
+/* See gdbtypes.h.  */
+
+struct type *
+fixed_point_type_base_type (struct type *type)
+{
+  while (check_typedef (type)->code () == TYPE_CODE_RANGE)
+    type = TYPE_TARGET_TYPE (check_typedef (type));
+  type = check_typedef (type);
+
+  gdb_assert (type->code () == TYPE_CODE_FIXED_POINT);
+  return type;
+}
+
+/* See gdbtypes.h.  */
+
+const gdb_mpq &
+fixed_point_scaling_factor (struct type *type)
+{
+  type = fixed_point_type_base_type (type);
+
+  return TYPE_FIXED_POINT_INFO (type)->scaling_factor;
+}
+
+
 
 static struct gdbarch_data *gdbtypes_data;
 

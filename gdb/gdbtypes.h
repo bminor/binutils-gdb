@@ -52,6 +52,7 @@
 #include "gdbsupport/print-utils.h"
 #include "dwarf2.h"
 #include "gdb_obstack.h"
+#include "gmp-utils.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -189,7 +190,10 @@ enum type_code
     TYPE_CODE_INTERNAL_FUNCTION,
 
     /* * Methods implemented in extension languages.  */
-    TYPE_CODE_XMETHOD
+    TYPE_CODE_XMETHOD,
+
+    /* * Fixed Point type.  */
+    TYPE_CODE_FIXED_POINT,
   };
 
 /* * Some bits for the type's instance_flags word.  See the macros
@@ -600,7 +604,8 @@ enum type_specific_kind
   /* Note: This is used by TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
   TYPE_SPECIFIC_FUNC,
   TYPE_SPECIFIC_SELF_TYPE,
-  TYPE_SPECIFIC_INT
+  TYPE_SPECIFIC_INT,
+  TYPE_SPECIFIC_FIXED_POINT,
 };
 
 union type_owner
@@ -765,6 +770,10 @@ union type_specific
      is a member of.  */
 
   struct type *self_type;
+
+  /* * For TYPE_CODE_FIXED_POINT types, the info necessary to decode
+     values of that type.  */
+  struct fixed_point_type_info *fixed_point_info;
 
   /* * An integer-like scalar type may be stored in just part of its
      enclosing storage bytes.  This structure describes this
@@ -1678,6 +1687,14 @@ struct call_site
     struct call_site_parameter parameter[1];
   };
 
+/* The type-specific info for TYPE_CODE_FIXED_POINT types.  */
+
+struct fixed_point_type_info
+{
+  /* The fixed point type's scaling factor.  */
+  gdb_mpq scaling_factor;
+};
+
 /* * The default value of TYPE_CPLUS_SPECIFIC(T) points to this shared
    static structure.  */
 
@@ -1724,6 +1741,13 @@ extern void allocate_gnat_aux_type (struct type *);
    TYPE_MAIN_TYPE (type)->type_specific.func_stuff = (struct func_type *)      \
      TYPE_ZALLOC (type,							       \
 		  sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
+
+/* "struct fixed_point_type_info" has a field that has a destructor.
+   See allocate_fixed_point_type_info to understand how this is
+   handled.  */
+#define INIT_FIXED_POINT_SPECIFIC(type) \
+  (TYPE_SPECIFIC_FIELD (type) = TYPE_SPECIFIC_FIXED_POINT, \
+   TYPE_FIXED_POINT_INFO (type) = allocate_fixed_point_type_info (type))
 
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
@@ -1820,6 +1844,9 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define BASETYPE_VIA_VIRTUAL(thistype, index) \
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
+
+#define TYPE_FIXED_POINT_INFO(thistype) \
+  (TYPE_MAIN_TYPE(thistype)->type_specific.fixed_point_info)
 
 #define FIELD_NAME(thisfld) ((thisfld).name)
 #define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
@@ -2192,6 +2219,8 @@ extern struct type *init_decfloat_type (struct objfile *, int, const char *);
 extern struct type *init_complex_type (const char *, struct type *);
 extern struct type *init_pointer_type (struct objfile *, int, const char *,
 				       struct type *);
+extern struct type *init_fixed_point_type (struct objfile *, int, int,
+					   const char *);
 
 /* Helper functions to construct architecture-owned types.  */
 extern struct type *arch_type (struct gdbarch *, enum type_code, int,
@@ -2528,6 +2557,26 @@ extern bool types_deeply_equal (struct type *, struct type *);
 extern int type_not_allocated (const struct type *type);
 
 extern int type_not_associated (const struct type *type);
+
+/* Return True if TYPE is a TYPE_CODE_FIXED_POINT or if TYPE is
+   a range type whose base type is a TYPE_CODE_FIXED_POINT.  */
+extern bool is_fixed_point_type (struct type *type);
+
+/* Assuming that TYPE is a fixed point type, return its base type.
+
+   In other words, this returns the type after having peeled all
+   intermediate type layers (such as TYPE_CODE_RANGE, for instance).
+   The TYPE_CODE of the type returned is guaranteed to be
+   a TYPE_CODE_FIXED_POINT.  */
+extern struct type *fixed_point_type_base_type (struct type *type);
+
+/* Given TYPE, which is a fixed point type, return its scaling factor.  */
+extern const gdb_mpq &fixed_point_scaling_factor (struct type *type);
+
+/* Allocate a fixed-point type info for TYPE.  This should only be
+   called by INIT_FIXED_POINT_SPECIFIC.  */
+extern fixed_point_type_info *allocate_fixed_point_type_info
+  (struct type *type);
 
 /* * When the type includes explicit byte ordering, return that.
    Otherwise, the byte ordering from gdbarch_byte_order for 

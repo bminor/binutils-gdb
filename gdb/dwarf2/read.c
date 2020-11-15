@@ -18092,6 +18092,157 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   return this_type;
 }
 
+/* Assuming DIE is a rational DW_TAG_constant, read the DIE's
+   numerator and denominator into NUMERATOR and DENOMINATOR (resp).
+
+   If the numerator and/or numerator attribute is missing,
+   a complaint is filed, and NUMERATOR and DENOMINATOR are left
+   untouched.  */
+
+static void
+get_dwarf2_rational_constant (struct die_info *die, struct dwarf2_cu *cu,
+			      LONGEST *numerator, LONGEST *denominator)
+{
+  struct attribute *num_attr, *denom_attr;
+
+  num_attr = dwarf2_attr (die, DW_AT_GNU_numerator, cu);
+  if (num_attr == nullptr)
+    complaint (_("DW_AT_GNU_numerator missing in %s DIE at %s"),
+	       dwarf_tag_name (die->tag), sect_offset_str (die->sect_off));
+
+  denom_attr = dwarf2_attr (die, DW_AT_GNU_denominator, cu);
+  if (denom_attr == nullptr)
+    complaint (_("DW_AT_GNU_denominator missing in %s DIE at %s"),
+	       dwarf_tag_name (die->tag), sect_offset_str (die->sect_off));
+
+  if (num_attr == nullptr || denom_attr == nullptr)
+    return;
+
+  *numerator = num_attr->constant_value (1);
+  *denominator = denom_attr->constant_value (1);
+}
+
+/* Same as get_dwarf2_rational_constant, but extracting an unsigned
+   rational constant, rather than a signed one.
+
+   If the rational constant has a negative value, a complaint
+   is filed, and NUMERATOR and DENOMINATOR are left untouched.  */
+
+static void
+get_dwarf2_unsigned_rational_constant (struct die_info *die,
+				       struct dwarf2_cu *cu,
+				       ULONGEST *numerator,
+				       ULONGEST *denominator)
+{
+  LONGEST num = 1, denom = 1;
+
+  get_dwarf2_rational_constant (die, cu, &num, &denom);
+  if (num < 0 && denom < 0)
+    {
+      num = -num;
+      denom = -denom;
+    }
+  else if (num < 0)
+    {
+      complaint (_("unexpected negative value for DW_AT_GNU_numerator"
+		   " in DIE at %s"),
+		 sect_offset_str (die->sect_off));
+      return;
+    }
+  else if (denom < 0)
+    {
+      complaint (_("unexpected negative value for DW_AT_GNU_denominator"
+		   " in DIE at %s"),
+		 sect_offset_str (die->sect_off));
+      return;
+    }
+
+  *numerator = num;
+  *denominator = denom;
+}
+
+/* Assuming DIE corresponds to a fixed point type, finish the creation
+   of the corresponding TYPE by setting its TYPE_FIXED_POINT_INFO.
+   CU is the DIE's CU.  */
+
+static void
+finish_fixed_point_type (struct type *type, struct die_info *die,
+			 struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+  /* Numerator and denominator of our fixed-point type's scaling factor.
+     The default is a scaling factor of 1, which we use as a fallback
+     when we are not able to decode it (problem with the debugging info,
+     unsupported forms, bug in GDB, etc...).  Using that as the default
+     allows us to at least print the unscaled value, which might still
+     be useful to a user.  */
+  ULONGEST scale_num = 1;
+  ULONGEST scale_denom = 1;
+
+  gdb_assert (type->code () == TYPE_CODE_FIXED_POINT
+	      && TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FIXED_POINT);
+
+  attr = dwarf2_attr (die, DW_AT_binary_scale, cu);
+  if (!attr)
+    attr = dwarf2_attr (die, DW_AT_decimal_scale, cu);
+  if (!attr)
+    attr = dwarf2_attr (die, DW_AT_small, cu);
+
+  if (attr == nullptr)
+    {
+      /* Scaling factor not found.  Assume a scaling factor of 1,
+	 and hope for the best.  At least the user will be able to see
+	 the encoded value.  */
+      complaint (_("no scale found for fixed-point type (DIE at %s)"),
+		 sect_offset_str (die->sect_off));
+    }
+  else if (attr->name == DW_AT_binary_scale)
+    {
+      LONGEST scale_exp = attr->constant_value (0);
+      ULONGEST *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
+
+      *num_or_denom = 1 << abs (scale_exp);
+    }
+  else if (attr->name == DW_AT_decimal_scale)
+    {
+      LONGEST scale_exp = attr->constant_value (0);
+      ULONGEST *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
+
+      *num_or_denom = uinteger_pow (10, abs (scale_exp));
+    }
+  else if (attr->name == DW_AT_small)
+    {
+      struct die_info *scale_die;
+      struct dwarf2_cu *scale_cu = cu;
+
+      scale_die = follow_die_ref (die, attr, &scale_cu);
+      if (scale_die->tag == DW_TAG_constant)
+	get_dwarf2_unsigned_rational_constant (scale_die, scale_cu,
+					       &scale_num, &scale_denom);
+      else
+	complaint (_("%s DIE not supported as target of DW_AT_small attribute"
+		     " (DIE at %s)"),
+		   dwarf_tag_name (die->tag), sect_offset_str (die->sect_off));
+    }
+  else
+    {
+      complaint (_("unsupported scale attribute %s for fixed-point type"
+		   " (DIE at %s)"),
+		 dwarf_attr_name (attr->name),
+		 sect_offset_str (die->sect_off));
+    }
+
+  gdb_mpq &scaling_factor = TYPE_FIXED_POINT_INFO (type)->scaling_factor;
+
+  gdb_mpz tmp_z (scale_num);
+  mpz_set (mpq_numref (scaling_factor.val), tmp_z.val);
+
+  tmp_z = scale_denom;
+  mpz_set (mpq_denref (scaling_factor.val), tmp_z.val);
+
+  mpq_canonicalize (scaling_factor.val);
+}
+
 /* Allocate a floating-point type of size BITS and name NAME.  Pass NAME_HINT
    (which may be different from NAME) to the architecture back-end to allow
    it to guess the correct format if necessary.  */
@@ -18131,6 +18282,32 @@ dwarf2_init_integer_type (struct dwarf2_cu *cu, struct objfile *objfile,
     type = init_integer_type (objfile, bits, unsigned_p, name);
 
   return type;
+}
+
+/* Return true if DIE has a DW_AT_small attribute whose value is
+   a constant rational, where both the numerator and denominator
+   are equal to zero.
+
+   CU is the DIE's Compilation Unit.  */
+
+static bool
+has_zero_over_zero_small_attribute (struct die_info *die,
+				    struct dwarf2_cu *cu)
+{
+  struct attribute *attr = dwarf2_attr (die, DW_AT_small, cu);
+  if (attr == nullptr)
+    return false;
+
+  struct dwarf2_cu *scale_cu = cu;
+  struct die_info *scale_die
+    = follow_die_ref (die, attr, &scale_cu);
+
+  if (scale_die->tag != DW_TAG_constant)
+    return false;
+
+  LONGEST num = 1, denom = 1;
+  get_dwarf2_rational_constant (scale_die, cu, &num, &denom);
+  return (num == 0 && denom == 0);
 }
 
 /* Initialise and return a floating point type of size BITS suitable for
@@ -18243,6 +18420,31 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+  if ((encoding == DW_ATE_signed_fixed || encoding == DW_ATE_unsigned_fixed)
+      && cu->language == language_ada
+      && has_zero_over_zero_small_attribute (die, cu))
+    {
+      /* brobecker/2018-02-24: This is a fixed point type for which
+	 the scaling factor is represented as fraction whose value
+	 does not make sense (zero divided by zero), so we should
+	 normally never see these.  However, there is a small category
+	 of fixed point types for which GNAT is unable to provide
+	 the scaling factor via the standard DWARF mechanisms, and
+	 for which the info is provided via the GNAT encodings instead.
+	 This is likely what this DIE is about.
+
+	 Ideally, GNAT should be declaring this type the same way
+	 it declares other fixed point types when using the legacy
+	 GNAT encoding, which is to use a simple signed or unsigned
+	 base type.  A report to the GNAT team has been created to
+	 look into it.  In the meantime, pretend this type is a simple
+	 signed or unsigned integral, rather than a fixed point type,
+	 to avoid any confusion later on as to how to process this type.  */
+      encoding = (encoding == DW_ATE_signed_fixed
+		  ? DW_ATE_signed
+		  : DW_ATE_unsigned);
+    }
+
   switch (encoding)
     {
       case DW_ATE_address:
@@ -18318,6 +18520,14 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    }
 	  return set_die_type (die, type, cu);
 	}
+	break;
+      case DW_ATE_signed_fixed:
+	type = init_fixed_point_type (objfile, bits, 0, name);
+	finish_fixed_point_type (type, die, cu);
+	break;
+      case DW_ATE_unsigned_fixed:
+	type = init_fixed_point_type (objfile, bits, 1, name);
+	finish_fixed_point_type (type, die, cu);
 	break;
 
       default:
@@ -24751,6 +24961,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       && type->code () != TYPE_CODE_METHODPTR
       && type->code () != TYPE_CODE_MEMBERPTR
       && type->code () != TYPE_CODE_METHOD
+      && type->code () != TYPE_CODE_FIXED_POINT
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
 

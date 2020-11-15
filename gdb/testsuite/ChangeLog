@@ -1,3 +1,14 @@
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/fixed_cmp.exp: Force compilation to use -fgnat-encodings=all.
+	* gdb.ada/fixed_points.exp: Add fixed-point variables printing tests.
+	* gdb.ada/fixed_points/pck.ads, gdb.ada/fixed_points/pck.adb:
+	New files.
+	* gdb.ada/fixed_points/fixed_points.adb: Add use of package Pck.
+
+	* gdb.dwarf2/dw2-fixed-point.c, gdb.dwarf2/dw2-fixed-point.exp:
+	New files.
+
 2020-11-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR cli/26879
