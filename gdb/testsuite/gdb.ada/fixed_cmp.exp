@@ -19,7 +19,7 @@ if { [skip_ada_tests] } { return -1 }
 
 standard_ada_testfile fixed
 
-foreach_with_prefix gnat_encodings {all} {
+foreach_with_prefix gnat_encodings {all minimal} {
     set flags [list debug additional_flags=-fgnat-encodings=$gnat_encodings]
 
     if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != "" } {

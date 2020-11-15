@@ -890,7 +890,9 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 {
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));
+  const struct language_defn *language = current_language;
 
+  struct gdbarch *gdbarch = get_type_arch (type1);
   struct value *val;
 
   gdb_assert (is_fixed_point_type (type1) || is_fixed_point_type (type2));
@@ -950,6 +952,16 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
     case BINOP_DIV:
       mpq_div (res.val, v1.val, v2.val);
       INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      break;
+
+    case BINOP_EQUAL:
+      val = value_from_ulongest (language_bool_type (language, gdbarch),
+				 mpq_cmp (v1.val, v2.val) == 0 ? 1 : 0);
+      break;
+
+    case BINOP_LESS:
+      val = value_from_ulongest (language_bool_type (language, gdbarch),
+				 mpq_cmp (v1.val, v2.val) < 0 ? 1 : 0);
       break;
 
     default:
@@ -1774,7 +1786,8 @@ value_less (struct value *arg1, struct value *arg2)
   is_int1 = is_integral_type (type1);
   is_int2 = is_integral_type (type2);
 
-  if (is_int1 && is_int2)
+  if ((is_int1 && is_int2)
+      || (is_fixed_point_type (type1) && is_fixed_point_type (type2)))
     return longest_to_int (value_as_long (value_binop (arg1, arg2,
 						       BINOP_LESS)));
   else if ((is_floating_value (arg1) || is_int1)

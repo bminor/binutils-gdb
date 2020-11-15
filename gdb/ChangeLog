@@ -1,5 +1,11 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* valarith.c (fixed_point_binop): Add BINOP_EQUAL and BINOP_LESS
+	handling.
+	(value_less): Add fixed-point handling.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* eval.c (binop_promote): Add fixed-point type handling.
 	* valarith.c (fixed_point_binop): New function.
 	(scalar_binop): Add fixed-point type handling.

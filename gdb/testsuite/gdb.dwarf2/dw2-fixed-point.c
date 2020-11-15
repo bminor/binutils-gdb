@@ -23,6 +23,12 @@
 int8_t pck__fp1_var = 4;
 
 /* Simulate an Ada variable declared inside package Pck as follow:
+      type FP1_Type is delta 0.1 range -1.0 .. +1.0;
+      FP1_Var2 : FP1_Type := 0.50;
+   Basically, the same as FP1_Var, but with a different value.  */
+int8_t pck__fp1_var2 = 8;
+
+/* Simulate an Ada variable declared inside package Pck as follow:
       type FP2_Type is delta 0.01 digits 14;
       FP2_Var : FP2_Type := -0.01;  */
 int32_t pck__fp2_var = -1;
@@ -41,6 +47,7 @@ int
 main (void)
 {
   pck__fp1_var++;
+  pck__fp1_var2++;
   pck__fp2_var++;
   pck__fp3_var++;
   pck__fp1_range_var++;
