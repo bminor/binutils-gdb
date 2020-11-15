@@ -1,5 +1,11 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* utils.h (uinteger_pow): Add declaration.
+	* utils.c (uinteger_pow): Moved here (without changes)...
+	* valarith.c (uinteger_pow): ... from here.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* gmp-utils.h,  gmp-utils.h: New file.
 	* unittests/gmp-utils-selftests.c: New file.
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add

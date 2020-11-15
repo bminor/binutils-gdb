@@ -709,6 +709,36 @@ myread (int desc, char *addr, int len)
   return orglen;
 }
 
+/* See utils.h.  */
+
+ULONGEST
+uinteger_pow (ULONGEST v1, LONGEST v2)
+{
+  if (v2 < 0)
+    {
+      if (v1 == 0)
+	error (_("Attempt to raise 0 to negative power."));
+      else
+	return 0;
+    }
+  else
+    {
+      /* The Russian Peasant's Algorithm.  */
+      ULONGEST v;
+
+      v = 1;
+      for (;;)
+	{
+	  if (v2 & 1L)
+	    v *= v1;
+	  v2 >>= 1;
+	  if (v2 == 0)
+	    return v;
+	  v1 *= v1;
+	}
+    }
+}
+
 void
 print_spaces (int n, struct ui_file *file)
 {
