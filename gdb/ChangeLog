@@ -1,5 +1,14 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* eval.c (binop_promote): Add fixed-point type handling.
+	* valarith.c (fixed_point_binop): New function.
+	(scalar_binop): Add fixed-point type handling.
+	(value_neg): Add fixed-point type handling.
+	* valops.c (value_cast_to_fixed_point): New function.
+	(value_cast): Add fixed-point type handling.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-typeprint.c (ada_print_type): Add handing of fixed-point
 	range types.
 	* c-typeprint.c (c_type_print_varspec_prefix)

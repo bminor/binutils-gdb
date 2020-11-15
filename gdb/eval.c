@@ -430,6 +430,9 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	  && !is_integral_type (type2)))
     return;
 
+  if (is_fixed_point_type (type1) || is_fixed_point_type (type2))
+        return;
+
   if (type1->code () == TYPE_CODE_DECFLOAT
       || type2->code () == TYPE_CODE_DECFLOAT)
     {

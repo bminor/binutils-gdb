@@ -143,6 +143,24 @@ gdb_test "print pck.fp1_range_var" \
 gdb_test "print /x pck.fp1_range_var" \
          " = 0x1"
 
+gdb_test "print pck.fp1_var + 0.25" \
+         " = 0.5"
+
+gdb_test "print pck.fp2_var - pck.fp2_var" \
+         " = 0"
+
+gdb_test "print pck.fp3_var * 1" \
+         " = 0.1"
+
+gdb_test "print pck.fp3_var / pck.fp3_var" \
+         " = 1"
+
+gdb_test "print pck.fp1_range_var - 0.5" \
+         " = 0.5"
+
+gdb_test "print -pck.fp1_var" \
+         " = -0.25"
+
 # Set the language to LANG and do a ptype test on pck__fp1_var,
 # pck__fp2_var and pck__fp3_var, verifying that the output matches
 # FP1_RE, FP2_RE, FP2_RE (resp.).

@@ -1,5 +1,9 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/dw2-fixed-point.exp: Add arithmetic tests.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/fixed_points.exp: Add ptype tests.
 	* gdb.dwarf2/dw2-fixed-point.exp: Likewise.
 

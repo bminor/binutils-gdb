@@ -331,6 +331,60 @@ value_cast_pointers (struct type *type, struct value *arg2,
   return arg2;
 }
 
+/* Assuming that TO_TYPE is a fixed point type, return a value
+   corresponding to the cast of FROM_VAL to that type.  */
+
+static struct value *
+value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
+{
+  struct type *from_type = value_type (from_val);
+
+  if (from_type == to_type)
+    return from_val;
+
+  gdb_mpq vq;
+
+  /* Extract the value as a rational number.  */
+
+  if (is_floating_type (from_type))
+    {
+      double d = target_float_to_host_double (value_contents (from_val),
+					      from_type);
+      mpq_set_d (vq.val, d);
+    }
+
+  else if (is_integral_type (from_type) || is_fixed_point_type (from_type))
+    {
+      gdb_mpz vz;
+
+      vz.read (value_contents (from_val), TYPE_LENGTH (from_type),
+	       type_byte_order (from_type), from_type->is_unsigned ());
+      mpq_set_z (vq.val, vz.val);
+
+      if (is_fixed_point_type (from_type))
+	mpq_mul (vq.val, vq.val, fixed_point_scaling_factor (from_type).val);
+    }
+
+  else
+    error (_("Invalid conversion from type %s to fixed point type %s"),
+	   from_type->name (), to_type->name ());
+
+  /* Divide that value by the scaling factor to obtain the unscaled
+     value, first in rational form, and then in integer form.  */
+
+  mpq_div (vq.val, vq.val, fixed_point_scaling_factor (to_type).val);
+  gdb_mpz unscaled = vq.get_rounded ();
+
+  /* Finally, create the result value, and pack the unscaled value
+     in it.  */
+  struct value *result = allocate_value (to_type);
+  unscaled.write (value_contents_raw (result),
+		  TYPE_LENGTH (to_type), type_byte_order (to_type),
+		  to_type->is_unsigned ());
+
+  return result;
+}
+
 /* Cast value ARG2 to type TYPE and return as a value.
    More general than a C cast: accepts any two types of the same length,
    and if ARG2 is an lvalue it can be cast into anything at all.  */
@@ -348,6 +402,9 @@ value_cast (struct type *type, struct value *arg2)
 
   if (value_type (arg2) == type)
     return arg2;
+
+  if (is_fixed_point_type (type))
+    return value_cast_to_fixed_point (type, arg2);
 
   /* Check if we are casting struct reference to struct reference.  */
   if (TYPE_IS_REFERENCE (check_typedef (type)))
@@ -439,7 +496,8 @@ value_cast (struct type *type, struct value *arg2)
 
   scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_FLT
 	    || code2 == TYPE_CODE_DECFLOAT || code2 == TYPE_CODE_ENUM
-	    || code2 == TYPE_CODE_RANGE);
+	    || code2 == TYPE_CODE_RANGE
+	    || is_fixed_point_type (type2));
 
   if ((code1 == TYPE_CODE_STRUCT || code1 == TYPE_CODE_UNION)
       && (code2 == TYPE_CODE_STRUCT || code2 == TYPE_CODE_UNION)
@@ -458,6 +516,20 @@ value_cast (struct type *type, struct value *arg2)
 	  struct value *v = allocate_value (to_type);
 	  target_float_convert (value_contents (arg2), type2,
 				value_contents_raw (v), type);
+	  return v;
+	}
+      else if (is_fixed_point_type (type2))
+	{
+	  gdb_mpq fp_val;
+
+	  fp_val.read_fixed_point
+	    (value_contents (arg2), TYPE_LENGTH (type2),
+	     type_byte_order (type2), type2->is_unsigned (),
+	     fixed_point_scaling_factor (type2));
+
+	  struct value *v = allocate_value (to_type);
+	  target_float_from_host_double (value_contents_raw (v),
+					 to_type, mpq_get_d (fp_val.val));
 	  return v;
 	}
 

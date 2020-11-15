@@ -881,6 +881,84 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
 	     type2->name ());
 }
 
+/* Assuming at last one of ARG1 or ARG2 is a fixed point value,
+   perform the binary operation OP on these two operands, and return
+   the resulting value (also as a fixed point).  */
+
+static struct value *
+fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
+{
+  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type2 = check_typedef (value_type (arg2));
+
+  struct value *val;
+
+  gdb_assert (is_fixed_point_type (type1) || is_fixed_point_type (type2));
+  if (!is_fixed_point_type (type1))
+    {
+      arg1 = value_cast (type2, arg1);
+      type1 = type2;
+    }
+  if (!is_fixed_point_type (type2))
+    {
+      arg2 = value_cast (type1, arg2);
+      type2 = type1;
+    }
+
+  gdb_mpq v1, v2, res;
+  v1.read_fixed_point (value_contents (arg1), TYPE_LENGTH (type1),
+		       type_byte_order (type1), type1->is_unsigned (),
+		       fixed_point_scaling_factor (type1));
+  v2.read_fixed_point (value_contents (arg2), TYPE_LENGTH (type2),
+		       type_byte_order (type2), type2->is_unsigned (),
+		       fixed_point_scaling_factor (type2));
+
+#define INIT_VAL_WITH_FIXED_POINT_VAL(RESULT) \
+  do { \
+      val = allocate_value (type1); \
+      (RESULT).write_fixed_point			\
+        (value_contents_raw (val), TYPE_LENGTH (type1), \
+	 type_byte_order (type1), type1->is_unsigned (), \
+	 fixed_point_scaling_factor (type1)); \
+     } while (0)
+
+  switch (op)
+    {
+    case BINOP_ADD:
+      mpq_add (res.val, v1.val, v2.val);
+      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      break;
+
+    case BINOP_SUB:
+      mpq_sub (res.val, v1.val, v2.val);
+      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      break;
+
+    case BINOP_MIN:
+      INIT_VAL_WITH_FIXED_POINT_VAL (mpq_cmp (v1.val, v2.val) < 0 ? v1 : v2);
+      break;
+
+    case BINOP_MAX:
+      INIT_VAL_WITH_FIXED_POINT_VAL (mpq_cmp (v1.val, v2.val) > 0 ? v1 : v2);
+      break;
+
+    case BINOP_MUL:
+      mpq_mul (res.val, v1.val, v2.val);
+      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      break;
+
+    case BINOP_DIV:
+      mpq_div (res.val, v1.val, v2.val);
+      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      break;
+
+    default:
+      error (_("Integer-only operation on fixed point number."));
+    }
+
+  return val;
+}
+
 /* A helper function that finds the type to use for a binary operation
    involving TYPE1 and TYPE2.  */
 
@@ -1054,9 +1132,16 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       || type2->code () == TYPE_CODE_COMPLEX)
     return complex_binop (arg1, arg2, op);
 
-  if ((!is_floating_value (arg1) && !is_integral_type (type1))
-      || (!is_floating_value (arg2) && !is_integral_type (type2)))
+  if ((!is_floating_value (arg1)
+       && !is_integral_type (type1)
+       && !is_fixed_point_type (type1))
+      || (!is_floating_value (arg2)
+	  && !is_integral_type (type2)
+	  && !is_fixed_point_type (type2)))
     error (_("Argument to arithmetic operation not a number or boolean."));
+
+  if (is_fixed_point_type (type1) || is_fixed_point_type (type2))
+    return fixed_point_binop (arg1, arg2, op);
 
   if (is_floating_type (type1) || is_floating_type (type2))
     {
@@ -1753,6 +1838,8 @@ value_neg (struct value *arg1)
 
   if (is_integral_type (type) || is_floating_type (type))
     return value_binop (value_from_longest (type, 0), arg1, BINOP_SUB);
+  else if (is_fixed_point_type (type))
+    return value_binop (value_zero (type, not_lval), arg1, BINOP_SUB);
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct value *tmp, *val = allocate_value (type);
