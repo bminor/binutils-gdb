@@ -1,5 +1,10 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* printcmd.c (print_scalar_formatted): Add fixed-point type
+	handling when options->format is set.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-valprint.c (ada_value_print_1): Add fixed-point type handling.
 	* dwarf2/read.c (get_dwarf2_rational_constant)
 	(get_dwarf2_unsigned_rational_constant, finish_fixed_point_type)

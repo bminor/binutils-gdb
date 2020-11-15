@@ -122,11 +122,23 @@ gdb_test_no_output "set lang ada"
 gdb_test "print pck.fp1_var" \
          " = 0.25"
 
+gdb_test "print /x pck.fp1_var" \
+         " = 0x0"
+
 gdb_test "print pck.fp2_var" \
          " = -0.01"
+
+gdb_test "print /x pck.fp2_var" \
+         " = 0x0"
 
 gdb_test "print pck.fp3_var" \
          " = 0.1"
 
+gdb_test "print /x pck.fp3_var" \
+         " = 0x0"
+
 gdb_test "print pck.fp1_range_var" \
          " = 1"
+
+gdb_test "print /x pck.fp1_range_var" \
+         " = 0x1"

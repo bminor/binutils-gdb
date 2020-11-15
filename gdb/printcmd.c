@@ -421,7 +421,8 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
      range case, we want to avoid this, so we store the unpacked value
      here for possible use later.  */
   gdb::optional<LONGEST> val_long;
-  if ((type->code () == TYPE_CODE_FLT
+  if (((type->code () == TYPE_CODE_FLT
+	|| is_fixed_point_type (type))
        && (options->format == 'o'
 	   || options->format == 'x'
 	   || options->format == 't'

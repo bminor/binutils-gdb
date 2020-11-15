@@ -1,5 +1,9 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.dwarf2/dw2-fixed-point.exp: Add "print /x" tests.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/fixed_cmp.exp: Force compilation to use -fgnat-encodings=all.
 	* gdb.ada/fixed_points.exp: Add fixed-point variables printing tests.
 	* gdb.ada/fixed_points/pck.ads, gdb.ada/fixed_points/pck.adb:
