@@ -662,6 +662,18 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     }
 }
 
+/* See typeprint.h.  */
+
+void
+print_type_fixed_point (struct type *type, struct ui_file *stream)
+{
+  gdb::unique_xmalloc_ptr<char> small_img
+    = fixed_point_scaling_factor (type).str ();
+
+  fprintf_filtered (stream, "%s-byte fixed point (small = %s)",
+		    pulongest (TYPE_LENGTH (type)), small_img.get ());
+}
+
 /* Dump details of a type specified either directly or indirectly.
    Uses the same sort of type lookup mechanism as ptype_command()
    and whatis_command().  */

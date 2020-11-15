@@ -296,6 +296,7 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
+    case TYPE_CODE_FIXED_POINT:
       /* These types need no prefix.  They are listed here so that
 	 gcc -Wall will reveal any types that haven't been handled.  */
       break;
@@ -429,6 +430,7 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
     case TYPE_CODE_STRING:
     case TYPE_CODE_COMPLEX:
     case TYPE_CODE_TYPEDEF:
+    case TYPE_CODE_FIXED_POINT:
       /* These types do not need a suffix.  They are listed so that
 	 gcc -Wall will report types that may not have been considered.  */
       break;

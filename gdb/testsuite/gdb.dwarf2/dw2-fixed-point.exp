@@ -142,3 +142,47 @@ gdb_test "print pck.fp1_range_var" \
 
 gdb_test "print /x pck.fp1_range_var" \
          " = 0x1"
+
+# Set the language to LANG and do a ptype test on pck__fp1_var,
+# pck__fp2_var and pck__fp3_var, verifying that the output matches
+# FP1_RE, FP2_RE, FP2_RE (resp.).
+
+proc do_ptype_test {lang fp1_re fp2_re fp3_re fp1_range_re} {
+    with_test_prefix "lang=$lang" {
+        gdb_test_no_output "set language $lang" \
+            "set language to $lang for ptype test"
+
+        gdb_test "ptype pck__fp1_var" $fp1_re
+
+        gdb_test "ptype pck__fp2_var" $fp2_re
+
+        gdb_test "ptype pck__fp3_var" $fp3_re
+
+        if { $lang == "modula-2" || $lang == "pascal" } {
+            setup_xfail "*-*-*" "not supported by language"
+        }
+        gdb_test "ptype pck__fp1_range_var" $fp1_range_re
+    }
+}
+
+do_ptype_test "ada" \
+              " = <1-byte fixed point \\(small = 1/16\\)>" \
+              " = <1-byte fixed point \\(small = 1/100\\)>" \
+              " = <1-byte fixed point \\(small = 1/30\\)>" \
+              " = <1-byte fixed point \\(small = 1/16\\)>"
+
+foreach lang [list "c" "d" "go" "objective-c" "opencl" ] {
+    do_ptype_test $lang \
+                  " = 1-byte fixed point \\(small = 1/16\\)" \
+                  " = 1-byte fixed point \\(small = 1/100\\)" \
+                  " = 1-byte fixed point \\(small = 1/30\\)" \
+                  " = <range type>"
+}
+
+foreach lang [list "fortran" "modula-2" "pascal" ] {
+    do_ptype_test $lang \
+                  " = pck__fp1_type" \
+                  " = pck__fp2_type" \
+                  " = pck__fp3_type" \
+                  " = <range type>"
+}

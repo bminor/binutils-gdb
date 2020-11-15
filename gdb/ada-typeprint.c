@@ -1046,6 +1046,12 @@ ada_print_type (struct type *type0, const char *varstring,
       case TYPE_CODE_RANGE:
 	if (ada_is_gnat_encoded_fixed_point_type (type))
 	  print_gnat_encoded_fixed_point_type (type, stream);
+	else if (is_fixed_point_type (type))
+	  {
+	    fprintf_filtered (stream, "<");
+	    print_type_fixed_point (type, stream);
+	    fprintf_filtered (stream, ">");
+	  }
 	else if (ada_is_modular_type (type))
 	  fprintf_filtered (stream, "mod %s", 
 			    int_string (ada_modulus (type), 10, 0, 0, 1));

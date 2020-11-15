@@ -1,5 +1,17 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-typeprint.c (ada_print_type): Add handing of fixed-point
+	range types.
+	* c-typeprint.c (c_type_print_varspec_prefix)
+	(c_type_print_varspec_suffix, c_type_print_base_1): Add
+	TYPE_CODE_FIXED_POINT handling.
+	* p-typeprint.c (pascal_type_print_varspec_prefix)
+	(pascal_type_print_varspec_suffix): Likewise.
+	* typeprint.c (print_type_fixed_point): New function.
+	* typeprint.h (print_type_fixed_point): Add declaration.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* printcmd.c (print_scalar_formatted): Add fixed-point type
 	handling when options->format is set.
 

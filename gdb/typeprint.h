@@ -151,6 +151,11 @@ private:
 
 void print_type_scalar (struct type * type, LONGEST, struct ui_file *);
 
+/* Assuming the TYPE is a fixed point type, print its type description
+   on STREAM.  */
+
+void print_type_fixed_point (struct type *type, struct ui_file *stream);
+
 void c_type_print_args (struct type *, struct ui_file *, int, enum language,
 			const struct type_print_options *);
 

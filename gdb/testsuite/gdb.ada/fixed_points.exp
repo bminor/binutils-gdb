@@ -55,8 +55,44 @@ gdb_test "ptype Overprecise_Object" \
 gdb_test "print fp1_var" \
          " = 0.25"
 
+gdb_test_multiple "ptype fp1_var" "" {
+    -re "type = <1-byte fixed point \\(small = 0\\.0625\\)>\r\n$gdb_prompt $" {
+        pass $gdb_test_name
+    }
+    -re "type = delta 0\\.1 <'small = 0\\.0625>\r\n$gdb_prompt $" {
+        # The (legacy) output we obtain when the compiler described
+        # our fixed point types using the GNAT encodings rather than
+        # standard DWARF.  OK as well.
+        pass $gdb_test_name
+    }
+}
+
 gdb_test "print fp2_var" \
          " = -0.01"
 
+gdb_test_multiple "ptype fp2_var" "" {
+    -re "type = <8-byte fixed point \\(small = 0\\.01\\)>\r\n$gdb_prompt $" {
+        pass $gdb_test_name
+    }
+    -re "type = delta 0\\.01\r\n$gdb_prompt $" {
+        # The (legacy) output we obtain when the compiler described
+        # our fixed point types using the GNAT encodings rather than
+        # standard DWARF.  OK as well.
+        pass $gdb_test_name
+    }
+}
+
 gdb_test "print fp3_var" \
          " = 0.1"
+
+gdb_test_multiple "ptype fp3_var" "" {
+    -re "type = <1-byte fixed point \\(small = 0\\.0333333\\)>\r\n$gdb_prompt $" {
+        pass $gdb_test_name
+    }
+    -re "type = delta 0\\.1 <'small = 0\\.0333333>\r\n$gdb_prompt $" {
+        # The (legacy) output we obtain when the compiler described
+        # our fixed point types using the GNAT encodings rather than
+        # standard DWARF.  OK as well.
+        pass $gdb_test_name
+    }
+}
