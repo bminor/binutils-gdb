@@ -1,5 +1,14 @@
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* gmp-utils.h,  gmp-utils.h: New file.
+	* unittests/gmp-utils-selftests.c: New file.
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
+	unittests/gmp-utils-selftests.c.
+	(COMMON_SFILES) Add gmp-utils.c.
+	(HFILES_NO_SRCDIR): Add gmp-utils.h.
+
+2020-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* configure.ac: Generate an error if a usable GMP library
 	could not be found.
 	* configure: Regenerate.

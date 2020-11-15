@@ -446,6 +446,7 @@ SELFTESTS_SRCS = \
 	unittests/filtered_iterator-selftests.c \
 	unittests/format_pieces-selftests.c \
 	unittests/function-view-selftests.c \
+	unittests/gmp-utils-selftests.c \
 	unittests/lookup_name_info-selftests.c \
 	unittests/memory-map-selftests.c \
 	unittests/memrange-selftests.c \
@@ -1059,6 +1060,7 @@ COMMON_SFILES = \
 	gdb_regex.c \
 	gdbarch.c \
 	gdbtypes.c \
+	gmp-utils.c \
 	gnu-v2-abi.c \
 	gnu-v3-abi.c \
 	go-lang.c \
@@ -1304,6 +1306,7 @@ HFILES_NO_SRCDIR = \
 	gdbthread.h \
 	gdbtypes.h \
 	glibc-tdep.h \
+	gmp-utils.h \
 	gnu-nat.h \
 	go-lang.h \
 	gregset.h \
