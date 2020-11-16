@@ -1,3 +1,7 @@
+2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/completion.exp: Add new completion tests.
+
 2020-11-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.mi/mi-nonstop-exit.exp: Enable non-stop through GDBFLAGS.

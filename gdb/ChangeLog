@@ -1,5 +1,14 @@
 2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* breakpoint.c (struct watch_options): New struct.
+	(watch_option_defs): New static global.
+	(make_watch_options_def_group): New function.
+	(watch_maybe_just_location): Convert option parsing.
+	(watch_command_completer): New function.
+	(_initialize_breakpoint): Build help text using options mechanism.
+
+2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* breakpoint.c (update_watchpoint): Pass 'false' not '0'.
 	(watch_command_1): Update parameter types.  Convert locals to
 	bool.

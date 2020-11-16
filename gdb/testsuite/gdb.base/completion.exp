@@ -951,3 +951,14 @@ test_gdb_complete_multiple "p -array on -- /d some_union_global." \
 	"f1"
 	"f2"
     }
+
+# Check the watch commands can all complete, with and without flags.
+foreach_with_prefix cmd { "watch" "awatch" "rwatch" } {
+    foreach_with_prefix opt { "" "-l" "-location" } {
+	test_gdb_complete_multiple "${cmd} ${opt} some_union_global." \
+	    "" "f" {
+		"f1"
+		"f2"
+	    }
+    }
+}
