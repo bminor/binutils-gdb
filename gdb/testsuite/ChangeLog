@@ -1,3 +1,8 @@
+2020-11-16  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.dwarf2/data-loc.exp: Update expected output.  Remove C
+	tests.
+
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/fixed_cmp.exp: Add -fgnat-encodings=minimal testing.
