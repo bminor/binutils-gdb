@@ -1088,7 +1088,7 @@ language_arch_info::lookup_primitive_type (const char *name)
 
 struct type *
 language_arch_info::lookup_primitive_type
-	(std::function<bool (struct type *)> filter)
+  (gdb::function_view<bool (struct type *)> filter)
 {
   for (struct type_and_symbol &tas : primitive_types_and_symbols)
     {
@@ -1111,32 +1111,39 @@ language_arch_info::lookup_primitive_type_as_symbol (const char *name,
   return nullptr;
 }
 
-/* See language.h.  */
+/* Helper for the language_lookup_primitive_type overloads to forward
+   to the corresponding language's lookup_primitive_type overload.  */
 
 template<typename T>
-struct type *
-language_lookup_primitive_type (const struct language_defn *la,
-				struct gdbarch *gdbarch,
-				T arg)
+static struct type *
+language_lookup_primitive_type_1 (const struct language_defn *la,
+				  struct gdbarch *gdbarch,
+				  T arg)
 {
   struct language_gdbarch *ld =
     (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
   return ld->arch_info[la->la_language].lookup_primitive_type (arg);
 }
 
-/* Template instantiation.  */
+/* See language.h.  */
 
-template struct type *
+struct type *
 language_lookup_primitive_type (const struct language_defn *la,
 				struct gdbarch *gdbarch,
-				const char *arg);
+				const char *name)
+{
+  return language_lookup_primitive_type_1 (la, gdbarch, name);
+}
 
-/* Template instantiation.  */
+/* See language.h.  */
 
-template struct type *
+struct type *
 language_lookup_primitive_type (const struct language_defn *la,
 				struct gdbarch *gdbarch,
-				std::function<bool (struct type *)> arg);
+				gdb::function_view<bool (struct type *)> filter)
+{
+  return language_lookup_primitive_type_1 (la, gdbarch, filter);
+}
 
 /* See language.h.  */
 

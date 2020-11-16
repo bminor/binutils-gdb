@@ -46,7 +46,7 @@ lookup_opencl_vector_type (struct gdbarch *gdbarch, enum type_code code,
   /* Triple vectors have the size of a quad vector.  */
   length = (n == 3) ?  el_length * 4 : el_length * n;
 
-  std::function<bool (struct type *)> filter = [&] (struct type *type)
+  auto filter = [&] (struct type *type)
   {
     LONGEST lowb, highb;
 

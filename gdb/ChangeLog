@@ -1,3 +1,20 @@
+2020-11-20  Pedro Alves  <pedro@palves.net>
+
+	* language.c (language_arch_info::lookup_primitive_type): Use
+	gdb::function_view instead of gdb::function.
+	(template language_lookup_primitive_type): Rename to ...
+	(language_lookup_primitive_type_1): ... this, and make static.
+	(language_lookup_primitive_type(const struct language_defn *,
+	struct gdbarch *, const char *): Make non-template.
+	(language_lookup_primitive_type(const struct language_defn *,
+	struct gdbarch *, std::function<bool (struct type *)>): Make
+	non-template and use gdb::function_view.
+	* language.h (language_arch_info::lookup_primitive_type): Use
+	gdb::function_view instead of std::function.
+	(language_lookup_primitive_type): No longer template.
+	* opencl-lang.c (lookup_opencl_vector_type): 'filter' is now a
+	lambda instead of a std::function.
+
 2020-11-19  Andreas Arnez  <arnez@linux.ibm.com>
 
 	PR tdep/26916

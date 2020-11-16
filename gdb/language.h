@@ -140,7 +140,7 @@ struct language_arch_info
   /* Lookup a primitive type for which FILTER returns true.  Will return
      nullptr if no matching type is found.  */
   struct type *lookup_primitive_type
-	(std::function<bool (struct type *)> filter);
+    (gdb::function_view<bool (struct type *)> filter);
 
   /* Lookup a primitive type called NAME and return the type as a symbol.
      LANG is the language for which type is being looked up.  */
@@ -719,15 +719,26 @@ struct type *language_bool_type (const struct language_defn *l,
 struct type *language_string_char_type (const struct language_defn *l,
 					struct gdbarch *gdbarch);
 
-/* Look up a type from the set of OS/ABI specific types defined in GDBARCH
-   for language L.  ARG is used for selecting the matching type, and is
-   passed through to the corresponding lookup_primitive_type member
-   function inside the language_arch_info class.  */
+/* Look up a type from the set of OS/ABI specific types defined in
+   GDBARCH for language L.  NAME is used for selecting the matching
+   type, and is passed through to the corresponding
+   lookup_primitive_type member function inside the language_arch_info
+   class.  */
 
-template<typename T>
 struct type *language_lookup_primitive_type (const struct language_defn *l,
 					     struct gdbarch *gdbarch,
-					     T arg);
+					     const char *name);
+
+/* Look up a type from the set of OS/ABI specific types defined in
+   GDBARCH for language L.  FILTER is used for selecting the matching
+   type, and is passed through to the corresponding
+   lookup_primitive_type member function inside the language_arch_info
+   class.  */
+
+struct type *language_lookup_primitive_type
+  (const struct language_defn *la,
+   struct gdbarch *gdbarch,
+   gdb::function_view<bool (struct type *)> filter);
 
 /* Wrapper around language_lookup_primitive_type to return the
    corresponding symbol.  */
