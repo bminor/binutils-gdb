@@ -9227,6 +9227,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
 			AARCH64_ARCH_NONE},
   {"flagm",		AARCH64_FEATURE (AARCH64_FEATURE_FLAGM, 0),
 			AARCH64_ARCH_NONE},
+  {"pauth",		AARCH64_FEATURE (AARCH64_FEATURE_PAC, 0),
+			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
 

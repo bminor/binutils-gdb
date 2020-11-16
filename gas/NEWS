@@ -32,6 +32,9 @@
 * Add support for +ls64 feature for -march in Armv8.7 AArch64. Add atomic
   64-byte load/store instructions for this feature.
 
+* Add support for +pauth (Pointer Authentication) feature for -march in
+  AArch64.
+
 * Add support for Intel TDX instructions.
 
 * Add support for Intel Key Locker instructions.

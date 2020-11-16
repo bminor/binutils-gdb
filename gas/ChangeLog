@@ -1,3 +1,11 @@
+2020-11-13  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* NEWS: Update news.
+	* config/tc-aarch64.c: Add option +pauth to -march.
+	* doc/c-aarch64.texi: Update docs.
+	* testsuite/gas/aarch64/pac-feat.d: New test.
+	* testsuite/gas/aarch64/pac-feat.s: New test.
+
 2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* NEWS: Update news.
