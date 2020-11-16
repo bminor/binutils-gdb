@@ -1,5 +1,13 @@
 2020-11-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arc-linux-tdep.c (arc_linux_sw_breakpoint_from_kind): Add an
+	assert.
+	* arc-tdep.c (arc_breakpoint_kind_from_pc): Likewise.
+	* disasm-selftests.c (print_one_insn_test): Fall throough from ARC
+	case to the default.
+
+2020-11-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* printcmd.c: Include 'safe-ctype.c'.
 	(skip_over_slash_fmt): New function.
 	(print_command_completer): Call skip_over_slash_fmt.

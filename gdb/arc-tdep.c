@@ -1634,6 +1634,7 @@ arc_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 static const gdb_byte *
 arc_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
+  gdb_assert (kind == 2 || kind == 4);
   *size = kind;
 
   if (kind == sizeof (arc_brk_le))

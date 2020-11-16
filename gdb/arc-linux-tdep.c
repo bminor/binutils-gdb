@@ -149,6 +149,7 @@ static const gdb_byte *
 arc_linux_sw_breakpoint_from_kind (struct gdbarch *gdbarch,
 				   int kind, int *size)
 {
+  gdb_assert (kind == trap_size);
   *size = kind;
   return ((gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 	  ? arc_linux_trap_s_be
