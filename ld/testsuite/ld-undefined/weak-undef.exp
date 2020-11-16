@@ -105,7 +105,8 @@ set asflags ""
 switch -glob $target_triplet {
     aarch64* -
     arm* -
-    powerpc* { set asflags "--defsym BL=1" }
+    powerpc64* { set asflags "--defsym BL=1" }
+    powerpc* { set asflags "--defsym BLPLT=1" }
     hppa* { set asflags "--defsym HPPA=1" }
     i\[3-7\]86* -
     x86_64* { set asflags "--defsym CALLPLT=1" }

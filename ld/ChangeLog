@@ -1,3 +1,14 @@
+2020-11-17  Alan Modra  <amodra@gmail.com>
+
+	PR 26882
+	* testsuite/ld-powerpc/dotsym3.d: Add "-z notext" to ld options.
+	* testsuite/ld-powerpc/dotsym4.d: Likewise.
+	* testsuite/ld-powerpc/ppc476-shared.d: Likewise.
+	* testsuite/ld-powerpc/ppc476-shared2.d: Likewise.
+	* testsuite/ld-powerpc/powerpc.exp: Likewise for various tests.
+	* testsuite/ld-undefined/weak-fundef.s: Add BLPLT variant.
+	* testsuite/ld-undefined/weak-undef.exp: Define BLPLT for ppc32.
+
 2020-11-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Updated Spanish translation.
