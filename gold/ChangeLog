@@ -1,3 +1,9 @@
+2020-11-16  Michael Hudson-Doyle  <michael.hudson@canonical.com>
+
+	PR 26902
+	* powerpc.cc (Relocate::relocate): Do not include local entry
+	offset of target function when computing the address of a stub.
+
 2020-11-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/26200

@@ -11094,8 +11094,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 			       + ent->off_);
 		      if (size == 64
 			  && r_type != elfcpp::R_PPC64_REL24_NOTOC)
-			value += (elfcpp::ppc64_decode_local_entry(ent->other_)
-				  + ent->tocoff_);
+			value += ent->tocoff_;
 		    }
 		  has_stub_value = true;
 		}
