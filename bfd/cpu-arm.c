@@ -152,6 +152,7 @@ processors[] =
   { bfd_mach_arm_8,	  "cortex-a77"	    },
   { bfd_mach_arm_8,	  "cortex-a78"	    },
   { bfd_mach_arm_8,	  "cortex-a78ae"    },
+  { bfd_mach_arm_8,	  "cortex-a78c"     },
   { bfd_mach_arm_6SM,	  "cortex-m0"	    },
   { bfd_mach_arm_6SM,	  "cortex-m0plus"   },
   { bfd_mach_arm_6SM,	  "cortex-m1"	    },

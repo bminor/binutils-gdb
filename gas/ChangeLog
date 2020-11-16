@@ -1,3 +1,9 @@
+2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add Cortex-A78C.
+	* doc/c-arm.texi: Document -mcpu=cortex-a78c.
+	* testsuite/gas/arm/cpu-cortex-a78c.d: New test.
+
 2020-11-14  Borislav Petkov  <bp@suse.de>
 
 	* testsuite/gas/i386/x86-64-segovr.d: Adjust regexes.

@@ -1,3 +1,7 @@
+2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* cpu-arm.c (processors): Add Cortex-A78C.
+
 2020-11-11  Tom Tromey  <tromey@adacore.com>
 
 	* archive.c (getuid, getgid): Move...

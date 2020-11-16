@@ -133,6 +133,7 @@ recognized:
 @code{cortex-a77},
 @code{cortex-a78},
 @code{cortex-a78ae},
+@code{cortex-a78c},
 @code{ares},
 @code{cortex-r4},
 @code{cortex-r4f},
