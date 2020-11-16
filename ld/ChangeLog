@@ -1,3 +1,7 @@
+2020-11-16  Shahab Vahedi  <shahab@synopsys.org>
+
+	* testsuite/ld-arc/tls_ie-01.d: Update the dump command.
+
 2020-11-14  Borislav Petkov  <bp@suse.de>
 
 	* testsuite/ld-x86-64/pe-x86-64-4.od: Adjust regexes.
