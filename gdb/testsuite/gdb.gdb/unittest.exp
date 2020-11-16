@@ -26,6 +26,13 @@ gdb_start
 
 set test "maintenance selftest"
 gdb_test_multiple $test $test {
+  -re ".*Running selftest \[^\n\r\]+\." {
+	# The selftests can take some time to complete.  To prevent
+	# timeout spot the 'Running ...' lines going past, so long as
+	# these are produced quickly enough then the overall test will
+	# not timeout.
+	exp_continue
+  }
   -re "Ran ($decimal) unit tests, 0 failed\r\n$gdb_prompt $" {
 	set num_ran $expect_out(1,string)
 	gdb_assert "$num_ran > 0" $test

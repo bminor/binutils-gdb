@@ -1,5 +1,9 @@
 2020-11-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.gdb/unittest.exp: Spot 'Running...' lines.
+
+2020-11-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/completion.exp: Add new tests.
 
 2020-11-16  Tom Tromey  <tromey@adacore.com>
