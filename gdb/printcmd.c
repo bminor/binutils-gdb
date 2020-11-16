@@ -53,6 +53,7 @@
 #include "source.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_optional.h"
+#include "safe-ctype.h"
 
 /* Last specified output format.  */
 
@@ -1233,6 +1234,62 @@ print_command_1 (const char *args, int voidprint)
     print_value (val, print_opts);
 }
 
+/* Called from command completion function to skip over /FMT
+   specifications, allowing the rest of the line to be completed.  Returns
+   true if the /FMT is at the end of the current line and there is nothing
+   left to complete, otherwise false is returned.
+
+   In either case *ARGS can be updated to point after any part of /FMT that
+   is present.
+
+   This function is designed so that trying to complete '/' will offer no
+   completions, the user needs to insert the format specification
+   themselves.  Trying to complete '/FMT' (where FMT is any non-empty set
+   of alpha-numeric characters) will cause readline to insert a single
+   space, setting the user up to enter the expression.  */
+
+static bool
+skip_over_slash_fmt (completion_tracker &tracker, const char **args)
+{
+  const char *text = *args;
+
+  if (text[0] == '/')
+    {
+      bool in_fmt;
+      tracker.set_use_custom_word_point (true);
+
+      if (ISALNUM (text[1]) || ISSPACE (text[1]))
+	{
+	  /* Skip over the actual format specification.  */
+	  while (*text != '\0' && !ISSPACE (*text))
+	    ++text;
+
+	  if (*text == '\0')
+	    {
+	      in_fmt = true;
+	      tracker.add_completion (make_unique_xstrdup (text));
+	    }
+	  else
+	    {
+	      in_fmt = false;
+	      while (ISSPACE (*text))
+		++text;
+	    }
+	}
+      else if (text[1] == '\0')
+	{
+	  in_fmt = true;
+	  ++text;
+	}
+
+      tracker.advance_custom_word_point_by (text - *args);
+      *args = text;
+      return in_fmt;
+    }
+
+  return false;
+}
+
 /* See valprint.h.  */
 
 void
@@ -1243,6 +1300,9 @@ print_command_completer (struct cmd_list_element *ignore,
   const auto group = make_value_print_options_def_group (nullptr);
   if (gdb::option::complete_options
       (tracker, &text, gdb::option::PROCESS_OPTIONS_REQUIRE_DELIMITER, group))
+    return;
+
+  if (skip_over_slash_fmt (tracker, &text))
     return;
 
   const char *word = advance_to_expression_complete_word_point (tracker, text);
@@ -1735,6 +1795,21 @@ x_command (const char *exp, int from_tty)
 	set_internalvar (lookup_internalvar ("__"), last_examine_value.get ());
     }
 }
+
+/* Command completion for the 'display' and 'x' commands.  */
+
+static void
+display_and_x_command_completer (struct cmd_list_element *ignore,
+				 completion_tracker &tracker,
+				 const char *text, const char * /*word*/)
+{
+  if (skip_over_slash_fmt (tracker, &text))
+    return;
+
+  const char *word = advance_to_expression_complete_word_point (tracker, text);
+  expression_completer (ignore, tracker, text, word);
+}
+
 
 
 /* Add an expression to the auto-display chain.
@@ -2713,7 +2788,7 @@ Describe what symbol is at location ADDR.\n\
 Usage: info symbol ADDR\n\
 Only for symbols with fixed locations (global or static scope)."));
 
-  add_com ("x", class_vars, x_command, _("\
+  c = add_com ("x", class_vars, x_command, _("\
 Examine memory: x/FMT ADDRESS.\n\
 ADDRESS is an expression for the memory address to examine.\n\
 FMT is a repeat count followed by a format letter and a size letter.\n\
@@ -2727,6 +2802,7 @@ examined backward from the address.\n\n\
 Defaults for format and size letters are those previously used.\n\
 Default count is 1.  Default address is following last thing printed\n\
 with this command or \"print\"."));
+  set_cmd_completer_handle_brkchars (c, display_and_x_command_completer);
 
   add_info ("display", info_display_command, _("\
 Expressions to display when program stops, with code numbers.\n\
@@ -2741,7 +2817,7 @@ No argument means cancel all automatic-display expressions.\n\
 Do \"info display\" to see current list of code numbers."),
 	   &cmdlist);
 
-  add_com ("display", class_vars, display_command, _("\
+  c = add_com ("display", class_vars, display_command, _("\
 Print value of expression EXP each time the program stops.\n\
 Usage: display[/FMT] EXP\n\
 /FMT may be used before EXP as in the \"print\" command.\n\
@@ -2750,6 +2826,7 @@ as in the \"x\" command, and then EXP is used to get the address to examine\n\
 and examining is done as in the \"x\" command.\n\n\
 With no argument, display all currently requested auto-display expressions.\n\
 Use \"undisplay\" to cancel display requests previously made."));
+  set_cmd_completer_handle_brkchars (c, display_and_x_command_completer);
 
   add_cmd ("display", class_vars, enable_display_command, _("\
 Enable some expressions to be displayed when program stops.\n\

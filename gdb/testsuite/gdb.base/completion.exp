@@ -172,6 +172,11 @@ if { ![readline_is_used] } {
     return -1
 }
 
+# The bulk of this test script pre-dates the completion-support
+# library, and should probably (where possible) be converted.
+# However, for now, new tests are being added using this library.
+load_lib completion-support.exp
+
 set test "complete 'hfgfh'"
 send_gdb "hfgfh\t"
 gdb_test_multiple "" "$test" {
@@ -922,3 +927,27 @@ gdb_test_multiple "" "$test" {
 	pass "$test"
     }
 }
+
+# Test completion of 'p', 'x', and 'display' all using a /FMT.
+foreach_with_prefix spc { " " "" } {
+    test_gdb_complete_multiple "p${spc}/d some_union_global." "" "f" {
+	"f1"
+	"f2"
+    }
+
+    test_gdb_complete_none "p${spc}/"
+    test_gdb_complete_unique "p${spc}/d" "p${spc}/d"
+
+    test_gdb_complete_unique "x${spc}/1w values\[0\].b"\
+	"x${spc}/1w values\[0\].b_field"
+
+    test_gdb_complete_unique "display${spc}/x values\[0\].z"\
+	"display${spc}/x values\[0\].z_field"
+}
+
+# Test 'p' using both options and /FMT.
+test_gdb_complete_multiple "p -array on -- /d some_union_global." \
+    "" "f" {
+	"f1"
+	"f2"
+    }

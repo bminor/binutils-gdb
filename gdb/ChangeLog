@@ -1,3 +1,12 @@
+2020-11-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* printcmd.c: Include 'safe-ctype.c'.
+	(skip_over_slash_fmt): New function.
+	(print_command_completer): Call skip_over_slash_fmt.
+	(display_and_x_command_completer): New function.
+	(_initialize_printcmd): Add command completion for 'x' and
+	'display'.
+
 2020-11-16  Pedro Alves  <pedro@palves.net>
 
 	* frame.c (get_prev_frame): Move get_frame_id call from here ...
