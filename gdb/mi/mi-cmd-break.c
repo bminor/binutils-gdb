@@ -463,13 +463,13 @@ mi_cmd_break_watch (const char *command, char **argv, int argc)
   switch (type)
     {
     case REG_WP:
-      watch_command_wrapper (expr, FROM_TTY, 0);
+      watch_command_wrapper (expr, FROM_TTY, false);
       break;
     case READ_WP:
-      rwatch_command_wrapper (expr, FROM_TTY, 0);
+      rwatch_command_wrapper (expr, FROM_TTY, false);
       break;
     case ACCESS_WP:
-      awatch_command_wrapper (expr, FROM_TTY, 0);
+      awatch_command_wrapper (expr, FROM_TTY, false);
       break;
     default:
       error (_("-break-watch: Unknown watchpoint type."));

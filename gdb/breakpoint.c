@@ -1905,7 +1905,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
       struct value *v, *result;
       struct program_space *frame_pspace;
 
-      fetch_subexp_value (b->exp.get (), &pc, &v, &result, &val_chain, 0);
+      fetch_subexp_value (b->exp.get (), &pc, &v, &result, &val_chain, false);
 
       /* Avoid setting b->val if it's already set.  The meaning of
 	 b->val is 'the last value' user saw, and we should update
@@ -4969,7 +4969,7 @@ watchpoint_check (bpstat bs)
 	return WP_VALUE_CHANGED;
 
       mark = value_mark ();
-      fetch_subexp_value (b->exp.get (), &pc, &new_val, NULL, NULL, 0);
+      fetch_subexp_value (b->exp.get (), &pc, &new_val, NULL, NULL, false);
 
       if (b->val_bitsize != 0)
 	new_val = extract_bitfield_from_watchpoint_value (b, new_val);
@@ -10676,7 +10676,7 @@ is_masked_watchpoint (const struct breakpoint *b)
 		hw_access: watch access (read or write) */
 static void
 watch_command_1 (const char *arg, int accessflag, int from_tty,
-		 int just_location, int internal)
+		 bool just_location, bool internal)
 {
   struct breakpoint *scope_breakpoint = NULL;
   const struct block *exp_valid_block = NULL, *cond_exp_valid_block = NULL;
@@ -10693,7 +10693,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   int pc = 0;
   /* Flag to indicate whether we are going to use masks for
      the hardware watchpoint.  */
-  int use_mask = 0;
+  bool use_mask = false;
   CORE_ADDR mask = 0;
 
   /* Make sure that we actually have parameters to parse.  */
@@ -10760,7 +10760,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	      if (use_mask)
 		error(_("You can specify only one mask."));
 
-	      use_mask = just_location = 1;
+	      use_mask = just_location = true;
 
 	      mark = value_mark ();
 	      mask_value = parse_to_comma_and_eval (&value_start);
@@ -11077,7 +11077,7 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 }
 
 void
-watch_command_wrapper (const char *arg, int from_tty, int internal)
+watch_command_wrapper (const char *arg, int from_tty, bool internal)
 {
   watch_command_1 (arg, hw_write, from_tty, 0, internal);
 }
@@ -11088,14 +11088,14 @@ watch_command_wrapper (const char *arg, int from_tty, int internal)
 static void
 watch_maybe_just_location (const char *arg, int accessflag, int from_tty)
 {
-  int just_location = 0;
+  bool just_location = false;
 
   if (arg
       && (check_for_argument (&arg, "-location", sizeof ("-location") - 1)
 	  || check_for_argument (&arg, "-l", sizeof ("-l") - 1)))
-    just_location = 1;
+    just_location = true;
 
-  watch_command_1 (arg, accessflag, from_tty, just_location, 0);
+  watch_command_1 (arg, accessflag, from_tty, just_location, false);
 }
 
 static void
@@ -11105,7 +11105,7 @@ watch_command (const char *arg, int from_tty)
 }
 
 void
-rwatch_command_wrapper (const char *arg, int from_tty, int internal)
+rwatch_command_wrapper (const char *arg, int from_tty, bool internal)
 {
   watch_command_1 (arg, hw_read, from_tty, 0, internal);
 }
@@ -11117,7 +11117,7 @@ rwatch_command (const char *arg, int from_tty)
 }
 
 void
-awatch_command_wrapper (const char *arg, int from_tty, int internal)
+awatch_command_wrapper (const char *arg, int from_tty, bool internal)
 {
   watch_command_1 (arg, hw_access, from_tty, 0, internal);
 }

@@ -1,5 +1,23 @@
 2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* breakpoint.c (update_watchpoint): Pass 'false' not '0'.
+	(watch_command_1): Update parameter types.  Convert locals to
+	bool.
+	(watch_command_wrapper): Change parameter type.
+	(watch_maybe_just_location): Change locals to bool.
+	(rwatch_command_wrapper): Update parameter type.
+	(awatch_command_wrapper): Update parameter type.
+	* breakpoint.h (watch_command_wrapper): Change parameter type.
+	(rwatch_command_wrapper): Update parameter type.
+	(awatch_command_wrapper): Update parameter type.
+	* eval.c (fetch_subexp_value): Change parameter type.
+	* ppc-linux-nat.c (ppc_linux_nat_target::check_condition): Pass
+	'false' not '0'.
+	* value.h (fetch_subexp_value): Change parameter type in
+	declaration.
+
+2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* printcmd.c (skip_over_slash_fmt): Make use of skip_to_space and
 	skip_spaces.
 

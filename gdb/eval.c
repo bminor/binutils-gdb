@@ -183,7 +183,7 @@ void
 fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
 		    struct value **resultp,
 		    std::vector<value_ref_ptr> *val_chain,
-		    int preserve_errors)
+		    bool preserve_errors)
 {
   struct value *mark, *new_mark, *result;
 
