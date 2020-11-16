@@ -1,3 +1,9 @@
+2020-11-16  Michael Hudson-Doyle  <michael.hudson@canonical.com>
+
+	PR 26902
+	* powerpc.cc (Relocate::relocate): Do not include local entry
+	offset of target function when computing the address of a stub.
+
 2020-10-09  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Powerpc_relobj::do_relocate_sections): Don't do
