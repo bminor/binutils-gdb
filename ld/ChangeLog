@@ -1,3 +1,12 @@
+2020-11-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26869
+	* ldelf.c (ldelf_before_allocation): Set rel_from_abs to 1 for
+	__ehdr_start.
+	* testsuite/ld-i386/i386.exp: Run pr26869.
+	* testsuite/ld-i386/pr26869.d: New file.
+	* testsuite/ld-i386/pr26869.s: Likewise.
+
 2020-10-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-i386/property-3.r: Updated for Fedora binary
