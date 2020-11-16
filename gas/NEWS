@@ -25,7 +25,9 @@
   AArch64.
 
 * Add support for +csre feature for -march. Add CSR PDEC instruction for CSRE
-  feature.
+  feature in AArch64.
+
+* Add support for +flagm feature for -march in Armv8.4 AArch64.
 
 * Add support for +ls64 feature for -march in Armv8.7 AArch64. Add atomic
   64-byte load/store instructions for this feature.

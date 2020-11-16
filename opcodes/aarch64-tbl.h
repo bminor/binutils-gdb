@@ -2422,6 +2422,8 @@ static const aarch64_feature_set aarch64_feature_csre =
   AARCH64_FEATURE (AARCH64_FEATURE_CSRE, 0);
 static const aarch64_feature_set aarch64_feature_ls64 =
   AARCH64_FEATURE (AARCH64_FEATURE_V8_6 | AARCH64_FEATURE_LS64, 0);
+static const aarch64_feature_set aarch64_feature_flagm =
+  AARCH64_FEATURE (AARCH64_FEATURE_FLAGM, 0);
 
 #define CORE		&aarch64_feature_v8
 #define FP		&aarch64_feature_fp
@@ -2470,6 +2472,7 @@ static const aarch64_feature_set aarch64_feature_ls64 =
 #define ARMV8_7	  &aarch64_feature_v8_7
 #define CSRE	  &aarch64_feature_csre
 #define LS64	  &aarch64_feature_ls64
+#define FLAGM	  &aarch64_feature_flagm
 
 #define CORE_INSN(NAME,OPCODE,MASK,CLASS,OP,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, OP, CORE, OPS, QUALS, FLAGS, 0, 0, NULL }
@@ -2583,6 +2586,8 @@ static const aarch64_feature_set aarch64_feature_ls64 =
   { NAME, OPCODE, MASK, CLASS, 0, CSRE, OPS, QUALS, FLAGS, 0, 0, NULL }
 #define _LS64_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
   { NAME, OPCODE, MASK, CLASS, 0, LS64, OPS, QUALS, FLAGS, 0, 0, NULL }
+#define FLAGM_INSN(NAME,OPCODE,MASK,CLASS,OPS,QUALS,FLAGS) \
+  { NAME, OPCODE, MASK, CLASS, 0, FLAGM, OPS, QUALS, FLAGS, 0, 0, NULL }
 
 struct aarch64_opcode aarch64_opcode_table[] =
 {
@@ -3906,7 +3911,7 @@ struct aarch64_opcode aarch64_opcode_table[] =
      potentially alias with too many instructions and so the tree can't be constructed.   As a work
      around we just place cfinv before msr.  This means the order between these two shouldn't be
      changed.  */
-  V8_4_INSN ("cfinv",  0xd500401f, 0xffffffff, ic_system, OP0 (), {}, 0),
+  FLAGM_INSN ("cfinv",  0xd500401f, 0xffffffff, ic_system, OP0 (), {}, 0),
   CORE_INSN ("msr", 0xd5000000, 0xffe00000, ic_system, 0, OP2 (SYSREG, Rt), QL_SRC_X, F_SYS_WRITE),
   CORE_INSN ("sysl",0xd5280000, 0xfff80000, ic_system, 0, OP5 (Rt, UIMM3_OP1, CRn, CRm, UIMM3_OP2), QL_SYSL, 0),
   CORE_INSN ("mrs", 0xd5200000, 0xffe00000, ic_system, 0, OP2 (Rt, SYSREG), QL_DST_X, F_SYS_READ),
@@ -5084,9 +5089,9 @@ struct aarch64_opcode aarch64_opcode_table[] =
   FP16_V8_2_INSN ("fmlal2", 0x6f808000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML4S, 0),
   FP16_V8_2_INSN ("fmlsl2", 0x6f80c000, 0xffc0f400, asimdelem, OP3 (Vd, Vn, Em16), QL_V2FML4S, 0),
   /* System extensions ARMv8.4-a.  */
-  V8_4_INSN ("rmif",   0xba000400, 0xffe07c10, ic_system, OP3 (Rn, IMM_2, MASK), QL_RMIF, 0),
-  V8_4_INSN ("setf8",  0x3a00080d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
-  V8_4_INSN ("setf16", 0x3a00480d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
+  FLAGM_INSN ("rmif",   0xba000400, 0xffe07c10, ic_system, OP3 (Rn, IMM_2, MASK), QL_RMIF, 0),
+  FLAGM_INSN ("setf8",  0x3a00080d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
+  FLAGM_INSN ("setf16", 0x3a00480d, 0xfffffc1f, ic_system, OP1 (Rn), QL_SETF, 0),
   /* Memory access instructions ARMv8.4-a.  */
   V8_4_INSN ("stlurb" ,  0x19000000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),
   V8_4_INSN ("ldapurb",  0x19400000, 0xffe00c00, ldst_unscaled, OP2 (Rt, ADDR_OFFSET), QL_STLW, 0),

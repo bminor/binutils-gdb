@@ -1,5 +1,13 @@
 2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
+	* NEWS: Update news.
+	* config/tc-aarch64.c: New feature flag +flagm.
+	* doc/c-aarch64.texi: Update docs.
+	* testsuite/gas/aarch64/flagm.d: New test.
+	* testsuite/gas/aarch64/flagm.s: New test.
+
+2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
 	* config/tc-arm.c (arm_cpus): Add Cortex-A78C.
 	* doc/c-arm.texi: Document -mcpu=cortex-a78c.
 	* testsuite/gas/arm/cpu-cortex-a78c.d: New test.

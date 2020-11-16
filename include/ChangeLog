@@ -1,3 +1,9 @@
+2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_FLAGM): Add new feature.
+	(AARCH64_FEATURE_FLAGMANIP): Update comment.
+	(AARCH64_ARCH_V8_4): Add back FLAGM to Armv8.4-A.
+
 2020-11-09  Spencer E. Olson  <olsonse@umich.edu>
 
 	* opcode/pru.h: Add LMBD (left-most bit detect) opcode index.

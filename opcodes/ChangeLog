@@ -1,3 +1,10 @@
+2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-tbl.h (FLAGM): Handle for FLAGM feature.
+	(struct aarch64_opcode):  Move FLAGM instructions from V8_4_INSN to
+	FLAGM_INSN.
+	(AARCH64_FEATURE_FLAGMANIP): Update comment for FEAT_FlagM2.
+
 2020-11-14  Borislav Petkov  <bp@suse.de>
 
 	* i386-dis.c (ckprefix): Do not assign active_seg_prefix in

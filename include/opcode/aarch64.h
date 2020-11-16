@@ -75,7 +75,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_AES	     (1ULL << 35) /* AES instructions.  */
 #define AARCH64_FEATURE_F16_FML      (1ULL << 36) /* v8.2 FP16FML ins.  */
 #define AARCH64_FEATURE_V8_5	     (1ULL << 37) /* ARMv8.5 processors.  */
-#define AARCH64_FEATURE_FLAGMANIP    (1ULL << 38) /* Flag Manipulation insns.  */
+#define AARCH64_FEATURE_FLAGMANIP    (1ULL << 38) /* v8.5 Flag Manipulation version 2.  */
 #define AARCH64_FEATURE_FRINTTS      (1ULL << 39) /* FRINT[32,64][Z,X] insns.  */
 #define AARCH64_FEATURE_SB	     (1ULL << 40) /* SB instruction.  */
 #define AARCH64_FEATURE_PREDRES      (1ULL << 41) /* Execution and Data Prediction Restriction instructions.  */
@@ -90,6 +90,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_I8MM	     (1ULL << 52) /* Matrix Multiply instructions.  */
 #define AARCH64_FEATURE_F32MM	     (1ULL << 53)
 #define AARCH64_FEATURE_F64MM	     (1ULL << 54)
+#define AARCH64_FEATURE_FLAGM	     (1ULL << 55) /* v8.4 Flag Manipulation.  */
 
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
@@ -117,6 +118,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_ARCH_V8_4	AARCH64_FEATURE (AARCH64_ARCH_V8_3,	\
 						 AARCH64_FEATURE_V8_4   \
 						 | AARCH64_FEATURE_DOTPROD \
+						 | AARCH64_FEATURE_FLAGM \
 						 | AARCH64_FEATURE_F16_FML)
 #define AARCH64_ARCH_V8_5	AARCH64_FEATURE (AARCH64_ARCH_V8_4,	\
 						 AARCH64_FEATURE_V8_5   \
