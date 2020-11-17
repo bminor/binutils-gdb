@@ -649,8 +649,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
       stub_tables_(), branch_lookup_table_(), branch_info_(), tocsave_loc_(),
       power10_relocs_(false), plt_thread_safe_(false), plt_localentry0_(false),
       plt_localentry0_init_(false), has_localentry0_(false),
-      has_tls_get_addr_opt_(false),
-      tprel_opt_(parameters->options().tls_optimize()),
+      has_tls_get_addr_opt_(false), no_tprel_opt_(false),
       relax_failed_(false), relax_fail_count_(0),
       stub_group_size_(0), savres_section_(0),
       tls_get_addr_(NULL), tls_get_addr_opt_(NULL),
@@ -1154,11 +1153,11 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
   bool
   tprel_opt() const
-  { return this->tprel_opt_; }
+  { return !this->no_tprel_opt_ && parameters->options().tls_optimize(); }
 
   void
-  set_tprel_opt(bool val)
-  { this->tprel_opt_ = val; }
+  set_no_tprel_opt()
+  { this->no_tprel_opt_ = true; }
 
   // Remember any symbols seen with non-zero localentry, even those
   // not providing a definition
@@ -1717,7 +1716,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
   bool plt_localentry0_init_;
   bool has_localentry0_;
   bool has_tls_get_addr_opt_;
-  bool tprel_opt_;
+  bool no_tprel_opt_;
 
   bool relax_failed_;
   int relax_fail_count_;
@@ -8471,7 +8470,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 	      uint32_t insn = elfcpp::Swap<32, big_endian>::readval(view + off);
 	      if ((insn & ((0x3fu << 26) | 0x1f << 16))
 		  != ((15u << 26) | ((size == 32 ? 2 : 13) << 16)))
-		target->set_tprel_opt(false);
+		target->set_no_tprel_opt();
 	    }
 	}
       break;
@@ -8486,7 +8485,7 @@ Target_powerpc<size, big_endian>::Scan::local(
 	break;
       // Fall through.
     case elfcpp::R_POWERPC_TPREL16_HI:
-      target->set_tprel_opt(false);
+      target->set_no_tprel_opt();
       break;
     default:
       break;
@@ -9268,7 +9267,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	      uint32_t insn = elfcpp::Swap<32, big_endian>::readval(view + off);
 	      if ((insn & ((0x3fu << 26) | 0x1f << 16))
 		  != ((15u << 26) | ((size == 32 ? 2 : 13) << 16)))
-		target->set_tprel_opt(false);
+		target->set_no_tprel_opt();
 	    }
 	}
       break;
@@ -9283,7 +9282,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	break;
       // Fall through.
     case elfcpp::R_POWERPC_TPREL16_HI:
-      target->set_tprel_opt(false);
+      target->set_no_tprel_opt();
       break;
     default:
       break;

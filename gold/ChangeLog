@@ -1,3 +1,12 @@
+2020-11-17  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::no_tprel_opt_): Rename from tprel_opt_.
+	Init to false.
+	(Target_powerpc::tprel_opt): Test parameters->options().tls_optimize().
+	(Target_powerpc::set_tprel_opt): Delete.
+	(Target_powerpc::set_no_tprel_opt): New function.  Update all uses
+	of set_tprel_opt.
+
 2020-11-16  Michael Hudson-Doyle  <michael.hudson@canonical.com>
 
 	PR 26902
