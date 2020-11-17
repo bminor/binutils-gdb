@@ -6169,14 +6169,18 @@ counter, and @code{.nolist} decrements it.  Assembly listings are
 generated whenever the counter is greater than zero.
 
 @node Nop
-@section @code{.nop}
+@section @code{.nop [@var{size}]}
 
 @cindex @code{nop} directive
 @cindex filling memory with no-op instructions
-This directive emits a single no-op instruction.  It is provided on all
-architectures, allowing the creation of architecture neutral tests involving
-actual code.  The size of the generated instruction is target specific.  The
-instruction does affect the generation of DWARF debug line information.
+This directive emits no-op instructions.  It is provided on all architectures,
+allowing the creation of architecture neutral tests involving actual code.  The
+size of the generated instruction is target specific, but if the optional
+@var{size} argument is given and resolves to an absolute positive value at that
+point in assembly (no forward expressions allowed) then the fewest no-op
+instructions are emitted that equal or exceed a total @var{size} in bytes.
+@code{.nop} does affect the generation of DWARF debug line information.
+Some targets do not support using @code{.nop} with @var{size}.
 
 @node Nops
 @section @code{.nops @var{size}[, @var{control}]}

@@ -2,6 +2,10 @@
 #as: -m68hc12 -gdwarf2
 #name: 68HC12 indexed addressing mode with 5, 9 and 16-bit offsets (indexed12)
 #source: indexed12.s
+#warning: .* line number information for \.data ignored
+#warning: .* line number information for \.data ignored
+#warning: .* line number information for \.data ignored
+#warning: .* line number information for \.data ignored
 
 .*: +file format elf32\-m68hc12
 

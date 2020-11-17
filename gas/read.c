@@ -3506,6 +3506,11 @@ s_space (int mult)
 void
 s_nop (int ignore ATTRIBUTE_UNUSED)
 {
+  expressionS exp;
+  fragS *start;
+  addressT start_off;
+  offsetT frag_off;
+
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif
@@ -3515,29 +3520,42 @@ s_nop (int ignore ATTRIBUTE_UNUSED)
 #endif
 
   SKIP_WHITESPACE ();
+  expression (&exp);
   demand_empty_rest_of_line ();
 
+  start = frag_now;
+  start_off = frag_now_fix ();
+  do
+    {
 #ifdef md_emit_single_noop
-  md_emit_single_noop;
+      md_emit_single_noop;
 #else
-  char * nop;
+      char *nop;
 
 #ifndef md_single_noop_insn
 #define md_single_noop_insn "nop"
 #endif
-  /* md_assemble might modify its argument, so
-     we must pass it a string that is writeable.  */
-  if (asprintf (&nop, "%s", md_single_noop_insn) < 0)
-    as_fatal ("%s", xstrerror (errno));
+      /* md_assemble might modify its argument, so
+	 we must pass it a string that is writable.  */
+      if (asprintf (&nop, "%s", md_single_noop_insn) < 0)
+	as_fatal ("%s", xstrerror (errno));
 
-  /* Some targets assume that they can update input_line_pointer inside
-     md_assemble, and, worse, that they can leave it assigned to the string
-     pointer that was provided as an argument.  So preserve ilp here.  */
-  char * saved_ilp = input_line_pointer;
-  md_assemble (nop);
-  input_line_pointer = saved_ilp;
-  free (nop);
+      /* Some targets assume that they can update input_line_pointer
+	 inside md_assemble, and, worse, that they can leave it
+	 assigned to the string pointer that was provided as an
+	 argument.  So preserve ilp here.  */
+      char *saved_ilp = input_line_pointer;
+      md_assemble (nop);
+      input_line_pointer = saved_ilp;
+      free (nop);
 #endif
+#ifdef md_flush_pending_output
+      md_flush_pending_output ();
+#endif
+    } while (exp.X_op == O_constant
+	     && exp.X_add_number > 0
+	     && frag_offset_ignore_align_p (start, frag_now, &frag_off)
+	     && frag_off + frag_now_fix () < start_off + exp.X_add_number);
 }
 
 void

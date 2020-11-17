@@ -154,6 +154,8 @@ char *frag_var (relax_stateT type,
 		char *opcode);
 
 bfd_boolean frag_offset_fixed_p (const fragS *, const fragS *, offsetT *);
+bfd_boolean frag_offset_ignore_align_p (const fragS *, const fragS *,
+					offsetT *);
 bfd_boolean frag_gtoffset_p (valueT, const fragS *, valueT, const fragS *,
 			     offsetT *);
 

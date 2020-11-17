@@ -1,10 +1,10 @@
 	.section .alloc0,"a"
-	.nop
+	.nop 16
 	.section .alloc1,"a"
-	.nop
+	.nop 16
 	.section .nonalloc,""
-	.nop
+	.nop 16
 	.section .allocexec,"ax"
-	.nop
+	.nop 16
 	.section .nonallocexec,"x"
-	.nop
+	.nop 16

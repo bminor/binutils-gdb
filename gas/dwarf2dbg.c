@@ -504,16 +504,18 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
 {
   struct line_subseg *lss;
   struct line_entry *e;
-  flagword need_flags = SEC_ALLOC | SEC_LOAD | SEC_CODE;
+  flagword need_flags = SEC_LOAD | SEC_CODE;
 
-  /* PR 26850: Do not record LOCs in non-executable, non-allocated,
-     or non-loaded sections.  */
+  /* PR 26850: Do not record LOCs in non-executable or non-loaded
+     sections.  SEC_ALLOC isn't tested for non-ELF because obj-coff.c
+     obj_coff_section is careless in setting SEC_ALLOC.  */
+  if (IS_ELF)
+    need_flags |= SEC_ALLOC;
   if ((now_seg->flags & need_flags) != need_flags)
     {
-      if (! SEG_NORMAL (now_seg))
-	/* FIXME: Add code to suppress multiple warnings ?  */
-	as_warn ("dwarf line number information for %s ignored",
-		 segment_name (now_seg));
+      /* FIXME: Add code to suppress multiple warnings ?  */
+      as_warn ("dwarf line number information for %s ignored",
+	       segment_name (now_seg));
       return;
     }
 

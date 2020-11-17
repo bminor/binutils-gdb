@@ -1,3 +1,15 @@
+2020-11-18  Alan Modra  <amodra@gmail.com>
+
+	* doc/as.texi (.nop): Document optional size arg.
+	* dwarf2dbg.c (dwarf2_gen_line_info_1): Only check SEC_ALLOC
+	when ELF.  Warn whenever dwarf line number information is ignored.
+	* frags.c (frag_offset_ignore_align_p): New function.
+	* frags.h (frag_offset_ignore_align_p): Declare.
+	* read.c (s_nop): Extend to support optional size arg.
+	* testsuite/gas/elf/dwarf2-20.d: Expect warnings, and exact range.
+	* testsuite/gas/elf/dwarf2-20.s: Emit 16 bytes worth of nops.
+	* testsuite/gas/m68hc11/indexed12.d: Expect warnings.
+
 2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 	H.J. Lu  <hongjiu.lu@intel.com>
 
