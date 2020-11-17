@@ -159,6 +159,10 @@ struct ada_tasks_pspace_data
 
   /* The index of various fields in the ATCB record and sub-records.  */
   struct atcb_fieldnos atcb_fieldno {};
+
+  /* On some systems, gdbserver applies an offset to the CPU that is
+     reported.  */
+  unsigned int cpu_id_offset = 0;
 };
 
 /* Key to our per-program-space data.  */
@@ -564,6 +568,18 @@ ada_get_tcb_types_info (void)
   if (fieldnos.ll_lwp < 0)
     fieldnos.ll_lwp = ada_get_field_index (ll_type, "thread_id", 1);
 
+  /* Check for the CPU offset.  */
+  bound_minimal_symbol first_id_sym
+    = lookup_bound_minimal_symbol ("__gnat_gdb_cpu_first_id");
+  unsigned int first_id = 0;
+  if (first_id_sym.minsym != nullptr)
+    {
+      CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (first_id_sym);
+      /* This symbol always has type uint32_t.  */
+      struct type *u32type = builtin_type (target_gdbarch ())->builtin_uint32;
+      first_id = value_as_long (value_at (u32type, addr));
+    }
+
   /* Set all the out parameters all at once, now that we are certain
      that there are no potential error() anymore.  */
   pspace_data = get_ada_tasks_pspace_data (current_program_space);
@@ -573,6 +589,7 @@ ada_get_tcb_types_info (void)
   pspace_data->atcb_ll_type = ll_type;
   pspace_data->atcb_call_type = call_type;
   pspace_data->atcb_fieldno = fieldnos;
+  pspace_data->cpu_id_offset = first_id;
   return NULL;
 }
 
@@ -769,8 +786,9 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
     }
 
   task_info->base_cpu
-    = value_as_long (value_field (common_value,
-				  pspace_data->atcb_fieldno.base_cpu));
+    = (pspace_data->cpu_id_offset
+      + value_as_long (value_field (common_value,
+				    pspace_data->atcb_fieldno.base_cpu)));
 
   /* And finally, compute the task ptid.  Note that there is not point
      in computing it if the task is no longer alive, in which case

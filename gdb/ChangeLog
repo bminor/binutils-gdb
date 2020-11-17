@@ -1,3 +1,10 @@
+2020-12-11  Tom Tromey  <tromey@adacore.com>
+
+	* ada-tasks.c (struct ada_tasks_pspace_data) <cpu_id_offset>: New
+	field.
+	(ada_get_tcb_types_info): Look for __gnat_gdb_cpu_first_id.
+	(read_atcb): Use cpu_id_offset.
+
 2020-12-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* ada-lang.c (ada_fold_name): Fix off-by-one error.
