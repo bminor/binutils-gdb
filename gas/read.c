@@ -5468,6 +5468,11 @@ stringer (int bits_appendzero)
 	  while (is_a_char (c = next_char_of_string ()))
 	    stringer_append_char (c, bitsize);
 
+	  /* Treat "a" "b" as "ab".  Even if we are appending zeros.  */
+	  SKIP_ALL_WHITESPACE ();
+	  if (*input_line_pointer == '"')
+	    break;
+
 	  if (append_zero)
 	    stringer_append_char (0, bitsize);
 

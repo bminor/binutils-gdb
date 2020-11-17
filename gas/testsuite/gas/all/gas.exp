@@ -473,3 +473,4 @@ run_dump_test "fill-1"
 gas_test "pr23938.s" "" "" ".xstabs"
 
 run_dump_test "nop"
+run_dump_test "asciz"
