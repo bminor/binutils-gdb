@@ -30,7 +30,7 @@
 
 #if (defined __x86_64__ || defined __i386__)
 
-static void
+static void __attribute__ ((used))
 x86_trace_dummy ()
 {
   int x = 0;

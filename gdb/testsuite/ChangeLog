@@ -1,3 +1,8 @@
+2020-11-17  Gary Benson <gbenson@redhat.com>
+
+	* gdb.trace/trace-common.h (x86_trace_dummy): Add
+	__attribute__ ((used)).
+
 2020-11-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.gdb/unittest.exp: Spot 'Running...' lines.
