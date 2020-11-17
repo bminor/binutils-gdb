@@ -70,7 +70,7 @@ convert_array (compile_c_instance *context, struct type *type)
     {
       LONGEST low_bound, high_bound, count;
 
-      if (get_array_bounds (type, &low_bound, &high_bound) == 0)
+      if (!get_array_bounds (type, &low_bound, &high_bound))
 	count = -1;
       else
 	{

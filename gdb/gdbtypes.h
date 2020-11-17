@@ -2435,8 +2435,15 @@ extern int get_vptr_fieldno (struct type *, struct type **);
 
 extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
 
-extern int get_array_bounds (struct type *type, LONGEST *low_bound,
-			     LONGEST *high_bound);
+/* Assuming TYPE is a simple, non-empty array type, compute its upper
+   and lower bound.  Save the low bound into LOW_BOUND if not NULL.
+   Save the high bound into HIGH_BOUND if not NULL.
+
+   Return true if the operation was successful.  Return false otherwise,
+   in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.  */
+
+extern bool get_array_bounds (struct type *type, LONGEST *low_bound,
+			      LONGEST *high_bound);
 
 extern int discrete_position (struct type *type, LONGEST val, LONGEST *pos);
 

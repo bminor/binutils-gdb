@@ -1119,14 +1119,9 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
     }
 }
 
-/* Assuming TYPE is a simple, non-empty array type, compute its upper
-   and lower bound.  Save the low bound into LOW_BOUND if not NULL.
-   Save the high bound into HIGH_BOUND if not NULL.
+/* See gdbtypes.h  */
 
-   Return 1 if the operation was successful.  Return zero otherwise,
-   in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.  */
-
-int
+bool
 get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
 {
   struct type *index = type->index_type ();
@@ -1135,11 +1130,11 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
   int res;
 
   if (index == NULL)
-    return 0;
+    return false;
 
   res = get_discrete_bounds (index, &low, &high);
   if (res == -1)
-    return 0;
+    return false;
 
   if (low_bound)
     *low_bound = low;
@@ -1147,7 +1142,7 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
   if (high_bound)
     *high_bound = high;
 
-  return 1;
+  return true;
 }
 
 /* Assuming that TYPE is a discrete type and VAL is a valid integer

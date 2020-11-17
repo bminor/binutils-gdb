@@ -491,7 +491,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
     {
       LONGEST low_bound, high_bound, count;
 
-      if (get_array_bounds (type, &low_bound, &high_bound) == 0)
+      if (!get_array_bounds (type, &low_bound, &high_bound))
 	count = -1;
       else
 	{

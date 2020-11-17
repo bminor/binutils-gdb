@@ -1,3 +1,9 @@
+2020-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (get_array_bounds): Return bool, adjust some
+	callers.  Move doc here.
+	* gdbtypes.c (get_array_bounds): Return bool
+
 2020-11-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arc-linux-tdep.c (arc_linux_sw_breakpoint_from_kind): Add an
