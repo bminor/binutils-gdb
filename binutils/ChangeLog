@@ -1,3 +1,8 @@
+2020-11-17  Howard Chu  <hyc@symas.com>
+
+	* ar.c (main): Place the libdeps record in the second archive
+	slot.
+
 2020-11-13  Nick Clifton  <nickc@redhat.com>
 
 	PR 26829

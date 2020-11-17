@@ -890,13 +890,16 @@ main (int argc, char **argv)
 	  if (bfd_find_target (plugin_target, libdeps_bfd) == NULL)
 	    fatal (_("Cannot reset libdeps record type."));
 
-	  /* Append our libdeps record to the list of files
-	     being operated on.  */
+	  /* Insert our libdeps record in 2nd slot of the list of files
+	     being operated on.  We shouldn't use 1st slot, but we want
+	     to avoid having to search all the way to the end of an
+	     archive with a large number of members at link time.  */
 	  new_files = xmalloc ((file_count + 2) * sizeof (char *));
-	  for (i = 0; i < file_count; i++)
-	    new_files[i] = files[i];
-	  new_files[i++] = LIBDEPS;
-	  file_count = i;
+	  new_files[0] = files[0];
+	  new_files[1] = LIBDEPS;
+	  for (i = 1; i < file_count; i++)
+	    new_files[i+1] = files[i];
+	  file_count = ++i;
 	  files = new_files;
 	  files[i] = NULL;
 	}
@@ -1135,7 +1138,7 @@ open_output_file (bfd * abfd)
 		 output_filename, base);
       output_filename = base;
     }
-  
+
   if (output_dir)
     {
       size_t len = strlen (output_dir);
@@ -1152,7 +1155,7 @@ open_output_file (bfd * abfd)
 
   if (verbose)
     printf ("x - %s\n", output_filename);
-  
+
   FILE * ostream = fopen (output_filename, FOPEN_WB);
   if (ostream == NULL)
     {
