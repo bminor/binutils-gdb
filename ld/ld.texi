@@ -1807,6 +1807,9 @@ specified either by one of the options @samp{--entry},
 @samp{--undefined}, or @samp{--gc-keep-exported} or by a @code{ENTRY}
 command in the linker script.
 
+As a GNU extension, ELF input sections marked with the
+@code{SHF_GNU_RETAIN} flag will not be garbage collected.
+
 @kindex --print-gc-sections
 @kindex --no-print-gc-sections
 @cindex garbage collection
@@ -5290,6 +5293,10 @@ section is discarded.
 The special output section name @samp{/DISCARD/} may be used to discard
 input sections.  Any input sections which are assigned to an output
 section named @samp{/DISCARD/} are not included in the output file.
+
+This can be used to discard input sections marked with the ELF flag
+@code{SHF_GNU_RETAIN}, which would otherwise have been saved from linker
+garbage collection.
 
 Note, sections that match the @samp{/DISCARD/} output section will be
 discarded even if they are in an ELF section group which has other

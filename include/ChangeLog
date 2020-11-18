@@ -1,3 +1,7 @@
+2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf/common.h (SHF_GNU_RETAIN): Define.
+
 2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_FLAGM): Add new feature.

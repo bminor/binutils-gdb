@@ -1,3 +1,26 @@
+2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+	H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Announce SHF_GNU_RETAIN support.
+	* config/obj-elf.c (obj_elf_change_section): Merge SHF_GNU_RETAIN bit
+	between section declarations.
+	(obj_elf_parse_section_letters): Handle 'R' flag.
+	Handle numeric flag values within the SHF_MASKOS range.
+	(obj_elf_section): Validate SHF_GNU_RETAIN usage.
+	* doc/as.texi: Document 'R' flag to .section directive.
+	* testsuite/gas/elf/elf.exp: Run new tests.
+	* testsuite/gas/elf/section10.d: Unset SHF_GNU_RETAIN bit.
+	* testsuite/gas/elf/section10.s: Likewise.
+	* testsuite/gas/elf/section22.d: New test.
+	* testsuite/gas/elf/section22.s: New test.
+	* testsuite/gas/elf/section23.s: New test.
+	* testsuite/gas/elf/section23a.d: New test.
+	* testsuite/gas/elf/section23b.d: New test.
+	* testsuite/gas/elf/section23b.err: New test.
+	* testsuite/gas/elf/section24.s: New test.
+	* testsuite/gas/elf/section24a.d: New test.
+	* testsuite/gas/elf/section24b.d: New test.
+
 2020-11-13  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* NEWS: Update news.

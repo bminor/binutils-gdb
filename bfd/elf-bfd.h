@@ -1897,14 +1897,15 @@ struct output_elf_obj_tdata
   bfd_boolean flags_init;
 };
 
-/* Indicate if the bfd contains SHF_GNU_MBIND sections or symbols that
-   have the STT_GNU_IFUNC symbol type or STB_GNU_UNIQUE binding.  Used
-   to set the osabi field in the ELF header structure.  */
+/* Indicate if the bfd contains SHF_GNU_MBIND/SHF_GNU_RETAIN sections or
+   symbols that have the STT_GNU_IFUNC symbol type or STB_GNU_UNIQUE
+   binding.  Used to set the osabi field in the ELF header structure.  */
 enum elf_gnu_osabi
 {
   elf_gnu_osabi_mbind = 1 << 0,
   elf_gnu_osabi_ifunc = 1 << 1,
   elf_gnu_osabi_unique = 1 << 2,
+  elf_gnu_osabi_retain = 1 << 3,
 };
 
 typedef struct elf_section_list
@@ -2034,7 +2035,7 @@ struct elf_obj_tdata
   ENUM_BITFIELD (dynamic_lib_link_class) dyn_lib_class : 4;
 
   /* Whether the bfd uses OS specific bits that require ELFOSABI_GNU.  */
-  ENUM_BITFIELD (elf_gnu_osabi) has_gnu_osabi : 3;
+  ENUM_BITFIELD (elf_gnu_osabi) has_gnu_osabi : 4;
 
   /* Whether if the bfd contains the GNU_PROPERTY_NO_COPY_ON_PROTECTED
      property.  */

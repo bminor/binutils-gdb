@@ -52,6 +52,11 @@
 
 * Configure with --enable-x86-used-note by default for Linux/x86.
 
+* Add support for the SHF_GNU_RETAIN flag, which can be applied to
+  sections using the 'R' flag in the .section directive.
+  SHF_GNU_RETAIN specifies that the section should not be garbage
+  collected by the linker.  It requires the GNU or FreeBSD ELF OSABIs.
+
 Changes in 2.35:
 
 * X86 NaCl target support is removed.

@@ -6659,6 +6659,9 @@ section is a member of a section group
 section is used for thread-local-storage
 @item ?
 section is a member of the previously-current section's group, if any
+@item R
+retained section (apply SHF_GNU_RETAIN to prevent linker garbage
+collection, GNU ELF extension)
 @item @code{<number>}
 a numeric value indicating the bits to be set in the ELF section header's flags
 field.  Note - if one or more of the alphabetic characters described above is

@@ -554,6 +554,7 @@
 /* #define SHF_MASKOS	0x0F000000    *//* OS-specific semantics */
 #define SHF_MASKOS	0x0FF00000	/* New value, Oct 4, 1999 Draft */
 #define SHF_GNU_BUILD_NOTE    (1 << 20)	/* Section contains GNU BUILD ATTRIBUTE notes.  */
+#define SHF_GNU_RETAIN	      (1 << 21)	/* Section should not be garbage collected by the linker.  */
 #define SHF_MASKPROC	0xF0000000	/* Processor-specific semantics */
 
 /* This used to be implemented as a processor specific section flag.

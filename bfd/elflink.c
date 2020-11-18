@@ -10746,6 +10746,14 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
       extsymoff = symtab_hdr->sh_info;
     }
 
+  /* Enable GNU OSABI features in the output BFD that are used in the input
+     BFD.  */
+  if (bed->elf_osabi == ELFOSABI_NONE
+      || bed->elf_osabi == ELFOSABI_GNU
+      || bed->elf_osabi == ELFOSABI_FREEBSD)
+    elf_tdata (output_bfd)->has_gnu_osabi
+      |= elf_tdata (input_bfd)->has_gnu_osabi;
+
   /* Read the local symbols.  */
   isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
   if (isymbuf == NULL && locsymcount != 0)
@@ -14116,7 +14124,9 @@ bfd_elf_gc_sections (bfd *abfd, struct bfd_link_info *info)
 			    == SHT_FINI_ARRAY)))
 		|| (elf_section_data (o)->this_hdr.sh_type == SHT_NOTE
 		    && elf_next_in_group (o) == NULL
-		    && elf_linked_to_section (o) == NULL)))
+		    && elf_linked_to_section (o) == NULL)
+		|| ((elf_tdata (sub)->has_gnu_osabi & elf_gnu_osabi_retain)
+		    && (elf_section_flags (o) & SHF_GNU_RETAIN))))
 	  {
 	    if (!_bfd_elf_gc_mark (info, o, gc_mark_hook))
 	      return FALSE;

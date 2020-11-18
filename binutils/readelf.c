@@ -5996,6 +5996,8 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
       /* 24 */ { STRING_COMMA_LEN ("GNU_MBIND") },
       /* VLE specific.  */
       /* 25 */ { STRING_COMMA_LEN ("VLE") },
+      /* GNU specific.  */
+      /* 26 */ { STRING_COMMA_LEN ("GNU_RETAIN") },
     };
 
   if (do_section_details)
@@ -6028,7 +6030,6 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 	    case SHF_TLS:		sindex = 9; break;
 	    case SHF_EXCLUDE:		sindex = 18; break;
 	    case SHF_COMPRESSED:	sindex = 20; break;
-	    case SHF_GNU_MBIND:		sindex = 24; break;
 
 	    default:
 	      sindex = -1;
@@ -6080,10 +6081,28 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 		  if (flag == SHF_PPC_VLE)
 		    sindex = 25;
 		  break;
-
 		default:
 		  break;
 		}
+
+	      switch (filedata->file_header.e_ident[EI_OSABI])
+		{
+		case ELFOSABI_GNU:
+		case ELFOSABI_FREEBSD:
+		  if (flag == SHF_GNU_RETAIN)
+		    sindex = 26;
+		  /* Fall through */
+		case ELFOSABI_NONE:
+		  if (flag == SHF_GNU_MBIND)
+		    /* We should not recognize SHF_GNU_MBIND for
+		       ELFOSABI_NONE, but binutils as of 2019-07-23 did
+		       not set the EI_OSABI header byte.  */
+		    sindex = 24;
+		  break;
+		default:
+		  break;
+		}
+	      break;
 	    }
 
 	  if (sindex != -1)
@@ -6126,7 +6145,6 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 	    case SHF_TLS:		*p = 'T'; break;
 	    case SHF_EXCLUDE:		*p = 'E'; break;
 	    case SHF_COMPRESSED:	*p = 'C'; break;
-	    case SHF_GNU_MBIND:		*p = 'D'; break;
 
 	    default:
 	      if ((filedata->file_header.e_machine == EM_X86_64
@@ -6136,14 +6154,37 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 		*p = 'l';
 	      else if (filedata->file_header.e_machine == EM_ARM
 		       && flag == SHF_ARM_PURECODE)
-		  *p = 'y';
+		*p = 'y';
 	      else if (filedata->file_header.e_machine == EM_PPC
 		       && flag == SHF_PPC_VLE)
-		  *p = 'v';
+		*p = 'v';
 	      else if (flag & SHF_MASKOS)
 		{
-		  *p = 'o';
-		  sh_flags &= ~ SHF_MASKOS;
+		  switch (filedata->file_header.e_ident[EI_OSABI])
+		    {
+		    case ELFOSABI_GNU:
+		    case ELFOSABI_FREEBSD:
+		      if (flag == SHF_GNU_RETAIN)
+			{
+			  *p = 'R';
+			  break;
+			}
+		      /* Fall through */
+		    case ELFOSABI_NONE:
+		      if (flag == SHF_GNU_MBIND)
+			{
+			  /* We should not recognize SHF_GNU_MBIND for
+			     ELFOSABI_NONE, but binutils as of 2019-07-23 did
+			     not set the EI_OSABI header byte.  */
+			  *p = 'D';
+			  break;
+			}
+		      /* Fall through */
+		    default:
+		      *p = 'o';
+		      sh_flags &= ~SHF_MASKOS;
+		      break;
+		    }
 		}
 	      else if (flag & SHF_MASKPROC)
 		{

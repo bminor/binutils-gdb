@@ -806,9 +806,17 @@ obj_elf_change_section (const char *name,
 		as_bad (_("changed section attributes for %s"), name);
 	    }
 	  else
-	    /* FIXME: Maybe we should consider removing a previously set
-	       processor or application specific attribute as suspicious ?  */
-	    elf_section_flags (sec) = attr;
+	    {
+	      /* Don't overwrite a previously set SHF_GNU_RETAIN flag for the
+		 section.  The entire section must be marked retained.  */
+	      if ((elf_tdata (stdoutput)->has_gnu_osabi & elf_gnu_osabi_retain)
+		  && ((elf_section_flags (old_sec) & SHF_GNU_RETAIN)))
+		attr |= SHF_GNU_RETAIN;
+
+	      /* FIXME: Maybe we should consider removing a previously set
+		 processor or application specific attribute as suspicious ?  */
+	      elf_section_flags (sec) = attr;
+	    }
 
 	  if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	    as_bad (_("changed section entity size for %s"), name);
@@ -861,6 +869,9 @@ obj_elf_parse_section_letters (char *str, size_t len,
 	case 'd':
 	  *gnu_attr |= SHF_GNU_MBIND;
 	  break;
+	case 'R':
+	  *gnu_attr |= SHF_GNU_RETAIN;
+	  break;
 	case '?':
 	  *is_clone = TRUE;
 	  break;
@@ -890,8 +901,32 @@ obj_elf_parse_section_letters (char *str, size_t len,
 	      if (ISDIGIT (*str))
 		{
 		  char * end;
+		  struct elf_backend_data *bed;
+		  bfd_vma numeric_flags = strtoul (str, &end, 0);
 
-		  attr |= strtoul (str, & end, 0);
+		  attr |= numeric_flags;
+
+		  bed = (struct elf_backend_data *)
+		    get_elf_backend_data (stdoutput);
+
+		  if (bed->elf_osabi == ELFOSABI_NONE
+		      || bed->elf_osabi == ELFOSABI_STANDALONE
+		      || bed->elf_osabi == ELFOSABI_GNU
+		      || bed->elf_osabi == ELFOSABI_FREEBSD)
+		    {
+		      /* Add flags in the SHF_MASKOS range to gnu_attr for
+			 OSABIs that support those flags.
+			 Also adding the flags for ELFOSABI_{NONE,STANDALONE}
+			 allows them to be validated later in obj_elf_section.
+			 We can't just always set these bits in gnu_attr for
+			 all OSABIs, since Binutils does not recognize all
+			 SHF_MASKOS bits for non-GNU OSABIs.  It's therefore
+			 possible that numeric flags are being used to set bits
+			 in the SHF_MASKOS range for those targets, and we
+			 don't want assembly to fail in those situations.  */
+		      *gnu_attr |= (numeric_flags & SHF_MASKOS);
+		    }
+
 		  /* Update str and len, allowing for the fact that
 		     we will execute str++ and len-- below.  */
 		  end --;
@@ -1387,26 +1422,37 @@ obj_elf_section (int push)
  done:
   demand_empty_rest_of_line ();
 
-  obj_elf_change_section (name, type, attr, entsize, &match, linkonce,
-			  push);
-
-  if ((gnu_attr & SHF_GNU_MBIND) != 0)
+  if ((gnu_attr & (SHF_GNU_MBIND | SHF_GNU_RETAIN)) != 0)
     {
       struct elf_backend_data *bed;
+      bfd_boolean mbind_p = (gnu_attr & SHF_GNU_MBIND) != 0;
 
-      if ((attr & SHF_ALLOC) == 0)
+      if (mbind_p && (attr & SHF_ALLOC) == 0)
 	as_bad (_("SHF_ALLOC isn't set for GNU_MBIND section: %s"), name);
 
       bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
-      if (bed->elf_osabi == ELFOSABI_NONE)
-	bed->elf_osabi = ELFOSABI_GNU;
-      else if (bed->elf_osabi != ELFOSABI_GNU
-	       && bed->elf_osabi != ELFOSABI_FREEBSD)
-	as_bad (_("GNU_MBIND section is supported only by GNU "
-		  "and FreeBSD targets"));
-      elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_mbind;
+
+      if (bed->elf_osabi != ELFOSABI_GNU
+	  && bed->elf_osabi != ELFOSABI_FREEBSD
+	  && bed->elf_osabi != ELFOSABI_NONE)
+	as_bad (_("%s section is supported only by GNU and FreeBSD targets"),
+		mbind_p ? "GNU_MBIND" : "GNU_RETAIN");
+      else
+	{
+	  if (bed->elf_osabi == ELFOSABI_NONE)
+	    bed->elf_osabi = ELFOSABI_GNU;
+
+	  if (mbind_p)
+	    elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_mbind;
+	  if ((gnu_attr & SHF_GNU_RETAIN) != 0)
+	    elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_retain;
+
+	  attr |= gnu_attr;
+	}
     }
-  elf_section_flags (now_seg) |= gnu_attr;
+
+  obj_elf_change_section (name, type, attr, entsize, &match, linkonce,
+			  push);
 
   if (linked_to_section_index != -1UL)
     {

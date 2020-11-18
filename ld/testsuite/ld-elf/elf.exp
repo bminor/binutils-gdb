@@ -119,6 +119,16 @@ if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
     set ASFLAGS "$ASFLAGS -mx86-used-note=no"
 }
 
+# Build libraries required for SHF_GNU_RETAIN tests.
+if { [check_gc_sections_available] && [supports_gnu_osabi] } {
+    run_ld_link_tests [list \
+	[list "Build libretain5.a" "" "" "" \
+	    {retain5lib.s} {} "libretain5.a"] \
+	[list "Build libretain6.a" "" "" "" \
+	    {retain6lib.s} {} "libretain6.a"] \
+	]
+}
+
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 foreach t $test_list {
     # We need to strip the ".d", but can leave the dirname.

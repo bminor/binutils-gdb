@@ -12,6 +12,10 @@
   symbol names.  In addition the --demangle=<style>, --no-demangle,
   --recurse-limit and --no-recurse-limit options are also now availale.
 
+* Add support for the SHF_GNU_RETAIN ELF section flag.
+  This flag specifies that the section should not be garbage collected by the
+  linker.
+
 Changes in 2.35:
 
 * Changed readelf's display of symbol names when wide mode is not enabled.

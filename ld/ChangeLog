@@ -1,3 +1,28 @@
+2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* NEWS: Announce support for SHF_GNU_RETAIN.
+	* ld.texi (garbage collection): Document SHF_GNU_RETAIN.
+	(Output Section Discarding): Likewise.
+	* testsuite/ld-elf/elf.exp: Run new tests.
+	* testsuite/ld-elf/retain1.s: New test.
+	* testsuite/ld-elf/retain1a.d: New test.
+	* testsuite/ld-elf/retain1b.d: New test.
+	* testsuite/ld-elf/retain2.d: New test.
+	* testsuite/ld-elf/retain2.ld: New test.
+	* testsuite/ld-elf/retain2.map: New test.
+	* testsuite/ld-elf/retain3.d: New test.
+	* testsuite/ld-elf/retain3.s: New test.
+	* testsuite/ld-elf/retain4.d: New test.
+	* testsuite/ld-elf/retain4.s: New test.
+	* testsuite/ld-elf/retain5.d: New test.
+	* testsuite/ld-elf/retain5.map: New test.
+	* testsuite/ld-elf/retain5lib.s: New test.
+	* testsuite/ld-elf/retain5main.s: New test.
+	* testsuite/ld-elf/retain6a.d: New test.
+	* testsuite/ld-elf/retain6b.d: New test.
+	* testsuite/ld-elf/retain6lib.s: New test.
+	* testsuite/ld-elf/retain6main.s: New test.
+
 2020-11-17  Alan Modra  <amodra@gmail.com>
 
 	PR 26882

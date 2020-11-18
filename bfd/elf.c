@@ -1066,9 +1066,12 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       /* FIXME: We should not recognize SHF_GNU_MBIND for ELFOSABI_NONE,
 	 but binutils as of 2019-07-23 did not set the EI_OSABI header
 	 byte.  */
-    case ELFOSABI_NONE:
     case ELFOSABI_GNU:
     case ELFOSABI_FREEBSD:
+      if ((hdr->sh_flags & SHF_GNU_RETAIN) != 0)
+	elf_tdata (abfd)->has_gnu_osabi |= elf_gnu_osabi_retain;
+      /* Fall through */
+    case ELFOSABI_NONE:
       if ((hdr->sh_flags & SHF_GNU_MBIND) != 0)
 	elf_tdata (abfd)->has_gnu_osabi |= elf_gnu_osabi_mbind;
       break;
@@ -12456,8 +12459,8 @@ _bfd_elf_final_write_processing (bfd *abfd)
     i_ehdrp->e_ident[EI_OSABI] = get_elf_backend_data (abfd)->elf_osabi;
 
   /* Set the osabi field to ELFOSABI_GNU if the binary contains
-     SHF_GNU_MBIND sections or symbols of STT_GNU_IFUNC type or
-     STB_GNU_UNIQUE binding.  */
+     SHF_GNU_MBIND or SHF_GNU_RETAIN sections or symbols of STT_GNU_IFUNC type
+     or STB_GNU_UNIQUE binding.  */
   if (elf_tdata (abfd)->has_gnu_osabi != 0)
     {
       if (i_ehdrp->e_ident[EI_OSABI] == ELFOSABI_NONE)
@@ -12466,11 +12469,17 @@ _bfd_elf_final_write_processing (bfd *abfd)
 	       && i_ehdrp->e_ident[EI_OSABI] != ELFOSABI_FREEBSD)
 	{
 	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_mbind)
-	    _bfd_error_handler (_("GNU_MBIND section is unsupported"));
+	    _bfd_error_handler (_("GNU_MBIND section is supported only by GNU "
+				  "and FreeBSD targets"));
 	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_ifunc)
-	    _bfd_error_handler (_("symbol type STT_GNU_IFUNC is unsupported"));
+	    _bfd_error_handler (_("symbol type STT_GNU_IFUNC is supported "
+				  "only by GNU and FreeBSD targets"));
 	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_unique)
-	    _bfd_error_handler (_("symbol binding STB_GNU_UNIQUE is unsupported"));
+	    _bfd_error_handler (_("symbol binding STB_GNU_UNIQUE is supported "
+				  "only by GNU and FreeBSD targets"));
+	  if (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_retain)
+	    _bfd_error_handler (_("GNU_RETAIN section is supported "
+				  "only by GNU and FreeBSD targets"));
 	  bfd_set_error (bfd_error_sorry);
 	  return FALSE;
 	}

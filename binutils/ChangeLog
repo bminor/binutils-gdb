@@ -1,3 +1,19 @@
+2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* NEWS: Announce SHF_GNU_RETAIN support.
+	* readelf.c (get_elf_section_flags): Handle SHF_GNU_RETAIN.
+	Recognize SHF_GNU_RETAIN and SHF_GNU_MBIND only for supported OSABIs.
+	* testsuite/binutils-all/readelf.exp: Run new tests.
+	Don't run run_dump_test when there isn't an assembler available.
+	* testsuite/lib/binutils-common.exp (supports_gnu_osabi): Adjust
+	comment.
+	* testsuite/binutils-all/readelf-maskos-1a.d: New test.
+	* testsuite/binutils-all/readelf-maskos-1b.d: New test.
+	* testsuite/binutils-all/readelf-maskos.s: New test.
+	* testsuite/binutils-all/retain1.s: New test.
+	* testsuite/binutils-all/retain1a.d: New test.
+	* testsuite/binutils-all/retain1b.d: New test.
+
 2020-11-17  Howard Chu  <hyc@symas.com>
 
 	* ar.c (main): Place the libdeps record in the second archive

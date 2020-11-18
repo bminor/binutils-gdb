@@ -23,6 +23,10 @@
   unless you are working on a project that has its own analogue
   of symbol tables that are not reflected in the ELF symtabs.
 
+* Add support for the SHF_GNU_RETAIN ELF section flag.
+  This flag specifies that the section should not be garbage collected by the
+  linker.
+
 Changes in 2.35:
 
 * X86 NaCl target support is removed.

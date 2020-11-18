@@ -195,12 +195,14 @@ proc match_target { target } {
 
 # True if the ELF target supports setting the ELF header OSABI field
 # to ELFOSABI_GNU or ELFOSABI_FREEBSD, a requirement for STT_GNU_IFUNC
-# symbol and SHF_GNU_MBIND section support.
+# symbol and SHF_GNU_MBIND or SHF_GNU_RETAIN section support.
 #
 # This generally depends on the target OS only, however there are a
 # number of exceptions for bare metal targets as follows.  The MSP430
 # and Visium targets set OSABI to ELFOSABI_STANDALONE.  Likewise
 # non-EABI ARM targets set OSABI to ELFOSABI_ARM
+#
+# Non-Linux HPPA defaults to ELFOSABI_HPUX.
 #
 # Note that some TI C6X targets use ELFOSABI_C6000_* but one doesn't,
 # so we don't try to sort out tic6x here.  (The effect is that linker
@@ -227,6 +229,7 @@ proc supports_gnu_osabi {} {
     }
     if { [istarget "arm*-*-*"]
 	 || [istarget "msp430-*-*"]
+	 || [istarget "hppa-unknown-elf"]
 	 || [istarget "visium-*-*"] } {
 	return 0
     }

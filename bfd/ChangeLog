@@ -1,3 +1,17 @@
+2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+	H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (enum elf_gnu_osabi): Add elf_gnu_osabi_retain.
+	(struct elf_obj_tdata): Increase has_gnu_osabi to 4 bits.
+	* elf.c (_bfd_elf_make_section_from_shdr): Set elf_gnu_osabi_retain
+	for SHF_GNU_RETAIN.
+	(_bfd_elf_final_write_processing): Report if SHF_GNU_RETAIN is
+	not supported by the OSABI.
+	Adjust error messages.
+	* elflink.c (elf_link_input_bfd): Copy enabled has_gnu_osabi bits from
+	input BFD to output BFD.
+	(bfd_elf_gc_sections): gc_mark the section if SHF_GNU_RETAIN is set.
+
 2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* cpu-arm.c (processors): Add Cortex-A78C.

@@ -364,8 +364,15 @@ readelf_wi_test
 readelf_compressed_wa_test
 
 readelf_dump_test
-run_dump_test "pr25543"
 
+# These dump tests require an assembler.
+if {[which $AS] != 0} then {
+    run_dump_test "pr25543"
+    run_dump_test "retain1a"
+    run_dump_test "retain1b"
+    run_dump_test "readelf-maskos-1a"
+    run_dump_test "readelf-maskos-1b"
+}
 
 # PR 13482 - Check for off-by-one errors when dumping .note sections.
 if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {
