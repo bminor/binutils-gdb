@@ -1247,7 +1247,7 @@ update_static_array_size (struct type *type)
       if (element_type->code () == TYPE_CODE_ARRAY
 	  && TYPE_LENGTH (element_type) != 0
 	  && TYPE_FIELD_BITSIZE (element_type, 0) != 0
-	  && get_array_bounds (element_type, &low_bound, &high_bound) >= 0
+	  && get_array_bounds (element_type, &low_bound, &high_bound)
 	  && high_bound >= low_bound)
 	TYPE_FIELD_BITSIZE (type, 0)
 	  = ((high_bound - low_bound + 1)

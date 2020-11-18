@@ -1,3 +1,8 @@
+2020-11-18  Tom de Vries  <tdevries@suse.de>
+
+	* gdbtypes.c (update_static_array_size): Fix -Werror=bool-compare
+	warning.
+
 2020-11-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.h (get_array_bounds): Return bool, adjust some
