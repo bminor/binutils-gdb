@@ -101,7 +101,7 @@
 
 2020-11-15  Joel Brobecker  <brobecker@adacore.com>
 
-	* gmp-utils.h,  gmp-utils.h: New file.
+	* gmp-utils.h,  gmp-utils.c: New file.
 	* unittests/gmp-utils-selftests.c: New file.
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Add
 	unittests/gmp-utils-selftests.c.
