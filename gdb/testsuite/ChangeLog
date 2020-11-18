@@ -1,3 +1,8 @@
+2020-11-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/mi-support.exp (mi_run_cmd_full): Use unresovled instead
+	of perror.
+
 2020-11-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* lib/mi-support.exp (mi_gdb_file_cmd): Check for case where

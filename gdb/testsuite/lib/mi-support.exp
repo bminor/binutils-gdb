@@ -961,7 +961,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	gdb_expect 30 {
 	    -re "$mi_gdb_prompt$" { }
 	    default {
-		perror "gdb_init_command for target failed"
+		unresolved "gdb_init_command for target failed"
 		return -1
 	    }
 	}
@@ -995,7 +995,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	gdb_expect {
 	    -re "&\"jump \\*${start}\\\\n\"\[\r\n\]+~\"Continuing at 0x\[0-9A-Fa-f\]+\.\\\\n\"\[\r\n\]+\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\[\r\n\]+${mi_gdb_prompt}" {}
 	    timeout {
-		perror "Unable to start target"
+		unresolved "unable to start target"
 		return -1
 	    }
 	}
@@ -1011,7 +1011,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	    return -1
 	}
 	timeout {
-	    perror "Unable to start target"
+	    unresolved "unable to start target"
 	    return -1
 	}
     }
