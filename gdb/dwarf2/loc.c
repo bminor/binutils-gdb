@@ -1474,15 +1474,15 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   if (size == 0)
     return allocate_optimized_out_value (subobj_type);
 
-  dwarf_expr_context ctx (per_objfile, per_cu->addr_size ());
-
   value *retval;
   scoped_value_mark free_values;
 
   try
     {
-      retval = ctx.evaluate (data, size, as_lval, per_cu, frame, nullptr,
-			     type, subobj_type, subobj_byte_offset);
+      retval
+	= dwarf2_evaluate (data, size, as_lval, per_objfile, per_cu,
+			   frame, per_cu->addr_size (), nullptr, nullptr,
+			   type, subobj_type, subobj_byte_offset);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1553,23 +1553,28 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
   dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
   dwarf2_per_cu_data *per_cu = dlbaton->per_cu;
-  dwarf_expr_context ctx (per_objfile, per_cu->addr_size ());
 
   value *result;
   scoped_value_mark free_values;
+  std::vector<value *> init_values;
 
   if (push_initial_value)
     {
+      struct type *type = address_type (per_objfile->objfile->arch (),
+					per_cu->addr_size ());
+
       if (addr_stack != nullptr)
-	ctx.push_address (addr_stack->addr, false);
+	init_values.push_back (value_at_lazy (type, addr_stack->addr));
       else
-	ctx.push_address (0, false);
+	init_values.push_back (value_at_lazy (type, 0));
     }
 
   try
     {
-      result = ctx.evaluate (dlbaton->data, dlbaton->size,
-			     true, per_cu, frame, addr_stack);
+      result
+	= dwarf2_evaluate (dlbaton->data, dlbaton->size, true, per_objfile,
+			   per_cu, frame, per_cu->addr_size (), &init_values,
+			   addr_stack);
     }
   catch (const gdb_exception_error &ex)
     {

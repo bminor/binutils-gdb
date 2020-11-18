@@ -229,11 +229,19 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  struct frame_info *this_frame, CORE_ADDR initial,
 		  int initial_in_stack_memory, dwarf2_per_objfile *per_objfile)
 {
-  dwarf_expr_context ctx (per_objfile, addr_size);
   scoped_value_mark free_values;
+  struct type *type = address_type (per_objfile->objfile->arch (),
+				    addr_size);
 
-  ctx.push_address (initial, initial_in_stack_memory);
-  value *result_val = ctx.evaluate (exp, len, true, nullptr, this_frame);
+  value *init_value = value_at_lazy (type, initial);
+  std::vector<value *> init_values;
+
+  set_value_stack (init_value, initial_in_stack_memory);
+  init_values.push_back (init_value);
+
+  value *result_val
+    = dwarf2_evaluate (exp, len, true, per_objfile, nullptr,
+		       this_frame, addr_size, &init_values, nullptr);
 
   if (VALUE_LVAL (result_val) == lval_memory)
     return value_address (result_val);
