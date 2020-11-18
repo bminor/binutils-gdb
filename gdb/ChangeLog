@@ -1,3 +1,8 @@
+2020-11-18  Keith Seitz  <keiths@redhat.com>
+
+	* linux-tdep.c (dump_note_entry_p): Return true instead of
+	checking `filename'.
+
 2020-11-18  Tom de Vries  <tdevries@suse.de>
 
 	* debuginfod-support.c (debuginfod_source_query)

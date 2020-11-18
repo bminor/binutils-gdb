@@ -742,7 +742,7 @@ dump_note_entry_p (filter_flags filterflags, const struct smaps_vmflags *v,
 
   /* Otherwise, any other file-based mapping should be placed in the
      note.  */
-  return filename != nullptr;
+  return 1;
 }
 
 /* Implement the "info proc" command.  */
