@@ -1,5 +1,14 @@
 2020-11-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb.mi/mi-nonstop-exit.exp: Enable non-stop through GDBFLAGS.
+	* gdb.mi/mi-ns-stale-regcache.exp: Likewise.
+	* gdb.mi/mi-nsintrall.exp: Likewise.
+	* gdb.mi/mi-nsmoribund.exp: Likewise.
+	* gdb.mi/mi-nsthrexec.exp: Likewise.
+	* gdb.mi/mi-watch-nonstop.exp: Likewise.
+
+2020-11-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* lib/mi-support.exp (mi_run_cmd_full): Use unresovled instead
 	of perror.
 

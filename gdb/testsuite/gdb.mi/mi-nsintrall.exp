@@ -31,9 +31,11 @@ if {[gdb_compile_pthreads "$srcdir/$subdir/$srcfile" $binfile executable $option
     return -1
 }
 
-mi_clean_restart $binfile
+save_vars { GDBFLAGS } {
+    append GDBFLAGS " -ex \"set non-stop on\""
+    mi_clean_restart $binfile
+}
 
-mi_gdb_test "-gdb-set non-stop 1" ".*"
 mi_gdb_test "-gdb-set mi-async 1" ".*"
 mi_detect_async
 
