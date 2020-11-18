@@ -111,7 +111,8 @@ debuginfod_source_query (const unsigned char *build_id,
 			 const char *srcpath,
 			 gdb::unique_xmalloc_ptr<char> *destname)
 {
-  if (getenv (DEBUGINFOD_URLS_ENV_VAR) == NULL)
+  const char *urls_env_var = getenv (DEBUGINFOD_URLS_ENV_VAR);
+  if (urls_env_var == NULL || urls_env_var[0] == '\0')
     return scoped_fd (-ENOSYS);
 
   debuginfod_client_up c = debuginfod_init ();
@@ -147,7 +148,8 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 			    const char *filename,
 			    gdb::unique_xmalloc_ptr<char> *destname)
 {
-  if (getenv (DEBUGINFOD_URLS_ENV_VAR) == NULL)
+  const char *urls_env_var = getenv (DEBUGINFOD_URLS_ENV_VAR);
+  if (urls_env_var == NULL || urls_env_var[0] == '\0')
     return scoped_fd (-ENOSYS);
 
   debuginfod_client_up c = debuginfod_init ();

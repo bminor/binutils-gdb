@@ -1,5 +1,11 @@
 2020-11-18  Tom de Vries  <tdevries@suse.de>
 
+	* debuginfod-support.c (debuginfod_source_query)
+	(debuginfod_debuginfo_query): Also do early exit if
+	"(getenv (DEBUGINFOD_URLS_ENV_VAR))[0] == '\0'".
+
+2020-11-18  Tom de Vries  <tdevries@suse.de>
+
 	* gdbtypes.c (update_static_array_size): Fix -Werror=bool-compare
 	warning.
 
