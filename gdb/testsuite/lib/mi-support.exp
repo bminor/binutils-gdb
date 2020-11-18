@@ -505,6 +505,11 @@ proc mi_gdb_file_cmd { arg } {
     global last_loaded_file
     upvar timeout timeout
 
+    # GCC for Windows target may create foo.exe given "-o foo".
+    if { ![file exists $arg] && [file exists "$arg.exe"] } {
+	set arg "$arg.exe"
+    }
+
     set last_loaded_file $arg
 
     if [is_remote host] {

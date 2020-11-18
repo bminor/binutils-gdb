@@ -1,3 +1,8 @@
+2020-11-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* lib/mi-support.exp (mi_gdb_file_cmd): Check for case where
+	$arg.exe exists but $arg does not.
+
 2020-11-17  Gary Benson <gbenson@redhat.com>
 
 	* gdb.trace/trace-common.h (x86_trace_dummy): Add
