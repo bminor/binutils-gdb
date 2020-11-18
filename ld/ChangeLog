@@ -1,3 +1,15 @@
+2020-11-18  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/group1.d,
+	* testsuite/ld-powerpc/group1.s,
+	* testsuite/ld-powerpc/group1.sym,
+	* testsuite/ld-powerpc/group2.d,
+	* testsuite/ld-powerpc/group2.s,
+	* testsuite/ld-powerpc/group2.sym,
+	* testsuite/ld-powerpc/group3.s,
+	* testsuite/ld-powerpc/group3.sym: New test files.
+	* testsuite/ld-powerpc/powerpc.exp: Run new tests.
+
 2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* NEWS: Announce support for SHF_GNU_RETAIN.

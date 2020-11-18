@@ -335,6 +335,15 @@ set ppc64elftests {
 	"-a64 -mpower10" {pcrelopt.s}
 	{{objdump {-d -Mpower10} pcrelopt.d}
 	 {readelf {-S --wide} pcrelopt.sec}} "pcrelopt" }
+    {"group1" "-melf64ppc -e foo" "" "-a64" {group1.s group2.s group3.s}
+	{{objdump {-d} group1.d}
+	 {readelf {-s} group1.sym}} "group1"}
+    {"group2" "-melf64ppc -e foo" "" "-a64" {group2.s group1.s group3.s}
+	{{objdump {-d} group2.d}
+	 {readelf {-s} group2.sym}} "group2"}
+    {"group3" "-melf64ppc -e foo" "" "-a64" {group3.s group2.s group1.s}
+	{{objdump {-d} group2.d}
+	 {readelf {-s} group3.sym}} "group3"}
 }
 
 set ppceabitests {
