@@ -1,3 +1,9 @@
+2020-11-21  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (_bfd_riscv_relax_section):  Add a new relax pass
+	to do the pcgp relaxation later, after the lui and call relaxations,
+	but before the delete and alignment relaxations.
+
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
 	* elflink.c (elf_finalize_dynstr): Call examine_strtab after

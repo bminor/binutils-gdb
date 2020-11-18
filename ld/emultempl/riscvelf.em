@@ -42,7 +42,7 @@ riscv_elf_before_allocation (void)
 	ENABLE_RELAXATION;
     }
 
-  link_info.relax_pass = 3;
+  link_info.relax_pass = 4;
 }
 
 static void

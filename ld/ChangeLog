@@ -1,3 +1,11 @@
+2020-11-21  Nelson Chu  <nelson.chu@sifive.com>
+
+	* emultempl/riscvelf.em (riscv_elf_before_allocation): Change
+	link_info.relax_pass from 3 to 4.
+	* testsuite/ld-riscv-elf/pcgp-relax.d: New testcase.
+	* testsuite/ld-riscv-elf/pcgp-relax.s: Likewise.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/data-func-conflicted.d: Shrink the expected

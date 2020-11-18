@@ -4607,7 +4607,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (info->disable_target_specific_optimizations
-	  && info->relax_pass == 0))
+	  && info->relax_pass < 2))
     return TRUE;
 
   riscv_init_pcgp_relocs (&pcgp_relocs);
@@ -4645,17 +4645,13 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       relax_func = NULL;
       if (info->relax_pass == 0)
 	{
-	  if (type == R_RISCV_CALL || type == R_RISCV_CALL_PLT)
+	  if (type == R_RISCV_CALL
+	      || type == R_RISCV_CALL_PLT)
 	    relax_func = _bfd_riscv_relax_call;
 	  else if (type == R_RISCV_HI20
 		   || type == R_RISCV_LO12_I
 		   || type == R_RISCV_LO12_S)
 	    relax_func = _bfd_riscv_relax_lui;
-	  else if (!bfd_link_pic(info)
-		   && (type == R_RISCV_PCREL_HI20
-		   || type == R_RISCV_PCREL_LO12_I
-		   || type == R_RISCV_PCREL_LO12_S))
-	    relax_func = _bfd_riscv_relax_pc;
 	  else if (type == R_RISCV_TPREL_HI20
 		   || type == R_RISCV_TPREL_ADD
 		   || type == R_RISCV_TPREL_LO12_I
@@ -4663,7 +4659,22 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	    relax_func = _bfd_riscv_relax_tls_le;
 	  else
 	    continue;
+	}
+      else if (info->relax_pass == 1
+	       && !bfd_link_pic(info)
+	       && (type == R_RISCV_PCREL_HI20
+		   || type == R_RISCV_PCREL_LO12_I
+		   || type == R_RISCV_PCREL_LO12_S))
+	relax_func = _bfd_riscv_relax_pc;
+      else if (info->relax_pass == 2 && type == R_RISCV_DELETE)
+	relax_func = _bfd_riscv_relax_delete;
+      else if (info->relax_pass == 3 && type == R_RISCV_ALIGN)
+	relax_func = _bfd_riscv_relax_align;
+      else
+	continue;
 
+      if (info->relax_pass < 2)
+	{
 	  /* Only relax this reloc if it is paired with R_RISCV_RELAX.  */
 	  if (i == sec->reloc_count - 1
 	      || ELFNN_R_TYPE ((rel + 1)->r_info) != R_RISCV_RELAX
@@ -4673,12 +4684,6 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  /* Skip over the R_RISCV_RELAX.  */
 	  i++;
 	}
-      else if (info->relax_pass == 1 && type == R_RISCV_DELETE)
-	relax_func = _bfd_riscv_relax_delete;
-      else if (info->relax_pass == 2 && type == R_RISCV_ALIGN)
-	relax_func = _bfd_riscv_relax_align;
-      else
-	continue;
 
       data->relocs = relocs;
 
