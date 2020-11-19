@@ -98,13 +98,15 @@ tui_apply_current_layout ()
 
   /* Now delete any window that was not re-applied.  */
   tui_win_info *focus = tui_win_with_focus ();
+  tui_win_info *locator = tui_locator_win_info_ptr ();
   for (tui_win_info *win_info : saved_tui_windows)
     {
       if (!win_info->is_visible ())
 	{
 	  if (focus == win_info)
 	    tui_set_win_focus_to (tui_windows[0]);
-	  delete win_info;
+	  if (win_info != locator)
+	    delete win_info;
 	}
     }
 

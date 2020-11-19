@@ -1,3 +1,9 @@
+2020-11-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR tui/26973
+	* tui/tui-layout.c (tui_apply_current_layout): Don't delete the
+	static locator win info.
+
 2020-11-06  Romain Geissler  <romain.geissler@amadeus.com>
 
 	PR python/26832
