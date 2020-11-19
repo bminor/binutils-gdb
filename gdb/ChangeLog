@@ -1,3 +1,8 @@
+2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* printcmd.c (skip_over_slash_fmt): Make use of skip_to_space and
+	skip_spaces.
+
 2020-11-18  Keith Seitz  <keiths@redhat.com>
 
 	* linux-tdep.c (dump_note_entry_p): Return true instead of

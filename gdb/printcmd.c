@@ -1261,8 +1261,7 @@ skip_over_slash_fmt (completion_tracker &tracker, const char **args)
       if (ISALNUM (text[1]) || ISSPACE (text[1]))
 	{
 	  /* Skip over the actual format specification.  */
-	  while (*text != '\0' && !ISSPACE (*text))
-	    ++text;
+	  text = skip_to_space (text);
 
 	  if (*text == '\0')
 	    {
@@ -1272,8 +1271,7 @@ skip_over_slash_fmt (completion_tracker &tracker, const char **args)
 	  else
 	    {
 	      in_fmt = false;
-	      while (ISSPACE (*text))
-		++text;
+	      text = skip_spaces (text);
 	    }
 	}
       else if (text[1] == '\0')
