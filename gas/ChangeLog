@@ -1,3 +1,10 @@
+2020-11-19  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/gas/elf/section22.d: Allow FreeBSD OSABI in readelf
+	output.
+	* testsuite/gas/elf/section23a.d: Likewise.
+	* testsuite/gas/elf/section24a.d: Likewise.
+
 2020-11-18  Alan Modra  <amodra@gmail.com>
 
 	* doc/as.texi (.nop): Document optional size arg.
