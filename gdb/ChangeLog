@@ -1,5 +1,9 @@
 2020-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* f-lang.c (fortran_value_subarray): Use plongest/pulongest.
+
+2020-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbarch.sh (read_core_file_mappings): Remove `other` parameter
 	in `loop_cb` parameter.
 	* gdbarch.c: Re-generate.

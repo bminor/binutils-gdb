@@ -450,21 +450,21 @@ fortran_value_subarray (struct value *array, struct expression *exp,
 	      std::string str = type_to_string (dim_type);
 	      debug_printf ("|   |-> Type: %s\n", str.c_str ());
 	      debug_printf ("|   |-> Array:\n");
-	      debug_printf ("|   |   |-> Low bound: %ld\n", lb);
-	      debug_printf ("|   |   |-> High bound: %ld\n", ub);
-	      debug_printf ("|   |   |-> Bit stride: %ld\n", sd);
-	      debug_printf ("|   |   |-> Byte stride: %ld\n", sd / 8);
-	      debug_printf ("|   |   |-> Type size: %ld\n",
-			    TYPE_LENGTH (dim_type));
-	      debug_printf ("|   |   '-> Target type size: %ld\n",
-			    TYPE_LENGTH (target_type));
+	      debug_printf ("|   |   |-> Low bound: %s\n", plongest (lb));
+	      debug_printf ("|   |   |-> High bound: %s\n", plongest (ub));
+	      debug_printf ("|   |   |-> Bit stride: %s\n", plongest (sd));
+	      debug_printf ("|   |   |-> Byte stride: %s\n", plongest (sd / 8));
+	      debug_printf ("|   |   |-> Type size: %s\n",
+			    pulongest (TYPE_LENGTH (dim_type)));
+	      debug_printf ("|   |   '-> Target type size: %s\n",
+			    pulongest (TYPE_LENGTH (target_type)));
 	      debug_printf ("|   |-> Accessing:\n");
-	      debug_printf ("|   |   |-> Low bound: %ld\n",
-			    low);
-	      debug_printf ("|   |   |-> High bound: %ld\n",
-			    high);
-	      debug_printf ("|   |   '-> Element stride: %ld\n",
-			    stride);
+	      debug_printf ("|   |   |-> Low bound: %s\n",
+			    plongest (low));
+	      debug_printf ("|   |   |-> High bound: %s\n",
+			    plongest (high));
+	      debug_printf ("|   |   '-> Element stride: %s\n",
+			    plongest (stride));
 	    }
 
 	  /* Check the user hasn't asked for something invalid.  */
@@ -506,13 +506,17 @@ fortran_value_subarray (struct value *array, struct expression *exp,
 	  if (fortran_array_slicing_debug)
 	    {
 	      debug_printf ("|   '-> Results:\n");
-	      debug_printf ("|       |-> Offset = %ld\n", offset);
-	      debug_printf ("|       |-> Elements = %ld\n", e_count);
-	      debug_printf ("|       |-> Low bound = %ld\n", new_low);
-	      debug_printf ("|       |-> High bound = %ld\n", new_high);
-	      debug_printf ("|       |-> Byte stride = %ld\n", new_stride);
-	      debug_printf ("|       |-> Last element = %ld\n", last_elem);
-	      debug_printf ("|       |-> Remainder = %ld\n", remainder);
+	      debug_printf ("|       |-> Offset = %s\n", plongest (offset));
+	      debug_printf ("|       |-> Elements = %s\n", plongest (e_count));
+	      debug_printf ("|       |-> Low bound = %s\n", plongest (new_low));
+	      debug_printf ("|       |-> High bound = %s\n",
+			    plongest (new_high));
+	      debug_printf ("|       |-> Byte stride = %s\n",
+			    plongest (new_stride));
+	      debug_printf ("|       |-> Last element = %s\n",
+			    plongest (last_elem));
+	      debug_printf ("|       |-> Remainder = %s\n",
+			    plongest (remainder));
 	      debug_printf ("|       '-> Contiguous = %s\n",
 			    (is_dim_contiguous ? "Yes" : "No"));
 	    }
@@ -548,14 +552,16 @@ fortran_value_subarray (struct value *array, struct expression *exp,
 	      std::string str = type_to_string (dim_type);
 	      debug_printf ("|   |-> Type: %s\n", str.c_str ());
 	      debug_printf ("|   |-> Array:\n");
-	      debug_printf ("|   |   |-> Low bound: %ld\n", lb);
-	      debug_printf ("|   |   |-> High bound: %ld\n", ub);
-	      debug_printf ("|   |   |-> Byte stride: %ld\n", sd);
-	      debug_printf ("|   |   |-> Type size: %ld\n", TYPE_LENGTH (dim_type));
-	      debug_printf ("|   |   '-> Target type size: %ld\n",
-			    TYPE_LENGTH (target_type));
+	      debug_printf ("|   |   |-> Low bound: %s\n", plongest (lb));
+	      debug_printf ("|   |   |-> High bound: %s\n", plongest (ub));
+	      debug_printf ("|   |   |-> Byte stride: %s\n", plongest (sd));
+	      debug_printf ("|   |   |-> Type size: %s\n",
+			    pulongest (TYPE_LENGTH (dim_type)));
+	      debug_printf ("|   |   '-> Target type size: %s\n",
+			    pulongest (TYPE_LENGTH (target_type)));
 	      debug_printf ("|   '-> Accessing:\n");
-	      debug_printf ("|       '-> Index: %ld\n", index);
+	      debug_printf ("|       '-> Index: %s\n",
+			    plongest (index));
 	    }
 
 	  /* If the array has actual content then check the index is in
@@ -612,7 +618,8 @@ fortran_value_subarray (struct value *array, struct expression *exp,
       debug_printf ("'-> Final result:\n");
       debug_printf ("    |-> Type: %s\n",
 		    type_to_string (array_slice_type).c_str ());
-      debug_printf ("    |-> Total offset: %ld\n", total_offset);
+      debug_printf ("    |-> Total offset: %s\n",
+		    plongest (total_offset));
       debug_printf ("    |-> Base address: %s\n",
 		    core_addr_to_string (value_address (array)));
       debug_printf ("    '-> Contiguous = %s\n",
