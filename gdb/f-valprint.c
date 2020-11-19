@@ -235,8 +235,8 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
     {
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
-      LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
-		       valaddr, TYPE_LENGTH (type), NULL, 0, options);
+      printstr (stream, builtin_type (gdbarch)->builtin_char, valaddr,
+		TYPE_LENGTH (type), NULL, 0, options);
       break;
 
     case TYPE_CODE_ARRAY:
@@ -247,9 +247,9 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 	  struct type *ch_type = TYPE_TARGET_TYPE (type);
 
 	  f77_get_dynamic_length_of_aggregate (type);
-	  LA_PRINT_STRING (stream, ch_type, valaddr,
-			   TYPE_LENGTH (type) / TYPE_LENGTH (ch_type),
-			   NULL, 0, options);
+	  printstr (stream, ch_type, valaddr,
+		    TYPE_LENGTH (type) / TYPE_LENGTH (ch_type), NULL, 0,
+		    options);
 	}
       break;
 

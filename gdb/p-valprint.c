@@ -116,8 +116,8 @@ pascal_language::value_print_inner (struct value *val,
 		    len = temp_len;
 		  }
 
-		LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
-				 valaddr, len, NULL, 0, options);
+		printstr (stream, TYPE_TARGET_TYPE (type), valaddr, len,
+			  NULL, 0, options);
 		i = len;
 	      }
 	    else
@@ -318,8 +318,8 @@ pascal_language::value_print_inner (struct value *val,
 	    {
 	      len = extract_unsigned_integer (valaddr + length_pos,
 					      length_size, byte_order);
-	      LA_PRINT_STRING (stream, char_type, valaddr + string_pos,
-			       len, NULL, 0, options);
+	      printstr (stream, char_type, valaddr + string_pos, len,
+			NULL, 0, options);
 	    }
 	  else
 	    pascal_object_print_value_fields (val, stream, recurse,

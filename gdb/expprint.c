@@ -226,9 +226,10 @@ print_subexp_standard (struct expression *exp, int *pos,
 	   If necessary, we can temporarily set it to zero, or pass it as an
 	   additional parameter to LA_PRINT_STRING.  -fnf */
 	get_user_print_options (&opts);
-	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 (gdb_byte *) &exp->elts[pc + 2].string, nargs,
-			 NULL, 0, &opts);
+	exp->language_defn
+	  ->printstr (stream, builtin_type (exp->gdbarch)->builtin_char,
+		      (gdb_byte *) &exp->elts[pc + 2].string, nargs,
+		      NULL, 0, &opts);
       }
       return;
 
@@ -241,9 +242,10 @@ print_subexp_standard (struct expression *exp, int *pos,
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
 	fputs_filtered ("@\"", stream);
 	get_user_print_options (&opts);
-	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 (gdb_byte *) &exp->elts[pc + 2].string, nargs,
-			 NULL, 0, &opts);
+	exp->language_defn
+	  ->printstr (stream, builtin_type (exp->gdbarch)->builtin_char,
+		      (gdb_byte *) &exp->elts[pc + 2].string, nargs,
+		      NULL, 0, &opts);
 	fputs_filtered ("\"", stream);
       }
       return;
@@ -325,8 +327,9 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  struct value_print_options opts;
 
 	  get_user_print_options (&opts);
-	  LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			   (gdb_byte *) tempstr, nargs - 1, NULL, 0, &opts);
+	  exp->language_defn
+	    ->printstr (stream, builtin_type (exp->gdbarch)->builtin_char,
+			(gdb_byte *) tempstr, nargs - 1, NULL, 0, &opts);
 	  (*pos) = pc;
 	}
       else

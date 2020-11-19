@@ -318,8 +318,8 @@ print_string_repr (PyObject *printer, const char *hint,
 	      type = builtin_type (gdbarch)->builtin_char;
 
 	      if (hint && !strcmp (hint, "string"))
-		LA_PRINT_STRING (stream, type, (gdb_byte *) output,
-				 length, NULL, 0, options);
+		language->printstr (stream, type, (gdb_byte *) output,
+				    length, NULL, 0, options);
 	      else
 		fputs_filtered (output, stream);
 	    }

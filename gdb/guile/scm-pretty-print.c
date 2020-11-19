@@ -675,8 +675,8 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
 	{
 	  struct type *type = builtin_type (gdbarch)->builtin_char;
 	  
-	  LA_PRINT_STRING (stream, type, (gdb_byte *) string.get (),
-			   length, NULL, 0, options);
+	  language->printstr (stream, type, (gdb_byte *) string.get (),
+			      length, NULL, 0, options);
 	}
       else
 	{

@@ -1,5 +1,14 @@
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* expprint.c (print_subexp_standard): Replace uses of
+	LA_PRINT_STRING.
+	* f-valprint.c (f_language::value_print_inner): Likewise.
+	* guile/scm-pretty-print.c (ppscm_print_string_repr): Likewise.
+	* p-valprint.c (pascal_language::value_print_inner): Likewise.
+	* python/py-prettyprint.c (print_string_repr): Likewise.
+
+2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* rust-exp.y (rust_parse): Rename to...
 	(rust_language::parser): ...this.
 	* rust-lang.c (-rust_printstr): Rename to...
