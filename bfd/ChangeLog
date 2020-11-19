@@ -1,3 +1,10 @@
+2020-11-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 26918
+	* elf64-s390.c (elf_s390_finish_dynamic_sections): Check for the
+	existance of an sgot output section before setting the
+	sh_entsize.
+
 2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 	H.J. Lu  <hongjiu.lu@intel.com>
 
