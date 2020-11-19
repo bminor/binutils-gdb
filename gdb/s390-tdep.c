@@ -5370,7 +5370,6 @@ ex:
 	case 0xe325: /* NTSTG - nontransactional store */
 	case 0xe326: /* CVDY - convert to decimal */
 	case 0xe32f: /* STRVG - store reversed */
-	case 0xebe3: /* STOCG - store on condition */
 	case 0xed67: /* STDY - store */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 8))
@@ -5399,8 +5398,6 @@ ex:
 	case 0xe33e: /* STRV - store reversed */
 	case 0xe350: /* STY - store */
 	case 0xe3cb: /* STFH - store high */
-	case 0xebe1: /* STOCFH - store high on condition */
-	case 0xebf3: /* STOC - store on condition */
 	case 0xed66: /* STEY - store */
 	  oaddr = s390_record_calc_disp (gdbarch, regcache, inib[3], insn[1], ibyte[4]);
 	  if (record_full_arch_list_add_mem (oaddr, 4))
@@ -6113,6 +6110,20 @@ ex:
 
 	/* 0xeb9c-0xebbf undefined */
 	/* 0xebc1-0xebdb undefined */
+
+	case 0xebe1: /* STOCFH - store high on condition */
+	case 0xebf3: /* STOC - store on condition */
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  if (record_full_arch_list_add_mem (oaddr, 4))
+	    return -1;
+	  break;
+
+	case 0xebe3: /* STOCG - store on condition */
+	  oaddr = s390_record_calc_disp (gdbarch, regcache, 0, insn[1], ibyte[4]);
+	  if (record_full_arch_list_add_mem (oaddr, 8))
+	    return -1;
+	  break;
+
 	/* 0xebe5 undefined */
 	/* 0xebe9 undefined */
 	/* 0xebeb-0xebf1 undefined */

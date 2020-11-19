@@ -1,3 +1,9 @@
+2020-11-19  Andreas Arnez  <arnez@linux.ibm.com>
+
+	PR tdep/26916
+	* s390-tdep.c (s390_process_record): Fix recording of STOC, STOCG,
+	and STOCFH.
+
 2020-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* f-lang.c (fortran_value_subarray): Use plongest/pulongest.
