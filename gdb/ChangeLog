@@ -1,3 +1,9 @@
+2020-11-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR tui/26973
+	* tui/tui-layout.c (tui_apply_current_layout): Don't delete the
+	static locator win info.
+
 2020-11-28  Alex Richardson  <Alexander.Richardson@cl.cam.ac.uk>
 
 	* acincludde.m4 (GDB_AC_CHECK_BFD): Include string.h in the test
