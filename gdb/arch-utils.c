@@ -1045,8 +1045,7 @@ default_read_core_file_mappings (struct gdbarch *gdbarch,
 							  ULONGEST start,
 							  ULONGEST end,
 							  ULONGEST file_ofs,
-							  const char *filename,
-							  const void *other)>
+							  const char *filename)>
 				   loop_cb)
 {
 }

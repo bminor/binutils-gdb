@@ -1,3 +1,16 @@
+2020-11-19  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (read_core_file_mappings): Remove `other` parameter
+	in `loop_cb` parameter.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+	* arch-utils.c (default_read_core_file_mappings): Remove `other`
+	parameter.
+	* arch-utils.h (default_read_core_file_mappings): Likewise.
+	* corelow.c (core_target::build_file_mappings): Likewise.
+	* linux-tdep.c (linux_read_core_file_mappings): Likewise.
+	(linux_core_info_proc_mappings): Likewise.
+
 2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add f-array-walker.h.

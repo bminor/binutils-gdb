@@ -1178,7 +1178,7 @@ m;ULONGEST;type_align;struct type *type;type;;default_type_align;;0
 f;std::string;get_pc_address_flags;frame_info *frame, CORE_ADDR pc;frame, pc;;default_get_pc_address_flags;;0
 
 # Read core file mappings
-m;void;read_core_file_mappings;struct bfd *cbfd,gdb::function_view<void (ULONGEST count)> pre_loop_cb,gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename, const void *other)> loop_cb;cbfd, pre_loop_cb, loop_cb;;default_read_core_file_mappings;;0
+m;void;read_core_file_mappings;struct bfd *cbfd, gdb::function_view<void (ULONGEST count)> pre_loop_cb, gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename)> loop_cb;cbfd, pre_loop_cb, loop_cb;;default_read_core_file_mappings;;0
 
 EOF
 }

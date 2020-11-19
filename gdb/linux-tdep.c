@@ -1072,8 +1072,7 @@ linux_read_core_file_mappings (struct gdbarch *gdbarch,
 							ULONGEST start,
 							ULONGEST end,
 							ULONGEST file_ofs,
-							const char *filename,
-							const void *other)>
+							const char *filename)>
 				 loop_cb)
 {
   /* Ensure that ULONGEST is big enough for reading 64-bit core files.  */
@@ -1157,7 +1156,7 @@ linux_read_core_file_mappings (struct gdbarch *gdbarch,
       char * filename = filenames;
       filenames += strlen ((char *) filenames) + 1;
 
-      loop_cb (i, start, end, file_ofs, filename, nullptr);
+      loop_cb (i, start, end, file_ofs, filename);
     }
 }
 
@@ -1186,7 +1185,7 @@ linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 	  }
       },
     [=] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
-	 const char *filename, const void *other)
+	 const char *filename)
       {
 	if (gdbarch_addr_bit (gdbarch) == 32)
 	  printf_filtered ("\t%10s %10s %10s %10s %s\n",
