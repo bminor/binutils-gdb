@@ -1,5 +1,16 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfxx-riscv.c (riscv_parse_std_ext): Stop parsing standard
+	extensions when parsed h keyword.
+	(riscv_get_prefix_class): Support prefixed h class.
+	(riscv_std_h_ext_strtab): Likewise.
+	(riscv_ext_h_valid_p): Likewise.
+	(parse_config): Likewise.
+	(riscv_std_z_ext_strtab): Add zifencei.
+	* elfxx-riscv.h (riscv_isa_ext_class): Add RV_ISA_CLASS_H.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfxx-riscv.c (riscv_parse_subset): ISA string cannot contain
 	any uppercase letter.
 

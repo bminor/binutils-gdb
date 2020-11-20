@@ -1225,7 +1225,7 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 
   while (p != NULL && *p != '\0')
     {
-      if (*p == 'x' || *p == 's' || *p == 'z')
+      if (*p == 'x' || *p == 's' || *p == 'h' || *p == 'z')
 	break;
 
       if (*p == '_')
@@ -1281,6 +1281,7 @@ riscv_get_prefix_class (const char *arch)
   switch (*arch)
     {
     case 's': return RV_ISA_CLASS_S;
+    case 'h': return RV_ISA_CLASS_H;
     case 'x': return RV_ISA_CLASS_X;
     case 'z': return RV_ISA_CLASS_Z;
     default: return RV_ISA_CLASS_UNKNOWN;
@@ -1362,6 +1363,7 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
       /* Check that the prefix extension is known.
 	 For 'x', anything goes but it cannot simply be 'x'.
 	 For 's', it must be known from a list and cannot simply be 's'.
+	 For 'h', it must be known from a list and cannot simply be 'h'.
 	 For 'z', it must be known from a list and cannot simply be 'z'.  */
 
       /* Check that the extension name is well-formed.  */
@@ -1432,10 +1434,15 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 
 static const char * const riscv_std_z_ext_strtab[] =
 {
-  "zicsr", NULL
+  "zicsr", "zifencei", NULL
 };
 
 static const char * const riscv_std_s_ext_strtab[] =
+{
+  NULL
+};
+
+static const char * const riscv_std_h_ext_strtab[] =
 {
   NULL
 };
@@ -1486,12 +1493,22 @@ riscv_ext_s_valid_p (const char *arg)
   return riscv_multi_letter_ext_valid_p (arg, riscv_std_s_ext_strtab);
 }
 
+/* Predicator function for 'h' prefixed extensions.
+   Only known h-extensions are permitted.  */
+
+static bfd_boolean
+riscv_ext_h_valid_p (const char *arg)
+{
+  return riscv_multi_letter_ext_valid_p (arg, riscv_std_h_ext_strtab);
+}
+
 /* Parsing order of the prefixed extensions that is specified by
    the ISA spec.  */
 
 static const riscv_parse_config_t parse_config[] =
 {
   {RV_ISA_CLASS_S, "s", riscv_ext_s_valid_p},
+  {RV_ISA_CLASS_H, "h", riscv_ext_h_valid_p},
   {RV_ISA_CLASS_Z, "z", riscv_ext_z_valid_p},
   {RV_ISA_CLASS_X, "x", riscv_ext_x_valid_p},
   {RV_ISA_CLASS_UNKNOWN, NULL, NULL}

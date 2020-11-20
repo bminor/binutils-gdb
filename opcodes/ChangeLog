@@ -1,3 +1,7 @@
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_ext_version_table): Add zifencei.
+
 2020-11-28 Borislav Petkov  <bp@suse.de>
 
 	* i386-dis.c (print_insn): Set active_seg_prefix for branch hint insns

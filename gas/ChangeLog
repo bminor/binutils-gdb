@@ -1,5 +1,15 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* testsuite/gas/riscv/march-fail-order-z.d: New testcase, check
+	orders of prefixed z extensions.
+	* testsuite/gas/riscv/march-fail-order-z.l: Likewise.
+	* testsuite/gas/riscv/march-fail-single-char-h.d: New testcase.
+	* testsuite/gas/riscv/march-fail-single-char.l: Updated.
+	* testsuite/gas/riscv/march-fail-unknown-h.d: New testcase.
+	* testsuite/gas/riscv/march-fail-unknown.l: Updated.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* testsuite/gas/riscv/march-fail-uppercase-base.d: Updated.
 	* testsuite/gas/riscv/march-fail-uppercase.l: Updated.
 	* testsuite/gas/riscv/march-fail-uppercase-x.d: New testcase.

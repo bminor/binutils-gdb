@@ -102,6 +102,7 @@ riscv_estimate_digit (unsigned);
 typedef enum riscv_isa_ext_class
 {
   RV_ISA_CLASS_S,
+  RV_ISA_CLASS_H,
   RV_ISA_CLASS_Z,
   RV_ISA_CLASS_X,
   RV_ISA_CLASS_UNKNOWN
