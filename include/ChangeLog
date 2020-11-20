@@ -1,5 +1,9 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* opcode/riscv.h (RISCV_UNKNOWN_VERSION): added.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* opcode/riscv.h (riscv_ext_version):
 	Change the version type from unsigned to int.
 

@@ -1173,6 +1173,7 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
     rps->get_default_version (subset, &major_version, &minor_version);
 
   if (!implicit
+      && strcmp (subset, "g") != 0
       && (major_version == RISCV_UNKNOWN_VERSION
 	  || minor_version == RISCV_UNKNOWN_VERSION))
     {
@@ -1354,8 +1355,6 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 	break;
 
       case 'g':
-	/* The g-ext shouldn't has the version, so we just
-	   skip the setting if user set a version to it.  */
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
 					  &minor_version, TRUE);
@@ -1363,6 +1362,11 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 	riscv_parse_add_subset (rps, "i",
 				RISCV_UNKNOWN_VERSION,
 				RISCV_UNKNOWN_VERSION, FALSE);
+	/* g-ext is used to add the implicit extensions, but will
+	   not be output to the arch string.  */
+	riscv_parse_add_subset (rps, "g",
+				major_version,
+				minor_version, FALSE);
 	for ( ; *std_exts != 'q'; std_exts++)
 	  {
 	    subset[0] = *std_exts;
@@ -1742,6 +1746,16 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
     riscv_parse_add_subset (rps, "zicsr",
 			    RISCV_UNKNOWN_VERSION,
 			    RISCV_UNKNOWN_VERSION, TRUE);
+
+  if ((riscv_lookup_subset (rps->subset_list, "g", &subset)))
+    {
+      riscv_parse_add_subset (rps, "zicsr",
+			      RISCV_UNKNOWN_VERSION,
+			      RISCV_UNKNOWN_VERSION, TRUE);
+      riscv_parse_add_subset (rps, "zifencei",
+			      RISCV_UNKNOWN_VERSION,
+			      RISCV_UNKNOWN_VERSION, TRUE);
+    }
 }
 
 /* Function for parsing arch string.
@@ -1911,10 +1925,11 @@ riscv_arch_str1 (riscv_subset_t *subset,
 
   strncat (attr_str, buf, bufsz);
 
-  /* Skip 'i' extension after 'e'.  */
-  if ((strcasecmp (subset->name, "e") == 0)
-      && subset->next
-      && (strcasecmp (subset->next->name, "i") == 0))
+  /* Skip 'i' extension after 'e', and skip 'g' extension.  */
+  if (subset->next
+      && ((strcmp (subset->name, "e") == 0
+	   && strcmp (subset->next->name, "i") == 0)
+	  || strcmp (subset->next->name, "g") == 0))
     riscv_arch_str1 (subset->next->next, attr_str, buf, bufsz);
   else
     riscv_arch_str1 (subset->next, attr_str, buf, bufsz);

@@ -1,5 +1,12 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* testsuite/gas/riscv/attribute-10.d: Updated.
+	* testsuite/gas/riscv/march-imply-g.d: New testcase for g.
+	* testsuite/gas/riscv/march-imply-unsupported.d: The zicsr and zifencei
+	are not supported in the ISA spec v2.2, so don't add and output them.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* config/tc-riscv.c (riscv_subset_supports): Updated.
 	* testsuite/gas/riscv/march-imply-i2p0.d: New testcase.  Need to
 	add the implicit zicsr and zifencei when i's version less than 2.1.

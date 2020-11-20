@@ -1,5 +1,16 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfxx-riscv.c (riscv_parse_add_subset): Allow to add g with
+	RISCV_UNKNOWN_VERSION versions.
+	(riscv_parse_std_ext): Add g to the subset list, we only use it
+	to add the implicit extensions, but won't output it to arch string.
+	(riscv_parse_add_implicit_subsets): Add implicit zicsr and zifencei
+	for g extension.
+	(riscv_arch_str1): Do not output g to the arch string.
+	* elfxx-riscv.h (RISCV_UNKNOWN_VERSION): Moved to include/opcode/riscv.h.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfnn-riscv.c (riscv_merge_std_ext): Updated since
 	riscv_lookup_subset is changed.
 	* elfxx-riscv.c (riscv_ext_order): New Array used to compare the

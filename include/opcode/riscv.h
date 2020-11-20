@@ -354,6 +354,8 @@ enum riscv_isa_spec_class
   ISA_SPEC_CLASS_20191213
 };
 
+#define RISCV_UNKNOWN_VERSION -1
+
 /* This structure holds version information for specific ISA.  */
 
 struct riscv_ext_version
