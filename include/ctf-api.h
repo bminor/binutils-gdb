@@ -109,7 +109,9 @@ typedef enum ctf_sect_names
    CTF_SECT_HEADER,
    CTF_SECT_LABEL,
    CTF_SECT_OBJT,
+   CTF_SECT_OBJTIDX = CTF_SECT_OBJT,
    CTF_SECT_FUNC,
+   CTF_SECT_FUNCIDX = CTF_SECT_FUNC,
    CTF_SECT_VAR,
    CTF_SECT_TYPE,
    CTF_SECT_STR
@@ -312,6 +314,10 @@ extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *,
 				       const ctf_sect_t *,
 				       int *);
 extern void ctf_arc_close (ctf_archive_t *);
+extern ctf_dict_t *ctf_arc_lookup_symbol (ctf_archive_t *,
+					  unsigned long symidx,
+					  ctf_id_t *, int *errp);
+extern void ctf_arc_flush_caches (ctf_archive_t *);
 extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
 				  const char *, int *);
 extern ctf_dict_t *ctf_dict_open_sections (const ctf_archive_t *,

@@ -116,9 +116,12 @@ extern "C"
    and libctf library are responsible for connecting the appropriate objects
    together so that the full set of types can be explored and manipulated.
 
-   This connection is done purely using the ctf_import() function.  There is no
-   notation anywhere in the child CTF file indicating which parent it is
-   connected to: it is the debugger's responsibility to track this.  */
+   This connection is done purely using the ctf_import() function.  The
+   ctf_archive machinery (and thus ctf_open et al) automatically imports archive
+   members named ".ctf" into child dicts if available in the same archive, to
+   match the relationship set up by the linker, but callers can call ctf_import
+   themselves as well if need be, if they know a different relationship is in
+   force.  */
 
 #define CTF_MAX_TYPE	0xfffffffe	/* Max type identifier value.  */
 #define CTF_MAX_PTYPE	0x7fffffff	/* Max parent type identifier value.  */

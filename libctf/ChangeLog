@@ -1,5 +1,26 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (struct ctf_archive_internal) <ctfi_dicts>: New, dicts
+	the archive machinery has opened and cached.
+	<ctfi_symdicts>: New, cache of dicts containing symbols looked up.
+	<ctfi_syms>: New, cache of types of symbols looked up.
+	* ctf-archive.c (ctf_arc_close): Free them on close.
+	(enosym): New, flag entry for 'symbol not present'.
+	(ctf_arc_import_parent): New, automatically import the parent from
+	".ctf" if this is a child in an archive and ".ctf" is present.
+	(ctf_dict_open_sections): Use it.
+	(ctf_archive_iter_internal): Likewise.
+	(ctf_cached_dict_close): New, thunk around ctf_dict_close.
+	(ctf_dict_open_cached): New, open and cache a dict.
+	(ctf_arc_flush_caches): New, flush the caches.
+	(ctf_arc_lookup_symbol): New, look up a symbol in (all members of)
+	an archive, and cache the lookup.
+	(ctf_archive_iter): Note the new caching behaviour.
+	(ctf_archive_next): Use ctf_dict_open_cached.
+	* libctf.ver: Add ctf_arc_lookup_symbol and ctf_arc_flush_caches.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dedup.c (ctf_dedup_rhash_type): Null out the names of nameless
 	type kinds, just in case the input has named them.
 

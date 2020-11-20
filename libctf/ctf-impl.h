@@ -502,12 +502,15 @@ struct ctf_archive_internal
   int ctfi_unmap_on_close;
   ctf_dict_t *ctfi_dict;
   struct ctf_archive *ctfi_archive;
+  ctf_dynhash_t *ctfi_dicts;	  /* Dicts we have opened and cached.  */
+  ctf_dict_t **ctfi_symdicts;	  /* Array of index -> ctf_dict_t *.  */
+  ctf_id_t *ctfi_syms;		  /* Array of index -> ctf_id_t.  */
   ctf_sect_t ctfi_symsect;
   ctf_sect_t ctfi_strsect;
   int ctfi_free_symsect;
   int ctfi_free_strsect;
   void *ctfi_data;
-  bfd *ctfi_abfd;		    /* Optional source of section data.  */
+  bfd *ctfi_abfd;		  /* Optional source of section data.  */
   void (*ctfi_bfd_close) (struct ctf_archive_internal *);
 };
 
