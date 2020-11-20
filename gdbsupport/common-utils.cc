@@ -20,7 +20,7 @@
 #include "common-defs.h"
 #include "common-utils.h"
 #include "host-defs.h"
-#include <ctype.h>
+#include "safe-ctype.h"
 
 void *
 xzalloc (size_t size)
@@ -177,7 +177,7 @@ extract_string_maybe_quoted (const char **arg)
   /* Parse p similarly to gdb_argv buildargv function.  */
   while (*p != '\0')
     {
-      if (isspace (*p) && !squote && !dquote && !bsquote)
+      if (ISSPACE (*p) && !squote && !dquote && !bsquote)
 	break;
       else
 	{
@@ -230,21 +230,21 @@ extract_string_maybe_quoted (const char **arg)
 static int
 is_digit_in_base (unsigned char digit, int base)
 {
-  if (!isalnum (digit))
+  if (!ISALNUM (digit))
     return 0;
   if (base <= 10)
-    return (isdigit (digit) && digit < base + '0');
+    return (ISDIGIT (digit) && digit < base + '0');
   else
-    return (isdigit (digit) || tolower (digit) < base - 10 + 'a');
+    return (ISDIGIT (digit) || TOLOWER (digit) < base - 10 + 'a');
 }
 
 static int
 digit_to_int (unsigned char c)
 {
-  if (isdigit (c))
+  if (ISDIGIT (c))
     return c - '0';
   else
-    return tolower (c) - 'a' + 10;
+    return TOLOWER (c) - 'a' + 10;
 }
 
 /* As for strtoul, but for ULONGEST results.  */
@@ -258,7 +258,7 @@ strtoulst (const char *num, const char **trailer, int base)
   int i = 0;
 
   /* Skip leading whitespace.  */
-  while (isspace (num[i]))
+  while (ISSPACE (num[i]))
     i++;
 
   /* Handle prefixes.  */
@@ -325,7 +325,7 @@ skip_spaces (char *chp)
 {
   if (chp == NULL)
     return NULL;
-  while (*chp && isspace (*chp))
+  while (*chp && ISSPACE (*chp))
     chp++;
   return chp;
 }
@@ -337,7 +337,7 @@ skip_spaces (const char *chp)
 {
   if (chp == NULL)
     return NULL;
-  while (*chp && isspace (*chp))
+  while (*chp && ISSPACE (*chp))
     chp++;
   return chp;
 }
@@ -349,7 +349,7 @@ skip_to_space (const char *chp)
 {
   if (chp == NULL)
     return NULL;
-  while (*chp && !isspace (*chp))
+  while (*chp && !ISSPACE (*chp))
     chp++;
   return chp;
 }

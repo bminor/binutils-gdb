@@ -1,3 +1,7 @@
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (IPA_LIB): Include libiberty library.
+
 2020-11-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* server.cc (gdbserver_usage): Add missing option to usage text.

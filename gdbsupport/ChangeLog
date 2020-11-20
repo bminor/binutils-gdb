@@ -1,3 +1,14 @@
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbsupport/common-utils.cc: Change 'ctype.h' include to
+	'safe-ctype.h'.
+	(extract_string_maybe_quoted): Use safe-ctype function versions.
+	(is_digit_in_base): Likewise.
+	(digit_to_int): Likewise.
+	(strtoulst): Likewise.
+	(skip_spaces): Likewise.
+	(skip_to_space): Likewise.
+
 2020-12-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common-debug.h (debug_prefixed_printf_cond): New.
