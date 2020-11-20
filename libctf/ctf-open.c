@@ -1854,6 +1854,18 @@ ctf_getdatasect (const ctf_dict_t *fp)
   return fp->ctf_data;
 }
 
+ctf_sect_t
+ctf_getsymsect (const ctf_dict_t *fp)
+{
+  return fp->ctf_symtab;
+}
+
+ctf_sect_t
+ctf_getstrsect (const ctf_dict_t *fp)
+{
+  return fp->ctf_strtab;
+}
+
 /* Return the CTF handle for the parent CTF dict, if one exists.  Otherwise
    return NULL to indicate this dict has no imported parent.  */
 ctf_dict_t *

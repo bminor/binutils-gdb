@@ -307,6 +307,8 @@ extern ctf_archive_t *ctf_open (const char *filename,
 				const char *target, int *errp);
 extern void ctf_close (ctf_archive_t *);
 extern ctf_sect_t ctf_getdatasect (const ctf_dict_t *);
+extern ctf_sect_t ctf_getsymsect (const ctf_dict_t *);
+extern ctf_sect_t ctf_getstrsect (const ctf_dict_t *);
 extern ctf_archive_t *ctf_get_arc (const ctf_dict_t *);
 extern ctf_archive_t *ctf_arc_open (const char *, int *);
 extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *,

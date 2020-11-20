@@ -190,4 +190,7 @@ LIBCTF_1.1 {
 
 	ctf_arc_lookup_symbol;
 	ctf_arc_flush_caches;
+
+	ctf_getsymsect;
+	ctf_getstrsect;
 } LIBCTF_1.0;

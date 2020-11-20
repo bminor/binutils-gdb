@@ -1,5 +1,11 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (ctf_getsymsect): New.
+	(ctf_getstrsect): Likewise.
+	* libctf.ver: Add them.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (struct ctf_archive_internal) <ctfi_dicts>: New, dicts
 	the archive machinery has opened and cached.
 	<ctfi_symdicts>: New, cache of dicts containing symbols looked up.

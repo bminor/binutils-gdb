@@ -1,5 +1,10 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_getsymsect): New.
+	(ctf_getstrsect): Likewise.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_arc_lookup_symbol): New.
 	(ctf_arc_flush_caches): Likewise.
 	* ctf.h: Document new auto-ctf_import behaviour.
