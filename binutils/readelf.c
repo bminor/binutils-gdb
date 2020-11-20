@@ -14775,7 +14775,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   /* Assume that the applicable parent archive member is the default one.
      (This is what all known implementations are expected to do, if they
      put CTFs and their parents in archives together.)  */
-  if ((parent = ctf_arc_open_by_name (lookparent, NULL, &err)) == NULL)
+  if ((parent = ctf_dict_open (lookparent, NULL, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
       error (_("CTF open failure: %s\n"), ctf_errmsg (err));

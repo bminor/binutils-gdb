@@ -33,10 +33,10 @@
 #endif
 
 static off_t arc_write_one_ctf (ctf_dict_t * f, int fd, size_t threshold);
-static ctf_dict_t *ctf_arc_open_by_offset (const struct ctf_archive *arc,
-					   const ctf_sect_t *symsect,
-					   const ctf_sect_t *strsect,
-					   size_t offset, int *errp);
+static ctf_dict_t *ctf_dict_open_by_offset (const struct ctf_archive *arc,
+					    const ctf_sect_t *symsect,
+					    const ctf_sect_t *strsect,
+					    size_t offset, int *errp);
 static int sort_modent_by_name (const void *one, const void *two, void *n);
 static void *arc_mmap_header (int fd, size_t headersz);
 static void *arc_mmap_file (int fd, size_t size);
@@ -506,10 +506,10 @@ ctf_arc_close (ctf_archive_t *arc)
 /* Return the ctf_dict_t with the given name, or NULL if none, setting 'err' if
    non-NULL.  A name of NULL means to open the default file.  */
 static ctf_dict_t *
-ctf_arc_open_by_name_internal (const struct ctf_archive *arc,
-			       const ctf_sect_t *symsect,
-			       const ctf_sect_t *strsect,
-			       const char *name, int *errp)
+ctf_dict_open_internal (const struct ctf_archive *arc,
+			const ctf_sect_t *symsect,
+			const ctf_sect_t *strsect,
+			const char *name, int *errp)
 {
   struct ctf_archive_modent *modent;
   const char *search_nametbl;
@@ -517,7 +517,7 @@ ctf_arc_open_by_name_internal (const struct ctf_archive *arc,
   if (name == NULL)
     name = _CTF_SECTION;		 /* The default name.  */
 
-  ctf_dprintf ("ctf_arc_open_by_name(%s): opening\n", name);
+  ctf_dprintf ("ctf_dict_open_internal(%s): opening\n", name);
 
   modent = (ctf_archive_modent_t *) ((char *) arc
 				     + sizeof (struct ctf_archive));
@@ -536,8 +536,8 @@ ctf_arc_open_by_name_internal (const struct ctf_archive *arc,
       return NULL;
     }
 
-  return ctf_arc_open_by_offset (arc, symsect, strsect,
-				 le64toh (modent->ctf_offset), errp);
+  return ctf_dict_open_by_offset (arc, symsect, strsect,
+				  le64toh (modent->ctf_offset), errp);
 }
 
 /* Return the ctf_dict_t with the given name, or NULL if none, setting 'err' if
@@ -547,17 +547,17 @@ ctf_arc_open_by_name_internal (const struct ctf_archive *arc,
 
    Public entry point.  */
 ctf_dict_t *
-ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
-			       const ctf_sect_t *symsect,
-			       const ctf_sect_t *strsect,
-			       const char *name,
-			       int *errp)
+ctf_dict_open_sections (const ctf_archive_t *arc,
+			const ctf_sect_t *symsect,
+			const ctf_sect_t *strsect,
+			const char *name,
+			int *errp)
 {
   if (arc->ctfi_is_archive)
     {
       ctf_dict_t *ret;
-      ret = ctf_arc_open_by_name_internal (arc->ctfi_archive, symsect, strsect,
-					   name, errp);
+      ret = ctf_dict_open_internal (arc->ctfi_archive, symsect, strsect,
+				    name, errp);
       if (ret)
 	ret->ctf_archive = (ctf_archive_t *) arc;
       return ret;
@@ -581,7 +581,7 @@ ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
 
    Public entry point.  */
 ctf_dict_t *
-ctf_arc_open_by_name (const ctf_archive_t *arc, const char *name, int *errp)
+ctf_dict_open (const ctf_archive_t *arc, const char *name, int *errp)
 {
   const ctf_sect_t *symsect = &arc->ctfi_symsect;
   const ctf_sect_t *strsect = &arc->ctfi_strsect;
@@ -591,21 +591,21 @@ ctf_arc_open_by_name (const ctf_archive_t *arc, const char *name, int *errp)
   if (strsect->cts_name == NULL)
     strsect = NULL;
 
-  return ctf_arc_open_by_name_sections (arc, symsect, strsect, name, errp);
+  return ctf_dict_open_sections (arc, symsect, strsect, name, errp);
 }
 
 /* Return the ctf_dict_t at the given ctfa_ctfs-relative offset, or NULL if
    none, setting 'err' if non-NULL.  */
 static ctf_dict_t *
-ctf_arc_open_by_offset (const struct ctf_archive *arc,
-			const ctf_sect_t *symsect,
-			const ctf_sect_t *strsect, size_t offset,
-			int *errp)
+ctf_dict_open_by_offset (const struct ctf_archive *arc,
+			 const ctf_sect_t *symsect,
+			 const ctf_sect_t *strsect, size_t offset,
+			 int *errp)
 {
   ctf_sect_t ctfsect;
   ctf_dict_t *fp;
 
-  ctf_dprintf ("ctf_arc_open_by_offset(%lu): opening\n", (unsigned long) offset);
+  ctf_dprintf ("ctf_dict_open_by_offset(%lu): opening\n", (unsigned long) offset);
 
   memset (&ctfsect, 0, sizeof (ctf_sect_t));
 
@@ -619,6 +619,24 @@ ctf_arc_open_by_offset (const struct ctf_archive *arc,
   if (fp)
     ctf_setmodel (fp, le64toh (arc->ctfa_model));
   return fp;
+}
+
+/* Backward compatibility.  */
+ctf_dict_t *
+ctf_arc_open_by_name (const ctf_archive_t *arc, const char *name,
+		      int *errp)
+{
+  return ctf_dict_open (arc, name, errp);
+}
+
+ctf_dict_t *
+ctf_arc_open_by_name_sections (const ctf_archive_t *arc,
+			       const ctf_sect_t *symsect,
+			       const ctf_sect_t *strsect,
+			       const char *name,
+			       int *errp)
+{
+  return ctf_dict_open_sections (arc, symsect, strsect, name, errp);
 }
 
 /* Return the number of members in an archive.  */
@@ -699,8 +717,8 @@ ctf_archive_iter_internal (const ctf_archive_t *wrapper,
       const char *name;
 
       name = &nametbl[le64toh (modent[i].name_offset)];
-      if ((f = ctf_arc_open_by_name_internal (arc, symsect, strsect,
-					      name, &rc)) == NULL)
+      if ((f = ctf_dict_open_internal (arc, symsect, strsect,
+				    name, &rc)) == NULL)
 	return rc;
 
       f->ctf_archive = (ctf_archive_t *) wrapper;
@@ -837,8 +855,7 @@ ctf_archive_next (const ctf_archive_t *wrapper, ctf_next_t **it, const char **na
   if (name)
     *name = name_;
 
-  f = ctf_arc_open_by_name_internal (arc, symsect, strsect,
-				     name_, errp);
+  f = ctf_dict_open_internal (arc, symsect, strsect, name_, errp);
   f->ctf_archive = (ctf_archive_t *) wrapper;
   return f;
 }

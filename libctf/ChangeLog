@@ -1,5 +1,19 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_arc_open_by_offset): Rename to...
+	(ctf_dict_open_by_offset): ... this.  Adjust callers.
+	(ctf_arc_open_by_name_internal): Rename to...
+	(ctf_dict_open_internal): ... this.  Adjust callers.
+	(ctf_arc_open_by_name_sections): Rename to...
+	(ctf_dict_open_sections): ... this, keeping compatibility function.
+	(ctf_arc_open_by_name): Rename to...
+	(ctf_dict_open): ... this, keeping compatibility function.
+	* libctf.ver: New functions added.
+	* ctf-link.c (ctf_link_one_input_archive): Adjusted accordingly.
+	(ctf_link_deduplicating_open_inputs): Likewise.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h: Rename ctf_file_t to ctf_dict_t: all declarations
 	adjusted.
 	(ctf_fileops): Rename to...

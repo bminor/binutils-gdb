@@ -1482,9 +1482,9 @@ elfctf_build_psymtabs (struct objfile *of)
     error (_("ctf_bfdopen failed on %s - %s"),
 	   bfd_get_filename (abfd), ctf_errmsg (err));
 
-  ctf_dict_t *fp = ctf_arc_open_by_name (arc, NULL, &err);
+  ctf_dict_t *fp = ctf_dict_open (arc, NULL, &err);
   if (fp == NULL)
-    error (_("ctf_arc_open_by_name failed on %s - %s"),
+    error (_("ctf_dict_open failed on %s - %s"),
 	   bfd_get_filename (abfd), ctf_errmsg (err));
   ctf_dict_key.emplace (of, fp);
 

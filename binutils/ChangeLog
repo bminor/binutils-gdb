@@ -1,5 +1,11 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* objdump.c (dump_ctf): Use ctf_dict_open, not
+	ctf_arc_open_by_name.
+	* readelf.c (dump_section_as_ctf): Likewise.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* objdump.c (dump_ctf_errs): Rename ctf_file_t to ctf_dict_t.
 	(dump_ctf_archive_member): Likewise.
 	(dump_ctf): Likewise. Use ctf_dict_close, not ctf_file_close.

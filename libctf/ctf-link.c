@@ -789,8 +789,8 @@ ctf_link_one_input_archive (void *key, void *value, void *arg_)
 
   arg->in_file_name = file_name;
   arg->done_parent = 0;
-  if ((arg->in_fp_parent = ctf_arc_open_by_name (input->clin_arc, NULL,
-						 &err)) == NULL)
+  if ((arg->in_fp_parent = ctf_dict_open (input->clin_arc,
+					  NULL, &err)) == NULL)
     if (err != ECTF_ARNNAME)
       {
 	ctf_err_warn (arg->out_fp, 1, 0,
@@ -1015,8 +1015,8 @@ ctf_link_deduplicating_open_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
 	 multiple members.  We assume, as elsewhere, that the parent is named
 	 _CTF_SECTION.  */
 
-      if ((parent_fp = ctf_arc_open_by_name (one_input->clin_arc,
-					     _CTF_SECTION, &err)) == NULL)
+      if ((parent_fp = ctf_dict_open (one_input->clin_arc, _CTF_SECTION,
+				      &err)) == NULL)
 	{
 	  if (err != ECTF_NOMEMBNAM)
 	    {

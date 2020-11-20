@@ -4194,7 +4194,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   /* Assume that the applicable parent archive member is the default one.
      (This is what all known implementations are expected to do, if they
      put CTFs and their parents in archives together.)  */
-  if ((parent = ctf_arc_open_by_name (lookparent, NULL, &err)) == NULL)
+  if ((parent = ctf_dict_open (lookparent, NULL, &err)) == NULL)
     {
       dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));

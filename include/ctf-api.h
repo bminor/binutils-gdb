@@ -306,12 +306,12 @@ extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *,
 				       const ctf_sect_t *,
 				       int *);
 extern void ctf_arc_close (ctf_archive_t *);
-extern ctf_dict_t *ctf_arc_open_by_name (const ctf_archive_t *,
-					 const char *, int *);
-extern ctf_dict_t *ctf_arc_open_by_name_sections (const ctf_archive_t *,
-						  const ctf_sect_t *,
-						  const ctf_sect_t *,
-						  const char *, int *);
+extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
+				  const char *, int *);
+extern ctf_dict_t *ctf_dict_open_sections (const ctf_archive_t *,
+					   const ctf_sect_t *,
+					   const ctf_sect_t *,
+					   const char *, int *);
 extern size_t ctf_archive_count (const ctf_archive_t *);
 
 /* The next functions return or close real CTF files, or write out CTF archives,
@@ -511,6 +511,12 @@ struct ctf_file;
 typedef struct ctf_dict ctf_file_t;
 extern void ctf_file_close (ctf_file_t *);
 extern ctf_dict_t *ctf_parent_file (ctf_dict_t *);
+extern ctf_dict_t *ctf_arc_open_by_name (const ctf_archive_t *,
+					 const char *, int *);
+extern ctf_dict_t *ctf_arc_open_by_name_sections (const ctf_archive_t *,
+						  const ctf_sect_t *,
+						  const ctf_sect_t *,
+						  const char *, int *);
 
 #ifdef	__cplusplus
 }

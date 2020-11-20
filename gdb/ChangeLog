@@ -1,5 +1,10 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctfread.c (elfctf_build_psymtabs): Use ctf_dict_open, not
+	ctf_arc_open_by_name.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctfread.c: Change uses of ctf_file_t to ctf_dict_t.
 	(ctf_fp_info::~ctf_fp_info): Call ctf_dict_close, not ctf_file_close.
 
