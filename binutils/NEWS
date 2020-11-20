@@ -1,5 +1,14 @@
 -*- text -*-
 
+* Nm has a new command line option: --ifunc-chars=CHARS.  This specifies a
+  string of one or two characters.  The first character is used as the type
+  character when displaying global ifunc symbols.  The second character, if
+  present is used when displaying local ifunc symbols.
+
+  In addition a new configure time option --enable-f-for-ifunc-symbols has been
+  created, which if used will change nm's default characters for ifunc symbols
+  from i (both local and global) to F (global) and f (local).
+
 * The ar tool's previously unused l modifier is now used for specifying
   dependencies of a static library. The arguments of this option
   (or --record-libdeps long form option) will be stored verbatim in the

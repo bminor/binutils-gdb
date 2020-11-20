@@ -797,6 +797,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{-B}|@option{--format=bsd}] [@option{-C}|@option{--demangle}[=@var{style}]]
    [@option{-D}|@option{--dynamic}] [@option{-f}@var{format}|@option{--format=}@var{format}]
    [@option{-g}|@option{--extern-only}] [@option{-h}|@option{--help}]
+   [@option{--ifunc-chars=@var{CHARS}}]
    [@option{-l}|@option{--line-numbers}] [@option{--inlines}]
    [@option{-n}|@option{-v}|@option{--numeric-sort}]
    [@option{-P}|@option{--portability}] [@option{-p}|@option{--no-sort}]
@@ -869,12 +870,21 @@ such as a global int variable as opposed to a large global array.
 
 @item i
 For PE format files this indicates that the symbol is in a section
-specific to the implementation of DLLs.  For ELF format files this
-indicates that the symbol is an indirect function.  This is a GNU
-extension to the standard set of ELF symbol types.  It indicates a
-symbol which if referenced by a relocation does not evaluate to its
-address, but instead must be invoked at runtime.  The runtime
-execution will then return the value to be used in the relocation.
+specific to the implementation of DLLs.
+
+For ELF format files this indicates that the symbol is an indirect
+function.  This is a GNU extension to the standard set of ELF symbol
+types.  It indicates a symbol which if referenced by a relocation does
+not evaluate to its address, but instead must be invoked at runtime.
+The runtime execution will then return the value to be used in the
+relocation.
+
+Note - the actual symbols display for GNU indirect symbols is
+controlled by the @option{--ifunc-chars} command line option.  If this
+option has been provided then the first character in the string will
+be used for global indirect function symbols.  If the string contains
+a second character then that will be used for local indirect function
+symbols.
 
 @item I
 The symbol is an indirect reference to another symbol.
@@ -1028,6 +1038,15 @@ Display only external symbols.
 @item -h
 @itemx --help
 Show a summary of the options to @command{nm} and exit.
+
+@item --ifunc-chars=@var{CHARS}
+When display GNU indirect function symbols @command{nm} will default
+to using the @code{i} character for both local indirect functions and
+global indirect functions.  The @option{--ifunc-chars} option allows
+the user to specify a string containing one or two characters. The
+first character will be used for global indirect function symbols and
+the second character, if present, will be used for local indirect
+function symbols.
 
 @item -l
 @itemx --line-numbers

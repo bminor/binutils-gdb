@@ -43,6 +43,7 @@ AC_ARG_ENABLE(targets,
   *)        enable_targets=$enableval ;;
 esac])dnl
 
+
 AC_ARG_ENABLE(deterministic-archives,
 [AS_HELP_STRING([--enable-deterministic-archives],
 		[ar and ranlib default to -D behavior])], [
@@ -55,6 +56,7 @@ fi], [default_ar_deterministic=0])
 AC_DEFINE_UNQUOTED(DEFAULT_AR_DETERMINISTIC, $default_ar_deterministic,
 		   [Should ar and ranlib use -D behavior by default?])
 
+
 AC_ARG_ENABLE(default-strings-all,
 [AS_HELP_STRING([--disable-default-strings-all],
 		[strings defaults to --data behavior])], [
@@ -64,10 +66,23 @@ else
   default_strings_all=1
 fi], [default_strings_all=1])
 
-AC_DEBUGINFOD
-
 AC_DEFINE_UNQUOTED(DEFAULT_STRINGS_ALL, $default_strings_all,
 		   [Should strings use -a behavior by default?])
+
+
+AC_ARG_ENABLE(f-for-ifunc-symbols,
+[AS_HELP_STRING([--enable-f-for-ifunc-symbols],
+	[Have nm use F and f for global and local ifunc symbols])], [
+if test "${enableval}" = no; then
+  default_f_for_ifunc=0
+else
+  default_f_for_ifunc=1
+fi], [default_f_for_ifunc=0])
+
+AC_DEFINE_UNQUOTED(DEFAULT_F_FOR_IFUNC_SYMBOLS, $default_f_for_ifunc,
+		   [Have nm use F and f for global and local ifunc symbols])
+
+AC_DEBUGINFOD
 
 GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
 if test "${enable_libctf}" = yes; then

@@ -1,3 +1,18 @@
+2020-11-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 22967
+	* nm.c (ifunc_type_chars): New variable.
+	(long_options): Add --ifunc-chars.
+	(print_symbol): Use ifunc_type_chars for ifunc symbols.
+	(main): Handle the new option.
+	* doc/binutils.texi: Document the new option.
+	* configure.ac: Add --enable-f-for-ifunc-symbols option which
+	changes the default symbol displayed by nm.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/nm.exp: Test the new feature.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2020-11-20  Linda Zhang  <lindasc@qq.com>
 
 	PR 20979
