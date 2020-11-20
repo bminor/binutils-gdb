@@ -14787,8 +14787,12 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   printf (_("\nDump of CTF section '%s':\n"),
 	  printable_section_name (filedata, section));
 
-  if (ctf_archive_iter (ctfa, dump_ctf_archive_member, parent) != 0)
-    ret = FALSE;
+  if ((err = ctf_archive_iter (ctfa, dump_ctf_archive_member, parent)) != 0)
+    {
+      dump_ctf_errs (NULL);
+      error (_("CTF member open failure: %s\n"), ctf_errmsg (err));
+      ret = FALSE;
+    }
 
  fail:
   ctf_dict_close (parent);

@@ -4203,7 +4203,12 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
 
   printf (_("Contents of CTF section %s:\n"), sanitize_string (sect_name));
 
-  ctf_archive_iter (ctfa, dump_ctf_archive_member, parent);
+  if ((err = ctf_archive_iter (ctfa, dump_ctf_archive_member, parent)) != 0)
+    {
+      dump_ctf_errs (NULL);
+      non_fatal (_("CTF archive member open failure: %s"), ctf_errmsg (err));
+      bfd_fatal (bfd_get_filename (abfd));
+    }
   ctf_dict_close (parent);
   ctf_close (ctfa);
   ctf_close (parenta);
