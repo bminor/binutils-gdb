@@ -1,3 +1,70 @@
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
+	(These are new testcases that cover more cases)
+	* testsuite/gas/riscv/march-fail-base-01.d: The first extension must
+	be e, i or g.
+	* testsuite/gas/riscv/march-fail-base-01.l: Likewise.
+	* testsuite/gas/riscv/march-fail-base-02.d: rv64e is an invalid base ISA.
+	* testsuite/gas/riscv/march-fail-base-02.l: Likewise.
+	* testsuite/gas/riscv/march-fail-order-std.d: Check orders of standard
+	extensions.
+	* testsuite/gas/riscv/march-fail-order-std.l: Likewise.
+	* testsuite/gas/riscv/march-fail-order-x.d: Check orders of prefixed
+	x extensions.
+	* testsuite/gas/riscv/march-fail-order-x.l: Likewise.
+	* testsuite/gas/riscv/march-fail-porder-x-std.d: Check orders when
+	standard and prefixed extensions are set at the same time.
+	* testsuite/gas/riscv/march-fail-porder-x-z.d: Likewise.
+	* testsuite/gas/riscv/march-fail-porder-z-std.d: Likewise.
+	* testsuite/gas/riscv/march-fail-porder.l: Likewise.
+	* testsuite/gas/riscv/march-fail-single-char-s.d: Only standard
+	extensions can use single char.
+	* testsuite/gas/riscv/march-fail-single-char-x.d: Likewise.
+	* testsuite/gas/riscv/march-fail-single-char-z.d: Likewise.
+	* testsuite/gas/riscv/march-fail-single-char.l: Likewise.
+	* testsuite/gas/riscv/march-fail-unknown-s.d: All extensions
+	should be known, except the non-standard x extensions.
+	* testsuite/gas/riscv/march-fail-unknown-std.d: Likewise.
+	* testsuite/gas/riscv/march-fail-unknown-std.l: Likewise.
+	* testsuite/gas/riscv/march-fail-unknown-z.d: Likewise.
+	* testsuite/gas/riscv/march-fail-unknown.l: Likewise.
+	* testsuite/gas/riscv/march-fail-uppercase-base.d: Do not
+	allow any uppercase in the arch string.
+	* testsuite/gas/riscv/march-fail-uppercase-std.d: Likewise.
+	* testsuite/gas/riscv/march-fail-uppercase-z.d: Likewise.
+	* testsuite/gas/riscv/march-fail-uppercase.l: Likewise.
+	* testsuite/gas/riscv/march-fail-version-x.d: Failed to set versions.
+	* testsuite/gas/riscv/march-fail-version-z.d: Likewise.
+	* testsuite/gas/riscv/march-fail-version.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32ef.l: Updated.
+	* testsuite/gas/riscv/march-fail-rv32id.d: Need f-ext.
+	* testsuite/gas/riscv/march-fail-rv32iq.d: Should be rv64.
+	* testsuite/gas/riscv/march-fail-rv32iq.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64iq.d: Need d-ext and f-ext.
+	* testsuite/gas/riscv/march-fail-rv64iq.l: Likewise.
+
+	(The following testcases are removed and covered by new testcases)
+	* testsuite/gas/riscv/march-fail-rv32i.d: march-fail-uppercase-base.
+	* testsuite/gas/riscv/march-fail-rv32i.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32iam.d: march-fail-order-std.
+	* testsuite/gas/riscv/march-fail-rv32iam.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32ic.d: march-fail-uppercase-std.
+	* testsuite/gas/riscv/march-fail-rv32ic.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32icx2p.d: march-fail-version-x.
+	* testsuite/gas/riscv/march-fail-rv32icx2p.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32imc.d: march-fail-order-std.
+	* testsuite/gas/riscv/march-fail-rv32imc.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64I.d: march-fail-uppercase-std.
+	* testsuite/gas/riscv/march-fail-rv64I.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64e.d: march-fail-base-02.
+	* testsuite/gas/riscv/march-fail-rv64e.l: Likewise.
+	* testsuite/gas/riscv/march-fail-s-with-version.d: march-fail-unknown-s.
+	* testsuite/gas/riscv/march-fail-s-with-version.l: Likewise.
+	* testsuite/gas/riscv/march-fail-s.d: march-fail-unknown-s.
+	* testsuite/gas/riscv/march-fail-s.l: Likewise.
+	* testsuite/gas/riscv/march-fail-sx.d: march-fail-unknown-s.
+	* testsuite/gas/riscv/march-fail-sx.l: Likewise.
+
 2002-11-29  Borislav Petkov  <bp@suse.de>
 
 	* testsuite/gas/i386/branch.d: Add new branch insns test.

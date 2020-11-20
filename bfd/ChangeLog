@@ -1,3 +1,13 @@
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.c: Re-indent codes, unify and improve the error
+	messages and comments.
+	(riscv_parse_prefixed_ext): Stop parsing the prefixed class
+	extensions if the class is RV_ISA_CLASS_UNKNOWN, I get internal
+	errors before adding this check for march-fail-porder* testcases.
+	(riscv_parse_subset): Move the rv32 with q checking in front.
+	* elfxx-riscv.h: Likewise.
+
 2020-12-01  Alan Modra  <amodra@gmail.com>
 
 	PR 26979
