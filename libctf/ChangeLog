@@ -1,5 +1,14 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_dump_header): Dump the new flags bits and the index
+	section lengths.
+	(ctf_dump_objts): Report indexed sections.  Also dump functions.  Use
+	ctf_symbol_next, not manual looping.
+	(ctf_dump_funcs): Delete.
+	(ctf_dump): Use ctf_dump_objts, not ctf_dump_funcs.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (CTF_INDEX_PAD_THRESHOLD): New.
 	(_libctf_nonnull_): Likewise.
 	(ctf_in_flight_dynsym_t): New.

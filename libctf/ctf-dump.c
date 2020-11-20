@@ -224,6 +224,7 @@ static int
 ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   char *str;
+  char *flagstr = NULL;
   const ctf_header_t *hp = fp->ctf_header;
   const char *vertab[] =
     {
@@ -259,10 +260,29 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   if (fp->ctf_openflags > 0)
     {
-      if (fp->ctf_openflags)
-	if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags,
-		      fp->ctf_openflags & CTF_F_COMPRESS ? "CTF_F_COMPRESS"
-							 : "") < 0)
+      if (asprintf (&flagstr, "%s%s%s%s%s%s%s",
+		    fp->ctf_openflags & CTF_F_COMPRESS
+		    ? "CTF_F_COMPRESS": "",
+		    (fp->ctf_openflags & CTF_F_COMPRESS)
+		    && (fp->ctf_openflags & ~CTF_F_COMPRESS)
+		    ? ", " : "",
+		    fp->ctf_openflags & CTF_F_NEWFUNCINFO
+		    ? "CTF_F_NEWFUNCINFO" : "",
+		    (fp->ctf_openflags & (CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
+		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO))
+		    ? ", " : "",
+		    fp->ctf_openflags & CTF_F_IDXSORTED
+		    ? "CTF_F_IDXSORTED" : "",
+		    fp->ctf_openflags & (CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
+					 | CTF_F_IDXSORTED)
+		    && (fp->ctf_openflags & ~(CTF_F_COMPRESS | CTF_F_NEWFUNCINFO
+					      | CTF_F_IDXSORTED))
+		    ? ", " : "",
+		    fp->ctf_openflags & CTF_F_DYNSTR
+		    ? "CTF_F_DYNSTR" : "") < 0)
+	goto err;
+
+      if (asprintf (&str, "Flags: 0x%x (%s)", fp->ctf_openflags, flagstr) < 0)
 	goto err;
       ctf_dump_append (state, str);
     }
@@ -287,7 +307,15 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
     goto err;
 
   if (ctf_dump_header_sectfield (fp, state, "Function info section",
-				 hp->cth_funcoff, hp->cth_varoff) < 0)
+				 hp->cth_funcoff, hp->cth_objtidxoff) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "Object index section",
+				 hp->cth_objtidxoff, hp->cth_funcidxoff) < 0)
+    goto err;
+
+  if (ctf_dump_header_sectfield (fp, state, "Function index section",
+				 hp->cth_funcidxoff, hp->cth_varoff) < 0)
     goto err;
 
   if (ctf_dump_header_sectfield (fp, state, "Variable section",
@@ -304,6 +332,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 
   return 0;
  err:
+  free (flagstr);
   return (ctf_set_errno (fp, errno));
 }
 
@@ -334,149 +363,68 @@ ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
   return 0;
 }
 
-/* Dump all the object entries into the cds_items.  (There is no iterator for
-   this section, so we just do it in a loop, and this function handles all of
-   them, rather than only one.  */
+/* Dump all the object or function entries into the cds_items.  */
 
 static int
-ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state)
+ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
 {
-  size_t i;
+  const char *name;
+  ctf_id_t id;
+  ctf_next_t *i = NULL;
+  char *str = NULL;
 
-  for (i = 0; i < fp->ctf_nsyms; i++)
+  if ((functions && fp->ctf_funcidx_names)
+      || (!functions && fp->ctf_objtidx_names))
+    str = str_append (str, _("Section is indexed.\n"));
+  else if (fp->ctf_symtab.cts_data == NULL)
+    str = str_append (str, _("No symbol table.\n"));
+
+  while ((id = ctf_symbol_next (fp, &i, &name, functions)) != CTF_ERR)
     {
-      char *str;
-      char *typestr;
-      const char *sym_name;
-      ctf_id_t type;
+      char *typestr = NULL;
+      int err = 0;
 
-      if ((type = ctf_lookup_by_symbol (state->cds_fp, i)) == CTF_ERR)
-	switch (ctf_errno (state->cds_fp))
-	  {
-	    /* Most errors are just an indication that this symbol is not a data
-	       symbol, but this one indicates that we were called wrong, on a
-	       CTF file with no associated symbol table.  */
-	  case ECTF_NOSYMTAB:
-	    return -1;
-	  case ECTF_NOTDATA:
-	  case ECTF_NOTYPEDAT:
-	    continue;
-	  }
-
-      /* Variable name.  */
-      sym_name = ctf_lookup_symbol_name (fp, i);
-      if (sym_name[0] == '\0')
+      /* Emit the name, if we know it.  */
+      if (name)
 	{
-	  if (asprintf (&str, "%lx -> ", (unsigned long) i) < 0)
-	    return (ctf_set_errno (fp, errno));
+	  if (asprintf (&str, "%s -> ", name) < 0)
+	    goto oom;
 	}
       else
-	{
-	  if (asprintf (&str, "%s (%lx) -> ", sym_name, (unsigned long) i) < 0)
-	    return (ctf_set_errno (fp, errno));
-	}
+	str = xstrdup ("");
 
-      /* Variable type.  */
-      if ((typestr = ctf_dump_format_type (state->cds_fp, type,
-					   CTF_ADD_ROOT)) == NULL)
+      if ((typestr = ctf_type_aname (fp, id)) == NULL)
 	{
-	  free (str);
-	  return 0;			/* Swallow the error.  */
+	  if (id == 0 || ctf_errno (fp) == ECTF_NONREPRESENTABLE)
+	    {
+	      if (asprintf (&typestr, " (%s)", _("type not represented in CTF")) < 0)
+		goto oom;
+
+	      goto out;
+	    }
+
+	  if (asprintf (&typestr, ctf_errmsg (ctf_errno (fp))) < 0)
+	    goto oom;
+
+	  err = -1;
+	  goto out;
 	}
 
       str = str_append (str, typestr);
-      free (typestr);
-
-      ctf_dump_append (state, str);
-    }
-  return 0;
-}
-
-/* Dump all the function entries into the cds_items.  (As above, there is no
-   iterator for this section.)  */
-
-static int
-ctf_dump_funcs (ctf_dict_t *fp, ctf_dump_state_t *state)
-{
-  size_t i;
-
-  for (i = 0; i < fp->ctf_nsyms; i++)
-    {
-      char *str;
-      char *bit = NULL;
-      const char *sym_name;
-      ctf_funcinfo_t fi;
-      ctf_id_t type;
-
-      if ((type = ctf_func_info (state->cds_fp, i, &fi)) == CTF_ERR)
-	switch (ctf_errno (state->cds_fp))
-	  {
-	    /* Most errors are just an indication that this symbol is not a data
-	       symbol, but this one indicates that we were called wrong, on a
-	       CTF file with no associated symbol table.  */
-	  case ECTF_NOSYMTAB:
-	    return -1;
-	  case ECTF_NOTDATA:
-	  case ECTF_NOTFUNC:
-	  case ECTF_NOFUNCDAT:
-	    continue;
-	  }
-
-      /* Return type and all args.  */
-      if ((bit = ctf_type_aname (state->cds_fp, type)) == NULL)
-	{
-	  ctf_err_warn (fp, 1, ctf_errno (state->cds_fp),
-			_("cannot look up return type dumping function type "
-			  "for symbol 0x%li"), (unsigned long) i);
-	  free (bit);
-	  return -1;			/* errno is set for us.  */
-	}
-
-      /* Replace in the returned string, dropping in the function name.  */
-
-      sym_name = ctf_lookup_symbol_name (fp, i);
-      if (sym_name[0] != '\0')
-	{
-	  char *retstar;
-	  char *new_bit;
-	  char *walk;
-
-	  new_bit = malloc (strlen (bit) + 1 + strlen (sym_name));
-	  if (!new_bit)
-	    goto oom;
-
-	  /* See ctf_type_aname.  */
-	  retstar = strstr (bit, "(*) (");
-	  if (!ctf_assert (fp, retstar))
-	    goto assert_err;
-	  retstar += 2;			/* After the '*' */
-
-	  /* C is not good at search-and-replace.  */
-	  walk = new_bit;
-	  memcpy (walk, bit, retstar - bit);
-	  walk += (retstar - bit);
-	  strcpy (walk, sym_name);
-	  walk += strlen (sym_name);
-	  strcpy (walk, retstar);
-
-	  free (bit);
-	  bit = new_bit;
-	}
-
-      if (asprintf (&str, "Symbol 0x%lx: %s", (unsigned long) i, bit) < 0)
-	goto oom;
-      free (bit);
-
+      str = str_append (str, "\n");
       ctf_dump_append (state, str);
       continue;
 
     oom:
-      free (bit);
-      return (ctf_set_errno (fp, errno));
-
-    assert_err:
-      free (bit);
-      return -1;		/* errno is set for us.  */
+      ctf_set_errno (fp, ENOMEM);
+      ctf_next_destroy (i);
+      return -1;
+    out:
+      str = str_append (str, typestr);
+      free (typestr);
+      ctf_dump_append (state, str);
+      ctf_next_destroy (i);
+      return err;				/* errno is set for us.  */
     }
   return 0;
 }
@@ -697,11 +645,11 @@ ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	    }
 	  break;
 	case CTF_SECT_OBJT:
-	  if (ctf_dump_objts (fp, state) < 0)
+	  if (ctf_dump_objts (fp, state, 0) < 0)
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_FUNC:
-	  if (ctf_dump_funcs (fp, state) < 0)
+	  if (ctf_dump_objts (fp, state, 1) < 0)
 	    goto end;			/* errno is set for us.  */
 	  break;
 	case CTF_SECT_VAR:
