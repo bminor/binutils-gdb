@@ -1,5 +1,35 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c (riscv_get_default_ext_version):
+	Change the version type from unsigned to int.
+	(riscv_set_arch): Use as_bad rather than as_fatal to
+	report more errors.
+	* testsuite/gas/riscv/attribute-02.d: Updated since x must be
+	set with versions.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/march-ok-two-nse.d: Likewise.
+	* testsuite/gas/riscv/attribute-09.d: zicsr wasn't supported
+	in the spec 2.2, so choose the newer spec.
+	* testsuite/gas/riscv/march-fail-base-01.l: Updated since as_bad.
+	* testsuite/gas/riscv/march-fail-base-02.l: Likewise.
+	* testsuite/gas/riscv/march-fail-order-std.l: Likewise.
+	* testsuite/gas/riscv/march-fail-order-x.l: Likewise.
+	* testsuite/gas/riscv/march-fail-order-z.l: Likewise.
+	* testsuite/gas/riscv/march-fail-porder.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32ef.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32id.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32iq.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64iq.l: Likewise.
+	* testsuite/gas/riscv/march-fail-single-char.l: Likewise.
+	* testsuite/gas/riscv/march-fail-unknown-std.l: Likewise.
+	* testsuite/gas/riscv/march-fail-unknown.l: Likewise.
+	* testsuite/gas/riscv/march-fail-uppercase.l: Likewise.
+	* testsuite/gas/riscv/march-fail-version.l: Likewise.
+	* testsuite/gas/riscv/march-fail-isa-spec.d: Likewise.
+	* testsuite/gas/riscv/march-fail-isa-spec.l: Likewise.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* testsuite/gas/riscv/march-fail-order-z.d: New testcase, check
 	orders of prefixed z extensions.
 	* testsuite/gas/riscv/march-fail-order-z.l: Likewise.

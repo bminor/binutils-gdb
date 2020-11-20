@@ -1025,6 +1025,96 @@ riscv_elf_add_sub_reloc (bfd *abfd,
   return bfd_reloc_ok;
 }
 
+/* Find subset in list, return NULL if not found.  */
+
+riscv_subset_t *
+riscv_lookup_subset (const riscv_subset_list_t *subset_list,
+		     const char *subset)
+{
+  riscv_subset_t *s;
+
+  for (s = subset_list->head; s != NULL; s = s->next)
+    if (strcasecmp (s->name, subset) == 0)
+      return s;
+
+  return NULL;
+}
+
+/* Add extension to the subset list.  */
+
+void
+riscv_add_subset (riscv_subset_list_t *subset_list,
+		  const char *subset,
+		  int major,
+		  int minor)
+{
+  riscv_subset_t *s = xmalloc (sizeof *s);
+
+  if (subset_list->head == NULL)
+    subset_list->head = s;
+
+  s->name = xstrdup (subset);
+  s->major_version = major;
+  s->minor_version = minor;
+  s->next = NULL;
+
+  if (subset_list->tail != NULL)
+    subset_list->tail->next = s;
+  subset_list->tail = s;
+}
+
+/* Find the default versions for the extension before adding them to
+   the subset list, if their versions are RISCV_UNKNOWN_VERSION.
+   Afterwards, report errors if we can not find their default versions.  */
+
+static void
+riscv_parse_add_subset (riscv_parse_subset_t *rps,
+			const char *subset,
+			int major,
+			int minor)
+{
+  int major_version = major;
+  int minor_version = minor;
+
+  if ((major_version == RISCV_UNKNOWN_VERSION
+       || minor_version == RISCV_UNKNOWN_VERSION)
+      && rps->get_default_version != NULL)
+    rps->get_default_version (subset, &major_version, &minor_version);
+
+  if (major_version == RISCV_UNKNOWN_VERSION
+      || minor_version == RISCV_UNKNOWN_VERSION)
+    {
+      if (subset[0] == 'x')
+	rps->error_handler
+	  (_("x ISA extension `%s' must be set with the versions"),
+	   subset);
+      else
+	rps->error_handler
+	  (_("cannot find default versions of the ISA extension `%s'"),
+	   subset);
+      return;
+    }
+
+  riscv_add_subset (rps->subset_list, subset,
+		    major_version, minor_version);
+}
+
+/* Release subset list.  */
+
+void
+riscv_release_subset_list (riscv_subset_list_t *subset_list)
+{
+   while (subset_list->head != NULL)
+    {
+      riscv_subset_t *next = subset_list->head->next;
+      free ((void *)subset_list->head->name);
+      free (subset_list->head);
+      subset_list->head = next;
+    }
+
+  subset_list->tail = NULL;
+}
+
 /* Parsing extension version.
 
    Return Value:
@@ -1034,25 +1124,20 @@ riscv_elf_add_sub_reloc (bfd *abfd,
      `rps`: Hooks and status for parsing extensions.
      `march`: Full arch string.
      `p`: Curent parsing position.
-     `major_version`: Parsing result of major version, using
-      default_major_version if version is not present in arch string.
-     `minor_version`: Parsing result of minor version, set to 0 if version is
-     not present in arch string, but set to `default_minor_version` if
-     `major_version` using default_major_version.
-     `std_ext_p`: True if parsing std extension.
-     `use_default_version`: Set it to True if we need the default version.  */
+     `major_version`: Parsed major version.
+     `minor_version`: Parsed minor version.
+     `std_ext_p`: True if parsing standard extension.  */
 
 static const char *
 riscv_parsing_subset_version (riscv_parse_subset_t *rps,
 			      const char *march,
 			      const char *p,
-			      unsigned *major_version,
-			      unsigned *minor_version,
-			      bfd_boolean std_ext_p,
-			      bfd_boolean *use_default_version)
+			      int *major_version,
+			      int *minor_version,
+			      bfd_boolean std_ext_p)
 {
   bfd_boolean major_p = TRUE;
-  unsigned version = 0;
+  int version = 0;
   char np;
 
   *major_version = 0;
@@ -1096,11 +1181,13 @@ riscv_parsing_subset_version (riscv_parse_subset_t *rps,
   else
     *minor_version = version;
 
-  /* We can not find any version in string, need to parse default version.  */
-  if (use_default_version != NULL
-      && *major_version == 0
-      && *minor_version == 0)
-    *use_default_version = TRUE;
+  /* We can not find any version in string.  */
+  if (*major_version == 0 && *minor_version == 0)
+    {
+      *major_version = RISCV_UNKNOWN_VERSION;
+      *minor_version = RISCV_UNKNOWN_VERSION;
+    }
+
   return p;
 }
 
@@ -1130,9 +1217,8 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 {
   const char *all_std_exts = riscv_supported_std_ext ();
   const char *std_exts = all_std_exts;
-  unsigned major_version = 0;
-  unsigned minor_version = 0;
-  bfd_boolean use_default_version = FALSE;
+  int major_version;
+  int minor_version;
   char subset[2] = {0, 0};
 
   /* First letter must start with i, e or g.  */
@@ -1141,42 +1227,23 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
       case 'i':
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
-					  &minor_version, TRUE,
-					  &use_default_version);
-	/* Find the default version if needed.  */
-	if (use_default_version
-	    && rps->get_default_version != NULL)
-	  rps->get_default_version ("i",
-				    &major_version,
-				    &minor_version);
-	riscv_add_subset (rps->subset_list, "i",
-			  major_version,
-			  minor_version);
+					  &minor_version, TRUE);
+	riscv_parse_add_subset (rps, "i",
+				major_version,
+				minor_version);
 	break;
 
       case 'e':
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
-					  &minor_version, TRUE,
-					  &use_default_version);
-	/* Find the default version if needed.  */
-	if (use_default_version
-	    && rps->get_default_version != NULL)
-	  rps->get_default_version ("e",
-				    &major_version,
-				    &minor_version);
-	riscv_add_subset (rps->subset_list, "e",
-			  major_version,
-			  minor_version);
-
+					  &minor_version, TRUE);
+	riscv_parse_add_subset (rps, "e",
+				major_version,
+				minor_version);
 	/* i-ext must be enabled.  */
-	if (rps->get_default_version != NULL)
-	  rps->get_default_version ("i",
-				    &major_version,
-				    &minor_version);
-	riscv_add_subset (rps->subset_list, "i",
-			  major_version,
-			  minor_version);
+	riscv_parse_add_subset (rps, "i",
+				RISCV_UNKNOWN_VERSION,
+				RISCV_UNKNOWN_VERSION);
 
 	if (*rps->xlen > 32)
 	  {
@@ -1192,27 +1259,17 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 	   skip the setting if user set a version to it.  */
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
-					  &minor_version, TRUE,
-					  &use_default_version);
+					  &minor_version, TRUE);
 	/* i-ext must be enabled.  */
-	if (rps->get_default_version != NULL)
-	  rps->get_default_version ("i",
-				    &major_version,
-				    &minor_version);
-	riscv_add_subset (rps->subset_list, "i",
-			  major_version,
-			  minor_version);
-
+	riscv_parse_add_subset (rps, "i",
+				RISCV_UNKNOWN_VERSION,
+				RISCV_UNKNOWN_VERSION);
 	for ( ; *std_exts != 'q'; std_exts++)
 	  {
 	    subset[0] = *std_exts;
-	    if (rps->get_default_version != NULL)
-	      rps->get_default_version (subset,
-					&major_version,
-					&minor_version);
-	    riscv_add_subset (rps->subset_list, subset,
-			      major_version,
-			      minor_version);
+	    riscv_parse_add_subset (rps, subset,
+				    RISCV_UNKNOWN_VERSION,
+				    RISCV_UNKNOWN_VERSION);
 	  }
 	break;
 
@@ -1253,21 +1310,13 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 	}
 
       std_exts++;
-      use_default_version = FALSE;
       subset[0] = std_ext;
       p = riscv_parsing_subset_version (rps, march, ++p,
 					&major_version,
-					&minor_version, TRUE,
-					&use_default_version);
-      /* Find the default version if needed.  */
-      if (use_default_version
-	  && rps->get_default_version != NULL)
-	rps->get_default_version (subset,
-				  &major_version,
-				  &minor_version);
-      riscv_add_subset (rps->subset_list, subset,
-			major_version,
-			minor_version);
+					&minor_version, TRUE);
+      riscv_parse_add_subset (rps, subset,
+			      major_version,
+			      minor_version);
     }
 
   return p;
@@ -1324,11 +1373,10 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 			  const char *p,
 			  const riscv_parse_config_t *config)
 {
-  unsigned major_version = 0;
-  unsigned minor_version = 0;
+  int major_version;
+  int minor_version;
   const char *last_name;
   riscv_isa_ext_class_t class;
-  bfd_boolean use_default_version;
 
   while (*p)
     {
@@ -1352,13 +1400,17 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
       while (*++q != '\0' && *q != '_' && !ISDIGIT (*q))
 	;
 
-      use_default_version = FALSE;
       end_of_version =
 	riscv_parsing_subset_version (rps, march, q,
 				      &major_version,
-				      &minor_version, FALSE,
-				      &use_default_version);
+				      &minor_version, FALSE);
       *q = '\0';
+
+      if (end_of_version == NULL)
+	{
+	  free (subset);
+	  return NULL;
+	}
 
       /* Check that the prefix extension is known.
 	 For 'x', anything goes but it cannot simply be 'x'.
@@ -1399,16 +1451,9 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 	  return NULL;
 	}
 
-      /* Find the default version if needed.  */
-      if (use_default_version
-         && rps->get_default_version != NULL)
-       rps->get_default_version (subset,
-                                 &major_version,
-                                 &minor_version);
-      riscv_add_subset (rps->subset_list, subset,
-			major_version,
-			minor_version);
-
+      riscv_parse_add_subset (rps, subset,
+			      major_version,
+			      minor_version);
       free (subset);
       p += end_of_version - subset;
 
@@ -1529,6 +1574,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
 {
   const char *p;
   size_t i;
+  bfd_boolean no_conflict = TRUE;
 
   for (p = arch; *p != '\0'; p++)
     {
@@ -1595,7 +1641,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       rps->error_handler
 	(_("-march=%s: rv32e does not support the `f' extension"),
 	 arch);
-      return FALSE;
+      no_conflict = FALSE;
     }
 
   if (riscv_lookup_subset (rps->subset_list, "q") && *rps->xlen < 64)
@@ -1603,7 +1649,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       rps->error_handler
 	(_("-march=%s: rv32 does not support the `q' extension"),
 	 arch);
-      return FALSE;
+      no_conflict = FALSE;
     }
 
   if (riscv_lookup_subset (rps->subset_list, "d")
@@ -1612,7 +1658,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       rps->error_handler
 	(_("-march=%s: `d' extension requires `f' extension"),
 	 arch);
-      return FALSE;
+      no_conflict = FALSE;
     }
 
   if (riscv_lookup_subset (rps->subset_list, "q")
@@ -1621,88 +1667,10 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       rps->error_handler
 	(_("-march=%s: `q' extension requires `d' extension"),
 	 arch);
-      return FALSE;
+      no_conflict = FALSE;
     }
 
-  return TRUE;
-}
-
-/* Add new subset to list.  */
-
-void
-riscv_add_subset (riscv_subset_list_t *subset_list,
-		  const char *subset,
-		  int major,
-		  int minor)
-{
-  riscv_subset_t *s = xmalloc (sizeof *s);
-
-  if (subset_list->head == NULL)
-    subset_list->head = s;
-
-  s->name = xstrdup (subset);
-  s->major_version = major;
-  s->minor_version = minor;
-  s->next = NULL;
-
-  if (subset_list->tail != NULL)
-    subset_list->tail->next = s;
-
-  subset_list->tail = s;
-}
-
-/* Find subset in list without version checking, return NULL if not found.  */
-
-riscv_subset_t *
-riscv_lookup_subset (const riscv_subset_list_t *subset_list,
-		     const char *subset)
-{
-  return riscv_lookup_subset_version
-    (subset_list, subset,
-     RISCV_DONT_CARE_VERSION,
-     RISCV_DONT_CARE_VERSION);
-}
-
-/* Find subset in list with version checking, return NULL if not found.  */
-
-riscv_subset_t *
-riscv_lookup_subset_version (const riscv_subset_list_t *subset_list,
-			     const char *subset,
-			     int major, int minor)
-{
-  riscv_subset_t *s;
-
-  for (s = subset_list->head; s != NULL; s = s->next)
-    if (strcasecmp (s->name, subset) == 0)
-      {
-	if ((major != RISCV_DONT_CARE_VERSION)
-	    && (s->major_version != major))
-	  return NULL;
-
-	if ((minor != RISCV_DONT_CARE_VERSION)
-	    && (s->minor_version != minor))
-	  return NULL;
-
-	return s;
-      }
-
-  return NULL;
-}
-
-/* Release subset list.  */
-
-void
-riscv_release_subset_list (riscv_subset_list_t *subset_list)
-{
-   while (subset_list->head != NULL)
-    {
-      riscv_subset_t *next = subset_list->head->next;
-      free ((void *)subset_list->head->name);
-      free (subset_list->head);
-      subset_list->head = next;
-    }
-
-  subset_list->tail = NULL;
+  return no_conflict;
 }
 
 /* Return the number of digits for the input.  */

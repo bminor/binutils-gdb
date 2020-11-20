@@ -360,8 +360,8 @@ struct riscv_ext_version
 {
   const char *name;
   enum riscv_isa_spec_class isa_spec_class;
-  unsigned int major_version;
-  unsigned int minor_version;
+  int major_version;
+  int minor_version;
 };
 
 /* All RISC-V CSR belong to one of these classes.  */

@@ -1,5 +1,27 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfxx-riscv.c (riscv_lookup_subset): Moved to front.
+	(riscv_add_subset): Likewise.
+	(riscv_release_subset_list): Likewise.
+	(riscv_parse_add_subset): New function.  Find and check the
+	versions before adding them by riscv_add_subset.
+	(riscv_parsing_subset_version): Remove use_default_version
+	and change the version type from unsigned to int.  Set the
+	versions to RISCV_UNKNOWN_VERSION if we can not find them
+	in the arch string.
+	(riscv_parse_std_ext): Updated.
+	(riscv_parse_prefixed_ext): Updated.  Since we use as_bad
+	rather than as_fatal to report more errors, return NULL
+	string if the parsed end_of_version is NULL, too.
+	(riscv_parse_subset): Use a new boolean, no_conflict, to
+	report more errors when we have more than one ISA conflicts.
+	* elfxx-riscv.h (RISCV_DONT_CARE_VERSION): Changed to
+	RISCV_UNKNOWN_VERSION.
+	(riscv_lookup_subset_version): Removed.
+	(riscv_parse_subset_t): Updated.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfxx-riscv.c (riscv_parse_std_ext): Stop parsing standard
 	extensions when parsed h keyword.
 	(riscv_get_prefix_class): Support prefixed h class.

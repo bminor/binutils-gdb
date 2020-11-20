@@ -1,2 +1,3 @@
 .*Assembler messages:
-.*Fatal error: .*expect number after `2p'
+.*Error: cannot find default versions of the ISA extension `p'
+.*Error: .*expect number after `2p'

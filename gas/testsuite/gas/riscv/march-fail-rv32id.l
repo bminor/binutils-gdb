@@ -1,2 +1,2 @@
 .*Assembler messages:
-.*Fatal error: .*`d' extension requires `f' extension
+.*Error: .*`d' extension requires `f' extension

@@ -33,7 +33,7 @@ riscv_reloc_type_lookup (bfd *, bfd_reloc_code_real_type);
 extern reloc_howto_type *
 riscv_elf_rtype_to_howto (bfd *, unsigned int r_type);
 
-#define RISCV_DONT_CARE_VERSION -1
+#define RISCV_UNKNOWN_VERSION -1
 
 /* The information of architecture attribute.  */
 struct riscv_subset_t
@@ -64,11 +64,6 @@ extern riscv_subset_t *
 riscv_lookup_subset (const riscv_subset_list_t *,
 		     const char *);
 
-extern riscv_subset_t *
-riscv_lookup_subset_version (const riscv_subset_list_t *,
-			     const char *,
-			     int, int);
-
 typedef struct
 {
   riscv_subset_list_t *subset_list;
@@ -76,8 +71,8 @@ typedef struct
 			 ...) ATTRIBUTE_PRINTF_1;
   unsigned *xlen;
   void (*get_default_version) (const char *,
-			       unsigned int *,
-			       unsigned int *);
+			       int *,
+			       int *);
 } riscv_parse_subset_t;
 
 extern bfd_boolean

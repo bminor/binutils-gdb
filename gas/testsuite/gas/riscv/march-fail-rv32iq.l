@@ -1,2 +1,3 @@
 .*Assembler messages:
-.*Fatal error: .*rv32 does not support the `q' extension
+.*Error: .*rv32 does not support the `q' extension
+.*Error: .*`q' extension requires `d' extension

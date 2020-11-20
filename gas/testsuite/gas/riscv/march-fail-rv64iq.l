@@ -1,2 +1,2 @@
 .*Assembler messages:
-.*Fatal error: .*`q' extension requires `d' extension
+.*Error: .*`q' extension requires `d' extension

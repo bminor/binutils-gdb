@@ -1,2 +1,2 @@
 .*Assembler messages:
-.*Fatal error: .*unknown standard ISA extension `[^eimafdqiglcbjtpvn]'
+.*Error: .*unknown standard ISA extension `[^eimafdqiglcbjtpvn]'
