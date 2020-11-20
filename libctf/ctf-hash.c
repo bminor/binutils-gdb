@@ -476,6 +476,13 @@ ctf_dynhash_next (ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
   return ECTF_NEXT_END;
 }
 
+int
+ctf_dynhash_sort_by_name (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
+			  void *unused _libctf_unused_)
+{
+  return strcmp ((char *) one->hkv_key, (char *) two->hkv_key);
+}
+
 /* Traverse a sorted dynhash, in _next iterator form.
 
    See ctf_dynhash_next for notes on error returns, etc.

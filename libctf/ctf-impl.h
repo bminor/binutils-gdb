@@ -43,6 +43,15 @@ extern "C"
 {
 #endif
 
+/* Tuning.  */
+
+/* The proportion of symtypetab entries which must be pads before we consider it
+   worthwhile to emit a symtypetab section as an index.  Indexes cost time to
+   look up, but save space all told.  Do not set to 1, since this will cause
+   indexes to be eschewed completely, even in child dicts, at considerable space
+   cost.  */
+#define CTF_INDEX_PAD_THRESHOLD .75
+
 /* Compiler attributes.  */
 
 #if defined (__GNUC__)
@@ -61,6 +70,7 @@ extern "C"
 #define _libctf_unlikely_(x) __builtin_expect ((x), 0)
 #define _libctf_unused_ __attribute__ ((__unused__))
 #define _libctf_malloc_ __attribute__((__malloc__))
+#define _libctf_nonnull_ __attribute__((__nonnull__))
 
 #else
 
@@ -68,6 +78,7 @@ extern "C"
 #define _libctf_unlikely_(x) (x)
 #define _libctf_unused_
 #define _libctf_malloc_
+#define _libctf_nonnull_
 #define __extension__
 
 #endif
@@ -232,6 +243,14 @@ typedef struct ctf_str_atom_ref
   uint32_t *caf_ref;		/* A single ref to this string.  */
 } ctf_str_atom_ref_t;
 
+/* A single linker-provided symbol, during symbol addition, possibly before we
+   have been given external strtab refs.  */
+typedef struct ctf_in_flight_dynsym
+{
+  ctf_list_t cid_list;		/* List forward/back pointers.  */
+  ctf_link_sym_t cid_sym;	/* The linker-known symbol.  */
+} ctf_in_flight_dynsym_t;
+
 /* The structure used as the key in a ctf_link_type_mapping.  The value is a
    type index, not a type ID.  */
 
@@ -380,11 +399,28 @@ struct ctf_dict
   unsigned char *ctf_dynbase;	  /* Freeable CTF file pointer. */
   unsigned char *ctf_buf;	  /* Uncompressed CTF data buffer.  */
   size_t ctf_size;		  /* Size of CTF header + uncompressed data.  */
-  uint32_t *ctf_sxlate;		  /* Translation table for symtab entries.  */
+  uint32_t *ctf_sxlate;		  /* Translation table for unindexed symtypetab
+				     entries.  */
   unsigned long ctf_nsyms;	  /* Number of entries in symtab xlate table.  */
   uint32_t *ctf_txlate;		  /* Translation table for type IDs.  */
   uint32_t *ctf_ptrtab;		  /* Translation table for pointer-to lookups.  */
   size_t ctf_ptrtab_len;	  /* Num types storable in ptrtab currently.  */
+  uint32_t *ctf_funcidx_names;	  /* Name of each function symbol in symtypetab
+				     (if indexed).  */
+  uint32_t *ctf_objtidx_names;	  /* Likewise, for object symbols.  */
+  size_t ctf_nfuncidx;		  /* Number of funcidx entries.  */
+  uint32_t *ctf_funcidx_sxlate;	  /* Offsets into funcinfo for a given funcidx.  */
+  uint32_t *ctf_objtidx_sxlate;	  /* Likewise, for ctf_objtidx.  */
+  size_t ctf_nobjtidx;		  /* Number of objtidx entries.  */
+  ctf_dynhash_t *ctf_objthash;	  /* name -> type ID.  */
+  ctf_dynhash_t *ctf_funchash;	  /* name -> CTF_K_FUNCTION type ID.  */
+
+  /* The next three are linker-derived state found in ctf_link targets only.  */
+
+  ctf_dynhash_t *ctf_dynsyms;	  /* Symbol info from ctf_link_shuffle_syms.  */
+  ctf_link_sym_t **ctf_dynsymidx;  /* Indexes ctf_dynsyms by symidx.  */
+  uint32_t ctf_dynsymmax;	  /* Maximum ctf_dynsym index.  */
+  ctf_list_t ctf_in_flight_dynsyms; /* Dynsyms during accumulation.  */
   struct ctf_varent *ctf_vars;	  /* Sorted variable->type mapping.  */
   unsigned long ctf_nvars;	  /* Number of variables in ctf_vars.  */
   unsigned long ctf_typemax;	  /* Maximum valid type ID number.  */
@@ -494,7 +530,10 @@ struct ctf_next
   /* We can save space on this side of things by noting that a dictionary is
      either dynamic or not, as a whole, and a given iterator can only iterate
      over one kind of thing at once: so we can overlap the DTD and non-DTD
-     members, and the structure, variable and enum members, etc.  */
+     members, and the structure, variable and enum members, etc.
+
+     Some of the _next iterators actually thunk down to another _next iterator
+     themselves, so one of the options in here is a _next iterator!  */
   union
   {
     const ctf_member_t *ctn_mp;
@@ -502,6 +541,7 @@ struct ctf_next
     const ctf_dmdef_t *ctn_dmd;
     const ctf_enum_t *ctn_en;
     const ctf_dvdef_t *ctn_dvd;
+    ctf_next_t *ctn_next;
     ctf_next_hkv_t *ctn_sorted_hkv;
     void **ctn_hash_slot;
   } u;
@@ -542,15 +582,19 @@ struct ctf_next
 #define LCTF_VBYTES(fp, kind, size, vlen) \
   ((fp)->ctf_dictops->ctfo_get_vbytes(fp, kind, size, vlen))
 
-#define LCTF_CHILD	0x0001	/* CTF dict is a child */
-#define LCTF_RDWR	0x0002	/* CTF dict is writable */
-#define LCTF_DIRTY	0x0004	/* CTF dict has been modified */
+#define LCTF_CHILD	0x0001	/* CTF dict is a child.  */
+#define LCTF_RDWR	0x0002	/* CTF dict is writable.  */
+#define LCTF_DIRTY	0x0004	/* CTF dict has been modified.  */
 
 extern ctf_names_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);
 extern ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *, int, const char *);
 extern ctf_id_t ctf_lookup_by_rawhash (ctf_dict_t *, ctf_names_t *, const char *);
 extern void ctf_set_ctl_hashes (ctf_dict_t *);
+
+extern int ctf_symtab_skippable (ctf_link_sym_t *sym);
+extern int ctf_add_funcobjt_sym (ctf_dict_t *, int is_function,
+				 const char *, ctf_id_t);
 
 extern ctf_dict_t *ctf_get_dict (ctf_dict_t *fp, ctf_id_t type);
 
@@ -598,6 +642,9 @@ extern void ctf_dynhash_iter_remove (ctf_dynhash_t *, ctf_hash_iter_remove_f,
 				     void *);
 extern void *ctf_dynhash_iter_find (ctf_dynhash_t *, ctf_hash_iter_find_f,
 				    void *);
+extern int ctf_dynhash_sort_by_name (const ctf_next_hkv_t *,
+				     const ctf_next_hkv_t *,
+				     void * _libctf_unused_);
 extern int ctf_dynhash_next (ctf_dynhash_t *, ctf_next_t **,
 			     void **key, void **value);
 extern int ctf_dynhash_next_sorted (ctf_dynhash_t *, ctf_next_t **,
@@ -721,7 +768,10 @@ extern void ctf_assert_fail_internal (ctf_dict_t *, const char *,
 				      size_t, const char *);
 extern const char *ctf_link_input_name (ctf_dict_t *);
 
-extern Elf64_Sym *ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst);
+extern ctf_link_sym_t *ctf_elf32_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst,
+					      const Elf32_Sym *src, uint32_t symidx);
+extern ctf_link_sym_t *ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst,
+					      const Elf64_Sym *src, uint32_t symidx);
 extern const char *ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx);
 
 /* Variables, all underscore-prepended. */

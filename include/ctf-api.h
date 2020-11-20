@@ -361,6 +361,8 @@ extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
 
 extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_lookup_by_symbol (ctf_dict_t *, unsigned long);
+extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
+				 const char **name, int functions);
 extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);
 
 extern ctf_id_t ctf_type_resolve (ctf_dict_t *, ctf_id_t);
@@ -467,6 +469,9 @@ extern int ctf_add_member_encoded (ctf_dict_t *, ctf_id_t, const char *,
 				   const ctf_encoding_t);
 
 extern int ctf_add_variable (ctf_dict_t *, const char *, ctf_id_t);
+
+extern int ctf_add_objt_sym (ctf_dict_t *, const char *, ctf_id_t);
+extern int ctf_add_func_sym (ctf_dict_t *, const char *, ctf_id_t);
 
 extern int ctf_set_array (ctf_dict_t *, ctf_id_t, const ctf_arinfo_t *);
 

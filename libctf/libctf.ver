@@ -182,5 +182,9 @@ LIBCTF_1.1 {
 	ctf_dict_close;
 	ctf_parent_dict;
 
+	ctf_symbol_next;
+	ctf_add_objt_sym;
+	ctf_add_func_sym;
+
 	ctf_link_add_linker_symbol;
 } LIBCTF_1.0;

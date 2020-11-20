@@ -51,10 +51,6 @@ ctf_add_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
 
   dst_type = LCTF_TYPE_TO_INDEX(dst_fp, dst_type);
 
-  /* This dynhash is a bit tricky: it has a multivalued (structural) key, so we
-     need to use the sized-hash machinery to generate key hashing and equality
-     functions.  */
-
   if (dst_fp->ctf_link_type_mapping == NULL)
     {
       ctf_hash_fun f = ctf_hash_type_key;
@@ -574,7 +570,7 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
   ctf_link_in_member_cb_arg_t *arg = (ctf_link_in_member_cb_arg_t *) arg_;
   ctf_dict_t *per_cu_out_fp;
   ctf_id_t dst_type = 0;
-  ctf_dict_t *check_fp;
+  ctf_dict_t *insert_fp;
   ctf_dvdef_t *dvd;
 
   /* See if this variable is filtered out.  */
@@ -590,18 +586,18 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
      dict, we want to try to add to that first: if it reports a duplicate,
      or if the type is in a child already, add straight to the child.  */
 
-  check_fp = arg->out_fp;
+  insert_fp = arg->out_fp;
 
-  dst_type = ctf_type_mapping (arg->in_fp, type, &check_fp);
+  dst_type = ctf_type_mapping (arg->in_fp, type, &insert_fp);
   if (dst_type != 0)
     {
-      if (check_fp == arg->out_fp)
+      if (insert_fp == arg->out_fp)
 	{
-	  if (check_variable (name, check_fp, dst_type, &dvd))
+	  if (check_variable (name, insert_fp, dst_type, &dvd))
 	    {
 	      /* No variable here: we can add it.  */
-	      if (ctf_add_variable (check_fp, name, dst_type) < 0)
-		return (ctf_set_errno (arg->out_fp, ctf_errno (check_fp)));
+	      if (ctf_add_variable (insert_fp, name, dst_type) < 0)
+		return (ctf_set_errno (arg->out_fp, ctf_errno (insert_fp)));
 	      return 0;
 	    }
 
@@ -628,11 +624,11 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
 					  arg->cu_name)) == NULL)
     return -1;					/* Errno is set for us.  */
 
-  /* If the type was not found, check for it in the child too. */
+  /* If the type was not found, check for it in the child too.  */
   if (dst_type == 0)
     {
-      check_fp = per_cu_out_fp;
-      dst_type = ctf_type_mapping (arg->in_fp, type, &check_fp);
+      insert_fp = per_cu_out_fp;
+      dst_type = ctf_type_mapping (arg->in_fp, type, &insert_fp);
 
       if (dst_type == 0)
 	{
@@ -1153,6 +1149,169 @@ ctf_link_deduplicating_variables (ctf_dict_t *fp, ctf_dict_t **inputs,
   return 0;
 }
 
+/* Check for symbol conflicts during linking.  Three possibilities: already
+   exists, conflicting, or nonexistent.  We don't have a dvd structure we can
+   use as a flag like check_variable does, so we use a tristate return
+   value instead: -1: conflicting; 1: nonexistent: 0: already exists.  */
+
+static int
+check_sym (ctf_dict_t *fp, const char *name, ctf_id_t type, int functions)
+{
+  ctf_dynhash_t *thishash = functions ? fp->ctf_funchash : fp->ctf_objthash;
+  ctf_dynhash_t *thathash = functions ? fp->ctf_objthash : fp->ctf_funchash;
+  void *value;
+
+  /* Wrong type (function when object is wanted, etc).  */
+  if (ctf_dynhash_lookup_kv (thathash, name, NULL, NULL))
+    return -1;
+
+  /* Not present at all yet.  */
+  if (!ctf_dynhash_lookup_kv (thishash, name, NULL, &value))
+    return 1;
+
+  /* Already present.  */
+  if ((ctf_id_t) (uintptr_t) value == type)
+    return 0;
+
+  /* Wrong type.  */
+  return -1;
+}
+
+/* Do a deduplicating link of one symtypetab (function info or data object) in
+   one input dict.  */
+
+static int
+ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
+				       int cu_mapped, int functions)
+{
+  ctf_next_t *it = NULL;
+  const char *name;
+  ctf_id_t type;
+  const char *in_file_name;
+
+  if (ctf_cuname (input) != NULL)
+    in_file_name = ctf_cuname (input);
+  else
+    in_file_name = "unnamed-CU";
+
+  while ((type = ctf_symbol_next (input, &it, &name, functions)) != CTF_ERR)
+    {
+      ctf_id_t dst_type;
+      ctf_dict_t *per_cu_out_fp;
+      ctf_dict_t *insert_fp = fp;
+      int sym;
+
+      /* Look in the parent first.  */
+
+      dst_type = ctf_type_mapping (input, type, &insert_fp);
+      if (dst_type != 0)
+	{
+	  if (insert_fp == fp)
+	    {
+	      sym = check_sym (fp, name, dst_type, functions);
+
+	      /* Already present: next symbol.  */
+	      if (sym == 0)
+		continue;
+	      /* Not present: add it.  */
+	      else if (sym > 0)
+		{
+		  if (ctf_add_funcobjt_sym (fp, functions,
+					    name, dst_type) < 0)
+		    return -1; 			/* errno is set for us.  */
+		  continue;
+		}
+	    }
+	}
+
+      /* Can't add to the parent due to a name clash (most unlikely), or because
+	 it references a type only present in the child.  Try adding to the
+	 child, creating if need be.  If we can't do that, skip it.  Don't add
+	 to a child if we're doing a CU-mapped link, since that has only one
+	 output.  */
+      if (cu_mapped)
+	{
+	  ctf_dprintf ("Symbol %s in input file %s depends on a type %lx "
+		       "hidden due to conflicts: skipped.\n", name,
+		       in_file_name, type);
+	  continue;
+	}
+
+      if ((per_cu_out_fp = ctf_create_per_cu (fp, in_file_name,
+					      in_file_name)) == NULL)
+	return -1;				/* errno is set for us.  */
+
+      /* If the type was not found, check for it in the child too.  */
+      if (dst_type == 0)
+	{
+	  insert_fp = per_cu_out_fp;
+	  dst_type = ctf_type_mapping (input, type, &insert_fp);
+
+	  if (dst_type == 0)
+	    {
+	      ctf_err_warn (fp, 1, 0,
+			    _("type %lx for symbol %s in input file %s "
+			      "not found: skipped"), type, name, in_file_name);
+	      continue;
+	    }
+	}
+
+      sym = check_sym (per_cu_out_fp, name, dst_type, functions);
+
+      /* Already present: next symbol.  */
+      if (sym == 0)
+	continue;
+      /* Not present: add it.  */
+      else if (sym > 0)
+	{
+	  if (ctf_add_funcobjt_sym (per_cu_out_fp, functions,
+				    name, dst_type) < 0)
+	    return -1;				/* errno is set for us.  */
+	}
+      else
+	{
+	  /* Perhaps this should be an assertion failure.  */
+	  ctf_err_warn (fp, 0, ECTF_DUPLICATE,
+			_("symbol %s in input file %s found conflicting "
+			  "even when trying in per-CU dict."), name,
+			in_file_name);
+	  return (ctf_set_errno (fp, ECTF_DUPLICATE));
+	}
+    }
+  if (ctf_errno (input) != ECTF_NEXT_END)
+    {
+      ctf_set_errno (fp, ctf_errno (input));
+      ctf_err_warn (fp, 0, ctf_errno (input),
+		    functions ? _("iterating over function symbols") :
+		    _("iterating over data symbols"));
+      return -1;
+    }
+
+  return 0;
+}
+
+/* Do a deduplicating link of the function info and data objects
+   in the inputs.  */
+static int
+ctf_link_deduplicating_syms (ctf_dict_t *fp, ctf_dict_t **inputs,
+			     size_t ninputs, int cu_mapped)
+{
+  size_t i;
+
+  for (i = 0; i < ninputs; i++)
+    {
+      if (ctf_link_deduplicating_one_symtypetab (fp, inputs[i],
+						 cu_mapped, 0) < 0)
+	return -1;				/* errno is set for us.  */
+
+      if (ctf_link_deduplicating_one_symtypetab (fp, inputs[i],
+						 cu_mapped, 1) < 0)
+	return -1;				/* errno is set for us.  */
+    }
+
+  return 0;
+}
+
 /* Do the per-CU part of a deduplicating link.  */
 static int
 ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
@@ -1304,6 +1463,11 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 				    "emission failed for %s"), out_name);
 	  goto err_inputs_outputs;
 	}
+
+      /* For now, we omit symbol section linking for CU-mapped links, until it
+	 is clear how to unify the symbol table across such links.  (Perhaps we
+	 should emit an unconditionally indexed symtab, like the compiler
+	 does.)  */
 
       if (ctf_link_deduplicating_close_inputs (fp, in, inputs, ninputs) < 0)
 	{
@@ -1457,6 +1621,15 @@ ctf_link_deduplicating (ctf_dict_t *fp)
       goto err;
     }
 
+  if (ctf_link_deduplicating_syms (fp, inputs, ninputs, 0) < 0)
+    {
+      ctf_err_warn (fp, 0, 0, _("deduplicating link symbol emission failed for "
+				"%s"), ctf_link_input_name (fp));
+      for (i = 1; i < noutputs; i++)
+	ctf_dict_close (outputs[i]);
+      goto err;
+    }
+
   /* Now close all the inputs, including per-CU intermediates.  */
 
   if (ctf_link_deduplicating_close_inputs (fp, NULL, inputs, ninputs) < 0)
@@ -1591,19 +1764,162 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
 	err = iter_arg.err;
     }
 
+  if (err)
+    ctf_set_errno (fp, err);
+
   return -err;
 }
 
-/* Not yet implemented.  */
+/* Inform the ctf-link machinery of a new symbol in the target symbol table
+   (which must be some symtab that is not usually stripped, and which
+   is in agreement with ctf_bfdopen_ctfsect).  May be called either before or
+   after ctf_link_add_strtab.  */
 int
 ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
 {
+  ctf_in_flight_dynsym_t *cid;
+
+  /* Cheat a little: if there is already an ENOMEM error code recorded against
+     this dict, we shouldn't even try to add symbols because there will be no
+     memory to do so: probably we failed to add some previous symbol.  This
+     makes out-of-memory exits 'sticky' across calls to this function, so the
+     caller doesn't need to worry about error conditions.  */
+
+  if (ctf_errno (fp) == ENOMEM)
+    return -ENOMEM;				/* errno is set for us.  */
+
+  if (ctf_symtab_skippable (sym))
+    return 0;
+
+  if (sym->st_type != STT_OBJECT && sym->st_type != STT_FUNC)
+    return 0;
+
+  /* Add the symbol to the in-flight list.  */
+
+  if ((cid = malloc (sizeof (ctf_in_flight_dynsym_t))) == NULL)
+    goto oom;
+
+  cid->cid_sym = *sym;
+  ctf_list_append (&fp->ctf_in_flight_dynsyms, cid);
+
   return 0;
+
+ oom:
+  ctf_dynhash_destroy (fp->ctf_dynsyms);
+  fp->ctf_dynsyms = NULL;
+  ctf_set_errno (fp, ENOMEM);
+  return -ENOMEM;
 }
+
+/* Impose an ordering on symbols.  The ordering takes effect immediately, but
+   since the ordering info does not include type IDs, lookups may return nothing
+   until such IDs are added by calls to ctf_add_*_sym.  Must be called after
+   ctf_link_add_strtab and ctf_link_add_linker_symbol.  */
 int
 ctf_link_shuffle_syms (ctf_dict_t *fp)
 {
+  ctf_in_flight_dynsym_t *did, *nid;
+  ctf_next_t *i = NULL;
+  int err = ENOMEM;
+  void *name_, *sym_;
+
+  if (!fp->ctf_dynsyms)
+    {
+      fp->ctf_dynsyms = ctf_dynhash_create (ctf_hash_string,
+					    ctf_hash_eq_string,
+					    NULL, free);
+      if (!fp->ctf_dynsyms)
+	{
+	  ctf_set_errno (fp, ENOMEM);
+	  return -ENOMEM;
+	}
+    }
+
+  /* Add all the symbols, excluding only those we already know are prohibited
+     from appearing in symtypetabs.  */
+
+  for (did = ctf_list_next (&fp->ctf_in_flight_dynsyms); did != NULL; did = nid)
+    {
+      ctf_link_sym_t *new_sym;
+
+      nid = ctf_list_next (did);
+      ctf_list_delete (&fp->ctf_in_flight_dynsyms, did);
+
+      /* We might get a name or an external strtab offset.  The strtab offset is
+	 guaranteed resolvable at this point, so turn it into a string.  */
+
+      if (did->cid_sym.st_name == NULL)
+	{
+	  uint32_t off = CTF_SET_STID (did->cid_sym.st_nameidx, CTF_STRTAB_1);
+
+	  did->cid_sym.st_name = ctf_strraw (fp, off);
+	  did->cid_sym.st_nameidx_set = 0;
+	  if (!ctf_assert (fp, did->cid_sym.st_name != NULL))
+	    return -ECTF_INTERNAL;		/* errno is set for us.  */
+	}
+
+      /* The symbol might have turned out to be nameless, so we have to recheck
+	 for skippability here.  */
+      if (!ctf_symtab_skippable (&did->cid_sym))
+	{
+	  ctf_dprintf ("symbol name from linker: %s\n", did->cid_sym.st_name);
+
+	  if ((new_sym = malloc (sizeof (ctf_link_sym_t))) == NULL)
+	    goto local_oom;
+
+	  memcpy (new_sym, &did->cid_sym, sizeof (ctf_link_sym_t));
+	  if (ctf_dynhash_cinsert (fp->ctf_dynsyms, new_sym->st_name, new_sym) < 0)
+	    goto local_oom;
+
+	  if (fp->ctf_dynsymmax < new_sym->st_symidx)
+	    fp->ctf_dynsymmax = new_sym->st_symidx;
+	}
+
+      free (did);
+      continue;
+
+    local_oom:
+      free (did);
+      free (new_sym);
+      goto err;
+    }
+
+  /* Construct a mapping from shndx to the symbol info.  */
+  free (fp->ctf_dynsymidx);
+  if ((fp->ctf_dynsymidx = calloc (fp->ctf_dynsymmax + 1,
+				   sizeof (ctf_link_sym_t *))) == NULL)
+    goto err;
+
+  while ((err = ctf_dynhash_next (fp->ctf_dynsyms, &i, &name_, &sym_)) == 0)
+    {
+      const char *name = (const char *) name;
+      ctf_link_sym_t *symp = (ctf_link_sym_t *) sym_;
+
+      if (!ctf_assert (fp, symp->st_symidx <= fp->ctf_dynsymmax))
+	{
+	  ctf_next_destroy (i);
+	  err = ctf_errno (fp);
+	  goto err;
+	}
+      fp->ctf_dynsymidx[symp->st_symidx] = symp;
+    }
+  if (err != ECTF_NEXT_END)
+    {
+      ctf_err_warn (fp, 0, err, _("error iterating over shuffled symbols"));
+      goto err;
+    }
   return 0;
+
+ err:
+  /* Leave the in-flight symbols around: they'll be freed at
+     dict close time regardless.  */
+  ctf_dynhash_destroy (fp->ctf_dynsyms);
+  fp->ctf_dynsyms = NULL;
+  free (fp->ctf_dynsymidx);
+  fp->ctf_dynsymidx = NULL;
+  fp->ctf_dynsymmax = 0;
+  ctf_set_errno (fp, err);
+  return -err;
 }
 
 typedef struct ctf_name_list_accum_cb_arg

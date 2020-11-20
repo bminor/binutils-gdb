@@ -73,18 +73,20 @@ extern "C"
    the data types section.  Each label is accompanied by a type ID i.  A given
    label refers to the group of types whose IDs are in the range [0, i].
 
-   Data object and function records are stored in the same order as they appear
-   in the corresponding symbol table, except that symbols marked SHN_UNDEF are
-   not stored and symbols that have no type data are padded out with zeroes.
-   For each data object, the type ID (a small integer) is recorded.  For each
-   function, the type ID of the return type and argument types is recorded.
+   Data object and function records (collectively, "symtypetabs") are stored in
+   the same order as they appear in the corresponding symbol table, except that
+   symbols marked SHN_UNDEF are not stored and symbols that have no type data
+   are padded out with zeroes.  For each entry in these tables, the type ID (a
+   small integer) is recorded.  (Functions get CTF_K_FUNCTION types, just like
+   data objects that are function pointers.)
 
    For situations in which the order of the symbols in the symtab is not known,
-   a pair of optional indexes follow the data object and function info sections:
-   each of these is an array of strtab indexes, mapped 1:1 to the corresponding
-   data object / function info section, giving each entry in those sections a
-   name so that the linker can correlate them with final symtab entries and
-   reorder them accordingly (dropping the indexes in the process).
+   or most symbols have no type in this dict and most entries would be
+   zero-pads, a pair of optional indexes follow the data object and function
+   info sections: each of these is an array of strtab indexes, mapped 1:1 to the
+   corresponding data object / function info section, giving each entry in those
+   sections a name so that the linker can correlate them with final symtab
+   entries and reorder them accordingly (dropping the indexes in the process).
 
    Variable records (as distinct from data objects) provide a modicum of support
    for non-ELF systems, mapping a variable name to a CTF type ID.  The variable
@@ -92,7 +94,8 @@ extern "C"
    not define how the consumer maps these variable names to addresses or
    anything else, or indeed what these names represent: they might be names
    looked up at runtime via dlsym() or names extracted at runtime by a debugger
-   or anything else the consumer likes.
+   or anything else the consumer likes.  Variable records with identically-
+   named entries in the data object section are removed.
 
    The data types section is a list of variable size records that represent each
    type, in order by their ID.  The types themselves form a directed graph,
@@ -104,9 +107,9 @@ extern "C"
    Strings are recorded as a string table ID (0 or 1) and a byte offset into the
    string table.  String table 0 is the internal CTF string table.  String table
    1 is the external string table, which is the string table associated with the
-   ELF symbol table for this object.  CTF does not record any strings that are
-   already in the symbol table, and the CTF string table does not contain any
-   duplicated strings.
+   ELF dynamic symbol table for this object.  CTF does not record any strings
+   that are already in the symbol table, and the CTF string table does not
+   contain any duplicated strings.
 
    If the CTF data has been merged with another parent CTF object, some outgoing
    edges may refer to type nodes that exist in another CTF object.  The debugger
@@ -199,9 +202,16 @@ typedef struct ctf_header
 #define CTF_VERSION_3 4
 #define CTF_VERSION CTF_VERSION_3 /* Current version.  */
 
+/* All of these flags bar CTF_F_COMPRESS and CTF_F_IDXSORTED are bug-workaround
+   flags and are valid only in format v3: in v2 and below they cannot occur and
+   in v4 and later, they will be recycled for other purposes.  */
+
 #define CTF_F_COMPRESS	0x1		/* Data buffer is compressed by libctf.  */
+#define CTF_F_NEWFUNCINFO 0x2		/* New v3 func info section format.  */
+#define CTF_F_IDXSORTED 0x4		/* Index sections already sorted.  */
 #define CTF_F_DYNSTR 0x8		/* Strings come from .dynstr.  */
-#define CTF_F_MAX (CTF_F_COMPRESS | CTF_F_DYNSTR)
+#define CTF_F_MAX (CTF_F_COMPRESS | CTF_F_NEWFUNCINFO | CTF_F_IDXSORTED	\
+		   | CTF_F_DYNSTR)
 
 typedef struct ctf_lblent
 {

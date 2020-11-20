@@ -1,5 +1,117 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (CTF_INDEX_PAD_THRESHOLD): New.
+	(_libctf_nonnull_): Likewise.
+	(ctf_in_flight_dynsym_t): New.
+	(ctf_dict_t) <ctf_funcidx_names>: Likewise.
+	<ctf_objtidx_names>: Likewise.
+	<ctf_nfuncidx>: Likewise.
+	<ctf_nobjtidx>: Likewise.
+	<ctf_funcidx_sxlate>: Likewise.
+	<ctf_objtidx_sxlate>: Likewise.
+	<ctf_objthash>: Likewise.
+	<ctf_funchash>: Likewise.
+	<ctf_dynsyms>: Likewise.
+	<ctf_dynsymidx>: Likewise.
+	<ctf_dynsymmax>: Likewise.
+	<ctf_in_flight_dynsym>: Likewise.
+	(struct ctf_next) <u.ctn_next>: Likewise.
+	(ctf_symtab_skippable): New prototype.
+	(ctf_add_funcobjt_sym): Likewise.
+	(ctf_dynhash_sort_by_name): Likewise.
+	(ctf_sym_to_elf64): Rename to...
+	(ctf_elf32_to_link_sym): ... this, and...
+	(ctf_elf64_to_link_sym): ... this.
+	* ctf-open.c (init_symtab): Check for lack of CTF_F_NEWFUNCINFO
+	flag, and presence of index sections.  Refactor out
+	ctf_symtab_skippable and ctf_elf*_to_link_sym, and use them.  Use
+	ctf_link_sym_t, not Elf64_Sym.  Skip initializing objt or func
+	sxlate sections if corresponding index section is present.  Adjust
+	for new func info section format.
+	(ctf_bufopen_internal): Add ctf_err_warn to corrupt-file error
+	handling.  Report incorrect-length index sections.  Always do an
+	init_symtab, even if there is no symtab section (there may be index
+	sections still).
+	(flip_objts): Adjust comment: func and objt sections are actually
+	identical in structure now, no need to caveat.
+	(ctf_dict_close):  Free newly-added data structures.
+	* ctf-create.c (ctf_create): Initialize them.
+	(ctf_symtab_skippable): New, refactored out of
+	init_symtab, with st_nameidx_set check added.
+	(ctf_add_funcobjt_sym): New, add a function or object symbol to the
+	ctf_objthash or ctf_funchash, by name.
+	(ctf_add_objt_sym): Call it.
+	(ctf_add_func_sym): Likewise.
+	(symtypetab_delete_nonstatic_vars): New, delete vars also present as
+	data objects.
+	(CTF_SYMTYPETAB_EMIT_FUNCTION): New flag to symtypetab emitters:
+	this is a function emission, not a data object emission.
+	(CTF_SYMTYPETAB_EMIT_PAD): New flag to symtypetab emitters: emit
+	pads for symbols with no type (only set for unindexed sections).
+	(CTF_SYMTYPETAB_FORCE_INDEXED): New flag to symtypetab emitters:
+	always emit indexed.
+	(symtypetab_density): New, figure out section sizes.
+	(emit_symtypetab): New, emit a symtypetab.
+	(emit_symtypetab_index): New, emit a symtypetab index.
+	(ctf_serialize): Call them, emitting suitably sorted symtypetab
+	sections and indexes.  Set suitable header flags.  Copy over new
+	fields.
+	* ctf-hash.c (ctf_dynhash_sort_by_name): New, used to impose an
+	order on symtypetab index sections.
+	* ctf-link.c (ctf_add_type_mapping): Delete erroneous comment
+	relating to code that was never committed.
+	(ctf_link_one_variable): Improve variable name.
+	(check_sym): New, symtypetab analogue of check_variable.
+	(ctf_link_deduplicating_one_symtypetab): New.
+	(ctf_link_deduplicating_syms): Likewise.
+	(ctf_link_deduplicating): Call them.
+	(ctf_link_deduplicating_per_cu): Note that we don't call them in
+	this case (yet).
+	(ctf_link_add_strtab): Set the error on the fp correctly.
+	(ctf_link_add_linker_symbol): New (no longer a do-nothing stub), add
+	a linker symbol to the in-flight list.
+	(ctf_link_shuffle_syms): New (no longer a do-nothing stub), turn the
+	in-flight list into a mapping we can use, now its names are
+	resolvable in the external strtab.
+	* ctf-string.c (ctf_str_rollback_atom): Don't roll back atoms with
+	external strtab offsets.
+	(ctf_str_rollback): Adjust comment.
+	(ctf_str_write_strtab): Migrate ctf_syn_ext_strtab population from
+	writeout time...
+	(ctf_str_add_external): ... to string addition time.
+	* ctf-lookup.c (ctf_lookup_var_key_t): Rename to...
+	(ctf_lookup_idx_key_t): ... this, now we use it for syms too.
+	<clik_names>: New member, a name table.
+	(ctf_lookup_var): Adjust accordingly.
+	(ctf_lookup_variable): Likewise.
+	(ctf_lookup_by_id): Shuffle further up in the file.
+	(ctf_symidx_sort_arg_cb): New, callback for...
+	(sort_symidx_by_name): ... this new function to sort a symidx
+	found to be unsorted (likely originating from the compiler).
+	(ctf_symidx_sort): New, sort a symidx.
+	(ctf_lookup_symbol_name): Support dynamic symbols with indexes
+	provided by the linker.  Use ctf_link_sym_t, not Elf64_Sym.
+	Check the parent if a child lookup fails.
+	(ctf_lookup_by_symbol): Likewise.  Work for function symbols too.
+	(ctf_symbol_next): New, iterate over symbols with types (without
+	sorting).
+	(ctf_lookup_idx_name): New, bsearch for symbol names in indexes.
+	(ctf_try_lookup_indexed): New, attempt an indexed lookup.
+	(ctf_func_info): Reimplement in terms of ctf_lookup_by_symbol.
+	(ctf_func_args): Likewise.
+	(ctf_get_dict): Move...
+	* ctf-types.c (ctf_get_dict): ... here.
+	* ctf-util.c (ctf_sym_to_elf64): Re-express as...
+	(ctf_elf64_to_link_sym): ... this.  Add new st_symidx field, and
+	st_nameidx_set (always 0, so st_nameidx can be ignored).  Look in
+	the ELF strtab for names.
+	(ctf_elf32_to_link_sym): Likewise, for Elf32_Sym.
+	(ctf_next_destroy): Destroy ctf_next_t.u.ctn_next if need be.
+	* libctf.ver: Add ctf_symbol_next, ctf_add_objt_sym and
+	ctf_add_func_sym.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_shuffle_syms): Adjust.
 	(ctf_link_add_linker_symbol): New, unimplemented stub.
 	* libctf.ver: Add it.

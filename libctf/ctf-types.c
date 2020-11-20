@@ -642,6 +642,18 @@ ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
   return type;
 }
 
+/* Return the native dict of a given type: if called on a child and the
+   type is in the parent, return the parent.  Needed if you plan to access
+   the type directly, without using the API.  */
+ctf_dict_t *
+ctf_get_dict (ctf_dict_t *fp, ctf_id_t type)
+{
+    if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type))
+      return fp->ctf_parent;
+
+    return fp;
+}
+
 /* Look up a name in the given name table, in the appropriate hash given the
    kind of the identifier.  The name is a raw, undecorated identifier.  */
 

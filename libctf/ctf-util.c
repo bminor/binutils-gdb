@@ -108,17 +108,48 @@ ctf_list_splice (ctf_list_t *lp, ctf_list_t *append)
   append->l_prev = NULL;
 }
 
-/* Convert a 32-bit ELF symbol into Elf64 and return a pointer to it.  */
+/* Convert a 32-bit ELF symbol to a ctf_link_sym_t.  */
 
-Elf64_Sym *
-ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst)
+ctf_link_sym_t *
+ctf_elf32_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst, const Elf32_Sym *src,
+		       uint32_t symidx)
 {
-  dst->st_name = src->st_name;
-  dst->st_value = src->st_value;
-  dst->st_size = src->st_size;
-  dst->st_info = src->st_info;
-  dst->st_other = src->st_other;
+  /* The name must be in the external string table.  */
+  if (src->st_name < fp->ctf_str[CTF_STRTAB_1].cts_len)
+    dst->st_name = (const char *) fp->ctf_str[CTF_STRTAB_1].cts_strs + src->st_name;
+  else
+    dst->st_name = _CTF_NULLSTR;
+  dst->st_nameidx_set = 0;
+  dst->st_symidx = symidx;
   dst->st_shndx = src->st_shndx;
+  dst->st_type = ELF32_ST_TYPE (src->st_info);
+  dst->st_value = src->st_value;
+
+  return dst;
+}
+
+/* Convert a 64-bit ELF symbol to a ctf_link_sym_t.  */
+
+ctf_link_sym_t *
+ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst, const Elf64_Sym *src,
+		       uint32_t symidx)
+{
+  /* The name must be in the external string table.  */
+  if (src->st_name < fp->ctf_str[CTF_STRTAB_1].cts_len)
+    dst->st_name = (const char *) fp->ctf_str[CTF_STRTAB_1].cts_strs + src->st_name;
+  else
+    dst->st_name = _CTF_NULLSTR;
+  dst->st_nameidx_set = 0;
+  dst->st_symidx = symidx;
+  dst->st_shndx = src->st_shndx;
+  dst->st_type = ELF32_ST_TYPE (src->st_info);
+
+  /* We only care if the value is zero, so avoid nonzeroes turning into
+     zeroes.  */
+  if (_libctf_unlikely_ (src->st_value != 0 && ((uint32_t) src->st_value == 0)))
+    dst->st_value = 1;
+  else
+    dst->st_value = (uint32_t) src->st_value;
 
   return dst;
 }
@@ -212,6 +243,9 @@ ctf_next_destroy (ctf_next_t *i)
 
   if (i->ctn_iter_fun == (void (*) (void)) ctf_dynhash_next_sorted)
     free (i->u.ctn_sorted_hkv);
+  if (i->ctn_iter_fun == (void (*) (void)) ctf_symbol_next
+      && i->cu.ctn_fp->ctf_flags & LCTF_RDWR)
+    ctf_next_destroy (i->u.ctn_next);
   free (i);
 }
 

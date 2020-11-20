@@ -1,5 +1,15 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_symbol_next): New.
+	(ctf_add_objt_sym): Likewise.
+	(ctf_add_func_sym): Likewise.
+	* ctf.h: Document new function info section format.
+	(CTF_F_NEWFUNCINFO): New.
+	(CTF_F_IDXSORTED): New.
+	(CTF_F_MAX): Adjust accordingly.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* bfdlink.h (struct elf_sym_strtab): Replace with...
 	(struct elf_internal_sym): ... this.
 	(struct bfd_link_callbacks) <examine_strtab>: Take only a

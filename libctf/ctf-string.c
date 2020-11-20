@@ -259,6 +259,28 @@ ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
     return 0;
 
   atom->csa_external_offset = CTF_SET_STID (offset, CTF_STRTAB_1);
+
+  if (!fp->ctf_syn_ext_strtab)
+    fp->ctf_syn_ext_strtab = ctf_dynhash_create (ctf_hash_integer,
+						 ctf_hash_eq_integer,
+						 NULL, NULL);
+  if (!fp->ctf_syn_ext_strtab)
+    {
+      ctf_set_errno (fp, ENOMEM);
+      return 0;
+    }
+
+  if (ctf_dynhash_insert (fp->ctf_syn_ext_strtab,
+			  (void *) (uintptr_t)
+			  atom->csa_external_offset,
+			  (void *) atom->csa_str) < 0)
+    {
+      /* No need to bother freeing the syn_ext_strtab: it will get freed at
+	 ctf_str_write_strtab time if unreferenced.  */
+      ctf_set_errno (fp, ENOMEM);
+      return 0;
+    }
+
   return 1;
 }
 
@@ -285,17 +307,20 @@ ctf_str_remove_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 }
 
 /* A ctf_dynhash_iter_remove() callback that removes atoms later than a given
-   snapshot ID.  */
+   snapshot ID.  External atoms are never removed, because they came from the
+   linker string table and are still present even if you roll back type
+   additions.  */
 static int
 ctf_str_rollback_atom (void *key _libctf_unused_, void *value, void *arg)
 {
   ctf_str_atom_t *atom = (ctf_str_atom_t *) value;
   ctf_snapshot_id_t *id = (ctf_snapshot_id_t *) arg;
 
-  return (atom->csa_snapshot_id > id->snapshot_id);
+  return (atom->csa_snapshot_id > id->snapshot_id)
+    && (atom->csa_external_offset == 0);
 }
 
-/* Roll back, deleting all atoms created after a particular ID.  */
+/* Roll back, deleting all (internal) atoms created after a particular ID.  */
 void
 ctf_str_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 {
@@ -455,32 +480,15 @@ ctf_str_write_strtab (ctf_dict_t *fp)
   if ((strtab.cts_strs = malloc (strtab.cts_len)) == NULL)
     goto oom_sorttab;
 
-  if (!fp->ctf_syn_ext_strtab)
-    fp->ctf_syn_ext_strtab = ctf_dynhash_create (ctf_hash_integer,
-						 ctf_hash_eq_integer,
-						 NULL, NULL);
-  if (!fp->ctf_syn_ext_strtab)
-    goto oom_strtab;
-
   /* Update all refs: also update the strtab appropriately.  */
   for (i = 0; i < s.strtab_count; i++)
     {
       if (sorttab[i]->csa_external_offset)
 	{
-	  /* External strtab entry: populate the synthetic external strtab.
-
-	     This is safe because you cannot ctf_rollback to before the point
-	     when a ctf_update is done, and the strtab is written at ctf_update
-	     time.  So any atoms we reference here are sure to stick around
-	     until ctf_dict_close.  */
+	  /* External strtab entry.  */
 
 	  any_external = 1;
 	  ctf_str_update_refs (sorttab[i], sorttab[i]->csa_external_offset);
-	  if (ctf_dynhash_insert (fp->ctf_syn_ext_strtab,
-				  (void *) (uintptr_t)
-				  sorttab[i]->csa_external_offset,
-				  (void *) sorttab[i]->csa_str) < 0)
-	    goto oom_strtab;
 	  sorttab[i]->csa_offset = sorttab[i]->csa_external_offset;
 	}
       else
@@ -510,9 +518,6 @@ ctf_str_write_strtab (ctf_dict_t *fp)
   fp->ctf_str_prov_offset = strtab.cts_len + 1;
   return strtab;
 
- oom_strtab:
-  free (strtab.cts_strs);
-  strtab.cts_strs = NULL;
  oom_sorttab:
   free (sorttab);
  oom:

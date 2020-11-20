@@ -20,6 +20,7 @@
 #include <ctf-impl.h>
 #include <elf.h>
 #include <string.h>
+#include <assert.h>
 
 /* Compare the given input string and length against a table of known C storage
    qualifier keywords.  We just ignore these in ctf_lookup_by_name, below.  To
@@ -192,131 +193,6 @@ err:
   return CTF_ERR;
 }
 
-typedef struct ctf_lookup_var_key
-{
-  ctf_dict_t *clvk_fp;
-  const char *clvk_name;
-} ctf_lookup_var_key_t;
-
-/* A bsearch function for variable names.  */
-
-static int
-ctf_lookup_var (const void *key_, const void *memb_)
-{
-  const ctf_lookup_var_key_t *key = key_;
-  const ctf_varent_t *memb = memb_;
-
-  return (strcmp (key->clvk_name, ctf_strptr (key->clvk_fp, memb->ctv_name)));
-}
-
-/* Given a variable name, return the type of the variable with that name.  */
-
-ctf_id_t
-ctf_lookup_variable (ctf_dict_t *fp, const char *name)
-{
-  ctf_varent_t *ent;
-  ctf_lookup_var_key_t key = { fp, name };
-
-  /* This array is sorted, so we can bsearch for it.  */
-
-  ent = bsearch (&key, fp->ctf_vars, fp->ctf_nvars, sizeof (ctf_varent_t),
-		 ctf_lookup_var);
-
-  if (ent == NULL)
-    {
-      if (fp->ctf_parent != NULL)
-	return ctf_lookup_variable (fp->ctf_parent, name);
-
-      return (ctf_set_errno (fp, ECTF_NOTYPEDAT));
-    }
-
-  return ent->ctv_type;
-}
-
-/* Given a symbol table index, return the name of that symbol from the secondary
-   string table, or the null string (never NULL).  */
-const char *
-ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx)
-{
-  const ctf_sect_t *sp = &fp->ctf_symtab;
-  Elf64_Sym sym, *gsp;
-
-  if (sp->cts_data == NULL)
-    {
-      ctf_set_errno (fp, ECTF_NOSYMTAB);
-      return _CTF_NULLSTR;
-    }
-
-  if (symidx >= fp->ctf_nsyms)
-    {
-      ctf_set_errno (fp, EINVAL);
-      return _CTF_NULLSTR;
-    }
-
-  if (sp->cts_entsize == sizeof (Elf32_Sym))
-    {
-      const Elf32_Sym *symp = (Elf32_Sym *) sp->cts_data + symidx;
-      gsp = ctf_sym_to_elf64 (symp, &sym);
-    }
-  else
-      gsp = (Elf64_Sym *) sp->cts_data + symidx;
-
-  if (gsp->st_name < fp->ctf_str[CTF_STRTAB_1].cts_len)
-    return (const char *) fp->ctf_str[CTF_STRTAB_1].cts_strs + gsp->st_name;
-
-  return _CTF_NULLSTR;
-}
-
-/* Given a symbol table index, return the type of the data object described
-   by the corresponding entry in the symbol table.  */
-
-ctf_id_t
-ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
-{
-  const ctf_sect_t *sp = &fp->ctf_symtab;
-  ctf_id_t type;
-
-  if (sp->cts_data == NULL)
-    return (ctf_set_errno (fp, ECTF_NOSYMTAB));
-
-  if (symidx >= fp->ctf_nsyms)
-    return (ctf_set_errno (fp, EINVAL));
-
-  if (sp->cts_entsize == sizeof (Elf32_Sym))
-    {
-      const Elf32_Sym *symp = (Elf32_Sym *) sp->cts_data + symidx;
-      if (ELF32_ST_TYPE (symp->st_info) != STT_OBJECT)
-	return (ctf_set_errno (fp, ECTF_NOTDATA));
-    }
-  else
-    {
-      const Elf64_Sym *symp = (Elf64_Sym *) sp->cts_data + symidx;
-      if (ELF64_ST_TYPE (symp->st_info) != STT_OBJECT)
-	return (ctf_set_errno (fp, ECTF_NOTDATA));
-    }
-
-  if (fp->ctf_sxlate[symidx] == -1u)
-    return (ctf_set_errno (fp, ECTF_NOTYPEDAT));
-
-  type = *(uint32_t *) ((uintptr_t) fp->ctf_buf + fp->ctf_sxlate[symidx]);
-  if (type == 0)
-    return (ctf_set_errno (fp, ECTF_NOTYPEDAT));
-
-  return type;
-}
-
-/* Return the native dict of a given type: if called on a child and the
-   type is in the parent, return the parent.  Needed if you plan to access
-   the type directly, without using the API.  */
-ctf_dict_t *
-ctf_get_dict (ctf_dict_t *fp, ctf_id_t type)
-{
-    if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type))
-      return fp->ctf_parent;
-
-    return fp;
-}
-
 /* Return the pointer to the internal CTF type data corresponding to the
    given type ID.  If the ID is invalid, the function returns NULL.
    This function is not exported outside of the library.  */
@@ -361,61 +237,499 @@ ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type)
   return NULL;
 }
 
+typedef struct ctf_lookup_idx_key
+{
+  ctf_dict_t *clik_fp;
+  const char *clik_name;
+  uint32_t *clik_names;
+} ctf_lookup_idx_key_t;
+
+/* A bsearch function for variable names.  */
+
+static int
+ctf_lookup_var (const void *key_, const void *lookup_)
+{
+  const ctf_lookup_idx_key_t *key = key_;
+  const ctf_varent_t *lookup = lookup_;
+
+  return (strcmp (key->clik_name, ctf_strptr (key->clik_fp, lookup->ctv_name)));
+}
+
+/* Given a variable name, return the type of the variable with that name.  */
+
+ctf_id_t
+ctf_lookup_variable (ctf_dict_t *fp, const char *name)
+{
+  ctf_varent_t *ent;
+  ctf_lookup_idx_key_t key = { fp, name, NULL };
+
+  /* This array is sorted, so we can bsearch for it.  */
+
+  ent = bsearch (&key, fp->ctf_vars, fp->ctf_nvars, sizeof (ctf_varent_t),
+		 ctf_lookup_var);
+
+  if (ent == NULL)
+    {
+      if (fp->ctf_parent != NULL)
+	return ctf_lookup_variable (fp->ctf_parent, name);
+
+      return (ctf_set_errno (fp, ECTF_NOTYPEDAT));
+    }
+
+  return ent->ctv_type;
+}
+
+typedef struct ctf_symidx_sort_arg_cb
+{
+  ctf_dict_t *fp;
+  uint32_t *names;
+} ctf_symidx_sort_arg_cb_t;
+
+static int
+sort_symidx_by_name (const void *one_, const void *two_, void *arg_)
+{
+  const uint32_t *one = one_;
+  const uint32_t *two = two_;
+  ctf_symidx_sort_arg_cb_t *arg = arg_;
+
+  return (strcmp (ctf_strptr (arg->fp, arg->names[*one]),
+		  ctf_strptr (arg->fp, arg->names[*two])));
+}
+
+/* Sort a symbol index section by name.  Takes a 1:1 mapping of names to the
+   corresponding symbol table.  Returns a lexicographically sorted array of idx
+   indexes (and thus, of indexes into the corresponding func info / data object
+   section).  */
+
+static uint32_t *
+ctf_symidx_sort (ctf_dict_t *fp, uint32_t *idx, size_t *nidx,
+			 size_t len)
+{
+  uint32_t *sorted;
+  size_t i;
+
+  if ((sorted = malloc (len)) == NULL)
+    {
+      ctf_set_errno (fp, ENOMEM);
+      return NULL;
+    }
+
+  *nidx = len / sizeof (uint32_t);
+  for (i = 0; i < *nidx; i++)
+    sorted[i] = i;
+
+  if (!(fp->ctf_header->cth_flags & CTF_F_IDXSORTED))
+    {
+      ctf_symidx_sort_arg_cb_t arg = { fp, idx };
+      ctf_dprintf ("Index section unsorted: sorting.");
+      ctf_qsort_r (sorted, *nidx, sizeof (uint32_t), sort_symidx_by_name, &arg);
+      fp->ctf_header->cth_flags |= CTF_F_IDXSORTED;
+    }
+
+  return sorted;
+}
+
+/* Given a symbol index, return the name of that symbol from the table provided
+   by ctf_link_shuffle_syms, or failing that from the secondary string table, or
+   the null string.  */
+const char *
+ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx)
+{
+  const ctf_sect_t *sp = &fp->ctf_symtab;
+  ctf_link_sym_t sym;
+  int err;
+
+  if (fp->ctf_dynsymidx)
+    {
+      err = EINVAL;
+      if (symidx > fp->ctf_dynsymmax)
+	goto try_parent;
+
+      ctf_link_sym_t *symp = fp->ctf_dynsymidx[symidx];
+
+      if (!symp)
+	goto try_parent;
+
+      return symp->st_name;
+    }
+
+  err = ECTF_NOSYMTAB;
+  if (sp->cts_data == NULL)
+    goto try_parent;
+
+  if (symidx >= fp->ctf_nsyms)
+    goto try_parent;
+
+  switch (sp->cts_entsize)
+    {
+    case sizeof (Elf64_Sym):
+      {
+	const Elf64_Sym *symp = (Elf64_Sym *) sp->cts_data + symidx;
+	ctf_elf64_to_link_sym (fp, &sym, symp, symidx);
+      }
+      break;
+    case sizeof (Elf32_Sym):
+      {
+	const Elf32_Sym *symp = (Elf32_Sym *) sp->cts_data + symidx;
+	ctf_elf32_to_link_sym (fp, &sym, symp, symidx);
+      }
+      break;
+    default:
+      ctf_set_errno (fp, ECTF_SYMTAB);
+      return _CTF_NULLSTR;
+    }
+
+  assert (!sym.st_nameidx_set);
+
+  return sym.st_name;
+
+ try_parent:
+  if (fp->ctf_parent)
+    return ctf_lookup_symbol_name (fp->ctf_parent, symidx);
+  else
+    {
+      ctf_set_errno (fp, err);
+      return _CTF_NULLSTR;
+    }
+}
+
+/* Iterate over all symbols with types: if FUNC, function symbols, otherwise,
+   data symbols.  The name argument is not optional.  The return order is
+   arbitrary, though is likely to be in symbol index or name order.  You can
+   change the value of 'functions' in the middle of iteration over non-dynamic
+   dicts, but doing so on dynamic dicts will fail.  (This is probably not very
+   useful, but there is no reason to prohibit it.)  */
+
+ctf_id_t
+ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
+		 int functions)
+{
+  ctf_id_t sym;
+  ctf_next_t *i = *it;
+  int err;
+
+  if (!i)
+    {
+      if ((i = ctf_next_create ()) == NULL)
+	return ctf_set_errno (fp, ENOMEM);
+
+      i->cu.ctn_fp = fp;
+      i->ctn_iter_fun = (void (*) (void)) ctf_symbol_next;
+      i->ctn_n = 0;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_symbol_next != i->ctn_iter_fun)
+    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFUN));
+
+  if (fp != i->cu.ctn_fp)
+    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFP));
+
+  /* We intentionally use raw access, not ctf_lookup_by_symbol, to avoid
+     incurring additional sorting cost for unsorted symtypetabs coming from the
+     compiler, to allow ctf_symbol_next to work in the absence of a symtab, and
+     finally because it's easier to work out what the name of each symbol is if
+     we do that.  */
+
+  if (fp->ctf_flags & LCTF_RDWR)
+    {
+      ctf_dynhash_t *dynh = functions ? fp->ctf_funchash : fp->ctf_objthash;
+      void *dyn_name = NULL, *dyn_value = NULL;
+
+      if (!dynh)
+	{
+	  ctf_next_destroy (i);
+	  return (ctf_set_errno (fp, ECTF_NEXT_END));
+	}
+
+      err = ctf_dynhash_next (dynh, &i->u.ctn_next, &dyn_name, &dyn_value);
+      /* This covers errors and also end-of-iteration.  */
+      if (err != 0)
+	{
+	  ctf_next_destroy (i);
+	  *it = NULL;
+	  return ctf_set_errno (fp, err);
+	}
+
+      *name = dyn_name;
+      sym = (ctf_id_t) (uintptr_t) dyn_value;
+    }
+  else if ((!functions && fp->ctf_objtidx_names) ||
+	   (functions && fp->ctf_funcidx_names))
+    {
+      ctf_header_t *hp = fp->ctf_header;
+      uint32_t *idx = functions ? fp->ctf_funcidx_names : fp->ctf_objtidx_names;
+      uint32_t *tab;
+      size_t len;
+
+      if (functions)
+	{
+	  len = (hp->cth_varoff - hp->cth_funcidxoff) / sizeof (uint32_t);
+	  tab = (uint32_t *) (fp->ctf_buf + hp->cth_funcoff);
+	}
+      else
+	{
+	  len = (hp->cth_funcidxoff - hp->cth_objtidxoff) / sizeof (uint32_t);
+	  tab = (uint32_t *) (fp->ctf_buf + hp->cth_objtoff);
+	}
+
+      do
+	{
+	  if (i->ctn_n >= len)
+	    goto end;
+
+	  *name = ctf_strptr (fp, idx[i->ctn_n]);
+	  sym = tab[i->ctn_n++];
+	} while (sym == -1u || sym == 0);
+    }
+  else
+    {
+      /* Skip over pads in ctf_xslate, padding for typeless symbols in the
+	 symtypetab itself, and symbols in the wrong table.  */
+      for (; i->ctn_n < fp->ctf_nsyms; i->ctn_n++)
+	{
+	  ctf_header_t *hp = fp->ctf_header;
+
+	  if (fp->ctf_sxlate[i->ctn_n] == -1u)
+	    continue;
+
+	  sym = *(uint32_t *) ((uintptr_t) fp->ctf_buf + fp->ctf_sxlate[i->ctn_n]);
+
+	  if (sym == 0)
+	    continue;
+
+	  if (functions)
+	    {
+	      if (fp->ctf_sxlate[i->ctn_n] >= hp->cth_funcoff
+		  && fp->ctf_sxlate[i->ctn_n] < hp->cth_objtidxoff)
+		break;
+	    }
+	  else
+	    {
+	      if (fp->ctf_sxlate[i->ctn_n] >= hp->cth_objtoff
+		  && fp->ctf_sxlate[i->ctn_n] < hp->cth_funcoff)
+		break;
+	    }
+	}
+
+      if (i->ctn_n >= fp->ctf_nsyms)
+	goto end;
+
+      *name = ctf_lookup_symbol_name (fp, i->ctn_n++);
+    }
+
+  return sym;
+
+ end:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return (ctf_set_errno (fp, ECTF_NEXT_END));
+}
+
+/* A bsearch function for function and object index names.  */
+
+static int
+ctf_lookup_idx_name (const void *key_, const void *idx_)
+{
+  const ctf_lookup_idx_key_t *key = key_;
+  const uint32_t *idx = idx_;
+
+  return (strcmp (key->clik_name, ctf_strptr (key->clik_fp, key->clik_names[*idx])));
+}
+
+/* Given a symbol number, look up that symbol in the function or object
+   index table (which must exist).  Return 0 if not found there (or pad).  */
+
+static ctf_id_t
+ctf_try_lookup_indexed (ctf_dict_t *fp, unsigned long symidx, int is_function)
+{
+  const char *symname = ctf_lookup_symbol_name (fp, symidx);
+  struct ctf_header *hp = fp->ctf_header;
+  uint32_t *symtypetab;
+  uint32_t *names;
+  uint32_t *sxlate;
+  size_t nidx;
+
+  ctf_dprintf ("Looking up type of object with symtab idx %lx (%s) in "
+	       "indexed symtypetab\n", symidx, symname);
+
+  if (symname[0] == '\0')
+    return -1;					/* errno is set for us.  */
+
+  if (is_function)
+    {
+      if (!fp->ctf_funcidx_sxlate)
+	{
+	  if ((fp->ctf_funcidx_sxlate
+	       = ctf_symidx_sort (fp, (uint32_t *)
+				  (fp->ctf_buf + hp->cth_funcidxoff),
+				  &fp->ctf_nfuncidx,
+				  hp->cth_varoff - hp->cth_funcidxoff))
+	      == NULL)
+	    {
+	      ctf_err_warn (fp, 0, 0, _("cannot sort function symidx"));
+	      return -1;				/* errno is set for us.  */
+	    }
+	}
+      symtypetab = (uint32_t *) (fp->ctf_buf + hp->cth_funcoff);
+      sxlate = fp->ctf_funcidx_sxlate;
+      names = fp->ctf_funcidx_names;
+      nidx = fp->ctf_nfuncidx;
+    }
+  else
+    {
+      if (!fp->ctf_objtidx_sxlate)
+	{
+	  if ((fp->ctf_objtidx_sxlate
+	       = ctf_symidx_sort (fp, (uint32_t *)
+				  (fp->ctf_buf + hp->cth_objtidxoff),
+				  &fp->ctf_nobjtidx,
+				  hp->cth_funcidxoff - hp->cth_objtidxoff))
+	      == NULL)
+	    {
+	      ctf_err_warn (fp, 0, 0, _("cannot sort object symidx"));
+	      return -1;				/* errno is set for us. */
+	    }
+	}
+
+      symtypetab = (uint32_t *) (fp->ctf_buf + hp->cth_objtoff);
+      sxlate = fp->ctf_objtidx_sxlate;
+      names = fp->ctf_objtidx_names;
+      nidx = fp->ctf_nobjtidx;
+    }
+
+  ctf_lookup_idx_key_t key = { fp, symname, names };
+  uint32_t *idx;
+
+  idx = bsearch (&key, sxlate, nidx, sizeof (uint32_t), ctf_lookup_idx_name);
+
+  if (!idx)
+    {
+      ctf_dprintf ("%s not found in idx\n", symname);
+      return 0;
+    }
+
+  /* Should be impossible, but be paranoid.  */
+  if ((idx - sxlate) > (ptrdiff_t) nidx)
+    return (ctf_set_errno (fp, ECTF_CORRUPT));
+
+  ctf_dprintf ("Symbol %lx (%s) is of type %x\n", symidx, symname,
+	       symtypetab[*idx]);
+  return symtypetab[*idx];
+}
+
+/* Given a symbol table index, return the type of the function or data object
+   described by the corresponding entry in the symbol table.  We can only return
+   symbols in read-only dicts and in dicts for which ctf_link_shuffle_syms has
+   been called to assign symbol indexes to symbol names.  */
+
+ctf_id_t
+ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
+{
+  const ctf_sect_t *sp = &fp->ctf_symtab;
+  ctf_id_t type = 0;
+  int err = 0;
+
+  /* Shuffled dynsymidx present?  Use that.  */
+  if (fp->ctf_dynsymidx)
+    {
+      const ctf_link_sym_t *sym;
+
+      ctf_dprintf ("Looking up type of object with symtab idx %lx in "
+		   "writable dict symtypetab\n", symidx);
+
+      /* The dict must be dynamic.  */
+      if (!ctf_assert (fp, fp->ctf_flags & LCTF_RDWR))
+	return CTF_ERR;
+
+      err = EINVAL;
+      if (symidx > fp->ctf_dynsymmax)
+	goto try_parent;
+
+      sym = fp->ctf_dynsymidx[symidx];
+      err = ECTF_NOTYPEDAT;
+      if (!sym || (sym->st_shndx != STT_OBJECT && sym->st_shndx != STT_FUNC))
+	goto try_parent;
+
+      if (!ctf_assert (fp, !sym->st_nameidx_set))
+	return CTF_ERR;
+
+      if (fp->ctf_objthash == NULL
+	  || ((type = (ctf_id_t) (uintptr_t)
+	       ctf_dynhash_lookup (fp->ctf_objthash, sym->st_name)) == 0))
+	{
+	  if (fp->ctf_funchash == NULL
+	      || ((type = (ctf_id_t) (uintptr_t)
+		   ctf_dynhash_lookup (fp->ctf_funchash, sym->st_name)) == 0))
+	    goto try_parent;
+	}
+
+      return type;
+    }
+
+  err = ECTF_NOSYMTAB;
+  if (sp->cts_data == NULL)
+    goto try_parent;
+
+  /* This covers both out-of-range lookups and a dynamic dict which hasn't been
+     shuffled yet.  */
+  err = EINVAL;
+  if (symidx >= fp->ctf_nsyms)
+    goto try_parent;
+
+  if (fp->ctf_objtidx_names)
+    {
+      if ((type = ctf_try_lookup_indexed (fp, symidx, 0)) == CTF_ERR)
+	return CTF_ERR;				/* errno is set for us.  */
+    }
+  if (type == 0 && fp->ctf_funcidx_names)
+    {
+      if ((type = ctf_try_lookup_indexed (fp, symidx, 1)) == CTF_ERR)
+	return CTF_ERR;				/* errno is set for us.  */
+    }
+  if (type != 0)
+    return type;
+
+  err = ECTF_NOTYPEDAT;
+  if (fp->ctf_objtidx_names && fp->ctf_funcidx_names)
+    goto try_parent;
+
+  /* Table must be nonindexed.  */
+
+  ctf_dprintf ("Looking up object type %lx in 1:1 dict symtypetab\n", symidx);
+
+  if (fp->ctf_sxlate[symidx] == -1u)
+    goto try_parent;
+
+  type = *(uint32_t *) ((uintptr_t) fp->ctf_buf + fp->ctf_sxlate[symidx]);
+
+  if (type == 0)
+    goto try_parent;
+
+  return type;
+ try_parent:
+  if (fp->ctf_parent)
+    return ctf_lookup_by_symbol (fp->ctf_parent, symidx);
+  else
+    return (ctf_set_errno (fp, err));
+}
+
 /* Given a symbol table index, return the info for the function described
-   by the corresponding entry in the symbol table.  */
+   by the corresponding entry in the symbol table, which may be a function
+   symbol or may be a data symbol that happens to be a function pointer.  */
 
 int
 ctf_func_info (ctf_dict_t *fp, unsigned long symidx, ctf_funcinfo_t *fip)
 {
-  const ctf_sect_t *sp = &fp->ctf_symtab;
-  const uint32_t *dp;
-  uint32_t info, kind, n;
+  ctf_id_t type;
 
-  if (sp->cts_data == NULL)
-    return (ctf_set_errno (fp, ECTF_NOSYMTAB));
+  if ((type = ctf_lookup_by_symbol (fp, symidx)) == CTF_ERR)
+    return -1;					/* errno is set for us.  */
 
-  if (symidx >= fp->ctf_nsyms)
-    return (ctf_set_errno (fp, EINVAL));
+  if (ctf_type_kind (fp, type) != CTF_K_FUNCTION)
+    return (ctf_set_errno (fp, ECTF_NOTFUNC));
 
-  if (sp->cts_entsize == sizeof (Elf32_Sym))
-    {
-      const Elf32_Sym *symp = (Elf32_Sym *) sp->cts_data + symidx;
-      if (ELF32_ST_TYPE (symp->st_info) != STT_FUNC)
-	return (ctf_set_errno (fp, ECTF_NOTFUNC));
-    }
-  else
-    {
-      const Elf64_Sym *symp = (Elf64_Sym *) sp->cts_data + symidx;
-      if (ELF64_ST_TYPE (symp->st_info) != STT_FUNC)
-	return (ctf_set_errno (fp, ECTF_NOTFUNC));
-    }
-
-  if (fp->ctf_sxlate[symidx] == -1u)
-    return (ctf_set_errno (fp, ECTF_NOFUNCDAT));
-
-  dp = (uint32_t *) ((uintptr_t) fp->ctf_buf + fp->ctf_sxlate[symidx]);
-
-  info = *dp++;
-  kind = LCTF_INFO_KIND (fp, info);
-  n = LCTF_INFO_VLEN (fp, info);
-
-  if (kind == CTF_K_UNKNOWN && n == 0)
-    return (ctf_set_errno (fp, ECTF_NOFUNCDAT));
-
-  if (kind != CTF_K_FUNCTION)
-    return (ctf_set_errno (fp, ECTF_CORRUPT));
-
-  fip->ctc_return = *dp++;
-  fip->ctc_argc = n;
-  fip->ctc_flags = 0;
-
-  if (n != 0 && dp[n - 1] == 0)
-    {
-      fip->ctc_flags |= CTF_FUNC_VARARG;
-      fip->ctc_argc--;
-    }
-
-  return 0;
+  return ctf_func_type_info (fp, type, fip);
 }
 
 /* Given a symbol table index, return the arguments for the function described
@@ -423,21 +737,15 @@ ctf_func_info (ctf_dict_t *fp, unsigned long symidx, ctf_funcinfo_t *fip)
 
 int
 ctf_func_args (ctf_dict_t *fp, unsigned long symidx, uint32_t argc,
-	       ctf_id_t * argv)
+	       ctf_id_t *argv)
 {
-  const uint32_t *dp;
-  ctf_funcinfo_t f;
+  ctf_id_t type;
 
-  if (ctf_func_info (fp, symidx, &f) < 0)
-    return -1;			/* errno is set for us.  */
+  if ((type = ctf_lookup_by_symbol (fp, symidx)) == CTF_ERR)
+    return -1;					/* errno is set for us.  */
 
-  /* The argument data is two uint32_t's past the translation table
-     offset: one for the function info, and one for the return type. */
+  if (ctf_type_kind (fp, type) != CTF_K_FUNCTION)
+    return (ctf_set_errno (fp, ECTF_NOTFUNC));
 
-  dp = (uint32_t *) ((uintptr_t) fp->ctf_buf + fp->ctf_sxlate[symidx]) + 2;
-
-  for (argc = MIN (argc, f.ctc_argc); argc != 0; argc--)
-    *argv++ = *dp++;
-
-  return 0;
+  return ctf_func_type_args (fp, type, argc, argv);
 }

@@ -27,8 +27,6 @@
 #include <bfd.h>
 #include <zlib.h>
 
-#include "elf-bfd.h"
-
 static const ctf_dmodel_t _libctf_models[] = {
   {"ILP32", CTF_MODEL_ILP32, 4, 1, 2, 4, 4},
   {"LP64", CTF_MODEL_LP64, 8, 1, 2, 4, 8},
@@ -220,55 +218,88 @@ static const ctf_dictops_t ctf_dictops[] = {
   {get_kind_v2, get_root_v2, get_vlen_v2, get_ctt_size_v2, get_vbytes_v2},
 };
 
-/* Initialize the symtab translation table by filling each entry with the
-  offset of the CTF type or function data corresponding to each STT_FUNC or
-  STT_OBJECT entry in the symbol table.  */
+/* Initialize the symtab translation table as appropriate for its indexing
+   state.  For unindexed symtypetabs, fill each entry with the offset of the CTF
+   type or function data corresponding to each STT_FUNC or STT_OBJECT entry in
+   the symbol table.  For indexed symtypetabs, do nothing: the needed
+   initialization for indexed lookups may be quite expensive, so it is done only
+   as needed, when lookups happen.  (In particular, the majority of indexed
+   symtypetabs come from the compiler, and all the linker does is iteration over
+   all entries, which doesn't need this initialization.)
+
+   The SP symbol table section may be NULL if there is no symtab.  */
 
 static int
-init_symtab (ctf_dict_t *fp, const ctf_header_t *hp,
-	     const ctf_sect_t *sp, const ctf_sect_t *strp)
+init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
 {
-  const unsigned char *symp = sp->cts_data;
+  const unsigned char *symp;
+  int skip_func_info = 0;
+  int i;
   uint32_t *xp = fp->ctf_sxlate;
   uint32_t *xend = xp + fp->ctf_nsyms;
 
   uint32_t objtoff = hp->cth_objtoff;
   uint32_t funcoff = hp->cth_funcoff;
 
-  uint32_t info, vlen;
-  Elf64_Sym sym, *gsp;
-  const char *name;
+  /* If the CTF_F_NEWFUNCINFO flag is not set, pretend the func info section
+     is empty: this compiler is too old to emit a function info section we
+     understand.  */
 
-  /* The CTF data object and function type sections are ordered to match
-     the relative order of the respective symbol types in the symtab.
-     If no type information is available for a symbol table entry, a
-     pad is inserted in the CTF section.  As a further optimization,
-     anonymous or undefined symbols are omitted from the CTF data.  */
+  if (!(hp->cth_flags & CTF_F_NEWFUNCINFO))
+    skip_func_info = 1;
 
-  for (; xp < xend; xp++, symp += sp->cts_entsize)
+  if (hp->cth_objtidxoff < hp->cth_funcidxoff)
+    fp->ctf_objtidx_names = (uint32_t *) (fp->ctf_buf + hp->cth_objtidxoff);
+  if (hp->cth_funcidxoff < hp->cth_varoff && !skip_func_info)
+    fp->ctf_funcidx_names = (uint32_t *) (fp->ctf_buf + hp->cth_funcidxoff);
+
+  /* Don't bother doing the rest if everything is indexed, or if we don't have a
+     symbol table: we will never use it.  */
+  if ((fp->ctf_objtidx_names && fp->ctf_funcidx_names) || !sp || !sp->cts_data)
+    return 0;
+
+  /* The CTF data object and function type sections are ordered to match the
+     relative order of the respective symbol types in the symtab, unless there
+     is an index section, in which case the order is arbitrary and the index
+     gives the mapping.  If no type information is available for a symbol table
+     entry, a pad is inserted in the CTF section.  As a further optimization,
+     anonymous or undefined symbols are omitted from the CTF data.  If an
+     index is available for function symbols but not object symbols, or vice
+     versa, we populate the xslate table for the unindexed symbols only.  */
+
+  for (i = 0, symp = sp->cts_data; xp < xend; xp++, symp += sp->cts_entsize,
+	 i++)
     {
-      if (sp->cts_entsize == sizeof (Elf32_Sym))
-	gsp = ctf_sym_to_elf64 ((Elf32_Sym *) (uintptr_t) symp, &sym);
-      else
-	gsp = (Elf64_Sym *) (uintptr_t) symp;
+      ctf_link_sym_t sym;
 
-      if (gsp->st_name < strp->cts_size)
-	name = (const char *) strp->cts_data + gsp->st_name;
-      else
-	name = _CTF_NULLSTR;
+      switch (sp->cts_entsize)
+	{
+	case sizeof (Elf64_Sym):
+	  {
+	    const Elf64_Sym *symp64 = (Elf64_Sym *) (uintptr_t) symp;
+	    ctf_elf64_to_link_sym (fp, &sym, symp64, i);
+	  }
+	  break;
+	case sizeof (Elf32_Sym):
+	  {
+	    const Elf32_Sym *symp32 = (Elf32_Sym *) (uintptr_t) symp;
+	    ctf_elf32_to_link_sym (fp, &sym, symp32, i);
+	  }
+	  break;
+	default:
+	  return ECTF_SYMTAB;
+	}
 
-      if (gsp->st_name == 0 || gsp->st_shndx == SHN_UNDEF
-	  || strcmp (name, "_START_") == 0 || strcmp (name, "_END_") == 0)
+      if (ctf_symtab_skippable (&sym))
 	{
 	  *xp = -1u;
 	  continue;
 	}
 
-      switch (ELF64_ST_TYPE (gsp->st_info))
+      switch (sym.st_type)
 	{
 	case STT_OBJECT:
-	  if (objtoff >= hp->cth_funcoff
-	      || (gsp->st_shndx == SHN_EXTABS && gsp->st_value == 0))
+	  if (fp->ctf_objtidx_names || objtoff >= hp->cth_funcoff)
 	    {
 	      *xp = -1u;
 	      break;
@@ -279,25 +310,15 @@ init_symtab (ctf_dict_t *fp, const ctf_header_t *hp,
 	  break;
 
 	case STT_FUNC:
-	  if (funcoff >= hp->cth_objtidxoff)
+	  if (fp->ctf_funcidx_names || funcoff >= hp->cth_objtidxoff
+	      || skip_func_info)
 	    {
 	      *xp = -1u;
 	      break;
 	    }
 
 	  *xp = funcoff;
-
-	  info = *(uint32_t *) ((uintptr_t) fp->ctf_buf + funcoff);
-	  vlen = LCTF_INFO_VLEN (fp, info);
-
-	  /* If we encounter a zero pad at the end, just skip it.  Otherwise
-	     skip over the function and its return type (+2) and the argument
-	     list (vlen).
-	   */
-	  if (LCTF_INFO_KIND (fp, info) == CTF_K_UNKNOWN && vlen == 0)
-	    funcoff += sizeof (uint32_t);	/* Skip pad.  */
-	  else
-	    funcoff += sizeof (uint32_t) * (vlen + 2);
+	  funcoff += sizeof (uint32_t);
 	  break;
 
 	default:
@@ -1012,9 +1033,7 @@ flip_lbls (void *start, size_t len)
 }
 
 /* Flip the endianness of the data-object or function sections or their indexes,
-   all arrays of uint32_t.  (The function section has more internal structure,
-   but that structure is an array of uint32_t, so can be treated as one big
-   array for byte-swapping.)  */
+   all arrays of uint32_t.  */
 
 static void
 flip_objts (void *start, size_t len)
@@ -1379,8 +1398,9 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	 info.  We do not support dynamically upgrading such entries (none
 	 should exist in any case, since dwarf2ctf does not create them).  */
 
-      ctf_err_warn (NULL, 0, 0, _("ctf_bufopen: CTF version %d symsect not "
-				  "supported"), pp->ctp_version);
+      ctf_err_warn (NULL, 0, ECTF_NOTSUP, _("ctf_bufopen: CTF version %d "
+					    "symsect not supported"),
+		    pp->ctp_version);
       return (ctf_set_open_errno (errp, ECTF_NOTSUP));
     }
 
@@ -1388,7 +1408,12 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
     hdrsz = sizeof (ctf_header_v2_t);
 
   if (_libctf_unlikely_ (pp->ctp_flags > CTF_F_MAX))
-    return (ctf_set_open_errno (errp, ECTF_FLAGS));
+    {
+      ctf_err_warn (NULL, 0, ECTF_FLAGS, _("ctf_bufopen: invalid header "
+					   "flags: %x"),
+		    (unsigned int) pp->ctp_flags);
+      return (ctf_set_open_errno (errp, ECTF_FLAGS));
+    }
 
   if (ctfsect->cts_size < hdrsz)
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
@@ -1423,7 +1448,10 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       || hp->cth_funcoff > fp->ctf_size || hp->cth_objtidxoff > fp->ctf_size
       || hp->cth_funcidxoff > fp->ctf_size || hp->cth_typeoff > fp->ctf_size
       || hp->cth_stroff > fp->ctf_size)
-    return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("header offset exceeds CTF size"));
+      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    }
 
   if (hp->cth_lbloff > hp->cth_objtoff
       || hp->cth_objtoff > hp->cth_funcoff
@@ -1432,13 +1460,46 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       || hp->cth_objtidxoff > hp->cth_funcidxoff
       || hp->cth_funcidxoff > hp->cth_varoff
       || hp->cth_varoff > hp->cth_typeoff || hp->cth_typeoff > hp->cth_stroff)
-    return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT, _("overlapping CTF sections"));
+      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    }
 
   if ((hp->cth_lbloff & 3) || (hp->cth_objtoff & 2)
       || (hp->cth_funcoff & 2) || (hp->cth_objtidxoff & 2)
       || (hp->cth_funcidxoff & 2) || (hp->cth_varoff & 3)
       || (hp->cth_typeoff & 3))
-    return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("CTF sections not properly aligned"));
+      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    }
+
+  /* This invariant will be lifted in v4, but for now it is true.  */
+
+  if ((hp->cth_funcidxoff - hp->cth_objtidxoff != 0) &&
+      (hp->cth_funcidxoff - hp->cth_objtidxoff
+       != hp->cth_funcoff - hp->cth_objtoff))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("Object index section exists is neither empty nor the "
+		      "same length as the object section: %u versus %u "
+		      "bytes"), hp->cth_funcoff - hp->cth_objtoff,
+		    hp->cth_funcidxoff - hp->cth_objtidxoff);
+      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    }
+
+  if ((hp->cth_varoff - hp->cth_funcidxoff != 0) &&
+      (hp->cth_varoff - hp->cth_funcidxoff
+       != hp->cth_objtidxoff - hp->cth_funcoff))
+    {
+      ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+		    _("Function index section exists is neither empty nor the "
+		      "same length as the function section: %u versus %u "
+		      "bytes"), hp->cth_objtidxoff - hp->cth_funcoff,
+		    hp->cth_varoff - hp->cth_funcidxoff);
+      return (ctf_set_open_errno (errp, ECTF_CORRUPT));
+    }
 
   /* Once everything is determined to be valid, attempt to decompress the CTF
      data buffer if it is compressed, or copy it into new storage if it is not
@@ -1586,10 +1647,12 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if ((err = init_types (fp, hp)) != 0)
     goto bad;
 
-  /* If we have a symbol table section, allocate and initialize
-     the symtab translation table, pointed to by ctf_sxlate.  This table may be
-     too large for the actual size of the object and function info sections: if
-     so, ctf_nsyms will be adjusted and the excess will never be used.  */
+  /* Allocate and initialize the symtab translation table, pointed to by
+     ctf_sxlate, and the corresponding index sections.  This table may be too
+     large for the actual size of the object and function info sections: if so,
+     ctf_nsyms will be adjusted and the excess will never be used.  It's
+     possible to do indexed symbol lookups even without a symbol table, so check
+     even in that case.  */
 
   if (symsect != NULL)
     {
@@ -1601,10 +1664,10 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  err = ENOMEM;
 	  goto bad;
 	}
-
-      if ((err = init_symtab (fp, hp, symsect, strsect)) != 0)
-	goto bad;
     }
+
+  if ((err = init_symtab (fp, hp, symsect)) != 0)
+    goto bad;
 
   ctf_set_ctl_hashes (fp);
 
@@ -1649,6 +1712,7 @@ ctf_dict_close (ctf_dict_t *fp)
 {
   ctf_dtdef_t *dtd, *ntd;
   ctf_dvdef_t *dvd, *nvd;
+  ctf_in_flight_dynsym_t *did, *nid;
   ctf_err_warning_t *err, *nerr;
 
   if (fp == NULL)
@@ -1701,6 +1765,20 @@ ctf_dict_close (ctf_dict_t *fp)
       ctf_dvd_delete (fp, dvd);
     }
   ctf_dynhash_destroy (fp->ctf_dvhash);
+
+  free (fp->ctf_funcidx_sxlate);
+  free (fp->ctf_objtidx_sxlate);
+  ctf_dynhash_destroy (fp->ctf_objthash);
+  ctf_dynhash_destroy (fp->ctf_funchash);
+  free (fp->ctf_dynsymidx);
+  ctf_dynhash_destroy (fp->ctf_dynsyms);
+  for (did = ctf_list_next (&fp->ctf_in_flight_dynsyms); did != NULL; did = nid)
+    {
+      nid = ctf_list_next (did);
+      ctf_list_delete (&fp->ctf_in_flight_dynsyms, did);
+      free (did);
+    }
+
   ctf_str_free_atoms (fp);
   free (fp->ctf_tmp_typeslice);
 
