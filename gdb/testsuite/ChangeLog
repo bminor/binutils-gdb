@@ -1,5 +1,10 @@
 2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/dcache-flush.c: New file.
+	* gdb.base/dcache-flush.exp: New file.
+
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/c-linkage-name.exp: Update to use new 'maint flush ...'
 	commands.
 	* gdb.base/killed-outside.exp: Likewise.

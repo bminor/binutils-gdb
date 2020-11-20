@@ -13494,6 +13494,12 @@ Show maximum number of dcache entries.  @xref{Caching Target Data, info dcache}.
 @kindex show dcache line-size
 Show default size of dcache lines.
 
+@item maint flush dcache
+@cindex dcache, flushing
+@kindex maint flush dcache
+Flush the contents (if any) of the dcache.  This maintainer command is
+useful when debugging the dcache implementation.
+
 @end table
 
 @node Searching Memory

@@ -1,5 +1,13 @@
 2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention new commands.
+	* target-dcache.c: Add 'cli/cli-cmds.h' include.
+	(maint_flush_dcache_command): New function.
+	(_initialize_target_dcache): Create new 'maint flush dcache'
+	command.
+
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention new commands, and that the old commands are now
 	deprecated.
 	* cli/cli-cmds.c (maintenanceflushlist): Define.

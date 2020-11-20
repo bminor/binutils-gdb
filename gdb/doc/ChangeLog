@@ -1,5 +1,10 @@
 2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.texinfo (Caching Target Data): Document 'maint flush
+	dcache'.
+
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.texinfo (Symbols): Document 'maint flush symbol-cache'.
 	(Maintenance Commands): Document 'maint flush register-cache'.
 
