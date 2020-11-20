@@ -1,5 +1,11 @@
 2020-11-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* unittests/gmp-utils-selftests.c (gdb_mpz_read_all_from_small):
+	Pass 2.0 to pow.
+	(gdb_mpz_write_all_from_small): Likewise.
+
+2020-11-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (finish_fixed_point_type): Use std::abs instead
 	of abs.
 

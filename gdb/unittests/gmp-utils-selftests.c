@@ -125,8 +125,8 @@ gdb_mpz_read_all_from_small ()
      to check the complete range.  */
 
   int buf_len = 1;
-  LONGEST l_min = -pow (2, buf_len * 8 - 1);
-  LONGEST l_max = pow (2, buf_len * 8 - 1) - 1;
+  LONGEST l_min = -pow (2.0, buf_len * 8 - 1);
+  LONGEST l_max = pow (2.0, buf_len * 8 - 1) - 1;
 
   for (LONGEST l = l_min; l <= l_max; l++)
     {
@@ -141,7 +141,7 @@ gdb_mpz_read_all_from_small ()
 
   /* Do the same as above, but with an unsigned type.  */
   ULONGEST ul_min = 0;
-  ULONGEST ul_max = pow (2, buf_len * 8) - 1;
+  ULONGEST ul_max = pow (2.0, buf_len * 8) - 1;
 
   for (ULONGEST ul = ul_min; ul <= ul_max; ul++)
     {
@@ -248,8 +248,8 @@ static void
 gdb_mpz_write_all_from_small ()
 {
   int buf_len = 1;
-  LONGEST l_min = -pow (2, buf_len * 8 - 1);
-  LONGEST l_max = pow (2, buf_len * 8 - 1) - 1;
+  LONGEST l_min = -pow (2.0, buf_len * 8 - 1);
+  LONGEST l_max = pow (2.0, buf_len * 8 - 1) - 1;
 
   for (LONGEST l = l_min; l <= l_max; l++)
     {
@@ -259,7 +259,7 @@ gdb_mpz_write_all_from_small ()
 
     /* Do the same as above, but with an unsigned type.  */
   ULONGEST ul_min = 0;
-  ULONGEST ul_max = pow (2, buf_len * 8) - 1;
+  ULONGEST ul_max = pow (2.0, buf_len * 8) - 1;
 
   for (ULONGEST ul = ul_min; ul <= ul_max; ul++)
     {
