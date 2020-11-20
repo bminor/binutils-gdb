@@ -1,3 +1,8 @@
+2020-11-20  Linda Zhang  <lindasc@qq.com>
+
+	PR 20979
+	* dllwrap.c (main): Deprecate and warn the use of dllwrap.
+
 2020-11-20  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* testsuite/binutils-all/readelf-maskos-1a.d: Fix test for unrecognized

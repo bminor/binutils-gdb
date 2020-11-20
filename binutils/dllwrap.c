@@ -639,6 +639,9 @@ main (int argc, char **argv)
   bindtextdomain (PACKAGE, LOCALEDIR);
   textdomain (PACKAGE);
 
+  warn (_("WARNING: %s is deprecated, use gcc -shared or ld -shared instead\n"),
+	prog_name);
+
   expandargv (&argc, &argv);
 
   saved_argv = (char **) xmalloc (argc * sizeof (char*));
