@@ -11,6 +11,7 @@ Contents of CTF section .ctf:
   Header:
     Magic number: dff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Compilation unit name: .*super-sub-cycles.c
 #...
     Type section:	.*\(0x108 bytes\)

@@ -11,21 +11,22 @@ Contents of CTF section .ctf:
   Header:
     Magic number: dff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Compilation unit name: \(\?\)
-    Variable section:	.*
+#...
+    Data object section:	.*
     Type section:	.*
     String section:	.*
 
   Labels:
 
   Data objects:
-
+    a -> struct A
+#...
   Function objects:
 
   Variables:
-#...
-    a ->  [0-9a-f]*: struct A \(.*
-#...
+
   Types:
 #...
      [0-9a-f]*: struct A \(.*

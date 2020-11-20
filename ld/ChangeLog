@@ -1,5 +1,36 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/ld-ctf/array.d: Adjust for nonzero flags word and
+	public symbols in the data section rather than variables: use
+	sysv hash style to keep test results the same on non-GNU targets.
+	* testsuite/ld-ctf/diag-cttname-null.d: Likewise.
+	* testsuite/ld-ctf/diag-cuname.d: Likewise.
+	* testsuite/ld-ctf/diag-parlabel.d: Likewise.
+	* testsuite/ld-ctf/slice.d: Likewise.
+	* testsuite/ld-ctf/function.d: Likewise, but in the function section.
+	* testsuite/ld-ctf/conflicting-cycle-1.B-1.d:  Adjust for nonzero
+	flags word.
+	* testsuite/ld-ctf/conflicting-cycle-1.B-2.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-1.parent.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-2.A-1.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-2.A-2.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-2.parent.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-3.C-1.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-3.C-2.d: Likewise.
+	* testsuite/ld-ctf/conflicting-cycle-3.parent.d: Likewise.
+	* testsuite/ld-ctf/cross-tu-noncyclic.d: Likewise.
+	* testsuite/ld-ctf/cycle-1.d: Likewise.
+	* testsuite/ld-ctf/cycle-2.A.d: Likewise.
+	* testsuite/ld-ctf/cycle-2.B.d: Likewise.
+	* testsuite/ld-ctf/cycle-2.C.d: Likewise.
+	* testsuite/ld-ctf/diag-wrong-magic-number-mixed.d:  Likewise.
+	* testsuite/ld-ctf/super-sub-cycles.d:  Likewise.
+	* testsuite/ld-ctf/data-func-1.c: New test.
+	* testsuite/ld-ctf/data-func-2.c: Likewise.
+	* testsuite/ld-ctf/data-func-conflicted.d: Likewise.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ldelfgen.c (struct ctf_strsym_iter_cb_arg): Rename to...
 	(struct ctf_strtab_iter_cb_arg): ... this, changing fields:
 	<syms>: Remove.

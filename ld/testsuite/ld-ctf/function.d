@@ -11,10 +11,14 @@ Contents of CTF section .ctf:
   Header:
     Magic number: dff2
     Version: 4 \(CTF_VERSION_3\)
-    Compilation unit name: .*function.c
 #...
-    Type section:	0x0 -- 0x8f \(0x90 bytes\)
+    Compilation unit name: .*function.c
+    Function info section:	.* \(0x4 bytes\)
+    Type section:	.* \(0x90 bytes\)
     String section:	.*
+#...
+  Function objects:
+    foo -> int \(\*\) \(char, int, float, void \*, void \(\*\)\(\*\) \(int\)\)
 #...
   Types:
 #...

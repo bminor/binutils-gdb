@@ -16,10 +16,11 @@ CTF archive member: .*/B-2.c:
   Header:
     Magic number: dff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Parent name: .ctf
     Compilation unit name: .*/B-2.c
-    Variable section:	0x0 -- 0x7 \(0x8 bytes\)
-    Type section:	0x8 -- 0x2b \(0x24 bytes\)
+#...
+    Type section:	.* \(0x24 bytes\)
     String section:	.*
 
   Labels:

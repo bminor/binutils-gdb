@@ -14,8 +14,8 @@ Contents of CTF section .ctf:
   Header:
     Magic number: dff2
     Version: 4 \(CTF_VERSION_3\)
-    Variable section:	0x0 -- 0x1f \(0x20 bytes\)
-    Type section:	0x20 -- 0xc7 \(0xa8 bytes\)
+#...
+    Type section:	.* \(0xa8 bytes\)
     String section:	.*
 
   Labels:

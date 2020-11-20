@@ -16,6 +16,7 @@ Contents of CTF section .ctf:
   Header:
     Magic number: dff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Type section:	0x0 -- 0x57 \(0x58 bytes\)
     String section:	.*
 

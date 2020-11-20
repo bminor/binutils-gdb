@@ -11,14 +11,16 @@ Contents of CTF section .ctf:
   Header:
     Magic number: dff2
     Version: 4 \(CTF_VERSION_3\)
+#...
     Compilation unit name: .*slice.c
-    Variable section:	0x0 -- 0x7 \(0x8 bytes\)
-    Type section:	0x8 -- 0xa3 \(0x9c bytes\)
+#...
+    Data object section:	.* \(0x4 bytes\)
+    Type section:	.* \(0x9c bytes\)
     String section:	.*
 #...
-  Variables:
-    slices ->  [0-9a-f]*: struct slices \(size 0x4\)
-
+  Data objects:
+    slices -> struct slices
+#...
   Types:
 #...
      [0-9a-f]*: struct slices \(size 0x[0-9a-f]*\)
