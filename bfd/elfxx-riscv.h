@@ -60,9 +60,10 @@ riscv_add_subset (riscv_subset_list_t *,
 		  const char *,
 		  int, int);
 
-extern riscv_subset_t *
+extern bfd_boolean
 riscv_lookup_subset (const riscv_subset_list_t *,
-		     const char *);
+		     const char *,
+		     riscv_subset_t **);
 
 typedef struct
 {

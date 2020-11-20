@@ -1,5 +1,36 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfnn-riscv.c (riscv_merge_std_ext): Updated since
+	riscv_lookup_subset is changed.
+	* elfxx-riscv.c (riscv_ext_order): New Array used to compare the
+	extensions' order quickly.
+	(riscv_init_ext_order): New function.  Init the riscv_ext_order
+	according to the riscv_supported_std_ext and parse_config[i].class
+	automatically.
+	(riscv_compare_subsets): New function.  Similar to the strcmp, but
+	compare the subsets with the specific order.
+	(riscv_lookup_subset): Return TRUE and set `current` to the subset
+	if it is found.  Otherwise, return FALSE and set `current` to the
+	place where we should insert the subset.
+	(riscv_add_implicit_subset): New function.  Search the list first,
+	and then find the right place to add the implicit_subset.
+	(riscv_parse_add_subset): Since We have to add all arch string
+	extensions first, and then start to add their implicit extensions.
+	We can add arch string extensions in order by the original
+	riscv_add_subset, and then add the implicit subsets by the
+	riscv_add_implicit_subset.  Besides, do not add the implicit
+	extensions if we failed to find their default versions.
+	(riscv_parse_std_ext): Updated.
+	(riscv_parse_add_implicit_subsets): New function.  Add all implicit
+	extensions according to the arch string extensions.
+	(riscv_parse_subset): Call riscv_init_ext_order and
+	riscv_parse_add_implicit_subsets, before and after parsing the
+	arch string.  Remove parts of the ISA conflict checking since
+	the implicit extensions are added.
+	* elfxx-riscv.h (riscv_lookup_subset): Updated.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfxx-riscv.c (riscv_lookup_subset): Moved to front.
 	(riscv_add_subset): Likewise.
 	(riscv_release_subset_list): Likewise.

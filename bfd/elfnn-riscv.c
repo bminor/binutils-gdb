@@ -3380,21 +3380,24 @@ riscv_merge_std_ext (bfd *ibfd,
   /* Handle standard extension first.  */
   for (p = standard_exts; *p; ++p)
     {
+      struct riscv_subset_t *ext_in, *ext_out, *ext_merged;
       char find_ext[2] = {*p, '\0'};
-      struct riscv_subset_t *find_in =
-	riscv_lookup_subset (&in_subsets, find_ext);
-      struct riscv_subset_t *find_out =
-	riscv_lookup_subset (&out_subsets, find_ext);
+      bfd_boolean find_in, find_out;
 
-      if (find_in == NULL && find_out == NULL)
+      find_in = riscv_lookup_subset (&in_subsets, find_ext, &ext_in);
+      find_out = riscv_lookup_subset (&out_subsets, find_ext, &ext_out);
+
+      if (!find_in && !find_out)
 	continue;
 
-      if (!riscv_version_mismatch (ibfd, find_in, find_out))
+      if (find_in
+	  && find_out
+	  && !riscv_version_mismatch (ibfd, ext_in, ext_out))
 	return FALSE;
 
-      struct riscv_subset_t *merged = find_out ? find_out : find_in;
-      riscv_add_subset (&merged_subsets, merged->name,
-			merged->major_version, merged->minor_version);
+      ext_merged = find_out ? ext_out : ext_in;
+      riscv_add_subset (&merged_subsets, ext_merged->name,
+			ext_merged->major_version, ext_merged->minor_version);
     }
 
   /* Skip all standard extensions.  */

@@ -1,5 +1,20 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c (riscv_subset_supports): Updated.
+	* testsuite/gas/riscv/march-imply-i2p0.d: New testcase.  Need to
+	add the implicit zicsr and zifencei when i's version less than 2.1.
+	* testsuite/gas/riscv/march-imply-i2p1.d: New testcase.
+	* testsuite/gas/riscv/march-imply-d.d: Likewise.
+	* testsuite/gas/riscv/march-imply-f.d: Likewise.
+	* testsuite/gas/riscv/march-imply-q.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv32iq.l: Updated.
+	* testsuite/gas/riscv/march-fail-rv32id.d: Removed.
+	* testsuite/gas/riscv/march-fail-rv32id.l: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64iq.d: Likewise.
+	* testsuite/gas/riscv/march-fail-rv64iq.l: Likewise.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* config/tc-riscv.c (riscv_get_default_ext_version):
 	Change the version type from unsigned to int.
 	(riscv_set_arch): Use as_bad rather than as_fatal to
