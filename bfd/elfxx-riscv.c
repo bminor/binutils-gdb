@@ -1543,8 +1543,7 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 	}
 
       /* Check that the extension is in alphabetical order.  */
-      if (!strncasecmp (last_name, config->prefix, 1)
-	  && strcasecmp (last_name, subset) > 0)
+      if (riscv_compare_subsets (last_name, subset) > 0)
 	{
 	  rps->error_handler
 	    (_("-march=%s: %s ISA extension `%s' is not in alphabetical "

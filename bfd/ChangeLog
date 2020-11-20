@@ -1,5 +1,10 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfxx-riscv.c (riscv_parse_prefixed_ext): Use riscv_compare_subsets
+	to check the Z* extensions' order.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfxx-riscv.c (riscv_parse_add_subset): Allow to add g with
 	RISCV_UNKNOWN_VERSION versions.
 	(riscv_parse_std_ext): Add g to the subset list, we only use it
