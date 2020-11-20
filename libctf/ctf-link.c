@@ -1596,9 +1596,12 @@ ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,
 
 /* Not yet implemented.  */
 int
-ctf_link_shuffle_syms (ctf_dict_t *fp _libctf_unused_,
-		       ctf_link_iter_symbol_f *add_sym _libctf_unused_,
-		       void *arg _libctf_unused_)
+ctf_link_add_linker_symbol (ctf_dict_t *fp, ctf_link_sym_t *sym)
+{
+  return 0;
+}
+int
+ctf_link_shuffle_syms (ctf_dict_t *fp)
 {
   return 0;
 }

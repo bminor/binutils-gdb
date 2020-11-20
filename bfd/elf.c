@@ -51,7 +51,8 @@ SECTION
 
 static int elf_sort_sections (const void *, const void *);
 static bfd_boolean assign_file_positions_except_relocs (bfd *, struct bfd_link_info *);
-static bfd_boolean swap_out_syms (bfd *, struct elf_strtab_hash **, int) ;
+static bfd_boolean swap_out_syms (bfd *, struct elf_strtab_hash **, int,
+				  struct bfd_link_info *);
 static bfd_boolean elf_parse_notes (bfd *abfd, char *buf, size_t size,
 				    file_ptr offset, size_t align);
 
@@ -4302,7 +4303,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
       /* Non-zero if doing a relocatable link.  */
       int relocatable_p = ! (abfd->flags & (EXEC_P | DYNAMIC));
 
-      if (! swap_out_syms (abfd, &strtab, relocatable_p))
+      if (! swap_out_syms (abfd, &strtab, relocatable_p, link_info))
 	return FALSE;
     }
 
@@ -8050,7 +8051,8 @@ _bfd_elf_copy_private_symbol_data (bfd *ibfd,
 static bfd_boolean
 swap_out_syms (bfd *abfd,
 	       struct elf_strtab_hash **sttp,
-	       int relocatable_p)
+	       int relocatable_p,
+	       struct bfd_link_info *info)
 {
   const struct elf_backend_data *bed;
   unsigned int symcount;
@@ -8402,6 +8404,12 @@ Unable to handle section index %x in ELF symbol.  Using ABS instead."),
       else
 	elfsym->sym.st_name = _bfd_elf_strtab_offset (stt,
 						      elfsym->sym.st_name);
+      if (info && info->callbacks->ctf_new_symbol)
+	info->callbacks->ctf_new_symbol (elfsym->dest_index,
+					 &elfsym->sym);
+
+      /* Inform the linker of the addition of this symbol.  */
+
       bed->s->swap_symbol_out (abfd, &elfsym->sym,
 			       (outbound_syms
 				+ (elfsym->dest_index

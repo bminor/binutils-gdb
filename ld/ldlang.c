@@ -3826,14 +3826,20 @@ lang_merge_ctf (void)
   lang_ctf_errs_warnings (ctf_output);
 }
 
-/* Let the emulation examine the symbol table and strtab to help it optimize the
-   CTF, if supported.  */
+/* Let the emulation acquire strings from the dynamic strtab to help it optimize
+   the CTF, if supported.  */
 
 void
-ldlang_ctf_apply_strsym (struct elf_sym_strtab *syms, bfd_size_type symcount,
-			 struct elf_strtab_hash *symstrtab)
+ldlang_ctf_acquire_strings (struct elf_strtab_hash *dynstrtab)
 {
-  ldemul_examine_strtab_for_ctf (ctf_output, syms, symcount, symstrtab);
+  ldemul_acquire_strings_for_ctf (ctf_output, dynstrtab);
+}
+
+/* Inform the emulation about the addition of a new dynamic symbol, in BFD
+   internal format.  */
+void ldlang_ctf_new_dynsym (int symidx, struct elf_internal_sym *sym)
+{
+  ldemul_new_dynsym_for_ctf (ctf_output, symidx, sym);
 }
 
 /* Write out the CTF section.  Called early, if the emulation isn't going to
@@ -3859,6 +3865,11 @@ lang_write_ctf (int late)
       if (!ldemul_emit_ctf_early ())
 	return;
     }
+
+  /* Inform the emulation that all the symbols that will be received have
+     been.  */
+
+  ldemul_new_dynsym_for_ctf (ctf_output, 0, NULL);
 
   /* Emit CTF.  */
 
@@ -3922,11 +3933,11 @@ ldlang_open_ctf (void)
 
 static void lang_merge_ctf (void) {}
 void
-ldlang_ctf_apply_strsym (struct elf_sym_strtab *syms ATTRIBUTE_UNUSED,
-			 bfd_size_type symcount ATTRIBUTE_UNUSED,
-			 struct elf_strtab_hash *symstrtab ATTRIBUTE_UNUSED)
-{
-}
+ldlang_ctf_acquire_strings (struct elf_strtab_hash *dynstrtab
+			    ATTRIBUTE_UNUSED) {}
+void
+ldlang_ctf_new_dynsym (int symidx ATTRIBUTE_UNUSED,
+		       struct elf_internal_sym *sym ATTRIBUTE_UNUSED) {}
 static void lang_write_ctf (int late ATTRIBUTE_UNUSED) {}
 void ldlang_write_ctf_late (void) {}
 #endif

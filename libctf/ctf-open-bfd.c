@@ -100,12 +100,36 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 
 #ifdef HAVE_BFD_ELF
   ctf_sect_t symsect, strsect;
-  Elf_Internal_Shdr *symhdr = &elf_symtab_hdr (abfd);
+  Elf_Internal_Shdr *symhdr;
   size_t symcount;
   Elf_Internal_Sym *isymbuf;
   bfd_byte *symtab = NULL;
+  const char *symtab_name;
   const char *strtab = NULL;
+  const char *strtab_name;
   size_t strsize;
+  const ctf_preamble_t *preamble;
+
+  if (ctfsect->cts_data == NULL)
+    {
+      bfderrstr = N_("CTF section is NULL");
+      goto err;
+    }
+  preamble = ctf_arc_bufpreamble (ctfsect);
+
+  if (preamble->ctp_flags & CTF_F_DYNSTR)
+    {
+      symhdr = &elf_tdata (abfd)->dynsymtab_hdr;
+      strtab_name = ".dynstr";
+      symtab_name = ".dynsym";
+    }
+  else
+    {
+      symhdr = &elf_tdata (abfd)->symtab_hdr;
+      strtab_name = ".strtab";
+      symtab_name = ".symtab";
+    }
+
   /* TODO: handle SYMTAB_SHNDX.  */
 
   /* Get the symtab, and the strtab associated with it.  */
@@ -145,12 +169,12 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 	    strtab = (const char *) strhdr->contents;
 	}
     }
-  else		/* No symtab: just try getting .strtab by name.  */
+  else		/* No symtab: just try getting .strtab or .dynstr by name.  */
     {
       bfd_byte *str_bcontents;
       asection *str_asect;
 
-      if ((str_asect = bfd_get_section_by_name (abfd, ".strtab")) != NULL)
+      if ((str_asect = bfd_get_section_by_name (abfd, strtab_name)) != NULL)
 	{
 	  if (bfd_malloc_and_get_section (abfd, str_asect, &str_bcontents))
 	    {
@@ -168,7 +192,7 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 	 use it for anything but debugging.  */
 
       strsect.cts_data = strtab;
-      strsect.cts_name = ".strtab";
+      strsect.cts_name = strtab_name;
       strsect.cts_size = strsize;
       strsectp = &strsect;
     }
@@ -176,7 +200,7 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
   if (symtab)
     {
       assert (symhdr->sh_entsize == get_elf_backend_data (abfd)->s->sizeof_sym);
-      symsect.cts_name = ".symtab";
+      symsect.cts_name = symtab_name;
       symsect.cts_entsize = symhdr->sh_entsize;
       symsect.cts_size = symhdr->sh_size;
       symsect.cts_data = symtab;

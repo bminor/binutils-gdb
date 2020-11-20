@@ -1595,7 +1595,8 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   NULL,				/* new_vers_pattern */
   NULL,				/* extra_map_file_text */
   ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL},
+  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
+  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
   gld${EMULATION_NAME}_print_symbol
 };
 EOF

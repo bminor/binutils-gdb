@@ -298,6 +298,8 @@ ctf_serialize (ctf_dict_t *fp)
   hdr.cth_magic = CTF_MAGIC;
   hdr.cth_version = CTF_VERSION;
 
+  hdr.cth_flags = CTF_F_DYNSTR;
+
   /* Iterate through the dynamic type definition list and compute the
      size of the CTF type section we will need to generate.  */
 

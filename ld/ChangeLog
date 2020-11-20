@@ -1,5 +1,47 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ldelfgen.c (struct ctf_strsym_iter_cb_arg): Rename to...
+	(struct ctf_strtab_iter_cb_arg): ... this, changing fields:
+	<syms>: Remove.
+	<symcount>: Remove.
+	<symstrtab>: Rename to...
+	<strtab>: ... this.
+	(ldelf_ctf_strtab_iter_cb): Adjust.
+	(ldelf_ctf_symbols_iter_cb): Remove.
+	(ldelf_new_dynsym_for_ctf): New, tell libctf about a single
+	symbol.
+	(ldelf_examine_strtab_for_ctf): Rename to...
+	(ldelf_acquire_strings_for_ctf): ... this, only doing the strtab
+	portion and not symbols.
+	* ldelfgen.h: Adjust declarations accordingly.
+	* ldemul.c (ldemul_examine_strtab_for_ctf): Rename to...
+	(ldemul_acquire_strings_for_ctf): ... this.
+	(ldemul_new_dynsym_for_ctf): New.
+	* ldemul.h: Adjust declarations accordingly.
+	* ldlang.c (ldlang_ctf_apply_strsym): Rename to...
+	(ldlang_ctf_acquire_strings): ... this.
+	(ldlang_ctf_new_dynsym): New.
+	(lang_write_ctf): Call ldemul_new_dynsym_for_ctf with NULL to do
+	the actual symbol shuffle.
+	* ldlang.h (struct elf_strtab_hash): Adjust accordingly.
+	* ldmain.c (bfd_link_callbacks): Wire up new/renamed callbacks.
+
+	* emultempl/aix.em: Adjust for emulation changes:
+	ldemul_examine_strtab_for_ctf renamed to
+	ldemul_acquire_strings_for_ctf, new ldemul_new_dynsym_for_ctf.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf.em: Likewise.
+	* emultempl/elf-generic.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/msp430.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ticoff.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ldlang.c (ctf_output): This is a ctf_dict_t now.
 	(lang_ctf_errs_warnings): Rename ctf_file_t to ctf_dict_t.
 	(ldlang_open_ctf): Adjust comment.

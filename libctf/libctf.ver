@@ -181,4 +181,6 @@ LIBCTF_1.1 {
 	ctf_dict_open_sections;
 	ctf_dict_close;
 	ctf_parent_dict;
+
+	ctf_link_add_linker_symbol;
 } LIBCTF_1.0;

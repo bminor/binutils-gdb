@@ -689,8 +689,10 @@ extern bfd_boolean load_symbols
 
 struct elf_sym_strtab;
 struct elf_strtab_hash;
-extern void ldlang_ctf_apply_strsym
-  (struct elf_sym_strtab *, bfd_size_type, struct elf_strtab_hash *);
+extern void ldlang_ctf_acquire_strings
+  (struct elf_strtab_hash *);
+extern void ldlang_ctf_new_dynsym
+  (int symidx, struct elf_internal_sym *);
 extern void ldlang_write_ctf_late
   (void);
 extern bfd_boolean

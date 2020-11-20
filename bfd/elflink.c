@@ -3779,6 +3779,11 @@ elf_finalize_dynstr (bfd *output_bfd, struct bfd_link_info *info)
   _bfd_elf_strtab_finalize (dynstr);
   size = _bfd_elf_strtab_size (dynstr);
 
+  /* Allow the linker to examine the dynsymtab now it's fully populated.  */
+
+  if (info->callbacks->examine_strtab)
+    info->callbacks->examine_strtab (dynstr);
+
   bed = get_elf_backend_data (dynobj);
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
   BFD_ASSERT (sdyn != NULL);
@@ -9853,6 +9858,7 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
 	}
     }
 
+  /* Now swap out the symbols.  */
   for (i = 0; i < hash_table->strtabcount; i++)
     {
       struct elf_sym_strtab *elfsym = &hash_table->strtab[i];
@@ -9862,6 +9868,13 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
 	elfsym->sym.st_name
 	  = (unsigned long) _bfd_elf_strtab_offset (flinfo->symstrtab,
 						    elfsym->sym.st_name);
+
+      /* Inform the linker of the addition of this symbol.  */
+
+      if (flinfo->info->callbacks->ctf_new_symbol)
+	flinfo->info->callbacks->ctf_new_symbol (elfsym->dest_index,
+						 &elfsym->sym);
+
       bed->s->swap_symbol_out (flinfo->output_bfd, &elfsym->sym,
 			       ((bfd_byte *) symbuf
 				+ (elfsym->dest_index
@@ -9869,14 +9882,6 @@ elf_link_swap_symbols_out (struct elf_final_link_info *flinfo)
 			       (flinfo->symshndxbuf
 				+ elfsym->destshndx_index));
     }
-
-  /* Allow the linker to examine the strtab and symtab now they are
-     populated.  */
-
-  if (flinfo->info->callbacks->examine_strtab)
-    flinfo->info->callbacks->examine_strtab (hash_table->strtab,
-					     hash_table->strtabcount,
-					     flinfo->symstrtab);
 
   hdr = &elf_tdata (flinfo->output_bfd)->symtab_hdr;
   pos = hdr->sh_offset + hdr->sh_size;
@@ -10485,6 +10490,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  eoinfo->failed = TRUE;
 	  return FALSE;
 	}
+
+      /* Inform the linker of the addition of this symbol.  */
+
+      if (flinfo->info->callbacks->ctf_new_dynsym)
+	flinfo->info->callbacks->ctf_new_dynsym (h->dynindx, &sym);
+
       bed->s->swap_symbol_out (flinfo->output_bfd, &sym, esym, 0);
 
       if (flinfo->hash_sec != NULL)
@@ -12761,6 +12772,12 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		}
 	      sym.st_value = s->vma;
 	      dest = dynsym + dynindx * bed->s->sizeof_sym;
+
+	      /* Inform the linker of the addition of this symbol.  */
+
+	      if (info->callbacks->ctf_new_dynsym)
+		info->callbacks->ctf_new_dynsym (dynindx, &sym);
+
 	      bed->s->swap_symbol_out (abfd, &sym, dest, 0);
 	    }
 	}
@@ -12798,6 +12815,11 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 				  + s->output_offset
 				  + e->isym.st_value);
 		}
+
+	      /* Inform the linker of the addition of this symbol.  */
+
+	      if (info->callbacks->ctf_new_dynsym)
+		info->callbacks->ctf_new_dynsym (e->dynindx, &sym);
 
 	      dest = dynsym + e->dynindx * bed->s->sizeof_sym;
 	      bed->s->swap_symbol_out (abfd, &sym, dest, 0);

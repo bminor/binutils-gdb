@@ -200,7 +200,8 @@ typedef struct ctf_header
 #define CTF_VERSION CTF_VERSION_3 /* Current version.  */
 
 #define CTF_F_COMPRESS	0x1		/* Data buffer is compressed by libctf.  */
-#define CTF_F_MAX	CTF_F_COMPRESS	/* The greatest flag value in use.  */
+#define CTF_F_DYNSTR 0x8		/* Strings come from .dynstr.  */
+#define CTF_F_MAX (CTF_F_COMPRESS | CTF_F_DYNSTR)
 
 typedef struct ctf_lblent
 {

@@ -65,14 +65,20 @@ typedef struct ctf_sect
 } ctf_sect_t;
 
 /* A minimal symbol extracted from a linker's internal symbol table
-   representation.  */
+   representation.  The symbol name can be given either via st_name or via a
+   strtab offset in st_nameidx, which corresponds to one of the string offsets
+   communicated via the ctf_link_add_strtab callback.  */
 
 typedef struct ctf_link_sym
 {
-  /* The st_name will not be accessed outside the call to
-     ctf_link_shuffle_syms().  */
+  /* The st_name and st_nameidx will not be accessed outside the call to
+     ctf_link_shuffle_syms().  If you set st_nameidx to offset zero, make sure
+     to set st_nameidx_set as well.  */
 
   const char *st_name;
+  size_t st_nameidx;
+  int st_nameidx_set;
+  uint32_t st_symidx;
   uint32_t st_shndx;
   uint32_t st_type;
   uint32_t st_value;
@@ -485,10 +491,8 @@ extern int ctf_link (ctf_dict_t *, int flags);
 typedef const char *ctf_link_strtab_string_f (uint32_t *offset, void *arg);
 extern int ctf_link_add_strtab (ctf_dict_t *, ctf_link_strtab_string_f *,
 				void *);
-typedef ctf_link_sym_t *ctf_link_iter_symbol_f (ctf_link_sym_t *dest,
-						void *arg);
-extern int ctf_link_shuffle_syms (ctf_dict_t *, ctf_link_iter_symbol_f *,
-				  void *);
+extern int ctf_link_add_linker_symbol (ctf_dict_t *, ctf_link_sym_t *);
+extern int ctf_link_shuffle_syms (ctf_dict_t *);
 extern unsigned char *ctf_link_write (ctf_dict_t *, size_t *size,
 				      size_t threshold);
 

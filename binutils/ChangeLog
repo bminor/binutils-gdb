@@ -1,5 +1,10 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* readelf.c (dump_section_as_ctf): Use .dynsym and .dynstr, not
+	.symtab and .strtab.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* objdump.c (dump_ctf): Report errors from ctf_archive_iter.
 	* readelf.c (dump_section_as_ctf): Likewise.
 

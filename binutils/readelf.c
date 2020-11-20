@@ -14695,10 +14695,10 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   ctfsect.cts_data = data;
 
   if (!dump_ctf_symtab_name)
-    dump_ctf_symtab_name = strdup (".symtab");
+    dump_ctf_symtab_name = strdup (".dynsym");
 
   if (!dump_ctf_strtab_name)
-    dump_ctf_strtab_name = strdup (".strtab");
+    dump_ctf_strtab_name = strdup (".dynstr");
 
   if (dump_ctf_symtab_name && dump_ctf_symtab_name[0] != 0)
     {

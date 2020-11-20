@@ -1,3 +1,16 @@
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
+	* elflink.c (elf_finalize_dynstr): Call examine_strtab after
+	dynstr finalization.
+	(elf_link_swap_symbols_out): Don't call it here.  Call
+	ctf_new_symbol before swap_symbol_out.
+	(elf_link_output_extsym): Call ctf_new_dynsym before
+	swap_symbol_out.
+	(bfd_elf_final_link): Likewise.
+	* elf.c (swap_out_syms): Pass in bfd_link_info.  Call
+	ctf_new_symbol before swap_symbol_out.
+	(_bfd_elf_compute_section_file_positions): Adjust.
+
 2020-11-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 26918

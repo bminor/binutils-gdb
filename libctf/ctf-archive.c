@@ -377,6 +377,25 @@ ctf_new_archive_internal (int is_archive, int unmap_on_close,
   return arci;
 }
 
+/* Get the CTF preamble from data in a buffer, which may be either an archive or
+   a CTF dict.  If multiple dicts are present in an archive, the preamble comes
+   from an arbitrary dict.  The preamble is a pointer into the ctfsect passed
+   in.  */
+
+const ctf_preamble_t *
+ctf_arc_bufpreamble (const ctf_sect_t *ctfsect)
+{
+  if (ctfsect->cts_size > sizeof (uint64_t) &&
+      (le64toh ((*(uint64_t *) ctfsect->cts_data)) == CTFA_MAGIC))
+    {
+      struct ctf_archive *arc = (struct ctf_archive *) ctfsect->cts_data;
+      return (const ctf_preamble_t *) ((char *) arc + le64toh (arc->ctfa_ctfs)
+				       + sizeof (uint64_t));
+    }
+  else
+    return (const ctf_preamble_t *) ctfsect->cts_data;
+}
+
 /* Open a CTF archive or dictionary from data in a buffer (which the caller must
    preserve until ctf_arc_close() time).  Returns the archive, or NULL and an
    error in *err (if not NULL).  */

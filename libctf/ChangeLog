@@ -1,5 +1,18 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_shuffle_syms): Adjust.
+	(ctf_link_add_linker_symbol): New, unimplemented stub.
+	* libctf.ver: Add it.
+	* ctf-create.c (ctf_serialize): Set CTF_F_DYNSTR on newly-serialized
+	dicts.
+	* ctf-open-bfd.c (ctf_bfdopen_ctfsect): Check for the flag: open the
+	symtab/strtab if not present, dynsym/dynstr otherwise.
+	* ctf-archive.c (ctf_arc_bufpreamble): New, get the preamble from
+	some arbitrary member of a CTF archive.
+	* ctf-impl.h (ctf_arc_bufpreamble): Declare it.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c (ctf_arc_open_by_offset): Rename to...
 	(ctf_dict_open_by_offset): ... this.  Adjust callers.
 	(ctf_arc_open_by_name_internal): Rename to...

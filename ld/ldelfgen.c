@@ -28,6 +28,7 @@
 #include "ldexp.h"
 #include "ldlang.h"
 #include "elf-bfd.h"
+#include "elf/internal.h"
 #include "ldelfgen.h"
 
 void
@@ -103,11 +104,9 @@ ldelf_emit_ctf_early (void)
 /* Callbacks used to map from bfd types to libctf types, under libctf's
    control.  */
 
-struct ctf_strsym_iter_cb_arg
+struct ctf_strtab_iter_cb_arg
 {
-  struct elf_sym_strtab *syms;
-  bfd_size_type symcount;
-  struct elf_strtab_hash *symstrtab;
+  struct elf_strtab_hash *strtab;
   size_t next_i;
   size_t next_idx;
 };
@@ -121,20 +120,20 @@ ldelf_ctf_strtab_iter_cb (uint32_t *offset, void *arg_)
   bfd_size_type off;
   const char *ret;
 
-  struct ctf_strsym_iter_cb_arg *arg =
-    (struct ctf_strsym_iter_cb_arg *) arg_;
+  struct ctf_strtab_iter_cb_arg *arg =
+    (struct ctf_strtab_iter_cb_arg *) arg_;
 
   /* There is no zeroth string.  */
   if (arg->next_i == 0)
     arg->next_i = 1;
 
-  if (arg->next_i >= _bfd_elf_strtab_len (arg->symstrtab))
+  if (arg->next_i >= _bfd_elf_strtab_len (arg->strtab))
     {
       arg->next_i = 0;
       return NULL;
     }
 
-  ret = _bfd_elf_strtab_str (arg->symstrtab, arg->next_i++, &off);
+  ret = _bfd_elf_strtab_str (arg->strtab, arg->next_i++, &off);
   *offset = off;
 
   /* If we've overflowed, we cannot share any further strings: the CTF
@@ -145,69 +144,74 @@ ldelf_ctf_strtab_iter_cb (uint32_t *offset, void *arg_)
   return ret;
 }
 
-/* Return symbols from the symbol table to libctf, one by one.  We assume (and
-   assert) that the symbols in the elf_link_hash_table are in strictly ascending
-   order, and that none will be added in between existing ones.  Returns NULL
-   when iteration is complete.  */
-
-static struct ctf_link_sym *
-ldelf_ctf_symbols_iter_cb (struct ctf_link_sym *dest,
-					   void *arg_)
-{
-  struct ctf_strsym_iter_cb_arg *arg =
-    (struct ctf_strsym_iter_cb_arg *) arg_;
-
-  if (arg->next_i > arg->symcount)
-    {
-      arg->next_i = 0;
-      arg->next_idx = 0;
-      return NULL;
-    }
-
-  ASSERT (arg->syms[arg->next_i].dest_index == arg->next_idx);
-  dest->st_name = _bfd_elf_strtab_str (arg->symstrtab, arg->next_i, NULL);
-  dest->st_shndx = arg->syms[arg->next_i].sym.st_shndx;
-  dest->st_type = ELF_ST_TYPE (arg->syms[arg->next_i].sym.st_info);
-  dest->st_value = arg->syms[arg->next_i].sym.st_value;
-  arg->next_i++;
-  return dest;
-}
-
 void
-ldelf_examine_strtab_for_ctf
-  (struct ctf_dict *ctf_output, struct elf_sym_strtab *syms,
-   bfd_size_type symcount, struct elf_strtab_hash *symstrtab)
+ldelf_acquire_strings_for_ctf
+  (struct ctf_dict *ctf_output, struct elf_strtab_hash *strtab)
 {
-  struct ctf_strsym_iter_cb_arg args = { syms, symcount, symstrtab,
-					  0, 0 };
-   if (!ctf_output)
-     return;
+  struct ctf_strtab_iter_cb_arg args = { strtab, 0, 0 };
+  if (!ctf_output)
+    return;
 
-   if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
-       && !bfd_link_relocatable (&link_info))
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
     {
       if (ctf_link_add_strtab (ctf_output, ldelf_ctf_strtab_iter_cb,
 			       &args) < 0)
 	einfo (_("%F%P: warning: CTF strtab association failed; strings will "
 		 "not be shared: %s\n"),
 	       ctf_errmsg (ctf_errno (ctf_output)));
+    }
+}
 
-      if (ctf_link_shuffle_syms (ctf_output, ldelf_ctf_symbols_iter_cb,
-				 &args) < 0)
-	einfo (_("%F%P: warning: CTF symbol shuffling failed; slight space "
-		 "cost: %s\n"), ctf_errmsg (ctf_errno (ctf_output)));
+void
+ldelf_new_dynsym_for_ctf (struct ctf_dict *ctf_output, int symidx,
+			  struct elf_internal_sym *sym)
+{
+  ctf_link_sym_t lsym;
+
+  if (!ctf_output)
+     return;
+
+  /* New symbol.  */
+  if (sym != NULL)
+    {
+      lsym.st_name = NULL;
+      lsym.st_nameidx = sym->st_name;
+      lsym.st_nameidx_set = 1;
+      lsym.st_symidx = symidx;
+      lsym.st_shndx = sym->st_shndx;
+      lsym.st_type = ELF_ST_TYPE (sym->st_info);
+      lsym.st_value = sym->st_value;
+      if (ctf_link_add_linker_symbol (ctf_output, &lsym) < 0)
+	{
+	  einfo (_("%F%P: warning: CTF symbol addition failed; CTF will "
+		   "not be tied to symbols: %s\n"),
+		 ctf_errmsg (ctf_errno (ctf_output)));
+	}
+    }
+  else
+    {
+      /* Shuffle all the symbols.  */
+
+      if (ctf_link_shuffle_syms (ctf_output) < 0)
+	einfo (_("%F%P: warning: CTF symbol shuffling failed; CTF will "
+		 "not be tied to symbols: %s\n"),
+	       ctf_errmsg (ctf_errno (ctf_output)));
     }
 }
 #else
-extern int ldelf_emit_ctf_early (void)
+int
+ldelf_emit_ctf_early (void)
 {
   return 0;
 }
 
-extern void ldelf_examine_strtab_for_ctf
-  (struct ctf_dict *ctf_output ATTRIBUTE_UNUSED,
-   struct elf_sym_strtab *syms ATTRIBUTE_UNUSED,
-   bfd_size_type symcount ATTRIBUTE_UNUSED,
-   struct elf_strtab_hash *symstrtab ATTRIBUTE_UNUSED)
+void
+ldelf_acquire_strings_for_ctf (struct ctf_dict *ctf_output ATTRIBUTE_UNUSED,
+			       struct elf_strtab_hash *strtab ATTRIBUTE_UNUSED)
+{}
+void
+ldelf_new_dynsym_for_ctf (struct ctf_dict *ctf_output ATTRIBUTE_UNUSED,
+			  int symidx ATTRIBUTE_UNUSED,
+			  struct elf_internal_sym *sym ATTRIBUTE_UNUSED)
 {}
 #endif

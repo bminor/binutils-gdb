@@ -1,5 +1,24 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* bfdlink.h (struct elf_sym_strtab): Replace with...
+	(struct elf_internal_sym): ... this.
+	(struct bfd_link_callbacks) <examine_strtab>: Take only a
+	symstrtab argument.
+	<ctf_new_symbol>: New.
+	<ctf_new_dynsym>: Likewise.
+	* ctf-api.h (struct ctf_link_sym) <st_symidx>: New.
+	<st_nameidx>: Likewise.
+	<st_nameidx_set>: Likewise.
+	(ctf_link_iter_symbol_f): Removed.
+	(ctf_link_shuffle_syms): Remove most parameters, just takes a
+	ctf_dict_t now.
+	(ctf_link_add_linker_symbol): New, split from
+	ctf_link_shuffle_syms.
+	* ctf.h (CTF_F_DYNSTR): New.
+	(CTF_F_MAX): Adjust.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_arc_open_by_name): Rename to...
 	(ctf_dict_open): ... this, keeping compatibility function.
 	(ctf_arc_open_by_name_sections): Rename to...

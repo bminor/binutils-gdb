@@ -418,15 +418,19 @@ ldemul_emit_ctf_early (void)
 }
 
 void
-ldemul_examine_strtab_for_ctf (struct ctf_dict *ctf_output,
-			       struct elf_sym_strtab *syms,
-			       bfd_size_type symcount,
-			       struct elf_strtab_hash *symstrtab)
-
+ldemul_acquire_strings_for_ctf (struct ctf_dict *ctf_output,
+				struct elf_strtab_hash *symstrtab)
 {
-  if (ld_emulation->examine_strtab_for_ctf)
-    ld_emulation->examine_strtab_for_ctf (ctf_output, syms,
-					  symcount, symstrtab);
+  if (ld_emulation->acquire_strings_for_ctf)
+    ld_emulation->acquire_strings_for_ctf (ctf_output, symstrtab);
+}
+
+void
+ldemul_new_dynsym_for_ctf (struct ctf_dict *ctf_output, int symidx,
+			   struct elf_internal_sym *sym)
+{
+  if (ld_emulation->new_dynsym_for_ctf)
+    ld_emulation->new_dynsym_for_ctf (ctf_output, symidx, sym);
 }
 
 bfd_boolean
