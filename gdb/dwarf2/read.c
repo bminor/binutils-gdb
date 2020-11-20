@@ -18201,14 +18201,14 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
       LONGEST scale_exp = attr->constant_value (0);
       ULONGEST *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
 
-      *num_or_denom = 1 << abs (scale_exp);
+      *num_or_denom = 1 << std::abs (scale_exp);
     }
   else if (attr->name == DW_AT_decimal_scale)
     {
       LONGEST scale_exp = attr->constant_value (0);
       ULONGEST *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
 
-      *num_or_denom = uinteger_pow (10, abs (scale_exp));
+      *num_or_denom = uinteger_pow (10, std::abs (scale_exp));
     }
   else if (attr->name == DW_AT_small)
     {

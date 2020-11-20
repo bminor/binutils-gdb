@@ -1,3 +1,8 @@
+2020-11-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (finish_fixed_point_type): Use std::abs instead
+	of abs.
+
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctfread.c (elfctf_build_psymtabs): Use ctf_dict_open, not
