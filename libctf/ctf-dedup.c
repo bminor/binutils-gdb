@@ -638,6 +638,27 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	&& ctf_dedup_record_origin (fp, input_num, decorated, type_id) < 0)
       return NULL;				/* errno is set for us.  */
 
+#ifdef ENABLE_LIBCTF_HASH_DEBUGGING
+  ctf_dprintf ("%lu: hashing thing with ID %i/%lx (kind %i): %s.\n",
+	       depth, input_num, type, kind, name ? name : "");
+#endif
+
+  /* Some type kinds don't have names: the API provides no way to set the name,
+     so the type the deduplicator outputs will be nameless even if the input
+     somehow has a name, and the name should not be mixed into the hash.  */
+
+  switch (kind)
+    {
+    case CTF_K_POINTER:
+    case CTF_K_ARRAY:
+    case CTF_K_FUNCTION:
+    case CTF_K_VOLATILE:
+    case CTF_K_CONST:
+    case CTF_K_RESTRICT:
+    case CTF_K_SLICE:
+      name = NULL;
+    }
+
   /* Mix in invariant stuff, transforming the type kind if needed.  Note that
      the vlen is *not* hashed in: the actual variable-length info is hashed in
      instead, piecewise.  The vlen is not part of the type, only the
@@ -646,11 +667,6 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
      compiler and the deduplicator set the nonroot flag to indicate clashes with
      *other types in the same TU* with the same name: so two types can easily
      have distinct nonroot flags, yet be exactly the same type.*/
-
-#ifdef ENABLE_LIBCTF_HASH_DEBUGGING
-  ctf_dprintf ("%lu: hashing thing with ID %i/%lx (kind %i): %s.\n",
-	       depth, input_num, type, kind, name ? name : "");
-#endif
 
   ctf_sha1_init (&hash);
   if (name)

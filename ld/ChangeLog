@@ -1,5 +1,11 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/ld-ctf/data-func-conflicted.d: Shrink the expected
+	size of the type section now that function types are being
+	deduplicated properly.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* testsuite/ld-ctf/array.d: Adjust for nonzero flags word and
 	public symbols in the data section rather than variables: use
 	sysv hash style to keep test results the same on non-GNU targets.

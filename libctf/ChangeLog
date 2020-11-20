@@ -1,5 +1,10 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dedup.c (ctf_dedup_rhash_type): Null out the names of nameless
+	type kinds, just in case the input has named them.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_header): Dump the new flags bits and the index
 	section lengths.
 	(ctf_dump_objts): Report indexed sections.  Also dump functions.  Use

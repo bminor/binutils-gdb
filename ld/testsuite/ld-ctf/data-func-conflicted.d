@@ -16,7 +16,7 @@ Contents of CTF section \.ctf:
     Data object section:	.* \(0xc bytes\)
     Function info section:	.* \(0x40 bytes\)
     Object index section:	.* \(0xc bytes\)
-    Type section:	.* \(0x228 bytes\)
+    Type section:	.* \(0xe8 bytes\)
     String section:	.*
 #...
   Data objects:
