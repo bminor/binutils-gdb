@@ -1,3 +1,14 @@
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/c-linkage-name.exp: Update to use new 'maint flush ...'
+	commands.
+	* gdb.base/killed-outside.exp: Likewise.
+	* gdb.opt/inline-bt.exp: Likewise.
+	* gdb.perf/gmonster-null-lookup.py: Likewise.
+	* gdb.perf/gmonster-print-cerr.py: Likewise.
+	* gdb.perf/gmonster-ptype-string.py: Likewise.
+	* gdb.python/py-unwind.exp: Likewise.
+
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/commands.exp: Update expected results.

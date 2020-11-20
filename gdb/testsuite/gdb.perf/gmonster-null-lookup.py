@@ -40,7 +40,7 @@ class NullLookup(perftest.TestCaseWithBasicMeasurements):
             utils.safe_execute("mt expand-symtabs")
             iteration = 5
             while iteration > 0:
-                utils.safe_execute("mt flush-symbol-cache")
+                utils.safe_execute("mt flush symbol-cache")
                 func = lambda: utils.safe_execute("p symbol_not_found")
                 self.measure.measure(func, run)
                 iteration -= 1

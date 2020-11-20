@@ -115,7 +115,7 @@ with_test_prefix "stepi" {
 # other commands would trigger.
 with_test_prefix "registers" {
     test {
-	gdb_test "flushregs" ".*"
+	gdb_test "maint flush register-cache" ".*"
 	gdb_test "info threads" ".*"
     }
 }

@@ -46,7 +46,7 @@ class PrintCerr(perftest.TestCaseWithBasicMeasurements):
             utils.runto_main()
             iteration = 5
             while iteration > 0:
-                utils.safe_execute("mt flush-symbol-cache")
+                utils.safe_execute("mt flush symbol-cache")
                 func = lambda: utils.safe_execute("print gm_std::cerr")
                 self.measure.measure(func, run)
                 iteration -= 1

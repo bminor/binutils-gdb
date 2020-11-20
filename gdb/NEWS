@@ -39,6 +39,11 @@ set debug event-loop
 show debug event-loop
   Control the display of debug output about GDB's event loop.
 
+maintenance flush symbol-cache
+maintenance flush register-cache
+  These new commands are equivalent to the already existing commands
+  'maintenance flush-symbol-cache' and 'flushregs' respectively.
+
 * Changed commands
 
 break [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]
@@ -60,6 +65,12 @@ condition [-force] N COND
   command as explained above.  The '-force' flag can be used to force
   GDB into defining the condition even when COND is invalid for all the
   current locations of breakpoint N.
+
+flushregs
+maintenance flush-symbol-cache
+  These commands are deprecated in favor of the new commands
+  'maintenance flush register-cache' and 'maintenance flush
+  symbol-cache' respectively.
 
 *** Changes in GDB 10
 

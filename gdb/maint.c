@@ -1083,6 +1083,11 @@ lists all sections from all object files, including shared libraries."),
 			&maintenanceprintlist, "maintenance print ", 0,
 			&maintenancelist);
 
+  add_basic_prefix_cmd ("flush", class_maintenance,
+			_("Maintenance command for flushing GDB internal caches."),
+			&maintenanceflushlist, "maintenance flush ", 0,
+			&maintenancelist);
+
   add_basic_prefix_cmd ("set", class_maintenance, _("\
 Set GDB internal variables used by the GDB maintainer.\n\
 Configure variables internal to GDB that aid in GDB's maintenance"),

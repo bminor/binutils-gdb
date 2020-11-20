@@ -1,3 +1,8 @@
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Symbols): Document 'maint flush symbol-cache'.
+	(Maintenance Commands): Document 'maint flush register-cache'.
+
 2020-12-04  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* Makefile.in: Delete GDBvn.texi and version.subst only in

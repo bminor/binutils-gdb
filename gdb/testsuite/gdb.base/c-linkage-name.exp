@@ -64,7 +64,7 @@ gdb_test "maint info symtabs" "\{ symtab \[^\r\n\]*c-linkage-name-2.c.*"
 
 # Flush the symbol cache to prevent the lookup to return the same as before.
 
-gdb_test "maint flush-symbol-cache"
+gdb_test "maint flush symbol-cache"
 
 # Try to print MUNDANE using its linkage name again, after partial
 # symtab expansion.

@@ -1,3 +1,19 @@
+2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Mention new commands, and that the old commands are now
+	deprecated.
+	* cli/cli-cmds.c (maintenanceflushlist): Define.
+	* cli/cli-cmds.h (maintenanceflushlist): Declare.
+	* maint.c (_initialize_maint_cmds): Initialise
+	maintenanceflushlist.
+	* regcache.c: Add 'cli/cli-cmds.h' include.
+	(reg_flush_command): Add header comment.
+	(_initialize_regcache): Create new 'maint flush register-cache'
+	command, make 'flushregs' an alias.
+	* symtab.c: Add 'cli/cli-cmds.h' include.
+	(_initialize_symtab): Create new 'maint flush symbol-cache'
+	command, make old command an alias.
+
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cli/cli-decode.c (deprecated_cmd_warning): Ignore the prefix

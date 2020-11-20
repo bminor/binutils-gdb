@@ -41,7 +41,7 @@ class GmonsterPtypeString(perftest.TestCaseWithBasicMeasurements):
             utils.safe_execute("mt expand-symtabs")
             iteration = 5
             while iteration > 0:
-                utils.safe_execute("mt flush-symbol-cache")
+                utils.safe_execute("mt flush symbol-cache")
                 func1 = lambda: utils.safe_execute("ptype hello")
                 func = lambda: utils.run_n_times(2, func1)
                 self.measure.measure(func, run)

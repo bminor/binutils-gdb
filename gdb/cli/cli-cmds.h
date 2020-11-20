@@ -89,6 +89,10 @@ extern struct cmd_list_element *maintenanceinfolist;
 
 extern struct cmd_list_element *maintenanceprintlist;
 
+/* Chain containing all defined "maintenance flush" subcommands.  */
+
+extern struct cmd_list_element *maintenanceflushlist;
+
 extern struct cmd_list_element *setprintlist;
 
 extern struct cmd_list_element *showprintlist;
