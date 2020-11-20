@@ -1,5 +1,10 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* riscv-opc.c (riscv_ext_version_table): Remove the p, v, n
+	and their versions.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* riscv-opc.c (riscv_ext_version_table): Add zifencei.
 
 2020-11-28 Borislav Petkov  <bp@suse.de>
