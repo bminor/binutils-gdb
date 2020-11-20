@@ -1616,18 +1616,14 @@ ctf_link_deduplicating (ctf_dict_t *fp)
     {
       ctf_err_warn (fp, 0, 0, _("deduplicating link variable emission failed for "
 				"%s"), ctf_link_input_name (fp));
-      for (i = 1; i < noutputs; i++)
-	ctf_dict_close (outputs[i]);
-      goto err;
+      goto err_clean_outputs;
     }
 
   if (ctf_link_deduplicating_syms (fp, inputs, ninputs, 0) < 0)
     {
       ctf_err_warn (fp, 0, 0, _("deduplicating link symbol emission failed for "
 				"%s"), ctf_link_input_name (fp));
-      for (i = 1; i < noutputs; i++)
-	ctf_dict_close (outputs[i]);
-      goto err;
+      goto err_clean_outputs;
     }
 
   /* Now close all the inputs, including per-CU intermediates.  */
@@ -1647,6 +1643,14 @@ ctf_link_deduplicating (ctf_dict_t *fp)
   free (parents);
   free (outputs);
   return;
+
+ err_clean_outputs:
+  for (i = 1; i < noutputs; i++)
+    {
+      ctf_dynhash_remove (fp->ctf_link_outputs, ctf_cuname (outputs[i]));
+      ctf_dict_close (outputs[i]);
+    }
+  goto err;
 }
 
 /* Merge types and variable sections in all files added to the link

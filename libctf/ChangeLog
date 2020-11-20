@@ -1,5 +1,10 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_deduplicating): Clean up the ctf_link_outputs
+	hash on error.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_dtd_insert): Set ENOMEM on the dict if out of memory.
 	(ctf_dvd_insert): Likewise.
 	(ctf_add_function): Report ECTF_RDONLY if this dict is not writable.
