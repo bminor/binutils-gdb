@@ -9,5 +9,5 @@
 #...
 [0-9a-f]+ . retain_from_lib
 #...
-[0-9a-f]+ . retained_fn
+[0-9a-f]+ . retained_var
 #pass

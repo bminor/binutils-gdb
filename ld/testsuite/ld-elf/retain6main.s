@@ -1,9 +1,9 @@
-/* Undefined symbol reference in retained section .text.retained_fn requires
+/* Undefined symbol reference in retained section .data.retained_var requires
    symbol definition to be pulled out of library.  */
-	.section	.text.retained_fn,"axR"
-	.global	retained_fn
-	.type	retained_fn, %function
-retained_fn:
+	.section	.data.retained_var,"awR"
+	.global	retained_var
+	.type	retained_var, %object
+retained_var:
 	.long bar
 
 	.section	.text._start,"ax"

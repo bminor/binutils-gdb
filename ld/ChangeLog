@@ -1,3 +1,13 @@
+2020-11-20  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/ld-elf/retain3.s: Move symbolic reference into writeable
+	.data section from read-only .text section.
+	* testsuite/ld-elf/retain5.d: Don't pass --print-gc-sections for test
+	that doesn't require it.
+	* testsuite/ld-elf/retain6a.d: Adjust test.
+	* testsuite/ld-elf/retain6main.s: Move symbolic reference into writeable
+	.data section from read-only .text section.
+
 2020-11-18  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/group1.d,

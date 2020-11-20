@@ -1,3 +1,10 @@
+2020-11-20  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/binutils-all/readelf-maskos-1a.d: Fix test for unrecognized
+	bit set in SHF_MASKOS range.
+	* testsuite/binutils-all/readelf-maskos-1b.d: Likewise.
+	* testsuite/binutils-all/readelf-maskos-unknown.s: New test.
+
 2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* NEWS: Announce SHF_GNU_RETAIN support.

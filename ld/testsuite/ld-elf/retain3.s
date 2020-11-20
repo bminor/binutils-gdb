@@ -6,9 +6,9 @@
 foo:
 	.word 0
 
-	.section	.text.bar,"axR"
+	.section	.data.bar,"awR"
 	.global	bar
-	.type	bar, %function
+	.type	bar, %object
 bar:
 	.long foo
 
