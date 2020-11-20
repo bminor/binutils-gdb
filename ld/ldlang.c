@@ -131,7 +131,7 @@ struct lang_phdr *lang_phdr_list;
 struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
 #ifdef ENABLE_LIBCTF
-static ctf_file_t *ctf_output;
+static ctf_dict_t *ctf_output;
 #endif
 
 /* Functions that traverse the linker script and might evaluate
@@ -3674,7 +3674,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 /* Emit CTF errors and warnings.  fp can be NULL to report errors/warnings
    that happened specifically at CTF open time.  */
 static void
-lang_ctf_errs_warnings (ctf_file_t *fp)
+lang_ctf_errs_warnings (ctf_dict_t *fp)
 {
   ctf_next_t *i = NULL;
   char *text;
@@ -3713,7 +3713,7 @@ ldlang_open_ctf (void)
     {
       asection *sect;
 
-      /* Incoming files from the compiler have a single ctf_file_t in them
+      /* Incoming files from the compiler have a single ctf_dict_t in them
 	 (which is presented to us by the libctf API in a ctf_archive_t
 	 wrapper): files derived from a previous relocatable link have a CTF
 	 archive containing possibly many CTF files.  */
@@ -3776,7 +3776,7 @@ lang_merge_ctf (void)
   /* If the section was discarded, don't waste time merging.  */
   if (output_sect == NULL)
     {
-      ctf_file_close (ctf_output);
+      ctf_dict_close (ctf_output);
       ctf_output = NULL;
 
       LANG_FOR_EACH_INPUT_STATEMENT (file)
@@ -3882,7 +3882,7 @@ lang_write_ctf (int late)
     }
 
   /* This also closes every CTF input file used in the link.  */
-  ctf_file_close (ctf_output);
+  ctf_dict_close (ctf_output);
   ctf_output = NULL;
 
   LANG_FOR_EACH_INPUT_STATEMENT (file)

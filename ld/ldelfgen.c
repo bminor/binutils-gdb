@@ -175,7 +175,7 @@ ldelf_ctf_symbols_iter_cb (struct ctf_link_sym *dest,
 
 void
 ldelf_examine_strtab_for_ctf
-  (struct ctf_file *ctf_output, struct elf_sym_strtab *syms,
+  (struct ctf_dict *ctf_output, struct elf_sym_strtab *syms,
    bfd_size_type symcount, struct elf_strtab_hash *symstrtab)
 {
   struct ctf_strsym_iter_cb_arg args = { syms, symcount, symstrtab,
@@ -205,7 +205,7 @@ extern int ldelf_emit_ctf_early (void)
 }
 
 extern void ldelf_examine_strtab_for_ctf
-  (struct ctf_file *ctf_output ATTRIBUTE_UNUSED,
+  (struct ctf_dict *ctf_output ATTRIBUTE_UNUSED,
    struct elf_sym_strtab *syms ATTRIBUTE_UNUSED,
    bfd_size_type symcount ATTRIBUTE_UNUSED,
    struct elf_strtab_hash *symstrtab ATTRIBUTE_UNUSED)

@@ -69,7 +69,7 @@ isqualifier (const char *s, size_t len)
    integers, floats, typedefs, and pointers to any of these named types.  */
 
 ctf_id_t
-ctf_lookup_by_name (ctf_file_t *fp, const char *name)
+ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
 {
   static const char delimiters[] = " \t\n\r\v\f*";
 
@@ -102,7 +102,7 @@ ctf_lookup_by_name (ctf_file_t *fp, const char *name)
 	     data includes "struct foo *" but not "foo_t *" and
 	     the user tries to access "foo_t *" in the debugger.
 
-	     TODO need to handle parent containers too.  */
+	     TODO need to handle parent dicts too.  */
 
 	  ntype = fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, type)];
 	  if (ntype == 0)
@@ -194,7 +194,7 @@ err:
 
 typedef struct ctf_lookup_var_key
 {
-  ctf_file_t *clvk_fp;
+  ctf_dict_t *clvk_fp;
   const char *clvk_name;
 } ctf_lookup_var_key_t;
 
@@ -212,7 +212,7 @@ ctf_lookup_var (const void *key_, const void *memb_)
 /* Given a variable name, return the type of the variable with that name.  */
 
 ctf_id_t
-ctf_lookup_variable (ctf_file_t *fp, const char *name)
+ctf_lookup_variable (ctf_dict_t *fp, const char *name)
 {
   ctf_varent_t *ent;
   ctf_lookup_var_key_t key = { fp, name };
@@ -236,7 +236,7 @@ ctf_lookup_variable (ctf_file_t *fp, const char *name)
 /* Given a symbol table index, return the name of that symbol from the secondary
    string table, or the null string (never NULL).  */
 const char *
-ctf_lookup_symbol_name (ctf_file_t *fp, unsigned long symidx)
+ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx)
 {
   const ctf_sect_t *sp = &fp->ctf_symtab;
   Elf64_Sym sym, *gsp;
@@ -271,7 +271,7 @@ ctf_lookup_symbol_name (ctf_file_t *fp, unsigned long symidx)
    by the corresponding entry in the symbol table.  */
 
 ctf_id_t
-ctf_lookup_by_symbol (ctf_file_t *fp, unsigned long symidx)
+ctf_lookup_by_symbol (ctf_dict_t *fp, unsigned long symidx)
 {
   const ctf_sect_t *sp = &fp->ctf_symtab;
   ctf_id_t type;
@@ -308,8 +308,8 @@ ctf_lookup_by_symbol (ctf_file_t *fp, unsigned long symidx)
 /* Return the native dict of a given type: if called on a child and the
    type is in the parent, return the parent.  Needed if you plan to access
    the type directly, without using the API.  */
-ctf_file_t *
-ctf_get_dict (ctf_file_t *fp, ctf_id_t type)
+ctf_dict_t *
+ctf_get_dict (ctf_dict_t *fp, ctf_id_t type)
 {
     if ((fp->ctf_flags & LCTF_CHILD) && LCTF_TYPE_ISPARENT (fp, type))
       return fp->ctf_parent;
@@ -322,9 +322,9 @@ ctf_get_dict (ctf_file_t *fp, ctf_id_t type)
    This function is not exported outside of the library.  */
 
 const ctf_type_t *
-ctf_lookup_by_id (ctf_file_t **fpp, ctf_id_t type)
+ctf_lookup_by_id (ctf_dict_t **fpp, ctf_id_t type)
 {
-  ctf_file_t *fp = *fpp;	/* Caller passes in starting CTF dict.  */
+  ctf_dict_t *fp = *fpp;	/* Caller passes in starting CTF dict.  */
   ctf_id_t idx;
 
   if ((fp = ctf_get_dict (fp, type)) == NULL)
@@ -353,7 +353,7 @@ ctf_lookup_by_id (ctf_file_t **fpp, ctf_id_t type)
   idx = LCTF_TYPE_TO_INDEX (fp, type);
   if (idx > 0 && (unsigned long) idx <= fp->ctf_typemax)
     {
-      *fpp = fp;		/* Function returns ending CTF container.  */
+      *fpp = fp;		/* Function returns ending CTF dict.  */
       return (LCTF_INDEX_TO_TYPEPTR (fp, idx));
     }
 
@@ -365,7 +365,7 @@ ctf_lookup_by_id (ctf_file_t **fpp, ctf_id_t type)
    by the corresponding entry in the symbol table.  */
 
 int
-ctf_func_info (ctf_file_t *fp, unsigned long symidx, ctf_funcinfo_t *fip)
+ctf_func_info (ctf_dict_t *fp, unsigned long symidx, ctf_funcinfo_t *fip)
 {
   const ctf_sect_t *sp = &fp->ctf_symtab;
   const uint32_t *dp;
@@ -422,7 +422,7 @@ ctf_func_info (ctf_file_t *fp, unsigned long symidx, ctf_funcinfo_t *fip)
    by the corresponding entry in the symbol table.  */
 
 int
-ctf_func_args (ctf_file_t * fp, unsigned long symidx, uint32_t argc,
+ctf_func_args (ctf_dict_t *fp, unsigned long symidx, uint32_t argc,
 	       ctf_id_t * argv)
 {
   const uint32_t *dp;

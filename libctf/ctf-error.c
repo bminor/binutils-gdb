@@ -77,7 +77,7 @@ ctf_errmsg (int error)
 }
 
 int
-ctf_errno (ctf_file_t * fp)
+ctf_errno (ctf_dict_t * fp)
 {
   return fp->ctf_errno;
 }

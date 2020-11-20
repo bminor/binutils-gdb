@@ -72,7 +72,7 @@ ctf_decl_fini (ctf_decl_t *cd)
 }
 
 void
-ctf_decl_push (ctf_decl_t *cd, ctf_file_t *fp, ctf_id_t type)
+ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_decl_node_t *cdp;
   ctf_decl_prec_t prec;

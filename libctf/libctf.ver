@@ -174,3 +174,9 @@ LIBCTF_1.0 {
     local:
 	*;
 };
+
+LIBCTF_1.1 {
+    global:
+	ctf_dict_close;
+	ctf_parent_dict;
+} LIBCTF_1.0;

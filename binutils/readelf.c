@@ -14598,7 +14598,7 @@ dump_ctf_indent_lines (ctf_sect_names_t sect ATTRIBUTE_UNUSED,
 
 /* Dump CTF errors/warnings.  */
 static void
-dump_ctf_errs (ctf_file_t *fp)
+dump_ctf_errs (ctf_dict_t *fp)
 {
   ctf_next_t *it = NULL;
   char *errtext;
@@ -14619,9 +14619,9 @@ dump_ctf_errs (ctf_file_t *fp)
 /* Dump one CTF archive member.  */
 
 static int
-dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
+dump_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 {
-  ctf_file_t *parent = (ctf_file_t *) arg;
+  ctf_dict_t *parent = (ctf_dict_t *) arg;
   const char *things[] = {"Header", "Labels", "Data objects",
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
@@ -14685,7 +14685,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
   ctf_sect_t *	       strsectp = NULL;
   ctf_archive_t *      ctfa = NULL;
   ctf_archive_t *      parenta = NULL, *lookparent;
-  ctf_file_t *         parent = NULL;
+  ctf_dict_t *         parent = NULL;
 
   int err;
   bfd_boolean ret = FALSE;
@@ -14791,7 +14791,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
     ret = FALSE;
 
  fail:
-  ctf_file_close (parent);
+  ctf_dict_close (parent);
   ctf_close (ctfa);
   ctf_close (parenta);
   free (parentdata);

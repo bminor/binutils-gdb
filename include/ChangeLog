@@ -1,3 +1,18 @@
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_file_t): Rename to...
+	(ctf_dict_t): ... this.  Keep ctf_file_t around for compatibility.
+	(struct ctf_file): Likewise rename to...
+	(struct ctf_dict): ... this.
+	(ctf_file_close): Rename to...
+	(ctf_dict_close): ... this, keeping compatibility function.
+	(ctf_parent_file): Rename to...
+	(ctf_parent_dict): ... this, keeping compatibility function.
+	All callers adjusted.
+	* ctf.h: Rename references to ctf_file_t to ctf_dict_t.
+	(struct ctf_archive) <ctfa_nfiles>: Rename to...
+	<ctfa_ndicts>: ... this.
+
 2020-11-18  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* elf/common.h (SHF_GNU_RETAIN): Define.

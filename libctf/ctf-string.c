@@ -23,7 +23,7 @@
 /* Convert an encoded CTF string name into a pointer to a C string, using an
   explicit internal strtab rather than the fp-based one.  */
 const char *
-ctf_strraw_explicit (ctf_file_t *fp, uint32_t name, ctf_strs_t *strtab)
+ctf_strraw_explicit (ctf_dict_t *fp, uint32_t name, ctf_strs_t *strtab)
 {
   ctf_strs_t *ctsp = &fp->ctf_str[CTF_NAME_STID (name)];
 
@@ -58,7 +58,7 @@ ctf_strraw_explicit (ctf_file_t *fp, uint32_t name, ctf_strs_t *strtab)
 /* Convert an encoded CTF string name into a pointer to a C string by looking
   up the appropriate string table buffer and then adding the offset.  */
 const char *
-ctf_strraw (ctf_file_t *fp, uint32_t name)
+ctf_strraw (ctf_dict_t *fp, uint32_t name)
 {
   return ctf_strraw_explicit (fp, name, NULL);
 }
@@ -66,7 +66,7 @@ ctf_strraw (ctf_file_t *fp, uint32_t name)
 /* Return a guaranteed-non-NULL pointer to the string with the given CTF
    name.  */
 const char *
-ctf_strptr (ctf_file_t *fp, uint32_t name)
+ctf_strptr (ctf_dict_t *fp, uint32_t name)
 {
   const char *s = ctf_strraw (fp, name);
   return (s != NULL ? s : "(?)");
@@ -99,7 +99,7 @@ ctf_str_free_atom (void *a)
 /* Create the atoms table.  There is always at least one atom in it, the null
    string.  */
 int
-ctf_str_create_atoms (ctf_file_t *fp)
+ctf_str_create_atoms (ctf_dict_t *fp)
 {
   fp->ctf_str_atoms = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 					  free, ctf_str_free_atom);
@@ -131,7 +131,7 @@ ctf_str_create_atoms (ctf_file_t *fp)
 
 /* Destroy the atoms table.  */
 void
-ctf_str_free_atoms (ctf_file_t *fp)
+ctf_str_free_atoms (ctf_dict_t *fp)
 {
   ctf_dynhash_destroy (fp->ctf_prov_strtab);
   ctf_dynhash_destroy (fp->ctf_str_atoms);
@@ -143,7 +143,7 @@ ctf_str_free_atoms (ctf_file_t *fp)
    passed-in ref.  Possibly add a provisional entry for this string to the
    provisional strtab.   */
 static ctf_str_atom_t *
-ctf_str_add_ref_internal (ctf_file_t *fp, const char *str,
+ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
 			  int add_ref, int make_provisional, uint32_t *ref)
 {
   char *newstr = NULL;
@@ -215,7 +215,7 @@ ctf_str_add_ref_internal (ctf_file_t *fp, const char *str,
    provisional offset is assigned to should be added as a ref using
    ctf_str_add_ref() as well.) */
 uint32_t
-ctf_str_add (ctf_file_t *fp, const char *str)
+ctf_str_add (ctf_dict_t *fp, const char *str)
 {
   ctf_str_atom_t *atom;
   if (!str)
@@ -232,7 +232,7 @@ ctf_str_add (ctf_file_t *fp, const char *str)
    passed-in ref, whether or not the string is already present.  There is no
    attempt to deduplicate the refs list (but duplicates are harmless).  */
 uint32_t
-ctf_str_add_ref (ctf_file_t *fp, const char *str, uint32_t *ref)
+ctf_str_add_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 {
   ctf_str_atom_t *atom;
   if (!str)
@@ -248,7 +248,7 @@ ctf_str_add_ref (ctf_file_t *fp, const char *str, uint32_t *ref)
 /* Add an external strtab reference at OFFSET.  Returns zero if the addition
    failed, nonzero otherwise.  */
 int
-ctf_str_add_external (ctf_file_t *fp, const char *str, uint32_t offset)
+ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
 {
   ctf_str_atom_t *atom;
   if (!str)
@@ -264,7 +264,7 @@ ctf_str_add_external (ctf_file_t *fp, const char *str, uint32_t offset)
 
 /* Remove a single ref.  */
 void
-ctf_str_remove_ref (ctf_file_t *fp, const char *str, uint32_t *ref)
+ctf_str_remove_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 {
   ctf_str_atom_ref_t *aref, *anext;
   ctf_str_atom_t *atom = NULL;
@@ -297,7 +297,7 @@ ctf_str_rollback_atom (void *key _libctf_unused_, void *value, void *arg)
 
 /* Roll back, deleting all atoms created after a particular ID.  */
 void
-ctf_str_rollback (ctf_file_t *fp, ctf_snapshot_id_t id)
+ctf_str_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 {
   ctf_dynhash_iter_remove (fp->ctf_str_atoms, ctf_str_rollback_atom, &id);
 }
@@ -313,7 +313,7 @@ ctf_str_purge_one_atom_refs (void *key _libctf_unused_, void *value,
 
 /* Remove all the recorded refs from the atoms table.  */
 void
-ctf_str_purge_refs (ctf_file_t *fp)
+ctf_str_purge_refs (ctf_dict_t *fp)
 {
   if (fp->ctf_str_num_refs > 0)
     ctf_dynhash_iter (fp->ctf_str_atoms, ctf_str_purge_one_atom_refs, NULL);
@@ -410,7 +410,7 @@ ctf_str_sort_strtab (const void *a, const void *b)
    external strtab offsets to names, so we can look them up with ctf_strptr().
    Only external strtab offsets with references are added.  */
 ctf_strs_writable_t
-ctf_str_write_strtab (ctf_file_t *fp)
+ctf_str_write_strtab (ctf_dict_t *fp)
 {
   ctf_strs_writable_t strtab;
   ctf_str_atom_t *nullstr;
@@ -472,7 +472,7 @@ ctf_str_write_strtab (ctf_file_t *fp)
 	     This is safe because you cannot ctf_rollback to before the point
 	     when a ctf_update is done, and the strtab is written at ctf_update
 	     time.  So any atoms we reference here are sure to stick around
-	     until ctf_file_close.  */
+	     until ctf_dict_close.  */
 
 	  any_external = 1;
 	  ctf_str_update_refs (sorttab[i], sorttab[i]->csa_external_offset);

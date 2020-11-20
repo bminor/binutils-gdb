@@ -201,7 +201,7 @@ static ctf_list_t open_errors;
    debug stream instead of that recorded on fp.  */
 _libctf_printflike_ (4, 5)
 extern void
-ctf_err_warn (ctf_file_t *fp, int is_warning, int err,
+ctf_err_warn (ctf_dict_t *fp, int is_warning, int err,
 	      const char *format, ...)
 {
   va_list alist;
@@ -244,7 +244,7 @@ ctf_err_warn (ctf_file_t *fp, int is_warning, int err,
 
 /* Move all the errors/warnings from an fp into the open_errors.  */
 void
-ctf_err_warn_to_open (ctf_file_t *fp)
+ctf_err_warn_to_open (ctf_dict_t *fp)
 {
   ctf_list_splice (&open_errors, &fp->ctf_errs_warnings);
 }
@@ -266,7 +266,7 @@ ctf_err_warn_to_open (ctf_file_t *fp)
    means the end, and not an iterator error.  */
 
 char *
-ctf_errwarning_next (ctf_file_t *fp, ctf_next_t **it, int *is_warning,
+ctf_errwarning_next (ctf_dict_t *fp, ctf_next_t **it, int *is_warning,
 		     int *errp)
 {
   ctf_next_t *i = *it;
@@ -335,7 +335,7 @@ ctf_errwarning_next (ctf_file_t *fp, ctf_next_t **it, int *is_warning,
 }
 
 void
-ctf_assert_fail_internal (ctf_file_t *fp, const char *file, size_t line,
+ctf_assert_fail_internal (ctf_dict_t *fp, const char *file, size_t line,
 			  const char *exprstr)
 {
   ctf_err_warn (fp, 0, ECTF_INTERNAL, _("%s: %lu: libctf assertion failed: %s"),

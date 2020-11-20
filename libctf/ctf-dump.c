@@ -36,7 +36,7 @@ typedef struct ctf_dump_item
 struct ctf_dump_state
 {
   ctf_sect_names_t cds_sect;
-  ctf_file_t *cds_fp;
+  ctf_dict_t *cds_fp;
   ctf_dump_item_t *cds_current;
   ctf_list_t cds_items;
 };
@@ -46,7 +46,7 @@ struct ctf_dump_state
 typedef struct ctf_dump_membstate
 {
   char **cdm_str;
-  ctf_file_t *cdm_fp;
+  ctf_dict_t *cdm_fp;
 } ctf_dump_membstate_t;
 
 static int
@@ -83,7 +83,7 @@ ctf_dump_free (ctf_dump_state_t *state)
    type's references.  */
 
 static char *
-ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
+ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 {
   ctf_id_t new_id;
   char *str = NULL, *bit = NULL, *buf = NULL;
@@ -183,7 +183,7 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
 
 /* Dump one string field from the file header into the cds_items.  */
 static int
-ctf_dump_header_strfield (ctf_file_t *fp, ctf_dump_state_t *state,
+ctf_dump_header_strfield (ctf_dict_t *fp, ctf_dump_state_t *state,
 			  const char *name, uint32_t value)
 {
   char *str;
@@ -201,7 +201,7 @@ ctf_dump_header_strfield (ctf_file_t *fp, ctf_dump_state_t *state,
 
 /* Dump one section-offset field from the file header into the cds_items.  */
 static int
-ctf_dump_header_sectfield (ctf_file_t *fp, ctf_dump_state_t *state,
+ctf_dump_header_sectfield (ctf_dict_t *fp, ctf_dump_state_t *state,
 			   const char *sect, uint32_t off, uint32_t nextoff)
 {
   char *str;
@@ -221,7 +221,7 @@ ctf_dump_header_sectfield (ctf_file_t *fp, ctf_dump_state_t *state,
 
 /* Dump the file header into the cds_items.  */
 static int
-ctf_dump_header (ctf_file_t *fp, ctf_dump_state_t *state)
+ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   char *str;
   const ctf_header_t *hp = fp->ctf_header;
@@ -252,7 +252,7 @@ ctf_dump_header (ctf_file_t *fp, ctf_dump_state_t *state)
 
   /* Everything else is only printed if present.  */
 
-  /* The flags are unusual in that they represent the ctf_file_t *in memory*:
+  /* The flags are unusual in that they represent the ctf_dict_t *in memory*:
      flags representing compression, etc, are turned off as the file is
      decompressed.  So we store a copy of the flags before they are changed, for
      the dumper.  */
@@ -339,7 +339,7 @@ ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
    them, rather than only one.  */
 
 static int
-ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
+ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   size_t i;
 
@@ -396,7 +396,7 @@ ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
    iterator for this section.)  */
 
 static int
-ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
+ctf_dump_funcs (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   size_t i;
 
@@ -627,7 +627,7 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 /* Dump the string table into the cds_items.  */
 
 static int
-ctf_dump_str (ctf_file_t *fp, ctf_dump_state_t *state)
+ctf_dump_str (ctf_dict_t *fp, ctf_dump_state_t *state)
 {
   const char *s = fp->ctf_str[CTF_STRTAB_0].cts_strs;
 
@@ -657,7 +657,7 @@ ctf_dump_str (ctf_file_t *fp, ctf_dump_state_t *state)
    allocate a new one and return it if it likes).  */
 
 char *
-ctf_dump (ctf_file_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
+ctf_dump (ctf_dict_t *fp, ctf_dump_state_t **statep, ctf_sect_names_t sect,
 	  ctf_dump_decorate_f *func, void *arg)
 {
   char *str;

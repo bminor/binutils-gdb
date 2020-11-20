@@ -781,7 +781,7 @@ ctf_hash_size (const ctf_hash_t *hp)
 }
 
 int
-ctf_hash_insert_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
+ctf_hash_insert_type (ctf_hash_t *hp, ctf_dict_t *fp, uint32_t type,
 		      uint32_t name)
 {
   const char *str = ctf_strraw (fp, name);
@@ -811,7 +811,7 @@ ctf_hash_insert_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
    this new official definition. If the key is not present, then call
    ctf_hash_insert_type and hash it in.  */
 int
-ctf_hash_define_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
+ctf_hash_define_type (ctf_hash_t *hp, ctf_dict_t *fp, uint32_t type,
                       uint32_t name)
 {
   /* This matches the semantics of ctf_hash_insert_type in this
@@ -821,7 +821,7 @@ ctf_hash_define_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
 }
 
 ctf_id_t
-ctf_hash_lookup_type (ctf_hash_t *hp, ctf_file_t *fp __attribute__ ((__unused__)),
+ctf_hash_lookup_type (ctf_hash_t *hp, ctf_dict_t *fp __attribute__ ((__unused__)),
 		      const char *key)
 {
   ctf_helem_t **slot;

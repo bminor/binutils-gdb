@@ -24,13 +24,13 @@
 /* Determine whether a type is a parent or a child.  */
 
 int
-ctf_type_isparent (ctf_file_t *fp, ctf_id_t id)
+ctf_type_isparent (ctf_dict_t *fp, ctf_id_t id)
 {
   return (LCTF_TYPE_ISPARENT (fp, id));
 }
 
 int
-ctf_type_ischild (ctf_file_t * fp, ctf_id_t id)
+ctf_type_ischild (ctf_dict_t * fp, ctf_id_t id)
 {
   return (LCTF_TYPE_ISCHILD (fp, id));
 }
@@ -39,9 +39,9 @@ ctf_type_ischild (ctf_file_t * fp, ctf_id_t id)
    type, and offset of each member to the specified callback function.  */
 
 int
-ctf_member_iter (ctf_file_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
+ctf_member_iter (ctf_dict_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   ctf_dtdef_t *dtd;
   ssize_t size, increment;
@@ -109,10 +109,10 @@ ctf_member_iter (ctf_file_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
    returns -1.  */
 
 ssize_t
-ctf_member_next (ctf_file_t *fp, ctf_id_t type, ctf_next_t **it,
+ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 		 const char **name, ctf_id_t *membtype)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   uint32_t kind;
   ssize_t offset;
   ctf_next_t *i = *it;
@@ -227,9 +227,9 @@ ctf_member_next (ctf_file_t *fp, ctf_id_t type, ctf_next_t **it,
    integer value of each enum element to the specified callback function.  */
 
 int
-ctf_enum_iter (ctf_file_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
+ctf_enum_iter (ctf_dict_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   const ctf_enum_t *ep;
   ctf_dtdef_t *dtd;
@@ -279,10 +279,10 @@ ctf_enum_iter (ctf_file_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
    enumerand's integer VALue.  */
 
 const char *
-ctf_enum_next (ctf_file_t *fp, ctf_id_t type, ctf_next_t **it,
+ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	       int *val)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   uint32_t kind;
   const char *name;
   ctf_next_t *i = *it;
@@ -388,7 +388,7 @@ ctf_enum_next (ctf_file_t *fp, ctf_id_t type, ctf_next_t **it,
   return NULL;
 }
 
-/* Iterate over every root (user-visible) type in the given CTF container.
+/* Iterate over every root (user-visible) type in the given CTF dict.
    We pass the type ID of each type to the specified callback function.
 
    Does not traverse parent types: you have to do that explicitly.  This is by
@@ -396,7 +396,7 @@ ctf_enum_next (ctf_file_t *fp, ctf_id_t type, ctf_next_t **it,
    of a single parent.  */
 
 int
-ctf_type_iter (ctf_file_t *fp, ctf_type_f *func, void *arg)
+ctf_type_iter (ctf_dict_t *fp, ctf_type_f *func, void *arg)
 {
   ctf_id_t id, max = fp->ctf_typemax;
   int rc, child = (fp->ctf_flags & LCTF_CHILD);
@@ -412,7 +412,7 @@ ctf_type_iter (ctf_file_t *fp, ctf_type_f *func, void *arg)
   return 0;
 }
 
-/* Iterate over every type in the given CTF container, user-visible or not.
+/* Iterate over every type in the given CTF dict, user-visible or not.
    We pass the type ID of each type to the specified callback function.
 
    Does not traverse parent types: you have to do that explicitly.  This is by
@@ -420,7 +420,7 @@ ctf_type_iter (ctf_file_t *fp, ctf_type_f *func, void *arg)
    of a single parent.  */
 
 int
-ctf_type_iter_all (ctf_file_t *fp, ctf_type_all_f *func, void *arg)
+ctf_type_iter_all (ctf_dict_t *fp, ctf_type_all_f *func, void *arg)
 {
   ctf_id_t id, max = fp->ctf_typemax;
   int rc, child = (fp->ctf_flags & LCTF_CHILD);
@@ -437,7 +437,7 @@ ctf_type_iter_all (ctf_file_t *fp, ctf_type_all_f *func, void *arg)
   return 0;
 }
 
-/* Iterate over every type in the given CTF container, optionally including
+/* Iterate over every type in the given CTF dict, optionally including
    non-user-visible types, returning each type ID and hidden flag in turn.
    Returns CTF_ERR on end of iteration or error.
 
@@ -446,7 +446,7 @@ ctf_type_iter_all (ctf_file_t *fp, ctf_type_all_f *func, void *arg)
    of a single parent.  */
 
 ctf_id_t
-ctf_type_next (ctf_file_t *fp, ctf_next_t **it, int *flag, int want_hidden)
+ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
 {
   ctf_next_t *i = *it;
 
@@ -486,11 +486,11 @@ ctf_type_next (ctf_file_t *fp, ctf_next_t **it, int *flag, int want_hidden)
   return ctf_set_errno (fp, ECTF_NEXT_END);
 }
 
-/* Iterate over every variable in the given CTF container, in arbitrary order.
+/* Iterate over every variable in the given CTF dict, in arbitrary order.
    We pass the name of each variable to the specified callback function.  */
 
 int
-ctf_variable_iter (ctf_file_t *fp, ctf_variable_f *func, void *arg)
+ctf_variable_iter (ctf_dict_t *fp, ctf_variable_f *func, void *arg)
 {
   int rc;
 
@@ -520,12 +520,12 @@ ctf_variable_iter (ctf_file_t *fp, ctf_variable_f *func, void *arg)
   return 0;
 }
 
-/* Iterate over every variable in the given CTF container, in arbitrary order,
+/* Iterate over every variable in the given CTF dict, in arbitrary order,
    returning the name and type of each variable in turn.  The name argument is
    not optional.  Returns CTF_ERR on end of iteration or error.  */
 
 ctf_id_t
-ctf_variable_next (ctf_file_t *fp, ctf_next_t **it, const char **name)
+ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
 {
   ctf_next_t *i = *it;
 
@@ -586,10 +586,10 @@ ctf_variable_next (ctf_file_t *fp, ctf_next_t **it, const char **name)
    Does not drill down through slices to their contained type.  */
 
 ctf_id_t
-ctf_type_resolve (ctf_file_t *fp, ctf_id_t type)
+ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_id_t prev = type, otype = type;
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
 
   if (type == 0)
@@ -627,7 +627,7 @@ ctf_type_resolve (ctf_file_t *fp, ctf_id_t type)
    type.  */
 
 ctf_id_t
-ctf_type_resolve_unsliced (ctf_file_t *fp, ctf_id_t type)
+ctf_type_resolve_unsliced (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
 
@@ -645,7 +645,7 @@ ctf_type_resolve_unsliced (ctf_file_t *fp, ctf_id_t type)
 /* Look up a name in the given name table, in the appropriate hash given the
    kind of the identifier.  The name is a raw, undecorated identifier.  */
 
-ctf_id_t ctf_lookup_by_rawname (ctf_file_t *fp, int kind, const char *name)
+ctf_id_t ctf_lookup_by_rawname (ctf_dict_t *fp, int kind, const char *name)
 {
   return ctf_lookup_by_rawhash (fp, ctf_name_table (fp, kind), name);
 }
@@ -654,7 +654,7 @@ ctf_id_t ctf_lookup_by_rawname (ctf_file_t *fp, int kind, const char *name)
    readability state of the dictionary.  The name is a raw, undecorated
    identifier.  */
 
-ctf_id_t ctf_lookup_by_rawhash (ctf_file_t *fp, ctf_names_t *np, const char *name)
+ctf_id_t ctf_lookup_by_rawhash (ctf_dict_t *fp, ctf_names_t *np, const char *name)
 {
   ctf_id_t id;
 
@@ -669,7 +669,7 @@ ctf_id_t ctf_lookup_by_rawhash (ctf_file_t *fp, ctf_names_t *np, const char *nam
    string.  */
 
 char *
-ctf_type_aname (ctf_file_t *fp, ctf_id_t type)
+ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 {
   ctf_decl_t cd;
   ctf_decl_node_t *cdp;
@@ -710,7 +710,7 @@ ctf_type_aname (ctf_file_t *fp, ctf_id_t type)
       for (cdp = ctf_list_next (&cd.cd_nodes[prec]);
 	   cdp != NULL; cdp = ctf_list_next (cdp))
 	{
-	  ctf_file_t *rfp = fp;
+	  ctf_dict_t *rfp = fp;
 	  const ctf_type_t *tp = ctf_lookup_by_id (&rfp, cdp->cd_type);
 	  const char *name = ctf_strptr (rfp, tp->ctt_name);
 
@@ -837,7 +837,7 @@ ctf_type_aname (ctf_file_t *fp, ctf_id_t type)
    the actual number of bytes (not including \0) needed to format the name.  */
 
 ssize_t
-ctf_type_lname (ctf_file_t *fp, ctf_id_t type, char *buf, size_t len)
+ctf_type_lname (ctf_dict_t *fp, ctf_id_t type, char *buf, size_t len)
 {
   char *str = ctf_type_aname (fp, type);
   size_t slen;
@@ -859,17 +859,17 @@ ctf_type_lname (ctf_file_t *fp, ctf_id_t type, char *buf, size_t len)
    is too small, return NULL: the ECTF_NAMELEN error is set on 'fp' for us.  */
 
 char *
-ctf_type_name (ctf_file_t *fp, ctf_id_t type, char *buf, size_t len)
+ctf_type_name (ctf_dict_t *fp, ctf_id_t type, char *buf, size_t len)
 {
   ssize_t rv = ctf_type_lname (fp, type, buf, len);
   return (rv >= 0 && (size_t) rv < len ? buf : NULL);
 }
 
 /* Lookup the given type ID and return its raw, unadorned, undecorated name.
-   The name will live as long as its ctf_file_t does.  */
+   The name will live as long as its ctf_dict_t does.  */
 
 const char *
-ctf_type_name_raw (ctf_file_t *fp, ctf_id_t type)
+ctf_type_name_raw (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
 
@@ -883,7 +883,7 @@ ctf_type_name_raw (ctf_file_t *fp, ctf_id_t type)
    new dynamically-allocated string.  */
 
 char *
-ctf_type_aname_raw (ctf_file_t *fp, ctf_id_t type)
+ctf_type_aname_raw (ctf_dict_t *fp, ctf_id_t type)
 {
   const char *name = ctf_type_name_raw (fp, type);
 
@@ -897,7 +897,7 @@ ctf_type_aname_raw (ctf_file_t *fp, ctf_id_t type)
    of the type storage in bytes.  */
 
 ssize_t
-ctf_type_size (ctf_file_t *fp, ctf_id_t type)
+ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
   ssize_t size;
@@ -947,10 +947,10 @@ ctf_type_size (ctf_file_t *fp, ctf_id_t type)
    XXX may need arch-dependent attention.  */
 
 ssize_t
-ctf_type_align (ctf_file_t *fp, ctf_id_t type)
+ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   int kind;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
@@ -1039,7 +1039,7 @@ ctf_type_align (ctf_file_t *fp, ctf_id_t type)
 /* Return the kind (CTF_K_* constant) for the specified type ID.  */
 
 int
-ctf_type_kind_unsliced (ctf_file_t *fp, ctf_id_t type)
+ctf_type_kind_unsliced (ctf_dict_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
 
@@ -1053,7 +1053,7 @@ ctf_type_kind_unsliced (ctf_file_t *fp, ctf_id_t type)
    Slices are considered to be of the same kind as the type sliced.  */
 
 int
-ctf_type_kind (ctf_file_t *fp, ctf_id_t type)
+ctf_type_kind (ctf_dict_t *fp, ctf_id_t type)
 {
   int kind;
 
@@ -1073,7 +1073,7 @@ ctf_type_kind (ctf_file_t *fp, ctf_id_t type)
 /* Return the kind of this type, except, for forwards, return the kind of thing
    this is a forward to.  */
 int
-ctf_type_kind_forwarded (ctf_file_t *fp, ctf_id_t type)
+ctf_type_kind_forwarded (ctf_dict_t *fp, ctf_id_t type)
 {
   int kind;
   const ctf_type_t *tp;
@@ -1094,9 +1094,9 @@ ctf_type_kind_forwarded (ctf_file_t *fp, ctf_id_t type)
    then return the ID of the type to which it refers.  */
 
 ctf_id_t
-ctf_type_reference (ctf_file_t *fp, ctf_id_t type)
+ctf_type_reference (ctf_dict_t *fp, ctf_id_t type)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
@@ -1139,12 +1139,12 @@ ctf_type_reference (ctf_file_t *fp, ctf_id_t type)
    instead.  This helps with cases where the CTF data includes "struct foo *"
    but not "foo_t *" and the user accesses "foo_t *" in the debugger.
 
-   XXX what about parent containers?  */
+   XXX what about parent dicts?  */
 
 ctf_id_t
-ctf_type_pointer (ctf_file_t *fp, ctf_id_t type)
+ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   ctf_id_t ntype;
 
   if (ctf_lookup_by_id (&fp, type) == NULL)
@@ -1168,9 +1168,9 @@ ctf_type_pointer (ctf_file_t *fp, ctf_id_t type)
 /* Return the encoding for the specified INTEGER or FLOAT.  */
 
 int
-ctf_type_encoding (ctf_file_t *fp, ctf_id_t type, ctf_encoding_t *ep)
+ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   ctf_dtdef_t *dtd;
   const ctf_type_t *tp;
   ssize_t increment;
@@ -1247,7 +1247,7 @@ ctf_type_encoding (ctf_file_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 }
 
 int
-ctf_type_cmp (ctf_file_t *lfp, ctf_id_t ltype, ctf_file_t *rfp,
+ctf_type_cmp (ctf_dict_t *lfp, ctf_id_t ltype, ctf_dict_t *rfp,
 	      ctf_id_t rtype)
 {
   int rval;
@@ -1284,8 +1284,8 @@ ctf_type_cmp (ctf_file_t *lfp, ctf_id_t ltype, ctf_file_t *rfp,
    unions) member count.  */
 
 int
-ctf_type_compat (ctf_file_t *lfp, ctf_id_t ltype,
-		 ctf_file_t *rfp, ctf_id_t rtype)
+ctf_type_compat (ctf_dict_t *lfp, ctf_id_t ltype,
+		 ctf_dict_t *rfp, ctf_id_t rtype)
 {
   const ctf_type_t *ltp, *rtp;
   ctf_encoding_t le, re;
@@ -1360,9 +1360,9 @@ ctf_type_compat (ctf_file_t *lfp, ctf_id_t ltype,
    enumerators in an ENUM.  */
 
 int
-ctf_member_count (ctf_file_t *fp, ctf_id_t type)
+ctf_member_count (ctf_dict_t *fp, ctf_id_t type)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   uint32_t kind;
 
@@ -1383,10 +1383,10 @@ ctf_member_count (ctf_file_t *fp, ctf_id_t type)
 /* Return the type and offset for a given member of a STRUCT or UNION.  */
 
 int
-ctf_member_info (ctf_file_t *fp, ctf_id_t type, const char *name,
+ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
 		 ctf_membinfo_t *mip)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   ctf_dtdef_t *dtd;
   ssize_t size, increment;
@@ -1459,9 +1459,9 @@ ctf_member_info (ctf_file_t *fp, ctf_id_t type, const char *name,
 /* Return the array type, index, and size information for the specified ARRAY.  */
 
 int
-ctf_array_info (ctf_file_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
+ctf_array_info (ctf_dict_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   const ctf_array_t *ap;
   const ctf_dtdef_t *dtd;
@@ -1493,9 +1493,9 @@ ctf_array_info (ctf_file_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
    matching name can be found.  Otherwise NULL is returned.  */
 
 const char *
-ctf_enum_name (ctf_file_t *fp, ctf_id_t type, int value)
+ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int value)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   const ctf_enum_t *ep;
   const ctf_dtdef_t *dtd;
@@ -1546,9 +1546,9 @@ ctf_enum_name (ctf_file_t *fp, ctf_id_t type, int value)
    matching name can be found.  Otherwise CTF_ERR is returned.  */
 
 int
-ctf_enum_value (ctf_file_t * fp, ctf_id_t type, const char *name, int *valp)
+ctf_enum_value (ctf_dict_t * fp, ctf_id_t type, const char *name, int *valp)
 {
-  ctf_file_t *ofp = fp;
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   const ctf_enum_t *ep;
   const ctf_dtdef_t *dtd;
@@ -1607,7 +1607,7 @@ ctf_enum_value (ctf_file_t * fp, ctf_id_t type, const char *name, int *valp)
    arg counts for that function.  */
 
 int
-ctf_func_type_info (ctf_file_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
+ctf_func_type_info (ctf_dict_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
 {
   const ctf_type_t *tp;
   uint32_t kind;
@@ -1649,7 +1649,7 @@ ctf_func_type_info (ctf_file_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
    function.  */
 
 int
-ctf_func_type_args (ctf_file_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv)
+ctf_func_type_args (ctf_dict_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv)
 {
   const ctf_type_t *tp;
   const uint32_t *args;
@@ -1686,7 +1686,7 @@ ctf_func_type_args (ctf_file_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv
    returns non-zero, we abort and percolate the error code back up to the top.  */
 
 static int
-ctf_type_rvisit (ctf_file_t *fp, ctf_id_t type, ctf_visit_f *func,
+ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
 		 void *arg, const char *name, unsigned long offset, int depth)
 {
   ctf_id_t otype = type;
@@ -1765,7 +1765,7 @@ ctf_type_rvisit (ctf_file_t *fp, ctf_id_t type, ctf_visit_f *func,
 /* Recursively visit the members of any type.  We pass the name, member
  type, and offset of each member to the specified callback function.  */
 int
-ctf_type_visit (ctf_file_t *fp, ctf_id_t type, ctf_visit_f *func, void *arg)
+ctf_type_visit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func, void *arg)
 {
   return (ctf_type_rvisit (fp, type, func, arg, "", 0, 0));
 }

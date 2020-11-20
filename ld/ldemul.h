@@ -110,7 +110,7 @@ extern int ldemul_emit_ctf_early
   (void);
 /* Called from per-target code to examine the strtab and symtab.  */
 extern void ldemul_examine_strtab_for_ctf
-  (struct ctf_file *, struct elf_sym_strtab *, bfd_size_type,
+  (struct ctf_dict *, struct elf_sym_strtab *, bfd_size_type,
    struct elf_strtab_hash *);
 extern bfd_boolean ldemul_print_symbol
   (struct bfd_link_hash_entry *hash_entry, void *ptr);
@@ -236,7 +236,7 @@ typedef struct ld_emulation_xfer_struct {
      waits until 'late'. (Late mode needs explicit support at per-target link
      time to get called at all).  If set, called by ld when the examine_strtab
      bfd_link_callback is invoked by per-target code.  */
-  void (*examine_strtab_for_ctf) (struct ctf_file *, struct elf_sym_strtab *,
+  void (*examine_strtab_for_ctf) (struct ctf_dict *, struct elf_sym_strtab *,
 				  bfd_size_type, struct elf_strtab_hash *);
 
   /* Called when printing a symbol to the map file.   AIX uses this

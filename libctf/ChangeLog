@@ -1,3 +1,48 @@
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h: Rename ctf_file_t to ctf_dict_t: all declarations
+	adjusted.
+	(ctf_fileops): Rename to...
+	(ctf_dictops): ... this.
+	(ctf_dedup_t) <cd_id_to_file_t>: Rename to...
+	<cd_id_to_dict_t>: ... this.
+	(ctf_file_t): Fix outdated comment.
+	<ctf_fileops>: Rename to...
+	<ctf_dictops>: ... this.
+	(struct ctf_archive_internal) <ctfi_file>: Rename to...
+	<ctfi_dict>: ... this.
+	* ctf-archive.c: Rename ctf_file_t to ctf_dict_t.
+	Rename ctf_archive.ctfa_nfiles to ctfa_ndicts.
+	Rename ctf_file_close to ctf_dict_close.  All users adjusted.
+	* ctf-create.c: Likewise.  Refer to CTF dicts, not CTF containers.
+	(ctf_bundle_t) <ctb_file>: Rename to...
+	<ctb_dict): ... this.
+	* ctf-decl.c: Rename ctf_file_t to ctf_dict_t.
+	* ctf-dedup.c: Likewise.  Rename ctf_file_close to
+	ctf_dict_close. Refer to CTF dicts, not CTF containers.
+	* ctf-dump.c: Likewise.
+	* ctf-error.c: Likewise.
+	* ctf-hash.c: Likewise.
+	* ctf-inlines.h: Likewise.
+	* ctf-labels.c: Likewise.
+	* ctf-link.c: Likewise.
+	* ctf-lookup.c: Likewise.
+	* ctf-open-bfd.c: Likewise.
+	* ctf-string.c: Likewise.
+	* ctf-subr.c: Likewise.
+	* ctf-types.c: Likewise.
+	* ctf-util.c: Likewise.
+	* ctf-open.c: Likewise.
+	(ctf_file_close): Rename to...
+	(ctf_dict_close): ...this.
+	(ctf_file_close): New trivial wrapper around ctf_dict_close, for
+	compatibility.
+	(ctf_parent_file): Rename to...
+	(ctf_parent_dict): ... this.
+	(ctf_parent_file): New trivial wrapper around ctf_parent_dict, for
+	compatibility.
+	* libctf.ver: Add ctf_dict_close and ctf_parent_dict.
+
 2020-10-21  Tom Tromey  <tromey@adacore.com>
 
 	* mkerrors.sed: Remove.

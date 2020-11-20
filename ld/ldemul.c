@@ -418,7 +418,7 @@ ldemul_emit_ctf_early (void)
 }
 
 void
-ldemul_examine_strtab_for_ctf (struct ctf_file *ctf_output,
+ldemul_examine_strtab_for_ctf (struct ctf_dict *ctf_output,
 			       struct elf_sym_strtab *syms,
 			       bfd_size_type symcount,
 			       struct elf_strtab_hash *symstrtab)

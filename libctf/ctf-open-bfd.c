@@ -209,10 +209,10 @@ err: _libctf_unused_;
 }
 
 /* Open the specified file descriptor and return a pointer to a CTF archive that
-   contains one or more CTF containers.  The file can be an ELF file, a raw CTF
-   file, or a CTF archive.  The caller is responsible for closing the file
-   descriptor when it is no longer needed.  If this is an ELF file, TARGET, if
-   non-NULL, should be the name of a suitable BFD target.  */
+   contains one or more CTF dicts.  The file can be an ELF file, a file
+   containing raw CTF, or a CTF archive.  The caller is responsible for closing
+   the file descriptor when it is no longer needed.  If this is an ELF file,
+   TARGET, if non-NULL, should be the name of a suitable BFD target.  */
 
 ctf_archive_t *
 ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
@@ -245,7 +245,7 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
       && (ctfhdr.ctp_magic == CTF_MAGIC
 	  || ctfhdr.ctp_magic == bswap_16 (CTF_MAGIC)))
     {
-      ctf_file_t *fp = NULL;
+      ctf_dict_t *fp = NULL;
       void *data;
 
       if ((data = ctf_mmap (st.st_size, 0, fd)) == NULL)
@@ -316,7 +316,7 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
   return arci;
 }
 
-/* Open the specified file and return a pointer to a CTF container.  The file
+/* Open the specified file and return a pointer to a CTF dict.  The file
    can be either an ELF file or raw CTF file.  This is just a convenient
    wrapper around ctf_fdopen() for callers.  */
 

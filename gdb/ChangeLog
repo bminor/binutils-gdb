@@ -1,3 +1,8 @@
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctfread.c: Change uses of ctf_file_t to ctf_dict_t.
+	(ctf_fp_info::~ctf_fp_info): Call ctf_dict_close, not ctf_file_close.
+
 2020-11-20  Pedro Alves  <pedro@palves.net>
 
 	* language.c (language_arch_info::lookup_primitive_type): Use

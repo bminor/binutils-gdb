@@ -1,3 +1,16 @@
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ldlang.c (ctf_output): This is a ctf_dict_t now.
+	(lang_ctf_errs_warnings): Rename ctf_file_t to ctf_dict_t.
+	(ldlang_open_ctf): Adjust comment.
+	(lang_merge_ctf): Use ctf_dict_close, not ctf_file_close.
+	* ldelfgen.h (ldelf_examine_strtab_for_ctf): Rename ctf_file_t to
+	ctf_dict_t.  Change opaque declaration accordingly.
+	* ldelfgen.c (ldelf_examine_strtab_for_ctf): Adjust.
+	* ldemul.h (examine_strtab_for_ctf): Likewise.
+	(ldemul_examine_strtab_for_ctf): Likewise.
+	* ldeuml.c (ldemul_examine_strtab_for_ctf): Likewise.
+
 2020-11-20  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* testsuite/ld-elf/retain3.s: Move symbolic reference into writeable

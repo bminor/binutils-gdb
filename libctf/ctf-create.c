@@ -38,7 +38,7 @@
    at a time.  */
 
 static int
-ctf_grow_ptrtab (ctf_file_t *fp)
+ctf_grow_ptrtab (ctf_dict_t *fp)
 {
   size_t new_ptrtab_len = fp->ctf_ptrtab_len;
 
@@ -66,12 +66,12 @@ ctf_grow_ptrtab (ctf_file_t *fp)
   return 0;
 }
 
-/* To create an empty CTF container, we just declare a zeroed header and call
-   ctf_bufopen() on it.  If ctf_bufopen succeeds, we mark the new container r/w
-   and initialize the dynamic members.  We start assigning type IDs at 1 because
+/* To create an empty CTF dict, we just declare a zeroed header and call
+   ctf_bufopen() on it.  If ctf_bufopen succeeds, we mark the new dict r/w and
+   initialize the dynamic members.  We start assigning type IDs at 1 because
    type ID 0 is used as a sentinel and a not-found indicator.  */
 
-ctf_file_t *
+ctf_dict_t *
 ctf_create (int *errp)
 {
   static const ctf_header_t hdr = { .cth_preamble = { CTF_MAGIC, CTF_VERSION, 0 } };
@@ -80,7 +80,7 @@ ctf_create (int *errp)
   ctf_dynhash_t *dvhash;
   ctf_dynhash_t *structs = NULL, *unions = NULL, *enums = NULL, *names = NULL;
   ctf_sect_t cts;
-  ctf_file_t *fp;
+  ctf_dict_t *fp;
 
   libctf_init_debug();
   dthash = ctf_dynhash_create (ctf_hash_integer, ctf_hash_eq_integer,
@@ -137,7 +137,7 @@ ctf_create (int *errp)
   if (ctf_grow_ptrtab (fp) < 0)
     {
       ctf_set_open_errno (errp, ctf_errno (fp));
-      ctf_file_close (fp);
+      ctf_dict_close (fp);
       return NULL;
     }
 
@@ -156,7 +156,7 @@ ctf_create (int *errp)
 }
 
 static unsigned char *
-ctf_copy_smembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
+ctf_copy_smembers (ctf_dict_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 {
   ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
   ctf_member_t ctm;
@@ -181,7 +181,7 @@ ctf_copy_smembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 }
 
 static unsigned char *
-ctf_copy_lmembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
+ctf_copy_lmembers (ctf_dict_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 {
   ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
   ctf_lmember_t ctlm;
@@ -207,7 +207,7 @@ ctf_copy_lmembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 }
 
 static unsigned char *
-ctf_copy_emembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
+ctf_copy_emembers (ctf_dict_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 {
   ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
   ctf_enum_t cte;
@@ -230,7 +230,7 @@ ctf_copy_emembers (ctf_file_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
 
 typedef struct ctf_sort_var_arg_cb
 {
-  ctf_file_t *fp;
+  ctf_dict_t *fp;
   ctf_strs_t *strtab;
 } ctf_sort_var_arg_cb_t;
 
@@ -247,7 +247,7 @@ ctf_sort_var (const void *one_, const void *two_, void *arg_)
 
 /* Compatibility: just update the threshold for ctf_discard.  */
 int
-ctf_update (ctf_file_t *fp)
+ctf_update (ctf_dict_t *fp)
 {
   if (!(fp->ctf_flags & LCTF_RDWR))
     return (ctf_set_errno (fp, ECTF_RDONLY));
@@ -256,20 +256,20 @@ ctf_update (ctf_file_t *fp)
   return 0;
 }
 
-/* If the specified CTF container is writable and has been modified, reload this
-   container with the updated type definitions, ready for serialization.  In
-   order to make this code and the rest of libctf as simple as possible, we
-   perform updates by taking the dynamic type definitions and creating an
-   in-memory CTF file containing the definitions, and then call
-   ctf_simple_open_internal() on it.  We perform one extra trick here for the
-   benefit of callers and to keep our code simple: ctf_simple_open_internal()
-   will return a new ctf_file_t, but we want to keep the fp constant for the
-   caller, so after ctf_simple_open_internal() returns, we use memcpy to swap
-   the interior of the old and new ctf_file_t's, and then free the old.  */
+/* If the specified CTF dict is writable and has been modified, reload this dict
+   with the updated type definitions, ready for serialization.  In order to make
+   this code and the rest of libctf as simple as possible, we perform updates by
+   taking the dynamic type definitions and creating an in-memory CTF dict
+   containing the definitions, and then call ctf_simple_open_internal() on it.
+   We perform one extra trick here for the benefit of callers and to keep our
+   code simple: ctf_simple_open_internal() will return a new ctf_dict_t, but we
+   want to keep the fp constant for the caller, so after
+   ctf_simple_open_internal() returns, we use memcpy to swap the interior of the
+   old and new ctf_dict_t's, and then free the old.  */
 int
-ctf_serialize (ctf_file_t *fp)
+ctf_serialize (ctf_dict_t *fp)
 {
-  ctf_file_t ofp, *nfp;
+  ctf_dict_t ofp, *nfp;
   ctf_header_t hdr, *hdrp;
   ctf_dtdef_t *dtd;
   ctf_dvdef_t *dvd;
@@ -508,8 +508,8 @@ ctf_serialize (ctf_file_t *fp)
   buf_size += hdrp->cth_strlen;
   free (strtab.cts_strs);
 
-  /* Finally, we are ready to ctf_simple_open() the new container.  If this
-     is successful, we then switch nfp and fp and free the old container.  */
+  /* Finally, we are ready to ctf_simple_open() the new dict.  If this is
+     successful, we then switch nfp and fp and free the old dict.  */
 
   if ((nfp = ctf_simple_open_internal ((char *) buf, buf_size, NULL, 0,
 				       0, NULL, 0, fp->ctf_syn_ext_strtab,
@@ -591,18 +591,18 @@ ctf_serialize (ctf_file_t *fp)
   fp->ctf_enums.ctn_writable = NULL;
   fp->ctf_names.ctn_writable = NULL;
 
-  memcpy (&ofp, fp, sizeof (ctf_file_t));
-  memcpy (fp, nfp, sizeof (ctf_file_t));
-  memcpy (nfp, &ofp, sizeof (ctf_file_t));
+  memcpy (&ofp, fp, sizeof (ctf_dict_t));
+  memcpy (fp, nfp, sizeof (ctf_dict_t));
+  memcpy (nfp, &ofp, sizeof (ctf_dict_t));
 
   nfp->ctf_refcnt = 1;		/* Force nfp to be freed.  */
-  ctf_file_close (nfp);
+  ctf_dict_close (nfp);
 
   return 0;
 }
 
 ctf_names_t *
-ctf_name_table (ctf_file_t *fp, int kind)
+ctf_name_table (ctf_dict_t *fp, int kind)
 {
   switch (kind)
     {
@@ -618,7 +618,7 @@ ctf_name_table (ctf_file_t *fp, int kind)
 }
 
 int
-ctf_dtd_insert (ctf_file_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
+ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 {
   const char *name;
   if (ctf_dynhash_insert (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type,
@@ -642,7 +642,7 @@ ctf_dtd_insert (ctf_file_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 }
 
 void
-ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
+ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 {
   ctf_dmdef_t *dmd, *nmd;
   int kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
@@ -687,14 +687,14 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
 }
 
 ctf_dtdef_t *
-ctf_dtd_lookup (const ctf_file_t *fp, ctf_id_t type)
+ctf_dtd_lookup (const ctf_dict_t *fp, ctf_id_t type)
 {
   return (ctf_dtdef_t *)
     ctf_dynhash_lookup (fp->ctf_dthash, (void *) (uintptr_t) type);
 }
 
 ctf_dtdef_t *
-ctf_dynamic_type (const ctf_file_t *fp, ctf_id_t id)
+ctf_dynamic_type (const ctf_dict_t *fp, ctf_id_t id)
 {
   ctf_id_t idx;
 
@@ -712,7 +712,7 @@ ctf_dynamic_type (const ctf_file_t *fp, ctf_id_t id)
 }
 
 int
-ctf_dvd_insert (ctf_file_t *fp, ctf_dvdef_t *dvd)
+ctf_dvd_insert (ctf_dict_t *fp, ctf_dvdef_t *dvd)
 {
   if (ctf_dynhash_insert (fp->ctf_dvhash, dvd->dvd_name, dvd) < 0)
     return -1;
@@ -721,7 +721,7 @@ ctf_dvd_insert (ctf_file_t *fp, ctf_dvdef_t *dvd)
 }
 
 void
-ctf_dvd_delete (ctf_file_t *fp, ctf_dvdef_t *dvd)
+ctf_dvd_delete (ctf_dict_t *fp, ctf_dvdef_t *dvd)
 {
   ctf_dynhash_remove (fp->ctf_dvhash, dvd->dvd_name);
   free (dvd->dvd_name);
@@ -731,20 +731,20 @@ ctf_dvd_delete (ctf_file_t *fp, ctf_dvdef_t *dvd)
 }
 
 ctf_dvdef_t *
-ctf_dvd_lookup (const ctf_file_t *fp, const char *name)
+ctf_dvd_lookup (const ctf_dict_t *fp, const char *name)
 {
   return (ctf_dvdef_t *) ctf_dynhash_lookup (fp->ctf_dvhash, name);
 }
 
 /* Discard all of the dynamic type definitions and variable definitions that
-   have been added to the container since the last call to ctf_update().  We
-   locate such types by scanning the dtd list and deleting elements that have
-   type IDs greater than ctf_dtoldid, which is set by ctf_update(), above, and
-   by scanning the variable list and deleting elements that have update IDs
-   equal to the current value of the last-update snapshot count (indicating that
-   they were added after the most recent call to ctf_update()).  */
+   have been added to the dict since the last call to ctf_update().  We locate
+   such types by scanning the dtd list and deleting elements that have type IDs
+   greater than ctf_dtoldid, which is set by ctf_update(), above, and by
+   scanning the variable list and deleting elements that have update IDs equal
+   to the current value of the last-update snapshot count (indicating that they
+   were added after the most recent call to ctf_update()).  */
 int
-ctf_discard (ctf_file_t *fp)
+ctf_discard (ctf_dict_t *fp)
 {
   ctf_snapshot_id_t last_update =
     { fp->ctf_dtoldid,
@@ -758,7 +758,7 @@ ctf_discard (ctf_file_t *fp)
 }
 
 ctf_snapshot_id_t
-ctf_snapshot (ctf_file_t *fp)
+ctf_snapshot (ctf_dict_t *fp)
 {
   ctf_snapshot_id_t snapid;
   snapid.dtd_id = fp->ctf_typemax;
@@ -768,7 +768,7 @@ ctf_snapshot (ctf_file_t *fp)
 
 /* Like ctf_discard(), only discards everything after a particular ID.  */
 int
-ctf_rollback (ctf_file_t *fp, ctf_snapshot_id_t id)
+ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 {
   ctf_dtdef_t *dtd, *ntd;
   ctf_dvdef_t *dvd, *nvd;
@@ -826,7 +826,7 @@ ctf_rollback (ctf_file_t *fp, ctf_snapshot_id_t id)
 }
 
 static ctf_id_t
-ctf_add_generic (ctf_file_t *fp, uint32_t flag, const char *name, int kind,
+ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
 		 ctf_dtdef_t **rp)
 {
   ctf_dtdef_t *dtd;
@@ -893,7 +893,7 @@ clp2 (size_t x)
 }
 
 ctf_id_t
-ctf_add_encoded (ctf_file_t *fp, uint32_t flag,
+ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
 		 const char *name, const ctf_encoding_t *ep, uint32_t kind)
 {
   ctf_dtdef_t *dtd;
@@ -914,11 +914,11 @@ ctf_add_encoded (ctf_file_t *fp, uint32_t flag,
 }
 
 ctf_id_t
-ctf_add_reftype (ctf_file_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
+ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
-  ctf_file_t *tmp = fp;
+  ctf_dict_t *tmp = fp;
   int child = fp->ctf_flags & LCTF_CHILD;
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
@@ -963,7 +963,7 @@ ctf_add_reftype (ctf_file_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
 }
 
 ctf_id_t
-ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
+ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
 	       const ctf_encoding_t *ep)
 {
   ctf_dtdef_t *dtd;
@@ -971,7 +971,7 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
   ctf_id_t type;
   int kind;
   const ctf_type_t *tp;
-  ctf_file_t *tmp = fp;
+  ctf_dict_t *tmp = fp;
 
   if (ep == NULL)
     return (ctf_set_errno (fp, EINVAL));
@@ -1011,31 +1011,31 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
 }
 
 ctf_id_t
-ctf_add_integer (ctf_file_t *fp, uint32_t flag,
+ctf_add_integer (ctf_dict_t *fp, uint32_t flag,
 		 const char *name, const ctf_encoding_t *ep)
 {
   return (ctf_add_encoded (fp, flag, name, ep, CTF_K_INTEGER));
 }
 
 ctf_id_t
-ctf_add_float (ctf_file_t *fp, uint32_t flag,
+ctf_add_float (ctf_dict_t *fp, uint32_t flag,
 	       const char *name, const ctf_encoding_t *ep)
 {
   return (ctf_add_encoded (fp, flag, name, ep, CTF_K_FLOAT));
 }
 
 ctf_id_t
-ctf_add_pointer (ctf_file_t *fp, uint32_t flag, ctf_id_t ref)
+ctf_add_pointer (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
 {
   return (ctf_add_reftype (fp, flag, ref, CTF_K_POINTER));
 }
 
 ctf_id_t
-ctf_add_array (ctf_file_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
+ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
-  ctf_file_t *tmp = fp;
+  ctf_dict_t *tmp = fp;
 
   if (arp == NULL)
     return (ctf_set_errno (fp, EINVAL));
@@ -1059,7 +1059,7 @@ ctf_add_array (ctf_file_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
 }
 
 int
-ctf_set_array (ctf_file_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
+ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
 {
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, type);
 
@@ -1077,14 +1077,14 @@ ctf_set_array (ctf_file_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
 }
 
 ctf_id_t
-ctf_add_function (ctf_file_t *fp, uint32_t flag,
+ctf_add_function (ctf_dict_t *fp, uint32_t flag,
 		  const ctf_funcinfo_t *ctc, const ctf_id_t *argv)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
   uint32_t vlen;
   uint32_t *vdat = NULL;
-  ctf_file_t *tmp = fp;
+  ctf_dict_t *tmp = fp;
   size_t i;
 
   if (ctc == NULL || (ctc->ctc_flags & ~CTF_FUNC_VARARG) != 0
@@ -1134,7 +1134,7 @@ ctf_add_function (ctf_file_t *fp, uint32_t flag,
 }
 
 ctf_id_t
-ctf_add_struct_sized (ctf_file_t *fp, uint32_t flag, const char *name,
+ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 		      size_t size)
 {
   ctf_dtdef_t *dtd;
@@ -1165,13 +1165,13 @@ ctf_add_struct_sized (ctf_file_t *fp, uint32_t flag, const char *name,
 }
 
 ctf_id_t
-ctf_add_struct (ctf_file_t *fp, uint32_t flag, const char *name)
+ctf_add_struct (ctf_dict_t *fp, uint32_t flag, const char *name)
 {
   return (ctf_add_struct_sized (fp, flag, name, 0));
 }
 
 ctf_id_t
-ctf_add_union_sized (ctf_file_t *fp, uint32_t flag, const char *name,
+ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 		     size_t size)
 {
   ctf_dtdef_t *dtd;
@@ -1202,13 +1202,13 @@ ctf_add_union_sized (ctf_file_t *fp, uint32_t flag, const char *name,
 }
 
 ctf_id_t
-ctf_add_union (ctf_file_t *fp, uint32_t flag, const char *name)
+ctf_add_union (ctf_dict_t *fp, uint32_t flag, const char *name)
 {
   return (ctf_add_union_sized (fp, flag, name, 0));
 }
 
 ctf_id_t
-ctf_add_enum (ctf_file_t *fp, uint32_t flag, const char *name)
+ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
@@ -1230,7 +1230,7 @@ ctf_add_enum (ctf_file_t *fp, uint32_t flag, const char *name)
 }
 
 ctf_id_t
-ctf_add_enum_encoded (ctf_file_t *fp, uint32_t flag, const char *name,
+ctf_add_enum_encoded (ctf_dict_t *fp, uint32_t flag, const char *name,
 		      const ctf_encoding_t *ep)
 {
   ctf_id_t type = 0;
@@ -1258,7 +1258,7 @@ ctf_add_enum_encoded (ctf_file_t *fp, uint32_t flag, const char *name,
 }
 
 ctf_id_t
-ctf_add_forward (ctf_file_t *fp, uint32_t flag, const char *name,
+ctf_add_forward (ctf_dict_t *fp, uint32_t flag, const char *name,
 		 uint32_t kind)
 {
   ctf_dtdef_t *dtd;
@@ -1286,12 +1286,12 @@ ctf_add_forward (ctf_file_t *fp, uint32_t flag, const char *name,
 }
 
 ctf_id_t
-ctf_add_typedef (ctf_file_t *fp, uint32_t flag, const char *name,
+ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
 		 ctf_id_t ref)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
-  ctf_file_t *tmp = fp;
+  ctf_dict_t *tmp = fp;
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
@@ -1310,25 +1310,25 @@ ctf_add_typedef (ctf_file_t *fp, uint32_t flag, const char *name,
 }
 
 ctf_id_t
-ctf_add_volatile (ctf_file_t *fp, uint32_t flag, ctf_id_t ref)
+ctf_add_volatile (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
 {
   return (ctf_add_reftype (fp, flag, ref, CTF_K_VOLATILE));
 }
 
 ctf_id_t
-ctf_add_const (ctf_file_t *fp, uint32_t flag, ctf_id_t ref)
+ctf_add_const (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
 {
   return (ctf_add_reftype (fp, flag, ref, CTF_K_CONST));
 }
 
 ctf_id_t
-ctf_add_restrict (ctf_file_t *fp, uint32_t flag, ctf_id_t ref)
+ctf_add_restrict (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref)
 {
   return (ctf_add_reftype (fp, flag, ref, CTF_K_RESTRICT));
 }
 
 int
-ctf_add_enumerator (ctf_file_t *fp, ctf_id_t enid, const char *name,
+ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 		    int value)
 {
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, enid);
@@ -1386,7 +1386,7 @@ ctf_add_enumerator (ctf_file_t *fp, ctf_id_t enid, const char *name,
 }
 
 int
-ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
+ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 		       ctf_id_t type, unsigned long bit_offset)
 {
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, souid);
@@ -1530,7 +1530,7 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 }
 
 int
-ctf_add_member_encoded (ctf_file_t *fp, ctf_id_t souid, const char *name,
+ctf_add_member_encoded (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 			ctf_id_t type, unsigned long bit_offset,
 			const ctf_encoding_t encoding)
 {
@@ -1548,17 +1548,17 @@ ctf_add_member_encoded (ctf_file_t *fp, ctf_id_t souid, const char *name,
 }
 
 int
-ctf_add_member (ctf_file_t *fp, ctf_id_t souid, const char *name,
+ctf_add_member (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 		ctf_id_t type)
 {
   return ctf_add_member_offset (fp, souid, name, type, (unsigned long) - 1);
 }
 
 int
-ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
+ctf_add_variable (ctf_dict_t *fp, const char *name, ctf_id_t ref)
 {
   ctf_dvdef_t *dvd;
-  ctf_file_t *tmp = fp;
+  ctf_dict_t *tmp = fp;
 
   if (!(fp->ctf_flags & LCTF_RDWR))
     return (ctf_set_errno (fp, ECTF_RDONLY));
@@ -1598,7 +1598,7 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
 
 typedef struct ctf_bundle
 {
-  ctf_file_t *ctb_file;		/* CTF container handle.  */
+  ctf_dict_t *ctb_dict;		/* CTF dict handle.  */
   ctf_id_t ctb_type;		/* CTF type identifier.  */
   ctf_dtdef_t *ctb_dtd;		/* CTF dynamic type definition (if any).  */
 } ctf_bundle_t;
@@ -1609,15 +1609,15 @@ enumcmp (const char *name, int value, void *arg)
   ctf_bundle_t *ctb = arg;
   int bvalue;
 
-  if (ctf_enum_value (ctb->ctb_file, ctb->ctb_type, name, &bvalue) < 0)
+  if (ctf_enum_value (ctb->ctb_dict, ctb->ctb_type, name, &bvalue) < 0)
     {
-      ctf_err_warn (ctb->ctb_file, 0, 0,
+      ctf_err_warn (ctb->ctb_dict, 0, 0,
 		    _("conflict due to enum %s iteration error"), name);
       return 1;
     }
   if (value != bvalue)
     {
-      ctf_err_warn (ctb->ctb_file, 1, ECTF_CONFLICT,
+      ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
 		    _("conflict due to enum value change: %i versus %i"),
 		    value, bvalue);
       return 1;
@@ -1630,7 +1630,7 @@ enumadd (const char *name, int value, void *arg)
 {
   ctf_bundle_t *ctb = arg;
 
-  return (ctf_add_enumerator (ctb->ctb_file, ctb->ctb_type,
+  return (ctf_add_enumerator (ctb->ctb_dict, ctb->ctb_type,
 			      name, value) < 0);
 }
 
@@ -1646,16 +1646,16 @@ membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
   if (name[0] == 0)
     return 0;
 
-  if (ctf_member_info (ctb->ctb_file, ctb->ctb_type, name, &ctm) < 0)
+  if (ctf_member_info (ctb->ctb_dict, ctb->ctb_type, name, &ctm) < 0)
     {
-      ctf_err_warn (ctb->ctb_file, 0, 0,
+      ctf_err_warn (ctb->ctb_dict, 0, 0,
 		    _("conflict due to struct member %s iteration error"),
 		    name);
       return 1;
     }
   if (ctm.ctm_offset != offset)
     {
-      ctf_err_warn (ctb->ctb_file, 1, ECTF_CONFLICT,
+      ctf_err_warn (ctb->ctb_dict, 1, ECTF_CONFLICT,
 		    _("conflict due to struct member %s offset change: "
 		      "%lx versus %lx"),
 		    name, ctm.ctm_offset, offset);
@@ -1672,12 +1672,12 @@ membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
   char *s = NULL;
 
   if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
-    return (ctf_set_errno (ctb->ctb_file, EAGAIN));
+    return (ctf_set_errno (ctb->ctb_dict, EAGAIN));
 
   if (name != NULL && (s = strdup (name)) == NULL)
     {
       free (dmd);
-      return (ctf_set_errno (ctb->ctb_file, EAGAIN));
+      return (ctf_set_errno (ctb->ctb_dict, EAGAIN));
     }
 
   /* For now, dmd_type is copied as the src_fp's type; it is reset to an
@@ -1689,22 +1689,22 @@ membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
 
   ctf_list_append (&ctb->ctb_dtd->dtd_u.dtu_members, dmd);
 
-  ctb->ctb_file->ctf_flags |= LCTF_DIRTY;
+  ctb->ctb_dict->ctf_flags |= LCTF_DIRTY;
   return 0;
 }
 
-/* The ctf_add_type routine is used to copy a type from a source CTF container
-   to a dynamic destination container.  This routine operates recursively by
+/* The ctf_add_type routine is used to copy a type from a source CTF dictionary
+   to a dynamic destination dictionary.  This routine operates recursively by
    following the source type's links and embedded member types.  If the
-   destination container already contains a named type which has the same
-   attributes, then we succeed and return this type but no changes occur.  */
+   destination dict already contains a named type which has the same attributes,
+   then we succeed and return this type but no changes occur.  */
 static ctf_id_t
-ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type,
-		       ctf_file_t *proc_tracking_fp)
+ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type,
+		       ctf_dict_t *proc_tracking_fp)
 {
   ctf_id_t dst_type = CTF_ERR;
   uint32_t dst_kind = CTF_K_UNKNOWN;
-  ctf_file_t *tmp_fp = dst_fp;
+  ctf_dict_t *tmp_fp = dst_fp;
   ctf_id_t tmp;
 
   const char *name;
@@ -1747,9 +1747,9 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 			      (void *) (uintptr_t) src_type))
 	return tmp;
 
-      /* If this type has already been added from this container, and is the same
-	 kind and (if a struct or union) has the same number of members, hand it
-	 straight back.  */
+      /* If this type has already been added from this dictionary, and is the
+	 same kind and (if a struct or union) has the same number of members,
+	 hand it straight back.  */
 
       if (ctf_type_kind_unsliced (tmp_fp, tmp) == (int) kind)
 	{
@@ -1769,9 +1769,9 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
   if (kind == CTF_K_FORWARD)
     forward_kind = src_tp->ctt_type;
 
-  /* If the source type has a name and is a root type (visible at the
-     top-level scope), lookup the name in the destination container and
-     verify that it is of the same kind before we do anything else.  */
+  /* If the source type has a name and is a root type (visible at the top-level
+     scope), lookup the name in the destination dictionary and verify that it is
+     of the same kind before we do anything else.  */
 
   if ((flag & CTF_ADD_ROOT) && name[0] != '\0'
       && (tmp = ctf_lookup_by_rawname (dst_fp, forward_kind, name)) != 0)
@@ -1803,7 +1803,7 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 	      && kind != CTF_K_UNION))
 	{
 	  ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
-			_("ctf_add_file(): conflict for type %s: "
+			_("ctf_add_type: conflict for type %s: "
 			  "kinds differ, new: %i; old (ID %lx): %i"),
 			name, kind, dst_type, dst_kind);
 	  return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
@@ -1821,7 +1821,7 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 
       if (dst_type != CTF_ERR)
 	{
-	  ctf_file_t *fp = dst_fp;
+	  ctf_dict_t *fp = dst_fp;
 
 	  if ((dst_tp = ctf_lookup_by_id (&fp, dst_type)) == NULL)
 	    return CTF_ERR;
@@ -1867,11 +1867,11 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 	}
     }
 
-  src.ctb_file = src_fp;
+  src.ctb_dict = src_fp;
   src.ctb_type = src_type;
   src.ctb_dtd = NULL;
 
-  dst.ctb_file = dst_fp;
+  dst.ctb_dict = dst_fp;
   dst.ctb_type = dst_type;
   dst.ctb_dtd = NULL;
 
@@ -2061,7 +2061,7 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 	for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
 	     dmd != NULL; dmd = ctf_list_next (dmd))
 	  {
-	    ctf_file_t *dst = dst_fp;
+	    ctf_dict_t *dst = dst_fp;
 	    ctf_id_t memb_type;
 
 	    memb_type = ctf_type_mapping (src_fp, dmd->dmd_type, &dst);
@@ -2142,7 +2142,7 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 }
 
 ctf_id_t
-ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
+ctf_add_type (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type)
 {
   ctf_id_t id;
 
@@ -2164,7 +2164,7 @@ ctf_add_type (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type)
 
 /* Write the compressed CTF data stream to the specified gzFile descriptor.  */
 int
-ctf_gzwrite (ctf_file_t *fp, gzFile fd)
+ctf_gzwrite (ctf_dict_t *fp, gzFile fd)
 {
   const unsigned char *buf;
   ssize_t resid;
@@ -2196,7 +2196,7 @@ ctf_gzwrite (ctf_file_t *fp, gzFile fd)
 /* Compress the specified CTF data stream and write it to the specified file
    descriptor.  */
 int
-ctf_compress_write (ctf_file_t *fp, int fd)
+ctf_compress_write (ctf_dict_t *fp, int fd)
 {
   unsigned char *buf;
   unsigned char *bp;
@@ -2263,7 +2263,7 @@ ret:
 /* Optionally compress the specified CTF data stream and return it as a new
    dynamically-allocated string.  */
 unsigned char *
-ctf_write_mem (ctf_file_t *fp, size_t *size, size_t threshold)
+ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
 {
   unsigned char *buf;
   unsigned char *bp;
@@ -2316,7 +2316,7 @@ ctf_write_mem (ctf_file_t *fp, size_t *size, size_t threshold)
 
 /* Write the uncompressed CTF data stream to the specified file descriptor.  */
 int
-ctf_write (ctf_file_t *fp, int fd)
+ctf_write (ctf_dict_t *fp, int fd)
 {
   const unsigned char *buf;
   ssize_t resid;
