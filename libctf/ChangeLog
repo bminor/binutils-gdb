@@ -1,5 +1,14 @@
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_dtd_insert): Set ENOMEM on the dict if out of memory.
+	(ctf_dvd_insert): Likewise.
+	(ctf_add_function): Report ECTF_RDONLY if this dict is not writable.
+	* ctf-subr.c (ctf_err_warn): Only debug-dump passed-in warnings if
+	the passed-in error code is nonzero: the error on the dict for
+	warnings may relate to a previous error.
+
+2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open.c (ctf_getsymsect): New.
 	(ctf_getstrsect): Likewise.
 	* libctf.ver: Add them.

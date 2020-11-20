@@ -225,10 +225,12 @@ ctf_err_warn (ctf_dict_t *fp, int is_warning, int err,
     }
   va_end (alist);
 
-  /* Include the error code only if there is one, and if this is not a warning.
+  /* Include the error code only if there is one; if this is not a warning,
+     only use the error code if it was explicitly passed and is nonzero.
      (Warnings may not have a meaningful error code, since the warning may not
      lead to unwinding up to the user.)  */
-  if (!is_warning && (err != 0 || (fp && ctf_errno (fp) != 0)))
+  if ((!is_warning && (err != 0 || (fp && ctf_errno (fp) != 0)))
+      || (is_warning && err != 0))
     ctf_dprintf ("%s: %s (%s)\n", is_warning ? _("error") : _("warning"),
 		 cew->cew_text, err != 0 ? ctf_errmsg (err)
 		 : ctf_errmsg (ctf_errno (fp)));

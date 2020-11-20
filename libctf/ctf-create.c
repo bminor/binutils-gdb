@@ -1257,7 +1257,10 @@ ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
   const char *name;
   if (ctf_dynhash_insert (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type,
 			  dtd) < 0)
-    return -1;
+    {
+      ctf_set_errno (fp, ENOMEM);
+      return -1;
+    }
 
   if (flag == CTF_ADD_ROOT && dtd->dtd_data.ctt_name
       && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
@@ -1268,6 +1271,7 @@ ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 	{
 	  ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t)
 			      dtd->dtd_type);
+	  ctf_set_errno (fp, ENOMEM);
 	  return -1;
 	}
     }
@@ -1349,7 +1353,10 @@ int
 ctf_dvd_insert (ctf_dict_t *fp, ctf_dvdef_t *dvd)
 {
   if (ctf_dynhash_insert (fp->ctf_dvhash, dvd->dvd_name, dvd) < 0)
-    return -1;
+    {
+      ctf_set_errno (fp, ENOMEM);
+      return -1;
+    }
   ctf_list_append (&fp->ctf_dvdefs, dvd);
   return 0;
 }
@@ -1720,6 +1727,9 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
   uint32_t *vdat = NULL;
   ctf_dict_t *tmp = fp;
   size_t i;
+
+  if (!(fp->ctf_flags & LCTF_RDWR))
+    return (ctf_set_errno (fp, ECTF_RDONLY));
 
   if (ctc == NULL || (ctc->ctc_flags & ~CTF_FUNC_VARARG) != 0
       || (ctc->ctc_argc != 0 && argv == NULL))
