@@ -1,3 +1,8 @@
+2020-11-20  Tom Tromey  <tromey@adacore.com>
+
+	* thread-pool.cc (thread_pool::set_thread_count): Ignore system
+	errors.
+
 2020-11-10  Tom Tromey  <tromey@adacore.com>
 
 	PR build/26848:

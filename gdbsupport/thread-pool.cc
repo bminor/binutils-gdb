@@ -25,6 +25,7 @@
 #include "gdbsupport/alt-stack.h"
 #include "gdbsupport/block-signals.h"
 #include <algorithm>
+#include <system_error>
 
 /* On the off chance that we have the pthread library on a Windows
    host, but std::thread is not using it, avoid calling
@@ -102,8 +103,19 @@ thread_pool::set_thread_count (size_t num_threads)
       block_signals blocker;
       for (size_t i = m_thread_count; i < num_threads; ++i)
 	{
-	  std::thread thread (&thread_pool::thread_function, this);
-	  thread.detach ();
+	  try
+	    {
+	      std::thread thread (&thread_pool::thread_function, this);
+	      thread.detach ();
+	    }
+	  catch (const std::system_error &)
+	    {
+	      /* libstdc++ may not implement std::thread, and will
+		 throw an exception on use.  It seems fine to ignore
+		 this, and any other sort of startup failure here.  */
+	      num_threads = i;
+	      break;
+	    }
 	}
     }
   /* If the new size is smaller, terminate some existing threads.  */
