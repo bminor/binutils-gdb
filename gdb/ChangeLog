@@ -1,3 +1,7 @@
+2020-12-21  Tom Tromey  <tom@tromey.com>
+
+	* expression.h (enum noside): Move earlier.
+
 2020-12-21  Peter Waller  <p@pwaller.net>
 
 	* interps.c (interpreter_exec_cmd): Restore streams pointers.

@@ -67,6 +67,28 @@ enum exp_opcode : uint8_t
     OP_UNUSED_LAST
   };
 
+/* Values of NOSIDE argument to eval_subexp.  */
+
+enum noside
+  {
+    EVAL_NORMAL,
+    EVAL_SKIP,			/* Only effect is to increment pos.
+				   Return type information where
+				   possible.  */
+    EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
+				   call any functions.  The value
+				   returned will have the correct
+				   type, and will have an
+				   approximately correct lvalue
+				   type (inaccuracy: anything that is
+				   listed as being in a register in
+				   the function in which it was
+				   declared will be lval_register).
+				   Ideally this would not even read
+				   target memory, but currently it
+				   does in many situations.  */
+  };
+
 union exp_element
   {
     enum exp_opcode opcode;
@@ -134,28 +156,6 @@ extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
 				  innermost_block_tracker * = nullptr);
 
 /* From eval.c */
-
-/* Values of NOSIDE argument to eval_subexp.  */
-
-enum noside
-  {
-    EVAL_NORMAL,
-    EVAL_SKIP,			/* Only effect is to increment pos.
-				   Return type information where
-				   possible.  */
-    EVAL_AVOID_SIDE_EFFECTS	/* Don't modify any variables or
-				   call any functions.  The value
-				   returned will have the correct
-				   type, and will have an
-				   approximately correct lvalue
-				   type (inaccuracy: anything that is
-				   listed as being in a register in
-				   the function in which it was
-				   declared will be lval_register).
-				   Ideally this would not even read
-				   target memory, but currently it
-				   does in many situations.  */
-  };
 
 extern struct value *evaluate_subexp_standard
   (struct type *, struct expression *, int *, enum noside);
