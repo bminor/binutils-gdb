@@ -1510,9 +1510,21 @@ bfd_boolean
 riscv_parse_subset (riscv_parse_subset_t *rps,
 		    const char *arch)
 {
-  const char *p = arch;
+  const char *p;
   size_t i;
 
+  for (p = arch; *p != '\0'; p++)
+    {
+      if (ISUPPER (*p))
+	{
+	  rps->error_handler
+	    (_("-march=%s: ISA string cannot contain uppercase letters"),
+	     arch);
+	  return FALSE;
+	}
+    }
+
+  p = arch;
   if (strncmp (p, "rv32", 4) == 0)
     {
       *rps->xlen = 32;

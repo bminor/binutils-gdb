@@ -1,5 +1,10 @@
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfxx-riscv.c (riscv_parse_subset): ISA string cannot contain
+	any uppercase letter.
+
+2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfxx-riscv.c: Re-indent codes, unify and improve the error
 	messages and comments.
 	(riscv_parse_prefixed_ext): Stop parsing the prefixed class

@@ -1,2 +1,2 @@
 .*Assembler messages:
-.*Fatal error: .*unknown (standard|z) ISA extension.*
+.*Fatal error: .*ISA string cannot contain uppercase letters
