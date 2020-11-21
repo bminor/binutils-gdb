@@ -1,3 +1,7 @@
+2020-11-21  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/vla-ptr.exp: Add XFAIL.
+
 2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/array-slices-bad.exp: New file.
