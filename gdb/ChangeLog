@@ -1,3 +1,7 @@
+2020-11-21  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (watchpoint_exp_is_const): Return bool.
+
 2020-11-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* unittests/gmp-utils-selftests.c (gdb_mpz_read_all_from_small):
