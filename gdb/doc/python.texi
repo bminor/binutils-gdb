@@ -5959,10 +5959,14 @@ displayed above the window.  This attribute can be modified.
 Remove all the contents of the window.
 @end defun
 
-@defun TuiWindow.write (@var{string})
+@defun TuiWindow.write (@var{string} @r{[}, @var{full_window}@r{]})
 Write @var{string} to the window.  @var{string} can contain ANSI
 terminal escape styling sequences; @value{GDBN} will translate these
 as appropriate for the terminal.
+
+If the @var{full_window} parameter is @code{True}, then @var{string}
+contains the full contents of the window.  This is similar to calling
+@code{erase} before @code{write}, but avoids the flickering.
 @end defun
 
 The factory function that you supply should return an object

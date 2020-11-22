@@ -1,5 +1,10 @@
 2021-05-27  Hannes Domani  <ssbssa@yahoo.de>
 
+	* python.texi (TUI Windows In Python): Document "full_window"
+	argument.
+
+2021-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
 	* python.texi (Symbols In Python): Document gdb.SYMBOL_LOC_LABEL.
 
 2021-05-25  Hannes Domani  <ssbssa@yahoo.de>

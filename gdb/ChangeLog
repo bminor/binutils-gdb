@@ -1,3 +1,9 @@
+2021-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python/py-tui.c (tui_py_window::output): Add full_window
+	argument.
+	(gdbpy_tui_write): Parse "full_window" argument.
+
 2021-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* make-init-c: Add option to reverse function calls.
