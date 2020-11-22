@@ -1,3 +1,9 @@
+2020-11-22  Gary Benson <gbenson@redhat.com>
+
+	PR gdb/26905
+	* gdb.dwarf2/count.exp: Add test for an array whose upper bound
+	is defined using a DW_AT_count which references another DIE.
+
 2020-11-21  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/vla-ptr.exp: Add XFAIL.
