@@ -1,3 +1,7 @@
+2020-11-23  Shahab Vahedi  <shahab@synopsys.org>
+
+	* testsuite/ld-arc/tls_ie-01.d: Use a more general pattern.
+
 2020-11-21  Nelson Chu  <nelson.chu@sifive.com>
 
 	* emultempl/riscvelf.em (riscv_elf_before_allocation): Change
