@@ -68,6 +68,5 @@ output_file_close (const char *filename)
   stdoutput = NULL;
 
   if (! res)
-    as_fatal (_("can't close %s: %s"), filename,
-	      bfd_errmsg (bfd_get_error ()));
+    as_fatal ("%s: %s", filename, bfd_errmsg (bfd_get_error ()));
 }
