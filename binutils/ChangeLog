@@ -1,3 +1,7 @@
+2020-11-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* readelf.c (dump_section_as_ctf): Call ctf_arc_symsect_endianness.
+
 2020-11-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/nm.exp (ifunc): xfail more targets.

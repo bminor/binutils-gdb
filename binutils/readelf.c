@@ -14758,6 +14758,9 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       goto fail;
     }
 
+  ctf_arc_symsect_endianness (ctfa, filedata->file_header.e_ident[EI_DATA]
+			      != ELFDATA2MSB);
+
   if (parentdata)
     {
       if ((parenta = ctf_arc_bufopen (&parentsect, symsectp, strsectp,
