@@ -11,7 +11,8 @@
 * When setting the link order attribute of ELF sections, it is now possible to
   use a numeric section index instead of symbol name.
 
-* Add support for Cortex-A78, Cortex-A78AE and Cortex-X1 for AArch64 and ARM.
+* Add support for Cortex-A78, Cortex-A78AE, Cortex-A78C and Cortex-X1 for
+  AArch64 and ARM.
   Add support for Cortex-R82, Neoverse V1, and Neoverse N2 for ARM.
 
 * Add support for ETMv4 (Embedded Trace Macrocell), ETE (Embedded Trace

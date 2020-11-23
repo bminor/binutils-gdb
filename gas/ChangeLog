@@ -1,3 +1,9 @@
+2020-11-04  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-aarch64.c (aarch64_cpus): Add Cortex-A78C.
+	* doc/c-aarch64.texi: Document -mcpu=cortex-a78c.
+	* doc/NEWS: Update news.
+
 2020-11-19  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* testsuite/gas/elf/section22.d: Allow FreeBSD OSABI in readelf

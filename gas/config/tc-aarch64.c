@@ -9039,6 +9039,15 @@ static const struct aarch64_cpu_option_table aarch64_cpus[] = {
                    | AARCH64_FEATURE_SSBS
                    | AARCH64_FEATURE_PROFILE),
    "Cortex-A78AE"},
+  {"cortex-a78c", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
+                   AARCH64_FEATURE_DOTPROD
+                   | AARCH64_FEATURE_F16
+                   | AARCH64_FEATURE_FLAGM
+                   | AARCH64_FEATURE_PAC
+                   | AARCH64_FEATURE_PROFILE
+                   | AARCH64_FEATURE_RCPC
+                   | AARCH64_FEATURE_SSBS),
+   "Cortex-A78C"},
   {"ares", AARCH64_FEATURE (AARCH64_ARCH_V8_2,
 				  AARCH64_FEATURE_RCPC | AARCH64_FEATURE_F16
 				  | AARCH64_FEATURE_DOTPROD
