@@ -1,5 +1,55 @@
 2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* arch/riscv.c: Include 'rv32e-xregs.c'.
+	(riscv_create_target_description): Update to handle rv32e.
+	* arch/riscv.h (struct riscv_gdbarch_features) <embedded>: New
+	member variable.
+	<operator==>: Update to account for new field.
+	<hash>: Likewise.
+	* features/Makefile (FEATURE_XMLFILES): Add riscv/rv32e-xregs.xml.
+	* features/riscv/rv32e-xregs.c: Generated.
+	* features/riscv/rv32e-xregs.xml: New file.
+	* riscv-tdep.c (riscv_debug_breakpoints): Move from later in the
+	file.
+	(riscv_debug_infcall): Likewise.
+	(riscv_debug_unwinder): Likewise.
+	(riscv_debug_gdbarch): Likewise.
+	(enum riscv_register_required_status): Delete.
+	(struct riscv_register_feature): Add constructor, delete default
+	constructor, copy, and assign constructors.
+	(struct riscv_register_feature::register_info) <required>: Delete.
+	<check>: Update comment and arguments.
+	(struct riscv_register_feature) <name>: Change to member function.
+	<prefer_first_name>: Delete.
+	<tdesc_feature>: New member function.
+	<registers>: Rename to...
+	<m_registers>: ...this.
+	<m_feature_name>: New member variable.
+	(riscv_register_feature::register_info::check): Update arguments.
+	(riscv_xreg_feature): Rewrite as class, create a single static
+	instance of the class.
+	(riscv_freg_feature): Likewise.
+	(riscv_virtual_feature): Likewise.
+	(riscv_csr_feature): Likewise.
+	(riscv_create_csr_aliases): Has become a member function inside
+	riscv_csr_feature class.
+	(riscv_abi_embedded): New function definition.
+	(riscv_register_name): Adjust to use new feature objects.
+	(struct riscv_call_info) <riscv_call_info>: Check for rv32e abi,
+	and adjust available argument registers.
+	(riscv_features_from_gdbarch_info): Check for EF_RISCV_RVE flag.
+	(riscv_check_tdesc_feature): Delete.
+	(riscv_tdesc_unknown_reg): Adjust to use new feature objects.
+	(riscv_gdbarch_init): Delete target description checking code, and
+	instead call to the new feature objects to perform the checks.
+	Reorder handling of no abi information case, allows small code
+	simplification.
+	(_initialize_riscv_tdep): Remove call, this is now done in the
+	riscv_csr_feature constructor.
+	* riscv-tdep.h (riscv_abi_embedded): Declare.
+
+2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_create_csr_aliases): Remove use of
 	DECLARE_CSR_ALIAS.
 

@@ -24,6 +24,7 @@
 #include "../features/riscv/64bit-cpu.c"
 #include "../features/riscv/32bit-fpu.c"
 #include "../features/riscv/64bit-fpu.c"
+#include "../features/riscv/rv32e-xregs.c"
 
 #ifndef GDBSERVER
 #define STATIC_IN_GDB static
@@ -43,7 +44,12 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
   std::string arch_name = "riscv";
 
   if (features.xlen == 4)
-    arch_name.append (":rv32i");
+    {
+      if (features.embedded)
+	arch_name.append (":rv32e");
+      else
+	arch_name.append (":rv32i");
+    }
   else if (features.xlen == 8)
     arch_name.append (":rv64i");
   else if (features.xlen == 16)
@@ -63,7 +69,12 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
 
   /* For now we only support creating 32-bit or 64-bit x-registers.  */
   if (features.xlen == 4)
-    regnum = create_feature_riscv_32bit_cpu (tdesc.get (), regnum);
+    {
+      if (features.embedded)
+	regnum = create_feature_riscv_rv32e_xregs (tdesc.get (), regnum);
+      else
+	regnum = create_feature_riscv_32bit_cpu (tdesc.get (), regnum);
+    }
   else if (features.xlen == 8)
     regnum = create_feature_riscv_64bit_cpu (tdesc.get (), regnum);
 
