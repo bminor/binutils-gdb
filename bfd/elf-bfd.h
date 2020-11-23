@@ -1571,7 +1571,7 @@ struct elf_backend_data
 					       const char *, unsigned int);
 
   /* Called when after loading the normal relocs for a section.  */
-  bfd_boolean (*slurp_secondary_relocs) (bfd *, asection *, asymbol **);
+  bfd_boolean (*slurp_secondary_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
 
   /* Called after writing the normal relocs for a section.  */
   bfd_boolean (*write_secondary_relocs) (bfd *, asection *);
@@ -2919,7 +2919,7 @@ extern bfd_boolean is_debuginfo_file (bfd *);
 extern bfd_boolean _bfd_elf_init_secondary_reloc_section
   (bfd *, Elf_Internal_Shdr *, const char *, unsigned int);
 extern bfd_boolean _bfd_elf_slurp_secondary_reloc_section
-  (bfd *, asection *, asymbol **);
+  (bfd *, asection *, asymbol **, bfd_boolean);
 extern bfd_boolean _bfd_elf_copy_special_section_fields
   (const bfd *, bfd *, const Elf_Internal_Shdr *, Elf_Internal_Shdr *);
 extern bfd_boolean _bfd_elf_write_secondary_reloc_section

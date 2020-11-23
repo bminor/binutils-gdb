@@ -1603,7 +1603,7 @@ elf_slurp_reloc_table (bfd *abfd,
 					      symbols, dynamic))
     return FALSE;
 
-  if (!bed->slurp_secondary_relocs (abfd, asect, symbols))
+  if (!bed->slurp_secondary_relocs (abfd, asect, symbols, dynamic))
     return FALSE;
 
   asect->relocation = relents;

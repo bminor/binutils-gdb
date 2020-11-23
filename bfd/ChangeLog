@@ -1,3 +1,15 @@
+2020-11-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 26931
+	* elf-bfd.h (struct elf_backend_data): Add bfd_boolean field to
+	slurp_secondary_relocs field.
+	(_bfd_elf_slurp_secondary_reloc_section): Update prototype.
+	* elf.c (_bfd_elf_slurp_secondary_reloc_section): Add new
+	parameter.  Compute number of symbols based upon the new
+	parameter.
+	* elfcode.h (elf_slurp_reloc_table): Pass dynamic as new
+	parameter.
+
 2020-11-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26918
