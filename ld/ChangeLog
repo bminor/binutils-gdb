@@ -1,3 +1,10 @@
+2020-11-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26918
+	* testsuite/ld-s390/pr26918-1.d: New file.
+	* testsuite/ld-s390/pr26918-1.s: Likewise.
+	* testsuite/ld-s390/s390.exp: Run all *.d tests.
+
 2020-11-23  Shahab Vahedi  <shahab@synopsys.org>
 
 	* testsuite/ld-arc/tls_ie-01.d: Use a more general pattern.

@@ -3547,7 +3547,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_put_64 (output_bfd, (bfd_vma) 0,
 		      htab->elf.hgot->root.u.def.section->contents + 16);
 	}
-      if (elf_section_data (htab->elf.splt->output_section) != NULL)
+      if (htab->elf.sgot != NULL && htab->elf.sgot->size > 0)
 	elf_section_data (htab->elf.sgot->output_section)
 	  ->this_hdr.sh_entsize = 8;
     }

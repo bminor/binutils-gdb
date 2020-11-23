@@ -1,3 +1,9 @@
+2020-11-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26918
+	* elf64-s390.c (elf_s390_finish_dynamic_sections): Set .got
+	sh_entsize only if .got size > 0.
+
 2020-11-21  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (_bfd_riscv_relax_section):  Add a new relax pass
