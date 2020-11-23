@@ -1728,7 +1728,14 @@ proc gdb_assert { condition {message ""} } {
     }
 
     set code [catch {uplevel 1 expr $condition} res]
-    if {$code != 0 || !$res} {
+    if {$code == 1} {
+	# If code is 1 (TCL_ERROR), it means evaluation failed and res contains
+	# an error message.  Print the error message, and set res to 0 since we
+	# want to return a boolean.
+	warning "While evaluating expression in gdb_assert: $res"
+	unresolved $message
+	set res 0
+    } elseif { !$res } {
 	fail $message
     } else {
 	pass $message

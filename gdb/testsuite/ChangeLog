@@ -1,3 +1,7 @@
+2020-11-23  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/gdb.exp (gdb_assert): Show error message on error.
+
 2020-11-23  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/enum_idx_packed.exp: Limit setup_kfail to gnat 9 and 10.
