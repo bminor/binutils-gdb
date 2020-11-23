@@ -1,3 +1,8 @@
+2020-11-23  Tom de Vries  <tdevries@suse.de>
+
+	* debuginfod-support.c (debuginfod_source_query)
+	(debuginfod_debuginfo_query): Only set DESTNAME if successful.
+
 2020-11-21  Tom Tromey  <tom@tromey.com>
 
 	* breakpoint.c (watchpoint_exp_is_const): Return bool.
