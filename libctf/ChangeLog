@@ -1,3 +1,30 @@
+2020-11-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_dict_t) <ctf_symtab_little_endian>: New.
+	(struct ctf_archive_internal) <ctfi_symsect_little_endian>: Likewise.
+	* ctf-create.c (ctf_serialize): Adjust for new field.
+	* ctf-open.c (init_symtab): Note the semantics of repeated calls.
+	(ctf_symsect_endianness): New.
+	(ctf_bufopen_internal): Set ctf_symtab_little_endian suitably for
+	the native endianness.
+	(_Static_assert): Moved...
+	(swap_thing): ... with this...
+	* swap.h: ... to here.
+	* ctf-util.c (ctf_elf32_to_link_sym): Use it, byteswapping the
+	Elf32_Sym if the ctf_symtab_little_endian demands it.
+	(ctf_elf64_to_link_sym): Likewise swap the Elf64_Sym if needed.
+	* ctf-archive.c (ctf_arc_symsect_endianness): New, set the
+	endianness of the symtab used by the dicts in an archive.
+	(ctf_archive_iter_internal): Initialize to unknown (assumed native,
+	do not call ctf_symsect_endianness).
+	(ctf_dict_open_by_offset): Call ctf_symsect_endianness if need be.
+	(ctf_dict_open_internal): Propagate the endianness down.
+	(ctf_dict_open_sections): Likewise.
+	* ctf-open-bfd.c (ctf_bfdopen_ctfsect): Get the endianness from the
+	struct bfd and pass it down to the archive.
+	* libctf.ver: Add ctf_symsect_endianness and
+	ctf_arc_symsect_endianness.
+
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-link.c (ctf_link_deduplicating): Clean up the ctf_link_outputs

@@ -36,7 +36,8 @@ static off_t arc_write_one_ctf (ctf_dict_t * f, int fd, size_t threshold);
 static ctf_dict_t *ctf_dict_open_by_offset (const struct ctf_archive *arc,
 					    const ctf_sect_t *symsect,
 					    const ctf_sect_t *strsect,
-					    size_t offset, int *errp);
+					    size_t offset, int little_endian,
+					    int *errp);
 static int sort_modent_by_name (const void *one, const void *two, void *n);
 static void *arc_mmap_header (int fd, size_t headersz);
 static void *arc_mmap_file (int fd, size_t size);
@@ -378,8 +379,19 @@ ctf_new_archive_internal (int is_archive, int unmap_on_close,
   arci->ctfi_free_symsect = 0;
   arci->ctfi_free_strsect = 0;
   arci->ctfi_unmap_on_close = unmap_on_close;
+  arci->ctfi_symsect_little_endian = -1;
 
   return arci;
+}
+
+/* Set the symbol-table endianness of an archive (defaulting the symtab
+   endianness of all ctf_file_t's opened from that archive).  */
+void
+ctf_arc_symsect_endianness (ctf_archive_t *arc, int little_endian)
+{
+  arc->ctfi_symsect_little_endian = !!little_endian;
+  if (!arc->ctfi_is_archive)
+    ctf_symsect_endianness (arc->ctfi_dict, arc->ctfi_symsect_little_endian);
 }
 
 /* Get the CTF preamble from data in a buffer, which may be either an archive or
@@ -536,7 +548,8 @@ static ctf_dict_t *
 ctf_dict_open_internal (const struct ctf_archive *arc,
 			const ctf_sect_t *symsect,
 			const ctf_sect_t *strsect,
-			const char *name, int *errp)
+			const char *name, int little_endian,
+			int *errp)
 {
   struct ctf_archive_modent *modent;
   const char *search_nametbl;
@@ -564,7 +577,8 @@ ctf_dict_open_internal (const struct ctf_archive *arc,
     }
 
   return ctf_dict_open_by_offset (arc, symsect, strsect,
-				  le64toh (modent->ctf_offset), errp);
+				  le64toh (modent->ctf_offset),
+				  little_endian, errp);
 }
 
 /* Return the ctf_dict_t with the given name, or NULL if none, setting 'err' if
@@ -584,7 +598,8 @@ ctf_dict_open_sections (const ctf_archive_t *arc,
     {
       ctf_dict_t *ret;
       ret = ctf_dict_open_internal (arc->ctfi_archive, symsect, strsect,
-				    name, errp);
+				    name, arc->ctfi_symsect_little_endian,
+				    errp);
       if (ret)
 	{
 	  ret->ctf_archive = (ctf_archive_t *) arc;
@@ -691,7 +706,7 @@ static ctf_dict_t *
 ctf_dict_open_by_offset (const struct ctf_archive *arc,
 			 const ctf_sect_t *symsect,
 			 const ctf_sect_t *strsect, size_t offset,
-			 int *errp)
+			 int little_endian, int *errp)
 {
   ctf_sect_t ctfsect;
   ctf_dict_t *fp;
@@ -708,7 +723,11 @@ ctf_dict_open_by_offset (const struct ctf_archive *arc,
   ctfsect.cts_data = (void *) ((char *) arc + offset + sizeof (uint64_t));
   fp = ctf_bufopen (&ctfsect, symsect, strsect, errp);
   if (fp)
-    ctf_setmodel (fp, le64toh (arc->ctfa_model));
+    {
+      ctf_setmodel (fp, le64toh (arc->ctfa_model));
+      if (little_endian >= 0)
+	ctf_symsect_endianness (fp, little_endian);
+    }
   return fp;
 }
 
@@ -961,7 +980,9 @@ ctf_archive_iter_internal (const ctf_archive_t *wrapper,
 
       name = &nametbl[le64toh (modent[i].name_offset)];
       if ((f = ctf_dict_open_internal (arc, symsect, strsect,
-				    name, &rc)) == NULL)
+				       name,
+				       wrapper->ctfi_symsect_little_endian,
+				       &rc)) == NULL)
 	return rc;
 
       f->ctf_archive = (ctf_archive_t *) wrapper;

@@ -1,3 +1,10 @@
+2020-11-23  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h: Style nit: remove () on function names in comments.
+	(ctf_sect_t): Mention endianness concerns.
+	(ctf_symsect_endianness): New declaration.
+	(ctf_arc_symsect_endianness): Likewise.
+
 2020-11-20  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (ctf_getsymsect): New.

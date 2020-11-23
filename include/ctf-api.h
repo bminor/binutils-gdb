@@ -51,10 +51,12 @@ struct bfd;
 
 /* If the debugger needs to provide the CTF library with a set of raw buffers
    for use as the CTF data, symbol table, and string table, it can do so by
-   filling in ctf_sect_t structures and passing them to ctf_bufopen().
+   filling in ctf_sect_t structures and passing them to ctf_bufopen.
 
-   The contents of this structure must always be in native endianness (no
-   byteswapping is performed).  */
+   The contents of this structure must always be in native endianness.  At read
+   time, the symbol table endianness is derived from the BFD target (if BFD is
+   in use): if a BFD target is not in use, please call ctf_symsect_endianness or
+   ctf_arc_symsect_endianness.  */
 
 typedef struct ctf_sect
 {
@@ -67,12 +69,12 @@ typedef struct ctf_sect
 /* A minimal symbol extracted from a linker's internal symbol table
    representation.  The symbol name can be given either via st_name or via a
    strtab offset in st_nameidx, which corresponds to one of the string offsets
-   communicated via the ctf_link_add_strtab callback.  */
+   communicated via the ctf_link_add_strtab callback.   */
 
 typedef struct ctf_link_sym
 {
   /* The st_name and st_nameidx will not be accessed outside the call to
-     ctf_link_shuffle_syms().  If you set st_nameidx to offset zero, make sure
+     ctf_link_shuffle_syms.  If you set st_nameidx to offset zero, make sure
      to set st_nameidx_set as well.  */
 
   const char *st_name;
@@ -118,7 +120,7 @@ typedef enum ctf_sect_names
   } ctf_sect_names_t;
 
 /* Encoding information for integers, floating-point values, and certain other
-   intrinsics can be obtained by calling ctf_type_encoding(), below.  The flags
+   intrinsics can be obtained by calling ctf_type_encoding, below.  The flags
    field will contain values appropriate for the type defined in <ctf.h>.  */
 
 typedef struct ctf_encoding
@@ -162,8 +164,8 @@ typedef struct ctf_snapshot_id
 #define	CTF_FUNC_VARARG	0x1	/* Function arguments end with varargs.  */
 
 /* Functions that return a ctf_id_t use the following value to indicate failure.
-   ctf_errno() can be used to obtain an error code.  Functions that return
-   a straight integral -1 also use ctf_errno().  */
+   ctf_errno can be used to obtain an error code.  Functions that return
+   a straight integral -1 also use ctf_errno.  */
 #define	CTF_ERR	((ctf_id_t) -1L)
 
 /* This macro holds information about all the available ctf errors.
@@ -244,7 +246,7 @@ _CTF_ERRORS
 #define ECTF_NERR (ECTF_NEEDSBFD - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
-   model of the given object, unless ctf_setmodel() is explicitly called.  */
+   model of the given object, unless ctf_setmodel is explicitly called.  */
 #define	CTF_MODEL_ILP32 1	/* Object data model is ILP32.  */
 #define	CTF_MODEL_LP64  2	/* Object data model is LP64.  */
 #ifdef _LP64
@@ -253,7 +255,7 @@ _CTF_ERRORS
 # define CTF_MODEL_NATIVE CTF_MODEL_ILP32
 #endif
 
-/* Dynamic CTF containers can be created using ctf_create().  The ctf_add_*
+/* Dynamic CTF containers can be created using ctf_create.  The ctf_add_*
    routines can be used to add new definitions to the dynamic container.
    New types are labeled as root or non-root to determine whether they are
    visible at the top-level program scope when subsequently doing a lookup.  */
@@ -283,9 +285,9 @@ typedef char *ctf_dump_decorate_f (ctf_sect_names_t sect,
 
 typedef struct ctf_dump_state ctf_dump_state_t;
 
-/* Iteration state for the _next() functions, and allocators/copiers/freers for
+/* Iteration state for the _next functions, and allocators/copiers/freers for
    it.  (None of these are needed for the simple case of iterating to the end:
-   the _next() function allocate and free the iterators for you.)  */
+   the _next function allocate and free the iterators for you.)  */
 
 typedef struct ctf_next ctf_next_t;
 extern ctf_next_t *ctf_next_create (void);
@@ -295,7 +297,7 @@ extern ctf_next_t *ctf_next_copy (ctf_next_t *);
 /* Opening.  These mostly return an abstraction over both CTF files and CTF
    archives: so they can be used to open both.  CTF files will appear to be an
    archive with one member named '.ctf'.  The low-level functions
-   ctf_simple_open() and ctf_bufopen() return ctf_dict_t's directly, and cannot
+   ctf_simple_open and ctf_bufopen return ctf_dict_t's directly, and cannot
    be used on CTF archives.  */
 
 extern ctf_archive_t *ctf_bfdopen (struct bfd *, int *);
@@ -309,12 +311,14 @@ extern void ctf_close (ctf_archive_t *);
 extern ctf_sect_t ctf_getdatasect (const ctf_dict_t *);
 extern ctf_sect_t ctf_getsymsect (const ctf_dict_t *);
 extern ctf_sect_t ctf_getstrsect (const ctf_dict_t *);
+extern void ctf_symsect_endianness (ctf_dict_t *, int little_endian);
 extern ctf_archive_t *ctf_get_arc (const ctf_dict_t *);
 extern ctf_archive_t *ctf_arc_open (const char *, int *);
 extern ctf_archive_t *ctf_arc_bufopen (const ctf_sect_t *,
 				       const ctf_sect_t *,
 				       const ctf_sect_t *,
 				       int *);
+extern void ctf_arc_symsect_endianness (ctf_archive_t *, int little_endian);
 extern void ctf_arc_close (ctf_archive_t *);
 extern ctf_dict_t *ctf_arc_lookup_symbol (ctf_archive_t *,
 					  unsigned long symidx,

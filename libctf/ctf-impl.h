@@ -381,6 +381,7 @@ struct ctf_dict
   ctf_sect_t ctf_data;		    /* CTF data from object file.  */
   ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_strtab;	    /* String table from object file.  */
+  int ctf_symsect_little_endian;    /* Endianness of the ctf_symtab.  */
   ctf_dynhash_t *ctf_prov_strtab;   /* Maps provisional-strtab offsets
 				       to names.  */
   ctf_dynhash_t *ctf_syn_ext_strtab; /* Maps ext-strtab offsets to names.  */
@@ -506,6 +507,7 @@ struct ctf_archive_internal
   ctf_dict_t **ctfi_symdicts;	  /* Array of index -> ctf_dict_t *.  */
   ctf_id_t *ctfi_syms;		  /* Array of index -> ctf_id_t.  */
   ctf_sect_t ctfi_symsect;
+  int ctfi_symsect_little_endian; /* -1 for unknown / do not set.  */
   ctf_sect_t ctfi_strsect;
   int ctfi_free_symsect;
   int ctfi_free_strsect;

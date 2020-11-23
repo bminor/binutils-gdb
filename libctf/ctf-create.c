@@ -1162,6 +1162,7 @@ ctf_serialize (ctf_dict_t *fp)
   nfp->ctf_link_memb_name_changer_arg = fp->ctf_link_memb_name_changer_arg;
   nfp->ctf_link_variable_filter = fp->ctf_link_variable_filter;
   nfp->ctf_link_variable_filter_arg = fp->ctf_link_variable_filter_arg;
+  nfp->ctf_symsect_little_endian = fp->ctf_symsect_little_endian;
   nfp->ctf_link_flags = fp->ctf_link_flags;
   nfp->ctf_dedup_atoms = fp->ctf_dedup_atoms;
   nfp->ctf_dedup_atoms_alloc = fp->ctf_dedup_atoms_alloc;

@@ -97,6 +97,7 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
   ctf_sect_t *strsectp = NULL;
   const char *bfderrstr = NULL;
   char *strtab_alloc = NULL;
+  int symsect_endianness = -1;
 
 #ifdef HAVE_BFD_ELF
   ctf_sect_t symsect, strsect;
@@ -206,6 +207,8 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
       symsect.cts_data = symtab;
       symsectp = &symsect;
     }
+
+  symsect_endianness = bfd_little_endian (abfd);
 #endif
 
   arci = ctf_arc_bufopen (ctfsect, symsectp, strsectp, errp);
@@ -215,6 +218,10 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
       arci->ctfi_free_symsect = 1;
       if (strtab_alloc)
 	arci->ctfi_free_strsect = 1;
+
+      /* Get the endianness right.  */
+      if (symsect_endianness > -1)
+	ctf_arc_symsect_endianness (arci, symsect_endianness);
       return arci;
     }
 #ifdef HAVE_BFD_ELF

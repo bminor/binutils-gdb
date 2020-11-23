@@ -22,7 +22,6 @@
 #include <string.h>
 #include <sys/types.h>
 #include <elf.h>
-#include <assert.h>
 #include "swap.h"
 #include <bfd.h>
 #include <zlib.h>
@@ -227,7 +226,10 @@ static const ctf_dictops_t ctf_dictops[] = {
    symtypetabs come from the compiler, and all the linker does is iteration over
    all entries, which doesn't need this initialization.)
 
-   The SP symbol table section may be NULL if there is no symtab.  */
+   The SP symbol table section may be NULL if there is no symtab.
+
+   If init_symtab works on one call, it cannot fail on future calls to the same
+   fp: ctf_symsect_endianness relies on this.  */
 
 static int
 init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
@@ -290,6 +292,10 @@ init_symtab (ctf_dict_t *fp, const ctf_header_t *hp, const ctf_sect_t *sp)
 	  return ECTF_SYMTAB;
 	}
 
+      /* This call may be led astray if our idea of the symtab's endianness is
+	 wrong, but when this is fixed by a call to ctf_symsect_endianness,
+	 init_symtab will be called again with the right endianness in
+	 force.  */
       if (ctf_symtab_skippable (&sym))
 	{
 	  *xp = -1u;
@@ -974,28 +980,6 @@ init_types (ctf_dict_t *fp, ctf_header_t *cth)
    We flip everything, mindlessly, even 1-byte entities, so that future
    expansions do not require changes to this code.  */
 
-/* < C11? define away static assertions.  */
-
-#if !defined (__STDC_VERSION__) || __STDC_VERSION__ < 201112L
-#define _Static_assert(cond, err)
-#endif
-
-/* Swap the endianness of something.  */
-
-#define swap_thing(x)							\
-  do {									\
-    _Static_assert (sizeof (x) == 1 || (sizeof (x) % 2 == 0		\
-					&& sizeof (x) <= 8),		\
-		    "Invalid size, update endianness code");		\
-    switch (sizeof (x)) {						\
-    case 2: x = bswap_16 (x); break;					\
-    case 4: x = bswap_32 (x); break;					\
-    case 8: x = bswap_64 (x); break;					\
-    case 1: /* Nothing needs doing */					\
-      break;								\
-    }									\
-  } while (0);
-
 /* Flip the endianness of the CTF header.  */
 
 static void
@@ -1652,7 +1636,13 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      large for the actual size of the object and function info sections: if so,
      ctf_nsyms will be adjusted and the excess will never be used.  It's
      possible to do indexed symbol lookups even without a symbol table, so check
-     even in that case.  */
+     even in that case.  Initially, we assume the symtab is native-endian: if it
+     isn't, the caller will inform us later by calling ctf_symsect_endianness.  */
+#ifdef WORDS_BIGENDIAN
+  fp->ctf_symsect_little_endian = 0;
+#else
+  fp->ctf_symsect_little_endian = 1;
+#endif
 
   if (symsect != NULL)
     {
@@ -1864,6 +1854,22 @@ ctf_sect_t
 ctf_getstrsect (const ctf_dict_t *fp)
 {
   return fp->ctf_strtab;
+}
+
+/* Set the endianness of the symbol table attached to FP.  */
+void
+ctf_symsect_endianness (ctf_dict_t *fp, int little_endian)
+{
+  int old_endianness = fp->ctf_symsect_little_endian;
+
+  fp->ctf_symsect_little_endian = !!little_endian;
+
+  /* If we already have a symtab translation table, we need to repopulate it if
+     our idea of the endianness has changed.  */
+
+  if (old_endianness != fp->ctf_symsect_little_endian
+      && fp->ctf_sxlate != NULL && fp->ctf_symtab.cts_data != NULL)
+    assert (init_symtab (fp, fp->ctf_header, &fp->ctf_symtab) == 0);
 }
 
 /* Return the CTF handle for the parent CTF dict, if one exists.  Otherwise

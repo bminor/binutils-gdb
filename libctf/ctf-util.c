@@ -19,6 +19,7 @@
 
 #include <ctf-impl.h>
 #include <string.h>
+#include "ctf-endian.h"
 
 /* Simple doubly-linked list append routine.  This implementation assumes that
    each list element contains an embedded ctf_list_t as the first member.
@@ -114,16 +115,35 @@ ctf_link_sym_t *
 ctf_elf32_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst, const Elf32_Sym *src,
 		       uint32_t symidx)
 {
+  Elf32_Sym tmp;
+  int needs_flipping = 0;
+
+#ifdef WORDS_BIGENDIAN
+  if (fp->ctf_symsect_little_endian)
+    needs_flipping = 1;
+#else
+  if (!fp->ctf_symsect_little_endian)
+    needs_flipping = 1;
+#endif
+
+  memcpy (&tmp, src, sizeof (Elf32_Sym));
+  if (needs_flipping)
+    {
+      swap_thing (tmp.st_name);
+      swap_thing (tmp.st_size);
+      swap_thing (tmp.st_shndx);
+      swap_thing (tmp.st_value);
+    }
   /* The name must be in the external string table.  */
-  if (src->st_name < fp->ctf_str[CTF_STRTAB_1].cts_len)
-    dst->st_name = (const char *) fp->ctf_str[CTF_STRTAB_1].cts_strs + src->st_name;
+  if (tmp.st_name < fp->ctf_str[CTF_STRTAB_1].cts_len)
+    dst->st_name = (const char *) fp->ctf_str[CTF_STRTAB_1].cts_strs + tmp.st_name;
   else
     dst->st_name = _CTF_NULLSTR;
   dst->st_nameidx_set = 0;
   dst->st_symidx = symidx;
-  dst->st_shndx = src->st_shndx;
-  dst->st_type = ELF32_ST_TYPE (src->st_info);
-  dst->st_value = src->st_value;
+  dst->st_shndx = tmp.st_shndx;
+  dst->st_type = ELF32_ST_TYPE (tmp.st_info);
+  dst->st_value = tmp.st_value;
 
   return dst;
 }
@@ -134,22 +154,42 @@ ctf_link_sym_t *
 ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst, const Elf64_Sym *src,
 		       uint32_t symidx)
 {
+  Elf64_Sym tmp;
+  int needs_flipping = 0;
+
+#ifdef WORDS_BIGENDIAN
+  if (fp->ctf_symsect_little_endian)
+    needs_flipping = 1;
+#else
+  if (!fp->ctf_symsect_little_endian)
+    needs_flipping = 1;
+#endif
+
+  memcpy (&tmp, src, sizeof (Elf64_Sym));
+  if (needs_flipping)
+    {
+      swap_thing (tmp.st_name);
+      swap_thing (tmp.st_size);
+      swap_thing (tmp.st_shndx);
+      swap_thing (tmp.st_value);
+    }
+
   /* The name must be in the external string table.  */
-  if (src->st_name < fp->ctf_str[CTF_STRTAB_1].cts_len)
-    dst->st_name = (const char *) fp->ctf_str[CTF_STRTAB_1].cts_strs + src->st_name;
+  if (tmp.st_name < fp->ctf_str[CTF_STRTAB_1].cts_len)
+    dst->st_name = (const char *) fp->ctf_str[CTF_STRTAB_1].cts_strs + tmp.st_name;
   else
     dst->st_name = _CTF_NULLSTR;
   dst->st_nameidx_set = 0;
   dst->st_symidx = symidx;
-  dst->st_shndx = src->st_shndx;
-  dst->st_type = ELF32_ST_TYPE (src->st_info);
+  dst->st_shndx = tmp.st_shndx;
+  dst->st_type = ELF32_ST_TYPE (tmp.st_info);
 
   /* We only care if the value is zero, so avoid nonzeroes turning into
      zeroes.  */
-  if (_libctf_unlikely_ (src->st_value != 0 && ((uint32_t) src->st_value == 0)))
+  if (_libctf_unlikely_ (tmp.st_value != 0 && ((uint32_t) tmp.st_value == 0)))
     dst->st_value = 1;
   else
-    dst->st_value = (uint32_t) src->st_value;
+    dst->st_value = (uint32_t) tmp.st_value;
 
   return dst;
 }

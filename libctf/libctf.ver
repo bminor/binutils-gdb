@@ -193,4 +193,6 @@ LIBCTF_1.1 {
 
 	ctf_getsymsect;
 	ctf_getstrsect;
+	ctf_symsect_endianness;
+	ctf_arc_symsect_endianness;
 } LIBCTF_1.0;
