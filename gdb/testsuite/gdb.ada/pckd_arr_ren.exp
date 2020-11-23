@@ -31,8 +31,9 @@ foreach_with_prefix scenario {all minimal} {
     set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
     runto "foo.adb:$bp_location"
 
-    # GNAT >= 11.0 has the needed fix here.
-    if {$scenario == "minimal" && ![test_compiler_info {gcc-1[1-9]-*}]} {
+    # GNAT 9 and 10 are known to fail.
+    if {$scenario == "minimal" && ([test_compiler_info {gcc-9-*}] \
+				       || [test_compiler_info {gcc-10-*}])} {
 	setup_kfail "minimal encodings" *-*-*
     }
     gdb_test "print A2" \

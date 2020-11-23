@@ -1,3 +1,9 @@
+2020-11-23  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/enum_idx_packed.exp: Limit setup_kfail to gnat 9 and 10.
+	* gdb.ada/mod_from_name.exp: Same.
+	* gdb.ada/pckd_arr_ren.exp: Same.
+
 2020-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/template.exp: New.
