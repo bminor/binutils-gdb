@@ -1,3 +1,8 @@
+2020-11-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/template.exp: New.
+	* gdb.base/template.c: New.
+
 2020-11-22  Gary Benson <gbenson@redhat.com>
 
 	PR gdb/26905
