@@ -908,10 +908,12 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
     }
 
   gdb_mpq v1, v2, res;
-  v1.read_fixed_point (value_contents (arg1), TYPE_LENGTH (type1),
+  v1.read_fixed_point (gdb::make_array_view (value_contents (arg1),
+					     TYPE_LENGTH (type1)),
 		       type_byte_order (type1), type1->is_unsigned (),
 		       fixed_point_scaling_factor (type1));
-  v2.read_fixed_point (value_contents (arg2), TYPE_LENGTH (type2),
+  v2.read_fixed_point (gdb::make_array_view (value_contents (arg2),
+					     TYPE_LENGTH (type2)),
 		       type_byte_order (type2), type2->is_unsigned (),
 		       fixed_point_scaling_factor (type2));
 
@@ -919,7 +921,8 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   do { \
       val = allocate_value (type1); \
       (RESULT).write_fixed_point			\
-        (value_contents_raw (val), TYPE_LENGTH (type1), \
+        (gdb::make_array_view (value_contents_raw (val), \
+			       TYPE_LENGTH (type1)), \
 	 type_byte_order (type1), type1->is_unsigned (), \
 	 fixed_point_scaling_factor (type1)); \
      } while (0)

@@ -42,12 +42,12 @@ gmp_string_printf (const char *fmt, ...)
 /* See gmp-utils.h.  */
 
 void
-gdb_mpz::read (const gdb_byte *buf, int len, enum bfd_endian byte_order,
+gdb_mpz::read (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order,
 	       bool unsigned_p)
 {
-  mpz_import (val, 1 /* count */, -1 /* order */, len /* size */,
+  mpz_import (val, 1 /* count */, -1 /* order */, buf.size () /* size */,
 	      byte_order == BFD_ENDIAN_BIG ? 1 : -1 /* endian */,
-	      0 /* nails */, buf /* op */);
+	      0 /* nails */, buf.data () /* op */);
 
   if (!unsigned_p)
     {
@@ -56,7 +56,7 @@ gdb_mpz::read (const gdb_byte *buf, int len, enum bfd_endian byte_order,
 	 was in fact negative, we need to adjust VAL accordingly.  */
       gdb_mpz max;
 
-      mpz_ui_pow_ui (max.val, 2, len * TARGET_CHAR_BIT - 1);
+      mpz_ui_pow_ui (max.val, 2, buf.size () * TARGET_CHAR_BIT - 1);
       if (mpz_cmp (val, max.val) >= 0)
 	mpz_submul_ui (val, max.val, 2);
     }
@@ -65,7 +65,7 @@ gdb_mpz::read (const gdb_byte *buf, int len, enum bfd_endian byte_order,
 /* See gmp-utils.h.  */
 
 void
-gdb_mpz::write (gdb_byte *buf, int len, enum bfd_endian byte_order,
+gdb_mpz::write (gdb::array_view<gdb_byte> buf, enum bfd_endian byte_order,
 		bool unsigned_p) const
 {
   gdb_mpz exported_val (val);
@@ -77,14 +77,15 @@ gdb_mpz::write (gdb_byte *buf, int len, enum bfd_endian byte_order,
 	 would be the same as our negative value.  */
       gdb_mpz neg_offset;
 
-      mpz_ui_pow_ui (neg_offset.val, 2, len * TARGET_CHAR_BIT);
+      mpz_ui_pow_ui (neg_offset.val, 2, buf.size () * TARGET_CHAR_BIT);
       mpz_add (exported_val.val, exported_val.val, neg_offset.val);
     }
 
   /* Start by clearing the buffer, as mpz_export only writes as many
      bytes as it needs (including none, if the value to export is zero.  */
-  memset (buf, 0, len);
-  mpz_export (buf, NULL /* count */, -1 /* order */, len /* size */,
+  memset (buf.data (), 0, buf.size ());
+  mpz_export (buf.data (), NULL /* count */, -1 /* order */,
+	      buf.size () /* size */,
 	      byte_order == BFD_ENDIAN_BIG ? 1 : -1 /* endian */,
 	      0 /* nails */, exported_val.val);
 }
@@ -125,12 +126,12 @@ gdb_mpq::get_rounded () const
 /* See gmp-utils.h.  */
 
 void
-gdb_mpq::read_fixed_point (const gdb_byte *buf, int len,
+gdb_mpq::read_fixed_point (gdb::array_view<const gdb_byte> buf,
 			   enum bfd_endian byte_order, bool unsigned_p,
 			   const gdb_mpq &scaling_factor)
 {
   gdb_mpz vz;
-  vz.read (buf, len, byte_order, unsigned_p);
+  vz.read (buf, byte_order, unsigned_p);
 
   mpq_set_z (val, vz.val);
   mpq_mul (val, val, scaling_factor.val);
@@ -139,7 +140,7 @@ gdb_mpq::read_fixed_point (const gdb_byte *buf, int len,
 /* See gmp-utils.h.  */
 
 void
-gdb_mpq::write_fixed_point (gdb_byte *buf, int len,
+gdb_mpq::write_fixed_point (gdb::array_view<gdb_byte> buf,
 			    enum bfd_endian byte_order, bool unsigned_p,
 			    const gdb_mpq &scaling_factor) const
 {
@@ -148,7 +149,7 @@ gdb_mpq::write_fixed_point (gdb_byte *buf, int len,
   mpq_div (unscaled.val, unscaled.val, scaling_factor.val);
 
   gdb_mpz unscaled_z = unscaled.get_rounded ();
-  unscaled_z.write (buf, len, byte_order, unsigned_p);
+  unscaled_z.write (buf, byte_order, unsigned_p);
 }
 
 /* A wrapper around xrealloc that we can then register with GMP

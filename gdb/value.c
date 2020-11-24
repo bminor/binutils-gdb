@@ -2812,7 +2812,8 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
     case TYPE_CODE_FIXED_POINT:
       {
 	gdb_mpq vq;
-	vq.read_fixed_point (valaddr, len, byte_order, nosign,
+	vq.read_fixed_point (gdb::make_array_view (valaddr, len),
+			     byte_order, nosign,
 			     fixed_point_scaling_factor (type));
 
 	gdb_mpz vz;

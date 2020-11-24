@@ -95,7 +95,7 @@ gdb_mpz_as_integer ()
 
 template<typename T>
 void
-store_and_read_back (T val, int buf_len, enum bfd_endian byte_order,
+store_and_read_back (T val, size_t buf_len, enum bfd_endian byte_order,
 		     gdb_mpz &expected, gdb_mpz &actual)
 {
   gdb_byte *buf;
@@ -109,7 +109,7 @@ store_and_read_back (T val, int buf_len, enum bfd_endian byte_order,
   mpz_set (actual.val, expected.val);
   mpz_sub_ui (actual.val, actual.val, 500);
 
-  actual.read (buf, buf_len, byte_order, !std::is_signed<T>::value);
+  actual.read ({buf, buf_len}, byte_order, !std::is_signed<T>::value);
 }
 
 /* Test the gdb_mpz::read method over a reasonable range of values.
@@ -227,14 +227,14 @@ gdb_mpz_read_min_max ()
 
 template<typename T>
 T
-write_and_extract (T val, int buf_len, enum bfd_endian byte_order)
+write_and_extract (T val, size_t buf_len, enum bfd_endian byte_order)
 {
   gdb_mpz v (val);
 
   SELF_CHECK (v.as_integer<T> () == val);
 
   gdb_byte *buf = (gdb_byte *) alloca (buf_len);
-  v.write (buf, buf_len, byte_order, !std::is_signed<T>::value);
+  v.write ({buf, buf_len}, byte_order, !std::is_signed<T>::value);
 
   return extract_integer<T> (buf, buf_len, byte_order);
 }
@@ -329,11 +329,11 @@ read_fp_test (int unscaled, const gdb_mpq &scaling_factor,
 {
   /* For this kind of testing, we'll use a buffer the same size as
      our unscaled parameter.  */
-  const int len = sizeof (unscaled);
+  const size_t len = sizeof (unscaled);
   gdb_byte buf[len];
   store_signed_integer (buf, len, byte_order, unscaled);
 
-  actual.read_fixed_point (buf, len, byte_order, 0, scaling_factor);
+  actual.read_fixed_point ({buf, len}, byte_order, 0, scaling_factor);
 
   mpq_set_si (expected.val, unscaled, 1);
   mpq_mul (expected.val, expected.val, scaling_factor.val);
@@ -395,14 +395,14 @@ write_fp_test (int numerator, unsigned int denominator,
      This is really an arbitrary decision, as long as the buffer
      is long enough to hold the unscaled values that we'll be
      writing.  */
-  const int len = sizeof (LONGEST);
+  const size_t len = sizeof (LONGEST);
   gdb_byte buf[len];
   memset (buf, 0, len);
 
   gdb_mpq v;
   mpq_set_si (v.val, numerator, denominator);
   mpq_canonicalize (v.val);
-  v.write_fixed_point (buf, len, byte_order, 0, scaling_factor);
+  v.write_fixed_point ({buf, len}, byte_order, 0, scaling_factor);
 
   return extract_unsigned_integer (buf, len, byte_order);
 }

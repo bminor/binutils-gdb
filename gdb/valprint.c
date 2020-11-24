@@ -809,7 +809,7 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
       const gdb_byte *valaddr = value_contents_for_printing (val);
       gdb_mpf f;
 
-      f.read_fixed_point (valaddr, TYPE_LENGTH (type),
+      f.read_fixed_point (gdb::make_array_view (valaddr, TYPE_LENGTH (type)),
 			  type_byte_order (type), type->is_unsigned (),
 			  fixed_point_scaling_factor (type));
 

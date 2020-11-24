@@ -357,7 +357,8 @@ value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
     {
       gdb_mpz vz;
 
-      vz.read (value_contents (from_val), TYPE_LENGTH (from_type),
+      vz.read (gdb::make_array_view (value_contents (from_val),
+				     TYPE_LENGTH (from_type)),
 	       type_byte_order (from_type), from_type->is_unsigned ());
       mpq_set_z (vq.val, vz.val);
 
@@ -378,8 +379,9 @@ value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
   /* Finally, create the result value, and pack the unscaled value
      in it.  */
   struct value *result = allocate_value (to_type);
-  unscaled.write (value_contents_raw (result),
-		  TYPE_LENGTH (to_type), type_byte_order (to_type),
+  unscaled.write (gdb::make_array_view (value_contents_raw (result),
+					TYPE_LENGTH (to_type)),
+		  type_byte_order (to_type),
 		  to_type->is_unsigned ());
 
   return result;
@@ -523,7 +525,7 @@ value_cast (struct type *type, struct value *arg2)
 	  gdb_mpq fp_val;
 
 	  fp_val.read_fixed_point
-	    (value_contents (arg2), TYPE_LENGTH (type2),
+	    (gdb::make_array_view (value_contents (arg2), TYPE_LENGTH (type2)),
 	     type_byte_order (type2), type2->is_unsigned (),
 	     fixed_point_scaling_factor (type2));
 

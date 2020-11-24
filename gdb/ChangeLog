@@ -1,5 +1,19 @@
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* gmp-utils.h (gdb_mpz::read): Change buf and len parameters
+	into one single gdb::array_view parameter.
+	(gdb_mpz::write): Likewise.
+	(gdb_mpq::read_fixed_point, gdb_mpq::write_fixed_point): Likewise.
+	* gmp-utils.c (gdb_mpz::read): Change buf and len parameters
+	into one single gdb::array_view parameter.
+	Adjust implementation accordingly.
+	(gdb_mpz::write): Likewise.
+	(gdb_mpq::read_fixed_point, gdb_mpq::write_fixed_point): Likewise.
+	* unittests/gmp-utils-selftests.c: Adapt following changes above.
+	* valarith.c, valops.c, valprint.c, value.c: Likewise.
+
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* gmp-utils.h (gmp_string_printf): Rename from gmp_string_asprintf.
 	Change return type to std::string. Update all callers.
 	* gmp-utils.c (gmp_string_printf): Likewise.
