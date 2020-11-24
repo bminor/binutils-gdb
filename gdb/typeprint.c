@@ -667,11 +667,10 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 void
 print_type_fixed_point (struct type *type, struct ui_file *stream)
 {
-  gdb::unique_xmalloc_ptr<char> small_img
-    = fixed_point_scaling_factor (type).str ();
+  std::string small_img = fixed_point_scaling_factor (type).str ();
 
   fprintf_filtered (stream, "%s-byte fixed point (small = %s)",
-		    pulongest (TYPE_LENGTH (type)), small_img.get ());
+		    pulongest (TYPE_LENGTH (type)), small_img.c_str ());
 }
 
 /* Dump details of a type specified either directly or indirectly.

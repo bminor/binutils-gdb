@@ -29,9 +29,9 @@
 #include <gmp.h>
 #include "gdbsupport/traits.h"
 
-/* Same as gmp_asprintf, but returning a convenient wrapper type.  */
+/* Same as gmp_asprintf, but returning an std::string.  */
 
-gdb::unique_xmalloc_ptr<char> gmp_string_asprintf (const char *fmt, ...);
+std::string gmp_string_printf (const char *fmt, ...);
 
 /* A class to make it easier to use GMP's mpz_t values within GDB.  */
 
@@ -110,8 +110,7 @@ struct gdb_mpz
 	      bool unsigned_p) const;
 
   /* Return a string containing VAL.  */
-  gdb::unique_xmalloc_ptr<char> str () const
-  { return gmp_string_asprintf ("%Zd", val); }
+  std::string str () const { return gmp_string_printf ("%Zd", val); }
 
   /* The destructor.  */
   ~gdb_mpz () { mpz_clear (val); }
@@ -163,8 +162,7 @@ struct gdb_mpq
   }
 
   /* Return a string representing VAL as "<numerator> / <denominator>".  */
-  gdb::unique_xmalloc_ptr<char> str () const
-  { return gmp_string_asprintf ("%Qd", val); }
+  std::string str () const { return gmp_string_printf ("%Qd", val); }
 
   /* Return VAL rounded to the nearest integer.  */
   gdb_mpz get_rounded () const;

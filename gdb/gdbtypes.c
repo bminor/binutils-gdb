@@ -4927,7 +4927,7 @@ static void
 print_fixed_point_type_info (struct type *type, int spaces)
 {
   printfi_filtered (spaces + 2, "scaling factor: %s\n",
-		    fixed_point_scaling_factor (type).str ().get ());
+		    fixed_point_scaling_factor (type).str ().c_str ());
 }
 
 static struct obstack dont_print_type_obstack;

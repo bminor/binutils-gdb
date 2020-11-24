@@ -19,17 +19,24 @@
 
 /* See gmp-utils.h.  */
 
-gdb::unique_xmalloc_ptr<char>
-gmp_string_asprintf (const char *fmt, ...)
+std::string
+gmp_string_printf (const char *fmt, ...)
 {
   va_list vp;
-  char *buf;
 
   va_start (vp, fmt);
-  gmp_vasprintf (&buf, fmt, vp);
+  int size = gmp_vsnprintf (NULL, 0, fmt, vp);
   va_end (vp);
 
-  return gdb::unique_xmalloc_ptr<char> (buf);
+  std::string str (size, '\0');
+
+  /* C++11 and later guarantee std::string uses contiguous memory and
+     always includes the terminating '\0'.  */
+  va_start (vp, fmt);
+  gmp_vsprintf (&str[0], fmt, vp);
+  va_end (vp);
+
+  return str;
 }
 
 /* See gmp-utils.h.  */

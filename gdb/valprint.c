@@ -814,8 +814,8 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
 			  fixed_point_scaling_factor (type));
 
       const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11Fg" : "%.17Fg";
-      gdb::unique_xmalloc_ptr<char> str = gmp_string_asprintf (fmt, f.val);
-      fprintf_filtered (stream, "%s", str.get ());
+      std::string str = gmp_string_printf (fmt, f.val);
+      fprintf_filtered (stream, "%s", str.c_str ());
     }
 }
 
