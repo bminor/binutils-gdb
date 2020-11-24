@@ -38,6 +38,7 @@
 #include <string>
 #include <vector>
 #include "cli/cli-style.h"
+#include "parser-defs.h"
 
 /* See rust-lang.h.  */
 

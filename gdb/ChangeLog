@@ -1,3 +1,9 @@
+2020-11-25  Tom Tromey  <tom@tromey.com>
+
+	* d-lang.c: Include parser-defs.h.
+	* rust-lang.c: Include parser-defs.h.
+	* c-lang.h: Do not include parser-defs.h.
+
 2020-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* regcache.h (struct cached_reg): Remove typedef.

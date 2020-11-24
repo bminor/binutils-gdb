@@ -28,7 +28,6 @@ struct parser_state;
 
 #include "value.h"
 #include "macroexp.h"
-#include "parser-defs.h"
 #include "gdbsupport/enum-flags.h"
 
 
