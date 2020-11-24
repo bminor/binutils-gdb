@@ -667,7 +667,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 void
 print_type_fixed_point (struct type *type, struct ui_file *stream)
 {
-  std::string small_img = fixed_point_scaling_factor (type).str ();
+  std::string small_img = type->fixed_point_scaling_factor ().str ();
 
   fprintf_filtered (stream, "%s-byte fixed point (small = %s)",
 		    pulongest (TYPE_LENGTH (type)), small_img.c_str ());

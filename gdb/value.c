@@ -2814,7 +2814,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 	gdb_mpq vq;
 	vq.read_fixed_point (gdb::make_array_view (valaddr, len),
 			     byte_order, nosign,
-			     fixed_point_scaling_factor (type));
+			     type->fixed_point_scaling_factor ());
 
 	gdb_mpz vz;
 	mpz_tdiv_q (vz.val, mpq_numref (vq.val), mpq_denref (vq.val));

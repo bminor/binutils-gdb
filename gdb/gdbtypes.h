@@ -1224,6 +1224,11 @@ struct type
 
   struct type *fixed_point_type_base_type ();
 
+  /* * Assuming that THIS is a TYPE_CODE_FIXED_POINT, return its scaling
+     factor.  */
+
+  const gdb_mpq &fixed_point_scaling_factor ();
+
   /* * Return the dynamic property of the requested KIND from this type's
      list of dynamic properties.  */
   dynamic_prop *dyn_prop (dynamic_prop_node_kind kind) const;
@@ -2595,9 +2600,6 @@ extern int type_not_associated (const struct type *type);
 /* Return True if TYPE is a TYPE_CODE_FIXED_POINT or if TYPE is
    a range type whose base type is a TYPE_CODE_FIXED_POINT.  */
 extern bool is_fixed_point_type (struct type *type);
-
-/* Given TYPE, which is a fixed point type, return its scaling factor.  */
-extern const gdb_mpq &fixed_point_scaling_factor (struct type *type);
 
 /* Allocate a fixed-point type info for TYPE.  This should only be
    called by INIT_FIXED_POINT_SPECIFIC.  */

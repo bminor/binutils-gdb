@@ -811,7 +811,7 @@ generic_val_print_fixed_point (struct value *val, struct ui_file *stream,
 
       f.read_fixed_point (gdb::make_array_view (valaddr, TYPE_LENGTH (type)),
 			  type_byte_order (type), type->is_unsigned (),
-			  fixed_point_scaling_factor (type));
+			  type->fixed_point_scaling_factor ());
 
       const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11Fg" : "%.17Fg";
       std::string str = gmp_string_printf (fmt, f.val);

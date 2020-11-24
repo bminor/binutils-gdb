@@ -4927,7 +4927,7 @@ static void
 print_fixed_point_type_info (struct type *type, int spaces)
 {
   printfi_filtered (spaces + 2, "scaling factor: %s\n",
-		    fixed_point_scaling_factor (type).str ().c_str ());
+		    type->fixed_point_scaling_factor ().str ().c_str ());
 }
 
 static struct obstack dont_print_type_obstack;
@@ -5881,9 +5881,9 @@ type::fixed_point_type_base_type ()
 /* See gdbtypes.h.  */
 
 const gdb_mpq &
-fixed_point_scaling_factor (struct type *type)
+type::fixed_point_scaling_factor ()
 {
-  type = type->fixed_point_type_base_type ();
+  struct type *type = this->fixed_point_type_base_type ();
 
   return type->fixed_point_info ().scaling_factor;
 }

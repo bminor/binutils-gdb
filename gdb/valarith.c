@@ -911,11 +911,11 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   v1.read_fixed_point (gdb::make_array_view (value_contents (arg1),
 					     TYPE_LENGTH (type1)),
 		       type_byte_order (type1), type1->is_unsigned (),
-		       fixed_point_scaling_factor (type1));
+		       type1->fixed_point_scaling_factor ());
   v2.read_fixed_point (gdb::make_array_view (value_contents (arg2),
 					     TYPE_LENGTH (type2)),
 		       type_byte_order (type2), type2->is_unsigned (),
-		       fixed_point_scaling_factor (type2));
+		       type2->fixed_point_scaling_factor ());
 
 #define INIT_VAL_WITH_FIXED_POINT_VAL(RESULT) \
   do { \
@@ -924,7 +924,7 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
         (gdb::make_array_view (value_contents_raw (val), \
 			       TYPE_LENGTH (type1)), \
 	 type_byte_order (type1), type1->is_unsigned (), \
-	 fixed_point_scaling_factor (type1)); \
+	 type1->fixed_point_scaling_factor ()); \
      } while (0)
 
   switch (op)
