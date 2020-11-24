@@ -304,12 +304,12 @@ if [is_elf_format] {
     
     # The following targets are known to not support ifuncs.
     setup_xfail "alpha*-*-*"
-    setup_xfail "arm*-*-nto*"
-    setup_xfail "arm*-*-netbsdelf*"
-    setup_xfail "mips*-*-*"
+    setup_xfail "arm*-elf" "arm*-*-nto*" "arm*-*-netbsdelf*"
+    setup_xfail "*-*-hpux*"
+    setup_xfail "mips*-*-*" "tx39*-*-*"
     setup_xfail "msp430*-*-*"
-    setup_xfail "tx39*-*-*"
     setup_xfail "visium*-*-*"
+    setup_xfail "x86_64-*-cloudabi*"
 
     set testname "nm --ifunc-chars"
     if {![binutils_assemble $srcdir/$subdir/ifunc.s tmpdir/ifunc.o]} then {
