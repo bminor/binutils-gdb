@@ -1,3 +1,8 @@
+2020-11-24  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/condbreak-multi-context.exp: Do not hard-code location
+	indices.
+
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.dwarf2/dw2-fixed-point.exp: Fix the expected output of
