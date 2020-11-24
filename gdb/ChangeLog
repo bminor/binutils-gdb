@@ -1,3 +1,7 @@
+2020-11-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.h (struct cached_reg): Remove typedef.
+
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* README: Fix the URL of the MPFR library.
