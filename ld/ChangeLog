@@ -1,3 +1,11 @@
+2020-11-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/26939
+	* testsuite/ld-x86-64/pr26939-x32.d: New file.
+	* testsuite/ld-x86-64/pr26939.d: Likewise.
+	* testsuite/ld-x86-64/pr26939.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR gold/26939 tests.
+
 2020-11-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26918
