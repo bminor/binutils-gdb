@@ -1,5 +1,14 @@
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.h (struct type) <fixed_point_type_base_type> New method,
+	replacing the fixed_point_type_base_type function. All callers
+	updated throughout this project.
+	(fixed_point_type_base_type): Remove declaration.
+	* gdbtypes.c (type::fixed_point_type_base_type): Replaces
+	fixed_point_type_base_type.  Adjust implementation accordingly.
+
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.h (struct type) <fixed_point_info, set_fixed_point_info>:
 	New methods.
 	(INIT_FIXED_POINT_SPECIFIC): Adjust.

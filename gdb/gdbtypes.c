@@ -5866,8 +5866,10 @@ is_fixed_point_type (struct type *type)
 /* See gdbtypes.h.  */
 
 struct type *
-fixed_point_type_base_type (struct type *type)
+type::fixed_point_type_base_type ()
 {
+  struct type *type = this;
+
   while (check_typedef (type)->code () == TYPE_CODE_RANGE)
     type = TYPE_TARGET_TYPE (check_typedef (type));
   type = check_typedef (type);
@@ -5881,7 +5883,7 @@ fixed_point_type_base_type (struct type *type)
 const gdb_mpq &
 fixed_point_scaling_factor (struct type *type)
 {
-  type = fixed_point_type_base_type (type);
+  type = type->fixed_point_type_base_type ();
 
   return type->fixed_point_info ().scaling_factor;
 }

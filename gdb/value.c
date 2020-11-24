@@ -2759,7 +2759,7 @@ LONGEST
 unpack_long (struct type *type, const gdb_byte *valaddr)
 {
   if (is_fixed_point_type (type))
-    type = fixed_point_type_base_type (type);
+    type = type->fixed_point_type_base_type ();
 
   enum bfd_endian byte_order = type_byte_order (type);
   enum type_code code = type->code ();
