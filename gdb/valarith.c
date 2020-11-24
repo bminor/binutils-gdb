@@ -917,44 +917,48 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 		       type_byte_order (type2), type2->is_unsigned (),
 		       type2->fixed_point_scaling_factor ());
 
-#define INIT_VAL_WITH_FIXED_POINT_VAL(RESULT) \
-  do { \
-      val = allocate_value (type1); \
-      (RESULT).write_fixed_point			\
-        (gdb::make_array_view (value_contents_raw (val), \
-			       TYPE_LENGTH (type1)), \
-	 type_byte_order (type1), type1->is_unsigned (), \
-	 type1->fixed_point_scaling_factor ()); \
-     } while (0)
+  auto fixed_point_to_value = [type1] (const gdb_mpq &fp)
+    {
+      value *fp_val = allocate_value (type1);
+
+      fp.write_fixed_point
+	(gdb::make_array_view (value_contents_raw (fp_val),
+			       TYPE_LENGTH (type1)),
+	 type_byte_order (type1),
+	 type1->is_unsigned (),
+	 type1->fixed_point_scaling_factor ());
+
+      return fp_val;
+    };
 
   switch (op)
     {
     case BINOP_ADD:
       mpq_add (res.val, v1.val, v2.val);
-      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      val = fixed_point_to_value (res);
       break;
 
     case BINOP_SUB:
       mpq_sub (res.val, v1.val, v2.val);
-      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      val = fixed_point_to_value (res);
       break;
 
     case BINOP_MIN:
-      INIT_VAL_WITH_FIXED_POINT_VAL (mpq_cmp (v1.val, v2.val) < 0 ? v1 : v2);
+      val = fixed_point_to_value (mpq_cmp (v1.val, v2.val) < 0 ? v1 : v2);
       break;
 
     case BINOP_MAX:
-      INIT_VAL_WITH_FIXED_POINT_VAL (mpq_cmp (v1.val, v2.val) > 0 ? v1 : v2);
+      val = fixed_point_to_value (mpq_cmp (v1.val, v2.val) > 0 ? v1 : v2);
       break;
 
     case BINOP_MUL:
       mpq_mul (res.val, v1.val, v2.val);
-      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      val = fixed_point_to_value (res);
       break;
 
     case BINOP_DIV:
       mpq_div (res.val, v1.val, v2.val);
-      INIT_VAL_WITH_FIXED_POINT_VAL (res);
+      val = fixed_point_to_value (res);
       break;
 
     case BINOP_EQUAL:

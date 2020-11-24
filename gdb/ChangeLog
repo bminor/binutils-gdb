@@ -1,5 +1,11 @@
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* valarith.c (fixed_point_binop): Replace the
+	INIT_VAL_WITH_FIXED_POINT_VAL macro by a lambda.  Update all
+	users accordingly.
+
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbtypes.h (struct type) <fixed_point_scaling_factor>: New method,
 	replacing fixed_point_scaling_factor.  All callers updated
 	throughout this project.
