@@ -1,3 +1,14 @@
+2020-11-25  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.c (lang_output_section_statement_lookup): Change "create"
+	parameter to a tristate, if 2 then always create a new output
+	section statement.  Update all callers, with
+	lang_enter_output_section_statement using "2".
+	(map_input_to_output_sections): Don't ignore SPECIAL constraint
+	here.
+	* ldlang.h (lang_output_section_statement_type): Update prototype.
+	(lang_output_section_find): Update.
+
 2020-11-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/26939

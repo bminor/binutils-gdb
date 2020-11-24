@@ -586,7 +586,7 @@ extern asection *section_for_dot
        statement = statement->next)
 
 #define lang_output_section_find(NAME) \
-  lang_output_section_statement_lookup (NAME, 0, FALSE)
+  lang_output_section_statement_lookup (NAME, 0, 0)
 
 extern void lang_process
   (void);
@@ -605,7 +605,7 @@ extern void lang_add_keepsyms_file
 extern lang_output_section_statement_type *lang_output_section_get
   (const asection *);
 extern lang_output_section_statement_type *lang_output_section_statement_lookup
-  (const char *, int, bfd_boolean);
+  (const char *, int, int);
 extern lang_output_section_statement_type *next_matching_output_section_statement
   (lang_output_section_statement_type *, int);
 extern void ldlang_add_undef
