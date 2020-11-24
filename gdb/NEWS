@@ -3,6 +3,9 @@
 
 *** Changes since GDB 10
 
+* Building GDB now requires GMP (The GNU Multiple Precision Arithmetic
+  Library).
+
 * MI changes
 
  ** '-break-insert --qualified' and '-dprintf-insert --qualified'
