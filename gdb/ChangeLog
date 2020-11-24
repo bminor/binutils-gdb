@@ -1,5 +1,9 @@
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* README: Document the --with-libgmp-prefix configure option.
+
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Add entry documenting support for DWARF-based fixed
 	point types.
 
