@@ -1,3 +1,8 @@
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* unittests/gmp-utils-selftests.c (write_fp_test): Use mpq_set_si
+	instead of mpq_set_ui to initialize our GMP rational.
+
 2020-11-23  Tom de Vries  <tdevries@suse.de>
 
 	* debuginfod-support.c (debuginfod_source_query)

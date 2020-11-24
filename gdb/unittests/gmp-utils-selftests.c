@@ -400,7 +400,7 @@ write_fp_test (int numerator, unsigned int denominator,
   memset (buf, 0, len);
 
   gdb_mpq v;
-  mpq_set_ui (v.val, numerator, denominator);
+  mpq_set_si (v.val, numerator, denominator);
   mpq_canonicalize (v.val);
   v.write_fixed_point (buf, len, byte_order, 0, scaling_factor);
 
