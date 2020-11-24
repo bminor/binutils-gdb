@@ -1,3 +1,8 @@
+2020-11-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR python/26974
+	* python.texi: Fix docu for static members argument.
+
 2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
 
 	* gdb.texinfo (Synopsys ARC): Document LP_START, LP_END and BTA.
