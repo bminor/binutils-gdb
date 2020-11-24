@@ -18162,7 +18162,7 @@ get_dwarf2_unsigned_rational_constant (struct die_info *die,
 }
 
 /* Assuming DIE corresponds to a fixed point type, finish the creation
-   of the corresponding TYPE by setting its TYPE_FIXED_POINT_INFO.
+   of the corresponding TYPE by setting its type-specific data.
    CU is the DIE's CU.  */
 
 static void
@@ -18232,7 +18232,7 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
 		 sect_offset_str (die->sect_off));
     }
 
-  gdb_mpq &scaling_factor = TYPE_FIXED_POINT_INFO (type)->scaling_factor;
+  gdb_mpq &scaling_factor = type->fixed_point_info ().scaling_factor;
 
   gdb_mpz tmp_z (scale_num);
   mpz_set (mpq_numref (scaling_factor.val), tmp_z.val);

@@ -1,5 +1,20 @@
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbtypes.h (struct type) <fixed_point_info, set_fixed_point_info>:
+	New methods.
+	(INIT_FIXED_POINT_SPECIFIC): Adjust.
+	(TYPE_FIXED_POINT_INFO): Delete macro.
+	(allocate_fixed_point_type_info): Change return type to void.
+	* gdbtypes.c (copy_type_recursive): Replace the use of
+	TYPE_FIXED_POINT_INFO by a call to the fixed_point_info method.
+	(fixed_point_scaling_factor): Likewise.
+	(allocate_fixed_point_type_info): Change return type to void.
+	Adjust implementation accordingly.
+	* dwarf2/read.c (finish_fixed_point_type): Replace the use of
+	TYPE_FIXED_POINT_INFO by a call to the fixed_point_info method.
+
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* gmp-utils.h (gdb_mpz::read): Change buf and len parameters
 	into one single gdb::array_view parameter.
 	(gdb_mpz::write): Likewise.
