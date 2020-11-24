@@ -1,3 +1,9 @@
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.dwarf2/dw2-fixed-point.exp: Fix the expected output of
+	the "ptype pck__fp1_range_var" test for the module-2 and pascal
+	languages.  Remove the associated setup_xfail.
+
 2020-11-23  Simon Marchi  <simon.marchi@efficios.com>
 
 	* lib/gdb.exp (gdb_assert): Show error message on error.

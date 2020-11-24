@@ -278,9 +278,6 @@ proc do_ptype_test {lang fp1_re fp2_re fp3_re fp1_range_re} {
 
         gdb_test "ptype pck__fp3_var" $fp3_re
 
-        if { $lang == "modula-2" || $lang == "pascal" } {
-            setup_xfail "*-*-*" "not supported by language"
-        }
         gdb_test "ptype pck__fp1_range_var" $fp1_range_re
     }
 }
@@ -299,10 +296,21 @@ foreach lang [list "c" "d" "go" "objective-c" "opencl" ] {
                   " = <range type>"
 }
 
-foreach lang [list "fortran" "modula-2" "pascal" ] {
-    do_ptype_test $lang \
-                  " = pck__fp1_type" \
-                  " = pck__fp2_type" \
-                  " = pck__fp3_type" \
-                  " = <range type>"
-}
+do_ptype_test "fortran" \
+          " = pck__fp1_type" \
+          " = pck__fp2_type" \
+          " = pck__fp3_type" \
+          " = <range type>"
+
+do_ptype_test "modula-2" \
+          " = pck__fp1_type" \
+          " = pck__fp2_type" \
+          " = pck__fp3_type" \
+          " = \\\[1-byte fixed point \\(small = 1/16\\)\\.\\.1-byte fixed point \\(small = 1/16\\)\\\]"
+
+do_ptype_test "pascal" \
+          " = pck__fp1_type" \
+          " = pck__fp2_type" \
+          " = pck__fp3_type" \
+          " = 1-byte fixed point \\(small = 1/16\\)\\.\\.1-byte fixed point \\(small = 1/16\\)"
+

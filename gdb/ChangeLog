@@ -1,5 +1,10 @@
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* typeprint.c (print_type_scalar): Add handling of
+	TYPE_CODE_FIXED_POINT.
+
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* valarith.c (fixed_point_binop): Replace the
 	INIT_VAL_WITH_FIXED_POINT_VAL macro by a lambda.  Update all
 	users accordingly.
