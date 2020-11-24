@@ -921,7 +921,7 @@ identify the @emph{actual} (derived) type of the object rather than the
 the @emph{declared} type should be used.  (See @code{set print object} in
 @ref{Print Settings}).
 
-@item static_fields
+@item static_members
 @code{True} if static members should be included in the string
 representation of a C@t{++} object, @code{False} if they shouldn't (see
 @code{set print static-members} in @ref{Print Settings}).

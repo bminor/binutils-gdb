@@ -1,3 +1,8 @@
+2020-11-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR python/26974
+	* python.texi: Fix docu for static members argument.
+
 2020-11-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Debugging Output): Document 'set/show debug
