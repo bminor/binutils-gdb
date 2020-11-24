@@ -1,3 +1,8 @@
+2020-09-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR libctf/26934
+	* ctf-dump.c (ctf_dump_objts): Pass format argument to asprintf.
+
 2020-11-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_dict_t) <ctf_symtab_little_endian>: New.

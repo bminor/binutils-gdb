@@ -403,7 +403,7 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
 	      goto out;
 	    }
 
-	  if (asprintf (&typestr, ctf_errmsg (ctf_errno (fp))) < 0)
+	  if (asprintf (&typestr, _("error: %s"), ctf_errmsg (ctf_errno (fp))) < 0)
 	    goto oom;
 
 	  err = -1;
