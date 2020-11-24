@@ -1,3 +1,8 @@
+2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/riscv-tdesc-regs.exp (get_expected_result): New proc,
+	update test to use this.
+
 2020-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.threads/non-ldr-exc-1.exp: Fix indentation.

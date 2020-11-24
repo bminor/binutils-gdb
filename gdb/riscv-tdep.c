@@ -969,6 +969,18 @@ riscv_is_regnum_a_named_csr (int regnum)
     }
 }
 
+/* Return true if REGNUM is an unknown CSR identified in
+   riscv_tdesc_unknown_reg for GDBARCH.  */
+
+static bool
+riscv_is_unknown_csr (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  return (regnum >= tdep->unknown_csrs_first_regnum
+	  && regnum < (tdep->unknown_csrs_first_regnum
+		       + tdep->unknown_csrs_count));
+}
+
 /* Implement the register_reggroup_p gdbarch method.  Is REGNUM a member
    of REGGROUP?  */
 
@@ -986,13 +998,21 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
     {
       /* Any extra registers from the CSR tdesc_feature (identified in
 	 riscv_tdesc_unknown_reg) are removed from the save/restore groups
-	 as some targets (QEMU) report CSRs which then can't be read.  */
-      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-      if ((reggroup == restore_reggroup || reggroup == save_reggroup)
-	  && regnum >= tdep->unknown_csrs_first_regnum
-	  && regnum < (tdep->unknown_csrs_first_regnum
-		       + tdep->unknown_csrs_count))
-	return 0;
+	 as some targets (QEMU) report CSRs which then can't be read and
+	 having unreadable registers in the save/restore group breaks
+	 things like inferior calls.
+
+	 The unknown CSRs are also removed from the general group, and
+	 added into both the csr and system group.  This is inline with the
+	 known CSRs (see below).  */
+      if (riscv_is_unknown_csr (gdbarch, regnum))
+	{
+	  if (reggroup == restore_reggroup || reggroup == save_reggroup
+	       || reggroup == general_reggroup)
+	    return 0;
+	  else if (reggroup == system_reggroup || reggroup == csr_reggroup)
+	    return 1;
+	}
 
       /* This is some other unknown register from the target description.
 	 In this case we trust whatever the target description says about

@@ -1,3 +1,10 @@
+2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_is_unknown_csr): New function,
+	implementation moved from riscv_register_reggroup_p.
+	(riscv_register_reggroup_p): Update group handling for unknown
+	CSRs.
+
 2020-12-01  Sergio Durigan Junior  <sergiodj@sergiodj.net>
 
 	* dwarf2/read.c (dwz_search_other_debugdirs): New function.
