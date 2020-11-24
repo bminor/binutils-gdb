@@ -498,7 +498,7 @@ more obscure GDB `configure' options are not listed here.
      floating-point formats than the host.  If GNU MPFR is not
      available, GDB will fall back to using host floating-point
      arithmetic.  If your host does not have GNU MPFR installed, you
-     can get the latest version from `http://www.mpfr.org'.
+     can get the latest version from `https://www.mpfr.org/'.
 
 `--with-python[=PYTHON]'
      Build GDB with Python scripting support.  (Done by default if
