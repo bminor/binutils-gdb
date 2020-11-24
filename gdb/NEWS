@@ -24,6 +24,15 @@
   $HOME/.gdbinit.  On Apple hosts the search order is instead:
   $HOME/Library/Preferences/gdb/gdbinit, $HOME/.gdbinit.
 
+* GDB now supports fixed point types which are described in DWARF
+  as base types with a fixed-point encoding.  Additionally, support
+  for the DW_AT_GNU_numerator and DW_AT_GNU_denominator has also
+  been added.
+
+  For Ada, this allows support for fixed point types without requiring
+  the use of the GNAT encoding (based on information added to the type's
+  name following a GNAT-specific format).
+
 * New commands
 
 set debug event-loop

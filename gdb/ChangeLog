@@ -1,5 +1,10 @@
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Add entry documenting support for DWARF-based fixed
+	point types.
+
+2020-11-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Document that building GDB now requires GMP.
 
 2020-11-24  Joel Brobecker  <brobecker@adacore.com>
