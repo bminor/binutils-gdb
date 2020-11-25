@@ -2142,12 +2142,11 @@ evaluate_subexp_standard (struct type *expect_type,
 		  || op == BINOP_MOD)
 	      && value_logical_not (arg2))
 	    {
-	      struct value *v_one, *retval;
+	      struct value *v_one;
 
 	      v_one = value_one (value_type (arg2));
 	      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &v_one);
-	      retval = value_binop (arg1, v_one, op);
-	      return retval;
+	      return value_binop (arg1, v_one, op);
 	    }
 	  else
 	    {
@@ -2532,12 +2531,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  return eval_skip_value (exp);
 	}
       else
-	{
-	  struct value *retvalp = evaluate_subexp_for_address (exp, pos,
-							       noside);
-
-	  return retvalp;
-	}
+	return evaluate_subexp_for_address (exp, pos, noside);
 
     case UNOP_SIZEOF:
       if (noside == EVAL_SKIP)
