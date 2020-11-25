@@ -1,3 +1,8 @@
+2020-12-04  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* Makefile.in: Delete GDBvn.texi and version.subst only in
+	the maintainer-clean target.
+
 2020-11-29  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR python/26974
