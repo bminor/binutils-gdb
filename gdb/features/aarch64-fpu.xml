@@ -83,6 +83,76 @@
   <reg name="v29" bitsize="128" type="aarch64v"/>
   <reg name="v30" bitsize="128" type="aarch64v"/>
   <reg name="v31" bitsize="128" type="aarch64v"/>
-  <reg name="fpsr" bitsize="32"/>
-  <reg name="fpcr" bitsize="32"/>
+
+  <flags id="fpsr_flags" size="4">
+    <!-- Invalid Operation cumulative floating-point exception bit.  -->
+    <field name="IOC" start="0" end="0"/>
+    <!-- Divide by Zero cumulative floating-point exception bit.  -->
+    <field name="DZC" start="1" end="1"/>
+    <!-- Overflow cumulative floating-point exception bit.  -->
+    <field name="OFC" start="2" end="2"/>
+    <!-- Underflow cumulative floating-point exception bit.  -->
+    <field name="UFC" start="3" end="3"/>
+    <!-- Inexact cumulative floating-point exception bit..  -->
+    <field name="IXC" start="4" end="4"/>
+    <!-- Input Denormal cumulative floating-point exception bit.  -->
+    <field name="IDC" start="7" end="7"/>
+    <!-- Cumulative saturation bit, Advanced SIMD only.  -->
+    <field name="QC" start="27" end="27"/>
+    <!-- When AArch32 is supported at any Exception level and AArch32
+         floating-point is implemented: Overflow condition flag for AArch32
+         floating-point comparison operations.  -->
+    <field name="V" start="28" end="28"/>
+    <!-- When AArch32 is supported at any Exception level and AArch32
+         floating-point is implemented:
+         Carry condition flag for AArch32 floating-point comparison operations.
+         -->
+    <field name="C" start="29" end="29"/>
+    <!-- When AArch32 is supported at any Exception level and AArch32
+         floating-point is implemented:
+         Zero condition flag for AArch32 floating-point comparison operations.
+         -->
+    <field name="Z" start="30" end="30"/>
+    <!-- When AArch32 is supported at any Exception level and AArch32
+         floating-point is implemented:
+         Negative condition flag for AArch32 floating-point comparison
+         operations.  -->
+    <field name="N" start="31" end="31"/>
+  </flags>
+  <reg name="fpsr" bitsize="32" type="fpsr_flags"/>
+
+  <flags id="fpcr_flags" size="4">
+    <!-- Flush Inputs to Zero (part of Armv8.7).  -->
+    <field name="FIZ" start="0" end="0"/>
+    <!-- Alternate Handling (part of Armv8.7).  -->
+    <field name="AH" start="1" end="1"/>
+    <!-- Controls how the output elements other than the lowest element of the
+         vector are determined for Advanced SIMD scalar instructions (part of
+         Armv8.7).  -->
+    <field name="NEP" start="2" end="2"/>
+    <!-- Invalid Operation floating-point exception trap enable.  -->
+    <field name="IOE" start="8" end="8"/>
+    <!-- Divide by Zero floating-point exception trap enable.  -->
+    <field name="DZE" start="9" end="9"/>
+    <!-- Overflow floating-point exception trap enable.  -->
+    <field name="OFE" start="10" end="10"/>
+    <!-- Underflow floating-point exception trap enable.  -->
+    <field name="UFE" start="11" end="11"/>
+    <!-- Inexact floating-point exception trap enable.  -->
+    <field name="IXE" start="12" end="12"/>
+    <!-- Input Denormal floating-point exception trap enable.  -->
+    <field name="IDE" start="15" end="15"/>
+    <!-- Flush-to-zero mode control bit on half-precision data-processing
+         instructions.  -->
+    <field name="FZ16" start="19" end="19"/>
+    <!-- Rounding Mode control field.  -->
+    <field name="RMode" start="22" end="23"/>
+    <!-- Flush-to-zero mode control bit.  -->
+    <field name="FZ" start="24" end="24"/>
+    <!-- Default NaN mode control bit.  -->
+    <field name="DN" start="25" end="25"/>
+    <!-- Alternative half-precision control bit.  -->
+    <field name="AHP" start="26" end="26"/>
+  </flags>
+  <reg name="fpcr" bitsize="32" type="fpcr_flags"/>
 </feature>

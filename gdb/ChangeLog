@@ -1,3 +1,8 @@
+2020-11-26  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* features/aarch64-fpu.c (create_feature_aarch64_fpu): Regenerate.
+	* features/aarch64-fpu.xml: Add named FPCR and FPSR register bit-fields.
+
 2020-11-25  Tom Tromey  <tom@tromey.com>
 
 	* eval.c (evaluate_subexp_standard): Remove unnecessary
