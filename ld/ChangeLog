@@ -1,3 +1,10 @@
+2020-11-26  Alan Modra  <amodra@gmail.com>
+
+	PR 26936
+	* testsuite/ld-elf/pr26936.d: Pass --gen-debug to gas rather than -g.
+	Only run when -shared -z options are supported.
+	* testsuite/ld-elf/pr26936b.s: Define more entry symbols.
+
 2020-11-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26936
