@@ -1,3 +1,11 @@
+2020-11-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26936
+	* testsuite/ld-elf/pr26936.d: New file.
+	* testsuite/ld-elf/pr26936a.s: Likewise.
+	* testsuite/ld-elf/pr26936b.s: Likewise.
+	* testsuite/ld-elf/pr26936c.s: Likewise.
+
 2020-11-25  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_output_section_statement_lookup): Change "create"
