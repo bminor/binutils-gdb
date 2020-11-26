@@ -1,5 +1,10 @@
 2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_create_csr_aliases): Remove use of
+	DECLARE_CSR_ALIAS.
+
+2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_is_unknown_csr): New function,
 	implementation moved from riscv_register_reggroup_p.
 	(riscv_register_reggroup_p): Update group handling for unknown

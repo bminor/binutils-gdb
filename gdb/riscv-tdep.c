@@ -376,16 +376,6 @@ riscv_create_csr_aliases ()
       int csr_num = reg.regnum - RISCV_FIRST_CSR_REGNUM;
       const char *alias = xstrprintf ("csr%d", csr_num);
       reg.names.push_back (alias);
-
-      /* Setup the other csr aliases.  We don't use a switch table here in
-	 case there are multiple aliases with the same value.  Also filter
-	 based on ABRT_VER in order to avoid a very old alias for misa that
-	 duplicates the name "misa" but at a different CSR address.  */
-#define DECLARE_CSR_ALIAS(NAME,VALUE,CLASS,DEF_VER,ABRT_VER)	 \
-      if (csr_num == VALUE && ABRT_VER >= PRIV_SPEC_CLASS_1P11)  \
-	reg.names.push_back ( # NAME );
-#include "opcode/riscv-opc.h"
-#undef DECLARE_CSR_ALIAS
     }
 }
 

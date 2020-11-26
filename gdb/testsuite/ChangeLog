@@ -1,5 +1,9 @@
 2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.arch/riscv-tdesc-regs.exp: Remove unwanted test.
+
+2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.arch/riscv-tdesc-regs.exp (get_expected_result): New proc,
 	update test to use this.
 
