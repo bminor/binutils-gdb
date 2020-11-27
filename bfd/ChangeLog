@@ -1,3 +1,12 @@
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* elf-bfd.h (elfcore_write_gdb_tdesc): Declare new function.
+	* elf.c (elfcore_grok_gdb_tdesc): New function.
+	(elfcore_grok_note): Handle NT_GDB_TDESC.
+	(elfcore_write_gdb_tdesc): New function.
+	(elfcore_write_register_note): Handle NT_GDB_TDESC.
+
 2021-03-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 27521

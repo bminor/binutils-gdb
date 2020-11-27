@@ -677,6 +677,10 @@
 #define NT_SIGINFO	0x53494749	/* Fields of siginfo_t.  */
 #define NT_FILE		0x46494c45	/* Description of mapped files.  */
 
+/* The range 0xff000000 to 0xffffffff is set aside for notes that don't
+   originate from any particular operating system.  */
+#define NT_GDB_TDESC	0xff000000	/* Contains copy of GDB's target description XML.  */
+
 /* Note segments for core files on dir-style procfs systems.  */
 
 #define NT_PSTATUS	10		/* Has a struct pstatus */
