@@ -1258,26 +1258,37 @@ skip_over_slash_fmt (completion_tracker &tracker, const char **args)
       bool in_fmt;
       tracker.set_use_custom_word_point (true);
 
-      if (ISALNUM (text[1]) || ISSPACE (text[1]))
+      if (text[1] == '\0')
 	{
-	  /* Skip over the actual format specification.  */
+	  /* The user tried to complete after typing just the '/' character
+	     of the /FMT string.  Step the completer past the '/', but we
+	     don't offer any completions.  */
+	  in_fmt = true;
+	  ++text;
+	}
+      else
+	{
+	  /* The user has typed some characters after the '/', we assume
+	     this is a complete /FMT string, first skip over it.  */
 	  text = skip_to_space (text);
 
 	  if (*text == '\0')
 	    {
+	      /* We're at the end of the input string.  The user has typed
+		 '/FMT' and asked for a completion.  Push an empty
+		 completion string, this will cause readline to insert a
+		 space so the user now has '/FMT '.  */
 	      in_fmt = true;
 	      tracker.add_completion (make_unique_xstrdup (text));
 	    }
 	  else
 	    {
+	      /* The user has already typed things after the /FMT, skip the
+		 whitespace and return false.  Whoever called this function
+		 should then try to complete what comes next.  */
 	      in_fmt = false;
 	      text = skip_spaces (text);
 	    }
-	}
-      else if (text[1] == '\0')
-	{
-	  in_fmt = true;
-	  ++text;
 	}
 
       tracker.advance_custom_word_point_by (text - *args);
