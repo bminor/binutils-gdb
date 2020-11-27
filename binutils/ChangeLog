@@ -1,3 +1,9 @@
+2020-11-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 26865
+	* windres.c (main): If the preprocessor name includes spaces,
+	ensure that it is quoted.
+
 2020-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* testsuite/lib/binutils-common.exp (supports_noinit_section): New.
