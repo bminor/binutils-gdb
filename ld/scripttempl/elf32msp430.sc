@@ -302,17 +302,25 @@ SECTIONS
   } ${RELOCATING+ > data}
   ${RELOCATING+ PROVIDE (__bsssize = SIZEOF(.bss)); }
 
+  /* This section contains data that is not initialized during load,
+     or during the application's initialization sequence.  */
   .noinit ${RELOCATING-0}${RELOCATING+SIZEOF(.bss) + ADDR(.bss)} :
   {
+    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
-    *(.noinit)
+    *(.noinit${RELOCATING+ .noinit.* .gnu.linkonce.n.*})
+    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__noinit_end = .) ; }
   } ${RELOCATING+ > data}
 
+  /* This section contains data that is initialized during load,
+     but not during the application's initialization sequence.  */
   .persistent ${RELOCATING-0}${RELOCATING+SIZEOF(.noinit) + ADDR(.noinit)} :
   {
+    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__persistent_start = .) ; }
-    *(.persistent)
+    *(.persistent${RELOCATING+ .persistent.* .gnu.linkonce.p.*})
+    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__persistent_end = .) ; }
   } ${RELOCATING+ > data}
 

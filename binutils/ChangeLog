@@ -1,3 +1,8 @@
+2020-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/lib/binutils-common.exp (supports_noinit_section): New.
+	(supports_persistent_section): New.
+
 2020-11-23  Nick Alcock  <nick.alcock@oracle.com>
 
 	* readelf.c (dump_section_as_ctf): Call ctf_arc_symsect_endianness.

@@ -1,3 +1,9 @@
+2020-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf.c (special_sections_g): Add .gnu.linkonce.n and .gnu.linkonce.p.
+	(special_sections_n): Add .noinit.
+	(special_sections_p): Add .persistent.
+
 2020-11-26  Nick Clifton  <nickc@redhat.com>
 
 	PR 26946

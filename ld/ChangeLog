@@ -1,3 +1,28 @@
+2020-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* emulparams/armelf.sh (OTHER_SECTIONS): Remove .noinit section
+	definition.
+	Define HAVE_{NOINIT,PERSISTENT}=yes.
+	* scripttempl/avr.sc (.noinit): Add .noinit.* and .gnu.linkonce.n.*
+	input section wildcard patterns.
+	* scripttempl/elf.sc: Define .noinit and .persistent sections when
+	HAVE_NOINIT or HAVE_PERSISTENT are defined to "yes".
+	* scripttempl/elf32msp430.sc (.noinit): Add .noinit.* and
+	.gnu.linkonce.n.*. input section wildcard patterns.
+	(.persistent): Add .persistent.* and
+	.gnu.linkonce.p.*. input section wildcard patterns.
+	* scripttempl/elfarcv2.sc (.noinit): Add .noinit.* and
+	.gnu.linkonce.n.*. input section wildcard patterns.
+	* scripttempl/pru.sc: Likewise.
+	* testsuite/ld-elf/noinit-sections-1.d: New test.
+	* testsuite/ld-elf/noinit-sections-2.d: New test.
+	* testsuite/ld-elf/noinit-sections-2.l: New test.
+	* testsuite/ld-elf/noinit-sections.s: New test.
+	* testsuite/ld-elf/persistent-sections-1.d: New test.
+	* testsuite/ld-elf/persistent-sections-2.d: New test.
+	* testsuite/ld-elf/persistent-sections-2.l: New test.
+	* testsuite/ld-elf/persistent-sections.s: New test.
+
 2020-11-26  Alan Modra  <amodra@gmail.com>
 
 	PR 26936

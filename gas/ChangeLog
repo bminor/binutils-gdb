@@ -1,3 +1,11 @@
+2020-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* testsuite/gas/elf/elf.exp: Run new tests.
+	* testsuite/gas/elf/section25.d: New test.
+	* testsuite/gas/elf/section25.s: New test.
+	* testsuite/gas/elf/section26.d: New test.
+	* testsuite/gas/elf/section26.s: New test.
+
 2020-11-25  Alan Modra  <amodra@gmail.com>
 
 	* output-file.c (output_file_close): Remove "can't close" from

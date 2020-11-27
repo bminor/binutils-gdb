@@ -271,7 +271,7 @@ cat <<EOF
   .noinit ${RELOCATING+ ADDR(.bss) + SIZEOF (.bss)} ${RELOCATING-0}: ${RELOCATING+ AT (ADDR (.noinit))}
   {
     ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
-    *(.noinit*)
+    *(.noinit${RELOCATING+ .noinit.* .gnu.linkonce.n.*})
     ${RELOCATING+ PROVIDE (__noinit_end = .) ; }
     ${RELOCATING+ _end = . ;  }
     ${RELOCATING+ PROVIDE (__heap_start = .) ; }

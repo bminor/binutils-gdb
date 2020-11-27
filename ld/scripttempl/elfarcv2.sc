@@ -283,7 +283,7 @@ SECTIONS
   /* Global data not cleared after reset.  */
   .noinit ${RELOCATING-0}:
   {
-    *(.noinit*)
+    *(.noinit${RELOCATING+ .noinit.* .gnu.linkonce.n.*})
     ${RELOCATING+. = ALIGN(${ALIGNMENT});}
     ${RELOCATING+ PROVIDE (__start_heap = .) ; }
   } ${RELOCATING+ > ${DATA_MEMORY}}
