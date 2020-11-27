@@ -1935,6 +1935,9 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   /* File mappings.  */
   linux_make_mappings_corefile_notes (gdbarch, obfd, note_data, note_size);
 
+  /* Target description.  */
+  gcore_elf_make_tdesc_note (obfd, &note_data, note_size);
+
   return note_data;
 }
 

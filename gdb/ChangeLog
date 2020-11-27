@@ -1,3 +1,17 @@
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* corelow.c: Add 'xml-tdesc.h' include.
+	(core_target::read_description): Load the target description from
+	the core file when possible.
+	* fbsd-tdep.c (fbsd_make_corefile_notes): Add target description
+	note.
+	* gcore-elf.c: Add 'gdbsupport/tdesc.h' include.
+	(gcore_elf_make_tdesc_note): New function.
+	* gcore-elf.h (gcore_elf_make_tdesc_note): Declare.
+	* linux-tdep.c (linux_make_corefile_notes): Add target description
+	note.
+
 2021-03-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* Makefile.in (SFILES): Add gcore-elf.c.

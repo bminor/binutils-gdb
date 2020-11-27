@@ -24,6 +24,7 @@
 #include "gdbthread.h"
 #include "inferior.h"
 #include "regset.h"
+#include "gdbsupport/tdesc.h"
 
 /* Structure for passing information from GCORE_COLLECT_THREAD_REGISTERS
    via an iterator to GCORE_COLLECT_REGSET_SECTION_CB. */
@@ -133,4 +134,33 @@ gcore_elf_build_thread_register_notes
   target_fetch_registers (regcache, -1);
   gcore_elf_collect_thread_registers (regcache, info->ptid, obfd,
 				      note_data, note_size, stop_signal);
+}
+
+/* See gcore-elf.h.  */
+
+void
+gcore_elf_make_tdesc_note (bfd *obfd,
+			   gdb::unique_xmalloc_ptr<char> *note_data,
+			   int *note_size)
+{
+  /* Append the target description to the core file.  */
+  const struct target_desc *tdesc = gdbarch_target_desc (target_gdbarch ());
+  const char *tdesc_xml
+    = tdesc == nullptr ? nullptr : tdesc_get_features_xml (tdesc);
+  if (tdesc_xml != nullptr && *tdesc_xml != '\0')
+    {
+      /* Skip the leading '@'.  */
+      if (*tdesc_xml == '@')
+	++tdesc_xml;
+
+      /* Include the null terminator in the length.  */
+      size_t tdesc_len = strlen (tdesc_xml) + 1;
+
+      /* Now add the target description into the core file.  */
+      note_data->reset (elfcore_write_register_note (obfd,
+						     note_data->release (),
+						     note_size,
+						     ".gdb-tdesc", tdesc_xml,
+						     tdesc_len));
+    }
 }

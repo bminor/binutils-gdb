@@ -712,6 +712,9 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 	return NULL;
     }
 
+  /* Include the target description when possible.  */
+  gcore_elf_make_tdesc_note (obfd, &note_data, note_size);
+
   return note_data;
 }
 
