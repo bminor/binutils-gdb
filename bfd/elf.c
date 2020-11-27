@@ -5257,7 +5257,8 @@ elf_sort_sections (const void *arg1, const void *arg2)
 
   /* Put !SEC_LOAD sections after SEC_LOAD ones.  */
 
-#define TOEND(x) (((x)->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0)
+#define TOEND(x) (((x)->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) == 0 \
+		  && (x)->size != 0)
 
   if (TOEND (sec1))
     {

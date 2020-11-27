@@ -1,3 +1,9 @@
+2020-11-28  Alan Modra  <amodra@gmail.com>
+
+	PR 26907
+	* elf.c (elf_sort_sections): Don't sort zero size !load sections
+	after load sections.
+
 2020-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* elf.c (special_sections_g): Add .gnu.linkonce.n and .gnu.linkonce.p.

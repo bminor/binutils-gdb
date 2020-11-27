@@ -1,3 +1,9 @@
+2020-11-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr26907.ld,
+	* testsuite/ld-elf/pr26907.s,
+	* testsuite/ld-elf/pr26907.d: New test.
+
 2020-11-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* emulparams/armelf.sh (OTHER_SECTIONS): Remove .noinit section
