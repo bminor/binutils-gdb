@@ -1,6 +1,11 @@
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* readelf.c (get_note_type): Handle NT_RISCV_CSR.
+
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* readelf.c (get_note_type): Handle NT_GDB_TDESC.
 
 2021-03-05  Nick Clifton  <nickc@redhat.com>

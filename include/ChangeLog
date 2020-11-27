@@ -1,6 +1,11 @@
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* elf/common.h (NT_RISCV_CSR): Define.
+
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* elf/common.h (NT_GDB_TDESC): Define.
 
 2021-03-03  Alan Modra  <amodra@gmail.com>
