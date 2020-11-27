@@ -23,6 +23,8 @@
 #include "riscv-tdep.h"
 #include "elf-bfd.h"
 #include "regset.h"
+#include "user-regs.h"
+#include "target-descriptions.h"
 
 #ifdef HAVE_ELF
 #include "elf-none-tdep.h"
@@ -65,6 +67,42 @@ static const struct regset riscv_fregset =
   riscv_fregmap, riscv_supply_regset, regcache_collect_regset
 };
 
+/* Define the CSR regset, this is not constant as the regmap field is
+   updated dynamically based on the current target description.  */
+
+static struct regset riscv_csrset =
+{
+  nullptr, regcache_supply_regset, regcache_collect_regset
+};
+
+/* Update the regmap field of RISCV_CSRSET based on the CSRs available in
+   the current target description.  */
+
+static void
+riscv_update_csrmap (struct gdbarch *gdbarch,
+		     const struct tdesc_feature *feature_csr)
+{
+  int i = 0;
+
+  /* Release any previously defined map.  */
+  delete[] ((struct regcache_map_entry *) riscv_csrset.regmap);
+
+  /* Now create a register map for every csr found in the target
+     description.  */
+  struct regcache_map_entry *riscv_csrmap
+    = new struct regcache_map_entry[feature_csr->registers.size() + 1];
+  for (auto &csr : feature_csr->registers)
+    {
+      int regnum = user_reg_map_name_to_regnum (gdbarch, csr->name.c_str(),
+						csr->name.length());
+      riscv_csrmap[i++] = {1, regnum, 0};
+    }
+
+  /* Mark the end of the array.  */
+  riscv_csrmap[i] = {0};
+  riscv_csrset.regmap = riscv_csrmap;
+}
+
 /* Implement the "iterate_over_regset_sections" gdbarch method.  */
 
 static void
@@ -83,6 +121,28 @@ riscv_iterate_over_regset_sections (struct gdbarch *gdbarch,
       sz = (32 * riscv_isa_flen (gdbarch)
 	    + register_size (gdbarch, RISCV_CSR_FCSR_REGNUM));
       cb (".reg2", sz, sz, &riscv_fregset, NULL, cb_data);
+    }
+
+  /* Read or write the CSRs.  The set of CSRs is defined by the current
+     target description.  The user is responsible for ensuring that the
+     same target description is in use when reading the core file as was
+     in use when writing the core file.  */
+  const struct target_desc *tdesc = gdbarch_target_desc (gdbarch);
+
+  /* Do not dump/load any CSRs if there is no target description or the target
+     description does not contain any CSRs.  */
+  if (tdesc != nullptr)
+    {
+      const struct tdesc_feature *feature_csr
+        = tdesc_find_feature (tdesc, riscv_feature_name_csr);
+      if (feature_csr != nullptr && feature_csr->registers.size () > 0)
+	{
+	  riscv_update_csrmap (gdbarch, feature_csr);
+	  cb (".reg-riscv-csr",
+	      (feature_csr->registers.size() * riscv_isa_xlen (gdbarch)),
+	      (feature_csr->registers.size() * riscv_isa_xlen (gdbarch)),
+	      &riscv_csrset, NULL, cb_data);
+	}
     }
 }
 

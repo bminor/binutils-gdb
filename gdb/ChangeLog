@@ -1,3 +1,12 @@
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-none-tdep.c: Add 'user-regs.h' and 'target-description.h'
+	includes.
+	(riscv_csrset): New static global.
+	(riscv_update_csrmap): New function.
+	(riscv_iterate_over_regset_sections): Process CSRs.
+
 2021-03-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_feature_name_csr): Define.
