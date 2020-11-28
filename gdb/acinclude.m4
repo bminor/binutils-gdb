@@ -266,6 +266,7 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
     [AC_LINK_IFELSE(
        [AC_LANG_PROGRAM(
 	  [#include <stdlib.h>
+	   #include <string.h>
 	   #include "bfd.h"
 	   #include "$4"],
 	  [return $3;]
