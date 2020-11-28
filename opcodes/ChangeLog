@@ -1,3 +1,8 @@
+2020-11-28 Borislav Petkov  <bp@suse.de>
+
+	* i386-dis.c (print_insn): Set active_seg_prefix for branch hint insns
+	to not dump branch hint prefixes 0x2E and 0x3E as unused prefixes.
+
 2020-11-16  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* aarch64-tbl.h (FLAGM): Handle for FLAGM feature.

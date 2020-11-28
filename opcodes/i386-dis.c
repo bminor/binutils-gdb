@@ -10910,10 +10910,19 @@ putop (const char *in_template, int sizeflag)
 	      used_prefixes |= prefixes & (PREFIX_CS | PREFIX_DS);
 	      *obufp++ = ',';
 	      *obufp++ = 'p';
+
+	      /* Set active_seg_prefix even if not set in 64-bit mode
+		 because here it is a valid branch hint. */
 	      if (prefixes & PREFIX_DS)
-		*obufp++ = 't';
+		{
+		  active_seg_prefix = PREFIX_DS;
+		  *obufp++ = 't';
+		}
 	      else
-		*obufp++ = 'n';
+		{
+		  active_seg_prefix = PREFIX_CS;
+		  *obufp++ = 'n';
+		}
 	    }
 	  break;
 	case 'K':

@@ -22,6 +22,10 @@
 	retw
 	retw	$8
 
+	jz,pt .Llabel
+	jz,pn .Llabel
+.Llabel:
+
 	.intel_syntax noprefix
 	call	rax
 	callq	rax

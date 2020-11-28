@@ -565,6 +565,7 @@ if [gas_32_check] then {
     run_dump_test "lfence-ret-c"
     run_dump_test "lfence-ret-d"
     run_dump_test "lfence-byte"
+    run_dump_test "branch"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
