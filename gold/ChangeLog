@@ -1,3 +1,27 @@
+2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/26937
+	* object.cc (Sized_relobj_file::map_to_kept_section): Get the
+	section index for linkonce section.  Also check the single
+	comdat section.
+	* testsuite/Makefile.am (check_SCRIPTS): Add pr26936.sh.
+	(check_DATA): Add pr26936a.stdout and pr26936b.stdout.
+	(MOSTLYCLEANFILES): Add pr26936a and pr26936b.
+	(pr26936a.stdout): New target.
+	(pr26936a): Likewise.
+	(pr26936b.stdout): Likewise.
+	(pr26936b): Likewise.
+	(pr26936a.o): Likewise.
+	(pr26936b.o): Likewise.
+	(pr26936c.o): Likewise.
+	(pr26936d.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/pr26936.sh: New file.
+	* testsuite/pr26936a.s: Likewise.
+	* testsuite/pr26936b.s: Likewise.
+	* testsuite/pr26936c.s: Likewise.
+	* testsuite/pr26936d.s: Likewise.
+
 2020-11-17  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::no_tprel_opt_): Rename from tprel_opt_.

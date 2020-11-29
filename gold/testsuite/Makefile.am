@@ -4385,4 +4385,26 @@ dwp_test_2a.dwp: ../dwp dwp_test_main.dwo dwp_test_1.dwo
 dwp_test_2b.dwp: ../dwp dwp_test_1b.dwo dwp_test_2.dwo
 	../dwp -o $@ dwp_test_1b.dwo dwp_test_2.dwo
 
+check_SCRIPTS += pr26936.sh
+check_DATA += pr26936a.stdout pr26936b.stdout
+MOSTLYCLEANFILES += pr26936a pr26936b
+pr26936a.stdout: pr26936a
+	$(TEST_READELF) -wL -wR -wr $< >$@ 2>/dev/null
+pr26936a: pr26936a.o pr26936b.o pr26936c.o ../ld-new
+	../ld-new -Ttext-segment 0x10000 -z max-page-size=0x1000 \
+		-e _start -o $@ pr26936a.o pr26936b.o pr26936c.o
+pr26936b.stdout: pr26936b
+	$(TEST_READELF) -wL -wR -wr $< >$@ 2>/dev/null
+pr26936b: pr26936d.o pr26936b.o pr26936c.o ../ld-new
+	../ld-new -Ttext-segment 0x10000 -z max-page-size=0x1000 \
+		-e _start -o $@ pr26936d.o pr26936b.o pr26936c.o
+pr26936a.o: pr26936a.s
+	$(TEST_AS) --gen-debug -o $@ $<
+pr26936b.o: pr26936b.s
+	$(TEST_AS) --gen-debug -o $@ $<
+pr26936c.o: pr26936c.s
+	$(TEST_AS) --gen-debug -o $@ $<
+pr26936d.o: pr26936d.s
+	$(TEST_AS) --gen-debug -o $@ $<
+
 endif DEFAULT_TARGET_X86_64
