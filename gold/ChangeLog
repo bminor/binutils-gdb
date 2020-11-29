@@ -1,5 +1,12 @@
 2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/26972
+	* x86_64.cc (Output_data_plt_x86_64_ibt::tlsdesc_plt_entry): Add
+	endbr64.
+	(Output_data_plt_x86_64_ibt::do_fill_tlsdesc_entry): Adjusted.
+
+2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/26939
 	* x86_64.cc (Target_x86_64<size>::Scan::local): Check
 	get_r_addend() == -4 for GOTPCRELX conversion.

@@ -2480,11 +2480,11 @@ Output_data_plt_x86_64_ibt<size>::tlsdesc_plt_entry[plt_entry_size] =
 {
   // From Alexandre Oliva, "Thread-Local Storage Descriptors for IA32
   // and AMD64/EM64T", Version 0.9.4 (2005-10-10).
+  0xf3, 0x0f, 0x1e, 0xfa, // endbr64
   0xff, 0x35,		// pushq x(%rip)
   0, 0, 0, 0,		// replaced with address of linkmap GOT entry (at PLTGOT + 8)
-  0xf2, 0xff, 0x25,	// jmpq *y(%rip)
+  0xff, 0x25,		// jmpq *y(%rip)
   0, 0, 0, 0,		// replaced with offset of reserved TLSDESC_GOT entry
-  0x0f,	0x1f, 0		// nop
 };
 
 template<int size>
@@ -2498,15 +2498,15 @@ Output_data_plt_x86_64_ibt<size>::do_fill_tlsdesc_entry(
     unsigned int plt_offset)
 {
   memcpy(pov, tlsdesc_plt_entry, plt_entry_size);
-  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
+  elfcpp::Swap_unaligned<32, false>::writeval(pov + 6,
 					      (got_address + 8
 					       - (plt_address + plt_offset
-						  + 6)));
-  elfcpp::Swap_unaligned<32, false>::writeval(pov + 9,
+						  + 10)));
+  elfcpp::Swap_unaligned<32, false>::writeval(pov + 12,
 					      (got_base
 					       + tlsdesc_got_offset
 					       - (plt_address + plt_offset
-						  + 13)));
+						  + 16)));
 }
 
 // The .eh_frame unwind information for the PLT.
