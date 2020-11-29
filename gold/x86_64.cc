@@ -3730,6 +3730,7 @@ Target_x86_64<size>::Scan::local(Symbol_table* symtab,
 	    && (r_type == elfcpp::R_X86_64_GOTPCREL
 		|| r_type == elfcpp::R_X86_64_GOTPCRELX
 		|| r_type == elfcpp::R_X86_64_REX_GOTPCRELX)
+	    && reloc.get_r_addend() == -4
 	    && reloc.get_r_offset() >= 2
 	    && !is_ifunc)
 	  {
@@ -4200,6 +4201,7 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
         Lazy_view<size> view(object, data_shndx);
         size_t r_offset = reloc.get_r_offset();
         if (!parameters->incremental()
+	    && reloc.get_r_addend() == -4
 	    && r_offset >= 2
             && Target_x86_64<size>::can_convert_mov_to_lea(gsym, r_type,
                                                            r_offset, &view))
@@ -4890,63 +4892,78 @@ Target_x86_64<size>::Relocate::relocate(
     case elfcpp::R_X86_64_GOTPCRELX:
     case elfcpp::R_X86_64_REX_GOTPCRELX:
       {
-      // Convert
-      // mov foo@GOTPCREL(%rip), %reg
-      // to lea foo(%rip), %reg.
-      // if possible.
-      if (!parameters->incremental()
-	  && ((gsym == NULL
-	       && rela.get_r_offset() >= 2
-	       && view[-2] == 0x8b
-	       && !psymval->is_ifunc_symbol())
-	      || (gsym != NULL
-		  && rela.get_r_offset() >= 2
-		  && Target_x86_64<size>::can_convert_mov_to_lea(gsym, r_type,
-								 0, &view))))
+      bool converted_p = false;
+
+      if (rela.get_r_addend() == -4)
 	{
-	  view[-2] = 0x8d;
-	  Reloc_funcs::pcrela32(view, object, psymval, addend, address);
-	}
-      // Convert
-      // callq *foo@GOTPCRELX(%rip) to
-      // addr32 callq foo
-      // and jmpq *foo@GOTPCRELX(%rip) to
-      // jmpq foo
-      // nop
-      else if (!parameters->incremental()
-	       && gsym != NULL
-	       && rela.get_r_offset() >= 2
-	       && Target_x86_64<size>::can_convert_callq_to_direct(gsym,
-								   r_type,
-								   0, &view))
-	{
-	  if (view[-1] == 0x15)
+	  // Convert
+	  // mov foo@GOTPCREL(%rip), %reg
+	  // to lea foo(%rip), %reg.
+	  // if possible.
+	  if (!parameters->incremental()
+	      && ((gsym == NULL
+		   && rela.get_r_offset() >= 2
+		   && view[-2] == 0x8b
+		   && !psymval->is_ifunc_symbol())
+		  || (gsym != NULL
+		      && rela.get_r_offset() >= 2
+		      && Target_x86_64<size>::can_convert_mov_to_lea(gsym,
+								     r_type,
+								     0,
+								     &view))))
 	    {
-	      // Convert callq *foo@GOTPCRELX(%rip) to addr32 callq.
-	      // Opcode of addr32 is 0x67 and opcode of direct callq is 0xe8.
-	      view[-2] = 0x67;
-	      view[-1] = 0xe8;
-	      // Convert GOTPCRELX to 32-bit pc relative reloc.
+	      view[-2] = 0x8d;
 	      Reloc_funcs::pcrela32(view, object, psymval, addend, address);
+	      converted_p = true;
 	    }
-	  else
+	  // Convert
+	  // callq *foo@GOTPCRELX(%rip) to
+	  // addr32 callq foo
+	  // and jmpq *foo@GOTPCRELX(%rip) to
+	  // jmpq foo
+	  // nop
+	  else if (!parameters->incremental()
+		   && gsym != NULL
+		   && rela.get_r_offset() >= 2
+		   && Target_x86_64<size>::can_convert_callq_to_direct(gsym,
+								       r_type,
+								       0,
+								       &view))
 	    {
-	      // Convert jmpq *foo@GOTPCRELX(%rip) to
-	      // jmpq foo
-	      // nop
-	      // The opcode of direct jmpq is 0xe9.
-	      view[-2] = 0xe9;
-	      // The opcode of nop is 0x90.
-	      view[3] = 0x90;
-	      // Convert GOTPCRELX to 32-bit pc relative reloc.  jmpq is rip
-	      // relative and since the instruction following the jmpq is now
-	      // the nop, offset the address by 1 byte.  The start of the
-              // relocation also moves ahead by 1 byte.
-	      Reloc_funcs::pcrela32(&view[-1], object, psymval, addend,
-				    address - 1);
+	      if (view[-1] == 0x15)
+		{
+		  // Convert callq *foo@GOTPCRELX(%rip) to addr32 callq.
+		  // Opcode of addr32 is 0x67 and opcode of direct callq
+		  // is 0xe8.
+		  view[-2] = 0x67;
+		  view[-1] = 0xe8;
+		  // Convert GOTPCRELX to 32-bit pc relative reloc.
+		  Reloc_funcs::pcrela32(view, object, psymval, addend,
+					address);
+		  converted_p = true;
+		}
+	      else
+		{
+		  // Convert jmpq *foo@GOTPCRELX(%rip) to
+		  // jmpq foo
+		  // nop
+		  // The opcode of direct jmpq is 0xe9.
+		  view[-2] = 0xe9;
+		  // The opcode of nop is 0x90.
+		  view[3] = 0x90;
+		  // Convert GOTPCRELX to 32-bit pc relative reloc.  jmpq
+		  // is rip relative and since the instruction following
+		  // the jmpq is now the nop, offset the address by 1
+		  // byte.  The start of the relocation also moves ahead
+		  // by 1 byte.
+		  Reloc_funcs::pcrela32(&view[-1], object, psymval, addend,
+					address - 1);
+		  converted_p = true;
+		}
 	    }
 	}
-      else
+
+      if (!converted_p)
 	{
 	  if (gsym != NULL)
 	    {

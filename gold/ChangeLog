@@ -1,5 +1,26 @@
 2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/26939
+	* x86_64.cc (Target_x86_64<size>::Scan::local): Check
+	get_r_addend() == -4 for GOTPCRELX conversion.
+	(Target_x86_64<size>::Scan::global): Likewise.
+	(Target_x86_64<size>::Relocate::relocate): Likewise.
+	* testsuite/Makefile.am (check_DATA): Add
+	x86_64_mov_to_lea15.stdout and x86_64_mov_to_lea16.stdout.
+	(MOSTLYCLEANFILES): Add x86_64_mov_to_lea15 and
+	x86_64_mov_to_lea16.
+	(x86_64_mov_to_lea9.o): New target.
+	(x86_64_mov_to_lea10.o): Likewise.
+	(x86_64_mov_to_lea15): Likewise.
+	(x86_64_mov_to_lea16): Likewise.
+	(x86_64_mov_to_lea15.stdout): Likewise.
+	(x86_64_mov_to_lea16.stdout): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/x86_64_mov_to_lea.sh: Updated.
+	* testsuite/x86_64_mov_to_lea5.s: New file.
+
+2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/26937
 	* object.cc (Sized_relobj_file::map_to_kept_section): Get the
 	section index for linkonce section.  Also check the single

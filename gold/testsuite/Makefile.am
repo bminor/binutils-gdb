@@ -1119,12 +1119,15 @@ check_DATA += x86_64_mov_to_lea1.stdout x86_64_mov_to_lea2.stdout \
 	x86_64_mov_to_lea7.stdout x86_64_mov_to_lea8.stdout \
 	x86_64_mov_to_lea9.stdout x86_64_mov_to_lea10.stdout \
 	x86_64_mov_to_lea11.stdout x86_64_mov_to_lea12.stdout \
-	x86_64_mov_to_lea13.stdout x86_64_mov_to_lea14.stdout
+	x86_64_mov_to_lea13.stdout x86_64_mov_to_lea14.stdout \
+	x86_64_mov_to_lea15.stdout x86_64_mov_to_lea16.stdout
+
 MOSTLYCLEANFILES += x86_64_mov_to_lea1 x86_64_mov_to_lea2 \
 	x86_64_mov_to_lea3 x86_64_mov_to_lea4 x86_64_mov_to_lea5 \
 	x86_64_mov_to_lea6 x86_64_mov_to_lea7 x86_64_mov_to_lea8 \
 	x86_64_mov_to_lea9 x86_64_mov_to_lea10 x86_64_mov_to_lea11 \
-	x86_64_mov_to_lea12 x86_64_mov_to_lea13 x86_64_mov_to_lea14
+	x86_64_mov_to_lea12 x86_64_mov_to_lea13 x86_64_mov_to_lea14 \
+	x86_64_mov_to_lea15 x86_64_mov_to_lea16
 
 x86_64_mov_to_lea1.o: x86_64_mov_to_lea1.s
 	$(TEST_AS) --64 -o $@ $<
@@ -1142,6 +1145,10 @@ x86_64_mov_to_lea7.o: x86_64_mov_to_lea4.s
 	$(TEST_AS) --x32 -o $@ $<
 x86_64_mov_to_lea8.o: x86_64_mov_to_lea4.s
 	$(TEST_AS) --64 -o $@ $<
+x86_64_mov_to_lea9.o: x86_64_mov_to_lea5.s
+	$(TEST_AS) --x32 -mrelax-relocations=yes -o $@ $<
+x86_64_mov_to_lea10.o: x86_64_mov_to_lea5.s
+	$(TEST_AS) --64 -mrelax-relocations=yes -o $@ $<
 x86_64_mov_to_lea1: x86_64_mov_to_lea1.o ../ld-new
 	../ld-new -Bsymbolic -shared -melf_x86_64 -o $@ $<
 x86_64_mov_to_lea2: x86_64_mov_to_lea1.o ../ld-new
@@ -1170,6 +1177,10 @@ x86_64_mov_to_lea13: x86_64_mov_to_lea7.o ../ld-new
 	../ld-new -melf32_x86_64 -shared -o $@ $<
 x86_64_mov_to_lea14: x86_64_mov_to_lea8.o ../ld-new
 	../ld-new -melf_x86_64 -shared -o $@ $<
+x86_64_mov_to_lea15: x86_64_mov_to_lea9.o ../ld-new
+	../ld-new -melf32_x86_64 -shared -o $@ $<
+x86_64_mov_to_lea16: x86_64_mov_to_lea10.o ../ld-new
+	../ld-new -melf_x86_64 -shared -o $@ $<
 x86_64_mov_to_lea1.stdout: x86_64_mov_to_lea1
 	$(TEST_OBJDUMP) -dw $< > $@
 x86_64_mov_to_lea2.stdout: x86_64_mov_to_lea2
@@ -1197,6 +1208,10 @@ x86_64_mov_to_lea12.stdout: x86_64_mov_to_lea12
 x86_64_mov_to_lea13.stdout: x86_64_mov_to_lea13
 	$(TEST_OBJDUMP) -dw $< > $@
 x86_64_mov_to_lea14.stdout: x86_64_mov_to_lea14
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea15.stdout: x86_64_mov_to_lea15
+	$(TEST_OBJDUMP) -dw $< > $@
+x86_64_mov_to_lea16.stdout: x86_64_mov_to_lea16
 	$(TEST_OBJDUMP) -dw $< > $@
 
 check_SCRIPTS += x86_64_indirect_call_to_direct.sh
