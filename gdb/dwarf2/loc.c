@@ -2499,7 +2499,8 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 			   struct frame_info *frame,
 			   const struct property_addr_info *addr_stack,
 			   CORE_ADDR *valp,
-			   bool push_initial_value)
+			   bool push_initial_value,
+			   bool *is_reference)
 {
   if (dlbaton == NULL || dlbaton->size == 0)
     return 0;
@@ -2546,9 +2547,12 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
   switch (ctx.location)
     {
+    case DWARF_VALUE_STACK:
+      *is_reference = false;
+      /* FALLTHROUGH */
+
     case DWARF_VALUE_REGISTER:
     case DWARF_VALUE_MEMORY:
-    case DWARF_VALUE_STACK:
       *valp = ctx.fetch_address (0);
       if (ctx.location == DWARF_VALUE_REGISTER)
 	*valp = ctx.read_addr_from_reg (*valp);
@@ -2589,10 +2593,11 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  = (const struct dwarf2_property_baton *) prop->baton ();
 	gdb_assert (baton->property_type != NULL);
 
+	bool is_reference = baton->locexpr.is_reference;
 	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame, addr_stack,
-				       value, push_initial_value))
+				       value, push_initial_value, &is_reference))
 	  {
-	    if (baton->locexpr.is_reference)
+	    if (is_reference)
 	      {
 		struct value *val = value_at (baton->property_type, *value);
 		*value = value_as_address (val);

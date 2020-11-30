@@ -1,5 +1,12 @@
 2020-11-30  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/26905
+	* dwarf2/loc.c (dwarf2_locexpr_baton_eval): Add and handle
+	is_reference parameter.
+	(dwarf2_evaluate_property): Update dwarf2_locexpr_baton_eval call.
+
+2020-11-30  Tom de Vries  <tdevries@suse.de>
+
 	* debuginfod-support.c (debuginfod_source_query)
 	(debuginfod_debuginfo_query): Only set DESTNAME if successful.
 

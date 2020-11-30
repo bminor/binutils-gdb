@@ -166,11 +166,7 @@ gdb_test "whatis static_array" "type = char \\\[5\\\]"
 gdb_test "print static_array" " = \"world\""
 gdb_test "print sizeof static_array" " = 5"
 
-setup_kfail "gdb/26905" *-*-*
 gdb_test "ptype vla_array" "type = char \\\[6\\\]"
-setup_kfail "gdb/26905" *-*-*
 gdb_test "whatis vla_array" "type = char \\\[6\\\]"
-setup_kfail "gdb/26905" *-*-*
 gdb_test "print vla_array" " = \"saluto\""
-setup_kfail "gdb/26905" *-*-*
 gdb_test "print sizeof vla_array" " = 6"
