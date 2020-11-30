@@ -171,7 +171,7 @@ extern struct value *evaluate_subexp_do_call (expression *exp,
 
 extern void print_expression (struct expression *, struct ui_file *);
 
-extern const char *op_name (struct expression *exp, enum exp_opcode opcode);
+extern const char *op_name (enum exp_opcode opcode);
 
 extern const char *op_string (enum exp_opcode);
 

@@ -127,8 +127,6 @@ static void replace_operator_with_call (expression_up *, int, int, int,
 
 static int possible_user_operator_p (enum exp_opcode, struct value **);
 
-static const char *ada_op_name (enum exp_opcode);
-
 static const char *ada_decoded_op_name (enum exp_opcode);
 
 static int numeric_type_p (struct type *);
@@ -13289,27 +13287,6 @@ ada_operator_check (struct expression *exp, int pos,
   return 0;
 }
 
-static const char *
-ada_op_name (enum exp_opcode opcode)
-{
-  switch (opcode)
-    {
-    default:
-      return op_name_standard (opcode);
-
-#define OP_DEFN(op, len, args, binop) case op: return #op;
-      ADA_OPERATORS;
-#undef OP_DEFN
-
-    case OP_AGGREGATE:
-      return "OP_AGGREGATE";
-    case OP_CHOICES:
-      return "OP_CHOICES";
-    case OP_NAME:
-      return "OP_NAME";
-    }
-}
-
 /* As for operator_length, but assumes PC is pointing at the first
    element of the operator, and gives meaningful results only for the 
    Ada-specific operators, returning 0 for *OPLENP and *ARGSP otherwise.  */
@@ -13601,7 +13578,6 @@ static const struct exp_descriptor ada_exp_descriptor = {
   ada_print_subexp,
   ada_operator_length,
   ada_operator_check,
-  ada_op_name,
   ada_dump_subexp_body,
   ada_evaluate_subexp
 };

@@ -948,7 +948,6 @@ const struct exp_descriptor exp_descriptor_opencl =
   print_subexp_standard,
   operator_length_standard,
   operator_check_standard,
-  op_name_standard,
   dump_subexp_body_standard,
   evaluate_subexp_opencl
 };

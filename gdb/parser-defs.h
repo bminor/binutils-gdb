@@ -355,8 +355,6 @@ extern int operator_check_standard (struct expression *exp, int pos,
 				      (struct objfile *objfile, void *data),
 				    void *data);
 
-extern const char *op_name_standard (enum exp_opcode);
-
 extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);
 
@@ -416,12 +414,6 @@ struct exp_descriptor
 			   int (*objfile_func) (struct objfile *objfile,
 						void *data),
 			   void *data);
-
-    /* Name of this operator for dumping purposes.
-       The returned value should never be NULL, even if EXP_OPCODE is
-       an unknown opcode (a string containing an image of the numeric
-       value of the opcode can be returned, for instance).  */
-    const char *(*op_name) (enum exp_opcode);
 
     /* Dump the rest of this (prefix) expression after the operator
        itself has been printed.  See dump_subexp_body_standard in

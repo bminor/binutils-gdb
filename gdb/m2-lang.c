@@ -167,7 +167,6 @@ const struct exp_descriptor m2_language::exp_descriptor_modula2 =
   print_subexp_standard,
   operator_length_standard,
   operator_check_standard,
-  op_name_standard,
   dump_subexp_body_standard,
   evaluate_subexp_modula2
 };

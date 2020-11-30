@@ -1680,22 +1680,6 @@ rust_operator_length (const struct expression *exp, int pc, int *oplenp,
   *argsp = args;
 }
 
-/* op_name implementation for Rust.  */
-
-static const char *
-rust_op_name (enum exp_opcode opcode)
-{
-  switch (opcode)
-    {
-    case OP_AGGREGATE:
-      return "OP_AGGREGATE";
-    case OP_OTHERS:
-      return "OP_OTHERS";
-    default:
-      return op_name_standard (opcode);
-    }
-}
-
 /* dump_subexp_body implementation for Rust.  */
 
 static int
@@ -1869,7 +1853,6 @@ static const struct exp_descriptor exp_descriptor_rust =
   rust_print_subexp,
   rust_operator_length,
   rust_operator_check,
-  rust_op_name,
   rust_dump_subexp_body,
   rust_evaluate_subexp
 };

@@ -1072,24 +1072,6 @@ print_subexp_f (struct expression *exp, int *pos,
     }
 }
 
-/* Special expression names for Fortran.  */
-
-static const char *
-op_name_f (enum exp_opcode opcode)
-{
-  switch (opcode)
-    {
-    default:
-      return op_name_standard (opcode);
-
-#define OP(name)	\
-    case name:		\
-      return #name ;
-#include "fortran-operator.def"
-#undef OP
-    }
-}
-
 /* Special expression dumping for Fortran.  */
 
 static int
@@ -1159,7 +1141,6 @@ const struct exp_descriptor f_language::exp_descriptor_tab =
   print_subexp_f,
   operator_length_f,
   operator_check_f,
-  op_name_f,
   dump_subexp_body_f,
   evaluate_subexp_f
 };

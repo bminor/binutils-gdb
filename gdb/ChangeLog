@@ -1,5 +1,25 @@
 2020-11-30  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_op_name): Remove.
+	(exp_descriptor_rust): Update.
+	* parser-defs.h (op_name_standard): Don't declare.
+	(struct exp_descriptor) <op_name>: Remove.
+	* parse.c (exp_descriptor_standard): Update.
+	* opencl-lang.c (exp_descriptor_opencl): Update.
+	* m2-lang.c (m2_language::exp_descriptor_modula2): Update.
+	* f-lang.c (op_name_f): Remove.
+	(f_language::exp_descriptor_tab): Update.
+	* expression.h (op_name): Update.
+	* expprint.c (op_name): Rewrite.
+	(op_name_standard): Remove.
+	(dump_raw_expression, dump_subexp): Update.
+	* c-lang.c (exp_descriptor_c): Update.
+	* ax-gdb.c (gen_expr): Update.
+	* ada-lang.c (ada_op_name): Remove.
+	(ada_exp_descriptor): Update.
+
+2020-11-30  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (init_array_element): Remove.
 	(evaluate_subexp_standard) <OP_ARRAY>: Remove "index_pc".
 

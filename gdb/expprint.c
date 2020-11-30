@@ -685,26 +685,11 @@ op_string (enum exp_opcode op)
 
 static int dump_subexp_body (struct expression *exp, struct ui_file *, int);
 
-/* Name for OPCODE, when it appears in expression EXP.  */
-
-const char *
-op_name (struct expression *exp, enum exp_opcode opcode)
-{
-  if (opcode >= OP_UNUSED_LAST)
-    {
-      char *cell = get_print_cell ();
-      xsnprintf (cell, PRINT_CELL_SIZE, "unknown opcode: %u",
-		 unsigned (opcode));
-      return cell;
-    }
-  return exp->language_defn->expression_ops ()->op_name (opcode);
-}
-
 /* Default name for the standard operator OPCODE (i.e., one defined in
    the definition of enum exp_opcode).  */
 
 const char *
-op_name_standard (enum exp_opcode opcode)
+op_name (enum exp_opcode opcode)
 {
   switch (opcode)
     {
@@ -719,6 +704,8 @@ op_name_standard (enum exp_opcode opcode)
     case name:		\
       return #name ;
 #include "std-operator.def"
+#include "ada-operator.def"
+#include "fortran-operator.def"
 #undef OP
     }
 }
@@ -747,7 +734,7 @@ dump_raw_expression (struct expression *exp, struct ui_file *stream,
     {
       fprintf_filtered (stream, "\t%5d  ", elt);
 
-      const char *opcode_name = op_name (exp, exp->elts[elt].opcode);
+      const char *opcode_name = op_name (exp->elts[elt].opcode);
       fprintf_filtered (stream, "%20s  ", opcode_name);
 
       print_longest (stream, 'd', 0, exp->elts[elt].longconst);
@@ -782,7 +769,7 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
     fprintf_filtered (stream, " ");
   indent += 2;
 
-  fprintf_filtered (stream, "%-20s  ", op_name (exp, exp->elts[elt].opcode));
+  fprintf_filtered (stream, "%-20s  ", op_name (exp->elts[elt].opcode));
 
   elt = dump_subexp_body (exp, stream, elt);
 
