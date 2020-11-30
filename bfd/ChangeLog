@@ -1,6 +1,15 @@
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* elfnn-riscv.c (PRPSINFO_PR_FNAME_LENGTH): Define.
+	(PRPSINFO_PR_PSARGS_LENGTH): Define.
+	(riscv_write_core_note): New function.
+	(riscv_elf_grok_psinfo): Make use of two new length defines.
+	(elf_backend_write_core_note): Define.
+
+2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* elf-bfd.h (elfcore_write_gdb_tdesc): Declare new function.
 	* elf.c (elfcore_grok_gdb_tdesc): New function.
 	(elfcore_grok_note): Handle NT_GDB_TDESC.
