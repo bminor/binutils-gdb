@@ -1,5 +1,10 @@
 2020-12-01  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/elf.exp: Set ASFLAGS for tic6x.
+	* testsuite/ld-elf/reloc-discard.d: Remove tic6x xfail.
+
+2020-12-01  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/pr26979a.s,
 	* testsuite/ld-elf/pr26979b.s,
 	* testsuite/ld-elf/pr26979c.s,

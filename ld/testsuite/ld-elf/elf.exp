@@ -46,6 +46,10 @@ if { [istarget alpha*-*-* ] } {
     set ASFLAGS "$ASFLAGS --defsym NO_SET=1"
 }
 
+if [istarget "tic6x-*-*"] {
+    append ASFLAGS " -mpic -mpid=near"
+}
+
 if { [istarget "*-*-solaris*"] } {
     # Same for Solaris
     set options_regsub(ld) {-melf_x86_64 -melf_x86_64_sol2}
