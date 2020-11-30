@@ -1,3 +1,9 @@
+2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26936
+	* testsuite/ld-elf/pr26936.d: Xfail targets which don't support
+	mixing linkonce and comdat sections.
+
 2020-11-28  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/pr26907.ld,
