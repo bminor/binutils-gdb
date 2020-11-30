@@ -174,8 +174,7 @@ bfd_boolean elf32_m68hc11_add_symbol_hook
    bfd_vma *valp);
 
 void elf32_m68hc11_merge_symbol_attribute
-  (struct elf_link_hash_entry *, const Elf_Internal_Sym *,
-   bfd_boolean, bfd_boolean);
+  (struct elf_link_hash_entry *, unsigned int, bfd_boolean, bfd_boolean);
 
 /* Tweak the OSABI field of the elf header.  */
 

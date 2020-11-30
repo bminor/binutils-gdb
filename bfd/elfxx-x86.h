@@ -638,8 +638,7 @@ extern bfd_boolean _bfd_x86_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 
 extern void _bfd_x86_elf_merge_symbol_attribute
-  (struct elf_link_hash_entry *, const Elf_Internal_Sym *,
-   bfd_boolean, bfd_boolean);
+  (struct elf_link_hash_entry *, unsigned int, bfd_boolean, bfd_boolean);
 
 extern void _bfd_x86_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,

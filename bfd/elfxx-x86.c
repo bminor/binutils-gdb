@@ -1624,7 +1624,7 @@ _bfd_x86_elf_always_size_sections (bfd *output_bfd,
 
 void
 _bfd_x86_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
-				     const Elf_Internal_Sym *isym,
+				     unsigned int st_other,
 				     bfd_boolean definition,
 				     bfd_boolean dynamic ATTRIBUTE_UNUSED)
 {
@@ -1632,8 +1632,7 @@ _bfd_x86_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
     {
       struct elf_x86_link_hash_entry *eh
 	= (struct elf_x86_link_hash_entry *) h;
-      eh->def_protected = (ELF_ST_VISIBILITY (isym->st_other)
-			   == STV_PROTECTED);
+      eh->def_protected = ELF_ST_VISIBILITY (st_other) == STV_PROTECTED;
     }
 }
 

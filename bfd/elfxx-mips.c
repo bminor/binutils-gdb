@@ -16320,21 +16320,21 @@ const struct bfd_elf_special_section _bfd_mips_elf_special_sections[] =
    definiton of the symbol.  */
 void
 _bfd_mips_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
-				      const Elf_Internal_Sym *isym,
+				      unsigned int st_other,
 				      bfd_boolean definition,
 				      bfd_boolean dynamic ATTRIBUTE_UNUSED)
 {
-  if ((isym->st_other & ~ELF_ST_VISIBILITY (-1)) != 0)
+  if ((st_other & ~ELF_ST_VISIBILITY (-1)) != 0)
     {
       unsigned char other;
 
-      other = (definition ? isym->st_other : h->other);
+      other = (definition ? st_other : h->other);
       other &= ~ELF_ST_VISIBILITY (-1);
       h->other = other | ELF_ST_VISIBILITY (h->other);
     }
 
   if (!definition
-      && ELF_MIPS_IS_OPTIONAL (isym->st_other))
+      && ELF_MIPS_IS_OPTIONAL (st_other))
     h->other |= STO_OPTIONAL;
 }
 

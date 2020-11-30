@@ -2093,13 +2093,13 @@ elf64_alpha_adjust_dynamic_symbol (struct bfd_link_info *info,
 
 static void
 elf64_alpha_merge_symbol_attribute (struct elf_link_hash_entry *h,
-				    const Elf_Internal_Sym *isym,
+				    unsigned int st_other,
 				    bfd_boolean definition,
 				    bfd_boolean dynamic)
 {
   if (!dynamic && definition)
     h->other = ((h->other & ELF_ST_VISIBILITY (-1))
-		| (isym->st_other & ~ELF_ST_VISIBILITY (-1)));
+		| (st_other & ~ELF_ST_VISIBILITY (-1)));
 }
 
 /* Symbol versioning can create new symbols, and make our old symbols

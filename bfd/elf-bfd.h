@@ -1295,8 +1295,7 @@ struct elf_backend_data
 
   /* Merge the backend specific symbol attribute.  */
   void (*elf_backend_merge_symbol_attribute)
-    (struct elf_link_hash_entry *, const Elf_Internal_Sym *, bfd_boolean,
-     bfd_boolean);
+    (struct elf_link_hash_entry *, unsigned int, bfd_boolean, bfd_boolean);
 
   /* This function, if defined, will return a string containing the
      name of a target-specific dynamic tag.  */

@@ -4152,12 +4152,12 @@ ppc64_elf_add_symbol_hook (bfd *ibfd,
 
 static void
 ppc64_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
-				  const Elf_Internal_Sym *isym,
+				  unsigned int st_other,
 				  bfd_boolean definition,
 				  bfd_boolean dynamic)
 {
   if (definition && (!dynamic || !h->def_regular))
-    h->other = ((isym->st_other & ~ELF_ST_VISIBILITY (-1))
+    h->other = ((st_other & ~ELF_ST_VISIBILITY (-1))
 		| ELF_ST_VISIBILITY (h->other));
 }
 

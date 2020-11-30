@@ -1,3 +1,12 @@
+2020-12-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr26979a.s,
+	* testsuite/ld-elf/pr26979b.s,
+	* testsuite/ld-elf/pr26979c.s,
+	* testsuite/ld-elf/pr26979.ver,
+	* testsuite/ld-elf/pr26979a.d,
+	* testsuite/ld-elf/pr26979b.d: New tests.
+
 2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26936

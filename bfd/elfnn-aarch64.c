@@ -2854,11 +2854,11 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 
 static void
 elfNN_aarch64_merge_symbol_attribute (struct elf_link_hash_entry *h,
-				      const Elf_Internal_Sym *isym,
+				      unsigned int st_other,
 				      bfd_boolean definition ATTRIBUTE_UNUSED,
 				      bfd_boolean dynamic ATTRIBUTE_UNUSED)
 {
-  unsigned int isym_sto = isym->st_other & ~ELF_ST_VISIBILITY (-1);
+  unsigned int isym_sto = st_other & ~ELF_ST_VISIBILITY (-1);
   unsigned int h_sto = h->other & ~ELF_ST_VISIBILITY (-1);
 
   if (isym_sto == h_sto)
