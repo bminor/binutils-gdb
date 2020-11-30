@@ -1,3 +1,16 @@
+2021-03-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Craig Blackmore  <craig.blackmore@embecosm.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add riscv-none-tdep.o.
+	(ALLDEPFILES): Add riscv-none-tdep.c.
+	* configure: Regenerate.
+	* configure.ac (CONFIG_OBS): Add elf-none-tdep.o when BFD has ELF
+	support.
+	* configure.tgt (riscv*-*-*): Include riscv-none-tdep.c.
+	* elf-none-tdep.c: New file.
+	* elf-none-tdep.h: New file.
+	* riscv-none-tdep.c: New file.
+
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

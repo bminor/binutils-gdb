@@ -808,6 +808,7 @@ ALL_TARGET_OBS = \
 	ravenscar-thread.o \
 	riscv-fbsd-tdep.o \
 	riscv-linux-tdep.o \
+	riscv-none-tdep.o \
 	riscv-ravenscar-thread.o \
 	riscv-tdep.o \
 	rl78-tdep.o \
@@ -1189,6 +1190,7 @@ SFILES = \
 	cp-name-parser.y \
 	d-exp.y \
 	dtrace-probe.c \
+	elf-none-tdep.c \
 	elfread.c \
 	f-exp.y \
 	gcore-elf.c \
@@ -1363,6 +1365,7 @@ HFILES_NO_SRCDIR = \
 	netbsd-tdep.h \
 	nds32-tdep.h \
 	nios2-tdep.h \
+	elf-none-tdep.h \
 	nto-tdep.h \
 	objc-lang.h \
 	objfiles.h \
@@ -2274,6 +2277,7 @@ ALLDEPFILES = \
 	riscv-fbsd-tdep.c \
 	riscv-linux-nat.c \
 	riscv-linux-tdep.c \
+	riscv-none-tdep.c \
 	riscv-ravenscar-thread.c \
 	riscv-tdep.c \
 	rl78-tdep.c \

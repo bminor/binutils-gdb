@@ -85,7 +85,7 @@ ia64*-*-*)
 	;;
 
 riscv*-*-*)
-	cpu_obs="riscv-tdep.o arch/riscv.o \
+	cpu_obs="riscv-tdep.o riscv-none-tdep.o arch/riscv.o \
 	         ravenscar-thread.o riscv-ravenscar-thread.o";;
 
 x86_64-*-*)
