@@ -1,3 +1,8 @@
+2020-11-30  Tom Tromey  <tom@tromey.com>
+
+	* eval.c (init_array_element): Remove.
+	(evaluate_subexp_standard) <OP_ARRAY>: Remove "index_pc".
+
 2020-11-29  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR tui/26973

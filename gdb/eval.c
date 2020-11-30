@@ -57,10 +57,6 @@ static struct value *evaluate_struct_tuple (struct value *,
 					    struct expression *, int *,
 					    enum noside, int);
 
-static LONGEST init_array_element (struct value *, struct value *,
-				   struct expression *, int *, enum noside,
-				   LONGEST, LONGEST);
-
 struct value *
 evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 int *pos, enum noside noside)
@@ -335,39 +331,6 @@ evaluate_struct_tuple (struct value *struct_val,
 
     }
   return struct_val;
-}
-
-/* Recursive helper function for setting elements of array tuples.
-   The target is ARRAY (which has bounds LOW_BOUND to HIGH_BOUND); the
-   element value is ELEMENT; EXP, POS and NOSIDE are as usual.
-   Evaluates index expressions and sets the specified element(s) of
-   ARRAY to ELEMENT.  Returns last index value.  */
-
-static LONGEST
-init_array_element (struct value *array, struct value *element,
-		    struct expression *exp, int *pos,
-		    enum noside noside, LONGEST low_bound, LONGEST high_bound)
-{
-  LONGEST index;
-  int element_size = TYPE_LENGTH (value_type (element));
-
-  if (exp->elts[*pos].opcode == BINOP_COMMA)
-    {
-      (*pos)++;
-      init_array_element (array, element, exp, pos, noside,
-			  low_bound, high_bound);
-      return init_array_element (array, element,
-				 exp, pos, noside, low_bound, high_bound);
-    }
-  else
-    {
-      index = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-      if (index < low_bound || index > high_bound)
-	error (_("tuple index out of range"));
-      memcpy (value_contents_raw (array) + (index - low_bound) * element_size,
-	      value_contents (element), element_size);
-    }
-  return index;
 }
 
 /* Promote value ARG1 as appropriate before performing a unary operation
@@ -1433,30 +1396,17 @@ evaluate_subexp_standard (struct type *expect_type,
 	  for (tem = nargs; --nargs >= 0;)
 	    {
 	      struct value *element;
-	      int index_pc = 0;
 
 	      element = evaluate_subexp (element_type, exp, pos, noside);
 	      if (value_type (element) != element_type)
 		element = value_cast (element_type, element);
-	      if (index_pc)
-		{
-		  int continue_pc = *pos;
-
-		  *pos = index_pc;
-		  index = init_array_element (array, element, exp, pos, noside,
-					      low_bound, high_bound);
-		  *pos = continue_pc;
-		}
-	      else
-		{
-		  if (index > high_bound)
-		    /* To avoid memory corruption.  */
-		    error (_("Too many array elements"));
-		  memcpy (value_contents_raw (array)
-			  + (index - low_bound) * element_size,
-			  value_contents (element),
-			  element_size);
-		}
+	      if (index > high_bound)
+		/* To avoid memory corruption.  */
+		error (_("Too many array elements"));
+	      memcpy (value_contents_raw (array)
+		      + (index - low_bound) * element_size,
+		      value_contents (element),
+		      element_size);
 	      index++;
 	    }
 	  return array;
