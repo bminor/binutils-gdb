@@ -1,5 +1,16 @@
 2020-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb.threads/non-ldr-exc-1.exp: Use foreach_with_prefix.
+	(do_test): Don't use with_test_prefix.
+	* gdb.threads/non-ldr-exc-2.exp: Use foreach_with_prefix.
+	(do_test): Don't use with_test_prefix.
+	* gdb.threads/non-ldr-exc-3.exp: Use foreach_with_prefix.
+	(do_test): Don't use with_test_prefix.
+	* gdb.threads/non-ldr-exc-4.exp: Use foreach_with_prefix.
+	(do_test): Don't use with_test_prefix.
+
+2020-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdb.threads/non-ldr-exit.exp: Fix comment.
 
 2020-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
