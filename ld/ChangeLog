@@ -1,3 +1,9 @@
+2020-12-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26970
+	* scripttempl/elfarc.sc (TEXT_START_ADDR): New.  Add SEGMENT_START.
+	(SHLIB_TEXT_START_ADDR): Likewise.
+
 2020-12-01  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/elf.exp: Set ASFLAGS for tic6x.
