@@ -1,3 +1,7 @@
+2020-12-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.threads/non-ldr-exit.exp: Fix comment.
+
 2020-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.xml/maint-xml-dump-03.xml: New file.
