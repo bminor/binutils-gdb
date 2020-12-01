@@ -351,6 +351,8 @@ void print_xml_feature::visit (const tdesc_type_with_fields *t)
       break;
 
     case TDESC_TYPE_ENUM:
+      if (t->size > 0)
+	string_appendf (tmp, " size=\"%d\"", t->size);
       string_appendf (tmp, ">");
       add_line (tmp);
       for (const tdesc_type_field &f : t->fields)
