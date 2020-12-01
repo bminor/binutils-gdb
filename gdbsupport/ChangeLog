@@ -1,3 +1,8 @@
+2020-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.cc (print_xml_feature::visit): Print enum fields using
+	'evalue' syntax.
+
 2020-12-01  Chungyi Chi  <demonic@csie.io>
 
 	* tdesc.cc (print_xml_feature::visit): Print enum size attribute.

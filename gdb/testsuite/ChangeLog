@@ -1,3 +1,7 @@
+2020-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.xml/maint-xml-dump-03.xml: New file.
+
 2020-11-30  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/26905
