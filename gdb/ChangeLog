@@ -46,6 +46,9 @@
 	* printcmd.c (skip_over_slash_fmt): Reorder code to ensure in_fmt
 	is always initialized.
 
+2020-11-26  Rogerio Alves <rcardoso@linux.ibm.com>
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2020-11-26  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* features/aarch64-fpu.c (create_feature_aarch64_fpu): Regenerate.
