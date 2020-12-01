@@ -138,6 +138,11 @@ struct ppc_hw_breakpoint
 #define PPC_DEBUG_FEATURE_DATA_BP_DAWR	0x10
 #endif /* PPC_DEBUG_FEATURE_DATA_BP_DAWR */
 
+/* Feature defined on Linux kernel v5.1: Second watchpoint support.  */
+#ifndef PPC_DEBUG_FEATURE_DATA_BP_ARCH_31
+#define PPC_DEBUG_FEATURE_DATA_BP_ARCH_31 0x20
+#endif /* PPC_DEBUG_FEATURE_DATA_BP_ARCH_31 */
+
 /* The version of the PowerPC HWDEBUG kernel interface that we will use, if
    available.  */
 #define PPC_DEBUG_CURRENT_VERSION 1
@@ -2108,9 +2113,10 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
      watchpoints.  */
   if (m_dreg_interface.hwdebug_p ())
     {
-      int region_size;
       const struct ppc_debug_info &hwdebug_info = (m_dreg_interface
 						   .hwdebug_info ());
+      int region_size = hwdebug_info.data_bp_alignment;
+      int region_align = region_size;
 
       /* Embedded DAC-based processors, like the PowerPC 440 have ranged
 	 watchpoints and can watch any access within an arbitrary memory
@@ -2122,15 +2128,19 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	return 2;
       /* Check if the processor provides DAWR interface.  */
       if (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_DAWR)
-	/* DAWR interface allows to watch up to 512 byte wide ranges which
-	   can't cross a 512 byte boundary.  */
-	region_size = 512;
-      else
-	region_size = hwdebug_info.data_bp_alignment;
+	{
+	  /* DAWR interface allows to watch up to 512 byte wide ranges.  */
+	  region_size = 512;
+	  /* DAWR interface allows to watch up to 512 byte wide ranges which
+	     can't cross a 512 byte bondary on machines that doesn't have a
+	     second DAWR (P9 or less).  */
+	  if (!(hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_ARCH_31))
+	    region_align = 512;
+	}
       /* Server processors provide one hardware watchpoint and addr+len should
 	 fall in the watchable region provided by the ptrace interface.  */
-      if (region_size
-	  && (addr + len > (addr & ~(region_size - 1)) + region_size))
+      if (region_align
+	  && (addr + len > (addr & ~(region_align - 1)) + region_size))
 	return 0;
     }
   /* addr+len must fall in the 8 byte watchable region for DABR-based
