@@ -1,3 +1,13 @@
+2021-01-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-fbsd-tdep.c (riscv_fbsd_supply_gregset): Delete.
+	(riscv_fbsd_gregset): Use riscv_supply_regset.
+	(riscv_fbsd_fpregset): Likewise.
+	* riscv-linux-tdep.c (riscv_linux_gregset): Likewise.
+	(riscv_linux_fregset): Likewise.
+	* riscv-tdep.c (riscv_supply_regset): Define new function.
+	* riscv-tdep.h (riscv_supply_regset): Declare new function.
+
 2021-01-18  Tom de Vries  <tdevries@suse.de>
 
 	PR tdep/27172

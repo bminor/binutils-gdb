@@ -3786,6 +3786,56 @@ riscv_init_reggroups ()
   csr_reggroup = reggroup_new ("csr", USER_REGGROUP);
 }
 
+/* See riscv-tdep.h.  */
+
+void
+riscv_supply_regset (const struct regset *regset,
+		     struct regcache *regcache, int regnum,
+		     const void *regs, size_t len)
+{
+  regcache->supply_regset (regset, regnum, regs, len);
+
+  if (regnum == -1 || regnum == RISCV_ZERO_REGNUM)
+    regcache->raw_supply_zeroed (RISCV_ZERO_REGNUM);
+
+  if (regnum == -1 || regnum == RISCV_CSR_FFLAGS_REGNUM
+      || regnum == RISCV_CSR_FRM_REGNUM)
+    {
+      int fcsr_regnum = RISCV_CSR_FCSR_REGNUM;
+
+      /* Ensure that FCSR has been read into REGCACHE.  */
+      if (regnum != -1)
+	regcache->supply_regset (regset, fcsr_regnum, regs, len);
+
+      /* Grab the FCSR value if it is now in the regcache.  We must check
+	 the status first as, if the register was not supplied by REGSET,
+	 this call will trigger a recursive attempt to fetch the
+	 registers.  */
+      if (regcache->get_register_status (fcsr_regnum) == REG_VALID)
+	{
+	  ULONGEST fcsr_val;
+	  regcache->raw_read (fcsr_regnum, &fcsr_val);
+
+	  /* Extract the fflags and frm values.  */
+	  ULONGEST fflags_val = fcsr_val & 0x1f;
+	  ULONGEST frm_val = (fcsr_val >> 5) & 0x7;
+
+	  /* And supply these if needed.  */
+	  if (regnum == -1 || regnum == RISCV_CSR_FFLAGS_REGNUM)
+	    regcache->raw_supply_integer (RISCV_CSR_FFLAGS_REGNUM,
+					  (gdb_byte *) &fflags_val,
+					  sizeof (fflags_val),
+					  /* is_signed */ false);
+
+	  if (regnum == -1 || regnum == RISCV_CSR_FRM_REGNUM)
+	    regcache->raw_supply_integer (RISCV_CSR_FRM_REGNUM,
+					  (gdb_byte *)&frm_val,
+					  sizeof (fflags_val),
+					  /* is_signed */ false);
+	}
+    }
+}
+
 void _initialize_riscv_tdep ();
 void
 _initialize_riscv_tdep ()

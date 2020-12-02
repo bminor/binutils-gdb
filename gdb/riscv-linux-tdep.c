@@ -52,14 +52,14 @@ static const struct regcache_map_entry riscv_linux_fregmap[] =
 
 static const struct regset riscv_linux_gregset =
 {
-  riscv_linux_gregmap, regcache_supply_regset, regcache_collect_regset
+  riscv_linux_gregmap, riscv_supply_regset, regcache_collect_regset
 };
 
 /* Define the FP register regset.  */
 
 static const struct regset riscv_linux_fregset =
 {
-  riscv_linux_fregmap, regcache_supply_regset, regcache_collect_regset
+  riscv_linux_fregmap, riscv_supply_regset, regcache_collect_regset
 };
 
 /* Define hook for core file support.  */
