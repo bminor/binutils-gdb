@@ -37,6 +37,10 @@ TAGS.sub
 .lvimrc
 
 .clang-format
+.clang-tidy
+.clangd
+.cache
+compile_commands.json
 
 .gdbinit
 .gdb_history
