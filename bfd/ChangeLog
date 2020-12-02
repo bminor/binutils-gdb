@@ -1,3 +1,15 @@
+2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.c (riscv_ext_dont_care_version): New function.  Return
+	TRUE if we don't care the versions of the extensions.  These extensions
+	are added to the subset list for special purposes, with the explicit
+	versions or the RISCV_UNKNOWN_VERSION versions.
+	(riscv_parse_add_subset): If we do care the versions of the extension,
+	and the versions are unknown, then report errors for the non-implicit
+	extensions, and return directly for the implicit one.
+	(riscv_arch_str1): Do not output i extension after e, and the extensions
+	which versions are unknown.
+
 2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
 
 	PR 26945

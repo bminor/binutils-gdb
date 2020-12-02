@@ -1,3 +1,7 @@
+2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h: Add INSN_CLASS_ZICSR and INSN_CLASS_ZIFENCEI.
+
 2020-12-07  Nick Clifton  <nickc@redhat.com>
 
 	* elf/common.h (SHF_GNU_BUILD_NOTE): Delete.

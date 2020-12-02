@@ -1,3 +1,24 @@
+2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_multi_subset_supports): Handle INSN_CLASS_ZICSR
+	and INSN_CLASS_ZIFENCEI.
+	* testsuite/gas/riscv/march-imply-i.s: New testcase.
+	* testsuite/gas/riscv/march-imply-i2p0-01.d: New testcase.  The version
+	of i is less than 2.1, and zi* are supported in the chosen spec, so
+	enable the fence.i and csr instructions, also output the implicit zi* to
+	the arch string.
+	* testsuite/gas/riscv/march-imply-i2p0-02.d: Likewise, but the zi* are
+	not supported in the spec 2.2.  Enable the related instructions since
+	i's version is less than 2.1, but do not output them.
+	* testsuite/gas/riscv/march-imply-i2p1-01.d: New testcase.  The version
+	of i is 2.1, so don't add it's implicit zi*, and disable the related
+	instructions.
+	* testsuite/gas/riscv/march-imply-i2p1-01.l: Likewise.
+	* testsuite/gas/riscv/march-imply-i2p1-02.d: Likewise, and set the zi*
+	explicitly, so enable the related instructions.
+	* testsuite/gas/riscv/march-imply-i2p0.d: Removed.
+	* testsuite/gas/riscv/march-imply-i2p1.d: Removed.
+
 2020-12-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/obj-elf.c (SEC_ASSEMBLER_SHF_MASK): New.

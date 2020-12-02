@@ -1148,6 +1148,21 @@ riscv_add_implicit_subset (riscv_subset_list_t *subset_list,
     }
 }
 
+/* These extensions are added to the subset list for special purposes,
+   with the explicit versions or the RISCV_UNKNOWN_VERSION versions.
+   Therefore, we won't output them to the output arch string in the
+   riscv_arch_str1, if the versions are unknown.  */
+
+static bfd_boolean
+riscv_ext_dont_care_version (const char *subset)
+{
+  if (strcmp (subset, "g") == 0
+      || strcmp (subset, "zicsr") == 0
+      || strcmp (subset, "zifencei") == 0)
+    return TRUE;
+  return FALSE;
+}
+
 /* We have to add all arch string extensions first, and then start to
    add their implicit extensions.  The arch string extensions must be
    set in order, so we can add them to the last of the subset list
@@ -1172,11 +1187,15 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
       && rps->get_default_version != NULL)
     rps->get_default_version (subset, &major_version, &minor_version);
 
-  if (!implicit
-      && strcmp (subset, "g") != 0
+  if (!riscv_ext_dont_care_version (subset)
       && (major_version == RISCV_UNKNOWN_VERSION
 	  || minor_version == RISCV_UNKNOWN_VERSION))
     {
+      /* We only add the implicit extension if it is supported in the
+	 chosen ISA spec.  */
+      if (implicit)
+	return;
+
       if (subset[0] == 'x')
 	rps->error_handler
 	  (_("x ISA extension `%s' must be set with the versions"),
@@ -1191,10 +1210,7 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
   if (!implicit)
     riscv_add_subset (rps->subset_list, subset,
 		      major_version, minor_version);
-  else if (major_version != RISCV_UNKNOWN_VERSION
-	   && minor_version != RISCV_UNKNOWN_VERSION)
-    /* We only add the implicit extension if it is supported in the
-       chosen ISA spec.  */
+  else
     riscv_add_implicit_subset (rps->subset_list, subset,
 			       major_version, minor_version);
 }
@@ -1907,31 +1923,34 @@ riscv_arch_str1 (riscv_subset_t *subset,
 		 char *attr_str, char *buf, size_t bufsz)
 {
   const char *underline = "_";
+  riscv_subset_t *subset_t = subset;
 
-  if (subset == NULL)
+  if (subset_t == NULL)
     return;
 
   /* No underline between rvXX and i/e.   */
-  if ((strcasecmp (subset->name, "i") == 0)
-      || (strcasecmp (subset->name, "e") == 0))
+  if ((strcasecmp (subset_t->name, "i") == 0)
+      || (strcasecmp (subset_t->name, "e") == 0))
     underline = "";
 
   snprintf (buf, bufsz, "%s%s%dp%d",
 	    underline,
-	    subset->name,
-	    subset->major_version,
-	    subset->minor_version);
+	    subset_t->name,
+	    subset_t->major_version,
+	    subset_t->minor_version);
 
   strncat (attr_str, buf, bufsz);
 
-  /* Skip 'i' extension after 'e', and skip 'g' extension.  */
-  if (subset->next
-      && ((strcmp (subset->name, "e") == 0
-	   && strcmp (subset->next->name, "i") == 0)
-	  || strcmp (subset->next->name, "g") == 0))
-    riscv_arch_str1 (subset->next->next, attr_str, buf, bufsz);
-  else
-    riscv_arch_str1 (subset->next, attr_str, buf, bufsz);
+  /* Skip 'i' extension after 'e', or skip extensions which
+     versions are unknown.  */
+  while (subset_t->next
+	 && ((strcmp (subset_t->name, "e") == 0
+	      && strcmp (subset_t->next->name, "i") == 0)
+	     || subset_t->next->major_version == RISCV_UNKNOWN_VERSION
+	     || subset_t->next->minor_version == RISCV_UNKNOWN_VERSION))
+    subset_t = subset_t->next;
+
+  riscv_arch_str1 (subset_t->next, attr_str, buf, bufsz);
 }
 
 /* Convert subset info to string with explicit version info.  */
