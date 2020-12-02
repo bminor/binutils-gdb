@@ -1,3 +1,7 @@
+2020-12-02  Enze Li  <lienze2010@hotmail.com>
+
+	* .gitignore: Add gnu global outputs.
+
 2020-12-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* .gitignore: Sync with gcc.

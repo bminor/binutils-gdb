@@ -48,6 +48,12 @@ compile_commands.json
 perf.data
 perf.data.old
 
+# gnu global files
+GPATH
+GRTAGS
+GTAGS
+GSYMS
+
 # ignore core files, but not java/net/protocol/core/
 core
 !core/
