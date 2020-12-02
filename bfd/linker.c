@@ -1301,7 +1301,7 @@ static const enum link_action link_action[8][8] =
   /* current\prev    new    undef  undefw def    defw   com    indr   warn  */
   /* UNDEF_ROW	*/  {UND,   NOACT, UND,   REF,   REF,   NOACT, REFC,  WARNC },
   /* UNDEFW_ROW	*/  {WEAK,  NOACT, NOACT, REF,   REF,   NOACT, REFC,  WARNC },
-  /* DEF_ROW	*/  {DEF,   DEF,   DEF,   MDEF,  DEF,   CDEF,  MDEF,  CYCLE },
+  /* DEF_ROW	*/  {DEF,   DEF,   DEF,   MDEF,  DEF,   CDEF,  MIND,  CYCLE },
   /* DEFW_ROW	*/  {DEFW,  DEFW,  DEFW,  NOACT, NOACT, NOACT, NOACT, CYCLE },
   /* COMMON_ROW	*/  {COM,   COM,   COM,   CREF,  COM,   BIG,   REFC,  WARNC },
   /* INDR_ROW	*/  {IND,   IND,   IND,   MDEF,  IND,   CIND,  MIND,  CYCLE },
@@ -1672,6 +1672,17 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	case MIND:
 	  /* Multiple indirect symbols.  This is OK if they both point
 	     to the same symbol.  */
+	  if (h->u.i.link->type == bfd_link_hash_defweak)
+	    {
+	      /* It is also OK to redefine a symbol that indirects to
+		 a weak definition.  So for sym@ver -> sym@@ver where
+		 sym@@ver is weak and we have a new strong sym@ver,
+		 redefine sym@@ver.  Of course if there exists
+		 sym -> sym@@ver then this also redefines sym.  */
+	      h = h->u.i.link;
+	      cycle = TRUE;
+	      break;
+	    }
 	  if (strcmp (h->u.i.link->root.string, string) == 0)
 	    break;
 	  /* Fall through.  */

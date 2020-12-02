@@ -1,3 +1,10 @@
+2020-12-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr26978a.d,
+	* testsuite/ld-elf/pr26978a.s,
+	* testsuite/ld-elf/pr26978b.d,
+	* testsuite/ld-elf/pr26978b.s: New tests.
+
 2020-12-03  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* testsuite/ld-s390/tlsbin_64.dd: The newly added jgnop mnemonic

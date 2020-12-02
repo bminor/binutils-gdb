@@ -2078,9 +2078,26 @@ _bfd_elf_add_default_symbol (bfd *abfd,
     return FALSE;
 
   if (skip)
-    return TRUE;
-
-  if (override)
+    {
+      if (!dynamic
+	  && h->root.type == bfd_link_hash_defweak
+	  && hi->root.type == bfd_link_hash_defined)
+	{
+	  /* We are handling a weak sym@@ver and attempting to define
+	     a weak sym@ver, but _bfd_elf_merge_symbol said to skip the
+	     new weak sym@ver because there is already a strong sym@ver.
+	     However, sym@ver and sym@@ver are really the same symbol.
+	     The existing strong sym@ver ought to override sym@@ver.  */
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = hi->root.u.def.section;
+	  h->root.u.def.value = hi->root.u.def.value;
+	  hi->root.type = bfd_link_hash_indirect;
+	  hi->root.u.i.link = &h->root;
+	}
+      else
+	return TRUE;
+    }
+  else if (override)
     {
       /* Here SHORTNAME is a versioned name, so we don't expect to see
 	 the type of override we do in the case above unless it is
@@ -2091,6 +2108,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	  /* xgettext:c-format */
 	  (_("%pB: unexpected redefinition of indirect versioned symbol `%s'"),
 	   abfd, shortname);
+      return TRUE;
     }
   else
     {
@@ -2100,37 +2118,36 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	      bfd_ind_section_ptr, 0, name, FALSE, collect, &bh)))
 	return FALSE;
       hi = (struct elf_link_hash_entry *) bh;
+    }
 
-      /* If there is a duplicate definition somewhere, then HI may not
-	 point to an indirect symbol.  We will have reported an error
-	 to the user in that case.  */
+  /* If there is a duplicate definition somewhere, then HI may not
+     point to an indirect symbol.  We will have reported an error
+     to the user in that case.  */
+  if (hi->root.type == bfd_link_hash_indirect)
+    {
+      (*bed->elf_backend_copy_indirect_symbol) (info, h, hi);
+      h->ref_dynamic_nonweak |= hi->ref_dynamic_nonweak;
+      hi->dynamic_def |= h->dynamic_def;
 
-      if (hi->root.type == bfd_link_hash_indirect)
+      /* If we first saw a reference to @VER symbol with
+	 non-default visibility, merge that visibility to the
+	 @@VER symbol.  */
+      elf_merge_st_other (abfd, h, hi->other, sec, TRUE, dynamic);
+
+      /* See if the new flags lead us to realize that the symbol
+	 must be dynamic.  */
+      if (! *dynsym)
 	{
-	  (*bed->elf_backend_copy_indirect_symbol) (info, h, hi);
-	  h->ref_dynamic_nonweak |= hi->ref_dynamic_nonweak;
-	  hi->dynamic_def |= h->dynamic_def;
-
-	  /* If we first saw a reference to @VER symbol with
-	     non-default visibility, merge that visibility to the
-	     @@VER symbol.  */
-	  elf_merge_st_other (abfd, h, hi->other, sec, TRUE, dynamic);
-
-	  /* See if the new flags lead us to realize that the symbol
-	     must be dynamic.  */
-	  if (! *dynsym)
+	  if (! dynamic)
 	    {
-	      if (! dynamic)
-		{
-		  if (! bfd_link_executable (info)
-		      || hi->ref_dynamic)
-		    *dynsym = TRUE;
-		}
-	      else
-		{
-		  if (hi->ref_regular)
-		    *dynsym = TRUE;
-		}
+	      if (! bfd_link_executable (info)
+		  || hi->ref_dynamic)
+		*dynsym = TRUE;
+	    }
+	  else
+	    {
+	      if (hi->ref_regular)
+		*dynsym = TRUE;
 	    }
 	}
     }
@@ -5060,8 +5077,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  /* Check to see if we need to add an indirect symbol for
 	     the default name.  */
-	  if (definition
-	      || (!override && h->root.type == bfd_link_hash_common))
+	  if ((definition
+	       || (!override && h->root.type == bfd_link_hash_common))
+	      && !(hi != h
+		   && hi->versioned == versioned_hidden))
 	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
 					      sec, value, &old_bfd, &dynsym))
 	      goto error_free_vers;
