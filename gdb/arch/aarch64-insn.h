@@ -21,6 +21,22 @@
 
 extern bool aarch64_debug;
 
+/* Support routines for instruction parsing.  */
+
+/* Create a mask of X bits.  */
+#define submask(x) ((1L << ((x) + 1)) - 1)
+
+/* Extract the bitfield from OBJ starting at bit ST and ending at bit FN.  */
+#define bits(obj,st,fn) (((obj) >> (st)) & submask ((fn) - (st)))
+
+/* Extract bit ST from OBJ.  */
+#define bit(obj,st) (((obj) >> (st)) & 1)
+
+/* Extract the signed bitfield from OBJ starting at bit ST and ending at
+   bit FN.  The result is sign-extended.  */
+#define sbits(obj,st,fn) \
+  ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
+
 /* List of opcodes that we need for building the jump pad and relocating
    an instruction.  */
 
