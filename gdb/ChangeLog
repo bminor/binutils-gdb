@@ -1,3 +1,16 @@
+2020-12-01  Tom Tromey  <tom@tromey.com>
+
+	* parse.c (expr_builder::expr_builder): Initialize expout.
+	(expr_builder::release): Use expression::resize.
+	(expression::expression, expression::~expression)
+	(expression::resize): New methods.
+	(write_exp_elt): Use expression::resize.
+	(prefixify_expression): Update.
+	(increase_expout_size): Use expression::resize.
+	* expression.h (struct expression): Add constructor, destructor.
+	<resize>: New method.
+	(expression_up): Change type.
+
 2020-12-01  Rogerio A. Cardoso  <rcardoso@linux.ibm.com>
 	* ppc-linux-nat.c: (PPC_DEBUG_FEATURE_DATA_BP_ARCH_31): New define.
 	(region_ok_for_hw_watchpoint): Check if 2nd DAWR is avaliable before

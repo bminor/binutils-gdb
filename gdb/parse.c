@@ -114,13 +114,9 @@ innermost_block_tracker::update (const struct block *b,
 expr_builder::expr_builder (const struct language_defn *lang,
 			    struct gdbarch *gdbarch)
   : expout_size (10),
-    expout (XNEWVAR (expression,
-		     (sizeof (expression)
-		      + EXP_ELEM_TO_BYTES (expout_size)))),
+    expout (new expression (lang, gdbarch, expout_size)),
     expout_ptr (0)
 {
-  expout->language_defn = lang;
-  expout->gdbarch = gdbarch;
 }
 
 expression_up
@@ -131,11 +127,29 @@ expr_builder::release ()
      excess elements.  */
 
   expout->nelts = expout_ptr;
-  expout.reset (XRESIZEVAR (expression, expout.release (),
-			    (sizeof (expression)
-			     + EXP_ELEM_TO_BYTES (expout_ptr))));
+  expout->resize (expout_ptr);
 
   return std::move (expout);
+}
+
+expression::expression (const struct language_defn *lang, struct gdbarch *arch,
+			size_t n)
+  : language_defn (lang),
+    gdbarch (arch),
+    elts (nullptr)
+{
+  resize (n);
+}
+
+expression::~expression ()
+{
+  xfree (elts);
+}
+
+void
+expression::resize (size_t n)
+{
+  elts = XRESIZEVAR (union exp_element, elts, EXP_ELEM_TO_BYTES (n));
 }
 
 /* This page contains the functions for adding data to the struct expression
@@ -152,9 +166,7 @@ write_exp_elt (struct expr_builder *ps, const union exp_element *expelt)
   if (ps->expout_ptr >= ps->expout_size)
     {
       ps->expout_size *= 2;
-      ps->expout.reset (XRESIZEVAR (expression, ps->expout.release (),
-				    (sizeof (expression)
-				     + EXP_ELEM_TO_BYTES (ps->expout_size))));
+      ps->expout->resize (ps->expout_size);
     }
   ps->expout->elts[ps->expout_ptr++] = *expelt;
 }
@@ -721,16 +733,14 @@ int
 prefixify_expression (struct expression *expr, int last_struct)
 {
   gdb_assert (expr->nelts > 0);
-  int len = sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
-  struct expression *temp;
+  int len = EXP_ELEM_TO_BYTES (expr->nelts);
+  struct expression temp (expr->language_defn, expr->gdbarch, expr->nelts);
   int inpos = expr->nelts, outpos = 0;
 
-  temp = (struct expression *) alloca (len);
-
   /* Copy the original expression into temp.  */
-  memcpy (temp, expr, len);
+  memcpy (temp.elts, expr->elts, len);
 
-  return prefixify_subexp (temp, expr, inpos, outpos, last_struct);
+  return prefixify_subexp (&temp, expr, inpos, outpos, last_struct);
 }
 
 /* Return the number of exp_elements in the postfix subexpression 
@@ -1412,10 +1422,7 @@ increase_expout_size (struct expr_builder *ps, size_t lenelt)
     {
       ps->expout_size = std::max (ps->expout_size * 2,
 				  ps->expout_ptr + lenelt + 10);
-      ps->expout.reset (XRESIZEVAR (expression,
-				    ps->expout.release (),
-				    (sizeof (struct expression)
-				     + EXP_ELEM_TO_BYTES (ps->expout_size))));
+      ps->expout->resize (ps->expout_size);
     }
 }
 

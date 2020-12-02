@@ -93,15 +93,22 @@ union exp_element
   };
 
 struct expression
-  {
-    const struct language_defn *language_defn;	/* language it was
-						   entered in.  */
-    struct gdbarch *gdbarch;  /* architecture it was parsed in.  */
-    int nelts;
-    union exp_element elts[1];
-  };
+{
+  expression (const struct language_defn *, struct gdbarch *, size_t);
+  ~expression ();
+  DISABLE_COPY_AND_ASSIGN (expression);
 
-typedef gdb::unique_xmalloc_ptr<expression> expression_up;
+  void resize (size_t);
+
+  /* Language it was entered in.  */
+  const struct language_defn *language_defn;
+  /* Architecture it was parsed in.  */
+  struct gdbarch *gdbarch;
+  int nelts = 0;
+  union exp_element *elts;
+};
+
+typedef std::unique_ptr<expression> expression_up;
 
 /* Macros for converting between number of expression elements and bytes
    to store that many expression elements.  */
