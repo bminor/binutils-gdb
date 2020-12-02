@@ -1,3 +1,7 @@
+2020-12-02  Hans-Peter Nilsson  <hp@axis.com>
+
+	* testsuite/ld-elf/pr26936.d: Pass -W.
+
 2020-12-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26970

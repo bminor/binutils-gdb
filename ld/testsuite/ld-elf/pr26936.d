@@ -3,7 +3,7 @@
 #source: pr26936c.s
 #as: --gen-debug
 #ld: -z noseparate-code -Ttext-segment 0x10000 -z max-page-size=0x1000
-#readelf: -wL
+#readelf: -wL -W
 #target: [check_shared_lib_support]
 # Assembly source file for the HPPA assembler is renamed and modifed by
 # sed.  mn10300 and riscv put different numbers of local symbols in
