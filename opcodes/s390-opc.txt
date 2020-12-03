@@ -246,10 +246,14 @@ d7 xc SS_L0RDRD "exclusive OR" g5 esa,zarch
 f8 zap SS_LLRDRD "zero and add" g5 esa,zarch
 a70a ahi RI_RI "add halfword immediate" g5 esa,zarch
 84 brxh RSI_RRP "branch relative on index high" g5 esa,zarch
+84 jxh RSI_RRP "branch relative on index high" g5 esa,zarch
 85 brxle RSI_RRP "branch relative on index low or equal" g5 esa,zarch
+85 jxle RSI_RRP "branch relative on index low or equal" g5 esa,zarch
 a705 bras RI_RP "branch relative and save" g5 esa,zarch
+a705 jas RI_RP "branch relative and save" g5 esa,zarch
 a704 brc RI_UP "branch relative on condition" g5 esa,zarch
 a706 brct RI_RP "branch relative on count" g5 esa,zarch
+a706 jct RI_RP "branch relative on count" g5 esa,zarch
 b241 cksm RRE_RR "checksum" g5 esa,zarch
 a70e chi RI_RI "compare halfword immediate" g5 esa,zarch
 a9 clcle RS_RRRD "compare logical long extended" g5 esa,zarch
@@ -268,8 +272,11 @@ a701 tml RI_RU "test under mask low" g5 esa,zarch
 4700 nop RX_0RRD "no operation" g5 esa,zarch optparm
 4700 b*8 RX_0RRD "conditional branch" g5 esa,zarch
 47f0 b RX_0RRD "unconditional branch" g5 esa,zarch
+a704 jnop RI_0P "nop jump" g5 esa,zarch
 a704 j*8 RI_0P "conditional jump" g5 esa,zarch
+a704 br*8 RI_0P "conditional jump" g5 esa,zarch
 a7f4 j RI_0P "unconditional jump" g5 esa,zarch
+a7f4 bru RI_0P "unconditional jump" g5 esa,zarch
 b34a axbr RRE_FEFE "add extended bfp" g5 esa,zarch
 b31a adbr RRE_FF "add long bfp" g5 esa,zarch
 ed000000001a adb RXE_FRRD "add long bfp" g5 esa,zarch
@@ -437,7 +444,9 @@ e3000000001b slgf RXE_RRRD "subtract logical 64<32" z900 zarch
 e3000000000c msg RXE_RRRD "multiply single 64" z900 zarch
 e3000000001c msgf RXE_RRRD "multiply single 64<32" z900 zarch
 ec0000000044 brxhg RIE_RRP "branch relative on index high 64" z900 zarch
+ec0000000044 jxhg RIE_RRP "branch relative on index high 64" z900 zarch
 ec0000000045 brxlg RIE_RRP "branch relative on index low or equal 64" z900 zarch
+ec0000000045 jxleg RIE_RRP "branch relative on index low or equal 64" z900 zarch
 eb0000000044 bxhg RSE_RRRD "branch on index high 64" z900 zarch
 eb0000000045 bxleg RSE_RRRD "branch on index low or equal 64" z900 zarch
 eb000000000c srlg RSE_RRRD "shift right single logical 64" z900 zarch
@@ -462,10 +471,15 @@ eb0000000080 icmh RSE_RURD "insert characters under mask high" z900 zarch
 a702 tmhh RI_RU "test under mask high high" z900 zarch
 a703 tmhl RI_RU "test under mask high low" z900 zarch
 c004 brcl RIL_UP "branch relative on condition long" z900 esa,zarch
+c004 jgnop RIL_0P "nop jump long" z900 esa,zarch
 c004 jg*8 RIL_0P "conditional jump long" z900 esa,zarch
+c004 br*8l RIL_0P "conditional jump long" z900 esa,zarch
 c0f4 jg RIL_0P "unconditional jump long" z900 esa,zarch
+c0f4 brul RIL_0P "unconditional jump long" z900 esa,zarch
 c005 brasl RIL_RP "branch relative and save long" z900 esa,zarch
+c005 jasl RIL_RP "branch relative and save long" z900 esa,zarch
 a707 brctg RI_RP "branch relative on count 64" z900 zarch
+a707 jctg RI_RP "branch relative on count 64" z900 zarch
 a709 lghi RI_RI "load halfword immediate 64" z900 zarch
 a70b aghi RI_RI "add halfword immediate 64" z900 zarch
 a70d mghi RI_RI "multiply halfword immediate 64" z900 zarch

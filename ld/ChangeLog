@@ -1,3 +1,8 @@
+2020-12-03  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* testsuite/ld-s390/tlsbin_64.dd: The newly added jgnop mnemonic
+	replaces long relative branches with empty condition code masks.
+
 2020-12-03  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* testsuite/ld-vax-elf/vax-elf.exp: Wrap excessively long lines

@@ -1,3 +1,12 @@
+2020-12-03  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* testsuite/gas/s390/esa-g5.s: Test new extended mnemonics.
+	* testsuite/gas/s390/esa-g5.d: Likewise.
+	* testsuite/gas/s390/esa-z900.s: Likewise.
+	* testsuite/gas/s390/esa-z900.d: Likewise.
+	* testsuite/gas/s390/zarch-z900.s: Likewise.
+	* testsuite/gas/s390/zarch-z900.d: Likewise.
+
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/gas/riscv/attribute-10.d: Updated.

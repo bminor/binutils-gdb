@@ -1,3 +1,7 @@
+2020-12-03  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* s390-opc.txt: Add extended mnemonics.
+
 2020-12-01  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-opc.c (riscv_ext_version_table): Remove the p, v, n
