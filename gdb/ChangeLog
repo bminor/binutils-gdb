@@ -1,3 +1,9 @@
+2020-12-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26876
+	* dwarf2/frame.c (find_comp_unit, set_comp_unit): Reverse use of
+	dwarf2_frame_bfd_data and dwarf2_frame_objfile_data.
+
 2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arch/riscv.c: Include 'rv32e-xregs.c'.

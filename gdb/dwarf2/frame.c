@@ -1640,8 +1640,9 @@ find_comp_unit (struct objfile *objfile)
 {
   bfd *abfd = objfile->obfd;
   if (gdb_bfd_requires_relocations (abfd))
-    return dwarf2_frame_bfd_data.get (abfd);
-  return dwarf2_frame_objfile_data.get (objfile);
+    return dwarf2_frame_objfile_data.get (objfile);
+
+  return dwarf2_frame_bfd_data.get (abfd);
 }
 
 /* Store the comp_unit on OBJFILE, or the corresponding BFD, as
@@ -1652,8 +1653,9 @@ set_comp_unit (struct objfile *objfile, struct comp_unit *unit)
 {
   bfd *abfd = objfile->obfd;
   if (gdb_bfd_requires_relocations (abfd))
-    return dwarf2_frame_bfd_data.set (abfd, unit);
-  return dwarf2_frame_objfile_data.set (objfile, unit);
+    return dwarf2_frame_objfile_data.set (objfile, unit);
+
+  return dwarf2_frame_bfd_data.set (abfd, unit);
 }
 
 /* Find the FDE for *PC.  Return a pointer to the FDE, and store the
