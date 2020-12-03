@@ -15570,77 +15570,77 @@ typedef struct
   const char * name;
   /* 0 = special, 1 = string, 2 = uleb123, > 0x80 == table lookup.  */
   unsigned int type;
-  const char ** table;
+  const char *const *table;
 } arm_attr_public_tag;
 
-static const char * arm_attr_tag_CPU_arch[] =
+static const char *const arm_attr_tag_CPU_arch[] =
   {"Pre-v4", "v4", "v4T", "v5T", "v5TE", "v5TEJ", "v6", "v6KZ", "v6T2",
    "v6K", "v7", "v6-M", "v6S-M", "v7E-M", "v8", "v8-R", "v8-M.baseline",
    "v8-M.mainline", "", "", "", "v8.1-M.mainline"};
-static const char * arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
-static const char * arm_attr_tag_THUMB_ISA_use[] =
+static const char *const arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
+static const char *const arm_attr_tag_THUMB_ISA_use[] =
   {"No", "Thumb-1", "Thumb-2", "Yes"};
-static const char * arm_attr_tag_FP_arch[] =
+static const char *const arm_attr_tag_FP_arch[] =
   {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16", "VFPv4", "VFPv4-D16",
    "FP for ARMv8", "FPv5/FP-D16 for ARMv8"};
-static const char * arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
-static const char * arm_attr_tag_Advanced_SIMD_arch[] =
+static const char *const arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1", "WMMXv2"};
+static const char *const arm_attr_tag_Advanced_SIMD_arch[] =
   {"No", "NEONv1", "NEONv1 with Fused-MAC", "NEON for ARMv8",
    "NEON for ARMv8.1"};
-static const char * arm_attr_tag_PCS_config[] =
+static const char *const arm_attr_tag_PCS_config[] =
   {"None", "Bare platform", "Linux application", "Linux DSO", "PalmOS 2004",
    "PalmOS (reserved)", "SymbianOS 2004", "SymbianOS (reserved)"};
-static const char * arm_attr_tag_ABI_PCS_R9_use[] =
+static const char *const arm_attr_tag_ABI_PCS_R9_use[] =
   {"V6", "SB", "TLS", "Unused"};
-static const char * arm_attr_tag_ABI_PCS_RW_data[] =
+static const char *const arm_attr_tag_ABI_PCS_RW_data[] =
   {"Absolute", "PC-relative", "SB-relative", "None"};
-static const char * arm_attr_tag_ABI_PCS_RO_data[] =
+static const char *const arm_attr_tag_ABI_PCS_RO_data[] =
   {"Absolute", "PC-relative", "None"};
-static const char * arm_attr_tag_ABI_PCS_GOT_use[] =
+static const char *const arm_attr_tag_ABI_PCS_GOT_use[] =
   {"None", "direct", "GOT-indirect"};
-static const char * arm_attr_tag_ABI_PCS_wchar_t[] =
+static const char *const arm_attr_tag_ABI_PCS_wchar_t[] =
   {"None", "??? 1", "2", "??? 3", "4"};
-static const char * arm_attr_tag_ABI_FP_rounding[] = {"Unused", "Needed"};
-static const char * arm_attr_tag_ABI_FP_denormal[] =
+static const char *const arm_attr_tag_ABI_FP_rounding[] = {"Unused", "Needed"};
+static const char *const arm_attr_tag_ABI_FP_denormal[] =
   {"Unused", "Needed", "Sign only"};
-static const char * arm_attr_tag_ABI_FP_exceptions[] = {"Unused", "Needed"};
-static const char * arm_attr_tag_ABI_FP_user_exceptions[] = {"Unused", "Needed"};
-static const char * arm_attr_tag_ABI_FP_number_model[] =
+static const char *const arm_attr_tag_ABI_FP_exceptions[] = {"Unused", "Needed"};
+static const char *const arm_attr_tag_ABI_FP_user_exceptions[] = {"Unused", "Needed"};
+static const char *const arm_attr_tag_ABI_FP_number_model[] =
   {"Unused", "Finite", "RTABI", "IEEE 754"};
-static const char * arm_attr_tag_ABI_enum_size[] =
+static const char *const arm_attr_tag_ABI_enum_size[] =
   {"Unused", "small", "int", "forced to int"};
-static const char * arm_attr_tag_ABI_HardFP_use[] =
+static const char *const arm_attr_tag_ABI_HardFP_use[] =
   {"As Tag_FP_arch", "SP only", "Reserved", "Deprecated"};
-static const char * arm_attr_tag_ABI_VFP_args[] =
+static const char *const arm_attr_tag_ABI_VFP_args[] =
   {"AAPCS", "VFP registers", "custom", "compatible"};
-static const char * arm_attr_tag_ABI_WMMX_args[] =
+static const char *const arm_attr_tag_ABI_WMMX_args[] =
   {"AAPCS", "WMMX registers", "custom"};
-static const char * arm_attr_tag_ABI_optimization_goals[] =
+static const char *const arm_attr_tag_ABI_optimization_goals[] =
   {"None", "Prefer Speed", "Aggressive Speed", "Prefer Size",
     "Aggressive Size", "Prefer Debug", "Aggressive Debug"};
-static const char * arm_attr_tag_ABI_FP_optimization_goals[] =
+static const char *const arm_attr_tag_ABI_FP_optimization_goals[] =
   {"None", "Prefer Speed", "Aggressive Speed", "Prefer Size",
     "Aggressive Size", "Prefer Accuracy", "Aggressive Accuracy"};
-static const char * arm_attr_tag_CPU_unaligned_access[] = {"None", "v6"};
-static const char * arm_attr_tag_FP_HP_extension[] =
+static const char *const arm_attr_tag_CPU_unaligned_access[] = {"None", "v6"};
+static const char *const arm_attr_tag_FP_HP_extension[] =
   {"Not Allowed", "Allowed"};
-static const char * arm_attr_tag_ABI_FP_16bit_format[] =
+static const char *const arm_attr_tag_ABI_FP_16bit_format[] =
   {"None", "IEEE 754", "Alternative Format"};
-static const char * arm_attr_tag_DSP_extension[] =
+static const char *const arm_attr_tag_DSP_extension[] =
   {"Follow architecture", "Allowed"};
-static const char * arm_attr_tag_MPextension_use[] =
+static const char *const arm_attr_tag_MPextension_use[] =
   {"Not Allowed", "Allowed"};
-static const char * arm_attr_tag_DIV_use[] =
+static const char *const arm_attr_tag_DIV_use[] =
   {"Allowed in Thumb-ISA, v7-R or v7-M", "Not allowed",
     "Allowed in v7-A with integer division extension"};
-static const char * arm_attr_tag_T2EE_use[] = {"Not Allowed", "Allowed"};
-static const char * arm_attr_tag_Virtualization_use[] =
+static const char *const arm_attr_tag_T2EE_use[] = {"Not Allowed", "Allowed"};
+static const char *const arm_attr_tag_Virtualization_use[] =
   {"Not Allowed", "TrustZone", "Virtualization Extensions",
     "TrustZone and Virtualization Extensions"};
-static const char * arm_attr_tag_MPextension_use_legacy[] =
+static const char *const arm_attr_tag_MPextension_use_legacy[] =
   {"Not Allowed", "Allowed"};
 
-static const char * arm_attr_tag_MVE_arch[] =
+static const char *const arm_attr_tag_MVE_arch[] =
   {"No MVE", "MVE Integer only", "MVE Integer and FP"};
 
 #define LOOKUP(id, name) \
@@ -18038,7 +18038,10 @@ process_mips_specific (Filedata * filedata)
       data = (unsigned char *) get_data (NULL, filedata, offset, end - mips_pltgot,
                                          1, _("Procedure Linkage Table data"));
       if (data == NULL)
-	return FALSE;
+	{
+	  free (rels);
+	  return FALSE;
+	}
 
       printf ("\nPLT GOT:\n\n");
       printf (_(" Reserved entries:\n"));

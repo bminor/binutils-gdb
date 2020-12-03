@@ -8187,11 +8187,9 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
 
   if (*need_col_headers)
     {
-      static const char *sloc = "   LOC";
-
       *need_col_headers = 0;
 
-      printf ("%-*s CFA      ", eh_addr_size * 2, sloc);
+      printf ("%-*s CFA      ", eh_addr_size * 2, "   LOC");
 
       for (r = 0; r < *max_regs; r++)
 	if (fc->col_type[r] != DW_CFA_unreferenced)
@@ -10467,6 +10465,8 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   return 1;
 }
 
+static int cu_tu_indexes_read = -1; /* Tri-state variable.  */
+
 /* Load the CU and TU indexes if present.  This will build a list of
    section sets that we can use to associate a .debug_info.dwo section
    with its associated .debug_abbrev.dwo section in a .dwp file.  */
@@ -10474,8 +10474,6 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 static bfd_boolean
 load_cu_tu_indexes (void *file)
 {
-  static int cu_tu_indexes_read = -1; /* Tri-state variable.  */
-
   /* If we have already loaded (or tried to load) the CU and TU indexes
      then do not bother to repeat the task.  */
   if (cu_tu_indexes_read == -1)
@@ -11248,6 +11246,20 @@ free_debug_memory (void)
   free (cu_abbrev_map);
   cu_abbrev_map = NULL;
   next_free_abbrev_map_entry = 0;
+
+  free (shndx_pool);
+  shndx_pool = NULL;
+  shndx_pool_size = 0;
+  shndx_pool_used = 0;
+  free (cu_sets);
+  cu_sets = NULL;
+  cu_count = 0;
+  free (tu_sets);
+  tu_sets = NULL;
+  tu_count = 0;
+
+  memset (level_type_signed, 0, sizeof level_type_signed);
+  cu_tu_indexes_read = -1;
 
   for (i = 0; i < max; i++)
     free_debug_section ((enum dwarf_section_display_enum) i);

@@ -1,3 +1,13 @@
+2020-12-04  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c (frame_display_row): Do without static variable "sloc".
+	(cu_tu_indexes_read): Move to file scope.
+	(free_debug_memory): Reset it here, along with level_type_signed.
+	Free and clear a number of other static variables.
+	* readelf.c (arm_attr_public_tag <table>): Constify, updating..
+	(arm_attr_tag_*): ..all these uses.
+	(process_mips_specific): Free "rels" on error path.
+
 2020-11-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 26865
