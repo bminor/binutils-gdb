@@ -81,5 +81,5 @@ with_test_prefix "second" {
 
 # Test that recording is now off.
 with_test_prefix "third" {
-  gdb_test "info record" "No record target is currently active."
+  gdb_test "info record" "No recording is currently active."
 }

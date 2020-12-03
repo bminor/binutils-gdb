@@ -47,7 +47,7 @@ with_test_prefix "no or double record" {
     gdb_test "python gdb.start_recording(\"full\")" ".*gdb\.error: The process is already being recorded\..*"
 
     gdb_test_no_output "python gdb.stop_recording()" "first"
-    gdb_test "python gdb.stop_recording()" ".*gdb\.error: No record target is currently active\..*" "second"
+    gdb_test "python gdb.stop_recording()" ".*gdb\.error: No recording is currently active\..*" "second"
 }
 
 with_test_prefix "preopened record full" {

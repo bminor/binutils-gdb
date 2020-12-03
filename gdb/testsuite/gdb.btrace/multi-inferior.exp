@@ -55,7 +55,7 @@ with_test_prefix "inferior 2" {
 with_test_prefix "inferior 1" {
     gdb_test "inferior 1" "Switching to inferior 1.*"
 
-    gdb_test "info record" "No record target is currently active\\."
+    gdb_test "info record" "No recording is currently active\\."
     gdb_test_no_output "record btrace" "record btrace"
 }
 
@@ -69,6 +69,6 @@ with_test_prefix "inferior 3" {
 	return -1
     }
 
-    gdb_test "info record" "No record target is currently active\\."
+    gdb_test "info record" "No recording is currently active\\."
     gdb_test_no_output "record btrace" "record btrace"
 }

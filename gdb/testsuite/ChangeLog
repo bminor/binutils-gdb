@@ -1,3 +1,11 @@
+2020-12-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable.exp: Update error message.
+	* gdb.btrace/multi-inferior.exp: Likewise.
+	* gdb.btrace/reconnect.exp: Likewise.
+	* gdb.python/py-record-btrace.exp: Likewise.
+	* gdb.python/py-record-full.exp: Likewise.
+
 2020-12-20  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (save_target_board_info): New proc.

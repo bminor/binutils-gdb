@@ -74,8 +74,8 @@ require_record_target (void)
 
   t = find_record_target ();
   if (t == NULL)
-    error (_("No record target is currently active.\n"
-	     "Use one of the \"target record-<TAB><TAB>\" commands first."));
+    error (_("No recording is currently active.\n"
+	     "Use the \"record full\" or \"record btrace\" command first."));
 
   return t;
 }
@@ -325,7 +325,7 @@ info_record_command (const char *args, int from_tty)
   t = find_record_target ();
   if (t == NULL)
     {
-      printf_filtered (_("No record target is currently active.\n"));
+      printf_filtered (_("No recording is currently active.\n"));
       return;
     }
 

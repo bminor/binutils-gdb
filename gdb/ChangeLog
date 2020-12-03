@@ -1,3 +1,8 @@
+2020-12-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record.c (require_record_target): Rephrase error message.
+	(info_record_command): Likewise.
+
 2020-12-19  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR exp/27070
