@@ -43,7 +43,8 @@ run_ld_link_tests [list \
 	  {} \
 	  "plt-local-rehidden-pic-r.o"] \
     [list "PLT test (executable)" \
-	  "-T plt-local.ld --hash-style=sysv tmpdir/plt-local-hidden-pic-r.o tmpdir/plt-local-rehidden-pic-r.o tmpdir/plt-local-lib.so" "" \
+	  "-T plt-local.ld --hash-style=sysv tmpdir/plt-local-hidden-pic-r.o \
+	   tmpdir/plt-local-rehidden-pic-r.o tmpdir/plt-local-lib.so" "" \
 	  "" \
 	  { plt-local.s } \
 	  { { objdump -d plt-local.dd } } \
@@ -71,13 +72,15 @@ run_ld_link_tests [list \
 	  {} \
 	  "got-local-def-r.o"] \
     [list "GOT test (executable)" \
-	  "-e 0 tmpdir/got-local-aux.so tmpdir/got-local-ref-r.o tmpdir/got-local-def-r.o" "" \
+	  "-e 0 tmpdir/got-local-aux.so tmpdir/got-local-ref-r.o \
+	   tmpdir/got-local-def-r.o" "" \
 	  "" \
 	  {} \
 	  { { readelf "-x .got" got-local-exe.xd } } \
 	  "got-local-exe"] \
     [list "GOT test (shared library)" \
-	  "-shared tmpdir/got-local-aux.so tmpdir/got-local-ref-r.o tmpdir/got-local-def-r.o" "" \
+	  "-shared tmpdir/got-local-aux.so tmpdir/got-local-ref-r.o \
+	   tmpdir/got-local-def-r.o" "" \
 	  "" \
 	  {} \
 	  { { readelf "-x .got" got-local-lib.xd } } \
