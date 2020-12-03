@@ -4414,12 +4414,12 @@ pr26936b: pr26936d.o pr26936b.o pr26936c.o ../ld-new
 	../ld-new -Ttext-segment 0x10000 -z max-page-size=0x1000 \
 		-e _start -o $@ pr26936d.o pr26936b.o pr26936c.o
 pr26936a.o: pr26936a.s
-	$(TEST_AS) --gen-debug -o $@ $<
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 pr26936b.o: pr26936b.s
-	$(TEST_AS) --gen-debug -o $@ $<
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 pr26936c.o: pr26936c.s
-	$(TEST_AS) --gen-debug -o $@ $<
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 pr26936d.o: pr26936d.s
-	$(TEST_AS) --gen-debug -o $@ $<
+	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 
 endif DEFAULT_TARGET_X86_64

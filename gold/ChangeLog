@@ -1,3 +1,9 @@
+2020-12-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (pr26936a.o): Pass -mx86-used-note=yes.
+	(pr26936b.o, pr26936c.o, pr26936d.o): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
 2020-11-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26972

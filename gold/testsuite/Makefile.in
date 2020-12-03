@@ -10388,13 +10388,13 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@	../ld-new -Ttext-segment 0x10000 -z max-page-size=0x1000 \
 @DEFAULT_TARGET_X86_64_TRUE@		-e _start -o $@ pr26936d.o pr26936b.o pr26936c.o
 @DEFAULT_TARGET_X86_64_TRUE@pr26936a.o: pr26936a.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@pr26936b.o: pr26936b.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@pr26936c.o: pr26936c.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@pr26936d.o: pr26936d.s
-@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
