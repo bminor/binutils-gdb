@@ -1,5 +1,9 @@
 2020-12-04  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.reverse/insn-reverse.exp: Fix count handling.
+
+2020-12-04  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.reverse/insn-reverse-x86.c: Guard x86_64 assembly with #ifdef
 	__x86_64__.
 
