@@ -1,5 +1,34 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (COMMON_SFILES): Add displaced-stepping.c.
+	* aarch64-tdep.h: Include displaced-stepping.h.
+	* displaced-stepping.h (struct displaced_step_copy_insn_closure):
+	Move here.
+	(displaced_step_copy_insn_closure_up): Move here.
+	(struct buf_displaced_step_copy_insn_closure): Move here.
+	(struct displaced_step_inferior_state): Move here.
+	(debug_displaced): Move here.
+	(displaced_debug_printf_1): Move here.
+	(displaced_debug_printf): Move here.
+	* displaced-stepping.c: New file.
+	* gdbarch.sh: Include displaced-stepping.h in gdbarch.h.
+	* gdbarch.h: Re-generate.
+	* inferior.h: Include displaced-stepping.h.
+	* infrun.h (debug_displaced): Move to displaced-stepping.h.
+	(displaced_debug_printf_1): Likewise.
+	(displaced_debug_printf): Likewise.
+	(struct displaced_step_copy_insn_closure): Likewise.
+	(displaced_step_copy_insn_closure_up): Likewise.
+	(struct buf_displaced_step_copy_insn_closure): Likewise.
+	(struct displaced_step_inferior_state): Likewise.
+	* infrun.c (show_debug_displaced): Move to displaced-stepping.c.
+	(displaced_debug_printf_1): Likewise.
+	(displaced_step_copy_insn_closure::~displaced_step_copy_insn_closure):
+	Likewise.
+	(_initialize_infrun): Don't register "set/show debug displaced".
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* linux-tdep.c (get_linux_inferior_data): Add inferior
 	parameter.
 	(linux_vsyscall_range): Pass current inferior.

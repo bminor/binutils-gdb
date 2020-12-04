@@ -31,6 +31,7 @@
 #include "gdb_obstack.h"
 #include "infrun.h"
 #include "osabi.h"
+#include "displaced-stepping.h"
 
 struct floatformat;
 struct ui_file;

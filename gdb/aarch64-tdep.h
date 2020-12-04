@@ -23,6 +23,7 @@
 #define AARCH64_TDEP_H
 
 #include "arch/aarch64.h"
+#include "displaced-stepping.h"
 #include "infrun.h"
 
 /* Forward declarations.  */

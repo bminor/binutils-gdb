@@ -60,6 +60,7 @@ struct thread_info;
 #include "gdbthread.h"
 
 #include "process-stratum-target.h"
+#include "displaced-stepping.h"
 
 struct infcall_suspend_state;
 struct infcall_control_state;

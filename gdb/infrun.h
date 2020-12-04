@@ -41,19 +41,6 @@ extern unsigned int debug_infrun;
     } \
   while (0)
 
-/* True if we are debugging displaced stepping.  */
-extern bool debug_displaced;
-
-/* Print a "displaced" debug statement.  */
-
-#define displaced_debug_printf(fmt, ...) \
-  do \
-    { \
-      if (debug_displaced) \
-	debug_prefixed_printf ("displaced", __func__, fmt, ##__VA_ARGS__); \
-    } \
-  while (0)
-
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 extern int stop_on_solib_events;
@@ -279,70 +266,5 @@ extern void all_uis_check_sync_execution_done (void);
    yet, re-disable its prompt (a synchronous execution command was
    started or re-started).  */
 extern void all_uis_on_sync_execution_starting (void);
-
-/* Base class for displaced stepping closures (the arch-specific data).  */
-
-struct displaced_step_copy_insn_closure
-{
-  virtual ~displaced_step_copy_insn_closure () = 0;
-};
-
-using displaced_step_copy_insn_closure_up
-  = std::unique_ptr<displaced_step_copy_insn_closure>;
-
-/* A simple displaced step closure that contains only a byte buffer.  */
-
-struct buf_displaced_step_copy_insn_closure : displaced_step_copy_insn_closure
-{
-  buf_displaced_step_copy_insn_closure (int buf_size)
-  : buf (buf_size)
-  {}
-
-  gdb::byte_vector buf;
-};
-
-/* Per-inferior displaced stepping state.  */
-struct displaced_step_inferior_state
-{
-  displaced_step_inferior_state ()
-  {
-    reset ();
-  }
-
-  /* Put this object back in its original state.  */
-  void reset ()
-  {
-    failed_before = 0;
-    step_thread = nullptr;
-    step_gdbarch = nullptr;
-    step_closure.reset ();
-    step_original = 0;
-    step_copy = 0;
-    step_saved_copy.clear ();
-  }
-
-  /* True if preparing a displaced step ever failed.  If so, we won't
-     try displaced stepping for this inferior again.  */
-  int failed_before;
-
-  /* If this is not nullptr, this is the thread carrying out a
-     displaced single-step in process PID.  This thread's state will
-     require fixing up once it has completed its step.  */
-  thread_info *step_thread;
-
-  /* The architecture the thread had when we stepped it.  */
-  gdbarch *step_gdbarch;
-
-  /* The closure provided gdbarch_displaced_step_copy_insn, to be used
-     for post-step cleanup.  */
-  displaced_step_copy_insn_closure_up step_closure;
-
-  /* The address of the original instruction, and the copy we
-     made.  */
-  CORE_ADDR step_original, step_copy;
-
-  /* Saved contents of copy area.  */
-  gdb::byte_vector step_saved_copy;
-};
 
 #endif /* INFRUN_H */

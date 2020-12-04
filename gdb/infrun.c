@@ -153,14 +153,6 @@ static ptid_t previous_inferior_ptid;
 
 static bool detach_fork = true;
 
-bool debug_displaced = false;
-static void
-show_debug_displaced (struct ui_file *file, int from_tty,
-		      struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("Displace stepping debugging is %s.\n"), value);
-}
-
 unsigned int debug_infrun = 0;
 static void
 show_debug_infrun (struct ui_file *file, int from_tty,
@@ -1459,11 +1451,6 @@ step_over_info_valid_p (void)
    step finishes, we pick the next thread in the queue and start a new
    displaced step operation on it.  See displaced_step_prepare and
    displaced_step_finish for details.  */
-
-/* Default destructor for displaced_step_copy_insn_closure.  */
-
-displaced_step_copy_insn_closure::~displaced_step_copy_insn_closure ()
-  = default;
 
 /* Returns true if any inferior has a thread doing a displaced
    step.  */
@@ -9296,15 +9283,6 @@ When non-zero, inferior specific debugging is enabled."),
 			     NULL,
 			     show_debug_infrun,
 			     &setdebuglist, &showdebuglist);
-
-  add_setshow_boolean_cmd ("displaced", class_maintenance,
-			   &debug_displaced, _("\
-Set displaced stepping debugging."), _("\
-Show displaced stepping debugging."), _("\
-When non-zero, displaced stepping specific debugging is enabled."),
-			    NULL,
-			    show_debug_displaced,
-			    &setdebuglist, &showdebuglist);
 
   add_setshow_boolean_cmd ("non-stop", no_class,
 			   &non_stop_1, _("\
