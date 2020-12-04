@@ -1,5 +1,10 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* amd64-linux-tdep.c (amd64_linux_init_abi): Pass 2 as the
+	number of displaced step buffers.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* displaced-stepping.h (struct displaced_step_buffer): Rename
 	to...
 	(struct displaced_step_buffers): ... this.

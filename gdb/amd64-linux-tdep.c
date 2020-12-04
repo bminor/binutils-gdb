@@ -1880,7 +1880,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   if (!valid_p)
     return;
 
-  amd64_linux_init_abi_common (info, gdbarch, 1);
+  amd64_linux_init_abi_common (info, gdbarch, 2);
 
   /* Initialize the amd64_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system
