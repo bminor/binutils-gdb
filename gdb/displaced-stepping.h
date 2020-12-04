@@ -20,6 +20,7 @@
 #ifndef DISPLACED_STEPPING_H
 #define DISPLACED_STEPPING_H
 
+#include "gdbsupport/array-view.h"
 #include "gdbsupport/byte-vector.h"
 
 struct gdbarch;
@@ -154,13 +155,19 @@ private:
   gdbarch *m_original_gdbarch = nullptr;
 };
 
-/* Manage access to a single displaced stepping buffer.  */
+/* Control access to multiple displaced stepping buffers at fixed addresses.  */
 
-struct displaced_step_buffer
+struct displaced_step_buffers
 {
-  explicit displaced_step_buffer (CORE_ADDR buffer_addr)
-    : m_addr (buffer_addr)
-  {}
+  explicit displaced_step_buffers (gdb::array_view<CORE_ADDR> buffer_addrs)
+  {
+    gdb_assert (buffer_addrs.size () > 0);
+
+    m_buffers.reserve (buffer_addrs.size ());
+
+    for (CORE_ADDR buffer_addr : buffer_addrs)
+      m_buffers.emplace_back (buffer_addr);
+  }
 
   displaced_step_prepare_status prepare (thread_info *thread,
 					 CORE_ADDR &displaced_pc);
@@ -174,21 +181,35 @@ struct displaced_step_buffer
   void restore_in_ptid (ptid_t ptid);
 
 private:
-  /* Original PC of the instruction being displaced-stepped in this buffer.  */
-  CORE_ADDR m_original_pc = 0;
 
-  /* Address of the buffer.  */
-  const CORE_ADDR m_addr;
+  /* State of a single buffer.  */
 
-  /* If set, the thread currently using the buffer.  */
-  thread_info *m_current_thread = nullptr;
+  struct displaced_step_buffer
+  {
+    explicit displaced_step_buffer (CORE_ADDR addr)
+      : addr (addr)
+    {}
 
-  /* Saved contents of copy area.  */
-  gdb::byte_vector m_saved_copy;
+    /* Address of the buffer.  */
+    const CORE_ADDR addr;
 
-  /* The closure provided gdbarch_displaced_step_copy_insn, to be used
-     for post-step cleanup.  */
-  displaced_step_copy_insn_closure_up m_copy_insn_closure;
+    /* The original PC of the instruction currently being stepped.  */
+    CORE_ADDR original_pc = 0;
+
+    /* If set, the thread currently using the buffer.  If unset, the buffer is not
+       used.  */
+    thread_info *current_thread = nullptr;
+
+    /* Saved copy of the bytes in the displaced buffer, to be restored once the
+       buffer is no longer used.  */
+    gdb::byte_vector saved_copy;
+
+    /* Closure obtained from gdbarch_displaced_step_copy_insn, to be passed to
+       gdbarch_displaced_step_fixup_insn.  */
+    displaced_step_copy_insn_closure_up copy_insn_closure;
+  };
+
+  std::vector<displaced_step_buffer> m_buffers;
 };
 
 #endif /* DISPLACED_STEPPING_H */

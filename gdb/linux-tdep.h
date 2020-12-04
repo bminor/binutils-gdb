@@ -82,7 +82,7 @@ extern void linux_displaced_step_restore_all_in_ptid (inferior *parent_inf,
 						      ptid_t ptid);
 
 extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
-			    bool supports_displaced_step);
+			    int num_disp_step_buffers);
 
 extern int linux_is_uclinux (void);
 

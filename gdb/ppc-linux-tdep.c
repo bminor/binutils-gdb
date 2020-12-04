@@ -1993,7 +1993,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
 
-  linux_init_abi (info, gdbarch, false);
+  linux_init_abi (info, gdbarch, 0);
 
   /* PPC GNU/Linux uses either 64-bit or 128-bit long doubles; where
      128-bit, they can be either IBM long double or IEEE quad long double.

@@ -166,9 +166,10 @@ enum
 static struct gdbarch_data *linux_gdbarch_data_handle;
 
 struct linux_gdbarch_data
-  {
-    struct type *siginfo_type;
-  };
+{
+  struct type *siginfo_type;
+  int num_disp_step_buffers;
+};
 
 static void *
 init_linux_gdbarch_data (struct obstack *obstack)
@@ -200,8 +201,8 @@ struct linux_info
      if we tried looking it up but failed.  */
   int vsyscall_range_p = 0;
 
-  /* Inferior's displaced step buffer.  */
-  gdb::optional<displaced_step_buffer> disp_step_buf;
+  /* Inferior's displaced step buffers.  */
+  gdb::optional<displaced_step_buffers> disp_step_bufs;
 };
 
 /* Per-inferior data key.  */
@@ -2540,15 +2541,25 @@ linux_displaced_step_prepare (gdbarch *arch, thread_info *thread,
 {
   linux_info *per_inferior = get_linux_inferior_data (thread->inf);
 
-  if (!per_inferior->disp_step_buf.has_value ())
+  if (!per_inferior->disp_step_bufs.has_value ())
     {
+      /* Figure out the location of the buffers.  They are contiguous, starting
+	 at DISP_STEP_BUF_ADDR.  They are all of size BUF_LEN.  */
       CORE_ADDR disp_step_buf_addr
 	= linux_displaced_step_location (thread->inf->gdbarch);
+      int buf_len = gdbarch_max_insn_length (arch);
 
-      per_inferior->disp_step_buf.emplace (disp_step_buf_addr);
+      linux_gdbarch_data *gdbarch_data = get_linux_gdbarch_data (arch);
+      gdb_assert (gdbarch_data->num_disp_step_buffers > 0);
+
+      std::vector<CORE_ADDR> buffers;
+      for (int i = 0; i < gdbarch_data->num_disp_step_buffers; i++)
+	buffers.push_back (disp_step_buf_addr + i * buf_len);
+
+      per_inferior->disp_step_bufs.emplace (buffers);
     }
 
-  return per_inferior->disp_step_buf->prepare (thread, displaced_pc);
+  return per_inferior->disp_step_bufs->prepare (thread, displaced_pc);
 }
 
 /* See linux-tdep.h.  */
@@ -2558,9 +2569,9 @@ linux_displaced_step_finish (gdbarch *arch, thread_info *thread, gdb_signal sig)
 {
   linux_info *per_inferior = get_linux_inferior_data (thread->inf);
 
-  gdb_assert (per_inferior->disp_step_buf.has_value ());
+  gdb_assert (per_inferior->disp_step_bufs.has_value ());
 
-  return per_inferior->disp_step_buf->finish (arch, thread, sig);
+  return per_inferior->disp_step_bufs->finish (arch, thread, sig);
 }
 
 /* See linux-tdep.h.  */
@@ -2571,10 +2582,10 @@ linux_displaced_step_copy_insn_closure_by_addr (inferior *inf, CORE_ADDR addr)
   linux_info *per_inferior = linux_inferior_data.get (inf);
 
   if (per_inferior == nullptr
-      || !per_inferior->disp_step_buf.has_value ())
+      || !per_inferior->disp_step_bufs.has_value ())
     return nullptr;
 
-  return per_inferior->disp_step_buf->copy_insn_closure_by_addr (addr);
+  return per_inferior->disp_step_bufs->copy_insn_closure_by_addr (addr);
 }
 
 /* See linux-tdep.h.  */
@@ -2585,10 +2596,10 @@ linux_displaced_step_restore_all_in_ptid (inferior *parent_inf, ptid_t ptid)
   linux_info *per_inferior = linux_inferior_data.get (parent_inf);
 
   if (per_inferior == nullptr
-      || !per_inferior->disp_step_buf.has_value ())
+      || !per_inferior->disp_step_bufs.has_value ())
     return;
 
-  per_inferior->disp_step_buf->restore_in_ptid (ptid);
+  per_inferior->disp_step_bufs->restore_in_ptid (ptid);
 }
 
 /* See linux-tdep.h.  */
@@ -2636,15 +2647,22 @@ show_dump_excluded_mappings (struct ui_file *file, int from_tty,
 }
 
 /* To be called from the various GDB_OSABI_LINUX handlers for the
-   various GNU/Linux architectures and machine types.  */
+   various GNU/Linux architectures and machine types.
+
+   NUM_DISP_STEP_BUFFERS is the number of displaced step buffers to use.  If 0,
+   displaced stepping is not supported. */
 
 void
 linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
-		bool supports_displaced_step)
+		int num_disp_step_buffers)
 {
-  if (supports_displaced_step)
+  if (num_disp_step_buffers > 0)
     {
-      set_gdbarch_displaced_step_prepare (gdbarch, linux_displaced_step_prepare);
+      linux_gdbarch_data *gdbarch_data = get_linux_gdbarch_data (gdbarch);
+      gdbarch_data->num_disp_step_buffers = num_disp_step_buffers;
+
+      set_gdbarch_displaced_step_prepare (gdbarch,
+					  linux_displaced_step_prepare);
       set_gdbarch_displaced_step_finish (gdbarch, linux_displaced_step_finish);
       set_gdbarch_displaced_step_copy_insn_closure_by_addr
 	(gdbarch, linux_displaced_step_copy_insn_closure_by_addr);

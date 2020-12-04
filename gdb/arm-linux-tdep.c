@@ -1721,7 +1721,7 @@ arm_linux_init_abi (struct gdbarch_info info,
 								    NULL };
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch, true);
+  linux_init_abi (info, gdbarch, 1);
 
   tdep->lowest_pc = 0x8000;
   if (info.byte_order_for_code == BFD_ENDIAN_BIG)

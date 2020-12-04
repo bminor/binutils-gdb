@@ -1,5 +1,75 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* displaced-stepping.h (struct displaced_step_buffer): Rename
+	to...
+	(struct displaced_step_buffers): ... this.
+	<m_addr, m_current_thread, m_copy_insn_closure>: Remove.
+	<struct displaced_step_buffer>: New inner class.
+	<m_buffers>: New.
+	* displaced-stepping.c (displaced_step_buffer::prepare): Rename
+	to...
+	(displaced_step_buffers::prepare): ... this, adjust for multiple
+	buffers.
+	(displaced_step_buffer::finish):  Rename to...
+	(displaced_step_buffers::finish): ... this, adjust for multiple
+	buffers.
+	(displaced_step_buffer::copy_insn_closure_by_addr): Rename to...
+	(displaced_step_buffers::copy_insn_closure_by_addr): ... this,
+	adjust for multiple buffers.
+	(displaced_step_buffer::restore_in_ptid): Rename to...
+	(displaced_step_buffers::restore_in_ptid): ... this, adjust for
+	multiple buffers.
+	* linux-tdep.h (linux_init_abi): Change supports_displaced_step
+	for num_disp_step_buffers.
+	* linux-tdep.c (struct linux_gdbarch_data)
+	<num_disp_step_buffers>: New field.
+	(struct linux_info) <disp_step_buf>: Rename to...
+	<disp_step_bufs>: ... this, change type to
+	displaced_step_buffers.
+	(linux_displaced_step_prepare): Use
+	linux_gdbarch_data::num_disp_step_buffers to create that number
+	of buffers.
+	(linux_displaced_step_finish): Adjust.
+	(linux_displaced_step_copy_insn_closure_by_addr): Adjust.
+	(linux_displaced_step_restore_all_in_ptid): Adjust.
+	(linux_init_abi): Change supports_displaced_step parameter for
+	num_disp_step_buffers, save it in linux_gdbarch_data.
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Adjust.
+	* alpha-linux-tdep.c (alpha_linux_init_abi): Adjust.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Change
+	supports_displaced_step parameter for num_disp_step_buffers.
+	(amd64_linux_init_abi): Adjust.
+	(amd64_x32_linux_init_abi): Adjust.
+	* arc-linux-tdep.c (arc_linux_init_osabi): Adjust.
+	* arm-linux-tdep.c (arm_linux_init_abi): Adjust.
+	* bfin-linux-tdep.c (bfin_linux_init_abi): Adjust.
+	* cris-linux-tdep.c (cris_linux_init_abi): Adjust.
+	* csky-linux-tdep.c (csky_linux_init_abi): Adjust.
+	* frv-linux-tdep.c (frv_linux_init_abi): Adjust.
+	* hppa-linux-tdep.c (hppa_linux_init_abi): Adjust.
+	* i386-linux-tdep.c (i386_linux_init_abi): Adjust.
+	* ia64-linux-tdep.c (ia64_linux_init_abi): Adjust.
+	* m32r-linux-tdep.c (m32r_linux_init_abi): Adjust.
+	* m68k-linux-tdep.c (m68k_linux_init_abi):
+	* microblaze-linux-tdep.c (microblaze_linux_init_abi):
+	* mips-linux-tdep.c (mips_linux_init_abi): Adjust.
+	* mn10300-linux-tdep.c (am33_linux_init_osabi): Adjust.
+	* nios2-linux-tdep.c (nios2_linux_init_abi): Adjust.
+	* or1k-linux-tdep.c (or1k_linux_init_abi): Adjust.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Adjust.
+	* riscv-linux-tdep.c (riscv_linux_init_abi): Adjust.
+	* rs6000-tdep.c (struct ppc_inferior_data) <disp_step_buf>:
+	Change type to displaced_step_buffers.
+	* s390-linux-tdep.c (s390_linux_init_abi_any): Adjust.
+	* sh-linux-tdep.c (sh_linux_init_abi): Adjust.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Adjust.
+	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Adjust.
+	* tic6x-linux-tdep.c (tic6x_uclinux_init_abi): Adjust.
+	* tilegx-linux-tdep.c (tilegx_linux_init_abi): Adjust.
+	* xtensa-linux-tdep.c (xtensa_linux_init_abi): Adjust.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* linux-tdep.c (init_linux_gdbarch_data): Change parameter to
 	obkstack.
 	(_initialize_linux_tdep): Register pre-init gdb data instead of

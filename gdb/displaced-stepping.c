@@ -44,82 +44,121 @@ show_debug_displaced (struct ui_file *file, int from_tty,
 }
 
 displaced_step_prepare_status
-displaced_step_buffer::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
+displaced_step_buffers::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
 {
   gdb_assert (!thread->displaced_step_state.in_progress ());
 
-  /* Is a thread currently using the buffer?  */
-  if (m_current_thread != nullptr)
-    {
-      /* If so, it better not be this thread.  */
-      gdb_assert (thread != m_current_thread);
-      return DISPLACED_STEP_PREPARE_STATUS_UNAVAILABLE;
-    }
+  /* Sanity check: the thread should not be using a buffer at this point.  */
+  for (displaced_step_buffer &buf : m_buffers)
+    gdb_assert (buf.current_thread != thread);
 
   regcache *regcache = get_thread_regcache (thread);
   const address_space *aspace = regcache->aspace ();
   gdbarch *arch = regcache->arch ();
   ULONGEST len = gdbarch_max_insn_length (arch);
 
-  if (breakpoint_in_range_p (aspace, m_addr, len))
-    {
-      /* There's a breakpoint set in the scratch pad location range
-	 (which is usually around the entry point).  We'd either
-	 install it before resuming, which would overwrite/corrupt the
-	 scratch pad, or if it was already inserted, this displaced
-	 step would overwrite it.  The latter is OK in the sense that
-	 we already assume that no thread is going to execute the code
-	 in the scratch pad range (after initial startup) anyway, but
-	 the former is unacceptable.  Simply punt and fallback to
-	 stepping over this breakpoint in-line.  */
-      displaced_debug_printf ("breakpoint set in scratch pad.  "
-			      "Stepping over breakpoint in-line instead.");
+  /* Search for an unused buffer.  */
+  displaced_step_buffer *buffer = nullptr;
+  displaced_step_prepare_status fail_status
+    = DISPLACED_STEP_PREPARE_STATUS_CANT;
 
-      return DISPLACED_STEP_PREPARE_STATUS_CANT;
+  for (displaced_step_buffer &candidate : m_buffers)
+    {
+      bool bp_in_range = breakpoint_in_range_p (aspace, candidate.addr, len);
+      bool is_free = candidate.current_thread == nullptr;
+
+      if (!bp_in_range)
+	{
+	  if (is_free)
+	    {
+	      buffer = &candidate;
+	      break;
+	    }
+	  else
+	    {
+	      /* This buffer would be suitable, but it's used right now.  */
+	      fail_status = DISPLACED_STEP_PREPARE_STATUS_UNAVAILABLE;
+	    }
+	}
+      else
+	{
+	  /* There's a breakpoint set in the scratch pad location range
+	     (which is usually around the entry point).  We'd either
+	     install it before resuming, which would overwrite/corrupt the
+	     scratch pad, or if it was already inserted, this displaced
+	     step would overwrite it.  The latter is OK in the sense that
+	     we already assume that no thread is going to execute the code
+	     in the scratch pad range (after initial startup) anyway, but
+	     the former is unacceptable.  Simply punt and fallback to
+	     stepping over this breakpoint in-line.  */
+	  displaced_debug_printf ("breakpoint set in displaced stepping "
+				  "buffer at %s, can't use.",
+				  paddress (arch, candidate.addr));
+	}
     }
 
-  m_original_pc = regcache_read_pc (regcache);
-  displaced_pc = m_addr;
+  if (buffer == nullptr)
+    return fail_status;
+
+  displaced_debug_printf ("selected buffer at %s",
+			  paddress (arch, buffer->addr));
+
+  /* Save the original PC of the thread.  */
+  buffer->original_pc = regcache_read_pc (regcache);
+
+  /* Return displaced step buffer address to caller.  */
+  displaced_pc = buffer->addr;
 
   /* Save the original contents of the displaced stepping buffer.  */
-  m_saved_copy.resize (len);
+  buffer->saved_copy.resize (len);
 
-  int status = target_read_memory (m_addr, m_saved_copy.data (), len);
+  int status = target_read_memory (buffer->addr,
+				    buffer->saved_copy.data (), len);
   if (status != 0)
     throw_error (MEMORY_ERROR,
 		 _("Error accessing memory address %s (%s) for "
 		   "displaced-stepping scratch space."),
-		 paddress (arch, m_addr), safe_strerror (status));
+		 paddress (arch, buffer->addr), safe_strerror (status));
 
   displaced_debug_printf ("saved %s: %s",
-			  paddress (arch, m_addr),
+			  paddress (arch, buffer->addr),
 			  displaced_step_dump_bytes
-			    (m_saved_copy.data (), len).c_str ());
+			  (buffer->saved_copy.data (), len).c_str ());
 
   /* Save this in a local variable first, so it's released if code below
      throws.  */
   displaced_step_copy_insn_closure_up copy_insn_closure
-    = gdbarch_displaced_step_copy_insn (arch, m_original_pc, m_addr, regcache);
+    = gdbarch_displaced_step_copy_insn (arch, buffer->original_pc,
+					buffer->addr, regcache);
 
   if (copy_insn_closure == nullptr)
     {
       /* The architecture doesn't know how or want to displaced step
-        this instruction or instruction sequence.  Fallback to
-        stepping over the breakpoint in-line.  */
+	 this instruction or instruction sequence.  Fallback to
+	 stepping over the breakpoint in-line.  */
       return DISPLACED_STEP_PREPARE_STATUS_CANT;
     }
 
   /* Resume execution at the copy.  */
-  regcache_write_pc (regcache, m_addr);
+  regcache_write_pc (regcache, buffer->addr);
 
   /* This marks the buffer as being in use.  */
-  m_current_thread = thread;
+  buffer->current_thread = thread;
 
   /* Save this, now that we know everything went fine.  */
-  m_copy_insn_closure = std::move (copy_insn_closure);
+  buffer->copy_insn_closure = std::move (copy_insn_closure);
 
-  /* Tell infrun not to try preparing a displaced step again for this inferior.  */
+  /* Tell infrun not to try preparing a displaced step again for this inferior if
+     all buffers are taken.  */
   thread->inf->displaced_step_state.unavailable = true;
+  for (const displaced_step_buffer &buf : m_buffers)
+    {
+      if (buf.current_thread == nullptr)
+	{
+	  thread->inf->displaced_step_state.unavailable = false;
+	  break;
+	}
+    }
 
   return DISPLACED_STEP_PREPARE_STATUS_OK;
 }
@@ -152,21 +191,34 @@ displaced_step_instruction_executed_successfully (gdbarch *arch,
 }
 
 displaced_step_finish_status
-displaced_step_buffer::finish (gdbarch *arch, thread_info *thread,
-			       gdb_signal sig)
+displaced_step_buffers::finish (gdbarch *arch, thread_info *thread,
+				gdb_signal sig)
 {
   gdb_assert (thread->displaced_step_state.in_progress ());
-  gdb_assert (thread == m_current_thread);
+
+  /* Find the buffer this thread was using.  */
+  displaced_step_buffer *buffer = nullptr;
+
+  for (displaced_step_buffer &candidate : m_buffers)
+    {
+      if (candidate.current_thread == thread)
+	{
+	  buffer = &candidate;
+	  break;
+	}
+    }
+
+  gdb_assert (buffer != nullptr);
 
   /* Move this to a local variable so it's released in case something goes
      wrong.  */
   displaced_step_copy_insn_closure_up copy_insn_closure
-    = std::move (m_copy_insn_closure);
+    = std::move (buffer->copy_insn_closure);
   gdb_assert (copy_insn_closure != nullptr);
 
-  /* Reset M_CURRENT_THREAD immediately to mark the buffer as available, in case
-     something goes wrong below.  */
-  m_current_thread = nullptr;
+  /* Reset BUFFER->CURRENT_THREAD immediately to mark the buffer as available,
+     in case something goes wrong below.  */
+  buffer->current_thread = nullptr;
 
   /* Now that a buffer gets freed, tell infrun it can ask us to prepare a displaced
      step again for this inferior.  Do that here in case something goes wrong
@@ -175,12 +227,13 @@ displaced_step_buffer::finish (gdbarch *arch, thread_info *thread,
 
   ULONGEST len = gdbarch_max_insn_length (arch);
 
-  write_memory_ptid (thread->ptid, m_addr,
-		     m_saved_copy.data (), len);
+  /* Restore memory of the buffer.  */
+  write_memory_ptid (thread->ptid, buffer->addr,
+		     buffer->saved_copy.data (), len);
 
   displaced_debug_printf ("restored %s %s",
 			  target_pid_to_str (thread->ptid).c_str (),
-			  paddress (arch, m_addr));
+			  paddress (arch, buffer->addr));
 
   regcache *rc = get_thread_regcache (thread);
 
@@ -189,8 +242,9 @@ displaced_step_buffer::finish (gdbarch *arch, thread_info *thread,
 
   if (instruction_executed_successfully)
     {
-      gdbarch_displaced_step_fixup (arch, copy_insn_closure.get (), m_original_pc,
-				    m_addr, rc);
+      gdbarch_displaced_step_fixup (arch, copy_insn_closure.get (),
+				    buffer->original_pc,
+				    buffer->addr, rc);
       return DISPLACED_STEP_FINISH_STATUS_OK;
     }
   else
@@ -198,35 +252,41 @@ displaced_step_buffer::finish (gdbarch *arch, thread_info *thread,
       /* Since the instruction didn't complete, all we can do is relocate the
 	 PC.  */
       CORE_ADDR pc = regcache_read_pc (rc);
-      pc = m_original_pc + (pc - m_addr);
+      pc = buffer->original_pc + (pc - buffer->addr);
       regcache_write_pc (rc, pc);
       return DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED;
     }
 }
 
 const displaced_step_copy_insn_closure *
-displaced_step_buffer::copy_insn_closure_by_addr (CORE_ADDR addr)
+displaced_step_buffers::copy_insn_closure_by_addr (CORE_ADDR addr)
 {
-  if (addr == m_addr)
-    return m_copy_insn_closure.get ();
-  else
-    return nullptr;
+  for (const displaced_step_buffer &buffer : m_buffers)
+    {
+      if (addr == buffer.addr)
+	return buffer.copy_insn_closure.get ();
+    }
+
+  return nullptr;
 }
 
 void
-displaced_step_buffer::restore_in_ptid (ptid_t ptid)
+displaced_step_buffers::restore_in_ptid (ptid_t ptid)
 {
-  if (m_current_thread != nullptr)
+  for (const displaced_step_buffer &buffer : m_buffers)
     {
-      regcache *regcache = get_thread_regcache (m_current_thread);
+      if (buffer.current_thread == nullptr)
+	continue;
+
+      regcache *regcache = get_thread_regcache (buffer.current_thread);
       gdbarch *arch = regcache->arch ();
       ULONGEST len = gdbarch_max_insn_length (arch);
 
-      write_memory_ptid (ptid, m_addr, m_saved_copy.data (), len);
+      write_memory_ptid (ptid, buffer.addr, buffer.saved_copy.data (), len);
 
       displaced_debug_printf ("restored in ptid %s %s",
 			      target_pid_to_str (ptid).c_str (),
-			      paddress (arch, m_addr));
+			      paddress (arch, buffer.addr));
     }
 }
 

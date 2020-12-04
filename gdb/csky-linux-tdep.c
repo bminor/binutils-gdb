@@ -233,7 +233,7 @@ csky_linux_rt_sigreturn_tramp_frame = {
 static void
 csky_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  linux_init_abi (info, gdbarch, false);
+  linux_init_abi (info, gdbarch, 0);
 
   /* Shared library handling.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);

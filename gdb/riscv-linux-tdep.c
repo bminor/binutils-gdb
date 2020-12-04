@@ -159,7 +159,7 @@ riscv_linux_sigframe_init (const struct tramp_frame *self,
 static void
 riscv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  linux_init_abi (info, gdbarch, false);
+  linux_init_abi (info, gdbarch, 0);
 
   set_gdbarch_software_single_step (gdbarch, riscv_software_single_step);
 

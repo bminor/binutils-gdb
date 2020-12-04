@@ -160,7 +160,7 @@ struct ppc_inferior_data
   /* This is an optional in case we add more fields to ppc_inferior_data, we
      don't want it instantiated as soon as we get the ppc_inferior_data for an
      inferior.  */
-  gdb::optional<displaced_step_buffer> disp_step_buf;
+  gdb::optional<displaced_step_buffers> disp_step_buf;
 };
 
 static inferior_key<ppc_inferior_data> ppc_inferior_data_key;

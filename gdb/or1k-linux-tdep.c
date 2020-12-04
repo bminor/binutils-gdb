@@ -140,7 +140,7 @@ or1k_linux_sigframe_init (const struct tramp_frame *self,
 static void
 or1k_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  linux_init_abi (info, gdbarch, false);
+  linux_init_abi (info, gdbarch, 0);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 					 svr4_ilp32_fetch_link_map_offsets);

@@ -111,7 +111,7 @@ tilegx_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   int arch_size = gdbarch_addr_bit (gdbarch);
 
-  linux_init_abi (info, gdbarch, false);
+  linux_init_abi (info, gdbarch, 0);
 
   tramp_frame_prepend_unwinder (gdbarch, &tilegx_linux_rt_sigframe);
 

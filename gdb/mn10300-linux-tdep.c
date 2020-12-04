@@ -704,7 +704,7 @@ am33_linux_sigframe_cache_init (const struct tramp_frame *self,
 static void
 am33_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  linux_init_abi (info, gdbarch, false);
+  linux_init_abi (info, gdbarch, 0);
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, am33_iterate_over_regset_sections);
