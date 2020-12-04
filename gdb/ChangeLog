@@ -1,5 +1,6 @@
 2020-12-04  Shahab Vahedi  <shahab@synopsys.com>
 
+	PR tdep/27015
 	* arc-linux-tdep.c (collect_register): Populate "eret" by
 	"pc" value from the regcache when asked for "pc" value.
 
