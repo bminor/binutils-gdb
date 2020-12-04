@@ -1,5 +1,10 @@
 2020-12-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* infrun.c (get_displaced_stepping_state): Remove, change
+	callers to access the field directly.
+
+2020-12-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* infrun.c (handle_inferior_event): Restore displaced step
 	buffer bytes in child process when handling fork, even if fork
 	happened in another thread than the displaced-stepping one.

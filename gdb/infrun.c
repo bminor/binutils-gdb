@@ -1463,14 +1463,6 @@ step_over_info_valid_p (void)
 
 displaced_step_closure::~displaced_step_closure () = default;
 
-/* Get the displaced stepping state of inferior INF.  */
-
-static displaced_step_inferior_state *
-get_displaced_stepping_state (inferior *inf)
-{
-  return &inf->displaced_step_state;
-}
-
 /* Returns true if any inferior has a thread doing a displaced
    step.  */
 
@@ -1493,7 +1485,7 @@ displaced_step_in_progress_thread (thread_info *thread)
 {
   gdb_assert (thread != NULL);
 
-  return get_displaced_stepping_state (thread->inf)->step_thread == thread;
+  return thread->inf->displaced_step_state.step_thread == thread;
 }
 
 /* Return true if INF has a thread doing a displaced step.  */
@@ -1501,7 +1493,7 @@ displaced_step_in_progress_thread (thread_info *thread)
 static bool
 displaced_step_in_progress (inferior *inf)
 {
-  return get_displaced_stepping_state (inf)->step_thread != nullptr;
+  return inf->displaced_step_state.step_thread != nullptr;
 }
 
 /* If inferior is in displaced stepping, and ADDR equals to starting address
@@ -1511,13 +1503,13 @@ displaced_step_in_progress (inferior *inf)
 struct displaced_step_closure*
 get_displaced_step_closure_by_addr (CORE_ADDR addr)
 {
-  displaced_step_inferior_state *displaced
-    = get_displaced_stepping_state (current_inferior ());
+  displaced_step_inferior_state &displaced
+    = current_inferior ()->displaced_step_state;
 
   /* If checking the mode of displaced instruction in copy area.  */
-  if (displaced->step_thread != nullptr
-      && displaced->step_copy == addr)
-    return displaced->step_closure.get ();
+  if (displaced.step_thread != nullptr
+      && displaced.step_copy == addr)
+    return displaced.step_closure.get ();
 
   return NULL;
 }
@@ -1606,12 +1598,9 @@ use_displaced_stepping (thread_info *tp)
   if (find_record_target () != nullptr)
     return false;
 
-  displaced_step_inferior_state *displaced_state
-    = get_displaced_stepping_state (tp->inf);
-
   /* If displaced stepping failed before for this inferior, don't bother trying
      again.  */
-  if (displaced_state->failed_before)
+  if (tp->inf->displaced_step_state.failed_before)
     return false;
 
   return true;
@@ -1690,8 +1679,7 @@ displaced_step_prepare_throw (thread_info *tp)
   /* We have to displaced step one thread at a time, as we only have
      access to a single scratch space per inferior.  */
 
-  displaced_step_inferior_state *displaced
-    = get_displaced_stepping_state (tp->inf);
+  displaced_step_inferior_state *displaced = &tp->inf->displaced_step_state;
 
   if (displaced->step_thread != nullptr)
     {
@@ -1795,8 +1783,6 @@ displaced_step_prepare (thread_info *thread)
     }
   catch (const gdb_exception_error &ex)
     {
-      struct displaced_step_inferior_state *displaced_state;
-
       if (ex.error != MEMORY_ERROR
 	  && ex.error != NOT_SUPPORTED_ERROR)
 	throw;
@@ -1813,9 +1799,7 @@ displaced_step_prepare (thread_info *thread)
 	}
 
       /* Disable further displaced stepping attempts.  */
-      displaced_state
-	= get_displaced_stepping_state (thread->inf);
-      displaced_state->failed_before = 1;
+      thread->inf->displaced_step_state.failed_before = 1;
     }
 
   return prepared;
@@ -1857,8 +1841,8 @@ displaced_step_restore (struct displaced_step_inferior_state *displaced,
 static int
 displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
 {
-  struct displaced_step_inferior_state *displaced
-    = get_displaced_stepping_state (event_thread->inf);
+  displaced_step_inferior_state *displaced
+    = &event_thread->inf->displaced_step_state;
   int ret;
 
   /* Was this event for the thread we displaced?  */
@@ -3629,7 +3613,7 @@ prepare_for_detach (void)
   struct inferior *inf = current_inferior ();
   ptid_t pid_ptid = ptid_t (inf->pid);
 
-  displaced_step_inferior_state *displaced = get_displaced_stepping_state (inf);
+  displaced_step_inferior_state *displaced = &inf->displaced_step_state;
 
   /* Is any thread of this process displaced stepping?  If not,
      there's nothing else to do.  */
@@ -5310,7 +5294,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
 	  {
 	    displaced_step_inferior_state *displaced
-	      = get_displaced_stepping_state (parent_inf);
+	      = &parent_inf->displaced_step_state;
 
 	    if (displaced->step_thread != nullptr)
 	      displaced_step_restore (displaced, ecs->ws.value.related_pid);
