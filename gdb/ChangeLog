@@ -1,5 +1,10 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* infrun.c (infrun_inferior_execd): New function.
+	(_initialize_infrun): Attach inferior_execd observer.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* observable.h (inferior_execd): Declare new observable.
 	* observable.c (inferior_execd): Declare new observable.
 	* infrun.c (follow_exec): Notify inferior_execd observer.
