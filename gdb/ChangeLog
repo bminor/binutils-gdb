@@ -1,3 +1,9 @@
+2020-12-04  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/27003
+	* completer.c (completion_tracker::build_completion_result): Don't
+	access match_list[0][-1].
+
 2020-12-04  Tom Tromey  <tromey@adacore.com>
 
 	* linespec.c (struct linespec_token): Rename; remove typedef.

@@ -2253,9 +2253,11 @@ completion_tracker::build_completion_result (const char *text,
       /* If the tracker wants to, or we already have a space at the
 	 end of the match, tell readline to skip appending
 	 another.  */
+      char *match = match_list[0];
       bool completion_suppress_append
 	= (suppress_append_ws ()
-	   || match_list[0][strlen (match_list[0]) - 1] == ' ');
+	   || (match[0] != '\0'
+	       && match[strlen (match) - 1] == ' '));
 
       return completion_result (match_list, 1, completion_suppress_append);
     }
