@@ -1,5 +1,10 @@
 2020-12-04  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.reverse/insn-reverse-x86.c: Guard x86_64 assembly with #ifdef
+	__x86_64__.
+
+2020-12-04  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.reverse/insn-reverse.c (test_nr): New var.
 	(usage, parse_args): New function.
 	(main): Call parse_args.  Only run test for test_nr.
