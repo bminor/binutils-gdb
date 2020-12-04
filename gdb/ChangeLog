@@ -1,5 +1,10 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* infrun.c (displaced_step_fixup): Rename to...
+	(displaced_step_finish): ... this, update all callers.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* infrun.h (get_displaced_step_closure_by_addr): Rename to...
 	(get_displaced_step_copy_insn_closure_by_addr): ... this.
 	Update all users.

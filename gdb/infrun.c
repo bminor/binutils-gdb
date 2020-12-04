@@ -1457,7 +1457,7 @@ step_over_info_valid_p (void)
    place it in the displaced_step_request_queue.  Whenever a displaced
    step finishes, we pick the next thread in the queue and start a new
    displaced step operation on it.  See displaced_step_prepare and
-   displaced_step_fixup for details.  */
+   displaced_step_finish for details.  */
 
 /* Default destructor for displaced_step_copy_insn_closure.  */
 
@@ -1840,7 +1840,7 @@ displaced_step_restore (struct displaced_step_inferior_state *displaced,
    -1.  If the thread wasn't displaced stepping, return 0.  */
 
 static int
-displaced_step_fixup (thread_info *event_thread, enum gdb_signal signal)
+displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
 {
   displaced_step_inferior_state *displaced
     = &event_thread->inf->displaced_step_state;
@@ -2201,7 +2201,7 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
 
      Likewise if we're displaced stepping, otherwise a trap for a
      breakpoint in a signal handler might be confused with the
-     displaced step finishing.  We don't make the displaced_step_fixup
+     displaced step finishing.  We don't make the displaced_step_finish
      step distinguish the cases instead, because:
 
      - a backtrace while stopped in the signal handler would show the
@@ -4815,7 +4815,7 @@ stop_all_threads (void)
 		      t->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
 		      t->suspend.waitstatus_pending_p = 0;
 
-		      if (displaced_step_fixup (t, GDB_SIGNAL_0) < 0)
+		      if (displaced_step_finish (t, GDB_SIGNAL_0) < 0)
 			{
 			  /* Add it back to the step-over queue.  */
 			  infrun_debug_printf
@@ -4843,7 +4843,7 @@ stop_all_threads (void)
 		      sig = (event.ws.kind == TARGET_WAITKIND_STOPPED
 			     ? event.ws.value.sig : GDB_SIGNAL_0);
 
-		      if (displaced_step_fixup (t, sig) < 0)
+		      if (displaced_step_finish (t, sig) < 0)
 			{
 			  /* Add it back to the step-over queue.  */
 			  t->control.trap_expected = 0;
@@ -5313,7 +5313,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	       has been done.  Perform cleanup for parent process here.  Note
 	       that this operation also cleans up the child process for vfork,
 	       because their pages are shared.  */
-	    displaced_step_fixup (ecs->event_thread, GDB_SIGNAL_TRAP);
+	    displaced_step_finish (ecs->event_thread, GDB_SIGNAL_TRAP);
 	    /* Start a new step-over in another thread if there's one
 	       that needs it.  */
 	    start_step_over ();
@@ -5656,8 +5656,8 @@ resumed_thread_with_pending_status (struct thread_info *tp,
 static int
 finish_step_over (struct execution_control_state *ecs)
 {
-  displaced_step_fixup (ecs->event_thread,
-			ecs->event_thread->suspend.stop_signal);
+  displaced_step_finish (ecs->event_thread,
+			 ecs->event_thread->suspend.stop_signal);
 
   bool had_step_over_info = step_over_info_valid_p ();
 
