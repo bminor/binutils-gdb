@@ -1,5 +1,11 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* linux-tdep.c (get_linux_inferior_data): Add inferior
+	parameter.
+	(linux_vsyscall_range): Pass current inferior.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* infrun.c (displaced_step_prepare_throw): Change return type to
 	displaced_step_prepare_status.
 	(displaced_step_prepare): Likewise.

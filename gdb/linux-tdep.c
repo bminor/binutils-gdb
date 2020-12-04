@@ -217,13 +217,11 @@ invalidate_linux_cache_inf (struct inferior *inf)
    valid INFO pointer.  */
 
 static struct linux_info *
-get_linux_inferior_data (void)
+get_linux_inferior_data (inferior *inf)
 {
-  struct linux_info *info;
-  struct inferior *inf = current_inferior ();
+  linux_info *info = linux_inferior_data.get (inf);
 
-  info = linux_inferior_data.get (inf);
-  if (info == NULL)
+  if (info == nullptr)
     info = linux_inferior_data.emplace (inf);
 
   return info;
@@ -2407,7 +2405,7 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
 static int
 linux_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
 {
-  struct linux_info *info = get_linux_inferior_data ();
+  struct linux_info *info = get_linux_inferior_data (current_inferior ());
 
   if (info->vsyscall_range_p == 0)
     {
