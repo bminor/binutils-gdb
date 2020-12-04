@@ -1,5 +1,11 @@
 2020-12-04  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/26990
+	* gdb.arch/amd64-gs_base.exp: Handle -m32 where fs_base and gs_base
+	are unsupported.
+
+2020-12-04  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.reverse/insn-reverse.exp: Don't break inside gdb_test_multiple
 	clause.
 
