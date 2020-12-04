@@ -171,9 +171,9 @@ struct linux_gdbarch_data
   };
 
 static void *
-init_linux_gdbarch_data (struct gdbarch *gdbarch)
+init_linux_gdbarch_data (struct obstack *obstack)
 {
-  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct linux_gdbarch_data);
+  return obstack_zalloc<linux_gdbarch_data> (obstack);
 }
 
 static struct linux_gdbarch_data *
@@ -2676,7 +2676,7 @@ void
 _initialize_linux_tdep ()
 {
   linux_gdbarch_data_handle =
-    gdbarch_data_register_post_init (init_linux_gdbarch_data);
+    gdbarch_data_register_pre_init (init_linux_gdbarch_data);
 
   /* Observers used to invalidate the cache when needed.  */
   gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf);

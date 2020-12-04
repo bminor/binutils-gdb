@@ -1,5 +1,12 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* linux-tdep.c (init_linux_gdbarch_data): Change parameter to
+	obkstack.
+	(_initialize_linux_tdep): Register pre-init gdb data instead of
+	post-init.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* displaced-stepping.h (struct
 	displaced_step_copy_insn_closure): Adjust comments.
 	(struct displaced_step_inferior_state) <step_thread,
