@@ -5302,24 +5302,26 @@ handle_inferior_event (struct execution_control_state *ecs)
       {
 	struct regcache *regcache = get_thread_regcache (ecs->event_thread);
 	struct gdbarch *gdbarch = regcache->arch ();
+	inferior *parent_inf = find_inferior_ptid (ecs->target, ecs->ptid);
 
-	/* If checking displaced stepping is supported, and thread
-	   ecs->ptid is displaced stepping.  */
+	/* If this is a fork (child gets its own address space copy) and the
+	   displaced step buffer was in use at the time of the fork, restore
+	   displaced step buffer bytes in the child process.  */
+	if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
+	  {
+	    displaced_step_inferior_state *displaced
+	      = get_displaced_stepping_state (parent_inf);
+
+	    if (displaced->step_thread != nullptr)
+	      displaced_step_restore (displaced, ecs->ws.value.related_pid);
+	  }
+
+	/* If displaced stepping is supported, and thread ecs->ptid is
+	   displaced stepping.  */
 	if (displaced_step_in_progress_thread (ecs->event_thread))
 	  {
-	    struct inferior *parent_inf
-	      = find_inferior_ptid (ecs->target, ecs->ptid);
 	    struct regcache *child_regcache;
 	    CORE_ADDR parent_pc;
-
-	    if (ecs->ws.kind == TARGET_WAITKIND_FORKED)
-	      {
-		struct displaced_step_inferior_state *displaced
-		  = get_displaced_stepping_state (parent_inf);
-
-		/* Restore scratch pad for child process.  */
-		displaced_step_restore (displaced, ecs->ws.value.related_pid);
-	      }
 
 	    /* GDB has got TARGET_WAITKIND_FORKED or TARGET_WAITKIND_VFORKED,
 	       indicating that the displaced stepping of syscall instruction

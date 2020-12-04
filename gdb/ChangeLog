@@ -1,3 +1,9 @@
+2020-12-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.c (handle_inferior_event): Restore displaced step
+	buffer bytes in child process when handling fork, even if fork
+	happened in another thread than the displaced-stepping one.
+
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
 	* infrun.c (infrun_inferior_execd): New function.
