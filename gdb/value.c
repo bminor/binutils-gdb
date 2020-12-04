@@ -2397,7 +2397,7 @@ create_internal_function (const char *name,
   return ifn;
 }
 
-char *
+const char *
 value_internal_function_name (struct value *val)
 {
   struct internal_function *ifn;

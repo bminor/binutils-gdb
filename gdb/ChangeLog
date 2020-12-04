@@ -1,3 +1,8 @@
+2020-12-04  Tom Tromey  <tromey@adacore.com>
+
+	* value.c (value_internal_function_name): Make return type const.
+	* value.h (value_internal_function_name): Make return type const.
+
 2020-12-04  Luis Machado  <luis.machado@linaro.org>
 
 	* aarch64-tdep.c (submask, bit, bits): Remove.

@@ -1198,7 +1198,7 @@ struct value *call_internal_function (struct gdbarch *gdbarch,
 				      struct value *function,
 				      int argc, struct value **argv);
 
-char *value_internal_function_name (struct value *);
+const char *value_internal_function_name (struct value *);
 
 /* Build a value wrapping and representing WORKER.  The value takes ownership
    of the xmethod_worker object.  */
