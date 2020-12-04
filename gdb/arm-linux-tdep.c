@@ -946,7 +946,7 @@ arm_linux_software_single_step (struct regcache *regcache)
 static void
 arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 		       struct regcache *regs,
-		       arm_displaced_step_closure *dsc)
+		       arm_displaced_step_copy_insn_closure *dsc)
 {
   ULONGEST apparent_pc;
   int within_scratch;
@@ -970,7 +970,7 @@ arm_linux_cleanup_svc (struct gdbarch *gdbarch,
 
 static int
 arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
-		    arm_displaced_step_closure *dsc)
+		    arm_displaced_step_copy_insn_closure *dsc)
 {
   CORE_ADDR return_to = 0;
 
@@ -1056,7 +1056,7 @@ arm_linux_copy_svc (struct gdbarch *gdbarch, struct regcache *regs,
 static void
 cleanup_kernel_helper_return (struct gdbarch *gdbarch,
 			      struct regcache *regs,
-			      arm_displaced_step_closure *dsc)
+			      arm_displaced_step_copy_insn_closure *dsc)
 {
   displaced_write_reg (regs, dsc, ARM_LR_REGNUM, dsc->tmp[0], CANNOT_WRITE_PC);
   displaced_write_reg (regs, dsc, ARM_PC_REGNUM, dsc->tmp[0], BRANCH_WRITE_PC);
@@ -1065,7 +1065,7 @@ cleanup_kernel_helper_return (struct gdbarch *gdbarch,
 static void
 arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
 				CORE_ADDR to, struct regcache *regs,
-				arm_displaced_step_closure *dsc)
+				arm_displaced_step_copy_insn_closure *dsc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -1094,13 +1094,13 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
    the program has stepped into a Linux kernel helper routine (which must be
    handled as a special case).  */
 
-static displaced_step_closure_up
+static displaced_step_copy_insn_closure_up
 arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				    CORE_ADDR from, CORE_ADDR to,
 				    struct regcache *regs)
 {
-  std::unique_ptr<arm_displaced_step_closure> dsc
-    (new arm_displaced_step_closure);
+  std::unique_ptr<arm_displaced_step_copy_insn_closure> dsc
+    (new arm_displaced_step_copy_insn_closure);
 
   /* Detect when we enter an (inaccessible by GDB) Linux kernel helper, and
      stop at the return location.  */
@@ -1122,7 +1122,7 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
   arm_displaced_init_closure (gdbarch, from, to, dsc.get ());
 
   /* This is a work around for a problem with g++ 4.8.  */
-  return displaced_step_closure_up (dsc.release ());
+  return displaced_step_copy_insn_closure_up (dsc.release ());
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in

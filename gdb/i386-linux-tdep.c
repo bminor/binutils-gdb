@@ -789,29 +789,30 @@ i386_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
    PC should get relocated back to its vDSO address.  Hide the 'ret'
    instruction by 'nop' so that i386_displaced_step_fixup is not confused.
    
-   It is not fully correct as the bytes in struct displaced_step_closure will
-   not match the inferior code.  But we would need some new flag in
-   displaced_step_closure otherwise to keep the state that syscall is finishing
-   for the later i386_displaced_step_fixup execution as the syscall execution
-   is already no longer detectable there.  The new flag field would mean
-   i386-linux-tdep.c needs to wrap all the displacement methods of i386-tdep.c
-   which does not seem worth it.  The same effect is achieved by patching that
-   'nop' instruction there instead.  */
+   It is not fully correct as the bytes in struct
+   displaced_step_copy_insn_closure will not match the inferior code.  But we
+   would need some new flag in displaced_step_copy_insn_closure otherwise to
+   keep the state that syscall is finishing for the later
+   i386_displaced_step_fixup execution as the syscall execution is already no
+   longer detectable there.  The new flag field would mean i386-linux-tdep.c
+   needs to wrap all the displacement methods of i386-tdep.c which does not seem
+   worth it.  The same effect is achieved by patching that 'nop' instruction
+   there instead.  */
 
-static displaced_step_closure_up
+static displaced_step_copy_insn_closure_up
 i386_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				     CORE_ADDR from, CORE_ADDR to,
 				     struct regcache *regs)
 {
-  displaced_step_closure_up closure_
+  displaced_step_copy_insn_closure_up closure_
     =  i386_displaced_step_copy_insn (gdbarch, from, to, regs);
 
   if (i386_linux_get_syscall_number_from_regcache (regs) != -1)
     {
       /* The closure returned by i386_displaced_step_copy_insn is simply a
 	 buffer with a copy of the instruction. */
-      i386_displaced_step_closure *closure
-	= (i386_displaced_step_closure *) closure_.get ();
+      i386_displaced_step_copy_insn_closure *closure
+	= (i386_displaced_step_copy_insn_closure *) closure_.get ();
 
       /* Fake nop.  */
       closure->buf[0] = 0x90;

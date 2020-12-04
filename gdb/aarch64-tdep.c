@@ -2899,7 +2899,8 @@ aarch64_software_single_step (struct regcache *regcache)
   return next_pcs;
 }
 
-struct aarch64_displaced_step_closure : public displaced_step_closure
+struct aarch64_displaced_step_copy_insn_closure
+  : public displaced_step_copy_insn_closure
 {
   /* It is true when condition instruction, such as B.CON, TBZ, etc,
      is being displaced stepping.  */
@@ -2925,7 +2926,7 @@ struct aarch64_displaced_step_data
   /* Registers when doing displaced stepping.  */
   struct regcache *regs;
 
-  aarch64_displaced_step_closure *dsc;
+  aarch64_displaced_step_copy_insn_closure *dsc;
 };
 
 /* Implementation of aarch64_insn_visitor method "b".  */
@@ -3134,7 +3135,7 @@ static const struct aarch64_insn_visitor visitor =
 
 /* Implement the "displaced_step_copy_insn" gdbarch method.  */
 
-displaced_step_closure_up
+displaced_step_copy_insn_closure_up
 aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				  CORE_ADDR from, CORE_ADDR to,
 				  struct regcache *regs)
@@ -3154,8 +3155,8 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
       return NULL;
     }
 
-  std::unique_ptr<aarch64_displaced_step_closure> dsc
-    (new aarch64_displaced_step_closure);
+  std::unique_ptr<aarch64_displaced_step_copy_insn_closure> dsc
+    (new aarch64_displaced_step_copy_insn_closure);
   dsd.base.insn_addr = from;
   dsd.new_addr = to;
   dsd.regs = regs;
@@ -3187,18 +3188,19 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
     }
 
   /* This is a work around for a problem with g++ 4.8.  */
-  return displaced_step_closure_up (dsc.release ());
+  return displaced_step_copy_insn_closure_up (dsc.release ());
 }
 
 /* Implement the "displaced_step_fixup" gdbarch method.  */
 
 void
 aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
-			      struct displaced_step_closure *dsc_,
+			      struct displaced_step_copy_insn_closure *dsc_,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs)
 {
-  aarch64_displaced_step_closure *dsc = (aarch64_displaced_step_closure *) dsc_;
+  aarch64_displaced_step_copy_insn_closure *dsc
+    = (aarch64_displaced_step_copy_insn_closure *) dsc_;
 
   ULONGEST pc;
 

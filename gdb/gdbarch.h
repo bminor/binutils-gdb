@@ -1030,8 +1030,8 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
 
 extern bool gdbarch_displaced_step_copy_insn_p (struct gdbarch *gdbarch);
 
-typedef displaced_step_closure_up (gdbarch_displaced_step_copy_insn_ftype) (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
-extern displaced_step_closure_up gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+typedef displaced_step_copy_insn_closure_up (gdbarch_displaced_step_copy_insn_ftype) (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+extern displaced_step_copy_insn_closure_up gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
 extern void set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, gdbarch_displaced_step_copy_insn_ftype *displaced_step_copy_insn);
 
 /* Return true if GDB should use hardware single-stepping to execute a displaced
@@ -1066,8 +1066,8 @@ extern void set_gdbarch_displaced_step_hw_singlestep (struct gdbarch *gdbarch, g
 
 extern bool gdbarch_displaced_step_fixup_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_displaced_step_fixup_ftype) (struct gdbarch *gdbarch, struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
-extern void gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+typedef void (gdbarch_displaced_step_fixup_ftype) (struct gdbarch *gdbarch, struct displaced_step_copy_insn_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+extern void gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displaced_step_copy_insn_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
 extern void set_gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, gdbarch_displaced_step_fixup_ftype *displaced_step_fixup);
 
 /* Return the address of an appropriate place to put displaced

@@ -1103,9 +1103,10 @@ struct amd64_insn
   gdb_byte *raw_insn;
 };
 
-struct amd64_displaced_step_closure : public displaced_step_closure
+struct amd64_displaced_step_copy_insn_closure
+  : public displaced_step_copy_insn_closure
 {
-  amd64_displaced_step_closure (int insn_buf_len)
+  amd64_displaced_step_copy_insn_closure (int insn_buf_len)
   : insn_buf (insn_buf_len, 0)
   {}
 
@@ -1386,7 +1387,8 @@ amd64_get_insn_details (gdb_byte *insn, struct amd64_insn *details)
    We set base = pc + insn_length so we can leave disp unchanged.  */
 
 static void
-fixup_riprel (struct gdbarch *gdbarch, amd64_displaced_step_closure *dsc,
+fixup_riprel (struct gdbarch *gdbarch,
+	      amd64_displaced_step_copy_insn_closure *dsc,
 	      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   const struct amd64_insn *insn_details = &dsc->insn_details;
@@ -1447,7 +1449,7 @@ fixup_riprel (struct gdbarch *gdbarch, amd64_displaced_step_closure *dsc,
 
 static void
 fixup_displaced_copy (struct gdbarch *gdbarch,
-		      amd64_displaced_step_closure *dsc,
+		      amd64_displaced_step_copy_insn_closure *dsc,
 		      CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   const struct amd64_insn *details = &dsc->insn_details;
@@ -1465,7 +1467,7 @@ fixup_displaced_copy (struct gdbarch *gdbarch,
     }
 }
 
-displaced_step_closure_up
+displaced_step_copy_insn_closure_up
 amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				CORE_ADDR from, CORE_ADDR to,
 				struct regcache *regs)
@@ -1474,8 +1476,8 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   /* Extra space for sentinels so fixup_{riprel,displaced_copy} don't have to
      continually watch for running off the end of the buffer.  */
   int fixup_sentinel_space = len;
-  std::unique_ptr<amd64_displaced_step_closure> dsc
-    (new amd64_displaced_step_closure (len + fixup_sentinel_space));
+  std::unique_ptr<amd64_displaced_step_copy_insn_closure> dsc
+    (new amd64_displaced_step_copy_insn_closure (len + fixup_sentinel_space));
   gdb_byte *buf = &dsc->insn_buf[0];
   struct amd64_insn *details = &dsc->insn_details;
 
@@ -1509,7 +1511,7 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
-  return displaced_step_closure_up (dsc.release ());
+  return displaced_step_copy_insn_closure_up (dsc.release ());
 }
 
 static int
@@ -1671,11 +1673,12 @@ amd64_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 void
 amd64_displaced_step_fixup (struct gdbarch *gdbarch,
-			    struct displaced_step_closure *dsc_,
+			    struct displaced_step_copy_insn_closure *dsc_,
 			    CORE_ADDR from, CORE_ADDR to,
 			    struct regcache *regs)
 {
-  amd64_displaced_step_closure *dsc = (amd64_displaced_step_closure *) dsc_;
+  amd64_displaced_step_copy_insn_closure *dsc
+    = (amd64_displaced_step_copy_insn_closure *) dsc_;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* The offset we applied to the instruction's address.  */
   ULONGEST insn_offset = to - from;

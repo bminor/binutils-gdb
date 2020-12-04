@@ -421,18 +421,19 @@ is_non_branch_ril (gdb_byte *insn)
   return 0;
 }
 
-typedef buf_displaced_step_closure s390_displaced_step_closure;
+typedef buf_displaced_step_copy_insn_closure
+  s390_displaced_step_copy_insn_closure;
 
 /* Implementation of gdbarch_displaced_step_copy_insn.  */
 
-static displaced_step_closure_up
+static displaced_step_copy_insn_closure_up
 s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       CORE_ADDR from, CORE_ADDR to,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  std::unique_ptr<s390_displaced_step_closure> closure
-    (new s390_displaced_step_closure (len));
+  std::unique_ptr<s390_displaced_step_copy_insn_closure> closure
+    (new s390_displaced_step_copy_insn_closure (len));
   gdb_byte *buf = closure->buf.data ();
 
   read_memory (from, buf, len);
@@ -470,7 +471,7 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			  displaced_step_dump_bytes (buf, len).c_str ());
 
   /* This is a work around for a problem with g++ 4.8.  */
-  return displaced_step_closure_up (closure.release ());
+  return displaced_step_copy_insn_closure_up (closure.release ());
 }
 
 /* Fix up the state of registers and memory after having single-stepped
@@ -478,13 +479,13 @@ s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
 static void
 s390_displaced_step_fixup (struct gdbarch *gdbarch,
-			   struct displaced_step_closure *closure_,
+			   displaced_step_copy_insn_closure *closure_,
 			   CORE_ADDR from, CORE_ADDR to,
 			   struct regcache *regs)
 {
   /* Our closure is a copy of the instruction.  */
-  s390_displaced_step_closure *closure
-    = (s390_displaced_step_closure *) closure_;
+  s390_displaced_step_copy_insn_closure *closure
+    = (s390_displaced_step_copy_insn_closure *) closure_;
   gdb_byte *insn = closure->buf.data ();
   static int s390_instrlen[] = { 2, 4, 4, 6 };
   int insnlen = s390_instrlen[insn[0] >> 6];

@@ -851,18 +851,19 @@ typedef BP_MANIPULATION_ENDIAN (little_breakpoint, big_breakpoint)
 					 || (insn & STORE_CONDITIONAL_MASK) == STHCX_INSTRUCTION \
 					 || (insn & STORE_CONDITIONAL_MASK) == STQCX_INSTRUCTION)
 
-typedef buf_displaced_step_closure ppc_displaced_step_closure;
+typedef buf_displaced_step_copy_insn_closure
+  ppc_displaced_step_copy_insn_closure;
 
 /* We can't displaced step atomic sequences.  */
 
-static displaced_step_closure_up
+static displaced_step_copy_insn_closure_up
 ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  std::unique_ptr<ppc_displaced_step_closure> closure
-    (new ppc_displaced_step_closure (len));
+  std::unique_ptr<ppc_displaced_step_copy_insn_closure> closure
+    (new ppc_displaced_step_copy_insn_closure (len));
   gdb_byte *buf = closure->buf.data ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int insn;
@@ -887,20 +888,21 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			  displaced_step_dump_bytes (buf, len).c_str ());;
 
   /* This is a work around for a problem with g++ 4.8.  */
-  return displaced_step_closure_up (closure.release ());
+  return displaced_step_copy_insn_closure_up (closure.release ());
 }
 
 /* Fix up the state of registers and memory after having single-stepped
    a displaced instruction.  */
 static void
 ppc_displaced_step_fixup (struct gdbarch *gdbarch,
-			  struct displaced_step_closure *closure_,
+			  struct displaced_step_copy_insn_closure *closure_,
 			  CORE_ADDR from, CORE_ADDR to,
 			  struct regcache *regs)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   /* Our closure is a copy of the instruction.  */
-  ppc_displaced_step_closure *closure = (ppc_displaced_step_closure *) closure_;
+  ppc_displaced_step_copy_insn_closure *closure
+    = (ppc_displaced_step_copy_insn_closure *) closure_;
   ULONGEST insn  = extract_unsigned_integer (closure->buf.data (),
 					     PPC_INSN_SIZE, byte_order);
   ULONGEST opcode = 0;

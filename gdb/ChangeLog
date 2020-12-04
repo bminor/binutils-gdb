@@ -1,5 +1,42 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* infrun.h (get_displaced_step_closure_by_addr): Rename to...
+	(get_displaced_step_copy_insn_closure_by_addr): ... this.
+	Update all users.
+	(displaced_step_closure): Rename to...
+	(displaced_step_copy_insn_closure): ... this.  Update all users.
+	(displaced_step_closure_up): Rename to...
+	(displaced_step_copy_insn_closure_up). ... this.  Update all
+	users.
+	(buf_displaced_step_closure): Rename to...
+	(buf_displaced_step_copy_insn_closure): ... this.  Update all
+	users.
+	* infrun.c (get_displaced_step_closure_by_addr): Rename to...
+	(get_displaced_step_copy_insn_closure_by_addr): ... this.
+	Update all users.
+	* aarch64-tdep.c (aarch64_displaced_step_closure): Rename to...
+	(aarch64_displaced_step_copy_insn_closure): ... this.  Update
+	all users.
+	* amd64-tdep.c (amd64_displaced_step_closure): Rename to...
+	(amd64_displaced_step_copy_insn_closure): ... this.  Update all
+	users.
+	* arm-tdep.h (arm_displaced_step_closure): Rename to...
+	(arm_displaced_step_copy_insn_closure): ... this.  Update all
+	users.
+	* i386-tdep.h (i386_displaced_step_closure): Rename to...
+	(i386_displaced_step_copy_insn_closure): ... this.  Update all
+	users.
+	* rs6000-tdep.c (ppc_displaced_step_closure): Rename to...
+	(ppc_displaced_step_copy_insn_closure): ... this.  Update all
+	users.
+	* s390-tdep.c (s390_displaced_step_closure): Rename to...
+	(s390_displaced_step_copy_insn_closure): ... this.  Update all
+	users.
+	* gdbarch.h: Re-generate.
+	* gdbarch.c: Re-generate.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbthread.h (thread_step_over_chain_enqueue): Rename to...
 	(global_thread_step_over_chain_enqueue): ... this.  Update all
 	users.

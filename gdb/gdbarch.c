@@ -3969,7 +3969,7 @@ gdbarch_displaced_step_copy_insn_p (struct gdbarch *gdbarch)
   return gdbarch->displaced_step_copy_insn != NULL;
 }
 
-displaced_step_closure_up
+displaced_step_copy_insn_closure_up
 gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   gdb_assert (gdbarch != NULL);
@@ -4011,7 +4011,7 @@ gdbarch_displaced_step_fixup_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
+gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displaced_step_copy_insn_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->displaced_step_fixup != NULL);

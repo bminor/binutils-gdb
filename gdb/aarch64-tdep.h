@@ -107,13 +107,13 @@ const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p);
 extern int aarch64_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);
 
-displaced_step_closure_up
+displaced_step_copy_insn_closure_up
   aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				    CORE_ADDR from, CORE_ADDR to,
 				    struct regcache *regs);
 
 void aarch64_displaced_step_fixup (struct gdbarch *gdbarch,
-				   struct displaced_step_closure *dsc,
+				   displaced_step_copy_insn_closure *dsc,
 				   CORE_ADDR from, CORE_ADDR to,
 				   struct regcache *regs);
 

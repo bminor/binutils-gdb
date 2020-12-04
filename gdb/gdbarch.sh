@@ -783,7 +783,7 @@ V;ULONGEST;max_insn_length;;;0;0
 # If the instruction cannot execute out of line, return NULL.  The
 # core falls back to stepping past the instruction in-line instead in
 # that case.
-M;displaced_step_closure_up;displaced_step_copy_insn;CORE_ADDR from, CORE_ADDR to, struct regcache *regs;from, to, regs
+M;displaced_step_copy_insn_closure_up;displaced_step_copy_insn;CORE_ADDR from, CORE_ADDR to, struct regcache *regs;from, to, regs
 
 # Return true if GDB should use hardware single-stepping to execute a displaced
 # step instruction.  If false, GDB will simply restart execution at the
@@ -811,7 +811,7 @@ m;bool;displaced_step_hw_singlestep;void;;;default_displaced_step_hw_singlestep;
 #
 # For a general explanation of displaced stepping and how GDB uses it,
 # see the comments in infrun.c.
-M;void;displaced_step_fixup;struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs;closure, from, to, regs;;NULL
+M;void;displaced_step_fixup;struct displaced_step_copy_insn_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs;closure, from, to, regs;;NULL
 
 # Return the address of an appropriate place to put displaced
 # instructions while we step over them.  There need only be one such

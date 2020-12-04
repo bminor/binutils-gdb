@@ -239,8 +239,8 @@ extern void clear_exit_convenience_vars (void);
 /* Dump LEN bytes at BUF in hex to a string and return it.  */
 extern std::string displaced_step_dump_bytes (const gdb_byte *buf, size_t len);
 
-extern struct displaced_step_closure *get_displaced_step_closure_by_addr
-    (CORE_ADDR addr);
+extern struct displaced_step_copy_insn_closure *
+  get_displaced_step_copy_insn_closure_by_addr (CORE_ADDR addr);
 
 extern void update_observer_mode (void);
 
@@ -282,18 +282,19 @@ extern void all_uis_on_sync_execution_starting (void);
 
 /* Base class for displaced stepping closures (the arch-specific data).  */
 
-struct displaced_step_closure
+struct displaced_step_copy_insn_closure
 {
-  virtual ~displaced_step_closure () = 0;
+  virtual ~displaced_step_copy_insn_closure () = 0;
 };
 
-using displaced_step_closure_up = std::unique_ptr<displaced_step_closure>;
+using displaced_step_copy_insn_closure_up
+  = std::unique_ptr<displaced_step_copy_insn_closure>;
 
 /* A simple displaced step closure that contains only a byte buffer.  */
 
-struct buf_displaced_step_closure : displaced_step_closure
+struct buf_displaced_step_copy_insn_closure : displaced_step_copy_insn_closure
 {
-  buf_displaced_step_closure (int buf_size)
+  buf_displaced_step_copy_insn_closure (int buf_size)
   : buf (buf_size)
   {}
 
@@ -334,7 +335,7 @@ struct displaced_step_inferior_state
 
   /* The closure provided gdbarch_displaced_step_copy_insn, to be used
      for post-step cleanup.  */
-  displaced_step_closure_up step_closure;
+  displaced_step_copy_insn_closure_up step_closure;
 
   /* The address of the original instruction, and the copy we
      made.  */
