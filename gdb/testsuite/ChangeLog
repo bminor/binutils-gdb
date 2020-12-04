@@ -1,5 +1,10 @@
 2020-12-04  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.reverse/insn-reverse.exp: Don't break inside gdb_test_multiple
+	clause.
+
+2020-12-04  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.reverse/insn-reverse.exp: Fix count handling.
 
 2020-12-04  Tom de Vries  <tdevries@suse.de>

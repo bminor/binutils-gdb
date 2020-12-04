@@ -79,23 +79,27 @@ proc test { func testcase_nr } {
 	set count 0
 	set insn_addr ""
 	for {} {$count < 500} {incr count} {
+	    set prev_insn_addr $insn_addr
+	    set insn_addr ""
 	    gdb_test_multiple "x/i \$pc" "" {
 		-re ".* ($hex) <.*>:\[ \t\]*(.*)\r\n$gdb_prompt $" {
-		    set prev_insn_addr $insn_addr
 		    set insn_addr $expect_out(1,string)
-
-		    if [expr {$last_insn == $insn_addr}] {
-			break
-		    }
-
-		    if { $prev_insn_addr == $insn_addr } {
-			# Failed to make progress, might have run into SIGILL.
-			unsupported "no progress at: $expect_out(2,string)"
-			break
-		    }
-
 		    set insn_array($count) $expect_out(2,string)
 		}
+	    }
+
+	    if { $insn_addr == "" } {
+		break
+	    }
+
+	    if { $last_insn == $insn_addr } {
+		break
+	    }
+
+	    if { $prev_insn_addr == $insn_addr } {
+		# Failed to make progress, might have run into SIGILL.
+		unsupported "no progress at: $expect_out(2,string)"
+		break
 	    }
 
 	    set pre_regs($count) [capture_command_output "info all-registers" ""]
