@@ -1,3 +1,8 @@
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/dwarf.exp (declare_labels): Use name as text if text is
+	not provided.
+
 2020-12-04  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/26990

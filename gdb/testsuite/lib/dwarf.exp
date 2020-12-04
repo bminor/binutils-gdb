@@ -863,12 +863,12 @@ namespace eval Dwarf {
 	    set name [lindex $arg 0]
 	    set text [lindex $arg 1]
 
-	    upvar $name label_var
-	    if {$text == ""} {
-		set label_var [new_label]
-	    } else {
-		set label_var [new_label $text]
+	    if { $text == "" } {
+		set text $name
 	    }
+
+	    upvar $name label_var
+	    set label_var [new_label $text]
 
 	    proc ${name}: {args} [format {
 		define_label %s
