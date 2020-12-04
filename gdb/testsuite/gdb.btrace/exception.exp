@@ -22,8 +22,11 @@ if { [skip_btrace_tests] } {
     return -1
 }
 
+# We expect a specific function call history.  This gets messed up with
+# PIE on 32-bit.
 standard_testfile exception.cc
-if [prepare_for_testing "failed to prepare" $testfile $srcfile {c++ debug}] {
+if [prepare_for_testing "failed to prepare" $testfile $srcfile \
+	{nopie c++ debug}] {
     return -1
 }
 
