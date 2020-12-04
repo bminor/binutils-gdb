@@ -1557,6 +1557,10 @@ _initialize_solib ()
   solib_data = gdbarch_data_register_pre_init (solib_init);
 
   gdb::observers::free_objfile.attach (remove_user_added_objfile);
+  gdb::observers::inferior_execd.attach ([] (inferior *inf)
+    {
+      solib_create_inferior_hook (0);
+    });
 
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   _("Load shared object library symbols for files matching REGEXP."));

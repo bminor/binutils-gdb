@@ -89,6 +89,9 @@ extern observable<> executable_changed;
    information on the inferior has been printed.  */
 extern observable<inferior */* inferior */> inferior_created;
 
+/* The inferior INF has exec'ed a new executable file.  */
+extern observable<struct inferior */* inf */> inferior_execd;
+
 /* The status of process record for inferior inferior in gdb has
    changed.  The process record is started if STARTED is true, and
    the process record is stopped if STARTED is false.

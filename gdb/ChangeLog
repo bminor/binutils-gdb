@@ -1,3 +1,13 @@
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* observable.h (inferior_execd): Declare new observable.
+	* observable.c (inferior_execd): Declare new observable.
+	* infrun.c (follow_exec): Notify inferior_execd observer.
+	* jit.c (jit_inferior_created_hook): Make static.
+	(_initialize_jit): Register inferior_execd observer.
+	* jit.h (jit_inferior_created_hook): Remove declaration.
+	* solib.c (_initialize_solib): Register inferior_execd observer.
+
 2020-12-04  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/27003

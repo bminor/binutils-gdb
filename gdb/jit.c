@@ -49,6 +49,7 @@ static const char jit_break_name[] = "__jit_debug_register_code";
 
 static const char jit_descriptor_name[] = "__jit_debug_descriptor";
 
+static void jit_inferior_created_hook (inferior *inf);
 static void jit_inferior_exit_hook (struct inferior *inf);
 
 /* An unwinder is registered for every gdbarch.  This key is used to
@@ -1230,9 +1231,12 @@ jit_inferior_init (inferior *inf)
     }
 }
 
-/* See jit.h.  */
+/* Looks for the descriptor and registration symbols and breakpoints
+   the registration function.  If it finds both, it registers all the
+   already JITed code.  If it has already found the symbols, then it
+   doesn't try again.  */
 
-void
+static void
 jit_inferior_created_hook (inferior *inf)
 {
   jit_inferior_init (inf);
@@ -1337,6 +1341,7 @@ _initialize_jit ()
 			     &setdebuglist, &showdebuglist);
 
   gdb::observers::inferior_created.attach (jit_inferior_created_hook);
+  gdb::observers::inferior_execd.attach (jit_inferior_created_hook);
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook);
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted);
 

@@ -1222,9 +1222,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
      registers.  */
   target_find_description ();
 
-  solib_create_inferior_hook (0);
-
-  jit_inferior_created_hook (inf);
+  gdb::observers::inferior_execd.notify (inf);
 
   breakpoint_re_set ();
 

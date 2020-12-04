@@ -103,13 +103,6 @@ struct jited_objfile_data
   CORE_ADDR addr;
 };
 
-/* Looks for the descriptor and registration symbols and breakpoints
-   the registration function.  If it finds both, it registers all the
-   already JITed code.  If it has already found the symbols, then it
-   doesn't try again.  */
-
-extern void jit_inferior_created_hook (inferior *inf);
-
 /* Re-establish the jit breakpoint(s).  */
 
 extern void jit_breakpoint_re_set (void);
