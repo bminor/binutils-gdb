@@ -19,6 +19,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "displaced-stepping.h"
 #include "infrun.h"
 #include <ctype.h>
 #include "symtab.h"
@@ -1650,11 +1651,13 @@ displaced_step_dump_bytes (const gdb_byte *buf, size_t len)
    Comments in the code for 'random signals' in handle_inferior_event
    explain how we handle this case instead.
 
-   Returns 1 if preparing was successful -- this thread is going to be
-   stepped now; 0 if displaced stepping this thread got queued; or -1
-   if this instruction can't be displaced stepped.  */
+   Returns DISPLACED_STEP_PREPARE_STATUS_OK if preparing was successful -- this
+   thread is going to be stepped now; DISPLACED_STEP_PREPARE_STATUS_UNAVAILABLE
+   if displaced stepping this thread got queued; or
+   DISPLACED_STEP_PREPARE_STATUS_CANT if this instruction can't be displaced
+   stepped.  */
 
-static int
+static displaced_step_prepare_status
 displaced_step_prepare_throw (thread_info *tp)
 {
   regcache *regcache = get_thread_regcache (tp);
@@ -1691,7 +1694,7 @@ displaced_step_prepare_throw (thread_info *tp)
 			      target_pid_to_str (tp->ptid).c_str ());
 
       global_thread_step_over_chain_enqueue (tp);
-      return 0;
+      return DISPLACED_STEP_PREPARE_STATUS_UNAVAILABLE;
     }
   else
     displaced_debug_printf ("stepping %s now",
@@ -1722,7 +1725,7 @@ displaced_step_prepare_throw (thread_info *tp)
       displaced_debug_printf ("breakpoint set in scratch pad.  "
 			      "Stepping over breakpoint in-line instead.");
 
-      return -1;
+      return DISPLACED_STEP_PREPARE_STATUS_CANT;
     }
 
   /* Save the original contents of the copy area.  */
@@ -1746,7 +1749,7 @@ displaced_step_prepare_throw (thread_info *tp)
       /* The architecture doesn't know how or want to displaced step
 	 this instruction or instruction sequence.  Fallback to
 	 stepping over the breakpoint in-line.  */
-      return -1;
+      return DISPLACED_STEP_PREPARE_STATUS_CANT;
     }
 
   /* Save the information we need to fix things up if the step
@@ -1767,20 +1770,21 @@ displaced_step_prepare_throw (thread_info *tp)
 
   displaced_debug_printf ("displaced pc to %s", paddress (gdbarch, copy));
 
-  return 1;
+  return DISPLACED_STEP_PREPARE_STATUS_OK;
 }
 
 /* Wrapper for displaced_step_prepare_throw that disabled further
    attempts at displaced stepping if we get a memory error.  */
 
-static int
+static displaced_step_prepare_status
 displaced_step_prepare (thread_info *thread)
 {
-  int prepared = -1;
+  displaced_step_prepare_status status
+    = DISPLACED_STEP_PREPARE_STATUS_CANT;
 
   try
     {
-      prepared = displaced_step_prepare_throw (thread);
+      status = displaced_step_prepare_throw (thread);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1803,7 +1807,7 @@ displaced_step_prepare (thread_info *thread)
       thread->inf->displaced_step_state.failed_before = 1;
     }
 
-  return prepared;
+  return status;
 }
 
 static void
@@ -1833,22 +1837,24 @@ displaced_step_restore (struct displaced_step_inferior_state *displaced,
 				    displaced->step_copy));
 }
 
-/* If we displaced stepped an instruction successfully, adjust
-   registers and memory to yield the same effect the instruction would
-   have had if we had executed it at its original address, and return
-   1.  If the instruction didn't complete, relocate the PC and return
-   -1.  If the thread wasn't displaced stepping, return 0.  */
+/* If we displaced stepped an instruction successfully, adjust registers and
+   memory to yield the same effect the instruction would have had if we had
+   executed it at its original address, and return
+   DISPLACED_STEP_FINISH_STATUS_OK.  If the instruction didn't complete,
+   relocate the PC and return DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED.
 
-static int
+   If the thread wasn't displaced stepping, return
+   DISPLACED_STEP_FINISH_STATUS_OK as well.  */
+
+static displaced_step_finish_status
 displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
 {
   displaced_step_inferior_state *displaced
     = &event_thread->inf->displaced_step_state;
-  int ret;
 
   /* Was this event for the thread we displaced?  */
   if (displaced->step_thread != event_thread)
-    return 0;
+    return DISPLACED_STEP_FINISH_STATUS_OK;
 
   /* Fixup may need to read memory/registers.  Switch to the thread
      that we're fixing up.  Also, target_stopped_by_watchpoint checks
@@ -1872,7 +1878,8 @@ displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
 				    displaced->step_original,
 				    displaced->step_copy,
 				    get_thread_regcache (displaced->step_thread));
-      ret = 1;
+
+      return DISPLACED_STEP_FINISH_STATUS_OK;
     }
   else
     {
@@ -1883,10 +1890,9 @@ displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
 
       pc = displaced->step_original + (pc - displaced->step_copy);
       regcache_write_pc (regcache, pc);
-      ret = -1;
-    }
 
-  return ret;
+      return DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED;
+    }
 }
 
 /* Data to be passed around while handling an event.  This data is
@@ -2410,16 +2416,17 @@ resume_1 (enum gdb_signal sig)
       && sig == GDB_SIGNAL_0
       && !current_inferior ()->waiting_for_vfork_done)
     {
-      int prepared = displaced_step_prepare (tp);
+      displaced_step_prepare_status prepare_status
+	= displaced_step_prepare (tp);
 
-      if (prepared == 0)
+      if (prepare_status == DISPLACED_STEP_PREPARE_STATUS_UNAVAILABLE)
 	{
 	  infrun_debug_printf ("Got placed in step-over queue");
 
 	  tp->control.trap_expected = 0;
 	  return;
 	}
-      else if (prepared < 0)
+      else if (prepare_status == DISPLACED_STEP_PREPARE_STATUS_CANT)
 	{
 	  /* Fallback to stepping over the breakpoint in-line.  */
 
@@ -2433,7 +2440,7 @@ resume_1 (enum gdb_signal sig)
 
 	  insert_breakpoints ();
 	}
-      else if (prepared > 0)
+      else if (prepare_status == DISPLACED_STEP_PREPARE_STATUS_OK)
 	{
 	  /* Update pc to reflect the new address from which we will
 	     execute instructions due to displaced stepping.  */
@@ -2441,6 +2448,9 @@ resume_1 (enum gdb_signal sig)
 
 	  step = gdbarch_displaced_step_hw_singlestep (gdbarch);
 	}
+      else
+	gdb_assert_not_reached (_("Invalid displaced_step_prepare_status "
+				  "value."));
     }
 
   /* Do we need to do it the hard way, w/temp breakpoints?  */
@@ -4815,7 +4825,8 @@ stop_all_threads (void)
 		      t->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
 		      t->suspend.waitstatus_pending_p = 0;
 
-		      if (displaced_step_finish (t, GDB_SIGNAL_0) < 0)
+		      if (displaced_step_finish (t, GDB_SIGNAL_0)
+			  == DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED)
 			{
 			  /* Add it back to the step-over queue.  */
 			  infrun_debug_printf
@@ -4843,7 +4854,8 @@ stop_all_threads (void)
 		      sig = (event.ws.kind == TARGET_WAITKIND_STOPPED
 			     ? event.ws.value.sig : GDB_SIGNAL_0);
 
-		      if (displaced_step_finish (t, sig) < 0)
+		      if (displaced_step_finish (t, sig)
+			  == DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED)
 			{
 			  /* Add it back to the step-over queue.  */
 			  t->control.trap_expected = 0;

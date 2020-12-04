@@ -1,5 +1,16 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* infrun.c (displaced_step_prepare_throw): Change return type to
+	displaced_step_prepare_status.
+	(displaced_step_prepare): Likewise.
+	(displaced_step_finish): Change return type to
+	displaced_step_finish_status.
+	(resume_1): Adjust.
+	(stop_all_threads): Adjust.
+	* displaced-stepping.h: New file.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* infrun.c (displaced_step_fixup): Rename to...
 	(displaced_step_finish): ... this, update all callers.
 
