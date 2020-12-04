@@ -93,13 +93,23 @@ gdb_test "up" "#2\[^\r\n\]*main \\(\\) at tailcall.c:37\r\n.*" "up to main"
 gdb_test "down" "#1\[^\r\n\]*foo \\(\\) at tailcall.c:29\r\n.*" "down to foo"
 
 # test stepping into and out of tailcalls.
-gdb_test "finish" "\[^\r\n\]*main \\(\\) at tailcall.c:38\r\n.*"
-gdb_test "reverse-step" "\[^\r\n\]*bar \\(\\) at tailcall.c:24\r\n.*"
-gdb_test "reverse-finish" "\[^\r\n\]*foo \\(\\) at tailcall.c:29\r\n.*"
-gdb_test "reverse-step" "\[^\r\n\]*main \\(\\) at tailcall.c:37\r\n.*"
-gdb_test "next" "\[^\r\n\]*38.*"
-gdb_test "reverse-next" "\[^\r\n\]*main \\(\\) at tailcall.c:37\r\n.*"
-gdb_test "step" "\[^\r\n\]*foo \\(\\) at tailcall.c:29\r\n.*"
-gdb_test "finish" "\[^\r\n\]*main \\(\\) at tailcall.c:38\r\n.*"
-gdb_test "reverse-step" "\[^\r\n\]*bar \\(\\) at tailcall.c:24\r\n.*"
-gdb_test "finish" "\[^\r\n\]*main \\(\\) at tailcall.c:38\r\n.*"
+gdb_test "finish" "\[^\r\n\]*main \\(\\) at tailcall.c:38\r\n.*" \
+    "finish.1"
+gdb_test "reverse-step" "\[^\r\n\]*bar \\(\\) at tailcall.c:24\r\n.*" \
+    "reverse-step.1"
+gdb_test "reverse-finish" "\[^\r\n\]*foo \\(\\) at tailcall.c:29\r\n.*" \
+    "reverse-finish.1"
+gdb_test "reverse-step" "\[^\r\n\]*main \\(\\) at tailcall.c:37\r\n.*" \
+    "reverse-step.2"
+gdb_test "next" "\[^\r\n\]*38.*" \
+    "next.1"
+gdb_test "reverse-next" "\[^\r\n\]*main \\(\\) at tailcall.c:37\r\n.*" \
+    "reverse-next.1"
+gdb_test "step" "\[^\r\n\]*foo \\(\\) at tailcall.c:29\r\n.*" \
+    "step.1"
+gdb_test "finish" "\[^\r\n\]*main \\(\\) at tailcall.c:38\r\n.*" \
+    "finish.2"
+gdb_test "reverse-step" "\[^\r\n\]*bar \\(\\) at tailcall.c:24\r\n.*" \
+    "reverse-step.3"
+gdb_test "finish" "\[^\r\n\]*main \\(\\) at tailcall.c:38\r\n.*" \
+    "finish.3"

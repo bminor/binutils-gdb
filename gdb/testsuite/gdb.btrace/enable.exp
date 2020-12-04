@@ -100,7 +100,7 @@ if ![runto_main] {
     untested "failed to run to main"
     return -1
 }
-gdb_test_no_output "record btrace"
+gdb_test_no_output "record btrace" "enable after restart"
 if ![runto_main] {
     untested "failed to run to main"
     return -1

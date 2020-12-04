@@ -42,8 +42,12 @@ proc check_not_replaying {} {
 
 gdb_test_no_output "record btrace"
 
-check_not_replaying
+with_test_prefix "forward" {
+    check_not_replaying
+}
 
 gdb_test "reverse-continue" "No more reverse-execution history\.\r\n.*"
 
-check_not_replaying
+with_test_prefix "backward" {
+    check_not_replaying
+}

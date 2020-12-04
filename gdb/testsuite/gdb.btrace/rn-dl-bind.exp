@@ -38,18 +38,18 @@ if ![runto_main] {
 
 # trace the code for the call to test
 gdb_test_no_output "record btrace"
-gdb_test "next" ".*main\.2.*"
+gdb_test "next" ".*main\.2.*" "next.1"
 
 # just dump the function-call-history to help debugging
 gdb_test_no_output "set record function-call-history-size 0"
 gdb_test "record function-call-history /cli 1" ".*"
 
 # check that we can reverse-next and next
-gdb_test "reverse-next" ".*main\.1.*"
-gdb_test "next" ".*main\.2.*"
+gdb_test "reverse-next" ".*main\.1.*" "reverse-next.1"
+gdb_test "next" ".*main\.2.*" "next.2"
 
 # now go into test and try to reverse-next and next over the library call
-gdb_test "reverse-step" ".*test\.3.*"
-gdb_test "reverse-step" ".*test\.2.*"
-gdb_test "reverse-next" ".*test\.1.*"
-gdb_test "next" ".*test\.2.*"
+gdb_test "reverse-step" ".*test\.3.*" "reverse-step.1"
+gdb_test "reverse-step" ".*test\.2.*" "reverse-step.2"
+gdb_test "reverse-next" ".*test\.1.*" "reverse-next.2"
+gdb_test "next" ".*test\.2.*" "next.3"

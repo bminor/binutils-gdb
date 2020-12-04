@@ -240,7 +240,7 @@ gdb_continue_to_breakpoint "cont to fib.3"
 gdb_continue_to_breakpoint "cont to fib.4"
 
 # start tracing
-gdb_test_no_output "record btrace"
+gdb_test_no_output "record btrace" "start recording after rerun"
 
 # continue until line 30 above
 delete_breakpoints
