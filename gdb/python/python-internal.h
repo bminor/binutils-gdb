@@ -318,7 +318,7 @@ extern PyTypeObject frame_object_type
 extern PyTypeObject thread_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
 
-typedef struct gdbpy_breakpoint_object
+struct gdbpy_breakpoint_object
 {
   PyObject_HEAD
 
@@ -331,7 +331,7 @@ typedef struct gdbpy_breakpoint_object
 
   /* 1 is this is a FinishBreakpoint object, 0 otherwise.  */
   int is_finish_bp;
-} gdbpy_breakpoint_object;
+};
 
 /* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
    exception if it is invalid.  */
@@ -361,7 +361,7 @@ typedef struct gdbpy_breakpoint_object
 extern gdbpy_breakpoint_object *bppy_pending_object;
 
 
-typedef struct
+struct thread_object
 {
   PyObject_HEAD
 
@@ -370,7 +370,7 @@ typedef struct
 
   /* The Inferior object to which this thread belongs.  */
   PyObject *inf_obj;
-} thread_object;
+};
 
 struct inferior_object;
 

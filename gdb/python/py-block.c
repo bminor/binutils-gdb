@@ -24,7 +24,7 @@
 #include "python-internal.h"
 #include "objfiles.h"
 
-typedef struct blpy_block_object {
+struct block_object {
   PyObject_HEAD
   /* The GDB block structure that represents a frame's code block.  */
   const struct block *block;
@@ -34,11 +34,11 @@ typedef struct blpy_block_object {
   struct objfile *objfile;
   /* Keep track of all blocks with a doubly-linked list.  Needed for
      block invalidation if the source object file has been freed.  */
-  struct blpy_block_object *prev;
-  struct blpy_block_object *next;
-} block_object;
+  block_object *prev;
+  block_object *next;
+};
 
-typedef struct {
+struct block_syms_iterator_object {
   PyObject_HEAD
   /* The block.  */
   const struct block *block;
@@ -49,8 +49,8 @@ typedef struct {
   /* Pointer back to the original source block object.  Needed to
      check if the block is still valid, and has not been invalidated
      when an object file has been freed.  */
-  struct blpy_block_object *source;
-} block_syms_iterator_object;
+  block_object *source;
+};
 
 /* Require a valid block.  All access to block_object->block should be
    gated by this call.  */
@@ -293,7 +293,7 @@ set_block (block_object *obj, const struct block *block,
   if (objfile)
     {
       obj->objfile = objfile;
-      obj->next = ((struct blpy_block_object *)
+      obj->next = ((block_object *)
 		   objfile_data (objfile, blpy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;

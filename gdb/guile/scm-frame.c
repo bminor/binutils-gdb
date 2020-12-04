@@ -32,10 +32,9 @@
 #include "value.h"
 #include "guile-internal.h"
 
-/* The <gdb:frame> smob.
-   The typedef for this struct is in guile-internal.h.  */
+/* The <gdb:frame> smob.  */
 
-struct _frame_smob
+struct frame_smob
 {
   /* This always appears first.  */
   eqable_gdb_smob base;

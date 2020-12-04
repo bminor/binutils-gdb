@@ -59,7 +59,7 @@ private:
 
 /* Data for a memory port.  */
 
-typedef struct
+struct ioscm_memory_port
 {
   /* Bounds of memory range this port is allowed to access: [start, end).
      This means that 0xff..ff is not accessible.  I can live with that.  */
@@ -80,7 +80,7 @@ typedef struct
      the user to specify these values to help get something similar.  */
   unsigned read_buf_size, write_buf_size;
 #endif
-} ioscm_memory_port;
+};
 
 /* Copies of the original system input/output/error ports.
    These are recorded for debugging purposes.  */

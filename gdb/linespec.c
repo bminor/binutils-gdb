@@ -260,7 +260,7 @@ const char * const linespec_keywords[] = { "if", "thread", "task", "-force-condi
 
 /* A token of the linespec lexer  */
 
-struct ls_token
+struct linespec_token
 {
   /* The type of the token  */
   linespec_token_type type;
@@ -275,7 +275,6 @@ struct ls_token
     const char *keyword;
   } data;
 };
-typedef struct ls_token linespec_token;
 
 #define LS_TOKEN_STOKEN(TOK) (TOK).data.string
 #define LS_TOKEN_KEYWORD(TOK) (TOK).data.keyword

@@ -53,7 +53,7 @@
 #define builtin_type_pychar \
   language_string_char_type (python_language, python_gdbarch)
 
-typedef struct value_object {
+struct value_object {
   PyObject_HEAD
   struct value_object *next;
   struct value_object *prev;
@@ -61,7 +61,7 @@ typedef struct value_object {
   PyObject *address;
   PyObject *type;
   PyObject *dynamic_type;
-} value_object;
+};
 
 /* List of all values which are currently exposed to Python. It is
    maintained so that when an objfile is discarded, preserve_values

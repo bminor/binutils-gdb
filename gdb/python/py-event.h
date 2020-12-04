@@ -32,12 +32,12 @@
 #include "py-event-types.def"
 #undef GDB_PY_DEFINE_EVENT_TYPE
 
-typedef struct
+struct event_object
 {
   PyObject_HEAD
 
   PyObject *dict;
-} event_object;
+};
 
 extern int emit_continue_event (ptid_t ptid);
 extern int emit_exited_event (const LONGEST *exit_code, struct inferior *inf);

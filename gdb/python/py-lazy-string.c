@@ -24,7 +24,7 @@
 #include "valprint.h"
 #include "language.h"
 
-typedef struct {
+struct lazy_string_object {
   PyObject_HEAD
 
   /*  Holds the address of the lazy string.  */
@@ -51,7 +51,7 @@ typedef struct {
      This is recorded as a PyObject so that we take advantage of support for
      preserving the type should its owning objfile go away.  */
   PyObject *type;
-} lazy_string_object;
+};
 
 extern PyTypeObject lazy_string_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("lazy_string_object");

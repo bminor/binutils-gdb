@@ -25,7 +25,7 @@
 #include "objfiles.h"
 #include "symfile.h"
 
-typedef struct sympy_symbol_object {
+struct symbol_object {
   PyObject_HEAD
   /* The GDB symbol structure this object is wrapping.  */
   struct symbol *symbol;
@@ -33,9 +33,9 @@ typedef struct sympy_symbol_object {
      doubly-linked list, rooted in the objfile.  This lets us
      invalidate the underlying struct symbol when the objfile is
      deleted.  */
-  struct sympy_symbol_object *prev;
-  struct sympy_symbol_object *next;
-} symbol_object;
+  symbol_object *prev;
+  symbol_object *next;
+};
 
 /* Require a valid symbol.  All access to symbol_object->symbol should be
    gated by this call.  */
@@ -307,7 +307,7 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
     {
       struct objfile *objfile = symbol_objfile (symbol);
 
-      obj->next = ((struct sympy_symbol_object *)
+      obj->next = ((symbol_object *)
 		   objfile_data (objfile, sympy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;

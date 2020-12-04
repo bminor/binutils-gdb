@@ -25,7 +25,7 @@
 #include "build-id.h"
 #include "symtab.h"
 
-typedef struct
+struct objfile_object
 {
   PyObject_HEAD
 
@@ -50,7 +50,7 @@ typedef struct
 
   /* The debug method matcher list.  */
   PyObject *xmethods;
-} objfile_object;
+};
 
 extern PyTypeObject objfile_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("objfile_object");

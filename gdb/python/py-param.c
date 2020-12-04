@@ -91,8 +91,6 @@ struct parmpy_object
   const char **enumeration;
 };
 
-typedef struct parmpy_object parmpy_object;
-
 extern PyTypeObject parmpy_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("parmpy_object");
 

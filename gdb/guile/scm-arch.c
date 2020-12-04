@@ -26,10 +26,9 @@
 #include "arch-utils.h"
 #include "guile-internal.h"
 
-/* The <gdb:arch> smob.
-   The typedef for this struct is in guile-internal.h.  */
+/* The <gdb:arch> smob.  */
 
-struct _arch_smob
+struct arch_smob
 {
   /* This always appears first.  */
   gdb_smob base;

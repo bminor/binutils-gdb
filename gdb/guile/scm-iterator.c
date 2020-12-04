@@ -55,10 +55,9 @@
 
 /* A smob for iterating over something.
    Typically this is used when computing a list of everything is
-   too expensive.
-   The typedef for this struct is in guile-internal.h.  */
+   too expensive.  */
 
-struct _iterator_smob
+struct iterator_smob
 {
   /* This always appears first.  */
   gdb_smob base;

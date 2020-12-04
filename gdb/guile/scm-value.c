@@ -34,7 +34,7 @@
 
 /* The <gdb:value> smob.  */
 
-typedef struct _value_smob
+struct value_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -42,8 +42,8 @@ typedef struct _value_smob
   /* Doubly linked list of values in values_in_scheme.
      IWBN to use a chained_gdb_smob instead, which is doable, it just requires
      a bit more casting than normal.  */
-  struct _value_smob *next;
-  struct _value_smob *prev;
+  value_smob *next;
+  value_smob *prev;
 
   struct value *value;
 
@@ -55,7 +55,7 @@ typedef struct _value_smob
   SCM address;
   SCM type;
   SCM dynamic_type;
-} value_smob;
+};
 
 static const char value_smob_name[] = "gdb:value";
 

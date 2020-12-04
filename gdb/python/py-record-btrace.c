@@ -40,7 +40,7 @@
 
 /* Python object for btrace record lists.  */
 
-typedef struct {
+struct btpy_list_object {
   PyObject_HEAD
 
   /* The thread this list belongs to.  */
@@ -57,7 +57,7 @@ typedef struct {
 
   /* Either &BTPY_CALL_TYPE or &RECPY_INSN_TYPE.  */
   PyTypeObject* element_type;
-} btpy_list_object;
+};
 
 /* Python type for btrace lists.  */
 

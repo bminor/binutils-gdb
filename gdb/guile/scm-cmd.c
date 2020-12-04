@@ -37,7 +37,7 @@
    any side-effects.  This means that the smob needs to store everything
    that was passed to make-command.  */
 
-typedef struct _command_smob
+struct command_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -85,7 +85,7 @@ typedef struct _command_smob
      the object since a reference to it comes from non-gc-managed space
      (the command context pointer).  */
   SCM containing_scm;
-} command_smob;
+};
 
 static const char command_smob_name[] = "gdb:command";
 

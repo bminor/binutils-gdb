@@ -25,10 +25,9 @@
 #include "language.h"
 #include "guile-internal.h"
 
-/* The <gdb:objfile> smob.
-   The typedef for this struct is in guile-internal.h.  */
+/* The <gdb:objfile> smob.  */
 
-struct _objfile_smob
+struct objfile_smob
 {
   /* This always appears first.  */
   gdb_smob base;

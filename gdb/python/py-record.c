@@ -50,7 +50,7 @@ PyTypeObject recpy_gap_type = {
 };
 
 /* Python RecordGap object.  */
-typedef struct
+struct recpy_gap_object
 {
   PyObject_HEAD
 
@@ -62,7 +62,7 @@ typedef struct
 
   /* Element number.  */
   Py_ssize_t number;
-} recpy_gap_object;
+};
 
 /* Implementation of record.method.  */
 

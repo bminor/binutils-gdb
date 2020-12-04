@@ -66,8 +66,6 @@ struct cmdpy_object
   struct cmd_list_element *sub_list;
 };
 
-typedef struct cmdpy_object cmdpy_object;
-
 extern PyTypeObject cmdpy_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("cmdpy_object");
 

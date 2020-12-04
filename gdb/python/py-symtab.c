@@ -25,7 +25,7 @@
 #include "objfiles.h"
 #include "block.h"
 
-typedef struct stpy_symtab_object {
+struct symtab_object {
   PyObject_HEAD
   /* The GDB Symbol table structure.  */
   struct symtab *symtab;
@@ -33,9 +33,9 @@ typedef struct stpy_symtab_object {
      a doubly-linked list, rooted in the objfile.  This allows
      invalidation of the underlying struct symtab when the objfile is
      deleted.  */
-  struct stpy_symtab_object *prev;
-  struct stpy_symtab_object *next;
-} symtab_object;
+  symtab_object *prev;
+  symtab_object *next;
+};
 
 extern PyTypeObject symtab_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symtab_object");
@@ -54,7 +54,7 @@ static const struct objfile_data *stpy_objfile_data_key;
       }							 \
   } while (0)
 
-typedef struct salpy_sal_object {
+struct sal_object {
   PyObject_HEAD
   /* The GDB Symbol table structure.  */
   PyObject *symtab;
@@ -64,9 +64,9 @@ typedef struct salpy_sal_object {
      track with a doubly-linked list, rooted in the objfile.  This
      allows invalidation of the underlying struct symtab_and_line
      when the objfile is deleted.  */
-  struct salpy_sal_object *prev;
-  struct salpy_sal_object *next;
-} sal_object;
+  sal_object *prev;
+  sal_object *next;
+};
 
 extern PyTypeObject sal_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("sal_object");
@@ -378,8 +378,8 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
       symtab *symtab = symtab_object_to_symtab (sal_obj->symtab);
 
       sal_obj->next
-	= ((struct salpy_sal_object *) objfile_data (SYMTAB_OBJFILE (symtab),
-						     salpy_objfile_data_key));
+	= ((sal_object *) objfile_data (SYMTAB_OBJFILE (symtab),
+					salpy_objfile_data_key));
       if (sal_obj->next)
 	sal_obj->next->prev = sal_obj;
 
@@ -405,7 +405,7 @@ set_symtab (symtab_object *obj, struct symtab *symtab)
   if (symtab)
     {
       obj->next
-	= ((struct stpy_symtab_object *)
+	= ((symtab_object *)
 	   objfile_data (SYMTAB_OBJFILE (symtab), stpy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;

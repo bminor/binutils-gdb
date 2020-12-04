@@ -28,7 +28,7 @@
 #include "language.h"
 #include "typeprint.h"
 
-typedef struct pyty_type_object
+struct type_object
 {
   PyObject_HEAD
   struct type *type;
@@ -36,35 +36,35 @@ typedef struct pyty_type_object
   /* If a Type object is associated with an objfile, it is kept on a
      doubly-linked list, rooted in the objfile.  This lets us copy the
      underlying struct type when the objfile is deleted.  */
-  struct pyty_type_object *prev;
-  struct pyty_type_object *next;
-} type_object;
+  struct type_object *prev;
+  struct type_object *next;
+};
 
 extern PyTypeObject type_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("type_object");
 
 /* A Field object.  */
-typedef struct pyty_field_object
+struct field_object
 {
   PyObject_HEAD
 
   /* Dictionary holding our attributes.  */
   PyObject *dict;
-} field_object;
+};
 
 extern PyTypeObject field_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("field_object");
 
 /* A type iterator object.  */
-typedef struct {
+struct typy_iterator_object {
   PyObject_HEAD
   /* The current field index.  */
   int field;
   /* What to return.  */
   enum gdbpy_iter_kind kind;
   /* Pointer back to the original source type object.  */
-  struct pyty_type_object *source;
-} typy_iterator_object;
+  type_object *source;
+};
 
 extern PyTypeObject type_iterator_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("typy_iterator_object");
@@ -1101,7 +1101,7 @@ set_type (type_object *obj, struct type *type)
     {
       struct objfile *objfile = TYPE_OBJFILE (type);
 
-      obj->next = ((struct pyty_type_object *)
+      obj->next = ((type_object *)
 		   objfile_data (objfile, typy_objfile_data_key));
       if (obj->next)
 	obj->next->prev = obj;

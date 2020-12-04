@@ -31,7 +31,7 @@
 #define TRACE_PY_UNWIND(level, args...) if (pyuw_debug >= level)  \
   { fprintf_unfiltered (gdb_stdlog, args); }
 
-typedef struct
+struct pending_frame_object
 {
   PyObject_HEAD
 
@@ -40,7 +40,7 @@ typedef struct
 
   /* Its architecture, passed by the sniffer caller.  */
   struct gdbarch *gdbarch;
-} pending_frame_object;
+};
 
 /* Saved registers array item.  */
 
@@ -59,7 +59,7 @@ struct saved_reg
 /* The data we keep for the PyUnwindInfo: pending_frame, saved registers
    and frame ID.  */
 
-typedef struct
+struct unwind_info_object
 {
   PyObject_HEAD
 
@@ -71,12 +71,12 @@ typedef struct
 
   /* Saved registers array.  */
   std::vector<saved_reg> *saved_regs;
-} unwind_info_object;
+};
 
 /* The data we keep for a frame we can unwind: frame ID and an array of
    (register_number, register_value) pairs.  */
 
-typedef struct
+struct cached_frame_info
 {
   /* Frame ID.  */
   struct frame_id frame_id;
@@ -88,7 +88,7 @@ typedef struct
   int reg_count;
 
   cached_reg_t reg[];
-} cached_frame_info;
+};
 
 extern PyTypeObject pending_frame_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pending_frame_object");

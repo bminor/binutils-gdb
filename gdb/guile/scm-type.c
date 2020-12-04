@@ -34,10 +34,9 @@
 /* The <gdb:type> smob.
    The type is chained with all types associated with its objfile, if any.
    This lets us copy the underlying struct type when the objfile is
-   deleted.
-   The typedef for this struct is in guile-internal.h.  */
+   deleted.  */
 
-struct _type_smob
+struct type_smob
 {
   /* This always appears first.
      eqable_gdb_smob is used so that types are eq?-able.
@@ -52,7 +51,7 @@ struct _type_smob
 
 /* A field smob.  */
 
-typedef struct
+struct field_smob
 {
   /* This always appears first.  */
   gdb_smob base;
@@ -62,7 +61,7 @@ typedef struct
 
   /* The field number in TYPE_SCM.  */
   int field_num;
-} field_smob;
+};
 
 static const char type_smob_name[] = "gdb:type";
 static const char field_smob_name[] = "gdb:field";

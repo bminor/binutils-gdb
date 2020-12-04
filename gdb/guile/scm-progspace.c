@@ -28,10 +28,9 @@
 /* NOTE: Python exports the name "Progspace", so we export "progspace".
    Internally we shorten that to "pspace".  */
 
-/* The <gdb:progspace> smob.
-   The typedef for this struct is in guile-internal.h.  */
+/* The <gdb:progspace> smob.  */
 
-struct _pspace_smob
+struct pspace_smob
 {
   /* This always appears first.  */
   gdb_smob base;

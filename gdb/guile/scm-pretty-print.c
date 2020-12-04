@@ -59,7 +59,7 @@ enum display_hint
 
 /* The <gdb:pretty-printer> smob.  */
 
-typedef struct
+struct pretty_printer_smob
 {
   /* This must appear first.  */
   gdb_smob base;
@@ -77,11 +77,11 @@ typedef struct
   SCM lookup;
 
   /* Note: Attaching subprinters to this smob is left to Scheme.  */
-} pretty_printer_smob;
+};
 
 /* The <gdb:pretty-printer-worker> smob.  */
 
-typedef struct
+struct pretty_printer_worker_smob
 {
   /* This must appear first.  */
   gdb_smob base;
@@ -99,7 +99,7 @@ typedef struct
      The iterator returns a pair for each iteration: (name . value),
      where "value" can have the same types as to_string.  */
   SCM children;
-} pretty_printer_worker_smob;
+};
 
 static const char pretty_printer_smob_name[] =
   "gdb:pretty-printer";

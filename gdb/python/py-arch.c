@@ -23,10 +23,10 @@
 #include "disasm.h"
 #include "python-internal.h"
 
-typedef struct arch_object_type_object {
+struct arch_object {
   PyObject_HEAD
   struct gdbarch *gdbarch;
-} arch_object;
+};
 
 static struct gdbarch_data *arch_object_data = NULL;
 

@@ -28,9 +28,9 @@ PyTypeObject py_insn_type = {
 
 /* Python instruction object.  */
 
-typedef struct {
+struct py_insn_obj {
   PyObject_HEAD
-} py_insn_obj;
+};
 
 /* Getter function for gdb.Instruction attributes.  */
 

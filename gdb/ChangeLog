@@ -1,5 +1,79 @@
 2020-12-04  Tom Tromey  <tromey@adacore.com>
 
+	* linespec.c (struct linespec_token): Rename; remove typedef.
+	* guile/scm-block.c (struct block_smob): Remove typedef.
+	(struct block_syms_progress_smob): Likewise.
+	* guile/scm-symbol.c (struct symbol_smob): Remove typedef.
+	* guile/scm-symtab.c (symtab_smob): Remove typedef.
+	(struct sal_smob): Remove typedef.
+	* guile/scm-param.c (struct param_smob): Remove typedef.
+	* guile/scm-progspace.c (struct pspace_smob): Rename.
+	* guile/scm-objfile.c (struct objfile_smob): Rename.
+	* guile/scm-iterator.c (struct iterator_smob): Rename.
+	* guile/scm-frame.c (struct frame_smob): Rename.
+	* guile/scm-arch.c (struct arch_smob): Rename.
+	* guile/scm-type.c (struct field_smob): Remove typedef.
+	(struct type_smob): Rename.
+	* guile/scm-cmd.c (struct command_smob): Remove typedef.
+	* guile/scm-ports.c (struct ioscm_memory_port): Remove typedef.
+	* guile/scm-value.c (struct value_smob): Remove typedef.
+	* guile/scm-lazy-string.c (lazy_string_smob): Remove typedef.
+	* guile/guile-internal.h (struct scheme_variable)
+	(struct scheme_function, struct scheme_integer_constant)
+	(struct gdb_smob, struct chained_gdb_smob)
+	(struct eqable_gdb_smob, arch_smob, frame_smob, iterator_smob)
+	(objfile_smob, pspace_smob, type_smob): Remove typedef.
+	* guile/scm-pretty-print.c (pretty_printer_smob): Remove typedef.
+	(struct pretty_printer_worker_smob): Remove typedef.
+	* guile/scm-exception.c (struct exception_smob): Remove typedef.
+	* python/py-block.c (struct block_object): Remove typedef.
+	(block_syms_iterator_object): Update.
+	(set_block): Update.
+	(block_syms_iterator_object): Remove typedef.
+	* python/py-inferior.c (struct membuf_object): Remove typedef.
+	* python/py-symtab.c (struct symtab_object): Remove typedef.
+	(set_symtab): Update.
+	(sal_object): Remove typedef.
+	(set_sal): Update.
+	* python/py-frame.c (frame_object): Remove typedef.
+	* python/py-record-btrace.c (struct btpy_list_object): Remove
+	typedef.
+	* python/py-arch.c (struct arch_object): Remove typedef.
+	* python/py-linetable.c (struct linetable_entry_object)
+	(linetable_object, struct ltpy_iterator_object): Remove typedef.
+	* python/py-events.h (eventregistry_object): Remove typedef.
+	(struct events_object): Remove typedef.
+	* python/python-internal.h (gdbpy_breakpoint_object): Remove
+	typedef.
+	(thread_object): Remove typedef.
+	* python/py-progspace.c (pspace_object): Remove typedef.
+	* python/py-value.c (struct value_object): Remove typedef.
+	* python/py-record.h (recpy_record_object): Remove typedef.
+	(struct recpy_element_object): Remove typedef.
+	* python/py-lazy-string.c (lazy_string_object): Remove typedef.
+	* python/py-objfile.c (objfile_object): Remove typedef.
+	* python/py-cmd.c (struct cmdpy_object): Remove typedef.
+	* python/py-type.c (type_object): Remove typedef.
+	(typy_iterator_object): Update.
+	(set_type): Update.
+	(field_object): Remove typedef.
+	(typy_iterator_object): Remove typedef.
+	* python/py-registers.c (register_descriptor_iterator_object):
+	Remove typedef.
+	(struct register_descriptor_object)
+	(struct reggroup_iterator_object, struct reggroup_object): Remove
+	typedef.
+	* python/py-record.c (recpy_gap_object): Remove typedef.
+	* python/py-symbol.c (symbol_object): Remove typedef.
+	(set_symbol): Update.
+	* python/py-event.h (event_object): Remove typedef.
+	* python/py-param.c (parmpy_object): Remove typedef.
+	* python/py-instruction.c (struct py_insn_obj): Remove typedef.
+	* python/py-unwind.c (struct pending_frame_object): Remove typedef.
+	(unwind_info_object, struct cached_frame_info): Likewise.
+
+2020-12-04  Tom Tromey  <tromey@adacore.com>
+
 	* value.c (value_internal_function_name): Make return type const.
 	* value.h (value_internal_function_name): Make return type const.
 

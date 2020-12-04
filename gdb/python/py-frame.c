@@ -28,7 +28,7 @@
 #include "symfile.h"
 #include "objfiles.h"
 
-typedef struct {
+struct frame_object {
   PyObject_HEAD
   struct frame_id frame_id;
   struct gdbarch *gdbarch;
@@ -42,7 +42,7 @@ typedef struct {
      ID as the  previous frame).  Whenever get_prev_frame returns NULL, we
      record the frame_id of the next frame and set FRAME_ID_IS_NEXT to 1.  */
   int frame_id_is_next;
-} frame_object;
+};
 
 /* Require a valid frame.  This must be called inside a TRY_CATCH, or
    another context in which a gdb exception is allowed.  */

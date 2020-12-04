@@ -61,14 +61,14 @@ extern PyTypeObject inferior_object_type
 
 static const struct inferior_data *infpy_inf_data_key;
 
-typedef struct {
+struct membuf_object {
   PyObject_HEAD
   void *buffer;
 
   /* These are kept just for mbpy_str.  */
   CORE_ADDR addr;
   CORE_ADDR length;
-} membuf_object;
+};
 
 extern PyTypeObject membuf_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("membuf_object");
