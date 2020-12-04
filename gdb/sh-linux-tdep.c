@@ -184,7 +184,7 @@ static struct tramp_frame sh_linux_rt_sigreturn_tramp_frame = {
 static void
 sh_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);

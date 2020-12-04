@@ -48,7 +48,7 @@ proc probe_displaced_stepping_support {} {
 	# that breakpoint.
 	gdb_test_no_output "set debug displaced 1"
 	gdb_test_multiple "next" "probe" {
-	    -re "displaced pc to.*$gdb_prompt $" {
+	    -re "prepared successfully .*$gdb_prompt $" {
 		pass "supported"
 	    }
 	    -re ".*$gdb_prompt $" {

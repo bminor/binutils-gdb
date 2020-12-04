@@ -439,7 +439,7 @@ arc_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
    */
   tdep->jb_pc = 15;
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* Set up target dependent GDB architecture entries.  */
   set_gdbarch_cannot_fetch_register (gdbarch, arc_linux_cannot_fetch_register);

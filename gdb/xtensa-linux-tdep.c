@@ -110,7 +110,7 @@ xtensa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       set_gdbarch_num_pseudo_regs (gdbarch, tdep->num_pseudo_regs);
     }
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);

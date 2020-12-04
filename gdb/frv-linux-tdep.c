@@ -456,7 +456,7 @@ frv_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 static void
 frv_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* Set the sigtramp frame sniffer.  */
   frame_unwind_append_unwinder (gdbarch, &frv_linux_sigtramp_frame_unwind); 

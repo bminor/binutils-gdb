@@ -153,6 +153,31 @@ static const char *const powerpc_vector_strings[] =
 static enum powerpc_vector_abi powerpc_vector_abi_global = POWERPC_VEC_AUTO;
 static const char *powerpc_vector_abi_string = "auto";
 
+/* PowerPC-related per-inferior data.  */
+
+struct ppc_inferior_data
+{
+  /* This is an optional in case we add more fields to ppc_inferior_data, we
+     don't want it instantiated as soon as we get the ppc_inferior_data for an
+     inferior.  */
+  gdb::optional<displaced_step_buffer> disp_step_buf;
+};
+
+static inferior_key<ppc_inferior_data> ppc_inferior_data_key;
+
+/* Get the per-inferior PowerPC data for INF.  */
+
+static ppc_inferior_data *
+get_ppc_per_inferior (inferior *inf)
+{
+  ppc_inferior_data *per_inf = ppc_inferior_data_key.get (inf);
+
+  if (per_inf == nullptr)
+    per_inf = ppc_inferior_data_key.emplace (inf);
+
+  return per_inf;
+}
+
 /* To be used by skip_prologue.  */
 
 struct rs6000_framedata
@@ -977,6 +1002,53 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
   /* Handle any other instructions that do not fit in the categories above.  */
     regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
 				    from + offset);
+}
+
+/* Implementation of gdbarch_displaced_step_prepare.  */
+
+static displaced_step_prepare_status
+ppc_displaced_step_prepare  (gdbarch *arch, thread_info *thread,
+			     CORE_ADDR &displaced_pc)
+{
+  ppc_inferior_data *per_inferior = get_ppc_per_inferior (thread->inf);
+
+  if (!per_inferior->disp_step_buf.has_value ())
+    {
+      /* Figure out where the displaced step buffer is.  */
+      CORE_ADDR disp_step_buf_addr
+	= displaced_step_at_entry_point (thread->inf->gdbarch);
+
+      per_inferior->disp_step_buf.emplace (disp_step_buf_addr);
+    }
+
+  return per_inferior->disp_step_buf->prepare (thread, displaced_pc);
+}
+
+/* Implementation of gdbarch_displaced_step_finish.  */
+
+static displaced_step_finish_status
+ppc_displaced_step_finish (gdbarch *arch, thread_info *thread,
+			   gdb_signal sig)
+{
+  ppc_inferior_data *per_inferior = get_ppc_per_inferior (thread->inf);
+
+  gdb_assert (per_inferior->disp_step_buf.has_value ());
+
+  return per_inferior->disp_step_buf->finish (arch, thread, sig);
+}
+
+/* Implementation of gdbarch_displaced_step_restore_all_in_ptid.  */
+
+static void
+ppc_displaced_step_restore_all_in_ptid (inferior *parent_inf, ptid_t ptid)
+{
+  ppc_inferior_data *per_inferior = ppc_inferior_data_key.get (parent_inf);
+
+  if (per_inferior == nullptr
+      || !per_inferior->disp_step_buf.has_value ())
+    return;
+
+  per_inferior->disp_step_buf->restore_in_ptid (ptid);
 }
 
 /* Always use hardware single-stepping to execute the
@@ -6990,8 +7062,10 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_displaced_step_hw_singlestep (gdbarch,
 					    ppc_displaced_step_hw_singlestep);
   set_gdbarch_displaced_step_fixup (gdbarch, ppc_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch,
-				       displaced_step_at_entry_point);
+  set_gdbarch_displaced_step_prepare (gdbarch, ppc_displaced_step_prepare);
+  set_gdbarch_displaced_step_finish (gdbarch, ppc_displaced_step_finish);
+  set_gdbarch_displaced_step_restore_all_in_ptid
+    (gdbarch, ppc_displaced_step_restore_all_in_ptid);
 
   set_gdbarch_max_insn_length (gdbarch, PPC_INSN_SIZE);
 

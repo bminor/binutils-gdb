@@ -199,6 +199,9 @@ struct linux_info
      yet.  Positive if we tried looking it up, and found it.  Negative
      if we tried looking it up but failed.  */
   int vsyscall_range_p = 0;
+
+  /* Inferior's displaced step buffer.  */
+  gdb::optional<displaced_step_buffer> disp_step_buf;
 };
 
 /* Per-inferior data key.  */
@@ -2531,6 +2534,65 @@ linux_displaced_step_location (struct gdbarch *gdbarch)
 
 /* See linux-tdep.h.  */
 
+displaced_step_prepare_status
+linux_displaced_step_prepare (gdbarch *arch, thread_info *thread,
+			      CORE_ADDR &displaced_pc)
+{
+  linux_info *per_inferior = get_linux_inferior_data (thread->inf);
+
+  if (!per_inferior->disp_step_buf.has_value ())
+    {
+      CORE_ADDR disp_step_buf_addr
+	= linux_displaced_step_location (thread->inf->gdbarch);
+
+      per_inferior->disp_step_buf.emplace (disp_step_buf_addr);
+    }
+
+  return per_inferior->disp_step_buf->prepare (thread, displaced_pc);
+}
+
+/* See linux-tdep.h.  */
+
+displaced_step_finish_status
+linux_displaced_step_finish (gdbarch *arch, thread_info *thread, gdb_signal sig)
+{
+  linux_info *per_inferior = get_linux_inferior_data (thread->inf);
+
+  gdb_assert (per_inferior->disp_step_buf.has_value ());
+
+  return per_inferior->disp_step_buf->finish (arch, thread, sig);
+}
+
+/* See linux-tdep.h.  */
+
+const displaced_step_copy_insn_closure *
+linux_displaced_step_copy_insn_closure_by_addr (inferior *inf, CORE_ADDR addr)
+{
+  linux_info *per_inferior = linux_inferior_data.get (inf);
+
+  if (per_inferior == nullptr
+      || !per_inferior->disp_step_buf.has_value ())
+    return nullptr;
+
+  return per_inferior->disp_step_buf->copy_insn_closure_by_addr (addr);
+}
+
+/* See linux-tdep.h.  */
+
+void
+linux_displaced_step_restore_all_in_ptid (inferior *parent_inf, ptid_t ptid)
+{
+  linux_info *per_inferior = linux_inferior_data.get (parent_inf);
+
+  if (per_inferior == nullptr
+      || !per_inferior->disp_step_buf.has_value ())
+    return;
+
+  per_inferior->disp_step_buf->restore_in_ptid (ptid);
+}
+
+/* See linux-tdep.h.  */
+
 CORE_ADDR
 linux_get_hwcap (struct target_ops *target)
 {
@@ -2577,8 +2639,19 @@ show_dump_excluded_mappings (struct ui_file *file, int from_tty,
    various GNU/Linux architectures and machine types.  */
 
 void
-linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
+linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
+		bool supports_displaced_step)
 {
+  if (supports_displaced_step)
+    {
+      set_gdbarch_displaced_step_prepare (gdbarch, linux_displaced_step_prepare);
+      set_gdbarch_displaced_step_finish (gdbarch, linux_displaced_step_finish);
+      set_gdbarch_displaced_step_copy_insn_closure_by_addr
+	(gdbarch, linux_displaced_step_copy_insn_closure_by_addr);
+      set_gdbarch_displaced_step_restore_all_in_ptid
+	(gdbarch, linux_displaced_step_restore_all_in_ptid);
+    }
+
   set_gdbarch_core_pid_to_str (gdbarch, linux_core_pid_to_str);
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
   set_gdbarch_core_info_proc (gdbarch, linux_core_info_proc);
@@ -2608,6 +2681,7 @@ _initialize_linux_tdep ()
   /* Observers used to invalidate the cache when needed.  */
   gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf);
   gdb::observers::inferior_appeared.attach (invalidate_linux_cache_inf);
+  gdb::observers::inferior_execd.attach (invalidate_linux_cache_inf);
 
   add_setshow_boolean_cmd ("use-coredump-filter", class_files,
 			   &use_coredump_filter, _("\

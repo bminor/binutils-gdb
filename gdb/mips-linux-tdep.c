@@ -1531,7 +1531,7 @@ mips_linux_init_abi (struct gdbarch_info info,
   enum mips_abi abi = mips_abi (gdbarch);
   struct tdesc_arch_data *tdesc_data = info.tdesc_data;
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* Get the syscall number from the arch's register.  */
   set_gdbarch_get_syscall_number (gdbarch, mips_linux_get_syscall_number);

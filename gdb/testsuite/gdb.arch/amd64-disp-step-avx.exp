@@ -97,7 +97,7 @@ proc disp_step_func { func } {
     gdb_test_no_output "set debug displaced on"
 
     gdb_test "continue" \
-	"Continuing.*displaced pc to.*Breakpoint.*, ${test_end_label} ().*" \
+	"Continuing.*prepared successfully .*Breakpoint.*, ${test_end_label} ().*" \
 	"continue to ${test_end_label}"
 
     gdb_test_no_output "set debug displaced off"

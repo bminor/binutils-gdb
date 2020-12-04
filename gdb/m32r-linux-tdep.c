@@ -449,7 +449,7 @@ static void
 m32r_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* Since EVB register is not available for native debug, we reduce
      the number of registers.  */

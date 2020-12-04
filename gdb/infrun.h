@@ -226,9 +226,6 @@ extern void clear_exit_convenience_vars (void);
 /* Dump LEN bytes at BUF in hex to a string and return it.  */
 extern std::string displaced_step_dump_bytes (const gdb_byte *buf, size_t len);
 
-extern struct displaced_step_copy_insn_closure *
-  get_displaced_step_copy_insn_closure_by_addr (CORE_ADDR addr);
-
 extern void update_observer_mode (void);
 
 extern void signal_catch_update (const unsigned int *);

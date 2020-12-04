@@ -223,7 +223,7 @@ ia64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   static const char *const stap_register_indirection_suffixes[] = { "]",
 								    NULL };
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* Set the method of obtaining the sigcontext addresses at which
      registers are saved.  */

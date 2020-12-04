@@ -1721,7 +1721,7 @@ arm_linux_init_abi (struct gdbarch_info info,
 								    NULL };
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, true);
 
   tdep->lowest_pc = 0x8000;
   if (info.byte_order_for_code == BFD_ENDIAN_BIG)
@@ -1807,7 +1807,6 @@ arm_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					arm_linux_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, arm_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
 
   /* Reversible debugging, process record.  */
   set_gdbarch_process_record (gdbarch, arm_process_record);

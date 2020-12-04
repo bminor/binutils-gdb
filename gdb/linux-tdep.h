@@ -21,7 +21,9 @@
 #define LINUX_TDEP_H
 
 #include "bfd.h"
+#include "displaced-stepping.h"
 
+struct inferior;
 struct regcache;
 
 /* Enum used to define the extra fields of the siginfo type used by an
@@ -57,7 +59,30 @@ extern int linux_gdb_signal_to_target (struct gdbarch *gdbarch,
    the target auxiliary vector.  */
 extern CORE_ADDR linux_displaced_step_location (struct gdbarch *gdbarch);
 
-extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
+
+/* Implementation of gdbarch_displaced_step_prepare.  */
+
+extern displaced_step_prepare_status linux_displaced_step_prepare
+  (gdbarch *arch, thread_info *thread, CORE_ADDR &displaced_pc);
+
+/* Implementation of gdbarch_displaced_step_finish.  */
+
+extern displaced_step_finish_status linux_displaced_step_finish
+  (gdbarch *arch, thread_info *thread, gdb_signal sig);
+
+/* Implementation of gdbarch_displaced_step_copy_insn_closure_by_addr.  */
+
+extern const displaced_step_copy_insn_closure *
+  linux_displaced_step_copy_insn_closure_by_addr
+    (inferior *inf, CORE_ADDR addr);
+
+/* Implementation of gdbarch_displaced_step_restore_all_in_ptid.  */
+
+extern void linux_displaced_step_restore_all_in_ptid (inferior *parent_inf,
+						      ptid_t ptid);
+
+extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
+			    bool supports_displaced_step);
 
 extern int linux_is_uclinux (void);
 

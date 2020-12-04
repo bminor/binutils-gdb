@@ -35,7 +35,7 @@ cris_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   if (tdep->cris_version == 32)
     /* Threaded debugging is only supported on CRISv32 for now.  */

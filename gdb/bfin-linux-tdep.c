@@ -150,7 +150,7 @@ bfin_linux_get_syscall_number (struct gdbarch *gdbarch,
 static void
 bfin_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* Set the sigtramp frame sniffer.  */
   tramp_frame_prepend_unwinder (gdbarch, &bfin_linux_sigframe);

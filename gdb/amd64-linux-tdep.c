@@ -1795,11 +1795,12 @@ amd64_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
 }
 
 static void
-amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
+amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch,
+			    bool supports_displaced_step)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, supports_displaced_step);
 
   tdep->sigtramp_p = amd64_linux_sigtramp_p;
   tdep->sigcontext_addr = amd64_linux_sigcontext_addr;
@@ -1839,8 +1840,6 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					amd64_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, amd64_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch,
-				       linux_displaced_step_location);
 
   set_gdbarch_process_record (gdbarch, i386_process_record);
   set_gdbarch_process_record_signal (gdbarch, amd64_linux_record_signal);
@@ -1881,7 +1880,7 @@ amd64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   if (!valid_p)
     return;
 
-  amd64_linux_init_abi_common (info, gdbarch);
+  amd64_linux_init_abi_common (info, gdbarch, true);
 
   /* Initialize the amd64_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system
@@ -2096,7 +2095,7 @@ amd64_x32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   if (!valid_p)
     return;
 
-  amd64_linux_init_abi_common (info, gdbarch);
+  amd64_linux_init_abi_common (info, gdbarch, false);
 
   /* Initialize the amd64_x32_linux_record_tdep.  */
   /* These values are the size of the type that will be used in a system

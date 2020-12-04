@@ -832,7 +832,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   gdb_assert (tdesc_data);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, true);
 
   /* GNU/Linux uses ELF.  */
   i386_elf_init_abi (info, gdbarch);
@@ -1065,8 +1065,6 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					i386_linux_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, i386_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch,
-				       linux_displaced_step_location);
 
   /* Functions for 'catch syscall'.  */
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_I386);

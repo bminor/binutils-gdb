@@ -22,6 +22,7 @@
 
 #include "gdbsupport/byte-vector.h"
 
+struct gdbarch;
 struct thread_info;
 
 /* True if we are debugging displaced stepping.  */
@@ -62,7 +63,8 @@ enum displaced_step_finish_status
   DISPLACED_STEP_FINISH_STATUS_NOT_EXECUTED,
 };
 
-/* Base class for displaced stepping closures (the arch-specific data).  */
+/* Data returned by a gdbarch displaced_step_copy_insn method, to be passed to
+   the matching displaced_step_fixup method.  */
 
 struct displaced_step_copy_insn_closure
 {
@@ -80,6 +82,9 @@ struct buf_displaced_step_copy_insn_closure : displaced_step_copy_insn_closure
   : buf (buf_size)
   {}
 
+  /* The content of this buffer is up to the user of the class, but typically
+     original instruction bytes, used during fixup to determine what needs to
+     be fixed up.  */
   gdb::byte_vector buf;
 };
 
@@ -95,37 +100,95 @@ struct displaced_step_inferior_state
   /* Put this object back in its original state.  */
   void reset ()
   {
-    failed_before = 0;
-    step_thread = nullptr;
-    step_gdbarch = nullptr;
-    step_closure.reset ();
-    step_original = 0;
-    step_copy = 0;
-    step_saved_copy.clear ();
+    failed_before = false;
+    in_progress_count = 0;
+    unavailable = false;
   }
 
   /* True if preparing a displaced step ever failed.  If so, we won't
      try displaced stepping for this inferior again.  */
-  int failed_before;
+  bool failed_before;
 
-  /* If this is not nullptr, this is the thread carrying out a
-     displaced single-step in process PID.  This thread's state will
-     require fixing up once it has completed its step.  */
-  thread_info *step_thread;
+  /* Number of displaced steps in progress for this inferior.  */
+  unsigned int in_progress_count;
 
-  /* The architecture the thread had when we stepped it.  */
-  gdbarch *step_gdbarch;
+  /* If true, this tells GDB that it's not worth asking the gdbarch displaced
+     stepping implementation to prepare a displaced step, because it would
+     return UNAVAILABLE.  This is set and reset by the gdbarch in the
+     displaced_step_prepare and displaced_step_finish methods.  */
+  bool unavailable;
+};
+
+/* Per-thread displaced stepping state.  */
+
+struct displaced_step_thread_state
+{
+  /* Return true if this thread is currently executing a displaced step.  */
+  bool in_progress () const
+  {
+    return m_original_gdbarch != nullptr;
+  }
+
+  /* Return the gdbarch of the thread prior to the step.  */
+  gdbarch *get_original_gdbarch () const
+  {
+    return m_original_gdbarch;
+  }
+
+  /* Mark this thread as currently executing a displaced step.
+
+     ORIGINAL_GDBARCH is the current gdbarch of the thread (before the step
+     is executed).  */
+  void set (gdbarch *original_gdbarch)
+  {
+    m_original_gdbarch = original_gdbarch;
+  }
+
+  /* Mark this thread as no longer executing a displaced step.  */
+  void reset ()
+  {
+    m_original_gdbarch = nullptr;
+  }
+
+private:
+  gdbarch *m_original_gdbarch = nullptr;
+};
+
+/* Manage access to a single displaced stepping buffer.  */
+
+struct displaced_step_buffer
+{
+  explicit displaced_step_buffer (CORE_ADDR buffer_addr)
+    : m_addr (buffer_addr)
+  {}
+
+  displaced_step_prepare_status prepare (thread_info *thread,
+					 CORE_ADDR &displaced_pc);
+
+  displaced_step_finish_status finish (gdbarch *arch, thread_info *thread,
+				       gdb_signal sig);
+
+  const displaced_step_copy_insn_closure *
+    copy_insn_closure_by_addr (CORE_ADDR addr);
+
+  void restore_in_ptid (ptid_t ptid);
+
+private:
+  /* Original PC of the instruction being displaced-stepped in this buffer.  */
+  CORE_ADDR m_original_pc = 0;
+
+  /* Address of the buffer.  */
+  const CORE_ADDR m_addr;
+
+  /* If set, the thread currently using the buffer.  */
+  thread_info *m_current_thread = nullptr;
+
+  /* Saved contents of copy area.  */
+  gdb::byte_vector m_saved_copy;
 
   /* The closure provided gdbarch_displaced_step_copy_insn, to be used
      for post-step cleanup.  */
-  displaced_step_copy_insn_closure_up step_closure;
-
-  /* The address of the original instruction, and the copy we
-     made.  */
-  CORE_ADDR step_original, step_copy;
-
-  /* Saved contents of copy area.  */
-  gdb::byte_vector step_saved_copy;
+  displaced_step_copy_insn_closure_up m_copy_insn_closure;
 };
 
 #endif /* DISPLACED_STEPPING_H */

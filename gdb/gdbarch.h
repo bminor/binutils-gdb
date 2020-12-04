@@ -58,6 +58,7 @@ struct mem_range;
 struct syscalls_info;
 struct thread_info;
 struct ui_out;
+struct inferior;
 
 #include "regcache.h"
 
@@ -1071,17 +1072,36 @@ typedef void (gdbarch_displaced_step_fixup_ftype) (struct gdbarch *gdbarch, stru
 extern void gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, struct displaced_step_copy_insn_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
 extern void set_gdbarch_displaced_step_fixup (struct gdbarch *gdbarch, gdbarch_displaced_step_fixup_ftype *displaced_step_fixup);
 
-/* Return the address of an appropriate place to put displaced
-   instructions while we step over them.  There need only be one such
-   place, since we're only stepping one thread over a breakpoint at a
-   time.
+/* Prepare THREAD for it to displaced step the instruction at its current PC.
   
-   For a general explanation of displaced stepping and how GDB uses it,
-   see the comments in infrun.c. */
+   Throw an exception if any unexpected error happens. */
 
-typedef CORE_ADDR (gdbarch_displaced_step_location_ftype) (struct gdbarch *gdbarch);
-extern CORE_ADDR gdbarch_displaced_step_location (struct gdbarch *gdbarch);
-extern void set_gdbarch_displaced_step_location (struct gdbarch *gdbarch, gdbarch_displaced_step_location_ftype *displaced_step_location);
+extern bool gdbarch_displaced_step_prepare_p (struct gdbarch *gdbarch);
+
+typedef displaced_step_prepare_status (gdbarch_displaced_step_prepare_ftype) (struct gdbarch *gdbarch, thread_info *thread, CORE_ADDR &displaced_pc);
+extern displaced_step_prepare_status gdbarch_displaced_step_prepare (struct gdbarch *gdbarch, thread_info *thread, CORE_ADDR &displaced_pc);
+extern void set_gdbarch_displaced_step_prepare (struct gdbarch *gdbarch, gdbarch_displaced_step_prepare_ftype *displaced_step_prepare);
+
+/* Clean up after a displaced step of THREAD. */
+
+typedef displaced_step_finish_status (gdbarch_displaced_step_finish_ftype) (struct gdbarch *gdbarch, thread_info *thread, gdb_signal sig);
+extern displaced_step_finish_status gdbarch_displaced_step_finish (struct gdbarch *gdbarch, thread_info *thread, gdb_signal sig);
+extern void set_gdbarch_displaced_step_finish (struct gdbarch *gdbarch, gdbarch_displaced_step_finish_ftype *displaced_step_finish);
+
+/* Return the closure associated to the displaced step buffer that is at ADDR. */
+
+extern bool gdbarch_displaced_step_copy_insn_closure_by_addr_p (struct gdbarch *gdbarch);
+
+typedef const displaced_step_copy_insn_closure * (gdbarch_displaced_step_copy_insn_closure_by_addr_ftype) (inferior *inf, CORE_ADDR addr);
+extern const displaced_step_copy_insn_closure * gdbarch_displaced_step_copy_insn_closure_by_addr (struct gdbarch *gdbarch, inferior *inf, CORE_ADDR addr);
+extern void set_gdbarch_displaced_step_copy_insn_closure_by_addr (struct gdbarch *gdbarch, gdbarch_displaced_step_copy_insn_closure_by_addr_ftype *displaced_step_copy_insn_closure_by_addr);
+
+/* PARENT_INF has forked and CHILD_PTID is the ptid of the child.  Restore the
+   contents of all displaced step buffers in the child's address space. */
+
+typedef void (gdbarch_displaced_step_restore_all_in_ptid_ftype) (inferior *parent_inf, ptid_t child_ptid);
+extern void gdbarch_displaced_step_restore_all_in_ptid (struct gdbarch *gdbarch, inferior *parent_inf, ptid_t child_ptid);
+extern void set_gdbarch_displaced_step_restore_all_in_ptid (struct gdbarch *gdbarch, gdbarch_displaced_step_restore_all_in_ptid_ftype *displaced_step_restore_all_in_ptid);
 
 /* Relocate an instruction to execute at a different address.  OLDLOC
    is the address in the inferior memory where the instruction to

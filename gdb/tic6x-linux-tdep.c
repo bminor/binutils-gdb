@@ -167,7 +167,7 @@ tic6x_uclinux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* Shared library handling.  */
   set_solib_ops (gdbarch, &dsbt_so_ops);

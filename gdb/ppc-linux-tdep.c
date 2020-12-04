@@ -1993,7 +1993,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   /* PPC GNU/Linux uses either 64-bit or 128-bit long doubles; where
      128-bit, they can be either IBM long double or IEEE quad long double.
@@ -2142,9 +2142,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
 				   PPC_TRAP_REGNUM, "trap");
 	}
     }
-
-  set_gdbarch_displaced_step_location (gdbarch,
-				       linux_displaced_step_location);
 
   /* Support reverse debugging.  */
   set_gdbarch_process_record (gdbarch, ppc_process_record);

@@ -1445,7 +1445,7 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tdep->lowest_pc = 0x8000;
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, true);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
 					 svr4_lp64_fetch_link_map_offsets);
@@ -1658,7 +1658,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_displaced_step_copy_insn (gdbarch,
 					aarch64_displaced_step_copy_insn);
   set_gdbarch_displaced_step_fixup (gdbarch, aarch64_displaced_step_fixup);
-  set_gdbarch_displaced_step_location (gdbarch, linux_displaced_step_location);
   set_gdbarch_displaced_step_hw_singlestep (gdbarch,
 					    aarch64_displaced_step_hw_singlestep);
 

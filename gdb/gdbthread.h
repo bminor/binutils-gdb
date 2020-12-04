@@ -32,6 +32,7 @@ struct symtab;
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/common-gdbthread.h"
 #include "gdbsupport/forward-scope-exit.h"
+#include "displaced-stepping.h"
 
 struct inferior;
 struct process_stratum_target;
@@ -388,6 +389,9 @@ public:
      fields point to self.  */
   struct thread_info *step_over_prev = NULL;
   struct thread_info *step_over_next = NULL;
+
+  /* Displaced-step state for this thread.  */
+  displaced_step_thread_state displaced_step_state;
 };
 
 /* A gdb::ref_ptr pointer to a thread_info.  */
@@ -745,9 +749,26 @@ extern bool value_in_thread_stack_temporaries (struct value *,
 
 extern void global_thread_step_over_chain_enqueue (thread_info *tp);
 
+/* Append the thread step over chain CHAIN_HEAD to the global thread step over
+   chain. */
+
+extern void global_thread_step_over_chain_enqueue_chain
+  (thread_info *chain_head);
+
+/* Remove TP from step-over chain LIST_P.  */
+
+extern void thread_step_over_chain_remove (thread_info **list_p,
+					   thread_info *tp);
+
 /* Remove TP from the global pending step-over chain.  */
 
 extern void global_thread_step_over_chain_remove (thread_info *tp);
+
+/* Return the thread following TP in the step-over chain whose head is
+   CHAIN_HEAD.  Return NULL if TP is the last entry in the chain.  */
+
+extern thread_info *thread_step_over_chain_next (thread_info *chain_head,
+						 thread_info *tp);
 
 /* Return the thread following TP in the global step-over chain, or NULL if TP
    is the last entry in the chain.  */
@@ -757,6 +778,14 @@ extern thread_info *global_thread_step_over_chain_next (thread_info *tp);
 /* Return true if TP is in any step-over chain.  */
 
 extern int thread_is_in_step_over_chain (struct thread_info *tp);
+
+/* Return the length of the the step over chain TP is in.
+
+   If TP is non-nullptr, the thread must be in a step over chain.
+   TP may be nullptr, in which case it denotes an empty list, so a length of
+   0.  */
+
+extern int thread_step_over_chain_length (thread_info *tp);
 
 /* Cancel any ongoing execution command.  */
 

@@ -1132,10 +1132,12 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_software_single_step (gdbarch, rs6000_software_single_step);
 
   /* Displaced stepping is currently not supported in combination with
-     software single-stepping.  */
+     software single-stepping.  These override the values set by
+     rs6000_gdbarch_init.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch, NULL);
   set_gdbarch_displaced_step_fixup (gdbarch, NULL);
-  set_gdbarch_displaced_step_location (gdbarch, NULL);
+  set_gdbarch_displaced_step_prepare (gdbarch, NULL);
+  set_gdbarch_displaced_step_finish (gdbarch, NULL);
 
   set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
   set_gdbarch_return_value (gdbarch, rs6000_return_value);

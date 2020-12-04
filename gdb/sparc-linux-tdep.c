@@ -422,7 +422,7 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  linux_init_abi (info, gdbarch);
+  linux_init_abi (info, gdbarch, false);
 
   tdep->gregset = &sparc32_linux_gregset;
   tdep->sizeof_gregset = 152;

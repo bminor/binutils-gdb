@@ -433,9 +433,12 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
   struct bound_minimal_symbol sym;
   char type;
-  arm_displaced_step_copy_insn_closure *dsc
-    = ((arm_displaced_step_copy_insn_closure * )
-	get_displaced_step_copy_insn_closure_by_addr (memaddr));
+  arm_displaced_step_copy_insn_closure *dsc = nullptr;
+
+  if (gdbarch_displaced_step_copy_insn_closure_by_addr_p (gdbarch))
+    dsc = ((arm_displaced_step_copy_insn_closure * )
+	   gdbarch_displaced_step_copy_insn_closure_by_addr
+	     (gdbarch, current_inferior (), memaddr));
 
   /* If checking the mode of displaced instruction in copy area, the mode
      should be determined by instruction on the original address.  */

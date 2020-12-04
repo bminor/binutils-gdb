@@ -69,7 +69,7 @@ set displaced_stepping_enabled 0
 set msg "check displaced-stepping"
 gdb_test_no_output "set debug displaced 1"
 gdb_test_multiple "next" $msg {
-    -re "displaced pc to.*$gdb_prompt $" {
+    -re "prepared successfully .*$gdb_prompt $" {
 	set displaced_stepping_enabled 1
     }
     -re ".*$gdb_prompt $" {

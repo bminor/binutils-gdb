@@ -1,5 +1,128 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* displaced-stepping.h (struct
+	displaced_step_copy_insn_closure): Adjust comments.
+	(struct displaced_step_inferior_state) <step_thread,
+	step_gdbarch, step_closure, step_original, step_copy,
+	step_saved_copy>: Remove fields.
+	(struct displaced_step_thread_state): New.
+	(struct displaced_step_buffer): New.
+	* displaced-stepping.c (displaced_step_buffer::prepare): New.
+	(write_memory_ptid): Move from infrun.c.
+	(displaced_step_instruction_executed_successfully): New,
+	factored out of displaced_step_finish.
+	(displaced_step_buffer::finish): New.
+	(displaced_step_buffer::copy_insn_closure_by_addr): New.
+	(displaced_step_buffer::restore_in_ptid): New.
+	* gdbarch.sh (displaced_step_location): Remove.
+	(displaced_step_prepare, displaced_step_finish,
+	displaced_step_copy_insn_closure_by_addr,
+	displaced_step_restore_all_in_ptid): New.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+	* gdbthread.h (class thread_info) <displaced_step_state>: New
+	field.
+	(thread_step_over_chain_remove): New declaration.
+	(thread_step_over_chain_next): New declaration.
+	(thread_step_over_chain_length): New declaration.
+	* thread.c (thread_step_over_chain_remove): Make non-static.
+	(thread_step_over_chain_next): New.
+	(global_thread_step_over_chain_next): Use
+	thread_step_over_chain_next.
+	(thread_step_over_chain_length): New.
+	(global_thread_step_over_chain_enqueue): Add debug print.
+	(global_thread_step_over_chain_remove): Add debug print.
+	* infrun.h (get_displaced_step_copy_insn_closure_by_addr):
+	Remove.
+	* infrun.c (get_displaced_stepping_state): New.
+	(displaced_step_in_progress_any_inferior): Remove.
+	(displaced_step_in_progress_thread): Adjust.
+	(displaced_step_in_progress): Adjust.
+	(displaced_step_in_progress_any_thread): New.
+	(get_displaced_step_copy_insn_closure_by_addr): Remove.
+	(gdbarch_supports_displaced_stepping): Use
+	gdbarch_displaced_step_prepare_p.
+	(displaced_step_reset): Change parameter from inferior to
+	thread.
+	(displaced_step_prepare_throw): Implement using
+	gdbarch_displaced_step_prepare.
+	(write_memory_ptid): Move to displaced-step.c.
+	(displaced_step_restore): Remove.
+	(displaced_step_finish): Implement using
+	gdbarch_displaced_step_finish.
+	(start_step_over): Allow starting more than one displaced step.
+	(prepare_for_detach): Handle possibly multiple threads doing
+	displaced steps.
+	(handle_inferior_event): Handle possibility that fork event
+	happens while another thread displaced steps.
+	* linux-tdep.h (linux_displaced_step_prepare): New.
+	(linux_displaced_step_finish): New.
+	(linux_displaced_step_copy_insn_closure_by_addr): New.
+	(linux_displaced_step_restore_all_in_ptid): New.
+	(linux_init_abi): Add supports_displaced_step parameter.
+	* linux-tdep.c (struct linux_info) <disp_step_buf>: New field.
+	(linux_displaced_step_prepare): New.
+	(linux_displaced_step_finish): New.
+	(linux_displaced_step_copy_insn_closure_by_addr): New.
+	(linux_displaced_step_restore_all_in_ptid): New.
+	(linux_init_abi): Add supports_displaced_step parameter,
+	register displaced step methods if true.
+	(_initialize_linux_tdep): Register inferior_execd observer.
+	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Add
+	supports_displaced_step parameter, adjust call to
+	linux_init_abi.  Remove call to
+	set_gdbarch_displaced_step_location.
+	(amd64_linux_init_abi): Adjust call to
+	amd64_linux_init_abi_common.
+	(amd64_x32_linux_init_abi): Likewise.
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Adjust call to
+	linux_init_abi.  Remove call to
+	set_gdbarch_displaced_step_location.
+	* arm-linux-tdep.c (arm_linux_init_abi): Likewise.
+	* i386-linux-tdep.c (i386_linux_init_abi): Likewise.
+	* alpha-linux-tdep.c (alpha_linux_init_abi): Adjust call to
+	linux_init_abi.
+	* arc-linux-tdep.c (arc_linux_init_osabi): Likewise.
+	* bfin-linux-tdep.c (bfin_linux_init_abi): Likewise.
+	* cris-linux-tdep.c (cris_linux_init_abi): Likewise.
+	* csky-linux-tdep.c (csky_linux_init_abi): Likewise.
+	* frv-linux-tdep.c (frv_linux_init_abi): Likewise.
+	* hppa-linux-tdep.c (hppa_linux_init_abi): Likewise.
+	* ia64-linux-tdep.c (ia64_linux_init_abi): Likewise.
+	* m32r-linux-tdep.c (m32r_linux_init_abi): Likewise.
+	* m68k-linux-tdep.c (m68k_linux_init_abi): Likewise.
+	* microblaze-linux-tdep.c (microblaze_linux_init_abi): Likewise.
+	* mips-linux-tdep.c (mips_linux_init_abi): Likewise.
+	* mn10300-linux-tdep.c (am33_linux_init_osabi): Likewise.
+	* nios2-linux-tdep.c (nios2_linux_init_abi): Likewise.
+	* or1k-linux-tdep.c (or1k_linux_init_abi): Likewise.
+	* riscv-linux-tdep.c (riscv_linux_init_abi): Likewise.
+	* s390-linux-tdep.c (s390_linux_init_abi_any): Likewise.
+	* sh-linux-tdep.c (sh_linux_init_abi): Likewise.
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Likewise.
+	* sparc64-linux-tdep.c (sparc64_linux_init_abi): Likewise.
+	* tic6x-linux-tdep.c (tic6x_uclinux_init_abi): Likewise.
+	* tilegx-linux-tdep.c (tilegx_linux_init_abi): Likewise.
+	* xtensa-linux-tdep.c (xtensa_linux_init_abi): Likewise.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Adjust call to
+	linux_init_abi.  Remove call to
+	set_gdbarch_displaced_step_location.
+	* arm-tdep.c (arm_pc_is_thumb): Call
+	gdbarch_displaced_step_copy_insn_closure_by_addr instead of
+	get_displaced_step_copy_insn_closure_by_addr.
+	* rs6000-aix-tdep.c (rs6000_aix_init_osabi): Adjust calls to
+	clear gdbarch methods.
+	* rs6000-tdep.c (struct ppc_inferior_data): New structure.
+	(get_ppc_per_inferior): New function.
+	(ppc_displaced_step_prepare): New function.
+	(ppc_displaced_step_finish): New function.
+	(ppc_displaced_step_restore_all_in_ptid): New function.
+	(rs6000_gdbarch_init): Register new gdbarch methods.
+	* s390-tdep.c (s390_gdbarch_init): Don't call
+	set_gdbarch_displaced_step_location, set new gdbarch methods.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.in (COMMON_SFILES): Add displaced-stepping.c.
 	* aarch64-tdep.h: Include displaced-stepping.h.
 	* displaced-stepping.h (struct displaced_step_copy_insn_closure):

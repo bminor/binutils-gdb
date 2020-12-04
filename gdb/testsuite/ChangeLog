@@ -1,5 +1,11 @@
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdb.arch/amd64-disp-step-avx.exp: Adjust pattern.
+	* gdb.threads/forking-threads-plus-breakpoint.exp: Likewise.
+	* gdb.threads/non-stop-fair-events.exp: Likewise.
+
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdb.threads/step-over-exec.exp: New.
 	* gdb.threads/step-over-exec.c: New.
 	* gdb.threads/step-over-exec-execd.c: New.
