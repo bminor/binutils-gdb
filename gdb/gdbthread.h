@@ -741,20 +741,20 @@ extern value *get_last_thread_stack_temporary (struct thread_info *tp);
 extern bool value_in_thread_stack_temporaries (struct value *,
 					       struct thread_info *thr);
 
-/* Add TP to the end of its inferior's pending step-over chain.  */
+/* Add TP to the end of the global pending step-over chain.  */
 
-extern void thread_step_over_chain_enqueue (struct thread_info *tp);
+extern void global_thread_step_over_chain_enqueue (thread_info *tp);
 
-/* Remove TP from its inferior's pending step-over chain.  */
+/* Remove TP from the global pending step-over chain.  */
 
-extern void thread_step_over_chain_remove (struct thread_info *tp);
+extern void global_thread_step_over_chain_remove (thread_info *tp);
 
-/* Return the next thread in the step-over chain starting at TP.  NULL
-   if TP is the last entry in the chain.  */
+/* Return the thread following TP in the global step-over chain, or NULL if TP
+   is the last entry in the chain.  */
 
-extern struct thread_info *thread_step_over_chain_next (struct thread_info *tp);
+extern thread_info *global_thread_step_over_chain_next (thread_info *tp);
 
-/* Return true if TP is in the step-over chain.  */
+/* Return true if TP is in any step-over chain.  */
 
 extern int thread_is_in_step_over_chain (struct thread_info *tp);
 

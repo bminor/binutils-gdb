@@ -262,9 +262,9 @@ extern void infrun_async (int enable);
    loop.  */
 extern void mark_infrun_async_event_handler (void);
 
-/* The global queue of threads that need to do a step-over operation
+/* The global chain of threads that need to do a step-over operation
    to get past e.g., a breakpoint.  */
-extern struct thread_info *step_over_queue_head;
+extern struct thread_info *global_thread_step_over_chain_head;
 
 /* Remove breakpoints if possible (usually that means, if everything
    is stopped).  On failure, print a message.  */

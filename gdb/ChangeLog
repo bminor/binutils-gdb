@@ -1,3 +1,32 @@
+2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbthread.h (thread_step_over_chain_enqueue): Rename to...
+	(global_thread_step_over_chain_enqueue): ... this.  Update all
+	users.
+	(thread_step_over_chain_remove): Rename to...
+	(global_thread_step_over_chain_remove): ... this.  Update all
+	users.
+	(thread_step_over_chain_next): Rename to...
+	(global_thread_step_over_chain_next): ... this.  Update all
+	users.
+	* infrun.h (step_over_queue_head): Rename to...
+	(global_thread_step_over_chain_head): ... this.  Update all
+	users.
+	* infrun.c (step_over_queue_head): Rename to...
+	(global_thread_step_over_chain_head): ... this.  Update all
+	users.
+	* thread.c (step_over_chain_remove): Rename to...
+	(thread_step_over_chain_remove): ... this.  Update all users.
+	(thread_step_over_chain_next): Rename to...
+	(global_thread_step_over_chain_next): ... this.  Update all
+	users.
+	(thread_step_over_chain_enqueue): Rename to...
+	(global_thread_step_over_chain_enqueue): ... this.  Update all
+	users.
+	(thread_step_over_chain_remove): Rename to...
+	(global_thread_step_over_chain_remove): ... this.  Update all
+	users.
+
 2020-12-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (get_displaced_stepping_state): Remove, change
