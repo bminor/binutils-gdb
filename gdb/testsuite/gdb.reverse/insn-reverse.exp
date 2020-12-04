@@ -50,11 +50,14 @@ proc read_testcase { n } {
 # the contents of registers are saved, and test compares them.  If
 # there is any differences, a FAIL is emitted.
 
-proc test { func } {
+proc test { func testcase_nr } {
     global hex decimal
     global gdb_prompt
 
     with_test_prefix "$func" {
+	gdb_start_cmd $testcase_nr
+	gdb_test "" "" "wait for prompt"
+
 	gdb_breakpoint $func
 	gdb_test "continue"
 
@@ -74,12 +77,20 @@ proc test { func } {
 
 	# Registers contents before each forward single step.
 	set count 0
+	set insn_addr ""
 	for {} {$count < 500} {incr count} {
 	    gdb_test_multiple "x/i \$pc" "" {
 		-re ".* ($hex) <.*>:\[ \t\]*(.*)\r\n$gdb_prompt $" {
+		    set prev_insn_addr $insn_addr
 		    set insn_addr $expect_out(1,string)
 
 		    if [expr {$last_insn == $insn_addr}] {
+			break
+		    }
+
+		    if { $prev_insn_addr == $insn_addr } {
+			# Failed to make progress, might have run into SIGILL.
+			unsupported "no progress at: $expect_out(2,string)"
 			break
 		    }
 
@@ -125,5 +136,5 @@ if { ${n_testcases} == 0 } {
 for { set i 0 } { ${i} < ${n_testcases} } { incr i } {
     set testcase [read_testcase $i]
 
-    test $testcase
+    test $testcase $i
 }

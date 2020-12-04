@@ -1,3 +1,12 @@
+2020-12-04  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.reverse/insn-reverse.c (test_nr): New var.
+	(usage, parse_args): New function.
+	(main): Call parse_args.  Only run test for test_nr.
+	* gdb.reverse/insn-reverse.exp: Detect lack of progress in stepi loop
+	and bail out.  Run subtests individually, using an inferior arg
+	specifying the subtest.
+
 2020-12-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/riscv-tdesc-regs.exp: Remove unwanted test.

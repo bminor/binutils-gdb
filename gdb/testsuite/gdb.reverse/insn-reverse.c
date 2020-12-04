@@ -15,6 +15,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <stdlib.h>
+#include <stdio.h>
+
 typedef void (*testcase_ftype) (void);
 
 /* The arch-specific files need to implement both the initialize function
@@ -45,16 +48,48 @@ initialize (void)
    array is defined together with them.  */
 static int n_testcases = (sizeof (testcases) / sizeof (testcase_ftype));
 
-int
-main ()
+static void
+usage (void)
 {
-  int i = 0;
+  printf ("usage: insn-reverse <0-%d>\n", n_testcases - 1);
+}
+
+static int test_nr;
+
+static void
+parse_args (int argc, char **argv)
+{
+  if (argc != 2)
+    {
+      usage ();
+      exit (1);
+    }
+
+  char *tail;
+  test_nr = strtol (argv[1], &tail, 10);
+  if (*tail != '\0')
+    {
+      usage ();
+      exit (1);
+    }
+
+  int in_range_p = 0 <= test_nr && test_nr < n_testcases;
+  if (!in_range_p)
+    {
+      usage ();
+      exit (1);
+    }
+}
+
+int
+main (int argc, char **argv)
+{
+  parse_args (argc, argv);
 
   /* Initialize any required arch-specific bits.  */
   initialize ();
 
-  for (i = 0; i < n_testcases; i++)
-    testcases[i] ();
+  testcases[test_nr] ();
 
   return 0;
 }
