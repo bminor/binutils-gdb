@@ -1,3 +1,10 @@
+2020-12-04  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* s390-opc.txt: Add risbgz and risbgnz.
+	* s390-opc.c (U6_26): New operand type.
+	(INSTR_RIE_RRUUU2, MASK_RIE_RRUUU2): New instruction format and
+	mask.
+
 2020-12-03  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* s390-opc.txt: Add extended mnemonics.

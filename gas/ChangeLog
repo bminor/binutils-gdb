@@ -1,3 +1,10 @@
+2020-12-04  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-z10.s: Add tests for risbgz.
+	* testsuite/gas/s390/zarch-z10.d: Add regexp for risbgz.
+	* testsuite/gas/s390/zarch-zEC12.s: Add tests for risbgnz.
+	* testsuite/gas/s390/zarch-zEC12.d: Add regexp for risbgnz.
+
 2020-12-03  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* testsuite/gas/s390/esa-g5.s: Test new extended mnemonics.

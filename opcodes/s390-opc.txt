@@ -970,6 +970,7 @@ ec0000000054 rnsbg RIE_RRUUU "rotate then and selected bits" z10 zarch
 ec0000000057 rxsbg RIE_RRUUU "rotate then exclusive or selected bits" z10 zarch
 ec0000000056 rosbg RIE_RRUUU "rotate then or selected bits" z10 zarch
 ec0000000055 risbg RIE_RRUUU "rotate then insert selected bits" z10 zarch
+ec0000800055 risbgz RIE_RRUUU2 "rotate then insert selected bits and zero remaining bits" z10 zarch
 c40f strl RIL_RP "store relative long (32)" z10 zarch
 c40b stgrl RIL_RP "store relative long (64)" z10 zarch
 c407 sthrl RIL_RP "store halfword relative long" z10 zarch
@@ -1153,6 +1154,7 @@ eb0000000023 clt$12 RSY_R0RD "compare logical and trap 32 bit reg-mem" zEC12 zar
 eb000000002b clgt RSY_RURD "compare logical and trap 64 bit reg-mem" zEC12 zarch
 eb000000002b clgt$12 RSY_R0RD "compare logical and trap 64 bit reg-mem" zEC12 zarch
 ec0000000059 risbgn RIE_RRUUU "rotate then insert selected bits nocc" zEC12 zarch
+ec0000800059 risbgnz RIE_RRUUU2 "rotate then insert selected bits and zero remaining bits nocc" zEC12 zarch
 ed00000000aa cdzt RSL_LRDFU "convert from zoned long" zEC12 zarch
 ed00000000ab cxzt RSL_LRDFEU "convert from zoned extended" zEC12 zarch
 ed00000000a8 czdt RSL_LRDFU "convert to zoned long" zEC12 zarch
