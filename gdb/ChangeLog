@@ -1,3 +1,8 @@
+2020-12-04  Tom de Vries  <tdevries@suse.de>
+
+	PR tdep/27007
+	* i386-tdep.c (i386_16_byte_align_p): Skip static fields.
+
 2020-12-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26876
