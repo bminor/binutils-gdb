@@ -1,3 +1,9 @@
+2020-12-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gmp-utils.c (gdb_mpz::read): Use HOST_CHAR_BIT instead of
+	TARGET_CHAR_BIT.
+	(gdb_mpz::write): Likewise.
+
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
 	* amd64-linux-tdep.c (amd64_linux_init_abi): Pass 2 as the

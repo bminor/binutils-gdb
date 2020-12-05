@@ -56,7 +56,7 @@ gdb_mpz::read (gdb::array_view<const gdb_byte> buf, enum bfd_endian byte_order,
 	 was in fact negative, we need to adjust VAL accordingly.  */
       gdb_mpz max;
 
-      mpz_ui_pow_ui (max.val, 2, buf.size () * TARGET_CHAR_BIT - 1);
+      mpz_ui_pow_ui (max.val, 2, buf.size () * HOST_CHAR_BIT - 1);
       if (mpz_cmp (val, max.val) >= 0)
 	mpz_submul_ui (val, max.val, 2);
     }
@@ -77,7 +77,7 @@ gdb_mpz::write (gdb::array_view<gdb_byte> buf, enum bfd_endian byte_order,
 	 would be the same as our negative value.  */
       gdb_mpz neg_offset;
 
-      mpz_ui_pow_ui (neg_offset.val, 2, buf.size () * TARGET_CHAR_BIT);
+      mpz_ui_pow_ui (neg_offset.val, 2, buf.size () * HOST_CHAR_BIT);
       mpz_add (exported_val.val, exported_val.val, neg_offset.val);
     }
 
