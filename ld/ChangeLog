@@ -1,3 +1,12 @@
+2020-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27016
+	* testsuite/ld-x86-64/x86-64.exp: Run pr27016a and pr27016b.
+	* testsuite/ld-x86-64/pr27016a.d: New file.
+	* testsuite/ld-x86-64/pr27016a.s: Likewise.
+	* testsuite/ld-x86-64/pr27016b.d: Likewise.
+	* testsuite/ld-x86-64/pr27016b.s: Likewise.
+
 2020-11-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26869

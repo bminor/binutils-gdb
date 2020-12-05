@@ -1,3 +1,9 @@
+2020-12-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27016
+	* elf64-x86-64.c (elf_x86_64_convert_load_reloc): Convert load
+	to mov only for GOTPCRELX relocations.
+
 2020-10-09  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (write_plt_relocs_for_local_syms): Don't do local
