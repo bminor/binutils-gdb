@@ -598,7 +598,7 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a global offset table entry.  */
-	  if (h->forced_local
+	  if (SYMBOL_REFERENCES_LOCAL (info, h)
 	      || h == elf_hash_table (info)->hgot
 	      || h == elf_hash_table (info)->hplt)
 	    break;

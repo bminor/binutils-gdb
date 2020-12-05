@@ -1,3 +1,27 @@
+2020-12-05  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* testsuite/ld-vax-elf/got-local-exe-off-hidden.dd: New test
+	dump.
+	* testsuite/ld-vax-elf/got-local-exe-off-visible.dd: New test
+	dump.
+	* testsuite/ld-vax-elf/got-local-lib-off-hidden.dd: New test
+	dump.
+	* testsuite/ld-vax-elf/got-local-lib-off-visible.ed: New test
+	dump.
+	* testsuite/ld-vax-elf/got-local-off-external.ed: New test dump.
+	* testsuite/ld-vax-elf/got-local-exe-off.xd: New test dump.
+	* testsuite/ld-vax-elf/got-local-lib-off.xd: New test dump.
+	* testsuite/ld-vax-elf/got-local.ld: New test linker script.
+	* testsuite/ld-vax-elf/got-local-aux-off.s: New test source.
+	* testsuite/ld-vax-elf/got-local-def-off.s: New test source.
+	* testsuite/ld-vax-elf/got-local-ref-off-external.s: New test
+	source.
+	* testsuite/ld-vax-elf/got-local-ref-off-hidden.s: New test
+	source.
+	* testsuite/ld-vax-elf/got-local-ref-off-visible.s: New test
+	source.
+	* testsuite/ld-vax-elf/vax-elf.exp: Run the new tests.
+
 2020-12-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27016
