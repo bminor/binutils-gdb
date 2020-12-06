@@ -117,7 +117,7 @@ enum
   op_basr  = 0x0d,
   op_bas   = 0x4d,
   op_bcr   = 0x07,
-  op_bc    = 0x0d,
+  op_bc    = 0x47,
   op_bctr  = 0x06,
   op_bctgr = 0xb946,
   op_bct   = 0x46,
