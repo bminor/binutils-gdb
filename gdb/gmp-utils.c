@@ -68,9 +68,61 @@ void
 gdb_mpz::write (gdb::array_view<gdb_byte> buf, enum bfd_endian byte_order,
 		bool unsigned_p) const
 {
+  this->safe_export
+    (buf, byte_order == BFD_ENDIAN_BIG ? 1 : -1 /* endian */, unsigned_p);
+}
+
+/* See gmp-utils.h.  */
+
+void
+gdb_mpz::safe_export (gdb::array_view<gdb_byte> buf,
+		      int endian, bool unsigned_p) const
+{
+  gdb_assert (buf.size () > 0);
+
+  if (mpz_sgn (val) == 0)
+    {
+      /* Our value is zero, so no need to call mpz_export to do the work,
+	 especially since mpz_export's documentation explicitly says
+	 that the function is a noop in this case.  Just write zero to
+	 BUF ourselves.  */
+      memset (buf.data (), 0, buf.size ());
+      return;
+    }
+
+  /* Determine the maximum range of values that our buffer can hold,
+     and verify that VAL is within that range.  */
+
+  gdb_mpz lo, hi;
+  const size_t max_usable_bits = buf.size () * HOST_CHAR_BIT;
+  if (unsigned_p)
+    {
+      lo = 0;
+
+      mpz_ui_pow_ui (hi.val, 2, max_usable_bits);
+      mpz_sub_ui (hi.val, hi.val, 1);
+    }
+  else
+    {
+      mpz_ui_pow_ui (lo.val, 2, max_usable_bits - 1);
+      mpz_neg (lo.val, lo.val);
+
+      mpz_ui_pow_ui (hi.val, 2, max_usable_bits - 1);
+      mpz_sub_ui (hi.val, hi.val, 1);
+    }
+
+  if (mpz_cmp (val, lo.val) < 0 || mpz_cmp (val, hi.val) > 0)
+    error (_("Cannot export value %s as %zu-bits %s integer"
+	     " (must be between %s and %s)"),
+	   this->str ().c_str (),
+	   max_usable_bits,
+	   unsigned_p ? _("unsigned") : _("signed"),
+	   lo.str ().c_str (),
+	   hi.str ().c_str ());
+
   gdb_mpz exported_val (val);
 
-  if (mpz_cmp_ui (val, 0) < 0)
+  if (mpz_cmp_ui (exported_val.val, 0) < 0)
     {
       /* mpz_export does not handle signed values, so create a positive
 	 value whose bit representation as an unsigned of the same length
@@ -81,13 +133,24 @@ gdb_mpz::write (gdb::array_view<gdb_byte> buf, enum bfd_endian byte_order,
       mpz_add (exported_val.val, exported_val.val, neg_offset.val);
     }
 
-  /* Start by clearing the buffer, as mpz_export only writes as many
-     bytes as it needs (including none, if the value to export is zero.  */
-  memset (buf.data (), 0, buf.size ());
-  mpz_export (buf.data (), NULL /* count */, -1 /* order */,
-	      buf.size () /* size */,
-	      byte_order == BFD_ENDIAN_BIG ? 1 : -1 /* endian */,
-	      0 /* nails */, exported_val.val);
+  /* Do the export into a buffer allocated by GMP itself; that way,
+     we can detect cases where BUF is not large enough to export
+     our value, and thus avoid a buffer overlow.  Normally, this should
+     never happen, since we verified earlier that the buffer is large
+     enough to accomodate our value, but doing this allows us to be
+     extra safe with the export.
+
+     After verification that the export behaved as expected, we will
+     copy the data over to BUF.  */
+
+  size_t word_countp;
+  gdb::unique_xmalloc_ptr<void> exported
+    (mpz_export (NULL, &word_countp, -1 /* order */, buf.size () /* size */,
+		 endian, 0 /* nails */, exported_val.val));
+
+  gdb_assert (word_countp == 1);
+
+  memcpy (buf.data (), exported.get (), buf.size ());
 }
 
 /* See gmp-utils.h.  */

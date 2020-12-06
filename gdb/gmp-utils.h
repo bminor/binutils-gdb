@@ -121,6 +121,24 @@ private:
 
   /* Helper template for constructor and operator=.  */
   template<typename T> void set (T src);
+
+  /* Low-level function to export VAL into BUF as a number whose byte size
+     is the size of BUF.
+
+     If UNSIGNED_P is true, then export VAL into BUF as an unsigned value.
+     Otherwise, export it as a signed value.
+
+     The API is inspired from GMP's mpz_export, hence the naming and types
+     of the following parameter:
+       - ENDIAN should be:
+           . 1 for most significant byte first; or
+	   . -1 for least significant byte first; or
+	   . 0 for native endianness.
+
+    An error is raised if BUF is not large enough to contain the value
+    being exported.  */
+  void safe_export (gdb::array_view<gdb_byte> buf,
+		    int endian, bool unsigned_p) const;
 };
 
 /* A class to make it easier to use GMP's mpq_t values within GDB.  */
@@ -258,26 +276,12 @@ template<typename T>
 T
 gdb_mpz::as_integer () const
 {
-  /* Initialize RESULT, because mpz_export only write the minimum
-     number of bytes, including none if our value is zero!  */
-  T result = 0;
+  T result;
 
-  gdb_mpz exported_val (val);
-  if (std::is_signed<T>::value && mpz_cmp_ui (val, 0) < 0)
-    {
-      /* We want to use mpz_export to set the return value, but
-	 this function does not handle the sign. So give exported_val
-	 a value which is at the same time positive, and has the same
-	 bit representation as our negative value.  */
-      gdb_mpz neg_offset;
+  this->safe_export ({(gdb_byte *) &result, sizeof (result)},
+		     0 /* endian (0 = native) */,
+		     !std::is_signed<T>::value /* unsigned_p */);
 
-      mpz_ui_pow_ui (neg_offset.val, 2, sizeof (T) * HOST_CHAR_BIT);
-      mpz_add (exported_val.val, exported_val.val, neg_offset.val);
-    }
-
-  mpz_export (&result, NULL /* count */, -1 /* order */,
-	      sizeof (T) /* size */, 0 /* endian (0 = native) */,
-	      0 /* nails */, exported_val.val);
   return result;
 }
 

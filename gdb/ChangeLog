@@ -1,3 +1,16 @@
+2020-12-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gmp-utils.h (gdb_mpz::safe_export): New private method.
+	(gdb_mpz::as_integer): Reimplement using gdb_mpz::safe_export.
+	* gmp-utils.c (gdb_mpz::write): Rewrite using gdb_mpz::safe_export.
+	(gdb_mpz::safe_export): New method.
+	* unittests/gmp-utils-selftests .c (gdb_mpz_as_integer):
+	Update function description.
+	(check_as_integer_raises_out_of_range_error): New function.
+	(gdb_mpz_as_integer_out_of_range): New function.
+	(_initialize_gmp_utils_selftests): Register
+	gdb_mpz_as_integer_out_of_range as a selftest.
+
 2020-12-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gmp-utils.c (gdb_mpz::read): Use HOST_CHAR_BIT instead of

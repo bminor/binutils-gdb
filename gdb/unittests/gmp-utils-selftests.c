@@ -26,9 +26,10 @@ namespace selftests {
 
 /* Perform a series of general tests of gdb_mpz's as_integer method.
 
-   This function tries to be reasonably exhaustive, by testing the edges,
-   as well as a resonable set of values including negative ones, zero,
-   and positive values.  */
+   This function limits itself to values which are in range (out-of-range
+   values will be tested separately).  In doing so, it tries to be reasonably
+   exhaustive, by testing the edges, as well as a resonable set of values
+   including negative ones, zero, and positive values.  */
 
 static void
 gdb_mpz_as_integer ()
@@ -78,6 +79,68 @@ gdb_mpz_as_integer ()
   mpz_sub_ui (v.val, v.val, 1);
 
   SELF_CHECK (v.as_integer<ULONGEST> () == ul_expected);
+}
+
+/* A helper function which calls the given gdb_mpz object's as_integer
+   method with the given type T, and verifies that this triggers
+   an error due to VAL's value being out of range for type T.  */
+
+template<typename T, typename = gdb::Requires<std::is_integral<T>>>
+static void
+check_as_integer_raises_out_of_range_error (const gdb_mpz &val)
+{
+  try
+    {
+      val.as_integer<T> ();
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      SELF_CHECK (ex.reason == RETURN_ERROR);
+      SELF_CHECK (ex.error == GENERIC_ERROR);
+      SELF_CHECK (strstr (ex.what (), "Cannot export value") != nullptr);
+      return;
+    }
+  /* The expected exception did not get raised.  */
+  SELF_CHECK (false);
+}
+
+/* Perform out-of-range tests of gdb_mpz's as_integer method.
+
+   The goal of this function is to verify that gdb_mpz::as_integer
+   handles out-of-range values correctly.  */
+
+static void
+gdb_mpz_as_integer_out_of_range ()
+{
+  gdb_mpz v;
+
+  /* Try LONGEST_MIN minus 1.  */
+  mpz_ui_pow_ui (v.val, 2, sizeof (LONGEST) * 8 - 1);
+  mpz_neg (v.val, v.val);
+  mpz_sub_ui (v.val, v.val, 1);
+
+  check_as_integer_raises_out_of_range_error<ULONGEST> (v);
+  check_as_integer_raises_out_of_range_error<LONGEST> (v);
+
+  /* Try negative one (-1). */
+  v = -1;
+
+  check_as_integer_raises_out_of_range_error<ULONGEST> (v);
+  SELF_CHECK (v.as_integer<LONGEST> () == (LONGEST) -1);
+
+  /* Try LONGEST_MAX plus 1.  */
+  v = LONGEST_MAX;
+  mpz_add_ui (v.val, v.val, 1);
+
+  SELF_CHECK (v.as_integer<ULONGEST> () == (ULONGEST) LONGEST_MAX + 1);
+  check_as_integer_raises_out_of_range_error<LONGEST> (v);
+
+  /* Try ULONGEST_MAX plus 1.  */
+  v = ULONGEST_MAX;
+  mpz_add_ui (v.val, v.val, 1);
+
+  check_as_integer_raises_out_of_range_error<ULONGEST> (v);
+  check_as_integer_raises_out_of_range_error<LONGEST> (v);
 }
 
 /* A helper function to store the given integer value into a buffer,
@@ -445,6 +508,8 @@ _initialize_gmp_utils_selftests ()
 {
   selftests::register_test ("gdb_mpz_as_integer",
 			    selftests::gdb_mpz_as_integer);
+  selftests::register_test ("gdb_mpz_as_integer_out_of_range",
+			    selftests::gdb_mpz_as_integer_out_of_range);
   selftests::register_test ("gdb_mpz_read_all_from_small",
 			    selftests::gdb_mpz_read_all_from_small);
   selftests::register_test ("gdb_mpz_read_min_max",
