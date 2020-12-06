@@ -1,3 +1,8 @@
+2020-12-06  Giancarlo Frix  <gfrix@rocketsoftware.com>  (tiny change)
+
+	PR breakpoints/27009
+	* s390-tdep.h (op_bc): Correct BC opcode value.
+
 2020-12-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* gmp-utils.h (gdb_mpz::safe_export): New private method.
