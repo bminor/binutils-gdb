@@ -620,12 +620,10 @@ per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
   ctx->eval (block.data, block.size);
 }
 
-/* Given context CTX, section offset SECT_OFF, and compilation unit
-   data PER_CU, execute the "variable value" operation on the DIE
-   found at SECT_OFF.  */
+/* See loc.h.  */
 
-static struct value *
-sect_variable_value (struct dwarf_expr_context *ctx, sect_offset sect_off,
+struct value *
+sect_variable_value (sect_offset sect_off,
 		     dwarf2_per_cu_data *per_cu,
 		     dwarf2_per_objfile *per_objfile)
 {
@@ -654,7 +652,6 @@ public:
     : dwarf_expr_context (per_objfile)
   {}
 
-  struct dwarf2_per_cu_data *per_cu;
   CORE_ADDR obj_address;
 
   /* Helper function for dwarf2_evaluate_loc_desc.  Computes the PC for
@@ -678,32 +675,6 @@ public:
   void dwarf_call (cu_offset die_offset) override
   {
     per_cu_dwarf_call (this, die_offset, per_cu, per_objfile);
-  }
-
-  /* Helper interface of sect_variable_value for
-     dwarf2_evaluate_loc_desc.  */
-
-  struct value *dwarf_variable_value (sect_offset sect_off) override
-  {
-    return sect_variable_value (this, sect_off, per_cu, per_objfile);
-  }
-
-  struct type *get_base_type (cu_offset die_offset, int size) override
-  {
-    struct type *result = dwarf2_get_die_type (die_offset, per_cu, per_objfile);
-    if (result == NULL)
-      error (_("Could not find type for DW_OP_const_type"));
-    if (size != 0 && TYPE_LENGTH (result) != size)
-      error (_("DW_OP_const_type has different sizes for type and data"));
-    return result;
-  }
-
-  /* Callback function for dwarf2_evaluate_loc_desc.
-     Fetch the address indexed by DW_OP_addrx or DW_OP_GNU_addr_index.  */
-
-  CORE_ADDR get_addr_index (unsigned int index) override
-  {
-    return dwarf2_read_addr_index (per_cu, per_objfile, index);
   }
 
   /* Callback function for get_object_address. Return the address of the VLA

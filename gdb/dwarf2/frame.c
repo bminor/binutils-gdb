@@ -258,16 +258,6 @@ public:
     invalid ("DW_OP_call*");
   }
 
-  struct value *dwarf_variable_value (sect_offset sect_off) override
-  {
-    invalid ("DW_OP_GNU_variable_value");
-  }
-
-  CORE_ADDR get_addr_index (unsigned int index) override
-  {
-    invalid ("DW_OP_addrx or DW_OP_GNU_addr_index");
-  }
-
  private:
 
   void invalid (const char *op) ATTRIBUTE_NORETURN
