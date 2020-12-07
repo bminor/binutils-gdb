@@ -69,86 +69,6 @@ show_jit_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("JIT debugging is %s.\n"), value);
 }
 
-struct target_buffer
-{
-  CORE_ADDR base;
-  ULONGEST size;
-};
-
-/* Opening the file is a no-op.  */
-
-static void *
-mem_bfd_iovec_open (struct bfd *abfd, void *open_closure)
-{
-  return open_closure;
-}
-
-/* Closing the file is just freeing the base/size pair on our side.  */
-
-static int
-mem_bfd_iovec_close (struct bfd *abfd, void *stream)
-{
-  xfree (stream);
-
-  /* Zero means success.  */
-  return 0;
-}
-
-/* For reading the file, we just need to pass through to target_read_memory and
-   fix up the arguments and return values.  */
-
-static file_ptr
-mem_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
-		     file_ptr nbytes, file_ptr offset)
-{
-  int err;
-  struct target_buffer *buffer = (struct target_buffer *) stream;
-
-  /* If this read will read all of the file, limit it to just the rest.  */
-  if (offset + nbytes > buffer->size)
-    nbytes = buffer->size - offset;
-
-  /* If there are no more bytes left, we've reached EOF.  */
-  if (nbytes == 0)
-    return 0;
-
-  err = target_read_memory (buffer->base + offset, (gdb_byte *) buf, nbytes);
-  if (err)
-    return -1;
-
-  return nbytes;
-}
-
-/* For statting the file, we only support the st_size attribute.  */
-
-static int
-mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
-{
-  struct target_buffer *buffer = (struct target_buffer*) stream;
-
-  memset (sb, 0, sizeof (struct stat));
-  sb->st_size = buffer->size;
-  return 0;
-}
-
-/* Open a BFD from the target's memory.  */
-
-static gdb_bfd_ref_ptr
-bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
-			     const char *target)
-{
-  struct target_buffer *buffer = XNEW (struct target_buffer);
-
-  buffer->base = addr;
-  buffer->size = size;
-  return gdb_bfd_openr_iovec ("<in-memory>", target,
-			      mem_bfd_iovec_open,
-			      buffer,
-			      mem_bfd_iovec_pread,
-			      mem_bfd_iovec_close,
-			      mem_bfd_iovec_stat);
-}
-
 struct jit_reader
 {
   jit_reader (struct gdb_reader_funcs *f, gdb_dlhandle_up &&h)
@@ -773,9 +693,8 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
 			paddress (gdbarch, code_entry->symfile_addr),
 			pulongest (code_entry->symfile_size));
 
-  gdb_bfd_ref_ptr nbfd (bfd_open_from_target_memory (code_entry->symfile_addr,
-						     code_entry->symfile_size,
-						     gnutarget));
+  gdb_bfd_ref_ptr nbfd (gdb_bfd_open_from_target_memory
+      (code_entry->symfile_addr, code_entry->symfile_size, gnutarget));
   if (nbfd == NULL)
     {
       puts_unfiltered (_("Error opening JITed symbol file, ignoring it.\n"));

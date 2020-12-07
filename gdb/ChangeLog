@@ -1,3 +1,9 @@
+2020-12-07  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* jit.c (mem_bfd*, bfd_open_from_target_memory): Removed.
+	* gdb_bfd.h (gdb_bfd_open_from_target_memory): New function.
+	* gdb_bfd.c (mem_bfd*, gdb_bfd_open_from_target_memory): New functions.	
+
 2020-12-09  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_lookup_encoded_symbol): Use add_angle_brackets.

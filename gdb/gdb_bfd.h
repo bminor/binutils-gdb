@@ -194,6 +194,12 @@ int gdb_bfd_requires_relocations (bfd *abfd);
 bool gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 					gdb::byte_vector *contents);
 
+/* Create and initialize a BFD handle from a target in-memory range.  */
+
+gdb_bfd_ref_ptr gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
+						 const char *target,
+						 const char *filename = nullptr);
+
 /* Range adapter for a BFD's sections.
 
    To be used as:
