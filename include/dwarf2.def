@@ -708,6 +708,7 @@ DW_OP (DW_OP_AARCH64_operation, 0xea)
 DW_OP_DUP (DW_OP_LLVM_offset, 0xe3)
 DW_OP_DUP (DW_OP_LLVM_offset_constu, 0xe4)
 DW_OP_DUP (DW_OP_LLVM_bit_offset, 0xe5)
+DW_OP (DW_OP_LLVM_undefined, 0xe7)
 DW_END_OP
 
 DW_FIRST_ATE (DW_ATE_void, 0x0)
