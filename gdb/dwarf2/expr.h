@@ -192,9 +192,6 @@ struct dwarf_expr_context
   /* Read LENGTH bytes at ADDR into BUF.  */
   virtual void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length) = 0;
 
-  /* Return the CFA for the frame.  */
-  virtual CORE_ADDR get_frame_cfa () = 0;
-
   /* Return the PC for the frame.  */
   virtual CORE_ADDR get_frame_pc ()
   {
