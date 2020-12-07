@@ -3729,8 +3729,8 @@ set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_h
 
 static void
 copy_file (const char *input_filename, const char *output_filename, int ofd,
-	   const char *input_target,   const char *output_target,
-	   const bfd_arch_info_type *input_arch)
+	   struct stat *in_stat, const char *input_target,
+	   const char *output_target, const bfd_arch_info_type *input_arch)
 {
   bfd *ibfd;
   char **obj_matching;
@@ -3749,7 +3749,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
   ibfd = bfd_openr (input_filename, input_target);
-  if (ibfd == NULL)
+  if (ibfd == NULL || fstat (fileno (ibfd->iostream), in_stat) != 0)
     {
       bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
       status = 1;
@@ -4822,11 +4822,6 @@ strip_main (int argc, char *argv[])
 	  continue;
 	}
 
-      if (preserve_dates)
-	/* No need to check the return value of stat().
-	   It has already been checked in get_file_size().  */
-	stat (argv[i], &statbuf);
-
       if (output_file == NULL
 	  || filename_cmp (argv[i], output_file) == 0)
 	tmpname = make_tempname (argv[i], &tmpfd);
@@ -4842,7 +4837,8 @@ strip_main (int argc, char *argv[])
 	}
 
       status = 0;
-      copy_file (argv[i], tmpname, tmpfd, input_target, output_target, NULL);
+      copy_file (argv[i], tmpname, tmpfd, &statbuf, input_target,
+		 output_target, NULL);
       if (status == 0)
 	{
 	  if (preserve_dates)
@@ -5899,11 +5895,6 @@ copy_main (int argc, char *argv[])
       convert_efi_target (efi);
     }
 
-  if (preserve_dates)
-    if (stat (input_filename, & statbuf) < 0)
-      fatal (_("warning: could not locate '%s'.  System error message: %s"),
-	     input_filename, strerror (errno));
-
   /* If there is no destination file, or the source and destination files
      are the same, then create a temp and rename the result into the input.  */
   if (output_filename == NULL
@@ -5916,8 +5907,8 @@ copy_main (int argc, char *argv[])
     fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
 	   input_filename, strerror (errno));
 
-  copy_file (input_filename, tmpname, tmpfd, input_target, output_target,
-	     input_arch);
+  copy_file (input_filename, tmpname, tmpfd, &statbuf, input_target,
+	     output_target, input_arch);
   if (status == 0)
     {
       if (preserve_dates)

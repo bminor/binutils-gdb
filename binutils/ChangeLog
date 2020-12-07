@@ -1,6 +1,15 @@
 2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
 
 	PR 26945
+	* objcopy.c (copy_file): New argument IN_STAT.  Return stat of
+	ibfd through it.
+	(strip_main): Remove redundant stat calls.  adjust copy_file
+	calls.
+	(copy_main): Likewise.
+
+2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
+
+	PR 26945
 	* bucomm.c (make_tempname): Add argument to return file
 	descriptor.
 	* bucomm.h (make_tempname): Likewise.
