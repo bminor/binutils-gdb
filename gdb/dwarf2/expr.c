@@ -1351,77 +1351,68 @@ dwarf_entry_factory::value_cast_op (const dwarf_value *arg, struct type *type)
   return create_value (value_contents_raw (result), type);
 }
 
-struct piece_closure
+/* Closure class that encapsulates a location description and
+   a context in which that description is created.  Used for
+   lval_computed value abstraction.  */
+class computed_closure : public refcounted_object
 {
-  /* Reference count.  */
-  int refc = 0;
+public:
+  computed_closure (dwarf_entry *entry, struct frame_id frame_id) :
+		    m_entry (entry), m_frame_id (frame_id)
+		    {entry->incref ();}
 
-  /* The objfile from which this closure's expression came.  */
-  dwarf2_per_objfile *per_objfile = nullptr;
+  virtual ~computed_closure ()
+  {
+    m_entry->decref ();
 
-  /* The CU from which this closure's expression came.  */
-  struct dwarf2_per_cu_data *per_cu = NULL;
+    if (m_entry->refcount () == 0)
+      delete m_entry;
+  }
 
-  /* Location description of this variable.  */
-  dwarf_location *location;
+  dwarf_entry *get_entry () const
+  {
+    return m_entry;
+  }
 
-  /* Frame ID of frame to which a register value is relative, used
-     only by DWARF_VALUE_REGISTER.  */
-  struct frame_id frame_id;
+  struct frame_id get_frame_id () const
+  {
+    return m_frame_id;
+  }
+
+private:
+  /* Entry that this class encloses.  */
+  dwarf_entry *m_entry;
+
+  /* Frame ID context of the closure.  */
+  struct frame_id m_frame_id;
 };
 
-/* Allocate a closure for a value formed from separately-described
-   PIECES.  */
-
-static struct piece_closure *
-allocate_piece_closure (dwarf2_per_cu_data *per_cu,
-			dwarf2_per_objfile *per_objfile,
-			dwarf_location *location,
-			struct frame_info *frame)
-{
-  struct piece_closure *c = new piece_closure;
-
-  c->refc = 1;
-  /* We must capture this here due to sharing of DWARF state.  */
-  c->per_objfile = per_objfile;
-  c->per_cu = per_cu;
-  if (frame == NULL)
-    c->frame_id = null_frame_id;
-  else
-    c->frame_id = get_frame_id (frame);
-
-  location->incref ();
-  c->location = location;
-  return c;
-}
-
-/* Read or write a pieced value V.  If FROM != NULL, operate in "write
-   mode": copy FROM into the pieces comprising V.  If FROM == NULL,
+/* Read or write a closure value V.  If FROM != NULL, operate in "write
+   mode": copy FROM into the closure comprising V.  If FROM == NULL,
    operate in "read mode": fetch the contents of the (lazy) value V by
-   composing it from its pieces.  */
+   composing it from its closure.  */
 
 static void
-rw_pieced_value (struct value *v, struct value *from)
+rw_closure_value (struct value *v, struct value *from)
 {
   LONGEST bit_offset = 0, max_bit_offset;
-  struct piece_closure *closure
-    = (struct piece_closure *) value_computed_closure (v);
+  computed_closure *closure = ((computed_closure*) value_computed_closure (v));
   bool big_endian = type_byte_order (value_type (v)) == BFD_ENDIAN_BIG;
-  dwarf_entry *entry = closure->location;
+  dwarf_entry *entry = closure->get_entry ();
 
   /* Only expect implicit pointer and composite location
      description here.  */
   if (entry == nullptr
       || (dynamic_cast<dwarf_implicit_pointer *> (entry) == nullptr
-          && dynamic_cast<dwarf_composite *> (entry) == nullptr))
+	  && dynamic_cast<dwarf_composite *> (entry) == nullptr))
     internal_error (__FILE__, __LINE__, _("invalid location type"));
 
   if (from == NULL)
     {
       if (value_type (v) != value_enclosing_type (v))
-        internal_error (__FILE__, __LINE__,
-			_("Should not be able to create a lazy value with "
-			  "an enclosing type"));
+	  internal_error (__FILE__, __LINE__,
+			  _("Should not be able to create a lazy value with "
+			    "an enclosing type"));
     }
 
   ULONGEST bits_to_skip = HOST_CHAR_BIT * value_offset (v);
@@ -1454,7 +1445,7 @@ rw_pieced_value (struct value *v, struct value *from)
       return;
     }
 
-  struct frame_info *frame = frame_find_by_id (closure->frame_id);
+  struct frame_info *frame = frame_find_by_id (closure->get_frame_id ());
 
   dwarf_composite *composite_entry = dynamic_cast<dwarf_composite *> (entry);
 
@@ -1524,15 +1515,15 @@ rw_pieced_value (struct value *v, struct value *from)
 }
 
 static void
-read_pieced_value (struct value *v)
+read_closure_value (struct value *v)
 {
-  rw_pieced_value (v, NULL);
+  rw_closure_value (v, NULL);
 }
 
 static void
-write_pieced_value (struct value *to, struct value *from)
+write_closure_value (struct value *to, struct value *from)
 {
-  rw_pieced_value (to, from);
+  rw_closure_value (to, from);
 }
 
 /* Check if a given location contains an implicit pointer
@@ -1592,17 +1583,18 @@ check_synthetic_pointer_location (const dwarf_location *location,
    a synthetic pointer.  */
 
 static int
-check_pieced_synthetic_pointer (const struct value *value, LONGEST bit_offset,
-				int bit_length)
+check_synthetic_pointer (const struct value *value, LONGEST bit_offset,
+			 int bit_length)
 {
   LONGEST total_bit_offset = bit_offset + HOST_CHAR_BIT * value_offset (value);
 
   if (value_bitsize (value))
     total_bit_offset += value_bitpos (value);
 
-  struct piece_closure *closure
-    = (struct piece_closure *) value_computed_closure (value);
-  dwarf_location *location = closure->location;
+  computed_closure *closure
+    = (computed_closure *) value_computed_closure (value);
+  auto location
+    = dynamic_cast<dwarf_location *> (closure->get_entry ());
 
   if (location == nullptr)
     return 0;
@@ -1680,10 +1672,10 @@ indirect_from_location (const dwarf_location *location,
    pointer.  This handles the synthetic pointer case when needed.  */
 
 static struct value *
-indirect_pieced_value (struct value *value)
+indirect_closure_value (struct value *value)
 {
-  struct piece_closure *closure
-    = (struct piece_closure *) value_computed_closure (value);
+  computed_closure *closure
+    = (computed_closure *) value_computed_closure (value);
 
   struct type *type = check_typedef (value_type (value));
   if (type->code () != TYPE_CODE_PTR)
@@ -1695,7 +1687,8 @@ indirect_pieced_value (struct value *value)
   if (value_bitsize (value))
     bit_offset += value_bitpos (value);
 
-  dwarf_location *location = closure->location;
+  auto location
+    = dynamic_cast<dwarf_location *> (closure->get_entry ());
 
   /* Only location descriptions are meaningful here.  */
   if (location == nullptr)
@@ -1726,20 +1719,20 @@ indirect_pieced_value (struct value *value)
    references.  */
 
 static struct value *
-coerce_pieced_ref (const struct value *value)
+coerce_closure_ref (const struct value *value)
 {
   struct type *type = check_typedef (value_type (value));
 
   if (value_bits_synthetic_pointer (value, value_embedded_offset (value),
 				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
     {
-      struct piece_closure *closure
-	= (struct piece_closure *) value_computed_closure (value);
+      computed_closure *closure
+	= (computed_closure *) value_computed_closure (value);
       struct frame_info *frame
 	= get_selected_frame (_("No frame selected."));
 
       auto pointer_entry
-	= dynamic_cast<dwarf_implicit_pointer *> (closure->location);
+	= dynamic_cast<dwarf_implicit_pointer *> (closure->get_entry ());
 
       /* Only implicit pointer location description is meaningful here.  */
       if (pointer_entry == nullptr)
@@ -1747,8 +1740,8 @@ coerce_pieced_ref (const struct value *value)
 
       return indirect_synthetic_pointer (pointer_entry->get_die_offset (),
 					 pointer_entry->get_offset (),
-					 closure->per_cu,
-					 closure->per_objfile,
+					 pointer_entry->get_per_cu (),
+					 pointer_entry->get_per_objfile (),
 					 frame, type);
     }
   else
@@ -1759,38 +1752,41 @@ coerce_pieced_ref (const struct value *value)
 }
 
 static void *
-copy_pieced_value_closure (const struct value *v)
+copy_value_closure (const struct value *v)
 {
-  struct piece_closure *c
-    = (struct piece_closure *) value_computed_closure (v);
+  computed_closure *closure = ((computed_closure*) value_computed_closure (v));
 
-  ++c->refc;
-  return c;
+  if (closure == nullptr)
+    internal_error (__FILE__, __LINE__, _("invalid closure type"));
+
+  closure->incref ();
+  return closure;
 }
 
 static void
-free_pieced_value_closure (struct value *v)
+free_value_closure (struct value *v)
 {
-  struct piece_closure *c
-    = (struct piece_closure *) value_computed_closure (v);
+  computed_closure *closure = ((computed_closure*) value_computed_closure (v));
 
-  --c->refc;
-  if (c->refc == 0)
-    {
-      c->location->decref ();
-      delete c;
-    }
+  if (closure == nullptr)
+    internal_error (__FILE__, __LINE__, _("invalid closure type"));
+
+  closure->decref ();
+
+  if (closure->refcount () == 0)
+    delete closure;
 }
 
-/* Functions for accessing a variable described by DW_OP_piece.  */
-static const struct lval_funcs pieced_value_funcs = {
-  read_pieced_value,
-  write_pieced_value,
-  indirect_pieced_value,
-  coerce_pieced_ref,
-  check_pieced_synthetic_pointer,
-  copy_pieced_value_closure,
-  free_pieced_value_closure
+/* Functions for accessing a variable described by DW_OP_piece,
+   DW_OP_bit_piece or DW_OP_implicit_pointer.  */
+static const struct lval_funcs closure_value_funcs = {
+  read_closure_value,
+  write_closure_value,
+  indirect_closure_value,
+  coerce_closure_ref,
+  check_synthetic_pointer,
+  copy_value_closure,
+  free_value_closure
 };
 
 /* Given context CTX, section offset SECT_OFF, and compilation unit
@@ -2331,9 +2327,9 @@ dwarf_expr_context::gdb_value_to_dwarf_entry (struct value *value)
       {
 	/* Dwarf entry is enclosed by the closure anyway so we just
 	   need to unwrap it here.  */
-	struct piece_closure *closure
-	  = (struct piece_closure *) value_computed_closure (value);
-	auto location = dynamic_cast<dwarf_location *> (closure->location);
+	computed_closure *closure
+	  = ((computed_closure *) value_computed_closure (value));
+	auto location = dynamic_cast<dwarf_location *> (closure->get_entry ());
 
 	if (location == nullptr)
 	  internal_error (__FILE__, __LINE__, _("invalid closure type"));
@@ -2425,15 +2421,19 @@ dwarf_expr_context::dwarf_entry_to_gdb_value (dwarf_entry *entry,
 	      (void *)(implicit_entry->get_contents () + subobj_offset),
 	      subtype_len);
     }
-  else if (auto implicit_pointer_entry
-	    = dynamic_cast<dwarf_implicit_pointer *> (entry))
+  else if (dynamic_cast<dwarf_implicit_pointer *> (entry) != nullptr)
     {
-      struct piece_closure *closure
-	= allocate_piece_closure (this->per_cu, this->per_objfile,
-				  implicit_pointer_entry, this->frame);
+      /* Complain if the expression is larger than the size of the
+	 outer type.  */
+      if (this->addr_size > HOST_CHAR_BIT * TYPE_LENGTH (type))
+	invalid_synthetic_pointer ();
+
+      computed_closure *closure
+	= new computed_closure (entry, get_frame_id (frame));
+      closure->incref ();
 
       retval
-	= allocate_computed_value (subobj_type, &pieced_value_funcs, closure);
+	= allocate_computed_value (subobj_type, &closure_value_funcs, closure);
       set_value_offset (retval, subobj_offset);
     }
   else if (auto composite_entry = dynamic_cast<dwarf_composite *> (entry))
@@ -2449,12 +2449,12 @@ dwarf_expr_context::dwarf_entry_to_gdb_value (dwarf_entry *entry,
       if (bit_size > HOST_CHAR_BIT * TYPE_LENGTH (type))
 	invalid_synthetic_pointer ();
 
-      struct piece_closure *closure
-	= allocate_piece_closure (this->per_cu, this->per_objfile,
-				  composite_entry, this->frame);
+      computed_closure *closure
+	= new computed_closure (entry, get_frame_id (frame));
+      closure->incref ();
 
       retval
-	= allocate_computed_value (subobj_type, &pieced_value_funcs, closure);
+	= allocate_computed_value (subobj_type, &closure_value_funcs, closure);
       set_value_offset (retval, subobj_offset);
   }
 
