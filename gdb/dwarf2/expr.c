@@ -134,7 +134,8 @@ dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile)
   initialized (0),
   per_objfile (per_objfile),
   frame (nullptr),
-  per_cu (nullptr)
+  per_cu (nullptr),
+  obj_address (0)
 {
 }
 
