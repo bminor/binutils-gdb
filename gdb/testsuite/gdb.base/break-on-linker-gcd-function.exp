@@ -31,7 +31,6 @@ if [get_compiler_info "c++"] {
     return -1
 }
 
-set additional_flags {-ffunction-sections -Wl,--gc-sections}
 if {[build_executable_from_specs $testfile.exp $testfile \
        {c++ additional_flags=-Wl,--gc-sections} \
        $srcfile {debug c++ additional_flags=-ffunction-sections}]} {

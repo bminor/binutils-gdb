@@ -1,3 +1,8 @@
+2020-12-07  Pedro Alves  <pedro@palves.net>
+
+	* gdb.base/break-on-linker-gcd-function.exp: Remove unused
+	'additional_flags' variable.
+
 2020-12-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.linespec/explicit.exp: Extend with a test to check completing
