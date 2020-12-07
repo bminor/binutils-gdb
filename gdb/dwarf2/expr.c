@@ -1442,6 +1442,9 @@ rw_closure_value (struct value *v, struct value *from)
   unsigned int i;
   unsigned int pieces_num = composite_entry->get_pieces_num ();
 
+  bits_to_skip += HOST_CHAR_BIT * composite_entry->get_offset ()
+		  + composite_entry->get_bit_suboffset ();
+
   for (i = 0; i < pieces_num; i++)
     {
       ULONGEST bit_size = composite_entry->get_bit_size_at (i);
@@ -2363,6 +2366,7 @@ dwarf_expr_context::dwarf_entry_to_gdb_value (dwarf_entry *entry,
       address = value_as_address (value_from_pointer (ptr_type, address));
       retval = value_at_lazy (subobj_type, address + subobj_offset);
       set_value_stack (retval, memory_entry->in_stack ());
+      set_value_bitpos (retval, memory_entry->get_bit_suboffset ());
     }
   else if (auto register_entry = dynamic_cast<dwarf_register *> (entry))
     {
@@ -2372,6 +2376,18 @@ dwarf_expr_context::dwarf_entry_to_gdb_value (dwarf_entry *entry,
       /* Construct the value.  */
       retval = gdbarch_value_from_register (gdbarch, type,
 					    gdb_regnum, get_frame_id (frame));
+
+      LONGEST reg_offset = register_entry->get_offset ();
+      LONGEST retval_offset = value_offset (retval);
+
+      if (type_byte_order (type) == BFD_ENDIAN_BIG
+	  && (TYPE_LENGTH (type) + reg_offset) < retval_offset)
+	/* Big-endian, and we want less than full size.  */
+	set_value_offset (retval, retval_offset - reg_offset);
+      else
+	set_value_offset (retval, retval_offset + reg_offset);
+
+      set_value_bitpos (retval, register_entry->get_bit_suboffset ());
 
       /* Get the data.  */
       read_frame_register_value (retval, frame);
@@ -2384,7 +2400,8 @@ dwarf_expr_context::dwarf_entry_to_gdb_value (dwarf_entry *entry,
 	     return a generic optimized out value instead, so that we show
 	     <optimized out> instead of <not saved>.  */
 	  struct value *temp = allocate_value (subobj_type);
-	  value_contents_copy (temp, 0, retval, 0, TYPE_LENGTH (subobj_type));
+	  value_contents_copy (temp, 0, retval, 0, 0,
+			       TYPE_LENGTH (subobj_type));
 	  retval = temp;
 	}
     }
@@ -3670,6 +3687,55 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	  /* Return the address of the object we are currently observing.  */
 	  result_entry
 	    = entry_factory->create_memory (this->addr_info->addr);
+	  break;
+
+	case DW_OP_LLVM_offset:
+	  {
+	    dwarf_value *offset_value
+	      = entry_factory->entry_to_value (fetch (0), address_type);
+	    pop ();
+
+	    dwarf_require_integral (offset_value->get_type ());
+
+	    dwarf_location *location
+	      = entry_factory->entry_to_location (fetch (0));
+	    pop ();
+
+	    location->add_bit_offset
+	      (offset_value->to_long () * HOST_CHAR_BIT);
+	    result_entry = location;
+	  }
+	  break;
+
+	case DW_OP_LLVM_offset_constu:
+	  {
+	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
+	    result = uoffset;
+
+	    dwarf_location *location
+	      = entry_factory->entry_to_location (fetch (0));
+	    pop ();
+
+	    location->add_bit_offset (result * HOST_CHAR_BIT);
+	    result_entry = location;
+	  }
+	  break;
+
+	case DW_OP_LLVM_bit_offset:
+	  {
+	    dwarf_value *offset_value
+	      = entry_factory->entry_to_value (fetch (0), address_type);
+	    pop ();
+
+	    dwarf_require_integral (offset_value->get_type ());
+
+	    dwarf_location *location
+	      = entry_factory->entry_to_location (fetch (0));
+	    pop ();
+
+	    location->add_bit_offset (offset_value->to_long ());
+	    result_entry = location;
+	  }
 	  break;
 
 	default:

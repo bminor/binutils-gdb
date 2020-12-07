@@ -1306,9 +1306,10 @@ value_ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
 
 void
 value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
-			 struct value *src, LONGEST src_offset, LONGEST length)
+			 struct value *src, LONGEST src_offset,
+			 LONGEST src_bit_offset, LONGEST length)
 {
-  LONGEST src_bit_offset, dst_bit_offset, bit_length;
+  LONGEST src_total_bit_offset, dst_total_bit_offset, bit_length;
   struct gdbarch *arch = get_value_arch (src);
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
@@ -1327,17 +1328,29 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
 					     TARGET_CHAR_BIT * length));
 
   /* Copy the data.  */
-  memcpy (value_contents_all_raw (dst) + dst_offset * unit_size,
-	  value_contents_all_raw (src) + src_offset * unit_size,
-	  length * unit_size);
-
-  /* Copy the meta-data, adjusted.  */
-  src_bit_offset = src_offset * unit_size * HOST_CHAR_BIT;
-  dst_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
   bit_length = length * unit_size * HOST_CHAR_BIT;
 
-  value_ranges_copy_adjusted (dst, dst_bit_offset,
-			      src, src_bit_offset,
+  if (src_bit_offset)
+    {
+      bool big_endian = type_byte_order (value_type (dst)) == BFD_ENDIAN_BIG;
+
+      copy_bitwise (value_contents_all_raw (dst) + dst_offset * unit_size, 0,
+		    value_contents_all_raw (src) + src_offset * unit_size,
+		    src_bit_offset, bit_length, big_endian);
+    }
+  else
+    memcpy (value_contents_all_raw (dst) + dst_offset * unit_size,
+	    value_contents_all_raw (src) + src_offset * unit_size,
+	    length * unit_size);
+
+  /* Copy the meta-data, adjusted.  */
+  src_total_bit_offset = src_offset * unit_size * HOST_CHAR_BIT
+			 + src_bit_offset;
+  dst_total_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
+
+
+  value_ranges_copy_adjusted (dst, dst_total_bit_offset,
+			      src, src_total_bit_offset,
 			      bit_length);
 }
 
@@ -1353,12 +1366,14 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
 
 void
 value_contents_copy (struct value *dst, LONGEST dst_offset,
-		     struct value *src, LONGEST src_offset, LONGEST length)
+		     struct value *src, LONGEST src_offset,
+		     LONGEST src_bit_offset, LONGEST length)
 {
   if (src->lazy)
     value_fetch_lazy (src);
 
-  value_contents_copy_raw (dst, dst_offset, src, src_offset, length);
+  value_contents_copy_raw (dst, dst_offset, src, src_offset,
+			   src_bit_offset, length);
 }
 
 int
@@ -3015,7 +3030,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
       else
 	{
 	  v = allocate_value (value_enclosing_type (arg1));
-	  value_contents_copy_raw (v, 0, arg1, 0,
+	  value_contents_copy_raw (v, 0, arg1, 0, 0,
 				   TYPE_LENGTH (value_enclosing_type (arg1)));
 	}
       v->type = type;
@@ -3050,7 +3065,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	  v = allocate_value (type);
 	  value_contents_copy_raw (v, value_embedded_offset (v),
 				   arg1, value_embedded_offset (arg1) + offset,
-				   type_length_units (type));
+				   0, type_length_units (type));
 	}
       v->offset = (value_offset (arg1) + offset
 		   + value_embedded_offset (arg1));
@@ -3644,7 +3659,7 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
       v = allocate_value (type);
       value_contents_copy (v, value_embedded_offset (v),
 			   whole, value_embedded_offset (whole) + offset,
-			   type_length_units (type));
+			   0, type_length_units (type));
     }
   v->offset = value_offset (whole) + offset + value_embedded_offset (whole);
   set_value_component_location (v, whole);
@@ -3827,9 +3842,9 @@ value_fetch_lazy_memory (struct value *val)
   struct type *type = check_typedef (value_enclosing_type (val));
 
   if (TYPE_LENGTH (type))
-      read_value_memory (val, 0, value_stack (val),
-			 addr, value_contents_all_raw (val),
-			 type_length_units (type));
+    read_value_memory (val, value_bitpos (val), value_stack (val),
+		       addr, value_contents_all_raw (val),
+		       type_length_units (type));
 }
 
 /* Helper for value_fetch_lazy when the value is in a register.  */
@@ -3841,10 +3856,6 @@ value_fetch_lazy_register (struct value *val)
   int regnum;
   struct type *type = check_typedef (value_type (val));
   struct value *new_val = val, *mark = value_mark ();
-
-  /* Offsets are not supported here; lazy register values must
-     refer to the entire register.  */
-  gdb_assert (value_offset (val) == 0);
 
   while (VALUE_LVAL (new_val) == lval_register && value_lazy (new_val))
     {
@@ -3888,6 +3899,11 @@ value_fetch_lazy_register (struct value *val)
 			_("infinite loop while fetching a register"));
     }
 
+  /* Check if NEW_VALUE is big enough to cover
+     the expected VAL type with an offset.  */
+  gdb_assert ((TYPE_LENGTH (type) + value_offset (val))
+	      <= TYPE_LENGTH (value_type (new_val)));
+
   /* If it's still lazy (for instance, a saved register on the
      stack), fetch it.  */
   if (value_lazy (new_val))
@@ -3896,9 +3912,9 @@ value_fetch_lazy_register (struct value *val)
   /* Copy the contents and the unavailability/optimized-out
      meta-data from NEW_VAL to VAL.  */
   set_value_lazy (val, 0);
-  value_contents_copy (val, value_embedded_offset (val),
-		       new_val, value_embedded_offset (new_val),
-		       type_length_units (type));
+  value_contents_copy (val, value_embedded_offset (val), new_val,
+		       value_embedded_offset (new_val) + value_offset (val),
+		       value_bitpos (val), type_length_units (type));
 
   if (frame_debug)
     {

@@ -196,7 +196,7 @@ protected:
      available offset.  */
   void copy_element_to_dest (struct value *elt)
   {
-    value_contents_copy (m_dest, m_dest_offset, elt, 0,
+    value_contents_copy (m_dest, m_dest_offset, elt, 0, 0,
 			 TYPE_LENGTH (value_type (elt)));
     m_dest_offset += TYPE_LENGTH (value_type (elt));
   }
