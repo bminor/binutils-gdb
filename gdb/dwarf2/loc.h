@@ -53,14 +53,6 @@ extern void func_get_frame_base_dwarf_block (struct symbol *framefunc,
 					     const gdb_byte **start,
 					     size_t *length);
 
-/* Given section offset SECT_OFF, and compilation unit data
-   PER_CU, execute the "variable value" operation on the DIE
-   found at SECT_OFF.  */
-
-struct value *sect_variable_value (sect_offset sect_off,
-				   dwarf2_per_cu_data *per_cu,
-				   dwarf2_per_objfile *per_objfile);
-
 /* Fetch call_site_parameter from caller matching KIND and KIND_U.
    FRAME is for callee.
 
@@ -285,5 +277,19 @@ extern int dwarf_reg_to_regnum (struct gdbarch *arch, int dwarf_reg);
 
 extern int dwarf_reg_to_regnum_or_error (struct gdbarch *arch,
 					 ULONGEST dwarf_reg);
+
+/* Helper function which throws an error if a synthetic pointer is
+   invalid.  */
+
+extern void invalid_synthetic_pointer (void);
+
+/* Fetch the value pointed to by a synthetic pointer.  */
+
+extern struct value *indirect_synthetic_pointer
+    (sect_offset die, LONGEST byte_offset,
+     dwarf2_per_cu_data *per_cu,
+     dwarf2_per_objfile *per_objfile,
+     struct frame_info *frame,
+     struct type *type, bool resolve_abstract_p = false);
 
 #endif /* dwarf2loc.h */
