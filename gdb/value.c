@@ -3401,7 +3401,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 
 /* Pack NUM into BUF using a target format of TYPE.  */
 
-static void
+void
 pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
 {
   LONGEST len;

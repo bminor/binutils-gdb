@@ -267,6 +267,352 @@ write_to_memory (CORE_ADDR address, const gdb_byte *buffer,
 					 length, buffer);
 }
 
+/* Base class that describes entries found on a DWARF expression
+   evaluation stack.  */
+
+class dwarf_entry : public refcounted_object
+{
+public:
+  /* Not expected to be called on it's own.  */
+  dwarf_entry () = default;
+
+  virtual ~dwarf_entry () = 0;
+};
+
+dwarf_entry::~dwarf_entry () = default;
+
+/* Value entry found on a DWARF expression evaluation stack.  */
+
+class dwarf_value : public dwarf_entry
+{
+public:
+  dwarf_value (const gdb_byte* contents, struct type *type)
+  {
+    size_t type_len = TYPE_LENGTH (type);
+    m_contents.reset ((gdb_byte *) xzalloc (type_len));
+
+    memcpy (m_contents.get (), contents, type_len);
+    m_type = type;
+  }
+
+  dwarf_value (ULONGEST value, struct type *type)
+  {
+    m_contents.reset ((gdb_byte *) xzalloc (TYPE_LENGTH (type)));
+
+    pack_unsigned_long (m_contents.get (), type, value);
+    m_type = type;
+  }
+
+  dwarf_value (LONGEST value, struct type *type)
+  {
+    m_contents.reset ((gdb_byte *) xzalloc (TYPE_LENGTH (type)));
+
+    pack_long (m_contents.get (), type, value);
+    m_type = type;
+  }
+
+  virtual ~dwarf_value () = default;
+
+  const gdb_byte* get_contents () const
+  {
+    return m_contents.get ();
+  }
+
+  struct type* get_type () const
+  {
+    return m_type;
+  }
+
+  LONGEST to_long () const
+  {
+    return unpack_long (m_type, m_contents.get ());
+  }
+
+private:
+  /* Value contents as a stream of bytes in target byte order.  */
+  gdb::unique_xmalloc_ptr<gdb_byte> m_contents;
+
+  /* Type of the value held by the entry.  */
+  struct type *m_type;
+};
+
+/* Location description entry found on a DWARF expression evaluation stack.
+
+   Types of locations descirbed can be: register location, memory location,
+   implicit location, implicit pointer location, undefined location and
+   composite location (made out of any of the location types including
+   another composite location).  */
+
+class dwarf_location : public dwarf_entry
+{
+public:
+  /* Not expected to be called on it's own.  */
+  dwarf_location (LONGEST offset = 0, LONGEST bit_suboffset = 0)
+    : m_initialised (true)
+  {
+    m_offset = offset;
+    m_offset += bit_suboffset / HOST_CHAR_BIT;
+    m_bit_suboffset = bit_suboffset % HOST_CHAR_BIT;
+  }
+
+  virtual ~dwarf_location () = default;
+
+  LONGEST get_offset () const
+  {
+    return m_offset;
+  };
+
+  LONGEST get_bit_suboffset () const
+  {
+    return m_bit_suboffset;
+  };
+
+  void add_bit_offset (LONGEST bit_offset)
+  {
+    LONGEST bit_total_offset = m_bit_suboffset + bit_offset;
+
+    m_offset += bit_total_offset / HOST_CHAR_BIT;
+    m_bit_suboffset = bit_total_offset % HOST_CHAR_BIT;
+  };
+
+  void set_initialised (bool initialised)
+  {
+    m_initialised = initialised;
+  };
+
+  bool is_initialised () const
+  {
+    return m_initialised;
+  };
+
+private:
+  /* Byte offset into the location.  */
+  LONGEST m_offset;
+
+  /* Bit suboffset of the last byte.  */
+  LONGEST m_bit_suboffset;
+
+  /* Whether the location is initialized.  Used for non-standard
+     DW_OP_GNU_uninit operation.  */
+  bool m_initialised;
+};
+
+/* Undefined location description entry.  This is a special location
+   description type that describes the location description that is
+   not known.  */
+
+class dwarf_undefined : public dwarf_location
+{
+public:
+  dwarf_undefined (LONGEST offset = 0, LONGEST bit_suboffset = 0)
+    : dwarf_location (offset, bit_suboffset)
+  {}
+};
+
+class dwarf_memory : public dwarf_location
+{
+public:
+  dwarf_memory (LONGEST offset, LONGEST bit_suboffset = 0,
+		bool stack = false)
+    : dwarf_location (offset, bit_suboffset),
+      m_stack (stack)
+  {}
+
+  bool in_stack () const
+  {
+    return m_stack;
+  };
+
+  void set_stack (bool stack)
+  {
+    m_stack = stack;
+  };
+private:
+  /* True if the location belongs to a stack memory region.  */
+  bool m_stack;
+};
+
+/* Register location description entry.  */
+
+class dwarf_register : public dwarf_location
+{
+public:
+  dwarf_register (unsigned int regnum,
+		  LONGEST offset = 0, LONGEST bit_suboffset = 0)
+    : dwarf_location (offset, bit_suboffset),
+      m_regnum (regnum)
+  {}
+
+  unsigned int get_regnum () const
+  {
+    return m_regnum;
+  };
+
+private:
+  /* DWARF register number.  */
+  unsigned int m_regnum;
+};
+
+/* Implicit location description entry.  Describes a location
+   description not found on the target but instead saved in a
+   gdb-allocated buffer.  */
+
+class dwarf_implicit : public dwarf_location
+{
+public:
+
+  dwarf_implicit (const gdb_byte* contents, size_t size,
+		  enum bfd_endian byte_order)
+  {
+    m_contents.reset ((gdb_byte *) xzalloc (size));
+
+    memcpy (m_contents.get (), contents, size);
+    m_size = size;
+    m_byte_order = byte_order;
+  }
+
+  const gdb_byte* get_contents () const
+  {
+    return m_contents.get ();
+  }
+
+  size_t get_size () const
+  {
+    return m_size;
+  }
+
+  size_t get_byte_order () const
+  {
+    return m_byte_order;
+  }
+
+private:
+  /* Implicit location contents as a stream of bytes in target byte-order.  */
+  gdb::unique_xmalloc_ptr<gdb_byte> m_contents;
+
+  /* Contents byte stream size.  */
+  size_t m_size;
+
+  /* Contents original byte order.  */
+  enum bfd_endian m_byte_order;
+};
+
+/* Implicit pointer location description entry.  */
+
+class dwarf_implicit_pointer : public dwarf_location
+{
+public:
+  dwarf_implicit_pointer (dwarf2_per_objfile *per_objfile,
+			  struct dwarf2_per_cu_data *per_cu,
+			  int addr_size, sect_offset die_offset,
+			  LONGEST offset, LONGEST bit_suboffset = 0)
+    : dwarf_location (offset, bit_suboffset),
+      m_per_objfile (per_objfile), m_per_cu (per_cu),
+      m_addr_size (addr_size), m_die_offset (die_offset)
+  {}
+
+  dwarf2_per_objfile *get_per_objfile () const
+  {
+    return m_per_objfile;
+  }
+
+  dwarf2_per_cu_data *get_per_cu () const
+  {
+    return m_per_cu;
+  }
+
+  int get_addr_size () const
+  {
+    return m_addr_size;
+  }
+
+  sect_offset get_die_offset () const
+  {
+    return m_die_offset;
+  }
+
+private:
+  /* Per object file data of the implicit pointer.  */
+  dwarf2_per_objfile *m_per_objfile;
+
+  /* Compilation unit context of the implicit pointer.  */
+  struct dwarf2_per_cu_data *m_per_cu;
+
+  /* Address size for the evaluation.  */
+  int m_addr_size;
+
+  /* DWARF die offset pointed by the implicit pointer.  */
+  sect_offset m_die_offset;
+};
+
+/* Composite location description entry.  */
+
+class dwarf_composite : public dwarf_location
+{
+public:
+  dwarf_composite (LONGEST offset = 0, LONGEST bit_suboffset = 0)
+    : dwarf_location (offset, bit_suboffset)
+  {}
+
+  /* A composite location gets detached from its factory object for
+     the purpose of lval_computed resolution, which means that it
+     needs to take care of garbage collecting its pieces.  */
+  ~dwarf_composite () override
+  {
+    for (unsigned int i = 0; i < m_pieces.size (); i++)
+      {
+	dwarf_location* location = m_pieces[i].m_location;
+
+	location->decref ();
+
+	if (location->refcount () == 0)
+	  delete location;
+      }
+  }
+
+  void add_piece (dwarf_location* location, ULONGEST bit_size)
+  {
+    gdb_assert (location != nullptr);
+    location->incref ();
+    m_pieces.emplace_back (location, bit_size);
+  }
+
+  const dwarf_location* get_piece_at (unsigned int index) const
+  {
+    gdb_assert (index < m_pieces.size ());
+    return m_pieces[index].m_location;
+  }
+
+  ULONGEST get_bit_size_at (unsigned int index) const
+  {
+    gdb_assert (index < m_pieces.size ());
+    return m_pieces[index].m_size;
+  }
+
+  size_t get_pieces_num () const
+  {
+    return m_pieces.size ();
+  }
+
+private:
+  /* Composite piece that contains a piece location
+     description and it's size.  */
+  class piece
+  {
+  public:
+    piece (dwarf_location *location, ULONGEST size)
+    : m_location (location),
+      m_size (size)
+    {}
+
+    dwarf_location *m_location;
+    ULONGEST m_size;
+  };
+
+  /* Vector of composite pieces.  */
+  std::vector<struct piece> m_pieces;
+};
+
 struct piece_closure
 {
   /* Reference count.  */
