@@ -98,6 +98,94 @@ read_addr_from_reg (struct frame_info *frame, int reg)
   return address_from_register (regnum, frame);
 }
 
+/* Read register REGNUM's contents in a given FRAME context.
+
+   The data read is offsetted by OFFSET, and the number of bytes read
+   is defined by LENGTH.  The data is then copied into the
+   caller-managed buffer BUF.
+
+   If the register is optimized out or unavailable for the given
+   FRAME, the OPTIMIZED and UNAVAILABLE outputs are set
+   accordingly  */
+
+static void
+read_from_register (struct frame_info *frame, int regnum,
+		    CORE_ADDR offset, int length, gdb_byte *buf,
+		    int *optimized, int *unavailable)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int regsize = register_size (gdbarch, regnum);
+  int numregs = gdbarch_num_cooked_regs (gdbarch);
+
+  /* If a register is wholly inside the OFFSET, skip it.  */
+  if (frame == NULL || !regsize
+      || (offset + length) > regsize || numregs < regnum)
+    {
+      (*optimized) = 0;
+      (*unavailable) = 1;
+      return;
+    }
+
+  gdb::byte_vector temp_buf (regsize);
+  enum lval_type lval;
+  CORE_ADDR address;
+  int realnum;
+
+  frame_register (frame, regnum, optimized, unavailable,
+		  &lval, &address, &realnum, temp_buf.data ());
+
+  if (!(*optimized) && !(*unavailable))
+     memcpy (buf, (char *) temp_buf.data () + offset, length);
+
+  return;
+}
+
+/* Write register REGNUM's contents in a given FRAME context.
+
+   The data written is offsetted by OFFSET, and the number of bytes
+   written is defined by LENGTH.  The data is copied from
+   caller-managed buffer BUF.
+
+   If the register is optimized out or unavailable for the given
+   FRAME, the OPTIMIZED and UNAVAILABLE outputs are set
+   accordingly. */
+
+static void
+write_to_register (struct frame_info *frame, int regnum,
+		   CORE_ADDR offset, int length, gdb_byte *buf,
+		   int *optimized, int *unavailable)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int regsize = register_size (gdbarch, regnum);
+  int numregs = gdbarch_num_cooked_regs (gdbarch);
+
+  /* If a register is wholly inside of OFFSET, skip it.  */
+  if (frame == NULL || !regsize
+     || (offset + length) > regsize || numregs < regnum)
+    {
+      (*optimized) = 0;
+      (*unavailable) = 1;
+      return;
+    }
+
+  gdb::byte_vector temp_buf (regsize);
+  enum lval_type lval;
+  CORE_ADDR address;
+  int realnum;
+
+  frame_register (frame, regnum, optimized, unavailable,
+		  &lval, &address, &realnum, temp_buf.data ());
+
+  if (!(*optimized) && !(*unavailable))
+    {
+      memcpy ((char *) temp_buf.data () + offset, buf, length);
+
+      put_frame_register (frame, regnum, temp_buf.data ());
+    }
+
+  return;
+}
+
 struct piece_closure
 {
   /* Reference count.  */
@@ -235,23 +323,19 @@ rw_pieced_value (struct value *v, struct value *from)
 	    if (from == NULL)
 	      {
 		/* Read mode.  */
-		if (!get_frame_register_bytes (frame, gdb_regnum,
-					       bits_to_skip / 8,
-					       this_size, buffer.data (),
-					       &optim, &unavail))
-		  {
-		    if (optim)
-		      mark_value_bits_optimized_out (v, offset,
-						     this_size_bits);
-		    if (unavail)
-		      mark_value_bits_unavailable (v, offset,
-						   this_size_bits);
-		    break;
-		  }
+		read_from_register (frame, gdb_regnum, bits_to_skip / 8,
+				    this_size, buffer.data (),
+				    &optim, &unavail);
 
-		copy_bitwise (v_contents, offset,
-			      buffer.data (), bits_to_skip % 8,
-			      this_size_bits, bits_big_endian);
+		if (optim)
+		  mark_value_bits_optimized_out (v, offset, this_size_bits);
+		if (unavail)
+		  mark_value_bits_unavailable (v, offset, this_size_bits);
+		/* Only copy data if valid.  */
+		if (!optim && !unavail)
+		  copy_bitwise (v_contents, offset,
+				buffer.data (), bits_to_skip % 8,
+				this_size_bits, bits_big_endian);
 	      }
 	    else
 	      {
@@ -260,10 +344,9 @@ rw_pieced_value (struct value *v, struct value *from)
 		  {
 		    /* Data is copied non-byte-aligned into the register.
 		       Need some bits from original register value.  */
-		    get_frame_register_bytes (frame, gdb_regnum,
-					      bits_to_skip / 8,
-					      this_size, buffer.data (),
-					      &optim, &unavail);
+		    read_from_register (frame, gdb_regnum, bits_to_skip / 8,
+					this_size, buffer.data (),
+					&optim, &unavail);
 		    if (optim)
 		      throw_error (OPTIMIZED_OUT_ERROR,
 				   _("Can't do read-modify-write to "
@@ -279,9 +362,9 @@ rw_pieced_value (struct value *v, struct value *from)
 		copy_bitwise (buffer.data (), bits_to_skip % 8,
 			      from_contents, offset,
 			      this_size_bits, bits_big_endian);
-		put_frame_register_bytes (frame, gdb_regnum,
-					  bits_to_skip / 8,
-					  this_size, buffer.data ());
+		write_to_register (frame, gdb_regnum, bits_to_skip / 8,
+				   this_size, buffer.data (),
+				   &optim, &unavail);
 	      }
 	  }
 	  break;
