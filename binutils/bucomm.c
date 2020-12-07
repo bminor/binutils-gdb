@@ -532,7 +532,7 @@ template_in_dir (const char *path)
    as FILENAME.  */
 
 char *
-make_tempname (const char *filename)
+make_tempname (const char *filename, int *ofd)
 {
   char *tmpname = template_in_dir (filename);
   int fd;
@@ -550,7 +550,7 @@ make_tempname (const char *filename)
       free (tmpname);
       return NULL;
     }
-  close (fd);
+  *ofd = fd;
   return tmpname;
 }
 

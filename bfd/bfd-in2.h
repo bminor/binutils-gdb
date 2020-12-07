@@ -588,6 +588,8 @@ bfd *bfd_openr (const char *filename, const char *target);
 
 bfd *bfd_fdopenr (const char *filename, const char *target, int fd);
 
+bfd *bfd_fdopenw (const char *filename, const char *target, int fd);
+
 bfd *bfd_openstreamr (const char * filename, const char * target,
     void * stream);
 

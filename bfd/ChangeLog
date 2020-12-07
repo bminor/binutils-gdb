@@ -1,3 +1,9 @@
+2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
+
+	PR 26945
+	* opncls.c (bfd_fdopenw): New function.
+	* bfd-in2.h: Regenerate.
+
 2020-12-07  Alan Modra  <amodra@gmail.com>
 
 	* elf32-csky.c (csky_relocate_contents): Correct negate test.

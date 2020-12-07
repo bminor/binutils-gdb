@@ -20,6 +20,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "libbfd.h"
 #include "progress.h"
 #include "getopt.h"
 #include "libiberty.h"
@@ -3727,7 +3728,7 @@ set_long_section_mode (bfd *output_bfd, bfd *input_bfd, enum long_section_name_h
 /* The top-level control.  */
 
 static void
-copy_file (const char *input_filename, const char *output_filename,
+copy_file (const char *input_filename, const char *output_filename, int ofd,
 	   const char *input_target,   const char *output_target,
 	   const bfd_arch_info_type *input_arch)
 {
@@ -3802,9 +3803,14 @@ copy_file (const char *input_filename, const char *output_filename,
       else
 	force_output_target = TRUE;
 
-      obfd = bfd_openw (output_filename, output_target);
+      if (ofd >= 0)
+	obfd = bfd_fdopenw (output_filename, output_target, ofd);
+      else
+	obfd = bfd_openw (output_filename, output_target);
+
       if (obfd == NULL)
 	{
+	  close (ofd);
 	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
 	  status = 1;
 	  return;
@@ -3832,13 +3838,19 @@ copy_file (const char *input_filename, const char *output_filename,
       if (output_target == NULL)
 	output_target = bfd_get_target (ibfd);
 
-      obfd = bfd_openw (output_filename, output_target);
+      if (ofd >= 0)
+	obfd = bfd_fdopenw (output_filename, output_target, ofd);
+      else
+	obfd = bfd_openw (output_filename, output_target);
+
       if (obfd == NULL)
  	{
+	  close (ofd);
  	  bfd_nonfatal_message (output_filename, NULL, NULL, NULL);
  	  status = 1;
  	  return;
  	}
+
       /* This is a no-op on non-Coff targets.  */
       set_long_section_mode (obfd, ibfd, long_section_names);
 
@@ -4802,6 +4814,7 @@ strip_main (int argc, char *argv[])
       int hold_status = status;
       struct stat statbuf;
       char *tmpname;
+      int tmpfd = -1;
 
       if (get_file_size (argv[i]) < 1)
 	{
@@ -4816,7 +4829,7 @@ strip_main (int argc, char *argv[])
 
       if (output_file == NULL
 	  || filename_cmp (argv[i], output_file) == 0)
-	tmpname = make_tempname (argv[i]);
+	tmpname = make_tempname (argv[i], &tmpfd);
       else
 	tmpname = output_file;
 
@@ -4829,7 +4842,7 @@ strip_main (int argc, char *argv[])
 	}
 
       status = 0;
-      copy_file (argv[i], tmpname, input_target, output_target, NULL);
+      copy_file (argv[i], tmpname, tmpfd, input_target, output_target, NULL);
       if (status == 0)
 	{
 	  if (preserve_dates)
@@ -5049,7 +5062,7 @@ copy_main (int argc, char *argv[])
   bfd_boolean formats_info = FALSE;
   bfd_boolean use_globalize = FALSE;
   bfd_boolean use_keep_global = FALSE;
-  int c;
+  int c, tmpfd = -1;
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
 
@@ -5895,7 +5908,7 @@ copy_main (int argc, char *argv[])
      are the same, then create a temp and rename the result into the input.  */
   if (output_filename == NULL
       || filename_cmp (input_filename, output_filename) == 0)
-    tmpname = make_tempname (input_filename);
+    tmpname = make_tempname (input_filename, &tmpfd);
   else
     tmpname = output_filename;
 
@@ -5903,7 +5916,8 @@ copy_main (int argc, char *argv[])
     fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
 	   input_filename, strerror (errno));
 
-  copy_file (input_filename, tmpname, input_target, output_target, input_arch);
+  copy_file (input_filename, tmpname, tmpfd, input_target, output_target,
+	     input_arch);
   if (status == 0)
     {
       if (preserve_dates)

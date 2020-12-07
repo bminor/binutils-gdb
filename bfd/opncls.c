@@ -395,6 +395,39 @@ bfd_fdopenr (const char *filename, const char *target, int fd)
 
 /*
 FUNCTION
+	bfd_fdopenw
+
+SYNOPSIS
+	bfd *bfd_fdopenw (const char *filename, const char *target, int fd);
+
+DESCRIPTION
+	<<bfd_fdopenw>> is exactly like <<bfd_fdopenr>> with the exception that
+	the resulting BFD is suitable for output.
+*/
+
+bfd *
+bfd_fdopenw (const char *filename, const char *target, int fd)
+{
+  bfd *out = bfd_fdopenr (filename, target, fd);
+
+  if (out != NULL)
+    {
+      if (!bfd_write_p (out))
+	{
+	  close (fd);
+	  _bfd_delete_bfd (out);
+	  out = NULL;
+	  bfd_set_error (bfd_error_invalid_operation);
+	}
+      else
+	out->direction = write_direction;
+    }
+
+  return out;
+}
+
+/*
+FUNCTION
 	bfd_openstreamr
 
 SYNOPSIS

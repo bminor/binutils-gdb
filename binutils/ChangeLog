@@ -1,3 +1,20 @@
+2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
+
+	PR 26945
+	* bucomm.c (make_tempname): Add argument to return file
+	descriptor.
+	* bucomm.h (make_tempname): Likewise.
+	* ar.c: Include libbfd.h.
+	(write_archive): Adjust for change in make_tempname.  Call
+	bfd_fdopenw instead of bfd_openw.
+	* objcopy.c: Include libbfd.h.
+	(copy_file): New argument OFD.  Use bfd_fdopenw instead of
+	bfd_openw.
+	(strip_main): Adjust for change in make_tempname and
+	copy_file.
+	(copy_main): Likewise.
+
+
 2020-12-07  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release (point releases): Add a note to
