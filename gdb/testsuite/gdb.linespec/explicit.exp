@@ -469,6 +469,20 @@ namespace eval $testfile {
 	    }
 	}
 
+	# Test that after a seemingly finished option argument,
+	# completion for "-" matches both the explicit location
+	# options and the linespec keywords that start with "-".
+	with_test_prefix "complete '-' after options" {
+	    test_gdb_complete_multiple "b -function myfunction " "-" "" {
+		"-force-condition"
+		"-function"
+		"-label"
+		"-line"
+		"-qualified"
+		"-source"
+	    }
+	}
+
 	# Tests that ensure that after "if" we complete on expressions
 	# are in cpcompletion.exp.
 

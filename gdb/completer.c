@@ -892,7 +892,11 @@ complete_explicit_location (completion_tracker &tracker,
   int keyword = skip_keyword (tracker, explicit_options, &text);
 
   if (keyword == -1)
-    complete_on_enum (tracker, explicit_options, text, text);
+    {
+      complete_on_enum (tracker, explicit_options, text, text);
+      /* There are keywords that start with "-".   Include them, too.  */
+      complete_on_enum (tracker, linespec_keywords, text, text);
+    }
   else
     {
       /* Completing on value.  */

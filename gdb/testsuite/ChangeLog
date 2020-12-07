@@ -1,5 +1,10 @@
 2020-12-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gdb.linespec/explicit.exp: Extend with a test to check completing
+	'-' after seemingly complete options.
+
+2020-12-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* gdb.linespec/keywords.exp: Add tests to check positional
 	flexibility of "-force-condition".
 

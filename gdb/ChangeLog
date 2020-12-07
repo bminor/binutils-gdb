@@ -1,5 +1,10 @@
 2020-12-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* completer.c (complete_explicit_location): Also add keywords
+	that start with '-' to the completion list.
+
+2020-12-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* linespec.c (linespec_lexer_lex_keyword): The "-force-condition"
 	keyword may be followed by any keyword.
 	* breakpoint.c (find_condition_and_thread): Advance 'tok' by
