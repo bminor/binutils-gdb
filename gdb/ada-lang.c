@@ -4005,11 +4005,15 @@ replace_operator_with_call (expression_up *expp, int pc, int nargs,
      expression.  */
   struct expression *exp = expp->get ();
   int save_nelts = exp->nelts;
-  exp->nelts = exp->nelts + 7 - oplen;
-  exp->resize (exp->nelts);
+  int extra_elts = 7 - oplen;
+  exp->nelts += extra_elts;
 
+  if (extra_elts > 0)
+    exp->resize (exp->nelts);
   memmove (exp->elts + pc + 7, exp->elts + pc + oplen,
 	   EXP_ELEM_TO_BYTES (save_nelts - pc - oplen));
+  if (extra_elts < 0)
+    exp->resize (exp->nelts);
 
   exp->elts[pc].opcode = exp->elts[pc + 2].opcode = OP_FUNCALL;
   exp->elts[pc + 1].longconst = (LONGEST) nargs;

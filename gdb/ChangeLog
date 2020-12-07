@@ -1,3 +1,7 @@
+2020-12-07  Tom de Vries  <tdevries@suse.de>
+
+	* ada-lang.c (replace_operator_with_call): Handle shrink resize.
+
 2020-12-06  Tom Tromey  <tom@tromey.com>
 
 	PR ada/26999
