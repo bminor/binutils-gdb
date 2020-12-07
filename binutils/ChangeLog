@@ -1,3 +1,8 @@
+2020-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release (point releases): Add a note to
+	update the milestone list on sourceware's bugzilla.
+
 2020-12-04  Alan Modra  <amodra@gmail.com>
 
 	* dwarf.c (frame_display_row): Do without static variable "sloc".

@@ -406,9 +406,12 @@ Cheers
   34. Examine the bfd/config.bfd file in the mainline sources and move
       any pending obsolete targets into the definitely obsolete
       section.  Create a changelog entry and commit.
-      
+
+
+
+
 --------------------------------------------------------------------------
-How to perform a point release.
+How to perform a POINT release.
 --------------------------------------------------------------------------
 
 A point release is easier than a normal release since a lot of the
@@ -499,10 +502,6 @@ looks like this:
      (The email to Davis is so that he can update the GNU Toolchain
      social media).  Something like this:
 
-  9. Create a new Bugzilla entry for the point release.
-     
-        https://sourceware.org/bugzilla/editversions.cgi?product=binutils
-
 ------------------------------------------------------------------------
 Hi Everyone,
 
@@ -524,11 +523,20 @@ Hi Everyone,
     xx
     xx
 --------------------------------------------------------------------------
-  9. Clean up the source tree.
+
+  9. Create a new Bugzilla entry for the point release.
+     
+       https://sourceware.org/bugzilla/editversions.cgi?product=binutils
+
+     And a new milestone too:
+
+       https://sourceware.org/bugzilla/editmilestones.cgi?product=binutils
+
+ 10. Clean up the source tree.
        
             git clean -dfx .
 
- 10. Edit bfd/development.sh on the branch and set the development flag
+ 11. Edit bfd/development.sh on the branch and set the development flag
      to "true".  Commit this change.
 
 
