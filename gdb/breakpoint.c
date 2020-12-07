@@ -9263,7 +9263,7 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 	}
       else if (toklen >= 1 && strncmp (tok, "-force-condition", toklen) == 0)
 	{
-	  tok = cond_start = end_tok + 1;
+	  tok = tok + toklen;
 	  force = true;
 	}
       else if (toklen >= 1 && strncmp (tok, "thread", toklen) == 0)

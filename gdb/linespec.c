@@ -477,32 +477,45 @@ linespec_lexer_lex_keyword (const char *p)
 	{
 	  int len = strlen (linespec_keywords[i]);
 
-	  /* If P begins with one of the keywords and the next
-	     character is whitespace, we may have found a keyword.
-	     It is only a keyword if it is not followed by another
-	     keyword.  */
-	  if (strncmp (p, linespec_keywords[i], len) == 0
-	      && isspace (p[len]))
+	  /* If P begins with
+
+	     - "thread" or "task" and the next character is
+	     whitespace, we may have found a keyword.  It is only a
+	     keyword if it is not followed by another keyword.
+
+	     - "-force-condition", the next character may be EOF
+	     since this keyword does not take any arguments.  Otherwise,
+	     it should be followed by a keyword.
+
+	     - "if", ALWAYS stop the lexer, since it is not possible to
+	     predict what is going to appear in the condition, which can
+	     only be parsed after SaLs have been found.  */
+	  if (strncmp (p, linespec_keywords[i], len) == 0)
 	    {
 	      int j;
 
-	      /* Special case: "-force" is always followed by an "if".  */
+	      if (i == FORCE_KEYWORD_INDEX && p[len] == '\0')
+		return linespec_keywords[i];
+
+	      if (!isspace (p[len]))
+		continue;
+
 	      if (i == FORCE_KEYWORD_INDEX)
 		{
 		  p += len;
 		  p = skip_spaces (p);
-		  int nextlen = strlen (linespec_keywords[IF_KEYWORD_INDEX]);
-		  if (!(strncmp (p, linespec_keywords[IF_KEYWORD_INDEX], nextlen) == 0
-			&& isspace (p[nextlen])))
-		    return NULL;
-		}
+		  for (j = 0; linespec_keywords[j] != NULL; ++j)
+		    {
+		      int nextlen = strlen (linespec_keywords[j]);
 
-	      /* Special case: "if" ALWAYS stops the lexer, since it
-		 is not possible to predict what is going to appear in
-		 the condition, which can only be parsed after SaLs have
-		 been found.  */
+		      if (strncmp (p, linespec_keywords[j], nextlen) == 0
+			  && isspace (p[nextlen]))
+			return linespec_keywords[i];
+		    }
+		}
 	      else if (i != IF_KEYWORD_INDEX)
 		{
+		  /* We matched a "thread" or "task".  */
 		  p += len;
 		  p = skip_spaces (p);
 		  for (j = 0; linespec_keywords[j] != NULL; ++j)
