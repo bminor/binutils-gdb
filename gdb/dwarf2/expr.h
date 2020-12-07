@@ -119,19 +119,30 @@ struct dwarf_stack_value
    its current state and its callbacks.  */
 struct dwarf_expr_context
 {
-  dwarf_expr_context (dwarf2_per_objfile *per_objfile);
+  /* We should ever only pass in the PER_OBJFILE, while the ADDR_SIZE
+     information should be retrievable from there.  The PER_OBJFILE
+     contains a pointer to the PER_BFD information anyway and the
+     address size information must be the same for the whole BFD.  */
+  dwarf_expr_context (struct dwarf2_per_objfile *per_objfile,
+		      int addr_size);
   virtual ~dwarf_expr_context () = default;
 
   void push_address (CORE_ADDR value, bool in_stack_memory);
-  void eval (const gdb_byte *addr, size_t len);
 
-  /* Fetch the result of the expression evaluation in a form of
-     a struct value, where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET
-     describe the source level representation of that result.  */
-  struct value *fetch_result (struct type *type = nullptr,
-			      struct type *subobj_type = nullptr,
-			      LONGEST subobj_offset = 0);
+  /* Evaluate the expression at ADDR (LEN bytes long) in a given PER_CU
+     FRAME context.  Where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET describe
+     expected struct value representation of the evaluation result.
+     The ADDR_INFO property can be specified to override the range of
+     memory addresses with the passed in buffer.  */
+  struct value *eval_exp (const gdb_byte *addr, size_t len,
+			  struct dwarf2_per_cu_data *per_cu,
+			  struct frame_info *frame,
+			  const struct property_addr_info *addr_info = nullptr,
+			  struct type *type = nullptr,
+			  struct type *subobj_type = nullptr,
+			  LONGEST subobj_offset = 0);
 
+private:
   /* The stack of values.  */
   std::vector<dwarf_stack_value> stack;
 
@@ -196,14 +207,10 @@ struct dwarf_expr_context
   /* Compilation unit used for the evaluation.  */
   struct dwarf2_per_cu_data *per_cu;
 
-  /* Object address used for the evaluation.  */
-  CORE_ADDR obj_address;
+  /* Property address info used for the evaluation.  */
+  const struct property_addr_info *addr_info;
 
-  /* The data that was passed in.  */
-  gdb::array_view<const gdb_byte> data_view;
-
-private:
-
+  void eval (const gdb_byte *addr, size_t len);
   struct type *address_type () const;
   void push (struct value *value, bool in_stack_memory);
   bool stack_empty_p () const;
@@ -213,6 +220,13 @@ private:
   struct value *fetch (int n);
   CORE_ADDR fetch_address (int n);
   bool fetch_in_stack_memory (int n);
+
+  /* Fetch the result of the expression evaluation in a form of
+     a struct value, where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET
+     describe the source level representation of that result.  */
+  struct value *fetch_result (struct type *type,
+			      struct type *subobj_type,
+			      LONGEST subobj_offset);
 
   /* Return the location expression for the frame base attribute, in
      START and LENGTH.  The result must be live until the current

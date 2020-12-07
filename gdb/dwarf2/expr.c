@@ -693,9 +693,10 @@ dwarf_expr_context::address_type () const
 
 /* Create a new context for the expression evaluator.  */
 
-dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile)
-: gdbarch (NULL),
-  addr_size (0),
+dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile,
+					int addr_size)
+: gdbarch (per_objfile->objfile->arch ()),
+  addr_size (addr_size),
   ref_addr_size (0),
   recursion_depth (0),
   max_recursion_depth (0x100),
@@ -706,7 +707,7 @@ dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile)
   per_objfile (per_objfile),
   frame (nullptr),
   per_cu (nullptr),
-  obj_address (0)
+  addr_info (nullptr)
 {
 }
 
@@ -831,12 +832,16 @@ dwarf_expr_context::read_mem (gdb_byte *buf, CORE_ADDR addr,
     return;
 
   /* Prefer the passed-in memory, if it exists.  */
-  CORE_ADDR offset = addr - obj_address;
-
-  if (offset < data_view.size () && offset + length <= data_view.size ())
+  if (addr_info != nullptr)
     {
-      memcpy (buf, data_view.data (), length);
+      CORE_ADDR offset = addr - addr_info->addr;
+
+      if (offset < addr_info->valaddr.size ()
+	  && offset + length <= addr_info->valaddr.size ())
+    {
+      memcpy (buf, addr_info->valaddr.data (), length);
       return;
+    }
     }
 
   read_memory (addr, buf, length);
@@ -880,8 +885,8 @@ dwarf_expr_context::push_dwarf_reg_entry_value
 						   caller_frame);
   scoped_restore save_per_cu = make_scoped_restore (&this->per_cu,
 						    caller_per_cu);
-  scoped_restore save_obj_addr = make_scoped_restore (&this->obj_address,
-						      (CORE_ADDR) 0);
+  scoped_restore save_addr_info = make_scoped_restore (&this->addr_info,
+						       nullptr);
   scoped_restore save_per_objfile = make_scoped_restore (&this->per_objfile,
 							 caller_per_objfile);
 
@@ -1047,6 +1052,28 @@ dwarf_expr_context::fetch_result (struct type *type,
   set_value_initialized (retval, this->initialized);
 
   return retval;
+}
+
+/* See expr.h.  */
+
+struct value *
+dwarf_expr_context::eval_exp (const gdb_byte *addr, size_t len,
+			      struct dwarf2_per_cu_data *per_cu,
+			      struct frame_info *frame,
+			      const struct property_addr_info *addr_info,
+			      struct type *type,
+			      struct type *subobj_type,
+			      LONGEST subobj_offset)
+{
+  this->per_cu = per_cu;
+  this->frame = frame;
+  this->addr_info = addr_info;
+
+  if (per_cu != nullptr)
+    this->ref_addr_size = per_cu->ref_addr_size ();
+
+  eval (addr, len);
+  return fetch_result (type, subobj_type, subobj_offset);
 }
 
 /* Require that TYPE be an integral type; throw an exception if not.  */
@@ -2319,11 +2346,11 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	case DW_OP_push_object_address:
 	  /* Return the address of the object we are currently observing.  */
-	  if (this->data_view.data () == nullptr
-	      && this->obj_address == 0)
+	  if (addr_info == nullptr)
 	    error (_("Location address is not set."));
 
-	  result_val = value_from_ulongest (address_type, this->obj_address);
+	  result_val
+	    = value_from_ulongest (address_type, this->addr_info->addr);
 	  break;
 
 	default:

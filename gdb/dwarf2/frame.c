@@ -228,26 +228,16 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
 		  struct frame_info *this_frame, CORE_ADDR initial,
 		  int initial_in_stack_memory, dwarf2_per_objfile *per_objfile)
 {
-  dwarf_expr_context ctx (per_objfile);
+  dwarf_expr_context ctx (per_objfile, addr_size);
   scoped_value_mark free_values;
 
-  ctx.frame = this_frame;
-  ctx.gdbarch = get_frame_arch (this_frame);
-  ctx.addr_size = addr_size;
-  ctx.ref_addr_size = -1;
-
   ctx.push_address (initial, initial_in_stack_memory);
-  ctx.eval (exp, len);
-
-  CORE_ADDR result;
-  struct value *result_val = ctx.fetch_result ();
+  struct value *result_val = ctx.eval_exp (exp, len, nullptr, this_frame);
 
   if (VALUE_LVAL (result_val) == lval_memory)
-    result = value_address (result_val);
+    return value_address (result_val);
   else
-    result = value_as_address (result_val);
-
-  return result;
+    return value_as_address (result_val);
 }
 
 
