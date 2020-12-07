@@ -260,6 +260,10 @@ private:
   void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t length);
 };
 
+/* Return the address type used of the GDBARCH architecture and
+   ADDR_SIZE is expected size of the type.  */
+struct type *address_type (struct gdbarch *gdbarch, int addr_size);
+
 /* Return the value of register number REG (a DWARF register number),
    read as an address in a given FRAME.  */
 CORE_ADDR read_addr_from_reg (struct frame_info *, int);
