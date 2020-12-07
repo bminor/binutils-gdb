@@ -3927,9 +3927,7 @@ csky_relocate_contents (reloc_howto_type *howto,
   unsigned int rightshift = howto->rightshift;
   unsigned int bitpos = howto->bitpos;
 
-  /* If the size is negative, negate RELOCATION. This isn't very
-     general.  */
-  if (howto->size < 0)
+  if (howto->negate)
     relocation = -relocation;
 
   /* FIXME: these macros should be defined at file head or head file head.  */

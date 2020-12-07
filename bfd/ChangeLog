@@ -1,3 +1,9 @@
+2020-12-07  Alan Modra  <amodra@gmail.com>
+
+	* elf32-csky.c (csky_relocate_contents): Correct negate test.
+	* cpu-ns32k.c (_bfd_do_ns32k_reloc_contents): Likewise.
+	* elf32-nds32.c (nds32_relocate_contents): Likewise.
+
 2020-12-05  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf32-vax.c (elf_vax_check_relocs) <R_VAX_GOT32>: Use

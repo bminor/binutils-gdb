@@ -574,9 +574,7 @@ _bfd_do_ns32k_reloc_contents (reloc_howto_type *howto,
   bfd_vma x;
   bfd_boolean overflow;
 
-  /* If the size is negative, negate RELOCATION.  This isn't very
-     general.  */
-  if (howto->size < 0)
+  if (howto->negate)
     relocation = -relocation;
 
   /* Get the value we are going to relocate.  */
