@@ -1,3 +1,8 @@
+2020-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (is_mergeable_note_section): Remove reference to
+	SHF_GNU_BUILD_NOTE.
+
 2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
 
 	PR 26945
