@@ -1,3 +1,8 @@
+2020-12-06  Tom Tromey  <tom@tromey.com>
+
+	PR ada/26999
+	* ada-lang.c (replace_operator_with_call): Rewrite.
+
 2020-12-06  Giancarlo Frix  <gfrix@rocketsoftware.com>  (tiny change)
 
 	PR breakpoints/27009

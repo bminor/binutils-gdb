@@ -4000,28 +4000,23 @@ replace_operator_with_call (expression_up *expp, int pc, int nargs,
 			    int oplen, struct symbol *sym,
 			    const struct block *block)
 {
-  /* A new expression, with 6 more elements (3 for funcall, 4 for function
-     symbol, -oplen for operator being replaced).  */
-  struct expression *newexp = (struct expression *)
-    xzalloc (sizeof (struct expression)
-	     + EXP_ELEM_TO_BYTES ((*expp)->nelts + 7 - oplen));
+  /* We want to add 6 more elements (3 for funcall, 4 for function
+     symbol, -OPLEN for operator being replaced) to the
+     expression.  */
   struct expression *exp = expp->get ();
+  int save_nelts = exp->nelts;
+  exp->nelts = exp->nelts + 7 - oplen;
+  exp->resize (exp->nelts);
 
-  newexp->nelts = exp->nelts + 7 - oplen;
-  newexp->language_defn = exp->language_defn;
-  newexp->gdbarch = exp->gdbarch;
-  memcpy (newexp->elts, exp->elts, EXP_ELEM_TO_BYTES (pc));
-  memcpy (newexp->elts + pc + 7, exp->elts + pc + oplen,
-	  EXP_ELEM_TO_BYTES (exp->nelts - pc - oplen));
+  memmove (exp->elts + pc + 7, exp->elts + pc + oplen,
+	   EXP_ELEM_TO_BYTES (save_nelts - pc - oplen));
 
-  newexp->elts[pc].opcode = newexp->elts[pc + 2].opcode = OP_FUNCALL;
-  newexp->elts[pc + 1].longconst = (LONGEST) nargs;
+  exp->elts[pc].opcode = exp->elts[pc + 2].opcode = OP_FUNCALL;
+  exp->elts[pc + 1].longconst = (LONGEST) nargs;
 
-  newexp->elts[pc + 3].opcode = newexp->elts[pc + 6].opcode = OP_VAR_VALUE;
-  newexp->elts[pc + 4].block = block;
-  newexp->elts[pc + 5].symbol = sym;
-
-  expp->reset (newexp);
+  exp->elts[pc + 3].opcode = exp->elts[pc + 6].opcode = OP_VAR_VALUE;
+  exp->elts[pc + 4].block = block;
+  exp->elts[pc + 5].symbol = sym;
 }
 
 /* Type-class predicates */
