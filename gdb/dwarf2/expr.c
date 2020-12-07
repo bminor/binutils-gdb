@@ -89,6 +89,14 @@ bits_to_bytes (ULONGEST start, ULONGEST n_bits)
   return (start % HOST_CHAR_BIT + n_bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
 }
 
+/* Throw an exception about the invalid DWARF expression.  */
+
+static void
+ill_formed_expression ()
+{
+  error (_("Ill-formed DWARF expression"));
+}
+
 /* See expr.h.  */
 
 CORE_ADDR
@@ -1009,6 +1017,314 @@ write_to_location (const dwarf_location *location, struct frame_info *frame,
     }
   else
     internal_error (__FILE__, __LINE__, _("invalid location type"));
+}
+
+/* Convert a value entry to the matching struct value representation
+   of a given TYPE.  OFFSET defines the offset into the value
+   contents.
+
+   We only need to support dwarf_value to gdb struct value conversion
+   here so that we can utilize the existing unary and binary operations
+   on struct value's.
+
+   We could implement them for the dwarf_value's but that would lead
+   to code duplication with no real gain at the moment.  */
+
+static struct value *
+value_to_gdb_value (const dwarf_value *value, struct type *type,
+		    LONGEST offset = 0)
+{
+  size_t type_len = TYPE_LENGTH (type);
+
+  if (offset + type_len > TYPE_LENGTH (value->get_type ()))
+    invalid_synthetic_pointer ();
+
+  struct value *retval = allocate_value (type);
+  memcpy (value_contents_raw (retval),
+	  value->get_contents () + offset, type_len);
+
+  return retval;
+}
+
+/* Factory class for creation and lifetime management of all DWARF
+   entries found on a DWARF evaluation stack.  */
+
+class dwarf_entry_factory
+{
+public:
+  dwarf_entry_factory () = default;
+  ~dwarf_entry_factory ();
+
+  /* Create a value entry of a given TYPE and copy a type size number of
+     bytes from the CONTENTS byte stream to the entry.  */
+  dwarf_value *create_value (const gdb_byte* contents, struct type *type);
+
+  /* Creates a value entry of a TYPE type and copies the NUM
+     value to it's contents byte stream.  */
+  dwarf_value *create_value (ULONGEST num, struct type *type);
+
+  /* Create a value entry of TYPE type and copy the NUM value to its
+     contents byte stream.  */
+  dwarf_value *create_value (LONGEST num, struct type *type);
+
+  /* Create an undefined location description entry.  */
+  dwarf_undefined *create_undefined ();
+
+  /* Create a memory location description entry.  */
+  dwarf_memory *create_memory (LONGEST offset, LONGEST bit_suboffset = 0,
+			       bool stack = false);
+
+  /* Create a register location description entry.  */
+  dwarf_register *create_register (unsigned int regnum, LONGEST offset = 0,
+				   LONGEST bit_suboffset = 0);
+
+  /* Create an implicit location description entry and copy SIZE
+     number of bytes from the CONTENTS byte stream to the location.
+     BYTE_ORDER holds the byte order of the location described.  */
+  dwarf_implicit *create_implicit (const gdb_byte *content, size_t size,
+				   enum bfd_endian byte_order);
+
+  /* Create an implicit pointer location description entry.  */
+  dwarf_implicit_pointer *create_implicit_pointer
+    (dwarf2_per_objfile *per_objfile, struct dwarf2_per_cu_data *per_cu,
+     int addr_size, sect_offset die_offset, LONGEST offset,
+     LONGEST bit_suboffset = 0);
+
+  /* Create a composite location description entry.  */
+  dwarf_composite *create_composite (LONGEST offset = 0,
+				     LONGEST bit_suboffset = 0);
+
+  /* Convert an entry to a location description entry. If the entry
+     is a location description entry a dynamic cast is applied.
+
+     In a case of a value entry, the value is implicitly
+     converted to a memory location description entry.  */
+  dwarf_location *entry_to_location (dwarf_entry *entry);
+
+  /* Convert an entry to a value entry.  If the entry is a value entry
+     a dynamic cast is applied.
+
+     A location description entry is implicitly converted to a value
+     entry of DEFAULT_TYPE type.
+     Note that only 'memory location description entry' to 'value
+     entry' conversion is currently supported. */
+  dwarf_value *entry_to_value (dwarf_entry *entry, struct type *default_type);
+
+  /* Execute OP operation between ARG1 and ARG2 and return a new value
+     entry containing the result of that operation.  */
+  dwarf_value *value_binary_op (const dwarf_value *arg1,
+				const dwarf_value *arg2, enum exp_opcode op);
+
+  /* Execute a negation operation on ARG and return a new value entry
+     containing the result of that operation.  */
+  dwarf_value *value_negation_op (const dwarf_value *arg);
+
+  /* Execute a complement operation on ARG and return a new value
+     entry containing the result of that operation.  */
+  dwarf_value *value_complement_op (const dwarf_value *arg);
+
+  /* Execute a cast operation on ARG and return a new value entry
+     containing the result of that operation.  */
+  dwarf_value *value_cast_op (const dwarf_value *arg, struct type *type);
+
+private:
+  /* Record entry for garbage collection.  */
+  void record_entry (dwarf_entry *entry);
+
+  /* List of all entries created by the factory.  */
+  std::vector<dwarf_entry *> m_dwarf_entries;
+};
+
+dwarf_entry_factory::~dwarf_entry_factory ()
+{
+  for (unsigned int i = 0; i < m_dwarf_entries.size (); i++)
+    {
+      dwarf_entry* entry = m_dwarf_entries[i];
+
+      entry->decref ();
+
+      if (entry->refcount () == 0)
+	delete entry;
+    }
+}
+
+void
+dwarf_entry_factory::record_entry (dwarf_entry *entry)
+{
+  entry->incref ();
+  m_dwarf_entries.push_back (entry);
+}
+
+dwarf_value *
+dwarf_entry_factory::create_value (const gdb_byte* content, struct type *type)
+{
+  dwarf_value *value = new dwarf_value (content, type);
+  record_entry (value);
+  return value;
+}
+
+dwarf_value *
+dwarf_entry_factory::create_value (ULONGEST num, struct type *type)
+{
+  dwarf_value *value = new dwarf_value (num, type);
+  record_entry (value);
+  return value;
+}
+
+dwarf_value *
+dwarf_entry_factory::create_value (LONGEST num, struct type *type)
+{
+  dwarf_value *value = new dwarf_value (num, type);
+  record_entry (value);
+  return value;
+}
+
+dwarf_undefined *
+dwarf_entry_factory::create_undefined ()
+{
+  dwarf_undefined *undefined_entry = new dwarf_undefined ();
+  record_entry (undefined_entry);
+  return undefined_entry;
+}
+
+dwarf_memory *
+dwarf_entry_factory::create_memory (LONGEST offset, LONGEST bit_suboffset,
+				    bool stack)
+{
+  dwarf_memory *memory_entry
+    = new dwarf_memory (offset, bit_suboffset, stack);
+  record_entry (memory_entry);
+  return memory_entry;
+}
+
+dwarf_register *
+dwarf_entry_factory::create_register (unsigned int regnum, LONGEST offset,
+				      LONGEST bit_suboffset)
+{
+  dwarf_register *register_entry
+    = new dwarf_register (regnum, offset, bit_suboffset);
+  record_entry (register_entry);
+  return register_entry;
+}
+
+dwarf_implicit *
+dwarf_entry_factory::create_implicit (const gdb_byte* content, size_t size,
+				      enum bfd_endian byte_order)
+{
+  dwarf_implicit *implicit_entry
+    = new dwarf_implicit (content, size, byte_order);
+  record_entry (implicit_entry);
+  return implicit_entry;
+}
+
+dwarf_implicit_pointer *
+dwarf_entry_factory::create_implicit_pointer
+  (dwarf2_per_objfile *per_objfile, struct dwarf2_per_cu_data *per_cu,
+   int addr_size, sect_offset die_offset, LONGEST offset,
+   LONGEST bit_suboffset)
+{
+  dwarf_implicit_pointer *implicit_pointer_entry
+    = new dwarf_implicit_pointer (per_objfile, per_cu, addr_size,
+				  die_offset, offset, bit_suboffset);
+  record_entry (implicit_pointer_entry);
+  return implicit_pointer_entry;
+}
+
+dwarf_composite *
+dwarf_entry_factory::create_composite (LONGEST offset, LONGEST bit_suboffset)
+{
+  dwarf_composite *composite_entry
+    = new dwarf_composite (offset, bit_suboffset);
+  record_entry (composite_entry);
+  return composite_entry;
+}
+
+dwarf_location *
+dwarf_entry_factory::entry_to_location (dwarf_entry *entry)
+{
+  /* If the given entry is already a location,
+     just send it back to the caller.  */
+  if (auto location = dynamic_cast<dwarf_location *> (entry))
+    return location;
+
+  auto value = dynamic_cast<dwarf_value *> (entry);
+  gdb_assert (value != nullptr);
+
+  struct type *type = value->get_type ();
+  struct gdbarch *gdbarch = get_type_arch (type);
+  LONGEST offset;
+
+  if (gdbarch_integer_to_address_p (gdbarch))
+    offset = gdbarch_integer_to_address (gdbarch, type,
+					 value->get_contents ());
+
+  offset = extract_unsigned_integer (value->get_contents (),
+				     TYPE_LENGTH (type),
+				     type_byte_order (type));
+
+  return create_memory (offset);
+}
+
+dwarf_value *
+dwarf_entry_factory::entry_to_value (dwarf_entry *entry,
+				     struct type *default_type)
+{
+  /* If the given entry is already a value,
+     just send it back to the caller.  */
+  if (auto value = dynamic_cast<dwarf_value *> (entry))
+    return value;
+
+  auto location = dynamic_cast<dwarf_location *> (entry);
+  gdb_assert (location != nullptr);
+
+  /* We only support memory location to value conversion at this point.
+     It is hard to define how would that conversion work for other
+     location description types.  */
+  if (dynamic_cast<dwarf_memory *> (location) == nullptr)
+    ill_formed_expression ();
+
+  return create_value (location->get_offset (), default_type);
+}
+
+/* We use the existing struct value operations to avoid code
+   duplication.  Vector types are planned to be promoted to base types
+   in the future anyway which means that the subset we actually need
+   from these operations is just going to grow anyway.  */
+
+dwarf_value *
+dwarf_entry_factory::value_binary_op (const dwarf_value *arg1,
+				      const dwarf_value *arg2,
+				      enum exp_opcode op)
+{
+  struct value *arg1_value = value_to_gdb_value (arg1, arg1->get_type ());
+  struct value *arg2_value = value_to_gdb_value (arg2, arg2->get_type ());
+  struct value *result = value_binop (arg1_value, arg2_value, op);
+
+  return create_value (value_contents_raw (result), value_type (result));
+}
+
+dwarf_value *
+dwarf_entry_factory::value_negation_op (const dwarf_value *arg)
+{
+  struct value *result
+    = value_neg (value_to_gdb_value (arg, arg->get_type ()));
+  return create_value (value_contents_raw (result), value_type (result));
+}
+
+dwarf_value *
+dwarf_entry_factory::value_complement_op (const dwarf_value *arg)
+{
+  struct value *result
+    = value_complement (value_to_gdb_value (arg, arg->get_type ()));
+  return create_value (value_contents_raw (result), value_type (result));
+}
+
+dwarf_value *
+dwarf_entry_factory::value_cast_op (const dwarf_value *arg, struct type *type)
+{
+  struct value *result
+    = value_cast (type, value_to_gdb_value (arg, arg->get_type ()));
+  return create_value (value_contents_raw (result), type);
 }
 
 struct piece_closure
