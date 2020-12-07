@@ -1,6 +1,24 @@
 2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
 
 	PR 26945
+	* ar.c
+	(write_archive) [!defined (_WIN32) || defined (__CYGWIN32__)]:
+	Initialize TARGET_STAT and OFD to pass to SMART_RENAME.
+	* arsup.c
+	(ar_save) [defined (_WIN32) || defined (__CYGWIN32__)]:
+	Likewise.
+	* bucomm.h (smart_rename): Add new arguments to declaration.
+	* objcopy.c
+	(strip_main)[defined (_WIN32) || defined (__CYGWIN32__)]:
+	Initialize COPYFD and pass to SMART_RENAME.
+	(copy_main) [defined (_WIN32) || defined (__CYGWIN32__)]:
+	Likewise.
+	* rename.c (try_preserve_permissions): New function.
+	(smart_rename): Use it and add new arguments.
+
+2020-12-07  Siddhesh Poyarekar  <siddhesh@sourceware.org>
+
+	PR 26945
 	* objcopy.c (copy_file): New argument IN_STAT.  Return stat of
 	ibfd through it.
 	(strip_main): Remove redundant stat calls.  adjust copy_file

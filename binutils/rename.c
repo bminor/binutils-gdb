@@ -131,17 +131,55 @@ set_times (const char *destination, const struct stat *statbuf)
 #endif
 #endif
 
-/* Rename FROM to TO, copying if TO is a link.
-   Return 0 if ok, -1 if error.  */
-
-int
-smart_rename (const char *from, const char *to, int preserve_dates ATTRIBUTE_UNUSED)
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+/* Try to preserve the permission bits and ownership of an existing file when
+   rename overwrites it.  FD is the file being renamed and TARGET_STAT has the
+   status of the file that was overwritten.  */
+static void
+try_preserve_permissions (int fd, struct stat *target_stat)
 {
-  bfd_boolean exists;
-  struct stat s;
+  struct stat from_stat;
   int ret = 0;
 
-  exists = lstat (to, &s) == 0;
+  if (fstat (fd, &from_stat) != 0)
+    return;
+
+  int from_mode = from_stat.st_mode & 0777;
+  int to_mode = target_stat->st_mode & 0777;
+
+  /* Fix up permissions before we potentially lose ownership with fchown.
+     Clear the setxid bits because in case the fchown below fails then we don't
+     want to end up with a sxid file owned by the invoking user.  If the user
+     hasn't changed or if fchown succeeded, we add back the sxid bits at the
+     end.  */
+  if (from_mode != to_mode)
+    fchmod (fd, to_mode);
+
+  /* Fix up ownership, this will clear the setxid bits.  */
+  if (from_stat.st_uid != target_stat->st_uid
+      || from_stat.st_gid != target_stat->st_gid)
+    ret = fchown (fd, target_stat->st_uid, target_stat->st_gid);
+
+  /* Fix up the sxid bits if either the fchown wasn't needed or it
+     succeeded.  */
+  if (ret == 0)
+    fchmod (fd, target_stat->st_mode & 07777);
+}
+#endif
+
+/* Rename FROM to TO, copying if TO is either a link or is not a regular file.
+   FD is an open file descriptor pointing to FROM that we can use to safely fix
+   up permissions of the file after renaming.  TARGET_STAT has the file status
+   that is used to fix up permissions and timestamps after rename.  Return 0 if
+   ok, -1 if error and FD is closed before returning.  */
+
+int
+smart_rename (const char *from, const char *to, int fd ATTRIBUTE_UNUSED,
+	      struct stat *target_stat ATTRIBUTE_UNUSED,
+	      int preserve_dates ATTRIBUTE_UNUSED)
+{
+  int ret = 0;
+  bfd_boolean exists = target_stat != NULL;
 
 #if defined (_WIN32) && !defined (__CYGWIN32__)
   /* Win32, unlike unix, will not erase `to' in `rename(from, to)' but
@@ -158,36 +196,35 @@ smart_rename (const char *from, const char *to, int preserve_dates ATTRIBUTE_UNU
       unlink (from);
     }
 #else
-  /* Use rename only if TO is not a symbolic link and has
-     only one hard link, and we have permission to write to it.  */
+  /* Avoid a full copy and use rename if we can fix up permissions of the
+     file after renaming, i.e.:
+
+     - TO is not a symbolic link
+     - TO is a regular file with only one hard link
+     - We have permission to write to TO
+     - FD is available to safely fix up permissions to be the same as the file
+       we overwrote with the rename.
+
+     Note though that the actual file on disk that TARGET_STAT describes may
+     have changed and we're only trying to preserve the status we know about.
+     At no point do we try to interact with the new file changes, so there can
+     only be two outcomes, i.e. either the external file change survives
+     without knowledge of our change (if it happens after the rename syscall)
+     or our rename and permissions fixup survive without any knowledge of the
+     external change.  */
   if (! exists
-      || (!S_ISLNK (s.st_mode)
-	  && S_ISREG (s.st_mode)
-	  && (s.st_mode & S_IWUSR)
-	  && s.st_nlink == 1)
+      || (fd >= 0
+	  && !S_ISLNK (target_stat->st_mode)
+	  && S_ISREG (target_stat->st_mode)
+	  && (target_stat->st_mode & S_IWUSR)
+	  && target_stat->st_nlink == 1)
       )
     {
       ret = rename (from, to);
       if (ret == 0)
 	{
 	  if (exists)
-	    {
-	      /* Try to preserve the permission bits and ownership of
-		 TO.  First get the mode right except for the setuid
-		 bit.  Then change the ownership.  Then fix the setuid
-		 bit.  We do the chmod before the chown because if the
-		 chown succeeds, and we are a normal user, we won't be
-		 able to do the chmod afterward.  We don't bother to
-		 fix the setuid bit first because that might introduce
-		 a fleeting security problem, and because the chown
-		 will clear the setuid bit anyhow.  We only fix the
-		 setuid bit if the chown succeeds, because we don't
-		 want to introduce an unexpected setuid file owned by
-		 the user running objcopy.  */
-	      chmod (to, s.st_mode & 0777);
-	      if (chown (to, s.st_uid, s.st_gid) >= 0)
-		chmod (to, s.st_mode & 07777);
-	    }
+	    try_preserve_permissions (fd, target_stat);
 	}
       else
 	{
@@ -203,9 +240,11 @@ smart_rename (const char *from, const char *to, int preserve_dates ATTRIBUTE_UNU
 	non_fatal (_("unable to copy file '%s'; reason: %s"), to, strerror (errno));
 
       if (preserve_dates)
-	set_times (to, &s);
+	set_times (to, target_stat);
       unlink (from);
     }
+  if (fd >= 0)
+    close (fd);
 #endif /* _WIN32 && !__CYGWIN32__ */
 
   return ret;

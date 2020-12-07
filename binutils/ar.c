@@ -1254,6 +1254,8 @@ write_archive (bfd *iarch)
   char *old_name, *new_name;
   bfd *contents_head = iarch->archive_next;
   int ofd = -1;
+  struct stat target_stat;
+  bfd_boolean skip_stat = FALSE;
 
   old_name = (char *) xmalloc (strlen (bfd_get_filename (iarch)) + 1);
   strcpy (old_name, bfd_get_filename (iarch));
@@ -1299,6 +1301,14 @@ write_archive (bfd *iarch)
   if (!bfd_set_archive_head (obfd, contents_head))
     bfd_fatal (old_name);
 
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+  ofd = dup (ofd);
+  if (iarch == NULL || iarch->iostream == NULL)
+    skip_stat = TRUE;
+  else if (ofd == -1 || fstat (fileno (iarch->iostream), &target_stat) != 0)
+    bfd_fatal (old_name);
+#endif
+
   if (!bfd_close (obfd))
     bfd_fatal (old_name);
 
@@ -1308,7 +1318,7 @@ write_archive (bfd *iarch)
   /* We don't care if this fails; we might be creating the archive.  */
   bfd_close (iarch);
 
-  if (smart_rename (new_name, old_name, 0) != 0)
+  if (smart_rename (new_name, old_name, ofd, skip_stat ? NULL : &target_stat, 0) != 0)
     xexit (1);
   free (old_name);
   free (new_name);
