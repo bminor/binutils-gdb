@@ -215,12 +215,6 @@ private:
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
   void pop ();
 
-  /* Return a value of type TYPE, stored in register number REGNUM
-     of the frame associated to the given BATON.
-
-     REGNUM is a DWARF register number.  */
-  struct value *get_reg_value (struct type *type, int regnum);
-
   /* Return the location expression for the frame base attribute, in
      START and LENGTH.  The result must be live until the current
      expression evaluation is complete.  */
