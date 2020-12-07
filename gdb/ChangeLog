@@ -1,3 +1,9 @@
+2020-12-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* main.c (catch_command_errors): Add a flag parameter; invoke
+	`bpstat_do_actions` if the flag is set.
+	(execute_cmdargs): Update a call to `catch_command_errors`.
+
 2020-12-07  Tom de Vries  <tdevries@suse.de>
 
 	* ada-lang.c (replace_operator_with_call): Handle shrink resize.

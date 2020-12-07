@@ -1,3 +1,12 @@
+2020-12-07  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/bp-cmds-run-with-ex.c: New file.
+	* gdb.base/bp-cmds-run-with-ex.exp: New file.
+	* gdb.base/bp-cmds-run-with-ex.gdb: New file.
+	* gdb.gdb/python-interrupts.exp: Update the call to
+	'catch_command_errors' with the new argument.
+	* gdb.gdb/python-selftest.exp: Ditto.
+
 2020-12-04  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.arch/amd64-disp-step-avx.exp: Adjust pattern.

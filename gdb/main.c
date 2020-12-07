@@ -439,7 +439,8 @@ typedef void (catch_command_errors_const_ftype) (const char *, int);
 
 static int
 catch_command_errors (catch_command_errors_const_ftype command,
-		      const char *arg, int from_tty)
+		      const char *arg, int from_tty,
+		      bool do_bp_actions = false)
 {
   try
     {
@@ -448,6 +449,10 @@ catch_command_errors (catch_command_errors_const_ftype command,
       command (arg, from_tty);
 
       maybe_wait_sync_command_done (was_sync);
+
+      /* Do any commands attached to breakpoint we stopped at.  */
+      if (do_bp_actions)
+	bpstat_do_actions ();
     }
   catch (const gdb_exception &e)
     {
@@ -531,7 +536,7 @@ execute_cmdargs (const std::vector<struct cmdarg> *cmdarg_vec,
 				     !batch_flag);
       else if (cmdarg_p.type == cmd_type)
 	*ret = catch_command_errors (execute_command, cmdarg_p.string,
-				     !batch_flag);
+				     !batch_flag, true);
     }
 }
 
