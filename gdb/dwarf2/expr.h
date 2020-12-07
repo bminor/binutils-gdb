@@ -130,11 +130,13 @@ struct dwarf_expr_context
   void push_address (CORE_ADDR value, bool in_stack_memory);
 
   /* Evaluate the expression at ADDR (LEN bytes long) in a given PER_CU
-     FRAME context.  Where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET describe
-     expected struct value representation of the evaluation result.
-     The ADDR_INFO property can be specified to override the range of
-     memory addresses with the passed in buffer.  */
-  struct value *eval_exp (const gdb_byte *addr, size_t len,
+     FRAME context.  AS_LVAL defines if the returned struct value is
+     expected to be a value or a location description.  Where TYPE,
+     SUBOBJ_TYPE and SUBOBJ_OFFSET describe expected struct value
+     representation of the evaluation result.  The ADDR_INFO property
+     can be specified to override the range of memory addresses with
+     the passed in buffer.  */
+  struct value *eval_exp (const gdb_byte *addr, size_t len, bool as_lval,
 			  struct dwarf2_per_cu_data *per_cu,
 			  struct frame_info *frame,
 			  const struct property_addr_info *addr_info = nullptr,
@@ -223,10 +225,13 @@ private:
 
   /* Fetch the result of the expression evaluation in a form of
      a struct value, where TYPE, SUBOBJ_TYPE and SUBOBJ_OFFSET
-     describe the source level representation of that result.  */
+     describe the source level representation of that result.
+     AS_LVAL defines if the fetched struct value is expected to
+     be a value or a location description.  */
   struct value *fetch_result (struct type *type,
 			      struct type *subobj_type,
-			      LONGEST subobj_offset);
+			      LONGEST subobj_offset,
+			      bool as_lval);
 
   /* Return the location expression for the frame base attribute, in
      START and LENGTH.  The result must be live until the current

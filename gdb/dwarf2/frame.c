@@ -232,7 +232,7 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   scoped_value_mark free_values;
 
   ctx.push_address (initial, initial_in_stack_memory);
-  struct value *result_val = ctx.eval_exp (exp, len, nullptr, this_frame);
+  struct value *result_val = ctx.eval_exp (exp, len, true, nullptr, this_frame);
 
   if (VALUE_LVAL (result_val) == lval_memory)
     return value_address (result_val);

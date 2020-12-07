@@ -50,7 +50,7 @@
 static struct value *dwarf2_evaluate_loc_desc_full
   (struct type *type, struct frame_info *frame, const gdb_byte *data,
    size_t size, dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
-   struct type *subobj_type, LONGEST subobj_byte_offset);
+   struct type *subobj_type, LONGEST subobj_byte_offset, bool as_lval = true);
 
 /* Until these have formal names, we define these here.
    ref: http://gcc.gnu.org/wiki/DebugFission
@@ -1183,7 +1183,6 @@ dwarf_entry_parameter_to_value (struct call_site_parameter *parameter,
 				dwarf2_per_objfile *per_objfile)
 {
   const gdb_byte *data_src;
-  gdb_byte *data;
   size_t size;
 
   data_src = deref_size == -1 ? parameter->value : parameter->data_value;
@@ -1194,15 +1193,8 @@ dwarf_entry_parameter_to_value (struct call_site_parameter *parameter,
     throw_error (NO_ENTRY_VALUE_ERROR,
 		 _("Cannot resolve DW_AT_call_data_value"));
 
-  /* DW_AT_call_value is a DWARF expression, not a DWARF
-     location.  Postprocessing of DWARF_VALUE_MEMORY would lose the type from
-     DWARF block.  */
-  data = (gdb_byte *) alloca (size + 1);
-  memcpy (data, data_src, size);
-  data[size] = DW_OP_stack_value;
-
-  return dwarf2_evaluate_loc_desc (type, caller_frame, data, size + 1, per_cu,
-				   per_objfile);
+  return dwarf2_evaluate_loc_desc (type, caller_frame, data_src, size, per_cu,
+				   per_objfile, false);
 }
 
 /* VALUE must be of type lval_computed with entry_data_value_funcs.  Perform
@@ -1428,7 +1420,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 			       dwarf2_per_cu_data *per_cu,
 			       dwarf2_per_objfile *per_objfile,
 			       struct type *subobj_type,
-			       LONGEST subobj_byte_offset)
+			       LONGEST subobj_byte_offset,
+			       bool as_lval)
 {
   if (subobj_type == NULL)
     {
@@ -1448,8 +1441,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   try
     {
-      retval = ctx.eval_exp (data, size, per_cu, frame, nullptr, type,
-			     subobj_type, subobj_byte_offset);
+      retval = ctx.eval_exp (data, size, as_lval, per_cu, frame, nullptr,
+			     type, subobj_type, subobj_byte_offset);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -1490,10 +1483,10 @@ struct value *
 dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 			  const gdb_byte *data, size_t size,
 			  dwarf2_per_cu_data *per_cu,
-			  dwarf2_per_objfile *per_objfile)
+			  dwarf2_per_objfile *per_objfile, bool as_lval)
 {
   return dwarf2_evaluate_loc_desc_full (type, frame, data, size, per_cu,
-					per_objfile, NULL, 0);
+					per_objfile, NULL, 0, as_lval);
 }
 
 /* Evaluates a dwarf expression and stores the result in VAL,
@@ -1536,7 +1529,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   try
     {
       result = ctx.eval_exp (dlbaton->data, dlbaton->size,
-			     per_cu, frame, addr_stack);
+			     true, per_cu, frame, addr_stack);
     }
   catch (const gdb_exception_error &ex)
     {

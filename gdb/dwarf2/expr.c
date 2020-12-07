@@ -903,7 +903,8 @@ dwarf_expr_context::push_dwarf_reg_entry_value
 struct value *
 dwarf_expr_context::fetch_result (struct type *type,
 				  struct type *subobj_type,
-				  LONGEST subobj_offset)
+				  LONGEST subobj_offset,
+				  bool as_lval)
 {
   struct value *retval = nullptr;
 
@@ -933,6 +934,11 @@ dwarf_expr_context::fetch_result (struct type *type,
     }
   else
     {
+      /* If AS_LVAL is false, means that the implicit conversion
+	 from a location description to value is expected.  */
+      if (as_lval == false)
+	this->location = DWARF_VALUE_STACK;
+
       switch (this->location)
 	{
 	case DWARF_VALUE_REGISTER:
@@ -1057,7 +1063,7 @@ dwarf_expr_context::fetch_result (struct type *type,
 /* See expr.h.  */
 
 struct value *
-dwarf_expr_context::eval_exp (const gdb_byte *addr, size_t len,
+dwarf_expr_context::eval_exp (const gdb_byte *addr, size_t len, bool as_lval,
 			      struct dwarf2_per_cu_data *per_cu,
 			      struct frame_info *frame,
 			      const struct property_addr_info *addr_info,
@@ -1073,7 +1079,7 @@ dwarf_expr_context::eval_exp (const gdb_byte *addr, size_t len,
     this->ref_addr_size = per_cu->ref_addr_size ();
 
   eval (addr, len);
-  return fetch_result (type, subobj_type, subobj_offset);
+  return fetch_result (type, subobj_type, subobj_offset, as_lval);
 }
 
 /* Require that TYPE be an integral type; throw an exception if not.  */
