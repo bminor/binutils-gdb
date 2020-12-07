@@ -525,7 +525,7 @@ Plugin_recorder::init()
 
   size_t len = strlen(dir_template) + 1;
   char* tempdir = new char[len];
-  strncpy(tempdir, dir_template, len);
+  memcpy(tempdir, dir_template, len);
 
   // Create the log file.
   std::string logname(tempdir);
