@@ -1,3 +1,8 @@
+2020-12-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/mi_task_arg.exp: Accept <optimized out> as valid value of
+	self_id.
+
 2020-12-07  Pedro Alves  <pedro@palves.net>
 
 	* gdb.base/break-on-linker-gcd-function.exp: Remove unused
