@@ -962,3 +962,9 @@ foreach_with_prefix cmd { "watch" "awatch" "rwatch" } {
 	    }
     }
 }
+
+# Check that tab completion of a deprecated alias does not display the
+# warning about the alias being deprecated during tab completion.
+gdb_test_no_output "alias xxx_yyy_zzz=break"
+gdb_test_no_output "maint deprecate xxx_yyy_zzz"
+test_gdb_complete_unique "xxx_yyy_" "xxx_yyy_zzz"

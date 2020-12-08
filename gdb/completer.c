@@ -1388,9 +1388,8 @@ complete_line_internal_1 (completion_tracker &tracker,
       result_list = 0;
     }
   else
-    {
-      c = lookup_cmd_1 (&p, cmdlist, &result_list, NULL, ignore_help_classes);
-    }
+    c = lookup_cmd_1 (&p, cmdlist, &result_list, NULL, ignore_help_classes,
+		      true);
 
   /* Move p up to the next interesting thing.  */
   while (*p == ' ' || *p == '\t')

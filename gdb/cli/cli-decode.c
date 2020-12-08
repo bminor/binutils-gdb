@@ -1613,50 +1613,12 @@ valid_user_defined_cmd_name_p (const char *name)
   return true;
 }
 
-/* This routine takes a line of TEXT and a CLIST in which to start the
-   lookup.  When it returns it will have incremented the text pointer past
-   the section of text it matched, set *RESULT_LIST to point to the list in
-   which the last word was matched, and will return a pointer to the cmd
-   list element which the text matches.  It will return NULL if no match at
-   all was possible.  It will return -1 (cast appropriately, ick) if ambigous
-   matches are possible; in this case *RESULT_LIST will be set to point to
-   the list in which there are ambiguous choices (and *TEXT will be set to
-   the ambiguous text string).
-
-   if DEFAULT_ARGS is not null, *DEFAULT_ARGS is set to the found command
-   default args (possibly empty).
-
-   If the located command was an abbreviation, this routine returns the base
-   command of the abbreviation.  Note that *DEFAULT_ARGS will contain the
-   default args defined for the alias.
-
-   It does no error reporting whatsoever; control will always return
-   to the superior routine.
-
-   In the case of an ambiguous return (-1), *RESULT_LIST will be set to point
-   at the prefix_command (ie. the best match) *or* (special case) will be NULL
-   if no prefix command was ever found.  For example, in the case of "info a",
-   "info" matches without ambiguity, but "a" could be "args" or "address", so
-   *RESULT_LIST is set to the cmd_list_element for "info".  So in this case
-   RESULT_LIST should not be interpreted as a pointer to the beginning of a
-   list; it simply points to a specific command.  In the case of an ambiguous
-   return *TEXT is advanced past the last non-ambiguous prefix (e.g.
-   "info t" can be "info types" or "info target"; upon return *TEXT has been
-   advanced past "info ").
-
-   If RESULT_LIST is NULL, don't set *RESULT_LIST (but don't otherwise
-   affect the operation).
-
-   This routine does *not* modify the text pointed to by TEXT.
-
-   If IGNORE_HELP_CLASSES is nonzero, ignore any command list elements which
-   are actually help classes rather than commands (i.e. the function field of
-   the struct cmd_list_element is NULL).  */
+/* See command.h.  */
 
 struct cmd_list_element *
 lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 	      struct cmd_list_element **result_list, std::string *default_args,
-	      int ignore_help_classes)
+	      int ignore_help_classes, bool lookup_for_completion_p)
 {
   char *command;
   int len, nfound;
@@ -1715,7 +1677,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
        itself and we will adjust the appropriate DEPRECATED_WARN_USER
        flags.  */
 
-      if (found->deprecated_warn_user)
+      if (found->deprecated_warn_user && !lookup_for_completion_p)
 	deprecated_cmd_warning (line);
 
       /* Return the default_args of the alias, not the default_args
@@ -1729,8 +1691,8 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
 
   if (found->prefixlist)
     {
-      c = lookup_cmd_1 (text, *found->prefixlist, result_list,
-			default_args, ignore_help_classes);
+      c = lookup_cmd_1 (text, *found->prefixlist, result_list, default_args,
+			ignore_help_classes, lookup_for_completion_p);
       if (!c)
 	{
 	  /* Didn't find anything; this is as far as we got.  */

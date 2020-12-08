@@ -1,3 +1,13 @@
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* cli/cli-decode.c (lookup_cmd_1): Move header comment into
+	command.h, add extra parameter, and use this to guard giving a
+	warning.
+	* command.h (lookup_cmd_1): Add comment from cli/cli-decode.c,
+	include argument names in declaration, add new argument.
+	* completer.c (complete_line_internal_1): Remove unneeded
+	brackets, pass extra argument to lookup_cmd_1.
+
 2020-12-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.h (debug_infrun): Make a bool.
