@@ -99,9 +99,17 @@ parse_riscv_dis_option (const char *option)
   value = equal + 1;
   if (strcmp (option, "priv-spec") == 0)
     {
-      if (!riscv_get_priv_spec_class (value, &default_priv_spec))
-       opcodes_error_handler (_("unknown privilege spec set by %s=%s"),
-                              option, value);
+      enum riscv_priv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
+      if (!riscv_get_priv_spec_class (value, &priv_spec))
+	opcodes_error_handler (_("unknown privilege spec set by %s=%s"),
+			       option, value);
+      else if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
+	default_priv_spec = priv_spec;
+      else if (default_priv_spec != priv_spec)
+	opcodes_error_handler (_("mis-matched privilege spec set by %s=%s, "
+				 "the elf privilege attribute is %s"),
+			       option, value,
+			       riscv_get_priv_spec_name (default_priv_spec));
     }
   else
     {
@@ -580,6 +588,29 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
     }
 
   return riscv_disassemble_insn (memaddr, insn, info);
+}
+
+disassembler_ftype
+riscv_get_disassembler (bfd *abfd)
+{
+  /* If -Mpriv-spec= isn't set, then try to set it by checking the elf
+     privileged attributes.  */
+  if (abfd)
+    {
+      const char *sec_name = get_elf_backend_data (abfd)->obj_attrs_section;
+      if (bfd_get_section_by_name (abfd, sec_name) != NULL)
+        {
+	  obj_attribute *attr = elf_known_obj_attributes_proc (abfd);
+	  unsigned int Tag_a = Tag_RISCV_priv_spec;
+	  unsigned int Tag_b = Tag_RISCV_priv_spec_minor;
+	  unsigned int Tag_c = Tag_RISCV_priv_spec_revision;
+	  riscv_get_priv_spec_class_from_numbers (attr[Tag_a].i,
+						  attr[Tag_b].i,
+						  attr[Tag_c].i,
+						  &default_priv_spec);
+        }
+    }
+   return print_insn_riscv;
 }
 
 /* Prevent use of the fake labels that are generated as part of the DWARF

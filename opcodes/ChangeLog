@@ -1,5 +1,16 @@
 2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
 
+	* disassemble.h (riscv_get_disassembler): Declare.
+	* disassemble.c (disassembler): Changed to riscv_get_disassembler.
+	* riscv-dis.c (riscv_get_disassembler): Check the elf privileged spec
+	attributes before calling print_insn_riscv.
+	(parse_riscv_dis_option): Same as the assembler, the priority of elf
+	attributes are higher than the options.  If we find the privileged
+	attributes, but the -Mpriv-spec= is different, then output error/warning
+	and still use the elf attributes set.
+
+2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
+
 	* riscv-opc.c (riscv_opcodes): Control fence.i and csr instructions by
 	zifencei and zicsr.
 
