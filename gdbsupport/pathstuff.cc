@@ -238,6 +238,16 @@ get_standard_cache_dir ()
       return string_printf ("%s/" HOME_CACHE_DIR "/gdb", abs.get ());
     }
 
+#ifdef WIN32
+  const char *win_home = getenv ("LOCALAPPDATA");
+  if (win_home != NULL)
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (win_home));
+      return string_printf ("%s/gdb", abs.get ());
+    }
+#endif
+    
   return {};
 }
 

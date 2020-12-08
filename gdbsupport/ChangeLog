@@ -1,3 +1,8 @@
+2020-12-08  Alexander Fedotov  <alfedotov@gmail.com>
+
+	* pathstuff.cc (get_standard_cache_dir): Use LOCALAPPDATA environment
+	variable when running on Windows.
+
 2020-12-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tdesc.cc (print_xml_feature::visit): Print enum fields using
