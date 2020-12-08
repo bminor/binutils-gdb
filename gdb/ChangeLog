@@ -1,3 +1,7 @@
+2020-12-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* ada-lang.c (ada_fold_name): Fix off-by-one error.
+
 2020-12-10  Luis Machado  <luis.machado@linaro.org>
 
 	* breakpoint.c (should_be_inserted): Don't output newline.

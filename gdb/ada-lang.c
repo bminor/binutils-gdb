@@ -984,8 +984,9 @@ ada_fold_name (gdb::string_view name)
     {
       int i;
 
-      for (i = 0; i <= len; i += 1)
+      for (i = 0; i < len; i += 1)
 	fold_buffer[i] = tolower (name[i]);
+      fold_buffer[i] = '\0';
     }
 
   return fold_buffer;
