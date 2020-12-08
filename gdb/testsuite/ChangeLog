@@ -1,5 +1,10 @@
 2020-12-08  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.arch/amd64-gs_base.exp: Undo commit 67748e0f66, reimplement
+	using is_amd64_regs_target.
+
+2020-12-08  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/mi_task_arg.exp: Accept <optimized out> as valid value of
 	self_id.
 
