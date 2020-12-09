@@ -2466,7 +2466,13 @@ extern struct type *lookup_template_type (const char *, struct type *,
 
 extern int get_vptr_fieldno (struct type *, struct type **);
 
-extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
+/* Set *LOWP and *HIGHP to the lower and upper bounds of discrete type
+   TYPE.
+
+   Return true if the two bounds are available, false otherwise.  */
+
+extern bool get_discrete_bounds (struct type *type, LONGEST *lowp,
+				 LONGEST *highp);
 
 /* Assuming TYPE is a simple, non-empty array type, compute its upper
    and lower bound.  Save the low bound into LOW_BOUND if not NULL.

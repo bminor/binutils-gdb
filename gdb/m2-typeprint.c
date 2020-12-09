@@ -372,7 +372,7 @@ m2_is_long_set (struct type *type)
 			    This should be integrated into gdbtypes.c
 			    inside get_discrete_bounds.  */
 
-static int
+static bool
 m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
   type = check_typedef (type);
@@ -419,7 +419,7 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
       l1 = type->field (i).type ()->bounds ()->low.const_val ();
       h1 = type->field (len - 1).type ()->bounds ()->high.const_val ();
       *of_type = target;
-      if (m2_get_discrete_bounds (target, &l2, &h2) >= 0)
+      if (m2_get_discrete_bounds (target, &l2, &h2))
 	return (l1 == l2 && h1 == h2);
       error (_("long_set failed to find discrete bounds for its subtype"));
       return 0;

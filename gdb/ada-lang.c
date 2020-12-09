@@ -2112,7 +2112,7 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
 
   if ((check_typedef (index_type)->code () == TYPE_CODE_RANGE
        && is_dynamic_type (check_typedef (index_type)))
-      || get_discrete_bounds (index_type, &low_bound, &high_bound) < 0)
+      || !get_discrete_bounds (index_type, &low_bound, &high_bound))
     low_bound = high_bound = 0;
   if (high_bound < low_bound)
     *elt_bits = TYPE_LENGTH (new_type) = 0;
@@ -2182,7 +2182,7 @@ recursively_update_array_bitsize (struct type *type)
   gdb_assert (type->code () == TYPE_CODE_ARRAY);
 
   LONGEST low, high;
-  if (get_discrete_bounds (type->index_type (), &low, &high) < 0
+  if (!get_discrete_bounds (type->index_type (), &low, &high)
       || low > high)
     return 0;
   LONGEST our_len = high - low + 1;
@@ -2299,7 +2299,7 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
 	  LONGEST lowerbound, upperbound;
 	  LONGEST idx;
 
-	  if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
+	  if (!get_discrete_bounds (range_type, &lowerbound, &upperbound))
 	    {
 	      lim_warning (_("don't know bounds of array"));
 	      lowerbound = upperbound = 0;

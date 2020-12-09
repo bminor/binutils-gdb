@@ -97,7 +97,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 
   target = TYPE_TARGET_TYPE (range);
 
-  if (get_discrete_bounds (range, &field_low, &field_high) >= 0)
+  if (get_discrete_bounds (range, &field_low, &field_high))
     {
       for (i = low_bound; i <= high_bound; i++)
 	{
@@ -137,7 +137,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	      if (field == len)
 		break;
 	      range = type->field (field).type ()->index_type ();
-	      if (get_discrete_bounds (range, &field_low, &field_high) < 0)
+	      if (!get_discrete_bounds (range, &field_low, &field_high))
 		break;
 	      target = TYPE_TARGET_TYPE (range);
 	    }
@@ -399,7 +399,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
 
 	  fputs_filtered ("{", stream);
 
-	  i = get_discrete_bounds (range, &low_bound, &high_bound);
+	  i = get_discrete_bounds (range, &low_bound, &high_bound) ? 0 : -1;
 	maybe_bad_bstring:
 	  if (i < 0)
 	    {

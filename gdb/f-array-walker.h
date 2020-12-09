@@ -42,7 +42,7 @@ public:
 
     /* Get the range, and extract the bounds.  */
     struct type *range_type = type->index_type ();
-    if (get_discrete_bounds (range_type, &m_lowerbound, &m_upperbound) < 0)
+    if (!get_discrete_bounds (range_type, &m_lowerbound, &m_upperbound))
       error ("unable to read array bounds");
 
     /* Figure out the stride for this array.  */
@@ -198,7 +198,7 @@ private:
     /* Extract the range, and get lower and upper bounds.  */
     struct type *range_type = check_typedef (type)->index_type ();
     LONGEST lowerbound, upperbound;
-    if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
+    if (!get_discrete_bounds (range_type, &lowerbound, &upperbound))
       error ("failed to get range bounds");
 
     /* CALC is used to calculate the offsets for each element in this
