@@ -1,5 +1,12 @@
 2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.c (get_discrete_bounds): Implement with
+	get_discrete_low_bound and get_discrete_high_bound.
+	(get_discrete_low_bound): New.
+	(get_discrete_high_bound): New.
+
+2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (get_discrete_bounds): Return bool, adjust all
 	callers.
 	* gdbtypes.c (get_discrete_bounds): Return bool.
