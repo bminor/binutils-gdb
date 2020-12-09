@@ -1081,7 +1081,7 @@ get_discrete_low_bound (struct type *type)
 
     case TYPE_CODE_INT:
       if (TYPE_LENGTH (type) > sizeof (LONGEST))	/* Too big */
-	return false;
+	return {};
 
       if (!TYPE_UNSIGNED (type))
 	return -(1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1));
@@ -1091,7 +1091,7 @@ get_discrete_low_bound (struct type *type)
       return 0;
 
     default:
-      return false;
+      return {};
     }
 }
 
@@ -1148,7 +1148,7 @@ get_discrete_high_bound (struct type *type)
 
     case TYPE_CODE_INT:
       if (TYPE_LENGTH (type) > sizeof (LONGEST))	/* Too big */
-	return false;
+	return {};
 
       if (!TYPE_UNSIGNED (type))
 	{
@@ -1167,7 +1167,7 @@ get_discrete_high_bound (struct type *type)
       }
 
     default:
-      return false;
+      return {};
     }
 }
 
@@ -1177,9 +1177,11 @@ bool
 get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
   gdb::optional<LONGEST> low = get_discrete_low_bound (type);
-  gdb::optional<LONGEST> high = get_discrete_high_bound (type);
+  if (!low.has_value ())
+    return false;
 
-  if (!low.has_value () || !high.has_value ())
+  gdb::optional<LONGEST> high = get_discrete_high_bound (type);
+  if (!high.has_value ())
     return false;
 
   *lowp = *low;
