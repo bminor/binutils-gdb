@@ -1,5 +1,14 @@
 2020-12-09  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (get_dwarf2_rational_constant): Change "numerator"
+	and "denominator" to gdb_mpz.  Handle block forms.
+	(get_dwarf2_unsigned_rational_constant): Change "numerator" and
+	"denominator" to gdb_mpz.
+	(finish_fixed_point_type): Update.
+	(has_zero_over_zero_small_attribute): Update.
+
+2020-12-09  Tom Tromey  <tromey@adacore.com>
+
 	* expprint.c (op_name): Update.
 	* expression.h (enum exp_opcode): Update.
 	* std-operator.def: Add more opcodes.

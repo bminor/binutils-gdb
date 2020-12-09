@@ -18194,7 +18194,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 
 static void
 get_dwarf2_rational_constant (struct die_info *die, struct dwarf2_cu *cu,
-			      LONGEST *numerator, LONGEST *denominator)
+			      gdb_mpz *numerator, gdb_mpz *denominator)
 {
   struct attribute *num_attr, *denom_attr;
 
@@ -18211,8 +18211,25 @@ get_dwarf2_rational_constant (struct die_info *die, struct dwarf2_cu *cu,
   if (num_attr == nullptr || denom_attr == nullptr)
     return;
 
-  *numerator = num_attr->constant_value (1);
-  *denominator = denom_attr->constant_value (1);
+  if (num_attr->form_is_block ())
+    {
+      dwarf_block *blk = num_attr->as_block ();
+      mpz_import (numerator->val, blk->size,
+		  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
+		  1, 0, 0, blk->data);
+    }
+  else
+    *numerator = gdb_mpz (num_attr->constant_value (1));
+
+  if (denom_attr->form_is_block ())
+    {
+      dwarf_block *blk = denom_attr->as_block ();
+      mpz_import (denominator->val, blk->size,
+		  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
+		  1, 0, 0, blk->data);
+    }
+  else
+    *denominator = gdb_mpz (denom_attr->constant_value (1));
 }
 
 /* Same as get_dwarf2_rational_constant, but extracting an unsigned
@@ -18224,25 +18241,26 @@ get_dwarf2_rational_constant (struct die_info *die, struct dwarf2_cu *cu,
 static void
 get_dwarf2_unsigned_rational_constant (struct die_info *die,
 				       struct dwarf2_cu *cu,
-				       ULONGEST *numerator,
-				       ULONGEST *denominator)
+				       gdb_mpz *numerator,
+				       gdb_mpz *denominator)
 {
-  LONGEST num = 1, denom = 1;
+  gdb_mpz num (1);
+  gdb_mpz denom (1);
 
   get_dwarf2_rational_constant (die, cu, &num, &denom);
-  if (num < 0 && denom < 0)
+  if (mpz_sgn (num.val) == -1 && mpz_sgn (denom.val) == -1)
     {
-      num = -num;
-      denom = -denom;
+      mpz_neg (num.val, num.val);
+      mpz_neg (denom.val, denom.val);
     }
-  else if (num < 0)
+  else if (mpz_sgn (num.val) == -1)
     {
       complaint (_("unexpected negative value for DW_AT_GNU_numerator"
 		   " in DIE at %s"),
 		 sect_offset_str (die->sect_off));
       return;
     }
-  else if (denom < 0)
+  else if (mpz_sgn (denom.val) == -1)
     {
       complaint (_("unexpected negative value for DW_AT_GNU_denominator"
 		   " in DIE at %s"),
@@ -18250,8 +18268,8 @@ get_dwarf2_unsigned_rational_constant (struct die_info *die,
       return;
     }
 
-  *numerator = num;
-  *denominator = denom;
+  *numerator = std::move (num);
+  *denominator = std::move (denom);
 }
 
 /* Assuming DIE corresponds to a fixed point type, finish the creation
@@ -18263,14 +18281,6 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
 			 struct dwarf2_cu *cu)
 {
   struct attribute *attr;
-  /* Numerator and denominator of our fixed-point type's scaling factor.
-     The default is a scaling factor of 1, which we use as a fallback
-     when we are not able to decode it (problem with the debugging info,
-     unsupported forms, bug in GDB, etc...).  Using that as the default
-     allows us to at least print the unscaled value, which might still
-     be useful to a user.  */
-  ULONGEST scale_num = 1;
-  ULONGEST scale_denom = 1;
 
   gdb_assert (type->code () == TYPE_CODE_FIXED_POINT
 	      && TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FIXED_POINT);
@@ -18280,6 +18290,15 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
     attr = dwarf2_attr (die, DW_AT_decimal_scale, cu);
   if (!attr)
     attr = dwarf2_attr (die, DW_AT_small, cu);
+
+  /* Numerator and denominator of our fixed-point type's scaling factor.
+     The default is a scaling factor of 1, which we use as a fallback
+     when we are not able to decode it (problem with the debugging info,
+     unsupported forms, bug in GDB, etc...).  Using that as the default
+     allows us to at least print the unscaled value, which might still
+     be useful to a user.  */
+  gdb_mpz scale_num (1);
+  gdb_mpz scale_denom (1);
 
   if (attr == nullptr)
     {
@@ -18292,16 +18311,16 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
   else if (attr->name == DW_AT_binary_scale)
     {
       LONGEST scale_exp = attr->constant_value (0);
-      ULONGEST *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
+      gdb_mpz *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
 
-      *num_or_denom = 1 << std::abs (scale_exp);
+      mpz_mul_2exp (num_or_denom->val, num_or_denom->val, std::abs (scale_exp));
     }
   else if (attr->name == DW_AT_decimal_scale)
     {
       LONGEST scale_exp = attr->constant_value (0);
-      ULONGEST *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
+      gdb_mpz *num_or_denom = scale_exp > 0 ? &scale_num : &scale_denom;
 
-      *num_or_denom = uinteger_pow (10, std::abs (scale_exp));
+      mpz_ui_pow_ui (num_or_denom->val, 10, std::abs (scale_exp));
     }
   else if (attr->name == DW_AT_small)
     {
@@ -18326,13 +18345,8 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
     }
 
   gdb_mpq &scaling_factor = type->fixed_point_info ().scaling_factor;
-
-  gdb_mpz tmp_z (scale_num);
-  mpz_set (mpq_numref (scaling_factor.val), tmp_z.val);
-
-  tmp_z = scale_denom;
-  mpz_set (mpq_denref (scaling_factor.val), tmp_z.val);
-
+  mpz_set (mpq_numref (scaling_factor.val), scale_num.val);
+  mpz_set (mpq_denref (scaling_factor.val), scale_denom.val);
   mpq_canonicalize (scaling_factor.val);
 }
 
@@ -18398,9 +18412,9 @@ has_zero_over_zero_small_attribute (struct die_info *die,
   if (scale_die->tag != DW_TAG_constant)
     return false;
 
-  LONGEST num = 1, denom = 1;
+  gdb_mpz num (1), denom (1);
   get_dwarf2_rational_constant (scale_die, cu, &num, &denom);
-  return (num == 0 && denom == 0);
+  return mpz_sgn (num.val) == 0 && mpz_sgn (denom.val) == 0;
 }
 
 /* Initialise and return a floating point type of size BITS suitable for
