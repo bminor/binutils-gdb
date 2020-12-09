@@ -46,6 +46,7 @@
 
 #include "hashtab.h"
 #include "gdbsupport/array-view.h"
+#include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/offset-type.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/underlying.h"
@@ -2266,7 +2267,8 @@ extern int get_discrete_bounds (struct type *, LONGEST *, LONGEST *);
 extern int get_array_bounds (struct type *type, LONGEST *low_bound,
 			     LONGEST *high_bound);
 
-extern int discrete_position (struct type *type, LONGEST val, LONGEST *pos);
+extern gdb::optional<LONGEST> discrete_position (struct type *type,
+						 LONGEST val);
 
 extern int class_types_same_p (const struct type *, const struct type *);
 
