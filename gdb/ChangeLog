@@ -1,3 +1,10 @@
+2020-12-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.c (get_discrete_low_bound, get_discrete_high_bound):
+	Return {} instead of false.
+	(get_discrete_bounds): Compute high bound only if low bound is
+	valid.
+
 2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
 
 	PR 26875, PR 26901
