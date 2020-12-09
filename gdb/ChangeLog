@@ -1,5 +1,9 @@
 2020-12-09  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_lookup_encoded_symbol): Use add_angle_brackets.
+
+2020-12-09  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (get_dwarf2_rational_constant): Change "numerator"
 	and "denominator" to gdb_mpz.  Handle block forms.
 	(get_dwarf2_unsigned_rational_constant): Change "numerator" and

@@ -5808,7 +5808,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
      ada_lookup_name_info would re-encode/fold it again, and that
      would e.g., incorrectly lowercase object renaming names like
      "R28b" -> "r28b".  */
-  std::string verbatim = std::string ("<") + name + '>';
+  std::string verbatim = add_angle_brackets (name);
 
   gdb_assert (info != NULL);
   *info = ada_lookup_symbol (verbatim.c_str (), block, domain);
