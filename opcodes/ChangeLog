@@ -1,5 +1,9 @@
 2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
 
+	* riscv-opc.c (riscv_opcodes): Add sext.[bh] and zext.[bhw].
+
+2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
+
 	* disassemble.h (riscv_get_disassembler): Declare.
 	* disassemble.c (disassembler): Changed to riscv_get_disassembler.
 	* riscv-dis.c (riscv_get_disassembler): Check the elf privileged spec

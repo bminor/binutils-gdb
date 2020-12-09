@@ -1,5 +1,9 @@
 2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
 
+	* opcode/riscv.h (M_ZEXTH, M_ZEXTW, M_SEXTB, M_SEXTH.): Added.
+
+2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
+
 	* opcode/riscv.h: Add INSN_CLASS_ZICSR and INSN_CLASS_ZIFENCEI.
 
 2020-12-07  Nick Clifton  <nickc@redhat.com>

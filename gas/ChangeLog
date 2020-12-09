@@ -1,5 +1,15 @@
 2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c (riscv_ext): New function.  Use md_assemblef
+	to expand the zext and sext pseudos, to give them a chance to be
+	expanded into c-ext instructions.
+	(macro): Handle M_ZEXTH, M_ZEXTW, M_SEXTB and M_SEXTH.
+	* testsuite/gas/riscv/ext.s: New testcase.
+	* testsuite/gas/riscv/ext-32.d: Likewise.
+	* testsuite/gas/riscv/ext-64.d: Likewise.
+
+2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
+
 	* config/tc-riscv.c (riscv_multi_subset_supports): Handle INSN_CLASS_ZICSR
 	and INSN_CLASS_ZIFENCEI.
 	* testsuite/gas/riscv/march-imply-i.s: New testcase.

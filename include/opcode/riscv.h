@@ -480,6 +480,10 @@ enum
   M_CALL,
   M_J,
   M_LI,
+  M_ZEXTH,
+  M_ZEXTW,
+  M_SEXTB,
+  M_SEXTH,
   M_NUM_MACROS
 };
 
