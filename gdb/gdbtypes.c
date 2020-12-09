@@ -1062,9 +1062,21 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 
       if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM)
 	{
-	  if (!discrete_position (TYPE_TARGET_TYPE (type), *lowp, lowp)
-	      || ! discrete_position (TYPE_TARGET_TYPE (type), *highp, highp))
+	  gdb::optional<LONGEST> low_pos
+	    = discrete_position (TYPE_TARGET_TYPE (type), *lowp);
+
+	  if (!low_pos.has_value ())
 	    return 0;
+
+	  *lowp = *low_pos;
+
+	  gdb::optional<LONGEST> high_pos
+	    = discrete_position (TYPE_TARGET_TYPE (type), *highp);
+
+	  if (!high_pos.has_value ())
+	    return 0;
+
+	  *highp = *high_pos;
 	}
       return 1;
     case TYPE_CODE_ENUM:
@@ -1160,8 +1172,8 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
    in which case the value of POS is unmodified.
 */
 
-int
-discrete_position (struct type *type, LONGEST val, LONGEST *pos)
+gdb::optional<LONGEST>
+discrete_position (struct type *type, LONGEST val)
 {
   if (type->code () == TYPE_CODE_RANGE)
     type = TYPE_TARGET_TYPE (type);
@@ -1173,19 +1185,14 @@ discrete_position (struct type *type, LONGEST val, LONGEST *pos)
       for (i = 0; i < type->num_fields (); i += 1)
 	{
 	  if (val == TYPE_FIELD_ENUMVAL (type, i))
-	    {
-	      *pos = i;
-	      return 1;
-	    }
+	    return i;
 	}
+
       /* Invalid enumeration value.  */
-      return 0;
+      return {};
     }
   else
-    {
-      *pos = val;
-      return 1;
-    }
+    return val;
 }
 
 /* If the array TYPE has static bounds calculate and update its

@@ -1,3 +1,12 @@
+2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
+
+	* ada-lang.c (ada_value_slice_from_ptr): Adjust.
+	(ada_value_slice): Adjust.
+	(pos_atr): Adjust.
+	* gdbtypes.c (get_discrete_bounds): Adjust.
+	(discrete_position): Return optional.
+	* gdbtypes.h (discrete_position): Return optional.
+
 2020-12-07  Tom Tromey  <tromey@adacore.com>
 
 	* maint.c (_initialize_maint_cmds): Use expression command
