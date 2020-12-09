@@ -1873,7 +1873,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   unsigned rel_index;
   struct type *range = type->index_type ();
 
-  if (get_discrete_bounds (range, &low_bound, &high_bound) < 0)
+  if (!get_discrete_bounds (range, &low_bound, &high_bound))
     return -2;
   if (index < low_bound || index > high_bound)
     return -1;

@@ -1024,15 +1024,9 @@ has_static_range (const struct range_bounds *bounds)
 	  && bounds->stride.kind () == PROP_CONST);
 }
 
+/* See gdbtypes.h.  */
 
-/* Set *LOWP and *HIGHP to the lower and upper bounds of discrete type
-   TYPE.
-
-   Return 1 if type is a range type with two defined, constant bounds.
-   Else, return 0 if it is discrete (and bounds will fit in LONGEST).
-   Else, return -1.  */
-
-int
+bool
 get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
   type = check_typedef (type);
@@ -1043,7 +1037,7 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
          constant bounds.  */
       if (type->bounds ()->low.kind () != PROP_CONST
 	  || type->bounds ()->high.kind () != PROP_CONST)
-	return -1;
+	return false;
 
       *lowp = type->bounds ()->low.const_val ();
       *highp = type->bounds ()->high.const_val ();
@@ -1053,20 +1047,17 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 	  gdb::optional<LONGEST> low_pos
 	    = discrete_position (TYPE_TARGET_TYPE (type), *lowp);
 
-	  if (!low_pos.has_value ())
-	    return 0;
-
-	  *lowp = *low_pos;
+	  if (low_pos.has_value ())
+	    *lowp = *low_pos;
 
 	  gdb::optional<LONGEST> high_pos
 	    = discrete_position (TYPE_TARGET_TYPE (type), *highp);
 
-	  if (!high_pos.has_value ())
-	    return 0;
-
-	  *highp = *high_pos;
+	  if (high_pos.has_value ())
+	    *highp = *high_pos;
 	}
-      return 1;
+      return true;
+
     case TYPE_CODE_ENUM:
       if (type->num_fields () > 0)
 	{
@@ -1094,19 +1085,22 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 	  *lowp = 0;
 	  *highp = -1;
 	}
-      return 0;
+      return true;
+
     case TYPE_CODE_BOOL:
       *lowp = 0;
       *highp = 1;
-      return 0;
+      return true;
+
     case TYPE_CODE_INT:
       if (TYPE_LENGTH (type) > sizeof (LONGEST))	/* Too big */
-	return -1;
+	return false;
+
       if (!TYPE_UNSIGNED (type))
 	{
 	  *lowp = -(1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1));
 	  *highp = -*lowp - 1;
-	  return 0;
+	  return true;
 	}
       /* fall through */
     case TYPE_CODE_CHAR:
@@ -1116,9 +1110,10 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
          if TYPE_LENGTH (type) == sizeof (LONGEST).  */
       *highp = 1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1);
       *highp = (*highp - 1) | *highp;
-      return 0;
+      return true;
+
     default:
-      return -1;
+      return false;
     }
 }
 
@@ -1135,13 +1130,11 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
   struct type *index = type->index_type ();
   LONGEST low = 0;
   LONGEST high = 0;
-  int res;
 
   if (index == NULL)
     return 0;
 
-  res = get_discrete_bounds (index, &low, &high);
-  if (res == -1)
+  if (!get_discrete_bounds (index, &low, &high))
     return 0;
 
   if (low_bound)
@@ -1217,8 +1210,9 @@ update_static_array_size (struct type *type)
       if (stride == 0)
 	stride = range_type->bit_stride ();
 
-      if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
+      if (!get_discrete_bounds (range_type, &low_bound, &high_bound))
 	low_bound = high_bound = 0;
+
       element_type = check_typedef (TYPE_TARGET_TYPE (type));
       /* Be careful when setting the array length.  Ada arrays can be
 	 empty arrays with the high_bound being smaller than the low_bound.
@@ -1400,8 +1394,9 @@ create_set_type (struct type *result_type, struct type *domain_type)
     {
       LONGEST low_bound, high_bound, bit_length;
 
-      if (get_discrete_bounds (domain_type, &low_bound, &high_bound) < 0)
+      if (!get_discrete_bounds (domain_type, &low_bound, &high_bound))
 	low_bound = high_bound = 0;
+
       bit_length = high_bound - low_bound + 1;
       TYPE_LENGTH (result_type)
 	= (bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;

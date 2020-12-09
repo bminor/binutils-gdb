@@ -343,7 +343,8 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 
 	  fputs_filtered ("[", stream);
 
-	  int bound_info = get_discrete_bounds (range, &low_bound, &high_bound);
+	  int bound_info = (get_discrete_bounds (range, &low_bound, &high_bound)
+			    ? 0 : -1);
 	  if (low_bound == 0 && high_bound == -1 && TYPE_LENGTH (type) > 0)
 	    {
 	      /* If we know the size of the set type, we can figure out the

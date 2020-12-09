@@ -698,8 +698,8 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 		LONGEST low_bound, high_bound;
 		int element_size = TYPE_LENGTH (type);
 
-		if (get_discrete_bounds (expect_type->index_type (),
-					 &low_bound, &high_bound) < 0)
+		if (!get_discrete_bounds (expect_type->index_type (),
+					  &low_bound, &high_bound))
 		  {
 		    low_bound = 0;
 		    high_bound = (TYPE_LENGTH (expect_type) / element_size) - 1;

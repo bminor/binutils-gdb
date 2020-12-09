@@ -1,5 +1,11 @@
 2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (get_discrete_bounds): Return bool, adjust all
+	callers.
+	* gdbtypes.c (get_discrete_bounds): Return bool.
+
+2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
+
 	* ada-lang.c (ada_value_slice_from_ptr): Adjust.
 	(ada_value_slice): Adjust.
 	(pos_atr): Adjust.
