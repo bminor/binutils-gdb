@@ -704,8 +704,6 @@ op_name (enum exp_opcode opcode)
     case name:		\
       return #name ;
 #include "std-operator.def"
-#include "ada-operator.def"
-#include "fortran-operator.def"
 #undef OP
     }
 }

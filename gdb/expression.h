@@ -61,15 +61,6 @@ enum exp_opcode : uint8_t
 
 #include "std-operator.def"
 
-    /* First extension operator.  Individual language modules define extra
-       operators in *.def include files below with numbers higher than
-       OP_EXTENDED0.  */
-    OP (OP_EXTENDED0)
-
-/* Language specific operators.  */
-#include "ada-operator.def"
-#include "fortran-operator.def"
-
 #undef OP
 
     /* Existing only to swallow the last comma (',') from last .inc file.  */

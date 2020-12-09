@@ -1,3 +1,11 @@
+2020-12-09  Tom Tromey  <tromey@adacore.com>
+
+	* expprint.c (op_name): Update.
+	* expression.h (enum exp_opcode): Update.
+	* std-operator.def: Add more opcodes.
+	* ada-operator.def, fortran-operator.def: Remove, moving contents
+	into std-operator.def.
+
 2020-12-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.c (get_discrete_low_bound, get_discrete_high_bound):
