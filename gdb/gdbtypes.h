@@ -2474,6 +2474,14 @@ extern int get_vptr_fieldno (struct type *, struct type **);
 extern bool get_discrete_bounds (struct type *type, LONGEST *lowp,
 				 LONGEST *highp);
 
+/* If TYPE's low bound is a known constant, return it, else return nullopt.  */
+
+extern gdb::optional<LONGEST> get_discrete_low_bound (struct type *type);
+
+/* If TYPE's high bound is a known constant, return it, else return nullopt.  */
+
+extern gdb::optional<LONGEST> get_discrete_high_bound (struct type *type);
+
 /* Assuming TYPE is a simple, non-empty array type, compute its upper
    and lower bound.  Save the low bound into LOW_BOUND if not NULL.
    Save the high bound into HIGH_BOUND if not NULL.

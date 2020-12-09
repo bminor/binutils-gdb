@@ -1036,9 +1036,9 @@ has_static_range (const struct range_bounds *bounds)
 	  && bounds->stride.kind () == PROP_CONST);
 }
 
-/* If TYPE's low bound is a known constant, return it, else return nullopt.  */
+/* See gdbtypes.h.  */
 
-static gdb::optional<LONGEST>
+gdb::optional<LONGEST>
 get_discrete_low_bound (struct type *type)
 {
   type = check_typedef (type);
@@ -1107,9 +1107,9 @@ get_discrete_low_bound (struct type *type)
     }
 }
 
-/* If TYPE's high bound is a known constant, return it, else return nullopt.  */
+/* See gdbtypes.h.  */
 
-static gdb::optional<LONGEST>
+gdb::optional<LONGEST>
 get_discrete_high_bound (struct type *type)
 {
   type = check_typedef (type);

@@ -1,5 +1,15 @@
 2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
 
+	PR 26875, PR 26901
+	* gdbtypes.c (get_discrete_low_bound): Make non-static.
+	(get_discrete_high_bound): Make non-static.
+	* gdbtypes.h (get_discrete_low_bound): New declaration.
+	(get_discrete_high_bound): New declaration.
+	* valarith.c (value_subscript): Only fetch high bound if
+	necessary.
+
+2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.c (get_discrete_bounds): Implement with
 	get_discrete_low_bound and get_discrete_high_bound.
 	(get_discrete_low_bound): New.

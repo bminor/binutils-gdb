@@ -150,25 +150,33 @@ value_subscript (struct value *array, LONGEST index)
       || tarray->code () == TYPE_CODE_STRING)
     {
       struct type *range_type = tarray->index_type ();
-      LONGEST lowerbound, upperbound;
+      gdb::optional<LONGEST> lowerbound = get_discrete_low_bound (range_type);
+      if (!lowerbound.has_value ())
+	lowerbound = 0;
 
-      get_discrete_bounds (range_type, &lowerbound, &upperbound);
       if (VALUE_LVAL (array) != lval_memory)
-	return value_subscripted_rvalue (array, index, lowerbound);
+	return value_subscripted_rvalue (array, index, *lowerbound);
 
       if (!c_style)
 	{
-	  if (index >= lowerbound && index <= upperbound)
-	    return value_subscripted_rvalue (array, index, lowerbound);
+	  gdb::optional<LONGEST> upperbound
+	    = get_discrete_high_bound (range_type);
+
+	  if (!upperbound.has_value ())
+	    upperbound = 0;
+
+	  if (index >= *lowerbound && index <= *upperbound)
+	    return value_subscripted_rvalue (array, index, *lowerbound);
+
 	  /* Emit warning unless we have an array of unknown size.
 	     An array of unknown size has lowerbound 0 and upperbound -1.  */
-	  if (upperbound > -1)
+	  if (*upperbound > -1)
 	    warning (_("array or string index out of range"));
 	  /* fall doing C stuff */
 	  c_style = true;
 	}
 
-      index -= lowerbound;
+      index -= *lowerbound;
       array = value_coerce_array (array);
     }
 

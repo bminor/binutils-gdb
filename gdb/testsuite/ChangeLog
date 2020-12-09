@@ -1,3 +1,9 @@
+2020-12-09  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR 26875, PR 26901
+	* gdb.base/flexible-array-member.c: New test.
+	* gdb.base/flexible-array-member.exp: New test.
+
 2020-12-08  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.arch/amd64-gs_base.exp: Undo commit 67748e0f66, reimplement
