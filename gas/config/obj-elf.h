@@ -106,8 +106,9 @@ struct elf_section_match
 {
   const char *   group_name;
   const char *   linked_to_symbol_name;
-  unsigned int   info;
   unsigned int   section_id;
+  unsigned int   sh_info;		/* ELF section information.  */
+  bfd_vma        sh_flags;		/* ELF section flags.  */
   flagword       flags;
 };
 

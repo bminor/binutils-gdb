@@ -3,8 +3,12 @@
 #source: section24.s
 #readelf: -S --wide
 
-#failif
 #...
-  \[..\] .(text|data|bss|rodata)[ 	]+PROGBITS[ 	]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 00 [^R] .*
+  \[..\] .text[ 	]+PROGBITS[ 	]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 00 +AX .*
+#...
+  \[..\] .data[ 	]+PROGBITS[ 	]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 00 +WA .*
+#...
+  \[..\] .bss[ 	]+NOBITS[ 	]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 00 +WA .*
+#...
+  \[..\] .rodata[ 	]+PROGBITS[ 	]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 00 +A .*
 #pass
-

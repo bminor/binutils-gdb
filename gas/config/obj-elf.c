@@ -519,6 +519,9 @@ struct section_stack
 
 static struct section_stack *section_stack;
 
+/* ELF section flags for unique sections.  */
+#define SEC_ASSEMBLER_SHF_MASK SHF_GNU_RETAIN
+
 /* Return TRUE iff SEC matches the section info INF.  */
 
 static bfd_boolean
@@ -529,9 +532,12 @@ get_section_by_match (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
   const char *group_name = elf_group_name (sec);
   const char *linked_to_symbol_name
     = sec->map_head.linked_to_symbol_name;
-  unsigned int info = elf_section_data (sec)->this_hdr.sh_info;
+  unsigned int sh_info = elf_section_data (sec)->this_hdr.sh_info;
+  bfd_vma sh_flags = (elf_section_data (sec)->this_hdr.sh_flags
+		      & SEC_ASSEMBLER_SHF_MASK);
 
-  return (info == match->info
+  return (sh_info == match->sh_info
+	  && sh_flags == match->sh_flags
 	  && ((bfd_section_flags (sec) & SEC_ASSEMBLER_SECTION_ID)
 	       == (match->flags & SEC_ASSEMBLER_SECTION_ID))
 	  && sec->section_id == match->section_id
@@ -740,7 +746,7 @@ obj_elf_change_section (const char *name,
 	type = bfd_elf_get_default_section_type (flags);
       elf_section_type (sec) = type;
       elf_section_flags (sec) = attr;
-      elf_section_data (sec)->this_hdr.sh_info = match_p->info;
+      elf_section_data (sec)->this_hdr.sh_info = match_p->sh_info;
 
       /* Prevent SEC_HAS_CONTENTS from being inadvertently set.  */
       if (type == SHT_NOBITS)
@@ -806,17 +812,9 @@ obj_elf_change_section (const char *name,
 		as_bad (_("changed section attributes for %s"), name);
 	    }
 	  else
-	    {
-	      /* Don't overwrite a previously set SHF_GNU_RETAIN flag for the
-		 section.  The entire section must be marked retained.  */
-	      if ((elf_tdata (stdoutput)->has_gnu_osabi & elf_gnu_osabi_retain)
-		  && ((elf_section_flags (old_sec) & SHF_GNU_RETAIN)))
-		attr |= SHF_GNU_RETAIN;
-
-	      /* FIXME: Maybe we should consider removing a previously set
-		 processor or application specific attribute as suspicious ?  */
-	      elf_section_flags (sec) = attr;
-	    }
+	    /* FIXME: Maybe we should consider removing a previously set
+	       processor or application specific attribute as suspicious?  */
+	    elf_section_flags (sec) = attr;
 
 	  if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
 	    as_bad (_("changed section entity size for %s"), name);
@@ -1322,17 +1320,20 @@ obj_elf_section (int push)
 	      if (ISDIGIT (* input_line_pointer))
 		{
 		  char *t = input_line_pointer;
-		  match.info = strtoul (input_line_pointer,
+		  match.sh_info = strtoul (input_line_pointer,
 					&input_line_pointer, 0);
-		  if (match.info == (unsigned int) -1)
+		  if (match.sh_info == (unsigned int) -1)
 		    {
 		      as_warn (_("unsupported mbind section info: %s"), t);
-		      match.info = 0;
+		      match.sh_info = 0;
 		    }
 		}
 	      else
 		input_line_pointer = save;
 	    }
+
+	  if ((gnu_attr & SHF_GNU_RETAIN) != 0)
+	    match.sh_flags |= SHF_GNU_RETAIN;
 
 	  if (*input_line_pointer == ',')
 	    {
