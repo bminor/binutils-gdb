@@ -19,6 +19,10 @@ yes | no) ;;
 *)	AC_MSG_ERROR(bad value ${enableval} given for --enable-sim option) ;;
 esac])
 
+AC_ARG_ENABLE([example-sims],
+	      [AC_HELP_STRING([--enable-example-sims],
+			      [enable example GNU simulators])])
+
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in
@@ -85,6 +89,10 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([ft32-*-*], [ft32])
     SIM_TARGET([v850*-*-*], [v850], [sim_igen=yes])
   done
+
+  if test "x${enable_example_sims}" = xyes; then
+    AC_CONFIG_SUBDIRS(example-synacor)
+  fi
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 

@@ -744,6 +744,7 @@ enable_maintainer_mode
 enable_dependency_tracking
 enable_silent_rules
 enable_sim
+enable_example_sims
 enable_targets
 '
       ac_precious_vars='build_alias
@@ -785,7 +786,8 @@ sh
 erc32
 ppc
 ft32
-v850'
+v850
+example-synacor'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1414,6 +1416,7 @@ Optional Features:
   --enable-silent-rules   less verbose build output (undo: "make V=1")
   --disable-silent-rules  verbose build output (undo: "make V=0")
   --enable-sim            Enable the GNU simulator
+  --enable-example-sims   enable example GNU simulators
   --enable-targets        alternative target configurations
 
 Some influential environment variables:
@@ -4832,6 +4835,12 @@ esac
 fi
 
 
+# Check whether --enable-example-sims was given.
+if test "${enable_example_sims+set}" = set; then :
+  enableval=$enable_example_sims;
+fi
+
+
 # Check whether --enable-targets was given.
 if test "${enable_targets+set}" = set; then :
   enableval=$enable_targets; case "${enableval}" in
@@ -5227,6 +5236,11 @@ subdirs="$subdirs aarch64"
   esac
 
   done
+
+  if test "x${enable_example_sims}" = xyes; then
+    subdirs="$subdirs example-synacor"
+
+  fi
 fi
  if test "$sim_igen" = "yes"; then
   SIM_ENABLE_IGEN_TRUE=

@@ -1,5 +1,9 @@
 2021-04-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* lib/sim-defs.exp (run_sim_test): Convert examples to binaries.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* local.mk: Include %D%/common/local.mk.
 	* common/Makefile.in: Removed.
 	* common/local.mk: New file.

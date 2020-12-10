@@ -1,5 +1,10 @@
 2021-04-03  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Add --example-sims option.
+	* configure: Regenerate.
+
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.am (check_PROGRAMS, CLEANFILES, DISTCLEANFILES): Define.
 	* Makefile.in: Regenerated.
 
