@@ -1,5 +1,15 @@
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cli/cli-decode.c (deprecated_cmd_warning): Ignore the prefix
+	result from lookup_cmd_composition_1, use the prefixes from both
+	the command and the alias instead.
+	(lookup_cmd_composition_1): Initial prefix command is the based on
+	the search list being passed in.  Simplify the logic for tracking
+	the prefix command.  Replace a use of alloca with a local
+	std::string.
+
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-decode.c (deprecated_cmd_warning): Use nullptr instead
 	of NULL.  Don't print message piece by piece, but sentence at a
 	time to allow internationalisation.  Some whitespace cleanup.

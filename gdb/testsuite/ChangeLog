@@ -1,5 +1,9 @@
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/commands.exp: Update expected results.
+
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR cli/15104
 	* gdb.base/commands.exp: Add additional tests.
 	* gdb.base/completion.exp: Add additional tests.
