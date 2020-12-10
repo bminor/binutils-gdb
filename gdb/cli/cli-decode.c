@@ -1686,6 +1686,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
       if (found->deprecated_warn_user && !lookup_for_completion_p)
 	deprecated_cmd_warning (line, clist);
 
+
       /* Return the default_args of the alias, not the default_args
 	 of the command it is pointing to.  */
       if (default_args != nullptr)
@@ -1899,59 +1900,57 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
 void
 deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
 {
-  struct cmd_list_element *alias = NULL;
-  struct cmd_list_element *prefix_cmd = NULL;
-  struct cmd_list_element *cmd = NULL;
+  struct cmd_list_element *alias = nullptr;
+  struct cmd_list_element *prefix_cmd = nullptr;
+  struct cmd_list_element *cmd = nullptr;
 
+  /* Return if text doesn't evaluate to a command.  */
   if (!lookup_cmd_composition_1 (text, &alias, &prefix_cmd, &cmd, list))
-    /* Return if text doesn't evaluate to a command.  */
     return;
 
-  if (!((alias ? alias->deprecated_warn_user : 0)
-      || cmd->deprecated_warn_user) ) 
-    /* Return if nothing is deprecated.  */
+  /* Return if nothing is deprecated.  */
+  if (!((alias != nullptr ? alias->deprecated_warn_user : 0)
+	|| cmd->deprecated_warn_user))
     return;
-  
-  printf_filtered ("Warning:");
-  
-  if (alias && !cmd->cmd_deprecated)
-    printf_filtered (" '%s', an alias for the", alias->name);
-    
-  printf_filtered (" command '");
-  
-  if (prefix_cmd)
-    printf_filtered ("%s", prefix_cmd->prefixname);
-  
-  printf_filtered ("%s", cmd->name);
 
-  if (alias && cmd->cmd_deprecated)
-    printf_filtered ("' (%s) is deprecated.\n", alias->name);
-  else
-    printf_filtered ("' is deprecated.\n"); 
-  
+  /* Join command prefix (if any) and the command name.  */
+  std::string tmp_cmd_str;
+  if (prefix_cmd != nullptr)
+    tmp_cmd_str += std::string (prefix_cmd->prefixname);
+  tmp_cmd_str += std::string (cmd->name);
 
-  /* If it is only the alias that is deprecated, we want to indicate
-     the new alias, otherwise we'll indicate the new command.  */
-
-  if (alias && !cmd->cmd_deprecated)
+  /* Display the appropriate first line, this warns that the thing the user
+     entered is deprecated.  */
+  if (alias != nullptr)
     {
-      if (alias->replacement)
-	printf_filtered ("Use '%s'.\n\n", alias->replacement);
+      if (cmd->cmd_deprecated)
+	printf_filtered (_("Warning: command '%s' (%s) is deprecated.\n"),
+			 tmp_cmd_str.c_str (), alias->name);
       else
-	printf_filtered ("No alternative known.\n\n");
-     }  
-  else
-    {
-      if (cmd->replacement)
-	printf_filtered ("Use '%s'.\n\n", cmd->replacement);
-      else
-	printf_filtered ("No alternative known.\n\n");
+	printf_filtered (_("Warning: '%s', an alias for the command '%s' "
+			   "is deprecated.\n"),
+			 alias->name, tmp_cmd_str.c_str ());
     }
+  else
+    printf_filtered (_("Warning: command '%s' is deprecated.\n"),
+		     tmp_cmd_str.c_str ());
+
+  /* Now display a second line indicating what the user should use instead.
+     If it is only the alias that is deprecated, we want to indicate the
+     new alias, otherwise we'll indicate the new command.  */
+  const char *replacement;
+  if (alias != nullptr && !cmd->cmd_deprecated)
+    replacement = alias->replacement;
+  else
+    replacement = cmd->replacement;
+  if (replacement != nullptr)
+    printf_filtered (_("Use '%s'.\n\n"), replacement);
+  else
+    printf_filtered (_("No alternative known.\n\n"));
 
   /* We've warned you, now we'll keep quiet.  */
-  if (alias)
+  if (alias != nullptr)
     alias->deprecated_warn_user = 0;
-  
   cmd->deprecated_warn_user = 0;
 }
 
