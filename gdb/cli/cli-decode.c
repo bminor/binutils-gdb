@@ -50,6 +50,12 @@ static void help_cmd_list (struct cmd_list_element *list,
 
 static void help_all (struct ui_file *stream);
 
+static int lookup_cmd_composition_1 (const char *text,
+				     struct cmd_list_element **alias,
+				     struct cmd_list_element **prefix_cmd,
+				     struct cmd_list_element **cmd,
+				     struct cmd_list_element *cur_list);
+
 /* Look up a command whose 'prefixlist' is KEY.  Return the command if found,
    otherwise return NULL.  */
 
@@ -1678,7 +1684,7 @@ lookup_cmd_1 (const char **text, struct cmd_list_element *clist,
        flags.  */
 
       if (found->deprecated_warn_user && !lookup_for_completion_p)
-	deprecated_cmd_warning (line);
+	deprecated_cmd_warning (line, clist);
 
       /* Return the default_args of the alias, not the default_args
 	 of the command it is pointing to.  */
@@ -1891,13 +1897,13 @@ lookup_cmd (const char **line, struct cmd_list_element *list,
    
 */
 void
-deprecated_cmd_warning (const char *text)
+deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
 {
   struct cmd_list_element *alias = NULL;
   struct cmd_list_element *prefix_cmd = NULL;
   struct cmd_list_element *cmd = NULL;
 
-  if (!lookup_cmd_composition (text, &alias, &prefix_cmd, &cmd))
+  if (!lookup_cmd_composition_1 (text, &alias, &prefix_cmd, &cmd, list))
     /* Return if text doesn't evaluate to a command.  */
     return;
 
@@ -1949,8 +1955,7 @@ deprecated_cmd_warning (const char *text)
   cmd->deprecated_warn_user = 0;
 }
 
-
-/* Look up the contents of TEXT as a command in the command list 'cmdlist'.
+/* Look up the contents of TEXT as a command in the command list CUR_LIST.
    Return 1 on success, 0 on failure.
 
    If TEXT refers to an alias, *ALIAS will point to that alias.
@@ -1964,22 +1969,21 @@ deprecated_cmd_warning (const char *text)
    exist, they are NULL when we return.
 
 */
-int
-lookup_cmd_composition (const char *text,
-			struct cmd_list_element **alias,
-			struct cmd_list_element **prefix_cmd,
-			struct cmd_list_element **cmd)
+
+static int
+lookup_cmd_composition_1 (const char *text,
+			  struct cmd_list_element **alias,
+			  struct cmd_list_element **prefix_cmd,
+			  struct cmd_list_element **cmd,
+			  struct cmd_list_element *cur_list)
 {
   char *command;
   int len, nfound;
-  struct cmd_list_element *cur_list;
   struct cmd_list_element *prev_cmd;
 
   *alias = NULL;
   *prefix_cmd = NULL;
   *cmd = NULL;
-
-  cur_list = cmdlist;
 
   text = skip_spaces (text);
 
@@ -2036,6 +2040,30 @@ lookup_cmd_composition (const char *text,
       else
 	return 1;
     }
+}
+
+/* Look up the contents of TEXT as a command in the command list 'cmdlist'.
+   Return 1 on success, 0 on failure.
+
+   If TEXT refers to an alias, *ALIAS will point to that alias.
+
+   If TEXT is a subcommand (i.e. one that is preceded by a prefix
+   command) set *PREFIX_CMD.
+
+   Set *CMD to point to the command TEXT indicates.
+
+   If any of *ALIAS, *PREFIX_CMD, or *CMD cannot be determined or do not
+   exist, they are NULL when we return.
+
+*/
+
+int
+lookup_cmd_composition (const char *text,
+			struct cmd_list_element **alias,
+			struct cmd_list_element **prefix_cmd,
+			struct cmd_list_element **cmd)
+{
+  return lookup_cmd_composition_1 (text, alias, prefix_cmd, cmd, cmdlist);
 }
 
 /* Helper function for SYMBOL_COMPLETION_FUNCTION.  */

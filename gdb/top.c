@@ -639,7 +639,7 @@ execute_command (const char *p, int from_tty)
       execute_cmd_pre_hook (c);
 
       if (c->deprecated_warn_user)
-	deprecated_cmd_warning (line);
+	deprecated_cmd_warning (line, cmdlist);
 
       /* c->user_commands would be NULL in the case of a python command.  */
       if (c->theclass == class_user && c->user_commands)

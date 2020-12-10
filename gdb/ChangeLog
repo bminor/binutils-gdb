@@ -1,5 +1,20 @@
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR cli/15104
+	* cli/cli-decode.c (lookup_cmd_1): Pass command list to
+	deprecated_cmd_warning.
+	(deprecated_cmd_warning): Take extra parameter, call
+	lookup_cmd_composition_1 and pass new parameter through.
+	(lookup_cmd_composition_1): New function, takes implementation of
+	lookup_cmd_composition but with extra parameter.
+	(lookup_cmd_composition): Now calls lookup_cmd_composition_1
+	passing in cmdlist.
+	* command.h (deprecated_cmd_warning): Add extra parameter to
+	declaration.
+	* top.c (execute_command): Pass cmdlist to deprecated_cmd_warning.
+
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cli/cli-decode.c (lookup_cmd_1): Move header comment into
 	command.h, add extra parameter, and use this to guard giving a
 	warning.

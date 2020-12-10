@@ -968,3 +968,10 @@ foreach_with_prefix cmd { "watch" "awatch" "rwatch" } {
 gdb_test_no_output "alias xxx_yyy_zzz=break"
 gdb_test_no_output "maint deprecate xxx_yyy_zzz"
 test_gdb_complete_unique "xxx_yyy_" "xxx_yyy_zzz"
+
+# Check that tab completion of a deprecated alias with a prefix does
+# not display the warning about the alias being deprecated during tab
+# completion.
+gdb_test_no_output "alias set aaa_bbb_ccc=set debug"
+gdb_test_no_output "maint deprecate set aaa_bbb_ccc"
+test_gdb_complete_unique "set aaa_bbb_" "set aaa_bbb_ccc"

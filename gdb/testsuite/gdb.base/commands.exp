@@ -689,6 +689,25 @@ proc_with_prefix deprecated_command_test {} {
     gdb_test "maintenance deprecate" \
 	    "\"maintenance deprecate\".*" \
 	    "deprecate with no arguments"
+
+    # Test that an alias with a prefix still gives a warning.
+    set file1 [standard_output_file xxx_yyy_cmd]
+    set fd [open "$file1" w]
+    puts $fd \
+"define set xxx_yyy
+echo in command xxx_yyy\\n
+end
+
+alias set qqq_aaa=set xxx_yyy
+maintenance deprecate set qqq_aaa"
+    close $fd
+    gdb_test_no_output "source $file1" \
+	"source file containing xxx_yyy command and its alias"
+    gdb_test "set qqq_aaa" \
+	"Warning: 'qqq_aaa', an alias for the command 'xxx_yyy' is deprecated\\.\r\n.*No alternative known\\..*" \
+	"deprecated alias with prefix give a warning"
+
+    file delete $file1
 }
 
 proc_with_prefix bp_deleted_in_command_test {} {

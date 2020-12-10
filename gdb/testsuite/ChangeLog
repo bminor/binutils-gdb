@@ -1,5 +1,11 @@
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR cli/15104
+	* gdb.base/commands.exp: Add additional tests.
+	* gdb.base/completion.exp: Add additional tests.
+
+2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/completion.exp: Add additional tests.
 
 2020-12-11  Tom de Vries  <tdevries@suse.de>

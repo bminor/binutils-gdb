@@ -329,7 +329,7 @@ extern struct cmd_list_element *lookup_cmd_1
 extern struct cmd_list_element *deprecate_cmd (struct cmd_list_element *,
 					       const char * );
 
-extern void deprecated_cmd_warning (const char *);
+extern void deprecated_cmd_warning (const char *, struct cmd_list_element *);
 
 extern int lookup_cmd_composition (const char *text,
 				   struct cmd_list_element **alias,
