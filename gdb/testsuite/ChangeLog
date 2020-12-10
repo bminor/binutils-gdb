@@ -1,3 +1,10 @@
+2020-12-16  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.arch/aarch64-tagged-pointer.c (main): Add a few more
+	pointer-based memory accesses.
+	* gdb.arch/aarch64-tagged-pointer.exp: Exercise additional
+	hw watchpoint cases.
+
 2020-12-15  Rae Kim  <rae.kim@gmail.com>
 
 	* gdb.base/document.exp: New test.

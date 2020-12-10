@@ -458,6 +458,23 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
+/* Return the address only having significant bits.  This is used to ignore
+   the top byte (TBI).  */
+
+static CORE_ADDR
+address_significant (CORE_ADDR addr)
+{
+  /* Clear insignificant bits of a target address and sign extend resulting
+     address.  */
+  int addr_bit = 56;
+
+  CORE_ADDR sign = (CORE_ADDR) 1 << (addr_bit - 1);
+  addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
+  addr = (addr ^ sign) - sign;
+
+  return addr;
+}
+
 /* Implementation of linux target ops method "low_stopped_data_address".  */
 
 CORE_ADDR
@@ -478,6 +495,12 @@ aarch64_target::low_stopped_data_address ()
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return (CORE_ADDR) 0;
 
+  /* Make sure to ignore the top byte, otherwise we may not recognize a
+     hardware watchpoint hit.  The stopped data addresses coming from the
+     kernel can potentially be tagged addresses.  */
+  const CORE_ADDR addr_trap
+    = address_significant ((CORE_ADDR) siginfo.si_addr);
+
   /* Check if the address matches any watched address.  */
   state = aarch64_get_debug_reg_state (pid_of (current_thread));
   for (i = aarch64_num_wp_regs - 1; i >= 0; --i)
@@ -485,7 +508,6 @@ aarch64_target::low_stopped_data_address ()
       const unsigned int offset
 	= aarch64_watchpoint_offset (state->dr_ctrl_wp[i]);
       const unsigned int len = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
-      const CORE_ADDR addr_trap = (CORE_ADDR) siginfo.si_addr;
       const CORE_ADDR addr_watch = state->dr_addr_wp[i] + offset;
       const CORE_ADDR addr_watch_aligned = align_down (state->dr_addr_wp[i], 8);
       const CORE_ADDR addr_orig = state->dr_addr_orig_wp[i];

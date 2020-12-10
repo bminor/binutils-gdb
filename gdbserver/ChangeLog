@@ -1,3 +1,8 @@
+2020-12-16  Luis Machado  <luis.machado@linaro.org>
+
+	* linux-aarch64-low.cc (address_significant): New function.
+	(aarch64_target::low_stopped_data_address): Handle the TBI.
+
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* Makefile.in (IPA_LIB): Include libiberty library.

@@ -877,6 +877,13 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
       || (siginfo.si_code & 0xffff) != TRAP_HWBKPT)
     return false;
 
+  /* Make sure to ignore the top byte, otherwise we may not recognize a
+     hardware watchpoint hit.  The stopped data addresses coming from the
+     kernel can potentially be tagged addresses.  */
+  struct gdbarch *gdbarch = thread_architecture (inferior_ptid);
+  const CORE_ADDR addr_trap
+    = address_significant (gdbarch, (CORE_ADDR) siginfo.si_addr);
+
   /* Check if the address matches any watched address.  */
   state = aarch64_get_debug_reg_state (inferior_ptid.pid ());
   for (i = aarch64_num_wp_regs - 1; i >= 0; --i)
@@ -884,7 +891,6 @@ aarch64_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
       const unsigned int offset
 	= aarch64_watchpoint_offset (state->dr_ctrl_wp[i]);
       const unsigned int len = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
-      const CORE_ADDR addr_trap = (CORE_ADDR) siginfo.si_addr;
       const CORE_ADDR addr_watch = state->dr_addr_wp[i] + offset;
       const CORE_ADDR addr_watch_aligned = align_down (state->dr_addr_wp[i], 8);
       const CORE_ADDR addr_orig = state->dr_addr_orig_wp[i];
