@@ -2173,7 +2173,7 @@ should_be_inserted (struct bp_location *bl)
       && stepping_past_nonsteppable_watchpoint ())
     {
       infrun_debug_printf ("stepping past non-steppable watchpoint. "
-			   "skipping watchpoint at %s:%d\n",
+			   "skipping watchpoint at %s:%d",
 			   paddress (bl->gdbarch, bl->address), bl->length);
       return 0;
     }
