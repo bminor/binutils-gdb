@@ -8097,7 +8097,6 @@ maybe_remove_breakpoints (void)
 struct stop_context
 {
   stop_context ();
-  ~stop_context ();
 
   DISABLE_COPY_AND_ASSIGN (stop_context);
 
@@ -8112,7 +8111,7 @@ struct stop_context
 
   /* If stopp for a thread event, this is the thread that caused the
      stop.  */
-  struct thread_info *thread;
+  thread_info_ref thread;
 
   /* The inferior that caused the stop.  */
   int inf_num;
@@ -8131,20 +8130,8 @@ stop_context::stop_context ()
     {
       /* Take a strong reference so that the thread can't be deleted
 	 yet.  */
-      thread = inferior_thread ();
-      thread->incref ();
+      thread = thread_info_ref::new_reference (inferior_thread ());
     }
-  else
-    thread = NULL;
-}
-
-/* Release a stop context previously created with save_stop_context.
-   Releases the strong reference to the thread as well. */
-
-stop_context::~stop_context ()
-{
-  if (thread != NULL)
-    thread->decref ();
 }
 
 /* Return true if the current context no longer matches the saved stop
