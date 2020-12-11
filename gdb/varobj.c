@@ -124,7 +124,7 @@ struct varobj_dynamic
 
   /* The iterator returned by the printer's 'children' method, or NULL
      if not available.  */
-  struct varobj_iter *child_iter = NULL;
+  std::unique_ptr<varobj_iter> child_iter;
 
   /* We request one extra item from the iterator, so that we can
      report to the caller whether there are more items than we have
@@ -660,7 +660,7 @@ dynamic_varobj_has_child_method (const struct varobj *var)
 /* A factory for creating dynamic varobj's iterators.  Returns an
    iterator object suitable for iterating over VAR's children.  */
 
-static struct varobj_iter *
+static std::unique_ptr<varobj_iter>
 varobj_get_iterator (struct varobj *var)
 {
 #if HAVE_PYTHON
@@ -701,7 +701,6 @@ update_dynamic_varobj_children (struct varobj *var,
 
   if (update_children || var->dynamic->child_iter == NULL)
     {
-      delete var->dynamic->child_iter;
       var->dynamic->child_iter = varobj_get_iterator (var);
 
       varobj_clear_saved_item (var->dynamic);
@@ -735,8 +734,7 @@ update_dynamic_varobj_children (struct varobj *var,
       if (item == NULL)
 	{
 	  /* Iteration is done.  Remove iterator from VAR.  */
-	  delete var->dynamic->child_iter;
-	  var->dynamic->child_iter = NULL;
+	  var->dynamic->child_iter.reset (nullptr);
 	  break;
 	}
       /* We don't want to push the extra child on any report list.  */
@@ -1064,8 +1062,7 @@ install_visualizer (struct varobj_dynamic *var, PyObject *constructor,
   Py_XDECREF (var->pretty_printer);
   var->pretty_printer = visualizer;
 
-  delete var->child_iter;
-  var->child_iter = NULL;
+  var->child_iter.reset (nullptr);
 }
 
 /* Install the default visualizer for VAR.  */
@@ -1875,7 +1872,6 @@ varobj::~varobj ()
     }
 #endif
 
-  delete var->dynamic->child_iter;
   varobj_clear_saved_item (var->dynamic);
 
   if (is_root_p (var))

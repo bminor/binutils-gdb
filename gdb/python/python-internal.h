@@ -754,8 +754,8 @@ int gdb_pymodule_addobject (PyObject *module, const char *name,
 
 struct varobj_iter;
 struct varobj;
-struct varobj_iter *py_varobj_get_iterator (struct varobj *var,
-					    PyObject *printer);
+std::unique_ptr<varobj_iter> py_varobj_get_iterator (struct varobj *var,
+						     PyObject *printer);
 
 /* Deleter for Py_buffer unique_ptr specialization.  */
 

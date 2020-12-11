@@ -133,7 +133,7 @@ py_varobj_iter::py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter)
 /* Return a new pretty-printed varobj iterator suitable to iterate
    over VAR's children.  */
 
-struct varobj_iter *
+std::unique_ptr<varobj_iter>
 py_varobj_get_iterator (struct varobj *var, PyObject *printer)
 {
   gdbpy_enter_varobj enter_py (var);
@@ -156,5 +156,6 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer)
       error (_("Could not get children iterator"));
     }
 
-  return new py_varobj_iter (var, std::move (iter));
+  return std::unique_ptr<varobj_iter> (new py_varobj_iter (var,
+							   std::move (iter)));
 }
