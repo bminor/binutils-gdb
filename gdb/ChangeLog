@@ -1,5 +1,12 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* thread.c (class scoped_inc_dec_ref): Remove.
+	(tp_array_compar_ascending, tp_array_compar_descending): Change
+	parameter types.
+	(thread_apply_all_command): Use thread_info_ref.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* infrun.c (struct stop_context) <thread>: Now a thread_info_ref.
 	(stop_context::stop_context): Update.
 	(stop_context::~stop_context): Remove.

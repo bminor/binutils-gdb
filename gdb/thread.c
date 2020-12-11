@@ -58,29 +58,6 @@ static int highest_thread_num;
 /* The current/selected thread.  */
 static thread_info *current_thread_;
 
-/* RAII type used to increase / decrease the refcount of each thread
-   in a given list of threads.  */
-
-class scoped_inc_dec_ref
-{
-public:
-  explicit scoped_inc_dec_ref (const std::vector<thread_info *> &thrds)
-    : m_thrds (thrds)
-  {
-    for (thread_info *thr : m_thrds)
-      thr->incref ();
-  }
-
-  ~scoped_inc_dec_ref ()
-  {
-    for (thread_info *thr : m_thrds)
-      thr->decref ();
-  }
-
-private:
-  const std::vector<thread_info *> &m_thrds;
-};
-
 /* Returns true if THR is the current thread.  */
 
 static bool
@@ -1468,7 +1445,7 @@ print_thread_id (struct thread_info *thr)
    ascending order.  */
 
 static bool
-tp_array_compar_ascending (const thread_info *a, const thread_info *b)
+tp_array_compar_ascending (const thread_info_ref &a, const thread_info_ref &b)
 {
   if (a->inf->num != b->inf->num)
     return a->inf->num < b->inf->num;
@@ -1481,7 +1458,7 @@ tp_array_compar_ascending (const thread_info *a, const thread_info *b)
    descending order.  */
 
 static bool
-tp_array_compar_descending (const thread_info *a, const thread_info *b)
+tp_array_compar_descending (const thread_info_ref &a, const thread_info_ref &b)
 {
   if (a->inf->num != b->inf->num)
     return a->inf->num > b->inf->num;
@@ -1619,16 +1596,12 @@ thread_apply_all_command (const char *cmd, int from_tty)
 	 thread, in case the command is one that wipes threads.  E.g.,
 	 detach, kill, disconnect, etc., or even normally continuing
 	 over an inferior or thread exit.  */
-      std::vector<thread_info *> thr_list_cpy;
+      std::vector<thread_info_ref> thr_list_cpy;
       thr_list_cpy.reserve (tc);
 
       for (thread_info *tp : all_non_exited_threads ())
-	thr_list_cpy.push_back (tp);
+	thr_list_cpy.push_back (thread_info_ref::new_reference (tp));
       gdb_assert (thr_list_cpy.size () == tc);
-
-      /* Increment the refcounts, and restore them back on scope
-	 exit.  */
-      scoped_inc_dec_ref inc_dec_ref (thr_list_cpy);
 
       auto *sorter = (ascending
 		      ? tp_array_compar_ascending
@@ -1637,9 +1610,9 @@ thread_apply_all_command (const char *cmd, int from_tty)
 
       scoped_restore_current_thread restore_thread;
 
-      for (thread_info *thr : thr_list_cpy)
-	if (switch_to_thread_if_alive (thr))
-	  thr_try_catch_cmd (thr, cmd, from_tty, flags);
+      for (thread_info_ref &thr : thr_list_cpy)
+	if (switch_to_thread_if_alive (thr.get ()))
+	  thr_try_catch_cmd (thr.get (), cmd, from_tty, flags);
     }
 }
 
