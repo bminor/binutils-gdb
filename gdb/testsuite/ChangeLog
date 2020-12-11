@@ -1,3 +1,8 @@
+2020-12-11  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26954
+	* gdb.base/float128.exp: Detect and handle no mpfr support.
+
 2020-12-10  Simon Marchi  <simon.marchi@efficios.com>
 
 	PR gdb/24694
