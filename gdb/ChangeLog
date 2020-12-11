@@ -1,5 +1,9 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (instantiate_pretty_printer): Use gdbpy_ref.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (varobj_clear_saved_item): Remove.
 	(update_dynamic_varobj_children): Update.
 	(varobj::~varobj): Don't call varobj_clear_saved_item.

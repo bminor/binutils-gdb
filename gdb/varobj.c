@@ -459,16 +459,11 @@ varobj_delete (struct varobj *var, bool only_children)
 static PyObject *
 instantiate_pretty_printer (PyObject *constructor, struct value *value)
 {
-  PyObject *val_obj = NULL; 
-  PyObject *printer;
-
-  val_obj = value_to_value_object (value);
-  if (! val_obj)
+  gdbpy_ref<> val_obj (value_to_value_object (value));
+  if (val_obj == nullptr)
     return NULL;
 
-  printer = PyObject_CallFunctionObjArgs (constructor, val_obj, NULL);
-  Py_DECREF (val_obj);
-  return printer;
+  return PyObject_CallFunctionObjArgs (constructor, val_obj.get (), NULL);
 }
 
 #endif
