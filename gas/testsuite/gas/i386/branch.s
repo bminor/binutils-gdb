@@ -1,4 +1,4 @@
 .text
-	jz,pt .Llabel
-	jz,pn .Llabel
-.Llabel:
+	jz,pt label
+	jz,pn label
+label:

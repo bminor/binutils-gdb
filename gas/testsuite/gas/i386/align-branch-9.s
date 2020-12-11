@@ -15,7 +15,7 @@ foo:
   movl  %esi, -12(%ebp)
   movl  %esi, -12(%ebp)
   cmp  %eax, %ebp
-  jo  .L_2
+  jo  label2
   movl  %esi, -12(%ebx)
   movl  %esi, -12(%ebp)
   movl  %edi, -8(%ebp)
@@ -27,9 +27,9 @@ foo:
   popl  %ebp
   popl  %ebp
   popl  %ebp
-  je  .L_2
+  je  label2
   popl  %ebp
-  je  .L_2
+  je  label2
   movl  %eax, -4(%esp)
   movl  %esi, -12(%ebp)
   movl  %edi, -8(%ebp)
@@ -39,26 +39,26 @@ foo:
   movl  %esi, -12(%ebp)
   movl  %esi, -12(%ebp)
   popl  %ebp
-  jmp  .L_3
-  jmp  .L_3
-  jmp  .L_3
+  jmp  label3
+  jmp  label3
+  jmp  label3
   movl  %eax, -4(%ebp)
   movl  %esi, -12(%ebp)
   movl  %edi, -8(%ebp)
   popl  %ebp
   popl  %ebp
   inc  %eax
-  jc  .L_2
+  jc  label2
   movl  %eax, -4(%ebp)
   movl  %esi, -12(%ebp)
   movl  %edi, -8(%ebp)
   movl  %esi, -12(%ebp)
   and  %eax, %ebx
-  jl  .L_3
-.L_2:
+  jl  label3
+label2:
   movl  -12(%ebp), %eax
   movl  %eax, -4(%ebp)
-.L_3:
+label3:
   movl  %esi, -1200(%ebp)
   movl  %esi, -1200(%ebp)
   movl  %esi, -1200(%ebp)
@@ -70,5 +70,5 @@ foo:
   movl  %esi, -1200(%ebp)
   movl  %esi, -1200(%ebp)
   movl  %esi, (%ebp)
-  je .L_3
-  je .L_3
+  je label3
+  je label3
