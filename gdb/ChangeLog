@@ -1,5 +1,14 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (install_dynamic_child, varobj_clear_saved_item)
+	(update_dynamic_varobj_children, create_child)
+	(create_child_with_value): Update.
+	* varobj-iter.h (struct varobj_item) <value>: Now a
+	value_ref_ptr.
+	* python/py-varobj.c (py_varobj_iter::next): Call release_value.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (struct varobj_dynamic) <child_iter>: Now unique_ptr.
 	(varobj_get_iterator): Return unique_ptr.
 	(update_dynamic_varobj_children, install_visualizer)

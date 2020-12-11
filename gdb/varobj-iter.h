@@ -25,7 +25,7 @@ struct varobj_item
   std::string name;
 
   /* Value of this item.  */
-  struct value *value;
+  value_ref_ptr value;
 };
 
 /* A dynamic varobj iterator "class".  */

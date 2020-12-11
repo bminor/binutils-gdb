@@ -625,14 +625,15 @@ install_dynamic_child (struct varobj *var,
   else
     {
       varobj *existing = var->children[index];
-      bool type_updated = update_type_if_necessary (existing, item->value);
+      bool type_updated = update_type_if_necessary (existing,
+						    item->value.get ());
 
       if (type_updated)
 	{
 	  if (type_changed != NULL)
 	    type_changed->push_back (existing);
 	}
-      if (install_new_value (existing, item->value, 0))
+      if (install_new_value (existing, item->value.get (), 0))
 	{
 	  if (!type_updated && changed != NULL)
 	    changed->push_back (existing);
@@ -678,10 +679,7 @@ static void
 varobj_clear_saved_item (struct varobj_dynamic *var)
 {
   if (var->saved_item != NULL)
-    {
-      value_decref (var->saved_item->value);
-      var->saved_item.reset (nullptr);
-    }
+    var->saved_item.reset (nullptr);
 }
 
 static bool
@@ -723,13 +721,7 @@ update_dynamic_varobj_children (struct varobj *var,
       if (var->dynamic->saved_item != NULL)
 	item = std::move (var->dynamic->saved_item);
       else
-	{
-	  item = var->dynamic->child_iter->next ();
-	  /* Release vitem->value so its lifetime is not bound to the
-	     execution of a command.  */
-	  if (item != NULL && item->value != NULL)
-	    item->value = release_value (item->value).release ();
-	}
+	item = var->dynamic->child_iter->next ();
 
       if (item == NULL)
 	{
@@ -1804,7 +1796,7 @@ create_child (struct varobj *parent, int index, std::string &name)
   struct varobj_item item;
 
   std::swap (item.name, name);
-  item.value = value_of_child (parent, index);
+  item.value = release_value (value_of_child (parent, index));
 
   return create_child_with_value (parent, index, &item);
 }
@@ -1835,12 +1827,12 @@ create_child_with_value (struct varobj *parent, int index,
   if (item->value != NULL)
     /* If the child had no evaluation errors, var->value
        will be non-NULL and contain a valid type.  */
-    child->type = value_actual_type (item->value, 0, NULL);
+    child->type = value_actual_type (item->value.get (), 0, NULL);
   else
     /* Otherwise, we must compute the type.  */
     child->type = (*child->root->lang_ops->type_of_child) (child->parent,
 							   child->index);
-  install_new_value (child, item->value, 1);
+  install_new_value (child, item->value.get (), 1);
 
   return child;
 }

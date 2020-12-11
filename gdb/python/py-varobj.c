@@ -111,7 +111,7 @@ py_varobj_iter::next ()
     }
 
   vitem = new varobj_item ();
-  vitem->value = convert_value_from_python (py_v);
+  vitem->value = release_value (convert_value_from_python (py_v));
   if (vitem->value == NULL)
     gdbpy_print_stack ();
   vitem->name = name;
