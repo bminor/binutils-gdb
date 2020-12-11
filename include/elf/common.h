@@ -339,9 +339,21 @@
 #define EM_AMDGPU 	224 	/* AMD GPU architecture */
 #define EM_RISCV 	243 	/* RISC-V */
 #define EM_LANAI	244	/* Lanai 32-bit processor.  */
+#define EM_CEVA		245	/* CEVA Processor Architecture Family */
+#define EM_CEVA_X2	246	/* CEVA X2 Processor Family */
 #define EM_BPF		247	/* Linux BPF – in-kernel virtual machine.  */
+#define EM_GRAPHCORE_IPU 248	/* Graphcore Intelligent Processing Unit */
+#define EM_IMG1		249	/* Imagination Technologies */
 #define EM_NFP		250	/* Netronome Flow Processor.  */
+#define EM_VE		251	/* NEC Vector Engine */
 #define EM_CSKY		252	/* C-SKY processor family.  */
+#define EM_ARC_COMPACT3_64 253	/* Synopsys ARCv2.3 64-bit */
+#define EM_MCS6502	254	/* MOS Technology MCS 6502 processor */
+#define EM_ARC_COMPACT3	255	/* Synopsys ARCv2.3 32-bit */
+#define EM_KVX		256	/* Kalray VLIW core of the MPPA processor family */
+#define EM_65816	257	/* WDC 65816/65C816 */
+#define EM_LOONGARCH	258	/* Loongson Loongarch */
+#define EM_KF32		259	/* ChipON KungFu32 */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
