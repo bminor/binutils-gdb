@@ -1,5 +1,14 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.h (all_root_varobjs): Take a function_view.
+	* varobj.c (all_root_varobjs): Take a function_view.
+	(varobj_invalidate_iter): Remove unused parameter.
+	(varobj_invalidate): Update.
+	* mi/mi-cmd-var.c (struct mi_cmd_var_update): Remove.
+	(mi_cmd_var_update_iter): Change parameters.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (struct varobj_root) <next>: Remove.
 	(struct vlist): Remove.
 	(rootlist): Now a std::list.

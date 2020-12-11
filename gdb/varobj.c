@@ -2357,11 +2357,11 @@ varobj_default_value_is_changeable_p (const struct varobj *var)
   return r;
 }
 
-/* Iterate all the existing _root_ VAROBJs and call the FUNC callback for them
-   with an arbitrary caller supplied DATA pointer.  */
+/* Iterate all the existing _root_ VAROBJs and call the FUNC callback
+   for each one.  */
 
 void
-all_root_varobjs (void (*func) (struct varobj *var, void *data), void *data)
+all_root_varobjs (gdb::function_view<void (struct varobj *var)> func)
 {
   /* Iterate "safely" - handle if the callee deletes its passed VAROBJ.  */
   auto iter = rootlist.begin ();
@@ -2369,7 +2369,7 @@ all_root_varobjs (void (*func) (struct varobj *var, void *data), void *data)
   while (iter != end)
     {
       auto self = iter++;
-      (*func) ((*self)->rootvar, data);
+      func ((*self)->rootvar);
     }
 }
 
@@ -2381,7 +2381,7 @@ all_root_varobjs (void (*func) (struct varobj *var, void *data), void *data)
    varobj must be either re-evaluated, or marked as invalid here.  */
 
 static void
-varobj_invalidate_iter (struct varobj *var, void *unused)
+varobj_invalidate_iter (struct varobj *var)
 {
   /* global and floating var must be re-evaluated.  */
   if (var->root->floating || var->root->valid_block == NULL)
@@ -2412,7 +2412,7 @@ varobj_invalidate_iter (struct varobj *var, void *unused)
 void 
 varobj_invalidate (void)
 {
-  all_root_varobjs (varobj_invalidate_iter, NULL);
+  all_root_varobjs (varobj_invalidate_iter);
 }
 
 /* A hash function for a varobj.  */

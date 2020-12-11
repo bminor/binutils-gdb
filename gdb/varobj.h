@@ -309,8 +309,7 @@ extern std::string varobj_get_value (struct varobj *var);
 
 extern bool varobj_set_value (struct varobj *var, const char *expression);
 
-extern void all_root_varobjs (void (*func) (struct varobj *var, void *data),
-			      void *data);
+extern void all_root_varobjs (gdb::function_view<void (struct varobj *var)>);
 
 extern std::vector<varobj_update_result>
   varobj_update (struct varobj **varp, bool is_explicit);

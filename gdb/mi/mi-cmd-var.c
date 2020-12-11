@@ -585,20 +585,12 @@ mi_cmd_var_assign (const char *command, char **argv, int argc)
   uiout->field_string ("value", val.c_str ());
 }
 
-/* Type used for parameters passing to mi_cmd_var_update_iter.  */
-
-struct mi_cmd_var_update
-  {
-    int only_floating;
-    enum print_values print_values;
-  };
-
 /* Helper for mi_cmd_var_update - update each VAR.  */
 
 static void
-mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
+mi_cmd_var_update_iter (struct varobj *var, bool only_floating,
+			enum print_values print_values)
 {
-  struct mi_cmd_var_update *data = (struct mi_cmd_var_update *) data_pointer;
   bool thread_stopped;
 
   int thread_id = varobj_get_thread_id (var);
@@ -617,8 +609,8 @@ mi_cmd_var_update_iter (struct varobj *var, void *data_pointer)
     }
 
   if (thread_stopped
-      && (!data->only_floating || varobj_floating_p (var)))
-    varobj_update_one (var, data->print_values, false /* implicit */);
+      && (!only_floating || varobj_floating_p (var)))
+    varobj_update_one (var, print_values, false /* implicit */);
 }
 
 void
@@ -656,16 +648,14 @@ mi_cmd_var_update (const char *command, char **argv, int argc)
 
   if ((*name == '*' || *name == '@') && (*(name + 1) == '\0'))
     {
-      struct mi_cmd_var_update data;
-
-      data.only_floating = (*name == '@');
-      data.print_values = print_values;
-
       /* varobj_update_one automatically updates all the children of
 	 VAROBJ.  Therefore update each VAROBJ only once by iterating
 	 only the root VAROBJs.  */
 
-      all_root_varobjs (mi_cmd_var_update_iter, &data);
+      all_root_varobjs ([=] (varobj *var)
+        {
+	  mi_cmd_var_update_iter (var, *name == '0', print_values);
+	});
     }
   else
     {
