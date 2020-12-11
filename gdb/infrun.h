@@ -29,7 +29,7 @@ struct process_stratum_target;
 struct thread_info;
 
 /* True if we are debugging run control.  */
-extern unsigned int debug_infrun;
+extern bool debug_infrun;
 
 /* Print an "infrun" debug statement.  */
 

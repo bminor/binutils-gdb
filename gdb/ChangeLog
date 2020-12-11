@@ -1,5 +1,12 @@
 2020-12-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* infrun.h (debug_infrun): Make a bool.
+	* infrun.c (debug_infrun): Make a bool.
+	(_initialize_infrun): Use add_setshow_boolean_cmd to define "set
+	debug infrun".
+
+2020-12-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* displaced-stepping.h (displaced_debug_printf): Use
 	debug_prefixed_printf_cond.
 	* dwarf2/read.c (dwarf_read_debug_printf): Likewise.
