@@ -1,5 +1,12 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (struct varobj_root) <next>: Remove.
+	(struct vlist): Remove.
+	(rootlist): Now a std::list.
+	(install_variable, uninstall_variable, all_root_varobjs): Update.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (VAROBJ_TABLE_SIZE): Remove.
 	(varobj_table): Now htab_t.
 	(varobj_get_handle, install_variable, uninstall_variable):

@@ -31,6 +31,7 @@
 #include "varobj-iter.h"
 #include "parser-defs.h"
 #include "gdbarch.h"
+#include <algorithm>
 
 #if HAVE_PYTHON
 #include "python/python.h"
@@ -100,9 +101,6 @@ struct varobj_root
 
   /* The varobj for this root node.  */
   struct varobj *rootvar = NULL;
-
-  /* Next root variable */
-  struct varobj_root *next = NULL;
 };
 
 /* Dynamic part of varobj.  */
@@ -134,14 +132,6 @@ struct varobj_dynamic
      when we read it, because that will mess up future updates.  So,
      we stash it here instead.  */
   varobj_item *saved_item = NULL;
-};
-
-/* A list of varobjs */
-
-struct vlist
-{
-  struct varobj *var;
-  struct vlist *next;
 };
 
 /* Private function prototypes */
@@ -197,8 +187,8 @@ static struct varobj *varobj_add_child (struct varobj *var,
 /* Mappings of varobj_display_formats enums to gdb's format codes.  */
 static int format_code[] = { 0, 't', 'd', 'x', 'o', 'z' };
 
-/* Header of the list of root variable objects.  */
-static struct varobj_root *rootlist;
+/* List of root variable objects.  */
+static std::list<struct varobj_root *> rootlist;
 
 /* Pointer to the varobj hash table (built at run time).  */
 static htab_t varobj_table;
@@ -1790,14 +1780,7 @@ install_variable (struct varobj *var)
 
   /* If root, add varobj to root list.  */
   if (is_root_p (var))
-    {
-      /* Add to list of root variables.  */
-      if (rootlist == NULL)
-	var->root->next = NULL;
-      else
-	var->root->next = rootlist;
-      rootlist = var->root;
-    }
+    rootlist.push_front (var->root);
 
   return true;			/* OK */
 }
@@ -1806,9 +1789,6 @@ install_variable (struct varobj *var)
 static void
 uninstall_variable (struct varobj *var)
 {
-  struct varobj_root *cr;
-  struct varobj_root *prer;
-
   hashval_t hash = htab_hash_string (var->obj_name.c_str ());
   htab_remove_elt_with_hash (varobj_table, var->obj_name.c_str (), hash);
 
@@ -1818,32 +1798,9 @@ uninstall_variable (struct varobj *var)
   /* If root, remove varobj from root list.  */
   if (is_root_p (var))
     {
-      /* Remove from list of root variables.  */
-      if (rootlist == var->root)
-	rootlist = var->root->next;
-      else
-	{
-	  prer = NULL;
-	  cr = rootlist;
-	  while ((cr != NULL) && (cr->rootvar != var))
-	    {
-	      prer = cr;
-	      cr = cr->next;
-	    }
-	  if (cr == NULL)
-	    {
-	      warning (_("Assertion failed: Could not find "
-			 "varobj \"%s\" in root list"),
-		       var->obj_name.c_str ());
-	      return;
-	    }
-	  if (prer == NULL)
-	    rootlist = NULL;
-	  else
-	    prer->next = cr->next;
-	}
+      auto iter = std::find (rootlist.begin (), rootlist.end (), var->root);
+      rootlist.erase (iter);
     }
-
 }
 
 /* Create and install a child of the parent of the given name.
@@ -2406,15 +2363,13 @@ varobj_default_value_is_changeable_p (const struct varobj *var)
 void
 all_root_varobjs (void (*func) (struct varobj *var, void *data), void *data)
 {
-  struct varobj_root *var_root, *var_root_next;
-
   /* Iterate "safely" - handle if the callee deletes its passed VAROBJ.  */
-
-  for (var_root = rootlist; var_root != NULL; var_root = var_root_next)
+  auto iter = rootlist.begin ();
+  auto end = rootlist.end ();
+  while (iter != end)
     {
-      var_root_next = var_root->next;
-
-      (*func) (var_root->rootvar, data);
+      auto self = iter++;
+      (*func) ((*self)->rootvar, data);
     }
 }
 
