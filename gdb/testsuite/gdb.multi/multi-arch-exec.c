@@ -30,6 +30,8 @@ static void *
 thread_start (void *arg)
 {
   pthread_barrier_wait (&barrier);
+  pthread_barrier_wait (&barrier);
+  pthread_barrier_wait (&barrier);
 
   while (1)
     sleep (1);
@@ -59,6 +61,11 @@ main (int argc, char ** argv)
 
   pthread_barrier_wait (&barrier);
   all_started ();
+
+  /* Avoid races with GDB ptrace-resuming the threads and the exec: ensure
+     both threads were resumed by GDB before going into the exec.  */
+  pthread_barrier_wait (&barrier);
+  pthread_barrier_wait (&barrier);
 
   execl (prog,
          prog,
