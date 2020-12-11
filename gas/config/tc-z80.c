@@ -3445,6 +3445,15 @@ area (int arg)
     psect (arg);
 }
 
+/* Handle the .bss pseudo-op.  */
+
+static void
+s_bss (int ignore ATTRIBUTE_UNUSED)
+{
+  subseg_set (bss_section, 0);
+  demand_empty_rest_of_line ();
+}
+
 /* Port specific pseudo ops.  */
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -3460,6 +3469,7 @@ const pseudo_typeS md_pseudo_table[] =
   { ".hd64", set_inss, INS_Z180},
   { ".z80", set_inss, INS_Z80},
   { ".z80n", set_inss, INS_Z80N},
+  { "bss", s_bss, 0},
   { "db" , emit_data, 1},
   { "d24", z80_cons, 3},
   { "d32", z80_cons, 4},

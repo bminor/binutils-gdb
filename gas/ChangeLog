@@ -1,3 +1,10 @@
+2020-12-11  Sergey Belyashov  <sergey.belyashov@gmail.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 27047
+	* config/tc-z80.c (s_bss): New function.
+	(md_pseudo_table): Add bss entry.
+
 2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (riscv_ext): New function.  Use md_assemblef
