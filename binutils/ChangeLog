@@ -1,3 +1,9 @@
+2020-12-11  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ar.c (write_archive): Cast iostream pointer to FILE *.
+	* arsup.c (ar_save): Likewise.
+	* objcopy.c (copy_file): Likewise.
+
 2020-12-07  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (is_mergeable_note_section): Remove reference to

@@ -1305,7 +1305,7 @@ write_archive (bfd *iarch)
   ofd = dup (ofd);
   if (iarch == NULL || iarch->iostream == NULL)
     skip_stat = TRUE;
-  else if (ofd == -1 || fstat (fileno (iarch->iostream), &target_stat) != 0)
+  else if (ofd == -1 || fstat (fileno ((FILE *) iarch->iostream), &target_stat) != 0)
     bfd_fatal (old_name);
 #endif
 
