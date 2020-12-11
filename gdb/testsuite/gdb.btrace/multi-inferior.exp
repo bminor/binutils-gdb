@@ -27,6 +27,11 @@ if { [skip_btrace_tests] } {
     return -1
 }
 
+if { [use_gdb_stub] } {
+    unsupported "test creates multiple inferiors"
+    return -1
+}
+
 standard_testfile
 if [prepare_for_testing "failed to prepare" $testfile {} {debug}] {
     return -1
