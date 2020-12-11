@@ -50,4 +50,21 @@ extern void ATTRIBUTE_PRINTF (3, 4) debug_prefixed_printf
 extern void ATTRIBUTE_PRINTF (3, 0) debug_prefixed_vprintf
   (const char *module, const char *func, const char *format, va_list args);
 
+
+/* Helper to define "_debug_print" macros.
+
+   DEBUG_ENABLED_COND is an expression that evaluates to true if the debugging
+   statement is enabled and should be printed.
+
+   The other arguments, as well as the name of the current function, are
+   forwarded to debug_prefixed_printf.  */
+
+#define debug_prefixed_printf_cond(debug_enabled_cond, module, fmt, ...) \
+  do \
+    { \
+      if (debug_enabled_cond) \
+	debug_prefixed_printf (module, __func__, fmt, ##__VA_ARGS__); \
+    } \
+  while (0)
+
 #endif /* COMMON_COMMON_DEBUG_H */

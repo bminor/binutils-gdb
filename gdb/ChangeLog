@@ -1,3 +1,12 @@
+2020-12-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* displaced-stepping.h (displaced_debug_printf): Use
+	debug_prefixed_printf_cond.
+	* dwarf2/read.c (dwarf_read_debug_printf): Likewise.
+	(dwarf_read_debug_printf_v): Likewise.
+	* infrun.h (infrun_debug_printf): Likewise.
+	* linux-nat.c (linux_nat_debug_printf): Likewise.
+
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
 	* p-exp.y (intvar): Remove global.

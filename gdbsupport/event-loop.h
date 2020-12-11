@@ -129,12 +129,8 @@ extern debug_event_loop_kind debug_event_loop;
 /* Print an "event loop" debug statement.  */
 
 #define event_loop_debug_printf(fmt, ...) \
-  do \
-    { \
-      if (debug_event_loop != debug_event_loop_kind::OFF) \
-	debug_prefixed_printf ("event-loop", __func__, fmt, ##__VA_ARGS__); \
-    } \
-  while (0)
+  debug_prefixed_printf_cond (debug_event_loop != debug_event_loop_kind::OFF, \
+			      "event-loop", fmt, ##__VA_ARGS__)
 
 /* Print an "event loop" debug statement that is know to come from a UI-related
    event (e.g. calling the event handler for the fd of the CLI).  */

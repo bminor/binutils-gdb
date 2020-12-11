@@ -33,12 +33,7 @@ extern bool debug_displaced;
 /* Print a "displaced" debug statement.  */
 
 #define displaced_debug_printf(fmt, ...) \
-  do \
-    { \
-      if (debug_displaced) \
-	debug_prefixed_printf ("displaced", __func__, fmt, ##__VA_ARGS__); \
-    } \
-  while (0)
+  debug_prefixed_printf_cond (debug_displaced, "displaced",fmt, ##__VA_ARGS__)
 
 enum displaced_step_prepare_status
 {

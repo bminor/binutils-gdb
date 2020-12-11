@@ -202,12 +202,7 @@ show_debug_linux_nat (struct ui_file *file, int from_tty,
 /* Print a linux-nat debug statement.  */
 
 #define linux_nat_debug_printf(fmt, ...) \
-  do \
-    { \
-      if (debug_linux_nat) \
-	debug_prefixed_printf ("linux-nat", __func__, fmt, ##__VA_ARGS__); \
-    } \
-  while (0)
+  debug_prefixed_printf_cond (debug_linux_nat, "linux-nat", fmt, ##__VA_ARGS__)
 
 struct simple_pid_list
 {

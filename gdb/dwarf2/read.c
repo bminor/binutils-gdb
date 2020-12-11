@@ -96,22 +96,14 @@ static unsigned int dwarf_read_debug = 0;
 /* Print a "dwarf-read" debug statement if dwarf_read_debug is >= 1.  */
 
 #define dwarf_read_debug_printf(fmt, ...) \
-  do \
-    { \
-      if (dwarf_read_debug >= 1) \
-	debug_prefixed_printf ("dwarf-read", __func__, fmt, ##__VA_ARGS__); \
-    } \
-  while (0)
+  debug_prefixed_printf_cond (dwarf_read_debug >= 1, "dwarf-read", fmt, \
+			      ##__VA_ARGS__)
 
 /* Print a "dwarf-read" debug statement if dwarf_read_debug is >= 2.  */
 
 #define dwarf_read_debug_printf_v(fmt, ...) \
-  do \
-    { \
-      if (dwarf_read_debug >= 2) \
-	debug_prefixed_printf ("dwarf-read", __func__, fmt, ##__VA_ARGS__); \
-    } \
-  while (0)
+  debug_prefixed_printf_cond (dwarf_read_debug >= 2, "dwarf-read", fmt, \
+			      ##__VA_ARGS__)
 
 /* When non-zero, dump DIEs after they are read in.  */
 static unsigned int dwarf_die_debug = 0;

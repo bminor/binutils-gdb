@@ -1,3 +1,9 @@
+2020-12-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* common-debug.h (debug_prefixed_printf_cond): New.
+	* event-loop.h (event_loop_debug_printf): Use
+	debug_prefixed_printf_cond.
+
 2020-12-08  Alexander Fedotov  <alfedotov@gmail.com>
 
 	* pathstuff.cc (get_standard_cache_dir): Use LOCALAPPDATA environment
