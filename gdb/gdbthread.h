@@ -711,12 +711,8 @@ class enable_thread_stack_temporaries
 public:
 
   explicit enable_thread_stack_temporaries (struct thread_info *thr)
-    : m_thr (thr)
+    : m_thr (thread_info_ref::new_reference (thr))
   {
-    gdb_assert (m_thr != NULL);
-
-    m_thr->incref ();
-
     m_thr->stack_temporaries_enabled = true;
     m_thr->stack_temporaries.clear ();
   }
@@ -725,15 +721,13 @@ public:
   {
     m_thr->stack_temporaries_enabled = false;
     m_thr->stack_temporaries.clear ();
-
-    m_thr->decref ();
   }
 
   DISABLE_COPY_AND_ASSIGN (enable_thread_stack_temporaries);
 
 private:
 
-  struct thread_info *m_thr;
+  thread_info_ref m_thr;
 };
 
 extern bool thread_stack_temporaries_enabled_p (struct thread_info *tp);
