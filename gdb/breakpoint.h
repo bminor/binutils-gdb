@@ -29,6 +29,7 @@
 #include <vector>
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/refcounted-object.h"
 #include "cli/cli-script.h"
 
 struct block;
@@ -311,7 +312,7 @@ enum bp_loc_type
   bp_loc_other			/* Miscellaneous...  */
 };
 
-class bp_location
+class bp_location : public refcounted_object
 {
 public:
   bp_location () = default;
@@ -328,9 +329,6 @@ public:
   /* Chain pointer to the next breakpoint location for
      the same parent breakpoint.  */
   bp_location *next = NULL;
-
-  /* The reference count.  */
-  int refc = 0;
 
   /* Type of this breakpoint location.  */
   bp_loc_type loc_type {};
@@ -509,6 +507,27 @@ public:
   /* The objfile the symbol or minimal symbol were found in.  */
   const struct objfile *objfile = NULL;
 };
+
+/* A policy class for bp_location reference counting.  */
+struct bp_location_ref_policy
+{
+  static void incref (bp_location *loc)
+  {
+    loc->incref ();
+  }
+
+  static void decref (bp_location *loc)
+  {
+    gdb_assert (loc->refcount () > 0);
+    loc->decref ();
+    if (loc->refcount () == 0)
+      delete loc;
+  }
+};
+
+/* A gdb::ref_ptr that has been specialized for bp_location.  */
+typedef gdb::ref_ptr<bp_location, bp_location_ref_policy>
+     bp_location_ref_ptr;
 
 /* The possible return values for print_bpstat, print_it_normal,
    print_it_done, print_it_noop.  */
@@ -1130,7 +1149,6 @@ struct bpstats
   {
     bpstats ();
     bpstats (struct bp_location *bl, bpstat **bs_link_pointer);
-    ~bpstats ();
 
     bpstats (const bpstats &);
     bpstats &operator= (const bpstats &) = delete;
@@ -1155,7 +1173,7 @@ struct bpstats
        What this means is that we should not (in most cases) follow
        the `bpstat->bp_location->owner' link, but instead use the
        `breakpoint_at' field below.  */
-    struct bp_location *bp_location_at;
+    bp_location_ref_ptr bp_location_at;
 
     /* Breakpoint that caused the stop.  This is nullified if the
        breakpoint ends up being deleted.  See comments on

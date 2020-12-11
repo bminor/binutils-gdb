@@ -1,5 +1,26 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* inline-frame.c (stopped_by_user_bp_inline_frame): Update.
+	* ada-lang.c (check_status_exception): Update.
+	* breakpoint.c (free_bp_location): Remove.
+	(decref_bp_location): Use bp_location_ref_policy.
+	(bpstats::bpstats): Don't call incref_bp_location.
+	(bpstats::~bpstats): Remove.
+	(bpstats::bpstats): Update.
+	(bpstat_check_watchpoint, bpstat_check_breakpoint_conditions)
+	(bp_location::bp_location): Update.
+	(incref_bp_location): Remove.
+	(bkpt_print_it): Update.
+	* breakpoint.h (class bp_location): Derive from
+	refcounted_object.
+	(struct bpstats): Remove destructor.
+	<bp_location_at>: Now a bp_location_ref_ptr.
+	<refc>: Remove.
+	(bp_location_ref_ptr): New typedef.
+	(struct bp_location_ref_policy): New.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* thread.c (class scoped_inc_dec_ref): Remove.
 	(tp_array_compar_ascending, tp_array_compar_descending): Change
 	parameter types.

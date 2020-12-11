@@ -12255,7 +12255,7 @@ should_stop_exception (const struct bp_location *bl)
 static void
 check_status_exception (bpstat bs)
 {
-  bs->stop = should_stop_exception (bs->bp_location_at);
+  bs->stop = should_stop_exception (bs->bp_location_at.get ());
 }
 
 /* Implement the PRINT_IT method in the breakpoint_ops structure

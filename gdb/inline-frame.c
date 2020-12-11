@@ -313,7 +313,7 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
       if (bpt != NULL
 	  && (user_breakpoint_p (bpt) || bpt->type == bp_until))
 	{
-	  bp_location *loc = s->bp_location_at;
+	  bp_location *loc = s->bp_location_at.get ();
 	  enum bp_loc_type t = loc->loc_type;
 
 	  if (t == bp_loc_software_breakpoint
