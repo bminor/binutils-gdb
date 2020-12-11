@@ -131,7 +131,7 @@ struct varobj_dynamic
      already reported.  However, we don't want to install this value
      when we read it, because that will mess up future updates.  So,
      we stash it here instead.  */
-  varobj_item *saved_item = NULL;
+  std::unique_ptr<varobj_item> saved_item;
 };
 
 /* Private function prototypes */
@@ -680,8 +680,7 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
   if (var->saved_item != NULL)
     {
       value_decref (var->saved_item->value);
-      delete var->saved_item;
-      var->saved_item = NULL;
+      var->saved_item.reset (nullptr);
     }
 }
 
@@ -723,10 +722,7 @@ update_dynamic_varobj_children (struct varobj *var,
 
       /* See if there was a leftover from last time.  */
       if (var->dynamic->saved_item != NULL)
-	{
-	  item = std::unique_ptr<varobj_item> (var->dynamic->saved_item);
-	  var->dynamic->saved_item = NULL;
-	}
+	item = std::move (var->dynamic->saved_item);
       else
 	{
 	  item = var->dynamic->child_iter->next ();
@@ -757,7 +753,7 @@ update_dynamic_varobj_children (struct varobj *var,
 	}
       else
 	{
-	  var->dynamic->saved_item = item.release ();
+	  var->dynamic->saved_item = std::move (item);
 
 	  /* We want to truncate the child list just before this
 	     element.  */

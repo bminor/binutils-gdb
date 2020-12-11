@@ -1,5 +1,11 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (struct varobj_dynamic) <saved_item>: Now unique_ptr.
+	(varobj_clear_saved_item, update_dynamic_varobj_children):
+	Update.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (update_dynamic_varobj_children): Update.
 	* varobj-iter.h (struct varobj_iter) <next>: Change return type.
 	* python/py-varobj.c (struct py_varobj_iter) <next>: Change return
