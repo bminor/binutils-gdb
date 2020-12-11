@@ -51,12 +51,12 @@ bool print_inferior_events = true;
 /* The Current Inferior.  This is a strong reference.  I.e., whenever
    an inferior is the current inferior, its refcount is
    incremented.  */
-static struct inferior *current_inferior_ = NULL;
+static inferior_ref current_inferior_;
 
 struct inferior*
 current_inferior (void)
 {
-  return current_inferior_;
+  return current_inferior_.get ();
 }
 
 void
@@ -65,9 +65,7 @@ set_current_inferior (struct inferior *inf)
   /* There's always an inferior.  */
   gdb_assert (inf != NULL);
 
-  inf->incref ();
-  current_inferior_->decref ();
-  current_inferior_ = inf;
+  current_inferior_ = inferior_ref::new_reference (inf);
 }
 
 private_inferior::~private_inferior () = default;
@@ -962,8 +960,7 @@ initialize_inferiors (void)
      can only allocate an inferior when all those modules have done
      that.  Do this after initialize_progspace, due to the
      current_program_space reference.  */
-  current_inferior_ = add_inferior_silent (0);
-  current_inferior_->incref ();
+  set_current_inferior (add_inferior_silent (0));
   current_inferior_->pspace = current_program_space;
   current_inferior_->aspace = current_program_space->aspace;
   /* The architecture will be initialized shortly, by

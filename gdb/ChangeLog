@@ -1,5 +1,11 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* inferior.c (current_inferior_): Change type.
+	(current_inferior, set_current_inferior, initialize_inferiors):
+	Update.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* gdbthread.h (class enable_thread_stack_temporaries) <m_thr>:
 	Change type.
 
