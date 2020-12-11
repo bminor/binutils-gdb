@@ -200,12 +200,8 @@ static int format_code[] = { 0, 't', 'd', 'x', 'o', 'z' };
 /* Header of the list of root variable objects.  */
 static struct varobj_root *rootlist;
 
-/* Prime number indicating the number of buckets in the hash table.  */
-/* A prime large enough to avoid too many collisions.  */
-#define VAROBJ_TABLE_SIZE 227
-
 /* Pointer to the varobj hash table (built at run time).  */
-static struct vlist **varobj_table;
+static htab_t varobj_table;
 
 
 
@@ -432,24 +428,13 @@ varobj_gen_name (void)
 struct varobj *
 varobj_get_handle (const char *objname)
 {
-  struct vlist *cv;
-  const char *chp;
-  unsigned int index = 0;
-  unsigned int i = 1;
+  varobj *var = (varobj *) htab_find_with_hash (varobj_table, objname,
+						htab_hash_string (objname));
 
-  for (chp = objname; *chp; chp++)
-    {
-      index = (index + (i++ * (unsigned int) *chp)) % VAROBJ_TABLE_SIZE;
-    }
-
-  cv = *(varobj_table + index);
-  while (cv != NULL && cv->var->obj_name != objname)
-    cv = cv->next;
-
-  if (cv == NULL)
+  if (var == NULL)
     error (_("Variable object not found"));
 
-  return cv->var;
+  return var;
 }
 
 /* Given the handle, return the name of the object.  */
@@ -1793,29 +1778,15 @@ delete_variable_1 (int *delcountp, struct varobj *var, bool only_children_p,
 static bool
 install_variable (struct varobj *var)
 {
-  struct vlist *cv;
-  struct vlist *newvl;
-  const char *chp;
-  unsigned int index = 0;
-  unsigned int i = 1;
-
-  for (chp = var->obj_name.c_str (); *chp; chp++)
-    {
-      index = (index + (i++ * (unsigned int) *chp)) % VAROBJ_TABLE_SIZE;
-    }
-
-  cv = *(varobj_table + index);
-  while (cv != NULL && cv->var->obj_name != var->obj_name)
-    cv = cv->next;
-
-  if (cv != NULL)
+  hashval_t hash = htab_hash_string (var->obj_name.c_str ());
+  void **slot = htab_find_slot_with_hash (varobj_table,
+					  var->obj_name.c_str (),
+					  hash, INSERT);
+  if (*slot != nullptr)
     error (_("Duplicate variable object name"));
 
   /* Add varobj to hash table.  */
-  newvl = XNEW (struct vlist);
-  newvl->next = *(varobj_table + index);
-  newvl->var = var;
-  *(varobj_table + index) = newvl;
+  *slot = var;
 
   /* If root, add varobj to root list.  */
   if (is_root_p (var))
@@ -1835,45 +1806,14 @@ install_variable (struct varobj *var)
 static void
 uninstall_variable (struct varobj *var)
 {
-  struct vlist *cv;
-  struct vlist *prev;
   struct varobj_root *cr;
   struct varobj_root *prer;
-  const char *chp;
-  unsigned int index = 0;
-  unsigned int i = 1;
 
-  /* Remove varobj from hash table.  */
-  for (chp = var->obj_name.c_str (); *chp; chp++)
-    {
-      index = (index + (i++ * (unsigned int) *chp)) % VAROBJ_TABLE_SIZE;
-    }
-
-  cv = *(varobj_table + index);
-  prev = NULL;
-  while (cv != NULL && cv->var->obj_name != var->obj_name)
-    {
-      prev = cv;
-      cv = cv->next;
-    }
+  hashval_t hash = htab_hash_string (var->obj_name.c_str ());
+  htab_remove_elt_with_hash (varobj_table, var->obj_name.c_str (), hash);
 
   if (varobjdebug)
     fprintf_unfiltered (gdb_stdlog, "Deleting %s\n", var->obj_name.c_str ());
-
-  if (cv == NULL)
-    {
-      warning
-	("Assertion failed: Could not find variable object \"%s\" to delete",
-	 var->obj_name.c_str ());
-      return;
-    }
-
-  if (prev == NULL)
-    *(varobj_table + index) = cv->next;
-  else
-    prev->next = cv->next;
-
-  xfree (cv);
 
   /* If root, remove varobj from root list.  */
   if (is_root_p (var))
@@ -2520,11 +2460,32 @@ varobj_invalidate (void)
   all_root_varobjs (varobj_invalidate_iter, NULL);
 }
 
+/* A hash function for a varobj.  */
+
+static hashval_t
+hash_varobj (const void *a)
+{
+  const varobj *obj = (const varobj *) a;
+  return htab_hash_string (obj->obj_name.c_str ());
+}
+
+/* A hash table equality function for varobjs.  */
+
+static int
+eq_varobj_and_string (const void *a, const void *b)
+{
+  const varobj *obj = (const varobj *) a;
+  const char *name = (const char *) b;
+
+  return obj->obj_name == name;
+}
+
 void _initialize_varobj ();
 void
 _initialize_varobj ()
 {
-  varobj_table = XCNEWVEC (struct vlist *, VAROBJ_TABLE_SIZE);
+  varobj_table = htab_create_alloc (5, hash_varobj, eq_varobj_and_string,
+				    nullptr, xcalloc, xfree);
 
   add_setshow_zuinteger_cmd ("varobj", class_maintenance,
 			     &varobjdebug,

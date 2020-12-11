@@ -1,5 +1,14 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (VAROBJ_TABLE_SIZE): Remove.
+	(varobj_table): Now htab_t.
+	(varobj_get_handle, install_variable, uninstall_variable):
+	Update.
+	(hash_varobj, eq_varobj_and_string): New functions.
+	(hash_varobj): Update.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* inline-frame.c (stopped_by_user_bp_inline_frame): Update.
 	* ada-lang.c (check_status_exception): Update.
 	* breakpoint.c (free_bp_location): Remove.
