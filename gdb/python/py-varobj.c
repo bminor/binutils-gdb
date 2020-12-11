@@ -21,34 +21,43 @@
 /* A dynamic varobj iterator "class" for python pretty-printed
    varobjs.  This inherits struct varobj_iter.  */
 
-struct py_varobj_iter
+struct py_varobj_iter : public varobj_iter
 {
-  /* The 'base class'.  */
-  struct varobj_iter base;
+  py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter);
+  ~py_varobj_iter () override;
+
+  varobj_item *next () override;
+
+private:
+
+  /* The varobj this iterator is listing children for.  */
+  struct varobj *m_var;
+
+  /* The next raw index we will try to check is available.  If it is
+     equal to number_of_children, then we've already iterated the
+     whole set.  */
+  int m_next_raw_index = 0;
 
   /* The python iterator returned by the printer's 'children' method,
      or NULL if not available.  */
-  PyObject *iter;
+  PyObject *m_iter;
 };
 
 /* Implementation of the 'dtor' method of pretty-printed varobj
    iterators.  */
 
-static void
-py_varobj_iter_dtor (struct varobj_iter *self)
+py_varobj_iter::~py_varobj_iter ()
 {
-  struct py_varobj_iter *dis = (struct py_varobj_iter *) self;
-  gdbpy_enter_varobj enter_py (self->var);
-  Py_XDECREF (dis->iter);
+  gdbpy_enter_varobj enter_py (m_var);
+  Py_XDECREF (m_iter);
 }
 
 /* Implementation of the 'next' method of pretty-printed varobj
    iterators.  */
 
-static varobj_item *
-py_varobj_iter_next (struct varobj_iter *self)
+varobj_item *
+py_varobj_iter::next ()
 {
-  struct py_varobj_iter *t = (struct py_varobj_iter *) self;
   PyObject *py_v;
   varobj_item *vitem;
   const char *name = NULL;
@@ -56,9 +65,9 @@ py_varobj_iter_next (struct varobj_iter *self)
   if (!gdb_python_initialized)
     return NULL;
 
-  gdbpy_enter_varobj enter_py (self->var);
+  gdbpy_enter_varobj enter_py (m_var);
 
-  gdbpy_ref<> item (PyIter_Next (t->iter));
+  gdbpy_ref<> item (PyIter_Next (m_iter));
 
   if (item == NULL)
     {
@@ -78,7 +87,7 @@ py_varobj_iter_next (struct varobj_iter *self)
 	    }
 
 	  std::string name_str = string_printf ("<error at %d>",
-						self->next_raw_index++);
+						m_next_raw_index++);
 	  item.reset (Py_BuildValue ("(ss)", name_str.c_str (),
 				     value_str.get ()));
 	  if (item == NULL)
@@ -107,45 +116,18 @@ py_varobj_iter_next (struct varobj_iter *self)
     gdbpy_print_stack ();
   vitem->name = name;
 
-  self->next_raw_index++;
+  m_next_raw_index++;
   return vitem;
 }
-
-/* The 'vtable' of pretty-printed python varobj iterators.  */
-
-static const struct varobj_iter_ops py_varobj_iter_ops =
-{
-  py_varobj_iter_dtor,
-  py_varobj_iter_next
-};
 
 /* Constructor of pretty-printed varobj iterators.  VAR is the varobj
    whose children the iterator will be iterating over.  PYITER is the
    python iterator actually responsible for the iteration.  */
 
-static void
-py_varobj_iter_ctor (struct py_varobj_iter *self,
-		     struct varobj *var, gdbpy_ref<> &&pyiter)
+py_varobj_iter::py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter)
+  : m_var (var),
+    m_iter (pyiter.release ())
 {
-  self->base.var = var;
-  self->base.ops = &py_varobj_iter_ops;
-  self->base.next_raw_index = 0;
-  self->iter = pyiter.release ();
-}
-
-/* Allocate and construct a pretty-printed varobj iterator.  VAR is
-   the varobj whose children the iterator will be iterating over.
-   PYITER is the python iterator actually responsible for the
-   iteration.  */
-
-static struct py_varobj_iter *
-py_varobj_iter_new (struct varobj *var, gdbpy_ref<> &&pyiter)
-{
-  struct py_varobj_iter *self;
-
-  self = XNEW (struct py_varobj_iter);
-  py_varobj_iter_ctor (self, var, std::move (pyiter));
-  return self;
 }
 
 /* Return a new pretty-printed varobj iterator suitable to iterate
@@ -154,8 +136,6 @@ py_varobj_iter_new (struct varobj *var, gdbpy_ref<> &&pyiter)
 struct varobj_iter *
 py_varobj_get_iterator (struct varobj *var, PyObject *printer)
 {
-  struct py_varobj_iter *py_iter;
-
   gdbpy_enter_varobj enter_py (var);
 
   if (!PyObject_HasAttr (printer, gdbpy_children_cst))
@@ -176,7 +156,5 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer)
       error (_("Could not get children iterator"));
     }
 
-  py_iter = py_varobj_iter_new (var, std::move (iter));
-
-  return &py_iter->base;
+  return new py_varobj_iter (var, std::move (iter));
 }

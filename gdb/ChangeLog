@@ -1,5 +1,22 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (update_dynamic_varobj_children, install_visualizer)
+	(varobj::~varobj): Update.
+	* varobj-iter.h (struct varobj_iter): Change to interface class.
+	(struct varobj_iter_ops): Remove.
+	(varobj_iter_next, varobj_iter_delete): Remove.
+	* python/py-varobj.c (struct py_varobj_iter): Derive from
+	varobj_iter.  Add constructor, destructor.  Rename members.
+	(py_varobj_iter::~py_varobj_iter): Rename from
+	py_varobj_iter_dtor.
+	(py_varobj_iter::next): Rename from py_varobj_iter_next.
+	(py_varobj_iter_ops): Remove.
+	(py_varobj_iter): Rename from py_varobj_iter_ctor.
+	(py_varobj_iter_new): Remove.
+	(py_varobj_get_iterator): Update.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.h (all_root_varobjs): Take a function_view.
 	* varobj.c (all_root_varobjs): Take a function_view.
 	(varobj_invalidate_iter): Remove unused parameter.

@@ -702,7 +702,7 @@ update_dynamic_varobj_children (struct varobj *var,
 
   if (update_children || var->dynamic->child_iter == NULL)
     {
-      varobj_iter_delete (var->dynamic->child_iter);
+      delete var->dynamic->child_iter;
       var->dynamic->child_iter = varobj_get_iterator (var);
 
       varobj_clear_saved_item (var->dynamic);
@@ -729,7 +729,7 @@ update_dynamic_varobj_children (struct varobj *var,
 	}
       else
 	{
-	  item = varobj_iter_next (var->dynamic->child_iter);
+	  item = var->dynamic->child_iter->next ();
 	  /* Release vitem->value so its lifetime is not bound to the
 	     execution of a command.  */
 	  if (item != NULL && item->value != NULL)
@@ -739,7 +739,7 @@ update_dynamic_varobj_children (struct varobj *var,
       if (item == NULL)
 	{
 	  /* Iteration is done.  Remove iterator from VAR.  */
-	  varobj_iter_delete (var->dynamic->child_iter);
+	  delete var->dynamic->child_iter;
 	  var->dynamic->child_iter = NULL;
 	  break;
 	}
@@ -1070,7 +1070,7 @@ install_visualizer (struct varobj_dynamic *var, PyObject *constructor,
   Py_XDECREF (var->pretty_printer);
   var->pretty_printer = visualizer;
 
-  varobj_iter_delete (var->child_iter);
+  delete var->child_iter;
   var->child_iter = NULL;
 }
 
@@ -1881,7 +1881,7 @@ varobj::~varobj ()
     }
 #endif
 
-  varobj_iter_delete (var->dynamic->child_iter);
+  delete var->dynamic->child_iter;
   varobj_clear_saved_item (var->dynamic);
 
   if (is_root_p (var))
