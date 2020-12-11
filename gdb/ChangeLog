@@ -1,5 +1,10 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (varobj_create): Update.
+	(install_variable): Return void.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (instantiate_pretty_printer): Use gdbpy_ref.
 
 2020-12-11  Tom Tromey  <tom@tromey.com>

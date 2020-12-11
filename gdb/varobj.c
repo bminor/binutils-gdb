@@ -142,7 +142,7 @@ static int delete_variable (struct varobj *, bool);
 
 static void delete_variable_1 (int *, struct varobj *, bool, bool);
 
-static bool install_variable (struct varobj *);
+static void install_variable (struct varobj *);
 
 static void uninstall_variable (struct varobj *);
 
@@ -390,11 +390,7 @@ varobj_create (const char *objname,
   if ((var != NULL) && (objname != NULL))
     {
       var->obj_name = objname;
-
-      /* If a varobj name is duplicated, the install will fail so
-	 we must cleanup.  */
-      if (!install_variable (var.get ()))
-	return NULL;
+      install_variable (var.get ());
     }
 
   return var.release ();
@@ -1733,7 +1729,7 @@ delete_variable_1 (int *delcountp, struct varobj *var, bool only_children_p,
 }
 
 /* Install the given variable VAR with the object name VAR->OBJ_NAME.  */
-static bool
+static void
 install_variable (struct varobj *var)
 {
   hashval_t hash = htab_hash_string (var->obj_name.c_str ());
@@ -1749,8 +1745,6 @@ install_variable (struct varobj *var)
   /* If root, add varobj to root list.  */
   if (is_root_p (var))
     rootlist.push_front (var->root);
-
-  return true;			/* OK */
 }
 
 /* Uninstall the object VAR.  */
