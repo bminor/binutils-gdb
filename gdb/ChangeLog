@@ -1,5 +1,19 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* p-exp.y (intvar): Remove global.
+	(DOLLAR_VARIABLE): Change type.
+	(start): Update.
+	(exp): Call write_dollar_variable here...
+	(yylex): ... not here.
+	* m2-exp.y (DOLLAR_VARIABLE): Change type.
+	(variable): Call write_dollar_variable here...
+	(yylex): ... not here.
+	* f-exp.y (DOLLAR_VARIABLE): Change type.
+	(exp): Call write_dollar_variable here...
+	(yylex): ... not here.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (varobj_create): Update.
 	(install_variable): Return void.
 

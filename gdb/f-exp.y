@@ -174,7 +174,7 @@ static int parse_number (struct parser_state *, const char *, int,
 %token SINGLE DOUBLE PRECISION
 %token <lval> CHARACTER 
 
-%token <voidval> DOLLAR_VARIABLE
+%token <sval> DOLLAR_VARIABLE
 
 %token <opcode> ASSIGN_MODIFY
 %token <opcode> UNOP_INTRINSIC BINOP_INTRINSIC
@@ -509,6 +509,7 @@ exp	:	variable
 	;
 
 exp	:	DOLLAR_VARIABLE
+			{ write_dollar_variable (pstate, $1); }
 	;
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
@@ -1357,11 +1358,8 @@ yylex (void)
   yylval.sval.length = namelen;
   
   if (*tokstart == '$')
-    {
-      write_dollar_variable (pstate, yylval.sval);
-      return DOLLAR_VARIABLE;
-    }
-  
+    return DOLLAR_VARIABLE;
+
   /* Use token-type TYPENAME for symbols that happen to be defined
      currently as names of types; NAME for other symbols.
      The caller is not constrained to care about the distinction.  */

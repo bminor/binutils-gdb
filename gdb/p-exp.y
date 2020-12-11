@@ -115,7 +115,6 @@ static int parse_number (struct parser_state *,
 			 const char *, int, int, YYSTYPE *);
 
 static struct type *current_type;
-static struct internalvar *intvar;
 static int leftdiv_is_integer;
 static void push_current_type (void);
 static void pop_current_type (void);
@@ -161,7 +160,7 @@ static int search_field;
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 
-%token <voidval> DOLLAR_VARIABLE
+%token <sval> DOLLAR_VARIABLE
 
 
 /* Object pascal */
@@ -192,7 +191,6 @@ static int search_field;
 %%
 
 start   :	{ current_type = NULL;
-		  intvar = NULL;
 		  search_field = 0;
 		  leftdiv_is_integer = 0;
 		}
@@ -526,17 +524,28 @@ exp	:	variable
 	;
 
 exp	:	DOLLAR_VARIABLE
-			/* Already written by write_dollar_variable.
-			   Handle current_type.  */
- 			{  if (intvar) {
- 			     struct value * val, * mark;
+			{
+			  write_dollar_variable (pstate, $1);
 
-			     mark = value_mark ();
- 			     val = value_of_internalvar (pstate->gdbarch (),
- 							 intvar);
- 			     current_type = value_type (val);
-			     value_release_to_mark (mark);
- 			   }
+			  /* $ is the normal prefix for pascal
+			     hexadecimal values but this conflicts
+			     with the GDB use for debugger variables
+			     so in expression to enter hexadecimal
+			     values we still need to use C syntax with
+			     0xff */
+			  std::string tmp ($1.ptr, $1.length);
+			  /* Handle current_type.  */
+			  struct internalvar *intvar
+			    = lookup_only_internalvar (tmp.c_str () + 1);
+			  if (intvar != nullptr)
+			    {
+			      scoped_value_mark mark;
+
+			      value *val
+				= value_of_internalvar (pstate->gdbarch (),
+							intvar);
+			      current_type = value_type (val);
+			    }
  			}
  	;
 
@@ -1494,17 +1503,6 @@ yylex (void)
 
   if (*tokstart == '$')
     {
-      char *tmp;
-
-      /* $ is the normal prefix for pascal hexadecimal values
-	but this conflicts with the GDB use for debugger variables
-	so in expression to enter hexadecimal values
-	we still need to use C syntax with 0xff  */
-      write_dollar_variable (pstate, yylval.sval);
-      tmp = (char *) alloca (namelen + 1);
-      memcpy (tmp, tokstart, namelen);
-      tmp[namelen] = '\0';
-      intvar = lookup_only_internalvar (tmp + 1);
       free (uptokstart);
       return DOLLAR_VARIABLE;
     }
