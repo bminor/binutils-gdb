@@ -49,6 +49,15 @@ gdb_test_multiple "print have_mpx ()" $test {
     }
 }
 
+set bounds_table 0
+gdb_test_multiple "disassemble upper" "" {
+    -re -wrap "bndldx.*" {
+	set bounds_table 1
+    }
+    -re -wrap "" {
+    }
+}
+
 # Convenience for returning from an inferior call that causes a BND violation.
 #
 gdb_test_no_output "set confirm off"
@@ -136,9 +145,25 @@ proc perform_a_call {func} {
 #
 proc check_bound_violation {parm parm_type is_positive} {
 
-    global u_fault
+    global u_fault bounds_table
 
-    gdb_test "continue" "$u_fault.*" "continue to a bnd violation"
+    set have_bnd_violation 0
+    gdb_test_multiple "continue" "continue to a bnd violation" {
+	-re -wrap "Continuing\." {
+	    if { $bounds_table } {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
+	-re -wrap "$u_fault.*" {
+	    pass $gdb_test_name
+	    set have_bnd_violation 1
+	}
+    }
+    if { ! $have_bnd_violation } {
+	return
+    }
 
     set message "access only one position"
     if {$is_positive == 1} {
