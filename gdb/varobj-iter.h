@@ -36,7 +36,7 @@ public:
 
   virtual ~varobj_iter () = default;
 
-  virtual varobj_item *next () = 0;
+  virtual std::unique_ptr<varobj_item> next () = 0;
 };
 
 #endif /* VAROBJ_ITER_H */

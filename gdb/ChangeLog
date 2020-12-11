@@ -1,5 +1,13 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (update_dynamic_varobj_children): Update.
+	* varobj-iter.h (struct varobj_iter) <next>: Change return type.
+	* python/py-varobj.c (struct py_varobj_iter) <next>: Change return
+	type.
+	(py_varobj_iter::next): Likewise.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (update_dynamic_varobj_children, install_visualizer)
 	(varobj::~varobj): Update.
 	* varobj-iter.h (struct varobj_iter): Change to interface class.

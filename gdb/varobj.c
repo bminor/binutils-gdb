@@ -719,12 +719,12 @@ update_dynamic_varobj_children (struct varobj *var,
      are more children.  */
   for (; to < 0 || i < to + 1; ++i)
     {
-      varobj_item *item;
+      std::unique_ptr<varobj_item> item;
 
       /* See if there was a leftover from last time.  */
       if (var->dynamic->saved_item != NULL)
 	{
-	  item = var->dynamic->saved_item;
+	  item = std::unique_ptr<varobj_item> (var->dynamic->saved_item);
 	  var->dynamic->saved_item = NULL;
 	}
       else
@@ -753,13 +753,11 @@ update_dynamic_varobj_children (struct varobj *var,
 				 can_mention ? newobj : NULL,
 				 can_mention ? unchanged : NULL,
 				 can_mention ? cchanged : NULL, i,
-				 item);
-
-	  delete item;
+				 item.get ());
 	}
       else
 	{
-	  var->dynamic->saved_item = item;
+	  var->dynamic->saved_item = item.release ();
 
 	  /* We want to truncate the child list just before this
 	     element.  */

@@ -26,7 +26,7 @@ struct py_varobj_iter : public varobj_iter
   py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter);
   ~py_varobj_iter () override;
 
-  varobj_item *next () override;
+  std::unique_ptr<varobj_item> next () override;
 
 private:
 
@@ -55,7 +55,7 @@ py_varobj_iter::~py_varobj_iter ()
 /* Implementation of the 'next' method of pretty-printed varobj
    iterators.  */
 
-varobj_item *
+std::unique_ptr<varobj_item>
 py_varobj_iter::next ()
 {
   PyObject *py_v;
@@ -117,7 +117,7 @@ py_varobj_iter::next ()
   vitem->name = name;
 
   m_next_raw_index++;
-  return vitem;
+  return std::unique_ptr<varobj_item> (vitem);
 }
 
 /* Constructor of pretty-printed varobj iterators.  VAR is the varobj
