@@ -673,15 +673,6 @@ varobj_get_iterator (struct varobj *var)
 requested an iterator from a non-dynamic varobj"));
 }
 
-/* Release and clear VAR's saved item, if any.  */
-
-static void
-varobj_clear_saved_item (struct varobj_dynamic *var)
-{
-  if (var->saved_item != NULL)
-    var->saved_item.reset (nullptr);
-}
-
 static bool
 update_dynamic_varobj_children (struct varobj *var,
 				std::vector<varobj *> *changed,
@@ -700,8 +691,7 @@ update_dynamic_varobj_children (struct varobj *var,
   if (update_children || var->dynamic->child_iter == NULL)
     {
       var->dynamic->child_iter = varobj_get_iterator (var);
-
-      varobj_clear_saved_item (var->dynamic);
+      var->dynamic->saved_item.reset (nullptr);
 
       i = 0;
 
@@ -1863,8 +1853,6 @@ varobj::~varobj ()
       Py_XDECREF (var->dynamic->pretty_printer);
     }
 #endif
-
-  varobj_clear_saved_item (var->dynamic);
 
   if (is_root_p (var))
     delete var->root;

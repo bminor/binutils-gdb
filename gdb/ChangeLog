@@ -1,5 +1,11 @@
 2020-12-11  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (varobj_clear_saved_item): Remove.
+	(update_dynamic_varobj_children): Update.
+	(varobj::~varobj): Don't call varobj_clear_saved_item.
+
+2020-12-11  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (install_dynamic_child, varobj_clear_saved_item)
 	(update_dynamic_varobj_children, create_child)
 	(create_child_with_value): Update.
