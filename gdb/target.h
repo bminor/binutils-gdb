@@ -470,8 +470,15 @@ struct target_ops
     virtual void attach (const char *, int);
     virtual void post_attach (int)
       TARGET_DEFAULT_IGNORE ();
+
+    /* Detaches from the inferior.  Note that on targets that support
+       async execution (i.e., targets where it is possible to detach
+       from programs with threads running), the target is responsible
+       for removing breakpoints from the program before the actual
+       detach, otherwise the program dies when it hits one.  */
     virtual void detach (inferior *, int)
       TARGET_DEFAULT_IGNORE ();
+
     virtual void disconnect (const char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     virtual void resume (ptid_t,

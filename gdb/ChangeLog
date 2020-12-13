@@ -1,5 +1,13 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* linux-nat.c (linux_nat_target::detach): Remove breakpoints
+	here...
+	* remote.c (remote_target::remote_detach_1): ... and here ...
+	* target.c (target_detach): ... instead of here.
+	* target.h (target_ops::detach): Add comment.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* infrun.c (struct wait_one_event): Move higher up.
 	(prepare_for_detach): Abort in-progress displaced steps instead of
 	letting them complete.
