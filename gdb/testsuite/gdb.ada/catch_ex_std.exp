@@ -24,28 +24,13 @@ if { [skip_ada_tests] } { return -1 }
 standard_ada_testfile foo
 
 set srcfile2 [file join [file dirname $srcfile] some_package.adb]
-set ofile2 [standard_output_file some_package.o]
 set sofile [standard_output_file libsome_package.so]
 
 set outdir [file dirname $binfile]
 
-# To make an Ada shared library we have to jump through a number of
-# hoops.
-
-# First compile to a .o.  We can't compile directly to a .so because
-# GCC rejects that:
-#    $ gcc -g -shared -fPIC -o qqz.o some_package.adb
-#    gcc: error: -c or -S required for Ada
-# And, we can't compile in "ada" mode because dejagnu will try to
-# invoke gnatmake, which we don't want.
-if {[target_compile_ada_from_dir $outdir $srcfile2 $ofile2 \
-	 object {debug additional_flags=-fPIC}] != ""} {
-    return -1
-}
-
-# Now turn the .o into a shared library.
-if {[gdb_compile_shlib $ofile2 $sofile \
-	 {debug additional_flags=-fPIC}] != ""} {
+# Create the shared library.
+if {[gdb_compile_shlib $srcfile2 $sofile \
+	 {ada debug additional_flags=-fPIC}] != ""} {
     return -1
 }
 

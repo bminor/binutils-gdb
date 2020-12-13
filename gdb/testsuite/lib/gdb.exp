@@ -4286,6 +4286,11 @@ proc gdb_compile_pthreads {source dest type options} {
 proc gdb_compile_shlib {sources dest options} {
     set obj_options $options
 
+    set ada 0
+    if { [lsearch -exact $options "ada"] >= 0 } {
+	set ada 1
+    }
+
     set info_options ""
     if { [lsearch -exact $options "c++"] >= 0 } {
 	set info_options "c++"
@@ -4324,19 +4329,45 @@ proc gdb_compile_shlib {sources dest options} {
     set outdir [file dirname $dest]
     set objects ""
     foreach source $sources {
-	set sourcebase [file tail $source]
 	if {[file extension $source] == ".o"} {
 	    # Already a .o file.
 	    lappend objects $source
-	} elseif {[gdb_compile $source "${outdir}/${sourcebase}.o" object \
-		       $obj_options] != ""} {
-	    return -1
-	} else {
-	    lappend objects ${outdir}/${sourcebase}.o
+	    continue
 	}
+	
+	set sourcebase [file tail $source]
+
+	if { $ada } {
+	    # Gnatmake doesn't like object name foo.adb.o, use foo.o.
+	    set sourcebase [file rootname $sourcebase]
+	}
+	set object ${outdir}/${sourcebase}.o
+
+	if { $ada } {
+	    # Use gdb_compile_ada_1 instead of gdb_compile_ada to avoid the
+	    # PASS message.
+	    if {[gdb_compile_ada_1 $source $object object \
+		     $obj_options] != ""} {
+		return -1
+	    }
+	} else {
+	    if {[gdb_compile $source $object object \
+		     $obj_options] != ""} {
+		return -1
+	    }
+	}
+
+	lappend objects $object
     }
 
     set link_options $options
+    if { $ada } {
+	# If we try to use gnatmake for the link, it will interpret the
+	# object file as an .adb file.  Remove ada from the options to
+	# avoid it.
+	set idx [lsearch $link_options "ada"]
+	set link_options [lreplace $link_options $idx $idx]
+    }
     if [test_compiler_info "xlc-*"] {
 	lappend link_options "additional_flags=-qmkshrobj"
     } else {

@@ -1,5 +1,11 @@
 2020-12-13  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (gdb_compile_shlib): Handle ada.
+	* gdb.ada/catch_ex_std.exp: Use gdb_compile_shlib to compile from
+	source to shared lib.  Add ada to options.
+
+2020-12-13  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/catch_ex_std.exp: Use gnatmake -bargs and -largs instead of
 	calling gnatbind and gnatlink.
 
