@@ -1456,6 +1456,11 @@ linux_nat_target::detach (inferior *inf, int from_tty)
      they're no longer running.  */
   iterate_over_lwps (ptid_t (pid), stop_wait_callback);
 
+  /* We can now safely remove breakpoints.  We don't this in earlier
+     in common code because this target doesn't currently support
+     writing memory while the inferior is running.  */
+  remove_breakpoints_inf (current_inferior ());
+
   iterate_over_lwps (ptid_t (pid), detach_callback);
 
   /* Only the initial process should be left right now.  */

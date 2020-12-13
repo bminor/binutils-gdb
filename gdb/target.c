@@ -1949,15 +1949,6 @@ target_detach (inferior *inf, int from_tty)
      assertion.  */
   gdb_assert (inf == current_inferior ());
 
-  if (gdbarch_has_global_breakpoints (target_gdbarch ()))
-    /* Don't remove global breakpoints here.  They're removed on
-       disconnection from the target.  */
-    ;
-  else
-    /* If we're in breakpoints-always-inserted mode, have to remove
-       breakpoints before detaching.  */
-    remove_breakpoints_inf (current_inferior ());
-
   prepare_for_detach ();
 
   /* Hold a strong reference because detaching may unpush the
