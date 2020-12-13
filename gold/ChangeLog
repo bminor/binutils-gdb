@@ -1,5 +1,11 @@
 2020-12-13  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/23539
+	* object.cc (Sized_relobj_file::layout_gnu_property_section): Ignore
+	Gnu properties during incremental links.
+
+2020-12-13  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/24123
 	* layout.cc (Layout::init_fixed_output_section): Mask out flags that
 	should be ignored when matching sections.

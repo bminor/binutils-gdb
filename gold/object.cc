@@ -1304,6 +1304,10 @@ Sized_relobj_file<size, big_endian>::layout_gnu_property_section(
     Layout* layout,
     unsigned int shndx)
 {
+  // We ignore Gnu property sections on incremental links.
+  if (parameters->incremental())
+    return;
+
   section_size_type contents_len;
   const unsigned char* pcontents = this->section_contents(shndx,
 							  &contents_len,
