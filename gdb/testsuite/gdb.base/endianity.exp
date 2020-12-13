@@ -34,12 +34,15 @@ gdb_test "print o.x = 2" "= 2"
 gdb_test "print o.f = 1.5" "= 1.5"
 gdb_test "print o.d = -23.125" "= -23.125"
 
-# scalar_storage_order requires gcc >= 6
+gdb_test "print o" "= {v = 4, w = 3, x = 2, f = 1.5, cplx = 1.25 \\+ 7.25i, d = -23.125}" \
+    "print o after assignment"
+
 if { ([test_compiler_info {gcc-[0-5]-*}] || ![test_compiler_info gcc*]) } {
-  setup_xfail "*-*-*"
+    # The rest of the testcase requires Scalar Storage Order support.
+    # This compiler does not support it, so skip the rest.
+    return -1
 }
+
 gdb_test "x/x &o.v" "0x04000000"
 gdb_test "x/xh &o.w" "0x0300"
 
-gdb_test "print o" "= {v = 4, w = 3, x = 2, f = 1.5, cplx = 1.25 \\+ 7.25i, d = -23.125}" \
-    "print o after assignment"
