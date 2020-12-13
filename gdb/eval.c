@@ -3096,7 +3096,7 @@ evaluate_subexp_for_cast (expression *exp, int *pos,
 /* Parse a type expression in the string [P..P+LENGTH).  */
 
 struct type *
-parse_and_eval_type (char *p, int length)
+parse_and_eval_type (const char *p, int length)
 {
   char *tmp = (char *) alloca (length + 4);
 

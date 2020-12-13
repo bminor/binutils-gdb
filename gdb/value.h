@@ -939,7 +939,7 @@ extern struct value *parse_and_eval (const char *exp);
 
 extern struct value *parse_to_comma_and_eval (const char **expp);
 
-extern struct type *parse_and_eval_type (char *p, int length);
+extern struct type *parse_and_eval_type (const char *p, int length);
 
 extern CORE_ADDR parse_and_eval_address (const char *exp);
 

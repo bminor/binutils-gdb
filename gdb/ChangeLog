@@ -1,3 +1,9 @@
+2020-12-13  Tom Tromey  <tom@tromey.com>
+
+	* gdbtypes.c (safe_parse_type): Make argument const.
+	* value.h (parse_and_eval_type): Make argument const.
+	* eval.c (parse_and_eval_type): Make argument const.
+
 2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention new commands.

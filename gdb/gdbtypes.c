@@ -3002,7 +3002,7 @@ check_typedef (struct type *type)
    occurs, silently return a void type.  */
 
 static struct type *
-safe_parse_type (struct gdbarch *gdbarch, char *p, int length)
+safe_parse_type (struct gdbarch *gdbarch, const char *p, int length)
 {
   struct ui_file *saved_gdb_stderr;
   struct type *type = NULL; /* Initialize to keep gcc happy.  */
