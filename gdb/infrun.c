@@ -3551,6 +3551,22 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs,
   return false;
 }
 
+/* An event reported by wait_one.  */
+
+struct wait_one_event
+{
+  /* The target the event came out of.  */
+  process_stratum_target *target;
+
+  /* The PTID the event was for.  */
+  ptid_t ptid;
+
+  /* The waitstatus.  */
+  target_waitstatus ws;
+};
+
+static bool handle_one (const wait_one_event &event);
+
 /* Prepare and stabilize the inferior for detaching it.  E.g.,
    detaching while a thread is displaced stepping is a recipe for
    crashing it, as nothing would readjust the PC out of the scratch
@@ -3561,56 +3577,60 @@ prepare_for_detach (void)
 {
   struct inferior *inf = current_inferior ();
   ptid_t pid_ptid = ptid_t (inf->pid);
-
-  /* Is any thread of this process displaced stepping?  If not,
-     there's nothing else to do.  */
-  if (displaced_step_in_progress (inf))
-    return;
-
-  infrun_debug_printf ("displaced-stepping in-process while detaching");
+  scoped_restore_current_thread restore_thread;
 
   scoped_restore restore_detaching = make_scoped_restore (&inf->detaching, true);
 
-  while (displaced_step_in_progress (inf))
+  /* Remove all threads of INF from the global step-over chain.  We
+     want to stop any ongoing step-over, not start any new one.  */
+  thread_info *next;
+  for (thread_info *tp = global_thread_step_over_chain_head;
+       tp != nullptr;
+       tp = next)
     {
-      struct execution_control_state ecss;
-      struct execution_control_state *ecs;
+      next = global_thread_step_over_chain_next (tp);
+      if (tp->inf == inf)
+	global_thread_step_over_chain_remove (tp);
+    }
 
-      ecs = &ecss;
-      memset (ecs, 0, sizeof (*ecs));
+  if (displaced_step_in_progress (inf))
+    {
+      infrun_debug_printf ("displaced-stepping in-process while detaching");
 
-      overlay_cache_invalid = 1;
-      /* Flush target cache before starting to handle each event.
-	 Target was running and cache could be stale.  This is just a
-	 heuristic.  Running threads may modify target memory, but we
-	 don't get any event.  */
-      target_dcache_invalidate ();
+      /* Stop threads currently displaced stepping, aborting it.  */
 
-      do_target_wait (pid_ptid, ecs, 0);
-
-      if (debug_infrun)
-	print_target_wait_results (pid_ptid, ecs->ptid, &ecs->ws);
-
-      /* If an error happens while handling the event, propagate GDB's
-	 knowledge of the executing state to the frontend/user running
-	 state.  */
-      scoped_finish_thread_state finish_state (inf->process_target (),
-					       minus_one_ptid);
-
-      /* Now figure out what to do with the result of the result.  */
-      handle_inferior_event (ecs);
-
-      /* No error, don't finish the state yet.  */
-      finish_state.release ();
-
-      /* Breakpoints and watchpoints are not installed on the target
-	 at this point, and signals are passed directly to the
-	 inferior, so this must mean the process is gone.  */
-      if (!ecs->wait_some_more)
+      for (thread_info *thr : inf->non_exited_threads ())
 	{
-	  restore_detaching.release ();
-	  error (_("Program exited while detaching"));
+	  if (thr->displaced_step_state.in_progress ())
+	    {
+	      if (thr->executing)
+		{
+		  if (!thr->stop_requested)
+		    {
+		      target_stop (thr->ptid);
+		      thr->stop_requested = true;
+		    }
+		}
+	      else
+		thr->resumed = false;
+	    }
 	}
+
+      while (displaced_step_in_progress (inf))
+	{
+	  wait_one_event event;
+
+	  event.target = inf->process_target ();
+	  event.ptid = do_target_wait_1 (inf, pid_ptid, &event.ws, 0);
+
+	  if (debug_infrun)
+	    print_target_wait_results (pid_ptid, event.ptid, &event.ws);
+
+	  handle_one (event);
+	}
+
+      /* It's OK to leave some of the threads of INF stopped, since
+	 they'll be detached shortly.  */
     }
 }
 
@@ -4364,20 +4384,6 @@ poll_one_curr_target (struct target_waitstatus *ws)
   return event_ptid;
 }
 
-/* An event reported by wait_one.  */
-
-struct wait_one_event
-{
-  /* The target the event came out of.  */
-  process_stratum_target *target;
-
-  /* The PTID the event was for.  */
-  ptid_t ptid;
-
-  /* The waitstatus.  */
-  target_waitstatus ws;
-};
-
 /* Wait for one event out of any target.  */
 
 static wait_one_event
@@ -4561,7 +4567,8 @@ mark_non_executing_threads (process_stratum_target *target,
 /* Handle one event after stopping threads.  If the eventing thread
    reports back any interesting event, we leave it pending.  If the
    eventing thread was in the middle of a displaced step, we
-   cancel/finish it.  */
+   cancel/finish it, and unless the thread's inferior is being
+   detached, put the thread back in the step-over chain.  */
 
 static bool
 handle_one (const wait_one_event &event)
@@ -4664,7 +4671,8 @@ handle_one (const wait_one_event &event)
 		 target_pid_to_str (t->ptid).c_str ());
 
 	      t->control.trap_expected = 0;
-	      global_thread_step_over_chain_enqueue (t);
+	      if (!t->inf->detaching)
+		global_thread_step_over_chain_enqueue (t);
 	    }
 	}
       else
@@ -4688,7 +4696,8 @@ handle_one (const wait_one_event &event)
 	    {
 	      /* Add it back to the step-over queue.  */
 	      t->control.trap_expected = 0;
-	      global_thread_step_over_chain_enqueue (t);
+	      if (!t->inf->detaching)
+		global_thread_step_over_chain_enqueue (t);
 	    }
 
 	  regcache = get_thread_regcache (t);
@@ -6119,7 +6128,6 @@ handle_signal_stop (struct execution_control_state *ecs)
   if (random_signal)
     {
       /* Signal not for debugging purposes.  */
-      struct inferior *inf = find_inferior_ptid (ecs->target, ecs->ptid);
       enum gdb_signal stop_signal = ecs->event_thread->suspend.stop_signal;
 
       infrun_debug_printf ("random signal (%s)",
@@ -6132,8 +6140,7 @@ handle_signal_stop (struct execution_control_state *ecs)
 	 to remain stopped.  */
       if (stop_soon != NO_STOP_QUIETLY
 	  || ecs->event_thread->stop_requested
-	  || (!inf->detaching
-	      && signal_stop_state (ecs->event_thread->suspend.stop_signal)))
+	  || signal_stop_state (ecs->event_thread->suspend.stop_signal))
 	{
 	  stop_waiting (ecs);
 	  return;
