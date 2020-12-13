@@ -1,5 +1,10 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* infrun.c (handle_one): New function, factored out from ...
+	(stop_all_threads): ... here.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* remote.c (remote_notif_stop_ack): Don't error out on
 	TARGET_WAITKIND_IGNORE; instead, just ignore the notification.
 	(remote_target::discard_pending_stop_replies): Don't delete
