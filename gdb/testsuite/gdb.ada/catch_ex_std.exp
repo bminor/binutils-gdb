@@ -23,8 +23,6 @@ if { [skip_ada_tests] } { return -1 }
 
 standard_ada_testfile foo
 
-set ofile ${binfile}.o
-
 set srcfile2 [file join [file dirname $srcfile] some_package.adb]
 set ofile2 [standard_output_file some_package.o]
 set sofile [standard_output_file libsome_package.so]
@@ -51,56 +49,33 @@ if {[gdb_compile_shlib $ofile2 $sofile \
     return -1
 }
 
-# Now we can compile the main program to an object file; but again, we
-# can't compile directly using gnatmake.
-if {[target_compile_ada_from_dir $outdir $srcfile $ofile object debug] != ""} {
-    return -1
+# Set linkarg such that the executable can find the shared library.
+if {[istarget "*-*-mingw*"]
+    || [istarget *-*-cygwin*]
+    || [istarget *-*-pe*]
+    || [istarget arm*-*-symbianelf*]} {
+    # Do not need anything.
+    set linkarg ""
+} elseif {[istarget *-*-freebsd*] || [istarget *-*-openbsd*]} {
+    set linkarg "-Wl,-rpath,$outdir"
+} else {
+    set linkarg "-Wl,-rpath,\\\$ORIGIN"
 }
 
-set gnatbind [find_ada_tool gnatbind]
-set gnatlink [find_ada_tool gnatlink]
+# Make sure we link against the shared GNAT run time.
+set gnatbind_options [list -bargs -shared -margs]
 
-with_cwd $outdir {
-    # Test if gnatbind is supported
-    set status [remote_exec host "$gnatbind --version"]
-    if {[lindex $status 0] == -1} {
-	unsupported "gnatbind foo"
-	return -1
-    }
-    # Bind.
-    set status [remote_exec host "$gnatbind -shared foo"]
-    if {[lindex $status 0] == 0} {
-	pass "gnatbind foo"
-    } else {
-	fail "gnatbind foo"
-	return -1
-    }
+# Link against the shared library.
+set gnatlink_options [list -largs $linkarg -Wl,-lsome_package -margs]
 
-    # Test if gnatlink is supported
-    set status [remote_exec host "$gnatlink --version"]
-    if {[lindex $status 0] == -1} {
-	unsupported "gnatlink foo"
-	return -1
-    }
-    # Finally, link.
-    if {[istarget "*-*-mingw*"]
-	|| [istarget *-*-cygwin*]
-	|| [istarget *-*-pe*]
-	|| [istarget arm*-*-symbianelf*]} {
-	# Do not need anything.
-	set linkarg ""
-    } elseif {[istarget *-*-freebsd*] || [istarget *-*-openbsd*]} {
-	set linkarg "-Wl,-rpath,$outdir"
-    } else {
-	set linkarg "-Wl,-rpath,\\\$ORIGIN"
-    }
-    set status [remote_exec host "$gnatlink foo $linkarg -Wl,-lsome_package"]
-    if {[lindex $status 0] == 0} {
-	pass "gnatlink foo"
-    } else {
-	fail "gnatlink foo"
-	return -1
-    }
+set options [list debug]
+foreach option [concat $gnatbind_options $gnatlink_options] {
+    lappend options [concat "additional_flags=" $option]
+}
+
+# Create executable.
+if {[gdb_compile_ada $srcfile $binfile executable $options] != ""} {
+    return -1
 }
 
 clean_restart ${testfile}

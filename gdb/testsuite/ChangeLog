@@ -1,3 +1,8 @@
+2020-12-13  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/catch_ex_std.exp: Use gnatmake -bargs and -largs instead of
+	calling gnatbind and gnatlink.
+
 2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/dcache-flush.c: New file.
