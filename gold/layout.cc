@@ -1099,7 +1099,8 @@ Layout::init_fixed_output_section(const char* name,
   typename elfcpp::Elf_types<size>::Elf_Addr sh_addr = shdr.get_sh_addr();
   typename elfcpp::Elf_types<size>::Elf_Off sh_offset = shdr.get_sh_offset();
   typename elfcpp::Elf_types<size>::Elf_WXword sh_size = shdr.get_sh_size();
-  typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
+  typename elfcpp::Elf_types<size>::Elf_WXword sh_flags =
+      this->get_output_section_flags(shdr.get_sh_flags());
   typename elfcpp::Elf_types<size>::Elf_WXword sh_addralign =
       shdr.get_sh_addralign();
 
