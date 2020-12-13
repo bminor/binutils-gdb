@@ -1,8 +1,8 @@
-	.section	.bss,"aw"
-	.global	discard0
-	.type	discard0, %object
-discard0:
-	.zero	2
+	.section	.text,"ax"
+	.global	discard2
+	.type	discard2, %function
+discard2:
+	.word	0
 
 	.section	.data,"aw"
 	.global	discard1
@@ -10,11 +10,11 @@ discard0:
 discard1:
 	.word	1
 
-	.text
-	.global	discard2
-	.type	discard2, %function
-discard2:
-	.word	0
+	.section	.bss,"aw"
+	.global	discard0
+	.type	discard0, %object
+discard0:
+	.zero	2
 
 	.section	.bss,"awR",%nobits
 	.global	retain0

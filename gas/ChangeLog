@@ -1,3 +1,9 @@
+2020-12-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section27.s: Reorder .text, .data and .bss
+	so that output section order does not depend on those sections
+	being already created.  Use ".section .text" rather than ".text".
+
 2020-12-13  Borislav Petkov  <bp@suse.de>
 
 	* testsuite/gas/i386/align-branch-9.s: Don't use labels that are
