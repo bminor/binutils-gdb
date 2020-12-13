@@ -1,5 +1,15 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* infrun.c (struct wait_one_event): Move higher up.
+	(prepare_for_detach): Abort in-progress displaced steps instead of
+	letting them complete.
+	(handle_one): If the inferior is detaching, don't add the thread
+	back to the global step-over chain.
+	(restart_threads): Don't restart threads if detaching.
+	(handle_signal_stop): Remove inferior::detaching reference.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* infrun.c (prepare_for_detach): Don't release scoped_restore
 	before returning.
 
