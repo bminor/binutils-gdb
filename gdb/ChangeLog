@@ -1,5 +1,9 @@
 2020-12-14  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (get_var_value): Only consider exact matches.
+
+2020-12-14  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (rewrite_array_type): New function.
         (quirk_ada_thick_pointer_struct): Use rewrite_array_type.
 

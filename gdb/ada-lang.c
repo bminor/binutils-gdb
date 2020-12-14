@@ -11351,14 +11351,16 @@ scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
   return 1;
 }
 
-/* Value of variable named NAME in the current environment.  If
-   no such variable found, then if ERR_MSG is null, returns 0, and
+/* Value of variable named NAME.  Only exact matches are considered.
+   If no such variable found, then if ERR_MSG is null, returns 0, and
    otherwise causes an error with message ERR_MSG.  */
 
 static struct value *
 get_var_value (const char *name, const char *err_msg)
 {
-  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+  std::string quoted_name = add_angle_brackets (name);
+
+  lookup_name_info lookup_name (quoted_name, symbol_name_match_type::FULL);
 
   std::vector<struct block_symbol> syms;
   int nsyms = ada_lookup_symbol_list_worker (lookup_name,
