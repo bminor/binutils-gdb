@@ -1,5 +1,10 @@
 2020-12-21  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.python/py-record-btrace.exp: Make test names unique.
+	* gdb.python/py-record-full.exp: Likewise.
+
+2020-12-21  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/data.exp: Make test names unique.
 	* gdb.btrace/delta.exp: Likewise.
 	* gdb.btrace/enable.exp: Likewise.
