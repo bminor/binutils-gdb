@@ -622,12 +622,22 @@ namespace eval Dwarf {
     proc _handle_attribute { attr_name attr_value attr_form } {
 	variable _abbrev_section
 	variable _constants
+	variable _cu_version
 
 	_handle_DW_FORM $attr_form $attr_value
 
 	_defer_output $_abbrev_section {
+	    if { $attr_form eq "SPECIAL_expr" } {
+		if { $_cu_version < 4 } {
+		    set attr_form_comment "DW_FORM_block"
+		} else {
+		    set attr_form_comment "DW_FORM_exprloc"
+		}
+	    } else {
+		set attr_form_comment $attr_form
+	    }
 	    _op .uleb128 $_constants($attr_name) $attr_name
-	    _op .uleb128 $_constants($attr_form) $attr_form
+	    _op .uleb128 $_constants($attr_form) $attr_form_comment
 	}
     }
 

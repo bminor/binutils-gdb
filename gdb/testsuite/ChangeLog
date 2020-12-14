@@ -1,5 +1,10 @@
 2020-12-14  Mark Wielaard  <mark@klomp.org>
 
+	* lib/dwarf.exp (Dwarf::_handle_attribute): Handle SPECIAL_expr
+	specially, set attr_form_comment to the actual FORM string used.
+
+2020-12-14  Mark Wielaard  <mark@klomp.org>
+
 	* lib/dwarf.exp (Dwarf::_read_constants): Don't set
 	_constants(SPECIAL_expr) here, but set it...
 	(Dwarf::cu): ...here based on _cu_version.
