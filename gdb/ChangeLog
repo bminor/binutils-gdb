@@ -1,3 +1,8 @@
+2020-12-19  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR exp/27070
+	* gdbtypes.c (check_types_equal): Don't compare types of enum fields.
+
 2020-12-19  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* configure.ac: Move the static libs vs. source-highlight

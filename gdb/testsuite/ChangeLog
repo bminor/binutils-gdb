@@ -1,3 +1,11 @@
+2020-12-19  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR exp/27070
+	* gdb.python/compare-enum-type-a.c: New test.
+	* gdb.python/compare-enum-type-b.c: New test.
+	* gdb.python/compare-enum-type.exp: New file.
+	* gdb.python/compare-enum-type.h: New test.
+
 2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
 
 	* gdb.python/py-format-string.exp: Add tests for address keyword.
