@@ -965,6 +965,8 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
       break;
 
     case BINOP_DIV:
+      if (mpq_sgn (v2.val) == 0)
+	error (_("Division by zero"));
       mpq_div (res.val, v1.val, v2.val);
       val = fixed_point_to_value (res);
       break;
