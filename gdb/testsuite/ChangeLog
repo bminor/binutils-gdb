@@ -1,5 +1,11 @@
 2020-12-14  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/26962
+	* gdb.base/solib-corrupted.exp: Handle "'_r_debug' has unknown type;
+	cast it to its declared type".
+
+2020-12-14  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26951
 	* gdb.base/batch-preserve-term-settings.exp: Use "gdb-subshell$ " as
 	shell prompt.
