@@ -160,7 +160,7 @@ software in general.  We will miss him.
 * GDB/MI::                      @value{GDBN}'s Machine Interface.
 * Annotations::                 @value{GDBN}'s annotation interface.
 * JIT Interface::               Using the JIT debugging interface.
-* In-Process Agent::            In-Process Agent
+* In-process Agent::            In-process Agent
 
 * GDB Bugs::                    Reporting bugs in @value{GDBN}
 
@@ -1315,7 +1315,7 @@ important when reporting @value{GDBN} bugs (@pxref{GDB Bugs}).
 @end table
 
 @node Startup
-@subsection What @value{GDBN} Does During Startup
+@subsection What @value{GDBN} Does during Startup
 @cindex @value{GDBN} startup
 
 Here's the description of what @value{GDBN} does during session startup:
@@ -1939,7 +1939,7 @@ struct ui_file
 @end smallexample
 
 @node Command Options
-@section Command options
+@section Command Options
 
 @cindex command options
 Some commands accept options starting with a leading dash.  For
@@ -2004,7 +2004,7 @@ uppercase.
 Data}.)
 
 @node Command aliases default args
-@section Automatically prepend default arguments to user-defined aliases
+@section Automatically Prepend Default Arguments to User-Defined Aliases
 
 You can tell @value{GDBN} to always prepend some default arguments to
 the list of arguments provided explicitly by the user when using a
@@ -2328,7 +2328,7 @@ your report.
 @end table
 
 @node Running
-@chapter Running Programs Under @value{GDBN}
+@chapter Running Programs under @value{GDBN}
 
 When you run a program under @value{GDBN}, you must first generate
 debugging information when you compile it.
@@ -2401,7 +2401,7 @@ format in @value{GDBN}.
 
 @need 2000
 @node Starting
-@section Starting your Program
+@section Starting Your Program
 @cindex starting
 @cindex running
 
@@ -2975,7 +2975,7 @@ Show the current tty for the program being debugged.
 @end table
 
 @node Attach
-@section Debugging an Already-running Process
+@section Debugging an Already-Running Process
 @kindex attach
 @cindex attach
 
@@ -4210,7 +4210,7 @@ are operated on.
 * Disabling::                   Disabling breakpoints
 * Conditions::                  Break conditions
 * Break Commands::              Breakpoint command lists
-* Dynamic Printf::              Dynamic printf
+* Dynamic printf::              Dynamic printf
 * Save Breakpoints::            How to save breakpoints in a file
 * Static Probe Points::         Listing static probe points
 * Error in Breakpoints::        ``Cannot insert breakpoints''
@@ -5595,8 +5595,8 @@ cont
 end
 @end smallexample
 
-@node Dynamic Printf
-@subsection Dynamic Printf
+@node Dynamic printf
+@subsection Dynamic printf
 
 @cindex dynamic printf
 @cindex dprintf
@@ -5706,7 +5706,7 @@ all enabled dynamic prints must be at locations within the scope of
 those locals.  If evaluation fails, @value{GDBN} will report an error.
 
 @node Save Breakpoints
-@subsection How to save breakpoints to a file
+@subsection How to Save Breakpoints to a File
 
 To save breakpoint definitions to a file use the @w{@code{save
 breakpoints}} command.
@@ -6215,7 +6215,7 @@ default is @code{on}.
 @end table
 
 @node Skipping Over Functions and Files
-@section Skipping Over Functions and Files
+@section Skipping over Functions and Files
 @cindex skipping over functions and files
 
 The program you are debugging may contain some functions which are
@@ -6649,7 +6649,7 @@ Bounds: [lower = 0x7fffffffc390, upper = 0x7fffffffc3a3]
 @end smallexample
 
 @node Thread Stops
-@section Stopping and Starting Multi-thread Programs
+@section Stopping and Starting Multi-Thread Programs
 
 @cindex stopped threads
 @cindex threads, stopped
@@ -7136,7 +7136,7 @@ Show the current permission to interrupt or stop the program.
 @end table
 
 @node Reverse Execution
-@chapter Running programs backward
+@chapter Running Programs Backward
 @cindex reverse execution
 @cindex running programs backward
 
@@ -8330,7 +8330,7 @@ distracting.
 @end table
 
 @node Frame Info
-@section Information About a Frame
+@section Information about a Frame
 
 There are several other commands to print information about the selected
 stack frame.
@@ -8454,7 +8454,7 @@ tfaas i lo -q -t lock_something_t
 @end table
 
 @node Frame Apply
-@section Applying a Command to Several Frames.
+@section Applying a Command to Several Frames
 @kindex frame apply
 @cindex apply command to several frames
 @table @code
@@ -8594,7 +8594,7 @@ on all frames of all threads.  See @xref{Threads,,Threads}.
 
 
 @node Frame Filter Management
-@section Management of Frame Filters.
+@section Management of Frame Filters
 @cindex managing frame filters
 
 Frame filters are Python based utilities to manage and decorate the
@@ -9094,7 +9094,7 @@ Edit the file containing @var{function} at the beginning of its definition.
 
 @end table
 
-@subsection Choosing your Editor
+@subsection Choosing Your Editor
 You can customize @value{GDBN} to use any editor you want
 @footnote{
 The only restriction is that your editor (say @code{ex}), recognizes the
@@ -12923,7 +12923,7 @@ Show the current handling of accesses to unknown memory.
 @c @end table
 
 @node Dump/Restore Files
-@section Copy Between Memory and a File
+@section Copy between Memory and a File
 @cindex dump/restore files
 @cindex append data to a file
 @cindex dump data to a file
@@ -15747,7 +15747,7 @@ language}.
 @end menu
 
 @node Setting
-@section Switching Between Source Languages
+@section Switching between Source Languages
 
 There are two ways to control the working language---either have @value{GDBN}
 set it automatically, or select it manually yourself.  You can use the
@@ -16624,7 +16624,7 @@ name, like:
 @end table
 
 @node Decimal Floating Point
-@subsubsection Decimal Floating Point format
+@subsubsection Decimal Floating Point Format
 @cindex decimal floating point format
 
 @value{GDBN} can examine, set and perform computations with numbers in
@@ -16787,7 +16787,7 @@ clear -[NSWindow makeKeyAndOrderFront:]
 @end smallexample
 
 @node The Print Command with Objective-C
-@subsubsection The Print Command With Objective-C
+@subsubsection The Print Command with Objective-C
 @cindex Objective-C, print objects
 @kindex print-object
 @kindex po @r{(@code{print-object})}
@@ -17966,7 +17966,7 @@ object.
 @end itemize
 
 @node Overloading support for Ada
-@subsubsection Overloading support for Ada
+@subsubsection Overloading Support for Ada
 @cindex overloading, Ada
 
 The debugger supports limited overloading.  Given a subprogram call in which
@@ -18274,7 +18274,7 @@ Breakpoint 5, test_task_debug () at test_task_debug.adb:15
 @end table
 
 @node Ada Tasks and Core Files
-@subsubsection Tasking Support when Debugging Core Files
+@subsubsection Tasking Support When Debugging Core Files
 @cindex Ada tasking and core file debugging
 
 When inspecting a core file, as opposed to debugging a live program,
@@ -18291,7 +18291,7 @@ Under these circumstances, you should make a backup copy of the core
 file before inspecting it with @value{GDBN}.
 
 @node Ravenscar Profile
-@subsubsection Tasking Support when using the Ravenscar Profile
+@subsubsection Tasking Support When Using the Ravenscar Profile
 @cindex Ravenscar Profile
 
 The @dfn{Ravenscar Profile} is a subset of the Ada tasking features,
@@ -19548,7 +19548,7 @@ detail.
 
 @c @group
 @node Signaling
-@section Giving your Program a Signal
+@section Giving Your Program a Signal
 @cindex deliver a signal to a program
 
 @table @code
@@ -19784,7 +19784,7 @@ Show permission to call functions in the program.
 
 @end table
 
-@subsection Calling functions with no debug info
+@subsection Calling Functions with No Debug Info
 
 @cindex no debug info functions
 Sometimes, a function you wish to call is missing debug information.
@@ -19888,7 +19888,7 @@ as well as reading.
 @end table
 
 @node Compiling and Injecting Code
-@section Compiling and injecting code in @value{GDBN}
+@section Compiling and Injecting Code in @value{GDBN}
 @cindex injecting code
 @cindex writing into executables
 @cindex compiling code
@@ -20006,7 +20006,7 @@ Displays the current state of displaying debugging information for
 C@t{++} type conversion.
 @end table
 
-@subsection Compilation options for the @code{compile} command
+@subsection Compilation Options for the @code{compile} Command
 
 @value{GDBN} needs to specify the right compilation options for the code
 to be injected, in part to make its ABI compatible with the inferior
@@ -20051,7 +20051,7 @@ This does not show all the options actually used during compilation,
 use @ref{set debug compile} for that.
 @end table
 
-@subsection Caveats when using the @code{compile} command
+@subsection Caveats When Using the @code{compile} Command
 
 There are a few caveats to keep in mind when using the @code{compile}
 command.  As the caveats are different per language, the table below
@@ -20208,7 +20208,7 @@ Access to those variables will generate a compiler error which @value{GDBN}
 will print to the console.
 @end table
 
-@subsection Compiler search for the @code{compile} command
+@subsection Compiler Search for the @code{compile} Command
 
 @value{GDBN} needs to find @value{NGCC} for the inferior being debugged
 which may not be obvious for remote targets of different architecture
@@ -21270,7 +21270,7 @@ gnu_debuglink_crc32 (unsigned long crc,
 This computation does not apply to the ``build ID'' method.
 
 @node MiniDebugInfo
-@section Debugging information in a special section
+@section Debugging Information in a Special Section
 @cindex separate debug sections
 @cindex @samp{.gnu_debugdata} section
 
@@ -21413,7 +21413,7 @@ $ gdb -iex "set use-deprecated-index-sections on" <program>
 
 Indices only work when using DWARF debugging information, not stabs.
 
-@subsection Automatic symbol index cache
+@subsection Automatic Symbol Index Cache
 
 @cindex automatic symbol index cache
 It is possible for @value{GDBN} to automatically save a copy of this index in a
@@ -22235,7 +22235,7 @@ and implement.
 @end table
 
 @node File Transfer
-@section Sending files to a remote system
+@section Sending Files to a Remote System
 @cindex remote target, file transfer
 @cindex file transfer
 @cindex sending files to remote systems
@@ -22401,7 +22401,7 @@ In case more than one copy of @var{program} is running, or @var{program}
 has multiple threads, most versions of @code{pidof} support the
 @code{-s} option to only return the first process ID.
 
-@subsubsection TCP port allocation lifecycle of @code{gdbserver}
+@subsubsection TCP Port Allocation Lifecycle of @code{gdbserver}
 
 This section applies only when @code{gdbserver} is run to listen on a TCP
 port.
@@ -22590,7 +22590,7 @@ of a multi-process mode debug session.
 
 @end table
 
-@subsection Tracepoints support in @code{gdbserver}
+@subsection Tracepoints Support in @code{gdbserver}
 @cindex tracepoints support in @code{gdbserver}
 
 On some targets, @code{gdbserver} supports tracepoints, fast
@@ -23373,7 +23373,7 @@ subroutines which @code{@value{NGCC}} generates as inline code.
 
 
 @node Debug Session
-@subsection Putting it All Together
+@subsection Putting It All Together
 
 @cindex remote serial debugging summary
 In summary, when your program is ready to debug, you must follow these
@@ -24870,8 +24870,8 @@ Show whether AArch64 debugging messages are displayed.
 
 @end table
 
-@subsubsection AArch64 SVE.
-@cindex AArch64 SVE.
+@subsubsection AArch64 SVE
+@cindex AArch64 SVE
 
 When @value{GDBN} is debugging the AArch64 architecture, if the Scalable Vector
 Extension (SVE) is present, then @value{GDBN} will provide the vector registers
@@ -24885,7 +24885,7 @@ but the lengths of the @code{z} and @code{p} registers will not change.  This
 is a known limitation of @value{GDBN} and does not affect the execution of the
 target process.
 
-@subsubsection AArch64 Pointer Authentication.
+@subsubsection AArch64 Pointer Authentication
 @cindex AArch64 Pointer Authentication.
 
 When @value{GDBN} is debugging the AArch64 architecture, and the program is
@@ -24896,7 +24896,7 @@ postfixed with the marker [PAC].  When using the MI, this is printed as part
 of the @code{addr_flags} field.
 
 @node i386
-@subsection x86 Architecture-specific Issues
+@subsection x86 Architecture-Specific Issues
 
 @table @code
 @item set struct-convention @var{mode}
@@ -25901,7 +25901,7 @@ Set the current C@t{++} ABI to @var{abi}, or return to automatic detection.
 @end table
 
 @node Auto-loading
-@section Automatically loading associated files
+@section Automatically Loading Associated Files
 @cindex auto-loading
 
 @value{GDBN} sometimes reads files with commands and settings automatically,
@@ -26041,7 +26041,7 @@ These are @value{GDBN} control commands for the auto-loading:
 @end multitable
 
 @node Init File in the Current Directory
-@subsection Automatically loading init file in the current directory
+@subsection Automatically Loading Init File in the Current Directory
 @cindex auto-loading init file in the current directory
 
 By default, @value{GDBN} reads and executes the canned sequences of commands
@@ -26072,7 +26072,7 @@ current directory have been auto-loaded.
 @end table
 
 @node libthread_db.so.1 file
-@subsection Automatically loading thread debugging library
+@subsection Automatically Loading Thread Debugging Library
 @cindex auto-loading libthread_db.so.1
 
 This feature is currently present only on @sc{gnu}/Linux native hosts.
@@ -26110,7 +26110,7 @@ for each such library print list of inferior @var{pid}s using it.
 @end table
 
 @node Auto-loading safe path
-@subsection Security restriction for auto-loading
+@subsection Security Restriction for Auto-Loading
 @cindex auto-loading safe-path
 
 As the files of inferior can come from untrusted source (such as submitted by
@@ -26233,7 +26233,7 @@ own before starting the comparison so a canonical form of directories is
 recommended to be entered.
 
 @node Auto-loading verbose mode
-@subsection Displaying files tried for auto-load
+@subsection Displaying Files Tried for Auto-Load
 @cindex auto-loading verbose mode
 
 For better visibility of all the file locations where you can place scripts to
@@ -26753,7 +26753,7 @@ files.
 @end menu
 
 @node Define
-@subsection User-defined Commands
+@subsection User-Defined Commands
 
 @cindex user-defined command
 @cindex arguments, to user-defined commands
@@ -26928,7 +26928,7 @@ commands that normally print messages to say what they are doing omit the
 messages when used in a user-defined command.
 
 @node Hooks
-@subsection User-defined Command Hooks
+@subsection User-Defined Command Hooks
 @cindex command hooks
 @cindex hooks, for commands
 @cindex hooks, pre-command
@@ -27293,7 +27293,7 @@ the string @var{template} to a command line, and call it.
 @end table
 
 @node Auto-loading sequences
-@subsection Controlling auto-loading native @value{GDBN} scripts
+@subsection Controlling Auto-Loading Native @value{GDBN} Scripts
 @cindex native script auto-loading
 
 When a new object file is read (for example, due to the @code{file}
@@ -27334,7 +27334,7 @@ matching names are printed.
 @include guile.texi
 
 @node Auto-loading extensions
-@section Auto-loading extensions
+@section Auto-Loading Extensions
 @cindex auto-loading extensions
 
 @value{GDBN} provides two mechanisms for automatically loading extensions
@@ -27363,7 +27363,7 @@ Note that loading of this script file also requires accordingly configured
 @code{auto-load safe-path} (@pxref{Auto-loading safe path}).
 
 @node objfile-gdbdotext file
-@subsection The @file{@var{objfile}-gdb.@var{ext}} file
+@subsection The @file{@var{objfile}-gdb.@var{ext}} File
 @cindex @file{@var{objfile}-gdb.gdb}
 @cindex @file{@var{objfile}-gdb.py}
 @cindex @file{@var{objfile}-gdb.scm}
@@ -27452,7 +27452,7 @@ So your @file{-gdb.@var{ext}} file should be careful to avoid errors if it
 is evaluated more than once.
 
 @node dotdebug_gdb_scripts section
-@subsection The @code{.debug_gdb_scripts} section
+@subsection The @code{.debug_gdb_scripts} Section
 @cindex @code{.debug_gdb_scripts} section
 
 For systems using file formats like ELF and COFF,
@@ -27552,7 +27552,7 @@ The path to specify in @code{auto-load safe-path} is the path of the file
 containing the @code{.debug_gdb_scripts} section.
 
 @node Which flavor to choose?
-@subsection Which flavor to choose?
+@subsection Which Flavor to Choose?
 
 Given the multiple ways of auto-loading extensions, it might not always
 be clear which one to choose.  This section provides some guidance.
@@ -27613,7 +27613,7 @@ The Guile and Python extension languages do not share any state,
 and generally do not interfere with each other.
 There are some things to be aware of, however.
 
-@subsection Python comes first
+@subsection Python Comes First
 
 Python was @value{GDBN}'s first extension language, and to avoid breaking
 existing behaviour Python comes first.  This is generally solved by the
@@ -27627,7 +27627,7 @@ while, for example, trying to pretty-print an object then the error is
 reported and any following extension languages are not tried.
 
 @node Aliases
-@section Creating new spellings of existing commands
+@section Creating New Spellings of Existing Commands
 @cindex aliases for commands
 
 It is often useful to define alternate spellings of existing commands.
@@ -28146,7 +28146,7 @@ SingleKey keymap will be named @samp{SingleKey}.  This can be used in
 @file{.inputrc} to add additional bindings to this keymap.
 
 @node TUI Commands
-@section TUI-specific Commands
+@section TUI-Specific Commands
 @cindex TUI commands
 
 The TUI has specific commands to control the text windows.
@@ -28678,7 +28678,7 @@ the user interface.
 @end menu
 
 @node Context management
-@subsection Context management
+@subsection Context Management
 
 @subsubsection Threads and Frames
 
@@ -28752,7 +28752,7 @@ The valid language names are the same names accepted by the
 @samp{local} or @samp{unknown}.
 
 @node Asynchronous and non-stop modes
-@subsection Asynchronous command execution and non-stop mode
+@subsection Asynchronous Command Execution and Non-Stop Mode
 
 On some targets, @value{GDBN} is capable of processing MI commands
 even while the target is running.  This is called @dfn{asynchronous
@@ -28813,7 +28813,7 @@ highly target dependent.  However, the two commands
 to find the state of a thread, will always work.
 
 @node Thread groups
-@subsection Thread groups
+@subsection Thread Groups
 @value{GDBN} may be used to debug several processes at the same time.
 On some platforms, @value{GDBN} may support debugging of several
 hardware systems, each one having several cores with several different
@@ -30960,7 +30960,7 @@ and @samp{tcatch catch} (@pxref{Set Catchpoints}).
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Program Context
-@section @sc{gdb/mi}  Program Context
+@section @sc{gdb/mi} Program Context
 
 @subheading The @code{-exec-arguments} Command
 @findex -exec-arguments
@@ -32474,7 +32474,7 @@ access this functionality:
 In the next subsection we describe each operation in detail and suggest
 how it can be used.
 
-@subheading Description And Use of Operations on Variable Objects
+@subheading Description and Use of Operations on Variable Objects
 
 @subheading The @code{-enable-pretty-printing} Command
 @findex -enable-pretty-printing
@@ -33126,7 +33126,7 @@ children will be reported.  Otherwise, children starting at @var{from}
 ^done
 @end smallexample
 
-@subheading The @code{-var-set-visualizer} command
+@subheading The @code{-var-set-visualizer} Command
 @findex -var-set-visualizer
 @anchor{-var-set-visualizer}
 
@@ -36459,7 +36459,7 @@ This is Edition @value{EDITION}, @value{DATE}.
 @end menu
 
 @node Annotations Overview
-@section What is an Annotation?
+@section What Is an Annotation?
 @cindex annotations
 
 Annotations start with a newline character, two @samp{control-z}
@@ -37011,8 +37011,8 @@ frame and to write out the values of the registers in the previous
 frame.  Both have a callback (@code{target_read}) to read bytes off the
 target's address space.
 
-@node In-Process Agent
-@chapter In-Process Agent
+@node In-process Agent
+@chapter In-process Agent
 @cindex debugging agent
 The traditional debugging model is conceptually low-speed, but works fine,
 because most bugs can be reproduced in debugging-mode execution.  However,
@@ -37031,7 +37031,7 @@ behavior without interrupting it.
 Therefore, traditional debugging model is too intrusive to reproduce
 some bugs.  In order to reduce the interference with the program, we can
 reduce the number of operations performed by debugger.  The
-@dfn{In-Process Agent}, a shared library, is running within the same
+@dfn{In-process Agent}, a shared library, is running within the same
 process with inferior, and is able to perform some debugging operations
 itself.  As a result, debugger is only involved when necessary, and
 performance of debugging can be improved accordingly.  Note that
@@ -37069,15 +37069,15 @@ the in-process agent.
 @end table
 
 @menu
-* In-Process Agent Protocol::
+* In-process Agent Protocol::
 @end menu
 
-@node In-Process Agent Protocol
-@section In-Process Agent Protocol
+@node In-process Agent Protocol
+@section In-process Agent Protocol
 @cindex in-process agent protocol
 
 The in-process agent is able to communicate with both @value{GDBN} and
-GDBserver (@pxref{In-Process Agent}).  This section documents the protocol
+GDBserver (@pxref{In-process Agent}).  This section documents the protocol
 used for communications between @value{GDBN} or GDBserver and the IPA.
 In general, @value{GDBN} or GDBserver sends commands
 (@pxref{IPA Protocol Commands}) and data to in-process agent, and then
@@ -38164,7 +38164,7 @@ was first introduced in GCC 4.9.
 @end table
 
 @node System-wide configuration
-@section System-wide configuration and settings
+@section System-Wide Configuration and Settings
 @cindex system-wide init file
 
 @value{GDBN} can be configured to have a system-wide init file and a
@@ -38227,7 +38227,7 @@ extension.
 @end menu
 
 @node System-wide Configuration Scripts
-@subsection Installed System-wide Configuration Scripts
+@subsection Installed System-Wide Configuration Scripts
 @cindex system-wide configuration scripts
 
 The @file{system-gdbinit} directory, located inside the data-directory
@@ -38292,7 +38292,7 @@ If not, generate remote agent bytecode for current frame PC address.
 Translate the given format string and list of argument expressions
 into remote agent bytecodes and display them as a disassembled list.
 This command is useful for debugging the agent version of dynamic
-printf (@pxref{Dynamic Printf}).
+printf (@pxref{Dynamic printf}).
 
 @kindex maint info breakpoints
 @item @anchor{maint info breakpoints}maint info breakpoints
@@ -42072,7 +42072,7 @@ details of XML target descriptions for each architecture.
 @end menu
 
 @node ARM-Specific Protocol Details
-@subsection @acronym{ARM}-specific Protocol Details
+@subsection @acronym{ARM}-Specific Protocol Details
 
 @menu
 * ARM Breakpoint Kinds::
@@ -42098,7 +42098,7 @@ These breakpoint kinds are defined for the @samp{Z0} and @samp{Z1} packets.
 @end table
 
 @node MIPS-Specific Protocol Details
-@subsection @acronym{MIPS}-specific Protocol Details
+@subsection @acronym{MIPS}-Specific Protocol Details
 
 @menu
 * MIPS Register packet Format::
@@ -42637,7 +42637,7 @@ types include @code{user}, @code{notes}, and @code{tstop}, the
 
 @end table
 
-@subsection Relocate instruction reply packet
+@subsection Relocate Instruction Reply Packet
 When installing fast tracepoints in memory, the target may need to
 relocate the instruction currently at the tracepoint address to a
 different address in memory.  For most instructions, a simple copy is
@@ -42716,7 +42716,7 @@ The valid responses to Host I/O packets are:
 @var{result} is the integer value returned by this operation, usually
 non-negative for success and -1 for errors.  If an error has occured,
 @var{errno} will be included in the result specifying a
-value defined by the File-I/O protocol (@pxref{Errno Values}).  For
+value defined by the File-I/O protocol (@pxref{errno Values}).  For
 operations which return data, @var{attachment} supplies the data as a
 binary buffer.  Binary buffers in response packets are escaped in the
 normal way (@pxref{Binary Data}).  See the individual packet
@@ -43954,7 +43954,7 @@ protocol.
 @end table
 
 @node Protocol-specific Representation of Datatypes
-@subsection Protocol-specific Representation of Datatypes
+@subsection Protocol-Specific Representation of Datatypes
 @cindex protocol-specific representation of datatypes, in file-i/o protocol
 
 @menu
@@ -44117,7 +44117,7 @@ values before and after the call as needed.
 @menu
 * Open Flags::
 * mode_t Values::
-* Errno Values::
+* errno Values::
 * Lseek Flags::
 * Limits::
 @end menu
@@ -44158,8 +44158,8 @@ All values are given in octal representation.
   S_IXOTH            01
 @end smallexample
 
-@node Errno Values
-@unnumberedsubsubsec Errno Values
+@node errno Values
+@unnumberedsubsubsec errno Values
 @cindex errno values, in file-i/o protocol
 
 All values are given in decimal representation.
@@ -45543,7 +45543,7 @@ targets.  It should contain the 32 core registers (@samp{zero},
 @samp{mpuacc}).
 
 @node OpenRISC 1000 Features
-@subsection Openrisc 1000 Features
+@subsection OpenRISC 1000 Features
 @cindex target descriptions, OpenRISC 1000 features
 
 The @samp{org.gnu.gdb.or1k.group0} feature is required for OpenRISC 1000
