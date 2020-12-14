@@ -29,8 +29,7 @@ set sofile [standard_output_file libsome_package.so]
 set outdir [file dirname $binfile]
 
 # Create the shared library.
-if {[gdb_compile_shlib $srcfile2 $sofile \
-	 {ada debug additional_flags=-fPIC}] != ""} {
+if {[gdb_compile_shlib $srcfile2 $sofile {ada debug}] != ""} {
     return -1
 }
 

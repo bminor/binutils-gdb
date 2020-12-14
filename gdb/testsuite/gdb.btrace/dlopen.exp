@@ -31,8 +31,7 @@ set basename_lib dlopen-dso
 set srcfile_lib $srcdir/$subdir/$basename_lib.c
 set binfile_lib [standard_output_file $basename_lib.so]
 
-if { [gdb_compile_shlib $srcfile_lib $binfile_lib \
-	  [list additional_flags=-fPIC]] != "" } {
+if { [gdb_compile_shlib $srcfile_lib $binfile_lib {}] != "" } {
     untested "failed to prepare shlib"
     return -1
 }

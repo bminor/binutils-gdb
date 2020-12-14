@@ -4304,17 +4304,21 @@ proc gdb_compile_shlib {sources dest options} {
             lappend obj_options "additional_flags=-qpic"
         }
 	"clang-*" {
-	    if { !([istarget "*-*-cygwin*"]
-		   || [istarget "*-*-mingw*"]) } {
+	    if { [istarget "*-*-cygwin*"]
+		 || [istarget "*-*-mingw*"] } {
+		lappend obj_options "additional_flags=-fPIC"
+	    } else {
 		lappend obj_options "additional_flags=-fpic"
 	    }
 	}
         "gcc-*" {
-            if { !([istarget "powerpc*-*-aix*"]
+            if { [istarget "powerpc*-*-aix*"]
                    || [istarget "rs6000*-*-aix*"]
                    || [istarget "*-*-cygwin*"]
                    || [istarget "*-*-mingw*"]
-                   || [istarget "*-*-pe*"]) } {
+                   || [istarget "*-*-pe*"] } {
+                lappend obj_options "additional_flags=-fPIC"
+	    } else {
                 lappend obj_options "additional_flags=-fpic"
             }
         }
@@ -4323,6 +4327,7 @@ proc gdb_compile_shlib {sources dest options} {
         }
         default {
 	    # don't know what the compiler is...
+	    lappend obj_options "additional_flags=-fPIC"
         }
     }
 

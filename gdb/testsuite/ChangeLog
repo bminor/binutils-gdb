@@ -1,5 +1,20 @@
 2020-12-14  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (gdb_compile_shlib): Make sure it's not necessary to
+	pass -fPIC.
+	* gdb.ada/catch_ex_std.exp: Don't pass -fPIC to gdb_compile_shlib.
+	* gdb.base/break-probes.exp: Same.
+	* gdb.base/ctxobj.exp: Same.
+	* gdb.base/dso2dso.exp: Same.
+	* gdb.base/global-var-nested-by-dso.exp: Same.
+	* gdb.base/info-shared.exp: Same.
+	* gdb.base/jit-reader-simple.exp: Same.
+	* gdb.base/print-file-var.exp: Same.
+	* gdb.base/skip-solib.exp: Same.
+	* gdb.btrace/dlopen.exp: Same.
+
+2020-12-14  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26963
 	* lib/gdb.exp (run_on_host): Declare test unsupported if spawn fails.
 

@@ -30,8 +30,7 @@ if { [istarget "*bsd*"] } {
 }
 set probes_bp "dl_main"
 
-if { [gdb_compile_shlib $srcfile_lib $binfile_lib \
-	  [list additional_flags=-fPIC]] != "" } {
+if { [gdb_compile_shlib $srcfile_lib $binfile_lib {}] != "" } {
     untested "failed to compile shared library"
     return -1
 }

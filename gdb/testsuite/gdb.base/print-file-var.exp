@@ -42,7 +42,7 @@ proc test {hidden dlopen version_id_main lang} {
     set libobj1 [standard_output_file ${lib1}$suffix.so]
     set libobj2 [standard_output_file ${lib2}$suffix.so]
 
-    set lib_opts { debug additional_flags=-fPIC $lang }
+    set lib_opts { debug $lang }
     lappend lib_opts "additional_flags=-DHIDDEN=$hidden"
 
     if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib1}.c \
