@@ -1942,6 +1942,7 @@ struct elf_obj_tdata
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
   unsigned int num_elf_sections;	/* elf_sect_ptr size */
+  unsigned char *being_created;
 
   /* A mapping from external symbols to entries in the linker hash
      table, used when linking.  This is indexed by the symbol index

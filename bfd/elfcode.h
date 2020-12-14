@@ -704,6 +704,9 @@ elf_object_p (bfd *abfd)
       elf_elfsections (abfd) = (Elf_Internal_Shdr **) bfd_alloc (abfd, amt);
       if (!elf_elfsections (abfd))
 	goto got_no_match;
+      elf_tdata (abfd)->being_created = bfd_zalloc (abfd, num_sec);
+      if (!elf_tdata (abfd)->being_created)
+	goto got_no_match;
 
       memcpy (i_shdrp, &i_shdr, sizeof (*i_shdrp));
       for (shdrp = i_shdrp, shindex = 0; shindex < num_sec; shindex++)

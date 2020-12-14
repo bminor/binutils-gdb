@@ -1,3 +1,10 @@
+2020-12-14  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_obj_tdata): Add being_created.
+	* elf.c (bfd_section_from_shdr): Delete static vars for loop
+	detection.  Use new tdata variable instead.
+	* elfcode.h (elf_object_p): Allocate being_created.
+
 2020-12-10  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfxx-riscv.c (riscv_ext_dont_care_version): New function.  Return

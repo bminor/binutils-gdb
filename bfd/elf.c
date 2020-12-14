@@ -2045,49 +2045,20 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
   const struct elf_backend_data *bed;
   const char *name;
   bfd_boolean ret = TRUE;
-  static bfd_boolean * sections_being_created = NULL;
-  static bfd * sections_being_created_abfd = NULL;
-  static unsigned int nesting = 0;
 
   if (shindex >= elf_numsections (abfd))
     return FALSE;
 
-  if (++ nesting > 3)
+  /* PR17512: A corrupt ELF binary might contain a loop of sections via
+     sh_link or sh_info.  Detect this here, by refusing to load a
+     section that we are already in the process of loading.  */
+  if (elf_tdata (abfd)->being_created[shindex])
     {
-      /* PR17512: A corrupt ELF binary might contain a recursive group of
-	 sections, with each the string indices pointing to the next in the
-	 loop.  Detect this here, by refusing to load a section that we are
-	 already in the process of loading.  We only trigger this test if
-	 we have nested at least three sections deep as normal ELF binaries
-	 can expect to recurse at least once.
-
-	 FIXME: It would be better if this array was attached to the bfd,
-	 rather than being held in a static pointer.  */
-
-      if (sections_being_created_abfd != abfd)
-	{
-	  free (sections_being_created);
-	  sections_being_created = NULL;
-	}
-      if (sections_being_created == NULL)
-	{
-	  size_t amt = elf_numsections (abfd) * sizeof (bfd_boolean);
-
-	  /* PR 26005: Do not use bfd_zalloc here as the memory might
-	     be released before the bfd has been fully scanned.  */
-	  sections_being_created = (bfd_boolean *) bfd_zmalloc (amt);
-	  if (sections_being_created == NULL)
-	    return FALSE;
-	  sections_being_created_abfd = abfd;
-	}
-      if (sections_being_created [shindex])
-	{
-	  _bfd_error_handler
-	    (_("%pB: warning: loop in section dependencies detected"), abfd);
-	  return FALSE;
-	}
-      sections_being_created [shindex] = TRUE;
+      _bfd_error_handler
+	(_("%pB: warning: loop in section dependencies detected"), abfd);
+      return FALSE;
     }
+  elf_tdata (abfd)->being_created[shindex] = TRUE;
 
   hdr = elf_elfsections (abfd)[shindex];
   ehdr = elf_elfheader (abfd);
@@ -2611,14 +2582,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
  fail:
   ret = FALSE;
  success:
-  if (sections_being_created && sections_being_created_abfd == abfd)
-    sections_being_created [shindex] = FALSE;
-  if (-- nesting == 0)
-    {
-      free (sections_being_created);
-      sections_being_created = NULL;
-      sections_being_created_abfd = NULL;
-    }
+  elf_tdata (abfd)->being_created[shindex] = FALSE;
   return ret;
 }
 
