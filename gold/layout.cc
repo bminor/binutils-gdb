@@ -5371,6 +5371,12 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags |= elfcpp::DF_1_PIE;
   if (flags != 0)
     odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
+
+  flags = 0;
+  if (parameters->options().unique())
+    flags |= elfcpp::DF_GNU_1_UNIQUE;
+  if (flags != 0)
+    odyn->add_constant(elfcpp::DT_GNU_FLAGS_1, flags);
 }
 
 // Set the size of the _DYNAMIC symbol table to be the size of the

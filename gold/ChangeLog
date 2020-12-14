@@ -1,3 +1,9 @@
+2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
+
+	Implement -z unique / -z nounique options.
+	* layout.cc (Layout::finish_dynamic_section): Set DF_GNU_1_UNIQUE.
+	* options.h (class General_options): Handle -z unique, -z nounique.
+
 2020-12-13  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/23539

@@ -1469,6 +1469,9 @@ class General_options
   DEFINE_bool(interpose, options::DASH_Z, '\0', false,
 	      N_("Mark object to interpose all DSOs but executable"),
 	      NULL);
+  DEFINE_bool(unique, options::DASH_Z, '\0', false,
+	      N_("Mark DSO to be loaded at most once, and only in the main namespace"),
+	      N_("Do not mark the DSO as one to be loaded only in the main namespace"));
   DEFINE_bool_alias(lazy, now, options::DASH_Z, '\0',
 		    N_("Mark object for lazy runtime binding"),
 		    NULL, true);
