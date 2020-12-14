@@ -1,3 +1,8 @@
+2020-12-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27064
+	* deffilep.y (SHARED_K): Rename from SHARED.  Update uses.
+
 2020-12-05  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* testsuite/ld-vax-elf/got-local-exe-off-hidden.dd: New test
