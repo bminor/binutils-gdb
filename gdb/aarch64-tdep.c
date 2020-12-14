@@ -4470,8 +4470,15 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
   if (record_debug)
     debug_printf ("\n");
 
+  /* Record the V/X register.  */
   aarch64_insn_r->reg_rec_count++;
-  gdb_assert (aarch64_insn_r->reg_rec_count == 1);
+
+  /* Some of these instructions may set bits in the FPSR, so record it
+     too.  */
+  record_buf[1] = AARCH64_FPSR_REGNUM;
+  aarch64_insn_r->reg_rec_count++;
+
+  gdb_assert (aarch64_insn_r->reg_rec_count == 2);
   REG_ALLOC (aarch64_insn_r->aarch64_regs, aarch64_insn_r->reg_rec_count,
 	     record_buf);
   return AARCH64_RECORD_SUCCESS;
