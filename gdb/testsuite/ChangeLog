@@ -1,3 +1,9 @@
+2020-12-14  Mark Wielaard  <mark@klomp.org>
+
+	* lib/dwarf.exp (Dwarf::_read_constants): Don't set
+	_constants(SPECIAL_expr) here, but set it...
+	(Dwarf::cu): ...here based on _cu_version.
+
 2020-12-14  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_compile_shlib): Make sure it's not necessary to

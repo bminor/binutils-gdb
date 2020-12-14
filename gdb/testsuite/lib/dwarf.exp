@@ -234,8 +234,9 @@ proc get_func_info { name {options {debug}} } {
 # section automatically.
 #
 # If FORM is 'SPECIAL_expr', then VALUE is treated as a location
-# expression.  The effective form is then DW_FORM_block, and VALUE
-# is passed to the (internal) '_location' proc to be translated.
+# expression.  The effective form is then DW_FORM_block or DW_FORM_exprloc
+# for DWARF version >= 4, and VALUE is passed to the (internal)
+# '_location' proc to be translated.
 # This proc implements a miniature DW_OP_ assembler.
 #
 # If FORM is not given, it is guessed:
@@ -389,7 +390,6 @@ namespace eval Dwarf {
 
     proc _read_constants {} {
 	global srcdir hex decimal
-	variable _constants
 
 	# DWARF name-matching regexp.
 	set dwrx "DW_\[a-zA-Z0-9_\]+"
@@ -416,8 +416,6 @@ namespace eval Dwarf {
 	    }
 	}
 	close $fd
-
-	set _constants(SPECIAL_expr) $_constants(DW_FORM_block)
     }
 
     proc _quote {string} {
@@ -1042,6 +1040,7 @@ namespace eval Dwarf {
     # BODY is Tcl code that emits the DIEs which make up the body of
     # the CU.  It is evaluated in the caller's context.
     proc cu {options body} {
+	variable _constants
 	variable _cu_count
 	variable _abbrev_section
 	variable _abbrev_num
@@ -1079,6 +1078,12 @@ namespace eval Dwarf {
 	if { $fission } {
 	    set section ".debug_info.dwo"
 	    set _abbrev_section ".debug_abbrev.dwo"
+	}
+
+	if {$_cu_version < 4} {
+	    set _constants(SPECIAL_expr) $_constants(DW_FORM_block)
+	} else {
+	    set _constants(SPECIAL_expr) $_constants(DW_FORM_exprloc)
 	}
 
 	_section $section
