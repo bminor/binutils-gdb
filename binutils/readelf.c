@@ -2232,6 +2232,7 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
     case DT_GNU_LIBLIST: return "GNU_LIBLIST";
     case DT_GNU_LIBLISTSZ: return "GNU_LIBLISTSZ";
     case DT_GNU_HASH:	return "GNU_HASH";
+    case DT_GNU_FLAGS_1: return "GNU_FLAGS_1";
 
     default:
       if ((type >= DT_LOPROC) && (type <= DT_HIPROC))
@@ -11079,6 +11080,28 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 	    {
 	      print_vma (entry->d_un.d_val, PREFIX_HEX);
 	      putchar ('\n');
+	    }
+	  break;
+
+	case DT_GNU_FLAGS_1:
+	  if (do_dynamic)
+	    {
+	      printf (_("Flags:"));
+	      if (entry->d_un.d_val == 0)
+		printf (_(" None\n"));
+	      else
+		{
+		  unsigned long int val = entry->d_un.d_val;
+
+		  if (val & DF_GNU_1_UNIQUE)
+		    {
+		      printf (" UNIQUE");
+		      val ^= DF_GNU_1_UNIQUE;
+		    }
+		  if (val != 0)
+		    printf (" %lx", val);
+		  puts ("");
+		}
 	    }
 	  break;
 

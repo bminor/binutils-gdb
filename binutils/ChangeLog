@@ -1,3 +1,8 @@
+2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
+
+	* readelf.c (get_dynamic_type): Handle DT_GNU_FLAGS_1.
+	(process_dynamic_section): Likewise.
+
 2020-12-11  Cary Coutant  <ccoutant@gmail.com>
 
 	* readelf.c (get_machine_name): Update list of e_machine values.
