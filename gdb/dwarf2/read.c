@@ -15890,6 +15890,55 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   smash_to_methodptr_type (type, new_type);
 }
 
+/* Helper for quirk_ada_thick_pointer.  If TYPE is an array type that
+   requires rewriting, then copy it and return the updated copy.
+   Otherwise return nullptr.  */
+
+static struct type *
+rewrite_array_type (struct type *type)
+{
+  if (type->code () != TYPE_CODE_ARRAY)
+    return nullptr;
+
+  struct type *index_type = type->index_type ();
+  range_bounds *current_bounds = index_type->bounds ();
+
+  /* Handle multi-dimensional arrays.  */
+  struct type *new_target = rewrite_array_type (TYPE_TARGET_TYPE (type));
+  if (new_target == nullptr)
+    {
+      /* Maybe we don't need to rewrite this array.  */
+      if (current_bounds->low.kind () == PROP_CONST
+	  && current_bounds->high.kind () == PROP_CONST)
+	return nullptr;
+    }
+
+  /* Either the target type was rewritten, or the bounds have to be
+     updated.  Either way we want to copy the type and update
+     everything.  */
+  struct type *copy = copy_type (type);
+  int nfields = copy->num_fields ();
+  field *new_fields
+    = ((struct field *) TYPE_ZALLOC (copy,
+				     nfields * sizeof (struct field)));
+  memcpy (new_fields, copy->fields (), nfields * sizeof (struct field));
+  copy->set_fields (new_fields);
+  if (new_target != nullptr)
+    TYPE_TARGET_TYPE (copy) = new_target;
+
+  struct type *index_copy = copy_type (index_type);
+  range_bounds *bounds
+    = (struct range_bounds *) TYPE_ZALLOC (index_copy,
+					   sizeof (range_bounds));
+  *bounds = *current_bounds;
+  bounds->low.set_const_val (1);
+  bounds->high.set_const_val (0);
+  index_copy->set_bounds (bounds);
+  copy->set_index_type (index_copy);
+
+  return copy;
+}
+
 /* While some versions of GCC will generate complicated DWARF for an
    array (see quirk_ada_thick_pointer), more recent versions were
    modified to emit an explicit thick pointer structure.  However, in
@@ -15916,20 +15965,16 @@ quirk_ada_thick_pointer_struct (struct die_info *die, struct dwarf2_cu *cu,
   /* Make sure we're looking at a pointer to an array.  */
   if (type->field (0).type ()->code () != TYPE_CODE_PTR)
     return;
-  struct type *ary_type = TYPE_TARGET_TYPE (type->field (0).type ());
 
-  while (ary_type->code () == TYPE_CODE_ARRAY)
-    {
-      /* The Ada code already knows how to handle these types, so all
-	 that we need to do is turn the bounds into static bounds.  */
-      struct type *index_type = ary_type->index_type ();
-
-      index_type->bounds ()->low.set_const_val (1);
-      index_type->bounds ()->high.set_const_val (0);
-
-      /* Handle multi-dimensional arrays.  */
-      ary_type = TYPE_TARGET_TYPE (ary_type);
-    }
+  /* The Ada code already knows how to handle these types, so all that
+     we need to do is turn the bounds into static bounds.  However, we
+     don't want to rewrite existing array or index types in-place,
+     because those may be referenced in other contexts where this
+     rewriting is undesirable.  */
+  struct type *new_ary_type
+    = rewrite_array_type (TYPE_TARGET_TYPE (type->field (0).type ()));
+  if (new_ary_type != nullptr)
+    type->field (0).set_type (lookup_pointer_type (new_ary_type));
 }
 
 /* If the DIE has a DW_AT_alignment attribute, return its value, doing

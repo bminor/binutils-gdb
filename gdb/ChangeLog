@@ -1,5 +1,10 @@
 2020-12-14  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (rewrite_array_type): New function.
+        (quirk_ada_thick_pointer_struct): Use rewrite_array_type.
+
+2020-12-14  Tom Tromey  <tromey@adacore.com>
+
 	* valarith.c (fixed_point_binop): Call error on division by zero.
 
 2020-12-13  Tom Tromey  <tom@tromey.com>

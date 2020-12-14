@@ -1,5 +1,9 @@
 2020-12-14  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.dwarf2/ada-thick-pointer.exp: New file.
+
+2020-12-14  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.dwarf2/dw2-fixed-point.exp: Add test for division by zero.
 
 2020-12-13  Tom de Vries  <tdevries@suse.de>
