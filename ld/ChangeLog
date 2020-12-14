@@ -2,6 +2,8 @@
 
 	* emultempl/elf.em (gld${EMULATION_NAME}_handle_option):
 	Parse -z unique / -z nounique options.
+	* ld.texi (Options): Document -z unique and -z nounique.
+	* lexsup.c (elf_shlib_list_options): Likewise.
 
 2020-12-14  Howard Chu  <hyc@symas.com>
 

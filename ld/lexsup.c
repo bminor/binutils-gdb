@@ -2022,6 +2022,10 @@ elf_shlib_list_options (FILE *file)
   fprintf (file, _("\
   -z interpose                Mark object to interpose all DSOs but executable\n"));
   fprintf (file, _("\
+  -z unique                   Mark DSO to be loaded at most once by default, and only in the main namespace\n"));
+  fprintf (file, _("\
+  -z nounique                 Don't mark DSO as a loadable at most once\n"));
+  fprintf (file, _("\
   -z lazy                     Mark object lazy runtime binding (default)\n"));
   fprintf (file, _("\
   -z loadfltr                 Mark object requiring immediate process\n"));

@@ -1306,6 +1306,16 @@ Specify that the dynamic loader should modify its symbol search order
 so that symbols in this shared library interpose all other shared
 libraries not so marked.
 
+@item unique
+@itemx nounique
+When generating a shared library or other dynamically loadable ELF
+object mark it as one that should (by default) only ever be loaded once,
+and only in the main namespace (when using @code{dlmopen}). This is
+primarily used to mark fundamental libraries such as libc, libpthread et
+al which do not usually function correctly unless they are the sole instances
+of themselves. This behaviour can be overridden by the @code{dlmopen} caller
+and does not apply to certain loading mechanisms (such as audit libraries).
+
 @item lazy
 When generating an executable or shared library, mark it to tell the
 dynamic linker to defer function call resolution to the point when
