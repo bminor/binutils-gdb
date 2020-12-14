@@ -3286,9 +3286,7 @@ incremental_test_6: two_file_test_1.o two_file_test_1b_v1.o two_file_test_1b.o \
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie two_file_test_main.o -Wl,--incremental-unchanged two_file_test_6.a -Wl,--incremental-unknown
 
 if !CFLAGS_CF_PROTECTION
-if !GCC9
 check_PROGRAMS += incremental_copy_test
-endif
 endif
 incremental_copy_test: copy_test_v1.o copy_test.o copy_test_1.so copy_test_2.so
 	cp -f copy_test_v1.o copy_test_tmp.o
@@ -3312,9 +3310,7 @@ common_test_1_v2.o: common_test_1_v2.c
 	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 
 if !CFLAGS_CF_PROTECTION
-if !GCC9
 check_PROGRAMS += incremental_comdat_test_1
-endif
 endif
 incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
 	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o

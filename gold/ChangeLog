@@ -1,6 +1,14 @@
 2020-12-13  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/23539
+	PR gold/24123
+	* testsuite/Makefile.am (incremental_copy_test): Re-enable for GCC 9+.
+	(incremental_comdat_test_1): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
+2020-12-13  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/23539
 	* object.cc (Sized_relobj_file::layout_gnu_property_section): Ignore
 	Gnu properties during incremental links.
 
