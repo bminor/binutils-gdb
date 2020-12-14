@@ -1,3 +1,9 @@
+2020-12-14  Nick Clifton  <nickc@redhat.com>
+
+	PR 27050
+	* lexsup.c (parse_args): Ensure that the longind local variable is
+	set.
+
 2020-12-14  Alan Modra  <amodra@gmail.com>
 
 	PR 27064

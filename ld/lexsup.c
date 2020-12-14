@@ -718,7 +718,7 @@ parse_args (unsigned argc, char **argv)
   last_optind = -1;
   while (1)
     {
-      int longind;
+      int longind = 0;
       int optc;
       static unsigned int defsym_count;
 
