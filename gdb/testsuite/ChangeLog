@@ -1,5 +1,10 @@
 2020-12-14  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/26963
+	* lib/gdb.exp (run_on_host): Declare test unsupported if spawn fails.
+
+2020-12-14  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26962
 	* gdb.base/solib-corrupted.exp: Handle "'_r_debug' has unknown type;
 	cast it to its declared type".
