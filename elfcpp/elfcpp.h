@@ -733,6 +733,7 @@ enum DT
 
   // The remaining values are extensions used by GNU or Solaris.
   DT_VALRNGLO = 0x6ffffd00,
+  DT_GNU_FLAGS_1 = 0x6ffffdf4,
   DT_GNU_PRELINKED = 0x6ffffdf5,
   DT_GNU_CONFLICTSZ = 0x6ffffdf6,
   DT_GNU_LIBLISTSZ = 0x6ffffdf7,
@@ -920,6 +921,12 @@ enum DF_1
   DF_1_NODUMP = 0x1000,
   DF_1_CONLFAT = 0x2000,
   DF_1_PIE = 0x08000000
+};
+
+// Flags found in the DT_GNU_FLAGS_1 dynamic element.
+enum DF_GNU_1
+{
+  DF_GNU_1_UNIQUE = 0x1,
 };
 
 // Version numbers which appear in the vd_version field of a Verdef
