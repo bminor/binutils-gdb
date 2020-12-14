@@ -1173,14 +1173,20 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
     {
       // Some flags in the input section should not be automatically
       // copied to the output section.
-      elfcpp::Elf_Xword flags = (shdr.get_sh_flags()
-				 & ~ elfcpp::SHF_COMPRESSED);
+      elfcpp::Elf_Xword sh_flags = (shdr.get_sh_flags()
+				    & ~ elfcpp::SHF_COMPRESSED);
       name = this->namepool_.add(name, true, NULL);
-      os = this->make_output_section(name, sh_type, flags,
-				     ORDER_INVALID, false);
+      os = this->make_output_section(name, sh_type, sh_flags, ORDER_INVALID,
+				     false);
     }
   else
     {
+      // Get the section flags and mask out any flags that do not
+      // take part in section matching.
+      elfcpp::Elf_Xword sh_flags
+	  = (this->get_output_section_flags(shdr.get_sh_flags())
+	     & ~object->osabi().ignored_sh_flags());
+
       // All ".text.unlikely.*" sections can be moved to a unique
       // segment with --text-unlikely-segment option.
       bool text_unlikely_segment
@@ -1189,13 +1195,10 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 			     object->section_name(shndx).c_str()));
       if (text_unlikely_segment)
 	{
-	  elfcpp::Elf_Xword flags
-	    = this->get_output_section_flags(shdr.get_sh_flags());
-
 	  Stringpool::Key name_key;
 	  const char* os_name = this->namepool_.add(".text.unlikely", true,
 						    &name_key);
-	  os = this->get_output_section(os_name, name_key, sh_type, flags,
+	  os = this->get_output_section(os_name, name_key, sh_type, sh_flags,
 					ORDER_INVALID, false);
 	  // Map this output section to a unique segment.  This is done to
 	  // separate "text" that is not likely to be executed from "text"
@@ -1213,22 +1216,18 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	  if (it == this->section_segment_map_.end())
 	    {
 	      os = this->choose_output_section(object, name, sh_type,
-					       shdr.get_sh_flags(), true,
-					       ORDER_INVALID, false, false,
-					       true);
+					       sh_flags, true, ORDER_INVALID,
+					       false, false, true);
 	    }
 	  else
 	    {
 	      // We know the name of the output section, directly call
 	      // get_output_section here by-passing choose_output_section.
-	      elfcpp::Elf_Xword flags
-		= this->get_output_section_flags(shdr.get_sh_flags());
-
 	      const char* os_name = it->second->name;
 	      Stringpool::Key name_key;
 	      os_name = this->namepool_.add(os_name, true, &name_key);
-	      os = this->get_output_section(os_name, name_key, sh_type, flags,
-					ORDER_INVALID, false);
+	      os = this->get_output_section(os_name, name_key, sh_type,
+					    sh_flags, ORDER_INVALID, false);
 	      if (!os->is_unique_segment())
 		{
 		  os->set_is_unique_segment();

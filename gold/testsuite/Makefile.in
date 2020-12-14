@@ -1130,12 +1130,13 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @DEFAULT_TARGET_S390_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	split_s390x_z4_ns split_s390x_n1_ns split_s390x_n2_ns split_s390x_r
 
 @DEFAULT_TARGET_X86_64_TRUE@am__append_114 = *.dwo *.dwp pr26936a \
-@DEFAULT_TARGET_X86_64_TRUE@	pr26936b
+@DEFAULT_TARGET_X86_64_TRUE@	pr26936b retain_1 retain_2
 @DEFAULT_TARGET_X86_64_TRUE@am__append_115 = dwp_test_1.sh \
-@DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.sh pr26936.sh
+@DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.sh pr26936.sh retain.sh
 @DEFAULT_TARGET_X86_64_TRUE@am__append_116 = dwp_test_1.stdout \
 @DEFAULT_TARGET_X86_64_TRUE@	dwp_test_2.stdout pr26936a.stdout \
-@DEFAULT_TARGET_X86_64_TRUE@	pr26936b.stdout
+@DEFAULT_TARGET_X86_64_TRUE@	pr26936b.stdout retain_1.out \
+@DEFAULT_TARGET_X86_64_TRUE@	retain_2.out
 subdir = testsuite
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/ax_pthread.m4 \
@@ -6451,6 +6452,13 @@ pr26936.sh.log: pr26936.sh
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+retain.sh.log: retain.sh
+	@p='retain.sh'; \
+	b='retain.sh'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 object_unittest.log: object_unittest$(EXEEXT)
 	@p='object_unittest$(EXEEXT)'; \
 	b='object_unittest'; \
@@ -10394,6 +10402,18 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@pr26936d.o: pr26936d.s
 @DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@retain_1.out: retain_1
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_NM) $< >$@
+@DEFAULT_TARGET_X86_64_TRUE@retain_1: retain_1.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@	../ld-new  -e _start --gc-sections -o $@  retain_1.o
+@DEFAULT_TARGET_X86_64_TRUE@retain_1.o: retain_1.s
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@retain_2.out: retain_2
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_READELF) -d $< >$@
+@DEFAULT_TARGET_X86_64_TRUE@retain_2: retain_2.o ../ld-new
+@DEFAULT_TARGET_X86_64_TRUE@	../ld-new -pie -e _start --gc-sections -o $@  retain_2.o
+@DEFAULT_TARGET_X86_64_TRUE@retain_2.o: retain_2.s
+@DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

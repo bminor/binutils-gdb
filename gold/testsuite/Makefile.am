@@ -4418,4 +4418,20 @@ pr26936c.o: pr26936c.s
 pr26936d.o: pr26936d.s
 	$(TEST_AS) --gen-debug -mx86-used-note=yes -o $@ $<
 
+check_SCRIPTS += retain.sh
+check_DATA += retain_1.out retain_2.out
+MOSTLYCLEANFILES += retain_1 retain_2
+retain_1.out: retain_1
+	$(TEST_NM) $< >$@
+retain_1: retain_1.o ../ld-new
+	../ld-new  -e _start --gc-sections -o $@  retain_1.o
+retain_1.o: retain_1.s
+	$(TEST_AS) -o $@ $<
+retain_2.out: retain_2
+	$(TEST_READELF) -d $< >$@
+retain_2: retain_2.o ../ld-new
+	../ld-new -pie -e _start --gc-sections -o $@  retain_2.o
+retain_2.o: retain_2.s
+	$(TEST_AS) -o $@ $<
+
 endif DEFAULT_TARGET_X86_64

@@ -438,6 +438,7 @@ enum SHF
   SHF_TLS = 0x400,
   SHF_COMPRESSED = 0x800,
   SHF_MASKOS = 0x0ff00000,
+  SHF_GNU_RETAIN = 0x200000,
   SHF_MASKPROC = 0xf0000000,
 
   // Indicates this section requires ordering in relation to
