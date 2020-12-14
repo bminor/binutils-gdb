@@ -42,6 +42,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
 
+#include <stdlib.h>
+
 /* Within cp1.c we refer to sim_cpu directly.  */
 #define CPU cpu
 #define SD CPU_STATE(cpu)
