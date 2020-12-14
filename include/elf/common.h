@@ -1044,6 +1044,7 @@
    deliberate special case and we maintain it for backwards compatability.
  */
 #define DT_VALRNGLO	0x6ffffd00
+#define DT_GNU_FLAGS_1  0x6ffffdf4
 #define DT_GNU_PRELINKED 0x6ffffdf5
 #define DT_GNU_CONFLICTSZ 0x6ffffdf6
 #define DT_GNU_LIBLISTSZ 0x6ffffdf7
@@ -1106,6 +1107,9 @@
 /* Flag values used in the DT_POSFLAG_1 .dynamic entry.	 */
 #define DF_P1_LAZYLOAD	0x00000001
 #define DF_P1_GROUPPERM	0x00000002
+
+/* Flag value in the DT_GNU_FLAGS_1 /dynamic entry.  */
+#define DF_GNU_1_UNIQUE 0x00000001
 
 /* Flag value in in the DT_FLAGS_1 .dynamic entry.  */
 #define DF_1_NOW	0x00000001
