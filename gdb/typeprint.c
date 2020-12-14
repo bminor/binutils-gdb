@@ -490,10 +490,12 @@ whatis_exp (const char *exp, int show)
 	 "whatis" prints the type of the expression without stripping
 	 any typedef level.  "ptype" always strips all levels of
 	 typedefs.  */
+      val = evaluate_type (expr.get ());
+      type = value_type (val);
+
       if (show == -1 && expr->elts[0].opcode == OP_TYPE)
 	{
 	  /* The user expression names a type directly.  */
-	  type = expr->elts[1].type;
 
 	  /* If this is a typedef, then find its immediate target.
 	     Use check_typedef to resolve stubs, but ignore its result
@@ -505,14 +507,6 @@ whatis_exp (const char *exp, int show)
 	  /* If the expression is actually a type, then there's no
 	     value to fetch the dynamic type from.  */
 	  val = NULL;
-	}
-      else
-	{
-	  /* The user expression names a type indirectly by naming an
-	     object or expression of that type.  Find that
-	     indirectly-named type.  */
-	  val = evaluate_type (expr.get ());
-	  type = value_type (val);
 	}
     }
   else
@@ -684,28 +678,14 @@ print_type_fixed_point (struct type *type, struct ui_file *stream)
 void
 maintenance_print_type (const char *type_name, int from_tty)
 {
-  struct value *val;
-  struct type *type;
-
   if (type_name != NULL)
     {
       expression_up expr = parse_expression (type_name);
-      if (expr->elts[0].opcode == OP_TYPE)
-	{
-	  /* The user expression names a type directly, just use that type.  */
-	  type = expr->elts[1].type;
-	}
-      else
-	{
-	  /* The user expression may name a type indirectly by naming an
-	     object of that type.  Find that indirectly named type.  */
-	  val = evaluate_type (expr.get ());
-	  type = value_type (val);
-	}
-      if (type != NULL)
-	{
-	  recursive_dump_type (type, 0);
-	}
+      struct value *val = evaluate_type (expr.get ());
+      struct type *type = value_type (val);
+
+      if (type != nullptr)
+	recursive_dump_type (type, 0);
     }
 }
 

@@ -493,7 +493,7 @@ dtrace_process_dof_probe (struct objfile *objfile,
 	    }
 
 	  if (expr != NULL && expr.get ()->elts[0].opcode == OP_TYPE)
-	    type = expr.get ()->elts[1].type;
+	    type = value_type (evaluate_type (expr.get ()));
 
 	  args.emplace_back (type, std::move (type_str), std::move (expr));
 	}

@@ -1,3 +1,9 @@
+2020-12-14  Tom Tromey  <tom@tromey.com>
+
+	* dtrace-probe.c (dtrace_process_dof_probe): Use value_type.
+	* typeprint.c (whatis_exp): Always use evaluate_type.
+	(maintenance_print_type): Likewise.  Simplify.
+
 2020-12-14  Tom Tromey  <tromey@adacore.com>
 
 	* dictionary.c (language_defn::search_name_hash): Ignore "B".
