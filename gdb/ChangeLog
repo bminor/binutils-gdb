@@ -1,5 +1,12 @@
 2020-12-14  Tom Tromey  <tromey@adacore.com>
 
+	* dictionary.c (language_defn::search_name_hash): Ignore "B".
+	* ada-lang.c (advance_wild_match): Ignore "B".
+	(full_match): Remove.
+	(do_full_match): Rewrite.
+
+2020-12-14  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (get_var_value): Only consider exact matches.
 
 2020-12-14  Tom Tromey  <tromey@adacore.com>

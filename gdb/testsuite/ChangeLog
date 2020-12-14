@@ -1,5 +1,10 @@
 2020-12-14  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/nested.exp: Add new tests.
+	* gdb.ada/nested/hello.adb (Fourth, Fifth): New procedures.
+
+2020-12-14  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.dwarf2/ada-thick-pointer.exp: New file.
 
 2020-12-14  Tom Tromey  <tromey@adacore.com>

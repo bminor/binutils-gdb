@@ -31,6 +31,20 @@ procedure Hello is
    end Third;
 
 begin
-   Third;
+   declare
+      procedure Fourth is
+      begin
+         Third;
+         declare
+            procedure Fifth is
+            begin
+               Second;
+            end Fifth;
+         begin
+            Fifth;
+         end;
+      end Fourth;
+   begin
+      Fourth;
+   end;
 end Hello;
-

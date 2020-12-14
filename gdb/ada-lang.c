@@ -6037,6 +6037,13 @@ advance_wild_match (const char **namep, const char *name0, char target0)
 	      name += 2;
 	      break;
 	    }
+	  else if (t1 == '_' && name[2] == 'B' && name[3] == '_')
+	    {
+	      /* Names like "pkg__B_N__name", where N is a number, are
+		 block-local.  We can handle these by simply skipping
+		 the "B_" here.  */
+	      name += 4;
+	    }
 	  else
 	    return 0;
 	}
@@ -6079,28 +6086,6 @@ wild_match (const char *name, const char *patn)
       if (!advance_wild_match (&name, name0, *patn))
 	return false;
     }
-}
-
-/* Returns true iff symbol name SYM_NAME matches SEARCH_NAME, ignoring
-   any trailing suffixes that encode debugging information or leading
-   _ada_ on SYM_NAME (see is_name_suffix commentary for the debugging
-   information that is ignored).  */
-
-static bool
-full_match (const char *sym_name, const char *search_name)
-{
-  size_t search_name_len = strlen (search_name);
-
-  if (strncmp (sym_name, search_name, search_name_len) == 0
-      && is_name_suffix (sym_name + search_name_len))
-    return true;
-
-  if (startswith (sym_name, "_ada_")
-      && strncmp (sym_name + 5, search_name, search_name_len) == 0
-      && is_name_suffix (sym_name + search_name_len + 5))
-    return true;
-
-  return false;
 }
 
 /* Add symbols from BLOCK matching LOOKUP_NAME in DOMAIN to vector
@@ -13606,7 +13591,41 @@ do_full_match (const char *symbol_search_name,
 	       const lookup_name_info &lookup_name,
 	       completion_match_result *comp_match_res)
 {
-  return full_match (symbol_search_name, ada_lookup_name (lookup_name));
+  if (startswith (symbol_search_name, "_ada_"))
+    symbol_search_name += 5;
+
+  const char *lname = lookup_name.ada ().lookup_name ().c_str ();
+  int uscore_count = 0;
+  while (*lname != '\0')
+    {
+      if (*symbol_search_name != *lname)
+	{
+	  if (*symbol_search_name == 'B' && uscore_count == 2
+	      && symbol_search_name[1] == '_')
+	    {
+	      symbol_search_name += 2;
+	      while (isdigit (*symbol_search_name))
+		++symbol_search_name;
+	      if (symbol_search_name[0] == '_'
+		  && symbol_search_name[1] == '_')
+		{
+		  symbol_search_name += 2;
+		  continue;
+		}
+	    }
+	  return false;
+	}
+
+      if (*symbol_search_name == '_')
+	++uscore_count;
+      else
+	uscore_count = 0;
+
+      ++symbol_search_name;
+      ++lname;
+    }
+
+  return is_name_suffix (symbol_search_name);
 }
 
 /* symbol_name_matcher_ftype for exact (verbatim) matches.  */

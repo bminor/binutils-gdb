@@ -761,6 +761,13 @@ language_defn::search_name_hash (const char *string0) const
 	    {
 	      int c = string[2];
 
+	      if (c == 'B' && string[3] == '_')
+		{
+		  for (string += 4; ISDIGIT (*string); ++string)
+		    ;
+		  continue;
+		}
+
 	      if ((c < 'a' || c > 'z') && c != 'O')
 		return hash;
 	      hash = 0;

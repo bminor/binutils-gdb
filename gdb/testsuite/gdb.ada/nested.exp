@@ -34,3 +34,18 @@ gdb_test "break first" \
          "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \
          "break on nested function First"
 
+gdb_test "break fourth" \
+    "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \
+    "break on nested function fourth"
+
+gdb_test "break hello.fourth" \
+    "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \
+    "full-qualified break on nested function fourth"
+
+gdb_test "break fifth" \
+    "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \
+    "break on nested function fifth"
+
+gdb_test "break hello.fourth.fifth" \
+    "Breakpoint $any_nb at $any_addr: file .*hello.adb, line $any_nb." \
+    "full-qualified break on nested function fifth"
