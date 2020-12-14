@@ -655,6 +655,9 @@ struct bfd_link_info
   /* May be used to set DT_FLAGS_1 for ELF. */
   bfd_vma flags_1;
 
+  /* May be used to set DT_GNU_FLAGS_1 for ELF. */
+  bfd_vma gnu_flags_1;
+
   /* May be used to set ELF visibility for __start_* / __stop_.  */
   unsigned int start_stop_visibility;
 

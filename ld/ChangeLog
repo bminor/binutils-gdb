@@ -1,3 +1,8 @@
+2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
+
+	* emultempl/elf.em (gld${EMULATION_NAME}_handle_option):
+	Parse -z unique / -z nounique options.
+
 2020-12-14  Howard Chu  <hyc@symas.com>
 
 	* libdep_plugin.c: New file: Processes archives that contain a

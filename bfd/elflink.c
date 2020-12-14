@@ -7178,7 +7178,10 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      || !_bfd_elf_add_dynamic_entry (info, DT_SYMTAB, 0)
 	      || !_bfd_elf_add_dynamic_entry (info, DT_STRSZ, strsize)
 	      || !_bfd_elf_add_dynamic_entry (info, DT_SYMENT,
-					      bed->s->sizeof_sym))
+					      bed->s->sizeof_sym)
+	      || (info->gnu_flags_1
+		  && !_bfd_elf_add_dynamic_entry (info, DT_GNU_FLAGS_1,
+						  info->gnu_flags_1)))
 	    return FALSE;
 	}
     }

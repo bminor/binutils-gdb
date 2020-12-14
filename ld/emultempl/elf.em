@@ -809,6 +809,10 @@ fragment <<EOF
 	  link_info.flags |= (bfd_vma) DF_ORIGIN;
 	  link_info.flags_1 |= (bfd_vma) DF_1_ORIGIN;
 	}
+      else if (strcmp (optarg, "unique") == 0)
+	link_info.gnu_flags_1 |= (bfd_vma) DF_GNU_1_UNIQUE;
+      else if (strcmp (optarg, "nounique") == 0)
+	link_info.gnu_flags_1 &= ~(bfd_vma) DF_GNU_1_UNIQUE;
       else if (strcmp (optarg, "combreloc") == 0)
 	link_info.combreloc = TRUE;
       else if (strcmp (optarg, "nocombreloc") == 0)

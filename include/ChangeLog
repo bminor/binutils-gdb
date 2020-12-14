@@ -1,6 +1,7 @@
 2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
 
 	* elf/common.h (DT_GNU_FLAGS_1, DF_GNU_1_UNIQUE): Define.
+	* bfdlink.h (struct bfd_link_info): New field gnu_flags_1.
 
 2020-12-11  Cary Coutant  <ccoutant@gmail.com>
 

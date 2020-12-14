@@ -1,3 +1,8 @@
+2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
+
+	* elflink.c (bfd_elf_size_dynamic_sections): Call
+	_bfd_elf_add_dynamic_entry to add a DT_GNU_FLAGS_1 section.
+
 2020-12-14  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_obj_tdata): Add being_created.
