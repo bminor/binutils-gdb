@@ -1699,6 +1699,10 @@ parse_args (unsigned argc, char **argv)
 	}
     }
 
+  free (really_longopts);
+  free (longopts);
+  free (shortopts);
+
   /* Run a couple of checks on the map filename.  */
   if (config.map_filename)
     {
