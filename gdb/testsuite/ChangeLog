@@ -1,3 +1,9 @@
+2020-12-14  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26951
+	* gdb.base/batch-preserve-term-settings.exp: Use "gdb-subshell$ " as
+	shell prompt.
+
 2020-12-14  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/nested.exp: Add new tests.
