@@ -998,6 +998,11 @@ libldtestplug4_la_SOURCES = testplug4.c
 libldtestplug4_la_CFLAGS= -g -O2
 libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
 
+bfdplugindir = $(libdir)/bfd-plugins
+bfdplugin_LTLIBRARIES = libdep.la
+libdep_la_SOURCES = libdep_plugin.c
+libdep_la_LDFLAGS = -no-undefined -rpath /nowhere
+
 # DOCUMENTATION TARGETS
 # Manual configuration file; not usually attached to normal configuration,
 # because almost all configs use "gen" version of manual.

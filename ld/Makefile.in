@@ -137,14 +137,49 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
-LTLIBRARIES = $(noinst_LTLIBRARIES)
-libldtestplug_la_LIBADD =
-am_libldtestplug_la_OBJECTS = libldtestplug_la-testplug.lo
-libldtestplug_la_OBJECTS = $(am_libldtestplug_la_OBJECTS)
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__installdirs = "$(DESTDIR)$(bfdplugindir)" "$(DESTDIR)$(bindir)" \
+	"$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"
+LTLIBRARIES = $(bfdplugin_LTLIBRARIES) $(noinst_LTLIBRARIES)
+libdep_la_LIBADD =
+am_libdep_la_OBJECTS = libdep_plugin.lo
+libdep_la_OBJECTS = $(am_libdep_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
+libdep_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libdep_la_LDFLAGS) $(LDFLAGS) -o $@
+libldtestplug_la_LIBADD =
+am_libldtestplug_la_OBJECTS = libldtestplug_la-testplug.lo
+libldtestplug_la_OBJECTS = $(am_libldtestplug_la_OBJECTS)
 libldtestplug_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libldtestplug_la_CFLAGS) $(CFLAGS) \
@@ -170,8 +205,6 @@ libldtestplug4_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libldtestplug4_la_CFLAGS) $(CFLAGS) \
 	$(libldtestplug4_la_LDFLAGS) $(LDFLAGS) -o $@
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
-	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_ld_new_OBJECTS = ldgram.$(OBJEXT) ldlex-wrapper.$(OBJEXT) \
 	lexsup.$(OBJEXT) ldlang.$(OBJEXT) mri.$(OBJEXT) \
@@ -235,9 +268,10 @@ AM_V_YACC = $(am__v_YACC_@AM_V@)
 am__v_YACC_ = $(am__v_YACC_@AM_DEFAULT_V@)
 am__v_YACC_0 = @echo "  YACC    " $@;
 am__v_YACC_1 = 
-SOURCES = $(libldtestplug_la_SOURCES) $(libldtestplug2_la_SOURCES) \
-	$(libldtestplug3_la_SOURCES) $(libldtestplug4_la_SOURCES) \
-	$(ld_new_SOURCES) $(EXTRA_ld_new_SOURCES)
+SOURCES = $(libdep_la_SOURCES) $(libldtestplug_la_SOURCES) \
+	$(libldtestplug2_la_SOURCES) $(libldtestplug3_la_SOURCES) \
+	$(libldtestplug4_la_SOURCES) $(ld_new_SOURCES) \
+	$(EXTRA_ld_new_SOURCES)
 AM_V_DVIPS = $(am__v_DVIPS_@AM_V@)
 am__v_DVIPS_ = $(am__v_DVIPS_@AM_DEFAULT_V@)
 am__v_DVIPS_0 = @echo "  DVIPS   " $@;
@@ -290,33 +324,6 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
-am__vpath_adj = case $$p in \
-    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
-    *) f=$$p;; \
-  esac;
-am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
-am__install_max = 40
-am__nobase_strip_setup = \
-  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
-am__nobase_strip = \
-  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
-am__nobase_list = $(am__nobase_strip_setup); \
-  for p in $$list; do echo "$$p $$p"; done | \
-  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
-  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
-    if (++n[$$2] == $(am__install_max)) \
-      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
-    END { for (dir in files) print dir, files[dir] }'
-am__base_list = \
-  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
-  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__uninstall_files_from_dir = { \
-  test -z "$$files" \
-    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
-    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
-         $(am__cd) "$$dir" && rm -f $$files; }; \
-  }
 man1dir = $(mandir)/man1
 NROFF = nroff
 MANS = $(man_MANS)
@@ -1013,6 +1020,10 @@ libldtestplug3_la_LDFLAGS = -no-undefined -rpath /nowhere
 libldtestplug4_la_SOURCES = testplug4.c
 libldtestplug4_la_CFLAGS = -g -O2
 libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
+bfdplugindir = $(libdir)/bfd-plugins
+bfdplugin_LTLIBRARIES = libdep.la
+libdep_la_SOURCES = libdep_plugin.c
+libdep_la_LDFLAGS = -no-undefined -rpath /nowhere
 MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.
@@ -1088,6 +1099,41 @@ distclean-hdr:
 po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
+install-bfdpluginLTLIBRARIES: $(bfdplugin_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	@list='$(bfdplugin_LTLIBRARIES)'; test -n "$(bfdplugindir)" || list=; \
+	list2=; for p in $$list; do \
+	  if test -f $$p; then \
+	    list2="$$list2 $$p"; \
+	  else :; fi; \
+	done; \
+	test -z "$$list2" || { \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(bfdplugindir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(bfdplugindir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(bfdplugindir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(bfdplugindir)"; \
+	}
+
+uninstall-bfdpluginLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	@list='$(bfdplugin_LTLIBRARIES)'; test -n "$(bfdplugindir)" || list=; \
+	for p in $$list; do \
+	  $(am__strip_dir) \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(bfdplugindir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(bfdplugindir)/$$f"; \
+	done
+
+clean-bfdpluginLTLIBRARIES:
+	-test -z "$(bfdplugin_LTLIBRARIES)" || rm -f $(bfdplugin_LTLIBRARIES)
+	@list='$(bfdplugin_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
 	@list='$(noinst_LTLIBRARIES)'; \
@@ -1098,6 +1144,9 @@ clean-noinstLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
+
+libdep.la: $(libdep_la_OBJECTS) $(libdep_la_DEPENDENCIES) $(EXTRA_libdep_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libdep_la_LINK) -rpath $(bfdplugindir) $(libdep_la_OBJECTS) $(libdep_la_LIBADD) $(LIBS)
 
 libldtestplug.la: $(libldtestplug_la_OBJECTS) $(libldtestplug_la_DEPENDENCIES) $(EXTRA_libldtestplug_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libldtestplug_la_LINK)  $(libldtestplug_la_OBJECTS) $(libldtestplug_la_LIBADD) $(LIBS)
@@ -1492,6 +1541,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ldwrite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lexsup.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libdep_plugin.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug2_la-testplug2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug3_la-testplug3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libldtestplug4_la-testplug4.Plo@am__quote@
@@ -1886,7 +1936,7 @@ all-am: Makefile $(INFO_DEPS) $(LTLIBRARIES) $(PROGRAMS) $(MANS) \
 		config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
+	for dir in "$(DESTDIR)$(bfdplugindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(man1dir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
@@ -1932,8 +1982,9 @@ maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-recursive
 
-clean-am: clean-aminfo clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES mostlyclean-am
+clean-am: clean-aminfo clean-bfdpluginLTLIBRARIES clean-binPROGRAMS \
+	clean-generic clean-libtool clean-noinstLTLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -1955,7 +2006,8 @@ info: info-recursive
 
 info-am: $(INFO_DEPS)
 
-install-data-am: install-data-local install-info-am install-man
+install-data-am: install-bfdpluginLTLIBRARIES install-data-local \
+	install-info-am install-man
 
 install-dvi: install-dvi-recursive
 
@@ -2095,9 +2147,9 @@ ps: ps-recursive
 
 ps-am: $(PSS)
 
-uninstall-am: uninstall-binPROGRAMS uninstall-dvi-am uninstall-html-am \
-	uninstall-info-am uninstall-man uninstall-pdf-am \
-	uninstall-ps-am
+uninstall-am: uninstall-bfdpluginLTLIBRARIES uninstall-binPROGRAMS \
+	uninstall-dvi-am uninstall-html-am uninstall-info-am \
+	uninstall-man uninstall-pdf-am uninstall-ps-am
 
 uninstall-man: uninstall-man1
 
@@ -2106,12 +2158,13 @@ uninstall-man: uninstall-man1
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
 	am--refresh check check-DEJAGNU check-am clean clean-aminfo \
-	clean-binPROGRAMS clean-cscope clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES cscope cscopelist-am ctags ctags-am \
-	dist-info distclean distclean-DEJAGNU distclean-compile \
-	distclean-generic distclean-hdr distclean-libtool \
-	distclean-local distclean-tags dvi dvi-am html html-am info \
-	info-am install install-am install-binPROGRAMS install-data \
+	clean-bfdpluginLTLIBRARIES clean-binPROGRAMS clean-cscope \
+	clean-generic clean-libtool clean-noinstLTLIBRARIES cscope \
+	cscopelist-am ctags ctags-am dist-info distclean \
+	distclean-DEJAGNU distclean-compile distclean-generic \
+	distclean-hdr distclean-libtool distclean-local distclean-tags \
+	dvi dvi-am html html-am info info-am install install-am \
+	install-bfdpluginLTLIBRARIES install-binPROGRAMS install-data \
 	install-data-am install-data-local install-dvi install-dvi-am \
 	install-exec install-exec-am install-exec-local install-html \
 	install-html-am install-info install-info-am install-man \
@@ -2121,9 +2174,10 @@ uninstall-man: uninstall-man1
 	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
 	mostlyclean-aminfo mostlyclean-compile mostlyclean-generic \
 	mostlyclean-libtool mostlyclean-local pdf pdf-am ps ps-am tags \
-	tags-am uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-dvi-am uninstall-html-am uninstall-info-am \
-	uninstall-man uninstall-man1 uninstall-pdf-am uninstall-ps-am
+	tags-am uninstall uninstall-am uninstall-bfdpluginLTLIBRARIES \
+	uninstall-binPROGRAMS uninstall-dvi-am uninstall-html-am \
+	uninstall-info-am uninstall-man uninstall-man1 \
+	uninstall-pdf-am uninstall-ps-am
 
 .PRECIOUS: Makefile
 

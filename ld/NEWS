@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add libdep plugin, for linking dependencies of static libraries that
+  were recorded by ar in the __.LIBDEP archive member.
+
 * Add --error-handling-script=<NAME> command line option to allow a helper
   script to be invoked when an undefined symbol or a missing library is
   encountered.  This option can be suppressed via the configure time

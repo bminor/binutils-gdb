@@ -1,3 +1,12 @@
+2020-12-14  Howard Chu  <hyc@symas.com>
+
+	* libdep_plugin.c: New file: Processes archives that contain a
+	special library dependencies element.
+	* Makefile.am: Add build rules for libdep_plugin.
+	* Makefile.in: Regenerate.
+	* NEWS: Mention the new plugin.
+	* ld.texi: Document the new plugin.
+
 2020-12-14  Alan Modra  <amodra@gmail.com>
 
 	PR 26836

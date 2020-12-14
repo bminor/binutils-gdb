@@ -126,6 +126,7 @@ in the section entitled ``GNU Free Documentation License''.
 * Overview::                    Overview
 * Invocation::                  Invocation
 * Scripts::                     Linker Scripts
+* Plugins::                     Linker Plugins
 @ifset GENERIC
 * Machine Dependent::           Machine Dependent Features
 @end ifset
@@ -6953,6 +6954,58 @@ commands.
 Any input files read because of an implicit linker script will be read
 at the position in the command line where the implicit linker script was
 read.  This can affect archive searching.
+
+@node Plugins
+@chapter Linker Plugins
+
+@cindex plugins
+@cindex linker plugins
+The linker can use dynamically loaded plugins to modify its behavior.
+For example, the link-time optimization feature that some compilers
+support is implemented with a linker plugin.
+
+Currently there is only one plugin shipped by default, but more may
+be added here later.
+
+@menu
+* libdep Plugin::	Static Library Dependencies Plugin
+@end menu
+
+@node libdep Plugin
+@section Static Library Dependencies Plugin
+@cindex static library dependencies
+Originally, static libraries were contained in an archive file consisting
+just of a collection of relocatable object files.  Later they evolved to
+optionally include a symbol table, to assist in finding the needed objects
+within a library.  There their evolution ended, and dynamic libraries
+rose to ascendance.
+
+One useful feature of dynamic libraries was that, more than just collecting
+multiple objects into a single file, they also included a list of their
+dependencies, such that one could specify just the name of a single dynamic
+library at link time, and all of its dependencies would be implicitly
+referenced as well.  But static libraries lacked this feature, so if a
+link invocation was switched from using dynamic libraries to static
+libraries, the link command would usually fail unless it was rewritten to
+explicitly list the dependencies of the static library.
+
+The GNU @command{ar} utility now supports a @option{--record-libdeps} option
+to embed dependency lists into static libraries as well, and the @file{libdep}
+plugin may be used to read this dependency information at link time.  The
+dependency information is stored as a single string, carrying @option{-l}
+and @option{-L} arguments as they would normally appear in a linker
+command line.  As such, the information can be written with any text
+utility and stored into any archive, even if GNU @command{ar} is not
+being used to create the archive.  The information is stored in an
+archive member named @samp{__.LIBDEP}.
+
+For example, given a library @file{libssl.a} that depends on another
+library @file{libcrypto.a} which may be found in @file{/usr/local/lib},
+the @samp{__.LIBDEP} member of @file{libssl.a} would contain
+
+@smallexample
+-L/usr/local/lib -lcrypto
+@end smallexample
 
 @ifset GENERIC
 @node Machine Dependent
