@@ -1,5 +1,10 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* gdb.threads/detach-step-over.c: New file.
+	* gdb.threads/detach-step-over.exp: New file.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* gdb.threads/attach-non-stop.c: New file.
 	* gdb.threads/attach-non-stop.exp: New file.
 
