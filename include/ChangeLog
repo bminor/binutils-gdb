@@ -1,3 +1,15 @@
+2021-01-07  Claire Xenia Wolf  <claire@symbioticeda.com>
+	    Jim Wilson  <jimw@sifive.com>
+	    Andrew Waterman  <andrew@sifive.com>
+	    Maxim Blinov  <maxim.blinov@embecosm.com>
+	    Kito Cheng  <kito.cheng@sifive.com>
+	    Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Added MASK/MATCH/DECLARE_INSN for ZBA/ZBB/ZBC.
+	* opcode/riscv.h (riscv_insn_class): Added INSN_CLASS_ZB*.
+	(enum riscv_isa_spec_class): Added ISA_SPEC_CLASS_DRAFT for the
+	frozen extensions.
+
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (CTF_MN_RECURSE): New.

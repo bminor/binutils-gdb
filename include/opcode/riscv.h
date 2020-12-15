@@ -311,6 +311,10 @@ enum riscv_insn_class
    INSN_CLASS_D_AND_C,
    INSN_CLASS_ZICSR,
    INSN_CLASS_ZIFENCEI,
+   INSN_CLASS_ZBA,
+   INSN_CLASS_ZBB,
+   INSN_CLASS_ZBC,
+   INSN_CLASS_ZBA_OR_ZBB,
   };
 
 /* This structure holds information for a particular instruction.  */
@@ -353,7 +357,8 @@ enum riscv_isa_spec_class
 
   ISA_SPEC_CLASS_2P2,
   ISA_SPEC_CLASS_20190608,
-  ISA_SPEC_CLASS_20191213
+  ISA_SPEC_CLASS_20191213,
+  ISA_SPEC_CLASS_DRAFT
 };
 
 #define RISCV_UNKNOWN_VERSION -1

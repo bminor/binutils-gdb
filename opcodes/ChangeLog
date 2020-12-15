@@ -1,3 +1,13 @@
+2021-01-07  Claire Xenia Wolf  <claire@symbioticeda.com>
+	    Jim Wilson  <jimw@sifive.com>
+	    Andrew Waterman  <andrew@sifive.com>
+	    Maxim Blinov  <maxim.blinov@embecosm.com>
+	    Kito Cheng  <kito.cheng@sifive.com>
+	    Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes): Add ZBA/ZBB/ZBC instructions.
+	(MASK_RVB_IMM): Used for rev8 and orc.b encoding.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

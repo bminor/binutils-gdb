@@ -1,3 +1,17 @@
+2021-01-07  Claire Xenia Wolf  <claire@symbioticeda.com>
+	    Jim Wilson  <jimw@sifive.com>
+	    Andrew Waterman  <andrew@sifive.com>
+	    Maxim Blinov  <maxim.blinov@embecosm.com>
+	    Kito Cheng  <kito.cheng@sifive.com>
+	    Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_multi_subset_supports): Handle INSN_CLASS_ZB*.
+	(riscv_get_default_ext_version): Do not check the default_isa_spec when
+	the version defined in the riscv_opcodes table is ISA_SPEC_CLASS_DRAFT.
+	* testsuite/gas/riscv/bitmanip-insns-32.d: New testcase.
+	* testsuite/gas/riscv/bitmanip-insns-64.d: Likewise.
+	* testsuite/gas/riscv/bitmanip-insns.s: Likewise.
+
 2021-01-06  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/sparc/sparc.exp: Move 64-bit tests inside gas_64_check.

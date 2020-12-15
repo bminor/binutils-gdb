@@ -251,6 +251,16 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
     case INSN_CLASS_ZIFENCEI:
       return riscv_subset_supports ("zifencei");
 
+    case INSN_CLASS_ZBA:
+      return riscv_subset_supports ("zba");
+    case INSN_CLASS_ZBB:
+      return riscv_subset_supports ("zbb");
+    case INSN_CLASS_ZBC:
+      return riscv_subset_supports ("zbc");
+    case INSN_CLASS_ZBA_OR_ZBB:
+      return (riscv_subset_supports ("zba")
+	      || riscv_subset_supports ("zbb"));
+
     default:
       as_fatal ("Unreachable");
       return FALSE;
@@ -296,7 +306,8 @@ riscv_get_default_ext_version (const char *name,
 	 && ext->name
 	 && strcmp (ext->name, name) == 0)
     {
-      if (ext->isa_spec_class == default_isa_spec)
+      if (ext->isa_spec_class == ISA_SPEC_CLASS_DRAFT
+	  || ext->isa_spec_class == default_isa_spec)
 	{
 	  *major_version = ext->major_version;
 	  *minor_version = ext->minor_version;
@@ -1454,6 +1465,7 @@ riscv_ext (int destreg, int srcreg, unsigned shift, bfd_boolean sign)
 }
 
 /* Expand RISC-V assembly macros into one or more instructions.  */
+
 static void
 macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
        bfd_reloc_code_real_type *imm_reloc)

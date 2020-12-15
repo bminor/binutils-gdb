@@ -79,6 +79,7 @@ const char * const riscv_fpr_names_abi[NFPR] = {
 #define MASK_AQ (OP_MASK_AQ << OP_SH_AQ)
 #define MASK_RL (OP_MASK_RL << OP_SH_RL)
 #define MASK_AQRL (MASK_AQ | MASK_RL)
+#define MASK_RVB_IMM (OP_MASK_SHAMT << OP_SH_SHAMT)
 
 static int
 match_opcode (const struct riscv_opcode *op, insn_t insn)
@@ -238,10 +239,7 @@ const struct riscv_opcode riscv_opcodes[] =
 {"mv",          0, INSN_CLASS_I,   "d,s",  MATCH_ADDI, MASK_ADDI | MASK_IMM, match_opcode, INSN_ALIAS },
 {"move",        0, INSN_CLASS_C,   "d,CV",  MATCH_C_MV, MASK_C_MV, match_c_add, INSN_ALIAS },
 {"move",        0, INSN_CLASS_I,   "d,s",  MATCH_ADDI, MASK_ADDI | MASK_IMM, match_opcode, INSN_ALIAS },
-{"sext.b",      0, INSN_CLASS_I,   "d,s",  0,    (int) M_SEXTB,  match_never, INSN_MACRO },
-{"sext.h",      0, INSN_CLASS_I,   "d,s",  0,    (int) M_SEXTH,  match_never, INSN_MACRO },
 {"zext.b",      0, INSN_CLASS_I,   "d,s",  MATCH_ANDI | ENCODE_ITYPE_IMM (255), MASK_ANDI | MASK_IMM, match_opcode, INSN_ALIAS },
-{"zext.h",      0, INSN_CLASS_I,   "d,s",  0,    (int) M_ZEXTH,  match_never, INSN_MACRO },
 {"andi",        0, INSN_CLASS_C,   "Cs,Cw,Co",  MATCH_C_ANDI, MASK_C_ANDI, match_opcode, INSN_ALIAS },
 {"andi",        0, INSN_CLASS_I,   "d,s,j",  MATCH_ANDI, MASK_ANDI, match_opcode, 0 },
 {"and",         0, INSN_CLASS_C,   "Cs,Cw,Ct",  MATCH_C_AND, MASK_C_AND, match_opcode, INSN_ALIAS },
@@ -374,7 +372,6 @@ const struct riscv_opcode riscv_opcodes[] =
 {"sd",         64, INSN_CLASS_C, "Ct,Cl(Cs)",  MATCH_C_SD, MASK_C_SD, match_opcode, INSN_ALIAS|INSN_DREF|INSN_8_BYTE },
 {"sd",         64, INSN_CLASS_I, "t,q(s)",  MATCH_SD, MASK_SD, match_opcode, INSN_DREF|INSN_8_BYTE },
 {"sd",         64, INSN_CLASS_I, "t,A,s",  0, (int) M_SD, match_never, INSN_MACRO },
-{"zext.w",     64, INSN_CLASS_I, "d,s",    0, (int) M_ZEXTW,  match_never, INSN_MACRO },
 {"sext.w",     64, INSN_CLASS_C, "d,CU",  MATCH_C_ADDIW, MASK_C_ADDIW | MASK_RVC_IMM, match_rd_nonzero, INSN_ALIAS },
 {"sext.w",     64, INSN_CLASS_I, "d,s",  MATCH_ADDIW, MASK_ADDIW | MASK_IMM, match_opcode, INSN_ALIAS },
 {"addiw",      64, INSN_CLASS_C, "d,CU,Co",  MATCH_C_ADDIW, MASK_C_ADDIW, match_rd_nonzero, INSN_ALIAS },
@@ -501,6 +498,54 @@ const struct riscv_opcode riscv_opcodes[] =
 {"divuw",    64, INSN_CLASS_M, "d,s,t",  MATCH_DIVUW, MASK_DIVUW, match_opcode, 0 },
 {"remw",     64, INSN_CLASS_M, "d,s,t",  MATCH_REMW, MASK_REMW, match_opcode, 0 },
 {"remuw",    64, INSN_CLASS_M, "d,s,t",  MATCH_REMUW, MASK_REMUW, match_opcode, 0 },
+
+/* Bitmanip instruction subset - ZBA/ZBB/ZBC  */
+{"sh1add",    0, INSN_CLASS_ZBA,   "d,s,t",  MATCH_SH1ADD, MASK_SH1ADD, match_opcode, 0 },
+{"sh2add",    0, INSN_CLASS_ZBA,   "d,s,t",  MATCH_SH2ADD, MASK_SH2ADD, match_opcode, 0 },
+{"sh3add",    0, INSN_CLASS_ZBA,   "d,s,t",  MATCH_SH3ADD, MASK_SH3ADD, match_opcode, 0 },
+{"sh1add.uw",64, INSN_CLASS_ZBA,   "d,s,t",  MATCH_SH1ADD_UW, MASK_SH1ADD_UW, match_opcode, 0 },
+{"sh2add.uw",64, INSN_CLASS_ZBA,   "d,s,t",  MATCH_SH2ADD_UW, MASK_SH2ADD_UW, match_opcode, 0 },
+{"sh3add.uw",64, INSN_CLASS_ZBA,   "d,s,t",  MATCH_SH3ADD_UW, MASK_SH3ADD_UW, match_opcode, 0 },
+{"zext.w",   64, INSN_CLASS_ZBA_OR_ZBB,   "d,s",    MATCH_ADD_UW, MASK_ADD_UW | MASK_RS2, match_opcode, INSN_ALIAS },
+{"zext.w",   64, INSN_CLASS_I,     "d,s",    0, (int) M_ZEXTW,  match_never, INSN_MACRO },
+{"add.uw",   64, INSN_CLASS_ZBA,   "d,s,t",  MATCH_ADD_UW, MASK_ADD_UW, match_opcode, 0 },
+{"slli.uw",  64, INSN_CLASS_ZBA,   "d,s,>",  MATCH_SLLI_UW, MASK_SLLI_UW, match_opcode, 0 },
+
+{"clz",       0, INSN_CLASS_ZBB,   "d,s",  MATCH_CLZ, MASK_CLZ, match_opcode, 0 },
+{"ctz",       0, INSN_CLASS_ZBB,   "d,s",  MATCH_CTZ, MASK_CTZ, match_opcode, 0 },
+{"cpop",      0, INSN_CLASS_ZBB,   "d,s",  MATCH_CPOP, MASK_CPOP, match_opcode, 0 },
+{"min",       0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_MIN, MASK_MIN, match_opcode, 0 },
+{"max",       0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_MAX, MASK_MAX, match_opcode, 0 },
+{"minu",      0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_MINU, MASK_MINU, match_opcode, 0 },
+{"maxu",      0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_MAXU, MASK_MAXU, match_opcode, 0 },
+{"sext.b",    0, INSN_CLASS_ZBB,   "d,s",  MATCH_SEXT_B, MASK_SEXT_B, match_opcode, 0 },
+{"sext.b",    0, INSN_CLASS_I,     "d,s",  0, (int) M_SEXTB,  match_never, INSN_MACRO },
+{"sext.h",    0, INSN_CLASS_ZBB,   "d,s",  MATCH_SEXT_H, MASK_SEXT_H, match_opcode, 0 },
+{"sext.h",    0, INSN_CLASS_I,     "d,s",  0, (int) M_SEXTH,  match_never, INSN_MACRO },
+{"zext.h",   32, INSN_CLASS_ZBB,   "d,s",  MATCH_PACK, MASK_PACK | MASK_RS2, match_opcode, 0 },
+{"zext.h",   64, INSN_CLASS_ZBB,   "d,s",  MATCH_PACKW, MASK_PACKW | MASK_RS2, match_opcode, 0 },
+{"zext.h",    0, INSN_CLASS_I,     "d,s",  0, (int) M_ZEXTH,  match_never, INSN_MACRO },
+{"andn",      0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_ANDN, MASK_ANDN, match_opcode, 0 },
+{"orn",       0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_ORN, MASK_ORN, match_opcode, 0 },
+{"xnor",      0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_XNOR, MASK_XNOR, match_opcode, 0 },
+{"rori",      0, INSN_CLASS_ZBB,   "d,s,>",  MATCH_RORI, MASK_RORI, match_opcode, 0 },
+{"ror",       0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_ROR, MASK_ROR, match_opcode, 0 },
+{"ror",       0, INSN_CLASS_ZBB,   "d,s,>",  MATCH_RORI, MASK_RORI, match_opcode, INSN_ALIAS },
+{"rol",       0, INSN_CLASS_ZBB,   "d,s,t",  MATCH_ROL, MASK_ROL, match_opcode, 0 },
+{"clzw",     64, INSN_CLASS_ZBB,   "d,s",  MATCH_CLZW, MASK_CLZW, match_opcode, 0 },
+{"ctzw",     64, INSN_CLASS_ZBB,   "d,s",  MATCH_CTZW, MASK_CTZW, match_opcode, 0 },
+{"cpopw",    64, INSN_CLASS_ZBB,   "d,s",  MATCH_CPOPW, MASK_CPOPW, match_opcode, 0 },
+{"roriw",    64, INSN_CLASS_ZBB,   "d,s,<",  MATCH_RORIW, MASK_RORIW, match_opcode, 0 },
+{"rorw",     64, INSN_CLASS_ZBB,   "d,s,t",  MATCH_RORW, MASK_RORW, match_opcode, 0 },
+{"rorw",     64, INSN_CLASS_ZBB,   "d,s,<",  MATCH_RORIW, MASK_RORIW, match_opcode, INSN_ALIAS },
+{"rolw",     64, INSN_CLASS_ZBB,   "d,s,t",  MATCH_ROLW, MASK_ROLW, match_opcode, 0 },
+{"rev8",     32, INSN_CLASS_ZBB,   "d,s",  MATCH_GREVI | ENCODE_ITYPE_IMM (0x18), MASK_GREVI | MASK_RVB_IMM, match_opcode, 0 },
+{"rev8",     64, INSN_CLASS_ZBB,   "d,s",  MATCH_GREVI | ENCODE_ITYPE_IMM (0x38), MASK_GREVI | MASK_RVB_IMM, match_opcode, 0 },
+{"orc.b",     0, INSN_CLASS_ZBB,   "d,s",  MATCH_GORCI | ENCODE_ITYPE_IMM (0x7), MASK_GORCI | MASK_RVB_IMM, match_opcode, 0 },
+
+{"clmul",     0, INSN_CLASS_ZBC,   "d,s,t",  MATCH_CLMUL, MASK_CLMUL, match_opcode, 0 },
+{"clmulh",    0, INSN_CLASS_ZBC,   "d,s,t",  MATCH_CLMULH, MASK_CLMULH, match_opcode, 0 },
+{"clmulr",    0, INSN_CLASS_ZBC,   "d,s,t",  MATCH_CLMULR, MASK_CLMULR, match_opcode, 0 },
 
 /* Single-precision floating-point instruction subset */
 {"frcsr",     0, INSN_CLASS_F,   "d",  MATCH_FRCSR, MASK_FRCSR, match_opcode, INSN_ALIAS },
@@ -931,6 +976,10 @@ const struct riscv_ext_version riscv_ext_version_table[] =
 
 {"zifencei", ISA_SPEC_CLASS_20191213, 2, 0},
 {"zifencei", ISA_SPEC_CLASS_20190608, 2, 0},
+
+{"zba", ISA_SPEC_CLASS_DRAFT, 0, 93},
+{"zbb", ISA_SPEC_CLASS_DRAFT, 0, 93},
+{"zbc", ISA_SPEC_CLASS_DRAFT, 0, 93},
 
 /* Terminate the list.  */
 {NULL, 0, 0, 0}

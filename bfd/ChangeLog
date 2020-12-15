@@ -1,3 +1,12 @@
+2021-01-07  Claire Xenia Wolf  <claire@symbioticeda.com>
+	    Jim Wilson  <jimw@sifive.com>
+	    Andrew Waterman  <andrew@sifive.com>
+	    Maxim Blinov  <maxim.blinov@embecosm.com>
+	    Kito Cheng  <kito.cheng@sifive.com>
+	    Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.c (riscv_std_z_ext_strtab): Added zba, zbb and zbc.
+
 2021-01-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-bfin.c (bfin_check_relocs): Check bfd_link_hash_indirect.
