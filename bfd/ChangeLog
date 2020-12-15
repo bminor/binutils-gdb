@@ -1,3 +1,15 @@
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
+	* coffcode.h (pelength, peheader): Delete static variables.
+	(coff_apply_checksum): Instead, define them as auto vars, and pass..
+	(coff_read_word, coff_compute_checksum): ..to here.  Delete
+	unnecessary forward declarations.
+	* pei-x86_64.c (pdata_count): Delete static variable.
+	(struct pex64_paps): New.
+	(pex64_print_all_pdata_sections, pex64_bfd_print_pdata): Pass
+	a pex64_paps for counting.
+	* peicode.h (jtab): Constify.
+
 2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
 
 	* elflink.c (bfd_elf_size_dynamic_sections): Call

@@ -699,7 +699,7 @@ typedef struct
 }
 jump_table;
 
-static jump_table jtab[] =
+static const jump_table jtab[] =
 {
 #ifdef I386MAGIC
   { I386MAGIC,

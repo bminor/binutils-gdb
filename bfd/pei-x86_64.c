@@ -820,20 +820,25 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
   return TRUE;
 }
 
-/* Static counter of number of found pdata sections.  */
-static bfd_boolean pdata_count;
+struct pex64_paps
+{
+  void *obj;
+  /* Number of found pdata sections.  */
+  unsigned int pdata_count;
+};
 
 /* Functionn prototype.  */
 bfd_boolean pex64_bfd_print_pdata (bfd *, void *);
 
 /* Helper function for bfd_map_over_section.  */
 static void
-pex64_print_all_pdata_sections (bfd *abfd, asection *pdata, void *obj)
+pex64_print_all_pdata_sections (bfd *abfd, asection *pdata, void *arg)
 {
+  struct pex64_paps *paps = arg;
   if (CONST_STRNEQ (pdata->name, ".pdata"))
     {
-      if (pex64_bfd_print_pdata_section (abfd, obj, pdata))
-	pdata_count++;
+      if (pex64_bfd_print_pdata_section (abfd, paps->obj, pdata))
+	paps->pdata_count++;
     }
 }
 
@@ -841,13 +846,15 @@ bfd_boolean
 pex64_bfd_print_pdata (bfd *abfd, void *vfile)
 {
   asection *pdata_section = bfd_get_section_by_name (abfd, ".pdata");
+  struct pex64_paps paps;
 
   if (pdata_section)
     return pex64_bfd_print_pdata_section (abfd, vfile, pdata_section);
 
-  pdata_count = 0;
-  bfd_map_over_sections (abfd, pex64_print_all_pdata_sections, vfile);
-  return (pdata_count > 0);
+  paps.obj = vfile;
+  paps.pdata_count = 0;
+  bfd_map_over_sections (abfd, pex64_print_all_pdata_sections, &paps);
+  return paps.pdata_count != 0;
 }
 
 #define bfd_pe_print_pdata   pex64_bfd_print_pdata

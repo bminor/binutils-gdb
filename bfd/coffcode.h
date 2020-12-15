@@ -445,14 +445,6 @@ static void * coff_mkobject_hook
 static flagword handle_COMDAT
   (bfd *, flagword, void *, const char *, asection *);
 #endif
-#ifdef COFF_IMAGE_WITH_PE
-static bfd_boolean coff_read_word
-  (bfd *, unsigned int *);
-static unsigned int coff_compute_checksum
-  (bfd *);
-static bfd_boolean coff_apply_checksum
-  (bfd *);
-#endif
 #ifdef TICOFF
 static bfd_boolean ticoff0_bad_format_hook
   (bfd *, void * );
@@ -3274,11 +3266,8 @@ coff_compute_section_file_positions (bfd * abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
 
-static unsigned int pelength;
-static unsigned int peheader;
-
 static bfd_boolean
-coff_read_word (bfd *abfd, unsigned int *value)
+coff_read_word (bfd *abfd, unsigned int *value, unsigned int *pelength)
 {
   unsigned char b[2];
   int status;
@@ -3295,13 +3284,13 @@ coff_read_word (bfd *abfd, unsigned int *value)
   else
     *value = (unsigned int) (b[0] + (b[1] << 8));
 
-  pelength += (unsigned int) status;
+  *pelength += status;
 
   return TRUE;
 }
 
 static unsigned int
-coff_compute_checksum (bfd *abfd)
+coff_compute_checksum (bfd *abfd, unsigned int *pelength)
 {
   bfd_boolean more_data;
   file_ptr filepos;
@@ -3309,7 +3298,7 @@ coff_compute_checksum (bfd *abfd)
   unsigned int total;
 
   total = 0;
-  pelength = 0;
+  *pelength = 0;
   filepos = (file_ptr) 0;
 
   do
@@ -3317,7 +3306,7 @@ coff_compute_checksum (bfd *abfd)
       if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
 	return 0;
 
-      more_data = coff_read_word (abfd, &value);
+      more_data = coff_read_word (abfd, &value, pelength);
       total += value;
       total = 0xffff & (total + (total >> 0x10));
       filepos += 2;
@@ -3332,11 +3321,13 @@ coff_apply_checksum (bfd *abfd)
 {
   unsigned int computed;
   unsigned int checksum = 0;
+  unsigned int peheader;
+  unsigned int pelength;
 
   if (bfd_seek (abfd, 0x3c, SEEK_SET) != 0)
     return FALSE;
 
-  if (!coff_read_word (abfd, &peheader))
+  if (!coff_read_word (abfd, &peheader, &pelength))
     return FALSE;
 
   if (bfd_seek (abfd, peheader + 0x58, SEEK_SET) != 0)
@@ -3348,7 +3339,7 @@ coff_apply_checksum (bfd *abfd)
   if (bfd_seek (abfd, peheader, SEEK_SET) != 0)
     return FALSE;
 
-  computed = coff_compute_checksum (abfd);
+  computed = coff_compute_checksum (abfd, &pelength);
 
   checksum = computed + pelength;
 
