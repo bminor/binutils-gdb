@@ -14358,7 +14358,7 @@ typedef struct
   flagword flag_value;
 } elf_flags_to_name_table;
 
-static elf_flags_to_name_table elf_flags_to_names [] =
+static const elf_flags_to_name_table elf_flags_to_names [] =
 {
   { "SHF_WRITE", SHF_WRITE },
   { "SHF_ALLOC", SHF_ALLOC },

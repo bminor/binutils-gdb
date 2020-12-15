@@ -1,5 +1,9 @@
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_flags_to_names): Constify.
+
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
 	* libxcoff.h (struct xcoff_backend_data_rec): Constify
 	_xcoff_glink_code.
 	(XCOFF_RELOC_FUNCTION_ARGS, XCOFF_COMPLAIN_FUNCTION_ARGS): Delete.
