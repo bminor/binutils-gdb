@@ -1,3 +1,7 @@
+2020-12-15  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.base/style.exp: Add deprecation tests.
+
 2020-12-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* lib/gdb.exp (gdb_test_multiple): Fix typo in doc.

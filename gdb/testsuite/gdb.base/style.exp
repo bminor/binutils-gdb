@@ -172,4 +172,11 @@ save_vars { env(TERM) } {
 	"warning: [style .*? file] is not a directory\\..*"
     gdb_test "show data-directory" \
 	"GDB's data directory is \"[style .*? file]\"\\..*"
+
+    # Check that deprecation styles command names.
+    gdb_test_no_output "maintenance deprecate p \"new_p\"" \
+	"maintenance deprecate p \"new_p\" /1/"
+    gdb_test "p 5" \
+	"Warning: '[style p title]', an alias for the command '[style print title]', is deprecated.*Use '[style new_p title]'.*" \
+	"p deprecated warning, with replacement"
 }

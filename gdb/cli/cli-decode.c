@@ -1939,16 +1939,23 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
       tmp_alias_str += std::string (alias->name);
 
       if (cmd->cmd_deprecated)
-	printf_filtered (_("Warning: command '%s' (%s) is deprecated.\n"),
-			 tmp_cmd_str.c_str (), tmp_alias_str.c_str ());
+	printf_filtered (_("Warning: command '%ps' (%ps) is deprecated.\n"),
+			 styled_string (title_style.style (),
+					tmp_cmd_str.c_str ()),
+			 styled_string (title_style.style (),
+					tmp_alias_str.c_str ()));
       else
-	printf_filtered (_("Warning: '%s', an alias for the command '%s', "
+	printf_filtered (_("Warning: '%ps', an alias for the command '%ps', "
 			   "is deprecated.\n"),
-			 tmp_alias_str.c_str (), tmp_cmd_str.c_str ());
+			 styled_string (title_style.style (),
+					tmp_alias_str.c_str ()),
+			 styled_string (title_style.style (),
+					tmp_cmd_str.c_str ()));
     }
   else
-    printf_filtered (_("Warning: command '%s' is deprecated.\n"),
-		     tmp_cmd_str.c_str ());
+    printf_filtered (_("Warning: command '%ps' is deprecated.\n"),
+		     styled_string (title_style.style (),
+				    tmp_cmd_str.c_str ()));
 
   /* Now display a second line indicating what the user should use instead.
      If it is only the alias that is deprecated, we want to indicate the
@@ -1959,7 +1966,9 @@ deprecated_cmd_warning (const char *text, struct cmd_list_element *list)
   else
     replacement = cmd->replacement;
   if (replacement != nullptr)
-    printf_filtered (_("Use '%s'.\n\n"), replacement);
+    printf_filtered (_("Use '%ps'.\n\n"),
+		     styled_string (title_style.style (),
+				    replacement));
   else
     printf_filtered (_("No alternative known.\n\n"));
 
