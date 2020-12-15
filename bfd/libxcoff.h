@@ -90,7 +90,7 @@ struct xcoff_backend_data_rec
 
   /* Global linkage.  The first word of global linkage code must be be
      modified by filling in the correct TOC offset.  */
-  unsigned long *_xcoff_glink_code;
+  const unsigned long *_xcoff_glink_code;
 
   /* Size of the global link code in bytes of the xcoff_glink_code table.  */
   unsigned long _xcoff_glink_size;
@@ -210,30 +210,30 @@ struct xcoff_backend_data_rec
 #endif
 #define N_ONES(n) (((((bfd_vma) 1 << ((n) - 1)) - 1) << 1) | 1)
 
-#define XCOFF_RELOC_FUNCTION_ARGS \
-  bfd *, asection *, bfd *, struct internal_reloc *, \
-  struct internal_syment *, struct reloc_howto_struct *, bfd_vma, bfd_vma, \
-  bfd_vma *relocation, bfd_byte *contents
+typedef bfd_boolean xcoff_reloc_function (bfd *, asection *, bfd *,
+					  struct internal_reloc *,
+					  struct internal_syment *,
+					  struct reloc_howto_struct *,
+					  bfd_vma, bfd_vma,
+					  bfd_vma *, bfd_byte *);
 
-#define XCOFF_COMPLAIN_FUNCTION_ARGS \
-  bfd *, bfd_vma, bfd_vma, struct reloc_howto_struct *howto
+typedef bfd_boolean xcoff_complain_function (bfd *, bfd_vma, bfd_vma,
+					     struct reloc_howto_struct *);
 
-extern bfd_boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
-  (XCOFF_RELOC_FUNCTION_ARGS);
-extern bfd_boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
+extern xcoff_reloc_function *const xcoff_calculate_relocation[];
+extern xcoff_complain_function *const xcoff_complain_overflow[];
 
 #define XCOFF_NO_LONG_SECTION_NAMES  (FALSE), bfd_coff_set_long_section_names_disallowed
 
 /* Relocation functions */
-bfd_boolean xcoff_reloc_type_noop (XCOFF_RELOC_FUNCTION_ARGS);
-bfd_boolean xcoff_reloc_type_fail (XCOFF_RELOC_FUNCTION_ARGS);
-bfd_boolean xcoff_reloc_type_pos  (XCOFF_RELOC_FUNCTION_ARGS);
-bfd_boolean xcoff_reloc_type_neg  (XCOFF_RELOC_FUNCTION_ARGS);
-bfd_boolean xcoff_reloc_type_rel  (XCOFF_RELOC_FUNCTION_ARGS);
-bfd_boolean xcoff_reloc_type_toc  (XCOFF_RELOC_FUNCTION_ARGS);
-bfd_boolean xcoff_reloc_type_ba   (XCOFF_RELOC_FUNCTION_ARGS);
-bfd_boolean xcoff_reloc_type_crel (XCOFF_RELOC_FUNCTION_ARGS);
+extern xcoff_reloc_function xcoff_reloc_type_noop;
+extern xcoff_reloc_function xcoff_reloc_type_fail;
+extern xcoff_reloc_function xcoff_reloc_type_pos;
+extern xcoff_reloc_function xcoff_reloc_type_neg;
+extern xcoff_reloc_function xcoff_reloc_type_rel;
+extern xcoff_reloc_function xcoff_reloc_type_toc;
+extern xcoff_reloc_function xcoff_reloc_type_ba;
+extern xcoff_reloc_function xcoff_reloc_type_crel;
 
 /* Structure to describe dwarf sections.
    Useful to convert from XCOFF section name to flag and vice-versa.

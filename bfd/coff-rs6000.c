@@ -148,19 +148,15 @@ static bfd_boolean do_pad (bfd *, unsigned int);
 static bfd_boolean do_copy (bfd *, bfd *);
 
 /* Relocation functions */
-static bfd_boolean xcoff_reloc_type_br (XCOFF_RELOC_FUNCTION_ARGS);
+static xcoff_reloc_function xcoff_reloc_type_br;
 
-static bfd_boolean xcoff_complain_overflow_dont_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
-static bfd_boolean xcoff_complain_overflow_bitfield_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
-static bfd_boolean xcoff_complain_overflow_signed_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
-static bfd_boolean xcoff_complain_overflow_unsigned_func
-  (XCOFF_COMPLAIN_FUNCTION_ARGS);
+static xcoff_complain_function xcoff_complain_overflow_dont_func;
+static xcoff_complain_function xcoff_complain_overflow_bitfield_func;
+static xcoff_complain_function xcoff_complain_overflow_signed_func;
+static xcoff_complain_function xcoff_complain_overflow_unsigned_func;
 
-bfd_boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
-  (XCOFF_RELOC_FUNCTION_ARGS) =
+xcoff_reloc_function *const
+xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
 {
   xcoff_reloc_type_pos,	 /* R_POS   (0x00) */
   xcoff_reloc_type_neg,	 /* R_NEG   (0x01) */
@@ -192,8 +188,8 @@ bfd_boolean (*xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
   xcoff_reloc_type_ba,	 /* R_RBRC  (0x1b) */
 };
 
-bfd_boolean (*xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW])
-  (XCOFF_COMPLAIN_FUNCTION_ARGS) =
+xcoff_complain_function *const
+xcoff_complain_overflow[XCOFF_MAX_COMPLAIN_OVERFLOW] =
 {
   xcoff_complain_overflow_dont_func,
   xcoff_complain_overflow_bitfield_func,
@@ -3981,7 +3977,7 @@ HOWTO (0,			/* type */
    The first word of global linkage code must be modified by filling in
    the correct TOC offset.  */
 
-static unsigned long xcoff_glink_code[9] =
+static const unsigned long xcoff_glink_code[9] =
   {
     0x81820000,	/* lwz r12,0(r2) */
     0x90410014,	/* stw r2,20(r1) */

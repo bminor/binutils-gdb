@@ -1,5 +1,26 @@
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
+	* libxcoff.h (struct xcoff_backend_data_rec): Constify
+	_xcoff_glink_code.
+	(XCOFF_RELOC_FUNCTION_ARGS, XCOFF_COMPLAIN_FUNCTION_ARGS): Delete.
+	(xcoff_reloc_function, xcoff_complain_function): New typedef.
+	(xcoff_calculate_relocation, xcoff_complain_overflow),
+	(xcoff_reloc_type_noop, xcoff_reloc_type_fail),
+	(xcoff_reloc_type_pos, xcoff_reloc_type_neg),
+	(xcoff_reloc_type_rel, xcoff_reloc_type_toc),
+	(xcoff_reloc_type_ba, xcoff_reloc_type_crel): Update declaration.
+	* coff-rs6000.c (xcoff_reloc_type_br): Declare using typedef.
+	(xcoff_complain_overflow_dont_func): Likewise.
+	(xcoff_complain_overflow_bitfield_func): Likewise.
+	(xcoff_complain_overflow_signed_func): Likewise.
+	(xcoff_complain_overflow_unsigned_func): Likewise.
+	(xcoff_calculate_relocation, xcoff_complain_overflow): Constify.
+	(xcoff_glink_code): Constify.
+	* coff64-rs6000.c (xcoff64_reloc_type_br): Declare using typedef.
+	(xcoff64_calculate_relocation, xcoff64_glink_code): Constify.
+
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
 	* elf32-xtensa.c (narrowable, widenable): Constify.
 	* xtensa-modules.c: Constify many arrays.
 
