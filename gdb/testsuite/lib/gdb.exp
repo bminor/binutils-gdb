@@ -777,7 +777,7 @@ proc gdb_internal_error_resync {} {
 }
 
 
-# gdb_test_multiple COMMAND MESSAGE [ -promp PROMPT_REGEXP] [ -lbl ]
+# gdb_test_multiple COMMAND MESSAGE [ -prompt PROMPT_REGEXP] [ -lbl ]
 #                   EXPECT_ARGUMENTS
 # Send a command to gdb; test the result.
 #
