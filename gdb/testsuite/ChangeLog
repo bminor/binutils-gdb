@@ -1,5 +1,10 @@
 2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/rn-dl-bind.exp: Replace reverse-step with
+	reverse-continue to breakpoint.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/delta.exp: Remove instruction-history and
 	function-call-history checks.
 
