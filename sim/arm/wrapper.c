@@ -241,6 +241,14 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
       ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_v6_Prop);
       break;
 
+#if 1
+    case bfd_mach_arm_6T2:
+    case bfd_mach_arm_7:
+    case bfd_mach_arm_7EM:
+      ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_v6_Prop);
+      break;
+#endif
+
     case bfd_mach_arm_XScale:
       ARMul_SelectProcessor (state, ARM_v5_Prop | ARM_v5e_Prop | ARM_XScale_Prop | ARM_v6_Prop);
       break;

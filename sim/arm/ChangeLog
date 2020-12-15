@@ -1,3 +1,12 @@
+2020-12-15  Nick Clifton  <nickc@redhat.com>
+
+	* wrapper.c (sim_create_inferior): Accept some more ARM machine numbers.
+
+2020-12-15  Jens Bauer <jens@plustv.dk>
+
+	* armemu.c (handle_v6_insn): Add support for SDIV and UDIV.
+	* thumbemu.c (handle_T2_insn): Likewise.
+
 2020-10-20  Dr. David Alan Gilbert  <dgilbert@redhat.com>
 
 	* armos.c (SWIread): Fix printf format.
