@@ -2056,7 +2056,7 @@ get_opd_info (asection * sec)
 
 /* Parameters for the qsort hook.  */
 static bfd_boolean synthetic_relocatable;
-static asection *synthetic_opd;
+static const asection *synthetic_opd;
 
 /* qsort comparison function for ppc64_elf_get_synthetic_symtab.  */
 

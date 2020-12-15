@@ -1,5 +1,9 @@
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (synthetic_opd): Constify.
+
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
 	* arc-plt.h (plt_versions): Constify.
 	* elf32-arc.c (arc_get_plt_version): Constify return pointer,
 	adjust uses throughout.
