@@ -9514,11 +9514,11 @@ nds32_elf_insn_size (bfd *abfd ATTRIBUTE_UNUSED,
    to do gp relaxation.  */
 
 static void
-relax_range_measurement (bfd *abfd)
+relax_range_measurement (bfd *abfd, struct bfd_link_info *link_info)
 {
   asection *sec_f, *sec_b;
   /* For upper bound.   */
-  bfd_vma maxpgsz = get_elf_backend_data (abfd)->maxpagesize;
+  bfd_vma maxpgsz;
   bfd_vma align;
   static int decide_relax_range = 0;
   int i;
@@ -9550,6 +9550,10 @@ relax_range_measurement (bfd *abfd)
       sec_b = sec_b->next;
     }
 
+  if (link_info != NULL)
+    maxpgsz = link_info->maxpagesize;
+  else
+    maxpgsz = get_elf_backend_data (abfd)->maxpagesize;
   /* I guess we can not determine the section before
      gp located section, so we assume the align is max page size.  */
   for (i = 0; i < range_number; i++)
@@ -12121,7 +12125,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
       is_SDA_BASE_set = 1;
       nds32_elf_final_sda_base (sec->output_section->owner, link_info,
 				&gp, FALSE);
-      relax_range_measurement (abfd);
+      relax_range_measurement (abfd, link_info);
     }
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;

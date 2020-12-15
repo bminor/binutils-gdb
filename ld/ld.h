@@ -294,12 +294,6 @@ typedef struct
   /* The size of the hash table to use.  */
   unsigned long hash_table_size;
 
-  /* The maximum page size for ELF.  */
-  bfd_vma maxpagesize;
-
-  /* The common page size for ELF.  */
-  bfd_vma commonpagesize;
-
   /* If set, print discarded sections in map file output.  */
   bfd_boolean print_map_discarded;
 

@@ -2335,49 +2335,6 @@ bfd_emul_get_maxpagesize (const char *emul)
   return 0;
 }
 
-static void
-bfd_elf_set_pagesize (const bfd_target *target, bfd_vma size,
-		      int offset, const bfd_target *orig_target)
-{
-  if (target->flavour == bfd_target_elf_flavour)
-    {
-      const struct elf_backend_data *bed;
-
-      bed = xvec_get_elf_backend_data (target);
-      *((bfd_vma *) ((char *) bed + offset)) = size;
-    }
-
-  if (target->alternative_target
-      && target->alternative_target != orig_target)
-    bfd_elf_set_pagesize (target->alternative_target, size, offset,
-			  orig_target);
-}
-
-/*
-FUNCTION
-	bfd_emul_set_maxpagesize
-
-SYNOPSIS
-	void bfd_emul_set_maxpagesize (const char *, bfd_vma);
-
-DESCRIPTION
-	For ELF, set the maximum page size for the emulation.  It is
-	a no-op for other formats.
-
-*/
-
-void
-bfd_emul_set_maxpagesize (const char *emul, bfd_vma size)
-{
-  const bfd_target *target;
-
-  target = bfd_find_target (emul, NULL);
-  if (target)
-    bfd_elf_set_pagesize (target, size,
-			  offsetof (struct elf_backend_data,
-				    maxpagesize), target);
-}
-
 /*
 FUNCTION
 	bfd_emul_get_commonpagesize
@@ -2411,31 +2368,6 @@ bfd_emul_get_commonpagesize (const char *emul, bfd_boolean relro)
 	return bed->commonpagesize;
     }
   return 0;
-}
-
-/*
-FUNCTION
-	bfd_emul_set_commonpagesize
-
-SYNOPSIS
-	void bfd_emul_set_commonpagesize (const char *, bfd_vma);
-
-DESCRIPTION
-	For ELF, set the common page size for the emulation.  It is
-	a no-op for other formats.
-
-*/
-
-void
-bfd_emul_set_commonpagesize (const char *emul, bfd_vma size)
-{
-  const bfd_target *target;
-
-  target = bfd_find_target (emul, NULL);
-  if (target)
-    bfd_elf_set_pagesize (target, size,
-			  offsetof (struct elf_backend_data,
-				    commonpagesize), target);
 }
 
 /*

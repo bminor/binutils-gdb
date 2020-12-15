@@ -4428,7 +4428,14 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       && (elf_tdata (abfd)->has_gnu_osabi & elf_gnu_osabi_mbind) != 0)
     {
       /* Add a PT_GNU_MBIND segment for each mbind section.  */
-      unsigned int page_align_power = bfd_log2 (bed->commonpagesize);
+      bfd_vma commonpagesize;
+      unsigned int page_align_power;
+
+      if (info != NULL)
+	commonpagesize = info->commonpagesize;
+      else
+	commonpagesize = bed->commonpagesize;
+      page_align_power = bfd_log2 (commonpagesize);
       for (s = abfd->sections; s != NULL; s = s->next)
 	if (elf_section_flags (s) & SHF_GNU_MBIND)
 	  {
@@ -4672,7 +4679,10 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       phdr_size += bed->s->sizeof_ehdr;
       /* phdr_size is compared to LMA values which are in bytes.  */
       phdr_size /= opb;
-      maxpagesize = bed->maxpagesize;
+      if (info != NULL)
+	maxpagesize = info->maxpagesize;
+      else
+	maxpagesize = bed->maxpagesize;
       if (maxpagesize == 0)
 	maxpagesize = 1;
       phdr_in_segment = info != NULL && info->load_phdrs;
@@ -5475,7 +5485,12 @@ assign_file_positions_for_load_sections (bfd *abfd,
 
   maxpagesize = 1;
   if ((abfd->flags & D_PAGED) != 0)
-    maxpagesize = bed->maxpagesize;
+    {
+      if (link_info != NULL)
+	maxpagesize = link_info->maxpagesize;
+      else
+	maxpagesize = bed->maxpagesize;
+    }
 
   /* Sections must map to file offsets past the ELF file header.  */
   off = bed->s->sizeof_ehdr;
@@ -6056,7 +6071,12 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   struct elf_segment_map *m;
   file_ptr off;
   unsigned int opb = bfd_octets_per_byte (abfd, NULL);
+  bfd_vma maxpagesize;
 
+  if (link_info != NULL)
+    maxpagesize = link_info->maxpagesize;
+  else
+    maxpagesize = bed->maxpagesize;
   i_shdrpp = elf_elfsections (abfd);
   end_hdrpp = i_shdrpp + elf_numsections (abfd);
   off = elf_next_file_pos (abfd);
@@ -6089,7 +6109,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	  /* We don't need to page align empty sections.  */
 	  if ((abfd->flags & D_PAGED) != 0 && hdr->sh_size != 0)
 	    off += vma_page_aligned_bias (hdr->sh_addr, off,
-					  bed->maxpagesize);
+					  maxpagesize);
 	  else
 	    off += vma_page_aligned_bias (hdr->sh_addr, off,
 					  hdr->sh_addralign);
@@ -6767,7 +6787,7 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
 /* Rewrite program header information.  */
 
 static bfd_boolean
-rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
+rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 {
   Elf_Internal_Ehdr *iehdr;
   struct elf_segment_map *map;
@@ -6779,7 +6799,6 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
   unsigned int num_segments;
   bfd_boolean phdr_included = FALSE;
   bfd_boolean p_paddr_valid;
-  bfd_vma maxpagesize;
   struct elf_segment_map *phdr_adjust_seg = NULL;
   unsigned int phdr_adjust_num = 0;
   const struct elf_backend_data *bed;
@@ -6792,7 +6811,6 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
   pointer_to_map = &map_first;
 
   num_segments = elf_elfheader (ibfd)->e_phnum;
-  maxpagesize = get_elf_backend_data (obfd)->maxpagesize;
 
   /* Returns the end address of the segment + 1.  */
 #define SEGMENT_END(segment, start)					\
@@ -7048,6 +7066,17 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_type = segment->p_type;
       map->p_flags = segment->p_flags;
       map->p_flags_valid = 1;
+
+      if (map->p_type == PT_LOAD
+	  && (ibfd->flags & D_PAGED) != 0
+	  && maxpagesize > 1
+	  && segment->p_align > 1)
+	{
+	  map->p_align = segment->p_align;
+	  if (segment->p_align > maxpagesize)
+	    map->p_align = maxpagesize;
+	  map->p_align_valid = 1;
+	}
 
       /* If the first section in the input segment is removed, there is
 	 no need to preserve segment physical address in the corresponding
@@ -7613,6 +7642,8 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 static bfd_boolean
 copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
+  bfd_vma maxpagesize;
+
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
@@ -7697,6 +7728,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
     }
 
  rewrite:
+  maxpagesize = 0;
   if (ibfd->xvec == obfd->xvec)
     {
       /* When rewriting program header, set the output maxpagesize to
@@ -7704,7 +7736,6 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       Elf_Internal_Phdr *segment;
       unsigned int i;
       unsigned int num_segments = elf_elfheader (ibfd)->e_phnum;
-      bfd_vma maxpagesize = 0;
 
       for (i = 0, segment = elf_tdata (ibfd)->phdr;
 	   i < num_segments;
@@ -7721,12 +7752,11 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	    else
 	      maxpagesize = segment->p_align;
 	  }
-
-      if (maxpagesize != get_elf_backend_data (obfd)->maxpagesize)
-	bfd_emul_set_maxpagesize (bfd_get_target (obfd), maxpagesize);
     }
+  if (maxpagesize == 0)
+    maxpagesize = get_elf_backend_data (obfd)->maxpagesize;
 
-  return rewrite_elf_program_header (ibfd, obfd);
+  return rewrite_elf_program_header (ibfd, obfd, maxpagesize);
 }
 
 /* Initialize private output section information from input section.  */

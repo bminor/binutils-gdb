@@ -232,11 +232,11 @@ after_parse_default (void)
       if (!is_vma)
 	ldlang_add_undef (entry_symbol.name, entry_from_cmdline);
     }
-  if (config.maxpagesize == 0)
-    config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
-  if (config.commonpagesize == 0)
-    config.commonpagesize = bfd_emul_get_commonpagesize (default_target,
-							 link_info.relro);
+  if (link_info.maxpagesize == 0)
+    link_info.maxpagesize = bfd_emul_get_maxpagesize (default_target);
+  if (link_info.commonpagesize == 0)
+    link_info.commonpagesize = bfd_emul_get_commonpagesize (default_target,
+							    link_info.relro);
 }
 
 void
@@ -303,9 +303,6 @@ set_output_arch_default (void)
   /* Set the output architecture and machine if possible.  */
   bfd_set_arch_mach (link_info.output_bfd,
 		     ldfile_output_architecture, ldfile_output_machine);
-
-  bfd_emul_set_maxpagesize (output_target, config.maxpagesize);
-  bfd_emul_set_commonpagesize (output_target, config.commonpagesize);
 }
 
 void

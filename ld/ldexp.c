@@ -547,8 +547,8 @@ fold_binary (etree_type *tree)
 	  {
 	    if (!seg->used
 		&& config.magic_demand_paged
-		&& config.maxpagesize != 0
-		&& (seg->value % config.maxpagesize) != 0)
+		&& link_info.maxpagesize != 0
+		&& (seg->value % link_info.maxpagesize) != 0)
 	      einfo (_("%P: warning: address of `%s' "
 		       "isn't multiple of maximum page size\n"),
 		     segment_name);
@@ -898,9 +898,9 @@ fold_name (etree_type *tree)
 
     case CONSTANT:
       if (strcmp (tree->name.name, "MAXPAGESIZE") == 0)
-	new_number (config.maxpagesize);
+	new_number (link_info.maxpagesize);
       else if (strcmp (tree->name.name, "COMMONPAGESIZE") == 0)
-	new_number (config.commonpagesize);
+	new_number (link_info.commonpagesize);
       else
 	einfo (_("%F%P:%pS: unknown constant `%s' referenced in expression\n"),
 	       tree, tree->name.name);

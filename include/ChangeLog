@@ -1,5 +1,10 @@
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
+	* bfdlink.h (struct bfd_link_info): Add maxpagesize and
+	commonpagesize.
+
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
 	* xtensa-isa-internal.h (xtensa_format_internal),
 	(xtensa_slot_internal, xtensa_operand_internal),
 	(xtensa_arg_internal, xtensa_iclass_internal),

@@ -1,5 +1,22 @@
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
+	* elfxx-target.h (elfNN_bed): Constify.
+	* bfd.c (bfd_elf_set_pagesize): Delete.
+	(bfd_emul_set_maxpagesize, bfd_emul_set_commonpagesize): Delete.
+	* elf.c (get_program_header_size): Get commonpagesize from
+	link info.
+	(_bfd_elf_map_sections_to_segments): Get maxpagesize from link info.
+	(assign_file_positions_for_load_sections): Likewise.
+	(assign_file_positions_for_non_load_sections): Likewise.
+	(rewrite_elf_program_header): Add maxpagesize param.  Set map_p_align.
+	(copy_private_bfd_data): Don't call bfd_elf_set_maxpagesize.
+	Instead pass maxpagesize to rewrite_elf_program_header.
+	* elf32-nds32.c (relax_range_measurement): Add link_info param.
+	Get maxpagesize from link_info.  Adjust caller.
+	* bfd-in2.h: Regenerate.
+
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (elf_flags_to_names): Constify.
 
 2020-12-16  Alan Modra  <amodra@gmail.com>

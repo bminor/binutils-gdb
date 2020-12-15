@@ -802,7 +802,7 @@
 
 extern const struct elf_size_info _bfd_elfNN_size_info;
 
-static struct elf_backend_data elfNN_bed =
+static const struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
   ELF_TARGET_ID,		/* target_id */

@@ -716,17 +716,18 @@ fragment <<EOF
 	{
 	  char *end;
 
-	  config.maxpagesize = strtoul (optarg + 14, &end, 0);
-	  if (*end || (config.maxpagesize & (config.maxpagesize - 1)) != 0)
+	  link_info.maxpagesize = strtoul (optarg + 14, &end, 0);
+	  if (*end
+	      || (link_info.maxpagesize & (link_info.maxpagesize - 1)) != 0)
 	    einfo (_("%F%P: invalid maximum page size \`%s'\n"),
 		   optarg + 14);
 	}
       else if (CONST_STRNEQ (optarg, "common-page-size="))
 	{
 	  char *end;
-	  config.commonpagesize = strtoul (optarg + 17, &end, 0);
+	  link_info.commonpagesize = strtoul (optarg + 17, &end, 0);
 	  if (*end
-	      || (config.commonpagesize & (config.commonpagesize - 1)) != 0)
+	      || (link_info.commonpagesize & (link_info.commonpagesize - 1)) != 0)
 	    einfo (_("%F%P: invalid common page size \`%s'\n"),
 		   optarg + 17);
 	}

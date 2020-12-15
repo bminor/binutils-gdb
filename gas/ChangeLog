@@ -1,3 +1,8 @@
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (obj_elf_section): Don't set elf_osabi here.
+	(obj_elf_type): Likewise.
+
 2020-12-15  Alan Modra  <amodra@gmail.com>
 
 	PR 27071

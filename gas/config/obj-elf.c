@@ -1425,13 +1425,13 @@ obj_elf_section (int push)
 
   if ((gnu_attr & (SHF_GNU_MBIND | SHF_GNU_RETAIN)) != 0)
     {
-      struct elf_backend_data *bed;
+      const struct elf_backend_data *bed;
       bfd_boolean mbind_p = (gnu_attr & SHF_GNU_MBIND) != 0;
 
       if (mbind_p && (attr & SHF_ALLOC) == 0)
 	as_bad (_("SHF_ALLOC isn't set for GNU_MBIND section: %s"), name);
 
-      bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
+      bed = get_elf_backend_data (stdoutput);
 
       if (bed->elf_osabi != ELFOSABI_GNU
 	  && bed->elf_osabi != ELFOSABI_FREEBSD
@@ -1440,9 +1440,6 @@ obj_elf_section (int push)
 		mbind_p ? "GNU_MBIND" : "GNU_RETAIN");
       else
 	{
-	  if (bed->elf_osabi == ELFOSABI_NONE)
-	    bed->elf_osabi = ELFOSABI_GNU;
-
 	  if (mbind_p)
 	    elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_mbind;
 	  if ((gnu_attr & SHF_GNU_RETAIN) != 0)
@@ -2361,13 +2358,12 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 	   || strcmp (type_name, "10") == 0
 	   || strcmp (type_name, "STT_GNU_IFUNC") == 0)
     {
-      struct elf_backend_data *bed;
+      const struct elf_backend_data *bed;
 
-      bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
-      if (bed->elf_osabi == ELFOSABI_NONE)
-	bed->elf_osabi = ELFOSABI_GNU;
-      else if (bed->elf_osabi != ELFOSABI_GNU
-	       && bed->elf_osabi != ELFOSABI_FREEBSD)
+      bed = get_elf_backend_data (stdoutput);
+      if (bed->elf_osabi != ELFOSABI_NONE
+	  && bed->elf_osabi != ELFOSABI_GNU
+	  && bed->elf_osabi != ELFOSABI_FREEBSD)
 	as_bad (_("symbol type \"%s\" is supported only by GNU "
 		  "and FreeBSD targets"), type_name);
       /* MIPS targets do not support IFUNCS.  */
@@ -2379,12 +2375,11 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
     }
   else if (strcmp (type_name, "gnu_unique_object") == 0)
     {
-      struct elf_backend_data *bed;
+      const struct elf_backend_data *bed;
 
-      bed = (struct elf_backend_data *) get_elf_backend_data (stdoutput);
-      if (bed->elf_osabi == ELFOSABI_NONE)
-	bed->elf_osabi = ELFOSABI_GNU;
-      else if (bed->elf_osabi != ELFOSABI_GNU)
+      bed = get_elf_backend_data (stdoutput);
+      if (bed->elf_osabi != ELFOSABI_NONE
+	  && bed->elf_osabi != ELFOSABI_GNU)
 	as_bad (_("symbol type \"%s\" is supported only by GNU targets"),
 		type_name);
       elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_unique;

@@ -51,7 +51,7 @@ ppc_after_open_output (void)
     params.emit_stub_syms = (link_info.emitrelocations
 			     || bfd_link_pic (&link_info));
   if (params.pagesize == 0)
-    params.pagesize = config.commonpagesize;
+    params.pagesize = link_info.commonpagesize;
   ppc_elf_link_params (&link_info, &params);
 }
 
