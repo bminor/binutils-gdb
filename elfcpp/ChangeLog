@@ -3,6 +3,12 @@
 	* elfcpp.h (enum DT): New enum member DT_GNU_FLAGS_1.
 	(enum DF_GNU_1): New enum DF_GNU_1 containing DF_GNU_1_UNIQUE.
 
+2020-12-14  H.J. Lu  <hjl.tools@gmail.com>
+	    Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/27039
+	* elfcpp.h (SHF): Add SHF_GNU_RETAIN.
+
 2020-10-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfcpp.h (GNU_PROPERTY_X86_ISA_1_USED): Renamed to ...
