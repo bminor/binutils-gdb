@@ -1,3 +1,13 @@
+2020-12-16  Luis Machado  <luis.machado@arm.com>
+
+	* capability.cc (cap_short_perms_strings): Remove.
+	(capability::is_null_derived): New member function.
+	(capability::to_str): Document and handle new CHERY-style printing
+	format.
+	* capability.h (cap_constants): Document the CAP_SEAL_TYPE_*
+	constants.
+	(struct capability) <is_null_derived>: New member function prototype.
+
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
 	* capability.cc (cap_short_perms_strings): New static global.
