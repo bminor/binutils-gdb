@@ -1,5 +1,10 @@
 2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/delta.exp: Remove instruction-history and
+	function-call-history checks.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* README (Note): Add nopie_ldflag.
 	* lib/gdb.exp (gdb_compile): Extend nopie handling.
 
