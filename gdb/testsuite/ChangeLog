@@ -1,5 +1,11 @@
 2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/exception.cc (main): Update test source.
+	* gdb.btrace/exception.exp: Update patterns.
+	* gdb.btrace/function_call_history.exp: Likewise.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/unknown_functions.exp: Move -Wl,-x to ldflags.
 
 2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
