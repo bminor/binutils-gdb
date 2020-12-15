@@ -856,8 +856,8 @@ make_sized_incremental_binary(Output_file* file,
 {
   Target* target = select_target(NULL, 0, // XXX
 				 ehdr.get_e_machine(), size, big_endian,
-				 ehdr.get_e_ident()[elfcpp::EI_OSABI],
-				 ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
+				 ehdr.get_ei_osabi(),
+				 ehdr.get_ei_abiversion());
   if (target == NULL)
     {
       explain_no_incremental(_("unsupported ELF machine number %d"),

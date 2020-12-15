@@ -1,3 +1,12 @@
+2020-12-15  Cary Coutant  <ccoutant@gmail.com>
+
+	* dwp.cc (class Dwo_file): Use new Ehdr::get_ei_osabi and
+	get_ei_abiversion methods.
+	* incremental.cc (make_sized_incremental_binary): Likewise.
+	* object.cc (Sized_relobj_file::Sized_relobj_file): Likewise.
+	(make_elf_sized_object): Likewise.
+	* object.h (class Osabi): Make the class untemplated.
+
 2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
 
 	Implement -z unique / -z nounique options.

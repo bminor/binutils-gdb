@@ -1,3 +1,7 @@
+2020-12-15  Cary Coutant  <ccoutant@gmail.com>
+
+	* elfcpp.h (class Ehdr): Add get_ei_osabi and get_ei_abiversion methods.
+
 2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
 
 	* elfcpp.h (enum DT): New enum member DT_GNU_FLAGS_1.

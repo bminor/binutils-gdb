@@ -1107,8 +1107,8 @@ Dwo_file::sized_make_object(const unsigned char* p, Input_file* input_file,
   if (output_file != NULL)
     output_file->record_target_info(
 	this->name_, ehdr.get_e_machine(), size, big_endian,
-	ehdr.get_e_ident()[elfcpp::EI_OSABI],
-	ehdr.get_e_ident()[elfcpp::EI_ABIVERSION]);
+	ehdr.get_ei_osabi(),
+	ehdr.get_ei_abiversion());
   return obj;
 }
 

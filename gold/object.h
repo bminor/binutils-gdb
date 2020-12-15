@@ -386,13 +386,11 @@ build_compressed_section_map(const unsigned char* pshdrs, unsigned int shnum,
 
 // Osabi represents the EI_OSABI field from the ELF header.
 
-template <int size, bool big_endian>
 class Osabi
 {
  public:
-  Osabi(const elfcpp::Ehdr<size, big_endian>& ehdr)
-    : ei_osabi_(static_cast<elfcpp::ELFOSABI>(
-		    ehdr.get_e_ident()[elfcpp::EI_OSABI]))
+  Osabi(unsigned char ei_osabi)
+    : ei_osabi_(static_cast<elfcpp::ELFOSABI>(ei_osabi))
   { }
 
   bool
@@ -2249,7 +2247,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   { return this->e_type_; }
 
   // Return the EI_OSABI.
-  const Osabi<size, big_endian>&
+  const Osabi&
   osabi() const
   { return this->osabi_; }
 
@@ -2894,7 +2892,7 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
   // The EI_OSABI.
-  const Osabi<size, big_endian> osabi_;
+  const Osabi osabi_;
   // Type of ELF file (ET_REL or ET_EXEC).  ET_EXEC files are allowed
   // as input files only for the --just-symbols option.
   int e_type_;

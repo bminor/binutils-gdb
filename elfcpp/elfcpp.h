@@ -1100,6 +1100,14 @@ class Ehdr
   get_e_ident() const
   { return this->p_->e_ident; }
 
+  unsigned char
+  get_ei_osabi() const
+  { return this->p_->e_ident[EI_OSABI]; }
+
+  unsigned char
+  get_ei_abiversion() const
+  { return this->p_->e_ident[EI_ABIVERSION]; }
+
   Elf_Half
   get_e_type() const
   { return Convert<16, big_endian>::convert_host(this->p_->e_type); }
