@@ -1,5 +1,11 @@
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
+	* arc-plt.h (plt_versions): Constify.
+	* elf32-arc.c (arc_get_plt_version): Constify return pointer,
+	adjust uses throughout.
+
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
 	* coffcode.h (pelength, peheader): Delete static variables.
 	(coff_apply_checksum): Instead, define them as auto vars, and pass..
 	(coff_read_word, coff_compute_checksum): ..to here.  Delete

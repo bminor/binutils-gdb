@@ -178,7 +178,7 @@ struct plt_version_t
 #define PLT_ELEM(...)
 #define ENTRY_RELOC(...)
 #define ELEM_RELOC(...)
-struct plt_version_t plt_versions[PLT_MAX] = {
+const struct plt_version_t plt_versions[PLT_MAX] = {
 
 #include "arc-plt.def"
 

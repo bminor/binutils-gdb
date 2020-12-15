@@ -2112,7 +2112,7 @@ elf_arc_check_relocs (bfd *			 abfd,
 
 #define ELF_DYNAMIC_INTERPRETER  "/sbin/ld-uClibc.so"
 
-static struct plt_version_t *
+static const struct plt_version_t *
 arc_get_plt_version (struct bfd_link_info *info)
 {
   int i;
@@ -2146,7 +2146,7 @@ add_symbol_to_plt (struct bfd_link_info *info)
   struct elf_link_hash_table *htab = elf_hash_table (info);
   bfd_vma ret;
 
-  struct plt_version_t *plt_data = arc_get_plt_version (info);
+  const struct plt_version_t *plt_data = arc_get_plt_version (info);
 
   /* If this is the first .plt entry, make room for the special first
      entry.  */
@@ -2226,7 +2226,7 @@ relocate_plt_for_symbol (bfd *output_bfd,
 			 struct bfd_link_info *info,
 			 struct elf_link_hash_entry *h)
 {
-  struct plt_version_t *plt_data = arc_get_plt_version (info);
+  const struct plt_version_t *plt_data = arc_get_plt_version (info);
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   bfd_vma plt_index = (h->plt.offset  - plt_data->entry_size)
@@ -2292,7 +2292,7 @@ static void
 relocate_plt_for_entry (bfd *abfd,
 			struct bfd_link_info *info)
 {
-  struct plt_version_t *plt_data = arc_get_plt_version (info);
+  const struct plt_version_t *plt_data = arc_get_plt_version (info);
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   {
