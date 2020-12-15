@@ -1,5 +1,10 @@
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
+	* elf32-xtensa.c (narrowable, widenable): Constify.
+	* xtensa-modules.c: Constify many arrays.
+
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (synthetic_opd): Constify.
 
 2020-12-16  Alan Modra  <amodra@gmail.com>

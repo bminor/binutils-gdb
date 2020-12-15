@@ -1,3 +1,12 @@
+2020-12-16  Alan Modra  <amodra@gmail.com>
+
+	* xtensa-isa-internal.h (xtensa_format_internal),
+	(xtensa_slot_internal, xtensa_operand_internal),
+	(xtensa_arg_internal, xtensa_iclass_internal),
+	(xtensa_opcode_internal, xtensa_regfile_internal),
+	(xtensa_interface_internal, xtensa_funcUnit_internal),
+	(xtensa_state_internal, xtensa_sysreg_internal): Constify.
+
 2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
 
 	* elf/common.h (DT_GNU_FLAGS_1, DF_GNU_1_UNIQUE): Define.
