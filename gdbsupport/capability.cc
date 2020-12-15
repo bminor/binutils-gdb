@@ -76,31 +76,6 @@ static const char *cap_perms_strings[] =
   "Load"
 };
 
-/* Short version of permission string names, indexed by bit number from
-   permissions
-   Valid bits are 0 through 17.  */
-static const char *cap_short_perms_strings[] =
-{
-  "G",
-  "E",
-  "U0",
-  "U1",
-  "U2",
-  "U3",
-  "MLd",
-  "CID",
-  "BrUn",
-  "Sys",
-  "Un",
-  "Sl",
-  "StLoC",
-  "StC",
-  "LdC",
-  "X",
-  "St",
-  "Ld"
-};
-
 /* Returns a capability, derived from the input capability, with base address
    set to the value of the input capability and the length set to a given
    value.  If precise bounds setting is not possible, either the bounds are
@@ -548,6 +523,14 @@ capability::set_offset (uint64_t offset)
   set_value (get_base () + offset);
 }
 
+/* Returns true if the capability has the top 64 bits equal to zero.
+   Returns false otherwise.  */
+
+bool capability::is_null_derived (void)
+{
+  return _bits (m_cap, 127, 64) == 0;
+}
+
 /* Returns a string representation of the capability.
 
    If COMPACT is true, use a less verbose form.  Otherwise print
@@ -556,19 +539,78 @@ capability::set_offset (uint64_t offset)
 std::string
 capability::to_str (bool compact)
 {
-  /* The printing format is the following:
-     {tag = %d, address = 0x%016x, permissions = {[%s], otype = 0x%04x,
-      [range = [0x%016x - 0x%016x)}}
+  /* There are 3 printing formats.
+
+     - (1) - If the top 64 bits are 0 and the tag is false, then we should print
+       the capability's value as a pointer. Example: 0xdeadbeef.
+
+     - (2) - If the top 64 bits are non-zero and the representation is
+       COMPACT, the capability has the following format:
+
+     - (3) - If the top 64 bits are non-zero and the representation is not
+       COMPACT, the capability has the following format:
+
+      {tag = %d, address = 0x%016x, permissions = {[%s], otype = 0x%04x,
+       [range = [0x%016x - 0x%016x)}}
   */
-  std::string cap_str ("");
-  std::string tag_str (get_tag ()? "1" : "0");
+
   std::string val_str ("");
-  std::string perm_str ("");
-  std::string otype_str ("");
-  std::string range_str ("");
 
   /* Capability value.  */
   val_str += core_addr_to_string_nz (get_value ());
+
+  /* Format 1.  */
+  if (is_null_derived ())
+    return val_str;
+
+  std::string cap_str ("");
+  std::string perm_str ("");
+  std::string range_str ("");
+
+  /* Format 2.  */
+  if (compact)
+    {
+      /* Handle compact permissions output.  */
+      if (check_permissions (1 << cap_perms_load))
+	perm_str += "r";
+      if (check_permissions (1 << cap_perms_store))
+	perm_str += "w";
+      if (check_permissions (1 << cap_perms_execute))
+	perm_str += "x";
+      if (check_permissions (1 << cap_perms_load_cap))
+	perm_str += "R";
+      if (check_permissions (1 << cap_perms_store_cap))
+	perm_str += "W";
+      if (check_permissions (1 << cap_perms_executive))
+	perm_str += "E";
+
+      /* Handle capability range.  */
+      range_str += core_addr_to_string_nz (get_base ());
+      range_str += "-";
+      range_str += core_addr_to_string_nz (get_limit ());
+
+      std::string attr_str ("");
+
+      /* Handle attributes.  */
+      if (get_tag () == false)
+	attr_str = "invalid ";
+      if (get_otype () == CAP_SEAL_TYPE_RB)
+	attr_str = "sentry ";
+      if (is_sealed ())
+	attr_str = "sealed ";
+
+      cap_str += "{";
+      cap_str = val_str + " [" + perm_str + "," + range_str + "]";
+
+      if (!attr_str.empty ())
+	cap_str += " ( " + attr_str + ")";
+
+      cap_str += "}";
+
+      return cap_str;
+    }
+
+  /* Format 3.  */
 
   /* Permissions.  */
   perm_str += "[";
@@ -577,14 +619,12 @@ capability::to_str (bool compact)
     if (check_permissions (1 << i))
       {
 	perm_str += " ";
-
-	if (compact)
-	  perm_str += cap_short_perms_strings[i];
-	else
-	  perm_str += cap_perms_strings[i];
+	perm_str += cap_perms_strings[i];
       }
 
   perm_str += " ]";
+
+  std::string otype_str ("");
 
   /* Object type, if sealed.  */
   otype_str += core_addr_to_string_nz (get_otype ());
@@ -595,6 +635,8 @@ capability::to_str (bool compact)
   range_str += " - ";
   range_str += core_addr_to_string_nz (get_limit ());
   range_str += ")";
+
+  std::string tag_str (get_tag ()? "1" : "0");
 
   /* Assemble the capability string.  */
   cap_str += "{tag = " + tag_str + ", address = " + val_str + ", "

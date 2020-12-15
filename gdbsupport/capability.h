@@ -250,8 +250,11 @@ enum cap_constants {
   CAP_PERM_LOAD = (1<<17),
   CAP_PERM_LOAD_BIT = CAP_PERMS_LO_BIT+17,
 
+  /* Equivalent to CHERI's OTYPE_RESERVED3.  */
   CAP_SEAL_TYPE_LB = 3,
+  /* Equivalent to CHERI's OTYPE_RESERVED2.  */
   CAP_SEAL_TYPE_LPB = 2,
+  /* Equivalent to CHERI's OTYPE_SENTRY.  */
   CAP_SEAL_TYPE_RB = 1,
 
   CAP_TAG_BIT = 128,
@@ -541,6 +544,11 @@ public:
   /* Returns true if two capabilities are bitwise identical, false
      otherwise.  */
   bool is_equal (void) const;
+
+  /* Returns true if the capability has the top 64 bits equal to zero.
+     Returns false otherwise.  */
+
+  bool is_null_derived (void);
 
   /* Printing functions.  */
 
