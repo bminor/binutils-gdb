@@ -508,17 +508,12 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
 	fseek (last_open_file, file->pos, SEEK_SET);
     }
 
-  /* Leave room for null.  */
-  size -= 1;
-
   c = fgetc (last_open_file);
 
   while (c != EOF && c != '\n' && c != '\r')
     {
-      if (count < size)
+      if (++count < size)
 	*p++ = c;
-      count++;
-
       c = fgetc (last_open_file);
     }
 
@@ -536,7 +531,7 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
   if (c == EOF)
     {
       file->at_end = 1;
-      if (count + 2 < size)
+      if (count + 3 < size)
 	{
 	  *p++ = '.';
 	  *p++ = '.';

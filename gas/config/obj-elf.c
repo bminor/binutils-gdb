@@ -2102,6 +2102,22 @@ elf_obj_symbol_new_hook (symbolS *symbolP)
 #endif
 }
 
+/* Deduplicate size expressions.  We might get into trouble with
+   multiple freeing or use after free if we leave them pointing to the
+   same expressionS.  */
+
+void
+elf_obj_symbol_clone_hook (symbolS *newsym, symbolS *orgsym ATTRIBUTE_UNUSED)
+{
+  struct elf_obj_sy *newelf = symbol_get_obj (newsym);
+  if (newelf->size)
+    {
+      expressionS *exp = XNEW (expressionS);
+      *exp = *newelf->size;
+      newelf->size = exp;
+    }
+}
+
 /* When setting one symbol equal to another, by default we probably
    want them to have the same "size", whatever it means in the current
    context.  */
@@ -3088,6 +3104,6 @@ const struct format_ops elf_format_ops =
 #endif
   elf_obj_read_begin_hook,
   elf_obj_symbol_new_hook,
-  0,
+  elf_obj_symbol_clone_hook,
   elf_adjust_symtab
 };

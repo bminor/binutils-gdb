@@ -1,3 +1,13 @@
+2020-12-15  Alan Modra  <amodra@gmail.com>
+
+	PR 27071
+	* config/obj-elf.c (elf_obj_symbol_clone_hook): New function.
+	(elf_format_ops): Set symbol_clone_hook.
+	* config/obj-elf.h (elf_obj_symbol_clone_hook): Declare.
+	(obj_symbol_clone_hook): Define.
+	* listing.c (buffer_line): Avoid integer overflow on paper_width
+	set to zero.
+
 2020-12-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/elf/section27.s: Reorder .text, .data and .bss
