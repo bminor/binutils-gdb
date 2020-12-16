@@ -714,11 +714,9 @@ dtrace_probe::evaluate_argument (unsigned n,
 {
   struct gdbarch *gdbarch = this->get_gdbarch ();
   struct dtrace_probe_arg *arg;
-  int pos = 0;
 
   arg = this->get_arg_by_number (n, gdbarch);
-  return evaluate_subexp_standard (arg->type, arg->expr.get (), &pos,
-				   EVAL_NORMAL);
+  return evaluate_expression (arg->expr.get (), arg->type);
 }
 
 /* Implementation of the compile_to_ax method.  */

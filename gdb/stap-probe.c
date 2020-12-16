@@ -1389,12 +1389,10 @@ struct value *
 stap_probe::evaluate_argument (unsigned n, struct frame_info *frame)
 {
   struct stap_probe_arg *arg;
-  int pos = 0;
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
   arg = this->get_arg_by_number (n, gdbarch);
-  return evaluate_subexp_standard (arg->atype, arg->aexpr.get (), &pos,
-				   EVAL_NORMAL);
+  return evaluate_expression (arg->aexpr.get (), arg->atype);
 }
 
 /* Compile the probe's argument N (indexed from 0) to agent expression.

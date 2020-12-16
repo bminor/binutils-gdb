@@ -120,17 +120,15 @@ parse_to_comma_and_eval (const char **expp)
   return evaluate_expression (expr.get ());
 }
 
-/* Evaluate an expression in internal prefix form
-   such as is constructed by parse.y.
 
-   See expression.h for info on the format of an expression.  */
+/* See value.h.  */
 
 struct value *
-evaluate_expression (struct expression *exp)
+evaluate_expression (struct expression *exp, struct type *expect_type)
 {
   int pc = 0;
 
-  return evaluate_subexp (nullptr, exp, &pc, EVAL_NORMAL);
+  return evaluate_subexp (expect_type, exp, &pc, EVAL_NORMAL);
 }
 
 /* Evaluate an expression, avoiding all memory references

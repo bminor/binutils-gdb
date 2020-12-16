@@ -1,5 +1,15 @@
 2020-12-15  Tom Tromey  <tom@tromey.com>
 
+	* stap-probe.c (stap_probe::evaluate_argument): Use
+	evaluate_expression.
+	* dtrace-probe.c (dtrace_probe::evaluate_argument): Use
+	evaluate_expression.
+	* value.h (evaluate_expression): Add expect_type parameter.
+	* objc-lang.c (print_object_command): Call evaluate_expression.
+	* eval.c (evaluate_expression): Add expect_type parameter.
+
+2020-12-15  Tom Tromey  <tom@tromey.com>
+
 	* varobj.c (varobj_create): Use first_opcode.
 	* value.c (init_if_undefined_command): Use first_opcode.
 	* typeprint.c (whatis_exp): Use first_opcode.
