@@ -527,7 +527,7 @@ struct language_defn
      non-zero, then the expression has been parsed for completion, not
      evaluation.  */
 
-  virtual void post_parser (expression_up *expp, int void_context_p,
+  virtual void post_parser (expression_up *expp, bool void_context_p,
 			    int completing,
 			    innermost_block_tracker *tracker) const
   {

@@ -14124,7 +14124,7 @@ public:
      A null CONTEXT_TYPE indicates that a non-void return type is
      preferred.  May change (expand) *EXP.  */
 
-  void post_parser (expression_up *expp, int void_context_p, int completing,
+  void post_parser (expression_up *expp, bool void_context_p, int completing,
 		    innermost_block_tracker *tracker) const override
   {
     struct type *context_type = NULL;

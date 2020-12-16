@@ -1,4 +1,12 @@
 2020-12-16  Tom Tromey  <tom@tromey.com>
+
+	* parse.c (parse_exp_1, parse_expression_for_completion): Update.
+	(parse_exp_in_context): Change void_context_p to bool.
+	* language.h (struct language_defn) <post_parser>: Change
+	void_context_p to bool.
+	* ada-lang.c (class ada_language) <post_parser>: Update.
+
+2020-12-16  Tom Tromey  <tom@tromey.com>
 	    Tom Tromey  <tromey@redhat.com>
 	    Tom de Vries  <tdevries@suse.de>
 
