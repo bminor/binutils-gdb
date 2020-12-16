@@ -1,3 +1,8 @@
+2020-12-16  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_compile_shlib_1): Factor out of ...
+	(gdb_compile_shlib): ... here.  Filter out PIE-related flags.
+
 2020-12-16  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.arch/aarch64-tagged-pointer.c (main): Add a few more

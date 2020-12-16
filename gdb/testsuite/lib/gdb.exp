@@ -4283,7 +4283,7 @@ proc gdb_compile_pthreads {source dest type options} {
 
 # Build a shared library from SOURCES.
 
-proc gdb_compile_shlib {sources dest options} {
+proc gdb_compile_shlib_1 {sources dest options} {
     set obj_options $options
 
     set ada 0
@@ -4414,6 +4414,43 @@ proc gdb_compile_shlib {sources dest options} {
     }
 
     return ""
+}
+
+# Build a shared library from SOURCES.  Ignore target boards PIE-related
+# multilib_flags.
+
+proc gdb_compile_shlib {sources dest options} {
+    global board
+
+    # Save multilib_flags.
+    set board [target_info name]
+    set save_multilib_flag [board_info $board multilib_flags]
+
+    # Ignore PIE-related setting in multilib_flags.
+    set multilib_flag ""
+    foreach op $save_multilib_flag {
+	if { $op == "-pie" || $op == "-no-pie" \
+		 || $op == "-fPIE" || $op == "-fno-PIE"} {
+	} else {
+	    append multilib_flag " $op"
+	}
+    }
+    unset_board_info "multilib_flags"
+    set_board_info multilib_flags "$multilib_flag"
+    set code [catch {gdb_compile_shlib_1 $sources $dest $options} result]
+
+    # Restore multilib_flags.
+    unset_board_info "multilib_flags"
+    set_board_info multilib_flags $save_multilib_flag
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif {$code > 1} {
+	return -code $code $result
+    }
+
+    return $result
 }
 
 # This is just like gdb_compile_shlib, above, except that it tries compiling
