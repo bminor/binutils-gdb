@@ -128,8 +128,11 @@ struct elf32_tic6x_obj_tdata
    faster assembler code.  This is what we use for the small common
    section.  This approach is copied from ecoff.c.  */
 static asection tic6x_elf_scom_section;
-static asymbol  tic6x_elf_scom_symbol;
-static asymbol  *tic6x_elf_scom_symbol_ptr;
+static const asymbol tic6x_elf_scom_symbol =
+  GLOBAL_SYM_INIT (".scommon", &tic6x_elf_scom_section);
+static asection tic6x_elf_scom_section =
+  BFD_FAKE_SECTION (tic6x_elf_scom_section, &tic6x_elf_scom_symbol,
+		    ".scommon", 0, SEC_IS_COMMON | SEC_SMALL_DATA);
 
 static reloc_howto_type elf32_tic6x_howto_table[] =
 {
@@ -2970,19 +2973,6 @@ elf32_tic6x_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
   switch (elfsym->internal_elf_sym.st_shndx)
     {
     case SHN_TIC6X_SCOMMON:
-      if (tic6x_elf_scom_section.name == NULL)
-	{
-	  /* Initialize the small common section.  */
-	  tic6x_elf_scom_section.name = ".scommon";
-	  tic6x_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  tic6x_elf_scom_section.output_section = &tic6x_elf_scom_section;
-	  tic6x_elf_scom_section.symbol = &tic6x_elf_scom_symbol;
-	  tic6x_elf_scom_section.symbol_ptr_ptr = &tic6x_elf_scom_symbol_ptr;
-	  tic6x_elf_scom_symbol.name = ".scommon";
-	  tic6x_elf_scom_symbol.flags = BSF_SECTION_SYM;
-	  tic6x_elf_scom_symbol.section = &tic6x_elf_scom_section;
-	  tic6x_elf_scom_symbol_ptr = &tic6x_elf_scom_symbol;
-	}
       asym->section = &tic6x_elf_scom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;

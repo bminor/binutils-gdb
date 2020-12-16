@@ -1337,8 +1337,11 @@ _bfd_m32r_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
    _SDA_BASE.  This is what we use for the small common section.  This
    approach is copied from elf32-mips.c.  */
 static asection m32r_elf_scom_section;
-static asymbol m32r_elf_scom_symbol;
-static asymbol *m32r_elf_scom_symbol_ptr;
+static const asymbol m32r_elf_scom_symbol =
+  GLOBAL_SYM_INIT (".scommon", &m32r_elf_scom_section);
+static asection m32r_elf_scom_section =
+  BFD_FAKE_SECTION (m32r_elf_scom_section, &m32r_elf_scom_symbol,
+		    ".scommon", 0, SEC_IS_COMMON | SEC_SMALL_DATA);
 
 /* Handle the special M32R section numbers that a symbol may use.  */
 
@@ -1350,19 +1353,6 @@ _bfd_m32r_elf_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
   switch (elfsym->internal_elf_sym.st_shndx)
     {
     case SHN_M32R_SCOMMON:
-      if (m32r_elf_scom_section.name == NULL)
-	{
-	  /* Initialize the small common section.  */
-	  m32r_elf_scom_section.name = ".scommon";
-	  m32r_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  m32r_elf_scom_section.output_section = &m32r_elf_scom_section;
-	  m32r_elf_scom_section.symbol = &m32r_elf_scom_symbol;
-	  m32r_elf_scom_section.symbol_ptr_ptr = &m32r_elf_scom_symbol_ptr;
-	  m32r_elf_scom_symbol.name = ".scommon";
-	  m32r_elf_scom_symbol.flags = BSF_SECTION_SYM;
-	  m32r_elf_scom_symbol.section = &m32r_elf_scom_section;
-	  m32r_elf_scom_symbol_ptr = &m32r_elf_scom_symbol;
-	}
       asym->section = &m32r_elf_scom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;

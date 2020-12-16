@@ -1,3 +1,18 @@
+2020-12-18  Alan Modra  <amodra@gmail.com>
+
+	* ecoff.c (bfd_debug_section): Init using BFD_FAKE_SECTION.
+	(ecoff_scom_section, ecoff_scom_symbol): Statically init using
+	BFD_FAKE_SECTION and GLOBAL_SYM_INIT.  Delete initialisation code.
+	* elf32-m32r.c (m32r_elf_scom_section, m32r_elf_scom_symbol),
+	* elf32-score.c (score_elf_scom_section, score_elf_scom_symbol),
+	* elf32-score7.c (score_elf_scom_section, score_elf_scom_symbol),
+	* elf32-tic6x.c (tic6x_elf_scom_section, tic6x_elf_scom_symbol),
+	* elf32-v850.c (v850_elf_scom_section, v850_elf_scom_symbol),
+	(v850_elf_tcom_section, v850_elf_tcom_symbol),
+	(v850_elf_zcom_section, v850_elf_zcom_symbol),
+	* elf64-mmix.c (mmix_elf_reg_section, mmix_elf_reg_section_symbol),
+	* elfxx-mips.c (mips_elf_scom_section, mips_elf_scom_symbol): Likewise.
+
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
 	* elfxx-target.h (elfNN_bed): Constify.

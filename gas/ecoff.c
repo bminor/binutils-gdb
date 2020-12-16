@@ -3551,6 +3551,13 @@ ecoff_stab (segT sec ATTRIBUTE_UNUSED,
   cur_file_ptr = save_file_ptr;
 }
 
+static asection ecoff_scom_section;
+static const asymbol ecoff_scom_symbol =
+  GLOBAL_SYM_INIT (SCOMMON, &ecoff_scom_section);
+static asection ecoff_scom_section =
+  BFD_FAKE_SECTION (ecoff_scom_section, &ecoff_scom_symbol,
+		    SCOMMON, 0, SEC_IS_COMMON | SEC_SMALL_DATA);
+
 /* Frob an ECOFF symbol.  Small common symbols go into a special
    .scommon section rather than bfd_com_section.  */
 
@@ -3561,23 +3568,7 @@ ecoff_frob_symbol (symbolS *sym)
       && S_GET_VALUE (sym) > 0
       && S_GET_VALUE (sym) <= bfd_get_gp_size (stdoutput))
     {
-      static asection scom_section;
-      static asymbol scom_symbol;
-
-      /* We must construct a fake section similar to bfd_com_section
-         but with the name .scommon.  */
-      if (scom_section.name == NULL)
-	{
-	  scom_section = *bfd_com_section_ptr;
-	  scom_section.name = ".scommon";
-	  scom_section.output_section = &scom_section;
-	  scom_section.symbol = &scom_symbol;
-	  scom_section.symbol_ptr_ptr = &scom_section.symbol;
-	  scom_symbol = *bfd_com_section_ptr->symbol;
-	  scom_symbol.name = ".scommon";
-	  scom_symbol.section = &scom_section;
-	}
-      S_SET_SEGMENT (sym, &scom_section);
+      S_SET_SEGMENT (sym, &ecoff_scom_section);
     }
 
   /* Double check weak symbols.  */

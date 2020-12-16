@@ -2076,8 +2076,11 @@ mmix_elf_link_output_symbol_hook (struct bfd_link_info *info ATTRIBUTE_UNUSED,
    formats (e.g. mmo) than for example a STT_REGISTER attribute.
    This section faking is based on a construct in elf32-mips.c.  */
 static asection mmix_elf_reg_section;
-static asymbol mmix_elf_reg_section_symbol;
-static asymbol *mmix_elf_reg_section_symbol_ptr;
+static const asymbol mmix_elf_reg_section_symbol =
+  GLOBAL_SYM_INIT (MMIX_REG_SECTION_NAME, &mmix_elf_reg_section);
+static asection mmix_elf_reg_section =
+  BFD_FAKE_SECTION (mmix_elf_reg_section, &mmix_elf_reg_section_symbol,
+		    MMIX_REG_SECTION_NAME, 0, SEC_NO_FLAGS);
 
 /* Handle the special section numbers that a symbol may use.  */
 
@@ -2090,19 +2093,6 @@ mmix_elf_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
   switch (elfsym->internal_elf_sym.st_shndx)
     {
     case SHN_REGISTER:
-      if (mmix_elf_reg_section.name == NULL)
-	{
-	  /* Initialize the register section.  */
-	  mmix_elf_reg_section.name = MMIX_REG_SECTION_NAME;
-	  mmix_elf_reg_section.flags = SEC_NO_FLAGS;
-	  mmix_elf_reg_section.output_section = &mmix_elf_reg_section;
-	  mmix_elf_reg_section.symbol = &mmix_elf_reg_section_symbol;
-	  mmix_elf_reg_section.symbol_ptr_ptr = &mmix_elf_reg_section_symbol_ptr;
-	  mmix_elf_reg_section_symbol.name = MMIX_REG_SECTION_NAME;
-	  mmix_elf_reg_section_symbol.flags = BSF_SECTION_SYM;
-	  mmix_elf_reg_section_symbol.section = &mmix_elf_reg_section;
-	  mmix_elf_reg_section_symbol_ptr = &mmix_elf_reg_section_symbol;
-	}
       asym->section = &mmix_elf_reg_section;
       break;
 

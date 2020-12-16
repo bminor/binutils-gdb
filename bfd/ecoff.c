@@ -51,38 +51,7 @@
 
 /* This stuff is somewhat copied from coffcode.h.  */
 static asection bfd_debug_section =
-{
-  /* name,	id,  section_id, index, next, prev, flags,	  */
-     "*DEBUG*", 0,   0,		 0,	NULL, NULL, 0,
-  /* user_set_vma,	   */
-     0,
-  /* linker_mark, linker_has_input, gc_mark, compress_status,	   */
-     0,		  0,		    1,	     0,
-  /* segment_mark, sec_info_type, use_rela_p,			   */
-     0,		   0,		  0,
-  /* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,   */
-     0,	       0,	 0,	   0,	     0,	       0,
-  /* vma, lma, size, rawsize, compressed_size, relax, relax_count, */
-     0,	  0,   0,    0,	      0,	       0,     0,
-  /* output_offset, output_section, alignment_power,		   */
-     0,		    NULL,	    0,
-  /* relocation, orelocation, reloc_count, filepos, rel_filepos,   */
-     NULL,	 NULL,	      0,	   0,	    0,
-  /* line_filepos, userdata, contents, lineno, lineno_count,	   */
-     0,		   NULL,     NULL,     NULL,   0,
-  /* entsize, kept_section, moving_line_filepos,		   */
-     0,	      NULL,	    0,
-  /* target_index, used_by_bfd, constructor_chain, owner,	   */
-     0,		   NULL,	NULL,		   NULL,
-  /* symbol,							   */
-     NULL,
-  /* symbol_ptr_ptr,						   */
-     NULL,
-  /* map_head, map_tail,					   */
-     { NULL }, { NULL },
-  /* already_assigned 						   */
-     NULL,
-};
+  BFD_FAKE_SECTION (bfd_debug_section, NULL, "*DEBUG*", 0, 0);
 
 /* Create an ECOFF object.  */
 
@@ -644,8 +613,11 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
    faster assembler code.  This is what we use for the small common
    section.  */
 static asection ecoff_scom_section;
-static asymbol ecoff_scom_symbol;
-static asymbol *ecoff_scom_symbol_ptr;
+static const asymbol ecoff_scom_symbol =
+  GLOBAL_SYM_INIT (SCOMMON, &ecoff_scom_section);
+static asection ecoff_scom_section =
+  BFD_FAKE_SECTION (ecoff_scom_section, &ecoff_scom_symbol,
+		    SCOMMON, 0, SEC_IS_COMMON | SEC_SMALL_DATA);
 
 /* Create an empty symbol.  */
 
@@ -787,19 +759,6 @@ ecoff_set_symbol_info (bfd *abfd,
 	}
       /* Fall through.  */
     case scSCommon:
-      if (ecoff_scom_section.name == NULL)
-	{
-	  /* Initialize the small common section.  */
-	  ecoff_scom_section.name = SCOMMON;
-	  ecoff_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  ecoff_scom_section.output_section = &ecoff_scom_section;
-	  ecoff_scom_section.symbol = &ecoff_scom_symbol;
-	  ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
-	  ecoff_scom_symbol.name = SCOMMON;
-	  ecoff_scom_symbol.flags = BSF_SECTION_SYM;
-	  ecoff_scom_symbol.section = &ecoff_scom_section;
-	  ecoff_scom_symbol_ptr = &ecoff_scom_symbol;
-	}
       asym->section = &ecoff_scom_section;
       asym->flags = 0;
       break;
@@ -3400,19 +3359,6 @@ ecoff_link_add_externals (bfd *abfd,
 	    }
 	  /* Fall through.  */
 	case scSCommon:
-	  if (ecoff_scom_section.name == NULL)
-	    {
-	      /* Initialize the small common section.  */
-	      ecoff_scom_section.name = SCOMMON;
-	      ecoff_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
-	      ecoff_scom_section.output_section = &ecoff_scom_section;
-	      ecoff_scom_section.symbol = &ecoff_scom_symbol;
-	      ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
-	      ecoff_scom_symbol.name = SCOMMON;
-	      ecoff_scom_symbol.flags = BSF_SECTION_SYM;
-	      ecoff_scom_symbol.section = &ecoff_scom_section;
-	      ecoff_scom_symbol_ptr = &ecoff_scom_symbol;
-	    }
 	  section = &ecoff_scom_section;
 	  break;
 	case scSUndefined:

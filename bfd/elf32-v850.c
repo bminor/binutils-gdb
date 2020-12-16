@@ -2929,15 +2929,29 @@ v850_elf_print_private_bfd_data (bfd *abfd, void * ptr)
    respectively, which yields smaller, faster assembler code.  This
    approach is copied from elf32-mips.c.  */
 
-static asection  v850_elf_scom_section;
-static asymbol   v850_elf_scom_symbol;
-static asymbol * v850_elf_scom_symbol_ptr;
-static asection  v850_elf_tcom_section;
-static asymbol   v850_elf_tcom_symbol;
-static asymbol * v850_elf_tcom_symbol_ptr;
-static asection  v850_elf_zcom_section;
-static asymbol   v850_elf_zcom_symbol;
-static asymbol * v850_elf_zcom_symbol_ptr;
+static asection v850_elf_scom_section;
+static const asymbol v850_elf_scom_symbol =
+  GLOBAL_SYM_INIT (".scommon", &v850_elf_scom_section);
+static asection v850_elf_scom_section =
+  BFD_FAKE_SECTION (v850_elf_scom_section, &v850_elf_scom_symbol,
+		    ".scommon", 0,
+		    SEC_IS_COMMON | SEC_SMALL_DATA | SEC_ALLOC | SEC_DATA);
+
+static asection v850_elf_tcom_section;
+static const asymbol v850_elf_tcom_symbol =
+  GLOBAL_SYM_INIT (".tcommon", &v850_elf_tcom_section);
+static asection v850_elf_tcom_section =
+  BFD_FAKE_SECTION (v850_elf_tcom_section, &v850_elf_tcom_symbol,
+		    ".tcommon", 0,
+		    SEC_IS_COMMON | SEC_SMALL_DATA);
+
+static asection v850_elf_zcom_section;
+static const asymbol v850_elf_zcom_symbol =
+  GLOBAL_SYM_INIT (".zcommon", &v850_elf_zcom_section);
+static asection v850_elf_zcom_section =
+  BFD_FAKE_SECTION (v850_elf_zcom_section, &v850_elf_zcom_symbol,
+		    ".zcommon", 0,
+		    SEC_IS_COMMON | SEC_SMALL_DATA);
 
 /* Given a BFD section, try to locate the
    corresponding ELF section index.  */
@@ -2997,56 +3011,16 @@ v850_elf_symbol_processing (bfd *abfd, asymbol *asym)
   switch (indx)
     {
     case SHN_V850_SCOMMON:
-      if (v850_elf_scom_section.name == NULL)
-	{
-	  /* Initialize the small common section.  */
-	  v850_elf_scom_section.name	       = ".scommon";
-	  v850_elf_scom_section.flags
-	    = SEC_IS_COMMON | SEC_SMALL_DATA | SEC_ALLOC | SEC_DATA;
-	  v850_elf_scom_section.output_section = & v850_elf_scom_section;
-	  v850_elf_scom_section.symbol	       = & v850_elf_scom_symbol;
-	  v850_elf_scom_section.symbol_ptr_ptr = & v850_elf_scom_symbol_ptr;
-	  v850_elf_scom_symbol.name	       = ".scommon";
-	  v850_elf_scom_symbol.flags	       = BSF_SECTION_SYM;
-	  v850_elf_scom_symbol.section	       = & v850_elf_scom_section;
-	  v850_elf_scom_symbol_ptr	       = & v850_elf_scom_symbol;
-	}
       asym->section = & v850_elf_scom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;
 
     case SHN_V850_TCOMMON:
-      if (v850_elf_tcom_section.name == NULL)
-	{
-	  /* Initialize the tcommon section.  */
-	  v850_elf_tcom_section.name	       = ".tcommon";
-	  v850_elf_tcom_section.flags	       = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  v850_elf_tcom_section.output_section = & v850_elf_tcom_section;
-	  v850_elf_tcom_section.symbol	       = & v850_elf_tcom_symbol;
-	  v850_elf_tcom_section.symbol_ptr_ptr = & v850_elf_tcom_symbol_ptr;
-	  v850_elf_tcom_symbol.name	       = ".tcommon";
-	  v850_elf_tcom_symbol.flags	       = BSF_SECTION_SYM;
-	  v850_elf_tcom_symbol.section	       = & v850_elf_tcom_section;
-	  v850_elf_tcom_symbol_ptr	       = & v850_elf_tcom_symbol;
-	}
       asym->section = & v850_elf_tcom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;
 
     case SHN_V850_ZCOMMON:
-      if (v850_elf_zcom_section.name == NULL)
-	{
-	  /* Initialize the zcommon section.  */
-	  v850_elf_zcom_section.name	       = ".zcommon";
-	  v850_elf_zcom_section.flags	       = SEC_IS_COMMON | SEC_SMALL_DATA;
-	  v850_elf_zcom_section.output_section = & v850_elf_zcom_section;
-	  v850_elf_zcom_section.symbol	       = & v850_elf_zcom_symbol;
-	  v850_elf_zcom_section.symbol_ptr_ptr = & v850_elf_zcom_symbol_ptr;
-	  v850_elf_zcom_symbol.name	       = ".zcommon";
-	  v850_elf_zcom_symbol.flags	       = BSF_SECTION_SYM;
-	  v850_elf_zcom_symbol.section	       = & v850_elf_zcom_section;
-	  v850_elf_zcom_symbol_ptr	       = & v850_elf_zcom_symbol;
-	}
       asym->section = & v850_elf_zcom_section;
       asym->value = elfsym->internal_elf_sym.st_size;
       break;
