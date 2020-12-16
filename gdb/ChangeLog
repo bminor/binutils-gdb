@@ -1,3 +1,8 @@
+2020-12-17  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* linux-tdep.c (linux_make_mappings_corefile_notes): Start using
+	elfcore_write_file_note.
+
 2021-01-26  Shahab Vahedi  <shahab@synopsys.com>
 
 	* arc-tdep.c (arc_add_reggroups): New function.

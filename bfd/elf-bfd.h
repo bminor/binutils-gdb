@@ -2801,6 +2801,8 @@ extern char *elfcore_write_lwpstatus
   (bfd *, char *, int *, long, int, const void *);
 extern char *elfcore_write_register_note
   (bfd *, char *, int *, const char *, const void *, int);
+extern char *elfcore_write_file_note
+  (bfd *, char *, int *, const void*, int);
 
 /* Internal structure which holds information to be included in the
    PRPSINFO section of Linux core files.

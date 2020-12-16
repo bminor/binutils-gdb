@@ -12038,6 +12038,14 @@ elfcore_write_register_note (bfd *abfd,
   return NULL;
 }
 
+char *
+elfcore_write_file_note (bfd *obfd, char *note_data, int *note_size,
+			 const void *buf, int bufsiz)
+{
+  return elfcore_write_note (obfd, note_data, note_size,
+			     "CORE", NT_FILE, buf, bufsiz);
+}
+
 static bfd_boolean
 elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset,
 		 size_t align)

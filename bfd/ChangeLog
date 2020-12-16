@@ -1,3 +1,8 @@
+2020-12-17  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* bfd-elf.h (elfcore_write_file_note): New function.
+	* elf.c (elfcore_write_file_note): New function.
+
 2021-01-26  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ft32.c (ft32_reloc_type_lookup): Don't miss ft32_reloc_map[0].

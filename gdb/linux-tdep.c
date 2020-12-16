@@ -1591,11 +1591,9 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
       obstack_grow (&data_obstack, obstack_base (&filename_obstack),
 		    size);
 
-      note_data.reset (elfcore_write_note
-			 (obfd, note_data.release (),
-			  note_size, "CORE", NT_FILE,
-			  obstack_base (&data_obstack),
-			  obstack_object_size (&data_obstack)));
+      note_data.reset (elfcore_write_file_note (obfd, note_data.release (), note_size,
+						obstack_base (&data_obstack),
+						obstack_object_size (&data_obstack)));
     }
 }
 
