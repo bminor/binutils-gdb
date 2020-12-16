@@ -91,6 +91,13 @@ struct expression
 
   void resize (size_t);
 
+  /* Return the opcode for the outermost sub-expression of this
+     expression.  */
+  enum exp_opcode first_opcode () const
+  {
+      return elts[0].opcode;
+  }
+
   /* Language it was entered in.  */
   const struct language_defn *language_defn;
   /* Architecture it was parsed in.  */

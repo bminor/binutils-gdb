@@ -493,7 +493,7 @@ whatis_exp (const char *exp, int show)
       val = evaluate_type (expr.get ());
       type = value_type (val);
 
-      if (show == -1 && expr->elts[0].opcode == OP_TYPE)
+      if (show == -1 && expr->first_opcode () == OP_TYPE)
 	{
 	  /* The user expression names a type directly.  */
 

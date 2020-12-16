@@ -1,5 +1,17 @@
 2020-12-15  Tom Tromey  <tom@tromey.com>
 
+	* varobj.c (varobj_create): Use first_opcode.
+	* value.c (init_if_undefined_command): Use first_opcode.
+	* typeprint.c (whatis_exp): Use first_opcode.
+	* tracepoint.c (validate_actionline): Use first_opcode.
+	(encode_actions_1): Use first_opcode.
+	* stack.c (return_command): Use first_opcode.
+	* expression.h (struct expression) <first_opcode>: New method.
+	* eval.c (parse_and_eval_type): Use first_opcode.
+	* dtrace-probe.c (dtrace_process_dof_probe): Use first_opcode.
+
+2020-12-15  Tom Tromey  <tom@tromey.com>
+
 	* f-lang.c (evaluate_subexp_f): Update.
 	* expression.h (evaluate_subexp_do_call): Update.
 	* eval.c (evaluate_subexp_do_call): Add callee parameter.  Replace

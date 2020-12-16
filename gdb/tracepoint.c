@@ -687,7 +687,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 	      expression_up exp = parse_exp_1 (&p, loc->address,
 					       block_for_pc (loc->address), 1);
 
-	      if (exp->elts[0].opcode == OP_VAR_VALUE)
+	      if (exp->first_opcode () == OP_VAR_VALUE)
 		{
 		  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
 		    {
@@ -1383,7 +1383,7 @@ encode_actions_1 (struct command_line *action,
 						   block_for_pc (tloc->address),
 						   1);
 
-		  switch (exp->elts[0].opcode)
+		  switch (exp->first_opcode ())
 		    {
 		    case OP_REGISTER:
 		      {

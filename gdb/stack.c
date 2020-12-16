@@ -2770,8 +2770,8 @@ return_command (const char *retval_exp, int from_tty)
 	return_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (thisfun));
       if (return_type == NULL)
       	{
-	  if (retval_expr->elts[0].opcode != UNOP_CAST
-	      && retval_expr->elts[0].opcode != UNOP_CAST_TYPE)
+	  if (retval_expr->first_opcode () != UNOP_CAST
+	      && retval_expr->first_opcode () != UNOP_CAST_TYPE)
 	    error (_("Return value type not available for selected "
 		     "stack frame.\n"
 		     "Please use an explicit cast of the value to return."));

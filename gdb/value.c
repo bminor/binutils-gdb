@@ -1981,7 +1981,7 @@ init_if_undefined_command (const char* args, int from_tty)
   /* Validate the expression.
      Was the expression an assignment?
      Or even an expression at all?  */
-  if (expr->nelts == 0 || expr->elts[0].opcode != BINOP_ASSIGN)
+  if (expr->nelts == 0 || expr->first_opcode () != BINOP_ASSIGN)
     error (_("Init-if-undefined requires an assignment expression."));
 
   /* Extract the variable from the parsed expression.

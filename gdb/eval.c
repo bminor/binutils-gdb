@@ -3104,7 +3104,7 @@ parse_and_eval_type (const char *p, int length)
   tmp[length + 2] = '0';
   tmp[length + 3] = '\0';
   expression_up expr = parse_expression (tmp);
-  if (expr->elts[0].opcode != UNOP_CAST)
+  if (expr->first_opcode () != UNOP_CAST)
     error (_("Internal error in eval_type."));
   return expr->elts[1].type;
 }
