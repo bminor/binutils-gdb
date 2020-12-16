@@ -1083,6 +1083,15 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   htab = riscv_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
+  /* When we are generating pde, make sure gp symbol is output as a
+     dynamic symbol.  Then ld.so can set the gp register earlier, before
+     resolving the ifunc.  */
+  if (!bfd_link_pic (info)
+      && htab->elf.dynamic_sections_created
+      && strcmp (h->root.root.string, RISCV_GP_SYMBOL) == 0
+      && !bfd_elf_link_record_dynamic_symbol (info, h))
+    return FALSE;
+
   /* Since STT_GNU_IFUNC symbols must go through PLT, we handle them
      in the allocate_ifunc_dynrelocs and allocate_local_ifunc_dynrelocs,
      if they are defined and referenced in a non-shared object.  */

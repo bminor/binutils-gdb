@@ -1,3 +1,8 @@
+2021-01-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (allocate_dynrelocs): When we are generating pde,
+	make sure gp symbol is output as a dynamic symbol.
+
 2021-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26256
