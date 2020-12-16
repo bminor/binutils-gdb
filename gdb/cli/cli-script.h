@@ -45,6 +45,7 @@ enum command_control_type
   guile_control,
   while_stepping_control,
   define_control,
+  document_control,
   invalid_control
 };
 

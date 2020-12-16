@@ -1,3 +1,7 @@
+2020-12-15  Rae Kim  <rae.kim@gmail.com>
+
+	* gdb.base/document.exp: New test.
+
 2020-12-15  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.base/style.exp: Add deprecation tests.

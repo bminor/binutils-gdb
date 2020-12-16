@@ -1,3 +1,15 @@
+2020-12-15  Rae Kim  <rae.kim@gmail.com>
+
+	* cli/cli-script.c (do_document_command): Rename from
+	document_command. Handle multi-line input.
+	(multi_line_command_p): Handle document_control.
+	(build_command_line): Likewise.
+	(execute_control_command_1): Likewise.
+	(process_next_line): Likewise.
+	(document_command): Call do_document_command.
+	* cli/cli-script.h (enum command_control_type): Add
+	document_control.
+
 2020-12-15  Tom Tromey  <tom@tromey.com>
 
 	* stap-probe.c (stap_probe::evaluate_argument): Use

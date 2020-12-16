@@ -51,6 +51,9 @@ recurse_read_control_structure
 static void do_define_command (const char *comname, int from_tty,
 			       const counted_command_line *commands);
 
+static void do_document_command (const char *comname, int from_tty,
+                                 const counted_command_line *commands);
+
 static const char *read_next_line ();
 
 /* Level of control structure when reading.  */
@@ -70,6 +73,9 @@ static cmd_list_element *if_cmd_element = nullptr;
 
 /* Command element for the 'define' command.  */
 static cmd_list_element *define_cmd_element = nullptr;
+
+/* Command element for the 'document' command.  */
+static cmd_list_element *document_cmd_element = nullptr;
 
 /* Structure for arguments to user defined functions.  */
 
@@ -139,6 +145,7 @@ multi_line_command_p (enum command_control_type type)
     case python_control:
     case guile_control:
     case define_control:
+    case document_control:
       return 1;
     default:
       return 0;
@@ -159,6 +166,8 @@ build_command_line (enum command_control_type type, const char *args)
 	error (_("while command requires an argument."));
       else if (type == define_control)
 	error (_("define command requires an argument."));
+      else if (type == document_control)
+	error (_("document command requires an argument."));
     }
   gdb_assert (args != NULL);
 
@@ -679,6 +688,12 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
       ret = simple_control;
       break;
 
+    case document_control:
+      print_command_trace ("document %s", cmd->line);
+      do_document_command (cmd->line, 0, &cmd->body_list_0);
+      ret = simple_control;
+      break;
+
     case python_control:
     case guile_control:
       {
@@ -1019,6 +1034,8 @@ process_next_line (const char *p, struct command_line **command,
 	*command = build_command_line (commands_control, line_first_arg (p));
       else if (cmd == define_cmd_element)
 	*command = build_command_line (define_control, line_first_arg (p));
+      else if (cmd == document_cmd_element)
+	*command = build_command_line (document_control, line_first_arg (p));
       else if (cmd == python_cmd_element && !inline_cmd)
 	{
 	  /* Note that we ignore the inline "python command" form
@@ -1508,8 +1525,13 @@ define_command (const char *comname, int from_tty)
   do_define_command (comname, from_tty, nullptr);
 }
 
+/* Document a user-defined command.  If COMMANDS is NULL, then this is a
+   top-level call and the document will be read using read_command_lines.
+   Otherwise, it is a "document" command in an existing command and the
+   commands are provided.  */
 static void
-document_command (const char *comname, int from_tty)
+do_document_command (const char *comname, int from_tty,
+                     const counted_command_line *commands)
 {
   struct cmd_list_element *c, **list;
   const char *tem;
@@ -1524,10 +1546,16 @@ document_command (const char *comname, int from_tty)
   if (c->theclass != class_user)
     error (_("Command \"%s\" is built-in."), comfull);
 
-  std::string prompt = string_printf ("Type documentation for \"%s\".",
-				      comfull);
-  counted_command_line doclines = read_command_lines (prompt.c_str (),
-						      from_tty, 0, 0);
+  counted_command_line doclines;
+
+  if (commands == nullptr)
+    {
+      std::string prompt 
+        = string_printf ("Type documentation for \"%s\".", comfull);
+      doclines = read_command_lines (prompt.c_str (), from_tty, 0, 0);
+    }
+  else
+    doclines = *commands;
 
   xfree ((char *) c->doc);
 
@@ -1551,6 +1579,12 @@ document_command (const char *comname, int from_tty)
 
     c->doc = doc;
   }
+}
+
+static void
+document_command (const char *comname, int from_tty)
+{
+  do_document_command (comname, from_tty, nullptr);
 }
 
 /* Implementation of the "define-prefix" command.  */
@@ -1676,11 +1710,12 @@ _initialize_cli_script ()
   /* "document", "define" and "define-prefix" use command_completer,
      as this helps the user to either type the command name and/or
      its prefixes.  */
-  c = add_com ("document", class_support, document_command, _("\
+  document_cmd_element = add_com ("document", class_support, document_command,
+                                  _("\
 Document a user-defined command.\n\
 Give command name as argument.  Give documentation on following lines.\n\
 End with a line of just \"end\"."));
-  set_cmd_completer (c, command_completer);
+  set_cmd_completer (document_cmd_element, command_completer);
   define_cmd_element = add_com ("define", class_support, define_command, _("\
 Define a new command name.  Command name is argument.\n\
 Definition appears on following lines, one command per line.\n\
