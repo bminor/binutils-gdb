@@ -29,7 +29,7 @@ standard_testfile
 #
 # Also discard local symbols.
 if [prepare_for_testing "failed to prepare" $testfile $srcfile \
-	{additional_flags=-Wl,-x nopie}] {
+	{ldflags=-Wl,-x nopie}] {
     return -1
 }
 
