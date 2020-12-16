@@ -109,14 +109,16 @@ struct parser_state : public expr_builder
 		int comma,
 		const char *input,
 		int completion,
-		innermost_block_tracker *tracker)
+		innermost_block_tracker *tracker,
+		bool void_p)
     : expr_builder (lang, gdbarch),
       expression_context_block (context_block),
       expression_context_pc (context_pc),
       comma_terminates (comma),
       lexptr (input),
       parse_completion (completion),
-      block_tracker (tracker)
+      block_tracker (tracker),
+      void_context_p (void_p)
   {
   }
 
@@ -191,6 +193,9 @@ struct parser_state : public expr_builder
 
   /* The innermost block tracker.  */
   innermost_block_tracker *block_tracker;
+
+  /* True if no value is expected from the expression.  */
+  bool void_context_p;
 
 private:
 

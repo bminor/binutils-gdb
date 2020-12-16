@@ -522,14 +522,10 @@ struct language_defn
   /* Given an expression *EXPP created by prefixifying the result of
      la_parser, perform any remaining processing necessary to complete its
      translation.  *EXPP may change; la_post_parser is responsible for
-     releasing its previous contents, if necessary.  If VOID_CONTEXT_P,
-     then no value is expected from the expression.  If COMPLETING is
-     non-zero, then the expression has been parsed for completion, not
-     evaluation.  */
+     releasing its previous contents, if necessary.  */
 
-  virtual void post_parser (expression_up *expp, bool void_context_p,
-			    int completing,
-			    innermost_block_tracker *tracker) const
+  virtual void post_parser (expression_up *expp, struct parser_state *ps)
+    const
   {
     /* By default the post-parser does nothing.  */
   }

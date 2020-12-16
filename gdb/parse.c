@@ -1113,7 +1113,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
 		   expression_context_pc, comma, *stringptr,
-		   cstate != nullptr, tracker);
+		   cstate != nullptr, tracker, void_context_p);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
@@ -1147,7 +1147,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (out_subexp)
     *out_subexp = subexp;
 
-  lang->post_parser (&result, void_context_p, ps.parse_completion, tracker);
+  lang->post_parser (&result, &ps);
 
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);

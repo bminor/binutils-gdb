@@ -1,5 +1,15 @@
 2020-12-16  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y (rust_lex_tests): Update.
+	* parser-defs.h (parser_state): Add void_p parameter.
+	<void_context_p>: New member.
+	* parse.c (parse_exp_in_context): Update.
+	* language.h (language_defn::post_parser): Remove void_context_p,
+	completing, tracker parameters.  Add parser state.
+	* ada-lang.c (ada_language::post_parser): Update.
+
+2020-12-16  Tom Tromey  <tom@tromey.com>
+
 	* parse.c (parse_exp_1, parse_expression_for_completion): Update.
 	(parse_exp_in_context): Change void_context_p to bool.
 	* language.h (struct language_defn) <post_parser>: Change

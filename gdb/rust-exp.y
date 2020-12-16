@@ -2732,7 +2732,7 @@ rust_lex_tests (void)
 
   /* Set up dummy "parser", so that rust_type works.  */
   struct parser_state ps (language_def (language_rust), target_gdbarch (),
-			  nullptr, 0, 0, nullptr, 0, nullptr);
+			  nullptr, 0, 0, nullptr, 0, nullptr, false);
   rust_parser parser (&ps);
 
   rust_lex_test_one (&parser, "", 0);

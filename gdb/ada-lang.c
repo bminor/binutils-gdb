@@ -14124,16 +14124,17 @@ public:
      A null CONTEXT_TYPE indicates that a non-void return type is
      preferred.  May change (expand) *EXP.  */
 
-  void post_parser (expression_up *expp, bool void_context_p, int completing,
-		    innermost_block_tracker *tracker) const override
+  void post_parser (expression_up *expp, struct parser_state *ps)
+    const override
   {
     struct type *context_type = NULL;
     int pc = 0;
 
-    if (void_context_p)
+    if (ps->void_context_p)
       context_type = builtin_type ((*expp)->gdbarch)->builtin_void;
 
-    resolve_subexp (expp, &pc, 1, context_type, completing, tracker);
+    resolve_subexp (expp, &pc, 1, context_type, ps->parse_completion,
+		    ps->block_tracker);
   }
 
   /* See language.h.  */
