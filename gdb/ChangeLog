@@ -1,3 +1,11 @@
+2020-12-15  Tom Tromey  <tom@tromey.com>
+
+	* ada-lang.c (num_component_specs): Remove.
+	(assign_aggregate): Update.
+	(aggregate_assign_positional, aggregate_assign_from_choices)
+	(aggregate_assign_others, add_component_interval): Change
+	arguments.
+
 2020-12-15  Tom Tromey  <tromey@adacore.com>
 
 	* cli/cli-decode.c (deprecated_cmd_warning): Use title style for

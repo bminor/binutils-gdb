@@ -218,23 +218,24 @@ static struct value *assign_aggregate (struct value *, struct value *,
 				       struct expression *,
 				       int *, enum noside);
 
-static void aggregate_assign_from_choices (struct value *, struct value *, 
+static void aggregate_assign_from_choices (struct value *, struct value *,
 					   struct expression *,
-					   int *, LONGEST *, int *,
-					   int, LONGEST, LONGEST);
+					   int *, std::vector<LONGEST> &,
+					   LONGEST, LONGEST);
 
 static void aggregate_assign_positional (struct value *, struct value *,
 					 struct expression *,
-					 int *, LONGEST *, int *, int,
+					 int *, std::vector<LONGEST> &,
 					 LONGEST, LONGEST);
 
 
 static void aggregate_assign_others (struct value *, struct value *,
 				     struct expression *,
-				     int *, LONGEST *, int, LONGEST, LONGEST);
+				     int *, std::vector<LONGEST> &,
+				     LONGEST, LONGEST);
 
 
-static void add_component_interval (LONGEST, LONGEST, LONGEST *, int *, int);
+static void add_component_interval (LONGEST, LONGEST, std::vector<LONGEST> &);
 
 
 static struct value *ada_evaluate_subexp (struct type *, struct expression *,
@@ -9471,34 +9472,6 @@ ada_value_equal (struct value *arg1, struct value *arg2)
   return value_equal (arg1, arg2);
 }
 
-/* Total number of component associations in the aggregate starting at
-   index PC in EXP.  Assumes that index PC is the start of an
-   OP_AGGREGATE.  */
-
-static int
-num_component_specs (struct expression *exp, int pc)
-{
-  int n, m, i;
-
-  m = exp->elts[pc + 1].longconst;
-  pc += 3;
-  n = 0;
-  for (i = 0; i < m; i += 1)
-    {
-      switch (exp->elts[pc].opcode) 
-	{
-	default:
-	  n += 1;
-	  break;
-	case OP_CHOICES:
-	  n += exp->elts[pc + 1].longconst;
-	  break;
-	}
-      ada_evaluate_subexp (NULL, exp, &pc, EVAL_SKIP);
-    }
-  return n;
-}
-
 /* Assign the result of evaluating EXP starting at *POS to the INDEXth 
    component of LHS (a simple array or a record), updating *POS past
    the expression, assuming that LHS is contained in CONTAINER.  Does
@@ -9552,9 +9525,6 @@ assign_aggregate (struct value *container,
   struct type *lhs_type;
   int n = exp->elts[*pos+1].longconst;
   LONGEST low_index, high_index;
-  int num_specs;
-  LONGEST *indices;
-  int max_indices, num_indices;
   int i;
 
   *pos += 3;
@@ -9588,32 +9558,27 @@ assign_aggregate (struct value *container,
   else
     error (_("Left-hand side must be array or record."));
 
-  num_specs = num_component_specs (exp, *pos - 3);
-  max_indices = 4 * num_specs + 4;
-  indices = XALLOCAVEC (LONGEST, max_indices);
+  std::vector<LONGEST> indices (4);
   indices[0] = indices[1] = low_index - 1;
   indices[2] = indices[3] = high_index + 1;
-  num_indices = 4;
 
   for (i = 0; i < n; i += 1)
     {
       switch (exp->elts[*pos].opcode)
 	{
 	  case OP_CHOICES:
-	    aggregate_assign_from_choices (container, lhs, exp, pos, indices, 
-					   &num_indices, max_indices,
+	    aggregate_assign_from_choices (container, lhs, exp, pos, indices,
 					   low_index, high_index);
 	    break;
 	  case OP_POSITIONAL:
 	    aggregate_assign_positional (container, lhs, exp, pos, indices,
-					 &num_indices, max_indices,
 					 low_index, high_index);
 	    break;
 	  case OP_OTHERS:
 	    if (i != n-1)
 	      error (_("Misplaced 'others' clause"));
-	    aggregate_assign_others (container, lhs, exp, pos, indices, 
-				     num_indices, low_index, high_index);
+	    aggregate_assign_others (container, lhs, exp, pos, indices,
+				     low_index, high_index);
 	    break;
 	  default:
 	    error (_("Internal error: bad aggregate clause"));
@@ -9625,15 +9590,14 @@ assign_aggregate (struct value *container,
 	      
 /* Assign into the component of LHS indexed by the OP_POSITIONAL
    construct at *POS, updating *POS past the construct, given that
-   the positions are relative to lower bound LOW, where HIGH is the 
-   upper bound.  Record the position in INDICES[0 .. MAX_INDICES-1]
-   updating *NUM_INDICES as needed.  CONTAINER is as for
+   the positions are relative to lower bound LOW, where HIGH is the
+   upper bound.  Record the position in INDICES.  CONTAINER is as for
    assign_aggregate.  */
 static void
 aggregate_assign_positional (struct value *container,
 			     struct value *lhs, struct expression *exp,
-			     int *pos, LONGEST *indices, int *num_indices,
-			     int max_indices, LONGEST low, LONGEST high) 
+			     int *pos, std::vector<LONGEST> &indices,
+			     LONGEST low, LONGEST high)
 {
   LONGEST ind = longest_to_int (exp->elts[*pos + 1].longconst) + low;
   
@@ -9641,7 +9605,7 @@ aggregate_assign_positional (struct value *container,
     warning (_("Extra components in aggregate ignored."));
   if (ind <= high)
     {
-      add_component_interval (ind, ind, indices, num_indices, max_indices);
+      add_component_interval (ind, ind, indices);
       *pos += 3;
       assign_component (container, lhs, ind, exp, pos);
     }
@@ -9652,13 +9616,12 @@ aggregate_assign_positional (struct value *container,
 /* Assign into the components of LHS indexed by the OP_CHOICES
    construct at *POS, updating *POS past the construct, given that
    the allowable indices are LOW..HIGH.  Record the indices assigned
-   to in INDICES[0 .. MAX_INDICES-1], updating *NUM_INDICES as
-   needed.  CONTAINER is as for assign_aggregate.  */
+   to in INDICES.  CONTAINER is as for assign_aggregate.  */
 static void
 aggregate_assign_from_choices (struct value *container,
 			       struct value *lhs, struct expression *exp,
-			       int *pos, LONGEST *indices, int *num_indices,
-			       int max_indices, LONGEST low, LONGEST high) 
+			       int *pos, std::vector<LONGEST> &indices,
+			       LONGEST low, LONGEST high)
 {
   int j;
   int n_choices = longest_to_int (exp->elts[*pos+1].longconst);
@@ -9718,8 +9681,7 @@ aggregate_assign_from_choices (struct value *container,
       if (lower <= upper && (lower < low || upper > high))
 	error (_("Index in component association out of bounds."));
 
-      add_component_interval (lower, upper, indices, num_indices,
-			      max_indices);
+      add_component_interval (lower, upper, indices);
       while (lower <= upper)
 	{
 	  int pos1;
@@ -9734,17 +9696,18 @@ aggregate_assign_from_choices (struct value *container,
 /* Assign the value of the expression in the OP_OTHERS construct in
    EXP at *POS into the components of LHS indexed from LOW .. HIGH that
    have not been previously assigned.  The index intervals already assigned
-   are in INDICES[0 .. NUM_INDICES-1].  Updates *POS to after the 
-   OP_OTHERS clause.  CONTAINER is as for assign_aggregate.  */
+   are in INDICES.  Updates *POS to after the OP_OTHERS clause.
+   CONTAINER is as for assign_aggregate.  */
 static void
 aggregate_assign_others (struct value *container,
 			 struct value *lhs, struct expression *exp,
-			 int *pos, LONGEST *indices, int num_indices,
+			 int *pos, std::vector<LONGEST> &indices,
 			 LONGEST low, LONGEST high) 
 {
   int i;
   int expr_pc = *pos + 1;
   
+  int num_indices = indices.size ();
   for (i = 0; i < num_indices - 2; i += 2)
     {
       LONGEST ind;
@@ -9760,22 +9723,22 @@ aggregate_assign_others (struct value *container,
   ada_evaluate_subexp (NULL, exp, pos, EVAL_SKIP);
 }
 
-/* Add the interval [LOW .. HIGH] to the sorted set of intervals 
-   [ INDICES[0] .. INDICES[1] ],..., [ INDICES[*SIZE-2] .. INDICES[*SIZE-1] ],
-   modifying *SIZE as needed.  It is an error if *SIZE exceeds
-   MAX_SIZE.  The resulting intervals do not overlap.  */
+/* Add the interval [LOW .. HIGH] to the sorted set of intervals
+   [ INDICES[0] .. INDICES[1] ],...  The resulting intervals do not
+   overlap.  */
 static void
 add_component_interval (LONGEST low, LONGEST high, 
-			LONGEST* indices, int *size, int max_size)
+			std::vector<LONGEST> &indices)
 {
   int i, j;
 
-  for (i = 0; i < *size; i += 2) {
+  int size = indices.size ();
+  for (i = 0; i < size; i += 2) {
     if (high >= indices[i] && low <= indices[i + 1])
       {
 	int kh;
 
-	for (kh = i + 2; kh < *size; kh += 2)
+	for (kh = i + 2; kh < size; kh += 2)
 	  if (high < indices[kh])
 	    break;
 	if (low < indices[i])
@@ -9783,18 +9746,16 @@ add_component_interval (LONGEST low, LONGEST high,
 	indices[i + 1] = indices[kh - 1];
 	if (high > indices[i + 1])
 	  indices[i + 1] = high;
-	memcpy (indices + i + 2, indices + kh, *size - kh);
-	*size -= kh - i - 2;
+	memcpy (indices.data () + i + 2, indices.data () + kh, size - kh);
+	indices.resize (kh - i - 2);
 	return;
       }
     else if (high < indices[i])
       break;
   }
 	
-  if (*size == max_size)
-    error (_("Internal error: miscounted aggregate components."));
-  *size += 2;
-  for (j = *size-1; j >= i+2; j -= 1)
+  indices.resize (indices.size () + 2);
+  for (j = size - 1; j >= i + 2; j -= 1)
     indices[j] = indices[j - 2];
   indices[i] = low;
   indices[i + 1] = high;
