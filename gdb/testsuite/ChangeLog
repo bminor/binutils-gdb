@@ -1,3 +1,10 @@
+2020-12-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/async-shell.exp: Enable non-stop through GDBFLAGS.
+	* gdb.base/continue-all-already-running.exp: Likewise.
+	* gdb.base/moribund-step.exp: Likewise.
+	* gdb.base/step-sw-breakpoint-adjust-pc.exp: Likewise.
+
 2020-12-16  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/batch-preserve-term-settings.exp:
