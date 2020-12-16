@@ -1,3 +1,9 @@
+2020-12-19  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* configure.ac: Move the static libs vs. source-highlight
+	error message to a better place.
+	* configure: Regenerate.
+
 2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
 
 	* gdb-gdb.py.in: Fix main_type field name.
