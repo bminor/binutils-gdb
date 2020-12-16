@@ -1,3 +1,28 @@
+2020-12-16  Tom Tromey  <tom@tromey.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Tom de Vries  <tdevries@suse.de>
+
+	* utils.h (get_chars_per_line): Declare.
+	* utils.c (get_chars_per_line): New function.
+	(fputs_maybe_filtered): Handle '\r'.
+	* ui-out.h (ui_out::progress_meter): New class.
+	(ui_out::progress, ui_out::do_progress_start)
+	(ui_out::do_progress_notify, ui_out::do_progress_end): New
+	methods.
+	* ui-out.c (do_progress_end)
+	(make_cleanup_ui_out_progress_begin_end, ui_out_progress): New
+	functions.
+	* mi/mi-out.h (mi_ui_out::do_progress_start)
+	(mi_ui_out::do_progress_notify, mi_ui_out::do_progress_end): New
+	methods.
+	* cli-out.h (struct cli_ui_out) <do_progress_start,
+	do_progress_notify, do_progress_end>: New methods.
+	<enum meter_stat, struct cli_progress_info>: New.
+	<m_meters>: New member.
+	* cli-out.c (cli_ui_out::do_progress_start)
+	(cli_ui_out::do_progress_notify, cli_ui_out::do_progress_end): New
+	methods.
+
 2020-12-16  Luis Machado  <luis.machado@linaro.org>
 
 	* aarch64-tdep.c (aarch64_record_data_proc_simd_fp): Record FPSR.

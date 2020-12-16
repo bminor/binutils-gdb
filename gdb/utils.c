@@ -1579,6 +1579,14 @@ gdb_flush (struct ui_file *stream)
   stream->flush ();
 }
 
+/* See utils.h.  */
+
+int
+get_chars_per_line ()
+{
+  return chars_per_line;
+}
+
 /* Indicate that if the next sequence of characters overflows the line,
    a newline should be inserted here rather than when it hits the end.
    If INDENT is non-null, it is a string to be printed to indent the
@@ -1768,6 +1776,12 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      /* Note that we don't consider this a character, so we
 		 don't increment chars_printed here.  */
 	      lineptr += skip_bytes;
+	    }
+	  else if (*lineptr == '\r')
+	    {
+	      wrap_buffer.push_back (*lineptr);
+	      chars_printed = 0;
+	      lineptr++;
 	    }
 	  else
 	    {
