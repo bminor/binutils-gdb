@@ -1,3 +1,13 @@
+2020-12-16  Howard Chu <hyc@symas.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27081
+	* libdep_plugin.c (onload): Skip if not all required plugin hooks
+	are available.
+	* testsuite/config/default.exp (dep_plug_opt): New.
+	* testsuite/ld-elf/elf.exp: Pass $dep_plug_opt to nm.
+	* testsuite/ld-elf/pr26391.fd: New file.
+
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
 	* ld.h (ld_config_type): Delete maxpagesize and commonpagesize.

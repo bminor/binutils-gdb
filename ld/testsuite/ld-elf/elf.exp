@@ -415,7 +415,10 @@ run_ld_link_tests [list \
 	"" \
 	"" \
 	{pr26391a.c pr26391b.c pr26391c.c pr26391d.c} \
-	{{nm "" pr26391.nd}} \
+	[list \
+	    [list "nm" "$dep_plug_opt" "pr26391.nd"] \
+	    [list "nm" "$dep_plug_opt" "pr26391.fd"] \
+	] \
 	"pr26391-5.o" \
 	"-fno-function-sections" \
     ] \

@@ -443,3 +443,11 @@ if { [check_compiler_available] } {
 	}
     }
 }
+
+if {[file exists .libs/libdep.so]} {
+  set dep_plug_opt "--plugin .libs/libdep.so"
+} elseif {[file exists .libs/libdep.dll]} {
+  set dep_plug_opt "--plugin .libs/libdep.dll"
+} else {
+    set dep_plug_opt ""
+}

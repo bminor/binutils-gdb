@@ -339,27 +339,14 @@ onload (struct ld_plugin_tv *tv)
   while ((tv++)->tv_tag != LDPT_NULL);
 
   /* Register hooks.  */
-  if (!tv_register_claim_file)
+  if (tv_register_claim_file
+      && tv_register_all_symbols_read
+      && tv_register_cleanup)
     {
-      TV_MESSAGE (LDPL_FATAL, "No register_claim_file hook");
-      fflush (NULL);
-      return LDPS_ERR;
+      (*tv_register_claim_file) (onclaim_file);
+      (*tv_register_all_symbols_read) (onall_symbols_read);
+      (*tv_register_cleanup) (oncleanup);
     }
-  (*tv_register_claim_file) (onclaim_file);
-  if (!tv_register_all_symbols_read)
-    {
-      TV_MESSAGE (LDPL_FATAL, "No register_all_symbols_read hook");
-      fflush (NULL);
-      return LDPS_ERR;
-    }
-  (*tv_register_all_symbols_read) (onall_symbols_read);
-  if (!tv_register_cleanup)
-    {
-      TV_MESSAGE (LDPL_FATAL, "No register_cleanup hook");
-      fflush (NULL);
-      return LDPS_ERR;
-    }
-  (*tv_register_cleanup) (oncleanup);
   fflush (NULL);
   return LDPS_OK;
 }
