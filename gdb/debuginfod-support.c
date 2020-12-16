@@ -21,6 +21,7 @@
 #include "cli/cli-style.h"
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
+#include "gdbsupport/gdb_optional.h"
 
 #ifndef HAVE_LIBDEBUGINFOD
 scoped_fd
@@ -46,12 +47,12 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 struct user_data
 {
   user_data (const char *desc, const char *fname)
-    : desc (desc), fname (fname), has_printed (false)
+    : desc (desc), fname (fname)
   { }
 
   const char * const desc;
   const char * const fname;
-  bool has_printed;
+  gdb::optional<ui_out::progress_meter> meter;
 };
 
 /* Deleter for a debuginfod_client.  */
@@ -80,14 +81,24 @@ progressfn (debuginfod_client *c, long cur, long total)
       return 1;
     }
 
-  if (!data->has_printed && total != 0)
+  if (total == 0)
+    return 0;
+
+  if (!data->meter.has_value ())
     {
-      /* Print this message only once.  */
-      data->has_printed = true;
-      printf_filtered ("Downloading %s %ps...\n",
-		       data->desc,
-		       styled_string (file_name_style.style (), data->fname));
+      float size_in_mb = 1.0f * total / (1024 * 1024);
+      string_file styled_filename (current_uiout->can_emit_style_escape ());
+      fprintf_styled (&styled_filename,
+		      file_name_style.style (),
+		      "%s",
+		      data->fname);
+      std::string message
+	= string_printf ("Downloading %.2f MB %s %s", size_in_mb, data->desc,
+			 styled_filename.c_str());
+      data->meter.emplace (current_uiout, message, 1);
     }
+
+  current_uiout->progress ((double)cur / (double)total);
 
   return 0;
 }

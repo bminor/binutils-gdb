@@ -272,7 +272,7 @@ cli_ui_out::do_redirect (ui_file *outstream)
    - printed for tty, SHOULD_PRINT == false:
      <>
    - printed for not-a-tty:
-     <NAME...done.
+     <NAME...
      >
 */
 
@@ -348,7 +348,7 @@ cli_ui_out::do_progress_end ()
 
   if (!stream->isatty ())
     {
-      fprintf_unfiltered (stream, "done.\n");
+      fprintf_unfiltered (stream, "\n");
       gdb_flush (stream);
     }
   else if (meter.printing == PROGRESS)

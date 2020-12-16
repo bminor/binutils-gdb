@@ -1,3 +1,10 @@
+2020-12-16  Martin Liska  <mliska@suse.cz>
+	    Tom de Vries  <tdevries@suse.de>
+
+	* gdb/debuginfod-support.c (struct user_data): Remove has_printed
+	field.  Add meter field.
+	(progressfn): Print progress using meter.
+
 2020-12-02  Enze Li  <lienze2010@hotmail.com>
 
 	* .gitignore: Add gnu global outputs.
