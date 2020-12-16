@@ -830,11 +830,11 @@ extern FILE *_bfd_real_fopen
 
 /* List of supported target vectors, and the default vector (if
    bfd_default_vector[0] is NULL, there is no default).  */
-extern const bfd_target * const *bfd_target_vector ATTRIBUTE_HIDDEN;
+extern const bfd_target *const *const bfd_target_vector ATTRIBUTE_HIDDEN;
 extern const bfd_target *bfd_default_vector[] ATTRIBUTE_HIDDEN;
 
 /* List of associated target vectors.  */
-extern const bfd_target * const *bfd_associated_vector ATTRIBUTE_HIDDEN;
+extern const bfd_target *const *const bfd_associated_vector ATTRIBUTE_HIDDEN;
 
 /* Functions shared by the ECOFF and MIPS ELF backends, which have no
    other common header files.  */

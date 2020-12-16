@@ -1405,7 +1405,7 @@ static const bfd_target * const _bfd_target_vector[] =
 
 	NULL /* end of list marker */
 };
-const bfd_target * const *bfd_target_vector = _bfd_target_vector;
+const bfd_target *const *const bfd_target_vector = _bfd_target_vector;
 
 /* bfd_default_vector[0] contains either the address of the default vector,
    if there is one, or zero if there isn't.  */
@@ -1420,13 +1420,13 @@ const bfd_target *bfd_default_vector[] = {
 /* bfd_associated_vector[] contains the associated target vectors used
    to reduce the ambiguity in bfd_check_format_matches.  */
 
-static const bfd_target *_bfd_associated_vector[] = {
+static const bfd_target *const _bfd_associated_vector[] = {
 #ifdef ASSOCIATED_VECS
 	ASSOCIATED_VECS,
 #endif
 	NULL
 };
-const bfd_target * const *bfd_associated_vector = _bfd_associated_vector;
+const bfd_target *const *const bfd_associated_vector = _bfd_associated_vector;
 
 /* When there is an ambiguous match, bfd_check_format_matches puts the
    names of the matching targets in an array.  This variable is the maximum

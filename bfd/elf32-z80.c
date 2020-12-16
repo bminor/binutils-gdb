@@ -30,7 +30,7 @@
 /* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
 #define OCTETS_PER_BYTE(ABFD, SEC) 1
 
-typedef struct {
+typedef const struct {
   bfd_reloc_code_real_type r_type;
   reloc_howto_type howto;
 } bfd_howto_type;

@@ -1347,7 +1347,7 @@ static int bytes_to_reloc[] = {
 /* If the displacement is within the given range and the new encoding
    differs from the old encoding (the index), then the insn can be
    relaxed to the new encoding.  */
-typedef struct {
+typedef const struct {
   int bytes;
   unsigned int max_disp;
   unsigned char new_encoding;

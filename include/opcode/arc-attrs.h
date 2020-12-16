@@ -58,7 +58,7 @@ const struct feature_type
 #endif
 
 /* A table with conflicting features.  */
-unsigned CONFLICT_LIST [] = {
+const unsigned CONFLICT_LIST [] = {
   NPS400 | SPX,
   NPS400 | DPX,
   DPX | DPA,

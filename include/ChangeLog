@@ -1,3 +1,7 @@
+2020-12-18  Alan Modra  <amodra@gmail.com>
+
+	* opcode/arc-attrs.h (CONFLICT_LIST): Make const.
+
 2020-12-16  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_info): Add maxpagesize and

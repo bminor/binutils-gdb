@@ -505,7 +505,7 @@ m68hc11_elf_bfd_link_hash_table_create (bfd *abfd)
 
 /* 68HC11 Linker Relaxation.  */
 
-struct m68hc11_direct_relax
+const struct m68hc11_direct_relax
 {
   const char *name;
   unsigned char code;
@@ -548,7 +548,7 @@ struct m68hc11_direct_relax
   { 0, 0, 0 }
 };
 
-static struct m68hc11_direct_relax *
+static const struct m68hc11_direct_relax *
 find_relaxable_insn (unsigned char code)
 {
   int i;
@@ -962,7 +962,7 @@ m68hc11_elf_relax_section (bfd *abfd, asection *sec,
 	{
 	  unsigned char code;
 	  unsigned short offset;
-	  struct m68hc11_direct_relax *rinfo;
+	  const struct m68hc11_direct_relax *rinfo;
 
 	  prev_insn_branch = 0;
 	  offset = bfd_get_16 (abfd, contents + irel->r_offset);

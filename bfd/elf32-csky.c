@@ -40,7 +40,7 @@ enum merge_class
   CSKY_V2
 };
 
-typedef struct csky_arch_for_merge
+typedef const struct csky_arch_for_merge
 {
   const char *name;
   const unsigned long arch_eflag;
@@ -53,7 +53,7 @@ typedef struct csky_arch_for_merge
   unsigned int do_warning;
 } csky_arch_for_merge;
 
-static struct csky_arch_for_merge csky_archs[] =
+static csky_arch_for_merge csky_archs[] =
 {
   /* 510 and 610 merge to 610 without warning.  */
   { "ck510",  CSKY_ARCH_510,  CSKY_V1,  0, 0},

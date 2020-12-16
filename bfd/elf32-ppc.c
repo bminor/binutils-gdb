@@ -1491,7 +1491,7 @@ static const struct bfd_elf_special_section ppc_elf_special_sections[] =
 };
 
 /* This is what we want for new plt/got.  */
-static struct bfd_elf_special_section ppc_alt_plt =
+static const struct bfd_elf_special_section ppc_alt_plt =
   { STRING_COMMA_LEN (".plt"),		   0, SHT_PROGBITS, SHF_ALLOC };
 
 static const struct bfd_elf_special_section *

@@ -1982,7 +1982,7 @@ rl78_offset_for_reloc (bfd *			abfd,
     }
 }
 
-struct {
+const struct {
   int prefix;		/* or -1 for "no prefix" */
   int insn;		/* or -1 for "end of list" */
   int insn_for_saddr;	/* or -1 for "no alternative" */

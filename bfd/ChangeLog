@@ -1,5 +1,21 @@
 2020-12-18  Alan Modra  <amodra@gmail.com>
 
+	* coff-z80.c (bfd_howto_type): Make typedef const.
+	* elf32-z80.c (bfd_howto_type): Likewise.
+	* elf32-m32c.c (EncodingTable): Likewise.
+	* elf32-csky.c (csky_arch_for_merge): Likewise.
+	(csky_archs): Use typedef.
+	* elf32-m68hc11.c (m68hc11_direct_relax_table): Make const.
+	(find_relaxable_insn, m68hc11_elf_relax_section): Adjust to suit.
+	* elf32-ppc.c (ppc_alt_plt): Make const.
+	* elf32-rl78.c (relax_addr16): Likewise.
+	* targets.c (_bfd_associated_vector): Likewise.
+	(bfd_target_vector, bfd_associated_vector): Likewise.
+	* libbfd-in.h (bfd_target_vector, bfd_associated_vector): Likewise.
+	* libbfd.h: Regenerate.
+
+2020-12-18  Alan Modra  <amodra@gmail.com>
+
 	* ecoff.c (bfd_debug_section): Init using BFD_FAKE_SECTION.
 	(ecoff_scom_section, ecoff_scom_symbol): Statically init using
 	BFD_FAKE_SECTION and GLOBAL_SYM_INIT.  Delete initialisation code.
