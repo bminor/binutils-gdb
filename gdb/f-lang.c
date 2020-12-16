@@ -947,8 +947,10 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	    argvec[tem] = 0;	/* signal end of arglist */
 	    if (noside == EVAL_SKIP)
 	      return eval_skip_value (exp);
-	    return evaluate_subexp_do_call (exp, noside, nargs, argvec, NULL,
-					    expect_type);
+	    return evaluate_subexp_do_call (exp, noside, argvec[0],
+					    gdb::make_array_view (argvec + 1,
+								  nargs),
+					    NULL, expect_type);
 	  }
 
 	default:

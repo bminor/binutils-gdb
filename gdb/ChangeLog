@@ -1,5 +1,13 @@
 2020-12-15  Tom Tromey  <tom@tromey.com>
 
+	* f-lang.c (evaluate_subexp_f): Update.
+	* expression.h (evaluate_subexp_do_call): Update.
+	* eval.c (evaluate_subexp_do_call): Add callee parameter.  Replace
+	nargs, argvec with array_view.
+	(evaluate_funcall): Update.
+
+2020-12-15  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (num_component_specs): Remove.
 	(assign_aggregate): Update.
 	(aggregate_assign_positional, aggregate_assign_from_choices)

@@ -153,15 +153,16 @@ enum noside
 extern struct value *evaluate_subexp_standard
   (struct type *, struct expression *, int *, enum noside);
 
-/* Evaluate a function call.  The function to be called is in ARGVEC[0] and
-   the arguments passed to the function are in ARGVEC[1..NARGS].
+/* Evaluate a function call.  The function to be called is in CALLEE and
+   the arguments passed to the function are in ARGVEC.
    FUNCTION_NAME is the name of the function, if known.
    DEFAULT_RETURN_TYPE is used as the function's return type if the return
    type is unknown.  */
 
 extern struct value *evaluate_subexp_do_call (expression *exp,
 					      enum noside noside,
-					      int nargs, value **argvec,
+					      value *callee,
+					      gdb::array_view<value *> argvec,
 					      const char *function_name,
 					      type *default_return_type);
 

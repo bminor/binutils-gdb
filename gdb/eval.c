@@ -692,11 +692,12 @@ eval_skip_value (expression *exp)
 
 value *
 evaluate_subexp_do_call (expression *exp, enum noside noside,
-			 int nargs, value **argvec,
+			 value *callee,
+			 gdb::array_view<value *> argvec,
 			 const char *function_name,
 			 type *default_return_type)
 {
-  if (argvec[0] == NULL)
+  if (callee == NULL)
     error (_("Cannot evaluate function -- may be inlined"));
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
@@ -704,7 +705,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	 call an error.  This can happen if somebody tries to turn
 	 a variable into a function call.  */
 
-      type *ftype = value_type (argvec[0]);
+      type *ftype = value_type (callee);
 
       if (ftype->code () == TYPE_CODE_INTERNAL_FUNCTION)
 	{
@@ -716,10 +717,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	}
       else if (ftype->code () == TYPE_CODE_XMETHOD)
 	{
-	  type *return_type
-	    = result_type_of_xmethod (argvec[0],
-				      gdb::make_array_view (argvec + 1,
-							    nargs));
+	  type *return_type = result_type_of_xmethod (callee, argvec);
 
 	  if (return_type == NULL)
 	    error (_("Xmethod is missing return type."));
@@ -730,7 +728,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	{
 	  if (ftype->is_gnu_ifunc ())
 	    {
-	      CORE_ADDR address = value_address (argvec[0]);
+	      CORE_ADDR address = value_address (callee);
 	      type *resolved_type = find_gnu_ifunc_target_type (address);
 
 	      if (resolved_type != NULL)
@@ -751,16 +749,15 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 	error (_("Expression of type other than "
 		 "\"Function returning ...\" used as function"));
     }
-  switch (value_type (argvec[0])->code ())
+  switch (value_type (callee)->code ())
     {
     case TYPE_CODE_INTERNAL_FUNCTION:
       return call_internal_function (exp->gdbarch, exp->language_defn,
-				     argvec[0], nargs, argvec + 1);
+				     callee, argvec.size (), argvec.data ());
     case TYPE_CODE_XMETHOD:
-      return call_xmethod (argvec[0], gdb::make_array_view (argvec + 1, nargs));
+      return call_xmethod (callee, argvec);
     default:
-      return call_function_by_hand (argvec[0], default_return_type,
-				    gdb::make_array_view (argvec + 1, nargs));
+      return call_function_by_hand (callee, default_return_type, argvec);
     }
 }
 
@@ -1165,7 +1162,8 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
       /* Nothing to be done; argvec already correctly set up.  */
     }
 
-  return evaluate_subexp_do_call (exp, noside, nargs, argvec,
+  return evaluate_subexp_do_call (exp, noside, argvec[0],
+				  gdb::make_array_view (argvec + 1, nargs),
 				  var_func_name, expect_type);
 }
 
