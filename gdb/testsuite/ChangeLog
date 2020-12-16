@@ -1,5 +1,9 @@
 2020-12-16  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/batch-preserve-term-settings.exp:
+
+2020-12-16  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (gdb_compile_shlib_1): Factor out of ...
 	(gdb_compile_shlib): ... here.  Filter out PIE-related flags.
 
