@@ -1,3 +1,9 @@
+2020-12-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27088
+	* gdb.texinfo (Range Checking): Fix "show check range" command
+	name.
+
 2020-12-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Caching Target Data): Document 'maint flush

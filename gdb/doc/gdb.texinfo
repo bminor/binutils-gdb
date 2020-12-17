@@ -16176,7 +16176,7 @@ expression may still be impossible for other reasons, such as accessing
 memory that the process does not own (a typical example from many Unix
 systems).
 
-@item show range
+@item show check range
 Show the current setting of the range checker, and whether or not it is
 being set automatically by @value{GDBN}.
 @end table
