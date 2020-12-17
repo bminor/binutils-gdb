@@ -1,5 +1,9 @@
 2020-12-17  Tom Tromey  <tromey@adacore.com>
 
+	* printcmd.c (print_variable_and_value): Don't use n_spaces.
+
+2020-12-17  Tom Tromey  <tromey@adacore.com>
+
 	* gdbtypes.c (print_args, dump_fn_fieldlists, print_cplus_stuff)
 	(print_gnat_stuff, print_fixed_point_type_info)
 	(recursive_dump_type): Update.

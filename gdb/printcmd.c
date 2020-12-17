@@ -2258,7 +2258,7 @@ print_variable_and_value (const char *name, struct symbol *var,
   if (!name)
     name = var->print_name ();
 
-  fprintf_filtered (stream, "%s%ps = ", n_spaces (2 * indent),
+  fprintf_filtered (stream, "%*s%ps = ", 2 * indent, "",
 		    styled_string (variable_name_style.style (), name));
 
   try
