@@ -1122,13 +1122,13 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	{
 	  if (type->is_stub ())
-	    fprintfi_filtered (level + 4, stream,
-			       _("%p[<incomplete type>%p]\n"),
-			       metadata_style.style ().ptr (), nullptr);
+	    fprintf_filtered (stream, _("%*s%p[<incomplete type>%p]\n"),
+			      level + 4, "",
+			      metadata_style.style ().ptr (), nullptr);
 	  else
-	    fprintfi_filtered (level + 4, stream,
-			       _("%p[<no data fields>%p]\n"),
-			       metadata_style.style ().ptr (), nullptr);
+	    fprintf_filtered (stream, _("%*s%p[<no data fields>%p]\n"),
+			      level + 4, "",
+			      metadata_style.style ().ptr (), nullptr);
 	}
 
       /* Start off with no specific section type, so we can print
@@ -1439,7 +1439,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	    print_spaces_filtered (2, stream);
 	}
 
-      fprintfi_filtered (level, stream, "}");
+      fprintf_filtered (stream, "%*s}", level, "");
     }
 }
 
@@ -1633,13 +1633,15 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	    if (type->num_fields () == 0)
 	      {
 		if (type->is_stub ())
-		  fprintfi_filtered (level + 4, stream,
-				     _("%p[<incomplete type>%p]\n"),
-				     metadata_style.style ().ptr (), nullptr);
+		  fprintf_filtered (stream,
+				    _("%*s%p[<incomplete type>%p]\n"),
+				    level + 4, "",
+				    metadata_style.style ().ptr (), nullptr);
 		else
-		  fprintfi_filtered (level + 4, stream,
-				     _("%p[<no data fields>%p]\n"),
-				     metadata_style.style ().ptr (), nullptr);
+		  fprintf_filtered (stream,
+				    _("%*s%p[<no data fields>%p]\n"),
+				    level + 4, "",
+				    metadata_style.style ().ptr (), nullptr);
 	      }
 	    len = type->num_fields ();
 	    for (i = 0; i < len; i++)
@@ -1663,7 +1665,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 		  }
 		fprintf_filtered (stream, ";\n");
 	      }
-	    fprintfi_filtered (level, stream, "}");
+	    fprintf_filtered (stream, "%*s}", level, "");
 	  }
       }
       break;

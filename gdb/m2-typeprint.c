@@ -582,7 +582,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	  fprintf_filtered (stream, ";\n");
 	}
       
-      fprintfi_filtered (level, stream, "END ");
+      fprintf_filtered (stream, "%*sEND ", level, "");
     }
 }
 

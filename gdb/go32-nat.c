@@ -1261,7 +1261,7 @@ go32_sysinfo (const char *arg, int from_tty)
       xsnprintf (cpu_string, sizeof (cpu_string), "%s%s Model %d Stepping %d",
 		 intel_p ? "Pentium" : (amd_p ? "AMD" : (hygon_p ? "Hygon" : "ix86")),
 		 cpu_brand, cpu_model, cpuid_eax & 0xf);
-      printfi_filtered (31, "%s\n", cpu_string);
+      printf_filtered ("%*s%s\n", 31, "", cpu_string);
       if (((cpuid_edx & (6 | (0x0d << 23))) != 0)
 	  || ((cpuid_edx & 1) == 0)
 	  || ((amd_p || hygon_p) && (cpuid_edx & (3 << 30)) != 0))
@@ -1372,11 +1372,11 @@ go32_sysinfo (const char *arg, int from_tty)
 		   "%s-bit DPMI, with%s Virtual Memory support\n",
 		   (dpmi_version_data.flags & 1) ? "32" : "16",
 		   (dpmi_version_data.flags & 4) ? "" : "out");
-  printfi_filtered (31, "Interrupts reflected to %s mode\n",
+  printf_filtered ("%*sInterrupts reflected to %s mode\n", 31, "",
 		   (dpmi_version_data.flags & 2) ? "V86" : "Real");
-  printfi_filtered (31, "Processor type: i%d86\n",
+  printf_filtered ("%*sProcessor type: i%d86\n", 31, "",
 		   dpmi_version_data.cpu);
-  printfi_filtered (31, "PIC base interrupt: Master: %#x  Slave: %#x\n",
+  printf_filtered ("%*sPIC base interrupt: Master: %#x  Slave: %#x\n", 31, "",
 		   dpmi_version_data.master_pic, dpmi_version_data.slave_pic);
 
   /* a_tss is only initialized when the debuggee is first run.  */
@@ -1430,8 +1430,8 @@ go32_sysinfo (const char *arg, int from_tty)
       __dpmi_int (0x21, &regs);
       if ((regs.x.flags & 1) != 0)
 	regs.h.al = 0;
-      printfi_filtered (31, "UMBs %sin DOS memory chain\n",
-			regs.h.al == 0 ? "not " : "");
+      printf_filtered ("%*sUMBs %sin DOS memory chain\n", 31, "",
+		       regs.h.al == 0 ? "not " : "");
     }
 }
 
@@ -1595,7 +1595,7 @@ display_descriptor (unsigned type, unsigned long base_addr, int idx, int force)
 		break;
 	      case 5:
 		printf_filtered ("TSS selector=0x%04x", descr.base0);
-		printfi_filtered (16, "Task Gate");
+		printf_filtered ("%*sTask Gate", 16, "");
 		break;
 	      case 6:
 	      case 7:

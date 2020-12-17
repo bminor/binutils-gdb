@@ -564,9 +564,11 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  if ((type->num_fields () == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
 	      if (type->is_stub ())
-		fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
+		fprintf_filtered (stream, "%*s<incomplete type>\n",
+				  level + 4, "");
 	      else
-		fprintfi_filtered (level + 4, stream, "<no data fields>\n");
+		fprintf_filtered (stream, "%*s<no data fields>\n",
+				  level + 4, "");
 	    }
 
 	  /* Start off with no specific section type, so we can print
@@ -597,8 +599,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      if (section_type != s_protected)
 			{
 			  section_type = s_protected;
-			  fprintfi_filtered (level + 2, stream,
-					     "protected\n");
+			  fprintf_filtered (stream, "%*sprotected\n",
+					    level + 2, "");
 			}
 		    }
 		  else if (TYPE_FIELD_PRIVATE (type, i))
@@ -606,7 +608,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      if (section_type != s_private)
 			{
 			  section_type = s_private;
-			  fprintfi_filtered (level + 2, stream, "private\n");
+			  fprintf_filtered (stream, "%*sprivate\n",
+					    level + 2, "");
 			}
 		    }
 		  else
@@ -614,7 +617,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      if (section_type != s_public)
 			{
 			  section_type = s_public;
-			  fprintfi_filtered (level + 2, stream, "public\n");
+			  fprintf_filtered (stream, "%*spublic\n",
+					    level + 2, "");
 			}
 		    }
 		}
@@ -668,8 +672,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      if (section_type != s_protected)
 			{
 			  section_type = s_protected;
-			  fprintfi_filtered (level + 2, stream,
-					     "protected\n");
+			  fprintf_filtered (stream, "%*sprotected\n",
+					    level + 2, "");
 			}
 		    }
 		  else if (TYPE_FN_FIELD_PRIVATE (f, j))
@@ -677,7 +681,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      if (section_type != s_private)
 			{
 			  section_type = s_private;
-			  fprintfi_filtered (level + 2, stream, "private\n");
+			  fprintf_filtered (stream, "%*sprivate\n",
+					    level + 2, "");
 			}
 		    }
 		  else
@@ -685,7 +690,8 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		      if (section_type != s_public)
 			{
 			  section_type = s_public;
-			  fprintfi_filtered (level + 2, stream, "public\n");
+			  fprintf_filtered (stream, "%*spublic\n",
+					    level + 2, "");
 			}
 		    }
 
@@ -736,7 +742,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 		  fprintf_filtered (stream, ";\n");
 		}
 	    }
-	  fprintfi_filtered (level, stream, "end");
+	  fprintf_filtered (stream, "%*send", level, "");
 	}
       break;
 

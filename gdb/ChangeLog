@@ -1,3 +1,20 @@
+2020-12-17  Tom Tromey  <tromey@adacore.com>
+
+	* gdbtypes.c (print_args, dump_fn_fieldlists, print_cplus_stuff)
+	(print_gnat_stuff, print_fixed_point_type_info)
+	(recursive_dump_type): Update.
+	* go32-nat.c (go32_sysinfo, display_descriptor): Update.
+	* c-typeprint.c (c_type_print_base_struct_union)
+	(c_type_print_base_1): Update.
+	* rust-lang.c (rust_internal_print_type): Update.
+	* f-typeprint.c (f_language::f_type_print_base): Update.
+	* utils.h (fprintfi_filtered, printfi_filtered): Remove.
+	* m2-typeprint.c (m2_record_fields): Update.
+	* p-typeprint.c (pascal_type_print_base): Update.
+	* compile/compile-loc2c.c (push, pushf, unary, binary)
+	(do_compile_dwarf_expr_to_c): Update.
+	* utils.c (fprintfi_filtered, printfi_filtered): Remove.
+
 2020-12-16  Tom Tromey  <tom@tromey.com>
 
 	* rust-exp.y (rust_lex_tests): Update.

@@ -307,7 +307,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 	prefix = "Type, C_Union :: ";
       else if (type->code () == TYPE_CODE_STRUCT)
 	prefix = "Type ";
-      fprintfi_filtered (level, stream, "%s%s", prefix, type->name ());
+      fprintf_filtered (stream, "%*s%s%s", level, "", prefix, type->name ());
       return;
     }
 
@@ -331,12 +331,12 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
       break;
 
     case TYPE_CODE_PTR:
-      fprintfi_filtered (level, stream, "PTR TO -> ( ");
+      fprintf_filtered (stream, "%*sPTR TO -> ( ", level, "");
       f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
       break;
 
     case TYPE_CODE_REF:
-      fprintfi_filtered (level, stream, "REF TO -> ( ");
+      fprintf_filtered (stream, "%*sREF TO -> ( ", level, "");
       f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
       break;
 
@@ -344,21 +344,21 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
       {
 	gdbarch *gdbarch = get_type_arch (type);
 	struct type *void_type = builtin_f_type (gdbarch)->builtin_void;
-	fprintfi_filtered (level, stream, "%s", void_type->name ());
+	fprintf_filtered (stream, "%*s%s", level, "", void_type->name ());
       }
       break;
 
     case TYPE_CODE_UNDEF:
-      fprintfi_filtered (level, stream, "struct <unknown>");
+      fprintf_filtered (stream, "%*sstruct <unknown>", level, "");
       break;
 
     case TYPE_CODE_ERROR:
-      fprintfi_filtered (level, stream, "%s", TYPE_ERROR_NAME (type));
+      fprintf_filtered (stream, "%*s%s", level, "", TYPE_ERROR_NAME (type));
       break;
 
     case TYPE_CODE_RANGE:
       /* This should not occur.  */
-      fprintfi_filtered (level, stream, "<range type>");
+      fprintf_filtered (stream, "%*s<range type>", level, "");
       break;
 
     case TYPE_CODE_CHAR:
@@ -368,7 +368,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 	 C-oriented, we must change these to "character" from "char".  */
 
       if (strcmp (type->name (), "char") == 0)
-	fprintfi_filtered (level, stream, "character");
+	fprintf_filtered (stream, "%*scharacter", level, "");
       else
 	goto default_case;
       break;
@@ -387,15 +387,15 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 	  fprintf_filtered (stream, "character*%s", pulongest (upper_bound));
 	}
       else
-	fprintfi_filtered (level, stream, "character*(*)");
+	fprintf_filtered (stream, "%*scharacter*(*)", level, "");
       break;
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
       if (type->code () == TYPE_CODE_UNION)
-	fprintfi_filtered (level, stream, "Type, C_Union :: ");
+	fprintf_filtered (stream, "%*sType, C_Union :: ", level, "");
       else
-	fprintfi_filtered (level, stream, "Type ");
+	fprintf_filtered (stream, "%*sType ", level, "");
       fputs_filtered (type->name (), stream);
       /* According to the definition,
 	 we only print structure elements in case show > 0.  */
@@ -413,13 +413,13 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 					   stream, show - 1, 0, 0, 0, false);
 	      fputs_filtered ("\n", stream);
 	    }
-	  fprintfi_filtered (level, stream, "End Type ");
+	  fprintf_filtered (stream, "%*sEnd Type ", level, "");
 	  fputs_filtered (type->name (), stream);
 	}
       break;
 
     case TYPE_CODE_MODULE:
-      fprintfi_filtered (level, stream, "module %s", type->name ());
+      fprintf_filtered (stream, "%*smodule %s", level, "", type->name ());
       break;
 
     default_case:
@@ -429,7 +429,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 	 the type name is, as recorded in the type itself.  If there
 	 is no type name, then complain.  */
       if (type->name () != NULL)
-	fprintfi_filtered (level, stream, "%s", type->name ());
+	fprintf_filtered (stream, "%*s%s", level, "", type->name ());
       else
 	error (_("Invalid type code (%d) in symbol table."), type->code ());
       break;

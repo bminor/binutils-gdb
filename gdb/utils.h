@@ -443,12 +443,7 @@ extern void vfprintf_filtered (struct ui_file *, const char *, va_list)
 extern void fprintf_filtered (struct ui_file *, const char *, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
-extern void fprintfi_filtered (int, struct ui_file *, const char *, ...)
-  ATTRIBUTE_PRINTF (3, 4);
-
 extern void printf_filtered (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
-
-extern void printfi_filtered (int, const char *, ...) ATTRIBUTE_PRINTF (2, 3);
 
 extern void vprintf_unfiltered (const char *, va_list) ATTRIBUTE_PRINTF (1, 0);
 

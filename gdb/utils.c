@@ -2183,22 +2183,6 @@ fprintf_unfiltered (struct ui_file *stream, const char *format, ...)
   va_end (args);
 }
 
-/* Like fprintf_filtered, but prints its result indented.
-   Called as fprintfi_filtered (spaces, stream, format, ...);  */
-
-void
-fprintfi_filtered (int spaces, struct ui_file *stream, const char *format,
-		   ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  print_spaces_filtered (spaces, stream);
-
-  vfprintf_filtered (stream, format, args);
-  va_end (args);
-}
-
 /* See utils.h.  */
 
 void
@@ -2260,20 +2244,6 @@ printf_unfiltered (const char *format, ...)
 
   va_start (args, format);
   vfprintf_unfiltered (gdb_stdout, format, args);
-  va_end (args);
-}
-
-/* Like printf_filtered, but prints it's result indented.
-   Called as printfi_filtered (spaces, format, ...);  */
-
-void
-printfi_filtered (int spaces, const char *format, ...)
-{
-  va_list args;
-
-  va_start (args, format);
-  print_spaces_filtered (spaces, gdb_stdout);
-  vfprintf_filtered (gdb_stdout, format, args);
   va_end (args);
 }
 

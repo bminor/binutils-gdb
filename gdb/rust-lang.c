@@ -849,9 +849,10 @@ rust_internal_print_type (struct type *type, const char *varstring,
 		&& name[len] == ':'
 		&& name[len + 1] == ':')
 	      name += len + 2;
-	    fprintfi_filtered (level + 2, stream, "%ps,\n",
-			       styled_string (variable_name_style.style (),
-					      name));
+	    fprintf_filtered (stream, "%*s%ps,\n",
+			      level + 2, "",
+			      styled_string (variable_name_style.style (),
+					     name));
 	  }
 
 	fputs_filtered ("}", stream);
