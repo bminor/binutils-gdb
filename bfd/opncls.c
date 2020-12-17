@@ -1347,7 +1347,7 @@ DESCRIPTION
 static bfd_boolean
 separate_debug_file_exists (const char *name, void *crc32_p)
 {
-  static unsigned char buffer [8 * 1024];
+  unsigned char buffer[8 * 1024];
   unsigned long file_crc = 0;
   FILE *f;
   bfd_size_type count;
@@ -1765,7 +1765,7 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
   char * contents;
   bfd_size_type crc_offset;
   FILE * handle;
-  static unsigned char buffer[8 * 1024];
+  unsigned char buffer[8 * 1024];
   size_t count;
   size_t filelen;
 

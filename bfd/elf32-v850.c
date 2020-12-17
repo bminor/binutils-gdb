@@ -144,7 +144,7 @@ v850_elf_check_relocs (bfd *abfd,
 		  && (h->other & V850_OTHER_ERROR) == 0)
 		{
 		  const char * msg;
-		  static char  buff[200]; /* XXX */
+		  char *buff;
 
 		  switch (h->other & V850_OTHER_MASK)
 		    {
@@ -165,10 +165,14 @@ v850_elf_check_relocs (bfd *abfd,
 		      break;
 		    }
 
-		  sprintf (buff, msg, h->root.root.string);
-		  info->callbacks->warning (info, buff, h->root.root.string,
+		  if (asprintf (&buff, msg, h->root.root.string) < 0)
+		    buff = NULL;
+		  else
+		    msg = buff;
+		  info->callbacks->warning (info, msg, h->root.root.string,
 					    abfd, h->root.u.def.section,
 					    (bfd_vma) 0);
+		  free (buff);
 
 		  bfd_set_error (bfd_error_bad_value);
 		  h->other |= V850_OTHER_ERROR;

@@ -3681,9 +3681,8 @@ rsrc_print_name (char * buffer, rsrc_string string)
 }
 
 static const char *
-rsrc_resource_name (rsrc_entry * entry, rsrc_directory * dir)
+rsrc_resource_name (rsrc_entry *entry, rsrc_directory *dir, char *buffer)
 {
-  static char buffer [256];
   bfd_boolean is_string = FALSE;
 
   buffer[0] = 0;
@@ -4015,8 +4014,12 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 			  || dir->entry->parent->entry == NULL)
 			_bfd_error_handler (_(".rsrc merge failure: duplicate leaf"));
 		      else
-			_bfd_error_handler (_(".rsrc merge failure: duplicate leaf: %s"),
-					    rsrc_resource_name (entry, dir));
+			{
+			  char buff[256];
+
+			  _bfd_error_handler (_(".rsrc merge failure: duplicate leaf: %s"),
+					      rsrc_resource_name (entry, dir, buff));
+			}
 		      bfd_set_error (bfd_error_file_truncated);
 		      return;
 		    }

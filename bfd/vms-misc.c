@@ -456,9 +456,8 @@ _bfd_vms_convert_to_var_unix_filename (const char *unix_filename)
    stolen from obj-vms.c.  */
 
 unsigned char *
-get_vms_time_string (void)
+get_vms_time_string (unsigned char *tbuf)
 {
-  static unsigned char tbuf[18];
 #ifndef VMS
   char *pnt;
   time_t timeb;

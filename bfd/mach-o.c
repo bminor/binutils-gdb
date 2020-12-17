@@ -618,10 +618,8 @@ cputype (unsigned long value)
 }
 
 static const char *
-cpusubtype (unsigned long cpu_type, unsigned long cpu_subtype)
+cpusubtype (unsigned long cpu_type, unsigned long cpu_subtype, char *buffer)
 {
-  static char buffer[128];
-
   buffer[0] = 0;
   switch (cpu_subtype & BFD_MACH_O_CPU_SUBTYPE_MASK)
     {
@@ -695,13 +693,14 @@ bfd_mach_o_bfd_print_private_bfd_data (bfd *abfd, void *ptr)
 {
   FILE * file = (FILE *) ptr;
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
+  char buff[128];
 
   fprintf (file, _(" MACH-O header:\n"));
   fprintf (file, _("   magic:      %#lx\n"), (long) mdata->header.magic);
   fprintf (file, _("   cputype:    %#lx (%s)\n"), (long) mdata->header.cputype,
 	   cputype (mdata->header.cputype));
   fprintf (file, _("   cpusubtype: %#lx%s\n"), (long) mdata->header.cpusubtype,
-	   cpusubtype (mdata->header.cputype, mdata->header.cpusubtype));
+	   cpusubtype (mdata->header.cputype, mdata->header.cpusubtype, buff));
   fprintf (file, _("   filetype:   %#lx\n"), (long) mdata->header.filetype);
   fprintf (file, _("   ncmds:      %#lx\n"), (long) mdata->header.ncmds);
   fprintf (file, _("   sizeocmds:  %#lx\n"), (long) mdata->header.sizeofcmds);

@@ -392,6 +392,7 @@ coff_mcore_relocate_section (bfd * output_bfd,
       reloc_howto_type *	     howto = NULL;
       struct coff_link_hash_entry *  h;
       const char *		     my_name;
+      char buf[SYMNMLEN + 1];
 
       symndx = rel->r_symndx;
       loc = contents + rel->r_vaddr - input_section->vma;
@@ -436,8 +437,6 @@ coff_mcore_relocate_section (bfd * output_bfd,
 		my_name = obj_coff_strings (input_bfd) + sym->_n._n_n._n_offset;
 	      else
 		{
-		  static char buf [SYMNMLEN + 1];
-
 		  strncpy (buf, sym->_n._n_name, SYMNMLEN);
 		  buf[SYMNMLEN] = '\0';
 		  my_name = buf;

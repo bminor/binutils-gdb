@@ -3086,10 +3086,8 @@ bfd_elf32_rx_set_target_flags (bfd_boolean user_no_warn_mismatch,
    Returns a static pointer.  */
 
 static const char *
-describe_flags (flagword flags)
+describe_flags (flagword flags, char *buf)
 {
-  static char buf [128];
-
   buf[0] = 0;
 
   if (flags & E_FLAG_RX_64BIT_DOUBLES)
@@ -3170,13 +3168,15 @@ rx_elf_merge_private_bfd_data (bfd * ibfd, struct bfd_link_info *info)
 	    }
 	  else
 	    {
+	      char buf[128];
+
 	      _bfd_error_handler (_("there is a conflict merging the"
 				    " ELF header flags from %pB"),
 				  ibfd);
 	      _bfd_error_handler (_("  the input  file's flags: %s"),
-				  describe_flags (new_flags));
+				  describe_flags (new_flags, buf));
 	      _bfd_error_handler (_("  the output file's flags: %s"),
-				  describe_flags (old_flags));
+				  describe_flags (old_flags, buf));
 	      error = TRUE;
 	    }
 	}
@@ -3195,6 +3195,7 @@ rx_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 {
   FILE * file = (FILE *) ptr;
   flagword flags;
+  char buf[128];
 
   BFD_ASSERT (abfd != NULL && ptr != NULL);
 
@@ -3204,7 +3205,7 @@ rx_elf_print_private_bfd_data (bfd * abfd, void * ptr)
   flags = elf_elfheader (abfd)->e_flags;
   fprintf (file, _("private flags = 0x%lx:"), (long) flags);
 
-  fprintf (file, "%s", describe_flags (flags));
+  fprintf (file, "%s", describe_flags (flags, buf));
   return TRUE;
 }
 

@@ -2927,6 +2927,7 @@ static void
 _bfd_vms_write_emh (bfd *abfd)
 {
   struct vms_rec_wr *recwr = &PRIV (recwr);
+  unsigned char tbuf[18];
 
   _bfd_vms_output_alignment (recwr, 2);
 
@@ -2949,7 +2950,7 @@ _bfd_vms_write_emh (bfd *abfd)
     _bfd_vms_output_counted (recwr, "NONAME");
 
   _bfd_vms_output_counted (recwr, BFD_VERSION_STRING);
-  _bfd_vms_output_dump (recwr, get_vms_time_string (), EMH_DATE_LENGTH);
+  _bfd_vms_output_dump (recwr, get_vms_time_string (tbuf), EMH_DATE_LENGTH);
   _bfd_vms_output_fill (recwr, 0, EMH_DATE_LENGTH);
   _bfd_vms_output_end (abfd, recwr);
 }

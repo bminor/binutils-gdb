@@ -172,7 +172,7 @@ struct ar_cache
 void
 _bfd_ar_spacepad (char *p, size_t n, const char *fmt, long val)
 {
-  static char buf[20];
+  char buf[20];
   size_t len;
 
   snprintf (buf, sizeof (buf), fmt, val);
@@ -189,7 +189,7 @@ _bfd_ar_spacepad (char *p, size_t n, const char *fmt, long val)
 bfd_boolean
 _bfd_ar_sizepad (char *p, size_t n, bfd_size_type size)
 {
-  static char buf[21];
+  char buf[21];
   size_t len;
 
   snprintf (buf, sizeof (buf), "%-10" BFD_VMA_FMT "u", size);

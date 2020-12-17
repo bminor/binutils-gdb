@@ -1056,7 +1056,7 @@ ecoff_emit_aggregate (bfd *abfd,
 /* Convert the type information to string format.  */
 
 static char *
-ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
+ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx, char *buff)
 {
   union aux_ext *aux_ptr;
   int bigendian;
@@ -1071,9 +1071,8 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
   unsigned int basic_type;
   int i;
   char buffer1[1024];
-  static char buffer2[1024];
   char *p1 = buffer1;
-  char *p2 = buffer2;
+  char *p2 = buff;
   RNDXR rndx;
 
   aux_ptr = ecoff_data (abfd)->debug_info.external_aux + fdr->iauxBase;
@@ -1239,7 +1238,7 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
       break;
     }
 
-  p1 += strlen (buffer1);
+  p1 += strlen (p1);
 
   /* If this is a bitfield, get the bitsize.  */
   if (u.ti.fBitfield)
@@ -1248,7 +1247,6 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
 
       bitsize = AUX_GET_WIDTH (bigendian, &aux_ptr[indx++]);
       sprintf (p1, " : %d", bitsize);
-      p1 += strlen (buffer1);
     }
 
   /* Deal with any qualifiers.  */
@@ -1332,7 +1330,7 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
 			       (long) (qualifiers[j].stride));
 
 		    else
-		      sprintf (p2, " {%ld bits}", (long) (qualifiers[j].stride));
+		      sprintf (p2, " {%ld bits}", (long) qualifiers[j].stride);
 
 		    p2 += strlen (p2);
 		    strcpy (p2, "] of ");
@@ -1345,7 +1343,7 @@ ecoff_type_to_string (bfd *abfd, FDR *fdr, unsigned int indx)
     }
 
   strcpy (p2, buffer1);
-  return buffer2;
+  return buff;
 }
 
 /* Return information about ECOFF symbol SYMBOL in RET.  */
@@ -1514,13 +1512,16 @@ _bfd_ecoff_print_symbol (bfd *abfd,
 		if (ECOFF_IS_STAB (&ecoff_ext.asym))
 		  ;
 		else if (ecoffsymbol (symbol)->local)
-		  /* xgettext:c-format */
-		  fprintf (file, _("\n      End+1 symbol: %-7ld   Type:  %s"),
-			   ((long)
-			    (AUX_GET_ISYM (bigendian,
-					   &aux_base[ecoff_ext.asym.index])
-			     + sym_base)),
-			   ecoff_type_to_string (abfd, fdr, indx + 1));
+		  {
+		    char buff[1024];
+		    /* xgettext:c-format */
+		    fprintf (file, _("\n      End+1 symbol: %-7ld   Type:  %s"),
+			     ((long)
+			      (AUX_GET_ISYM (bigendian,
+					     &aux_base[ecoff_ext.asym.index])
+			       + sym_base)),
+			     ecoff_type_to_string (abfd, fdr, indx + 1, buff));
+		  }
 		else
 		  fprintf (file, _("\n      Local symbol: %ld"),
 			   ((long) indx
@@ -1546,8 +1547,11 @@ _bfd_ecoff_print_symbol (bfd *abfd,
 
 	      default:
 		if (! ECOFF_IS_STAB (&ecoff_ext.asym))
-		  fprintf (file, _("\n      Type: %s"),
-			   ecoff_type_to_string (abfd, fdr, indx));
+		  {
+		    char buff[1024];
+		    fprintf (file, _("\n      Type: %s"),
+			     ecoff_type_to_string (abfd, fdr, indx, buff));
+		  }
 		break;
 	      }
 	  }

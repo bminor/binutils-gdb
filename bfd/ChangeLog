@@ -1,5 +1,34 @@
 2020-12-18  Alan Modra  <amodra@gmail.com>
 
+	* archive.c (_bfd_ar_spacepad, _bfd_ar_sizepad): Use auto buf.
+	* coff-mcore.c (coff_mcore_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_unhandled_reloc): Use asprintf in place
+	of fixed size and possibly too small buf for translated message.
+	* elf64-ppc.c (ppc64_elf_unhandled_reloc): Likewise.
+	* elf32-v850.c (v850_elf_check_relocs): Likewise.
+	* ecoff.c (ecoff_type_to_string): Pass in return string buff rather
+	than using static buffer2.  Delete dead code.  Remove unnecessary
+	parentheses.
+	(_bfd_ecoff_print_symbol): Pass auto buff to ecoff_type_to_string.
+	* elf32-rx.c (describe_flags): Pass in return string buf rather
+	than using static buf.
+	(rx_elf_merge_private_bfd_data): Pass buf to describe_flags.
+	(rx_elf_print_private_bfd_data): Likewise.
+	* mach-o.c (cpusubtype): Pass in return string buffer rather than
+	using static buffer.
+	(bfd_mach_o_bfd_print_private_bfd_data): Pass buff to cpusubtype.
+	* opncls.c (separate_debug_file_exists): Make buffer an auto var.
+	(bfd_fill_in_gnu_debuglink_section): Likewise.
+	* peXXigen.c (rsrc_resource_name): Pass in return string buffer
+	rather than using static buffer.
+	(rsrc_sort_entries): Pass buff to rsrc_resource_name.
+	* vms-alpha.c (_bfd_vms_write_emh): Pass tbuf to get_vms_time_string.
+	* vms-misc.c (get_vms_time_string): Pass in return string tbuf
+	rather than using static tbuf.
+	* vms.h (get_vms_time_string): Update prototype.
+
+2020-12-18  Alan Modra  <amodra@gmail.com>
+
 	* coff-z80.c (bfd_howto_type): Make typedef const.
 	* elf32-z80.c (bfd_howto_type): Likewise.
 	* elf32-m32c.c (EncodingTable): Likewise.
