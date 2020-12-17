@@ -44,7 +44,7 @@ if [info exists COMPILE] {
     return -1
 }
 
-if [prepare_for_testing "failed to prepare" $testfile $srcfile] {
+if [prepare_for_testing "failed to prepare" $testfile $srcfile {}] {
     return -1
 }
 
