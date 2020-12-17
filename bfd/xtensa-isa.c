@@ -24,8 +24,8 @@
 #include "xtensa-isa.h"
 #include "xtensa-isa-internal.h"
 
-xtensa_isa_status xtisa_errno;
-char xtisa_error_msg[1024];
+static xtensa_isa_status xtisa_errno;
+static char xtisa_error_msg[1024];
 
 
 xtensa_isa_status

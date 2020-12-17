@@ -114,7 +114,7 @@ static unsigned int som_slurp_symbol_table (bfd *);
 
    Note one side effect of using a R_PREV_FIXUP is the relocation that
    is being repeated moves to the front of the queue.  */
-struct reloc_queue
+static struct reloc_queue
 {
   unsigned char *reloc;
   unsigned int size;

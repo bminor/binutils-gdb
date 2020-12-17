@@ -20,8 +20,6 @@
    Boston, MA 02110-1301, USA.  */
 
 
-int dbg = 0;
-
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdlink.h"

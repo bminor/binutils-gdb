@@ -1,5 +1,9 @@
 2020-12-18  Alan Modra  <amodra@gmail.com>
 
+	* xtensa-isa-internal.h (xtisa_errno, xtisa_error_msg): Delete.
+
+2020-12-18  Alan Modra  <amodra@gmail.com>
+
 	* opcode/arc-attrs.h (CONFLICT_LIST): Make const.
 
 2020-12-16  Alan Modra  <amodra@gmail.com>

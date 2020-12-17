@@ -1,5 +1,12 @@
 2020-12-18  Alan Modra  <amodra@gmail.com>
 
+	* elf32-microblaze.c (dbg): Delete unused variable.
+	* elf32-nds32.c (relax_group_section_id_list): Make static.
+	* som.c (reloc_queue): Make static.
+	* xtensa-isa.c (xtisa_errno, xtisa_error_msg): Make static.
+
+2020-12-18  Alan Modra  <amodra@gmail.com>
+
 	* archive.c (_bfd_ar_spacepad, _bfd_ar_sizepad): Use auto buf.
 	* coff-mcore.c (coff_mcore_relocate_section): Likewise.
 	* elf32-ppc.c (ppc_elf_unhandled_reloc): Use asprintf in place

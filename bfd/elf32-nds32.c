@@ -13336,7 +13336,7 @@ elf32_nds32_check_relax_group (bfd *abfd, asection *asec)
 }
 
 /* Reorder RELAX_GROUP ID when command line option '-r' is applied.  */
-struct section_id_list_t *relax_group_section_id_list = NULL;
+static struct section_id_list_t *relax_group_section_id_list = NULL;
 
 struct section_id_list_t *
 elf32_nds32_lookup_section_id (int id, struct section_id_list_t **lst_ptr)
