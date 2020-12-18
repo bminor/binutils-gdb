@@ -1,5 +1,10 @@
 2020-12-30  Luis Machado  <luis.machado@arm.com>
 
+	* capability.cc (capability::to_str): Append strings to
+	attribute string.
+
+2020-12-30  Luis Machado  <luis.machado@arm.com>
+
 	* valprint.c (generic_value_print_capability): Don't add 1 to
 	the capability length.
 

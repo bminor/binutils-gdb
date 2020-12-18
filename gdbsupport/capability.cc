@@ -595,9 +595,9 @@ capability::to_str (bool compact)
       if (get_tag () == false)
 	attr_str = "invalid ";
       if (get_otype () == CAP_SEAL_TYPE_RB)
-	attr_str = "sentry ";
+	attr_str += "sentry ";
       if (is_sealed ())
-	attr_str = "sealed ";
+	attr_str += "sealed ";
 
       cap_str += "{";
       cap_str = val_str + " [" + perm_str + "," + range_str + "]";
