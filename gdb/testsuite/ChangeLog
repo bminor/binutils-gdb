@@ -1,3 +1,9 @@
+2020-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/27059
+	* gdb.dwarf2/dyn-type-unallocated.c: New file.
+	* gdb.dwarf2/dyn-type-unallocated.exp: New file.
+
 2020-12-21  Peter Waller  <p@pwaller.net>
 
 	* gdb.base/style-interp-exec-mi.exp: New.

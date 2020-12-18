@@ -2961,10 +2961,14 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	{
 	  val = evaluate_subexp (nullptr, exp, pos, EVAL_NORMAL);
 	  type = value_type (val);
-	  if (type->code () == TYPE_CODE_ARRAY
-	      && is_dynamic_type (type->index_type ())
-	      && type->bounds ()->high.kind () == PROP_UNDEFINED)
-	    return allocate_optimized_out_value (size_type);
+	  if (type->code () == TYPE_CODE_ARRAY)
+	    {
+	      if (type_not_allocated (type) || type_not_associated (type))
+		return value_zero (size_type, not_lval);
+	      else if (is_dynamic_type (type->index_type ())
+		       && type->bounds ()->high.kind () == PROP_UNDEFINED)
+		return allocate_optimized_out_value (size_type);
+	    }
 	}
       else
 	(*pos) += 4;

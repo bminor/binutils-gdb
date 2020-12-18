@@ -1391,6 +1391,10 @@ fortran_adjust_dynamic_array_base_address_hack (struct type *type,
 {
   gdb_assert (type->code () == TYPE_CODE_ARRAY);
 
+  /* We can't adjust the base address for arrays that have no content.  */
+  if (type_not_allocated (type) || type_not_associated (type))
+    return address;
+
   int ndimensions = calc_f77_array_dims (type);
   LONGEST total_offset = 0;
 

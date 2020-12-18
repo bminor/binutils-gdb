@@ -1,5 +1,19 @@
 2020-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR gdb/27059
+	* eval.c (evaluate_subexp_for_sizeof): Handle not allocated and
+	not associated arrays.
+	* f-lang.c (fortran_adjust_dynamic_array_base_address_hack): Don't
+	adjust arrays that are not allocated/associated.
+	* gdbtypes.c (resolve_dynamic_range): Update header comment.  Add
+	new parameter which is used to sometimes set dynamic properties to
+	undefined.
+	(resolve_dynamic_array_or_string): Update header comment.  Add new
+	parameter which is used to guard evaluating dynamic properties.
+	Resolve allocated/associated properties first.
+
+2020-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdbtypes (recursive_dump_type): Include allocated and associated
 	properties.
 

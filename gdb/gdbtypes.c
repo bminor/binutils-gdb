@@ -2177,11 +2177,20 @@ static struct type *resolve_dynamic_type_internal
 
 /* Given a dynamic range type (dyn_range_type) and a stack of
    struct property_addr_info elements, return a static version
-   of that type.  */
+   of that type.
+
+   When RESOLVE_P is true then the returned static range is created by
+   actually evaluating any dynamic properties within the range type, while
+   when RESOLVE_P is false the returned static range has all of the bounds
+   and stride information set to undefined.  The RESOLVE_P set to false
+   case will be used when evaluating a dynamic array that is not
+   allocated, or not associated, i.e. the bounds information might not be
+   initialized yet.  */
 
 static struct type *
 resolve_dynamic_range (struct type *dyn_range_type,
-		       struct property_addr_info *addr_stack)
+		       struct property_addr_info *addr_stack,
+		       bool resolve_p = true)
 {
   CORE_ADDR value;
   struct type *static_range_type, *static_target_type;
@@ -2190,13 +2199,13 @@ resolve_dynamic_range (struct type *dyn_range_type,
   gdb_assert (dyn_range_type->code () == TYPE_CODE_RANGE);
 
   const struct dynamic_prop *prop = &dyn_range_type->bounds ()->low;
-  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     low_bound.set_const_val (value);
   else
     low_bound.set_undefined ();
 
   prop = &dyn_range_type->bounds ()->high;
-  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       high_bound.set_const_val (value);
 
@@ -2209,7 +2218,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
   bool byte_stride_p = dyn_range_type->bounds ()->flag_is_byte_stride;
   prop = &dyn_range_type->bounds ()->stride;
-  if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       stride.set_const_val (value);
 
@@ -2242,11 +2251,16 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
 /* Resolves dynamic bound values of an array or string type TYPE to static
    ones.  ADDR_STACK is a stack of struct property_addr_info to be used if
-   needed during the dynamic resolution.  */
+   needed during the dynamic resolution.
+
+   When RESOLVE_P is true then the dynamic properties of TYPE are
+   evaluated, otherwise the dynamic properties of TYPE are not evaluated,
+   instead we assume the array is not allocated/associated yet.  */
 
 static struct type *
 resolve_dynamic_array_or_string (struct type *type,
-				 struct property_addr_info *addr_stack)
+				 struct property_addr_info *addr_stack,
+				 bool resolve_p = true)
 {
   CORE_ADDR value;
   struct type *elt_type;
@@ -2262,29 +2276,44 @@ resolve_dynamic_array_or_string (struct type *type,
 
   type = copy_type (type);
 
-  elt_type = type;
-  range_type = check_typedef (elt_type->index_type ());
-  range_type = resolve_dynamic_range (range_type, addr_stack);
-
-  /* Resolve allocated/associated here before creating a new array type, which
-     will update the length of the array accordingly.  */
+  /* Resolve the allocated and associated properties before doing anything
+     else.  If an array is not allocated or not associated then (at least
+     for Fortran) there is no guarantee that the data to define the upper
+     bound, lower bound, or stride will be correct.  If RESOLVE_P is
+     already false at this point then this is not the first dimension of
+     the array and a more outer dimension has already marked this array as
+     not allocated/associated, as such we just ignore this property.  This
+     is fine as GDB only checks the allocated/associated on the outer most
+     dimension of the array.  */
   prop = TYPE_ALLOCATED_PROP (type);
-  if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
-    prop->set_const_val (value);
+  if (prop != NULL && resolve_p
+      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    {
+      prop->set_const_val (value);
+      if (value == 0)
+	resolve_p = false;
+    }
 
   prop = TYPE_ASSOCIATED_PROP (type);
-  if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
-    prop->set_const_val (value);
+  if (prop != NULL && resolve_p
+      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    {
+      prop->set_const_val (value);
+      if (value == 0)
+	resolve_p = false;
+    }
 
-  ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
+  range_type = check_typedef (type->index_type ());
+  range_type = resolve_dynamic_range (range_type, addr_stack, resolve_p);
 
+  ary_dim = check_typedef (TYPE_TARGET_TYPE (type));
   if (ary_dim != NULL && ary_dim->code () == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_array_or_string (ary_dim, addr_stack);
+    elt_type = resolve_dynamic_array_or_string (ary_dim, addr_stack, resolve_p);
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
   prop = type->dyn_prop (DYN_PROP_BYTE_STRIDE);
-  if (prop != NULL)
+  if (prop != NULL && resolve_p)
     {
       if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
 	{
