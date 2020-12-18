@@ -1,3 +1,12 @@
+2020-12-30  Luis Machado  <luis.machado@arm.com>
+
+	* valprint.c (user_print_options): Initialize compact_capabilities.
+	(show_print_compact_capabilities): New function.
+	(generic_value_print_capability): Use compact_capabilities option.
+	(value_print_option_defs): New compact_capabilities option.
+	* valprint.h (value_print_options) <compact_capabilities>: New member
+	variable.
+
 2020-11-11  Luis Machado  <luis.machado@arm.com>
 
 	* aarch64-tdep.c (aarch64_dwarf_reg_to_regnum): Don't return LR
