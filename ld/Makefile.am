@@ -1001,7 +1001,11 @@ libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
 bfdplugindir = $(libdir)/bfd-plugins
 bfdplugin_LTLIBRARIES = libdep.la
 libdep_la_SOURCES = libdep_plugin.c
-libdep_la_LDFLAGS = -no-undefined -rpath /nowhere
+libdep_la_LDFLAGS = -no-undefined -rpath /nowhere -module -avoid-version
+libdep_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	--tag=disable-static \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libdep_la_LDFLAGS) $(LDFLAGS) -o $@
 
 # DOCUMENTATION TARGETS
 # Manual configuration file; not usually attached to normal configuration,
@@ -1060,11 +1064,12 @@ install-exec-local: ld-new$(EXEEXT) install-binPROGRAMS
 	  fi; \
 	fi
 
-install-data-local:
+install-data-local: install-bfdpluginLTLIBRARIES
 	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
 	for f in ldscripts/* ; do \
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
+	rm -f $(DESTDIR)$(bfdplugindir)/libdep.la
 
 # Stuff that should be included in a distribution.  The diststuff
 # target is run by the taz target in ../Makefile.in.

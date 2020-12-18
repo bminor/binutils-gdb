@@ -170,16 +170,13 @@ LTLIBRARIES = $(bfdplugin_LTLIBRARIES) $(noinst_LTLIBRARIES)
 libdep_la_LIBADD =
 am_libdep_la_OBJECTS = libdep_plugin.lo
 libdep_la_OBJECTS = $(am_libdep_la_OBJECTS)
+libldtestplug_la_LIBADD =
+am_libldtestplug_la_OBJECTS = libldtestplug_la-testplug.lo
+libldtestplug_la_OBJECTS = $(am_libldtestplug_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-libdep_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libdep_la_LDFLAGS) $(LDFLAGS) -o $@
-libldtestplug_la_LIBADD =
-am_libldtestplug_la_OBJECTS = libldtestplug_la-testplug.lo
-libldtestplug_la_OBJECTS = $(am_libldtestplug_la_OBJECTS)
 libldtestplug_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libldtestplug_la_CFLAGS) $(CFLAGS) \
@@ -1023,7 +1020,12 @@ libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
 bfdplugindir = $(libdir)/bfd-plugins
 bfdplugin_LTLIBRARIES = libdep.la
 libdep_la_SOURCES = libdep_plugin.c
-libdep_la_LDFLAGS = -no-undefined -rpath /nowhere
+libdep_la_LDFLAGS = -no-undefined -rpath /nowhere -module -avoid-version
+libdep_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	--tag=disable-static \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(libdep_la_LDFLAGS) $(LDFLAGS) -o $@
+
 MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.
@@ -1146,7 +1148,7 @@ clean-noinstLTLIBRARIES:
 	}
 
 libdep.la: $(libdep_la_OBJECTS) $(libdep_la_DEPENDENCIES) $(EXTRA_libdep_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libdep_la_LINK) -rpath $(bfdplugindir) $(libdep_la_OBJECTS) $(libdep_la_LIBADD) $(LIBS)
+	$(AM_V_GEN)$(libdep_la_LINK) -rpath $(bfdplugindir) $(libdep_la_OBJECTS) $(libdep_la_LIBADD) $(LIBS)
 
 libldtestplug.la: $(libldtestplug_la_OBJECTS) $(libldtestplug_la_DEPENDENCIES) $(EXTRA_libldtestplug_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libldtestplug_la_LINK)  $(libldtestplug_la_OBJECTS) $(libldtestplug_la_LIBADD) $(LIBS)
@@ -2655,11 +2657,12 @@ install-exec-local: ld-new$(EXEEXT) install-binPROGRAMS
 	  fi; \
 	fi
 
-install-data-local:
+install-data-local: install-bfdpluginLTLIBRARIES
 	$(mkinstalldirs) $(DESTDIR)$(scriptdir)/ldscripts
 	for f in ldscripts/* ; do \
 	  $(INSTALL_DATA) $$f $(DESTDIR)$(scriptdir)/$$f ; \
 	done
+	rm -f $(DESTDIR)$(bfdplugindir)/libdep.la
 diststuff: info $(EXTRA_DIST)
 
 # Both info (ld.info) and ld.1 depend on configdoc.texi.

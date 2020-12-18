@@ -1,5 +1,14 @@
 2020-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/27082
+	* Makefile.am
+	(libdep_la_LDFLAGS): Add -module -avoid-version.
+	(libdep_la_LINK): New.
+	(install-data-local): Depend on $(install-bfdpluginLTLIBRARIES)
+	and remove libdep.la.
+
+2020-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/27091
 	* testsuite/ld-elf/retain7.s: New file.
 	* testsuite/ld-elf/retain7a.d: Likewise.
