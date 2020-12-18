@@ -105,3 +105,9 @@ riscv_get_prefix_class (const char *);
 
 extern int
 riscv_compare_subsets (const char *, const char *);
+
+extern bfd_boolean
+bfd_elf32_riscv_restart_relax_sections (struct bfd_link_info *);
+
+extern bfd_boolean
+bfd_elf64_riscv_restart_relax_sections (struct bfd_link_info *);

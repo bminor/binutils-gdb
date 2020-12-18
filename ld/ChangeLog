@@ -1,3 +1,13 @@
+2021-03-11  Nelson Chu  <nelson.chu@sifive.com>
+
+	* emultempl/riscvelf.em (after_allocation): Run ldelf_map_segments
+	many times if riscv_restart_relax_sections returns TRUE.
+	* testsuite/ld-riscv-elf/restart-relax.d: New testcase.  Before
+	applying this patch, the call won't be relaxed to jal; But now we
+	have more chances to do relaxations.
+	* testsuite/ld-riscv-elf/restart-relax.s: Likewise.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/ld-scripts/pr22267.t: Avoid symbol value with more

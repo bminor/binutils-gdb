@@ -1,3 +1,19 @@
+2021-03-11  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_link_hash_table): New boolean
+	restart_relax, used to check if we need to run the whole
+	relaxations from relax pass 0 to 2 again.
+	(riscv_elf_link_hash_table_create): Init restart_relax to FALSE.
+	(_bfd_riscv_relax_align): Remove obsolete sec_flg0 set.
+	(_bfd_riscv_relax_delete): Set again to TRUE if we do delete the code.
+	(bfd_elfNN_riscv_restart_relax_sections): New function.  Called by
+	after_allocation to check if we need to run the whole relaxations again.
+	(_bfd_riscv_relax_section): We will only enter into the relax pass 3
+	when the restart_relax is FALSE; At last set restart_relax to TRUE if
+	again is TRUE, too.
+	* elfxx-riscv.h (bfd_elf32_riscv_restart_relax_sections): Declaration.
+	(bfd_elf64_riscv_restart_relax_sections): Likewise.
+
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
 	* cofflink.c (_bfd_coff_write_global_sym): Range-check symbol

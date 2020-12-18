@@ -62,7 +62,11 @@ gld${EMULATION_NAME}_after_allocation (void)
 	}
     }
 
-  ldelf_map_segments (need_layout);
+  do
+    {
+      ldelf_map_segments (need_layout);
+    }
+  while (bfd_elf${ELFSIZE}_riscv_restart_relax_sections (&link_info));
 }
 
 /* This is a convenient point to tell BFD about target specific flags.

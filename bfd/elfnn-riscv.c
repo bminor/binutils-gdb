@@ -131,6 +131,9 @@ struct riscv_elf_link_hash_table
 
   /* The index of the last unused .rel.iplt slot.  */
   bfd_vma last_iplt_index;
+
+  /* Re-run the relaxations from relax pass 0 if TRUE.  */
+  bfd_boolean restart_relax;
 };
 
 /* Instruction access functions. */
@@ -399,6 +402,7 @@ riscv_elf_link_hash_table_create (bfd *abfd)
     }
 
   ret->max_alignment = (bfd_vma) -1;
+  ret->restart_relax = FALSE;
 
   /* Create hash table for local ifunc.  */
   ret->loc_hash_table = htab_try_create (1024,
@@ -4365,7 +4369,8 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
     }
 }
 
-/* Implement R_RISCV_ALIGN by deleting excess alignment NOPs.  */
+/* Implement R_RISCV_ALIGN by deleting excess alignment NOPs.
+   Once we've handled an R_RISCV_ALIGN, we can't relax anything else.  */
 
 static bfd_boolean
 _bfd_riscv_relax_align (bfd *abfd, asection *sec,
@@ -4387,9 +4392,6 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
   symval -= rel->r_addend;
   bfd_vma aligned_addr = ((symval - 1) & ~(alignment - 1)) + alignment;
   bfd_vma nop_bytes = aligned_addr - symval;
-
-  /* Once we've handled an R_RISCV_ALIGN, we can't relax anything else.  */
-  sec->sec_flg0 = TRUE;
 
   /* Make sure there are enough NOPs to actually achieve the alignment.  */
   if (rel->r_addend < nop_bytes)
@@ -4586,7 +4588,7 @@ _bfd_riscv_relax_delete (bfd *abfd,
 			 bfd_vma symval ATTRIBUTE_UNUSED,
 			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
 			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
-			 bfd_boolean *again ATTRIBUTE_UNUSED,
+			 bfd_boolean *again,
 			 riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
 			 bfd_boolean undefined_weak ATTRIBUTE_UNUSED)
 {
@@ -4594,15 +4596,39 @@ _bfd_riscv_relax_delete (bfd *abfd,
 				 link_info))
     return FALSE;
   rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+  *again = TRUE;
   return TRUE;
+}
+
+/* Called by after_allocation to check if we need to run the whole
+   relaxations again.  */
+
+bfd_boolean
+bfd_elfNN_riscv_restart_relax_sections (struct bfd_link_info *info)
+{
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (info);
+  bfd_boolean restart = htab->restart_relax;
+  /* Reset the flag.  */
+  htab->restart_relax = FALSE;
+  return restart;
 }
 
 /* Relax a section.
 
    Pass 0: Shortens code sequences for LUI/CALL/TPREL relocs.
    Pass 1: Shortens code sequences for PCREL relocs.
-   Pass 2: Deletes the bytes that pass 1 made obselete.
-   Pass 3: Which cannot be disabled, handles code alignment directives.  */
+   Pass 2: Deletes the bytes that pass 1 made obsolete.
+   Pass 3: Which cannot be disabled, handles code alignment directives.
+
+   The `again` is used to determine whether the relax pass itself needs to
+   run again.  And the `restart_relax` is used to determine if we need to
+   run the whole relax passes again from 0 to 2.  Once we have deleted the
+   code between relax pass 0 to 2, the restart_relax will be set to TRUE,
+   and we should run the whole relaxations again to give them more chances
+   to shorten the code.
+
+   Since we can't relax anything else once we start to handle the alignments,
+   we will only enter into the relax pass 3 when the restart_relax is FALSE.  */
 
 static bfd_boolean
 _bfd_riscv_relax_section (bfd *abfd, asection *sec,
@@ -4621,11 +4647,12 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   *again = FALSE;
 
   if (bfd_link_relocatable (info)
-      || sec->sec_flg0
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (info->disable_target_specific_optimizations
-	  && info->relax_pass < 2))
+	  && info->relax_pass < 2)
+      || (htab->restart_relax
+	  && info->relax_pass == 3))
     return TRUE;
 
   riscv_init_pcgp_relocs (&pcgp_relocs);
@@ -4863,6 +4890,9 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   if (relocs != data->relocs)
     free (relocs);
   riscv_free_pcgp_relocs (&pcgp_relocs, abfd, sec);
+
+  if (*again)
+    htab->restart_relax = TRUE;
 
   return ret;
 }
