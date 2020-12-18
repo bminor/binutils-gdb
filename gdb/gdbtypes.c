@@ -5271,6 +5271,24 @@ recursive_dump_type (struct type *type, int spaces)
     }
   puts_filtered ("\n");
   printf_filtered ("%*snfields %d ", spaces, "", type->num_fields ());
+  if (TYPE_ASSOCIATED_PROP (type) != nullptr
+      || TYPE_ALLOCATED_PROP (type) != nullptr)
+    {
+      printf_filtered ("%*s", spaces, "");
+      if (TYPE_ASSOCIATED_PROP (type) != nullptr)
+	{
+	  printf_filtered ("associated ");
+	  dump_dynamic_prop (*TYPE_ASSOCIATED_PROP (type));
+	}
+      if (TYPE_ALLOCATED_PROP (type) != nullptr)
+	{
+	  if (TYPE_ASSOCIATED_PROP (type) != nullptr)
+	    printf_filtered ("  ");
+	  printf_filtered ("allocated ");
+	  dump_dynamic_prop (*TYPE_ALLOCATED_PROP (type));
+	}
+      printf_filtered ("\n");
+    }
   gdb_print_host_address (type->fields (), gdb_stdout);
   puts_filtered ("\n");
   for (idx = 0; idx < type->num_fields (); idx++)

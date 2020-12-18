@@ -1,3 +1,8 @@
+2020-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbtypes (recursive_dump_type): Include allocated and associated
+	properties.
+
 2020-12-24  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* gdbtypes.c (is_scalar_type_recursive): Prevent comparison
