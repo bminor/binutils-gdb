@@ -175,7 +175,7 @@ class StructMainTypePrettyPrinter:
             label += " (artificial)"
         fields = []
         fields.append("name = %s" % f['name'])
-        fields.append("type = %s" % f['type'])
+        fields.append("type = %s" % f['m_type'])
         fields.append("loc_kind = %s" % f['loc_kind'])
         fields.append("bitsize = %d" % f['bitsize'])
         fields.append(self.struct_field_location_img(f))
