@@ -1,5 +1,9 @@
 2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
 
+	* gdb.python/py-format-string.exp: Add tests for address keyword.
+
+2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
+
 	* gdb.python/py-type.exp: Add tests for TYPE_CODE_METHOD.
 
 2020-12-18  Tom Tromey  <tromey@adacore.com>

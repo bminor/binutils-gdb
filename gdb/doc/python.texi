@@ -906,6 +906,11 @@ corresponding symbol name (if one exists), @code{False} if it shouldn't
 should be expanded, @code{False} if they shouldn't (see @code{set print
 union} in @ref{Print Settings}).
 
+@item address
+@code{True} if the string representation of a pointer should include the
+address, @code{False} if it shouldn't (see @code{set print address} in
+@ref{Print Settings}).
+
 @item deref_refs
 @code{True} if C@t{++} references should be resolved to the value they
 refer to, @code{False} (the default) if they shouldn't.  Note that, unlike

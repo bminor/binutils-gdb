@@ -1,3 +1,7 @@
+2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python.texi (Values From Inferior): Document the address keyword.
+
 2020-12-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27088

@@ -1,5 +1,9 @@
 2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
 
+	* python/py-value.c (valpy_format_string): Implement address keyword.
+
+2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
+
 	* python/py-type.c (typy_get_composite): Add TYPE_CODE_METHOD.
 
 2020-12-18  Jameson Nash  <vtjnash@gmail.com>

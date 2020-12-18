@@ -487,6 +487,48 @@ proc test_unions {} {
   }
 }
 
+# Test the address option for gdb.Value.format_string.
+proc test_address {} {
+  global undefined
+  global current_lang
+
+  check_var_with_bool_opt "address" "a_point_t"
+  check_var_with_bool_opt "address" "a_point_t_pointer" \
+    $undefined \
+    ""
+  check_var_with_bool_opt "address" "another_point"
+  check_var_with_bool_opt "symbols" "a_struct_with_union"
+  check_var_with_bool_opt "address" "an_enum"
+  check_var_with_bool_opt "address" "a_string" \
+    $undefined \
+    "\"hello world\""
+  check_var_with_bool_opt "address" "a_binary_string" \
+    $undefined \
+    "\"hello\""
+  check_var_with_bool_opt "address" "a_binary_string_array"
+  check_var_with_bool_opt "address" "a_big_string"
+  check_var_with_bool_opt "address" "an_array"
+  check_var_with_bool_opt "address" "an_array_with_repetition"
+  check_var_with_bool_opt "address" "a_symbol_pointer" \
+    $undefined \
+    "<global_symbol>"
+
+  if { $current_lang == "c++" } {
+    check_var_with_bool_opt "address" "a_point_t_ref"
+    check_var_with_bool_opt "address" "a_base_ref" \
+      $undefined \
+      ""
+  }
+
+  with_temp_option "set print address off" "set print address on" {
+    check_var_with_no_opts "a_string" \
+      "\"hello world\""
+    check_var_with_bool_opt "address" "a_string" \
+      $undefined \
+      "\"hello world\""
+  }
+}
+
 # Test the deref_refs option for gdb.Value.format_string.
 proc test_deref_refs {} {
   global current_lang
@@ -943,6 +985,7 @@ proc test_all_common {} {
   test_array_indexes
   test_symbols
   test_unions
+  test_address
   test_deref_refs
   test_actual_objects
   test_static_members
