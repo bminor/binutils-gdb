@@ -1,3 +1,13 @@
+2020-12-18  Jameson Nash  <vtjnash@gmail.com>
+
+	* coffread.c (linetab_offset): Change type to file_ptr.
+	(linetab_size): Likewise.
+	(enter_linenos): Change parameter type to file_ptr.
+	(init_lineno): Likewise.
+	(init_stringtab): Likewise.
+	(coff_symtab_read): Likewise.
+	(coff_symfile_read): Change variable types to file_ptr.
+
 2020-12-17  Tom Tromey  <tromey@adacore.com>
 
 	* printcmd.c (print_variable_and_value): Don't use n_spaces.

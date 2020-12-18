@@ -155,8 +155,8 @@ static int type_vector_length;
 #define INITIAL_TYPE_VECTOR_LENGTH 160
 
 static char *linetab = NULL;
-static long linetab_offset;
-static unsigned long linetab_size;
+static file_ptr linetab_offset;
+static file_ptr linetab_size;
 
 static char *stringtab = NULL;
 
@@ -188,23 +188,23 @@ static struct symbol *process_coff_symbol (struct coff_symbol *,
 
 static void patch_opaque_types (struct symtab *);
 
-static void enter_linenos (long, int, int, struct objfile *);
+static void enter_linenos (file_ptr, int, int, struct objfile *);
 
-static int init_lineno (bfd *, long, int, gdb::unique_xmalloc_ptr<char> *);
+static int init_lineno (bfd *, file_ptr, file_ptr, gdb::unique_xmalloc_ptr<char> *);
 
 static char *getsymname (struct internal_syment *);
 
 static const char *coff_getfilename (union internal_auxent *);
 
-static int init_stringtab (bfd *, long, gdb::unique_xmalloc_ptr<char> *);
+static int init_stringtab (bfd *, file_ptr, gdb::unique_xmalloc_ptr<char> *);
 
 static void read_one_sym (struct coff_symbol *,
 			  struct internal_syment *,
 			  union internal_auxent *);
 
 static void coff_symtab_read (minimal_symbol_reader &,
-			      long, unsigned int, struct objfile *);
-
+			      file_ptr, unsigned int, struct objfile *);
+
 /* We are called once per section from coff_symfile_read.  We
    need to examine each section we are passed, check to see
    if it is something we are interested in processing, and
@@ -540,9 +540,9 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   const char *filename = bfd_get_filename (abfd);
   int val;
   unsigned int num_symbols;
-  int symtab_offset;
-  int stringtab_offset;
-  int stabstrsize;
+  file_ptr symtab_offset;
+  file_ptr stringtab_offset;
+  unsigned int stabstrsize;
   
   info = coff_objfile_data_key.get (objfile);
   symfile_bfd = abfd;		/* Kludge for swap routines.  */
@@ -750,7 +750,7 @@ coff_symfile_finish (struct objfile *objfile)
 
 static void
 coff_symtab_read (minimal_symbol_reader &reader,
-		  long symtab_offset, unsigned int nsyms,
+		  file_ptr symtab_offset, unsigned int nsyms,
 		  struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();
@@ -796,7 +796,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
   bfd_seek (objfile->obfd, 0, 0);
 
   /* Position to read the symbol table.  */
-  val = bfd_seek (objfile->obfd, (long) symtab_offset, 0);
+  val = bfd_seek (objfile->obfd, symtab_offset, 0);
   if (val < 0)
     perror_with_name (objfile_name (objfile));
 
@@ -1270,7 +1270,7 @@ read_one_sym (struct coff_symbol *cs,
 /* Support for string table handling.  */
 
 static int
-init_stringtab (bfd *abfd, long offset, gdb::unique_xmalloc_ptr<char> *storage)
+init_stringtab (bfd *abfd, file_ptr offset, gdb::unique_xmalloc_ptr<char> *storage)
 {
   long length;
   int val;
@@ -1366,7 +1366,7 @@ coff_getfilename (union internal_auxent *aux_entry)
    them into GDB's data structures.  */
 
 static int
-init_lineno (bfd *abfd, long offset, int size,
+init_lineno (bfd *abfd, file_ptr offset, file_ptr size,
 	     gdb::unique_xmalloc_ptr<char> *storage)
 {
   int val;
@@ -1399,7 +1399,7 @@ init_lineno (bfd *abfd, long offset, int size,
 #endif
 
 static void
-enter_linenos (long file_offset, int first_line,
+enter_linenos (file_ptr file_offset, int first_line,
 	       int last_line, struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();
