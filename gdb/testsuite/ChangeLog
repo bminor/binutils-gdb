@@ -1,3 +1,8 @@
+2020-12-18  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/fixed_points.exp: Also run with
+	-fgnat-encodings=minimal.  Update expected output.
+
 2020-12-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.base/async-shell.exp: Enable non-stop through GDBFLAGS.
