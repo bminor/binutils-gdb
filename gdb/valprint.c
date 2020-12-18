@@ -499,7 +499,7 @@ generic_value_print_capability (struct value *val, struct ui_file *stream,
 {
   struct type *type = check_typedef (value_type (val));
   /* Account for the tag bit in the length.  */
-  int length = TYPE_LENGTH (type) + 1;
+  int length = TYPE_LENGTH (type);
   const gdb_byte *contents = value_contents_for_printing (val);
   enum bfd_endian byte_order = type_byte_order (type);
   bool tag = false;
