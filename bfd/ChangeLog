@@ -1,3 +1,9 @@
+2020-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27091
+	* elflink.c (elf_link_input_bfd): Copy elf_gnu_osabi_retain
+	from input only for relocatable link.
+
 2020-12-18  Alan Modra  <amodra@gmail.com>
 
 	* elf32-microblaze.c (dbg): Delete unused variable.

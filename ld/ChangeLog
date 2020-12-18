@@ -1,3 +1,10 @@
+2020-12-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27091
+	* testsuite/ld-elf/retain7.s: New file.
+	* testsuite/ld-elf/retain7a.d: Likewise.
+	* testsuite/ld-elf/retain7b.d: Likewise.
+
 2020-12-16  Howard Chu <hyc@symas.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

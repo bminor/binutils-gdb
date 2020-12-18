@@ -10806,7 +10806,9 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
       || bed->elf_osabi == ELFOSABI_GNU
       || bed->elf_osabi == ELFOSABI_FREEBSD)
     elf_tdata (output_bfd)->has_gnu_osabi
-      |= elf_tdata (input_bfd)->has_gnu_osabi;
+      |= (elf_tdata (input_bfd)->has_gnu_osabi
+	  & (bfd_link_relocatable (flinfo->info)
+	     ? -1 : ~elf_gnu_osabi_retain));
 
   /* Read the local symbols.  */
   isymbuf = (Elf_Internal_Sym *) symtab_hdr->contents;
