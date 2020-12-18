@@ -471,6 +471,7 @@ typy_get_composite (struct type *type)
   if (type->code () != TYPE_CODE_STRUCT
       && type->code () != TYPE_CODE_UNION
       && type->code () != TYPE_CODE_ENUM
+      && type->code () != TYPE_CODE_METHOD
       && type->code () != TYPE_CODE_FUNC)
     {
       PyErr_SetString (PyExc_TypeError,

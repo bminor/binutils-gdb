@@ -1,3 +1,7 @@
+2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
+
+	* gdb.python/py-type.exp: Add tests for TYPE_CODE_METHOD.
+
 2020-12-18  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/fixed_points.exp: Also run with

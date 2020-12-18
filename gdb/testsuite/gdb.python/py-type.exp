@@ -83,15 +83,18 @@ proc test_fields {lang} {
       gdb_test "python print (gdb.parse_and_eval ('C::a_method').type.fields ()\[0\].type)" "C \\* const"
       gdb_test "python print (gdb.parse_and_eval ('C::a_method').type.fields ()\[1\].type)" "int"
       gdb_test "python print (gdb.parse_and_eval ('C::a_method').type.fields ()\[2\].type)" "char"
+      gdb_test "python print (gdb.parse_and_eval ('c')\['a_method'\].type.fields ()\[0\].type)" "C \\* const"
 
       gdb_test "python print (len (gdb.parse_and_eval ('C::a_const_method').type.fields ()))" "3"
       gdb_test "python print (gdb.parse_and_eval ('C::a_const_method').type.fields ()\[0\].type)" "const C \\* const"
       gdb_test "python print (gdb.parse_and_eval ('C::a_const_method').type.fields ()\[1\].type)" "int"
       gdb_test "python print (gdb.parse_and_eval ('C::a_const_method').type.fields ()\[2\].type)" "char"
+      gdb_test "python print (gdb.parse_and_eval ('c')\['a_const_method'\].type.fields ()\[0\].type)" "const C \\* const"
 
       gdb_test "python print (len (gdb.parse_and_eval ('C::a_static_method').type.fields ()))" "2"
       gdb_test "python print (gdb.parse_and_eval ('C::a_static_method').type.fields ()\[0\].type)" "int"
       gdb_test "python print (gdb.parse_and_eval ('C::a_static_method').type.fields ()\[1\].type)" "char"
+      gdb_test "python print (gdb.parse_and_eval ('c')\['a_static_method'\].type.fields ()\[0\].type)" "int"
     }
 
     # Test normal fields usage in structs.

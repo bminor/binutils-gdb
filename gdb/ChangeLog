@@ -1,3 +1,7 @@
+2020-12-18  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python/py-type.c (typy_get_composite): Add TYPE_CODE_METHOD.
+
 2020-12-18  Jameson Nash  <vtjnash@gmail.com>
 
 	* coffread.c (linetab_offset): Change type to file_ptr.
