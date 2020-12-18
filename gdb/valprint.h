@@ -75,6 +75,9 @@ struct value_print_options
      an array.  */
   bool print_array_indexes;
 
+  /* True if capabilities should be displayed in a compact form.  */
+  bool compact_capabilities;
+
   /* If true, then dereference references, otherwise just print
      them like pointers.  */
   bool deref_ref;
