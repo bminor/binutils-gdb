@@ -5834,7 +5834,7 @@ window.  This is called with a single argument of type
 that implements the TUI window protocol, also described below.
 @end defun
 
-As mentioned above, when a factory function is called, it is passed a
+As mentioned above, when a factory function is called, it is passed
 an object of type @code{gdb.TuiWindow}.  This object has these
 methods and attributes:
 
