@@ -1397,7 +1397,6 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 {
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   unsigned char symbuf[sym_size];
-  elfcpp::Sym<size, big_endian> sym(symbuf);
   elfcpp::Sym_write<size, big_endian> osym(symbuf);
 
   Plugin_recorder* recorder = parameters->options().plugins()->recorder();
@@ -1480,6 +1479,7 @@ Sized_pluginobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
       osym.put_st_other(vis, 0);
       osym.put_st_shndx(shndx);
 
+      elfcpp::Sym<size, big_endian> sym(symbuf);
       this->symbols_[i] =
         symtab->add_from_pluginobj<size, big_endian>(this, name, ver, &sym);
     }

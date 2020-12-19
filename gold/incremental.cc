@@ -2129,7 +2129,6 @@ Sized_relobj_incr<size, big_endian>::do_add_symbols(
 {
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   unsigned char symbuf[sym_size];
-  elfcpp::Sym<size, big_endian> sym(symbuf);
   elfcpp::Sym_write<size, big_endian> osym(symbuf);
 
   typedef typename elfcpp::Elf_types<size>::Elf_WXword Elf_size_type;
@@ -2196,6 +2195,7 @@ Sized_relobj_incr<size, big_endian>::do_add_symbols(
       osym.put_st_other(gsym.get_st_other());
       osym.put_st_shndx(shndx);
 
+      elfcpp::Sym<size, big_endian> sym(symbuf);
       Symbol* res = symtab->add_from_incrobj(this, name, NULL, &sym);
 
       if (shndx != elfcpp::SHN_UNDEF)
@@ -2730,7 +2730,6 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
 {
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   unsigned char symbuf[sym_size];
-  elfcpp::Sym<size, big_endian> sym(symbuf);
   elfcpp::Sym_write<size, big_endian> osym(symbuf);
 
   unsigned int nsyms = this->input_reader_.get_global_symbol_count();
@@ -2795,6 +2794,7 @@ Sized_incr_dynobj<size, big_endian>::do_add_symbols(
       osym.put_st_other(gsym.get_st_other());
       osym.put_st_shndx(shndx);
 
+      elfcpp::Sym<size, big_endian> sym(symbuf);
       Sized_symbol<size>* res =
 	  symtab->add_from_incrobj<size, big_endian>(this, name, NULL, &sym);
       this->symbols_[i] = res;
