@@ -1,3 +1,11 @@
+2020-12-19  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (supports_scalar_storage_order_attribute)
+	(supports_gnuc): New proc.
+	* gdb.base/endianity.exp: Define TEST_SSO.  Eliminate
+	test_compiler_info calls.  Add unsupported message.
+	* gdb.base/endianity.c: Use TEST_SSO.
+
 2020-12-19  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR exp/27070

@@ -26,7 +26,7 @@ struct otherendian
   __complex__ float cplx;
   double d;
 }
-#if defined __GNUC__ && (__GNUC__ >= 6)
+#if TEST_SSO
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 __attribute__( ( scalar_storage_order( "big-endian" ) ) )
 #else
