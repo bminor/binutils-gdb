@@ -1,3 +1,8 @@
+2020-12-20  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (save_target_board_info): New proc.
+	(gdb_compile_shlib): Use save_target_board_info.
+
 2020-12-19  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (supports_scalar_storage_order_attribute)

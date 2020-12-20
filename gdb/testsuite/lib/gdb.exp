@@ -2427,6 +2427,53 @@ proc save_vars { vars body } {
     }
 }
 
+# As save_vars, but for variables stored in the board_info for the
+# target board.
+#
+# Usage example:
+#
+#   save_target_board_info { multilib_flags } {
+#       global board
+#       set board [target_info name]
+#       unset_board_info multilib_flags
+#       set_board_info multilib_flags "$multilib_flags"
+#       ...
+#   }
+
+proc save_target_board_info { vars body } {
+    global board board_info
+    set board [target_info name]
+
+    array set saved_target_board_info { }
+    set unset_target_board_info { }
+
+    foreach var $vars {
+	if { [info exists board_info($board,$var)] } {
+	    set saved_target_board_info($var) [board_info $board $var]
+	} else {
+	    lappend unset_target_board_info $var
+	}
+    }
+
+    set code [catch {uplevel 1 $body} result]
+
+    foreach {var value} [array get saved_target_board_info] {
+	unset_board_info $var
+	set_board_info $var $value
+    }
+
+    foreach var $unset_target_board_info {
+	unset_board_info $var
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
 # Run tests in BODY with the current working directory (CWD) set to
 # DIR.  When BODY is finished, restore the original CWD.  Return the
 # result of BODY.
@@ -4422,32 +4469,22 @@ proc gdb_compile_shlib_1 {sources dest options} {
 proc gdb_compile_shlib {sources dest options} {
     global board
 
-    # Save multilib_flags.
-    set board [target_info name]
-    set save_multilib_flag [board_info $board multilib_flags]
-
     # Ignore PIE-related setting in multilib_flags.
-    set multilib_flag ""
-    foreach op $save_multilib_flag {
+    set board [target_info name]
+    set multilib_flags_orig [board_info $board multilib_flags]
+    set multilib_flags ""
+    foreach op $multilib_flags_orig {
 	if { $op == "-pie" || $op == "-no-pie" \
 		 || $op == "-fPIE" || $op == "-fno-PIE"} {
 	} else {
-	    append multilib_flag " $op"
+	    append multilib_flags " $op"
 	}
     }
-    unset_board_info "multilib_flags"
-    set_board_info multilib_flags "$multilib_flag"
-    set code [catch {gdb_compile_shlib_1 $sources $dest $options} result]
 
-    # Restore multilib_flags.
-    unset_board_info "multilib_flags"
-    set_board_info multilib_flags $save_multilib_flag
-
-    if {$code == 1} {
-	global errorInfo errorCode
-	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
-    } elseif {$code > 1} {
-	return -code $code $result
+    save_target_board_info { multilib_flags } {
+	unset_board_info multilib_flags
+	set_board_info multilib_flags "$multilib_flags"
+	set result [gdb_compile_shlib_1 $sources $dest $options]
     }
 
     return $result
