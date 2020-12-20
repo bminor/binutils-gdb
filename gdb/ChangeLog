@@ -1,5 +1,10 @@
 2021-06-04  Hannes Domani  <ssbssa@yahoo.de>
 
+	* python/py-tui.c (class tui_py_window): Add click function.
+	(tui_py_window::click): Likewise.
+
+2021-06-04  Hannes Domani  <ssbssa@yahoo.de>
+
 	* ser-mingw.c (console_select_thread): Handle MOUSE_EVENT.
 	* tui/tui-data.h (struct tui_win_info): Add click function.
 	* tui/tui-io.c (tui_prep_terminal): Enable mouse events.

@@ -101,6 +101,8 @@ public:
       tui_win_info::refresh_window ();
   }
 
+  void click (int mouse_x, int mouse_y, int mouse_button) override;
+
   /* Erase and re-box the window.  */
   void erase ()
   {
@@ -224,6 +226,21 @@ tui_py_window::do_scroll_vertical (int num_to_scroll)
     {
       gdbpy_ref<> result (PyObject_CallMethod (m_window.get (), "vscroll",
 					       "i", num_to_scroll, nullptr));
+      if (result == nullptr)
+	gdbpy_print_stack ();
+    }
+}
+
+void
+tui_py_window::click (int mouse_x, int mouse_y, int mouse_button)
+{
+  gdbpy_enter enter_py (get_current_arch (), current_language);
+
+  if (PyObject_HasAttrString (m_window.get (), "click"))
+    {
+      gdbpy_ref<> result (PyObject_CallMethod (m_window.get (), "click",
+					       "iii", mouse_x, mouse_y,
+					       mouse_button));
       if (result == nullptr)
 	gdbpy_print_stack ();
     }
