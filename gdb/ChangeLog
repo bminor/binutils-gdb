@@ -1,3 +1,12 @@
+2021-06-04  Hannes Domani  <ssbssa@yahoo.de>
+
+	* ser-mingw.c (console_select_thread): Handle MOUSE_EVENT.
+	* tui/tui-data.h (struct tui_win_info): Add click function.
+	* tui/tui-io.c (tui_prep_terminal): Enable mouse events.
+	(tui_deprep_terminal): Disable mouse events.
+	(tui_dispatch_ctrl_char): Handle KEY_MOUSE.
+	* tui/tui.c (tui_disable): Disable mouse events.
+
 2021-06-03  Magne Hov  <mhov@undo.io>
 
 	PR python/27841

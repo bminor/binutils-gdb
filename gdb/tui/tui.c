@@ -508,6 +508,10 @@ tui_disable (void)
   rl_startup_hook = 0;
   rl_already_prompted = 0;
 
+#ifdef NCURSES_MOUSE_VERSION
+  mousemask (0, NULL);
+#endif
+
   /* Leave curses and restore previous gdb terminal setting.  */
   endwin ();
 

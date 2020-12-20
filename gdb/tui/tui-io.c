@@ -639,6 +639,9 @@ tui_redisplay_readline (void)
 static void
 tui_prep_terminal (int notused1)
 {
+#ifdef NCURSES_MOUSE_VERSION
+  mousemask (ALL_MOUSE_EVENTS, NULL);
+#endif
 }
 
 /* Readline callback to restore the terminal.  It is called once each
@@ -646,6 +649,9 @@ tui_prep_terminal (int notused1)
 static void
 tui_deprep_terminal (void)
 {
+#ifdef NCURSES_MOUSE_VERSION
+  mousemask (0, NULL);
+#endif
 }
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
@@ -978,6 +984,37 @@ tui_dispatch_ctrl_char (unsigned int ch)
     case KEY_LEFT:
       win_info->right_scroll (1);
       break;
+#ifdef NCURSES_MOUSE_VERSION
+    case KEY_MOUSE:
+	{
+	  MEVENT mev;
+	  if (getmouse (&mev) != OK)
+	    break;
+
+	  for (tui_win_info *wi : all_tui_windows ())
+	    if (mev.x > wi->x && mev.x < wi->x + wi->width - 1
+		&& mev.y > wi->y && mev.y < wi->y + wi->height - 1)
+	      {
+		if ((mev.bstate & BUTTON1_CLICKED) != 0
+		    || (mev.bstate & BUTTON2_CLICKED) != 0
+		    || (mev.bstate & BUTTON3_CLICKED) != 0)
+		  {
+		    int button = (mev.bstate & BUTTON1_CLICKED) != 0 ? 1
+		      :         ((mev.bstate & BUTTON2_CLICKED) != 0 ? 2
+				 : 3);
+		    wi->click (mev.x - wi->x - 1, mev.y - wi->y - 1, button);
+		  }
+#ifdef BUTTON5_PRESSED
+		else if ((mev.bstate & BUTTON4_PRESSED) != 0)
+		  wi->backward_scroll (3);
+		else if ((mev.bstate & BUTTON5_PRESSED) != 0)
+		  wi->forward_scroll (3);
+#endif
+		break;
+	      }
+	}
+      break;
+#endif
     case '\f':
       break;
     default:
