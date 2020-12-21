@@ -37832,6 +37832,15 @@ recent C@t{++}11 compiler, e.g.@: GCC.
 @item GNU make
 @value{GDBN}'s build system relies on features only found in the GNU
 make program.  Other variants of @code{make} will not work.
+
+@item GMP (The GNU Multiple Precision Arithmetic Library)
+@value{GDBN} now uses GMP to perform some of its arithmetics.
+This library may be included with your operating system distribution;
+if it is not, you can get the latest version from
+@url{https://gmplib.org/}. If GMP is installed at an unusual path,
+you can use the @option{--with-libgmp-prefix} option to specify
+its location.
+
 @end table
 
 @heading Tools/Packages Optional for Building @value{GDBN}
