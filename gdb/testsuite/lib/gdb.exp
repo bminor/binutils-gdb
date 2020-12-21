@@ -3646,6 +3646,9 @@ proc gdb_is_target_native { } {
 # This is the preferred way of checking use_gdb_stub, since it allows to check
 # the value before the gdb has been spawned and it will return the correct value
 # even when it was overriden by the test.
+#
+# Note that stub targets are not able to spawn new inferiors.  Use this
+# check for skipping respective tests.
 
 proc use_gdb_stub {} {
   global use_gdb_stub
