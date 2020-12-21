@@ -533,6 +533,21 @@ process_stratum_target::qxfer_siginfo (const char *annex,
 }
 
 bool
+process_stratum_target::supports_qxfer_capability ()
+{
+  return false;
+}
+
+int
+process_stratum_target::qxfer_capability (const CORE_ADDR address,
+					  unsigned char *readbuf,
+					  unsigned const char *writebuf,
+					  CORE_ADDR offset, int len)
+{
+  gdb_assert_not_reached ("target op qxfer_capability not supported");
+}
+
+bool
 process_stratum_target::supports_non_stop ()
 {
   return false;

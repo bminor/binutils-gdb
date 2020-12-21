@@ -526,9 +526,10 @@ generic_value_print_capability (struct value *val, struct ui_file *stream,
 	  tag = value_tag (val);
 	break;
       case lval_memory:
-	/* TODO-Morello: Add hook that reads capabilities from memory.  We
-	   should use those here to fetch the tag from a memory location.  */
-	tag = true;
+	{
+	  struct gdbarch *gdbarch = type->arch ();
+	  tag = gdbarch_get_cap_tag_from_address (gdbarch, value_address (val));
+	}
 	break;
       default:
 	break;

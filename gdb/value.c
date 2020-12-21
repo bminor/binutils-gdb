@@ -3961,6 +3961,13 @@ value_fetch_lazy_memory (struct value *val)
       read_value_memory (val, 0, value_stack (val),
 			 addr, value_contents_all_raw (val).data (),
 			 type_length_units (type));
+
+  if (TYPE_CAPABILITY (type))
+    {
+      set_value_tagged (val, true);
+      bool tag = gdbarch_get_cap_tag_from_address (get_value_arch (val), addr);
+      set_value_tag (val, tag);
+    }
 }
 
 /* Helper for value_fetch_lazy when the value is in a register.  */

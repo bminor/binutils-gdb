@@ -58,4 +58,11 @@ struct user_cap {
   uint8_t __reserved[15];
 };
 
+/* From thread TID, read a capability from memory at ADDRESS and store
+   it into CAP.
+
+   Return true if successful and false otherwise.  */
+
+extern bool aarch64_linux_read_capability (int tid, CORE_ADDR address,
+					   user_cap &cap);
 #endif /* NAT_AARCH64_CAP_LINUX_H */

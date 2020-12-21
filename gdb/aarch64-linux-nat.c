@@ -109,6 +109,8 @@ public:
   /* Write allocation tags to memory via PTRACE.  */
   bool store_memtags (CORE_ADDR address, size_t len,
 		      const gdb::byte_vector &tags, int type) override;
+
+  gdb::byte_vector read_capability (CORE_ADDR addr) override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -939,11 +941,49 @@ aarch64_linux_nat_target::store_memtags (CORE_ADDR address, size_t len,
   return false;
 }
 
+/* Implement the "read_capability" target_ops method.  */
+
+gdb::byte_vector
+aarch64_linux_nat_target::read_capability (CORE_ADDR addr)
+{
+  int tid = get_ptrace_pid (inferior_ptid);
+
+  struct user_cap cap;
+
+  if (!aarch64_linux_read_capability (tid, addr, cap))
+    perror_with_name (_("Unable to read capability from address."));
+
+  gdb::byte_vector cap_vec (17);
+  memcpy (cap_vec.data (), &cap.tag, 1);
+  memcpy (cap_vec.data () + 1, &cap.val, 16);
+
+  return cap_vec;
+}
+
+/* Implement the maintenance print capability tag command.  */
+
+static void
+maint_print_cap_from_addr_cmd (const char *args, int from_tty)
+{
+  gdb::byte_vector cap;
+  CORE_ADDR addr = parse_and_eval_address (args);
+  cap = target_read_capability (addr);
+
+  for (auto it : cap)
+    fprintf_unfiltered (gdb_stdlog, "%x ", it);
+
+  fputs_unfiltered ("\n", gdb_stdlog);
+}
+
 void _initialize_aarch64_linux_nat ();
 void
 _initialize_aarch64_linux_nat ()
 {
   aarch64_initialize_hw_point ();
+
+  add_cmd ("cap_from_addr", class_maintenance, maint_print_cap_from_addr_cmd, _("\
+Print the capability from addr."),
+	   &maintenanceprintlist);
 
   /* Register the target.  */
   linux_target = &the_aarch64_linux_nat_target;

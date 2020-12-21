@@ -1022,6 +1022,17 @@ register.  Normally the identity mapping.
     invalid=False,
 )
 
+Method(
+    comment="""
+Return the tag from a capability stored at address ADDR.
+""",
+    type="bool",
+    name="get_cap_tag_from_address",
+    params=[("CORE_ADDR", "addr")],
+    predefault="default_get_cap_tag_from_address",
+    invalid=False,
+)
+
 Function(
     comment="""
 Fetch the target specific address used to represent a load module.

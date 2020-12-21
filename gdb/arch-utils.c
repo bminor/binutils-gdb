@@ -1110,6 +1110,13 @@ default_register_tag (struct gdbarch *gdbarch,
   return false;
 }
 
+/* See arch-utils.h.  */
+bool default_get_cap_tag_from_address (struct gdbarch *gdbarch,
+				       CORE_ADDR addr)
+{
+  return false;
+}
+
 /* Static function declarations */
 
 static void alloc_gdbarch_data (struct gdbarch *);

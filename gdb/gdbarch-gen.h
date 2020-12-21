@@ -547,6 +547,12 @@ typedef int (gdbarch_remote_register_number_ftype) (struct gdbarch *gdbarch, int
 extern int gdbarch_remote_register_number (struct gdbarch *gdbarch, int regno);
 extern void set_gdbarch_remote_register_number (struct gdbarch *gdbarch, gdbarch_remote_register_number_ftype *remote_register_number);
 
+/* Return the tag from a capability stored at address ADDR. */
+
+typedef bool (gdbarch_get_cap_tag_from_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern bool gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch, gdbarch_get_cap_tag_from_address_ftype *get_cap_tag_from_address);
+
 /* Fetch the target specific address used to represent a load module. */
 
 extern bool gdbarch_fetch_tls_load_module_address_p (struct gdbarch *gdbarch);

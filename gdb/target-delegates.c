@@ -196,6 +196,7 @@ struct dummy_target : public target_ops
   bool supports_memory_tagging () override;
   bool fetch_memtags (CORE_ADDR arg0, size_t arg1, gdb::byte_vector &arg2, int arg3) override;
   bool store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector &arg2, int arg3) override;
+  gdb::byte_vector read_capability (CORE_ADDR arg0) override;
 };
 
 struct debug_target : public target_ops
@@ -370,6 +371,7 @@ struct debug_target : public target_ops
   bool supports_memory_tagging () override;
   bool fetch_memtags (CORE_ADDR arg0, size_t arg1, gdb::byte_vector &arg2, int arg3) override;
   bool store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector &arg2, int arg3) override;
+  gdb::byte_vector read_capability (CORE_ADDR arg0) override;
 };
 
 void
@@ -4532,6 +4534,32 @@ debug_target::store_memtags (CORE_ADDR arg0, size_t arg1, const gdb::byte_vector
   target_debug_print_int (arg3);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_bool (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+gdb::byte_vector
+target_ops::read_capability (CORE_ADDR arg0)
+{
+  return this->beneath ()->read_capability (arg0);
+}
+
+gdb::byte_vector
+dummy_target::read_capability (CORE_ADDR arg0)
+{
+  tcomplain ();
+}
+
+gdb::byte_vector
+debug_target::read_capability (CORE_ADDR arg0)
+{
+  gdb::byte_vector result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->read_capability (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->read_capability (arg0);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->read_capability (", this->beneath ()->shortname ());
+  target_debug_print_CORE_ADDR (arg0);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_gdb_byte_vector (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

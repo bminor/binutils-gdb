@@ -2009,11 +2009,29 @@ handle_qxfer_btrace_conf (const char *annex,
   return len;
 }
 
+/* Handle qXfer:capa:read.  */
+
+static int
+handle_qxfer_capability (const char *annex, gdb_byte *readbuf,
+			 const gdb_byte *writebuf, ULONGEST offset,
+			 LONGEST len)
+{
+   if (!the_target->supports_qxfer_capability () || writebuf != NULL)
+    return -2;
+
+  CORE_ADDR addr;
+  unpack_varlen_hex (annex, &addr);
+
+  /* Read a capability and its tag.  */
+  return the_target->qxfer_capability (addr, readbuf, NULL, offset, len);
+}
+
 static const struct qxfer qxfer_packets[] =
   {
     { "auxv", handle_qxfer_auxv },
     { "btrace", handle_qxfer_btrace },
     { "btrace-conf", handle_qxfer_btrace_conf },
+    { "capa", handle_qxfer_capability },
     { "exec-file", handle_qxfer_exec_file},
     { "fdpic", handle_qxfer_fdpic},
     { "features", handle_qxfer_features },

@@ -130,6 +130,7 @@ struct gdbarch
   CORE_ADDR decr_pc_after_break;
   CORE_ADDR deprecated_function_start_offset;
   gdbarch_remote_register_number_ftype *remote_register_number;
+  gdbarch_get_cap_tag_from_address_ftype *get_cap_tag_from_address;
   gdbarch_fetch_tls_load_module_address_ftype *fetch_tls_load_module_address;
   gdbarch_get_thread_local_address_ftype *get_thread_local_address;
   CORE_ADDR frame_args_skip;
@@ -328,6 +329,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->memory_insert_breakpoint = default_memory_insert_breakpoint;
   gdbarch->memory_remove_breakpoint = default_memory_remove_breakpoint;
   gdbarch->remote_register_number = default_remote_register_number;
+  gdbarch->get_cap_tag_from_address = default_get_cap_tag_from_address;
   gdbarch->unwind_pc = default_unwind_pc;
   gdbarch->unwind_sp = default_unwind_sp;
   gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
@@ -495,6 +497,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of decr_pc_after_break, invalid_p == 0 */
   /* Skip verify of deprecated_function_start_offset, invalid_p == 0 */
   /* Skip verify of remote_register_number, invalid_p == 0 */
+  /* Skip verify of get_cap_tag_from_address, invalid_p == 0 */
   /* Skip verify of fetch_tls_load_module_address, has predicate.  */
   /* Skip verify of get_thread_local_address, has predicate.  */
   /* Skip verify of frame_args_skip, invalid_p == 0 */
@@ -946,6 +949,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_filtered (file,
                       "gdbarch_dump: remote_register_number = <%s>\n",
                       host_address_to_string (gdbarch->remote_register_number));
+  fprintf_filtered (file,
+                      "gdbarch_dump: get_cap_tag_from_address = <%s>\n",
+                      host_address_to_string (gdbarch->get_cap_tag_from_address));
   fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_fetch_tls_load_module_address_p() = %d\n",
                       gdbarch_fetch_tls_load_module_address_p (gdbarch));
@@ -2990,6 +2996,23 @@ set_gdbarch_remote_register_number (struct gdbarch *gdbarch,
                                     gdbarch_remote_register_number_ftype remote_register_number)
 {
   gdbarch->remote_register_number = remote_register_number;
+}
+
+bool
+gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->get_cap_tag_from_address != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_get_cap_tag_from_address called\n");
+  return gdbarch->get_cap_tag_from_address (gdbarch, addr);
+}
+
+void
+set_gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch,
+                                      gdbarch_get_cap_tag_from_address_ftype get_cap_tag_from_address)
+{
+  gdbarch->get_cap_tag_from_address = get_cap_tag_from_address;
 }
 
 bool

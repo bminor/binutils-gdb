@@ -264,6 +264,14 @@ public:
 			    unsigned const char *writebuf,
 			    CORE_ADDR offset, int len);
 
+  /* Return true if the qxfer_capability target op is supported.  */
+  virtual bool supports_qxfer_capability ();
+
+  /* Read a capability using qXfer packets.  */
+  virtual int qxfer_capability (const CORE_ADDR address, unsigned char *readbuf,
+				unsigned const char *writebuf, CORE_ADDR offset,
+				int len);
+
   /* Return true if the qxfer_siginfo target op is supported.  */
   virtual bool supports_qxfer_siginfo ();
 

@@ -204,6 +204,8 @@ enum target_object
   TARGET_OBJECT_FREEBSD_VMMAP,
   /* FreeBSD process strings.  */
   TARGET_OBJECT_FREEBSD_PS_STRINGS,
+  /* CHERI capabilities.  */
+  TARGET_OBJECT_CAPABILITY,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
@@ -1319,6 +1321,10 @@ struct target_ops
        Returns true if storing the tags succeeded and false otherwise.  */
     virtual bool store_memtags (CORE_ADDR address, size_t len,
 				const gdb::byte_vector &tags, int type)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
+
+    /* Read a capability from ADDR.  */
+    virtual gdb::byte_vector read_capability (CORE_ADDR addr)
       TARGET_DEFAULT_NORETURN (tcomplain ());
   };
 
@@ -2579,5 +2585,8 @@ extern void target_prepare_to_generate_core (void);
 
 /* See to_done_generating_core.  */
 extern void target_done_generating_core (void);
+
+/* See read_capability.  */
+extern gdb::byte_vector target_read_capability (CORE_ADDR addr);
 
 #endif /* !defined (TARGET_H) */

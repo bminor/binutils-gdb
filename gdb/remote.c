@@ -689,6 +689,8 @@ public:
   bool store_memtags (CORE_ADDR address, size_t len,
 		      const gdb::byte_vector &tags, int type) override;
 
+  gdb::byte_vector read_capability (CORE_ADDR addr) override;
+
 public: /* Remote specific methods.  */
 
   void remote_download_command_source (int num, ULONGEST addr,
@@ -2212,6 +2214,9 @@ enum {
   /* Support for memory tagging, allocation tag fetch/store
      packets and the tag violation stop replies.  */
   PACKET_memory_tagging_feature,
+
+  /* Support for the qXfer:capa:read packet.  */
+  PACKET_qXfer_capability,
 
   PACKET_MAX
 };
@@ -11263,6 +11268,19 @@ remote_target::xfer_partial (enum target_object object,
 	return TARGET_XFER_E_IO;
     }
 
+
+  /* Read CHERI capabilities.  */
+  if (object == TARGET_OBJECT_CAPABILITY)
+    {
+      if (readbuf)
+	return remote_read_qxfer ("capa", annex,
+				  readbuf, offset, len, xfered_len,
+				  &remote_protocol_packets
+				  [PACKET_qXfer_capability]);
+      else
+	return TARGET_XFER_E_IO;
+    }
+
   /* Only handle flash writes.  */
   if (writebuf != NULL)
     {
@@ -14906,6 +14924,27 @@ test_memory_tagging_functions ()
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
+/* Implementation of the read_capability method.  */
+
+gdb::byte_vector
+remote_target::read_capability (CORE_ADDR addr)
+{
+  gdb::optional<gdb::byte_vector> cap;
+  gdb::byte_vector cap_vec;
+
+  std::string addr_str = string_printf ("%s", phex_nz (addr, 0));
+
+  cap = target_read_alloc (current_inferior ()->top_target (),
+			   TARGET_OBJECT_CAPABILITY, addr_str.c_str ());
+
+  if (cap.has_value ())
+    cap_vec = *cap;
+  else
+    perror_with_name (_("Unable to read capability from address."));
+
+  return cap_vec;
+}
+
 void _initialize_remote ();
 void
 _initialize_remote ()
@@ -15301,6 +15340,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_memory_tagging_feature],
 			 "memory-tagging-feature", "memory-tagging-feature", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_capability],
+			 "qXfer:capa:read", "read-capability", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */
