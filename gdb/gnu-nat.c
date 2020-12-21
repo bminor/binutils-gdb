@@ -32,6 +32,7 @@ extern "C"
 #include <mach/message.h>
 #include <mach/notify.h>
 #include <mach/vm_attributes.h>
+#include <mach/vm_param.h>
 
 #include <hurd.h>
 #include <hurd/interrupt.h>
