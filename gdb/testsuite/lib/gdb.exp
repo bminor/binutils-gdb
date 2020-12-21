@@ -4210,16 +4210,23 @@ proc gdb_compile {source dest type options} {
 	lappend options "$flag"
     }
 
-    # Replace the "nopie" option with the appropriate linker flag to disable
-    # PIE executables.  There are no compiler flags for this option.
+    # Replace the "nopie" option with the appropriate compiler and linker
+    # flags to disable PIE executables.
     set nopie [lsearch -exact $options nopie]
     if {$nopie != -1} {
 	if [target_info exists gdb,nopie_flag] {
-	    set flag "ldflags=[target_info gdb,nopie_flag]"
+	    set flag "additional_flags=[target_info gdb,nopie_flag]"
+	} else {
+	    set flag "additional_flags=-fno-pie"
+	}
+	set options [lreplace $options $nopie $nopie $flag]
+
+	if [target_info exists gdb,nopie_ldflag] {
+	    set flag "ldflags=[target_info gdb,nopie_ldflag]"
 	} else {
 	    set flag "ldflags=-no-pie"
 	}
-	set options [lreplace $options $nopie $nopie $flag]
+	lappend options "$flag"
     }
 
     if { $type == "executable" } {

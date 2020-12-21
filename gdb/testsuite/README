@@ -528,6 +528,11 @@ gdb,nopie_flag
   The flag required to force the compiler to produce non-position-independent
   executables.
 
+gdb,nopie_ldflag
+
+  The flag required to force the linker to produce non-position-independent
+  executables.
+
 gdb,debug
 
   When set gdb debug is sent to the file gdb.debug in the test output

@@ -1,3 +1,8 @@
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* README (Note): Add nopie_ldflag.
+	* lib/gdb.exp (gdb_compile): Extend nopie handling.
+
 2021-03-02  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/fixed_points.exp: Remove most special cases for minimal
