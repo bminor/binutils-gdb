@@ -1,5 +1,10 @@
 2021-01-05  Hannes Domani  <ssbssa@yahoo.de>
 
+	* tui/tui-winsource.c (tui_source_window_base::refresh_window):
+	Call wnoutrefresh instead of tui_win_info::refresh_window.
+
+2021-01-05  Hannes Domani  <ssbssa@yahoo.de>
+
 	* tui/tui-source.c (tui_source_window::show_line_number):
 	Redraw second space after line number.
 

@@ -252,7 +252,9 @@ tui_source_window_base::show_source_line (int lineno)
 void
 tui_source_window_base::refresh_window ()
 {
-  tui_win_info::refresh_window ();
+  /* tui_win_info::refresh_window would draw the empty background window to
+     the screen, potentially creating a flicker.  */
+  wnoutrefresh (handle.get ());
 
   int pad_width = std::max (m_max_length, width);
   int left_margin = 1 + TUI_EXECINFO_SIZE + extra_margin ();
