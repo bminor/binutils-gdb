@@ -1,3 +1,8 @@
+2020-12-21  Peter Waller  <p@pwaller.net>
+
+	* gdb.base/style-interp-exec-mi.exp: New.
+	* gdb.base/style-interp-exec-mi.c: New.
+
 2020-12-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/list.exp: Replace send_gdb + gdb_expect with

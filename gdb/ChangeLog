@@ -1,3 +1,7 @@
+2020-12-21  Peter Waller  <p@pwaller.net>
+
+	* interps.c (interpreter_exec_cmd): Restore streams pointers.
+
 2020-12-21  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record.c (require_record_target): Rephrase error message.
