@@ -233,6 +233,8 @@ tui_source_window::show_line_number (int offset) const
 {
   int lineno = m_content[0].line_or_addr.u.line_no + offset;
   char text[20];
-  xsnprintf (text, sizeof (text), "%*d ", m_digits - 1, lineno);
+  /* To completely overwrite the previous border when the source window height
+     is increased, both spaces after the line number have to be redrawn.  */
+  xsnprintf (text, sizeof (text), "%*d  ", m_digits - 1, lineno);
   waddstr (handle.get (), text);
 }
