@@ -1,3 +1,11 @@
+2021-01-05  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR tui/26927
+	* tui/tui-winsource.c (tui_source_window_base::refresh_window):
+	Fix source pad size in prefresh.
+	(tui_source_window_base::show_source_content): Grow source pad
+	if necessary.
+
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-tdep.c (bfin_push_dummy_call): Use align_up.

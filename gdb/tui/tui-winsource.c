@@ -262,7 +262,7 @@ tui_source_window_base::refresh_window ()
      scrolled beyond where we clip.  */
   m_horizontal_offset = pad_x;
   prefresh (m_pad.get (), 0, pad_x, y + 1, x + left_margin,
-	    y + 1 + m_content.size (), x + left_margin + view_width - 1);
+	    y + m_content.size (), x + left_margin + view_width - 1);
 }
 
 void
@@ -273,7 +273,8 @@ tui_source_window_base::show_source_content ()
   check_and_display_highlight_if_needed ();
 
   int pad_width = std::max (m_max_length, width);
-  if (m_pad == nullptr || pad_width > getmaxx (m_pad.get ()))
+  if (m_pad == nullptr || pad_width > getmaxx (m_pad.get ())
+      || m_content.size () > getmaxy (m_pad.get ()))
     m_pad.reset (newpad (m_content.size (), pad_width));
 
   werase (m_pad.get ());
