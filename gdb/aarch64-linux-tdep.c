@@ -32,6 +32,7 @@
 #include "tramp-frame.h"
 #include "trad-frame.h"
 #include "target/target.h"
+#include "target.h"
 
 #include "regcache.h"
 #include "regset.h"
@@ -1613,6 +1614,22 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
   uiout->text ("\n");
 }
 
+/* AArch64 Linux implementation of the get_cap_tag_from_address gdbarch
+   hook.  Returns the tag from the capability located at ADDR.  */
+
+static bool
+aarch64_linux_get_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb::byte_vector cap;
+
+  cap = target_read_capability (addr);
+
+  if (cap.size () == 0)
+    return false;
+
+  return cap[0] != 0;
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1850,6 +1867,8 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
       set_gdbarch_report_signal_info (gdbarch,
 				      aarch64_linux_report_signal_info);
+      set_gdbarch_get_cap_tag_from_address (gdbarch,
+					    aarch64_linux_get_cap_tag_from_address);
     }
   else
     {

@@ -3603,6 +3603,14 @@ target_done_generating_core (void)
   current_top_target ()->done_generating_core ();
 }
 
+/* See target.h.  */
+
+gdb::byte_vector
+target_read_capability (CORE_ADDR addr)
+{
+  return current_top_target ()->read_capability (addr);
+}
+
 
 
 static char targ_desc[] =

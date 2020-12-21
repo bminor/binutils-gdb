@@ -1,5 +1,40 @@
 2021-01-15  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-nat.c (aarch64_linux_nat_target)
+	<read_capability>: New function override.
+	(aarch64_linux_nat_target::read_capability): New function.
+	(maint_print_cap_from_addr_cmd): New function.
+	(add_show_debug_regs_command): Register new maintenance command.
+	* aarch64-linux-tdep.c: Include target.h.
+	(aarch64_linux_get_cap_tag_from_address): New function.
+	(aarch64_linux_init_abi): Register hook for
+	gdbarch_get_cap_tag_from_address
+	* arch-utils.c (default_get_cap_tag_from_address): New function.
+	* arch-utils.h (default_get_cap_tag_from_address): New prototype.
+	* configure.nat: Add nat/aarch64-cap-linux.o to the list of object
+	files for AArch64-Linux.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (get_cap_tag_from_address): New gdbarch hook.
+	* nat/aarch64-cap-linux.c: New file.
+	* nat/aarch64-cap-linux.h (aarch64_linux_read_capability): New
+	prototype.
+	* remote.c (remote_target) <read_capability>: New function override.
+	(PACKET_qXfer_capability): New enum.
+	(remote_target::xfer_partial): Handle TARGET_OBJECT_CAPABILITY.
+	(remote_target::read_capability): New member function.
+	(_initialize_remote): Add new packet configuration.
+	* target-delegates.c: Regenerate.
+	* target.c (target_read_capability): New function.
+	* target.h (target_object) <TARGET_OBJECT_CAPABILITY>: New enum field.
+	(struct target_ops) <read_capability>: New virtual member function.
+	(target_read_capability): New prototype.
+	* valprint.c (generic_value_print_capability): Handle tags from
+	capabilities stored in memory.
+	* value.c (value_fetch_lazy_memory): Fetch tag if reading a capability.
+
+2021-01-15  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_prologue_prev_register)
 	(aarch64_dwarf2_prev_register): Throw error if LR is optimized out.
 

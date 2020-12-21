@@ -173,6 +173,7 @@ struct dummy_target : public target_ops
   const struct frame_unwind *get_tailcall_unwinder () override;
   void prepare_to_generate_core () override;
   void done_generating_core () override;
+  gdb::byte_vector read_capability (CORE_ADDR arg0) override;
 };
 
 struct debug_target : public target_ops
@@ -344,6 +345,7 @@ struct debug_target : public target_ops
   const struct frame_unwind *get_tailcall_unwinder () override;
   void prepare_to_generate_core () override;
   void done_generating_core () override;
+  gdb::byte_vector read_capability (CORE_ADDR arg0) override;
 };
 
 void
@@ -4411,5 +4413,31 @@ debug_target::done_generating_core ()
   this->beneath ()->done_generating_core ();
   fprintf_unfiltered (gdb_stdlog, "<- %s->done_generating_core (", this->beneath ()->shortname ());
   fputs_unfiltered (")\n", gdb_stdlog);
+}
+
+gdb::byte_vector
+target_ops::read_capability (CORE_ADDR arg0)
+{
+  return this->beneath ()->read_capability (arg0);
+}
+
+gdb::byte_vector
+dummy_target::read_capability (CORE_ADDR arg0)
+{
+  tcomplain ();
+}
+
+gdb::byte_vector
+debug_target::read_capability (CORE_ADDR arg0)
+{
+  gdb::byte_vector result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->read_capability (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->read_capability (arg0);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->read_capability (", this->beneath ()->shortname ());
+  target_debug_print_CORE_ADDR (arg0);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_gdb_byte_vector (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
 }
 

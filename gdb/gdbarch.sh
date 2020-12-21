@@ -571,6 +571,9 @@ v;CORE_ADDR;deprecated_function_start_offset;;;0;;;0
 # register.  Normally the identity mapping.
 m;int;remote_register_number;int regno;regno;;default_remote_register_number;;0
 
+# Return the tag from a capability stored at address ADDR.
+m;bool;get_cap_tag_from_address;CORE_ADDR addr;addr;0;default_get_cap_tag_from_address;;0
+
 # Fetch the target specific address used to represent a load module.
 F;CORE_ADDR;fetch_tls_load_module_address;struct objfile *objfile;objfile
 

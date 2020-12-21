@@ -83,6 +83,12 @@ public:
 
   struct emit_ops *emit_ops () override;
 
+  bool supports_qxfer_capability () override;
+
+  int qxfer_capability (const CORE_ADDR address, unsigned char *readbuf,
+			unsigned const char *writebuf,
+			CORE_ADDR offset, int len) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -3208,6 +3214,40 @@ aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return aarch64_breakpoint_len;
   else
     return arm_breakpoint_kind_from_current_state (pcptr);
+}
+
+/* Implementation of targets ops method "supports_qxfer_capability.  */
+
+bool
+aarch64_target::supports_qxfer_capability ()
+{
+  unsigned long hwcap2 = linux_get_hwcap2 (8);
+
+  return (hwcap2 & HWCAP2_MORELLO) != 0;
+}
+
+/* Implementation of targets ops method "qxfer_capability.  */
+
+int
+aarch64_target::qxfer_capability (const CORE_ADDR address,
+				  unsigned char *readbuf,
+				  unsigned const char *writebuf,
+				  CORE_ADDR offset, int len)
+{
+  int tid = pid_of (current_thread);
+
+  struct user_cap cap;
+
+  if (!aarch64_linux_read_capability (tid, address, cap))
+    {
+      warning (_("Unable to read capability from address."));
+      return 0;
+    }
+
+  memcpy (readbuf, &cap.tag, 1);
+  memcpy (readbuf + 1, &cap.val, 16);
+
+  return sizeof (cap.val) + 1;
 }
 
 /* The linux target ops object.  */
