@@ -568,7 +568,7 @@ public:
 
   inline bool is_sealed (void)
   {
-    return check_permissions (CAP_PERM_SEAL);
+    return get_otype () != 0;
   }
 
   /* Returns true if this is a system access capability.
