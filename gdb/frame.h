@@ -149,8 +149,8 @@ struct frame_id
 
   /* The frame's special address.  This shall be constant through out the
      lifetime of the frame.  This is used for architectures that may have
-     frames that do not change the stack but are still distinct and have 
-     some form of distinct identifier (e.g. the ia64 which uses a 2nd 
+     frames that do not change the stack but are still distinct and have
+     some form of distinct identifier (e.g. the ia64 which uses a 2nd
      stack for registers).  This field is treated as unordered - i.e. will
      not be used in frame ordering comparisons.
 
