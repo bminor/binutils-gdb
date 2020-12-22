@@ -547,6 +547,8 @@ capability::to_str (bool compact)
      - (2) - If the top 64 bits are non-zero and the representation is
        COMPACT, the capability has the following format:
 
+       <address> [<permissions>,<base>-<top>] (<attr>)
+
      - (3) - If the top 64 bits are non-zero and the representation is not
        COMPACT, the capability has the following format:
 
@@ -589,23 +591,28 @@ capability::to_str (bool compact)
       range_str += "-";
       range_str += core_addr_to_string_nz (get_limit ());
 
-      std::string attr_str ("");
+      std::string attr1_str ("");
+      std::string attr2_str ("");
+      std::string attr3_str ("");
 
       /* Handle attributes.  */
       if (get_tag () == false)
-	attr_str = "invalid ";
+	attr1_str = "invalid";
       if (get_otype () == CAP_SEAL_TYPE_RB)
-	attr_str += "sentry ";
+	{
+	  if (!attr1_str.empty ())
+	    attr2_str += ",";
+	  attr2_str += "sentry";
+	}
       if (is_sealed ())
-	attr_str += "sealed ";
+	{
+	  if (!attr1_str.empty () || !attr2_str.empty ())
+	    attr3_str += ",";
+	  attr3_str += "sealed";
+	}
 
-      cap_str += "{";
-      cap_str = val_str + " [" + perm_str + "," + range_str + "]";
-
-      if (!attr_str.empty ())
-	cap_str += " ( " + attr_str + ")";
-
-      cap_str += "}";
+      cap_str += val_str + " [" + perm_str + "," + range_str + "]";
+      cap_str += " (" + attr1_str + attr2_str + attr3_str + ")";
 
       return cap_str;
     }
