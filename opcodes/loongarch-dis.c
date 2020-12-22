@@ -73,8 +73,8 @@ set_default_loongarch_dis_options (void)
   LARCH_opts.ase_128vec = 1;
   LARCH_opts.ase_256vec = 1;
 
-  loongarch_r_disname = loongarch_r_normal_name;
-  loongarch_f_disname = loongarch_f_normal_name;
+  loongarch_r_disname = loongarch_r_lp64_name;
+  loongarch_f_disname = loongarch_f_lp64_name;
   loongarch_c_disname = loongarch_c_normal_name;
   loongarch_cr_disname = loongarch_cr_normal_name;
   loongarch_v_disname = loongarch_v_normal_name;
@@ -82,8 +82,13 @@ set_default_loongarch_dis_options (void)
 }
 
 static int
-parse_loongarch_dis_option (const char *option ATTRIBUTE_UNUSED)
+parse_loongarch_dis_option (const char *option)
 {
+  if (strcmp (option, "numeric") == 0)
+    {
+      loongarch_r_disname = loongarch_r_normal_name;
+      loongarch_f_disname = loongarch_f_normal_name;
+    }
   return -1;
 }
 
@@ -292,8 +297,11 @@ void
 print_loongarch_disassembler_options (FILE *stream)
 {
   fprintf (stream, _ ("\n\
-		       LARCH:\n"));
+The following LoongArch disassembler options are supported for use\n\
+with the -M switch (multiple options should be separated by commas):\n"));
 
+  fprintf (stream, _ ("\n\
+           numeric       Print numeric register names, rather than ABI names.\n"));
   fprintf (stream, _ ("\n"));
 }
 
