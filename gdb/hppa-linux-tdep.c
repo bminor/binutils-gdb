@@ -191,7 +191,7 @@ hppa_linux_sigtramp_find_sigcontext (struct gdbarch *gdbarch, CORE_ADDR pc)
 struct hppa_linux_sigtramp_unwind_cache
 {
   CORE_ADDR base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct hppa_linux_sigtramp_unwind_cache *
@@ -227,13 +227,13 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   scptr += 4;
 
   /* GR[0] is the psw.  */
-  info->saved_regs[HPPA_IPSW_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_IPSW_REGNUM].set_addr (scptr);
   scptr += 4;
 
   /* General registers.  */
   for (i = 1; i < 32; i++)
     {
-      info->saved_regs[HPPA_R0_REGNUM + i].addr = scptr;
+      info->saved_regs[HPPA_R0_REGNUM + i].set_addr (scptr);
       scptr += 4;
     }
 
@@ -245,24 +245,24 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 
   for (i = 4; i < 32; i++)
     {
-      info->saved_regs[HPPA_FP0_REGNUM + (i * 2)].addr = scptr;
+      info->saved_regs[HPPA_FP0_REGNUM + (i * 2)].set_addr (scptr);
       scptr += 4;
-      info->saved_regs[HPPA_FP0_REGNUM + (i * 2) + 1].addr = scptr;
+      info->saved_regs[HPPA_FP0_REGNUM + (i * 2) + 1].set_addr (scptr);
       scptr += 4;
     }
 
   /* IASQ/IAOQ.  */
-  info->saved_regs[HPPA_PCSQ_HEAD_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCSQ_HEAD_REGNUM].set_addr (scptr);
   scptr += 4;
-  info->saved_regs[HPPA_PCSQ_TAIL_REGNUM].addr = scptr;
-  scptr += 4;
-
-  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].addr = scptr;
-  scptr += 4;
-  info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCSQ_TAIL_REGNUM].set_addr (scptr);
   scptr += 4;
 
-  info->saved_regs[HPPA_SAR_REGNUM].addr = scptr;
+  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_addr (scptr);
+  scptr += 4;
+  info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].set_addr (scptr);
+  scptr += 4;
+
+  info->saved_regs[HPPA_SAR_REGNUM].set_addr (scptr);
 
   info->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 

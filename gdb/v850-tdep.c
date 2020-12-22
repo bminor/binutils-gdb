@@ -286,7 +286,7 @@ struct v850_frame_cache
   int uses_fp;
   
   /* Saved registers.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Info gleaned from scanning a function's prologue.  */
@@ -933,7 +933,7 @@ v850_analyze_prologue (struct gdbarch *gdbarch,
   for (pifsr_tmp = pifsrs; pifsr_tmp != pifsr; pifsr_tmp++)
     {
       pifsr_tmp->offset -= pi->sp_offset - pifsr_tmp->cur_frameoffset;
-      pi->saved_regs[pifsr_tmp->reg].addr = pifsr_tmp->offset;
+      pi->saved_regs[pifsr_tmp->reg].set_addr (pifsr_tmp->offset);
     }
 
   return current_pc;
@@ -1280,7 +1280,8 @@ v850_frame_cache (struct frame_info *this_frame, void **this_cache)
      instead of offsets.  */
   for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     if (trad_frame_addr_p (cache->saved_regs, i))
-      cache->saved_regs[i].addr += cache->base;
+      cache->saved_regs[i].set_addr (cache->saved_regs[i].addr ()
+				     + cache->base);
 
   /* The call instruction moves the caller's PC in the callee's LP.
      Since this is an unwind, do the reverse.  Copy the location of LP
@@ -1314,7 +1315,7 @@ v850_frame_this_id (struct frame_info *this_frame, void **this_cache,
   if (cache->base == 0)
     return;
 
-  *this_id = frame_id_build (cache->saved_regs[E_SP_REGNUM].addr, cache->pc);
+  *this_id = frame_id_build (cache->saved_regs[E_SP_REGNUM].addr (), cache->pc);
 }
 
 static const struct frame_unwind v850_frame_unwind = {

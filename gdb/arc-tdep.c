@@ -82,7 +82,7 @@ struct arc_frame_cache
   /* Store addresses for registers saved in prologue.  During prologue analysis
      GDB stores offsets relatively to "old SP", then after old SP is evaluated,
      offsets are replaced with absolute addresses.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Global debug flag.  */
@@ -1457,7 +1457,7 @@ arc_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR entrypoint,
 	{
 	  CORE_ADDR offset;
 	  if (stack.find_reg (gdbarch, i, &offset))
-	    cache->saved_regs[i].addr = offset;
+	    cache->saved_regs[i].set_addr (offset);
 	}
     }
 
@@ -1677,7 +1677,7 @@ arc_print_frame_cache (struct gdbarch *gdbarch, const char *message,
 	debug_printf ("arc: saved register %s at %s %s\n",
 		      gdbarch_register_name (gdbarch, i),
 		      (addresses_known) ? "address" : "offset",
-		      paddress (gdbarch, cache->saved_regs[i].addr));
+		      paddress (gdbarch, cache->saved_regs[i].addr ()));
     }
 }
 
@@ -1739,7 +1739,8 @@ arc_make_frame_cache (struct frame_info *this_frame)
   for (int i = 0; i <= ARC_LAST_CORE_REGNUM; i++)
     {
       if (trad_frame_addr_p (cache->saved_regs, i))
-	cache->saved_regs[i].addr += cache->prev_sp;
+	cache->saved_regs[i].set_addr (cache->saved_regs[i].addr ()
+				       + cache->prev_sp);
     }
 
   if (arc_debug)
@@ -1877,7 +1878,7 @@ arc_make_sigtramp_frame_cache (struct frame_info *this_frame)
   for (int i = 0; i < tdep->sc_num_regs; i++)
     {
       if (tdep->sc_reg_offset[i] != ARC_OFFSET_NO_REGISTER)
-	cache->saved_regs[i].addr = addr + tdep->sc_reg_offset[i];
+	cache->saved_regs[i].set_addr (addr + tdep->sc_reg_offset[i]);
     }
 
   return cache;

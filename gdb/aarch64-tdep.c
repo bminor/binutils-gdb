@@ -201,7 +201,7 @@ struct aarch64_prologue_cache
   int framereg;
 
   /* Saved register offsets.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static void
@@ -564,7 +564,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       CORE_ADDR offset;
 
       if (stack.find_reg (gdbarch, i, &offset))
-	cache->saved_regs[i].addr = offset;
+	cache->saved_regs[i].set_addr (offset);
     }
 
   for (i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
@@ -574,7 +574,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
       if (stack.find_reg (gdbarch, i + AARCH64_X_REGISTER_COUNT,
 			  &offset))
-	cache->saved_regs[i + regnum + AARCH64_D0_REGNUM].addr = offset;
+	cache->saved_regs[i + regnum + AARCH64_D0_REGNUM].set_addr (offset);
     }
 
   return start;
@@ -654,19 +654,19 @@ aarch64_analyze_prologue_test (void)
     for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
       {
 	if (i == AARCH64_FP_REGNUM)
-	  SELF_CHECK (cache.saved_regs[i].addr == -272);
+	  SELF_CHECK (cache.saved_regs[i].addr () == -272);
 	else if (i == AARCH64_LR_REGNUM)
-	  SELF_CHECK (cache.saved_regs[i].addr == -264);
+	  SELF_CHECK (cache.saved_regs[i].addr () == -264);
 	else
-	  SELF_CHECK (cache.saved_regs[i].addr == -1);
+	  SELF_CHECK (cache.saved_regs[i].is_realreg ());
       }
 
     for (int i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
       {
 	int regnum = gdbarch_num_regs (gdbarch);
 
-	SELF_CHECK (cache.saved_regs[i + regnum + AARCH64_D0_REGNUM].addr
-		    == -1);
+	SELF_CHECK (cache.saved_regs[i + regnum
+				     + AARCH64_D0_REGNUM].is_realreg ());
       }
   }
 
@@ -694,11 +694,11 @@ aarch64_analyze_prologue_test (void)
     for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
       {
 	if (i == 1)
-	  SELF_CHECK (cache.saved_regs[i].addr == -16);
+	  SELF_CHECK (cache.saved_regs[i].addr () == -16);
 	else if (i == 19)
-	  SELF_CHECK (cache.saved_regs[i].addr == -48);
+	  SELF_CHECK (cache.saved_regs[i].addr () == -48);
 	else
-	  SELF_CHECK (cache.saved_regs[i].addr == -1);
+	  SELF_CHECK (cache.saved_regs[i].is_realreg ());
       }
 
     for (int i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
@@ -706,11 +706,12 @@ aarch64_analyze_prologue_test (void)
 	int regnum = gdbarch_num_regs (gdbarch);
 
 	if (i == 0)
-	  SELF_CHECK (cache.saved_regs[i + regnum + AARCH64_D0_REGNUM].addr
+	  SELF_CHECK (cache.saved_regs[i + regnum
+				       + AARCH64_D0_REGNUM].addr ()
 		      == -24);
 	else
-	  SELF_CHECK (cache.saved_regs[i + regnum + AARCH64_D0_REGNUM].addr
-		      == -1);
+	  SELF_CHECK (cache.saved_regs[i + regnum
+				       + AARCH64_D0_REGNUM].is_realreg ());
       }
   }
 
@@ -848,20 +849,21 @@ aarch64_analyze_prologue_test (void)
       for (int i = 0; i < AARCH64_X_REGISTER_COUNT; i++)
 	{
 	  if (i == 19)
-	    SELF_CHECK (cache.saved_regs[i].addr == -20);
+	    SELF_CHECK (cache.saved_regs[i].addr () == -20);
 	  else if (i == AARCH64_FP_REGNUM)
-	    SELF_CHECK (cache.saved_regs[i].addr == -48);
+	    SELF_CHECK (cache.saved_regs[i].addr () == -48);
 	  else if (i == AARCH64_LR_REGNUM)
-	    SELF_CHECK (cache.saved_regs[i].addr == -40);
+	    SELF_CHECK (cache.saved_regs[i].addr () == -40);
 	  else
-	    SELF_CHECK (cache.saved_regs[i].addr == -1);
+	    SELF_CHECK (cache.saved_regs[i].is_realreg ());
 	}
 
       if (tdep->has_pauth ())
 	{
 	  SELF_CHECK (trad_frame_value_p (cache.saved_regs,
 					  tdep->pauth_ra_state_regnum));
-	  SELF_CHECK (cache.saved_regs[tdep->pauth_ra_state_regnum].addr == 1);
+	  SELF_CHECK (cache.saved_regs[tdep->pauth_ra_state_regnum].addr ()
+		      == 1);
 	}
     }
 }
@@ -950,8 +952,8 @@ aarch64_scan_prologue (struct frame_info *this_frame,
 
       cache->framereg = AARCH64_FP_REGNUM;
       cache->framesize = 16;
-      cache->saved_regs[29].addr = 0;
-      cache->saved_regs[30].addr = 8;
+      cache->saved_regs[29].set_addr (0);
+      cache->saved_regs[30].set_addr (8);
     }
 }
 
@@ -981,7 +983,8 @@ aarch64_make_prologue_cache_1 (struct frame_info *this_frame,
      determined by aarch64_analyze_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
     if (trad_frame_addr_p (cache->saved_regs, reg))
-      cache->saved_regs[reg].addr += cache->prev_sp;
+      cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
+				       + cache->prev_sp);
 
   cache->func = get_frame_func (this_frame);
 

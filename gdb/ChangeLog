@@ -1,3 +1,70 @@
+2021-01-04  Luis Machado  <luis.machado@linaro.org>
+
+	Update all users of trad_frame_saved_reg to use the new member
+	functions.
+
+	Remote all struct keywords from declarations of trad_frame_saved_reg
+	types, except on forward declarations.
+
+	* aarch64-tdep.c: Update.
+	* alpha-mdebug-tdep.c: Update.
+	* alpha-tdep.c: Update.
+	* arc-tdep.c: Update.
+	* arm-tdep.c: Update.
+	* avr-tdep.c: Update.
+	* cris-tdep.c: Update.
+	* csky-tdep.c: Update.
+	* frv-tdep.c: Update.
+	* hppa-linux-tdep.c: Update.
+	* hppa-tdep.c: Update.
+	* hppa-tdep.h: Update.
+	* lm32-tdep.c: Update.
+	* m32r-linux-tdep.c: Update.
+	* m32r-tdep.c: Update.
+	* m68hc11-tdep.c: Update.
+	* mips-tdep.c: Update.
+	* moxie-tdep.c: Update.
+	* riscv-tdep.c: Update.
+	* rs6000-tdep.c: Update.
+	* s390-linux-tdep.c: Update.
+	* s390-tdep.c: Update.
+	* score-tdep.c: Update.
+	* sparc-netbsd-tdep.c: Update.
+	* sparc-sol2-tdep.c: Update.
+	* sparc64-fbsd-tdep.c: Update.
+	* sparc64-netbsd-tdep.c: Update.
+	* sparc64-obsd-tdep.c: Update.
+	* sparc64-sol2-tdep.c: Update.
+	* tilegx-tdep.c: Update.
+	* v850-tdep.c: Update.
+	* vax-tdep.c: Update.
+
+	* frame-unwind.c (frame_unwind_got_bytes): Make parameter const.
+	* frame-unwind.h (frame_unwind_got_bytes): Likewise.
+
+	* trad-frame.c: Update.
+	Remove TF_REG_* enum.
+	(trad_frame_alloc_saved_regs): Add a static assertion to check for
+	a trivially-constructible struct.
+	(trad_frame_reset_saved_regs): Adjust to use member function.
+	(trad_frame_value_p): Likewise.
+	(trad_frame_addr_p): Likewise.
+	(trad_frame_realreg_p): Likewise.
+	(trad_frame_value_bytes_p): Likewise.
+	(trad_frame_set_value): Likewise.
+	(trad_frame_set_realreg): Likewise.
+	(trad_frame_set_addr): Likewise.
+	(trad_frame_set_unknown): Likewise.
+	(trad_frame_set_value_bytes): Likewise.
+	(trad_frame_get_prev_register): Likewise.
+	* trad-frame.h: Update.
+	(trad_frame_saved_reg_kind): New enum.
+	(struct trad_frame_saved_reg) <addr, realreg, data>: Remove.
+	<m_kind, m_reg>: New member fields.
+	<set_value, set_realreg, set_addr, set_unknown, set_value_bytes>
+	<kind, value, realreg, addr, value_bytes, is_value, is_realreg>
+	<is_addr, is_unknown, is_value_bytes>: New member functions.
+
 2021-01-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target-float.c: Fix typos.

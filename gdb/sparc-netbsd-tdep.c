@@ -94,11 +94,11 @@ sparc32nbsd_pc_in_sigtramp (CORE_ADDR pc, const char *name)
   return nbsd_pc_in_sigtramp (pc, name);
 }
 
-struct trad_frame_saved_reg *
+trad_frame_saved_reg *
 sparc32nbsd_sigcontext_saved_regs (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
   CORE_ADDR addr, sigcontext_addr;
   int regnum, delta;
   ULONGEST psr;
@@ -115,34 +115,34 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *this_frame)
      that the part of the signal trampoline that saves the state has
      been executed.  */
 
-  saved_regs[SPARC_SP_REGNUM].addr = sigcontext_addr + 8;
-  saved_regs[SPARC32_PC_REGNUM].addr = sigcontext_addr + 12;
-  saved_regs[SPARC32_NPC_REGNUM].addr = sigcontext_addr + 16;
-  saved_regs[SPARC32_PSR_REGNUM].addr = sigcontext_addr + 20;
-  saved_regs[SPARC_G1_REGNUM].addr = sigcontext_addr + 24;
-  saved_regs[SPARC_O0_REGNUM].addr = sigcontext_addr + 28;
+  saved_regs[SPARC_SP_REGNUM].set_addr (sigcontext_addr + 8);
+  saved_regs[SPARC32_PC_REGNUM].set_addr (sigcontext_addr + 12);
+  saved_regs[SPARC32_NPC_REGNUM].set_addr (sigcontext_addr + 16);
+  saved_regs[SPARC32_PSR_REGNUM].set_addr (sigcontext_addr + 20);
+  saved_regs[SPARC_G1_REGNUM].set_addr (sigcontext_addr + 24);
+  saved_regs[SPARC_O0_REGNUM].set_addr (sigcontext_addr + 28);
 
   /* The remaining `global' registers and %y are saved in the `local'
      registers.  */
   delta = SPARC_L0_REGNUM - SPARC_G0_REGNUM;
   for (regnum = SPARC_G2_REGNUM; regnum <= SPARC_G7_REGNUM; regnum++)
-    saved_regs[regnum].realreg = regnum + delta;
-  saved_regs[SPARC32_Y_REGNUM].realreg = SPARC_L1_REGNUM;
+    saved_regs[regnum].set_realreg (regnum + delta);
+  saved_regs[SPARC32_Y_REGNUM].set_realreg (SPARC_L1_REGNUM);
 
   /* The remaining `out' registers can be found in the current frame's
      `in' registers.  */
   delta = SPARC_I0_REGNUM - SPARC_O0_REGNUM;
   for (regnum = SPARC_O1_REGNUM; regnum <= SPARC_O5_REGNUM; regnum++)
-    saved_regs[regnum].realreg = regnum + delta;
-  saved_regs[SPARC_O7_REGNUM].realreg = SPARC_I7_REGNUM;
+    saved_regs[regnum].set_realreg (regnum + delta);
+  saved_regs[SPARC_O7_REGNUM].set_realreg (SPARC_I7_REGNUM);
 
   /* The `local' and `in' registers have been saved in the register
      save area.  */
-  addr = saved_regs[SPARC_SP_REGNUM].addr;
+  addr = saved_regs[SPARC_SP_REGNUM].addr ();
   addr = get_frame_memory_unsigned (this_frame, addr, 4);
   for (regnum = SPARC_L0_REGNUM;
        regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
-    saved_regs[regnum].addr = addr;
+    saved_regs[regnum].set_addr (addr);
 
   /* Handle StackGhost.  */
   {
@@ -152,7 +152,7 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *this_frame)
       {
 	ULONGEST i7;
 
-	addr = saved_regs[SPARC_I7_REGNUM].addr;
+	addr = saved_regs[SPARC_I7_REGNUM].addr ();
 	i7 = get_frame_memory_unsigned (this_frame, addr, 4);
 	trad_frame_set_value (saved_regs, SPARC_I7_REGNUM, i7 ^ wcookie);
       }
@@ -163,17 +163,17 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *this_frame)
 
 #define PSR_EF	0x00001000
 
-  addr = saved_regs[SPARC32_PSR_REGNUM].addr;
+  addr = saved_regs[SPARC32_PSR_REGNUM].addr ();
   psr = get_frame_memory_unsigned (this_frame, addr, 4);
   if (psr & PSR_EF)
     {
       CORE_ADDR sp;
 
       sp = get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
-      saved_regs[SPARC32_FSR_REGNUM].addr = sp + 96;
+      saved_regs[SPARC32_FSR_REGNUM].set_addr (sp + 96);
       for (regnum = SPARC_F0_REGNUM, addr = sp + 96 + 8;
 	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
-	saved_regs[regnum].addr = addr;
+	saved_regs[regnum].set_addr (addr);
     }
 
   return saved_regs;

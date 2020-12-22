@@ -50,7 +50,7 @@ struct tilegx_frame_cache
   CORE_ADDR start_pc;
 
   /* Table of saved registers.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Register state values used by analyze_prologue.  */
@@ -464,8 +464,8 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 		     saved_address.  The value of realreg is not
 		     meaningful in this case but it must be >= 0.
 		     See trad-frame.h.  */
-		  cache->saved_regs[saved_register].realreg = saved_register;
-		  cache->saved_regs[saved_register].addr = saved_address;
+		  cache->saved_regs[saved_register].set_realreg (saved_register);
+		  cache->saved_regs[saved_register].set_addr (saved_address);
 		} 
 	      else if (cache
 		       && (operands[0] == TILEGX_SP_REGNUM) 
@@ -488,12 +488,12 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 		  /* Fix up the sign-extension.  */
 		  if (opcode->mnemonic == TILEGX_OPC_ADDI)
 		    op2_as_short = op2_as_char;
-		  prev_sp_value = (cache->saved_regs[hopefully_sp].addr
+		  prev_sp_value = (cache->saved_regs[hopefully_sp].addr ()
 				   - op2_as_short);
 
 		  new_reverse_frame[i].state = REVERSE_STATE_VALUE;
 		  new_reverse_frame[i].value
-		    = cache->saved_regs[hopefully_sp].addr;
+		    = cache->saved_regs[hopefully_sp].addr ();
 		  trad_frame_set_value (cache->saved_regs,
 					hopefully_sp, prev_sp_value);
 		}
@@ -717,17 +717,16 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	    {
 	      unsigned saved_register = (unsigned) reverse_frame[i].value;
 
-	      cache->saved_regs[saved_register].realreg = i;
-	      cache->saved_regs[saved_register].addr = (LONGEST) -1;
+	      cache->saved_regs[saved_register].set_realreg (i);
+	      cache->saved_regs[saved_register].set_addr ((LONGEST) -1);
 	    }
 	}
     }
 
   if (lr_saved_on_stack_p)
     {
-      cache->saved_regs[TILEGX_LR_REGNUM].realreg = TILEGX_LR_REGNUM;
-      cache->saved_regs[TILEGX_LR_REGNUM].addr =
-	cache->saved_regs[TILEGX_SP_REGNUM].addr;
+      cache->saved_regs[TILEGX_LR_REGNUM].set_realreg (TILEGX_LR_REGNUM);
+      cache->saved_regs[TILEGX_LR_REGNUM].set_addr (cache->saved_regs[TILEGX_SP_REGNUM].addr ());
     }
 
   return prolog_end;

@@ -2299,7 +2299,7 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 
 struct value *
 s390_trad_frame_prev_register (struct frame_info *this_frame,
-			       struct trad_frame_saved_reg saved_regs[],
+			       trad_frame_saved_reg saved_regs[],
 			       int regnum)
 {
   if (regnum < S390_NUM_REGS)
@@ -2316,7 +2316,7 @@ struct s390_unwind_cache {
   CORE_ADDR frame_base;
   CORE_ADDR local_base;
 
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Unwind THIS_FRAME and write the information into unwind cache INFO using
@@ -2464,12 +2464,12 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
   for (i = 0; i < 16; i++)
     if (s390_register_call_saved (gdbarch, S390_R0_REGNUM + i)
 	&& data.gpr_slot[i] != 0)
-      info->saved_regs[S390_R0_REGNUM + i].addr = cfa - data.gpr_slot[i];
+      info->saved_regs[S390_R0_REGNUM + i].set_addr (cfa - data.gpr_slot[i]);
 
   for (i = 0; i < 16; i++)
     if (s390_register_call_saved (gdbarch, S390_F0_REGNUM + i)
 	&& data.fpr_slot[i] != 0)
-      info->saved_regs[S390_F0_REGNUM + i].addr = cfa - data.fpr_slot[i];
+      info->saved_regs[S390_F0_REGNUM + i].set_addr (cfa - data.fpr_slot[i]);
 
   /* Function return will set PC to %r14.  */
   info->saved_regs[S390_PSWA_REGNUM] = info->saved_regs[S390_RETADDR_REGNUM];
@@ -2481,7 +2481,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
   if (size == 0
       && !trad_frame_addr_p (info->saved_regs, S390_PSWA_REGNUM))
     {
-      info->saved_regs[S390_PSWA_REGNUM].realreg = S390_RETADDR_REGNUM;
+      info->saved_regs[S390_PSWA_REGNUM].set_realreg (S390_RETADDR_REGNUM);
     }
 
   /* Another sanity check: unless this is a frameless function,
@@ -2547,8 +2547,8 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
       /* We don't know which registers were saved, but it will have
 	 to be at least %r14 and %r15.  This will allow us to continue
 	 unwinding, but other prev-frame registers may be incorrect ...  */
-      info->saved_regs[S390_SP_REGNUM].addr = backchain + 15*word_size;
-      info->saved_regs[S390_RETADDR_REGNUM].addr = backchain + 14*word_size;
+      info->saved_regs[S390_SP_REGNUM].set_addr (backchain + 15*word_size);
+      info->saved_regs[S390_RETADDR_REGNUM].set_addr (backchain + 14*word_size);
 
       /* Function return will set PC to %r14.  */
       info->saved_regs[S390_PSWA_REGNUM]
@@ -2648,7 +2648,7 @@ static const struct frame_unwind s390_frame_unwind = {
 struct s390_stub_unwind_cache
 {
   CORE_ADDR frame_base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Unwind THIS_FRAME and return the corresponding unwind cache for
@@ -2671,7 +2671,7 @@ s390_stub_frame_unwind_cache (struct frame_info *this_frame,
   info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The return address is in register %r14.  */
-  info->saved_regs[S390_PSWA_REGNUM].realreg = S390_RETADDR_REGNUM;
+  info->saved_regs[S390_PSWA_REGNUM].set_realreg (S390_RETADDR_REGNUM);
 
   /* Retrieve stack pointer and determine our frame base.  */
   reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);

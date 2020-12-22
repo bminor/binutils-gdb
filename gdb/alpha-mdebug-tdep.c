@@ -180,7 +180,7 @@ struct alpha_mdebug_unwind_cache
 {
   struct mdebug_extra_func_info *proc_desc;
   CORE_ADDR vfp;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Extract all of the information about the frame from PROC_DESC
@@ -231,14 +231,14 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
       /* Clear bit for RA so we don't save it again later.  */
       mask &= ~(1 << returnreg);
 
-      info->saved_regs[returnreg].addr = reg_position;
+      info->saved_regs[returnreg].set_addr (reg_position);
       reg_position += 8;
     }
 
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	info->saved_regs[ireg].addr = reg_position;
+	info->saved_regs[ireg].set_addr (reg_position);
 	reg_position += 8;
       }
 
@@ -248,7 +248,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	info->saved_regs[ALPHA_FP0_REGNUM + ireg].addr = reg_position;
+	info->saved_regs[ALPHA_FP0_REGNUM + ireg].set_addr (reg_position);
 	reg_position += 8;
       }
 

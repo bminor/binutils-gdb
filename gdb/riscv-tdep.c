@@ -107,7 +107,7 @@ struct riscv_unwind_cache
   int frame_base_offset;
 
   /* Information about previous register values.  */
-  struct trad_frame_saved_reg *regs;
+  trad_frame_saved_reg *regs;
 
   /* The id for this frame.  */
   struct frame_id this_id;
@@ -3146,7 +3146,8 @@ riscv_frame_cache (struct frame_info *this_frame, void **this_cache)
   for (regno = 0; regno < numregs; ++regno)
     {
       if (trad_frame_addr_p (cache->regs, regno))
-	cache->regs[regno].addr += cache->frame_base;
+	cache->regs[regno].set_addr (cache->regs[regno].addr ()
+				     + cache->frame_base);
     }
 
   /* The previous $pc can be found wherever the $ra value can be found.

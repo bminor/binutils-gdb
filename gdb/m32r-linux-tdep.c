@@ -219,7 +219,7 @@ static int m32r_linux_sc_reg_offset[] = {
 struct m32r_frame_cache
 {
   CORE_ADDR base, pc;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct m32r_frame_cache *
@@ -258,8 +258,8 @@ m32r_linux_sigtramp_frame_cache (struct frame_info *this_frame,
   for (regnum = 0; regnum < sizeof (m32r_linux_sc_reg_offset) / 4; regnum++)
     {
       if (m32r_linux_sc_reg_offset[regnum] >= 0)
-	cache->saved_regs[regnum].addr =
-	  sigcontext_addr + m32r_linux_sc_reg_offset[regnum];
+	cache->saved_regs[regnum].set_addr (sigcontext_addr
+					    + m32r_linux_sc_reg_offset[regnum]);
     }
 
   return cache;

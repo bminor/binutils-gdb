@@ -502,7 +502,7 @@ struct csky_unwind_cache
   int framereg;
 
   /* Saved register offsets.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Do prologue analysis, returning the PC of the first instruction
@@ -1459,17 +1459,17 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 	{
 	  if (register_offsets[rn] >= 0)
 	    {
-	      this_cache->saved_regs[rn].addr
-		= this_cache->prev_sp - register_offsets[rn];
+	      this_cache->saved_regs[rn].set_addr (this_cache->prev_sp
+						   - register_offsets[rn]);
 	      if (csky_debug)
 		{
 		  CORE_ADDR rn_value = read_memory_unsigned_integer (
-		    this_cache->saved_regs[rn].addr, 4, byte_order);
+		    this_cache->saved_regs[rn].addr (), 4, byte_order);
 		  fprintf_unfiltered (gdb_stdlog, "Saved register %s "
 				      "stored at 0x%08lx, value=0x%08lx\n",
 				      csky_register_names[rn],
 				      (unsigned long)
-					this_cache->saved_regs[rn].addr,
+					this_cache->saved_regs[rn].addr (),
 				      (unsigned long) rn_value);
 		}
 	    }

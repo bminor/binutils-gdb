@@ -161,7 +161,7 @@ struct m68hc11_unwind_cache
   enum insn_return_kind return_kind;
 
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Table of registers for 68HC11.  This includes the hard registers
@@ -700,7 +700,7 @@ m68hc11_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
 	      save_addr -= 2;
 	      if (info->saved_regs)
-		info->saved_regs[saved_reg].addr = save_addr;
+		info->saved_regs[saved_reg].set_addr (save_addr);
 	    }
 	  else
 	    {
@@ -800,11 +800,11 @@ m68hc11_frame_unwind_cache (struct frame_info *this_frame,
   if (info->pc != 0)
     m68hc11_scan_prologue (gdbarch, info->pc, current_pc, info);
 
-  info->saved_regs[HARD_PC_REGNUM].addr = info->size;
+  info->saved_regs[HARD_PC_REGNUM].set_addr (info->size);
 
   if (info->sp_offset != (CORE_ADDR) -1)
     {
-      info->saved_regs[HARD_PC_REGNUM].addr = info->sp_offset;
+      info->saved_regs[HARD_PC_REGNUM].set_addr (info->sp_offset);
       this_base = get_frame_register_unsigned (this_frame, HARD_SP_REGNUM);
       prev_sp = this_base + info->sp_offset + 2;
       this_base += STACK_CORRECTION (gdbarch);
@@ -817,23 +817,23 @@ m68hc11_frame_unwind_cache (struct frame_info *this_frame,
 
       this_base += STACK_CORRECTION (gdbarch);
       if (soft_regs[SOFT_FP_REGNUM].name)
-	info->saved_regs[SOFT_FP_REGNUM].addr = info->size - 2;
+	info->saved_regs[SOFT_FP_REGNUM].set_addr (info->size - 2);
    }
 
   if (info->return_kind == RETURN_RTC)
     {
       prev_sp += 1;
-      info->saved_regs[HARD_PAGE_REGNUM].addr = info->size;
-      info->saved_regs[HARD_PC_REGNUM].addr = info->size + 1;
+      info->saved_regs[HARD_PAGE_REGNUM].set_addr (info->size);
+      info->saved_regs[HARD_PC_REGNUM].set_addr (info->size + 1);
     }
   else if (info->return_kind == RETURN_RTI)
     {
       prev_sp += 7;
-      info->saved_regs[HARD_CCR_REGNUM].addr = info->size;
-      info->saved_regs[HARD_D_REGNUM].addr = info->size + 1;
-      info->saved_regs[HARD_X_REGNUM].addr = info->size + 3;
-      info->saved_regs[HARD_Y_REGNUM].addr = info->size + 5;
-      info->saved_regs[HARD_PC_REGNUM].addr = info->size + 7;
+      info->saved_regs[HARD_CCR_REGNUM].set_addr (info->size);
+      info->saved_regs[HARD_D_REGNUM].set_addr (info->size + 1);
+      info->saved_regs[HARD_X_REGNUM].set_addr (info->size + 3);
+      info->saved_regs[HARD_Y_REGNUM].set_addr (info->size + 5);
+      info->saved_regs[HARD_PC_REGNUM].set_addr (info->size + 7);
     }
 
   /* Add 1 here to adjust for the post-decrement nature of the push
@@ -847,7 +847,7 @@ m68hc11_frame_unwind_cache (struct frame_info *this_frame,
   for (i = 0; i < gdbarch_num_cooked_regs (gdbarch); i++)
     if (trad_frame_addr_p (info->saved_regs, i))
       {
-	info->saved_regs[i].addr += this_base;
+	info->saved_regs[i].set_addr (info->saved_regs[i].addr () + this_base);
       }
 
   /* The previous frame's SP needed to be computed.  Save the computed

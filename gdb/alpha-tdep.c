@@ -1118,7 +1118,7 @@ struct alpha_heuristic_unwind_cache
 { 
   CORE_ADDR vfp;
   CORE_ADDR start_pc;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
   int return_reg;
 };
 
@@ -1305,7 +1305,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 		 pointer or not.  */
 	      /* Hack: temporarily add one, so that the offset is non-zero
 		 and we can tell which registers have save offsets below.  */
-	      info->saved_regs[reg].addr = (word & 0xffff) + 1;
+	      info->saved_regs[reg].set_addr ((word & 0xffff) + 1);
 
 	      /* Starting with OSF/1-3.2C, the system libraries are shipped
 		 without local symbols, but they still contain procedure
@@ -1386,7 +1386,8 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
      one to the offsets to make all detected offsets non-zero.  */
   for (reg = 0; reg < ALPHA_NUM_REGS; ++reg)
     if (trad_frame_addr_p(info->saved_regs, reg))
-      info->saved_regs[reg].addr += val - 1;
+      info->saved_regs[reg].set_addr (info->saved_regs[reg].addr ()
+				      + val - 1);
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */

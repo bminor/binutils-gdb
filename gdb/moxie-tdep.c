@@ -267,7 +267,7 @@ struct moxie_unwind_cache
   LONGEST r13_offset;
   int uses_frame;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Read an unsigned integer from the inferior, and adjust

@@ -296,7 +296,7 @@ frame_unwind_got_constant (struct frame_info *frame, int regnum,
 }
 
 struct value *
-frame_unwind_got_bytes (struct frame_info *frame, int regnum, gdb_byte *buf)
+frame_unwind_got_bytes (struct frame_info *frame, int regnum, const gdb_byte *buf)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
   struct value *reg_val;

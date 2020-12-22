@@ -379,7 +379,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
 
 struct s390_sigtramp_unwind_cache {
   CORE_ADDR frame_base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Unwind THIS_FRAME and return the corresponding unwind cache for
@@ -443,33 +443,33 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 	    double fprs[16];  */
 
   /* PSW mask and address.  */
-  info->saved_regs[S390_PSWM_REGNUM].addr = sigreg_ptr;
+  info->saved_regs[S390_PSWM_REGNUM].set_addr (sigreg_ptr);
   sigreg_ptr += word_size;
-  info->saved_regs[S390_PSWA_REGNUM].addr = sigreg_ptr;
+  info->saved_regs[S390_PSWA_REGNUM].set_addr (sigreg_ptr);
   sigreg_ptr += word_size;
 
   /* Then the GPRs.  */
   for (i = 0; i < 16; i++)
     {
-      info->saved_regs[S390_R0_REGNUM + i].addr = sigreg_ptr;
+      info->saved_regs[S390_R0_REGNUM + i].set_addr (sigreg_ptr);
       sigreg_ptr += word_size;
     }
 
   /* Then the ACRs.  */
   for (i = 0; i < 16; i++)
     {
-      info->saved_regs[S390_A0_REGNUM + i].addr = sigreg_ptr;
+      info->saved_regs[S390_A0_REGNUM + i].set_addr (sigreg_ptr);
       sigreg_ptr += 4;
     }
 
   /* The floating-point control word.  */
-  info->saved_regs[S390_FPC_REGNUM].addr = sigreg_ptr;
+  info->saved_regs[S390_FPC_REGNUM].set_addr (sigreg_ptr);
   sigreg_ptr += 8;
 
   /* And finally the FPRs.  */
   for (i = 0; i < 16; i++)
     {
-      info->saved_regs[S390_F0_REGNUM + i].addr = sigreg_ptr;
+      info->saved_regs[S390_F0_REGNUM + i].set_addr (sigreg_ptr);
       sigreg_ptr += 8;
     }
 
@@ -478,13 +478,13 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   if (tdep->gpr_full_regnum != -1)
     for (i = 0; i < 16; i++)
       {
-	info->saved_regs[S390_R0_UPPER_REGNUM + i].addr = sigreg_ptr;
+	info->saved_regs[S390_R0_UPPER_REGNUM + i].set_addr (sigreg_ptr);
 	sigreg_ptr += 4;
       }
 
   /* Restore the previous frame's SP.  */
   prev_sp = read_memory_unsigned_integer (
-			info->saved_regs[S390_SP_REGNUM].addr,
+			info->saved_regs[S390_SP_REGNUM].addr (),
 			word_size, byte_order);
 
   /* Determine our frame base.  */

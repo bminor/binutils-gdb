@@ -58,7 +58,7 @@ struct lm32_frame_cache
   /* Size of frame.  */
   int size;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Add the available register groups.  */
@@ -146,8 +146,7 @@ lm32_analyze_prologue (struct gdbarch *gdbarch,
 	  /* Any stack displaced store is likely part of the prologue.
 	     Record that the register is being saved, and the offset 
 	     into the stack.  */
-	  info->saved_regs[LM32_REG1 (instruction)].addr =
-	    LM32_IMM16 (instruction);
+	  info->saved_regs[LM32_REG1 (instruction)].set_addr (LM32_IMM16 (instruction));
 	}
       else if ((LM32_OPCODE (instruction) == OP_ADDI)
 	       && (LM32_REG1 (instruction) == SIM_LM32_SP_REGNUM))
@@ -188,7 +187,7 @@ lm32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, limit_pc;
   struct lm32_frame_cache frame_info;
-  struct trad_frame_saved_reg saved_regs[SIM_LM32_NUM_REGS];
+  trad_frame_saved_reg saved_regs[SIM_LM32_NUM_REGS];
 
   /* See if we can determine the end of the prologue via the symbol table.
      If so, then return either PC, or the PC after the prologue, whichever
@@ -419,7 +418,7 @@ lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
   for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
     {
       if (trad_frame_addr_p (info->saved_regs, i))
-	info->saved_regs[i].addr = this_base + info->saved_regs[i].addr;
+	info->saved_regs[i].set_addr (this_base + info->saved_regs[i].addr ());
     }
 
   /* The call instruction moves the caller's PC in the callee's RA register.

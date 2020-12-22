@@ -3469,7 +3469,7 @@ struct rs6000_frame_cache
 {
   CORE_ADDR base;
   CORE_ADDR initial_sp;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 
   /* Set BASE_P to true if this frame cache is properly initialized.
      Otherwise set to false because some registers or memory cannot
@@ -3580,7 +3580,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
       if (ppc_floating_point_unit_p (gdbarch))
 	for (i = fdata.saved_fpr; i < ppc_num_fprs; i++)
 	  {
-	    cache->saved_regs[tdep->ppc_fp0_regnum + i].addr = fpr_addr;
+	    cache->saved_regs[tdep->ppc_fp0_regnum + i].set_addr (fpr_addr);
 	    fpr_addr += 8;
 	  }
     }
@@ -3596,7 +3596,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
       for (i = fdata.saved_gpr; i < ppc_num_gprs; i++)
 	{
 	  if (fdata.gpr_mask & (1U << i))
-	    cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = gpr_addr;
+	    cache->saved_regs[tdep->ppc_gp0_regnum + i].set_addr (gpr_addr);
 	  gpr_addr += wordsize;
 	}
     }
@@ -3611,7 +3611,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  CORE_ADDR vr_addr = cache->base + fdata.vr_offset;
 	  for (i = fdata.saved_vr; i < 32; i++)
 	    {
-	      cache->saved_regs[tdep->ppc_vr0_regnum + i].addr = vr_addr;
+	      cache->saved_regs[tdep->ppc_vr0_regnum + i].set_addr (vr_addr);
 	      vr_addr += register_size (gdbarch, tdep->ppc_vr0_regnum);
 	    }
 	}
@@ -3629,8 +3629,9 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
 
 	  for (i = fdata.saved_ev; i < ppc_num_gprs; i++)
 	    {
-	      cache->saved_regs[tdep->ppc_ev0_regnum + i].addr = ev_addr;
-	      cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = ev_addr + off;
+	      cache->saved_regs[tdep->ppc_ev0_regnum + i].set_addr (ev_addr);
+	      cache->saved_regs[tdep->ppc_gp0_regnum + i].set_addr (ev_addr
+								    + off);
 	      ev_addr += register_size (gdbarch, tdep->ppc_ev0_regnum);
 	    }
 	}
@@ -3639,16 +3640,16 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* If != 0, fdata.cr_offset is the offset from the frame that
      holds the CR.  */
   if (fdata.cr_offset != 0)
-    cache->saved_regs[tdep->ppc_cr_regnum].addr
-      = cache->base + fdata.cr_offset;
+    cache->saved_regs[tdep->ppc_cr_regnum].set_addr (cache->base
+						     + fdata.cr_offset);
 
   /* If != 0, fdata.lr_offset is the offset from the frame that
      holds the LR.  */
   if (fdata.lr_offset != 0)
-    cache->saved_regs[tdep->ppc_lr_regnum].addr
-      = cache->base + fdata.lr_offset;
+    cache->saved_regs[tdep->ppc_lr_regnum].set_addr (cache->base
+						     + fdata.lr_offset);
   else if (fdata.lr_register != -1)
-    cache->saved_regs[tdep->ppc_lr_regnum].realreg = fdata.lr_register;
+    cache->saved_regs[tdep->ppc_lr_regnum].set_realreg (fdata.lr_register);
   /* The PC is found in the link register.  */
   cache->saved_regs[gdbarch_pc_regnum (gdbarch)] =
     cache->saved_regs[tdep->ppc_lr_regnum];
@@ -3656,8 +3657,8 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* If != 0, fdata.vrsave_offset is the offset from the frame that
      holds the VRSAVE.  */
   if (fdata.vrsave_offset != 0)
-    cache->saved_regs[tdep->ppc_vrsave_regnum].addr
-      = cache->base + fdata.vrsave_offset;
+    cache->saved_regs[tdep->ppc_vrsave_regnum].set_addr (cache->base
+							 + fdata.vrsave_offset);
 
   if (fdata.alloca_reg < 0)
     /* If no alloca register used, then fi->frame is the value of the

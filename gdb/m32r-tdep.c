@@ -509,7 +509,7 @@ struct m32r_unwind_cache
   LONGEST r13_offset;
   int uses_frame;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Put here the code to store, into fi->saved_regs, the addresses of
@@ -581,7 +581,7 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
 	  /* st rn, @-sp */
 	  int regno = ((op >> 8) & 0xf);
 	  info->sp_offset -= 4;
-	  info->saved_regs[regno].addr = info->sp_offset;
+	  info->saved_regs[regno].set_addr (info->sp_offset);
 	}
       else if ((op & 0xff00) == 0x4f00)
 	{
@@ -633,7 +633,8 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
      not offsets.  */
   for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
     if (trad_frame_addr_p (info->saved_regs, i))
-      info->saved_regs[i].addr = (info->prev_sp + info->saved_regs[i].addr);
+      info->saved_regs[i].set_addr (info->prev_sp
+				    + info->saved_regs[i].addr ());
 
   /* The call instruction moves the caller's PC in the callee's LR.
      Since this is an unwind, do the reverse.  Copy the location of LR

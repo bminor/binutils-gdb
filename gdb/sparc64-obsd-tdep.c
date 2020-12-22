@@ -249,13 +249,13 @@ sparc64obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 
   cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  cache->saved_regs[SPARC64_STATE_REGNUM].addr = trapframe_addr;
-  cache->saved_regs[SPARC64_PC_REGNUM].addr = trapframe_addr + 8;
-  cache->saved_regs[SPARC64_NPC_REGNUM].addr = trapframe_addr + 16;
+  cache->saved_regs[SPARC64_STATE_REGNUM].set_addr (trapframe_addr);
+  cache->saved_regs[SPARC64_PC_REGNUM].set_addr (trapframe_addr + 8);
+  cache->saved_regs[SPARC64_NPC_REGNUM].set_addr (trapframe_addr + 16);
 
   for (regnum = SPARC_G0_REGNUM; regnum <= SPARC_I7_REGNUM; regnum++)
-    cache->saved_regs[regnum].addr =
-      trapframe_addr + 48 + (regnum - SPARC_G0_REGNUM) * 8;
+    cache->saved_regs[regnum].set_addr (trapframe_addr + 48
+					+ (regnum - SPARC_G0_REGNUM) * 8);
 
   return cache;
 }

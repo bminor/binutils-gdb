@@ -49,7 +49,7 @@ struct frv_unwind_cache		/* was struct frame_extra_info */
     CORE_ADDR base;
 
     /* Table indicating the location of each and every register.  */
-    struct trad_frame_saved_reg *saved_regs;
+    trad_frame_saved_reg *saved_regs;
   };
 
 /* A structure describing a particular variant of the FRV.
@@ -949,15 +949,16 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 
       for (i = 0; i < 64; i++)
 	if (gr_saved[i])
-	  info->saved_regs[i].addr = this_base - fp_offset + gr_sp_offset[i];
+	  info->saved_regs[i].set_addr (this_base - fp_offset
+					+ gr_sp_offset[i]);
 
       info->prev_sp = this_base - fp_offset + framesize;
       info->base = this_base;
 
       /* If LR was saved on the stack, record its location.  */
       if (lr_saved_on_stack)
-	info->saved_regs[lr_regnum].addr
-	  = this_base - fp_offset + lr_sp_offset;
+	info->saved_regs[lr_regnum].set_addr (this_base - fp_offset
+					      + lr_sp_offset);
 
       /* The call instruction moves the caller's PC in the callee's LR.
 	 Since this is an unwind, do the reverse.  Copy the location of LR

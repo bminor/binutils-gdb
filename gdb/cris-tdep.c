@@ -305,7 +305,7 @@ struct cris_unwind_cache
   int leaf_function;
 
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct cris_unwind_cache *
@@ -354,18 +354,18 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
       /* R0 to R13 are stored in reverse order at offset (2 * 4) in 
 	 struct pt_regs.  */
       for (i = 0; i <= 13; i++)
-	info->saved_regs[i].addr = addr + ((15 - i) * 4);
+	info->saved_regs[i].set_addr (addr + ((15 - i) * 4));
 
-      info->saved_regs[MOF_REGNUM].addr = addr + (16 * 4);
-      info->saved_regs[DCCR_REGNUM].addr = addr + (17 * 4);
-      info->saved_regs[SRP_REGNUM].addr = addr + (18 * 4);
+      info->saved_regs[MOF_REGNUM].set_addr (addr + (16 * 4));
+      info->saved_regs[DCCR_REGNUM].set_addr (addr + (17 * 4));
+      info->saved_regs[SRP_REGNUM].set_addr (addr + (18 * 4));
       /* Note: IRP is off by 2 at this point.  There's no point in correcting
 	 it though since that will mean that the backtrace will show a PC 
 	 different from what is shown when stopped.  */
-      info->saved_regs[IRP_REGNUM].addr = addr + (19 * 4);
+      info->saved_regs[IRP_REGNUM].set_addr (addr + (19 * 4));
       info->saved_regs[gdbarch_pc_regnum (gdbarch)]
 	= info->saved_regs[IRP_REGNUM];
-      info->saved_regs[gdbarch_sp_regnum (gdbarch)].addr = addr + (24 * 4);
+      info->saved_regs[gdbarch_sp_regnum (gdbarch)].set_addr (addr + (24 * 4));
     }
   else
     {
@@ -373,17 +373,17 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
       /* R0 to R13 are stored in order at offset (1 * 4) in 
 	 struct pt_regs.  */
       for (i = 0; i <= 13; i++)
-	info->saved_regs[i].addr = addr + ((i + 1) * 4);
+	info->saved_regs[i].set_addr (addr + ((i + 1) * 4));
 
-      info->saved_regs[ACR_REGNUM].addr = addr + (15 * 4);
-      info->saved_regs[SRS_REGNUM].addr = addr + (16 * 4);
-      info->saved_regs[MOF_REGNUM].addr = addr + (17 * 4);
-      info->saved_regs[SPC_REGNUM].addr = addr + (18 * 4);
-      info->saved_regs[CCS_REGNUM].addr = addr + (19 * 4);
-      info->saved_regs[SRP_REGNUM].addr = addr + (20 * 4);
-      info->saved_regs[ERP_REGNUM].addr = addr + (21 * 4);
-      info->saved_regs[EXS_REGNUM].addr = addr + (22 * 4);
-      info->saved_regs[EDA_REGNUM].addr = addr + (23 * 4);
+      info->saved_regs[ACR_REGNUM].set_addr (addr + (15 * 4));
+      info->saved_regs[SRS_REGNUM].set_addr (addr + (16 * 4));
+      info->saved_regs[MOF_REGNUM].set_addr (addr + (17 * 4));
+      info->saved_regs[SPC_REGNUM].set_addr (addr + (18 * 4));
+      info->saved_regs[CCS_REGNUM].set_addr (addr + (19 * 4));
+      info->saved_regs[SRP_REGNUM].set_addr (addr + (20 * 4));
+      info->saved_regs[ERP_REGNUM].set_addr (addr + (21 * 4));
+      info->saved_regs[EXS_REGNUM].set_addr (addr + (22 * 4));
+      info->saved_regs[EDA_REGNUM].set_addr (addr + (23 * 4));
 
       /* FIXME: If ERP is in a delay slot at this point then the PC will
 	 be wrong at this point.  This problem manifests itself in the
@@ -395,8 +395,7 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
       info->saved_regs[gdbarch_pc_regnum (gdbarch)]
 	= info->saved_regs[ERP_REGNUM];
 
-      info->saved_regs[gdbarch_sp_regnum (gdbarch)].addr
-	= addr + (25 * 4);
+      info->saved_regs[gdbarch_sp_regnum (gdbarch)].set_addr (addr + (25 * 4));
     }
   
   return info;
@@ -1229,7 +1228,7 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
 	 the next frame.  */
       this_base = get_frame_register_unsigned (this_frame, CRIS_FP_REGNUM);
       info->base = this_base;
-      info->saved_regs[CRIS_FP_REGNUM].addr = info->base;
+      info->saved_regs[CRIS_FP_REGNUM].set_addr (info->base);
   
       /* The FP points at the last saved register.  Adjust the FP back
 	 to before the first saved register giving the SP.  */
@@ -1254,7 +1253,7 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
 
   for (regno = regsave; regno >= 0; regno--)
     {
-      info->saved_regs[regno].addr = info->base + info->r8_offset - val;
+      info->saved_regs[regno].set_addr (info->base + info->r8_offset - val);
       val -= 4;
     }
 
@@ -1269,12 +1268,12 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
       if (info->r8_offset == 0)
 	{
 	  /* R8 not pushed yet.  */
-	  info->saved_regs[SRP_REGNUM].addr = info->base;
+	  info->saved_regs[SRP_REGNUM].set_addr (info->base);
 	}
       else
 	{
 	  /* R8 pushed, but SP may or may not be moved to R8 yet.  */
-	  info->saved_regs[SRP_REGNUM].addr = info->base + 4;
+	  info->saved_regs[SRP_REGNUM].set_addr (info->base + 4);
 	}
     }
 

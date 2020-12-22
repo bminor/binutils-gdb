@@ -2425,7 +2425,7 @@ micromips_instruction_is_compact_branch (unsigned short insn)
 struct mips_frame_cache
 {
   CORE_ADDR base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 /* Set a register's saved stack address in temp_saved_regs.  If an
@@ -2444,12 +2444,12 @@ set_reg_offset (struct gdbarch *gdbarch, struct mips_frame_cache *this_cache,
 		int regnum, CORE_ADDR offset)
 {
   if (this_cache != NULL
-      && this_cache->saved_regs[regnum].addr == -1)
+      && this_cache->saved_regs[regnum].is_realreg ())
     {
-      this_cache->saved_regs[regnum + 0 * gdbarch_num_regs (gdbarch)].addr
-	= offset;
-      this_cache->saved_regs[regnum + 1 * gdbarch_num_regs (gdbarch)].addr
-	= offset;
+      this_cache->saved_regs[regnum + 0
+			     * gdbarch_num_regs (gdbarch)].set_addr (offset);
+      this_cache->saved_regs[regnum + 1
+			     * gdbarch_num_regs (gdbarch)].set_addr (offset);
     }
 }
 
@@ -3389,9 +3389,7 @@ reset_saved_regs (struct gdbarch *gdbarch, struct mips_frame_cache *this_cache)
     int i;
 
     for (i = 0; i < num_regs; i++)
-      {
-	this_cache->saved_regs[i].addr = -1;
-      }
+      this_cache->saved_regs[i].set_addr (-1);
   }
 }
 

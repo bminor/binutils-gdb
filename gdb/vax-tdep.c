@@ -301,7 +301,7 @@ struct vax_frame_cache
   CORE_ADDR base;
 
   /* Table of saved registers.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct vax_frame_cache *
@@ -329,10 +329,10 @@ vax_frame_cache (struct frame_info *this_frame, void **this_cache)
   mask = get_frame_memory_unsigned (this_frame, cache->base + 4, 4) >> 16;
 
   /* These are always saved.  */
-  cache->saved_regs[VAX_PC_REGNUM].addr = cache->base + 16;
-  cache->saved_regs[VAX_FP_REGNUM].addr = cache->base + 12;
-  cache->saved_regs[VAX_AP_REGNUM].addr = cache->base + 8;
-  cache->saved_regs[VAX_PS_REGNUM].addr = cache->base + 4;
+  cache->saved_regs[VAX_PC_REGNUM].set_addr (cache->base + 16);
+  cache->saved_regs[VAX_FP_REGNUM].set_addr (cache->base + 12);
+  cache->saved_regs[VAX_AP_REGNUM].set_addr (cache->base + 8);
+  cache->saved_regs[VAX_PS_REGNUM].set_addr (cache->base + 4);
 
   /* Scan the register save mask and record the location of the saved
      registers.  */
@@ -341,7 +341,7 @@ vax_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       if (mask & (1 << regnum))
 	{
-	  cache->saved_regs[regnum].addr = addr;
+	  cache->saved_regs[regnum].set_addr (addr);
 	  addr += 4;
 	}
     }

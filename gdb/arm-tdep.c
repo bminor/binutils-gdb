@@ -282,7 +282,7 @@ struct arm_prologue_cache
   int framereg;
 
   /* Saved register offsets.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 namespace {
@@ -1153,7 +1153,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 
   for (i = 0; i < 16; i++)
     if (stack.find_reg (gdbarch, i, &offset))
-      cache->saved_regs[i].addr = offset;
+      cache->saved_regs[i].set_addr (offset);
 
   return unrecognized_pc;
 }
@@ -1779,7 +1779,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 
       for (regno = 0; regno < ARM_FPS_REGNUM; regno++)
 	if (stack.find_reg (gdbarch, regno, &offset))
-	  cache->saved_regs[regno].addr = offset;
+	  cache->saved_regs[regno].set_addr (offset);
     }
 
   if (arm_debug)
@@ -1907,7 +1907,8 @@ arm_make_prologue_cache (struct frame_info *this_frame)
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
     if (trad_frame_addr_p (cache->saved_regs, reg))
-      cache->saved_regs[reg].addr += cache->prev_sp;
+      cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
+				       + cache->prev_sp);
 
   return cache;
 }
@@ -2367,12 +2368,12 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	{
 	  if (trad_frame_realreg_p (cache->saved_regs, ARM_SP_REGNUM))
 	    {
-	      int reg = cache->saved_regs[ARM_SP_REGNUM].realreg;
+	      int reg = cache->saved_regs[ARM_SP_REGNUM].realreg ();
 	      vsp = get_frame_register_unsigned (this_frame, reg);
 	    }
 	  else
 	    {
-	      CORE_ADDR addr = cache->saved_regs[ARM_SP_REGNUM].addr;
+	      CORE_ADDR addr = cache->saved_regs[ARM_SP_REGNUM].addr ();
 	      vsp = get_frame_memory_unsigned (this_frame, addr, 4);
 	    }
 
@@ -2407,7 +2408,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  for (i = 0; i < 12; i++)
 	    if (mask & (1 << i))
 	      {
-		cache->saved_regs[4 + i].addr = vsp;
+		cache->saved_regs[4 + i].set_addr (vsp);
 		vsp += 4;
 	      }
 
@@ -2436,14 +2437,14 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  /* Pop r4..r[4+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[4 + i].addr = vsp;
+	      cache->saved_regs[4 + i].set_addr (vsp);
 	      vsp += 4;
 	    }
 
 	  /* If indicated by flag, pop LR as well.  */
 	  if (pop_lr)
 	    {
-	      cache->saved_regs[ARM_LR_REGNUM].addr = vsp;
+	      cache->saved_regs[ARM_LR_REGNUM].set_addr (vsp);
 	      vsp += 4;
 	    }
 	}
@@ -2471,7 +2472,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  for (i = 0; i < 4; i++)
 	    if (mask & (1 << i))
 	      {
-		cache->saved_regs[i].addr = vsp;
+		cache->saved_regs[i].set_addr (vsp);
 		vsp += 4;
 	      }
 	}
@@ -2502,7 +2503,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  /* Pop VFP double-precision registers D[start]..D[start+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[ARM_D0_REGNUM + start + i].addr = vsp;
+	      cache->saved_regs[ARM_D0_REGNUM + start + i].set_addr (vsp);
 	      vsp += 8;
 	    }
 
@@ -2517,7 +2518,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  /* Pop VFP double-precision registers D[8]..D[8+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[ARM_D0_REGNUM + 8 + i].addr = vsp;
+	      cache->saved_regs[ARM_D0_REGNUM + 8 + i].set_addr (vsp);
 	      vsp += 8;
 	    }
 
@@ -2537,7 +2538,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  /* Pop iwmmx registers WR[start]..WR[start+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[ARM_WR0_REGNUM + start + i].addr = vsp;
+	      cache->saved_regs[ARM_WR0_REGNUM + start + i].set_addr (vsp);
 	      vsp += 8;
 	    }
 	}
@@ -2554,7 +2555,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  for (i = 0; i < 4; i++)
 	    if (mask & (1 << i))
 	      {
-		cache->saved_regs[ARM_WCGR0_REGNUM + i].addr = vsp;
+		cache->saved_regs[ARM_WCGR0_REGNUM + i].set_addr (vsp);
 		vsp += 4;
 	      }
 	}
@@ -2566,7 +2567,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  /* Pop iwmmx registers WR[10]..WR[10+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[ARM_WR0_REGNUM + 10 + i].addr = vsp;
+	      cache->saved_regs[ARM_WR0_REGNUM + 10 + i].set_addr (vsp);
 	      vsp += 8;
 	    }
 	}
@@ -2584,7 +2585,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	     D[16+start]..D[16+start+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[ARM_D0_REGNUM + 16 + start + i].addr = vsp;
+	      cache->saved_regs[ARM_D0_REGNUM + 16 + start + i].set_addr (vsp);
 	      vsp += 8;
 	    }
 	}
@@ -2597,7 +2598,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  /* Pop VFP double-precision registers D[start]..D[start+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[ARM_D0_REGNUM + start + i].addr = vsp;
+	      cache->saved_regs[ARM_D0_REGNUM + start + i].set_addr (vsp);
 	      vsp += 8;
 	    }
 	}
@@ -2609,7 +2610,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	  /* Pop VFP double-precision registers D[8]..D[8+count].  */
 	  for (i = 0; i <= count; i++)
 	    {
-	      cache->saved_regs[ARM_D0_REGNUM + 8 + i].addr = vsp;
+	      cache->saved_regs[ARM_D0_REGNUM + 8 + i].set_addr (vsp);
 	      vsp += 8;
 	    }
 	}
@@ -2623,7 +2624,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
   /* If we restore SP from a register, assume this was the frame register.
      Otherwise just fall back to SP as frame register.  */
   if (trad_frame_realreg_p (cache->saved_regs, ARM_SP_REGNUM))
-    cache->framereg = cache->saved_regs[ARM_SP_REGNUM].realreg;
+    cache->framereg = cache->saved_regs[ARM_SP_REGNUM].realreg ();
   else
     cache->framereg = ARM_SP_REGNUM;
 
@@ -2760,7 +2761,8 @@ arm_make_epilogue_frame_cache (struct frame_info *this_frame)
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
     if (trad_frame_addr_p (cache->saved_regs, reg))
-      cache->saved_regs[reg].addr += cache->prev_sp;
+      cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
+				       + cache->prev_sp);
 
   return cache;
 }
@@ -3037,14 +3039,14 @@ arm_m_exception_cache (struct frame_info *this_frame)
      ReturnAddress, LR (R14), R12, R3, R2, R1, R0.  See details in
      "B1.5.6 Exception entry behavior" in
      "ARMv7-M Architecture Reference Manual".  */
-  cache->saved_regs[0].addr = unwound_sp;
-  cache->saved_regs[1].addr = unwound_sp + 4;
-  cache->saved_regs[2].addr = unwound_sp + 8;
-  cache->saved_regs[3].addr = unwound_sp + 12;
-  cache->saved_regs[ARM_IP_REGNUM].addr = unwound_sp + 16;
-  cache->saved_regs[ARM_LR_REGNUM].addr = unwound_sp + 20;
-  cache->saved_regs[ARM_PC_REGNUM].addr = unwound_sp + 24;
-  cache->saved_regs[ARM_PS_REGNUM].addr = unwound_sp + 28;
+  cache->saved_regs[0].set_addr (unwound_sp);
+  cache->saved_regs[1].set_addr (unwound_sp + 4);
+  cache->saved_regs[2].set_addr (unwound_sp + 8);
+  cache->saved_regs[3].set_addr (unwound_sp + 12);
+  cache->saved_regs[ARM_IP_REGNUM].set_addr (unwound_sp + 16);
+  cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + 20);
+  cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + 24);
+  cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + 28);
 
   /* Check EXC_RETURN bit FTYPE if extended stack frame (FPU regs stored)
      type used.  */
@@ -3066,10 +3068,10 @@ arm_m_exception_cache (struct frame_info *this_frame)
       fpu_regs_stack_offset = unwound_sp + 0x20;
       for (i = 0; i < 16; i++)
 	{
-	  cache->saved_regs[ARM_D0_REGNUM + i].addr = fpu_regs_stack_offset;
+	  cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
 	  fpu_regs_stack_offset += 4;
 	}
-      cache->saved_regs[ARM_FPSCR_REGNUM].addr = unwound_sp + 0x60;
+      cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp + 0x60);
 
       /* Offset 0x64 is reserved.  */
       cache->prev_sp = unwound_sp + 0x68;

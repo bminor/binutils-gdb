@@ -1865,7 +1865,7 @@ hppa_find_unwind_entry_in_block (struct frame_info *this_frame)
 struct hppa_frame_cache
 {
   CORE_ADDR base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct hppa_frame_cache *
@@ -2007,18 +2007,18 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	if (inst == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
 	  {
 	    looking_for_rp = 0;
-	    cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
+	    cache->saved_regs[HPPA_RP_REGNUM].set_addr (-20);
 	  }
 	else if (inst == 0x6bc23fd1) /* stw rp,-0x18(sr0,sp) */
 	  {
 	    looking_for_rp = 0;
-	    cache->saved_regs[HPPA_RP_REGNUM].addr = -24;
+	    cache->saved_regs[HPPA_RP_REGNUM].set_addr (-24);
 	  }
 	else if (inst == 0x0fc212c1 
 		 || inst == 0x73c23fe1) /* std rp,-0x10(sr0,sp) */
 	  {
 	    looking_for_rp = 0;
-	    cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
+	    cache->saved_regs[HPPA_RP_REGNUM].set_addr (-16);
 	  }
 	
 	/* Check to see if we saved SP into the stack.  This also
@@ -2028,7 +2028,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	    || (inst & 0xffffc00c) == 0x73c10008) /* std,ma r1,N(sr0,sp) */
 	  {
 	    looking_for_sp = 0;
-	    cache->saved_regs[HPPA_FP_REGNUM].addr = 0;
+	    cache->saved_regs[HPPA_FP_REGNUM].set_addr (0);
 	  }
 	else if (inst == 0x08030241) /* copy %r3, %r1 */
 	  {
@@ -2044,10 +2044,10 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	    if ((inst >> 26) == 0x1b && hppa_extract_14 (inst) >= 0)
 	      /* stwm with a positive displacement is a _post_
 		 _modify_.  */
-	      cache->saved_regs[reg].addr = 0;
+	      cache->saved_regs[reg].set_addr (0);
 	    else if ((inst & 0xfc00000c) == 0x70000008)
 	      /* A std has explicit post_modify forms.  */
-	      cache->saved_regs[reg].addr = 0;
+	      cache->saved_regs[reg].set_addr (0);
 	    else
 	      {
 		CORE_ADDR offset;
@@ -2062,10 +2062,10 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 		
 		/* Handle code with and without frame pointers.  */
 		if (u->Save_SP)
-		  cache->saved_regs[reg].addr = offset;
+		  cache->saved_regs[reg].set_addr (offset);
 		else
-		  cache->saved_regs[reg].addr
-		    = (u->Total_frame_size << 3) + offset;
+		  cache->saved_regs[reg].set_addr ((u->Total_frame_size << 3)
+						   + offset);
 	      }
 	  }
 
@@ -2095,12 +2095,12 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 		/* 1st HP CC FP register store.  After this
 		   instruction we've set enough state that the GCC and
 		   HPCC code are both handled in the same manner.  */
-		cache->saved_regs[reg + HPPA_FP4_REGNUM + 4].addr = 0;
+		cache->saved_regs[reg + HPPA_FP4_REGNUM + 4].set_addr (0);
 		fp_loc = 8;
 	      }
 	    else
 	      {
-		cache->saved_regs[reg + HPPA_FP0_REGNUM + 4].addr = fp_loc;
+		cache->saved_regs[reg + HPPA_FP0_REGNUM + 4].set_addr (fp_loc);
 		fp_loc += 8;
 	      }
 	  }
@@ -2251,7 +2251,8 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
     for (reg = 0; reg < gdbarch_num_regs (gdbarch); reg++)
       {
 	if (trad_frame_addr_p (cache->saved_regs, reg))
-	  cache->saved_regs[reg].addr += cache->base;
+	  cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
+					   + cache->base);
       }
   }
 
@@ -2357,13 +2358,13 @@ hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
 	     stack.  */
 	  if (insn == 0x6bc23fd9) /* stw rp,-0x14(sr0,sp) */
 	    {
-	      cache->saved_regs[HPPA_RP_REGNUM].addr = -20;
+	      cache->saved_regs[HPPA_RP_REGNUM].set_addr (-20);
 	      found_rp = 1;
 	    }
 	  else if (insn == 0x0fc212c1
 		   || insn == 0x73c23fe1) /* std rp,-0x10(sr0,sp) */
 	    {
-	      cache->saved_regs[HPPA_RP_REGNUM].addr = -16;
+	      cache->saved_regs[HPPA_RP_REGNUM].set_addr (-16);
 	      found_rp = 1;
 	    }
 	}
@@ -2379,7 +2380,8 @@ hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
     {
-      cache->saved_regs[HPPA_RP_REGNUM].addr += cache->base;
+      cache->saved_regs[HPPA_RP_REGNUM].set_addr (cache->saved_regs[HPPA_RP_REGNUM].addr ()
+						  + cache->base);
       cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = 
 	cache->saved_regs[HPPA_RP_REGNUM];
     }
@@ -2428,7 +2430,7 @@ static const struct frame_unwind hppa_fallback_frame_unwind =
 struct hppa_stub_unwind_cache
 {
   CORE_ADDR base;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static struct hppa_stub_unwind_cache *
@@ -2447,7 +2449,7 @@ hppa_stub_frame_unwind_cache (struct frame_info *this_frame,
   info->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 
   /* By default we assume that stubs do not change the rp.  */
-  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].realreg = HPPA_RP_REGNUM;
+  info->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_realreg (HPPA_RP_REGNUM);
 
   return info;
 }
@@ -2754,7 +2756,7 @@ hppa_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 
 struct value *
 hppa_frame_prev_register_helper (struct frame_info *this_frame,
-				 struct trad_frame_saved_reg saved_regs[],
+				 trad_frame_saved_reg saved_regs[],
 				 int regnum)
 {
   struct gdbarch *arch = get_frame_arch (this_frame);

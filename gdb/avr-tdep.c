@@ -185,7 +185,7 @@ struct avr_unwind_cache
   int size;
   int prologue_type;
   /* Table indicating the location of each and every register.  */
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 struct gdbarch_tdep
@@ -672,14 +672,14 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	{
 	  int from;
 
-	  info->saved_regs[AVR_FP_REGNUM + 1].addr = num_pushes;
+	  info->saved_regs[AVR_FP_REGNUM + 1].set_addr (num_pushes);
 	  if (num_pushes >= 2)
-	    info->saved_regs[AVR_FP_REGNUM].addr = num_pushes - 1;
+	    info->saved_regs[AVR_FP_REGNUM].set_addr (num_pushes - 1);
 
 	  i = 0;
 	  for (from = AVR_LAST_PUSHED_REGNUM + 1 - (num_pushes - 2);
 	       from <= AVR_LAST_PUSHED_REGNUM; ++from)
-	    info->saved_regs [from].addr = ++i;
+	    info->saved_regs [from].set_addr (++i);
 	}
       info->size = loc_size + num_pushes;
       info->prologue_type = AVR_PROLOGUE_CALL;
@@ -707,9 +707,9 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	{
 	  info->prologue_type = AVR_PROLOGUE_INTR;
 	  vpc += sizeof (img);
-	  info->saved_regs[AVR_SREG_REGNUM].addr = 3;
-	  info->saved_regs[0].addr = 2;
-	  info->saved_regs[1].addr = 1;
+	  info->saved_regs[AVR_SREG_REGNUM].set_addr (3);
+	  info->saved_regs[0].set_addr (2);
+	  info->saved_regs[1].set_addr (1);
 	  info->size += 3;
 	}
       else if (len >= sizeof (img) - 2
@@ -717,9 +717,9 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	{
 	  info->prologue_type = AVR_PROLOGUE_SIG;
 	  vpc += sizeof (img) - 2;
-	  info->saved_regs[AVR_SREG_REGNUM].addr = 3;
-	  info->saved_regs[0].addr = 2;
-	  info->saved_regs[1].addr = 1;
+	  info->saved_regs[AVR_SREG_REGNUM].set_addr (3);
+	  info->saved_regs[0].set_addr (2);
+	  info->saved_regs[1].set_addr (1);
 	  info->size += 2;
 	}
     }
@@ -735,7 +735,7 @@ avr_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 	  /* Bits 4-9 contain a mask for registers R0-R32.  */
 	  int regno = (insn & 0x1f0) >> 4;
 	  info->size++;
-	  info->saved_regs[regno].addr = info->size;
+	  info->saved_regs[regno].set_addr (info->size);
 	  scan_stage = 1;
 	}
       else
@@ -892,7 +892,7 @@ avr_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   {
     CORE_ADDR prologue_end = pc;
     struct avr_unwind_cache info = {0};
-    struct trad_frame_saved_reg saved_regs[AVR_NUM_REGS];
+    trad_frame_saved_reg saved_regs[AVR_NUM_REGS];
 
     info.saved_regs = saved_regs;
     
@@ -1037,14 +1037,15 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
   /* Adjust all the saved registers so that they contain addresses and not
      offsets.  */
   for (i = 0; i < gdbarch_num_regs (gdbarch) - 1; i++)
-    if (info->saved_regs[i].addr > 0)
-      info->saved_regs[i].addr = info->prev_sp - info->saved_regs[i].addr;
+    if (info->saved_regs[i].addr () > 0)
+      info->saved_regs[i].set_addr (info->prev_sp
+				    - info->saved_regs[i].addr ());
 
   /* Except for the main and startup code, the return PC is always saved on
      the stack and is at the base of the frame.  */
 
   if (info->prologue_type != AVR_PROLOGUE_MAIN)
-    info->saved_regs[AVR_PC_REGNUM].addr = info->prev_sp;
+    info->saved_regs[AVR_PC_REGNUM].set_addr (info->prev_sp);
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
@@ -1132,7 +1133,7 @@ avr_frame_prev_register (struct frame_info *this_frame,
 	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
 	  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-	  read_memory (info->saved_regs[AVR_PC_REGNUM].addr,
+	  read_memory (info->saved_regs[AVR_PC_REGNUM].addr (),
 		       buf, tdep->call_length);
 
 	  /* Extract the PC read from memory as a big-endian.  */

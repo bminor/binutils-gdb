@@ -50,7 +50,7 @@ struct score_frame_cache
 {
   CORE_ADDR base;
   CORE_ADDR fp;
-  struct trad_frame_saved_reg *saved_regs;
+  trad_frame_saved_reg *saved_regs;
 };
 
 static int target_mach = bfd_mach_score7;
@@ -1019,9 +1019,9 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save RA.  */
   if (ra_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_PC_REGNUM].addr == -1)
-	this_cache->saved_regs[SCORE_PC_REGNUM].addr =
-	  sp + sp_offset - ra_offset;
+      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ())
+	this_cache->saved_regs[SCORE_PC_REGNUM].set_addr (sp + sp_offset
+							  - ra_offset);
     }
   else
     {
@@ -1032,9 +1032,9 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save FP.  */
   if (fp_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_FP_REGNUM].addr == -1)
-	this_cache->saved_regs[SCORE_FP_REGNUM].addr =
-	  sp + sp_offset - fp_offset;
+      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ())
+	this_cache->saved_regs[SCORE_FP_REGNUM].set_addr (sp + sp_offset
+							  - fp_offset);
     }
 
   /* Save SP and FP.  */
@@ -1265,9 +1265,9 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save RA.  */
   if (ra_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_PC_REGNUM].addr == -1)
-	this_cache->saved_regs[SCORE_PC_REGNUM].addr =
-	  sp + sp_offset - ra_offset;
+      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ())
+	this_cache->saved_regs[SCORE_PC_REGNUM].set_addr (sp + sp_offset
+							  - ra_offset);
     }
   else
     {
@@ -1278,9 +1278,9 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save FP.  */
   if (fp_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_FP_REGNUM].addr == -1)
-	this_cache->saved_regs[SCORE_FP_REGNUM].addr =
-	  sp + sp_offset - fp_offset;
+      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ())
+	this_cache->saved_regs[SCORE_FP_REGNUM].set_addr (sp + sp_offset
+							  - fp_offset);
     }
 
   /* Save SP and FP.  */
