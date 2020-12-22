@@ -1,3 +1,7 @@
+2020-12-22  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arc-linux-tdep.c: Replace "regnum" with "REGNUM" in comments.
+
 2020-12-22  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* Makefile.in (ALLDEPFILES): Add arc-linux-nat.c.

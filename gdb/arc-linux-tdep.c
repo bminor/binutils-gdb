@@ -483,7 +483,7 @@ arc_linux_supply_gregset (const struct regset *regset,
 
   const bfd_byte *buf = (const bfd_byte *) gregs;
 
-  /* regnum == -1 means writing all the registers.  */
+  /* REGNUM == -1 means writing all the registers.  */
   if (regnum == -1)
     for (int reg = 0; reg <= ARC_LAST_REGNUM; reg++)
       supply_register (regcache, reg, buf);
@@ -547,7 +547,7 @@ arc_linux_collect_gregset (const struct regset *regset,
   gdb_byte *buf = (gdb_byte *) gregs;
   struct gdbarch *gdbarch = regcache->arch ();
 
-  /* regnum == -1 means writing all the registers.  */
+  /* REGNUM == -1 means writing all the registers.  */
   if (regnum == -1)
     for (int reg = 0; reg <= ARC_LAST_REGNUM; reg++)
       collect_register (regcache, gdbarch, reg, buf);
