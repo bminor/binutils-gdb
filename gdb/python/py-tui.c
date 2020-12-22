@@ -91,12 +91,14 @@ public:
 
   void refresh_window () override
   {
-    tui_win_info::refresh_window ();
     if (m_inner_window != nullptr)
       {
+	wnoutrefresh (handle.get ());
 	touchwin (m_inner_window.get ());
 	tui_wrefresh (m_inner_window.get ());
       }
+    else
+      tui_win_info::refresh_window ();
   }
 
   /* Erase and re-box the window.  */
