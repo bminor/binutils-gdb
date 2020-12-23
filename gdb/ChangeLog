@@ -1,3 +1,11 @@
+2020-12-23  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* i386-gnu-tdep.c (I386_GNU_UCONTEXT_T_THREAD_STATE_OFFSET): New
+	macro.
+	(i386_gnu_sigcontext_addr): Detect between legacy and siginfo from the
+	second parameter, which is a small sigcode in the legacy case, and a
+	pointer in the siginfo case.
+
 2020-12-22  Shahab Vahedi  <shahab@synopsys.com>
 
 	* frame.c: Remove trailing white spaces.
