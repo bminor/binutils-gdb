@@ -229,12 +229,12 @@ trad_frame_set_unknown (trad_frame_saved_reg this_saved_regs[],
 
 void
 trad_frame_set_value_bytes (trad_frame_saved_reg this_saved_regs[],
-			    int regnum, const gdb_byte *bytes,
-			    size_t size)
+			    int regnum,
+			    gdb::array_view<const gdb_byte> bytes)
 {
   /* Allocate the space and copy the data bytes.  */
-  gdb_byte *data = FRAME_OBSTACK_CALLOC (size, gdb_byte);
-  memcpy (data, bytes, size);
+  gdb_byte *data = FRAME_OBSTACK_CALLOC (bytes.size (), gdb_byte);
+  memcpy (data, bytes.data (), bytes.size ());
   this_saved_regs[regnum].set_value_bytes (data);
 }
 
@@ -242,13 +242,12 @@ trad_frame_set_value_bytes (trad_frame_saved_reg this_saved_regs[],
 
 void
 trad_frame_set_reg_value_bytes (struct trad_frame_cache *this_trad_cache,
-				int regnum, const gdb_byte *bytes,
-				size_t size)
+				int regnum,
+				gdb::array_view<const gdb_byte> bytes)
 {
   /* External interface for users of trad_frame_cache
      (who cannot access the prev_regs object directly).  */
-  trad_frame_set_value_bytes (this_trad_cache->prev_regs, regnum, bytes,
-			      size);
+  trad_frame_set_value_bytes (this_trad_cache->prev_regs, regnum, bytes);
 }
 
 

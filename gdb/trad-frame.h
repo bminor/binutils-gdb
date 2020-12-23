@@ -55,8 +55,8 @@ void trad_frame_set_reg_value (struct trad_frame_cache *this_cache,
 /* Given the cache in THIS_TRAD_CACHE, set the value of REGNUM to the bytes
    contained in BYTES with size SIZE.  */
 void trad_frame_set_reg_value_bytes (struct trad_frame_cache *this_trad_cache,
-				     int regnum, const gdb_byte *bytes,
-				     size_t size);
+				     int regnum,
+				     gdb::array_view<const gdb_byte> bytes);
 
 struct value *trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
 				       struct frame_info *this_frame,
@@ -204,8 +204,8 @@ void trad_frame_set_unknown (trad_frame_saved_reg this_saved_regs[],
 /* Encode REGNUM value in the trad-frame as a sequence of bytes.  This is
    useful when the value is larger than what primitive types can hold.  */
 void trad_frame_set_value_bytes (trad_frame_saved_reg this_saved_regs[],
-				 int regnum, const gdb_byte *bytes,
-				 size_t size);
+				 int regnum,
+				 gdb::array_view<const gdb_byte> bytes);
 
 /* Convenience functions, return non-zero if the register has been
    encoded as specified.  */

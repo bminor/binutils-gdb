@@ -1,3 +1,13 @@
+2021-01-19  Luis Machado  <luis.machado@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_linux_restore_vreg): Pass in an
+	array_view.
+	* trad-frame.c (trad_frame_set_value_bytes): Use gdb::array_view
+	instead of buffer and size.
+	(trad_frame_set_reg_value_bytes): Likewise.
+	* trad-frame.h (trad_frame_set_reg_value_bytes): Likewise.
+	(trad_frame_set_value_bytes): Likewise.
+
 2021-01-18  Mike Frysinger  <vapier@gentoo.org>
 
 	* copyright.py (NOT_FSF_LIST): Delete sim/testsuite/sim/bfin/s21.s.

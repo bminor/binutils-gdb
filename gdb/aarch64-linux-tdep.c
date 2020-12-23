@@ -222,27 +222,27 @@ aarch64_linux_restore_vreg (struct trad_frame_cache *cache, int num_regs,
 
 	  /* Now we can store the correct bytes for the V register.  */
 	  trad_frame_set_reg_value_bytes (cache, AARCH64_V0_REGNUM + vreg_num,
-					  buf, V_REGISTER_SIZE);
+					  {buf, V_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_Q0_REGNUM
-					  + vreg_num, buf, Q_REGISTER_SIZE);
+					  + vreg_num, {buf, Q_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_D0_REGNUM
-					  + vreg_num, buf, D_REGISTER_SIZE);
+					  + vreg_num, {buf, D_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_S0_REGNUM
-					  + vreg_num, buf, S_REGISTER_SIZE);
+					  + vreg_num, {buf, S_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_H0_REGNUM
-					  + vreg_num, buf, H_REGISTER_SIZE);
+					  + vreg_num, {buf, H_REGISTER_SIZE});
 	  trad_frame_set_reg_value_bytes (cache,
 					  num_regs + AARCH64_B0_REGNUM
-					  + vreg_num, buf, B_REGISTER_SIZE);
+					  + vreg_num, {buf, B_REGISTER_SIZE});
 
 	  if (has_sve)
 	    trad_frame_set_reg_value_bytes (cache,
 					    num_regs + AARCH64_SVE_V0_REGNUM
-					    + vreg_num, buf, V_REGISTER_SIZE);
+					    + vreg_num, {buf, V_REGISTER_SIZE});
 	}
       return;
     }
