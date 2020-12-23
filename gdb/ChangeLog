@@ -6,6 +6,8 @@
 	second parameter, which is a small sigcode in the legacy case, and a
 	pointer in the siginfo case.
 
+	* MAINTAINERS (Write After Approval): Add myself.
+
 2020-12-22  Shahab Vahedi  <shahab@synopsys.com>
 
 	* frame.c: Remove trailing white spaces.
