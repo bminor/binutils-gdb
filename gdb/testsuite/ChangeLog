@@ -1,3 +1,8 @@
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
+	* gdb.threads/attach-non-stop.c: New file.
+	* gdb.threads/attach-non-stop.exp: New file.
+
 2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* gdb.base/inferior-noarg.c: New test.
