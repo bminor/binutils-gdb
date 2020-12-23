@@ -1,3 +1,9 @@
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/27055
+	* infrun.c (handle_signal_stop): Move main context_switch call
+	earlier, before STOP_QUIETLY_NO_SIGSTOP.
+
 2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* NEWS (Changed commands): Add entry for the behavior change of

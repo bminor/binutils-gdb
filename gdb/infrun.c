@@ -5735,12 +5735,15 @@ handle_signal_stop (struct execution_control_state *ecs)
   ecs->event_thread->suspend.stop_pc
     = regcache_read_pc (get_thread_regcache (ecs->event_thread));
 
+  context_switch (ecs);
+
+  if (deprecated_context_hook)
+    deprecated_context_hook (ecs->event_thread->global_num);
+
   if (debug_infrun)
     {
       struct regcache *regcache = get_thread_regcache (ecs->event_thread);
       struct gdbarch *reg_gdbarch = regcache->arch ();
-
-      switch_to_thread (ecs->event_thread);
 
       infrun_debug_printf ("stop_pc=%s",
 			   paddress (reg_gdbarch,
@@ -5764,7 +5767,6 @@ handle_signal_stop (struct execution_control_state *ecs)
   stop_soon = get_inferior_stop_soon (ecs);
   if (stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_REMOTE)
     {
-      context_switch (ecs);
       infrun_debug_printf ("quietly stopped");
       stop_print_frame = true;
       stop_waiting (ecs);
@@ -5800,18 +5802,6 @@ handle_signal_stop (struct execution_control_state *ecs)
       stop_waiting (ecs);
       ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
       return;
-    }
-
-  /* See if something interesting happened to the non-current thread.  If
-     so, then switch to that thread.  */
-  if (ecs->ptid != inferior_ptid)
-    {
-      infrun_debug_printf ("context switch");
-
-      context_switch (ecs);
-
-      if (deprecated_context_hook)
-	deprecated_context_hook (ecs->event_thread->global_num);
     }
 
   /* At this point, get hold of the now-current thread's frame.  */
