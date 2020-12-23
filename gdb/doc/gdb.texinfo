@@ -39502,9 +39502,10 @@ The remote target both supports and has enabled extended mode.
 @item ?
 @cindex @samp{?} packet
 @anchor{? packet}
-Indicate the reason the target halted.  The reply is the same as for
-step and continue.  This packet has a special interpretation when the
-target is in non-stop mode; see @ref{Remote Non-Stop}.
+This is sent when connection is first established to query the reason
+the target halted.  The reply is the same as for step and continue.
+This packet has a special interpretation when the target is in
+non-stop mode; see @ref{Remote Non-Stop}.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.

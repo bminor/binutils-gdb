@@ -1,3 +1,7 @@
+2020-12-23  Alex Bennée  <alex.bennee@linaro.org>
+
+	* gdb.texinfo (Packets): Clarify language for ? packet.
+
 2020-12-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Requirements): Add GMP to list of requirements.
