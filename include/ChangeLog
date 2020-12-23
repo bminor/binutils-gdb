@@ -1,3 +1,8 @@
+2020-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (GNU_PROPERTY_X86_FEATURE_1_LAM_U48): New.
+	(GNU_PROPERTY_X86_FEATURE_1_LAM_U57): Likewise.
+
 2020-12-18  Alan Modra  <amodra@gmail.com>
 
 	* xtensa-isa-internal.h (xtisa_errno, xtisa_error_msg): Delete.

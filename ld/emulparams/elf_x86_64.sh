@@ -5,6 +5,7 @@ source_sh ${srcdir}/emulparams/reloc_overflow.sh
 source_sh ${srcdir}/emulparams/call_nop.sh
 source_sh ${srcdir}/emulparams/cet.sh
 source_sh ${srcdir}/emulparams/x86-64-level.sh
+source_sh ${srcdir}/emulparams/x86-64-lam.sh
 source_sh ${srcdir}/emulparams/static.sh
 SCRIPT_NAME=elf
 ELFSIZE=64

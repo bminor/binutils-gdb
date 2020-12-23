@@ -5117,7 +5117,8 @@ supported ELF OSABI are the same as @option{--input-osabi}.
 @item --enable-x86-feature=@var{feature}
 Set the @var{feature} bit in program property in @var{exec} or @var{dyn}
 ELF files with machine types of @var{i386} or @var{x86-64}.  The
-supported features are, @var{ibt} and @var{shstk}.
+supported features are, @var{ibt}, @var{shstk}, @var{lam_u48} and
+@var{lam_u57}.
 
 @item --disable-x86-feature=@var{feature}
 Clear the @var{feature} bit in program property in @var{exec} or

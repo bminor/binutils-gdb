@@ -1,3 +1,16 @@
+2020-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention LAM_U48 and LAM_U57 support.
+	* elfedit.c (elf_x86_feature): Support lam_u48 and lam_u57.
+	(usage): Add lam_u48 and lam_u57.
+	* readelf.c (decode_x86_feature_1): Support LAM_U48 and LAM_U57.
+	* doc/binutils.texi: Update elfedit with lam_u48 and lam_u57
+	support.
+	* testsuite/binutils-all/x86-64/lam-u48.d: New file.
+	* testsuite/binutils-all/x86-64/lam-u48.s: Likewise.
+	* testsuite/binutils-all/x86-64/lam-u57.d: Likewise.
+	* testsuite/binutils-all/x86-64/lam-u57.s: Likewise.
+
 2020-12-15  Vivek Das Mohapatra  <vivek@collabora.com>
 
 	* readelf.c (get_dynamic_type): Handle DT_GNU_FLAGS_1.

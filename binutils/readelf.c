@@ -18748,6 +18748,12 @@ decode_x86_feature_1 (unsigned int bitmask)
 	case GNU_PROPERTY_X86_FEATURE_1_SHSTK:
 	  printf ("SHSTK");
 	  break;
+	case GNU_PROPERTY_X86_FEATURE_1_LAM_U48:
+	  printf ("LAM_U48");
+	  break;
+	case GNU_PROPERTY_X86_FEATURE_1_LAM_U57:
+	  printf ("LAM_U57");
+	  break;
 	default:
 	  printf (_("<unknown: %x>"), bit);
 	  break;

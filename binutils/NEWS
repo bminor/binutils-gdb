@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Update elfedit and readelf with LAM_U48 and LAM_U57 support.
+
 * Nm has a new command line option: --ifunc-chars=CHARS.  This specifies a
   string of one or two characters.  The first character is used as the type
   character when displaying global ifunc symbols.  The second character, if

@@ -1316,6 +1316,50 @@ al which do not usually function correctly unless they are the sole instances
 of themselves. This behaviour can be overridden by the @code{dlmopen} caller
 and does not apply to certain loading mechanisms (such as audit libraries).
 
+@item lam-u48
+Generate GNU_PROPERTY_X86_FEATURE_1_LAM_U48 in .note.gnu.property section
+to indicate compatibility with Intel LAM_U48.  Supported for Linux/x86_64.
+
+@item lam-u57
+Generate GNU_PROPERTY_X86_FEATURE_1_LAM_U57 in .note.gnu.property section
+to indicate compatibility with Intel LAM_U57.  Supported for Linux/x86_64.
+
+@item lam-u48-report=none
+@itemx lam-u48-report=warning
+@itemx lam-u48-report=error
+Specify how to report the missing GNU_PROPERTY_X86_FEATURE_1_LAM_U48
+property in input .note.gnu.property section.
+@option{lam-u48-report=none}, which is the default, will make the
+linker not report missing properties in input files.
+@option{lam-u48-report=warning} will make the linker issue a warning for
+missing properties in input files.  @option{lam-u48-report=error} will
+make the linker issue an error for missing properties in input files.
+Supported for Linux/x86_64.
+
+@item lam-u57-report=none
+@itemx lam-u57-report=warning
+@itemx lam-u57-report=error
+Specify how to report the missing GNU_PROPERTY_X86_FEATURE_1_LAM_U57
+property in input .note.gnu.property section.
+@option{lam-u57-report=none}, which is the default, will make the
+linker not report missing properties in input files.
+@option{lam-u57-report=warning} will make the linker issue a warning for
+missing properties in input files.  @option{lam-u57-report=error} will
+make the linker issue an error for missing properties in input files.
+Supported for Linux/x86_64.
+
+@item lam-report=none
+@itemx lam-report=warning
+@itemx lam-report=error
+Specify how to report the missing GNU_PROPERTY_X86_FEATURE_1_LAM_U48 and
+GNU_PROPERTY_X86_FEATURE_1_LAM_U57 properties in input .note.gnu.property
+section.  @option{lam-report=none}, which is the default, will make the
+linker not report missing properties in input files.
+@option{lam-report=warning} will make the linker issue a warning for
+missing properties in input files.  @option{lam-report=error} will make
+the linker issue an error for missing properties in input files.
+Supported for Linux/x86_64.
+
 @item lazy
 When generating an executable or shared library, mark it to tell the
 dynamic linker to defer function call resolution to the point when

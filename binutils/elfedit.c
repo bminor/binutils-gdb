@@ -260,6 +260,10 @@ elf_x86_feature (const char *feature, int enable)
     x86_feature = GNU_PROPERTY_X86_FEATURE_1_IBT;
   else if (strcasecmp (feature, "shstk") == 0)
     x86_feature = GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+  else if (strcasecmp (feature, "lam_u48") == 0)
+    x86_feature = GNU_PROPERTY_X86_FEATURE_1_LAM_U48;
+  else if (strcasecmp (feature, "lam_u57") == 0)
+    x86_feature = GNU_PROPERTY_X86_FEATURE_1_LAM_U57;
   else
     {
       error (_("Unknown x86 feature: %s\n"), feature);
@@ -920,9 +924,9 @@ usage (FILE *stream, int exit_status)
 	   osabi, osabi);
 #ifdef HAVE_MMAP
   fprintf (stream, _("\
-  --enable-x86-feature [ibt|shstk]\n\
+  --enable-x86-feature [ibt|shstk|lam_u48|lam_u57]\n\
                               Enable x86 feature\n\
-  --disable-x86-feature [ibt|shstk]\n\
+  --disable-x86-feature [ibt|shstk|lam_u48|lam_u57]\n\
                               Disable x86 feature\n"));
 #endif
   fprintf (stream, _("\

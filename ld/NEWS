@@ -8,6 +8,19 @@
   encountered.  This option can be suppressed via the configure time
   switch: --enable-error-handling-script=no.
 
+* Add -z lam-u48 to x86-64 ELF linker to generate LAM_U48 property.
+
+* Add -z lam-u57 to x86-64 ELF linker to enerate LAM_U57 property.
+
+* Add -z lam-u48-report=[none|warning|error] to report missing LAM_U48
+  property.
+
+* Add -z lam-u57-report=[none|warning|error] to report missing LAM_U57
+  property.
+
+* Add -z lam-report=[none|warning|error] to report missing LAM_U48 and
+  LAM_U57 properties.
+
 * Add -z x86-64-{baseline|v[234]} to the x86 ELF linker to mark
   x86-64-{baseline|v[234]} ISA level as needed.
 

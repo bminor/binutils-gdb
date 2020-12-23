@@ -1,3 +1,15 @@
+2020-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-linker-x86.h (elf_x86_cet_report): Renamed to ...
+	(elf_x86_prop_report): This.
+	(elf_linker_x86_params): Add lam_u48, lam_u57, lam_u48_report
+	and lam_u57_report.
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Support
+	GNU_PROPERTY_X86_FEATURE_1_LAM_U48 and
+	GNU_PROPERTY_X86_FEATURE_1_LAM_U57.
+	(_bfd_x86_elf_link_fixup_gnu_properties): Keep LAM features only
+	for 64-bit output.
+
 2020-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27091

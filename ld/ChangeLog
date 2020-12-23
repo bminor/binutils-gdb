@@ -1,3 +1,28 @@
+2020-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention LAM_U48 and LAM_U57 support.
+	* ld.texi: Document LAM_U48 and LAM_U57 support.
+	* emulparams/cet.sh: Updated.
+	* emulparams/elf_x86_64.sh: Source x86-64-lam.sh.
+	* emulparams/x86-64-lam.sh: New file.
+	* testsuite/ld-x86-64/property-x86-lam-u48-1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u48-1b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u48-2.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u48-3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u48-3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u48-4.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u48-5.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u48.s: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57-1a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57-1b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57-2.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57-3a.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57-3b.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57-4.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57-5.d: Likewise.
+	* testsuite/ld-x86-64/property-x86-lam-u57.s: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run LAM tests.
+
 2020-12-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27082
