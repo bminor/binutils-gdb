@@ -3,6 +3,7 @@
 #source: fill_2.s
 #ld: -T fill.t
 #objdump: -s -j .text
+#notarget: [is_aout_format]
 #skip: ia64-*-* mips*-*-freebsd* mips*-*-gnu* mips*-*-irix* mips*-*-kfreebsd*
 #skip: mips*-*-linux* mips*-*-netbsd* mips*-*-openbsd* mips*-*-sysv4*
 #skip: tilegx*-*-* tilepro-*-* x86_64-*-cygwin x86_64-*-mingw* x86_64-*-pe*

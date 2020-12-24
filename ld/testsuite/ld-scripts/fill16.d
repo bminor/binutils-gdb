@@ -3,6 +3,7 @@
 #source: fill16_2.s
 #ld: -T fill.t
 #objdump: -s -j .text
+#notarget: [is_aout_format]
 #skip: arm-*-coff i[3-7]86-*-coff [is_xcoff_format]
 #xfail: alpha*-*-*ecoff sh-*-pe sparc*-*-coff
 #xfail: tic30-*-coff tic4x-*-* tic54x-*-* z8k-*-*

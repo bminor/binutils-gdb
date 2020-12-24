@@ -1,3 +1,17 @@
+2020-12-24  Alan Modra  <amodra@gmail.com>
+
+	PR 27100
+	* ldlang.h (lang_output_section_statement_type): Add dup_output.
+	* ldlang.c (lang_output_section_statement_lookup): Set dup_output.
+	(init_os): Test dup_output rather than constraint.
+	* testsuite/ld-scripts/pr27100.d,
+	* testsuite/ld-scripts/pr27100.s,
+	* testsuite/ld-scripts/pr27100.t: New test.
+	* testsuite/ld-scripts/data.exp: Run it.  Don't exclude aout here.
+	* testsuite/ld-scripts/data.d: Do so here instead.
+	* testsuite/ld-scripts/fill.d: Likewise.
+	* testsuite/ld-scripts/fill16.d: Likewise.
+
 2020-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention LAM_U48 and LAM_U57 support.

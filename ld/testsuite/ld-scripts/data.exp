@@ -19,14 +19,6 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-# An a.out "objdump -s -j .text" has the file header visible inside the
-# text segment, confusing run_dump_test.
-if {[is_aout_format]} {
-	unsupported data
-	unsupported fill
-	return
-}
-
 set old_LDFLAGS $LDFLAGS
 if { [is_xcoff_format] } then {
     set LDFLAGS "$LDFLAGS -bnogc"
@@ -35,5 +27,6 @@ if { [is_xcoff_format] } then {
 run_dump_test data
 run_dump_test fill
 run_dump_test fill16
+run_dump_test pr27100
 
 set LDFLAGS $old_LDFLAGS

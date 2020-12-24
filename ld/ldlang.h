@@ -173,6 +173,9 @@ typedef struct lang_output_section_statement_struct
   unsigned int after_end : 1;
   /* If this section uses the alignment of its input sections.  */
   unsigned int align_lma_with_input : 1;
+  /* If script has duplicate output section statements of the same name
+     create duplicate output sections.  */
+  unsigned int dup_output : 1;
 } lang_output_section_statement_type;
 
 typedef struct
