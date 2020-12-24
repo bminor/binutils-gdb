@@ -1,5 +1,11 @@
 2020-12-24  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/retain7a.d: Don't run on hppa-linux.
+	* testsuite/ld-elf/retain7b.d: Correct name.  Don't run on tic6x.
+	Allow OSABI FreeBSD.
+
+2020-12-24  Alan Modra  <amodra@gmail.com>
+
 	PR 27100
 	* ldlang.h (lang_output_section_statement_type): Add dup_output.
 	* ldlang.c (lang_output_section_statement_lookup): Set dup_output.
