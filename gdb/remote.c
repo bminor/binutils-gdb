@@ -6033,7 +6033,12 @@ extended_remote_target::attach (const char *args, int from_tty)
 	}
     }
   else
-    gdb_assert (wait_status == NULL);
+    {
+      gdb_assert (wait_status == NULL);
+
+      gdb_assert (target_can_async_p ());
+      target_async (1);
+    }
 }
 
 /* Implementation of the to_post_attach method.  */

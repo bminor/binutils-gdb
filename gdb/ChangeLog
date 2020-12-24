@@ -1,5 +1,10 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* remote.c (extended_remote_target::attach): Set target async in
+	the target-non-stop path too.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	PR gdb/27055
 	* infrun.c (handle_signal_stop): Move main context_switch call
 	earlier, before STOP_QUIETLY_NO_SIGSTOP.
