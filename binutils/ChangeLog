@@ -1,3 +1,9 @@
+2020-12-24  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (INT64_MIN): Define if not already defined.
+	(print_vms_time): Catch 64-bit overflow when converting from
+	vms time to posix time.  Don't segfault if gmtime returns NULL.
+
 2020-12-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention LAM_U48 and LAM_U57 support.

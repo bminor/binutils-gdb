@@ -9886,20 +9886,29 @@ dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
 
 #define VMS_EPOCH_OFFSET 35067168000000000LL
 #define VMS_GRANULARITY_FACTOR 10000000
+#ifndef INT64_MIN
+#define INT64_MIN (-9223372036854775807LL - 1)
+#endif
 
 /* Display a VMS time in a human readable format.  */
 
 static void
 print_vms_time (bfd_int64_t vmstime)
 {
-  struct tm *tm;
+  struct tm *tm = NULL;
   time_t unxtime;
 
-  unxtime = (vmstime - VMS_EPOCH_OFFSET) / VMS_GRANULARITY_FACTOR;
-  tm = gmtime (&unxtime);
-  printf ("%04u-%02u-%02uT%02u:%02u:%02u",
-          tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-          tm->tm_hour, tm->tm_min, tm->tm_sec);
+  if (vmstime >= INT64_MIN + VMS_EPOCH_OFFSET)
+    {
+      vmstime = (vmstime - VMS_EPOCH_OFFSET) / VMS_GRANULARITY_FACTOR;
+      unxtime = vmstime;
+      if (unxtime == vmstime)
+	tm = gmtime (&unxtime);
+    }
+  if (tm != NULL)
+    printf ("%04u-%02u-%02uT%02u:%02u:%02u",
+	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
+	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
 #endif /* BFD64 */
 
