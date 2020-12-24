@@ -3665,9 +3665,11 @@ is_scalar_type_recursive (struct type *t)
       LONGEST low_bound, high_bound;
       struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (t));
 
-      get_discrete_bounds (t->index_type (), &low_bound, &high_bound);
-
-      return high_bound == low_bound && is_scalar_type_recursive (elt_type);
+      if (get_discrete_bounds (t->index_type (), &low_bound, &high_bound))
+	return (high_bound == low_bound
+		&& is_scalar_type_recursive (elt_type));
+      else
+	return 0;
     }
   /* Are we dealing with a struct with one element?  */
   else if (t->code () == TYPE_CODE_STRUCT && t->num_fields () == 1)

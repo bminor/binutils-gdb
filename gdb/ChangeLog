@@ -1,3 +1,8 @@
+2020-12-24  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* gdbtypes.c (is_scalar_type_recursive): Prevent comparison
+	between uninitialized values.
+
 2020-12-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* expprint.c (print_subexp_standard): Replace uses of
