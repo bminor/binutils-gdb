@@ -1335,7 +1335,7 @@ top) and @samp{fstpt} (store 80-bit real and pop stack) instructions.
 @item
 Integer constructors are @samp{.word}, @samp{.long} or @samp{.int}, and
 @samp{.quad} for the 16-, 32-, and 64-bit integer formats.  The
-corresponding instruction mnemonic suffixes are @samp{s} (single),
+corresponding instruction mnemonic suffixes are @samp{s} (short),
 @samp{l} (long), and @samp{q} (quad).  As with the 80-bit real format,
 the 64-bit @samp{q} format is only present in the @samp{fildq} (load
 quad integer to stack top) and @samp{fistpq} (store quad integer and pop
