@@ -1,3 +1,10 @@
+2021-01-04  Nicolas Boulenguez  <nicolas@debian.org>
+
+	PR 27117
+	* configure.ac: Make AC_CONFIG_MACRO_DIR consistent with
+	ACLOCAL_AMFLAGS -I dirs.
+	* configure: Regenerate.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.
