@@ -1,3 +1,8 @@
+2020-12-27  Tom Tromey  <tom@tromey.com>
+
+	* eval.c (evaluate_subexp_standard) <case MULTI_SUBSCRIPT>:
+	Simplify.
+
 2020-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/27059

@@ -2142,36 +2142,14 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      while (nargs-- > 0)
+      argvec = XALLOCAVEC (struct value *, nargs);
+      for (ix = 0; ix < nargs; ++ix)
+	argvec[ix] = evaluate_subexp_with_coercion (exp, pos, noside);
+      if (noside == EVAL_SKIP)
+	return arg1;
+      for (ix = 0; ix < nargs; ++ix)
 	{
-	  arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-	  /* FIXME:  EVAL_SKIP handling may not be correct.  */
-	  if (noside == EVAL_SKIP)
-	    {
-	      if (nargs > 0)
-		continue;
-	      return eval_skip_value (exp);
-	    }
-	  /* FIXME:  EVAL_AVOID_SIDE_EFFECTS handling may not be correct.  */
-	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	    {
-	      /* If the user attempts to subscript something that has no target
-		 type (like a plain int variable for example), then report this
-		 as an error.  */
-
-	      type = TYPE_TARGET_TYPE (check_typedef (value_type (arg1)));
-	      if (type != NULL)
-		{
-		  arg1 = value_zero (type, VALUE_LVAL (arg1));
-		  noside = EVAL_SKIP;
-		  continue;
-		}
-	      else
-		{
-		  error (_("cannot subscript something of type `%s'"),
-			 value_type (arg1)->name ());
-		}
-	    }
+	  arg2 = argvec[ix];
 
 	  if (binop_user_defined_p (op, arg1, arg2))
 	    {
