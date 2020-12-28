@@ -680,10 +680,19 @@ proc test_gnu_debuglink {} {
     global STRIP
     global OBJCOPY
     global OBJDUMP
+    global gcc_gas_flag
 
     set test "gnu-debuglink"
 
-    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
+    # Use the newly built assembler and linker.
+    set flags debug
+    if { [istarget *-*-linux*]
+	 || [istarget *-*-gnu*] } {
+	foreach i $gcc_gas_flag {
+	    set flags "additional_flags=$i $flags"
+	}
+    }
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable $flags] != "" } {
 	unsupported "$test (build)"
 	return
     }
