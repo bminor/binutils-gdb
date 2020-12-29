@@ -2045,7 +2045,7 @@ empty iterable, or @code{None} means frame arguments will not be
 printed for this frame.  This iterable must contain objects that
 implement two methods, described here.
 
-This object must implement a @code{argument} method which takes a
+This object must implement a @code{symbol} method which takes a
 single @code{self} parameter and must return a @code{gdb.Symbol}
 (@pxref{Symbols In Python}), or a Python string.  The object must also
 implement a @code{value} method which takes a single @code{self}

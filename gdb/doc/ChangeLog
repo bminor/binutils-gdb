@@ -1,3 +1,7 @@
+2020-12-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	* python.texi (Frame Decorator API): Fix method name.
+
 2020-12-23  Alex Bennée  <alex.bennee@linaro.org>
 
 	* gdb.texinfo (Packets): Clarify language for ? packet.
