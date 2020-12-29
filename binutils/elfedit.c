@@ -902,7 +902,7 @@ usage (FILE *stream, int exit_status)
   char *osabi = concat (osabis[0].name, NULL);
 
   for (i = 1; i < ARRAY_SIZE (osabis); i++)
-    osabi = reconcat (osabi, "|", osabis[i].name, NULL);
+    osabi = reconcat (osabi, osabi, "|", osabis[i].name, NULL);
 
   fprintf (stream, _("Usage: %s <option(s)> elffile(s)\n"),
 	   program_name);
