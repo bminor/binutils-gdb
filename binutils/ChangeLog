@@ -1,3 +1,10 @@
+2020-12-31  Alan Modra  <amodra@gmail.com>
+
+	PR 27128
+	* nm.c (print_symname): Append version string to symbol name
+	before printing the lot under control of "form".  Append version
+	to demangled names too.
+
 2020-12-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfedit (usage): Pass osabi to reconcat.

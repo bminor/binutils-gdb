@@ -1,3 +1,15 @@
+2020-12-31  H.J. Lu  <hongjiu.lu@intel.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR 27128
+	* testsuite/ld-elf/pr27128.s: New file.
+	* testsuite/ld-elf/pr27128.t: Likewise.
+	* testsuite/ld-elf/pr27128a.d: Likewise.
+	* testsuite/ld-elf/pr27128b.d: Likewise.
+	* testsuite/ld-elf/pr27128c.d: Likewise.
+	* testsuite/ld-elf/pr27128d.d: Likewise.
+	* testsuite/ld-elf/pr27128e.d: Likewise.
+
 2020-12-24  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/retain7a.d: Don't run on hppa-linux.
