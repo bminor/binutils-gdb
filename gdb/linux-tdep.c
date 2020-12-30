@@ -1276,8 +1276,6 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 				linux_find_memory_region_ftype *func,
 				void *obfd)
 {
-  char mapsfilename[100];
-  char coredumpfilter_name[100];
   pid_t pid;
   /* Default dump behavior of coredump_filter (0x33), according to
      Documentation/filesystems/proc.txt from the Linux kernel
@@ -1295,10 +1293,12 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
   if (use_coredump_filter)
     {
-      xsnprintf (coredumpfilter_name, sizeof (coredumpfilter_name),
-		 "/proc/%d/coredump_filter", pid);
+      std::string core_dump_filter_name
+	= string_printf ("/proc/%d/coredump_filter", pid);
+
       gdb::unique_xmalloc_ptr<char> coredumpfilterdata
-	= target_fileio_read_stralloc (NULL, coredumpfilter_name);
+	= target_fileio_read_stralloc (NULL, core_dump_filter_name.c_str ());
+
       if (coredumpfilterdata != NULL)
 	{
 	  unsigned int flags;
@@ -1308,14 +1308,16 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	}
     }
 
-  xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/smaps", pid);
+  std::string maps_filename = string_printf ("/proc/%d/smaps", pid);
+
   gdb::unique_xmalloc_ptr<char> data
-    = target_fileio_read_stralloc (NULL, mapsfilename);
+    = target_fileio_read_stralloc (NULL, maps_filename.c_str ());
+
   if (data == NULL)
     {
       /* Older Linux kernels did not support /proc/PID/smaps.  */
-      xsnprintf (mapsfilename, sizeof mapsfilename, "/proc/%d/maps", pid);
-      data = target_fileio_read_stralloc (NULL, mapsfilename);
+      maps_filename = string_printf ("/proc/%d/maps", pid);
+      data = target_fileio_read_stralloc (NULL, maps_filename.c_str ());
     }
 
   if (data != NULL)
@@ -1375,7 +1377,8 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
 	      if (sscanf (line, "%64s", keyword) != 1)
 		{
-		  warning (_("Error parsing {s,}maps file '%s'"), mapsfilename);
+		  warning (_("Error parsing {s,}maps file '%s'"),
+			   maps_filename.c_str ());
 		  break;
 		}
 
@@ -1396,7 +1399,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 		  if (sscanf (line, "%*s%lu", &number) != 1)
 		    {
 		      warning (_("Error parsing {s,}maps file '%s' number"),
-			       mapsfilename);
+			       maps_filename.c_str ());
 		      break;
 		    }
 		  if (number > 0)

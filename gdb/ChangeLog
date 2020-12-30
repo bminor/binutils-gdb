@@ -1,3 +1,12 @@
+2021-05-04  Luis Machado  <luis.machado@arm.com>
+
+	Cherry-picked from GDB master
+
+	2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* linux-tdep.c (linux_find_memory_regions_full): Use std::string
+	instead of char arrays.
+
 2021-04-27  Luis Machado  <luis.machado@arm.com>
 
 	* aarch64-tdep.c (struct stack_item_t) <arg_value): New field.
