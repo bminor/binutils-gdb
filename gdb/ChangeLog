@@ -1,5 +1,10 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* linux-tdep.c (linux_find_memory_regions_full): Use std::string
+	instead of char arrays.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* Makefile.in (ALL_64_TARGET_OBS): Add arch/aarch64-mte-linux.o.
 	(HFILES_NO_SRCDIR): Add arch/aarch64-mte-linux.h and
 	nat/aarch64-mte-linux-ptrace.h.
