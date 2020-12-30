@@ -1,6 +1,12 @@
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2020-12-31  Alan Modra  <amodra@gmail.com>
+	PR 27128
+	* nm.c (print_symname): Append version string to symbol name
+	before printing the lot under control of "form".  Append version
+	to demangled names too.
+
 	2020-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 	PR ld/26382
 	* nm.c (print_symname): Display only one '@' for undefined
