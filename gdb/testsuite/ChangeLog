@@ -1,3 +1,7 @@
+2020-12-31  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/simple.exp: Update output for Rust 1.49.
+
 2020-12-31  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
 	* gdb.cp/step-and-next-inline.exp: Fix test case.

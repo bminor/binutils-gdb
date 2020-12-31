@@ -262,8 +262,14 @@ gdb_test_multiple "print str_none" "" {
 
 gdb_test "print int_some" " = core::option::Option<u8>::Some\\(1\\)"
 gdb_test "print int_none" " = core::option::Option<u8>::None"
-gdb_test "print box_some" " = core::option::Option<\[a-z:\]*Box<u8>>::Some\\(.*\\)"
-gdb_test "print box_none" " = core::option::Option<\[a-z:\]*Box<u8>>::None"
+# The result expressions are a bit lax here, to handle the fact that
+# the output varies between Rust versions.  Mostly we just want to
+# check for the presence "Option", "Box", "u8", and either "Some" or
+# "None".
+gdb_test "print box_some" \
+    " = core::option::Option<\[a-z:\]*Box<u8.*>>::Some\\(.*\\)"
+gdb_test "print box_none" \
+    " = core::option::Option<\[a-z:\]*Box<u8.*>>::None"
 
 set pass_pattern \
     " = simple::NonZeroOptimized::Value\\(\[a-z\]+::string::String .*"
@@ -332,11 +338,11 @@ gdb_test "print (1)" " = 1"
 gdb_test "print 23..97.0" "Range expression with different types"
 
 gdb_test "print (*parametrized.next.val)" \
-    " = simple::ParametrizedStruct<i32> {next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Empty, value: 1}"
+    " = simple::ParametrizedStruct<i32> {next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>.*>>::Empty, value: 1}"
 gdb_test "print parametrized.next.val" \
     " = \\(\\*mut simple::ParametrizedStruct<i32>\\) $hex"
 gdb_test "print parametrized" \
-    " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"
+    " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>.*>>::Val\\{val: $hex\\}, value: 0\\}"
 
 gdb_test_sequence "ptype/o SimpleLayout" "" {
     "/\\* offset    |  size \\*/  type = struct simple::SimpleLayout {"
