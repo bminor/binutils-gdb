@@ -1,3 +1,7 @@
+2021-01-01  Alan Modra  <amodra@gmail.com>
+
+	Update year range in copyright notice of all files.
+
 2021-01-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* config/tc-mmix.h (md_single_noop_insn): Change to "swym 0".
