@@ -1,3 +1,7 @@
+2021-01-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* config/tc-mmix.h (md_single_noop_insn): Change to "swym 0".
+
 2020-12-18  Alan Modra  <amodra@gmail.com>
 
 	* ecoff.c (ecoff_frob_symbol): Rename scom_section to
