@@ -1,3 +1,7 @@
+2020-12-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.python/py-frame-args.exp: De-duplicate test names.
+
 2020-12-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/27059
