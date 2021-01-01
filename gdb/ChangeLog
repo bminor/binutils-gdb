@@ -1,5 +1,9 @@
 2021-01-01  Joel Brobecker  <brobecker@adacore.com>
 
+	Update copyright year range in copyright header of all GDB files.
+
+2021-01-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* copyright.py (get_update_list): Add "gdbserver" and "gdbsupport"
 	to the list of directories to update.
 

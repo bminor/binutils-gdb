@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2016-2020 Free Software Foundation, Inc.
+dnl Copyright (C) 2016-2021 Free Software Foundation, Inc.
 dnl Contributed by Dimitar Dimitrov <dimitar@dinux.eu>
 dnl
 dnl This file is part of the GNU simulators.
