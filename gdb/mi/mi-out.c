@@ -1,6 +1,6 @@
 /* MI Command Set - output generating routines.
 
-   Copyright (C) 2000-2020 Free Software Foundation, Inc.
+   Copyright (C) 2000-2021 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions (a Red Hat company).
 

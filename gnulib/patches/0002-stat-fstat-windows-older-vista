@@ -74,7 +74,7 @@ index 53c089619..bd8cb7966 100644
 @@ -1,4 +1,4 @@
 -# fstat.m4 serial 6
 +# fstat.m4 serial 7
- dnl Copyright (C) 2011-2020 Free Software Foundation, Inc.
+ dnl Copyright (C) 2011-2021 Free Software Foundation, Inc.
  dnl This file is free software; the Free Software Foundation
  dnl gives unlimited permission to copy and/or distribute it,
 @@ -35,5 +35,6 @@ AC_DEFUN([gl_FUNC_FSTAT],
