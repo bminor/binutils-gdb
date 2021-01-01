@@ -1,3 +1,10 @@
+2021-01-27  Lancelot SIX  <lsix@lancelotsix.com>
+
+	PR gdb/27133
+	* gdb.base/ui-redirect.exp: Add test case that ensures that
+	redirecting both logging and debug does not cause gdb to crash.
+
+
 2021-01-27  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* gdb.arch/insn-reloc.c: Add tests for BR and BLR.

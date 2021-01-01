@@ -1,3 +1,10 @@
+2021-01-27  Lancelot SIX  <lsix@lancelotsix.com>
+
+	PR gdb/27133
+	* cli/cli-interp.c (cli_interp_base::set_logging): Ensure the
+	unique_ptr is released when the wrapped pointer is kept for later
+	use.
+
 2021-01-27  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* aarch64-tdep.c (aarch64_displaced_step_others): Account for
