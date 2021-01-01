@@ -1,3 +1,7 @@
+2021-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo, refcard.tex: Update copyright year range.
+
 2020-12-26  Jeanne Rasata <jeanne@fsf.org>  (tiny change)
 
 	* gdb.texinfo: Fix capitalization in many sections following CMS
