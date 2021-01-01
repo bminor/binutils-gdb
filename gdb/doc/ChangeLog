@@ -1,3 +1,7 @@
+2021-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo, refcard.tex: Update copyright year range.
+
 2020-12-29  Hannes Domani  <ssbssa@yahoo.de>
 
 	* python.texi (Frame Decorator API): Fix method name.
