@@ -1,3 +1,7 @@
+2021-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* top.c (print_gdb_version): Update copyright year.
+
 2020-12-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.c (get_discrete_low_bound, get_discrete_high_bound):

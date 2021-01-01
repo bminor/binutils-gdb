@@ -1,3 +1,8 @@
+2021-01-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* server.cc (gdbserver_version): Update copyright year.
+	* gdbreplay.cc (gdbreplay_version): Likewise.
+
 2020-10-07  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* configure.srv: Support ARC architecture.
