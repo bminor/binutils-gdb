@@ -1,3 +1,7 @@
+2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
+
+	* tilegx.cc: Correct comment spelling.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

@@ -424,7 +424,7 @@ do_type (unsigned int i)
       if (sym->n_numaux)
 	{
 	  if (aux == NULL)
-	    fatal (_("Aggregate definition needs auxillary information"));
+	    fatal (_("Aggregate definition needs auxiliary information"));
 
 	  if (aux->x_sym.x_tagndx.p)
 	    {
@@ -474,7 +474,7 @@ do_type (unsigned int i)
       break;
     case T_ENUM:
       if (aux == NULL)
-	fatal (_("Enum definition needs auxillary information"));
+	fatal (_("Enum definition needs auxiliary information"));
       if (aux->x_sym.x_tagndx.p)
 	{
 	  unsigned int idx = INDEXOF (aux->x_sym.x_tagndx.p);
@@ -517,7 +517,7 @@ do_type (unsigned int i)
 	    int els;
 
 	    if (aux == NULL)
-	      fatal (_("Array definition needs auxillary information"));
+	      fatal (_("Array definition needs auxiliary information"));
 	    els = (dimind < DIMNUM
 		   ? aux->x_sym.x_fcnary.x_ary.x_dimen[dimind]
 		   : 0);

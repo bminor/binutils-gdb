@@ -1255,7 +1255,7 @@ struct aarch64_instr_sequence
 {
   /* The instruction that caused this sequence to be opened.  */
   aarch64_inst *instr;
-  /* The number of instructions the above instruction allows to be kept in the
+  /* The number of instructions the above instruction allows one to be kept in the
      sequence before an automatic close is done.  */
   int num_insns;
   /* The instructions currently added to the sequence.  */

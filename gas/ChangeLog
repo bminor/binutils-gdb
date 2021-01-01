@@ -1,3 +1,11 @@
+2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
+
+	* config/tc-i386.c: Correct comment spelling.
+	* config/tc-riscv.c: Likewise.
+	* config/tc-s390.c: Correct comment grammar.
+	* doc/c-i386.texi: Correct spelling.
+	* doc/c-s390.texi: Correct grammar.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

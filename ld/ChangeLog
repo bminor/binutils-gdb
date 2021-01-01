@@ -1,3 +1,9 @@
+2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
+
+	* configure.tgt: Correct comment grammar.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* ld.texi: Correct grammar.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

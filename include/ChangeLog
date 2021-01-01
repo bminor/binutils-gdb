@@ -1,3 +1,9 @@
+2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
+
+	* coff/internal.h: Correct comment spelling.
+	* coff/sym.h: Likewise.
+	* opcode/aarch64.h: Likewise.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

@@ -3408,7 +3408,7 @@ xcoff_post_gc_symbol (struct xcoff_link_hash_entry *h, void * p)
 }
 
 /* INPUT_BFD includes XCOFF symbol ISYM, which is associated with linker
-   hash table entry H and csect CSECT.  AUX contains ISYM's auxillary
+   hash table entry H and csect CSECT.  AUX contains ISYM's auxiliary
    csect information, if any.  NAME is the function's name if the name
    is stored in the .debug section, otherwise it is null.
 
@@ -5145,7 +5145,7 @@ xcoff_find_tc0 (bfd *output_bfd, struct xcoff_final_link_info *flinfo)
   irsym.n_numaux = 1;
   bfd_coff_swap_sym_out (output_bfd, &irsym, flinfo->outsyms);
 
-  /* Fill out the auxillary csect information.  */
+  /* Fill out the auxiliary csect information.  */
   memset (&iraux, 0, sizeof iraux);
   iraux.x_csect.x_smtyp = XTY_SD;
   iraux.x_csect.x_smclas = XMC_TC0;

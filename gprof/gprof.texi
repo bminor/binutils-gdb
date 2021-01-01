@@ -1931,7 +1931,7 @@ load due to other users won't directly affect the output you get.
 @section Profiling Data File Format
 
 The old BSD-derived file format used for profile data does not contain a
-magic cookie that allows to check whether a data file really is a
+magic cookie that allows one to check whether a data file really is a
 @code{gprof} file.  Furthermore, it does not provide a version number, thus
 rendering changes to the file format almost impossible.  @sc{gnu} @code{gprof}
 uses a new file format that provides these features.  For backward

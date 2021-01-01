@@ -1051,7 +1051,7 @@ sparc*-*-solaris2*)
   ;;
 
 spu-*-elf*)
-  # This allows to build a pair of PPU/SPU toolchains with common sysroot.
+  # This allows one to build a pair of PPU/SPU toolchains with common sysroot.
   NATIVE_LIB_DIRS='/lib'
   ;;
 

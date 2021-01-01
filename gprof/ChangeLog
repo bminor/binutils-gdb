@@ -1,3 +1,8 @@
+2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
+
+	* README: Correct grammar.
+	* gprof.texi: Likewise.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

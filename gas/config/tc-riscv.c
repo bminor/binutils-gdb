@@ -401,10 +401,10 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
 /* Indicate we are already assemble any instructions or not.  */
 static bfd_boolean start_assemble = FALSE;
 
-/* Indicate ELF attributes are explictly set.  */
+/* Indicate ELF attributes are explicitly set.  */
 static bfd_boolean explicit_attr = FALSE;
 
-/* Indicate CSR or priv instructions are explictly used.  */
+/* Indicate CSR or priv instructions are explicitly used.  */
 static bfd_boolean explicit_priv_attr = FALSE;
 
 /* Macros for encoding relaxation state for RVC branches and far jumps.  */

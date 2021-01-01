@@ -3436,7 +3436,7 @@ gas/ChangeLog:
 	prefix into i.rex for SSE2AVX templates.
 	(set_rex_vrex): New helper.
 	(build_modrm_byte): Use it.
-	* testsuite/gas/i386/x86-64-sse2avx.s: Add cases with explict
+	* testsuite/gas/i386/x86-64-sse2avx.s: Add cases with explicit
 	REX prefixes.
 	* testsuite/gas/i386/x86-64-sse2avx.d: Adjust expectations.
 
@@ -3462,7 +3462,7 @@ gas/ChangeLog:
 
 	* config/tc-riscv.c (explicit_priv_attr): Rename explicit_csr to
 	explicit_priv_attr.  It used to indicate CSR or priv instructions are
-	explictly used.
+	explicitly used.
 	(riscv_is_priv_insn): Return True if it is a privileged instruction.
 	(riscv_ip): Call riscv_is_priv_insn to check whether the instruction
 	is privileged or not.  If it is, then set explicit_priv_attr to TRUE.
@@ -3665,7 +3665,7 @@ gas/ChangeLog:
 2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (explicit_csr): New static boolean.
-	Used to indicate CSR are explictly used.
+	Used to indicate CSR are explicitly used.
 	(riscv_ip): Set explicit_csr to TRUE if any CSR is used.
 	(riscv_write_out_attrs): If we already have set elf priv
 	attributes, then generate them.  Otherwise, don't generate
@@ -4324,7 +4324,7 @@ gas/ChangeLog:
 	(md_parse_option): Change -mlfence-before-ret=[none|not|or] to
 	-mlfence-before-ret=[none/not/or/shl/yes].
 	Enable -mlfence-before-ret=shl when
-	-mlfence-beofre-indirect-branch=all and no explict -mlfence-before-ret option.
+	-mlfence-beofre-indirect-branch=all and no explicit -mlfence-before-ret option.
 	(md_show_usage): Ditto.
 	* doc/c-i386.texi: Ditto.
 	* testsuite/gas/i386/i386.exp: Add new testcases.

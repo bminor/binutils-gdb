@@ -3296,7 +3296,7 @@
 	(find_executable): Likewise.
 	(win32_spawn): Cast alloca return to (char**).
 	Replace malloc with XNEWVEC.
-	bcopy.c (bcopy): Add explict casts in assignments.
+	bcopy.c (bcopy): Add explicit casts in assignments.
 
 2006-10-25  Ben Elliston  <bje@au.ibm.com>
 

@@ -905,7 +905,7 @@ except instructions from the HTM facility.
 
 @cindex @code{.machinemode} directive, s390
 @item .machinemode string
-This directive allows to change the architecture mode for which code
+This directive allows one to change the architecture mode for which code
 is being generated.  @code{string} may be @code{esa}, @code{zarch},
 @code{zarch_nohighgprs}, @code{push}, or @code{pop}.
 @code{.machinemode zarch_nohighgprs} can be used to prevent the

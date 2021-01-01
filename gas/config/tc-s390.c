@@ -1900,7 +1900,7 @@ s390_literals (int ignore ATTRIBUTE_UNUSED)
 
 #define MAX_HISTORY 100
 
-/* The .machine pseudo op allows to switch to a different CPU level in
+/* The .machine pseudo op allows one to switch to a different CPU level in
    the asm listing.  The current CPU setting can be stored on a stack
    with .machine push and restored with .machine pop.  */
 
@@ -1991,7 +1991,7 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* The .machinemode pseudo op allows to switch to a different
+/* The .machinemode pseudo op allows one to switch to a different
    architecture mode in the asm listing.  The current architecture
    mode setting can be stored on a stack with .machinemode push and
    restored with .machinemode pop.  */

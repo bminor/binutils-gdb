@@ -2471,7 +2471,7 @@ hexadecimal using @option{hex}.  By default, the short immediates are
 printed using the decimal representation, while the long immediate
 values are printed as hexadecimal.
 
-@option{cpu=...} allows to enforce a particular ISA when disassembling
+@option{cpu=...} allows one to enforce a particular ISA when disassembling
 instructions, overriding the @option{-m} value or whatever is in the ELF file.
 This might be useful to select ARC EM or HS ISA, because architecture is same
 for those and disassembler relies on private ELF header data to decide if code

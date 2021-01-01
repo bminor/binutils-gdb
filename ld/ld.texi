@@ -939,7 +939,7 @@ just copy in the newest one.
 @kindex --push-state
 @cindex push state governing input file handling
 @item --push-state
-The @option{--push-state} allows to preserve the current state of the
+The @option{--push-state} allows one to preserve the current state of the
 flags which govern the input file handling so that they can all be
 restored with one corresponding @option{--pop-state} option.
 

@@ -11451,7 +11451,7 @@ process_version_sections (Filedata * filedata)
 		  }
 
 		if (j < ent.vn_cnt)
-		  warn (_("Missing Version Needs auxillary information\n"));
+		  warn (_("Missing Version Needs auxiliary information\n"));
 
 		if (ent.vn_next < sizeof (*entry)
 		    && !(cnt == section->sh_info - 1 && ent.vn_next == 0))

@@ -377,7 +377,7 @@ struct internal_aouthdr
 #define C_THUMBEXTFUNC  (C_THUMBEXT  + 20)	/* 150 */
 #define C_THUMBSTATFUNC (C_THUMBSTAT + 20)	/* 151 */
 
-/* True if XCOFF symbols of class CLASS have auxillary csect information.  */
+/* True if XCOFF symbols of class CLASS have auxiliary csect information.  */
 #define CSECT_SYM_P(CLASS) \
   ((CLASS) == C_EXT || (CLASS) == C_AIX_WEAKEXT || (CLASS) == C_HIDEXT)
 

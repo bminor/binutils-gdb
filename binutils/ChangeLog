@@ -1,3 +1,11 @@
+2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
+
+	* coffgrok.c (do_type): Correct spelling of auxiliary in errors.
+	* doc/binutils.texi: Correct grammar.
+	* readelf.c (process_version_sections): Correct spelling of auxiliary
+	in warning.
+	* testsuite/binutils-all/vax/objdump.exp: Comment grammar fix.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

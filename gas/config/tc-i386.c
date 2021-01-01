@@ -7156,7 +7156,7 @@ process_suffix (void)
       break;
 
     case 0:
-      /* Select word/dword/qword operation with explict data sizing prefix
+      /* Select word/dword/qword operation with explicit data sizing prefix
 	 when there are no suitable register operands.  */
       if (i.tm.opcode_modifier.w
 	  && (i.prefix[DATA_PREFIX] || (i.prefix[REX_PREFIX] & REX_W))

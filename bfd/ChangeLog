@@ -1,3 +1,7 @@
+2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
+
+	* xcofflink.c: Correct spelling in comments.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Update year range in copyright notice of all files.

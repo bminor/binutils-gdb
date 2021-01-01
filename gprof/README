@@ -358,7 +358,7 @@ Short Form:	Long Form:
 ** File Format Changes
 
 The old BSD-derived format used for profile data does not contain a
-magic cookie that allows to check whether a data file really is a
+magic cookie that allows one to check whether a data file really is a
 gprof file.  Furthermore, it does not provide a version number, thus
 rendering changes to the file format almost impossible.  GNU gprof
 uses a new file format that provides these features.  For backward

@@ -513,7 +513,7 @@ before indirect near branch instructions.
 before indirect near branch via register and issue a warning before
 indirect near branch via memory.
 It also implicitly sets @option{-mlfence-before-ret=@var{shl}} when
-there's no explict @option{-mlfence-before-ret=}.
+there's no explicit @option{-mlfence-before-ret=}.
 @option{-mlfence-before-indirect-branch=@var{register}} will generate
 lfence before indirect near branch via register.
 @option{-mlfence-before-indirect-branch=@var{memory}} will issue a
