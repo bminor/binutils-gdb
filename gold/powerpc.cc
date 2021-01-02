@@ -3536,7 +3536,7 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
       from += (this->object_->output_section(this->shndx_)->address()
 	       + this->offset_);
       Address to;
-      unsigned int other;
+      unsigned int other = 0;
       if (gsym != NULL)
 	{
 	  switch (gsym->source())
@@ -3564,7 +3564,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	  to = symtab->compute_final_value<size>(gsym, &status);
 	  if (status != Symbol_table::CFVS_OK)
 	    return true;
-	  other = gsym->nonvis() >> 3;
+	  if (size == 64)
+	    other = gsym->nonvis() >> 3;
 	}
       else
 	{
@@ -3581,7 +3582,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
 	      || !symval.has_output_value())
 	    return true;
 	  to = symval.value(this->object_, 0);
-	  other = this->object_->st_other(this->r_sym_) >> 5;
+	  if (size == 64)
+	    other = this->object_->st_other(this->r_sym_) >> 5;
 	}
       if (!(size == 32 && this->r_type_ == elfcpp::R_PPC_PLTREL24))
 	to += this->addend_;
@@ -5303,7 +5305,7 @@ Stub_table<size, big_endian>::add_long_branch_entry(
 	this->need_resize_ = true;
       p.first->second.toc_ = true;
     }
-  if (p.first->second.other_ == 0)
+  if (size == 64 && p.first->second.other_ == 0)
     p.first->second.other_ = other;
   gold_assert(save_res == p.first->second.save_res_);
   if (p.second || (this->resizing_ && !p.first->second.iter_))

@@ -1,3 +1,10 @@
+2021-01-03  Alan Modra  <amodra@gmail.com>
+
+	PR 27140
+	* powerpc.cc (Target_powerpc::Branch_info::make_stub): Only access
+	object->st_other() when 64-bit.
+	(Stub_table::add_long_branch_entry): Ignore "other" when 32-bit.
+
 2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
 
 	* tilegx.cc: Correct comment spelling.
