@@ -2609,7 +2609,7 @@ static void
 decode_ARC_machine_flags (unsigned e_flags, unsigned e_machine, char buf[])
 {
   /* ARC has two machine types EM_ARC_COMPACT and EM_ARC_COMPACT2.  Some
-     other compilers don't a specific architecture type in the e_flags, and
+     other compilers don't specify an architecture type in the e_flags, and
      instead use EM_ARC_COMPACT for old ARC600, ARC601, and ARC700
      architectures, and switch to EM_ARC_COMPACT2 for newer ARCEM and ARCHS
      architectures.
