@@ -1,3 +1,11 @@
+2021-01-21  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR python/19151
+	* python/py-breakpoint.c (bppy_get_location): Handle
+	bp_hardware_breakpoint.
+	(bppy_init): Likewise.
+	(gdbpy_breakpoint_created): Likewise.
+
 2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* arm-tdep.c (arm_debug_printf): Add and use throughout file.

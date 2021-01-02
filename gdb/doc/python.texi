@@ -5402,6 +5402,10 @@ module:
 @item gdb.BP_BREAKPOINT
 Normal code breakpoint.
 
+@vindex BP_HARDWARE_BREAKPOINT
+@item gdb.BP_HARDWARE_BREAKPOINT
+Hardware assisted code breakpoint.
+
 @vindex BP_WATCHPOINT
 @item gdb.BP_WATCHPOINT
 Watchpoint breakpoint.

@@ -1,3 +1,9 @@
+2021-01-21  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR python/19151
+	* python.texi (Breakpoints In Python): Document
+	gdb.BP_HARDWARE_BREAKPOINT.
+
 2021-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo, refcard.tex: Update copyright year range.

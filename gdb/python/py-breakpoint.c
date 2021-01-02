@@ -58,6 +58,7 @@ static struct pybp_code pybp_codes[] =
 {
   { "BP_NONE", bp_none},
   { "BP_BREAKPOINT", bp_breakpoint},
+  { "BP_HARDWARE_BREAKPOINT", bp_hardware_breakpoint},
   { "BP_WATCHPOINT", bp_watchpoint},
   { "BP_HARDWARE_WATCHPOINT", bp_hardware_watchpoint},
   { "BP_READ_WATCHPOINT", bp_read_watchpoint},
@@ -383,7 +384,8 @@ bppy_get_location (PyObject *self, void *closure)
 
   BPPY_REQUIRE_VALID (obj);
 
-  if (obj->bp->type != bp_breakpoint)
+  if (obj->bp->type != bp_breakpoint
+      && obj->bp->type != bp_hardware_breakpoint)
     Py_RETURN_NONE;
 
   const char *str = event_location_to_string (obj->bp->location.get ());
@@ -793,6 +795,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
       switch (type)
 	{
 	case bp_breakpoint:
+	case bp_hardware_breakpoint:
 	  {
 	    event_location_up location;
 	    symbol_name_match_type func_name_match_type
@@ -834,7 +837,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	    create_breakpoint (python_gdbarch,
 			       location.get (), NULL, -1, NULL,
 			       0,
-			       temporary_bp, bp_breakpoint,
+			       temporary_bp, type,
 			       0,
 			       AUTO_BOOLEAN_TRUE,
 			       ops,
@@ -1008,6 +1011,7 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
     return;
 
   if (bp->type != bp_breakpoint
+      && bp->type != bp_hardware_breakpoint
       && bp->type != bp_watchpoint
       && bp->type != bp_hardware_watchpoint
       && bp->type != bp_read_watchpoint
