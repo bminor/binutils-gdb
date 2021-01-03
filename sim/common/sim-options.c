@@ -835,6 +835,21 @@ sim_print_version (SIM_DESC sd, int is_command)
 License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\
 \nThis is free software: you are free to change and redistribute it.\n\
 There is NO WARRANTY, to the extent permitted by law.\n");
+
+  if (!is_command)
+    return;
+
+  sim_io_printf (sd, "This SIM was configured as:\n");
+  sim_config_print (sd);
+
+  if (REPORT_BUGS_TO[0])
+    {
+      sim_io_printf (sd, "For bug reporting instructions, please see:\n\
+    %s.\n",
+		     REPORT_BUGS_TO);
+    }
+  sim_io_printf (sd, "Find the SIM homepage & other documentation resources \
+online at:\n    <https://sourceware.org/gdb/wiki/Sim/>.\n");
 }
 
 /* Utility of sim_args_command to find the closest match for a command.
