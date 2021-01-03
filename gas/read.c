@@ -1548,7 +1548,7 @@ static void
 s_align (signed int arg, int bytes_p)
 {
   unsigned int align_limit = TC_ALIGN_LIMIT;
-  unsigned int align;
+  addressT align;
   char *stop = NULL;
   char stopc = 0;
   offsetT fill = 0;
@@ -1595,7 +1595,7 @@ s_align (signed int arg, int bytes_p)
   if (align > align_limit)
     {
       align = align_limit;
-      as_warn (_("alignment too large: %u assumed"), align);
+      as_warn (_("alignment too large: %u assumed"), align_limit);
     }
 
   if (*input_line_pointer != ',')
