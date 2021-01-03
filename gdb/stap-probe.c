@@ -870,7 +870,7 @@ stap_parse_single_operand (struct stap_parse_info *p)
       return;
     }
 
-  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+')
+  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' || *p->arg == '!')
     {
       char c = *p->arg;
       /* We use this variable to do a lookahead.  */
@@ -924,6 +924,8 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	    write_exp_elt_opcode (&p->pstate, UNOP_NEG);
 	  else if (c == '~')
 	    write_exp_elt_opcode (&p->pstate, UNOP_COMPLEMENT);
+	  else if (c == '!')
+	    write_exp_elt_opcode (&p->pstate, UNOP_LOGICAL_NOT);
 	}
     }
   else if (isdigit (*p->arg))
@@ -1012,7 +1014,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 {
   gdb_assert (gdbarch_stap_is_single_operand_p (p->gdbarch));
 
-  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' /* Unary.  */
+  if (*p->arg == '-' || *p->arg == '~' || *p->arg == '+' || *p->arg == '!'
       || isdigit (*p->arg)
       || gdbarch_stap_is_single_operand (p->gdbarch, p->arg))
     stap_parse_single_operand (p);
@@ -1027,11 +1029,12 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 
       stap_parse_argument_1 (p, 0, STAP_OPERAND_PREC_NONE);
 
-      --p->inside_paren_p;
+      p->arg = skip_spaces (p->arg);
       if (*p->arg != ')')
-	error (_("Missign close-paren on expression `%s'."),
+	error (_("Missign close-parenthesis on expression `%s'."),
 	       p->saved_arg);
 
+      --p->inside_paren_p;
       ++p->arg;
       if (p->inside_paren_p)
 	p->arg = skip_spaces (p->arg);
@@ -1066,6 +1069,9 @@ stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
 	 left-side in order to continue the process.  */
       stap_parse_argument_conditionally (p);
     }
+
+  if (p->inside_paren_p)
+    p->arg = skip_spaces (p->arg);
 
   /* Start to parse the right-side, and to "join" left and right sides
      depending on the operation specified.
@@ -1104,8 +1110,21 @@ stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
       if (p->inside_paren_p)
 	p->arg = skip_spaces (p->arg);
 
-      /* Parse the right-side of the expression.  */
+      /* Parse the right-side of the expression.
+
+	 We save whether the right-side is a parenthesized
+	 subexpression because, if it is, we will have to finish
+	 processing this part of the expression before continuing.  */
+      bool paren_subexp = *p->arg == '(';
+
       stap_parse_argument_conditionally (p);
+      if (p->inside_paren_p)
+	p->arg = skip_spaces (p->arg);
+      if (paren_subexp)
+	{
+	  write_exp_elt_opcode (&p->pstate, opcode);
+	  continue;
+	}
 
       /* While we still have operators, try to parse another
 	 right-side, but using the current right-side as a left-side.  */
@@ -1130,6 +1149,8 @@ stap_parse_argument_1 (struct stap_parse_info *p, bool has_lhs,
 	  /* Parse the right-side of the expression, but since we already
 	     have a left-side at this point, set `has_lhs' to 1.  */
 	  stap_parse_argument_1 (p, 1, lookahead_prec);
+	  if (p->inside_paren_p)
+	    p->arg = skip_spaces (p->arg);
 	}
 
       write_exp_elt_opcode (&p->pstate, opcode);

@@ -1,3 +1,8 @@
+2021-01-20  Sergio Durigan Junior  <sergiodj@sergiodj.net>
+
+	* gdb.arch/amd64-stap-expressions.S: New file.
+	* gdb.arch/amd64-stap-expressions.exp: New file.
+
 2021-01-19  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/step-over-syscall.exp: Detect and handle sysenter/int

@@ -1,3 +1,16 @@
+2021-01-20  Sergio Durigan Junior  <sergiodj@sergiodj.net>
+	    Tom Tromey <tom@tromey.com>
+
+	* stap-probe.c (stap_parse_single_operand): Handle '!'
+	operator.
+	(stap_parse_argument_conditionally): Likewise.
+	Skip spaces after processing open-parenthesis sub-expression.
+	(stap_parse_argument_1): Skip spaces after call to
+	stap_parse_argument_conditionally.
+	Handle case when right-side expression is a parenthesized
+	sub-expression.
+	Skip spaces after call to stap_parse_argument_1.
+
 2021-01-19  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* top.h (switch_thru_all_uis): Use DISABLE_COPY_AND_ASSIGN.
