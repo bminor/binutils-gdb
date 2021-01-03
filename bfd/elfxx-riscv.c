@@ -1572,8 +1572,8 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
       riscv_parse_add_subset (rps, subset,
 			      major_version,
 			      minor_version, FALSE);
-      free (subset);
       p += end_of_version - subset;
+      free (subset);
 
       if (*p != '\0' && *p != '_')
 	{

@@ -1,3 +1,9 @@
+2021-01-04  Alan Modra  <amodra@gmail.com>
+
+	PR 26741
+	* elfxx-riscv.c (riscv_parse_prefixed_ext): Free subset after
+	calculating subset version length.
+
 2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
 
 	* xcofflink.c: Correct spelling in comments.
