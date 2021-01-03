@@ -1191,7 +1191,7 @@ public:
 	       const gdb_byte *y, const struct type *type_y) const override;
 
 private:
-  /* Local wrapper class to handle mpfr_t initalization and cleanup.  */
+  /* Local wrapper class to handle mpfr_t initialization and cleanup.  */
   class gdb_mpfr
   {
   public:
@@ -2234,7 +2234,7 @@ get_target_float_ops_kind (const struct type *type)
     }
 }
 
-/* Return target_float_ops to peform operations for KIND.  */
+/* Return target_float_ops to perform operations for KIND.  */
 static const target_float_ops *
 get_target_float_ops (enum target_float_ops_kind kind)
 {
