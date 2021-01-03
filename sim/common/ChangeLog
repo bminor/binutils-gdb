@@ -1,5 +1,11 @@
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-options.c (standard_option_handler): Call sim_print_version.
+	(sim_print_version): New function.
+	* sim-options.h (sim_print_version): New prototype.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-config.c (print_sim_config): Rename to ...
 	(sim_print_config): ... this.
 	* sim-config.h: Likewise.
