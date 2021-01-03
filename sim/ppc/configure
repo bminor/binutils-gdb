@@ -6636,7 +6636,7 @@ if test "${with_bugurl+set}" = set; then :
 	   ;;
      esac
 else
-  BUGURL="http://www.gnu.org/software/gdb/bugs/"
+  BUGURL="https://www.gnu.org/software/gdb/bugs/"
 
 fi
 

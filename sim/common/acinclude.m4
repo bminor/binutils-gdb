@@ -237,7 +237,7 @@ SIM_AC_OPTION_ENVIRONMENT
 SIM_AC_OPTION_INLINE
 
 ACX_PKGVERSION([SIM])
-ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
+ACX_BUGURL([https://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
 AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
 

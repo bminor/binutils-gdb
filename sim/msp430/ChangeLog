@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2020-08-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* msp430-sim.c (sim_open): Increase the size of the main memory region

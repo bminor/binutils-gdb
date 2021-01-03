@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2020-12-31  Pavel I. Kryukov  <kryukov@frtk.ru>  (tiny change)
 
 	*  sim-main.c: Include <stdlib.h>.

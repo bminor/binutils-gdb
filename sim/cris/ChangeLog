@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2019-09-06  Alan Modra  <amodra@gmail.com>
 
 	* sim-if.c (sim_open): Constify filename variable.

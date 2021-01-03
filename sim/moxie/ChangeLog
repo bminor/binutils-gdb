@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2019-12-14  Anthony Green  <green@moxielogic.com>
 
 	* interp.c (sim_engine_run): Make use of sim_io_* functions for

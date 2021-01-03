@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2020-11-12  Dimitar Dimitrov  <dimitar@dinux.eu>
 
 	* pru.h (RS1SEL): New macro.

@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2020-02-06  Carlo Bramini  <carlo_bramini@users.sourceforge.net>
 
 	PR sim/25318
