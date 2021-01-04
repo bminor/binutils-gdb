@@ -2126,26 +2126,30 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
 {
   if (debug_timestamp && stream == gdb_stdlog)
     {
-      using namespace std::chrono;
-      int len, need_nl;
+      static bool needs_timestamp = true;
 
+      /* Print timestamp if previous print ended with a \n.  */
+      if (needs_timestamp)
+	{
+	  using namespace std::chrono;
+
+	  steady_clock::time_point now = steady_clock::now ();
+	  seconds s = duration_cast<seconds> (now.time_since_epoch ());
+	  microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
+	  std::string timestamp = string_printf ("%ld.%06ld ",
+						 (long) s.count (),
+						 (long) us.count ());
+	  fputs_unfiltered (timestamp.c_str (), stream);
+	}
+
+      /* Print the message.  */
       string_file sfile;
       cli_ui_out (&sfile, 0).vmessage (ui_file_style (), format, args);
       std::string linebuffer = std::move (sfile.string ());
+      fputs_unfiltered (linebuffer.c_str (), stream);
 
-      steady_clock::time_point now = steady_clock::now ();
-      seconds s = duration_cast<seconds> (now.time_since_epoch ());
-      microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
-
-      len = linebuffer.size ();
-      need_nl = (len > 0 && linebuffer[len - 1] != '\n');
-
-      std::string timestamp = string_printf ("%ld.%06ld %s%s",
-					     (long) s.count (),
-					     (long) us.count (),
-					     linebuffer.c_str (),
-					     need_nl ? "\n": "");
-      fputs_unfiltered (timestamp.c_str (), stream);
+      size_t len = linebuffer.length ();
+      needs_timestamp = (len > 0 && linebuffer[len - 1] == '\n');
     }
   else
     vfprintf_maybe_filtered (stream, format, args, false, true);

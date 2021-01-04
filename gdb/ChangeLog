@@ -1,3 +1,8 @@
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* utils.c (vfprintf_unfiltered): Print timestamp only when
+	previous debug output ended with a newline.
+
 2021-01-04  Luis Machado  <luis.machado@linaro.org>
 
 	Update all users of trad_frame_saved_reg to use the new member
