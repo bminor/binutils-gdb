@@ -96,7 +96,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +10 *
 .* SECTION +LOCAL +DEFAULT +11 *
 .* SECTION +LOCAL +DEFAULT +12 *
-.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlspic1.o
+.* FILE +LOCAL +DEFAULT +ABS .*tlspic1.o
 .* TLS +LOCAL +DEFAULT +8 sl1
 .* TLS +LOCAL +DEFAULT +8 sl2
 .* TLS +LOCAL +DEFAULT +8 sl3

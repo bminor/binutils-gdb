@@ -1,3 +1,44 @@
+2021-01-04  Alan Modra  <amodra@gmail.com>
+
+	PR 26822
+	* testsuite/ld-arm/non-contiguous-arm2.d: Adjust STT_FILE symbol match.
+	* testsuite/ld-arm/non-contiguous-arm3.d: Likewise.
+	* testsuite/ld-arm/non-contiguous-arm5.d: Likewise.
+	* testsuite/ld-arm/non-contiguous-arm6.d: Likewise.
+	* testsuite/ld-i386/tlsbin.rd: Likewise.
+	* testsuite/ld-i386/tlsbin2.rd: Likewise.
+	* testsuite/ld-i386/tlsbindesc.rd: Likewise.
+	* testsuite/ld-i386/tlsdesc.rd: Likewise.
+	* testsuite/ld-i386/tlsnopic.rd: Likewise.
+	* testsuite/ld-i386/tlspic.rd: Likewise.
+	* testsuite/ld-i386/tlspic2.rd: Likewise.
+	* testsuite/ld-mips-elf/global-local-symtab-sort-n64.d: Likewise.
+	* testsuite/ld-mips-elf/global-local-symtab-sort-n64t.d: Likewise.
+	* testsuite/ld-mips-elf/global-local-symtab-sort-o32.d: Likewise.
+	* testsuite/ld-mips-elf/global-local-symtab-sort-o32t.d: Likewise.
+	* testsuite/ld-plugin/pr17973.d: Likewise.
+	* testsuite/ld-tic6x/shlib-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1rb.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbin2.rd: Likewise.
+	* testsuite/ld-x86-64/tlsbindesc.rd: Likewise.
+	* testsuite/ld-x86-64/tlsdesc.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic.rd: Likewise.
+	* testsuite/ld-x86-64/tlspic2.rd: Likewise.
+	* testsuite/ld-xtensa/tlsbin.rd: Likewise.
+	* testsuite/ld-xtensa/tlspic.rd: Likewise.
+
 2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
 
 	* configure.tgt: Correct comment grammar.

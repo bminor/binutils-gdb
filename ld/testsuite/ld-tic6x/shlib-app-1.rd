@@ -18,8 +18,8 @@ Section Headers:
   \[13\] \.bss              NOBITS          100000cc 0020cc 000004 00  WA  0   0  4
   \[14\] \.c6xabi\.attributes C6000_ATTRIBUTES 00000000 0020cc 000019 00      0   0  1
   \[15\] \.symtab           SYMTAB          00000000 0020e8 0001b0 10     16  22  4
-  \[16\] \.strtab           STRTAB          00000000 002298 00005e 00      0   0  1
-  \[17\] \.shstrtab         STRTAB          00000000 0022f6 000080 00      0   0  1
+  \[16\] \.strtab           STRTAB .*
+  \[17\] \.shstrtab         STRTAB .*
 Key to Flags:
 #...
 
@@ -111,7 +111,7 @@ Symbol table '\.symtab' contains 27 entries:
     12: 100000c0     0 SECTION LOCAL  DEFAULT   12 
     13: 100000cc     0 SECTION LOCAL  DEFAULT   13 
     14: 00000000     0 SECTION LOCAL  DEFAULT   14 
-    15: 00000000     0 FILE    LOCAL  DEFAULT  ABS tmpdir/shlib-app-1\.o
+    15: 00000000     0 FILE    LOCAL  DEFAULT  ABS .*shlib-app-1\.o
     16: 10000060     0 NOTYPE  LOCAL  DEFAULT   10 fish
     17: 100000c4     8 OBJECT  LOCAL  DEFAULT   12 w
     18: 00000000     0 FILE    LOCAL  DEFAULT  ABS 

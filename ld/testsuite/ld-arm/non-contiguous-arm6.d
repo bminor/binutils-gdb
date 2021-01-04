@@ -19,7 +19,7 @@ SYMBOL TABLE:
 1fff0000 l    d  .raml	00000000 .raml
 40040000 l    d  .ramz	00000000 .ramz
 00000000 l    d  .ARM.attributes	00000000 .ARM.attributes
-00000000 l    df \*ABS\*	00000000 .*/non-contiguous-arm.o
+00000000 l    df \*ABS\*	00000000 .*non-contiguous-arm.o
 1fff0020 l     F .raml	00000008 __code4_veneer
 1fff0028 g       .raml	00000000 _raml_end
 30000000 g       .raml	00000000 _ramu_start

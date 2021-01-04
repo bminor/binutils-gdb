@@ -88,7 +88,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +11 *
 .* SECTION +LOCAL +DEFAULT +12 *
 .* SECTION +LOCAL +DEFAULT +13 *
-.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbinpic.o
+.* FILE +LOCAL +DEFAULT +ABS .*tlsbinpic.o
 .* TLS +LOCAL +DEFAULT +9 sl1
 .* TLS +LOCAL +DEFAULT +9 sl2
 .* TLS +LOCAL +DEFAULT +9 sl3
@@ -97,7 +97,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +LOCAL +DEFAULT +9 sl6
 .* TLS +LOCAL +DEFAULT +9 sl7
 .* TLS +LOCAL +DEFAULT +9 sl8
-.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsbin.o
+.* FILE +LOCAL +DEFAULT +ABS .*tlsbin.o
 .* TLS +LOCAL +DEFAULT +10 bl1
 .* TLS +LOCAL +DEFAULT +10 bl2
 .* TLS +LOCAL +DEFAULT +10 bl3

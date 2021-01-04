@@ -89,7 +89,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +7 *
  +[0-9]+: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +8 *
  +[0-9]+: [0-9a-f]+ +0 +SECTION +LOCAL +DEFAULT +9 *
-.* FILE +LOCAL +DEFAULT +ABS tmpdir/tlsnopic1.o
+.* FILE +LOCAL +DEFAULT +ABS .*tlsnopic1.o
  +[0-9]+: 0+00 +0 +TLS +LOCAL +DEFAULT +6 bl1
  +[0-9]+: 0+04 +0 +TLS +LOCAL +DEFAULT +6 bl2
  +[0-9]+: 0+08 +0 +TLS +LOCAL +DEFAULT +6 bl3

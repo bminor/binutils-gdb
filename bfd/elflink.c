@@ -10952,16 +10952,18 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	     files lack such, so that their symbols won't be
 	     associated with a previous input file.  It's not the
 	     source file, but the best we can do.  */
+	  const char *filename;
 	  have_file_sym = TRUE;
 	  flinfo->filesym_count += 1;
 	  memset (&osym, 0, sizeof (osym));
 	  osym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
 	  osym.st_shndx = SHN_ABS;
-	  if (!elf_link_output_symstrtab (flinfo,
-					  (input_bfd->lto_output ? NULL
-					   : bfd_get_filename (input_bfd)),
-					  &osym, bfd_abs_section_ptr,
-					  NULL))
+	  if (input_bfd->lto_output)
+	    filename = NULL;
+	  else
+	    filename = lbasename (bfd_get_filename (input_bfd));
+	  if (!elf_link_output_symstrtab (flinfo, filename, &osym,
+					  bfd_abs_section_ptr, NULL))
 	    return FALSE;
 	}
 
