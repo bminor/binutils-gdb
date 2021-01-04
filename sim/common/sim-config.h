@@ -313,7 +313,7 @@ extern SIM_RC sim_config (SIM_DESC sd);
 
 /* Print the simulator configuration.  */
 
-extern void sim_print_config (SIM_DESC sd);
+extern void sim_config_print (SIM_DESC sd);
 
 
 #endif

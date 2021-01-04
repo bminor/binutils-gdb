@@ -294,7 +294,7 @@ sim_config (SIM_DESC sd)
 
 
 void
-sim_print_config (SIM_DESC sd)
+sim_config_print (SIM_DESC sd)
 {
   sim_io_printf (sd, "WITH_TARGET_BYTE_ORDER = %s\n",
 		 config_byte_order_to_a (WITH_TARGET_BYTE_ORDER));

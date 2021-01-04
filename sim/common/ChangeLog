@@ -7,7 +7,7 @@
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-config.c (print_sim_config): Rename to ...
-	(sim_print_config): ... this.
+	(sim_config_print): ... this.
 	* sim-config.h: Likewise.
 
 2021-01-02  Mike Frysinger  <vapier@gentoo.org>
