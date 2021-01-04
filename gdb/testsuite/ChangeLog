@@ -1,5 +1,9 @@
 2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdb.server/ext-run.exp: Use clean_restart.
+
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdb.server/stop-reply-no-thread.exp: Use build_executable
 	instead of prepare_for_testing.
 
