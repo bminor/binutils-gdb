@@ -707,13 +707,18 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
      anyway.  */
   if (line == 0)
     {
+      struct linetable_entry *last = nullptr;
       while (subfile->line_vector->nitems > 0)
 	{
-	  e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
-	  if (e->pc != pc)
+	  last = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+	  if (last->pc != pc)
 	    break;
 	  subfile->line_vector->nitems--;
 	}
+
+      /* Ignore an end-of-sequence marker marking an empty sequence.  */
+      if (last == nullptr || last->line == 0)
+	return;
     }
 
   e = subfile->line_vector->item + subfile->line_vector->nitems++;
