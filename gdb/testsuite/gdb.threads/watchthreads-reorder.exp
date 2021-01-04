@@ -90,5 +90,10 @@ foreach reorder {0 1} { with_test_prefix "reorder$reorder" {
     # found in the DEBUG_INFRUN code path.
     gdb_test "set debug infrun 1"
 
-    gdb_continue_to_breakpoint "break-at-exit" ".*break-at-exit.*"
+    set prompt "$gdb_prompt \\\[infrun\\\] fetch_inferior_event: exit\r\n$"
+    gdb_test_multiple "continue" "continue to breakpoint: break-at-exit" -prompt $prompt {
+        -re ".*break-at-exit.*$prompt$" {
+	    pass $gdb_test_name
+	}
+    }
 }}

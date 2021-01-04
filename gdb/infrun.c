@@ -1833,6 +1833,8 @@ static step_over_what thread_still_needs_step_over (struct thread_info *tp);
 static bool
 start_step_over (void)
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
   thread_info *next;
 
   /* Don't start a new step-over if we already have an in-line
@@ -2849,6 +2851,8 @@ check_multi_target_resumption (process_stratum_target *resume_target)
 void
 proceed (CORE_ADDR addr, enum gdb_signal siggnal)
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
   struct regcache *regcache;
   struct gdbarch *gdbarch;
   CORE_ADDR pc;
@@ -3018,6 +3022,9 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
       }
     else if (!non_stop && target_is_non_stop_p ())
       {
+	INFRUN_SCOPED_DEBUG_START_END
+	  ("resuming threads, all-stop-on-top-of-non-stop");
+
 	/* In all-stop, but the target is always in non-stop mode.
 	   Start all other threads that are implicitly resumed too.  */
 	for (thread_info *tp : all_non_exited_threads (resume_target,
@@ -3771,6 +3778,8 @@ all_uis_on_sync_execution_starting (void)
 void
 fetch_inferior_event ()
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
   int cmd_done = 0;

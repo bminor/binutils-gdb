@@ -1,3 +1,11 @@
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* common-debug.h (debug_print_depth): New.
+	(struct scoped_debug_start_end): New.
+	(scoped_debug_start_end): New.
+	(scoped_debug_enter_exit): New.
+	* common-debug.cc (debug_prefixed_vprintf): Print indentation.
+
 2020-12-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdbsupport/common-utils.cc: Change 'ctype.h' include to

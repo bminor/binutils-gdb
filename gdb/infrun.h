@@ -36,6 +36,16 @@ extern bool debug_infrun;
 #define infrun_debug_printf(fmt, ...) \
   debug_prefixed_printf_cond (debug_infrun, "infrun",fmt, ##__VA_ARGS__)
 
+/* Print "infrun" start/end debug statements.  */
+
+#define INFRUN_SCOPED_DEBUG_START_END(msg) \
+  scoped_debug_start_end (debug_infrun, "infrun", msg)
+
+/* Print "infrun" enter/exit debug statements.  */
+
+#define INFRUN_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (debug_infrun, "infrun")
+
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 extern int stop_on_solib_events;

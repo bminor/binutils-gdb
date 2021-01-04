@@ -55,7 +55,7 @@ void
 debug_prefixed_vprintf (const char *module, const char *func,
 			const char *format, va_list args)
 {
-  debug_printf ("[%s] %s: ", module, func);
+  debug_printf ("%*s[%s] %s: ", debug_print_depth * 2, "", module, func);
   debug_vprintf (format, args);
   debug_printf ("\n");
 }

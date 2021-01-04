@@ -23,6 +23,10 @@
 
 /* See gdbsupport/common-debug.h.  */
 
+int debug_print_depth = 0;
+
+/* See gdbsupport/common-debug.h.  */
+
 void
 debug_vprintf (const char *fmt, va_list ap)
 {

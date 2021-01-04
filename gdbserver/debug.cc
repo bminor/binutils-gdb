@@ -64,6 +64,10 @@ debug_set_output (const char *new_debug_file)
 
 #endif
 
+/* See gdbsupport/common-debug.h.  */
+
+int debug_print_depth = 0;
+
 /* Print a debugging message.
    If the text begins a new line it is preceded by a timestamp.
    We don't get fancy with newline checking, we just check whether the

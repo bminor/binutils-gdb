@@ -1,5 +1,16 @@
 2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* debug.c (debug_print_depth): New.
+	* infrun.h (INFRUN_SCOPED_DEBUG_START_END): New.
+	(INFRUN_SCOPED_DEBUG_ENTER_EXIT): New.
+	* infrun.c (start_step_over): Use
+	INFRUN_SCOPED_DEBUG_ENTER_EXIT.
+	(proceed): Use INFRUN_SCOPED_DEBUG_ENTER_EXIT and
+	INFRUN_SCOPED_DEBUG_START_END.
+	(fetch_inferior_event): Use INFRUN_SCOPED_DEBUG_ENTER_EXIT.
+
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* infrun.c (print_target_wait_results): Use infrun_debug_printf.
 
 2021-01-04  Simon Marchi  <simon.marchi@efficios.com>

@@ -1,3 +1,7 @@
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* debug.cc (debug_print_depth): New.
+
 2021-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* server.cc (gdbserver_version): Update copyright year.
