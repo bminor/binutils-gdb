@@ -1,5 +1,11 @@
 2021-01-04  Alan Modra  <amodra@gmail.com>
 
+	PR 27102
+	* symbols.c (S_SET_EXTERNAL): Revise section symbol warning
+	message and register symbol error message.
+
+2021-01-04  Alan Modra  <amodra@gmail.com>
+
 	PR 27101
 	* read.c (s_align): Use a large enough type for "align" to hold
 	the result of get_absolute_expression.
