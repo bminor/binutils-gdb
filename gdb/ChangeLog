@@ -1,5 +1,9 @@
 2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* infrun.c (print_target_wait_results): Use infrun_debug_printf.
+
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* utils.c (vfprintf_unfiltered): Print timestamp only when
 	previous debug output ended with a newline.
 

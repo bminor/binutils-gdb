@@ -3275,31 +3275,17 @@ void
 print_target_wait_results (ptid_t waiton_ptid, ptid_t result_ptid,
 			   const struct target_waitstatus *ws)
 {
-  std::string status_string = target_waitstatus_to_string (ws);
-  string_file stb;
-
-  /* The text is split over several lines because it was getting too long.
-     Call fprintf_unfiltered (gdb_stdlog) once so that the text is still
-     output as a unit; we want only one timestamp printed if debug_timestamp
-     is set.  */
-
-  stb.printf ("[infrun] target_wait (%d.%ld.%ld",
-	      waiton_ptid.pid (),
-	      waiton_ptid.lwp (),
-	      waiton_ptid.tid ());
-  if (waiton_ptid.pid () != -1)
-    stb.printf (" [%s]", target_pid_to_str (waiton_ptid).c_str ());
-  stb.printf (", status) =\n");
-  stb.printf ("[infrun]   %d.%ld.%ld [%s],\n",
-	      result_ptid.pid (),
-	      result_ptid.lwp (),
-	      result_ptid.tid (),
-	      target_pid_to_str (result_ptid).c_str ());
-  stb.printf ("[infrun]   %s\n", status_string.c_str ());
-
-  /* This uses %s in part to handle %'s in the text, but also to avoid
-     a gcc error: the format attribute requires a string literal.  */
-  fprintf_unfiltered (gdb_stdlog, "%s", stb.c_str ());
+  infrun_debug_printf ("target_wait (%d.%ld.%ld [%s], status) =",
+		       waiton_ptid.pid (),
+		       waiton_ptid.lwp (),
+		       waiton_ptid.tid (),
+		       target_pid_to_str (waiton_ptid).c_str ());
+  infrun_debug_printf ("  %d.%ld.%ld [%s],",
+		       result_ptid.pid (),
+		       result_ptid.lwp (),
+		       result_ptid.tid (),
+		       target_pid_to_str (result_ptid).c_str ());
+  infrun_debug_printf ("  %s", target_waitstatus_to_string (ws).c_str ());
 }
 
 /* Select a thread at random, out of those which are resumed and have
