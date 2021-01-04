@@ -11869,8 +11869,21 @@ compare_link_order (const void *a, const void *b)
   const struct bfd_link_order *blo = *(const struct bfd_link_order **) b;
   asection *asec = elf_linked_to_section (alo->u.indirect.section);
   asection *bsec = elf_linked_to_section (blo->u.indirect.section);
-  bfd_vma apos = asec->output_section->lma + asec->output_offset;
-  bfd_vma bpos = bsec->output_section->lma + bsec->output_offset;
+  bfd_vma apos, bpos;
+
+  /* Check if any sections are unordered.  */
+  if (asec == NULL || bsec == NULL)
+    {
+      /* Place unordered sections before ordered sections.  */
+      if (bsec != NULL)
+	return -1;
+      else if (asec != NULL)
+	return 1;
+      return 0;
+    }
+
+  apos = asec->output_section->lma + asec->output_offset;
+  bpos = bsec->output_section->lma + bsec->output_offset;
 
   if (apos < bpos)
     return -1;
@@ -11905,14 +11918,14 @@ compare_link_order (const void *a, const void *b)
    sections.  Ideally we'd do this in the linker proper.  */
 
 static bfd_boolean
-elf_fixup_link_order (bfd *abfd, asection *o)
+elf_fixup_link_order (struct bfd_link_info *info, bfd *abfd, asection *o)
 {
   size_t seen_linkorder;
   size_t seen_other;
   size_t n;
   struct bfd_link_order *p;
   bfd *sub;
-  struct bfd_link_order **sections;
+  struct bfd_link_order **sections, **indirect_sections;
   asection *other_sec, *linkorder_sec;
   bfd_vma offset;  /* Octets.  */
 
@@ -11943,7 +11956,9 @@ elf_fixup_link_order (bfd *abfd, asection *o)
       else
 	seen_other++;
 
-      if (seen_other && seen_linkorder)
+      /* Allow mixed ordered and unordered input sections for
+         non-relocatable link.  */
+      if (bfd_link_relocatable (info) && seen_other && seen_linkorder)
 	{
 	  if (other_sec && linkorder_sec)
 	    _bfd_error_handler
@@ -11963,6 +11978,10 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   if (!seen_linkorder)
     return TRUE;
 
+  /* Non-relocatable output can have both ordered and unordered input
+     sections.  */
+  seen_linkorder += seen_other;
+
   sections = bfd_malloc (seen_linkorder * sizeof (*sections));
   if (sections == NULL)
     return FALSE;
@@ -11971,22 +11990,48 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   for (p = o->map_head.link_order; p != NULL; p = p->next)
     sections[seen_linkorder++] = p;
 
-  /* Sort the input sections in the order of their linked section.  */
-  qsort (sections, seen_linkorder, sizeof (*sections), compare_link_order);
+  for (indirect_sections = sections, n = 0;
+       n < seen_linkorder;
+       indirect_sections++, n++)
+    {
+      /* Find the first bfd_indirect_link_order section.  */
+      if (indirect_sections[0]->type == bfd_indirect_link_order)
+	{
+	  /* Count the consecutive bfd_indirect_link_order sections
+	     with the same pattern.  */
+	  size_t i, n_indirect;
+	  const char *pattern
+	    = indirect_sections[0]->u.indirect.section->pattern;
+	  for (i = n + 1; i < seen_linkorder; i++)
+	    if (sections[i]->type != bfd_indirect_link_order
+		|| sections[i]->u.indirect.section->pattern != pattern)
+	      break;
+	  n_indirect = i - n;
+	  /* Sort the bfd_indirect_link_order sections in the order of
+	     their linked section.  */
+	  qsort (indirect_sections, n_indirect, sizeof (*sections),
+		 compare_link_order);
+	  indirect_sections += n_indirect;
+	  n += n_indirect;
+	}
+    }
 
-  /* Change the offsets of the sections.  */
+  /* Change the offsets of the bfd_indirect_link_order sections.  */
   offset = 0;
   for (n = 0; n < seen_linkorder; n++)
-    {
-      bfd_vma mask;
-      asection *s = sections[n]->u.indirect.section;
-      unsigned int opb = bfd_octets_per_byte (abfd, s);
+    if (sections[n]->type == bfd_indirect_link_order)
+      {
+	bfd_vma mask;
+	asection *s = sections[n]->u.indirect.section;
+	unsigned int opb = bfd_octets_per_byte (abfd, s);
 
-      mask = ~(bfd_vma) 0 << s->alignment_power * opb;
-      offset = (offset + ~mask) & mask;
-      sections[n]->offset = s->output_offset = offset / opb;
-      offset += sections[n]->size;
-    }
+	mask = ~(bfd_vma) 0 << s->alignment_power * opb;
+	offset = (offset + ~mask) & mask;
+	sections[n]->offset = s->output_offset = offset / opb;
+	offset += sections[n]->size;
+      }
+    else
+      offset = sections[n]->offset + sections[n]->size;
 
   free (sections);
   return TRUE;
@@ -12629,7 +12674,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Reorder SHF_LINK_ORDER sections.  */
   for (o = abfd->sections; o != NULL; o = o->next)
     {
-      if (!elf_fixup_link_order (abfd, o))
+      if (!elf_fixup_link_order (info, abfd, o))
 	return FALSE;
     }
 

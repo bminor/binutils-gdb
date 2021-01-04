@@ -1,3 +1,18 @@
+2021-01-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26256
+	* elflink.c (compare_link_order): Place unordered sections before
+	ordered sections.
+	(elf_fixup_link_order): Add a link info argument.  Allow mixed
+	ordered and unordered input sections for non-relocatable link.
+	Sort the consecutive bfd_indirect_link_order sections with the
+	same pattern.  Change the offsets of the bfd_indirect_link_order
+	sections only.
+	(bfd_elf_final_link): Pass info to elf_fixup_link_order.
+	* section.c (bfd_section): Add pattern.
+	(BFD_FAKE_SECTION): Initialize pattern to NULL.
+	* bfd-in2.h: Regenerated.
+
 2021-01-04  Alexander Fedotov  <alfedotov@gmail.com>
 
 	* elf32-arm.c (elf32_arm_print_private_bfd_data): Prefix hex value
