@@ -1,3 +1,9 @@
+2021-01-04  Alexander Fedotov  <alfedotov@gmail.com>
+
+	* elf32-arm.c (elf32_arm_print_private_bfd_data): Prefix hex value
+	of private flags with 0x.
+	* elfnn-aarch64.c (elfNN_aarch64_print_private_bfd_data): Likewise.
+
 2021-01-04  Alan Modra  <amodra@gmail.com>
 
 	PR 26822

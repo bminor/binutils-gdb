@@ -7331,10 +7331,10 @@ elfNN_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
      containing valid data.  */
 
   /* xgettext:c-format */
-  fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
+  fprintf (file, _("private flags = 0x%lx:"), elf_elfheader (abfd)->e_flags);
 
   if (flags)
-    fprintf (file, _("<Unrecognised flag bits set>"));
+    fprintf (file, _(" <Unrecognised flag bits set>"));
 
   fputc ('\n', file);
 

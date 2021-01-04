@@ -15062,7 +15062,7 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
   /* Ignore init flag - it may not be set, despite the flags field
      containing valid data.  */
 
-  fprintf (file, _("private flags = %lx:"), elf_elfheader (abfd)->e_flags);
+  fprintf (file, _("private flags = 0x%lx:"), elf_elfheader (abfd)->e_flags);
 
   switch (EF_ARM_EABI_VERSION (flags))
     {
@@ -15183,7 +15183,7 @@ elf32_arm_print_private_bfd_data (bfd *abfd, void * ptr)
   flags &= ~ (EF_ARM_RELEXEC | EF_ARM_PIC);
 
   if (flags)
-    fprintf (file, _("<Unrecognised flag bits set>"));
+    fprintf (file, _(" <Unrecognised flag bits set>"));
 
   fputc ('\n', file);
 
