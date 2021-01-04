@@ -1,3 +1,12 @@
+2021-01-04  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.c (riscv_compare_subsets): Removed static.
+	* elfxx-riscv.h: Add declaration.
+	* elfnn-riscv.c (riscv_merge_multi_letter_ext): Use
+	riscv_compare_subsets to check the orders.
+	(riscv_skip_prefix): Removed.
+	(riscv_prefix_cmp): Removed.
+
 2021-01-04  Alan Modra  <amodra@gmail.com>
 
 	PR 26741

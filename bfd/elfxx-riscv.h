@@ -116,3 +116,6 @@ riscv_get_priv_spec_class_from_numbers (unsigned int,
 
 extern const char *
 riscv_get_priv_spec_name (enum riscv_priv_spec_class);
+
+extern int
+riscv_compare_subsets (const char *, const char *);

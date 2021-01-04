@@ -1037,7 +1037,7 @@ static int riscv_ext_order[26] = {0};
    or greater than zero if `subset2` is found, respectively, to be less
    than, to match, or be greater than `subset1`.  */
 
-static int
+int
 riscv_compare_subsets (const char *subset1, const char *subset2)
 {
   int order1 = riscv_ext_order[(*subset1 - 'a')];

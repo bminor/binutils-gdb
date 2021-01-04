@@ -3410,39 +3410,6 @@ riscv_merge_std_ext (bfd *ibfd,
   return TRUE;
 }
 
-/* If C is a prefix class, then return the EXT string without the prefix.
-   Otherwise return the entire EXT string.  */
-
-static const char *
-riscv_skip_prefix (const char *ext, riscv_isa_ext_class_t c)
-{
-  switch (c)
-    {
-    case RV_ISA_CLASS_X: return &ext[1];
-    case RV_ISA_CLASS_S: return &ext[1];
-    case RV_ISA_CLASS_Z: return &ext[1];
-    default: return ext;
-    }
-}
-
-/* Compare prefixed extension names canonically.  */
-
-static int
-riscv_prefix_cmp (const char *a, const char *b)
-{
-  riscv_isa_ext_class_t ca = riscv_get_prefix_class (a);
-  riscv_isa_ext_class_t cb = riscv_get_prefix_class (b);
-
-  /* Extension name without prefix  */
-  const char *anp = riscv_skip_prefix (a, ca);
-  const char *bnp = riscv_skip_prefix (b, cb);
-
-  if (ca == cb)
-    return strcasecmp (anp, bnp);
-
-  return (int)ca - (int)cb;
-}
-
 /* Merge multi letter extensions.  PIN is a pointer to the head of the input
    object subset list.  Likewise for POUT and the output object.  Return TRUE
    on success and FALSE when a conflict is found.  */
@@ -3460,7 +3427,7 @@ riscv_merge_multi_letter_ext (bfd *ibfd,
 
   while (in && out)
     {
-      cmp = riscv_prefix_cmp (in->name, out->name);
+      cmp = riscv_compare_subsets (in->name, out->name);
 
       if (cmp < 0)
 	{
