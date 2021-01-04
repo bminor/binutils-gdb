@@ -1,3 +1,7 @@
+2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.server/solib-list.exp: Use clean_restart.
+
 2021-01-04  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/morestack.c: Remove printf.

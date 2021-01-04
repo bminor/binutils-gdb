@@ -42,12 +42,7 @@ set interp_system [section_get ${binfile} .interp]
 verbose -log "system interpreter is: $interp_system"
 
 foreach nonstop { 0 1 } { with_test_prefix "non-stop $nonstop" {
-
-    # clean_restart assumes ${objdir}/${subdir}/ which is not applicable
-    # for ${interp_system}.
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
+    clean_restart
     gdb_load_shlib ${binlibfile}
 
     set remote_binfile [gdb_remote_download target $binfile]
