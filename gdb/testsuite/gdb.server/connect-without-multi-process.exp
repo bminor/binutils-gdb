@@ -31,9 +31,17 @@ if {[build_executable "failed to prepare" $testfile $srcfile debug]} {
 # Test spawning gdbserver with a program, connect to it and run to
 # main, with both multiprocess extensions on and off.
 proc do_test {multiprocess} {
-    global binfile
+    global binfile GDBFLAGS
 
-    clean_restart $binfile
+    save_vars { GDBFLAGS } {
+	# If GDB and GDBserver are both running locally, set the sysroot to avoid
+	# reading files via the remote protocol.
+	if { ![is_remote host] && ![is_remote target] } {
+	    set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
+	}
+
+	clean_restart $binfile
+    }
 
     # Make sure we're disconnected, in case we're testing with an
     # extended-remote board, therefore already connected.

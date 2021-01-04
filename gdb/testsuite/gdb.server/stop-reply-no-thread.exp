@@ -34,9 +34,17 @@ if { [build_executable "failed to prepare" $testfile $srcfile] == -1 } {
 
 # Run the tests with different features of GDBserver disabled.
 proc run_test { disable_feature target_nonstop } {
-    global binfile gdb_prompt decimal
+    global binfile gdb_prompt decimal GDBFLAGS
 
-    clean_restart ${binfile}
+    save_vars { GDBFLAGS } {
+	# If GDB and GDBserver are both running locally, set the sysroot to avoid
+	# reading files via the remote protocol.
+	if { ![is_remote host] && ![is_remote target] } {
+	    set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
+	}
+
+	clean_restart ${binfile}
+    }
 
     # Make sure we're disconnected, in case we're testing with an
     # extended-remote board, therefore already connected.

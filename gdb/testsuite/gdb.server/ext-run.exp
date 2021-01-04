@@ -32,7 +32,15 @@ if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
 # gdb_skip_xml_test must be called while gdb is not running.
 set do_xml_test [expr ![gdb_skip_xml_test]]
 
-clean_restart $binfile
+save_vars { GDBFLAGS } {
+    # If GDB and GDBserver are both running locally, set the sysroot to avoid
+    # reading files via the remote protocol.
+    if { ![is_remote host] && ![is_remote target] } {
+	set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
+    }
+
+    clean_restart $binfile
+}
 
 # Make sure we're disconnected, in case we're testing with an
 # extended-remote board, therefore already connected.

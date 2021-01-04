@@ -31,6 +31,13 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 # remote/21852.
 save_vars { GDBFLAGS } {
     set GDBFLAGS ""
+
+    # If GDB and GDBserver are both running locally, set the sysroot to avoid
+    # reading files via the remote protocol.
+    if { ![is_remote host] && ![is_remote target] } {
+	set GDBFLAGS "-ex \"set sysroot\""
+    }
+
     gdb_exit
     gdb_start
 
