@@ -16,9 +16,6 @@ case ${target} in
     d10v-*-elf )
 	AC_CONFIG_SUBDIRS(d10v-elf)
 	;;
-    mips64el-*-elf )
-        AC_CONFIG_SUBDIRS(mips64el-elf)
-	;;
 esac
 
 sinclude(../configure.tgt)

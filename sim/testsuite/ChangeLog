@@ -1,3 +1,9 @@
+2021-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (target): Delete mips64el-*-elf case.
+	* configure: Regenerate.
+	* mips64el-elf/: Delete directory.
+
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (target): Delete frv-*-elf case.

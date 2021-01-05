@@ -645,8 +645,7 @@ enable_option_checking
       ac_precious_vars='build_alias
 host_alias
 target_alias'
-ac_subdirs_all='d10v-elf
-mips64el-elf'
+ac_subdirs_all='d10v-elf'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -1832,10 +1831,6 @@ case ${target} in
 
 
 subdirs="$subdirs d10v-elf"
-
-	;;
-    mips64el-*-elf )
-        subdirs="$subdirs mips64el-elf"
 
 	;;
 esac
