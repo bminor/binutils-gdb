@@ -37,4 +37,4 @@
 #define SEGV_CAPPERMERR	      13  /* Capability permission fault */
 #define SEGV_CAPSTORETAGERR   14  /* Capability tag store fault */
 
-#endif /*ARCH_AARCH64_CAP_LINUX_H */
+#endif /* ARCH_AARCH64_CAP_LINUX_H */
