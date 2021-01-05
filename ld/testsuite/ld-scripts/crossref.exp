@@ -79,9 +79,6 @@ if [istarget arc*-*-elf32] {
     set flags "$flags --defsym=__SDATA_BEGIN__=0"
 }
 
-# IA64 has both ordered and unordered sections in an input file.
-setup_xfail ia64-*-*
-
 set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross1 -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o"]
 
 set exec_output [prune_warnings $exec_output]
