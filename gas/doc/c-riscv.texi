@@ -99,6 +99,14 @@ read-only CSR can not be written by the CSR instructions.
 @cindex @samp{-mno-csr-check} option, RISC-V
 @item -mno-csr-check
 Don't do CSR checking.
+
+@cindex @samp{-mlittle-endian} option, RISC-V
+@item -mlittle-endian
+Generate code for a little endian machine.
+
+@cindex @samp{-mbig-endian} option, RISC-V
+@item -mbig-endian
+Generate code for a big endian machine.
 @end table
 @c man end
 

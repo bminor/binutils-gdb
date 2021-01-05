@@ -536,6 +536,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-fpic}|@b{-fPIC}|@b{-fno-pic}]
    [@b{-march}=@var{ISA}]
    [@b{-mabi}=@var{ABI}]
+   [@b{-mlittle-endian}|@b{-mbig-endian}]
 @end ifset
 @ifset RL78
 

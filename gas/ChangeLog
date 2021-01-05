@@ -1,5 +1,10 @@
 2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
 
+	* doc/as.texi: Add -mlittle-endian and -mbig-endian to docs.
+	* doc/c-riscv.texi: Likewise.
+
+2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
+
 	* testsuite/gas/riscv/li32.d: Accept bigriscv in addition
 	to littleriscv.
 	* testsuite/gas/riscv/li64.d: Likewise.
