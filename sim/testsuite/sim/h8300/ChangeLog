@@ -1,5 +1,11 @@
 2021-01-05  Mike Frysinger  <vapier@gentoo.org>
 
+	* rotl.s (mach): Set to "h8300s h8sx".
+	* rotr.s, rotxl.s, rotxr.s, shal.s, shar.s, shll.s, shlr.s, tas.s:
+	Likewise.
+
+2021-01-05  Mike Frysinger  <vapier@gentoo.org>
+
 	* allinsn.exp: Rewrite file to use globs.
 
 2004-06-28  Alexandre Oliva  <aoliva@redhat.com>

@@ -1,5 +1,5 @@
 # Hitachi H8 testcase 'tas'
-# mach(): h8300h h8300s h8sx
+# mach(): h8300s h8sx
 # as(h8300):	--defsym sim_cpu=0
 # as(h8300h):	--defsym sim_cpu=1
 # as(h8300s):	--defsym sim_cpu=2
