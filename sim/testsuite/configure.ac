@@ -19,9 +19,6 @@ case ${target} in
     frv-*-elf )
 	AC_CONFIG_SUBDIRS(frv-elf)
 	;;
-    m32r-*-elf )
-	AC_CONFIG_SUBDIRS(m32r-elf)
-	;;
     mips64el-*-elf )
         AC_CONFIG_SUBDIRS(mips64el-elf)
 	;;

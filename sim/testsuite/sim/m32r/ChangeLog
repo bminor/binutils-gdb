@@ -1,3 +1,7 @@
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* exit47.ms: New testcase from ../../m32r-elf/.
+
 1999-04-21  Doug Evans  <devans@casey.cygnus.com>
 
 	* nop.cgs: Add missing nop insn.

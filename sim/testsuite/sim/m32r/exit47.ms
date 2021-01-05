@@ -1,3 +1,7 @@
+# mach(): m32r m32rx
+# status: 47
+# output:
+
 	;; Return with exit code 47.
 
 	.globl _start

@@ -647,7 +647,6 @@ host_alias
 target_alias'
 ac_subdirs_all='d10v-elf
 frv-elf
-m32r-elf
 mips64el-elf'
 
 # Initialize some variables set by options.
@@ -1838,10 +1837,6 @@ subdirs="$subdirs d10v-elf"
 	;;
     frv-*-elf )
 	subdirs="$subdirs frv-elf"
-
-	;;
-    m32r-*-elf )
-	subdirs="$subdirs m32r-elf"
 
 	;;
     mips64el-*-elf )

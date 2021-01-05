@@ -1,5 +1,11 @@
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (target): Delete m32r-*-elf case.
+	* configure: Regenerate.
+	* m32r-elf/: Delete directory.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* lib/sim-defs.exp (sim_run): Delete status and return return_code.
 	(run_sim_test): Define status option.  Change sim_run return to
 	return_code.  Define status.  Log return_code.
