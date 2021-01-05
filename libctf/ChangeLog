@@ -1,5 +1,11 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/libctf-lookup/enum-symbol.lk: New symbol-lookup test.
+	* testsuite/libctf-lookup/enum-symbol-ctf.c: New CTF input.
+	* testsuite/libctf-lookup/enum-symbol.c: New lookup test.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* Makefile.am (EXPECT): New.
 	(RUNTEST): Likewise.
 	(RUNTESTFLAGS): Likewise.
