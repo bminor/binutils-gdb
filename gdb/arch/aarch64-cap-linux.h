@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_AARCH64_LINUX_H
-#define ARCH_AARCH64_LINUX_H
+#ifndef ARCH_AARCH64_CAP_LINUX_H
+#define ARCH_AARCH64_CAP_LINUX_H
 
 /* Morello HWCAP bit.  */
 #define HWCAP2_MORELLO (1 << 19)
@@ -37,4 +37,4 @@
 #define SEGV_CAPPERMERR	      13  /* Capability permission fault */
 #define SEGV_CAPSTORETAGERR   14  /* Capability tag store fault */
 
-#endif /*ARCH_AARCH64_LINUX_H */
+#endif /* ARCH_AARCH64_CAP_LINUX_H */
