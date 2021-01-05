@@ -281,7 +281,11 @@ tui_data_window::display_registers_from (int start_element_no)
 	max_len = len;
     }
   m_item_width = max_len + 1;
-  int i = start_element_no;
+
+  int i;
+  /* Mark register windows above the visible area.  */
+  for (i = 0; i < start_element_no; i++)
+    m_regs_content[i].y = 0;
 
   m_regs_column_count = (width - 2) / m_item_width;
   if (m_regs_column_count == 0)
@@ -306,6 +310,10 @@ tui_data_window::display_registers_from (int start_element_no)
 	}
       cur_y++;		/* Next row.  */
     }
+
+  /* Mark register windows below the visible area.  */
+  for (; i < m_regs_content.size (); i++)
+    m_regs_content[i].y = 0;
 
   refresh_window ();
 }
@@ -470,7 +478,9 @@ tui_data_window::check_register_values (struct frame_info *frame)
 			    data_item_win.regno,
 			    &data_item_win.highlight);
 
-	  if (data_item_win.highlight || was_hilighted)
+	  /* Register windows whose y == 0 are outside the visible area.  */
+	  if ((data_item_win.highlight || was_hilighted)
+	      && data_item_win.y > 0)
 	    data_item_win.rerender (handle.get (), m_item_width);
 	}
     }

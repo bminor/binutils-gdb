@@ -1,5 +1,12 @@
 2021-02-07  Hannes Domani  <ssbssa@yahoo.de>
 
+	* tui/tui-regs.c (tui_data_window::display_registers_from):
+	Mark invisible register sub windows.
+	(tui_data_window::check_register_values): Ignore invisible
+	register sub windows.
+
+2021-02-07  Hannes Domani  <ssbssa@yahoo.de>
+
 	* tui/tui-regs.c (tui_data_item_window::rerender): Don't call
 	n_spaces with a negative value.
 
