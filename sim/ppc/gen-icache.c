@@ -17,6 +17,7 @@
  
     */
 
+#include <stdlib.h>
 
 #include "misc.h"
 #include "lf.h"

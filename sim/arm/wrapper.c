@@ -23,6 +23,7 @@
 #include "config.h"
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include <bfd.h>
 #include <signal.h>

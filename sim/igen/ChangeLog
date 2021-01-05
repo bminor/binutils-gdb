@@ -1,5 +1,9 @@
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
+	* gen-icache.c, igen.c: Include stdlib.h.
+
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2020-07-03  Sebastian Huber  <sebastian.huber@embedded-brains.de>

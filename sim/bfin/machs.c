@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #include "sim-main.h"
 #include "gdb/sim-bfin.h"
 #include "bfd.h"
