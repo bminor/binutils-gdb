@@ -406,6 +406,9 @@ struct ctf_dict
   uint32_t *ctf_txlate;		  /* Translation table for type IDs.  */
   uint32_t *ctf_ptrtab;		  /* Translation table for pointer-to lookups.  */
   size_t ctf_ptrtab_len;	  /* Num types storable in ptrtab currently.  */
+  uint32_t *ctf_pptrtab;	  /* Parent types pointed to by child dicts.  */
+  size_t ctf_pptrtab_len;	  /* Num types storable in pptrtab currently.  */
+  uint32_t ctf_pptrtab_typemax;	  /* Max child type when pptrtab last updated.  */
   uint32_t *ctf_funcidx_names;	  /* Name of each function symbol in symtypetab
 				     (if indexed).  */
   uint32_t *ctf_objtidx_names;	  /* Likewise, for object symbols.  */

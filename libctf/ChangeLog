@@ -1,5 +1,29 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dict_t) <ctf_pptrtab>: New.
+	<ctf_pptrtab_len>: New.
+	<ctf_pptrtab_typemax>: New.
+	* ctf-create.c (ctf_serialize): Update accordingly.
+	(ctf_add_reftype): Note that we don't need to update pptrtab here,
+	despite updating ptrtab.
+	* ctf-open.c (ctf_dict_close): Destroy the pptrtab.
+	(ctf_import): Likewise.
+	(ctf_import_unref): Likewise.
+	* ctf-lookup.c (grow_pptrtab): New.
+	(refresh_pptrtab): New, update a pptrtab.
+	(ctf_lookup_by_name): Turn into a wrapper around (and rename to)...
+	(ctf_lookup_by_name_internal): ... this: construct the pptrtab, and
+	use it in addition to the parent's ptrtab when parent dicts are
+	searched.
+	* testsuite/libctf-regression/regression.exp: New testsuite for
+	regression tests.
+	* testsuite/libctf-regression/pptrtab*: New test.
+	* testsuite/libctf-writable/writable.exp: New testsuite for tests of
+	writable CTF dicts.
+	* testsuite/libctf-writable/pptrtab*: New test.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c (ctf_archive_iter): Remove outdated comment.
 
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>

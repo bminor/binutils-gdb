@@ -1142,9 +1142,11 @@ ctf_serialize (ctf_dict_t *fp)
   nfp->ctf_funchash = fp->ctf_funchash;
   nfp->ctf_dynsyms = fp->ctf_dynsyms;
   nfp->ctf_ptrtab = fp->ctf_ptrtab;
+  nfp->ctf_pptrtab = fp->ctf_pptrtab;
   nfp->ctf_dynsymidx = fp->ctf_dynsymidx;
   nfp->ctf_dynsymmax = fp->ctf_dynsymmax;
   nfp->ctf_ptrtab_len = fp->ctf_ptrtab_len;
+  nfp->ctf_pptrtab_len = fp->ctf_pptrtab_len;
   nfp->ctf_link_inputs = fp->ctf_link_inputs;
   nfp->ctf_link_outputs = fp->ctf_link_outputs;
   nfp->ctf_errs_warnings = fp->ctf_errs_warnings;
@@ -1154,6 +1156,7 @@ ctf_serialize (ctf_dict_t *fp)
   nfp->ctf_objtidx_sxlate = fp->ctf_objtidx_sxlate;
   nfp->ctf_str_prov_offset = fp->ctf_str_prov_offset;
   nfp->ctf_syn_ext_strtab = fp->ctf_syn_ext_strtab;
+  nfp->ctf_pptrtab_typemax = fp->ctf_pptrtab_typemax;
   nfp->ctf_in_flight_dynsyms = fp->ctf_in_flight_dynsyms;
   nfp->ctf_link_in_cu_mapping = fp->ctf_link_in_cu_mapping;
   nfp->ctf_link_out_cu_mapping = fp->ctf_link_out_cu_mapping;
@@ -1186,6 +1189,7 @@ ctf_serialize (ctf_dict_t *fp)
   memset (&fp->ctf_errs_warnings, 0, sizeof (ctf_list_t));
   fp->ctf_add_processing = NULL;
   fp->ctf_ptrtab = NULL;
+  fp->ctf_pptrtab = NULL;
   fp->ctf_funcidx_names = NULL;
   fp->ctf_objtidx_names = NULL;
   fp->ctf_funcidx_sxlate = NULL;
@@ -1582,7 +1586,8 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
      type and (if an anonymous typedef node is being pointed at) the type that
      points at too.  Note that ctf_typemax is at this point one higher than we
      want to check against, because it's just been incremented for the addition
-     of this type.  */
+     of this type.  The pptrtab is lazily-updated as needed, so is not touched
+     here.  */
 
   uint32_t type_idx = LCTF_TYPE_TO_INDEX (fp, type);
   uint32_t ref_idx = LCTF_TYPE_TO_INDEX (fp, ref);

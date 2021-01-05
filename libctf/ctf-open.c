@@ -1806,6 +1806,7 @@ ctf_dict_close (ctf_dict_t *fp)
   free (fp->ctf_sxlate);
   free (fp->ctf_txlate);
   free (fp->ctf_ptrtab);
+  free (fp->ctf_pptrtab);
 
   free (fp->ctf_header);
   free (fp);
@@ -1931,7 +1932,8 @@ ctf_cuname_set (ctf_dict_t *fp, const char *name)
 
 /* Import the types from the specified parent dict by storing a pointer to it in
    ctf_parent and incrementing its reference count.  Only one parent is allowed:
-   if a parent already exists, it is replaced by the new parent.  */
+   if a parent already exists, it is replaced by the new parent.  The pptrtab
+   is wiped, and will be refreshed by the next ctf_lookup_by_name call.  */
 int
 ctf_import (ctf_dict_t *fp, ctf_dict_t *pfp)
 {
@@ -1944,6 +1946,11 @@ ctf_import (ctf_dict_t *fp, ctf_dict_t *pfp)
   if (fp->ctf_parent && !fp->ctf_parent_unreffed)
     ctf_dict_close (fp->ctf_parent);
   fp->ctf_parent = NULL;
+
+  free (fp->ctf_pptrtab);
+  fp->ctf_pptrtab = NULL;
+  fp->ctf_pptrtab_len = 0;
+  fp->ctf_pptrtab_typemax = 0;
 
   if (pfp != NULL)
     {
@@ -1979,6 +1986,10 @@ ctf_import_unref (ctf_dict_t *fp, ctf_dict_t *pfp)
     ctf_dict_close (fp->ctf_parent);
   fp->ctf_parent = NULL;
 
+  free (fp->ctf_pptrtab);
+  fp->ctf_pptrtab = NULL;
+  fp->ctf_pptrtab_len = 0;
+  fp->ctf_pptrtab_typemax = 0;
   if (pfp != NULL)
     {
       int err;

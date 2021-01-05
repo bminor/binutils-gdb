@@ -22,6 +22,88 @@
 #include <string.h>
 #include <assert.h>
 
+/* Grow the pptrtab so that it is at least NEW_LEN long.  */
+static int
+grow_pptrtab (ctf_dict_t *fp, size_t new_len)
+{
+  uint32_t *new_pptrtab;
+
+  if ((new_pptrtab = realloc (fp->ctf_pptrtab, sizeof (uint32_t)
+			      * new_len)) == NULL)
+    return (ctf_set_errno (fp, ENOMEM));
+
+  fp->ctf_pptrtab = new_pptrtab;
+
+  memset (fp->ctf_pptrtab + fp->ctf_pptrtab_len, 0,
+	  sizeof (uint32_t) * (new_len - fp->ctf_pptrtab_len));
+
+  fp->ctf_pptrtab_len = new_len;
+  return 0;
+}
+
+/* Update entries in the pptrtab that relate to types newly added in the
+   child.  */
+static int
+refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
+{
+  uint32_t i;
+  for (i = fp->ctf_pptrtab_typemax; i <= fp->ctf_typemax; i++)
+    {
+      ctf_id_t type = LCTF_INDEX_TO_TYPE (fp, i, 1);
+      ctf_id_t reffed_type;
+      int updated;
+
+      if (ctf_type_kind (fp, type) != CTF_K_POINTER)
+	continue;
+
+      reffed_type = ctf_type_reference (fp, type);
+
+      if (LCTF_TYPE_ISPARENT (fp, reffed_type))
+	{
+	  uint32_t idx = LCTF_TYPE_TO_INDEX (fp, reffed_type);
+
+	  /* Guard against references to invalid types.  No need to consider
+	     the CTF dict corrupt in this case: this pointer just can't be a
+	     pointer to any type we know about.  */
+	  if (idx <= pfp->ctf_typemax)
+	    {
+	      if (idx >= fp->ctf_pptrtab_len
+		  && grow_pptrtab (fp, pfp->ctf_ptrtab_len) < 0)
+		return -1;			/* errno is set for us.  */
+
+	      fp->ctf_pptrtab[idx] = i;
+	      updated = 1;
+	    }
+	}
+      if (!updated)
+	continue;
+
+      /* If we updated the ptrtab entry for this type's referent, and it's an
+	 anonymous typedef node, we also want to chase down its referent and
+	 change that as well.  */
+
+      if ((ctf_type_kind (fp, reffed_type) == CTF_K_TYPEDEF)
+	  && strcmp (ctf_type_name_raw (fp, reffed_type), "") == 0)
+	{
+	  uint32_t idx;
+	  idx = LCTF_TYPE_TO_INDEX (pfp, ctf_type_reference (fp, reffed_type));
+
+	  if (idx <= pfp->ctf_typemax)
+	    {
+	      if (idx >= fp->ctf_pptrtab_len
+		  && grow_pptrtab (fp, pfp->ctf_ptrtab_len) < 0)
+		return -1;			/* errno is set for us.  */
+
+	      fp->ctf_pptrtab[idx] = i;
+	    }
+	}
+    }
+
+  fp->ctf_pptrtab_typemax = fp->ctf_typemax;
+
+  return 0;
+}
+
 /* Compare the given input string and length against a table of known C storage
    qualifier keywords.  We just ignore these in ctf_lookup_by_name, below.  To
    do this quickly, we use a pre-computed Perfect Hash Function similar to the
@@ -69,8 +151,9 @@ isqualifier (const char *s, size_t len)
    finds the things that we actually care about: structs, unions, enums,
    integers, floats, typedefs, and pointers to any of these named types.  */
 
-ctf_id_t
-ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
+static ctf_id_t
+ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
+			     const char *name)
 {
   static const char delimiters[] = " \t\n\r\v\f*";
 
@@ -95,30 +178,66 @@ ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
 
       if (*p == '*')
 	{
-	  /* Find a pointer to type by looking in fp->ctf_ptrtab.
-	     If we can't find a pointer to the given type, see if
-	     we can compute a pointer to the type resulting from
-	     resolving the type down to its base type and use
-	     that instead.  This helps with cases where the CTF
-	     data includes "struct foo *" but not "foo_t *" and
-	     the user tries to access "foo_t *" in the debugger.
+	  /* Find a pointer to type by looking in child->ctf_pptrtab (if child
+	     is set) and fp->ctf_ptrtab.  If we can't find a pointer to the
+	     given type, see if we can compute a pointer to the type resulting
+	     from resolving the type down to its base type and use that instead.
+	     This helps with cases where the CTF data includes "struct foo *"
+	     but not "foo_t *" and the user tries to access "foo_t *" in the
+	     debugger.  */
 
-	     TODO need to handle parent dicts too.  */
+	  uint32_t idx = LCTF_TYPE_TO_INDEX (fp, type);
+	  int in_child = 0;
 
-	  ntype = fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, type)];
-	  if (ntype == 0)
+	  ntype = type;
+	  if (child && idx <= child->ctf_pptrtab_len)
 	    {
-	      ntype = ctf_type_resolve_unsliced (fp, type);
-	      if (ntype == CTF_ERR
-		  || (ntype =
-		      fp->ctf_ptrtab[LCTF_TYPE_TO_INDEX (fp, ntype)]) == 0)
-		{
-		  (void) ctf_set_errno (fp, ECTF_NOTYPE);
-		  goto err;
-		}
+	      ntype = child->ctf_pptrtab[idx];
+	      if (ntype)
+		in_child = 1;
 	    }
 
-	  type = LCTF_INDEX_TO_TYPE (fp, ntype, (fp->ctf_flags & LCTF_CHILD));
+	  if (ntype == 0)
+	    ntype = fp->ctf_ptrtab[idx];
+
+	  /* Try resolving to its base type and check again.  */
+	  if (ntype == 0)
+	    {
+	      if (child)
+		ntype = ctf_type_resolve_unsliced (child, type);
+	      else
+		ntype = ctf_type_resolve_unsliced (fp, type);
+
+	      if (ntype == CTF_ERR)
+		goto notype;
+
+	      idx = LCTF_TYPE_TO_INDEX (fp, ntype);
+
+	      ntype = 0;
+	      if (child && idx <= child->ctf_pptrtab_len)
+		{
+		  ntype = child->ctf_pptrtab[idx];
+		  if (ntype)
+		    in_child = 1;
+		}
+
+	      if (ntype == 0)
+		ntype = fp->ctf_ptrtab[idx];
+	      if (ntype == CTF_ERR)
+		goto notype;
+	    }
+
+	  type = LCTF_INDEX_TO_TYPE (fp, ntype, (fp->ctf_flags & LCTF_CHILD)
+				     || in_child);
+
+	  /* We are looking up a type in the parent, but the pointed-to type is
+	     in the child.  Switch to looking in the child: if we need to go
+	     back into the parent, we can recurse again.  */
+	  if (in_child)
+	    {
+	      fp = child;
+	      child = NULL;
+	    }
 
 	  q = p + 1;
 	  continue;
@@ -157,27 +276,21 @@ ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
 		  fp->ctf_tmp_typeslice = xstrndup (p, (size_t) (q - p));
 		  if (fp->ctf_tmp_typeslice == NULL)
 		    {
-		      (void) ctf_set_errno (fp, ENOMEM);
+		      ctf_set_errno (fp, ENOMEM);
 		      return CTF_ERR;
 		    }
 		}
 
 	      if ((type = ctf_lookup_by_rawhash (fp, lp->ctl_hash,
 						 fp->ctf_tmp_typeslice)) == 0)
-		{
-		  (void) ctf_set_errno (fp, ECTF_NOTYPE);
-		  goto err;
-		}
+		goto notype;
 
 	      break;
 	    }
 	}
 
       if (lp->ctl_prefix == NULL)
-	{
-	  (void) ctf_set_errno (fp, ECTF_NOTYPE);
-	  goto err;
-	}
+	goto notype;
     }
 
   if (*p != '\0' || type == 0)
@@ -185,12 +298,32 @@ ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
 
   return type;
 
-err:
-  if (fp->ctf_parent != NULL
-      && (ptype = ctf_lookup_by_name (fp->ctf_parent, name)) != CTF_ERR)
-    return ptype;
+ notype:
+  ctf_set_errno (fp, ECTF_NOTYPE);
+  if (fp->ctf_parent != NULL)
+    {
+      /* Need to look up in the parent, from the child's perspective.
+	 Make sure the pptrtab is up to date.  */
+
+      if (fp->ctf_pptrtab_typemax < fp->ctf_typemax)
+	{
+	  if (refresh_pptrtab (fp, fp->ctf_parent) < 0)
+	    return -1;			/* errno is set for us.  */
+	}
+
+      if ((ptype = ctf_lookup_by_name_internal (fp->ctf_parent, fp,
+						name)) != CTF_ERR)
+	return ptype;
+      return (ctf_set_errno (fp, ctf_errno (fp->ctf_parent)));
+    }
 
   return CTF_ERR;
+}
+
+ctf_id_t
+ctf_lookup_by_name (ctf_dict_t *fp, const char *name)
+{
+  return ctf_lookup_by_name_internal (fp, NULL, name);
 }
 
 /* Return the pointer to the internal CTF type data corresponding to the
