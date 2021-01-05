@@ -30,8 +30,7 @@ Contents of CTF section .ctf:
 
   Types:
 #...
-     0x[0-9a-f]*: int \[0x0:0x[0-9a-f]*\] \(size 0x[0-9a-f]*\)
-           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) int:[0-9]* \(aligned at 0x[0-9a-f]*, format 0x1, offset:bits 0x0:0x[0-9a-f]*\)
+    0x[0-9a-f]*: \(kind 1\) int \(format 0x1\) \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\)
 #...
   Strings:
     0x0: 

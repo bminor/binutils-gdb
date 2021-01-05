@@ -1,5 +1,28 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-decl.c (ctf_decl_push): Exclude slices from the decl stack.
+	* ctf-types.c (ctf_type_aname): No longer deal with slices here.
+	* ctf-dump.c (ctf_dump_membstate_t) <cdm_toplevel_indent>: Constify.
+	(CTF_FT_REFS): New.
+	(CTF_FT_BITFIELD): Likewise.
+	(CTF_FT_ID): Likewise.
+	(ctf_dump_member): Do not do indentation here. Migrate the
+	type-printing parts of this into...
+	(ctf_dump_format_type): ... here, to be shared by all type printers.
+	Get the errno value for non-representable types right.  Do not print
+	bitfield info for non-bitfields.  Improve the format and indentation
+	of other type output.  Shuffle spacing around to make all indentation
+	either 'width of column' or 4 chars.
+	(ctf_dump_label): Pass CTF_FT_REFS to ctf_dump_format_type.
+	(ctf_dump_objts): Likewise.  Spacing shuffle.
+	(ctf_dump_var): Likewise.
+	(type_hex_digits): Migrate down in the file, to above its new user.
+	(ctf_dump_type): Indent here instead.  Pass CTF_FT_REFS to
+	ctf_dump_format_type. Don't trim off excess linefeeds now we no
+	longer generate them.  Dump enumerated types.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_type_resolve): Improve comment.
 	(ctf_type_size): Yield ECTF_INCOMPLETE when applied to forwards.
 	Emit errors into the right dict.

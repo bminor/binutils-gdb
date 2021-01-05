@@ -28,9 +28,8 @@ Contents of CTF section .ctf:
 #...
   Types:
 #...
-     0x[0-9a-f]*: struct cycle_1 \(.*
-           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct cycle_1 \(.*
-               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* a \(.*
-               *\[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(.*
-               *\[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct cycle_1 \* next \(.*
+    0x[0-9a-f]*: \(kind 6\) struct cycle_1 \(.*
+        *\[0x0\] a: ID 0x[0-9a-f]*: \(kind 3\) struct A \* \(.*
+        *\[0x[0-9a-f]*\] b: ID 0x[0-9a-f]*: \(kind 3\) struct B \* \(.*
+        *\[0x[0-9a-f]*\] next: ID 0x[0-9a-f]*: \(kind 3\) struct cycle_1 \* \(.*
 #...

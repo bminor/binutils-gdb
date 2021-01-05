@@ -47,7 +47,7 @@ typedef struct ctf_dump_membstate
 {
   char **cdm_str;
   ctf_dict_t *cdm_fp;
-  char *cdm_toplevel_indent;
+  const char *cdm_toplevel_indent;
 } ctf_dump_membstate_t;
 
 static int
@@ -80,8 +80,12 @@ ctf_dump_free (ctf_dump_state_t *state)
     }
 }
 
-/* Return a dump for a single type, without member info: but do show the
-   type's references.  */
+/* Return a dump for a single type, without member info: but do optionally show
+   the type's references.  */
+
+#define CTF_FT_REFS     0x2 	/* Print referenced types.  */
+#define CTF_FT_BITFIELD 0x4	/* Print :BITS if a bitfield.  */
+#define CTF_FT_ID       0x8	/* Print "ID: " in front of type IDs.  */
 
 static char *
 ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
@@ -89,14 +93,16 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
   ctf_id_t new_id;
   char *str = NULL, *bit = NULL, *buf = NULL;
 
+  ctf_set_errno (fp, 0);
   new_id = id;
   do
     {
-      ctf_encoding_t enc;
+      ctf_encoding_t ep;
       ctf_arinfo_t ar;
       int kind, unsliced_kind;
       const char *nonroot_leader = "";
       const char *nonroot_trailer = "";
+      const char *idstr = "";
 
       id = new_id;
       if (flag == CTF_ADD_NONROOT)
@@ -110,15 +116,18 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	{
 	  if (id == 0 || ctf_errno (fp) == ECTF_NONREPRESENTABLE)
 	    {
+	      ctf_set_errno (fp, ECTF_NONREPRESENTABLE);
 	      str = str_append (str, " (type not represented in CTF)");
-	      ctf_set_errno (fp, ECTF_NOTREF);
-	      break;
+	      return str;
 	    }
 
 	  goto err;
 	}
 
-      if (asprintf (&bit, " %s0x%lx: ", nonroot_leader, id) < 0)
+      if (flag & CTF_FT_ID)
+	idstr = "ID ";
+      if (asprintf (&bit, "%s%s0x%lx: (kind %i) ", nonroot_leader, idstr,
+		    id, ctf_type_kind (fp, id)) < 0)
 	goto oom;
       str = str_append (str, bit);
       free (bit);
@@ -129,37 +138,74 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 
       free (buf);
       buf = NULL;
+
       unsliced_kind = ctf_type_kind_unsliced (fp, id);
       kind = ctf_type_kind (fp, id);
 
-      /* Slices get a different print representation.  */
-      if (unsliced_kind == CTF_K_SLICE)
+      if (ctf_type_encoding (fp, id, &ep) == 0)
 	{
-	  ctf_type_encoding (fp, id, &enc);
-	  if (asprintf (&bit, " [slice 0x%x:0x%x]",
-			enc.cte_offset, enc.cte_bits) < 0)
+	  if (ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
+	      && flag & CTF_FT_BITFIELD)
+	    {
+	      if (asprintf (&bit, ":%i", ep.cte_bits) < 0)
+		goto oom;
+	      str = str_append (str, bit);
+	      free (bit);
+	      bit = NULL;
+	    }
+
+	  if (ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
+	      || ep.cte_offset != 0)
+	    {
+	      const char *slice = "";
+
+	      if (unsliced_kind == CTF_K_SLICE)
+		slice = "slice ";
+
+	      if (asprintf (&bit, " [%s0x%x:0x%x]",
+			    slice, ep.cte_offset, ep.cte_bits) < 0)
+		goto oom;
+	      str = str_append (str, bit);
+	      free (bit);
+	      bit = NULL;
+	    }
+
+	  if (asprintf (&bit, " (format 0x%x)", ep.cte_format) < 0)
 	    goto oom;
+	  str = str_append (str, bit);
+	  free (bit);
+	  bit = NULL;
 	}
-      else if (kind == CTF_K_INTEGER)
-	{
-	  ctf_type_encoding (fp, id, &enc);
-	  if (asprintf (&bit, " [0x%x:0x%x]",
-			enc.cte_offset, enc.cte_bits) < 0)
-	    goto oom;
-	}
-      str = str_append (str, bit);
-      free (bit);
-      bit = NULL;
 
       if (kind != CTF_K_FUNCTION && kind != CTF_K_FORWARD)
-	if (asprintf (&bit, " (size 0x%lx)%s",
-		      (unsigned long) ctf_type_size (fp, id),
-		      nonroot_trailer) < 0)
-	  goto oom;
+	{
+	  if (asprintf (&bit, " (size 0x%lx)",
+			(unsigned long) ctf_type_size (fp, id)) < 0)
+	    goto oom;
 
-      str = str_append (str, bit);
-      free (bit);
-      bit = NULL;
+	  str = str_append (str, bit);
+	  free (bit);
+	  bit = NULL;
+	}
+
+      if (kind != CTF_K_FORWARD)
+	{
+	  if (asprintf (&bit, " (aligned at 0x%lx)",
+			(unsigned long) ctf_type_align (fp, id)) < 0)
+	    goto oom;
+
+	  str = str_append (str, bit);
+	  free (bit);
+	  bit = NULL;
+	}
+
+      if (nonroot_trailer[0] != 0)
+	str = str_append (str, nonroot_trailer);
+
+      /* Just exit after one iteration if we are not showing the types this type
+	 references.  */
+      if (!(flag & CTF_FT_REFS))
+	return str;
 
       /* Keep going as long as this type references another.  We consider arrays
 	 to "reference" their element type. */
@@ -173,7 +219,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       else
 	new_id = ctf_type_reference (fp, id);
       if (new_id != CTF_ERR)
-	str = str_append (str, " ->");
+	str = str_append (str, " -> ");
     } while (new_id != CTF_ERR);
 
   if (ctf_errno (fp) != ECTF_NOTREF)
@@ -363,7 +409,7 @@ ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
     return (ctf_set_errno (state->cds_fp, errno));
 
   if ((typestr = ctf_dump_format_type (state->cds_fp, info->ctb_type,
-				       CTF_ADD_ROOT)) == NULL)
+				       CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
     {
       free (str);
       return 0;				/* Swallow the error.  */
@@ -400,14 +446,14 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
 	 has a leading one.   */
       if (name)
 	{
-	  if (asprintf (&str, "%s ->", name) < 0)
+	  if (asprintf (&str, "%s -> ", name) < 0)
 	    goto oom;
 	}
       else
 	str = xstrdup ("");
 
       if ((typestr = ctf_dump_format_type (state->cds_fp, id,
-					   CTF_ADD_ROOT)) == NULL)
+					   CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
 	{
 	  ctf_dump_append (state, str);
 	  continue;				/* Swallow the error.  */
@@ -438,7 +484,7 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
     return (ctf_set_errno (state->cds_fp, errno));
 
   if ((typestr = ctf_dump_format_type (state->cds_fp, type,
-				       CTF_ADD_ROOT)) == NULL)
+				       CTF_ADD_ROOT | CTF_FT_REFS)) == NULL)
     {
       free (str);
       return 0;			/* Swallow the error.  */
@@ -449,6 +495,46 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
 
   ctf_dump_append (state, str);
   return 0;
+}
+
+/* Dump a single struct/union member into the string in the membstate.  */
+static int
+ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
+		 int depth, void *arg)
+{
+  ctf_dump_membstate_t *state = arg;
+  char *typestr = NULL;
+  char *bit = NULL;
+
+  /* The struct/union itself has already been printed.  */
+  if (depth == 0)
+    return 0;
+
+  if (asprintf (&bit, "%s%*s", state->cdm_toplevel_indent, (depth-1)*4, "") < 0)
+    goto oom;
+  *state->cdm_str = str_append (*state->cdm_str, bit);
+  free (bit);
+
+  if ((typestr = ctf_dump_format_type (state->cdm_fp, id,
+				       CTF_ADD_ROOT | CTF_FT_BITFIELD
+				       | CTF_FT_ID)) == NULL)
+    return -1;				/* errno is set for us.  */
+
+  if (asprintf (&bit, "[0x%lx] %s: %s\n", offset, name, typestr) < 0)
+    goto oom;
+
+  *state->cdm_str = str_append (*state->cdm_str, bit);
+  free (typestr);
+  free (bit);
+  typestr = NULL;
+  bit = NULL;
+
+  return 0;
+
+ oom:
+  free (typestr);
+  free (bit);
+  return (ctf_set_errno (state->cdm_fp, errno));
 }
 
 /* Report the number of digits in the hexadecimal representation of a type
@@ -466,145 +552,97 @@ type_hex_digits (ctf_id_t id)
   return i;
 }
 
-/* Dump a single member into the string in the membstate.  */
-static int
-ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
-		 int depth, void *arg)
-{
-  ctf_dump_membstate_t *state = arg;
-  char *typestr = NULL;
-  char *bit = NULL;
-  ctf_encoding_t ep;
-  int has_encoding = 0;
-  int opened_paren = 0;
-
-  /* Align neatly.  */
-
-  if (depth == 0)
-    {
-      if (asprintf (&state->cdm_toplevel_indent, "     %*s",
-		    type_hex_digits (id), "") < 0)
-	goto oom;
-    }
-
-  if (asprintf (&bit, "%s%*s", state->cdm_toplevel_indent, depth * 4, "") < 0)
-    goto oom;
-  *state->cdm_str = str_append (*state->cdm_str, bit);
-  free (bit);
-
-  if ((typestr = ctf_type_aname (state->cdm_fp, id)) == NULL)
-    {
-      if (id == 0 || ctf_errno (state->cdm_fp) == ECTF_NONREPRESENTABLE)
-	{
-	  if (asprintf (&bit, "[0x%lx] (type not represented in CTF)",
-			offset) < 0)
-	    goto oom;
-
-	  *state->cdm_str = str_append (*state->cdm_str, bit);
-	  free (typestr);
-	  free (bit);
-	  return 0;
-	}
-
-      return -1;				/* errno is set for us.  */
-    }
-
-  if (ctf_type_encoding (state->cdm_fp, id, &ep) == 0)
-    {
-      has_encoding = 1;
-      ctf_type_encoding (state->cdm_fp, id, &ep);
-
-      if (asprintf (&bit, "[0x%lx] (ID 0x%lx) (kind %i) %s%s%s:%i "
-		    "(aligned at 0x%lx", offset, id,
-		    ctf_type_kind (state->cdm_fp, id), typestr,
-		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
-		    ep.cte_bits, (unsigned long) ctf_type_align (state->cdm_fp,
-								 id)) < 0)
-	goto oom;
-      opened_paren = 1;
-    }
-  else if (ctf_type_kind (state->cdm_fp, id) != CTF_K_FORWARD)
-    {
-      if (asprintf (&bit, "[0x%lx] (ID 0x%lx) (kind %i) %s%s%s "
-		    "(aligned at 0x%lx", offset, id,
-		    ctf_type_kind (state->cdm_fp, id), typestr,
-		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
-		    (unsigned long) ctf_type_align (state->cdm_fp, id)) < 0)
-	goto oom;
-      opened_paren = 1;
-    }
-  else /* Forwards have no alignment.  */
-    {
-      if (asprintf (&bit, "[0x%lx] (ID 0x%lx) (kind %i) %s%s%s\n", offset, id,
-		    ctf_type_kind (state->cdm_fp, id), typestr,
-		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name) < 0)
-	goto oom;
-    }
-
-  *state->cdm_str = str_append (*state->cdm_str, bit);
-  free (typestr);
-  free (bit);
-  typestr = NULL;
-  bit = NULL;
-
-  if (has_encoding)
-    {
-      if (asprintf (&bit, ", format 0x%x, offset:bits 0x%x:0x%x", ep.cte_format,
-		    ep.cte_offset, ep.cte_bits) < 0)
-	goto oom;
-      *state->cdm_str = str_append (*state->cdm_str, bit);
-      free (bit);
-      bit = NULL;
-    }
-
-  if (opened_paren)
-    *state->cdm_str = str_append (*state->cdm_str, ")\n");
-  return 0;
-
- oom:
-  free (typestr);
-  free (bit);
-  return (ctf_set_errno (state->cdm_fp, errno));
-}
-
 /* Dump a single type into the cds_items.  */
 static int
 ctf_dump_type (ctf_id_t id, int flag, void *arg)
 {
   char *str;
+  char *indent;
+  int err = 0;
   ctf_dump_state_t *state = arg;
   ctf_dump_membstate_t membstate = { &str, state->cds_fp, NULL };
-  size_t len;
 
-  if ((str = ctf_dump_format_type (state->cds_fp, id, flag)) == NULL)
+  /* Indent neatly.  */
+  if (asprintf (&indent, "    %*s", type_hex_digits (id), "") < 0)
+    return (ctf_set_errno (state->cds_fp, ENOMEM));
+
+  /* Dump the type itself.  */
+  if ((str = ctf_dump_format_type (state->cds_fp, id,
+				   flag | CTF_FT_REFS)) == NULL)
     goto err;
-
   str = str_append (str, "\n");
-  if ((ctf_type_visit (state->cds_fp, id, ctf_dump_member, &membstate)) < 0)
-    {
-      if (id == 0 || ctf_errno (state->cds_fp) == ECTF_NONREPRESENTABLE)
-	{
-	  ctf_dump_append (state, str);
-	  return 0;
-	}
-      ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
-		    _("cannot visit members dumping type 0x%lx"), id);
-      goto err;
-    }
-  free (membstate.cdm_toplevel_indent);
 
-  /* Trim off the last linefeed added by ctf_dump_member().  */
-  len = strlen (str);
-  if (str[len-1] == '\n')
-    str[len-1] = '\0';
+  membstate.cdm_toplevel_indent = indent;
+
+  /* Member dumping for structs, unions...  */
+  if (ctf_type_kind (state->cds_fp, id) == CTF_K_STRUCT
+      || ctf_type_kind (state->cds_fp, id) == CTF_K_UNION)
+    {
+      if ((ctf_type_visit (state->cds_fp, id, ctf_dump_member, &membstate)) < 0)
+	{
+	  if (id == 0 || ctf_errno (state->cds_fp) == ECTF_NONREPRESENTABLE)
+	    {
+	      ctf_dump_append (state, str);
+	      return 0;
+	    }
+	  ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+			_("cannot visit members dumping type 0x%lx"), id);
+	  goto err;
+	}
+    }
+
+  /* ... and enums, for which we dump the first and last few members and skip
+     the ones in the middle.  */
+  if (ctf_type_kind (state->cds_fp, id) == CTF_K_ENUM)
+    {
+      int enum_count = ctf_member_count (state->cds_fp, id);
+      ctf_next_t *it = NULL;
+      int i = 0;
+      const char *enumerand;
+      char *bit;
+      int value;
+
+      while ((enumerand = ctf_enum_next (state->cds_fp, id,
+					 &it, &value)) != NULL)
+	{
+	  i++;
+	  if ((i > 5) && (i < enum_count - 4))
+	    continue;
+
+	  str = str_append (str, indent);
+
+	  if (asprintf (&bit, "%s: %i\n", enumerand, value) < 0)
+	    {
+	      err = ENOMEM;
+	      ctf_next_destroy (it);
+	      goto err;
+	    }
+	  str = str_append (str, bit);
+	  free (bit);
+
+	  if ((i == 5) && (enum_count > 10))
+	    {
+	      str = str_append (str, indent);
+	      str = str_append (str, "...\n");
+	    }
+	}
+      if (ctf_errno (state->cds_fp) != ECTF_NEXT_END)
+	{
+	  ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+			_("cannot visit enumerands dumping type 0x%lx"), id);
+	  goto err;
+	}
+    }
 
   ctf_dump_append (state, str);
+  free (indent);
+
   return 0;
 
  err:
-  free (membstate.cdm_toplevel_indent);
+  free (indent);
   free (str);
-  return 0;				/* Swallow the error.  */
+  return ctf_set_errno (state->cds_fp, err);
 }
 
 /* Dump the string table into the cds_items.  */

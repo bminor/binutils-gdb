@@ -29,18 +29,14 @@ Contents of CTF section .ctf:
 
   Types:
 #...
-     0x[0-9a-f]*: struct A .*
-           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct A .*
-               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) long int a:[0-9]* .*
-               *\[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* foo .*
+    0x[0-9a-f]*: \(kind 6\) struct A .*
+       *\[0x0\] a: ID 0x[0-9a-f]*: \(kind 1\) long int .*
+       *\[0x[0-9a-f]*\] foo: ID 0x[0-9a-f]*: \(kind 3\) struct B \* .*
 #...
-     0x[0-9a-f]*: struct B .*
-           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B .*
-               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) int foo:[0-9]* .*
+    0x[0-9a-f]*: \(kind 6\) struct B .*
+       *\[0x0\] foo: ID 0x[0-9a-f]*: \(kind 1\) int .*
 #...
-     0x[0-9a-f]*: struct B \* \(size 0x[0-9a-f]*\) -> 0x[0-9a-f]*: struct B .*
-           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* .*
+    0x[0-9a-f]*: \(kind 3\) struct B \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> 0x[0-9a-f]*: \(kind 6\) struct B .*
 #...
-     0x[0-9a-f]*: struct A \* \(size 0x[0-9a-f]*\) -> 0x[0-9a-f]*: struct A .*
-           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* .*
+    0x[0-9a-f]*: \(kind 3\) struct A \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> 0x[0-9a-f]*: \(kind 6\) struct A .*
 #...

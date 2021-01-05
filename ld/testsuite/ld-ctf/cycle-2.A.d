@@ -25,13 +25,12 @@ Contents of CTF section .ctf:
 
   Variables:
 #...
-    a ->  0x[0-9a-f]*: struct A \(.*
+    a -> 0x[0-9a-f]*: \(kind 6\) struct A \(.*
 #...
   Types:
 #...
-     0x[0-9a-f]*: struct A \(.*
-           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct A \(.*
-               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(.*
+    0x[0-9a-f]*: \(kind 6\) struct A \(.*
+        *\[0x0\] b: ID 0x[0-9a-f]*: \(kind 3\) struct B \* \(.*
 #...
   Strings:
     0x0: 

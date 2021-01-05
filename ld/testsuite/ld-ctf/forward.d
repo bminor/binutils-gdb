@@ -16,8 +16,6 @@ Contents of CTF section .ctf:
 #...
   Types:
 
-     0x[0-9a-f]: struct foo
-          *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 9\) struct foo
-     0x[0-9a-f]: struct foo \* \(size 0x[0-9a-f]*\) -> 0x[0-9a-f]: struct foo
-          *\[0x0\] \(ID 0x[0-9a-f]\) \(kind 3\) struct foo \* \(aligned at 0x[0-9a-f]*\)
+    0x[0-9a-f]: \(kind 9\) struct foo
+    0x[0-9a-f]: \(kind 3\) struct foo \* \(size 0x[0-9a-f]*\) \(aligned at 0x[0-9a-f]*\) -> 0x[0-9a-f]: \(kind 9\) struct foo
 #...

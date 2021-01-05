@@ -20,8 +20,8 @@ Contents of CTF section .ctf:
   Labels:
 
   Data objects:
-    digits -> 0x[0-9a-f]*: int \[10\] .*
-    digits_names -> 0x[0-9a-f]*: char \*\[10\] .*
+    digits -> 0x[0-9a-f]*: \(kind 4\) int \[10\] .*
+    digits_names -> 0x[0-9a-f]*: \(kind 4\) char \*\[10\] .*
 
   Function objects:
 
@@ -29,7 +29,7 @@ Contents of CTF section .ctf:
 
   Types:
 #...
-     0x[0-9a-f]*: .*\[10\] .*
+    0x[0-9a-f]*: \(kind 4\) .*\[10\] \(size .*
 #...
-     0x[0-9a-f]*: .*\[10\] .*
+    0x[0-9a-f]*: \(kind 4\) .*\[10\] \(size .*
 #...

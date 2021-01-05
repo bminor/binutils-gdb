@@ -826,10 +826,6 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	    case CTF_K_RESTRICT:
 	      ctf_decl_sprintf (&cd, "restrict");
 	      break;
-	    case CTF_K_SLICE:
-	      /* No representation: just changes encoding of contained type,
-		 which is not in any case printed.  Skip it.  */
-	      break;
 	    }
 
 	  k = cdp->cd_kind;
