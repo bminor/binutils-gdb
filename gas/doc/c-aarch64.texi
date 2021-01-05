@@ -229,8 +229,6 @@ automatically cause those extensions to be disabled.
  @tab Enable SVE2 SHA3 Extension.
 @item @code{flagm} @tab ARMv8-A @tab ARMv8.4-A or later
  @tab Enable Flag Manipulation instructions.
-@item @code{csre} @tab ARMv8-A @tab No
- @tab Enable Call Stack Recorder Extension.
 @item @code{ls64} @tab ARMv8.6-A @tab ARMv8.7-A or later
  @tab Enable 64 Byte Loads/Stores.
 @item @code{pauth} @tab ARMv8-A @tab No

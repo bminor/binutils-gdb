@@ -1,3 +1,8 @@
+2021-01-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* opcode/aarch64.h (AARCH64_FEATURE_CSRE): Delete.
+	(aarch64_opnd): Delete AARCH64_OPND_CSRE_CSR.
+
 2021-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* 2.36 release branch crated.

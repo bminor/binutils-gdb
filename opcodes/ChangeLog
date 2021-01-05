@@ -1,3 +1,15 @@
+2021-01-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* aarch64-asm-2.c: Regenerate.
+	* aarch64-dis-2.c: Likewise.
+	* aarch64-opc-2.c: Likewise.
+	* aarch64-opc.c (aarch64_print_operand):
+	Delete handling of AARCH64_OPND_CSRE_CSR.
+	* aarch64-tbl.h (aarch64_feature_csre): Delete.
+	(CSRE): Likewise.
+	(_CSRE_INSN): Likewise.
+	(aarch64_opcode_table): Delete csr.
+
 2021-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.

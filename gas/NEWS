@@ -18,17 +18,13 @@ Changes in 2.36:
   Add support for Cortex-R82, Neoverse V1, and Neoverse N2 for ARM.
 
 * Add support for ETMv4 (Embedded Trace Macrocell), ETE (Embedded Trace
-  Extension), TRBE (Trace Buffer Extension), CSRE (Call Stack Recorder
-  Extension) and BRBE (Branch Record Buffer Extension) system registers for
-  AArch64.
+  Extension), TRBE (Trace Buffer Extension)and BRBE (Branch Record Buffer
+  Extension) system registers for AArch64.
 
 * Add support for Armv8-R and Armv8.7-A AArch64.
 
 * Add support for DSB memory nXS barrier, WFET and WFIT instruction for Armv8.7
   AArch64.
-
-* Add support for +csre feature for -march. Add CSR PDEC instruction for CSRE
-  feature in AArch64.
 
 * Add support for +flagm feature for -march in Armv8.4 AArch64.
 

@@ -3788,10 +3788,6 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	snprintf (buf, size, "%s", opnd->hint_option->name);
       break;
 
-    case AARCH64_OPND_CSRE_CSR:
-      snprintf (buf, size, "pdec");
-      break;
-
     default:
       assert (0);
     }

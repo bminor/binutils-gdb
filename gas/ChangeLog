@@ -1,3 +1,20 @@
+2021-10-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* NEWS: Remove CSRE.
+	* config/tc-aarch64.c (parse_csr_operand): Delete.
+	(parse_operands): Delete handling of
+	AARCH64_OPND_CSRE_CSR.
+	(aarch64_features): Remove csre.
+	* doc/c-aarch64.texi: Remove CSRE.
+	* testsuite/gas/aarch64/csre.d: Delete.
+	* testsuite/gas/aarch64/csre-invalid.s: Likewise.
+	* testsuite/gas/aarch64/csre-invalid.d: Likewise.
+	* testsuite/gas/aarch64/csre_csr.s: Likewise.
+	* testsuite/gas/aarch64/csre_csr.d: Likewise.
+	* testsuite/gas/aarch64/csre_csr-invalid.s: Likewise.
+	* testsuite/gas/aarch64/csre_csr-invalid.l: Likewise.
+	* testsuite/gas/aarch64/csre_csr-invalid.d: Likewise.
+
 2021-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.
