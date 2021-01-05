@@ -834,7 +834,6 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	      }
 	      break;
 	    case CTF_K_STRUCT:
-	    case CTF_K_FORWARD:
 	      ctf_decl_sprintf (&cd, "struct %s", name);
 	      break;
 	    case CTF_K_UNION:
@@ -843,6 +842,26 @@ ctf_type_aname (ctf_dict_t *fp, ctf_id_t type)
 	    case CTF_K_ENUM:
 	      ctf_decl_sprintf (&cd, "enum %s", name);
 	      break;
+	    case CTF_K_FORWARD:
+	      {
+		switch (ctf_type_kind_forwarded (fp, cdp->cd_type))
+		  {
+		  case CTF_K_STRUCT:
+		    ctf_decl_sprintf (&cd, "struct %s", name);
+		    break;
+		  case CTF_K_UNION:
+		    ctf_decl_sprintf (&cd, "union %s", name);
+		    break;
+		  case CTF_K_ENUM:
+		    ctf_decl_sprintf (&cd, "enum %s", name);
+		    break;
+		  default:
+		    ctf_set_errno (fp, ECTF_CORRUPT);
+		    ctf_decl_fini (&cd);
+		    return NULL;
+		  }
+		break;
+	      }
 	    case CTF_K_VOLATILE:
 	      ctf_decl_sprintf (&cd, "volatile");
 	      break;

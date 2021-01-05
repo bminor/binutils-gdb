@@ -1,5 +1,10 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_aname): Print forwards to unions and enums
+	properly.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dict_t) <ctf_pptrtab>: New.
 	<ctf_pptrtab_len>: New.
 	<ctf_pptrtab_typemax>: New.
