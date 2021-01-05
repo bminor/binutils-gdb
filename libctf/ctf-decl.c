@@ -152,11 +152,10 @@ ctf_decl_push (ctf_decl_t *cd, ctf_dict_t *fp, ctf_id_t type)
   if (prec > cd->cd_qualp && prec < CTF_PREC_ARRAY)
     cd->cd_qualp = prec;
 
-  /* C array declarators are ordered inside out so prepend them.  Also by
-     convention qualifiers of base types precede the type specifier (e.g.
+  /* By convention qualifiers of base types precede the type specifier (e.g.
      const int vs. int const) even though the two forms are equivalent.  */
 
-  if (kind == CTF_K_ARRAY || (is_qual && prec == CTF_PREC_BASE))
+  if (is_qual && prec == CTF_PREC_BASE)
     ctf_list_prepend (&cd->cd_nodes[prec], cdp);
   else
     ctf_list_append (&cd->cd_nodes[prec], cdp);

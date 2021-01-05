@@ -1,3 +1,7 @@
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-decl.c (ctf_decl_push): Don't print array decls backwards.
+
 2021-01-04  Nicolas Boulenguez  <nicolas@debian.org>
 
 	PR 27117
