@@ -1,5 +1,20 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* configure.ac (BFD_LIBADD): Remove.
+	(BFD_DEPENDENCIES): Likewise. Remove associated cases.
+	(SHARED_LIBADD): Rename to...
+	(CTF_LIBADD): ... this.  Stick in a suitable libiberty even when
+	linking statically.
+	* Makefile.am (libctf_nobfd_la_LIBADD): Adjust accordingly.
+	libctf uses libintl.
+	(libctf_la_LIBADD): Reference libbfd.la directly, not via
+	BFD_LIBADD.
+	(libctf_la_DEPENDENCIES): Remove.
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-decl.c (ctf_decl_push): Exclude slices from the decl stack.
 	* ctf-types.c (ctf_type_aname): No longer deal with slices here.
 	* ctf-dump.c (ctf_dump_membstate_t) <cdm_toplevel_indent>: Constify.

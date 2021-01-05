@@ -170,10 +170,9 @@ if test $ac_cv_libctf_macro_O_CLOEXEC = yes; then
 fi
 
 # Horrible hacks to build DLLs on Windows and a shared library elsewhere.
-SHARED_LIBADD=
+
+CTF_LIBADD="-L`pwd`/../libiberty -liberty"
 SHARED_LDFLAGS=
-BFD_LIBADD=
-BFD_DEPENDENCIES=
 if test "$enable_shared" = "yes"; then
 # When building a shared libctf, link against the pic version of libiberty
 # so that apps that use libctf won't need libiberty just to satisfy any
@@ -187,38 +186,19 @@ changequote(,)dnl
   x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
 changequote([,])dnl
   if test -n "$x"; then
-    SHARED_LIBADD="-L`pwd`/../libiberty/pic -liberty"
+    CTF_LIBADD="-L`pwd`/../libiberty/pic -liberty"
   fi
 
   case "${host}" in
   # More hacks to build DLLs on Windows.
     *-*-cygwin*)
       SHARED_LDFLAGS="-no-undefined"
-      SHARED_LIBADD="-L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
-      BFD_LIBADD="-L`pwd`/../bfd -lbfd"
-      ;;
-
-    *-*-darwin*)
-      BFD_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.dylib"
-      BFD_DEPENDENCIES="../bfd/libbfd.la"
-      ;;
-    *)
-      case "$host_vendor" in
-	hp)
-	  BFD_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.sl"
-	  ;;
-	*)
-	  BFD_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so"
-	  ;;
-      esac
-      BFD_DEPENDENCIES="../bfd/libbfd.la"
+      CTF_LIBADD="$CTF_LIBADD -L`pwd`/../intl -lintl -lcygwin"
       ;;
   esac
 fi
 AC_SUBST(SHARED_LDFLAGS)
-AC_SUBST(SHARED_LIBADD)
-AC_SUBST(BFD_LIBADD)
-AC_SUBST(BFD_DEPENDENCIES)
+AC_SUBST(CTF_LIBADD)
 
 # Use a version script, if possible, or an -export-symbols-regex otherwise.
 VERSION_FLAGS='-export-symbols-regex ctf_.*'
