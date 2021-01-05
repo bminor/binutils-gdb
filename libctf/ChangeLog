@@ -1,5 +1,12 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_dump_objts): Dump by calling ctf_dump_format_type.
+	(ctf_dump_format_type): Don't emit the size for function objects.
+	Dump the element type of arrays like we dump the pointed-to type of
+	pointers, etc.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_format_type): Add 0x to hex type IDs.
 	(ctf_dump_header): Add 0x to the hex magic number.
 	(ctf_dump_str): Add 0x to the hex string offsets.

@@ -1,6 +1,16 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/array.d: Adjust for dumper changes.
+	* testsuite/ld-ctf/data-func-conflicted.d: Likewise.
+	* testsuite/ld-ctf/diag-cttname-null.d: Likewise.
+	* testsuite/ld-ctf/diag-cuname.d: Likewise.
+	* testsuite/ld-ctf/diag-parlabel.d: Likewise.
+	* testsuite/ld-ctf/function.d: Likewise.
+	* testsuite/ld-ctf/slice.d: Likewise.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* testsuite/ld-ctf/array.d: Adjust for dumper changes.
 	* testsuite/ld-ctf/conflicting-cycle-1.B-1.d: Likewise.
 	* testsuite/ld-ctf/conflicting-cycle-1.B-2.d: Likewise.
 	* testsuite/ld-ctf/conflicting-cycle-1.parent.d: Likewise.

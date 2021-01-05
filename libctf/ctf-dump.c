@@ -93,6 +93,8 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
   do
     {
       ctf_encoding_t enc;
+      ctf_arinfo_t ar;
+      int kind, unsliced_kind;
       const char *nonroot_leader = "";
       const char *nonroot_trailer = "";
 
@@ -123,26 +125,25 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       bit = NULL;
 
       if (buf[0] != '\0')
-	{
-	  str = str_append (str, buf);
-	  str = str_append (str, " ");
-	}
+	str = str_append (str, buf);
 
       free (buf);
       buf = NULL;
+      unsliced_kind = ctf_type_kind_unsliced (fp, id);
+      kind = ctf_type_kind (fp, id);
 
       /* Slices get a different print representation.  */
-      if (ctf_type_kind_unsliced (fp, id) == CTF_K_SLICE)
+      if (unsliced_kind == CTF_K_SLICE)
 	{
 	  ctf_type_encoding (fp, id, &enc);
-	  if (asprintf (&bit, "[slice 0x%x:0x%x] ",
+	  if (asprintf (&bit, " [slice 0x%x:0x%x]",
 			enc.cte_offset, enc.cte_bits) < 0)
 	    goto oom;
 	}
-      else if (ctf_type_kind (fp, id) == CTF_K_INTEGER)
+      else if (kind == CTF_K_INTEGER)
 	{
 	  ctf_type_encoding (fp, id, &enc);
-	  if (asprintf (&bit, "[0x%x:0x%x] ",
+	  if (asprintf (&bit, " [0x%x:0x%x]",
 			enc.cte_offset, enc.cte_bits) < 0)
 	    goto oom;
 	}
@@ -150,16 +151,27 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       free (bit);
       bit = NULL;
 
-      if (asprintf (&bit, "(size 0x%lx)%s",
-		    (unsigned long) ctf_type_size (fp, id),
-		    nonroot_trailer) < 0)
-	goto oom;
+      if (kind != CTF_K_FUNCTION)
+	if (asprintf (&bit, " (size 0x%lx)%s",
+		      (unsigned long) ctf_type_size (fp, id),
+		      nonroot_trailer) < 0)
+	  goto oom;
 
       str = str_append (str, bit);
       free (bit);
       bit = NULL;
 
-      new_id = ctf_type_reference (fp, id);
+      /* Keep going as long as this type references another.  We consider arrays
+	 to "reference" their element type. */
+
+      if (kind == CTF_K_ARRAY)
+	{
+	  if (ctf_array_info (fp, id, &ar) < 0)
+	    goto err;
+	  new_id = ar.ctr_contents;
+	}
+      else
+	new_id = ctf_type_reference (fp, id);
       if (new_id != CTF_ERR)
 	str = str_append (str, " ->");
     } while (new_id != CTF_ERR);
@@ -383,36 +395,26 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
   while ((id = ctf_symbol_next (fp, &i, &name, functions)) != CTF_ERR)
     {
       char *typestr = NULL;
-      int err = 0;
 
-      /* Emit the name, if we know it.  */
+      /* Emit the name, if we know it.  No trailing space: ctf_dump_format_type
+	 has a leading one.   */
       if (name)
 	{
-	  if (asprintf (&str, "%s -> ", name) < 0)
+	  if (asprintf (&str, "%s ->", name) < 0)
 	    goto oom;
 	}
       else
 	str = xstrdup ("");
 
-      if ((typestr = ctf_type_aname (fp, id)) == NULL)
+      if ((typestr = ctf_dump_format_type (state->cds_fp, id,
+					   CTF_ADD_ROOT)) == NULL)
 	{
-	  if (id == 0 || ctf_errno (fp) == ECTF_NONREPRESENTABLE)
-	    {
-	      if (asprintf (&typestr, " (%s)", _("type not represented in CTF")) < 0)
-		goto oom;
-
-	      goto out;
-	    }
-
-	  if (asprintf (&typestr, _("error: %s"), ctf_errmsg (ctf_errno (fp))) < 0)
-	    goto oom;
-
-	  err = -1;
-	  goto out;
+	  ctf_dump_append (state, str);
+	  continue;				/* Swallow the error.  */
 	}
 
       str = str_append (str, typestr);
-      str = str_append (str, "\n");
+      free (typestr);
       ctf_dump_append (state, str);
       continue;
 
@@ -420,12 +422,6 @@ ctf_dump_objts (ctf_dict_t *fp, ctf_dump_state_t *state, int functions)
       ctf_set_errno (fp, ENOMEM);
       ctf_next_destroy (i);
       return -1;
-    out:
-      str = str_append (str, typestr);
-      free (typestr);
-      ctf_dump_append (state, str);
-      ctf_next_destroy (i);
-      return err;				/* errno is set for us.  */
     }
   return 0;
 }

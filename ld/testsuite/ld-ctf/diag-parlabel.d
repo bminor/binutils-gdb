@@ -20,7 +20,7 @@ Contents of CTF section .ctf:
   Labels:
 
   Data objects:
-    a -> struct A
+    a -> 0x[0-9a-f]*: struct A \(size 0x[0-9a-f]*\)
 #...
   Function objects:
 
