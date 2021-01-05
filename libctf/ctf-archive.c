@@ -1021,9 +1021,7 @@ ctf_archive_iter (const ctf_archive_t *arc, ctf_archive_member_f *func,
 
 /* Iterate over all CTF files in an archive, returning each dict in turn as a
    ctf_dict_t, and NULL on error or end of iteration.  It is the caller's
-   responsibility to close it.  Parent dicts may be skipped.  Regardless of
-   whether they are skipped or not, the caller must ctf_import the parent if
-   need be.
+   responsibility to close it.  Parent dicts may be skipped.
 
    The archive member is cached for rapid return on future calls.
 

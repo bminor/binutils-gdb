@@ -1,5 +1,9 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_archive_iter): Remove outdated comment.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (struct ctf_next) <u.ctn_next>: Move to...
 	<ctn_next>: ... here.
 	* ctf-util.c (ctf_next_destroy): Unconditionally destroy it.
