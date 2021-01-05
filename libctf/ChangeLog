@@ -1,5 +1,22 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* Makefile.am (EXPECT): New.
+	(RUNTEST): Likewise.
+	(RUNTESTFLAGS): Likewise.
+	(CC_FOR_TARGET): Likewise.
+	(check-DEJAGNU): Likewise.
+	(AUTOMAKE_OPTIONS): Add dejagnu.
+	* Makefile.in: Regenerated.
+	* testsuite/config/default.exp: New.
+	* testsuite/lib/ctf-lib.exp: Likewise.
+	* testsuite/libctf-lookup/enum.lk: New test.
+	* testsuite/libctf-lookup/enum-ctf.c: New CTF input.
+	* testsuite/libctf-lookup/enum.c: New lookup test.
+	* testsuite/libctf-lookup/ambiguous-struct*.c: New test.
+	* testsuite/libctf-lookup/lookup.exp: New.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* configure.ac (BFD_LIBADD): Remove.
 	(BFD_DEPENDENCIES): Likewise. Remove associated cases.
 	(SHARED_LIBADD): Rename to...

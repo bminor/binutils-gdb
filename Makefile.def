@@ -131,8 +131,7 @@ host_modules= { module= lto-plugin; bootstrap=true;
 		extra_make_flags='@extra_linker_plugin_flags@'; };
 host_modules= { module= libcc1; extra_configure_flags=--enable-shared; };
 host_modules= { module= gotools; };
-host_modules= { module= libctf; no_check=true;
-		bootstrap=true; };
+host_modules= { module= libctf; bootstrap=true; };
 
 target_modules = { module= libstdc++-v3;
 		   bootstrap=true;
@@ -547,6 +546,7 @@ dependencies = { module=configure-libctf; on=all-bfd; };
 dependencies = { module=configure-libctf; on=all-intl; };
 dependencies = { module=configure-libctf; on=all-zlib; };
 dependencies = { module=configure-libctf; on=all-libiconv; };
+dependencies = { module=check-libctf; on=all-ld; };
 
 // The Makefiles in gdb and gdbserver pull in a file that configure
 // generates in the gnulib directory, so distclean gnulib only after

@@ -34761,6 +34761,12 @@ maybe-check-libctf:
 maybe-check-libctf: check-libctf
 
 check-libctf:
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(HOST_EXPORTS) $(EXTRA_HOST_EXPORTS) \
+	(cd $(HOST_SUBDIR)/libctf && \
+	  $(MAKE) $(FLAGS_TO_PASS)  $(EXTRA_BOOTSTRAP_FLAGS) check)
 
 @endif libctf
 
@@ -52366,6 +52372,13 @@ configure-stage3-libctf: maybe-all-stage3-libiconv
 configure-stage4-libctf: maybe-all-stage4-libiconv
 configure-stageprofile-libctf: maybe-all-stageprofile-libiconv
 configure-stagefeedback-libctf: maybe-all-stagefeedback-libiconv
+check-libctf: maybe-all-ld
+check-stage1-libctf: maybe-all-stage1-ld
+check-stage2-libctf: maybe-all-stage2-ld
+check-stage3-libctf: maybe-all-stage3-ld
+check-stage4-libctf: maybe-all-stage4-ld
+check-stageprofile-libctf: maybe-all-stageprofile-ld
+check-stagefeedback-libctf: maybe-all-stagefeedback-ld
 distclean-gnulib: maybe-distclean-gdb
 distclean-gnulib: maybe-distclean-gdbserver
 all-bison: maybe-all-build-texinfo

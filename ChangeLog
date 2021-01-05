@@ -1,3 +1,9 @@
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* Makefile.def (libctf): No longer no_check.  Checking depends on
+	all-ld.
+	* Makefile.in: Regenerated.
+
 2021-01-05  Nick Clifton  <nickc@redhat.com>
 
 	* libiberty: Sync with gcc.  Bring in:
