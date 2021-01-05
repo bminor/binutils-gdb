@@ -26,7 +26,7 @@ main (int argc, char *argv[])
   const char *name;
   ctf_id_t membtype;
   ssize_t offset;
-  ssize_t icount = 0;
+  int icount = 0;
   int err;
 
   if (argc != 2)
@@ -69,8 +69,8 @@ main (int argc, char *argv[])
     goto nerr;
 
   if (icount != ctf_member_count (fp, type))
-    printf ("member counts differ: %li by direct iteration, "
-	    "%li by ctf_member_count\n", icount, ctf_member_count (fp, type));
+    printf ("member counts differ: %i by direct iteration, "
+	    "%i by ctf_member_count\n", icount, ctf_member_count (fp, type));
 
   ctf_dict_close (fp);
   ctf_close (ctf);

@@ -1,5 +1,10 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/libctf-lookup/struct-iteration.c (main):
+	ctf_member_count returns an int.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* Makefile.am (BASEDIR): New.
 	(BFDDIR): Likewise.
 	(check-DEJAGNU): Add development.exp to prerequisites.
