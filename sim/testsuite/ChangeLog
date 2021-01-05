@@ -1,5 +1,11 @@
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (target): Delete frv-*-elf case.
+	* configure: Regenerate.
+	* frv-elf/: Delete directory.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (target): Delete m32r-*-elf case.
 	* configure: Regenerate.
 	* m32r-elf/: Delete directory.

@@ -1,5 +1,9 @@
-# run with --memory-region 0xff000000,4 --memory-region 0xfe000000,00404000
+# mach: frv fr500 fr550
+# sim: --memory-region 0xff000000,4 --memory-region 0xfe000000,00404000
+# xfail: "crashes with bad write" frv-*
+
 ; Exit with return code
+
 	.macro exit rc
 	setlos.p	#1,gr7
 	setlos          \rc,gr8

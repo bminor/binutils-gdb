@@ -1,3 +1,9 @@
+# mach: all
+# status: 47
+# output:
+
+	;; Return with exit code 47.
+
 	.global _start
 _start:
 	setlos	#47,gr8

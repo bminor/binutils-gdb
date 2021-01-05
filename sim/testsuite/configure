@@ -646,7 +646,6 @@ enable_option_checking
 host_alias
 target_alias'
 ac_subdirs_all='d10v-elf
-frv-elf
 mips64el-elf'
 
 # Initialize some variables set by options.
@@ -1833,10 +1832,6 @@ case ${target} in
 
 
 subdirs="$subdirs d10v-elf"
-
-	;;
-    frv-*-elf )
-	subdirs="$subdirs frv-elf"
 
 	;;
     mips64el-*-elf )

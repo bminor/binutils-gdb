@@ -1,3 +1,6 @@
+# mach: all
+# output:
+
 	.global _start
 _start:
 	setlo	0x0400,gr10

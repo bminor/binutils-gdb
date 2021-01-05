@@ -1,3 +1,6 @@
+# mach: all
+# output: Hello World!\n
+
 	.global _start
 _start:
 
