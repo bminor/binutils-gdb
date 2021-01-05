@@ -492,7 +492,8 @@ tui_data_item_window::rerender (WINDOW *handle, int field_width)
     (void) wstandout (handle);
       
   mvwaddnstr (handle, y, x, content.c_str (), field_width - 1);
-  waddstr (handle, n_spaces (field_width - content.size ()));
+  if (content.size () < field_width)
+    waddstr (handle, n_spaces (field_width - content.size ()));
 
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
