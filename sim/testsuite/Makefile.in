@@ -171,11 +171,11 @@ distclean maintainer-clean realclean: clean
 	    done ; \
 	else true; fi
 
-Makefile : Makefile.in config.status
-	$(SHELL) config.status
+Makefile : Makefile.in ../config.status
+	$(SHELL) ../config.status
 
-config.status: $(srcdir)/configure
-	$(SHELL) ./config.status --recheck
+config.status: $(srcdir)/../configure
+	$(SHELL) ../config.status --recheck
 # FIXME: Requires --enable-maintainer-mode, which one could add, but
 # it's provided by automake.  Maybe switch to automake someday.
 #$(srcdir)/configure: @MAINT@ $(srcdir)/configure.in

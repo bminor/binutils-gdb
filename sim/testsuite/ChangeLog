@@ -1,5 +1,10 @@
 2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure, configure.ac: Delete.
+	* Makefile.in (Makefile, config.status): Switch to ../config.status.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (target): Delete d10v-*-elf case.
 	* configure: Regenerate.
 	* d10v-elf/: Move directory ...

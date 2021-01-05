@@ -1,3 +1,10 @@
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete AC_CONFIG_SUBDIRS(testsuite) call.
+	Add AC_CONFIG_FILES([Makefile testsuite/Makefile]) call.
+	Drop argument to AC_OUTPUT.
+	* configure: Regenerate.
+
 2021-01-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* README-HACKING (SIM_RUN_OBJS): Delete.

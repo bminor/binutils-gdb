@@ -42,15 +42,11 @@ m4_define([SIM_ARCH], [
   AC_CONFIG_SUBDIRS($1)
 ])
 if test "${enable_sim}" != no; then
-   sinclude(configure.tgt)
-   if test x"${sim_arch}" != x; then
-      AC_CONFIG_SUBDIRS(testsuite)
-      if test "$sim_igen" = yes; then
-         AC_CONFIG_SUBDIRS(igen)
-      fi
-   fi
+  sinclude(configure.tgt)
+  if test "$sim_igen" = yes; then
+    AC_CONFIG_SUBDIRS(igen)
+  fi
 fi
 
-AC_OUTPUT(Makefile)
-
-exit 0
+AC_CONFIG_FILES([Makefile testsuite/Makefile])
+AC_OUTPUT

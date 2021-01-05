@@ -695,7 +695,6 @@ erc32
 ppc
 ft32
 v850
-testsuite
 igen'
 
 # Initialize some variables set by options.
@@ -3906,17 +3905,13 @@ subdirs="$subdirs aarch64"
 esac
 
 
-   if test x"${sim_arch}" != x; then
-      subdirs="$subdirs testsuite"
+  if test "$sim_igen" = yes; then
+    subdirs="$subdirs igen"
 
-      if test "$sim_igen" = yes; then
-         subdirs="$subdirs igen"
-
-      fi
-   fi
+  fi
 fi
 
-ac_config_files="$ac_config_files Makefile"
+ac_config_files="$ac_config_files Makefile testsuite/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4625,6 +4620,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "testsuite/Makefile") CONFIG_FILES="$CONFIG_FILES testsuite/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -5224,5 +5220,3 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
-
-exit 0
