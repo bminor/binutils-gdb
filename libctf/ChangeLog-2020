@@ -1840,7 +1840,7 @@
 	* configure.in: Check for bfd_section_from_elf_index.
 	* configure: Regenerate.
 	* config.h.in [HAVE_BFD_ELF]: Likewise.
-	* libctf/ctf_open_bfd (ctf_bfdopen_ctfsect): Use it.
+	* libctf/ctf-open-bfd.c (ctf_bfdopen_ctfsect): Use it.
 	abfd is potentially unused now.
 
 2019-05-28  Nick Alcock  <nick.alcock@oracle.com>
