@@ -11,13 +11,6 @@ AC_SUBST(CC)
 AC_CONFIG_AUX_DIR(../..)
 AC_CANONICAL_SYSTEM
 
-# Configure sub-directory for appropriate targets
-case ${target} in
-    d10v-*-elf )
-	AC_CONFIG_SUBDIRS(d10v-elf)
-	;;
-esac
-
 sinclude(../configure.tgt)
 
 AC_OUTPUT(Makefile)

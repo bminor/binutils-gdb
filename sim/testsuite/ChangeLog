@@ -1,4 +1,11 @@
-2021-01-05  Mike Frysinger  <vapier@gentoo.org>
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (target): Delete d10v-*-elf case.
+	* configure: Regenerate.
+	* d10v-elf/: Move directory ...
+	* sim/d10v/: ... here.
+
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (target): Delete mips64el-*-elf case.
 	* configure: Regenerate.
