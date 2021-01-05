@@ -47,6 +47,7 @@ typedef struct ctf_dump_membstate
 {
   char **cdm_str;
   ctf_dict_t *cdm_fp;
+  char *cdm_toplevel_indent;
 } ctf_dump_membstate_t;
 
 static int
@@ -115,7 +116,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	  goto err;
 	}
 
-      if (asprintf (&bit, " %s%lx: ", nonroot_leader, id) < 0)
+      if (asprintf (&bit, " %s0x%lx: ", nonroot_leader, id) < 0)
 	goto oom;
       str = str_append (str, bit);
       free (bit);
@@ -236,7 +237,7 @@ ctf_dump_header (ctf_dict_t *fp, ctf_dump_state_t *state)
     };
   const char *verstr = NULL;
 
-  if (asprintf (&str, "Magic number: %x\n", hp->cth_magic) < 0)
+  if (asprintf (&str, "Magic number: 0x%x\n", hp->cth_magic) < 0)
       goto err;
   ctf_dump_append (state, str);
 
@@ -454,26 +455,51 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
   return 0;
 }
 
+/* Report the number of digits in the hexadecimal representation of a type
+   ID.  */
+
+static int
+type_hex_digits (ctf_id_t id)
+{
+  int i = 0;
+
+  if (id == 0)
+    return 1;
+
+  for (; id > 0; id >>= 4, i++);
+  return i;
+}
+
 /* Dump a single member into the string in the membstate.  */
 static int
 ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
-		  int depth, void *arg)
+		 int depth, void *arg)
 {
   ctf_dump_membstate_t *state = arg;
   char *typestr = NULL;
   char *bit = NULL;
   ctf_encoding_t ep;
   int has_encoding = 0;
-  ssize_t i;
 
-  for (i = 0; i < depth; i++)
-    *state->cdm_str = str_append (*state->cdm_str, "    ");
+  /* Align neatly.  */
+
+  if (depth == 0)
+    {
+      if (asprintf (&state->cdm_toplevel_indent, "     %*s",
+		    type_hex_digits (id), "") < 0)
+	goto oom;
+    }
+
+  if (asprintf (&bit, "%s%*s", state->cdm_toplevel_indent, depth * 4, "") < 0)
+    goto oom;
+  *state->cdm_str = str_append (*state->cdm_str, bit);
+  free (bit);
 
   if ((typestr = ctf_type_aname (state->cdm_fp, id)) == NULL)
     {
       if (id == 0 || ctf_errno (state->cdm_fp) == ECTF_NONREPRESENTABLE)
 	{
-	  if (asprintf (&bit, "    [0x%lx] (type not represented in CTF)",
+	  if (asprintf (&bit, "[0x%lx] (type not represented in CTF)",
 			offset) < 0)
 	    goto oom;
 
@@ -491,7 +517,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
       has_encoding = 1;
       ctf_type_encoding (state->cdm_fp, id, &ep);
 
-      if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s%s%s:%i "
+      if (asprintf (&bit, "[0x%lx] (ID 0x%lx) (kind %i) %s%s%s:%i "
 		    "(aligned at 0x%lx", offset, id,
 		    ctf_type_kind (state->cdm_fp, id), typestr,
 		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
@@ -501,7 +527,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
     }
   else
     {
-      if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s%s%s "
+      if (asprintf (&bit, "[0x%lx] (ID 0x%lx) (kind %i) %s%s%s "
 		    "(aligned at 0x%lx", offset, id,
 		    ctf_type_kind (state->cdm_fp, id), typestr,
 		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
@@ -540,7 +566,7 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 {
   char *str;
   ctf_dump_state_t *state = arg;
-  ctf_dump_membstate_t membstate = { &str, state->cds_fp };
+  ctf_dump_membstate_t membstate = { &str, state->cds_fp, NULL };
   size_t len;
 
   if ((str = ctf_dump_format_type (state->cds_fp, id, flag)) == NULL)
@@ -558,6 +584,7 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 		    _("cannot visit members dumping type 0x%lx"), id);
       goto err;
     }
+  free (membstate.cdm_toplevel_indent);
 
   /* Trim off the last linefeed added by ctf_dump_member().  */
   len = strlen (str);
@@ -568,6 +595,7 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
   return 0;
 
  err:
+  free (membstate.cdm_toplevel_indent);
   free (str);
   return 0;				/* Swallow the error.  */
 }
@@ -583,7 +611,7 @@ ctf_dump_str (ctf_dict_t *fp, ctf_dump_state_t *state)
 	 fp->ctf_str[CTF_STRTAB_0].cts_len;)
     {
       char *str;
-      if (asprintf (&str, "%lx: %s",
+      if (asprintf (&str, "0x%lx: %s",
 		    (unsigned long) (s - fp->ctf_str[CTF_STRTAB_0].cts_strs),
 		    s) < 0)
 	return (ctf_set_errno (fp, errno));

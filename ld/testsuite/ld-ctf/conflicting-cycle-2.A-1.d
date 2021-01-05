@@ -16,7 +16,7 @@
 CTF archive member: .*/A.c:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
     Parent name: .*
@@ -29,13 +29,13 @@ CTF archive member: .*/A.c:
   Function objects:
 
   Variables:
-    a ->  80000001: struct A \(size 0x[0-9a-f]*\)
+    a ->  0x80000001: struct A \(size 0x[0-9a-f]*\)
 
   Types:
-     8[0-9a-f]*: struct A \(size 0x[0-9a-f]*\)
-        \[0x0\] \(ID 0x8[0-9a-f]*\) \(kind 6\) struct A \(aligned at 0x[0-9a-f]*\)
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(aligned at 0x[0-9a-f]*\)
+     0x8[0-9a-f]*: struct A \(size 0x[0-9a-f]*\)
+           *\[0x0\] \(ID 0x8[0-9a-f]*\) \(kind 6\) struct A \(aligned at 0x[0-9a-f]*\)
+               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(aligned at 0x[0-9a-f]*\)
 
   Strings:
-    0: 
+    0x0: 
 #...

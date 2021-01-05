@@ -1,5 +1,17 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_dump_format_type): Add 0x to hex type IDs.
+	(ctf_dump_header): Add 0x to the hex magic number.
+	(ctf_dump_str): Add 0x to the hex string offsets.
+	(ctf_dump_membstate_t) <cdm_toplevel_indent>: New.
+	(ctf_dump_type): Adjust.  Free it when we're done.
+	(type_hex_digits): New.
+	(ctf_dump_member): Align output depending on the width of the type
+	ID being generated.  Use printf padding, not a loop, to generate
+	indentation.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-decl.c (ctf_decl_push): Don't print array decls backwards.
 
 2021-01-04  Nicolas Boulenguez  <nicolas@debian.org>

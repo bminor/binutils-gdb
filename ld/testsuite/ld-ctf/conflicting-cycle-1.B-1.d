@@ -14,7 +14,7 @@
 CTF archive member: .*/B.c:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
     Parent name: .ctf
@@ -30,12 +30,12 @@ CTF archive member: .*/B.c:
   Function objects:
 
   Variables:
-    b ->  80000001: struct B \(size 0x[0-9]*\)
+    b ->  0x80000001: struct B \(size 0x[0-9]*\)
 
   Types:
-     8[0-9a-f]*: struct B .*
-        \[0x0\] \(ID 0x8[0-9a-f]*\) \(kind 6\) struct B \(.*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct C \* c \(.*
+     0x8[0-9a-f]*: struct B .*
+           *\[0x0\] \(ID 0x8[0-9a-f]*\) \(kind 6\) struct B \(.*
+               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct C \* c \(.*
 
   Strings:
 #...

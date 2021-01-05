@@ -12,7 +12,7 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
     Type section:	.* \(0xa8 bytes\)
@@ -28,9 +28,9 @@ Contents of CTF section .ctf:
 #...
   Types:
 #...
-     [0-9a-f]*: struct cycle_1 \(.*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct cycle_1 \(.*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* a \(.*
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(.*
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct cycle_1 \* next \(.*
+     0x[0-9a-f]*: struct cycle_1 \(.*
+           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct cycle_1 \(.*
+               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* a \(.*
+               *\[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* b \(.*
+               *\[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct cycle_1 \* next \(.*
 #...

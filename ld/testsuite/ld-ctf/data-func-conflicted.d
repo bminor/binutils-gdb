@@ -10,7 +10,7 @@
 Contents of CTF section \.ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
     Data object section:	.* \(0xc bytes\)
@@ -34,7 +34,7 @@ Contents of CTF section \.ctf:
 CTF archive member: .*/data-func-1\.c:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
     Parent name: \.ctf
@@ -59,5 +59,5 @@ CTF archive member: .*/data-func-1\.c:
   Variables:
 
   Types:
-     80000001: foo_t .* -> .* int .*
+     0x80000001: foo_t .* -> .* int .*
 #...

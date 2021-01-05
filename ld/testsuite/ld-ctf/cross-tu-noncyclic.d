@@ -12,7 +12,7 @@
 Contents of CTF section .ctf:
 
   Header:
-    Magic number: dff2
+    Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
     Type section:	.* \(0x74 bytes\)
@@ -29,18 +29,18 @@ Contents of CTF section .ctf:
 
   Types:
 #...
-     [0-9a-f]*: struct A .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct A .*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) long int a:[0-9]* .*
-            \[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* foo .*
+     0x[0-9a-f]*: struct A .*
+           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct A .*
+               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) long int a:[0-9]* .*
+               *\[0x[0-9a-f]*\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* foo .*
 #...
-     [0-9a-f]*: struct B .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B .*
-            \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) int foo:[0-9]* .*
+     0x[0-9a-f]*: struct B .*
+           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 6\) struct B .*
+               *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 1\) int foo:[0-9]* .*
 #...
-     [0-9a-f]*: struct B \* \(size 0x[0-9a-f]*\) -\> [0-9a-f]*: struct B .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* .*
+     0x[0-9a-f]*: struct B \* \(size 0x[0-9a-f]*\) -> 0x[0-9a-f]*: struct B .*
+           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct B \* .*
 #...
-     [0-9a-f]*: struct A \* \(size 0x[0-9a-f]*\) -> [0-9a-f]*: struct A .*
-        \[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* .*
+     0x[0-9a-f]*: struct A \* \(size 0x[0-9a-f]*\) -> 0x[0-9a-f]*: struct A .*
+           *\[0x0\] \(ID 0x[0-9a-f]*\) \(kind 3\) struct A \* .*
 #...
