@@ -1,3 +1,7 @@
+2021-01-05  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/Make-common.in: Delete.
+
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
