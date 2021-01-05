@@ -583,7 +583,10 @@ ctf_variable_next (ctf_dict_t *fp, ctf_next_t **it, const char **name)
    against infinite loops, we implement simplified cycle detection and check
    each link against itself, the previous node, and the topmost node.
 
-   Does not drill down through slices to their contained type.  */
+   Does not drill down through slices to their contained type.
+
+   Callers of this function must not presume that a type it returns must have a
+   valid ctt_size: forwards do not, and must be separately handled.  */
 
 ctf_id_t
 ctf_type_resolve (ctf_dict_t *fp, ctf_id_t type)
@@ -911,6 +914,7 @@ ctf_type_aname_raw (ctf_dict_t *fp, ctf_id_t type)
 ssize_t
 ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
 {
+  ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   ssize_t size;
   ctf_arinfo_t ar;
@@ -942,11 +946,15 @@ ctf_type_size (ctf_dict_t *fp, ctf_id_t type)
       if ((size = ctf_get_ctt_size (fp, tp, NULL, NULL)) > 0)
 	return size;
 
-      if (ctf_array_info (fp, type, &ar) < 0
-	  || (size = ctf_type_size (fp, ar.ctr_contents)) < 0)
+      if (ctf_array_info (ofp, type, &ar) < 0
+	  || (size = ctf_type_size (ofp, ar.ctr_contents)) < 0)
 	return -1;		/* errno is set for us.  */
 
       return size * ar.ctr_nelems;
+
+    case CTF_K_FORWARD:
+      /* Forwards do not have a meaningful size.  */
+      return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
 
     default: /* including slices of enums, etc */
       return (ctf_get_ctt_size (fp, tp, NULL, NULL));
@@ -981,9 +989,9 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_ARRAY:
       {
 	ctf_arinfo_t r;
-	if (ctf_array_info (fp, type, &r) < 0)
+	if (ctf_array_info (ofp, type, &r) < 0)
 	  return -1;		/* errno is set for us.  */
-	return (ctf_type_align (fp, r.ctr_contents));
+	return (ctf_type_align (ofp, r.ctr_contents));
       }
 
     case CTF_K_STRUCT:
@@ -1009,7 +1017,7 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 		const ctf_member_t *mp = vmp;
 		for (; n != 0; n--, mp++)
 		  {
-		    ssize_t am = ctf_type_align (fp, mp->ctm_type);
+		    ssize_t am = ctf_type_align (ofp, mp->ctm_type);
 		    align = MAX (align, (size_t) am);
 		  }
 	      }
@@ -1018,7 +1026,7 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 		const ctf_lmember_t *lmp = vmp;
 		for (; n != 0; n--, lmp++)
 		  {
-		    ssize_t am = ctf_type_align (fp, lmp->ctlm_type);
+		    ssize_t am = ctf_type_align (ofp, lmp->ctlm_type);
 		    align = MAX (align, (size_t) am);
 		  }
 	      }
@@ -1030,7 +1038,7 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 	      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
 		   dmd != NULL; dmd = ctf_list_next (dmd))
 		{
-		  ssize_t am = ctf_type_align (fp, dmd->dmd_type);
+		  ssize_t am = ctf_type_align (ofp, dmd->dmd_type);
 		  align = MAX (align, (size_t) am);
 		  if (kind == CTF_K_STRUCT)
 		    break;
@@ -1042,6 +1050,10 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
 
     case CTF_K_ENUM:
       return fp->ctf_dmodel->ctd_int;
+
+    case CTF_K_FORWARD:
+      /* Forwards do not have a meaningful alignment.  */
+      return (ctf_set_errno (ofp, ECTF_INCOMPLETE));
 
     default:  /* including slices of enums, etc */
       return (ctf_get_ctt_size (fp, tp, NULL, NULL));

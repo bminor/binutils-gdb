@@ -1690,6 +1690,14 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
   if (ctf_lookup_by_id (&tmp, arp->ctr_index) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
+  if (ctf_type_kind (fp, arp->ctr_index) == CTF_K_FORWARD)
+    {
+      ctf_err_warn (fp, 1, ECTF_INCOMPLETE,
+		    _("ctf_add_array: index type %lx is incomplete"),
+		    arp->ctr_contents);
+      return (ctf_set_errno (fp, ECTF_INCOMPLETE));
+    }
+
   if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_ARRAY, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
@@ -2040,6 +2048,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   ssize_t msize, malign, ssize;
   uint32_t kind, vlen, root;
   char *s = NULL;
+  int is_incomplete = 0;
 
   if (!(fp->ctf_flags & LCTF_RDWR))
     return (ctf_set_errno (fp, ECTF_RDONLY));
@@ -2075,14 +2084,19 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
     {
       /* The unimplemented type, and any type that resolves to it, has no size
 	 and no alignment: it can correspond to any number of compiler-inserted
-	 types.  */
+	 types.  We allow incomplete types through since they are routinely
+	 added to the ends of structures, and can even be added elsewhere in
+	 structures by the deduplicator.  They are assumed to be zero-size with
+	 no alignment: this is often wrong, but problems can be avoided in this
+	 case by explicitly specifying the size of the structure via the _sized
+	 functions.  The deduplicator always does this.  */
 
+      msize = 0;
+      malign = 0;
       if (ctf_errno (fp) == ECTF_NONREPRESENTABLE)
-	{
-	  msize = 0;
-	  malign = 0;
-	  ctf_set_errno (fp, 0);
-	}
+	ctf_set_errno (fp, 0);
+      else if (ctf_errno (fp) == ECTF_INCOMPLETE)
+	is_incomplete = 1;
       else
 	return -1;		/* errno is set for us.  */
     }
@@ -2123,10 +2137,32 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	      return -1;	/* errno is set for us.  */
 	    }
 
+	  if (is_incomplete)
+	    {
+	      ctf_err_warn (fp, 1, ECTF_INCOMPLETE,
+			    _("ctf_add_member_offset: cannot add member %s of "
+			      "incomplete type %lx to struct %lx without "
+			      "specifying explicit offset\n"),
+			    name ? name : _("(unnamed member)"), type, souid);
+	      return (ctf_set_errno (fp, ECTF_INCOMPLETE));
+	    }
+
 	  if (ctf_type_encoding (fp, ltype, &linfo) == 0)
 	    off += linfo.cte_bits;
 	  else if ((lsize = ctf_type_size (fp, ltype)) > 0)
 	    off += lsize * CHAR_BIT;
+	  else if (lsize == -1 && ctf_errno (fp) == ECTF_INCOMPLETE)
+	    {
+	      ctf_err_warn (fp, 1, ECTF_INCOMPLETE,
+			    _("ctf_add_member_offset: cannot add member %s of "
+			      "type %lx to struct %lx without specifying "
+			      "explicit offset after member %s of type %lx, "
+			      "which is an incomplete type\n"),
+			    name ? name : _("(unnamed member)"), type, souid,
+			    lmd->dmd_name ? lmd->dmd_name
+			    : _("(unnamed member)"), ltype);
+	      return -1;			/* errno is set for us.  */
+	    }
 
 	  /* Round up the offset of the end of the last member to
 	     the next byte boundary, convert 'off' to bytes, and

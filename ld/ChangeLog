@@ -1,5 +1,13 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/ld-ctf/conflicting-cycle-1.parent.d: Adjust for dumper
+	changes.
+	* testsuite/ld-ctf/cross-tu-cyclic-conflicting.d: Likewise.
+	* testsuite/ld-ctf/forward.c: New test...
+	* testsuite/ld-ctf/forward.d: ... and results.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* testsuite/ld-ctf/array.d: Adjust for dumper changes.
 	* testsuite/ld-ctf/data-func-conflicted.d: Likewise.
 	* testsuite/ld-ctf/diag-cttname-null.d: Likewise.

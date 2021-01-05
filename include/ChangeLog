@@ -1,3 +1,8 @@
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_INCOMPLETE): New.
+	(ECTF_NERR): Adjust.
+
 2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
 
 	* coff/internal.h: Correct comment spelling.

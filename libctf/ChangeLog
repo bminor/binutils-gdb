@@ -1,5 +1,18 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_resolve): Improve comment.
+	(ctf_type_size): Yield ECTF_INCOMPLETE when applied to forwards.
+	Emit errors into the right dict.
+	(ctf_type_align): Likewise.
+	* ctf-create.c (ctf_add_member_offset): Yield ECTF_INCOMPLETE
+	when adding a member without explicit offset when this member, or
+	the previous member, is incomplete.
+	* ctf-dump.c (ctf_dump_format_type): Do not try to print the size of
+	forwards.
+	(ctf_dump_member): Do not try to print their alignment.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_objts): Dump by calling ctf_dump_format_type.
 	(ctf_dump_format_type): Don't emit the size for function objects.
 	Dump the element type of arrays like we dump the pointed-to type of

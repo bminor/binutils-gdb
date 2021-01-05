@@ -151,7 +151,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       free (bit);
       bit = NULL;
 
-      if (kind != CTF_K_FUNCTION)
+      if (kind != CTF_K_FUNCTION && kind != CTF_K_FORWARD)
 	if (asprintf (&bit, " (size 0x%lx)%s",
 		      (unsigned long) ctf_type_size (fp, id),
 		      nonroot_trailer) < 0)
@@ -476,6 +476,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
   char *bit = NULL;
   ctf_encoding_t ep;
   int has_encoding = 0;
+  int opened_paren = 0;
 
   /* Align neatly.  */
 
@@ -520,14 +521,23 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
 		    ep.cte_bits, (unsigned long) ctf_type_align (state->cdm_fp,
 								 id)) < 0)
 	goto oom;
+      opened_paren = 1;
     }
-  else
+  else if (ctf_type_kind (state->cdm_fp, id) != CTF_K_FORWARD)
     {
       if (asprintf (&bit, "[0x%lx] (ID 0x%lx) (kind %i) %s%s%s "
 		    "(aligned at 0x%lx", offset, id,
 		    ctf_type_kind (state->cdm_fp, id), typestr,
 		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
 		    (unsigned long) ctf_type_align (state->cdm_fp, id)) < 0)
+	goto oom;
+      opened_paren = 1;
+    }
+  else /* Forwards have no alignment.  */
+    {
+      if (asprintf (&bit, "[0x%lx] (ID 0x%lx) (kind %i) %s%s%s\n", offset, id,
+		    ctf_type_kind (state->cdm_fp, id), typestr,
+		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name) < 0)
 	goto oom;
     }
 
@@ -547,7 +557,8 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
       bit = NULL;
     }
 
-  *state->cdm_str = str_append (*state->cdm_str, ")\n");
+  if (opened_paren)
+    *state->cdm_str = str_append (*state->cdm_str, ")\n");
   return 0;
 
  oom:
