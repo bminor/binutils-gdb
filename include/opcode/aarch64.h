@@ -51,7 +51,6 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_V8_4	     (1ULL << 11) /* ARMv8.4 processors.  */
 #define AARCH64_FEATURE_V8_R	     (1ULL << 12) /* Armv8-R processors.  */
 #define AARCH64_FEATURE_V8_7	     (1ULL << 13) /* Armv8.7 processors.  */
-#define AARCH64_FEATURE_CSRE	     (1ULL << 14) /* CSRE feature.  */
 #define AARCH64_FEATURE_LS64	     (1ULL << 15) /* Atomic 64-byte load/store.  */
 #define AARCH64_FEATURE_PAC	     (1ULL << 16) /* v8.3 Pointer Authentication.  */
 #define AARCH64_FEATURE_FP	     (1ULL << 17) /* FP instructions.  */
@@ -440,7 +439,6 @@ enum aarch64_opnd
   AARCH64_OPND_SVE_ZtxN,	/* SVE vector register list in Zt.  */
   AARCH64_OPND_TME_UIMM16,	/* TME unsigned 16-bit immediate.  */
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
-  AARCH64_OPND_CSRE_CSR,	/* CSRE CSR instruction Rt field.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
