@@ -1,5 +1,9 @@
 2021-01-05  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/sysroot-prefix.exp: Exclude some targets.
+
+2021-01-05  Alan Modra  <amodra@gmail.com>
+
 	PR ld/26256
 	* testsuite/ld-elf/pr26256-1b.d: xfail s12z.
 	* testsuite/ld-scripts/crossref.exp (cross1): Don't xfail ia64.

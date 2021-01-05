@@ -17,6 +17,15 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
+# Don't run on alpha-vms which requires linking with other libraries,
+# or on targets that complain about relocations in read-only sections.
+if { [istarget *-*-vms]
+     || [istarget bfin-*-*]
+     || [istarget frv-*-*]
+     || [istarget lm32-*-*] } then {
+    return
+}
+
 # Check that scripts using the "=" sysroot-prefix work, for both
 # toolchains with and without --sysroot support.
 
