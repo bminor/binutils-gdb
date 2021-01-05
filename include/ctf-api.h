@@ -264,6 +264,10 @@ _CTF_ERRORS
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
+/* Flags for ctf_member_next.  */
+
+#define CTF_MN_RECURSE 0x1	/* Recurse into unnamed members.  */
+
 /* These typedefs are used to define the signature for callback functions that
    can be used with the iteration and visit functions below.  There is also a
    family of iteration functions that do not require callbacks.  */
@@ -411,7 +415,8 @@ extern int ctf_label_info (ctf_dict_t *, const char *, ctf_lblinfo_t *);
 extern int ctf_member_count (ctf_dict_t *, ctf_id_t);
 extern int ctf_member_iter (ctf_dict_t *, ctf_id_t, ctf_member_f *, void *);
 extern ssize_t ctf_member_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
-				const char **name, ctf_id_t *membtype);
+				const char **name, ctf_id_t *membtype,
+				int flags);
 extern int ctf_enum_iter (ctf_dict_t *, ctf_id_t, ctf_enum_f *, void *);
 extern const char *ctf_enum_next (ctf_dict_t *, ctf_id_t, ctf_next_t **,
 				  int *);

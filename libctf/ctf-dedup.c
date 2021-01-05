@@ -887,8 +887,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	ctf_dedup_sha1_add (&hash, &size, sizeof (ssize_t), "struct size",
 			    depth);
 
-	while ((offset = ctf_member_next (input, type, &i, &mname,
-					  &membtype)) >= 0)
+	while ((offset = ctf_member_next (input, type, &i, &mname, &membtype,
+					  0)) >= 0)
 	  {
 	    if (mname == NULL)
 	      mname = "";
@@ -2956,7 +2956,7 @@ ctf_dedup_emit_struct_members (ctf_dict_t *output, ctf_dict_t **inputs,
       target_type = CTF_DEDUP_GID_TO_TYPE (target_id);
 
       while ((offset = ctf_member_next (input_fp, input_type, &j, &name,
-					&membtype)) >= 0)
+					&membtype, 0)) >= 0)
 	{
 	  err_fp = target;
 	  err_type = target_type;

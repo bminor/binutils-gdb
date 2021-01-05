@@ -1,5 +1,10 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (CTF_MN_RECURSE): New.
+	(ctf_member_next): Add flags argument.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ECTF_INCOMPLETE): New.
 	(ECTF_NERR): Adjust.
 

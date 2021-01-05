@@ -1,5 +1,27 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (struct ctf_next) <u.ctn_next>: Move to...
+	<ctn_next>: ... here.
+	* ctf-util.c (ctf_next_destroy): Unconditionally destroy it.
+	* ctf-lookup.c (ctf_symbol_next): Adjust accordingly.
+	* ctf-types.c (ctf_member_iter): Reimplement in terms of...
+	(ctf_member_next): ... this.  Support recursive unnamed member
+	iteration (off by default).
+	(ctf_member_info): Look up members in unnamed sub-structs.
+	* ctf-dedup.c (ctf_dedup_rhash_type): Adjust ctf_member_next call.
+	(ctf_dedup_emit_struct_members): Likewise.
+	* testsuite/libctf-lookup/struct-iteration-ctf.c: Test empty unnamed
+	members, and a normal member after the end.
+	* testsuite/libctf-lookup/struct-iteration.c: Verify that
+	ctf_member_count is consistent with the number of successful returns
+	from a non-recursive ctf_member_next.
+	* testsuite/libctf-lookup/struct-iteration-*: New, test iteration
+	over struct members.
+	* testsuite/libctf-lookup/struct-lookup.c: New test.
+	* testsuite/libctf-lookup/struct-lookup.lk: New test.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_warn_outdated_inputs): New.
 	(ctf_link_write): Call it.
 

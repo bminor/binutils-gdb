@@ -283,9 +283,8 @@ ctf_next_destroy (ctf_next_t *i)
 
   if (i->ctn_iter_fun == (void (*) (void)) ctf_dynhash_next_sorted)
     free (i->u.ctn_sorted_hkv);
-  if (i->ctn_iter_fun == (void (*) (void)) ctf_symbol_next
-      && i->cu.ctn_fp->ctf_flags & LCTF_RDWR)
-    ctf_next_destroy (i->u.ctn_next);
+  if (i->ctn_next)
+    ctf_next_destroy (i->ctn_next);
   free (i);
 }
 

@@ -442,7 +442,7 @@ ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 	  return (ctf_set_errno (fp, ECTF_NEXT_END));
 	}
 
-      err = ctf_dynhash_next (dynh, &i->u.ctn_next, &dyn_name, &dyn_value);
+      err = ctf_dynhash_next (dynh, &i->ctn_next, &dyn_name, &dyn_value);
       /* This covers errors and also end-of-iteration.  */
       if (err != 0)
 	{
