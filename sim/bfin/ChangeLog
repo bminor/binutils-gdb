@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* dv-bfin_dma.c: Include stdlib.h.
+
 2021-01-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c: Change ALIGN to align_up.

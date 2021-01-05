@@ -1,3 +1,7 @@
+2021-01-04  Mike Frysinger  <vapier@gentoo.org>
+
+	* mdma-skel.h: Include stdlib.h.
+
 2015-10-11  Mike Frysinger  <vapier@gentoo.org>
 
 	PR sim/18407

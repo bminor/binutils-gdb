@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 
 void _mdma_memcpy (bu32 dst, bu32 src, bu32 size, bs16 mod)

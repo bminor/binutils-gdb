@@ -20,6 +20,8 @@
 
 #include "config.h"
 
+#include <stdlib.h>
+
 #include "sim-main.h"
 #include "devices.h"
 #include "hw-device.h"
