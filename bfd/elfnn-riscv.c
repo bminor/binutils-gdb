@@ -33,6 +33,13 @@
 #include "opcode/riscv.h"
 #include "objalloc.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 /* Internal relocations used exclusively by the relaxation pass.  */
 #define R_RISCV_DELETE (R_RISCV_max + 1)
 
@@ -125,6 +132,18 @@ struct riscv_elf_link_hash_table
   bfd_vma last_iplt_index;
 };
 
+/* Instruction access functions. */
+
+#define riscv_get_insn(bits, ptr)		\
+  ((bits) == 16 ? bfd_getl16 (ptr)		\
+   : (bits) == 32 ? bfd_getl32 (ptr)		\
+   : (bits) == 64 ? bfd_getl64 (ptr)		\
+   : (abort (), (bfd_vma) - 1))
+#define riscv_put_insn(bits, val, ptr)		\
+  ((bits) == 16 ? bfd_putl16 (val, ptr)		\
+   : (bits) == 32 ? bfd_putl32 (val, ptr)	\
+   : (bits) == 64 ? bfd_putl64 (val, ptr)	\
+   : (abort (), (void) 0))
 
 /* Get the RISC-V ELF linker hash table from a link_info structure.  */
 #define riscv_elf_hash_table(p) \
@@ -150,6 +169,19 @@ riscv_elf_append_rela (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   bed = get_elf_backend_data (abfd);
   loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rela);
   bed->s->swap_reloca_out (abfd, rel, loc);
+}
+
+/* Return true if a relocation is modifying an instruction. */
+
+static bfd_boolean
+riscv_is_insn_reloc (const reloc_howto_type *howto)
+{
+  /* Heuristic: A multibyte destination with a nontrivial mask
+     is an instruction */
+  return (howto->bitsize > 8
+	  && howto->dst_mask != 0
+	  && ~(howto->dst_mask | (howto->bitsize < sizeof(bfd_vma) * CHAR_BIT
+	       ? (MINUS_ONE << howto->bitsize) : (bfd_vma)0)) != 0);
 }
 
 /* PLT/GOT stuff.  */
@@ -1645,10 +1677,10 @@ perform_relocation (const reloc_howto_type *howto,
 	  /* Linker relaxation can convert an address equal to or greater than
 	     0x800 to slightly below 0x800.  C.LUI does not accept zero as a
 	     valid immediate.  We can fix this by converting it to a C.LI.  */
-	  bfd_vma insn = bfd_get (howto->bitsize, input_bfd,
-				  contents + rel->r_offset);
+	  bfd_vma insn = riscv_get_insn (howto->bitsize,
+					 contents + rel->r_offset);
 	  insn = (insn & ~MATCH_C_LUI) | MATCH_C_LI;
-	  bfd_put (howto->bitsize, input_bfd, insn, contents + rel->r_offset);
+	  riscv_put_insn (howto->bitsize, insn, contents + rel->r_offset);
 	  value = ENCODE_RVC_IMM (0);
 	}
       else if (!VALID_RVC_LUI_IMM (RISCV_CONST_HIGH_PART (value)))
@@ -1684,9 +1716,16 @@ perform_relocation (const reloc_howto_type *howto,
       return bfd_reloc_notsupported;
     }
 
-  bfd_vma word = bfd_get (howto->bitsize, input_bfd, contents + rel->r_offset);
+  bfd_vma word;
+  if (riscv_is_insn_reloc (howto))
+    word = riscv_get_insn (howto->bitsize, contents + rel->r_offset);
+  else
+    word = bfd_get (howto->bitsize, input_bfd, contents + rel->r_offset);
   word = (word & ~howto->dst_mask) | (value & howto->dst_mask);
-  bfd_put (howto->bitsize, input_bfd, word, contents + rel->r_offset);
+  if (riscv_is_insn_reloc (howto))
+    riscv_put_insn (howto->bitsize, word, contents + rel->r_offset);
+  else
+    bfd_put (howto->bitsize, input_bfd, word, contents + rel->r_offset);
 
   return bfd_reloc_ok;
 }
@@ -1764,7 +1803,7 @@ riscv_zero_pcrel_hi_reloc (Elf_Internal_Rela *rel,
 			   bfd_vma addr,
 			   bfd_byte *contents,
 			   const reloc_howto_type *howto,
-			   bfd *input_bfd)
+			   bfd *input_bfd ATTRIBUTE_UNUSED)
 {
   /* We may need to reference low addreses in PC-relative modes even when the
    * PC is far away from these addresses.  For example, undefweak references
@@ -1790,9 +1829,9 @@ riscv_zero_pcrel_hi_reloc (Elf_Internal_Rela *rel,
 
   rel->r_info = ELFNN_R_INFO(addr, R_RISCV_HI20);
 
-  bfd_vma insn = bfd_get(howto->bitsize, input_bfd, contents + rel->r_offset);
+  bfd_vma insn = riscv_get_insn(howto->bitsize, contents + rel->r_offset);
   insn = (insn & ~MASK_AUIPC) | MATCH_LUI;
-  bfd_put(howto->bitsize, input_bfd, insn, contents + rel->r_offset);
+  riscv_put_insn(howto->bitsize, insn, contents + rel->r_offset);
   return TRUE;
 }
 
@@ -2380,10 +2419,9 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	      && (!bfd_link_pic (info) || h->plt.offset == MINUS_ONE))
 	    {
 	      /* We can use x0 as the base register.  */
-	      bfd_vma insn = bfd_get_32 (input_bfd,
-					 contents + rel->r_offset + 4);
+	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset + 4);
 	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset + 4);
+	      bfd_putl32 (insn, contents + rel->r_offset + 4);
 	      /* Set the relocation value so that we get 0 after the pc
 		 relative adjustment.  */
 	      relocation = sec_addr (input_section) + rel->r_offset;
@@ -2416,10 +2454,10 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  if (VALID_ITYPE_IMM (relocation + rel->r_addend))
 	    {
 	      /* We can use tp as the base register.  */
-	      bfd_vma insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
 	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
 	      insn |= X_TP << OP_SH_RS1;
-	      bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+	      bfd_putl32 (insn, contents + rel->r_offset);
 	    }
 	  else
 	    r = bfd_reloc_overflow;
@@ -2433,14 +2471,14 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	    if (x0_base || VALID_ITYPE_IMM (relocation + rel->r_addend - gp))
 	      {
 		/* We can use x0 or gp as the base register.  */
-		bfd_vma insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
 		insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
 		if (!x0_base)
 		  {
 		    rel->r_addend -= gp;
 		    insn |= X_GP << OP_SH_RS1;
 		  }
-		bfd_put_32 (input_bfd, insn, contents + rel->r_offset);
+		bfd_putl32 (insn, contents + rel->r_offset);
 	      }
 	    else
 	      r = bfd_reloc_overflow;
@@ -2864,7 +2902,7 @@ riscv_elf_finish_dynamic_symbol (bfd *output_bfd,
 	return FALSE;
 
       for (i = 0; i < PLT_ENTRY_INSNS; i++)
-	bfd_put_32 (output_bfd, plt_entry[i], loc + 4*i);
+	bfd_putl32 (plt_entry[i], loc + 4*i);
 
       /* Fill in the initial value of the .got.plt entry.  */
       loc = gotplt->contents + (got_address - sec_addr (gotplt));
@@ -3161,7 +3199,7 @@ riscv_elf_finish_dynamic_sections (bfd *output_bfd,
 	    return ret;
 
 	  for (i = 0; i < PLT_HEADER_INSNS; i++)
-	    bfd_put_32 (output_bfd, plt_header[i], splt->contents + 4*i);
+	    bfd_putl32 (plt_header[i], splt->contents + 4*i);
 
 	  elf_section_data (splt->output_section)->this_hdr.sh_entsize
 	    = PLT_ENTRY_SIZE;
@@ -4118,8 +4156,8 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   /* Shorten the function call.  */
   BFD_ASSERT (rel->r_offset + 8 <= sec->size);
 
-  auipc = bfd_get_32 (abfd, contents + rel->r_offset);
-  jalr = bfd_get_32 (abfd, contents + rel->r_offset + 4);
+  auipc = bfd_getl32 (contents + rel->r_offset);
+  jalr = bfd_getl32 (contents + rel->r_offset + 4);
   rd = (jalr >> OP_SH_RD) & OP_MASK_RD;
   rvc = rvc && VALID_RVC_J_IMM (foff);
 
@@ -4149,7 +4187,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   /* Replace the R_RISCV_CALL reloc.  */
   rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), r_type);
   /* Replace the AUIPC.  */
-  bfd_put (8 * len, abfd, auipc, contents + rel->r_offset);
+  riscv_put_insn (8 * len, auipc, contents + rel->r_offset);
 
   /* Delete unnecessary JALR.  */
   *again = TRUE;
@@ -4223,9 +4261,9 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  if (undefined_weak)
 	    {
 	      /* Change the RS1 to zero.  */
-	      bfd_vma insn = bfd_get_32 (abfd, contents + rel->r_offset);
+	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
 	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_put_32 (abfd, insn, contents + rel->r_offset);
+	      bfd_putl32 (insn, contents + rel->r_offset);
 	    }
 	  else
 	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_I);
@@ -4235,9 +4273,9 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  if (undefined_weak)
 	    {
 	      /* Change the RS1 to zero.  */
-	      bfd_vma insn = bfd_get_32 (abfd, contents + rel->r_offset);
+	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
 	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_put_32 (abfd, insn, contents + rel->r_offset);
+	      bfd_putl32 (insn, contents + rel->r_offset);
 	    }
 	  else
 	    rel->r_info = ELFNN_R_INFO (sym, R_RISCV_GPREL_S);
@@ -4268,13 +4306,13 @@ _bfd_riscv_relax_lui (bfd *abfd,
 			       : ELF_MAXPAGESIZE)))
     {
       /* Replace LUI with C.LUI if legal (i.e., rd != x0 and rd != x2/sp).  */
-      bfd_vma lui = bfd_get_32 (abfd, contents + rel->r_offset);
+      bfd_vma lui = bfd_getl32 (contents + rel->r_offset);
       unsigned rd = ((unsigned)lui >> OP_SH_RD) & OP_MASK_RD;
       if (rd == 0 || rd == X_SP)
 	return TRUE;
 
       lui = (lui & (OP_MASK_RD << OP_SH_RD)) | MATCH_C_LUI;
-      bfd_put_32 (abfd, lui, contents + rel->r_offset);
+      bfd_putl32 (lui, contents + rel->r_offset);
 
       /* Replace the R_RISCV_HI20 reloc.  */
       rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_RISCV_RVC_LUI);
@@ -4376,11 +4414,11 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
 
   /* Write as many RISC-V NOPs as we need.  */
   for (pos = 0; pos < (nop_bytes & -4); pos += 4)
-    bfd_put_32 (abfd, RISCV_NOP, contents + rel->r_offset + pos);
+    bfd_putl32 (RISCV_NOP, contents + rel->r_offset + pos);
 
   /* Write a final RVC NOP if need be.  */
   if (nop_bytes % 4 != 0)
-    bfd_put_16 (abfd, RVC_NOP, contents + rel->r_offset + pos);
+    bfd_putl16 (RVC_NOP, contents + rel->r_offset + pos);
 
   /* Delete the excess bytes.  */
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + nop_bytes,
@@ -4487,9 +4525,9 @@ _bfd_riscv_relax_pc  (bfd *abfd ATTRIBUTE_UNUSED,
 	    {
 	      /* Change the RS1 to zero, and then modify the relocation
 		 type to R_RISCV_LO12_I.  */
-	      bfd_vma insn = bfd_get_32 (abfd, contents + rel->r_offset);
+	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
 	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_put_32 (abfd, insn, contents + rel->r_offset);
+	      bfd_putl32 (insn, contents + rel->r_offset);
 	      rel->r_info = ELFNN_R_INFO (sym, R_RISCV_LO12_I);
 	      rel->r_addend = hi_reloc.hi_addend;
 	    }
@@ -4505,9 +4543,9 @@ _bfd_riscv_relax_pc  (bfd *abfd ATTRIBUTE_UNUSED,
 	    {
 	      /* Change the RS1 to zero, and then modify the relocation
 		 type to R_RISCV_LO12_S.  */
-	      bfd_vma insn = bfd_get_32 (abfd, contents + rel->r_offset);
+	      bfd_vma insn = bfd_getl32 (contents + rel->r_offset);
 	      insn &= ~(OP_MASK_RS1 << OP_SH_RS1);
-	      bfd_put_32 (abfd, insn, contents + rel->r_offset);
+	      bfd_putl32 (insn, contents + rel->r_offset);
 	      rel->r_info = ELFNN_R_INFO (sym, R_RISCV_LO12_S);
 	      rel->r_addend = hi_reloc.hi_addend;
 	    }
@@ -4919,7 +4957,8 @@ static bfd_boolean
 riscv_elf_object_p (bfd *abfd)
 {
   /* There are only two mach types in RISCV currently.  */
-  if (strcmp (abfd->xvec->name, "elf32-littleriscv") == 0)
+  if (strcmp (abfd->xvec->name, "elf32-littleriscv") == 0
+      || strcmp (abfd->xvec->name, "elf32-bigriscv") == 0)
     bfd_default_set_arch_mach (abfd, bfd_arch_riscv, bfd_mach_riscv32);
   else
     bfd_default_set_arch_mach (abfd, bfd_arch_riscv, bfd_mach_riscv64);
@@ -4938,6 +4977,8 @@ riscv_elf_obj_attrs_arg_type (int tag)
 
 #define TARGET_LITTLE_SYM		riscv_elfNN_vec
 #define TARGET_LITTLE_NAME		"elfNN-littleriscv"
+#define TARGET_BIG_SYM			riscv_elfNN_be_vec
+#define TARGET_BIG_NAME			"elfNN-bigriscv"
 
 #define elf_backend_reloc_type_class	     riscv_reloc_type_class
 

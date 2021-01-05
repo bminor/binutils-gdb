@@ -266,6 +266,9 @@ ALL_EMULATION_SOURCES = \
 	eelf32lriscv.c \
 	eelf32lriscv_ilp32f.c \
 	eelf32lriscv_ilp32.c \
+	eelf32briscv.c \
+	eelf32briscv_ilp32f.c \
+	eelf32briscv_ilp32.c \
 	eelf32rl78.c \
 	eelf32rx.c \
 	eelf32rx_linux.c \
@@ -435,6 +438,9 @@ ALL_64_EMULATION_SOURCES = \
 	eelf64lriscv.c \
 	eelf64lriscv_lp64f.c \
 	eelf64lriscv_lp64.c \
+	eelf64briscv.c \
+	eelf64briscv_lp64f.c \
+	eelf64briscv_lp64.c \
 	eelf64ltsmip.c \
 	eelf64ltsmip_fbsd.c \
 	eelf64mmix.c \
@@ -751,6 +757,9 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lriscv.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lriscv_ilp32f.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lriscv_ilp32.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32briscv.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32briscv_ilp32f.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32briscv_ilp32.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32rl78.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32rx.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32rx_linux.Pc@am__quote@
@@ -916,6 +925,9 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv_lp64f.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lriscv_lp64.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64briscv.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64briscv_lp64f.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64briscv_lp64.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ltsmip.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ltsmip_fbsd.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64mmix.Pc@am__quote@

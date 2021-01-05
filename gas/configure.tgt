@@ -89,7 +89,9 @@ case ${cpu} in
   pj*)			cpu_type=pj endian=big ;;
   powerpc*le*)		cpu_type=ppc endian=little ;;
   powerpc*)		cpu_type=ppc endian=big ;;
+  riscv64be*)		cpu_type=riscv endian=big arch=riscv64 ;;
   riscv64*)		cpu_type=riscv endian=little arch=riscv64 ;;
+  riscv32be*|riscvbe*)	cpu_type=riscv endian=big arch=riscv32 ;;
   riscv32* | riscv*)	cpu_type=riscv endian=little arch=riscv32 ;;
   rs6000*)		cpu_type=ppc ;;
   rl78*)		cpu_type=rl78 ;;
@@ -357,7 +359,7 @@ case ${generic_target} in
 
   pru-*-*)				fmt=elf ;;
 
-  riscv*-*-*)				fmt=elf endian=little ;;
+  riscv*-*-*)				fmt=elf ;;
 
   rx-*-linux*)				fmt=elf em=linux ;;
 

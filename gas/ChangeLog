@@ -1,3 +1,17 @@
+2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
+
+	* config/tc-riscv.c (riscv_target_format): Add elf64-bigriscv and
+	elf32-bigriscv.
+	(install_insn): Always write instructions as little endian.
+	(riscv_make_nops): Likewise.
+	(md_convert_frag_branch): Likewise.
+	(md_number_to_chars): Write data in target endianness.
+	(options, md_longopts): Add -mbig-endian and -mlittle-endian options.
+	(md_parse_option): Handle the endian options.
+	* config/tc-riscv.h: Only define TARGET_BYTES_BIG_ENDIAN if not
+	already defined.
+	* configure.tgt: Added riscv64be*, riscv32be*, riscvbe*.
+
 2021-01-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26256

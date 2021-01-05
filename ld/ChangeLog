@@ -1,3 +1,17 @@
+2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
+
+	* configure.tgt: Added riscvbe-*-*, riscv32be*-*-*, riscv64be*-*-*,
+	riscv32be*-*-linux*, and riscv64be*-*-linux*.
+	* Makefile.am: Added eelf32briscv.c, eelf32briscv_ilp32f.c and
+	eelf32briscv_ilp32.c.
+	* Makefile.in: Regenerate.
+	* emulparams/elf32briscv.sh: Added.
+	* emulparams/elf32briscv_ilp32.sh: Likewise.
+	* emulparams/elf32briscv_ilp32f.sh: Likewise.
+	* emulparams/elf64briscv.sh: Likewise.
+	* emulparams/elf64briscv_lp64.sh: Likewise.
+	* emulparams/elf64briscv_lp64f.sh: Likewise.
+
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/enum-forward.c: New test.

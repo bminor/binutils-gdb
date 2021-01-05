@@ -28,7 +28,9 @@
 struct frag;
 struct expressionS;
 
+#ifndef TARGET_BYTES_BIG_ENDIAN
 #define TARGET_BYTES_BIG_ENDIAN 0
+#endif
 
 #define TARGET_ARCH bfd_arch_riscv
 

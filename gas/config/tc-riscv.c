@@ -445,7 +445,10 @@ static char *expr_end;
 const char *
 riscv_target_format (void)
 {
-  return xlen == 64 ? "elf64-littleriscv" : "elf32-littleriscv";
+  if (target_big_endian)
+    return xlen == 64 ? "elf64-bigriscv" : "elf32-bigriscv";
+  else
+    return xlen == 64 ? "elf64-littleriscv" : "elf32-littleriscv";
 }
 
 /* Return the length of instruction INSN.  */
@@ -474,7 +477,7 @@ static void
 install_insn (const struct riscv_cl_insn *insn)
 {
   char *f = insn->frag->fr_literal + insn->where;
-  md_number_to_chars (f, insn->insn_opcode, insn_length (insn));
+  number_to_chars_littleendian (f, insn->insn_opcode, insn_length (insn));
 }
 
 /* Move INSN to offset WHERE in FRAG.  Adjust the fixups accordingly
@@ -2662,7 +2665,10 @@ md_atof (int type, char *litP, int *sizeP)
 void
 md_number_to_chars (char *buf, valueT val, int n)
 {
-  number_to_chars_littleendian (buf, val, n);
+  if (target_big_endian)
+    number_to_chars_bigendian (buf, val, n);
+  else
+    number_to_chars_littleendian (buf, val, n);
 }
 
 const char *md_shortopts = "O::g::G:";
@@ -2681,6 +2687,8 @@ enum options
   OPTION_NO_CSR_CHECK,
   OPTION_MISA_SPEC,
   OPTION_MPRIV_SPEC,
+  OPTION_BIG_ENDIAN,
+  OPTION_LITTLE_ENDIAN,
   OPTION_END_OF_ENUM
 };
 
@@ -2699,6 +2707,8 @@ struct option md_longopts[] =
   {"mno-csr-check", no_argument, NULL, OPTION_NO_CSR_CHECK},
   {"misa-spec", required_argument, NULL, OPTION_MISA_SPEC},
   {"mpriv-spec", required_argument, NULL, OPTION_MPRIV_SPEC},
+  {"mbig-endian", no_argument, NULL, OPTION_BIG_ENDIAN},
+  {"mlittle-endian", no_argument, NULL, OPTION_LITTLE_ENDIAN},
 
   {NULL, no_argument, NULL, 0}
 };
@@ -2776,6 +2786,14 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MPRIV_SPEC:
       return riscv_set_default_priv_spec (arg);
+
+    case OPTION_BIG_ENDIAN:
+      target_big_endian = 1;
+      break;
+
+    case OPTION_LITTLE_ENDIAN:
+      target_big_endian = 0;
+      break;
 
     default:
       return 0;
@@ -3258,13 +3276,13 @@ riscv_make_nops (char *buf, bfd_vma bytes)
   /* Use at most one 2-byte NOP.  */
   if ((bytes - i) % 4 == 2)
     {
-      md_number_to_chars (buf + i, RVC_NOP, 2);
+      number_to_chars_littleendian (buf + i, RVC_NOP, 2);
       i += 2;
     }
 
   /* Fill the remainder with 4-byte NOPs.  */
   for ( ; i < bytes; i += 4)
-    md_number_to_chars (buf + i, RISCV_NOP, 4);
+    number_to_chars_littleendian (buf + i, RISCV_NOP, 4);
 }
 
 /* Called from md_do_align.  Used to create an alignment frag in a
@@ -3468,14 +3486,14 @@ md_convert_frag_branch (fragS *fragp)
       insn = bfd_getl32 (buf);
       insn ^= MATCH_BEQ ^ MATCH_BNE;
       insn |= ENCODE_SBTYPE_IMM (8);
-      md_number_to_chars ((char *) buf, insn, 4);
+      bfd_putl32 (insn, buf);
       buf += 4;
 
     jump:
       /* Jump to the target.  */
       fixp = fix_new_exp (fragp, buf - (bfd_byte *)fragp->fr_literal,
 			  4, &exp, FALSE, BFD_RELOC_RISCV_JMP);
-      md_number_to_chars ((char *) buf, MATCH_JAL, 4);
+      bfd_putl32 (MATCH_JAL, buf);
       buf += 4;
       break;
 
