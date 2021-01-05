@@ -27,6 +27,8 @@ AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex
 ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
 
+BASEDIR = $(srcdir)/..
+BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(srcdir)/../include
 AM_CPPFLAGS = -D_GNU_SOURCE -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../bfd -I../bfd @INCINTL@
 AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@ $(ZLIBINC)
@@ -75,7 +77,7 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
-check-DEJAGNU: site.exp
+check-DEJAGNU: site.exp development.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	r=`pwd`; export r; \
 	LC_ALL=C; export LC_ALL; \
@@ -87,3 +89,14 @@ check-DEJAGNU: site.exp
 		CC_FOR_HOST="$(CC)" LIBS="$(LIBS)" $(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
+
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
+
+# development.sh is used to determine -Werror default.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
+
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp
+
+DISTCLEANFILES = site.exp development.exp

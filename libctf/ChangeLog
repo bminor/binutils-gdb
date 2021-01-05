@@ -1,5 +1,19 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* Makefile.am (BASEDIR): New.
+	(BFDDIR): Likewise.
+	(check-DEJAGNU): Add development.exp to prerequisites.
+	(development.exp): New.
+	(CONFIG_STATUS_DEPENDENCIES): New.
+	(EXTRA_DEJAGNU_SITE_CONFIG): Likewise.
+	(DISTCLEANFILES): Likewise.
+	* Makefile.in: Regenerated.
+	* testsuite/lib/ctf-lib.exp (check_ctf_available): Return boolean.
+	* testsuite/libctf-lookup/lookup.exp: Call check_ctf_available.
+	* testsuite/libctf-regression/regression.exp: Likewise.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_type_aname): Print forwards to unions and enums
 	properly.
 

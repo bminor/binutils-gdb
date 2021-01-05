@@ -448,6 +448,8 @@ AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex
 # case both are empty.
 ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
+BASEDIR = $(srcdir)/..
+BFDDIR = $(BASEDIR)/bfd
 INCDIR = $(srcdir)/../include
 AM_CPPFLAGS = -D_GNU_SOURCE -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../bfd -I../bfd @INCINTL@
 AM_CFLAGS = -std=gnu99 @ac_libctf_warn_cflags@ @warn@ @c_warn@ @WARN_PEDANTIC@ @WERROR@ $(ZLIBINC)
@@ -486,6 +488,11 @@ CC_FOR_TARGET = ` \
     fi; \
   fi`
 
+
+# development.sh is used to determine -Werror default.
+CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
+EXTRA_DEJAGNU_SITE_CONFIG = development.exp
+DISTCLEANFILES = site.exp development.exp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -1216,6 +1223,7 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1319,7 +1327,7 @@ uninstall-am: uninstall-includeHEADERS uninstall-libLTLIBRARIES
 .PRECIOUS: Makefile
 
 
-check-DEJAGNU: site.exp
+check-DEJAGNU: site.exp development.exp
 	srcroot=`cd $(srcdir) && pwd`; export srcroot; \
 	r=`pwd`; export r; \
 	LC_ALL=C; export LC_ALL; \
@@ -1331,6 +1339,10 @@ check-DEJAGNU: site.exp
 		CC_FOR_HOST="$(CC)" LIBS="$(LIBS)" $(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
+
+development.exp: $(BFDDIR)/development.sh
+	$(EGREP) "(development|experimental)=" $(BFDDIR)/development.sh  \
+	  | $(AWK) -F= '{ print "set " $$1 " " $$2 }' > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -23,6 +23,11 @@ if ![is_elf_format] {
     return 0
 }
 
+if {![check_ctf_available]} {
+    unsupported "no CTF format support in the compiler"
+    return 0
+}
+
 if {[info exists env(LC_ALL)]} {
     set old_lc_all $env(LC_ALL)
 }

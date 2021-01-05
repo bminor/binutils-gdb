@@ -399,7 +399,12 @@ proc check_ctf_available { } {
 	    set f [open $src "w"]
 	    puts $f "int main() { return 0; }"
 	    close $f
-	    set ctf_available_saved [compile_one_cc $src $output "-gt -c"]
+	    set comp_output [compile_one_cc $src $output "-gt -c"]
+            if { $comp_output == ""} {
+                set ctf_available_saved 1
+            } else {
+                set ctf_available_saved 0
+            }
 	    remote_file host delete $src
 	    remote_file host delete $output
 	    file delete $src

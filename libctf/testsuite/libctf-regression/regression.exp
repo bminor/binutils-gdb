@@ -18,6 +18,11 @@
 # MA 02110-1301, USA.
 #
 
+if {![check_ctf_available]} {
+    unsupported "no CTF format support in the compiler"
+    return 0
+}
+
 if ![is_elf_format] {
     unsupported "CTF needs bfd changes to be emitted on non-ELF"
     return 0
