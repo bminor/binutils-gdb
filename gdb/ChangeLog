@@ -1,5 +1,10 @@
 2021-02-07  Hannes Domani  <ssbssa@yahoo.de>
 
+	* tui/tui-regs.c (tui_data_window::display_registers_from):
+	Add refresh_window call.
+
+2021-02-07  Hannes Domani  <ssbssa@yahoo.de>
+
 	* python/py-frame.c (frapy_richcompare): Compare frame_id_is_next.
 
 2021-02-05  Simon Marchi  <simon.marchi@polymtl.ca>

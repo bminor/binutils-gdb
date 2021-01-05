@@ -306,6 +306,8 @@ tui_data_window::display_registers_from (int start_element_no)
 	}
       cur_y++;		/* Next row.  */
     }
+
+  refresh_window ();
 }
 
 /* See tui-regs.h.  */
