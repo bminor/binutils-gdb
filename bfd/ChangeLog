@@ -1,5 +1,10 @@
 2021-01-05  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (bfd_elf_link_record_dynamic_symbol): Handle no_export
+	for relocatable executable.
+
+2021-01-05  Alan Modra  <amodra@gmail.com>
+
 	* vms-alpha.c (_bfd_vms_slurp_egsd): Read flags after size check.
 
 2021-01-05  Nelson Chu  <nelson.chu@sifive.com>
