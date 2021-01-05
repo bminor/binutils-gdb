@@ -1394,14 +1394,13 @@ _bfd_vms_slurp_egsd (bfd *abfd)
 	    flagword old_flags;
 	    unsigned int nameoff = offsetof (struct vms_egst, namlng);
 
-	    old_flags = bfd_getl16 (egst->header.flags);
-
 	    if (nameoff >= gsd_size)
 	      goto too_small;
 	    entry = add_symbol (abfd, &egst->namlng, gsd_size - nameoff);
 	    if (entry == NULL)
 	      return FALSE;
 
+	    old_flags = bfd_getl16 (egst->header.flags);
 	    entry->typ = gsd_type;
 	    entry->data_type = egst->header.datyp;
 	    entry->flags = old_flags;
