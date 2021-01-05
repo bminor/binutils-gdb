@@ -1,5 +1,24 @@
 2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
 
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Added
+	riscv_choose_[ilp32|lp64]_emul to choose the correct linker script.
+	* testsuite/ld-riscv-elf/attr-merge-arch-01.d: Call
+	riscv_choose_[ilp32|lp64]_emul instead of hardcoding elf[32|64]lriscv.
+	* testsuite/ld-riscv-elf/attr-merge-arch-02.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-02.d: Likewise.
+	* testsuite/ld-riscv-elf/c-lui-2.d: Likewise.
+	* testsuite/ld-riscv-elf/c-lui.d: Likewise.
+	* testsuite/ld-riscv-elf/call-relax.d: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend-2.d: Likewise.
+	* testsuite/ld-riscv-elf/pcrel-lo-addend.d: Likewise.
+	* testsuite/ld-riscv-elf/weakref32.d: Accept bigriscv in addition
+	to littleriscv.
+	* testsuite/ld-riscv-elf/weakref64.d: Likewise.
+
+2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
+
 	* configure.tgt: Added riscvbe-*-*, riscv32be*-*-*, riscv64be*-*-*,
 	riscv32be*-*-linux*, and riscv64be*-*-linux*.
 	* Makefile.am: Added eelf32briscv.c, eelf32briscv_ilp32f.c and

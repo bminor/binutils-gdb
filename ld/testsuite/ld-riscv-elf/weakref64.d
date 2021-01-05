@@ -1,5 +1,5 @@
 
-.*:     file format elf64-littleriscv
+.*:     file format elf64-(little|big)riscv
 
 
 Disassembly of section \.text:

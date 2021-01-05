@@ -1,7 +1,7 @@
 #source: attr-merge-arch-failed-01a.s
 #source: attr-merge-arch-failed-01b.s
 #as: -march-attr
-#ld: -r -melf32lriscv
+#ld: -r -m[riscv_choose_ilp32_emul]
 #warning: .*mis-matched ISA version 3.0 for 'a' extension, the output version is 2.0
 #readelf: -A
 
