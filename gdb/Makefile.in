@@ -1528,6 +1528,7 @@ HFILES_NO_SRCDIR = \
 	mi/mi-main.h \
 	mi/mi-out.h \
 	mi/mi-parse.h \
+	nat/aarch64-cap-linux.h \
 	nat/aarch64-linux.h \
 	nat/aarch64-linux-hw-point.h \
 	nat/aarch64-mte-linux-ptrace.h \
