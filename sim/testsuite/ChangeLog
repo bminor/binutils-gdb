@@ -1,3 +1,9 @@
+2021-01-15  Mike Frysinger  <vapier@gentoo.org>
+
+	* lib/sim-defs.exp (sim_run): Delete status and return return_code.
+	(run_sim_test): Define status option.  Change sim_run return to
+	return_code.  Define status.  Log return_code.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* common/alu-tst.c: Include stdlib.h.

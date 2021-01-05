@@ -214,8 +214,13 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
 
     set result [sim_run $dest "$opts(sim,$mach)" "$opts(progoptions)" \
 	"" "$opts(simenv)"]
-    set status [lindex $result 0]
+    set return_code [lindex $result 0]
     set output [lindex $result 1]
+
+    set status fail
+    if { $return_code == 0 } {
+	set status pass
+    }
 
     if { "$status" == "pass" } {
 	if { "$opts(xerror)" == "no" } {
