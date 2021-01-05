@@ -1,3 +1,8 @@
+2021-01-05  Alan Modra  <amodra@gmail.com>
+
+	* config.guess: Import from upstream.
+	* config.sub: Likewise.
+
 2020-12-16  Martin Liska  <mliska@suse.cz>
 	    Tom de Vries  <tdevries@suse.de>
 
