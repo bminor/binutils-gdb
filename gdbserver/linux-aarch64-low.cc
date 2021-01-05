@@ -21,6 +21,7 @@
 
 #include "server.h"
 #include "linux-low.h"
+#include "nat/aarch64-cap-linux.h" /* For Morello  */
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
 #include "arch/aarch64-cap-linux.h"
