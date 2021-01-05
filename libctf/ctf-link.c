@@ -2004,6 +2004,34 @@ ctf_change_parent_name (void *key _libctf_unused_, void *value, void *arg)
   ctf_parent_name_set (fp, name);
 }
 
+/* Warn if we may suffer information loss because the CTF input files are too
+   old.  Usually we provide complete backward compatibility, but compiler
+   changes etc which never hit a release may have a flag in the header that
+   simply prevents those changes from being used.  */
+static void
+ctf_link_warn_outdated_inputs (ctf_dict_t *fp)
+{
+  ctf_next_t *i = NULL;
+  void *name_;
+  void *ifp_;
+  int err;
+
+  while ((err = ctf_dynhash_next (fp->ctf_link_inputs, &i, &name_, &ifp_)) == 0)
+    {
+      const char *name = (const char *) name_;
+      ctf_dict_t *ifp = (ctf_dict_t *) ifp_;
+
+      if (!(ifp->ctf_header->cth_flags & CTF_F_NEWFUNCINFO)
+	  && (ifp->ctf_header->cth_varoff - ifp->ctf_header->cth_funcoff) > 0)
+	ctf_err_warn (ifp, 1, 0, _("linker input %s has CTF func info but uses "
+				   "an old, unreleased func info format: "
+				   "this func info section will be dropped."),
+		      name);
+    }
+  if (err != ECTF_NEXT_END)
+    ctf_err_warn (fp, 0, err, _("error checking for outdated inputs"));
+}
+
 /* Write out a CTF archive (if there are per-CU CTF files) or a CTF file
    (otherwise) into a new dynamically-allocated string, and return it.
    Members with sizes above THRESHOLD are compressed.  */
@@ -2022,6 +2050,8 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 
   memset (&arg, 0, sizeof (ctf_name_list_accum_cb_arg_t));
   arg.fp = fp;
+
+  ctf_link_warn_outdated_inputs (fp);
 
   if (fp->ctf_link_outputs)
     {

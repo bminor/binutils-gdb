@@ -1,5 +1,10 @@
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_warn_outdated_inputs): New.
+	(ctf_link_write): Call it.
+
+2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
+
 	* testsuite/libctf-lookup/enum-symbol.lk: New symbol-lookup test.
 	* testsuite/libctf-lookup/enum-symbol-ctf.c: New CTF input.
 	* testsuite/libctf-lookup/enum-symbol.c: New lookup test.
