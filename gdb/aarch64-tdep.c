@@ -3775,9 +3775,8 @@ static const char*
 aarch64_address_class_type_flags_to_name (struct gdbarch *gdbarch,
 					  type_instance_flags type_flags)
 {
-  if (type_flags & TYPE_INSTANCE_FLAG_CAPABILITY)
-    return "__capability";
-  else
+    /* No need to display the extra __capability modifier.  GDB already takes
+       cares of this.  */
     return NULL;
 }
 
