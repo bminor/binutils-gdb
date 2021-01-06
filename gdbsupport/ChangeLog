@@ -1,3 +1,8 @@
+2021-01-15  Luis Machado  <luis.machado@arm.com>
+
+	capability.cc (capability::to_str): Don't print parenthesis if there
+	are no attributes.
+
 2020-12-30  Luis Machado  <luis.machado@arm.com>
 
 	* capability.cc (capability::to_str): Fix compact printing

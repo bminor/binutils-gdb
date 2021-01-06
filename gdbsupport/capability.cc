@@ -612,7 +612,9 @@ capability::to_str (bool compact)
 	}
 
       cap_str += val_str + " [" + perm_str + "," + range_str + "]";
-      cap_str += " (" + attr1_str + attr2_str + attr3_str + ")";
+
+      if (!attr1_str.empty () || !attr2_str.empty () || !attr3_str.empty ())
+	cap_str += " (" + attr1_str + attr2_str + attr3_str + ")";
 
       return cap_str;
     }
