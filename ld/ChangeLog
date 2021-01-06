@@ -1,5 +1,37 @@
 2021-01-06  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-sparc/sparc.exp (sparc64tests): Set text-segment
+	base for some tests.
+	* testsuite/ld-sparc/gotop32.dd: Match solaris output.
+	* testsuite/ld-sparc/gotop32.sd: Likewise.
+	* testsuite/ld-sparc/gotop32.td: Likewise.
+	* testsuite/ld-sparc/gotop64.dd: Likewise.
+	* testsuite/ld-sparc/gotop64.sd: Likewise.
+	* testsuite/ld-sparc/gotop64.td: Likewise.
+	* testsuite/ld-sparc/tlsg32.sd: Likewise.
+	* testsuite/ld-sparc/tlsg64.sd: Likewise.
+	* testsuite/ld-sparc/tlspie32.dd: Likewise.
+	* testsuite/ld-sparc/tlspie64.dd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.dd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.sd: Likewise.
+	* testsuite/ld-sparc/tlssunbin32.td: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.dd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.sd: Likewise.
+	* testsuite/ld-sparc/tlssunbin64.td: Likewise.
+	* testsuite/ld-sparc/tlssunnopic32.dd: Likewise.
+	* testsuite/ld-sparc/tlssunnopic32.sd: Likewise.
+	* testsuite/ld-sparc/tlssunnopic64.dd: Likewise.
+	* testsuite/ld-sparc/tlssunnopic64.sd: Likewise.
+	* testsuite/ld-sparc/tlssunpic32.dd: Likewise.
+	* testsuite/ld-sparc/tlssunpic32.sd: Likewise.
+	* testsuite/ld-sparc/tlssunpic32.td: Likewise.
+	* testsuite/ld-sparc/tlssunpic64.dd: Likewise.
+	* testsuite/ld-sparc/tlssunpic64.sd: Likewise.
+	* testsuite/ld-sparc/tlssunpic64.td: Likewise.
+	* testsuite/ld-sparc/wdispcall.dd: Likewise.
+
+2021-01-06  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-scripts/rgn-at10.d: xfail v850.
 	* testsuite/ld-scripts/rgn-at11.d: Likewise.
 

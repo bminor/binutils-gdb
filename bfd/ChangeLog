@@ -1,3 +1,9 @@
+2021-01-06  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd (sparc-*-solaris2*): Add sparc_elf32_vec.
+	(sparc64-*-solaris2*): Add sparc_elf64_vec and
+	sparc_elf32_vec.
+
 2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
 
 	* config.bfd: Added targets riscv64be*-*-*, riscv32be*-*-* and
