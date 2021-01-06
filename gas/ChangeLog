@@ -1,5 +1,9 @@
 2021-01-06  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/sparc/sparc.exp: Move 64-bit tests inside gas_64_check.
+
+2021-01-06  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/macros/app1.d: xfail tic30.
 	* testsuite/gas/macros/app2.d: Likewise.
 	* testsuite/gas/macros/app3.d: Likewise.
