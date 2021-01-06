@@ -163,6 +163,7 @@ proc_with_prefix test-print {{prefix ""}} {
 	"-address"
 	"-array"
 	"-array-indexes"
+	"-compact-capabilities"
 	"-elements"
 	"-max-depth"
 	"-null-stop"
