@@ -1,3 +1,8 @@
+2021-01-06  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/rgn-at10.d: xfail v850.
+	* testsuite/ld-scripts/rgn-at11.d: Likewise.
+
 2021-01-06  Marcus Comstedt  <marcus@mc.pp.se>
 
 	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Added
