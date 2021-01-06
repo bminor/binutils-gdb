@@ -71,7 +71,7 @@ if { [istarget "mips*vr4100*-*-elf*"] \
 }
 
 if [is_underscore_target] {
-    set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
+    append ASFLAGS " --defsym UNDERSCORE=1"
 }
 
 run_ld_link_tests [list \
@@ -94,15 +94,6 @@ run_ld_link_tests [list \
 	"pr22471b.so" \
     ] \
     [list \
-	"Build pr22471" \
-	"$LFLAGS -rpath-link ." \
-	"tmpdir/pr22471b.so" \
-	"" \
-	{pr22471b.s} \
-	{} \
-	"pr22471" \
-    ] \
-    [list \
 	"Build pr22649-1.so" \
 	"$LFLAGS -shared" \
 	"" \
@@ -112,6 +103,18 @@ run_ld_link_tests [list \
 	"pr22649-1.so" \
     ] \
 ]
+
+run_ld_link_tests [list \
+    [list \
+	"Build pr22471" \
+	"$LFLAGS -rpath-link . -rpath-link tmpdir" \
+	"tmpdir/pr22471b.so" \
+	"" \
+	{pr22471b.s} \
+	{} \
+	"pr22471" \
+    ] \
+] bfin-*-* frv-*-* lm32-*-*
 
 if { [check_gc_sections_available] } {
     if [istarget mips*-*-*] {
