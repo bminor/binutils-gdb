@@ -1,3 +1,11 @@
+2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* NEWS (Changed commands): Add entry for the behavior change of
+	the inferior command.
+	* inferior.c (inferior_command): When no argument is given to the
+	inferior command, display info about the currently selected
+	inferior.
+
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.c (read_loclist_index, read_rnglist_index): Return

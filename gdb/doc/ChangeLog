@@ -1,3 +1,8 @@
+2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* gdb.texinfo (Inferiors Connections and Programs): Document the
+	inferior command when used without argument.
+
 2021-01-27  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Auto-loading extensions): Remove extraneous space.

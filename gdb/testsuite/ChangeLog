@@ -1,3 +1,8 @@
+2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* gdb.base/inferior-noarg.c: New test.
+	* gdb.base/inferior-noarg.exp: New test.
+
 2021-02-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/scope.exp: Use proc_with_prefix.

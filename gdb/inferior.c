@@ -635,34 +635,50 @@ inferior_command (const char *args, int from_tty)
   struct inferior *inf;
   int num;
 
-  num = parse_and_eval_long (args);
-
-  inf = find_inferior_id (num);
-  if (inf == NULL)
-    error (_("Inferior ID %d not known."), num);
-
-  if (inf->pid != 0)
+  if (args == nullptr)
     {
-      if (inf != current_inferior ())
-	{
-	  thread_info *tp = any_thread_of_inferior (inf);
-	  if (tp == NULL)
-	    error (_("Inferior has no threads."));
+      inf = current_inferior ();
+      gdb_assert (inf != nullptr);
+      const char *filename = inf->pspace->exec_filename.get ();
 
-	  switch_to_thread (tp);
-	}
+      if (filename == nullptr)
+	filename = _("<noexec>");
 
-      gdb::observers::user_selected_context_changed.notify
-	(USER_SELECTED_INFERIOR
-	 | USER_SELECTED_THREAD
-	 | USER_SELECTED_FRAME);
+      printf_filtered (_("[Current inferior is %d [%s] (%s)]\n"),
+		       inf->num, inferior_pid_to_str (inf->pid).c_str (),
+		       filename);
     }
   else
     {
-      switch_to_inferior_no_thread (inf);
+      num = parse_and_eval_long (args);
 
-      gdb::observers::user_selected_context_changed.notify
-	(USER_SELECTED_INFERIOR);
+      inf = find_inferior_id (num);
+      if (inf == NULL)
+	error (_("Inferior ID %d not known."), num);
+
+      if (inf->pid != 0)
+	{
+	  if (inf != current_inferior ())
+	    {
+	      thread_info *tp = any_thread_of_inferior (inf);
+	      if (tp == NULL)
+		error (_("Inferior has no threads."));
+
+	      switch_to_thread (tp);
+	    }
+
+	  gdb::observers::user_selected_context_changed.notify
+	    (USER_SELECTED_INFERIOR
+	     | USER_SELECTED_THREAD
+	     | USER_SELECTED_FRAME);
+	}
+      else
+	{
+	  switch_to_inferior_no_thread (inf);
+
+	  gdb::observers::user_selected_context_changed.notify
+	    (USER_SELECTED_INFERIOR);
+	}
     }
 }
 

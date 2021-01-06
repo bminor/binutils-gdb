@@ -3118,6 +3118,22 @@ For example,
   2    process 2307      2 (extended-remote host:10000)  hello
 @end smallexample
 
+To get informations about the current inferior, use @code{inferior}:
+
+@table @code
+@kindex inferior
+@item inferior
+Shows information about the current inferior.
+
+For example,
+@end table
+@c end table here to get a little more width for example
+
+@smallexample
+(@value{GDBP}) inferior
+[Current inferior is 1 [process 3401] (helloworld)]
+@end smallexample
+
 To find out what open target connections exist at any moment, use
 @w{@code{info connections}}:
 
