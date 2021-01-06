@@ -1,5 +1,6 @@
 #nm: -n
 #name: APP with macro then NO_APP then more code
+#xfail: tic30-*-*
 #...
 0+ T label_a
 #...
