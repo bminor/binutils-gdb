@@ -203,6 +203,15 @@ discard_queued_stop_replies (ptid_t ptid)
       next = iter;
       ++next;
 
+      if (iter == notif_stop.queue.begin ())
+	{
+	  /* The head of the list contains the notification that was
+	     already sent to GDB.  So we can't remove it, otherwise
+	     when GDB sends the vStopped, it would ack the _next_
+	     notification, which hadn't been sent yet!  */
+	  continue;
+	}
+
       if (remove_all_on_match_ptid (*iter, ptid))
 	{
 	  delete *iter;

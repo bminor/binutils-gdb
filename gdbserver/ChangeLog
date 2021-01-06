@@ -1,3 +1,8 @@
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
+	* server.cc (discard_queued_stop_replies): Don't ever discard the
+	notification at the head of the list.
+
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ax.cc (bytecode_address_table): Make static.

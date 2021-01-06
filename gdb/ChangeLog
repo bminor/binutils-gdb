@@ -1,5 +1,12 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* remote.c (remote_notif_stop_ack): Don't error out on
+	TARGET_WAITKIND_IGNORE; instead, just ignore the notification.
+	(remote_target::discard_pending_stop_replies): Don't delete
+	in-flight notification; instead, clear its contents.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* remote.c (extended_remote_target::attach): Set target async in
 	the target-non-stop path too.
 
