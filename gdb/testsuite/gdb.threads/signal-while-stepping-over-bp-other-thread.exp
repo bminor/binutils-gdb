@@ -102,7 +102,7 @@ gdb_test "set scheduler-locking off"
 gdb_test "set debug infrun 1"
 
 set test "step"
-gdb_test_sequence $test $test {
+gdb_test_sequence $test $test -prompt "$gdb_prompt \\\[infrun\\\] fetch_inferior_event: exit\r\n$"  {
     "need to step-over"
     "resume_1: step=1,"
     "signal arrived while stepping over breakpoint"

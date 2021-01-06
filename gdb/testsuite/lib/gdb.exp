@@ -1401,6 +1401,9 @@ proc gdb_test_no_output { args } {
 # EXPECTED_OUTPUT_LIST is a list of regexps of expected output, which are
 # processed in order, and all must be present in the output.
 #
+# The -prompt switch can be used to override the prompt expected at the end of
+# the output sequence.
+#
 # It is unnecessary to specify ".*" at the beginning or end of any regexp,
 # there is an implicit ".*" between each element of EXPECTED_OUTPUT_LIST.
 # There is also an implicit ".*" between the last regexp and the gdb prompt.
@@ -1413,16 +1416,32 @@ proc gdb_test_no_output { args } {
 #    0 if the test passes,
 #   -1 if there was an internal error.
 
-proc gdb_test_sequence { command test_name expected_output_list } {
+proc gdb_test_sequence { args } {
     global gdb_prompt
+
+    parse_args {{prompt ""}}
+
+    if { $prompt == "" } {
+	set prompt "$gdb_prompt $"
+    }
+
+    if { [llength $args] != 3 } {
+	error "Unexpected # of arguments, expecting: COMMAND TEST_NAME EXPECTED_OUTPUT_LIST"
+    }
+
+    lassign $args command test_name expected_output_list
+
     if { $test_name == "" } {
 	set test_name $command
     }
+
     lappend expected_output_list ""; # implicit ".*" before gdb prompt
+
     if { $command != "" } {
 	send_gdb "$command\n"
     }
-    return [gdb_expect_list $test_name "$gdb_prompt $" $expected_output_list]
+
+    return [gdb_expect_list $test_name $prompt $expected_output_list]
 }
 
 

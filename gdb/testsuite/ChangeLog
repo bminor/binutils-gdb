@@ -1,3 +1,9 @@
+2021-01-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/gdb.exp (gdb_test_sequence): Accept -prompt switch.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	Pass prompt containing debug print to gdb_test_sequence.
+
 2021-01-04  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/dw2-out-of-range-end-of-seq.exp: New file.
