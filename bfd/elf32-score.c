@@ -2379,7 +2379,7 @@ score_elf_final_link_relocate (reloc_howto_type *howto,
 
 /* Score backend functions.  */
 static bfd_boolean
-s3_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
+s3_bfd_score_info_to_howto (bfd *abfd,
 			    arelent *bfd_reloc,
 			    Elf_Internal_Rela *elf_reloc)
 {
@@ -2387,7 +2387,13 @@ s3_bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
 
   r_type = ELF32_R_TYPE (elf_reloc->r_info);
   if (r_type >= ARRAY_SIZE (elf32_score_howto_table))
-    return FALSE;
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+			  abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   bfd_reloc->howto = &elf32_score_howto_table[r_type];
   return TRUE;

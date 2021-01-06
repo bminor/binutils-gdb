@@ -1,5 +1,11 @@
 2021-01-06  Alan Modra  <amodra@gmail.com>
 
+	* elf32-score.c (s3_bfd_score_info_to_howto): Report an error
+	on unknown r_type.
+	* elf32-score7.c (s7_bfd_score_info_to_howto): Likewise.
+
+2021-01-06  Alan Modra  <amodra@gmail.com>
+
 	* config.bfd (sparc-*-solaris2*): Add sparc_elf32_vec.
 	(sparc64-*-solaris2*): Add sparc_elf64_vec and
 	sparc_elf32_vec.
