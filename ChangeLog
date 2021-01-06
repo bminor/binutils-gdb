@@ -1,3 +1,7 @@
+2021-01-07  Alan Modra  <amodra@gmail.com>
+
+	* config.sub: Accept OS of eabi* and gnueabi*.
+
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
 	* Makefile.def (libctf): No longer no_check.  Checking depends on
