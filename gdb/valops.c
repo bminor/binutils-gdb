@@ -331,6 +331,39 @@ value_cast_pointers (struct type *type, struct value *arg2,
   return arg2;
 }
 
+/* See value.h.  */
+
+gdb_mpq
+value_to_gdb_mpq (struct value *value)
+{
+  struct type *type = check_typedef (value_type (value));
+
+  gdb_mpq result;
+  if (is_floating_type (type))
+    {
+      double d = target_float_to_host_double (value_contents (value),
+					      type);
+      mpq_set_d (result.val, d);
+    }
+  else
+    {
+      gdb_assert (is_integral_type (type)
+		  || is_fixed_point_type (type));
+
+      gdb_mpz vz;
+      vz.read (gdb::make_array_view (value_contents (value),
+				     TYPE_LENGTH (type)),
+	       type_byte_order (type), type->is_unsigned ());
+      mpq_set_z (result.val, vz.val);
+
+      if (is_fixed_point_type (type))
+	mpq_mul (result.val, result.val,
+		 type->fixed_point_scaling_factor ().val);
+    }
+
+  return result;
+}
+
 /* Assuming that TO_TYPE is a fixed point type, return a value
    corresponding to the cast of FROM_VAL to that type.  */
 
@@ -342,33 +375,13 @@ value_cast_to_fixed_point (struct type *to_type, struct value *from_val)
   if (from_type == to_type)
     return from_val;
 
-  gdb_mpq vq;
-
-  /* Extract the value as a rational number.  */
-
-  if (is_floating_type (from_type))
-    {
-      double d = target_float_to_host_double (value_contents (from_val),
-					      from_type);
-      mpq_set_d (vq.val, d);
-    }
-
-  else if (is_integral_type (from_type) || is_fixed_point_type (from_type))
-    {
-      gdb_mpz vz;
-
-      vz.read (gdb::make_array_view (value_contents (from_val),
-				     TYPE_LENGTH (from_type)),
-	       type_byte_order (from_type), from_type->is_unsigned ());
-      mpq_set_z (vq.val, vz.val);
-
-      if (is_fixed_point_type (from_type))
-	mpq_mul (vq.val, vq.val, from_type->fixed_point_scaling_factor ().val);
-    }
-
-  else
+  if (!is_floating_type (from_type)
+      && !is_integral_type (from_type)
+      && !is_fixed_point_type (from_type))
     error (_("Invalid conversion from type %s to fixed point type %s"),
 	   from_type->name (), to_type->name ());
+
+  gdb_mpq vq = value_to_gdb_mpq (from_val);
 
   /* Divide that value by the scaling factor to obtain the unscaled
      value, first in rational form, and then in integer form.  */

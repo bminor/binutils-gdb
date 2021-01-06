@@ -1,3 +1,12 @@
+2021-01-06  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) <BINOP_ADD, BINOP_SUB>:
+	Do not cast result.
+	* valarith.c (fixed_point_binop): Handle multiplication
+	and division specially.
+	* valops.c (value_to_gdb_mpq): New function.
+	(value_cast_to_fixed_point): Use it.
+
 2021-01-05  Hannes Domani  <ssbssa@yahoo.de>
 
 	* tui/tui-winsource.c (tui_source_window_base::refresh_window):

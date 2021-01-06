@@ -10195,18 +10195,28 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	return (value_from_longest
 		 (value_type (arg2),
 		  value_as_long (arg1) + value_as_long (arg2)));
-      if ((ada_is_gnat_encoded_fixed_point_type (value_type (arg1))
-	   || ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
-	  && value_type (arg1) != value_type (arg2))
-	error (_("Operands of fixed-point addition must have the same type"));
-      /* Do the addition, and cast the result to the type of the first
-	 argument.  We cannot cast the result to a reference type, so if
-	 ARG1 is a reference type, find its underlying type.  */
+      /* Preserve the original type for use by the range case below.
+	 We cannot cast the result to a reference type, so if ARG1 is
+	 a reference type, find its underlying type.  */
       type = value_type (arg1);
       while (type->code () == TYPE_CODE_REF)
 	type = TYPE_TARGET_TYPE (type);
-      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-      return value_cast (type, value_binop (arg1, arg2, BINOP_ADD));
+      if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1))
+	  || ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
+	{
+	  if (value_type (arg1) != value_type (arg2))
+	    error (_("Operands of fixed-point addition must have the same type"));
+	}
+      else
+	binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      arg1 = value_binop (arg1, arg2, BINOP_ADD);
+      /* We need to special-case the result of adding to a range.
+	 This is done for the benefit of "ptype".  gdb's Ada support
+	 historically used the LHS to set the result type here, so
+	 preserve this behavior.  */
+      if (type->code () == TYPE_CODE_RANGE)
+	arg1 = value_cast (type, arg1);
+      return arg1;
 
     case BINOP_SUB:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -10221,19 +10231,29 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	return (value_from_longest
 		 (value_type (arg2),
 		  value_as_long (arg1) - value_as_long (arg2)));
-      if ((ada_is_gnat_encoded_fixed_point_type (value_type (arg1))
-	   || ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
-	  && value_type (arg1) != value_type (arg2))
-	error (_("Operands of fixed-point subtraction "
-		 "must have the same type"));
-      /* Do the substraction, and cast the result to the type of the first
-	 argument.  We cannot cast the result to a reference type, so if
-	 ARG1 is a reference type, find its underlying type.  */
+      /* Preserve the original type for use by the range case below.
+	 We cannot cast the result to a reference type, so if ARG1 is
+	 a reference type, find its underlying type.  */
       type = value_type (arg1);
       while (type->code () == TYPE_CODE_REF)
 	type = TYPE_TARGET_TYPE (type);
-      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-      return value_cast (type, value_binop (arg1, arg2, BINOP_SUB));
+      if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1))
+	  || ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
+	{
+	  if (value_type (arg1) != value_type (arg2))
+	    error (_("Operands of fixed-point subtraction "
+		     "must have the same type"));
+	}
+      else
+	binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      arg1 = value_binop (arg1, arg2, BINOP_SUB);
+      /* We need to special-case the result of adding to a range.
+	 This is done for the benefit of "ptype".  gdb's Ada support
+	 historically used the LHS to set the result type here, so
+	 preserve this behavior.  */
+      if (type->code () == TYPE_CODE_RANGE)
+	arg1 = value_cast (type, arg1);
+      return arg1;
 
     case BINOP_MUL:
     case BINOP_DIV:

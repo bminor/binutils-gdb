@@ -107,4 +107,21 @@ foreach_with_prefix scenario {all minimal} {
 	    pass $gdb_test_name
 	}
     }
+
+    # One of the benefits of minimal encoding is that operations work
+    # a bit better.
+    if {$scenario == "minimal"} {
+	gdb_test "print fp2_var + 0" \
+	    " = -0.01"
+	gdb_test "print 0 + fp2_var" \
+	    " = -0.01"
+	gdb_test "print fp2_var - 0" \
+	    " = -0.01"
+
+	set fp4 "= 2e-07"
+	gdb_test "print fp4_var" $fp4
+	gdb_test "print fp4_var * 1" $fp4
+	gdb_test "print 1 * fp4_var" $fp4
+	gdb_test "print fp4_var / 1" $fp4
+    }
 }

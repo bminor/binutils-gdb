@@ -25,6 +25,11 @@ package Pck is
    type FP3_Type is delta 0.1 range 0.0 .. 1.0 with Small => 0.1/3.0;
    FP3_Var : FP3_Type := 0.1;
 
+   Delta4 : constant := 0.000_000_1;
+   type FP4_Type is delta Delta4 range 0.0 .. Delta4 * 10
+      with Small => Delta4 / 3.0;
+   FP4_Var : FP4_Type := 2 * Delta4;
+
    procedure Do_Nothing (A : System.Address);
 end pck;
 

@@ -23,6 +23,7 @@
 #include "frame.h"		/* For struct frame_id.  */
 #include "extension.h"
 #include "gdbsupport/gdb_ref_ptr.h"
+#include "gmp-utils.h"
 
 struct block;
 struct expression;
@@ -1221,5 +1222,9 @@ extern struct value *call_xmethod (struct value *method,
 /* Destroy the values currently allocated.  This is called when GDB is
    exiting (e.g., on quit_force).  */
 extern void finalize_values ();
+
+/* Convert VALUE to a gdb_mpq.  The caller must ensure that VALUE is
+   of floating-point, fixed-point, or integer type.  */
+extern gdb_mpq value_to_gdb_mpq (struct value *value);
 
 #endif /* !defined (VALUE_H) */

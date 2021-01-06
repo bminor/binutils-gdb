@@ -63,4 +63,5 @@ begin
    Do_Nothing (FP1_Var'Address);
    Do_Nothing (FP2_Var'Address);
    Do_Nothing (FP3_Var'Address);
+   Do_Nothing (FP4_Var'Address);
 end Fixed_Points;

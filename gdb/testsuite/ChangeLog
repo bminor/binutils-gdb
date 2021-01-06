@@ -1,3 +1,11 @@
+2021-01-06  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/fixed_points/pck.ads (Delta4): New constant.
+	(FP4_Type): New type.
+	(FP4_Var): New variable.
+	* gdb.ada/fixed_points/fixed_points.adb: Update.
+	* gdb.ada/fixed_points.exp: Add tests for binary operators.
+
 2021-01-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* lib/gdb.exp (gdb_test_sequence): Accept -prompt switch.

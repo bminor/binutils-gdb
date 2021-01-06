@@ -903,27 +903,41 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   struct gdbarch *gdbarch = get_type_arch (type1);
   struct value *val;
 
-  gdb_assert (is_fixed_point_type (type1) || is_fixed_point_type (type2));
-  if (!is_fixed_point_type (type1))
-    {
-      arg1 = value_cast (type2, arg1);
-      type1 = type2;
-    }
-  if (!is_fixed_point_type (type2))
-    {
-      arg2 = value_cast (type1, arg2);
-      type2 = type1;
-    }
-
   gdb_mpq v1, v2, res;
-  v1.read_fixed_point (gdb::make_array_view (value_contents (arg1),
-					     TYPE_LENGTH (type1)),
-		       type_byte_order (type1), type1->is_unsigned (),
-		       type1->fixed_point_scaling_factor ());
-  v2.read_fixed_point (gdb::make_array_view (value_contents (arg2),
-					     TYPE_LENGTH (type2)),
-		       type_byte_order (type2), type2->is_unsigned (),
-		       type2->fixed_point_scaling_factor ());
+
+  gdb_assert (is_fixed_point_type (type1) || is_fixed_point_type (type2));
+  if (op == BINOP_MUL || op == BINOP_DIV)
+    {
+      v1 = value_to_gdb_mpq (arg1);
+      v2 = value_to_gdb_mpq (arg2);
+
+      /* The code below uses TYPE1 for the result type, so make sure
+	 it is set properly.  */
+      if (!is_fixed_point_type (type1))
+	type1 = type2;
+    }
+  else
+    {
+      if (!is_fixed_point_type (type1))
+	{
+	  arg1 = value_cast (type2, arg1);
+	  type1 = type2;
+	}
+      if (!is_fixed_point_type (type2))
+	{
+	  arg2 = value_cast (type1, arg2);
+	  type2 = type1;
+	}
+
+      v1.read_fixed_point (gdb::make_array_view (value_contents (arg1),
+						 TYPE_LENGTH (type1)),
+			   type_byte_order (type1), type1->is_unsigned (),
+			   type1->fixed_point_scaling_factor ());
+      v2.read_fixed_point (gdb::make_array_view (value_contents (arg2),
+						 TYPE_LENGTH (type2)),
+			   type_byte_order (type2), type2->is_unsigned (),
+			   type2->fixed_point_scaling_factor ());
+    }
 
   auto fixed_point_to_value = [type1] (const gdb_mpq &fp)
     {
