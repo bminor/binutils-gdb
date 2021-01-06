@@ -1,3 +1,8 @@
+2021-01-07  Marcus Comstedt  <marcus@mc.pp.se>
+
+	* testsuite/ld-scripts/empty-address-2a.d: xfail riscv64*-*-*.
+	* testsuite/ld-scripts/empty-address-2b.d: Likewise.
+
 2021-01-07  Alan Modra  <amodra@gmail.com>
 
 	* po/BLD-POTFILES.in: Regenerate.
