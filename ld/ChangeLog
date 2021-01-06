@@ -1,5 +1,9 @@
 2021-01-07  Alan Modra  <amodra@gmail.com>
 
+	* po/BLD-POTFILES.in: Regenerate.
+
+2021-01-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/shared.exp: xfail pr22471 for targets that
 	complain about relocs in read-only sections.  Tidy ASFLAGS append.
 
