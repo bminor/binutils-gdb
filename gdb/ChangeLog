@@ -1,3 +1,8 @@
+2021-01-07  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (add_component_interval): Start loop using vector's
+	updated size.
+
 2021-01-06  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) <BINOP_ADD, BINOP_SUB>:

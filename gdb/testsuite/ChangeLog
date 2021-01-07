@@ -1,3 +1,7 @@
+2021-01-07  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/assign_arr.exp: Add 'others' test.
+
 2021-01-06  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/fixed_points/pck.ads (Delta4): New constant.

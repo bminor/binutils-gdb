@@ -9755,7 +9755,7 @@ add_component_interval (LONGEST low, LONGEST high,
   }
 	
   indices.resize (indices.size () + 2);
-  for (j = size - 1; j >= i + 2; j -= 1)
+  for (j = indices.size () - 1; j >= i + 2; j -= 1)
     indices[j] = indices[j - 2];
   indices[i] = low;
   indices[i + 1] = high;
