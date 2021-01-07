@@ -1,10 +1,10 @@
 2021-01-07  Mike Frysinger  <vapier@gentoo.org>
 
-	* kill2.c: Include unistd.h.
-	* pipe1.c, sched1.c, sched2.c, sched3.c, sched4.c, sig5.c,
-	sig8.c: Likewise.
-	* openpf1.c (main): Change close to fclose.
-	* openpf2.c: Likewise.
+	* c/kill2.c: Include unistd.h.
+	* c/pipe1.c, c/sched1.c, c/sched2.c, c/sched3.c, c/sched4.c,
+	c/sig5.c, c/sig8.c: Likewise.
+	* c/openpf1.c (main): Change close to fclose.
+	* c/openpf2.c: Likewise.
 
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
