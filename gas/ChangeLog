@@ -1,3 +1,11 @@
+2021-01-07  Philipp Tomsich  <prt@gnu.org>
+
+	* config/tc-riscv.c (riscv_multi_subset_supports): Added
+	INSN_CLASS_ZIHINTPAUSE.
+	* testsuite/gas/riscv/pause.d: New testcase.  Adding coverage for
+	the pause hint instruction.
+	* testsuite/gas/riscv/pause.s: Likewise.
+
 2021-01-07  Claire Xenia Wolf  <claire@symbioticeda.com>
 	    Jim Wilson  <jimw@sifive.com>
 	    Andrew Waterman  <andrew@sifive.com>

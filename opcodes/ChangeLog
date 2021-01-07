@@ -1,3 +1,7 @@
+2021-01-07  Philipp Tomsich  <prt@gnu.org>
+
+	* riscv-opc.c (riscv_opcodes): Add pause hint instruction.
+
 2021-01-07  Claire Xenia Wolf  <claire@symbioticeda.com>
 	    Jim Wilson  <jimw@sifive.com>
 	    Andrew Waterman  <andrew@sifive.com>

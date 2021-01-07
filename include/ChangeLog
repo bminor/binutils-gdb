@@ -1,3 +1,9 @@
+2021-01-07  Philipp Tomsich  <prt@gnu.org>
+
+	* opcode/riscv-opc.h: Added MATCH_PAUSE, MASK_PAUSE and DECLARE_INSN
+	for pause hint instruction.
+	* opcode/riscv.h (enum riscv_insn_class): Added INSN_CLASS_ZIHINTPAUSE.
+
 2021-01-07  Claire Xenia Wolf  <claire@symbioticeda.com>
 	    Jim Wilson  <jimw@sifive.com>
 	    Andrew Waterman  <andrew@sifive.com>
