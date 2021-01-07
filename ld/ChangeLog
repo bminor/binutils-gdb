@@ -1,3 +1,14 @@
+2021-01-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/comm-data5.d: xfail targets that complain
+	about dynamic relocations in read-only sections.
+	* testsuite/ld-elf/ehdr_start-shared.d: Likewise.
+	* testsuite/ld-elf/ehdr_start.d: Likewise.
+	* testsuite/ld-scripts/pr22267.d: Likewise.
+	* testsuite/ld-elf/shared.exp: Likewise for DT_TEXTREL tests and
+	pr20995 text.
+	* testsuite/ld-elf/sec64k.exp: Don't run 64ksec on lm32-linux.
+
 2021-01-07  Marcus Comstedt  <marcus@mc.pp.se>
 
 	* testsuite/ld-scripts/empty-address-2a.d: xfail riscv64*-*-*.

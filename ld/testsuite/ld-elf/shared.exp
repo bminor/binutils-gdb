@@ -180,7 +180,7 @@ run_ld_link_tests [list \
 	  {readelf {-d --wide} textrel.rd}} \
 	"textrel.so" \
     ] \
-] "xtensa-*-*"
+] bfin-*-* frv-*-* lm32-*-* xtensa-*-*
 
 # The MIPS backend sets SHF_WRITE, in `mips_elf_create_dynamic_relocation',
 # for any section that has a dynamic relocation attached and consequently
@@ -197,7 +197,7 @@ run_ld_link_tests [list \
 	 {{ld textrel.map}} \
 	"textrel.so" \
     ] \
-] "cris*-*-*" "mips*-*-*"
+] bfin-*-* cris*-*-* frv-*-* lm32-*-* mips*-*-*
 
 # PR ld/20828 check for correct dynamic symbol table entries where:
 # - symbols have been defined with a linker script,
@@ -467,6 +467,8 @@ run_ld_link_tests [list \
 setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
 # or don't have .data.rel.ro
 setup_xfail "hppa*64*-*-hpux*" "tic6x-*-*"
+# or complain about relocs in read-only sections
+setup_xfail frv-*-* lm32-*-*
 run_ld_link_tests [list \
     [list \
 	"pr20995" \
