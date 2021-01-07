@@ -1347,7 +1347,13 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	  switch (ELF_ST_TYPE (isym->st_info))
 	    {
 	    case STT_SECTION:
-	      sym->symbol.flags |= BSF_SECTION_SYM | BSF_DEBUGGING;
+	      /* Mark the input section symbol as used since it may be
+	         used for relocation and section group.
+		 NB: BSF_SECTION_SYM_USED is ignored by linker and may
+		 be cleared by objcopy for non-relocatable inputs.  */
+	      sym->symbol.flags |= (BSF_SECTION_SYM
+				    | BSF_DEBUGGING
+				    | BSF_SECTION_SYM_USED);
 	      break;
 	    case STT_FILE:
 	      sym->symbol.flags |= BSF_FILE | BSF_DEBUGGING;

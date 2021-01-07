@@ -133,6 +133,11 @@ DESCRIPTION
 .   (bfd_assert (__FILE__,__LINE__), NULL))
 .#endif
 .
+.{* Defined to TRUE if unused section symbol should be kept.  *}
+.#ifndef TARGET_KEEP_UNUSED_SECTION_SYMBOLS
+.#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS TRUE
+.#endif
+.
 	This is the structure which defines the type of BFD this is.  The
 	<<xvec>> member of the struct <<bfd>> itself points here.  Each
 	module that implements access to a different target under BFD,
@@ -214,6 +219,9 @@ DESCRIPTION
 .  {* How well this target matches, used to select between various
 .     possible targets when more than one target matches.  *}
 .  unsigned char match_priority;
+.
+. {* TRUE if unused section symbols should be kept.  *}
+.  bfd_boolean keep_unused_section_symbols;
 .
 .  {* Entries for byte swapping for data. These are different from the
 .     other entry points, since they don't take a BFD as the first argument.
@@ -653,6 +661,12 @@ to find an alternative output format that is suitable.
 .  if ((sy->flags & BSF_SYNTHETIC) != 0)
 .    return bfd_target_unknown_flavour;
 .  return sy->the_bfd->xvec->flavour;
+.}
+.
+.static inline bfd_boolean
+.bfd_keep_unused_section_symbols (const bfd *abfd)
+.{
+.  return abfd->xvec->keep_unused_section_symbols;
 .}
 .
 */

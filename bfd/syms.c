@@ -307,6 +307,9 @@ CODE_FRAGMENT
 .     with this name and type in use.  BSF_OBJECT must also be set.  *}
 .#define BSF_GNU_UNIQUE          (1 << 23)
 .
+.  {* This section symbol should be included in the symbol table.  *}
+.#define BSF_SECTION_SYM_USED    (1 << 24)
+.
 .  flagword flags;
 .
 .  {* A pointer to the section to which this symbol is

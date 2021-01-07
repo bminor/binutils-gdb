@@ -794,6 +794,7 @@ const bfd_target wasm_vec =
   ' ',				/* AR_pad_char.  */
   255,				/* AR_max_namelen.  */
   0,				/* Match priority.  */
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
   /* Routines to byte-swap various sized integers from the data sections.  */
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,
   bfd_getl32, bfd_getl_signed_32, bfd_putl32,

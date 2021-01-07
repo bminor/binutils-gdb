@@ -89,6 +89,10 @@ subseg_set_rest (segT seg, subsegT subseg)
 
   seginfo = seg_info (seg);
 
+  /* Should the section symbol be kept?  */
+  if (bfd_keep_unused_section_symbols (stdoutput))
+    seg->symbol->flags |= BSF_SECTION_SYM_USED;
+
   /* Attempt to find or make a frchain for that subsection.
      We keep the list sorted by subsection number.  */
   for (frcP = *(lastPP = &seginfo->frchainP);

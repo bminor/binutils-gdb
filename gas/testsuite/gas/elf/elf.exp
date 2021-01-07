@@ -54,7 +54,11 @@ proc run_elf_list_test { name suffix opts readelf_opts readelf_pipe } {
 
 # We're testing bits in obj-elf -- don't run on anything else.
 if { [is_elf_format] } then {
-    set target_machine ""
+    if { [is_elf_unused_section_symbols ] } {
+	set target_machine -unused
+    } else {
+	set target_machine ""
+    }
     set dump_opts ""
     if {[istarget "arc*-*-*"]} {
 	set target_machine -arc

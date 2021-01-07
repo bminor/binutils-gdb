@@ -20,7 +20,7 @@ Disassembly of section .plt:
 Disassembly of section .text:
 
 0+140 <_start>:
- +[a-f0-9]+:	48 3b 05 f1 00 20 00 	cmp    0x2000f1\(%rip\),%rax        # 200238 <.got>
- +[a-f0-9]+:	ff 25 f3 00 20 00    	jmp    \*0x2000f3\(%rip\)        # 200240 <.got\+0x8>
- +[a-f0-9]+:	e8 de ff ff ff       	call   130 <.plt\+0x10>
+ +[a-f0-9]+:	48 3b 05 f1 00 20 00 	cmp    0x2000f1\(%rip\),%rax        # 200238 <_DYNAMIC\+0xe0>
+ +[a-f0-9]+:	ff 25 f3 00 20 00    	jmp    \*0x2000f3\(%rip\)        # 200240 <_DYNAMIC\+0xe8>
+ +[a-f0-9]+:	e8 de ff ff ff       	call   130 <_start-0x10>
 #pass

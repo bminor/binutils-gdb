@@ -18,6 +18,9 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+/* Don't generate unused section symbols.  */
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS FALSE
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "bfdlink.h"

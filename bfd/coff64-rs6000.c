@@ -2665,6 +2665,7 @@ const bfd_target rs6000_xcoff64_vec =
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
+    TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
     /* data */
     bfd_getb64,
@@ -2928,6 +2929,7 @@ const bfd_target rs6000_xcoff64_aix_vec =
     '/',			/* ar_pad_char */
     15,				/* ar_max_namelen */
     0,				/* match priority.  */
+    TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
     /* data */
     bfd_getb64,

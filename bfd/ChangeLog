@@ -1,3 +1,79 @@
+2021-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 27109
+	* aix386-core.c (core_aix386_vec): Initialize
+	keep_unused_section_symbol to TARGET_KEEP_UNUSED_SECTION_SYMBOLS.
+	* aout-target.h (MY (vec)): Likewise.
+	* binary.c (binary_vec): Likewise.
+	* cisco-core.c (core_cisco_be_vec): Likewise.
+	(core_cisco_le_vec): Likewise.
+	* coff-alpha.c (alpha_ecoff_le_vec): Likewise.
+	* coff-i386.c (TARGET_SYM): Likewise.
+	(TARGET_SYM_BIG): Likewise.
+	* coff-ia64.c (TARGET_SYM): Likewise.
+	* coff-mips.c (mips_ecoff_le_vec): Likewise.
+	(mips_ecoff_be_vec): Likewise.
+	(mips_ecoff_bele_vec): Likewise.
+	* coff-rs6000.c (rs6000_xcoff_vec): Likewise.
+	(powerpc_xcoff_vec): Likewise.
+	* coff-sh.c (sh_coff_small_vec): Likewise.
+	(sh_coff_small_le_vec): Likewise.
+	* coff-tic30.c (tic30_coff_vec): Likewise.
+	* coff-tic54x.c (tic54x_coff0_vec): Likewise.
+	(tic54x_coff0_beh_vec): Likewise.
+	(tic54x_coff1_vec): Likewise.
+	(tic54x_coff1_beh_vec): Likewise.
+	(tic54x_coff2_vec): Likewise.
+	(tic54x_coff2_beh_vec): Likewise.
+	* coff-x86_64.c (TARGET_SYM): Likewise.
+	(TARGET_SYM_BIG): Likewise.
+	* coff64-rs6000.c (rs6000_xcoff64_vec): Likewise.
+	(rs6000_xcoff64_aix_vec): Likewise.
+	* coffcode.h (CREATE_BIG_COFF_TARGET_VEC): Likewise.
+	(CREATE_BIGHDR_COFF_TARGET_VEC): Likewise.
+	(CREATE_LITTLE_COFF_TARGET_VEC): Likewise.
+	* elfxx-target.h (TARGET_BIG_SYM): Likewise.
+	(TARGET_LITTLE_SYM): Likewise.
+	* hppabsd-core.c (core_hppabsd_vec): Likewise.
+	* hpux-core.c (core_hpux_vec): Likewise.
+	* i386msdos.c (i386_msdos_vec): Likewise.
+	* ihex.c (ihex_vec): Likewise.
+	* irix-core.c (core_irix_vec): Likewise.
+	* mach-o-target.c (TARGET_NAME): Likewise.
+	* mmo.c (mmix_mmo_vec): Likewise.
+	* netbsd-core.c (core_netbsd_vec): Likewise.
+	* osf-core.c (core_osf_vec): Likewise.
+	* pdp11.c (MY (vec)): Likewise.
+	* pef.c (pef_vec): Likewise.
+	(pef_xlib_vec): Likewise.
+	* plugin.c (plugin_vec): Likewise.
+	* ppcboot.c (powerpc_boot_vec): Likewise.
+	* ptrace-core.c (core_ptrace_vec): Likewise.
+	* sco5-core.c (core_sco5_vec): Likewise.
+	* som.c (hppa_som_vec): Likewise.
+	* srec.c (srec_vec): Likewise.
+	(symbolsrec_vec): Likewise.
+	* tekhex.c (tekhex_vec): Likewise.
+	* trad-core.c (core_trad_vec): Likewise.
+	* verilog.c (verilog_vec): Likewise.
+	* vms-alpha.c (alpha_vms_vec): Likewise.
+	* vms-lib.c (alpha_vms_lib_txt_vec): Likewise.
+	* wasm-module.c (wasm_vec): Likewise.
+	* xsym.c (sym_vec): Likewise.
+	* elf.c (ignore_section_sym): Return TRUE if BSF_SECTION_SYM_USED
+	isn't set.
+	(elf_map_symbols): Don't include ignored section symbols.
+	* elfcode.h (elf_slurp_symbol_table): Also set
+	BSF_SECTION_SYM_USED on STT_SECTION symbols.
+	* elflink.c (bfd_elf_final_link): Generated section symbols only
+	when emitting relocations or reqired.
+	* elfxx-x86.h (TARGET_KEEP_UNUSED_SECTION_SYMBOLS): New.
+	* syms.c (BSF_SECTION_SYM_USED): New.
+	* targets.c (TARGET_KEEP_UNUSED_SECTION_SYMBOLS): New.
+	(bfd_target): Add keep_unused_section_symbols.
+	(bfd_keep_unused_section_symbols): New.
+	* bfd-in2.h: Regenerated.
+
 2021-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 25713

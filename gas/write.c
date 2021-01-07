@@ -848,7 +848,12 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	/* Since we're reducing to section symbols, don't attempt to reduce
 	   anything that's already using one.  */
 	if (symbol_section_p (sym))
-	  continue;
+	  {
+	    /* Mark the section symbol used in relocation so that it will
+	       be included in the symbol table.  */
+	    symbol_mark_used_in_reloc (sym);
+	    continue;
+	  }
 
 	symsec = S_GET_SEGMENT (sym);
 	if (symsec == NULL)
@@ -1747,10 +1752,13 @@ set_symtab (void)
 
   /* Count symbols.  We can't rely on a count made by the loop in
      write_object_file, because *_frob_file may add a new symbol or
-     two.  */
+     two.  Generate unused section symbols only if needed.  */
   nsyms = 0;
   for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-    nsyms++;
+    if (bfd_keep_unused_section_symbols (stdoutput)
+	|| !symbol_section_p (symp)
+	|| symbol_used_in_reloc_p (symp))
+      nsyms++;
 
   if (nsyms)
     {
@@ -1759,15 +1767,22 @@ set_symtab (void)
 
       asympp = (asymbol **) bfd_alloc (stdoutput, amt);
       symp = symbol_rootP;
-      for (i = 0; i < nsyms; i++, symp = symbol_next (symp))
-	{
-	  asympp[i] = symbol_get_bfdsym (symp);
-	  if (asympp[i]->flags != BSF_SECTION_SYM
-	      || !(bfd_is_const_section (asympp[i]->section)
-		   && asympp[i]->section->symbol == asympp[i]))
-	    asympp[i]->flags |= BSF_KEEP;
-	  symbol_mark_written (symp);
-	}
+      for (i = 0; i < nsyms; symp = symbol_next (symp))
+	if (bfd_keep_unused_section_symbols (stdoutput)
+	    || !symbol_section_p (symp)
+	    || symbol_used_in_reloc_p (symp))
+	  {
+	    asympp[i] = symbol_get_bfdsym (symp);
+	    if (asympp[i]->flags != BSF_SECTION_SYM
+		|| !(bfd_is_const_section (asympp[i]->section)
+		     && asympp[i]->section->symbol == asympp[i]))
+	      asympp[i]->flags |= BSF_KEEP;
+	    symbol_mark_written (symp);
+	    /* Include this section symbol in the symbol table.  */
+	    if (symbol_section_p (symp))
+	      asympp[i]->flags |= BSF_SECTION_SYM_USED;
+	    i++;
+	  }
     }
   else
     asympp = 0;
@@ -2057,6 +2072,10 @@ maybe_generate_build_notes (void)
 			   desc_reloc,
 			   bfd_section_size (bsym->section),
 			   note);
+
+	/* Mark the section symbol used in relocation so that it will be
+	   included in the symbol table.  */
+	symbol_mark_used_in_reloc (sym);
 
 	total_size += note_size;
 	/* FIXME: Maybe add a note recording the assembler command line and version ?  */

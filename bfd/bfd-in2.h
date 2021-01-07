@@ -6416,6 +6416,9 @@ typedef struct bfd_symbol
      with this name and type in use.  BSF_OBJECT must also be set.  */
 #define BSF_GNU_UNIQUE          (1 << 23)
 
+  /* This section symbol should be included in the symbol table.  */
+#define BSF_SECTION_SYM_USED    (1 << 24)
+
   flagword flags;
 
   /* A pointer to the section to which this symbol is
@@ -7291,6 +7294,11 @@ bfd_boolean generic_core_file_matches_executable_p
    (bfd_assert (__FILE__,__LINE__), NULL))
 #endif
 
+/* Defined to TRUE if unused section symbol should be kept.  */
+#ifndef TARGET_KEEP_UNUSED_SECTION_SYMBOLS
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS TRUE
+#endif
+
 enum bfd_flavour
 {
   /* N.B. Update bfd_flavour_name if you change this.  */
@@ -7363,6 +7371,9 @@ typedef struct bfd_target
   /* How well this target matches, used to select between various
      possible targets when more than one target matches.  */
   unsigned char match_priority;
+
+ /* TRUE if unused section symbols should be kept.  */
+  bfd_boolean keep_unused_section_symbols;
 
   /* Entries for byte swapping for data. These are different from the
      other entry points, since they don't take a BFD as the first argument.
@@ -7792,6 +7803,12 @@ bfd_asymbol_flavour (const asymbol *sy)
   if ((sy->flags & BSF_SYNTHETIC) != 0)
     return bfd_target_unknown_flavour;
   return sy->the_bfd->xvec->flavour;
+}
+
+static inline bfd_boolean
+bfd_keep_unused_section_symbols (const bfd *abfd)
+{
+  return abfd->xvec->keep_unused_section_symbols;
 }
 
 bfd_boolean bfd_set_default_target (const char *name);

@@ -4061,6 +4061,10 @@ ignore_section_sym (bfd *abfd, asymbol *sym)
   if ((sym->flags & BSF_SECTION_SYM) == 0)
     return FALSE;
 
+  /* Ignore the section symbol if it isn't used.  */
+  if ((sym->flags & BSF_SECTION_SYM_USED) == 0)
+    return TRUE;
+
   if (sym->section == NULL)
     return TRUE;
 
@@ -4148,7 +4152,10 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
      at least in that case.  */
   for (asect = abfd->sections; asect; asect = asect->next)
     {
-      if (sect_syms[asect->index] == NULL)
+      asymbol *sym = asect->symbol;
+      /* Don't include ignored section symbols.  */
+      if (!ignore_section_sym (abfd, sym)
+	  && sect_syms[asect->index] == NULL)
 	{
 	  if (!sym_is_global (abfd, asect->symbol))
 	    num_locals++;
@@ -4170,6 +4177,7 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
 
       if (sym_is_global (abfd, sym))
 	i = num_locals + num_globals2++;
+      /* Don't include ignored section symbols.  */
       else if (!ignore_section_sym (abfd, sym))
 	i = num_locals2++;
       else
@@ -4179,9 +4187,10 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
     }
   for (asect = abfd->sections; asect; asect = asect->next)
     {
-      if (sect_syms[asect->index] == NULL)
+      asymbol *sym = asect->symbol;
+      if (!ignore_section_sym (abfd, sym)
+	  && sect_syms[asect->index] == NULL)
 	{
-	  asymbol *sym = asect->symbol;
 	  unsigned int i;
 
 	  sect_syms[asect->index] = sym;

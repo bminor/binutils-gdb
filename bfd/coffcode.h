@@ -5820,6 +5820,7 @@ const bfd_target VAR =							\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
   0,				/* match priority.  */			\
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */ \
 									\
   /* Data conversion functions.  */					\
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
@@ -5881,6 +5882,7 @@ const bfd_target VAR =							\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
   0,				/* match priority.  */			\
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */ \
 									\
   /* Data conversion functions.  */					\
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
@@ -5942,6 +5944,7 @@ const bfd_target VAR =							\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
   0,				/* match priority.  */			\
+  TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */ \
 									\
   /* Data conversion functions.  */					\
   bfd_getl64, bfd_getl_signed_64, bfd_putl64,				\

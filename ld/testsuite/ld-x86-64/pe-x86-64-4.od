@@ -2,12 +2,6 @@
 .*: +file format .*
 
 SYMBOL TABLE:
-0+401000 l    d  .text\$mn	0000000000000000 .text\$mn
-0+402000 l    d  .xdata	0000000000000000 .xdata
-0+402008 l    d  .pdata	0000000000000000 .pdata
-0+403018 l    d  .data	0000000000000000 .data
-0+403038 l    d  .bss	0000000000000000 .bss
-0+ l    d  .debug\$S	0000000000000000 .debug\$S
 0+403038 g       .bss	0000000000000000 c
 0+401000 g       .text\$mn	0000000000000000 begin
 0+403038 g       .bss	0000000000000000 __bss_start

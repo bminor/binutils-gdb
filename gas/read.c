@@ -4207,6 +4207,9 @@ s_reloc (int ignore ATTRIBUTE_UNUSED)
       goto err_out;
     case O_constant:
       exp.X_add_symbol = section_symbol (now_seg);
+      /* Mark the section symbol used in relocation so that it will be
+	 included in the symbol table.  */
+      symbol_mark_used_in_reloc (exp.X_add_symbol);
       exp.X_op = O_symbol;
       /* Fallthru */
     case O_symbol:

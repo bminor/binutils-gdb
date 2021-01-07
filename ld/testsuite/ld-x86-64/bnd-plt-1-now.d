@@ -13,16 +13,16 @@ Disassembly of section .plt:
  +[a-f0-9]+:	f2 ff 25 a3 01 20 00 	bnd jmp \*0x2001a3\(%rip\)        # 2003e0 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
- +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 230 <.plt>
+ +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 230 <foo2@plt-0x50>
  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
  +[a-f0-9]+:	68 01 00 00 00       	push   \$0x1
- +[a-f0-9]+:	f2 e9 d5 ff ff ff    	bnd jmp 230 <.plt>
+ +[a-f0-9]+:	f2 e9 d5 ff ff ff    	bnd jmp 230 <foo2@plt-0x50>
  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
  +[a-f0-9]+:	68 02 00 00 00       	push   \$0x2
- +[a-f0-9]+:	f2 e9 c5 ff ff ff    	bnd jmp 230 <.plt>
+ +[a-f0-9]+:	f2 e9 c5 ff ff ff    	bnd jmp 230 <foo2@plt-0x50>
  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
  +[a-f0-9]+:	68 03 00 00 00       	push   \$0x3
- +[a-f0-9]+:	f2 e9 b5 ff ff ff    	bnd jmp 230 <.plt>
+ +[a-f0-9]+:	f2 e9 b5 ff ff ff    	bnd jmp 230 <foo2@plt-0x50>
  +[a-f0-9]+:	0f 1f 44 00 00       	nopl   0x0\(%rax,%rax,1\)
 
 Disassembly of section .plt.sec:

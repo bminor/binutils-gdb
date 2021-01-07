@@ -1,3 +1,19 @@
+2021-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 27109
+	* objcopy.c (copy_object): Handle section symbols for
+	non-relocatable inputs.
+	* testsuite/binutils-all/readelf.exp (readelf_test): Check
+	is_elf_unused_section_symbols.
+	* testsuite/binutils-all/readelf.s-64: Updated.
+	* testsuite/binutils-all/readelf.ss: Likewise.
+	* testsuite/binutils-all/readelf.ss-64: Likewise.
+	* testsuite/binutils-all/readelf.s-64-unused: New file.
+	* testsuite/binutils-all/readelf.ss-64-unused: Likewise.
+	* testsuite/binutils-all/readelf.ss-unused: Likewise.
+	* testsuite/lib/binutils-common.exp
+	(is_elf_unused_section_symbols): New proc.
+
 2021-01-06  Reuben Thomas  <rrt@sc3d.org>
 
 	* binutils/readelf.c: Correct grammar in comment.

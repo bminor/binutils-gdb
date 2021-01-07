@@ -12527,9 +12527,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   if (info->strip != strip_all || emit_relocs)
     {
-      bfd_boolean name_local_sections;
-      const char *name;
-
       file_ptr off = elf_next_file_pos (abfd);
 
       _bfd_elf_assign_file_position_for_section (symtab_hdr, off, TRUE);
@@ -12550,36 +12547,38 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 				     bfd_und_section_ptr, NULL) != 1)
 	goto error_return;
 
-      /* Output a symbol for each section.  We output these even if we are
-	 discarding local symbols, since they are used for relocs.  These
-	 symbols usually have no names.  We store the index of each one in
-	 the index field of the section, so that we can find it again when
-	 outputting relocs.  */
+      /* Output a symbol for each section if asked or they are used for
+	 relocs.  These symbols usually have no names.  We store the
+	 index of each one in the index field of the section, so that
+	 we can find it again when outputting relocs.  */
 
-      name_local_sections
-	= (bed->elf_backend_name_local_section_symbols
-	   && bed->elf_backend_name_local_section_symbols (abfd));
-
-      name = NULL;
-      elfsym.st_size = 0;
-      elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
-      elfsym.st_other = 0;
-      elfsym.st_value = 0;
-      elfsym.st_target_internal = 0;
-      for (i = 1; i < elf_numsections (abfd); i++)
+      if (bfd_keep_unused_section_symbols (abfd) || emit_relocs)
 	{
-	  o = bfd_section_from_elf_index (abfd, i);
-	  if (o != NULL)
+	  bfd_boolean name_local_sections
+	    = (bed->elf_backend_name_local_section_symbols
+	       && bed->elf_backend_name_local_section_symbols (abfd));
+	  const char *name = NULL;
+
+	  elfsym.st_size = 0;
+	  elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
+	  elfsym.st_other = 0;
+	  elfsym.st_value = 0;
+	  elfsym.st_target_internal = 0;
+	  for (i = 1; i < elf_numsections (abfd); i++)
 	    {
-	      o->target_index = bfd_get_symcount (abfd);
-	      elfsym.st_shndx = i;
-	      if (!bfd_link_relocatable (info))
-		elfsym.st_value = o->vma;
-	      if (name_local_sections)
-		name = o->name;
-	      if (elf_link_output_symstrtab (&flinfo, name, &elfsym, o,
-					     NULL) != 1)
-		goto error_return;
+	      o = bfd_section_from_elf_index (abfd, i);
+	      if (o != NULL)
+		{
+		  o->target_index = bfd_get_symcount (abfd);
+		  elfsym.st_shndx = i;
+		  if (!bfd_link_relocatable (info))
+		    elfsym.st_value = o->vma;
+		  if (name_local_sections)
+		    name = o->name;
+		  if (elf_link_output_symstrtab (&flinfo, name, &elfsym, o,
+						 NULL) != 1)
+		    goto error_return;
+		}
 	    }
 	}
     }

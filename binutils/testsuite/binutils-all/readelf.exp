@@ -100,7 +100,11 @@ proc readelf_test { options binary_file regexp_file xfails } {
 	return
     }
 
-    set target_machine ""
+    if { [is_elf_unused_section_symbols ] } {
+	set target_machine unused
+    } else {
+	set target_machine ""
+    }
     if [istarget "mips*-*-*"] then {
 	if [is_bad_symtab] then {
 	    set target_machine mips

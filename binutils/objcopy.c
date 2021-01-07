@@ -3204,6 +3204,30 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   if (convert_debugging)
     dhandle = read_debugging_info (ibfd, isympp, symcount, FALSE);
 
+   if ((obfd->flags & (EXEC_P | DYNAMIC)) != 0
+       && (obfd->flags & HAS_RELOC) == 0)
+    {
+      if (bfd_keep_unused_section_symbols (obfd))
+	{
+	  /* Non-relocatable inputs may not have the unused section
+	     symbols.  Mark all section symbols as used to generate
+	     section symbols.  */
+	  asection *asect;
+	  for (asect = obfd->sections; asect != NULL; asect = asect->next)
+	    if (asect->symbol)
+	      asect->symbol->flags |= BSF_SECTION_SYM_USED;
+	}
+      else
+	{
+	  /* Non-relocatable inputs may have the unused section symbols.
+	     Mark all section symbols as unused to excluded them.  */
+	  long s;
+	  for (s = 0; s < symcount; s++)
+	    if ((isympp[s]->flags & BSF_SECTION_SYM_USED))
+	      isympp[s]->flags &= ~BSF_SECTION_SYM_USED;
+	}
+    }
+
   if (strip_symbols == STRIP_DEBUG
       || strip_symbols == STRIP_ALL
       || strip_symbols == STRIP_UNNEEDED

@@ -1,3 +1,36 @@
+2021-01-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 27109
+	* read.c (s_reloc): Call symbol_mark_used_in_reloc on the
+	section symbol.
+	* subsegs.c (subseg_set_rest): Set BSF_SECTION_SYM_USED if needed.
+	* write.c (adjust_reloc_syms): Call symbol_mark_used_in_reloc
+	on the section symbol.
+	(set_symtab): Don't generate unused section symbols.
+	(maybe_generate_build_notes): Call symbol_mark_used_in_reloc
+	on the section symbol.
+	* config/obj-elf.c (elf_adjust_symtab): Call
+	symbol_mark_used_in_reloc on the group signature symbol.
+	* testsuite/gas/cfi/cfi-label.d: Remove unused section symbols
+	from expected output.
+	* testsuite/gas/elf/elf.exp (run_elf_list_test): Check
+	is_elf_unused_section_symbols.
+	* testsuite/gas/elf/section2.e: Updated.
+	* testsuite/gas/elf/section2.e-unused: New file.
+	* testsuite/gas/elf/symver.d: Remove unused section symbols.
+	* testsuite/gas/i386/ilp32/elf/symver.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-size-1.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-size-3.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-size-5.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-unwind.d: Likewise.
+	* testsuite/gas/i386/size-1.d: Likewise.
+	* testsuite/gas/i386/size-3.d: Likewise.
+	* testsuite/gas/i386/svr4.d: Likewise.
+	* testsuite/gas/i386/x86-64-size-1.d: Likewise.
+	* testsuite/gas/i386/x86-64-size-3.d: Likewise.
+	* testsuite/gas/i386/x86-64-size-5.d: Likewise.
+	* testsuite/gas/i386/x86-64-unwind.d: Likewise.
+
 2021-01-07  Philipp Tomsich  <prt@gnu.org>
 
 	* config/tc-riscv.c (riscv_multi_subset_supports): Added
