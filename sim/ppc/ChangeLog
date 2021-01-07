@@ -37,6 +37,10 @@
 	PR build/24572:
 	* Makefile.in (install-strip): New target.
 
+2019-09-20  Alan Modra  <amodra@gmail.com>
+
+	* emul_generic.c (emul_add_tree_options): Delete old bfd code.
+
 2019-01-26  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (version.c): Use sim's create-version.sh.

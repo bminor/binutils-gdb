@@ -2,6 +2,14 @@
 
 	* configure: Regenerate.
 
+2017-11-01  James Bowman  <james.bowman@ftdichip.com>
+
+	* interp.c (step_once): Add ft32 shortcode decoder.
+
+2017-10-12  James Bowman  <james.bowman@ftdichip.com>
+
+	* interp.c (step_once): Replace FT32_FLD_K8 with K15.
+
 2017-09-06  John Baldwin  <jhb@FreeBSD.org>
 
 	* configure: Regenerate.

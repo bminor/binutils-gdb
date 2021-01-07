@@ -1,0 +1,54 @@
+2020-11-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* configure: Re-generate.
+
+2020-09-08  David Faust  <david.faust@oracle.com>
+
+	* sem-be.c: Regenerate.
+	* sem-le.c: Likewise.
+
+2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* bpf.c: Include bpf-helpers.h.
+	* bpf-helpers.h: Provide a prototype for bpf_trace_printk.
+	* configure.ac: Set simulator bitsize to 64.
+	* configure (includedir): Regenerate.
+	* sim-if.c: Include stdlib.h.
+	* traps.c: Likewise.
+
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* arch.c: Likewise.
+	* arch.h: Likewise.
+	* cpu.c: Likewise.
+	* cpu.h: Likewise.
+	* cpuall.h: Likewise.
+	* decode-be.c: Likewise.
+	* decode-be.h: Likewise.
+	* decode-le.c: Likewise.
+	* decode-le.h: Likewise.
+	* defs-be.h: Likewise.
+	* defs-le.h: Likewise.
+	* sem-be.c: Likewise.
+	* sem-le.c: Likewise.
+
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* Makefile.in: New file.
+	* bpf-helpers.c: Likewise.
+	* bpf-helpers.def: Likewise.
+	* bpf-helpers.h: Likewise.
+	* bpf-sim.h: Likewise.
+	* bpf.c: Likewise.
+	* config.in: Likewise.
+	* configure.ac: Likewise.
+	* decode.h: Likewise.
+	* eng.h: Likewise.
+	* mloop.in: Likewise.
+	* sim-if.c: Likewise.
+	* sim-main.h: Likewise.
+	* traps.c: Likewise.
+	* configure: Generate.
+	* aclocal.m4: Likewise.
