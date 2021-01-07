@@ -1,3 +1,7 @@
+2021-01-07  Samuel Thibault  <samuel.thibault@gnu.org>
+
+	* libtool.m4: Match gnu* along with other GNU systems.
+
 2021-01-07  Alan Modra  <amodra@gmail.com>
 
 	* config.sub: Accept OS of eabi* and gnueabi*.

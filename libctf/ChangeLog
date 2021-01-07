@@ -1,3 +1,7 @@
+2021-01-07  Samuel Thibault  <samuel.thibault@gnu.org>
+
+	* configure: Regenerate.
+
 2021-01-05  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/libctf-lookup/struct-iteration.c (main):
