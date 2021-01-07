@@ -1413,6 +1413,12 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
       struct value *lr_value = frame_unwind_register_value (this_frame,
 							    lr_regnum);
 
+      /* Make sure LR is available. If not, there is nothing we can do.  */
+      if (lr_value == nullptr || (lr_value != nullptr
+				  && value_optimized_out (lr_value)))
+	throw_error (OPTIMIZED_OUT_ERROR, _("Register %d was not saved"),
+		     prev_regnum);
+
       /* Extract only the bottom 8 bytes of CLR.  This truncates the capability
 	 to 8 bytes.  For LR, this gets us the whole register.  */
       lr = extract_unsigned_integer (value_contents_all (lr_value), 8,
@@ -1607,8 +1613,14 @@ aarch64_dwarf2_prev_register (struct frame_info *this_frame,
       else
 	lr_regnum = tdep->cap_reg_clr;
 
-       struct value *lr_value = frame_unwind_register_value (this_frame,
-							     lr_regnum);
+      struct value *lr_value = frame_unwind_register_value (this_frame,
+							    lr_regnum);
+
+      /* Make sure LR is available. If not, there is nothing we can do.  */
+      if (lr_value == nullptr || (lr_value != nullptr
+				  && value_optimized_out (lr_value)))
+	throw_error (OPTIMIZED_OUT_ERROR, _("Register %d was not saved"),
+		     regnum);
 
       /* Extract only the bottom 8 bytes of CLR.  This truncates the capability
 	 to 8 bytes.  For LR, this gets us the whole register.  */

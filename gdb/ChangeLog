@@ -1,5 +1,10 @@
 2021-01-15  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_prologue_prev_register)
+	(aarch64_dwarf2_prev_register): Throw error if LR is optimized out.
+
+2021-01-15  Luis Machado  <luis.machado@arm.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add nat/aarch64-cap-linux.h.
 	* aarch64-linux-nat.c: Include nat/aarch64-cap-linux.h.
 	* nat/aarch64-cap-linux.h: New file.
