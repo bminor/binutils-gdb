@@ -14163,9 +14163,13 @@ remote_async_serial_handler (struct serial *scb, void *context)
 static void
 remote_async_inferior_event_handler (gdb_client_data data)
 {
+  remote_target *remote = (remote_target *) data;
+  /* Hold a strong reference to the remote target while handling an
+     event, since that could result in closing the connection.  */
+  auto remote_ref = target_ops_ref::new_reference (remote);
+
   inferior_event_handler (INF_REG_EVENT);
 
-  remote_target *remote = (remote_target *) data;
   remote_state *rs = remote->get_remote_state ();
 
   /* inferior_event_handler may have consumed an event pending on the

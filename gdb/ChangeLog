@@ -1,3 +1,11 @@
+2021-01-07  Pedro Alves  <pedro@palves.net>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tom de Vries  <tdevries@suse.de>
+
+	PR remote/26614
+	* remote.c (remote_async_inferior_event_handler):  Hold a strong
+	reference to the remote target while handling an event.
+
 2021-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbarch.sh: Update copyright year range.
