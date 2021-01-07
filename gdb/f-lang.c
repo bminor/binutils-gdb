@@ -690,11 +690,7 @@ fortran_value_subarray (struct value *array, struct expression *exp,
 						      + total_offset));
 	}
       else if (!value_lazy (array))
-	{
-	  const void *valaddr = value_contents (array) + total_offset;
-	  array = allocate_value (array_slice_type);
-	  memcpy (value_contents_raw (array), valaddr, TYPE_LENGTH (array_slice_type));
-	}
+	array = value_from_component (array, array_slice_type, total_offset);
       else
 	error (_("cannot subscript arrays that are not in memory"));
     }
