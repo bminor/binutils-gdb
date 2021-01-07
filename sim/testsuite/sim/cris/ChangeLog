@@ -1,5 +1,9 @@
 2021-01-07  Mike Frysinger  <vapier@gentoo.org>
 
+	* c/c.exp [cris*-*-elf] (CFLAGS_FOR_TARGET): Add -sim.
+
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
 	* c/kill2.c: Include unistd.h.
 	* c/pipe1.c, c/sched1.c, c/sched2.c, c/sched3.c, c/sched4.c,
 	c/sig5.c, c/sig8.c: Likewise.

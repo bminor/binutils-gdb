@@ -26,6 +26,10 @@ if [istarget cris-*-*] {
     set mach "crisv32"
 }
 
+if [istarget cris*-*-elf] {
+    append CFLAGS_FOR_TARGET " -sim"
+}
+
 # Using target_compile, since it is less noisy,
 if { [target_compile $srcdir/$subdir/hello.c compilercheck.x \
 	  "executable" "" ] == "" } {
