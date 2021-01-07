@@ -1951,7 +1951,6 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
 	/* FIXME-Morello: Show more information about the faults.  */
 	uiout->text (_(" while accessing address "));
 	uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
-	uiout->text ("\n");
 	break;
     }
 }
