@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <unistd.h>
+
 int main (void)
 {
   signal (SIGALRM, SIG_IGN);

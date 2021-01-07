@@ -1,3 +1,11 @@
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* kill2.c: Include unistd.h.
+	* pipe1.c, sched1.c, sched2.c, sched3.c, sched4.c, sig5.c,
+	sig8.c: Likewise.
+	* openpf1.c (main): Change close to fclose.
+	* openpf2.c: Likewise.
+
 2016-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* asm/opterr1.ms: Update expected output.
