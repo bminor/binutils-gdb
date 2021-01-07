@@ -1,5 +1,11 @@
 2021-01-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/fill.d: Skip sh-*-pe rather than xfail.
+	* testsuite/ld-scripts/fill16.d: Don't xfail sh-*-pe.
+	* testsuite/ld-scripts/segment-start.d: Likewise.
+
+2021-01-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/comm-data5.d: xfail targets that complain
 	about dynamic relocations in read-only sections.
 	* testsuite/ld-elf/ehdr_start-shared.d: Likewise.
