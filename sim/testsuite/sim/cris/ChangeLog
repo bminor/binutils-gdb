@@ -1,5 +1,10 @@
 2021-01-07  Mike Frysinger  <vapier@gentoo.org>
 
+	PR ld/13900
+	* c/helloaout.c: Disable test
+
+2021-01-07  Mike Frysinger  <vapier@gentoo.org>
+
 	* c/c.exp [cris*-*-elf] (CFLAGS_FOR_TARGET): Add -sim.
 
 2021-01-07  Mike Frysinger  <vapier@gentoo.org>
