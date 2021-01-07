@@ -235,7 +235,7 @@ const struct m68k_opcode m68k_opcodes[] =
 {"chk2w", 4, 	two(0001300,0004000),	two(0177700,07777), "!sR1", m68020up | cpu32 | fido_a },
 {"chk2l", 4, 	two(0002300,0004000),	two(0177700,07777), "!sR1", m68020up | cpu32 | fido_a },
 
-{"chkl", 2,	one(0040400),		one(0170700), ";lDd", m68000up },
+{"chkl", 2,	one(0040400),		one(0170700), ";lDd", m68020up },
 {"chkw", 2,	one(0040600),		one(0170700), ";wDd", m68000up },
 
 #define SCOPE_LINE (0x1 << 3)
