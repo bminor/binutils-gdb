@@ -1,5 +1,9 @@
 2021-01-07  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (do_full_match): Conditionally skip "_ada_" prefix.
+
+2021-01-07  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (add_component_interval): Start loop using vector's
 	updated size.
 
