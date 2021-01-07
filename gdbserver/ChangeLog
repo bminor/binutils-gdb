@@ -1,3 +1,10 @@
+2021-01-07  Tom de Vries  <tdevries@suse.de>
+
+	* Makefile.in (LIBIBERTY_NORMAL, LIBIBERTY_NOASAN, LIBIBERTY_PIC):
+	(LIBIBERTY_FOR_SHLIB): New var.
+	(LIBIBERTY): Set using $(LIBIBERTY_NORMAL).
+	(IPA_LIB): Use LIBIBERTY_FOR_SHLIB instead of LIBIBERTY in target rule.
+
 2021-01-04  Simon Marchi  <simon.marchi@efficios.com>
 
 	* debug.cc (debug_print_depth): New.
