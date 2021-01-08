@@ -146,5 +146,7 @@ run_dump_test "stringop"
 run_dump_test "xvtlsbb"
 run_dump_test "rightmost"
 run_dump_test "scalarquad"
+run_dump_test "rop"
+run_dump_test "rop-checks"
 
 run_dump_test "dcbt"
