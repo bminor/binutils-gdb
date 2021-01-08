@@ -1,5 +1,9 @@
 2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/completion.exp: Add a new test.
+
+2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/intvar-dynamic-types.exp: New file.
 	* gdb.fortran/intvar-dynamic-types.f90: New file.
 

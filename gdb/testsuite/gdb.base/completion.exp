@@ -938,6 +938,11 @@ foreach_with_prefix spc { " " "" } {
     test_gdb_complete_none "p${spc}/"
     test_gdb_complete_unique "p${spc}/d" "p${spc}/d"
 
+    # Try completion on an invalid /FMT string.  GDB doesn't attempt
+    # to validate the /FMT string during completion, the string is
+    # just assumed to be complete when the user hits TAB.
+    test_gdb_complete_unique "p${spc}/@" "p${spc}/@"
+
     test_gdb_complete_unique "x${spc}/1w values\[0\].b"\
 	"x${spc}/1w values\[0\].b_field"
 
