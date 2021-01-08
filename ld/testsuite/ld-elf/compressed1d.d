@@ -3,10 +3,11 @@
 #ld: -r --compress-debug-sections=zlib-gnu
 #readelf: -SW
 #xfail: [uses_genelf]
-#xfail: riscv*-*-*
+#xfail: [riscv_little_endian]
 # Not all ELF targets use the elf.em emulation...
 # RISC-V has linker relaxations that delete code, so text label subtractions
-# do not get resolved at assembly time, which results in a compressed section.
+# do not get resolved at assembly time, which results in a compressed section
+# for little endian targets; but it is uncompressed for big endian targets.
 
 #failif
 #...
