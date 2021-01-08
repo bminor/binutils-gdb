@@ -1405,6 +1405,9 @@ fortran_undetermined::evaluate (struct type *expect_type,
 				enum noside noside)
 {
   value *callee = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  if (noside == EVAL_AVOID_SIDE_EFFECTS
+      && is_dynamic_type (value_type (callee)))
+    callee = std::get<0> (m_storage)->evaluate (nullptr, exp, EVAL_NORMAL);
   struct type *type = check_typedef (value_type (callee));
   enum type_code code = type->code ();
 
@@ -1488,6 +1491,43 @@ fortran_bound_2arg::evaluate (struct type *expect_type,
     }
 
   return fortran_bounds_for_dimension (lbound_p, exp->gdbarch, arg1, arg2);
+}
+
+/* Implement STRUCTOP_STRUCT for Fortran.  See operation::evaluate in
+   expression.h for argument descriptions.  */
+
+value *
+fortran_structop_operation::evaluate (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  const char *str = std::get<1> (m_storage).c_str ();
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *type = lookup_struct_elt_type (value_type (arg1), str, 1);
+
+      if (type != nullptr && is_dynamic_type (type))
+	arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, EVAL_NORMAL);
+    }
+
+  value *elt = value_struct_elt (&arg1, NULL, str, NULL, "structure");
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *elt_type = value_type (elt);
+      if (is_dynamic_type (elt_type))
+	{
+	  const gdb_byte *valaddr = value_contents_for_printing (elt);
+	  CORE_ADDR address = value_address (elt);
+	  gdb::array_view<const gdb_byte> view
+	    = gdb::make_array_view (valaddr, TYPE_LENGTH (elt_type));
+	  elt_type = resolve_dynamic_type (elt_type, view, address);
+	}
+      elt = value_zero (elt_type, VALUE_LVAL (elt));
+    }
+
+  return elt;
 }
 
 } /* namespace expr */

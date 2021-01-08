@@ -1,5 +1,10 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/dynamic-ptype-whatis.exp: New file.
+	* gdb.fortran/dynamic-ptype-whatis.f90: New file.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.cp/rvalue-ref-params.cc (f3): New function.
 	(f4): New function.
 	(global_int): New global variable.

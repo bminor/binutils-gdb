@@ -273,6 +273,22 @@ public:
   { return std::get<0> (m_storage); }
 };
 
+/* Implement STRUCTOP_STRUCT for Fortran.  */
+class fortran_structop_operation
+  : public structop_base_operation
+{
+public:
+
+  using structop_base_operation::structop_base_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_STRUCT; }
+};
+
 } /* namespace expr */
 
 #endif /* FORTRAN_EXP_H */

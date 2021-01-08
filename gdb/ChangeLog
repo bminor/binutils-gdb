@@ -1,5 +1,21 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.h (class fortran_structop_operation): New class.
+	* f-exp.y (exp): Create fortran_structop_operation instead of the
+	generic structop_operation.
+	* f-lang.c (fortran_undetermined::evaluate): Re-evaluate
+	expression as EVAL_NORMAL if the result type was dynamic so we can
+	extract the actual array bounds.
+	(fortran_structop_operation::evaluate): New function.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* eval.c (evaluate_subexp_standard): Remove
+	EVAL_AVOID_SIDE_EFFECTS handling from STRUCTOP_STRUCT and
+	STRUCTOP_PTR.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* valops.c (value_cast): Call value_deeply_equal before performing
 	any cast.
 

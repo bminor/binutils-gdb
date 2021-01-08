@@ -492,7 +492,7 @@ exp	:	'(' type ')' exp  %prec UNARY
 
 exp     :       exp '%' name
 			{
-			  pstate->push_new<structop_operation>
+			  pstate->push_new<fortran_structop_operation>
 			    (pstate->pop (), copy_name ($3));
 			}
 	;
@@ -500,8 +500,8 @@ exp     :       exp '%' name
 exp     :       exp '%' name COMPLETE
 			{
 			  structop_base_operation *op
-			    = new structop_operation (pstate->pop (),
-						      copy_name ($3));
+			    = new fortran_structop_operation (pstate->pop (),
+							      copy_name ($3));
 			  pstate->mark_struct_expression (op);
 			  pstate->push (operation_up (op));
 			}
@@ -510,7 +510,8 @@ exp     :       exp '%' name COMPLETE
 exp     :       exp '%' COMPLETE
 			{
 			  structop_base_operation *op
-			    = new structop_operation (pstate->pop (), "");
+			    = new fortran_structop_operation (pstate->pop (),
+							      "");
 			  pstate->mark_struct_expression (op);
 			  pstate->push (operation_up (op));
 			}
