@@ -1,3 +1,12 @@
+2021-01-08  Tom Tromey  <tromey@adacore.com>
+
+	* parse.c (parse_expression): Add void_context_p parameter.  Use
+	parse_exp_in_context.
+	* printcmd.c (print_command_1): Change voidprint to bool.  Pass to
+	parse_expression.
+	(print_command, call_command): Update.
+	* expression.h (parse_expression): Add void_context_p parameter.
+
 2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* value.c (set_value_component_location): Adjust the VALUE_LVAL

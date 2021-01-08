@@ -1,3 +1,10 @@
+2021-01-08  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/voidctx/pck.adb: New file.
+	* gdb.ada/voidctx/pck.ads: New file.
+	* gdb.ada/voidctx/voidctx.adb: New file.
+	* gdb.ada/voidctx.exp: New file.
+
 2021-01-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27157

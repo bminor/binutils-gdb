@@ -142,7 +142,8 @@ typedef std::unique_ptr<expression> expression_up;
 
 class innermost_block_tracker;
 extern expression_up parse_expression (const char *,
-				       innermost_block_tracker * = nullptr);
+				       innermost_block_tracker * = nullptr,
+				       bool void_context_p = false);
 
 extern expression_up parse_expression_with_language (const char *string,
 						     enum language lang);

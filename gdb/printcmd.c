@@ -1206,7 +1206,7 @@ print_value (value *val, const value_print_options &opts)
 /* Implementation of the "print" and "call" commands.  */
 
 static void
-print_command_1 (const char *args, int voidprint)
+print_command_1 (const char *args, bool voidprint)
 {
   struct value *val;
   value_print_options print_opts;
@@ -1223,7 +1223,9 @@ print_command_1 (const char *args, int voidprint)
 
   if (exp != nullptr && *exp)
     {
-      expression_up expr = parse_expression (exp);
+      /* VOIDPRINT is true to indicate that we do want to print a void
+	 value, so invert it for parse_expression.  */
+      expression_up expr = parse_expression (exp, nullptr, !voidprint);
       val = evaluate_expression (expr.get ());
     }
   else
@@ -1321,14 +1323,14 @@ print_command_completer (struct cmd_list_element *ignore,
 static void
 print_command (const char *exp, int from_tty)
 {
-  print_command_1 (exp, 1);
+  print_command_1 (exp, true);
 }
 
 /* Same as print, except it doesn't print void results.  */
 static void
 call_command (const char *exp, int from_tty)
 {
-  print_command_1 (exp, 0);
+  print_command_1 (exp, false);
 }
 
 /* Implementation of the "output" command.  */
