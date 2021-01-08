@@ -2729,8 +2729,10 @@ determine_disassembling_preference (struct aarch64_inst *inst,
 	     successfully converted to the form of ALIAS.  */
 	  if (convert_to_alias (&copy, alias) == 1)
 	    {
+	      int res;
 	      aarch64_replace_opcode (&copy, alias);
-	      assert (aarch64_match_operands_constraint (&copy, NULL));
+	      res = aarch64_match_operands_constraint (&copy, NULL);
+	      assert (res == 1);
 	      DEBUG_TRACE ("succeed with %s via conversion", alias->name);
 	      memcpy (inst, &copy, sizeof (aarch64_inst));
 	      return;

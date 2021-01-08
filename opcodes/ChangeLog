@@ -1,5 +1,11 @@
 2021-01-08  Nick Clifton  <nickc@redhat.com>
 
+	PR 27129
+	* aarch64-dis.c (determine_disassembling_preference): Move call to
+	aarch64_match_operands_constraint outside of the assertion.
+	* aarch64-asm.c (aarch64_ins_limm_1): Remove call to assert.
+	Replace with a return of FALSE.
+
 	PR 27139
 	* aarch64-opc.c (aarch64_sys_regs): Treat id_aa64mmfr2_el1 as a
 	core system register.

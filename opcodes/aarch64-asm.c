@@ -545,18 +545,19 @@ aarch64_ins_limm_1 (const aarch64_operand *self,
 		    const aarch64_inst *inst, bfd_boolean invert_p,
 		    aarch64_operand_error *errors ATTRIBUTE_UNUSED)
 {
+  bfd_boolean res;
   aarch64_insn value;
   uint64_t imm = info->imm.value;
   int esize = aarch64_get_qualifier_esize (inst->operands[0].qualifier);
 
   if (invert_p)
     imm = ~imm;
-  /* The constraint check should have guaranteed this wouldn't happen.  */
-  assert (aarch64_logical_immediate_p (imm, esize, &value));
-
-  insert_fields (code, value, 0, 3, self->fields[2], self->fields[1],
-		 self->fields[0]);
-  return TRUE;
+  /* The constraint check should guarantee that this will work.  */
+  res = aarch64_logical_immediate_p (imm, esize, &value);
+  if (res)
+    insert_fields (code, value, 0, 3, self->fields[2], self->fields[1],
+		   self->fields[0]);
+  return res;
 }
 
 /* Insert logical/bitmask immediate for e.g. the last operand in
