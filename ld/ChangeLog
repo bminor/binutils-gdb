@@ -1,3 +1,10 @@
+2021-01-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/ld-elf/elf.exp (riscv_little_endian): Added.  Return true
+	if target is riscv little endian.  Otherwise, return false.
+	* testsuite/ld-elf/compressed1d.d: Only xfail the riscv little endian
+	targets by [riscv_little_endian].
+
 2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27193
