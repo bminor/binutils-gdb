@@ -3360,92 +3360,126 @@ create_std_terminate_master_breakpoint (void)
     }
 }
 
+/* Install a master breakpoint on the unwinder's debug hook for OBJFILE using a
+   probe.  Return true if a breakpoint was installed.  */
+
+static bool
+create_exception_master_breakpoint_probe (objfile *objfile)
+{
+  struct breakpoint *b;
+  struct gdbarch *gdbarch;
+  struct breakpoint_objfile_data *bp_objfile_data;
+
+  bp_objfile_data = get_breakpoint_objfile_data (objfile);
+
+  /* We prefer the SystemTap probe point if it exists.  */
+  if (!bp_objfile_data->exception_searched)
+    {
+      std::vector<probe *> ret
+	= find_probes_in_objfile (objfile, "libgcc", "unwind");
+
+      if (!ret.empty ())
+	{
+	  /* We are only interested in checking one element.  */
+	  probe *p = ret[0];
+
+	  if (!p->can_evaluate_arguments ())
+	    {
+	      /* We cannot use the probe interface here, because it does
+		 not know how to evaluate arguments.  */
+	      ret.clear ();
+	    }
+	}
+      bp_objfile_data->exception_probes = ret;
+      bp_objfile_data->exception_searched = 1;
+    }
+
+  if (bp_objfile_data->exception_probes.empty ())
+    return false;
+
+  gdbarch = objfile->arch ();
+
+  for (probe *p : bp_objfile_data->exception_probes)
+    {
+      b = create_internal_breakpoint (gdbarch,
+				      p->get_relocated_address (objfile),
+				      bp_exception_master,
+				      &internal_breakpoint_ops);
+      b->location = new_probe_location ("-probe-stap libgcc:unwind");
+      b->enable_state = bp_disabled;
+    }
+
+  return true;
+}
+
+/* Install a master breakpoint on the unwinder's debug hook for OBJFILE using
+   _Unwind_DebugHook.  Return true if a breakpoint was installed.  */
+
+static bool
+create_exception_master_breakpoint_hook (objfile *objfile)
+{
+  const char *const func_name = "_Unwind_DebugHook";
+  struct breakpoint *b;
+  struct gdbarch *gdbarch;
+  struct breakpoint_objfile_data *bp_objfile_data;
+  CORE_ADDR addr;
+  struct explicit_location explicit_loc;
+
+  bp_objfile_data = get_breakpoint_objfile_data (objfile);
+
+  if (msym_not_found_p (bp_objfile_data->exception_msym.minsym))
+    return false;
+
+  gdbarch = objfile->arch ();
+
+  if (bp_objfile_data->exception_msym.minsym == NULL)
+    {
+      struct bound_minimal_symbol debug_hook;
+
+      debug_hook = lookup_minimal_symbol (func_name, NULL, objfile);
+      if (debug_hook.minsym == NULL)
+	{
+	  bp_objfile_data->exception_msym.minsym = &msym_not_found;
+	  return false;
+	}
+
+      bp_objfile_data->exception_msym = debug_hook;
+    }
+
+  addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
+  addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
+					     current_top_target ());
+  b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
+				  &internal_breakpoint_ops);
+  initialize_explicit_location (&explicit_loc);
+  explicit_loc.function_name = ASTRDUP (func_name);
+  b->location = new_explicit_location (&explicit_loc);
+  b->enable_state = bp_disabled;
+
+  return true;
+}
+
 /* Install a master breakpoint on the unwinder's debug hook.  */
 
 static void
 create_exception_master_breakpoint (void)
 {
-  const char *const func_name = "_Unwind_DebugHook";
-
-  for (objfile *objfile : current_program_space->objfiles ())
+  for (objfile *obj : current_program_space->objfiles ())
     {
-      struct breakpoint *b;
-      struct gdbarch *gdbarch;
-      struct breakpoint_objfile_data *bp_objfile_data;
-      CORE_ADDR addr;
-      struct explicit_location explicit_loc;
-
-      bp_objfile_data = get_breakpoint_objfile_data (objfile);
-
-      /* We prefer the SystemTap probe point if it exists.  */
-      if (!bp_objfile_data->exception_searched)
-	{
-	  std::vector<probe *> ret
-	    = find_probes_in_objfile (objfile, "libgcc", "unwind");
-
-	  if (!ret.empty ())
-	    {
-	      /* We are only interested in checking one element.  */
-	      probe *p = ret[0];
-
-	      if (!p->can_evaluate_arguments ())
-		{
-		  /* We cannot use the probe interface here, because it does
-		     not know how to evaluate arguments.  */
-		  ret.clear ();
-		}
-	    }
-	  bp_objfile_data->exception_probes = ret;
-	  bp_objfile_data->exception_searched = 1;
-	}
-
-      if (!bp_objfile_data->exception_probes.empty ())
-	{
-	  gdbarch = objfile->arch ();
-
-	  for (probe *p : bp_objfile_data->exception_probes)
-	    {
-	      b = create_internal_breakpoint (gdbarch,
-					      p->get_relocated_address (objfile),
-					      bp_exception_master,
-					      &internal_breakpoint_ops);
-	      b->location = new_probe_location ("-probe-stap libgcc:unwind");
-	      b->enable_state = bp_disabled;
-	    }
-
-	  continue;
-	}
-
-      /* Otherwise, try the hook function.  */
-
-      if (msym_not_found_p (bp_objfile_data->exception_msym.minsym))
+      /* Skip separate debug object.  */
+      if (obj->separate_debug_objfile_backlink)
 	continue;
 
-      gdbarch = objfile->arch ();
+      /* Try a probe kind breakpoint.  */
+      if (create_exception_master_breakpoint_probe (obj))
+	continue;
 
-      if (bp_objfile_data->exception_msym.minsym == NULL)
-	{
-	  struct bound_minimal_symbol debug_hook;
-
-	  debug_hook = lookup_minimal_symbol (func_name, NULL, objfile);
-	  if (debug_hook.minsym == NULL)
-	    {
-	      bp_objfile_data->exception_msym.minsym = &msym_not_found;
-	      continue;
-	    }
-
-	  bp_objfile_data->exception_msym = debug_hook;
-	}
-
-      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
-      addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
-						 current_top_target ());
-      b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
-				      &internal_breakpoint_ops);
-      initialize_explicit_location (&explicit_loc);
-      explicit_loc.function_name = ASTRDUP (func_name);
-      b->location = new_explicit_location (&explicit_loc);
-      b->enable_state = bp_disabled;
+      /* Iterate over separate debug objects and try an _Unwind_DebugHook
+	 kind breakpoint.  */
+      for (objfile *sepdebug = obj->separate_debug_objfile;
+	   sepdebug != nullptr; sepdebug = sepdebug->separate_debug_objfile)
+	if (create_exception_master_breakpoint_hook (sepdebug))
+	  break;
     }
 }
 
