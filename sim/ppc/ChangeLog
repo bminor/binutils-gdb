@@ -1,3 +1,7 @@
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim_calls.c (sim_memory_map): Define.
+
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* gen-icache.c, igen.c: Include stdlib.h.
