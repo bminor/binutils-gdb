@@ -1,3 +1,7 @@
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/pointer-to-pointer.exp: Additional tests.
+
 2021-02-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/i386-biarch-core.exp: Add target check.

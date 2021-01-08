@@ -2425,19 +2425,29 @@ evaluate_subexp_standard (struct type *expect_type,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  type = check_typedef (value_type (arg1));
-	  if (type->code () == TYPE_CODE_PTR
-	      || TYPE_IS_REFERENCE (type)
-	  /* In C you can dereference an array to get the 1st elt.  */
-	      || type->code () == TYPE_CODE_ARRAY
-	    )
-	    return value_zero (TYPE_TARGET_TYPE (type),
-			       lval_memory);
-	  else if (type->code () == TYPE_CODE_INT)
-	    /* GDB allows dereferencing an int.  */
-	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
-			       lval_memory);
-	  else
-	    error (_("Attempt to take contents of a non-pointer value."));
+
+	  /* If the type pointed to is dynamic then in order to resolve the
+	     dynamic properties we must actually dereference the pointer.
+	     There is a risk that this dereference will have side-effects
+	     in the inferior, but being able to print accurate type
+	     information seems worth the risk. */
+	  if ((type->code () != TYPE_CODE_PTR
+	       && !TYPE_IS_REFERENCE (type))
+	      || !is_dynamic_type (TYPE_TARGET_TYPE (type)))
+	    {
+	      if (type->code () == TYPE_CODE_PTR
+		  || TYPE_IS_REFERENCE (type)
+		  /* In C you can dereference an array to get the 1st elt.  */
+		  || type->code () == TYPE_CODE_ARRAY)
+		return value_zero (TYPE_TARGET_TYPE (type),
+				   lval_memory);
+	      else if (type->code () == TYPE_CODE_INT)
+		/* GDB allows dereferencing an int.  */
+		return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+				   lval_memory);
+	      else
+		error (_("Attempt to take contents of a non-pointer value."));
+	    }
 	}
 
       /* Allow * on an integer so we can cast it to whatever we want.
