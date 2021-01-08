@@ -1,3 +1,14 @@
+2021-01-08  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/26881
+	* breakpoint.c (create_exception_master_breakpoint_probe)
+	(create_exception_master_breakpoint_hook): Factor out
+	of ...
+	(create_exception_master_breakpoint): ... here.  Only try to install
+	the master exception breakpoint in objfile.debug using the
+	_Unwind_DebugHook method, if the install using probes in objfile
+	failed.
+
 2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-lang.c (fortran_value_subarray): Call value_from_component.
