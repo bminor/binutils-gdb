@@ -1,3 +1,8 @@
+2021-01-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27157
+	* gdb.base/empty-host-env-vars.exp: New test.
+
 2021-01-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/completion.exp: Add a new test.

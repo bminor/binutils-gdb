@@ -222,7 +222,7 @@ get_standard_cache_dir ()
 
 #ifndef __APPLE__
   const char *xdg_cache_home = getenv ("XDG_CACHE_HOME");
-  if (xdg_cache_home != NULL)
+  if (xdg_cache_home != NULL && xdg_cache_home[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (xdg_cache_home));
@@ -231,7 +231,7 @@ get_standard_cache_dir ()
 #endif
 
   const char *home = getenv ("HOME");
-  if (home != NULL)
+  if (home != NULL && home[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
@@ -240,14 +240,14 @@ get_standard_cache_dir ()
 
 #ifdef WIN32
   const char *win_home = getenv ("LOCALAPPDATA");
-  if (win_home != NULL)
+  if (win_home != NULL && win_home[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (win_home));
       return string_printf ("%s/gdb", abs.get ());
     }
 #endif
-    
+
   return {};
 }
 
@@ -289,7 +289,7 @@ get_standard_config_dir ()
 
 #ifndef __APPLE__
   const char *xdg_config_home = getenv ("XDG_CONFIG_HOME");
-  if (xdg_config_home != NULL)
+  if (xdg_config_home != NULL && xdg_config_home[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (xdg_config_home));
@@ -298,7 +298,7 @@ get_standard_config_dir ()
 #endif
 
   const char *home = getenv ("HOME");
-  if (home != NULL)
+  if (home != NULL && home[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
@@ -340,7 +340,7 @@ find_gdb_home_config_file (const char *name, struct stat *buf)
     }
 
   const char *homedir = getenv ("HOME");
-  if (homedir != nullptr)
+  if (homedir != nullptr && homedir[0] != '\0')
     {
       /* Make sure the path is absolute and tilde-expanded.  */
       gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (homedir));
