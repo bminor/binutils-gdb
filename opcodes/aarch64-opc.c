@@ -3943,7 +3943,7 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("id_aa64isar1_el1",	CPENC (3,0,C0,C6,1),	F_REG_READ),
   SR_CORE ("id_aa64mmfr0_el1",	CPENC (3,0,C0,C7,0),	F_REG_READ),
   SR_CORE ("id_aa64mmfr1_el1",	CPENC (3,0,C0,C7,1),	F_REG_READ),
-  SR_V8_2 ("id_aa64mmfr2_el1",	CPENC (3,0,C0,C7,2),	F_REG_READ),
+  SR_CORE ("id_aa64mmfr2_el1",	CPENC (3,0,C0,C7,2),	F_REG_READ),
   SR_CORE ("id_aa64afr0_el1",	CPENC (3,0,C0,C5,4),	F_REG_READ),
   SR_CORE ("id_aa64afr1_el1",	CPENC (3,0,C0,C5,5),	F_REG_READ),
   SR_SVE  ("id_aa64zfr0_el1",	CPENC (3,0,C0,C4,4),	F_REG_READ),
