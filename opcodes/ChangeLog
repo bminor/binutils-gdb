@@ -1,5 +1,9 @@
 2021-01-08  Nick Clifton  <nickc@redhat.com>
 
+	* po/sv.po: Updated Swedish translation.
+
+2021-01-08  Nick Clifton  <nickc@redhat.com>
+
 	PR 27129
 	* aarch64-dis.c (determine_disassembling_preference): Move call to
 	aarch64_match_operands_constraint outside of the assertion.
