@@ -56,6 +56,32 @@ AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
 
+# Require C11 or newer.  Autoconf-2.70 provides ac_cv_prog_cc_c11 when using
+# AC_PROG_CC, but we're still using Autoconf-2.69, and the newest it understands
+# is C99.  So handle it ourselves.
+m4_version_prereq([2.70], [AC_MSG_ERROR([clean this up!])], [:])
+C_DIALECT=
+AC_MSG_CHECKING([whether C11 is supported by default])
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+# error "C11 support not found"
+#endif
+])], [AC_MSG_RESULT([yes])], [
+  AC_MSG_RESULT([no])
+  AC_MSG_CHECKING([for -std=c11 support])
+  ac_save_CC="$CC"
+  CC="$CC -std=c11"
+  AC_COMPILE_IFELSE([AC_LANG_SOURCE([
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+# error "C11 support not found"
+#endif
+])], [
+  AC_MSG_RESULT([yes])
+  CC="$ac_save_CC"
+  C_DIALECT="-std=c11"
+], [AC_MSG_ERROR([C11 is required])])])
+AC_SUBST(C_DIALECT)
+
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
 # is defined.

@@ -1,3 +1,7 @@
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2020-11-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* configure: Re-generate.

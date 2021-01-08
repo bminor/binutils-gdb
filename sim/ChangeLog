@@ -1,3 +1,7 @@
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING (C Language Assumptions): Require C11 compiler.
+
 2020-09-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* configure.ac: Do not configure sim/testsuite nor sim/igen if the

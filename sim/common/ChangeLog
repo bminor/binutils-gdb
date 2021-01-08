@@ -1,3 +1,9 @@
+2021-01-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (C_DIALECT): Define.
+	(COMPILE.pre): Append $(C_DIALECT).
+	* acinclude.m4 (SIM_AC_COMMON): Probe C11 to define C_DIALECT.
+
 2021-01-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-core.c (sim_memory_map): Define.

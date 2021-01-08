@@ -161,33 +161,7 @@ To add the entries to an alternative ChangeLog file, use:
 C Language Assumptions
 ======================
 
-The programmer may assume that the simulator is being built using an
-ANSI C compiler that supports a 64 bit data type.  Consequently:
-
-	o	prototypes can be used
-
-	o	If sim-types.h is included, the two
-		types signed64 and unsigned64 are
-		available.
-
-	o	The type `unsigned' is valid.
-
-However, the user should be aware of the following:
-
-	o	GCC's `<number>LL' is NOT acceptable.
-		Microsoft-C doesn't reconize it.
-
-	o	MSC's `<number>i64' is NOT acceptable.
-		GCC doesn't reconize it.
-
-	o	GCC's `long long' MSC's `_int64' can
-		NOT be used to define 64 bit integer data
-		types.
-
-	o	An empty array (eg int a[0]) is not valid.
-
-When building with GCC it is effectivly a requirement that
---enable-build-warnings=,-Werror be specified during configuration.
+An ISO C11 compiler is required, as is an ISO C standard library.
 
 "dump" commands under gdb
 =========================

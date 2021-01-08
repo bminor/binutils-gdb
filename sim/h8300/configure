@@ -678,6 +678,7 @@ CCDEPMODE
 DEPDIR
 am__leading_dot
 PACKAGE
+C_DIALECT
 RANLIB
 AR
 HDEFINES
@@ -8640,6 +8641,55 @@ else
 fi
 
 
+# Require C11 or newer.  Autoconf-2.70 provides ac_cv_prog_cc_c11 when using
+# AC_PROG_CC, but we're still using Autoconf-2.69, and the newest it understands
+# is C99.  So handle it ourselves.
+:
+C_DIALECT=
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C11 is supported by default" >&5
+$as_echo_n "checking whether C11 is supported by default... " >&6; }
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+# error "C11 support not found"
+#endif
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for -std=c11 support" >&5
+$as_echo_n "checking for -std=c11 support... " >&6; }
+  ac_save_CC="$CC"
+  CC="$CC -std=c11"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+# error "C11 support not found"
+#endif
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+  CC="$ac_save_CC"
+  C_DIALECT="-std=c11"
+
+else
+  as_fn_error $? "C11 is required" "$LINENO" 5
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+
 # Some of the common include files depend on bfd.h, and bfd.h checks
 # that config.h is included first by testing that the PACKAGE macro
 # is defined.
@@ -12056,16 +12106,6 @@ freebsd* | dragonfly*)
   esac
   ;;
 
-gnu*)
-  version_type=linux
-  need_lib_prefix=no
-  need_version=no
-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}${major} ${libname}${shared_ext}'
-  soname_spec='${libname}${release}${shared_ext}$major'
-  shlibpath_var=LD_LIBRARY_PATH
-  hardcode_into_libs=yes
-  ;;
-
 haiku*)
   version_type=linux
   need_lib_prefix=no
@@ -12182,7 +12222,7 @@ linux*oldld* | linux*aout* | linux*coff*)
   ;;
 
 # This must be Linux ELF.
-linux* | k*bsd*-gnu | kopensolaris*-gnu)
+linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
   version_type=linux
   need_lib_prefix=no
   need_version=no
@@ -12871,7 +12911,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12874 "configure"
+#line 12914 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12977,7 +13017,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12980 "configure"
+#line 13020 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

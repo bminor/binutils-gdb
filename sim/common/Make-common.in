@@ -70,6 +70,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
 CC = @CC@
+C_DIALECT = @C_DIALECT@
 CC_FOR_BUILD = @CC_FOR_BUILD@
 CFLAGS = @CFLAGS@
 CPPFLAGS = @CPPFLAGS@
@@ -107,7 +108,7 @@ depcomp = $(SHELL) $(srcroot)/depcomp
 
 # Note that these are overridden by GNU make-specific code below if
 # GNU make is used.  The overrides implement dependency tracking.
-COMPILE.pre = $(CC)
+COMPILE.pre = $(CC) $(C_DIALECT)
 COMPILE.post = -c -o $@
 COMPILE = $(COMPILE.pre) $(ALL_CFLAGS) $(COMPILE.post)
 POSTCOMPILE = @true
