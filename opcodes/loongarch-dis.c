@@ -123,7 +123,7 @@ dis_one_arg (char esc1, char esc2, const char *bit_field,
   if (esc1)
     {
       if (need_comma)
-        info->fprintf_func (info->stream, ",");
+        info->fprintf_func (info->stream, ", ");
       need_comma = 1;
       imm = loongarch_decode_imm (bit_field, insn, 1);
       u_imm = loongarch_decode_imm (bit_field, insn, 0);
@@ -233,7 +233,7 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
     }
 
   info->insn_type = dis_nonbranch;
-  info->fprintf_func (info->stream, "%s", opc->name);
+  info->fprintf_func (info->stream, "%-12s", opc->name);
 
   {
     char fake_args[strlen (opc->format) + 1];
@@ -247,7 +247,7 @@ disassemble_one (insn_t insn, struct disassemble_info *info)
 
   if (info->insn_type == dis_branch || info->insn_type == dis_condbranch
       /* || someother if we have extra info to print */)
-    info->fprintf_func (info->stream, " #");
+    info->fprintf_func (info->stream, "\t#");
 
   if (info->insn_type == dis_branch || info->insn_type == dis_condbranch)
     {
