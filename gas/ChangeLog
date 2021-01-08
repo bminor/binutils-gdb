@@ -1,6 +1,14 @@
 2021-01-28  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2021-01-08  Peter Bergner  <bergner@linux.ibm.com>
+	* testsuite/gas/ppc/rop-checks.d,
+	* testsuite/gas/ppc/rop-checks.l,
+	* testsuite/gas/ppc/rop-checks.s,
+	* testsuite/gas/ppc/rop.d,
+	* testsuite/gas/ppc/rop.s: New tests.
+	* testsuite/gas/ppc/ppc.exp: Run them.
+
 	2020-09-09  Alan Modra  <amodra@gmail.com>
 	* config/tc-ppc.c (md_assemble): Emit prefix insn by parts when
 	valueT is smaller than 64 bits.

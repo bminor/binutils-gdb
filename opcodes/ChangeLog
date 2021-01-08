@@ -1,3 +1,11 @@
+2021-01-28  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2021-01-08  Peter Bergner  <bergner@linux.ibm.com>
+	* ppc-opc.c (insert_dw, (extract_dw): New functions.
+	(DW, (XRC_MASK): Define.
+	(powerpc_opcodes) <hashchk, hashchkp, hashst, haststp>: New mnemonics.
+
 2021-01-26  Alan Modra  <amodra@gmail.com>
 
 	* i386-gen.c (parse_template): Ensure entire template_instance

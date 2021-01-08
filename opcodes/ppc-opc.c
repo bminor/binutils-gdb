@@ -558,6 +558,34 @@ extract_dcmxs (uint64_t insn,
   return (insn & 0x40) | ((insn << 3) & 0x20) | ((insn >> 16) & 0x1f);
 }
 
+/* The DW field in a X form instruction when the field is split
+   into separate D and DX fields.  */
+
+static uint64_t
+insert_dw (uint64_t insn,
+	   int64_t value,
+	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg ATTRIBUTE_UNUSED)
+{
+  /* DW offsets must be in the range [-512, -8] and be a multiple of 8.  */
+  if (value < -512
+      || value > -8
+      || (value & 0x7) != 0)
+    *errmsg = _("invalid offset: must be in the range [-512, -8] "
+		"and be a multiple of 8");
+
+  return insn | ((value & 0xf8) << 18) | ((value >> 8) & 1);
+}
+
+static int64_t
+extract_dw (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  int64_t dw = ((insn & 1) << 8) | ((insn >> 18) & 0xf8);
+  return dw - 512;
+}
+
 /* The D field in a DX form instruction when the field is split
    into separate D0, D1 and D2 fields.  */
 
@@ -2497,8 +2525,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define BHRBE DUIS
   { 0x3ff, 11, NULL, NULL, 0 },
 
+  /* The split DW field in a X form instruction.  */
+#define DW DUIS + 1
+  { -1, PPC_OPSHIFT_INV, insert_dw, extract_dw,
+    PPC_OPERAND_PARENS | PPC_OPERAND_SIGNED},
+
   /* The split D field in a DX form instruction.  */
-#define DXD DUIS + 1
+#define DXD DW + 1
   { 0xffff, PPC_OPSHIFT_INV, insert_dxd, extract_dxd,
     PPC_OPERAND_SIGNED | PPC_OPERAND_SIGNOPT},
 
@@ -3749,6 +3782,9 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 
 /* The mask for an X form instruction with the BF bits specified.  */
 #define XBF_MASK (X_MASK | (3 << 21))
+
+/* An X form instruction without the RC field specified.  */
+#define XRC_MASK XRC (0x3f, 0x3ff, 0)
 
 /* An X form wait instruction with everything filled in except the WC
    field.  */
@@ -7649,6 +7685,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"addeo.",	XO(31,138,1,1),	XO_MASK,     PPCCOM,	0,		{RT, RA, RB}},
 {"aeo.",	XO(31,138,1,1),	XO_MASK,     PWRCOM,	0,		{RT, RA, RB}},
 
+{"hashstp",	X(31,658),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
+
 {"mfsrin",	X(31,659),	XRA_MASK,    PPC,	NON32,		{RT, RB}},
 
 {"stdbrx",	X(31,660),	X_MASK, CELL|POWER7|PPCA2, 0,		{RS, RA0, RB}},
@@ -7677,6 +7715,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"tendall.",	XRC(31,686,1)|(1<<25), XRTRARB_MASK, PPCHTM, 0,		{0}},
 {"tend.",	XRC(31,686,1), XRTARARB_MASK, PPCHTM,	0,		{HTM_A}},
+
+{"hashchkp",	X(31,690),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
 
 {"stbcx.",	XRC(31,694,1),	X_MASK,	  POWER8|E6500, 0,		{RS, RA0, RB}},
 
@@ -7707,6 +7747,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"azeo",	XO(31,202,1,0),	XORB_MASK,   PWRCOM,	0,		{RT, RA}},
 {"addzeo.",	XO(31,202,1,1),	XORB_MASK,   PPCCOM,	0,		{RT, RA}},
 {"azeo.",	XO(31,202,1,1),	XORB_MASK,   PWRCOM,	0,		{RT, RA}},
+
+{"hashst",	X(31,722),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
 
 {"stswi",	X(31,725),	X_MASK,	     PPCCOM,	E500|E500MC,	{RS, RA0, NB}},
 {"stsi",	X(31,725),	X_MASK,	     PWRCOM,	0,		{RS, RA0, NB}},
@@ -7753,6 +7795,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"tsuspend.",	XRCL(31,750,0,1), XRTRARB_MASK,PPCHTM,	0,		{0}},
 {"tresume.",	XRCL(31,750,1,1), XRTRARB_MASK,PPCHTM,	0,		{0}},
 {"tsr.",	XRC(31,750,1),	  XRTLRARB_MASK,PPCHTM,	0,		{L}},
+
+{"hashchk",	X(31,754),	XRC_MASK,    POWER8,	0,		{RB, DW, RA0}},
 
 {"darn",	X(31,755),	XLRAND_MASK, POWER9,	0,		{RT, LRAND}},
 
