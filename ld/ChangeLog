@@ -1,3 +1,10 @@
+2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27166
+	* testsuite/ld-x86-64/lam-u48.rd: New file.
+	* testsuite/ld-x86-64/lam-u57.rd: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Add PR ld/27166 tests.
+
 2021-01-09  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
