@@ -1940,9 +1940,6 @@ case "${target}" in
    rx-*-*)
        sim_arch=rx
        ;;
-   sh64*-*-*)
-       sim_arch=sh64
-       ;;
    sh*-*-*)
        sim_arch=sh
        ;;

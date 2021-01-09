@@ -1,5 +1,12 @@
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* MAINTAINERS (sh64): Move to past maintainers.
+	* configure: Regenerate.
+	* configure.tgt (sh64*-*-*): Delete.
+	* sh64/: Delete.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* README-HACKING (AC_PREREQ): Delete.
 
 2021-01-08  Mike Frysinger  <vapier@gentoo.org>

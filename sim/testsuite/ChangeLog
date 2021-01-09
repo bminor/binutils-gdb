@@ -1,3 +1,8 @@
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+	* sim/sh64/: Delete.
+
 2021-01-05  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim/fr30/: Delete.

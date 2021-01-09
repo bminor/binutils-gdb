@@ -32,7 +32,6 @@ msp430		Nick Clifton <nickc@redhat.com>
 or1k		Stafford Horne <shorne@gmail.com>
 pru		Dimitar Dimitrov <dimitar@dinux.eu>
 sh		(global maintainers)
-sh64		Dave Brolley <brolley@redhat.com>
 common		Frank Ch. Eigler <fche@redhat.com>
 *		(target, then global maintainers)
 
@@ -50,5 +49,6 @@ ppc		Geoff Keating <geoffk@geoffk.org>
 ppc		Andrew Cagney <cagney@gnu.org>
 rl78		DJ Delorie <dj@redhat.com>
 rx		DJ Delorie <dj@redhat.com>
+sh64		Dave Brolley <brolley@redhat.com>
 v850		DJ Delorie <dj@redhat.com>
 *		Mike Frysinger <vapier@gentoo.org>
