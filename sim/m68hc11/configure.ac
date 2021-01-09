@@ -7,7 +7,7 @@ SIM_AC_COMMON
 dnl Options available in this module
 SIM_AC_OPTION_ENDIAN(BIG)
 SIM_AC_OPTION_ALIGNMENT(NONSTRICT_ALIGNMENT)
-SIM_AC_OPTION_WARNINGS
+SIM_AC_OPTION_WARNINGS(no)
 
 #
 # Add simulated hardware devices

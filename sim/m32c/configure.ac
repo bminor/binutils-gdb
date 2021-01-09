@@ -23,7 +23,7 @@ sinclude(../common/acinclude.m4)
 
 SIM_AC_COMMON
 
-SIM_AC_OPTION_WARNINGS
+SIM_AC_OPTION_WARNINGS(no)
 
 AC_CHECK_HEADERS(sys/select.h termios.h sys/socket.h netinet/in.h netinet/tcp.h)
 

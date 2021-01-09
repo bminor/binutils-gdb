@@ -13778,11 +13778,6 @@ if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
 fi
 
 WERROR_CFLAGS=""
-if test "${ERROR_ON_WARNING}" = yes ; then
-# NOTE: Disabled in the sim dir due to most sims generating warnings.
-#    WERROR_CFLAGS="-Werror"
-     true
-fi
 
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wpointer-sign \

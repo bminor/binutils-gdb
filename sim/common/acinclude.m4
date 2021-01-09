@@ -737,6 +737,7 @@ AC_MSG_RESULT($sim_smp)
 
 dnl --enable-build-warnings is for developers of the simulator.
 dnl it enables extra GCC specific warnings.
+dnl arg[1] Enable -Werror by default? ("yes" or "no")
 AC_DEFUN([SIM_AC_OPTION_WARNINGS],
 [
 AC_ARG_ENABLE(werror,
@@ -753,11 +754,11 @@ if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
 fi
 
 WERROR_CFLAGS=""
-if test "${ERROR_ON_WARNING}" = yes ; then
-# NOTE: Disabled in the sim dir due to most sims generating warnings.
-#    WERROR_CFLAGS="-Werror"
-     true
-fi
+m4_if(m4_default([$1], [yes]), [yes], [dnl
+  if test "${ERROR_ON_WARNING}" = yes ; then
+    WERROR_CFLAGS="-Werror"
+  fi
+])dnl
 
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
 -Wpointer-sign \

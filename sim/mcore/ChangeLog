@@ -1,3 +1,8 @@
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (SIM_AC_OPTION_WARNINGS): Pass "no".
+	* configure: Regenerate.
+
 2021-01-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

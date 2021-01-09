@@ -1,5 +1,9 @@
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-main.h: Include config.h.
 
 2021-01-08  Mike Frysinger  <vapier@gentoo.org>
