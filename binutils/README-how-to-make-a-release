@@ -27,6 +27,9 @@ How to perform a release.
      directories and the top level Makefile and configure files.  Also
      consider updating the toplevel libtool files.
 
+
+Approx time to complete from here: 2 hours ....
+
   3. When branch day arrives add markers for the upcoming release to
      the NEWS files in gas, ld, and binutils.  No need to update NEWS
      in the gold directory - it has its own release numbering.
@@ -40,8 +43,8 @@ How to perform a release.
 
   4. Create the release branch using:
 
-	git branch binutils-2_36-branch
-        git push origin binutils-2_36-branch
+	git branch binutils-2_37-branch
+        git push origin binutils-2_37-branch
 
      If you get a message like:
      
@@ -51,7 +54,7 @@ How to perform a release.
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_36-branch 2.36
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_37-branch 2.37
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -73,21 +76,21 @@ How to perform a release.
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.36 (HEAD)" to 2.36, and create "2.37
-     (HEAD)":
+     new one.  E.g. rename "2.37 (HEAD)" to 2.37, and create
+     "2.38 (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
      of the next release:
      
-       m4_define([BFD_VERSION], [2.36.50])
+       m4_define([BFD_VERSION], [2.37.50])
        
      Update the release number in bfd/version.m4 for the BRANCH.
      The branch only needs the point value set to 90 as the release
      has not actually happened yet.
 
-       m4_define([BFD_VERSION], [2.35.90])
+       m4_define([BFD_VERSION], [2.36.90])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold" and then building
@@ -103,7 +106,7 @@ How to perform a release.
         src-release script to rebuild them.
 	 
           cd <branch-sources>
-          git clean -fdx .
+          git clean -fdx
 	  
      b. Create a source tarball of the BRANCH sources:
 
@@ -111,29 +114,29 @@ How to perform a release.
 
      c. Build a test target using this tarball.
 
-           cp binutils-<OLD_VERSION>.90.tar.xz /dev/shm
-	   cd /dev/shm
-	   tar xvf binutils-<OLD_VERSION>.90.tar.xz
+           cp binutils-2.36.90.tar.xz /dev/shm
+	   pushd /dev/shm
+	   tar xvf binutils-2.36.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-<OLD_VERSION>.90/configure --quiet --enable-gold
+	   ../binutils-2.36.90/configure --quiet --enable-gold
 	   make
+	   popd
 
         If there are problems, fix them.
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          cd <branch-sources>
-          scp binutils-<OLD_VERSION>.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-<OLD_VERSION>.90.tar.xz
+          scp binutils-2.36.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.36.90.tar.xz
 
      e. Clean up the source directory again.
 
-         git clean -fdx .
+         git clean -fdx
 
   10. Tell the Translation Project where to find the new tarball.
       <coordinator@translationproject.org>
-      qv: http://translationproject.org/html/maintainers.html
+      qv: https://translationproject.org/html/maintainers.html
 
 ------------------------------------------------------------------------
 Dear Translation Project
