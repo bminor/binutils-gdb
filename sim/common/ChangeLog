@@ -1,5 +1,9 @@
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_OUTPUT): Require SIM_AC_OPTION_WARNINGS.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-core.c (sim_memory_map): Change %#x to PRIxTW.
 
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
