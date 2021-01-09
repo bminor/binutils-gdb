@@ -1,5 +1,10 @@
 2021-01-09  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/gprof.pot: Regenerate.
+
+2021-01-09  Nick Clifton  <nickc@redhat.com>
+
 	* 2.36 release branch crated.
 
 2021-01-09  Alan Modra  <amodra@gmail.com>

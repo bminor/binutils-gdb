@@ -1,5 +1,11 @@
 2021-01-09  Nick Clifton  <nickc@redhat.com>
 
+	* version.m4: Change to 2.36.50.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2021-01-09  Nick Clifton  <nickc@redhat.com>
+
 	* 2.36 release branch crated.
 
 2021-01-08  H.J. Lu  <hongjiu.lu@intel.com>

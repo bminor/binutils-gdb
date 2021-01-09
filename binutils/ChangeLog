@@ -1,6 +1,14 @@
 2021-01-09  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2021-01-09  Nick Clifton  <nickc@redhat.com>
+
 	* 2.36 release branch crated.
+	* README-how-to-make-a-release: Add note about updating Makefiles
+	and libtool files.
+	* BRANCHES: Add binutils-2.36-branch.
 
 2021-01-09  Alan Modra  <amodra@gmail.com>
 
