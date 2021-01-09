@@ -19,6 +19,8 @@
 #ifndef PRU_SIM_MAIN
 #define PRU_SIM_MAIN
 
+#include "config.h"
+
 #include <stdint.h>
 #include <stddef.h>
 #include "pru.h"
