@@ -1,3 +1,7 @@
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* readlink4.c (main): Change rindex to strrchr.
+
 2021-01-07  Mike Frysinger  <vapier@gentoo.org>
 
 	PR ld/13900

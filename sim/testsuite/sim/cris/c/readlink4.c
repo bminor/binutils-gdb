@@ -39,10 +39,10 @@ int main (int argc, char *argv[])
 
   strcat (buf, argv[0]);
 
-  if (rindex (buf, '/') == NULL)
+  if (strrchr (buf, '/') == NULL)
     strcat (buf, "./");
 
-  for (i = rindex (buf, '/') - buf + 1; i < max; i++)
+  for (i = strrchr (buf, '/') - buf + 1; i < max; i++)
     buf[i] = 'a';
 
   buf [i] = 0;
