@@ -18,9 +18,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
-#ifdef HAVE_STDLIB_H
+
 #include <stdlib.h>
-#endif
+
 #include "sim-options.h"
 #include "libiberty.h"
 #include "bfd.h"

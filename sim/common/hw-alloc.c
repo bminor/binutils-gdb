@@ -21,10 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "hw-main.h"
 #include "hw-base.h"
 
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 struct hw_alloc_data
 {

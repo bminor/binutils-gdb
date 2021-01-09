@@ -23,9 +23,7 @@
 #include "libiberty.h"
 #include "bfd.h"
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 /* Cover function of sim_state_free to free the cpu buffers as well.  */
 

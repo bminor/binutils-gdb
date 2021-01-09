@@ -26,18 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <ctype.h>
 #include <stdio.h>
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 enum {
   OPTION_WATCH_DELETE                      = OPTION_START,

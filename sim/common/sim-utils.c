@@ -20,14 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-main.h"
 #include "sim-assert.h"
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#ifdef HAVE_TIME_H
 #include <time.h>
-#endif
-
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h> /* needed by sys/resource.h */
 #endif
@@ -35,14 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
 #endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
 
 #include "libiberty.h"
 #include "bfd.h"

@@ -1,3 +1,8 @@
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* main.c: Delete HAVE_STDLIB_H.
+
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

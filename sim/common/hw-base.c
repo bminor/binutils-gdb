@@ -23,19 +23,8 @@
 #include "hw-main.h"
 #include "hw-base.h"
 
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
-#if HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
 #include <ctype.h>
 
 #include "hw-config.h"

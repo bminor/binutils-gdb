@@ -23,14 +23,7 @@
 
 #include "device_table.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
 #include <sys/ipc.h>
 #include <sys/sem.h>
 

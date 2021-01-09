@@ -98,12 +98,11 @@ ALL_LINGUAS=
 ZW_GNU_GETTEXT_SISTER_DIR(../../intl)
 
 # Check for common headers.
-# FIXME: Seems to me this can cause problems for i386-windows hosts.
-# At one point there were hardcoded AC_DEFINE's if ${host} = i386-*-windows*.
-AC_CHECK_HEADERS(stdlib.h string.h strings.h unistd.h time.h)
+# NB: You can assume C11 headers exist.
+AC_CHECK_HEADERS(unistd.h)
 AC_CHECK_HEADERS(sys/time.h sys/times.h sys/resource.h sys/mman.h)
 AC_CHECK_HEADERS(fcntl.h fpu_control.h)
-AC_CHECK_HEADERS(dlfcn.h errno.h sys/stat.h)
+AC_CHECK_HEADERS(dlfcn.h sys/stat.h)
 AC_CHECK_FUNCS(getrusage time sigaction __setfpucw)
 AC_CHECK_FUNCS(mmap munmap lstat truncate ftruncate posix_fallocate)
 AC_CHECK_MEMBERS([[struct stat.st_dev], [struct stat.st_ino],

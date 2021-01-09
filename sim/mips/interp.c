@@ -41,16 +41,8 @@ code on the hardware.
 #include <ctype.h>
 #include <limits.h>
 #include <math.h>
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
 
 #include "getopt.h"
 #include "libiberty.h"

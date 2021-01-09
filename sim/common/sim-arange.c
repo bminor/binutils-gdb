@@ -24,13 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-basics.h"
 #include "sim-arange.h"
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
-
-#ifdef HAVE_STRING_H
 #include <string.h>
-#endif
 
 /* Insert a range.  */
 

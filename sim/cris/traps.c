@@ -24,9 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* FIXME: get rid of targ-vals.h usage everywhere else.  */
 
 #include <stdarg.h>
-#ifdef HAVE_ERRNO_H
 #include <errno.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

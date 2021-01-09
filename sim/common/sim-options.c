@@ -19,16 +19,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
 #include "sim-main.h"
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <ctype.h>
 #include <stdio.h>
 #include "libiberty.h"

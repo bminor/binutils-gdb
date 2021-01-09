@@ -19,9 +19,7 @@
 #include "config.h"
 #include <signal.h>
 #include <string.h>
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include "sis.h"

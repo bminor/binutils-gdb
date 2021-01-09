@@ -24,9 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "ansidecl.h"
 #include <stdio.h> /* for NULL */
 #include <stdarg.h>
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <time.h>
 
 #include "sim-basics.h"

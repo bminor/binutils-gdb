@@ -28,14 +28,7 @@
 #include "emul_generic.h"
 #include "emul_netbsd.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -82,9 +75,7 @@ int getrusage();
 #include <unistd.h>
 #endif
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #define WITH_NetBSD_HOST (NetBSD >= 199306)
 #if WITH_NetBSD_HOST /* here NetBSD as that is what we're emulating */

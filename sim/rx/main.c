@@ -22,9 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "config.h"
 #include <stdio.h>
 #include <string.h>
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

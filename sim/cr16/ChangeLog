@@ -1,3 +1,8 @@
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
+	* config.in, configure: Regenerate.
+	* simops.c: Delete HAVE_STRING_H & HAVE_TIME_H.
+
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* cr16_sim.h (State): Change to an extern.

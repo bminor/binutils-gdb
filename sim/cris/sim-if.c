@@ -26,9 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "elf-bfd.h"
 
 #include "sim-main.h"
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <errno.h>
 #include "sim-options.h"
 #include "dis-asm.h"

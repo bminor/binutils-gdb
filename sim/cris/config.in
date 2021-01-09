@@ -16,9 +16,6 @@
 /* Define if dv-sockser is usable. */
 #undef HAVE_DV_SOCKSER
 
-/* Define to 1 if you have the <errno.h> header file. */
-#undef HAVE_ERRNO_H
-
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
@@ -42,9 +39,6 @@
 
 /* Define to 1 if you have the `socket' library (-lsocket). */
 #undef HAVE_LIBSOCKET
-
-/* Define to 1 if you have the <limits.h> header file. */
-#undef HAVE_LIMITS_H
 
 /* Define to 1 if you have the `lstat' function. */
 #undef HAVE_LSTAT
@@ -147,9 +141,6 @@
 
 /* Define to 1 if you have the `time' function. */
 #undef HAVE_TIME
-
-/* Define to 1 if you have the <time.h> header file. */
-#undef HAVE_TIME_H
 
 /* Define to 1 if you have the `truncate' function. */
 #undef HAVE_TRUNCATE

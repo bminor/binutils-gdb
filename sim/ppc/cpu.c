@@ -26,13 +26,7 @@
 #include "cpu.h"
 #include "idecode.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
 
 struct _cpu {
 

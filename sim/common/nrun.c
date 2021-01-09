@@ -21,15 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <signal.h>
 #include <stdlib.h>
-
 /* For strsignal.  */
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
 
 #include "sim-main.h"
 

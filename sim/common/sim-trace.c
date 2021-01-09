@@ -29,16 +29,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-assert.h"
 
-#ifdef HAVE_STRING_H
 #include <string.h>
-#else
-#ifdef HAVE_STRINGS_H
-#include <strings.h>
-#endif
-#endif
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 #ifndef SIZE_PHASE
 #define SIZE_PHASE 8
