@@ -37,11 +37,6 @@
 #include <stdio.h>
 #include <setjmp.h>
 
-#ifdef __CYGWIN32__
-extern int vasprintf (char **result, const char *format, va_list args);
-extern int asprintf (char **result, const char *format, ...);
-#endif
-
 
 #ifndef NULL
 #define NULL 0

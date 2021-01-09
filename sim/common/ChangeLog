@@ -1,5 +1,10 @@
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-basics.h [__CYGWIN32__] (vasprintf, asprintf): Delete.
+	* sim-core.c, sim-watch.c: Include libiberty.h.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4: Replace duplicate text with pointer to README-HACKING.
 
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>

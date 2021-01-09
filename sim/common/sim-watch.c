@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "config.h"
 #include "sim-main.h"
 #include "sim-options.h"
+#include "libiberty.h"
 
 #include "sim-assert.h"
 
