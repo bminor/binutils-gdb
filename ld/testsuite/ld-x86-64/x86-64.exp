@@ -1452,6 +1452,22 @@ if { [isnative] && [check_compiler_available] } {
 		{{error_output "pr21997-1b.err"}} \
 		"pr21997-1b" \
 	    ] \
+	    [list \
+		"Build lam-u48.so" \
+		"-shared -Wl,-z,lam-u48" \
+		"" \
+		{dummy.s} \
+		{{readelf -n lam-u48.rd}}  \
+		"lam-u48.so" \
+	    ] \
+	    [list \
+		"Build lam-u57.so" \
+		"-shared -Wl,-z,lam-u57" \
+		"" \
+		{dummy.s} \
+		{{readelf -n lam-u57.rd}}  \
+		"lam-u57.so" \
+	    ] \
 	]
     }
 

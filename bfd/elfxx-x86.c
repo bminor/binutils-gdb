@@ -2449,8 +2449,15 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 		features = GNU_PROPERTY_X86_FEATURE_1_IBT;
 	      if (htab->params->shstk)
 		features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
-	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT and
-		 GNU_PROPERTY_X86_FEATURE_1_SHSTK.  */
+	      if (htab->params->lam_u48)
+		features |= (GNU_PROPERTY_X86_FEATURE_1_LAM_U48
+			     | GNU_PROPERTY_X86_FEATURE_1_LAM_U57);
+	      else if (htab->params->lam_u57)
+		features |= GNU_PROPERTY_X86_FEATURE_1_LAM_U57;
+	      /* Add GNU_PROPERTY_X86_FEATURE_1_IBT,
+		 GNU_PROPERTY_X86_FEATURE_1_SHSTK,
+		 GNU_PROPERTY_X86_FEATURE_1_LAM_U48 and
+		 GNU_PROPERTY_X86_FEATURE_1_LAM_U57.  */
 	      aprop->u.number |= features;
 	    }
 	  updated = number != (unsigned int) aprop->u.number;
@@ -2470,6 +2477,11 @@ _bfd_x86_elf_merge_gnu_properties (struct bfd_link_info *info,
 		features = GNU_PROPERTY_X86_FEATURE_1_IBT;
 	      if (htab->params->shstk)
 		features |= GNU_PROPERTY_X86_FEATURE_1_SHSTK;
+	      if (htab->params->lam_u48)
+		features |= (GNU_PROPERTY_X86_FEATURE_1_LAM_U48
+			     | GNU_PROPERTY_X86_FEATURE_1_LAM_U57);
+	      else if (htab->params->lam_u57)
+		features |= GNU_PROPERTY_X86_FEATURE_1_LAM_U57;
 	    }
 	  if (features)
 	    {
