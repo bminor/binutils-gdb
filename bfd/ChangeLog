@@ -1,3 +1,10 @@
+2021-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26256
+	PR ld/27160
+	* elflink.c (elf_fixup_link_order): Verify that fixing up
+	SHF_LINK_ORDER doesn't increase the output section size.
+
 2021-01-09  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

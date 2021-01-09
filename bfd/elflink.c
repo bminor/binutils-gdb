@@ -12039,6 +12039,14 @@ elf_fixup_link_order (struct bfd_link_info *info, bfd *abfd, asection *o)
       offset = sections[n]->offset + sections[n]->size;
 
   free (sections);
+
+  /* Verify that fixing up SHF_LINK_ORDER doesn't increase the section
+     size.  */
+  if (offset > o->size)
+    info->callbacks->einfo
+      (_("%F%P: %pA has ordered sections with incompatible alignments\n"),
+       o);
+
   return TRUE;
 }
 
