@@ -1,5 +1,27 @@
 2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/26766
+	* Makefile.tpl (BUILD_CFLAGS): New.
+	(CFLAGS): Append $(BUILD_CFLAGS).
+	(CXXFLAGS): Likewise.
+	(PGO_BUILD_GEN_FLAGS_TO_PASS): New.
+	(PGO_BUILD_TRAINING_CFLAGS): Likewise.
+	(PGO_BUILD_TRAINING_CXXFLAGS): Likewise.
+	(PGO_BUILD_TRAINING_FLAGS_TO_PASS): Likewise.
+	(PGO_BUILD_TRAINING_MFLAGS): Likewise.
+	(PGO_BUILD_USE_FLAGS_TO_PASS): Likewise.
+	(PGO-TRAINING-TARGETS): Likewise.
+	(PGO_BUILD_TRAINING): Likewise.
+	(all): Add '+' to the command line for recursive make.  Support
+	the PGO build.
+	* configure.ac: Add --enable-pgo-build[=lto].
+	AC_SUBST PGO_BUILD_GEN_CFLAGS, PGO_BUILD_USE_CFLAGS and
+	PGO_BUILD_LTO_CFLAGS.  Enable the PGO build in Makefile.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
+2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* Makefile.tpl (AR): Add @AR_PLUGIN_OPTION@
 	(RANLIB): Add @RANLIB_PLUGIN_OPTION@.
 	* configure.ac: Include config/gcc-plugin.m4.
