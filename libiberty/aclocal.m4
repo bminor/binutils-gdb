@@ -1,6 +1,7 @@
 sinclude(../config/acx.m4)
 sinclude(../config/cet.m4)
 sinclude(../config/enable.m4)
+sinclude(../config/gcc-plugin.m4)
 sinclude(../config/no-executables.m4)
 sinclude(../config/override.m4)
 sinclude(../config/picflag.m4)

@@ -1,3 +1,13 @@
+2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.in (AR): Add @AR_PLUGIN_OPTION@
+	(RANLIB): Add @RANLIB_PLUGIN_OPTION@.
+	(configure_deps): Depend on ../config/gcc-plugin.m4.
+	* aclocal.m4: Include ../config/gcc-plugin.m4.
+	* configure.ac: AC_SUBST AR_PLUGIN_OPTION and
+	RANLIB_PLUGIN_OPTION.
+	* configure: Regenerated.
+
 2021-01-04  Martin Liska  <mliska@suse.cz>
 
 	* strverscmp.c: Convert to utf8 from iso8859.
