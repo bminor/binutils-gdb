@@ -25,6 +25,8 @@
 
 enum _leftright { LEFT_FIRST, RIGHT_FIRST };
 
+struct _state State;
+
 int d10v_debug;
 
 /* Set this to true to get the previous segment layout. */

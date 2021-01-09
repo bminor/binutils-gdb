@@ -243,7 +243,9 @@ struct _state
 
   enum _ins_type ins_type;
 
-} State;
+};
+
+extern struct _state State;
 
 
 extern uint32 OP[4];

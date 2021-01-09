@@ -33,6 +33,8 @@
 #include "gdb/signals.h"
 #include "opcode/cr16.h"
 
+struct _state State;
+
 int cr16_debug;
 
 uint32 OP[4];

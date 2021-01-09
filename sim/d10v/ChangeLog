@@ -1,5 +1,10 @@
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* d10v_sim.h (State): Change to an extern.
+	* interp.c (State): Define.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure: Regenerate.
 
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
