@@ -1,5 +1,9 @@
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-core.c (sim_memory_map): Change %#x to PRIxTW.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* acinclude.m4 (SIM_AC_COMMON): Delete checks for stdlib.h, string.h,
 	strings.h, time.h, and errno.h.
 	* callback.c, cgen-scache.c, dv-glue.c, dv-pal.c, dv-sockser.c,

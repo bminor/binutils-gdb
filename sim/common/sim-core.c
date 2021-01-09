@@ -480,7 +480,8 @@ sim_memory_map (SIM_DESC sd)
 	  if (mapping->level != 0)
 	    continue;
 
-	  entry = xasprintf ("<memory type='ram' start='%#x' length='%#x'/>\n",
+	  entry = xasprintf ("<memory type='ram' start='%#" PRIxTW "' "
+			     "length='%#" PRIxTW "'/>\n",
 			     mapping->base, mapping->nr_bytes);
 	  /* The sim memory map is organized by access, not by addresses.
 	     So a RWX memory map will have three independent mappings.
