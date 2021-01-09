@@ -21,6 +21,8 @@
 
 #define WITH_SCACHE_PBB 1
 
+#include "config.h"
+
 #include "ansidecl.h"
 #include "or1k-desc.h"
 #include "sim-basics.h"
