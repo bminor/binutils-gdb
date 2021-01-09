@@ -703,7 +703,9 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
       const char *arch_rx = gdbarch_gnu_triplet_regexp (gdbarch);
 
       /* Allow triplets with or without vendor set.  */
-      triplet_rx = std::string (arch_rx) + "(-[^-]*)?-" + os_rx;
+      triplet_rx = std::string (arch_rx) + "(-[^-]*)?-";
+      if (os_rx != nullptr)
+	triplet_rx += os_rx;
       compiler->set_triplet_regexp (triplet_rx.c_str ());
     }
 

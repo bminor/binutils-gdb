@@ -1,5 +1,11 @@
 2021-01-09  Tom Tromey  <tom@tromey.com>
 
+	PR compile/23672
+	* compile/compile.c (compile_to_object): Avoid crash when
+	osabi_triplet_regexp returns NULL.
+
+2021-01-09  Tom Tromey  <tom@tromey.com>
+
 	* tracepoint.h (class collection_list) <append_exp>: Take a
 	std::string.
 	* tracepoint.c (collection_list::append_exp): Take a std::string.
