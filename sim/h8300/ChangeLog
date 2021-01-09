@@ -1,5 +1,10 @@
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call SIM_AC_OPTION_WARNINGS.
+	* configure: Regenerate.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 	* compile.c: Delete HAVE_TIME_H & HAVE_STDLIB_H.
 
