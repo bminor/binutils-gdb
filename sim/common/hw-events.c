@@ -187,6 +187,7 @@ hw_event_remain_time (struct hw *me, struct hw_event *event)
 #include "sim-main.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void
 test_handler (struct hw *me,

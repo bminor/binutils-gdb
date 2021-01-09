@@ -19,6 +19,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "config.h"
 #include <errno.h>
+#include <stdlib.h>
 #include "dis-asm.h"
 #include "bfd.h"
 #include "sim-main.h"

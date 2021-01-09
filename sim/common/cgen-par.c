@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
+#include <stdlib.h>
 #include "cgen-mem.h"
 #include "cgen-par.h"
 
