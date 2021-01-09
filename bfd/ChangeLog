@@ -1,5 +1,9 @@
 2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure: Regenerated.
+
+2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/27166
 	* elfxx-x86.c (_bfd_x86_elf_merge_gnu_properties): Handle
 	-z lam-u48 and -z lam-u57.
