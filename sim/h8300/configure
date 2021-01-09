@@ -2354,18 +2354,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 # SIM_AC_OUTPUT is a cover function to AC_OUTPUT to generate the Makefile.
 # It is intended to be invoked last.
 #
-# The simulator's configure.ac should look like:
-#
-# dnl Process this file with autoconf to produce a configure script.
-# AC_PREREQ(2.64)dnl
-# AC_INIT(Makefile.in)
-# sinclude(../common/aclocal.m4)
-#
-# SIM_AC_COMMON
-#
-# ... target specific stuff ...
-#
-# SIM_AC_OUTPUT
+# See README-HACKING for more details.
 
 # Include global overrides and fixes for Autoconf.
 
@@ -12911,7 +12900,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12914 "configure"
+#line 12903 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13017,7 +13006,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13020 "configure"
+#line 13009 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

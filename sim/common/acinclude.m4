@@ -5,18 +5,7 @@
 # SIM_AC_OUTPUT is a cover function to AC_OUTPUT to generate the Makefile.
 # It is intended to be invoked last.
 #
-# The simulator's configure.ac should look like:
-#
-# dnl Process this file with autoconf to produce a configure script.
-# AC_PREREQ(2.64)dnl
-# AC_INIT(Makefile.in)
-# sinclude(../common/aclocal.m4)
-#
-# SIM_AC_COMMON
-#
-# ... target specific stuff ...
-#
-# SIM_AC_OUTPUT
+# See README-HACKING for more details.
 
 # Include global overrides and fixes for Autoconf.
 m4_include(../../config/override.m4)
