@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.36:
+
 * Add libdep plugin, for linking dependencies of static libraries that
   were recorded by ar in the __.LIBDEP archive member.
 

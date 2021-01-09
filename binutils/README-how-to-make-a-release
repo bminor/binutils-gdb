@@ -24,7 +24,8 @@ How to perform a release.
      they are less busy).
 
   2. When the branch date is near:  Update the libiberty and config
-     directories and the top level configure files.
+     directories and the top level Makefile and configure files.  Also
+     consider updating the toplevel libtool files.
 
   3. When branch day arrives add markers for the upcoming release to
      the NEWS files in gas, ld, and binutils.  No need to update NEWS

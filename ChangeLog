@@ -1,3 +1,7 @@
+2021-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* 2.36 release branch crated.
+
 2021-01-07  Samuel Thibault  <samuel.thibault@gnu.org>
 
 	* libtool.m4: Match gnu* along with other GNU systems.

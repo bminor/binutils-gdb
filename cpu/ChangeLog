@@ -1,3 +1,7 @@
+2021-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* 2.36 release branch crated.
+
 2020-10-05  Samanta Navarro  <ferivoz@riseup.net>
 
 	* m32r.cpu: Fix spelling mistakes.

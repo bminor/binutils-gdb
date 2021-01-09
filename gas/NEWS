@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.36:
+
 * Add support for Intel AVX VNNI instructions.
 
 * Add support for Intel HRESET instruction.

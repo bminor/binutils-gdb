@@ -1,3 +1,7 @@
+2021-01-09  Nick Clifton  <nickc@redhat.com>
+
+	* 2.36 release branch crated.
+
 2021-01-01  Nicolas Boulenguez  <nicolas@debian.org>
 
 	* override.m4: Correct comment grammar.
