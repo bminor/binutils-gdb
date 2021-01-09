@@ -1,5 +1,10 @@
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
+	* cpu.h (pc): Change to an extern.
+	* cpu.c (pc): Define.
+
+2021-01-11  Mike Frysinger  <vapier@gentoo.org>
+
 	* config.in, configure: Regenerate.
 
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>

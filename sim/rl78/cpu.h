@@ -39,7 +39,7 @@ extern int rl78_in_gdb;
 SI get_reg (RL78_Register);
 SI set_reg (RL78_Register, SI);
 
-SI pc;
+extern SI pc;
 
 
 extern const char * const reg_names[];

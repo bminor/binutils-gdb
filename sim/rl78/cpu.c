@@ -36,6 +36,8 @@ int rl78_g10_mode = 0;
 int g13_multiply = 0;
 int g14_multiply = 0;
 
+SI pc;
+
 #define REGISTER_ADDRESS 0xffee0
 
 typedef struct {
