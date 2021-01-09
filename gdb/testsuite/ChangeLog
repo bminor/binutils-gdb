@@ -1,3 +1,7 @@
+2021-01-09  Tom Tromey  <tom@tromey.com>
+
+	* gdb.trace/ax.exp: Do not require an "ext".
+
 2021-01-08  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/voidctx/pck.adb: New file.
