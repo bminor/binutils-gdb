@@ -2556,10 +2556,12 @@ _bfd_x86_elf_link_setup_gnu_properties
     htab->params->cet_report = prop_report_none;
   if (htab->params->lam_u48)
     {
-      features |= GNU_PROPERTY_X86_FEATURE_1_LAM_U48;
+      features |= (GNU_PROPERTY_X86_FEATURE_1_LAM_U48
+		   | GNU_PROPERTY_X86_FEATURE_1_LAM_U57);
       htab->params->lam_u48_report = prop_report_none;
+      htab->params->lam_u57_report = prop_report_none;
     }
-  if (htab->params->lam_u57)
+  else if (htab->params->lam_u57)
     {
       features |= GNU_PROPERTY_X86_FEATURE_1_LAM_U57;
       htab->params->lam_u57_report = prop_report_none;

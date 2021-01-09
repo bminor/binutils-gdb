@@ -1,5 +1,10 @@
 2021-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Also set
+	LAM_U57 when setting LAM_U48.
+
+2021-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/26256
 	PR ld/27160
 	* elflink.c (elf_fixup_link_order): Verify that fixing up
