@@ -1266,16 +1266,12 @@ collection_list::stringify ()
   return str_list;
 }
 
-/* Add the printed expression EXP to *LIST.  */
+/* Add the expression STR to M_COMPUTED.  */
 
 void
-collection_list::append_exp (struct expression *exp)
+collection_list::append_exp (std::string &&str)
 {
-  string_file tmp_stream;
-
-  print_expression (exp, &tmp_stream);
-
-  m_computed.push_back (std::move (tmp_stream.string ()));
+  m_computed.push_back (std::move (str));
 }
 
 void
@@ -1379,6 +1375,7 @@ encode_actions_1 (struct command_line *action,
 		{
 		  unsigned long addr;
 
+		  const char *exp_start = action_exp;
 		  expression_up exp = parse_exp_1 (&action_exp, tloc->address,
 						   block_for_pc (tloc->address),
 						   1);
@@ -1412,7 +1409,8 @@ encode_actions_1 (struct command_line *action,
 					     memrange_absolute, addr,
 					     TYPE_LENGTH (exp->elts[1].type),
 					     tloc->address);
-		      collect->append_exp (exp.get ());
+		      collect->append_exp (std::string (exp_start,
+							action_exp));
 		      break;
 
 		    case OP_VAR_VALUE:
@@ -1441,7 +1439,8 @@ encode_actions_1 (struct command_line *action,
 		      collect->add_ax_registers (aexpr.get ());
 
 		      collect->add_aexpr (std::move (aexpr));
-		      collect->append_exp (exp.get ());
+		      collect->append_exp (std::string (exp_start,
+							action_exp));
 		      break;
 		    }		/* switch */
 		}		/* do */

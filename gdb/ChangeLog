@@ -1,3 +1,10 @@
+2021-01-09  Tom Tromey  <tom@tromey.com>
+
+	* tracepoint.h (class collection_list) <append_exp>: Take a
+	std::string.
+	* tracepoint.c (collection_list::append_exp): Take a std::string.
+	(encode_actions_1): Update.
+
 2021-01-08  Tom Tromey  <tromey@adacore.com>
 
 	* parse.c (parse_expression): Add void_context_p parameter.  Use

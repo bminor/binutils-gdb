@@ -257,7 +257,7 @@ public:
 
   void add_wholly_collected (const char *print_name);
 
-  void append_exp (struct expression *exp);
+  void append_exp (std::string &&exp);
 
   /* Add AEXPR to the list, taking ownership.  */
   void add_aexpr (agent_expr_up aexpr);
