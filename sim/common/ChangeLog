@@ -1,5 +1,10 @@
 2021-01-09  Mike Frysinger  <vapier@gentoo.org>
 
+	* hw-base.c (full_name_of_hw): Delete full_name.  Replace
+	hw_strdup call with hw_malloc.
+
+2021-01-09  Mike Frysinger  <vapier@gentoo.org>
+
 	* cgen-par.c: Include stdlib.h.
 	* cgen-trace.c, hw-events.c, sim-abort.c: Likewise.
 
