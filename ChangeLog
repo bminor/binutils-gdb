@@ -1,3 +1,7 @@
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* src-release.sh (do_proto_toplev): Rewrite indentation.
+
 2021-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26766
