@@ -1,3 +1,12 @@
+2021-03-24  Mike Frysinger  <vapier@gentoo.org>
+
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add gitlog-to-changelog.
+	* Makefile.in, configure: Regenerate.
+	* import/Makefile.am, import/Makefile.in: Regenerate.
+	* import/m4/gnulib-cache.m4: Regenerate.
+	* import/m4/gnulib-comp.m4: Regenerate.
+	* import/extra/gitlog-to-changelog: New file.
+
 2021-02-05  Paul E. Murphy  <murphyp@linux.ibm.com>
 
 	* update-gnulib.sh (GNULIB_COMMIT_SHA1): Bump to

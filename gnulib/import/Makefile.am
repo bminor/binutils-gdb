@@ -43,6 +43,7 @@
 #  frexpl \
 #  getcwd \
 #  gettimeofday \
+#  gitlog-to-changelog \
 #  glob \
 #  inet_ntop \
 #  inttypes \
@@ -737,6 +738,13 @@ EXTRA_DIST += gettimeofday.c
 EXTRA_libgnu_a_SOURCES += gettimeofday.c
 
 ## end   gnulib module gettimeofday
+
+## begin gnulib module gitlog-to-changelog
+
+
+EXTRA_DIST += $(top_srcdir)/import/extra/gitlog-to-changelog
+
+## end   gnulib module gitlog-to-changelog
 
 ## begin gnulib module glob
 

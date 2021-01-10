@@ -107,6 +107,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module getrandom:
   # Code from module gettext-h:
   # Code from module gettimeofday:
+  # Code from module gitlog-to-changelog:
   # Code from module glob:
   # Code from module glob-h:
   # Code from module hard-locale:
@@ -923,6 +924,7 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
+  build-aux/gitlog-to-changelog
   build-aux/update-copyright
   lib/_Noreturn.h
   lib/alloca.c

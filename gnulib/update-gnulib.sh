@@ -40,6 +40,7 @@ IMPORTED_GNULIB_MODULES="\
     frexpl \
     getcwd \
     gettimeofday \
+    gitlog-to-changelog \
     glob \
     inet_ntop
     inttypes \

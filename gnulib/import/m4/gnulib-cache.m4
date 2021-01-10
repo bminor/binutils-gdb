@@ -48,6 +48,7 @@
 #  frexpl \
 #  getcwd \
 #  gettimeofday \
+#  gitlog-to-changelog \
 #  glob \
 #  inet_ntop \
 #  inttypes \
@@ -89,6 +90,7 @@ gl_MODULES([
   frexpl
   getcwd
   gettimeofday
+  gitlog-to-changelog
   glob
   inet_ntop
   inttypes

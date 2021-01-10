@@ -57,6 +57,7 @@
 #  frexpl \
 #  getcwd \
 #  gettimeofday \
+#  gitlog-to-changelog \
 #  glob \
 #  inet_ntop \
 #  inttypes \
@@ -1781,34 +1782,36 @@ EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	fnmatch.c fnmatch_loop.c fnmatch.c fnmatch.in.h fpucw.h free.c \
 	frexp.c frexp.c frexpl.c fstat.c stat-w32.c stat-w32.h \
 	at-func.c fstatat.c getcwd.c getcwd-lgpl.c getdtablesize.c \
-	getlogin_r.c getrandom.c gettimeofday.c glob.c glob_internal.h \
-	glob_pattern_p.c globfree.c glob-libc.h glob.in.h \
-	hard-locale.h inet_ntop.c intprops.h inttypes.in.h isblank.c \
-	float+.h isnan.c isnand-nolibm.h isnand.c float+.h isnan.c \
-	isnanl-nolibm.h isnanl.c cdefs.h libc-config.h limits.in.h \
-	localcharset.h locale.in.h lstat.c malloc.c malloca.h \
-	math.in.h lc-charset-dispatch.c lc-charset-dispatch.h \
-	mbrtowc-impl-utf8.h mbrtowc-impl.h mbrtowc.c mbtowc-lock.c \
-	mbtowc-lock.h windows-initguard.h mbsinit.c mbsrtowcs-impl.h \
-	mbsrtowcs-state.c mbsrtowcs.c mbtowc-impl.h mbtowc.c memchr.c \
-	memchr.valgrind memmem.c memmem.c str-two-way.h mempcpy.c \
-	memrchr.c mkdir.c mkdtemp.c mkostemp.c msvc-inval.c \
-	msvc-inval.h msvc-nothrow.c msvc-nothrow.h netinet_in.in.h \
-	open.c openat.c openat.h dirent-private.h opendir.c pathmax.h \
-	pipe.c rawmemchr.c rawmemchr.valgrind dirent-private.h \
-	readdir.c readlink.c realloc.c rename.c dirent-private.h \
-	rewinddir.c rmdir.c same-inode.h save-cwd.h \
-	malloc/scratch_buffer.h scratch_buffer.h setenv.c \
-	setlocale-lock.c setlocale_null.h windows-initguard.h \
-	signal.in.h _Noreturn.h arg-nonnull.h c++defs.h warn-on-use.h \
-	stat-w32.c stat-w32.h stat.c stat-time.h stdalign.in.h \
-	stdbool.in.h stddef.in.h stdint.in.h stdio.in.h stdlib.in.h \
-	strchrnul.c strchrnul.valgrind strdup.c streq.h strerror.c \
-	strerror-override.c strerror-override.h strerror_r.c \
-	string.in.h strnlen.c strstr.c str-two-way.h strstr.c \
-	strtok_r.c sys_random.in.h sys_socket.in.h sys_stat.in.h \
-	sys_time.in.h sys_types.in.h sys_uio.in.h tempname.h time.in.h \
-	time_r.c unistd.in.h unistd--.h unistd-safer.h unsetenv.c \
+	getlogin_r.c getrandom.c gettimeofday.c \
+	$(top_srcdir)/import/extra/gitlog-to-changelog glob.c \
+	glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
+	glob.in.h hard-locale.h inet_ntop.c intprops.h inttypes.in.h \
+	isblank.c float+.h isnan.c isnand-nolibm.h isnand.c float+.h \
+	isnan.c isnanl-nolibm.h isnanl.c cdefs.h libc-config.h \
+	limits.in.h localcharset.h locale.in.h lstat.c malloc.c \
+	malloca.h math.in.h lc-charset-dispatch.c \
+	lc-charset-dispatch.h mbrtowc-impl-utf8.h mbrtowc-impl.h \
+	mbrtowc.c mbtowc-lock.c mbtowc-lock.h windows-initguard.h \
+	mbsinit.c mbsrtowcs-impl.h mbsrtowcs-state.c mbsrtowcs.c \
+	mbtowc-impl.h mbtowc.c memchr.c memchr.valgrind memmem.c \
+	memmem.c str-two-way.h mempcpy.c memrchr.c mkdir.c mkdtemp.c \
+	mkostemp.c msvc-inval.c msvc-inval.h msvc-nothrow.c \
+	msvc-nothrow.h netinet_in.in.h open.c openat.c openat.h \
+	dirent-private.h opendir.c pathmax.h pipe.c rawmemchr.c \
+	rawmemchr.valgrind dirent-private.h readdir.c readlink.c \
+	realloc.c rename.c dirent-private.h rewinddir.c rmdir.c \
+	same-inode.h save-cwd.h malloc/scratch_buffer.h \
+	scratch_buffer.h setenv.c setlocale-lock.c setlocale_null.h \
+	windows-initguard.h signal.in.h _Noreturn.h arg-nonnull.h \
+	c++defs.h warn-on-use.h stat-w32.c stat-w32.h stat.c \
+	stat-time.h stdalign.in.h stdbool.in.h stddef.in.h stdint.in.h \
+	stdio.in.h stdlib.in.h strchrnul.c strchrnul.valgrind strdup.c \
+	streq.h strerror.c strerror-override.c strerror-override.h \
+	strerror_r.c string.in.h strnlen.c strstr.c str-two-way.h \
+	strstr.c strtok_r.c sys_random.in.h sys_socket.in.h \
+	sys_stat.in.h sys_time.in.h sys_types.in.h sys_uio.in.h \
+	tempname.h time.in.h time_r.c unistd.in.h unistd--.h \
+	unistd-safer.h unsetenv.c \
 	$(top_srcdir)/import/extra/update-copyright verify.h \
 	wchar.in.h wctype.in.h windows-initguard.h windows-mutex.c \
 	windows-mutex.h windows-once.c windows-once.h \
