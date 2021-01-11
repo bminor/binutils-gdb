@@ -1,5 +1,15 @@
 2021-01-15  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-nat.c (store_cregs_to_thread): Implement.
+	(aarch64_linux_nat_target::store_registers): Don't fetch the C
+	registers before writing to them.
+	Fetch GPR's after modifying the C registers.
+	* aarch64-tdep.c (aarch64_cannot_store_register): Remove C registers
+	write restriction.
+	* regcache.c (regcache_write_pc): Handle partial writes to PCC.
+
+2021-01-15  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-linux-tdep.c (aarch64_linux_report_signal_info): Remove
 	spurious newline output.
 

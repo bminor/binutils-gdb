@@ -268,6 +268,36 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
 		   &pauth_regset[1]);
 }
 
+/* Capability registers fill hook implementation.  */
+
+static void
+aarch64_fill_cregset (struct regcache *regcache, void *buf)
+{
+  struct user_morello_state *cregset
+      = (struct user_morello_state *) buf;
+
+  int cregs_base = find_regno (regcache->tdesc, "c0");
+
+  /* Store the C registers to the buffer.  */
+  int i, regno;
+  for (regno = cregs_base, i = 0;
+       regno < cregs_base + AARCH64_C_REGS_NUM;
+       regno++, i++)
+    collect_register (regcache, regno, &cregset->cregs[i]);
+
+  /* Store the other registers to the buffer.  */
+  collect_register (regcache, regno++, &cregset->csp);
+  collect_register (regcache, regno++, &cregset->pcc);
+  collect_register (regcache, regno++, &cregset->ddc);
+  collect_register (regcache, regno++, &cregset->ctpidr);
+  collect_register (regcache, regno++, &cregset->rcsp);
+  collect_register (regcache, regno++, &cregset->rddc);
+  collect_register (regcache, regno++, &cregset->rctpidr);
+  collect_register (regcache, regno++, &cregset->cid);
+  collect_register (regcache, regno++, &cregset->tag_map);
+  collect_register (regcache, regno++, &cregset->cctlr);
+}
+
 /* Capability registers store hook implementation.  */
 
 static void
@@ -723,7 +753,7 @@ static struct regset_info aarch64_regsets[] =
   /* FIXME-Morello: Fixup the register set size.  */
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MORELLO,
     AARCH64_LINUX_CREGS_SIZE, OPTIONAL_REGS,
-    nullptr, aarch64_store_cregset },
+    aarch64_fill_cregset, aarch64_store_cregset },
   NULL_REGSET
 };
 
@@ -756,7 +786,7 @@ static struct regset_info aarch64_sve_regsets[] =
   /* FIXME-Morello: Fixup the register set size.  */
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MORELLO,
     AARCH64_LINUX_CREGS_SIZE, OPTIONAL_REGS,
-    nullptr, aarch64_store_cregset },
+    aarch64_fill_cregset, aarch64_store_cregset },
   NULL_REGSET
 };
 

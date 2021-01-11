@@ -1,5 +1,10 @@
 2021-01-15  Luis Machado  <luis.machado@arm.com>
 
+	* linux-aarch64-low.cc (aarch64_fill_cregset): New function.
+	(aarch64_regsets, aarch64_sve_regsets): Add C registers fill hook.
+
+2021-01-15  Luis Machado  <luis.machado@arm.com>
+
 	* configure.srv: Add nat/aarch64-cap-linux.o to the list of object
 	files for AArch64-Linux
 	* linux-aarch64-low.cc (aarch64_target) <supports_qxfer_capability>
