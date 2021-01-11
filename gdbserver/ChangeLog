@@ -1,5 +1,10 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* linux-low.cc (linux_process_target::complete_ongoing_step_over):
+	Discard step SIGTRAP, unless GDB wanted the thread to step.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* server.cc (discard_queued_stop_replies): Don't ever discard the
 	notification at the head of the list.
 
