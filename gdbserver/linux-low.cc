@@ -4695,7 +4695,34 @@ linux_process_target::complete_ongoing_step_over ()
 
       lwp = find_lwp_pid (step_over_bkpt);
       if (lwp != NULL)
-	finish_step_over (lwp);
+	{
+	  finish_step_over (lwp);
+
+	  /* If we got our step SIGTRAP, don't leave it pending,
+	     otherwise we would report it to GDB as a spurious
+	     SIGTRAP.  */
+	  gdb_assert (lwp->status_pending_p);
+	  if (WIFSTOPPED (lwp->status_pending)
+	      && WSTOPSIG (lwp->status_pending) == SIGTRAP)
+	    {
+	      thread_info *thread = get_lwp_thread (lwp);
+	      if (thread->last_resume_kind != resume_step)
+		{
+		  if (debug_threads)
+		    debug_printf ("detach: discard step-over SIGTRAP\n");
+
+		  lwp->status_pending_p = 0;
+		  lwp->status_pending = 0;
+		  resume_one_lwp (lwp, lwp->stepping, 0, NULL);
+		}
+	      else
+		{
+		  if (debug_threads)
+		    debug_printf ("detach: resume_step, "
+				  "not discarding step-over SIGTRAP\n");
+		}
+	    }
+	}
       step_over_bkpt = null_ptid;
       unsuspend_all_lwps (lwp);
     }
