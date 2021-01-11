@@ -388,12 +388,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	    regs[rd] = regs[rm];
 	  else
 	    {
-	      if (aarch64_debug)
-		{
-		  debug_printf ("aarch64: prologue analysis gave up "
-				"addr=%s opcode=0x%x (orr x register)\n",
-				core_addr_to_string_nz (start), insn);
-		}
+	      aarch64_debug_printf ("prologue analysis gave up "
+				    "addr=%s opcode=0x%x (orr x register)",
+				    core_addr_to_string_nz (start), insn);
+
 	      break;
 	    }
 	}
@@ -513,10 +511,9 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	    }
 	  else
 	    {
-	      if (aarch64_debug)
-		debug_printf ("aarch64: prologue analysis gave up addr=%s"
-			      " opcode=0x%x (iclass)\n",
-			      core_addr_to_string_nz (start), insn);
+	      aarch64_debug_printf ("prologue analysis gave up addr=%s"
+				    " opcode=0x%x (iclass)",
+				    core_addr_to_string_nz (start), insn);
 	      break;
 	    }
 
@@ -527,12 +524,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  if (aarch64_debug)
-	    {
-	      debug_printf ("aarch64: prologue analysis gave up addr=%s"
-			    " opcode=0x%x\n",
-			    core_addr_to_string_nz (start), insn);
-	    }
+	  aarch64_debug_printf ("prologue analysis gave up addr=%s"
+				" opcode=0x%x",
+				core_addr_to_string_nz (start), insn);
+
 	  break;
 	}
     }
@@ -1606,12 +1601,10 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
 	regval <<= ((X_REGISTER_SIZE - partial_len) * TARGET_CHAR_BIT);
 
-      if (aarch64_debug)
-	{
-	  debug_printf ("arg %d in %s = 0x%s\n", info->argnum,
-			gdbarch_register_name (gdbarch, regnum),
-			phex (regval, X_REGISTER_SIZE));
-	}
+      aarch64_debug_printf ("arg %d in %s = 0x%s", info->argnum,
+			    gdbarch_register_name (gdbarch, regnum),
+			    phex (regval, X_REGISTER_SIZE));
+
       regcache_cooked_write_unsigned (regcache, regnum, regval);
       len -= partial_len;
       buf += partial_len;
@@ -1646,11 +1639,9 @@ pass_in_v (struct gdbarch *gdbarch,
       memcpy (reg, buf, len);
       regcache->cooked_write (regnum, reg);
 
-      if (aarch64_debug)
-	{
-	  debug_printf ("arg %d in %s\n", info->argnum,
-			gdbarch_register_name (gdbarch, regnum));
-	}
+      aarch64_debug_printf ("arg %d in %s", info->argnum,
+			    gdbarch_register_name (gdbarch, regnum));
+
       return 1;
     }
   info->nsrn = 8;
@@ -1680,11 +1671,8 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
   if (align > 16)
     align = 16;
 
-  if (aarch64_debug)
-    {
-      debug_printf ("arg %d len=%d @ sp + %d\n", info->argnum, len,
-		    info->nsaa);
-    }
+  aarch64_debug_printf ("arg %d len=%d @ sp + %d\n", info->argnum, len,
+			info->nsaa);
 
   item.len = len;
   item.data = buf;
@@ -1833,13 +1821,11 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* The struct_return pointer occupies X8.  */
   if (return_method != return_method_normal)
     {
-      if (aarch64_debug)
-	{
-	  debug_printf ("struct return in %s = 0x%s\n",
-			gdbarch_register_name (gdbarch,
-					       AARCH64_STRUCT_RETURN_REGNUM),
-			paddress (gdbarch, struct_addr));
-	}
+      aarch64_debug_printf ("struct return in %s = 0x%s",
+			    gdbarch_register_name
+			      (gdbarch, AARCH64_STRUCT_RETURN_REGNUM),
+			    paddress (gdbarch, struct_addr));
+
       regcache_cooked_write_unsigned (regcache, AARCH64_STRUCT_RETURN_REGNUM,
 				      struct_addr);
     }
@@ -2246,12 +2232,10 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  gdb_byte buf[register_size (gdbarch, regno)];
 	  gdb_assert (len <= sizeof (buf));
 
-	  if (aarch64_debug)
-	    {
-	      debug_printf ("read HFA or HVA return value element %d from %s\n",
-			    i + 1,
-			    gdbarch_register_name (gdbarch, regno));
-	    }
+	  aarch64_debug_printf
+	    ("read HFA or HVA return value element %d from %s",
+	     i + 1, gdbarch_register_name (gdbarch, regno));
+
 	  regs->cooked_read (regno, buf);
 
 	  memcpy (valbuf, buf, len);
@@ -2358,12 +2342,9 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  gdb_byte tmpbuf[register_size (gdbarch, regno)];
 	  gdb_assert (len <= sizeof (tmpbuf));
 
-	  if (aarch64_debug)
-	    {
-	      debug_printf ("write HFA or HVA return value element %d to %s\n",
-			    i + 1,
-			    gdbarch_register_name (gdbarch, regno));
-	    }
+	  aarch64_debug_printf
+	    ("write HFA or HVA return value element %d to %s",
+	     i + 1, gdbarch_register_name (gdbarch, regno));
 
 	  memcpy (tmpbuf, valbuf,
 		  len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
@@ -2438,8 +2419,7 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
     {
       if (aarch64_return_in_memory (gdbarch, valtype))
 	{
-	  if (aarch64_debug)
-	    debug_printf ("return value in memory\n");
+	  aarch64_debug_printf ("return value in memory");
 	  return RETURN_VALUE_STRUCT_CONVENTION;
 	}
     }
@@ -2450,8 +2430,7 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
   if (readbuf)
     aarch64_extract_return_value (valtype, regcache, readbuf);
 
-  if (aarch64_debug)
-    debug_printf ("return value in registers\n");
+  aarch64_debug_printf ("return value in registers");
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }

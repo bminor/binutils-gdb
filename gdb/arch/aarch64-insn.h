@@ -21,6 +21,11 @@
 
 extern bool aarch64_debug;
 
+/* Print an "aarch64" debug statement.  */
+
+#define aarch64_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (aarch64_debug, "aarch64", fmt, ##__VA_ARGS__)
+
 /* Support routines for instruction parsing.  */
 
 /* Create a mask of X bits.  */

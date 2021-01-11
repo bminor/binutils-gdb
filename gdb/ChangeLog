@@ -1,5 +1,11 @@
 2021-01-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* arch/aarch64-insn.h (aarch64_debug_printf): New.
+	* arch/aarch64-insn.c: Use aarch64_debug_printf.
+	* aarch64-tdep.c: Use aarch64_debug_printf.
+
+2021-01-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* solib-aix.c (solib_aix_debug_printf): New, use throughout
 	file.
 
