@@ -1,5 +1,10 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* infrun.c (struct step_over_info): Initialize fields.
+	(prepare_for_detach): Handle ongoing in-line step over.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* linux-nat.c (linux_nat_target::detach): Remove breakpoints
 	here...
 	* remote.c (remote_target::remote_detach_1): ... and here ...

@@ -1261,15 +1261,15 @@ struct step_over_info
      and address of the instruction the breakpoint is set at.  We'll
      skip inserting all breakpoints here.  Valid iff ASPACE is
      non-NULL.  */
-  const address_space *aspace;
-  CORE_ADDR address;
+  const address_space *aspace = nullptr;
+  CORE_ADDR address = 0;
 
   /* The instruction being stepped over triggers a nonsteppable
      watchpoint.  If true, we'll skip inserting watchpoints.  */
-  int nonsteppable_watchpoint_p;
+  int nonsteppable_watchpoint_p = 0;
 
   /* The thread's global number.  */
-  int thread;
+  int thread = -1;
 };
 
 /* The step-over info of the location that is being stepped over.
@@ -3566,6 +3566,7 @@ struct wait_one_event
 };
 
 static bool handle_one (const wait_one_event &event);
+static void restart_threads (struct thread_info *event_thread);
 
 /* Prepare and stabilize the inferior for detaching it.  E.g.,
    detaching while a thread is displaced stepping is a recipe for
@@ -3591,6 +3592,35 @@ prepare_for_detach (void)
       next = global_thread_step_over_chain_next (tp);
       if (tp->inf == inf)
 	global_thread_step_over_chain_remove (tp);
+    }
+
+  /* If we were already in the middle of an inline step-over, and the
+     thread stepping belongs to the inferior we're detaching, we need
+     to restart the threads of other inferiors.  */
+  if (step_over_info.thread != -1)
+    {
+      infrun_debug_printf ("inline step-over in-process while detaching");
+
+      thread_info *thr = find_thread_global_id (step_over_info.thread);
+      if (thr->inf == inf)
+	{
+	  /* Since we removed threads of INF from the step-over chain,
+	     we know this won't start a step-over for INF.  */
+	  clear_step_over_info ();
+
+	  if (target_is_non_stop_p ())
+	    {
+	      /* Start a new step-over in another thread if there's
+		 one that needs it.  */
+	      start_step_over ();
+
+	      /* Restart all other threads (except the
+		 previously-stepping thread, since that one is still
+		 running).  */
+	      if (!step_over_info_valid_p ())
+		restart_threads (thr);
+	    }
+	}
     }
 
   if (displaced_step_in_progress (inf))
@@ -5528,6 +5558,13 @@ restart_threads (struct thread_info *event_thread)
 
   for (thread_info *tp : all_non_exited_threads ())
     {
+      if (tp->inf->detaching)
+	{
+	  infrun_debug_printf ("restart threads: [%s] inferior detaching",
+			       target_pid_to_str (tp->ptid).c_str ());
+	  continue;
+	}
+
       switch_to_thread_no_regs (tp);
 
       if (tp == event_thread)
