@@ -3612,8 +3612,6 @@ prepare_for_detach (void)
 	  error (_("Program exited while detaching"));
 	}
     }
-
-  restore_detaching.release ();
 }
 
 /* Wait for control to return from inferior to debugger.
