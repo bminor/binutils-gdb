@@ -1,3 +1,9 @@
+2021-01-11  Matt Jenkins  <matt@majenko.co.uk>
+
+	PR ld/27167
+	* ldmain.c (get_emulation): Add mipsmips32r3, mips32r5, mips64r3
+	and mips64r5 to list of known mips targets.
+
 2021-01-11  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portuguese translation.
