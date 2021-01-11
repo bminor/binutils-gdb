@@ -269,4 +269,8 @@ extern void all_uis_check_sync_execution_done (void);
    started or re-started).  */
 extern void all_uis_on_sync_execution_starting (void);
 
+/* In all-stop, restart the target if it had to be stopped to
+   detach.  */
+extern void restart_after_all_stop_detach (process_stratum_target *proc_target);
+
 #endif /* INFRUN_H */

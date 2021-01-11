@@ -2750,6 +2750,16 @@ detach_command (const char *args, int from_tty)
 
   disconnect_tracing ();
 
+  /* Hold a strong reference to the target while (maybe)
+     detaching the parent.  Otherwise detaching could close the
+     target.  */
+  auto target_ref
+    = target_ops_ref::new_reference (current_inferior ()->process_target ());
+
+  /* Save this before detaching, since detaching may unpush the
+     process_stratum target.  */
+  bool was_non_stop_p = target_is_non_stop_p ();
+
   target_detach (current_inferior (), from_tty);
 
   /* The current inferior process was just detached successfully.  Get
@@ -2766,6 +2776,9 @@ detach_command (const char *args, int from_tty)
 
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
+
+  if (!was_non_stop_p)
+    restart_after_all_stop_detach (as_process_stratum_target (target_ref.get ()));
 }
 
 /* Disconnect from the current target without resuming it (leaving it
