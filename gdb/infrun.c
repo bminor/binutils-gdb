@@ -3607,13 +3607,8 @@ prepare_for_detach (void)
 	 at this point, and signals are passed directly to the
 	 inferior, so this must mean the process is gone.  */
       if (!ecs->wait_some_more)
-	{
-	  restore_detaching.release ();
-	  error (_("Program exited while detaching"));
-	}
+	error (_("Program exited while detaching"));
     }
-
-  restore_detaching.release ();
 }
 
 /* Wait for control to return from inferior to debugger.

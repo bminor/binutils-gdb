@@ -1,5 +1,10 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* infrun.c (prepare_for_detach): Don't release scoped_restore
+	before returning.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* infrun.c (handle_one): New function, factored out from ...
 	(stop_all_threads): ... here.
 
