@@ -1,5 +1,15 @@
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
+	* infcmd.c (detach_command): Hold strong reference to target, and
+	if all-stop on entry, restart threads on exit.
+	* infrun.c (switch_back_to_stepped_thread): Factor out bits to ...
+	(restart_stepped_thread): ... this new function.  Also handle
+	trap_expected.
+	(restart_after_all_stop_detach): New function.
+	* infrun.h (restart_after_all_stop_detach): Declare.
+
+2021-02-03  Pedro Alves  <pedro@palves.net>
+
 	* infrun.c (struct step_over_info): Initialize fields.
 	(prepare_for_detach): Handle ongoing in-line step over.
 
