@@ -1,3 +1,8 @@
+2021-01-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (jit_debug): Change type to bool.
+	(_initialize_jit): Adjust.
+
 2021-01-09  Tom Tromey  <tom@tromey.com>
 
 	PR compile/23672

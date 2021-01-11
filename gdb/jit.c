@@ -58,9 +58,9 @@ static void jit_inferior_exit_hook (struct inferior *inf);
 
 static struct gdbarch_data *jit_gdbarch_data;
 
-/* Non-zero if we want to see trace of jit level stuff.  */
+/* True if we want to see trace of jit level stuff.  */
 
-static unsigned int jit_debug = 0;
+static bool jit_debug = false;
 
 static void
 show_jit_debug (struct ui_file *file, int from_tty,
@@ -1251,13 +1251,13 @@ _initialize_jit ()
 {
   jit_reader_dir = relocate_gdb_directory (JIT_READER_DIR,
 					   JIT_READER_DIR_RELOCATABLE);
-  add_setshow_zuinteger_cmd ("jit", class_maintenance, &jit_debug,
-			     _("Set JIT debugging."),
-			     _("Show JIT debugging."),
-			     _("When non-zero, JIT debugging is enabled."),
-			     NULL,
-			     show_jit_debug,
-			     &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd ("jit", class_maintenance, &jit_debug,
+			   _("Set JIT debugging."),
+			   _("Show JIT debugging."),
+			   _("When non-zero, JIT debugging is enabled."),
+			   NULL,
+			   show_jit_debug,
+			   &setdebuglist, &showdebuglist);
 
   gdb::observers::inferior_created.attach (jit_inferior_created_hook);
   gdb::observers::inferior_execd.attach (jit_inferior_created_hook);
