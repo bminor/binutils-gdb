@@ -1,5 +1,10 @@
 2021-01-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* solib-aix.c (solib_aix_debug_printf): New, use throughout
+	file.
+
+2021-01-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (jit_debug): Change type to bool.
 	(_initialize_jit): Adjust.
 
