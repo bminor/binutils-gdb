@@ -109,6 +109,36 @@ proc test_dot_operations {} {
 	gdb_test "p 4 $gt 4" " = .FALSE."
 	gdb_test "p 3 $gt 4" " = .FALSE."
     }
+
+    # Now test the symbol based comparison operators.
+
+    # Arithmetic EQ
+    gdb_test "p 5 == 4" " = .FALSE."
+    gdb_test "p 4 == 4" " = .TRUE."
+
+    # Arithmetic NE
+    gdb_test "p 5 /= 4" " = .TRUE."
+    gdb_test "p 4 /= 4" " = .FALSE."
+
+    # Arithmetic LE
+    gdb_test "p 5 <= 4" " = .FALSE."
+    gdb_test "p 4 <= 4" " = .TRUE."
+    gdb_test "p 3 <= 4" " = .TRUE."
+
+    # Arithmetic LT
+    gdb_test "p 5 < 4" " = .FALSE."
+    gdb_test "p 4 < 4" " = .FALSE."
+    gdb_test "p 3 < 4" " = .TRUE."
+
+    # Arithmetic GE
+    gdb_test "p 5 >= 4" " = .TRUE."
+    gdb_test "p 4 >= 4" " = .TRUE."
+    gdb_test "p 3 >= 4" " = .FALSE."
+
+    # Arithmetic GT
+    gdb_test "p 5 > 4" " = .TRUE."
+    gdb_test "p 4 > 4" " = .FALSE."
+    gdb_test "p 3 > 4" " = .FALSE."
 }
 
 # Start of test script.

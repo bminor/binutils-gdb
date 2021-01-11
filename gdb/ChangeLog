@@ -1,3 +1,12 @@
+2021-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-exp.y (dot_ops): Rename to...
+	(fortran_operators): ...this.  Add a header comment.  Add symbol
+	based operators.
+	(yylex): Update to use fortran_operators not dot_ops.  Remove
+	special handling for '**', this is now included in
+	fortran_operators.
+
 2021-01-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* arch/aarch64-insn.h (aarch64_debug_printf): New.

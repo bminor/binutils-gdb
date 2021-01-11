@@ -979,7 +979,9 @@ struct token
   bool case_sensitive;
 };
 
-static const struct token dot_ops[] =
+/* List of Fortran operators.  */
+
+static const struct token fortran_operators[] =
 {
   { ".and.", BOOL_AND, BINOP_END, false },
   { ".or.", BOOL_OR, BINOP_END, false },
@@ -987,11 +989,18 @@ static const struct token dot_ops[] =
   { ".eq.", EQUAL, BINOP_END, false },
   { ".eqv.", EQUAL, BINOP_END, false },
   { ".neqv.", NOTEQUAL, BINOP_END, false },
+  { "==", EQUAL, BINOP_END, false },
   { ".ne.", NOTEQUAL, BINOP_END, false },
+  { "/=", NOTEQUAL, BINOP_END, false },
   { ".le.", LEQ, BINOP_END, false },
+  { "<=", LEQ, BINOP_END, false },
   { ".ge.", GEQ, BINOP_END, false },
+  { ">=", GEQ, BINOP_END, false },
   { ".gt.", GREATERTHAN, BINOP_END, false },
+  { ">", GREATERTHAN, BINOP_END, false },
   { ".lt.", LESSTHAN, BINOP_END, false },
+  { "<", LESSTHAN, BINOP_END, false },
+  { "**", STARSTAR, BINOP_EXP, false },
 };
 
 /* Holds the Fortran representation of a boolean, and the integer value we
@@ -1163,25 +1172,16 @@ yylex (void)
 	}
     }
 
-  /* See if it is a special .foo. operator.  */
-  for (int i = 0; i < ARRAY_SIZE (dot_ops); i++)
-    if (strncasecmp (tokstart, dot_ops[i].oper,
-		     strlen (dot_ops[i].oper)) == 0)
+  /* See if it is a Fortran operator.  */
+  for (int i = 0; i < ARRAY_SIZE (fortran_operators); i++)
+    if (strncasecmp (tokstart, fortran_operators[i].oper,
+		     strlen (fortran_operators[i].oper)) == 0)
       {
-	gdb_assert (!dot_ops[i].case_sensitive);
-	pstate->lexptr += strlen (dot_ops[i].oper);
-	yylval.opcode = dot_ops[i].opcode;
-	return dot_ops[i].token;
+	gdb_assert (!fortran_operators[i].case_sensitive);
+	pstate->lexptr += strlen (fortran_operators[i].oper);
+	yylval.opcode = fortran_operators[i].opcode;
+	return fortran_operators[i].token;
       }
-
-  /* See if it is an exponentiation operator.  */
-
-  if (strncmp (tokstart, "**", 2) == 0)
-    {
-      pstate->lexptr += 2;
-      yylval.opcode = BINOP_EXP;
-      return STARSTAR;
-    }
 
   switch (c = *tokstart)
     {

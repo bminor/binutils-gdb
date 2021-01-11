@@ -1,3 +1,7 @@
+2021-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/dot-ops.exp: Add new tests.
+
 2021-01-11  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/26968
