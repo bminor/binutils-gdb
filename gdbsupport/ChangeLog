@@ -1,3 +1,10 @@
+2021-01-23  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* gdb_tilde_expand.cc (gdb_tilde_expand): Improve
+	implementation.
+	(gdb_tilde_expand_up): Delegate logic to gdb_tilde_expand.
+	* gdb_tilde_expand.h (gdb_tilde_expand): Update description.
+
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common-debug.h (debug_prefixed_printf_cond_nofunc): New.

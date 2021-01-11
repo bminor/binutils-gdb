@@ -1,3 +1,9 @@
+2021-01-23  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* Makefile.in (SELFTESTS_SRCS): Add
+	unittests/gdb_tilde_expand-selftests.c.
+	* unittests/gdb_tilde_expand-selftests.c: New file.
+
 2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR cli/25956
