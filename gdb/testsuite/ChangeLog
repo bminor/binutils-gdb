@@ -1,3 +1,9 @@
+2021-01-11  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26968
+	* gdb.arch/amd64-stap-three-arg-disp.S: Remove insn modifying $ebx.
+	Move insn setting $eax to before probe point.
+
 2021-01-09  Tom Tromey  <tom@tromey.com>
 
 	* gdb.trace/ax.exp: Do not require an "ext".
