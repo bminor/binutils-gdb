@@ -536,7 +536,42 @@ fetch_cregs_from_thread (struct regcache *regcache)
 static void
 store_cregs_to_thread (const struct regcache *regcache)
 {
-  /* Can't modify capability registers, do nothing.  */
+  struct gdbarch *gdbarch = regcache->arch ();
+  gdb_assert (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 64);
+
+  int tid = regcache->ptid ().lwp ();
+
+  struct user_morello_state cregset;
+  struct iovec iovec;
+  iovec.iov_base = &cregset;
+  iovec.iov_len = sizeof (cregset);
+
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_MORELLO, &iovec) < 0)
+    perror_with_name (_("Unable to fetch capability registers."));
+
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+
+  /* Stored the C registers.  */
+  int regno, i;
+  for (regno = tdep->cap_reg_base, i = 0;
+       regno < tdep->cap_reg_base + AARCH64_C_REGS_NUM;
+       regno++, i++)
+    regcache->raw_collect (regno, &cregset.cregs[i]);
+
+  /* Store the other registers.  */
+  regcache->raw_collect (regno++, &cregset.csp);
+  regcache->raw_collect (regno++, &cregset.pcc);
+  regcache->raw_collect (regno++, &cregset.ddc);
+  regcache->raw_collect (regno++, &cregset.ctpidr);
+  regcache->raw_collect (regno++, &cregset.rcsp);
+  regcache->raw_collect (regno++, &cregset.rddc);
+  regcache->raw_collect (regno++, &cregset.rctpidr);
+  regcache->raw_collect (regno++, &cregset.cid);
+  regcache->raw_collect (regno++, &cregset.tag_map);
+  regcache->raw_collect (regno++, &cregset.cctlr);
+
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_MORELLO, &iovec) < 0)
+    perror_with_name (_("Unable to store capability registers."));
 }
 
 /* Implement the "fetch_registers" target_ops method.  */
@@ -618,18 +653,14 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
 	store_tlsregs_to_thread (regcache);
 
       if (tdep->has_capability ())
-	{
-	  /* Due to the aliasing of X/C registers and due to register merging
-	     by the kernel (see documentation in the kernel), we should force
-	     a read of the C registers whenever the X registers are written
-	     to.  */
-	  fetch_cregs_from_thread (regcache);
-	  store_cregs_to_thread (regcache);
-	}
+	store_cregs_to_thread (regcache);
     }
   else if (tdep->has_capability () && regno >= tdep->cap_reg_base
 	   && regno < tdep->cap_reg_base + AARCH64_MORELLO_REGS_NUM)
-    store_cregs_to_thread (regcache);
+    {
+      store_cregs_to_thread (regcache);
+      fetch_gregs_from_thread (regcache);
+    }
   else if (regno < AARCH64_V0_REGNUM)
     {
       store_gregs_to_thread (regcache);

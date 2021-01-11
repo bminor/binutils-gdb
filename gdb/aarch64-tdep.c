@@ -3802,12 +3802,6 @@ aarch64_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 	      || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base));
     }
 
-  if (tdep->has_capability ())
-    {
-      /* Capability register set is read-only for now.  */
-      return (regnum >= tdep->cap_reg_base && regnum < tdep->cap_reg_last);
-    }
-
   return 0;
 }
 
