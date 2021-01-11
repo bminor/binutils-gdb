@@ -1121,11 +1121,18 @@ dump_subexp_body_standard (struct expression *exp,
       }
       break;
 
+    case OP_BOOL:
+      {
+	bool val = (bool) (exp->elts[elt].longconst);
+	fputs_filtered (val ? "TRUE" : "FALSE", stream);
+	elt += 2;
+      }
+      break;
+
     default:
     case OP_NULL:
     case MULTI_SUBSCRIPT:
     case OP_COMPLEX:
-    case OP_BOOL:
     case OP_M2_STRING:
     case OP_THIS:
     case OP_NAME:

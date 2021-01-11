@@ -1,5 +1,9 @@
 2021-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* expprint.c (dump_subexp_body_standard): Handle OP_BOOL.
+
+2021-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.y (dot_ops): Rename to...
 	(fortran_operators): ...this.  Add a header comment.  Add symbol
 	based operators.
