@@ -36,6 +36,14 @@ typedef void *serial_ttystate;
 struct serial;
 struct serial_ops;
 
+/* Speed in bits per second, or -1 which means don't mess with the speed.  */
+
+extern int baud_rate;
+
+/* Parity for serial port  */
+
+extern int serial_parity;
+
 /* Create a new serial for OPS.  The new serial is not opened.  */
 
 /* Try to open NAME.  Returns a new `struct serial *' on success, NULL

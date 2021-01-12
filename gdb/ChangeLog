@@ -1,5 +1,12 @@
 2021-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target.h (baud_rate, serial_parity): Move declarations...
+	* serial.h: ... here.
+	* main.c: Include serial.h.
+	* serial.c (baud_rate, serial_parity): Update doc.
+
+2021-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* top.c (pre_init_ui_hook): Remove.
 
 2021-01-12  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>

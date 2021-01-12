@@ -2477,12 +2477,6 @@ extern gdb::optional<gdb::char_vector> target_get_osdata (const char *type);
    information (higher values, more information).  */
 extern int remote_debug;
 
-/* Speed in bits per second, or -1 which means don't mess with the speed.  */
-extern int baud_rate;
-
-/* Parity for serial port  */
-extern int serial_parity;
-
 /* Timeout limit for response from target.  */
 extern int remote_timeout;
 
