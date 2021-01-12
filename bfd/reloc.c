@@ -921,6 +921,13 @@ space consuming.  For each target:
       if (howto->type >= R_AMD64_PCRLONG_1
 	  && howto->type <= R_AMD64_PCRLONG_5)
 	relocation -= (bfd_vma)(howto->type - R_AMD64_PCRLONG);
+      else if (howto->type == R_AMD64_DIR64
+	       || howto->type == R_AMD64_DIR32)
+	{
+	  bfd_vma val = read_reloc (abfd, (bfd_byte *) data + octets,
+				    howto);
+	  relocation -= val & howto->src_mask;
+	}
     }
 
   /* FIXME: This overflow checking is incomplete, because the value

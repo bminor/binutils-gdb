@@ -1,3 +1,11 @@
+2021-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27171
+	* testsuite/ld-x86-64/pe-x86-64-5.obj.bz2: New file.
+	* testsuite/ld-x86-64/pe-x86-64-5.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-5.rd: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64.exp: Run PR ld/27171 test.
+
 2021-01-11  Matt Jenkins  <matt@majenko.co.uk>
 
 	PR ld/27167

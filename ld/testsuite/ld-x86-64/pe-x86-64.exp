@@ -63,4 +63,14 @@ run_ld_link_tests [list \
 	{{objdump {-dw --sym} pe-x86-64-4.od}} \
 	"pe-x86-64-4" \
     ] \
+    [list \
+	"Build pe-x86-64-5" \
+	"-m elf_x86_64 --entry=begin" \
+	"" \
+	"" \
+	{pe-x86-64-5.obj.bz2 } \
+	{{objdump {-dw --sym} pe-x86-64-5.od} \
+	 {readelf {-s -x .data} pe-x86-64-5.rd}} \
+	"pe-x86-64-5" \
+    ] \
 ]
