@@ -15,7 +15,7 @@
 
 # This test exercises disassemble /s with optimized and inlined code.
 
-if { ![istarget "x86_64-*-linux*"] } {
+if { ![is_amd64_regs_target] } {
     continue
 }
 

@@ -1,3 +1,7 @@
+2021-01-12  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/disasm-optim.exp: Require is_amd64_regs_target.
+
 2021-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/debug-expr.exp: Add new tests.
