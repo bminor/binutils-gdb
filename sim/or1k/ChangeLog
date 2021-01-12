@@ -1,5 +1,10 @@
 2021-01-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* traps.c (or1k32bf_exception): Move handler_pc decl to top of scope.
+	(or1k32bf_mfspr): Move val decl to top of function body.
+
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_OBJS): Delete redundant sim-cpu.o, sim-hload.o,
 	sim-hrw.o, sim-reg.o, sim-reason.o, sim-engine.o, sim-model.o,
 	sim-stop.o, and $(TRAPS_OBJ) entries.

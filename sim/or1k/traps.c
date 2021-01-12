@@ -128,6 +128,7 @@ or1k32bf_exception (sim_cpu *current_cpu, USI pc, USI exnum)
     }
   else
     {
+      IADDR handler_pc;
 
       /* Calculate the exception program counter.  */
       switch (exnum)
@@ -162,8 +163,8 @@ or1k32bf_exception (sim_cpu *current_cpu, USI pc, USI exnum)
       current_cpu->next_delay_slot = 0;
 
       /* Jump program counter into handler.  */
-      IADDR handler_pc =
-	(GET_H_SYS_SR_EPH ()? 0xf0000000 : 0x00000000) + (exnum << 8);
+      handler_pc =
+	(GET_H_SYS_SR_EPH () ? 0xf0000000 : 0x00000000) + (exnum << 8);
 
       sim_engine_restart (sd, current_cpu, NULL, handler_pc);
     }
@@ -191,6 +192,7 @@ USI
 or1k32bf_mfspr (sim_cpu *current_cpu, USI addr)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
+  SI val;
 
   if (!GET_H_SYS_SR_SM () && !GET_H_SYS_SR_SUMRA ())
     {
@@ -202,7 +204,7 @@ or1k32bf_mfspr (sim_cpu *current_cpu, USI addr)
   if (addr >= NUM_SPR)
     goto bad_address;
 
-  SI val = GET_H_SPR (addr);
+  val = GET_H_SPR (addr);
 
   switch (addr)
     {
