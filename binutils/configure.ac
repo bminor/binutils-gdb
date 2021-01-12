@@ -494,3 +494,5 @@ AC_SUBST(pdfdir)
 
 AC_CONFIG_FILES(Makefile doc/Makefile po/Makefile.in:po/Make-in)
 AC_OUTPUT
+
+GNU_MAKE_JOBSERVER

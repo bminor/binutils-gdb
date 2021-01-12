@@ -15083,3 +15083,21 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+
+touch config.status.tmp
+if touch --reference=config.status config.status.tmp > /dev/null 2>&1; then
+  sed '/as_fn_exit 0/i \
+sed -e \"s/^\t\\\(\\\$(AM_V_CCLD)\\\)/\t+ \\\1/\" Makefile > Makefile.tmp \
+touch --reference=Makefile Makefile.tmp \
+mv Makefile.tmp Makefile \
+' config.status > config.status.tmp
+  touch --reference=config.status config.status.tmp
+  mv config.status.tmp config.status
+  chmod +x config.status
+  sed -e "s/^\t\(\$(AM_V_CCLD)\)/\t+ \1/" Makefile > Makefile.tmp
+  touch --reference=Makefile Makefile.tmp
+  mv Makefile.tmp Makefile
+else
+  rm -f config.status.tmp
+fi

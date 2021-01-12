@@ -1076,3 +1076,5 @@ AC_CONFIG_COMMANDS([default],
  te_file=${te_file}])
 
 AC_OUTPUT
+
+GNU_MAKE_JOBSERVER
