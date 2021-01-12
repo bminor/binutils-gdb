@@ -1,3 +1,7 @@
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-profile.h [!WITH_PROFILE]: Rewrite to use #error.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4 (SIM_AC_OUTPUT): Require SIM_AC_OPTION_WARNINGS.

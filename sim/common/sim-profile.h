@@ -21,7 +21,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_PROFILE_H
 
 #ifndef WITH_PROFILE
-Error, WITH_PROFILE not defined.
+#error "WITH_PROFILE not defined"
 #endif
 
 /* Standard profilable entities.  */
