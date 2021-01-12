@@ -37,6 +37,9 @@ create_feature_aarch64_fpu (struct target_desc *result, long regnum)
   element_type = tdesc_named_type (feature, "int16");
   tdesc_create_vector (feature, "v8i", element_type, 8);
 
+  element_type = tdesc_named_type (feature, "bfloat16");
+  tdesc_create_vector (feature, "v8bf16", element_type, 8);
+
   element_type = tdesc_named_type (feature, "uint8");
   tdesc_create_vector (feature, "v16u", element_type, 16);
 
@@ -68,6 +71,8 @@ create_feature_aarch64_fpu (struct target_desc *result, long regnum)
   tdesc_add_field (type_with_fields, "s", field_type);
 
   type_with_fields = tdesc_create_union (feature, "vnh");
+  field_type = tdesc_named_type (feature, "v8bf16");
+  tdesc_add_field (type_with_fields, "bf", field_type);
   field_type = tdesc_named_type (feature, "v8f");
   tdesc_add_field (type_with_fields, "f", field_type);
   field_type = tdesc_named_type (feature, "v8u");

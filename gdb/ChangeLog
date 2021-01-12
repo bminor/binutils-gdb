@@ -1,3 +1,10 @@
+2021-01-12  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
+
+	* aarch64-tdep.c (aarch64_vnh_type): Add "bf" field in h registers.
+	(aarch64_vnv_type): Add "bf" type in h field of v registers.
+	* features/aarch64-fpu.c (create_feature_aarch64_fpu): Regenerated.
+	* features/aarch64-fpu.xml: Add bfloat16 type.
+
 2021-01-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* expprint.c (dump_subexp_body_standard): Handle OP_BOOL.
