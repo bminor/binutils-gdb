@@ -1,3 +1,9 @@
+2021-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27173
+	* gcc-plugin.m4 (GCC_PLUGIN_OPTION): Check if AR works with
+	--plugin and rc before enabling --plugin.
+
 2021-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gcc-plugin.m4 (GCC_PLUGIN_OPTION): New.
