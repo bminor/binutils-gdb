@@ -10241,6 +10241,10 @@ if test -n "$PLUGIN_OPTION"; then
   if $RANLIB --help 2>&1 | grep -q "\--plugin"; then
     RANLIB_PLUGIN_OPTION="$PLUGIN_OPTION"
   fi
+else
+  if test "$enable_pgo_build" != "no"; then
+    as_fn_error $? "AR with --plugin and rc is required for LTO build" "$LINENO" 5
+  fi
 fi
 
 

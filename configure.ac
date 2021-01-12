@@ -3452,6 +3452,10 @@ if test -n "$PLUGIN_OPTION"; then
   if $RANLIB --help 2>&1 | grep -q "\--plugin"; then
     RANLIB_PLUGIN_OPTION="$PLUGIN_OPTION"
   fi
+else
+  if test "$enable_pgo_build" != "no"; then
+    AC_MSG_ERROR([AR with --plugin and rc is required for LTO build])
+  fi
 fi
 AC_SUBST(AR_PLUGIN_OPTION)
 AC_SUBST(RANLIB_PLUGIN_OPTION)

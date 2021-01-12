@@ -1,5 +1,11 @@
 2021-01-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/26766
+	* configure.ac:
+	* configure: Regenerated.
+
+2021-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/27173
 	* configure: Regenerated.
 	* libtool.m4 (_LT_CMD_OLD_ARCHIVE): Check if AR works with
