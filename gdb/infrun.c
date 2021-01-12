@@ -8317,7 +8317,7 @@ normal_stop (void)
      print the stop event.  */
   if (inferior_ptid != null_ptid)
     gdb::observers::normal_stop.notify (inferior_thread ()->control.stop_bpstat,
-				 stop_print_frame);
+					stop_print_frame);
   else
     gdb::observers::normal_stop.notify (NULL, stop_print_frame);
 

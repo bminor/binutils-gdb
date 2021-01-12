@@ -1,5 +1,9 @@
 2021-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* infrun.c (normal_stop): Fix indentation.
+
+2021-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* top.h (readnow_symbol_files, readnever_symbol_files): Move
 	declarations to ...
 	* symfile.h: ... here.
