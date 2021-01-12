@@ -174,6 +174,7 @@ struct dummy_target : public target_ops
   void prepare_to_generate_core () override;
   void done_generating_core () override;
   gdb::byte_vector read_capability (CORE_ADDR arg0) override;
+  bool write_capability (CORE_ADDR arg0, gdb::array_view<const gdb_byte> arg1) override;
 };
 
 struct debug_target : public target_ops
@@ -346,6 +347,7 @@ struct debug_target : public target_ops
   void prepare_to_generate_core () override;
   void done_generating_core () override;
   gdb::byte_vector read_capability (CORE_ADDR arg0) override;
+  bool write_capability (CORE_ADDR arg0, gdb::array_view<const gdb_byte> arg1) override;
 };
 
 void
@@ -4437,6 +4439,34 @@ debug_target::read_capability (CORE_ADDR arg0)
   target_debug_print_CORE_ADDR (arg0);
   fputs_unfiltered (") = ", gdb_stdlog);
   target_debug_print_gdb_byte_vector (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+bool
+target_ops::write_capability (CORE_ADDR arg0, gdb::array_view<const gdb_byte> arg1)
+{
+  return this->beneath ()->write_capability (arg0, arg1);
+}
+
+bool
+dummy_target::write_capability (CORE_ADDR arg0, gdb::array_view<const gdb_byte> arg1)
+{
+  tcomplain ();
+}
+
+bool
+debug_target::write_capability (CORE_ADDR arg0, gdb::array_view<const gdb_byte> arg1)
+{
+  bool result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->write_capability (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->write_capability (arg0, arg1);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->write_capability (", this->beneath ()->shortname ());
+  target_debug_print_CORE_ADDR (arg0);
+  fputs_unfiltered (", ", gdb_stdlog);
+  target_debug_print_gdb_array_view_const_gdb_byte (arg1);
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_bool (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
 }

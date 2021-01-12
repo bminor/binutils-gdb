@@ -1,5 +1,32 @@
 2021-03-17  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-linux-nat.c (aarch64_linux_nat_target)
+	<write_capability>: New member function override.
+	(aarch64_linux_nat_target::write_capability): New member
+	function.
+	(maint_print_cap_from_addr_cmd): Adjust printing format.
+	(maint_set_capability_in_memory_cmd): New maintenance function.
+	(add_show_debug_regs_command): Register new maintenance command.
+	* nat/aarch64-cap-linux.c (aarch64_linux_write_capability): New
+	function.
+	* nat/aarch64-cap-linux.h (aarch64_linux_write_capability): New
+	prototype.
+	* remote.c (remote_target)
+	<write_capability>: New member function override.
+	Adjust enum documentation for PACKET_qXfer_capability.
+	(remote_target::write_capability): New member function.
+	(_initialize_remote): Adjust documentation for
+	PACKET_qXfer_capability.
+	* target-debug.h
+	(target_debug_print_gdb_array_view_const_gdb_byte): New macro.
+	* target-delegates.c: Regenerate.
+	* target.c (target_write_capability): New function.
+	* target.h (struct target_ops) <write_capability>: New virtual member
+	function.
+	(target_write_capability): New prototype.
+
+2021-03-17  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_register_tag): Handle PCC/CSP tag
 	extraction.
 

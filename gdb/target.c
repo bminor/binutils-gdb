@@ -3611,6 +3611,15 @@ target_read_capability (CORE_ADDR addr)
   return current_top_target ()->read_capability (addr);
 }
 
+/* See target.h.  */
+
+bool
+target_write_capability (CORE_ADDR addr,
+			 gdb::array_view<const gdb_byte> buffer)
+{
+  return current_top_target ()->write_capability (addr, buffer);
+}
+
 
 
 static char targ_desc[] =
