@@ -1,3 +1,8 @@
+2021-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27173
+	* configure: Regenerated.
+
 2021-01-11  Matt Jenkins  <matt@majenko.co.uk>
 
 	PR ld/27167
