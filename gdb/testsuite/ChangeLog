@@ -1,3 +1,22 @@
+2021-01-12  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.arch/i386-mpx-call.c (have_mpx): Remove.
+	(main): Remove call to have_mpx.
+	* gdb.arch/i386-mpx-call.exp: Use have_mpx.
+	* gdb.arch/i386-mpx-map.c (have_mpx): Remove.
+	(main): Remote call to have_mpx.
+	* gdb.arch/i386-mpx-map.exp: Use have_mpx.
+	* gdb.arch/i386-mpx-sigsegv.c (have_mpx): Remove.
+	(main): Remove call to have_mpx.
+	* gdb.arch/i386-mpx-sigsegv.exp: Use have_mpx.
+	* gdb.arch/i386-mpx-simple_segv.c (have_mpx): Remove.
+	(main): Remove call to have_mpx.
+	* gdb.arch/i386-mpx-simple_segv.exp: Use have_mpx.
+	* gdb.arch/i386-mpx.c (have_mpx): Remove.
+	(main): Remote call to have_mpx.
+	* gdb.arch/i386-mpx.exp: Use have_mpx.
+	* lib/gdb.exp (have_mpx): New proc.
+
 2021-01-12  Srinath Parvathaneni  <srinath.parvathaneni@arm.com>
 
 	* gdb.arch/aarch64-fp.exp: Modify to test bfloat16 support.

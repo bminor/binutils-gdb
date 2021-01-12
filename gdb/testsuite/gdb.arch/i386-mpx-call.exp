@@ -25,6 +25,11 @@ if { ![supports_mpx_check_pointer_bounds] } {
     return -1
 }
 
+if { ![have_mpx] } {
+    unsupported "processor does not support MPX"
+    return -1
+}
+
 set comp_flags "-mmpx -fcheck-pointer-bounds -I${srcdir}/../nat"
 
 if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
@@ -35,18 +40,6 @@ if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 if ![runto_main] {
     untested "could not run to main"
     return -1
-}
-
-set test "check whether processor supports MPX"
-gdb_test_multiple "print have_mpx ()" $test {
-    -re ".*= 1\r\n$gdb_prompt " {
-        pass $test
-    }
-    -re ".*= 0\r\n$gdb_prompt " {
-        pass $test
-        untested "processor does not support MPX; skipping tests"
-        return
-    }
 }
 
 set bounds_table 0
