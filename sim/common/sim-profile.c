@@ -554,7 +554,7 @@ profile_pc_init (SIM_DESC sd)
 		    {
 		      /* nr_buckets = (full-address-range / 2) / (bucket_size / 2) */
 		      PROFILE_PC_NR_BUCKETS (data) =
-			((1 << sizeof (sim_cia) * (8 - 1))
+			((1ULL << sizeof (sim_cia) * (8 - 1))
 			 / (PROFILE_PC_BUCKET_SIZE (data) / 2));
 		    }
 		  else
@@ -573,7 +573,7 @@ profile_pc_init (SIM_DESC sd)
 	    {
 	      if (PROFILE_PC_END (data) == 0)
 		/* bucket_size = (full-address-range / 2) / (nr_buckets / 2) */
-		bucket_size = ((1 << ((sizeof (sim_cia) * 8) - 1))
+		bucket_size = ((1ULL << ((sizeof (sim_cia) * 8) - 1))
 			       / (PROFILE_PC_NR_BUCKETS (data) / 2));
 	      else
 		bucket_size = ((PROFILE_PC_END (data)
