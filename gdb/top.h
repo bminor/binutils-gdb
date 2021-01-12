@@ -273,10 +273,6 @@ extern void set_prompt (const char *s);
 
 extern int gdb_in_secondary_prompt_p (struct ui *ui);
 
-/* From random places.  */
-extern int readnow_symbol_files;
-extern int readnever_symbol_files;
-
 /* Perform _initialize initialization.  */
 extern void gdb_init (char *);
 

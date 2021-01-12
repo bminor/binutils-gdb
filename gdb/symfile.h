@@ -641,4 +641,12 @@ extern gdb_bfd_ref_ptr find_separate_debug_file_in_section (struct objfile *);
 
 extern bool separate_debug_file_debug;
 
+/* Read full symbols immediately.  */
+
+extern int readnow_symbol_files;
+
+/* Never read full symbols.  */
+
+extern int readnever_symbol_files;
+
 #endif /* !defined(SYMFILE_H) */

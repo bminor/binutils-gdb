@@ -85,8 +85,14 @@ using clear_symtab_users_cleanup
   = FORWARD_SCOPE_EXIT (clear_symtab_users);
 
 /* Global variables owned by this file.  */
-int readnow_symbol_files;	/* Read full symbols immediately.  */
-int readnever_symbol_files;	/* Never read full symbols.  */
+
+/* See symfile.h.  */
+
+int readnow_symbol_files;
+
+/* See symfile.h.  */
+
+int readnever_symbol_files;
 
 /* Functions this file defines.  */
 
