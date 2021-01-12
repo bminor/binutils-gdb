@@ -1,5 +1,12 @@
 2021-01-12  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (SIM_OBJS): Delete redundant sim-cpu.o, sim-hload.o,
+	sim-hrw.o, sim-reg.o, sim-reason.o, sim-engine.o, sim-model.o,
+	sim-stop.o, and $(TRAPS_OBJ) entries.
+	(SIM_RUN_OBJS): Delete.
+
+2021-01-12  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_INLINE): Delete call.
 	* configure: Regenerate.
 
