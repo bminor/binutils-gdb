@@ -1,3 +1,16 @@
+2021-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Commands): Update menu.
+	(Extending GDB): Likewise.
+	(Command aliases default args): Moved later into the document,
+	added a cindex entry.  Renamed the section 'Automatically prepend
+	default arguments to user-defined aliases' to 'Default Arguments'.
+	(Aliases): Moved earlier in the document.  Minor rewording of the
+	first paragraph, down-cased the text inside all uses of @var, and
+	added a cross reference to the Python code.  Renamed the section
+	'Creating new spellings of existing commands' to 'Command
+	Aliases'.
+
 2021-01-21  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR python/19151
