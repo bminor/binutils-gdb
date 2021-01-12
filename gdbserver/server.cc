@@ -2016,14 +2016,27 @@ handle_qxfer_capability (const char *annex, gdb_byte *readbuf,
 			 const gdb_byte *writebuf, ULONGEST offset,
 			 LONGEST len)
 {
-   if (!the_target->supports_qxfer_capability () || writebuf != NULL)
+  if (!the_target->supports_qxfer_capability ())
     return -2;
+
+  gdb_assert (readbuf != nullptr || writebuf != nullptr);
 
   CORE_ADDR addr;
   unpack_varlen_hex (annex, &addr);
 
-  /* Read a capability and its tag.  */
-  return the_target->qxfer_capability (addr, readbuf, NULL, offset, len);
+  if (readbuf != nullptr)
+    {
+      /* Read a capability and its tag.  */
+      return the_target->qxfer_capability (addr, readbuf, nullptr, offset, len);
+    }
+  else
+    {
+      /* Write a capability to memory.  */
+      return the_target->qxfer_capability (addr, nullptr, writebuf, offset,
+					   len);
+    }
+
+  return -2;
 }
 
 static const struct qxfer qxfer_packets[] =

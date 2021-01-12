@@ -3430,14 +3430,31 @@ aarch64_target::qxfer_capability (const CORE_ADDR address,
 
   struct user_cap cap;
 
-  if (!aarch64_linux_read_capability (tid, address, cap))
+  if (readbuf != nullptr)
     {
-      warning (_("Unable to read capability from address."));
-      return 0;
-    }
+      if (!aarch64_linux_read_capability (tid, address, cap))
+	{
+	  warning (_("Unable to read capability from address."));
+	  return 0;
+	}
 
-  memcpy (readbuf, &cap.tag, 1);
-  memcpy (readbuf + 1, &cap.val, 16);
+      /* Copy data to readbuf.  */
+      memcpy (readbuf, &cap.tag, 1);
+      memcpy (readbuf + 1, &cap.val, 16);
+    }
+  else
+    {
+      /* Copy data from writebuf.  */
+      memcpy (&cap.tag, writebuf, 1);
+      memcpy (&cap.val, writebuf + 1, 16);
+      memset (&cap.__reserved, 0, 15);
+
+      if (!aarch64_linux_write_capability (tid, address, cap))
+	{
+	  warning (_("Unable to write capability to address."));
+	  return 0;
+	}
+    }
 
   return sizeof (cap.val) + 1;
 }

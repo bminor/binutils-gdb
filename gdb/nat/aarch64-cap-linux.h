@@ -65,4 +65,11 @@ struct user_cap {
 
 extern bool aarch64_linux_read_capability (int tid, CORE_ADDR address,
 					   user_cap &cap);
+
+/* For thread TID, write capability CAP to the memory address ADDRESS.
+
+   Return true if successful and false otherwise.  */
+
+extern bool aarch64_linux_write_capability (int tid, CORE_ADDR address,
+					    const user_cap &cap);
 #endif /* NAT_AARCH64_CAP_LINUX_H */

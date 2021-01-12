@@ -35,3 +35,16 @@ aarch64_linux_read_capability (int tid, CORE_ADDR address,
 
   return true;
 }
+
+/* See aarch64-cap-linux.h */
+
+bool
+aarch64_linux_write_capability (int tid, CORE_ADDR address,
+				const user_cap &cap)
+{
+  /* Fetch the tag from ptrace.  */
+  if (ptrace (PTRACE_POKECAP, tid, address, &cap) < 0)
+    return false;
+
+  return true;
+}

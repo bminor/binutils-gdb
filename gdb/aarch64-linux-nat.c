@@ -111,6 +111,8 @@ public:
 		      const gdb::byte_vector &tags, int type) override;
 
   gdb::byte_vector read_capability (CORE_ADDR addr) override;
+  bool write_capability (CORE_ADDR addr,
+			 gdb::array_view<const gdb_byte> buffer) override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -991,6 +993,25 @@ aarch64_linux_nat_target::read_capability (CORE_ADDR addr)
   return cap_vec;
 }
 
+/* Implement the "write_capability" target_ops method.  */
+
+bool
+aarch64_linux_nat_target::write_capability (CORE_ADDR addr,
+					    gdb::array_view<const gdb_byte> buffer)
+{
+  int tid = get_ptrace_pid (inferior_ptid);
+
+  struct user_cap cap;
+
+  memcpy (&cap.tag, buffer.data (), 1);
+  memcpy (&cap.val, buffer.data () + 1, 16);
+
+  if (!aarch64_linux_write_capability (tid, addr, cap))
+    perror_with_name (_("Unable to write capability from address."));
+
+  return true;
+}
+
 /* Implement the maintenance print capability tag command.  */
 
 static void
@@ -1001,9 +1022,45 @@ maint_print_cap_from_addr_cmd (const char *args, int from_tty)
   cap = target_read_capability (addr);
 
   for (auto it : cap)
-    fprintf_unfiltered (gdb_stdlog, "%x ", it);
+    fprintf_unfiltered (gdb_stdlog, "%02x ", it);
 
   fputs_unfiltered ("\n", gdb_stdlog);
+}
+
+/* Implement the maintenance set capability in memory command.  */
+
+static void
+maint_set_capability_in_memory_cmd (const char *args, int from_tty)
+{
+  std::string addr_str, tag_str, upper_str, lower_str;
+  const char *args_ptr = args;
+
+  addr_str = extract_string_maybe_quoted (&args_ptr);
+  tag_str = extract_string_maybe_quoted (&args_ptr);
+  upper_str = extract_string_maybe_quoted (&args_ptr);
+  lower_str = extract_string_maybe_quoted (&args_ptr);
+
+  CORE_ADDR addr = parse_and_eval_address (addr_str.c_str ());
+  CORE_ADDR tag_part = parse_and_eval_address (tag_str.c_str ());
+  CORE_ADDR half_a = parse_and_eval_address (upper_str.c_str ());
+  CORE_ADDR half_b = parse_and_eval_address (lower_str.c_str ());
+
+  unsigned __int128 a, b;
+
+  a = half_a;
+  b = half_b;
+
+  a = (a << 64) | b;
+  bool tag = (tag_part != 0)? true : false;
+
+  gdb::byte_vector cap;
+
+  cap.resize (17);
+  memcpy (cap.data (), &tag, 1);
+  memcpy (cap.data () + 1, &a, 16);
+
+  if (!target_write_capability (addr, {cap.data (), cap.size ()}))
+    perror_with_name (_("Failed to set capability in memory."));
 }
 
 void _initialize_aarch64_linux_nat ();
@@ -1015,6 +1072,10 @@ _initialize_aarch64_linux_nat ()
   add_cmd ("cap_from_addr", class_maintenance, maint_print_cap_from_addr_cmd, _("\
 Print the capability from addr."),
 	   &maintenanceprintlist);
+
+  add_cmd ("cap_in_memory", class_maintenance,
+	   maint_set_capability_in_memory_cmd,
+	   _("Print the capability from addr."), &maintenancelist);
 
   /* Register the target.  */
   linux_target = &the_aarch64_linux_nat_target;
