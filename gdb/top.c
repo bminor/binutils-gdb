@@ -447,8 +447,6 @@ read_command_file (FILE *stream)
       command_handler (command);
     }
 }
-
-void (*pre_init_ui_hook) (void);
 
 #ifdef __MSDOS__
 static void
@@ -2324,9 +2322,6 @@ gdb_init (char *argv0)
 {
   saved_command_line = xstrdup ("");
   previous_saved_command_line = xstrdup ("");
-
-  if (pre_init_ui_hook)
-    pre_init_ui_hook ();
 
   /* Run the init function of each source file.  */
 
