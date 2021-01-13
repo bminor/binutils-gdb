@@ -1,5 +1,13 @@
 2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* arc-tdep.h (arc_debug): Change type to bool.
+	* arc-tdep.c (arc_debug): Change type to bool.
+	(arc_analyze_prologue): Adjust.
+	(_initialize_arc_tdep): Use add_setshow_boolean_cmd.
+	* arc-linux-nat.c (ps_get_thread_area): Adjust.
+
+2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* auto-load.c (auto_load_objfile_script_1): Use bool.
 	(execute_script_contents): Use bool.
 

@@ -295,7 +295,7 @@ ps_err_e
 ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
 		    void **base)
 {
-  if (arc_debug >= 2)
+  if (arc_debug)
     debug_printf ("arc-linux-nat: ps_get_thread_area called");
 
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)

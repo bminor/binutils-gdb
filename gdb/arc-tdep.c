@@ -87,7 +87,7 @@ struct arc_frame_cache
 
 /* Global debug flag.  */
 
-int arc_debug;
+bool arc_debug;
 
 /* List of "maintenance print arc" commands.  */
 
@@ -1421,7 +1421,7 @@ arc_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR entrypoint,
       arc_insn_decode (current_prologue_end, &di, arc_delayed_print_insn,
 		       &insn);
 
-      if (arc_debug >= 2)
+      if (arc_debug)
 	arc_insn_dump (insn);
 
       /* If this instruction is in the prologue, fields in the cache will be
@@ -2517,10 +2517,10 @@ _initialize_arc_tdep ()
 	   &maintenance_print_arc_list);
 
   /* Debug internals for ARC GDB.  */
-  add_setshow_zinteger_cmd ("arc", class_maintenance,
-			    &arc_debug,
-			    _("Set ARC specific debugging."),
-			    _("Show ARC specific debugging."),
-			    _("Non-zero enables ARC specific debugging."),
-			    NULL, NULL, &setdebuglist, &showdebuglist);
+  add_setshow_boolean_cmd ("arc", class_maintenance,
+			   &arc_debug,
+			   _("Set ARC specific debugging."),
+			   _("Show ARC specific debugging."),
+			   _("When set, ARC specific debugging is enabled."),
+			   NULL, NULL, &setdebuglist, &showdebuglist);
 }
