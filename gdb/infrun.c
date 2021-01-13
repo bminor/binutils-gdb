@@ -2809,7 +2809,7 @@ check_multi_target_resumption (process_stratum_target *resume_target)
 	 always-non-stop mode.  */
       inferior *first_not_non_stop = nullptr;
 
-      for (inferior *inf : all_non_exited_inferiors (resume_target))
+      for (inferior *inf : all_non_exited_inferiors ())
 	{
 	  switch_to_inferior_no_thread (inf);
 
