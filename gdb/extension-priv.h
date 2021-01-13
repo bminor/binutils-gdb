@@ -92,7 +92,7 @@ struct extension_language_script_ops
 
   /* Return non-zero if auto-loading scripts in this extension language
      is enabled.  */
-  int (*auto_load_enabled) (const struct extension_language_defn *);
+  bool (*auto_load_enabled) (const struct extension_language_defn *);
 };
 
 /* The interface for making calls from GDB to an external extension

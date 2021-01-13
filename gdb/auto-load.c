@@ -93,9 +93,9 @@ show_auto_load_gdb_scripts (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* Return non-zero if auto-loading gdb scripts is enabled.  */
+/* See auto-load.h.  */
 
-int
+bool
 auto_load_gdb_scripts_enabled (const struct extension_language_defn *extlang)
 {
   return auto_load_gdb_scripts;

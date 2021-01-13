@@ -379,7 +379,10 @@ extern struct cmd_list_element *show_python_list;
 
 /* extension_language_script_ops "methods".  */
 
-extern int gdbpy_auto_load_enabled (const struct extension_language_defn *);
+/* Return true if auto-loading Python scripts is enabled.
+   This is the extension_language_script_ops.auto_load_enabled "method".  */
+
+extern bool gdbpy_auto_load_enabled (const struct extension_language_defn *);
 
 /* extension_language_ops "methods".  */
 

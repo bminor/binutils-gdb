@@ -56,7 +56,9 @@ extern bool file_is_auto_load_safe (const char *filename,
 				    const char *debug_fmt, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
-extern int auto_load_gdb_scripts_enabled
+/* Return true if auto-loading gdb scripts is enabled.  */
+
+extern bool auto_load_gdb_scripts_enabled
   (const struct extension_language_defn *extlang);
 
 #endif /* AUTO_LOAD_H */

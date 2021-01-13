@@ -282,14 +282,13 @@ ext_lang_objfile_script_executor
   return extlang->script_ops->objfile_script_executor;
 }
 
-/* Return non-zero if auto-loading of EXTLANG scripts is enabled.
-   Zero is returned if support for this language isn't compiled in.  */
+/* See extension.h.  */
 
-int
+bool
 ext_lang_auto_load_enabled (const struct extension_language_defn *extlang)
 {
   if (extlang->script_ops == NULL)
-    return 0;
+    return false;
 
   /* The extension language is required to implement this function.  */
   gdb_assert (extlang->script_ops->auto_load_enabled != NULL);

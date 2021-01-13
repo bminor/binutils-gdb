@@ -1,5 +1,26 @@
 2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* auto-load.h (auto_load_gdb_scripts_enabled): Return bool, move
+	comment here.
+	* auto-load.c (auto_load_gdb_scripts_enabled): Return bool, move
+	comment to header.
+	* extension-priv.h (struct extension_language_script_ops)
+	<auto_load_enabled>: Return bool.
+	* extension.h (ext_lang_auto_load_enabled): Return bool, move
+	comment here.
+	* extension.c (ext_lang_auto_load_enabled): Return bool, move
+	comment to header.
+	* guile/guile-header.h (gdbscm_auto_load_enabled): Return bool,
+	move comment here.
+	* guile/scm-auto-load.c (gdbscm_auto_load_enabled): Return bool,
+	move comment to header.
+	* python/python-header.h (gdbpy_auto_load_enabled): Return bool,
+	move comment here.
+	* python/py-auto-load.c (gdbpy_auto_load_enabled): Return bool,
+	move comment to header.
+
+2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* auto-load.h (file_is_auto_load_safe): Change return type to
 	bool, move comment here.
 	* auto-load.c (file_is_auto_load_safe): Change return type and

@@ -268,7 +268,10 @@ extern objfile_script_sourcer_func *ext_lang_objfile_script_sourcer
 extern objfile_script_executor_func *ext_lang_objfile_script_executor
   (const struct extension_language_defn *);
 
-extern int ext_lang_auto_load_enabled (const struct extension_language_defn *);
+/* Return true if auto-loading of EXTLANG scripts is enabled.
+   False is returned if support for this language isn't compiled in.  */
+
+extern bool ext_lang_auto_load_enabled (const struct extension_language_defn *);
 
 /* Wrappers for each extension language API function that iterate over all
    extension languages.  */
