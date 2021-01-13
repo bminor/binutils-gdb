@@ -1,3 +1,13 @@
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* utils.c (emit_style_escape): Only emit an escape sequence if the
+	requested style is different than the current applied style.
+	(fputs_maybe_filtered): Adjust the juggling of the wrap_style, and
+	current applied_style.
+	(fputs_styled): Remove is_default check.
+	(fputs_styled_unfiltered): Likewise.
+	(vfprintf_styled_no_gdbfmt): Likewise.
+
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* remote.h (remote_debug_printf): New.

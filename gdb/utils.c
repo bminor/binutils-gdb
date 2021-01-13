@@ -1426,12 +1426,15 @@ static void
 emit_style_escape (const ui_file_style &style,
 		   struct ui_file *stream = nullptr)
 {
-  applied_style = style;
+  if (applied_style != style)
+    {
+      applied_style = style;
 
-  if (stream == nullptr)
-    wrap_buffer.append (style.to_ansi ());
-  else
-    stream->puts (style.to_ansi ().c_str ());
+      if (stream == nullptr)
+	wrap_buffer.append (style.to_ansi ());
+      else
+	stream->puts (style.to_ansi ().c_str ());
+    }
 }
 
 /* Set the current output style.  This will affect future uses of the
@@ -1800,14 +1803,20 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		 prompt is given; and to avoid emitting style
 		 sequences in the middle of a run of text, we track
 		 this as well.  */
-	      ui_file_style save_style;
+	      ui_file_style save_style = applied_style;
 	      bool did_paginate = false;
 
 	      chars_printed = 0;
 	      lines_printed++;
 	      if (wrap_column)
 		{
-		  save_style = wrap_style;
+		  /* We are about to insert a newline at an historic
+		     location in the WRAP_BUFFER.  Before we do we want to
+		     restore the default style.  To know if we actually
+		     need to insert an escape sequence we must restore the
+		     current applied style to how it was at the WRAP_COLUMN
+		     location.  */
+		  applied_style = wrap_style;
 		  if (stream->can_emit_style_escape ())
 		    emit_style_escape (ui_file_style (), stream);
 		  /* If we aren't actually wrapping, don't output
@@ -1822,10 +1831,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		  stream->puts ("\n");
 		}
 	      else
-		{
-		  save_style = applied_style;
-		  flush_wrap_buffer (stream);
-		}
+		flush_wrap_buffer (stream);
 
 	      /* Possible new page.  Note that
 		 PAGINATION_DISABLED_FOR_COMMAND might be set during
@@ -1841,8 +1847,19 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      if (wrap_column)
 		{
 		  stream->puts (wrap_indent);
+
+		  /* Having finished inserting the wrapping we should
+		     restore the style as it was at the WRAP_COLUMN.  */
 		  if (stream->can_emit_style_escape ())
-		    emit_style_escape (save_style, stream);
+		    emit_style_escape (wrap_style, stream);
+
+		  /* The WRAP_BUFFER will still contain content, and that
+		     content might set some alternative style.  Restore
+		     APPLIED_STYLE as it was before we started wrapping,
+		     this reflects the current style for the last character
+		     in WRAP_BUFFER.  */
+		  applied_style = save_style;
+
 		  /* FIXME, this strlen is what prevents wrap_indent from
 		     containing tabs.  However, if we recurse to print it
 		     and count its chars, we risk trouble if wrap_indent is
@@ -1895,16 +1912,9 @@ void
 fputs_styled (const char *linebuffer, const ui_file_style &style,
 	      struct ui_file *stream)
 {
-  /* This just makes it so we emit somewhat fewer escape
-     sequences.  */
-  if (style.is_default ())
-    fputs_maybe_filtered (linebuffer, stream, 1);
-  else
-    {
-      set_output_style (stream, style);
-      fputs_maybe_filtered (linebuffer, stream, 1);
-      set_output_style (stream, ui_file_style ());
-    }
+  set_output_style (stream, style);
+  fputs_maybe_filtered (linebuffer, stream, 1);
+  set_output_style (stream, ui_file_style ());
 }
 
 /* See utils.h.  */
@@ -1913,16 +1923,9 @@ void
 fputs_styled_unfiltered (const char *linebuffer, const ui_file_style &style,
 			 struct ui_file *stream)
 {
-  /* This just makes it so we emit somewhat fewer escape
-     sequences.  */
-  if (style.is_default ())
-    fputs_maybe_filtered (linebuffer, stream, 0);
-  else
-    {
-      set_output_style (stream, style);
-      fputs_maybe_filtered (linebuffer, stream, 0);
-      set_output_style (stream, ui_file_style ());
-    }
+  set_output_style (stream, style);
+  fputs_maybe_filtered (linebuffer, stream, 0);
+  set_output_style (stream, ui_file_style ());
 }
 
 /* See utils.h.  */
@@ -2222,11 +2225,9 @@ vfprintf_styled_no_gdbfmt (struct ui_file *stream, const ui_file_style &style,
   std::string str = string_vprintf (format, args);
   if (!str.empty ())
     {
-      if (!style.is_default ())
-	set_output_style (stream, style);
+      set_output_style (stream, style);
       fputs_maybe_filtered (str.c_str (), stream, filter);
-      if (!style.is_default ())
-	set_output_style (stream, ui_file_style ());
+      set_output_style (stream, ui_file_style ());
     }
 }
 
