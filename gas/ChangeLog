@@ -1,5 +1,16 @@
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c: Error and warning messages tidy.
+	* testsuite/gas/riscv/priv-reg-fail-fext.l: Updated.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p10.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p11.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9p1.l: Likewise.
+
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
 	* config/tc-riscv.c: Comments tidy and improvement.  Also update
 	comment "fallthru" to "Fall through" that end with a period and
 	two spaces.

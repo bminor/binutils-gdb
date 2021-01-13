@@ -1,5 +1,9 @@
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfnn-riscv.c (riscv_merge_attributes): Fix typos of messages.
+
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfnn-riscv.c: Comments tidy and improvement.
 	* elfxx-riscv.c: Likewise.
 	* elfxx-riscv.h: Likewise.

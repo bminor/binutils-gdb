@@ -1,5 +1,9 @@
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
+	* riscv-dis.c (parse_riscv_dis_option): Fix typos of message.
+
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
 	* riscv-dis.c: Comments tidy and improvement.
 	* riscv-opc.c: Likewise.
 

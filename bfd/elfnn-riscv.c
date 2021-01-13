@@ -3704,7 +3704,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		     && in_priv_spec != out_priv_spec)
 	      {
 		_bfd_error_handler
-		  (_("warning: %pB use privilege spec version %u.%u.%u but "
+		  (_("warning: %pB use privileged spec version %u.%u.%u but "
 		     "the output use version %u.%u.%u"),
 		   ibfd,
 		   in_attr[Tag_a].i,
@@ -3721,7 +3721,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		    || out_priv_spec == PRIV_SPEC_CLASS_1P9P1)
 		  {
 		    _bfd_error_handler
-		      (_("warning: privilege spec version 1.9.1 can not be "
+		      (_("warning: privileged spec version 1.9.1 can not be "
 			 "linked with other spec versions"));
 		  }
 

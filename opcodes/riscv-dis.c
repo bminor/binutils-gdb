@@ -101,7 +101,7 @@ parse_riscv_dis_option (const char *option)
     {
       enum riscv_priv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
       if (!riscv_get_priv_spec_class (value, &priv_spec))
-	opcodes_error_handler (_("unknown privilege spec set by %s=%s"),
+	opcodes_error_handler (_("unknown privileged spec set by %s=%s"),
 			       option, value);
       else if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
 	default_priv_spec = priv_spec;
