@@ -3097,6 +3097,8 @@ clear_proceed_status_thread (struct thread_info *tp)
 
   /* Discard any remaining commands or status from previous stop.  */
   bpstat_clear (&tp->control.stop_bpstat);
+
+  tp->control.is_replaying = target_record_is_replaying (tp->ptid);
 }
 
 /* Notify the current interpreter and observers that the target is about to
@@ -8994,6 +8996,29 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 {
   gdb_assert (ecs->event_thread->ptid == inferior_ptid);
   gdb_assert (!ecs->event_thread->resumed ());
+
+  /* When a thread reaches the end of its execution history, it automatically
+     stops replaying.  This is so the user doesn't need to explicitly stop it
+     with a separate command.
+
+     We do not want a single command (e.g. continue) to transition from
+     replaying to recording, though, e.g. when starting from a breakpoint we
+     needed to step over at the end of the trace.  When we reach the end of the
+     execution history during stepping, stop with no-history.
+
+     The other direction is fine.  When we're at the end of the execution
+     history, we may reverse-continue to start replaying.  */
+  if (ecs->event_thread->control.is_replaying
+      && !target_record_is_replaying (ecs->event_thread->ptid))
+    {
+      interps_notify_no_history ();
+      ecs->ws.set_no_history ();
+      set_last_target_status (ecs->target, ecs->ptid, ecs->ws);
+      stop_print_frame = true;
+      stop_waiting (ecs);
+      normal_stop ();
+      return;
+    }
 
   /* Save the pc before execution, to compare with pc after stop.  */
   ecs->event_thread->prev_pc

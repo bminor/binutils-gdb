@@ -176,6 +176,9 @@ struct thread_control_state
 
   /* True if the thread is evaluating a BP condition.  */
   bool in_cond_eval = false;
+
+  /* Whether the thread was replaying when the command was issued.  */
+  bool is_replaying = false;
 };
 
 /* Inferior thread specific part of `struct infcall_suspend_state'.  */

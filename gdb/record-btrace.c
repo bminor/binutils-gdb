@@ -2386,6 +2386,16 @@ record_btrace_single_step_forward (struct thread_info *tp)
   if (replay == NULL)
     return btrace_step_no_history ();
 
+  /* The execution trace contains (and ends with) the current instruction.
+     This instruction has not been executed, yet, so the trace really ends
+     one instruction earlier.
+
+     We'd fail later on in btrace_insn_next () but we must not trigger
+     breakpoints as we're not really able to step.  */
+  btrace_insn_end (&end, btinfo);
+  if (btrace_insn_cmp (replay, &end) == 0)
+    return btrace_step_no_history ();
+
   /* Check if we're stepping a breakpoint.  */
   if (record_btrace_replay_at_breakpoint (tp))
     return btrace_step_stopped ();
@@ -2426,15 +2436,6 @@ record_btrace_single_step_forward (struct thread_info *tp)
       /* We have an instruction, we are done.  */
       break;
     }
-
-  /* Determine the end of the instruction trace.  */
-  btrace_insn_end (&end, btinfo);
-
-  /* The execution trace contains (and ends with) the current instruction.
-     This instruction has not been executed, yet, so the trace really ends
-     one instruction earlier.  */
-  if (btrace_insn_cmp (replay, &end) == 0)
-    return btrace_step_no_history ();
 
   return btrace_step_spurious ();
 }
