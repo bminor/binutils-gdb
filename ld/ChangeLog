@@ -1,5 +1,9 @@
 2021-01-13  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.in: Regenerate.
+
+2021-01-13  Alan Modra  <amodra@gmail.com>
+
 	PR 27160
 	* ldlang.h (lang_output_section_statement_type): Add data field.
 	(lang_input_section_type, lang_section_bst_type): Add pattern field.

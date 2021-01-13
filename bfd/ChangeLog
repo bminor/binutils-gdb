@@ -1,5 +1,10 @@
 2021-01-13  Alan Modra  <amodra@gmail.com>
 
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
+2021-01-13  Alan Modra  <amodra@gmail.com>
+
 	PR 27160
 	* section.c (struct bfd_section): Remove pattern field.
 	(BFD_FAKE_SECTION): Adjust to suit.
