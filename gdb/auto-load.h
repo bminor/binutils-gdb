@@ -44,8 +44,16 @@ extern struct cmd_list_element **auto_load_set_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_show_cmdlist_get (void);
 extern struct cmd_list_element **auto_load_info_cmdlist_get (void);
 
-extern int file_is_auto_load_safe (const char *filename,
-				   const char *debug_fmt, ...)
+/* Return true if FILENAME is located in one of the directories of
+   AUTO_LOAD_SAFE_PATH.  Otherwise call warning and return false.  FILENAME does
+   not have to be an absolute path.
+
+   Existence of FILENAME is not checked.  Function will still give a warning
+   even if the caller would quietly skip non-existing file in unsafe
+   directory.  */
+
+extern bool file_is_auto_load_safe (const char *filename,
+				    const char *debug_fmt, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
 extern int auto_load_gdb_scripts_enabled

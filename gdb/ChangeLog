@@ -1,5 +1,12 @@
 2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* auto-load.h (file_is_auto_load_safe): Change return type to
+	bool, move comment here.
+	* auto-load.c (file_is_auto_load_safe): Change return type and
+	advice_printed to bool.  Move comment to  header.
+
+2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (jit_debug_printf): New, use throughout file.
 
 2021-01-12  Simon Marchi  <simon.marchi@polymtl.ca>

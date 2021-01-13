@@ -461,19 +461,13 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
   return 0;
 }
 
-/* Return 1 if FILENAME is located in one of the directories of
-   AUTO_LOAD_SAFE_PATH.  Otherwise call warning and return 0.  FILENAME does
-   not have to be an absolute path.
+/* See auto-load.h.  */
 
-   Existence of FILENAME is not checked.  Function will still give a warning
-   even if the caller would quietly skip non-existing file in unsafe
-   directory.  */
-
-int
+bool
 file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
 {
   gdb::unique_xmalloc_ptr<char> filename_real;
-  static int advice_printed = 0;
+  static bool advice_printed = false;
 
   if (debug_auto_load)
     {
@@ -485,11 +479,11 @@ file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
     }
 
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
-    return 1;
+    return true;
 
   auto_load_safe_path_vec_update ();
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
-    return 1;
+    return true;
 
   warning (_("File \"%ps\" auto-loading has been declined by your "
 	     "`auto-load safe-path' set to \"%s\"."),
@@ -531,10 +525,10 @@ For more information about this security protection see the\n\
 \tinfo \"(gdb)Auto-loading safe path\"\n"),
 		       filename_real.get (),
 		       home_config.c_str (), home_config.c_str ());
-      advice_printed = 1;
+      advice_printed = true;
     }
 
-  return 0;
+  return false;
 }
 
 /* For scripts specified in .debug_gdb_scripts, multiple objfiles may load
