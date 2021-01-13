@@ -255,7 +255,7 @@ do_watchpoint_create (SIM_DESC sd,
 
   (*point)->arg0 = strtoul (arg, &arg, 0);
   if (arg[0] == ',')
-    (*point)->arg0 = strtoul (arg, NULL, 0);
+    (*point)->arg1 = strtoul (arg + 1, NULL, 0);
   else
     (*point)->arg1 = (*point)->arg0;
 

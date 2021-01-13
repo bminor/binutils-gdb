@@ -1,5 +1,9 @@
 2021-01-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-watch.c (do_watchpoint_create): Parse arg+1 and assign to arg1.
+
+2021-01-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-events.c (sim_events_watch_sim): Change byte_order type to
 	enum bfd_endian.
 	(sim_events_watch_core): Likewise.
