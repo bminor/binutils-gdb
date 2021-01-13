@@ -25788,6 +25788,18 @@ Control the styling of addresses.  These are managed with the
 @code{set style address} family of commands.  By default, this style's
 foreground color is blue.
 
+@item version
+Control the styling of @value{GDBN}'s version number text.  By
+default, this style's foreground color is magenta and it has bold
+intensity.  The version number is displayed in two places, the output
+of @command{show version}, and when @value{GDBN} starts up.
+
+Currently the version string displayed at startup is printed before
+@value{GDBN} has parsed any command line options, or parsed any
+command files, so there is currently no way to control the styling of
+this string.  However, @value{GDBN}'s @code{--quiet} command line option
+can be used to disable printing of the version string on startup.
+
 @item title
 Control the styling of titles.  These are managed with the
 @code{set style title} family of commands.  By default, this style's

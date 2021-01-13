@@ -1,5 +1,12 @@
 2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR cli/25956
+	* gdb.base/style.exp (run_style_tests): Add version string test.
+	(test_startup_version_string): Use version style name.
+	* lib/gdb-utils.exp (style): Handle version style name.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/style.exp (limited_style): New proc.
 	(clean_restart_and_disable): New proc.
 	(run_style_tests): New proc.  Most of the old tests from this file

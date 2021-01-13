@@ -270,6 +270,12 @@ proc run_style_tests { } {
 	gdb_test "p 5" \
 	    "Warning: '[limited_style p title]', an alias for the command '[limited_style print title]', is deprecated.*Use '[limited_style new_p title]'.*" \
 	    "p deprecated warning, with replacement"
+
+	# Check that the version string is styled in the output of 'show
+	# version', and that this styling can be disabled.
+	set vers [style "GNU gdb.*" version]
+	gdb_test "show version" "${vers}.*" \
+	    "version is styled in 'show version'"
     }
 }
 
@@ -282,7 +288,7 @@ proc test_startup_version_string { } {
 
     # Deliberate use of base STYLE proc here as the style of the
     # startup version string can't (currently) be controlled.
-    set vers [style "GNU gdb.*" "35;1"]
+    set vers [style "GNU gdb.*" version]
     gdb_test "" "${vers}.*" "version is styled at startup"
 }
 

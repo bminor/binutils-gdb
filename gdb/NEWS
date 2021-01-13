@@ -75,6 +75,11 @@ maintenance flush-symbol-cache
   'maintenance flush register-cache' and 'maintenance flush
   symbol-cache' respectively.
 
+set style version foreground COLOR
+set style version background COLOR
+set style version intensity VALUE
+  Control the styling of GDB's version number text.
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

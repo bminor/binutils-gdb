@@ -1,5 +1,10 @@
 2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR cli/25956
+	* gdb.texinfo (Output Styling): Document version style.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.texinfo (Auto-loading extensions): Add additional cross
 	references and move @menu to the end of the node.
 

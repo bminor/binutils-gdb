@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-setshow.h"
 #include "cli/cli-style.h"
 #include "source-cache.h"
 #include "observable.h"
@@ -98,13 +99,19 @@ cli_style_option metadata_style ("metadata", ui_file_style::DIM);
 
 /* See cli-style.h.  */
 
+cli_style_option version_style ("version", ui_file_style::MAGENTA,
+				ui_file_style::BOLD);
+
+/* See cli-style.h.  */
+
 cli_style_option::cli_style_option (const char *name,
-				    ui_file_style::basic_color fg)
+				    ui_file_style::basic_color fg,
+				    ui_file_style::intensity intensity)
   : changed (name),
     m_name (name),
     m_foreground (cli_colors[fg - ui_file_style::NONE]),
     m_background (cli_colors[0]),
-    m_intensity (cli_intensities[ui_file_style::NORMAL])
+    m_intensity (cli_intensities[intensity])
 {
 }
 
@@ -382,4 +389,10 @@ TUI window that does have the focus."),
 						&style_set_list,
 						&style_show_list,
 						true);
+
+  version_style.add_setshow_commands (no_class, _("\
+Version string display styling.\n\
+Configure colors used to display the GDB version string."),
+				      &style_set_list, &style_show_list,
+				      false);
 }

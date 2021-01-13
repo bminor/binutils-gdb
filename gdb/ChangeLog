@@ -1,5 +1,19 @@
 2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR cli/25956
+	* NEWS: Mention new command.
+	* cli/cli-style.c: Add 'cli/cli-setshow.h' include.
+	(version_style): Define.
+	(cli_style_option::cli_style_option): Add intensity parameter, and
+	use as appropriate.
+	(_initialize_cli_style): Register version style set/show commands.
+	* cli/cli-style.h (cli_style_option): Add intensity parameter.
+	(version_style): Declare.
+	* top.c (print_gdb_version): Use version_stype, and styled_string
+	to print the GDB version string.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* utils.c (emit_style_escape): Only emit an escape sequence if the
 	requested style is different than the current applied style.
 	(fputs_maybe_filtered): Adjust the juggling of the wrap_style, and
