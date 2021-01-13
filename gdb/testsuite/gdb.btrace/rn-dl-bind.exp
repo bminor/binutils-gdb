@@ -27,7 +27,8 @@ if { [skip_btrace_tests] } {
 }
 
 standard_testfile
-if [prepare_for_testing "failed to prepare" $testfile $srcfile {c++ debug}] {
+if [prepare_for_testing "failed to prepare" $testfile $srcfile \
+	{c++ debug ldflags=-Wl,-z,lazy}] {
     return -1
 }
 

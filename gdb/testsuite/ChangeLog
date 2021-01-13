@@ -1,5 +1,9 @@
 2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/rn-dl-bind.exp: Add ldflags=-Wl,-z,lazy.
+
+2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/non-stop.exp: Adjust expected source lines.
 
 2021-03-03  Markus Metzger  <markus.t.metzger@intel.com>
