@@ -320,7 +320,7 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
   if (walk_wild_file_in_exclude_list (sec->spec.exclude_name_list, file))
     return;
 
-  (*callback) (ptr, sec, s, ptr->section_flag_list, file, data);
+  (*callback) (ptr, sec, s, file, data);
 }
 
 /* Lowest common denominator routine that can handle everything correctly,
@@ -339,7 +339,7 @@ walk_wild_section_general (lang_wild_statement_type *ptr,
     {
       sec = ptr->section_list;
       if (sec == NULL)
-	(*callback) (ptr, sec, s, ptr->section_flag_list, file, data);
+	(*callback) (ptr, sec, s, file, data);
 
       while (sec != NULL)
 	{
@@ -566,7 +566,6 @@ static void
 output_section_callback_fast (lang_wild_statement_type *ptr,
 			      struct wildcard_list *sec,
 			      asection *section,
-			      struct flag_info *sflag_list ATTRIBUTE_UNUSED,
 			      lang_input_statement_type *file,
 			      void *output)
 {
@@ -2823,7 +2822,6 @@ static void
 output_section_callback (lang_wild_statement_type *ptr,
 			 struct wildcard_list *sec,
 			 asection *section,
-			 struct flag_info *sflag_info,
 			 lang_input_statement_type *file,
 			 void *output)
 {
@@ -2844,14 +2842,14 @@ output_section_callback (lang_wild_statement_type *ptr,
      of the current list.  */
 
   if (before == NULL)
-    lang_add_section (&ptr->children, section, sflag_info, os);
+    lang_add_section (&ptr->children, section, ptr->section_flag_list, os);
   else
     {
       lang_statement_list_type list;
       lang_statement_union_type **pp;
 
       lang_list_init (&list);
-      lang_add_section (&list, section, sflag_info, os);
+      lang_add_section (&list, section, ptr->section_flag_list, os);
 
       /* If we are discarding the section, LIST.HEAD will
 	 be NULL.  */
@@ -2877,7 +2875,6 @@ static void
 check_section_callback (lang_wild_statement_type *ptr ATTRIBUTE_UNUSED,
 			struct wildcard_list *sec ATTRIBUTE_UNUSED,
 			asection *section,
-			struct flag_info *sflag_info ATTRIBUTE_UNUSED,
 			lang_input_statement_type *file ATTRIBUTE_UNUSED,
 			void *output)
 {
@@ -7490,7 +7487,6 @@ static void
 gc_section_callback (lang_wild_statement_type *ptr,
 		     struct wildcard_list *sec,
 		     asection *section,
-		     struct flag_info *sflag_info ATTRIBUTE_UNUSED,
 		     lang_input_statement_type *file ATTRIBUTE_UNUSED,
 		     void *data ATTRIBUTE_UNUSED)
 {
@@ -7563,7 +7559,6 @@ static void
 find_relro_section_callback (lang_wild_statement_type *ptr ATTRIBUTE_UNUSED,
 			     struct wildcard_list *sec ATTRIBUTE_UNUSED,
 			     asection *section,
-			     struct flag_info *sflag_info ATTRIBUTE_UNUSED,
 			     lang_input_statement_type *file ATTRIBUTE_UNUSED,
 			     void *data)
 {

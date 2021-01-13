@@ -1,3 +1,12 @@
+2021-01-13  Alan Modra  <amodra@gmail.com>
+
+	* ldlang.h (callback_t): Remove flag_info function parameter.
+	* ldlang.c (walk_wild_consider_section): Adjust to suit.
+	(walk_wild_section_general): Likewise.
+	(output_section_callback_fast, output_section_callback): Likewise.
+	(check_section_callback, gc_section_callback): Likewise.
+	(find_relro_section_callback): Likewise.
+
 2021-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26792

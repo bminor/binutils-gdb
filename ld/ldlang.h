@@ -349,8 +349,7 @@ bfd_input_just_syms (const bfd *abfd)
 typedef struct lang_wild_statement_struct lang_wild_statement_type;
 
 typedef void (*callback_t) (lang_wild_statement_type *, struct wildcard_list *,
-			    asection *, struct flag_info *,
-			    lang_input_statement_type *, void *);
+			    asection *, lang_input_statement_type *, void *);
 
 typedef void (*walk_wild_section_handler_t) (lang_wild_statement_type *,
 					     lang_input_statement_type *,
