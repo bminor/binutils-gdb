@@ -79,7 +79,8 @@ add_link_order_input_section (lang_input_section_type *is,
   os_info->isec[os_info->count].idx = os_info->count;
   os_info->count++;
   s = is->section;
-  if ((s->flags & SEC_LINKER_CREATED) == 0
+  if (s->owner->xvec->flavour == bfd_target_elf_flavour
+      && (s->flags & SEC_LINKER_CREATED) == 0
       && elf_section_data (s) != NULL
       && elf_linked_to_section (s) != NULL)
     os_info->ordered++;
