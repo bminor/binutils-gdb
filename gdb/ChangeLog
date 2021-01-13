@@ -1,3 +1,7 @@
+2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (jit_debug_printf): New, use throughout file.
+
 2021-01-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (normal_stop): Fix indentation.

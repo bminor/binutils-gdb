@@ -62,6 +62,11 @@ static struct gdbarch_data *jit_gdbarch_data;
 
 static bool jit_debug = false;
 
+/* Print a "jit" debug statement.  */
+
+#define jit_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (jit_debug, "jit", fmt, ##__VA_ARGS__)
+
 static void
 show_jit_debug (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
@@ -103,9 +108,8 @@ jit_reader_load (const char *file_name)
   reader_init_fn_type *init_fn;
   struct gdb_reader_funcs *funcs = NULL;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, _("Opening shared object %s.\n"),
-			file_name);
+  jit_debug_printf ("Opening shared object %s", file_name);
+
   gdb_dlhandle_up so = gdb_dlopen (file_name);
 
   init_fn = (reader_init_fn_type *) gdb_dlsym (so, reader_init_fn_sym);
@@ -211,10 +215,7 @@ jit_read_descriptor (gdbarch *gdbarch,
 
   CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (jiter, objf_data->descriptor);
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_read_descriptor, descriptor_addr = %s\n",
-			paddress (gdbarch, addr));
+  jit_debug_printf ("descriptor_addr = %s", paddress (gdbarch, addr));
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -668,9 +669,9 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
 	status = 0;
     }
 
-  if (jit_debug && status == 0)
-    fprintf_unfiltered (gdb_stdlog,
-			"Could not read symtab using the loaded JIT reader.\n");
+  if (status == 0)
+    jit_debug_printf ("Could not read symtab using the loaded JIT reader.");
+
   return status;
 }
 
@@ -686,12 +687,9 @@ jit_bfd_try_read_symtab (struct jit_code_entry *code_entry,
   struct objfile *objfile;
   const struct bfd_arch_info *b;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_bfd_try_read_symtab, symfile_addr = %s, "
-			"symfile_size = %s\n",
-			paddress (gdbarch, code_entry->symfile_addr),
-			pulongest (code_entry->symfile_size));
+  jit_debug_printf ("symfile_addr = %s, symfile_size = %s",
+		    paddress (gdbarch, code_entry->symfile_addr),
+		    pulongest (code_entry->symfile_size));
 
   gdb_bfd_ref_ptr nbfd (gdb_bfd_open_from_target_memory
       (code_entry->symfile_addr, code_entry->symfile_size, gnutarget));
@@ -752,12 +750,9 @@ jit_register_code (struct gdbarch *gdbarch,
 {
   int success;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"jit_register_code, symfile_addr = %s, "
-			"symfile_size = %s\n",
-			paddress (gdbarch, code_entry->symfile_addr),
-			pulongest (code_entry->symfile_size));
+  jit_debug_printf ("symfile_addr = %s, symfile_size = %s",
+		    paddress (gdbarch, code_entry->symfile_addr),
+		    pulongest (code_entry->symfile_size));
 
   success = jit_reader_try_read_symtab (code_entry, entry_addr);
 
@@ -845,11 +840,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
       CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (the_objfile,
 					      objf_data->register_code);
 
-      if (jit_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "jit_breakpoint_re_set_internal, "
-			    "breakpoint_addr = %s\n",
-			    paddress (gdbarch, addr));
+      jit_debug_printf ("breakpoint_addr = %s", paddress (gdbarch, addr));
 
       /* Check if we need to re-create the breakpoint.  */
       if (objf_data->cached_code_address == addr)
@@ -893,10 +884,7 @@ jit_unwind_reg_set_impl (struct gdb_unwind_callbacks *cb, int dwarf_regnum,
 					  dwarf_regnum);
   if (gdb_reg == -1)
     {
-      if (jit_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    _("Could not recognize DWARF regnum %d"),
-			    dwarf_regnum);
+      jit_debug_printf ("Could not recognize DWARF regnum %d", dwarf_regnum);
       value->free (value);
       return;
     }
@@ -987,14 +975,11 @@ jit_frame_sniffer (const struct frame_unwind *self,
   /* Try to coax the provided unwinder to unwind the stack */
   if (funcs->unwind (funcs, &callbacks) == GDB_SUCCESS)
     {
-      if (jit_debug)
-	fprintf_unfiltered (gdb_stdlog, _("Successfully unwound frame using "
-					  "JIT reader.\n"));
+      jit_debug_printf ("Successfully unwound frame using JIT reader.");
       return 1;
     }
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, _("Could not unwind frame using "
-				      "JIT reader.\n"));
+
+  jit_debug_printf ("Could not unwind frame using JIT reader.");
 
   jit_dealloc_cache (this_frame, *cache);
   *cache = NULL;
@@ -1105,8 +1090,7 @@ jit_inferior_init (inferior *inf)
   struct gdbarch *gdbarch = inf->gdbarch;
   program_space *pspace = inf->pspace;
 
-  if (jit_debug)
-    fprintf_unfiltered (gdb_stdlog, "jit_inferior_init\n");
+  jit_debug_printf ("called");
 
   jit_prepend_unwinder (gdbarch);
 
@@ -1254,7 +1238,7 @@ _initialize_jit ()
   add_setshow_boolean_cmd ("jit", class_maintenance, &jit_debug,
 			   _("Set JIT debugging."),
 			   _("Show JIT debugging."),
-			   _("When non-zero, JIT debugging is enabled."),
+			   _("When set, JIT debugging is enabled."),
 			   NULL,
 			   show_jit_debug,
 			   &setdebuglist, &showdebuglist);
