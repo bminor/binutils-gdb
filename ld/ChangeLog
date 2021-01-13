@@ -1,3 +1,12 @@
+2021-01-14  Alan Modra  <amodra@gmail.com>
+
+	PR 27160
+	* ldelfgen.c (compare_link_order): Protect access of ELF section
+	data.
+	(add_link_order_input_section): Remove redundant NULL check.
+	Use bfd_get_flavour.
+	(ldelf_map_segments): Use bfd_get_flavour.
+
 2021-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ldelfgen.c (add_link_order_input_section): Check for ELF input

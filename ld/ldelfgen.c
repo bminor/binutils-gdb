@@ -79,9 +79,8 @@ add_link_order_input_section (lang_input_section_type *is,
   os_info->isec[os_info->count].idx = os_info->count;
   os_info->count++;
   s = is->section;
-  if (s->owner->xvec->flavour == bfd_target_elf_flavour
+  if (bfd_get_flavour (s->owner) == bfd_target_elf_flavour
       && (s->flags & SEC_LINKER_CREATED) == 0
-      && elf_section_data (s) != NULL
       && elf_linked_to_section (s) != NULL)
     os_info->ordered++;
   return FALSE;
@@ -145,9 +144,14 @@ compare_link_order (const void *a, const void *b)
 {
   const struct os_sections_input *ai = a;
   const struct os_sections_input *bi = b;
-  asection *asec = elf_linked_to_section (ai->is->section);
-  asection *bsec = elf_linked_to_section (bi->is->section);
+  asection *asec = NULL;
+  asection *bsec = NULL;
   bfd_vma apos, bpos;
+
+  if (bfd_get_flavour (ai->is->section->owner) == bfd_target_elf_flavour)
+    asec = elf_linked_to_section (ai->is->section);
+  if (bfd_get_flavour (bi->is->section->owner) == bfd_target_elf_flavour)
+    bsec = elf_linked_to_section (bi->is->section);
 
   /* Place unordered sections before ordered sections.  */
   if (asec == NULL || bsec == NULL)
@@ -257,7 +261,7 @@ ldelf_map_segments (bfd_boolean need_layout)
       lang_relax_sections (need_layout);
       need_layout = FALSE;
 
-      if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour)
+      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
 	{
 	  lang_output_section_statement_type *os;
 	  if (!done_link_order_scan)
@@ -285,7 +289,7 @@ ldelf_map_segments (bfd_boolean need_layout)
 	    }
 	}
 
-      if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour
+      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
 	  && !bfd_link_relocatable (&link_info))
 	{
 	  bfd_size_type phdr_size;
@@ -319,7 +323,7 @@ ldelf_map_segments (bfd_boolean need_layout)
   if (tries == 0)
     einfo (_("%F%P: looping in map_segments"));
 
-  if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
       && lang_phdr_list == NULL)
     {
       /* If we don't have user supplied phdrs, strip zero-sized dynamic
