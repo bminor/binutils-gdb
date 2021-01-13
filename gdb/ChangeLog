@@ -1,5 +1,10 @@
 2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* auto-load.c (auto_load_objfile_script_1): Use bool.
+	(execute_script_contents): Use bool.
+
+2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* auto-load.h (auto_load_gdb_scripts_enabled): Return bool, move
 	comment here.
 	* auto-load.c (auto_load_gdb_scripts_enabled): Return bool, move

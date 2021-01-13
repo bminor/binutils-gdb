@@ -808,10 +808,9 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
   if (input)
     {
-      int is_safe;
       struct auto_load_pspace_info *pspace_info;
 
-      is_safe
+      bool is_safe
 	= file_is_auto_load_safe (debugfile,
 				  _("auto-load: Loading %s script \"%s\""
 				    " by extension for objfile \"%s\".\n"),
@@ -968,7 +967,7 @@ execute_script_contents (struct auto_load_pspace_info *pspace_info,
   objfile_script_executor_func *executor;
   const char *newline, *script_text;
   const char *name;
-  int is_safe, in_hash_table;
+  int in_hash_table;
 
   /* The first line of the script is the name of the script.
      It must not contain any kind of space character.  */
@@ -1022,12 +1021,13 @@ of file %ps."),
       return;
     }
 
-  is_safe = file_is_auto_load_safe (objfile_name (objfile),
-				    _("auto-load: Loading %s script "
-				      "\"%s\" from section \"%s\" of "
-				      "objfile \"%s\".\n"),
-				    ext_lang_name (language), name,
-				    section_name, objfile_name (objfile));
+  bool is_safe
+    = file_is_auto_load_safe (objfile_name (objfile),
+			      _("auto-load: Loading %s script "
+				"\"%s\" from section \"%s\" of "
+				"objfile \"%s\".\n"),
+			      ext_lang_name (language), name,
+			      section_name, objfile_name (objfile));
 
   in_hash_table = maybe_add_script_text (pspace_info, is_safe, name, language);
 
