@@ -114,6 +114,11 @@ enum arc_regnum
 
 extern bool arc_debug;
 
+/* Print an "arc" debug statement.  */
+
+#define arc_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (arc_debug, "arc", fmt, ##__VA_ARGS__)
+
 /* Target-dependent information.  */
 
 struct gdbarch_tdep

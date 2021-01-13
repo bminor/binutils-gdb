@@ -46,6 +46,11 @@
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
 
+/* Print an "arc-linux-nat" debug statement.  */
+
+#define arc_linux_nat_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (arc_debug, "arc-linux-nat", fmt, ##__VA_ARGS__)
+
 /* Linux starting with 4.12 supports NT_ARC_V2 note type, which adds R30,
    R58 and R59 registers, which are specific to ARC HS and aren't
    available in ARC 700.  */
@@ -219,9 +224,7 @@ void
 fill_fpregset (const struct regcache *regcache,
 	       gdb_fpregset_t *fpregsetp, int regnum)
 {
-  if (arc_debug)
-    debug_printf ("arc-linux-nat: fill_fpregset called.");
-  return;
+  arc_linux_nat_debug_printf ("called");
 }
 
 /* ARC doesn't have separate FP registers.  This function is exported
@@ -230,9 +233,7 @@ fill_fpregset (const struct regcache *regcache,
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregsetp)
 {
-  if (arc_debug)
-    debug_printf ("arc-linux-nat: supply_fpregset called.");
-  return;
+  arc_linux_nat_debug_printf ("called");
 }
 
 /* Implement the "read_description" method of linux_nat_target.  */
@@ -295,8 +296,7 @@ ps_err_e
 ps_get_thread_area (struct ps_prochandle *ph, lwpid_t lwpid, int idx,
 		    void **base)
 {
-  if (arc_debug)
-    debug_printf ("arc-linux-nat: ps_get_thread_area called");
+  arc_linux_nat_debug_printf ("called");
 
   if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
     return PS_ERR;

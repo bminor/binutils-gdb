@@ -1,5 +1,13 @@
 2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* arc-tdep.h (arc_debug_printf): New.
+	* arc-tdep.c: Use arc_debug_printf.
+	* arc-linux-nat.c (arc_linux_nat_debug_printf): Add and use.
+	* arc-linux-tdep.c (arc_linux_debug_printf): Add and use.
+	* arc-newlib-tdep.c (arc_newlib_debug_printf): Add and use.
+
+2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* arc-tdep.h (arc_debug): Change type to bool.
 	* arc-tdep.c (arc_debug): Change type to bool.
 	(arc_analyze_prologue): Adjust.

@@ -31,6 +31,11 @@
 #include "arc-tdep.h"
 #include "arch/arc.h"
 
+/* Print an "arc-linux" debug statement.  */
+
+#define arc_linux_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (arc_debug, "arc-linux", fmt, ##__VA_ARGS__)
+
 #define REGOFF(offset) (offset * ARC_REGISTER_SIZE)
 
 /* arc_linux_sc_reg_offsets[i] is the offset of register i in the `struct
@@ -158,11 +163,7 @@ arc_linux_is_sigtramp (struct frame_info *this_frame)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);
 
-  if (arc_debug)
-    {
-      debug_printf ("arc-linux: arc_linux_is_sigtramp, pc=%s\n",
-		    paddress(gdbarch, pc));
-    }
+  arc_linux_debug_printf ("pc=%s", paddress(gdbarch, pc));
 
   static const gdb_byte insns_be_hs[] = {
     0x20, 0x8a, 0x12, 0xc2,	/* mov  r8,nr_rt_sigreturn */
@@ -383,15 +384,12 @@ arc_linux_software_single_step (struct regcache *regcache)
 	  regcache_cooked_read_unsigned (regcache, ARC_LP_COUNT_REGNUM,
 					 &lp_count);
 
-	  if (arc_debug)
-	    {
-	      debug_printf ("arc-linux: lp_start = %s, lp_end = %s, "
-			    "lp_count = %s, next_pc = %s\n",
-			    paddress (gdbarch, lp_start),
-			    paddress (gdbarch, lp_end),
-			    pulongest (lp_count),
-			    paddress (gdbarch, next_pc));
-	    }
+	  arc_linux_debug_printf ("lp_start = %s, lp_end = %s, "
+				  "lp_count = %s, next_pc = %s",
+				  paddress (gdbarch, lp_start),
+				  paddress (gdbarch, lp_end),
+				  pulongest (lp_count),
+				  paddress (gdbarch, next_pc));
 
 	  if (next_pc == lp_end && lp_count > 1)
 	    {
@@ -436,17 +434,13 @@ arc_linux_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (resolver.minsym != nullptr)
 	{
 	  CORE_ADDR res_addr = BMSYMBOL_VALUE_ADDRESS (resolver);
-	  debug_printf ("arc-linux: skip_solib_resolver (): "
-			"pc = %s, resolver at %s\n",
-			print_core_address (gdbarch, pc),
-			print_core_address (gdbarch, res_addr));
+	  arc_linux_debug_printf ("pc = %s, resolver at %s",
+				  print_core_address (gdbarch, pc),
+				  print_core_address (gdbarch, res_addr));
 	}
       else
-	{
-	  debug_printf ("arc-linux: skip_solib_resolver (): "
-			"pc = %s, no resolver found\n",
-			print_core_address (gdbarch, pc));
-	}
+	arc_linux_debug_printf ("pc = %s, no resolver found",
+				print_core_address (gdbarch, pc));
     }
 
   if (resolver.minsym != nullptr && BMSYMBOL_VALUE_ADDRESS (resolver) == pc)
@@ -625,8 +619,7 @@ arc_linux_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (arc_debug)
-    debug_printf ("arc-linux: GNU/Linux OS/ABI initialization.\n");
+  arc_linux_debug_printf ("GNU/Linux OS/ABI initialization.");
 
   /* Fill in target-dependent info in ARC-private structure.  */
   tdep->is_sigtramp = arc_linux_is_sigtramp;
