@@ -1,5 +1,11 @@
 2021-01-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-watch.c (default_interrupt_handler): Define.
+	(sim_watchpoint_install): Set default interrupt_handler to new
+	default_interrupt_handler.
+
+2021-01-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-watch.c (do_watchpoint_create): Parse arg+1 and assign to arg1.
 
 2021-01-13  Mike Frysinger  <vapier@gentoo.org>
