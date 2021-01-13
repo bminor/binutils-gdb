@@ -173,7 +173,7 @@ schedule_watchpoint (SIM_DESC sd,
       point->event = sim_events_watch_sim (sd,
 					   watch->pc,
 					   watch->sizeof_pc,
-					   0/* host-endian */,
+					   HOST_BYTE_ORDER,
 					   point->is_within,
 					   point->arg0, point->arg1,
 					   /* PC in arg0..arg1 */

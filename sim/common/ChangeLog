@@ -1,3 +1,12 @@
+2021-01-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* sim-events.c (sim_events_watch_sim): Change byte_order type to
+	enum bfd_endian.
+	(sim_events_watch_core): Likewise.
+	* sim-events.h (sim_events_watch_sim, sim_events_watch_core): Likewise.
+	* sim-watch.c (schedule_watchpoint): Change 0 to HOST_BYTE_ORDER in
+	call to sim_events_watch_sim.
+
 2021-01-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-profile.h [!WITH_PROFILE]: Rewrite to use #error.
