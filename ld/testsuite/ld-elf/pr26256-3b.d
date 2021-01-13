@@ -1,7 +1,6 @@
 #source: pr26256-3.s
 #ld: -e _start -T pr26256-3b.t
 #readelf: -x .rodata -x .text
-#xfail: [is_generic]
 
 Hex dump of section \'.rodata\':
   0x[a-f0-9]+ +00020301 +040907 +.+

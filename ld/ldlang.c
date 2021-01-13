@@ -69,13 +69,6 @@ static bfd_boolean map_option_f;
 static bfd_vma print_dot;
 static lang_input_statement_type *first_file;
 static const char *current_target;
-/* Header for list of statements corresponding to any files involved in the
-   link, either specified from the command-line or added implicitely (eg.
-   archive member used to resolved undefined symbol, wildcard statement from
-   linker script, etc.).  Next pointer is in next field of a
-   lang_statement_header_type (reached via header field in a
-   lang_statement_union).  */
-static lang_statement_list_type statement_list;
 static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
 static struct unique_sections *unique_section_list;
@@ -103,6 +96,13 @@ static void lang_do_memory_regions (bfd_boolean);
 /* Exported variables.  */
 const char *output_target;
 lang_output_section_statement_type *abs_output_section;
+/* Header for list of statements corresponding to any files involved in the
+   link, either specified from the command-line or added implicitely (eg.
+   archive member used to resolved undefined symbol, wildcard statement from
+   linker script, etc.).  Next pointer is in next field of a
+   lang_statement_header_type (reached via header field in a
+   lang_statement_union).  */
+lang_statement_list_type statement_list;
 lang_statement_list_type lang_os_list;
 lang_statement_list_type *stat_ptr = &statement_list;
 /* Header for list of statements corresponding to files used in the final
@@ -582,6 +582,7 @@ output_section_callback_fast (lang_wild_statement_type *ptr,
   node->left = 0;
   node->right = 0;
   node->section = section;
+  node->pattern = ptr->section_list;
 
   tree = wild_sort_fast (ptr, sec, file, section);
   if (tree != NULL)
@@ -598,7 +599,7 @@ output_section_callback_tree_to_list (lang_wild_statement_type *ptr,
   if (tree->left)
     output_section_callback_tree_to_list (ptr, tree->left, output);
 
-  lang_add_section (&ptr->children, tree->section, NULL,
+  lang_add_section (&ptr->children, tree->section, tree->pattern, NULL,
 		    (lang_output_section_statement_type *) output);
 
   if (tree->right)
@@ -1896,7 +1897,7 @@ lang_insert_orphan (asection *s,
 
   if (add_child == NULL)
     add_child = &os->children;
-  lang_add_section (add_child, s, NULL, os);
+  lang_add_section (add_child, s, NULL, NULL, os);
 
   if (after && (s->flags & (SEC_LOAD | SEC_ALLOC)) != 0)
     {
@@ -2537,6 +2538,7 @@ lang_discard_section_p (asection *section)
 void
 lang_add_section (lang_statement_list_type *ptr,
 		  asection *section,
+		  struct wildcard_list *pattern,
 		  struct flag_info *sflag_info,
 		  lang_output_section_statement_type *output)
 {
@@ -2717,6 +2719,7 @@ lang_add_section (lang_statement_list_type *ptr,
   /* Add a section reference to the list.  */
   new_section = new_stat (lang_input_section, ptr);
   new_section->section = section;
+  new_section->pattern = pattern;
 }
 
 /* Handle wildcard sorting.  This returns the lang_input_section which
@@ -2842,14 +2845,16 @@ output_section_callback (lang_wild_statement_type *ptr,
      of the current list.  */
 
   if (before == NULL)
-    lang_add_section (&ptr->children, section, ptr->section_flag_list, os);
+    lang_add_section (&ptr->children, section, ptr->section_list,
+		      ptr->section_flag_list, os);
   else
     {
       lang_statement_list_type list;
       lang_statement_union_type **pp;
 
       lang_list_init (&list);
-      lang_add_section (&list, section, ptr->section_flag_list, os);
+      lang_add_section (&list, section, ptr->section_list,
+			ptr->section_flag_list, os);
 
       /* If we are discarding the section, LIST.HEAD will
 	 be NULL.  */
@@ -7204,7 +7209,7 @@ ldlang_place_orphan (asection *s)
 	  && (bfd_link_relocatable (&link_info)
 	      || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0))
 	os->addr_tree = exp_intop (0);
-      lang_add_section (&os->children, s, NULL, os);
+      lang_add_section (&os->children, s, NULL, NULL, os);
     }
   else
     {
@@ -7227,7 +7232,7 @@ ldlang_place_orphan (asection *s)
 	      && (bfd_link_relocatable (&link_info)
 		  || (s->flags & (SEC_LOAD | SEC_ALLOC)) == 0))
 	    os->addr_tree = exp_intop (0);
-	  lang_add_section (&os->children, s, NULL, os);
+	  lang_add_section (&os->children, s, NULL, NULL, os);
 	}
 
       if (config.orphan_handling == orphan_handling_warn)
@@ -7271,7 +7276,7 @@ lang_place_orphans (void)
 			default_common_section
 			  = lang_output_section_statement_lookup (".bss", 0, 1);
 		      lang_add_section (&default_common_section->children, s,
-					NULL, default_common_section);
+					NULL, NULL, default_common_section);
 		    }
 		}
 	      else
@@ -7485,7 +7490,7 @@ lang_reset_memory_regions (void)
 
 static void
 gc_section_callback (lang_wild_statement_type *ptr,
-		     struct wildcard_list *sec,
+		     struct wildcard_list *sec ATTRIBUTE_UNUSED,
 		     asection *section,
 		     lang_input_statement_type *file ATTRIBUTE_UNUSED,
 		     void *data ATTRIBUTE_UNUSED)
@@ -7494,8 +7499,6 @@ gc_section_callback (lang_wild_statement_type *ptr,
      should be as well.  */
   if (ptr->keep_sections)
     section->flags |= SEC_KEEP;
-  if (sec)
-    section->pattern = sec->spec.name;
 }
 
 /* Iterate over sections marking them against GC.  */

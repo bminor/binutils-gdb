@@ -325,7 +325,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
 
   /* Always place orphaned sections in lower.  Optimal placement of either
      sections is performed later, once section sizes have been finalized.  */
-  lang_add_section (& lower->children, s, NULL, lower);
+  lang_add_section (& lower->children, s, NULL, NULL, lower);
  end:
   free (upper_name);
   free (lower_name);
@@ -358,7 +358,8 @@ change_output_section (lang_statement_union_type **head,
 	      lang_statement_list_type *old_list
 		= (lang_statement_list_type *) &old_os->children;
 	      s->output_section = NULL;
-	      lang_add_section (&new_os->children, s, NULL, new_os);
+	      lang_add_section (&new_os->children, s,
+				curr->input_section.pattern, NULL, new_os);
 
 	      /* Remove the section from the old output section.  */
 	      if (prev == NULL)

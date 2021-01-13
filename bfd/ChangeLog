@@ -1,3 +1,12 @@
+2021-01-13  Alan Modra  <amodra@gmail.com>
+
+	PR 27160
+	* section.c (struct bfd_section): Remove pattern field.
+	(BFD_FAKE_SECTION): Adjust to suit.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (compare_link_order, elf_fixup_link_order): Delete.
+	(bfd_elf_final_link): Don't call elf_fixup_link_order.
+
 2021-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26792

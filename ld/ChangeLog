@@ -1,5 +1,45 @@
 2021-01-13  Alan Modra  <amodra@gmail.com>
 
+	PR 27160
+	* ldlang.h (lang_output_section_statement_type): Add data field.
+	(lang_input_section_type, lang_section_bst_type): Add pattern field.
+	(statement_list): Declare.
+	(lang_add_section): Adjust prototype.
+	* emultempl/aarch64elf.em: Adjust lang_add_section calls.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/cskyelf.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/metagelf.em: Likewise.
+	* emultempl/mipself.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/msp430.em: Likewise.
+	* emultempl/nios2elf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/vms.em: Likewise.
+	* ldelf.c: Likewise.
+	* ldelfgen.c: Include ldctor.h.
+	(struct os_sections): New.
+	(add_link_order_input_section, link_order_scan): New functions.
+	(compare_link_order, fixup_link_order): New functions.
+	(ldelf_map_segments): Call link_order_scan and fixup_link_order.
+	* ldlang.c (statement_list): Make global.
+	(output_section_callback_fast): Save pattern in tree node.
+	(lang_add_section): Add pattern parameter, save in lang_input_section.
+	(output_section_callback_tree_to_list): Adjust lang_add_section calls.
+	(lang_insert_orphan, output_section_callback): Likewise.
+	(ldlang_place_orphan): Likewise.
+	(gc_section_callback): Don't set section->pattern.
+	* testsuite/ld-elf/pr26256-2a.d: Don't xfail generic.
+	* testsuite/ld-elf/pr26256-3b.d: Likewise.
+	* testsuite/ld-elf/pr26256-2b.d: Likewise.  notarget xgate.
+
+2021-01-13  Alan Modra  <amodra@gmail.com>
+
 	* ldlang.h (callback_t): Remove flag_info function parameter.
 	* ldlang.c (walk_wild_consider_section): Adjust to suit.
 	(walk_wild_section_general): Likewise.

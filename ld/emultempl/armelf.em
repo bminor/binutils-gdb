@@ -246,7 +246,7 @@ elf32_arm_add_stub_section (const char * stub_sec_name,
 
   info.input_section = after_input_section;
   lang_list_init (&info.add);
-  lang_add_section (&info.add, stub_sec, NULL, os);
+  lang_add_section (&info.add, stub_sec, NULL, NULL, os);
 
   if (info.add.head == NULL)
     goto err_ret;

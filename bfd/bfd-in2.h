@@ -1184,9 +1184,6 @@ typedef struct bfd_section
   struct bfd_symbol *symbol;
   struct bfd_symbol **symbol_ptr_ptr;
 
-  /* The matching section name pattern in linker script.  */
-  const char *pattern;
-
   /* Early in the link process, map_head and map_tail are used to build
      a list of input sections attached to an output section.  Later,
      output sections use these fields for a list of bfd_link_order
@@ -1380,8 +1377,8 @@ discarded_section (const asection *sec)
   /* target_index, used_by_bfd, constructor_chain, owner,           */ \
      0,            NULL,        NULL,              NULL,               \
                                                                        \
-  /* symbol,                    symbol_ptr_ptr, pattern,            */ \
-     (struct bfd_symbol *) SYM, &SEC.symbol,    NULL,                  \
+  /* symbol,                    symbol_ptr_ptr,                     */ \
+     (struct bfd_symbol *) SYM, &SEC.symbol,                           \
                                                                        \
   /* map_head, map_tail, already_assigned                           */ \
      { NULL }, { NULL }, NULL                                          \

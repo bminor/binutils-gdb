@@ -2006,7 +2006,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 	    && (elf_section_data (os->bfd_section)->this_hdr.sh_info
 		== elf_section_data (s)->this_hdr.sh_info))
 	    {
-	      lang_add_section (&os->children, s, NULL, os);
+	      lang_add_section (&os->children, s, NULL, NULL, os);
 	      return os;
 	    }
 
@@ -2049,7 +2049,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 			|| !elfoutput
 			|| elf_orphan_compatible (s, os->bfd_section)))))
 	  {
-	    lang_add_section (&os->children, s, NULL, os);
+	    lang_add_section (&os->children, s, NULL, NULL, os);
 	    return os;
 	  }
 
@@ -2063,7 +2063,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
      unused one and use that.  */
   if (match_by_name)
     {
-      lang_add_section (&match_by_name->children, s, NULL, match_by_name);
+      lang_add_section (&match_by_name->children, s, NULL, NULL, match_by_name);
       return match_by_name;
     }
 
@@ -2088,7 +2088,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
       && hold[orphan_text].os != NULL)
     {
       os = hold[orphan_text].os;
-      lang_add_section (&os->children, s, NULL, os);
+      lang_add_section (&os->children, s, NULL, NULL, os);
       return os;
     }
 

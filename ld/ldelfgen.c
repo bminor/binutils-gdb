@@ -27,19 +27,262 @@
 #include "ldmisc.h"
 #include "ldexp.h"
 #include "ldlang.h"
+#include "ldctor.h"
 #include "elf-bfd.h"
 #include "elf/internal.h"
 #include "ldelfgen.h"
+
+/* Info attached to an output_section_statement about input sections,
+   used when sorting SHF_LINK_ORDER sections.  */
+
+struct os_sections
+{
+  /* Size allocated for isec.  */
+  unsigned int alloc;
+  /* Used entries in isec.  */
+  unsigned int count;
+  /* How many are SHF_LINK_ORDER.  */
+  unsigned int ordered;
+  /* Input sections attached to this output section.  */
+  struct os_sections_input {
+    lang_input_section_type *is;
+    unsigned int idx;
+  } isec[1];
+};
+
+/* Add IS to data kept for OS.  */
+
+static bfd_boolean
+add_link_order_input_section (lang_input_section_type *is,
+			      lang_output_section_statement_type *os)
+{
+  struct os_sections *os_info = os->data;
+  asection *s;
+
+  if (os_info == NULL)
+    {
+      os_info = xmalloc (sizeof (*os_info) + 63 * sizeof (*os_info->isec));
+      os_info->alloc = 64;
+      os_info->count = 0;
+      os_info->ordered = 0;
+      os->data = os_info;
+    }
+  if (os_info->count == os_info->alloc)
+    {
+      size_t want;
+      os_info->alloc *= 2;
+      want = sizeof (*os_info) + (os_info->alloc - 1) * sizeof (*os_info->isec);
+      os_info = xrealloc (os_info, want);
+      os->data = os_info;
+    }
+  os_info->isec[os_info->count].is = is;
+  os_info->isec[os_info->count].idx = os_info->count;
+  os_info->count++;
+  s = is->section;
+  if ((s->flags & SEC_LINKER_CREATED) == 0
+      && elf_section_data (s) != NULL
+      && elf_linked_to_section (s) != NULL)
+    os_info->ordered++;
+  return FALSE;
+}
+
+/* Run over the linker's statement list, extracting info about input
+   sections attached to each output section.  */
+
+static bfd_boolean
+link_order_scan (lang_statement_union_type *u,
+		 lang_output_section_statement_type *os)
+{
+  asection *s;
+  bfd_boolean ret = FALSE;
+
+  for (; u != NULL; u = u->header.next)
+    {
+      switch (u->header.type)
+	{
+	case lang_wild_statement_enum:
+	  if (link_order_scan (u->wild_statement.children.head, os))
+	    ret = TRUE;
+	  break;
+	case lang_constructors_statement_enum:
+	  if (link_order_scan (constructor_list.head, os))
+	    ret = TRUE;
+	  break;
+	case lang_output_section_statement_enum:
+	  if (u->output_section_statement.constraint != -1
+	      && link_order_scan (u->output_section_statement.children.head,
+				  &u->output_section_statement))
+	    ret = TRUE;
+	  break;
+	case lang_group_statement_enum:
+	  if (link_order_scan (u->group_statement.children.head, os))
+	    ret = TRUE;
+	  break;
+	case lang_input_section_enum:
+	  s = u->input_section.section;
+	  if (s->output_section != NULL
+	      && s->output_section->owner == link_info.output_bfd
+	      && (s->output_section->flags & SEC_EXCLUDE) == 0
+	      && ((s->output_section->flags & SEC_HAS_CONTENTS) != 0
+		  || ((s->output_section->flags & (SEC_LOAD | SEC_THREAD_LOCAL))
+		      == (SEC_LOAD | SEC_THREAD_LOCAL))))
+	    if (add_link_order_input_section (&u->input_section, os))
+	      ret = TRUE;
+	  break;
+	default:
+	  break;
+	}
+    }
+  return ret;
+}
+
+/* Compare two sections based on the locations of the sections they are
+   linked to.  Used by fixup_link_order.  */
+
+static int
+compare_link_order (const void *a, const void *b)
+{
+  const struct os_sections_input *ai = a;
+  const struct os_sections_input *bi = b;
+  asection *asec = elf_linked_to_section (ai->is->section);
+  asection *bsec = elf_linked_to_section (bi->is->section);
+  bfd_vma apos, bpos;
+
+  /* Place unordered sections before ordered sections.  */
+  if (asec == NULL || bsec == NULL)
+    {
+      if (bsec != NULL)
+	return -1;
+      else if (asec != NULL)
+	return 1;
+      return ai->idx - bi->idx;
+    }
+
+  apos = asec->output_section->lma + asec->output_offset;
+  bpos = bsec->output_section->lma + bsec->output_offset;
+
+  if (apos < bpos)
+    return -1;
+  else if (apos > bpos)
+    return 1;
+
+  /* The only way we should get matching LMAs is when the first of two
+     sections has zero size.  */
+  if (asec->size < bsec->size)
+    return -1;
+  else if (asec->size > bsec->size)
+    return 1;
+
+  /* If they are both zero size then they almost certainly have the same
+     VMA and thus are not ordered with respect to each other.  Test VMA
+     anyway, and fall back to id to make the result reproducible across
+     qsort implementations.  */
+  apos = asec->output_section->vma + asec->output_offset;
+  bpos = bsec->output_section->vma + bsec->output_offset;
+  if (apos < bpos)
+    return -1;
+  else if (apos > bpos)
+    return 1;
+
+  return asec->id - bsec->id;
+}
+
+/* Rearrange sections with SHF_LINK_ORDER into the same order as their
+   linked sections.  */
+
+static bfd_boolean
+fixup_link_order (lang_output_section_statement_type *os)
+{
+  struct os_sections *os_info = os->data;
+  unsigned int i, j;
+  lang_input_section_type **orig_is;
+  asection **save_s;
+
+  for (i = 0; i < os_info->count; i = j)
+    {
+      /* Normally a linker script will select SHF_LINK_ORDER sections
+	 with an input section wildcard something like the following:
+	 *(.IA_64.unwind* .gnu.linkonce.ia64unw.*)
+	 However if some other random sections are smashed into an
+	 output section, or if SHF_LINK_ORDER are split up by the
+	 linker script, then we only want to sort sections matching a
+	 given wildcard.  That's the purpose of the pattern test.  */
+      for (j = i + 1; j < os_info->count; j++)
+	if (os_info->isec[j].is->pattern != os_info->isec[i].is->pattern)
+	  break;
+      if (j - i > 1)
+	qsort (&os_info->isec[i], j - i, sizeof (*os_info->isec),
+	       compare_link_order);
+    }
+  for (i = 0; i < os_info->count; i++)
+    if (os_info->isec[i].idx != i)
+      break;
+  if (i == os_info->count)
+    return FALSE;
+
+  /* Now reorder the linker input section statements to reflect the
+     proper sorting.  The is done by rewriting the existing statements
+     rather than fiddling with lists, since the only thing we need to
+     change is the bfd section pointer.  */
+  orig_is = xmalloc (os_info->count * sizeof (*orig_is));
+  save_s = xmalloc (os_info->count * sizeof (*save_s));
+  for (i = 0; i < os_info->count; i++)
+    {
+      orig_is[os_info->isec[i].idx] = os_info->isec[i].is;
+      save_s[i] = os_info->isec[i].is->section;
+    }
+  for (i = 0; i < os_info->count; i++)
+    if (os_info->isec[i].idx != i)
+      {
+	orig_is[i]->section = save_s[i];
+	/* Restore os_info to pristine state before the qsort, for the
+	   next pass over sections.  */
+	os_info->isec[i].is = orig_is[i];
+	os_info->isec[i].idx = i;
+      }
+  free (save_s);
+  free (orig_is);
+  return TRUE;
+}
 
 void
 ldelf_map_segments (bfd_boolean need_layout)
 {
   int tries = 10;
+  static bfd_boolean done_link_order_scan = FALSE;
 
   do
     {
       lang_relax_sections (need_layout);
       need_layout = FALSE;
+
+      if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour)
+	{
+	  lang_output_section_statement_type *os;
+	  if (!done_link_order_scan)
+	    {
+	      link_order_scan (statement_list.head, NULL);
+	      done_link_order_scan = TRUE;
+	    }
+	  for (os = (void *) lang_os_list.head; os != NULL; os = os->next)
+	    {
+	      struct os_sections *os_info = os->data;
+	      if (os_info != NULL && os_info->ordered != 0)
+		{
+		  if (os_info->ordered != os_info->count
+		      && bfd_link_relocatable (&link_info))
+		    {
+		      einfo (_("%F%P: "
+			       "%pA has both ordered and unordered sections"),
+			     os->bfd_section);
+		      return;
+		    }
+		  if (os_info->count > 1
+		      && fixup_link_order (os))
+		    need_layout = TRUE;
+		}
+	    }
+	}
 
       if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour
 	  && !bfd_link_relocatable (&link_info))
