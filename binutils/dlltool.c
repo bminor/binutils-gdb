@@ -570,19 +570,21 @@ static const char i386_trampoline[] =
   "\tjmp *%%eax\n";
 
 static const char i386_x64_trampoline[] =
-  "\tpushq %%rcx\n"
-  "\tpushq %%rdx\n"
-  "\tpushq %%r8\n"
-  "\tpushq %%r9\n"
-  "\tsubq  $40, %%rsp\n"
+  "\tsubq $72, %%rsp\n"
+  "\t.seh_stackalloc 72\n"
+  "\t.seh_endprologue\n"
+  "\tmovq %%rcx, 64(%%rsp)\n"
+  "\tmovq %%rdx, 56(%%rsp)\n"
+  "\tmovq %%r8, 48(%%rsp)\n"
+  "\tmovq %%r9, 40(%%rsp)\n"
   "\tmovq  %%rax, %%rdx\n"
   "\tleaq  __DELAY_IMPORT_DESCRIPTOR_%s(%%rip), %%rcx\n"
   "\tcall __delayLoadHelper2\n"
-  "\taddq  $40, %%rsp\n"
-  "\tpopq %%r9\n"
-  "\tpopq %%r8\n"
-  "\tpopq %%rdx\n"
-  "\tpopq %%rcx\n"
+  "\tmovq 40(%%rsp), %%r9\n"
+  "\tmovq 48(%%rsp), %%r8\n"
+  "\tmovq 56(%%rsp), %%rdx\n"
+  "\tmovq 64(%%rsp), %%rcx\n"
+  "\taddq $72, %%rsp\n"
   "\tjmp *%%rax\n";
 
 struct mac
@@ -609,6 +611,7 @@ struct mac
   int how_dljtab_roff1; /* Offset for the ind 32 reloc into idata 5.  */
   int how_dljtab_roff2; /* Offset for the ind 32 reloc into idata 5.  */
   int how_dljtab_roff3; /* Offset for the ind 32 reloc into idata 5.  */
+  bfd_boolean how_seh;
   const char *trampoline;
 };
 
@@ -622,7 +625,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
     "pe-arm-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
   {
@@ -631,7 +634,7 @@ mtable[] =
     "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
     "pe-i386",bfd_arch_i386,
     i386_jtab, sizeof (i386_jtab), 2,
-    i386_dljtab, sizeof (i386_dljtab), 2, 7, 12, i386_trampoline
+    i386_dljtab, sizeof (i386_dljtab), 2, 7, 12, FALSE, i386_trampoline
   }
   ,
   {
@@ -641,7 +644,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
     "pe-arm-little", bfd_arch_arm,
     thumb_jtab, sizeof (thumb_jtab), 12,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
 #define MARM_INTERWORK 3
@@ -651,7 +654,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mthumb-interwork",
     "pe-arm-little", bfd_arch_arm,
     arm_interwork_jtab, sizeof (arm_interwork_jtab), 12,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
   {
@@ -661,7 +664,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "",
     "pe-mcore-big", bfd_arch_mcore,
     mcore_be_jtab, sizeof (mcore_be_jtab), 8,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
   {
@@ -671,7 +674,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "pe-mcore-little", bfd_arch_mcore,
     mcore_le_jtab, sizeof (mcore_le_jtab), 8,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
   {
@@ -681,7 +684,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "",
     "elf32-mcore-big", bfd_arch_mcore,
     mcore_be_jtab, sizeof (mcore_be_jtab), 8,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
   {
@@ -691,7 +694,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-EL",
     "elf32-mcore-little", bfd_arch_mcore,
     mcore_le_jtab, sizeof (mcore_le_jtab), 8,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
   {
@@ -701,7 +704,7 @@ mtable[] =
     ".global", ".space", ".align\t2",".align\t4", "-mapcs-32",
     "pe-arm-wince-little", bfd_arch_arm,
     arm_jtab, sizeof (arm_jtab), 8,
-    0, 0, 0, 0, 0, 0
+    0, 0, 0, 0, 0, FALSE, 0
   }
   ,
   {
@@ -710,10 +713,10 @@ mtable[] =
     "jmp *", ".global", ".space", ".align\t2",".align\t4", "",
     "pe-x86-64",bfd_arch_i386,
     i386_jtab, sizeof (i386_jtab), 2,
-    i386_x64_dljtab, sizeof (i386_x64_dljtab), 2, 9, 14, i386_x64_trampoline
+    i386_x64_dljtab, sizeof (i386_x64_dljtab), 2, 9, 14, TRUE, i386_x64_trampoline
   }
   ,
-  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+  { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
 };
 
 typedef struct dlist
@@ -947,6 +950,7 @@ asm_prefix (int mach, const char *name)
 #define HOW_JTAB_ROFF2		(delay ? mtable[machine].how_dljtab_roff2 : 0)
 #define HOW_JTAB_ROFF3		(delay ? mtable[machine].how_dljtab_roff3 : 0)
 #define ASM_SWITCHES		mtable[machine].how_default_as_switches
+#define HOW_SEH			mtable[machine].how_seh
 
 static char **oav;
 
@@ -2789,8 +2793,12 @@ make_delay_head (void)
   fprintf (f, "%s Import trampoline\n", ASM_C);
   fprintf (f, "\t.section\t.text\n");
   fprintf(f,"\t%s\t%s\n", ASM_GLOBAL, head_label);
+  if (HOW_SEH)
+    fprintf (f, "\t.seh_proc\t%s\n", head_label);
   fprintf (f, "%s:\n", head_label);
   fprintf (f, mtable[machine].trampoline, imp_name_lab);
+  if (HOW_SEH)
+    fprintf (f, "\t.seh_endproc\n");
 
   /* Output the delay import descriptor */
   fprintf (f, "\n%s DELAY_IMPORT_DESCRIPTOR\n", ASM_C);
