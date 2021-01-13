@@ -133,7 +133,6 @@ struct riscv_elf_link_hash_table
 };
 
 /* Instruction access functions. */
-
 #define riscv_get_insn(bits, ptr)		\
   ((bits) == 16 ? bfd_getl16 (ptr)		\
    : (bits) == 32 ? bfd_getl32 (ptr)		\
@@ -185,14 +184,11 @@ riscv_is_insn_reloc (const reloc_howto_type *howto)
 }
 
 /* PLT/GOT stuff.  */
-
 #define PLT_HEADER_INSNS 8
 #define PLT_ENTRY_INSNS 4
 #define PLT_HEADER_SIZE (PLT_HEADER_INSNS * 4)
 #define PLT_ENTRY_SIZE (PLT_ENTRY_INSNS * 4)
-
 #define GOT_ENTRY_SIZE RISCV_ELF_WORD_BYTES
-
 /* Reserve two entries of GOTPLT for ld.so, one is used for PLT resolver,
    the other is used for link map.  Other targets also reserve one more
    entry used for runtime profile?  */
@@ -230,7 +226,7 @@ riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
      addi   t0, t2, %lo(.got.plt)    # &.got.plt
      srli   t1, t1, log2(16/PTRSIZE) # .got.plt offset
      l[w|d] t0, PTRSIZE(t0)	     # link map
-     jr	    t3 */
+     jr	    t3  */
 
   entry[0] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
   entry[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
@@ -261,7 +257,7 @@ riscv_make_plt_entry (bfd *output_bfd, bfd_vma got, bfd_vma addr,
   /* auipc  t3, %hi(.got.plt entry)
      l[w|d] t3, %lo(.got.plt entry)(t3)
      jalr   t1, t3
-     nop */
+     nop  */
 
   entry[0] = RISCV_UTYPE (AUIPC, X_T3, RISCV_PCREL_HIGH_PART (got, addr));
   entry[1] = RISCV_ITYPE (LREG,  X_T3, X_T3, RISCV_PCREL_LOW_PART (got, addr));
@@ -302,9 +298,9 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
 }
 
 /* Compute a hash of a local hash entry.  We use elf_link_hash_entry
-  for local symbol so that we can handle local STT_GNU_IFUNC symbols
-  as global symbol.  We reuse indx and dynstr_index for local symbol
-  hash since they aren't used by global symbols in this backend.  */
+   for local symbol so that we can handle local STT_GNU_IFUNC symbols
+   as global symbol.  We reuse indx and dynstr_index for local symbol
+   hash since they aren't used by global symbols in this backend.  */
 
 static hashval_t
 riscv_elf_local_htab_hash (const void *ptr)
@@ -618,6 +614,7 @@ bad_static_reloc (bfd *abfd, unsigned r_type, struct elf_link_hash_entry *h)
   bfd_set_error (bfd_error_bad_value);
   return FALSE;
 }
+
 /* Look through the relocs for a section during the first phase, and
    allocate space in the global offset table or procedure linkage
    table.  */
@@ -743,8 +740,8 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_RISCV_CALL:
 	case R_RISCV_CALL_PLT:
-	  /* These symbol requires a procedure linkage table entry.  We
-	     actually build the entry in adjust_dynamic_symbol,
+	  /* These symbol requires a procedure linkage table entry.
+	     We actually build the entry in adjust_dynamic_symbol,
 	     because these might be a case of linking PIC code without
 	     linking in any dynamic objects, in which case we don't
 	     need to generate a procedure linkage table after all.  */
@@ -1806,24 +1803,24 @@ riscv_zero_pcrel_hi_reloc (Elf_Internal_Rela *rel,
 			   bfd *input_bfd ATTRIBUTE_UNUSED)
 {
   /* We may need to reference low addreses in PC-relative modes even when the
-   * PC is far away from these addresses.  For example, undefweak references
-   * need to produce the address 0 when linked.  As 0 is far from the arbitrary
-   * addresses that we can link PC-relative programs at, the linker can't
-   * actually relocate references to those symbols.  In order to allow these
-   * programs to work we simply convert the PC-relative auipc sequences to
-   * 0-relative lui sequences.  */
+     PC is far away from these addresses.  For example, undefweak references
+     need to produce the address 0 when linked.  As 0 is far from the arbitrary
+     addresses that we can link PC-relative programs at, the linker can't
+     actually relocate references to those symbols.  In order to allow these
+     programs to work we simply convert the PC-relative auipc sequences to
+     0-relative lui sequences.  */
   if (bfd_link_pic (info))
     return FALSE;
 
   /* If it's possible to reference the symbol using auipc we do so, as that's
-   * more in the spirit of the PC-relative relocations we're processing.  */
+     more in the spirit of the PC-relative relocations we're processing.  */
   bfd_vma offset = addr - pc;
   if (ARCH_SIZE == 32 || VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (offset)))
     return FALSE;
 
   /* If it's impossible to reference this with a LUI-based offset then don't
-   * bother to convert it at all so users still see the PC-relative relocation
-   * in the truncation message.  */
+     bother to convert it at all so users still see the PC-relative relocation
+     in the truncation message.  */
   if (ARCH_SIZE > 32 && !VALID_UTYPE_IMM (RISCV_CONST_HIGH_PART (addr)))
     return FALSE;
 
@@ -3305,7 +3302,7 @@ riscv_float_abi_string (flagword flags)
     }
 }
 
-/* The information of architecture attribute.  */
+/* The information of architecture elf attributes.  */
 static riscv_subset_list_t in_subsets;
 static riscv_subset_list_t out_subsets;
 static riscv_subset_list_t merged_subsets;
@@ -3382,11 +3379,10 @@ riscv_i_or_e_p (bfd *ibfd,
 
    Arguments:
      `bfd`: bfd handler.
-     `in_arch`: Raw arch string for input object.
-     `out_arch`: Raw arch string for output object.
-     `pin`: subset list for input object, and it'll skip all merged subset after
-            merge.
-     `pout`: Like `pin`, but for output object.  */
+     `in_arch`: Raw ISA string for input object.
+     `out_arch`: Raw ISA string for output object.
+     `pin`: Subset list for input object.
+     `pout`: Subset list for output object.  */
 
 static bfd_boolean
 riscv_merge_std_ext (bfd *ibfd,
@@ -3555,7 +3551,7 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
   if (in_arch != NULL && out_arch == NULL)
     return in_arch;
 
-  /* Parse subset from arch string.  */
+  /* Parse subset from ISA string.  */
   if (!riscv_parse_subset (&rpe_in, in_arch))
     return NULL;
 
@@ -3660,7 +3656,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	else if (in_attr[Tag_RISCV_arch].s
 		 && out_attr[Tag_RISCV_arch].s)
 	  {
-	    /* Check arch compatible.  */
+	    /* Check compatible.  */
 	    char *merged_arch =
 		riscv_merge_arch_attr_info (ibfd,
 					    in_attr[Tag_RISCV_arch].s,
@@ -3678,7 +3674,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
       case Tag_RISCV_priv_spec:
       case Tag_RISCV_priv_spec_minor:
       case Tag_RISCV_priv_spec_revision:
-	/* If we have handled the priv attributes, then skip it.  */
+	/* If we have handled the privileged elf attributes, then skip it.  */
 	if (!priv_attrs_merged)
 	  {
 	    unsigned int Tag_a = Tag_RISCV_priv_spec;
@@ -3687,7 +3683,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    enum riscv_priv_spec_class in_priv_spec;
 	    enum riscv_priv_spec_class out_priv_spec;
 
-	    /* Get the priv spec class from elf attribute numbers.  */
+	    /* Get the privileged spec class from elf attributes.  */
 	    riscv_get_priv_spec_class_from_numbers (in_attr[Tag_a].i,
 						    in_attr[Tag_b].i,
 						    in_attr[Tag_c].i,
@@ -3697,7 +3693,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 						    out_attr[Tag_c].i,
 						    &out_priv_spec);
 
-	    /* Allow to link the object without the priv specs.  */
+	    /* Allow to link the object without the privileged specs.  */
 	    if (out_priv_spec == PRIV_SPEC_CLASS_NONE)
 	      {
 		out_attr[Tag_a].i = in_attr[Tag_a].i;
@@ -3718,10 +3714,9 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		   out_attr[Tag_b].i,
 		   out_attr[Tag_c].i);
 
-		/* The priv spec v1.9.1 can not be linked with other spec
-		   versions since the conflicts.  We plan to drop the
-		   v1.9.1 in a year or two, so this confict should be
-		   removed in the future.  */
+		/* The privileged spec v1.9.1 can not be linked with others
+		   since the conflicts, so we plan to drop it in a year or
+		   two.  */
 		if (in_priv_spec == PRIV_SPEC_CLASS_1P9P1
 		    || out_priv_spec == PRIV_SPEC_CLASS_1P9P1)
 		  {
@@ -3730,7 +3725,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 			 "linked with other spec versions"));
 		  }
 
-		/* Update the output priv spec to the newest one.  */
+		/* Update the output privileged spec to the newest one.  */
 		if (in_priv_spec > out_priv_spec)
 		  {
 		    out_attr[Tag_a].i = in_attr[Tag_a].i;
@@ -3938,8 +3933,9 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
 	 call to SYMBOL as well. Since both __wrap_SYMBOL and SYMBOL reference
 	 the same symbol (which is __wrap_SYMBOL), but still exist as two
 	 different symbols in 'sym_hashes', we don't want to adjust
-	 the global symbol __wrap_SYMBOL twice.  */
-      /* The same problem occurs with symbols that are versioned_hidden, as
+	 the global symbol __wrap_SYMBOL twice.
+
+         The same problem occurs with symbols that are versioned_hidden, as
 	 foo becomes an alias for foo@BAR, and hence they need the same
 	 treatment.  */
       if (link_info->wrap_hash != NULL
@@ -4177,9 +4173,9 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
       r_type = R_RISCV_JAL;
       auipc = MATCH_JAL | (rd << OP_SH_RD);
     }
-  else /* near_zero */
+  else
     {
-      /* Relax to JALR rd, x0, addr.  */
+      /* Near zero, relax to JALR rd, x0, addr.  */
       r_type = R_RISCV_LO12_I;
       auipc = MATCH_JALR | (rd << OP_SH_RD);
     }
@@ -4212,7 +4208,7 @@ _bfd_riscv_get_max_alignment (asection *sec)
   return (bfd_vma) 1 << max_alignment_power;
 }
 
-/* Relax non-PIC global variable references.  */
+/* Relax non-PIC global variable references to GP-relative references.  */
 
 static bfd_boolean
 _bfd_riscv_relax_lui (bfd *abfd,
@@ -4325,7 +4321,7 @@ _bfd_riscv_relax_lui (bfd *abfd,
   return TRUE;
 }
 
-/* Relax non-PIC TLS references.  */
+/* Relax non-PIC TLS references to TP-relative references.  */
 
 static bfd_boolean
 _bfd_riscv_relax_tls_le (bfd *abfd,
@@ -4446,7 +4442,7 @@ _bfd_riscv_relax_pc  (bfd *abfd ATTRIBUTE_UNUSED,
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
   /* Chain the _LO relocs to their cooresponding _HI reloc to compute the
-   * actual target address.  */
+     actual target address.  */
   riscv_pcgp_hi_reloc hi_reloc;
   memset (&hi_reloc, 0, sizeof (hi_reloc));
   switch (ELFNN_R_TYPE (rel->r_info))
@@ -4486,7 +4482,7 @@ _bfd_riscv_relax_pc  (bfd *abfd ATTRIBUTE_UNUSED,
 	return TRUE;
 
       /* If the cooresponding lo relocation has already been seen then it's not
-       * safe to relax this relocation.  */
+         safe to relax this relocation.  */
       if (riscv_find_pcgp_lo_reloc (pcgp_relocs, rel->r_offset))
 	return TRUE;
 
@@ -4577,7 +4573,7 @@ _bfd_riscv_relax_pc  (bfd *abfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
-/* Relax PC-relative references to GP-relative references.  */
+/* Delete the bytes for R_RISCV_DELETE.  */
 
 static bfd_boolean
 _bfd_riscv_relax_delete (bfd *abfd,
@@ -4599,9 +4595,12 @@ _bfd_riscv_relax_delete (bfd *abfd,
   return TRUE;
 }
 
-/* Relax a section.  Pass 0 shortens code sequences unless disabled.  Pass 1
-   deletes the bytes that pass 0 made obselete.  Pass 2, which cannot be
-   disabled, handles code alignment directives.  */
+/* Relax a section.
+
+   Pass 0: Shortens code sequences for LUI/CALL/TPREL relocs.
+   Pass 1: Shortens code sequences for PCREL relocs.
+   Pass 2: Deletes the bytes that pass 1 made obselete.
+   Pass 3: Which cannot be disabled, handles code alignment directives.  */
 
 static bfd_boolean
 _bfd_riscv_relax_section (bfd *abfd, asection *sec,
@@ -4898,7 +4897,7 @@ riscv_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
       default:
 	return FALSE;
 
-      case PRSTATUS_SIZE:  /* sizeof(struct elf_prstatus) on Linux/RISC-V.  */
+      case PRSTATUS_SIZE: /* sizeof(struct elf_prstatus) on Linux/RISC-V.  */
 	/* pr_cursig */
 	elf_tdata (abfd)->core->signal
 	  = bfd_get_16 (abfd, note->descdata + PRSTATUS_OFFSET_PR_CURSIG);
@@ -4953,6 +4952,7 @@ riscv_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 }
 
 /* Set the right mach type.  */
+
 static bfd_boolean
 riscv_elf_object_p (bfd *abfd)
 {

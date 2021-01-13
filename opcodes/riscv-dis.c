@@ -44,8 +44,8 @@ struct riscv_private_data
 static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
 
-/* Other options.  */
-static int no_aliases;	/* If set disassemble as most general inst.  */
+/* If set, disassemble as most general instruction.  */
+static int no_aliases;
 
 static void
 set_default_riscv_dis_options (void)
@@ -179,20 +179,20 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	case 'C': /* RVC */
 	  switch (*++d)
 	    {
-	    case 's': /* RS1 x8-x15 */
-	    case 'w': /* RS1 x8-x15 */
+	    case 's': /* RS1 x8-x15.  */
+	    case 'w': /* RS1 x8-x15.  */
 	      print (info->stream, "%s",
 		     riscv_gpr_names[EXTRACT_OPERAND (CRS1S, l) + 8]);
 	      break;
-	    case 't': /* RS2 x8-x15 */
-	    case 'x': /* RS2 x8-x15 */
+	    case 't': /* RS2 x8-x15.  */
+	    case 'x': /* RS2 x8-x15.  */
 	      print (info->stream, "%s",
 		     riscv_gpr_names[EXTRACT_OPERAND (CRS2S, l) + 8]);
 	      break;
-	    case 'U': /* RS1, constrained to equal RD */
+	    case 'U': /* RS1, constrained to equal RD.  */
 	      print (info->stream, "%s", riscv_gpr_names[rd]);
 	      break;
-	    case 'c': /* RS1, constrained to equal sp */
+	    case 'c': /* RS1, constrained to equal sp.  */
 	      print (info->stream, "%s", riscv_gpr_names[X_SP]);
 	      break;
 	    case 'V': /* RS2 */
@@ -248,11 +248,11 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	    case '<':
 	      print (info->stream, "0x%x", (int)EXTRACT_RVC_IMM (l) & 0x1f);
 	      break;
-	    case 'T': /* floating-point RS2 */
+	    case 'T': /* Floating-point RS2.  */
 	      print (info->stream, "%s",
 		     riscv_fpr_names[EXTRACT_OPERAND (CRS2, l)]);
 	      break;
-	    case 'D': /* floating-point RS2 x8-x15 */
+	    case 'D': /* Floating-point RS2 x8-x15.  */
 	      print (info->stream, "%s",
 		     riscv_fpr_names[EXTRACT_OPERAND (CRS2S, l) + 8]);
 	      break;
@@ -268,7 +268,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	  break;
 
 	case '0':
-	  /* Only print constant 0 if it is the last argument */
+	  /* Only print constant 0 if it is the last argument.  */
 	  if (!d[1])
 	    print (info->stream, "0");
 	  break;
@@ -371,7 +371,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 
 	case 'E':
 	  {
-	    static const char *riscv_csr_hash[4096];    /* Total 2^12 CSR.  */
+	    static const char *riscv_csr_hash[4096]; /* Total 2^12 CSRs.  */
 	    static bfd_boolean init_csr = FALSE;
 	    unsigned int csr = EXTRACT_OPERAND (CSR, l);
 
@@ -381,7 +381,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 		for (i = 0; i < 4096; i++)
 		  riscv_csr_hash[i] = NULL;
 
-		/* Set to the newest privilege version.  */
+		/* Set to the newest privileged version.  */
 		if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
 		  default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
 
@@ -593,8 +593,6 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 disassembler_ftype
 riscv_get_disassembler (bfd *abfd)
 {
-  /* If -Mpriv-spec= isn't set, then try to set it by checking the elf
-     privileged attributes.  */
   if (abfd)
     {
       const char *sec_name = get_elf_backend_data (abfd)->obj_attrs_section;

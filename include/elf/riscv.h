@@ -118,10 +118,9 @@ END_RELOC_NUMBERS (R_RISCV_max)
 #define RISCV_GP_SYMBOL "__global_pointer$"
 
 /* Additional section types.  */
-#define SHT_RISCV_ATTRIBUTES   0x70000003  /* Section holds attributes.  */
+#define SHT_RISCV_ATTRIBUTES 0x70000003 /* Section holds attributes.  */
 
 /* Object attributes.  */
-
 enum
 {
   /* 0-3 are generic.  */

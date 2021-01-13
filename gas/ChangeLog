@@ -1,3 +1,9 @@
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c: Comments tidy and improvement.  Also update
+	comment "fallthru" to "Fall through" that end with a period and
+	two spaces.
+
 2021-01-14  Mike Frysinger  <vapier@gentoo.org>
 
 	* doc/as.texi: Delete @ifset ELF wrapping around [248]byte entries.

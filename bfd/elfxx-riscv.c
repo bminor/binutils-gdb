@@ -872,7 +872,6 @@ static reloc_howto_type howto_table[] =
 };
 
 /* A mapping from BFD reloc types to RISC-V ELF reloc types.  */
-
 struct elf_reloc_map
 {
   bfd_reloc_code_real_type bfd_val;
@@ -1025,11 +1024,11 @@ riscv_elf_add_sub_reloc (bfd *abfd,
   return bfd_reloc_ok;
 }
 
-/* Array is used to compare the all extensions' order quickly.
+/* Array is used to compare the orders of all extensions quickly.
 
-   Zero     number means it is a preserved keyword.
-   Negative number means it is a prefix keyword (s, h, x, z).
-   Positive number means it is a standard extension.  */
+   Zero value: Preserved keyword.
+   Negative value: Prefixed keyword (s, h, x, z).
+   Positive value: Standard extension.  */
 
 static int riscv_ext_order[26] = {0};
 
@@ -1093,7 +1092,7 @@ riscv_lookup_subset (const riscv_subset_list_t *subset_list,
   return FALSE;
 }
 
-/* Add arch string extension to the last of the subset list.  */
+/* Add extension from ISA string to the last of the subset list.  */
 
 void
 riscv_add_subset (riscv_subset_list_t *subset_list,
@@ -1150,7 +1149,7 @@ riscv_add_implicit_subset (riscv_subset_list_t *subset_list,
 
 /* These extensions are added to the subset list for special purposes,
    with the explicit versions or the RISCV_UNKNOWN_VERSION versions.
-   Therefore, we won't output them to the output arch string in the
+   Therefore, we won't output them to the output ISA string in the
    riscv_arch_str1, if the versions are unknown.  */
 
 static bfd_boolean
@@ -1163,8 +1162,8 @@ riscv_ext_dont_care_version (const char *subset)
   return FALSE;
 }
 
-/* We have to add all arch string extensions first, and then start to
-   add their implicit extensions.  The arch string extensions must be
+/* We have to add all extensions from ISA string first, and then start to
+   add their implicit extensions.  The extensions from ISA string must be
    set in order, so we can add them to the last of the subset list
    directly, without searching.
 
@@ -1238,7 +1237,7 @@ riscv_release_subset_list (riscv_subset_list_t *subset_list)
 
    Arguments:
      `rps`: Hooks and status for parsing extensions.
-     `march`: Full arch string.
+     `march`: Full ISA string.
      `p`: Curent parsing position.
      `major_version`: Parsed major version.
      `minor_version`: Parsed minor version.
@@ -1323,7 +1322,7 @@ riscv_supported_std_ext (void)
 
    Arguments:
      `rps`: Hooks and status for parsing extensions.
-     `march`: Full arch string.
+     `march`: Full ISA string.
      `p`: Curent parsing position.  */
 
 static const char *
@@ -1379,7 +1378,7 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
 				RISCV_UNKNOWN_VERSION,
 				RISCV_UNKNOWN_VERSION, FALSE);
 	/* g-ext is used to add the implicit extensions, but will
-	   not be output to the arch string.  */
+	   not be output to the ISA string.  */
 	riscv_parse_add_subset (rps, "g",
 				major_version,
 				minor_version, FALSE);
@@ -1441,7 +1440,7 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
   return p;
 }
 
-/* Classify the argument 'arch' into one of riscv_isa_ext_class_t.  */
+/* Classify ARCH into one of riscv_isa_ext_class_t.  */
 
 riscv_isa_ext_class_t
 riscv_get_prefix_class (const char *arch)
@@ -1457,9 +1456,8 @@ riscv_get_prefix_class (const char *arch)
 }
 
 /* Structure describing parameters to use when parsing a particular
-   riscv_isa_ext_class_t. One of these should be provided for each
+   riscv_isa_ext_class_t.  One of these should be provided for each
    possible class, except RV_ISA_CLASS_UNKNOWN.  */
-
 typedef struct riscv_parse_config
 {
   /* Class of the extension. */
@@ -1481,7 +1479,7 @@ typedef struct riscv_parse_config
 
    Arguments:
      `rps`: Hooks and status for parsing extensions.
-     `march`: Full architecture string.
+     `march`: Full ISA string.
      `p`: Curent parsing position.
      `config`: What class and predicate function to use for the
      extension.  */
@@ -1667,7 +1665,6 @@ riscv_ext_h_valid_p (const char *arg)
 
 /* Parsing order of the prefixed extensions that is specified by
    the ISA spec.  */
-
 static const riscv_parse_config_t parse_config[] =
 {
   {RV_ISA_CLASS_S, "s", riscv_ext_s_valid_p},
@@ -1692,7 +1689,7 @@ riscv_init_ext_order (void)
   if (inited)
     return;
 
-  /* All standard extensions' orders are positive numbers.  */
+  /* The orders of all standard extensions are positive.  */
   order = 1;
 
   /* Init the standard base extensions first.  */
@@ -1703,8 +1700,7 @@ riscv_init_ext_order (void)
   for (ext = std_remain_exts; *ext; ext++)
     riscv_ext_order[(*ext - 'a')] = order++;
 
-  /* Init the order for prefixed keywords.  The orders are
-     negative numbers.  */
+  /* Init the order for prefixed keywords.  The orders are negative.  */
   order = -1;
   for (i = 0; parse_config[i].class != RV_ISA_CLASS_UNKNOWN; i++)
     {
@@ -1715,7 +1711,7 @@ riscv_init_ext_order (void)
   inited = TRUE;
 }
 
-/* Add the implicit extensions according to the arch string extensions.  */
+/* Add the implicit extensions.  */
 
 static void
 riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
@@ -1773,14 +1769,14 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
     }
 }
 
-/* Function for parsing arch string.
+/* Function for parsing ISA string.
 
    Return Value:
      Return TRUE on success.
 
    Arguments:
      `rps`: Hooks and status for parsing extensions.
-     `arch`: Full arch string.  */
+     `arch`: Full ISA string.  */
 
 bfd_boolean
 riscv_parse_subset (riscv_parse_subset_t *rps,
@@ -1815,11 +1811,11 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
     }
   else
     {
-      /* Arch string shouldn't be NULL or empty here.  However,
-	 it might be empty only when we failed to merge the arch
+      /* ISA string shouldn't be NULL or empty here.  However,
+	 it might be empty only when we failed to merge the ISA
 	 string in the riscv_merge_attributes.  We have already
 	 issued the correct error message in another side, so do
-	 not issue this error when the arch string is empty.  */
+	 not issue this error when the ISA string is empty.  */
       if (strlen (arch))
 	rps->error_handler (
 	  _("-march=%s: ISA string must begin with rv32 or rv64"),
@@ -1903,7 +1899,7 @@ riscv_estimate_arch_strlen1 (const riscv_subset_t *subset)
   return riscv_estimate_arch_strlen1 (subset->next)
 	 + strlen (subset->name)
 	 + riscv_estimate_digit (subset->major_version)
-	 + 1 /* For version seperator: 'p'.  */
+	 + 1 /* For version seperator 'p'.  */
 	 + riscv_estimate_digit (subset->minor_version)
 	 + 1 /* For underscore.  */;
 }
@@ -1928,7 +1924,7 @@ riscv_arch_str1 (riscv_subset_t *subset,
   if (subset_t == NULL)
     return;
 
-  /* No underline between rvXX and i/e.   */
+  /* No underline between rvXX and i/e.  */
   if ((strcasecmp (subset_t->name, "i") == 0)
       || (strcasecmp (subset_t->name, "e") == 0))
     underline = "";
@@ -1953,7 +1949,7 @@ riscv_arch_str1 (riscv_subset_t *subset,
   riscv_arch_str1 (subset_t->next, attr_str, buf, bufsz);
 }
 
-/* Convert subset info to string with explicit version info.  */
+/* Convert subset information into string with explicit versions.  */
 
 char *
 riscv_arch_str (unsigned xlen, const riscv_subset_list_t *subset)

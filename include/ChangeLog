@@ -1,3 +1,9 @@
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elf/riscv.h: Comments tidy and improvement.
+	* opcode/riscv-opc.h: Likewise.
+	* opcode/riscv.h: Likewise.
+
 2021-01-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_CSRE): Delete.

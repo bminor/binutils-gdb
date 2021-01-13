@@ -29,13 +29,13 @@ typedef uint64_t insn_t;
 
 static inline unsigned int riscv_insn_length (insn_t insn)
 {
-  if ((insn & 0x3) != 0x3) /* RVC.  */
+  if ((insn & 0x3) != 0x3) /* RVC instructions.  */
     return 2;
-  if ((insn & 0x1f) != 0x1f) /* Base ISA and extensions in 32-bit space.  */
+  if ((insn & 0x1f) != 0x1f) /* 32-bit instructions.  */
     return 4;
-  if ((insn & 0x3f) == 0x1f) /* 48-bit extensions.  */
+  if ((insn & 0x3f) == 0x1f) /* 48-bit instructions.  */
     return 6;
-  if ((insn & 0x7f) == 0x3f) /* 64-bit extensions.  */
+  if ((insn & 0x7f) == 0x3f) /* 64-bit instructions.  */
     return 8;
   /* Longer instructions not supported at the moment.  */
   return 2;
@@ -291,11 +291,10 @@ static const char * const riscv_pred_succ[16] =
 #define EXTRACT_OPERAND(FIELD, INSN) \
   EXTRACT_BITS ((INSN), OP_MASK_##FIELD, OP_SH_##FIELD)
 
-/* The maximal number of subset can be required. */
+/* The maximal number of subset can be required.  */
 #define MAX_SUBSET_NUM 4
 
 /* All RISC-V instructions belong to at least one of these classes.  */
-
 enum riscv_insn_class
   {
    INSN_CLASS_NONE,
@@ -319,7 +318,6 @@ enum riscv_insn_class
   };
 
 /* This structure holds information for a particular instruction.  */
-
 struct riscv_opcode
 {
   /* The name of the instruction.  */
@@ -351,7 +349,6 @@ struct riscv_opcode
 };
 
 /* The current supported ISA spec versions.  */
-
 enum riscv_isa_spec_class
 {
   ISA_SPEC_CLASS_NONE,
@@ -365,7 +362,6 @@ enum riscv_isa_spec_class
 #define RISCV_UNKNOWN_VERSION -1
 
 /* This structure holds version information for specific ISA.  */
-
 struct riscv_ext_version
 {
   const char *name;
@@ -375,19 +371,17 @@ struct riscv_ext_version
 };
 
 /* All RISC-V CSR belong to one of these classes.  */
-
 enum riscv_csr_class
 {
   CSR_CLASS_NONE,
 
   CSR_CLASS_I,
-  CSR_CLASS_I_32,      /* rv32 only */
-  CSR_CLASS_F,         /* f-ext only */
-  CSR_CLASS_DEBUG      /* debug CSR */
+  CSR_CLASS_I_32, /* RV32 only.  */
+  CSR_CLASS_F, /* F extension only.  */
+  CSR_CLASS_DEBUG /* Debug CSR.  */
 };
 
 /* The current supported privilege spec versions.  */
-
 enum riscv_priv_spec_class
 {
   PRIV_SPEC_CLASS_NONE,
@@ -399,7 +393,6 @@ enum riscv_priv_spec_class
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
-
 struct riscv_csr_extra
 {
   /* Class to which this CSR belongs.  Used to decide whether or
@@ -452,14 +445,7 @@ struct riscv_csr_extra
    disassembler, and requires special treatment by the assembler.  */
 #define INSN_MACRO		0xffffffff
 
-/* This is a list of macro expanded instructions.
-
-   _I appended means immediate
-   _A appended means address
-   _AB appended means address with base register
-   _D appended means 64 bit floating point constant
-   _S appended means 32 bit floating point constant.  */
-
+/* This is a list of macro expanded instructions.  */
 enum
 {
   M_LA,

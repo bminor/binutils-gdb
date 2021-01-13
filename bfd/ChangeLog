@@ -1,3 +1,9 @@
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c: Comments tidy and improvement.
+	* elfxx-riscv.c: Likewise.
+	* elfxx-riscv.h: Likewise.
+
 2021-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26688
