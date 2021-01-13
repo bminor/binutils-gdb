@@ -645,6 +645,8 @@ if [gas_32_check] then {
 	run_dump_test "got"
 	run_dump_test "got-no-relax"
 
+	run_dump_test "no-got"
+
 	run_dump_test "addend"
 	run_dump_test "nop-3"
 	run_dump_test "nop-4"
@@ -1261,6 +1263,8 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-gotpcrel"
 	run_dump_test "x86-64-gotpcrel-no-relax"
 	run_dump_test "x86-64-gotpcrel-2"
+
+	run_dump_test "x86-64-no-got"
 
 	run_dump_test "x86-64-addend"
 	run_dump_test "x86-64-nop-3"
