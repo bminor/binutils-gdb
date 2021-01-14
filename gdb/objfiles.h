@@ -786,7 +786,8 @@ extern int pc_in_section (CORE_ADDR, const char *);
 static inline int
 in_plt_section (CORE_ADDR pc)
 {
-  return pc_in_section (pc, ".plt");
+  return (pc_in_section (pc, ".plt")
+	  || pc_in_section (pc, ".plt.sec"));
 }
 
 /* Keep a registry of per-objfile data-pointers required by other GDB

@@ -1,3 +1,8 @@
+2021-01-14  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoints/27151
+	* objfiles.h (in_plt_section): Handle .plt.sec.
+
 2021-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/26819
