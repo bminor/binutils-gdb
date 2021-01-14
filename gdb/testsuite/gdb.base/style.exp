@@ -46,6 +46,16 @@ save_vars { env(TERM) } {
     set main_line [gdb_get_line_number "break here"]
     gdb_test "list $main_line,$main_line" "return.*some_called_function.*"
 
+    gdb_test_no_output "set style enabled off"
+
+    set argv ""
+    gdb_test_multiple "frame" "frame without styling" {
+	-re -wrap "main \\(argc=.*, (argv=$hex)\\).*style\\.c:\[0-9\].*" {
+	    set argv $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+
     gdb_test_no_output "set style enabled on"
 
     set main_expr [style main function]
@@ -60,7 +70,7 @@ save_vars { env(TERM) } {
     gdb_test_no_output "set style sources off"
     gdb_test "frame" \
 	"\r\n\[^\033\]*break here.*" \
-	"frame without styling"
+	"frame without sources styling"
     gdb_test_no_output "set style sources on"
 
     gdb_test "break -q main" "file $base_file_expr.*"
@@ -71,19 +81,46 @@ save_vars { env(TERM) } {
     # wrong spot with styling.  There were different bugs at different
     # widths, so try two.
     foreach width {20 30} {
-	gdb_test_no_output "set width $width"
+	set argv_len [string length $argv]
+	if { $argv_len == 0 } {
+	    continue
+	}
+
 	# There was also a bug where the styling could be wrong in the
 	# line listing; this is why the words from the source code are
 	# spelled out in the final result line of the test.
-	gdb_test "frame" \
+	set re1_styled \
 	    [multi_line \
 		 "#0 *$main_expr.*$arg_expr.*" \
 		 ".*$arg_expr.*" \
 		 ".* at .*$file_expr.*" \
-		 "\[0-9\]+.*return.* break here .*"
-	    ] \
-	    "frame when width=$width"
+		 "\[0-9\]+.*return.* break here .*"]
+	set re2_styled \
+	    [multi_line \
+		 "#0 *$main_expr.*$arg_expr.*" \
+		 ".*$arg_expr.* at .*$file_expr.*" \
+		 "\[0-9\]+.*return.* break here .*"]
+
+	# The length of the line containing argv containing:
+	# - 4 leading spaces
+	# - argv string
+	# - closing parenthesis
+	set line_len [expr 4 + $argv_len + 1]
+
+	if { $line_len > $width } {
+	    # At on the next line.
+	    set re_styled $re1_styled
+	} else {
+	    # At on the same line as argv.
+	    set re_styled $re2_styled
+	}
+
+	gdb_test_no_output "set width $width"
+	gdb_test "frame" $re_styled "frame when width=$width"
     }
+
+    # Reset width back to 0.
+    gdb_test_no_output "set width 0"
 
     if {$test_macros} {
 	set macro_line [gdb_get_line_number "\#define SOME_MACRO"]
