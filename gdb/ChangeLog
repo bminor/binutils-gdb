@@ -1,5 +1,12 @@
 2021-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* record-btrace.c (class record_btrace_target): Remove.
+	(record_btrace_target::commit_resume): Remove.
+	* record-full.c (class record_full_target): Remove.
+	(record_full_target::commit_resume): Remove.
+
+2021-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* remote.c (enum class resume_state): New.
 	(struct resumed_pending_vcont_info): New.
 	(struct remote_thread_info) <resume_state, set_not_resumed,

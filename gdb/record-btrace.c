@@ -116,7 +116,6 @@ public:
 
   const struct frame_unwind *get_tailcall_unwinder () override;
 
-  void commit_resume () override;
   void resume (ptid_t, int, enum gdb_signal) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
 
@@ -2204,16 +2203,6 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
       target_async (1);
       mark_async_event_handler (record_btrace_async_inferior_event_handler);
     }
-}
-
-/* The commit_resume method of target record-btrace.  */
-
-void
-record_btrace_target::commit_resume ()
-{
-  if ((::execution_direction != EXEC_REVERSE)
-      && !record_is_replaying (minus_one_ptid))
-    beneath ()->commit_resume ();
 }
 
 /* Cancel resuming TP.  */

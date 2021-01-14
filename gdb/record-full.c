@@ -267,7 +267,6 @@ public:
   const target_info &info () const override
   { return record_full_target_info; }
 
-  void commit_resume () override;
   void resume (ptid_t, int, enum gdb_signal) override;
   void disconnect (const char *, int) override;
   void detach (inferior *, int) override;
@@ -1101,15 +1100,6 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
      let's register it with the event loop.  */
   if (target_can_async_p ())
     target_async (1);
-}
-
-/* "commit_resume" method for process record target.  */
-
-void
-record_full_target::commit_resume ()
-{
-  if (!RECORD_FULL_IS_REPLAY)
-    beneath ()->commit_resume ();
 }
 
 static int record_full_get_sig = 0;
