@@ -203,8 +203,8 @@ relocate_gdb_directory (const char *initial, bool relocatable)
    otherwise.  */
 
 static std::string
-relocate_gdbinit_path_maybe_in_datadir (const std::string &file,
-					bool relocatable)
+relocate_file_path_maybe_in_datadir (const std::string &file,
+				     bool relocatable)
 {
   size_t datadir_len = strlen (GDB_DATADIR);
 
@@ -233,45 +233,52 @@ relocate_gdbinit_path_maybe_in_datadir (const std::string &file,
     return relocated_path;
 }
 
-/* Compute the locations of init files that GDB should source and
-   return them in SYSTEM_GDBINIT, HOME_GDBINIT, LOCAL_GDBINIT.  If
-   there is no system gdbinit (resp. home gdbinit and local gdbinit)
-   to be loaded, then SYSTEM_GDBINIT (resp. HOME_GDBINIT and
-   LOCAL_GDBINIT) is set to the empty string.  */
-static void
-get_init_files (std::vector<std::string> *system_gdbinit,
-		std::string *home_gdbinit,
-		std::string *local_gdbinit)
+/* A class to wrap up the logic for finding the three different types of
+   initialisation files GDB uses, system wide, home directory, and current
+   working directory.  */
+
+class gdb_initfile_finder
 {
-  static std::vector<std::string> sysgdbinit;
-  static std::string homeinit;
-  static std::string localinit;
-  static int initialized = 0;
+public:
+  /* Constructor.  Finds initialisation files named FILENAME in the home
+     directory or local (current working) directory.  System initialisation
+     files are found in both SYSTEM_FILENAME and SYSTEM_DIRNAME if these
+     are not nullptr (either or both can be).  The matching *_RELOCATABLE
+     flag is passed through to RELOCATE_FILE_PATH_MAYBE_IN_DATADIR.
 
-  if (!initialized)
-    {
-      struct stat homebuf, cwdbuf, s;
+     If FILENAME starts with a '.' then when looking in the home directory
+     this first '.' can be ignored in some cases.  */
+  explicit gdb_initfile_finder (const char *filename,
+				const char *system_filename,
+				bool system_filename_relocatable,
+				const char *system_dirname,
+				bool system_dirname_relocatable,
+				bool lookup_local_file)
+  {
+    struct stat s;
 
-      if (SYSTEM_GDBINIT[0])
-	{
-	  std::string relocated_sysgdbinit
-	    = relocate_gdbinit_path_maybe_in_datadir
-		(SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE);
-	  if (!relocated_sysgdbinit.empty ()
-	      && stat (relocated_sysgdbinit.c_str (), &s) == 0)
-	    sysgdbinit.push_back (relocated_sysgdbinit);
-	}
-      if (SYSTEM_GDBINIT_DIR[0])
-	{
-	  std::string relocated_gdbinit_dir
-	    = relocate_gdbinit_path_maybe_in_datadir
-		(SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_DIR_RELOCATABLE);
-	  if (!relocated_gdbinit_dir.empty ()) {
-	    gdb_dir_up dir (opendir (relocated_gdbinit_dir.c_str ()));
+    if (system_filename != nullptr && system_filename[0] != '\0')
+      {
+	std::string relocated_filename
+	  = relocate_file_path_maybe_in_datadir (system_filename,
+						 system_filename_relocatable);
+	if (!relocated_filename.empty ()
+	    && stat (relocated_filename.c_str (), &s) == 0)
+	  m_system_files.push_back (relocated_filename);
+      }
+
+    if (system_dirname != nullptr && system_dirname[0] != '\0')
+      {
+	std::string relocated_dirname
+	  = relocate_file_path_maybe_in_datadir (system_dirname,
+						 system_dirname_relocatable);
+	if (!relocated_dirname.empty ())
+	  {
+	    gdb_dir_up dir (opendir (relocated_dirname.c_str ()));
 	    if (dir != nullptr)
 	      {
 		std::vector<std::string> files;
-		for (;;)
+		while (true)
 		  {
 		    struct dirent *ent = readdir (dir.get ());
 		    if (ent == nullptr)
@@ -279,28 +286,28 @@ get_init_files (std::vector<std::string> *system_gdbinit,
 		    std::string name (ent->d_name);
 		    if (name == "." || name == "..")
 		      continue;
-		    /* ent->d_type is not available on all systems (e.g. mingw,
-		       Solaris), so we have to call stat().  */
-		    std::string filename
-		      = relocated_gdbinit_dir + SLASH_STRING + name;
-		    if (stat (filename.c_str (), &s) != 0
+		    /* ent->d_type is not available on all systems
+		       (e.g. mingw, Solaris), so we have to call stat().  */
+		    std::string tmp_filename
+		      = relocated_dirname + SLASH_STRING + name;
+		    if (stat (tmp_filename.c_str (), &s) != 0
 			|| !S_ISREG (s.st_mode))
 		      continue;
 		    const struct extension_language_defn *extlang
-		      = get_ext_lang_of_file (filename.c_str ());
+		      = get_ext_lang_of_file (tmp_filename.c_str ());
 		    /* We effectively don't support "set script-extension
-		       off/soft", because we are loading system init files here,
-		       so it does not really make sense to depend on a
-		       setting.  */
+		       off/soft", because we are loading system init files
+		       here, so it does not really make sense to depend on
+		       a setting.  */
 		    if (extlang != nullptr && ext_lang_present_p (extlang))
-		      files.push_back (std::move (filename));
+		      files.push_back (std::move (tmp_filename));
 		  }
 		std::sort (files.begin (), files.end ());
-		sysgdbinit.insert (sysgdbinit.end (),
-				   files.begin (), files.end ());
+		m_system_files.insert (m_system_files.end (),
+				       files.begin (), files.end ());
 	      }
 	  }
-	}
+      }
 
       /* If the .gdbinit file in the current directory is the same as
 	 the $HOME/.gdbinit file, it should not be sourced.  homebuf
@@ -308,25 +315,75 @@ get_init_files (std::vector<std::string> *system_gdbinit,
 	 are zero in case one of them fails (this guarantees that they
 	 won't match if either exists).  */
 
-      memset (&homebuf, 0, sizeof (struct stat));
-      memset (&cwdbuf, 0, sizeof (struct stat));
+    struct stat homebuf, cwdbuf;
+    memset (&homebuf, 0, sizeof (struct stat));
+    memset (&cwdbuf, 0, sizeof (struct stat));
 
-      homeinit = find_gdb_home_config_file (GDBINIT, &homebuf);
+    m_home_file = find_gdb_home_config_file (filename, &homebuf);
 
-      if (stat (GDBINIT, &cwdbuf) == 0)
-	{
-	  if (homeinit.empty ()
-	      || memcmp ((char *) &homebuf, (char *) &cwdbuf,
-			 sizeof (struct stat)))
-	    localinit = GDBINIT;
-	}
+    if (lookup_local_file && stat (filename, &cwdbuf) == 0)
+      {
+	if (m_home_file.empty ()
+	    || memcmp ((char *) &homebuf, (char *) &cwdbuf,
+		       sizeof (struct stat)))
+	  m_local_file = filename;
+      }
+  }
 
-      initialized = 1;
-    }
+  DISABLE_COPY_AND_ASSIGN (gdb_initfile_finder);
 
-  *system_gdbinit = sysgdbinit;
-  *home_gdbinit = homeinit;
-  *local_gdbinit = localinit;
+  /* Return a list of system initialisation files.  The list could be
+     empty.  */
+  const std::vector<std::string> &system_files () const
+  { return m_system_files; }
+
+  /* Return the path to the home initialisation file.  The string can be
+     empty if there is no such file.  */
+  const std::string &home_file () const
+  { return m_home_file; }
+
+  /* Return the path to the local initialisation file.  The string can be
+     empty if there is no such file.  */
+  const std::string &local_file () const
+  { return m_local_file; }
+
+private:
+
+  /* Vector of all system init files in the order they should be processed.
+     Could be empty.  */
+  std::vector<std::string> m_system_files;
+
+  /* Initialization file from the home directory.  Could be the empty
+     string if there is no such file found.  */
+  std::string m_home_file;
+
+  /* Initialization file from the current working directory.  Could be the
+     empty string if there is no such file found.  */
+  std::string m_local_file;
+};
+
+/* Compute the locations of init files that GDB should source and return
+   them in SYSTEM_GDBINIT, HOME_GDBINIT, LOCAL_GDBINIT.  The SYSTEM_GDBINIT
+   can be returned as an empty vector, and HOME_GDBINIT and LOCAL_GDBINIT
+   can be returned as empty strings if there is no init file of that
+   type.  */
+
+static void
+get_init_files (std::vector<std::string> *system_gdbinit,
+		std::string *home_gdbinit,
+		std::string *local_gdbinit)
+{
+  /* Cache the file lookup object so we only actually search for the files
+     once.  */
+  static gdb::optional<gdb_initfile_finder> init_files;
+  if (!init_files.has_value ())
+    init_files.emplace (GDBINIT, SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE,
+			SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_DIR_RELOCATABLE,
+			true);
+
+  *system_gdbinit = init_files->system_files ();
+  *home_gdbinit = init_files->home_file ();
+  *local_gdbinit = init_files->local_file ();
 }
 
 /* Start up the event loop.  This is the entry point to the event loop
@@ -1375,6 +1432,10 @@ At startup, GDB reads the following init files and executes their commands:\n\
     fprintf_unfiltered (stream, _("\
    * local init file (see also 'set auto-load local-gdbinit'): ./%s\n\
 "), local_gdbinit.c_str ());
+  if (system_gdbinit.empty () && home_gdbinit.empty ()
+      && local_gdbinit.empty ())
+    fprintf_unfiltered (stream, _("\
+   None found.\n"));
   fputs_unfiltered (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\

@@ -1,3 +1,11 @@
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* main.c (relocate_gdbinit_path_maybe_in_datadir): Rename to...
+	(relocate_file_path_maybe_in_datadir): ...this.
+	(class gdb_initfile_finder): New class.
+	(get_init_files): Now uses gdb_initfile_finder.
+	(print_gdb_help): Print 'None found' when there are no init files.
+
 2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* dwarf2/read.c (inherit_abstract_dies): Keep a reference to the
