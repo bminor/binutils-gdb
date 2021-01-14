@@ -1,5 +1,10 @@
 2021-01-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.am (bfin-lex-wrapper.@OBJEXT@): Delete $(NO_WERROR).
+	* Makefile.in: Regenerated.
+
+2021-01-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-lex.l (YY_NO_INPUT, YY_NO_UNPUT): Define.
 	(parse_int): Mark char_bag const.
 
