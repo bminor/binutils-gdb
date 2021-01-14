@@ -114,10 +114,14 @@ struct trad_frame_saved_reg
   /* Encode that the saved register's value is stored as a sequence of bytes.
      This is useful when the value is larger than what primitive types
      can hold.  */
-  void set_value_bytes (const gdb_byte *value_bytes)
+  void set_value_bytes (gdb::array_view<const gdb_byte> bytes)
   {
+    /* Allocate the space and copy the data bytes.  */
+    gdb_byte *data = FRAME_OBSTACK_CALLOC (bytes.size (), gdb_byte);
+    memcpy (data, bytes.data (), bytes.size ());
+
     m_kind = trad_frame_saved_reg_kind::VALUE_BYTES;
-    m_reg.value_bytes = value_bytes;
+    m_reg.value_bytes = data;
   }
 
   /* Getters */
@@ -185,43 +189,7 @@ private:
   } m_reg;
 };
 
-/* Encode REGNUM value in the trad-frame.  */
-void trad_frame_set_value (trad_frame_saved_reg this_saved_regs[],
-			   int regnum, LONGEST val);
-
-/* Encode REGNUM is in REALREG in the trad-frame.  */
-void trad_frame_set_realreg (trad_frame_saved_reg this_saved_regs[],
-			     int regnum, int realreg);
-
-/* Encode REGNUM is at address ADDR in the trad-frame.  */
-void trad_frame_set_addr (trad_frame_saved_reg this_trad_cache[],
-			  int regnum, CORE_ADDR addr);
-
-/* Mark REGNUM as unknown.  */
-void trad_frame_set_unknown (trad_frame_saved_reg this_saved_regs[],
-			     int regnum);
-
-/* Encode REGNUM value in the trad-frame as a sequence of bytes.  This is
-   useful when the value is larger than what primitive types can hold.  */
-void trad_frame_set_value_bytes (trad_frame_saved_reg this_saved_regs[],
-				 int regnum,
-				 gdb::array_view<const gdb_byte> bytes);
-
-/* Convenience functions, return non-zero if the register has been
-   encoded as specified.  */
-int trad_frame_value_p (trad_frame_saved_reg this_saved_regs[],
-			int regnum);
-int trad_frame_addr_p (trad_frame_saved_reg this_saved_regs[],
-		       int regnum);
-int trad_frame_realreg_p (trad_frame_saved_reg this_saved_regs[],
-			  int regnum);
-
-/* Return TRUE if REGNUM is stored as a sequence of bytes, and FALSE
-   otherwise.  */
-bool trad_frame_value_bytes_p (trad_frame_saved_reg this_saved_regs[],
-			      int regnum);
-
-/* Reset the saved regs cache, setting register values to -1.  */
+/* Reset the saved regs cache, setting register values to REALREG.  */
 void trad_frame_reset_saved_regs (struct gdbarch *gdbarch,
 				  trad_frame_saved_reg *regs);
 

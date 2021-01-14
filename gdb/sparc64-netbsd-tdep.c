@@ -139,7 +139,7 @@ sparc64nbsd_sigcontext_saved_regs (CORE_ADDR sigcontext_addr,
 
 	addr = saved_regs[SPARC_I7_REGNUM].addr ();
 	i7 = get_frame_memory_unsigned (this_frame, addr, 8);
-	trad_frame_set_value (saved_regs, SPARC_I7_REGNUM, i7 ^ wcookie);
+	saved_regs[SPARC_I7_REGNUM].set_value (i7 ^ wcookie);
       }
   }
 

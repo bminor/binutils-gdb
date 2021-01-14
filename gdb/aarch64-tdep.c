@@ -518,9 +518,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	    }
 
 	  if (tdep->has_pauth () && cache != nullptr)
-	    trad_frame_set_value (cache->saved_regs,
-				  tdep->pauth_ra_state_regnum,
-				  ra_state_val);
+	    {
+	      int regnum = tdep->pauth_ra_state_regnum;
+	      cache->saved_regs[regnum].set_value (ra_state_val);
+	    }
 	}
       else
 	{
@@ -653,15 +654,17 @@ aarch64_analyze_prologue_test (void)
 	else if (i == AARCH64_LR_REGNUM)
 	  SELF_CHECK (cache.saved_regs[i].addr () == -264);
 	else
-	  SELF_CHECK (cache.saved_regs[i].is_realreg ());
+	  SELF_CHECK (cache.saved_regs[i].is_realreg ()
+		      && cache.saved_regs[i].realreg () == i);
       }
 
     for (int i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
       {
-	int regnum = gdbarch_num_regs (gdbarch);
+	int num_regs = gdbarch_num_regs (gdbarch);
+	int regnum = i + num_regs + AARCH64_D0_REGNUM;
 
-	SELF_CHECK (cache.saved_regs[i + regnum
-				     + AARCH64_D0_REGNUM].is_realreg ());
+	SELF_CHECK (cache.saved_regs[regnum].is_realreg ()
+		    && cache.saved_regs[regnum].realreg () == regnum);
       }
   }
 
@@ -693,20 +696,21 @@ aarch64_analyze_prologue_test (void)
 	else if (i == 19)
 	  SELF_CHECK (cache.saved_regs[i].addr () == -48);
 	else
-	  SELF_CHECK (cache.saved_regs[i].is_realreg ());
+	  SELF_CHECK (cache.saved_regs[i].is_realreg ()
+		      && cache.saved_regs[i].realreg () == i);
       }
 
     for (int i = 0; i < AARCH64_D_REGISTER_COUNT; i++)
       {
-	int regnum = gdbarch_num_regs (gdbarch);
+	int num_regs = gdbarch_num_regs (gdbarch);
+	int regnum = i + num_regs + AARCH64_D0_REGNUM;
+
 
 	if (i == 0)
-	  SELF_CHECK (cache.saved_regs[i + regnum
-				       + AARCH64_D0_REGNUM].addr ()
-		      == -24);
+	  SELF_CHECK (cache.saved_regs[regnum].addr () == -24);
 	else
-	  SELF_CHECK (cache.saved_regs[i + regnum
-				       + AARCH64_D0_REGNUM].is_realreg ());
+	  SELF_CHECK (cache.saved_regs[regnum].is_realreg ()
+		      && cache.saved_regs[regnum].realreg () == regnum);
       }
   }
 
@@ -850,15 +854,14 @@ aarch64_analyze_prologue_test (void)
 	  else if (i == AARCH64_LR_REGNUM)
 	    SELF_CHECK (cache.saved_regs[i].addr () == -40);
 	  else
-	    SELF_CHECK (cache.saved_regs[i].is_realreg ());
+	    SELF_CHECK (cache.saved_regs[i].is_realreg ()
+			&& cache.saved_regs[i].realreg () == i);
 	}
 
       if (tdep->has_pauth ())
 	{
-	  SELF_CHECK (trad_frame_value_p (cache.saved_regs,
-					  tdep->pauth_ra_state_regnum));
-	  SELF_CHECK (cache.saved_regs[tdep->pauth_ra_state_regnum].addr ()
-		      == 1);
+	  int regnum = tdep->pauth_ra_state_regnum;
+	  SELF_CHECK (cache.saved_regs[regnum].is_value ());
 	}
     }
 }
@@ -977,7 +980,7 @@ aarch64_make_prologue_cache_1 (struct frame_info *this_frame,
   /* Calculate actual addresses of saved registers using offsets
      determined by aarch64_analyze_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
-    if (trad_frame_addr_p (cache->saved_regs, reg))
+    if (cache->saved_regs[reg].is_addr ())
       cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
 				       + cache->prev_sp);
 
@@ -1076,8 +1079,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
       lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
 
       if (tdep->has_pauth ()
-	  && trad_frame_value_p (cache->saved_regs,
-				 tdep->pauth_ra_state_regnum))
+	  && cache->saved_regs[tdep->pauth_ra_state_regnum].is_value ())
 	lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
 
       return frame_unwind_got_constant (this_frame, prev_regnum, lr);

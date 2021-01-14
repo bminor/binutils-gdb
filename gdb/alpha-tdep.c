@@ -1289,7 +1289,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 		 All it says is that the function we are scanning reused
 		 that register for some computation of its own, and is now
 		 saving its result.  */
-	      if (trad_frame_addr_p(info->saved_regs, reg))
+	      if (info->saved_regs[reg].is_addr ())
 		continue;
 
 	      if (reg == 31)
@@ -1385,14 +1385,14 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
   /* Convert offsets to absolute addresses.  See above about adding
      one to the offsets to make all detected offsets non-zero.  */
   for (reg = 0; reg < ALPHA_NUM_REGS; ++reg)
-    if (trad_frame_addr_p(info->saved_regs, reg))
+    if (info->saved_regs[reg].is_addr ())
       info->saved_regs[reg].set_addr (info->saved_regs[reg].addr ()
 				      + val - 1);
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */
-  if (!trad_frame_addr_p (info->saved_regs, ALPHA_SP_REGNUM))
-   trad_frame_set_value (info->saved_regs, ALPHA_SP_REGNUM, info->vfp);
+  if (!info->saved_regs[ALPHA_SP_REGNUM].is_addr ())
+   info->saved_regs[ALPHA_SP_REGNUM].set_value (info->vfp);
 
   return info;
 }

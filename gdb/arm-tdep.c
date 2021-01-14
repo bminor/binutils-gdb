@@ -1906,7 +1906,7 @@ arm_make_prologue_cache (struct frame_info *this_frame)
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
-    if (trad_frame_addr_p (cache->saved_regs, reg))
+    if (cache->saved_regs[reg].is_addr ())
       cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
 				       + cache->prev_sp);
 
@@ -2366,7 +2366,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	 actual value in the current frame.  */
       if (!vsp_valid)
 	{
-	  if (trad_frame_realreg_p (cache->saved_regs, ARM_SP_REGNUM))
+	  if (cache->saved_regs[ARM_SP_REGNUM].is_realreg ())
 	    {
 	      int reg = cache->saved_regs[ARM_SP_REGNUM].realreg ();
 	      vsp = get_frame_register_unsigned (this_frame, reg);
@@ -2452,7 +2452,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 	{
 	  /* We could only have updated PC by popping into it; if so, it
 	     will show up as address.  Otherwise, copy LR into PC.  */
-	  if (!trad_frame_addr_p (cache->saved_regs, ARM_PC_REGNUM))
+	  if (!cache->saved_regs[ARM_PC_REGNUM].is_addr ())
 	    cache->saved_regs[ARM_PC_REGNUM]
 	      = cache->saved_regs[ARM_LR_REGNUM];
 
@@ -2623,7 +2623,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 
   /* If we restore SP from a register, assume this was the frame register.
      Otherwise just fall back to SP as frame register.  */
-  if (trad_frame_realreg_p (cache->saved_regs, ARM_SP_REGNUM))
+  if (cache->saved_regs[ARM_SP_REGNUM].is_realreg ())
     cache->framereg = cache->saved_regs[ARM_SP_REGNUM].realreg ();
   else
     cache->framereg = ARM_SP_REGNUM;
@@ -2760,7 +2760,7 @@ arm_make_epilogue_frame_cache (struct frame_info *this_frame)
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
-    if (trad_frame_addr_p (cache->saved_regs, reg))
+    if (cache->saved_regs[reg].is_addr ())
       cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
 				       + cache->prev_sp);
 

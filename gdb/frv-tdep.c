@@ -967,7 +967,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       info->saved_regs[pc_regnum] = info->saved_regs[lr_regnum];
 
       /* Save the previous frame's computed SP value.  */
-      trad_frame_set_value (info->saved_regs, sp_regnum, info->prev_sp);
+      info->saved_regs[sp_regnum].set_value (info->prev_sp);
     }
 
   return last_prologue_pc;

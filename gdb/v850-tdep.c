@@ -1273,13 +1273,12 @@ v850_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Now that we have the base address for the stack frame we can
      calculate the value of sp in the calling frame.  */
-  trad_frame_set_value (cache->saved_regs, E_SP_REGNUM,
-  			cache->base - cache->sp_offset);
+  cache->saved_regs[E_SP_REGNUM].set_value (cache->base - cache->sp_offset);
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
   for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
-    if (trad_frame_addr_p (cache->saved_regs, i))
+    if (cache->saved_regs[i].is_addr ())
       cache->saved_regs[i].set_addr (cache->saved_regs[i].addr ()
 				     + cache->base);
 

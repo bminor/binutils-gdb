@@ -136,7 +136,7 @@ sparc32_sol2_sigtramp_frame_cache (struct frame_info *this_frame,
     {
       /* The register windows haven't been flushed.  */
       for (regnum = SPARC_L0_REGNUM; regnum <= SPARC_I7_REGNUM; regnum++)
-	trad_frame_set_unknown (cache->saved_regs, regnum);
+	cache->saved_regs[regnum].set_unknown ();
     }
   else
     {

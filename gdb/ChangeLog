@@ -1,5 +1,60 @@
 2021-01-19  Luis Machado  <luis.machado@linaro.org>
 
+	* trad-frame.h (trad_frame_saved_reg) <set_value_bytes>: Allocate
+	memory and save data.
+	(trad_frame_set_value, trad_frame_set_realreg, trad_frame_set_addr)
+	(trad_frame_set_unknown, trad_frame_set_value_bytes)
+	(trad_frame_value_p, trad_frame_addr_p, trad_frame_realreg_p)
+	(trad_frame_value_bytes_p): Remove.
+	(trad_frame_reset_saved_regs): Adjust documentation.
+	* trad-frame.c (trad_frame_alloc_saved_regs): Initialize via a
+	constructor and reset the state of the registers.
+	(trad_frame_value_p, trad_frame_addr_p, trad_frame_realreg_p)
+	(trad_frame_value_bytes_p, trad_frame_set_value)
+	(trad_frame_set_realreg, trad_frame_set_addr)
+	(trad_frame_set_unknown, trad_frame_set_value_bytes): Remove.
+	(trad_frame_set_reg_realreg): Update to call member function.
+	(trad_frame_set_reg_addr, trad_frame_set_reg_value_bytes): Likewise.
+	(trad_frame_get_prev_register): Likewise.
+
+	* aarch64-tdep.c (aarch64_analyze_prologue)
+	(aarch64_analyze_prologue_test, aarch64_make_prologue_cache_1)
+	(aarch64_prologue_prev_register): Update to use member functions.
+	* alpha-mdebug-tdep.c (alpha_mdebug_frame_unwind_cache): Likewise.
+	* alpha-tdep.c (alpha_heuristic_frame_unwind_cache): Likewise.
+	* arc-tdep.c (arc_print_frame_cache, arc_make_frame_cache): Likewise.
+	* arm-tdep.c (arm_make_prologue_cache, arm_exidx_fill_cache)
+	(arm_make_epilogue_frame_cache): Likewise.
+	* avr-tdep.c (avr_frame_unwind_cache)
+	(avr_frame_prev_register): Likewise.
+	* cris-tdep.c (cris_scan_prologue): Likewise.
+	* csky-tdep.c (csky_frame_unwind_cache): Likewise.
+	* frv-tdep.c (frv_analyze_prologue): Likewise.
+	* hppa-tdep.c (hppa_frame_cache, hppa_fallback_frame_cache): Likewise.
+	* lm32-tdep.c (lm32_frame_cache): Likewise.
+	* m32r-tdep.c (m32r_frame_unwind_cache): Likewise.
+	* m68hc11-tdep.c (m68hc11_frame_unwind_cache): Likewise.
+	* mips-tdep.c (set_reg_offset, mips_insn16_frame_cache)
+	(mips_micro_frame_cache, mips_insn32_frame_cache): Likewise.
+	(reset_saved_regs): Adjust to set realreg.
+	* riscv-tdep.c (riscv_scan_prologue, riscv_frame_cache): Adjust to
+	call member functions.
+	* rs6000-tdep.c (rs6000_frame_cache, rs6000_epilogue_frame_cache)
+	* s390-tdep.c (s390_prologue_frame_unwind_cache)
+	(s390_backchain_frame_unwind_cache): Likewise.
+	* score-tdep.c (score7_analyze_prologue)
+	(score3_analyze_prologue, score_make_prologue_cache): Likewise.
+	* sparc-netbsd-tdep.c (sparc32nbsd_sigcontext_saved_regs): Likewise.
+	* sparc-sol2-tdep.c (sparc32_sol2_sigtramp_frame_cache): Likewise.
+	* sparc64-netbsd-tdep.c (sparc64nbsd_sigcontext_saved_regs): Likewise.
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_cache): Likewise.
+	* tilegx-tdep.c (tilegx_analyze_prologue)
+	(tilegx_frame_cache): Likewise.
+	* v850-tdep.c (v850_frame_cache): Likewise.
+	* vax-tdep.c (vax_frame_cache): Likewise.
+
+2021-01-19  Luis Machado  <luis.machado@linaro.org>
+
 	* frame.h (get_frame_register_bytes): Pass a gdb::array_view instead
 	of buffer + length.
 	(put_frame_register_bytes): Likewise.

@@ -1019,7 +1019,9 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save RA.  */
   if (ra_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ())
+      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_PC_REGNUM].realreg ()
+	     == SCORE_PC_REGNUM)
 	this_cache->saved_regs[SCORE_PC_REGNUM].set_addr (sp + sp_offset
 							  - ra_offset);
     }
@@ -1032,7 +1034,9 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save FP.  */
   if (fp_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ())
+      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_FP_REGNUM].realreg ()
+	     == SCORE_FP_REGNUM)
 	this_cache->saved_regs[SCORE_FP_REGNUM].set_addr (sp + sp_offset
 							  - fp_offset);
     }
@@ -1265,7 +1269,9 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save RA.  */
   if (ra_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ())
+      if (this_cache->saved_regs[SCORE_PC_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_PC_REGNUM].realreg ()
+	     == SCORE_PC_REGNUM)
 	this_cache->saved_regs[SCORE_PC_REGNUM].set_addr (sp + sp_offset
 							  - ra_offset);
     }
@@ -1278,7 +1284,9 @@ score3_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   /* Save FP.  */
   if (fp_offset_p == 1)
     {
-      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ())
+      if (this_cache->saved_regs[SCORE_FP_REGNUM].is_realreg ()
+	  && this_cache->saved_regs[SCORE_FP_REGNUM].realreg ()
+	     == SCORE_FP_REGNUM)
 	this_cache->saved_regs[SCORE_FP_REGNUM].set_addr (sp + sp_offset
 							  - fp_offset);
     }
@@ -1318,7 +1326,7 @@ score_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
   }
 
   /* Save SP.  */
-  trad_frame_set_value (cache->saved_regs, SCORE_SP_REGNUM, cache->base);
+  cache->saved_regs[SCORE_SP_REGNUM].set_value (cache->base);
 
   return (struct score_frame_cache *) (*this_cache);
 }

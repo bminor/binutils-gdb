@@ -254,8 +254,8 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */
-  if (!trad_frame_addr_p (info->saved_regs, ALPHA_SP_REGNUM))
-   trad_frame_set_value (info->saved_regs, ALPHA_SP_REGNUM, vfp);
+  if (!info->saved_regs[ALPHA_SP_REGNUM].is_addr ())
+    info->saved_regs[ALPHA_SP_REGNUM].set_value (vfp);
 
   return info;
 }

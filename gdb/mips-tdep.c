@@ -2444,7 +2444,8 @@ set_reg_offset (struct gdbarch *gdbarch, struct mips_frame_cache *this_cache,
 		int regnum, CORE_ADDR offset)
 {
   if (this_cache != NULL
-      && this_cache->saved_regs[regnum].is_realreg ())
+      && this_cache->saved_regs[regnum].is_realreg ()
+      && this_cache->saved_regs[regnum].realreg () == regnum)
     {
       this_cache->saved_regs[regnum + 0
 			     * gdbarch_num_regs (gdbarch)].set_addr (offset);
@@ -2861,9 +2862,8 @@ mips_insn16_frame_cache (struct frame_info *this_frame, void **this_cache)
   }
   
   /* gdbarch_sp_regnum contains the value and not the address.  */
-  trad_frame_set_value (cache->saved_regs,
-			gdbarch_num_regs (gdbarch) + MIPS_SP_REGNUM,
-			cache->base);
+  cache->saved_regs[gdbarch_num_regs (gdbarch)
+		    + MIPS_SP_REGNUM].set_value (cache->base);
 
   return (struct mips_frame_cache *) (*this_cache);
 }
@@ -3296,9 +3296,8 @@ mips_micro_frame_cache (struct frame_info *this_frame, void **this_cache)
   }
 
   /* gdbarch_sp_regnum contains the value and not the address.  */
-  trad_frame_set_value (cache->saved_regs,
-			gdbarch_num_regs (gdbarch) + MIPS_SP_REGNUM,
-			cache->base);
+  cache->saved_regs[gdbarch_num_regs (gdbarch)
+		    + MIPS_SP_REGNUM].set_value (cache->base);
 
   return (struct mips_frame_cache *) (*this_cache);
 }
@@ -3388,8 +3387,10 @@ reset_saved_regs (struct gdbarch *gdbarch, struct mips_frame_cache *this_cache)
     const int num_regs = gdbarch_num_regs (gdbarch);
     int i;
 
+    /* Reset the register values to their default state.  Register i's value
+       is in register i.  */
     for (i = 0; i < num_regs; i++)
-      this_cache->saved_regs[i].set_addr (-1);
+      this_cache->saved_regs[i].set_realreg (i);
   }
 }
 
@@ -3672,9 +3673,8 @@ mips_insn32_frame_cache (struct frame_info *this_frame, void **this_cache)
   }
   
   /* gdbarch_sp_regnum contains the value and not the address.  */
-  trad_frame_set_value (cache->saved_regs,
-			gdbarch_num_regs (gdbarch) + MIPS_SP_REGNUM,
-			cache->base);
+  cache->saved_regs[gdbarch_num_regs (gdbarch)
+		    + MIPS_SP_REGNUM].set_value (cache->base);
 
   return (struct mips_frame_cache *) (*this_cache);
 }

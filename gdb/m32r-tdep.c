@@ -632,7 +632,7 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
   for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
-    if (trad_frame_addr_p (info->saved_regs, i))
+    if (info->saved_regs[i].is_addr ())
       info->saved_regs[i].set_addr (info->prev_sp
 				    + info->saved_regs[i].addr ());
 
@@ -644,7 +644,7 @@ m32r_frame_unwind_cache (struct frame_info *this_frame,
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_set_value (info->saved_regs, M32R_SP_REGNUM, prev_sp);
+  info->saved_regs[M32R_SP_REGNUM].set_value (prev_sp);
 
   return info;
 }

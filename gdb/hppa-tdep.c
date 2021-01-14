@@ -2163,7 +2163,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 			      paddress (gdbarch, cache->base));
       }
      else if (u->Save_SP 
-	      && trad_frame_addr_p (cache->saved_regs, HPPA_SP_REGNUM))
+	      && cache->saved_regs[HPPA_SP_REGNUM].is_addr ())
       {
 	    /* Both we're expecting the SP to be saved and the SP has been
 	       saved.  The entry SP value is saved at this frame's SP
@@ -2184,14 +2184,14 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 			      paddress (gdbarch, cache->base));
 
       }
-    trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
+    cache->saved_regs[HPPA_SP_REGNUM].set_value (cache->base);
   }
 
   /* The PC is found in the "return register", "Millicode" uses "r31"
      as the return register while normal code uses "rp".  */
   if (u->Millicode)
     {
-      if (trad_frame_addr_p (cache->saved_regs, 31))
+      if (cache->saved_regs[31].is_addr ())
 	{
 	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = cache->saved_regs[31];
 	  if (hppa_debug)
@@ -2200,14 +2200,14 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
       else
 	{
 	  ULONGEST r31 = get_frame_register_unsigned (this_frame, 31);
-	  trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, r31);
+	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_value (r31);
 	  if (hppa_debug)
 	    fprintf_unfiltered (gdb_stdlog, " (pc=r31) [frame] } ");
 	}
     }
   else
     {
-      if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
+      if (cache->saved_regs[HPPA_RP_REGNUM].is_addr ())
 	{
 	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM] = 
 	    cache->saved_regs[HPPA_RP_REGNUM];
@@ -2218,7 +2218,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	{
 	  ULONGEST rp = get_frame_register_unsigned (this_frame,
 						     HPPA_RP_REGNUM);
-	  trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, rp);
+	  cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_value (rp);
 	  if (hppa_debug)
 	    fprintf_unfiltered (gdb_stdlog, " (pc=rp) [frame] } ");
 	}
@@ -2238,11 +2238,11 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
      on the stack, but it's been overwritten.  The prologue analyzer will
      set fp_in_r1 when it sees the copy insn so we know to get the value 
      from r1 instead.  */
-  if (u->Save_SP && !trad_frame_addr_p (cache->saved_regs, HPPA_FP_REGNUM)
+  if (u->Save_SP && !cache->saved_regs[HPPA_FP_REGNUM].is_addr ()
       && fp_in_r1)
     {
       ULONGEST r1 = get_frame_register_unsigned (this_frame, 1);
-      trad_frame_set_value (cache->saved_regs, HPPA_FP_REGNUM, r1);
+      cache->saved_regs[HPPA_FP_REGNUM].set_value (r1);
     }
 
   {
@@ -2250,7 +2250,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
     int reg;
     for (reg = 0; reg < gdbarch_num_regs (gdbarch); reg++)
       {
-	if (trad_frame_addr_p (cache->saved_regs, reg))
+	if (cache->saved_regs[reg].is_addr ())
 	  cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
 					   + cache->base);
       }
@@ -2376,9 +2376,9 @@ hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   cache->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
   cache->base -= frame_size;
-  trad_frame_set_value (cache->saved_regs, HPPA_SP_REGNUM, cache->base);
+  cache->saved_regs[HPPA_SP_REGNUM].set_value (cache->base);
 
-  if (trad_frame_addr_p (cache->saved_regs, HPPA_RP_REGNUM))
+  if (cache->saved_regs[HPPA_RP_REGNUM].is_addr ())
     {
       cache->saved_regs[HPPA_RP_REGNUM].set_addr (cache->saved_regs[HPPA_RP_REGNUM].addr ()
 						  + cache->base);
@@ -2389,7 +2389,7 @@ hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       ULONGEST rp;
       rp = get_frame_register_unsigned (this_frame, HPPA_RP_REGNUM);
-      trad_frame_set_value (cache->saved_regs, HPPA_PCOQ_HEAD_REGNUM, rp);
+      cache->saved_regs[HPPA_PCOQ_HEAD_REGNUM].set_value (rp);
     }
 
   return cache;

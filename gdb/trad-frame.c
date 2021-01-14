@@ -69,7 +69,11 @@ trad_frame_alloc_saved_regs (struct gdbarch *gdbarch)
   trad_frame_saved_reg *this_saved_regs
     = FRAME_OBSTACK_CALLOC (numregs, trad_frame_saved_reg);
 
+  /* For backwards compatibility, initialize all the register values to
+     REALREG, with register 0 stored in 0, register 1 stored in 1 and so
+     on.  */
   trad_frame_reset_saved_regs (gdbarch, this_saved_regs);
+
   return this_saved_regs;
 }
 
@@ -86,80 +90,27 @@ trad_frame_alloc_saved_regs (struct frame_info *this_frame)
   return trad_frame_alloc_saved_regs (gdbarch);
 }
 
-int
-trad_frame_value_p (trad_frame_saved_reg this_saved_regs[], int regnum)
-{
-  return this_saved_regs[regnum].is_value ();
-}
-
-int
-trad_frame_addr_p (trad_frame_saved_reg this_saved_regs[], int regnum)
-{
-  return this_saved_regs[regnum].is_addr ();
-}
-
-int
-trad_frame_realreg_p (trad_frame_saved_reg this_saved_regs[],
-		      int regnum)
-{
-  return this_saved_regs[regnum].is_realreg ();
-}
-
-/* See trad-frame.h.  */
-
-bool
-trad_frame_value_bytes_p (trad_frame_saved_reg this_saved_regs[],
-			  int regnum)
-{
-  return this_saved_regs[regnum].is_value_bytes ();
-}
-
-void
-trad_frame_set_value (trad_frame_saved_reg this_saved_regs[],
-		      int regnum, LONGEST val)
-{
-  this_saved_regs[regnum].set_value (val);
-}
-
-/* See trad-frame.h.  */
-
-void
-trad_frame_set_realreg (trad_frame_saved_reg this_saved_regs[],
-			int regnum, int realreg)
-{
-  this_saved_regs[regnum].set_realreg (realreg);
-}
-
-/* See trad-frame.h.  */
-
-void
-trad_frame_set_addr (trad_frame_saved_reg this_saved_regs[],
-		     int regnum, CORE_ADDR addr)
-{
-  this_saved_regs[regnum].set_addr (addr);
-}
-
 void
 trad_frame_set_reg_value (struct trad_frame_cache *this_trad_cache,
 			  int regnum, LONGEST val)
 {
   /* External interface for users of trad_frame_cache
      (who cannot access the prev_regs object directly).  */
-  trad_frame_set_value (this_trad_cache->prev_regs, regnum, val);
+  this_trad_cache->prev_regs[regnum].set_value (val);
 }
 
 void
 trad_frame_set_reg_realreg (struct trad_frame_cache *this_trad_cache,
 			    int regnum, int realreg)
 {
-  trad_frame_set_realreg (this_trad_cache->prev_regs, regnum, realreg);
+  this_trad_cache->prev_regs[regnum].set_realreg (realreg);
 }
 
 void
 trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 			 int regnum, CORE_ADDR addr)
 {
-  trad_frame_set_addr (this_trad_cache->prev_regs, regnum, addr);
+  this_trad_cache->prev_regs[regnum].set_addr (addr);
 }
 
 void
@@ -218,26 +169,6 @@ trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
     }
 }
 
-void
-trad_frame_set_unknown (trad_frame_saved_reg this_saved_regs[],
-			int regnum)
-{
-  this_saved_regs[regnum].set_unknown ();
-}
-
-/* See trad-frame.h.  */
-
-void
-trad_frame_set_value_bytes (trad_frame_saved_reg this_saved_regs[],
-			    int regnum,
-			    gdb::array_view<const gdb_byte> bytes)
-{
-  /* Allocate the space and copy the data bytes.  */
-  gdb_byte *data = FRAME_OBSTACK_CALLOC (bytes.size (), gdb_byte);
-  memcpy (data, bytes.data (), bytes.size ());
-  this_saved_regs[regnum].set_value_bytes (data);
-}
-
 /* See trad-frame.h.  */
 
 void
@@ -247,7 +178,7 @@ trad_frame_set_reg_value_bytes (struct trad_frame_cache *this_trad_cache,
 {
   /* External interface for users of trad_frame_cache
      (who cannot access the prev_regs object directly).  */
-  trad_frame_set_value_bytes (this_trad_cache->prev_regs, regnum, bytes);
+  this_trad_cache->prev_regs[regnum].set_value_bytes (bytes);
 }
 
 
@@ -257,18 +188,18 @@ trad_frame_get_prev_register (struct frame_info *this_frame,
 			      trad_frame_saved_reg this_saved_regs[],
 			      int regnum)
 {
-  if (trad_frame_addr_p (this_saved_regs, regnum))
+  if (this_saved_regs[regnum].is_addr ())
     /* The register was saved in memory.  */
     return frame_unwind_got_memory (this_frame, regnum,
 				    this_saved_regs[regnum].addr ());
-  else if (trad_frame_realreg_p (this_saved_regs, regnum))
+  else if (this_saved_regs[regnum].is_realreg ())
     return frame_unwind_got_register (this_frame, regnum,
 				      this_saved_regs[regnum].realreg ());
-  else if (trad_frame_value_p (this_saved_regs, regnum))
+  else if (this_saved_regs[regnum].is_value ())
     /* The register's value is available.  */
     return frame_unwind_got_constant (this_frame, regnum,
 				      this_saved_regs[regnum].value ());
-  else if (trad_frame_value_bytes_p (this_saved_regs, regnum))
+  else if (this_saved_regs[regnum].is_value_bytes ())
     /* The register's value is available as a sequence of bytes.  */
     return frame_unwind_got_bytes (this_frame, regnum,
 				   this_saved_regs[regnum].value_bytes ());

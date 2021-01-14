@@ -1652,7 +1652,7 @@ arc_print_frame_cache (struct gdbarch *gdbarch, const char *message,
 
   for (int i = 0; i <= ARC_BLINK_REGNUM; i++)
     {
-      if (trad_frame_addr_p (cache->saved_regs, i))
+      if (cache->saved_regs[i].is_addr ())
 	arc_debug_printf ("saved register %s at %s %s",
 			  gdbarch_register_name (gdbarch, i),
 			  (addresses_known) ? "address" : "offset",
@@ -1716,7 +1716,7 @@ arc_make_frame_cache (struct frame_info *this_frame)
 
   for (int i = 0; i <= ARC_LAST_CORE_REGNUM; i++)
     {
-      if (trad_frame_addr_p (cache->saved_regs, i))
+      if (cache->saved_regs[i].is_addr ())
 	cache->saved_regs[i].set_addr (cache->saved_regs[i].addr ()
 				       + cache->prev_sp);
     }

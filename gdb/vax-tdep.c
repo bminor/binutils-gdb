@@ -361,7 +361,7 @@ vax_frame_cache (struct frame_info *this_frame, void **this_cache)
     }
 
   /* Bits 1:0 of the stack pointer were saved in the control bits.  */
-  trad_frame_set_value (cache->saved_regs, VAX_SP_REGNUM, addr + (mask >> 14));
+  cache->saved_regs[VAX_SP_REGNUM].set_value (addr + (mask >> 14));
 
   return cache;
 }

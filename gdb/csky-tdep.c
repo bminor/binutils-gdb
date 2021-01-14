@@ -1871,7 +1871,7 @@ csky_frame_unwind_cache (struct frame_info *this_frame)
 			    func_end, this_frame, cache, lr_type);
 
   /* gdbarch_sp_regnum contains the value and not the address.  */
-  trad_frame_set_value (cache->saved_regs, sp_regnum, cache->prev_sp);
+  cache->saved_regs[sp_regnum].set_value (cache->prev_sp);
   return cache;
 }
 

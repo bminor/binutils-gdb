@@ -3566,8 +3566,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
 	cache->base = (CORE_ADDR) backchain;
     }
 
-  trad_frame_set_value (cache->saved_regs,
-			gdbarch_sp_regnum (gdbarch), cache->base);
+  cache->saved_regs[gdbarch_sp_regnum (gdbarch)].set_value (cache->base);
 
   /* if != -1, fdata.saved_fpr is the smallest number of saved_fpr.
      All fpr's from saved_fpr to fp31 are saved.  */
@@ -3745,8 +3744,7 @@ rs6000_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
       cache->base = sp;
       cache->initial_sp = sp;
 
-      trad_frame_set_value (cache->saved_regs,
-			    gdbarch_pc_regnum (gdbarch), lr);
+      cache->saved_regs[gdbarch_pc_regnum (gdbarch)].set_value (lr);
     }
   catch (const gdb_exception_error &ex)
     {

@@ -1050,8 +1050,8 @@ avr_frame_unwind_cache (struct frame_info *this_frame,
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
   tdep = gdbarch_tdep (gdbarch);
-  trad_frame_set_value (info->saved_regs, AVR_SP_REGNUM,
-			info->prev_sp - 1 + tdep->call_length);
+  info->saved_regs[AVR_SP_REGNUM].set_value (info->prev_sp
+					     - 1 + tdep->call_length);
 
   return info;
 }
@@ -1113,7 +1113,7 @@ avr_frame_prev_register (struct frame_info *this_frame,
 
   if (regnum == AVR_PC_REGNUM || regnum == AVR_PSEUDO_PC_REGNUM)
     {
-      if (trad_frame_addr_p (info->saved_regs, AVR_PC_REGNUM))
+      if (info->saved_regs[AVR_PC_REGNUM].is_addr ())
 	{
 	  /* Reading the return PC from the PC register is slightly
 	     abnormal.  register_size(AVR_PC_REGNUM) says it is 4 bytes,

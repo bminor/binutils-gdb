@@ -417,7 +417,7 @@ lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
   /* Convert callee save offsets into addresses.  */
   for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
     {
-      if (trad_frame_addr_p (info->saved_regs, i))
+      if (info->saved_regs[i].is_addr ())
 	info->saved_regs[i].set_addr (this_base + info->saved_regs[i].addr ());
     }
 
@@ -429,7 +429,7 @@ lm32_frame_cache (struct frame_info *this_frame, void **this_prologue_cache)
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_set_value (info->saved_regs, SIM_LM32_SP_REGNUM, prev_sp);
+  info->saved_regs[SIM_LM32_SP_REGNUM].set_value (prev_sp);
 
   return info;
 }

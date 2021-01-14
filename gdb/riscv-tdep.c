@@ -1864,7 +1864,7 @@ riscv_scan_prologue (struct gdbarch *gdbarch,
 				      gdbarch_register_name (gdbarch, i),
 				      plongest ((LONGEST) offset));
 		}
-	      trad_frame_set_addr (cache->regs, i, offset);
+	      cache->regs[i].set_addr (offset);
 	    }
 	}
     }
@@ -3145,7 +3145,7 @@ riscv_frame_cache (struct frame_info *this_frame, void **this_cache)
   numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
   for (regno = 0; regno < numregs; ++regno)
     {
-      if (trad_frame_addr_p (cache->regs, regno))
+      if (cache->regs[regno].is_addr ())
 	cache->regs[regno].set_addr (cache->regs[regno].addr ()
 				     + cache->frame_base);
     }
@@ -3154,14 +3154,13 @@ riscv_frame_cache (struct frame_info *this_frame, void **this_cache)
      The previous $ra value is gone, this would have been stored be the
      previous frame if required.  */
   cache->regs[gdbarch_pc_regnum (gdbarch)] = cache->regs[RISCV_RA_REGNUM];
-  trad_frame_set_unknown (cache->regs, RISCV_RA_REGNUM);
+  cache->regs[RISCV_RA_REGNUM].set_unknown ();
 
   /* Build the frame id.  */
   cache->this_id = frame_id_build (cache->frame_base, start_addr);
 
   /* The previous $sp value is the frame base value.  */
-  trad_frame_set_value (cache->regs, gdbarch_sp_regnum (gdbarch),
-			cache->frame_base);
+  cache->regs[gdbarch_sp_regnum (gdbarch)].set_value (cache->frame_base);
 
   return cache;
 }

@@ -1259,8 +1259,7 @@ cris_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
 
   /* The previous frame's SP needed to be computed.  Save the computed
      value.  */
-  trad_frame_set_value (info->saved_regs,
-			gdbarch_sp_regnum (gdbarch), info->prev_sp);
+  info->saved_regs[gdbarch_sp_regnum (gdbarch)].set_value (info->prev_sp);
 
   if (!info->leaf_function)
     {
