@@ -1,3 +1,8 @@
+2021-01-14  Mike Frysinger  <vapier@gentoo.org>
+
+	* bfin-lex.l (YY_NO_INPUT, YY_NO_UNPUT): Define.
+	(parse_int): Mark char_bag const.
+
 2021-01-13  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/27178
