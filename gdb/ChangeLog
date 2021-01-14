@@ -1,3 +1,19 @@
+2021-01-13  Simon Marchi  <simon.marchi@efficios.com>
+
+	* remote.c (enum class resume_state): New.
+	(struct resumed_pending_vcont_info): New.
+	(struct remote_thread_info) <resume_state, set_not_resumed,
+	set_resumed_pending_vcont, resumed_pending_vcont_info,
+	set_resumed, m_resume_state, m_resumed_pending_vcont_info>:
+	New.
+	<last_resume_step, last_resume_sig, vcont_resumed>: Remove.
+	(remote_target::remote_add_thread): Adjust.
+	(remote_target::process_initial_stop_replies): Adjust.
+	(remote_target::resume): Adjust.
+	(remote_target::commit_resume): Rely on state in
+	remote_thread_info and not on tp->executing.
+	(remote_target::process_stop_reply): Adjust.
+
 2021-01-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* arc-tdep.h (arc_debug_printf): New.
