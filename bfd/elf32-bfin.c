@@ -2727,129 +2727,130 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	  break;
 
 	case R_BFIN_FUNCDESC:
-	  {
-	    int dynindx;
-	    bfd_vma addend = rel->r_addend;
+	  if ((input_section->flags & SEC_ALLOC) != 0)
+	    {
+	      int dynindx;
+	      bfd_vma addend = rel->r_addend;
 
-	    if (! (h && h->root.type == bfd_link_hash_undefweak
-		   && BFINFDPIC_SYM_LOCAL (info, h)))
-	      {
-		/* If the symbol is dynamic and there may be dynamic
-		   symbol resolution because we are or are linked with a
-		   shared library, emit a FUNCDESC relocation such that
-		   the dynamic linker will allocate the function
-		   descriptor.  If the symbol needs a non-local function
-		   descriptor but binds locally (e.g., its visibility is
-		   protected, emit a dynamic relocation decayed to
-		   section+offset.  */
-		if (h && ! BFINFDPIC_FUNCDESC_LOCAL (info, h)
-		    && BFINFDPIC_SYM_LOCAL (info, h)
-		    && !bfd_link_pde (info))
-		  {
-		    dynindx = elf_section_data (h->root.u.def.section
-						->output_section)->dynindx;
-		    addend += h->root.u.def.section->output_offset
-		      + h->root.u.def.value;
-		  }
-		else if (h && ! BFINFDPIC_FUNCDESC_LOCAL (info, h))
-		  {
-		    if (addend)
-		      {
-			info->callbacks->warning
-			  (info, _("R_BFIN_FUNCDESC references dynamic symbol with nonzero addend"),
-			   name, input_bfd, input_section, rel->r_offset);
-			return FALSE;
-		      }
-		    dynindx = h->dynindx;
-		  }
-		else
-		  {
-		    /* Otherwise, we know we have a private function
-		       descriptor, so reference it directly.  */
-		    BFD_ASSERT (picrel->privfd);
-		    r_type = R_BFIN_BYTE4_DATA;
-		    dynindx = elf_section_data (bfinfdpic_got_section (info)
-						->output_section)->dynindx;
-		    addend = bfinfdpic_got_section (info)->output_offset
-		      + bfinfdpic_got_initial_offset (info)
-		      + picrel->fd_entry;
-		  }
+	      if (! (h && h->root.type == bfd_link_hash_undefweak
+		     && BFINFDPIC_SYM_LOCAL (info, h)))
+		{
+		  /* If the symbol is dynamic and there may be dynamic
+		     symbol resolution because we are or are linked with a
+		     shared library, emit a FUNCDESC relocation such that
+		     the dynamic linker will allocate the function
+		     descriptor.  If the symbol needs a non-local function
+		     descriptor but binds locally (e.g., its visibility is
+		     protected, emit a dynamic relocation decayed to
+		     section+offset.  */
+		  if (h && ! BFINFDPIC_FUNCDESC_LOCAL (info, h)
+		      && BFINFDPIC_SYM_LOCAL (info, h)
+		      && !bfd_link_pde (info))
+		    {
+		      dynindx = elf_section_data (h->root.u.def.section
+						  ->output_section)->dynindx;
+		      addend += h->root.u.def.section->output_offset
+			+ h->root.u.def.value;
+		    }
+		  else if (h && ! BFINFDPIC_FUNCDESC_LOCAL (info, h))
+		    {
+		      if (addend)
+			{
+			  info->callbacks->warning
+			    (info, _("R_BFIN_FUNCDESC references dynamic symbol with nonzero addend"),
+			     name, input_bfd, input_section, rel->r_offset);
+			  return FALSE;
+			}
+		      dynindx = h->dynindx;
+		    }
+		  else
+		    {
+		      /* Otherwise, we know we have a private function
+			 descriptor, so reference it directly.  */
+		      BFD_ASSERT (picrel->privfd);
+		      r_type = R_BFIN_BYTE4_DATA;
+		      dynindx = elf_section_data (bfinfdpic_got_section (info)
+						  ->output_section)->dynindx;
+		      addend = bfinfdpic_got_section (info)->output_offset
+			+ bfinfdpic_got_initial_offset (info)
+			+ picrel->fd_entry;
+		    }
 
-		/* If there is room for dynamic symbol resolution, emit
-		   the dynamic relocation.  However, if we're linking an
-		   executable at a fixed location, we won't have emitted a
-		   dynamic symbol entry for the got section, so idx will
-		   be zero, which means we can and should compute the
-		   address of the private descriptor ourselves.  */
-		if (bfd_link_pde (info)
-		    && (!h || BFINFDPIC_FUNCDESC_LOCAL (info, h)))
-		  {
-		    bfd_vma offset;
+		  /* If there is room for dynamic symbol resolution, emit
+		     the dynamic relocation.  However, if we're linking an
+		     executable at a fixed location, we won't have emitted a
+		     dynamic symbol entry for the got section, so idx will
+		     be zero, which means we can and should compute the
+		     address of the private descriptor ourselves.  */
+		  if (bfd_link_pde (info)
+		      && (!h || BFINFDPIC_FUNCDESC_LOCAL (info, h)))
+		    {
+		      bfd_vma offset;
 
-		    addend += bfinfdpic_got_section (info)->output_section->vma;
-		    if ((bfd_section_flags (input_section->output_section)
-			 & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
-		      {
-			if (_bfinfdpic_osec_readonly_p (output_bfd,
-						       input_section
-						       ->output_section))
-			  {
-			    info->callbacks->warning
-			      (info,
-			       _("cannot emit fixups in read-only section"),
-			       name, input_bfd, input_section, rel->r_offset);
-			    return FALSE;
-			  }
+		      addend += bfinfdpic_got_section (info)->output_section->vma;
+		      if ((bfd_section_flags (input_section->output_section)
+			   & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
+			{
+			  if (_bfinfdpic_osec_readonly_p (output_bfd,
+							  input_section
+							  ->output_section))
+			    {
+			      info->callbacks->warning
+				(info,
+				 _("cannot emit fixups in read-only section"),
+				 name, input_bfd, input_section, rel->r_offset);
+			      return FALSE;
+			    }
 
-			offset = _bfd_elf_section_offset
-			  (output_bfd, info,
-			   input_section, rel->r_offset);
+			  offset = _bfd_elf_section_offset
+			    (output_bfd, info,
+			     input_section, rel->r_offset);
 
-			if (offset != (bfd_vma)-1)
-			  _bfinfdpic_add_rofixup (output_bfd,
-						  bfinfdpic_gotfixup_section
-						  (info),
+			  if (offset != (bfd_vma)-1)
+			    _bfinfdpic_add_rofixup (output_bfd,
+						    bfinfdpic_gotfixup_section
+						    (info),
+						    offset + input_section
+						    ->output_section->vma
+						    + input_section->output_offset,
+						    picrel);
+			}
+		    }
+		  else if ((bfd_section_flags (input_section->output_section)
+			    & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
+		    {
+		      bfd_vma offset;
+
+		      if (_bfinfdpic_osec_readonly_p (output_bfd,
+						      input_section
+						      ->output_section))
+			{
+			  info->callbacks->warning
+			    (info,
+			     _("cannot emit dynamic relocations in read-only section"),
+			     name, input_bfd, input_section, rel->r_offset);
+			  return FALSE;
+			}
+		      offset = _bfd_elf_section_offset (output_bfd, info,
+							input_section, rel->r_offset);
+
+		      if (offset != (bfd_vma)-1)
+			_bfinfdpic_add_dyn_reloc (output_bfd,
+						  bfinfdpic_gotrel_section (info),
 						  offset + input_section
 						  ->output_section->vma
 						  + input_section->output_offset,
-						  picrel);
-		      }
-		  }
-		else if ((bfd_section_flags (input_section->output_section)
-			  & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD))
-		  {
-		    bfd_vma offset;
+						  r_type,
+						  dynindx, addend, picrel);
+		    }
+		  else
+		    addend += bfinfdpic_got_section (info)->output_section->vma;
+		}
 
-		    if (_bfinfdpic_osec_readonly_p (output_bfd,
-						   input_section
-						   ->output_section))
-		      {
-			info->callbacks->warning
-			  (info,
-			   _("cannot emit dynamic relocations in read-only section"),
-			   name, input_bfd, input_section, rel->r_offset);
-			return FALSE;
-		      }
-		    offset = _bfd_elf_section_offset (output_bfd, info,
-						      input_section, rel->r_offset);
-
-		    if (offset != (bfd_vma)-1)
-		      _bfinfdpic_add_dyn_reloc (output_bfd,
-						bfinfdpic_gotrel_section (info),
-						offset + input_section
-						->output_section->vma
-						+ input_section->output_offset,
-						r_type,
-						dynindx, addend, picrel);
-		  }
-		else
-		  addend += bfinfdpic_got_section (info)->output_section->vma;
-	      }
-
-	    /* We want the addend in-place because dynamic
-	       relocations are REL.  Setting relocation to it should
-	       arrange for it to be installed.  */
-	    relocation = addend - rel->r_addend;
+	      /* We want the addend in-place because dynamic
+		 relocations are REL.  Setting relocation to it should
+		 arrange for it to be installed.  */
+	      relocation = addend - rel->r_addend;
 	  }
 	  check_segment[0] = check_segment[1] = got_segment;
 	  break;
