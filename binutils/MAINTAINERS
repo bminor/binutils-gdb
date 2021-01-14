@@ -84,7 +84,7 @@ responsibility among the other maintainers.
   EPIPHANY	   Joern Rennecke <joern.rennecke@embecosm.com>
   FR30		   Nick Clifton <nickc@redhat.com>
   FRV		   Nick Clifton <nickc@redhat.com>
-  FRV		   Alexandre Oliva <aoliva@redhat.com>
+  FRV		   Alexandre Oliva <aoliva@sourceware.org>
   GOLD		   Ian Lance Taylor <iant@google.com>
   GOLD		   Cary Coutant <ccoutant@gmail.com>
   H8300		   Prafulla Thakare <prafulla.thakare@kpitcummins.com>
@@ -109,7 +109,7 @@ responsibility among the other maintainers.
   MIPS		   Chenghua Xu <paul.hua.gm@gmail.com>
   MIPS I-IV	   Maciej W. Rozycki <macro@linux-mips.org>
   MMIX		   Hans-Peter Nilsson <hp@bitrange.com>
-  MN10300	   Alexandre Oliva <aoliva@redhat.com>
+  MN10300	   Alexandre Oliva <aoliva@sourceware.org>
   Moxie		   Anthony Green <green@moxielogic.com>
   MSP430	   Dmitry Diky <diwil@spec.ru>
   NDS32		   Kuan-Lin Chen <kuanlinchentw@gmail.com>
@@ -133,7 +133,7 @@ responsibility among the other maintainers.
   S12Z		   John Darrington <john@darrington.wattle.id.au>
   s390, s390x	   Martin Schwidefsky <schwidefsky@de.ibm.com>
   s390, s390x	   Andreas Krebbel <krebbel@linux.vnet.ibm.com>
-  SH		   Alexandre Oliva <aoliva@redhat.com>
+  SH		   Alexandre Oliva <aoliva@sourceware.org>
   SPARC		   David S. Miller <davem@davemloft.net>
   SPARC		   Jose E. Marchesi <jose.marchesi@oracle.com>
   SPU		   Alan Modra <amodra@gmail.com>
