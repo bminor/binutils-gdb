@@ -121,10 +121,6 @@ static const pseudo_typeS elf_pseudo_table[] =
   /* A GNU extension for object attributes.  */
   {"gnu_attribute", obj_elf_gnu_attribute, 0},
 
-  /* These are used for dwarf.  */
-  {"2byte", cons, 2},
-  {"4byte", cons, 4},
-  {"8byte", cons, 8},
   /* These are used for dwarf2.  */
   { "file", dwarf2_directive_file, 0 },
   { "loc",  dwarf2_directive_loc,  0 },

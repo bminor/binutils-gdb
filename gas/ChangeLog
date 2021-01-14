@@ -1,5 +1,12 @@
 2021-01-14  Mike Frysinger  <vapier@gentoo.org>
 
+	* doc/as.texi: Delete @ifset ELF wrapping around [248]byte entries.
+	Delete warning that these are only available with ELF targets.
+	* obj-elf.c (elf_pseudo_table): Move 2byte/4byte/8byte entries ...
+	* read.c (potable): ... here.
+
+2021-01-14  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.am (bfin-lex-wrapper.@OBJEXT@): Delete $(NO_WERROR).
 	* Makefile.in: Regenerated.
 

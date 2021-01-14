@@ -530,6 +530,9 @@ static const pseudo_typeS potable[] = {
   {"weakref", s_weakref, 0},
   {"word", cons, 2},
   {"zero", s_space, 0},
+  {"2byte", cons, 2},
+  {"4byte", cons, 4},
+  {"8byte", cons, 8},
   {NULL, NULL, 0}			/* End sentinel.  */
 };
 

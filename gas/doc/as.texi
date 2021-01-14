@@ -4537,11 +4537,9 @@ Some machine configurations provide additional directives.
 @ifclear no-space-dir
 * Zero::                        @code{.zero @var{size}}
 @end ifclear
-@ifset ELF
 * 2byte::                       @code{.2byte @var{expressions}}
 * 4byte::                       @code{.4byte @var{expressions}}
 * 8byte::                       @code{.8byte @var{bignums}}
-@end ifset
 * Deprecated::                  Deprecated Directives
 @end menu
 
@@ -7505,7 +7503,6 @@ so it can take an optional second argument of the value to store in the bytes
 instead of zero.  Using @samp{.zero} in this way would be confusing however.
 @end ifclear
 
-@ifset ELF
 @node 2byte
 @section @code{.2byte @var{expression} [, @var{expression}]*}
 @cindex @code{2byte} directive
@@ -7525,8 +7522,6 @@ This directive does not apply any alignment before or after inserting the
 values.  As a result of this, if relocations are generated, they may be
 different from those used for inserting values with a guaranteed alignment.
 
-This directive is only available for ELF targets,
-
 @node 4byte
 @section @code{.4byte @var{expression} [, @var{expression}]*}
 @cindex @code{4byte} directive
@@ -7544,8 +7539,6 @@ long values into the output.
 
 Like the @option{.2byte} directive, except that it inserts unaligned, eight
 byte long bignum values into the output.
-
-@end ifset
 
 @node Deprecated
 @section Deprecated Directives
