@@ -1,3 +1,9 @@
+2021-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/26819
+	* gdb.server/stop-reply-no-thread-multi.c: New file.
+	* gdb.server/stop-reply-no-thread-multi.exp: New file.
+
 2021-01-12  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.arch/i386-mpx-call.c (have_mpx): Remove.

@@ -747,6 +747,9 @@ public: /* Remote specific methods.  */
   ptid_t process_stop_reply (struct stop_reply *stop_reply,
 			     target_waitstatus *status);
 
+  ptid_t select_thread_for_ambiguous_stop_reply
+    (const struct target_waitstatus *status);
+
   void remote_notice_new_inferior (ptid_t currthread, int executing);
 
   void process_initial_stop_replies (int from_tty);
@@ -7753,6 +7756,108 @@ remote_notif_get_pending_events (remote_target *remote, notif_client *nc)
   remote->remote_notif_get_pending_events (nc);
 }
 
+/* Called from process_stop_reply when the stop packet we are responding
+   to didn't include a process-id or thread-id.  STATUS is the stop event
+   we are responding to.
+
+   It is the task of this function to select a suitable thread (or process)
+   and return its ptid, this is the thread (or process) we will assume the
+   stop event came from.
+
+   In some cases there isn't really any choice about which thread (or
+   process) is selected, a basic remote with a single process containing a
+   single thread might choose not to send any process-id or thread-id in
+   its stop packets, this function will select and return the one and only
+   thread.
+
+   However, if a target supports multiple threads (or processes) and still
+   doesn't include a thread-id (or process-id) in its stop packet then
+   first, this is a badly behaving target, and second, we're going to have
+   to select a thread (or process) at random and use that.  This function
+   will print a warning to the user if it detects that there is the
+   possibility that GDB is guessing which thread (or process) to
+   report.
+
+   Note that this is called before GDB fetches the updated thread list from the
+   target.  So it's possible for the stop reply to be ambiguous and for GDB to
+   not realize it.  For example, if there's initially one thread, the target
+   spawns a second thread, and then sends a stop reply without an id that
+   concerns the first thread.  GDB will assume the stop reply is about the
+   first thread - the only thread it knows about - without printing a warning.
+   Anyway, if the remote meant for the stop reply to be about the second thread,
+   then it would be really broken, because GDB doesn't know about that thread
+   yet.  */
+
+ptid_t
+remote_target::select_thread_for_ambiguous_stop_reply
+  (const struct target_waitstatus *status)
+{
+  /* Some stop events apply to all threads in an inferior, while others
+     only apply to a single thread.  */
+  bool process_wide_stop
+    = (status->kind == TARGET_WAITKIND_EXITED
+       || status->kind == TARGET_WAITKIND_SIGNALLED);
+
+  thread_info *first_resumed_thread = nullptr;
+  bool ambiguous = false;
+
+  /* Consider all non-exited threads of the target, find the first resumed
+     one.  */
+  for (thread_info *thr : all_non_exited_threads (this))
+    {
+      remote_thread_info *remote_thr = get_remote_thread_info (thr);
+
+      if (remote_thr->resume_state () != resume_state::RESUMED)
+	continue;
+
+      if (first_resumed_thread == nullptr)
+	first_resumed_thread = thr;
+      else if (!process_wide_stop
+	       || first_resumed_thread->ptid.pid () != thr->ptid.pid ())
+	ambiguous = true;
+    }
+
+  gdb_assert (first_resumed_thread != nullptr);
+
+  /* Warn if the remote target is sending ambiguous stop replies.  */
+  if (ambiguous)
+    {
+      static bool warned = false;
+
+      if (!warned)
+	{
+	  /* If you are seeing this warning then the remote target has
+	     stopped without specifying a thread-id, but the target
+	     does have multiple threads (or inferiors), and so GDB is
+	     having to guess which thread stopped.
+
+	     Examples of what might cause this are the target sending
+	     and 'S' stop packet, or a 'T' stop packet and not
+	     including a thread-id.
+
+	     Additionally, the target might send a 'W' or 'X packet
+	     without including a process-id, when the target has
+	     multiple running inferiors.  */
+	  if (process_wide_stop)
+	    warning (_("multi-inferior target stopped without "
+		       "sending a process-id, using first "
+		       "non-exited inferior"));
+	  else
+	    warning (_("multi-threaded target stopped without "
+		       "sending a thread-id, using first "
+		       "non-exited thread"));
+	  warned = true;
+	}
+    }
+
+  /* If this is a stop for all threads then don't use a particular threads
+     ptid, instead create a new ptid where only the pid field is set.  */
+  if (process_wide_stop)
+    return ptid_t (first_resumed_thread->ptid.pid ());
+  else
+    return first_resumed_thread->ptid;
+}
+
 /* Called when it is decided that STOP_REPLY holds the info of the
    event that is to be returned to the core.  This function always
    destroys STOP_REPLY.  */
@@ -7761,66 +7866,14 @@ ptid_t
 remote_target::process_stop_reply (struct stop_reply *stop_reply,
 				   struct target_waitstatus *status)
 {
-  ptid_t ptid;
-
   *status = stop_reply->ws;
-  ptid = stop_reply->ptid;
+  ptid_t ptid = stop_reply->ptid;
 
-  /* If no thread/process was reported by the stub then use the first
-     non-exited thread in the current target.  */
+  /* If no thread/process was reported by the stub then select a suitable
+     thread/process.  */
   if (ptid == null_ptid)
-    {
-      /* Some stop events apply to all threads in an inferior, while others
-	 only apply to a single thread.  */
-      bool is_stop_for_all_threads
-	= (status->kind == TARGET_WAITKIND_EXITED
-	   || status->kind == TARGET_WAITKIND_SIGNALLED);
-
-      for (thread_info *thr : all_non_exited_threads (this))
-	{
-	  if (ptid != null_ptid
-	      && (!is_stop_for_all_threads
-		  || ptid.pid () != thr->ptid.pid ()))
-	    {
-	      static bool warned = false;
-
-	      if (!warned)
-		{
-		  /* If you are seeing this warning then the remote target
-		     has stopped without specifying a thread-id, but the
-		     target does have multiple threads (or inferiors), and
-		     so GDB is having to guess which thread stopped.
-
-		     Examples of what might cause this are the target
-		     sending and 'S' stop packet, or a 'T' stop packet and
-		     not including a thread-id.
-
-		     Additionally, the target might send a 'W' or 'X
-		     packet without including a process-id, when the target
-		     has multiple running inferiors.  */
-		  if (is_stop_for_all_threads)
-		    warning (_("multi-inferior target stopped without "
-			       "sending a process-id, using first "
-			       "non-exited inferior"));
-		  else
-		    warning (_("multi-threaded target stopped without "
-			       "sending a thread-id, using first "
-			       "non-exited thread"));
-		  warned = true;
-		}
-	      break;
-	    }
-
-	  /* If this is a stop for all threads then don't use a particular
-	     threads ptid, instead create a new ptid where only the pid
-	     field is set.  */
-	  if (is_stop_for_all_threads)
-	    ptid = ptid_t (thr->ptid.pid ());
-	  else
-	    ptid = thr->ptid;
-	}
-      gdb_assert (ptid != null_ptid);
-    }
+    ptid = select_thread_for_ambiguous_stop_reply (status);
+  gdb_assert (ptid != null_ptid);
 
   if (status->kind != TARGET_WAITKIND_EXITED
       && status->kind != TARGET_WAITKIND_SIGNALLED

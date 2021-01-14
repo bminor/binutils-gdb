@@ -1,3 +1,12 @@
+2021-01-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/26819
+	* remote.c
+	(remote_target::select_thread_for_ambiguous_stop_reply): New
+	member function.
+	(remote_target::process_stop_reply): Call
+	select_thread_for_ambiguous_stop_reply.
+
 2021-01-13  Simon Marchi  <simon.marchi@efficios.com>
 
 	* record-btrace.c (class record_btrace_target): Remove.
