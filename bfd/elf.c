@@ -10163,7 +10163,8 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
   type = bfd_get_32 (abfd, note->descdata);
 
-  struct {
+  struct
+  {
     const char *type_name;
     unsigned long min_size;
   } size_check[] =
@@ -10174,7 +10175,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
        { "NOTE_INFO_MODULE64", 16 },
       };
 
-  if (type > (sizeof(size_check)/sizeof(size_check[0])))
+  if (type == 0 || type > (sizeof(size_check)/sizeof(size_check[0])))
       return TRUE;
 
   if (note->descsz < size_check[type - 1].min_size)

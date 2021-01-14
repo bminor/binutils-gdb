@@ -1,3 +1,7 @@
+2021-01-14  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (elfcore_grok_win32pstatus): Check for a note type of 0.
+
 2021-01-13  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.
