@@ -1,5 +1,10 @@
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
+	* opcode/riscv.h: Indent and GNU coding standards tidy,
+	also aligned the code.
+
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elf/riscv.h: Comments tidy and improvement.
 	* opcode/riscv-opc.h: Likewise.
 	* opcode/riscv.h: Likewise.

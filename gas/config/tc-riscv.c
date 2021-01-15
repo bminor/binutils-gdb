@@ -85,7 +85,8 @@ static enum riscv_priv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 static unsigned xlen = 0; /* The width of an x-register.  */
 static unsigned abi_xlen = 0; /* The width of a pointer in the ABI.  */
 static bfd_boolean rve_abi = FALSE;
-enum float_abi {
+enum float_abi
+{
   FLOAT_ABI_DEFAULT = -1,
   FLOAT_ABI_SOFT,
   FLOAT_ABI_SINGLE,
@@ -274,7 +275,7 @@ init_ext_version_hash (const struct riscv_ext_version *table)
 
       i++;
       while (table[i].name
-            && strcmp (table[i].name, name) == 0)
+	     && strcmp (table[i].name, name) == 0)
        i++;
     }
 
@@ -709,14 +710,14 @@ riscv_init_csr_hash (const char *name,
   while (need_enrty && entry != NULL)
     {
       if (entry->csr_class == class
-         && entry->address == address
-         && entry->define_version == define_version
-         && entry->abort_version == abort_version)
-       need_enrty = FALSE;
+	  && entry->address == address
+	  && entry->define_version == define_version
+	  && entry->abort_version == abort_version)
+	need_enrty = FALSE;
       pre_entry = entry;
       entry = entry->next;
     }
- 
+
   /* Duplicate CSR.  */
   if (!need_enrty)
     return;
@@ -969,31 +970,31 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
       case ',': break;
       case '(': break;
       case ')': break;
-      case '<': USE_BITS (OP_MASK_SHAMTW,	OP_SH_SHAMTW);	break;
-      case '>':	USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
+      case '<': USE_BITS (OP_MASK_SHAMTW, OP_SH_SHAMTW); break;
+      case '>': USE_BITS (OP_MASK_SHAMT, OP_SH_SHAMT); break;
       case 'A': break;
-      case 'D':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
-      case 'Z':	USE_BITS (OP_MASK_RS1,		OP_SH_RS1);	break;
-      case 'E':	USE_BITS (OP_MASK_CSR,		OP_SH_CSR);	break;
+      case 'D': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+      case 'Z': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+      case 'E': USE_BITS (OP_MASK_CSR, OP_SH_CSR); break;
       case 'I': break;
-      case 'R':	USE_BITS (OP_MASK_RS3,		OP_SH_RS3);	break;
-      case 'S':	USE_BITS (OP_MASK_RS1,		OP_SH_RS1);	break;
-      case 'U':	USE_BITS (OP_MASK_RS1,		OP_SH_RS1);
+      case 'R': USE_BITS (OP_MASK_RS3, OP_SH_RS3); break;
+      case 'S': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+      case 'U': USE_BITS (OP_MASK_RS1, OP_SH_RS1);
 	/* Fall through.  */
-      case 'T':	USE_BITS (OP_MASK_RS2,		OP_SH_RS2);	break;
-      case 'd':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
-      case 'm':	USE_BITS (OP_MASK_RM,		OP_SH_RM);	break;
-      case 's':	USE_BITS (OP_MASK_RS1,		OP_SH_RS1);	break;
-      case 't':	USE_BITS (OP_MASK_RS2,		OP_SH_RS2);	break;
-      case 'r':	USE_BITS (OP_MASK_RS3,          OP_SH_RS3);     break;
-      case 'P':	USE_BITS (OP_MASK_PRED,		OP_SH_PRED); break;
-      case 'Q':	USE_BITS (OP_MASK_SUCC,		OP_SH_SUCC); break;
+      case 'T': USE_BITS (OP_MASK_RS2, OP_SH_RS2); break;
+      case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
+      case 'm': USE_BITS (OP_MASK_RM, OP_SH_RM); break;
+      case 's': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+      case 't': USE_BITS (OP_MASK_RS2, OP_SH_RS2); break;
+      case 'r': USE_BITS (OP_MASK_RS3, OP_SH_RS3);     break;
+      case 'P': USE_BITS (OP_MASK_PRED, OP_SH_PRED); break;
+      case 'Q': USE_BITS (OP_MASK_SUCC, OP_SH_SUCC); break;
       case 'o':
       case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
-      case 'a':	used_bits |= ENCODE_UJTYPE_IMM (-1U); break;
-      case 'p':	used_bits |= ENCODE_SBTYPE_IMM (-1U); break;
-      case 'q':	used_bits |= ENCODE_STYPE_IMM (-1U); break;
-      case 'u':	used_bits |= ENCODE_UTYPE_IMM (-1U); break;
+      case 'a': used_bits |= ENCODE_UJTYPE_IMM (-1U); break;
+      case 'p': used_bits |= ENCODE_SBTYPE_IMM (-1U); break;
+      case 'q': used_bits |= ENCODE_STYPE_IMM (-1U); break;
+      case 'u': used_bits |= ENCODE_UTYPE_IMM (-1U); break;
       case 'z': break;
       case '[': break;
       case ']': break;
@@ -1252,10 +1253,6 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
 	case 't':
 	  INSERT_OPERAND (RS2, insn, va_arg (args, int));
-	  continue;
-
-	case '>':
-	  INSERT_OPERAND (SHAMT, insn, va_arg (args, int));
 	  continue;
 
 	case 'j':
@@ -2184,11 +2181,11 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 				      "field, value must be 0...64"));
 			    break;
 			  }
-
 			INSERT_OPERAND (CFUNCT6, *ip, imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
 			s = expr_end;
 			continue;
+
 		      case '4':
 		        if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 			    || imm_expr->X_op != O_constant
@@ -2199,11 +2196,11 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 				      "field, value must be 0...15"));
 			    break;
 			  }
-
 			INSERT_OPERAND (CFUNCT4, *ip, imm_expr->X_add_number);
 			imm_expr->X_op = O_absent;
 			s = expr_end;
 			continue;
+
 		      case '3':
 			if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 			    || imm_expr->X_op != O_constant
@@ -2218,6 +2215,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			imm_expr->X_op = O_absent;
 			s = expr_end;
 			continue;
+
 		      case '2':
 			if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 			    || imm_expr->X_op != O_constant
@@ -2232,6 +2230,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			imm_expr->X_op = O_absent;
 			s = expr_end;
 			continue;
+
 		      default:
 			as_bad (_("internal: unknown compressed funct "
 				  "field specifier `CF%c'"), *args);
@@ -2392,7 +2391,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    }
 		  continue;
 		}
-
 	      break;
 
 	    case 'I':
@@ -2462,7 +2460,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_add_number < -(signed)RISCV_IMM_REACH/2)
 		    break;
 		}
-
 	      s = expr_end;
 	      continue;
 
@@ -2508,6 +2505,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      else
 		*imm_reloc = BFD_RELOC_RISCV_CALL;
 	      continue;
+
 	    case 'O':
 	      switch (*++args)
 		{
@@ -2523,11 +2521,11 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 				"lower 2 bits must be 0x3"));
 		      break;
 		    }
-
 		  INSERT_OPERAND (OP, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
 		  s = expr_end;
 		  continue;
+
 		case '2':
 		  if (my_getOpcodeExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
@@ -2538,11 +2536,11 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 				"value must be 0...2"));
 		      break;
 		    }
-
 		  INSERT_OPERAND (OP2, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
 		  s = expr_end;
 		  continue;
+
 		default:
 		  as_bad (_("internal: unknown opcode field "
 			    "specifier `O%c'"), *args);
@@ -2562,11 +2560,11 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 				"value must be 0...127"));
 		      break;
 		    }
-
 		  INSERT_OPERAND (FUNCT7, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
 		  s = expr_end;
 		  continue;
+
 		case '3':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
@@ -2577,11 +2575,11 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			        "value must be 0...7"));
 		      break;
 		    }
-
 		  INSERT_OPERAND (FUNCT3, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
 		  s = expr_end;
 		  continue;
+
 		case '2':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
@@ -2592,7 +2590,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			        "value must be 0...3"));
 		      break;
 		    }
-
 		  INSERT_OPERAND (FUNCT2, *ip, imm_expr->X_add_number);
 		  imm_expr->X_op = O_absent;
 		  s = expr_end;
@@ -3646,7 +3643,7 @@ riscv_write_out_attrs (void)
   /* Re-write architecture elf attribute.  */
   arch_str = riscv_arch_str (xlen, &riscv_subsets);
   bfd_elf_add_proc_attr_string (stdoutput, Tag_RISCV_arch, arch_str);
-  xfree ((void *)arch_str);
+  xfree ((void *) arch_str);
 
   /* For the file without any instruction, we don't set the default_priv_spec
      according to the privileged elf attributes since the md_assemble isn't
@@ -3711,28 +3708,27 @@ riscv_convert_symbolic_attribute (const char *name)
 {
   static const struct
   {
-    const char * name;
-    const int    tag;
+    const char *name;
+    const int tag;
   }
   attribute_table[] =
-    {
-      /* When you modify this table you should
-	 also modify the list in doc/c-riscv.texi.  */
-#define T(tag) {#tag, Tag_RISCV_##tag},  {"Tag_RISCV_" #tag, Tag_RISCV_##tag}
-      T(arch),
-      T(priv_spec),
-      T(priv_spec_minor),
-      T(priv_spec_revision),
-      T(unaligned_access),
-      T(stack_align),
+  {
+    /* When you modify this table you should
+       also modify the list in doc/c-riscv.texi.  */
+#define T(tag) {#tag, Tag_RISCV_##tag}, {"Tag_RISCV_" #tag, Tag_RISCV_##tag}
+    T(arch),
+    T(priv_spec),
+    T(priv_spec_minor),
+    T(priv_spec_revision),
+    T(unaligned_access),
+    T(stack_align),
 #undef T
-    };
-
-  unsigned int i;
+  };
 
   if (name == NULL)
     return -1;
 
+  unsigned int i;
   for (i = 0; i < ARRAY_SIZE (attribute_table); i++)
     if (strcmp (name, attribute_table[i].name) == 0)
       return attribute_table[i].tag;

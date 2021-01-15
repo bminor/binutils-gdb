@@ -228,33 +228,33 @@ static const char * const riscv_pred_succ[16] =
 #define OP_MASK_CSR		0xfffU
 #define OP_SH_CSR		20
 
-#define OP_MASK_FUNCT3         0x7
-#define OP_SH_FUNCT3           12
-#define OP_MASK_FUNCT7         0x7fU
-#define OP_SH_FUNCT7           25
-#define OP_MASK_FUNCT2         0x3
-#define OP_SH_FUNCT2           25
+#define OP_MASK_FUNCT3		0x7
+#define OP_SH_FUNCT3		12
+#define OP_MASK_FUNCT7		0x7fU
+#define OP_SH_FUNCT7		25
+#define OP_MASK_FUNCT2		0x3
+#define OP_SH_FUNCT2		25
 
 /* RVC fields.  */
 
-#define OP_MASK_OP2            0x3
-#define OP_SH_OP2              0
+#define OP_MASK_OP2		0x3
+#define OP_SH_OP2		0
 
-#define OP_MASK_CRS2 0x1f
-#define OP_SH_CRS2 2
-#define OP_MASK_CRS1S 0x7
-#define OP_SH_CRS1S 7
-#define OP_MASK_CRS2S 0x7
-#define OP_SH_CRS2S 2
+#define OP_MASK_CRS2		0x1f
+#define OP_SH_CRS2		2
+#define OP_MASK_CRS1S		0x7
+#define OP_SH_CRS1S		7
+#define OP_MASK_CRS2S		0x7
+#define OP_SH_CRS2S		2
 
-#define OP_MASK_CFUNCT6                0x3f
-#define OP_SH_CFUNCT6          10
-#define OP_MASK_CFUNCT4                0xf
-#define OP_SH_CFUNCT4          12
-#define OP_MASK_CFUNCT3                0x7
-#define OP_SH_CFUNCT3          13
-#define OP_MASK_CFUNCT2                0x3
-#define OP_SH_CFUNCT2          5
+#define OP_MASK_CFUNCT6		0x3f
+#define OP_SH_CFUNCT6		10
+#define OP_MASK_CFUNCT4		0xf
+#define OP_SH_CFUNCT4		12
+#define OP_MASK_CFUNCT3		0x7
+#define OP_SH_CFUNCT3		13
+#define OP_MASK_CFUNCT2		0x3
+#define OP_SH_CFUNCT2		5
 
 /* ABI names for selected x-registers.  */
 
@@ -296,52 +296,59 @@ static const char * const riscv_pred_succ[16] =
 
 /* All RISC-V instructions belong to at least one of these classes.  */
 enum riscv_insn_class
-  {
-   INSN_CLASS_NONE,
+{
+  INSN_CLASS_NONE,
 
-   INSN_CLASS_I,
-   INSN_CLASS_C,
-   INSN_CLASS_A,
-   INSN_CLASS_M,
-   INSN_CLASS_F,
-   INSN_CLASS_D,
-   INSN_CLASS_Q,
-   INSN_CLASS_F_AND_C,
-   INSN_CLASS_D_AND_C,
-   INSN_CLASS_ZICSR,
-   INSN_CLASS_ZIFENCEI,
-   INSN_CLASS_ZIHINTPAUSE,
-   INSN_CLASS_ZBA,
-   INSN_CLASS_ZBB,
-   INSN_CLASS_ZBC,
-   INSN_CLASS_ZBA_OR_ZBB,
-  };
+  INSN_CLASS_I,
+  INSN_CLASS_C,
+  INSN_CLASS_A,
+  INSN_CLASS_M,
+  INSN_CLASS_F,
+  INSN_CLASS_D,
+  INSN_CLASS_Q,
+  INSN_CLASS_F_AND_C,
+  INSN_CLASS_D_AND_C,
+  INSN_CLASS_ZICSR,
+  INSN_CLASS_ZIFENCEI,
+  INSN_CLASS_ZIHINTPAUSE,
+  INSN_CLASS_ZBA,
+  INSN_CLASS_ZBB,
+  INSN_CLASS_ZBC,
+  INSN_CLASS_ZBA_OR_ZBB,
+};
 
 /* This structure holds information for a particular instruction.  */
 struct riscv_opcode
 {
   /* The name of the instruction.  */
   const char *name;
+
   /* The requirement of xlen for the instruction, 0 if no requirement.  */
   unsigned xlen_requirement;
+
   /* Class to which this instruction belongs.  Used to decide whether or
      not this instruction is legal in the current -march context.  */
   enum riscv_insn_class insn_class;
+
   /* A string describing the arguments for this instruction.  */
   const char *args;
+
   /* The basic opcode for the instruction.  When assembling, this
      opcode is modified by the arguments to produce the actual opcode
      that is used.  If pinfo is INSN_MACRO, then this is 0.  */
   insn_t match;
+
   /* If pinfo is not INSN_MACRO, then this is a bit mask for the
      relevant portions of the opcode when disassembling.  If the
      actual opcode anded with the match field equals the opcode field,
      then we have found the correct instruction.  If pinfo is
      INSN_MACRO, then this field is the macro identifier.  */
   insn_t mask;
+
   /* A function to determine if a word corresponds to this instruction.
      Usually, this computes ((word & mask) == match).  */
   int (*match_func) (const struct riscv_opcode *op, insn_t word);
+
   /* For a macro, this is INSN_MACRO.  Otherwise, it is a collection
      of bits describing the instruction, notably any relevant hazard
      information.  */

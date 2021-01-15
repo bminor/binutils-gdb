@@ -1,5 +1,11 @@
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c: Indent and GNU coding standards tidy,
+	also aligned the code.
+	* config/tc-riscv.h: Likewise.
+
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
 	* config/tc-riscv.c: Error and warning messages tidy.
 	* testsuite/gas/riscv/priv-reg-fail-fext.l: Updated.
 	* testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.

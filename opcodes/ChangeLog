@@ -1,5 +1,12 @@
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
+	* riscv-opc.c (riscv_gpr_names_abi): Aligned the code.
+	(riscv_fpr_names_abi): Likewise.
+	(riscv_opcodes): Likewise.
+	(riscv_insn_types): Likewise.
+
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
 	* riscv-dis.c (parse_riscv_dis_option): Fix typos of message.
 
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
