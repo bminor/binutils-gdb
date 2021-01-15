@@ -60,8 +60,7 @@ decompress_contents (bfd_byte *compressed_buffer,
 	break;
       rc = inflateReset (&strm);
     }
-  rc |= inflateEnd (&strm);
-  return rc == Z_OK && strm.avail_out == 0;
+  return inflateEnd (&strm) == Z_OK && rc == Z_OK && strm.avail_out == 0;
 }
 
 /* Compress data of the size specified in @var{uncompressed_size}

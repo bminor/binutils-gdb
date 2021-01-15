@@ -14229,8 +14229,8 @@ uncompress_section_contents (unsigned char **   buffer,
         break;
       rc = inflateReset (& strm);
     }
-  rc |= inflateEnd (& strm);
-  if (rc != Z_OK
+  if (inflateEnd (& strm) != Z_OK
+      || rc != Z_OK
       || strm.avail_out != 0)
     goto fail;
 

@@ -1,3 +1,7 @@
+2021-01-16  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (uncompress_section_contents): Tidy inflateEnd result test.
+
 2021-01-15  Alan Modra  <amodra@gmail.com>
 
 	PR 26539
