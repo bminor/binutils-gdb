@@ -14221,15 +14221,15 @@ uncompress_section_contents (unsigned char **   buffer,
   while (strm.avail_in > 0)
     {
       if (rc != Z_OK)
-        goto fail;
+        break;
       strm.next_out = ((Bytef *) uncompressed_buffer
                        + (uncompressed_size - strm.avail_out));
       rc = inflate (&strm, Z_FINISH);
       if (rc != Z_STREAM_END)
-        goto fail;
+        break;
       rc = inflateReset (& strm);
     }
-  rc = inflateEnd (& strm);
+  rc |= inflateEnd (& strm);
   if (rc != Z_OK
       || strm.avail_out != 0)
     goto fail;
