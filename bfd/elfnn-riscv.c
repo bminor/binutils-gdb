@@ -3934,7 +3934,7 @@ riscv_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, size_t count,
 	 different symbols in 'sym_hashes', we don't want to adjust
 	 the global symbol __wrap_SYMBOL twice.
 
-         The same problem occurs with symbols that are versioned_hidden, as
+	 The same problem occurs with symbols that are versioned_hidden, as
 	 foo becomes an alias for foo@BAR, and hence they need the same
 	 treatment.  */
       if (link_info->wrap_hash != NULL

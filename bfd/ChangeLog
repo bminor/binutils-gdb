@@ -1,5 +1,10 @@
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfnn-riscv.c (riscv_relax_delete_bytes): Fixed the indent that
+	caused the by previous commit accidentally.
+
+2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfnn-riscv.c: Indent, labels and GNU coding standards tidy,
 	also aligned the code.
 
