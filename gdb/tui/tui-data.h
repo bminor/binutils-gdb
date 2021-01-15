@@ -96,7 +96,7 @@ public:
   /* Return true if this window is visible.  */
   bool is_visible () const
   {
-    return handle != nullptr;
+    return handle != nullptr && tui_active;
   }
 
   /* Return true if this window can accept the focus.  */

@@ -86,6 +86,7 @@ tui_apply_current_layout ()
       tui_win_list[win_type] = nullptr;
 
   /* This should always be made visible by a layout.  */
+  gdb_assert (TUI_CMD_WIN != nullptr);
   gdb_assert (TUI_CMD_WIN->is_visible ());
 
   /* Get the new list of currently visible windows.  */

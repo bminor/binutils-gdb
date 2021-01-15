@@ -1,5 +1,11 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/tui-window-disabled.c: New file.
+	* gdb.python/tui-window-disabled.exp: New file.
+	* gdb.python/tui-window-disabled.py: New file.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/tui-window.exp: Add new tests.
 	* gdb.python/tui-window.py (TestWindow) <__init__>: Store
 	TestWindow object into global the_window.

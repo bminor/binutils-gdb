@@ -5848,6 +5848,11 @@ user changes the TUI layout, windows no longer visible in the new
 layout will be destroyed.  At this point, the @code{gdb.TuiWindow}
 will no longer be valid, and methods (and attributes) other than
 @code{is_valid} will throw an exception.
+
+When the TUI is disabled using @code{tui disable} (@pxref{TUI
+Commands,,tui disable}) the window is hidden rather than destroyed,
+but @code{is_valid} will still return @code{False} and other methods
+(and attributes) will still throw an exception.
 @end defun
 
 @defvar TuiWindow.width

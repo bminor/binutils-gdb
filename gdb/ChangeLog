@@ -1,5 +1,19 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-tui.c (gdbpy_tui_window) <is_valid>: New member
+	function.
+	(REQUIRE_WINDOW): Call is_valid member function.
+	(REQUIRE_WINDOW_FOR_SETTER): New define.
+	(gdbpy_tui_is_valid): Call is_valid member function.
+	(gdbpy_tui_set_title): Call REQUIRE_WINDOW_FOR_SETTER instead.
+	* tui/tui-data.h (struct tui_win_info) <is_visible>: Check
+	tui_active too.
+	* tui/tui-layout.c (tui_apply_current_layout): Add an assert.
+	* tui/tui.c (tui_enable): Move setting of tui_active earlier in
+	the function.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/py-tui.c (gdbpy_tui_set_title): Check that the new value
 	for the title is not nullptr.
 

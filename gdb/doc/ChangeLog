@@ -1,3 +1,8 @@
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texinfo (TUI Windows In Python): Extend description of
+	TuiWindow.is_valid.
+
 2021-02-02  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* gdb.texinfo (Inferiors Connections and Programs): Document the
