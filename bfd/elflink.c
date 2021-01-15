@@ -10568,7 +10568,7 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	      if (h->verinfo.verdef == NULL
 		  || (elf_dyn_lib_class (h->verinfo.verdef->vd_bfd)
 		      & (DYN_AS_NEEDED | DYN_DT_NEEDED | DYN_NO_NEEDED)))
-		iversym.vs_vers = 0;
+		iversym.vs_vers = 1;
 	      else
 		iversym.vs_vers = h->verinfo.verdef->vd_exp_refno + 1;
 	    }

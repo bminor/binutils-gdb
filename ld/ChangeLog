@@ -1,3 +1,10 @@
+2021-01-16  Alan Modra  <amodra@gmail.com>
+
+	PR 26002
+	* testsuite/ld-elfvers/vers6.dsym: Expect "Base" for undefined
+	unversioned symbols.
+	* testsuite/ld-elfvers/vers16.dsym: Likewise.
+
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-01.d: Updated.

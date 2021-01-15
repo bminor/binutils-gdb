@@ -1,3 +1,9 @@
+2021-01-16  Alan Modra  <amodra@gmail.com>
+
+	PR 26002
+	* elflink.c (elf_link_output_extsym): Use version 1 in
+	.gnu.version for undefined unversioned symbols.
+
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_relax_delete_bytes): Fixed the indent that
