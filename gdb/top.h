@@ -173,6 +173,8 @@ public:
     current_ui = ui_list;
   }
 
+  DISABLE_COPY_AND_ASSIGN (switch_thru_all_uis);
+
   /* If done iterating, return true; otherwise return false.  */
   bool done () const
   {
@@ -189,11 +191,6 @@ public:
   }
 
  private:
-
-  /* No need for these.  They are intentionally not defined
-     anywhere.  */
-  switch_thru_all_uis &operator= (const switch_thru_all_uis &);
-  switch_thru_all_uis (const switch_thru_all_uis &);
 
   /* Used to iterate through the UIs.  */
   struct ui *m_iter;

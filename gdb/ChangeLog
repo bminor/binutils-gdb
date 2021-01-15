@@ -1,3 +1,7 @@
+2021-01-19  Lancelot SIX  <lsix@lancelotsix.com>
+
+	* top.h (switch_thru_all_uis): Use DISABLE_COPY_AND_ASSIGN.
+
 2021-01-19  Luis Machado  <luis.machado@linaro.org>
 
 	* trad-frame.h (trad_frame_saved_reg) <set_value_bytes>: Allocate
