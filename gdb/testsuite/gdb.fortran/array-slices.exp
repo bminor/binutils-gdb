@@ -208,7 +208,7 @@ proc run_test { repack } {
 	    set start_addr [get_hexadecimal_valueof "&${full_var_name}" \
 				"start unknown"]
 	    set end_addr [get_hexadecimal_valueof \
-			      "(&${full_var_name}) + sizeof (${full_var_name})" \
+			      "$start_addr + sizeof (${full_var_name})" \
 			      "end unknown"]
 
 	    # The Fortran compiler can choose to either send a descriptor that
