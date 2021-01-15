@@ -544,9 +544,9 @@ tui_is_window_visible (enum tui_win_type type)
   if (!tui_active)
     return false;
 
-  if (tui_win_list[type] == 0)
+  if (tui_win_list[type] == nullptr)
     return false;
-  
+
   return tui_win_list[type]->is_visible ();
 }
 

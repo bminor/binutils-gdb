@@ -1,3 +1,7 @@
+2021-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui.c (tui_is_window_visible): Compare to nullptr, not 0.
+
 2021-01-14  Lancelot Six  <lsix@lancelotsix.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.
