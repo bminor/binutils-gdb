@@ -1200,7 +1200,7 @@ value_assign (struct value *toval, struct value *fromval)
 	  {
 	    struct value *parent = value_parent (toval);
 	    LONGEST offset = value_offset (parent) + value_offset (toval);
-	    int changed_len;
+	    size_t changed_len;
 	    gdb_byte buffer[sizeof (LONGEST)];
 	    int optim, unavail;
 
@@ -1209,13 +1209,13 @@ value_assign (struct value *toval, struct value *fromval)
 			   + HOST_CHAR_BIT - 1)
 			  / HOST_CHAR_BIT;
 
-	    if (changed_len > (int) sizeof (LONGEST))
+	    if (changed_len > sizeof (LONGEST))
 	      error (_("Can't handle bitfields which "
 		       "don't fit in a %d bit word."),
 		     (int) sizeof (LONGEST) * HOST_CHAR_BIT);
 
 	    if (!get_frame_register_bytes (frame, value_reg, offset,
-					   changed_len, buffer,
+					   {buffer, changed_len},
 					   &optim, &unavail))
 	      {
 		if (optim)
@@ -1230,7 +1230,7 @@ value_assign (struct value *toval, struct value *fromval)
 			  value_bitpos (toval), value_bitsize (toval));
 
 	    put_frame_register_bytes (frame, value_reg, offset,
-				      changed_len, buffer);
+				      {buffer, changed_len});
 	  }
 	else
 	  {
@@ -1248,8 +1248,8 @@ value_assign (struct value *toval, struct value *fromval)
 	      {
 		put_frame_register_bytes (frame, value_reg,
 					  value_offset (toval),
-					  TYPE_LENGTH (type),
-					  value_contents (fromval));
+					  {value_contents (fromval),
+					   TYPE_LENGTH (type)});
 	      }
 	  }
 

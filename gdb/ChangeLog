@@ -1,5 +1,47 @@
 2021-01-19  Luis Machado  <luis.machado@linaro.org>
 
+	* frame.h (get_frame_register_bytes): Pass a gdb::array_view instead
+	of buffer + length.
+	(put_frame_register_bytes): Likewise.
+	Adjust documentation.
+	(get_frame_memory): Pass a gdb::array_view instead of buffer + length.
+	(safe_frame_unwind_memory): Likewise.
+	* frame.c (get_frame_register_bytes, put_frame_register_bytes)
+	(get_frame_memory, safe_frame_unwind_memory): Adjust to use
+	gdb::array_view.
+	* amd64-fbsd-tdep.c (amd64fbsd_sigtramp_p): Likewise.
+	* amd64-linux-tdep.c (amd64_linux_sigtramp_start): Likewise.
+	* amd64-obsd-tdep.c (amd64obsd_sigtramp_p): Likewise.
+	* arc-linux-tdep.c (arc_linux_is_sigtramp): Likewise.
+	* cris-tdep.c (cris_sigtramp_start, cris_rt_sigtramp_start): Likewise.
+	* dwarf2/loc.c (rw_pieced_value): Likewise.
+	* hppa-tdep.c (hppa_frame_cache): Likewise.
+	* i386-fbsd-tdep.c (i386fbsd_sigtramp_p): Likewise.
+	* i386-gnu-tdep.c (i386_gnu_sigtramp_start): Likewise.
+	* i386-linux-tdep.c (i386_linux_sigtramp_start)
+	(i386_linux_rt_sigtramp_start): Likewise.
+	* i386-obsd-tdep.c (i386obsd_sigtramp_p): Likewise.
+	* i386-tdep.c (i386_register_to_value): Likewise.
+	* i387-tdep.c (i387_register_to_value): Likewise.
+	* ia64-tdep.c (ia64_register_to_value): Likewise.
+	* m32r-linux-tdep.c (m32r_linux_sigtramp_start)
+	(m32r_linux_rt_sigtramp_start): Likewise.
+	* m68k-linux-tdep.c (m68k_linux_pc_in_sigtramp): Likewise.
+	* m68k-tdep.c (m68k_register_to_value): Likewise.
+	* mips-tdep.c (mips_register_to_value)
+	(mips_value_to_register): Likewise.
+	* ppc-fbsd-tdep.c (ppcfbsd_sigtramp_frame_sniffer)
+	(ppcfbsd_sigtramp_frame_cache): Likewise.
+	* ppc-obsd-tdep.c (ppcobsd_sigtramp_frame_sniffer)
+	(ppcobsd_sigtramp_frame_cache): Likewise.
+	* rs6000-tdep.c (rs6000_in_function_epilogue_frame_p)
+	(rs6000_register_to_value): Likewise.
+	* tilegx-tdep.c (tilegx_analyze_prologue): Likewise.
+	* tramp-frame.c (tramp_frame_start): Likewise.
+	* valops.c (value_assign): Likewise.
+
+2021-01-19  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-linux-tdep.c (aarch64_linux_restore_vreg): Pass in an
 	array_view.
 	* trad-frame.c (trad_frame_set_value_bytes): Use gdb::array_view

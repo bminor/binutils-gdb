@@ -777,7 +777,8 @@ rs6000_in_function_epilogue_frame_p (struct frame_info *curfrm,
 
   for (scan_pc = pc; scan_pc < epilogue_end; scan_pc += PPC_INSN_SIZE)
     {
-      if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
+      if (!safe_frame_unwind_memory (curfrm, scan_pc,
+				     {insn_buf, PPC_INSN_SIZE}))
 	return 0;
       insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE, byte_order);
       if (insn == 0x4e800020)
@@ -803,7 +804,8 @@ rs6000_in_function_epilogue_frame_p (struct frame_info *curfrm,
        scan_pc >= epilogue_start;
        scan_pc -= PPC_INSN_SIZE)
     {
-      if (!safe_frame_unwind_memory (curfrm, scan_pc, insn_buf, PPC_INSN_SIZE))
+      if (!safe_frame_unwind_memory (curfrm, scan_pc,
+				     {insn_buf, PPC_INSN_SIZE}))
 	return 0;
       insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE, byte_order);
       if (insn_changes_sp_or_jumps (insn))
@@ -2607,8 +2609,10 @@ rs6000_register_to_value (struct frame_info *frame,
   gdb_assert (type->code () == TYPE_CODE_FLT);
 
   if (!get_frame_register_bytes (frame, regnum, 0,
-				 register_size (gdbarch, regnum),
-				 from, optimizedp, unavailablep))
+				 gdb::make_array_view (from,
+						       register_size (gdbarch,
+								      regnum)),
+				 optimizedp, unavailablep))
     return 0;
 
   target_float_convert (from, builtin_type (gdbarch)->builtin_double,

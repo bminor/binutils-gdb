@@ -99,7 +99,7 @@ i386obsd_sigtramp_p (struct frame_info *this_frame)
     {
       /* If we can't read the instructions, return zero.  */
       if (!safe_frame_unwind_memory (this_frame, start_pc + *offset,
-				     buf, buflen))
+				     {buf, buflen}))
 	return 0;
 
       /* Check for sigreturn(2).  */

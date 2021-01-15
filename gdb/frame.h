@@ -653,15 +653,15 @@ extern void put_frame_register (struct frame_info *frame, int regnum,
    contents are optimized out or unavailable, set *OPTIMIZEDP,
    *UNAVAILABLEP accordingly.  */
 extern bool get_frame_register_bytes (frame_info *frame, int regnum,
-				      CORE_ADDR offset, int len,
-				      gdb_byte *myaddr,
+				      CORE_ADDR offset,
+				      gdb::array_view<gdb_byte> buffer,
 				      int *optimizedp, int *unavailablep);
 
-/* Write LEN bytes to one or multiple registers starting with REGNUM
-   in frame FRAME, starting at OFFSET, into BUF.  */
+/* Write bytes from BUFFER to one or multiple registers starting with REGNUM
+   in frame FRAME, starting at OFFSET.  */
 extern void put_frame_register_bytes (struct frame_info *frame, int regnum,
-				      CORE_ADDR offset, int len,
-				      const gdb_byte *myaddr);
+				      CORE_ADDR offset,
+				      gdb::array_view<const gdb_byte> buffer);
 
 /* Unwind the PC.  Strictly speaking return the resume address of the
    calling frame.  For GDB, `pc' is the resume address and not a
@@ -687,7 +687,7 @@ extern void frame_pop (struct frame_info *frame);
    adaptor frames this should be ok.  */
 
 extern void get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr,
-			      gdb_byte *buf, int len);
+			      gdb::array_view<gdb_byte> buffer);
 extern LONGEST get_frame_memory_signed (struct frame_info *this_frame,
 					CORE_ADDR memaddr, int len);
 extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
@@ -696,7 +696,7 @@ extern ULONGEST get_frame_memory_unsigned (struct frame_info *this_frame,
 /* Same as above, but return true zero when the entire memory read
    succeeds, false otherwise.  */
 extern bool safe_frame_unwind_memory (frame_info *this_frame, CORE_ADDR addr,
-				      gdb_byte *buf, int len);
+				      gdb::array_view<gdb_byte> buffer);
 
 /* Return this frame's architecture.  */
 extern struct gdbarch *get_frame_arch (struct frame_info *this_frame);

@@ -1748,7 +1748,7 @@ rw_pieced_value (struct value *v, struct value *from)
 		/* Read mode.  */
 		if (!get_frame_register_bytes (frame, gdb_regnum,
 					       bits_to_skip / 8,
-					       this_size, buffer.data (),
+					       buffer,
 					       &optim, &unavail))
 		  {
 		    if (optim)
@@ -1773,7 +1773,7 @@ rw_pieced_value (struct value *v, struct value *from)
 		       Need some bits from original register value.  */
 		    get_frame_register_bytes (frame, gdb_regnum,
 					      bits_to_skip / 8,
-					      this_size, buffer.data (),
+					      buffer,
 					      &optim, &unavail);
 		    if (optim)
 		      throw_error (OPTIMIZED_OUT_ERROR,
@@ -1792,7 +1792,7 @@ rw_pieced_value (struct value *v, struct value *from)
 			      this_size_bits, bits_big_endian);
 		put_frame_register_bytes (frame, gdb_regnum,
 					  bits_to_skip / 8,
-					  this_size, buffer.data ());
+					  buffer);
 	      }
 	  }
 	  break;

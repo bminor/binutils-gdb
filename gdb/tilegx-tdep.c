@@ -429,7 +429,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	  instbuf_start = next_addr;
 
 	  status = safe_frame_unwind_memory (next_frame, instbuf_start,
-					     instbuf, instbuf_size);
+					     {instbuf, instbuf_size});
 	  if (status == 0)
 	    memory_error (TARGET_XFER_E_IO, next_addr);
 	}

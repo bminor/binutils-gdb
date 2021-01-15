@@ -198,7 +198,7 @@ cris_sigtramp_start (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[SIGTRAMP_LEN];
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
 
   if (((buf[1] << 8) + buf[0]) != SIGTRAMP_INSN0)
@@ -207,7 +207,7 @@ cris_sigtramp_start (struct frame_info *this_frame)
 	return 0;
 
       pc -= SIGTRAMP_OFFSET1;
-      if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf))
 	return 0;
     }
 
@@ -226,7 +226,7 @@ cris_rt_sigtramp_start (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[SIGTRAMP_LEN];
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
 
   if (((buf[1] << 8) + buf[0]) != SIGTRAMP_INSN0)
@@ -235,7 +235,7 @@ cris_rt_sigtramp_start (struct frame_info *this_frame)
 	return 0;
 
       pc -= SIGTRAMP_OFFSET1;
-      if (!safe_frame_unwind_memory (this_frame, pc, buf, SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf))
 	return 0;
     }
 

@@ -134,7 +134,7 @@ i386_linux_sigtramp_start (struct frame_info *this_frame)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, LINUX_SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -155,7 +155,7 @@ i386_linux_sigtramp_start (struct frame_info *this_frame)
 
       pc -= adjust;
 
-      if (!safe_frame_unwind_memory (this_frame, pc, buf, LINUX_SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf))
 	return 0;
     }
 
@@ -202,7 +202,7 @@ i386_linux_rt_sigtramp_start (struct frame_info *this_frame)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, LINUX_RT_SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf))
     return 0;
 
   if (buf[0] != LINUX_RT_SIGTRAMP_INSN0)
@@ -212,8 +212,8 @@ i386_linux_rt_sigtramp_start (struct frame_info *this_frame)
 
       pc -= LINUX_RT_SIGTRAMP_OFFSET1;
 
-      if (!safe_frame_unwind_memory (this_frame, pc, buf,
-				     LINUX_RT_SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (this_frame, pc,
+				     buf))
 	return 0;
     }
 

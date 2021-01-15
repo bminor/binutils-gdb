@@ -204,7 +204,7 @@ arc_linux_is_sigtramp (struct frame_info *this_frame)
 
   /* Read the memory at the PC.  Since we are stopped, any breakpoint must
      have been removed.  */
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, insns_sz))
+  if (!safe_frame_unwind_memory (this_frame, pc, {buf, insns_sz}))
     {
       /* Failed to unwind frame.  */
       return FALSE;
@@ -215,7 +215,7 @@ arc_linux_is_sigtramp (struct frame_info *this_frame)
     return TRUE;
 
   /* No - look one instruction earlier in the code...  */
-  if (!safe_frame_unwind_memory (this_frame, pc - 4, buf, insns_sz))
+  if (!safe_frame_unwind_memory (this_frame, pc - 4, {buf, insns_sz}))
     {
       /* Failed to unwind frame.  */
       return FALSE;

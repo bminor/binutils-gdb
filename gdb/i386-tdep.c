@@ -3781,8 +3781,10 @@ i386_register_to_value (struct frame_info *frame, int regnum,
       gdb_assert (register_size (gdbarch, regnum) == 4);
 
       if (!get_frame_register_bytes (frame, regnum, 0,
-				     register_size (gdbarch, regnum),
-				     to, optimizedp, unavailablep))
+				     gdb::make_array_view (to,
+							register_size (gdbarch,
+								       regnum)),
+				     optimizedp, unavailablep))
 	return 0;
 
       regnum = i386_next_regnum (regnum);

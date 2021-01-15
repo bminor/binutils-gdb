@@ -99,7 +99,7 @@ m32r_linux_sigtramp_start (CORE_ADDR pc, struct frame_info *this_frame)
 
   if (pc % 2 != 0)
     {
-      if (!safe_frame_unwind_memory (this_frame, pc, buf, 2))
+      if (!safe_frame_unwind_memory (this_frame, pc, {buf, 2}))
 	return 0;
 
       if (memcmp (buf, linux_sigtramp_code, 2) == 0)
@@ -108,7 +108,7 @@ m32r_linux_sigtramp_start (CORE_ADDR pc, struct frame_info *this_frame)
 	return 0;
     }
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, 4))
+  if (!safe_frame_unwind_memory (this_frame, pc, {buf, 4}))
     return 0;
 
   if (memcmp (buf, linux_sigtramp_code, 4) != 0)
@@ -148,12 +148,12 @@ m32r_linux_rt_sigtramp_start (CORE_ADDR pc, struct frame_info *this_frame)
   if (pc % 2 != 0)
     return 0;
 
-  if (!safe_frame_unwind_memory (this_frame, pc, buf, 4))
+  if (!safe_frame_unwind_memory (this_frame, pc, {buf, 4}))
     return 0;
 
   if (memcmp (buf, linux_rt_sigtramp_code, 4) == 0)
     {
-      if (!safe_frame_unwind_memory (this_frame, pc + 4, buf, 4))
+      if (!safe_frame_unwind_memory (this_frame, pc + 4, {buf, 4}))
 	return 0;
 
       if (memcmp (buf, linux_rt_sigtramp_code + 4, 4) == 0)
@@ -161,7 +161,7 @@ m32r_linux_rt_sigtramp_start (CORE_ADDR pc, struct frame_info *this_frame)
     }
   else if (memcmp (buf, linux_rt_sigtramp_code + 4, 4) == 0)
     {
-      if (!safe_frame_unwind_memory (this_frame, pc - 4, buf, 4))
+      if (!safe_frame_unwind_memory (this_frame, pc - 4, {buf, 4}))
 	return 0;
 
       if (memcmp (buf, linux_rt_sigtramp_code, 4) == 0)

@@ -1990,7 +1990,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	gdb_byte buf4[4];
 	long inst;
 
-	if (!safe_frame_unwind_memory (this_frame, pc, buf4, sizeof buf4)) 
+	if (!safe_frame_unwind_memory (this_frame, pc, buf4))
 	  {
 	    error (_("Cannot read instruction at %s."),
 		   paddress (gdbarch, pc));

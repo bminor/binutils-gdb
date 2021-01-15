@@ -1469,7 +1469,8 @@ deprecated_frame_register_read (frame_info *frame, int regnum,
 
 bool
 get_frame_register_bytes (frame_info *frame, int regnum,
-			  CORE_ADDR offset, int len, gdb_byte *myaddr,
+			  CORE_ADDR offset,
+			  gdb::array_view<gdb_byte> buffer,
 			  int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1496,6 +1497,8 @@ get_frame_register_bytes (frame_info *frame, int regnum,
 	break;	/* This register is not available on this architecture.  */
       maxsize += thissize;
     }
+
+  int len = buffer.size ();
   if (len > maxsize)
     error (_("Bad debug information detected: "
 	     "Attempt to read %d bytes from registers."), len);
@@ -1507,6 +1510,8 @@ get_frame_register_bytes (frame_info *frame, int regnum,
 
       if (curr_len > len)
 	curr_len = len;
+
+      gdb_byte *myaddr = buffer.data ();
 
       if (curr_len == register_size (gdbarch, regnum))
 	{
@@ -1551,7 +1556,8 @@ get_frame_register_bytes (frame_info *frame, int regnum,
 
 void
 put_frame_register_bytes (struct frame_info *frame, int regnum,
-			  CORE_ADDR offset, int len, const gdb_byte *myaddr)
+			  CORE_ADDR offset,
+			  gdb::array_view<const gdb_byte> buffer)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -1562,6 +1568,7 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
       regnum++;
     }
 
+  int len = buffer.size ();
   /* Copy the data.  */
   while (len > 0)
     {
@@ -1570,6 +1577,7 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
       if (curr_len > len)
 	curr_len = len;
 
+      const gdb_byte *myaddr = buffer.data ();
       if (curr_len == register_size (gdbarch, regnum))
 	{
 	  put_frame_register (frame, regnum, myaddr);
@@ -2891,9 +2899,9 @@ get_frame_address_space (struct frame_info *frame)
 
 void
 get_frame_memory (struct frame_info *this_frame, CORE_ADDR addr,
-		  gdb_byte *buf, int len)
+		  gdb::array_view<gdb_byte> buffer)
 {
-  read_memory (addr, buf, len);
+  read_memory (addr, buffer.data (), buffer.size ());
 }
 
 LONGEST
@@ -2918,10 +2926,10 @@ get_frame_memory_unsigned (struct frame_info *this_frame, CORE_ADDR addr,
 
 bool
 safe_frame_unwind_memory (struct frame_info *this_frame,
-			  CORE_ADDR addr, gdb_byte *buf, int len)
+			  CORE_ADDR addr, gdb::array_view<gdb_byte> buffer)
 {
   /* NOTE: target_read_memory returns zero on success!  */
-  return target_read_memory (addr, buf, len) == 0;
+  return target_read_memory (addr, buffer.data (), buffer.size ()) == 0;
 }
 
 /* Architecture methods.  */

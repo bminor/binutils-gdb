@@ -63,7 +63,7 @@ i386_gnu_sigtramp_start (struct frame_info *this_frame)
 
   if (!safe_frame_unwind_memory (this_frame,
 				 pc + GNU_SIGTRAMP_TAIL - GNU_SIGTRAMP_LEN,
-				 buf, GNU_SIGTRAMP_LEN))
+				 buf))
     return 0;
 
   if (memcmp (buf, gnu_sigtramp_code, GNU_SIGTRAMP_LEN) != 0)
