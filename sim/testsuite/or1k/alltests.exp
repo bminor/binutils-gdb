@@ -16,6 +16,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [istarget or1k*-*-*] {
+    # Used to locate the `run` program.
+    global arch
+    set arch "or1k"
 
     set all_machs "or1k"
 

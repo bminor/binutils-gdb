@@ -111,4 +111,3 @@ case "${target}" in
        sim_igen=yes
        ;;
 esac
-AC_SUBST(sim_arch)

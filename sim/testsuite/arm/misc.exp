@@ -1,8 +1,9 @@
 # Miscellaneous ARM simulator testcases
 
 if { [istarget arm*-*-*] } {
-    # load support procs
-    # load_lib cgen.exp
+    # Used to locate the `run` program.
+    global arch
+    set arch "arm"
 
     # all machines
     set all_machs "arm7tdmi"

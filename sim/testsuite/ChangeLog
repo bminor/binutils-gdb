@@ -1,3 +1,8 @@
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (arch): Delete.
+	(site.exp): Do not output $arch.
+
 2021-02-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* riscv/: New directory.

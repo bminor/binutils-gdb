@@ -1,6 +1,10 @@
 # mcore simulator testsuite
 
 if [istarget mcore-*] {
+    # Used to locate the `run` program.
+    global arch
+    set arch "mcore"
+
     # all machines
     set all_machs "mcore"
 

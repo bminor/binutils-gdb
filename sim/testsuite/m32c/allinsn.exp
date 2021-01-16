@@ -2,6 +2,10 @@
 # TODO: Add support for .c tests.
 
 if [istarget m32c*-*-*] {
+    # Used to locate the `run` program.
+    global arch
+    set arch "m32c"
+
     # all machines
     set all_machs "m32c"
 

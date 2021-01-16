@@ -29,8 +29,6 @@ target_canonical = @target@
 target_alias = @target_alias@
 program_transform_name = @program_transform_name@
 
-arch = @sim_arch@
-
 SHELL = /bin/sh
 SUBDIRS = @subdirs@
 RPATH_ENVVAR = @RPATH_ENVVAR@
@@ -129,7 +127,6 @@ site.exp: Makefile
 	@echo '# edit the last section' >> $@-t
 	@echo 'set srcdir $(srcdir)' >> $@-t
 	@echo 'set objdir' `pwd` >> $@-t
-	@echo 'set arch $(arch)' >> $@-t
 	@echo 'set build_alias $(build_alias)' >> $@-t
 	@echo 'set build_triplet $(build_canonical)' >> $@-t
 	@echo 'set host_alias $(host_alias)' >> $@-t

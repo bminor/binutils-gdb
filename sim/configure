@@ -585,7 +585,6 @@ ac_unique_file="Makefile.in"
 enable_option_checking=no
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
-sim_arch
 subdirs
 CFLAGS_FOR_BUILD
 CC_FOR_BUILD
@@ -4086,7 +4085,6 @@ subdirs="$subdirs aarch64"
        sim_igen=yes
        ;;
 esac
-
 
   if test "$sim_igen" = yes; then
     subdirs="$subdirs igen"

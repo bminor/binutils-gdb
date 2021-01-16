@@ -1,8 +1,9 @@
 # ARM simulator testsuite.
 
 if { [istarget arm*-*-*] } {
-    # load support procs (none yet)
-    # load_lib cgen.exp
+    # Used to locate the `run` program.
+    global arch
+    set arch "arm"
 
     # all machines
     set all_machs "xscale"

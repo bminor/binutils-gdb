@@ -1,8 +1,10 @@
 # d10v simulator testsuite.
 
 if [istarget d10v*-*] {
-    # load support procs (none yet)
-    # load_lib cgen.exp
+    # Used to locate the `run` program.
+    global arch
+    set arch "d10v"
+
     # all machines
     set all_machs "d10v"
 

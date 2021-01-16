@@ -1,6 +1,10 @@
 # eBPF simulator testsuite
 
 if [istarget bpf-unknown-none] {
+    # Used to locate the `run` program.
+    global arch
+    set arch "bpf"
+
     # all machines
     set all_machs "bpf"
 

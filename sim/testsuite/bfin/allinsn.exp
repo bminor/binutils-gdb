@@ -1,6 +1,10 @@
 # Analog Devices Blackfin simulator testsuite
 
 if [istarget bfin-*-elf] {
+    # Used to locate the `run` program.
+    global arch
+    set arch "bfin"
+
     # all machines
     set all_machs "bfin"
 

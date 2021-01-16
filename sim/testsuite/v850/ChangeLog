@@ -1,3 +1,7 @@
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* allinsns.exp: Define arch.
+
 2008-02-05  DJ Delorie  <dj@redhat.com>
 
 	* .: New directory.

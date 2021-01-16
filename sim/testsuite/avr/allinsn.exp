@@ -1,6 +1,10 @@
 # avr simulator testsuite
 
 if [istarget avr-*] {
+    # Used to locate the `run` program.
+    global arch
+    set arch "avr"
+
     # all machines
     set all_machs "avr"
 

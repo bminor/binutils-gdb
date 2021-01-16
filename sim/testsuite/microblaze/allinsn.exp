@@ -1,6 +1,10 @@
 # microblaze simulator testsuite
 
 if [istarget microblaze-*] {
+    # Used to locate the `run` program.
+    global arch
+    set arch "microblaze"
+
     # all machines
     set all_machs "microblaze"
 

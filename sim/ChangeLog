@@ -1,5 +1,10 @@
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.tgt: Delete call to AC_SUBST(sim_arch).
+	* configure: Regenerate.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* README-HACKING: Replace sinclude with AC_CONFIG_MACRO_DIRS in
 	configure.ac skeleton.
 
