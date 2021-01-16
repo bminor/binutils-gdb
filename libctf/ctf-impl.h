@@ -70,7 +70,7 @@ extern "C"
 #define _libctf_unlikely_(x) __builtin_expect ((x), 0)
 #define _libctf_unused_ __attribute__ ((__unused__))
 #define _libctf_malloc_ __attribute__((__malloc__))
-#define _libctf_nonnull_ __attribute__((__nonnull__))
+#define _libctf_nonnull_(params) __attribute__((__nonnull__ params))
 
 #else
 
@@ -78,7 +78,7 @@ extern "C"
 #define _libctf_unlikely_(x) (x)
 #define _libctf_unused_
 #define _libctf_malloc_
-#define _libctf_nonnull_
+#define _libctf_nonnull_(params)
 #define __extension__
 
 #endif
@@ -469,7 +469,8 @@ struct ctf_dict
      individual value members are shared with ctf_link_in_cu_mapping.  */
   ctf_dynhash_t *ctf_link_out_cu_mapping;
 
-  /* CTF linker flags.  */
+  /* CTF linker flags.  Set on the parent output dict (the one passed to
+     ctf_link).  Only respected when LCTF_LINKING set in ctf_flags.  */
   int ctf_link_flags;
 
   /* Allow the caller to change the name of link archive members.  */
@@ -595,6 +596,7 @@ struct ctf_next
 #define LCTF_CHILD	0x0001	/* CTF dict is a child.  */
 #define LCTF_RDWR	0x0002	/* CTF dict is writable.  */
 #define LCTF_DIRTY	0x0004	/* CTF dict has been modified.  */
+#define LCTF_LINKING	0x0008  /* CTF link is underway: respect ctf_link_flags.  */
 
 extern ctf_names_t *ctf_name_table (ctf_dict_t *, int);
 extern const ctf_type_t *ctf_lookup_by_id (ctf_dict_t **, ctf_id_t);

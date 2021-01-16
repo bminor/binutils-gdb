@@ -1,3 +1,38 @@
+2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.c (_libctf_nonnull_): Add parameters.
+	(LCTF_LINKING): New flag.
+	(ctf_dict_t) <ctf_link_flags>: Mention it.
+	* ctf-link.c (ctf_link): Keep LCTF_LINKING set across call.
+	(ctf_write): Likewise, including in child dictionaries.
+	(ctf_link_shuffle_syms): Make sure ctf_dynsyms is NULL if there
+	are no reported symbols.
+	* ctf-create.c (symtypetab_delete_nonstatic_vars): Make sure
+	the variable has been reported as a symbol by the linker.
+	(symtypetab_skippable): Mention relationship between SYMFP and the
+	flags.
+	(symtypetab_density): Adjust nonnullity.  Exit early if no symbols
+	were reported and force-indexing is off (i.e., we are doing a
+	final link).
+	(ctf_serialize): Handle the !LCTF_LINKING case by writing out an
+	indexed, sorted symtypetab (and allow SYMFP to be NULL in this
+	case).  Turn sorting off if this is a non-final link.  Only delete
+	nonstatic vars if we are filtering symbols and the linker has
+	reported some.
+	* testsuite/libctf-regression/nonstatic-var-section-ld-r*:
+	New test of variable and symtypetab section population when
+	ld -r is used.
+	* testsuite/libctf-regression/nonstatic-var-section-ld-executable.lk:
+	Likewise, when ld of an executable is used.
+	* testsuite/libctf-regression/nonstatic-var-section-ld.lk:
+	Likewise, when ld -shared alone is used.
+	* testsuite/libctf-regression/nonstatic-var-section-ld*.c:
+	Lookup programs for the above.
+	* testsuite/libctf-writable/symtypetab-nonlinker-writeout.*: New
+	test, testing survival of symbols across ctf_write paths.
+	* testsuite/lib/ctf-lib.exp (run_lookup_test): New option,
+	nonshared, suppressing linking of the SOURCE with -shared.
+
 2021-01-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-create.c (membadd): Transform ""-named members into

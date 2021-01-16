@@ -233,6 +233,9 @@ proc compile_one_cc { src output additional_flags } {
 #   source: SOURCE
 #	Assemble the file SOURCE.c and pass it to the LOOKUP program.
 #
+#   nonshared:
+#       If set, do not link with -shared.
+#
 #   link:
 #	If set, link the SOURCE together even if only one file is specified.
 #
@@ -270,8 +273,10 @@ proc run_lookup_test { name } {
 	return
     }
     set run_ld 0
+    set shared "-shared"
     set opts(link) {}
     set opts(link_flags) {}
+    set opts(nonshared) {}
     set opts(lookup) {}
     set opts(name) {}
     set opts(source) {}
@@ -308,6 +313,10 @@ proc run_lookup_test { name } {
 	set run_ld 1
     }
 
+    if { [llength $opts(nonshared)] != 0 } {
+	set shared ""
+    }
+
     set testname $opts(name)
     if { $opts(name) == "" } {
 	set testname "$subdir/$name"
@@ -330,7 +339,7 @@ proc run_lookup_test { name } {
 	set lookup_flags ""
 	if { $run_ld } {
 	    set lookup_output "tmpdir/out.so"
-	    set lookup_flags "-gt -fPIC -shared $opts(link_flags)"
+	    set lookup_flags "-gt -fPIC $shared $opts(link_flags)"
 	} else {
 	    set lookup_output "tmpdir/out.o"
 	    set lookup_flags "-gt -fPIC -c"

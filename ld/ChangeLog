@@ -1,3 +1,8 @@
+2021-01-26  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ldlang.c (lang_merge_ctf): Set CTF_LINK_NO_FILTER_REPORTED_SYMS
+	when appropriate.
+
 2021-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19609

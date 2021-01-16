@@ -1682,6 +1682,7 @@ ctf_link (ctf_dict_t *fp, int flags)
      links in succession with CTF_LINK_EMPTY_CU_MAPPINGS set in some calls and
      not set in others will do anything especially sensible.  */
 
+  fp->ctf_flags |= LCTF_LINKING;
   if (fp->ctf_link_out_cu_mapping && (flags & CTF_LINK_EMPTY_CU_MAPPINGS))
     {
       void *v;
@@ -1692,12 +1693,14 @@ ctf_link (ctf_dict_t *fp, int flags)
 	  const char *to = (const char *) v;
 	  if (ctf_create_per_cu (fp, to, to) == NULL)
 	    {
+	      fp->ctf_flags &= ~LCTF_LINKING;
 	      ctf_next_destroy (i);
 	      return -1;			/* Errno is set for us.  */
 	    }
 	}
       if (err != ECTF_NEXT_END)
 	{
+	  fp->ctf_flags &= ~LCTF_LINKING;
 	  ctf_err_warn (fp, 1, err, _("iteration error creating empty CUs"));
 	  ctf_set_errno (fp, err);
 	  return -1;
@@ -1715,6 +1718,7 @@ ctf_link (ctf_dict_t *fp, int flags)
     ctf_dynhash_empty (fp->ctf_link_type_mapping);
   ctf_dynhash_iter (fp->ctf_link_outputs, empty_link_type_mapping, NULL);
 
+  fp->ctf_flags &= ~LCTF_LINKING;
   if ((ctf_errno (fp) != 0) && (ctf_errno (fp) != ECTF_NOCTFDATA))
     return -1;
   return 0;
@@ -1888,6 +1892,17 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
       goto err;
     }
 
+  /* If no symbols are reported, unwind what we have done and return.  This
+     makes it a bit easier for the serializer to tell that no symbols have been
+     reported and that it should look elsewhere for reported symbols.  */
+  if (!ctf_dynhash_elements (fp->ctf_dynsyms))
+    {
+      ctf_dprintf ("No symbols: not a final link.\n");
+      free (fp->ctf_dynsyms);
+      fp->ctf_dynsyms = NULL;
+      return 0;
+    }
+
   /* Construct a mapping from shndx to the symbol info.  */
   free (fp->ctf_dynsymidx);
   if ((fp->ctf_dynsymidx = calloc (fp->ctf_dynsymmax + 1,
@@ -2043,6 +2058,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
   char *transformed_name = NULL;
   ctf_dict_t **files;
   FILE *f = NULL;
+  size_t i;
   int err;
   long fsize;
   const char *errloc;
@@ -2050,6 +2066,7 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 
   memset (&arg, 0, sizeof (ctf_name_list_accum_cb_arg_t));
   arg.fp = fp;
+  fp->ctf_flags |= LCTF_LINKING;
 
   ctf_link_warn_outdated_inputs (fp);
 
@@ -2065,7 +2082,11 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 
   /* No extra outputs? Just write a simple ctf_dict_t.  */
   if (arg.i == 0)
-    return ctf_write_mem (fp, size, threshold);
+    {
+      unsigned char *ret = ctf_write_mem (fp, size, threshold);
+      fp->ctf_flags &= ~LCTF_LINKING;
+      return ret;
+    }
 
   /* Writing an archive.  Stick ourselves (the shared repository, parent of all
      other archives) on the front of it with the default name.  */
@@ -2091,6 +2112,13 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 	  ctf_dynhash_iter (fp->ctf_link_outputs, ctf_change_parent_name,
 			    transformed_name);
 	}
+    }
+
+  /* Propagate the link flags to all the dicts in this link.  */
+  for (i = 0; i < arg.i; i++)
+    {
+      arg.files[i]->ctf_link_flags = fp->ctf_link_flags;
+      arg.files[i]->ctf_flags |= LCTF_LINKING;
     }
 
   if ((files = realloc (arg.files,
@@ -2165,6 +2193,10 @@ ctf_link_write (ctf_dict_t *fp, size_t *size, size_t threshold)
 
  err_no:
   ctf_set_errno (fp, errno);
+
+  /* Turn off the is-linking flag on all the dicts in this link.  */
+  for (i = 0; i < arg.i; i++)
+    arg.files[i]->ctf_flags &= ~LCTF_LINKING;
  err:
   free (buf);
   if (f)

@@ -172,7 +172,7 @@ ctf_create (int *errp)
    you can safely delete variables without messing up ctf_rollback.  */
 
 static int
-symtypetab_delete_nonstatic_vars (ctf_dict_t *fp)
+symtypetab_delete_nonstatic_vars (ctf_dict_t *fp, ctf_dict_t *symfp)
 {
   ctf_dvdef_t *dvd, *nvd;
   ctf_id_t type;
@@ -183,6 +183,7 @@ symtypetab_delete_nonstatic_vars (ctf_dict_t *fp)
 
       if (((type = (ctf_id_t) (uintptr_t)
 	    ctf_dynhash_lookup (fp->ctf_objthash, dvd->dvd_name)) > 0)
+	  && ctf_dynhash_lookup (symfp->ctf_dynsyms, dvd->dvd_name) != NULL
 	  && type == dvd->dvd_type)
 	ctf_dvd_delete (fp, dvd);
     }
@@ -217,12 +218,14 @@ ctf_symtab_skippable (ctf_link_sym_t *sym)
 /* Get the number of symbols in a symbol hash, the count of symbols, the maximum
    seen, the eventual size, without any padding elements, of the func/data and
    (if generated) index sections, and the size of accumulated padding elements.
-   The linker-reported set of symbols is found in SYMFP.
+   The linker-reported set of symbols is found in SYMFP: it may be NULL if
+   symbol filtering is not desired, in which case CTF_SYMTYPETAB_FORCE_INDEXED
+   will always be set in the flags.
 
    Also figure out if any symbols need to be moved to the variable section, and
    add them (if not already present).  */
 
-_libctf_nonnull_
+_libctf_nonnull_ ((1,3,4,5,6,7,8))
 static int
 symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 		    size_t *count, size_t *max, size_t *unpadsize,
@@ -248,7 +251,12 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 	 of, removing them from linker_known as we go.  Once this is done, the
 	 only symbols remaining in linker_known are symbols we don't know the
 	 types of: we must emit pads for those symbols that are below the
-	 maximum symbol we will emit (any beyond that are simply skipped).  */
+	 maximum symbol we will emit (any beyond that are simply skipped).
+
+	 If there are none, this symtypetab will be empty: just report that.  */
+
+      if (!symfp->ctf_dynsyms)
+	return 0;
 
       if ((linker_known = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
 					      NULL, NULL)) == NULL)
@@ -676,19 +684,24 @@ ctf_serialize (ctf_dict_t *fp)
   ctf_dvdef_t *dvd;
   ctf_varent_t *dvarents;
   ctf_strs_writable_t strtab;
-  ctf_dict_t *symfp = fp;
 
   unsigned char *t;
   unsigned long i;
-  int symflags = 0;
   size_t buf_size, type_size, objt_size, func_size;
   size_t objt_unpadsize, func_unpadsize, objt_padsize, func_padsize;
   size_t funcidx_size, objtidx_size;
   size_t nvars, nfuncs, nobjts, maxobjt, maxfunc;
-  size_t ndynsyms = 0;
+  size_t nsymtypes = 0;
   const char **sym_name_order = NULL;
   unsigned char *buf = NULL, *newbuf;
   int err;
+
+  /* Symtab filtering. If filter_syms is true, symfp is set: otherwise,
+     CTF_SYMTYPETAB_FORCE_INDEXED is set in symflags.  */
+  int filter_syms = 0;
+  int sort_syms = 1;
+  int symflags = 0;
+  ctf_dict_t *symfp = NULL;
 
   if (!(fp->ctf_flags & LCTF_RDWR))
     return (ctf_set_errno (fp, ECTF_RDONLY));
@@ -696,6 +709,22 @@ ctf_serialize (ctf_dict_t *fp)
   /* Update required?  */
   if (!(fp->ctf_flags & LCTF_DIRTY))
     return 0;
+
+  /* If doing a writeout as part of linking, and the link flags request it,
+     filter out reported symbols from the variable section, and filter out all
+     other symbols from the symtypetab sections.  (If we are not linking, the
+     symbols are sorted; if we are linking, don't bother sorting if we are not
+     filtering out reported symbols: this is almost certaily an ld -r and only
+     the linker is likely to consume these symtypetabs again.  The linker
+     doesn't care what order the symtypetab entries is in, since it only
+     iterates over symbols and does not use the ctf_lookup_by_symbol* API.)  */
+
+  if (fp->ctf_flags & LCTF_LINKING)
+    {
+      filter_syms = !(fp->ctf_link_flags & CTF_LINK_NO_FILTER_REPORTED_SYMS);
+      if (!filter_syms)
+	sort_syms = 0;
+    }
 
   /* Fill in an initial CTF header.  We will leave the label, object,
      and function sections empty and only output a header, type section,
@@ -754,21 +783,27 @@ ctf_serialize (ctf_dict_t *fp)
 	}
     }
 
-  /* Symbol table stuff is done only if the linker has told this dict about
-     potential symbols (usually the case for parent dicts only).  The linker
-     will report symbols to the parent dict in a parent/child link, as usual
-     with all linker-related matters.  */
+  /* Find the dict to which the linker has reported symbols, if any.  */
 
-  if (!fp->ctf_dynsyms && fp->ctf_parent && fp->ctf_parent->ctf_dynsyms)
-    symfp = fp->ctf_parent;
+  if (filter_syms)
+    {
+      if (!fp->ctf_dynsyms && fp->ctf_parent && fp->ctf_parent->ctf_dynsyms)
+	symfp = fp->ctf_parent;
+      else
+	symfp = fp;
+    }
 
-  /* No linker-reported symbols at all: ctf_link_shuffle_syms was never called.
-     This must be an unsorted, indexed dict.  Otherwise, this is a sorted
-     dict, and the header flags indicate as much.  */
-  if (!symfp->ctf_dynsyms)
+  /* If not filtering, keep all potential symbols in an unsorted, indexed
+     dict.  */
+  if (!filter_syms)
     symflags = CTF_SYMTYPETAB_FORCE_INDEXED;
   else
     hdr.cth_flags |= CTF_F_IDXSORTED;
+
+  if (!ctf_assert (fp, (filter_syms && symfp)
+		   || (!filter_syms && !symfp
+		       && ((symflags & CTF_SYMTYPETAB_FORCE_INDEXED) != 0))))
+    return -1;
 
   /* Work out the sizes of the object and function sections, and work out the
      number of pad (unassigned) symbols in each, and the overall size of the
@@ -792,15 +827,15 @@ ctf_serialize (ctf_dict_t *fp)
 	       "%i bytes of pads, index size %i\n", (int) nfuncs, (int) maxfunc,
 	       (int) func_unpadsize, (int) func_padsize, (int) funcidx_size);
 
-  /* If the linker has reported any symbols at all, those symbols that the
-     linker has not reported are now removed from the ctf_objthash and
-     ctf_funchash.  Delete entries from the variable section that duplicate
-     newly-added data symbols.  There's no need to migrate new ones in, because
-     linker invocations (even ld -r) can only introduce new symbols, not remove
-     symbols that already exist, and the compiler always emits both a variable
-     and a data symbol simultaneously.  */
+  /* If we are filtering symbols out, those symbols that the linker has not
+     reported have now been removed from the ctf_objthash and ctf_funchash.
+     Delete entries from the variable section that duplicate newly-added data
+     symbols.  There's no need to migrate new ones in, because the compiler
+     always emits both a variable and a data symbol simultaneously, and
+     filtering only happens at final link time.  */
 
-  if (symtypetab_delete_nonstatic_vars (fp) < 0)
+  if (filter_syms && symfp->ctf_dynsyms &&
+      symtypetab_delete_nonstatic_vars (fp, symfp) < 0)
     return -1;
 
   /* It is worth indexing each section if it would save space to do so, due to
@@ -865,11 +900,7 @@ ctf_serialize (ctf_dict_t *fp)
   if (fp->ctf_cuname != NULL)
     ctf_str_add_ref (fp, fp->ctf_cuname, &hdrp->cth_cuname);
 
-  /* Sort the linker's symbols into name order if need be: if
-     ctf_link_shuffle_syms has not been called at all, just use all the symbols
-     that were added to this dict, and don't bother sorting them since this is
-     probably an ld -r and will likely just be consumed by ld again, with no
-     ctf_lookup_by_symbol()s ever done on it.  */
+  /* Sort the linker's symbols into name order if need be.  */
 
   if ((objtidx_size != 0) || (funcidx_size != 0))
     {
@@ -878,36 +909,52 @@ ctf_serialize (ctf_dict_t *fp)
       const char **walk;
       int err;
 
-      if (symfp->ctf_dynsyms)
-	ndynsyms = ctf_dynhash_elements (symfp->ctf_dynsyms);
+      if (filter_syms)
+	{
+	  if (symfp->ctf_dynsyms)
+	    nsymtypes = ctf_dynhash_elements (symfp->ctf_dynsyms);
+	  else
+	    nsymtypes = 0;
+	}
       else
-	ndynsyms = ctf_dynhash_elements (symfp->ctf_objthash)
-	  + ctf_dynhash_elements (symfp->ctf_funchash);
+	nsymtypes = ctf_dynhash_elements (fp->ctf_objthash)
+	  + ctf_dynhash_elements (fp->ctf_funchash);
 
-      if ((sym_name_order = calloc (ndynsyms, sizeof (const char *))) == NULL)
+      if ((sym_name_order = calloc (nsymtypes, sizeof (const char *))) == NULL)
 	goto oom;
 
       walk = sym_name_order;
 
-      if (symfp->ctf_dynsyms)
+      if (filter_syms)
 	{
-	  while ((err = ctf_dynhash_next_sorted (symfp->ctf_dynsyms, &i, &symname,
-						 NULL, ctf_dynhash_sort_by_name,
-						 NULL)) == 0)
-	    *walk++ = (const char *) symname;
-	  if (err != ECTF_NEXT_END)
-	    goto symerr;
+	  if (symfp->ctf_dynsyms)
+	    {
+	      while ((err = ctf_dynhash_next_sorted (symfp->ctf_dynsyms, &i,
+						     &symname, NULL,
+						     ctf_dynhash_sort_by_name,
+						     NULL)) == 0)
+		*walk++ = (const char *) symname;
+	      if (err != ECTF_NEXT_END)
+		goto symerr;
+	    }
 	}
       else
 	{
-	  while ((err = ctf_dynhash_next (symfp->ctf_objthash, &i, &symname,
-					  NULL)) == 0)
+	  ctf_hash_sort_f sort_fun = NULL;
+
+	  /* Since we partition the set of symbols back into objt and func,
+	     we can sort the two independently without harm.  */
+	  if (sort_syms)
+	    sort_fun = ctf_dynhash_sort_by_name;
+
+	  while ((err = ctf_dynhash_next_sorted (fp->ctf_objthash, &i, &symname,
+						 NULL, sort_fun, NULL)) == 0)
 	    *walk++ = (const char *) symname;
 	  if (err != ECTF_NEXT_END)
 	    goto symerr;
 
-	  while ((err = ctf_dynhash_next (symfp->ctf_funchash, &i, &symname,
-					  NULL)) == 0)
+	  while ((err = ctf_dynhash_next_sorted (fp->ctf_funchash, &i, &symname,
+						 NULL, sort_fun, NULL)) == 0)
 	    *walk++ = (const char *) symname;
 	  if (err != ECTF_NEXT_END)
 	    goto symerr;
@@ -918,7 +965,7 @@ ctf_serialize (ctf_dict_t *fp)
      Emission is done in symtab order if there is no index, and in index
      (name) order otherwise.  */
 
-  if ((objtidx_size == 0) && symfp->ctf_dynsymidx)
+  if ((objtidx_size == 0) && symfp && symfp->ctf_dynsymidx)
     {
       ctf_dprintf ("Emitting unindexed objt symtypetab\n");
       if (emit_symtypetab (fp, symfp, (uint32_t *) t, symfp->ctf_dynsymidx,
@@ -930,13 +977,13 @@ ctf_serialize (ctf_dict_t *fp)
     {
       ctf_dprintf ("Emitting indexed objt symtypetab\n");
       if (emit_symtypetab (fp, symfp, (uint32_t *) t, NULL, sym_name_order,
-			   ndynsyms, maxobjt, objt_size, symflags) < 0)
+			   nsymtypes, maxobjt, objt_size, symflags) < 0)
 	goto err;				/* errno is set for us.  */
     }
 
   t += objt_size;
 
-  if ((funcidx_size == 0) && symfp->ctf_dynsymidx)
+  if ((funcidx_size == 0) && symfp && symfp->ctf_dynsymidx)
     {
       ctf_dprintf ("Emitting unindexed func symtypetab\n");
       if (emit_symtypetab (fp, symfp, (uint32_t *) t, symfp->ctf_dynsymidx,
@@ -949,7 +996,7 @@ ctf_serialize (ctf_dict_t *fp)
     {
       ctf_dprintf ("Emitting indexed func symtypetab\n");
       if (emit_symtypetab (fp, symfp, (uint32_t *) t, NULL, sym_name_order,
-			   ndynsyms, maxfunc, func_size,
+			   nsymtypes, maxfunc, func_size,
 			   symflags | CTF_SYMTYPETAB_EMIT_FUNCTION) < 0)
 	goto err;				/* errno is set for us.  */
     }
@@ -958,14 +1005,14 @@ ctf_serialize (ctf_dict_t *fp)
 
   if (objtidx_size > 0)
     if (emit_symtypetab_index (fp, symfp, (uint32_t *) t, sym_name_order,
-			       ndynsyms, objtidx_size, symflags) < 0)
+			       nsymtypes, objtidx_size, symflags) < 0)
       goto err;
 
   t += objtidx_size;
 
   if (funcidx_size > 0)
     if (emit_symtypetab_index (fp, symfp, (uint32_t *) t, sym_name_order,
-			       ndynsyms, funcidx_size,
+			       nsymtypes, funcidx_size,
 			       symflags | CTF_SYMTYPETAB_EMIT_FUNCTION) < 0)
       goto err;
 

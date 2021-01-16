@@ -3811,6 +3811,8 @@ lang_merge_ctf (void)
     flags = CTF_LINK_SHARE_DUPLICATED;
   if (!config.ctf_variables)
     flags |= CTF_LINK_OMIT_VARIABLES_SECTION;
+  if (bfd_link_relocatable (&link_info))
+    flags |= CTF_LINK_NO_FILTER_REPORTED_SYMS;
 
   if (ctf_link (ctf_output, flags) < 0)
     {

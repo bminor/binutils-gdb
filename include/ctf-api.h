@@ -104,6 +104,15 @@ typedef struct ctf_link_sym
 /* Omit the content of the variables section.  */
 #define CTF_LINK_OMIT_VARIABLES_SECTION 0x8
 
+/* If *unset*, filter out entries corresponding to linker-reported symbols
+   from the variable section, and filter out all entries with no linker-reported
+   symbols from the data object and function info sections: if set, do no
+   filtering and leave all entries in place.  (This is a negative-sense flag
+   because it is rare to want symbols the linker has not reported as present to
+   stick around in the symtypetab sections nonetheless: relocatable links are
+   the only likely case.)  */
+#define CTF_LINK_NO_FILTER_REPORTED_SYMS 0x10
+
 /* Symbolic names for CTF sections.  */
 
 typedef enum ctf_sect_names
