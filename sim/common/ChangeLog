@@ -1,5 +1,9 @@
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* sim-hw.c (merge_device_file): Replace fgets with getline.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* gennltvals.sh (gen_arches): Sort calls by first arg.
 	* nltvals.def: Regenerate.
 
