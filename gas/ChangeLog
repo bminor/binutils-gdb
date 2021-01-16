@@ -1,3 +1,11 @@
+2021-02-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/tc-tic54x (tic54x_mmregs): Rename to ...
+	(tic54x_register_mmregs): ... this.  Change mmregs to tic54x_mmregs.
+	(md_pseudo_table): Change tic54x_mmregs to tic54x_register_mmregs.
+	(md_begin): Add tic54x_ prefix to regs, mmregs, condition_codes,
+	cc2_codes, cc3_codes, status_bits, and misc_symbols.
+
 2021-02-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 27355
