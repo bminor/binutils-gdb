@@ -1,3 +1,9 @@
+2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23169
+	* elfxx-x86.c (_bfd_x86_elf_link_fixup_ifunc_symbol): Don't
+	check pointer_equality_needed.
+
 2021-01-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26688

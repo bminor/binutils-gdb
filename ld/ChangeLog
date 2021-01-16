@@ -1,3 +1,11 @@
+2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/23169
+	* testsuite/ld-ifunc/ifunc.exp: Replace pr23169c.rd with
+	pr23169a.rd for pr23169c and pr23169f.  Remove pr23169e tests.
+	* testsuite/ld-ifunc/pr23169a.c (foo): Don't compare function
+	address.
+
 2021-01-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

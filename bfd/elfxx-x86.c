@@ -1711,8 +1711,7 @@ _bfd_x86_elf_link_fixup_ifunc_symbol (struct bfd_link_info *info,
       && h->def_regular
       && h->dynindx != -1
       && h->plt.offset != (bfd_vma) -1
-      && h->type == STT_GNU_IFUNC
-      && h->pointer_equality_needed)
+      && h->type == STT_GNU_IFUNC)
     {
       asection *plt_s;
       bfd_vma plt_offset;
