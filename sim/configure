@@ -630,6 +630,7 @@ LIBOBJS
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
 subdirs
+SIM_PRIMARY_TARGET
 AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
 AM_DEFAULT_V
@@ -743,6 +744,7 @@ enable_maintainer_mode
 enable_dependency_tracking
 enable_silent_rules
 enable_sim
+enable_targets
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1412,6 +1414,7 @@ Optional Features:
   --enable-silent-rules   less verbose build output (undo: "make V=1")
   --disable-silent-rules  verbose build output (undo: "make V=0")
   --enable-sim            Enable the GNU simulator
+  --enable-targets        alternative target configurations
 
 Some influential environment variables:
   CC          C compiler command
@@ -4829,139 +4832,401 @@ esac
 fi
 
 
+# Check whether --enable-targets was given.
+if test "${enable_targets+set}" = set; then :
+  enableval=$enable_targets; case "${enableval}" in
+  yes | "") as_fn_error $? "enable-targets option must specify target names or 'all'" "$LINENO" 5
+	    ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac
+fi
+
+
+SIM_PRIMARY_TARGET=
+
+
+
+
 if test "${enable_sim}" != no; then
   sim_igen=no
-  case "${target}" in
-    aarch64*-*-*)
+  for targ in `echo $target $enable_targets | sed 's/,/ /g'`
+  do
+
+  case "${targ}" in
+    all|aarch64*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=aarch64
+      fi
 
 
 subdirs="$subdirs aarch64"
 
+
       ;;
-    arm*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|arm*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=arm
+      fi
       subdirs="$subdirs arm"
 
+
       ;;
-    avr*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|avr*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=avr
+      fi
       subdirs="$subdirs avr"
 
+
       ;;
-    bfin-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|bfin-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=bfin
+      fi
       subdirs="$subdirs bfin"
 
+
       ;;
-    bpf-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|bpf-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=bpf
+      fi
       subdirs="$subdirs bpf"
 
+
       ;;
-    cr16*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|cr16*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=cr16
+      fi
       subdirs="$subdirs cr16"
 
+
       ;;
-    cris-*-* | crisv32-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|cris-*-* | crisv32-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=cris
+      fi
       subdirs="$subdirs cris"
 
+
       ;;
-    d10v-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|d10v-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=d10v
+      fi
       subdirs="$subdirs d10v"
 
+
       ;;
-    frv-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|frv-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=frv
+      fi
       subdirs="$subdirs frv"
 
+
       ;;
-    h8300*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|h8300*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=h8300
+      fi
       subdirs="$subdirs h8300"
 
+
       ;;
-    iq2000-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|iq2000-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=iq2000
+      fi
       subdirs="$subdirs iq2000"
 
+
       ;;
-    lm32-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|lm32-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=lm32
+      fi
       subdirs="$subdirs lm32"
 
+
       ;;
-    m32c-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|m32c-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=m32c
+      fi
       subdirs="$subdirs m32c"
 
+
       ;;
-    m32r-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|m32r-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=m32r
+      fi
       subdirs="$subdirs m32r"
 
+
       ;;
-    m68hc11-*-*|m6811-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|m68hc11-*-*|m6811-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=m68hc11
+      fi
       subdirs="$subdirs m68hc11"
 
+
       ;;
-    mcore-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|mcore-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=mcore
+      fi
       subdirs="$subdirs mcore"
 
-      ;;
-    microblaze-*-*)
-      subdirs="$subdirs microblaze"
 
       ;;
-    mips*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|microblaze-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=microblaze
+      fi
+      subdirs="$subdirs microblaze"
+
+
+      ;;
+  esac
+
+
+  case "${targ}" in
+    all|mips*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=mips
+      fi
       subdirs="$subdirs mips"
 
       sim_igen=yes
       ;;
-    mn10300*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|mn10300*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=mn10300
+      fi
       subdirs="$subdirs mn10300"
 
       sim_igen=yes
       ;;
-    moxie-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|moxie-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=moxie
+      fi
       subdirs="$subdirs moxie"
 
+
       ;;
-    msp430*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|msp430*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=msp430
+      fi
       subdirs="$subdirs msp430"
 
+
       ;;
-    or1k-*-* | or1knd-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|or1k-*-* | or1knd-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=or1k
+      fi
       subdirs="$subdirs or1k"
 
+
       ;;
-    pru*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|pru*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=pru
+      fi
       subdirs="$subdirs pru"
 
+
       ;;
-    riscv*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|riscv*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=riscv
+      fi
       subdirs="$subdirs riscv"
 
+
       ;;
-    rl78-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|rl78-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=rl78
+      fi
       subdirs="$subdirs rl78"
 
+
       ;;
-    rx-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|rx-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=rx
+      fi
       subdirs="$subdirs rx"
 
+
       ;;
-    sh*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|sh*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=sh
+      fi
       subdirs="$subdirs sh"
 
+
       ;;
-    sparc-*-rtems*|sparc-*-elf*)
+  esac
+
+
+  case "${targ}" in
+    all|sparc-*-rtems*|sparc-*-elf*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=erc32
+      fi
       subdirs="$subdirs erc32"
 
+
       ;;
-    powerpc*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|powerpc*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=ppc
+      fi
       subdirs="$subdirs ppc"
 
-      ;;
-    ft32-*-*)
-      subdirs="$subdirs ft32"
 
       ;;
-    v850*-*-*)
+  esac
+
+
+  case "${targ}" in
+    all|ft32-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=ft32
+      fi
+      subdirs="$subdirs ft32"
+
+
+      ;;
+  esac
+
+
+  case "${targ}" in
+    all|v850*-*-*)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=v850
+      fi
       subdirs="$subdirs v850"
 
       sim_igen=yes
       ;;
   esac
+
+  done
 fi
  if test "$sim_igen" = "yes"; then
   SIM_ENABLE_IGEN_TRUE=

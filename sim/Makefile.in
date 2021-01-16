@@ -350,6 +350,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 STRIP = @STRIP@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
@@ -411,6 +412,7 @@ AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@
+AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 
 # We don't set some of these vars here, but we need to define them so they may
 # be used consistently in local.mk files we include below.

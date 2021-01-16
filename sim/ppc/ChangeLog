@@ -1,3 +1,8 @@
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (install): Install as run-ppc when not the primary arch.
+	(install-strip): Likewise.
+
 2021-03-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (BUILD_LDFLAGS): Rename to ...

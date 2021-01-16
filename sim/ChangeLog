@@ -1,3 +1,10 @@
+2021-04-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (SIM_PRIMARY_TARGET, AM_MAKEFLAGS): Define.
+	* configure.ac: Add --enable-targets option.  Define SIM_PRIMARY_TARGET
+	and SIM_TARGET.  Rewrite case statement with SIM_TARGET calls.
+	* Makefile.in, configure: Regenerate.
+
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am [SIM_ENABLE_IGEN]: Include igen/local.mk.

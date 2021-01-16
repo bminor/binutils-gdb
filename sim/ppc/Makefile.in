@@ -885,11 +885,15 @@ config.status: configure
 check:
 
 install: installdirs
+	a=`basename "$$(pwd)"`; \
 	n=`echo run | sed '$(program_transform_name)'`; \
+	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
 	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 
 install-strip: installdirs
+	a=`basename "$$(pwd)"`; \
 	n=`echo run | sed '$(program_transform_name)'`; \
+	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
 	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 	$(STRIP) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 

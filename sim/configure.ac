@@ -19,110 +19,72 @@ yes | no) ;;
 *)	AC_MSG_ERROR(bad value ${enableval} given for --enable-sim option) ;;
 esac])
 
+AC_ARG_ENABLE(targets,
+[  --enable-targets        alternative target configurations],
+[case "${enableval}" in
+  yes | "") AC_MSG_ERROR(enable-targets option must specify target names or 'all')
+	    ;;
+  no)       enable_targets= ;;
+  *)        enable_targets=$enableval ;;
+esac])
+
+dnl Used to keep track of which target (if any) is the default one.  This is
+dnl used when installing files to see if they need to be suffixed.
+SIM_PRIMARY_TARGET=
+AC_SUBST(SIM_PRIMARY_TARGET)
+
+m4_define([SIM_TARGET], [
+  case "${targ}" in
+    all|$1)
+      if test "${targ}" = "${target}"; then
+        SIM_PRIMARY_TARGET=$2
+      fi
+      AC_CONFIG_SUBDIRS($2)
+      $3
+      ;;
+  esac
+])
+
 dnl WHEN ADDING ENTRIES TO THIS MATRIX:
 dnl Make sure that the left side always has two dashes.  Otherwise you can get
 dnl spurious matches.  Even for unambiguous cases, do this as a convention, else
 dnl the table becomes a real mess to understand and maintain.
 if test "${enable_sim}" != no; then
   sim_igen=no
-  case "${target}" in
-    aarch64*-*-*)
-      AC_CONFIG_SUBDIRS(aarch64)
-      ;;
-    arm*-*-*)
-      AC_CONFIG_SUBDIRS(arm)
-      ;;
-    avr*-*-*)
-      AC_CONFIG_SUBDIRS(avr)
-      ;;
-    bfin-*-*)
-      AC_CONFIG_SUBDIRS(bfin)
-      ;;
-    bpf-*-*)
-      AC_CONFIG_SUBDIRS(bpf)
-      ;;
-    cr16*-*-*)
-      AC_CONFIG_SUBDIRS(cr16)
-      ;;
-    cris-*-* | crisv32-*-*)
-      AC_CONFIG_SUBDIRS(cris)
-      ;;
-    d10v-*-*)
-      AC_CONFIG_SUBDIRS(d10v)
-      ;;
-    frv-*-*)
-      AC_CONFIG_SUBDIRS(frv)
-      ;;
-    h8300*-*-*)
-      AC_CONFIG_SUBDIRS(h8300)
-      ;;
-    iq2000-*-*)
-      AC_CONFIG_SUBDIRS(iq2000)
-      ;;
-    lm32-*-*)
-      AC_CONFIG_SUBDIRS(lm32)
-      ;;
-    m32c-*-*)
-      AC_CONFIG_SUBDIRS(m32c)
-      ;;
-    m32r-*-*)
-      AC_CONFIG_SUBDIRS(m32r)
-      ;;
-    m68hc11-*-*|m6811-*-*)
-      AC_CONFIG_SUBDIRS(m68hc11)
-      ;;
-    mcore-*-*)
-      AC_CONFIG_SUBDIRS(mcore)
-      ;;
-    microblaze-*-*)
-      AC_CONFIG_SUBDIRS(microblaze)
-      ;;
-    mips*-*-*)
-      AC_CONFIG_SUBDIRS(mips)
-      sim_igen=yes
-      ;;
-    mn10300*-*-*)
-      AC_CONFIG_SUBDIRS(mn10300)
-      sim_igen=yes
-      ;;
-    moxie-*-*)
-      AC_CONFIG_SUBDIRS(moxie)
-      ;;
-    msp430*-*-*)
-      AC_CONFIG_SUBDIRS(msp430)
-      ;;
-    or1k-*-* | or1knd-*-*)
-      AC_CONFIG_SUBDIRS(or1k)
-      ;;
-    pru*-*-*)
-      AC_CONFIG_SUBDIRS(pru)
-      ;;
-    riscv*-*-*)
-      AC_CONFIG_SUBDIRS(riscv)
-      ;;
-    rl78-*-*)
-      AC_CONFIG_SUBDIRS(rl78)
-      ;;
-    rx-*-*)
-      AC_CONFIG_SUBDIRS(rx)
-      ;;
-    sh*-*-*)
-      AC_CONFIG_SUBDIRS(sh)
-      ;;
-    sparc-*-rtems*|sparc-*-elf*)
-      AC_CONFIG_SUBDIRS(erc32)
-      ;;
-    powerpc*-*-*)
-      AC_CONFIG_SUBDIRS(ppc)
-      ;;
-    ft32-*-*)
-      AC_CONFIG_SUBDIRS(ft32)
-      ;;
-    v850*-*-*)
-      AC_CONFIG_SUBDIRS(v850)
-      sim_igen=yes
-      ;;
-  esac
+  for targ in `echo $target $enable_targets | sed 's/,/ /g'`
+  do
+    SIM_TARGET([aarch64*-*-*], [aarch64])
+    SIM_TARGET([arm*-*-*], [arm])
+    SIM_TARGET([avr*-*-*], [avr])
+    SIM_TARGET([bfin-*-*], [bfin])
+    SIM_TARGET([bpf-*-*], [bpf])
+    SIM_TARGET([cr16*-*-*], [cr16])
+    SIM_TARGET([cris-*-* | crisv32-*-*], [cris])
+    SIM_TARGET([d10v-*-*], [d10v])
+    SIM_TARGET([frv-*-*], [frv])
+    SIM_TARGET([h8300*-*-*], [h8300])
+    SIM_TARGET([iq2000-*-*], [iq2000])
+    SIM_TARGET([lm32-*-*], [lm32])
+    SIM_TARGET([m32c-*-*], [m32c])
+    SIM_TARGET([m32r-*-*], [m32r])
+    SIM_TARGET([m68hc11-*-*|m6811-*-*], [m68hc11])
+    SIM_TARGET([mcore-*-*], [mcore])
+    SIM_TARGET([microblaze-*-*], [microblaze])
+    SIM_TARGET([mips*-*-*], [mips], [sim_igen=yes])
+    SIM_TARGET([mn10300*-*-*], [mn10300], [sim_igen=yes])
+    SIM_TARGET([moxie-*-*], [moxie])
+    SIM_TARGET([msp430*-*-*], [msp430])
+    SIM_TARGET([or1k-*-* | or1knd-*-*], [or1k])
+    SIM_TARGET([pru*-*-*], [pru])
+    SIM_TARGET([riscv*-*-*], [riscv])
+    SIM_TARGET([rl78-*-*], [rl78])
+    SIM_TARGET([rx-*-*], [rx])
+    SIM_TARGET([sh*-*-*], [sh])
+    SIM_TARGET([sparc-*-rtems*|sparc-*-elf*], [erc32])
+    SIM_TARGET([powerpc*-*-*], [ppc])
+    SIM_TARGET([ft32-*-*], [ft32])
+    SIM_TARGET([v850*-*-*], [v850], [sim_igen=yes])
+  done
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 
