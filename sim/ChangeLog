@@ -1,3 +1,9 @@
+2021-02-20  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt: Move arch list ...
+	* configure.ac: ... here.
+	* configure: Regenerate.
+
 2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
 
 	PR 27158

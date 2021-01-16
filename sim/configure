@@ -1833,8 +1833,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
-
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -3847,245 +3845,139 @@ esac
 fi
 
 
-
 if test "${enable_sim}" != no; then
-
-# WHEN ADDING ENTRIES TO THIS MATRIX:
-
-# Make sure that the left side always has two dashes.  Otherwise you
-# can get spurious matches.  Even for unambiguous cases, do this as a
-# convention, else the table becomes a real mess to understand and
-# maintain.
-
-
-
-sim_igen=no
-sim_arch=
-case "${target}" in
-   aarch64*-*-*)
-
-  sim_arch=aarch64
+  sim_igen=no
+  case "${target}" in
+    aarch64*-*-*)
 
 
 subdirs="$subdirs aarch64"
 
-
-       ;;
-   arm*-*-*)
-
-  sim_arch=arm
-  subdirs="$subdirs arm"
-
-
-       ;;
-   avr*-*-*)
-
-  sim_arch=avr
-  subdirs="$subdirs avr"
-
-
-       ;;
-   bfin-*-*)
-
-  sim_arch=bfin
-  subdirs="$subdirs bfin"
-
-
-       ;;
-   bpf-*-*)
-
-  sim_arch=bpf
-  subdirs="$subdirs bpf"
-
-
-       ;;
-   cr16*-*-*)
-
-  sim_arch=cr16
-  subdirs="$subdirs cr16"
-
-
-       ;;
-   cris-*-* | crisv32-*-*)
-
-  sim_arch=cris
-  subdirs="$subdirs cris"
-
-
-       ;;
-   d10v-*-*)
-
-  sim_arch=d10v
-  subdirs="$subdirs d10v"
-
-
-       ;;
-   frv-*-*)
-
-  sim_arch=frv
-  subdirs="$subdirs frv"
-
-
-       ;;
-   h8300*-*-*)
-
-  sim_arch=h8300
-  subdirs="$subdirs h8300"
-
-
-       ;;
-   iq2000-*-*)
-
-  sim_arch=iq2000
-  subdirs="$subdirs iq2000"
-
-
-       ;;
-   lm32-*-*)
-
-  sim_arch=lm32
-  subdirs="$subdirs lm32"
-
-
-       ;;
-   m32c-*-*)
-
-  sim_arch=m32c
-  subdirs="$subdirs m32c"
-
-
-       ;;
-   m32r-*-*)
-
-  sim_arch=m32r
-  subdirs="$subdirs m32r"
-
-
-       ;;
-   m68hc11-*-*|m6811-*-*)
-
-  sim_arch=m68hc11
-  subdirs="$subdirs m68hc11"
-
-
-       ;;
-   mcore-*-*)
-
-  sim_arch=mcore
-  subdirs="$subdirs mcore"
-
-
-       ;;
-   microblaze-*-*)
-
-  sim_arch=microblaze
-  subdirs="$subdirs microblaze"
-
-
-       ;;
-   mips*-*-*)
-
-  sim_arch=mips
-  subdirs="$subdirs mips"
-
-
-       sim_igen=yes
-       ;;
-   mn10300*-*-*)
-
-  sim_arch=mn10300
-  subdirs="$subdirs mn10300"
-
-
-       sim_igen=yes
-       ;;
-   moxie-*-*)
-
-  sim_arch=moxie
-  subdirs="$subdirs moxie"
-
-
-       ;;
-   msp430*-*-*)
-
-  sim_arch=msp430
-  subdirs="$subdirs msp430"
-
-
-       ;;
-   or1k-*-* | or1knd-*-*)
-
-  sim_arch=or1k
-  subdirs="$subdirs or1k"
-
-
-       ;;
-   pru*-*-*)
-
-  sim_arch=pru
-  subdirs="$subdirs pru"
-
-
-       ;;
-   riscv*-*-*)
-
-  sim_arch=riscv
-  subdirs="$subdirs riscv"
-
-
-       ;;
-   rl78-*-*)
-
-  sim_arch=rl78
-  subdirs="$subdirs rl78"
-
-
-       ;;
-   rx-*-*)
-
-  sim_arch=rx
-  subdirs="$subdirs rx"
-
-
-       ;;
-   sh*-*-*)
-
-  sim_arch=sh
-  subdirs="$subdirs sh"
-
-
-       ;;
-   sparc-*-rtems*|sparc-*-elf*)
-
-  sim_arch=erc32
-  subdirs="$subdirs erc32"
-
-
-       ;;
-   powerpc*-*-*)
-
-  sim_arch=ppc
-  subdirs="$subdirs ppc"
-
-
-       ;;
-   ft32-*-*)
-
-  sim_arch=ft32
-  subdirs="$subdirs ft32"
-
-
-       ;;
-   v850*-*-*)
-
-  sim_arch=v850
-  subdirs="$subdirs v850"
-
-
-       sim_igen=yes
-       ;;
-esac
-
+      ;;
+    arm*-*-*)
+      subdirs="$subdirs arm"
+
+      ;;
+    avr*-*-*)
+      subdirs="$subdirs avr"
+
+      ;;
+    bfin-*-*)
+      subdirs="$subdirs bfin"
+
+      ;;
+    bpf-*-*)
+      subdirs="$subdirs bpf"
+
+      ;;
+    cr16*-*-*)
+      subdirs="$subdirs cr16"
+
+      ;;
+    cris-*-* | crisv32-*-*)
+      subdirs="$subdirs cris"
+
+      ;;
+    d10v-*-*)
+      subdirs="$subdirs d10v"
+
+      ;;
+    frv-*-*)
+      subdirs="$subdirs frv"
+
+      ;;
+    h8300*-*-*)
+      subdirs="$subdirs h8300"
+
+      ;;
+    iq2000-*-*)
+      subdirs="$subdirs iq2000"
+
+      ;;
+    lm32-*-*)
+      subdirs="$subdirs lm32"
+
+      ;;
+    m32c-*-*)
+      subdirs="$subdirs m32c"
+
+      ;;
+    m32r-*-*)
+      subdirs="$subdirs m32r"
+
+      ;;
+    m68hc11-*-*|m6811-*-*)
+      subdirs="$subdirs m68hc11"
+
+      ;;
+    mcore-*-*)
+      subdirs="$subdirs mcore"
+
+      ;;
+    microblaze-*-*)
+      subdirs="$subdirs microblaze"
+
+      ;;
+    mips*-*-*)
+      subdirs="$subdirs mips"
+
+      sim_igen=yes
+      ;;
+    mn10300*-*-*)
+      subdirs="$subdirs mn10300"
+
+      sim_igen=yes
+      ;;
+    moxie-*-*)
+      subdirs="$subdirs moxie"
+
+      ;;
+    msp430*-*-*)
+      subdirs="$subdirs msp430"
+
+      ;;
+    or1k-*-* | or1knd-*-*)
+      subdirs="$subdirs or1k"
+
+      ;;
+    pru*-*-*)
+      subdirs="$subdirs pru"
+
+      ;;
+    riscv*-*-*)
+      subdirs="$subdirs riscv"
+
+      ;;
+    rl78-*-*)
+      subdirs="$subdirs rl78"
+
+      ;;
+    rx-*-*)
+      subdirs="$subdirs rx"
+
+      ;;
+    sh*-*-*)
+      subdirs="$subdirs sh"
+
+      ;;
+    sparc-*-rtems*|sparc-*-elf*)
+      subdirs="$subdirs erc32"
+
+      ;;
+    powerpc*-*-*)
+      subdirs="$subdirs ppc"
+
+      ;;
+    ft32-*-*)
+      subdirs="$subdirs ft32"
+
+      ;;
+    v850*-*-*)
+      subdirs="$subdirs v850"
+
+      sim_igen=yes
+      ;;
+  esac
   if test "$sim_igen" = yes; then
     subdirs="$subdirs igen"
 
