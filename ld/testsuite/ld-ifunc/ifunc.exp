@@ -640,7 +640,7 @@ run_cc_link_tests [list \
 	"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libpr23169a.so" \
 	"-fPIE -O2 -g" \
 	{ pr23169b.c pr23169c.c } \
-	{{readelf {--dyn-syms} pr23169c.rd} \
+	{{readelf {--dyn-syms} pr23169a.rd} \
 	 {readelf {-r -W} pr23169b.rd}} \
 	"pr23169c" \
     ] \
@@ -654,20 +654,11 @@ run_cc_link_tests [list \
 	"pr23169d" \
     ] \
     [list \
-	"Build pr23169e" \
-	"-pie -Wl,--no-as-needed,-z,now tmpdir/libpr23169b.so" \
-	"-fPIE -O2 -g" \
-	{ pr23169b.c pr23169c.c } \
-	{{readelf {--dyn-syms} pr23169c.rd} \
-	 {readelf {-r -W} pr23169b.rd}} \
-	"pr23169e" \
-    ] \
-    [list \
 	"Build pr23169f" \
 	"$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,now tmpdir/libpr23169b.so" \
 	"-fPIE -O2 -g" \
 	{ pr23169b.c pr23169c.c } \
-	{{readelf {--dyn-syms} pr23169c.rd} \
+	{{readelf {--dyn-syms} pr23169a.rd} \
 	 {readelf {-r -W} pr23169b.rd}} \
 	"pr23169f" \
     ] \
@@ -773,15 +764,6 @@ run_ld_link_exec_tests [list \
 	"pr23169d" \
 	"pass.out" \
 	"$NOPIE_CFLAGS -O2 -g" \
-    ] \
-    [list \
-	"Run pr23169e" \
-	"-pie -Wl,--no-as-needed,-z,now tmpdir/libpr23169b.so" \
-	"" \
-	{ pr23169b.c pr23169c.c } \
-	"pr23169e" \
-	"pass.out" \
-	"-fPIE -O2 -g" \
     ] \
     [list \
 	"Run pr23169f" \
