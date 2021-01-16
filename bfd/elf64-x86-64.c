@@ -2784,6 +2784,11 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      outrel.r_addend = (h->root.u.def.value
 					 + h->root.u.def.section->output_section->vma
 					 + h->root.u.def.section->output_offset);
+
+		      if (htab->params->report_relative_reloc)
+			_bfd_x86_elf_link_report_relative_reloc
+			  (info, input_section, h, sym,
+			   "R_X86_64_IRELATIVE", &outrel);
 		    }
 		  else
 		    {
@@ -2940,6 +2945,12 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 				 + off);
 	      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
 	      outrel.r_addend = relocation;
+
+	      if (htab->params->report_relative_reloc)
+		_bfd_x86_elf_link_report_relative_reloc
+		  (info, input_section, h, sym, "R_X86_64_RELATIVE",
+		   &outrel);
+
 	      elf_append_rela (output_bfd, s, &outrel);
 	    }
 
@@ -3221,6 +3232,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      Elf_Internal_Rela outrel;
 	      bfd_boolean skip, relocate;
 	      asection *sreloc;
+	      const char *relative_reloc_name = NULL;
 
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
@@ -3259,6 +3271,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      relocate = TRUE;
 		      outrel.r_info = htab->r_info (0, R_X86_64_RELATIVE);
 		      outrel.r_addend = relocation + rel->r_addend;
+		      relative_reloc_name = "R_X86_64_RELATIVE";
 		    }
 		  else if (r_type == R_X86_64_64
 			   && !ABI_64_P (output_bfd))
@@ -3267,6 +3280,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		      outrel.r_info = htab->r_info (0,
 						    R_X86_64_RELATIVE64);
 		      outrel.r_addend = relocation + rel->r_addend;
+		      relative_reloc_name = "R_X86_64_RELATIVE64";
 		      /* Check addend overflow.  */
 		      if ((outrel.r_addend & 0x80000000)
 			  != (rel->r_addend & 0x80000000))
@@ -3332,6 +3346,12 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 		  r = bfd_reloc_notsupported;
 		  goto check_relocation_error;
 		}
+
+	      if (relative_reloc_name
+		  && htab->params->report_relative_reloc)
+		_bfd_x86_elf_link_report_relative_reloc
+		  (info, input_section, h, sym, relative_reloc_name,
+		   &outrel);
 
 	      elf_append_rela (output_bfd, sreloc, &outrel);
 
@@ -4292,6 +4312,11 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	      rela.r_addend = (h->root.u.def.value
 			       + h->root.u.def.section->output_section->vma
 			       + h->root.u.def.section->output_offset);
+
+	      if (htab->params->report_relative_reloc)
+		_bfd_x86_elf_link_report_relative_reloc
+		  (info, relplt, h, sym, "R_X86_64_IRELATIVE", &rela);
+
 	      /* R_X86_64_IRELATIVE comes last.  */
 	      plt_index = htab->next_irelative_index--;
 	    }
@@ -4409,6 +4434,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
     {
       Elf_Internal_Rela rela;
       asection *relgot = htab->elf.srelgot;
+      const char *relative_reloc_name = NULL;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -4447,6 +4473,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 		  rela.r_addend = (h->root.u.def.value
 				   + h->root.u.def.section->output_section->vma
 				   + h->root.u.def.section->output_offset);
+		  relative_reloc_name = "R_X86_64_IRELATIVE";
 		}
 	      else
 		goto do_glob_dat;
@@ -4494,6 +4521,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  rela.r_addend = (h->root.u.def.value
 			   + h->root.u.def.section->output_section->vma
 			   + h->root.u.def.section->output_offset);
+	  relative_reloc_name = "R_X86_64_RELATIVE";
 	}
       else
 	{
@@ -4504,6 +4532,11 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  rela.r_info = htab->r_info (h->dynindx, R_X86_64_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
+
+      if (relative_reloc_name != NULL
+	  && htab->params->report_relative_reloc)
+	_bfd_x86_elf_link_report_relative_reloc
+	  (info, relgot, h, sym, relative_reloc_name, &rela);
 
       elf_append_rela (output_bfd, relgot, &rela);
     }

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -z report-relative-reloc to x86 ELF linker to report dynamic
+  relative relocations.
+
 Changes in 2.36:
 
 * Add libdep plugin, for linking dependencies of static libraries that

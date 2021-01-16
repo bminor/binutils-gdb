@@ -677,6 +677,8 @@ run_dump_test "pr26939"
 run_dump_test "pr26939-x32"
 run_dump_test "pr27016a"
 run_dump_test "pr27016b"
+run_dump_test "report-reloc-1"
+run_dump_test "report-reloc-1-x32"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"

@@ -2409,6 +2409,12 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 		      /* This symbol is resolved locally.  */
 		      outrel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
+
+		      if (htab->params->report_relative_reloc)
+			_bfd_x86_elf_link_report_relative_reloc
+			  (info, input_section, h, sym,
+			   "R_386_IRELATIVE", &outrel);
+
 		      bfd_put_32 (output_bfd,
 				  (h->root.u.def.value
 				   + h->root.u.def.section->output_section->vma
@@ -2532,6 +2538,12 @@ elf_i386_relocate_section (bfd *output_bfd,
 				 + htab->elf.sgot->output_offset
 				 + off);
 	      outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+
+	      if (htab->params->report_relative_reloc)
+		_bfd_x86_elf_link_report_relative_reloc
+		  (info, input_section, h, sym, "R_386_RELATIVE",
+		   &outrel);
+
 	      elf_append_rel (output_bfd, s, &outrel);
 	    }
 
@@ -2738,6 +2750,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  /* This symbol is local, or marked to become local.  */
 		  relocate = TRUE;
 		  outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+
+		  if (htab->params->report_relative_reloc)
+		    _bfd_x86_elf_link_report_relative_reloc
+		      (info, input_section, h, sym, "R_386_RELATIVE",
+		       &outrel);
 		}
 
 	      sreloc = elf_section_data (input_section)->sreloc;
@@ -2769,6 +2786,12 @@ elf_i386_relocate_section (bfd *output_bfd,
 				+ input_section->output_section->vma
 				+ input_section->output_offset;
 	      outrel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+
+	      if (htab->params->report_relative_reloc)
+		_bfd_x86_elf_link_report_relative_reloc
+		  (info, input_section, h, sym, "R_386_RELATIVE",
+		   &outrel);
+
 	      sreloc = elf_section_data (input_section)->sreloc;
 	      if (sreloc == NULL)
 		abort ();
@@ -3664,6 +3687,11 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 			   + h->root.u.def.section->output_offset),
 			  gotplt->contents + got_offset);
 	      rel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
+
+	      if (htab->params->report_relative_reloc)
+		_bfd_x86_elf_link_report_relative_reloc
+		  (info, relplt, h, sym, "R_386_IRELATIVE", &rel);
+
 	      /* R_386_IRELATIVE comes last.  */
 	      plt_index = htab->next_irelative_index--;
 	    }
@@ -3762,6 +3790,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
     {
       Elf_Internal_Rela rel;
       asection *relgot = htab->elf.srelgot;
+      const char *relative_reloc_name = NULL;
 
       /* This symbol has an entry in the global offset table.  Set it
 	 up.  */
@@ -3802,6 +3831,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 			       + h->root.u.def.section->output_offset),
 			      htab->elf.sgot->contents + h->got.offset);
 		  rel.r_info = ELF32_R_INFO (0, R_386_IRELATIVE);
+		  relative_reloc_name = "R_386_IRELATIVE";
 		}
 	      else
 		goto do_glob_dat;
@@ -3844,6 +3874,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 	{
 	  BFD_ASSERT((h->got.offset & 1) != 0);
 	  rel.r_info = ELF32_R_INFO (0, R_386_RELATIVE);
+	  relative_reloc_name = "R_386_RELATIVE";
 	}
       else
 	{
@@ -3853,6 +3884,11 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		      htab->elf.sgot->contents + h->got.offset);
 	  rel.r_info = ELF32_R_INFO (h->dynindx, R_386_GLOB_DAT);
 	}
+
+      if (relative_reloc_name != NULL
+	  && htab->params->report_relative_reloc)
+	_bfd_x86_elf_link_report_relative_reloc
+	  (info, relgot, h, sym, relative_reloc_name, &rel);
 
       elf_append_rel (output_bfd, relgot, &rel);
     }

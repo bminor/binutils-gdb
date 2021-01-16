@@ -1,3 +1,18 @@
+2021-01-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-linker-x86.h (elf_linker_x86_params): Add
+	report_relative_reloc.
+	* elf32-i386.c (elf_i386_relocate_section): Call
+	_bfd_x86_elf_link_report_relative_reloc to report relative
+	relocations for -z report-relative-reloc.
+	(elf_i386_finish_dynamic_symbol): Likewse.
+	* elf64-x86-64.c (elf_x86_64_relocate_section): Likewse.
+	(elf_x86_64_finish_dynamic_symbol): Likewse.
+	* elfxx-x86.c (_bfd_x86_elf_link_report_relative_reloc): New
+	function.
+	* elfxx-x86.h (_bfd_x86_elf_link_report_relative_reloc): New
+	prototype.
+
 2021-01-16  Alan Modra  <amodra@gmail.com>
 
 	* compress.c (decompress_contents): Tidy inflateEnd result test.
