@@ -1,3 +1,7 @@
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-01-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* compile.c (memory_size): Move definition to top of file.

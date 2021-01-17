@@ -40,7 +40,6 @@ fi
 AC_SUBST(CC_FOR_BUILD)
 
 AC_SUBST(CFLAGS)
-AC_SUBST(HDEFINES)
 AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB
@@ -134,8 +133,6 @@ AC_PLUGINS
 AM_CONDITIONAL(PLUGINS, test "$plugins" = yes)
 LT_INIT([dlopen])
 AC_SUBST(lt_cv_dlopen_libs)
-
-. ${srcdir}/../../bfd/configure.host
 
 dnl Standard (and optional) simulator options.
 dnl Eventually all simulators will support these.

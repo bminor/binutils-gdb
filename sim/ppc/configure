@@ -652,7 +652,6 @@ sim_line_nr
 sim_warnings
 RANLIB
 AR
-HDEFINES
 CFLAGS_FOR_BUILD
 CC_FOR_BUILD
 LIBOBJS
@@ -6899,8 +6898,6 @@ fi
   fi
 
 
-. ${srcdir}/../../bfd/configure.host
-
 case ${host} in
   *mingw32*)
 
@@ -7755,7 +7752,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
 
 
 

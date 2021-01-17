@@ -626,8 +626,6 @@ AM_ZLIB
 # BFD uses libdl when when plugins enabled.
 AC_PLUGINS
 
-. ${srcdir}/../../bfd/configure.host
-
 case ${host} in
   *mingw32*)
     AC_DEFINE(USE_WIN32API, 1,
@@ -835,7 +833,6 @@ AC_EXEEXT
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 AC_SUBST(CFLAGS)
-AC_SUBST(HDEFINES)
 AR=${AR-ar}
 AC_SUBST(AR)
 AC_PROG_RANLIB

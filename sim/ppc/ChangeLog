@@ -1,3 +1,12 @@
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (STD_CFLAGS): Delete $(HDEFINES) $(TDEFINES).
+	(NOWARN_CFLAGS): Likewise.
+	(HDEFINES, TDEFINES): Delete.
+	* configure.ac: Delete AC_SUBST(HDEFINES) and bfd/configure.host
+	sourcing.
+	* configure: Regenerate.
+
 2021-01-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (version.c): Simplifiy args and call move-if-change.

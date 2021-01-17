@@ -5023,8 +5023,6 @@ ac_script='s/[\\$]/&&/g;s/;s,x,x,$//'
 program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 
 
-. ${srcdir}/../../bfd/configure.host
-
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 

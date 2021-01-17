@@ -28,8 +28,6 @@ fi
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
-. ${srcdir}/../../bfd/configure.host
-
 AC_CONFIG_HEADER(config.h:config.in)
 
 # NB: You can assume C11 headers exist.

@@ -1,3 +1,8 @@
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Delete bfd/configure.host sourcing.
+	* configure: Regenerate.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CHECK_HEADERS): Delete stdlib.h, string.h, and

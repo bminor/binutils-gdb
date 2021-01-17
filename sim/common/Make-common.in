@@ -93,9 +93,6 @@ WERROR_CFLAGS = @WERROR_CFLAGS@
 SIM_WARN_CFLAGS = $(WARN_CFLAGS)
 SIM_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
-HDEFINES = @HDEFINES@
-TDEFINES =
-
 AR = @AR@
 AR_FLAGS = rc
 RANLIB = @RANLIB@
@@ -230,8 +227,7 @@ CONFIG_CFLAGS = \
 	$(SIM_WARN_CFLAGS) \
 	$(SIM_WERROR_CFLAGS) \
 	$(SIM_HARDWARE) \
-	$(SIM_EXTRA_CFLAGS) \
-	$(HDEFINES) $(TDEFINES)
+	$(SIM_EXTRA_CFLAGS)
 CSEARCH = -I. -I$(srcdir) -I../common -I$(srccom) \
   -I../../include -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \

@@ -1,3 +1,8 @@
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (HDEFINES): Delete AC_SUBST call.
+	* configure: Regenerate.
+
 2021-02-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt (sim_arch): Add entry for riscv*-*-*.
@@ -1426,5 +1431,3 @@ Mon Feb  8 11:46:06 1993  Steve Chamberlain  (sac@thepub.cygnus.com)
 
 	* Makefile.in, configure.in: if target isn't supported, build a
 	harmless makefile.
-
-

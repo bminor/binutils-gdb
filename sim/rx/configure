@@ -681,7 +681,6 @@ PACKAGE
 C_DIALECT
 RANLIB
 AR
-HDEFINES
 CC_FOR_BUILD
 INSTALL_DATA
 INSTALL_SCRIPT
@@ -6903,7 +6902,15 @@ fi
 test -z "$AR" && AR=ar
 if test -n "$plugin_option"; then
   if $AR --help 2>&1 | grep -q "\--plugin"; then
-    AR="$AR $plugin_option"
+    touch conftest.c
+    $AR $plugin_option rc conftest.a conftest.c
+    if test "$?" != 0; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Failed: $AR $plugin_option rc" >&5
+$as_echo "$as_me: WARNING: Failed: $AR $plugin_option rc" >&2;}
+    else
+      AR="$AR $plugin_option"
+    fi
+    rm -f conftest.*
   fi
 fi
 test -z "$AR_FLAGS" && AR_FLAGS=cru
@@ -8560,7 +8567,6 @@ if test -z "$CC_FOR_BUILD"; then
     CC_FOR_BUILD=gcc
   fi
 fi
-
 
 
 
@@ -12927,7 +12933,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12930 "configure"
+#line 12936 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13033,7 +13039,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13036 "configure"
+#line 13042 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13271,8 +13277,6 @@ CC="$lt_save_CC"
 
 
 
-
-. ${srcdir}/../../bfd/configure.host
 
 
 
