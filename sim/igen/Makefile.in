@@ -167,6 +167,7 @@ Makefile: Makefile.in config.status
 config.status: configure
 	$(SHELL) ./config.status --recheck
 
+check:
 install:
 install-strip:
 #

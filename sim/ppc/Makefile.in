@@ -879,6 +879,8 @@ stamp-h: config.in config.status
 config.status: configure
 	$(SHELL) ./config.status --recheck
 
+check:
+
 install: installdirs
 	n=`echo run | sed '$(program_transform_name)'`; \
 	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)

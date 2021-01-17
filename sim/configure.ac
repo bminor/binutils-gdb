@@ -1,13 +1,19 @@
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Makefile.in)
-AC_CONFIG_MACRO_DIRS([.. ../config])
+dnl NB: The version here is not used.  If gdb ever changes from generating its
+dnl version at build time to autoconf time (like bfd et al do), we can switch.
+AC_INIT([sim], [0],
+  [https://sourceware.org/bugzilla/enter_bug.cgi?product=gdb&component=sim],
+  [], [https://sourceware.org/gdb/wiki/Sim/])
+
+AC_CANONICAL_SYSTEM
+
+AM_INIT_AUTOMAKE
 
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(RANLIB, ranlib, :)
 
-AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 AC_PROG_CC
 AC_PROG_CPP

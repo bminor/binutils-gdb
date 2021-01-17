@@ -1,3 +1,7 @@
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (check): Define.
+
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
@@ -4329,4 +4333,3 @@ Wed May 29 22:57:40 1996  Andrew Cagney  <cagney@kremvax.highland.com.au>
 
 	* ChangeLog.00, ChangeLog: ChangeLog from gdb-4.16 becomes
 	ChangeLog.00
-

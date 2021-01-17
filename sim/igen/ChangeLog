@@ -1,3 +1,7 @@
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (check): Define.
+
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (filter_filename.o): Delete unused target.
