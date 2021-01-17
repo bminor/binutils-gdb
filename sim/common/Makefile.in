@@ -82,7 +82,7 @@ headers:
 	rootme=`pwd` ; \
 	cd $(srcdir) ; \
 	rm -f nltvals.new ; \
-	$(SHELL) $(abs_srcdir)/gennltvals.sh $(SHELL) $(srcroot) "$(CPP_FOR_TARGET)" > nltvals.new ; \
+	$(SHELL) $(abs_srcdir)/gennltvals.sh --cpp "$(CPP_FOR_TARGET)" --srcroot $(srcroot) --output nltvals.new ; \
 	$(SHELL) $(srcroot)/move-if-change nltvals.new nltvals.def
 
 .c.o:
