@@ -1,3 +1,12 @@
+2021-01-18  Alan Modra  <amodra@gmail.com>
+
+	PR 27198
+	* config/tc-i386.c (need_plt32_p): Return FALSE for NULL symbol.
+	* testsuite/gas/i386/pr27198.d,
+	* gas/testsuite/gas/i386/pr27198.err,
+	* gas/testsuite/gas/i386/pr27198.s: New test.
+	* gas/testsuite/gas/i386/i386.exp: Run it.
+
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c: Indent and GNU coding standards tidy,

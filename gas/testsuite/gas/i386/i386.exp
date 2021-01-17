@@ -1293,6 +1293,7 @@ if [gas_64_check] then {
 	}
 
     }
+    run_dump_test pr27198
 
     set ASFLAGS "$old_ASFLAGS --64"
 

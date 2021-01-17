@@ -8628,6 +8628,9 @@ need_plt32_p (symbolS *s)
   if (!object_64bit)
     return FALSE;
 
+  if (s == NULL)
+    return FALSE;
+
   /* Weak or undefined symbol need PLT32 relocation.  */
   if (S_IS_WEAK (s) || !S_IS_DEFINED (s))
     return TRUE;
