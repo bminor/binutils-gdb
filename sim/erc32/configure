@@ -8324,7 +8324,6 @@ done
 
 
 
-# autoconf.info says this should be called right after AC_INIT.
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 
@@ -12930,7 +12929,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12933 "configure"
+#line 12932 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13036,7 +13035,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13039 "configure"
+#line 13038 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
