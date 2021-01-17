@@ -1,5 +1,13 @@
 2021-01-18  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac: Call AC_PROG_CPP.
+	* configure: Regenerate.
+	* Makefile.in (abs_srcdir, srcroot, CPP): Define.
+	(nltvals): New target.
+	* README-HACKING: Change headers to nltvals.
+
+2021-01-18  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (headers): Change args to gennltvals.sh.
 	* gennltvals.sh: Rewrite from scratch.
 	* gentvals.sh: Delete.

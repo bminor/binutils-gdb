@@ -191,10 +191,10 @@ convenience):
 	$  cd /tmp/$$/build
 	$  /tmp/$$/devo/configure --target=d10v-elf
 
-In the sim/common directory rebuild the headers:
+In the sim/ directory rebuild the headers:
 
-	$  cd sim/common
-	$  make headers
+	$  cd sim/
+	$  make nltvals
 
 To add a new target:
 
