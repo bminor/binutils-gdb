@@ -1,5 +1,11 @@
 2021-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/23460
+	* testsuite/ld-plugin/lto.exp: Increase the max number of open
+	files to 20 for PR binutils/23460 test.
+
+2021-01-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23169
 	* testsuite/ld-ifunc/ifunc.exp: Replace pr23169c.rd with
 	pr23169a.rd for pr23169c and pr23169f.  Remove pr23169e tests.

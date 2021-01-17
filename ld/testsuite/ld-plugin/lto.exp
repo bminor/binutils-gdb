@@ -721,7 +721,7 @@ if { [at_least_gcc_version 4 7] } {
 	] \
     ]
     set exec_output [run_host_cmd "sh" \
-				  "-c \"ulimit -n 16; \
+				  "-c \"ulimit -n 20; \
 				   $ar -rc $plug_opt \
 				   tmpdir/libpr23460.a \
 				   tmpdir/pr23460a.o \
