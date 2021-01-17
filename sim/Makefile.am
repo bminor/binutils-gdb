@@ -16,13 +16,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
-ACLOCAL_AMFLAGS = -I.. -I../config
+ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 
 srcroot = $(srcdir)/..
 
 SUBDIRS = @subdirs@
 
 MOSTLYCLEANFILES = core
+
+COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
+LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
 # Generate nltvals.def for newlib/libgloss using devo and build tree.
 # This file is shipped with distributions so we build in the source dir.

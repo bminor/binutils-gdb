@@ -5,35 +5,10 @@ AC_INIT([sim], [0],
   [https://sourceware.org/bugzilla/enter_bug.cgi?product=gdb&component=sim],
   [], [https://sourceware.org/gdb/wiki/Sim/])
 
-AC_CANONICAL_SYSTEM
+SIM_AC_TOOLCHAIN
 
 AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE
-
-AC_PROG_CC
-AC_PROG_INSTALL
-AC_CHECK_TOOL(AR, ar)
-AC_CHECK_TOOL(RANLIB, ranlib, :)
-
-AC_ARG_PROGRAM
-AC_PROG_CC
-AC_PROG_CPP
-AC_SUBST(CFLAGS)
-AR=${AR-ar}
-AC_SUBST(AR)
-AC_PROG_RANLIB
-
-# Put a plausible default for CC_FOR_BUILD in Makefile.
-if test -z "$CC_FOR_BUILD"; then
-  if test "x$cross_compiling" = "xno"; then
-    CC_FOR_BUILD='$(CC)'
-  else
-    CC_FOR_BUILD=gcc
-  fi
-fi
-AC_SUBST(CC_FOR_BUILD)
-CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-${CFLAGS}}
-AC_SUBST(CFLAGS_FOR_BUILD)
 
 # If a cpu ever has more than one simulator to choose from, use
 # --enable-sim=... to choose.

@@ -1,3 +1,13 @@
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (ACLOCAL_AMFLAGS): Add -Im4.
+	(COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
+	* configure.ac: Replace toolchain calls with SIM_AC_TOOLCHAIN.
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Replace toolchain calls
+	with SIM_AC_TOOLCHAIN.
+	* m4/sim_ac_toolchain.m4: New file.
+	* aclocal.m4, configure, Makefile.in: Regenerate.
+
 2021-03-08  Tom Tromey  <tromey@adacore.com>
 
 	* aclocal.m4, configure, Makefile.in: Rebuild.

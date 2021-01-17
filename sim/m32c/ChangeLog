@@ -1,3 +1,7 @@
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
 2021-03-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (opc2c.o, safe-fgets.o): Call COMPILE_FOR_BUILD.

@@ -124,7 +124,9 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
-	$(top_srcdir)/../config/override.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/../config/override.m4 \
+	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -209,18 +211,22 @@ CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
+C_DIALECT = @C_DIALECT@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LDFLAGS = @LDFLAGS@
+LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LTLIBOBJS = @LTLIBOBJS@
@@ -297,10 +303,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
-ACLOCAL_AMFLAGS = -I.. -I../config
+ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@
 MOSTLYCLEANFILES = core site-srcdir.exp testrun.log testrun.sum
+COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
+LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
 # Tweak the site.exp so it works with plain `runtest` from user.
 EXTRA_DEJAGNU_SITE_CONFIG = site-srcdir.exp

@@ -1,3 +1,11 @@
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Call SIM_AC_TOOLCHAIN and AC_CONFIG_FILES.
+	(AC_PROG_INSTALL, AC_PROG_CC, AC_CANONICAL_SYSTEM, CC_FOR_BUILD,
+	CFLAGS_FOR_BUILD): Delete.
+	* aclocal.m4: New file.
+	* configure: Regenerate.
+
 2021-03-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (LDFLAGS_FOR_BUILD): Define.
