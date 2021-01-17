@@ -471,7 +471,6 @@ installdirs:
 	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(libdir)
 
 check:
-	cd ../testsuite && $(MAKE) check RUNTESTFLAGS="$(RUNTESTFLAGS)"
 
 info:
 clean-info:

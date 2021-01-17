@@ -1,3 +1,9 @@
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in: Removed.
+	* lib/sim-defs.exp (sim): Update default path.
+	* local.mk: New file based on Makefile.in.
+
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (arch): Delete.

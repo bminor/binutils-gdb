@@ -1,3 +1,7 @@
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (check): Delete body.
+
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (SIM_EXTRA_LIBDEPS): Delete.

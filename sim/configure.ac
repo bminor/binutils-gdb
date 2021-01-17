@@ -152,5 +152,5 @@ if test "${enable_sim}" != no; then
   fi
 fi
 
-AC_CONFIG_FILES([Makefile testsuite/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

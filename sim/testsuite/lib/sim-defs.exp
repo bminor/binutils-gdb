@@ -106,7 +106,7 @@ proc sim_run { prog sim_opts prog_opts redir options } {
 	# These global variables come from generated site.exp.
 	global objdir
 	global arch
-	set sim "$objdir/../$arch/run"
+	set sim "$objdir/$arch/run"
     }
 
     if [is_remote host] {

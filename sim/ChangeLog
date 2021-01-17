@@ -1,5 +1,12 @@
 2021-03-07  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure.ac (AC_CONFIG_FILES): Delete testsuite/Makefile.
+	* Makefile.am: Include testsuite/local.mk.
+	(AUTOMAKE_OPTIONS): Add dejagnu.
+	* configure, Makefile.in: Regenerated.
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.am: New file.
 	* configure.ac: Update AC_INIT call.  Move AC_CANONICAL_SYSTEM after
 	it.  Call AM_INIT_AUTOMAKE.  Delete AC_CONFIG_MACRO_DIRS.
