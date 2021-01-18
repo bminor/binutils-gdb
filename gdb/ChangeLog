@@ -1,3 +1,18 @@
+2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* remote.c (class remote_target)
+	<remote_unpack_thread_info_response,
+	parse_threadlist_response>: Constify parameter and/or return
+	value and or local variable.
+	(stub_unpack_int): Likewise.
+	(unpack_nibble): Likewise.
+	(unpack_byte): Likewise.
+	(unpack_int): Likewise.
+	(unpack_string): Likewise.
+	(unpack_threadid): Likewise.
+	(remote_target::remote_unpack_thread_info_response): Likewise.
+	(remote_target::parse_threadlist_response): Likewise.
+
 2021-01-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tui/tui.c (tui_is_window_visible): Compare to nullptr, not 0.
