@@ -1,5 +1,13 @@
 2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* remote.c (class remote_target):
+	<add_current_inferior_and_thread>: Constify parameter.
+	(stop_reply_extract_thread): Likewise.
+	(remote_target::get_current_thread): Likewise.
+	(remote_target::add_current_inferior_and_thread): Likewise.
+
+2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* remote.c (class remote_target)
 	<remote_unpack_thread_info_response,
 	parse_threadlist_response>: Constify parameter and/or return

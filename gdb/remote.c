@@ -737,7 +737,7 @@ public: /* Remote specific methods.  */
   int remote_resume_with_vcont (ptid_t ptid, int step,
 				gdb_signal siggnal);
 
-  void add_current_inferior_and_thread (char *wait_status);
+  void add_current_inferior_and_thread (const char *wait_status);
 
   ptid_t wait_ns (ptid_t ptid, struct target_waitstatus *status,
 		  target_wait_flags options);
@@ -784,7 +784,7 @@ public: /* Remote specific methods.  */
 				 int try_open_exec);
 
   ptid_t remote_current_thread (ptid_t oldpid);
-  ptid_t get_current_thread (char *wait_status);
+  ptid_t get_current_thread (const char *wait_status);
 
   void set_thread (ptid_t ptid, int gen);
   void set_general_thread (ptid_t ptid);
@@ -4351,7 +4351,7 @@ remote_target::send_interrupt_sequence ()
    and extract the PTID.  Returns NULL_PTID if not found.  */
 
 static ptid_t
-stop_reply_extract_thread (char *stop_reply)
+stop_reply_extract_thread (const char *stop_reply)
 {
   if (stop_reply[0] == 'T' && strlen (stop_reply) > 3)
     {
@@ -4391,7 +4391,7 @@ stop_reply_extract_thread (char *stop_reply)
    method avoids a roundtrip.  */
 
 ptid_t
-remote_target::get_current_thread (char *wait_status)
+remote_target::get_current_thread (const char *wait_status)
 {
   ptid_t ptid = null_ptid;
 
@@ -4418,7 +4418,7 @@ remote_target::get_current_thread (char *wait_status)
    in in WAIT_STATUS, which may be NULL.  */
 
 void
-remote_target::add_current_inferior_and_thread (char *wait_status)
+remote_target::add_current_inferior_and_thread (const char *wait_status)
 {
   struct remote_state *rs = get_remote_state ();
   bool fake_pid_p = false;
