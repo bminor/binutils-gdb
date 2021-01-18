@@ -1,5 +1,4 @@
 .*: Assembler messages:
-.*:2: Error: file number less than one
 .*:3: Error: missing string
 .*:4: Error: file table slot 1 is already occupied.*
 .*:8: Error: unassigned file number 3
@@ -9,7 +8,6 @@
 .*:19: Error: bad or irreducible absolute expression
 .*:23: Error: isa number less than zero
 .*:26: Error: bad or irreducible absolute expression
-.*:26: Error: file number less than one
 .*:27: Error: bad or irreducible absolute expression
 .*:28: Error: unknown .loc sub-directive `frobnitz'
 .*:29: Error: unknown .loc sub-directive `frobnitz'

@@ -551,7 +551,11 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   if (loc->line == 0)
     return;
   if (loc->filenum == 0 && DWARF2_LINE_VERSION < 5)
-    return;
+    {
+      dwarf_level = 5;
+      if (DWARF2_LINE_VERSION < 5)
+	return;
+    }
 
   /* Don't emit sequences of line symbols for the same line when the
      symbols apply to assembler code.  It is necessary to emit
@@ -1044,9 +1048,13 @@ dwarf2_directive_filename (void)
 
   if ((offsetT) num < 1 && DWARF2_LINE_VERSION < 5)
     {
-      as_bad (_("file number less than one"));
-      ignore_rest_of_line ();
-      return NULL;
+      dwarf_level = 5;
+      if (DWARF2_LINE_VERSION < 5)
+	{
+	  as_bad (_("file number less than one"));
+	  ignore_rest_of_line ();
+	  return NULL;
+	}
     }
 
   /* FIXME: Should we allow ".file <N>\n" as an expression meaning
@@ -1143,8 +1151,12 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
     {
       if (filenum != 0 || DWARF2_LINE_VERSION < 5)
 	{
-	  as_bad (_("file number less than one"));
-	  return;
+	  dwarf_level = 5;
+	  if (DWARF2_LINE_VERSION < 5)
+	    {
+	      as_bad (_("file number less than one"));
+	      return;
+	    }
 	}
     }
 
