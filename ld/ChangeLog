@@ -1,3 +1,11 @@
+2021-01-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27193
+	* testsuite/ld-i386/i386.exp: Run PR ld/27193 test.
+	* testsuite/ld-i386/pr27193.dd: New file.
+	* testsuite/ld-i386/pr27193a.o.bz2: Likewise.
+	* testsuite/ld-i386/pr27193b.s: Likewise.
+
 2021-01-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/23460
