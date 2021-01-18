@@ -209,7 +209,8 @@ proc run_test { repack } {
 				"start unknown"]
 	    set end_addr [get_hexadecimal_valueof \
 			      "$start_addr + sizeof (${full_var_name})" \
-			      "end unknown"]
+			      "end unknown" \
+			      "get end address of ${full_var_name}"]
 
 	    # The Fortran compiler can choose to either send a descriptor that
 	    # describes the array slice to the subroutine, or it can repack the
