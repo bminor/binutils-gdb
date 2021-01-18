@@ -277,6 +277,8 @@ typedef struct compat_x32_siginfo
 #define cpt_si_ptr _sifields._rt._sigval.sival_ptr
 #define cpt_si_addr _sifields._sigfault._addr
 #define cpt_si_addr_lsb _sifields._sigfault._addr_lsb
+#define cpt_si_lower _sifields._sigfault.si_addr_bnd._lower
+#define cpt_si_upper _sifields._sigfault.si_addr_bnd._upper
 #define cpt_si_band _sifields._sigpoll._band
 #define cpt_si_fd _sifields._sigpoll._fd
 
@@ -288,6 +290,10 @@ typedef struct compat_x32_siginfo
 #endif
 #ifndef si_overrun
 #define si_overrun si_timer2
+#endif
+
+#ifndef SEGV_BNDERR
+#define SEGV_BNDERR	3
 #endif
 
 /* The type of the siginfo object the kernel returns in
@@ -323,6 +329,13 @@ compat_siginfo_from_siginfo (compat_siginfo_t *to, const siginfo_t *from)
     {
       to->cpt_si_pid = from_ptrace.cpt_si_pid;
       to->cpt_si_uid = from_ptrace.cpt_si_uid;
+    }
+  else if (to->si_code == SEGV_BNDERR
+	   && to->si_signo == SIGSEGV)
+    {
+      to->cpt_si_addr = from_ptrace.cpt_si_addr;
+      to->cpt_si_lower = from_ptrace.cpt_si_lower;
+      to->cpt_si_upper = from_ptrace.cpt_si_upper;
     }
   else if (to->si_code < 0)
     {

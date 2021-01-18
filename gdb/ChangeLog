@@ -1,3 +1,11 @@
+2021-01-18  Tom de Vries  <tdevries@suse.de>
+
+	PR tdep/27172
+	* nat/amd64-linux-siginfo.c (cpt_si_lower, cpt_si_upper, SEGV_BNDERR):
+	New macro.
+	(compat_siginfo_from_siginfo): Copy cpt_si_lower and cpt_si_upper
+	for SEGV_BNDERR.
+
 2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* remote.c (class remote_target) <remote_hostio_send_command,
