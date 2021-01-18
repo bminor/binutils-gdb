@@ -1,3 +1,9 @@
+2021-01-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ifuncmain6pie.c: Remove non-JUMP_SLOT relocations
+	against foo in ifuncmod6.so.
+	* testsuite/ifuncmod6.c: Likewise.
+
 2021-01-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
