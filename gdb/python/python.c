@@ -1320,7 +1320,7 @@ gdbpy_print_stack (void)
 	      PyErr_Clear ();
 	    }
 	  else
-	    fprintf_filtered (gdb_stderr, "Python Exception %s %s: \n",
+	    fprintf_filtered (gdb_stderr, "Python Exception %s: %s\n",
 			      type.get (), msg.get ());
 	}
       catch (const gdb_exception &except)

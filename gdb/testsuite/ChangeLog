@@ -1,5 +1,10 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-framefilter.exp: Update expected results.
+	* gdb.python/python.exp: Update expected results.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.tui/scroll.exp: Tighten expected results.  Remove comment
 	about bug in GDB, update expected results, and add more tests.
 

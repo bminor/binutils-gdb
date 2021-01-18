@@ -1,5 +1,9 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/python.c (gdbpy_print_stack): Reformat an error message.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-interp.c (tui_command_line_handler): New function.
 	(tui_interp::resume): Register tui_command_line_handler as the
 	input_handler.
