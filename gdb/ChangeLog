@@ -1,5 +1,10 @@
 2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* remote.c (remote_target::start_remote): Move wait_status to
+	narrower scope.
+
+2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* remote.c (class remote_target):
 	<add_current_inferior_and_thread>: Constify parameter.
 	(stop_reply_extract_thread): Likewise.

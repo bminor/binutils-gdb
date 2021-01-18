@@ -4636,7 +4636,6 @@ remote_target::start_remote (int from_tty, int extended_p)
 {
   struct remote_state *rs = get_remote_state ();
   struct packet_config *noack_config;
-  char *wait_status = NULL;
 
   /* Signal other parts that we're going through the initial setup,
      and so things may not be stable yet.  E.g., we don't try to
@@ -4776,6 +4775,8 @@ remote_target::start_remote (int from_tty, int extended_p)
 
   if (!target_is_non_stop_p ())
     {
+      char *wait_status = NULL;
+
       if (rs->buf[0] == 'W' || rs->buf[0] == 'X')
 	{
 	  if (!extended_p)
@@ -4902,10 +4903,6 @@ remote_target::start_remote (int from_tty, int extended_p)
 	  rs->starting_up = 0;
 	  return;
 	}
-
-      /* In non-stop mode, any cached wait status will be stored in
-	 the stop reply queue.  */
-      gdb_assert (wait_status == NULL);
 
       /* Report all signals during attach/startup.  */
       pass_signals ({});
