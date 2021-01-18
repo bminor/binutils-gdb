@@ -1,3 +1,14 @@
+2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/27195
+	* dwarf2dbg.c (dwarf2_gen_line_info): Set dwarf_level to 5 if
+	needed.
+	(dwarf2_directive_filename): Likewise.
+	(dwarf2_directive_loc): Likewise.
+	* testsuite/gas/elf/dwarf-5-file0.d: Pass --gdwarf-3.
+	* testsuite/gas/lns/lns-diag-1.l: Remove the
+	"Error: file number less than one" errors.
+
 2021-01-18  Alan Modra  <amodra@gmail.com>
 
 	PR 27198
