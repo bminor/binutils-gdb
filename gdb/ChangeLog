@@ -1,3 +1,32 @@
+2021-02-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add corefile.h.
+	* gcore.c (struct gcore_collect_regset_section_cb_data): Moved
+	here from linux-tdep.c and given a new name.  Minor cleanups.
+	(gcore_collect_regset_section_cb): Likewise.
+	(gcore_collect_thread_registers): Likewise.
+	(gcore_build_thread_register_notes): Likewise.
+	(gcore_find_signalled_thread): Likewise.
+	* gcore.h (gcore_build_thread_register_notes): Declare.
+	(gcore_find_signalled_thread): Declare.
+	* fbsd-tdep.c: Add 'gcore.h' include.
+	(struct fbsd_collect_regset_section_cb_data): Delete.
+	(fbsd_collect_regset_section_cb): Delete.
+	(fbsd_collect_thread_registers): Delete.
+	(struct fbsd_corefile_thread_data): Delete.
+	(fbsd_corefile_thread): Delete.
+	(fbsd_make_corefile_notes): Call
+	gcore_build_thread_register_notes instead of the now deleted
+	FreeBSD code.
+	* linux-tdep.c: Add 'gcore.h' include.
+	(struct linux_collect_regset_section_cb_data): Delete.
+	(linux_collect_regset_section_cb): Delete.
+	(linux_collect_thread_registers): Delete.
+	(linux_corefile_thread): Call
+	gcore_build_thread_register_notes.
+	(find_signalled_thread): Delete.
+	(linux_make_corefile_notes): Call gcore_find_signalled_thread.
+
 2021-01-29  Tom de Vries  <tdevries@suse.de>
 
 	PR breakpoints/26063

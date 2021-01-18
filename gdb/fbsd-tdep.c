@@ -32,6 +32,7 @@
 
 #include "elf-bfd.h"
 #include "fbsd-tdep.h"
+#include "gcore.h"
 
 /* This enum is derived from FreeBSD's <sys/signal.h>.  */
 
@@ -583,129 +584,6 @@ find_signalled_thread (struct thread_info *info, void *data)
   return 0;
 }
 
-/* Structure for passing information from
-   fbsd_collect_thread_registers via an iterator to
-   fbsd_collect_regset_section_cb. */
-
-struct fbsd_collect_regset_section_cb_data
-{
-  fbsd_collect_regset_section_cb_data (const struct regcache *regcache,
-				       bfd *obfd,
-				       gdb::unique_xmalloc_ptr<char> &note_data,
-				       int *note_size,
-				       unsigned long lwp,
-				       gdb_signal stop_signal)
-    : regcache (regcache),
-      obfd (obfd),
-      note_data (note_data),
-      note_size (note_size),
-      lwp (lwp),
-      stop_signal (stop_signal)
-  {}
-
-  const struct regcache *regcache;
-  bfd *obfd;
-  gdb::unique_xmalloc_ptr<char> &note_data;
-  int *note_size;
-  unsigned long lwp;
-  enum gdb_signal stop_signal;
-  bool abort_iteration = false;
-};
-
-static void
-fbsd_collect_regset_section_cb (const char *sect_name, int supply_size,
-				int collect_size, const struct regset *regset,
-				const char *human_name, void *cb_data)
-{
-  char *buf;
-  struct fbsd_collect_regset_section_cb_data *data
-    = (struct fbsd_collect_regset_section_cb_data *) cb_data;
-
-  if (data->abort_iteration)
-    return;
-
-  gdb_assert (regset->collect_regset);
-
-  buf = (char *) xmalloc (collect_size);
-  regset->collect_regset (regset, data->regcache, -1, buf, collect_size);
-
-  /* PRSTATUS still needs to be treated specially.  */
-  if (strcmp (sect_name, ".reg") == 0)
-    data->note_data.reset (elfcore_write_prstatus
-			     (data->obfd, data->note_data.release (),
-			      data->note_size, data->lwp,
-			      gdb_signal_to_host (data->stop_signal),
-			      buf));
-  else
-    data->note_data.reset (elfcore_write_register_note
-			     (data->obfd, data->note_data.release (),
-			      data->note_size, sect_name, buf,
-			      collect_size));
-  xfree (buf);
-
-  if (data->note_data == NULL)
-    data->abort_iteration = true;
-}
-
-/* Records the thread's register state for the corefile note
-   section.  */
-
-static void
-fbsd_collect_thread_registers (const struct regcache *regcache,
-			       ptid_t ptid, bfd *obfd,
-			       gdb::unique_xmalloc_ptr<char> &note_data,
-			       int *note_size,
-			       enum gdb_signal stop_signal)
-{
-  fbsd_collect_regset_section_cb_data data (regcache, obfd, note_data,
-					    note_size, ptid.lwp (),
-					    stop_signal);
-
-  gdbarch_iterate_over_regset_sections (regcache->arch (),
-					fbsd_collect_regset_section_cb,
-					&data, regcache);
-}
-
-struct fbsd_corefile_thread_data
-{
-  fbsd_corefile_thread_data (struct gdbarch *gdbarch,
-			     bfd *obfd,
-			     gdb::unique_xmalloc_ptr<char> &note_data,
-			     int *note_size,
-			     gdb_signal stop_signal)
-    : gdbarch (gdbarch),
-      obfd (obfd),
-      note_data (note_data),
-      note_size (note_size),
-      stop_signal (stop_signal)
-  {}
-
-  struct gdbarch *gdbarch;
-  bfd *obfd;
-  gdb::unique_xmalloc_ptr<char> &note_data;
-  int *note_size;
-  enum gdb_signal stop_signal;
-};
-
-/* Records the thread's register state for the corefile note
-   section.  */
-
-static void
-fbsd_corefile_thread (struct thread_info *info,
-		      struct fbsd_corefile_thread_data *args)
-{
-  struct regcache *regcache;
-
-  regcache = get_thread_arch_regcache (info->inf->process_target (),
-				       info->ptid, args->gdbarch);
-
-  target_fetch_registers (regcache, -1);
-
-  fbsd_collect_thread_registers (regcache, info->ptid, args->obfd,
-				 args->note_data, args->note_size,
-				 args->stop_signal);
-}
-
 /* Return a byte_vector containing the contents of a core dump note
    for the target object of type OBJECT.  If STRUCTSIZE is non-zero,
    the data is prefixed with a 32-bit integer size to match the format
@@ -782,16 +660,17 @@ fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 	signalled_thr = curr_thr;
     }
 
-  fbsd_corefile_thread_data thread_args (gdbarch, obfd, note_data, note_size,
-					 signalled_thr->suspend.stop_signal);
-
-  fbsd_corefile_thread (signalled_thr, &thread_args);
+  gcore_build_thread_register_notes (gdbarch, signalled_thr,
+				     signalled_thr->suspend.stop_signal,
+				     obfd, &note_data, note_size);
   for (thread_info *thr : current_inferior ()->non_exited_threads ())
     {
       if (thr == signalled_thr)
 	continue;
 
-      fbsd_corefile_thread (thr, &thread_args);
+      gcore_build_thread_register_notes (gdbarch, thr,
+					 signalled_thr->suspend.stop_signal,
+					 obfd, &note_data, note_size);
     }
 
   /* Auxiliary vector.  */

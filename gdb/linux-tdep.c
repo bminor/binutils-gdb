@@ -39,6 +39,7 @@
 #include "gdb_regex.h"
 #include "gdbsupport/enum-flags.h"
 #include "gdbsupport/gdb_optional.h"
+#include "gcore.h"
 
 #include <ctype.h>
 
@@ -1597,104 +1598,6 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
     }
 }
 
-/* Structure for passing information from
-   linux_collect_thread_registers via an iterator to
-   linux_collect_regset_section_cb. */
-
-struct linux_collect_regset_section_cb_data
-{
-  linux_collect_regset_section_cb_data (struct gdbarch *gdbarch,
-					const struct regcache *regcache,
-					bfd *obfd,
-					gdb::unique_xmalloc_ptr<char> &note_data,
-					int *note_size,
-					unsigned long lwp,
-					gdb_signal stop_signal)
-    : gdbarch (gdbarch), regcache (regcache), obfd (obfd),
-      note_data (note_data), note_size (note_size), lwp (lwp),
-      stop_signal (stop_signal)
-  {}
-
-  struct gdbarch *gdbarch;
-  const struct regcache *regcache;
-  bfd *obfd;
-  gdb::unique_xmalloc_ptr<char> &note_data;
-  int *note_size;
-  unsigned long lwp;
-  enum gdb_signal stop_signal;
-  bool abort_iteration = false;
-};
-
-/* Callback for iterate_over_regset_sections that records a single
-   regset in the corefile note section.  */
-
-static void
-linux_collect_regset_section_cb (const char *sect_name, int supply_size,
-				 int collect_size, const struct regset *regset,
-				 const char *human_name, void *cb_data)
-{
-  struct linux_collect_regset_section_cb_data *data
-    = (struct linux_collect_regset_section_cb_data *) cb_data;
-  bool variable_size_section = (regset != NULL
-				&& regset->flags & REGSET_VARIABLE_SIZE);
-
-  if (!variable_size_section)
-    gdb_assert (supply_size == collect_size);
-
-  if (data->abort_iteration)
-    return;
-
-  gdb_assert (regset && regset->collect_regset);
-
-  /* This is intentionally zero-initialized by using std::vector, so
-     that any padding bytes in the core file will show as 0.  */
-  std::vector<gdb_byte> buf (collect_size);
-
-  regset->collect_regset (regset, data->regcache, -1, buf.data (),
-			  collect_size);
-
-  /* PRSTATUS still needs to be treated specially.  */
-  if (strcmp (sect_name, ".reg") == 0)
-    data->note_data.reset (elfcore_write_prstatus
-			     (data->obfd, data->note_data.release (),
-			      data->note_size, data->lwp,
-			      gdb_signal_to_host (data->stop_signal),
-			      buf.data ()));
-  else
-    data->note_data.reset (elfcore_write_register_note
-			   (data->obfd, data->note_data.release (),
-			    data->note_size, sect_name, buf.data (),
-			    collect_size));
-
-  if (data->note_data == NULL)
-    data->abort_iteration = true;
-}
-
-/* Records the thread's register state for the corefile note
-   section.  */
-
-static void
-linux_collect_thread_registers (const struct regcache *regcache,
-				ptid_t ptid, bfd *obfd,
-				gdb::unique_xmalloc_ptr<char> &note_data,
-				int *note_size,
-				enum gdb_signal stop_signal)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-
-  /* For remote targets the LWP may not be available, so use the TID.  */
-  long lwp = ptid.lwp ();
-  if (lwp == 0)
-    lwp = ptid.tid ();
-
-  linux_collect_regset_section_cb_data data (gdbarch, regcache, obfd, note_data,
-					     note_size, lwp, stop_signal);
-
-  gdbarch_iterate_over_regset_sections (gdbarch,
-					linux_collect_regset_section_cb,
-					&data, regcache);
-}
-
 /* Fetch the siginfo data for the specified thread, if it exists.  If
    there is no data, or we could not read it, return an empty
    buffer.  */
@@ -1746,22 +1649,16 @@ static void
 linux_corefile_thread (struct thread_info *info,
 		       struct linux_corefile_thread_data *args)
 {
-  struct regcache *regcache;
-
-  regcache = get_thread_arch_regcache (info->inf->process_target (),
-				       info->ptid, args->gdbarch);
-
-  target_fetch_registers (regcache, -1);
-  gdb::byte_vector siginfo_data = linux_get_siginfo_data (info, args->gdbarch);
-
-  linux_collect_thread_registers (regcache, info->ptid, args->obfd,
-				  args->note_data, args->note_size,
-				  args->stop_signal);
+  gcore_build_thread_register_notes (args->gdbarch, info, args->stop_signal,
+				     args->obfd, &args->note_data,
+				     args->note_size);
 
   /* Don't return anything if we got no register information above,
      such a core file is useless.  */
   if (args->note_data != NULL)
     {
+      gdb::byte_vector siginfo_data
+	= linux_get_siginfo_data (info, args->gdbarch);
       if (!siginfo_data.empty ())
 	args->note_data.reset (elfcore_write_note (args->obfd,
 						   args->note_data.release (),
@@ -1960,30 +1857,6 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   return 1;
 }
 
-/* Find the signalled thread.  In case there's more than one signalled
-   thread, prefer the current thread, if it is signalled.  If no
-   thread was signalled, default to the current thread, unless it has
-   exited, in which case return NULL.  */
-
-static thread_info *
-find_signalled_thread ()
-{
-  thread_info *curr_thr = inferior_thread ();
-  if (curr_thr->state != THREAD_EXITED
-      && curr_thr->suspend.stop_signal != GDB_SIGNAL_0)
-    return curr_thr;
-
-  for (thread_info *thr : current_inferior ()->non_exited_threads ())
-    if (thr->suspend.stop_signal != GDB_SIGNAL_0)
-      return thr;
-
-  /* Default to the current thread, unless it has exited.  */
-  if (curr_thr->state != THREAD_EXITED)
-    return curr_thr;
-
-  return nullptr;
-}
-
 /* Build the note section for a corefile, and return it in a malloc
    buffer.  */
 
@@ -2021,7 +1894,7 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   /* Like the kernel, prefer dumping the signalled thread first.
      "First thread" is what tools use to infer the signalled
      thread.  */
-  thread_info *signalled_thr = find_signalled_thread ();
+  thread_info *signalled_thr = gcore_find_signalled_thread ();
   gdb_signal stop_signal;
   if (signalled_thr != nullptr)
     stop_signal = signalled_thr->suspend.stop_signal;
