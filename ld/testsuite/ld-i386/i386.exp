@@ -245,6 +245,11 @@ set i386tests {
      "-melf_i386 -shared -Bsymbolic -z notext" ""
      "--32 -mx86-used-note=yes"
      { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
+    {"Build pr27193.so"
+     "-melf_i386 -shared" ""
+     "--32"
+     { pr27193a.o.bz2 pr27193b.s }
+     {{objdump {-dw} pr27193.dd}} "pr27193.so"}
 }
 
 proc iamcu_tests {} {

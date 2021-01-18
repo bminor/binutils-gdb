@@ -8126,8 +8126,12 @@ elf_create_symbuf (size_t symcount, Elf_Internal_Sym *isymbuf)
   if (indbuf == NULL)
     return NULL;
 
+  /* NB: When checking if 2 sections define the same set of local and
+     global symbols, ignore both undefined and section symbols in the
+     symbol table.  */
   for (ind = indbuf, i = 0; i < symcount; i++)
-    if (isymbuf[i].st_shndx != SHN_UNDEF)
+    if (isymbuf[i].st_shndx != SHN_UNDEF
+	&& ELF_ST_TYPE (isymbuf[i].st_info) != STT_SECTION)
       *ind++ = &isymbuf[i];
   indbufend = ind;
 

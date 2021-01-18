@@ -1,5 +1,13 @@
 2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/27193
+	* testsuite/ld-i386/i386.exp: Run PR ld/27193 test.
+	* testsuite/ld-i386/pr27193.dd: New file.
+	* testsuite/ld-i386/pr27193a.o.bz2: Likewise.
+	* testsuite/ld-i386/pr27193b.s: Likewise.
+
+2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/23169
 	* testsuite/ld-ifunc/ifunc.exp: Replace pr23169c.rd with
 	pr23169a.rd for pr23169c and pr23169f.  Remove pr23169e tests.
