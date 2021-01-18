@@ -1,3 +1,34 @@
+2021-03-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (SFILES): Add gcore-elf.c.
+	(HFILES_NO_SRCDIR): Add gcore-elf.h
+	* configure: Regenerate.
+	* configure.ac: Add gcore-elf.o to CONFIG_OBS if we have ELF
+	support.
+	* fbsd-tdep.c: Add 'gcore-elf.h' include.
+	(struct fbsd_collect_regset_section_cb_data): Delete.
+	(fbsd_collect_regset_section_cb): Delete.
+	(fbsd_collect_thread_registers): Delete.
+	(struct fbsd_corefile_thread_data): Delete.
+	(fbsd_corefile_thread): Delete.
+	(fbsd_make_corefile_notes): Call
+	gcore_elf_build_thread_register_notes instead of the now deleted
+	FreeBSD code.
+	* gcore-elf.c: New file, the content was moved here from
+	linux-tdep.c, functions were renamed and given minor cleanup.
+	* gcore-elf.h: New file.
+	* gcore.c (gcore_find_signalled_thread): Moved here from
+	linux-tdep.c and given a new name.  Minor cleanups.
+	* gcore.h (gcore_find_signalled_thread): Declare.
+	* linux-tdep.c: Add 'gcore.h' and 'gcore-elf.h' includes.
+	(struct linux_collect_regset_section_cb_data): Delete.
+	(linux_collect_regset_section_cb): Delete.
+	(linux_collect_thread_registers): Delete.
+	(linux_corefile_thread): Call
+	gcore_elf_build_thread_register_notes.
+	(find_signalled_thread): Delete.
+	(linux_make_corefile_notes): Call gcore_find_signalled_thread.
+
 2021-03-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27147

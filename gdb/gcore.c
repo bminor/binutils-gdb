@@ -579,6 +579,27 @@ gcore_memory_sections (bfd *obfd)
   return 1;
 }
 
+/* See gcore.h.  */
+
+thread_info *
+gcore_find_signalled_thread ()
+{
+  thread_info *curr_thr = inferior_thread ();
+  if (curr_thr->state != THREAD_EXITED
+      && curr_thr->suspend.stop_signal != GDB_SIGNAL_0)
+    return curr_thr;
+
+  for (thread_info *thr : current_inferior ()->non_exited_threads ())
+    if (thr->suspend.stop_signal != GDB_SIGNAL_0)
+      return thr;
+
+  /* Default to the current thread, unless it has exited.  */
+  if (curr_thr->state != THREAD_EXITED)
+    return curr_thr;
+
+  return nullptr;
+}
+
 void _initialize_gcore ();
 void
 _initialize_gcore ()

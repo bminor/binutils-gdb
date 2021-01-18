@@ -1191,6 +1191,7 @@ SFILES = \
 	dtrace-probe.c \
 	elfread.c \
 	f-exp.y \
+	gcore-elf.c \
 	gdb.c \
 	go-exp.y \
 	m2-exp.y \
@@ -1292,6 +1293,7 @@ HFILES_NO_SRCDIR = \
 	frame-unwind.h \
 	frv-tdep.h \
 	ft32-tdep.h \
+	gcore-elf.h \
 	gcore.h \
 	gdb_bfd.h \
 	gdb_curses.h \
