@@ -1,5 +1,15 @@
 2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* remote.c (class remote_target) <remote_hostio_send_command,
+	remote_hostio_parse_result>: Constify parameter.
+	(remote_hostio_parse_result): Likewise.
+	(remote_target::remote_hostio_send_command): Adjust.
+	(remote_target::remote_hostio_pread_vFile): Adjust.
+	(remote_target::fileio_readlink): Adjust.
+	(remote_target::fileio_fstat): Adjust.
+
+2021-01-18  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* remote.c (remote_target::start_remote): Move wait_status to
 	narrower scope.
 

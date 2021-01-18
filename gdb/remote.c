@@ -705,7 +705,7 @@ public: /* Remote specific methods.  */
 				 ULONGEST offset, int *remote_errno);
 
   int remote_hostio_send_command (int command_bytes, int which_packet,
-				  int *remote_errno, char **attachment,
+				  int *remote_errno, const char **attachment,
 				  int *attachment_len);
   int remote_hostio_set_filesystem (struct inferior *inf,
 				    int *remote_errno);
@@ -11969,8 +11969,8 @@ remote_buffer_add_int (char **buffer, int *left, ULONGEST value)
    -1 is returned, the other variables may not be initialized.  */
 
 static int
-remote_hostio_parse_result (char *buffer, int *retcode,
-			    int *remote_errno, char **attachment)
+remote_hostio_parse_result (const char *buffer, int *retcode,
+			    int *remote_errno, const char **attachment)
 {
   char *p, *p2;
 
@@ -12026,12 +12026,12 @@ remote_hostio_parse_result (char *buffer, int *retcode,
 
 int
 remote_target::remote_hostio_send_command (int command_bytes, int which_packet,
-					   int *remote_errno, char **attachment,
+					   int *remote_errno, const char **attachment,
 					   int *attachment_len)
 {
   struct remote_state *rs = get_remote_state ();
   int ret, bytes_read;
-  char *attachment_tmp;
+  const char *attachment_tmp;
 
   if (packet_support (which_packet) == PACKET_DISABLE)
     {
@@ -12242,7 +12242,7 @@ remote_target::remote_hostio_pread_vFile (int fd, gdb_byte *read_buf, int len,
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
-  char *attachment;
+  const char *attachment;
   int left = get_remote_packet_size ();
   int ret, attachment_len;
   int read_len;
@@ -12406,7 +12406,7 @@ remote_target::fileio_readlink (struct inferior *inf, const char *filename,
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
-  char *attachment;
+  const char *attachment;
   int left = get_remote_packet_size ();
   int len, attachment_len;
   int read_len;
@@ -12445,7 +12445,7 @@ remote_target::fileio_fstat (int fd, struct stat *st, int *remote_errno)
   char *p = rs->buf.data ();
   int left = get_remote_packet_size ();
   int attachment_len, ret;
-  char *attachment;
+  const char *attachment;
   struct fio_stat fst;
   int read_len;
 
