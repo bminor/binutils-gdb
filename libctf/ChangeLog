@@ -1,5 +1,11 @@
 2021-01-19  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (membadd): Transform ""-named members into
+	NULL-named ones.
+	* testsuite/libctf-regression/type-add-unnamed-struct*: New test.
+
+2021-01-19  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-lookup.c (ctf_lookup_by_name_internal): Do not return the
 	base type if looking up a nonexistent pointer type.
 	* testsuite/libctf-regression/pptrtab*: Test it.

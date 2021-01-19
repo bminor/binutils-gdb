@@ -2403,6 +2403,12 @@ membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
   if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
     return (ctf_set_errno (ctb->ctb_dict, EAGAIN));
 
+  /* Unnamed members in non-dynamic dicts have a name of "", while dynamic dicts
+     use NULL.  Adapt.  */
+
+  if (name[0] == 0)
+    name = NULL;
+
   if (name != NULL && (s = strdup (name)) == NULL)
     {
       free (dmd);
