@@ -184,24 +184,36 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 	     from resolving the type down to its base type and use that instead.
 	     This helps with cases where the CTF data includes "struct foo *"
 	     but not "foo_t *" and the user tries to access "foo_t *" in the
-	     debugger.  */
+	     debugger.
+
+	     There is extra complexity here because uninitialized elements in
+	     the pptrtab and ptrtab are set to zero, but zero (as the type ID
+	     meaning the unimplemented type) is a valid return type from
+	     ctf_lookup_by_name.  (Pointers to types are never of type 0, so
+	     this is unambiguous, just fiddly to deal with.)  */
 
 	  uint32_t idx = LCTF_TYPE_TO_INDEX (fp, type);
 	  int in_child = 0;
 
-	  ntype = type;
+	  ntype = CTF_ERR;
 	  if (child && idx <= child->ctf_pptrtab_len)
 	    {
 	      ntype = child->ctf_pptrtab[idx];
 	      if (ntype)
 		in_child = 1;
+	      else
+		ntype = CTF_ERR;
 	    }
 
-	  if (ntype == 0)
-	    ntype = fp->ctf_ptrtab[idx];
+	  if (ntype == CTF_ERR)
+	    {
+	      ntype = fp->ctf_ptrtab[idx];
+	      if (ntype == 0)
+		ntype = CTF_ERR;
+	    }
 
 	  /* Try resolving to its base type and check again.  */
-	  if (ntype == 0)
+	  if (ntype == CTF_ERR)
 	    {
 	      if (child)
 		ntype = ctf_type_resolve_unsliced (child, type);
@@ -213,16 +225,22 @@ ctf_lookup_by_name_internal (ctf_dict_t *fp, ctf_dict_t *child,
 
 	      idx = LCTF_TYPE_TO_INDEX (fp, ntype);
 
-	      ntype = 0;
+	      ntype = CTF_ERR;
 	      if (child && idx <= child->ctf_pptrtab_len)
 		{
 		  ntype = child->ctf_pptrtab[idx];
 		  if (ntype)
 		    in_child = 1;
+		  else
+		    ntype = CTF_ERR;
 		}
 
-	      if (ntype == 0)
-		ntype = fp->ctf_ptrtab[idx];
+	      if (ntype == CTF_ERR)
+		{
+		  ntype = fp->ctf_ptrtab[idx];
+		  if (ntype == 0)
+		    ntype = CTF_ERR;
+		}
 	      if (ntype == CTF_ERR)
 		goto notype;
 	    }
