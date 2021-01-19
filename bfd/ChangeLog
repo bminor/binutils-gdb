@@ -1,3 +1,16 @@
+2021-01-19  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (elf_hash_entry): New inline function.  Use
+	throughout to replace casts.
+	(branch_reloc_hash_match): Remove const from params.
+	(use_local_plt): New function.
+	(allocate_dynrelocs, ppc_build_one_stub, ppc_size_one_stub),
+	(build_global_entry_stubs_and_plt, ppc64_elf_relocate_section):
+	Use use_local_plt.
+	* elf32-ppc.c (use_local_plt): New function.
+	(allocate_dynrelocs, ppc_elf_relocate_section),
+	(write_global_sym_plt): Use use_local_plt.
+
 2021-01-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27193

@@ -3149,6 +3149,12 @@ ppc_elf_hash_entry (struct elf_link_hash_entry *ent)
   return (struct ppc_link_hash_entry *) ent;
 }
 
+static inline struct elf_link_hash_entry *
+elf_hash_entry (struct ppc_link_hash_entry *ent)
+{
+  return (struct elf_link_hash_entry *) ent;
+}
+
 /* ppc64 ELF linker hash table.  */
 
 struct ppc_link_hash_table
@@ -5656,10 +5662,10 @@ static bfd_boolean
 is_tls_get_addr (struct elf_link_hash_entry *h,
 		 struct ppc_link_hash_table *htab)
 {
-  return (h == (struct elf_link_hash_entry *) htab->tls_get_addr_fd
-	  || h == (struct elf_link_hash_entry *) htab->tga_desc_fd
-	  || h == (struct elf_link_hash_entry *) htab->tls_get_addr
-	  || h == (struct elf_link_hash_entry *) htab->tga_desc);
+  return (h == elf_hash_entry (htab->tls_get_addr_fd)
+	  || h == elf_hash_entry (htab->tga_desc_fd)
+	  || h == elf_hash_entry (htab->tls_get_addr)
+	  || h == elf_hash_entry (htab->tga_desc));
 }
 
 static bfd_boolean func_desc_adjust (struct elf_link_hash_entry *, void *);
@@ -7856,7 +7862,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		  if (tga_fd != NULL)
 		    {
 		      htab->tls_get_addr_fd = ppc_elf_hash_entry (opt_fd);
-		      tga = (struct elf_link_hash_entry *) htab->tls_get_addr;
+		      tga = elf_hash_entry (htab->tls_get_addr);
 		      if (opt != NULL && tga != NULL)
 			{
 			  tga->root.type = bfd_link_hash_indirect;
@@ -7917,12 +7923,12 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
    any of HASH1, HASH2, HASH3, or HASH4.  */
 
 static bfd_boolean
-branch_reloc_hash_match (const bfd *ibfd,
-			 const Elf_Internal_Rela *rel,
-			 const struct ppc_link_hash_entry *hash1,
-			 const struct ppc_link_hash_entry *hash2,
-			 const struct ppc_link_hash_entry *hash3,
-			 const struct ppc_link_hash_entry *hash4)
+branch_reloc_hash_match (bfd *ibfd,
+			 Elf_Internal_Rela *rel,
+			 struct ppc_link_hash_entry *hash1,
+			 struct ppc_link_hash_entry *hash2,
+			 struct ppc_link_hash_entry *hash3,
+			 struct ppc_link_hash_entry *hash4)
 {
   Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (ibfd);
   enum elf_ppc64_reloc_type r_type = ELF64_R_TYPE (rel->r_info);
@@ -7935,10 +7941,10 @@ branch_reloc_hash_match (const bfd *ibfd,
 
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
       h = elf_follow_link (h);
-      if (h == (struct elf_link_hash_entry *) hash1
-	  || h == (struct elf_link_hash_entry *) hash2
-	  || h == (struct elf_link_hash_entry *) hash3
-	  || h == (struct elf_link_hash_entry *) hash4)
+      if (h == elf_hash_entry (hash1)
+	  || h == elf_hash_entry (hash2)
+	  || h == elf_hash_entry (hash3)
+	  || h == elf_hash_entry (hash4))
 	return TRUE;
     }
   return FALSE;
@@ -9629,6 +9635,18 @@ ensure_undef_dynamic (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Choose whether to use htab->iplt or htab->pltlocal rather than the
+   usual htab->elf.splt section for a PLT entry.  */
+
+static inline
+bfd_boolean use_local_plt (struct bfd_link_info *info,
+			   struct elf_link_hash_entry *h)
+{
+  return (h == NULL
+	  || h->dynindx == -1
+	  || !elf_hash_table (info)->dynamic_sections_created);
+}
+
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 
@@ -9818,8 +9836,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       for (pent = h->plt.plist; pent != NULL; pent = pent->next)
 	if (pent->plt.refcount > 0)
 	  {
-	    if (!htab->elf.dynamic_sections_created
-		|| h->dynindx == -1)
+	    if (use_local_plt (info, h))
 	      {
 		if (h->type == STT_GNU_IFUNC)
 		  {
@@ -11703,9 +11720,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    abort ();
 
 	  plt = htab->elf.splt;
-	  if (!htab->elf.dynamic_sections_created
-	      || stub_entry->h == NULL
-	      || stub_entry->h->elf.dynindx == -1)
+	  if (use_local_plt (info, elf_hash_entry (stub_entry->h)))
 	    {
 	      if (stub_entry->symtype == STT_GNU_IFUNC)
 		plt = htab->elf.iplt;
@@ -11837,9 +11852,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	abort ();
 
       plt = htab->elf.splt;
-      if (!htab->elf.dynamic_sections_created
-	  || stub_entry->h == NULL
-	  || stub_entry->h->elf.dynindx == -1)
+      if (use_local_plt (info, elf_hash_entry (stub_entry->h)))
 	{
 	  if (stub_entry->symtype == STT_GNU_IFUNC)
 	    plt = htab->elf.iplt;
@@ -12208,9 +12221,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	abort ();
 
       plt = htab->elf.splt;
-      if (!htab->elf.dynamic_sections_created
-	  || stub_entry->h == NULL
-	  || stub_entry->h->elf.dynindx == -1)
+      if (use_local_plt (info, elf_hash_entry (stub_entry->h)))
 	{
 	  if (stub_entry->symtype == STT_GNU_IFUNC)
 	    plt = htab->elf.iplt;
@@ -12292,9 +12303,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (targ >= (bfd_vma) -2)
 	abort ();
       plt = htab->elf.splt;
-      if (!htab->elf.dynamic_sections_created
-	  || stub_entry->h == NULL
-	  || stub_entry->h->elf.dynindx == -1)
+      if (use_local_plt (info, elf_hash_entry (stub_entry->h)))
 	{
 	  if (stub_entry->symtype == STT_GNU_IFUNC)
 	    plt = htab->elf.iplt;
@@ -14061,8 +14070,7 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 	asection *plt, *relplt;
 	bfd_byte *loc;
 
-	if (!htab->elf.dynamic_sections_created
-	    || h->dynindx == -1)
+	if (use_local_plt (info, h))
 	  {
 	    if (!(h->def_regular
 		  && (h->root.type == bfd_link_hash_defined
@@ -14151,8 +14159,7 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 
 	p = s->contents + h->root.u.def.value;
 	plt = htab->elf.splt;
-	if (!htab->elf.dynamic_sections_created
-	    || h->dynindx == -1)
+	if (use_local_plt (info, h))
 	  {
 	    if (h->type == STT_GNU_IFUNC)
 	      plt = htab->elf.iplt;
@@ -16490,9 +16497,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      bfd_vma got;
 
 		      plt = htab->elf.splt;
-		      if (!htab->elf.dynamic_sections_created
-			  || h == NULL
-			  || h->elf.dynindx == -1)
+		      if (use_local_plt (info, elf_hash_entry (h)))
 			{
 			  if (h != NULL
 			      ? h->elf.type == STT_GNU_IFUNC
