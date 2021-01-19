@@ -149,20 +149,20 @@ gen_arch() {
 
 gen_arches() {
   gen_arch bfin
-  gen_arch d10v newlib/libc/sys/d10v/sys
   gen_arch cr16 libgloss/cr16/sys
+  gen_arch d10v newlib/libc/sys/d10v/sys
   gen_arch fr30
   gen_arch frv
   gen_arch i960 libgloss/i960
+  gen_arch lm32
   gen_arch m32r
   gen_arch mcore libgloss/mcore
   gen_arch mn10200
   gen_arch mn10300
   gen_arch msp430
+  gen_arch pru
   gen_arch sparc
   gen_arch v850 libgloss/v850/sys
-  gen_arch lm32
-  gen_arch pru
 }
 
 # Process the script command line options.
