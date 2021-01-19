@@ -1,5 +1,11 @@
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* gennltvals.sh: Replace shell script with ...
+	* gennltvals.py: ... this Python script.
+	* nltvals.def: Regenerate.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* sim-watch.c (schedule_watchpoint): Change sizeof_pc to sizeof
 	sim_cia.
 	* sim-watch.h (struct _sim_watchpoints): Delete sizeof_pc.

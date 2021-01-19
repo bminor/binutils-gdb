@@ -232,7 +232,7 @@ config.status: configure
 # An alternative is to slurp in the tables at runtime.
 .PHONY: nltvals
 nltvals:
-	$(SHELL) $(abs_srcdir)/common/gennltvals.sh --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot) && \
+	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot) && \
 	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
 
 # Utility to run autoconf in each directory that uses the common framework.

@@ -1,5 +1,9 @@
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (nltvals): Change to gennltvals.py.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* README-HACKING: Delete reference to sizeof_pc.
 
 2021-01-29  Mike Frysinger  <vapier@gentoo.org>
