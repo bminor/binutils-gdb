@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 int
-main (int argc, char **argv)
+main (void)
 {
 #ifdef __x86_64__
   asm ("mov $10, %rax\n\t"
