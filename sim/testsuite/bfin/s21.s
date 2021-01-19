@@ -1,4 +1,3 @@
-// Copyright (c) 1997,1998,1999 Analog Devices Inc., All Rights Reserved
 //  Test  A0 = ROT    (A0 by imm6);
 # mach: bfin
 

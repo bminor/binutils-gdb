@@ -1,3 +1,7 @@
+2021-01-18  Mike Frysinger  <vapier@gentoo.org>
+
+	* s21.s: Delete accidental copyright line.
+
 2021-01-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* mdma-skel.h: Include stdlib.h.

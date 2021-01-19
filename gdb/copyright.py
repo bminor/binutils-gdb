@@ -287,7 +287,7 @@ NOT_FSF_LIST = (
     "sim/ppc/events.c", "sim/ppc/gen-idecode.h", "sim/ppc/emul_netbsd.c",
     "sim/ppc/igen.c", "sim/ppc/vm_n.h", "sim/ppc/vm.h",
     "sim/ppc/hw_iobus.c", "sim/ppc/inline.h",
-    "sim/testsuite/sim/bfin/s21.s", "sim/testsuite/sim/mips/mips32-dsp2.s",
+    "sim/testsuite/sim/mips/mips32-dsp2.s",
 )
 
 if __name__ == "__main__":
