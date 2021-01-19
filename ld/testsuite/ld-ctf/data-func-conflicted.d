@@ -14,9 +14,9 @@ Contents of CTF section \.ctf:
     Version: 4 \(CTF_VERSION_3\)
 #...
     Data object section:	.* \(0xc bytes\)
-    Function info section:	.* \(0x40 bytes\)
+    Function info section:	.* \(0x44 bytes\)
     Object index section:	.* \(0xc bytes\)
-    Type section:	.* \(0xe8 bytes\)
+    Type section:	.* \(0xf4 bytes\)
     String section:	.*
 #...
   Data objects:
