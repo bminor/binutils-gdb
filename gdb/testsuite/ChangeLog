@@ -1,5 +1,10 @@
 2021-01-19  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/step-over-syscall.exp: Detect and handle sysenter/int
+	sequence.
+
+2021-01-19  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.arch/i386-mpx.c (main): Drop argc/argv parameter.
 
 2021-01-18  Andrew Burgess  <andrew.burgess@embecosm.com>
