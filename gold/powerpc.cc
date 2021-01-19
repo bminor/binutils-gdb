@@ -3946,7 +3946,6 @@ Target_powerpc<size, big_endian>::do_plt_fde_location(const Output_data* plt,
       // See Output_data_glink::do_write() for glink contents.
       if (len == 0)
 	{
-	  gold_assert(parameters->doing_static_link());
 	  // Static linking may need stubs, to support ifunc and long
 	  // branches.  We need to create an output section for
 	  // .eh_frame early in the link process, to have a place to
