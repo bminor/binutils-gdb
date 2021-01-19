@@ -1,3 +1,7 @@
+2021-01-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (version.c): Simplifiy args and call move-if-change.
+
 2021-01-11  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Delete checks for stdlib.h, string.h,
