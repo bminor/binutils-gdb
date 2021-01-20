@@ -1,5 +1,9 @@
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* lib/tuiterm.exp: Rename _cur_x/_cur_y to _cur_col/_cur_row.
+
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* lib/tuiterm.exp: Add links in comments.
 
 2021-01-20  Tom de Vries  <tdevries@suse.de>

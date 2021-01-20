@@ -46,12 +46,16 @@ proc tuiterm_env_finish { } {
 }
 
 namespace eval Term {
+    # Size of the terminal.
     variable _rows
     variable _cols
+
+    # Buffer / contents of the terminal.
     variable _chars
 
-    variable _cur_x
-    variable _cur_y
+    # Position of the cursor.
+    variable _cur_col
+    variable _cur_row
 
     variable _attrs
 
@@ -94,33 +98,33 @@ namespace eval Term {
 
     # Backspace.
     proc _ctl_0x08 {} {
-	variable _cur_x
-	incr _cur_x -1
-	if {$_cur_x < 0} {
-	    variable _cur_y
+	variable _cur_col
+	incr _cur_col -1
+	if {$_cur_col < 0} {
+	    variable _cur_row
 	    variable _cols
-	    set _cur_x [expr {$_cols - 1}]
-	    incr _cur_y -1
-	    if {$_cur_y < 0} {
-		set _cur_y 0
+	    set _cur_col [expr {$_cols - 1}]
+	    incr _cur_row -1
+	    if {$_cur_row < 0} {
+		set _cur_row 0
 	    }
 	}
     }
 
     # Linefeed.
     proc _ctl_0x0a {} {
-	variable _cur_y
+	variable _cur_row
 	variable _rows
-	incr _cur_y 1
-	if {$_cur_y >= $_rows} {
+	incr _cur_row 1
+	if {$_cur_row >= $_rows} {
 	    error "FIXME scroll"
 	}
     }
 
     # Carriage return.
     proc _ctl_0x0d {} {
-	variable _cur_x
-	set _cur_x 0
+	variable _cur_col
+	set _cur_col 0
     }
 
     # Insert Character.
@@ -128,13 +132,13 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/ICH.html
     proc _csi_@ {args} {
 	set n [_default [lindex $args 0] 1]
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _chars
-	set in_x $_cur_x
-	set out_x [expr {$_cur_x + $n}]
+	set in_x $_cur_col
+	set out_x [expr {$_cur_col + $n}]
 	for {set i 0} {$i < $n} {incr i} {
-	    set _chars($out_x,$_cur_y) $_chars($in_x,$_cur_y)
+	    set _chars($out_x,$_cur_row) $_chars($in_x,$_cur_row)
 	    incr in_x
 	    incr out_x
 	}
@@ -144,82 +148,82 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/CUU.html
     proc _csi_A {args} {
-	variable _cur_y
+	variable _cur_row
 	set arg [_default [lindex $args 0] 1]
-	set _cur_y [expr {max ($_cur_y - $arg, 0)}]
+	set _cur_row [expr {max ($_cur_row - $arg, 0)}]
     }
 
     # Cursor Down.
     #
     # https://vt100.net/docs/vt510-rm/CUD.html
     proc _csi_B {args} {
-	variable _cur_y
+	variable _cur_row
 	variable _rows
 	set arg [_default [lindex $args 0] 1]
-	set _cur_y [expr {min ($_cur_y + $arg, $_rows)}]
+	set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
     }
 
     # Cursor Forward.
     #
     # https://vt100.net/docs/vt510-rm/CUF.html
     proc _csi_C {args} {
-	variable _cur_x
+	variable _cur_col
 	variable _cols
 	set arg [_default [lindex $args 0] 1]
-	set _cur_x [expr {min ($_cur_x + $arg, $_cols)}]
+	set _cur_col [expr {min ($_cur_col + $arg, $_cols)}]
     }
 
     # Cursor Backward.
     #
     # https://vt100.net/docs/vt510-rm/CUB.html
     proc _csi_D {args} {
-	variable _cur_x
+	variable _cur_col
 	set arg [_default [lindex $args 0] 1]
-	set _cur_x [expr {max ($_cur_x - $arg, 0)}]
+	set _cur_col [expr {max ($_cur_col - $arg, 0)}]
     }
 
     # Cursor Next Line.
     #
     # https://vt100.net/docs/vt510-rm/CNL.html
     proc _csi_E {args} {
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _rows
 	set arg [_default [lindex $args 0] 1]
-	set _cur_x 0
-	set _cur_y [expr {min ($_cur_y + $arg, $_rows)}]
+	set _cur_col 0
+	set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
     }
 
     # Cursor Previous Line.
     #
     # https://vt100.net/docs/vt510-rm/CPL.html
     proc _csi_F {args} {
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _rows
 	set arg [_default [lindex $args 0] 1]
-	set _cur_x 0
-	set _cur_y [expr {max ($_cur_y - $arg, 0)}]
+	set _cur_col 0
+	set _cur_row [expr {max ($_cur_row - $arg, 0)}]
     }
 
     # Cursor Horizontal Absolute.
     #
     # https://vt100.net/docs/vt510-rm/CHA.html
     proc _csi_G {args} {
-	variable _cur_x
+	variable _cur_col
 	variable _cols
 	set arg [_default [lindex $args 0] 1]
-	set _cur_x [expr {min ($arg - 1, $_cols)}]
+	set _cur_col [expr {min ($arg - 1, $_cols)}]
     }
 
     # Cursor Position.
     #
     # https://vt100.net/docs/vt510-rm/CUP.html
     proc _csi_H {args} {
-	variable _cur_x
-	variable _cur_y
-	set _cur_y [expr {[_default [lindex $args 0] 1] - 1}]
-	set _cur_x [expr {[_default [lindex $args 1] 1] - 1}]
+	variable _cur_col
+	variable _cur_row
+	set _cur_row [expr {[_default [lindex $args 0] 1] - 1}]
+	set _cur_col [expr {[_default [lindex $args 1] 1] - 1}]
     }
 
     # Cursor Horizontal Forward Tabulation.
@@ -227,11 +231,11 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/CHT.html
     proc _csi_I {args} {
 	set n [_default [lindex $args 0] 1]
-	variable _cur_x
+	variable _cur_col
 	variable _cols
-	incr _cur_x [expr {$n * 8 - $_cur_x % 8}]
-	if {$_cur_x >= $_cols} {
-	    set _cur_x [expr {$_cols - 1}]
+	incr _cur_col [expr {$n * 8 - $_cur_col % 8}]
+	if {$_cur_col >= $_cols} {
+	    set _cur_col [expr {$_cols - 1}]
 	}
     }
 
@@ -239,17 +243,17 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/ED.html
     proc _csi_J {args} {
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _rows
 	variable _cols
 	set arg [_default [lindex $args 0] 0]
 	if {$arg == 0} {
-	    _clear_in_line $_cur_x $_cols $_cur_y
-	    _clear_lines [expr {$_cur_y + 1}] $_rows
+	    _clear_in_line $_cur_col $_cols $_cur_row
+	    _clear_lines [expr {$_cur_row + 1}] $_rows
 	} elseif {$arg == 1} {
-	    _clear_lines 0 [expr {$_cur_y - 1}]
-	    _clear_in_line 0 $_cur_x $_cur_y
+	    _clear_lines 0 [expr {$_cur_row - 1}]
+	    _clear_in_line 0 $_cur_col $_cur_row
 	} elseif {$arg == 2} {
 	    _clear_lines 0 $_rows
 	}
@@ -259,17 +263,17 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/EL.html
     proc _csi_K {args} {
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _cols
 	set arg [_default [lindex $args 0] 0]
 	if {$arg == 0} {
 	    # From cursor to end.
-	    _clear_in_line $_cur_x $_cols $_cur_y
+	    _clear_in_line $_cur_col $_cols $_cur_row
 	} elseif {$arg == 1} {
-	    _clear_in_line 0 $_cur_x $_cur_y
+	    _clear_in_line 0 $_cur_col $_cur_row
 	} elseif {$arg == 2} {
-	    _clear_in_line 0 $_cols $_cur_y
+	    _clear_in_line 0 $_cols $_cur_row
 	}
     }
 
@@ -277,12 +281,12 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/DL.html
     proc _csi_M {args} {
-	variable _cur_y
+	variable _cur_row
 	variable _rows
 	variable _cols
 	variable _chars
 	set count [_default [lindex $args 0] 1]
-	set y $_cur_y
+	set y $_cur_row
 	set next_y [expr {$y + 1}]
 	while {$count > 0 && $next_y < $_rows} {
 	    for {set x 0} {$x < $_cols} {incr x} {
@@ -301,14 +305,14 @@ namespace eval Term {
     proc _csi_X {args} {
 	set n [_default [lindex $args 0] 1]
 	# Erase characters but don't move cursor.
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _attrs
 	variable _chars
 	set lattr [array get _attrs]
-	set x $_cur_x
+	set x $_cur_col
 	for {set i 0} {$i < $n} {incr i} {
-	    set _chars($x,$_cur_y) [list " " $lattr]
+	    set _chars($x,$_cur_row) [list " " $lattr]
 	    incr x
 	}
     }
@@ -318,8 +322,8 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/CBT.html
     proc _csi_Z {args} {
 	set n [_default [lindex $args 0] 1]
-	variable _cur_x
-	set _cur_x [expr {max (int (($_cur_x - 1) / 8) * 8 - ($n - 1) * 8, 0)}]
+	variable _cur_col
+	set _cur_col [expr {max (int (($_cur_col - 1) / 8) * 8 - ($n - 1) * 8, 0)}]
     }
 
     # Repeat.
@@ -335,8 +339,8 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/VPA.html
     proc _csi_d {args} {
-	variable _cur_y
-	set _cur_y [expr {[_default [lindex $args 0] 1] - 1}]
+	variable _cur_row
+	set _cur_row [expr {[_default [lindex $args 0] 1] - 1}]
     }
 
     # Select Graphic Rendition.
@@ -393,20 +397,20 @@ namespace eval Term {
     # Insert string at the cursor location.
     proc _insert {str} {
 	verbose "INSERT <<$str>>"
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _rows
 	variable _cols
 	variable _attrs
 	variable _chars
 	set lattr [array get _attrs]
 	foreach char [split $str {}] {
-	    set _chars($_cur_x,$_cur_y) [list $char $lattr]
-	    incr _cur_x
-	    if {$_cur_x >= $_cols} {
-		set _cur_x 0
-		incr _cur_y
-		if {$_cur_y >= $_rows} {
+	    set _chars($_cur_col,$_cur_row) [list $char $lattr]
+	    incr _cur_col
+	    if {$_cur_col >= $_cols} {
+		set _cur_col 0
+		incr _cur_row
+		if {$_cur_row >= $_rows} {
 		    error "FIXME scroll"
 		}
 	    }
@@ -420,15 +424,15 @@ namespace eval Term {
 
 	variable _rows
 	variable _cols
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 	variable _attrs
 	variable _resize_count
 
 	set _rows $rows
 	set _cols $cols
-	set _cur_x 0
-	set _cur_y 0
+	set _cur_col 0
+	set _cur_row 0
 	set _resize_count 0
 	array set _attrs {
 	    intensity normal
@@ -447,8 +451,8 @@ namespace eval Term {
     proc wait_for {wait_for} {
 	global expect_out
 	global gdb_prompt
-	variable _cur_x
-	variable _cur_y
+	variable _cur_col
+	variable _cur_row
 
 	set prompt_wait_for "$gdb_prompt \$"
 
@@ -487,9 +491,9 @@ namespace eval Term {
 	    # isn't reliable to check this only after an insertion,
 	    # because curses may make "unusual" redrawing decisions.
 	    if {$wait_for == "$prompt_wait_for"} {
-		set prev [get_line $_cur_y $_cur_x]
+		set prev [get_line $_cur_row $_cur_col]
 	    } else {
-		set prev [get_line $_cur_y]
+		set prev [get_line $_cur_row]
 	    }
 	    if {[regexp -- $wait_for $prev]} {
 		if {$wait_for == "$prompt_wait_for"} {
@@ -609,9 +613,9 @@ namespace eval Term {
 
     # Get the text just before the cursor.
     proc get_current_line {} {
-	variable _cur_x
-	variable _cur_y
-	return [get_line $_cur_y $_cur_x]
+	variable _cur_col
+	variable _cur_row
+	return [get_line $_cur_row $_cur_col]
     }
 
     # Helper function for check_box.  Returns empty string if the box
