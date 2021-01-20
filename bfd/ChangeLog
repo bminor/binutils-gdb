@@ -1,5 +1,11 @@
 2021-01-20  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c: Delete outdated comment.
+	(TARGET_KEEP_UNUSED_SECTION_SYMBOLS): Define.
+	* elf64-ppc.c (TARGET_KEEP_UNUSED_SECTION_SYMBOLS): Define.
+
+2021-01-20  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't assume
 	section symbols are present.
 

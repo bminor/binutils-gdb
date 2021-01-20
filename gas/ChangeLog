@@ -1,3 +1,9 @@
+2021-01-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/power4.d: Adjust for removal of section sym.
+	* testsuite/gas/ppc/test1elf32.d: Likewise.
+	* testsuite/gas/ppc/test1elf64.d: Likewise.
+
 2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/27195

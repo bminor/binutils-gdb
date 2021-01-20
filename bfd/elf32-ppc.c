@@ -19,11 +19,8 @@
    Free Software Foundation, Inc., 51 Franklin Street - Fifth Floor,
    Boston, MA 02110-1301, USA.  */
 
-
-/* This file is based on a preliminary PowerPC ELF ABI.  The
-   information may not match the final PowerPC ELF ABI.  It includes
-   suggestions from the in-progress Embedded PowerPC ABI, and that
-   information may also not match.  */
+/* Don't generate unused section symbols.  */
+#define TARGET_KEEP_UNUSED_SECTION_SYMBOLS FALSE
 
 #include "sysdep.h"
 #include <stdarg.h>

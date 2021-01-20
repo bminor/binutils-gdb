@@ -1,3 +1,23 @@
+2021-01-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/relbrlt.s: Make symbols global.
+	* testsuite/ld-powerpc/relbrlt.d: Adjust to suit.
+	* testsuite/ld-powerpc/tlsget.d: Adjust for reordered stubs.
+	* testsuite/ld-powerpc/tlsget.wf: Likewise.
+	* testsuite/ld-powerpc/tlsget2.d: Likewise.
+	* testsuite/ld-powerpc/tlsget2.wf: Likewise.
+	* testsuite/ld-powerpc/tlsexe.r: Adjust for removed section syms.
+	* testsuite/ld-powerpc/tlsexe32.r: Likewise.
+	* testsuite/ld-powerpc/tlsexe32no.r: Likewise.
+	* testsuite/ld-powerpc/tlsexeno.r: Likewise.
+	* testsuite/ld-powerpc/tlsexenors.r: Likewise.
+	* testsuite/ld-powerpc/tlsexers.r: Likewise.
+	* testsuite/ld-powerpc/tlsexetoc.r: Likewise.
+	* testsuite/ld-powerpc/tlsexetocrs.r: Likewise.
+	* testsuite/ld-powerpc/tlsso.r: Likewise.
+	* testsuite/ld-powerpc/tlsso32.r: Likewise.
+	* testsuite/ld-powerpc/tlstocso.r: Likewise.
+
 2021-01-19  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/data-func-2.c: Stop removal of the extern foo_t
