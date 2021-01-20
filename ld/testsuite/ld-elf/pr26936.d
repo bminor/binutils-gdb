@@ -7,11 +7,9 @@
 #target: [check_shared_lib_support]
 # Assembly source file for the HPPA assembler is renamed and modifed by
 # sed.  mn10300 and riscv put different numbers of local symbols in
-# linkonce section and comdat sections.  Some MIPS targets put section
-# names in symbol table.  xtensa has more than one member in comdat
-# groups.
-#xfail: am33_2.0-*-* hppa*-*-hpux* mips*-*-elf mips*-*-irix*
-#xfail: mn10300-*-* tx39*-*-* riscv*-*-* xtensa*-*-*
+# linkonce section and comdat sections.  xtensa has more than one member
+# in comdat groups.
+#xfail: am33_2.0-*-* hppa*-*-hpux* mn10300-*-* riscv*-*-* xtensa*-*-*
 
 #...
 CU: .*/pr26936c.s:
