@@ -398,6 +398,35 @@ x86_target::low_cannot_fetch_register (int regno)
 }
 
 static void
+collect_register_i386 (struct regcache *regcache, int regno, void *buf)
+{
+  collect_register (regcache, regno, buf);
+
+#ifdef __x86_64__
+  /* In case of x86_64 -m32, collect_register only writes 4 bytes, but the
+     space reserved in buf for the register is 8 bytes.  Make sure the entire
+     reserved space is initialized.  */
+
+  gdb_assert (register_size (regcache->tdesc, regno) == 4);
+
+  if (regno == RAX)
+    {
+      /* Sign extend EAX value to avoid potential syscall restart
+	 problems.
+
+	 See amd64_linux_collect_native_gregset() in
+	 gdb/amd64-linux-nat.c for a detailed explanation.  */
+      *(int64_t *) buf = *(int32_t *) buf;
+    }
+  else
+    {
+      /* Zero-extend.  */
+      *(uint64_t *) buf = *(uint32_t *) buf;
+    }
+#endif
+}
+
+static void
 x86_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
@@ -411,32 +440,14 @@ x86_fill_gregset (struct regcache *regcache, void *buf)
 
       return;
     }
-
-  /* 32-bit inferior registers need to be zero-extended.
-     Callers would read uninitialized memory otherwise.  */
-  memset (buf, 0x00, X86_64_USER_REGS * 8);
 #endif
 
   for (i = 0; i < I386_NUM_REGS; i++)
-    collect_register (regcache, i, ((char *) buf) + i386_regmap[i]);
+    collect_register_i386 (regcache, i, ((char *) buf) + i386_regmap[i]);
 
-  collect_register_by_name (regcache, "orig_eax",
-			    ((char *) buf) + ORIG_EAX * REGSIZE);
-
-#ifdef __x86_64__
-  /* Sign extend EAX value to avoid potential syscall restart
-     problems. 
-
-     See amd64_linux_collect_native_gregset() in gdb/amd64-linux-nat.c
-     for a detailed explanation.  */
-  if (register_size (regcache->tdesc, 0) == 4)
-    {
-      void *ptr = ((gdb_byte *) buf
-		   + i386_regmap[find_regno (regcache->tdesc, "eax")]);
-
-      *(int64_t *) ptr = *(int32_t *) ptr;
-    }
-#endif
+  /* Handle ORIG_EAX, which is not in i386_regmap.  */
+  collect_register_i386 (regcache, find_regno (regcache->tdesc, "orig_eax"),
+			 ((char *) buf) + ORIG_EAX * REGSIZE);
 }
 
 static void
