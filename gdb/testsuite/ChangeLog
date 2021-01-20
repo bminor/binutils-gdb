@@ -1,5 +1,10 @@
 2021-01-20  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.python/py-format-string.exp: Allow Deriv+$decimal as vtable
+	offset.
+
+2021-01-20  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (skip_rust_tests): Skip if multilib_flags contains -m32.
 
 2021-01-20  Sergio Durigan Junior  <sergiodj@sergiodj.net>
