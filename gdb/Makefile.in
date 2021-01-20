@@ -729,6 +729,7 @@ ALL_TARGET_OBS = \
 	arm-fbsd-tdep.o \
 	arm-linux-tdep.o \
 	arm-netbsd-tdep.o \
+	arm-none-tdep.o \
 	arm-obsd-tdep.o \
 	arm-pikeos-tdep.o \
 	arm-tdep.o \
@@ -2163,6 +2164,7 @@ ALLDEPFILES = \
 	arm-linux-tdep.c \
 	arm-netbsd-nat.c \
 	arm-netbsd-tdep.c \
+	arm-none-tdep.c \
 	arm-obsd-tdep.c \
 	arm-tdep.c \
 	avr-tdep.c \

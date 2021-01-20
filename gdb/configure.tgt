@@ -65,7 +65,8 @@ arc*-*-*)
 
 arm*-*-*)
 	cpu_obs="aarch32-tdep.o arch/aarch32.o arch/arm.o \
-		 arch/arm-get-next-pcs.o arm-tdep.o";;
+		 arch/arm-get-next-pcs.o arm-tdep.o arm-none-tdep.o"
+	;;
 
 hppa*-*-*)
 	# Target: HP PA-RISC

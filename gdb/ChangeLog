@@ -1,3 +1,12 @@
+2021-06-01  Fredrik Hederstierna  <fredrik@hederstierna.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/14383
+	* Makefile.in (ALL_TARGET_OBS): Add arm-none-tdep.o.
+	(ALLDEPFILES): Add arm-none-tdep.c
+	* arm-none-tdep.c: New file.
+	* configure.tgt (arm*-*-*): Add arm-none-tdep.o to cpu_obs.
+
 2021-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Richard Bunt  <richard.bunt@arm.com>
 
