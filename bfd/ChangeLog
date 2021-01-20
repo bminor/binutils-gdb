@@ -1,3 +1,8 @@
+2021-01-20  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't assume
+	section symbols are present.
+
 2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27193
