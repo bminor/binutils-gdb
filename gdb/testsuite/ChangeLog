@@ -1,3 +1,7 @@
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/tuiterm.exp: Add links in comments.
+
 2021-01-20  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.python/py-format-string.exp: Allow Deriv+$decimal as vtable
