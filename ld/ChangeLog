@@ -1,3 +1,7 @@
+2021-01-21  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr26936.d: No longer xfail mips.
+
 2021-01-20  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/relbrlt.s: Make symbols global.
