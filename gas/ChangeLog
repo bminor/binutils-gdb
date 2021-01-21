@@ -1,3 +1,10 @@
+2021-01-21  Alan Modra  <amodra@gmail.com>
+
+	PR 27218
+	* dwarf2dbg.c (dwarf2_gen_line_info): Correct setting of dwarf_level.
+	(dwarf2_directive_filename, dwarf2_directive_loc): Likewise, and
+	error for negative file numbers.
+
 2021-01-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/27195
