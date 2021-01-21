@@ -1,3 +1,7 @@
+2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* arm-tdep.c (arm_debug_printf): Add and use throughout file.
+
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb_bfd.c (debug_bfd_cache): Change type to bool.

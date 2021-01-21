@@ -68,6 +68,11 @@
 
 static bool arm_debug;
 
+/* Print an "arm" debug statement.  */
+
+#define arm_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (arm_debug, "arm", fmt, ##__VA_ARGS__)
+
 /* Macros for setting and testing a bit in a minimal symbol that marks
    it as Thumb function.  The MSB of the minimal symbol's "info" field
    is used for this purpose.
@@ -1122,9 +1127,8 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
       start += 2;
     }
 
-  if (arm_debug)
-    fprintf_unfiltered (gdb_stdlog, "Prologue scan stopped at %s\n",
-			paddress (gdbarch, start));
+  arm_debug_printf ("Prologue scan stopped at %s",
+		    paddress (gdbarch, start));
 
   if (unrecognized_pc == 0)
     unrecognized_pc = start;
@@ -1782,9 +1786,8 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 	  cache->saved_regs[regno].set_addr (offset);
     }
 
-  if (arm_debug)
-    fprintf_unfiltered (gdb_stdlog, "Prologue scan stopped at %s\n",
-			paddress (gdbarch, unrecognized_pc));
+  arm_debug_printf ("Prologue scan stopped at %s",
+		    paddress (gdbarch, unrecognized_pc));
 
   return unrecognized_pc;
 }
@@ -3789,10 +3792,10 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      passing register.  */
   if (return_method == return_method_struct)
     {
-      if (arm_debug)
-	fprintf_unfiltered (gdb_stdlog, "struct return in %s = %s\n",
-			    gdbarch_register_name (gdbarch, argreg),
-			    paddress (gdbarch, struct_addr));
+      arm_debug_printf ("struct return in %s = %s",
+			gdbarch_register_name (gdbarch, argreg),
+			paddress (gdbarch, struct_addr));
+
       regcache_cooked_write_unsigned (regcache, argreg, struct_addr);
       argreg++;
     }
@@ -3938,12 +3941,11 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		 register.  */
 	      if (byte_order == BFD_ENDIAN_BIG)
 		regval <<= (ARM_INT_REGISTER_SIZE - partial_len) * 8;
-	      if (arm_debug)
-		fprintf_unfiltered (gdb_stdlog, "arg %d in %s = 0x%s\n",
-				    argnum,
-				    gdbarch_register_name
-				      (gdbarch, argreg),
-				    phex (regval, ARM_INT_REGISTER_SIZE));
+
+	      arm_debug_printf ("arg %d in %s = 0x%s", argnum,
+				gdbarch_register_name (gdbarch, argreg),
+				phex (regval, ARM_INT_REGISTER_SIZE));
+
 	      regcache_cooked_write_unsigned (regcache, argreg, regval);
 	      argreg++;
 	    }
@@ -3955,9 +3957,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      store_unsigned_integer (buf, partial_len, byte_order, regval);
 
 	      /* Push the arguments onto the stack.  */
-	      if (arm_debug)
-		fprintf_unfiltered (gdb_stdlog, "arg %d @ sp + %d\n",
-				    argnum, nstack);
+	      arm_debug_printf ("arg %d @ sp + %d", argnum, nstack);
 	      si = push_stack_item (si, buf, ARM_INT_REGISTER_SIZE);
 	      nstack += ARM_INT_REGISTER_SIZE;
 	    }
