@@ -134,9 +134,10 @@ show_bfd_sharing  (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("BFD sharing is %s.\n"), value);
 }
 
-/* When non-zero debugging of the bfd caches is enabled.  */
+/* When true debugging of the bfd caches is enabled.  */
 
-static unsigned int debug_bfd_cache;
+static bool debug_bfd_cache;
+
 static void
 show_bfd_cache_debug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
@@ -1105,12 +1106,13 @@ filename, file size, file modification time, and file inode."),
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 
-  add_setshow_zuinteger_cmd ("bfd-cache", class_maintenance,
-			     &debug_bfd_cache, _("\
-Set bfd cache debugging."), _("\
-Show bfd cache debugging."), _("\
+  add_setshow_boolean_cmd ("bfd-cache", class_maintenance,
+			   &debug_bfd_cache,
+			   _("Set bfd cache debugging."),
+			   _("Show bfd cache debugging."),
+			   _("\
 When non-zero, bfd cache specific debugging is enabled."),
-			     NULL,
-			     &show_bfd_cache_debug,
-			     &setdebuglist, &showdebuglist);
+			   NULL,
+			   &show_bfd_cache_debug,
+			   &setdebuglist, &showdebuglist);
 }

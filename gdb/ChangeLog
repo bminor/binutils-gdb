@@ -1,5 +1,10 @@
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb_bfd.c (debug_bfd_cache): Change type to bool.
+	(_initialize_gdb_bfd): Adjust.
+
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	PR gdb/26828
 	* dwarf2/read.c (maybe_queue_comp_unit): Add assertion.
 
