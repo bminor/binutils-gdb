@@ -39,11 +39,6 @@
 
 static void f77_get_dynamic_length_of_aggregate (struct type *);
 
-int f77_array_offset_tbl[MAX_FORTRAN_DIMS + 1][2];
-
-/* Array which holds offsets to be applied to get a row's elements
-   for a given array.  Array also holds the size of each subarray.  */
-
 LONGEST
 f77_get_lowerbound (struct type *type)
 {
