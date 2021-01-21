@@ -1,5 +1,10 @@
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	PR gdb/26828
+	* dwarf2/read.c (maybe_queue_comp_unit): Add assertion.
+
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (follow_die_offset): Add logging.
 	(dwarf2_per_objfile::age_comp_units): Add logging.
 

@@ -9179,7 +9179,12 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
 
   /* If it's already on the queue, we have nothing to do.  */
   if (per_cu->queued)
-    return 0;
+    {
+      /* Verify the invariant that if a CU is queued for expansion, its DIEs are
+	 loaded.  */
+      gdb_assert (per_objfile->get_cu (per_cu) != nullptr);
+      return 0;
+    }
 
   /* If the compilation unit is already loaded, just mark it as
      used.  */
