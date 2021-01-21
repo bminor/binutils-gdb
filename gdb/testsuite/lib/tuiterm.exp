@@ -63,6 +63,23 @@ namespace eval Term {
 
     variable _resize_count
 
+    proc _log { what } {
+	verbose -log "+++ $what"
+    }
+
+    # Call BODY, then log WHAT along with the original and new cursor position.
+    proc _log_cur { what body } {
+	variable _cur_row
+	variable _cur_col
+
+	set orig_cur_row $_cur_row
+	set orig_cur_col $_cur_col
+
+	uplevel $body
+
+	_log "$what, cursor: ($orig_cur_row, $orig_cur_col) -> ($_cur_row, $_cur_col)"
+    }
+
     # If ARG is empty, return DEF: otherwise ARG.  This is useful for
     # defaulting arguments in CSIs.
     proc _default {arg def} {
@@ -98,33 +115,43 @@ namespace eval Term {
 
     # Backspace.
     proc _ctl_0x08 {} {
-	variable _cur_col
-	incr _cur_col -1
-	if {$_cur_col < 0} {
-	    variable _cur_row
-	    variable _cols
-	    set _cur_col [expr {$_cols - 1}]
-	    incr _cur_row -1
-	    if {$_cur_row < 0} {
-		set _cur_row 0
+	_log_cur "Backspace" {
+	    variable _cur_col
+
+	    incr _cur_col -1
+	    if {$_cur_col < 0} {
+		variable _cur_row
+		variable _cols
+
+		set _cur_col [expr {$_cols - 1}]
+		incr _cur_row -1
+		if {$_cur_row < 0} {
+		    set _cur_row 0
+		}
 	    }
 	}
     }
 
     # Linefeed.
     proc _ctl_0x0a {} {
-	variable _cur_row
-	variable _rows
-	incr _cur_row 1
-	if {$_cur_row >= $_rows} {
-	    error "FIXME scroll"
+	_log_cur "Line feed" {
+	    variable _cur_row
+	    variable _rows
+
+	    incr _cur_row 1
+	    if {$_cur_row >= $_rows} {
+		error "FIXME scroll"
+	    }
 	}
     }
 
     # Carriage return.
     proc _ctl_0x0d {} {
-	variable _cur_col
-	set _cur_col 0
+	_log_cur "Carriage return" {
+	    variable _cur_col
+
+	    set _cur_col 0
+	}
     }
 
     # Insert Character.
@@ -132,15 +159,19 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/ICH.html
     proc _csi_@ {args} {
 	set n [_default [lindex $args 0] 1]
-	variable _cur_col
-	variable _cur_row
-	variable _chars
-	set in_x $_cur_col
-	set out_x [expr {$_cur_col + $n}]
-	for {set i 0} {$i < $n} {incr i} {
-	    set _chars($out_x,$_cur_row) $_chars($in_x,$_cur_row)
-	    incr in_x
-	    incr out_x
+
+	_log_cur "Insert Character ($n)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _chars
+
+	    set in_x $_cur_col
+	    set out_x [expr {$_cur_col + $n}]
+	    for {set i 0} {$i < $n} {incr i} {
+		set _chars($out_x,$_cur_row) $_chars($in_x,$_cur_row)
+		incr in_x
+		incr out_x
+	    }
 	}
     }
 
@@ -148,82 +179,116 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/CUU.html
     proc _csi_A {args} {
-	variable _cur_row
 	set arg [_default [lindex $args 0] 1]
-	set _cur_row [expr {max ($_cur_row - $arg, 0)}]
+
+	_log_cur "Cursor Up ($arg)" {
+	    variable _cur_row
+
+	    set _cur_row [expr {max ($_cur_row - $arg, 0)}]
+	}
     }
 
     # Cursor Down.
     #
     # https://vt100.net/docs/vt510-rm/CUD.html
     proc _csi_B {args} {
-	variable _cur_row
-	variable _rows
 	set arg [_default [lindex $args 0] 1]
-	set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
+
+	_log_cur "Cursor Down ($arg)" {
+	    variable _cur_row
+	    variable _rows
+
+	    set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
+	}
     }
 
     # Cursor Forward.
     #
     # https://vt100.net/docs/vt510-rm/CUF.html
     proc _csi_C {args} {
-	variable _cur_col
-	variable _cols
 	set arg [_default [lindex $args 0] 1]
-	set _cur_col [expr {min ($_cur_col + $arg, $_cols)}]
+
+	_log_cur "Cursor Forward ($arg)" {
+	    variable _cur_col
+	    variable _cols
+
+	    set _cur_col [expr {min ($_cur_col + $arg, $_cols)}]
+	}
     }
 
     # Cursor Backward.
     #
     # https://vt100.net/docs/vt510-rm/CUB.html
     proc _csi_D {args} {
-	variable _cur_col
 	set arg [_default [lindex $args 0] 1]
-	set _cur_col [expr {max ($_cur_col - $arg, 0)}]
+
+	_log_cur "Cursor Backward ($arg)" {
+	    variable _cur_col
+
+	    set _cur_col [expr {max ($_cur_col - $arg, 0)}]
+	}
     }
 
     # Cursor Next Line.
     #
     # https://vt100.net/docs/vt510-rm/CNL.html
     proc _csi_E {args} {
-	variable _cur_col
-	variable _cur_row
-	variable _rows
 	set arg [_default [lindex $args 0] 1]
-	set _cur_col 0
-	set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
+
+	_log_cur "Cursor Next Line ($arg)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _rows
+
+	    set _cur_col 0
+	    set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
+	}
     }
 
     # Cursor Previous Line.
     #
     # https://vt100.net/docs/vt510-rm/CPL.html
     proc _csi_F {args} {
-	variable _cur_col
-	variable _cur_row
-	variable _rows
 	set arg [_default [lindex $args 0] 1]
-	set _cur_col 0
-	set _cur_row [expr {max ($_cur_row - $arg, 0)}]
+
+	_log_cur "Cursor Previous Line ($arg)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _rows
+
+	    set _cur_col 0
+	    set _cur_row [expr {max ($_cur_row - $arg, 0)}]
+	}
     }
 
     # Cursor Horizontal Absolute.
     #
     # https://vt100.net/docs/vt510-rm/CHA.html
     proc _csi_G {args} {
-	variable _cur_col
-	variable _cols
 	set arg [_default [lindex $args 0] 1]
-	set _cur_col [expr {min ($arg - 1, $_cols)}]
+
+	_log_cur "Cursor Horizontal Absolute ($arg)" {
+	    variable _cur_col
+	    variable _cols
+
+	    set _cur_col [expr {min ($arg - 1, $_cols)}]
+	}
     }
 
     # Cursor Position.
     #
     # https://vt100.net/docs/vt510-rm/CUP.html
     proc _csi_H {args} {
-	variable _cur_col
-	variable _cur_row
-	set _cur_row [expr {[_default [lindex $args 0] 1] - 1}]
-	set _cur_col [expr {[_default [lindex $args 1] 1] - 1}]
+	set row [_default [lindex $args 0] 1]
+	set col [_default [lindex $args 1] 1]
+
+	_log_cur "Cursor Position ($row, $col)" {
+	    variable _cur_col
+	    variable _cur_row
+
+	    set _cur_row [expr {$row - 1}]
+	    set _cur_col [expr {$col - 1}]
+	}
     }
 
     # Cursor Horizontal Forward Tabulation.
@@ -231,11 +296,15 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/CHT.html
     proc _csi_I {args} {
 	set n [_default [lindex $args 0] 1]
-	variable _cur_col
-	variable _cols
-	incr _cur_col [expr {$n * 8 - $_cur_col % 8}]
-	if {$_cur_col >= $_cols} {
-	    set _cur_col [expr {$_cols - 1}]
+
+	_log_cur "Cursor Horizontal Forward Tabulation ($n)" {
+	    variable _cur_col
+	    variable _cols
+
+	    incr _cur_col [expr {$n * 8 - $_cur_col % 8}]
+	    if {$_cur_col >= $_cols} {
+		set _cur_col [expr {$_cols - 1}]
+	    }
 	}
     }
 
@@ -243,19 +312,23 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/ED.html
     proc _csi_J {args} {
-	variable _cur_col
-	variable _cur_row
-	variable _rows
-	variable _cols
 	set arg [_default [lindex $args 0] 0]
-	if {$arg == 0} {
-	    _clear_in_line $_cur_col $_cols $_cur_row
-	    _clear_lines [expr {$_cur_row + 1}] $_rows
-	} elseif {$arg == 1} {
-	    _clear_lines 0 [expr {$_cur_row - 1}]
-	    _clear_in_line 0 $_cur_col $_cur_row
-	} elseif {$arg == 2} {
-	    _clear_lines 0 $_rows
+
+	_log_cur "Erase in Display ($arg)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _rows
+	    variable _cols
+
+	    if {$arg == 0} {
+		_clear_in_line $_cur_col $_cols $_cur_row
+		_clear_lines [expr {$_cur_row + 1}] $_rows
+	    } elseif {$arg == 1} {
+		_clear_lines 0 [expr {$_cur_row - 1}]
+		_clear_in_line 0 $_cur_col $_cur_row
+	    } elseif {$arg == 2} {
+		_clear_lines 0 $_rows
+	    }
 	}
     }
 
@@ -263,17 +336,21 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/EL.html
     proc _csi_K {args} {
-	variable _cur_col
-	variable _cur_row
-	variable _cols
 	set arg [_default [lindex $args 0] 0]
-	if {$arg == 0} {
-	    # From cursor to end.
-	    _clear_in_line $_cur_col $_cols $_cur_row
-	} elseif {$arg == 1} {
-	    _clear_in_line 0 $_cur_col $_cur_row
-	} elseif {$arg == 2} {
-	    _clear_in_line 0 $_cols $_cur_row
+
+	_log_cur "Erase in Line ($arg)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _cols
+
+	    if {$arg == 0} {
+		# From cursor to end.
+		_clear_in_line $_cur_col $_cols $_cur_row
+	    } elseif {$arg == 1} {
+		_clear_in_line 0 $_cur_col $_cur_row
+	    } elseif {$arg == 2} {
+		_clear_in_line 0 $_cols $_cur_row
+	    }
 	}
     }
 
@@ -281,22 +358,26 @@ namespace eval Term {
     #
     # https://vt100.net/docs/vt510-rm/DL.html
     proc _csi_M {args} {
-	variable _cur_row
-	variable _rows
-	variable _cols
-	variable _chars
 	set count [_default [lindex $args 0] 1]
-	set y $_cur_row
-	set next_y [expr {$y + 1}]
-	while {$count > 0 && $next_y < $_rows} {
-	    for {set x 0} {$x < $_cols} {incr x} {
-		set _chars($x,$y) $_chars($x,$next_y)
+
+	_log_cur "Delete line ($count)" {
+	    variable _cur_row
+	    variable _rows
+	    variable _cols
+	    variable _chars
+
+	    set y $_cur_row
+	    set next_y [expr {$y + 1}]
+	    while {$count > 0 && $next_y < $_rows} {
+		for {set x 0} {$x < $_cols} {incr x} {
+		    set _chars($x,$y) $_chars($x,$next_y)
+		}
+		incr y
+		incr next_y
+		incr count -1
 	    }
-	    incr y
-	    incr next_y
-	    incr count -1
+	    _clear_lines $next_y $_rows
 	}
-	_clear_lines $next_y $_rows
     }
 
     # Erase chars.
@@ -304,16 +385,20 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/ECH.html
     proc _csi_X {args} {
 	set n [_default [lindex $args 0] 1]
-	# Erase characters but don't move cursor.
-	variable _cur_col
-	variable _cur_row
-	variable _attrs
-	variable _chars
-	set lattr [array get _attrs]
-	set x $_cur_col
-	for {set i 0} {$i < $n} {incr i} {
-	    set _chars($x,$_cur_row) [list " " $lattr]
-	    incr x
+
+	_log_cur "Erase chars ($n)" {
+	    # Erase characters but don't move cursor.
+	    variable _cur_col
+	    variable _cur_row
+	    variable _attrs
+	    variable _chars
+
+	    set lattr [array get _attrs]
+	    set x $_cur_col
+	    for {set i 0} {$i < $n} {incr i} {
+		set _chars($x,$_cur_row) [list " " $lattr]
+		incr x
+	    }
 	}
     }
 
@@ -322,96 +407,117 @@ namespace eval Term {
     # https://vt100.net/docs/vt510-rm/CBT.html
     proc _csi_Z {args} {
 	set n [_default [lindex $args 0] 1]
-	variable _cur_col
-	set _cur_col [expr {max (int (($_cur_col - 1) / 8) * 8 - ($n - 1) * 8, 0)}]
+
+	_log_cur "Cursor Backward Tabulation ($n)" {
+	    variable _cur_col
+
+	    set _cur_col [expr {max (int (($_cur_col - 1) / 8) * 8 - ($n - 1) * 8, 0)}]
+	}
     }
 
     # Repeat.
     #
     # https://www.xfree86.org/current/ctlseqs.html (See `(REP)`)
     proc _csi_b {args} {
-	variable _last_char
 	set n [_default [lindex $args 0] 1]
-	_insert [string repeat $_last_char $n]
+
+	_log_cur "Repeat ($n)" {
+	    variable _last_char
+
+	    _insert [string repeat $_last_char $n]
+	}
     }
 
     # Vertical Line Position Absolute.
     #
     # https://vt100.net/docs/vt510-rm/VPA.html
     proc _csi_d {args} {
-	variable _cur_row
-	set _cur_row [expr {[_default [lindex $args 0] 1] - 1}]
+	set row [_default [lindex $args 0] 1]
+
+	_log_cur "Vertical Line Position Absolute ($row)" {
+	    variable _cur_row
+
+	    set _cur_row [expr {$row - 1}]
+	}
     }
 
     # Select Graphic Rendition.
     #
     # https://vt100.net/docs/vt510-rm/SGR.html
     proc _csi_m {args} {
-	variable _attrs
-	foreach item $args {
-	    switch -exact -- $item {
-		"" - 0 {
-		    set _attrs(intensity) normal
-		    set _attrs(fg) default
-		    set _attrs(bg) default
-		    set _attrs(underline) 0
-		    set _attrs(reverse) 0
-		}
-		1 {
-		    set _attrs(intensity) bold
-		}
-		2 {
-		    set _attrs(intensity) dim
-		}
-		4 {
-		    set _attrs(underline) 1
-		}
-		7 {
-		    set _attrs(reverse) 1
-		}
-		22 {
-		    set _attrs(intensity) normal
-		}
-		24 {
-		    set _attrs(underline) 0
-		}
-		27 {
-		    set _attrs(reverse) 1
-		}
-		30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
-		    set _attrs(fg) $item
-		}
-		39 {
-		    set _attrs(fg) default
-		}
-		40 - 41 - 42 - 43 - 44 - 45 - 46 - 47 {
-		    set _attrs(bg) $item
-		}
-		49 {
-		    set _attrs(bg) default
-		}
-	    }
+	_log_cur "Select Graphic Rendition ([join $args {, }])" {
+	  variable _attrs
+
+	  foreach item $args {
+	      switch -exact -- $item {
+		  "" - 0 {
+		      set _attrs(intensity) normal
+		      set _attrs(fg) default
+		      set _attrs(bg) default
+		      set _attrs(underline) 0
+		      set _attrs(reverse) 0
+		  }
+		  1 {
+		      set _attrs(intensity) bold
+		  }
+		  2 {
+		      set _attrs(intensity) dim
+		  }
+		  4 {
+		      set _attrs(underline) 1
+		  }
+		  7 {
+		      set _attrs(reverse) 1
+		  }
+		  22 {
+		      set _attrs(intensity) normal
+		  }
+		  24 {
+		      set _attrs(underline) 0
+		  }
+		  27 {
+		      set _attrs(reverse) 1
+		  }
+		  30 - 31 - 32 - 33 - 34 - 35 - 36 - 37 {
+		      set _attrs(fg) $item
+		  }
+		  39 {
+		      set _attrs(fg) default
+		  }
+		  40 - 41 - 42 - 43 - 44 - 45 - 46 - 47 {
+		      set _attrs(bg) $item
+		  }
+		  49 {
+		      set _attrs(bg) default
+		  }
+	      }
+	  }
 	}
     }
 
     # Insert string at the cursor location.
     proc _insert {str} {
-	verbose "INSERT <<$str>>"
-	variable _cur_col
-	variable _cur_row
-	variable _rows
-	variable _cols
-	variable _attrs
-	variable _chars
-	set lattr [array get _attrs]
-	foreach char [split $str {}] {
-	    set _chars($_cur_col,$_cur_row) [list $char $lattr]
-	    incr _cur_col
-	    if {$_cur_col >= $_cols} {
-		set _cur_col 0
-		incr _cur_row
-		if {$_cur_row >= $_rows} {
-		    error "FIXME scroll"
+	_log_cur "Inserted string '$str'" {
+	    _log "Inserting string '$str'"
+
+	    variable _cur_col
+	    variable _cur_row
+	    variable _rows
+	    variable _cols
+	    variable _attrs
+	    variable _chars
+	    set lattr [array get _attrs]
+	    foreach char [split $str {}] {
+		  _log_cur "  Inserted char '$char'" {
+		    set _chars($_cur_col,$_cur_row) [list $char $lattr]
+		    incr _cur_col
+		    if {$_cur_col >= $_cols} {
+			set _cur_col 0
+			incr _cur_row
+			if {$_cur_row >= $_rows} {
+			    error "FIXME scroll"
+			}
+		    }
 		}
 	    }
 	}
@@ -461,17 +567,17 @@ namespace eval Term {
 		-re "^\[\x07\x08\x0a\x0d\]" {
 		    scan $expect_out(0,string) %c val
 		    set hexval [format "%02x" $val]
-		    verbose "+++ _ctl_0x${hexval}"
+		    _log "wait_for: _ctl_0x${hexval}"
 		    _ctl_0x${hexval}
 		}
 		-re "^\x1b(\[0-9a-zA-Z\])" {
-		    verbose "+++ unsupported escape"
+		    _log "wait_for: unsupported escape"
 		    error "unsupported escape"
 		}
 		-re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@\])" {
 		    set cmd $expect_out(2,string)
 		    set params [split $expect_out(1,string) ";"]
-		    verbose "+++ _csi_$cmd <<<$expect_out(1,string)>>>"
+		    _log "wait_for: _csi_$cmd <<<$expect_out(1,string)>>>"
 		    eval _csi_$cmd $params
 		}
 		-re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
