@@ -1,5 +1,9 @@
 2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb_bfd.c (bfd_cache_debug_printf): New, use throughout file.
+
+2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* ser-tcp.c (wait_for_connect): Use interruptible_select instead
 	of gdb_select.
 
