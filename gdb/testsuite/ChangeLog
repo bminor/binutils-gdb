@@ -1,3 +1,8 @@
+2021-01-21  Luis Machado  <luis.machado@linaro.org>
+
+	* lib/gdbserver-support.exp (gdb_target_cmd_ext): Handle a new error
+	message.
+
 2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* lib/tuiterm.exp (_log, _log_cur): New, use throughout.
