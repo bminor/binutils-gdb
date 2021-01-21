@@ -536,9 +536,10 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   /* Early out for as-yet incomplete location information.  */
   if (loc->line == 0)
     return;
-  if (loc->filenum == 0 && DWARF2_LINE_VERSION < 5)
+  if (loc->filenum == 0)
     {
-      dwarf_level = 5;
+      if (dwarf_level < 5)
+	dwarf_level = 5;
       if (DWARF2_LINE_VERSION < 5)
 	return;
     }
@@ -1032,10 +1033,11 @@ dwarf2_directive_filename (void)
 
   num = get_absolute_expression ();
 
-  if ((offsetT) num < 1 && DWARF2_LINE_VERSION < 5)
+  if ((offsetT) num < 1)
     {
-      dwarf_level = 5;
-      if (DWARF2_LINE_VERSION < 5)
+      if (num == 0 && dwarf_level < 5)
+	dwarf_level = 5;
+      if ((offsetT) num < 0 || DWARF2_LINE_VERSION < 5)
 	{
 	  as_bad (_("file number less than one"));
 	  ignore_rest_of_line ();
@@ -1135,18 +1137,16 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   if (filenum < 1)
     {
-      if (filenum != 0 || DWARF2_LINE_VERSION < 5)
+      if (filenum == 0 && dwarf_level < 5)
+	dwarf_level = 5;
+      if (filenum < 0 || DWARF2_LINE_VERSION < 5)
 	{
-	  dwarf_level = 5;
-	  if (DWARF2_LINE_VERSION < 5)
-	    {
-	      as_bad (_("file number less than one"));
-	      return;
-	    }
+	  as_bad (_("file number less than one"));
+	  return;
 	}
     }
 
-  if (filenum >= (int) files_in_use || files[filenum].filename == NULL)
+  if ((valueT) filenum >= files_in_use || files[filenum].filename == NULL)
     {
       as_bad (_("unassigned file number %ld"), (long) filenum);
       return;
