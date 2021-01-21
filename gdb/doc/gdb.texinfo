@@ -24754,8 +24754,8 @@ Show whether OpenRISC-specific debugging messages are enabled.
 implement in hardware simple hardware watchpoint conditions of the form:
 
 @smallexample
-(@value{GDBP}) watch @var{ADDRESS|VARIABLE} \
-  if  @var{ADDRESS|VARIABLE} == @var{CONSTANT EXPRESSION}
+(@value{GDBP}) watch @var{address|variable} \
+  if  @var{address|variable} == @var{constant expression}
 @end smallexample
 
 The DVC register will be automatically used when @value{GDBN} detects
