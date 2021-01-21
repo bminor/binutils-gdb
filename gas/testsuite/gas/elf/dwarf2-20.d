@@ -5,10 +5,6 @@
 #xfail: mn102*-*
 # score-elf, tic6x-elf and xtensa-elf need special handling to support .nop 16
 #xfail: score-* tic6x-* xtensa-*
-#warning: .* \.alloc0 ignored
-#warning: .* \.alloc1 ignored
-#warning: .* \.nonalloc ignored
-#warning: .* \.nonallocexec ignored
 
 Contents of the .debug_aranges section:
 

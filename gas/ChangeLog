@@ -1,5 +1,15 @@
 2021-01-21  Alan Modra  <amodra@gmail.com>
 
+	PR 27221
+	* dwarf2dbg.c (dwarf2_gen_line_info_1): Don't warn about ignored
+	line number info when gas is generating it.
+	* testsuite/gas/elf/dwarf2-20.d: Adjust to not expect warnings.
+	* testsuite/gas/m68hc11/indexed12.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Don't run warn-2.
+	* gas/testsuite/gas/elf/warn-2.s: Delete.
+
+2021-01-21  Alan Modra  <amodra@gmail.com>
+
 	PR 27218
 	* dwarf2dbg.c (dwarf2_gen_line_info): Correct setting of dwarf_level.
 	(dwarf2_directive_filename, dwarf2_directive_loc): Likewise, and
