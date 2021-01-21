@@ -514,8 +514,9 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
   if ((now_seg->flags & need_flags) != need_flags)
     {
       /* FIXME: Add code to suppress multiple warnings ?  */
-      as_warn ("dwarf line number information for %s ignored",
-	       segment_name (now_seg));
+      if (debug_type != DEBUG_DWARF2)
+	as_warn ("dwarf line number information for %s ignored",
+		 segment_name (now_seg));
       return;
     }
 
