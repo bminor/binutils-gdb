@@ -23574,6 +23574,12 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 
   target_cu = cu;
 
+  dwarf_read_debug_printf_v ("source CU offset: %s, target offset: %s, "
+			     "source CU contains target offset: %d",
+			     sect_offset_str (cu->per_cu->sect_off),
+			     sect_offset_str (sect_off),
+			     cu->header.offset_in_cu_p (sect_off));
+
   if (cu->per_cu->is_debug_types)
     {
       /* .debug_types CUs cannot reference anything outside their CU.
@@ -23589,6 +23595,11 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 
       per_cu = dwarf2_find_containing_comp_unit (sect_off, offset_in_dwz,
 						 per_objfile);
+
+      dwarf_read_debug_printf_v ("target CU offset: %s, "
+				 "target CU DIEs loaded: %d",
+				 sect_offset_str (per_cu->sect_off),
+				 per_objfile->get_cu (per_cu) != nullptr);
 
       /* If necessary, add it to the queue and load its DIEs.  */
       if (maybe_queue_comp_unit (cu, per_cu, per_objfile, cu->language))
@@ -24970,6 +24981,8 @@ dwarf2_per_objfile::set_cu (dwarf2_per_cu_data *per_cu, dwarf2_cu *cu)
 void
 dwarf2_per_objfile::age_comp_units ()
 {
+  dwarf_read_debug_printf_v ("running");
+
   /* Start by clearing all marks.  */
   for (auto pair : m_dwarf2_cus)
     pair.second->mark = false;
@@ -24992,6 +25005,8 @@ dwarf2_per_objfile::age_comp_units ()
 
       if (!cu->mark)
 	{
+	  dwarf_read_debug_printf_v ("deleting old CU %s",
+				     sect_offset_str (cu->per_cu->sect_off));
 	  delete cu;
 	  it = m_dwarf2_cus.erase (it);
 	}

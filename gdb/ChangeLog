@@ -1,5 +1,10 @@
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.c (follow_die_offset): Add logging.
+	(dwarf2_per_objfile::age_comp_units): Add logging.
+
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* aarch64-linux-tdep.c (aarch64_linux_record_tdep): Make static.
 	* aarch64-tdep.c (tdesc_aarch64_list, aarch64_prologue_unwind,
 	aarch64_stub_unwind, aarch64_normal_base, ): Make static.
