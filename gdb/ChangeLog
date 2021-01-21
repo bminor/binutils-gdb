@@ -1,3 +1,13 @@
+2021-01-20  Joel Sherrill  <joel@rtems.org>
+
+	PR gdb/27219
+	* remote.c (struct remote_thread_info) <resume_state>: Rename
+	to...
+	<get_resume_state>: ... this.
+	(remote_target::resume): Adjust.
+	(remote_target::commit_resume): Adjust.
+	(remote_target::select_thread_for_ambiguous_stop_reply): Adjust.
+
 2021-01-20  Sergio Durigan Junior  <sergiodj@sergiodj.net>
 	    Tom Tromey <tom@tromey.com>
 
