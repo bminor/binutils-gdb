@@ -1246,10 +1246,12 @@ value_assign (struct value *toval, struct value *fromval)
 	      }
 	    else
 	      {
+		gdb::array_view<const gdb_byte> contents
+		  = gdb::make_array_view (value_contents (fromval),
+					  TYPE_LENGTH (type));
 		put_frame_register_bytes (frame, value_reg,
 					  value_offset (toval),
-					  {value_contents (fromval),
-					   TYPE_LENGTH (type)});
+					  contents);
 	      }
 	  }
 

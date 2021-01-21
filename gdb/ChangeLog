@@ -1,3 +1,8 @@
+2021-01-21  Luis Machado  <luis.machado@linaro.org>
+
+	* coffread.c (enter_linenos): Passing string to complaint.
+	* valops.c (value_assign): Make array view.
+
 2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* auto-load.h (debug_auto_load): Move here.

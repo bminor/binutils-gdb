@@ -1410,8 +1410,8 @@ enter_linenos (file_ptr file_offset, int first_line,
     return;
   if (file_offset < linetab_offset)
     {
-      complaint (_("Line number pointer %ld lower than start of line numbers"),
-		 file_offset);
+      complaint (_("Line number pointer %s lower than start of line numbers"),
+		 plongest (file_offset));
       if (file_offset > linetab_size)	/* Too big to be an offset?  */
 	return;
       file_offset += linetab_offset;	/* Try reading at that linetab
