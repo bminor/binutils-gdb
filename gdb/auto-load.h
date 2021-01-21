@@ -25,6 +25,15 @@ struct program_space;
 struct auto_load_pspace_info;
 struct extension_language_defn;
 
+/* Value of the 'set debug auto-load' configuration variable.  */
+
+extern bool debug_auto_load;
+
+/* Print an "auto-load" debug statement.  */
+
+#define auto_load_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_auto_load, "auto-load", fmt, ##__VA_ARGS__)
+
 extern bool global_auto_load;
 
 extern bool auto_load_local_gdbinit;
@@ -52,9 +61,7 @@ extern struct cmd_list_element **auto_load_info_cmdlist_get (void);
    even if the caller would quietly skip non-existing file in unsafe
    directory.  */
 
-extern bool file_is_auto_load_safe (const char *filename,
-				    const char *debug_fmt, ...)
-  ATTRIBUTE_PRINTF (2, 3);
+extern bool file_is_auto_load_safe (const char *filename);
 
 /* Return true if auto-loading gdb scripts is enabled.  */
 

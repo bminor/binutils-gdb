@@ -1,5 +1,15 @@
 2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* auto-load.h (debug_auto_load): Move here.
+	(auto_load_debug_printf): New.
+	* auto-load.c: Use auto_load_debug_printf.
+	(debug_auto_load): Move to header.
+	* linux-thread-db.c (try_thread_db_load): Use
+	auto_load_debug_printf.
+	* main.c (captured_main_1): Likewise.
+
+2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* f-valprint.c (f77_array_offset_tbl): Remove.
 
 2021-01-21  Simon Marchi  <simon.marchi@polymtl.ca>

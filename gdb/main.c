@@ -1185,15 +1185,17 @@ captured_main_1 (struct captured_main_args *context)
       auto_load_local_gdbinit_pathname
 	= gdb_realpath (local_gdbinit.c_str ()).release ();
 
-      if (!inhibit_gdbinit && auto_load_local_gdbinit
-	  && file_is_auto_load_safe (local_gdbinit.c_str (),
-				     _("auto-load: Loading .gdbinit "
-				       "file \"%s\".\n"),
-				     local_gdbinit.c_str ()))
+      if (!inhibit_gdbinit && auto_load_local_gdbinit)
 	{
-	  auto_load_local_gdbinit_loaded = 1;
+	  auto_load_debug_printf ("Loading .gdbinit file \"%s\".",
+				  local_gdbinit.c_str ());
 
-	  ret = catch_command_errors (source_script, local_gdbinit.c_str (), 0);
+	  if (file_is_auto_load_safe (local_gdbinit.c_str ()))
+	    {
+	      auto_load_local_gdbinit_loaded = 1;
+
+	      ret = catch_command_errors (source_script, local_gdbinit.c_str (), 0);
+	    }
 	}
     }
 

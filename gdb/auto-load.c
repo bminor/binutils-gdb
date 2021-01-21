@@ -61,8 +61,9 @@ static void maybe_print_script_not_found_warning
    const struct extension_language_defn *language,
    const char *section_name, unsigned offset);
 
-/* Value of the 'set debug auto-load' configuration variable.  */
-static bool debug_auto_load = false;
+/* See auto-load.h.  */
+
+bool debug_auto_load = false;
 
 /* "show" command for the debug_auto_load configuration variable.  */
 
@@ -183,8 +184,7 @@ auto_load_expand_dir_vars (const char *string)
   substitute_path_component (&s, "$debugdir", debug_file_directory);
 
   if (debug_auto_load && strcmp (s, string) != 0)
-    fprintf_unfiltered (gdb_stdlog,
-			_("auto-load: Expanded $-variables to \"%s\".\n"), s);
+    auto_load_debug_printf ("Expanded $-variables to \"%s\".", s);
 
   std::vector<gdb::unique_xmalloc_ptr<char>> dir_vec
     = dirnames_to_char_ptr_vec (s);
@@ -198,10 +198,8 @@ auto_load_expand_dir_vars (const char *string)
 static void
 auto_load_safe_path_vec_update (void)
 {
-  if (debug_auto_load)
-    fprintf_unfiltered (gdb_stdlog,
-			_("auto-load: Updating directories of \"%s\".\n"),
-			auto_load_safe_path);
+  auto_load_debug_printf ("Updating directories of \"%s\".",
+			  auto_load_safe_path);
 
   auto_load_safe_path_vec = auto_load_expand_dir_vars (auto_load_safe_path);
   size_t len = auto_load_safe_path_vec.size ();
@@ -222,23 +220,18 @@ auto_load_safe_path_vec_update (void)
       if (debug_auto_load)
 	{
 	  if (strcmp (in_vec.get (), original.get ()) == 0)
-	    fprintf_unfiltered (gdb_stdlog,
-				_("auto-load: Using directory \"%s\".\n"),
-				in_vec.get ());
+	    auto_load_debug_printf ("Using directory \"%s\".",
+				    in_vec.get ());
 	  else
-	    fprintf_unfiltered (gdb_stdlog,
-				_("auto-load: Resolved directory \"%s\" "
-				  "as \"%s\".\n"),
-				original.get (), in_vec.get ());
+	    auto_load_debug_printf ("Resolved directory \"%s\" as \"%s\".",
+				    original.get (), in_vec.get ());
 	}
 
       /* If gdb_realpath returns a different content, append it.  */
       if (strcmp (real_path.get (), in_vec.get ()) != 0)
 	{
-	  if (debug_auto_load)
-	    fprintf_unfiltered (gdb_stdlog,
-				_("auto-load: And canonicalized as \"%s\".\n"),
-				real_path.get ());
+	  auto_load_debug_printf ("And canonicalized as \"%s\".",
+				  real_path.get ());
 
 	  auto_load_safe_path_vec.push_back (std::move (real_path));
 	}
@@ -338,10 +331,8 @@ filename_is_in_pattern_1 (char *filename, char *pattern)
   size_t pattern_len = strlen (pattern);
   size_t filename_len = strlen (filename);
 
-  if (debug_auto_load)
-    fprintf_unfiltered (gdb_stdlog, _("auto-load: Matching file \"%s\" "
-				      "to pattern \"%s\"\n"),
-			filename, pattern);
+  auto_load_debug_printf ("Matching file \"%s\" to pattern \"%s\"",
+			  filename, pattern);
 
   /* Trim trailing slashes ("/") from PATTERN.  Even for "d:\" paths as
      trailing slashes are trimmed also from FILENAME it still matches
@@ -355,9 +346,7 @@ filename_is_in_pattern_1 (char *filename, char *pattern)
      IS_DIR_SEPARATOR character, such as the 'C:\x.exe' filename.  */
   if (pattern_len == 0)
     {
-      if (debug_auto_load)
-	fprintf_unfiltered (gdb_stdlog,
-			    _("auto-load: Matched - empty pattern\n"));
+      auto_load_debug_printf ("Matched - empty pattern");
       return 1;
     }
 
@@ -370,20 +359,15 @@ filename_is_in_pattern_1 (char *filename, char *pattern)
       filename[filename_len] = '\0';
       if (filename_len == 0)
 	{
-	  if (debug_auto_load)
-	    fprintf_unfiltered (gdb_stdlog,
-				_("auto-load: Not matched - pattern \"%s\".\n"),
-				pattern);
+	  auto_load_debug_printf ("Not matched - pattern \"%s\".", pattern);
 	  return 0;
 	}
 
       if (gdb_filename_fnmatch (pattern, filename, FNM_FILE_NAME | FNM_NOESCAPE)
 	  == 0)
 	{
-	  if (debug_auto_load)
-	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Matched - file "
-					      "\"%s\" to pattern \"%s\".\n"),
-				filename, pattern);
+	  auto_load_debug_printf ("Matched - file \"%s\" to pattern \"%s\".",
+				  filename, pattern);
 	  return 1;
 	}
 
@@ -434,10 +418,8 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 	{
 	  *filename_realp = gdb_realpath (filename);
 	  if (debug_auto_load && strcmp (filename_realp->get (), filename) != 0)
-	    fprintf_unfiltered (gdb_stdlog,
-				_("auto-load: Resolved "
-				  "file \"%s\" as \"%s\".\n"),
-				filename, filename_realp->get ());
+	    auto_load_debug_printf ("Resolved file \"%s\" as \"%s\".",
+				    filename, filename_realp->get ());
 	}
 
       if (strcmp (filename_realp->get (), filename) != 0)
@@ -451,10 +433,8 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 
   if (pattern != NULL)
     {
-      if (debug_auto_load)
-	fprintf_unfiltered (gdb_stdlog, _("auto-load: File \"%s\" matches "
-					  "directory \"%s\".\n"),
-			    filename, pattern);
+      auto_load_debug_printf ("File \"%s\" matches directory \"%s\".",
+			      filename, pattern);
       return 1;
     }
 
@@ -464,19 +444,10 @@ filename_is_in_auto_load_safe_path_vec (const char *filename,
 /* See auto-load.h.  */
 
 bool
-file_is_auto_load_safe (const char *filename, const char *debug_fmt, ...)
+file_is_auto_load_safe (const char *filename)
 {
   gdb::unique_xmalloc_ptr<char> filename_real;
   static bool advice_printed = false;
-
-  if (debug_auto_load)
-    {
-      va_list debug_args;
-
-      va_start (debug_args, debug_fmt);
-      vfprintf_unfiltered (gdb_stdlog, debug_fmt, debug_args);
-      va_end (debug_args);
-    }
 
   if (filename_is_in_auto_load_safe_path_vec (filename, &filename_real))
     return true;
@@ -766,9 +737,10 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
   gdb_file_up input = gdb_fopen_cloexec (filename.c_str (), "r");
   debugfile = filename.c_str ();
-  if (debug_auto_load)
-    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file \"%s\" %s.\n"),
-			debugfile, input ? _("exists") : _("does not exist"));
+
+  auto_load_debug_printf ("Attempted file \"%s\" %s.",
+			  debugfile,
+			  input != nullptr ? "exists" : "does not exist");
 
   std::string debugfile_holder;
   if (!input)
@@ -779,10 +751,9 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
       std::vector<gdb::unique_xmalloc_ptr<char>> vec
 	= auto_load_expand_dir_vars (auto_load_dir);
 
-      if (debug_auto_load)
-	fprintf_unfiltered (gdb_stdlog, _("auto-load: Searching 'set auto-load "
-					  "scripts-directory' path \"%s\".\n"),
-			    auto_load_dir);
+      auto_load_debug_printf
+	("Searching 'set auto-load scripts-directory' path \"%s\".",
+	 auto_load_dir);
 
       /* Convert Windows file name from c:/dir/file to /c/dir/file.  */
       if (HAS_DRIVE_SPEC (debugfile))
@@ -796,11 +767,13 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 	  debugfile = debugfile_holder.c_str ();
 
 	  input = gdb_fopen_cloexec (debugfile, "r");
-	  if (debug_auto_load)
-	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file "
-					      "\"%s\" %s.\n"),
-				debugfile,
-				input ? _("exists") : _("does not exist"));
+
+	  auto_load_debug_printf ("Attempted file \"%s\" %s.",
+				  debugfile,
+				  (input != nullptr
+				   ? "exists"
+				   : "does not exist"));
+
 	  if (input != NULL)
 	    break;
 	}
@@ -810,12 +783,11 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
     {
       struct auto_load_pspace_info *pspace_info;
 
-      bool is_safe
-	= file_is_auto_load_safe (debugfile,
-				  _("auto-load: Loading %s script \"%s\""
-				    " by extension for objfile \"%s\".\n"),
-				  ext_lang_name (language),
-				  debugfile, objfile_name (objfile));
+      auto_load_debug_printf
+	("Loading %s script \"%s\" by extension for objfile \"%s\".",
+	 ext_lang_name (language), debugfile, objfile_name (objfile));
+
+      bool is_safe = file_is_auto_load_safe (debugfile);
 
       /* Add this script to the hash table too so
 	 "info auto-load ${lang}-scripts" can print it.  */
@@ -871,10 +843,11 @@ auto_load_objfile_script (struct objfile *objfile,
 	{
 	  len -= lexe;
 	  realname.get ()[len] = '\0';
-	  if (debug_auto_load)
-	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Stripped .exe suffix, "
-					      "retrying with \"%s\".\n"),
-				realname.get ());
+
+	  auto_load_debug_printf
+	    ("auto-load: Stripped .exe suffix, retrying with \"%s\".",
+	     realname.get ());
+
 	  auto_load_objfile_script_1 (objfile, realname.get (), language);
 	}
     }
@@ -917,13 +890,12 @@ source_script_file (struct auto_load_pspace_info *pspace_info,
 
   if (opened)
     {
-      if (!file_is_auto_load_safe (opened->full_path.get (),
-				   _("auto-load: Loading %s script "
-				     "\"%s\" from section \"%s\" of "
-				     "objfile \"%s\".\n"),
-				   ext_lang_name (language),
-				   opened->full_path.get (),
-				   section_name, objfile_name (objfile)))
+      auto_load_debug_printf
+	("Loading %s script \"%s\" from section \"%s\" of objfile \"%s\".",
+	 ext_lang_name (language), opened->full_path.get (),
+	 section_name, objfile_name (objfile));
+
+      if (!file_is_auto_load_safe (opened->full_path.get ()))
 	opened.reset ();
     }
   else
@@ -1018,13 +990,11 @@ of file %ps."),
       return;
     }
 
-  bool is_safe
-    = file_is_auto_load_safe (objfile_name (objfile),
-			      _("auto-load: Loading %s script "
-				"\"%s\" from section \"%s\" of "
-				"objfile \"%s\".\n"),
-			      ext_lang_name (language), name,
-			      section_name, objfile_name (objfile));
+  auto_load_debug_printf
+    ("Loading %s script \"%s\" from section \"%s\" of objfile \"%s\".",
+     ext_lang_name (language), name, section_name, objfile_name (objfile));
+
+  bool is_safe = file_is_auto_load_safe (objfile_name (objfile));
 
   bool in_hash_table
     = maybe_add_script_text (pspace_info, is_safe, name, language);
