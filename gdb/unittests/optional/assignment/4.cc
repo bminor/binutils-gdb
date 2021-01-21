@@ -19,7 +19,7 @@ namespace assign_4 {
 
 struct exception {};
 
-int counter = 0;
+static int counter = 0;
 
 struct mixin_counter
 {

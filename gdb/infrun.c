@@ -221,7 +221,7 @@ show_non_stop (struct ui_file *file, int from_tty,
    non-stop, in which all GDB operations that might affect the
    target's execution have been disabled.  */
 
-bool observer_mode = false;
+static bool observer_mode = false;
 static bool observer_mode_1 = false;
 
 static void

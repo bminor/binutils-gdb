@@ -47,9 +47,9 @@
    debugging GDB with itself.  Because stdin et al need not be constants,
    we initialize them in the _initialize_symmisc function at the bottom
    of the file.  */
-FILE *std_in;
-FILE *std_out;
-FILE *std_err;
+static FILE *std_in;
+static FILE *std_out;
+static FILE *std_err;
 
 /* Prototypes for local functions */
 

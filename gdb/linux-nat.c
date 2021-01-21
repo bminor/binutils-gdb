@@ -757,7 +757,7 @@ static sigset_t suspend_mask;
 static sigset_t blocked_mask;
 
 /* SIGCHLD action.  */
-struct sigaction sigchld_action;
+static struct sigaction sigchld_action;
 
 /* Block child signals (SIGCHLD and linux threads signals), and store
    the previous mask in PREV_MASK.  */

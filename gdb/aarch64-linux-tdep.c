@@ -849,7 +849,7 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 
 /* AArch64 process record-replay constructs: syscall, signal etc.  */
 
-struct linux_record_tdep aarch64_linux_record_tdep;
+static linux_record_tdep aarch64_linux_record_tdep;
 
 /* Enum that defines the AArch64 linux specific syscall identifiers used for
    process record/replay.  */

@@ -5314,7 +5314,7 @@ struct gdbarch_data_registry
   struct gdbarch_data_registration *registrations;
 };
 
-struct gdbarch_data_registry gdbarch_data_registry =
+static struct gdbarch_data_registry gdbarch_data_registry =
 {
   0, NULL,
 };

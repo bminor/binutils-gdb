@@ -29,7 +29,7 @@
 #include "cp-support.h"
 #include <ctype.h>
 
-struct cp_abi_ops gnu_v2_abi_ops;
+static cp_abi_ops gnu_v2_abi_ops;
 
 static int vb_match (struct type *, int, struct type *);
 

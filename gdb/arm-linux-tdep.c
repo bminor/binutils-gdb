@@ -1248,7 +1248,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 
 /* ARM process record-replay constructs: syscall, signal etc.  */
 
-struct linux_record_tdep arm_linux_record_tdep;
+static linux_record_tdep arm_linux_record_tdep;
 
 /* arm_canonicalize_syscall maps from the native arm Linux set
    of syscall ids into a canonical set of syscall ids used by

@@ -2219,7 +2219,7 @@ amd64_emit_ge_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-struct emit_ops amd64_emit_ops =
+static emit_ops amd64_emit_ops =
   {
     amd64_emit_prologue,
     amd64_emit_epilogue,
@@ -2888,7 +2888,7 @@ i386_emit_ge_goto (int *offset_p, int *size_p)
     *size_p = 4;
 }
 
-struct emit_ops i386_emit_ops =
+static emit_ops i386_emit_ops =
   {
     i386_emit_prologue,
     i386_emit_epilogue,

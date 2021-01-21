@@ -2024,7 +2024,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 				       prev_regnum);
 }
 
-struct frame_unwind arm_prologue_unwind = {
+static frame_unwind arm_prologue_unwind = {
   NORMAL_FRAME,
   arm_prologue_unwind_stop_reason,
   arm_prologue_this_id,

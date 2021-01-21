@@ -1,3 +1,51 @@
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* aarch64-linux-tdep.c (aarch64_linux_record_tdep): Make static.
+	* aarch64-tdep.c (tdesc_aarch64_list, aarch64_prologue_unwind,
+	aarch64_stub_unwind, aarch64_normal_base, ): Make static.
+	* arm-linux-tdep.c (arm_prologue_unwind): Make static.
+	* arm-tdep.c (struct frame_unwind): Make static.
+	* auto-load.c (auto_load_safe_path_vec): Make static.
+	* csky-tdep.c (csky_stub_unwind): Make static.
+	* gdbarch.c (gdbarch_data_registry): Make static.
+	* gnu-v2-abi.c (gnu_v2_abi_ops): Make static.
+	* i386-netbsd-tdep.c (i386nbsd_mc_reg_offset): Make static.
+	* i386-tdep.c (i386_frame_setup_skip_insns,
+	i386_tramp_chain_in_reg_insns, i386_tramp_chain_on_stack_insns):
+	Make static.
+	* infrun.c (observer_mode): Make static.
+	* linux-nat.c (sigchld_action): Make static.
+	* linux-thread-db.c (thread_db_list): Make static.
+	* maint-test-options.c (maintenance_test_options_list):
+	* mep-tdep.c (mep_csr_registers): Make static.
+	* mi/mi-cmds.c (struct mi_cmd_stats): Remove struct type name.
+	(stats): Make static.
+	* nat/linux-osdata.c (struct osdata_type): Make static.
+	* ppc-netbsd-tdep.c (ppcnbsd_reg_offsets): Make static.
+	* progspace.c (last_program_space_num): Make static.
+	* python/py-param.c (struct parm_constant): Remove struct type
+	name.
+	(parm_constants): Make static.
+	* python/py-record-btrace.c (btpy_list_methods): Make static.
+	* python/py-record.c (recpy_gap_type): Make static.
+	* record.c (record_goto_cmdlist): Make static.
+	* regcache.c (regcache_descr_handle): Make static.
+	* registry.h (DEFINE_REGISTRY): Make definition static.
+	* symmisc.c (std_in, std_out, std_err): Make static.
+	* top.c (previous_saved_command_line): Make static.
+	* tracepoint.c (trace_user, trace_notes, trace_stop_notes): Make
+	static.
+	* unittests/command-def-selftests.c (nr_duplicates,
+	nr_invalid_prefixcmd, lists): Make static.
+	* unittests/observable-selftests.c (test_notification): Make
+	static.
+	* unittests/optional/assignment/1.cc (counter): Make static.
+	* unittests/optional/assignment/2.cc (counter): Make static.
+	* unittests/optional/assignment/3.cc (counter): Make static.
+	* unittests/optional/assignment/4.cc (counter): Make static.
+	* unittests/optional/assignment/5.cc (counter): Make static.
+	* unittests/optional/assignment/6.cc (counter): Make static.
+
 2021-01-20  Joel Sherrill  <joel@rtems.org>
 
 	PR gdb/27219

@@ -145,15 +145,15 @@ static int trace_buffer_size = -1;
 
 /* Textual notes applying to the current and/or future trace runs.  */
 
-char *trace_user = NULL;
+static char *trace_user = NULL;
 
 /* Textual notes applying to the current and/or future trace runs.  */
 
-char *trace_notes = NULL;
+static char *trace_notes = NULL;
 
 /* Textual notes applying to the stopping of a trace.  */
 
-char *trace_stop_notes = NULL;
+static char *trace_stop_notes = NULL;
 
 /* support routines */
 

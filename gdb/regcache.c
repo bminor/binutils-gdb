@@ -41,7 +41,7 @@
 /* Per-architecture object describing the layout of a register cache.
    Computed once when the architecture is created.  */
 
-struct gdbarch_data *regcache_descr_handle;
+static struct gdbarch_data *regcache_descr_handle;
 
 struct regcache_descr
 {

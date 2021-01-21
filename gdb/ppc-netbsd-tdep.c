@@ -33,7 +33,7 @@
 #include "solib-svr4.h"
 
 /* Register offsets from <machine/reg.h>.  */
-struct ppc_reg_offsets ppcnbsd_reg_offsets;
+static ppc_reg_offsets ppcnbsd_reg_offsets;
 
 
 /* Core file support.  */

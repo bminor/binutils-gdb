@@ -1467,7 +1467,7 @@ i386_match_insn_block (CORE_ADDR pc, struct i386_insn *insn_patterns)
    yet, and only the scratch registers %eax, %ecx and %edx can be
    touched.  */
 
-struct i386_insn i386_frame_setup_skip_insns[] =
+static i386_insn i386_frame_setup_skip_insns[] =
 {
   /* Check for `movb imm8, r' and `movl imm32, r'.
     
@@ -2333,7 +2333,7 @@ static const struct frame_unwind i386_epilogue_frame_unwind =
 
 /* Static chain passed in register.  */
 
-struct i386_insn i386_tramp_chain_in_reg_insns[] =
+static i386_insn i386_tramp_chain_in_reg_insns[] =
 {
   /* `movl imm32, %eax' and `movl imm32, %ecx' */
   { 5, { 0xb8 }, { 0xfe } },
@@ -2346,7 +2346,7 @@ struct i386_insn i386_tramp_chain_in_reg_insns[] =
 
 /* Static chain passed on stack (when regparm=3).  */
 
-struct i386_insn i386_tramp_chain_on_stack_insns[] =
+static i386_insn i386_tramp_chain_on_stack_insns[] =
 {
   /* `push imm32' */
   { 5, { 0x68 }, { 0xff } },

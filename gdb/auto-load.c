@@ -170,7 +170,7 @@ static char *auto_load_safe_path;
 /* Vector of directory elements of AUTO_LOAD_SAFE_PATH with each one normalized
    by tilde_expand and possibly each entries has added its gdb_realpath
    counterpart.  */
-std::vector<gdb::unique_xmalloc_ptr<char>> auto_load_safe_path_vec;
+static std::vector<gdb::unique_xmalloc_ptr<char>> auto_load_safe_path_vec;
 
 /* Expand $datadir and $debugdir in STRING according to the rules of
    substitute_path_component.  */

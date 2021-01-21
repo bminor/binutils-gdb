@@ -24,7 +24,7 @@
 namespace selftests {
 namespace observers {
 
-gdb::observers::observable<int> test_notification ("test_notification");
+static gdb::observers::observable<int> test_notification ("test_notification");
 
 static int test_first_observer = 0;
 static int test_second_observer = 0;

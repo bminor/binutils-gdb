@@ -76,7 +76,7 @@ static int i386nbsd_sc_reg_offset[] =
 };
 
 /* From <machine/mcontext.h>.  */
-int i386nbsd_mc_reg_offset[] =
+static int i386nbsd_mc_reg_offset[] =
 {
   11 * 4,			/* %eax */
   10 * 4,			/* %ecx */

@@ -29,7 +29,7 @@
 #include <algorithm>
 
 /* The last program space number assigned.  */
-int last_program_space_num = 0;
+static int last_program_space_num = 0;
 
 /* The head of the program spaces list.  */
 std::vector<struct program_space *> program_spaces;

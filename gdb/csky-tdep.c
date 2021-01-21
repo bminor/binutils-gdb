@@ -1998,7 +1998,7 @@ csky_stub_prev_register (struct frame_info *this_frame,
 				       prev_regnum);
 }
 
-struct frame_unwind csky_stub_unwind = {
+static frame_unwind csky_stub_unwind = {
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   csky_stub_this_id,

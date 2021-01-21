@@ -45,7 +45,7 @@ PyTypeObject recpy_func_type = {
 
 /* Python RecordGap type.  */
 
-PyTypeObject recpy_gap_type = {
+static PyTypeObject recpy_gap_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
 };
 

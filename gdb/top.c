@@ -161,7 +161,7 @@ static const char *repeat_arguments;
    command.  We need this as when a command is running, saved_command_line
    already contains the line of the currently executing command.  */
 
-char *previous_saved_command_line;
+static char *previous_saved_command_line;
 
 /* If not NULL, the arguments that should be passed if the
    previous_saved_command_line is repeated.  */

@@ -146,7 +146,7 @@ CORE_ADDR current_insn_ptr;
 
 int emit_error;
 
-struct bytecode_address
+static struct bytecode_address
 {
   int pc;
   CORE_ADDR address;

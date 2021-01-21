@@ -48,7 +48,7 @@ static unsigned int record_call_history_size = 10;
 static unsigned int record_call_history_size_setshow_var;
 
 struct cmd_list_element *record_cmdlist = NULL;
-struct cmd_list_element *record_goto_cmdlist = NULL;
+static struct cmd_list_element *record_goto_cmdlist = NULL;
 struct cmd_list_element *set_record_cmdlist = NULL;
 struct cmd_list_element *show_record_cmdlist = NULL;
 struct cmd_list_element *info_record_cmdlist = NULL;

@@ -1,3 +1,15 @@
+2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* ax.cc (bytecode_address_table): Make static.
+	* debug.cc (debug_file): Make static.
+	* linux-low.cc (stopping_threads): Make static.
+	(step_over_bkpt): Make static.
+	* linux-x86-low.cc (amd64_emit_ops, i386_emit_ops): Make static.
+	* tracepoint.cc (stop_tracing_bkpt, flush_trace_buffer_bkpt,
+	alloced_trace_state_variables, trace_buffer_ctrl,
+	tracing_start_time, tracing_stop_time, tracing_user_name,
+	tracing_notes, tracing_stop_note): Make static.
+
 2021-01-20  Tom de Vries  <tdevries@suse.de>
 
 	* linux-x86-low.cc (collect_register_i386): New function.

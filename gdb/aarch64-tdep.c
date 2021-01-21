@@ -58,7 +58,7 @@
 #define HA_MAX_NUM_FLDS		4
 
 /* All possible aarch64 target descriptors.  */
-struct target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/];
+static target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/];
 
 /* The standard register names, and all the valid aliases for them.  */
 static const struct
@@ -1109,7 +1109,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 }
 
 /* AArch64 prologue unwinder.  */
-struct frame_unwind aarch64_prologue_unwind =
+static frame_unwind aarch64_prologue_unwind =
 {
   NORMAL_FRAME,
   aarch64_prologue_frame_unwind_stop_reason,
@@ -1203,7 +1203,7 @@ aarch64_stub_unwind_sniffer (const struct frame_unwind *self,
 }
 
 /* AArch64 stub unwinder.  */
-struct frame_unwind aarch64_stub_unwind =
+static frame_unwind aarch64_stub_unwind =
 {
   NORMAL_FRAME,
   aarch64_stub_frame_unwind_stop_reason,
@@ -1225,7 +1225,7 @@ aarch64_normal_frame_base (struct frame_info *this_frame, void **this_cache)
 }
 
 /* AArch64 default frame base information.  */
-struct frame_base aarch64_normal_base =
+static frame_base aarch64_normal_base =
 {
   &aarch64_prologue_unwind,
   aarch64_normal_frame_base,

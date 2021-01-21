@@ -808,7 +808,7 @@ recpy_bt_goto (PyObject *self, PyObject *args)
 
 /* BtraceList methods.  */
 
-struct PyMethodDef btpy_list_methods[] =
+static PyMethodDef btpy_list_methods[] =
 {
   { "count", btpy_list_count, METH_O, "count number of occurrences"},
   { "index", btpy_list_index, METH_O, "index of entry"},

@@ -402,11 +402,11 @@ tracepoint_handler (CORE_ADDR address)
 }
 
 /* Breakpoint at "stop_tracing" in the inferior lib.  */
-struct breakpoint *stop_tracing_bkpt;
+static struct breakpoint *stop_tracing_bkpt;
 static int stop_tracing_handler (CORE_ADDR);
 
 /* Breakpoint at "flush_trace_buffer" in the inferior lib.  */
-struct breakpoint *flush_trace_buffer_bkpt;
+static struct breakpoint *flush_trace_buffer_bkpt;
 static int flush_trace_buffer_handler (CORE_ADDR);
 
 static void download_trace_state_variables (void);
@@ -912,7 +912,7 @@ struct trace_state_variable
 /* Linked list of all trace state variables.  */
 
 #ifdef IN_PROCESS_AGENT
-struct trace_state_variable *alloced_trace_state_variables;
+static struct trace_state_variable *alloced_trace_state_variables;
 #endif
 
 IP_AGENT_EXPORT_VAR struct trace_state_variable *trace_state_variables;
@@ -1170,7 +1170,7 @@ IP_AGENT_EXPORT_VAR unsigned int trace_buffer_ctrl_curr;
    it doesn't need to sync with itself.  Define it as array anyway so
    that the rest of the code base doesn't need to care for the
    difference.  */
-struct trace_buffer_control trace_buffer_ctrl[1];
+static trace_buffer_control trace_buffer_ctrl[1];
 # define TRACE_BUFFER_CTRL_CURR 0
 #endif
 
@@ -1264,23 +1264,23 @@ static int tracing_stop_tpnum;
 /* 64-bit timestamps for the trace run's start and finish, expressed
    in microseconds from the Unix epoch.  */
 
-LONGEST tracing_start_time;
-LONGEST tracing_stop_time;
+static LONGEST tracing_start_time;
+static LONGEST tracing_stop_time;
 
 /* The (optional) user-supplied name of the user that started the run.
    This is an arbitrary string, and may be NULL.  */
 
-char *tracing_user_name;
+static char *tracing_user_name;
 
 /* Optional user-supplied text describing the run.  This is
    an arbitrary string, and may be NULL.  */
 
-char *tracing_notes;
+static char *tracing_notes;
 
 /* Optional user-supplied text explaining a tstop command.  This is an
    arbitrary string, and may be NULL.  */
 
-char *tracing_stop_note;
+static char *tracing_stop_note;
 
 #endif
 

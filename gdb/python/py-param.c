@@ -29,13 +29,10 @@
 #include "arch-utils.h"
 
 /* Parameter constants and their values.  */
-struct parm_constant
-{
+static struct {
   const char *name;
   int value;
-};
-
-struct parm_constant parm_constants[] =
+} parm_constants[] =
 {
   { "PARAM_BOOLEAN", var_boolean }, /* ARI: var_boolean */
   { "PARAM_AUTO_BOOLEAN", var_auto_boolean },

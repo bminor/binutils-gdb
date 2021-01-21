@@ -17,7 +17,7 @@
 
 namespace assign_5 {
 
-int counter = 0;
+static int counter = 0;
 
 struct mixin_counter
 {

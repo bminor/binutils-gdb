@@ -107,13 +107,13 @@ help_doc_invariants_tests ()
 namespace command_structure_tests {
 
 /* Nr of commands in which a duplicated list is found.  */
-unsigned int nr_duplicates = 0;
+static unsigned int nr_duplicates = 0;
 /* Nr of commands in a list having no valid prefix cmd.  */
-unsigned int nr_invalid_prefixcmd = 0;
+static unsigned int nr_invalid_prefixcmd = 0;
 
 /* A map associating a list with the prefix leading to it.  */
 
-std::map<cmd_list_element **, const char *> lists;
+static std::map<cmd_list_element **, const char *> lists;
 
 /* Store each command list in lists, associated with the prefix to reach it.  A
    list must only be found once.

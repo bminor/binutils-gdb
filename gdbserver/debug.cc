@@ -24,7 +24,7 @@ int remote_debug = 0;
 #endif
 
 /* Output file for debugging.  Default to standard error.  */
-FILE *debug_file = stderr;
+static FILE *debug_file = stderr;
 
 /* See debug.h.  */
 int debug_threads;

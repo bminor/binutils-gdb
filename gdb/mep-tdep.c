@@ -661,7 +661,7 @@ struct mep_csr_register
    We just list the register numbers here explicitly to help catch
    typos.  */
 #define CSR(name) MEP_RAW_ ## name ## _REGNUM, MEP_ ## name ## _REGNUM
-struct mep_csr_register mep_csr_registers[] = {
+static mep_csr_register mep_csr_registers[] = {
   { CSR(PC),    0xffffffff },   /* manual says r/o, but we can write it */
   { CSR(LP),    0xffffffff },
   { CSR(SAR),   0x0000003f },

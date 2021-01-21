@@ -253,7 +253,7 @@ enum stopping_threads_kind
   };
 
 /* This is set while stop_all_lwps is in effect.  */
-enum stopping_threads_kind stopping_threads = NOT_STOPPING_THREADS;
+static stopping_threads_kind stopping_threads = NOT_STOPPING_THREADS;
 
 /* FIXME make into a target method?  */
 int using_threads = 1;
@@ -272,7 +272,7 @@ static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
-ptid_t step_over_bkpt;
+static ptid_t step_over_bkpt;
 
 bool
 linux_process_target::low_supports_breakpoints ()
