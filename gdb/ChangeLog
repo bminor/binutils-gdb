@@ -1,5 +1,14 @@
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* cli/cli-cmds.c (show_remote_debug): Remove.
+	(show_remote_timeout): Remove.
+	(_initialize_cli_cmds): Don't register commands.
+	* remote.c (show_remote_debug): Move here.
+	(show_remote_timeout): Move here.
+	(_initialize_remote): Register commands.
+
+2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbtypes.h (TYPE_OBJFILE): Remove, change all users to use the
 	type::objfile method instead.
 

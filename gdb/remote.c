@@ -14533,6 +14533,23 @@ set_range_stepping (const char *ignore_args, int from_tty,
     }
 }
 
+static void
+show_remote_debug (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Debugging of remote protocol is %s.\n"),
+		    value);
+}
+
+static void
+show_remote_timeout (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Timeout limit to wait for target to respond is %s.\n"),
+		    value);
+}
+
 void _initialize_remote ();
 void
 _initialize_remote ()
@@ -15040,6 +15057,25 @@ Show the maximum number of characters to display for each remote packet."), _("\
 Specify \"unlimited\" to display all the characters."),
 				       NULL, show_remote_packet_max_chars,
 				       &setdebuglist, &showdebuglist);
+
+  add_setshow_zinteger_cmd ("remote", no_class, &remote_debug, _("\
+Set debugging of remote protocol."), _("\
+Show debugging of remote protocol."), _("\
+When enabled, each packet sent or received with the remote target\n\
+is displayed."),
+			    NULL,
+			    show_remote_debug,
+			    &setdebuglist, &showdebuglist);
+
+  add_setshow_zuinteger_unlimited_cmd ("remotetimeout", no_class,
+				       &remote_timeout, _("\
+Set timeout limit to wait for target to respond."), _("\
+Show timeout limit to wait for target to respond."), _("\
+This value is used to set the time limit for gdb to wait for a response\n\
+from the target."),
+				       NULL,
+				       show_remote_timeout,
+				       &setlist, &showlist);
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (&remote_set_cmdlist, &remote_show_cmdlist);

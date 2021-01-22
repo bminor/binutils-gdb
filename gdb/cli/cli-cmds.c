@@ -2038,23 +2038,6 @@ show_history_expansion_p (struct ui_file *file, int from_tty,
 }
 
 static void
-show_remote_debug (struct ui_file *file, int from_tty,
-		   struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("Debugging of remote protocol is %s.\n"),
-		    value);
-}
-
-static void
-show_remote_timeout (struct ui_file *file, int from_tty,
-		     struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file,
-		    _("Timeout limit to wait for target to respond is %s.\n"),
-		    value);
-}
-
-static void
 show_max_user_call_depth (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
@@ -2454,25 +2437,6 @@ the previous command number shown."),
 
   add_cmd ("configuration", no_set_class, show_configuration,
 	   _("Show how GDB was configured at build time."), &showlist);
-
-  add_setshow_zinteger_cmd ("remote", no_class, &remote_debug, _("\
-Set debugging of remote protocol."), _("\
-Show debugging of remote protocol."), _("\
-When enabled, each packet sent or received with the remote target\n\
-is displayed."),
-			    NULL,
-			    show_remote_debug,
-			    &setdebuglist, &showdebuglist);
-
-  add_setshow_zuinteger_unlimited_cmd ("remotetimeout", no_class,
-				       &remote_timeout, _("\
-Set timeout limit to wait for target to respond."), _("\
-Show timeout limit to wait for target to respond."), _("\
-This value is used to set the time limit for gdb to wait for a response\n\
-from the target."),
-				       NULL,
-				       show_remote_timeout,
-				       &setlist, &showlist);
 
   add_basic_prefix_cmd ("debug", no_class,
 			_("Generic command for setting gdb debugging flags."),
