@@ -286,7 +286,7 @@ the native maintainer when resolving ABI issues.
 			Michael Eager		eager@eagercon.com
 
 	mips I-IV	--target=mips-elf ,-Werror
-			Maciej W. Rozycki	macro@linux-mips.org
+			Maciej W. Rozycki	macro@orcam.me.uk
 
 	mn10300		--target=mn10300-elf broken
 			(sim/ dies with make -j)
@@ -629,7 +629,7 @@ Xavier Roirand 					roirand@adacore.com
 Bob Rossi 					bob_rossi@cox.net
 Theodore A. Roth				troth@openavr.org
 Ian Roxborough					irox@redhat.com
-Maciej W. Rozycki				macro@linux-mips.org
+Maciej W. Rozycki				macro@orcam.me.uk
 Kamil Rytarowski				n54@gmx.com
 Grace Sainsbury					graces@redhat.com
 Kei Sakamoto					sakamoto.kei@renesas.com
