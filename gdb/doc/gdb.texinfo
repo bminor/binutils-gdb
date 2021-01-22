@@ -27455,10 +27455,6 @@ matching names are printed.
 @section Command Aliases
 @cindex aliases for commands
 
-@menu
-* Command aliases default args::	Default arguments for aliases
-@end menu
-
 Aliases allow you to define alternate spellings for existing commands.
 For example, if a new @value{GDBN} command defined in Python
 (@pxref{Python}) has a long name, it is handy to have an abbreviated
@@ -27556,6 +27552,10 @@ This creates alias @samp{spe} of the command @samp{set print elements}.
 (gdb) alias spe = set print elements
 (gdb) spe 20
 @end smallexample
+
+@menu
+* Command aliases default args::	Default arguments for aliases
+@end menu
 
 @node Command aliases default args
 @subsection Default Arguments

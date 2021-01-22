@@ -1,5 +1,9 @@
 2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.texinfo (Aliases): Move @menu to the end of the node.
+
+2021-01-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.texinfo (PowerPC Embedded): Down case contents of @var.
 
 2021-01-21  Andrew Burgess  <andrew.burgess@embecosm.com>
