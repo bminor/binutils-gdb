@@ -61,8 +61,6 @@ proc mi_uncatched_gdb_exit {} {
     global mi_gdb_prompt
     global MIFLAGS
 
-    gdb_stop_suppressing_tests
-
     if { [info procs sid_exit] != "" } {
 	sid_exit
     }
@@ -232,7 +230,6 @@ proc default_mi_gdb_start { args } {
 	return [eval mi_gdb_start_separate_mi_tty $args]
     }
 
-    gdb_stop_suppressing_tests
     set inferior_pty no-tty
 
     # Set the default value, it may be overriden later by specific testfile.
@@ -389,11 +386,6 @@ proc mi_delete_breakpoints {} {
 proc mi_gdb_reinitialize_dir { subdir } {
     global mi_gdb_prompt
     global MIFLAGS
-
-    global suppress_flag
-    if { $suppress_flag } {
-	return
-    }
 
     if [is_remote host] {
 	return ""
@@ -729,13 +721,7 @@ proc mi_gdb_test { args } {
 	    if { $foo < [expr $len - 1] } {
 		set str [string range "$string" 0 $foo]
 		if { [send_gdb "$str"] != "" } {
-		    global suppress_flag
-
-		    if { ! $suppress_flag } {
-			perror "Couldn't send $command to GDB."
-		    }
-		    fail "$message"
-		    return $result
+		    perror "Couldn't send $command to GDB."
 		}
 		gdb_expect 2 {
 		    -re "\[\r\n\]" { }
@@ -748,13 +734,7 @@ proc mi_gdb_test { args } {
 	}
 	if { "$string" != "" } {
 	    if { [send_gdb "$string"] != "" } {
-		global suppress_flag
-
-		if { ! $suppress_flag } {
-		    perror "Couldn't send $command to GDB."
-		}
-		fail "$message"
-		return $result
+		perror "Couldn't send $command to GDB."
 	    }
 	}
     }
@@ -780,7 +760,6 @@ proc mi_gdb_test { args } {
 	     if { $message != "" } {
 		 fail "$message"
 	     }
-	     gdb_suppress_entire_file "GDB died"
 	     return -1
 	 }
 	 -re "Ending remote debugging.*$mi_gdb_prompt\[ \]*$" {
@@ -940,10 +919,6 @@ proc mi_gdb_expect_cli_output {until message} {
 # If USE_MI_COMMAND is false, they are effectively arguments passed
 # to the test program.  If the global USE_GDB_STUB is true, ARGS is not used.
 proc mi_run_cmd_full {use_mi_command args} {
-    global suppress_flag
-    if { $suppress_flag } {
-	return -1
-    }
     global mi_gdb_prompt use_gdb_stub
     global thread_selected_re
     global library_loaded_re
@@ -1077,7 +1052,7 @@ proc mi_clean_restart { args } {
 #
 # FUNC is the linespec of the place to stop (it inserts a breakpoint here).
 # It returns:
-#   -1  if test suppressed, failed, timedout
+#   -1  if failed, timedout
 #    0  if test passed
 #
 # Supported options:
@@ -1085,11 +1060,6 @@ proc mi_clean_restart { args } {
 #  -qualified -- pass --qualified to -break-insert
 
 proc mi_runto_helper {func run_or_continue args} {
-  global suppress_flag
-  if { $suppress_flag } {
-    return -1
-  }
-
   global mi_gdb_prompt expect_out
   global hex decimal fullname_syntax
 
@@ -1359,11 +1329,6 @@ proc mi_expect_interrupt { test } {
 # after the first prompt is printed.
 
 proc mi_execute_to { cmd reason func args file line extra test } {
-    global suppress_flag
-    if { $suppress_flag } {
-	return -1
-    }
-
     mi_send_resuming_command "$cmd" "$test"
     set r [mi_expect_stop $reason $func $args $file $line $extra $test]
     return $r

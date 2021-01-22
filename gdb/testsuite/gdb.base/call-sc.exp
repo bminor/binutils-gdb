@@ -68,7 +68,7 @@ proc start_scalars_test { type } {
 
     # Advance to main
     if { ![runto_main] } then {
-	gdb_suppress_tests
+	return
     }
 
     # Get the debug format

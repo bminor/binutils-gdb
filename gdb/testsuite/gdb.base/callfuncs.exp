@@ -332,7 +332,7 @@ proc rerun_and_prepare {} {
     with_test_prefix "rerun number ${rerun_count}" {
 
 	if { ![runto_main] } {
-	    gdb_suppress_tests
+	    return
 	}
 
 	gdb_test_no_output "set language c"

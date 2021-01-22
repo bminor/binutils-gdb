@@ -80,7 +80,7 @@ proc start_structs_test { types } {
 
     # Advance to main
     if { ![runto_main] } then {
-	gdb_suppress_tests
+	return
     }
 
     # Get the debug format

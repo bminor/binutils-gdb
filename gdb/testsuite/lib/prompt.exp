@@ -31,8 +31,6 @@ proc default_prompt_gdb_start { } {
     global timeout
     global gdb_spawn_id
 
-    gdb_stop_suppressing_tests
-
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {

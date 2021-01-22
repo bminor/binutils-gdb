@@ -439,28 +439,28 @@ proc test_next_with_recursion {} {
     # Run until we call factorial with 6
 
     gdb_run_cmd
-    if [gdb_test "" \
+    gdb_test "" \
 	"Break.* factorial .value=6. .*" \
-	"run to factorial(6)"] then { gdb_suppress_tests }
+	"run to factorial(6)"
 
     # Continue until we call factorial recursively with 5.
 
-    if [gdb_test "continue" \
+    gdb_test "continue" \
 	"Continuing.*Break.* factorial .value=5. .*" \
-	"continue to factorial(5)"] then { gdb_suppress_tests }
+	"continue to factorial(5)"
 
     # Do a backtrace just to confirm how many levels deep we are.
 
-    if [gdb_test "backtrace" \
+    gdb_test "backtrace" \
 	"#0\[ \t\]+ factorial .value=5..*" \
-	"backtrace from factorial(5)"] then { gdb_suppress_tests }
+	"backtrace from factorial(5)"
 
     # Now a "next" should position us at the recursive call, which
     # we will be performing with 4.
 
-    if [gdb_test "next" \
+    gdb_test "next" \
 	".* factorial .value - 1.;.*" \
-	"next to recursive call"] then { gdb_suppress_tests }
+	"next to recursive call"
 
     # Disable the breakpoint at the entry to factorial by deleting them all.
     # The "next" should run until we return to the next line from this
@@ -492,14 +492,13 @@ proc test_next_with_recursion {} {
     # OK, we should be back in the same stack frame we started from.
     # Do a backtrace just to confirm.
 
-    set result [gdb_test "backtrace" \
+    gdb_test "backtrace" \
 	"#0\[ \t\]+ factorial .value=120.*\r\n#1\[ \t\]+ \[0-9a-fx\]+ in factorial .value=6..*" \
-	"backtrace from factorial(5.1)"]
-    if { $result != 0 } { gdb_suppress_tests }
+	"backtrace from factorial(5.1)"
 
-    if [target_info exists gdb,noresults] { gdb_suppress_tests }
-    gdb_continue_to_end "recursive next test"
-    gdb_stop_suppressing_tests
+    if { ![target_info exists gdb,noresults] } {
+	gdb_continue_to_end "recursive next test"
+    }
 }
 
 test_next_with_recursion

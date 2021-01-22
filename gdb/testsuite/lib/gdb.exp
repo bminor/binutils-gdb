@@ -1029,13 +1029,7 @@ proc gdb_test_multiple { command message args } {
 	    if { $foo < [expr $len - 1] } {
 		set str [string range "$string" 0 $foo]
 		if { [send_gdb "$str"] != "" } {
-		    global suppress_flag
-
-		    if { ! $suppress_flag } {
-			perror "Couldn't send $command to GDB."
-		    }
-		    fail "$message"
-		    return $result
+		    perror "Couldn't send $command to GDB."
 		}
 		# since we're checking if each line of the multi-line
 		# command are 'accepted' by GDB here,
@@ -1054,13 +1048,7 @@ proc gdb_test_multiple { command message args } {
 	}
 	if { "$string" != "" } {
 	    if { [send_gdb "$string"] != "" } {
-		global suppress_flag
-
-		if { ! $suppress_flag } {
-		    perror "Couldn't send $command to GDB."
-		}
-		fail "$message"
-		return $result
+		perror "Couldn't send $command to GDB."
 	    }
 	}
     }
@@ -1076,7 +1064,6 @@ proc gdb_test_multiple { command message args } {
 	    if { $message != "" } {
 		fail "$message"
 	    }
-	    gdb_suppress_entire_file "GDB died"
 	    set result -1
 	}
     }
@@ -1804,8 +1791,6 @@ proc default_gdb_exit {} {
     global gdb_spawn_id inferior_spawn_id
     global inotify_log_file
 
-    gdb_stop_suppressing_tests
-
     if ![info exists gdb_spawn_id] {
 	return
     }
@@ -1977,8 +1962,6 @@ proc default_gdb_spawn { } {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_spawn_id
-
-    gdb_stop_suppressing_tests
 
     # Set the default value, it may be overriden later by specific testfile.
     #
@@ -4611,10 +4594,6 @@ proc gdb_compile_openmp {source dest type options} {
 # For options for TYPE see gdb_stdin_log_write
 
 proc send_gdb { string {type standard}} {
-    global suppress_flag
-    if { $suppress_flag } {
-	return "suppressed"
-    }
     gdb_stdin_log_write $string $type
     return [remote_send host "$string"]
 }
@@ -4650,25 +4629,8 @@ proc gdb_expect { args } {
 	set tmt [get_largest_timeout]
     }
 
-    global suppress_flag
-    global remote_suppress_flag
-    if [info exists remote_suppress_flag] {
-	set old_val $remote_suppress_flag
-    }
-    if [info exists suppress_flag] {
-	if { $suppress_flag } {
-	    set remote_suppress_flag 1
-	}
-    }
     set code [catch \
 	{uplevel remote_expect host $tmt $expcode} string]
-    if [info exists old_val] {
-	set remote_suppress_flag $old_val
-    } else {
-	if [info exists remote_suppress_flag] {
-	    unset remote_suppress_flag
-	}
-    }
 
     if {$code == 1} {
         global errorInfo errorCode
@@ -4694,13 +4656,9 @@ proc gdb_expect { args } {
 
 proc gdb_expect_list {test sentinel list} {
     global gdb_prompt
-    global suppress_flag
     set index 0
     set ok 1
-    if { $suppress_flag } {
-	set ok 0
-	unresolved "${test}"
-    }
+
     while { ${index} < [llength ${list}] } {
 	set pattern [lindex ${list} ${index}]
         set index [expr ${index} + 1]
@@ -4759,58 +4717,6 @@ proc gdb_expect_list {test sentinel list} {
     } else {
 	return 1
     }
-}
-
-#
-#
-proc gdb_suppress_entire_file { reason } {
-    global suppress_flag
-
-    warning "$reason\n"
-    set suppress_flag -1
-}
-
-#
-# Set suppress_flag, which will cause all subsequent calls to send_gdb and
-# gdb_expect to fail immediately (until the next call to 
-# gdb_stop_suppressing_tests).
-#
-proc gdb_suppress_tests { args } {
-    global suppress_flag
-
-    return;  # fnf - disable pending review of results where
-             # testsuite ran better without this
-    incr suppress_flag
-
-    if { $suppress_flag == 1 } {
-	if { [llength $args] > 0 } {
-	    warning "[lindex $args 0]\n"
-	} else {
-	    warning "Because of previous failure, all subsequent tests in this group will automatically fail.\n"
-	}
-    }
-}
-
-#
-# Clear suppress_flag.
-#
-proc gdb_stop_suppressing_tests { } {
-    global suppress_flag
-
-    if [info exists suppress_flag] {
-	if { $suppress_flag > 0 } {
-	    set suppress_flag 0
-	    clone_output "Tests restarted.\n"
-	}
-    } else {
-	set suppress_flag 0
-    }
-}
-
-proc gdb_clear_suppressed { } {
-    global suppress_flag
-
-    set suppress_flag 0
 }
 
 # Spawn the gdb process.
@@ -5322,8 +5228,6 @@ proc default_gdb_init { test_file_name } {
     set gdb_instances 0
 
     set cleanfiles {}
-
-    gdb_clear_suppressed
 
     set gdb_test_file_name [file rootname [file tail $test_file_name]]
 
