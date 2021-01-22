@@ -1,3 +1,8 @@
+2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/range-stepping-support.exp (exec_cmd_expect_vCont_count):
+	Adjust to "set debug remote" changes.
+
 2021-01-21  Luis Machado  <luis.machado@linaro.org>
 
 	* lib/gdbserver-support.exp (gdb_target_cmd_ext): Handle a new error

@@ -28,6 +28,22 @@ struct remote_target;
 
 extern bool remote_debug;
 
+/* Print a "remote" debug statement.  */
+
+#define remote_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (remote_debug, "remote", fmt, ##__VA_ARGS__)
+
+/* Same as the above, but don't include the function name.  */
+
+#define remote_debug_printf_nofunc(fmt, ...) \
+		debug_prefixed_printf_cond_nofunc (remote_debug, "remote", \
+						   fmt, ##__VA_ARGS__)
+
+/* Print "remote" enter/exit debug statements.  */
+
+#define REMOTE_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (remote_debug, "remote")
+
 /* Read a packet from the remote machine, with error checking, and
    store it in *BUF.  Resize *BUF using xrealloc if necessary to hold
    the result, and update *SIZEOF_BUF.  If FOREVER, wait forever

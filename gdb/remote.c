@@ -1990,10 +1990,8 @@ packet_ok (const char *buf, struct packet_config *config)
       /* The stub recognized the packet request.  */
       if (config->support == PACKET_SUPPORT_UNKNOWN)
 	{
-	  if (remote_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Packet %s (%s) is supported\n",
-				config->name, config->title);
+	  remote_debug_printf ("Packet %s (%s) is supported",
+			       config->name, config->title);
 	  config->support = PACKET_ENABLE;
 	}
       break;
@@ -2014,10 +2012,8 @@ packet_ok (const char *buf, struct packet_config *config)
 		 config->name, config->title);
 	}
 
-      if (remote_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Packet %s (%s) is NOT supported\n",
-			    config->name, config->title);
+      remote_debug_printf ("Packet %s (%s) is NOT supported",
+			   config->name, config->title);
       config->support = PACKET_DISABLE;
       break;
     }
@@ -2732,13 +2728,8 @@ remote_target::set_syscall_catchpoint (int pid, bool needed, int any_count,
 	}
     }
 
-  if (remote_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog,
-			  "remote_set_syscall_catchpoint "
-			  "pid %d needed %d any_count %d n_sysno %d\n",
-			  pid, needed, any_count, n_sysno);
-    }
+  remote_debug_printf ("pid %d needed %d any_count %d n_sysno %d",
+		       pid, needed, any_count, n_sysno);
 
   std::string built_packet;
   if (needed)
@@ -3709,9 +3700,8 @@ remote_target::remote_current_thread (ptid_t oldpid)
       ptid_t result;
 
       result = read_ptid (&rs->buf[2], &obuf);
-      if (*obuf != '\0' && remote_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "warning: garbage in qC reply\n");
+      if (*obuf != '\0')
+	remote_debug_printf ("warning: garbage in qC reply");
 
       return result;
     }
@@ -4514,8 +4504,7 @@ remote_target::process_initial_stop_replies (int from_tty)
 	case TARGET_WAITKIND_SIGNALLED:
 	case TARGET_WAITKIND_EXITED:
 	  /* We shouldn't see these, but if we do, just ignore.  */
-	  if (remote_debug)
-	    fprintf_unfiltered (gdb_stdlog, "remote: event ignored\n");
+	  remote_debug_printf ("event ignored");
 	  ignore_event = 1;
 	  break;
 
@@ -4638,6 +4627,8 @@ remote_target::process_initial_stop_replies (int from_tty)
 void
 remote_target::start_remote (int from_tty, int extended_p)
 {
+  REMOTE_SCOPED_DEBUG_ENTER_EXIT;
+
   struct remote_state *rs = get_remote_state ();
   struct packet_config *noack_config;
 
@@ -4824,11 +4815,9 @@ remote_target::start_remote (int from_tty, int extended_p)
 		 tell us which thread was current (no "thread"
 		 register in T stop reply?).  Just pick the first
 		 thread in the thread list then.  */
-	      
-	      if (remote_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "warning: couldn't determine remote "
-				    "current thread; picking first in list.\n");
+
+	      remote_debug_printf ("warning: couldn't determine remote "
+				   "current thread; picking first in list.");
 
 	      for (thread_info *tp : all_non_exited_threads (this,
 							     minus_one_ptid))
@@ -6851,8 +6840,7 @@ remote_target::remote_interrupt_ns ()
 void
 remote_target::stop (ptid_t ptid)
 {
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "remote_stop called\n");
+  REMOTE_SCOPED_DEBUG_ENTER_EXIT;
 
   if (target_is_non_stop_p ())
     remote_stop_ns (ptid);
@@ -6869,8 +6857,7 @@ remote_target::stop (ptid_t ptid)
 void
 remote_target::interrupt ()
 {
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
+  REMOTE_SCOPED_DEBUG_ENTER_EXIT;
 
   if (target_is_non_stop_p ())
     remote_interrupt_ns ();
@@ -6883,10 +6870,9 @@ remote_target::interrupt ()
 void
 remote_target::pass_ctrlc ()
 {
-  struct remote_state *rs = get_remote_state ();
+  REMOTE_SCOPED_DEBUG_ENTER_EXIT;
 
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "remote_pass_ctrlc called\n");
+  struct remote_state *rs = get_remote_state ();
 
   /* If we're starting up, we're not fully synced yet.  Quit
      immediately.  */
@@ -8148,6 +8134,8 @@ ptid_t
 remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
 		     target_wait_flags options)
 {
+  REMOTE_SCOPED_DEBUG_ENTER_EXIT;
+
   ptid_t event_ptid;
 
   if (target_is_non_stop_p ())
@@ -8253,9 +8241,7 @@ remote_target::send_g_packet ()
 	 && (rs->buf[0] < 'a' || rs->buf[0] > 'f')
 	 && rs->buf[0] != 'x')	/* New: unavailable register value.  */
     {
-      if (remote_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Bad register packet; fetching a new packet\n");
+      remote_debug_printf ("Bad register packet; fetching a new packet");
       getpkt (&rs->buf, 0);
     }
 
@@ -8711,17 +8697,12 @@ remote_target::check_binary_download (CORE_ADDR addr)
 
 	if (rs->buf[0] == '\0')
 	  {
-	    if (remote_debug)
-	      fprintf_unfiltered (gdb_stdlog,
-				  "binary downloading NOT "
-				  "supported by target\n");
+	    remote_debug_printf ("binary downloading NOT supported by target");
 	    remote_protocol_packets[PACKET_X].support = PACKET_DISABLE;
 	  }
 	else
 	  {
-	    if (remote_debug)
-	      fprintf_unfiltered (gdb_stdlog,
-				  "binary downloading supported by target\n");
+	    remote_debug_printf ("binary downloading supported by target");
 	    remote_protocol_packets[PACKET_X].support = PACKET_ENABLE;
 	  }
 	break;
@@ -9422,8 +9403,6 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 
   while (1)
     {
-      int started_error_output = 0;
-
       if (remote_debug)
 	{
 	  *p = '\0';
@@ -9439,15 +9418,12 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 	  std::string str
 	    = escape_buffer (buf2, std::min (len, max_chars));
 
-	  fprintf_unfiltered (gdb_stdlog, "Sending packet: %s", str.c_str ());
-
 	  if (len > max_chars)
-	    fprintf_unfiltered (gdb_stdlog, "[%d bytes omitted]",
-				len - max_chars);
-
-	  fprintf_unfiltered (gdb_stdlog, "...");
-
-	  gdb_flush (gdb_stdlog);
+	    remote_debug_printf_nofunc
+	      ("Sending packet: %s [%d bytes omitted]", str.c_str (),
+	       len - max_chars);
+	  else
+	    remote_debug_printf_nofunc ("Sending packet: %s", str.c_str ());
 	}
       remote_serial_write (buf2, p - buf2);
 
@@ -9462,32 +9438,13 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 	{
 	  ch = readchar (remote_timeout);
 
-	  if (remote_debug)
-	    {
-	      switch (ch)
-		{
-		case '+':
-		case '-':
-		case SERIAL_TIMEOUT:
-		case '$':
-		case '%':
-		  if (started_error_output)
-		    {
-		      putchar_unfiltered ('\n');
-		      started_error_output = 0;
-		    }
-		}
-	    }
-
 	  switch (ch)
 	    {
 	    case '+':
-	      if (remote_debug)
-		fprintf_unfiltered (gdb_stdlog, "Ack\n");
+	      remote_debug_printf_nofunc ("Received Ack");
 	      return 1;
 	    case '-':
-	      if (remote_debug)
-		fprintf_unfiltered (gdb_stdlog, "Nak\n");
+	      remote_debug_printf_nofunc ("Received Nak");
 	      /* FALLTHROUGH */
 	    case SERIAL_TIMEOUT:
 	      tcount++;
@@ -9496,9 +9453,7 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 	      break;		/* Retransmit buffer.  */
 	    case '$':
 	      {
-		if (remote_debug)
-		  fprintf_unfiltered (gdb_stdlog,
-				      "Packet instead of Ack, ignoring it\n");
+		remote_debug_printf ("Packet instead of Ack, ignoring it");
 		/* It's probably an old response sent because an ACK
 		   was lost.  Gobble up the packet and ack it so it
 		   doesn't get retransmitted when we resend this
@@ -9519,44 +9474,23 @@ remote_target::putpkt_binary (const char *buf, int cnt)
 		val = read_frame (&rs->buf);
 		if (val >= 0)
 		  {
-		    if (remote_debug)
-		      {
-			std::string str = escape_buffer (rs->buf.data (), val);
+		    remote_debug_printf_nofunc
+		      ("  Notification received: %s",
+		       escape_buffer (rs->buf.data (), val).c_str ());
 
-			fprintf_unfiltered (gdb_stdlog,
-					    "  Notification received: %s\n",
-					    str.c_str ());
-		      }
 		    handle_notification (rs->notif_state, rs->buf.data ());
 		    /* We're in sync now, rewait for the ack.  */
 		    tcount = 0;
 		  }
 		else
-		  {
-		    if (remote_debug)
-		      {
-			if (!started_error_output)
-			  {
-			    started_error_output = 1;
-			    fprintf_unfiltered (gdb_stdlog, "putpkt: Junk: ");
-			  }
-			fputc_unfiltered (ch & 0177, gdb_stdlog);
-			fprintf_unfiltered (gdb_stdlog, "%s", rs->buf.data ());
-		      }
-		  }
+		  remote_debug_printf_nofunc ("Junk: %c%s", ch & 0177,
+					      rs->buf.data ());
 		continue;
 	      }
 	      /* fall-through */
 	    default:
-	      if (remote_debug)
-		{
-		  if (!started_error_output)
-		    {
-		      started_error_output = 1;
-		      fprintf_unfiltered (gdb_stdlog, "putpkt: Junk: ");
-		    }
-		  fputc_unfiltered (ch & 0177, gdb_stdlog);
-		}
+	      remote_debug_printf_nofunc ("Junk: %c%s", ch & 0177,
+					  rs->buf.data ());
 	      continue;
 	    }
 	  break;		/* Here to retransmit.  */
@@ -9642,14 +9576,13 @@ remote_target::read_frame (gdb::char_vector *buf_p)
       switch (c)
 	{
 	case SERIAL_TIMEOUT:
-	  if (remote_debug)
-	    fputs_filtered ("Timeout in mid-packet, retrying\n", gdb_stdlog);
+	  remote_debug_printf ("Timeout in mid-packet, retrying");
 	  return -1;
+
 	case '$':
-	  if (remote_debug)
-	    fputs_filtered ("Saw new packet start in middle of old one\n",
-			    gdb_stdlog);
+	  remote_debug_printf ("Saw new packet start in middle of old one");
 	  return -1;		/* Start a new packet, count retries.  */
+
 	case '#':
 	  {
 	    unsigned char pktcsum;
@@ -9664,16 +9597,12 @@ remote_target::read_frame (gdb::char_vector *buf_p)
 
 	    if (check_0 == SERIAL_TIMEOUT || check_1 == SERIAL_TIMEOUT)
 	      {
-		if (remote_debug)
-		  fputs_filtered ("Timeout in checksum, retrying\n",
-				  gdb_stdlog);
+		remote_debug_printf ("Timeout in checksum, retrying");
 		return -1;
 	      }
 	    else if (check_0 < 0 || check_1 < 0)
 	      {
-		if (remote_debug)
-		  fputs_filtered ("Communication error in checksum\n",
-				  gdb_stdlog);
+		remote_debug_printf ("Communication error in checksum");
 		return -1;
 	      }
 
@@ -9687,15 +9616,10 @@ remote_target::read_frame (gdb::char_vector *buf_p)
 	    if (csum == pktcsum)
 	      return bc;
 
-	    if (remote_debug)
-	      {
-		std::string str = escape_buffer (buf, bc);
+	    remote_debug_printf
+	      ("Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s",
+	       pktcsum, csum, escape_buffer (buf, bc).c_str ());
 
-		fprintf_unfiltered (gdb_stdlog,
-				    "Bad checksum, sentsum=0x%x, "
-				    "csum=0x%x, buf=%s\n",
-				    pktcsum, csum, str.c_str ());
-	      }
 	    /* Number of characters in buffer ignoring trailing
 	       NULL.  */
 	    return -1;
@@ -9847,8 +9771,8 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 			       _("Watchdog timeout has expired.  "
 				 "Target detached."));
 		}
-	      if (remote_debug)
-		fputs_filtered ("Timed out.\n", gdb_stdlog);
+
+	      remote_debug_printf ("Timed out.");
 	    }
 	  else
 	    {
@@ -9890,14 +9814,13 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 		= escape_buffer (buf->data (),
 				 std::min (val, max_chars));
 
-	      fprintf_unfiltered (gdb_stdlog, "Packet received: %s",
-				  str.c_str ());
-
 	      if (val > max_chars)
-		fprintf_unfiltered (gdb_stdlog, "[%d bytes omitted]",
-				    val - max_chars);
-
-	      fprintf_unfiltered (gdb_stdlog, "\n");
+		remote_debug_printf_nofunc
+		  ("Packet received: %s [%d bytes omitted]", str.c_str (),
+		   val - max_chars);
+	      else
+		remote_debug_printf_nofunc ("Packet received: %s",
+					    str.c_str ());
 	    }
 
 	  /* Skip the ack char if we're in no-ack mode.  */
@@ -9914,14 +9837,10 @@ remote_target::getpkt_or_notif_sane_1 (gdb::char_vector *buf,
 	{
 	  gdb_assert (c == '%');
 
-	  if (remote_debug)
-	    {
-	      std::string str = escape_buffer (buf->data (), val);
+	  remote_debug_printf_nofunc
+	    ("  Notification received: %s",
+	     escape_buffer (buf->data (), val).c_str ());
 
-	      fprintf_unfiltered (gdb_stdlog,
-				  "  Notification received: %s\n",
-				  str.c_str ());
-	    }
 	  if (is_notif != NULL)
 	    *is_notif = 1;
 
@@ -12313,16 +12232,15 @@ remote_target::remote_hostio_pread (int fd, gdb_byte *read_buf, int len,
     {
       cache->hit_count++;
 
-      if (remote_debug)
-	fprintf_unfiltered (gdb_stdlog, "readahead cache hit %s\n",
-			    pulongest (cache->hit_count));
+      remote_debug_printf ("readahead cache hit %s",
+			   pulongest (cache->hit_count));
       return ret;
     }
 
   cache->miss_count++;
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "readahead cache miss %s\n",
-			pulongest (cache->miss_count));
+
+  remote_debug_printf ("readahead cache miss %s",
+		       pulongest (cache->miss_count));
 
   cache->fd = fd;
   cache->offset = offset;

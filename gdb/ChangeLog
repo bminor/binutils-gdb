@@ -1,5 +1,12 @@
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* remote.h (remote_debug_printf): New.
+	(remote_debug_printf_nofunc): New.
+	(REMOTE_SCOPED_DEBUG_ENTER_EXIT): New.
+	* remote.c: Use above macros throughout file.
+
+2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* remote.h (remote_debug): Change to bool.
 	* remote.c (remote_debug): Change to bool.
 	(_initialize_remote): Adjust.
