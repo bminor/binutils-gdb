@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2020 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2021 Free Software Foundation, Inc.
    This file is part of gnulib.
 
    This program is free software: you can redistribute it and/or modify
@@ -38,6 +38,10 @@ typedef int dummy;
    necessary.  */
 
 # undef getcwd
+# if defined _WIN32 && !defined __CYGWIN__
+#  define getcwd _getcwd
+# endif
+
 char *
 rpl_getcwd (char *buf, size_t size)
 {

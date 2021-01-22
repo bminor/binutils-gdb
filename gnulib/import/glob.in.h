@@ -1,6 +1,6 @@
 /* glob.h -- Find a path matching a pattern.
 
-   Copyright (C) 2005-2007, 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2005-2007, 2009-2021 Free Software Foundation, Inc.
 
    Written by Derek Price <derek@ximbiot.com> & Paul Eggert <eggert@CS.UCLA.EDU>
 
@@ -45,7 +45,9 @@
    'configure' might #define 'restrict' to those words, so pick a
    different name.  */
 #ifndef _Restrict_
-# if defined __restrict || 2 < __GNUC__ + (95 <= __GNUC_MINOR__)
+# if defined __restrict \
+     || 2 < __GNUC__ + (95 <= __GNUC_MINOR__) \
+     || __clang_major__ >= 3
 #  define _Restrict_ __restrict
 # elif 199901L <= __STDC_VERSION__ || defined restrict
 #  define _Restrict_ restrict

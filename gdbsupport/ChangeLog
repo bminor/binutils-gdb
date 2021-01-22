@@ -1,3 +1,10 @@
+2021-01-22  Paul E. Murphy  <murphy@linux.ibm.com>
+
+	* common-defs.h (ATTRIBUTE_PRINTF): rename
+	_GL_ATTRIBUTE_FORMAT_PRINTF to _GL_ATTRIBUTE_FORMAT_PRINTF_STANDARD.
+	* common-utils.h (xfree): use GNULIB_NAMESPACE namespace when calling
+	free if this macro is defined.
+
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* common-debug.h (debug_prefixed_printf_cond_nofunc): New.

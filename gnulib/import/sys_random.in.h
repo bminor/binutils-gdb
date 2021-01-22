@@ -1,5 +1,5 @@
 /* Substitute for <sys/random.h>.
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@
 
 #if @HAVE_SYS_RANDOM_H@
 
+/* On uClibc, <sys/random.h> assumes prior inclusion of <stddef.h>.  */
+# if defined __UCLIBC__
+#  include <stddef.h>
+# endif
 /* On Mac OS X 10.5, <sys/random.h> assumes prior inclusion of <sys/types.h>.
    On Max OS X 10.13, <sys/random.h> assumes prior inclusion of a file that
    includes <Availability.h>, such as <stdlib.h> or <unistd.h>.  */

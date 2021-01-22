@@ -1,6 +1,6 @@
 /* Concatenate two arbitrary file names.
 
-   Copyright (C) 1996-2007, 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 1996-2007, 2009-2021 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dirname.h"
+#include "basename-lgpl.h"
+#include "filename.h"
 
 #if ! HAVE_MEMPCPY && ! defined mempcpy
 # define mempcpy(D, S, N) ((void *) ((char *) memcpy (D, S, N) + (N)))

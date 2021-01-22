@@ -1,3 +1,10 @@
+2021-01-22  Paul E. Murphy <murphyp@linux.ibm.com>
+
+	* Makefile.in (UNDO_GNULIB_CFLAGS): disable
+	gnulib free replacement too.
+	* common-defs.h [USE_WIN32API](read, write): undefine
+	gnulib versions before defining these macros.
+
 2021-01-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* ax.cc (bytecode_address_table): Make static.

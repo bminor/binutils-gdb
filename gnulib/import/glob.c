@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2020 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2021 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -59,12 +59,6 @@
 # define readdir(str) __readdir64 (str)
 # define getpwnam_r(name, bufp, buf, len, res) \
     __getpwnam_r (name, bufp, buf, len, res)
-# ifndef __lstat64
-#  define __lstat64(fname, buf) __lxstat64 (_STAT_VER, fname, buf)
-# endif
-# ifndef __stat64
-#  define __stat64(fname, buf) __xstat64 (_STAT_VER, fname, buf)
-# endif
 # define struct_stat64          struct stat64
 # define FLEXIBLE_ARRAY_MEMBER
 # include <shlib-compat.h>
@@ -72,8 +66,8 @@
 # define __glob                 glob
 # define __getlogin_r(buf, len) getlogin_r (buf, len)
 # define __lstat64(fname, buf)  lstat (fname, buf)
-# ifdef __MINGW32__
-   /* Avoid GCC warning.  mingw has an unused __stat64 macro.  */
+# if defined _WIN32 && !defined __CYGWIN__
+   /* Avoid GCC or clang warning.  The original __stat64 macro is unused.  */
 #  undef __stat64
 # endif
 # define __stat64(fname, buf)   stat (fname, buf)
@@ -227,7 +221,7 @@ glob_lstat (glob_t *pglob, int flags, const char *fullname)
 static bool
 size_add_wrapv (size_t a, size_t b, size_t *r)
 {
-#if 5 <= __GNUC__ && !defined __ICC
+#if 7 <= __GNUC__ && !defined __ICC
   return __builtin_add_overflow (a, b, r);
 #else
   *r = a + b;

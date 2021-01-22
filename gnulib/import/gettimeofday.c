@@ -1,6 +1,6 @@
 /* Provide gettimeofday for systems that don't have it or for which it's broken.
 
-   Copyright (C) 2001-2003, 2005-2007, 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2001-2003, 2005-2007, 2009-2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@
 # define WINDOWS_NATIVE
 # include <windows.h>
 #endif
-
-#include "localtime-buffer.h"
 
 #ifdef WINDOWS_NATIVE
 
@@ -123,11 +121,6 @@ gettimeofday (struct timeval *restrict tv, void *restrict tz)
 #else
 
 # if HAVE_GETTIMEOFDAY
-#  if GETTIMEOFDAY_CLOBBERS_LOCALTIME
-  /* Save and restore the contents of the buffer used for localtime's
-     result around the call to gettimeofday.  */
-  struct tm save = *localtime_buffer_addr;
-#  endif
 
 #  if defined timeval /* 'struct timeval' overridden by gnulib?  */
 #   undef timeval
@@ -140,10 +133,6 @@ gettimeofday (struct timeval *restrict tv, void *restrict tz)
     }
 #  else
   int result = gettimeofday (tv, (struct timezone *) tz);
-#  endif
-
-#  if GETTIMEOFDAY_CLOBBERS_LOCALTIME
-  *localtime_buffer_addr = save;
 #  endif
 
   return result;
