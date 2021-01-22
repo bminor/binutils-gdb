@@ -55,4 +55,9 @@ extern void tui_apply_style (WINDOW *w, ui_file_style style);
 extern struct ui_out *tui_out;
 extern cli_ui_out *tui_old_uiout;
 
+/* This should be called when the user has entered a command line in tui
+   mode.  Inject the newline into the output and move the cursor to the
+   next line.  */
+extern void tui_inject_newline_into_command_window ();
+
 #endif /* TUI_TUI_IO_H */

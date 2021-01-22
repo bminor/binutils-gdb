@@ -1,3 +1,13 @@
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tui/tui-interp.c (tui_command_line_handler): New function.
+	(tui_interp::resume): Register tui_command_line_handler as the
+	input_handler.
+	* tui/tui-io.c (tui_inject_newline_into_command_window): New
+	function.
+	(tui_getc_1): Delete handling of '\n' and '\r'.
+	* tui-io.h (tui_inject_newline_into_command_window): Declare.
+
 2021-02-07  Hannes Domani  <ssbssa@yahoo.de>
 
 	* tui/tui-regs.c (tui_data_window::display_registers_from):
