@@ -59,7 +59,11 @@ xfree (T *ptr)
 data type.  Use operator delete instead.");
 
   if (ptr != NULL)
-    free (ptr);		/* ARI: free */
+#ifdef GNULIB_NAMESPACE
+    GNULIB_NAMESPACE::free (ptr);	/* ARI: free */
+#else
+    free (ptr);				/* ARI: free */
+#endif
 }
 
 

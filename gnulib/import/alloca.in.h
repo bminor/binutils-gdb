@@ -1,6 +1,6 @@
 /* Memory allocation on the stack.
 
-   Copyright (C) 1995, 1999, 2001-2004, 2006-2020 Free Software Foundation,
+   Copyright (C) 1995, 1999, 2001-2004, 2006-2021 Free Software Foundation,
    Inc.
 
    This program is free software; you can redistribute it and/or modify it
@@ -44,7 +44,7 @@
 # endif
 #endif
 #ifndef alloca
-# ifdef __GNUC__
+# if defined __GNUC__ || (__clang_major__ >= 4)
 #  define alloca __builtin_alloca
 # elif defined _AIX
 #  define alloca __alloca

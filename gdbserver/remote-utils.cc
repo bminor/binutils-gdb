@@ -102,6 +102,10 @@ static int remote_desc = -1;
 static int listen_desc = -1;
 
 #ifdef USE_WIN32API
+/* gnulib wraps these as macros, undo them.  */
+# undef read
+# undef write
+
 # define read(fd, buf, len) recv (fd, (char *) buf, len, 0)
 # define write(fd, buf, len) send (fd, (char *) buf, len, 0)
 #endif

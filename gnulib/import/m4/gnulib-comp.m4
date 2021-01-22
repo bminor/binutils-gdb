@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2020 Free Software Foundation, Inc.
+# Copyright (C) 2002-2021 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -50,12 +50,14 @@ AC_DEFUN([gl_EARLY],
   # Code from module assure:
   # Code from module at-internal:
   # Code from module attribute:
+  # Code from module basename-lgpl:
   # Code from module btowc:
   # Code from module builtin-expect:
   # Code from module c99:
   # Code from module canonicalize-lgpl:
   # Code from module chdir:
   # Code from module chdir-long:
+  # Code from module clock-time:
   # Code from module cloexec:
   # Code from module close:
   # Code from module closedir:
@@ -69,6 +71,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module double-slash-root:
   # Code from module dup:
   # Code from module dup2:
+  # Code from module eloop-threshold:
   # Code from module environ:
   # Code from module errno:
   # Code from module error:
@@ -91,6 +94,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module fpieee:
   AC_REQUIRE([gl_FP_IEEE])
   # Code from module fpucw:
+  # Code from module free-posix:
   # Code from module frexp:
   # Code from module frexpl:
   # Code from module fstat:
@@ -106,6 +110,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module glob:
   # Code from module glob-h:
   # Code from module hard-locale:
+  # Code from module idx:
   # Code from module include_next:
   # Code from module inet_ntop:
   # Code from module intprops:
@@ -120,7 +125,6 @@ AC_DEFUN([gl_EARLY],
   # Code from module limits-h:
   # Code from module localcharset:
   # Code from module locale:
-  # Code from module localtime-buffer:
   # Code from module lock:
   # Code from module lstat:
   # Code from module malloc-posix:
@@ -150,6 +154,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module openat-h:
   # Code from module opendir:
   # Code from module pathmax:
+  # Code from module pipe-posix:
   # Code from module rawmemchr:
   # Code from module readdir:
   # Code from module readlink:
@@ -253,10 +258,11 @@ AC_DEFUN([gl_INIT],
   gl_STDLIB_MODULE_INDICATOR([realpath])
   gl_UNISTD_MODULE_INDICATOR([chdir])
   gl_FUNC_CHDIR_LONG
-  if test $gl_cv_have_arbitrary_file_name_length_limit = yes; then
+  if test $gl_cv_have_unlimited_file_name_length = no; then
     AC_LIBOBJ([chdir-long])
     gl_PREREQ_CHDIR_LONG
   fi
+  gl_CLOCK_TIME
   gl_MODULE_INDICATOR_FOR_TESTS([cloexec])
   gl_FUNC_CLOSE
   if test $REPLACE_CLOSE = 1; then
@@ -279,7 +285,6 @@ AC_DEFUN([gl_INIT],
     gl_PREREQ_DIRFD
   fi
   gl_DIRENT_MODULE_INDICATOR([dirfd])
-  gl_DIRNAME_LGPL
   gl_DOUBLE_SLASH_ROOT
   gl_FUNC_DUP
   if test $REPLACE_DUP = 1; then
@@ -288,7 +293,7 @@ AC_DEFUN([gl_INIT],
   fi
   gl_UNISTD_MODULE_INDICATOR([dup])
   gl_FUNC_DUP2
-  if test $HAVE_DUP2 = 0 || test $REPLACE_DUP2 = 1; then
+  if test $REPLACE_DUP2 = 1; then
     AC_LIBOBJ([dup2])
     gl_PREREQ_DUP2
   fi
@@ -342,6 +347,12 @@ AC_DEFUN([gl_INIT],
   fi
   gl_MODULE_INDICATOR([fnmatch-gnu])
   gl_FNMATCH_H
+  gl_FUNC_FREE
+  if test $REPLACE_FREE = 1; then
+    AC_LIBOBJ([free])
+    gl_PREREQ_FREE
+  fi
+  gl_STDLIB_MODULE_INDICATOR([free-posix])
   AC_REQUIRE([gl_FUNC_FREXP])
   if test $gl_func_frexp != yes; then
     AC_LIBOBJ([frexp])
@@ -454,8 +465,6 @@ AC_DEFUN([gl_INIT],
   LOCALCHARSET_TESTS_ENVIRONMENT=
   AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
   gl_LOCALE_H
-  AC_REQUIRE([gl_LOCALTIME_BUFFER_DEFAULTS])
-  AC_LIBOBJ([localtime-buffer])
   gl_LOCK
   gl_MODULE_INDICATOR([lock])
   gl_FUNC_LSTAT
@@ -502,7 +511,7 @@ AC_DEFUN([gl_INIT],
   fi
   gl_STDLIB_MODULE_INDICATOR([mbtowc])
   gl_FUNC_MEMCHR
-  if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
+  if test $REPLACE_MEMCHR = 1; then
     AC_LIBOBJ([memchr])
     gl_PREREQ_MEMCHR
   fi
@@ -533,6 +542,7 @@ AC_DEFUN([gl_INIT],
   if test $REPLACE_MKDIR = 1; then
     AC_LIBOBJ([mkdir])
   fi
+  gl_SYS_STAT_MODULE_INDICATOR([mkdir])
   gl_FUNC_MKDTEMP
   if test $HAVE_MKDTEMP = 0; then
     AC_LIBOBJ([mkdtemp])
@@ -577,6 +587,11 @@ AC_DEFUN([gl_INIT],
   fi
   gl_DIRENT_MODULE_INDICATOR([opendir])
   gl_PATHMAX
+  gl_FUNC_PIPE
+  if test $HAVE_PIPE = 0; then
+    AC_LIBOBJ([pipe])
+  fi
+  gl_UNISTD_MODULE_INDICATOR([pipe])
   gl_FUNC_RAWMEMCHR
   if test $HAVE_RAWMEMCHR = 0; then
     AC_LIBOBJ([rawmemchr])
@@ -655,7 +670,7 @@ AC_DEFUN([gl_INIT],
   fi
   gl_STRING_MODULE_INDICATOR([strchrnul])
   gl_FUNC_STRDUP_POSIX
-  if test $ac_cv_func_strdup = no || test $REPLACE_STRDUP = 1; then
+  if test $REPLACE_STRDUP = 1; then
     AC_LIBOBJ([strdup])
     gl_PREREQ_STRDUP
   fi
@@ -715,6 +730,7 @@ AC_DEFUN([gl_INIT],
   gl_HEADER_SYS_UIO
   AC_PROG_MKDIR_P
   gl_FUNC_GEN_TEMPNAME
+  gl_MODULE_INDICATOR([tempname])
   AC_REQUIRE([gl_THREADLIB])
   gl_HEADER_TIME_H
   gl_TIME_R
@@ -917,6 +933,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/at-func.c
   lib/attribute.h
   lib/basename-lgpl.c
+  lib/basename-lgpl.h
   lib/btowc.c
   lib/c++defs.h
   lib/canonicalize-lgpl.c
@@ -939,6 +956,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/dup-safer.c
   lib/dup.c
   lib/dup2.c
+  lib/eloop-threshold.h
   lib/errno.in.h
   lib/error.c
   lib/error.h
@@ -963,6 +981,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/fnmatch.in.h
   lib/fnmatch_loop.c
   lib/fpucw.h
+  lib/free.c
   lib/frexp.c
   lib/frexpl.c
   lib/fstat.c
@@ -987,6 +1006,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/glthread/threadlib.c
   lib/hard-locale.c
   lib/hard-locale.h
+  lib/idx.h
   lib/inet_ntop.c
   lib/intprops.h
   lib/inttypes.in.h
@@ -1004,11 +1024,10 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/localcharset.c
   lib/localcharset.h
   lib/locale.in.h
-  lib/localtime-buffer.c
-  lib/localtime-buffer.h
   lib/lstat.c
   lib/malloc.c
   lib/malloc/scratch_buffer.h
+  lib/malloc/scratch_buffer_dupfree.c
   lib/malloc/scratch_buffer_grow.c
   lib/malloc/scratch_buffer_grow_preserve.c
   lib/malloc/scratch_buffer_set_array_size.c
@@ -1050,6 +1069,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/opendir.c
   lib/pathmax.h
   lib/pipe-safer.c
+  lib/pipe.c
   lib/rawmemchr.c
   lib/rawmemchr.valgrind
   lib/readdir.c
@@ -1137,6 +1157,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/builtin-expect.m4
   m4/canonicalize.m4
   m4/chdir-long.m4
+  m4/clock_time.m4
   m4/close.m4
   m4/closedir.m4
   m4/codeset.m4
@@ -1145,7 +1166,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/d-type.m4
   m4/dirent_h.m4
   m4/dirfd.m4
-  m4/dirname.m4
   m4/double-slash-root.m4
   m4/dup.m4
   m4/dup2.m4
@@ -1168,6 +1188,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/fnmatch.m4
   m4/fnmatch_h.m4
   m4/fpieee.m4
+  m4/free.m4
   m4/frexp.m4
   m4/frexpl.m4
   m4/fstat.m4
@@ -1187,7 +1208,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/gnulib-common.m4
   m4/include_next.m4
   m4/inet_ntop.m4
-  m4/inttypes-pri.m4
   m4/inttypes.m4
   m4/isblank.m4
   m4/isnand.m4
@@ -1199,7 +1219,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/locale-ja.m4
   m4/locale-zh.m4
   m4/locale_h.m4
-  m4/localtime-buffer.m4
   m4/lock.m4
   m4/lstat.m4
   m4/malloc.m4
@@ -1232,6 +1251,8 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/openat.m4
   m4/opendir.m4
   m4/pathmax.m4
+  m4/pid_t.m4
+  m4/pipe.m4
   m4/pthread_rwlock_rdlock.m4
   m4/rawmemchr.m4
   m4/readdir.m4

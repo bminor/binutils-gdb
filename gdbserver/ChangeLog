@@ -1,3 +1,10 @@
+2021-02-05  Paul E. Murphy  <murphyp@linux.ibm.com>
+
+	* Makefile.in (UNDO_GNULIB_CFLAGS): Disable
+	gnulib free replacement too.
+	* common-defs.h [USE_WIN32API](read, write): Undefine
+	gnulib versions before defining these macros.
+
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
 	* linux-low.cc (linux_process_target::complete_ongoing_step_over):

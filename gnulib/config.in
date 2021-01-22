@@ -18,12 +18,7 @@
 /* Define to the number of bits in type 'wint_t'. */
 #undef BITSIZEOF_WINT_T
 
-/* Define to one of `_getb67', `GETB67', `getb67' for Cray-2 and Cray-YMP
-   systems. This function is required for `alloca.c' support on those systems.
-   */
-#undef CRAY_STACKSEG_END
-
-/* Define to 1 if using `alloca.c'. */
+/* Define to 1 if using 'alloca.c'. */
 #undef C_ALLOCA
 
 /* Define as the bit index in the word where to find bit 0 of the exponent of
@@ -66,9 +61,6 @@
 /* Define to 1 if realpath() can malloc memory, always gives an absolute path,
    and handles trailing slash correctly. */
 #undef FUNC_REALPATH_WORKS
-
-/* Define if gettimeofday clobbers the localtime buffer. */
-#undef GETTIMEOFDAY_CLOBBERS_LOCALTIME
 
 /* Define this to 'void' or 'struct timezone' to match the system's
    declaration of the second argument to gettimeofday. */
@@ -134,6 +126,10 @@
    whether the gnulib module strerror_r-posix shall be considered present. */
 #undef GNULIB_STRERROR_R_POSIX
 
+/* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+   whether the gnulib module tempname shall be considered present. */
+#undef GNULIB_TEMPNAME
+
 /* Define to 1 when the gnulib module btowc should be tested. */
 #undef GNULIB_TEST_BTOWC
 
@@ -176,6 +172,9 @@
 
 /* Define to 1 when the gnulib module fnmatch should be tested. */
 #undef GNULIB_TEST_FNMATCH
+
+/* Define to 1 when the gnulib module free-posix should be tested. */
+#undef GNULIB_TEST_FREE_POSIX
 
 /* Define to 1 when the gnulib module frexp should be tested. */
 #undef GNULIB_TEST_FREXP
@@ -237,6 +236,9 @@
 /* Define to 1 when the gnulib module memrchr should be tested. */
 #undef GNULIB_TEST_MEMRCHR
 
+/* Define to 1 when the gnulib module mkdir should be tested. */
+#undef GNULIB_TEST_MKDIR
+
 /* Define to 1 when the gnulib module mkdtemp should be tested. */
 #undef GNULIB_TEST_MKDTEMP
 
@@ -251,6 +253,9 @@
 
 /* Define to 1 when the gnulib module opendir should be tested. */
 #undef GNULIB_TEST_OPENDIR
+
+/* Define to 1 when the gnulib module pipe should be tested. */
+#undef GNULIB_TEST_PIPE
 
 /* Define to 1 when the gnulib module rawmemchr should be tested. */
 #undef GNULIB_TEST_RAWMEMCHR
@@ -344,6 +349,12 @@
 /* Define to 1 if you have the `catgets' function. */
 #undef HAVE_CATGETS
 
+/* Define to 1 if you have the `clock_gettime' function. */
+#undef HAVE_CLOCK_GETTIME
+
+/* Define to 1 if you have the `clock_settime' function. */
+#undef HAVE_CLOCK_SETTIME
+
 /* Define to 1 if you have the `closedir' function. */
 #undef HAVE_CLOSEDIR
 
@@ -358,13 +369,33 @@
    */
 #undef HAVE_DECL_DIRFD
 
+/* Define to 1 if you have the declaration of `ecvt', and to 0 if you don't.
+   */
+#undef HAVE_DECL_ECVT
+
+/* Define to 1 if you have the declaration of `execvpe', and to 0 if you
+   don't. */
+#undef HAVE_DECL_EXECVPE
+
 /* Define to 1 if you have the declaration of `fchdir', and to 0 if you don't.
    */
 #undef HAVE_DECL_FCHDIR
 
+/* Define to 1 if you have the declaration of `fcloseall', and to 0 if you
+   don't. */
+#undef HAVE_DECL_FCLOSEALL
+
+/* Define to 1 if you have the declaration of `fcvt', and to 0 if you don't.
+   */
+#undef HAVE_DECL_FCVT
+
 /* Define to 1 if you have the declaration of `fdopendir', and to 0 if you
    don't. */
 #undef HAVE_DECL_FDOPENDIR
+
+/* Define to 1 if you have the declaration of `gcvt', and to 0 if you don't.
+   */
+#undef HAVE_DECL_GCVT
 
 /* Define to 1 if you have the declaration of `getcwd', and to 0 if you don't.
    */
@@ -446,6 +477,10 @@
    don't. */
 #undef HAVE_DECL_UNSETENV
 
+/* Define to 1 if you have the declaration of `wcsdup', and to 0 if you don't.
+   */
+#undef HAVE_DECL_WCSDUP
+
 /* Define to 1 if you have the declaration of `__argv', and to 0 if you don't.
    */
 #undef HAVE_DECL___ARGV
@@ -459,11 +494,11 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* Define to 1 if you have the 'dup2' function. */
-#undef HAVE_DUP2
-
 /* Define if you have the declaration of environ. */
 #undef HAVE_ENVIRON_DECL
+
+/* Define to 1 if you have the `faccessat' function. */
+#undef HAVE_FACCESSAT
 
 /* Define to 1 if you have the `fchdir' function. */
 #undef HAVE_FCHDIR
@@ -618,6 +653,9 @@
    when it succeeds. */
 #undef HAVE_MINIMALLY_WORKING_GETCWD
 
+/* Define to 1 if you have the <minix/config.h> header file. */
+#undef HAVE_MINIX_CONFIG_H
+
 /* Define to 1 if <limits.h> defines the MIN and MAX macros. */
 #undef HAVE_MINMAX_IN_LIMITS_H
 
@@ -693,6 +731,9 @@
 /* Define to 1 if the system has the type `sa_family_t'. */
 #undef HAVE_SA_FAMILY_T
 
+/* Define to 1 if you have the <sdkddkver.h> header file. */
+#undef HAVE_SDKDDKVER_H
+
 /* Define to 1 if you have the <search.h> header file. */
 #undef HAVE_SEARCH_H
 
@@ -728,9 +769,6 @@
 
 /* Define to 1 if you have the `strchrnul' function. */
 #undef HAVE_STRCHRNUL
-
-/* Define to 1 if you have the `strdup' function. */
-#undef HAVE_STRDUP
 
 /* Define to 1 if you have the `strerror_r' function. */
 #undef HAVE_STRERROR_R
@@ -967,9 +1005,6 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
-/* Define if <inttypes.h> exists and defines unusable PRI* macros. */
-#undef PRI_MACROS_BROKEN
-
 /* Define to the type that is the result of default argument promotions of
    type mode_t. */
 #undef PROMOTED_MODE_T
@@ -983,6 +1018,10 @@
 
 /* Define to 1 if readlink fails to recognize a trailing slash. */
 #undef READLINK_TRAILING_SLASH_BUG
+
+/* Define to 1 if readlink sets errno instead of truncating a too-long link.
+   */
+#undef READLINK_TRUNCATE_BUG
 
 /* Define if rename does not work when the destination file exists, as on
    Cygwin 1.5 or Windows. */
@@ -1034,9 +1073,9 @@
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
    automatically deduced at runtime.
-	STACK_DIRECTION > 0 => grows toward higher addresses
-	STACK_DIRECTION < 0 => grows toward lower addresses
-	STACK_DIRECTION = 0 => direction of growth unknown */
+        STACK_DIRECTION > 0 => grows toward higher addresses
+        STACK_DIRECTION < 0 => grows toward lower addresses
+        STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
 /* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
@@ -1074,19 +1113,44 @@
 #ifndef _DARWIN_C_SOURCE
 # undef _DARWIN_C_SOURCE
 #endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# undef __EXTENSIONS__
+#endif
 /* Enable GNU extensions on systems that have them.  */
 #ifndef _GNU_SOURCE
 # undef _GNU_SOURCE
 #endif
-/* Enable NetBSD extensions on NetBSD.  */
+/* Enable X/Open compliant socket functions that do not require linking
+   with -lxnet on HP-UX 11.11.  */
+#ifndef _HPUX_ALT_XOPEN_SOCKET_API
+# undef _HPUX_ALT_XOPEN_SOCKET_API
+#endif
+/* Identify the host operating system as Minix.
+   This macro does not affect the system headers' behavior.
+   A future release of Autoconf may stop defining this macro.  */
+#ifndef _MINIX
+# undef _MINIX
+#endif
+/* Enable general extensions on NetBSD.
+   Enable NetBSD compatibility extensions on Minix.  */
 #ifndef _NETBSD_SOURCE
 # undef _NETBSD_SOURCE
 #endif
-/* Enable OpenBSD extensions on NetBSD.  */
+/* Enable OpenBSD compatibility extensions on NetBSD.
+   Oddly enough, this does nothing on OpenBSD.  */
 #ifndef _OPENBSD_SOURCE
 # undef _OPENBSD_SOURCE
 #endif
-/* Enable threading extensions on Solaris.  */
+/* Define to 1 if needed for POSIX-compatible behavior.  */
+#ifndef _POSIX_SOURCE
+# undef _POSIX_SOURCE
+#endif
+/* Define to 2 if needed for POSIX-compatible behavior.  */
+#ifndef _POSIX_1_SOURCE
+# undef _POSIX_1_SOURCE
+#endif
+/* Enable POSIX-compatible threading on Solaris.  */
 #ifndef _POSIX_PTHREAD_SEMANTICS
 # undef _POSIX_PTHREAD_SEMANTICS
 #endif
@@ -1122,20 +1186,10 @@
 #ifndef _TANDEM_SOURCE
 # undef _TANDEM_SOURCE
 #endif
-/* Enable X/Open extensions if necessary.  HP-UX 11.11 defines
-   mbstate_t only if _XOPEN_SOURCE is defined to 500, regardless of
-   whether compiling with -Ae or -D_HPUX_SOURCE=1.  */
+/* Enable X/Open extensions.  Define to 500 only if necessary
+   to make mbstate_t available.  */
 #ifndef _XOPEN_SOURCE
 # undef _XOPEN_SOURCE
-#endif
-/* Enable X/Open compliant socket functions that do not require linking
-   with -lxnet on HP-UX 11.11.  */
-#ifndef _HPUX_ALT_XOPEN_SOCKET_API
-# undef _HPUX_ALT_XOPEN_SOCKET_API
-#endif
-/* Enable general extensions on Solaris.  */
-#ifndef __EXTENSIONS__
-# undef __EXTENSIONS__
 #endif
 
 
@@ -1177,17 +1231,14 @@
 #endif
 
 
+/* Define to enable the declarations of ISO C 11 types and functions. */
+#undef _ISOC11_SOURCE
+
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
 
 /* Define to 1 on Solaris. */
 #undef _LCONV_C99
-
-/* Define to 1 if on MINIX. */
-#undef _MINIX
-
-/* Define to 1 to make NetBSD features available. MINIX 3 needs this. */
-#undef _NETBSD_SOURCE
 
 /* The _Noreturn keyword of C11.  */
 #ifndef _Noreturn
@@ -1209,7 +1260,7 @@
                 ? 6000000 <= __apple_build_version__ \
                 : 3 < __clang_major__ + (5 <= __clang_minor__))))
    /* _Noreturn works as-is.  */
-# elif _GL_GNUC_PREREQ (2, 8) || 0x5110 <= __SUNPRO_C
+# elif _GL_GNUC_PREREQ (2, 8) || defined __clang__ || 0x5110 <= __SUNPRO_C
 #  define _Noreturn __attribute__ ((__noreturn__))
 # elif 1200 <= (defined _MSC_VER ? _MSC_VER : 0)
 #  define _Noreturn __declspec (noreturn)
@@ -1219,16 +1270,9 @@
 #endif
 
 
-/* Define to 2 if the system does not provide POSIX.1 features except with
-   this defined. */
-#undef _POSIX_1_SOURCE
-
 /* Define to 1 in order to get the POSIX compatible declarations of socket
    functions. */
 #undef _POSIX_PII_SOCKET
-
-/* Define to 1 if you need to in order for 'stat' and other things to work. */
-#undef _POSIX_SOURCE
 
 /* For standard stat data types on VMS. */
 #undef _USE_STD_STAT
@@ -1277,6 +1321,7 @@
 # define _GL_ATTR_cold _GL_GNUC_PREREQ (4, 3)
 # define _GL_ATTR_const _GL_GNUC_PREREQ (2, 95)
 # define _GL_ATTR_deprecated _GL_GNUC_PREREQ (3, 1)
+# define _GL_ATTR_diagnose_if 0
 # define _GL_ATTR_error _GL_GNUC_PREREQ (4, 3)
 # define _GL_ATTR_externally_visible _GL_GNUC_PREREQ (4, 1)
 # define _GL_ATTR_fallthrough _GL_GNUC_PREREQ (7, 0)
@@ -1320,9 +1365,14 @@
 #endif
 
 /* Avoid __attribute__ ((cold)) on MinGW; see thread starting at
-   <https://lists.gnu.org/r/emacs-devel/2019-04/msg01152.html>. */
+   <https://lists.gnu.org/r/emacs-devel/2019-04/msg01152.html>.
+   Also, Oracle Studio 12.6 requires 'cold' not '__cold__'.  */
 #if _GL_HAS_ATTRIBUTE (cold) && !defined __MINGW32__
-# define _GL_ATTRIBUTE_COLD __attribute__ ((__cold__))
+# ifndef __SUNPRO_C
+#  define _GL_ATTRIBUTE_COLD __attribute__ ((__cold__))
+# else
+#  define _GL_ATTRIBUTE_COLD __attribute__ ((cold))
+# endif
 #else
 # define _GL_ATTRIBUTE_COLD
 #endif
@@ -1344,6 +1394,9 @@
 #if _GL_HAS_ATTRIBUTE (error)
 # define _GL_ATTRIBUTE_ERROR(msg) __attribute__ ((__error__ (msg)))
 # define _GL_ATTRIBUTE_WARNING(msg) __attribute__ ((__warning__ (msg)))
+#elif _GL_HAS_ATTRIBUTE (diagnose_if)
+# define _GL_ATTRIBUTE_ERROR(msg) __attribute__ ((__diagnose_if__ (1, msg, "error")))
+# define _GL_ATTRIBUTE_WARNING(msg) __attribute__ ((__diagnose_if__ (1, msg, "warning")))
 #else
 # define _GL_ATTRIBUTE_ERROR(msg)
 # define _GL_ATTRIBUTE_WARNING(msg)
@@ -1376,7 +1429,8 @@
 # define _GL_ATTRIBUTE_LEAF
 #endif
 
-#if _GL_HAS_ATTRIBUTE (may_alias)
+/* Oracle Studio 12.6 mishandles may_alias despite __has_attribute OK.  */
+#if _GL_HAS_ATTRIBUTE (may_alias) && !defined __SUNPRO_C
 # define _GL_ATTRIBUTE_MAY_ALIAS __attribute__ ((__may_alias__))
 #else
 # define _GL_ATTRIBUTE_MAY_ALIAS
@@ -1592,18 +1646,34 @@
 /* Define to a type if <wchar.h> does not define. */
 #undef mbstate_t
 
+/* _GL_CMP (n1, n2) performs a three-valued comparison on n1 vs. n2, where
+   n1 and n2 are expressions without side effects, that evaluate to real
+   numbers (excluding NaN).
+   It returns
+     1  if n1 > n2
+     0  if n1 == n2
+     -1 if n1 < n2
+   The naïve code   (n1 > n2 ? 1 : n1 < n2 ? -1 : 0)  produces a conditional
+   jump with nearly all GCC versions up to GCC 10.
+   This variant     (n1 < n2 ? -1 : n1 > n2)  produces a conditional with many
+   GCC versions up to GCC 9.
+   The better code  (n1 > n2) - (n1 < n2)  from Hacker's Delight § 2-9
+   avoids conditional jumps in all GCC versions >= 3.4.  */
+#define _GL_CMP(n1, n2) (((n1) > (n2)) - ((n1) < (n2)))
+
+
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
 /* Define to the type of st_nlink in struct stat, or a supertype. */
 #undef nlink_t
 
-/* Define to `int' if <sys/types.h> does not define. */
+/* Define as a signed integer type capable of holding a process identifier. */
 #undef pid_t
 
 /* Define to the equivalent of the C99 'restrict' keyword, or to
    nothing if this is not supported.  Do not define if restrict is
-   supported directly.  */
+   supported only directly.  */
 #undef restrict
 /* Work around a bug in older versions of Sun C++, which did not
    #define __restrict__ or support _Restrict or __restrict__

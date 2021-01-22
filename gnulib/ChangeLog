@@ -1,3 +1,9 @@
+2021-02-05  Paul E. Murphy  <murphyp@linux.ibm.com>
+
+	* update-gnulib.sh (GNULIB_COMMIT_SHA1): Bump to
+	776af40e09b476a41073131a90022572f448c189.
+	* Makefile.in, config.in, configure, import/*: Re-generate.
+
 2020-10-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* Makefile.gnulib.inc.in: New file.

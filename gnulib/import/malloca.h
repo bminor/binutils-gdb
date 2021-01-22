@@ -1,5 +1,5 @@
 /* Safe automatic memory allocation.
-   Copyright (C) 2003-2007, 2009-2020 Free Software Foundation, Inc.
+   Copyright (C) 2003-2007, 2009-2021 Free Software Foundation, Inc.
    Written by Bruno Haible <bruno@clisp.org>, 2003.
 
    This program is free software; you can redistribute it and/or modify
@@ -89,7 +89,7 @@ extern void freea (void *p);
 /* ------------------- Auxiliary, non-public definitions ------------------- */
 
 /* Determine the alignment of a type at compile time.  */
-#if defined __GNUC__ || defined __IBM__ALIGNOF__
+#if defined __GNUC__ || defined __clang__ || defined __IBM__ALIGNOF__
 # define sa_alignof __alignof__
 #elif defined __cplusplus
   template <class type> struct sa_alignof_helper { char __slot1; type __slot2; };

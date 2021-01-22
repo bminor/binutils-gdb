@@ -1,3 +1,10 @@
+2021-02-05  Paul E. Murphy  <murphy@linux.ibm.com>
+
+	* common-defs.h (ATTRIBUTE_PRINTF): Rename
+	_GL_ATTRIBUTE_FORMAT_PRINTF to _GL_ATTRIBUTE_FORMAT_PRINTF_STANDARD.
+	* common-utils.h (xfree): Use GNULIB_NAMESPACE namespace when calling
+	free if this macro is defined.
+
 2021-01-23  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* gdb_tilde_expand.cc (gdb_tilde_expand): Improve
