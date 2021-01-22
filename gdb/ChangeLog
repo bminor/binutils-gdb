@@ -1,5 +1,11 @@
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* remote.h (remote_debug): Change to bool.
+	* remote.c (remote_debug): Change to bool.
+	(_initialize_remote): Adjust.
+
+2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target.h (remote_debug): Move to...
 	* remote.h (remote_debug): ... here.
 	* top.c (remote_debug): Move to...

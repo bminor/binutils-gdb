@@ -24,9 +24,9 @@
 struct target_desc;
 struct remote_target;
 
-/* Debugging level.  0 is off, and non-zero values mean to print some debug
-   information (higher values, more information).  */
-extern int remote_debug;
+/* True when printing "remote" debug statements is enabled.  */
+
+extern bool remote_debug;
 
 /* Read a packet from the remote machine, with error checking, and
    store it in *BUF.  Resize *BUF using xrealloc if necessary to hold

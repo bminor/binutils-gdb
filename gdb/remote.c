@@ -89,7 +89,7 @@ Specify the serial device it is connected to\n\
 
 /* See remote.h  */
 
-int remote_debug = 0;
+bool remote_debug = false;
 
 #define OPAQUETHREADBYTES 8
 
@@ -15062,14 +15062,15 @@ Specify \"unlimited\" to display all the characters."),
 				       NULL, show_remote_packet_max_chars,
 				       &setdebuglist, &showdebuglist);
 
-  add_setshow_zinteger_cmd ("remote", no_class, &remote_debug, _("\
-Set debugging of remote protocol."), _("\
-Show debugging of remote protocol."), _("\
+  add_setshow_boolean_cmd ("remote", no_class, &remote_debug,
+			   _("Set debugging of remote protocol."),
+			   _("Show debugging of remote protocol."),
+			   _("\
 When enabled, each packet sent or received with the remote target\n\
 is displayed."),
-			    NULL,
-			    show_remote_debug,
-			    &setdebuglist, &showdebuglist);
+			   NULL,
+			   show_remote_debug,
+			   &setdebuglist, &showdebuglist);
 
   add_setshow_zuinteger_unlimited_cmd ("remotetimeout", no_class,
 				       &remote_timeout, _("\
