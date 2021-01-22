@@ -1,3 +1,12 @@
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.tui/scroll.exp: New file.
+	* gdb.tui/tui-layout-asm-short-prog.exp: Update expected results.
+	* lib/tuiterm.exp (Term::_csi_M): Delete count lines, scroll
+	remaining lines up.
+	(Term::check_region_contents): New proc.
+	(Term::check_box_contents): Use check_region_contents.
+
 2021-02-06  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/26922
