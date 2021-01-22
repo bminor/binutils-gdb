@@ -27651,17 +27651,15 @@ see @ref{Command Settings}.
 @section Auto-loading extensions
 @cindex auto-loading extensions
 
-@value{GDBN} provides two mechanisms for automatically loading extensions
-when a new object file is read (for example, due to the @code{file}
-command, or because the inferior has loaded a shared library):
-@file{@var{objfile}-gdb.@var{ext}} and the @code{.debug_gdb_scripts}
-section of modern file formats like ELF.
-
-@menu
-* objfile-gdb.ext file: objfile-gdbdotext file.  The @file{@var{objfile}-gdb.@var{ext}} file
-* .debug_gdb_scripts section: dotdebug_gdb_scripts section.  The @code{.debug_gdb_scripts} section
-* Which flavor to choose?::
-@end menu
+@value{GDBN} provides two mechanisms for automatically loading
+extensions when a new object file is read (for example, due to the
+@code{file} command, or because the inferior has loaded a shared
+library): @file{@var{objfile}-gdb.@var{ext}} (@pxref{objfile-gdbdotext
+file,,The @file{@var{objfile}-gdb.@var{ext}} file}) and the
+@code{.debug_gdb_scripts} section of modern file formats like ELF
+(@pxref {dotdebug_gdb_scripts section,,The @code{.debug_gdb_scripts}
+section}).  For a discussion of the differences between these two
+approaches see @ref{Which flavor to choose?}.
 
 The auto-loading feature is useful for supplying application-specific
 debugging commands and features.
@@ -27675,6 +27673,12 @@ For Python files see @ref{Python Auto-loading}.
 
 Note that loading of this script file also requires accordingly configured
 @code{auto-load safe-path} (@pxref{Auto-loading safe path}).
+
+@menu
+* objfile-gdbdotext file::		The @file{@var{objfile}-gdb.@var{ext}} file
+* dotdebug_gdb_scripts section::	The @code{.debug_gdb_scripts} section
+* Which flavor to choose?::		Choosing between these approaches
+@end menu
 
 @node objfile-gdbdotext file
 @subsection The @file{@var{objfile}-gdb.@var{ext}} file
