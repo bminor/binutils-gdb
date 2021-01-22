@@ -1825,7 +1825,7 @@ rust_operator_check (struct expression *exp, int pos,
     case OP_AGGREGATE:
       {
 	struct type *type = exp->elts[pos + 1].type;
-	struct objfile *objfile = TYPE_OBJFILE (type);
+	struct objfile *objfile = type->objfile ();
 
 	if (objfile != NULL && (*objfile_func) (objfile, data))
 	  return 1;

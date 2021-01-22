@@ -220,12 +220,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_NOTTEXT(t)	(((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_NOTTEXT)
 
-/* * Type owner.  If TYPE_OBJFILE_OWNED is true, the type is owned by
-   the objfile retrieved as TYPE_OBJFILE.  Otherwise, the type is
-   owned by an architecture; TYPE_OBJFILE is NULL in this case.  */
-
-#define TYPE_OBJFILE(t) ((t)->objfile ())
-
 /* * True if this type was declared using the "class" keyword.  This is
    only valid for C++ structure and enum types.  If false, a structure
    was declared as a "struct"; if true it was declared "class".  For

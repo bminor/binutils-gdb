@@ -1,5 +1,10 @@
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbtypes.h (TYPE_OBJFILE): Remove, change all users to use the
+	type::objfile method instead.
+
+2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbtypes.h (TYPE_OBJFILE_OWNED): Remove, update all users to
 	use the type::is_objfile_owned method.
 

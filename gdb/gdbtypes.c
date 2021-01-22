@@ -293,7 +293,7 @@ alloc_type_instance (struct type *oldtype)
   if (!oldtype->is_objfile_owned ())
     type = GDBARCH_OBSTACK_ZALLOC (get_type_arch (oldtype), struct type);
   else
-    type = OBSTACK_ZALLOC (&TYPE_OBJFILE (oldtype)->objfile_obstack,
+    type = OBSTACK_ZALLOC (&oldtype->objfile ()->objfile_obstack,
 			   struct type);
 
   TYPE_MAIN_TYPE (type) = TYPE_MAIN_TYPE (oldtype);
@@ -648,7 +648,7 @@ make_qualified_type (struct type *type, type_instance_flags new_flags,
 	 as TYPE.  Otherwise, we can't link it into TYPE's cv chain:
 	 if one objfile is freed and the other kept, we'd have
 	 dangling pointers.  */
-      gdb_assert (TYPE_OBJFILE (type) == TYPE_OBJFILE (storage));
+      gdb_assert (type->objfile () == storage->objfile ());
 
       ntype = storage;
       TYPE_MAIN_TYPE (ntype) = TYPE_MAIN_TYPE (type);
@@ -738,7 +738,7 @@ make_cv_type (int cnst, int voltl,
 	 can't have inter-objfile pointers.  The only thing to do is
 	 to leave stub types as stub types, and look them up afresh by
 	 name each time you encounter them.  */
-      gdb_assert (TYPE_OBJFILE (*typeptr) == TYPE_OBJFILE (type));
+      gdb_assert ((*typeptr)->objfile () == type->objfile ());
     }
   
   ntype = make_qualified_type (type, new_flags, 
@@ -804,7 +804,7 @@ replace_type (struct type *ntype, struct type *type)
      the assignment of one type's main type structure to the other
      will produce a type with references to objects (names; field
      lists; etc.) allocated on an objfile other than its own.  */
-  gdb_assert (TYPE_OBJFILE (ntype) == TYPE_OBJFILE (type));
+  gdb_assert (ntype->objfile () == type->objfile ());
 
   *TYPE_MAIN_TYPE (ntype) = *TYPE_MAIN_TYPE (type);
 
@@ -1681,7 +1681,7 @@ type_name_or_error (struct type *type)
     return name;
 
   name = saved_type->name ();
-  objfile = TYPE_OBJFILE (saved_type);
+  objfile = saved_type->objfile ();
   error (_("Invalid anonymous type %s [in module %s], GCC PR debug/47510 bug?"),
 	 name ? name : "<anonymous>",
 	 objfile ? objfile_name (objfile) : "<arch>");
@@ -2027,7 +2027,7 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
 	    {
 	      /* If the type comes from a different objfile we can't cache
 		 it, it may have a different lifetime.  PR 2384 */
-	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (basetype))
+	      if (type->objfile () == basetype->objfile ())
 		{
 		  set_type_vptr_fieldno (type, fieldno);
 		  set_type_vptr_basetype (type, basetype);
@@ -2800,7 +2800,7 @@ type::add_dyn_prop (dynamic_prop_node_kind prop_kind, dynamic_prop prop)
 
   gdb_assert (this->is_objfile_owned ());
 
-  temp = XOBNEW (&TYPE_OBJFILE (this)->objfile_obstack,
+  temp = XOBNEW (&this->objfile ()->objfile_obstack,
 		 struct dynamic_prop_list);
   temp->prop_kind = prop_kind;
   temp->prop = prop;
@@ -2969,7 +2969,7 @@ check_typedef (struct type *type)
 	     TYPE's objfile is pointless, too, since you'll have to
 	     move over any other types NEWTYPE refers to, which could
 	     be an unbounded amount of stuff.  */
-	  if (TYPE_OBJFILE (newtype) == TYPE_OBJFILE (type))
+	  if (newtype->objfile () == type->objfile ())
 	    type = make_qualified_type (newtype, type->instance_flags (), type);
 	  else
 	    type = newtype;
@@ -2995,7 +2995,7 @@ check_typedef (struct type *type)
 	  /* Same as above for opaque types, we can replace the stub
 	     with the complete type only if they are in the same
 	     objfile.  */
-	  if (TYPE_OBJFILE (SYMBOL_TYPE (sym)) == TYPE_OBJFILE (type))
+	  if (SYMBOL_TYPE (sym)->objfile () == type->objfile ())
 	    type = make_qualified_type (SYMBOL_TYPE (sym),
 					type->instance_flags (), type);
 	  else
@@ -5497,7 +5497,7 @@ copy_type_recursive (struct objfile *objfile,
 
   /* This type shouldn't be pointing to any types in other objfiles;
      if it did, the type might disappear unexpectedly.  */
-  gdb_assert (TYPE_OBJFILE (type) == objfile);
+  gdb_assert (type->objfile () == objfile);
 
   struct type_pair pair (type, nullptr);
 
@@ -5667,7 +5667,7 @@ copy_type (const struct type *type)
 	  sizeof (struct main_type));
   if (type->main_type->dyn_prop_list != NULL)
     new_type->main_type->dyn_prop_list
-      = copy_dynamic_prop_list (&TYPE_OBJFILE (type) -> objfile_obstack,
+      = copy_dynamic_prop_list (&type->objfile ()->objfile_obstack,
 				type->main_type->dyn_prop_list);
 
   return new_type;
@@ -5963,9 +5963,9 @@ allocate_fixed_point_type_info (struct type *type)
   if (type->is_objfile_owned ())
     {
       fixed_point_type_storage *storage
-	= fixed_point_objfile_key.get (TYPE_OBJFILE (type));
+	= fixed_point_objfile_key.get (type->objfile ());
       if (storage == nullptr)
-	storage = fixed_point_objfile_key.emplace (TYPE_OBJFILE (type));
+	storage = fixed_point_objfile_key.emplace (type->objfile ());
       info = up.get ();
       storage->push_back (std::move (up));
     }
