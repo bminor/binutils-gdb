@@ -3801,16 +3801,6 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (!riscv_merge_attributes (ibfd, info))
     return FALSE;
 
-  new_flags = elf_elfheader (ibfd)->e_flags;
-  old_flags = elf_elfheader (obfd)->e_flags;
-
-  if (! elf_flags_init (obfd))
-    {
-      elf_flags_init (obfd) = TRUE;
-      elf_elfheader (obfd)->e_flags = new_flags;
-      return TRUE;
-    }
-
   /* Check to see if the input BFD actually contains any sections.  If not,
      its flags may not have been initialized either, but it cannot actually
      cause any incompatibility.  Do not short-circuit dynamic objects; their
@@ -3826,17 +3816,29 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
+	  null_input_bfd = FALSE;
+
 	  if ((bfd_section_flags (sec)
 	       & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
 	      == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
-	    only_data_sections = FALSE;
-
-	  null_input_bfd = FALSE;
-	  break;
+	    {
+	      only_data_sections = FALSE;
+	      break;
+	    }
 	}
 
       if (null_input_bfd || only_data_sections)
 	return TRUE;
+    }
+
+  new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
+
+  if (!elf_flags_init (obfd))
+    {
+      elf_flags_init (obfd) = TRUE;
+      elf_elfheader (obfd)->e_flags = new_flags;
+      return TRUE;
     }
 
   /* Disallow linking different float ABIs.  */

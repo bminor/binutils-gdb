@@ -1,3 +1,12 @@
+2021-02-17  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27200
+	* elfnn-riscv.c (_bfd_riscv_elf_merge_private_bfd_data): Delay
+	copying the elf flags from input BFD to output BFD, until we have
+	checked if the input BFD has no code section or not.  Also fix the
+	problem that we only check the first section rather than the entire
+	sections for input BFD.
+
 2021-02-16  Alan Modra  <amodra@gmail.com>
 
 	* libbfd.c (_bfd_read_unsigned_leb128): Avoid excessive shift.
