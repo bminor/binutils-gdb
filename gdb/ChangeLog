@@ -1,3 +1,31 @@
+2021-01-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_OBJFILE_OWNED): Adjust.
+	(TYPE_OWNER): Remove.
+	(TYPE_OBJFILE): Adjust.
+	(struct main_type) <flag_objfile_owned>: Rename to...
+	<m_flag_objfile_owned>: ... this.
+	<owner>: Rename to...
+	<m_owner>: ... this.
+	(struct type) <is_objfile_owned, set_owner, objfile, arch>: New
+	methods.
+	(TYPE_ALLOC): Adjust.
+	* gdbtypes.c (alloc_type): Adjust.
+	(alloc_type_arch): Adjust.
+	(alloc_type_copy): Adjust.
+	(get_type_arch): Adjust.
+	(smash_type): Adjust.
+	(lookup_array_range_type): Adjust.
+	(recursive_dump_type): Adjust.
+	(copy_type_recursive): Adjust.
+	* compile/compile-c-types.c (convert_func): Adjust.
+	(convert_type_basic): Adjust.
+	* compile/compile-cplus-types.c (compile_cplus_convert_func):
+	Adjust.
+	* language.c
+	(language_arch_info::type_and_symbol::alloc_type_symbol):
+	Adjust.
+
 2021-01-21  Luis Machado  <luis.machado@linaro.org>
 
 	* coffread.c (enter_linenos): Passing string to complaint.

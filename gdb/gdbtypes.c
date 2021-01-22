@@ -183,8 +183,7 @@ alloc_type (struct objfile *objfile)
 					  struct main_type);
   OBJSTAT (objfile, n_types++);
 
-  TYPE_OBJFILE_OWNED (type) = 1;
-  TYPE_OWNER (type).objfile = objfile;
+  type->set_owner (objfile);
 
   /* Initialize the fields that might not be zero.  */
 
@@ -210,8 +209,7 @@ alloc_type_arch (struct gdbarch *gdbarch)
   type = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct type);
   TYPE_MAIN_TYPE (type) = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct main_type);
 
-  TYPE_OBJFILE_OWNED (type) = 0;
-  TYPE_OWNER (type).gdbarch = gdbarch;
+  type->set_owner (gdbarch);
 
   /* Initialize the fields that might not be zero.  */
 
@@ -229,9 +227,9 @@ struct type *
 alloc_type_copy (const struct type *type)
 {
   if (TYPE_OBJFILE_OWNED (type))
-    return alloc_type (TYPE_OWNER (type).objfile);
+    return alloc_type (type->objfile ());
   else
-    return alloc_type_arch (TYPE_OWNER (type).gdbarch);
+    return alloc_type_arch (type->arch ());
 }
 
 /* If TYPE is gdbarch-associated, return that architecture.
@@ -243,9 +241,9 @@ get_type_arch (const struct type *type)
   struct gdbarch *arch;
 
   if (TYPE_OBJFILE_OWNED (type))
-    arch = TYPE_OWNER (type).objfile->arch ();
+    arch = type->objfile ()->arch ();
   else
-    arch = TYPE_OWNER (type).gdbarch;
+    arch = type->arch ();
 
   /* The ARCH can be NULL if TYPE is associated with neither an objfile nor
      a gdbarch, however, this is very rare, and even then, in most cases
@@ -311,14 +309,17 @@ alloc_type_instance (struct type *oldtype)
 static void
 smash_type (struct type *type)
 {
-  int objfile_owned = TYPE_OBJFILE_OWNED (type);
-  union type_owner owner = TYPE_OWNER (type);
+  bool objfile_owned = type->is_objfile_owned ();
+  objfile *objfile = type->objfile ();
+  gdbarch *arch = type->arch ();
 
   memset (TYPE_MAIN_TYPE (type), 0, sizeof (struct main_type));
 
   /* Restore owner information.  */
-  TYPE_OBJFILE_OWNED (type) = objfile_owned;
-  TYPE_OWNER (type) = owner;
+  if (objfile_owned)
+    type->set_owner (objfile);
+  else
+    type->set_owner (arch);
 
   /* For now, delete the rings.  */
   TYPE_CHAIN (type) = type;
@@ -1429,9 +1430,10 @@ lookup_array_range_type (struct type *element_type,
   struct type *range_type;
 
   if (TYPE_OBJFILE_OWNED (element_type))
-    index_type = objfile_type (TYPE_OWNER (element_type).objfile)->builtin_int;
+    index_type = objfile_type (element_type->objfile ())->builtin_int;
   else
-    index_type = builtin_type (get_type_arch (element_type))->builtin_int;
+    index_type = builtin_type (element_type->arch ())->builtin_int;
+
   range_type = create_static_range_type (NULL, index_type,
 					 low_bound, high_bound);
 
@@ -5190,12 +5192,12 @@ recursive_dump_type (struct type *type, int spaces)
   if (TYPE_OBJFILE_OWNED (type))
     {
       printf_filtered ("%*sobjfile ", spaces, "");
-      gdb_print_host_address (TYPE_OWNER (type).objfile, gdb_stdout);
+      gdb_print_host_address (type->objfile (), gdb_stdout);
     }
   else
     {
       printf_filtered ("%*sgdbarch ", spaces, "");
-      gdb_print_host_address (TYPE_OWNER (type).gdbarch, gdb_stdout);
+      gdb_print_host_address (type->arch (), gdb_stdout);
     }
   printf_filtered ("\n");
   printf_filtered ("%*starget_type ", spaces, "");
@@ -5515,8 +5517,8 @@ copy_type_recursive (struct objfile *objfile,
   /* Copy the common fields of types.  For the main type, we simply
      copy the entire thing and then update specific fields as needed.  */
   *TYPE_MAIN_TYPE (new_type) = *TYPE_MAIN_TYPE (type);
-  TYPE_OBJFILE_OWNED (new_type) = 0;
-  TYPE_OWNER (new_type).gdbarch = get_type_arch (type);
+
+  new_type->set_owner (type->arch ());
 
   if (type->name ())
     new_type->set_name (xstrdup (type->name ()));
