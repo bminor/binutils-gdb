@@ -8892,17 +8892,17 @@ As described in the preceding table.
 @cindex location
 @cindex source location
 
-@menu
-* Linespec Locations::                Linespec locations
-* Explicit Locations::                Explicit locations
-* Address Locations::                 Address locations
-@end menu
-
 Several @value{GDBN} commands accept arguments that specify a location
 of your program's code.  Since @value{GDBN} is a source-level
 debugger, a location usually specifies some line in the source code.
 Locations may be specified using three different formats:
 linespec locations, explicit locations, or address locations.
+
+@menu
+* Linespec Locations::                Linespec locations
+* Explicit Locations::                Explicit locations
+* Address Locations::                 Address locations
+@end menu
 
 @node Linespec Locations
 @subsection Linespec Locations
@@ -25994,14 +25994,6 @@ without being explicitly told so by the user.  We call this feature
 results or introduce security risks (e.g., if the file comes from untrusted
 sources).
 
-@menu
-* Init File in the Current Directory:: @samp{set/show/info auto-load local-gdbinit}
-* libthread_db.so.1 file::             @samp{set/show/info auto-load libthread-db}
-
-* Auto-loading safe path::             @samp{set/show/info auto-load safe-path}
-* Auto-loading verbose mode::          @samp{set/show debug auto-load}
-@end menu
-
 There are various kinds of files @value{GDBN} can automatically load.
 In addition to these files, @value{GDBN} supports auto-loading code written
 in various extension languages.  @xref{Auto-loading extensions}.
@@ -26122,6 +26114,14 @@ These are @value{GDBN} control commands for the auto-loading:
 @item @xref{add-auto-load-safe-path}.
 @tab Add directory trusted for automatic loading.
 @end multitable
+
+@menu
+* Init File in the Current Directory:: @samp{set/show/info auto-load local-gdbinit}
+* libthread_db.so.1 file::             @samp{set/show/info auto-load libthread-db}
+
+* Auto-loading safe path::             @samp{set/show/info auto-load safe-path}
+* Auto-loading verbose mode::          @samp{set/show debug auto-load}
+@end menu
 
 @node Init File in the Current Directory
 @subsection Automatically loading init file in the current directory
@@ -26824,15 +26824,6 @@ extensions when it reads a file for debugging.  This allows the
 user to automatically customize @value{GDBN} for the program
 being debugged.
 
-@menu
-* Sequences::                Canned Sequences of @value{GDBN} Commands
-* Aliases::                  Command Aliases
-* Python::                   Extending @value{GDBN} using Python
-* Guile::                    Extending @value{GDBN} using Guile
-* Auto-loading extensions::  Automatically loading extensions
-* Multiple Extension Languages:: Working with multiple extension languages
-@end menu
-
 To facilitate the use of extension languages, @value{GDBN} is capable
 of evaluating the contents of a file.  When doing so, @value{GDBN}
 can recognize which extension language is being used by looking at
@@ -26871,6 +26862,15 @@ Files in that directory must have an extension matching their language,
 or have a @file{.gdb} extension to be interpreted as regular @value{GDBN}
 commands.  @xref{Startup}.
 @end ifset
+
+@menu
+* Sequences::                Canned Sequences of @value{GDBN} Commands
+* Aliases::                  Command Aliases
+* Python::                   Extending @value{GDBN} using Python
+* Guile::                    Extending @value{GDBN} using Guile
+* Auto-loading extensions::  Automatically loading extensions
+* Multiple Extension Languages:: Working with multiple extension languages
+@end menu
 
 @node Sequences
 @section Canned Sequences of Commands
@@ -28064,14 +28064,6 @@ runs an MI interpreter on @file{/dev/pts/9}.
 @cindex TUI
 @cindex Text User Interface
 
-@menu
-* TUI Overview::                TUI overview
-* TUI Keys::                    TUI key bindings
-* TUI Single Key Mode::         TUI single key mode
-* TUI Commands::                TUI-specific commands
-* TUI Configuration::           TUI configuration variables
-@end menu
-
 The @value{GDBN} Text User Interface (TUI) is a terminal
 interface which uses the @code{curses} library to show the source
 file, the assembly output, the program registers and @value{GDBN}
@@ -28085,6 +28077,14 @@ You can also switch in and out of TUI mode while @value{GDBN} runs by
 using various TUI commands and key bindings, such as @command{tui
 enable} or @kbd{C-x C-a}.  @xref{TUI Commands, ,TUI Commands}, and
 @ref{TUI Keys, ,TUI Key Bindings}.
+
+@menu
+* TUI Overview::                TUI overview
+* TUI Keys::                    TUI key bindings
+* TUI Single Key Mode::         TUI single key mode
+* TUI Commands::                TUI-specific commands
+* TUI Configuration::           TUI configuration variables
+@end menu
 
 @node TUI Overview
 @section TUI Overview
@@ -46050,10 +46050,6 @@ contain registers @samp{TSR}, @samp{ILC} and @samp{RILC}.
 @appendix Operating System Information
 @cindex operating system information
 
-@menu
-* Process list::
-@end menu
-
 Users of @value{GDBN} often wish to obtain information about the state of
 the operating system running on the target---for example the list of
 processes, or the list of open files.  This section describes the
@@ -46065,6 +46061,10 @@ Operating system information is retrieved from the target via the
 remote protocol, using @samp{qXfer} requests (@pxref{qXfer osdata
 read}).  The object name in the request should be @samp{osdata}, and
 the @var{annex} identifies the data to be fetched.
+
+@menu
+* Process list::
+@end menu
 
 @node Process list
 @appendixsection Process list
