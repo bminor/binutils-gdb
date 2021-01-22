@@ -87,6 +87,10 @@ Use a remote computer via a serial line, using a gdb-specific protocol.\n\
 Specify the serial device it is connected to\n\
 (e.g. /dev/ttyS0, /dev/ttya, COM1, etc.).");
 
+/* See remote.h  */
+
+int remote_debug = 0;
+
 #define OPAQUETHREADBYTES 8
 
 /* a 64 bit opaque identifier */

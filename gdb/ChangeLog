@@ -1,5 +1,13 @@
 2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target.h (remote_debug): Move to...
+	* remote.h (remote_debug): ... here.
+	* top.c (remote_debug): Move to...
+	* remote.c (remote_debug): ... here.
+	* remote-sim.c: Include remote.h.
+
+2021-01-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* cli/cli-cmds.c (show_remote_debug): Remove.
 	(show_remote_timeout): Remove.
 	(_initialize_cli_cmds): Don't register commands.

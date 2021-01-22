@@ -43,6 +43,7 @@
 #include "gdbthread.h"
 #include "gdbsupport/byte-vector.h"
 #include "memory-map.h"
+#include "remote.h"
 
 /* Prototypes */
 

@@ -198,10 +198,6 @@ bool server_command;
 
 int remote_timeout = 2;
 
-/* Non-zero tells remote* modules to output debugging info.  */
-
-int remote_debug = 0;
-
 /* Sbrk location on entry to main.  Used for statistics only.  */
 #ifdef HAVE_USEFUL_SBRK
 char *lim_at_start;

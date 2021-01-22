@@ -2473,9 +2473,6 @@ extern gdb::optional<gdb::char_vector> target_get_osdata (const char *type);
 
 /* Stuff that should be shared among the various remote targets.  */
 
-/* Debugging level.  0 is off, and non-zero values mean to print some debug
-   information (higher values, more information).  */
-extern int remote_debug;
 
 /* Timeout limit for response from target.  */
 extern int remote_timeout;
