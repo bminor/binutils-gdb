@@ -226,7 +226,7 @@ alloc_type_arch (struct gdbarch *gdbarch)
 struct type *
 alloc_type_copy (const struct type *type)
 {
-  if (TYPE_OBJFILE_OWNED (type))
+  if (type->is_objfile_owned ())
     return alloc_type (type->objfile ());
   else
     return alloc_type_arch (type->arch ());
@@ -240,7 +240,7 @@ get_type_arch (const struct type *type)
 {
   struct gdbarch *arch;
 
-  if (TYPE_OBJFILE_OWNED (type))
+  if (type->is_objfile_owned ())
     arch = type->objfile ()->arch ();
   else
     arch = type->arch ();
@@ -290,7 +290,7 @@ alloc_type_instance (struct type *oldtype)
 
   /* Allocate the structure.  */
 
-  if (! TYPE_OBJFILE_OWNED (oldtype))
+  if (!oldtype->is_objfile_owned ())
     type = GDBARCH_OBSTACK_ZALLOC (get_type_arch (oldtype), struct type);
   else
     type = OBSTACK_ZALLOC (&TYPE_OBJFILE (oldtype)->objfile_obstack,
@@ -1429,7 +1429,7 @@ lookup_array_range_type (struct type *element_type,
   struct type *index_type;
   struct type *range_type;
 
-  if (TYPE_OBJFILE_OWNED (element_type))
+  if (element_type->is_objfile_owned ())
     index_type = objfile_type (element_type->objfile ())->builtin_int;
   else
     index_type = builtin_type (element_type->arch ())->builtin_int;
@@ -2798,7 +2798,7 @@ type::add_dyn_prop (dynamic_prop_node_kind prop_kind, dynamic_prop prop)
 {
   struct dynamic_prop_list *temp;
 
-  gdb_assert (TYPE_OBJFILE_OWNED (this));
+  gdb_assert (this->is_objfile_owned ());
 
   temp = XOBNEW (&TYPE_OBJFILE (this)->objfile_obstack,
 		 struct dynamic_prop_list);
@@ -5189,7 +5189,7 @@ recursive_dump_type (struct type *type, int spaces)
   puts_filtered ("\n");
   printf_filtered ("%*slength %s\n", spaces, "",
 		   pulongest (TYPE_LENGTH (type)));
-  if (TYPE_OBJFILE_OWNED (type))
+  if (type->is_objfile_owned ())
     {
       printf_filtered ("%*sobjfile ", spaces, "");
       gdb_print_host_address (type->objfile (), gdb_stdout);
@@ -5492,7 +5492,7 @@ copy_type_recursive (struct objfile *objfile,
   void **slot;
   struct type *new_type;
 
-  if (! TYPE_OBJFILE_OWNED (type))
+  if (!type->is_objfile_owned ())
     return type;
 
   /* This type shouldn't be pointing to any types in other objfiles;
@@ -5658,7 +5658,7 @@ copy_type (const struct type *type)
 {
   struct type *new_type;
 
-  gdb_assert (TYPE_OBJFILE_OWNED (type));
+  gdb_assert (type->is_objfile_owned ());
 
   new_type = alloc_type_copy (type);
   new_type->set_instance_flags (type->instance_flags ());
@@ -5960,7 +5960,7 @@ allocate_fixed_point_type_info (struct type *type)
   std::unique_ptr<fixed_point_type_info> up (new fixed_point_type_info);
   fixed_point_type_info *info;
 
-  if (TYPE_OBJFILE_OWNED (type))
+  if (type->is_objfile_owned ())
     {
       fixed_point_type_storage *storage
 	= fixed_point_objfile_key.get (TYPE_OBJFILE (type));

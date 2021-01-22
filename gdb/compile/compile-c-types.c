@@ -164,7 +164,7 @@ convert_func (compile_c_instance *context, struct type *type)
      GDB's parser used to do.  */
   if (target_type == NULL)
     {
-      if (TYPE_OBJFILE_OWNED (type))
+      if (type->is_objfile_owned ())
 	target_type = objfile_type (type->objfile ())->builtin_int;
       else
 	target_type = builtin_type (type->arch ())->builtin_int;
@@ -323,7 +323,7 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 	   built-in parser does.  For now, assume "int" like GDB's
 	   built-in parser used to do, but at least warn.  */
 	struct type *fallback;
-	if (TYPE_OBJFILE_OWNED (type))
+	if (type->is_objfile_owned ())
 	  fallback = objfile_type (type->objfile ())->builtin_int;
 	else
 	  fallback = builtin_type (type->arch ())->builtin_int;

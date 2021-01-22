@@ -970,7 +970,7 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
      GDB's parser used to do.  */
   if (target_type == nullptr)
     {
-      if (TYPE_OBJFILE_OWNED (type))
+      if (type->is_objfile_owned ())
 	target_type = objfile_type (type->objfile ())->builtin_int;
       else
 	target_type = builtin_type (type->arch ())->builtin_int;

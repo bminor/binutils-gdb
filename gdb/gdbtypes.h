@@ -224,7 +224,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
    the objfile retrieved as TYPE_OBJFILE.  Otherwise, the type is
    owned by an architecture; TYPE_OBJFILE is NULL in this case.  */
 
-#define TYPE_OBJFILE_OWNED(t) ((t)->is_objfile_owned ())
 #define TYPE_OBJFILE(t) ((t)->objfile ())
 
 /* * True if this type was declared using the "class" keyword.  This is
@@ -2242,7 +2241,7 @@ extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
    when it is no longer needed.  */
 
 #define TYPE_ALLOC(t,size)                                              \
-  (obstack_alloc ((TYPE_OBJFILE_OWNED (t)                               \
+  (obstack_alloc (((t)->is_objfile_owned ()                             \
 		   ? &((t)->objfile ()->objfile_obstack)                \
 		   : gdbarch_obstack ((t)->arch ())),                   \
 		  size))
