@@ -5518,7 +5518,7 @@ copy_type_recursive (struct objfile *objfile,
      copy the entire thing and then update specific fields as needed.  */
   *TYPE_MAIN_TYPE (new_type) = *TYPE_MAIN_TYPE (type);
 
-  new_type->set_owner (type->arch ());
+  new_type->set_owner (get_type_arch (type));
 
   if (type->name ())
     new_type->set_name (xstrdup (type->name ()));

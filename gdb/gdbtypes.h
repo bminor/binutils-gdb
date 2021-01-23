@@ -1245,6 +1245,8 @@ struct type
   /* Set the owner of the type to be OBJFILE.  */
   void set_owner (objfile *objfile)
   {
+    gdb_assert (objfile != nullptr);
+
     this->main_type->m_owner.objfile = objfile;
     this->main_type->m_flag_objfile_owned = true;
   }
@@ -1252,6 +1254,8 @@ struct type
   /* Set the owner of the type to be ARCH.  */
   void set_owner (gdbarch *arch)
   {
+    gdb_assert (arch != nullptr);
+
     this->main_type->m_owner.gdbarch = arch;
     this->main_type->m_flag_objfile_owned = false;
   }

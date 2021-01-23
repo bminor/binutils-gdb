@@ -1,3 +1,8 @@
+2021-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.c (copy_type_recursive): Use get_type_arch.
+	* gdbtypes.h (struct type) <set_owner>: Add asserts.
+
 2021-01-23  Lancelot SIX  <lsix@lancelotsix.com>
 
 	* Makefile.in (SELFTESTS_SRCS): Add
