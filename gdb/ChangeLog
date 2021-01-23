@@ -1,5 +1,11 @@
 2021-01-23  Tom Tromey  <tom@tromey.com>
 
+	PR compile/25575
+	* compile/compile-loc2c.c (note_register): New function.
+	(pushf_register_address, pushf_register): Use it.
+
+2021-01-23  Tom Tromey  <tom@tromey.com>
+
 	* symtab.h (struct symbol_computed_ops) <generate_c_location>:
 	Change type of "registers_used".
 	* dwarf2/loc.h (dwarf2_compile_property_to_c): Update.
