@@ -511,12 +511,12 @@ print_label (string_file *stream, unsigned int scope, int target)
 
 static void
 pushf_register_address (int indent, string_file *stream,
-			unsigned char *registers_used,
+			std::vector<bool> &registers_used,
 			struct gdbarch *gdbarch, int regnum)
 {
   std::string regname = compile_register_name_mangled (gdbarch, regnum);
 
-  registers_used[regnum] = 1;
+  registers_used[regnum] = true;
   pushf (indent, stream,
 	 "(" GCC_UINTPTR ") &" COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
 	 regname.c_str ());
@@ -529,12 +529,12 @@ pushf_register_address (int indent, string_file *stream,
 
 static void
 pushf_register (int indent, string_file *stream,
-		unsigned char *registers_used,
+		std::vector<bool> &registers_used,
 		struct gdbarch *gdbarch, int regnum, uint64_t offset)
 {
   std::string regname = compile_register_name_mangled (gdbarch, regnum);
 
-  registers_used[regnum] = 1;
+  registers_used[regnum] = true;
   if (offset == 0)
     pushf (indent, stream, COMPILE_I_SIMPLE_REGISTER_ARG_NAME "->%s",
 	   regname.c_str ());
@@ -579,7 +579,7 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 			    const char *result_name,
 			    struct symbol *sym, CORE_ADDR pc,
 			    struct gdbarch *arch,
-			    unsigned char *registers_used,
+			    std::vector<bool> &registers_used,
 			    unsigned int addr_size,
 			    const gdb_byte *op_ptr, const gdb_byte *op_end,
 			    CORE_ADDR *initial,
@@ -1129,7 +1129,8 @@ do_compile_dwarf_expr_to_c (int indent, string_file *stream,
 void
 compile_dwarf_expr_to_c (string_file *stream, const char *result_name,
 			 struct symbol *sym, CORE_ADDR pc,
-			 struct gdbarch *arch, unsigned char *registers_used,
+			 struct gdbarch *arch,
+			 std::vector<bool> &registers_used,
 			 unsigned int addr_size,
 			 const gdb_byte *op_ptr, const gdb_byte *op_end,
 			 dwarf2_per_cu_data *per_cu,
@@ -1147,7 +1148,8 @@ compile_dwarf_bounds_to_c (string_file *stream,
 			   const char *result_name,
 			   const struct dynamic_prop *prop,
 			   struct symbol *sym, CORE_ADDR pc,
-			   struct gdbarch *arch, unsigned char *registers_used,
+			   struct gdbarch *arch,
+			   std::vector<bool> &registers_used,
 			   unsigned int addr_size,
 			   const gdb_byte *op_ptr, const gdb_byte *op_end,
 			   dwarf2_per_cu_data *per_cu,

@@ -2699,7 +2699,7 @@ void
 dwarf2_compile_property_to_c (string_file *stream,
 			      const char *result_name,
 			      struct gdbarch *gdbarch,
-			      unsigned char *registers_used,
+			      std::vector<bool> &registers_used,
 			      const struct dynamic_prop *prop,
 			      CORE_ADDR pc,
 			      struct symbol *sym)
@@ -4475,7 +4475,7 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
 static void
 locexpr_generate_c_location (struct symbol *sym, string_file *stream,
 			     struct gdbarch *gdbarch,
-			     unsigned char *registers_used,
+			     std::vector<bool> &registers_used,
 			     CORE_ADDR pc, const char *result_name)
 {
   struct dwarf2_locexpr_baton *dlbaton
@@ -4707,7 +4707,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
 static void
 loclist_generate_c_location (struct symbol *sym, string_file *stream,
 			     struct gdbarch *gdbarch,
-			     unsigned char *registers_used,
+			     std::vector<bool> &registers_used,
 			     CORE_ADDR pc, const char *result_name)
 {
   struct dwarf2_loclist_baton *dlbaton

@@ -213,7 +213,7 @@ write_macro_definitions (const struct block *block, CORE_ADDR pc,
 
 static void
 generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
-			  const unsigned char *registers_used)
+			  const std::vector<bool> &registers_used)
 {
   int i;
   int seen = 0;
@@ -221,7 +221,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
   fputs_unfiltered ("struct " COMPILE_I_SIMPLE_REGISTER_STRUCT_TAG " {\n",
 		    stream);
 
-  if (registers_used != NULL)
+  if (!registers_used.empty ())
     for (i = 0; i < gdbarch_num_regs (gdbarch); ++i)
       {
 	if (registers_used[i])
@@ -572,7 +572,7 @@ public:
 	   before generating the function header, so we can define the
 	   register struct before the function body.  This requires a
 	   temporary stream.  */
-	gdb::unique_xmalloc_ptr<unsigned char> registers_used
+	std::vector<bool> registers_used
 	  = generate_c_for_variable_locations (m_instance, &var_stream, m_arch,
 					       expr_block, expr_pc);
 
@@ -595,7 +595,7 @@ public:
 			mode, mode);
 	  }
 
-	generate_register_struct (&buf, m_arch, registers_used.get ());
+	generate_register_struct (&buf, m_arch, registers_used);
       }
 
     AddCodeHeaderPolicy::add_code_header (m_instance->scope (), &buf);

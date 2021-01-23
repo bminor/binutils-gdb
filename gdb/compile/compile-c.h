@@ -66,7 +66,7 @@ private:
    register number, where each element indicates if the corresponding
    register is needed to compute a local variable.  */
 
-extern gdb::unique_xmalloc_ptr<unsigned char>
+extern std::vector<bool>
   generate_c_for_variable_locations
      (compile_instance *compiler,
       string_file *stream,

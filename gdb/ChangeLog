@@ -1,5 +1,29 @@
 2021-01-23  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (struct symbol_computed_ops) <generate_c_location>:
+	Change type of "registers_used".
+	* dwarf2/loc.h (dwarf2_compile_property_to_c): Update.
+	* dwarf2/loc.c (dwarf2_compile_property_to_c)
+	(locexpr_generate_c_location, loclist_generate_c_location): Change
+	type of "registers_used".
+	* compile/compile.h (compile_dwarf_expr_to_c)
+	(compile_dwarf_bounds_to_c): Update.
+	* compile/compile-loc2c.c (pushf_register_address)
+	(pushf_register, do_compile_dwarf_expr_to_c)
+	(compile_dwarf_expr_to_c, compile_dwarf_bounds_to_c): Change type
+	of "registers_used".
+	* compile/compile-c.h (generate_c_for_variable_locations):
+	Update.
+	* compile/compile-c-symbols.c (generate_vla_size)
+	(generate_c_for_for_one_variable): Change type of
+	"registers_used".
+	(generate_c_for_variable_locations): Return std::vector.
+	* compile/compile-c-support.c (generate_register_struct): Change
+	type of "registers_used".
+	(compute): Update.
+
+2021-01-23  Tom Tromey  <tom@tromey.com>
+
 	* compile/compile-internal.h (class compile_instance)
 	<set_arguments>: Change return type.
 	* compile/compile.c (compile_to_object): Remove call to reset.

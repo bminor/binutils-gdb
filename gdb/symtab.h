@@ -1022,7 +1022,7 @@ struct symbol_computed_ops
 
   void (*generate_c_location) (struct symbol *symbol, string_file *stream,
 			       struct gdbarch *gdbarch,
-			       unsigned char *registers_used,
+			       std::vector<bool> &registers_used,
 			       CORE_ADDR pc, const char *result_name);
 
 };
