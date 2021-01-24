@@ -3276,9 +3276,6 @@ read_rnglists (struct comp_unit *unit, struct arange *arange,
 	  return FALSE;
 	}
 
-      if ((low_pc == 0 && high_pc == 0) || low_pc == high_pc)
-	return FALSE;
-
       if (!arange_add (unit, arange, low_pc, high_pc))
 	return FALSE;
     }
