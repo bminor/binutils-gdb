@@ -1,3 +1,9 @@
+2021-01-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27231
+	* dwarf2.c (read_rnglists): Advance rngs_ptr after
+	_bfd_safe_read_leb128 when parsing DW_RLE_offset_pair.
+
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

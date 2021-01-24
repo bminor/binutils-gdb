@@ -3252,9 +3252,11 @@ read_rnglists (struct comp_unit *unit, struct arange *arange,
 	  low_pc = base_address;
 	  low_pc += _bfd_safe_read_leb128 (abfd, rngs_ptr, &bytes_read,
 					   FALSE, rngs_end);
+	  rngs_ptr += bytes_read;
 	  high_pc = base_address;
 	  high_pc += _bfd_safe_read_leb128 (abfd, rngs_ptr, &bytes_read,
 					    FALSE, rngs_end);
+	  rngs_ptr += bytes_read;
 	  break;
 
 	case DW_RLE_start_end:
