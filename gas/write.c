@@ -737,7 +737,9 @@ resolve_reloc_expr_symbols (void)
 		 prevent the offset from overflowing the relocated field,
 	         unless it has enough bits to cover the whole address
 	         space.  */
-	      if (S_IS_LOCAL (sym) && !symbol_section_p (sym)
+	      if (S_IS_LOCAL (sym)
+		  && S_IS_DEFINED (sym)
+		  && !symbol_section_p (sym)
 		  && (sec->use_rela_p
 		      || (howto->partial_inplace
 			  && (!howto->pc_relative
