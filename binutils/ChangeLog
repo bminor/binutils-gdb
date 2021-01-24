@@ -1,3 +1,7 @@
+2021-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Minor updates after the 2.36 release.
+
 2021-01-16  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (uncompress_section_contents): Tidy inflateEnd result test.

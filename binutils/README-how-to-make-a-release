@@ -196,11 +196,11 @@ When the time comes to actually make the release....
       patch files (.reg .orig *~) left over.
 
          cd <branch>
-	 git clean -dfx .
+	 git clean -fdx
 
   21. Update the release number in bfd/version.m4 on the release
       branch to a whole new minor version number, without a point
-      value.  Eg "2.35.90" becomes "2.36".  Change bfd/development.sh
+      value.  Eg "2.36.90" becomes "2.37".  Change bfd/development.sh
       to set all values to "false".  Regenerate the configure and
       makefiles.  And *info* files.  Add ChangeLog entries for the
       updates and add a  "this-is-the-2.3x-release" comment and
@@ -237,8 +237,8 @@ When the time comes to actually make the release....
         cd /dev/shm
 	mkdir delme
 	cd delme
-	tar xvf <path-to-sources>/binutils-2.X.tar.xz
-	chmod -R -w binutils-2.X
+	tar xvf <path-to-sources>/binutils-2.*.tar.xz
+	chmod -R -w binutils-2.*
 	mkdir build
 	cd build
 	../binutils-2.X/configure --enable-gold --prefix=`pwd`/install --enable-plugins
@@ -251,7 +251,7 @@ When the time comes to actually make the release....
 
   26. Tag the branch with the new release number:
 
-            git tag -a binutils-2_3x
+            git tag -a binutils-2_3x     <=== Be careful to get the tag right
 	      [optional: add "-u XXXXX" to sign with a gpg key]
 	      enter a tag message such as: "Official Binutils 2.3x release"
 	      
@@ -266,8 +266,10 @@ When the time comes to actually make the release....
 
   27. Upload the tarballs to ftp.gnu.org.
 
-       gnupload --to ftp.gnu.org:binutils binutils-2.3x.tar.*
+       gnupload --to ftp.gnu.org:binutils binutils-2.3*.tar.*
 
+      Be prepared to provide the password for the key, if you signed the binaries.
+      
       The gnupload script is in the gnulib/build-aux directory.
 
       Check for an email response from the upload.  If necessary
@@ -277,7 +279,7 @@ When the time comes to actually make the release....
 
        sftp sourceware.org
          cd /sourceware/ftp/pub/binutils/releases
- 	 put binutils-2.3x.tar.*
+ 	 put binutils-2.3*.tar.*
  	 chmod 644 binutils-2.3x.tar.*
 	 quit
 
@@ -309,9 +311,9 @@ When the time comes to actually make the release....
 	 put index.html
 
       Make the html documentation locally with the "make html" command
-      and then upload and rename the directories as needed.  (sftp
-      does not appear to support recursive uploads however, so the
-      directories had to be made by hand, as shown above).
+      (see step 25 above).  Then upload and rename the directories as
+      needed.  (sftp does not appear to support recursive uploads
+      however, so the directories had to be made by hand, as shown above).
 
          cd as
 	 lcd <build-dir>/gas/doc/as.html
@@ -368,7 +370,7 @@ Cheers
       David Edelsohn <dje.gcc@gmail.com> announcing the new release.
       Sign the email and include the checksum:
 
-          sha256sum binutils-2.3x.tar.*
+          sha256sum binutils-2.3*.tar.*
 
       (The email to Davis is so that he can update the GNU Toolchain
       social media).  Something like this:
