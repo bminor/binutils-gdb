@@ -1,5 +1,10 @@
 2021-01-24  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/opercodes.pot: Regenerate.
+
+2021-01-24  Nick Clifton  <nickc@redhat.com>
+
 	This is the 2.36 release.
 	* configure: Regenerate.
 	* po/opercodes.pot: Regenerate.

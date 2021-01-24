@@ -1,5 +1,12 @@
 2021-01-24  Nick Clifton  <nickc@redhat.com>
 
+	* version.m4: Set to 2.36.0.
+	* development.sh (development): Set to true.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2021-01-24  Nick Clifton  <nickc@redhat.com>
+
 	This is the 2.36 release.
 	* version.m4: Set to 2.36.
 	* development.sh (development): Set to false.
