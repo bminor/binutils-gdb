@@ -328,4 +328,5 @@ if { [is_elf_format] } then {
 
     run_dump_test "bignums"
     run_dump_test "section-symbol-redef"
+    run_dump_test "pr27228"
 }
