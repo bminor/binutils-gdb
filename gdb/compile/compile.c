@@ -714,9 +714,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   int argc = argv_holder.count ();
   char **argv = argv_holder.get ();
 
-  gdb::unique_xmalloc_ptr<char> error_message;
-  error_message.reset (compiler->set_arguments (argc, argv,
-						triplet_rx.c_str ()));
+  gdb::unique_xmalloc_ptr<char> error_message
+    = compiler->set_arguments (argc, argv, triplet_rx.c_str ());
 
   if (error_message != NULL)
     error ("%s", error_message.get ());
@@ -882,13 +881,14 @@ compile_instance::set_triplet_regexp (const char *regexp)
 
 /* See compile-internal.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 compile_instance::set_arguments (int argc, char **argv, const char *regexp)
 {
   if (version () >= GCC_FE_VERSION_1)
-    return FORWARD (set_arguments, argc, argv);
+    return gdb::unique_xmalloc_ptr<char> (FORWARD (set_arguments, argc, argv));
   else
-    return FORWARD (set_arguments_v0, regexp, argc, argv);
+    return gdb::unique_xmalloc_ptr<char> (FORWARD (set_arguments_v0, regexp,
+						   argc, argv));
 }
 
 /* See compile-internal.h.  */

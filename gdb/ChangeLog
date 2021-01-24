@@ -1,3 +1,10 @@
+2021-01-23  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-internal.h (class compile_instance)
+	<set_arguments>: Change return type.
+	* compile/compile.c (compile_to_object): Remove call to reset.
+	(compile_instance::set_arguments): Change return type.
+
 2021-01-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.c (copy_type_recursive): Use get_type_arch.
