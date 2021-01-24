@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-01-09 10:56+0000\n"
+"POT-Creation-Date: 2021-01-24 10:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -291,47 +291,47 @@ msgstr ""
 msgid "writing to a read-only register"
 msgstr ""
 
-#: aarch64-opc.c:5154
+#: aarch64-opc.c:5150
 msgid "instruction opens new dependency sequence without ending previous one"
 msgstr ""
 
-#: aarch64-opc.c:5174
+#: aarch64-opc.c:5170
 msgid "previous `movprfx' sequence not closed"
 msgstr ""
 
-#: aarch64-opc.c:5193
+#: aarch64-opc.c:5189
 msgid "SVE instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5206
+#: aarch64-opc.c:5202
 msgid "SVE `movprfx' compatible instruction expected"
 msgstr ""
 
-#: aarch64-opc.c:5293
+#: aarch64-opc.c:5289
 msgid "predicated instruction expected after `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5305
+#: aarch64-opc.c:5301
 msgid "merging predicate expected due to preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5317
+#: aarch64-opc.c:5313
 msgid "predicate register differs from that in preceding `movprfx'"
 msgstr ""
 
-#: aarch64-opc.c:5336
+#: aarch64-opc.c:5332
 msgid "output register of preceding `movprfx' not used in current instruction"
 msgstr ""
 
-#: aarch64-opc.c:5349
+#: aarch64-opc.c:5345
 msgid "output register of preceding `movprfx' expected as output"
 msgstr ""
 
-#: aarch64-opc.c:5361
+#: aarch64-opc.c:5357
 msgid "output register of preceding `movprfx' used as input"
 msgstr ""
 
-#: aarch64-opc.c:5377
+#: aarch64-opc.c:5373
 msgid "register size not compatible with previous `movprfx'"
 msgstr ""
 

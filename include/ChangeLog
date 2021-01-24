@@ -1,3 +1,7 @@
+2021-01-24  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.36 release.
+
 2021-01-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* opcode/aarch64.h (AARCH64_FEATURE_CSRE): Delete.

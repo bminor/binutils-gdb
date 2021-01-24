@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-01-09 10:59+0000\n"
+"POT-Creation-Date: 2021-01-24 10:23+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -81,14 +81,14 @@ msgid ""
 "current value is 0x%lx."
 msgstr ""
 
-#: aarch64.cc:6015 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7610
+#: aarch64.cc:6015 arm.cc:8477 i386.cc:1772 mips.cc:12461 powerpc.cc:7609
 #: s390.cc:2180 s390.cc:2628 sparc.cc:2134 tilegx.cc:3137 tilegx.cc:3589
 #: x86_64.cc:3471 x86_64.cc:3924
 #, c-format
 msgid "%s: unsupported reloc %u against local symbol"
 msgstr ""
 
-#: aarch64.cc:6056 powerpc.cc:7715 s390.cc:2254 sparc.cc:2230
+#: aarch64.cc:6056 powerpc.cc:7714 s390.cc:2254 sparc.cc:2230
 msgid "requires unsupported dynamic reloc; recompile with -fPIC"
 msgstr ""
 
@@ -107,7 +107,7 @@ msgstr ""
 msgid "%s: unsupported TLSLE reloc %u in shared code."
 msgstr ""
 
-#: aarch64.cc:6372 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8530
+#: aarch64.cc:6372 arm.cc:8885 i386.cc:2127 mips.cc:12474 powerpc.cc:8529
 #: s390.cc:3059 s390.cc:3076 sparc.cc:2572 tilegx.cc:3605 tilegx.cc:4144
 #: x86_64.cc:3940 x86_64.cc:4446
 #, c-format
@@ -124,7 +124,7 @@ msgstr ""
 msgid "%s: unsupported reloc type in global scan"
 msgstr ""
 
-#: aarch64.cc:6907 powerpc.cc:9636 s390.cc:4009 sparc.cc:3164 tilegx.cc:4211
+#: aarch64.cc:6907 powerpc.cc:9635 s390.cc:4009 sparc.cc:3164 tilegx.cc:4211
 #: x86_64.cc:4511
 #, c-format
 msgid "%s: unsupported REL reloc section"
@@ -135,7 +135,7 @@ msgstr ""
 msgid "cannot relocate %s in object file"
 msgstr ""
 
-#: aarch64.cc:7343 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:11935
+#: aarch64.cc:7343 i386.cc:2987 i386.cc:3753 mips.cc:10076 powerpc.cc:11934
 #: s390.cc:3460 sparc.cc:3695 tilegx.cc:4726 x86_64.cc:5008
 #, c-format
 msgid "unexpected reloc %u in object file"
@@ -395,7 +395,7 @@ msgstr ""
 msgid "%s: unsupported TLS reloc %u for IFUNC symbol"
 msgstr ""
 
-#: arm.cc:8643 i386.cc:1862 powerpc.cc:8018 s390.cc:2364 x86_64.cc:3679
+#: arm.cc:8643 i386.cc:1862 powerpc.cc:8017 s390.cc:2364 x86_64.cc:3679
 #, c-format
 msgid "section symbol %u has bad shndx %u"
 msgstr ""
@@ -427,7 +427,7 @@ msgid ""
 msgstr ""
 
 #: arm.cc:10247 i386.cc:3019 i386.cc:3101 i386.cc:3166 i386.cc:3202
-#: i386.cc:3274 mips.cc:12296 powerpc.cc:12049 s390.cc:3466 s390.cc:3537
+#: i386.cc:3274 mips.cc:12296 powerpc.cc:12048 s390.cc:3466 s390.cc:3537
 #: s390.cc:3574 s390.cc:3596 s390.cc:3621 sparc.cc:3701 sparc.cc:3892
 #: sparc.cc:3953 sparc.cc:4060 tilegx.cc:4732 x86_64.cc:5029 x86_64.cc:5155
 #: x86_64.cc:5227 x86_64.cc:5261
@@ -1115,7 +1115,7 @@ msgstr ""
 msgid "unsupported reloc %u in object file"
 msgstr ""
 
-#: i386.cc:4036 powerpc.cc:9590 s390.cc:4877 x86_64.cc:6113
+#: i386.cc:4036 powerpc.cc:9589 s390.cc:4877 x86_64.cc:6113
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
 msgstr ""
@@ -3537,103 +3537,103 @@ msgstr ""
 msgid "%s: stub group size is too large; retrying with %#x"
 msgstr ""
 
-#: powerpc.cc:5574
+#: powerpc.cc:5573
 msgid "** glink"
 msgstr ""
 
-#: powerpc.cc:6221 powerpc.cc:6924
+#: powerpc.cc:6220 powerpc.cc:6923
 #, c-format
 msgid "linkage table error against `%s'"
 msgstr ""
 
-#: powerpc.cc:6224
+#: powerpc.cc:6223
 #, c-format
 msgid "linkage table error against `%s:[local %u]'"
 msgstr ""
 
-#: powerpc.cc:7053
+#: powerpc.cc:7052
 msgid "** save/restore"
 msgstr ""
 
-#: powerpc.cc:7807
+#: powerpc.cc:7806
 #, c-format
 msgid "%s: unsupported reloc %u for IFUNC symbol"
 msgstr ""
 
-#: powerpc.cc:8072 powerpc.cc:8833
+#: powerpc.cc:8071 powerpc.cc:8832
 #, c-format
 msgid "tocsave symbol %u has bad shndx %u"
 msgstr ""
 
-#: powerpc.cc:8345 powerpc.cc:9147
+#: powerpc.cc:8344 powerpc.cc:9146
 #, c-format
 msgid "%s: toc optimization is not supported for %#08x instruction"
 msgstr ""
 
-#: powerpc.cc:8411 powerpc.cc:9209
+#: powerpc.cc:8410 powerpc.cc:9208
 #, c-format
 msgid "%s: unsupported -mbss-plt code"
 msgstr ""
 
-#: powerpc.cc:9556
+#: powerpc.cc:9555
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
 msgstr ""
 
-#: powerpc.cc:9627
+#: powerpc.cc:9626
 msgid ""
 "--plt-localentry is especially dangerous without ld.so support to detect ABI "
 "violations"
 msgstr ""
 
-#: powerpc.cc:9656
+#: powerpc.cc:9655
 msgid "--plt-localentry is incompatible with power10 pc-relative code"
 msgstr ""
 
-#: powerpc.cc:9934 powerpc.cc:9940
+#: powerpc.cc:9933 powerpc.cc:9939
 #, c-format
 msgid "%s uses hard float, %s uses soft float"
 msgstr ""
 
-#: powerpc.cc:9946 powerpc.cc:9953
+#: powerpc.cc:9945 powerpc.cc:9952
 #, c-format
 msgid ""
 "%s uses double-precision hard float, %s uses single-precision hard float"
 msgstr ""
 
-#: powerpc.cc:9973 powerpc.cc:9979
+#: powerpc.cc:9972 powerpc.cc:9978
 #, c-format
 msgid "%s uses 64-bit long double, %s uses 128-bit long double"
 msgstr ""
 
-#: powerpc.cc:9985 powerpc.cc:9991
+#: powerpc.cc:9984 powerpc.cc:9990
 #, c-format
 msgid "%s uses IBM long double, %s uses IEEE long double"
 msgstr ""
 
-#: powerpc.cc:10045 powerpc.cc:10051
+#: powerpc.cc:10044 powerpc.cc:10050
 #, c-format
 msgid "%s uses AltiVec vector ABI, %s uses SPE vector ABI"
 msgstr ""
 
-#: powerpc.cc:10080 powerpc.cc:10087
+#: powerpc.cc:10079 powerpc.cc:10086
 #, c-format
 msgid "%s uses r3/r4 for small structure returns, %s uses memory"
 msgstr ""
 
-#: powerpc.cc:10365
+#: powerpc.cc:10364
 msgid "__tls_get_addr call lacks marker reloc"
 msgstr ""
 
-#: powerpc.cc:10636
+#: powerpc.cc:10635
 msgid "call lacks nop, can't restore toc; recompile with -fPIC"
 msgstr ""
 
-#: powerpc.cc:12080 s390.cc:3474
+#: powerpc.cc:12079 s390.cc:3474
 msgid "relocation overflow"
 msgstr ""
 
-#: powerpc.cc:12082
+#: powerpc.cc:12081
 msgid "try relinking with a smaller --stub-group-size"
 msgstr ""
 
