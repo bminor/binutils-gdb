@@ -1,3 +1,9 @@
+2021-01-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27231
+	* dwarf2.c (read_rnglists): Ignore empty range when parsing line
+	number tables.
+
 2021-01-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/27231
