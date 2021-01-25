@@ -1,3 +1,8 @@
+2021-01-25  Fangrui Song  <maskray@google.com>
+
+	PR ld/27230
+	* scripttempl/DWARF.sc: Add .debug_* sections.
+
 2021-01-25  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/DWARF.sc: Add .debug_loclists, .debug_rnglists,

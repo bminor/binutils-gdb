@@ -41,10 +41,12 @@ cat <<EOF
   .debug_ranges   0 : { *(.debug_ranges) }
 
   /* DWARF 5.  */
-  .debug_loclists 0 : { *(.debug_loclists) }
-  .debug_rnglists 0 : { *(.debug_rnglists) }
-  .debug_line_str 0 : { *(.debug_line_str) }
-  .debug_str_offsets 0 : { *(.debug_str_offsets) }
-  .debug_macro    0 : { *(.debug_macro) }
   .debug_addr     0 : { *(.debug_addr) }
+  .debug_line_str 0 : { *(.debug_line_str) }
+  .debug_loclists 0 : { *(.debug_loclists) }
+  .debug_macro    0 : { *(.debug_macro) }
+  .debug_names    0 : { *(.debug_names) }
+  .debug_rnglists 0 : { *(.debug_rnglists) }
+  .debug_str_offsets 0 : { *(.debug_str_offsets) }
+  .debug_sup      0 : { *(.debug_sup) }
 EOF
