@@ -517,6 +517,13 @@ wait_sync_command_done (void)
   scoped_restore save_ui = make_scoped_restore (&current_ui);
   struct ui *ui = current_ui;
 
+  /* We're about to wait until the target stops after having resumed
+     it so must force-commit resumptions, in case we're being called
+     in some context where a scoped_disable_commit_resumed object is
+     active.  I.e., this function is a commit-resumed sync/flush
+     point.  */
+  scoped_enable_commit_resumed enable ("sync wait");
+
   while (gdb_do_one_event () >= 0)
     if (ui->prompt_state != PROMPT_BLOCKED)
       break;

@@ -273,4 +273,102 @@ extern void all_uis_on_sync_execution_starting (void);
    detach.  */
 extern void restart_after_all_stop_detach (process_stratum_target *proc_target);
 
+/* RAII object to temporarily disable the requirement for target
+   stacks to commit their resumed threads.
+
+   On construction, set process_stratum_target::commit_resumed_state
+   to false for all process_stratum targets in all target
+   stacks.
+
+   On destruction (or if reset_and_commit() is called), set
+   process_stratum_target::commit_resumed_state to true for all
+   process_stratum targets in all target stacks, except those that:
+
+     - have no resumed threads
+     - have a resumed thread with a pending status
+
+   target_commit_resumed is not called in the destructor, because its
+   implementations could throw, and we don't to swallow that error in
+   a destructor.  Instead, the caller should call the
+   reset_and_commit_resumed() method so that an eventual exception can
+   propagate.  "reset" in the method name refers to the fact that this
+   method has the same effect as the destructor, in addition to
+   committing resumes.
+
+   The creation of nested scoped_disable_commit_resumed objects is
+   tracked, such that only the outermost instance actually does
+   something, for cases like this:
+
+     void
+     inner_func ()
+     {
+       scoped_disable_commit_resumed disable;
+
+       // do stuff
+
+       disable.reset_and_commit ();
+     }
+
+     void
+     outer_func ()
+     {
+       scoped_disable_commit_resumed disable;
+
+       for (... each thread ...)
+	 inner_func ();
+
+       disable.reset_and_commit ();
+     }
+
+   In this case, we don't want the `disable` destructor in
+   `inner_func` to require targets to commit resumed threads, so that
+   the `reset_and_commit()` call in `inner_func` doesn't actually
+   resume threads.  */
+
+struct scoped_disable_commit_resumed
+{
+  explicit scoped_disable_commit_resumed (const char *reason);
+  ~scoped_disable_commit_resumed ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_disable_commit_resumed);
+
+  /* Undoes the disabling done by the ctor, and calls
+     maybe_call_commit_resumed_all_targets().  */
+  void reset_and_commit ();
+
+private:
+  /* Undoes the disabling done by the ctor.  */
+  void reset ();
+
+  /* Whether this object has been reset.  */
+  bool m_reset = false;
+
+  const char *m_reason;
+  bool m_prev_enable_commit_resumed;
+};
+
+/* Call target_commit_resumed method on all target stacks whose
+   process_stratum target layer has COMMIT_RESUME_STATE set.  */
+
+extern void maybe_call_commit_resumed_all_targets ();
+
+/* RAII object to temporarily enable the requirement for target stacks
+   to commit their resumed threads.  This is the inverse of
+   scoped_disable_commit_resumed.  The constructor calls the
+   maybe_call_commit_resumed_all_targets function itself, since it's
+   OK to throw from a constructor.  */
+
+struct scoped_enable_commit_resumed
+{
+  explicit scoped_enable_commit_resumed (const char *reason);
+  ~scoped_enable_commit_resumed ();
+
+  DISABLE_COPY_AND_ASSIGN (scoped_enable_commit_resumed);
+
+private:
+  const char *m_reason;
+  bool m_prev_enable_commit_resumed;
+};
+
+
 #endif /* INFRUN_H */

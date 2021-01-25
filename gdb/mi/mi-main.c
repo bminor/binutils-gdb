@@ -266,6 +266,8 @@ exec_continue (char **argv, int argc)
 {
   prepare_execution_command (current_inferior ()->top_target (), mi_async_p ());
 
+  scoped_disable_commit_resumed disable_commit_resumed ("mi continue");
+
   if (non_stop)
     {
       /* In non-stop mode, 'resume' always resumes a single thread.
@@ -311,6 +313,8 @@ exec_continue (char **argv, int argc)
 	  continue_1 (1);
 	}
     }
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 static void

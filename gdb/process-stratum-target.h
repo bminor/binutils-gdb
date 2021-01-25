@@ -72,6 +72,38 @@ public:
 
   /* The connection number.  Visible in "info connections".  */
   int connection_number = 0;
+
+  /* Whether resumed threads must be committed to the target.
+
+     When true, resumed threads must be committed to the execution
+     target.
+
+     When false, the target may leave resumed threads stopped when
+     it's convenient or efficient to do so.  When the core requires
+     resumed threads to be committed again, this is set back to true
+     and calls the `commit_resumed` method to allow the target to do
+     so.
+
+     To simplify the implementation of targets, the following methods
+     are guaranteed to be called with COMMIT_RESUMED_STATE set to
+     false:
+
+       - resume
+       - stop
+       - wait
+
+     Knowing this, the target doesn't need to implement different
+     behaviors depending on the COMMIT_RESUMED_STATE, and can simply
+     assume that it is false.
+
+     Targets can take advantage of this to batch resumption requests,
+     for example.  In that case, the target doesn't actually resume in
+     its `resume` implementation.  Instead, it takes note of the
+     resumption intent in `resume` and defers the actual resumption to
+     `commit_resumed`.  For example, the remote target uses this to
+     coalesce multiple resumption requests in a single vCont
+     packet.  */
+  bool commit_resumed_state = false;
 };
 
 /* Downcast TARGET to process_stratum_target.  */

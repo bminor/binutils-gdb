@@ -1,3 +1,58 @@
+2021-03-26  Simon Marchi  <simon.marchi@efficios.com>
+	    Pedro Alves  <pedro@palves.net>
+
+	* infcmd.c (run_command_1, attach_command, detach_command)
+	(interrupt_target_1): Use scoped_disable_commit_resumed.
+	* infrun.c (do_target_resume): Remove
+	target_commit_resume call.
+	(commit_resume_all_targets): Remove.
+	(maybe_set_commit_resumed_all_targets): New.
+	(maybe_call_commit_resumed_all_targets): New.
+	(enable_commit_resumed): New.
+	(scoped_disable_commit_resumed::scoped_disable_commit_resumed)
+	(scoped_disable_commit_resumed::~scoped_disable_commit_resumed)
+	(scoped_disable_commit_resumed::reset)
+	(scoped_disable_commit_resumed::reset_and_commit)
+	(scoped_enable_commit_resumed::scoped_enable_commit_resumed)
+	(scoped_enable_commit_resumed::~scoped_enable_commit_resumed):
+	New.
+	(proceed): Use scoped_disable_commit_resumed and
+	maybe_call_commit_resumed_all_targets.
+	(fetch_inferior_event): Use scoped_disable_commit_resumed.
+	* infrun.h (struct scoped_disable_commit_resumed): New.
+	(maybe_call_commit_resumed_all_process_targets): New.
+	(struct scoped_enable_commit_resumed): New.
+	* mi/mi-main.c (exec_continue): Use scoped_disable_commit_resumed.
+	* process-stratum-target.h (class process_stratum_target):
+	<commit_resumed_state>: New.
+	* record-full.c (record_full_wait_1): Change commit_resumed_state
+	around calling commit_resumed.
+	* remote.c (class remote_target) <commit_resume>: Rename to...
+	<commit_resumed>: ... this.
+	(struct stop_reply): Move up.
+	(remote_target::commit_resume): Rename to...
+	(remote_target::commit_resumed): ... this.  Check if there is any
+	thread pending vCont resume.
+	(remote_target::remote_stop_ns): Generate stop replies for resumed
+	but pending vCont threads.
+	(remote_target::wait_ns): Add gdb_assert.
+	* target-delegates.c: Regenerate.
+	* target.c (target_wait, target_resume): Assert that the current
+	process_stratum target isn't in commit-resumed state.
+	(defer_target_commit_resume): Remove.
+	(target_commit_resume): Remove.
+	(target_commit_resumed): New.
+	(make_scoped_defer_target_commit_resume): Remove.
+	(target_stop): Assert that the current process_stratum target
+	isn't in commit-resumed state.
+	* target.h (struct target_ops) <commit_resume>: Rename to ...
+	 <commit_resumed>: ... this.
+	(target_commit_resume): Remove.
+	(target_commit_resumed): New.
+	(make_scoped_defer_target_commit_resume): Remove.
+	* top.c (wait_sync_command_done): Use
+	scoped_enable_commit_resumed.
+
 2021-03-26  Pedro Alves  <pedro@palves.net>
 
 	* target.c (target_always_non_stop_p): Also check whether the

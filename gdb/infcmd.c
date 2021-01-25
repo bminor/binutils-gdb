@@ -419,6 +419,8 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
 
   dont_repeat ();
 
+  scoped_disable_commit_resumed disable_commit_resumed ("running");
+
   kill_if_already_running (from_tty);
 
   init_wait_for_inferior ();
@@ -538,6 +540,8 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   /* Since there was no error, there's no need to finish the thread
      states here.  */
   finish_state.release ();
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 static void
@@ -2565,6 +2569,8 @@ attach_command (const char *args, int from_tty)
 
   dont_repeat ();		/* Not for the faint of heart */
 
+  scoped_disable_commit_resumed disable_commit_resumed ("attaching");
+
   if (gdbarch_has_global_solist (target_gdbarch ()))
     /* Don't complain if all processes share the same symbol
        space.  */
@@ -2673,6 +2679,8 @@ attach_command (const char *args, int from_tty)
     }
   else
     attach_post_wait (args, from_tty, mode);
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 /* We had just found out that the target was already attached to an
@@ -2746,6 +2754,8 @@ detach_command (const char *args, int from_tty)
   if (inferior_ptid == null_ptid)
     error (_("The program is not being run."));
 
+  scoped_disable_commit_resumed disable_commit_resumed ("detaching");
+
   query_if_trace_running (from_tty);
 
   disconnect_tracing ();
@@ -2779,6 +2789,8 @@ detach_command (const char *args, int from_tty)
 
   if (!was_non_stop_p)
     restart_after_all_stop_detach (as_process_stratum_target (target_ref.get ()));
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 /* Disconnect from the current target without resuming it (leaving it
@@ -2827,6 +2839,8 @@ stop_current_target_threads_ns (ptid_t ptid)
 void
 interrupt_target_1 (bool all_threads)
 {
+  scoped_disable_commit_resumed disable_commit_resumed ("interrupting");
+
   if (non_stop)
     {
       if (all_threads)
@@ -2844,6 +2858,8 @@ interrupt_target_1 (bool all_threads)
     }
   else
     target_interrupt ();
+
+  disable_commit_resumed.reset_and_commit ();
 }
 
 /* interrupt [-a]
