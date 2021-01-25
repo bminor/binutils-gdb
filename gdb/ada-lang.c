@@ -3474,6 +3474,12 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
   struct value **argvec;        /* Vector of operand types (alloca'ed).  */
   int nargs;                    /* Number of operands.  */
   int oplen;
+  /* If we're resolving an expression like ARRAY(ARG...), then we set
+     this to the type of the array, so we can use the index types as
+     the expected types for resolution.  */
+  struct type *array_type = nullptr;
+  /* The arity of ARRAY_TYPE.  */
+  int array_arity = 0;
 
   argvec = NULL;
   nargs = 0;
@@ -3490,7 +3496,12 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
       else
 	{
 	  *pos += 3;
-	  resolve_subexp (expp, pos, 0, NULL, parse_completion, tracker);
+	  struct value *lhs = resolve_subexp (expp, pos, 0, NULL,
+					      parse_completion, tracker);
+	  struct type *lhstype = ada_check_typedef (value_type (lhs));
+	  array_arity = ada_array_arity (lhstype);
+	  if (array_arity > 0)
+	    array_type = lhstype;
 	}
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
       break;
@@ -3627,8 +3638,13 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 
   argvec = XALLOCAVEC (struct value *, nargs + 1);
   for (i = 0; i < nargs; i += 1)
-    argvec[i] = resolve_subexp (expp, pos, 1, NULL, parse_completion,
-				tracker);
+    {
+      struct type *subtype = nullptr;
+      if (i < array_arity)
+	subtype = ada_index_type (array_type, i + 1, "array type");
+      argvec[i] = resolve_subexp (expp, pos, 1, subtype, parse_completion,
+				  tracker);
+    }
   argvec[i] = NULL;
   exp = expp->get ();
 

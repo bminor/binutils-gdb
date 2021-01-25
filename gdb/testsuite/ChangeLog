@@ -1,5 +1,9 @@
 2021-01-25  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/local-enum.exp: Add enumerator resolution test.
+
+2021-01-25  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/local-enum.exp: New file.
 	* gdb.ada/local-enum/local.adb: New file.
 

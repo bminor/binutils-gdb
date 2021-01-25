@@ -81,3 +81,8 @@ proc print_three {which_enum value} {
 
 print_three e2 0
 print_three e1 2
+
+# These will not result in a menu, as expression resolution should
+# disambiguate the meaning of 'three'.
+gdb_test "print v1(three)" " = 2" "print v1 element"
+gdb_test "print v2(three)" " = 3" "print v2 element"

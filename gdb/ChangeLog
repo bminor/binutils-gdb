@@ -1,3 +1,7 @@
+2021-01-25  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (resolve_subexp): Handle array context.
+
 2021-01-23  Tom Tromey  <tom@tromey.com>
 
 	PR compile/25575
