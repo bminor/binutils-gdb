@@ -1,3 +1,9 @@
+2021-01-25  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/DWARF.sc: Add .debug_loclists, .debug_rnglists,
+	.debug_line_str and .debug_str_offsets.  Move .debug_macro and
+	.debug_addr into DWARF-5 section.
+
 2021-01-21  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/pr26936.d: No longer xfail mips.
