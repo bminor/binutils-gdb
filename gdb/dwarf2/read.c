@@ -19833,7 +19833,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	    /* It would be nice to reuse dwarf2_get_pc_bounds here,
 	       but that requires a full DIE, so instead we just
 	       reimplement it.  */
-	    unsigned int ranges_offset = (attr.constant_value (0)
+	    unsigned int ranges_offset = (attr.as_unsigned ()
 					  + (need_ranges_base
 					     ? cu->ranges_base
 					     : 0));
