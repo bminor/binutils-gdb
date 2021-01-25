@@ -398,11 +398,6 @@ if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] && ![istarget "hppa*-
     run_dump_test relax
 }
 
-# powerpc and s390 allow a string argument to .byte
-if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000*-*-*"] && ![istarget "s390*-*-*"] } {
-    run_dump_test byte
-}
-
 run_dump_test quad
 
 # poor little PDP-11 can't handle 16-byte values
