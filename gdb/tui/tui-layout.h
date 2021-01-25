@@ -91,6 +91,9 @@ public:
      depth of this layout in the hierarchy (zero-based).  */
   virtual void specification (ui_file *output, int depth) = 0;
 
+  /* Add all windows to the WINDOWS vector.  */
+  virtual void get_windows (std::vector<tui_win_info *> *windows) = 0;
+
   /* The most recent space allocation.  */
   int x = 0;
   int y = 0;
@@ -140,6 +143,12 @@ public:
   void replace_window (const char *name, const char *new_window) override;
 
   void specification (ui_file *output, int depth) override;
+
+  /* See tui_layout_base::get_windows.  */
+  void get_windows (std::vector<tui_win_info *> *windows) override
+  {
+    windows->push_back (m_window);
+  }
 
 protected:
 
@@ -194,6 +203,13 @@ public:
   void replace_window (const char *name, const char *new_window) override;
 
   void specification (ui_file *output, int depth) override;
+
+  /* See tui_layout_base::get_windows.  */
+  void get_windows (std::vector<tui_win_info *> *windows) override
+  {
+    for (auto &item : m_splits)
+      item.layout->get_windows (windows);
+  }
 
 protected:
 

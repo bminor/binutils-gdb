@@ -1,5 +1,16 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tui-layout.c (saved_tui_windows): Delete.
+	(tui_apply_current_layout): Don't make use of saved_tui_windows,
+	call new get_windows member function instead.
+	(tui_get_window_by_name): Check in tui_windows.
+	(tui_layout_window::apply): Don't add to tui_windows.
+	* tui-layout.h (tui_layout_base::get_windows): New member function.
+	(tui_layout_window::get_windows): Likewise.
+	(tui_layout_split::get_windows): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui/tui-layout.c (tui_apply_current_layout): Restore the delete
 	of the window objects.
 

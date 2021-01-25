@@ -1,5 +1,9 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.tui/winheight.exp: Add more tests.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-framefilter.exp: Update expected results.
 	* gdb.python/python.exp: Update expected results.
 
