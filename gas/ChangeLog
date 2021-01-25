@@ -1,3 +1,9 @@
+2021-01-26  Alan Modra  <amodra@gmail.com>
+
+	PR 27282
+	* testsuite/gas/all/none.d: Replace skip with xfail, don't xfail ft32.
+	* testsuite/gas/elf/pr27228.d: xfail hppa and allow OBJECT match.
+
 2021-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/27228

@@ -267,8 +267,7 @@ ft32_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 {
   unsigned int i;
 
-  for (i = sizeof (ft32_reloc_map) / sizeof (ft32_reloc_map[0]);
-       --i;)
+  for (i = 0; i < sizeof (ft32_reloc_map) / sizeof (ft32_reloc_map[0]); i++)
     if (ft32_reloc_map [i].bfd_reloc_val == code)
       return & ft32_elf_howto_table [ft32_reloc_map[i].ft32_reloc_val];
 
