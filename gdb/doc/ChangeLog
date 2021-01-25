@@ -1,3 +1,7 @@
+2021-01-25  Marco Barisione  <mbarisione@undo.io>
+
+	* python.texi: Add parentheses to print statements/functions.
+
 2021-01-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Specify Location): Move menu to the end of the
