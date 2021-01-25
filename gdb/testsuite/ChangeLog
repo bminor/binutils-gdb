@@ -1,3 +1,9 @@
+2021-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <pedro@palves.net>
+
+	* gdb.base/run-attach-while-running.exp: New.
+	* gdb.base/run-attach-while-running.c: New.
+
 2021-03-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-framefilter-addr.c: New file.
