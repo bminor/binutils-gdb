@@ -123,5 +123,10 @@ foreach_with_prefix scenario {all minimal} {
 	gdb_test "print fp4_var * 1" $fp4
 	gdb_test "print 1 * fp4_var" $fp4
 	gdb_test "print fp4_var / 1" $fp4
+
+	# This only started working in GCC 11.
+	if {[test_compiler_info {gcc-11-*}]} {
+	    gdb_test "print fp5_var" " = 3e-19"
+	}
     }
 }

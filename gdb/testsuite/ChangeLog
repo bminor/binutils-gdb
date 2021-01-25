@@ -1,5 +1,11 @@
 2021-01-25  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/fixed_points.exp: Add regression test.
+	* gdb.ada/fixed_points/fixed_points.adb (FP5_Var): New variable.
+	* gdb.ada/fixed_points/pck.adb (Delta5, FP5_Type): New.
+
+2021-01-25  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/local-enum.exp: Add enumerator resolution test.
 
 2021-01-25  Tom Tromey  <tromey@adacore.com>

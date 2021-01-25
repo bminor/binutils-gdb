@@ -1,5 +1,10 @@
 2021-01-25  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (get_mpz): New function.
+	(get_dwarf2_rational_constant): Use it.
+
+2021-01-25  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (resolve_subexp): Handle array context.
 
 2021-01-23  Tom Tromey  <tom@tromey.com>

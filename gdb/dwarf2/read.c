@@ -18228,6 +18228,46 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   return this_type;
 }
 
+/* Helper for get_dwarf2_rational_constant that computes the value of
+   a given gmp_mpz given an attribute.  */
+
+static void
+get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
+{
+  /* GCC will sometimes emit a 16-byte constant value as a DWARF
+     location expression that pushes an implicit value.  */
+  if (attr->form == DW_FORM_exprloc)
+    {
+      dwarf_block *blk = attr->as_block ();
+      if (blk->size > 0 && blk->data[0] == DW_OP_implicit_value)
+	{
+	  uint64_t len;
+	  const gdb_byte *ptr = safe_read_uleb128 (blk->data + 1,
+						   blk->data + blk->size,
+						   &len);
+	  if (ptr - blk->data + len <= blk->size)
+	    {
+	      mpz_import (value->val, len,
+			  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
+			  1, 0, 0, ptr);
+	      return;
+	    }
+	}
+
+      /* On failure set it to 1.  */
+      *value = gdb_mpz (1);
+    }
+  else if (attr->form_is_block ())
+    {
+      dwarf_block *blk = attr->as_block ();
+      mpz_import (value->val, blk->size,
+		  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
+		  1, 0, 0, blk->data);
+    }
+  else
+    *value = gdb_mpz (attr->constant_value (1));
+}
+
 /* Assuming DIE is a rational DW_TAG_constant, read the DIE's
    numerator and denominator into NUMERATOR and DENOMINATOR (resp).
 
@@ -18254,25 +18294,8 @@ get_dwarf2_rational_constant (struct die_info *die, struct dwarf2_cu *cu,
   if (num_attr == nullptr || denom_attr == nullptr)
     return;
 
-  if (num_attr->form_is_block ())
-    {
-      dwarf_block *blk = num_attr->as_block ();
-      mpz_import (numerator->val, blk->size,
-		  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
-		  1, 0, 0, blk->data);
-    }
-  else
-    *numerator = gdb_mpz (num_attr->constant_value (1));
-
-  if (denom_attr->form_is_block ())
-    {
-      dwarf_block *blk = denom_attr->as_block ();
-      mpz_import (denominator->val, blk->size,
-		  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
-		  1, 0, 0, blk->data);
-    }
-  else
-    *denominator = gdb_mpz (denom_attr->constant_value (1));
+  get_mpz (cu, numerator, num_attr);
+  get_mpz (cu, denominator, denom_attr);
 }
 
 /* Same as get_dwarf2_rational_constant, but extracting an unsigned

@@ -55,6 +55,8 @@ procedure Fixed_Points is
    Overprecise_Object : Overprecise_Fixed_Point :=
      Overprecise_Fixed_Point'Small;
 
+   FP5_Var : FP5_Type := 3 * Delta5;
+
 begin
    Base_Object := 1.0/16.0;   -- Set breakpoint here
    Subtype_Object := 1.0/16.0;
@@ -64,4 +66,5 @@ begin
    Do_Nothing (FP2_Var'Address);
    Do_Nothing (FP3_Var'Address);
    Do_Nothing (FP4_Var'Address);
+   Do_Nothing (FP5_Var'Address);
 end Fixed_Points;
