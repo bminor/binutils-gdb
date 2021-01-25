@@ -2,7 +2,7 @@
 #name: elf section15
 # .pushsection always creates the named section, but the
 # test harness translates ".text" into "P" for the RX...
-#notarget: rx-*
+#xfail: rx-*
 
 .*: +file format .*
 

@@ -1,6 +1,6 @@
 # as: --generate-missing-build-notes=yes
 # objdump: -r
-#skip: mips*-*-openbsd
+#xfail: mips*-*-openbsd
 
 # Check that the relocations are for increasing addresses...
 

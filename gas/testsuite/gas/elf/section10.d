@@ -1,7 +1,7 @@
 #readelf: -N --wide
 #name: numeric section flags and types
 # The RX port annoyingly reorders the sections so that they do not match the sequence expected below.
-#skip: rx-*-*
+#xfail: rx-*-*
 
 #...
 [ 	]*\[.*\][ 	]+.text

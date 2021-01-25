@@ -1,5 +1,37 @@
 2021-01-26  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/all/local-label-overflow.d: Use xfail rather than
+	notarget all except hppa.  Comment.
+	* testsuite/gas/all/sleb128-2.d: Use xfail rather than notarget.
+	* testsuite/gas/all/sleb128-4.d: Likewise.  Don't skip msp430.
+	* testsuite/gas/all/sleb128-5.d: Use xfail rather than notarget.
+	* testsuite/gas/all/sleb128-7.d: Likewise.
+	* testsuite/gas/all/sleb128-9.d: Likewise.
+	* testsuite/gas/elf/bignums.d: Likewise.
+	* testsuite/gas/elf/group0c.d: Likewise.
+	* testsuite/gas/elf/group1a.d: Likewise.
+	* testsuite/gas/elf/section-symbol-redef.d: Likewise.
+	* testsuite/gas/elf/section15.d: Likewise.
+	* testsuite/gas/elf/section4.d: Likewise.
+	* testsuite/gas/elf/section7.d: Likewise.
+	* testsuite/gas/macros/irp.d: Likewise.
+	* testsuite/gas/macros/repeat.d: Likewise.
+	* testsuite/gas/macros/rept.d: Likewise.
+	* testsuite/gas/macros/test2.d: Likewise.
+	* testsuite/gas/macros/vararg.d: Likewise.
+	* testsuite/gas/all/string.d: Use xfail rather than skip.
+	* testsuite/gas/elf/missing-build-notes.d: Likewise.
+	* testsuite/gas/elf/section0.d: Likewise.
+	* testsuite/gas/elf/section1.d: Likewise.
+	* testsuite/gas/elf/section10.d: Likewise.
+	* testsuite/gas/elf/section11.d: Likewise.
+	* testsuite/gas/elf/section6.d: Likewise.
+	* testsuite/gas/elf/symtab.d: Use xfail rather than skip, adjust hppa.
+	* testsuite/gas/elf/symtab.s: Don't start directives in first column.
+	* testsuite/gas/macros/test3.d: Don't notarget nds32.
+
+2021-01-26  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/all/byte.d,
 	* testsuite/gas/all/byte.l,
 	* testsuite/gas/all/byte.s: Delete.
