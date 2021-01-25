@@ -1,3 +1,7 @@
+2021-01-26  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ft32.c (ft32_reloc_type_lookup): Don't miss ft32_reloc_map[0].
+
 2021-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/27231
