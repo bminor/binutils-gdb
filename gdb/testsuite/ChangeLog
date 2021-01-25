@@ -1,3 +1,7 @@
+2021-02-08  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.base/gnu-ifunc.exp (build): Pass -Wl,z,lazy.
+
 2021-02-08  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/enqueued-cu-base-addr.exp: Fix inter-CU reference.

@@ -64,6 +64,10 @@ proc build {resolver_attr resolver_debug final_debug} {
     set lib_opts {}
     set final_opts {}
 
+    # Force lazy binding so we don't resolve everything at process startup.
+    lappend exec_opts "additional_flags=-Wl,-z,lazy"
+    lappend lib_opts "additional_flags=-Wl,-z,lazy"
+
     if {$resolver_attr} {
 	lappend lib_opts "additional_flags=-DIFUNC_RESOLVER_ATTR"
     }
