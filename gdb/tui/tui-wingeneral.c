@@ -200,13 +200,9 @@ tui_win_info::make_visible (bool visible)
 void
 tui_refresh_all ()
 {
-  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
-
   for (tui_win_info *win_info : all_tui_windows ())
     {
       if (win_info->is_visible ())
 	win_info->refresh_window ();
     }
-  if (locator->is_visible ())
-    locator->refresh_window ();
 }

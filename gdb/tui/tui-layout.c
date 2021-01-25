@@ -98,15 +98,12 @@ tui_apply_current_layout ()
 
   /* Now delete any window that was not re-applied.  */
   tui_win_info *focus = tui_win_with_focus ();
-  tui_win_info *locator = tui_locator_win_info_ptr ();
   for (tui_win_info *win_info : saved_tui_windows)
     {
       if (!win_info->is_visible ())
 	{
 	  if (focus == win_info)
 	    tui_set_win_focus_to (tui_windows[0]);
-	  if (win_info != locator)
-	    delete win_info;
 	}
     }
 
@@ -331,15 +328,6 @@ make_standard_window (const char *)
   return tui_win_list[V];
 }
 
-/* Helper function to wrap tui_locator_win_info_ptr for
-   tui_get_window_by_name.  */
-
-static tui_win_info *
-get_locator_window (const char *)
-{
-  return tui_locator_win_info_ptr ();
-}
-
 /* A map holding all the known window types, keyed by name.  Note that
    this is heap-allocated and "leaked" at gdb exit.  This avoids
    ordering issues with destroying elements in the map at shutdown.
@@ -386,7 +374,9 @@ initialize_known_windows ()
   known_window_types->emplace (DISASSEM_NAME,
 			       make_standard_window<DISASSEM_WIN,
 						    tui_disasm_window>);
-  known_window_types->emplace (STATUS_NAME, get_locator_window);
+  known_window_types->emplace (STATUS_NAME,
+			       make_standard_window<STATUS_WIN,
+						    tui_locator_window>);
 }
 
 /* See tui-layout.h.  */

@@ -1,3 +1,54 @@
+2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* Makefile.in (SUBDIR_TUI_SRCS): Add tui/tui-location.c.
+	(HFILES_NO_SRCDIR): Add tui/tui-location.h.
+	* tui/tui-data.h (TUI_STATUS_WIN): Define.
+	(tui_locator_win_info_ptr): Delete declaration.
+	* tui/tui-disasm.c: Add 'tui/tui-location.h' include.
+	(tui_disasm_window::set_contents): Fetch state from tui_location
+	global.
+	(tui_get_begin_asm_address): Likewise.
+	* tui/tui-layout.c (tui_apply_current_layout): Remove special case
+	for locator window.
+	(get_locator_window): Delete.
+	(initialize_known_windows): Treat locator window just like all the
+	rest.
+	* tui/tui-source.c: Add 'tui/tui-location.h' include.
+	(tui_source_window::set_contents): Fetch state from tui_location
+	global.
+	(tui_source_window::showing_source_p): Likewise.
+	* tui/tui-stack.c: Add 'tui/tui-location.h' include.
+	(_locator): Delete.
+	(tui_locator_win_info_ptr): Delete.
+	(tui_locator_window::make_status_line): Fetch state from
+	tui_location global.
+	(tui_locator_window::rerender): Remove check of 'handle',
+	reindent function body.
+	(tui_locator_window::set_locator_fullname): Delete.
+	(tui_locator_window::set_locator_info): Delete.
+	(tui_update_locator_fullname): Delete.
+	(tui_show_frame_info): Likewise.
+	(tui_show_locator_content): Access window through TUI_STATUS_WIN.
+	* tui/tui-stack.h (tui_locator_window::set_locator_info): Moved to
+	tui/tui-location.h and renamed to
+	tui_location_tracker::set_location.
+	(tui_locator_window::set_locator_fullname): Moved to
+	tui/tui-location.h and renamed to
+	tui_location_tracker::set_fullname.
+	(tui_locator_window::full_name): Delete.
+	(tui_locator_window::proc_name): Delete.
+	(tui_locator_window::line_no): Delete.
+	(tui_locator_window::addr): Delete.
+	(tui_locator_window::gdbarch): Delete.
+	(tui_update_locator_fullname): Delete declaration.
+	* tui/tui-wingeneral.c (tui_refresh_all): Removed special handling
+	for locator window.
+	* tui/tui-winsource.c: Add 'tui/tui-location.h' include.
+	(tui_display_main): Call function on tui_location directly.
+	* tui/tui.h (enum tui_win_type): Add STATUS_WIN.
+	* tui/tui-location.c: New file.
+	* tui/tui-location.h: New file.
+
 2021-01-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.h (get_type_arch): Rename to...

@@ -39,6 +39,7 @@
 #include "tui/tui-winsource.h"
 #include "tui/tui-source.h"
 #include "tui/tui-disasm.h"
+#include "tui/tui-location.h"
 #include "gdb_curses.h"
 
 /* Function to display the "main" routine.  */
@@ -58,7 +59,7 @@ tui_display_main ()
 
 	  tui_update_source_windows_with_addr (gdbarch, addr);
 	  s = find_pc_line_symtab (addr);
-	  tui_update_locator_fullname (s);
+	  tui_location.set_location (s);
 	}
     }
 }
