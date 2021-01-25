@@ -1,3 +1,8 @@
+2021-01-25  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/local-enum.exp: New file.
+	* gdb.ada/local-enum/local.adb: New file.
+
 2021-01-23  Tom Tromey  <tom@tromey.com>
 
 	* lib/gdb.exp (default_gdb_init): Set INPUTRC to a cached file.
