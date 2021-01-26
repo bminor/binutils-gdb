@@ -1,4 +1,4 @@
-2020-01-26  Anton Kolesov  <anton.kolesov@synopsys.com>
+2021-01-26  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* arc-tdep.c (arc_skip_prologue): Log "pc" address.
 
