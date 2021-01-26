@@ -1,3 +1,11 @@
+2021-01-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/27243
+	* config/tc-nios2.c (md_begin): Don't disable relaxation with
+	--gdwarf-N.
+	* testsuite/gas/nios2/relax.d: New file.
+	* testsuite/gas/nios2/relax.s: Likewise.
+
 2021-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/27228
