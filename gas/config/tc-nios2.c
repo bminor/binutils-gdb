@@ -3643,10 +3643,6 @@ md_begin (void)
   nios2_as_options.noat = FALSE;
   nios2_as_options.nobreak = FALSE;
 
-  /* Debug information is incompatible with relaxation.  */
-  if (debug_type != DEBUG_UNSPECIFIED)
-    nios2_as_options.relax = relax_none;
-
   /* Initialize the alignment data.  */
   nios2_current_align_seg = now_seg;
   nios2_last_label = NULL;
