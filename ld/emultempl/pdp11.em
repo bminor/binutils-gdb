@@ -94,7 +94,11 @@ gld${EMULATION_NAME}_handle_option (int optc)
 static char *
 gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
+
+if test x"$COMPILE_IN" = xyes
+then
 # Scripts compiled in.
+
 # sed commands to quote an ld script as a C string.
 sc="-f stringify.sed"
 
@@ -109,8 +113,7 @@ sed $sc ldscripts/${EMULATION_NAME}.xu			>> e${EMULATION_NAME}.c
 echo '  ; else if (bfd_link_relocatable (&link_info)) return' >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr			>> e${EMULATION_NAME}.c
 echo '  ; else if (link_info.separate_code) return'	>> e${EMULATION_NAME}.c
-sed $sc ldscripts/${EMULATION_NAME}.xn | \
-  sed -e "s/ALIGN($TARGET_PAGE_SIZE)/0/"		>> e${EMULATION_NAME}.c
+sed $sc ldscripts/${EMULATION_NAME}.xe			>> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'	>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn			>> e${EMULATION_NAME}.c
 echo '  ; else if (!config.magic_demand_paged) return'	>> e${EMULATION_NAME}.c
@@ -118,6 +121,29 @@ sed $sc ldscripts/${EMULATION_NAME}.xn			>> e${EMULATION_NAME}.c
 echo '  ; else return'					>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
 echo '; }'						>> e${EMULATION_NAME}.c
+
+else
+# Scripts read from the filesystem.
+
+fragment <<EOF
+{
+  *isfile = 1;
+
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
+    return "ldscripts/${EMULATION_NAME}.xu";
+  else if (bfd_link_relocatable (&link_info))
+    return "ldscripts/${EMULATION_NAME}.xr";
+  else if (link_info.separate_code)
+    return "ldscripts/${EMULATION_NAME}.xe";
+  else if (!config.text_read_only)
+    return "ldscripts/${EMULATION_NAME}.xbn";
+  else if (!config.magic_demand_paged)
+    return "ldscripts/${EMULATION_NAME}.xn";
+  else
+    return "ldscripts/${EMULATION_NAME}.x";
+}
+EOF
+fi
 
 fragment <<EOF
 

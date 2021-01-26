@@ -2355,7 +2355,11 @@ gld_${EMULATION_NAME}_find_potential_libraries
 static char *
 gld_${EMULATION_NAME}_get_script (int *isfile)
 EOF
+
+if test x"$COMPILE_IN" = xyes
+then
 # Scripts compiled in.
+
 # sed commands to quote an ld script as a C string.
 sc="-f stringify.sed"
 
@@ -2380,6 +2384,36 @@ fi
 echo '  ; else return'					>> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.x			>> e${EMULATION_NAME}.c
 echo '; }'						>> e${EMULATION_NAME}.c
+
+else
+# Scripts read from the filesystem.
+
+fragment <<EOF
+{
+  *isfile = 1;
+
+  if (bfd_link_relocatable (&link_info) && config.build_constructors)
+    return "ldscripts/${EMULATION_NAME}.xu";
+  else if (bfd_link_relocatable (&link_info))
+    return "ldscripts/${EMULATION_NAME}.xr";
+  else if (!config.text_read_only)
+    return "ldscripts/${EMULATION_NAME}.xbn";
+  else if (!config.magic_demand_paged)
+    return "ldscripts/${EMULATION_NAME}.xn";
+EOF
+if test -n "$GENERATE_AUTO_IMPORT_SCRIPT" ; then
+fragment <<EOF
+  else if (link_info.pei386_auto_import == 1
+	   && (MERGE_RDATA_V2 || link_info.pei386_runtime_pseudo_reloc != 2))
+    return "ldscripts/${EMULATION_NAME}.xa";
+EOF
+fi
+fragment <<EOF
+  else
+    return "ldscripts/${EMULATION_NAME}.x";
+}
+EOF
+fi
 
 fragment <<EOF
 

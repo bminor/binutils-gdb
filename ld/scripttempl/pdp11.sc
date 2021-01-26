@@ -35,7 +35,7 @@ SECTIONS
     ${RELOCATING+__etext = .;}
     ${PAD_TEXT+${RELOCATING+. = ${DATA_ALIGNMENT};}}
   }
-  ${RELOCATING+. = ${DATA_ALIGNMENT};}
+  ${RELOCATING+. = ${DATA_SEG_ADDR};}
   .data :
   {
     *(.data)

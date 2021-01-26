@@ -1,3 +1,22 @@
+2021-01-26  Alan Modra  <amodra@gmail.com>
+
+	PR 27226
+	* emulparams/alphavms.sh: Don't set COMPILE_IN.
+	* emulparams/elf64_ia64_vms.sh: Likewise.
+	* emulparams/elf64mmix.sh: Likewise.
+	* emulparams/elf_iamcu.sh: Likewise.
+	* emulparams/elf_k1om.sh: Likewise.
+	* emulparams/elf_l1om.sh: Likewise.
+	* emulparams/mmo.sh: Likewise.
+	* emulparams/pdp11.sh: Set DATA_SEG_ADDR.
+	* scripttempl/pdp11.sc: Use it.
+	* emultempl/pdp11.em: Don't edit .xn script for separate_code,
+	instead use .xe script.  Support scripts from file system.
+	* emultempl/beos.em: Support scripts from file system.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* testsuite/ld-bootstrap/bootstrap.exp: Make tmpdir/ldscripts link.
+
 2021-01-25  Fangrui Song  <maskray@google.com>
 
 	PR ld/27230
