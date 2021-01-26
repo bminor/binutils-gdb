@@ -1,3 +1,9 @@
+2021-01-26  Frederic Cambus  <fred@statdns.com>
+
+	* objcopy.c (copy_main): Fix a double free happening when both
+	--localize-symbols and --globalize-symbols options are invoked
+	together.
+
 2021-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Minor updates after the 2.36 release.
