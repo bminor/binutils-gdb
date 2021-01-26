@@ -218,10 +218,17 @@ static int windows_initialization_done;
 #endif
 
 #define CHECK(x)	check (x, __FILE__,__LINE__)
-#define DEBUG_EXEC(x)	if (debug_exec)		debug_printf x
-#define DEBUG_EVENTS(x)	if (debug_events)	debug_printf x
-#define DEBUG_MEM(x)	if (debug_memory)	debug_printf x
-#define DEBUG_EXCEPT(x)	if (debug_exceptions)	debug_printf x
+#define DEBUG_EXEC(fmt, ...) \
+  debug_prefixed_printf_cond (debug_exec, "windows exec", fmt, ## __VA_ARGS__)
+#define DEBUG_EVENTS(fmt, ...) \
+  debug_prefixed_printf_cond (debug_events, "windows events", fmt, \
+			      ## __VA_ARGS__)
+#define DEBUG_MEM(fmt, ...) \
+  debug_prefixed_printf_cond (debug_memory, "windows mem", fmt, \
+			      ## __VA_ARGS__)
+#define DEBUG_EXCEPT(fmt, ...) \
+  debug_prefixed_printf_cond (debug_exceptions, "windows except", fmt, \
+			      ## __VA_ARGS__)
 
 static void cygwin_set_dr (int i, CORE_ADDR addr);
 static void cygwin_set_dr7 (unsigned long val);
@@ -503,7 +510,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
 static void
 windows_init_thread_list (void)
 {
-  DEBUG_EVENTS (("gdb: windows_init_thread_list\n"));
+  DEBUG_EVENTS ("");
   init_thread_list ();
 
   for (windows_thread_info *here : thread_list)
@@ -885,8 +892,8 @@ windows_nat::handle_load_dll ()
 
   lm_info_windows *li = (lm_info_windows *) solib_end->lm_info;
 
-  DEBUG_EVENTS (("gdb: Loading dll \"%s\" at %s.\n", solib_end->so_name,
-		 host_address_to_string (li->load_addr)));
+  DEBUG_EVENTS ("Loading dll \"%s\" at %s.", solib_end->so_name,
+		host_address_to_string (li->load_addr));
 }
 
 static void
@@ -917,7 +924,7 @@ windows_nat::handle_unload_dll ()
 	  so->next = sodel->next;
 	  if (!so->next)
 	    solib_end = so;
-	  DEBUG_EVENTS (("gdb: Unloading dll \"%s\".\n", sodel->so_name));
+	  DEBUG_EVENTS ("Unloading dll \"%s\".", sodel->so_name);
 
 	  windows_free_so (sodel);
 	  return;
@@ -1402,7 +1409,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
     {
       if (current_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
 	{
-	  DEBUG_EXCEPT(("Cannot continue with signal %d here.\n",sig));
+	  DEBUG_EXCEPT ("Cannot continue with signal %d here.", sig);
 	}
       else if (sig == last_sig)
 	continue_status = DBG_EXCEPTION_NOT_HANDLED;
@@ -1423,18 +1430,18 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 	      }
 	  if (continue_status == DBG_CONTINUE)
 	    {
-	      DEBUG_EXCEPT(("Cannot continue with signal %d.\n",sig));
+	      DEBUG_EXCEPT ("Cannot continue with signal %d.", sig);
 	    }
 	}
 #endif
-	DEBUG_EXCEPT(("Can only continue with received signal %d.\n",
-	  last_sig));
+      DEBUG_EXCEPT ("Can only continue with received signal %d.",
+		    last_sig);
     }
 
   last_sig = GDB_SIGNAL_0;
 
-  DEBUG_EXEC (("gdb: windows_resume (pid=%d, tid=0x%x, step=%d, sig=%d);\n",
-	       ptid.pid (), (unsigned) ptid.lwp (), step, sig));
+  DEBUG_EXEC ("pid=%d, tid=0x%x, step=%d, sig=%d",
+	      ptid.pid (), (unsigned) ptid.lwp (), step, sig);
 
   /* Get context for currently selected thread.  */
   th = thread_rec (inferior_ptid, DONT_INVALIDATE_CONTEXT);
@@ -1599,10 +1606,10 @@ windows_nat_target::get_windows_debug_event (int pid,
   switch (event_code)
     {
     case CREATE_THREAD_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "CREATE_THREAD_DEBUG_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "CREATE_THREAD_DEBUG_EVENT");
       if (saw_create != 1)
 	{
 	  inferior *inf = find_inferior_pid (this, current_event.dwProcessId);
@@ -1628,10 +1635,10 @@ windows_nat_target::get_windows_debug_event (int pid,
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "EXIT_THREAD_DEBUG_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "EXIT_THREAD_DEBUG_EVENT");
       windows_delete_thread (ptid_t (current_event.dwProcessId,
 				     current_event.dwThreadId, 0),
 			     current_event.u.ExitThread.dwExitCode,
@@ -1639,10 +1646,10 @@ windows_nat_target::get_windows_debug_event (int pid,
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "CREATE_PROCESS_DEBUG_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "CREATE_PROCESS_DEBUG_EVENT");
       CloseHandle (current_event.u.CreateProcessInfo.hFile);
       if (++saw_create != 1)
 	break;
@@ -1659,10 +1666,10 @@ windows_nat_target::get_windows_debug_event (int pid,
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "EXIT_PROCESS_DEBUG_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "EXIT_PROCESS_DEBUG_EVENT");
       if (!windows_initialization_done)
 	{
 	  target_terminal::ours ();
@@ -1697,10 +1704,10 @@ windows_nat_target::get_windows_debug_event (int pid,
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "LOAD_DLL_DEBUG_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "LOAD_DLL_DEBUG_EVENT");
       CloseHandle (current_event.u.LoadDll.hFile);
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
@@ -1711,10 +1718,10 @@ windows_nat_target::get_windows_debug_event (int pid,
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "UNLOAD_DLL_DEBUG_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "UNLOAD_DLL_DEBUG_EVENT");
       if (saw_create != 1 || ! windows_initialization_done)
 	break;
       catch_errors (handle_unload_dll);
@@ -1724,10 +1731,10 @@ windows_nat_target::get_windows_debug_event (int pid,
       break;
 
     case EXCEPTION_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "EXCEPTION_DEBUG_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "EXCEPTION_DEBUG_EVENT");
       if (saw_create != 1)
 	break;
       switch (handle_exception (ourstatus, debug_exceptions))
@@ -1746,10 +1753,10 @@ windows_nat_target::get_windows_debug_event (int pid,
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* Message from the kernel.  */
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
-		     (unsigned) current_event.dwProcessId,
-		     (unsigned) current_event.dwThreadId,
-		     "OUTPUT_DEBUG_STRING_EVENT"));
+      DEBUG_EVENTS ("kernel event for pid=%u tid=0x%x code=%s",
+		    (unsigned) current_event.dwProcessId,
+		    (unsigned) current_event.dwThreadId,
+		    "OUTPUT_DEBUG_STRING_EVENT");
       if (saw_create != 1)
 	break;
       thread_id = handle_output_debug_string (ourstatus);
@@ -1774,9 +1781,9 @@ windows_nat_target::get_windows_debug_event (int pid,
     {
       /* Pending stop.  See the comment by the definition of
 	 "pending_stops" for details on why this is needed.  */
-      DEBUG_EVENTS (("get_windows_debug_event - "
-		     "unexpected stop in 0x%x (expecting 0x%x)\n",
-		     thread_id, desired_stop_thread_id));
+      DEBUG_EVENTS ("get_windows_debug_event - "
+		    "unexpected stop in 0x%x (expecting 0x%x)",
+		    thread_id, desired_stop_thread_id);
 
       if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
 	  && ((current_event.u.Exception.ExceptionRecord.ExceptionCode
@@ -3066,7 +3073,7 @@ windows_nat_target::mourn_inferior ()
 void
 windows_nat_target::interrupt ()
 {
-  DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
+  DEBUG_EVENTS ("GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)");
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
   registers_changed ();		/* refresh register state */
 }
@@ -3084,8 +3091,8 @@ windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 
   if (writebuf != NULL)
     {
-      DEBUG_MEM (("gdb: write target memory, %s bytes at %s\n",
-		  pulongest (len), core_addr_to_string (memaddr)));
+      DEBUG_MEM ("write target memory, %s bytes at %s",
+		 pulongest (len), core_addr_to_string (memaddr));
       success = WriteProcessMemory (current_process_handle,
 				    (LPVOID) (uintptr_t) memaddr, writebuf,
 				    len, &done);
@@ -3096,8 +3103,8 @@ windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
     }
   else
     {
-      DEBUG_MEM (("gdb: read target memory, %s bytes at %s\n",
-		  pulongest (len), core_addr_to_string (memaddr)));
+      DEBUG_MEM ("read target memory, %s bytes at %s",
+		 pulongest (len), core_addr_to_string (memaddr));
       success = ReadProcessMemory (current_process_handle,
 				   (LPCVOID) (uintptr_t) memaddr, readbuf,
 				   len, &done);
@@ -3132,8 +3139,7 @@ windows_nat_target::kill ()
 void
 windows_nat_target::close ()
 {
-  DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
-		inferior_ptid.pid ()));
+  DEBUG_EVENTS ("inferior_ptid=%d\n", inferior_ptid.pid ());
 }
 
 /* Convert pid to printable format.  */

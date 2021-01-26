@@ -1,3 +1,18 @@
+2021-01-26  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (DEBUG_EXEC, DEBUG_EVENTS, DEBUG_MEM)
+	(DEBUG_EXCEPT): Use debug_prefixed_printf_cond.
+	(windows_init_thread_list, windows_nat::handle_load_dll)
+	(windows_nat::handle_unload_dll, windows_nat_target::resume)
+	(windows_nat_target::resume)
+	(windows_nat_target::get_windows_debug_event)
+	(windows_nat_target::interrupt, windows_xfer_memory)
+	(windows_nat_target::close): Update.
+	* nat/windows-nat.c (DEBUG_EVENTS): Use
+	debug_prefixed_printf_cond.
+	(matching_pending_stop, fetch_pending_stop)
+	(continue_last_debug_event): Update.
+
 2020-12-17  Mihails Strasuns  <mihails.strasuns@intel.com>
 
 	* linux-tdep.c (linux_make_mappings_corefile_notes): Start using
