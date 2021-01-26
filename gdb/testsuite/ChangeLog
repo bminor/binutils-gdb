@@ -1,5 +1,9 @@
 2021-01-26  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.threads/killed-outside.exp: Allow regular output.
+
+2021-01-26  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.opt/solib-intra-step.exp: Handle stepping into thunk.
 
 2021-01-25  Tom de Vries  <tdevries@suse.de>
