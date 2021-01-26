@@ -1,3 +1,8 @@
+2021-01-26  Alan Modra  <amodra@gmail.com>
+
+	* i386-gen.c (parse_template): Ensure entire template_instance
+	is initialised.
+
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-opc.c (riscv_gpr_names_abi): Aligned the code.
