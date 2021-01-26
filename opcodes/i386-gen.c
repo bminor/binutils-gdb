@@ -1465,6 +1465,8 @@ parse_template (char *buf, int lineno)
       *end++ = '\0';
 
       inst = xmalloc (sizeof (*inst));
+      inst->next = NULL;
+      inst->args = NULL;
 
       cur = next_field (buf, ':', &next, end);
       inst->name = xstrdup (cur);
