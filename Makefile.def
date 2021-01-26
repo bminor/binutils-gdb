@@ -448,6 +448,7 @@ dependencies = { module=all-binutils; on=all-intl; };
 dependencies = { module=all-binutils; on=all-gas; };
 dependencies = { module=all-binutils; on=all-libctf; };
 dependencies = { module=all-ld; on=all-libctf; };
+dependencies = { module=install-ld; on=install-libctf; };
 
 // We put install-opcodes before install-binutils because the installed
 // binutils might be on PATH, and they might need the shared opcodes

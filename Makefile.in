@@ -52170,6 +52170,7 @@ all-stage3-ld: maybe-all-stage3-libctf
 all-stage4-ld: maybe-all-stage4-libctf
 all-stageprofile-ld: maybe-all-stageprofile-libctf
 all-stagefeedback-ld: maybe-all-stagefeedback-libctf
+install-ld: maybe-install-libctf
 install-binutils: maybe-install-opcodes
 install-strip-binutils: maybe-install-strip-opcodes
 install-opcodes: maybe-install-bfd
