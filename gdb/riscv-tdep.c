@@ -1399,7 +1399,7 @@ private:
   {
     m_opcode = opcode;
     m_rd = m_rs1 = decode_register_index (ival, OP_SH_CRS1S);
-    m_imm.s = EXTRACT_RVC_IMM (ival);
+    m_imm.s = EXTRACT_CITYPE_IMM (ival);
   }
 
   /* Helper for DECODE, decode 32-bit S-type instruction.  */
@@ -1449,14 +1449,14 @@ private:
   {
     m_opcode = opcode;
     m_rd = decode_register_index (ival, OP_SH_RD);
-    m_imm.s = EXTRACT_UJTYPE_IMM (ival);
+    m_imm.s = EXTRACT_JTYPE_IMM (ival);
   }
 
   /* Helper for DECODE, decode 32-bit J-type instruction.  */
   void decode_cj_type_insn (enum opcode opcode, ULONGEST ival)
   {
     m_opcode = opcode;
-    m_imm.s = EXTRACT_RVC_J_IMM (ival);
+    m_imm.s = EXTRACT_CJTYPE_IMM (ival);
   }
 
   void decode_b_type_insn (enum opcode opcode, ULONGEST ival)
@@ -1464,14 +1464,14 @@ private:
     m_opcode = opcode;
     m_rs1 = decode_register_index (ival, OP_SH_RS1);
     m_rs2 = decode_register_index (ival, OP_SH_RS2);
-    m_imm.s = EXTRACT_SBTYPE_IMM (ival);
+    m_imm.s = EXTRACT_BTYPE_IMM (ival);
   }
 
   void decode_cb_type_insn (enum opcode opcode, ULONGEST ival)
   {
     m_opcode = opcode;
     m_rs1 = decode_register_index_short (ival, OP_SH_CRS1S);
-    m_imm.s = EXTRACT_RVC_B_IMM (ival);
+    m_imm.s = EXTRACT_CBTYPE_IMM (ival);
   }
 
   /* Fetch instruction from target memory at ADDR, return the content of
@@ -1629,31 +1629,31 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
 	{
 	  m_opcode = ADDI;
 	  m_rd = m_rs1 = decode_register_index (ival, OP_SH_RD);
-	  m_imm.s = EXTRACT_RVC_ADDI16SP_IMM (ival);
+	  m_imm.s = EXTRACT_CITYPE_ADDI16SP_IMM (ival);
 	}
       else if (is_c_addi4spn_insn (ival))
 	{
 	  m_opcode = ADDI;
 	  m_rd = decode_register_index_short (ival, OP_SH_CRS2S);
 	  m_rs1 = RISCV_SP_REGNUM;
-	  m_imm.s = EXTRACT_RVC_ADDI4SPN_IMM (ival);
+	  m_imm.s = EXTRACT_CIWTYPE_ADDI4SPN_IMM (ival);
 	}
       else if (is_c_lui_insn (ival))
 	{
 	  m_opcode = LUI;
 	  m_rd = decode_register_index (ival, OP_SH_CRS1S);
-	  m_imm.s = EXTRACT_RVC_LUI_IMM (ival);
+	  m_imm.s = EXTRACT_CITYPE_LUI_IMM (ival);
 	}
       /* C_SD and C_FSW have the same opcode.  C_SD is RV64 and RV128 only,
 	 and C_FSW is RV32 only.  */
       else if (xlen != 4 && is_c_sd_insn (ival))
-	decode_cs_type_insn (SD, ival, EXTRACT_RVC_LD_IMM (ival));
+	decode_cs_type_insn (SD, ival, EXTRACT_CLTYPE_LD_IMM (ival));
       else if (is_c_sw_insn (ival))
-	decode_cs_type_insn (SW, ival, EXTRACT_RVC_LW_IMM (ival));
+	decode_cs_type_insn (SW, ival, EXTRACT_CLTYPE_LW_IMM (ival));
       else if (is_c_swsp_insn (ival))
-	decode_css_type_insn (SW, ival, EXTRACT_RVC_SWSP_IMM (ival));
+	decode_css_type_insn (SW, ival, EXTRACT_CSSTYPE_SWSP_IMM (ival));
       else if (xlen != 4 && is_c_sdsp_insn (ival))
-	decode_css_type_insn (SD, ival, EXTRACT_RVC_SDSP_IMM (ival));
+	decode_css_type_insn (SD, ival, EXTRACT_CSSTYPE_SDSP_IMM (ival));
       /* C_JR and C_MV have the same opcode.  If RS2 is 0, then this is a C_JR.
 	 So must try to match C_JR first as it ahs more bits in mask.  */
       else if (is_c_jr_insn (ival))

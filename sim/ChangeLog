@@ -1,3 +1,8 @@
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* riscv/sim-main.c (execute_i): Updated encoding macros.
+
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt: Delete call to AC_SUBST(sim_arch).

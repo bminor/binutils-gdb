@@ -65,99 +65,106 @@ static const char * const riscv_pred_succ[16] =
   (RV_X(x, 20, 12) | (RV_IMM_SIGN(x) << 12))
 #define EXTRACT_STYPE_IMM(x) \
   (RV_X(x, 7, 5) | (RV_X(x, 25, 7) << 5) | (RV_IMM_SIGN(x) << 12))
-#define EXTRACT_SBTYPE_IMM(x) \
+#define EXTRACT_BTYPE_IMM(x) \
   ((RV_X(x, 8, 4) << 1) | (RV_X(x, 25, 6) << 5) | (RV_X(x, 7, 1) << 11) | (RV_IMM_SIGN(x) << 12))
 #define EXTRACT_UTYPE_IMM(x) \
   ((RV_X(x, 12, 20) << 12) | (RV_IMM_SIGN(x) << 32))
-#define EXTRACT_UJTYPE_IMM(x) \
+#define EXTRACT_JTYPE_IMM(x) \
   ((RV_X(x, 21, 10) << 1) | (RV_X(x, 20, 1) << 11) | (RV_X(x, 12, 8) << 12) | (RV_IMM_SIGN(x) << 20))
-#define EXTRACT_RVC_IMM(x) \
+#define EXTRACT_CITYPE_IMM(x) \
   (RV_X(x, 2, 5) | (-RV_X(x, 12, 1) << 5))
-#define EXTRACT_RVC_LUI_IMM(x) \
-  (EXTRACT_RVC_IMM (x) << RISCV_IMM_BITS)
-#define EXTRACT_RVC_SIMM3(x) \
-  (RV_X(x, 10, 2) | (-RV_X(x, 12, 1) << 2))
-#define EXTRACT_RVC_UIMM8(x) \
-  (RV_X(x, 5, 8))
-#define EXTRACT_RVC_ADDI4SPN_IMM(x) \
-  ((RV_X(x, 6, 1) << 2) | (RV_X(x, 5, 1) << 3) | (RV_X(x, 11, 2) << 4) | (RV_X(x, 7, 4) << 6))
-#define EXTRACT_RVC_ADDI16SP_IMM(x) \
+#define EXTRACT_CITYPE_LUI_IMM(x) \
+  (EXTRACT_CITYPE_IMM (x) << RISCV_IMM_BITS)
+#define EXTRACT_CITYPE_ADDI16SP_IMM(x) \
   ((RV_X(x, 6, 1) << 4) | (RV_X(x, 2, 1) << 5) | (RV_X(x, 5, 1) << 6) | (RV_X(x, 3, 2) << 7) | (-RV_X(x, 12, 1) << 9))
-#define EXTRACT_RVC_LW_IMM(x) \
-  ((RV_X(x, 6, 1) << 2) | (RV_X(x, 10, 3) << 3) | (RV_X(x, 5, 1) << 6))
-#define EXTRACT_RVC_LD_IMM(x) \
-  ((RV_X(x, 10, 3) << 3) | (RV_X(x, 5, 2) << 6))
-#define EXTRACT_RVC_LWSP_IMM(x) \
+#define EXTRACT_CITYPE_LWSP_IMM(x) \
   ((RV_X(x, 4, 3) << 2) | (RV_X(x, 12, 1) << 5) | (RV_X(x, 2, 2) << 6))
-#define EXTRACT_RVC_LDSP_IMM(x) \
+#define EXTRACT_CITYPE_LDSP_IMM(x) \
   ((RV_X(x, 5, 2) << 3) | (RV_X(x, 12, 1) << 5) | (RV_X(x, 2, 3) << 6))
-#define EXTRACT_RVC_SWSP_IMM(x) \
+#define EXTRACT_CSSTYPE_IMM(x) \
+  (RV_X(x, 7, 6) << 0)
+#define EXTRACT_CSSTYPE_SWSP_IMM(x) \
   ((RV_X(x, 9, 4) << 2) | (RV_X(x, 7, 2) << 6))
-#define EXTRACT_RVC_SDSP_IMM(x) \
+#define EXTRACT_CSSTYPE_SDSP_IMM(x) \
   ((RV_X(x, 10, 3) << 3) | (RV_X(x, 7, 3) << 6))
-#define EXTRACT_RVC_B_IMM(x) \
+#define EXTRACT_CIWTYPE_IMM(x) \
+  (RV_X(x, 5, 8))
+#define EXTRACT_CIWTYPE_ADDI4SPN_IMM(x) \
+  ((RV_X(x, 6, 1) << 2) | (RV_X(x, 5, 1) << 3) | (RV_X(x, 11, 2) << 4) | (RV_X(x, 7, 4) << 6))
+#define EXTRACT_CLTYPE_IMM(x) \
+  ((RV_X(x, 5, 2) << 0) | (RV_X(x, 10, 3) << 2))
+#define EXTRACT_CLTYPE_LW_IMM(x) \
+  ((RV_X(x, 6, 1) << 2) | (RV_X(x, 10, 3) << 3) | (RV_X(x, 5, 1) << 6))
+#define EXTRACT_CLTYPE_LD_IMM(x) \
+  ((RV_X(x, 10, 3) << 3) | (RV_X(x, 5, 2) << 6))
+#define EXTRACT_CBTYPE_IMM(x) \
   ((RV_X(x, 3, 2) << 1) | (RV_X(x, 10, 2) << 3) | (RV_X(x, 2, 1) << 5) | (RV_X(x, 5, 2) << 6) | (-RV_X(x, 12, 1) << 8))
-#define EXTRACT_RVC_J_IMM(x) \
+#define EXTRACT_CJTYPE_IMM(x) \
   ((RV_X(x, 3, 3) << 1) | (RV_X(x, 11, 1) << 4) | (RV_X(x, 2, 1) << 5) | (RV_X(x, 7, 1) << 6) | (RV_X(x, 6, 1) << 7) | (RV_X(x, 9, 2) << 8) | (RV_X(x, 8, 1) << 10) | (-RV_X(x, 12, 1) << 11))
 
 #define ENCODE_ITYPE_IMM(x) \
   (RV_X(x, 0, 12) << 20)
 #define ENCODE_STYPE_IMM(x) \
   ((RV_X(x, 0, 5) << 7) | (RV_X(x, 5, 7) << 25))
-#define ENCODE_SBTYPE_IMM(x) \
+#define ENCODE_BTYPE_IMM(x) \
   ((RV_X(x, 1, 4) << 8) | (RV_X(x, 5, 6) << 25) | (RV_X(x, 11, 1) << 7) | (RV_X(x, 12, 1) << 31))
 #define ENCODE_UTYPE_IMM(x) \
   (RV_X(x, 12, 20) << 12)
-#define ENCODE_UJTYPE_IMM(x) \
+#define ENCODE_JTYPE_IMM(x) \
   ((RV_X(x, 1, 10) << 21) | (RV_X(x, 11, 1) << 20) | (RV_X(x, 12, 8) << 12) | (RV_X(x, 20, 1) << 31))
-#define ENCODE_RVC_IMM(x) \
+#define ENCODE_CITYPE_IMM(x) \
   ((RV_X(x, 0, 5) << 2) | (RV_X(x, 5, 1) << 12))
-#define ENCODE_RVC_LUI_IMM(x) \
-  ENCODE_RVC_IMM ((x) >> RISCV_IMM_BITS)
-#define ENCODE_RVC_SIMM3(x) \
-  (RV_X(x, 0, 3) << 10)
-#define ENCODE_RVC_UIMM8(x) \
-  (RV_X(x, 0, 8) << 5)
-#define ENCODE_RVC_ADDI4SPN_IMM(x) \
-  ((RV_X(x, 2, 1) << 6) | (RV_X(x, 3, 1) << 5) | (RV_X(x, 4, 2) << 11) | (RV_X(x, 6, 4) << 7))
-#define ENCODE_RVC_ADDI16SP_IMM(x) \
+#define ENCODE_CITYPE_LUI_IMM(x) \
+  ENCODE_CITYPE_IMM ((x) >> RISCV_IMM_BITS)
+#define ENCODE_CITYPE_ADDI16SP_IMM(x) \
   ((RV_X(x, 4, 1) << 6) | (RV_X(x, 5, 1) << 2) | (RV_X(x, 6, 1) << 5) | (RV_X(x, 7, 2) << 3) | (RV_X(x, 9, 1) << 12))
-#define ENCODE_RVC_LW_IMM(x) \
-  ((RV_X(x, 2, 1) << 6) | (RV_X(x, 3, 3) << 10) | (RV_X(x, 6, 1) << 5))
-#define ENCODE_RVC_LD_IMM(x) \
-  ((RV_X(x, 3, 3) << 10) | (RV_X(x, 6, 2) << 5))
-#define ENCODE_RVC_LWSP_IMM(x) \
+#define ENCODE_CITYPE_LWSP_IMM(x) \
   ((RV_X(x, 2, 3) << 4) | (RV_X(x, 5, 1) << 12) | (RV_X(x, 6, 2) << 2))
-#define ENCODE_RVC_LDSP_IMM(x) \
+#define ENCODE_CITYPE_LDSP_IMM(x) \
   ((RV_X(x, 3, 2) << 5) | (RV_X(x, 5, 1) << 12) | (RV_X(x, 6, 3) << 2))
-#define ENCODE_RVC_SWSP_IMM(x) \
+#define ENCODE_CSSTYPE_IMM(x) \
+  (RV_X(x, 0, 6) << 7)
+#define ENCODE_CSSTYPE_SWSP_IMM(x) \
   ((RV_X(x, 2, 4) << 9) | (RV_X(x, 6, 2) << 7))
-#define ENCODE_RVC_SDSP_IMM(x) \
+#define ENCODE_CSSTYPE_SDSP_IMM(x) \
   ((RV_X(x, 3, 3) << 10) | (RV_X(x, 6, 3) << 7))
-#define ENCODE_RVC_B_IMM(x) \
+#define ENCODE_CIWTYPE_IMM(x) \
+  (RV_X(x, 0, 8) << 5)
+#define ENCODE_CIWTYPE_ADDI4SPN_IMM(x) \
+  ((RV_X(x, 2, 1) << 6) | (RV_X(x, 3, 1) << 5) | (RV_X(x, 4, 2) << 11) | (RV_X(x, 6, 4) << 7))
+#define ENCODE_CLTYPE_IMM(x) \
+  ((RV_X(x, 0, 2) << 5) | (RV_X(x, 2, 3) << 10))
+#define ENCODE_CLTYPE_LW_IMM(x) \
+  ((RV_X(x, 2, 1) << 6) | (RV_X(x, 3, 3) << 10) | (RV_X(x, 6, 1) << 5))
+#define ENCODE_CLTYPE_LD_IMM(x) \
+  ((RV_X(x, 3, 3) << 10) | (RV_X(x, 6, 2) << 5))
+#define ENCODE_CBTYPE_IMM(x) \
   ((RV_X(x, 1, 2) << 3) | (RV_X(x, 3, 2) << 10) | (RV_X(x, 5, 1) << 2) | (RV_X(x, 6, 2) << 5) | (RV_X(x, 8, 1) << 12))
-#define ENCODE_RVC_J_IMM(x) \
+#define ENCODE_CJTYPE_IMM(x) \
   ((RV_X(x, 1, 3) << 3) | (RV_X(x, 4, 1) << 11) | (RV_X(x, 5, 1) << 2) | (RV_X(x, 6, 1) << 7) | (RV_X(x, 7, 1) << 6) | (RV_X(x, 8, 2) << 9) | (RV_X(x, 10, 1) << 8) | (RV_X(x, 11, 1) << 12))
 
 #define VALID_ITYPE_IMM(x) (EXTRACT_ITYPE_IMM(ENCODE_ITYPE_IMM(x)) == (x))
 #define VALID_STYPE_IMM(x) (EXTRACT_STYPE_IMM(ENCODE_STYPE_IMM(x)) == (x))
-#define VALID_SBTYPE_IMM(x) (EXTRACT_SBTYPE_IMM(ENCODE_SBTYPE_IMM(x)) == (x))
+#define VALID_BTYPE_IMM(x) (EXTRACT_BTYPE_IMM(ENCODE_BTYPE_IMM(x)) == (x))
 #define VALID_UTYPE_IMM(x) (EXTRACT_UTYPE_IMM(ENCODE_UTYPE_IMM(x)) == (x))
-#define VALID_UJTYPE_IMM(x) (EXTRACT_UJTYPE_IMM(ENCODE_UJTYPE_IMM(x)) == (x))
-#define VALID_RVC_IMM(x) (EXTRACT_RVC_IMM(ENCODE_RVC_IMM(x)) == (x))
-#define VALID_RVC_LUI_IMM(x) (ENCODE_RVC_LUI_IMM(x) != 0 && EXTRACT_RVC_LUI_IMM(ENCODE_RVC_LUI_IMM(x)) == (x))
-#define VALID_RVC_SIMM3(x) (EXTRACT_RVC_SIMM3(ENCODE_RVC_SIMM3(x)) == (x))
-#define VALID_RVC_UIMM8(x) (EXTRACT_RVC_UIMM8(ENCODE_RVC_UIMM8(x)) == (x))
-#define VALID_RVC_ADDI4SPN_IMM(x) (EXTRACT_RVC_ADDI4SPN_IMM(ENCODE_RVC_ADDI4SPN_IMM(x)) == (x))
-#define VALID_RVC_ADDI16SP_IMM(x) (EXTRACT_RVC_ADDI16SP_IMM(ENCODE_RVC_ADDI16SP_IMM(x)) == (x))
-#define VALID_RVC_LW_IMM(x) (EXTRACT_RVC_LW_IMM(ENCODE_RVC_LW_IMM(x)) == (x))
-#define VALID_RVC_LD_IMM(x) (EXTRACT_RVC_LD_IMM(ENCODE_RVC_LD_IMM(x)) == (x))
-#define VALID_RVC_LWSP_IMM(x) (EXTRACT_RVC_LWSP_IMM(ENCODE_RVC_LWSP_IMM(x)) == (x))
-#define VALID_RVC_LDSP_IMM(x) (EXTRACT_RVC_LDSP_IMM(ENCODE_RVC_LDSP_IMM(x)) == (x))
-#define VALID_RVC_SWSP_IMM(x) (EXTRACT_RVC_SWSP_IMM(ENCODE_RVC_SWSP_IMM(x)) == (x))
-#define VALID_RVC_SDSP_IMM(x) (EXTRACT_RVC_SDSP_IMM(ENCODE_RVC_SDSP_IMM(x)) == (x))
-#define VALID_RVC_B_IMM(x) (EXTRACT_RVC_B_IMM(ENCODE_RVC_B_IMM(x)) == (x))
-#define VALID_RVC_J_IMM(x) (EXTRACT_RVC_J_IMM(ENCODE_RVC_J_IMM(x)) == (x))
+#define VALID_JTYPE_IMM(x) (EXTRACT_JTYPE_IMM(ENCODE_JTYPE_IMM(x)) == (x))
+#define VALID_CITYPE_IMM(x) (EXTRACT_CITYPE_IMM(ENCODE_CITYPE_IMM(x)) == (x))
+#define VALID_CITYPE_LUI_IMM(x) (ENCODE_CITYPE_LUI_IMM(x) != 0 \
+				 && EXTRACT_CITYPE_LUI_IMM(ENCODE_CITYPE_LUI_IMM(x)) == (x))
+#define VALID_CITYPE_ADDI16SP_IMM(x) (ENCODE_CITYPE_ADDI16SP_IMM(x) != 0 \
+				      && EXTRACT_CITYPE_ADDI16SP_IMM(ENCODE_CITYPE_ADDI16SP_IMM(x)) == (x))
+#define VALID_CITYPE_LWSP_IMM(x) (EXTRACT_CITYPE_LWSP_IMM(ENCODE_CITYPE_LWSP_IMM(x)) == (x))
+#define VALID_CITYPE_LDSP_IMM(x) (EXTRACT_CITYPE_LDSP_IMM(ENCODE_CITYPE_LDSP_IMM(x)) == (x))
+#define VALID_CSSTYPE_IMM(x) (EXTRACT_CSSTYPE_IMM(ENCODE_CSSTYPE_IMM(x)) == (x))
+#define VALID_CSSTYPE_SWSP_IMM(x) (EXTRACT_CSSTYPE_SWSP_IMM(ENCODE_CSSTYPE_SWSP_IMM(x)) == (x))
+#define VALID_CSSTYPE_SDSP_IMM(x) (EXTRACT_CSSTYPE_SDSP_IMM(ENCODE_CSSTYPE_SDSP_IMM(x)) == (x))
+#define VALID_CIWTYPE_IMM(x) (EXTRACT_CIWTYPE_IMM(ENCODE_CIWTYPE_IMM(x)) == (x))
+#define VALID_CIWTYPE_ADDI4SPN_IMM(x) (EXTRACT_CIWTYPE_ADDI4SPN_IMM(ENCODE_CIWTYPE_ADDI4SPN_IMM(x)) == (x))
+#define VALID_CLTYPE_IMM(x) (EXTRACT_CLTYPE_IMM(ENCODE_CLTYPE_IMM(x)) == (x))
+#define VALID_CLTYPE_LW_IMM(x) (EXTRACT_CLTYPE_LW_IMM(ENCODE_CLTYPE_LW_IMM(x)) == (x))
+#define VALID_CLTYPE_LD_IMM(x) (EXTRACT_CLTYPE_LD_IMM(ENCODE_CLTYPE_LD_IMM(x)) == (x))
+#define VALID_CBTYPE_IMM(x) (EXTRACT_CBTYPE_IMM(ENCODE_CBTYPE_IMM(x)) == (x))
+#define VALID_CJTYPE_IMM(x) (EXTRACT_CJTYPE_IMM(ENCODE_CJTYPE_IMM(x)) == (x))
 
 #define RISCV_RTYPE(insn, rd, rs1, rs2) \
   ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ((rs1) << OP_SH_RS1) | ((rs2) << OP_SH_RS2))
@@ -165,12 +172,12 @@ static const char * const riscv_pred_succ[16] =
   ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ((rs1) << OP_SH_RS1) | ENCODE_ITYPE_IMM(imm))
 #define RISCV_STYPE(insn, rs1, rs2, imm) \
   ((MATCH_ ## insn) | ((rs1) << OP_SH_RS1) | ((rs2) << OP_SH_RS2) | ENCODE_STYPE_IMM(imm))
-#define RISCV_SBTYPE(insn, rs1, rs2, target) \
-  ((MATCH_ ## insn) | ((rs1) << OP_SH_RS1) | ((rs2) << OP_SH_RS2) | ENCODE_SBTYPE_IMM(target))
+#define RISCV_BTYPE(insn, rs1, rs2, target) \
+  ((MATCH_ ## insn) | ((rs1) << OP_SH_RS1) | ((rs2) << OP_SH_RS2) | ENCODE_BTYPE_IMM(target))
 #define RISCV_UTYPE(insn, rd, bigimm) \
   ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ENCODE_UTYPE_IMM(bigimm))
-#define RISCV_UJTYPE(insn, rd, target) \
-  ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ENCODE_UJTYPE_IMM(target))
+#define RISCV_JTYPE(insn, rd, target) \
+  ((MATCH_ ## insn) | ((rd) << OP_SH_RD) | ENCODE_JTYPE_IMM(target))
 
 #define RISCV_NOP RISCV_ITYPE(ADDI, 0, 0, 0)
 #define RVC_NOP MATCH_C_ADDI

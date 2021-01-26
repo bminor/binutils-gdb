@@ -1,3 +1,8 @@
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* opcode/riscv.h: Updated encoding macros.
+
 2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
 
 	* opcode/riscv.h: Moved stuff and make the file tidy.

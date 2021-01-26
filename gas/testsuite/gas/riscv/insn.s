@@ -10,11 +10,14 @@ target:
 	.insn uj 0x6f, a0, target
 	.insn j  0x6f, a0, target
 
-	.insn ci 0x1, 0x0, a0, 4
-	.insn cr 0x2, 0x8, a0, a1
+	.insn cr  0x2, 0x8, a0, a1
+	.insn ci  0x1, 0x0, a0, 4
 	.insn ciw 0x0, 0x0, a1, 1
-	.insn cb 0x1, 0x6, a1, target
-	.insn cj 0x1, 0x5, target
+	.insn css 0x2, 0x6, a0, 1
+	.insn cl  0x0, 0x2, a0, 1(a1)
+	.insn cs  0x0, 0x6, a0, 1(a1)
+	.insn cb  0x1, 0x6, a1, target
+	.insn cj  0x1, 0x5, target
 
 	.insn r  OP,  0,  0, a0, a1, a2
 	.insn i  OP_IMM,  0, a0, a1, 13
@@ -27,12 +30,15 @@ target:
 	.insn uj JAL, a0, target
 	.insn j  JAL, a0, target
 
-	.insn ci C1, 0x0, a0, 4
-	.insn cr C2, 0x8, a0, a1
+	.insn cr  C2, 0x8, a0, a1
+	.insn ci  C1, 0x0, a0, 4
 	.insn ciw C0, 0x0, a1, 1
-	.insn ca C1, 0x23, 0x3, a0, a1
-	.insn cb C1, 0x6, a1, target
-	.insn cj C1, 0x5, target
+	.insn css C2, 0x6, a0, 1
+	.insn cl  C0, 0x2, a0, 1(a1)
+	.insn cs  C0, 0x6, a0, 1(a1)
+	.insn ca  C1, 0x23, 0x3, a0, a1
+	.insn cb  C1, 0x6, a1, target
+	.insn cj  C1, 0x5, target
 
 	.insn r  MADD, 0, 0, a0, a1, a2, a3
 	.insn r4 MADD, 0, 0, a0, a1, a2, a3

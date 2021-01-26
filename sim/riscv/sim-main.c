@@ -157,7 +157,7 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
   unsigned_word i_imm = EXTRACT_ITYPE_IMM (iw);
   unsigned_word u_imm = EXTRACT_UTYPE_IMM ((unsigned64) iw);
   unsigned_word s_imm = EXTRACT_STYPE_IMM (iw);
-  unsigned_word sb_imm = EXTRACT_SBTYPE_IMM (iw);
+  unsigned_word sb_imm = EXTRACT_BTYPE_IMM (iw);
   unsigned_word shamt_imm = ((iw >> OP_SH_SHAMT) & OP_MASK_SHAMT);
   unsigned_word tmp;
   sim_cia pc = cpu->pc + 4;
@@ -416,9 +416,9 @@ execute_i (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
       break;
     case MATCH_JAL:
       TRACE_INSN (cpu, "jal %s, %" PRIiTW ";", rd_name,
-		  EXTRACT_UJTYPE_IMM (iw));
+		  EXTRACT_JTYPE_IMM (iw));
       store_rd (cpu, rd, cpu->pc + 4);
-      pc = cpu->pc + EXTRACT_UJTYPE_IMM (iw);
+      pc = cpu->pc + EXTRACT_JTYPE_IMM (iw);
       TRACE_BRANCH (cpu, "to %#" PRIxTW, pc);
       break;
     case MATCH_JALR:

@@ -1,3 +1,15 @@
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* config/tc-riscv.c (riscv_ip): Updated encoding macros.
+	(md_apply_fix): Likewise.
+	(md_convert_frag_branch): Likewise.
+	(validate_riscv_insn): Likewise.  Also arranged operands, including
+	added C5 and C6 operands, and removed unused Ci and C< operands.
+	* doc/c-riscv.texi: Updated and added CSS/CL/CS types.
+	* testsuite/gas/riscv/insn.d: Added CSS/CL/CS instructions.
+	* testsuite/gas/riscv/insn.s: Likewise.
+
 2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c: Included cpu-riscv.h.

@@ -73,7 +73,7 @@ const char * const riscv_fpr_names_abi[NFPR] =
 #define MASK_RD (OP_MASK_RD << OP_SH_RD)
 #define MASK_CRS2 (OP_MASK_CRS2 << OP_SH_CRS2)
 #define MASK_IMM ENCODE_ITYPE_IMM (-1U)
-#define MASK_RVC_IMM ENCODE_RVC_IMM (-1U)
+#define MASK_RVC_IMM ENCODE_CITYPE_IMM (-1U)
 #define MASK_UIMM ENCODE_UTYPE_IMM (-1U)
 #define MASK_RM (OP_MASK_RM << OP_SH_RM)
 #define MASK_PRED (OP_MASK_PRED << OP_SH_PRED)
@@ -135,8 +135,7 @@ static int
 match_c_addi16sp (const struct riscv_opcode *op, insn_t insn)
 {
   return (match_opcode (op, insn)
-	  && (((insn & MASK_RD) >> OP_SH_RD) == 2)
-	  && EXTRACT_RVC_ADDI16SP_IMM (insn) != 0);
+	  && (((insn & MASK_RD) >> OP_SH_RD) == 2));
 }
 
 static int
@@ -144,7 +143,7 @@ match_c_lui (const struct riscv_opcode *op, insn_t insn)
 {
   return (match_rd_nonzero (op, insn)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
-	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
+	  && EXTRACT_CITYPE_LUI_IMM (insn) != 0);
 }
 
 /* We don't allow lui zero,X to become a c.lui hint, so we need a separate
@@ -155,13 +154,13 @@ match_c_lui_with_hint (const struct riscv_opcode *op, insn_t insn)
 {
   return (match_opcode (op, insn)
 	  && (((insn & MASK_RD) >> OP_SH_RD) != 2)
-	  && EXTRACT_RVC_LUI_IMM (insn) != 0);
+	  && EXTRACT_CITYPE_LUI_IMM (insn) != 0);
 }
 
 static int
 match_c_addi4spn (const struct riscv_opcode *op, insn_t insn)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_ADDI4SPN_IMM (insn) != 0;
+  return match_opcode (op, insn) && EXTRACT_CIWTYPE_ADDI4SPN_IMM (insn) != 0;
 }
 
 /* This requires a non-zero shift.  A zero rd is a hint, so is allowed.  */
@@ -169,7 +168,7 @@ match_c_addi4spn (const struct riscv_opcode *op, insn_t insn)
 static int
 match_c_slli (const struct riscv_opcode *op, insn_t insn)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
 }
 
 /* This requires a non-zero rd, and a non-zero shift.  */
@@ -177,7 +176,7 @@ match_c_slli (const struct riscv_opcode *op, insn_t insn)
 static int
 match_slli_as_c_slli (const struct riscv_opcode *op, insn_t insn)
 {
-  return match_rd_nonzero (op, insn) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_rd_nonzero (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
 }
 
 /* This requires a zero shift.  A zero rd is a hint, so is allowed.  */
@@ -185,7 +184,7 @@ match_slli_as_c_slli (const struct riscv_opcode *op, insn_t insn)
 static int
 match_c_slli64 (const struct riscv_opcode *op, insn_t insn)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_IMM (insn) == 0;
+  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) == 0;
 }
 
 /* This is used for both srli and srai.  This requires a non-zero shift.
@@ -194,7 +193,7 @@ match_c_slli64 (const struct riscv_opcode *op, insn_t insn)
 static int
 match_srxi_as_c_srxi (const struct riscv_opcode *op, insn_t insn)
 {
-  return match_opcode (op, insn) && EXTRACT_RVC_IMM (insn) != 0;
+  return match_opcode (op, insn) && EXTRACT_CITYPE_IMM (insn) != 0;
 }
 
 const struct riscv_opcode riscv_opcodes[] =
@@ -847,7 +846,6 @@ const struct riscv_opcode riscv_insn_types[] =
 {"sb",      0, INSN_CLASS_F,       "O4,F3,S,t,p",       0, 0, match_opcode, 0 },
 {"sb",      0, INSN_CLASS_F,       "O4,F3,s,T,p",       0, 0, match_opcode, 0 },
 {"sb",      0, INSN_CLASS_F,       "O4,F3,S,T,p",       0, 0, match_opcode, 0 },
-
 {"b",       0, INSN_CLASS_I,       "O4,F3,s,t,p",       0, 0, match_opcode, 0 },
 {"b",       0, INSN_CLASS_F,       "O4,F3,S,t,p",       0, 0, match_opcode, 0 },
 {"b",       0, INSN_CLASS_F,       "O4,F3,s,T,p",       0, 0, match_opcode, 0 },
@@ -858,7 +856,6 @@ const struct riscv_opcode riscv_insn_types[] =
 
 {"uj",      0, INSN_CLASS_I,       "O4,d,a",            0, 0, match_opcode, 0 },
 {"uj",      0, INSN_CLASS_F,       "O4,D,a",            0, 0, match_opcode, 0 },
-
 {"j",       0, INSN_CLASS_I,       "O4,d,a",            0, 0, match_opcode, 0 },
 {"j",       0, INSN_CLASS_F,       "O4,D,a",            0, 0, match_opcode, 0 },
 
@@ -872,6 +869,19 @@ const struct riscv_opcode riscv_insn_types[] =
 
 {"ciw",     0, INSN_CLASS_C,       "O2,CF3,Ct,C8",      0, 0, match_opcode, 0 },
 {"ciw",     0, INSN_CLASS_F_AND_C, "O2,CF3,CD,C8",      0, 0, match_opcode, 0 },
+
+{"css",     0, INSN_CLASS_C,       "O2,CF3,CV,C6",      0, 0, match_opcode, 0 },
+{"css",     0, INSN_CLASS_F_AND_C, "O2,CF3,CT,C6",      0, 0, match_opcode, 0 },
+
+{"cl",      0, INSN_CLASS_C,       "O2,CF3,Ct,C5(Cs)",  0, 0, match_opcode, 0 },
+{"cl",      0, INSN_CLASS_F_AND_C, "O2,CF3,CD,C5(Cs)",  0, 0, match_opcode, 0 },
+{"cl",      0, INSN_CLASS_F_AND_C, "O2,CF3,Ct,C5(CS)",  0, 0, match_opcode, 0 },
+{"cl",      0, INSN_CLASS_F_AND_C, "O2,CF3,CD,C5(CS)",  0, 0, match_opcode, 0 },
+
+{"cs",      0, INSN_CLASS_C,       "O2,CF3,Ct,C5(Cs)",  0, 0, match_opcode, 0 },
+{"cs",      0, INSN_CLASS_F_AND_C, "O2,CF3,CD,C5(Cs)",  0, 0, match_opcode, 0 },
+{"cs",      0, INSN_CLASS_F_AND_C, "O2,CF3,Ct,C5(CS)",  0, 0, match_opcode, 0 },
+{"cs",      0, INSN_CLASS_F_AND_C, "O2,CF3,CD,C5(CS)",  0, 0, match_opcode, 0 },
 
 {"ca",      0, INSN_CLASS_C,       "O2,CF6,CF2,Cs,Ct",  0, 0, match_opcode, 0 },
 {"ca",      0, INSN_CLASS_F_AND_C, "O2,CF6,CF2,CS,Ct",  0, 0, match_opcode, 0 },

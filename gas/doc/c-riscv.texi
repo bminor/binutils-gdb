@@ -363,7 +363,7 @@ The pseudo la.tls.gd instruction can be expended to
 @cindex instruction formats, risc-v
 @cindex RISC-V instruction formats
 
-The RISC-V Instruction Set Manual Volume I: User-Level ISA lists 12
+The RISC-V Instruction Set Manual Volume I: User-Level ISA lists 15
 instruction formats where some of the formats have multiple variants.
 For the @samp{.insn} pseudo directive the assembler recognizes some
 of the formats.
@@ -394,6 +394,8 @@ only accept s0-s1, a0-a5, fs0-fs1 and fa0-fa5.
 @item simm12 @tab Sign-extended 12-bit immediate for operand x.
 @item simm20 @tab Sign-extended 20-bit immediate for operand x.
 @item simm6 @tab Sign-extended 6-bit immediate for operand x.
+@item uimm5 @tab Unsigned 5-bit immediate for operand x.
+@item uimm6 @tab Unsigned 6-bit immediate for operand x.
 @item uimm8 @tab Unsigned 8-bit immediate for operand x.
 @item symbol @tab Symbol or lable reference for operand x.
 @end multitable
@@ -487,112 +489,136 @@ The following table lists the RISC-V instruction formats that are available
 with the @samp{.insn} pseudo directive:
 
 @table @code
-@item R type: .insn r opcode, func3, func7, rd, rs1, rs2
+@item R type: .insn r opcode6, func3, func7, rd, rs1, rs2
 @verbatim
-+-------+-----+-----+-------+----+-------------+
-| func7 | rs2 | rs1 | func3 | rd |      opcode |
-+-------+-----+-----+-------+----+-------------+
-31      25    20    15      12   7             0
++-------+-----+-----+-------+----+---------+
+| func7 | rs2 | rs1 | func3 | rd | opcode6 |
++-------+-----+-----+-------+----+---------+
+31      25    20    15      12   7        0
 @end verbatim
 
-@item R type with 4 register operands: .insn r opcode, func3, func2, rd, rs1, rs2, rs3
-@itemx R4 type: .insn r4 opcode, func3, func2, rd, rs1, rs2, rs3
+@item R type with 4 register operands: .insn r opcode6, func3, func2, rd, rs1, rs2, rs3
+@itemx R4 type: .insn r4 opcode6, func3, func2, rd, rs1, rs2, rs3
 @verbatim
-+-----+-------+-----+-----+-------+----+-------------+
-| rs3 | func2 | rs2 | rs1 | func3 | rd |      opcode |
-+-----+-------+-----+-----+-------+----+-------------+
-31    27      25    20    15      12   7             0
++-----+-------+-----+-----+-------+----+---------+
+| rs3 | func2 | rs2 | rs1 | func3 | rd | opcode6 |
++-----+-------+-----+-----+-------+----+---------+
+31    27      25    20    15      12   7         0
 @end verbatim
 
-@item I type: .insn i opcode, func3, rd, rs1, simm12
-@itemx I type: .insn i opcode, func3, rd, simm12(rs1)
+@item I type: .insn i opcode6, func3, rd, rs1, simm12
+@itemx I type: .insn i opcode6, func3, rd, simm12(rs1)
 @verbatim
-+-------------+-----+-------+----+-------------+
-|      simm12 | rs1 | func3 | rd |      opcode |
-+-------------+-----+-------+----+-------------+
-31            20    15      12   7             0
++--------------+-----+-------+----+---------+
+| simm12[11:0] | rs1 | func3 | rd | opcode6 |
++--------------+-----+-------+----+---------+
+31             20    15      12   7         0
 @end verbatim
 
-@item S type: .insn s opcode, func3, rs2, simm12(rs1)
+@item S type: .insn s opcode6, func3, rs2, simm12(rs1)
 @verbatim
-+--------------+-----+-----+-------+-------------+-------------+
-| simm12[11:5] | rs2 | rs1 | func3 | simm12[4:0] |      opcode |
-+--------------+-----+-----+-------+-------------+-------------+
-31             25    20    15      12            7             0
++--------------+-----+-----+-------+-------------+---------+
+| simm12[11:5] | rs2 | rs1 | func3 | simm12[4:0] | opcode6 |
++--------------+-----+-----+-------+-------------+---------+
+31             25    20    15      12            7         0
 @end verbatim
 
-@item B type: .insn s opcode, func3, rs1, rs2, symbol
-@itemx SB type: .insn sb opcode, func3, rs1, rs2, symbol
+@item B type: .insn s opcode6, func3, rs1, rs2, symbol
+@itemx SB type: .insn sb opcode6, func3, rs1, rs2, symbol
 @verbatim
-+------------+--------------+-----+-----+-------+-------------+-------------+--------+
-| simm12[12] | simm12[10:5] | rs2 | rs1 | func3 | simm12[4:1] | simm12[11]] | opcode |
-+------------+--------------+-----+-----+-------+-------------+-------------+--------+
-31          30            25    20    15      12           7            0
++-----------------+-----+-----+-------+----------------+---------+
+| simm12[12|10:5] | rs2 | rs1 | func3 | simm12[4:1|11] | opcode6 |
++-----------------+-----+-----+-------+----------------+---------+
+31                25    20    15      12               7         0
 @end verbatim
 
-@item U type: .insn u opcode, rd, simm20
+@item U type: .insn u opcode6, rd, simm20
 @verbatim
-+---------------------------+----+-------------+
-|                    simm20 | rd |      opcode |
-+---------------------------+----+-------------+
-31                          12   7             0
++--------------------------+----+---------+
+| simm20[20|10:1|11|19:12] | rd | opcode6 |
++--------------------------+----+---------+
+31                         12   7         0
 @end verbatim
 
-@item J type: .insn j opcode, rd, symbol
-@itemx UJ type: .insn uj opcode, rd, symbol
+@item J type: .insn j opcode6, rd, symbol
+@itemx UJ type: .insn uj opcode6, rd, symbol
 @verbatim
-+------------+--------------+------------+---------------+----+-------------+
-| simm20[20] | simm20[10:1] | simm20[11] | simm20[19:12] | rd |      opcode |
-+------------+--------------+------------+---------------+----+-------------+
-31           30             21           20              12   7             0
++------------+--------------+------------+---------------+----+---------+
+| simm20[20] | simm20[10:1] | simm20[11] | simm20[19:12] | rd | opcode6 |
++------------+--------------+------------+---------------+----+---------+
+31           30             21           20              12   7         0
 @end verbatim
 
 @item CR type: .insn cr opcode2, func4, rd, rs2
 @verbatim
-+---------+--------+-----+---------+
-|   func4 | rd/rs1 | rs2 | opcode2 |
-+---------+--------+-----+---------+
-15        12       7     2        0
++-------+--------+-----+---------+
+| func4 | rd/rs1 | rs2 | opcode2 |
++-------+--------+-----+---------+
+15      12       7     2        0
 @end verbatim
 
 @item CI type: .insn ci opcode2, func3, rd, simm6
 @verbatim
-+---------+-----+--------+-----+---------+
-|   func3 | imm | rd/rs1 | imm | opcode2 |
-+---------+-----+--------+-----+---------+
-15        13    12       7     2         0
++-------+----------+--------+------------+---------+
+| func3 | simm6[5] | rd/rs1 | simm6[4:0] | opcode2 |
++-------+----------+--------+------------+---------+
+15      13         12       7            2         0
 @end verbatim
 
-@item CIW type: .insn ciw opcode2, func3, rd, uimm8
+@item CIW type: .insn ciw opcode2, func3, rd', uimm8
 @verbatim
-+---------+--------------+-----+---------+
-|   func3 |          imm | rd' | opcode2 |
-+---------+--------------+-----+---------+
-15        13             7     2         0
++-------+------------+-----+---------+
+| func3 | uimm8[7:0] | rd' | opcode2 |
++-------+-------- ---+-----+---------+
+15      13           5     2         0
 @end verbatim
 
-@item CA type: .insn ca opcode2, func6, func2, rd, rs2
+@item CSS type: .insn css opcode2, func3, rd, uimm6
 @verbatim
-+---------+----------+-------+------+--------+
-|   func6 | rd'/rs1' | func2 | rs2' | opcode |
-+---------+----------+-------+------+--------+
-15        10         7       5      2        0
++-------+------------+----+---------+
+| func3 | uimm6[5:0] | rd | opcode2 |
++-------+------------+----+---------+
+15      13           7    2         0
 @end verbatim
 
-@item CB type: .insn cb opcode2, func3, rs1, symbol
+@item CL type: .insn cl opcode2, func3, rd', uimm5(rs1')
 @verbatim
-+---------+--------+------+--------+---------+
-|   func3 | offset | rs1' | offset | opcode2 |
-+---------+--------+------+--------+---------+
-15        13       10     7        2         0
++-------+------------+------+------------+------+---------+
+| func3 | uimm5[4:2] | rs1' | uimm5[1:0] |  rd' | opcode2 |
++-------+------------+------+------------+------+---------+
+15      13           10     7            5      2         0
+@end verbatim
+
+@item CS type: .insn cs opcode2, func3, rs2', uimm5(rs1')
+@verbatim
++-------+------------+------+------------+------+---------+
+| func3 | uimm5[4:2] | rs1' | uimm5[1:0] | rs2' | opcode2 |
++-------+------------+------+------------+------+---------+
+15      13           10     7            5      2         0
+@end verbatim
+
+@item CA type: .insn ca opcode2, func6, func2, rd', rs2'
+@verbatim
++-- ----+----------+-------+------+---------+
+| func6 | rd'/rs1' | func2 | rs2' | opcode2 |
++-------+----------+-------+------+---------+
+15      10         7       5      2         0
+@end verbatim
+
+@item CB type: .insn cb opcode2, func3, rs1', symbol
+@verbatim
++-------+--------------+------+------------------+---------+
+| func3 | simm8[8|4:3] | rs1' | simm8[7:6|2:1|5] | opcode2 |
++-------+--------------+------+------------------+---------+
+15      13             10     7                  2         0
 @end verbatim
 
 @item CJ type: .insn cj opcode2, symbol
 @verbatim
-+---------+--------------------+---------+
-|   func3 |        jump target | opcode2 |
-+---------+--------------------+---------+
-15        13             7     2         0
++-------+-------------------------------+---------+
+| func3 | simm11[11|4|9:8|10|6|7|3:1|5] | opcode2 |
++-------+-------------------------------+---------+
+15      13                              2         0
 @end verbatim
 
 

@@ -235,7 +235,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_BRANCH",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 ENCODE_SBTYPE_IMM (-1U),	/* dst_mask */
+	 ENCODE_BTYPE_IMM (-1U),	/* dst_mask */
 	 TRUE),				/* pcrel_offset */
 
   /* 20-bit PC-relative jump offset.  */
@@ -250,7 +250,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_JAL",			/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 ENCODE_UJTYPE_IMM (-1U),	/* dst_mask */
+	 ENCODE_JTYPE_IMM (-1U),	/* dst_mask */
 	 TRUE),				/* pcrel_offset */
 
   /* 32-bit PC-relative function call (AUIPC/JALR).  */
@@ -659,7 +659,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_RVC_BRANCH",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 ENCODE_RVC_B_IMM (-1U),	/* dst_mask */
+	 ENCODE_CBTYPE_IMM (-1U),	/* dst_mask */
 	 TRUE),				/* pcrel_offset */
 
   /* 11-bit PC-relative jump offset.  */
@@ -674,7 +674,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_RVC_JUMP",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 ENCODE_RVC_J_IMM (-1U),	/* dst_mask */
+	 ENCODE_CJTYPE_IMM (-1U),	/* dst_mask */
 	 TRUE),				/* pcrel_offset */
 
   /* High 6 bits of 18-bit absolute address.  */
@@ -689,7 +689,7 @@ static reloc_howto_type howto_table[] =
 	 "R_RISCV_RVC_LUI",		/* name */
 	 FALSE,				/* partial_inplace */
 	 0,				/* src_mask */
-	 ENCODE_RVC_IMM (-1U),		/* dst_mask */
+	 ENCODE_CITYPE_IMM (-1U),	/* dst_mask */
 	 FALSE),			/* pcrel_offset */
 
   /* GP-relative load.  */

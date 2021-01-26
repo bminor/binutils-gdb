@@ -996,36 +996,37 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
       case 'C': /* RVC */
 	switch (c = *p++)
 	  {
-	  case 'a': used_bits |= ENCODE_RVC_J_IMM (-1U); break;
-	  case 'c': break; /* RS1, constrained to equal sp.  */
-	  case 'i': used_bits |= ENCODE_RVC_SIMM3(-1U); break;
-	  case 'j': used_bits |= ENCODE_RVC_IMM (-1U); break;
-	  case 'o': used_bits |= ENCODE_RVC_IMM (-1U); break;
-	  case 'k': used_bits |= ENCODE_RVC_LW_IMM (-1U); break;
-	  case 'l': used_bits |= ENCODE_RVC_LD_IMM (-1U); break;
-	  case 'm': used_bits |= ENCODE_RVC_LWSP_IMM (-1U); break;
-	  case 'n': used_bits |= ENCODE_RVC_LDSP_IMM (-1U); break;
-	  case 'p': used_bits |= ENCODE_RVC_B_IMM (-1U); break;
-	  case 's': USE_BITS (OP_MASK_CRS1S, OP_SH_CRS1S); break;
-	  case 't': USE_BITS (OP_MASK_CRS2S, OP_SH_CRS2S); break;
-	  case 'u': used_bits |= ENCODE_RVC_IMM (-1U); break;
-	  case 'v': used_bits |= ENCODE_RVC_IMM (-1U); break;
-	  case 'w': break; /* RS1S, constrained to equal RD.  */
-	  case 'x': break; /* RS2S, constrained to equal RD.  */
-	  case 'z': break; /* RS2S, constrained to be x0.  */
-	  case 'K': used_bits |= ENCODE_RVC_ADDI4SPN_IMM (-1U); break;
-	  case 'L': used_bits |= ENCODE_RVC_ADDI16SP_IMM (-1U); break;
-	  case 'M': used_bits |= ENCODE_RVC_SWSP_IMM (-1U); break;
-	  case 'N': used_bits |= ENCODE_RVC_SDSP_IMM (-1U); break;
-	  case 'U': break; /* RS1, constrained to equal RD.  */
+	  case 'U': break; /* CRS1, constrained to equal RD.  */
+	  case 'c': break; /* CRS1, constrained to equal sp.  */
+	  case 'T': /* CRS2, floating point.  */
 	  case 'V': USE_BITS (OP_MASK_CRS2, OP_SH_CRS2); break;
-	  case '<': used_bits |= ENCODE_RVC_IMM (-1U); break;
-	  case '>': used_bits |= ENCODE_RVC_IMM (-1U); break;
-	  case '8': used_bits |= ENCODE_RVC_UIMM8 (-1U); break;
-	  case 'S': USE_BITS (OP_MASK_CRS1S, OP_SH_CRS1S); break;
-	  case 'T': USE_BITS (OP_MASK_CRS2, OP_SH_CRS2); break;
-	  case 'D': USE_BITS (OP_MASK_CRS2S, OP_SH_CRS2S); break;
-	  case 'F': /* RVC funct for .insn directive.  */
+	  case 'S': /* CRS1S, floating point.  */
+	  case 's': USE_BITS (OP_MASK_CRS1S, OP_SH_CRS1S); break;
+	  case 'w': break; /* CRS1S, constrained to equal RD.  */
+	  case 'D': /* CRS2S, floating point.  */
+	  case 't': USE_BITS (OP_MASK_CRS2S, OP_SH_CRS2S); break;
+	  case 'x': break; /* CRS2S, constrained to equal RD.  */
+	  case 'z': break; /* CRS2S, constrained to be x0.  */
+	  case '>': /* CITYPE immediate, compressed shift.  */
+	  case 'u': /* CITYPE immediate, compressed lui.  */
+	  case 'v': /* CITYPE immediate, li to compressed lui.  */
+	  case 'o': /* CITYPE immediate, allow zero.  */
+	  case 'j': used_bits |= ENCODE_CITYPE_IMM (-1U); break;
+	  case 'L': used_bits |= ENCODE_CITYPE_ADDI16SP_IMM (-1U); break;
+	  case 'm': used_bits |= ENCODE_CITYPE_LWSP_IMM (-1U); break;
+	  case 'n': used_bits |= ENCODE_CITYPE_LDSP_IMM (-1U); break;
+	  case '6': used_bits |= ENCODE_CSSTYPE_IMM (-1U); break;
+	  case 'M': used_bits |= ENCODE_CSSTYPE_SWSP_IMM (-1U); break;
+	  case 'N': used_bits |= ENCODE_CSSTYPE_SDSP_IMM (-1U); break;
+	  case '8': used_bits |= ENCODE_CIWTYPE_IMM (-1U); break;
+	  case 'K': used_bits |= ENCODE_CIWTYPE_ADDI4SPN_IMM (-1U); break;
+	  /* CLTYPE and CSTYPE have the same immediate encoding.  */
+	  case '5': used_bits |= ENCODE_CLTYPE_IMM (-1U); break;
+	  case 'k': used_bits |= ENCODE_CLTYPE_LW_IMM (-1U); break;
+	  case 'l': used_bits |= ENCODE_CLTYPE_LD_IMM (-1U); break;
+	  case 'p': used_bits |= ENCODE_CBTYPE_IMM (-1U); break;
+	  case 'a': used_bits |= ENCODE_CJTYPE_IMM (-1U); break;
+	  case 'F': /* Compressed funct for .insn directive.  */
 	    switch (c = *p++)
 	      {
 		case '6': USE_BITS (OP_MASK_CFUNCT6, OP_SH_CFUNCT6); break;
@@ -1051,34 +1052,36 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
       case ')': break;
       case '<': USE_BITS (OP_MASK_SHAMTW, OP_SH_SHAMTW); break;
       case '>': USE_BITS (OP_MASK_SHAMT, OP_SH_SHAMT); break;
-      case 'A': break;
-      case 'D': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
-      case 'Z': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
-      case 'E': USE_BITS (OP_MASK_CSR, OP_SH_CSR); break;
-      case 'I': break;
-      case 'R': USE_BITS (OP_MASK_RS3, OP_SH_RS3); break;
-      case 'S': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
-      case 'U': USE_BITS (OP_MASK_RS1, OP_SH_RS1);
-	/* Fall through.  */
-      case 'T': USE_BITS (OP_MASK_RS2, OP_SH_RS2); break;
+      case 'A': break; /* Macro operand, must be symbol.  */
+      case 'B': break; /* Macro operand, must be symbol or constant.  */
+      case 'I': break; /* Macro operand, must be constant.  */
+      case 'D': /* RD, floating point.  */
       case 'd': USE_BITS (OP_MASK_RD, OP_SH_RD); break;
-      case 'm': USE_BITS (OP_MASK_RM, OP_SH_RM); break;
+      case 'Z': /* RS1, CSR number.  */
+      case 'S': /* RS1, floating point.  */
       case 's': USE_BITS (OP_MASK_RS1, OP_SH_RS1); break;
+      case 'U': /* RS1 and RS2 are the same, floating point.  */
+	USE_BITS (OP_MASK_RS1, OP_SH_RS1);
+	/* Fall through.  */
+      case 'T': /* RS2, floating point.  */
       case 't': USE_BITS (OP_MASK_RS2, OP_SH_RS2); break;
-      case 'r': USE_BITS (OP_MASK_RS3, OP_SH_RS3);     break;
+      case 'R': /* RS3, floating point.  */
+      case 'r': USE_BITS (OP_MASK_RS3, OP_SH_RS3); break;
+      case 'm': USE_BITS (OP_MASK_RM, OP_SH_RM); break;
+      case 'E': USE_BITS (OP_MASK_CSR, OP_SH_CSR); break;
       case 'P': USE_BITS (OP_MASK_PRED, OP_SH_PRED); break;
       case 'Q': USE_BITS (OP_MASK_SUCC, OP_SH_SUCC); break;
-      case 'o':
+      case 'o': /* ITYPE immediate, load displacement.  */
       case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
-      case 'a': used_bits |= ENCODE_UJTYPE_IMM (-1U); break;
-      case 'p': used_bits |= ENCODE_SBTYPE_IMM (-1U); break;
+      case 'a': used_bits |= ENCODE_JTYPE_IMM (-1U); break;
+      case 'p': used_bits |= ENCODE_BTYPE_IMM (-1U); break;
       case 'q': used_bits |= ENCODE_STYPE_IMM (-1U); break;
       case 'u': used_bits |= ENCODE_UTYPE_IMM (-1U); break;
-      case 'z': break;
-      case '[': break;
-      case ']': break;
-      case '0': break;
-      case '1': break;
+      case 'z': break; /* Zero immediate.  */
+      case '[': break; /* Unused operand.  */
+      case ']': break; /* Unused operand.  */
+      case '0': break; /* AMO displacement, must to zero.  */
+      case '1': break; /* Relaxation operand.  */
       case 'F': /* Funct for .insn directive.  */
 	switch (c = *p++)
 	  {
@@ -2078,82 +2081,83 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_add_number <= 0
 		      || imm_expr->X_add_number >= 64)
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CITYPE_IMM (imm_expr->X_add_number);
 		rvc_imm_done:
 		  s = expr_end;
 		  imm_expr->X_op = O_absent;
 		  continue;
-		case '<':
+		case '5':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || imm_expr->X_add_number <= 0
+		      || imm_expr->X_add_number < 0
 		      || imm_expr->X_add_number >= 32
-		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CLTYPE_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
+		    ip->insn_opcode |= ENCODE_CLTYPE_IMM (imm_expr->X_add_number);
+		  goto rvc_imm_done;
+		case '6':
+		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
+		      || imm_expr->X_op != O_constant
+		      || imm_expr->X_add_number < 0
+		      || imm_expr->X_add_number >= 64
+		      || !VALID_CSSTYPE_IMM ((valueT) imm_expr->X_add_number))
+		    break;
+		    ip->insn_opcode |= ENCODE_CSSTYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case '8':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number < 0
 		      || imm_expr->X_add_number >= 256
-		      || !VALID_RVC_UIMM8 ((valueT) imm_expr->X_add_number))
+		      || !VALID_CIWTYPE_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_UIMM8 (imm_expr->X_add_number);
-		  goto rvc_imm_done;
-		case 'i':
-		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
-		      || imm_expr->X_op != O_constant
-		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_SIMM3 ((valueT) imm_expr->X_add_number))
-		    break;
-		  ip->insn_opcode |= ENCODE_RVC_SIMM3 (imm_expr->X_add_number);
+		    ip->insn_opcode |= ENCODE_CIWTYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'j':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CITYPE_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CITYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'k':
 		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LW_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CLTYPE_LW_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_LW_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CLTYPE_LW_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'l':
 		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LD_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CLTYPE_LD_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_LD_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CLTYPE_LD_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'm':
 		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LWSP_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CITYPE_LWSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
-		    ENCODE_RVC_LWSP_IMM (imm_expr->X_add_number);
+		    ENCODE_CITYPE_LWSP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'n':
 		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LDSP_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CITYPE_LDSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
-		    ENCODE_RVC_LDSP_IMM (imm_expr->X_add_number);
+		    ENCODE_CITYPE_LDSP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'o':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
@@ -2161,47 +2165,46 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      /* C.addiw, c.li, and c.andi allow zero immediate.
 			 C.addi allows zero immediate as hint.  Otherwise this
 			 is same as 'j'.  */
-		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CITYPE_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CITYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'K':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_ADDI4SPN_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CIWTYPE_ADDI4SPN_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
-		    ENCODE_RVC_ADDI4SPN_IMM (imm_expr->X_add_number);
+		    ENCODE_CIWTYPE_ADDI4SPN_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'L':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_ADDI16SP_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CITYPE_ADDI16SP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
-		    ENCODE_RVC_ADDI16SP_IMM (imm_expr->X_add_number);
+		    ENCODE_CITYPE_ADDI16SP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'M':
 		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_SWSP_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CSSTYPE_SWSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
-		    ENCODE_RVC_SWSP_IMM (imm_expr->X_add_number);
+		    ENCODE_CSSTYPE_SWSP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'N':
 		  if (riscv_handle_implicit_zero_offset (imm_expr, s))
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_SDSP_IMM ((valueT) imm_expr->X_add_number))
+		      || !VALID_CSSTYPE_SDSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
-		    ENCODE_RVC_SDSP_IMM (imm_expr->X_add_number);
+		    ENCODE_CSSTYPE_SDSP_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'u':
 		  p = percent_op_utype;
@@ -2215,7 +2218,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			  && (imm_expr->X_add_number <
 			      RISCV_BIGIMM_REACH - RISCV_RVC_IMM_REACH / 2)))
 		    break;
-		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CITYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'v':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
@@ -3114,7 +3117,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  /* Fill in a tentative value to improve objdump readability.  */
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
-	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_UJTYPE_IMM (delta), buf);
+	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_JTYPE_IMM (delta), buf);
 	}
       break;
 
@@ -3124,7 +3127,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  /* Fill in a tentative value to improve objdump readability.  */
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
-	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_SBTYPE_IMM (delta), buf);
+	  bfd_putl32 (bfd_getl32 (buf) | ENCODE_BTYPE_IMM (delta), buf);
 	}
       break;
 
@@ -3134,7 +3137,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  /* Fill in a tentative value to improve objdump readability.  */
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
-	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_RVC_B_IMM (delta), buf);
+	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_CBTYPE_IMM (delta), buf);
 	}
       break;
 
@@ -3144,7 +3147,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  /* Fill in a tentative value to improve objdump readability.  */
 	  bfd_vma target = S_GET_VALUE (fixP->fx_addsy) + *valP;
 	  bfd_vma delta = target - md_pcrel_from (fixP);
-	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_RVC_J_IMM (delta), buf);
+	  bfd_putl16 (bfd_getl16 (buf) | ENCODE_CJTYPE_IMM (delta), buf);
 	}
       break;
 
@@ -3530,7 +3533,7 @@ md_convert_frag_branch (fragS *fragp)
 	    /* Invert the branch condition.  Branch over the jump.  */
 	    insn = bfd_getl16 (buf);
 	    insn ^= MATCH_C_BEQZ ^ MATCH_C_BNEZ;
-	    insn |= ENCODE_RVC_B_IMM (6);
+	    insn |= ENCODE_CBTYPE_IMM (6);
 	    bfd_putl16 (insn, buf);
 	    buf += 2;
 	    goto jump;
@@ -3557,7 +3560,7 @@ md_convert_frag_branch (fragS *fragp)
       /* Invert the branch condition.  Branch over the jump.  */
       insn = bfd_getl32 (buf);
       insn ^= MATCH_BEQ ^ MATCH_BNE;
-      insn |= ENCODE_SBTYPE_IMM (8);
+      insn |= ENCODE_BTYPE_IMM (8);
       bfd_putl32 (insn, buf);
       buf += 4;
 

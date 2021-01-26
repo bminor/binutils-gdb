@@ -1,3 +1,11 @@
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* elfnn-riscv.c (perform_relocation): Updated encoding macros.
+	(_bfd_riscv_relax_call): Likewise.
+	(_bfd_riscv_relax_lui): Likewise.
+	* elfxx-riscv.c (howto_table): Likewise.
+
 2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
 
 	* Makefile.am: Added cpu-riscv.h.

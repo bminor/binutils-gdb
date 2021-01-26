@@ -1,3 +1,12 @@
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* riscv-tdep.c (decode_ci_type_insn): Updated encoding macros.
+	(decode_j_type_insn): Likewise.
+	(decode_cj_type_insn): Likewise.
+	(decode_b_type_insn): Likewise.
+	(decode): Likewise.
+
 2021-02-18  Tom Tromey  <tom@tromey.com>
 
 	* expression.h (struct expression) <evaluate>: Declare method.

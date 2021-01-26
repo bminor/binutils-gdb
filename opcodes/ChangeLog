@@ -1,3 +1,18 @@
+2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27158
+	* riscv-dis.c (print_insn_args): Updated encoding macros.
+	* riscv-opc.c (MASK_RVC_IMM): defined to ENCODE_CITYPE_IMM.
+	(match_c_addi16sp): Updated encoding macros.
+	(match_c_lui): Likewise.
+	(match_c_lui_with_hint): Likewise.
+	(match_c_addi4spn): Likewise.
+	(match_c_slli): Likewise.
+	(match_slli_as_c_slli): Likewise.
+	(match_c_slli64): Likewise.
+	(match_srxi_as_c_srxi): Likewise.
+	(riscv_insn_types): Added .insn css/cl/cs.
+
 2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-dis.c: Included cpu-riscv.h, and removed elfxx-riscv.h.
