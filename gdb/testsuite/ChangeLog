@@ -1,3 +1,7 @@
+2021-01-26  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.opt/solib-intra-step.exp: Handle stepping into thunk.
+
 2021-01-25  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/dw2-ranges-psym.exp (gdb_load_no_complaints): New proc.
