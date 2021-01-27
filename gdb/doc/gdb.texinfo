@@ -27669,7 +27669,7 @@ extensions when a new object file is read (for example, due to the
 library): @file{@var{objfile}-gdb.@var{ext}} (@pxref{objfile-gdbdotext
 file,,The @file{@var{objfile}-gdb.@var{ext}} file}) and the
 @code{.debug_gdb_scripts} section of modern file formats like ELF
-(@pxref {dotdebug_gdb_scripts section,,The @code{.debug_gdb_scripts}
+(@pxref{dotdebug_gdb_scripts section,,The @code{.debug_gdb_scripts}
 section}).  For a discussion of the differences between these two
 approaches see @ref{Which flavor to choose?}.
 

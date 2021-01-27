@@ -1,3 +1,7 @@
+2021-01-27  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Auto-loading extensions): Remove extraneous space.
+
 2021-01-25  Marco Barisione  <mbarisione@undo.io>
 
 	* python.texi: Add parentheses to print statements/functions.
