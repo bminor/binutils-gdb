@@ -1,3 +1,10 @@
+2021-01-27  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* aarch64-tdep.c (aarch64_displaced_step_others): Account for
+	BLR and BR instructions.
+	* arch/aarch64-insn.h (enum aarch64_opcodes): Add BR opcode.
+	(enum aarch64_masks): New.
+
 2021-01-26  Tom Tromey  <tromey@adacore.com>
 
 	* windows-nat.c (DEBUG_EXEC, DEBUG_EVENTS, DEBUG_MEM)

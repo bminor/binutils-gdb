@@ -3099,14 +3099,21 @@ aarch64_displaced_step_others (const uint32_t insn,
   struct aarch64_displaced_step_data *dsd
     = (struct aarch64_displaced_step_data *) data;
 
-  aarch64_emit_insn (dsd->insn_buf, insn);
+  uint32_t masked_insn = (insn & CLEAR_Rn_MASK);
+  if (masked_insn == BLR)
+    {
+      /* Emit a BR to the same register and then update LR to the original
+	 address (similar to aarch64_displaced_step_b).  */
+      aarch64_emit_insn (dsd->insn_buf, insn & 0xffdfffff);
+      regcache_cooked_write_unsigned (dsd->regs, AARCH64_LR_REGNUM,
+				      data->insn_addr + 4);
+    }
+  else
+    aarch64_emit_insn (dsd->insn_buf, insn);
   dsd->insn_count = 1;
 
-  if ((insn & 0xfffffc1f) == 0xd65f0000)
-    {
-      /* RET */
-      dsd->dsc->pc_adjust = 0;
-    }
+  if (masked_insn == RET || masked_insn == BR || masked_insn == BLR)
+    dsd->dsc->pc_adjust = 0;
   else
     dsd->dsc->pc_adjust = 4;
 }

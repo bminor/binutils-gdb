@@ -1,3 +1,7 @@
+2021-01-27  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* gdb.arch/insn-reloc.c: Add tests for BR and BLR.
+
 2021-01-26  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.threads/killed-outside.exp: Allow regular output.
