@@ -5241,6 +5241,13 @@ proc default_gdb_init { test_file_name } {
     unset -nocomplain ::env(GDBHISTFILE)
     unset -nocomplain ::env(GDBHISTSIZE)
 
+    # Ensure that XDG_CONFIG_HOME is not set.  Some tests setup a fake
+    # home directory in order to test loading settings from gdbinit.
+    # If XDG_CONFIG_HOME is set then GDB will load a gdbinit from
+    # there (if one is present) rather than the home directory setup
+    # in the test.
+    unset -nocomplain ::env(XDG_CONFIG_HOME)
+
     # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
     # during startup.  See "man expect" for details about stty_init.
     global stty_init

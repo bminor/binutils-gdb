@@ -1,3 +1,7 @@
+2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/gdb.exp (default_gdb_init): Unset XDG_CONFIG_HOME.
+
 2021-01-28  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/out_of_line_in_inlined.exp: Use gdb_breakpoint.
