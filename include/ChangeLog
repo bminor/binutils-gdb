@@ -1,3 +1,8 @@
+2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ECTF_NONAME): New.
+	(ECTF_NERR): Adjust.
+
 2021-01-26  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (CTF_LINK_NO_FILTER_REPORTED_SYMS): New.

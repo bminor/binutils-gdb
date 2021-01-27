@@ -1595,6 +1595,9 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
   if (ep == NULL)
     return (ctf_set_errno (fp, EINVAL));
 
+  if (name == NULL || name[0] == '\0')
+    return (ctf_set_errno (fp, ECTF_NONAME));
+
   if ((type = ctf_add_generic (fp, flag, name, kind, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
@@ -1961,11 +1964,13 @@ ctf_add_forward (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (!ctf_forwardable_kind (kind))
     return (ctf_set_errno (fp, ECTF_NOTSUE));
 
+  if (name == NULL || name[0] == '\0')
+    return (ctf_set_errno (fp, ECTF_NONAME));
+
   /* If the type is already defined or exists as a forward tag, just
      return the ctf_id_t of the existing definition.  */
 
-  if (name != NULL)
-    type = ctf_lookup_by_rawname (fp, kind, name);
+  type = ctf_lookup_by_rawname (fp, kind, name);
 
   if (type)
     return type;
@@ -1989,6 +1994,9 @@ ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
 
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
+
+  if (name == NULL || name[0] == '\0')
+    return (ctf_set_errno (fp, ECTF_NONAME));
 
   if (ref != 0 && ctf_lookup_by_id (&tmp, ref) == NULL)
     return CTF_ERR;		/* errno is set for us.  */

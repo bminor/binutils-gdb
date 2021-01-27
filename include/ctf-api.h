@@ -240,7 +240,8 @@ typedef struct ctf_snapshot_id
   _CTF_ITEM (ECTF_NEXT_WRONGFP, "Iteration entity changed in mid-iterate.") \
   _CTF_ITEM (ECTF_FLAGS, "CTF header contains flags unknown to libctf.") \
   _CTF_ITEM (ECTF_NEEDSBFD, "This feature needs a libctf with BFD support.") \
-  _CTF_ITEM (ECTF_INCOMPLETE, "Type is not a complete type.")
+  _CTF_ITEM (ECTF_INCOMPLETE, "Type is not a complete type.") \
+  _CTF_ITEM (ECTF_NONAME, "Type name must not be empty.")
 
 #define	ECTF_BASE	1000	/* Base value for libctf errnos.  */
 
@@ -253,7 +254,7 @@ _CTF_ERRORS
 #undef _CTF_FIRST
   };
 
-#define ECTF_NERR (ECTF_INCOMPLETE - ECTF_BASE + 1) /* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_NONAME - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel is explicitly called.  */

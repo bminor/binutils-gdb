@@ -1,5 +1,11 @@
 2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_add_encoded): Add check for non-empty name.
+	(ctf_add_forward): Likewise.
+	(ctf_add_typedef): Likewise.
+
+2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open.c (init_types): Rip out code to check anonymous typedef
 	nodes.
 	* ctf-create.c (ctf_add_reftype): Likewise.
