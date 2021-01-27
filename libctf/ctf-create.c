@@ -1629,29 +1629,18 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
   if (kind != CTF_K_POINTER)
     return type;
 
-  /* If we are adding a pointer, update the ptrtab, both the directly pointed-to
-     type and (if an anonymous typedef node is being pointed at) the type that
-     points at too.  Note that ctf_typemax is at this point one higher than we
-     want to check against, because it's just been incremented for the addition
-     of this type.  The pptrtab is lazily-updated as needed, so is not touched
-     here.  */
+  /* If we are adding a pointer, update the ptrtab, pointing at this type from
+     the type it points to.  Note that ctf_typemax is at this point one higher
+     than we want to check against, because it's just been incremented for the
+     addition of this type.  The pptrtab is lazily-updated as needed, so is not
+     touched here.  */
 
   uint32_t type_idx = LCTF_TYPE_TO_INDEX (fp, type);
   uint32_t ref_idx = LCTF_TYPE_TO_INDEX (fp, ref);
 
   if (LCTF_TYPE_ISCHILD (fp, ref) == child
       && ref_idx < fp->ctf_typemax)
-    {
-      fp->ctf_ptrtab[ref_idx] = type_idx;
-
-      ctf_id_t refref_idx = LCTF_TYPE_TO_INDEX (fp, dtd->dtd_data.ctt_type);
-
-      if (tmp == fp
-	  && (LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info) == CTF_K_TYPEDEF)
-	  && strcmp (ctf_strptr (fp, dtd->dtd_data.ctt_name), "") == 0
-	  && refref_idx < fp->ctf_typemax)
-	fp->ctf_ptrtab[refref_idx] = type_idx;
-    }
+    fp->ctf_ptrtab[ref_idx] = type_idx;
 
   return type;
 }

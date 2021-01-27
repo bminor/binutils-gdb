@@ -51,7 +51,6 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
     {
       ctf_id_t type = LCTF_INDEX_TO_TYPE (fp, i, 1);
       ctf_id_t reffed_type;
-      int updated;
 
       if (ctf_type_kind (fp, type) != CTF_K_POINTER)
 	continue;
@@ -65,29 +64,6 @@ refresh_pptrtab (ctf_dict_t *fp, ctf_dict_t *pfp)
 	  /* Guard against references to invalid types.  No need to consider
 	     the CTF dict corrupt in this case: this pointer just can't be a
 	     pointer to any type we know about.  */
-	  if (idx <= pfp->ctf_typemax)
-	    {
-	      if (idx >= fp->ctf_pptrtab_len
-		  && grow_pptrtab (fp, pfp->ctf_ptrtab_len) < 0)
-		return -1;			/* errno is set for us.  */
-
-	      fp->ctf_pptrtab[idx] = i;
-	      updated = 1;
-	    }
-	}
-      if (!updated)
-	continue;
-
-      /* If we updated the ptrtab entry for this type's referent, and it's an
-	 anonymous typedef node, we also want to chase down its referent and
-	 change that as well.  */
-
-      if ((ctf_type_kind (fp, reffed_type) == CTF_K_TYPEDEF)
-	  && strcmp (ctf_type_name_raw (fp, reffed_type), "") == 0)
-	{
-	  uint32_t idx;
-	  idx = LCTF_TYPE_TO_INDEX (pfp, ctf_type_reference (fp, reffed_type));
-
 	  if (idx <= pfp->ctf_typemax)
 	    {
 	      if (idx >= fp->ctf_pptrtab_len

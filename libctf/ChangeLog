@@ -1,5 +1,12 @@
 2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (init_types): Rip out code to check anonymous typedef
+	nodes.
+	* ctf-create.c (ctf_add_reftype): Likewise.
+	* ctf-lookup.c (refresh_pptrtab): Likewise.
+
+2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.c (_libctf_nonnull_): Add parameters.
 	(LCTF_LINKING): New flag.
 	(ctf_dict_t) <ctf_link_flags>: Mention it.
