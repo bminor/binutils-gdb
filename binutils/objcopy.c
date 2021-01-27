@@ -2793,8 +2793,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	pe->timestamp = pe_data (ibfd)->coff.timestamp;
     }
 
-  if (isympp)
-    free (isympp);
+  free (isympp);
 
   if (osympp != isympp)
     free (osympp);
@@ -4612,8 +4611,7 @@ mark_symbols_used_in_relocations (bfd *ibfd, sec_ptr isection, void *symbolsarg)
 	(*relpp[i]->sym_ptr_ptr)->flags |= BSF_KEEP;
     }
 
-  if (relpp != NULL)
-    free (relpp);
+  free (relpp);
 }
 
 /* Write out debugging information.  */
@@ -6008,26 +6006,13 @@ copy_main (int argc, char *argv[])
 	}
     }
 
-  if (strip_specific_buffer)
-    free (strip_specific_buffer);
-
-  if (strip_unneeded_buffer)
-    free (strip_unneeded_buffer);
-
-  if (keep_specific_buffer)
-    free (keep_specific_buffer);
-
-  if (localize_specific_buffer)
-    free (localize_specific_buffer);
-
-  if (globalize_specific_buffer)
-    free (globalize_specific_buffer);
-
-  if (keepglobal_specific_buffer)
-    free (keepglobal_specific_buffer);
-
-  if (weaken_specific_buffer)
-    free (weaken_specific_buffer);
+  free (strip_specific_buffer);
+  free (strip_unneeded_buffer);
+  free (keep_specific_buffer);
+  free (localize_specific_buffer);
+  free (globalize_specific_buffer);
+  free (keepglobal_specific_buffer);
+  free (weaken_specific_buffer);
 
   return 0;
 }

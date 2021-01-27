@@ -1,3 +1,9 @@
+2021-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_main): Remove conditional control of the calls
+	to free, simplifying the code and making it easier to detect
+	typos.
+
 2021-01-26  Frederic Cambus  <fred@statdns.com>
 
 	* objcopy.c (copy_main): Fix a double free happening when both
