@@ -1466,15 +1466,16 @@ tp_array_compar_descending (const thread_info_ref &a, const thread_info_ref &b)
   return (a->per_inf_num > b->per_inf_num);
 }
 
-/* Switch to thread THR and execute CMD.
+/* Assuming that THR is the current thread, execute CMD.
    FLAGS.QUIET controls the printing of the thread information.
-   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  */
+   FLAGS.CONT and FLAGS.SILENT control how to handle errors.  Can throw an
+   exception if !FLAGS.SILENT and !FLAGS.CONT and CMD fails.  */
 
 static void
 thr_try_catch_cmd (thread_info *thr, const char *cmd, int from_tty,
 		   const qcs_flags &flags)
 {
-  switch_to_thread (thr);
+  gdb_assert (is_current_thread (thr));
 
   /* The thread header is computed before running the command since
      the command can change the inferior, which is not permitted

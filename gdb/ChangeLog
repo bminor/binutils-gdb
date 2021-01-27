@@ -1,5 +1,10 @@
 2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* thread.c (thr_try_catch_cmd): Replace swith_to_thread with an
+	assert.  Extend the header comment.
+
+2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* Makefile.in (SUBDIR_TUI_SRCS): Add tui/tui-location.c.
 	(HFILES_NO_SRCDIR): Add tui/tui-location.h.
 	* tui/tui-data.h (TUI_STATUS_WIN): Define.
