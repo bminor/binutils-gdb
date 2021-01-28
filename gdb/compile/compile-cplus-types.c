@@ -971,9 +971,9 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
   if (target_type == nullptr)
     {
       if (type->is_objfile_owned ())
-	target_type = objfile_type (type->objfile ())->builtin_int;
+	target_type = objfile_type (type->objfile_owner ())->builtin_int;
       else
-	target_type = builtin_type (type->arch ())->builtin_int;
+	target_type = builtin_type (type->arch_owner ())->builtin_int;
       warning (_("function has unknown return type; assuming int"));
     }
 

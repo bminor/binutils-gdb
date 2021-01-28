@@ -1,3 +1,10 @@
+2021-01-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (struct type) <arch>: Rename to...
+	<arch_owner>: ... this, update all users.
+	<objfile>: Rename to...
+	<objfile_owner>: ... this, update all users.
+
 2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdbcmd.h (execute_command_to_string): Update comment.

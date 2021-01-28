@@ -1320,7 +1320,7 @@ operator_check_standard (struct expression *exp, int pos,
 	for (arg = 0; arg < nargs; arg++)
 	  {
 	    struct type *inst_type = elts[pos + 3 + arg].type;
-	    struct objfile *inst_objfile = inst_type->objfile ();
+	    struct objfile *inst_objfile = inst_type->objfile_owner ();
 
 	    if (inst_objfile && (*objfile_func) (inst_objfile, data))
 	      return 1;
@@ -1351,8 +1351,8 @@ operator_check_standard (struct expression *exp, int pos,
 
   /* Invoke callbacks for TYPE and OBJFILE if they were set as non-NULL.  */
 
-  if (type != nullptr && type->objfile () != nullptr
-      && objfile_func (type->objfile (), data))
+  if (type != nullptr && type->objfile_owner () != nullptr
+      && objfile_func (type->objfile_owner (), data))
     return 1;
 
   if (objfile && (*objfile_func) (objfile, data))

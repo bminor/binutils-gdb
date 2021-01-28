@@ -418,7 +418,7 @@ static PyObject *
 typy_get_objfile (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
-  struct objfile *objfile = type->objfile ();
+  struct objfile *objfile = type->objfile_owner ();
 
   if (objfile == nullptr)
     Py_RETURN_NONE;
@@ -1098,9 +1098,9 @@ set_type (type_object *obj, struct type *type)
 {
   obj->type = type;
   obj->prev = NULL;
-  if (type != nullptr && type->objfile () != nullptr)
+  if (type != nullptr && type->objfile_owner () != nullptr)
     {
-      struct objfile *objfile = type->objfile ();
+      struct objfile *objfile = type->objfile_owner ();
 
       obj->next = ((type_object *)
 		   objfile_data (objfile, typy_objfile_data_key));
@@ -1119,10 +1119,10 @@ typy_dealloc (PyObject *obj)
 
   if (type->prev)
     type->prev->next = type->next;
-  else if (type->type != nullptr && type->type->objfile () != nullptr)
+  else if (type->type != nullptr && type->type->objfile_owner () != nullptr)
     {
       /* Must reset head of list.  */
-      struct objfile *objfile = type->type->objfile ();
+      struct objfile *objfile = type->type->objfile_owner ();
 
       if (objfile)
 	set_objfile_data (objfile, typy_objfile_data_key, type->next);

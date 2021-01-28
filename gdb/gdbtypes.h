@@ -1263,7 +1263,7 @@ struct type
   /* Return the objfile owner of this type.
 
      Return nullptr if this type is not objfile-owned.  */
-  struct objfile *objfile () const
+  struct objfile *objfile_owner () const
   {
     if (!this->is_objfile_owned ())
       return nullptr;
@@ -1274,7 +1274,7 @@ struct type
   /* Return the gdbarch owner of this type.
 
      Return nullptr if this type is not gdbarch-owned.  */
-  gdbarch *arch () const
+  gdbarch *arch_owner () const
   {
     if (this->is_objfile_owned ())
       return nullptr;
@@ -2240,8 +2240,8 @@ extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
 
 #define TYPE_ALLOC(t,size)                                              \
   (obstack_alloc (((t)->is_objfile_owned ()                             \
-		   ? &((t)->objfile ()->objfile_obstack)                \
-		   : gdbarch_obstack ((t)->arch ())),                   \
+		   ? &((t)->objfile_owner ()->objfile_obstack)          \
+		   : gdbarch_obstack ((t)->arch_owner ())),             \
 		  size))
 
 
