@@ -1,3 +1,9 @@
+2021-01-28  Alan Modra  <amodra@gmail.com>
+
+	PR 27259
+	* ldelf.c (ldelf_before_place_orphans): Use linker_mark to
+	prevent endless looping of linked-to sections.
+
 2021-01-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-x86-64/bnd-plt-1.d: Fix a typo.

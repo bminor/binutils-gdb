@@ -13631,15 +13631,23 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	      /* Since all sections, except for backend specific ones,
 		 have been garbage collected, call mark_hook on this
 		 section if any of its linked-to sections is marked.  */
-	      asection *linked_to_sec = elf_linked_to_section (isec);
-	      for (; linked_to_sec != NULL;
+	      asection *linked_to_sec;
+	      for (linked_to_sec = elf_linked_to_section (isec);
+		   linked_to_sec != NULL && !linked_to_sec->linker_mark;
 		   linked_to_sec = elf_linked_to_section (linked_to_sec))
-		if (linked_to_sec->gc_mark)
-		  {
-		    if (!_bfd_elf_gc_mark (info, isec, mark_hook))
-		      return FALSE;
-		    break;
-		  }
+		{
+		  if (linked_to_sec->gc_mark)
+		    {
+		      if (!_bfd_elf_gc_mark (info, isec, mark_hook))
+			return FALSE;
+		      break;
+		    }
+		  linked_to_sec->linker_mark = 1;
+		}
+	      for (linked_to_sec = elf_linked_to_section (isec);
+		   linked_to_sec != NULL && linked_to_sec->linker_mark;
+		   linked_to_sec = elf_linked_to_section (linked_to_sec))
+		linked_to_sec->linker_mark = 0;
 	    }
 
 	  if (!debug_frag_seen

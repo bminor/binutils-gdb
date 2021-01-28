@@ -1,3 +1,9 @@
+2021-01-28  Alan Modra  <amodra@gmail.com>
+
+	PR 27259
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Use linker_mark to
+	prevent endless looping of linked-to sections.
+
 2020-12-17  Mihails Strasuns  <mihails.strasuns@intel.com>
 
 	* bfd-elf.h (elfcore_write_file_note): New function.
