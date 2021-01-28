@@ -1,5 +1,9 @@
 2021-01-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.ada/out_of_line_in_inlined.exp: Use gdb_breakpoint.
+
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/dw2-out-of-range-end-of-seq.exp: Add regexp to
 	"maint info line-table".  Make PASS pattern more specific.  Make
 	FAIL pattern work for -m32.

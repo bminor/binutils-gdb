@@ -30,8 +30,7 @@ foreach_with_prefix scenario {all minimal} {
 
     clean_restart ${testfile}
 
-    gdb_test "break foo_o224_021.child1.child2" \
-	"Breakpoint \[0-9\]+ at.*: file .*foo_o224_021.adb, line \[0-9\]+."
+    gdb_breakpoint "foo_o224_021.child1.child2"
 
     gdb_run_cmd
     gdb_test "" \
