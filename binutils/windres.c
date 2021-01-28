@@ -703,19 +703,44 @@ quot (const char *string)
   const char *src;
   char *dest;
 
-  if ((buflen < slen * 2 + 2) || ! buf)
+  if ((buflen < slen * 2 + 3) || ! buf)
     {
-      buflen = slen * 2 + 2;
+      buflen = slen * 2 + 3;
       free (buf);
       buf = (char *) xmalloc (buflen);
     }
 
-  for (src=string, dest=buf; *src; src++, dest++)
+#if defined (_WIN32) && !defined (__CYGWIN__)
+  /* For Windows shells, quote "like this".   */
+  {
+    bfd_boolean quoted = FALSE;
+
+    dest = buf;
+    if (strchr (string, ' '))
+      {
+	quoted = TRUE;
+	*dest++ = '"';
+      }
+
+    for (src = string; *src; src++, dest++)
+      {
+	/* Escape-protect embedded double quotes.  */
+	if (quoted && *src == '"')
+	  *dest++ = '\\';
+	*dest = *src;
+      }
+
+    if (quoted)
+      *dest++ = '"';
+  }
+#else
+  for (src = string, dest = buf; *src; src++, dest++)
     {
       if (*src == '(' || *src == ')' || *src == ' ')
 	*dest++ = '\\';
       *dest = *src;
     }
+#endif
   *dest = 0;
   return buf;
 }

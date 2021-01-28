@@ -1,5 +1,11 @@
 2021-01-28  Eli Zaretskii  <eliz@gnu.org>
 
+	PR 4356
+	* windres.c (quot): Use double quotes to protect strings on
+	Windows platforms.
+
+2021-01-28  Eli Zaretskii  <eliz@gnu.org>
+
 	PR 27252
 	* bucomm.c (get_file_size): Add code to handle /dev/null on
 	Windows systems.
