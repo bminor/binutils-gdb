@@ -907,7 +907,6 @@ ctf_serialize (ctf_dict_t *fp)
       ctf_next_t *i = NULL;
       void *symname;
       const char **walk;
-      int err;
 
       if (filter_syms)
 	{

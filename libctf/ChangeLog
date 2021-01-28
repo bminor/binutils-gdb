@@ -1,5 +1,9 @@
 2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_serialize): Fix shadowing.
+
+2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_add_encoded): Add check for non-empty name.
 	(ctf_add_forward): Likewise.
 	(ctf_add_typedef): Likewise.
