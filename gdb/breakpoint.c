@@ -3327,6 +3327,110 @@ create_overlay_event_breakpoint (void)
     }
 }
 
+/* Install a master longjmp breakpoint for OBJFILE using a probe.  Return
+   true if a breakpoint was installed.  */
+
+static bool
+create_longjmp_master_breakpoint_probe (objfile *objfile)
+{
+  struct gdbarch *gdbarch = objfile->arch ();
+  struct breakpoint_objfile_data *bp_objfile_data
+    = get_breakpoint_objfile_data (objfile);
+
+  if (!bp_objfile_data->longjmp_searched)
+    {
+      std::vector<probe *> ret
+	= find_probes_in_objfile (objfile, "libc", "longjmp");
+
+      if (!ret.empty ())
+	{
+	  /* We are only interested in checking one element.  */
+	  probe *p = ret[0];
+
+	  if (!p->can_evaluate_arguments ())
+	    {
+	      /* We cannot use the probe interface here,
+		 because it does not know how to evaluate
+		 arguments.  */
+	      ret.clear ();
+	    }
+	}
+      bp_objfile_data->longjmp_probes = ret;
+      bp_objfile_data->longjmp_searched = 1;
+    }
+
+  if (bp_objfile_data->longjmp_probes.empty ())
+    return false;
+
+  for (probe *p : bp_objfile_data->longjmp_probes)
+    {
+      struct breakpoint *b;
+
+      b = create_internal_breakpoint (gdbarch,
+				      p->get_relocated_address (objfile),
+				      bp_longjmp_master,
+				      &internal_breakpoint_ops);
+      b->location = new_probe_location ("-probe-stap libc:longjmp");
+      b->enable_state = bp_disabled;
+    }
+
+  return true;
+}
+
+/* Install master longjmp breakpoints for OBJFILE using longjmp_names.
+   Return true if at least one breakpoint was installed.  */
+
+static bool
+create_longjmp_master_breakpoint_names (objfile *objfile)
+{
+  struct gdbarch *gdbarch = objfile->arch ();
+  if (!gdbarch_get_longjmp_target_p (gdbarch))
+    return false;
+
+  struct breakpoint_objfile_data *bp_objfile_data
+    = get_breakpoint_objfile_data (objfile);
+  unsigned int installed_bp = 0;
+
+  for (int i = 0; i < NUM_LONGJMP_NAMES; i++)
+    {
+      struct breakpoint *b;
+      const char *func_name;
+      CORE_ADDR addr;
+      struct explicit_location explicit_loc;
+
+      if (msym_not_found_p (bp_objfile_data->longjmp_msym[i].minsym))
+	continue;
+
+      func_name = longjmp_names[i];
+      if (bp_objfile_data->longjmp_msym[i].minsym == NULL)
+	{
+	  struct bound_minimal_symbol m;
+
+	  m = lookup_minimal_symbol_text (func_name, objfile);
+	  if (m.minsym == NULL)
+	    {
+	      /* Prevent future lookups in this objfile.  */
+	      bp_objfile_data->longjmp_msym[i].minsym = &msym_not_found;
+	      continue;
+	    }
+	  bp_objfile_data->longjmp_msym[i] = m;
+	}
+
+      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
+      b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
+				      &internal_breakpoint_ops);
+      initialize_explicit_location (&explicit_loc);
+      explicit_loc.function_name = ASTRDUP (func_name);
+      b->location = new_explicit_location (&explicit_loc);
+      b->enable_state = bp_disabled;
+      installed_bp++;
+    }
+
+  return installed_bp > 0;
+}
+
+/* Create a master longjmp breakpoint.  */
+
 static void
 create_longjmp_master_breakpoint (void)
 {
@@ -3336,91 +3440,21 @@ create_longjmp_master_breakpoint (void)
     {
       set_current_program_space (pspace);
 
-      for (objfile *objfile : current_program_space->objfiles ())
+      for (objfile *obj : current_program_space->objfiles ())
 	{
-	  int i;
-	  struct gdbarch *gdbarch;
-	  struct breakpoint_objfile_data *bp_objfile_data;
-
-	  gdbarch = objfile->arch ();
-
-	  bp_objfile_data = get_breakpoint_objfile_data (objfile);
-
-	  if (!bp_objfile_data->longjmp_searched)
-	    {
-	      std::vector<probe *> ret
-		= find_probes_in_objfile (objfile, "libc", "longjmp");
-
-	      if (!ret.empty ())
-		{
-		  /* We are only interested in checking one element.  */
-		  probe *p = ret[0];
-
-		  if (!p->can_evaluate_arguments ())
-		    {
-		      /* We cannot use the probe interface here,
-			 because it does not know how to evaluate
-			 arguments.  */
-		      ret.clear ();
-		    }
-		}
-	      bp_objfile_data->longjmp_probes = ret;
-	      bp_objfile_data->longjmp_searched = 1;
-	    }
-
-	  if (!bp_objfile_data->longjmp_probes.empty ())
-	    {
-	      for (probe *p : bp_objfile_data->longjmp_probes)
-		{
-		  struct breakpoint *b;
-
-		  b = create_internal_breakpoint (gdbarch,
-						  p->get_relocated_address (objfile),
-						  bp_longjmp_master,
-						  &internal_breakpoint_ops);
-		  b->location = new_probe_location ("-probe-stap libc:longjmp");
-		  b->enable_state = bp_disabled;
-		}
-
-	      continue;
-	    }
-
-	  if (!gdbarch_get_longjmp_target_p (gdbarch))
+	  /* Skip separate debug object, it's handled in the loop below.  */
+	  if (obj->separate_debug_objfile_backlink != nullptr)
 	    continue;
 
-	  for (i = 0; i < NUM_LONGJMP_NAMES; i++)
-	    {
-	      struct breakpoint *b;
-	      const char *func_name;
-	      CORE_ADDR addr;
-	      struct explicit_location explicit_loc;
+	  /* Try a probe kind breakpoint on main objfile.  */
+	  if (create_longjmp_master_breakpoint_probe (obj))
+	    continue;
 
-	      if (msym_not_found_p (bp_objfile_data->longjmp_msym[i].minsym))
-		continue;
-
-	      func_name = longjmp_names[i];
-	      if (bp_objfile_data->longjmp_msym[i].minsym == NULL)
-		{
-		  struct bound_minimal_symbol m;
-
-		  m = lookup_minimal_symbol_text (func_name, objfile);
-		  if (m.minsym == NULL)
-		    {
-		      /* Prevent future lookups in this objfile.  */
-		      bp_objfile_data->longjmp_msym[i].minsym = &msym_not_found;
-		      continue;
-		    }
-		  bp_objfile_data->longjmp_msym[i] = m;
-		}
-
-	      addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
-	      b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
-					      &internal_breakpoint_ops);
-	      initialize_explicit_location (&explicit_loc);
-	      explicit_loc.function_name = ASTRDUP (func_name);
-	      b->location = new_explicit_location (&explicit_loc);
-	      b->enable_state = bp_disabled;
-	    }
+	  /* Try longjmp_names kind breakpoints on main and separate_debug
+	     objfiles.  */
+	  for (objfile *debug_objfile : obj->separate_debug_objfiles ())
+	    if (create_longjmp_master_breakpoint_names (debug_objfile))
+	      break;
 	}
     }
 }

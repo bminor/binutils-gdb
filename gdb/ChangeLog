@@ -1,3 +1,13 @@
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoints/27205
+	* breakpoint.c (create_longjmp_master_breakpoint_probe)
+	(create_longjmp_master_breakpoint_names): New function, factored out
+	of ...
+	(create_longjmp_master_breakpoint): ... here.  Only try to install
+	longjmp_names breakpoints in libc.so/libc.so.debug if installing probe
+	breakpoint in libc.so failed.
+
 2021-01-27  Lancelot SIX  <lsix@lancelotsix.com>
 
 	PR gdb/27133
