@@ -716,9 +716,7 @@ execute_command_to_ui_file (struct ui_file *file, const char *p, int from_tty)
   }
 }
 
-/* Run execute_command for P and FROM_TTY.  Capture its output into the
-   returned string, do not display it to the screen.  BATCH_FLAG will be
-   temporarily set to true.  */
+/* See gdbcmd.h.  */
 
 std::string
 execute_command_to_string (const char *p, int from_tty,

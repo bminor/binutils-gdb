@@ -1,3 +1,8 @@
+2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbcmd.h (execute_command_to_string): Update comment.
+	* top.c (execute_command_to_string): Update header comment.
+
 2021-01-28  Tom de Vries  <tdevries@suse.de>
 
 	PR breakpoints/27205
