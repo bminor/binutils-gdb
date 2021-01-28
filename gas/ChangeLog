@@ -1,3 +1,16 @@
+2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c: Included cpu-riscv.h.
+	(enum riscv_csr_clas): Moved from include/opcode/riscv.h.
+	(struct riscv_csr_extra): Likewise.
+	(struct riscv_ext_version): Likewise.
+	(ext_version_table): Moved from opcodes/riscv-opc.c.
+	(default_isa_spec): Updated type to riscv_spec_class.
+	(default_priv_spec): Likewise.
+	(riscv_set_default_isa_spec): Updated.
+	(init_ext_version_hash): Likewise.
+	(riscv_init_csr_hash): Likewise, also fixed indent.
+
 2021-02-17  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/elf/section28.d: xfail h8300.

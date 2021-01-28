@@ -1,3 +1,29 @@
+2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
+
+	* Makefile.am: Added cpu-riscv.h.
+	* Makefile.in: Regenerated.
+	* po/SRC-POTFILES.in: Regenerated.
+	* cpu-riscv.h: Added to support spec versions controlling.
+	Also added extern arrays and functions for cpu-riscv.c.
+	(enum riscv_spec_class): Define all spec classes here uniformly.
+	(struct riscv_spec): Added for all specs.
+	(RISCV_GET_SPEC_CLASS): Added to reduce repeated code.
+	(RISCV_GET_SPEC_NAME): Likewise.
+	(RISCV_GET_ISA_SPEC_CLASS): Added to get ISA spec class.
+	(RISCV_GET_PRIV_SPEC_CLASS): Added to get privileged spec class.
+	(RISCV_GET_PRIV_SPEC_NAME): Added to get privileged spec name.
+	* cpu-riscv.c (struct priv_spec_t): Replaced with struct riscv_spec.
+	(riscv_get_priv_spec_class): Replaced with RISCV_GET_PRIV_SPEC_CLASS.
+	(riscv_get_priv_spec_name): Replaced with RISCV_GET_PRIV_SPEC_NAME.
+	(riscv_priv_specs): Moved below.
+	(riscv_get_priv_spec_class_from_numbers): Likewise, updated.
+	(riscv_isa_specs): Moved from include/opcode/riscv.h.
+	* elfnn-riscv.c: Included cpu-riscv.h.
+	(riscv_merge_attributes): Initialize in_priv_spec and out_priv_spec.
+	* elfxx-riscv.c: Included cpu-riscv.h and opcode/riscv.h.
+	(RISCV_UNKNOWN_VERSION): Moved from include/opcode/riscv.h.
+	* elfxx-riscv.h: Removed extern functions to cpu-riscv.h.
+
 2021-02-17  Alan Modra  <amodra@gmail.com>
 
 	* wasm-module.c: Guard include of limits.h.

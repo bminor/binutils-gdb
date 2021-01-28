@@ -675,7 +675,7 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 SOURCE_HFILES = \
 	aout-target.h aoutx.h arc-got.h arc-plt.h \
 	coff-arm.h coff-bfd.h coffcode.h coffswap.h \
-	cpu-aarch64.h cpu-arm.h cpu-h8300.h cpu-m68k.h \
+	cpu-aarch64.h cpu-arm.h cpu-h8300.h cpu-m68k.h cpu-riscv.h \
 	ecoff-bfd.h ecoffswap.h \
 	elf32-arm.h elf32-avr.h elf32-bfin.h elf32-cr16.h elf32-csky.h \
 	elf32-dlx.h elf32-hppa.h elf32-m68hc1x.h elf32-m68k.h \

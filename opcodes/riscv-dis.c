@@ -27,12 +27,12 @@
 #include "opintl.h"
 #include "elf-bfd.h"
 #include "elf/riscv.h"
-#include "elfxx-riscv.h"
+#include "cpu-riscv.h"
 
 #include "bfd_stdint.h"
 #include <ctype.h>
 
-static enum riscv_priv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
 struct riscv_private_data
 {
@@ -99,17 +99,22 @@ parse_riscv_dis_option (const char *option)
   value = equal + 1;
   if (strcmp (option, "priv-spec") == 0)
     {
-      enum riscv_priv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
-      if (!riscv_get_priv_spec_class (value, &priv_spec))
+      enum riscv_spec_class priv_spec = PRIV_SPEC_CLASS_NONE;
+      const char *name = NULL;
+
+      RISCV_GET_PRIV_SPEC_CLASS (value, priv_spec);
+      if (priv_spec == PRIV_SPEC_CLASS_NONE)
 	opcodes_error_handler (_("unknown privileged spec set by %s=%s"),
 			       option, value);
       else if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
 	default_priv_spec = priv_spec;
       else if (default_priv_spec != priv_spec)
-	opcodes_error_handler (_("mis-matched privilege spec set by %s=%s, "
-				 "the elf privilege attribute is %s"),
-			       option, value,
-			       riscv_get_priv_spec_name (default_priv_spec));
+	{
+	  RISCV_GET_PRIV_SPEC_NAME (name, default_priv_spec);
+	  opcodes_error_handler (_("mis-matched privilege spec set by %s=%s, "
+				   "the elf privilege attribute is %s"),
+				 option, value, name);
+	}
     }
   else
     {

@@ -1,3 +1,10 @@
+2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-dis.c: Included cpu-riscv.h, and removed elfxx-riscv.h.
+	(default_priv_spec): Updated type to riscv_spec_class.
+	(parse_riscv_dis_option): Updated.
+	* riscv-opc.c: Moved stuff and make the file tidy.
+
 2021-02-17  Alan Modra  <amodra@gmail.com>
 
 	* wasm32-dis.c: Include limits.h.

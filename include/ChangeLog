@@ -1,3 +1,7 @@
+2021-02-18  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h: Moved stuff and make the file tidy.
+
 2021-02-15  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* opcode/s390.h (enum s390_opcode_cpu_val): Add

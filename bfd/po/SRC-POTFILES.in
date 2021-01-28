@@ -101,6 +101,7 @@ cpu-pj.c
 cpu-powerpc.c
 cpu-pru.c
 cpu-riscv.c
+cpu-riscv.h
 cpu-rl78.c
 cpu-rs6000.c
 cpu-rx.c

@@ -29,6 +29,7 @@
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 
+#include "bfd/cpu-riscv.h"
 #include "bfd/elfxx-riscv.h"
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
@@ -55,6 +56,93 @@ struct riscv_cl_insn
   fixS *fixp;
 };
 
+/* All RISC-V CSR belong to one of these classes.  */
+enum riscv_csr_class
+{
+  CSR_CLASS_NONE,
+
+  CSR_CLASS_I,
+  CSR_CLASS_I_32, /* rv32 only */
+  CSR_CLASS_F, /* f-ext only */
+  CSR_CLASS_DEBUG /* debug CSR */
+};
+
+/* This structure holds all restricted conditions for a CSR.  */
+struct riscv_csr_extra
+{
+  /* Class to which this CSR belongs.  Used to decide whether or
+     not this CSR is legal in the current -march context.  */
+  enum riscv_csr_class csr_class;
+
+  /* CSR may have differnet numbers in the previous priv spec.  */
+  unsigned address;
+
+  /* Record the CSR is defined/valid in which versions.  */
+  enum riscv_spec_class define_version;
+
+  /* Record the CSR is aborted/invalid from which versions.  If it isn't
+     aborted in the current version, then it should be CSR_CLASS_VDRAFT.  */
+  enum riscv_spec_class abort_version;
+
+  /* The CSR may have more than one setting.  */
+  struct riscv_csr_extra *next;
+};
+
+/* All standard/Z* extensions defined in all supported ISA spec.  */
+struct riscv_ext_version
+{
+  const char *name;
+  enum riscv_spec_class isa_spec_class;
+  int major_version;
+  int minor_version;
+};
+
+static const struct riscv_ext_version ext_version_table[] =
+{
+  {"e", ISA_SPEC_CLASS_20191213, 1, 9},
+  {"e", ISA_SPEC_CLASS_20190608, 1, 9},
+  {"e", ISA_SPEC_CLASS_2P2,      1, 9},
+
+  {"i", ISA_SPEC_CLASS_20191213, 2, 1},
+  {"i", ISA_SPEC_CLASS_20190608, 2, 1},
+  {"i", ISA_SPEC_CLASS_2P2,      2, 0},
+
+  {"m", ISA_SPEC_CLASS_20191213, 2, 0},
+  {"m", ISA_SPEC_CLASS_20190608, 2, 0},
+  {"m", ISA_SPEC_CLASS_2P2,      2, 0},
+
+  {"a", ISA_SPEC_CLASS_20191213, 2, 1},
+  {"a", ISA_SPEC_CLASS_20190608, 2, 0},
+  {"a", ISA_SPEC_CLASS_2P2,      2, 0},
+
+  {"f", ISA_SPEC_CLASS_20191213, 2, 2},
+  {"f", ISA_SPEC_CLASS_20190608, 2, 2},
+  {"f", ISA_SPEC_CLASS_2P2,      2, 0},
+
+  {"d", ISA_SPEC_CLASS_20191213, 2, 2},
+  {"d", ISA_SPEC_CLASS_20190608, 2, 2},
+  {"d", ISA_SPEC_CLASS_2P2,      2, 0},
+
+  {"q", ISA_SPEC_CLASS_20191213, 2, 2},
+  {"q", ISA_SPEC_CLASS_20190608, 2, 2},
+  {"q", ISA_SPEC_CLASS_2P2,      2, 0},
+
+  {"c", ISA_SPEC_CLASS_20191213, 2, 0},
+  {"c", ISA_SPEC_CLASS_20190608, 2, 0},
+  {"c", ISA_SPEC_CLASS_2P2,      2, 0},
+
+  {"zicsr", ISA_SPEC_CLASS_20191213, 2, 0},
+  {"zicsr", ISA_SPEC_CLASS_20190608, 2, 0},
+
+  {"zifencei", ISA_SPEC_CLASS_20191213, 2, 0},
+  {"zifencei", ISA_SPEC_CLASS_20190608, 2, 0},
+
+  {"zihintpause", ISA_SPEC_CLASS_DRAFT, 1, 0},
+
+  /* Terminate the list.  */
+  {NULL, 0, 0, 0}
+};
+
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "riscv64"
 #endif
@@ -79,8 +167,8 @@ struct riscv_cl_insn
 
 static const char default_arch[] = DEFAULT_ARCH;
 static const char *default_arch_with_ext = DEFAULT_RISCV_ARCH_WITH_EXT;
-static enum riscv_isa_spec_class default_isa_spec = ISA_SPEC_CLASS_NONE;
-static enum riscv_priv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_NONE;
+static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
 
 static unsigned xlen = 0; /* The width of an x-register.  */
 static unsigned abi_xlen = 0; /* The width of a pointer in the ABI.  */
@@ -106,8 +194,9 @@ static unsigned elf_flags = 0;
 static int
 riscv_set_default_isa_spec (const char *s)
 {
-  enum riscv_isa_spec_class class;
-  if (!riscv_get_isa_spec_class (s, &class))
+  enum riscv_spec_class class = ISA_SPEC_CLASS_NONE;
+  RISCV_GET_ISA_SPEC_CLASS (s, class);
+  if (class == ISA_SPEC_CLASS_NONE)
     {
       as_bad ("unknown default ISA spec `%s' set by "
 	      "-misa-spec or --with-isa-spec", s);
@@ -125,11 +214,12 @@ riscv_set_default_isa_spec (const char *s)
 static int
 riscv_set_default_priv_spec (const char *s)
 {
-  enum riscv_priv_spec_class class;
+  enum riscv_spec_class class = PRIV_SPEC_CLASS_NONE;
   unsigned major, minor, revision;
   obj_attribute *attr;
 
-  if (riscv_get_priv_spec_class (s, &class))
+  RISCV_GET_PRIV_SPEC_CLASS (s, class);
+  if (class != PRIV_SPEC_CLASS_NONE)
     {
       default_priv_spec = class;
       return 1;
@@ -147,15 +237,13 @@ riscv_set_default_priv_spec (const char *s)
   major = (unsigned) attr[Tag_RISCV_priv_spec].i;
   minor = (unsigned) attr[Tag_RISCV_priv_spec_minor].i;
   revision = (unsigned) attr[Tag_RISCV_priv_spec_revision].i;
-  if (riscv_get_priv_spec_class_from_numbers (major,
-					      minor,
-					      revision,
-					      &class))
-    {
-      /* 0.0.0 is meaningless.  */
-      if (class == PRIV_SPEC_CLASS_NONE)
-	return 1;
+  /* Version 0.0.0 is the default value and meningless.  */
+  if (major == 0 && minor == 0 && revision == 0)
+    return 1;
 
+  riscv_get_priv_spec_class_from_numbers (major, minor, revision, &class);
+  if (class != PRIV_SPEC_CLASS_NONE)
+    {
       default_priv_spec = class;
       return 1;
     }
@@ -252,10 +340,11 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
 static htab_t ext_version_hash = NULL;
 
 static htab_t
-init_ext_version_hash (const struct riscv_ext_version *table)
+init_ext_version_hash (void)
 {
-  int i = 0;
+  const struct riscv_ext_version *table = ext_version_table;
   htab_t hash = str_htab_create ();
+  int i = 0;
 
   while (table[i].name)
     {
@@ -687,10 +776,10 @@ hash_reg_names (enum reg_class class, const char * const names[], unsigned n)
 
 static void
 riscv_init_csr_hash (const char *name,
-                    unsigned address,
-                    enum riscv_csr_class class,
-                    enum riscv_priv_spec_class define_version,
-                    enum riscv_priv_spec_class abort_version)
+		     unsigned address,
+		     enum riscv_csr_class class,
+		     enum riscv_spec_class define_version,
+		     enum riscv_spec_class abort_version)
 {
   struct riscv_csr_extra *entry, *pre_entry;
   bfd_boolean need_enrty = TRUE;
@@ -782,8 +871,8 @@ riscv_csr_address (const char *csr_name,
      so use the newly defined value.  */
   if (riscv_opts.csr_check)
     {
-      const char *priv_name = riscv_get_priv_spec_name (default_priv_spec);
-
+      const char *priv_name = NULL;
+      RISCV_GET_PRIV_SPEC_NAME (priv_name, default_priv_spec);
       if (priv_name != NULL)
 	as_warn (_("invalid CSR `%s' for the privileged spec `%s'"),
 		 csr_name, priv_name);
@@ -2812,7 +2901,7 @@ riscv_after_parse_args (void)
     default_arch_with_ext = xlen == 64 ? "rv64g" : "rv32g";
 
   /* Initialize the hash table for extensions with default version.  */
-  ext_version_hash = init_ext_version_hash (riscv_ext_version_table);
+  ext_version_hash = init_ext_version_hash ();
 
   /* Set default specs.  */
   if (default_isa_spec == ISA_SPEC_CLASS_NONE)
@@ -3648,7 +3737,7 @@ riscv_write_out_attrs (void)
   if (!explicit_priv_attr)
     return;
 
-  priv_str = riscv_get_priv_spec_name (default_priv_spec);
+  RISCV_GET_PRIV_SPEC_NAME (priv_str, default_priv_spec);
   p = priv_str;
   for (i = 0; *p; ++p)
     {

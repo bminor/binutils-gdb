@@ -32,6 +32,7 @@
 #include "elf/riscv.h"
 #include "opcode/riscv.h"
 #include "objalloc.h"
+#include "cpu-riscv.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -3679,8 +3680,8 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    unsigned int Tag_a = Tag_RISCV_priv_spec;
 	    unsigned int Tag_b = Tag_RISCV_priv_spec_minor;
 	    unsigned int Tag_c = Tag_RISCV_priv_spec_revision;
-	    enum riscv_priv_spec_class in_priv_spec;
-	    enum riscv_priv_spec_class out_priv_spec;
+	    enum riscv_spec_class in_priv_spec = PRIV_SPEC_CLASS_NONE;
+	    enum riscv_spec_class out_priv_spec = PRIV_SPEC_CLASS_NONE;
 
 	    /* Get the privileged spec class from elf attributes.  */
 	    riscv_get_priv_spec_class_from_numbers (in_attr[Tag_a].i,

@@ -25,9 +25,11 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/riscv.h"
+#include "opcode/riscv.h"
 #include "libiberty.h"
 #include "elfxx-riscv.h"
 #include "safe-ctype.h"
+#include "cpu-riscv.h"
 
 #define MINUS_ONE ((bfd_vma)0 - 1)
 
@@ -1024,12 +1026,13 @@ riscv_elf_add_sub_reloc (bfd *abfd,
   return bfd_reloc_ok;
 }
 
+#define RISCV_UNKNOWN_VERSION -1
+
 /* Array is used to compare the orders of all extensions quickly.
 
    Zero value: Preserved keyword.
    Negative value: Prefixed keyword (s, h, x, z).
    Positive value: Standard extension.  */
-
 static int riscv_ext_order[26] = {0};
 
 /* Similar to the strcmp.  It returns an integer less than, equal to,
