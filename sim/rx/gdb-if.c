@@ -804,13 +804,13 @@ sim_do_command (SIM_DESC sd, const char *cmd)
     p++;
 
   /* Find the extent of the command word.  */
-  for (p = cmd; *p; p++)
+  for (; *p != '\0'; p++)
     if (isspace (*p))
       break;
 
   /* Null-terminate the command word, and record the start of any
      further arguments.  */
-  if (*p)
+  if (*p != '\0')
     {
       *p = '\0';
       args = p + 1;
