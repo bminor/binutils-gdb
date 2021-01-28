@@ -1,3 +1,9 @@
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.arch/i386-sse-stack-align.S: Rename g[0-4] to test_g[0-4].
+	* gdb.arch/i386-sse-stack-align.c: Same.
+	* gdb.arch/i386-sse-stack-align.exp: Same.
+
 2021-01-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/gdb.exp (default_gdb_init): Unset XDG_CONFIG_HOME.
