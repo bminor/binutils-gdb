@@ -52,8 +52,8 @@ public:
       m_stride = type_length_units (elt_type);
     else
       {
-	struct gdbarch *arch = get_type_arch (elt_type);
-	int unit_size = gdbarch_addressable_memory_unit_size (arch);
+	int unit_size
+	  = gdbarch_addressable_memory_unit_size (elt_type->arch ());
 	m_stride /= (unit_size * 8);
       }
   };

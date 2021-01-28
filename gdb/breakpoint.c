@@ -1982,7 +1982,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		  for (tmp = &(b->loc); *tmp != NULL; tmp = &((*tmp)->next))
 		    ;
 		  *tmp = loc;
-		  loc->gdbarch = get_type_arch (value_type (v));
+		  loc->gdbarch = value_type (v)->arch ();
 
 		  loc->pspace = frame_pspace;
 		  loc->address = address_significant (loc->gdbarch, addr);

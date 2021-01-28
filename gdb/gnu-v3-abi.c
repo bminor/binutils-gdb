@@ -308,7 +308,7 @@ gnuv3_rtti_type (struct value *value,
     return NULL;
 
   /* Determine architecture.  */
-  gdbarch = get_type_arch (values_type);
+  gdbarch = values_type->arch ();
 
   if (using_enc_p)
     *using_enc_p = 0;
@@ -422,7 +422,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
     error (_("Only classes can have virtual functions."));
 
   /* Determine architecture.  */
-  gdbarch = get_type_arch (values_type);
+  gdbarch = values_type->arch ();
 
   /* Cast our value to the base class which defines this virtual
      function.  This takes care of any necessary `this'
@@ -454,7 +454,7 @@ gnuv3_baseclass_offset (struct type *type, int index,
   long int cur_base_offset, base_offset;
 
   /* Determine architecture.  */
-  gdbarch = get_type_arch (type);
+  gdbarch = type->arch ();
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 
   /* If it isn't a virtual base, this is easy.  The offset is in the
@@ -611,7 +611,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 			struct ui_file *stream)
 {
   struct type *self_type = TYPE_SELF_TYPE (type);
-  struct gdbarch *gdbarch = get_type_arch (self_type);
+  struct gdbarch *gdbarch = self_type->arch ();
   CORE_ADDR ptr_value;
   LONGEST adjustment;
   int vbit;
@@ -691,9 +691,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 static int
 gnuv3_method_ptr_size (struct type *type)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
-
-  return 2 * TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
+  return 2 * TYPE_LENGTH (builtin_type (type->arch ())->builtin_data_ptr);
 }
 
 /* GNU v3 implementation of cplus_make_method_ptr.  */
@@ -702,7 +700,7 @@ static void
 gnuv3_make_method_ptr (struct type *type, gdb_byte *contents,
 		       CORE_ADDR value, int is_virtual)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
   enum bfd_endian byte_order = type_byte_order (type);
 
@@ -745,7 +743,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
 
   /* Extract the pointer to member.  */
-  gdbarch = get_type_arch (self_type);
+  gdbarch = self_type->arch ();
   vbit = gnuv3_decode_method_ptr (gdbarch, contents, &ptr_value, &adjustment);
 
   /* First convert THIS to match the containing type of the pointer to
@@ -978,7 +976,7 @@ gnuv3_print_vtable (struct value *value)
       type = check_typedef (value_type (value));
     }
 
-  gdbarch = get_type_arch (type);
+  gdbarch = type->arch ();
 
   vtable = NULL;
   if (type->code () == TYPE_CODE_STRUCT)
@@ -1107,7 +1105,7 @@ gnuv3_get_typeid (struct value *value)
 
   /* Ignore top-level cv-qualifiers.  */
   type = make_cv_type (0, 0, type, NULL);
-  gdbarch = get_type_arch (type);
+  gdbarch = type->arch ();
 
   type_name = type_to_string (type);
   if (type_name.empty ())
@@ -1161,7 +1159,7 @@ gnuv3_get_typeid (struct value *value)
 static std::string
 gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
 {
-  struct gdbarch *gdbarch = get_type_arch (value_type (type_info_ptr));
+  struct gdbarch *gdbarch = value_type (type_info_ptr)->arch ();
   struct bound_minimal_symbol typeinfo_sym;
   CORE_ADDR addr;
   const char *symname;

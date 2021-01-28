@@ -70,7 +70,7 @@ pascal_language::value_print_inner (struct value *val,
 
 {
   struct type *type = check_typedef (value_type (val));
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   enum bfd_endian byte_order = type_byte_order (type);
   unsigned int i = 0;	/* Number of characters printed */
   unsigned len;

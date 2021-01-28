@@ -2207,7 +2207,7 @@ varobj_value_get_print_value (struct value *value,
 
 			  thevalue = std::string (s.get ());
 			  len = thevalue.size ();
-			  gdbarch = get_type_arch (value_type (value));
+			  gdbarch = value_type (value)->arch ();
 			  type = builtin_type (gdbarch)->builtin_char;
 
 			  if (!string_print)

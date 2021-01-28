@@ -149,7 +149,7 @@ c_emit_char (int c, struct type *type,
 {
   const char *encoding;
 
-  classify_type (type, get_type_arch (type), &encoding);
+  classify_type (type, type->arch (), &encoding);
   generic_emit_char (c, type, stream, quoter, encoding);
 }
 
@@ -161,7 +161,7 @@ language_defn::printchar (int c, struct type *type,
 {
   c_string_type str_type;
 
-  str_type = classify_type (type, get_type_arch (type), NULL);
+  str_type = classify_type (type, type->arch (), NULL);
   switch (str_type)
     {
     case C_CHAR:
@@ -199,7 +199,7 @@ c_printstr (struct ui_file *stream, struct type *type,
   const char *type_encoding;
   const char *encoding;
 
-  str_type = (classify_type (type, get_type_arch (type), &type_encoding)
+  str_type = (classify_type (type, type->arch (), &type_encoding)
 	      & ~C_CHAR);
   switch (str_type)
     {
@@ -279,7 +279,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 
   if (! c_textual_element_type (element_type, 0))
     goto error;
-  classify_type (element_type, get_type_arch (element_type), charset);
+  classify_type (element_type, element_type->arch (), charset);
   width = TYPE_LENGTH (element_type);
 
   /* If the string lives in GDB's memory instead of the inferior's,

@@ -1282,6 +1282,13 @@ struct type
     return this->main_type->m_owner.gdbarch;
   }
 
+  /* Return the type's architecture.  For types owned by an
+     architecture, that architecture is returned.  For types owned by an
+     objfile, that objfile's architecture is returned.
+
+     The return value is always non-nullptr.  */
+  gdbarch *arch () const;
+
   /* * Return true if this is an integer type whose logical (bit) size
      differs from its storage size; false otherwise.  Always return
      false for non-integer (i.e., non-TYPE_SPECIFIC_INT) types.  */
@@ -2258,12 +2265,6 @@ extern struct type *alloc_type (struct objfile *);
 extern struct type *alloc_type_arch (struct gdbarch *);
 extern struct type *alloc_type_copy (const struct type *);
 
-/* * Return the type's architecture.  For types owned by an
-   architecture, that architecture is returned.  For types owned by an
-   objfile, that objfile's architecture is returned.  */
-
-extern struct gdbarch *get_type_arch (const struct type *);
-
 /* * This returns the target type (or NULL) of TYPE, also skipping
    past typedefs.  */
 
@@ -2661,9 +2662,9 @@ extern bool is_fixed_point_type (struct type *type);
 extern void allocate_fixed_point_type_info (struct type *type);
 
 /* * When the type includes explicit byte ordering, return that.
-   Otherwise, the byte ordering from gdbarch_byte_order for 
-   get_type_arch is returned.  */
-   
+   Otherwise, the byte ordering from gdbarch_byte_order for
+   the type's arch is returned.  */
+
 extern enum bfd_endian type_byte_order (const struct type *type);
 
 /* A flag to enable printing of debugging information of C++

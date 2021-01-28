@@ -202,7 +202,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
   LONGEST stride = array_type->bit_stride ();
   if (stride != 0)
     {
-      struct gdbarch *arch = get_type_arch (elt_type);
+      struct gdbarch *arch = elt_type->arch ();
       int unit_size = gdbarch_addressable_memory_unit_size (arch);
       elt_size = stride / (unit_size * 8);
     }
@@ -539,7 +539,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 struct value *
 value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 {
-  struct gdbarch *gdbarch = get_type_arch (value_type (arg1));
+  struct gdbarch *gdbarch = value_type (arg1)->arch ();
   char *ptr;
   char tstr[13], mangle_tstr[13];
   int static_memfuncp, nargs;
@@ -900,7 +900,7 @@ fixed_point_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   struct type *type2 = check_typedef (value_type (arg2));
   const struct language_defn *language = current_language;
 
-  struct gdbarch *gdbarch = get_type_arch (type1);
+  struct gdbarch *gdbarch = type1->arch ();
   struct value *val;
 
   gdb_mpq v1, v2, res;
@@ -1967,7 +1967,7 @@ value_complement (struct value *arg1)
 int
 value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   LONGEST low_bound, high_bound;
   LONGEST word;
   unsigned rel_index;

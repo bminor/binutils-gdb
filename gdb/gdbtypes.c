@@ -232,24 +232,23 @@ alloc_type_copy (const struct type *type)
     return alloc_type_arch (type->arch_owner ());
 }
 
-/* If TYPE is gdbarch-associated, return that architecture.
-   If TYPE is objfile-associated, return that objfile's architecture.  */
+/* See gdbtypes.h.  */
 
-struct gdbarch *
-get_type_arch (const struct type *type)
+gdbarch *
+type::arch () const
 {
   struct gdbarch *arch;
 
-  if (type->is_objfile_owned ())
-    arch = type->objfile_owner ()->arch ();
+  if (this->is_objfile_owned ())
+    arch = this->objfile_owner ()->arch ();
   else
-    arch = type->arch_owner ();
+    arch = this->arch_owner ();
 
   /* The ARCH can be NULL if TYPE is associated with neither an objfile nor
      a gdbarch, however, this is very rare, and even then, in most cases
-     that get_type_arch is called, we assume that a non-NULL value is
+     that type::arch is called, we assume that a non-NULL value is
      returned.  */
-  gdb_assert (arch != NULL);
+  gdb_assert (arch != nullptr);
   return arch;
 }
 
@@ -273,8 +272,7 @@ get_target_type (struct type *type)
 unsigned int
 type_length_units (struct type *type)
 {
-  struct gdbarch *arch = get_type_arch (type);
-  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+  int unit_size = gdbarch_addressable_memory_unit_size (type->arch ());
 
   return TYPE_LENGTH (type) / unit_size;
 }
@@ -291,7 +289,7 @@ alloc_type_instance (struct type *oldtype)
   /* Allocate the structure.  */
 
   if (!oldtype->is_objfile_owned ())
-    type = GDBARCH_OBSTACK_ZALLOC (get_type_arch (oldtype), struct type);
+    type = GDBARCH_OBSTACK_ZALLOC (oldtype->arch_owner (), struct type);
   else
     type = OBSTACK_ZALLOC (&oldtype->objfile_owner ()->objfile_obstack,
 			   struct type);
@@ -371,8 +369,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
 
   /* FIXME!  Assumes the machine has only one representation for pointers!  */
 
-  TYPE_LENGTH (ntype)
-    = gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
+  TYPE_LENGTH (ntype) = gdbarch_ptr_bit (type->arch ()) / TARGET_CHAR_BIT;
   ntype->set_code (TYPE_CODE_PTR);
 
   /* Mark pointers as unsigned.  The target converts between pointers
@@ -455,8 +452,7 @@ make_reference_type (struct type *type, struct type **typeptr,
      references, and that it matches the (only) representation for
      pointers!  */
 
-  TYPE_LENGTH (ntype) =
-    gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
+  TYPE_LENGTH (ntype) = gdbarch_ptr_bit (type->arch ()) / TARGET_CHAR_BIT;
   ntype->set_code (refcode);
 
   *reftype = ntype;
@@ -1617,8 +1613,7 @@ smash_to_memberptr_type (struct type *type, struct type *self_type,
   set_type_self_type (type, self_type);
   /* Assume that a data member pointer is the same size as a normal
      pointer.  */
-  TYPE_LENGTH (type)
-    = gdbarch_ptr_bit (get_type_arch (to_type)) / TARGET_CHAR_BIT;
+  TYPE_LENGTH (type) = gdbarch_ptr_bit (to_type->arch ()) / TARGET_CHAR_BIT;
 }
 
 /* Smash TYPE to be a type of pointer to methods type TO_TYPE.
@@ -2228,7 +2223,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
 	 I really don't think this is going to work with current GDB, the
 	 array indexing code in GDB seems to be pretty heavily tied to byte
 	 offsets right now.  Assuming 8 bits in a byte.  */
-      struct gdbarch *gdbarch = get_type_arch (dyn_range_type);
+      struct gdbarch *gdbarch = dyn_range_type->arch ();
       int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
       if (!byte_stride_p && (value % (unit_size * 8)) != 0)
 	error (_("bit strides that are not a multiple of the byte size "
@@ -2903,7 +2898,7 @@ check_typedef (struct type *type)
 	  if (sym)
 	    TYPE_TARGET_TYPE (type) = SYMBOL_TYPE (sym);
 	  else					/* TYPE_CODE_UNDEF */
-	    TYPE_TARGET_TYPE (type) = alloc_type_arch (get_type_arch (type));
+	    TYPE_TARGET_TYPE (type) = alloc_type_arch (type->arch ());
 	}
       type = TYPE_TARGET_TYPE (type);
 
@@ -3071,7 +3066,7 @@ safe_parse_type (struct gdbarch *gdbarch, const char *p, int length)
 static void
 check_stub_method (struct type *type, int method_id, int signature_id)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   struct fn_field *f;
   char *mangled_name = gdb_mangle_name (type, method_id, signature_id);
   char *demangled_name = gdb_demangle (mangled_name,
@@ -3510,8 +3505,7 @@ type_align (struct type *type)
     return raw_align;
 
   /* Allow the architecture to provide an alignment.  */
-  struct gdbarch *arch = get_type_arch (type);
-  ULONGEST align = gdbarch_type_align (arch, type);
+  ULONGEST align = gdbarch_type_align (type->arch (), type);
   if (align != 0)
     return align;
 
@@ -3878,7 +3872,7 @@ is_unique_ancestor (struct type *base, struct value *val)
 enum bfd_endian
 type_byte_order (const struct type *type)
 {
-  bfd_endian byteorder = gdbarch_byte_order (get_type_arch (type));
+  bfd_endian byteorder = gdbarch_byte_order (type->arch ());
   if (type->endianity_is_not_default ())
     {
       if (byteorder == BFD_ENDIAN_BIG)
@@ -5505,7 +5499,7 @@ copy_type_recursive (struct objfile *objfile,
   if (*slot != NULL)
     return ((struct type_pair *) *slot)->newobj;
 
-  new_type = alloc_type_arch (get_type_arch (type));
+  new_type = alloc_type_arch (type->arch ());
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
@@ -5518,7 +5512,7 @@ copy_type_recursive (struct objfile *objfile,
      copy the entire thing and then update specific fields as needed.  */
   *TYPE_MAIN_TYPE (new_type) = *TYPE_MAIN_TYPE (type);
 
-  new_type->set_owner (get_type_arch (type));
+  new_type->set_owner (type->arch ());
 
   if (type->name ())
     new_type->set_name (xstrdup (type->name ()));
@@ -5844,10 +5838,8 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
 void
 append_flags_type_flag (struct type *type, int bitpos, const char *name)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
-
   append_flags_type_field (type, bitpos, 1,
-			   builtin_type (gdbarch)->builtin_bool,
+			   builtin_type (type->arch ())->builtin_bool,
 			   name);
 }
 

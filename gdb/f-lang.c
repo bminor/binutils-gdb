@@ -82,7 +82,7 @@ f_language::get_encoding (struct type *type)
   switch (TYPE_LENGTH (type))
     {
     case 1:
-      encoding = target_charset (get_type_arch (type));
+      encoding = target_charset (type->arch ());
       break;
     case 4:
       if (type_byte_order (type) == BFD_ENDIAN_BIG)
@@ -1416,8 +1416,8 @@ fortran_adjust_dynamic_array_base_address_hack (struct type *type,
 	stride = type_length_units (elt_type);
       else
 	{
-	  struct gdbarch *arch = get_type_arch (elt_type);
-	  int unit_size = gdbarch_addressable_memory_unit_size (arch);
+	  int unit_size
+	    = gdbarch_addressable_memory_unit_size (elt_type->arch ());
 	  stride /= (unit_size * 8);
 	}
 

@@ -408,7 +408,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 			CORE_ADDR address, struct ui_file *stream,
 			const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
 
   if (elttype->code () == TYPE_CODE_FUNC)
     {
@@ -483,7 +483,7 @@ static void
 print_ref_address (struct type *type, const gdb_byte *address_buffer,
 		  int embedded_offset, struct ui_file *stream)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
 
   if (address_buffer != NULL)
     {
@@ -673,7 +673,7 @@ generic_val_print_enum (struct type *type,
 			const struct value_print_options *options)
 {
   LONGEST val;
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
   gdb_assert (!options->format);
@@ -694,7 +694,7 @@ generic_val_print_func (struct type *type,
 			struct value *original_value,
 			const struct value_print_options *options)
 {
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
 
   gdb_assert (!options->format);
 
@@ -1182,7 +1182,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 			     + embedded_offset);
   ULONGEST val = unpack_long (type, valaddr);
   int field, nfields = type->num_fields ();
-  struct gdbarch *gdbarch = get_type_arch (type);
+  struct gdbarch *gdbarch = type->arch ();
   struct type *bool_type = builtin_type (gdbarch)->builtin_bool;
 
   fputs_filtered ("[", stream);
@@ -2713,7 +2713,7 @@ val_print_string (struct type *elttype, const char *encoding,
   unsigned int fetchlimit;	/* Maximum number of chars to print.  */
   int bytes_read;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;	/* Dynamically growable fetch buffer.  */
-  struct gdbarch *gdbarch = get_type_arch (elttype);
+  struct gdbarch *gdbarch = elttype->arch ();
   enum bfd_endian byte_order = type_byte_order (elttype);
   int width = TYPE_LENGTH (elttype);
 

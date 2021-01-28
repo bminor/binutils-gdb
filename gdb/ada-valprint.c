@@ -788,7 +788,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 	     so we have to work-around this deficiency by handling
 	     System.Address values as a special case.  */
 
-	  struct gdbarch *gdbarch = get_type_arch (type);
+	  struct gdbarch *gdbarch = type->arch ();
 	  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 	  CORE_ADDR addr = extract_typed_address (valaddr, ptr_type);
 

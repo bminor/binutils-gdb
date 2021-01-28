@@ -1,5 +1,10 @@
 2021-01-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbtypes.h (get_type_arch): Rename to...
+	(struct type) <arch>: ... this, update all users.
+
+2021-01-28  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbtypes.h (struct type) <arch>: Rename to...
 	<arch_owner>: ... this, update all users.
 	<objfile>: Rename to...

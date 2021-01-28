@@ -158,7 +158,7 @@ extract_typed_address (const gdb_byte *buf, struct type *type)
 		    _("extract_typed_address: "
 		    "type is not a pointer or reference"));
 
-  return gdbarch_pointer_to_address (get_type_arch (type), type, buf);
+  return gdbarch_pointer_to_address (type->arch (), type, buf);
 }
 
 /* All 'store' functions accept a host-format integer and store a
@@ -211,7 +211,7 @@ store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 		    _("store_typed_address: "
 		    "type is not a pointer or reference"));
 
-  gdbarch_address_to_pointer (get_type_arch (type), type, buf, addr);
+  gdbarch_address_to_pointer (type->arch (), type, buf, addr);
 }
 
 /* Copy a value from SOURCE of size SOURCE_SIZE bytes to DEST of size DEST_SIZE

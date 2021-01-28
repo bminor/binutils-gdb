@@ -528,7 +528,7 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
     }
 
   address_space_id
-    = address_space_type_instance_flags_to_name (get_type_arch (type),
+    = address_space_type_instance_flags_to_name (type->arch (),
 						 type->instance_flags ());
   if (address_space_id)
     {
