@@ -1,3 +1,11 @@
+2021-01-30  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2021-01-28  Alan Modra  <amodra@gmail.com>
+	PR 27259
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Use linker_mark to
+	prevent endless looping of linked-to sections.
+
 2021-01-28  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

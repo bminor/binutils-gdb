@@ -1,6 +1,11 @@
 2021-01-30  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2021-01-28  Alan Modra  <amodra@gmail.com>
+	PR 27259
+	* ldelf.c (ldelf_before_place_orphans): Use linker_mark to
+	prevent endless looping of linked-to sections.
+
 	2020-07-29  Alan Modra  <amodra@gmail.com>
 	* ldelf.c (ldelf_before_place_orphans): Set SEC_EXCLUDE for
 	discarded sections.
