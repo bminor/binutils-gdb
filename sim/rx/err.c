@@ -28,7 +28,7 @@ static unsigned char ee_actions[SIM_ERR_NUM_ERRORS];
 static enum execution_error last_error;
 
 static void
-ee_overrides ()
+ee_overrides (void)
 {
   /* GCC may initialize a bitfield by reading the uninitialized byte,
      masking in the bitfield, and writing the byte back out.  */

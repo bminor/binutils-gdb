@@ -1,5 +1,17 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* cpu.h (trace_register_changes): Add void parameter type.
+	* err.c (ee_overrides): Likewise.
+	* mem.c (mem_usage_stats): Likewise.
+	(e): Likewise.
+	* reg.c (stack_heap_stats): Likewise.
+	* rx.c (pop): Likewise.
+	(poppc): Likewise.
+	(decode_opcode): Likewise.
+	* syscalls.c (arg): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb-if.c (sim_do_command): Work with a copy of the command.
 
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>

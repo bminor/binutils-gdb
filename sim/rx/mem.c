@@ -161,7 +161,7 @@ mcs (int isput, int bytes)
 }
 
 void
-mem_usage_stats ()
+mem_usage_stats (void)
 {
   int i, j;
   int rstart = 0;
@@ -244,7 +244,7 @@ s (int address, char *dir)
 
 #define S(d) if (trace) s(address, d)
 static void
-e ()
+e (void)
 {
   if (!trace)
     return;

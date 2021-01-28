@@ -149,7 +149,7 @@ get_reg64 (int id)
 static int highest_sp = 0, lowest_sp = 0xffffff;
 
 void
-stack_heap_stats ()
+stack_heap_stats (void)
 {
   if (heapbottom < heaptop)
     printf ("heap:  %08x - %08x (%d bytes)\n", heapbottom, heaptop,

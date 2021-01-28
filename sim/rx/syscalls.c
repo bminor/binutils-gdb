@@ -69,7 +69,7 @@ get_callbacks (void)
 int argp, stackp;
 
 static int
-arg ()
+arg (void)
 {
   int rv = 0;
   argp++;
