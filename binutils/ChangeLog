@@ -1,3 +1,10 @@
+2021-01-28  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 27252
+	* bucomm.c (get_file_size): Add code to handle /dev/null on
+	Windows systems.
+	* elfedit.c (check_file): Likewise.
+
 2021-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_main): Remove conditional control of the calls

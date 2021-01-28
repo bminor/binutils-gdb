@@ -623,6 +623,21 @@ get_file_size (const char * file_name)
   else if (statbuf.st_size < 0)
     non_fatal (_("Warning: '%s' has negative size, probably it is too large"),
                file_name);
+#if defined (_WIN32) && !defined (__CYGWIN__)
+  else if (statbuf.st_size == 0)
+    {
+      /* MS-Windows 'stat' doesn't reports the null device as a
+	 regular file; fix that.  */
+      int fd = open (file_name, O_RDONLY | O_BINARY);
+      if (isatty (fd))
+	{
+	  close (fd);
+	  non_fatal (_("Warning: '%s' is not an ordinary file"),
+		     /* libtool wants to see /dev/null in the output.  */
+		     strcasecmp (file_name, "nul") ? file_name : "/dev/null");
+	}
+    }
+#endif
   else
     return statbuf.st_size;
 

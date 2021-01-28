@@ -721,6 +721,20 @@ check_file (const char *file_name, struct stat *statbuf_p)
       return 1;
     }
 
+#if defined (_WIN32) && !defined (__CYGWIN__)
+  else if (statbuf_p->st_size == 0)
+    {
+      /* MS-Windows 'stat' doesn't reports the null device as a
+	 regular file; fix that.  */
+      int fd = open (file_name, O_RDONLY | O_BINARY);
+      if (isatty (fd))
+	{
+	  statbuf_p->st_mode &= ~S_IFREG;
+	  statbuf_p->st_mode |= S_IFCHR;
+	}
+    }
+#endif
+
   if (! S_ISREG (statbuf_p->st_mode))
     {
       error (_("'%s' is not an ordinary file\n"), file_name);
