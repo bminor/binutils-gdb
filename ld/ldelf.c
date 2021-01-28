@@ -2188,14 +2188,21 @@ ldelf_before_place_orphans (void)
 	       been discarded.  */
 	    asection *linked_to_sec;
 	    for (linked_to_sec = elf_linked_to_section (isec);
-		 linked_to_sec != NULL;
+		 linked_to_sec != NULL && !linked_to_sec->linker_mark;
 		 linked_to_sec = elf_linked_to_section (linked_to_sec))
-	      if (discarded_section (linked_to_sec))
-		{
-		  isec->output_section = bfd_abs_section_ptr;
-		  isec->flags |= SEC_EXCLUDE;
-		  break;
-		}
+	      {
+		if (discarded_section (linked_to_sec))
+		  {
+		    isec->output_section = bfd_abs_section_ptr;
+		    isec->flags |= SEC_EXCLUDE;
+		    break;
+		  }
+		linked_to_sec->linker_mark = 1;
+	      }
+	    for (linked_to_sec = elf_linked_to_section (isec);
+		 linked_to_sec != NULL && linked_to_sec->linker_mark;
+		 linked_to_sec = elf_linked_to_section (linked_to_sec))
+	      linked_to_sec->linker_mark = 0;
 	  }
       }
 }
