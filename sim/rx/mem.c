@@ -262,7 +262,7 @@ mtypec (int address)
 
 #define E() if (trace) e()
 
-void
+static void
 mem_put_byte (unsigned int address, unsigned char value)
 {
   unsigned char *m;

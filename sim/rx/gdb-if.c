@@ -688,7 +688,7 @@ rx_signal_to_gdb_signal (int rx)
 
 /* Take a step return code RC and set up the variables consulted by
    sim_stop_reason appropriately.  */
-void
+static void
 handle_step (int rc)
 {
   if (execution_error_get_last_error () != SIM_ERR_NONE)

@@ -1,5 +1,11 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* fpu.c (check_exceptions): Make static.
+	* gdb-if.c (handle_step): Likewise.
+	* mem.c (mem_put_byte): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* cpu.h (trace_register_changes): Add void parameter type.
 	* err.c (ee_overrides): Likewise.
 	* mem.c (mem_usage_stats): Likewise.
