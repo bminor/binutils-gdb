@@ -1,5 +1,9 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* err.c (execution_error_exit_all): Delete.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* fpu.c (check_exceptions): Make static.
 	* gdb-if.c (handle_step): Likewise.
 	* mem.c (mem_put_byte): Likewise.

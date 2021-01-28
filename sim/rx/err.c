@@ -61,15 +61,6 @@ execution_error_init_debugger (void)
 }
 
 void
-execution_error_exit_all (void)
-{
-  int i;
-
-  for (i = 0; i < SIM_ERR_NUM_ERRORS; i++)
-    ee_actions[i] = SIM_ERRACTION_EXIT;
-}
-
-void
 execution_error_warn_all (void)
 {
   int i;
