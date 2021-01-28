@@ -1,5 +1,11 @@
 2021-01-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.arch/i386-gnu-cfi.exp: Capture the position of function gate
+	in the backtrace, and use that in the rest of the test instead of
+	hardcoded constant 3.  Use "frame" instead of "up" for robustness.
+
+2021-01-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.arch/i386-sse-stack-align.S: Rename g[0-4] to test_g[0-4].
 	* gdb.arch/i386-sse-stack-align.c: Same.
 	* gdb.arch/i386-sse-stack-align.exp: Same.
