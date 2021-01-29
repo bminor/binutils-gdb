@@ -922,7 +922,10 @@ ctf_type_name (ctf_dict_t *fp, ctf_id_t type, char *buf, size_t len)
 }
 
 /* Lookup the given type ID and return its raw, unadorned, undecorated name.
-   The name will live as long as its ctf_dict_t does.  */
+   The name will live as long as its ctf_dict_t does.
+
+   The only decoration is that a NULL return always means an error: nameless
+   types return a null string.  */
 
 const char *
 ctf_type_name_raw (ctf_dict_t *fp, ctf_id_t type)
@@ -931,6 +934,9 @@ ctf_type_name_raw (ctf_dict_t *fp, ctf_id_t type)
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return NULL;		/* errno is set for us.  */
+
+  if (tp->ctt_name == 0)
+    return "";
 
   return ctf_strraw (fp, tp->ctt_name);
 }

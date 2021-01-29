@@ -1,5 +1,15 @@
 2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-string.c (ctf_str_add): Treat adding a NULL as adding "".
+	(ctf_str_add_ref): Likewise.
+	(ctf_str_add_external): Likewise.
+	* ctf-types.c (ctf_type_name_raw): Always return "" for offset 0.
+	* ctf-dedup.c (ctf_dedup_multiple_input_dicts): Don't armour
+	against NULL name.
+	(ctf_dedup_maybe_synthesize_forward): Likewise.
+
+2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_serialize): Fix shadowing.
 
 2021-01-27  Nick Alcock  <nick.alcock@oracle.com>

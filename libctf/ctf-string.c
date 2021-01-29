@@ -218,8 +218,9 @@ uint32_t
 ctf_str_add (ctf_dict_t *fp, const char *str)
 {
   ctf_str_atom_t *atom;
+
   if (!str)
-    return 0;
+    str = "";
 
   atom = ctf_str_add_ref_internal (fp, str, FALSE, TRUE, 0);
   if (!atom)
@@ -235,8 +236,9 @@ uint32_t
 ctf_str_add_ref (ctf_dict_t *fp, const char *str, uint32_t *ref)
 {
   ctf_str_atom_t *atom;
+
   if (!str)
-    return 0;
+    str = "";
 
   atom = ctf_str_add_ref_internal (fp, str, TRUE, TRUE, ref);
   if (!atom)
@@ -251,8 +253,9 @@ int
 ctf_str_add_external (ctf_dict_t *fp, const char *str, uint32_t offset)
 {
   ctf_str_atom_t *atom;
+
   if (!str)
-    return 0;
+    str = "";
 
   atom = ctf_str_add_ref_internal (fp, str, FALSE, FALSE, 0);
   if (!atom)

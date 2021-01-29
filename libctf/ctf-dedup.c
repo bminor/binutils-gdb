@@ -1776,7 +1776,7 @@ ctf_dedup_multiple_input_dicts (ctf_dict_t *output, ctf_dict_t **inputs,
   name = ctf_type_name_raw (input_fp, input_id);
 
   if ((fwdkind == CTF_K_STRUCT || fwdkind == CTF_K_UNION)
-      && name && name[0] != '\0')
+      && name[0] != '\0')
     {
       const void *origin;
 
@@ -2375,20 +2375,19 @@ ctf_dedup_maybe_synthesize_forward (ctf_dict_t *output, ctf_dict_t *target,
   ctf_dedup_t *td = &target->ctf_dedup;
   int kind;
   int fwdkind;
-  const char *name;
+  const char *name = ctf_type_name_raw (input, id);
   const char *decorated;
   void *v;
   ctf_id_t emitted_forward;
 
   if (!ctf_dynset_exists (od->cd_conflicting_types, hval, NULL)
       || target->ctf_flags & LCTF_CHILD
-      || !ctf_type_name_raw (input, id)
+      || name[0] == '\0'
       || (((kind = ctf_type_kind_unsliced (input, id)) != CTF_K_STRUCT
 	   && kind != CTF_K_UNION && kind != CTF_K_FORWARD)))
     return 0;
 
   fwdkind = ctf_type_kind_forwarded (input, id);
-  name = ctf_type_name_raw (input, id);
 
   ctf_dprintf ("Using synthetic forward for conflicted struct/union with "
 	       "hval %s\n", hval);
