@@ -1,3 +1,9 @@
+2021-01-29  Alan Modra  <amodra@gmail.com>
+
+	PR 27271
+	* elflink.c (bfd_elf_link_record_dynamic_symbol): Don't segfault
+	on symbols defined in absolute or other special sections.
+
 2021-01-28  Alan Modra  <amodra@gmail.com>
 
 	PR 27259
