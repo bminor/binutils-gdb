@@ -1,5 +1,11 @@
 2021-01-29  Tom de Vries  <tdevries@suse.de>
 
+	PR breakpoints/26063
+	* gdb.dwarf2/dw2-step-out-of-function-no-stmt.c: New test.
+	* gdb.dwarf2/dw2-step-out-of-function-no-stmt.exp: New file.
+
+2021-01-29  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.opt/solib-intra-step.exp: Remove state tracking logic.
 
 2021-01-28  Tom de Vries  <tdevries@suse.de>

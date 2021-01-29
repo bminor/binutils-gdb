@@ -7000,25 +7000,42 @@ process_event_stop_test (struct execution_control_state *ecs)
       && (ecs->event_thread->current_line != stop_pc_sal.line
  	  || ecs->event_thread->current_symtab != stop_pc_sal.symtab))
     {
+      /* We are at a different line.  */
+
       if (stop_pc_sal.is_stmt)
 	{
-	  /* We are at the start of a different line.  So stop.  Note that
-	     we don't stop if we step into the middle of a different line.
-	     That is said to make things like for (;;) statements work
-	     better.  */
+	  /* We are at the start of a statement.
+
+	     So stop.  Note that we don't stop if we step into the middle of a
+	     statement.  That is said to make things like for (;;) statements
+	     work better.  */
 	  infrun_debug_printf ("stepped to a different line");
 	  end_stepping_range (ecs);
 	  return;
 	}
       else if (frame_id_eq (get_frame_id (get_current_frame ()),
-			    ecs->event_thread->control.step_frame_id))
+                           ecs->event_thread->control.step_frame_id))
 	{
-	  /* We are at the start of a different line, however, this line is
-	     not marked as a statement, and we have not changed frame.  We
-	     ignore this line table entry, and continue stepping forward,
+	  /* We are not at the start of a statement, and we have not changed
+	     frame.
+
+	     We ignore this line table entry, and continue stepping forward,
 	     looking for a better place to stop.  */
 	  refresh_step_info = false;
 	  infrun_debug_printf ("stepped to a different line, but "
+			       "it's not the start of a statement");
+	}
+      else
+	{
+	  /* We are not the start of a statement, and we have changed frame.
+
+	     We ignore this line table entry, and continue stepping forward,
+	     looking for a better place to stop.  Keep refresh_step_info at
+	     true to note that the frame has changed, but ignore the line
+	     number to make sure we don't ignore a subsequent entry with the
+	     same line number.  */
+	  stop_pc_sal.line = 0;
+	  infrun_debug_printf ("stepped to a different frame, but "
 			       "it's not the start of a statement");
 	}
     }
