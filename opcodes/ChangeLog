@@ -1,3 +1,10 @@
+2021-01-30  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.35.2 release.
+
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2021-01-28  Alan Modra  <amodra@gmail.com>
 
 	Apply from master

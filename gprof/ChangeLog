@@ -1,3 +1,10 @@
+2021-01-30  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.35.2 release.
+
+	* configure: Regenerate.
+	* po/gprof.pot: Regenerate.
+
 2020-09-19  Nick Clifton  <nickc@redhat.com>
 
 	This is the 2.35.1 point release.

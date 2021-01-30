@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-09-19 11:19+0100\n"
+"POT-Creation-Date: 2021-01-30 12:22+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1142,37 +1142,37 @@ msgstr ""
 msgid "unknown broadcast operand: %s\n"
 msgstr ""
 
-#: i386-gen.c:1777
+#: i386-gen.c:1779
 #, c-format
 msgid "can't find i386-reg.tbl for reading, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:1855
+#: i386-gen.c:1857
 #, c-format
 msgid "can't create i386-init.h, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:1945 ia64-gen.c:2829
+#: i386-gen.c:1947 ia64-gen.c:2829
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:1959 i386-gen.c:1964
+#: i386-gen.c:1961 i386-gen.c:1966
 #, c-format
 msgid "CpuMax != %d!\n"
 msgstr ""
 
-#: i386-gen.c:1968
+#: i386-gen.c:1970
 #, c-format
 msgid "%d unused bits in i386_cpu_flags.\n"
 msgstr ""
 
-#: i386-gen.c:1983
+#: i386-gen.c:1985
 #, c-format
 msgid "%d unused bits in i386_operand_type.\n"
 msgstr ""
 
-#: i386-gen.c:1997
+#: i386-gen.c:1999
 #, c-format
 msgid "can't create i386-tbl.h, errno = %s\n"
 msgstr ""
@@ -1935,99 +1935,103 @@ msgstr ""
 msgid "attempt to set 'at' bits when using + or - modifier"
 msgstr ""
 
-#: ppc-opc.c:677
+#: ppc-opc.c:574
+msgid "invalid offset: must be in the range [-512, -8] and be a multiple of 8"
+msgstr ""
+
+#: ppc-opc.c:705
 msgid "invalid R operand"
 msgstr ""
 
-#: ppc-opc.c:732
+#: ppc-opc.c:760
 msgid "invalid mask field"
 msgstr ""
 
-#: ppc-opc.c:755
+#: ppc-opc.c:783
 msgid "invalid mfcr mask"
 msgstr ""
 
-#: ppc-opc.c:873 ppc-opc.c:891
+#: ppc-opc.c:901 ppc-opc.c:919
 msgid "illegal L operand value"
 msgstr ""
 
-#: ppc-opc.c:914
+#: ppc-opc.c:942
 msgid "illegal WC operand value"
 msgstr ""
 
-#: ppc-opc.c:1011
+#: ppc-opc.c:1039
 msgid "incompatible L operand value"
 msgstr ""
 
-#: ppc-opc.c:1051 ppc-opc.c:1086
+#: ppc-opc.c:1079 ppc-opc.c:1114
 msgid "illegal bitmask"
 msgstr ""
 
-#: ppc-opc.c:1173
+#: ppc-opc.c:1201
 msgid "address register in load range"
 msgstr ""
 
-#: ppc-opc.c:1213
+#: ppc-opc.c:1241
 msgid "illegal PL operand value"
 msgstr ""
 
-#: ppc-opc.c:1274
+#: ppc-opc.c:1302
 msgid "index register in load range"
 msgstr ""
 
-#: ppc-opc.c:1303 ppc-opc.c:1389
+#: ppc-opc.c:1331 ppc-opc.c:1417
 msgid "source and target register operands must be different"
 msgstr ""
 
-#: ppc-opc.c:1334
+#: ppc-opc.c:1362
 msgid "invalid register operand when updating"
 msgstr ""
 
-#: ppc-opc.c:1452
+#: ppc-opc.c:1480
 msgid "illegal immediate value"
 msgstr ""
 
-#: ppc-opc.c:1557
+#: ppc-opc.c:1585
 msgid "invalid bat number"
 msgstr ""
 
-#: ppc-opc.c:1592
+#: ppc-opc.c:1620
 msgid "invalid sprg number"
 msgstr ""
 
-#: ppc-opc.c:1629
+#: ppc-opc.c:1657
 msgid "invalid tbr number"
 msgstr ""
 
-#: ppc-opc.c:1715 ppc-opc.c:1761
+#: ppc-opc.c:1743 ppc-opc.c:1789
 msgid "VSR overlaps ACC operand"
 msgstr ""
 
-#: ppc-opc.c:1868
+#: ppc-opc.c:1896
 msgid "invalid constant"
 msgstr ""
 
-#: ppc-opc.c:1970 ppc-opc.c:1993 ppc-opc.c:2016 ppc-opc.c:2039
+#: ppc-opc.c:1998 ppc-opc.c:2021 ppc-opc.c:2044 ppc-opc.c:2067
 msgid "UIMM = 00000 is illegal"
 msgstr ""
 
-#: ppc-opc.c:2062
+#: ppc-opc.c:2090
 msgid "UIMM values >7 are illegal"
 msgstr ""
 
-#: ppc-opc.c:2085
+#: ppc-opc.c:2113
 msgid "UIMM values >15 are illegal"
 msgstr ""
 
-#: ppc-opc.c:2108
+#: ppc-opc.c:2136
 msgid "GPR odd is illegal"
 msgstr ""
 
-#: ppc-opc.c:2131 ppc-opc.c:2154
+#: ppc-opc.c:2159 ppc-opc.c:2182
 msgid "invalid offset"
 msgstr ""
 
-#: ppc-opc.c:2177
+#: ppc-opc.c:2205
 msgid "invalid Ddd value"
 msgstr ""
 

@@ -1,3 +1,9 @@
+2021-01-30  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.35.2 release.
+
+	* po/gold.pot: Regenerate.
+
 2021-01-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/27246
