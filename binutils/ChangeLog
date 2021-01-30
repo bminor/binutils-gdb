@@ -1,3 +1,8 @@
+2021-01-30  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Small updates after the 2.35.2
+	release.
+
 2021-01-28  Eli Zaretskii  <eliz@gnu.org>
 
 	PR 4356

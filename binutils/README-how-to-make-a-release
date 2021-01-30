@@ -448,39 +448,43 @@ looks like this:
        a. Update the minor release number in bfd/version.m4.
        b. Edit bfd/development.sh, set "development=false".
        c. Regenerate the configure files.
-       c.1. Remove spurious autom4te.cache files:
+       d. Remove spurious autom4te.cache files:
 
-          find . -depth -name autom4te.cache -exec rm -r {} \;
+          git clean -fdx
 	  
-       d. Commit the updates along with a "this-is-the-2.3x.y-release"
+       e. Commit the updates along with a "this-is-the-2.3x.y-release"
           note in all of the changelogs.
-       e. Tag the branch with the new release number:
+       f. Tag the branch with the new release number:
 
             git tag -a binutils-2_3x_y
 	      [optional: add "-u XXXXX" to sign with a gpg key]
 	    git push origin binutils-2_3x_y
 
-       f. Check that your file creation mask will create the
-          correct file permissions.  Eg:
+       g. Check that your file creation mask will create the
+          correct file permissions.  Ie:
 
 	    umask 022
 
-       g. Create the release tarballs:
+       h. Create the release tarballs:
        
             ./src-release -b -g -l -x binutils
 
-       h. Check that the files in the tarballs have the correct
+       i. Check that the files in the tarballs have the correct
           permissions.
 
-       i. Edit bfd/development.sh and set "development=true".
-       j. Commit this change into the git repository.
+       j. Clean the source tree again
+       
+	    git clean -fdx
+	  
+       k. Edit bfd/development.sh and set "development=true".
+       l. Commit this change.
 
   4. [If paranoid - upload the tarballs to one of the FTP servers and
       ask people to test it before going on to step 5].
 
   5. Upload the tarballs to ftp.gnu.org.
 
-       gnupload --to ftp.gnu.org:binutils binutils-2.3x.y.tar.*
+       gnupload --to ftp.gnu.org:binutils binutils-*.tar.*
 
      The gnupload script is in the gnulib/build-aux directory.
 
@@ -488,8 +492,8 @@ looks like this:
 
        sftp sourceware.org
          cd /sourceware/ftp/pub/binutils/releases
- 	 put binutils-2.3x.y.tar.*
- 	 chmod 644 binutils-2.3x.y.tar.*
+ 	 put binutils-*.tar.*
+ 	 chmod 644 binutils-*.tar.*
 	 quit
 
     It is OK to upload the signatures as well.
@@ -498,7 +502,7 @@ looks like this:
 
       * Log on to sourceware.org
       * Go to /sourceware/www/sourceware/htdocs/binutils
-      * Edit index.html
+      * Edit index.html and update the latest release number (if this is a latest release)
 
       For the www.gnu.org site you have to email webmasters@gnu.org
       and ask them to make the change(s).
@@ -537,14 +541,6 @@ Hi Everyone,
      And a new milestone too:
 
        https://sourceware.org/bugzilla/editmilestones.cgi?product=binutils
-
- 10. Clean up the source tree.
-       
-            git clean -dfx .
-
- 11. Edit bfd/development.sh on the branch and set the development flag
-     to "true".  Commit this change.
-
 
 Copyright (C) 2017-2021 Free Software Foundation, Inc.
 
