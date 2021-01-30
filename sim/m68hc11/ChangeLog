@@ -1,5 +1,9 @@
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-m68hc11.c, m68hc11_sim.c: Include stdlib.h.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac (SIM_AC_OPTION_HARDWARE): Inline variables.
 	* configure: Regenerate.
 

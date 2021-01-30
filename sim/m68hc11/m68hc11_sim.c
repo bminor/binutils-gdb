@@ -22,6 +22,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "sim-module.h"
 #include "sim-options.h"
 
+#include <stdlib.h>
+
 enum {
   OPTION_CPU_RESET = OPTION_START,
   OPTION_EMUL_OS,

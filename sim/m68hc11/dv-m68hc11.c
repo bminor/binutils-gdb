@@ -25,6 +25,7 @@
 #include "sim-options.h"
 #include "hw-base.h"
 #include <limits.h>
+#include <stdlib.h>
 
 /* DEVICE
 
