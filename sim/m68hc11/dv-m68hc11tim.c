@@ -503,7 +503,7 @@ cycle_to_string (sim_cpu *cpu, signed64 t, int flags)
   if (t < LONG_MAX)
     sprintf (buf, "%9lu%s%s", (unsigned long) t, cycle_buf, time_buf);
   else
-    sprintf (buf, "%llu%s%s", t, cycle_buf, time_buf);
+    sprintf (buf, "%" PRIi64 "%s%s", t, cycle_buf, time_buf);
   return buf;
 }
 

@@ -1,5 +1,9 @@
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* dv-m68hc11tim.c (cycle_to_string): Change llu to PRIi64.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* m68hc11_sim.c (cpu_set_sp): Add static markings.
 	(cpu_get_reg, cpu_get_src_reg, cpu_set_dst_reg,
 	cpu_get_indexed_operand_addr, cpu_get_indexed_operand8): Likewise.
