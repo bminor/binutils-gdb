@@ -1,5 +1,11 @@
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
+	* m68hc11_sim.c (cpu_set_sp): Add static markings.
+	(cpu_get_reg, cpu_get_src_reg, cpu_set_dst_reg,
+	cpu_get_indexed_operand_addr, cpu_get_indexed_operand8): Likewise.
+
+2021-01-30  Mike Frysinger  <vapier@gentoo.org>
+
 	* interp.c (sim_get_info, sim_board_reset): Pass %s to sim_hw_parse.
 
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
