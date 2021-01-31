@@ -1,3 +1,7 @@
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* cgen-trace.c (cgen_trace_insn): Add "%s" argument.
+
 2021-01-31  Stafford Horne  <shorne@gmail.com>
 
 	* cgen-accfp.c (fixsfsi): Change res from unsigned32 to signed32.
