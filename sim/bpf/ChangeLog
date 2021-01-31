@@ -1,5 +1,9 @@
 2021-01-31  Mike Frysinger  <vapier@gentoo.org>
 
+	* mloop.in (xextract-scache): Call SEM_ARGBUF.
+
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
 	* decode-be.c (bpfbf_ebpfbe_decode): Change TRACE_EXTRACT to
 	CGEN_TRACE_EXTRACT.
 	* decode-le.c (bpfbf_ebpfle_decode): Likewise.
