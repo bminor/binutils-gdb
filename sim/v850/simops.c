@@ -1904,7 +1904,7 @@ OP_10007E0 (void)
 	    store_mem (PARM1 + 4, 4, tms.tms_stime);
 	    store_mem (PARM1 + 8, 4, tms.tms_cutime);
 	    store_mem (PARM1 + 12, 4, tms.tms_cstime);
-	    reterr = errno;
+	    RETERR = errno;
 	    break;
 	  }
 #endif

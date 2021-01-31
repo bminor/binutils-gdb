@@ -1,3 +1,7 @@
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* simops.c (OP_10007E0): Change reterr to RETERR.
+
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
 
 	* interp.c (sim_open): Delete STATE_WATCHPOINTS (sd)->sizeof_pc.
@@ -1702,4 +1706,3 @@ Wed Aug 28 13:53:22 1996  Jeffrey A Law  (law@cygnus.com)
 
 	* ChangeLog, Makefile.in, configure, configure.in, v850_sim.h,
 	gencode.c, interp.c, simops.c: Created.
-
