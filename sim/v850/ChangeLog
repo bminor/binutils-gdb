@@ -1,5 +1,11 @@
 2021-01-31  Mike Frysinger  <vapier@gentoo.org>
 
+	* simops.c: Include stdlib.h.
+	* configure.ac (SIM_AC_OPTION_WARNINGS): Delete call.
+	* configure: Regenerate.
+
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
 	* simops.c (OP_10007E0): Change reterr to RETERR.
 
 2021-01-30  Mike Frysinger  <vapier@gentoo.org>
