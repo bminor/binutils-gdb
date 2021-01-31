@@ -20,7 +20,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "libbfd.h"
 #include "progress.h"
 #include "getopt.h"
 #include "libiberty.h"
@@ -3768,7 +3767,7 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
   /* To allow us to do "strip *" without dying on the first
      non-object file, failures are nonfatal.  */
   ibfd = bfd_openr (input_filename, input_target);
-  if (ibfd == NULL || fstat (fileno ((FILE *) ibfd->iostream), in_stat) != 0)
+  if (ibfd == NULL || bfd_stat (ibfd, in_stat) != 0)
     {
       bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
       status = 1;

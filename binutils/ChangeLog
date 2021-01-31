@@ -1,3 +1,19 @@
+2021-02-03  Alan Modra  <amodra@gmail.com>
+
+	PR 27270
+	PR 27284
+	PR 26945
+	* ar.c: Don't include libbfd.h.
+	(write_archive): Replace xmalloc+strcpy with xstrdup.  Use
+	bfd_stat rather than fstat on iostream.  Move stat and fd tests
+	outside of _WIN32 ifdef.  Delete skip_stat variable.
+	* arsup.c (temp_name, real_ofd): New static variables.
+	(ar_open): Use make_tempname and bfd_fdopenw.
+	(ar_save): Adjust to suit ar_open changes.  Move stat output
+	of _WIN32 ifdef.
+	* objcopy.c: Don't include libbfd.h.
+	(copy_file): Use bfd_stat.
+
 2021-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/27281

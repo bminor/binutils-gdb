@@ -25,7 +25,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "libbfd.h"
 #include "libiberty.h"
 #include "progress.h"
 #include "getopt.h"
@@ -1255,10 +1254,8 @@ write_archive (bfd *iarch)
   bfd *contents_head = iarch->archive_next;
   int ofd = -1;
   struct stat target_stat;
-  bfd_boolean skip_stat = FALSE;
 
-  old_name = (char *) xmalloc (strlen (bfd_get_filename (iarch)) + 1);
-  strcpy (old_name, bfd_get_filename (iarch));
+  old_name = xstrdup (bfd_get_filename (iarch));
   new_name = make_tempname (old_name, &ofd);
 
   if (new_name == NULL)
@@ -1303,11 +1300,9 @@ write_archive (bfd *iarch)
 
 #if !defined (_WIN32) || defined (__CYGWIN32__)
   ofd = dup (ofd);
-  if (iarch == NULL || iarch->iostream == NULL)
-    skip_stat = TRUE;
-  else if (ofd == -1 || fstat (fileno ((FILE *) iarch->iostream), &target_stat) != 0)
-    bfd_fatal (old_name);
 #endif
+  if (ofd == -1 || bfd_stat (iarch, &target_stat) != 0)
+    bfd_fatal (old_name);
 
   if (!bfd_close (obfd))
     bfd_fatal (old_name);
@@ -1318,7 +1313,7 @@ write_archive (bfd *iarch)
   /* We don't care if this fails; we might be creating the archive.  */
   bfd_close (iarch);
 
-  if (smart_rename (new_name, old_name, ofd, skip_stat ? NULL : &target_stat, 0) != 0)
+  if (smart_rename (new_name, old_name, ofd, &target_stat, 0) != 0)
     xexit (1);
   free (old_name);
   free (new_name);
