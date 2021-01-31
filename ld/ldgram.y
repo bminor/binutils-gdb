@@ -864,12 +864,13 @@ high_level_library_NAME_list:
 			{ ldemul_hll($3); }
 	|	filename
 			{ ldemul_hll($1); }
-
 	;
 
 low_level_library:
 	SYSLIB '(' low_level_library_NAME_list ')'
-	; low_level_library_NAME_list:
+	;
+
+low_level_library_NAME_list:
 		low_level_library_NAME_list opt_comma filename
 			{ ldemul_syslib($3); }
 	|

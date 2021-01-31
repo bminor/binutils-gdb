@@ -1,5 +1,9 @@
 2021-02-01  Alan Modra  <amodra@gmail.com>
 
+	* ldgram.y: Whitespace fixes.
+
+2021-02-01  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/pr27259.d: Correct sh_link match.
 
 2021-01-29  Alan Modra  <amodra@gmail.com>
