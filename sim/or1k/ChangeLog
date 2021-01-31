@@ -1,3 +1,8 @@
+2021-01-31  Mike Frysinger  <vapier@gentoo.org>
+
+	* decode.c (or1k32bf_decode): Change TRACE_EXTRACT to
+	CGEN_TRACE_EXTRACT.
+
 2021-01-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* traps.c (or1k32bf_exception): Move handler_pc decl to top of scope.
