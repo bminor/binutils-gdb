@@ -1973,7 +1973,7 @@ insert_operand (unsigned insn,
 		const char *file,
 		unsigned line)
 {
-  if (operand->bits != 32 && !(operand->flags & AXP_OPERAND_NOOVERFLOW))
+  if (!(operand->flags & AXP_OPERAND_NOOVERFLOW))
     {
       offsetT min, max;
 
