@@ -33,6 +33,8 @@
      return init (&argc);
    }
 */
+#define XSTR(s) STR(s)
+#define STR(s) #s
 
 	.file	"fission-loclists-pie.c"
 	.text
@@ -461,7 +463,7 @@ main:
 .LASF1:
 	.string	"/tmp/19999/obj64/gdb/testsuite"
 .LASF0:
-	.string	"fission-loclists-pie.dwo"
+	.string	XSTR(DWO)
 	.section	.debug_str_offsets.dwo,"e",@progbits
 	.long	0	# indexed string 0x0: argv
 	.long	0x5	# indexed string 0x1: argc

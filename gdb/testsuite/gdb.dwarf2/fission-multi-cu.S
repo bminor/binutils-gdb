@@ -23,6 +23,10 @@
 
    and then massaging the output.
 */
+
+#define XSTR(s) STR(s)
+#define STR(s) #s
+
 	.text
 	.file	"llvm-link"
 	.globl	func
@@ -80,7 +84,7 @@ main:                                   # @main
 
 	.section	.debug_str,"MS",@progbits,1
 .Lskel_string0:
-	.asciz	"fission-multi-cu.dwo"  # string offset=0
+	.asciz	XSTR(DWO)  # string offset=0
 .Lskel_string1:
 	.asciz	"/tmp/src/gdb/testsuite" # string offset=21
 	.section	.debug_loc.dwo,"",@progbits
