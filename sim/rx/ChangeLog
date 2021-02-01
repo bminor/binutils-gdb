@@ -1,5 +1,11 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* syscalls.c (rx_syscall): Move declaration of some variables to
+	the start of the enclosing block.
+	* trace.c (load_file_and_line): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* reg.c (fpsw2str): Provide a format string to printf.
 	(trace_register_changes): Likewise.
 
