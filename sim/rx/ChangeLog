@@ -1,5 +1,10 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* reg.c (fpsw2str): Provide a format string to printf.
+	(trace_register_changes): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* err.c (execution_error_exit_all): Delete.
 
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
