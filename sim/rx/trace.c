@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cpu.h"
 #include "mem.h"
 #include "load.h"
+#include "trace.h"
 
 static int
 sim_dis_read (bfd_vma memaddr, bfd_byte * ptr, unsigned int length,
