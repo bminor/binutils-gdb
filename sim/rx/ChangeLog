@@ -1,5 +1,13 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* mem.c (mem_put_blk): Rename parameter, add cast from parameter
+	type to local type.  Remove cast later in the function.
+	(mem_get_blk): Likewise.
+	* mem.h (mem_put_blk): Rename parameter to match definition.
+	(mem_get_blk): Likewise.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* load.c: Replace 'elf/internal.h' and 'elf/common.h' includes
 	with 'elf-bfd.h' include.
 	* trace.c: Add 'trace.h' include.

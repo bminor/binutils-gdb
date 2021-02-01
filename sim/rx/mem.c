@@ -434,13 +434,15 @@ mem_put_si (int address, unsigned long value)
 }
 
 void
-mem_put_blk (int address, void *bufptr, int nbytes)
+mem_put_blk (int address, void *bufptr_void, int nbytes)
 {
+  unsigned char *bufptr = (unsigned char *) bufptr_void;
+
   S ("<=");
   if (enable_counting)
     mem_counters[1][1] += nbytes;
   while (nbytes--)
-    mem_put_byte (address++, *(unsigned char *) bufptr++);
+    mem_put_byte (address++, *bufptr++);
   E ();
 }
 
@@ -567,13 +569,15 @@ mem_get_si (int address)
 }
 
 void
-mem_get_blk (int address, void *bufptr, int nbytes)
+mem_get_blk (int address, void *bufptr_void, int nbytes)
 {
+  char *bufptr = (char *) bufptr_void;
+
   S ("=>");
   if (enable_counting)
     mem_counters[0][1] += nbytes;
   while (nbytes--)
-    *(char *) bufptr++ = mem_get_byte (address++);
+    *bufptr++ = mem_get_byte (address++);
   E ();
 }
 
