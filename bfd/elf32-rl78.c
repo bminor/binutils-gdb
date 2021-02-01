@@ -923,7 +923,7 @@ rl78_elf_relocate_section
 
 	case R_RL78_RH_SADDR:
 	  RANGE (0xffe20, 0xfff1f);
-	  OP (0) = relocation & 0xff;
+	  OP (0) = (relocation - 0x20) & 0xff;
 	  break;
 
 	  /* Complex reloc handling:  */
