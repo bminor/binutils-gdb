@@ -1,5 +1,10 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* configure: Regenerate.
+	* configure.ac (SIM_AC_OPTION_WARNINGS): Delete call.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* mem.c (mem_put_blk): Rename parameter, add cast from parameter
 	type to local type.  Remove cast later in the function.
 	(mem_get_blk): Likewise.
