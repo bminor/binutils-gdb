@@ -548,8 +548,8 @@ trace_register_changes (void)
   if (oldregs.r_acc != regs.r_acc)
     {
       if (tag) { printf ("%s", tag); tag = 0; }
-      printf("  acc %016llx:", oldregs.r_acc);
-      printf("%016llx", regs.r_acc);
+      printf("  acc %016" PRIx64 ":", oldregs.r_acc);
+      printf("%016" PRIx64, regs.r_acc);
       oldregs.r_acc = regs.r_acc;
     }
 
