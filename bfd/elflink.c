@@ -5274,6 +5274,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  if (!add_needed
 	      && matched
 	      && definition
+	      && h->root.type != bfd_link_hash_indirect
 	      && ((dynsym
 		   && h->ref_regular_nonweak)
 		  || (old_bfd != NULL
