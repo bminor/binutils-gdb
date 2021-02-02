@@ -616,6 +616,14 @@ write_one_signatured_type (void **slot, void *d)
   struct signatured_type *entry = (struct signatured_type *) *slot;
   partial_symtab *psymtab = entry->per_cu.v.psymtab;
 
+  if (psymtab == nullptr)
+    {
+      /* We can end up here when processing a skeleton CU referring to a
+	 .dwo file that hasn't been found.  There's not much we can do in
+	 such a case, so skip this CU.  */
+      return 1;
+    }
+
   write_psymbols (info->symtab, info->psyms_seen,
 		  psymtab->global_psymbols, info->cu_index,
 		  0);

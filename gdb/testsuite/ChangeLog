@@ -1,3 +1,8 @@
+2021-02-02  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/24620
+	* gdb.dwarf2/fission-reread.exp: Add test-case.
+
 2021-02-01  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/fission-base.S: Pass -DDWO=$dwo.
