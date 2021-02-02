@@ -1,5 +1,14 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	* lib/dwarf.exp (rnglists): Add -no-offset-array option to
+	table proc.
+	* gdb.dwarf2/rnglists-sec-offset.exp: Add test for
+	.debug_rnglists table without offset array.
+	* gdb.dwarf2/loclists-sec-offset.exp: Add test for
+	.debug_loclists table without offset array.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdb.dwarf2/rnglists-sec-offset.exp: Add test for DW_AT_ranges
 	of DW_FORM_sec_offset form plus DW_AT_rnglists_base attribute.
 	* gdb.dwarf2/loclists-sec-offset.exp: Add test for

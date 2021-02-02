@@ -35,8 +35,8 @@ foreach_with_prefix is_64 {false true} {
     Dwarf::assemble $asm_file {
 	global is_64
 
-	declare_labels cu1_range_list cu2_range_list
-	declare_labels foo_range_list bar_range_list
+	declare_labels cu1_range_list cu2_range_list cu3_range_list
+	declare_labels foo_range_list bar_range_list baz_range_list
 
 	# This CU uses the DW_FORM_sec_offset form to refer to the .debug_rnglists
 	# section.
@@ -73,6 +73,23 @@ foreach_with_prefix is_64 {false true} {
 	    }
 	}
 
+	# This CU uses the DW_FORM_sec_offset form to refer to the .debug_rnglists
+	# section.  The corresponding contribution in the .debug_rnglists has no
+	# offset array.
+	cu {
+	    version 5
+	    is_64 $is_64
+	} {
+	    DW_TAG_compile_unit {
+		{DW_AT_ranges $cu3_range_list DW_FORM_sec_offset}
+	    } {
+		DW_TAG_subprogram {
+		    {DW_AT_name "baz"}
+		    {DW_AT_ranges $baz_range_list DW_FORM_sec_offset}
+		}
+	    }
+	}
+
 	rnglists -is-64 $is_64 {
 	    # The lists in this table are accessed by direct offset
 	    # (DW_FORM_sec_offset).
@@ -99,6 +116,18 @@ foreach_with_prefix is_64 {false true} {
 		    start_end 0x5000 0x5010
 		}
 	    }
+
+	    table -with-offset-array false {
+		# For the third CU.
+		cu3_range_list: list_ {
+		    start_end 0x6000 0x7000
+		}
+
+		# For the baz function.
+		baz_range_list: list_ {
+		    start_end 0x6000 0x6010
+		}
+	    }
 	}
     }
 
@@ -110,4 +139,5 @@ foreach_with_prefix is_64 {false true} {
     # Sanity checks to make sure GDB slurped the symbols correctly.
     gdb_test "p/x &foo" " = 0x4000"
     gdb_test "p/x &bar" " = 0x5000"
+    gdb_test "p/x &baz" " = 0x6000"
 }
