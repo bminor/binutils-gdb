@@ -20233,11 +20233,6 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
 	     ".debug_loclists offset array [in module %s]"),
 	   objfile_name (objfile));
 
-  if (start_offset >= section->size)
-    error (_("DW_FORM_loclistx pointing outside of "
-	     ".debug_loclists section [in module %s]"),
-	   objfile_name (objfile));
-
   /* Validate that reading won't go beyond the end of the section.  */
   if (start_offset + cu->header.offset_size > section->size)
     error (_("Reading DW_FORM_loclistx index beyond end of"
@@ -20287,12 +20282,6 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
   if (rnglist_index >= header.offset_entry_count)
     error (_("DW_FORM_rnglistx index pointing outside of "
 	     ".debug_rnglists offset array [in module %s]"),
-	   objfile_name (objfile));
-
-  /* Validate that the offset is within the section's range.  */
-  if (start_offset >= section->size)
-    error (_("DW_FORM_rnglistx pointing outside of "
-	     ".debug_rnglists section [in module %s]"),
 	   objfile_name (objfile));
 
   /* Validate that reading won't go beyond the end of the section.  */
