@@ -1,3 +1,8 @@
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (read_loclist_index): Change complaints into
+	errors.
+
 2021-01-08  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/26881
