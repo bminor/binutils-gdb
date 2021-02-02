@@ -1,5 +1,14 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	PR gdb/26813
+	* dwarf2/read.c (read_loclists_rnglists_header): Add
+	header_offset parameter and use it.
+	(read_loclist_index): Read header of the current contribution,
+	not the one at the beginning of the section.
+	(read_rnglist_index): Likewise.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (read_loclist_index): Add bound check for the end
 	of the offset.
 
