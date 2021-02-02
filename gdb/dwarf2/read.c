@@ -20218,19 +20218,22 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
 
   section->read (objfile);
   if (section->buffer == NULL)
-    complaint (_("DW_FORM_loclistx used without .debug_loclists "
-		"section [in module %s]"), objfile_name (objfile));
+    error (_("DW_FORM_loclistx used without .debug_loclists "
+	     "section [in module %s]"), objfile_name (objfile));
+
   struct loclists_rnglists_header header;
   read_loclists_rnglists_header (&header, section);
   if (loclist_index >= header.offset_entry_count)
-    complaint (_("DW_FORM_loclistx pointing outside of "
-		".debug_loclists offset array [in module %s]"),
-		objfile_name (objfile));
+    error (_("DW_FORM_loclistx pointing outside of "
+	     ".debug_loclists offset array [in module %s]"),
+	   objfile_name (objfile));
+
   if (loclist_base + loclist_index * cu->header.offset_size
 	>= section->size)
-    complaint (_("DW_FORM_loclistx pointing outside of "
-		".debug_loclists section [in module %s]"),
-		objfile_name (objfile));
+    error (_("DW_FORM_loclistx pointing outside of "
+	     ".debug_loclists section [in module %s]"),
+	   objfile_name (objfile));
+
   const gdb_byte *info_ptr
     = section->buffer + loclist_base + loclist_index * cu->header.offset_size;
 
