@@ -19530,6 +19530,11 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd = objfile->obfd;
   ULONGEST loclist_base = lookup_loclist_base (cu);
+
+  /* Offset in .debug_loclists of the offset for LOCLIST_INDEX.  */
+  ULONGEST start_offset =
+    loclist_base + loclist_index * cu->header.offset_size;
+
   struct dwarf2_section_info *section = cu_debug_loc_section (cu);
 
   section->read (objfile);
@@ -19544,14 +19549,18 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
 	     ".debug_loclists offset array [in module %s]"),
 	   objfile_name (objfile));
 
-  if (loclist_base + loclist_index * cu->header.offset_size
-	>= section->size)
+  if (start_offset >= section->size)
     error (_("DW_FORM_loclistx pointing outside of "
 	     ".debug_loclists section [in module %s]"),
 	   objfile_name (objfile));
 
-  const gdb_byte *info_ptr
-    = section->buffer + loclist_base + loclist_index * cu->header.offset_size;
+  /* Validate that reading won't go beyond the end of the section.  */
+  if (start_offset + cu->header.offset_size > section->size)
+    error (_("Reading DW_FORM_loclistx index beyond end of"
+	     ".debug_loclists section [in module %s]"),
+	   objfile_name (objfile));
+
+  const gdb_byte *info_ptr = section->buffer + start_offset;
 
   if (cu->header.offset_size == 4)
     return bfd_get_32 (abfd, info_ptr) + loclist_base;
