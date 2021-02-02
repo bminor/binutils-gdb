@@ -1,5 +1,15 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	PR gdb/26813
+	* lib/dwarf.exp (_handle_DW_FORM): Handle DW_FORM_loclistx.
+	(loclists): New proc.
+	* gdb.dwarf2/loclists-multiple-cus.c: New.
+	* gdb.dwarf2/loclists-multiple-cus.exp: New.
+	* gdb.dwarf2/loclists-sec-offset.c: New.
+	* gdb.dwarf2/loclists-sec-offset.exp: New.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	* lib/dwarf.exp (_location): Add parameters.
 	(_handle_DW_FORM): Adjust.
 
