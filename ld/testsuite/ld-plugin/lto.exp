@@ -415,6 +415,18 @@ set lto_link_elf_tests [list \
   [list {pr26806.so} \
    {-shared} {-fpic -O2 -flto} \
    {pr26806.c} {{nm {-D} pr26806.d}} {pr26806.so}] \
+  [list {pr27311a.so} \
+   {-shared -Wl,--version-script=pr27311.ver} {-fPIC} \
+   {pr27311a.c} {} {pr27311a.so}] \
+  [list {pr27311b.so} \
+   {-shared -Wl,--no-as-needed tmpdir/pr27311a.so} {-fPIC} \
+   {pr27311b.c} {} {pr27311b.so}] \
+  [list {pr27311c.o} \
+   {} {-flto} \
+   {pr27311c.c} {} {} {c}] \
+  [list {pr27311} \
+   {tmpdir/pr27311c.o -Wl,--no-as-needed,--rpath-link=. tmpdir/pr27311b.so} {} \
+   {dummy.c} {{readelf {--dyn-syms --wide} pr27311.d}} {pr27311}] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
@@ -423,11 +435,10 @@ set lto_link_elf_tests [list \
 # __aeabi_unwind_cpp_pr0@@GCC_3.5 which is provided by libgcc_s.so.1, so the
 # test fails.  Hence this code to skip the test.
 if { ! [istarget "arm*-*-*"] } {
-    lappend lto_link_elf_tests [list \
+    lappend lto_link_elf_tests \
   [list "PR ld/14918" \
    "-flto" "-flto" \
-   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"] \
-  ]
+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"]
 }
 
 # PR 12982 checks that an executable stack is not created by default
@@ -435,11 +446,10 @@ if { ! [istarget "arm*-*-*"] } {
 # executable stack for syscall restarts and signal returns, so we
 # skip this test for that target.
 if { ! [istarget "hppa*-*-*"] } {
-    lappend lto_link_elf_tests [list \
+    lappend lto_link_elf_tests \
   [list "PR ld/12982" \
    "-O2 -flto -fuse-linker-plugin" "-O2 -flto" \
-   {pr12982.c} {{"readelf" {-l --wide} "pr12982.d"}} "pr12982.exe"] \
-  ]
+   {pr12982.c} {{"readelf" {-l --wide} "pr12982.d"}} "pr12982.exe"]
 }
 
 # Check final symbols in executables.

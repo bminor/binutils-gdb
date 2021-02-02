@@ -1,3 +1,13 @@
+2021-02-02  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/pr27311.d,
+	* testsuite/ld-plugin/pr27311.ver,
+	* testsuite/ld-plugin/pr27311a.c,
+	* testsuite/ld-plugin/pr27311b.c,
+	* testsuite/ld-plugin/pr27311c.c: New testcase.
+	* testsuite/ld-plugin/lto.exp: Run it.  Correct PR14918 and
+	PR12982 entries.
+
 2021-02-01  Emery Hemingway  <ehmry@posteo.net>
 
 	* configure.tgt: Add *-*-genode* as a target for AArch64 and x86.
