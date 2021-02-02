@@ -1367,6 +1367,10 @@ namespace eval Dwarf {
 	# The -post-header-label option can be used to define a label just after
 	# the header of the table.  This is the label that a DW_AT_rnglists_base
 	# attribute will usually refer to.
+	#
+	# The `-with-offset-array true|false` option can be used to control
+	# whether the headers of the location list tables have an array of
+	# offset.  The default is true.
 
 	proc table { args } {
 	    variable _debug_rnglists_table_count
@@ -1374,7 +1378,10 @@ namespace eval Dwarf {
 	    variable _debug_rnglists_offset_size
 	    variable _debug_rnglists_is_64_dwarf
 
-	    parse_args {{post-header-label ""}}
+	    parse_args {
+		{post-header-label ""}
+		{with-offset-array true}
+	    }
 
 	    if { [llength $args] != 1 } {
 		error "table proc expects one positional argument (body)"
@@ -1452,7 +1459,12 @@ namespace eval Dwarf {
 	    _op .2byte 5 "dwarf version"
 	    _op .byte $_debug_rnglists_addr_size "address size"
 	    _op .byte 0 "segment selector size"
-	    _op .4byte "$_debug_rnglists_list_count" "offset entry count"
+
+	    if { ${with-offset-array} } {
+	      _op .4byte "$_debug_rnglists_list_count" "offset entry count"
+	    } else {
+	      _op .4byte 0 "offset entry count"
+	    }
 
 	    define_label $post_header_label
 
@@ -1462,9 +1474,11 @@ namespace eval Dwarf {
 	    }
 
 	    # Emit the offset array.
-	    for {set list_idx 0} {$list_idx < $_debug_rnglists_list_count} {incr list_idx} {
-		set list_label [_compute_list_label $list_idx]
-		_op .${_debug_rnglists_offset_size}byte "$list_label - $post_header_label" "offset of list $list_idx"
+	    if { ${with-offset-array} } {
+		for {set list_idx 0} {$list_idx < $_debug_rnglists_list_count} {incr list_idx} {
+		    set list_label [_compute_list_label $list_idx]
+		    _op .${_debug_rnglists_offset_size}byte "$list_label - $post_header_label" "offset of list $list_idx"
+		}
 	    }
 
 	    # Emit the actual list data.
@@ -1540,6 +1554,10 @@ namespace eval Dwarf {
 	# The -post-header-label option can be used to define a label just after the
 	# header of the table.  This is the label that a DW_AT_loclists_base
 	# attribute will usually refer to.
+	#
+	# The `-with-offset-array true|false` option can be used to control
+	# whether the headers of the location list tables have an array of
+	# offset.  The default is true.
 
 	proc table { args } {
 	    variable _debug_loclists_table_count
@@ -1547,7 +1565,10 @@ namespace eval Dwarf {
 	    variable _debug_loclists_offset_size
 	    variable _debug_loclists_is_64_dwarf
 
-	    parse_args {{post-header-label ""}}
+	    parse_args {
+		{post-header-label ""}
+		{with-offset-array true}
+	    }
 
 	    if { [llength $args] != 1 } {
 		error "table proc expects one positional argument (body)"
@@ -1647,7 +1668,12 @@ namespace eval Dwarf {
 	    _op .2byte 5 "DWARF version"
 	    _op .byte $_debug_loclists_addr_size "address size"
 	    _op .byte 0 "segment selector size"
-	    _op .4byte $_debug_loclists_list_count "offset entry count"
+
+	    if { ${with-offset-array} } {
+	      _op .4byte "$_debug_loclists_list_count" "offset entry count"
+	    } else {
+	      _op .4byte 0 "offset entry count"
+	    }
 
 	    define_label $post_header_label
 
@@ -1657,9 +1683,11 @@ namespace eval Dwarf {
 	    }
 
 	    # Emit the offset array.
-	    for {set list_idx 0} {$list_idx < $_debug_loclists_list_count} {incr list_idx} {
-		set list_label [_compute_list_label $list_idx]
-		_op .${_debug_loclists_offset_size}byte "$list_label - $post_header_label" "offset of list $list_idx"
+	    if { ${with-offset-array} } {
+		for {set list_idx 0} {$list_idx < $_debug_loclists_list_count} {incr list_idx} {
+		    set list_label [_compute_list_label $list_idx]
+		    _op .${_debug_loclists_offset_size}byte "$list_label - $post_header_label" "offset of list $list_idx"
+		}
 	    }
 
 	    # Emit the actual list data.

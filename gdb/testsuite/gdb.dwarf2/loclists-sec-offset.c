@@ -29,9 +29,25 @@ func2 (void)
   return 2;
 }
 
+static int
+func5 (void)
+{
+  asm ("func5_label: .global func5_label\n");
+  return 5;
+}
+
+static int
+func6 (void)
+{
+  asm ("func6_label: .global func6_label\n");
+  return 6;
+}
+
 int
 main (void)
 {
   func1 ();
   func2 ();
+  func5 ();
+  func6 ();
 }
