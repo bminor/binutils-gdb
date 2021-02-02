@@ -518,11 +518,15 @@ namespace eval Dwarf {
 	    }
 
 	    SPECIAL_expr {
+		variable _cu_version
+		variable _cu_addr_size
+		variable _cu_offset_size
+
 		set l1 [new_label "expr_start"]
 		set l2 [new_label "expr_end"]
 		_op .uleb128 "$l2 - $l1" "expression"
 		define_label $l1
-		_location $value
+		_location $value $_cu_version $_cu_addr_size $_cu_offset_size
 		define_label $l2
 	    }
 
@@ -864,18 +868,28 @@ namespace eval Dwarf {
     # This is a miniature assembler for location expressions.  It is
     # suitable for use in the attributes to a DIE.  Its output is
     # prefixed with "=" to make it automatically use DW_FORM_block.
+    #
     # BODY is split by lines, and each line is taken to be a list.
+    #
+    # DWARF_VERSION is the DWARF version for the section where the location
+    # description is found.
+    #
+    # ADDR_SIZE is the length in bytes (4 or 8) of an address on the target
+    # machine (typically found in the header of the section where the location
+    # description is found).
+    #
+    # OFFSET_SIZE is the length in bytes (4 or 8) of an offset into a DWARF
+    # section.  This typically depends on whether 32-bit or 64-bit DWARF is
+    # used, as indicated in the header of the section where the location
+    # description is found.
+    #
     # (FIXME should use 'info complete' here.)
     # Each list's first element is the opcode, either short or long
     # forms are accepted.
     # FIXME argument handling
     # FIXME move docs
-    proc _location {body} {
+    proc _location { body dwarf_version addr_size offset_size } {
 	variable _constants
-	variable _cu_label
-	variable _cu_version
-	variable _cu_addr_size
-	variable _cu_offset_size
 
 	foreach line [split $body \n] {
 	    # Ignore blank lines, and allow embedded comments.
@@ -887,7 +901,7 @@ namespace eval Dwarf {
 
 	    switch -exact -- $opcode {
 		DW_OP_addr {
-		    _op .${_cu_addr_size}byte [lindex $line 1]
+		    _op .${addr_size}byte [lindex $line 1]
 		}
 
 		DW_OP_regx {
@@ -967,10 +981,10 @@ namespace eval Dwarf {
 
 		    # Here label is a section offset.
 		    set label [lindex $line 1]
-		    if { $_cu_version == 2 } {
-			_op .${_cu_addr_size}byte $label
+		    if { $dwarf_version == 2 } {
+			_op .${addr_size}byte $label
 		    } else {
-			_op .${_cu_offset_size}byte $label
+			_op .${offset_size}byte $label
 		    }
 		    _op .sleb128 [lindex $line 2]
 		}
@@ -982,10 +996,10 @@ namespace eval Dwarf {
 
 		    # Here label is a section offset.
 		    set label [lindex $line 1]
-		    if { $_cu_version == 2 } {
-			_op .${_cu_addr_size}byte $label
+		    if { $dwarf_version == 2 } {
+			_op .${addr_size}byte $label
 		    } else {
-			_op .${_cu_offset_size}byte $label
+			_op .${offset_size}byte $label
 		    }
 		}
 
