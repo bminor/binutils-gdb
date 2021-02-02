@@ -20223,7 +20223,8 @@ lookup_loclist_base (struct dwarf2_cu *cu)
 
 /* Given a DW_FORM_loclistx value LOCLIST_INDEX, fetch the offset from the
    array of offsets in the .debug_loclists section.  */
-static CORE_ADDR
+
+static sect_offset
 read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
@@ -20273,14 +20274,15 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
   const gdb_byte *info_ptr = section->buffer + start_offset;
 
   if (cu->header.offset_size == 4)
-    return bfd_get_32 (abfd, info_ptr) + loclist_base;
+    return (sect_offset) (bfd_get_32 (abfd, info_ptr) + loclist_base);
   else
-    return bfd_get_64 (abfd, info_ptr) + loclist_base;
+    return (sect_offset) (bfd_get_64 (abfd, info_ptr) + loclist_base);
 }
 
 /* Given a DW_FORM_rnglistx value RNGLIST_INDEX, fetch the offset from the
    array of offsets in the .debug_rnglists section.  */
-static CORE_ADDR
+
+static sect_offset
 read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
 		    dwarf_tag tag)
 {
@@ -20337,9 +20339,9 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
   const gdb_byte *info_ptr = section->buffer + start_offset;
 
   if (cu->header.offset_size == 4)
-    return read_4_bytes (abfd, info_ptr) + rnglist_base;
+    return (sect_offset) (read_4_bytes (abfd, info_ptr) + rnglist_base);
   else
-    return read_8_bytes (abfd, info_ptr) + rnglist_base;
+    return (sect_offset) (read_8_bytes (abfd, info_ptr) + rnglist_base);
 }
 
 /* Process the attributes that had to be skipped in the first round. These
@@ -20360,18 +20362,18 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
 	break;
       case DW_FORM_loclistx:
 	{
-	  CORE_ADDR loclists_sect_off
+	  sect_offset loclists_sect_off
 	    = read_loclist_index (cu, attr->as_unsigned_reprocess ());
 
-	  attr->set_unsigned (loclists_sect_off);
+	  attr->set_unsigned (to_underlying (loclists_sect_off));
 	}
 	break;
       case DW_FORM_rnglistx:
 	{
-	  CORE_ADDR rnglists_sect_off
+	  sect_offset rnglists_sect_off
 	    = read_rnglist_index (cu, attr->as_unsigned_reprocess (), tag);
 
-	  attr->set_unsigned (rnglists_sect_off);
+	  attr->set_unsigned (to_underlying (rnglists_sect_off));
 	}
 	break;
       case DW_FORM_strx:

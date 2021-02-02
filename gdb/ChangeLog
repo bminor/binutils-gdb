@@ -1,5 +1,11 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (read_loclist_index, read_rnglist_index): Return
+	a sect_offset.
+	(read_attribute_reprocess): Adjust.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/die.h (struct die_info) <ranges_base>: Split in...
 	<gnu_ranges_base>: ... this...
 	<rnglists_base>: ... and this.
