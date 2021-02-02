@@ -19573,6 +19573,8 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
      : RNGLIST_HEADER_SIZE64);
   ULONGEST rnglist_base =
       (cu->dwo_unit != nullptr) ? rnglist_header_size : cu->ranges_base;
+
+  /* Offset in .debug_rnglists of the offset for RNGLIST_INDEX.  */
   ULONGEST start_offset =
     rnglist_base + rnglist_index * cu->header.offset_size;
 
@@ -19601,7 +19603,7 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
 	   objfile_name (objfile));
 
   /* Validate that reading won't go beyond the end of the section.  */
-  if (start_offset + cu->header.offset_size > rnglist_base + section->size)
+  if (start_offset + cu->header.offset_size > section->size)
     error (_("Reading DW_FORM_rnglistx index beyond end of"
 	     ".debug_rnglists section [in module %s]"),
 	   objfile_name (objfile));
