@@ -6992,6 +6992,18 @@ process_section_headers (Filedata * filedata)
   W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n\
   L (link order), O (extra OS processing required), G (group), T (TLS),\n\
   C (compressed), x (unknown), o (OS specific), E (exclude),\n  "));
+      switch (filedata->file_header.e_ident[EI_OSABI])
+	{
+	case ELFOSABI_GNU:
+	case ELFOSABI_FREEBSD:
+	  printf (_("R (retain), "));
+	  /* Fall through */
+	case ELFOSABI_NONE:
+	  printf (_("D (mbind), "));
+	  break;
+	default:
+	  break;
+	}
       if (filedata->file_header.e_machine == EM_X86_64
 	  || filedata->file_header.e_machine == EM_L1OM
 	  || filedata->file_header.e_machine == EM_K1OM)

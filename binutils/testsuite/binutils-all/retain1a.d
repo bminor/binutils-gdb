@@ -15,4 +15,6 @@
   \[[ 0-9]+\] .bss.lsretain0.*WAR.*
   \[[ 0-9]+\] .bss.lsretain1.*WAR.*
   \[[ 0-9]+\] .data.lsretain2.*WAR.*
+#...
+  R \(retain\), D \(mbind\), .*
 #pass
