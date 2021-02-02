@@ -223,6 +223,7 @@ struct attribute
   {
     gdb_assert (form_is_unsigned ());
     u.unsnd = unsnd;
+    requires_reprocessing = 0;
   }
 
   /* Temporarily set this attribute to an unsigned integer.  This is

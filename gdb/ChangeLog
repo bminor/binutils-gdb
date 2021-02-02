@@ -1,5 +1,18 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	PR gdb/26813
+	* dwarf2/attribute.h (struct attribute) <set_unsigned>: Clear
+	requires_reprocessing flag.
+	* dwarf2/attribute.c (attribute::form_is_unsigned): Handle
+	DW_FORM_loclistx.
+	(attribute::form_requires_reprocessing): Handle DW_FORM_rnglistx
+	and DW_FORM_loclistx.
+	* dwarf2/read.c (read_attribute_reprocess): Use set_unsigned
+	instead of set_address for DW_FORM_loclistx and
+	DW_FORM_rnglistx.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (read_loclist_index): Remove bound check for
 	start of offset.
 	(read_rnglist_index): Likewise.

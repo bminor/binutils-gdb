@@ -20315,10 +20315,20 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
 					    attr->as_unsigned_reprocess ()));
 	break;
       case DW_FORM_loclistx:
-	attr->set_address (read_loclist_index (cu, attr->as_unsigned ()));
-	 break;
+	{
+	  CORE_ADDR loclists_sect_off
+	    = read_loclist_index (cu, attr->as_unsigned_reprocess ());
+
+	  attr->set_unsigned (loclists_sect_off);
+	}
+	break;
       case DW_FORM_rnglistx:
-	attr->set_address (read_rnglist_index (cu, attr->as_unsigned (), tag));
+	{
+	  CORE_ADDR rnglists_sect_off
+	    = read_rnglist_index (cu, attr->as_unsigned_reprocess (), tag);
+
+	  attr->set_unsigned (rnglists_sect_off);
+	}
 	break;
       case DW_FORM_strx:
       case DW_FORM_strx1:
