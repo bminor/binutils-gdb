@@ -1,3 +1,7 @@
+2021-02-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/scope.exp: Use proc_with_prefix.
+
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
 	* lib/dwarf.exp (rnglists): Add -no-offset-array option to
