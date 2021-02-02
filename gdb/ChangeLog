@@ -1,5 +1,10 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (read_loclist_index): Add bound check for the end
+	of the offset.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (read_rnglist_index): Fix bound check.
 
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
