@@ -603,3 +603,9 @@ sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 {
     return NULL;
 }
+
+char *
+sim_memory_map (SIM_DESC sd)
+{
+  return NULL;
+}
