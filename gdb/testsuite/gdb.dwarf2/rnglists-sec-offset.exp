@@ -35,7 +35,8 @@ foreach_with_prefix is_64 {false true} {
     Dwarf::assemble $asm_file {
 	global is_64
 
-	declare_labels cu_range_list foo_range_list
+	declare_labels cu1_range_list cu2_range_list
+	declare_labels foo_range_list bar_range_list
 
 	# This CU uses the DW_FORM_sec_offset form to refer to the .debug_rnglists
 	# section.
@@ -44,7 +45,7 @@ foreach_with_prefix is_64 {false true} {
 	    is_64 $is_64
 	} {
 	    DW_TAG_compile_unit {
-		{DW_AT_ranges $cu_range_list DW_FORM_sec_offset}
+		{DW_AT_ranges $cu1_range_list DW_FORM_sec_offset}
 	    } {
 		DW_TAG_subprogram {
 		    {DW_AT_name "foo"}
@@ -53,18 +54,49 @@ foreach_with_prefix is_64 {false true} {
 	    }
 	}
 
+	# This CU uses the DW_FORM_sec_offset form to refer to the
+	# .debug_rnglists section, but also has the DW_AT_rnglists_base
+	# attribute present.  The DW_AT_rnglists_base attribute is not used to
+	# interpret the DW_AT_ranges value, but it should also do no harm.
+	cu {
+	    version 5
+	    is_64 $is_64
+	} {
+	    DW_TAG_compile_unit {
+		{DW_AT_ranges $cu2_range_list DW_FORM_sec_offset}
+		{DW_AT_rnglists_base cu2_table DW_FORM_sec_offset}
+	    } {
+		DW_TAG_subprogram {
+		    {DW_AT_name "bar"}
+		    {DW_AT_ranges $bar_range_list DW_FORM_sec_offset}
+		}
+	    }
+	}
+
 	rnglists -is-64 $is_64 {
 	    # The lists in this table are accessed by direct offset
 	    # (DW_FORM_sec_offset).
 	    table {
-		# For the CU.
-		cu_range_list: list_ {
+		# For the first CU.
+		cu1_range_list: list_ {
 		    start_end 0x4000 0x5000
 		}
 
 		# For function foo.
 		foo_range_list: list_ {
 		    start_end 0x4000 0x4010
+		}
+	    }
+
+	    table -post-header-label cu2_table {
+		# For the second CU.
+		cu2_range_list: list_ {
+		    start_end 0x5000 0x6000
+		}
+
+		# For the bar function.
+		bar_range_list: list_ {
+		    start_end 0x5000 0x5010
 		}
 	    }
 	}
@@ -77,4 +109,5 @@ foreach_with_prefix is_64 {false true} {
 
     # Sanity checks to make sure GDB slurped the symbols correctly.
     gdb_test "p/x &foo" " = 0x4000"
+    gdb_test "p/x &bar" " = 0x5000"
 }

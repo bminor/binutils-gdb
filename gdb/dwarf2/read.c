@@ -551,16 +551,41 @@ public:
      Note this value comes from the Fission stub CU/TU's DIE.  */
   gdb::optional<ULONGEST> addr_base;
 
-  /* The DW_AT_rnglists_base attribute if present.
-     Note this value comes from the Fission stub CU/TU's DIE.
-     Also note that the value is zero in the non-DWO case so this value can
-     be used without needing to know whether DWO files are in use or not.
-     N.B. This does not apply to DW_AT_ranges appearing in
-     DW_TAG_compile_unit dies.  This is a bit of a wart, consider if ever
-     DW_AT_ranges appeared in the DW_TAG_compile_unit of DWO DIEs: then
-     DW_AT_rnglists_base *would* have to be applied, and we'd have to care
-     whether the DW_AT_ranges attribute came from the skeleton or DWO.  */
-  ULONGEST ranges_base = 0;
+  /* The DW_AT_GNU_ranges_base attribute, if present.
+
+     This is only relevant in the context of pre-DWARF 5 split units.  In this
+     context, there is a .debug_ranges section in the linked executable,
+     containing all the ranges data for all the compilation units.  Each
+     skeleton/stub unit has (if needed) a DW_AT_GNU_ranges_base attribute that
+     indicates the base of its contribution to that section.  The DW_AT_ranges
+     attributes in the split-unit are of the form DW_FORM_sec_offset and point
+     into the .debug_ranges section of the linked file.  However, they are not
+     "true" DW_FORM_sec_offset, because they are relative to the base of their
+     compilation unit's contribution, rather than relative to the beginning of
+     the section.  The DW_AT_GNU_ranges_base value must be added to it to make
+     it relative to the beginning of the section.
+
+     Note that the value is zero when we are not in a pre-DWARF 5 split-unit
+     case, so this value can be added without needing to know whether we are in
+     this case or not.
+
+     N.B. If a DW_AT_ranges attribute is found on the DW_TAG_compile_unit in the
+     skeleton/stub, it must not have the base added, as it already points to the
+     right place.  And since the DW_TAG_compile_unit DIE in the split-unit can't
+     have a DW_AT_ranges attribute, we can use the
+
+       die->tag != DW_AT_compile_unit
+
+     to determine whether the base should be added or not.  */
+  ULONGEST gnu_ranges_base = 0;
+
+  /* The DW_AT_rnglists_base attribute, if present.
+
+     This is used when processing attributes of form DW_FORM_rnglistx in
+     non-split units.  Attributes of this form found in a split unit don't
+     use it, as split-unit files have their own non-shared .debug_rnglists.dwo
+     section.  */
+  ULONGEST rnglists_base = 0;
 
   /* The DW_AT_loclists_base attribute if present.  */
   ULONGEST loclist_base = 0;
@@ -6967,10 +6992,17 @@ read_cutu_die_from_dwo (dwarf2_cu *cu,
 
       cu->addr_base = stub_comp_unit_die->addr_base ();
 
-      /* There should be a DW_AT_rnglists_base (DW_AT_GNU_ranges_base) attribute
-	 here (if needed). We need the value before we can process
-	 DW_AT_ranges.  */
-      cu->ranges_base = stub_comp_unit_die->ranges_base ();
+      /* There should be a DW_AT_GNU_ranges_base attribute here (if needed).
+         We need the value before we can process DW_AT_ranges values from the
+         DWO.  */
+      cu->gnu_ranges_base = stub_comp_unit_die->gnu_ranges_base ();
+
+      /* For DWARF5: record the DW_AT_rnglists_base value from the skeleton.  If
+         there are attributes of form DW_FORM_rnglistx in the skeleton, they'll
+         need the rnglists base.  Attributes of form DW_FORM_rnglistx in the
+         split unit don't use it, as the DWO has its own .debug_rnglists.dwo
+         section.  */
+      cu->rnglists_base = stub_comp_unit_die->rnglists_base ();
     }
   else if (stub_comp_dir != NULL)
     {
@@ -14659,20 +14691,14 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
       attr = dwarf2_attr (die, DW_AT_ranges, cu);
       if (attr != nullptr && attr->form_is_unsigned ())
 	{
-	  /* DW_AT_rnglists_base does not apply to DIEs from the DWO skeleton.
-	     We take advantage of the fact that DW_AT_ranges does not appear
-	     in DW_TAG_compile_unit of DWO files.
+	  /* Offset in the .debug_ranges or .debug_rnglist section (depending
+	     on DWARF version).  */
+	  ULONGEST ranges_offset = attr->as_unsigned ();
 
-	     Attributes of the form DW_FORM_rnglistx have already had their
-	     value changed by read_rnglist_index and already include
-	     DW_AT_rnglists_base, so don't need to add the ranges base,
-	     either.  */
-	  int need_ranges_base = (die->tag != DW_TAG_compile_unit
-				  && attr->form != DW_FORM_rnglistx);
-	  unsigned int ranges_offset = (attr->as_unsigned ()
-					+ (need_ranges_base
-					   ? cu->ranges_base
-					   : 0));
+	  /* See dwarf2_cu::gnu_ranges_base's doc for why we might want to add
+	     this value.  */
+	  if (die->tag != DW_TAG_compile_unit)
+	    ranges_offset += cu->gnu_ranges_base;
 
 	  /* Value of the DW_AT_ranges attribute is the offset in the
 	     .debug_ranges section.  */
@@ -14837,24 +14863,17 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
   attr = dwarf2_attr (die, DW_AT_ranges, cu);
   if (attr != nullptr && attr->form_is_unsigned ())
     {
-      /* DW_AT_rnglists_base does not apply to DIEs from the DWO skeleton.
-	 We take advantage of the fact that DW_AT_ranges does not appear
-	 in DW_TAG_compile_unit of DWO files.
+      /* Offset in the .debug_ranges or .debug_rnglist section (depending
+	 on DWARF version).  */
+      ULONGEST ranges_offset = attr->as_unsigned ();
 
-	 Attributes of the form DW_FORM_rnglistx have already had their
-	 value changed by read_rnglist_index and already include
-	 DW_AT_rnglists_base, so don't need to add the ranges base,
-	 either.  */
-      int need_ranges_base = (die->tag != DW_TAG_compile_unit
-			      && attr->form != DW_FORM_rnglistx);
-
-      /* The value of the DW_AT_ranges attribute is the offset of the
-	 address range list in the .debug_ranges section.  */
-      unsigned long offset = (attr->as_unsigned ()
-			      + (need_ranges_base ? cu->ranges_base : 0));
+      /* See dwarf2_cu::gnu_ranges_base's doc for why we might want to add
+	 this value.  */
+      if (die->tag != DW_TAG_compile_unit)
+	ranges_offset += cu->gnu_ranges_base;
 
       std::vector<blockrange> blockvec;
-      dwarf2_ranges_process (offset, cu, die->tag,
+      dwarf2_ranges_process (ranges_offset, cu, die->tag,
 	[&] (CORE_ADDR start, CORE_ADDR end)
 	{
 	  start += baseaddr;
@@ -19292,7 +19311,7 @@ read_full_die_1 (const struct die_reader_specs *reader,
 
   attr = die->attr (DW_AT_rnglists_base);
   if (attr != nullptr)
-    cu->ranges_base = attr->as_unsigned ();
+    cu->rnglists_base = attr->as_unsigned ();
 
   if (any_need_reprocess)
     {
@@ -19820,26 +19839,15 @@ partial_die_info::read (const struct die_reader_specs *reader,
 
 	case DW_AT_ranges:
 	  {
-	    /* DW_AT_rnglists_base does not apply to DIEs from the DWO
-	       skeleton.  We take advantage of the fact the DW_AT_ranges
-	       does not appear in DW_TAG_compile_unit of DWO files.
+	    /* Offset in the .debug_ranges or .debug_rnglist section (depending
+	       on DWARF version).  */
+	    ULONGEST ranges_offset = attr.as_unsigned ();
 
-	       Attributes of the form DW_FORM_rnglistx have already had
-	       their value changed by read_rnglist_index and already
-	       include DW_AT_rnglists_base, so don't need to add the ranges
-	       base, either.  */
-	    int need_ranges_base = (tag != DW_TAG_compile_unit
-				    && attr.form != DW_FORM_rnglistx);
-	    /* It would be nice to reuse dwarf2_get_pc_bounds here,
-	       but that requires a full DIE, so instead we just
-	       reimplement it.  */
-	    unsigned int ranges_offset = (attr.as_unsigned ()
-					  + (need_ranges_base
-					     ? cu->ranges_base
-					     : 0));
+	    /* See dwarf2_cu::gnu_ranges_base's doc for why we might want to add
+	       this value.  */
+	    if (tag != DW_TAG_compile_unit)
+	      ranges_offset += cu->gnu_ranges_base;
 
-	    /* Value of the DW_AT_ranges attribute is the offset in the
-	       .debug_ranges section.  */
 	    if (dwarf2_ranges_read (ranges_offset, &lowpc, &highpc, cu,
 				    nullptr, tag))
 	      has_pc_info = 1;
@@ -20282,8 +20290,12 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
   ULONGEST rnglist_header_size =
     (cu->header.initial_length_size == 4 ? RNGLIST_HEADER_SIZE32
      : RNGLIST_HEADER_SIZE64);
+
+  /* When reading a DW_FORM_rnglistx from a DWO, we read from the DWO's
+     .debug_rnglists.dwo section.  The rnglists base given in the skeleton
+     doesn't apply.  */
   ULONGEST rnglist_base =
-      (cu->dwo_unit != nullptr) ? rnglist_header_size : cu->ranges_base;
+      (cu->dwo_unit != nullptr) ? rnglist_header_size : cu->rnglists_base;
 
   /* Offset in .debug_rnglists of the offset for RNGLIST_INDEX.  */
   ULONGEST start_offset =

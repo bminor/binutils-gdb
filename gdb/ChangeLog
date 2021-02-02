@@ -1,5 +1,20 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/die.h (struct die_info) <ranges_base>: Split in...
+	<gnu_ranges_base>: ... this...
+	<rnglists_base>: ... and this.
+	* dwarf2/read.c (struct dwarf2_cu) <ranges_base>: Split in...
+	<gnu_ranges_base>: ... this...
+	<rnglists_base>: ... and this.
+	(read_cutu_die_from_dwo): Adjust
+	(dwarf2_get_pc_bounds): Adjust
+	(dwarf2_record_block_ranges): Adjust.
+	(read_full_die_1): Adjust
+	(partial_die_info::read): Adjust.
+	(read_rnglist_index): Adjust.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	PR gdb/26813
 	* dwarf2/read.c (read_loclists_rnglists_header): Add
 	header_offset parameter and use it.

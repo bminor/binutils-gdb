@@ -1,5 +1,13 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdb.dwarf2/rnglists-sec-offset.exp: Add test for DW_AT_ranges
+	of DW_FORM_sec_offset form plus DW_AT_rnglists_base attribute.
+	* gdb.dwarf2/loclists-sec-offset.exp: Add test for
+	DW_AT_location of DW_FORM_sec_offset plus DW_AT_loclists_base
+	attribute
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
 	PR gdb/26813
 	* lib/dwarf.exp (_handle_DW_FORM): Handle DW_FORM_loclistx.
 	(loclists): New proc.
