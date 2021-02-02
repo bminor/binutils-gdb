@@ -47,6 +47,11 @@ case $USE_INCLUDED_LIBINTL in
     ;;
 esac
 
+# intl is sometimes linked into shared libraries even without --enable-shared
+# (e.g. gdbsupport's inprocess agent): so always PICify, just in case.
+GCC_PICFLAG
+AC_SUBST(PICFLAG)
+
 BISON3_YES='#'
 BISON3_NO=
 if test "$INTLBISON" != :; then
