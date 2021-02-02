@@ -1,6 +1,15 @@
 2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
 
 	PR gdb/26813
+	* dwarf2/read.c (read_loclists_rnglists_header): Add
+	header_offset parameter and use it.
+	(read_loclist_index): Read header of the current contribution,
+	not the one at the beginning of the section.
+	(read_rnglist_index): Likewise.
+
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/26813
 	* dwarf2/attribute.h (struct attribute) <set_unsigned>: Clear
 	requires_reprocessing flag.
 	* dwarf2/attribute.c (attribute::form_is_unsigned): Handle

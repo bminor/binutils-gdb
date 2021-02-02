@@ -20164,22 +20164,30 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 }
 
 /* Read the .debug_loclists or .debug_rnglists header (they are the same format)
-   contents from the given SECTION in the HEADER.  */
+   contents from the given SECTION in the HEADER.
+
+   HEADER_OFFSET is the offset of the header in the section.  */
 static void
 read_loclists_rnglists_header (struct loclists_rnglists_header *header,
-			       struct dwarf2_section_info *section)
+			       struct dwarf2_section_info *section,
+			       sect_offset header_offset)
 {
   unsigned int bytes_read;
   bfd *abfd = section->get_bfd_owner ();
-  const gdb_byte *info_ptr = section->buffer;
+  const gdb_byte *info_ptr = section->buffer + to_underlying (header_offset);
+
   header->length = read_initial_length (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
+
   header->version = read_2_bytes (abfd, info_ptr);
   info_ptr += 2;
+
   header->addr_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
+
   header->segment_collector_size = read_1_byte (abfd, info_ptr);
   info_ptr += 1;
+
   header->offset_entry_count = read_4_bytes (abfd, info_ptr);
 }
 
@@ -20213,21 +20221,36 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
   bfd *abfd = objfile->obfd;
+  ULONGEST loclist_header_size =
+    (cu->header.initial_length_size == 4 ? LOCLIST_HEADER_SIZE32
+     : LOCLIST_HEADER_SIZE64);
   ULONGEST loclist_base = lookup_loclist_base (cu);
 
   /* Offset in .debug_loclists of the offset for LOCLIST_INDEX.  */
   ULONGEST start_offset =
     loclist_base + loclist_index * cu->header.offset_size;
 
+  /* Get loclists section.  */
   struct dwarf2_section_info *section = cu_debug_loc_section (cu);
 
+  /* Read the loclists section content.  */
   section->read (objfile);
   if (section->buffer == NULL)
     error (_("DW_FORM_loclistx used without .debug_loclists "
 	     "section [in module %s]"), objfile_name (objfile));
 
+  /* DW_AT_loclists_base points after the .debug_loclists contribution header,
+     so if loclist_base is smaller than the header size, we have a problem.  */
+  if (loclist_base < loclist_header_size)
+    error (_("DW_AT_loclists_base is smaller than header size [in module %s]"),
+	   objfile_name (objfile));
+
+  /* Read the header of the loclists contribution.  */
   struct loclists_rnglists_header header;
-  read_loclists_rnglists_header (&header, section);
+  read_loclists_rnglists_header (&header, section,
+				 (sect_offset) (loclist_base - loclist_header_size));
+
+  /* Verify the loclist index is valid.  */
   if (loclist_index >= header.offset_entry_count)
     error (_("DW_FORM_loclistx pointing outside of "
 	     ".debug_loclists offset array [in module %s]"),
@@ -20276,9 +20299,18 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
 	     "[in module %s]"),
 	   objfile_name (objfile));
 
-  /* Verify the rnglist index is valid.  */
+  /* DW_AT_rnglists_base points after the .debug_rnglists contribution header,
+     so if rnglist_base is smaller than the header size, we have a problem.  */
+  if (rnglist_base < rnglist_header_size)
+    error (_("DW_AT_rnglists_base is smaller than header size [in module %s]"),
+	   objfile_name (objfile));
+
+  /* Read the header of the rnglists contribution.  */
   struct loclists_rnglists_header header;
-  read_loclists_rnglists_header (&header, section);
+  read_loclists_rnglists_header (&header, section,
+				 (sect_offset) (rnglist_base - rnglist_header_size));
+
+  /* Verify the rnglist index is valid.  */
   if (rnglist_index >= header.offset_entry_count)
     error (_("DW_FORM_rnglistx index pointing outside of "
 	     ".debug_rnglists offset array [in module %s]"),
