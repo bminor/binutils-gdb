@@ -473,7 +473,8 @@ namespace eval Dwarf {
 	    }
 
 	    DW_FORM_ref_udata -
-	    DW_FORM_udata {
+	    DW_FORM_udata -
+	    DW_FORM_rnglistx {
 		_op .uleb128 $value
 	    }
 
@@ -1115,8 +1116,16 @@ namespace eval Dwarf {
 	}
 	define_label $start_label
 	_op .2byte $_cu_version Version
-	_op .${_cu_offset_size}byte $my_abbrevs Abbrevs
-	_op .byte $_cu_addr_size "Pointer size"
+
+	# The CU header for DWARF 4 and 5 are slightly different.
+	if { $_cu_version == 5 } {
+	    _op .byte 0x1 "DW_UT_compile"
+	    _op .byte $_cu_addr_size "Pointer size"
+	    _op .${_cu_offset_size}byte $my_abbrevs Abbrevs
+	} else {
+	    _op .${_cu_offset_size}byte $my_abbrevs Abbrevs
+	    _op .byte $_cu_addr_size "Pointer size"
+	}
 
 	_defer_output $_abbrev_section {
 	    define_label $my_abbrevs
@@ -1306,6 +1315,178 @@ namespace eval Dwarf {
 	uplevel $body
     }
 
+    # Emit a DWARF .debug_rnglists section.
+    #
+    # The target address size is based on the current target's address size.
+    #
+    # There is one mandatory positional argument, BODY, which must be Tcl code
+    # that emits the content of the section.  It is evaluated in the caller's
+    # context.
+    #
+    # The following option can be used:
+    #
+    #  - -is-64 true|false: Whether to use 64-bit DWARF instead of 32-bit DWARF.
+    #                       The default is 32-bit.
+
+    proc rnglists { args } {
+	variable _debug_rnglists_addr_size
+	variable _debug_rnglists_offset_size
+	variable _debug_rnglists_is_64_dwarf
+
+	parse_args {{"is-64" "false"}}
+
+	if { [llength $args] != 1 } {
+	    error "rnglists proc expects one positional argument (body)"
+	}
+
+	lassign $args body
+
+	if [is_64_target] {
+	    set _debug_rnglists_addr_size 8
+	} else {
+	    set _debug_rnglists_addr_size 4
+	}
+
+	if { ${is-64} } {
+	    set _debug_rnglists_offset_size 8
+	    set _debug_rnglists_is_64_dwarf true
+	} else {
+	    set _debug_rnglists_offset_size 4
+	    set _debug_rnglists_is_64_dwarf false
+	}
+
+	_section ".debug_rnglists"
+
+	# Count of tables in the section.
+	variable _debug_rnglists_table_count 0
+
+	# Compute the label name for list at index LIST_IDX, for the current
+	# table.
+
+	proc _compute_list_label { list_idx } {
+	    variable _debug_rnglists_table_count
+
+	    return ".Lrnglists_table_${_debug_rnglists_table_count}_list_${list_idx}"
+	}
+
+	# Generate one table (header + offset array + range lists).
+	#
+	# Accepts one positional argument, BODY.  BODY may call the LIST_
+	# procedure to generate rnglists.
+	#
+	# The -post-header-label option can be used to define a label just after
+	# the header of the table.  This is the label that a DW_AT_rnglists_base
+	# attribute will usually refer to.
+
+	proc table { args } {
+	    variable _debug_rnglists_table_count
+	    variable _debug_rnglists_addr_size
+	    variable _debug_rnglists_offset_size
+	    variable _debug_rnglists_is_64_dwarf
+
+	    parse_args {{post-header-label ""}}
+
+	    if { [llength $args] != 1 } {
+		error "table proc expects one positional argument (body)"
+	    }
+
+	    lassign $args body
+
+	    # Generate one range list.
+	    #
+	    # BODY may call the various procs defined below to generate list entries.
+	    # They correspond to the range list entry kinds described in section 2.17.3
+	    # of the DWARF 5 spec.
+	    #
+	    # To define a label pointing to the beginning of the list, use
+	    # the conventional way of declaring and defining labels:
+	    #
+	    #   declare_labels the_list
+	    #
+	    #   the_list: list_ {
+	    #     ...
+	    #   }
+
+	    proc list_ { body } {
+		variable _debug_rnglists_list_count
+
+		# Define a label for this list.  It is used to build the offset
+		# array later.
+		set list_label [_compute_list_label $_debug_rnglists_list_count]
+		define_label $list_label
+
+		# Emit a DW_RLE_start_end entry.
+
+		proc start_end { start end } {
+		    variable _debug_rnglists_addr_size
+
+		    _op .byte 0x06 "DW_RLE_start_end"
+		    _op .${_debug_rnglists_addr_size}byte $start "start"
+		    _op .${_debug_rnglists_addr_size}byte $end "end"
+		}
+
+		uplevel $body
+
+		# Emit end of list.
+		_op .byte 0x00 "DW_RLE_end_of_list"
+
+		incr _debug_rnglists_list_count
+	    }
+
+	    # Count of lists in the table.
+	    variable _debug_rnglists_list_count 0
+
+	    # Generate the lists ops first, because we need to know how many
+	    # lists there are to generate the header and offset table.
+	    set lists_ops [_defer_to_string {
+		uplevel $body
+	    }]
+
+	    set post_unit_len_label \
+		[_compute_label "rnglists_table_${_debug_rnglists_table_count}_post_unit_len"]
+	    set post_header_label \
+		[_compute_label "rnglists_table_${_debug_rnglists_table_count}_post_header"]
+	    set table_end_label \
+		[_compute_label "rnglists_table_${_debug_rnglists_table_count}_end"]
+
+	    # Emit the table header.
+	    if { $_debug_rnglists_is_64_dwarf } {
+		_op .4byte 0xffffffff "unit length 1/2"
+		_op .8byte "$table_end_label - $post_unit_len_label" "unit length 2/2"
+	    } else {
+		_op .4byte "$table_end_label - $post_unit_len_label" "unit length"
+	    }
+
+	    define_label $post_unit_len_label
+
+	    _op .2byte 5 "dwarf version"
+	    _op .byte $_debug_rnglists_addr_size "address size"
+	    _op .byte 0 "segment selector size"
+	    _op .4byte "$_debug_rnglists_list_count" "offset entry count"
+
+	    define_label $post_header_label
+
+	    # Define the user post-header label, if provided.
+	    if { ${post-header-label} != "" } {
+		define_label ${post-header-label}
+	    }
+
+	    # Emit the offset array.
+	    for {set list_idx 0} {$list_idx < $_debug_rnglists_list_count} {incr list_idx} {
+		set list_label [_compute_list_label $list_idx]
+		_op .${_debug_rnglists_offset_size}byte "$list_label - $post_header_label" "offset of list $list_idx"
+	    }
+
+	    # Emit the actual list data.
+	    _emit "$lists_ops"
+
+	    define_label $table_end_label
+
+	    incr _debug_rnglists_table_count
+	}
+
+	uplevel $body
+    }
 
     # Emit a DWARF .debug_line unit.
     # OPTIONS is a list with an even number of elements containing

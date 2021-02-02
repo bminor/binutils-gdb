@@ -1,3 +1,12 @@
+2021-02-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/26813
+	* lib/dwarf.exp (_handle_DW_FORM): Handle DW_FORM_rnglistx.
+	(cu): Generate header for DWARF 5.
+	(rnglists): New proc.
+	* gdb.dwarf2/rnglists-multiple-cus.exp: New.
+	* gdb.dwarf2/rnglists-sec-offset.exp: New.
+
 2021-02-02  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/24620
