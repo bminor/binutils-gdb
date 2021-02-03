@@ -1,3 +1,8 @@
+2021-02-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-ifunc/ifunc.exp (libpr16467b.so, libpr16467bn.so):
+	Link with --as-needed.
+
 2021-02-02  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-plugin/pr27311.d,

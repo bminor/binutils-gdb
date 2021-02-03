@@ -397,7 +397,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build libpr16467b.so" \
-	"-shared tmpdir/pr16467b.o tmpdir/libpr16467a.so \
+	"-shared -Wl,--as-needed tmpdir/pr16467b.o tmpdir/libpr16467a.so \
 	 -Wl,--version-script=pr16467b.map" \
 	"-fPIC" \
 	{ dummy.c } \
@@ -422,7 +422,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build libpr16467bn.so" \
-	"-shared tmpdir/pr16467b.o tmpdir/libpr16467an.so \
+	"-shared -Wl,--as-needed tmpdir/pr16467b.o tmpdir/libpr16467an.so \
 	 -Wl,--version-script=pr16467b.map" \
 	"-fPIC" \
 	{ dummy.c } \

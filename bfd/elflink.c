@@ -1946,12 +1946,16 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	  if (hi->verinfo.vertree != NULL && hide)
 	    {
 	      (*bed->elf_backend_hide_symbol) (info, hi, TRUE);
+	      *override = FALSE;
 	      goto nondefault;
 	    }
 	}
       if (hi->verinfo.vertree != NULL
 	  && strcmp (p + 1 + (p[1] == '@'), hi->verinfo.vertree->name) != 0)
-	goto nondefault;
+	{
+	  *override = FALSE;
+	  goto nondefault;
+	}
     }
 
   if (!*override)
