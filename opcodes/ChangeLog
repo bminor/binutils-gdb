@@ -1,3 +1,9 @@
+2021-02-04  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac (SHARED_LIBADD): Remove explicit -lintl population in
+	favour of LIBINTL.
+	* configure: Regenerated.
+
 2021-02-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* tic54x-dis.c (sprint_mmr): Change to tic54x_mmregs.

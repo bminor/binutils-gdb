@@ -1,3 +1,9 @@
+2021-02-03  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac (SHARED_LIBADD): Remove explicit -lintl population in
+	favour of LIBINTL.
+	* configure: Regenerated.
+
 2021-02-09  Alan Modra  <amodra@gmail.com>
 
 	* config.bfd (arm*-*-symbianelf*): Move from obsolete to removed.

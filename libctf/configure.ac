@@ -169,31 +169,36 @@ if test $ac_cv_libctf_macro_O_CLOEXEC = yes; then
 	    [Whether the platform has a definition of O_CLOEXEC.])
 fi
 
-# Horrible hacks to build DLLs on Windows and a shared library elsewhere.
-
 CTF_LIBADD="-L`pwd`/../libiberty -liberty"
 SHARED_LDFLAGS=
+
+# Horrible hacks to build DLLs on Windows and a shared library elsewhere.
 if test "$enable_shared" = "yes"; then
 # When building a shared libctf, link against the pic version of libiberty
 # so that apps that use libctf won't need libiberty just to satisfy any
-# libctf references.
-# We can't do that if a pic libiberty is unavailable since including non-pic
-# code would insert text relocations into libctf.
+# libctf references.  We can't do that if a pic libiberty is unavailable
+# since including non-pic # code would insert text relocations into libctf.
 # Note that linking against libbfd as we do here, which is itself linked
 # against libiberty, may not satisfy all the libctf libiberty references
 # since libbfd may not pull in the entirety of libiberty.
+# Also, jam libintl into the right place in all of this: after libiberty,
+# which uses it, but before -lcygwin, which it uses.
 changequote(,)dnl
   x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
 changequote([,])dnl
   if test -n "$x"; then
     CTF_LIBADD="-L`pwd`/../libiberty/pic -liberty"
   fi
+fi
 
+CTF_LIBADD="$CTF_LIBADD $LIBINTL"
+
+if test "$enable_shared" = "yes"; then
   case "${host}" in
   # More hacks to build DLLs on Windows.
     *-*-cygwin*)
       SHARED_LDFLAGS="-no-undefined"
-      CTF_LIBADD="$CTF_LIBADD -L`pwd`/../intl -lintl -lcygwin"
+      CTF_LIBADD="$CTF_LIBADD -lcygwin"
       ;;
   esac
 fi

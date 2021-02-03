@@ -166,17 +166,23 @@ if test "$enable_shared" = "yes"; then
 # Note that linking against libbfd as we do here, which is itself linked
 # against libiberty, may not satisfy all the libopcodes libiberty references
 # since libbfd may not pull in the entirety of libiberty.
+# Also, jam libintl into the right place in all of this: after libiberty,
+# which uses it, but before -lcygwin, which it uses.
 changequote(,)dnl
   x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
 changequote([,])dnl
   if test -n "$x"; then
     SHARED_LIBADD="-L`pwd`/../libiberty/pic -liberty"
   fi
+fi
 
+SHARED_LIBADD="$SHARED_LIBADD $LIBINTL"
+
+if test "$enable_shared" = "yes"; then
   case "${host}" in
     *-*-cygwin*)
       SHARED_LDFLAGS="-no-undefined"
-      SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
+      SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty $SHARED_LIBADD"
       ;;
    *-*-darwin*)
      SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.dylib ${SHARED_LIBADD}"
