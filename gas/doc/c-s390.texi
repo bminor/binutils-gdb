@@ -312,7 +312,7 @@ field. The notation changes as follows:
 @cindex instruction formats, s390
 @cindex s390 instruction formats
 
-The Principles of Operation manuals lists 26 instruction formats where
+The Principles of Operation manuals lists 35 instruction formats where
 some of the formats have multiple variants. For the @samp{.insn}
 pseudo directive the assembler recognizes some of the formats.
 Typically, the most general variant of the instruction format is used
@@ -542,6 +542,54 @@ with the @samp{.insn} pseudo directive:
 | OpCode | R3 |OpCd| B1 |     D1      | B2 |     D2     |
 +--------+----+----+----+-------------+----+------------+
 0        8    12   16   20            32   36           47
+@end verbatim
+
+@item VRV format: <insn> V1,D2(V2,B2),M3
+@verbatim
++--------+----+----+----+-------------+----+------------+
+| OpCode | V1 | V2 | B2 |     D2      | M3 |   Opcode   |
++--------+----+----+----+-------------+----+------------+
+0        8    12   16   20            32   36           47
+@end verbatim
+
+@item VRI format: <insn> V1,V2,I3,M4,M5
+@verbatim
++--------+----+----+-------------+----+----+------------+
+| OpCode | V1 | V2 |     I3      | M5 | M4 |   Opcode   |
++--------+----+----+-------------+----+----+------------+
+0        8    12   16            28   32   36           47
+@end verbatim
+
+@item VRX format: <insn> V1,D2(R2,B2),M3
+@verbatim
++--------+----+----+----+-------------+----+------------+
+| OpCode | V1 | R2 | B2 |     D2      | M3 |   Opcode   |
++--------+----+----+----+-------------+----+------------+
+0        8    12   16   20            32   36           47
+@end verbatim
+
+@item VRS format: <insn> R1,V3,D2(B2),M4
+@verbatim
++--------+----+----+----+-------------+----+------------+
+| OpCode | R1 | V3 | B2 |     D2      | M4 |   Opcode   |
++--------+----+----+----+-------------+----+------------+
+0        8    12   16   20            32   36           47
+@end verbatim
+
+@item VRR format: <insn> V1,V2,V3,M4,M5,M6
+@verbatim
++--------+----+----+----+---+----+----+----+------------+
+| OpCode | V1 | V2 | V3 |///| M6 | M5 | M4 |   Opcode   |
++--------+----+----+----+---+----+----+----+------------+
+0        8    12   16       24   28   32   36           47
+@end verbatim
+
+@item VSI format: <insn> V1,D2(B2),I3
+@verbatim
++--------+---------+----+-------------+----+------------+
+| OpCode |   I3    | B2 |     D2      | V1 |   Opcode   |
++--------+---------+----+-------------+----+------------+
+0        8         16   20            32   36           47
 @end verbatim
 
 @end table

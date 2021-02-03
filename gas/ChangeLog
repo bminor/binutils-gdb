@@ -1,3 +1,7 @@
+2021-02-03  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* doc/c-s390.texi: Document vector instruction formats.
+
 2021-02-01  Emery Hemingway  <ehmry@posteo.net>
 
 	* configure.tgt: Add *-*-genode* as a target for AArch64 and x86.
