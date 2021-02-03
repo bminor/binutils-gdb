@@ -1,3 +1,11 @@
+2021-02-03  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac (EXPECT): Check for, in order to define...
+	(TCL_TRY): ... this, if Tcl supports try/catch.
+	* Makefile.am (TCL_TRY): Run the testsuite only if set.
+	* configure: Regenerated.
+	* Makefile.in: Likewise.
+
 2021-02-02  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac (CTF_LIBADD): Remove explicit -lintl population in

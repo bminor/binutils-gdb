@@ -205,6 +205,15 @@ fi
 AC_SUBST(SHARED_LDFLAGS)
 AC_SUBST(CTF_LIBADD)
 
+AC_PATH_PROG([EXPECT], [expect])
+AC_CACHE_CHECK([for Tcl supporting try/catch], [ac_cv_libctf_tcl_try],
+  [ac_cv_libctf_tcl_try=`if test -z $EXPECT; then echo no; else $EXPECT << EOF
+if @<:@llength @<:@info commands try@:>@@:>@ then { puts yes } else { puts no }
+EOF
+fi`
+])
+AM_CONDITIONAL(TCL_TRY, test "${ac_cv_libctf_tcl_try}" = yes)
+
 # Use a version script, if possible, or an -export-symbols-regex otherwise.
 VERSION_FLAGS='-export-symbols-regex ctf_.*'
 if $LD --help 2>&1 | grep -- --version-script >/dev/null; then

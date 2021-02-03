@@ -62,6 +62,7 @@ EXPECT = expect
 RUNTEST = runtest
 RUNTESTFLAGS =
 
+if TCL_TRY
 CC_FOR_TARGET = ` \
   if [ -f $$r/../gcc/xgcc ] ; then \
     if [ -f $$r/../newlib/Makefile ] ; then \
@@ -100,3 +101,4 @@ CONFIG_STATUS_DEPENDENCIES = $(BFDDIR)/development.sh
 EXTRA_DEJAGNU_SITE_CONFIG = development.exp
 
 DISTCLEANFILES = site.exp development.exp
+endif
