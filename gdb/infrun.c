@@ -5023,8 +5023,6 @@ handle_inferior_event (struct execution_control_state *ecs)
      end.  */
   scoped_value_mark free_values;
 
-  enum stop_kind stop_soon;
-
   infrun_debug_printf ("%s", target_waitstatus_to_string (&ecs->ws).c_str ());
 
   if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
@@ -5118,80 +5116,82 @@ handle_inferior_event (struct execution_control_state *ecs)
   switch (ecs->ws.kind)
     {
     case TARGET_WAITKIND_LOADED:
-      context_switch (ecs);
-      /* Ignore gracefully during startup of the inferior, as it might
-	 be the shell which has just loaded some objects, otherwise
-	 add the symbols for the newly loaded objects.  Also ignore at
-	 the beginning of an attach or remote session; we will query
-	 the full list of libraries once the connection is
-	 established.  */
+      {
+	context_switch (ecs);
+	/* Ignore gracefully during startup of the inferior, as it might
+	   be the shell which has just loaded some objects, otherwise
+	   add the symbols for the newly loaded objects.  Also ignore at
+	   the beginning of an attach or remote session; we will query
+	   the full list of libraries once the connection is
+	   established.  */
 
-      stop_soon = get_inferior_stop_soon (ecs);
-      if (stop_soon == NO_STOP_QUIETLY)
-	{
-	  struct regcache *regcache;
+	stop_kind stop_soon = get_inferior_stop_soon (ecs);
+	if (stop_soon == NO_STOP_QUIETLY)
+	  {
+	    struct regcache *regcache;
 
-	  regcache = get_thread_regcache (ecs->event_thread);
+	    regcache = get_thread_regcache (ecs->event_thread);
 
-	  handle_solib_event ();
+	    handle_solib_event ();
 
-	  ecs->event_thread->control.stop_bpstat
-	    = bpstat_stop_status (regcache->aspace (),
-				  ecs->event_thread->suspend.stop_pc,
-				  ecs->event_thread, &ecs->ws);
+	    ecs->event_thread->control.stop_bpstat
+	      = bpstat_stop_status (regcache->aspace (),
+				    ecs->event_thread->suspend.stop_pc,
+				    ecs->event_thread, &ecs->ws);
 
-	  if (handle_stop_requested (ecs))
+	    if (handle_stop_requested (ecs))
+	      return;
+
+	    if (bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
+	      {
+		/* A catchpoint triggered.  */
+		process_event_stop_test (ecs);
+		return;
+	      }
+
+	    /* If requested, stop when the dynamic linker notifies
+	       gdb of events.  This allows the user to get control
+	       and place breakpoints in initializer routines for
+	       dynamically loaded objects (among other things).  */
+	    ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
+	    if (stop_on_solib_events)
+	      {
+		/* Make sure we print "Stopped due to solib-event" in
+		   normal_stop.  */
+		stop_print_frame = true;
+
+		stop_waiting (ecs);
+		return;
+	      }
+	  }
+
+	/* If we are skipping through a shell, or through shared library
+	   loading that we aren't interested in, resume the program.  If
+	   we're running the program normally, also resume.  */
+	if (stop_soon == STOP_QUIETLY || stop_soon == NO_STOP_QUIETLY)
+	  {
+	    /* Loading of shared libraries might have changed breakpoint
+	       addresses.  Make sure new breakpoints are inserted.  */
+	    if (stop_soon == NO_STOP_QUIETLY)
+	      insert_breakpoints ();
+	    resume (GDB_SIGNAL_0);
+	    prepare_to_wait (ecs);
 	    return;
+	  }
 
-	  if (bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
-	    {
-	      /* A catchpoint triggered.  */
-	      process_event_stop_test (ecs);
-	      return;
-	    }
+	/* But stop if we're attaching or setting up a remote
+	   connection.  */
+	if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
+	    || stop_soon == STOP_QUIETLY_REMOTE)
+	  {
+	    infrun_debug_printf ("quietly stopped");
+	    stop_waiting (ecs);
+	    return;
+	  }
 
-	  /* If requested, stop when the dynamic linker notifies
-	     gdb of events.  This allows the user to get control
-	     and place breakpoints in initializer routines for
-	     dynamically loaded objects (among other things).  */
-	  ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-	  if (stop_on_solib_events)
-	    {
-	      /* Make sure we print "Stopped due to solib-event" in
-		 normal_stop.  */
-	      stop_print_frame = true;
-
-	      stop_waiting (ecs);
-	      return;
-	    }
-	}
-
-      /* If we are skipping through a shell, or through shared library
-	 loading that we aren't interested in, resume the program.  If
-	 we're running the program normally, also resume.  */
-      if (stop_soon == STOP_QUIETLY || stop_soon == NO_STOP_QUIETLY)
-	{
-	  /* Loading of shared libraries might have changed breakpoint
-	     addresses.  Make sure new breakpoints are inserted.  */
-	  if (stop_soon == NO_STOP_QUIETLY)
-	    insert_breakpoints ();
-	  resume (GDB_SIGNAL_0);
-	  prepare_to_wait (ecs);
-	  return;
-	}
-
-      /* But stop if we're attaching or setting up a remote
-	 connection.  */
-      if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
-	  || stop_soon == STOP_QUIETLY_REMOTE)
-	{
-	  infrun_debug_printf ("quietly stopped");
-	  stop_waiting (ecs);
-	  return;
-	}
-
-      internal_error (__FILE__, __LINE__,
-		      _("unhandled stop_soon: %d"), (int) stop_soon);
+	internal_error (__FILE__, __LINE__,
+			_("unhandled stop_soon: %d"), (int) stop_soon);
+      }
 
     case TARGET_WAITKIND_SPURIOUS:
       if (handle_stop_requested (ecs))

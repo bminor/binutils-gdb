@@ -1,3 +1,8 @@
+2021-02-03  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.c (handle_inferior_event): Move stop_soon variable to
+	inner scope.
+
 2021-02-03  Pedro Alves  <pedro@palves.net>
 
 	* infcmd.c (detach_command): Hold strong reference to target, and
