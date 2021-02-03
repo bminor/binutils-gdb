@@ -176,10 +176,7 @@ record_read_length (const char *length)
   while (*tmp != '\0' && isdigit (*tmp))
     ++tmp;
   if (*tmp != '\0' || *length == '\0')
-    {
-      fprintf (stderr, "APB: Bad length string: %s\n", tmp);
-      return LDPS_ERR;
-    }
+    return LDPS_ERR;
 
   bytes_to_read_before_claim = atoi (length);
   return LDPS_OK;

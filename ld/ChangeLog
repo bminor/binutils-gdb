@@ -1,3 +1,7 @@
+2021-02-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* testplugin.c (record_read_length): Remove debug fprintf.
+
 2021-02-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-cdtest/cdtest.exp,
