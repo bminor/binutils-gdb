@@ -1850,8 +1850,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 			     asection *sec,
 			     bfd_vma value,
 			     bfd **poldbfd,
-			     bfd_boolean *dynsym,
-			     bfd **override)
+			     bfd_boolean *dynsym)
 {
   bfd_boolean type_change_ok;
   bfd_boolean size_change_ok;
@@ -1862,7 +1861,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   const struct elf_backend_data *bed;
   bfd_boolean collect;
   bfd_boolean dynamic;
-  bfd *nondef_override;
+  bfd *override;
   char *p;
   size_t len, shortlen;
   asection *tmp_sec;
@@ -1922,7 +1921,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   matched = TRUE;
   tmp_sec = sec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
-			      &hi, poldbfd, NULL, NULL, &skip, override,
+			      &hi, poldbfd, NULL, NULL, &skip, &override,
 			      &type_change_ok, &size_change_ok, &matched))
     return FALSE;
 
@@ -1946,19 +1945,15 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 	  if (hi->verinfo.vertree != NULL && hide)
 	    {
 	      (*bed->elf_backend_hide_symbol) (info, hi, TRUE);
-	      *override = FALSE;
 	      goto nondefault;
 	    }
 	}
       if (hi->verinfo.vertree != NULL
 	  && strcmp (p + 1 + (p[1] == '@'), hi->verinfo.vertree->name) != 0)
-	{
-	  *override = FALSE;
-	  goto nondefault;
-	}
+	goto nondefault;
     }
 
-  if (!*override)
+  if (! override)
     {
       /* Add the default symbol if not performing a relocatable link.  */
       if (! bfd_link_relocatable (info))
@@ -2085,7 +2080,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   size_change_ok = FALSE;
   tmp_sec = sec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
-			      &hi, poldbfd, NULL, NULL, &skip, &nondef_override,
+			      &hi, poldbfd, NULL, NULL, &skip, &override,
 			      &type_change_ok, &size_change_ok, &matched))
     return FALSE;
 
@@ -2109,7 +2104,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
       else
 	return TRUE;
     }
-  else if (nondef_override)
+  else if (override)
     {
       /* Here SHORTNAME is a versioned name, so we don't expect to see
 	 the type of override we do in the case above unless it is
@@ -5094,8 +5089,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      && !(hi != h
 		   && hi->versioned == versioned_hidden))
 	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
-					      sec, value, &old_bfd, &dynsym,
-					      &override))
+					      sec, value, &old_bfd, &dynsym))
 	      goto error_free_vers;
 
 	  /* Check the alignment when a common symbol is involved. This
@@ -5278,9 +5272,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	      }
 
 	  if (!add_needed
-	      && !override
 	      && matched
 	      && definition
+	      && h->root.type != bfd_link_hash_indirect
 	      && ((dynsym
 		   && h->ref_regular_nonweak)
 		  || (old_bfd != NULL
