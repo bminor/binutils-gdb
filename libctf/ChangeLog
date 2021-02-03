@@ -1,5 +1,10 @@
 2021-02-03  Nick Alcock  <nick.alcock@oracle.com>
 
+	* configure.ac (ac_cv_libctf_bfd_elf): Include string.h.
+	* configure: Regenerated.
+
+2021-02-03  Nick Alcock  <nick.alcock@oracle.com>
+
 	* configure.ac (EXPECT): Check for, in order to define...
 	(TCL_TRY): ... this, if Tcl supports try/catch.
 	* Makefile.am (TCL_TRY): Run the testsuite only if set.

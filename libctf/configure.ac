@@ -88,6 +88,7 @@ intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
 LIBS="-lbfd -liberty -lz $intl $LIBS"
 AC_CACHE_CHECK([for ELF support in BFD], ac_cv_libctf_bfd_elf,
 [AC_TRY_LINK([#include <stdlib.h>
+	     #include <string.h>
 	     #include "bfd.h"
 	     #include "elf-bfd.h"],
 	    [(void) bfd_section_from_elf_index (NULL, 0);
