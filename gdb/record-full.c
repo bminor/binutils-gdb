@@ -903,6 +903,7 @@ static struct async_event_handler *record_full_async_inferior_event_token;
 static void
 record_full_async_inferior_event_handler (gdb_client_data data)
 {
+  clear_async_event_handler (record_full_async_inferior_event_token);
   inferior_event_handler (INF_REG_EVENT);
 }
 

@@ -14259,10 +14259,11 @@ remote_async_serial_handler (struct serial *scb, void *context)
 static void
 remote_async_inferior_event_handler (gdb_client_data data)
 {
-  inferior_event_handler (INF_REG_EVENT);
-
   remote_target *remote = (remote_target *) data;
   remote_state *rs = remote->get_remote_state ();
+  clear_async_event_handler (rs->remote_async_inferior_event_token);
+
+  inferior_event_handler (INF_REG_EVENT);
 
   /* inferior_event_handler may have consumed an event pending on the
      infrun side without calling target_wait on the REMOTE target, or

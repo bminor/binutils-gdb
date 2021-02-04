@@ -325,6 +325,7 @@ record_btrace_auto_disable (void)
 static void
 record_btrace_handle_async_inferior_event (gdb_client_data data)
 {
+  clear_async_event_handler (record_btrace_async_inferior_event_handler);
   inferior_event_handler (INF_REG_EVENT);
 }
 

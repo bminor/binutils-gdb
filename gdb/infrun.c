@@ -9212,6 +9212,7 @@ static const struct internalvar_funcs siginfo_funcs =
 static void
 infrun_async_inferior_event_handler (gdb_client_data data)
 {
+  clear_async_event_handler (infrun_async_inferior_event_token);
   inferior_event_handler (INF_REG_EVENT);
 }
 

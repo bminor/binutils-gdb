@@ -24,6 +24,15 @@
 struct async_signal_handler;
 struct async_event_handler;
 typedef void (sig_handler_func) (gdb_client_data);
+
+/* Type of async event handler callbacks.
+
+   DATA is the client data originally passed to create_async_event_handler.
+
+   The callback is called when the async event handler is marked.  The callback
+   is responsible for clearing the async event handler if it no longer needs
+   to be called.  */
+
 typedef void (async_event_handler_func) (gdb_client_data);
 
 extern struct async_signal_handler *

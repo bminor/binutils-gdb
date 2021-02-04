@@ -1,3 +1,18 @@
+2021-02-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* async-event.h (async_event_handler_func):  Add documentation.
+	* async-event.c (check_async_event_handlers): Don't clear
+	async_event_handler ready flag.
+	* infrun.c (infrun_async_inferior_event_handler): Clear ready
+	flag.
+	* record-btrace.c (record_btrace_handle_async_inferior_event):
+	Likewise.
+	* record-full.c (record_full_async_inferior_event_handler):
+	Likewise.
+	* remote-notif.c (remote_async_get_pending_events_handler):
+	Likewise.
+	* remote.c (remote_async_inferior_event_handler): Likewise.
+
 2021-02-03  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (handle_inferior_event): Move stop_soon variable to
