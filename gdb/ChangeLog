@@ -1,5 +1,12 @@
 2021-02-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* record-full.c (record_full_async_inferior_event_handler):
+	Don't clear async event handler.
+	(record_full_base_target::wait): Clear async event handler at
+	beginning.
+
+2021-02-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* record-btrace.c (record_btrace_handle_async_inferior_event):
 	Don't clear async event handler.
 	(record_btrace_target::wait): Clear async event handler at

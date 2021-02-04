@@ -903,7 +903,6 @@ static struct async_event_handler *record_full_async_inferior_event_token;
 static void
 record_full_async_inferior_event_handler (gdb_client_data data)
 {
-  clear_async_event_handler (record_full_async_inferior_event_token);
   inferior_event_handler (INF_REG_EVENT);
 }
 
@@ -1453,6 +1452,8 @@ record_full_base_target::wait (ptid_t ptid, struct target_waitstatus *status,
 			       target_wait_flags options)
 {
   ptid_t return_ptid;
+
+  clear_async_event_handler (record_full_async_inferior_event_token);
 
   return_ptid = record_full_wait_1 (this, ptid, status, options);
   if (status->kind != TARGET_WAITKIND_IGNORE)
