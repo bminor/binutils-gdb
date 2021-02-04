@@ -3729,8 +3729,8 @@ target_always_non_stop_p (void)
 
 /* See target.h.  */
 
-int
-target_is_non_stop_p (void)
+bool
+target_is_non_stop_p ()
 {
   return (non_stop
 	  || target_non_stop_enabled == AUTO_BOOLEAN_TRUE

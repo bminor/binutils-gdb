@@ -1873,7 +1873,7 @@ extern enum auto_boolean target_non_stop_enabled;
 /* Is the target in non-stop mode?  Some targets control the inferior
    in non-stop mode even with "set non-stop off".  Always true if "set
    non-stop" is on.  */
-extern int target_is_non_stop_p (void);
+extern bool target_is_non_stop_p ();
 
 /* Return true if at least one inferior has a non-stop target.  */
 extern bool exists_non_stop_target ();
