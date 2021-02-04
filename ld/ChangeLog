@@ -1,3 +1,9 @@
+2021-02-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/pr27311d.c: New test.
+	* testsuite/ld-plugin/lto.exp: Rename pr27311 to pr27311-1, compile
+	and link new test as pr27311-2.
+
 2021-02-03  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-ifunc/ifunc.exp (libpr16467b.so, libpr16467bn.so):
