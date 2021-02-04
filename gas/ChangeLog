@@ -1,3 +1,11 @@
+2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_multi_subset_supports): Removed
+	INSN_CLASS_ZB*.
+	* testsuite/gas/riscv/bitmanip-insns-32.d: Removed.
+	* testsuite/gas/riscv/bitmanip-insns-64.d: Removed.
+	* testsuite/gas/riscv/bitmanip-insns.s: Removed.
+
 2021-01-26  Alan Modra  <amodra@gmail.com>
 
 	PR 27282
