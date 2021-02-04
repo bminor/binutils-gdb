@@ -2430,6 +2430,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *wrel;
   Elf_Internal_Rela *relend;
   unsigned int plt_entry_size;
+  bfd_boolean status;
 
   /* Skip if check_relocs failed.  */
   if (input_section->check_relocs_failed)
@@ -2453,6 +2454,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 
   _bfd_x86_elf_set_tls_module_base (info);
 
+  status = TRUE;
   rel = wrel = relocs;
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; wrel++, rel++)
@@ -4118,8 +4120,13 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	      if (converted_reloc)
 		{
 		  info->callbacks->einfo
-		    (_("%F%P: failed to convert GOTPCREL relocation; relink with --no-relax\n"));
-		  return FALSE;
+		    ("%X%H:", input_bfd, input_section, rel->r_offset);
+		  info->callbacks->einfo
+		    (_(" failed to convert GOTPCREL relocation against "
+		       "'%s'; relink with --no-relax\n"),
+		     name);
+		  status = FALSE;
+		  continue;
 		}
 	      (*info->callbacks->reloc_overflow)
 		(info, (h ? &h->root : NULL), name, howto->name,
@@ -4160,7 +4167,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
       input_section->reloc_count -= deleted;
     }
 
-  return TRUE;
+  return status;
 }
 
 /* Finish up dynamic symbol handling.  We set the contents of various
