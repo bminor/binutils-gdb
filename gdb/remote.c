@@ -5672,7 +5672,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 
   /* Register extra event sources in the event loop.  */
   rs->remote_async_inferior_event_token
-    = create_async_event_handler (remote_async_inferior_event_handler, remote,
+    = create_async_event_handler (remote_async_inferior_event_handler, nullptr,
 				  "remote");
   rs->notif_state = remote_notif_state_allocate (remote);
 
@@ -8155,6 +8155,13 @@ remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
 {
   REMOTE_SCOPED_DEBUG_ENTER_EXIT;
 
+  remote_state *rs = get_remote_state ();
+
+  /* Start by clearing the flag that asks for our wait method to be called,
+     we'll mark it again at the end if needed.  */
+  if (target_is_async_p ())
+    clear_async_event_handler (rs->remote_async_inferior_event_token);
+
   ptid_t event_ptid;
 
   if (target_is_non_stop_p ())
@@ -8164,11 +8171,10 @@ remote_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   if (target_is_async_p ())
     {
-      remote_state *rs = get_remote_state ();
-
-      /* If there are are events left in the queue tell the event loop
-	 to return here.  */
-      if (!rs->stop_reply_queue.empty ())
+      /* If there are events left in the queue, or unacknowledged
+	 notifications, then tell the event loop to call us again.  */
+      if (!rs->stop_reply_queue.empty ()
+	  || rs->notif_state->pending_event[notif_client_stop.id] != nullptr)
 	mark_async_event_handler (rs->remote_async_inferior_event_token);
     }
 
@@ -14259,21 +14265,7 @@ remote_async_serial_handler (struct serial *scb, void *context)
 static void
 remote_async_inferior_event_handler (gdb_client_data data)
 {
-  remote_target *remote = (remote_target *) data;
-  remote_state *rs = remote->get_remote_state ();
-  clear_async_event_handler (rs->remote_async_inferior_event_token);
-
   inferior_event_handler (INF_REG_EVENT);
-
-  /* inferior_event_handler may have consumed an event pending on the
-     infrun side without calling target_wait on the REMOTE target, or
-     may have pulled an event out of a different target.  Keep trying
-     for this remote target as long it still has either pending events
-     or unacknowledged notifications.  */
-
-  if (rs->notif_state->pending_event[notif_client_stop.id] != NULL
-      || !rs->stop_reply_queue.empty ())
-    mark_async_event_handler (rs->remote_async_inferior_event_token);
 }
 
 int

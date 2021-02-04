@@ -1,5 +1,12 @@
 2021-02-04  Simon Marchi  <simon.marchi@efficios.com>
 
+	* remote.c (remote_target::wait): Clear async event handler at
+	beginning, mark if needed at the end.
+	(remote_async_inferior_event_handler): Don't set or clear async
+	event handler.
+
+2021-02-04  Simon Marchi  <simon.marchi@efficios.com>
+
 	* async-event.h (async_event_handler_func):  Add documentation.
 	* async-event.c (check_async_event_handlers): Don't clear
 	async_event_handler ready flag.
