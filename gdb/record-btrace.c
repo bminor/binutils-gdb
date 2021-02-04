@@ -325,7 +325,6 @@ record_btrace_auto_disable (void)
 static void
 record_btrace_handle_async_inferior_event (gdb_client_data data)
 {
-  clear_async_event_handler (record_btrace_async_inferior_event_handler);
   inferior_event_handler (INF_REG_EVENT);
 }
 
@@ -2531,6 +2530,9 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 {
   std::vector<thread_info *> moving;
   std::vector<thread_info *> no_history;
+
+  /* Clear this, if needed we'll re-mark it below.  */
+  clear_async_event_handler (record_btrace_async_inferior_event_handler);
 
   DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid).c_str (),
 	 (unsigned) options);
