@@ -1,5 +1,15 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_features_from_gdbarch_info): Rename to...
+	(riscv_features_from_bfd): ...this.  Change parameter type to
+	'bfd*', and update as required.
+	(riscv_find_default_target_description): Update call to
+	riscv_features_from_bfd.  Select a default xlen based on
+	info.bfd_arch_info.
+	(riscv_gdbarch_init): Update call to riscv_features_from_bfd.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* eval.c (evaluate_subexp_standard): Call value_ind for points to
 	dynamic types in UNOP_IND.
 

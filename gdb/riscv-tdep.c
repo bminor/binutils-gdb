@@ -3215,13 +3215,11 @@ static const struct frame_unwind riscv_frame_unwind =
   /*.prev_arch     =*/ NULL,
 };
 
-/* Extract a set of required target features out of INFO, specifically the
-   bfd being executed is examined to see what target features it requires.
-   IF there is no current bfd, or the bfd doesn't indicate any useful
-   features then a RISCV_GDBARCH_FEATURES is returned in its default state.  */
+/* Extract a set of required target features out of ABFD.  If ABFD is
+   nullptr then a RISCV_GDBARCH_FEATURES is returned in its default state.  */
 
 static struct riscv_gdbarch_features
-riscv_features_from_gdbarch_info (const struct gdbarch_info info)
+riscv_features_from_bfd (const bfd *abfd)
 {
   struct riscv_gdbarch_features features;
 
@@ -3231,11 +3229,10 @@ riscv_features_from_gdbarch_info (const struct gdbarch_info info)
      only used at all if the target hasn't given us a description, so this
      is really a last ditched effort to do something sane before giving
      up.  */
-  if (info.abfd != NULL
-      && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+  if (abfd != nullptr && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
-      unsigned char eclass = elf_elfheader (info.abfd)->e_ident[EI_CLASS];
-      int e_flags = elf_elfheader (info.abfd)->e_flags;
+      unsigned char eclass = elf_elfheader (abfd)->e_ident[EI_CLASS];
+      int e_flags = elf_elfheader (abfd)->e_flags;
 
       if (eclass == ELFCLASS32)
 	features.xlen = 4;
@@ -3273,13 +3270,14 @@ riscv_find_default_target_description (const struct gdbarch_info info)
 {
   /* Extract desired feature set from INFO.  */
   struct riscv_gdbarch_features features
-    = riscv_features_from_gdbarch_info (info);
+    = riscv_features_from_bfd (info.abfd);
 
-  /* If the XLEN field is still 0 then we got nothing useful from INFO.  In
-     this case we fall back to a minimal useful target, 8-byte x-registers,
-     with no floating point.  */
+  /* If the XLEN field is still 0 then we got nothing useful from INFO.BFD,
+     maybe there was no bfd object.  In this case we fall back to a minimal
+     useful target with no floating point, the x-register size is selected
+     based on the architecture from INFO.  */
   if (features.xlen == 0)
-    features.xlen = 8;
+    features.xlen = info.bfd_arch_info->bits_per_word == 32 ? 4 : 8;
 
   /* Now build a target description based on the feature set.  */
   return riscv_lookup_target_description (features);
@@ -3497,7 +3495,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
      target, then check that this matches with what the target is
      providing.  */
   struct riscv_gdbarch_features abi_features
-    = riscv_features_from_gdbarch_info (info);
+    = riscv_features_from_bfd (info.abfd);
 
   /* If the ABI_FEATURES xlen is 0 then this indicates we got no useful abi
      features from the INFO object.  In this case we just treat the
