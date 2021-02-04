@@ -21,6 +21,11 @@
 # #define EM_X86_64       62              /* AMD x86-64 architecture */
 # patch @0x12: 0x3E -> 0x03
 
+if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } then {
+    verbose "Skipping i386 biarch core test."
+    return
+}
+
 standard_testfile
 
 gdb_exit

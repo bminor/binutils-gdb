@@ -1,3 +1,7 @@
+2021-02-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/i386-biarch-core.exp: Add target check.
+
 2021-02-16  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 
 	* gdb.dwarf2/pr13961.S: Corrected invalid DIE references.
