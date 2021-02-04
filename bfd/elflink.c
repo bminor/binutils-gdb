@@ -5279,6 +5279,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		   && h->ref_regular_nonweak)
 		  || (old_bfd != NULL
 		      && (old_bfd->flags & BFD_PLUGIN) != 0
+		      && !info->lto_all_symbols_read
 		      && bind != STB_WEAK)
 		  || (h->ref_dynamic_nonweak
 		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
