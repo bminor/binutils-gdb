@@ -1,3 +1,13 @@
+2021-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15146
+	* testsuite/ld-plugin/lto.exp: Run PR ld/15146 tests.
+	* testsuite/ld-plugin/pr15146.d: Restored.
+	* testsuite/ld-plugin/pr15146a.c: Likewise.
+	* testsuite/ld-plugin/pr15146b.c: Likewise.
+	* testsuite/ld-plugin/pr15146c.c: Likewise.
+	* testsuite/ld-plugin/pr15146d.c: Likewise.
+
 2021-02-04  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-plugin/pr27311d.c: New test.
