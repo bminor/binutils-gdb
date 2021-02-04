@@ -242,16 +242,6 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
     case INSN_CLASS_ZIHINTPAUSE:
       return riscv_subset_supports ("zihintpause");
 
-    case INSN_CLASS_ZBA:
-      return riscv_subset_supports ("zba");
-    case INSN_CLASS_ZBB:
-      return riscv_subset_supports ("zbb");
-    case INSN_CLASS_ZBC:
-      return riscv_subset_supports ("zbc");
-    case INSN_CLASS_ZBA_OR_ZBB:
-      return (riscv_subset_supports ("zba")
-	      || riscv_subset_supports ("zbb"));
-
     default:
       as_fatal ("internal: unreachable");
       return FALSE;

@@ -1,3 +1,8 @@
+2021-02-04  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Removed macros for zb* extensions.
+	* opcode/riscv.h (riscv_insn_class): Removed INSN_CLASS_ZB*.
+
 2021-01-15  Nelson Chu  <nelson.chu@sifive.com>
 
 	* opcode/riscv.h: Indent and GNU coding standards tidy,

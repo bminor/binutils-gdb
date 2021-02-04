@@ -1,3 +1,9 @@
+2021-02-04  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (MASK_RVB_IMM): Removed.
+	(riscv_opcodes): Removed zb* instructions.
+	(riscv_ext_version_table): Removed versions for zb*.
+
 2021-01-26  Alan Modra  <amodra@gmail.com>
 
 	* i386-gen.c (parse_template): Ensure entire template_instance
