@@ -1,5 +1,10 @@
 2021-02-05  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/main-subprogram.exp: Add KFAIL for PR symtab/24549.
+	* gdb.fortran/mixed-lang-stack.exp: Same.
+
+2021-02-05  Tom de Vries  <tdevries@suse.de>
+
 	PR exp/27265
 	* gdb.base/complex-parts.exp: Add tests.
 
