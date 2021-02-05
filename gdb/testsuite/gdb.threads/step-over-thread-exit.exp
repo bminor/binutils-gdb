@@ -1,0 +1,126 @@
+# Copyright 2021-2022 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test stepping over a breakpoint installed on an instruction that
+# exits the thread.
+
+standard_testfile .c
+
+set syscalls_src $srcdir/lib/my-syscalls.S
+
+if { [build_executable "failed to prepare" $testfile \
+	  [list $srcfile $syscalls_src] {debug pthreads}] == -1 } {
+    return
+}
+
+# Each argument is a different testing axis, most of them obvious.
+# NS_STOP_ALL is only used if testing "set non-stop on", and indicates
+# whether to have GDB explicitly stop all threads before continuing to
+# thread exit.
+proc test {displaced-stepping non-stop target-non-stop schedlock ns_stop_all} {
+    if {${non-stop} == "off" && $ns_stop_all} {
+	error "invalid arguments"
+    }
+
+    save_vars ::GDBFLAGS {
+	append ::GDBFLAGS " -ex \"maintenance set target-non-stop ${target-non-stop}\""
+	append ::GDBFLAGS " -ex \"set non-stop ${non-stop}\""
+	clean_restart $::binfile
+    }
+
+    gdb_test_no_output "set displaced-stepping ${displaced-stepping}"
+
+    if { ![runto_main] } {
+	return
+    }
+
+    gdb_breakpoint "my_exit_syscall"
+
+    if {$schedlock
+	|| (${non-stop} == "on" && $ns_stop_all)} {
+	gdb_test "continue" \
+	    "Thread 2 .*hit Breakpoint $::decimal.* my_exit_syscall .*" \
+	    "continue until syscall"
+
+	if {${non-stop} == "on"} {
+	    # The test only spawns one thread at a time, so this just
+	    # stops the main thread.
+	    gdb_test_multiple "interrupt -a" "" {
+		-re "$::gdb_prompt " {
+		    gdb_test_multiple "" $gdb_test_name {
+			-re "Thread 1 \[^\r\n\]*stopped." {
+			    pass $gdb_test_name
+			}
+		    }
+		}
+	    }
+	}
+
+	gdb_test "thread 2" "Switching to thread 2 .*"
+
+	gdb_test_no_output "set scheduler-locking ${schedlock}"
+
+	gdb_test "continue" \
+	    "No unwaited-for children left." \
+	    "continue stops when thread exits"
+    } else {
+	gdb_test_no_output "set scheduler-locking ${schedlock}"
+
+	for { set i 0 } { $i < 100 } { incr i } {
+	    with_test_prefix "iter $i" {
+		set ok 0
+		set thread "<unknown>"
+		gdb_test_multiple "continue" "" {
+		    -re -wrap "Thread ($::decimal) .*hit Breakpoint $::decimal.* my_exit_syscall .*" {
+			set thread $expect_out(1,string)
+			set ok 1
+		    }
+		}
+		if {!${ok}} {
+		    # Exit if there's a failure to avoid lengthy
+		    # timeouts.
+		    break
+		}
+
+		if {${non-stop}} {
+		    gdb_test "thread $thread" "Switching to thread .*" \
+			"switch to event thread"
+		}
+	    }
+	}
+    }
+}
+
+foreach_with_prefix displaced-stepping {off auto} {
+    foreach_with_prefix non-stop {off on} {
+	foreach_with_prefix target-non-stop {off on} {
+	    if {${non-stop} == "on" && ${target-non-stop} == "off"} {
+		# Invalid combination.
+		continue
+	    }
+
+	    foreach_with_prefix schedlock {off on} {
+		if {${non-stop} == "on"} {
+		    foreach_with_prefix ns_stop_all {0 1} {
+			test ${displaced-stepping} ${non-stop} ${target-non-stop} \
+			    ${schedlock} ${ns_stop_all}
+		    }
+		} else {
+		    test ${displaced-stepping} ${non-stop} ${target-non-stop} ${schedlock} 0
+		}
+	    }
+	}
+    }
+}
