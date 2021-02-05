@@ -416,7 +416,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
 			      CORE_ADDR *address_p)
 {
   bound_minimal_symbol bound_msym = {msymbol, objfile};
-  struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
+  struct obj_section *section = msymbol->obj_section (objfile);
   enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
 
   bool is_tls = (section != NULL
@@ -1359,8 +1359,7 @@ operator_check_standard (struct expression *exp, int pos,
 	const struct block *const block = elts[pos + 1].block;
 	const struct symbol *const symbol = elts[pos + 2].symbol;
 
-	/* Check objfile where the variable itself is placed.
-	   SYMBOL_OBJ_SECTION (symbol) may be NULL.  */
+	/* Check objfile where the variable itself is placed.  */
 	if ((*objfile_func) (symbol_objfile (symbol), data))
 	  return 1;
 

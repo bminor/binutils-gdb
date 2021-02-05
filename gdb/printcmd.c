@@ -1534,7 +1534,7 @@ info_address_command (const char *exp, int from_tty)
 	  fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
 			gdb_stdout);
 	  printf_filtered (" in a file compiled without debugging");
-	  section = MSYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
+	  section = msymbol.minsym->obj_section (objfile);
 	  if (section_is_overlay (section))
 	    {
 	      load_addr = overlay_unmapped_address (load_addr, section);
@@ -1558,7 +1558,7 @@ info_address_command (const char *exp, int from_tty)
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
   if (SYMBOL_OBJFILE_OWNED (sym))
-    section = SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym);
+    section = sym->obj_section (symbol_objfile (sym));
   else
     section = NULL;
   gdbarch = symbol_arch (sym);
@@ -1678,7 +1678,7 @@ info_address_command (const char *exp, int from_tty)
 	  printf_filtered ("unresolved");
 	else
 	  {
-	    section = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
+	    section = msym.minsym->obj_section (msym.objfile);
 
 	    if (section
 		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)

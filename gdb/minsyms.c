@@ -800,9 +800,9 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		      /* Some types of debug info, such as COFF,
 			 don't fill the bfd_section member, so don't
 			 throw away symbols on those platforms.  */
-		      && MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi]) != NULL
+		      && msymbol[hi].obj_section (objfile) != nullptr
 		      && (!matching_obj_sections
-			  (MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi]),
+			  (msymbol[hi].obj_section (objfile),
 			   section)))
 		    {
 		      hi--;
@@ -820,8 +820,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
 		      && (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
 			  == MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi - 1]))
-		      && (MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi])
-			  == MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi - 1])))
+		      && (msymbol[hi].obj_section (objfile)
+			  == msymbol[hi - 1].obj_section (objfile)))
 		    {
 		      hi--;
 		      continue;
@@ -1560,7 +1560,7 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
 	break;
     }
 
-  obj_section = MSYMBOL_OBJ_SECTION (minsym.objfile, minsym.minsym);
+  obj_section = minsym.minsym->obj_section (minsym.objfile);
   if (iter != past_the_end
       && (MSYMBOL_VALUE_ADDRESS (minsym.objfile, iter)
 	  < obj_section_endaddr (obj_section)))

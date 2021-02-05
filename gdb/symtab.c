@@ -1012,6 +1012,16 @@ general_symbol_info::search_name () const
 
 /* See symtab.h.  */
 
+struct obj_section *
+general_symbol_info::obj_section (const struct objfile *objfile) const
+{
+  if (section >= 0)
+    return &objfile->sections[section];
+  return nullptr;
+}
+
+/* See symtab.h.  */
+
 bool
 symbol_matches_search_name (const struct general_symbol_info *gsymbol,
 			    const lookup_name_info &name)
@@ -1730,7 +1740,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   if (objfile == NULL)
     objfile = symbol_objfile (sym);
 
-  if (SYMBOL_OBJ_SECTION (objfile, sym))
+  if (sym->obj_section (objfile) != nullptr)
     return sym;
 
   /* We should have an objfile by now.  */
@@ -2972,8 +2982,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 		  ALL_BLOCK_SYMBOLS (b, iter, sym)
 		    {
 		      fixup_symbol_section (sym, obj_file);
-		      if (matching_obj_sections (SYMBOL_OBJ_SECTION (obj_file,
-								     sym),
+		      if (matching_obj_sections (sym->obj_section (obj_file),
 						 section))
 			break;
 		    }
@@ -3732,7 +3741,7 @@ find_function_start_sal (symbol *sym, bool funfirstline)
   fixup_symbol_section (sym, NULL);
   symtab_and_line sal
     = find_function_start_sal_1 (BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)),
-				 SYMBOL_OBJ_SECTION (symbol_objfile (sym), sym),
+				 sym->obj_section (symbol_objfile (sym)),
 				 funfirstline);
   sal.symbol = sym;
   return sal;
@@ -3823,7 +3832,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
       objfile = symbol_objfile (sym);
       pc = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
-      section = SYMBOL_OBJ_SECTION (objfile, sym);
+      section = sym->obj_section (objfile);
       name = sym->linkage_name ();
     }
   else
@@ -3836,7 +3845,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
       objfile = msymbol.objfile;
       pc = BMSYMBOL_VALUE_ADDRESS (msymbol);
-      section = MSYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
+      section = msymbol.minsym->obj_section (objfile);
       name = msymbol.minsym->linkage_name ();
     }
 

@@ -540,6 +540,12 @@ struct general_symbol_info
      does not get relocated relative to a section.  */
 
   short section;
+
+  /* Return the obj_section from OBJFILE for this symbol.  The symbol
+     returned is based on the SECTION member variable, and can be nullptr
+     if SECTION is negative.  */
+
+  struct obj_section *obj_section (const struct objfile *objfile) const;
 };
 
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
@@ -565,10 +571,6 @@ extern CORE_ADDR get_symbol_address (const struct symbol *sym);
 #define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
 #define SYMBOL_SECTION(symbol)		(symbol)->section
-#define SYMBOL_OBJ_SECTION(objfile, symbol)			\
-  (((symbol)->section >= 0)				\
-   ? (&(((objfile)->sections)[(symbol)->section]))	\
-   : NULL)
 
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
@@ -763,10 +765,6 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
 #define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
 #define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
 #define MSYMBOL_SECTION(symbol)		(symbol)->section
-#define MSYMBOL_OBJ_SECTION(objfile, symbol)			\
-  (((symbol)->section >= 0)				\
-   ? (&(((objfile)->sections)[(symbol)->section]))	\
-   : NULL)
 
 #include "minsyms.h"
 
