@@ -3474,11 +3474,10 @@ create_exception_master_breakpoint (void)
       if (create_exception_master_breakpoint_probe (obj))
 	continue;
 
-      /* Iterate over separate debug objects and try an _Unwind_DebugHook
-	 kind breakpoint.  */
-      for (objfile *sepdebug = obj->separate_debug_objfile;
-	   sepdebug != nullptr; sepdebug = sepdebug->separate_debug_objfile)
-	if (create_exception_master_breakpoint_hook (sepdebug))
+      /* Iterate over main and separate debug objects and try an
+	 _Unwind_DebugHook kind breakpoint.  */
+      for (objfile *debug_objfile : obj->separate_debug_objfiles ())
+	if (create_exception_master_breakpoint_hook (debug_objfile))
 	  break;
     }
 }
