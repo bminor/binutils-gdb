@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2020-2023 Free Software Foundation, Inc.
+   Copyright 2021-2022 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,16 +15,38 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef MY_SYSCALLS_H
-#define MY_SYSCALLS_H
+#include <pthread.h>
+#include <assert.h>
+#include <stdlib.h>
+#include "../lib/my-syscalls.h"
 
-/* Declarations for syscall wrappers implemented in my-syscalls.S.  */
+static void *
+thread_func (void *arg)
+{
+  my_exit (0);
 
-int my_execve (const char *file, char *argv[], char *envp[]);
+  /* my_exit above should exit the thread, we don't expect to reach
+     here.  */
+  abort ();
+}
 
-/* `exit` syscall, which makes the thread exit (as opposed to
-   `exit_group`, which makes the process exit).  */
+int
+main (void)
+{
+  int i;
 
-void my_exit (int code);
+  /* Spawn and join a thread, 100 times.  */
+  for (i = 0; i < 100; i++)
+    {
+      pthread_t thread;
+      int ret;
 
-#endif /* MY_SYSCALLS_H */
+      ret = pthread_create (&thread, NULL, thread_func, NULL);
+      assert (ret == 0);
+
+      ret = pthread_join (thread, NULL);
+      assert (ret == 0);
+    }
+
+  return 0;
+}
