@@ -42,8 +42,6 @@ extern int deterministic;
 
 static bfd *obfd;
 static char *real_name;
-static char *temp_name;
-static int real_ofd;
 static FILE *outfile;
 
 static void
@@ -151,24 +149,27 @@ maybequit (void)
 void
 ar_open (char *name, int t)
 {
-  real_name = xstrdup (name);
-  temp_name = make_tempname (real_name, &real_ofd);
+  char *tname;
+  const char *bname = lbasename (name);
+  real_name = name;
 
-  if (temp_name == NULL)
+  /* Prepend tmp- to the beginning, to avoid file-name clashes after
+     truncation on filesystems with limited namespaces (DOS).  */
+  if (asprintf (&tname, "%.*stmp-%s", (int) (bname - name), name, bname) == -1)
     {
-      fprintf (stderr, _("%s: Can't open temporary file (%s)\n"),
+      fprintf (stderr, _("%s: Can't allocate memory for temp name (%s)\n"),
 	       program_name, strerror(errno));
       maybequit ();
       return;
     }
 
-  obfd = bfd_fdopenw (temp_name, NULL, real_ofd);
+  obfd = bfd_openw (tname, NULL);
 
   if (!obfd)
     {
       fprintf (stderr,
 	       _("%s: Can't open output archive %s\n"),
-	       program_name, temp_name);
+	       program_name,  tname);
 
       maybequit ();
     }
@@ -343,9 +344,10 @@ ar_save (void)
     }
   else
     {
+      char *ofilename = xstrdup (bfd_get_filename (obfd));
       bfd_boolean skip_stat = FALSE;
       struct stat target_stat;
-      int ofd = real_ofd;
+      int ofd = -1;
 
       if (deterministic > 0)
         obfd->flags |= BFD_DETERMINISTIC_OUTPUT;
@@ -353,31 +355,17 @@ ar_save (void)
 #if !defined (_WIN32) || defined (__CYGWIN32__)
       /* It's OK to fail; at worst it will result in SMART_RENAME using a slow
          copy fallback to write the output.  */
-      ofd = dup (ofd);
+      ofd = dup (fileno ((FILE *) obfd->iostream));
+      if (lstat (real_name, &target_stat) != 0)
+	skip_stat = TRUE;
 #endif
+
       bfd_close (obfd);
 
-      if (lstat (real_name, &target_stat) != 0)
-	{
-	  /* The temp file created in ar_open has mode 0600 as per mkstemp.
-	     Create the real empty output file here so smart_rename will
-	     update the mode according to the process umask.  */
-	  obfd = bfd_openw (real_name, NULL);
-	  if (obfd == NULL
-	      || bfd_stat (obfd, &target_stat) != 0)
-	    skip_stat = TRUE;
-	  if (obfd != NULL)
-	    {
-	      bfd_set_format (obfd, bfd_archive);
-	      bfd_close (obfd);
-	    }
-	}
-
-      smart_rename (temp_name, real_name, ofd,
+      smart_rename (ofilename, real_name, ofd,
 		    skip_stat ? NULL : &target_stat, 0);
       obfd = 0;
-      free (temp_name);
-      free (real_name);
+      free (ofilename);
     }
 }
 
