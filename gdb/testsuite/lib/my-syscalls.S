@@ -68,3 +68,7 @@ NAME ## _syscall:		;\
 #endif
 
 SYSCALL (my_execve, __NR_execve)
+
+/* void my_exit (int code);  */
+
+SYSCALL (my_exit, __NR_exit)
