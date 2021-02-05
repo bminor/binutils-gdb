@@ -4835,7 +4835,6 @@ strip_main (int argc, char *argv[])
       struct stat statbuf;
       char *tmpname;
       int tmpfd = -1;
-      int copyfd = -1;
 
       if (get_file_size (argv[i]) < 1)
 	{
@@ -4849,12 +4848,7 @@ strip_main (int argc, char *argv[])
       else
 	tmpname = output_file;
 
-      if (tmpname == NULL
-#if !defined (_WIN32) || defined (__CYGWIN32__)
-	  /* Retain a copy of TMPFD since we will need it for SMART_RENAME.  */
-	  || (tmpfd >= 0 && (copyfd = dup (tmpfd)) == -1)
-#endif
-      )
+      if (tmpname == NULL)
 	{
 	  bfd_nonfatal_message (argv[i], NULL, NULL,
 				_("could not create temporary file to hold stripped copy"));
@@ -4872,18 +4866,12 @@ strip_main (int argc, char *argv[])
 	  if (output_file != tmpname)
 	    status = (smart_rename (tmpname,
 				    output_file ? output_file : argv[i],
-				    copyfd, &statbuf, preserve_dates) != 0);
+				    preserve_dates) != 0);
 	  if (status == 0)
 	    status = hold_status;
 	}
       else
-	{
-#if !defined (_WIN32) || defined (__CYGWIN32__)
-	  if (copyfd >= 0)
-	    close (copyfd);
-#endif
-	  unlink_if_ordinary (tmpname);
-	}
+	unlink_if_ordinary (tmpname);
       if (output_file != tmpname)
 	free (tmpname);
     }
@@ -5091,7 +5079,6 @@ copy_main (int argc, char *argv[])
   bfd_boolean use_globalize = FALSE;
   bfd_boolean use_keep_global = FALSE;
   int c, tmpfd = -1;
-  int copyfd = -1;
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
 
@@ -5936,16 +5923,9 @@ copy_main (int argc, char *argv[])
   else
     tmpname = output_filename;
 
-  if (tmpname == NULL
-#if !defined (_WIN32) || defined (__CYGWIN32__)
-      /* Retain a copy of TMPFD since we will need it for SMART_RENAME.  */
-      || (tmpfd >= 0 && (copyfd = dup (tmpfd)) == -1)
-#endif
-  )
-    {
-      fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
-	     input_filename, strerror (errno));
-    }
+  if (tmpname == NULL)
+    fatal (_("warning: could not create temporary file whilst copying '%s', (error: %s)"),
+	   input_filename, strerror (errno));
 
   copy_file (input_filename, tmpname, tmpfd, &statbuf, input_target,
 	     output_target, input_arch);
@@ -5954,17 +5934,11 @@ copy_main (int argc, char *argv[])
       if (preserve_dates)
 	set_times (tmpname, &statbuf);
       if (tmpname != output_filename)
-	status = (smart_rename (tmpname, input_filename, copyfd, &statbuf,
+	status = (smart_rename (tmpname, input_filename,
 				preserve_dates) != 0);
     }
   else
-    {
-#if !defined (_WIN32) || defined (__CYGWIN32__)
-      if (copyfd >= 0)
-	close (copyfd);
-#endif
-      unlink_if_ordinary (tmpname);
-    }
+    unlink_if_ordinary (tmpname);
 
   if (tmpname != output_filename)
     free (tmpname);
