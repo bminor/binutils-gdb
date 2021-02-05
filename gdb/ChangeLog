@@ -1,5 +1,10 @@
 2021-02-05  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/27333
+	* dwarf2/read.c (process_psymtab_comp_unit): Handle DW_TAG_type_unit.
+
+2021-02-05  Tom de Vries  <tdevries@suse.de>
+
 	PR breakpoints/27313
 	* break-catch-syscall.c (catch_syscall_split_args): Reject negative
 	syscall numbers.

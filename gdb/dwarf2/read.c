@@ -7836,6 +7836,9 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
     case DW_TAG_partial_unit:
       this_cu->unit_type = DW_UT_partial;
       break;
+    case DW_TAG_type_unit:
+      this_cu->unit_type = DW_UT_type;
+      break;
     default:
       abort ();
     }
