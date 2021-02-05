@@ -33,6 +33,22 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
+set test "no file command warnings"
+if { [regexp "warning: " $gdb_file_cmd_msg] } {
+    set kfail_re \
+	[concat \
+	     "warning: Section .debug_aranges in \[^\r\n\]* entry" \
+	     "at offset 0 debug_info_offset 0 does not exists," \
+	     "ignoring \\.debug_aranges\\."]
+    if { [regexp $kfail_re $gdb_file_cmd_msg] } {
+	kfail symtab/25969 $test
+    } else {
+	fail $test
+    }
+} else {
+    pass $test
+}
+
 set cmd "ptype main"
 set pass_re \
     [multi_line \

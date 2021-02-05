@@ -5350,6 +5350,7 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 					 sect_off, 0);
 	  per_bfd->all_comp_units.push_back (per_cu);
 	}
+      return;
     }
 
   sect_offset sect_off_prev;
