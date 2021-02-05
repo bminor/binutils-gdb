@@ -1,3 +1,8 @@
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Files): Update documentation for 'maint info
+	sections'.
+
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python.texinfo (TUI Windows In Python): Extend description of

@@ -1,5 +1,21 @@
 2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention changes to 'maint info sections'.
+	* maint.c (match_substring): Return a bool, fix whitespace issue.
+	(struct single_bfd_flag_info): New struct.
+	(bfd_flag_info): New static global.
+	(match_bfd_flags): Return a bool, use bfd_flag_info.
+	(print_bfd_flags): Use bfd_flag_info.
+	(maint_print_section_info): Delete trailing whitespace.
+	(struct maint_info_sections_opts): New struct.
+	(maint_info_sections_option_defs): New static global.
+	(maint_info_sections_completer): New function.
+	(maintenance_info_sections): Use option parsing mechanism.
+	(_initialize_maint_cmds): Update command help text for 'maint info
+	sections' and register a command completer.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* maint.c (print_bfd_section_info_maybe_relocated): Delete,
 	functionality merged into...
 	(maint_print_all_sections): ...this new function.

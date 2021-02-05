@@ -15,6 +15,8 @@
 
 # Test just for the 'maintenance info sections' command.
 
+load_lib completion-support.exp
+
 standard_testfile break.c break1.c
 
 if {[prepare_for_testing "failed to prepare" $testfile \
@@ -139,11 +141,11 @@ gdb_test "add-symbol-file ${binfile}" ".*" \
 gdb_test_no_output "maint info sections" \
     "no output when no executable is set"
 
-# Check that the executable shows up as an object file when ALLOBJ is
-# used.
+# Check that the executable shows up as an object file when
+# -all-objects is used.
 set seen_header false
 set seen_a_section false
-gdb_test_multiple "maint info sections ALLOBJ" "" {
+gdb_test_multiple "maint info sections -all-objects" "" {
     -re "Object file: `${binfile}', file type \[^.\]+\.\r\n" {
 	set seen_header true
 	exp_continue
@@ -154,7 +156,29 @@ gdb_test_multiple "maint info sections ALLOBJ" "" {
     }
     -re "^$gdb_prompt $" {
 	gdb_assert { $seen_header && $seen_a_section } \
-	    "ensure header and section seen in ALLOBJ case"
+	    "ensure header and section seen in -all-objects case"
 	pass $gdb_test_name
     }
+}
+
+# Test the command line completion on 'maint info sections'.  First
+# the command line flag.
+test_gdb_complete_unique \
+    "maintenance info sections -" \
+    "maintenance info sections -all-objects"
+
+# Now check the section flags complete.
+test_gdb_complete_multiple "maintenance info sections " "" "" {
+    "ALLOC"
+    "CODE"
+    "COFF_SHARED_LIBRARY"
+    "CONSTRUCTOR"
+    "DATA"
+    "HAS_CONTENTS"
+    "IS_COMMON"
+    "LOAD"
+    "NEVER_LOAD"
+    "READONLY"
+    "RELOC"
+    "ROM"
 }

@@ -86,6 +86,11 @@ inferior [ID]
   behavior of the command is unchanged and have the inferior ID become
   the current inferior.
 
+maintenance info sections
+  The ALLOBJ keyword has been replaced with an -all-objects command
+  line flag.  It is now possible to filter which sections are printed
+  even when -all-objects is passed.
+
 * Removed targets and native configurations
 
 ARM Symbian			arm*-*-symbianelf*
