@@ -1,5 +1,13 @@
 2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* maint.c (print_bfd_section_info_maybe_relocated): Delete,
+	functionality merged into...
+	(maint_print_all_sections): ...this new function.
+	(maintenance_info_sections): Make use of maint_print_all_sections,
+	allow all objects to be printed even where there's no executable.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* breakpoint.c (resolve_sal_pc): Make use of
 	bound_minimal_symbol::obj_section.
 	* maint.c (maintenance_translate_address): Likewise.

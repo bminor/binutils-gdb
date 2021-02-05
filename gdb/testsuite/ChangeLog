@@ -1,5 +1,10 @@
 2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/maint-info-sections.exp: Update expected output, and
+	add additional tests.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/maint-info-sections.exp: New file, content is moved
 	from gdb.base/maint.exp and cleaned up to use latest testsuite
 	techniques.

@@ -354,25 +354,50 @@ maint_obj_section_from_bfd_section (bfd *abfd,
   return osect;
 }
 
-/* Print information about ASECT from ABFD.  Where possible the information for
-   ASECT will print the relocated addresses of the section.
+/* Print information about all sections from ABFD, which is the bfd
+   corresponding to OBJFILE.  It is fine for OBJFILE to be nullptr, but
+   ABFD must never be nullptr.  If OBJFILE is provided then the sections of
+   ABFD will (potentially) be displayed relocated (i.e. the object file was
+   loaded with add-symbol-file and custom offsets were provided).
 
-   ARG is the argument string passed by the user to the top level maintenance
-   info sections command.  Used for filtering which sections are printed.  */
+   HEADER is a string that describes this file, e.g. 'Exec file: ', or
+   'Core file: '.
+
+   ARG is a string used for filtering which sections are printed, this can
+   be nullptr for no filtering.  See the top level 'maint info sections'
+   for a fuller description of the possible filtering strings.  */
 
 static void
-print_bfd_section_info_maybe_relocated (bfd *abfd, asection *asect,
-					objfile *objfile, const char *arg,
-					int index_digits)
+maint_print_all_sections (const char *header, bfd *abfd, objfile *objfile,
+			  const char *arg)
 {
-  gdb_assert (objfile->sections != NULL);
-  obj_section *osect
-    = maint_obj_section_from_bfd_section (abfd, asect, objfile);
+  puts_filtered (header);
+  wrap_here ("        ");
+  printf_filtered ("`%s', ", bfd_get_filename (abfd));
+  wrap_here ("        ");
+  printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
 
-  if (osect->the_bfd_section == NULL)
-    print_bfd_section_info (abfd, asect, arg, index_digits);
-  else
-    print_objfile_section_info (abfd, osect, arg, index_digits);
+  int section_count = gdb_bfd_count_sections (abfd);
+  int digits = index_digits (section_count);
+
+  for (asection *sect : gdb_bfd_sections (abfd))
+    {
+      obj_section *osect = nullptr;
+
+      if (objfile != nullptr)
+	{
+	  gdb_assert (objfile->sections != nullptr);
+	  osect
+	    = maint_obj_section_from_bfd_section (abfd, sect, objfile);
+	  if (osect->the_bfd_section == nullptr)
+	    osect = nullptr;
+	}
+
+      if (osect == nullptr)
+	print_bfd_section_info (abfd, sect, arg, digits);
+      else
+	print_objfile_section_info (abfd, osect, arg, digits);
+    }
 }
 
 /* Implement the "maintenance info sections" command.  */
@@ -380,56 +405,27 @@ print_bfd_section_info_maybe_relocated (bfd *abfd, asection *asect,
 static void
 maintenance_info_sections (const char *arg, int from_tty)
 {
-  if (current_program_space->exec_bfd ())
+  bool allobj = false;
+
+  /* Only this function cares about the 'ALLOBJ' argument; if 'ALLOBJ' is
+     the only argument, discard it rather than passing it down to
+     print_objfile_section_info (which wouldn't know how to handle it).  */
+  if (arg != nullptr && strcmp (arg, "ALLOBJ") == 0)
     {
-      bool allobj = false;
+      arg = nullptr;
+      allobj = true;
+    }
 
-      printf_filtered (_("Exec file:\n"));
-      printf_filtered ("    `%s', ",
-		       bfd_get_filename (current_program_space->exec_bfd ()));
-      wrap_here ("        ");
-      printf_filtered (_("file type %s.\n"),
-		       bfd_get_target (current_program_space->exec_bfd ()));
-
-      /* Only this function cares about the 'ALLOBJ' argument;
-	 if 'ALLOBJ' is the only argument, discard it rather than
-	 passing it down to print_objfile_section_info (which
-	 wouldn't know how to handle it).  */
-      if (arg && strcmp (arg, "ALLOBJ") == 0)
-	{
-	  arg = NULL;
-	  allobj = true;
-	}
-
-      for (objfile *ofile : current_program_space->objfiles ())
-	{
-	  if (allobj)
-	    printf_filtered (_("  Object file: %s\n"),
-			     bfd_get_filename (ofile->obfd));
-	  else if (ofile->obfd != current_program_space->exec_bfd ())
-	    continue;
-
-	  int section_count = gdb_bfd_count_sections (ofile->obfd);
-
-	  for (asection *sect : gdb_bfd_sections (ofile->obfd))
-	    print_bfd_section_info_maybe_relocated
-	      (ofile->obfd, sect, ofile, arg, index_digits (section_count));
-	}
+  for (objfile *ofile : current_program_space->objfiles ())
+    {
+      if (ofile->obfd == current_program_space->exec_bfd ())
+	maint_print_all_sections (_("Exec file: "), ofile->obfd, ofile, arg);
+      else if (allobj)
+	maint_print_all_sections (_("Object file: "), ofile->obfd, ofile, arg);
     }
 
   if (core_bfd)
-    {
-      printf_filtered (_("Core file:\n"));
-      printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
-      wrap_here ("        ");
-      printf_filtered (_("file type %s.\n"), bfd_get_target (core_bfd));
-
-      int section_count = gdb_bfd_count_sections (core_bfd);
-
-      for (asection *sect : gdb_bfd_sections (core_bfd))
-	print_bfd_section_info (core_bfd, sect, arg,
-				index_digits (section_count));
-    }
+    maint_print_all_sections (_("Core file: "), core_bfd, nullptr, arg);
 }
 
 static void

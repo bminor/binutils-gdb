@@ -34,7 +34,7 @@ if ![runto_main] then {
 set seen_header false
 set seen_a_section false
 gdb_test_multiple "maint info sections" "general output check" {
-    -re "Exec file:\r\n\[\t ]+`\[^'\]+', file type \[^.\]+\.\r\n" {
+    -re "Exec file: `\[^'\]+', file type \[^.\]+\.\r\n" {
 	set seen_header true
 	exp_continue
     }
@@ -63,18 +63,18 @@ set text_section ".text"
 set data_section ".data"
 
 gdb_test_multiple "maint info sections" "" {
-    -re -wrap "Exec file:\r\n.*${binfile}., file type.*ER_RO.*" {
+    -re -wrap "Exec file: .*${binfile}., file type.*ER_RO.*" {
 	# Looks like RealView which uses different section names.
 	set text_section ER_RO
 	set data_section ER_RW
 	pass "maint info sections"
     }
-    -re -wrap "Exec file:\r\n.*${binfile}., file type.*neardata.*" {
+    -re -wrap "Exec file: .*${binfile}., file type.*neardata.*" {
 	# c6x doesn't have .data section.  It has .neardata and .fardata section.
 	set data_section ".neardata"
 	pass "maint info sections"
     }
-    -re -wrap "Exec file:\r\n.*${binfile}., file type.*" {
+    -re -wrap "Exec file: .*${binfile}., file type.*" {
 	pass "maint info sections"
     }
 }
@@ -122,6 +122,39 @@ gdb_test_multiple "maint info sections DATA" "" {
 	pass $gdb_test_name
     }
     -re -wrap " .rodata .*" {
+	pass $gdb_test_name
+    }
+}
+
+# Restart GDB, but don't load the executable.
+clean_restart
+
+# Now load the executable in as a symbol file.
+gdb_test "add-symbol-file ${binfile}" ".*" \
+    "load the executable as a symbol file" \
+    "add symbol table from file \"${binfile}\"\r\n\\(y or n\\) " \
+    "y"
+
+# As we have no object file 'maint info sections' will print nothing.
+gdb_test_no_output "maint info sections" \
+    "no output when no executable is set"
+
+# Check that the executable shows up as an object file when ALLOBJ is
+# used.
+set seen_header false
+set seen_a_section false
+gdb_test_multiple "maint info sections ALLOBJ" "" {
+    -re "Object file: `${binfile}', file type \[^.\]+\.\r\n" {
+	set seen_header true
+	exp_continue
+    }
+    -re "^ \\\[\[0-9\]+\\\]\[\t \]+$hex->$hex at $hex: \[^*\r\]+\r\n" {
+	set seen_a_section true
+	exp_continue
+    }
+    -re "^$gdb_prompt $" {
+	gdb_assert { $seen_header && $seen_a_section } \
+	    "ensure header and section seen in ALLOBJ case"
 	pass $gdb_test_name
     }
 }
