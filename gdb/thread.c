@@ -402,6 +402,9 @@ thread_info::clear_pending_waitstatus ()
 void
 thread_info::set_thread_options (gdb_thread_options thread_options)
 {
+  gdb_assert (this->state != THREAD_EXITED);
+  gdb_assert (!this->executing ());
+
   if (m_thread_options == thread_options)
     return;
 
