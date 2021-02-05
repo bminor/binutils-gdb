@@ -1,3 +1,7 @@
+2021-02-05  Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS: Remove Richard Henderson as the ALPHA maintainer.
+
 2021-02-05  Eli Zaretskii  <eliz@gnu.org>
 
 	PR 27252

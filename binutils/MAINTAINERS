@@ -58,7 +58,6 @@ maintainers for a given domain then responsibility falls to the first
 maintainer.  The first maintainer is free to devolve that
 responsibility among the other maintainers.
 
-  ALPHA            Richard Henderson <rth@twiddle.net>
   AARCH64	   Richard Earnshaw <rearnsha@arm.com>
   AARCH64	   Marcus Shawcroft <marcus.shawcroft@arm.com>
   ARC		   Claudiu Zissulescu <claziss@synopsys.com>
