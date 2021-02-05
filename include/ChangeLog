@@ -1,6 +1,11 @@
 2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	PR 27348
+	* opcode/riscv.h: Remove obsolete OP_*CUSTOM_IMM.
+
+2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	PR 27348
 	* opcode/riscv-opc.h: Remove obsolete Xcustom support.
 
 2021-01-27  Nick Alcock  <nick.alcock@oracle.com>
