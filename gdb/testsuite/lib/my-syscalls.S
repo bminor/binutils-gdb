@@ -69,4 +69,8 @@ NAME ## _syscall:		;\
 
 SYSCALL (my_execve, __NR_execve)
 
+/* void my_exit (int code);  */
+
+SYSCALL (my_exit, __NR_exit)
+
 	.section	.note.GNU-stack,"",@progbits
