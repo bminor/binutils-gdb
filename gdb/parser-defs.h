@@ -334,6 +334,16 @@ extern void write_exp_msymbol (struct expr_builder *,
 
 extern void write_dollar_variable (struct parser_state *, struct stoken str);
 
+/* Write a reference to a symbol to the expression being built in PS.
+   NAME is the name of the symbol to write; SYM is the symbol.  If SYM
+   is nullptr (meaning the 'symbol' member), a minimal symbol will be
+   searched for and used if available.  Throws an exception if SYM is
+   nullptr and no minimal symbol can be found.  */
+
+extern void write_exp_symbol_reference (struct parser_state *ps,
+					const char *name,
+					struct block_symbol sym);
+
 extern const char *find_template_name_end (const char *);
 
 extern std::string copy_name (struct stoken);

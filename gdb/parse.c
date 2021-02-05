@@ -650,6 +650,32 @@ handle_register:
   return;
 }
 
+/* See parser-defs.h.  */
+
+void
+write_exp_symbol_reference (struct parser_state *pstate, const char *name,
+			    struct block_symbol sym)
+{
+  if (sym.symbol != nullptr)
+    {
+      if (symbol_read_needs_frame (sym.symbol))
+	pstate->block_tracker->update (sym);
+      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+      write_exp_elt_block (pstate, NULL);
+      write_exp_elt_sym (pstate, sym.symbol);
+      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
+    }
+  else
+    {
+      struct bound_minimal_symbol msymbol = lookup_bound_minimal_symbol (name);
+      if (msymbol.minsym != NULL)
+	write_exp_msymbol (pstate, msymbol);
+      else if (!have_full_symbols () && !have_partial_symbols ())
+	error (_("No symbol table is loaded.  Use the \"file\" command."));
+      else
+	error (_("No symbol \"%s\" in current context."), name);
+    }
+}
 
 const char *
 find_template_name_end (const char *p)

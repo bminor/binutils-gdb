@@ -1,3 +1,13 @@
+2021-02-05  Tom Tromey  <tom@tromey.com>
+
+	* parser-defs.h (write_exp_symbol_reference): Declare.
+	* parse.c (write_exp_symbol_reference): New function.
+	* p-exp.y (variable): Use write_exp_symbol_reference.
+	* m2-exp.y (variable): Use write_exp_symbol_reference.
+	* f-exp.y (variable): Use write_exp_symbol_reference.
+	* d-exp.y (PrimaryExpression): Use write_exp_symbol_reference.
+	* c-exp.y (variable): Use write_exp_symbol_reference.
+
 2021-02-05  Tom de Vries  <tdevries@suse.de>
 
 	PR exp/27265

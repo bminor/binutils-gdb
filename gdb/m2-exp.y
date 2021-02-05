@@ -561,37 +561,15 @@ variable:	NAME
 			{ struct block_symbol sym;
 			  struct field_of_this_result is_a_field_of_this;
 
+			  std::string name = copy_name ($1);
 			  sym
-			    = lookup_symbol (copy_name ($1).c_str (),
+			    = lookup_symbol (name.c_str (),
 					     pstate->expression_context_block,
 					     VAR_DOMAIN,
 					     &is_a_field_of_this);
 
-			  if (sym.symbol)
-			    {
-			      if (symbol_read_needs_frame (sym.symbol))
-				pstate->block_tracker->update (sym);
-
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      write_exp_elt_block (pstate, sym.block);
-			      write_exp_elt_sym (pstate, sym.symbol);
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			    }
-			  else
-			    {
-			      struct bound_minimal_symbol msymbol;
-			      std::string arg = copy_name ($1);
-
-			      msymbol =
-				lookup_bound_minimal_symbol (arg.c_str ());
-			      if (msymbol.minsym != NULL)
-				write_exp_msymbol (pstate, msymbol);
-			      else if (!have_full_symbols () && !have_partial_symbols ())
-				error (_("No symbol table is loaded.  Use the \"symbol-file\" command."));
-			      else
-				error (_("No symbol \"%s\" in current context."),
-				       arg.c_str ());
-			    }
+			  write_exp_symbol_reference (pstate, name.c_str (),
+						      sym);
 			}
 	;
 

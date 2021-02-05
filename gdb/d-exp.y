@@ -464,7 +464,6 @@ PrimaryExpression:
 			     been resolved, it's not likely to be found.  */
 			  if (type->code () == TYPE_CODE_MODULE)
 			    {
-			      struct bound_minimal_symbol msymbol;
 			      struct block_symbol sym;
 			      const char *type_name = TYPE_SAFE_NAME (type);
 			      int type_name_len = strlen (type_name);
@@ -477,35 +476,23 @@ PrimaryExpression:
 				lookup_symbol (name.c_str (),
 					       (const struct block *) NULL,
 					       VAR_DOMAIN, NULL);
-			      if (sym.symbol)
-				{
-				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-				  write_exp_elt_block (pstate, sym.block);
-				  write_exp_elt_sym (pstate, sym.symbol);
-				  write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-				  break;
-				}
-
-			      msymbol = lookup_bound_minimal_symbol (name.c_str ());
-			      if (msymbol.minsym != NULL)
-				write_exp_msymbol (pstate, msymbol);
-			      else if (!have_full_symbols () && !have_partial_symbols ())
-				error (_("No symbol table is loaded.  Use the \"file\" command."));
-			      else
-				error (_("No symbol \"%s\" in current context."),
-				       name.c_str ());
+			      write_exp_symbol_reference (pstate,
+							  name.c_str (),
+							  sym);
 			    }
+			  else
+			    {
+			      /* Check if the qualified name resolves as a member
+				 of an aggregate or an enum type.  */
+			      if (!type_aggregate_p (type))
+				error (_("`%s' is not defined as an aggregate type."),
+				       TYPE_SAFE_NAME (type));
 
-			  /* Check if the qualified name resolves as a member
-			     of an aggregate or an enum type.  */
-			  if (!type_aggregate_p (type))
-			    error (_("`%s' is not defined as an aggregate type."),
-				   TYPE_SAFE_NAME (type));
-
-			  write_exp_elt_opcode (pstate, OP_SCOPE);
-			  write_exp_elt_type (pstate, type);
-			  write_exp_string (pstate, $3);
-			  write_exp_elt_opcode (pstate, OP_SCOPE);
+			      write_exp_elt_opcode (pstate, OP_SCOPE);
+			      write_exp_elt_type (pstate, type);
+			      write_exp_string (pstate, $3);
+			      write_exp_elt_opcode (pstate, OP_SCOPE);
+			    }
 			}
 |	DOLLAR_VARIABLE
 		{ write_dollar_variable (pstate, $1); }

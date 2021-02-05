@@ -691,33 +691,12 @@ variable:	qualified_name
 	|	COLONCOLON name
 			{
 			  std::string name = copy_name ($2);
-			  struct symbol *sym;
-			  struct bound_minimal_symbol msymbol;
 
-			  sym =
-			    lookup_symbol (name.c_str (),
-					   (const struct block *) NULL,
-					   VAR_DOMAIN, NULL).symbol;
-			  if (sym)
-			    {
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      write_exp_elt_block (pstate, NULL);
-			      write_exp_elt_sym (pstate, sym);
-			      write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-			      break;
-			    }
-
-			  msymbol
-			    = lookup_bound_minimal_symbol (name.c_str ());
-			  if (msymbol.minsym != NULL)
-			    write_exp_msymbol (pstate, msymbol);
-			  else if (!have_full_symbols ()
-				   && !have_partial_symbols ())
-			    error (_("No symbol table is loaded.  "
-				   "Use the \"file\" command."));
-			  else
-			    error (_("No symbol \"%s\" in current context."),
-				   name.c_str ());
+			  struct block_symbol sym
+			    = lookup_symbol (name.c_str (), nullptr,
+					     VAR_DOMAIN, nullptr);
+			  write_exp_symbol_reference (pstate, name.c_str (),
+						      sym);
 			}
 	;
 
