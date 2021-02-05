@@ -357,7 +357,7 @@ ar_save (void)
 #endif
       bfd_close (obfd);
 
-      if (lstat (real_name, &target_stat) != 0)
+      if (stat (real_name, &target_stat) != 0)
 	{
 	  /* The temp file created in ar_open has mode 0600 as per mkstemp.
 	     Create the real empty output file here so smart_rename will
