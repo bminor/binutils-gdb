@@ -1,3 +1,7 @@
+2021-02-05  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (create_cus_from_debug_names_list): Fix indentation.
+
 2021-02-04  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt (riscv*-*-*): Set gdb_sim.
