@@ -355,7 +355,7 @@ ar_save (void)
 #if !defined (_WIN32) || defined (__CYGWIN32__)
       /* It's OK to fail; at worst it will result in SMART_RENAME using a slow
          copy fallback to write the output.  */
-      ofd = dup (fileno ((FILE *) obfd->iostream));
+      ofd = dup (fileno (obfd->iostream));
       if (lstat (real_name, &target_stat) != 0)
 	skip_stat = TRUE;
 #endif
