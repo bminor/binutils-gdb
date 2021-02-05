@@ -1,3 +1,8 @@
+2021-02-05  Alan Modra  <amodra@gmail.com>
+
+	PR 27345
+	* arsup.c (ar_save): Use stat rather than lstat.
+
 2021-02-03  Alan Modra  <amodra@gmail.com>
 
 	PR 27270
