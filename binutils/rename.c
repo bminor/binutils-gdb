@@ -179,7 +179,10 @@ smart_rename (const char *from, const char *to, int fd ATTRIBUTE_UNUSED,
 	      int preserve_dates ATTRIBUTE_UNUSED)
 {
   int ret = 0;
-  bfd_boolean exists = target_stat != NULL;
+  struct stat to_stat;
+  bfd_boolean exists;
+
+  exists = lstat (to, &to_stat) == 0;
 
 #if defined (_WIN32) && !defined (__CYGWIN32__)
   /* Win32, unlike unix, will not erase `to' in `rename(from, to)' but
@@ -214,16 +217,16 @@ smart_rename (const char *from, const char *to, int fd ATTRIBUTE_UNUSED,
      external change.  */
   if (! exists
       || (fd >= 0
-	  && !S_ISLNK (target_stat->st_mode)
-	  && S_ISREG (target_stat->st_mode)
-	  && (target_stat->st_mode & S_IWUSR)
-	  && target_stat->st_nlink == 1)
+	  && !S_ISLNK (to_stat.st_mode)
+	  && S_ISREG (to_stat.st_mode)
+	  && (to_stat.st_mode & S_IWUSR)
+	  && to_stat.st_nlink == 1)
       )
     {
       ret = rename (from, to);
       if (ret == 0)
 	{
-	  if (exists)
+	  if (exists && target_stat != NULL)
 	    try_preserve_permissions (fd, target_stat);
 	}
       else
@@ -239,7 +242,7 @@ smart_rename (const char *from, const char *to, int fd ATTRIBUTE_UNUSED,
       if (ret != 0)
 	non_fatal (_("unable to copy file '%s'; reason: %s"), to, strerror (errno));
 
-      if (preserve_dates)
+      if (preserve_dates && target_stat != NULL)
 	set_times (to, target_stat);
       unlink (from);
     }
