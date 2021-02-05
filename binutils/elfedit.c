@@ -724,8 +724,8 @@ check_file (const char *file_name, struct stat *statbuf_p)
 #if defined (_WIN32) && !defined (__CYGWIN__)
   else if (statbuf_p->st_size == 0)
     {
-      /* MS-Windows 'stat' doesn't reports the null device as a
-	 regular file; fix that.  */
+      /* MS-Windows 'stat' reports the null device as a regular file;
+	 fix that.  */
       int fd = open (file_name, O_RDONLY | O_BINARY);
       if (isatty (fd))
 	{

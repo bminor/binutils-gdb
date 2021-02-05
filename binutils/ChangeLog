@@ -1,3 +1,9 @@
+2021-02-05  Eli Zaretskii  <eliz@gnu.org>
+
+	PR 27252
+	* elfedit.c (check_file):
+	* bucomm.c (get_file_size): Fix typos in comments.
+
 2021-02-05  Alan Modra  <amodra@gmail.com>
 
 	PR 27345
