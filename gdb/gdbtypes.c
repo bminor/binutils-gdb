@@ -3413,6 +3413,15 @@ init_decfloat_type (struct objfile *objfile, int bit, const char *name)
   return t;
 }
 
+/* Return true if init_complex_type can be called with TARGET_TYPE.  */
+
+bool
+can_create_complex_type (struct type *target_type)
+{
+  return (target_type->code () == TYPE_CODE_INT
+	  || target_type->code () == TYPE_CODE_FLT);
+}
+
 /* Allocate a TYPE_CODE_COMPLEX type structure.  NAME is the type
    name.  TARGET_TYPE is the component type.  */
 
@@ -3421,8 +3430,7 @@ init_complex_type (const char *name, struct type *target_type)
 {
   struct type *t;
 
-  gdb_assert (target_type->code () == TYPE_CODE_INT
-	      || target_type->code () == TYPE_CODE_FLT);
+  gdb_assert (can_create_complex_type (target_type));
 
   if (TYPE_MAIN_TYPE (target_type)->flds_bnds.complex_type == nullptr)
     {

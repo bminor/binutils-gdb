@@ -2289,6 +2289,7 @@ extern struct type *init_float_type (struct objfile *, int, const char *,
 				     const struct floatformat **,
 				     enum bfd_endian = BFD_ENDIAN_UNKNOWN);
 extern struct type *init_decfloat_type (struct objfile *, int, const char *);
+extern bool can_create_complex_type (struct type *);
 extern struct type *init_complex_type (const char *, struct type *);
 extern struct type *init_pointer_type (struct objfile *, int, const char *,
 				       struct type *);

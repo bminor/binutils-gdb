@@ -103,3 +103,14 @@ gdb_test "print (_Complex int) 4" " = 4 \\+ 0i"
 gdb_test "print (_Complex float) 4.5" " = 4.5 \\+ 0i"
 gdb_test "ptype __complex__ short" " = _Complex short"
 gdb_test "print (_Complex int) (23.75 + 8.88i)" " = 23 \\+ 8i"
+
+set re_reject_arg "Argument to complex arithmetic operation not supported\\."
+gdb_test "print (void *)0 + 5i" $re_reject_arg
+gdb_test "print (_Decimal32)0 + 5i" $re_reject_arg
+
+# Set language to c++.  Avoid warning by not having current frame.
+clean_restart
+gdb_test_no_output "set language c++"
+
+# C++ type tests.
+gdb_test "print (bool)1 + 1i" " = 1 \\+ 1i"

@@ -1076,6 +1076,9 @@ complex_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   struct type *comp_type = promotion_type (value_type (arg1_real),
 					   value_type (arg2_real));
+  if (!can_create_complex_type (comp_type))
+    error (_("Argument to complex arithmetic operation not supported."));
+
   arg1_real = value_cast (comp_type, arg1_real);
   arg1_imag = value_cast (comp_type, arg1_imag);
   arg2_real = value_cast (comp_type, arg2_real);
