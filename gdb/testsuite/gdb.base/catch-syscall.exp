@@ -54,6 +54,9 @@ gdb_test_multiple "continue" $test {
     }
 }
 
+# Test-case for PR27313.  Verify that negative syscall numbers are refused.
+gdb_test "catch syscall -1" "Unknown syscall number '-1'\\."
+
 # All (but the last) syscalls from the example code.  It is filled in
 # proc setup_all_syscalls.
 set all_syscalls { }
