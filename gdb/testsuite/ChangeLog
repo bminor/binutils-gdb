@@ -1,3 +1,11 @@
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/maint-info-sections.exp: New file, content is moved
+	from gdb.base/maint.exp and cleaned up to use latest testsuite
+	techniques.
+	* gdb.base/maint.exp: Tests moved out to
+	gdb.base/maint-info-sections.exp.
+
 2021-02-10  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.multi/multi-target.exp.tcl (setup): Add "set sysroot" to

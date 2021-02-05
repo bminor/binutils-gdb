@@ -1,0 +1,127 @@
+# Copyright 1998-2021 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test just for the 'maintenance info sections' command.
+
+standard_testfile break.c break1.c
+
+if {[prepare_for_testing "failed to prepare" $testfile \
+	 [list $srcfile $srcfile2] {debug nowarnings}]} {
+    return -1
+}
+
+if ![runto_main] then {
+    untested "maint info sections"
+    return -1
+}
+
+# Check that 'maint info sections' output looks correct.  When
+# checking the lines for each section we reject section names starting
+# with a '*' character, the internal *COM*, *UND*, *ABS*, and *IND*
+# sections should not be displayed in this output.
+set seen_header false
+set seen_a_section false
+gdb_test_multiple "maint info sections" "general output check" {
+    -re "Exec file:\r\n\[\t ]+`\[^'\]+', file type \[^.\]+\.\r\n" {
+	set seen_header true
+	exp_continue
+    }
+    -re "^ \\\[\[0-9\]+\\\]\[\t \]+$hex->$hex at $hex: \[^*\r\]+\r\n" {
+	set seen_a_section true
+	exp_continue
+    }
+    -re "^$gdb_prompt $" {
+	gdb_assert { $seen_header && $seen_a_section }
+	pass $gdb_test_name
+    }
+}
+
+# It'd be nice to check for every possible section.  However, that's
+# problematic, since the relative ordering wanders from release to
+# release of the compilers.  Instead, we'll just check for two
+# sections which appear to always come out in the same relative
+# order.  (If that changes, then we should just check for one
+# section.)
+#
+# And by the way: This testpoint will break for PA64, where a.out's
+# are ELF files.
+
+# Standard GNU names.
+set text_section ".text"
+set data_section ".data"
+
+gdb_test_multiple "maint info sections" "" {
+    -re -wrap "Exec file:\r\n.*${binfile}., file type.*ER_RO.*" {
+	# Looks like RealView which uses different section names.
+	set text_section ER_RO
+	set data_section ER_RW
+	pass "maint info sections"
+    }
+    -re -wrap "Exec file:\r\n.*${binfile}., file type.*neardata.*" {
+	# c6x doesn't have .data section.  It has .neardata and .fardata section.
+	set data_section ".neardata"
+	pass "maint info sections"
+    }
+    -re -wrap "Exec file:\r\n.*${binfile}., file type.*" {
+	pass "maint info sections"
+    }
+}
+
+# Test for new option: maint info sections <section name>
+# If you don't have a .text section, this will require tweaking.
+
+gdb_test_multiple "maint info sections $text_section" "" {
+    -re -wrap " \\.bss .*" {
+	fail $gdb_test_name
+    }
+    -re -wrap " $data_section .*" {
+	fail $gdb_test_name
+    }
+    -re -wrap " $text_section .*" {
+	pass $gdb_test_name
+    }
+}
+
+# Test for new option: CODE section flag
+# If your data section is tagged CODE, xfail this test.
+
+gdb_test_multiple "maint info sections CODE" "" {
+    -re -wrap " $data_section .*" {
+	fail $gdb_test_name
+    }
+    -re -wrap " $text_section .*" {
+	pass $gdb_test_name
+    }
+}
+
+# Test for new option: DATA section flag
+# If your text section is tagged DATA, xfail this test.
+#
+# The "maint info sections DATA" test is marked for XFAIL on Windows,
+# because Windows has text sections marked DATA.
+setup_xfail "*-*-*cygwin*"
+setup_xfail "*-*-*mingw*"
+
+gdb_test_multiple "maint info sections DATA" "" {
+    -re -wrap " $text_section .*" {
+	fail $gdb_test_name
+    }
+    -re -wrap " $data_section .*" {
+	pass $gdb_test_name
+    }
+    -re -wrap " .rodata .*" {
+	pass $gdb_test_name
+    }
+}
