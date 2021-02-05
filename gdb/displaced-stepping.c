@@ -258,6 +258,13 @@ displaced_step_buffers::finish (gdbarch *arch, thread_info *thread,
 			  thread->ptid.to_string ().c_str (),
 			  paddress (arch, buffer->addr));
 
+  /* If the thread exited while stepping, we are done.  The code above
+     made the buffer available again, and we restored the bytes in the
+     buffer.  We don't want to run the fixup: since the thread is now
+     dead there's nothing to adjust.  */
+  if (status.kind () == TARGET_WAITKIND_THREAD_EXITED)
+    return DISPLACED_STEP_FINISH_STATUS_OK;
+
   regcache *rc = get_thread_regcache (thread);
 
   bool instruction_executed_successfully

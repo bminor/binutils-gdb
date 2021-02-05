@@ -1958,13 +1958,15 @@ displaced_step_prepare (thread_info *thread)
    a step-over (either in-line or displaced) finishes.  */
 
 static void
-update_thread_events_after_step_over (thread_info *event_thread)
+update_thread_events_after_step_over (thread_info *event_thread,
+				      const target_waitstatus &event_status)
 {
   if (target_supports_set_thread_options (0))
     {
       /* We can control per-thread options.  Disable events for the
-	 event thread.  */
-      event_thread->set_thread_options (0);
+	 event thread, unless the thread is gone.  */
+      if (event_status.kind () != TARGET_WAITKIND_THREAD_EXITED)
+	event_thread->set_thread_options (0);
     }
   else
     {
@@ -2020,7 +2022,7 @@ displaced_step_finish (thread_info *event_thread,
   if (!displaced->in_progress ())
     return DISPLACED_STEP_FINISH_STATUS_OK;
 
-  update_thread_events_after_step_over (event_thread);
+  update_thread_events_after_step_over (event_thread, event_status);
 
   gdb_assert (event_thread->inf->displaced_step_state.in_progress_count > 0);
   event_thread->inf->displaced_step_state.in_progress_count--;
@@ -4168,6 +4170,7 @@ struct wait_one_event
 };
 
 static bool handle_one (const wait_one_event &event);
+static int finish_step_over (struct execution_control_state *ecs);
 
 /* Prepare and stabilize the inferior for detaching it.  E.g.,
    detaching while a thread is displaced stepping is a recipe for
@@ -5372,6 +5375,16 @@ handle_one (const wait_one_event &event)
 				      event.ws);
 	  save_waitstatus (t, event.ws);
 	  t->stop_requested = false;
+
+	  if (event.ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
+	    {
+	      if (displaced_step_finish (t, event.ws)
+		  != DISPLACED_STEP_FINISH_STATUS_OK)
+		{
+		  gdb_assert_not_reached ("displaced_step_finish on "
+					  "exited thread failed");
+		}
+	    }
 	}
     }
   else
@@ -5584,7 +5597,9 @@ stop_all_threads (const char *reason, inferior *inf)
     }
 }
 
-/* Handle a TARGET_WAITKIND_NO_RESUMED event.  */
+/* Handle a TARGET_WAITKIND_NO_RESUMED event.  Return true if we
+   handled the event and should continue waiting.  Return false if we
+   should stop and report the event to the user.  */
 
 static bool
 handle_no_resumed (struct execution_control_state *ecs)
@@ -5712,6 +5727,125 @@ handle_no_resumed (struct execution_control_state *ecs)
   return false;
 }
 
+/* Handle a TARGET_WAITKIND_THREAD_EXITED event.  Return true if we
+   handled the event and should continue waiting.  Return false if we
+   should stop and report the event to the user.  */
+
+static bool
+handle_thread_exited (execution_control_state *ecs)
+{
+  context_switch (ecs);
+
+  /* Clear these so we don't re-start the thread stepping over a
+     breakpoint/watchpoint.  */
+  ecs->event_thread->stepping_over_breakpoint = 0;
+  ecs->event_thread->stepping_over_watchpoint = 0;
+
+  /* Maybe the thread was doing a step-over, if so release
+     resources and start any further pending step-overs.
+
+     If we are on a non-stop target and the thread was doing an
+     in-line step, this also restarts the other threads.  */
+  int ret = finish_step_over (ecs);
+
+  /* finish_step_over returns true if it moves ecs' wait status
+     back into the thread, so that we go handle another pending
+     event before this one.  But we know it never does that if
+     the event thread has exited.  */
+  gdb_assert (ret == 0);
+
+  /* If finish_step_over started a new in-line step-over, don't
+     try to restart anything else.  */
+  if (step_over_info_valid_p ())
+    {
+      delete_thread (ecs->event_thread);
+      return true;
+    }
+
+  /* Maybe we are on an all-stop target and we got this event
+     while doing a step-like command on another thread.  If so,
+     go back to doing that.  If this thread was stepping,
+     switch_back_to_stepped_thread will consider that the thread
+     was interrupted mid-step and will try keep stepping it.  We
+     don't want that, the thread is gone.  So clear the proceed
+     status so it doesn't do that.  */
+  clear_proceed_status_thread (ecs->event_thread);
+  if (switch_back_to_stepped_thread (ecs))
+    {
+      delete_thread (ecs->event_thread);
+      return true;
+    }
+
+  inferior *inf = ecs->event_thread->inf;
+  bool slock_applies = schedlock_applies (ecs->event_thread);
+
+  delete_thread (ecs->event_thread);
+  ecs->event_thread = nullptr;
+
+  /* Continue handling the event as if we had gotten a
+     TARGET_WAITKIND_NO_RESUMED.  */
+  auto handle_as_no_resumed = [ecs] ()
+  {
+    /* handle_no_resumed doesn't really look at the event kind, but
+       normal_stop does.  */
+    ecs->ws.set_no_resumed ();
+    ecs->event_thread = nullptr;
+    ecs->ptid = minus_one_ptid;
+
+    /* Re-record the last target status.  */
+    set_last_target_status (ecs->target, ecs->ptid, ecs->ws);
+
+    return handle_no_resumed (ecs);
+  };
+
+  /* If we are on an all-stop target, the target has stopped all
+     threads to report the event.  We don't actually want to
+     stop, so restart the threads.  */
+  if (!target_is_non_stop_p ())
+    {
+      if (slock_applies)
+	{
+	  /* Since the target is !non-stop, then everything is stopped
+	     at this point, and we can't assume we'll get further
+	     events until we resume the target again.  Handle this
+	     event like if it were a TARGET_WAITKIND_NO_RESUMED.  Note
+	     this refreshes the thread list and checks whether there
+	     are other resumed threads before deciding whether to
+	     print "no-unwaited-for left".  This is important because
+	     the user could have done:
+
+	      (gdb) set scheduler-locking on
+	      (gdb) thread 1
+	      (gdb) c&
+	      (gdb) thread 2
+	      (gdb) c
+
+	     ... and only one of the threads exited.  */
+	  return handle_as_no_resumed ();
+	}
+      else
+	{
+	  /* Switch to the first non-exited thread we can find, and
+	     resume.  */
+	  auto range = inf->non_exited_threads ();
+	  if (range.begin () == range.end ())
+	    {
+	      /* Looks like the target reported a
+		 TARGET_WAITKIND_THREAD_EXITED for its last known
+		 thread.  */
+	      return handle_as_no_resumed ();
+	    }
+	  thread_info *non_exited_thread = *range.begin ();
+	  switch_to_thread (non_exited_thread);
+	  insert_breakpoints ();
+	  resume (GDB_SIGNAL_0);
+	}
+    }
+
+  prepare_to_wait (ecs);
+  return true;
+}
+
 /* Given an execution control state that has been freshly filled in by
    an event from the inferior, figure out what it means and take
    appropriate action.
@@ -5750,15 +5884,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
     }
 
-  if (ecs->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
-    {
-      ecs->event_thread = ecs->target->find_thread (ecs->ptid);
-      gdb_assert (ecs->event_thread != nullptr);
-      delete_thread (ecs->event_thread);
-      prepare_to_wait (ecs);
-      return;
-    }
-
   if (ecs->ws.kind () == TARGET_WAITKIND_NO_RESUMED
       && handle_no_resumed (ecs))
     return;
@@ -5773,7 +5898,6 @@ handle_inferior_event (struct execution_control_state *ecs)
     {
       /* No unwaited-for children left.  IOW, all resumed children
 	 have exited.  */
-      stop_print_frame = false;
       stop_waiting (ecs);
       return;
     }
@@ -5921,6 +6045,12 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (!switch_back_to_stepped_thread (ecs))
 	keep_going (ecs);
       return;
+
+    case TARGET_WAITKIND_THREAD_EXITED:
+      if (handle_thread_exited (ecs))
+	return;
+      stop_waiting (ecs);
+      break;
 
     case TARGET_WAITKIND_EXITED:
     case TARGET_WAITKIND_SIGNALLED:
@@ -6367,7 +6497,7 @@ finish_step_over (struct execution_control_state *ecs)
 	 back an event.  */
       gdb_assert (ecs->event_thread->control.trap_expected);
 
-      update_thread_events_after_step_over (ecs->event_thread);
+      update_thread_events_after_step_over (ecs->event_thread, ecs->ws);
 
       clear_step_over_info ();
     }
@@ -6412,6 +6542,13 @@ finish_step_over (struct execution_control_state *ecs)
 	 clobber this info.  */
       if (ecs->event_thread->stepping_over_watchpoint)
 	return 0;
+
+      /* The code below is meant to avoid one thread hogging the event
+	 loop by doing constant in-line step overs.  If the stepping
+	 thread exited, there's no risk for this to happen, so we can
+	 safely let our caller process the event immediately.  */
+      if (ecs->ws.kind () == TARGET_WAITKIND_THREAD_EXITED)
+       return 0;
 
       pending = iterate_over_threads (resumed_thread_with_pending_status,
 				      nullptr);
@@ -9105,6 +9242,8 @@ normal_stop ()
 
   if (last.kind () == TARGET_WAITKIND_NO_RESUMED)
     {
+      stop_print_frame = false;
+
       SWITCH_THRU_ALL_UIS ()
 	if (current_ui->prompt_state == PROMPT_BLOCKED)
 	  {

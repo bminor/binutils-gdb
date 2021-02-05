@@ -1880,6 +1880,10 @@ Throw an exception if any unexpected error happens.
 Method(
     comment="""
 Clean up after a displaced step of THREAD.
+
+It is possible for the displaced-stepped instruction to have caused
+the thread to exit.  The implementation can detect this case by
+checking if WS.kind is TARGET_WAITKIND_THREAD_EXITED.
 """,
     type="displaced_step_finish_status",
     name="displaced_step_finish",

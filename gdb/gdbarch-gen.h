@@ -1138,7 +1138,11 @@ typedef displaced_step_prepare_status (gdbarch_displaced_step_prepare_ftype) (st
 extern displaced_step_prepare_status gdbarch_displaced_step_prepare (struct gdbarch *gdbarch, thread_info *thread, CORE_ADDR &displaced_pc);
 extern void set_gdbarch_displaced_step_prepare (struct gdbarch *gdbarch, gdbarch_displaced_step_prepare_ftype *displaced_step_prepare);
 
-/* Clean up after a displaced step of THREAD. */
+/* Clean up after a displaced step of THREAD.
+
+   It is possible for the displaced-stepped instruction to have caused
+   the thread to exit.  The implementation can detect this case by
+   checking if WS.kind is TARGET_WAITKIND_THREAD_EXITED. */
 
 typedef displaced_step_finish_status (gdbarch_displaced_step_finish_ftype) (struct gdbarch *gdbarch, thread_info *thread, const target_waitstatus &ws);
 extern displaced_step_finish_status gdbarch_displaced_step_finish (struct gdbarch *gdbarch, thread_info *thread, const target_waitstatus &ws);
