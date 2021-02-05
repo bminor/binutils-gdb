@@ -374,18 +374,14 @@ struct language_defn
   symbol_name_matcher_ftype *get_symbol_name_matcher
 	(const lookup_name_info &lookup_name) const;
 
-  /* If this language allows compilation from the gdb command line, then
-     this method will return an instance of struct gcc_context appropriate
-     to the language.  If compilation for this language is generally
-     supported, but something goes wrong then an exception is thrown.  The
-     returned compiler instance is owned by its caller and must be
-     deallocated by the caller.  If compilation is not supported for this
-     language then this method returns NULL.  */
+  /* If this language allows compilation from the gdb command line,
+     then this method will return an instance of struct gcc_context
+     appropriate to the language.  If compilation for this language is
+     generally supported, but something goes wrong then an exception
+     is thrown.  If compilation is not supported for this language
+     then this method returns NULL.  */
 
-  virtual compile_instance *get_compile_instance () const
-  {
-    return nullptr;
-  }
+  virtual std::unique_ptr<compile_instance> get_compile_instance () const;
 
   /* This method must be overridden if 'get_compile_instance' is
      overridden.

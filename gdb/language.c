@@ -46,6 +46,7 @@
 #include "c-lang.h"
 #include <algorithm>
 #include "gdbarch.h"
+#include "compile/compile-internal.h"
 
 static void set_range_case (void);
 
@@ -702,6 +703,14 @@ bool
 language_defn::is_string_type_p (struct type *type) const
 {
   return c_is_string_type_p (type);
+}
+
+/* See language.h.  */
+
+std::unique_ptr<compile_instance>
+language_defn::get_compile_instance () const
+{
+  return {};
 }
 
 /* The default implementation of the get_symbol_name_matcher_inner method

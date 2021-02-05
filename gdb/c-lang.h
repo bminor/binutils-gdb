@@ -147,21 +147,19 @@ extern bool c_is_string_type_p (struct type *type);
 
 extern int c_textual_element_type (struct type *, char);
 
-/* Create a new instance of the C compiler and return it.  The new
-   compiler is owned by the caller and must be freed using the destroy
-   method.  This function never returns NULL, but rather throws an
-   exception on failure.  This is suitable for use as the
+/* Create a new instance of the C compiler and return it.  This
+   function never returns NULL, but rather throws an exception on
+   failure.  This is suitable for use as the
    language_defn::get_compile_instance method.  */
 
-extern compile_instance *c_get_compile_context (void);
+extern std::unique_ptr<compile_instance> c_get_compile_context ();
 
-/* Create a new instance of the C++ compiler and return it.  The new
-   compiler is owned by the caller and must be freed using the destroy
-   method.  This function never returns NULL, but rather throws an
-   exception on failure.  This is suitable for use as the
+/* Create a new instance of the C++ compiler and return it.  This
+   function never returns NULL, but rather throws an exception on
+   failure.  This is suitable for use as the
    language_defn::get_compile_instance method.  */
 
-extern compile_instance *cplus_get_compile_context ();
+extern std::unique_ptr<compile_instance> cplus_get_compile_context ();
 
 /* This takes the user-supplied text and returns a new bit of code to
    compile.

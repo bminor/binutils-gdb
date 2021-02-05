@@ -649,8 +649,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
   expr_pc = get_frame_address_in_block (get_selected_frame (NULL));
 
   /* Set up instance and context for the compiler.  */
-  std::unique_ptr <compile_instance> compiler
-			(current_language->get_compile_instance ());
+  std::unique_ptr<compile_instance> compiler
+    = current_language->get_compile_instance ();
   if (compiler == nullptr)
     error (_("No compiler support for language %s."),
 	   current_language->name ());

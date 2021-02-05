@@ -36,8 +36,7 @@
 #include <ctype.h>
 #include "gdbcore.h"
 #include "gdbarch.h"
-
-class compile_instance;
+#include "compile/compile-internal.h"
 
 /* Given a C string type, STR_TYPE, return the corresponding target
    character set name.  */
@@ -888,7 +887,7 @@ public:
   }
 
   /* See language.h.  */
-  compile_instance *get_compile_instance () const override
+  std::unique_ptr<compile_instance> get_compile_instance () const override
   {
     return c_get_compile_context ();
   }
@@ -1021,7 +1020,7 @@ public:
   }
 
   /* See language.h.  */
-  compile_instance *get_compile_instance () const override
+  std::unique_ptr<compile_instance> get_compile_instance () const override
   {
     return cplus_get_compile_context ();
   }
