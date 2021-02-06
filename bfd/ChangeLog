@@ -1,5 +1,9 @@
 2021-02-06  Nick Clifton  <nickc@redhat.com>
 
+	(development): Set to true.
+
+2021-02-06  Nick Clifton  <nickc@redhat.com>
+
 	This is the 2.36.1 release.
 	* version.m4: Set to 2.36.1
 	* development.sh (development): Set to false.
