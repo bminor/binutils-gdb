@@ -1,5 +1,10 @@
 2021-02-06  Mike Frysinger  <vapier@gentoo.org>
 
+	* acinclude.m4 (SIM_AC_COMMON): Replace AC_CONFIG_HEADER with
+	AC_CONFIG_HEADERS.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (HDEFINES, TDEFINES): Delete.
 	(CONFIG_CFLAGS): Delete $(HDEFINES) $(TDEFINES).
 	* acinclude.m4 (SIM_AC_COMMON): Delete AC_SUBST(HDEFINES) and

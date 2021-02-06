@@ -1,5 +1,12 @@
 2021-02-06  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (LIBIBERTY_LIB): Delete.
+	(igen): Delete $(LIBIBERTY_LIB).
+	* configure.ac (LIBIBERTY_LIB): Delete.
+	* configure: Regenerate.
+
+2021-02-06  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Delete bfd/configure.host sourcing.
 	* configure: Regenerate.
 
