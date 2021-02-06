@@ -1,3 +1,9 @@
+2021-02-06  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26922
+	* gdb.tui/tui-layout-asm.exp: Ignore whitespace mismatches when
+	scrolling.
+
 2021-02-05  Tom de Vries  <tdevries@suse.de>
 
 	PR breakpoints/27313

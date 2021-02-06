@@ -58,8 +58,11 @@ while (1) {
     # Send the down key to GDB.
     send_gdb "\033\[B"
     incr down_count
-    if {[Term::wait_for [string_to_regexp $line]] \
-	    && [Term::get_line 1] == $line} {
+    set re_line [string_to_regexp $line]
+    # Ignore whitespace mismatches.
+    regsub -all {\s+} $re_line {\s+} re_line
+    if {[Term::wait_for $re_line] \
+	    && [regexp $re_line [Term::get_line 1]]} {
 	# We scrolled successfully.
     } else {
 	fail "$testname (scroll failed)"
