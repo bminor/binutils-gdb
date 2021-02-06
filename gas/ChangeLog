@@ -1,3 +1,9 @@
+2021-02-06  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.36.1 release.
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+
 2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (riscv_multi_subset_supports): Removed

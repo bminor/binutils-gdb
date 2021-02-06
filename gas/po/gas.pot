@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-01-24 10:22+0000\n"
+"POT-Creation-Date: 2021-02-06 09:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2616,8 +2616,8 @@ msgstr ""
 #: config/tc-nios2.c:3640 config/tc-ns32k.c:1906 config/tc-ppc.c:1688
 #: config/tc-ppc.c:1726 config/tc-ppc.c:1765 config/tc-ppc.c:1804
 #: config/tc-ppc.c:1822 config/tc-pru.c:1569 config/tc-pru.c:1573
-#: config/tc-riscv.c:285 config/tc-riscv.c:636 config/tc-riscv.c:693
-#: config/tc-riscv.c:1078 config/tc-s390.c:536 config/tc-s390.c:574
+#: config/tc-riscv.c:275 config/tc-riscv.c:626 config/tc-riscv.c:683
+#: config/tc-riscv.c:1068 config/tc-s390.c:536 config/tc-s390.c:574
 #: config/tc-sparc.c:961 config/tc-sparc.c:993 config/tc-tic30.c:121
 #: config/tc-tic30.c:131 config/tc-tic30.c:141 config/tc-tic30.c:151
 #: config/tc-tic4x.c:1215 config/tc-tilegx.c:316 config/tc-tilepro.c:252
@@ -2714,8 +2714,8 @@ msgstr ""
 msgid "unknown architecture: %s\n"
 msgstr ""
 
-#: config/tc-arc.c:893 config/tc-ia64.c:7476 config/tc-riscv.c:1110
-#: config/tc-riscv.c:3793 config/tc-tilegx.c:262
+#: config/tc-arc.c:893 config/tc-ia64.c:7476 config/tc-riscv.c:1100
+#: config/tc-riscv.c:3783 config/tc-tilegx.c:262
 msgid "Could not set architecture and machine"
 msgstr ""
 
@@ -7878,7 +7878,7 @@ msgstr ""
 msgid "internal error: losing opcode: `%s' \"%s\"\n"
 msgstr ""
 
-#: config/tc-hppa.c:8263 config/tc-nios2.c:1438 config/tc-riscv.c:1089
+#: config/tc-hppa.c:8263 config/tc-nios2.c:1438 config/tc-riscv.c:1079
 #: config/tc-sparc.c:999
 msgid "Broken assembler.  No assembly attempted."
 msgstr ""
@@ -8390,7 +8390,7 @@ msgstr ""
 msgid "segment override on `%s' is ineffectual"
 msgstr ""
 
-#: config/tc-i386.c:8528 config/tc-riscv.c:1185
+#: config/tc-i386.c:8528 config/tc-riscv.c:1175
 msgid "relaxable branches not supported in absolute section"
 msgstr ""
 
@@ -12301,7 +12301,7 @@ msgstr ""
 msgid "la used to load 64-bit address; recommend using dla instead"
 msgstr ""
 
-#: config/tc-mips.c:11104 config/tc-riscv.c:1490
+#: config/tc-mips.c:11104 config/tc-riscv.c:1480
 msgid "offset too large"
 msgstr ""
 
@@ -12424,7 +12424,7 @@ msgstr ""
 msgid "PC-relative reference to a different section"
 msgstr ""
 
-#: config/tc-mips.c:15911 config/tc-riscv.c:2931
+#: config/tc-mips.c:15911 config/tc-riscv.c:2921
 msgid "TLS relocation against a constant"
 msgstr ""
 
@@ -14302,36 +14302,36 @@ msgid "Big-endian R2 is not supported."
 msgstr ""
 
 #. Unrecognised instruction - error.
-#: config/tc-nios2.c:3756 config/tc-pru.c:1717
+#: config/tc-nios2.c:3752 config/tc-pru.c:1717
 #, c-format
 msgid "unrecognised instruction %s"
 msgstr ""
 
-#: config/tc-nios2.c:3876 config/tc-pru.c:1773
+#: config/tc-nios2.c:3872 config/tc-pru.c:1773
 #, c-format
 msgid "can't represent relocation type %s"
 msgstr ""
 
-#: config/tc-nios2.c:3969
+#: config/tc-nios2.c:3965
 msgid "Bad .section directive: want a,s,w,x,M,S,G,T in string"
 msgstr ""
 
-#: config/tc-nios2.c:3998
+#: config/tc-nios2.c:3994
 #, c-format
 msgid "Illegal operands: %%tls_ldo in %d-byte data field"
 msgstr ""
 
-#: config/tc-nios2.c:4010
+#: config/tc-nios2.c:4006
 #, c-format
 msgid "Illegal operands: %%gotoff in %d-byte data field"
 msgstr ""
 
-#: config/tc-nios2.c:4023 config/tc-nios2.c:4042 config/tc-nios2.c:4050
+#: config/tc-nios2.c:4019 config/tc-nios2.c:4038 config/tc-nios2.c:4046
 #, c-format
 msgid "Illegal operands: %s requires arguments in ()"
 msgstr ""
 
-#: config/tc-nios2.c:4058
+#: config/tc-nios2.c:4054
 #, c-format
 msgid "Illegal operands: garbage after %s()"
 msgstr ""
@@ -15372,200 +15372,200 @@ msgstr ""
 msgid "Unknown default privilege spec `%d.%d.%d' set by privilege attributes"
 msgstr ""
 
-#: config/tc-riscv.c:777
+#: config/tc-riscv.c:767
 #, c-format
 msgid "internal: bad RISC-V CSR class (0x%x)"
 msgstr ""
 
-#: config/tc-riscv.c:782
+#: config/tc-riscv.c:772
 #, c-format
 msgid "Invalid CSR `%s' for the current ISA"
 msgstr ""
 
-#: config/tc-riscv.c:805
+#: config/tc-riscv.c:795
 #, c-format
 msgid "Invalid CSR `%s' for the privilege spec `%s'"
 msgstr ""
 
-#: config/tc-riscv.c:924
+#: config/tc-riscv.c:914
 #, c-format
 msgid "internal: bad RISC-V opcode (mask error): %s %s"
 msgstr ""
 
-#: config/tc-riscv.c:973
+#: config/tc-riscv.c:963
 #, c-format
 msgid "internal: bad RISC-V opcode (unknown operand type `CF%c'): %s %s"
 msgstr ""
 
-#: config/tc-riscv.c:980
+#: config/tc-riscv.c:970
 #, c-format
 msgid "internal: bad RISC-V opcode (unknown operand type `C%c'): %s %s"
 msgstr ""
 
-#: config/tc-riscv.c:1024 config/tc-riscv.c:1036
+#: config/tc-riscv.c:1014 config/tc-riscv.c:1026
 #, c-format
 msgid "internal: bad RISC-V opcode (unknown operand type `F%c'): %s %s"
 msgstr ""
 
-#: config/tc-riscv.c:1043
+#: config/tc-riscv.c:1033
 #, c-format
 msgid "internal: bad RISC-V opcode (unknown operand type `%c'): %s %s"
 msgstr ""
 
-#: config/tc-riscv.c:1051
+#: config/tc-riscv.c:1041
 #, c-format
 msgid "internal: bad RISC-V opcode (bits 0x%lx undefined): %s %s"
 msgstr ""
 
-#: config/tc-riscv.c:1199
+#: config/tc-riscv.c:1189
 #, c-format
 msgid "Unsupported RISC-V relocation number %d"
 msgstr ""
 
-#: config/tc-riscv.c:1284
+#: config/tc-riscv.c:1274
 msgid "internal error: invalid macro"
 msgstr ""
 
-#: config/tc-riscv.c:1309
+#: config/tc-riscv.c:1299
 msgid "internal error: vasprintf failed"
 msgstr ""
 
-#: config/tc-riscv.c:1338 config/tc-riscv.c:1414
+#: config/tc-riscv.c:1328 config/tc-riscv.c:1404
 msgid "unsupported large constant"
 msgstr ""
 
-#: config/tc-riscv.c:1340
+#: config/tc-riscv.c:1330
 #, c-format
 msgid "unknown CSR `%s'"
 msgstr ""
 
-#: config/tc-riscv.c:1343
+#: config/tc-riscv.c:1333
 #, c-format
 msgid "Instruction %s requires absolute expression"
 msgstr ""
 
-#: config/tc-riscv.c:1608
+#: config/tc-riscv.c:1598
 #, c-format
 msgid "Macro %s not implemented"
 msgstr ""
 
-#: config/tc-riscv.c:1955
+#: config/tc-riscv.c:1945
 #, c-format
 msgid "Read-only CSR is written `%s'"
 msgstr ""
 
-#: config/tc-riscv.c:2195
+#: config/tc-riscv.c:2185
 msgid "bad value for funct6 field, value must be 0...64"
 msgstr ""
 
-#: config/tc-riscv.c:2210
+#: config/tc-riscv.c:2200
 msgid "bad value for funct4 field, value must be 0...15"
 msgstr ""
 
-#: config/tc-riscv.c:2225 config/tc-riscv.c:2584
+#: config/tc-riscv.c:2215 config/tc-riscv.c:2574
 msgid "bad value for funct3 field, value must be 0...7"
 msgstr ""
 
-#: config/tc-riscv.c:2239 config/tc-riscv.c:2599
+#: config/tc-riscv.c:2229 config/tc-riscv.c:2589
 msgid "bad value for funct2 field, value must be 0...3"
 msgstr ""
 
-#: config/tc-riscv.c:2248
+#: config/tc-riscv.c:2238
 #, c-format
 msgid "bad compressed FUNCT field specifier 'CF%c'\n"
 msgstr ""
 
-#: config/tc-riscv.c:2255
+#: config/tc-riscv.c:2245
 #, c-format
 msgid "bad RVC field specifier 'C%c'\n"
 msgstr ""
 
-#: config/tc-riscv.c:2278 config/tc-riscv.c:2289
+#: config/tc-riscv.c:2268 config/tc-riscv.c:2279
 #, c-format
 msgid "Improper shift amount (%lu)"
 msgstr ""
 
-#: config/tc-riscv.c:2300
+#: config/tc-riscv.c:2290
 #, c-format
 msgid "Improper CSRxI immediate (%lu)"
 msgstr ""
 
-#: config/tc-riscv.c:2317
+#: config/tc-riscv.c:2307
 #, c-format
 msgid "Improper CSR address (%lu)"
 msgstr ""
 
-#: config/tc-riscv.c:2494
+#: config/tc-riscv.c:2484
 msgid "lui expression not in range 0..1048575"
 msgstr ""
 
-#: config/tc-riscv.c:2530
+#: config/tc-riscv.c:2520
 msgid ""
 "bad value for opcode field, value must be 0...127 and lower 2 bits must be "
 "0x3"
 msgstr ""
 
-#: config/tc-riscv.c:2546
+#: config/tc-riscv.c:2536
 msgid "bad value for opcode field, value must be 0...2"
 msgstr ""
 
-#: config/tc-riscv.c:2556
+#: config/tc-riscv.c:2546
 #, c-format
 msgid "bad Opcode field specifier 'O%c'\n"
 msgstr ""
 
-#: config/tc-riscv.c:2569
+#: config/tc-riscv.c:2559
 msgid "bad value for funct7 field, value must be 0...127"
 msgstr ""
 
-#: config/tc-riscv.c:2610
+#: config/tc-riscv.c:2600
 #, c-format
 msgid "bad FUNCT field specifier 'F%c'\n"
 msgstr ""
 
-#: config/tc-riscv.c:2624
+#: config/tc-riscv.c:2614
 #, c-format
 msgid "internal error: bad argument type %c"
 msgstr ""
 
-#: config/tc-riscv.c:2629
+#: config/tc-riscv.c:2619
 msgid "illegal operands"
 msgstr ""
 
-#: config/tc-riscv.c:3027
+#: config/tc-riscv.c:3017
 #, c-format
 msgid "internal error: bad CFA value #%d"
 msgstr ""
 
-#: config/tc-riscv.c:3108
+#: config/tc-riscv.c:3098
 #, c-format
 msgid "internal error: bad relocation #%d"
 msgstr ""
 
-#: config/tc-riscv.c:3113
+#: config/tc-riscv.c:3103
 msgid "unsupported symbol subtraction"
 msgstr ""
 
-#: config/tc-riscv.c:3224
+#: config/tc-riscv.c:3214
 msgid ".option pop with no .option push"
 msgstr ""
 
-#: config/tc-riscv.c:3234
+#: config/tc-riscv.c:3224
 #, c-format
 msgid "Unrecognized .option directive: %s\n"
 msgstr ""
 
-#: config/tc-riscv.c:3254
+#: config/tc-riscv.c:3244
 #, c-format
 msgid "Unsupported use of %s"
 msgstr ""
 
-#: config/tc-riscv.c:3409
+#: config/tc-riscv.c:3399
 #, c-format
 msgid "cannot represent %s relocation in object file"
 msgstr ""
 
-#: config/tc-riscv.c:3550
+#: config/tc-riscv.c:3540
 #, c-format
 msgid ""
 "RISC-V options:\n"
@@ -15584,26 +15584,26 @@ msgid ""
 "  -mno-arch-attr              don't generate RISC-V arch attribute\n"
 msgstr ""
 
-#: config/tc-riscv.c:3587
+#: config/tc-riscv.c:3577
 #, c-format
 msgid "unknown register `%s'"
 msgstr ""
 
-#: config/tc-riscv.c:3609
+#: config/tc-riscv.c:3599
 #, c-format
 msgid "non-constant .%cleb128 is not supported"
 msgstr ""
 
-#: config/tc-riscv.c:3698
+#: config/tc-riscv.c:3688
 #, c-format
 msgid "internal: bad RISC-V priv spec string (%s)"
 msgstr ""
 
-#: config/tc-riscv.c:3784
+#: config/tc-riscv.c:3774
 msgid ".attribute arch must set before any instructions"
 msgstr ""
 
-#: config/tc-riscv.c:3801
+#: config/tc-riscv.c:3791
 msgid ".attribute priv spec must set before any instructions"
 msgstr ""
 

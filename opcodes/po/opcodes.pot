@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-01-24 11:46+0000\n"
+"POT-Creation-Date: 2021-02-06 09:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1173,37 +1173,37 @@ msgstr ""
 msgid "%s: %s: invalid opcode length: %s\n"
 msgstr ""
 
-#: i386-gen.c:1888
+#: i386-gen.c:1890
 #, c-format
 msgid "can't find i386-reg.tbl for reading, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:1966
+#: i386-gen.c:1968
 #, c-format
 msgid "can't create i386-init.h, errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:2056 ia64-gen.c:2829
+#: i386-gen.c:2058 ia64-gen.c:2829
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr ""
 
-#: i386-gen.c:2070 i386-gen.c:2075
+#: i386-gen.c:2072 i386-gen.c:2077
 #, c-format
 msgid "CpuMax != %d!\n"
 msgstr ""
 
-#: i386-gen.c:2079
+#: i386-gen.c:2081
 #, c-format
 msgid "%d unused bits in i386_cpu_flags.\n"
 msgstr ""
 
-#: i386-gen.c:2094
+#: i386-gen.c:2096
 #, c-format
 msgid "%d unused bits in i386_operand_type.\n"
 msgstr ""
 
-#: i386-gen.c:2108
+#: i386-gen.c:2110
 #, c-format
 msgid "can't create i386-tbl.h, errno = %s\n"
 msgstr ""

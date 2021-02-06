@@ -1,3 +1,7 @@
+2021-02-06  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.36.1 release.
+
 2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	* opcode/riscv-opc.h: Removed macros for zb* extensions.

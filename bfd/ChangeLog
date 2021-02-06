@@ -1,3 +1,11 @@
+2021-02-06  Nick Clifton  <nickc@redhat.com>
+
+	This is the 2.36.1 release.
+	* version.m4: Set to 2.36.1
+	* development.sh (development): Set to false.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
 2021-02-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfxx-riscv.c (riscv_parse_prefixed_ext): Removed zb*.

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-01-09 10:56+0000\n"
+"POT-Creation-Date: 2021-02-06 09:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -96,7 +96,7 @@ msgstr ""
 msgid "%s: cannot find section %s"
 msgstr ""
 
-#: addr2line.c:444 ar.c:759 dlltool.c:3231 nm.c:1738 objcopy.c:6058
+#: addr2line.c:444 ar.c:759 dlltool.c:3231 nm.c:1738 objcopy.c:6032
 #: objdump.c:5161 size.c:153 strings.c:291 windmc.c:960 windres.c:817
 msgid "fatal error: libbfd ABI mismatch"
 msgstr ""
@@ -455,7 +455,7 @@ msgstr ""
 msgid "Cannot convert existing thin library %s to normal format"
 msgstr ""
 
-#: ar.c:1091 ar.c:1188 ar.c:1520 objcopy.c:3617
+#: ar.c:1091 ar.c:1188 ar.c:1510 objcopy.c:3617
 #, c-format
 msgid "internal stat error on %s"
 msgstr ""
@@ -470,21 +470,21 @@ msgstr ""
 msgid "illegal output pathname for archive member: %s, using '%s' instead"
 msgstr ""
 
-#: ar.c:1265
+#: ar.c:1263
 msgid "could not create temporary file whilst writing archive"
 msgstr ""
 
-#: ar.c:1423
+#: ar.c:1413
 #, c-format
 msgid "No member named `%s'\n"
 msgstr ""
 
-#: ar.c:1473
+#: ar.c:1463
 #, c-format
 msgid "no entry %s in archive %s!"
 msgstr ""
 
-#: ar.c:1633
+#: ar.c:1623
 #, c-format
 msgid "%s: no archive map to update"
 msgstr ""
@@ -524,27 +524,27 @@ msgstr ""
 msgid "%s: no output archive specified yet\n"
 msgstr ""
 
-#: arsup.c:257 arsup.c:300 arsup.c:342 arsup.c:377 arsup.c:443
+#: arsup.c:257 arsup.c:300 arsup.c:342 arsup.c:365 arsup.c:431
 #, c-format
 msgid "%s: no open output archive\n"
 msgstr ""
 
-#: arsup.c:273 arsup.c:398 arsup.c:424
+#: arsup.c:273 arsup.c:386 arsup.c:412
 #, c-format
 msgid "%s: can't open file %s\n"
 msgstr ""
 
-#: arsup.c:327 arsup.c:420 arsup.c:501
+#: arsup.c:327 arsup.c:408 arsup.c:489
 #, c-format
 msgid "%s: can't find module file %s\n"
 msgstr ""
 
-#: arsup.c:452
+#: arsup.c:440
 #, c-format
 msgid "Current open archive is %s\n"
 msgstr ""
 
-#: arsup.c:476
+#: arsup.c:464
 #, c-format
 msgid "%s: no open archive\n"
 msgstr ""
@@ -5021,7 +5021,7 @@ msgstr ""
 msgid "cannot open '%s': %s"
 msgstr ""
 
-#: objcopy.c:1095 objcopy.c:5070
+#: objcopy.c:1095 objcopy.c:5058
 #, c-format
 msgid "%s: fread failed"
 msgstr ""
@@ -5392,151 +5392,151 @@ msgstr ""
 msgid "don't know how to write debugging information for %s"
 msgstr ""
 
-#: objcopy.c:4860
+#: objcopy.c:4854
 msgid "could not create temporary file to hold stripped copy"
 msgstr ""
 
-#: objcopy.c:4939
+#: objcopy.c:4927
 #, c-format
 msgid "%s: bad version in PE subsystem"
 msgstr ""
 
-#: objcopy.c:4969
+#: objcopy.c:4957
 #, c-format
 msgid "unknown PE subsystem: %s"
 msgstr ""
 
-#: objcopy.c:5023 objcopy.c:5294 objcopy.c:5374 objcopy.c:5515 objcopy.c:5547
-#: objcopy.c:5610 objcopy.c:5614 objcopy.c:5634
+#: objcopy.c:5011 objcopy.c:5281 objcopy.c:5361 objcopy.c:5502 objcopy.c:5534
+#: objcopy.c:5597 objcopy.c:5601 objcopy.c:5621
 #, c-format
 msgid "bad format for %s"
 msgstr ""
 
-#: objcopy.c:5052
+#: objcopy.c:5040
 #, c-format
 msgid "cannot open: %s: %s"
 msgstr ""
 
-#: objcopy.c:5106
+#: objcopy.c:5093
 msgid "byte number must be non-negative"
 msgstr ""
 
-#: objcopy.c:5112
+#: objcopy.c:5099
 #, c-format
 msgid "architecture %s unknown"
 msgstr ""
 
-#: objcopy.c:5120
+#: objcopy.c:5107
 msgid "interleave must be positive"
 msgstr ""
 
-#: objcopy.c:5129
+#: objcopy.c:5116
 msgid "interleave width must be positive"
 msgstr ""
 
-#: objcopy.c:5447
+#: objcopy.c:5434
 #, c-format
 msgid "unrecognized --compress-debug-sections type `%s'"
 msgstr ""
 
-#: objcopy.c:5468
+#: objcopy.c:5455
 #, c-format
 msgid "unrecognized --elf-stt-common= option `%s'"
 msgstr ""
 
-#: objcopy.c:5484
+#: objcopy.c:5471
 #, c-format
 msgid "Warning: truncating gap-fill from 0x%s to 0x%x"
 msgstr ""
 
-#: objcopy.c:5570
+#: objcopy.c:5557
 msgid "bad format for --set-section-alignment: argument needed"
 msgstr ""
 
-#: objcopy.c:5574
+#: objcopy.c:5561
 msgid "bad format for --set-section-alignment: numeric argument needed"
 msgstr ""
 
 #. Number has more than on 1, i.e. wasn't a power of 2.
-#: objcopy.c:5586
+#: objcopy.c:5573
 msgid "bad format for --set-section-alignment: alignment is not a power of two"
 msgstr ""
 
-#: objcopy.c:5689
+#: objcopy.c:5676
 #, c-format
 msgid "unknown long section names option '%s'"
 msgstr ""
 
-#: objcopy.c:5712
+#: objcopy.c:5699
 msgid "unable to parse alternative machine code"
 msgstr ""
 
-#: objcopy.c:5761
+#: objcopy.c:5748
 msgid "number of bytes to reverse must be positive and even"
 msgstr ""
 
-#: objcopy.c:5764
+#: objcopy.c:5751
 #, c-format
 msgid "Warning: ignoring previous --reverse-bytes value of %d"
 msgstr ""
 
-#: objcopy.c:5779
+#: objcopy.c:5766
 #, c-format
 msgid "%s: invalid reserve value for --heap"
 msgstr ""
 
-#: objcopy.c:5785
+#: objcopy.c:5772
 #, c-format
 msgid "%s: invalid commit value for --heap"
 msgstr ""
 
-#: objcopy.c:5810
+#: objcopy.c:5797
 #, c-format
 msgid "%s: invalid reserve value for --stack"
 msgstr ""
 
-#: objcopy.c:5816
+#: objcopy.c:5803
 #, c-format
 msgid "%s: invalid commit value for --stack"
 msgstr ""
 
-#: objcopy.c:5825
+#: objcopy.c:5812
 msgid "verilog data width must be at least 1 byte"
 msgstr ""
 
-#: objcopy.c:5842
+#: objcopy.c:5829
 msgid "--globalize-symbol(s) is incompatible with -G/--keep-global-symbol(s)"
 msgstr ""
 
-#: objcopy.c:5854
+#: objcopy.c:5841
 msgid "interleave start byte must be set with --byte"
 msgstr ""
 
-#: objcopy.c:5857
+#: objcopy.c:5844
 msgid "byte number must be less than interleave"
 msgstr ""
 
-#: objcopy.c:5860
+#: objcopy.c:5847
 msgid "interleave width must be less than or equal to interleave - byte`"
 msgstr ""
 
-#: objcopy.c:5889
+#: objcopy.c:5876
 #, c-format
 msgid "unknown input EFI target: %s"
 msgstr ""
 
-#: objcopy.c:5920
+#: objcopy.c:5907
 #, c-format
 msgid "unknown output EFI target: %s"
 msgstr ""
 
-#: objcopy.c:5946
+#: objcopy.c:5927
 #, c-format
 msgid ""
 "warning: could not create temporary file whilst copying '%s', (error: %s)"
 msgstr ""
 
-#: objcopy.c:5987 objcopy.c:6001
+#: objcopy.c:5961 objcopy.c:5975
 #, c-format
 msgid "%s %s%c0x%s never used"
 msgstr ""
@@ -10861,12 +10861,12 @@ msgid "%s: cannot set time: %s"
 msgstr ""
 
 #. We have to clean up here.
-#: rename.c:195 rename.c:232
+#: rename.c:157 rename.c:195
 #, c-format
 msgid "unable to rename '%s'; reason: %s"
 msgstr ""
 
-#: rename.c:240
+#: rename.c:203
 #, c-format
 msgid "unable to copy file '%s'; reason: %s"
 msgstr ""
