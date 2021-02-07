@@ -1556,7 +1556,7 @@ partial_symtab::add_psymbol (gdb::string_view name, bool copy_name,
   memset (&psymbol, 0, sizeof (psymbol));
 
   psymbol.set_unrelocated_address (coreaddr);
-  psymbol.ginfo.section = section;
+  psymbol.ginfo.set_section_index (section);
   psymbol.domain = domain;
   psymbol.aclass = theclass;
   psymbol.ginfo.set_language (language, objfile->partial_symtabs->obstack ());

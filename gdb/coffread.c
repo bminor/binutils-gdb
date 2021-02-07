@@ -1026,7 +1026,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 		sym = process_coff_symbol
 		  (cs, &main_aux, objfile);
 		SYMBOL_VALUE (sym) = tmpaddr + offset;
-		SYMBOL_SECTION (sym) = sec;
+		sym->set_section_index (sec);
 	      }
 	  }
 	  break;
@@ -1565,7 +1565,7 @@ process_coff_symbol (struct coff_symbol *cs,
   /* default assumptions */
   SYMBOL_VALUE (sym) = cs->c_value;
   SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-  SYMBOL_SECTION (sym) = cs_to_section (cs, objfile);
+  sym->set_section_index (cs_to_section (cs, objfile));
 
   if (ISFCN (cs->c_type))
     {

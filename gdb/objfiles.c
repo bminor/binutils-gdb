@@ -621,11 +621,11 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
      they can't possibly pass the tests below.  */
   if ((SYMBOL_CLASS (sym) == LOC_LABEL
        || SYMBOL_CLASS (sym) == LOC_STATIC)
-      && SYMBOL_SECTION (sym) >= 0)
+      && sym->section_index () >= 0)
     {
       SET_SYMBOL_VALUE_ADDRESS (sym,
 				SYMBOL_VALUE_ADDRESS (sym)
-				+ delta[SYMBOL_SECTION (sym)]);
+				+ delta[sym->section_index ()]);
     }
 }
 

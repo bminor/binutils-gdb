@@ -40,9 +40,7 @@ struct partial_symbol
      section has been set.  */
   struct obj_section *obj_section (struct objfile *objfile) const
   {
-    if (ginfo.section >= 0)
-      return &objfile->sections[ginfo.section];
-    return nullptr;
+    return ginfo.obj_section (objfile);
   }
 
   /* Return the unrelocated address of this partial symbol.  */
@@ -55,7 +53,8 @@ struct partial_symbol
      the offsets provided in OBJFILE.  */
   CORE_ADDR address (const struct objfile *objfile) const
   {
-    return ginfo.value.address + objfile->section_offsets[ginfo.section];
+    return (ginfo.value.address
+	    + objfile->section_offsets[ginfo.section_index ()]);
   }
 
   /* Set the address of this partial symbol.  The address must be

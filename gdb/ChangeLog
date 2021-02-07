@@ -1,5 +1,39 @@
 2021-02-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* coff-pe-read.c (add_pe_forwarded_sym): Make use of section_index
+	and set_section_index member functions where appropriate.
+	* coffread.c (coff_symtab_read): Likewise.
+	(process_coff_symbol): Likewise.
+	* ctfread.c (set_symbol_address): Likewise.
+	* dwarf2/read.c (add_partial_symbol): Likewise.
+	(var_decode_location): Likewise.
+	* language.c: Likewise.
+	* minsyms.c (minimal_symbol_reader::record_full): Likewise.
+	(compact_minimal_symbols): Likewise.
+	(minimal_symbol_upper_bound): Likewise.
+	* objfiles.c (relocate_one_symbol): Likewise.
+	* psympriv.h (partial_symbol::obj_section): Likewise.
+	(partial_symbol::address): Likewise.
+	* psymtab.c (partial_symtab::add_psymbol): Likewise.
+	* stabsread.c (scan_file_globals): Likewise.
+	* symmisc.c (dump_msymbols): Likewise.
+	* symtab.c (general_symbol_info::obj_section): Likewise.
+	(fixup_section): Likewise.
+	(get_msymbol_address): Likewise.
+	* symtab.h (general_symbol_info::section): Rename to...
+	(general_symbol_info::m_section): ...this.
+	(general_symbol_info::set_section_index): New member function.
+	(general_symbol_info::section_index): Likewise.
+	(SYMBOL_SECTION): Delete.
+	(MSYMBOL_VALUE_ADDRESS): Make use of section_index and
+	set_section_index member functions where appropriate.
+	(MSYMBOL_SECTION): Delete.
+	(symbol::symbol): Update to initialize 'm_section'.
+	* xcoffread.c (read_xcoff_symtab): Make use of set_section_index.
+	(process_xcoff_symbol): Likewise.
+
+2021-02-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* breakpoint.c (resolve_sal_pc): Replace SYMBOL_OBJ_SECTION and
 	MSYMBOL_OBJ_SECTION.
 	* findvar.c (language_defn::read_var_value): Likewise.

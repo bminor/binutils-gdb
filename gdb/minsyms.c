@@ -1157,7 +1157,7 @@ minimal_symbol_reader::record_full (gdb::string_view name,
     msymbol->m_name = name.data ();
 
   SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
-  MSYMBOL_SECTION (msymbol) = section;
+  msymbol->set_section_index (section);
 
   MSYMBOL_TYPE (msymbol) = ms_type;
 
@@ -1246,7 +1246,8 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 	{
 	  if (MSYMBOL_VALUE_RAW_ADDRESS (copyfrom)
 	      == MSYMBOL_VALUE_RAW_ADDRESS ((copyfrom + 1))
-	      && MSYMBOL_SECTION (copyfrom) == MSYMBOL_SECTION (copyfrom + 1)
+	      && (copyfrom->section_index ()
+		  == (copyfrom + 1)->section_index ())
 	      && strcmp (copyfrom->linkage_name (),
 			 (copyfrom + 1)->linkage_name ()) == 0)
 	    {
@@ -1551,12 +1552,12 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
     = (minsym.objfile->per_bfd->msymbols.get ()
        + minsym.objfile->per_bfd->minimal_symbol_count);
   msymbol = minsym.minsym;
-  section = MSYMBOL_SECTION (msymbol);
+  section = msymbol->section_index ();
   for (iter = msymbol + 1; iter != past_the_end; ++iter)
     {
       if ((MSYMBOL_VALUE_RAW_ADDRESS (iter)
 	   != MSYMBOL_VALUE_RAW_ADDRESS (msymbol))
-	  && MSYMBOL_SECTION (iter) == section)
+	  && iter->section_index () == section)
 	break;
     }
 

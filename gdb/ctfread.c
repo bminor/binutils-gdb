@@ -297,7 +297,7 @@ set_symbol_address (struct objfile *of, struct symbol *sym, const char *name)
     {
       SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
-      SYMBOL_SECTION (sym) = MSYMBOL_SECTION (msym.minsym);
+      sym->set_section_index (msym.minsym->section_index ());
     }
 }
 

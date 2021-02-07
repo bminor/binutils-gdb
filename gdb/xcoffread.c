@@ -1372,7 +1372,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 		(fcn_cs_saved.c_value + off,
 		 fcn_stab_saved.c_name, 0, 0, objfile);
 	      if (newobj->name != NULL)
-		SYMBOL_SECTION (newobj->name) = SECT_OFF_TEXT (objfile);
+		newobj->name->set_section_index (SECT_OFF_TEXT (objfile));
 	    }
 	  else if (strcmp (cs->c_name, ".ef") == 0)
 	    {
@@ -1559,7 +1559,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   /* default assumptions */
   SET_SYMBOL_VALUE_ADDRESS (sym, cs->c_value + off);
   SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-  SYMBOL_SECTION (sym) = secnum_to_section (cs->c_secnum, objfile);
+  sym->set_section_index (secnum_to_section (cs->c_secnum, objfile));
 
   if (ISFCN (cs->c_type))
     {
@@ -1625,7 +1625,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 	    sym = define_symbol (cs->c_value + off, cs->c_name, 0, 0, objfile);
 	    if (sym != NULL)
 	      {
-		SYMBOL_SECTION (sym) = sec;
+		sym->set_section_index (sec);
 	      }
 	    return sym;
 	  }
@@ -1657,7 +1657,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 	      SET_SYMBOL_VALUE_ADDRESS (sym,
 					SYMBOL_VALUE_ADDRESS (sym)
 					+ static_block_base);
-	      SYMBOL_SECTION (sym) = static_block_section;
+	      sym->set_section_index (static_block_section);
 	    }
 	  return sym;
 
