@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
-m4_include([../config/override.m4])
 AC_INIT(Makefile.in)
+AC_CONFIG_MACRO_DIRS([.. ../config])
 
 AC_PROG_CC
 AC_PROG_INSTALL

@@ -38,8 +38,8 @@ The configure.ac of a simulator using the common framework should look like:
 
 --- snip ---
 dnl Process this file with autoconf to produce a configure script.
-sinclude(../common/aclocal.m4)
 AC_INIT(Makefile.in)
+AC_CONFIG_MACRO_DIRS([../common ../.. ../../config])
 
 SIM_AC_COMMON
 

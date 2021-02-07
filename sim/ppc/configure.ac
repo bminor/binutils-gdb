@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(Makefile.in)
-sinclude(../common/acinclude.m4)
+AC_CONFIG_MACRO_DIRS([../common ../.. ../../config])
 
 AC_PROG_INSTALL
 AC_PROG_CC
