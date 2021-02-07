@@ -1,3 +1,15 @@
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4, m4/sim_ac_option_alignment.m4,
+	m4/sim_ac_option_assert.m4, m4/sim_ac_option_bitsize.m4,
+	m4/sim_ac_option_cgen_maint.m4, m4/sim_ac_option_default_model.m4,
+	m4/sim_ac_option_endian.m4, m4/sim_ac_option_environment.m4,
+	m4/sim_ac_option_float.m4, m4/sim_ac_option_hardware.m4,
+	m4/sim_ac_option_inline.m4, m4/sim_ac_option_reserved_bits.m4,
+	m4/sim_ac_option_scache.m4, m4/sim_ac_option_smp.m4,
+	m4/sim_ac_option_warnings.m4, m4/sim_ac_option_xor_endian.m4,
+	m4/sim_ac_output.m4: New files.
+
 2021-02-20  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt: Move arch list ...

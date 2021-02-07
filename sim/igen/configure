@@ -692,18 +692,7 @@ PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
 WERROR_CFLAGS
-WARN_CFLAGS
-sim_reserved_bits
-sim_inline
-sim_hw
-sim_hw_objs
-sim_hw_cflags
-sim_default_model
-sim_scache
-sim_float
-sim_endian
-sim_bitsize
-sim_alignment'
+WARN_CFLAGS'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
@@ -2063,9 +2052,6 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-
 
 
 

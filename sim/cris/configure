@@ -631,6 +631,9 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+sim_reserved_bits
+sim_float
+sim_bitsize
 cgen_breaks
 cgen
 cgendir
@@ -750,16 +753,13 @@ PATH_SEPARATOR
 SHELL
 WERROR_CFLAGS
 WARN_CFLAGS
-sim_reserved_bits
+sim_scache
 sim_inline
 sim_hw
 sim_hw_objs
 sim_hw_cflags
-sim_default_model
-sim_scache
-sim_float
 sim_endian
-sim_bitsize
+sim_default_model
 sim_alignment'
 ac_subst_files=''
 ac_user_opts='
@@ -11804,7 +11804,6 @@ _ACEOF
 
 
 
-
 # For dv-rv and rvdummy.
 for ac_header in sys/socket.h sys/select.h sys/param.h
 do :
@@ -12201,6 +12200,18 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
+
+
+
+
+
+
+
+
+
+
+
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

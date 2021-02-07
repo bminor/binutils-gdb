@@ -1,3 +1,8 @@
+2021-02-21  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
+	* aclocal.m4, configure: Regenerate.
+
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.

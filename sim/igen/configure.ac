@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(table.h)
-AC_CONFIG_MACRO_DIRS([../common ../.. ../../config])
+AC_CONFIG_MACRO_DIRS([../m4 ../.. ../../config])
 
 AC_PROG_INSTALL
 AC_PROG_CC

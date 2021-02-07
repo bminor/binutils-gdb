@@ -631,6 +631,8 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+sim_default_model
+sim_scache
 cgen_breaks
 mips_extra_libs
 XMKMF
@@ -765,8 +767,6 @@ sim_inline
 sim_hw
 sim_hw_objs
 sim_hw_cflags
-sim_default_model
-sim_scache
 sim_float
 sim_endian
 sim_bitsize
@@ -11823,7 +11823,6 @@ _ACEOF
 
 
 
-
 wire_alignment="NONSTRICT_ALIGNMENT"
 default_alignment=""
 
@@ -12924,6 +12923,18 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
+
+
+
+
+
+
+
+
+
+
+
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure

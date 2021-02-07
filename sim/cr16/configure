@@ -631,6 +631,14 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+sim_reserved_bits
+sim_hw
+sim_hw_objs
+sim_hw_cflags
+sim_default_model
+sim_scache
+sim_float
+sim_bitsize
 cgen_breaks
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
@@ -747,16 +755,8 @@ PATH_SEPARATOR
 SHELL
 WERROR_CFLAGS
 WARN_CFLAGS
-sim_reserved_bits
 sim_inline
-sim_hw
-sim_hw_objs
-sim_hw_cflags
-sim_default_model
-sim_scache
-sim_float
 sim_endian
-sim_bitsize
 sim_alignment'
 ac_subst_files=''
 ac_user_opts='
@@ -11791,7 +11791,6 @@ _ACEOF
 
 
 
-
 wire_endian="LITTLE"
 default_endian=""
 # Check whether --enable-sim-endian was given.
@@ -11995,6 +11994,18 @@ ac_config_files="$ac_config_files .gdbinit:../common/gdbinit.in"
 ac_config_commands="$ac_config_commands Makefile"
 
 ac_config_commands="$ac_config_commands stamp-h"
+
+
+
+
+
+
+
+
+
+
+
+
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
