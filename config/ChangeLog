@@ -1,3 +1,7 @@
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* debuginfod.m4: Delete m4_include(../config/pkg.m4).
+
 2021-01-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26792
@@ -2293,4 +2297,3 @@ Thu Jan 30 16:17:30 1992  Stu Grossman  (grossman at cygnus.com)
 Tue Dec 10 00:10:55 1991  K. Richard Pixley  (rich at rtl.cygnus.com)
 
 	* ChangeLog: fresh changelog.
-

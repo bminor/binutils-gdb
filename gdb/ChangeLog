@@ -1,3 +1,7 @@
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Regenerate.
+
 2021-02-12  Tom de Vries  <tdevries@suse.de>
 
 	PR threads/26228
