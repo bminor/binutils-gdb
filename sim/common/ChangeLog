@@ -1,3 +1,7 @@
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4: Delete.
+
 2021-02-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* sim-events.c: Include sim-cpu.h.
