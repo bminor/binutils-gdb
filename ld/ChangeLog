@@ -1,3 +1,10 @@
+2021-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27358
+	* testsuite/ld-i386/i386.exp: Remove property 3/4/5 run-time
+	tests.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2021-01-26  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ldlang.c (lang_merge_ctf): Set CTF_LINK_NO_FILTER_REPORTED_SYMS
