@@ -1,3 +1,8 @@
+2021-02-07  Alan Modra  <amodra@gmail.com>
+
+	* unwind-ia64.c (unw_print_xyreg): Don't leave output buffer
+	uninitialised on invalid input.
+
 2021-02-06  Alan Modra  <amodra@gmail.com>
 
 	PR 27349
