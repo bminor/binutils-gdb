@@ -1,3 +1,7 @@
+2021-02-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/enqueued-cu-base-addr.exp: Fix inter-CU reference.
+
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/tui-window-disabled.c: New file.

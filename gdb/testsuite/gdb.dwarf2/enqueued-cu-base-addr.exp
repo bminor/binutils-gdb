@@ -50,7 +50,7 @@ Dwarf::assemble $asm_file {
 	} {
 	    DW_TAG_variable {
 		{name foo}
-		{type :$int_label}
+		{type %$int_label}
 		{const_value 1 DW_FORM_sdata}
 	    }
 	}
