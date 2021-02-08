@@ -104,6 +104,7 @@ tui_apply_current_layout ()
 	{
 	  if (focus == win_info)
 	    tui_set_win_focus_to (tui_windows[0]);
+	  delete win_info;
 	}
     }
 
