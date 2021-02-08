@@ -769,7 +769,7 @@ allocate_filename_to_slot (const char *  dirname,
     {
       const char * dir = NULL;
 
-      if (dirs)
+      if (dirs != NULL)
 	dir = dirs[files[num].dir];
 
       if (with_md5
@@ -787,7 +787,15 @@ allocate_filename_to_slot (const char *  dirname,
 	  /* If the filenames match, but the directory table entry was
 	     empty, then fill it with the provided directory name.  */
 	  if (dir == NULL)
-	    dirs[files[num].dir] = xmemdup0 (dirname, strlen (dirname));
+	    {
+	      if (dirs == NULL)
+		{
+		  dirs_allocated = files[num].dir + 32;
+		  dirs = XCNEWVEC (char *, dirs_allocated);
+		}
+	      
+	      dirs[files[num].dir] = xmemdup0 (dirname, strlen (dirname));
+	    }
 	    
 	  return TRUE;
 	}

@@ -1,3 +1,9 @@
+2021-02-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 27355
+	* dwarf2dbg.c (allocate_filename_to_slot): Allocate the dirs array
+	if it has not already been created.
+
 2021-02-04  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (riscv_multi_subset_supports): Removed
