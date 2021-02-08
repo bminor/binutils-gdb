@@ -543,7 +543,6 @@ struct bfd_link_needed_list
 enum elf_target_os
 {
   is_normal,
-  is_symbian,	/* Symbian OS.  */
   is_solaris,	/* Solaris.  */
   is_vxworks,	/* VxWorks.  */
   is_nacl	/* Native Client.  */

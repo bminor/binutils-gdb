@@ -2497,14 +2497,6 @@ static const bfd_vma elf32_arm_plt_thumb_stub [] =
   0xe7fd		/* b .-2 */
 };
 
-/* The entries in a PLT when using a DLL-based target with multiple
-   address spaces.  */
-static const bfd_vma elf32_arm_symbian_plt_entry [] =
-{
-  0xe51ff004,	      /* ldr   pc, [pc, #-4] */
-  0x00000000,	      /* dcd   R_ARM_GLOB_DAT(X) */
-};
-
 /* The first entry in a procedure linkage table looks like
    this.  It is set up so that any shared library function that is
    called before the relocation has been set up calls the dynamic
@@ -3793,10 +3785,6 @@ create_got_section (bfd *dynobj, struct bfd_link_info *info)
   htab = elf32_arm_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  /* BPABI objects never have a GOT, or associated sections.  */
-  if (htab->root.target_os == is_symbian)
-    return TRUE;
 
   if (! _bfd_elf_create_got_section (dynobj, info))
     return FALSE;
@@ -9558,20 +9546,17 @@ elf32_arm_allocate_plt_entry (struct bfd_link_info *info,
   root_plt->offset = splt->size;
   splt->size += htab->plt_entry_size;
 
-  if (htab->root.target_os != is_symbian)
-    {
-      /* We also need to make an entry in the .got.plt section, which
-	 will be placed in the .got section by the linker script.  */
-      if (is_iplt_entry)
-	arm_plt->got_offset = sgotplt->size;
-      else
-	arm_plt->got_offset = sgotplt->size - 8 * htab->num_tls_desc;
-      if (htab->fdpic_p)
-	/* Function descriptor takes 64 bits in GOT.  */
-	sgotplt->size += 8;
-      else
-	sgotplt->size += 4;
-    }
+  /* We also need to make an entry in the .got.plt section, which
+     will be placed in the .got section by the linker script.  */
+  if (is_iplt_entry)
+    arm_plt->got_offset = sgotplt->size;
+  else
+    arm_plt->got_offset = sgotplt->size - 8 * htab->num_tls_desc;
+  if (htab->fdpic_p)
+    /* Function descriptor takes 64 bits in GOT.  */
+    sgotplt->size += 8;
+  else
+    sgotplt->size += 4;
 }
 
 static bfd_vma
@@ -9610,7 +9595,6 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
   bfd_byte *loc;
   bfd_vma plt_index;
   Elf_Internal_Rela rel;
-  bfd_vma plt_header_size;
   bfd_vma got_header_size;
 
   htab = elf32_arm_hash_table (info);
@@ -9625,7 +9609,6 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
       /* There are no reserved entries in .igot.plt, and no special
 	 first entry in .iplt.  */
       got_header_size = 0;
-      plt_header_size = 0;
     }
   else
     {
@@ -9634,348 +9617,320 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
       srel = htab->root.srelplt;
 
       got_header_size = get_elf_backend_data (output_bfd)->got_header_size;
-      plt_header_size = htab->plt_header_size;
     }
   BFD_ASSERT (splt != NULL && srel != NULL);
 
-  /* Fill in the entry in the procedure linkage table.  */
-  if (htab->root.target_os == is_symbian)
+  bfd_vma got_offset, got_address, plt_address;
+  bfd_vma got_displacement, initial_got_entry;
+  bfd_byte * ptr;
+
+  BFD_ASSERT (sgot != NULL);
+
+  /* Get the offset into the .(i)got.plt table of the entry that
+     corresponds to this function.  */
+  got_offset = (arm_plt->got_offset & -2);
+
+  /* Get the index in the procedure linkage table which
+     corresponds to this symbol.  This is the index of this symbol
+     in all the symbols for which we are making plt entries.
+     After the reserved .got.plt entries, all symbols appear in
+     the same order as in .plt.  */
+  if (htab->fdpic_p)
+    /* Function descriptor takes 8 bytes.  */
+    plt_index = (got_offset - got_header_size) / 8;
+  else
+    plt_index = (got_offset - got_header_size) / 4;
+
+  /* Calculate the address of the GOT entry.  */
+  got_address = (sgot->output_section->vma
+		 + sgot->output_offset
+		 + got_offset);
+
+  /* ...and the address of the PLT entry.  */
+  plt_address = (splt->output_section->vma
+		 + splt->output_offset
+		 + root_plt->offset);
+
+  ptr = splt->contents + root_plt->offset;
+  if (htab->root.target_os == is_vxworks && bfd_link_pic (info))
     {
-      BFD_ASSERT (dynindx >= 0);
+      unsigned int i;
+      bfd_vma val;
+
+      for (i = 0; i != htab->plt_entry_size / 4; i++, ptr += 4)
+	{
+	  val = elf32_arm_vxworks_shared_plt_entry[i];
+	  if (i == 2)
+	    val |= got_address - sgot->output_section->vma;
+	  if (i == 5)
+	    val |= plt_index * RELOC_SIZE (htab);
+	  if (i == 2 || i == 5)
+	    bfd_put_32 (output_bfd, val, ptr);
+	  else
+	    put_arm_insn (htab, output_bfd, val, ptr);
+	}
+    }
+  else if (htab->root.target_os == is_vxworks)
+    {
+      unsigned int i;
+      bfd_vma val;
+
+      for (i = 0; i != htab->plt_entry_size / 4; i++, ptr += 4)
+	{
+	  val = elf32_arm_vxworks_exec_plt_entry[i];
+	  if (i == 2)
+	    val |= got_address;
+	  if (i == 4)
+	    val |= 0xffffff & -((root_plt->offset + i * 4 + 8) >> 2);
+	  if (i == 5)
+	    val |= plt_index * RELOC_SIZE (htab);
+	  if (i == 2 || i == 5)
+	    bfd_put_32 (output_bfd, val, ptr);
+	  else
+	    put_arm_insn (htab, output_bfd, val, ptr);
+	}
+
+      loc = (htab->srelplt2->contents
+	     + (plt_index * 2 + 1) * RELOC_SIZE (htab));
+
+      /* Create the .rela.plt.unloaded R_ARM_ABS32 relocation
+	 referencing the GOT for this PLT entry.  */
+      rel.r_offset = plt_address + 8;
+      rel.r_info = ELF32_R_INFO (htab->root.hgot->indx, R_ARM_ABS32);
+      rel.r_addend = got_offset;
+      SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+      loc += RELOC_SIZE (htab);
+
+      /* Create the R_ARM_ABS32 relocation referencing the
+	 beginning of the PLT for this GOT entry.  */
+      rel.r_offset = got_address;
+      rel.r_info = ELF32_R_INFO (htab->root.hplt->indx, R_ARM_ABS32);
+      rel.r_addend = 0;
+      SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+    }
+  else if (htab->root.target_os == is_nacl)
+    {
+      /* Calculate the displacement between the PLT slot and the
+	 common tail that's part of the special initial PLT slot.  */
+      int32_t tail_displacement
+	= ((splt->output_section->vma + splt->output_offset
+	    + ARM_NACL_PLT_TAIL_OFFSET)
+	   - (plt_address + htab->plt_entry_size + 4));
+      BFD_ASSERT ((tail_displacement & 3) == 0);
+      tail_displacement >>= 2;
+
+      BFD_ASSERT ((tail_displacement & 0xff000000) == 0
+		  || (-tail_displacement & 0xff000000) == 0);
+
+      /* Calculate the displacement between the PLT slot and the entry
+	 in the GOT.  The offset accounts for the value produced by
+	 adding to pc in the penultimate instruction of the PLT stub.  */
+      got_displacement = (got_address
+			  - (plt_address + htab->plt_entry_size));
+
+      /* NaCl does not support interworking at all.  */
+      BFD_ASSERT (!elf32_arm_plt_needs_thumb_stub_p (info, arm_plt));
+
       put_arm_insn (htab, output_bfd,
-		    elf32_arm_symbian_plt_entry[0],
-		    splt->contents + root_plt->offset);
-      bfd_put_32 (output_bfd,
-		  elf32_arm_symbian_plt_entry[1],
-		  splt->contents + root_plt->offset + 4);
+		    elf32_arm_nacl_plt_entry[0]
+		    | arm_movw_immediate (got_displacement),
+		    ptr + 0);
+      put_arm_insn (htab, output_bfd,
+		    elf32_arm_nacl_plt_entry[1]
+		    | arm_movt_immediate (got_displacement),
+		    ptr + 4);
+      put_arm_insn (htab, output_bfd,
+		    elf32_arm_nacl_plt_entry[2],
+		    ptr + 8);
+      put_arm_insn (htab, output_bfd,
+		    elf32_arm_nacl_plt_entry[3]
+		    | (tail_displacement & 0x00ffffff),
+		    ptr + 12);
+    }
+  else if (htab->fdpic_p)
+    {
+      const bfd_vma *plt_entry = using_thumb_only(htab)
+	? elf32_arm_fdpic_thumb_plt_entry
+	: elf32_arm_fdpic_plt_entry;
 
-      /* Fill in the entry in the .rel.plt section.  */
-      rel.r_offset = (splt->output_section->vma
-		      + splt->output_offset
-		      + root_plt->offset + 4);
-      rel.r_info = ELF32_R_INFO (dynindx, R_ARM_GLOB_DAT);
+      /* Fill-up Thumb stub if needed.  */
+      if (elf32_arm_plt_needs_thumb_stub_p (info, arm_plt))
+	{
+	  put_thumb_insn (htab, output_bfd,
+			  elf32_arm_plt_thumb_stub[0], ptr - 4);
+	  put_thumb_insn (htab, output_bfd,
+			  elf32_arm_plt_thumb_stub[1], ptr - 2);
+	}
+      /* As we are using 32 bit instructions even for the Thumb
+	 version, we have to use 'put_arm_insn' instead of
+	 'put_thumb_insn'.  */
+      put_arm_insn(htab, output_bfd, plt_entry[0], ptr + 0);
+      put_arm_insn(htab, output_bfd, plt_entry[1], ptr + 4);
+      put_arm_insn(htab, output_bfd, plt_entry[2], ptr + 8);
+      put_arm_insn(htab, output_bfd, plt_entry[3], ptr + 12);
+      bfd_put_32 (output_bfd, got_offset, ptr + 16);
 
-      /* Get the index in the procedure linkage table which
-	 corresponds to this symbol.  This is the index of this symbol
-	 in all the symbols for which we are making plt entries.  The
-	 first entry in the procedure linkage table is reserved.  */
-      plt_index = ((root_plt->offset - plt_header_size)
-		   / htab->plt_entry_size);
+      if (!(info->flags & DF_BIND_NOW))
+	{
+	  /* funcdesc_value_reloc_offset.  */
+	  bfd_put_32 (output_bfd,
+		      htab->root.srelplt->reloc_count * RELOC_SIZE (htab),
+		      ptr + 20);
+	  put_arm_insn(htab, output_bfd, plt_entry[6], ptr + 24);
+	  put_arm_insn(htab, output_bfd, plt_entry[7], ptr + 28);
+	  put_arm_insn(htab, output_bfd, plt_entry[8], ptr + 32);
+	  put_arm_insn(htab, output_bfd, plt_entry[9], ptr + 36);
+	}
+    }
+  else if (using_thumb_only (htab))
+    {
+      /* PR ld/16017: Generate thumb only PLT entries.  */
+      if (!using_thumb2 (htab))
+	{
+	  /* FIXME: We ought to be able to generate thumb-1 PLT
+	     instructions...  */
+	  _bfd_error_handler (_("%pB: warning: thumb-1 mode PLT generation not currently supported"),
+			      output_bfd);
+	  return FALSE;
+	}
+
+      /* Calculate the displacement between the PLT slot and the entry in
+	 the GOT.  The 12-byte offset accounts for the value produced by
+	 adding to pc in the 3rd instruction of the PLT stub.  */
+      got_displacement = got_address - (plt_address + 12);
+
+      /* As we are using 32 bit instructions we have to use 'put_arm_insn'
+	 instead of 'put_thumb_insn'.  */
+      put_arm_insn (htab, output_bfd,
+		    elf32_thumb2_plt_entry[0]
+		    | ((got_displacement & 0x000000ff) << 16)
+		    | ((got_displacement & 0x00000700) << 20)
+		    | ((got_displacement & 0x00000800) >>  1)
+		    | ((got_displacement & 0x0000f000) >> 12),
+		    ptr + 0);
+      put_arm_insn (htab, output_bfd,
+		    elf32_thumb2_plt_entry[1]
+		    | ((got_displacement & 0x00ff0000)      )
+		    | ((got_displacement & 0x07000000) <<  4)
+		    | ((got_displacement & 0x08000000) >> 17)
+		    | ((got_displacement & 0xf0000000) >> 28),
+		    ptr + 4);
+      put_arm_insn (htab, output_bfd,
+		    elf32_thumb2_plt_entry[2],
+		    ptr + 8);
+      put_arm_insn (htab, output_bfd,
+		    elf32_thumb2_plt_entry[3],
+		    ptr + 12);
     }
   else
     {
-      bfd_vma got_offset, got_address, plt_address;
-      bfd_vma got_displacement, initial_got_entry;
-      bfd_byte * ptr;
+      /* Calculate the displacement between the PLT slot and the
+	 entry in the GOT.  The eight-byte offset accounts for the
+	 value produced by adding to pc in the first instruction
+	 of the PLT stub.  */
+      got_displacement = got_address - (plt_address + 8);
 
-      BFD_ASSERT (sgot != NULL);
-
-      /* Get the offset into the .(i)got.plt table of the entry that
-	 corresponds to this function.  */
-      got_offset = (arm_plt->got_offset & -2);
-
-      /* Get the index in the procedure linkage table which
-	 corresponds to this symbol.  This is the index of this symbol
-	 in all the symbols for which we are making plt entries.
-	 After the reserved .got.plt entries, all symbols appear in
-	 the same order as in .plt.  */
-      if (htab->fdpic_p)
-	/* Function descriptor takes 8 bytes.  */
-	plt_index = (got_offset - got_header_size) / 8;
-      else
-	plt_index = (got_offset - got_header_size) / 4;
-
-      /* Calculate the address of the GOT entry.  */
-      got_address = (sgot->output_section->vma
-		     + sgot->output_offset
-		     + got_offset);
-
-      /* ...and the address of the PLT entry.  */
-      plt_address = (splt->output_section->vma
-		     + splt->output_offset
-		     + root_plt->offset);
-
-      ptr = splt->contents + root_plt->offset;
-      if (htab->root.target_os == is_vxworks && bfd_link_pic (info))
+      if (elf32_arm_plt_needs_thumb_stub_p (info, arm_plt))
 	{
-	  unsigned int i;
-	  bfd_vma val;
-
-	  for (i = 0; i != htab->plt_entry_size / 4; i++, ptr += 4)
-	    {
-	      val = elf32_arm_vxworks_shared_plt_entry[i];
-	      if (i == 2)
-		val |= got_address - sgot->output_section->vma;
-	      if (i == 5)
-		val |= plt_index * RELOC_SIZE (htab);
-	      if (i == 2 || i == 5)
-		bfd_put_32 (output_bfd, val, ptr);
-	      else
-		put_arm_insn (htab, output_bfd, val, ptr);
-	    }
+	  put_thumb_insn (htab, output_bfd,
+			  elf32_arm_plt_thumb_stub[0], ptr - 4);
+	  put_thumb_insn (htab, output_bfd,
+			  elf32_arm_plt_thumb_stub[1], ptr - 2);
 	}
-      else if (htab->root.target_os == is_vxworks)
+
+      if (!elf32_arm_use_long_plt_entry)
 	{
-	  unsigned int i;
-	  bfd_vma val;
-
-	  for (i = 0; i != htab->plt_entry_size / 4; i++, ptr += 4)
-	    {
-	      val = elf32_arm_vxworks_exec_plt_entry[i];
-	      if (i == 2)
-		val |= got_address;
-	      if (i == 4)
-		val |= 0xffffff & -((root_plt->offset + i * 4 + 8) >> 2);
-	      if (i == 5)
-		val |= plt_index * RELOC_SIZE (htab);
-	      if (i == 2 || i == 5)
-		bfd_put_32 (output_bfd, val, ptr);
-	      else
-		put_arm_insn (htab, output_bfd, val, ptr);
-	    }
-
-	  loc = (htab->srelplt2->contents
-		 + (plt_index * 2 + 1) * RELOC_SIZE (htab));
-
-	  /* Create the .rela.plt.unloaded R_ARM_ABS32 relocation
-	     referencing the GOT for this PLT entry.  */
-	  rel.r_offset = plt_address + 8;
-	  rel.r_info = ELF32_R_INFO (htab->root.hgot->indx, R_ARM_ABS32);
-	  rel.r_addend = got_offset;
-	  SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
-	  loc += RELOC_SIZE (htab);
-
-	  /* Create the R_ARM_ABS32 relocation referencing the
-	     beginning of the PLT for this GOT entry.  */
-	  rel.r_offset = got_address;
-	  rel.r_info = ELF32_R_INFO (htab->root.hplt->indx, R_ARM_ABS32);
-	  rel.r_addend = 0;
-	  SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
-	}
-      else if (htab->root.target_os == is_nacl)
-	{
-	  /* Calculate the displacement between the PLT slot and the
-	     common tail that's part of the special initial PLT slot.  */
-	  int32_t tail_displacement
-	    = ((splt->output_section->vma + splt->output_offset
-		+ ARM_NACL_PLT_TAIL_OFFSET)
-	       - (plt_address + htab->plt_entry_size + 4));
-	  BFD_ASSERT ((tail_displacement & 3) == 0);
-	  tail_displacement >>= 2;
-
-	  BFD_ASSERT ((tail_displacement & 0xff000000) == 0
-		      || (-tail_displacement & 0xff000000) == 0);
-
-	  /* Calculate the displacement between the PLT slot and the entry
-	     in the GOT.  The offset accounts for the value produced by
-	     adding to pc in the penultimate instruction of the PLT stub.  */
-	  got_displacement = (got_address
-			      - (plt_address + htab->plt_entry_size));
-
-	  /* NaCl does not support interworking at all.  */
-	  BFD_ASSERT (!elf32_arm_plt_needs_thumb_stub_p (info, arm_plt));
+	  BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
 
 	  put_arm_insn (htab, output_bfd,
-			elf32_arm_nacl_plt_entry[0]
-			| arm_movw_immediate (got_displacement),
+			elf32_arm_plt_entry_short[0]
+			| ((got_displacement & 0x0ff00000) >> 20),
 			ptr + 0);
 	  put_arm_insn (htab, output_bfd,
-			elf32_arm_nacl_plt_entry[1]
-			| arm_movt_immediate (got_displacement),
-			ptr + 4);
+			elf32_arm_plt_entry_short[1]
+			| ((got_displacement & 0x000ff000) >> 12),
+			ptr+ 4);
 	  put_arm_insn (htab, output_bfd,
-			elf32_arm_nacl_plt_entry[2],
+			elf32_arm_plt_entry_short[2]
+			| (got_displacement & 0x00000fff),
 			ptr + 8);
-	  put_arm_insn (htab, output_bfd,
-			elf32_arm_nacl_plt_entry[3]
-			| (tail_displacement & 0x00ffffff),
-			ptr + 12);
-	}
-      else if (htab->fdpic_p)
-	{
-	  const bfd_vma *plt_entry = using_thumb_only(htab)
-	    ? elf32_arm_fdpic_thumb_plt_entry
-	    : elf32_arm_fdpic_plt_entry;
-
-	  /* Fill-up Thumb stub if needed.  */
-	  if (elf32_arm_plt_needs_thumb_stub_p (info, arm_plt))
-	    {
-	      put_thumb_insn (htab, output_bfd,
-			      elf32_arm_plt_thumb_stub[0], ptr - 4);
-	      put_thumb_insn (htab, output_bfd,
-			      elf32_arm_plt_thumb_stub[1], ptr - 2);
-	    }
-	  /* As we are using 32 bit instructions even for the Thumb
-	     version, we have to use 'put_arm_insn' instead of
-	     'put_thumb_insn'.  */
-	  put_arm_insn(htab, output_bfd, plt_entry[0], ptr + 0);
-	  put_arm_insn(htab, output_bfd, plt_entry[1], ptr + 4);
-	  put_arm_insn(htab, output_bfd, plt_entry[2], ptr + 8);
-	  put_arm_insn(htab, output_bfd, plt_entry[3], ptr + 12);
-	  bfd_put_32 (output_bfd, got_offset, ptr + 16);
-
-	  if (!(info->flags & DF_BIND_NOW))
-	    {
-	      /* funcdesc_value_reloc_offset.  */
-	      bfd_put_32 (output_bfd,
-			  htab->root.srelplt->reloc_count * RELOC_SIZE (htab),
-			  ptr + 20);
-	      put_arm_insn(htab, output_bfd, plt_entry[6], ptr + 24);
-	      put_arm_insn(htab, output_bfd, plt_entry[7], ptr + 28);
-	      put_arm_insn(htab, output_bfd, plt_entry[8], ptr + 32);
-	      put_arm_insn(htab, output_bfd, plt_entry[9], ptr + 36);
-	    }
-	}
-      else if (using_thumb_only (htab))
-	{
-	  /* PR ld/16017: Generate thumb only PLT entries.  */
-	  if (!using_thumb2 (htab))
-	    {
-	      /* FIXME: We ought to be able to generate thumb-1 PLT
-		 instructions...  */
-	      _bfd_error_handler (_("%pB: warning: thumb-1 mode PLT generation not currently supported"),
-				  output_bfd);
-	      return FALSE;
-	    }
-
-	  /* Calculate the displacement between the PLT slot and the entry in
-	     the GOT.  The 12-byte offset accounts for the value produced by
-	     adding to pc in the 3rd instruction of the PLT stub.  */
-	  got_displacement = got_address - (plt_address + 12);
-
-	  /* As we are using 32 bit instructions we have to use 'put_arm_insn'
-	     instead of 'put_thumb_insn'.  */
-	  put_arm_insn (htab, output_bfd,
-			elf32_thumb2_plt_entry[0]
-			| ((got_displacement & 0x000000ff) << 16)
-			| ((got_displacement & 0x00000700) << 20)
-			| ((got_displacement & 0x00000800) >>  1)
-			| ((got_displacement & 0x0000f000) >> 12),
-			ptr + 0);
-	  put_arm_insn (htab, output_bfd,
-			elf32_thumb2_plt_entry[1]
-			| ((got_displacement & 0x00ff0000)      )
-			| ((got_displacement & 0x07000000) <<  4)
-			| ((got_displacement & 0x08000000) >> 17)
-			| ((got_displacement & 0xf0000000) >> 28),
-			ptr + 4);
-	  put_arm_insn (htab, output_bfd,
-			elf32_thumb2_plt_entry[2],
-			ptr + 8);
-	  put_arm_insn (htab, output_bfd,
-			elf32_thumb2_plt_entry[3],
-			ptr + 12);
-	}
-      else
-	{
-	  /* Calculate the displacement between the PLT slot and the
-	     entry in the GOT.  The eight-byte offset accounts for the
-	     value produced by adding to pc in the first instruction
-	     of the PLT stub.  */
-	  got_displacement = got_address - (plt_address + 8);
-
-	  if (elf32_arm_plt_needs_thumb_stub_p (info, arm_plt))
-	    {
-	      put_thumb_insn (htab, output_bfd,
-			      elf32_arm_plt_thumb_stub[0], ptr - 4);
-	      put_thumb_insn (htab, output_bfd,
-			      elf32_arm_plt_thumb_stub[1], ptr - 2);
-	    }
-
-	  if (!elf32_arm_use_long_plt_entry)
-	    {
-	      BFD_ASSERT ((got_displacement & 0xf0000000) == 0);
-
-	      put_arm_insn (htab, output_bfd,
-			    elf32_arm_plt_entry_short[0]
-			    | ((got_displacement & 0x0ff00000) >> 20),
-			    ptr + 0);
-	      put_arm_insn (htab, output_bfd,
-			    elf32_arm_plt_entry_short[1]
-			    | ((got_displacement & 0x000ff000) >> 12),
-			    ptr+ 4);
-	      put_arm_insn (htab, output_bfd,
-			    elf32_arm_plt_entry_short[2]
-			    | (got_displacement & 0x00000fff),
-			    ptr + 8);
 #ifdef FOUR_WORD_PLT
-	      bfd_put_32 (output_bfd, elf32_arm_plt_entry_short[3], ptr + 12);
+	  bfd_put_32 (output_bfd, elf32_arm_plt_entry_short[3], ptr + 12);
 #endif
-	    }
-	  else
-	    {
-	      put_arm_insn (htab, output_bfd,
-			    elf32_arm_plt_entry_long[0]
-			    | ((got_displacement & 0xf0000000) >> 28),
-			    ptr + 0);
-	      put_arm_insn (htab, output_bfd,
-			    elf32_arm_plt_entry_long[1]
-			    | ((got_displacement & 0x0ff00000) >> 20),
-			    ptr + 4);
-	      put_arm_insn (htab, output_bfd,
-			    elf32_arm_plt_entry_long[2]
-			    | ((got_displacement & 0x000ff000) >> 12),
-			    ptr+ 8);
-	      put_arm_insn (htab, output_bfd,
-			    elf32_arm_plt_entry_long[3]
-			    | (got_displacement & 0x00000fff),
-			    ptr + 12);
-	    }
-	}
-
-      /* Fill in the entry in the .rel(a).(i)plt section.  */
-      rel.r_offset = got_address;
-      rel.r_addend = 0;
-      if (dynindx == -1)
-	{
-	  /* .igot.plt entries use IRELATIVE relocations against SYM_VALUE.
-	     The dynamic linker or static executable then calls SYM_VALUE
-	     to determine the correct run-time value of the .igot.plt entry.  */
-	  rel.r_info = ELF32_R_INFO (0, R_ARM_IRELATIVE);
-	  initial_got_entry = sym_value;
 	}
       else
 	{
-	  /* For FDPIC we will have to resolve a R_ARM_FUNCDESC_VALUE
-	     used by PLT entry.  */
-	  if (htab->fdpic_p)
-	    {
-	      rel.r_info = ELF32_R_INFO (dynindx, R_ARM_FUNCDESC_VALUE);
-	      initial_got_entry = 0;
-	    }
-	  else
-	    {
-	      rel.r_info = ELF32_R_INFO (dynindx, R_ARM_JUMP_SLOT);
-	      initial_got_entry = (splt->output_section->vma
-				   + splt->output_offset);
-
-	      /* PR ld/16017
-		 When thumb only we need to set the LSB for any address that
-		 will be used with an interworking branch instruction.  */
-	      if (using_thumb_only (htab))
-		initial_got_entry |= 1;
-	    }
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_plt_entry_long[0]
+			| ((got_displacement & 0xf0000000) >> 28),
+			ptr + 0);
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_plt_entry_long[1]
+			| ((got_displacement & 0x0ff00000) >> 20),
+			ptr + 4);
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_plt_entry_long[2]
+			| ((got_displacement & 0x000ff000) >> 12),
+			ptr+ 8);
+	  put_arm_insn (htab, output_bfd,
+			elf32_arm_plt_entry_long[3]
+			| (got_displacement & 0x00000fff),
+			ptr + 12);
 	}
+    }
 
-      /* Fill in the entry in the global offset table.  */
-      bfd_put_32 (output_bfd, initial_got_entry,
-		  sgot->contents + got_offset);
-
-      if (htab->fdpic_p && !(info->flags & DF_BIND_NOW))
+  /* Fill in the entry in the .rel(a).(i)plt section.  */
+  rel.r_offset = got_address;
+  rel.r_addend = 0;
+  if (dynindx == -1)
+    {
+      /* .igot.plt entries use IRELATIVE relocations against SYM_VALUE.
+	 The dynamic linker or static executable then calls SYM_VALUE
+	 to determine the correct run-time value of the .igot.plt entry.  */
+      rel.r_info = ELF32_R_INFO (0, R_ARM_IRELATIVE);
+      initial_got_entry = sym_value;
+    }
+  else
+    {
+      /* For FDPIC we will have to resolve a R_ARM_FUNCDESC_VALUE
+	 used by PLT entry.  */
+      if (htab->fdpic_p)
 	{
-	  /* Setup initial funcdesc value.  */
-	  /* FIXME: we don't support lazy binding because there is a
-	     race condition between both words getting written and
-	     some other thread attempting to read them. The ARM
-	     architecture does not have an atomic 64 bit load/store
-	     instruction that could be used to prevent it; it is
-	     recommended that threaded FDPIC applications run with the
-	     LD_BIND_NOW environment variable set.  */
-	  bfd_put_32(output_bfd, plt_address + 0x18,
-		     sgot->contents + got_offset);
-	  bfd_put_32(output_bfd, -1 /*TODO*/,
-		     sgot->contents + got_offset + 4);
+	  rel.r_info = ELF32_R_INFO (dynindx, R_ARM_FUNCDESC_VALUE);
+	  initial_got_entry = 0;
 	}
+      else
+	{
+	  rel.r_info = ELF32_R_INFO (dynindx, R_ARM_JUMP_SLOT);
+	  initial_got_entry = (splt->output_section->vma
+			       + splt->output_offset);
+
+	  /* PR ld/16017
+	     When thumb only we need to set the LSB for any address that
+	     will be used with an interworking branch instruction.  */
+	  if (using_thumb_only (htab))
+	    initial_got_entry |= 1;
+	}
+    }
+
+  /* Fill in the entry in the global offset table.  */
+  bfd_put_32 (output_bfd, initial_got_entry,
+	      sgot->contents + got_offset);
+
+  if (htab->fdpic_p && !(info->flags & DF_BIND_NOW))
+    {
+      /* Setup initial funcdesc value.  */
+      /* FIXME: we don't support lazy binding because there is a
+	 race condition between both words getting written and
+	 some other thread attempting to read them. The ARM
+	 architecture does not have an atomic 64 bit load/store
+	 instruction that could be used to prevent it; it is
+	 recommended that threaded FDPIC applications run with the
+	 LD_BIND_NOW environment variable set.  */
+      bfd_put_32(output_bfd, plt_address + 0x18,
+		 sgot->contents + got_offset);
+      bfd_put_32(output_bfd, -1 /*TODO*/,
+		 sgot->contents + got_offset + 4);
     }
 
   if (dynindx == -1)
@@ -10588,47 +10543,10 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 	      /* This symbol is local, or marked to become local.  */
 	      BFD_ASSERT (r_type == R_ARM_ABS32 || r_type == R_ARM_ABS32_NOI
 			  || (globals->fdpic_p && !bfd_link_pic(info)));
-	      if (globals->root.target_os == is_symbian)
-		{
-		  asection *osec;
-
-		  /* On Symbian OS, the data segment and text segement
-		     can be relocated independently.  Therefore, we
-		     must indicate the segment to which this
-		     relocation is relative.  The BPABI allows us to
-		     use any symbol in the right segment; we just use
-		     the section symbol as it is convenient.  (We
-		     cannot use the symbol given by "h" directly as it
-		     will not appear in the dynamic symbol table.)
-
-		     Note that the dynamic linker ignores the section
-		     symbol value, so we don't subtract osec->vma
-		     from the emitted reloc addend.  */
-		  if (sym_sec)
-		    osec = sym_sec->output_section;
-		  else
-		    osec = input_section->output_section;
-		  symbol = 0;
-		  if (osec && elf_section_data (osec))
-		    symbol = elf_section_data (osec)->dynindx;
-		  if (symbol == 0)
-		    {
-		      struct elf_link_hash_table *htab = elf_hash_table (info);
-
-		      if ((osec->flags & SEC_READONLY) == 0
-			  && htab->data_index_section != NULL)
-			osec = htab->data_index_section;
-		      else
-			osec = htab->text_index_section;
-		      symbol = elf_section_data (osec)->dynindx;
-		    }
-		  BFD_ASSERT (symbol != 0);
-		}
-	      else
-		/* On SVR4-ish systems, the dynamic loader cannot
-		   relocate the text and data segments independently,
-		   so the symbol does not matter.  */
-		symbol = 0;
+	      /* On SVR4-ish systems, the dynamic loader cannot
+		 relocate the text and data segments independently,
+		 so the symbol does not matter.  */
+	      symbol = 0;
 	      if (dynreloc_st_type == STT_GNU_IFUNC)
 		/* We have an STT_GNU_IFUNC symbol that doesn't resolve
 		   to the .iplt entry.  Instead, every non-call reference
@@ -15641,16 +15559,6 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	      if (sreloc == NULL)
 		return FALSE;
-
-	      /* BPABI objects never have dynamic relocations mapped.  */
-	      if (htab->root.target_os == is_symbian)
-		{
-		  flagword flags;
-
-		  flags = bfd_section_flags (sreloc);
-		  flags &= ~(SEC_LOAD | SEC_ALLOC);
-		  bfd_set_section_flags (sreloc, flags);
-		}
 	    }
 
 	  /* If this is a global symbol, count the number of
@@ -16284,111 +16192,108 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
       /* Make sure this symbol is output as a dynamic symbol.
 	 Undefined weak syms won't yet be marked as dynamic.  */
-      if (htab->root.dynamic_sections_created && h->dynindx == -1 && !h->forced_local
+      if (htab->root.dynamic_sections_created
+	  && h->dynindx == -1
+	  && !h->forced_local
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	    return FALSE;
 	}
 
-      if (htab->root.target_os != is_symbian)
+      s = htab->root.sgot;
+      h->got.offset = s->size;
+
+      if (tls_type == GOT_UNKNOWN)
+	abort ();
+
+      if (tls_type == GOT_NORMAL)
+	/* Non-TLS symbols need one GOT slot.  */
+	s->size += 4;
+      else
 	{
-	  s = htab->root.sgot;
-	  h->got.offset = s->size;
+	  if (tls_type & GOT_TLS_GDESC)
+	    {
+	      /* R_ARM_TLS_DESC needs 2 GOT slots.  */
+	      eh->tlsdesc_got
+		= (htab->root.sgotplt->size
+		   - elf32_arm_compute_jump_table_size (htab));
+	      htab->root.sgotplt->size += 8;
+	      h->got.offset = (bfd_vma) -2;
+	      /* plt.got_offset needs to know there's a TLS_DESC
+		 reloc in the middle of .got.plt.  */
+	      htab->num_tls_desc++;
+	    }
 
-	  if (tls_type == GOT_UNKNOWN)
-	    abort ();
+	  if (tls_type & GOT_TLS_GD)
+	    {
+	      /* R_ARM_TLS_GD32 and R_ARM_TLS_GD32_FDPIC need two
+		 consecutive GOT slots.  If the symbol is both GD
+		 and GDESC, got.offset may have been
+		 overwritten.  */
+	      h->got.offset = s->size;
+	      s->size += 8;
+	    }
 
-	  if (tls_type == GOT_NORMAL)
-	    /* Non-TLS symbols need one GOT slot.  */
+	  if (tls_type & GOT_TLS_IE)
+	    /* R_ARM_TLS_IE32/R_ARM_TLS_IE32_FDPIC need one GOT
+	       slot.  */
 	    s->size += 4;
-	  else
-	    {
-	      if (tls_type & GOT_TLS_GDESC)
-		{
-		  /* R_ARM_TLS_DESC needs 2 GOT slots.  */
-		  eh->tlsdesc_got
-		    = (htab->root.sgotplt->size
-		       - elf32_arm_compute_jump_table_size (htab));
-		  htab->root.sgotplt->size += 8;
-		  h->got.offset = (bfd_vma) -2;
-		  /* plt.got_offset needs to know there's a TLS_DESC
-		     reloc in the middle of .got.plt.  */
-		  htab->num_tls_desc++;
-		}
-
-	      if (tls_type & GOT_TLS_GD)
-		{
-		  /* R_ARM_TLS_GD32 and R_ARM_TLS_GD32_FDPIC need two
-		     consecutive GOT slots.  If the symbol is both GD
-		     and GDESC, got.offset may have been
-		     overwritten.  */
-		  h->got.offset = s->size;
-		  s->size += 8;
-		}
-
-	      if (tls_type & GOT_TLS_IE)
-		/* R_ARM_TLS_IE32/R_ARM_TLS_IE32_FDPIC need one GOT
-		   slot.  */
-		s->size += 4;
-	    }
-
-	  dyn = htab->root.dynamic_sections_created;
-
-	  indx = 0;
-	  if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn,
-					       bfd_link_pic (info),
-					       h)
-	      && (!bfd_link_pic (info)
-		  || !SYMBOL_REFERENCES_LOCAL (info, h)))
-	    indx = h->dynindx;
-
-	  if (tls_type != GOT_NORMAL
-	      && (bfd_link_dll (info) || indx != 0)
-	      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		  || h->root.type != bfd_link_hash_undefweak))
-	    {
-	      if (tls_type & GOT_TLS_IE)
-		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
-
-	      if (tls_type & GOT_TLS_GD)
-		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
-
-	      if (tls_type & GOT_TLS_GDESC)
-		{
-		  elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
-		  /* GDESC needs a trampoline to jump to.  */
-		  htab->tls_trampoline = -1;
-		}
-
-	      /* Only GD needs it.  GDESC just emits one relocation per
-		 2 entries.  */
-	      if ((tls_type & GOT_TLS_GD) && indx != 0)
-		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
-	    }
-	  else if (((indx != -1) || htab->fdpic_p)
-		   && !SYMBOL_REFERENCES_LOCAL (info, h))
-	    {
-	      if (htab->root.dynamic_sections_created)
-		/* Reserve room for the GOT entry's R_ARM_GLOB_DAT relocation.  */
-		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
-	    }
-	  else if (h->type == STT_GNU_IFUNC
-		   && eh->plt.noncall_refcount == 0)
-	    /* No non-call references resolve the STT_GNU_IFUNC's PLT entry;
-	       they all resolve dynamically instead.  Reserve room for the
-	       GOT entry's R_ARM_IRELATIVE relocation.  */
-	    elf32_arm_allocate_irelocs (info, htab->root.srelgot, 1);
-	  else if (bfd_link_pic (info)
-		   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
-	    /* Reserve room for the GOT entry's R_ARM_RELATIVE relocation.  */
-	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
-	  else if (htab->fdpic_p && tls_type == GOT_NORMAL)
-	    /* Reserve room for rofixup for FDPIC executable.  */
-	    /* TLS relocs do not need space since they are completely
-	       resolved.  */
-	    htab->srofixup->size += 4;
 	}
+
+      dyn = htab->root.dynamic_sections_created;
+
+      indx = 0;
+      if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, bfd_link_pic (info), h)
+	  && (!bfd_link_pic (info)
+	      || !SYMBOL_REFERENCES_LOCAL (info, h)))
+	indx = h->dynindx;
+
+      if (tls_type != GOT_NORMAL
+	  && (bfd_link_dll (info) || indx != 0)
+	  && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	      || h->root.type != bfd_link_hash_undefweak))
+	{
+	  if (tls_type & GOT_TLS_IE)
+	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+
+	  if (tls_type & GOT_TLS_GD)
+	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+
+	  if (tls_type & GOT_TLS_GDESC)
+	    {
+	      elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
+	      /* GDESC needs a trampoline to jump to.  */
+	      htab->tls_trampoline = -1;
+	    }
+
+	  /* Only GD needs it.  GDESC just emits one relocation per
+	     2 entries.  */
+	  if ((tls_type & GOT_TLS_GD) && indx != 0)
+	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+	}
+      else if (((indx != -1) || htab->fdpic_p)
+	       && !SYMBOL_REFERENCES_LOCAL (info, h))
+	{
+	  if (htab->root.dynamic_sections_created)
+	    /* Reserve room for the GOT entry's R_ARM_GLOB_DAT relocation.  */
+	    elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+	}
+      else if (h->type == STT_GNU_IFUNC
+	       && eh->plt.noncall_refcount == 0)
+	/* No non-call references resolve the STT_GNU_IFUNC's PLT entry;
+	   they all resolve dynamically instead.  Reserve room for the
+	   GOT entry's R_ARM_IRELATIVE relocation.  */
+	elf32_arm_allocate_irelocs (info, htab->root.srelgot, 1);
+      else if (bfd_link_pic (info)
+	       && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
+	/* Reserve room for the GOT entry's R_ARM_RELATIVE relocation.  */
+	elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
+      else if (htab->fdpic_p && tls_type == GOT_NORMAL)
+	/* Reserve room for rofixup for FDPIC executable.  */
+	/* TLS relocs do not need space since they are completely
+	   resolved.  */
+	htab->srofixup->size += 4;
     }
   else
     h->got.offset = (bfd_vma) -1;
@@ -16400,7 +16305,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
       if (h->dynindx != -1)
 	abort();
 
-      /* We only allocate one function descriptor with its associated relocation.  */
+      /* We only allocate one function descriptor with its associated
+	 relocation.  */
       if (eh->fdpic_cnts.funcdesc_offset == -1)
 	{
 	  asection *s = htab->root.sgot;
@@ -16426,13 +16332,15 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
       if (h->dynindx == -1)
 	{
-	  /* We only allocate one function descriptor with its associated relocation. q */
+	  /* We only allocate one function descriptor with its
+	     associated relocation.  */
 	  if (eh->fdpic_cnts.funcdesc_offset == -1)
 	    {
 
 	      eh->fdpic_cnts.funcdesc_offset = s->size;
 	      s->size += 8;
-	      /* We will add an R_ARM_FUNCDESC_VALUE relocation or two rofixups.  */
+	      /* We will add an R_ARM_FUNCDESC_VALUE relocation or two
+		 rofixups.  */
 	      if (bfd_link_pic(info))
 		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	      else
@@ -16459,14 +16367,16 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 
       if (h->dynindx == -1)
 	{
-	  /* We only allocate one function descriptor with its associated relocation.  */
+	  /* We only allocate one function descriptor with its
+	     associated relocation.  */
 	  if (eh->fdpic_cnts.funcdesc_offset == -1)
 	    {
 	      asection *s = htab->root.sgot;
 
 	      eh->fdpic_cnts.funcdesc_offset = s->size;
 	      s->size += 8;
-	      /* We will add an R_ARM_FUNCDESC_VALUE relocation or two rofixups.  */
+	      /* We will add an R_ARM_FUNCDESC_VALUE relocation or two
+		 rofixups.  */
 	      if (bfd_link_pic(info))
 		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	      else
@@ -16529,7 +16439,9 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
      space for pc-relative relocs that have become local due to symbol
      visibility changes.  */
 
-  if (bfd_link_pic (info) || htab->root.is_relocatable_executable || htab->fdpic_p)
+  if (bfd_link_pic (info)
+      || htab->root.is_relocatable_executable
+      || htab->fdpic_p)
     {
       /* Relocs that use pc_count are PC-relative forms, which will appear
 	 on something like ".long foo - ." or "movw REG, foo - .".  We want
@@ -16637,7 +16549,8 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	  && eh->plt.noncall_refcount == 0
 	  && SYMBOL_REFERENCES_LOCAL (info, h))
 	elf32_arm_allocate_irelocs (info, sreloc, p->count);
-      else if (h->dynindx != -1 && (!bfd_link_pic(info) || !info->symbolic || !h->def_regular))
+      else if (h->dynindx != -1
+	       && (!bfd_link_pic(info) || !info->symbolic || !h->def_regular))
 	elf32_arm_allocate_dynrelocs (info, sreloc, p->count);
       else if (htab->fdpic_p && !bfd_link_pic(info))
 	htab->srofixup->size += 4 * p->count;
@@ -17267,7 +17180,7 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
       splt = htab->root.splt;
       BFD_ASSERT (splt != NULL && sdyn != NULL);
-      BFD_ASSERT (htab->root.target_os == is_symbian || sgot != NULL);
+      BFD_ASSERT (sgot != NULL);
 
       dyncon = (Elf32_External_Dyn *) sdyn->contents;
       dynconend = (Elf32_External_Dyn *) (sdyn->contents + sdyn->size);
@@ -17282,8 +17195,6 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 
 	  switch (dyn.d_tag)
 	    {
-	      unsigned int type;
-
 	    default:
 	      if (htab->root.target_os == is_vxworks
 		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
@@ -17291,27 +17202,15 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	      break;
 
 	    case DT_HASH:
-	      name = ".hash";
-	      goto get_vma_if_bpabi;
 	    case DT_STRTAB:
-	      name = ".dynstr";
-	      goto get_vma_if_bpabi;
 	    case DT_SYMTAB:
-	      name = ".dynsym";
-	      goto get_vma_if_bpabi;
 	    case DT_VERSYM:
-	      name = ".gnu.version";
-	      goto get_vma_if_bpabi;
 	    case DT_VERDEF:
-	      name = ".gnu.version_d";
-	      goto get_vma_if_bpabi;
 	    case DT_VERNEED:
-	      name = ".gnu.version_r";
-	      goto get_vma_if_bpabi;
+	      break;
 
 	    case DT_PLTGOT:
-	      name = (htab->root.target_os == is_symbian
-		      ? ".got" : ".got.plt");
+	      name = ".got.plt";
 	      goto get_vma;
 	    case DT_JMPREL:
 	      name = RELOC_SECTION (htab, ".plt");
@@ -17324,19 +17223,8 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 		  bfd_set_error (bfd_error_invalid_operation);
 		  return FALSE;
 		}
-	      if (htab->root.target_os != is_symbian)
-		dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
-	      else
-		/* In the BPABI, tags in the PT_DYNAMIC section point
-		   at the file offset, not the memory address, for the
-		   convenience of the post linker.  */
-		dyn.d_un.d_ptr = s->output_section->filepos + s->output_offset;
+	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-	      break;
-
-	    get_vma_if_bpabi:
-	      if (htab->root.target_os == is_symbian)
-		goto get_vma;
 	      break;
 
 	    case DT_PLTRELSZ:
@@ -17350,35 +17238,6 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	    case DT_RELASZ:
 	    case DT_REL:
 	    case DT_RELA:
-	      /* In the BPABI, the DT_REL tag must point at the file
-		 offset, not the VMA, of the first relocation
-		 section.  So, we use code similar to that in
-		 elflink.c, but do not check for SHF_ALLOC on the
-		 relocation section, since relocation sections are
-		 never allocated under the BPABI.  PLT relocs are also
-		 included.  */
-	      if (htab->root.target_os == is_symbian)
-		{
-		  unsigned int i;
-		  type = ((dyn.d_tag == DT_REL || dyn.d_tag == DT_RELSZ)
-			  ? SHT_REL : SHT_RELA);
-		  dyn.d_un.d_val = 0;
-		  for (i = 1; i < elf_numsections (output_bfd); i++)
-		    {
-		      Elf_Internal_Shdr *hdr
-			= elf_elfsections (output_bfd)[i];
-		      if (hdr->sh_type == type)
-			{
-			  if (dyn.d_tag == DT_RELSZ
-			      || dyn.d_tag == DT_RELASZ)
-			    dyn.d_un.d_val += hdr->sh_size;
-			  else if ((ufile_ptr) hdr->sh_offset
-				   <= dyn.d_un.d_val - 1)
-			    dyn.d_un.d_val = hdr->sh_offset;
-			}
-		    }
-		  bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
-		}
 	      break;
 
 	    case DT_TLSDESC_PLT:
@@ -17846,14 +17705,7 @@ elf32_arm_output_plt_map_1 (output_arch_syminfo *osi,
 		    (osi->info->output_bfd, osi->sec->output_section));
 
   addr = root_plt->offset & -2;
-  if (htab->root.target_os == is_symbian)
-    {
-      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
-	return FALSE;
-      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 4))
-	return FALSE;
-    }
-  else if (htab->root.target_os == is_vxworks)
+  if (htab->root.target_os == is_vxworks)
     {
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	return FALSE;
@@ -18224,8 +18076,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       osi.sec_shndx = (_bfd_elf_section_from_bfd_section
 		       (output_bfd, osi.sec->output_section));
 
-      /* Output mapping symbols for the plt header.  SymbianOS does not have a
-	 plt header.  */
+      /* Output mapping symbols for the plt header.  */
       if (htab->root.target_os == is_vxworks)
 	{
 	  /* VxWorks shared libraries have no PLT header.  */
@@ -18251,7 +18102,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_THUMB, 16))
 	    return FALSE;
 	}
-      else if (htab->root.target_os != is_symbian && !htab->fdpic_p)
+      else if (!htab->fdpic_p)
 	{
 	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
 	    return FALSE;
@@ -20778,167 +20629,3 @@ elf32_arm_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   return flags_compatible;
 }
-
-
-/* Symbian OS Targets.  */
-
-#undef	TARGET_LITTLE_SYM
-#define TARGET_LITTLE_SYM		arm_elf32_symbian_le_vec
-#undef	TARGET_LITTLE_NAME
-#define TARGET_LITTLE_NAME		"elf32-littlearm-symbian"
-#undef	TARGET_BIG_SYM
-#define TARGET_BIG_SYM			arm_elf32_symbian_be_vec
-#undef	TARGET_BIG_NAME
-#define TARGET_BIG_NAME			"elf32-bigarm-symbian"
-
-/* Like elf32_arm_link_hash_table_create -- but overrides
-   appropriately for Symbian OS.  */
-
-static struct bfd_link_hash_table *
-elf32_arm_symbian_link_hash_table_create (bfd *abfd)
-{
-  struct bfd_link_hash_table *ret;
-
-  ret = elf32_arm_link_hash_table_create (abfd);
-  if (ret)
-    {
-      struct elf32_arm_link_hash_table *htab
-	= (struct elf32_arm_link_hash_table *)ret;
-      /* There is no PLT header for Symbian OS.  */
-      htab->plt_header_size = 0;
-      /* The PLT entries are each one instruction and one word.  */
-      htab->plt_entry_size = 4 * ARRAY_SIZE (elf32_arm_symbian_plt_entry);
-      /* Symbian uses armv5t or above, so use_blx is always true.  */
-      htab->use_blx = 1;
-      htab->root.is_relocatable_executable = 1;
-    }
-  return ret;
-}
-
-static const struct bfd_elf_special_section
-elf32_arm_symbian_special_sections[] =
-{
-  /* In a BPABI executable, the dynamic linking sections do not go in
-     the loadable read-only segment.  The post-linker may wish to
-     refer to these sections, but they are not part of the final
-     program image.  */
-  { STRING_COMMA_LEN (".dynamic"),	 0, SHT_DYNAMIC,  0 },
-  { STRING_COMMA_LEN (".dynstr"),	 0, SHT_STRTAB,	  0 },
-  { STRING_COMMA_LEN (".dynsym"),	 0, SHT_DYNSYM,	  0 },
-  { STRING_COMMA_LEN (".got"),		 0, SHT_PROGBITS, 0 },
-  { STRING_COMMA_LEN (".hash"),		 0, SHT_HASH,	  0 },
-  /* These sections do not need to be writable as the SymbianOS
-     postlinker will arrange things so that no dynamic relocation is
-     required.  */
-  { STRING_COMMA_LEN (".init_array"),	 0, SHT_INIT_ARRAY,    SHF_ALLOC },
-  { STRING_COMMA_LEN (".fini_array"),	 0, SHT_FINI_ARRAY,    SHF_ALLOC },
-  { STRING_COMMA_LEN (".preinit_array"), 0, SHT_PREINIT_ARRAY, SHF_ALLOC },
-  { NULL,			      0, 0, 0,		       0 }
-};
-
-static void
-elf32_arm_symbian_begin_write_processing (bfd *abfd,
-					  struct bfd_link_info *link_info)
-{
-  /* BPABI objects are never loaded directly by an OS kernel; they are
-     processed by a postlinker first, into an OS-specific format.  If
-     the D_PAGED bit is set on the file, BFD will align segments on
-     page boundaries, so that an OS can directly map the file.  With
-     BPABI objects, that just results in wasted space.  In addition,
-     because we clear the D_PAGED bit, map_sections_to_segments will
-     recognize that the program headers should not be mapped into any
-     loadable segment.  */
-  abfd->flags &= ~D_PAGED;
-  elf32_arm_begin_write_processing (abfd, link_info);
-}
-
-static bfd_boolean
-elf32_arm_symbian_modify_segment_map (bfd *abfd,
-				      struct bfd_link_info *info)
-{
-  struct elf_segment_map *m;
-  asection *dynsec;
-
-  /* BPABI shared libraries and executables should have a PT_DYNAMIC
-     segment.  However, because the .dynamic section is not marked
-     with SEC_LOAD, the generic ELF code will not create such a
-     segment.  */
-  dynsec = bfd_get_section_by_name (abfd, ".dynamic");
-  if (dynsec)
-    {
-      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
-	if (m->p_type == PT_DYNAMIC)
-	  break;
-
-      if (m == NULL)
-	{
-	  m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
-	  m->next = elf_seg_map (abfd);
-	  elf_seg_map (abfd) = m;
-	}
-    }
-
-  /* Also call the generic arm routine.  */
-  return elf32_arm_modify_segment_map (abfd, info);
-}
-
-/* Return address for Ith PLT stub in section PLT, for relocation REL
-   or (bfd_vma) -1 if it should not be included.  */
-
-static bfd_vma
-elf32_arm_symbian_plt_sym_val (bfd_vma i, const asection *plt,
-			       const arelent *rel ATTRIBUTE_UNUSED)
-{
-  return plt->vma + 4 * ARRAY_SIZE (elf32_arm_symbian_plt_entry) * i;
-}
-
-#undef  elf32_bed
-#define elf32_bed elf32_arm_symbian_bed
-
-/* The dynamic sections are not allocated on SymbianOS; the postlinker
-   will process them and then discard them.  */
-#undef  ELF_DYNAMIC_SEC_FLAGS
-#define ELF_DYNAMIC_SEC_FLAGS \
-  (SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED)
-
-#undef elf_backend_emit_relocs
-
-#undef  bfd_elf32_bfd_link_hash_table_create
-#define bfd_elf32_bfd_link_hash_table_create	elf32_arm_symbian_link_hash_table_create
-#undef  elf_backend_special_sections
-#define elf_backend_special_sections		elf32_arm_symbian_special_sections
-#undef  elf_backend_begin_write_processing
-#define elf_backend_begin_write_processing	elf32_arm_symbian_begin_write_processing
-#undef  elf_backend_final_write_processing
-#define elf_backend_final_write_processing	elf32_arm_final_write_processing
-
-#undef  elf_backend_modify_segment_map
-#define elf_backend_modify_segment_map elf32_arm_symbian_modify_segment_map
-
-/* There is no .got section for BPABI objects, and hence no header.  */
-#undef  elf_backend_got_header_size
-#define elf_backend_got_header_size 0
-
-/* Similarly, there is no .got.plt section.  */
-#undef  elf_backend_want_got_plt
-#define elf_backend_want_got_plt 0
-
-#undef  elf_backend_plt_sym_val
-#define elf_backend_plt_sym_val		elf32_arm_symbian_plt_sym_val
-
-#undef  elf_backend_may_use_rel_p
-#define elf_backend_may_use_rel_p	1
-#undef  elf_backend_may_use_rela_p
-#define elf_backend_may_use_rela_p	0
-#undef  elf_backend_default_use_rela_p
-#define elf_backend_default_use_rela_p	0
-#undef  elf_backend_want_plt_sym
-#define elf_backend_want_plt_sym	0
-#undef  elf_backend_dtrel_excludes_plt
-#define elf_backend_dtrel_excludes_plt	0
-#undef  ELF_MAXPAGESIZE
-#define ELF_MAXPAGESIZE			0x8000
-#undef ELF_TARGET_OS
-#define ELF_TARGET_OS			is_symbian
-
-#include "elf32-target.h"

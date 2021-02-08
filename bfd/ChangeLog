@@ -1,3 +1,12 @@
+2021-02-09  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd (arm*-*-symbianelf*): Move from obsolete to removed.
+	* configure.ac: Delete symbian entries.
+	* elf-bfd.h (enum elf_target_os): Delete is_symbian.
+	* elf32-arm.c: Remove symbian support.  Formatting.
+	* targets.c: Delete symbian entries.
+	* configure: Regenerate.
+
 2021-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/19609

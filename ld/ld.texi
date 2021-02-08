@@ -7316,7 +7316,7 @@ meanings, and target defaults are as follows:
 @item rel
 @samp{R_ARM_REL32} (arm*-*-elf, arm*-*-eabi)
 @item abs
-@samp{R_ARM_ABS32} (arm*-*-symbianelf)
+@samp{R_ARM_ABS32}
 @item got-rel
 @samp{R_ARM_GOT_PREL} (arm*-*-linux, arm*-*-*bsd)
 @end table
@@ -7357,9 +7357,6 @@ BLX instructions (available on ARMv5t and above) in various
 situations. Currently it is used to perform calls via the PLT from Thumb
 code using BLX rather than using BX and a mode-switching stub before
 each PLT entry. This should lead to such calls executing slightly faster.
-
-This option is enabled implicitly for SymbianOS, so there is no need to
-specify it if you are using that target.
 
 @cindex VFP11_DENORM_FIX
 @kindex --vfp11-denorm-fix

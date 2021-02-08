@@ -1,3 +1,8 @@
+2021-02-09  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Delete arm*-*-symbianelf* entry.
+	* configure: Regenerate.
+
 2021-01-26  Nick Alcock  <nick.alcock@oracle.com>
 
 	* Makefile.def: Add install-libctf dependency to install-ld.

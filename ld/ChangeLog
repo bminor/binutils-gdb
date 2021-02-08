@@ -1,3 +1,17 @@
+2021-02-09  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Remove earmsymbian.c.
+	Don't include symbian dep file.
+	* configure.tgt: Remove arm*-*-symbianelf* entry.
+	* emulparams/armsymbian.sh: Delete.
+	* ld.texi: Don't mention symbian.
+	* scripttempl/armbpabi.sc: Delete.
+	* testsuite/ld-arm/symbian-seg1.d: Delete.
+	* testsuite/ld-arm/symbian-seg1.s: Delete.
+	* testsuite/ld-arm/arm-elf.exp: Don't run symbian-seg1.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
 2021-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27358

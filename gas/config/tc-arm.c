@@ -30495,11 +30495,7 @@ arm_fix_adjustable (fixS * fixP)
 const char *
 elf32_arm_target_format (void)
 {
-#ifdef TE_SYMBIAN
-  return (target_big_endian
-	  ? "elf32-bigarm-symbian"
-	  : "elf32-littlearm-symbian");
-#elif defined (TE_VXWORKS)
+#if defined (TE_VXWORKS)
   return (target_big_endian
 	  ? "elf32-bigarm-vxworks"
 	  : "elf32-littlearm-vxworks");

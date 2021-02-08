@@ -151,7 +151,6 @@ armeb-*-elf | armeb-*-eabi*)
 arm-*-elf | arm*-*-eabi* | arm-*-rtems* | arm-*-genode*)
 			targ_emul=armelf
 			;;
-arm*-*-symbianelf*)	targ_emul=armsymbian;;
 arm-*-kaos*)		targ_emul=armelf
 			;;
 arm9e-*-elf)		targ_emul=armelf

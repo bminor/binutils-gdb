@@ -1,3 +1,24 @@
+2021-02-09  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (TARG_ENV_HFILES): Remove config/te-symbian.h.
+	* config/tc-arm.c (elf32_arm_target_format): Remove TE_SYMBIAN
+	support.
+	* config/te-symbian.h: Delete.
+	* configure.tgt: Remove arm-*-symbianelf*.
+	* testsuite/gas/arm/arch4t-eabi.d: Don't mention symbianelf in
+	target selection.
+	* testsuite/gas/arm/arch4t.d: Likewise.
+	* testsuite/gas/arm/got_prel.d: Likewise.
+	* testsuite/gas/arm/mapdir.d: Likewise.
+	* testsuite/gas/arm/mapmisc.d: Likewise.
+	* testsuite/gas/arm/mapsecs.d: Likewise.
+	* testsuite/gas/arm/mapshort-eabi.d: Likewise.
+	* testsuite/gas/arm/thumb-eabi.d: Likewise.
+	* testsuite/gas/arm/thumb.d: Likewise.
+	* testsuite/gas/arm/thumbrel.d: Likewise.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2021-02-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 27384

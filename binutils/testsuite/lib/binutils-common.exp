@@ -213,7 +213,6 @@ proc supports_gnu_osabi {} {
 	 || [istarget *-*-linux*]
 	 || [istarget *-*-nacl*]
 	 || ( [istarget *-*-*bsd*] && ![istarget arm*-*-netbsd*] )
-	 || [istarget *-*-symbianelf]
 	 || [istarget *-*-lynxos]
 	 || ( [istarget *-*-nto*] && ![istarget arm*-*-*] )
 	 || [istarget *-*-irix*]
