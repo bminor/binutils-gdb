@@ -1,0 +1,142 @@
+# Copyright 2021 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This test exercises the gdb-gdb.py helper script that is generated
+# into the GDB build directory.  This script is intended for use by
+# developers to make debugging GDB easier.
+
+load_lib selftest-support.exp
+
+if [target_info exists gdb,noinferiorio] {
+    verbose "Skipping because of no inferiorio capabilities."
+    return
+}
+
+# Find the helper script in the GDB build directory.
+set py_helper_script [file dirname $GDB]/gdb-gdb.py
+if { ![file readable $py_helper_script] \
+	 || [file type $py_helper_script] != "file" } {
+    untested "failed to find gdb-gdb.py helper script"
+    return
+}
+
+# Start GDB and check that we have python support.
+gdb_start
+if { [skip_python_tests] } {
+    untested "skipped gdb-gdb.py tests due to lack of python support"
+    return
+}
+gdb_exit
+
+# The main test.  This is called by the self-test framework once GDB
+# has been started on a copy of itself.
+proc test_python_helper {} {
+    global py_helper_script decimal hex gdb_prompt
+    global inferior_spawn_id
+
+    # Source the python helper script.  This script registers the
+    # pretty printer for the object file called 'gdb', however, in our
+    # selftests we rename 'gdb' to 'xgdb', so the pretty printer
+    # doesn't get registered by default.
+    #
+    # So, after sourcing the script we do our own objfile scan and
+    # register the pretty printer for the objfile called 'xgdb'.
+    gdb_test_no_output "source $py_helper_script" \
+	"source gdb-gdb.py helper script"
+    gdb_test [multi_line_input \
+		  "python" \
+		  "for objfile in gdb.objfiles():" \
+		  "  if os.path.basename(objfile.filename) == \"xgdb\":" \
+		  "    objfile.pretty_printers.append(type_lookup_function)" \
+		  "end"] ".*" \
+	"register the type pretty printer"
+
+    # Now place a breakpoint somewhere useful.  This can be any function that:
+    # (a) is easy to reach by issuing a simple gdb command, and
+    # (b) is unlikely to be modified very often within gdb, and
+    # (c) has a parameter that is either a 'struct type *' or a 'struct value *'.
+    gdb_breakpoint value_print
+
+    # Adjust the prompt on the outer gdb, this just makes things a
+    # little clearer when trying to unpick which GDB is active.
+    gdb_test_multiple "set prompt (xgdb) " "set xgdb prompt" {
+	-re "\[(\]xgdb\[)\].*\[(\]xgdb\[)\] $" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # Send a command to the outer GDB to continue the inner GDB.  The
+    # stop is being detected from the inner GDB, hence the use of -i
+    # here.
+    gdb_test_multiple "continue" "start inner gdb" {
+	-i "$inferior_spawn_id"
+	-re "\r\n$gdb_prompt $" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # Send a command to the inner GDB (hence send_inferior), this
+    # should result in the outer GDB stopping at the breakpoint we
+    # just created.
+    send_inferior "print 1\n"
+    gdb_test_multiple "" "hit breakpoint in inner gdb" {
+	-re "hit Breakpoint $decimal, value_print.*\\(xgdb\\) $" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # Now inspect the type of parameter VAL, this should trigger the
+    # pretty printers.
+    set answer [multi_line \
+		    "${decimal} = " \
+		    "{pointer_type = 0x0," \
+		    " reference_type = 0x0," \
+		    " chain = 0x0," \
+		    " instance_flags = 0," \
+		    " length = $decimal," \
+		    " main_type = $hex}" \
+		    "\\(xgdb\\) $"]
+    gdb_test_multiple "print *val->type" "pretty print type" {
+	-re "$answer" {
+	    pass $gdb_test_name
+	}
+	-re "There is no member named.*\r\n\\(xgdb\\) $" {
+	    fail $gdb_test_name
+	}
+    }
+
+    set answer [multi_line \
+		    "$decimal = " \
+		    "{name = $hex \"int\"," \
+		    " code = TYPE_CODE_INT," \
+		    " flags = \[^\r\n\]+," \
+		    " owner = $hex \\(gdbarch\\)," \
+		    " target_type = 0x0," \
+		    " type_specific_field = TYPE_SPECIFIC_NONE}" \
+		    "\\(xgdb\\) $"]
+    gdb_test_multiple "print *val->type->main_type" "pretty print type->main_type" {
+	-re "$answer" {
+	    pass $gdb_test_name
+	}
+	-re "There is no member named.*\r\n\\(xgdb\\) $" {
+	    fail $gdb_test_name
+	}
+    }
+
+    return 0
+}
+
+# Use the self-test framework to run the test.
+do_self_tests captured_main test_python_helper

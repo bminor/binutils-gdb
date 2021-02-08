@@ -1,3 +1,9 @@
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb-gdb.py.in (StructMainTypePrettyPrinter) <owner_to_string>:
+	Updated fields names flag_objfile_owned to m_flag_objfile_owned,
+	and owner to m_owner.
+
 2021-03-09  Felix Willgerodt  <felix.willgerodt@intel.com>
 
         * f-exp.h (eval_op_f_loc): Declare.
