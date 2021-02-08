@@ -1,5 +1,14 @@
 2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gdb.opt/inline-locals.c (scoped): New function.
+	(main): Call 'scoped'.
+	* gdb.opt/inline-locals.exp: Update with "info locals" tests
+	for scoped variables.
+	* gdb.dwarf2/dw2-inline-with-lexical-scope.c: New file.
+	* gdb.dwarf2/dw2-inline-with-lexical-scope.exp: New file.
+
+2021-04-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* lib/dwarf.exp (_location): Recognize DW_OP_fbreg as an op.
 
 2021-04-12  Will Schmidt  <will_schmidt@vnet.ibm.com>

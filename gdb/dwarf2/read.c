@@ -13492,6 +13492,37 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	       sect_offset_str (die->sect_off),
 	       sect_offset_str (origin_die->sect_off));
 
+  /* Find if the concrete and abstract trees are structurally the
+     same.  This is a shallow traversal and it is not bullet-proof;
+     the compiler can trick the debugger into believing that the trees
+     are isomorphic, whereas they actually are not.  However, the
+     likelyhood of this happening is pretty low, and a full-fledged
+     check would be an overkill.  */
+  bool are_isomorphic = true;
+  die_info *concrete_child = die->child;
+  die_info *abstract_child = origin_die->child;
+  while (concrete_child != nullptr || abstract_child != nullptr)
+    {
+      if (concrete_child == nullptr
+	  || abstract_child == nullptr
+	  || concrete_child->tag != abstract_child->tag)
+	{
+	  are_isomorphic = false;
+	  break;
+	}
+
+      concrete_child = concrete_child->sibling;
+      abstract_child = abstract_child->sibling;
+    }
+
+  /* Walk the origin's children in parallel to the concrete children.
+     This helps match an origin child in case the debug info misses
+     DW_AT_abstract_origin attributes.  Keep in mind that the abstract
+     origin tree may not have the same tree structure as the concrete
+     DIE, though.  */
+  die_info *corresponding_abstract_child
+    = are_isomorphic ? origin_die->child : nullptr;
+
   std::vector<sect_offset> offsets;
 
   for (child_die = die->child;
@@ -13508,7 +13539,12 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	 one.  */
       if (child_die->tag == DW_TAG_call_site
 	  || child_die->tag == DW_TAG_GNU_call_site)
-	continue;
+	{
+	  if (are_isomorphic)
+	    corresponding_abstract_child
+	      = corresponding_abstract_child->sibling;
+	  continue;
+	}
 
       /* For each CHILD_DIE, find the corresponding child of
 	 ORIGIN_DIE.  If there is more than one layer of
@@ -13526,6 +13562,14 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  child_origin_die = follow_die_ref (child_origin_die, attr,
 					     &child_origin_cu);
 	}
+
+      /* If missing DW_AT_abstract_origin, try the corresponding child
+	 of the origin.  Clang emits such lexical scopes.  */
+      if (child_origin_die == child_die
+	  && dwarf2_attr (child_die, DW_AT_abstract_origin, cu) == nullptr
+	  && are_isomorphic
+	  && child_die->tag == DW_TAG_lexical_block)
+	child_origin_die = corresponding_abstract_child;
 
       /* According to DWARF3 3.3.8.2 #3 new entries without their abstract
 	 counterpart may exist.  */
@@ -13546,6 +13590,9 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  else
 	    offsets.push_back (child_origin_die->sect_off);
 	}
+
+      if (are_isomorphic)
+	corresponding_abstract_child = corresponding_abstract_child->sibling;
     }
   std::sort (offsets.begin (), offsets.end ());
   sect_offset *offsets_end = offsets.data () + offsets.size ();
