@@ -434,7 +434,7 @@ gdbpy_tui_set_title (PyObject *self, PyObject *newvalue, void *closure)
       return -1;
     }
 
-  if (win->window == nullptr)
+  if (newvalue == nullptr)
     {
       PyErr_Format (PyExc_TypeError, _("Cannot delete \"title\" attribute."));
       return -1;

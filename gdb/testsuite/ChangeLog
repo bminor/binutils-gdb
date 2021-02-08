@@ -1,5 +1,13 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/tui-window.exp: Add new tests.
+	* gdb.python/tui-window.py (TestWindow) <__init__>: Store
+	TestWindow object into global the_window.
+	<remote_title>: New method.
+	(delete_window_title): New function.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.tui/winheight.exp: Add more tests.
 
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>

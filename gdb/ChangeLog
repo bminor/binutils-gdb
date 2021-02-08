@@ -1,5 +1,10 @@
 2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-tui.c (gdbpy_tui_set_title): Check that the new value
+	for the title is not nullptr.
+
+2021-02-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tui-layout.c (saved_tui_windows): Delete.
 	(tui_apply_current_layout): Don't make use of saved_tui_windows,
 	call new get_windows member function instead.
