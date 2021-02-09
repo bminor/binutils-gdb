@@ -601,13 +601,17 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
 	 trying to allocate some memory for it.  */
       ada_ensure_varsize_limit (type);
 
-      if (value_lazy (val)
-	  || TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val)))
+      if (value_optimized_out (val))
+	result = allocate_optimized_out_value (type);
+      else if (value_lazy (val)
+	       /* Be careful not to make a lazy not_lval value.  */
+	       || (VALUE_LVAL (val) != not_lval
+		   && TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val))))
 	result = allocate_value_lazy (type);
       else
 	{
 	  result = allocate_value (type);
-	  value_contents_copy_raw (result, 0, val, 0, TYPE_LENGTH (type));
+	  value_contents_copy (result, 0, val, 0, TYPE_LENGTH (type));
 	}
       set_value_component_location (result, val);
       set_value_bitsize (result, value_bitsize (val));

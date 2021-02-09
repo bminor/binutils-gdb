@@ -739,9 +739,6 @@ extern struct value *allocate_value_lazy (struct type *type);
 extern void value_contents_copy (struct value *dst, LONGEST dst_offset,
 				 struct value *src, LONGEST src_offset,
 				 LONGEST length);
-extern void value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
-				     struct value *src, LONGEST src_offset,
-				     LONGEST length);
 
 extern struct value *allocate_repeat_value (struct type *type, int count);
 

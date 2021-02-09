@@ -1,5 +1,12 @@
 2021-02-09  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (coerce_unspec_val_to_type): Avoid making lazy
+	not_lval value.
+	* value.c (value_contents_copy_raw): Now static.
+	* value.h (value_contents_copy_raw): Don't declare.
+
+2021-02-09  Tom Tromey  <tromey@adacore.com>
+
 	* gdbtypes.c (resolve_dynamic_struct): Handle structure with no
 	fields.
 

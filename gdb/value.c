@@ -1304,7 +1304,7 @@ value_ranges_copy_adjusted (struct value *dst, int dst_bit_offset,
    It is assumed the contents of DST in the [DST_OFFSET,
    DST_OFFSET+LENGTH) range are wholly available.  */
 
-void
+static void
 value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
 			 struct value *src, LONGEST src_offset, LONGEST length)
 {
