@@ -1,3 +1,11 @@
+2021-02-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 27355
+	* testsuite/gas/elf/pr27355.s: New test source file.
+	* testsuite/gas/elf/pr27355.d: New test control file.
+	* testsuite/gas/elf/pr27355.err: Expected errors from new test.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
 2021-02-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* config/tc-tic54x (tic54x_mmregs): Rename to ...

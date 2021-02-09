@@ -304,6 +304,7 @@ if { [is_elf_format] } then {
     run_dump_test "bad-section-flag"
     run_dump_test "bad-size"
     run_dump_test "bad-group"
+    run_dump_test "pr27355"
 
     run_dump_test "syms"
 
