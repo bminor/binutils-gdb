@@ -2545,7 +2545,6 @@ resolve_dynamic_struct (struct type *type,
   unsigned resolved_type_bit_length = 0;
 
   gdb_assert (type->code () == TYPE_CODE_STRUCT);
-  gdb_assert (type->num_fields () > 0);
 
   resolved_type = copy_type (type);
 
@@ -2564,9 +2563,10 @@ resolve_dynamic_struct (struct type *type,
 	((struct field *)
 	 TYPE_ALLOC (resolved_type,
 		     resolved_type->num_fields () * sizeof (struct field)));
-      memcpy (resolved_type->fields (),
-	      type->fields (),
-	      resolved_type->num_fields () * sizeof (struct field));
+      if (type->num_fields () > 0)
+	memcpy (resolved_type->fields (),
+		type->fields (),
+		resolved_type->num_fields () * sizeof (struct field));
     }
 
   for (i = 0; i < resolved_type->num_fields (); ++i)

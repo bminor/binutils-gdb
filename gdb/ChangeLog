@@ -1,3 +1,8 @@
+2021-02-09  Tom Tromey  <tromey@adacore.com>
+
+	* gdbtypes.c (resolve_dynamic_struct): Handle structure with no
+	fields.
+
 2021-02-08  Shahab Vahedi  <shahab@synopsys.com>
 
 	PR tdep/27369
