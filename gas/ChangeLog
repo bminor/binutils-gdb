@@ -1,3 +1,13 @@
+2021-02-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 27381
+	* read.c (s_incbin): Check that the file to be included is a
+	regular, non-directory file.
+	* testsuite/gas/all/pr27381.s: New test source file.
+	* testsuite/gas/all/pr27381.d: New test control file.
+	* testsuite/gas/all/pr27381.err: Expected error output for the new test.
+	* testsuite/gas/all/gas.exp: Run the new test.
+
 2021-02-09  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (TARG_ENV_HFILES): Remove config/te-symbian.h.

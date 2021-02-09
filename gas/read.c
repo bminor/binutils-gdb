@@ -5909,7 +5909,16 @@ s_incbin (int x ATTRIBUTE_UNUSED)
   if (binfile)
     {
       long   file_len;
+      struct stat filestat;
 
+      if (fstat (fileno (binfile), &filestat) != 0
+	  || ! S_ISREG (filestat.st_mode)
+	  || S_ISDIR (filestat.st_mode))
+	{
+	  as_bad (_("unable to include `%s'"), path);
+	  goto done;
+	}
+      
       register_dependency (path);
 
       /* Compute the length of the file.  */
