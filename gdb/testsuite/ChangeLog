@@ -1,3 +1,11 @@
+2021-02-09  Abid Qadeer  <abidh@codesourcery.com>
+
+	* gdb.threads/signal-command-handle-nopass.exp: Call
+	'standard_testfile' before using 'testfile'.
+	* gdb.threads/signal-command-multiple-signals-pending.exp: Likewise.
+	* gdb.threads/signal-delivered-right-thread.exp: Likewise
+	* gdb.threads/signal-sigtrap.exp: Likewise
+
 2021-02-08  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.base/gnu-ifunc.exp (build): Pass -Wl,z,lazy.

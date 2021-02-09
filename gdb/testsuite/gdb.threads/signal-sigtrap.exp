@@ -16,12 +16,12 @@
 # Check that GDB doesn't forget to pass SIGTRAP to the program when
 # the user explicitly passes it with the signal command.
 
+standard_testfile
+
 if [target_info exists gdb,nosignals] {
     verbose "Skipping ${testfile}.exp because of nosignals."
     return -1
 }
-
-standard_testfile
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}]} {
     return -1
