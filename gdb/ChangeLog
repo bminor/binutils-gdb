@@ -1,3 +1,9 @@
+2021-02-09  Shahab Vahedi  <shahab@synopsys.com>
+
+	PR build/27385
+	* arch/arc.c (arc_lookup_target_description): Use
+	target_desc_up() ctor explicitly.
+
 2021-02-08  Shahab Vahedi  <shahab@synopsys.com>
 
 	PR tdep/27369
