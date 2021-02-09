@@ -1,5 +1,15 @@
 2021-02-09  Nick Clifton  <nickc@redhat.com>
 
+	PR 27384
+	* listing.c (listing_psize): Check the result of the width
+	expression before assigning it to paper_width.
+	* testsuite/gas/all/pr27384.s: New test source file.
+	* testsuite/gas/all/pr27384.d: New test control file.
+	* testsuite/gas/all/pr27384.err: Expected errors from new test.
+	* testsuite/gas/all/gas.exp: Run the new test.
+
+2021-02-09  Nick Clifton  <nickc@redhat.com>
+
 	PR 27355
 	* testsuite/gas/elf/pr27355.s: New test source file.
 	* testsuite/gas/elf/pr27355.d: New test control file.

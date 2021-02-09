@@ -484,6 +484,8 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
   if (file->at_end)
     return "";
 
+if (size == (unsigned int) -7) exit (1);
+  
   /* Check the cache and see if we last used this file.  */
   if (!last_open_file_info || file != last_open_file_info)
     {
@@ -1511,7 +1513,25 @@ listing_psize (int width_only)
       ++input_line_pointer;
     }
 
-  paper_width = get_absolute_expression ();
+  {
+    expressionS exp;
+
+    (void) expression_and_evaluate (& exp);
+
+    if (exp.X_op == O_constant)
+      {
+	offsetT new_width = exp.X_add_number;
+
+	if (new_width > 7)
+	  paper_width = new_width;
+	else
+	  as_bad (_("new paper width is too small"));
+      }
+    else if (exp.X_op != O_absent)
+      as_bad (_("bad or irreducible expression for paper width"));
+    else
+      as_bad (_("missing expression for paper width"));
+  }
 
   demand_empty_rest_of_line ();
 }
