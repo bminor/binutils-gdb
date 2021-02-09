@@ -17217,6 +17217,14 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
       child_die = child_die->sibling;
     }
 
+  if (range_types.empty ())
+    {
+      complaint (_("unable to find array range - DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_objfile->objfile));
+      return NULL;
+    }
+
   /* Dwarf2 dimensions are output from left to right, create the
      necessary array types in backwards order.  */
 
@@ -17245,6 +17253,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 	  byte_stride_prop = nullptr;
 	}
     }
+
+  gdb_assert (type != element_type);
 
   /* Understand Dwarf2 support for vector types (like they occur on
      the PowerPC w/ AltiVec).  Gcc just adds another attribute to the

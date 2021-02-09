@@ -1,3 +1,10 @@
+2021-02-09  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27341
+	* dwarf2/read.c (read_array_type): Return NULL when not being able to
+	construct an array type.  Add assert to ensure that element_type is
+	not being modified.
+
 2021-02-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gcore.c (struct gcore_collect_regset_section_cb_data): Delete.

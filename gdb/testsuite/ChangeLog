@@ -1,3 +1,10 @@
+2021-02-09  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27341
+	* lib/gdb.exp (with_complaints): New proc, factored out of ...
+	(gdb_load_no_complaints): ... here.
+	* gdb.fortran/function-calls.exp: Add test-case.
+
 2021-02-09  Abid Qadeer  <abidh@codesourcery.com>
 
 	* gdb.threads/signal-command-handle-nopass.exp: Call

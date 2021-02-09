@@ -5096,11 +5096,11 @@ proc gdb_load { arg } {
 }
 
 #
-# gdb_load_no_complaints -- As gdb_load, but in addition verifies that
-# loading caused no symbol reading complaints.
+# with_complaints -- Execute BODY and set complaints temporary to N for the
+# duration.
 #
-proc gdb_load_no_complaints { arg } {
-    global gdb_prompt gdb_file_cmd_msg decimal
+proc with_complaints { n body } {
+    global decimal
 
     # Save current setting of complaints.
     set save ""
@@ -5112,16 +5112,39 @@ proc gdb_load_no_complaints { arg } {
 	}
     }
 
-    # Fall back to regular gdb_load if we couldn't get the current setting
-    # of complaints.
     if { $save == "" } {
-	return gdb_load $arg
+	perror "Did not manage to set complaints"
+    } else {
+	# Set complaints.
+	gdb_test_no_output "set complaints $n" ""
     }
 
-    # Temporarily set complaint to a small non-zero number.
-    gdb_test_no_output "set complaints 5" ""
+    set code [catch {uplevel 1 $body} result]
 
-    gdb_load $arg
+    # Restore saved setting of complaints.
+    if { $save != "" } {
+	gdb_test_no_output "set complaints $save" ""
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
+#
+# gdb_load_no_complaints -- As gdb_load, but in addition verifies that
+# loading caused no symbol reading complaints.
+#
+proc gdb_load_no_complaints { arg } {
+    global gdb_prompt gdb_file_cmd_msg decimal
+
+    # Temporarily set complaint to a small non-zero number.
+    with_complaints 5 {
+	gdb_load $arg
+    }
 
     # Verify that there were no complaints.
     set re "^Reading symbols from \[^\r\n\]*\r\n$gdb_prompt $"
