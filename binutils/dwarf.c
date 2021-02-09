@@ -2117,6 +2117,7 @@ get_type_abbrev_from_form (unsigned long                 form,
   switch (form)
     {
     case DW_FORM_GNU_ref_alt:
+    case DW_FORM_ref_sig8:
       /* FIXME: We are unable to handle this form at the moment.  */
       return NULL;
 

@@ -1,5 +1,10 @@
 2021-02-09  Tom de Vries  <tdevries@suse.de>
 
+	PR binutils/27370
+	* dwarf.c (get_type_abbrev_from_form): Handle DW_FORM_ref_sig8.
+
+2021-02-09  Tom de Vries  <tdevries@suse.de>
+
 	PR binutils/27386
 	* dwarf.c (process_debug_info): Handling DW_UT_skeleton and
 	DW_UT_split_compile.
