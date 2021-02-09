@@ -178,6 +178,7 @@ static int parse_number (struct parser_state *, const char *, int,
 
 %token <opcode> ASSIGN_MODIFY
 %token <opcode> UNOP_INTRINSIC BINOP_INTRINSIC
+%token <opcode> UNOP_OR_BINOP_INTRINSIC
 
 %left ','
 %left ABOVE_COMMA
@@ -244,6 +245,21 @@ exp	:	SIZEOF exp       %prec UNARY
 
 exp	:	KIND '(' exp ')'       %prec UNARY
 			{ write_exp_elt_opcode (pstate, UNOP_FORTRAN_KIND); }
+	;
+
+exp	:	UNOP_OR_BINOP_INTRINSIC '('
+			{ pstate->start_arglist (); }
+		one_or_two_args ')'
+			{ write_exp_elt_opcode (pstate, $1);
+			  write_exp_elt_longcst (pstate, pstate->end_arglist ());
+			  write_exp_elt_opcode (pstate, $1); }
+	;
+
+one_or_two_args
+	:	exp
+			{ pstate->arglist_len = 1; }
+	|	exp ',' exp
+			{ pstate->arglist_len = 2; }
 	;
 
 /* No more explicit array operators, we treat everything in F77 as 
@@ -1028,6 +1044,8 @@ static const struct token f77_keywords[] =
   { "ceiling", UNOP_INTRINSIC, UNOP_FORTRAN_CEILING, false },
   { "modulo", BINOP_INTRINSIC, BINOP_FORTRAN_MODULO, false },
   { "cmplx", BINOP_INTRINSIC, BINOP_FORTRAN_CMPLX, false },
+  { "lbound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_LBOUND, false },
+  { "ubound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_UBOUND, false },
 };
 
 /* Implementation of a dynamically expandable buffer for processing input

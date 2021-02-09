@@ -128,6 +128,107 @@ const struct op_print f_language::op_print_tab[] =
 };
 
 
+/* Create an array containing the lower bounds (when LBOUND_P is true) or
+   the upper bounds (when LBOUND_P is false) of ARRAY (which must be of
+   array type).  GDBARCH is the current architecture.  */
+
+static struct value *
+fortran_bounds_all_dims (bool lbound_p,
+			 struct gdbarch *gdbarch,
+			 struct value *array)
+{
+  type *array_type = check_typedef (value_type (array));
+  int ndimensions = calc_f77_array_dims (array_type);
+
+  /* Allocate a result value of the correct type.  */
+  struct type *range
+    = create_static_range_type (nullptr,
+				builtin_type (gdbarch)->builtin_int,
+				1, ndimensions);
+  struct type *elm_type = builtin_type (gdbarch)->builtin_long_long;
+  struct type *result_type = create_array_type (nullptr, elm_type, range);
+  struct value *result = allocate_value (result_type);
+
+  /* Walk the array dimensions backwards due to the way the array will be
+     laid out in memory, the first dimension will be the most inner.  */
+  LONGEST elm_len = TYPE_LENGTH (elm_type);
+  for (LONGEST dst_offset = elm_len * (ndimensions - 1);
+       dst_offset >= 0;
+       dst_offset -= elm_len)
+    {
+      LONGEST b;
+
+      /* Grab the required bound.  */
+      if (lbound_p)
+	b = f77_get_lowerbound (array_type);
+      else
+	b = f77_get_upperbound (array_type);
+
+      /* And copy the value into the result value.  */
+      struct value *v = value_from_longest (elm_type, b);
+      gdb_assert (dst_offset + TYPE_LENGTH (value_type (v))
+		  <= TYPE_LENGTH (value_type (result)));
+      gdb_assert (TYPE_LENGTH (value_type (v)) == elm_len);
+      value_contents_copy (result, dst_offset, v, 0, elm_len);
+
+      /* Peel another dimension of the array.  */
+      array_type = TYPE_TARGET_TYPE (array_type);
+    }
+
+  return result;
+}
+
+/* Return the lower bound (when LBOUND_P is true) or the upper bound (when
+   LBOUND_P is false) for dimension DIM_VAL (which must be an integer) of
+   ARRAY (which must be an array).  GDBARCH is the current architecture.  */
+
+static struct value *
+fortran_bounds_for_dimension (bool lbound_p,
+			      struct gdbarch *gdbarch,
+			      struct value *array,
+			      struct value *dim_val)
+{
+  /* Check the requested dimension is valid for this array.  */
+  type *array_type = check_typedef (value_type (array));
+  int ndimensions = calc_f77_array_dims (array_type);
+  long dim = value_as_long (dim_val);
+  if (dim < 1 || dim > ndimensions)
+    {
+      if (lbound_p)
+	error (_("LBOUND dimension must be from 1 to %d"), ndimensions);
+      else
+	error (_("UBOUND dimension must be from 1 to %d"), ndimensions);
+    }
+
+  /* The type for the result.  */
+  struct type *bound_type = builtin_type (gdbarch)->builtin_long_long;
+
+  /* Walk the dimensions backwards, due to the ordering in which arrays are
+     laid out the first dimension is the most inner.  */
+  for (int i = ndimensions - 1; i >= 0; --i)
+    {
+      /* If this is the requested dimension then we're done.  Grab the
+	 bounds and return.  */
+      if (i == dim - 1)
+	{
+	  LONGEST b;
+
+	  if (lbound_p)
+	    b = f77_get_lowerbound (array_type);
+	  else
+	    b = f77_get_upperbound (array_type);
+
+	  return value_from_longest (bound_type, b);
+	}
+
+      /* Peel off another dimension of the array.  */
+      array_type = TYPE_TARGET_TYPE (array_type);
+    }
+
+  gdb_assert_not_reached ("failed to find matching dimension");
+}
+
+
 /* Return the number of dimensions for a Fortran array or string.  */
 
 int
@@ -843,6 +944,47 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	error (_("MODULO of type %s not supported"), TYPE_SAFE_NAME (type));
       }
 
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
+      {
+	int nargs = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 2;
+
+	/* This assertion should be enforced by the expression parser.  */
+	gdb_assert (nargs == 1 || nargs == 2);
+
+	bool lbound_p = op == FORTRAN_LBOUND;
+
+	/* Check that the first argument is array like.  */
+	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+	type = check_typedef (value_type (arg1));
+	if (type->code () != TYPE_CODE_ARRAY)
+	  {
+	    if (lbound_p)
+	      error (_("LBOUND can only be applied to arrays"));
+	    else
+	      error (_("UBOUND can only be applied to arrays"));
+	  }
+
+	if (nargs == 1)
+	  return fortran_bounds_all_dims (lbound_p, exp->gdbarch, arg1);
+
+	/* User asked for the bounds of a specific dimension of the array.  */
+	arg2 = evaluate_subexp (nullptr, exp, pos, noside);
+	type = check_typedef (value_type (arg2));
+	if (type->code () != TYPE_CODE_INT)
+	  {
+	    if (lbound_p)
+	      error (_("LBOUND second argument should be an integer"));
+	    else
+	      error (_("UBOUND second argument should be an integer"));
+	  }
+
+	return fortran_bounds_for_dimension (lbound_p, exp->gdbarch, arg1,
+					     arg2);
+      }
+      break;
+
     case BINOP_FORTRAN_CMPLX:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
@@ -986,6 +1128,12 @@ operator_length_f (const struct expression *exp, int pc, int *oplenp,
       args = 2;
       break;
 
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
+      oplen = 3;
+      args = longest_to_int (exp->elts[pc - 2].longconst);
+      break;
+
     case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (exp->elts[pc - 2].longconst);
@@ -1063,6 +1211,23 @@ print_subexp_f (struct expression *exp, int *pos,
       print_binop_subexp_f (exp, pos, stream, prec, "MODULO");
       return;
 
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
+      {
+	unsigned nargs = longest_to_int (exp->elts[*pos + 1].longconst);
+	(*pos) += 3;
+	fprintf_filtered (stream, "%s (",
+			  ((op == FORTRAN_LBOUND) ? "LBOUND" : "UBOUND"));
+	for (unsigned tem = 0; tem < nargs; tem++)
+	  {
+	    if (tem != 0)
+	      fputs_filtered (", ", stream);
+	    print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+	  }
+	fputs_filtered (")", stream);
+	return;
+      }
+
     case OP_F77_UNDETERMINED_ARGLIST:
       (*pos)++;
       print_subexp_funcall (exp, pos, stream);
@@ -1090,6 +1255,11 @@ dump_subexp_body_f (struct expression *exp,
     case BINOP_FORTRAN_CMPLX:
     case BINOP_FORTRAN_MODULO:
       operator_length_f (exp, (elt + 1), &oplen, &nargs);
+      break;
+
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
+      operator_length_f (exp, (elt + 3), &oplen, &nargs);
       break;
 
     case OP_F77_UNDETERMINED_ARGLIST:
@@ -1120,6 +1290,8 @@ operator_check_f (struct expression *exp, int pos,
     case UNOP_FORTRAN_CEILING:
     case BINOP_FORTRAN_CMPLX:
     case BINOP_FORTRAN_MODULO:
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
       /* Any references to objfiles are held in the arguments to this
 	 expression, not within the expression itself, so no additional
 	 checking is required here, the outer expression iteration code

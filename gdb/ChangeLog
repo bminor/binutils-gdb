@@ -1,5 +1,21 @@
 2021-02-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.y (UNOP_OR_BINOP_INTRINSIC): New token.
+	(exp): New pattern using UNOP_OR_BINOP_INTRINSIC.
+	(one_or_two_args): New pattern.
+	(f77_keywords): Add lbound and ubound.
+	* f-lang.c (fortran_bounds_all_dims): New function.
+	(fortran_bounds_for_dimension): New function.
+	(evaluate_subexp_f): Handle FORTRAN_LBOUND and FORTRAN_UBOUND.
+	(operator_length_f): Likewise.
+	(print_subexp_f): Likewise.
+	(dump_subexp_body_f): Likewise.
+	(operator_check_f): Likewise.
+	* std-operator.def (FORTRAN_LBOUND): Define.
+	(FORTRAN_UBOUND): Define.
+
+2021-02-10  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* coff-pe-read.c (add_pe_forwarded_sym): Make use of section_index
 	and set_section_index member functions where appropriate.
 	* coffread.c (coff_symtab_read): Likewise.

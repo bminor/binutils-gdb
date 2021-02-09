@@ -442,3 +442,7 @@ OP (UNOP_FORTRAN_CEILING)
 /* Two operand builtins.  */
 OP (BINOP_FORTRAN_CMPLX)
 OP (BINOP_FORTRAN_MODULO)
+
+/* Builtins that take one or two operands.  */
+OP (FORTRAN_LBOUND)
+OP (FORTRAN_UBOUND)
