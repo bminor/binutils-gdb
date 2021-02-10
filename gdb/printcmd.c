@@ -1678,7 +1678,7 @@ info_address_command (const char *exp, int from_tty)
 	  printf_filtered ("unresolved");
 	else
 	  {
-	    section = msym.minsym->obj_section (msym.objfile);
+	    section = msym.obj_section ();
 
 	    if (section
 		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)

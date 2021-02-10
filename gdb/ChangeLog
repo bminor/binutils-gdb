@@ -1,3 +1,14 @@
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* breakpoint.c (resolve_sal_pc): Make use of
+	bound_minimal_symbol::obj_section.
+	* maint.c (maintenance_translate_address): Likewise.
+	* minsyms.c (minimal_symbol_upper_bound): Likewise.
+	* minsyms.h (struct bound_minimal_symbol) <obj_section>: New
+	member function.
+	* printcmd.c (info_address_command): Make use of
+	bound_minimal_symbol::obj_section.
+
 2021-02-11  Alan Modra  <amodra@gmail.com>
 
 	* arm-symbian-tdep.c: Delete.

@@ -1561,7 +1561,7 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
 	break;
     }
 
-  obj_section = minsym.minsym->obj_section (minsym.objfile);
+  obj_section = minsym.obj_section ();
   if (iter != past_the_end
       && (MSYMBOL_VALUE_ADDRESS (minsym.objfile, iter)
 	  < obj_section_endaddr (obj_section)))

@@ -509,7 +509,7 @@ maintenance_translate_address (const char *arg, int from_tty)
       const char *symbol_offset
 	= pulongest (address - BMSYMBOL_VALUE_ADDRESS (sym));
 
-      sect = sym.minsym->obj_section (sym.objfile);
+      sect = sym.obj_section ();
       if (sect != NULL)
 	{
 	  const char *section_name;
