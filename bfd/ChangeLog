@@ -1,3 +1,10 @@
+2021-02-11  Alan Modra  <amodra@gmail.com>
+
+	PR 27291
+	* section.c (bfd_get_section_contents): Avoid possible overflow
+	when range checking offset and count.
+	(bfd_set_section_contents): Likewise.
+
 2021-02-03  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac (SHARED_LIBADD): Remove explicit -lintl population in

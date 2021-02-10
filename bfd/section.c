@@ -1498,8 +1498,7 @@ bfd_set_section_contents (bfd *abfd,
 
   sz = section->size;
   if ((bfd_size_type) offset > sz
-      || count > sz
-      || offset + count > sz
+      || count > sz - offset
       || count != (size_t) count)
     {
       bfd_set_error (bfd_error_bad_value);
@@ -1569,8 +1568,7 @@ bfd_get_section_contents (bfd *abfd,
   else
     sz = section->size;
   if ((bfd_size_type) offset > sz
-      || count > sz
-      || offset + count > sz
+      || count > sz - offset
       || count != (size_t) count)
     {
       bfd_set_error (bfd_error_bad_value);
