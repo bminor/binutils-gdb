@@ -7673,7 +7673,15 @@ display_debug_ranges (struct dwarf_section *section,
 
   num_range_list = 0;
   for (i = 0; i < num_debug_info_entries; i++)
-    num_range_list += debug_information [i].num_range_lists;
+    {
+      if (debug_information [i].dwarf_version < 5 && is_rnglists)
+	/* Skip .debug_rnglists reference.  */
+	continue;
+      if (debug_information [i].dwarf_version >= 5 && !is_rnglists)
+	/* Skip .debug_range reference.  */
+	continue;
+      num_range_list += debug_information [i].num_range_lists;
+    }
 
   if (num_range_list == 0)
     {
@@ -7691,6 +7699,13 @@ display_debug_ranges (struct dwarf_section *section,
     {
       debug_info *debug_info_p = &debug_information[i];
       unsigned int j;
+
+      if (debug_information [i].dwarf_version < 5 && is_rnglists)
+	/* Skip .debug_rnglists reference.  */
+	continue;
+      if (debug_information [i].dwarf_version >= 5 && !is_rnglists)
+	/* Skip .debug_range reference.  */
+	continue;
 
       for (j = 0; j < debug_info_p->num_range_lists; j++)
 	{
