@@ -1,3 +1,7 @@
+2021-02-09  Tom Tromey  <tom@tromey.com>
+
+	* stap-probe.c (stap_parse_argument_conditionally): Fix typo.
+
 2021-02-09  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/27341

@@ -1031,7 +1031,7 @@ stap_parse_argument_conditionally (struct stap_parse_info *p)
 
       p->arg = skip_spaces (p->arg);
       if (*p->arg != ')')
-	error (_("Missign close-parenthesis on expression `%s'."),
+	error (_("Missing close-parenthesis on expression `%s'."),
 	       p->saved_arg);
 
       --p->inside_paren_p;
