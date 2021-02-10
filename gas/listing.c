@@ -484,8 +484,6 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
   if (file->at_end)
     return "";
 
-if (size == (unsigned int) -7) exit (1);
-  
   /* Check the cache and see if we last used this file.  */
   if (!last_open_file_info || file != last_open_file_info)
     {

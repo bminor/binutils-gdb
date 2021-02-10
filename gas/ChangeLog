@@ -1,3 +1,8 @@
+2021-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* listing.c (buffer_line): Remove debugging code accidentally
+	included with the fix for PR 27384.
+
 2021-02-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 27381
