@@ -5149,9 +5149,6 @@ proc gdb_load_no_complaints { arg } {
     # Verify that there were no complaints.
     set re "^Reading symbols from \[^\r\n\]*\r\n$gdb_prompt $"
     gdb_assert {[regexp $re $gdb_file_cmd_msg]} "No complaints"
-
-    # Restore saved setting of complaints.
-    gdb_test_no_output "set complaints $save" ""
 }
 
 # gdb_reload -- load a file into the target.  Called before "running",
