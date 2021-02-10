@@ -1,3 +1,8 @@
+2021-02-10  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.multi/multi-target.exp.tcl (setup): Add "set sysroot" to
+	GDBFLAGS.
+
 2021-02-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/lbound-ubound.F90: New file.
