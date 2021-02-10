@@ -11092,8 +11092,11 @@ load_dwo_file (const char * main_filename, const char * name, const char * dir, 
   char * separate_filename;
   void * separate_handle;
 
-  /* FIXME: Skip adding / if dwo_dir ends in /.  */
-  separate_filename = concat (dir, "/", name, NULL);
+  if (IS_ABSOLUTE_PATH (name))
+    separate_filename = strdup (name);
+  else
+    /* FIXME: Skip adding / if dwo_dir ends in /.  */
+    separate_filename = concat (dir, "/", name, NULL);
   if (separate_filename == NULL)
     {
       warn (_("Out of memory allocating dwo filename\n"));

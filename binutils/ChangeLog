@@ -1,5 +1,10 @@
 2021-02-10  Tom de Vries  <tdevries@suse.de>
 
+	PR binutils/27391
+	* dwarf.c (load_dwo_file): Handle case that name is absolute path.
+
+2021-02-10  Tom de Vries  <tdevries@suse.de>
+
 	PR binutils/27371
 	* dwarf.c (display_debug_ranges): Filter range lists according to
 	section.
