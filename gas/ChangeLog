@@ -1,3 +1,7 @@
+2021-02-11  Alan Modra  <amodra@gmail.com>
+
+	* NEWS: Mention arm-symbianelf removal.
+
 2021-02-10  Nick Clifton  <nickc@redhat.com>
 
 	* listing.c (buffer_line): Remove debugging code accidentally

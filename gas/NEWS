@@ -1,5 +1,7 @@
 -*- text -*-
 
+* arm-symbianelf support removed.
+
 Changes in 2.36:
 
 * Add support for Intel AVX VNNI instructions.
