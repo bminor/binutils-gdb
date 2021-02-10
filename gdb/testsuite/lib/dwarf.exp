@@ -21,7 +21,6 @@ proc dwarf2_support {} {
 	|| [istarget *-*-elf*]
 	|| [istarget *-*-openbsd*]
 	|| [istarget arm*-*-eabi*]
-	|| [istarget arm*-*-symbianelf*]
 	|| [istarget powerpc-*-eabi*]} {
 	return 1
     }

@@ -156,8 +156,7 @@ if { $sizeof_double == 8 || $sizeof_long_double == 8 } {
     if { ([istarget "arm*-*-*"]) \
 	 && !([istarget "*-*-*eabi*"] || \
 	      [istarget "*-*-mingw32ce*"] || \
-	      [istarget "*-*-openbsd*"] || \
-	      [istarget "*-*-symbianelf"]) } then {
+	      [istarget "*-*-openbsd*"]) } then {
 	# assume the long long represents a floating point double in ARM format
 	gdb_test "p/f val.oct" "2.1386676354387559e\\+265"
     } else {

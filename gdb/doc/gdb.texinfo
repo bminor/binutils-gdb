@@ -20850,8 +20850,8 @@ to specify a local system root using a directory that happens to be
 named @file{target:} or @file{remote:}, you need to use some
 equivalent variant of the name like @file{./target:}.
 
-For targets with an MS-DOS based filesystem, such as MS-Windows and
-SymbianOS, @value{GDBN} tries prefixing a few variants of the target
+For targets with an MS-DOS based filesystem, such as MS-Windows,
+@value{GDBN} tries prefixing a few variants of the target
 absolute file name with @var{path}.  But first, on Unix hosts,
 @value{GDBN} converts all backslash directory separators into forward
 slashes, because the backslash is not a directory separator on Unix:

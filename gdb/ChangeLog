@@ -1,3 +1,23 @@
+2021-02-11  Alan Modra  <amodra@gmail.com>
+
+	* arm-symbian-tdep.c: Delete.
+	* NEWS: Mention arm-symbian removal.
+	* Makefile.in: Remove arm-symbian-tdep entries.
+	* configure.tgt: Remove arm*-*-symbianelf*.
+	* doc/gdb.texinfo: Remove mention of SymbianOS.
+	* osabi.c (gdb_osabi_names): Remove "Symbian".
+	* osabi.h (enum gdb_osabi): Remove GDB_OSABI_SYMBIAN.
+	* testsuite/gdb.base/ending-run.exp: Remove E32Main handling.
+	* testsuite/gdb.ada/catch_ex_std.exp: Remove arm*-*-symbianelf*
+	handling.
+	* testsuite/gdb.base/dup-sect.exp: Likewise.
+	* testsuite/gdb.base/long_long.exp: Likewise.
+	* testsuite/gdb.base/solib-weak.exp: Likewise.
+	* testsuite/gdb.guile/scm-section-script.exp: Likewise.
+	* testsuite/gdb.python/py-section-script.exp: Likewise.
+	* testsuite/lib/dwarf.exp: Likewise.
+	* testsuite/lib/gdb.exp: Likewise.
+
 2021-02-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-exp.y (UNOP_OR_BINOP_INTRINSIC): New token.

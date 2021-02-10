@@ -730,7 +730,6 @@ ALL_TARGET_OBS = \
 	arm-netbsd-tdep.o \
 	arm-obsd-tdep.o \
 	arm-pikeos-tdep.o \
-	arm-symbian-tdep.o \
 	arm-tdep.o \
 	arm-wince-tdep.o \
 	avr-tdep.o \
@@ -2168,7 +2167,6 @@ ALLDEPFILES = \
 	arm-netbsd-nat.c \
 	arm-netbsd-tdep.c \
 	arm-obsd-tdep.c \
-	arm-symbian-tdep.c \
 	arm-tdep.c \
 	avr-tdep.c \
 	bfin-linux-tdep.c \

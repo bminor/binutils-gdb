@@ -77,7 +77,6 @@ static const struct osabi_names gdb_osabi_names[] =
   { "AIX", NULL },
   { "DICOS", NULL },
   { "Darwin", NULL },
-  { "Symbian", NULL },
   { "OpenVMS", NULL },
   { "LynxOS178", NULL },
   { "Newlib", NULL },

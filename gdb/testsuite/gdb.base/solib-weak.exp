@@ -22,8 +22,7 @@ if {[skip_shlib_tests]} {
 }
 
 # These targets have shared libraries, but weak symbols are not meaningful.
-if {([istarget arm*-*-symbianelf*]
-     || [istarget *-*-mingw*]
+if {([istarget *-*-mingw*]
      || [istarget *-*-cygwin*]
      || [istarget *-*-pe*])} {
     return 0

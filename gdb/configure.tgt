@@ -184,10 +184,6 @@ arm*-*-openbsd*)
 	# Target: OpenBSD/arm
 	gdb_target_obs="arm-bsd-tdep.o arm-obsd-tdep.o"
 	;;
-arm*-*-symbianelf*)
-	# Target: SymbianOS/arm
-	gdb_target_obs="arm-symbian-tdep.o"
-	;;
 arm*-*-*)
 	# Target: ARM embedded system
 	gdb_target_obs="arm-pikeos-tdep.o"
@@ -787,8 +783,6 @@ m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-mingw*)	gdb_osabi=GDB_OSABI_WINDOWS ;;
 *-*-cygwin*)	gdb_osabi=GDB_OSABI_CYGWIN ;;
 *-*-dicos*)	gdb_osabi=GDB_OSABI_DICOS ;;
-*-*-symbianelf*)
-		gdb_osabi=GDB_OSABI_SYMBIAN ;;
 powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
                 gdb_osabi=GDB_OSABI_AIX ;;
 esac
