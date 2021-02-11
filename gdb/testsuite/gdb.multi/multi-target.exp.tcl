@@ -112,7 +112,7 @@ proc setup {non-stop} {
 
     save_vars { ::GDBFLAGS } {
 	# Make GDB read files from the local file system, not through the
-	# remote targets.
+	# remote targets, to speed things up.
 	set ::GDBFLAGS "${::GDBFLAGS} -ex \"set sysroot\""
 	clean_restart ${binfile}
     }
