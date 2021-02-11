@@ -1,3 +1,17 @@
+2021-02-11  Alan Modra  <amodra@gmail.com>
+
+	PR 27290
+	PR 27293
+	PR 27295
+	* od-elf32_avr.c (elf32_avr_get_note_section_contents): Formatting.
+	Use bfd_malloc_and_get_section.
+	(elf32_avr_get_note_desc): Formatting.  Return descsz.  Sanity
+	check namesz.  Return NULL if descsz is too small.  Ensure
+	string table is terminated.
+	(elf32_avr_get_device_info): Formatting.  Add note_size param.
+	Sanity check note.
+	(elf32_avr_dump_mem_usage): Adjust to suit.
+
 2021-02-10  Tom de Vries  <tdevries@suse.de>
 
 	PR binutils/27391
