@@ -1,5 +1,9 @@
 2021-02-11  Alan Modra  <amodra@gmail.com>
 
+	* config.bfd: Remove ia64 from obsolete list.
+
+2021-02-11  Alan Modra  <amodra@gmail.com>
+
 	PR ld/22269
 	* elfnn-ia64.c: Revert 2017-10-14 git commit db41f6eb5234.
 
