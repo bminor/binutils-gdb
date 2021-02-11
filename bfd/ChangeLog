@@ -1,5 +1,12 @@
 2021-02-11  Alan Modra  <amodra@gmail.com>
 
+	PR 27294
+	* elf32-avr.c (avr_elf32_load_records_from_section): Use
+	bfd_malloc_and_get_section.  Use bfd_byte* vars and remove then
+	unnecessary casts.
+
+2021-02-11  Alan Modra  <amodra@gmail.com>
+
 	PR 27291
 	* section.c (bfd_get_section_contents): Avoid possible overflow
 	when range checking offset and count.

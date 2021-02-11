@@ -4001,7 +4001,7 @@ avr_find_section_for_address (bfd *abfd ATTRIBUTE_UNUSED,
 static struct avr_property_record_list *
 avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 {
-  char *contents = NULL, *ptr;
+  bfd_byte *contents, *ptr;
   bfd_size_type size, mem_size;
   bfd_byte version, flags;
   uint16_t record_count, i;
@@ -4011,9 +4011,8 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 
   fs_data.section = NULL;
 
-  size = bfd_section_size (sec);
-  contents = bfd_malloc (size);
-  bfd_get_section_contents (abfd, sec, contents, 0, size);
+  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
+    goto load_failed;
   ptr = contents;
 
   /* Load the relocations for the '.avr.prop' section if there are any, and
@@ -4032,15 +4031,16 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
   */
 
   /* Check we have at least got a headers worth of bytes.  */
+  size = bfd_section_size (sec);
   if (size < AVR_PROPERTY_SECTION_HEADER_SIZE)
     goto load_failed;
 
-  version = *((bfd_byte *) ptr);
+  version = *ptr;
   ptr++;
-  flags = *((bfd_byte *) ptr);
+  flags = *ptr;
   ptr++;
   record_count = bfd_get_16 (abfd, ptr);
-  ptr+=2;
+  ptr += 2;
   BFD_ASSERT (ptr - contents == AVR_PROPERTY_SECTION_HEADER_SIZE);
 
   /* Now allocate space for the list structure, and all of the list
@@ -4135,7 +4135,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 	    = address - bfd_section_vma (fs_data.section);
 	}
 
-      r_list->records [i].type = *((bfd_byte *) ptr);
+      r_list->records [i].type = *ptr;
       ptr += 1;
       size -= 1;
 
