@@ -1,3 +1,8 @@
+2021-02-11  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/27383:
+	* parse.c (write_exp_symbol_reference): Write sym.block.
+
 2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention changes to 'maint info sections'.
