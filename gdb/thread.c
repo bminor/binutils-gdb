@@ -637,8 +637,8 @@ any_thread_of_inferior (inferior *inf)
 {
   gdb_assert (inf->pid != 0);
 
-  /* Prefer the current thread.  */
-  if (inf == current_inferior ())
+  /* Prefer the current thread, if there's one.  */
+  if (inf == current_inferior () && inferior_ptid != null_ptid)
     return inferior_thread ();
 
   for (thread_info *tp : inf->non_exited_threads ())
