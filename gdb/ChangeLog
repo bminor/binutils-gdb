@@ -1,3 +1,13 @@
+2021-02-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-exp.y (f77_keywords): Add allocated.
+	* f-lang.c (evaluate_subexp_f): Handle UNOP_FORTRAN_ALLOCATED.
+	(operator_length_f): Likewise.
+	(print_subexp_f): Likewise.
+	(dump_subexp_body_f): Likewise.
+	(operator_check_f): Likewise.
+	* std-operator.def (UNOP_FORTRAN_ALLOCATED): New operator.
+
 2021-02-11  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/27353

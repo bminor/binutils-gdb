@@ -906,6 +906,20 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	return value_from_host_double (type, val);
       }
 
+    case UNOP_FORTRAN_ALLOCATED:
+      {
+	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+	if (noside == EVAL_SKIP)
+	  return eval_skip_value (exp);
+	type = check_typedef (value_type (arg1));
+	if (type->code () != TYPE_CODE_ARRAY)
+	  error (_("ALLOCATED can only be applied to arrays"));
+	struct type *result_type
+	  = builtin_f_type (exp->gdbarch)->builtin_logical;
+	LONGEST result_value = type_not_allocated (type) ? 0 : 1;
+	return value_from_longest (result_type, result_value);
+      }
+
     case BINOP_FORTRAN_MODULO:
       {
 	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
@@ -1118,6 +1132,7 @@ operator_length_f (const struct expression *exp, int pc, int *oplenp,
     case UNOP_FORTRAN_KIND:
     case UNOP_FORTRAN_FLOOR:
     case UNOP_FORTRAN_CEILING:
+    case UNOP_FORTRAN_ALLOCATED:
       oplen = 1;
       args = 1;
       break;
@@ -1203,6 +1218,10 @@ print_subexp_f (struct expression *exp, int *pos,
       print_unop_subexp_f (exp, pos, stream, prec, "CEILING");
       return;
 
+    case UNOP_FORTRAN_ALLOCATED:
+      print_unop_subexp_f (exp, pos, stream, prec, "ALLOCATED");
+      return;
+
     case BINOP_FORTRAN_CMPLX:
       print_binop_subexp_f (exp, pos, stream, prec, "CMPLX");
       return;
@@ -1252,6 +1271,7 @@ dump_subexp_body_f (struct expression *exp,
     case UNOP_FORTRAN_KIND:
     case UNOP_FORTRAN_FLOOR:
     case UNOP_FORTRAN_CEILING:
+    case UNOP_FORTRAN_ALLOCATED:
     case BINOP_FORTRAN_CMPLX:
     case BINOP_FORTRAN_MODULO:
       operator_length_f (exp, (elt + 1), &oplen, &nargs);
@@ -1288,6 +1308,7 @@ operator_check_f (struct expression *exp, int pos,
     case UNOP_FORTRAN_KIND:
     case UNOP_FORTRAN_FLOOR:
     case UNOP_FORTRAN_CEILING:
+    case UNOP_FORTRAN_ALLOCATED:
     case BINOP_FORTRAN_CMPLX:
     case BINOP_FORTRAN_MODULO:
     case FORTRAN_LBOUND:

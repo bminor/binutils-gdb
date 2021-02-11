@@ -1,3 +1,8 @@
+2021-02-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/allocated.exp: New file.
+	* gdb.fortran/allocated.f90: New file.
+
 2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/lbound-ubound.exp: Remove old comment.

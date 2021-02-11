@@ -1046,6 +1046,7 @@ static const struct token f77_keywords[] =
   { "cmplx", BINOP_INTRINSIC, BINOP_FORTRAN_CMPLX, false },
   { "lbound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_LBOUND, false },
   { "ubound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_UBOUND, false },
+  { "allocated", UNOP_INTRINSIC, UNOP_FORTRAN_ALLOCATED, false },
 };
 
 /* Implementation of a dynamically expandable buffer for processing input
