@@ -47,6 +47,7 @@
 #include "expop.h"
 #include "arch/amd64-linux-tdesc.h"
 #include "inferior.h"
+#include "x86-tdep.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
@@ -1593,6 +1594,15 @@ amd64_linux_record_signal (struct gdbarch *gdbarch,
   return 0;
 }
 
+/* Return true if the core file ABFD contains shadow stack pointer state.
+   Otherwise, return false.  */
+
+static bool
+amd64_linux_core_read_ssp_state_p (bfd *abfd)
+{
+  return bfd_get_section_by_name (abfd, ".reg-ssp") != nullptr;
+}
+
 /* Get Linux/x86 target description from core dump.  */
 
 static const struct target_desc *
@@ -1602,11 +1612,14 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 {
   /* Linux/x86-64.  */
   x86_xsave_layout layout;
-  uint64_t xcr0 = i386_linux_core_read_xsave_info (abfd, layout);
-  if (xcr0 == 0)
-    xcr0 = X86_XSTATE_SSE_MASK;
+  uint64_t xstate_bv = i386_linux_core_read_xsave_info (abfd, layout);
+  if (xstate_bv == 0)
+    xstate_bv = X86_XSTATE_SSE_MASK;
 
-  return amd64_linux_read_description (xcr0 & X86_XSTATE_ALL_MASK,
+  if (amd64_linux_core_read_ssp_state_p (abfd))
+    xstate_bv |= X86_XSTATE_CET_U;
+
+  return amd64_linux_read_description (xstate_bv & X86_XSTATE_ALL_MASK,
 				       gdbarch_ptr_bit (gdbarch) == 32);
 }
 
@@ -1637,6 +1650,37 @@ static const struct regset amd64_linux_xstateregset =
     amd64_linux_collect_xstateregset
   };
 
+/* Supply shadow stack pointer register from SSP to the register cache
+   REGCACHE.  */
+
+static void
+amd64_linux_supply_ssp (const regset *regset,
+			regcache *regcache, int regnum,
+			const void *ssp, size_t len)
+{
+  gdb_assert (len == sizeof (uint64_t));
+  x86_supply_ssp (regcache, *static_cast<const uint64_t *> (ssp));
+}
+
+/* Collect the shadow stack pointer register from the register cache
+   REGCACHE and store it in SSP.  */
+
+static void
+amd64_linux_collect_ssp (const regset *regset,
+			 const regcache *regcache, int regnum,
+			 void *ssp, size_t len)
+{
+  gdb_assert (len == sizeof (uint64_t));
+  x86_collect_ssp (regcache, *static_cast<uint64_t *> (ssp));
+}
+
+/* Shadow stack pointer register.  */
+
+static const struct regset amd64_linux_ssp_register
+  {
+    NULL, amd64_linux_supply_ssp, amd64_linux_collect_ssp
+  };
+
 /* Iterate over core file register note sections.  */
 
 static void
@@ -1653,6 +1697,14 @@ amd64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
     cb (".reg-xstate", tdep->xsave_layout.sizeof_xsave,
 	tdep->xsave_layout.sizeof_xsave, &amd64_linux_xstateregset,
 	"XSAVE extended state", cb_data);
+
+  /* SSP can be unavailable.  Thus, we need to check the register status
+     in case we write a core file (regcache != nullptr).  */
+  if (tdep->ssp_regnum != -1
+      && (regcache == nullptr
+	  || REG_VALID == regcache->get_register_status (tdep->ssp_regnum)))
+    cb (".reg-ssp", 8, 8, &amd64_linux_ssp_register,
+	"shadow stack pointer", cb_data);
 }
 
 /* The instruction sequences used in x86_64 machines for a
