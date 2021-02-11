@@ -1,5 +1,9 @@
 2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/lbound-ubound.exp: Remove old comment.
+
+2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/maint-info-sections.exp: Update expected output, and
 	add additional tests. Again.
 
