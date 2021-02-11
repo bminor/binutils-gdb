@@ -192,7 +192,8 @@ attribute::form_is_unsigned () const
 bool
 attribute::form_requires_reprocessing () const
 {
-  return (form == DW_FORM_strx1
+  return (form == DW_FORM_strx
+	  || form == DW_FORM_strx1
 	  || form == DW_FORM_strx2
 	  || form == DW_FORM_strx3
 	  || form == DW_FORM_strx4

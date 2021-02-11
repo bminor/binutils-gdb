@@ -1,3 +1,9 @@
+2021-02-11  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27353
+	* dwarf2/attribute.c (attribute::form_requires_reprocessing):
+	Return true for DW_FORM_strx.
+
 2021-02-11  Tom Tromey  <tromey@adacore.com>
 
 	PR gdb/27383:
