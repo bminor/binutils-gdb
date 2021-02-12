@@ -7379,18 +7379,22 @@ display_debug_str_offsets (struct dwarf_section *section,
       else
 	entry_length = 4;
 
+      unsigned char *entries_end;
       if (length == 0)
 	{
 	  /* This is probably an old style .debug_str_offset section which
 	     just contains offsets and no header (and the first offset is 0).  */
 	  length = section->size;
 	  curr   = section->start;
+	  entries_end = end;
 
 	  printf (_("    Length: %#lx\n"), (unsigned long) length);
 	  printf (_("       Index   Offset [String]\n"));
 	}
       else
 	{
+	  entries_end = curr + length;
+
 	  int version;
 	  SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
 	  if (version != 5)
@@ -7406,10 +7410,14 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  printf (_("       Index   Offset [String]\n"));
 	}
 
-      for (idx = 0; length >= entry_length && curr < end; idx++)
+      for (idx = 0; curr < entries_end; idx++)
 	{
 	  dwarf_vma offset;
 	  const unsigned char * string;
+
+	  if (curr + entry_length > entries_end)
+	    /* Not enough space to read one entry_length, give up.  */
+	    return 0;
 
 	  SAFE_BYTE_GET_AND_INC (offset, curr, entry_length, end);
 	  if (dwo)
