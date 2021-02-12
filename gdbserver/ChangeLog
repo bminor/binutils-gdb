@@ -1,3 +1,7 @@
+2021-02-12  Tom Tromey  <tromey@adacore.com>
+
+	* gdbreplay.cc (remote_open): Constify.
+
 2021-02-05  Paul E. Murphy  <murphyp@linux.ibm.com>
 
 	* Makefile.in (UNDO_GNULIB_CFLAGS): Disable

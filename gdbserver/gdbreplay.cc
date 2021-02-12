@@ -151,9 +151,9 @@ remote_close (void)
    NAME is the filename used for communication.  */
 
 static void
-remote_open (char *name)
+remote_open (const char *name)
 {
-  char *last_colon = strrchr (name, ':');
+  const char *last_colon = strrchr (name, ':');
 
   if (last_colon == NULL)
     {
