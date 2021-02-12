@@ -161,8 +161,6 @@ static thread_db_target the_thread_db_target;
 /* Non-zero if we have determined the signals used by the threads
    library.  */
 static int thread_signals;
-static sigset_t thread_stop_set;
-static sigset_t thread_print_set;
 
 struct thread_db_info
 {
@@ -1225,23 +1223,14 @@ check_thread_signals (void)
 {
   if (!thread_signals)
     {
-      sigset_t mask;
       int i;
 
-      lin_thread_get_thread_signals (&mask);
-      sigemptyset (&thread_stop_set);
-      sigemptyset (&thread_print_set);
-
-      for (i = 1; i < NSIG; i++)
+      for (i = 0; i < lin_thread_get_thread_signal_num (); i++)
 	{
-	  if (sigismember (&mask, i))
-	    {
-	      if (signal_stop_update (gdb_signal_from_host (i), 0))
-		sigaddset (&thread_stop_set, i);
-	      if (signal_print_update (gdb_signal_from_host (i), 0))
-		sigaddset (&thread_print_set, i);
-	      thread_signals = 1;
-	    }
+	  int sig = lin_thread_get_thread_signal (i);
+	  signal_stop_update (gdb_signal_from_host (sig), 0);
+	  signal_print_update (gdb_signal_from_host (sig), 0);
+	  thread_signals = 1;
 	}
     }
 }

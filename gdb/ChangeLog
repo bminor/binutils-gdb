@@ -1,3 +1,16 @@
+2021-02-12  Tom de Vries  <tdevries@suse.de>
+
+	PR threads/26228
+	* linux-nat.c (lin_thread_get_thread_signals): Remove.
+	(lin_thread_signals): New static var.
+	(lin_thread_get_thread_signal_num, lin_thread_get_thread_signal):
+	New function.
+	* linux-nat.h (lin_thread_get_thread_signals): Remove.
+	(lin_thread_get_thread_signal_num, lin_thread_get_thread_signal):
+	Declare.
+	* linux-thread-db.c (check_thread_signals): Use
+	lin_thread_get_thread_signal_num and lin_thread_get_thread_signal.
+
 2021-02-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-exp.y (f77_keywords): Add allocated.

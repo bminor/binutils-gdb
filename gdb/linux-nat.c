@@ -4411,16 +4411,24 @@ Enables printf debugging output."),
    the GNU/Linux Threads library and therefore doesn't really belong
    here.  */
 
-/* Return the set of signals used by the threads library in *SET.  */
+/* NPTL reserves the first two RT signals, but does not provide any
+   way for the debugger to query the signal numbers - fortunately
+   they don't change.  */
+static int lin_thread_signals[] = { __SIGRTMIN, __SIGRTMIN + 1 };
 
-void
-lin_thread_get_thread_signals (sigset_t *set)
+/* See linux-nat.h.  */
+
+unsigned int
+lin_thread_get_thread_signal_num (void)
 {
-  sigemptyset (set);
+  return sizeof (lin_thread_signals) / sizeof (lin_thread_signals[0]);
+}
 
-  /* NPTL reserves the first two RT signals, but does not provide any
-     way for the debugger to query the signal numbers - fortunately
-     they don't change.  */
-  sigaddset (set, __SIGRTMIN);
-  sigaddset (set, __SIGRTMIN + 1);
+/* See linux-nat.h.  */
+
+int
+lin_thread_get_thread_signal (unsigned int i)
+{
+  gdb_assert (i < lin_thread_get_thread_signal_num ());
+  return lin_thread_signals[i];
 }
