@@ -1,5 +1,29 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* exec.c (exec_target::close): Call new clear_target_sections
+	function.
+	(program_space::add_target_sections): Update name of member
+	variable.
+	(program_space::add_target_sections): Update name of member
+	variable.
+	(program_space::remove_target_sections): Likewise.
+	(exec_one_fork): Use new target_sections member function.
+	(exec_target::get_section_table): Likewise.
+	(exec_target::files_info): Likewise.
+	(set_section_command): Likewise.
+	(exec_set_section_address): Likewise.
+	(exec_target::has_memory): Use new target_sections member
+	function.
+	* progspace.h (program_space::clear_target_sections): New member
+	function.
+	(program_space::target_sections): Rename member variable to
+	m_target_sections, replace with a new member function.
+	(program_space::m_target_sections): New member variable.
+	* solib-dsbt.c (scan_dyntag): Use new member function.
+	* solib-svr4.c (scan_dyntag): Likewise.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/bfd-target.c (class target_bfd) <get_section_table>: Make
 	return type const.
 	* gdb/exec.c (struct exec_target) <get_section_table>: Likewise.

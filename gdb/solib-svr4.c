@@ -611,7 +611,7 @@ scan_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
 
   bool found = false;
   for (const target_section &target_section
-	 : current_program_space->target_sections)
+	 : current_program_space->target_sections ())
     if (sect == target_section.the_bfd_section)
       {
 	dyn_addr = target_section.addr;

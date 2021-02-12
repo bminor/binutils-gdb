@@ -309,6 +309,18 @@ struct program_space
      sections.  They are given OBJFILE as the "owner".  */
   void add_target_sections (struct objfile *objfile);
 
+  /* Clear all target sections from M_TARGET_SECTIONS table.  */
+  void clear_target_sections ()
+  {
+    m_target_sections.clear ();
+  }
+
+  /* Return a reference to the M_TARGET_SECTIONS table.  */
+  target_section_table &target_sections ()
+  {
+    return m_target_sections;
+  }
+
   /* Unique ID number.  */
   int num = 0;
 
@@ -359,10 +371,6 @@ struct program_space
   /* All known objfiles are kept in a linked list.  */
   std::list<std::shared_ptr<objfile>> objfiles_list;
 
-  /* The set of target sections matching the sections mapped into
-     this program space.  Managed by both exec_ops and solib.c.  */
-  target_section_table target_sections;
-
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */
   struct so_list *so_list = NULL;
@@ -380,6 +388,11 @@ struct program_space
 
   /* Per pspace data-pointers required by other GDB modules.  */
   REGISTRY_FIELDS {};
+
+private:
+  /* The set of target sections matching the sections mapped into
+     this program space.  Managed by both exec_ops and solib.c.  */
+  target_section_table m_target_sections;
 };
 
 /* An address space.  It is used for comparing if
