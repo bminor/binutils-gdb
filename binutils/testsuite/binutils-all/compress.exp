@@ -589,7 +589,7 @@ proc convert_test { testname  as_flags  objcop_flags } {
     global OBJDUMP
 
     if { ![binutils_assemble_flags $srcdir/$subdir/dw2-3.S ${testfile3}.o "$as_flags"] } then {
-       unresolved "$testname"
+       unsupported "$testname"
        return
     }
 

@@ -1,5 +1,15 @@
 2021-02-12  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/objcopy.exp: Report "unsupported" when
+	gas or ld fails to build a testcase rather than "unresolved".
+	Report "fail" when readelf returns an error status rather than
+	"unresolved".
+	* testsuite/binutils-all/ar.exp: Likewise.
+	* testsuite/binutils-all/compress.exp: Likewise.
+	* testsuite/binutils-all/readelf.exp: Likewise.
+
+2021-02-12  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/pr25662.s: Replace "a" with "aaa" and
 	"c" with "ccc" labels.
 

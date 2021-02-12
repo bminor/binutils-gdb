@@ -264,7 +264,7 @@ proc readelf_dump_test {} {
 
     # Assemble the dump test file.
     if {![binutils_assemble $srcdir/$subdir/dumptest.s tmpdir/dumptest.o]} then {
-      unresolved "readelf -p: failed to assemble dump test file"
+      unsupported "readelf -p: failed to assemble dump test file"
       return
     }
     # Download it.
@@ -324,10 +324,10 @@ send_user "Version [binutil_version $READELF]"
 
 # Assemble the test file.
 if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
-    unresolved "readelf -h bintest (failed to assemble)"
-    unresolved "readelf -S bintest (failed to assemble)"
-    unresolved "readelf -s bintest (failed to assemble)"
-    unresolved "readelf -r bintest (failed to assemble)"
+    unsupported "readelf -h bintest (failed to assemble)"
+    unsupported "readelf -S bintest (failed to assemble)"
+    unsupported "readelf -s bintest (failed to assemble)"
+    unsupported "readelf -r bintest (failed to assemble)"
     global readelf_size
     set readelf_size ""
 } else {
@@ -351,7 +351,7 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
 
 # Test demangling symbol names.
 if {![binutils_assemble $srcdir/$subdir/mangled.s tmpdir/mangled.o]} then {
-    unresolved "readelf -s -C bintest (failed to assemble)"
+    unsupported "readelf -s -C bintest (failed to assemble)"
 } else {
 
     if ![is_remote host] {
@@ -380,7 +380,7 @@ if {[which $AS] != 0} then {
 
 # PR 13482 - Check for off-by-one errors when dumping .note sections.
 if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {
-    unresolved "readelf -n version (failed to assemble)"
+    unsupported "readelf -n version (failed to assemble)"
 } else {
 
     if ![is_remote host] {
@@ -396,7 +396,7 @@ if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {
 # PR 18374 - Check that relocations against the .debug_loc section
 # do not prevent readelf from displaying all the location lists.
 if {![binutils_assemble $srcdir/$subdir/pr18374.s tmpdir/pr18374.o]} then {
-    unresolved "readelf --debug-dump=loc pr18374 (failed to assemble)"
+    unsupported "readelf --debug-dump=loc pr18374 (failed to assemble)"
 } else {
 
     if ![is_remote host] {
@@ -411,7 +411,7 @@ if {![binutils_assemble $srcdir/$subdir/pr18374.s tmpdir/pr18374.o]} then {
 
 # locview - Check dumping of location lists with location views.
 if {![binutils_assemble $srcdir/$subdir/locview-1.s tmpdir/locview-1.o]} then {
-    unresolved "readelf --debug-dump=loc locview-1 (failed to assemble)"
+    unsupported "readelf --debug-dump=loc locview-1 (failed to assemble)"
 } else {
 
     if ![is_remote host] {
@@ -423,7 +423,7 @@ if {![binutils_assemble $srcdir/$subdir/locview-1.s tmpdir/locview-1.o]} then {
     readelf_test --debug-dump=loc $tempfile readelf.locview-1  {}
 }
 if {![binutils_assemble $srcdir/$subdir/locview-2.s tmpdir/locview-2.o]} then {
-    unresolved "readelf --debug-dump=loc locview-2 (failed to assemble)"
+    unsupported "readelf --debug-dump=loc locview-2 (failed to assemble)"
 } else {
 
     if ![is_remote host] {
@@ -438,7 +438,7 @@ if {![binutils_assemble $srcdir/$subdir/locview-2.s tmpdir/locview-2.o]} then {
 
 # Check that decompressed dumps work.
 if {![binutils_assemble $srcdir/$subdir/z.s tmpdir/z.o]} then {
-    unresolved "readelf --decompress --hex-dump .debug_loc z (failed to assemble)"
+    unsupported "readelf --decompress --hex-dump .debug_loc z (failed to assemble)"
 } else {
 
     if ![is_remote host] {
@@ -461,7 +461,7 @@ if ![istarget "riscv*-*-*"] then {
 
     # Assemble the DWARF-5 test file.
     if {![binutils_assemble_flags $srcdir/$subdir/dw5.S tmpdir/dw5.o $hpux]} then {
-	unresolved "readelf -wiaoRlL dw5 (failed to assemble)"
+	unsupported "readelf -wiaoRlL dw5 (failed to assemble)"
     } else {
 
 	# Download it.
@@ -481,7 +481,7 @@ if ![istarget "riscv*-*-*"] then {
 
 # Assemble the DWARF-5 attributes test file.
 if {![binutils_assemble_flags $srcdir/$subdir/dwarf-attributes.S tmpdir/dwarf-attributes.o ""]} then {
-    unresolved "readelf -wi dwarf-attributes (failed to assemble)"
+    unsupported "readelf -wi dwarf-attributes (failed to assemble)"
 } else {
     # Download it.
     if ![is_remote host] {
@@ -499,7 +499,7 @@ if {![binutils_assemble_flags $srcdir/$subdir/dwarf-attributes.S tmpdir/dwarf-at
 
 # Check that debug link sections can be dumped.
 if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
-    unresolved "readelf --debug-dump=links (failed to assemble debuglink.s)"
+    unsupported "readelf --debug-dump=links (failed to assemble debuglink.s)"
 } else {
     if ![is_remote host] {
 	set tempfile tmpdir/debuglink.o
@@ -511,7 +511,7 @@ if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 
     # Check that debug link sections can be followed.
     if {![binutils_assemble $srcdir/$subdir/linkdebug.s tmpdir/linkdebug.debug]} then {
-	unresolved "readelf --debug-dump=follow-links (failed to assemble linkdebug.s)"
+	unsupported "readelf --debug-dump=follow-links (failed to assemble linkdebug.s)"
     } else {
 	if [is_remote host] {
 	    set tempfile2 [remote_download host tmpdir/linkdebug.debug]
@@ -522,7 +522,7 @@ if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 }
 
 if {![binutils_assemble $srcdir/$subdir/dwo.s tmpdir/dwo.o]} then {
-    unresolved "readelf --debug-dump=links (failed to assemble dwo.s)"
+    unsupported "readelf --debug-dump=links (failed to assemble dwo.s)"
 } else {
     if ![is_remote host] {
 	set tempfile tmpdir/dwo.o
@@ -534,7 +534,7 @@ if {![binutils_assemble $srcdir/$subdir/dwo.s tmpdir/dwo.o]} then {
 }
 
 if {![binutils_assemble $srcdir/$subdir/zero-sec.s tmpdir/zero-sec.o]} then {
-    unresolved "readelf --enable-checks (failed to assemble zero-sec.s)"
+    unsupported "readelf --enable-checks (failed to assemble zero-sec.s)"
 } else {
     if ![is_remote host] {
 	set tempfile tmpdir/zero-sec.o
