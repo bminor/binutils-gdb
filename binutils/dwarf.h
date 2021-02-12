@@ -169,7 +169,7 @@ typedef struct
   dwarf_vma	 cu_offset;
   dwarf_vma	 base_address;
   /* This field is filled in when reading the attribute DW_AT_GNU_addr_base and
-     is used with the form DW_AT_GNU_FORM_addr_index.  */
+     is used with the form DW_FORM_GNU_addr_index.  */
   dwarf_vma	 addr_base;
   /* This field is filled in when reading the attribute DW_AT_GNU_ranges_base and
      is used when calculating ranges.  */

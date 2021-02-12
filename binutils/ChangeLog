@@ -1,5 +1,9 @@
 2021-02-12  Tom de Vries  <tdevries@suse.de>
 
+	* dwarf.h (debug_info): Fix typo in comment.
+
+2021-02-12  Tom de Vries  <tdevries@suse.de>
+
 	* dwarf.c (display_debug_str_offsets): Handle multiple sets of
 	entries.
 
