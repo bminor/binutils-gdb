@@ -606,7 +606,7 @@ if { [is_elf_format] } then {
 	set testfile tmpdir/debuglink.${obj}
     }
 
-    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk $testfile" "" "/dev/null" "objdump.out"]
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -Wk -WN $testfile" "" "/dev/null" "objdump.out"]
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "objdump -Wk (reason: unexpected output)"
@@ -615,7 +615,7 @@ if { [is_elf_format] } then {
     }
 
     if { [regexp_diff objdump.out $srcdir/$subdir/objdump.Wk] } then {
-	fail "objdump -Wk"
+	fail "objdump -Wk (reason: output does not match expectations)"
     } else {
 	pass "objdump -Wk"
     }

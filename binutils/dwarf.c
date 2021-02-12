@@ -99,7 +99,7 @@ int do_debug_addr;
 int do_debug_cu_index;
 int do_wide;
 int do_debug_links;
-int do_follow_links;
+int do_follow_links = DEFAULT_FOR_FOLLOW_LINKS;
 bfd_boolean do_checks;
 
 int dwarf_cutoff_level = -1;
@@ -11373,6 +11373,7 @@ dwarf_select_sections_by_names (const char *names)
       { "links", & do_debug_links, 1 },
       { "loc",  & do_debug_loc, 1 },
       { "macro", & do_debug_macinfo, 1 },
+      { "no-follow-links", & do_follow_links, 0 },
       { "pubnames", & do_debug_pubnames, 1 },
       { "pubtypes", & do_debug_pubtypes, 1 },
       /* This entry is for compatibility
@@ -11402,7 +11403,7 @@ dwarf_select_sections_by_names (const char *names)
 	  if (strncmp (p, entry->option, len) == 0
 	      && (p[len] == ',' || p[len] == '\0'))
 	    {
-	      * entry->variable |= entry->val;
+	      * entry->variable = entry->val;
 
 	      /* The --debug-dump=frames-interp option also
 		 enables the --debug-dump=frames option.  */
@@ -11443,6 +11444,7 @@ dwarf_select_sections_by_letters (const char *letters)
       case 'g':	do_gdb_index = 1; break;
       case 'i':	do_debug_info = 1; break;
       case 'K': do_follow_links = 1; break;
+      case 'N': do_follow_links = 0; break;
       case 'k':	do_debug_links = 1; break;
       case 'l':	do_debug_lines |= FLAG_DEBUG_LINES_RAW;	break;
       case 'L':	do_debug_lines |= FLAG_DEBUG_LINES_DECODED; break;

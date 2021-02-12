@@ -717,7 +717,7 @@ proc test_gnu_debuglink {} {
 	fail "$test (objcopy link decompress)"
 	return
     }
-    set got [remote_exec host "$OBJDUMP -S tmpdir/testprog" "" "/dev/null" "tmpdir/testprog.decompress.dump"]
+    set got [remote_exec host "$OBJDUMP -S -WN tmpdir/testprog" "" "/dev/null" "tmpdir/testprog.decompress.dump"]
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "$test (objcopy dump decompress)"
 	return
@@ -726,7 +726,7 @@ proc test_gnu_debuglink {} {
 	fail "$test (objcopy link compress)"
 	return
     }
-    set got [remote_exec host "$OBJDUMP -S tmpdir/testprog" "" "/dev/null" "tmpdir/testprog.compress.dump"]
+    set got [remote_exec host "$OBJDUMP -S -WN tmpdir/testprog" "" "/dev/null" "tmpdir/testprog.compress.dump"]
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "$test (objcopy dump compress)"
 	return

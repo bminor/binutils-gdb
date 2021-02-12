@@ -61,6 +61,17 @@ In addition, when displaying DWARF attributes, if a form is found that
 references the separate debug info file, then the referenced contents
 will also be displayed.
 
+Note - in some distributions this option is enabled by default.  It
+can be disabled via the @option{N} debug option.  The default can be
+chosen when configuring the binutils via the
+@option{--enable-follow-debug-links=yes} or
+@option{--enable-follow-debug-links=no} options.  If these are not
+used then the default is to enable the following of debug links.
+
+@item N
+@itemx =no-follow-links
+Disables the following of links to separate debug info files.
+
 @item l
 @itemx =rawline
 Displays the contents of the @samp{.debug_line} section in a raw

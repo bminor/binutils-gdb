@@ -1,3 +1,9 @@
+2021-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/mach-o/sections-1.d: Stop automatic debug link
+        following.
+	* testsuite/gas/xgate/insns-dwarf2.d: Likewise.
+
 2021-02-12  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/all/pr27381.err: Don't match source file name.

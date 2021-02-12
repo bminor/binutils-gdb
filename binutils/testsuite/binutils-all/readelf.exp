@@ -507,7 +507,7 @@ if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 	set tempfile [remote_download host tmpdir/debuglink.o]
     }
 
-    readelf_test {--debug-dump=links} $tempfile readelf.k  {}
+    readelf_test {--debug-dump=links -wN} $tempfile readelf.k  {}
 
     # Check that debug link sections can be followed.
     if {![binutils_assemble $srcdir/$subdir/linkdebug.s tmpdir/linkdebug.debug]} then {
@@ -530,7 +530,7 @@ if {![binutils_assemble $srcdir/$subdir/dwo.s tmpdir/dwo.o]} then {
 	set tempfile [remote_download host tmpdir/dwo.o]
     }
 
-    readelf_test {--debug-dump=links} $tempfile readelf.k2  {}
+    readelf_test {--debug-dump=links --debug-dump=no-follow-links} $tempfile readelf.k2  {}
 }
 
 if {![binutils_assemble $srcdir/$subdir/zero-sec.s tmpdir/zero-sec.o]} then {
@@ -555,6 +555,6 @@ if ![is_remote host] {
     if {[catch "system \"bzip2 -dc $test > $tempfile\""] != 0} {
 	untested "bzip2 -dc ($testname)"
     } else {
-	readelf_test {--debug-dump=macro} $tempfile pr26112.r {}
+	readelf_test {--debug-dump=macro -wN} $tempfile pr26112.r {}
     }
 }

@@ -1,3 +1,8 @@
+2021-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/sec64k.exp: Stop readelf from automatically
+	following debug links.
+
 2021-02-11  Alan Modra  <amodra@gmail.com>
 
 	* NEWS: Mention arm-symbianelf removal.

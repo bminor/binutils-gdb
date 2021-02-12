@@ -229,13 +229,24 @@ usage (FILE *stream, int status)
   -g, --debugging          Display debug information in object file\n\
   -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
-  -W[lLiaprmfFsoORtUuTgAckK] or\n\
+  -W[lLiaprmfFsoORtUuTgAck] or\n\
   --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
           =frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,\n\
           =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
-          =addr,=cu_index,=links,=follow-links]\n\
+          =addr,=cu_index,=links]\n\
                            Display DWARF info in the file\n\
 "));
+#if DEFAULT_FOR_FOLLOW_LINKS
+  fprintf (stream, _("\
+  -WK,--dwarf=follow-links     Follow links to separate debug info files (default)\n\
+  -WN,--dwarf=no-follow-links  Do not follow links to separate debug info files\n\
+"));
+#else
+  fprintf (stream, _("\
+  -WK,--dwarf=follow-links     Follow links to separate debug info files\n\
+  -WN,--dwarf=no-follow-links  Do not follow links to separate debug info files (default)\n\
+"));
+#endif
 #ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
   --ctf=SECTION            Display CTF info from SECTION\n\
@@ -737,31 +748,32 @@ slurp_symtab (bfd *abfd)
       non_fatal (_("failed to read symbol table from: %s"), bfd_get_filename (abfd));
       bfd_fatal (_("error message was"));
     }
-  if (storage)
+  /* Add an extra entry (at the end) with a NULL pointer.  */
+  storage += sizeof (asymbol *);
+
+  off_t filesize = bfd_get_file_size (abfd);
+
+  /* qv PR 24707.  */
+  if (filesize > 0
+      && filesize < storage
+      /* The MMO file format supports its own special compression
+	 technique, so its sections can be larger than the file size.  */
+      && bfd_get_flavour (abfd) != bfd_target_mmo_flavour)	  
     {
-      off_t filesize = bfd_get_file_size (abfd);
-
-      /* qv PR 24707.  */
-      if (filesize > 0
-	  && filesize < storage
-	  /* The MMO file format supports its own special compression
-	     technique, so its sections can be larger than the file size.  */
-	  && bfd_get_flavour (abfd) != bfd_target_mmo_flavour)	  
-	{
-	  bfd_nonfatal_message (bfd_get_filename (abfd), abfd, NULL,
-				_("error: symbol table size (%#lx) is larger than filesize (%#lx)"),
-			storage, (long) filesize);
-	  exit_status = 1;
-	  symcount = 0;
-	  return NULL;
-	}
-
-      sy = (asymbol **) xmalloc (storage);
+      bfd_nonfatal_message (bfd_get_filename (abfd), abfd, NULL,
+			    _("error: symbol table size (%#lx) is larger than filesize (%#lx)"),
+			    storage, (long) filesize);
+      exit_status = 1;
+      symcount = 0;
+      return NULL;
     }
 
+  sy = (asymbol **) xmalloc (storage);
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
+  /* assert (symcount < (storage / sizeof (asymbol *))) */
+  sy[symcount] = NULL;
   return sy;
 }
 
@@ -774,6 +786,7 @@ slurp_dynamic_symtab (bfd *abfd)
   long storage;
 
   storage = bfd_get_dynamic_symtab_upper_bound (abfd);
+  /* Add an extra entry (at the end) with a NULL pointer.  */
   if (storage < 0)
     {
       if (!(bfd_get_file_flags (abfd) & DYNAMIC))
@@ -786,12 +799,15 @@ slurp_dynamic_symtab (bfd *abfd)
 
       bfd_fatal (bfd_get_filename (abfd));
     }
-  if (storage)
-    sy = (asymbol **) xmalloc (storage);
+
+  storage += sizeof (asymbol *);
+  sy = (asymbol **) xmalloc (storage);
 
   dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
   if (dynsymcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
+  /* assert (symcount < (storage / sizeof (asymbol *))) */
+  sy[dynsymcount] = NULL;
   return sy;
 }
 
@@ -4899,10 +4915,12 @@ dump_bfd (bfd *abfd, bfd_boolean is_mainfile)
 		    }
 		  else
 		    {
-		      syms = xrealloc (syms, (symcount + old_symcount) * sizeof (asymbol *));
+		      syms = xrealloc (syms, (symcount + old_symcount + 1) * sizeof (asymbol *));
 		      memcpy (syms + old_symcount,
 			      extra_syms,
 			      symcount * sizeof (asymbol *));
+		      /* Preserve the NULL entry at the end of the symbol table.  */
+		      syms[symcount + old_symcount] = NULL;
 		    }
 		}
 

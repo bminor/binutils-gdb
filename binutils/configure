@@ -822,6 +822,7 @@ enable_targets
 enable_deterministic_archives
 enable_default_strings_all
 enable_f_for_ifunc_symbols
+enable_follow_debug_links
 with_debuginfod
 enable_libctf
 enable_werror
@@ -1489,6 +1490,9 @@ Optional Features:
   --enable-f-for-ifunc-symbols
                           Have nm use F and f for global and local ifunc
                           symbols
+  --enable-follow-debug-links
+                          Have readelf and objdump follow debug links by
+                          default
   --enable-libctf         Handle .ctf type-info sections [default=yes]
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
@@ -11577,7 +11581,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11580 "configure"
+#line 11584 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11683,7 +11687,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11686 "configure"
+#line 11690 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12356,6 +12360,27 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_F_FOR_IFUNC_SYMBOLS $default_f_for_ifunc
 _ACEOF
+
+
+
+# Check whether --enable-follow-debug-links was given.
+if test "${enable_follow_debug_links+set}" = set; then :
+  enableval=$enable_follow_debug_links;
+if test "${enableval}" = no; then
+  default_for_follow_links=0
+else
+  default_for_follow_links=1
+fi
+else
+  default_for_follow_links=1
+fi
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_FOR_FOLLOW_LINKS $default_for_follow_links
+_ACEOF
+
 
 
 

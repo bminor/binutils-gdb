@@ -82,6 +82,20 @@ fi], [default_f_for_ifunc=0])
 AC_DEFINE_UNQUOTED(DEFAULT_F_FOR_IFUNC_SYMBOLS, $default_f_for_ifunc,
 		   [Have nm use F and f for global and local ifunc symbols])
 
+
+AC_ARG_ENABLE(follow-debug-links,
+[AS_HELP_STRING([--enable-follow-debug-links],
+	[Have readelf and objdump follow debug links by default])], [
+if test "${enableval}" = no; then
+  default_for_follow_links=0
+else
+  default_for_follow_links=1
+fi], [default_for_follow_links=1])
+
+AC_DEFINE_UNQUOTED(DEFAULT_FOR_FOLLOW_LINKS, $default_for_follow_links,
+		   [Have readelf and objdump follow debug links by default])
+
+
 AC_DEBUGINFOD
 
 GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])

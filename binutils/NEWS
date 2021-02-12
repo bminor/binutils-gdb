@@ -1,5 +1,12 @@
 -*- text -*-
 
+* Readelf and objdump will now follow links to separate debug info files by
+  default.  This behaviour can be stopped via the use of the new -wN or
+  --debug-dump=no-follow-links options for readelf and the -WN or
+  --dwarf=no-follow-links options for objdump.  Also the old behaviour can be
+  restored by the use of the --enable-follow-debug-links=no configure time
+  option.
+
 Changes in 2.36:
 
 * Update elfedit and readelf with LAM_U48 and LAM_U57 support.

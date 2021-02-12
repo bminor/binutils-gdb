@@ -1,3 +1,33 @@
+2021-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (follow-debug-links): Add option to enable or
+	disable the following of debug links by default.  Set the
+	default for the option to be 'follow'.
+	* dwarf.c (do_follow_links): Initialise with DEFAULT_FOR_FOLLOW_LINKS.
+	(dwarf_select_sections_by_names): Add no-follow-links option.
+	(dwarf_select_sections_by_letter): Add 'N' option.
+	* objdump.c (usage): Add conditional text describing the
+	follow links option.
+	(slurp_symtab): Ensure that there is a NULL entry at the end
+	of the symbol table.
+	(slurp_dynamic_symtab): Likewise.
+	(dump_bfd): When extending the symbol table, ensure that there
+	is still a NULL entry at the end.
+	* readelf.c (usage): Add conditional text describing the
+	follow links option.
+	* doc/binutils.texi: Update documentation for objcopy and
+	readelf.
+	* doc/debug.options.texi: Update documentation of the
+	follow-links option.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* testsuite/binutils-all/compress.exp: Add the -WN option to
+	objdump command lines that are not expecting to follow links.
+	* testsuite/binutils-all/readelf.exp: Add the
+	--debug-dump=no-follow-links option to tests that are not
+	expecting to follow debug links.
+	* NEWS: Mention the new behaviour.
+
 2021-02-12  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/objcopy.exp: Report "unsupported" when
