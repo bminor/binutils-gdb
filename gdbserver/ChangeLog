@@ -1,5 +1,15 @@
 2021-02-12  Tom Tromey  <tromey@adacore.com>
 
+	* gdbreplay.cc (remote_desc): Remove.
+	(remote_desc_in, remote_desc_out): New globals.
+	(remote_close): Update.
+	(remote_open): Handle "-".
+	(remote_open): Update.
+	(logchar): Log to stderr.
+	(expect, play): Update.
+
+2021-02-12  Tom Tromey  <tromey@adacore.com>
+
 	* gdbreplay.cc (remote_open): Constify.
 
 2021-02-05  Paul E. Murphy  <murphyp@linux.ibm.com>
