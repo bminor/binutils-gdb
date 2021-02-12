@@ -1,4 +1,4 @@
-.*pr27384.s: Assembler messages:
-.*pr27384.s:2: Error: bad or irreducible absolute expression
-.*pr27384.s:2: Error: new paper width is too small
+.*: Assembler messages:
+.*:3: Error: bad or irreducible absolute expression
+.*:3: Error: new paper width is too small
 #pass

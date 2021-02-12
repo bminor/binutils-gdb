@@ -1,2 +1,2 @@
-.*pr27381.s: Assembler messages:
-.*pr27381.s:1: Error: unable to include `/etc/'
+.*: Assembler messages:
+.*:1: Error: unable to include `/etc/'

@@ -1,1 +1,1 @@
-.incbin "/etc/"
+ .incbin "/etc/"

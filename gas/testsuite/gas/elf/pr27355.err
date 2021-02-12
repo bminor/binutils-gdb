@@ -1,5 +1,5 @@
-.*pr27355.s: Assembler messages:
-.*pr27355.s:1: Error: bad expression
-.*pr27355.s:2: Error: bad or irreducible absolute expression
-.*pr27355.s:3: Error: bad or irreducible absolute expression
-.*pr27355.s:3: Error: missing string
+.*: Assembler messages:
+.*:1: Error: bad expression
+.*:2: Error: bad or irreducible absolute expression
+.*:3: Error: bad or irreducible absolute expression
+.*:3: Error: missing string

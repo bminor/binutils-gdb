@@ -1,3 +1,12 @@
+2021-02-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/all/pr27381.err: Don't match source file name.
+	* testsuite/gas/all/pr27381.s: Don't start directive in first column.
+	* testsuite/gas/all/pr27384.err: Don't match source file name.
+	Adjust line number.
+	* testsuite/gas/all/pr27384.s: Add ".text" directive.
+	* testsuite/gas/elf/pr27355.err: Don't match source file name.
+
 2021-02-11  Alan Modra  <amodra@gmail.com>
 
 	* NEWS: Mention arm-symbianelf removal.
