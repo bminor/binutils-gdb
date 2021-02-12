@@ -1,3 +1,8 @@
+2021-02-12  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/pr25662.s: Replace "a" with "aaa" and
+	"c" with "ccc" labels.
+
 2021-02-12  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf.h (debug_info): Fix typo in comment.
