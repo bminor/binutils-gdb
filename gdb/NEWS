@@ -47,6 +47,9 @@ maintenance flush register-cache
 maintenance flush dcache
   A new command to flush the dcache.
 
+maintenance info target-sections
+  Print GDB's internal target sections table.
+
 * Changed commands
 
 break [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]

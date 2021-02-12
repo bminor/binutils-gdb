@@ -464,6 +464,56 @@ maintenance_info_sections (const char *arg, int from_tty)
     maint_print_all_sections (_("Core file: "), core_bfd, nullptr, arg);
 }
 
+/* Implement the "maintenance info target-sections" command.  */
+
+static void
+maintenance_info_target_sections (const char *arg, int from_tty)
+{
+  bfd *abfd = nullptr;
+  int digits = 0;
+  const target_section_table *table
+    = target_get_section_table (current_top_target ());
+  if (table == nullptr)
+    return;
+
+  for (const target_section &sec : *table)
+    {
+      if (abfd == nullptr || sec.the_bfd_section->owner != abfd)
+	{
+	  abfd = sec.the_bfd_section->owner;
+	  digits = std::max (index_digits (gdb_bfd_count_sections (abfd)),
+			     digits);
+	}
+    }
+
+  struct gdbarch *gdbarch = nullptr;
+  int addr_size = 0;
+  abfd = nullptr;
+  for (const target_section &sec : *table)
+   {
+      if (sec.the_bfd_section->owner != abfd)
+	{
+	  abfd = sec.the_bfd_section->owner;
+	  gdbarch = gdbarch_from_bfd (abfd);
+	  addr_size = gdbarch_addr_bit (gdbarch) / 8;
+
+	  printf_filtered (_("From '%s', file type %s:\n"),
+			   bfd_get_filename (abfd), bfd_get_target (abfd));
+	}
+      print_bfd_section_info (abfd,
+			      sec.the_bfd_section,
+			      nullptr,
+			      digits);
+      /* The magic '8 + digits' here ensures that the 'Start' is aligned
+	 with the output of print_bfd_section_info.  */
+      printf_filtered ("%*sStart: %s, End: %s, Owner token: %p\n",
+		       (8 + digits), "",
+		       hex_string_custom (sec.addr, addr_size),
+		       hex_string_custom (sec.endaddr, addr_size),
+		       sec.owner);
+    }
+}
+
 static void
 maintenance_print_statistics (const char *args, int from_tty)
 {
@@ -1121,6 +1171,15 @@ Options:\n\
 		 maint_info_sections_command_help.c_str (),
 		 &maintenanceinfolist);
   set_cmd_completer_handle_brkchars (cmd, maint_info_sections_completer);
+
+  add_cmd ("target-sections", class_maintenance,
+	   maintenance_info_target_sections, _("\
+List GDB's internal section table.\n\
+\n\
+Print the current targets section list.  This is a sub-set of all\n\
+sections, from all objects currently loaded.  Usually the ALLOC\n\
+sectoins."),
+	   &maintenanceinfolist);
 
   add_basic_prefix_cmd ("print", class_maintenance,
 			_("Maintenance command for printing GDB internal state."),

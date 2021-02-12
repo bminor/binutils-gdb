@@ -1,5 +1,10 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/maint-info-sections.exp: Add new tests.
+	(check_maint_info_target_sections_output): New proc.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.arch/riscv-default-tdesc.exp: New file.
 
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>

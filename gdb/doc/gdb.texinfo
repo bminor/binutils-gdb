@@ -20668,6 +20668,14 @@ COFF shared library information.
 Section contains common symbols.
 @end table
 @end table
+
+@kindex maint info target-sections
+@item maint info target-sections
+This command prints @value{GDBN}'s internal section table.  For each
+target @value{GDBN} maintains a table containing the allocatable
+sections from all currently mapped objects, along with information
+about where the section is mapped.
+
 @kindex set trust-readonly-sections
 @cindex read-only sections
 @item set trust-readonly-sections on

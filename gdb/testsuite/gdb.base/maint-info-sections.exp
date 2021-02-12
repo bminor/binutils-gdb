@@ -13,7 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test just for the 'maintenance info sections' command.
+# Test just for the 'maintenance info sections' command and the
+# 'maintenance info target-sections' command.
 
 load_lib completion-support.exp
 
@@ -27,6 +28,65 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 if ![runto_main] then {
     untested "maint info sections"
     return -1
+}
+
+# Check the output of 'maint info target-sections' command.
+proc check_maint_info_target_sections_output {prefix} {
+    global hex gdb_prompt
+
+    with_test_prefix $prefix {
+	# Check the output of the 'maint info target-sections' command.
+	# Ensures that all the lines have the expected format, and that we see
+	# an auxiliary information line after every section information line.
+	#
+	# We also check that every bfd section has the ALLOC flag.
+	set seen_header false
+	set seen_a_section false
+	set seen_aux_info false
+	set expecting_aux_info false
+	gdb_test_multiple "maint info target-sections" "" {
+	    -re "^maint info target-sections\r\n" {
+		# Consume the command we sent to GDB that the terminal echo'd
+		# back.
+		exp_continue
+	    }
+	    -re "^From '\[^\r\n\]+', file type \[^\r\n\]+:\r\n" {
+		# There might be more than one header, but there should be at
+		# least one.
+		set seen_header true
+		if { $expecting_aux_info } {
+		    fail $gdb_test_name
+		} else {
+		    exp_continue
+		}
+	    }
+	    -re "^ \\\[\[0-9\]+\\\]\\s+$hex->$hex at $hex: \[^*\r\]+\\yALLOC\\y\[^*\r\]*\r\n" {
+		# A bfd section description line.
+		set seen_a_section true
+		if { $expecting_aux_info } {
+		    fail $gdb_test_name
+		} else {
+		    set expecting_aux_info true
+		    exp_continue
+		}
+	    }
+	    -re "^\\s+Start: $hex, End: $hex, Owner token: $hex\r\n" {
+		# A target section auxiliary information line.
+		set seen_aux_info true
+		if { !$expecting_aux_info } {
+		    fail $gdb_test_name
+		} else {
+		    set expecting_aux_info false
+		    exp_continue
+		}
+	    }
+	    -re "^$gdb_prompt $" {
+		gdb_assert { $seen_header && $seen_a_section && $seen_aux_info }
+		gdb_assert { !$expecting_aux_info }
+		pass $gdb_test_name
+	    }
+	}
+    }
 }
 
 # Check that 'maint info sections' output looks correct.  When
@@ -128,6 +188,8 @@ gdb_test_multiple "maint info sections DATA" "" {
     }
 }
 
+check_maint_info_target_sections_output "with executable"
+
 # Restart GDB, but don't load the executable.
 clean_restart
 
@@ -160,6 +222,10 @@ gdb_test_multiple "maint info sections -all-objects" "" {
 	pass $gdb_test_name
     }
 }
+
+# NOTE: We would like to check 'maint info target-sections' again
+# here, but GDB currently doesn't display the target sections table in
+# this case.  This is a bug and will be fixed shortly!!
 
 # Test the command line completion on 'maint info sections'.  First
 # the command line flag.

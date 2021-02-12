@@ -1,3 +1,8 @@
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.texinfo (Files): Document new 'maint info target-sections'
+	command.
+
 2021-02-17  Lancelot Six  <lsix@lancelotsix.com>
 
 	PR cli/17290

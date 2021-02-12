@@ -1,5 +1,11 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention new 'maint info target-sections' command.
+	* maint.c (maintenance_info_target_sections): New function.
+	(_initialize_maint_cmds): Register new command.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_features_from_gdbarch_info): Rename to...
 	(riscv_features_from_bfd): ...this.  Change parameter type to
 	'bfd*', and update as required.
