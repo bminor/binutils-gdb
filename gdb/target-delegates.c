@@ -2030,7 +2030,7 @@ target_ops::get_section_table ()
 const target_section_table *
 dummy_target::get_section_table ()
 {
-  return NULL;
+  return default_get_section_table ();
 }
 
 const target_section_table *

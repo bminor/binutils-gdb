@@ -1,5 +1,16 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* exec.c (exec_target::get_section_table): Delete member function.
+	(section_table_read_available_memory): Use current_top_target, not
+	just the exec_ops target.
+	* target-delegates.c: Regenerate.
+	* target.c (default_get_section_table): New function.
+	* target.h (target_ops::get_section_table): Change default
+	behaviour to call default_get_section_table.
+	(default_get_section_table): Declare.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* exec.c (exec_target::close): Call new clear_target_sections
 	function.
 	(program_space::add_target_sections): Update name of member

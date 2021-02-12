@@ -223,9 +223,7 @@ gdb_test_multiple "maint info sections -all-objects" "" {
     }
 }
 
-# NOTE: We would like to check 'maint info target-sections' again
-# here, but GDB currently doesn't display the target sections table in
-# this case.  This is a bug and will be fixed shortly!!
+check_maint_info_target_sections_output "with loaded symbol file"
 
 # Test the command line completion on 'maint info sections'.  First
 # the command line flag.

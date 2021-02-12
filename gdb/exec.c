@@ -75,7 +75,6 @@ struct exec_target final : public target_ops
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
-  const target_section_table *get_section_table () override;
   void files_info () override;
 
   bool has_memory () override;
@@ -775,7 +774,8 @@ enum target_xfer_status
 section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
 				     ULONGEST len, ULONGEST *xfered_len)
 {
-  const target_section_table *table = target_get_section_table (&exec_ops);
+  const target_section_table *table
+    = target_get_section_table (current_top_target ());
   std::vector<mem_range> available_memory
     = section_table_available_memory (offset, len, *table);
 
@@ -882,12 +882,6 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
     }
 
   return TARGET_XFER_EOF;		/* We can't help.  */
-}
-
-const target_section_table *
-exec_target::get_section_table ()
-{
-  return &current_program_space->target_sections ();
 }
 
 enum target_xfer_status

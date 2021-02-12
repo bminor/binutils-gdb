@@ -836,6 +836,13 @@ target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
   return NULL;
 }
 
+/* See target.h.  */
+
+const target_section_table *
+default_get_section_table ()
+{
+  return &current_program_space->target_sections ();
+}
 
 /* Helper for the memory xfer routines.  Checks the attributes of the
    memory region of MEMADDR against the read or write being attempted.
