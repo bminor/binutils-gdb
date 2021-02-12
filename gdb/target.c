@@ -812,7 +812,7 @@ target_read_string (CORE_ADDR memaddr, int len, int *bytes_read)
   return gdb::unique_xmalloc_ptr<char> ((char *) buffer.release ());
 }
 
-target_section_table *
+const target_section_table *
 target_get_section_table (struct target_ops *target)
 {
   return target->get_section_table ();
@@ -820,15 +820,15 @@ target_get_section_table (struct target_ops *target)
 
 /* Find a section containing ADDR.  */
 
-struct target_section *
+const struct target_section *
 target_section_by_addr (struct target_ops *target, CORE_ADDR addr)
 {
-  target_section_table *table = target_get_section_table (target);
+  const target_section_table *table = target_get_section_table (target);
 
   if (table == NULL)
     return NULL;
 
-  for (target_section &secp : *table)
+  for (const target_section &secp : *table)
     {
       if (addr >= secp.addr && addr < secp.endaddr)
 	return &secp;
@@ -965,7 +965,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
       if (pc_in_unmapped_range (memaddr, section))
 	{
-	  target_section_table *table = target_get_section_table (ops);
+	  const target_section_table *table = target_get_section_table (ops);
 	  const char *section_name = section->the_bfd_section->name;
 
 	  memaddr = overlay_mapped_address (memaddr, section);
@@ -984,13 +984,12 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
   /* Try the executable files, if "trust-readonly-sections" is set.  */
   if (readbuf != NULL && trust_readonly)
     {
-      struct target_section *secp;
-
-      secp = target_section_by_addr (ops, memaddr);
+      const struct target_section *secp
+	= target_section_by_addr (ops, memaddr);
       if (secp != NULL
 	  && (bfd_section_flags (secp->the_bfd_section) & SEC_READONLY))
 	{
-	  target_section_table *table = target_get_section_table (ops);
+	  const target_section_table *table = target_get_section_table (ops);
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
 						    *table);

@@ -1439,7 +1439,7 @@ record_btrace_target::xfer_partial (enum target_object object,
 	{
 	case TARGET_OBJECT_MEMORY:
 	  {
-	    struct target_section *section;
+	    const struct target_section *section;
 
 	    /* We do not allow writing memory in general.  */
 	    if (writebuf != NULL)

@@ -1,5 +1,35 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb/bfd-target.c (class target_bfd) <get_section_table>: Make
+	return type const.
+	* gdb/exec.c (struct exec_target) <get_section_table>: Likewise.
+	(section_table_read_available_memory): Make local const.
+	(exec_target::xfer_partial): Make local const.
+	(print_section_info): Make parameter const.
+	* gdb/exec.h (print_section_info): Likewise.
+	* gdb/ppc64-tdep.c (ppc64_convert_from_func_ptr_addr): Make local
+	const.
+	* gdb/record-btrace.c (record_btrace_target::xfer_partial):
+	Likewise.
+	* gdb/remote.c (remote_target::remote_xfer_live_readonly_partial):
+	Likewise.
+	* gdb/s390-tdep.c (s390_load): Likewise.
+	* gdb/solib-dsbt.c (scan_dyntag): Likewise.
+	* gdb/solib-svr4.c (scan_dyntag): Likewise.
+	* gdb/target-debug.h (target_debug_print_target_section_table_p):
+	Rename to...
+	(target_debug_print_const_target_section_table_p): ...this.
+	* gdb/target-delegates.c: Regenerate.
+	* gdb/target.c (target_get_section_table): Make return type const.
+	(target_section_by_addr): Likewise.  Also make some locals const.
+	(memory_xfer_partial_1): Make some locals const.
+	* gdb/target.h (struct target_ops) <get_section_table>: Make
+	return type const.
+	(target_section_by_addr): Likewise.
+	(target_get_section_table): Likewise.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention new 'maint info target-sections' command.
 	* maint.c (maintenance_info_target_sections): New function.
 	(_initialize_maint_cmds): Register new command.

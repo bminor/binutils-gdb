@@ -687,7 +687,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (NULL);
     virtual void log_command (const char *)
       TARGET_DEFAULT_IGNORE ();
-    virtual target_section_table *get_section_table ()
+    virtual const target_section_table *get_section_table ()
       TARGET_DEFAULT_RETURN (NULL);
 
     /* Provide default values for all "must have" methods.  */
@@ -2427,13 +2427,13 @@ extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);
 
 /* Return the "section" containing the specified address.  */
-struct target_section *target_section_by_addr (struct target_ops *target,
-					       CORE_ADDR addr);
+const struct target_section *target_section_by_addr (struct target_ops *target,
+						     CORE_ADDR addr);
 
 /* Return the target section table this target (or the targets
    beneath) currently manipulate.  */
 
-extern target_section_table *target_get_section_table
+extern const target_section_table *target_get_section_table
   (struct target_ops *target);
 
 /* From mem-break.c */

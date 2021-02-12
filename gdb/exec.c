@@ -75,7 +75,7 @@ struct exec_target final : public target_ops
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
-  target_section_table *get_section_table () override;
+  const target_section_table *get_section_table () override;
   void files_info () override;
 
   bool has_memory () override;
@@ -775,7 +775,7 @@ enum target_xfer_status
 section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
 				     ULONGEST len, ULONGEST *xfered_len)
 {
-  target_section_table *table = target_get_section_table (&exec_ops);
+  const target_section_table *table = target_get_section_table (&exec_ops);
   std::vector<mem_range> available_memory
     = section_table_available_memory (offset, len, *table);
 
@@ -884,7 +884,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   return TARGET_XFER_EOF;		/* We can't help.  */
 }
 
-target_section_table *
+const target_section_table *
 exec_target::get_section_table ()
 {
   return &current_program_space->target_sections;
@@ -896,7 +896,7 @@ exec_target::xfer_partial (enum target_object object,
 			   const gdb_byte *writebuf,
 			   ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  target_section_table *table = get_section_table ();
+  const target_section_table *table = target_get_section_table (this);
 
   if (object == TARGET_OBJECT_MEMORY)
     return section_table_xfer_memory_partial (readbuf, writebuf,
@@ -908,7 +908,7 @@ exec_target::xfer_partial (enum target_object object,
 
 
 void
-print_section_info (target_section_table *t, bfd *abfd)
+print_section_info (const target_section_table *t, bfd *abfd)
 {
   struct gdbarch *gdbarch = gdbarch_from_bfd (abfd);
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */

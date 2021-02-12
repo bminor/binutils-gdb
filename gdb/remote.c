@@ -9044,7 +9044,7 @@ remote_target::remote_xfer_live_readonly_partial (gdb_byte *readbuf,
 						  int unit_size,
 						  ULONGEST *xfered_len)
 {
-  struct target_section *secp;
+  const struct target_section *secp;
 
   secp = target_section_by_addr (this, memaddr);
   if (secp != NULL
@@ -9052,8 +9052,8 @@ remote_target::remote_xfer_live_readonly_partial (gdb_byte *readbuf,
     {
       ULONGEST memend = memaddr + len;
 
-      target_section_table *table = target_get_section_table (this);
-      for (target_section &p : *table)
+      const target_section_table *table = target_get_section_table (this);
+      for (const target_section &p : *table)
 	{
 	  if (memaddr >= p.addr)
 	    {

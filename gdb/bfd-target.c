@@ -50,7 +50,7 @@ public:
 		  ULONGEST offset, ULONGEST len,
 		  ULONGEST *xfered_len) override;
 
-  target_section_table *get_section_table () override;
+  const target_section_table *get_section_table () override;
 
 private:
   /* The BFD we're wrapping.  */
@@ -82,7 +82,7 @@ target_bfd::xfer_partial (target_object object,
     }
 }
 
-target_section_table *
+const target_section_table *
 target_bfd::get_section_table ()
 {
   return &m_table;
