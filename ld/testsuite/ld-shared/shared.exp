@@ -213,8 +213,8 @@ verbose "Using $picflag to compile PIC code"
 
 # Compile the main program.
 if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] {
-    unresolved "shared (non PIC)"
-    unresolved "shared"
+    unsupported "shared (non PIC)"
+    unsupported "shared"
 } else {
     # The shared library is composed of two files.  First compile them
     # without using -fpic.  That should work on an ELF system,
@@ -225,7 +225,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
     global PLT_CFLAGS NOPIE_CFLAGS
     if { ![ld_compile "$CC $PLT_CFLAGS $NOPIE_CFLAGS $CFLAGS $SHCFLAG" $srcdir/$subdir/sh1.c $tmpdir/sh1np.o]
 	 || ![ld_compile "$CC $PLT_CFLAGS $CFLAGS $SHCFLAG" $srcdir/$subdir/sh2.c $tmpdir/sh2np.o] } {
-	unresolved "shared (non PIC)"
+	unsupported "shared (non PIC)"
     } else { if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	shared_test shnp "shared (nonPIC)" mainnp.o sh1np.o sh2np.o xcoff
     } else {
@@ -286,7 +286,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 
     if { ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/sh1.c $tmpdir/sh1p.o]
 	 || ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/sh2.c $tmpdir/sh2p.o] } {
-	unresolved "shared"
+	unsupported "shared"
     } else {
 	if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	    shared_test shp "shared" mainnp.o sh1p.o sh2p.o xcoff
@@ -303,8 +303,8 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG" $srcdir/$subdir/main.c $tmpdir/mainnp.o] 
 
 # Now do the same tests again, but this time compile main.c PIC.
 if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/mainp.o] {
-    unresolved "shared (PIC main, non PIC so)"
-    unresolved "shared (PIC main)"
+    unsupported "shared (PIC main, non PIC so)"
+    unsupported "shared (PIC main)"
 } else {
     if { [file exists $tmpdir/sh1np.o ] && [ file exists $tmpdir/sh2np.o ] } {
         if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
@@ -333,7 +333,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    shared_test shmpnp "shared (PIC main, non PIC so)" mainp.o sh1np.o sh2np.o shared
 	}
     } else {
-	unresolved "shared (PIC main, non PIC so)"
+	unsupported "shared (PIC main, non PIC so)"
     }
 
     if { [file exists $tmpdir/sh1p.o ] && [ file exists $tmpdir/sh2p.o ] } {
@@ -343,7 +343,7 @@ if ![ld_compile "$CC $CFLAGS $SHCFLAG $picflag" $srcdir/$subdir/main.c $tmpdir/m
 	    shared_test shmpp "shared (PIC main)" mainp.o sh1p.o sh2p.o shared
 	}
     } else {
-	unresolved "shared (PIC main)"
+	unsupported "shared (PIC main)"
     }
 }
 

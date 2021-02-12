@@ -23,7 +23,7 @@
 set testname "SIZEOF"
 
 if ![ld_assemble $as $srcdir/$subdir/sizeof.s tmpdir/sizeof.o] {
-    unresolved $testname
+    unsupported $testname
     return
 }
 

@@ -22,7 +22,7 @@
 set testname "EXTERN"
 
 if ![ld_assemble $as $srcdir/$subdir/extern.s tmpdir/extern.o] {
-    unresolved $testname
+    unsupported $testname
     return
 }
 

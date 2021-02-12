@@ -51,14 +51,14 @@ set test9 "ld don't exclude symbols from archive - --exclude-libs foo:bar"
 
 if { ![ld_assemble_flags $as $as_opt $srcdir/$subdir/exclude1.s tmpdir/exclude1.o ]
      || ![ld_assemble_flags $as $as_opt $srcdir/$subdir/exclude2.s tmpdir/exclude2.o] } {
-    unresolved $test1
+    unsupported $test1
     return
 }
 
 remote_file host delete "tmpdir/libexclude.a"
 set catch_output [run_host_cmd "$ar" "cq tmpdir/libexclude.a tmpdir/exclude2.o"]
 if {![string match "" $catch_output]} {
-    unresolved $test1
+    fail $test1
     return
 }
 

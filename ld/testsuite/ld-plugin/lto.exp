@@ -679,7 +679,7 @@ set testname "Build liblto-11.a"
 remote_file host delete "tmpdir/liblto-11.a"
 set catch_output [run_host_cmd "$ar" "rc $plug_opt tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
 if {![string match "" $catch_output]} {
-    unresolved $testname
+    fail $testname
     restore_notify
     return
 }

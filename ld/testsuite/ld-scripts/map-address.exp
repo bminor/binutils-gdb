@@ -22,7 +22,7 @@ set testname "map addresses"
 
 # The source file doesn't matter.  Pinch one from the sizeof test.
 if {![ld_assemble $as $srcdir/$subdir/sizeof.s tmpdir/map-address.o]} {
-    unresolved $testname
+    unsupported $testname
     return
 }
 

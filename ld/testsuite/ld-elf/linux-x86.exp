@@ -84,13 +84,13 @@ proc elfedit_test { options test output } {
     set got [remote_exec host "$ELFEDIT $options tmpdir/$test" "" "/dev/null"]
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	send_log "$got\n"
-	unresolved "$test_name"
+	fail "$test_name"
     }
     send_log "$READELF -n $options tmpdir/$test > tmpdir/$output.out\n"
     set got [remote_exec host "$READELF -n tmpdir/$test" "" "/dev/null" "tmpdir/$output.out"]
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	send_log "$got\n"
-	unresolved "$test_name"
+	fail "$test_name"
 }
     if { [regexp_diff tmpdir/$output.out $srcdir/$subdir/$output.rd] } then {
 	fail "$test_name"

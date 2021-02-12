@@ -494,7 +494,7 @@ proc run_ld_link_tests { ldtests args } {
 	set binfile tmpdir/[lindex $testitem 6]
 	set cflags [lindex $testitem 7]
 	set objfiles {}
-	set is_unresolved 0
+	set is_unsupported 0
 	set failed 0
 	set maybe_failed 0
 	set ld_output ""
@@ -523,7 +523,7 @@ proc run_ld_link_tests { ldtests args } {
 		catch "$unbzip2" exec_output
 		if ![string match "" $exec_output] then {
 		    send_log "$exec_output\n"
-		    set is_unresolved 1
+		    set is_unsupported 1
 		    break
 		}
 	    } else {
@@ -531,7 +531,7 @@ proc run_ld_link_tests { ldtests args } {
 		if { [file extension $src_file] == ".c" } {
 		    set as_file "tmpdir/$fileroot.s"
 		    if ![ld_compile "$CC -S $CFLAGS $cflags" $srcdir/$subdir/$src_file $as_file] {
-			set is_unresolved 1
+			set is_unsupported 1
 			break
 		    }
 		} else {
@@ -551,8 +551,8 @@ proc run_ld_link_tests { ldtests args } {
 	    continue
 	}
 	# Catch compiler errors.
-	if { $is_unresolved } {
-	    unresolved $testname
+	if { $is_unsupported } {
+	    unsupported $testname
 	    continue
 	}
 
@@ -567,6 +567,7 @@ proc run_ld_link_tests { ldtests args } {
 	    set ld_output "$exec_output"
 	}
 
+	set is_unresolved 0
 	if { !$failed } {
 	    foreach actionlist $actions {
 		set action [lindex $actionlist 0]
@@ -751,7 +752,7 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    }
 	}
 	if { $failed != 0 } {
-	    unresolved $testname
+	    unsupported $testname
 	    continue
 	}
 
@@ -941,7 +942,7 @@ proc run_cc_link_tests { ldtests } {
 	    }
 	}
 	if { $failed != 0 } {
-	    unresolved $testname
+	    unsupported $testname
 	    continue
 	}
 

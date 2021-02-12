@@ -22,7 +22,7 @@
 set testname "align1"
 
 if ![ld_assemble $as $srcdir/$subdir/align.s tmpdir/align.o] {
-    unresolved $testname
+    unsupported $testname
     return
 }
 

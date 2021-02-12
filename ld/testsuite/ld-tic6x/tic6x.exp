@@ -175,7 +175,7 @@ proc check_osabi_tic6x { test_name binary_file } {
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	send_log "$got\n"
-	unresolved "$test_name"
+	fail "$test_name"
 	remote_file build delete "dump.out"
 	return
     }
@@ -184,7 +184,7 @@ proc check_osabi_tic6x { test_name binary_file } {
     if { ![regexp "\n\[ \]*OS/ABI:\[ \]*(.+)\n\[ \]*ABI" \
 	   [file_contents dump.out] nil osabi] } {
 	verbose "proc check_osabi_tic6x: Readelf failed to extract an ELF header from $binary_file"
-	unresolved "$test_name"
+	fail "$test_name"
     } elseif { $osabi == $expected_osabi } {
 	pass "$test_name"
     } else {
