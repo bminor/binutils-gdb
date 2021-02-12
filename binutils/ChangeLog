@@ -1,3 +1,7 @@
+2021-02-12  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.c (process_debug_info): Print DWO ID.
+
 2021-02-11  Alan Modra  <amodra@gmail.com>
 
 	PR 27290

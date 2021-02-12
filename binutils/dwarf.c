@@ -3692,11 +3692,13 @@ process_debug_info (struct dwarf_section *           section,
       if (compunit.cu_version < 5)
 	SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end);
 
+      bfd_boolean do_dwo_id = FALSE;
+      uint64_t dwo_id;
       if (compunit.cu_unit_type == DW_UT_split_compile
 	  || compunit.cu_unit_type == DW_UT_skeleton)
 	{
-	  uint64_t dwo_id;
 	  SAFE_BYTE_GET_AND_INC (dwo_id, hdrptr, 8, end);
+	  do_dwo_id = TRUE;
 	}
 
       /* PR 17512: file: 001-108546-0.001:0.1.  */
@@ -3769,6 +3771,8 @@ process_debug_info (struct dwarf_section *           section,
 	      printf (_("   Type Offset:   0x%s\n"),
 		      dwarf_vmatoa ("x", type_offset));
 	    }
+	  if (do_dwo_id)
+	    printf (_("   DWO ID:        0x%s\n"), dwarf_vmatoa ("x", dwo_id));
 	  if (this_set != NULL)
 	    {
 	      dwarf_vma *offsets = this_set->section_offsets;
