@@ -1,3 +1,9 @@
+2021-03-25  Pedro Alves  <pedro@palves.net>
+
+	* gdb.server/stop-reply-no-thread-multi.exp (run_test): Add
+	"target_non_stop" parameter and use it.
+	(top level): Add "maint set target-non-stop on/off" testing axis.
+
 2021-03-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/ada.exp (gnat_runtime_has_debug_info): Use -wrap with

@@ -7190,14 +7190,16 @@ remote_target::check_pending_events_prevent_wildcard_vcont
 	  || event->ws.kind == TARGET_WAITKIND_VFORKED)
 	*may_global_wildcard = 0;
 
-      struct inferior *inf = find_inferior_ptid (this, event->ptid);
-
       /* This may be the first time we heard about this process.
 	 Regardless, we must not do a global wildcard resume, otherwise
 	 we'd resume this process too.  */
       *may_global_wildcard = 0;
-      if (inf != NULL)
-	get_remote_inferior (inf)->may_wildcard_vcont = false;
+      if (event->ptid != null_ptid)
+	{
+	  inferior *inf = find_inferior_ptid (this, event->ptid);
+	  if (inf != NULL)
+	    get_remote_inferior (inf)->may_wildcard_vcont = false;
+	}
     }
 }
 

@@ -41,10 +41,15 @@ if { [build_executable "failed to prepare" $testfile $srcfile {debug pthreads}] 
 }
 
 # Run the tests with different features of GDBserver disabled.
-proc run_test { disable_feature } {
+# TARGET_NON_STOP is passed to "maint set target-non-stop".
+proc run_test { target_non_stop disable_feature } {
     global binfile gdb_prompt decimal hex
+    global GDBFLAGS
 
-    clean_restart ${binfile}
+    save_vars { GDBFLAGS } {
+	append GDBFLAGS " -ex \"maint set target-non-stop $target_non_stop\""
+	clean_restart ${binfile}
+    }
 
     # Make sure we're disconnected, in case we're testing with an
     # extended-remote board, therefore already connected.
@@ -131,6 +136,11 @@ proc run_test { disable_feature } {
 #
 # T: Start GDBserver with the entire 'T' stop reply packet disabled,
 #    GDBserver will instead send the 'S' stop reply.
-foreach_with_prefix to_disable { "" Tthread T } {
-    run_test $to_disable
+#
+# Also test both all-stop and non-stop variants of the remote
+# protocol.
+foreach_with_prefix target-non-stop {"off" "on"} {
+    foreach_with_prefix to_disable { "" Tthread T } {
+	run_test ${target-non-stop} $to_disable
+    }
 }

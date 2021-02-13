@@ -1,3 +1,10 @@
+2021-03-25  Pedro Alves  <pedro@palves.net>
+
+	* remote.c
+	(remote_target::check_pending_events_prevent_wildcard_vcont):
+	Check whether the event's ptid is not null_ptid before looking up
+	the corresponding inferior.
+
 2021-03-24  Changbin Du  <changbin.du@gmail.com>
 
 	* riscv-tdep.c (riscv_breakpoint_kind_from_pc): Remove call to
