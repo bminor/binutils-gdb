@@ -1,5 +1,10 @@
 2021-03-25  Pedro Alves  <pedro@palves.net>
 
+	* gdb.server/bkpt-other-inferior.exp: Only enable remote output
+	around setting the breakpoint.
+
+2021-03-25  Pedro Alves  <pedro@palves.net>
+
 	* remote.c
 	(remote_target::check_pending_events_prevent_wildcard_vcont):
 	Check whether the event's ptid is not null_ptid before looking up
