@@ -143,6 +143,7 @@ load_file_and_line (const char *filename, int lineno)
       FILE *file;
       int i;
       struct stat s;
+      size_t ret;
       const char *found_filename, *slash;
 
       found_filename = filename;
@@ -162,8 +163,8 @@ load_file_and_line (const char *filename, int lineno)
       f->filename = strdup (filename);
       f->data = (char *) malloc (s.st_size + 2);
       file = fopen (found_filename, "rb");
-      fread (f->data, 1, s.st_size, file);
-      f->data[s.st_size] = 0;
+      ret = fread (f->data, 1, s.st_size, file);
+      f->data[ret] = 0;
       fclose (file);
 
       f->nlines = 1;

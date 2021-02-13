@@ -1,5 +1,10 @@
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* trace.c (load_file_and_line): Use fread return value to index
+	the data.
+
+2021-02-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Replace sinclude with AC_CONFIG_MACRO_DIRS.
 	* aclocal.m4, configure: Regenerate.
 
