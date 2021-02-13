@@ -22905,7 +22905,7 @@ is high level of serial line for some certain time.
 Linux kernel prefers @samp{BREAK-g}, a.k.a Magic SysRq g.
 It is @code{BREAK} signal followed by character @code{g}.
 
-@item show interrupt-sequence
+@item show remote interrupt-sequence
 Show which of @samp{Ctrl-C}, @code{BREAK} or @code{BREAK-g}
 is sent by @value{GDBN} to interrupt the remote program.
 @code{BREAK-g} is BREAK signal followed by @code{g} and
@@ -22918,7 +22918,7 @@ Specify whether interrupt-sequence is sent to remote target when
 Linux kernel.  Linux kernel expects @code{BREAK} followed by @code{g}
 which is known as Magic SysRq g in order to connect @value{GDBN}.
 
-@item show interrupt-on-connect
+@item show remote interrupt-on-connect
 Show whether interrupt-sequence is sent
 to remote target when @value{GDBN} connects to it.
 

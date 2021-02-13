@@ -1,3 +1,9 @@
+2021-02-17  Lancelot Six  <lsix@lancelotsix.com>
+
+	PR cli/17290
+	* gdb.texinfo (Remote Configuration): Fix show remote
+	interrupt-sequence and show remote interrupt-on-connect.
+
 2021-02-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Files): Update documentation for 'maint info
