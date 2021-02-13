@@ -1,3 +1,9 @@
+2021-02-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* ada-lang.c (ada_fold_name): Check for non-empty string prior
+	to accessing it.
+	(ada_lookup_name_info): Likewise.
+
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4: Regenerate.

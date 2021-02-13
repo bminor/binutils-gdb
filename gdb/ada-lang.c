@@ -980,7 +980,7 @@ ada_fold_name (gdb::string_view name)
   int len = name.size ();
   GROW_VECT (fold_buffer, fold_buffer_size, len + 1);
 
-  if (name[0] == '\'')
+  if (!name.empty () && name[0] == '\'')
     {
       strncpy (fold_buffer, name.data () + 1, len - 2);
       fold_buffer[len - 2] = '\000';
@@ -13650,7 +13650,7 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
 {
   gdb::string_view user_name = lookup_name.name ();
 
-  if (user_name[0] == '<')
+  if (!user_name.empty () && user_name[0] == '<')
     {
       if (user_name.back () == '>')
 	m_encoded_name
