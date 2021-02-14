@@ -1,5 +1,12 @@
 2021-02-15  Alan Modra  <amodra@gmail.com>
 
+	* elf32-nds32.c (nds32_get_section_contents): Replace
+	bfd_malloc_and_get_section with bfd_get_full_section_contents.
+	(nds32_elf_relax_delete_blanks): Init contents.
+	(nds32_elf_relax_section, nds32_relax_fp_as_gp): Likewise.
+
+2021-02-15  Alan Modra  <amodra@gmail.com>
+
 	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents): Use
 	bfd_get_full_section_contents.
 

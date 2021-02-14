@@ -9201,6 +9201,7 @@ nds32_elf_relax_delete_blanks (bfd *abfd, asection *sec,
       if (!(sect->flags & SEC_RELOC))
 	continue;
 
+      contents = NULL;
       nds32_get_section_contents (abfd, sect, &contents, TRUE);
 
       for (irel = internal_relocs; irel < irelend; irel++)
@@ -9457,7 +9458,7 @@ nds32_get_section_contents (bfd *abfd, asection *sec,
     *contents_p = elf_section_data (sec)->this_hdr.contents;
   else
     {
-      if (!bfd_malloc_and_get_section (abfd, sec, contents_p))
+      if (!bfd_get_full_section_contents (abfd, sec, contents_p))
 	return FALSE;
       if (cache)
 	elf_section_data (sec)->this_hdr.contents = *contents_p;
@@ -12157,6 +12158,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
   load_store_relax = table->load_store_relax;
 
   /* Get symbol table and section content.  */
+  contents = NULL;
   if (!nds32_get_section_contents (abfd, sec, &contents, TRUE)
       || !nds32_get_local_syms (abfd, sec, &isymbuf))
     goto error_return;
@@ -12814,6 +12816,7 @@ nds32_relax_fp_as_gp (struct bfd_link_info *link_info,
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
 
+  contents = NULL;
   if (!nds32_get_section_contents (abfd, sec, &contents, TRUE)
       || !nds32_get_local_syms (abfd, sec, &isymbuf))
     return FALSE;

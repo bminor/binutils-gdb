@@ -503,7 +503,7 @@ if { ![is_elf_format] } then {
 	send_log "\n"
     }
 
-    setup_xfail "msp430-*-*" "nds32*-*-*"
+    setup_xfail "msp430-*-*"
     if { [regexp_diff objdump.out $srcdir/$subdir/dw2-ranges.W] } then {
 	fail "objdump -W for debug_ranges"
     } else {
