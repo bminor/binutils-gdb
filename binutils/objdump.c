@@ -748,32 +748,33 @@ slurp_symtab (bfd *abfd)
       non_fatal (_("failed to read symbol table from: %s"), bfd_get_filename (abfd));
       bfd_fatal (_("error message was"));
     }
-  /* Add an extra entry (at the end) with a NULL pointer.  */
-  storage += sizeof (asymbol *);
 
-  off_t filesize = bfd_get_file_size (abfd);
-
-  /* qv PR 24707.  */
-  if (filesize > 0
-      && filesize < storage
-      /* The MMO file format supports its own special compression
-	 technique, so its sections can be larger than the file size.  */
-      && bfd_get_flavour (abfd) != bfd_target_mmo_flavour)	  
+  if (storage)
     {
-      bfd_nonfatal_message (bfd_get_filename (abfd), abfd, NULL,
-			    _("error: symbol table size (%#lx) is larger than filesize (%#lx)"),
-			    storage, (long) filesize);
-      exit_status = 1;
-      symcount = 0;
-      return NULL;
+      off_t filesize = bfd_get_file_size (abfd);
+
+      /* qv PR 24707.  */
+      if (filesize > 0
+	  && filesize < storage
+	  /* The MMO file format supports its own special compression
+	     technique, so its sections can be larger than the file size.  */
+	  && bfd_get_flavour (abfd) != bfd_target_mmo_flavour)
+	{
+	  bfd_nonfatal_message (bfd_get_filename (abfd), abfd, NULL,
+				_("error: symbol table size (%#lx) "
+				  "is larger than filesize (%#lx)"),
+				storage, (long) filesize);
+	  exit_status = 1;
+	  symcount = 0;
+	  return NULL;
+	}
+
+      sy = (asymbol **) xmalloc (storage);
     }
 
-  sy = (asymbol **) xmalloc (storage);
   symcount = bfd_canonicalize_symtab (abfd, sy);
   if (symcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
-  /* assert (symcount < (storage / sizeof (asymbol *))) */
-  sy[symcount] = NULL;
   return sy;
 }
 
@@ -786,7 +787,6 @@ slurp_dynamic_symtab (bfd *abfd)
   long storage;
 
   storage = bfd_get_dynamic_symtab_upper_bound (abfd);
-  /* Add an extra entry (at the end) with a NULL pointer.  */
   if (storage < 0)
     {
       if (!(bfd_get_file_flags (abfd) & DYNAMIC))
@@ -800,14 +800,12 @@ slurp_dynamic_symtab (bfd *abfd)
       bfd_fatal (bfd_get_filename (abfd));
     }
 
-  storage += sizeof (asymbol *);
-  sy = (asymbol **) xmalloc (storage);
+  if (storage)
+    sy = (asymbol **) xmalloc (storage);
 
   dynsymcount = bfd_canonicalize_dynamic_symtab (abfd, sy);
   if (dynsymcount < 0)
     bfd_fatal (bfd_get_filename (abfd));
-  /* assert (symcount < (storage / sizeof (asymbol *))) */
-  sy[dynsymcount] = NULL;
   return sy;
 }
 
@@ -4915,12 +4913,11 @@ dump_bfd (bfd *abfd, bfd_boolean is_mainfile)
 		    }
 		  else
 		    {
-		      syms = xrealloc (syms, (symcount + old_symcount + 1) * sizeof (asymbol *));
+		      syms = xrealloc (syms, ((symcount + old_symcount + 1)
+					      * sizeof (asymbol *)));
 		      memcpy (syms + old_symcount,
 			      extra_syms,
-			      symcount * sizeof (asymbol *));
-		      /* Preserve the NULL entry at the end of the symbol table.  */
-		      syms[symcount + old_symcount] = NULL;
+			      (symcount + 1) * sizeof (asymbol *));
 		    }
 		}
 

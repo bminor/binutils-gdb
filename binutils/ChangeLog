@@ -1,5 +1,12 @@
 2021-02-14  Alan Modra  <amodra@gmail.com>
 
+	* objdump.c (slurp_symtab): Don't add an extra entry for NULL
+	to the symbol array.
+	(slurp_dynamic_symtab): Likewise.
+	(dump_bfd): Formatting.  Copy terminating NULL from extra_syms.
+
+2021-02-14  Alan Modra  <amodra@gmail.com>
+
 	* Makefile.in: Regenerate.
 	* doc/Makefile.in: Regenerate.
 
