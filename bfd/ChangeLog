@@ -1,3 +1,9 @@
+2021-02-14  Alan Modra  <amodra@gmail.com>
+
+	* elfxx-mips.c (_bfd_elf_mips_get_relocated_section_contents): Apply
+	all fixes to bfd_generic_get_relocated_section_contents since this
+	function was split out.
+
 2021-02-11  Alan Modra  <amodra@gmail.com>
 
 	* config.bfd: Remove ia64 from obsolete list.

@@ -13216,26 +13216,29 @@ _bfd_elf_mips_get_relocated_section_contents
    bfd_boolean relocatable,
    asymbol **symbols)
 {
-  /* Get enough memory to hold the stuff */
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
-  bfd_size_type sz;
-
-  long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
-  arelent **reloc_vector = NULL;
+  long reloc_size;
+  arelent **reloc_vector;
   long reloc_count;
 
+  reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   if (reloc_size < 0)
-    goto error_return;
+    return NULL;
 
-  reloc_vector = bfd_malloc (reloc_size);
-  if (reloc_vector == NULL && reloc_size != 0)
-    goto error_return;
+  /* Read in the section.  */
+  if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
+    return NULL;
 
-  /* read in the section */
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (!bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
-    goto error_return;
+  if (data == NULL)
+    return NULL;
+
+  if (reloc_size == 0)
+    return data;
+
+  reloc_vector = (arelent **) bfd_malloc (reloc_size);
+  if (reloc_vector == NULL)
+    return NULL;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd,
 					input_section,
@@ -13292,26 +13295,69 @@ _bfd_elf_mips_get_relocated_section_contents
 	  gp_found = 0;
       }
       /* end mips */
+
       for (parent = reloc_vector; *parent != NULL; parent++)
 	{
 	  char *error_message = NULL;
+	  asymbol *symbol;
 	  bfd_reloc_status_type r;
+
+	  symbol = *(*parent)->sym_ptr_ptr;
+	  /* PR ld/19628: A specially crafted input file
+	     can result in a NULL symbol pointer here.  */
+	  if (symbol == NULL)
+	    {
+	      link_info->callbacks->einfo
+		/* xgettext:c-format */
+		(_("%X%P: %pB(%pA): error: relocation for offset %V has no value\n"),
+		 abfd, input_section, (* parent)->address);
+	      goto error_return;
+	    }
+
+	  /* Zap reloc field when the symbol is from a discarded
+	     section, ignoring any addend.  Do the same when called
+	     from bfd_simple_get_relocated_section_contents for
+	     undefined symbols in debug sections.  This is to keep
+	     debug info reasonably sane, in particular so that
+	     DW_FORM_ref_addr to another file's .debug_info isn't
+	     confused with an offset into the current file's
+	     .debug_info.  */
+	  if ((symbol->section != NULL && discarded_section (symbol->section))
+	      || (symbol->section == bfd_und_section_ptr
+		  && (input_section->flags & SEC_DEBUGGING) != 0
+		  && link_info->input_bfds == link_info->output_bfd))
+	    {
+	      bfd_vma off;
+	      static reloc_howto_type none_howto
+		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
+			 "unused", FALSE, 0, 0, FALSE);
+
+	      off = ((*parent)->address
+		     * bfd_octets_per_byte (input_bfd, input_section));
+	      _bfd_clear_contents ((*parent)->howto, input_bfd,
+				   input_section, data, off);
+	      (*parent)->sym_ptr_ptr = bfd_abs_section_ptr->symbol_ptr_ptr;
+	      (*parent)->addend = 0;
+	      (*parent)->howto = &none_howto;
+	      r = bfd_reloc_ok;
+	    }
 
 	  /* Specific to MIPS: Deal with relocation types that require
 	     knowing the gp of the output bfd.  */
-	  asymbol *sym = *(*parent)->sym_ptr_ptr;
 
 	  /* If we've managed to find the gp and have a special
 	     function for the relocation then go ahead, else default
 	     to the generic handling.  */
-	  if (gp_found
-	      && (*parent)->howto->special_function
-	      == _bfd_mips_elf32_gprel16_reloc)
-	    r = _bfd_mips_elf_gprel16_with_gp (input_bfd, sym, *parent,
+	  else if (gp_found
+		   && ((*parent)->howto->special_function
+		       == _bfd_mips_elf32_gprel16_reloc))
+	    r = _bfd_mips_elf_gprel16_with_gp (input_bfd, symbol, *parent,
 					       input_section, relocatable,
 					       data, gp);
 	  else
-	    r = bfd_perform_relocation (input_bfd, *parent, data,
+	    r = bfd_perform_relocation (input_bfd,
+					*parent,
+					data,
 					input_section,
 					relocatable ? abfd : NULL,
 					&error_message);
@@ -13320,7 +13366,7 @@ _bfd_elf_mips_get_relocated_section_contents
 	    {
 	      asection *os = input_section->output_section;
 
-	      /* A partial link, so keep the relocs */
+	      /* A partial link, so keep the relocs.  */
 	      os->orelocation[os->reloc_count] = *parent;
 	      os->reloc_count++;
 	    }
@@ -13348,14 +13394,40 @@ _bfd_elf_mips_get_relocated_section_contents
 		     input_bfd, input_section, (*parent)->address);
 		  break;
 		case bfd_reloc_outofrange:
+		  /* PR ld/13730:
+		     This error can result when processing some partially
+		     complete binaries.  Do not abort, but issue an error
+		     message instead.  */
+		  link_info->callbacks->einfo
+		    /* xgettext:c-format */
+		    (_("%X%P: %pB(%pA): relocation \"%pR\" goes out of range\n"),
+		     abfd, input_section, * parent);
+		  goto error_return;
+
+		case bfd_reloc_notsupported:
+		  /* PR ld/17512
+		     This error can result when processing a corrupt binary.
+		     Do not abort.  Issue an error message instead.  */
+		  link_info->callbacks->einfo
+		    /* xgettext:c-format */
+		    (_("%X%P: %pB(%pA): relocation \"%pR\" is not supported\n"),
+		     abfd, input_section, * parent);
+		  goto error_return;
+
 		default:
-		  abort ();
+		  /* PR 17512; file: 90c2a92e.
+		     Report unexpected results, without aborting.  */
+		  link_info->callbacks->einfo
+		    /* xgettext:c-format */
+		    (_("%X%P: %pB(%pA): relocation \"%pR\" returns an unrecognized value %x\n"),
+		     abfd, input_section, * parent, r);
 		  break;
 		}
 
 	    }
 	}
     }
+
   free (reloc_vector);
   return data;
 
