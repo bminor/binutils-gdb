@@ -94,6 +94,12 @@ static unsigned int riscv_debug_unwinder = 0;
 
 static unsigned int riscv_debug_gdbarch = 0;
 
+/* The names of the RISC-V target description features.  */
+const char *riscv_feature_name_csr = "org.gnu.gdb.riscv.csr";
+static const char *riscv_feature_name_cpu = "org.gnu.gdb.riscv.cpu";
+static const char *riscv_feature_name_fpu = "org.gnu.gdb.riscv.fpu";
+static const char *riscv_feature_name_virtual = "org.gnu.gdb.riscv.virtual";
+
 /* Cached information about a frame.  */
 
 struct riscv_unwind_cache
@@ -257,7 +263,7 @@ riscv_register_feature::register_info::check
 struct riscv_xreg_feature : public riscv_register_feature
 {
   riscv_xreg_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.cpu")
+    : riscv_register_feature (riscv_feature_name_cpu)
   {
     m_registers =  {
       { RISCV_ZERO_REGNUM + 0, { "zero", "x0" } },
@@ -354,7 +360,7 @@ static const struct riscv_xreg_feature riscv_xreg_feature;
 struct riscv_freg_feature : public riscv_register_feature
 {
   riscv_freg_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.fpu")
+    : riscv_register_feature (riscv_feature_name_fpu)
   {
     m_registers =  {
       { RISCV_FIRST_FP_REGNUM + 0, { "ft0", "f0" } },
@@ -482,7 +488,7 @@ static const struct riscv_freg_feature riscv_freg_feature;
 struct riscv_virtual_feature : public riscv_register_feature
 {
   riscv_virtual_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.virtual")
+    : riscv_register_feature (riscv_feature_name_virtual)
   {
     m_registers =  {
       { RISCV_PRIV_REGNUM, { "priv" } }
@@ -518,7 +524,7 @@ static const struct riscv_virtual_feature riscv_virtual_feature;
 struct riscv_csr_feature : public riscv_register_feature
 {
   riscv_csr_feature ()
-    : riscv_register_feature ("org.gnu.gdb.riscv.csr")
+    : riscv_register_feature (riscv_feature_name_csr)
   {
     m_registers = {
 #define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER)		\

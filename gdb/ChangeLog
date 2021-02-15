@@ -1,4 +1,16 @@
 2021-03-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_feature_name_csr): Define.
+	(riscv_feature_name_cpu): Define.
+	(riscv_feature_name_fpu): Define.
+	(riscv_feature_name_virtual): Define.
+	(riscv_xreg_feature): Use riscv_feature_name_cpu.
+	(riscv_freg_feature): Use riscv_feature_name_fpu.
+	(riscv_virtual_feature): Use riscv_feature_name_virtual.
+	(riscv_csr_feature): Use riscv_feature_name_csr.
+	* riscv-tdep.h (riscv_feature_name_csr): Declare.
+
+2021-03-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Craig Blackmore  <craig.blackmore@embecosm.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add riscv-none-tdep.o.
