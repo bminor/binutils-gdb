@@ -143,8 +143,6 @@ struct dwarf_section
   /* Used by clients to help them implement the reloc_at callback.  */
   void *                           reloc_info;
   unsigned long                    num_relocs;
-  /* A spare field for random use.  */
-  void *                           user_data;
 };
 
 /* A structure containing the name of a debug section

@@ -14898,7 +14898,6 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 
   snprintf (buf, sizeof (buf), _("%s section data"), section->name);
   section->address = sec->sh_addr;
-  section->user_data = NULL;
   section->filename = filedata->file_name;
   section->start = (unsigned char *) get_data (NULL, filedata,
                                                sec->sh_offset, 1,

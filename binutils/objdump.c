@@ -3552,6 +3552,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   bfd_byte *contents;
   bfd_size_type amt;
   size_t alloced;
+  bfd_boolean ret;
 
   if (section->start != NULL)
     {
@@ -3565,7 +3566,6 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   section->reloc_info = NULL;
   section->num_relocs = 0;
   section->address = bfd_section_vma (sec);
-  section->user_data = sec;
   section->size = bfd_section_size (sec);
   /* PR 24360: On 32-bit hosts sizeof (size_t) < sizeof (bfd_size_type). */
   alloced = amt = section->size + 1;
@@ -3578,56 +3578,49 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 	      (unsigned long long) section->size);
       return FALSE;
     }
-  section->start = contents = malloc (alloced);
-  if (section->start == NULL
-      || !bfd_get_full_section_contents (abfd, sec, &contents))
-    {
-      free_debug_section (debug);
-      printf (_("\nCan't get contents for section '%s'.\n"),
-	      sanitize_string (section->name));
-      return FALSE;
-    }
+
+  section->start = contents = xmalloc (alloced);
   /* Ensure any string section has a terminating NUL.  */
   section->start[section->size] = 0;
 
   if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0
       && debug_displays [debug].relocate)
     {
-      long         reloc_size;
-      bfd_boolean  ret;
-
-      bfd_cache_section_contents (sec, section->start);
-
       ret = bfd_simple_get_relocated_section_contents (abfd,
 						       sec,
 						       section->start,
 						       syms) != NULL;
-
-      if (! ret)
-        {
-          free_debug_section (debug);
-          printf (_("\nCan't get contents for section '%s'.\n"),
-	          sanitize_string (section->name));
-          return FALSE;
-        }
-
-      reloc_size = bfd_get_reloc_upper_bound (abfd, sec);
-      if (reloc_size > 0)
+      if (ret)
 	{
-	  unsigned long reloc_count;
-	  arelent **relocs;
+	  long reloc_size = bfd_get_reloc_upper_bound (abfd, sec);
 
-	  relocs = (arelent **) xmalloc (reloc_size);
-
-	  reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, NULL);
-	  if (reloc_count == 0)
-	    free (relocs);
-	  else
+	  if (reloc_size > 0)
 	    {
-	      section->reloc_info = relocs;
-	      section->num_relocs = reloc_count;
+	      unsigned long reloc_count;
+	      arelent **relocs;
+
+	      relocs = (arelent **) xmalloc (reloc_size);
+
+	      reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, NULL);
+	      if (reloc_count == 0)
+		free (relocs);
+	      else
+		{
+		  section->reloc_info = relocs;
+		  section->num_relocs = reloc_count;
+		}
 	    }
 	}
+    }
+  else
+    ret = bfd_get_full_section_contents (abfd, sec, &contents);
+
+  if (!ret)
+    {
+      free_debug_section (debug);
+      printf (_("\nCan't get contents for section '%s'.\n"),
+	      sanitize_string (section->name));
+      return FALSE;
     }
 
   return TRUE;
@@ -3685,26 +3678,6 @@ void
 free_debug_section (enum dwarf_section_display_enum debug)
 {
   struct dwarf_section *section = &debug_displays [debug].section;
-
-  if (section->start == NULL)
-    return;
-
-  /* PR 17512: file: 0f67f69d.  */
-  if (section->user_data != NULL)
-    {
-      asection * sec = (asection *) section->user_data;
-
-      /* If we are freeing contents that are also pointed to by the BFD
-	 library's section structure then make sure to update those pointers
-	 too.  Otherwise, the next time we try to load data for this section
-	 we can end up using a stale pointer.  */
-      if (section->start == sec->contents)
-	{
-	  sec->contents = NULL;
-	  sec->flags &= ~ SEC_IN_MEMORY;
-	  sec->compress_status = COMPRESS_SECTION_NONE;
-	}
-    }
 
   free ((char *) section->start);
   section->start = NULL;

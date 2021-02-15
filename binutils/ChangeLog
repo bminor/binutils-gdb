@@ -1,5 +1,18 @@
 2021-02-15  Alan Modra  <amodra@gmail.com>
 
+	* objdump.c (load_specific_debug_section): Don't call
+	bfd_cache_section_contents.  Rearrange so that
+	bfd_get_full_section_contents is not called on path where
+	bfd_simple_get_relocated_section_contents is called.
+	Don't set section->user_data.
+	(free_debug_section): Always free section->start.  Don't twiddle
+	section flags.
+	* readelf.c (load_specific_debug_section): Don't set user_data.
+	* dwarf.h (struct dwarf_section): Remove use_data field.
+	* dwarf.c (NO_ABBREVS, ABBREV): Adjust to suit.
+
+2021-02-15  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/compress.exp: Remove nds32 xfails.
 	* testsuite/binutils-all/objdump.exp: Likewise.
 

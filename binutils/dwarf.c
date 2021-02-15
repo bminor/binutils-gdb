@@ -11491,8 +11491,8 @@ dwarf_select_sections_all (void)
   do_debug_str_offsets = 1;
 }
 
-#define NO_ABBREVS   NULL, NULL, NULL, 0, 0, 0, NULL, 0, NULL
-#define ABBREV(N)    NULL, NULL, NULL, 0, 0, N, NULL, 0, NULL
+#define NO_ABBREVS   NULL, NULL, NULL, 0, 0, 0, NULL, 0
+#define ABBREV(N)    NULL, NULL, NULL, 0, 0, N, NULL, 0
 
 /* N.B. The order here must match the order in section_display_enum.  */
 
