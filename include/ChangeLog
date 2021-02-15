@@ -1,3 +1,8 @@
+2021-02-15  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* opcode/s390.h (enum s390_opcode_cpu_val): Add
+	S390_OPCODE_ARCH14.
+
 2021-02-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* opcode/tic54x.h (mmregs): Rename to ...

@@ -1,3 +1,11 @@
+2021-02-15  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): New entry for arch14.
+	* doc/c-s390.texi: Document arch14 march option.
+	* testsuite/gas/s390/s390.exp: Run the arch14 related tests.
+	* testsuite/gas/s390/zarch-arch14.d: New test.
+	* testsuite/gas/s390/zarch-arch14.s: New test.
+
 2021-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/mach-o/sections-1.d: Stop automatic debug link
