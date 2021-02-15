@@ -1,3 +1,8 @@
+2021-02-15  Jan Beulich  <jbeulich@suse.com>
+
+	* doc/Makefile.am: Replace "cp -p" by "$(LN_S)".
+	* doc/Makefile.in: Re-generate.
+
 2021-02-15  Alan Modra  <amodra@gmail.com>
 
 	* elf32-nds32.c (nds32_get_section_contents): Replace
