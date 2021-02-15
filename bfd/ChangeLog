@@ -1,3 +1,8 @@
+2021-02-15  Alan Modra  <amodra@gmail.com>
+
+	* coff-alpha.c (alpha_ecoff_get_relocated_section_contents): Use
+	bfd_get_full_section_contents.
+
 2021-02-14  Alan Modra  <amodra@gmail.com>
 
 	* elfxx-mips.c (_bfd_elf_mips_get_relocated_section_contents): Apply

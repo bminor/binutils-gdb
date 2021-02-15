@@ -732,25 +732,31 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
 {
   bfd *input_bfd = link_order->u.indirect.section->owner;
   asection *input_section = link_order->u.indirect.section;
-  long reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
-  arelent **reloc_vector = NULL;
+  long reloc_size;
+  arelent **reloc_vector;
   long reloc_count;
   bfd *output_bfd = relocatable ? abfd : (bfd *) NULL;
   bfd_vma gp;
-  bfd_size_type sz;
   bfd_boolean gp_undefined;
   bfd_vma stack[RELOC_STACKSIZE];
   int tos = 0;
 
+  reloc_size = bfd_get_reloc_upper_bound (input_bfd, input_section);
   if (reloc_size < 0)
-    goto error_return;
-  reloc_vector = (arelent **) bfd_malloc ((bfd_size_type) reloc_size);
-  if (reloc_vector == NULL && reloc_size != 0)
-    goto error_return;
+    return NULL;
 
-  sz = input_section->rawsize ? input_section->rawsize : input_section->size;
-  if (! bfd_get_section_contents (input_bfd, input_section, data, 0, sz))
-    goto error_return;
+  if (!bfd_get_full_section_contents (input_bfd, input_section, &data))
+    return NULL;
+
+  if (data == NULL)
+    return NULL;
+
+  if (reloc_size == 0)
+    return data;
+
+  reloc_vector = (arelent **) bfd_malloc (reloc_size);
+  if (reloc_vector == NULL)
+    return NULL;
 
   reloc_count = bfd_canonicalize_reloc (input_bfd, input_section,
 					reloc_vector, symbols);
