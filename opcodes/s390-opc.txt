@@ -2016,3 +2016,31 @@ e60000000052 vcvbg VRR_RV0UU "vector convert to binary 64 bit" arch13 zarch optp
 # Message Security Assist Extension 9
 
 b93a kdsa RRE_RR "compute digital signature authentication" arch13 zarch
+
+
+# arch14 instructions
+
+e60000000074 vschp VRR_VVV0U0U " " arch14 zarch
+e60000002074 vschsp VRR_VVV0U0 " " arch14 zarch
+e60000003074 vschdp VRR_VVV0U0 " " arch14 zarch
+e60000004074 vschxp VRR_VVV0U0 " " arch14 zarch
+e6000000007c vscshp VRR_VVV " " arch14 zarch
+e6000000007d vcsph VRR_VVV0U0 " " arch14 zarch
+e60000000051 vclzdp VRR_VV0U2 " " arch14 zarch
+e60000000070 vpkzr VRI_VVV0UU2 " " arch14 zarch
+e60000000072 vsrpr VRI_VVV0UU2 " " arch14 zarch
+e60000000054 vupkzh VRR_VV0U2 " " arch14 zarch
+e6000000005c vupkzl VRR_VV0U2 " " arch14 zarch
+
+b93b nnpa RRE_00 " " arch14 zarch
+e60000000056 vclfnh VRR_VV0UU2 " " arch14 zarch
+e6000000005e vclfnl VRR_VV0UU2 " " arch14 zarch
+e60000000075 vcrnf VRR_VVV0UU " " arch14 zarch
+e6000000005d vcfn VRR_VV0UU2 " " arch14 zarch
+e60000000055 vcnf VRR_VV0UU2 " " arch14 zarch
+
+b98B rdp RRF_RURR2 " " arch14 zarch optparm
+
+eb0000000071 lpswey SIY_URD " " arch14 zarch
+b200 lbear S_RD " " arch14 zarch
+b201 stbear S_RD " " arch14 zarch

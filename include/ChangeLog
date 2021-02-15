@@ -1,3 +1,8 @@
+2021-02-19  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* opcode/s390.h (enum s390_opcode_cpu_val): Add
+	S390_OPCODE_ARCH14.
+
 2021-02-06  Nick Clifton  <nickc@redhat.com>
 
 	This is the 2.36.1 release.
