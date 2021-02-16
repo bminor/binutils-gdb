@@ -655,15 +655,6 @@ if [gas_32_check] then {
 	run_dump_test "unique"
 
 	run_dump_test "property-1"
-	run_dump_test "property-2"
-	run_dump_test "property-3"
-	run_dump_test "property-4"
-	run_dump_test "property-5"
-	run_dump_test "property-6"
-	run_dump_test "property-10"
-	run_dump_test "property-11"
-	run_dump_test "property-12"
-	run_dump_test "property-13"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "align-branch-3"
@@ -724,6 +715,16 @@ if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     run_dump_test "dw2-compressed-1"
     run_dump_test "dw2-compressed-3a"
     run_dump_test "dw2-compressed-3b"
+
+    run_dump_test "property-2"
+    run_dump_test "property-3"
+    run_dump_test "property-4"
+    run_dump_test "property-5"
+    run_dump_test "property-6"
+    run_dump_test "property-10"
+    run_dump_test "property-11"
+    run_dump_test "property-12"
+    run_dump_test "property-13"
 
     if {![istarget "*-*-dragonfly*"]
 	&& ![istarget "*-*-gnu*"]
@@ -1274,18 +1275,9 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-unique"
 
 	run_dump_test "x86-64-property-1"
-	run_dump_test "x86-64-property-2"
-	run_dump_test "x86-64-property-3"
-	run_dump_test "x86-64-property-4"
-	run_dump_test "x86-64-property-5"
-	run_dump_test "x86-64-property-6"
 	run_dump_test "x86-64-property-7"
 	run_dump_test "x86-64-property-8"
 	run_dump_test "x86-64-property-9"
-	run_dump_test "x86-64-property-10"
-	run_dump_test "x86-64-property-11"
-	run_dump_test "x86-64-property-12"
-	run_dump_test "x86-64-property-13"
 	run_dump_test "x86-64-property-14"
 
 	if {[istarget "*-*-linux*"]} then {
