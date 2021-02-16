@@ -1074,8 +1074,11 @@ _bfd_read_unsigned_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
       byte = bfd_get_8 (abfd, buf);
       buf++;
       num_read++;
-      result |= (((bfd_vma) byte & 0x7f) << shift);
-      shift += 7;
+      if (shift < 8 * sizeof (result))
+	{
+	  result |= (((bfd_vma) byte & 0x7f) << shift);
+	  shift += 7;
+	}
     }
   while (byte & 0x80);
   *bytes_read_ptr = num_read;
@@ -1104,10 +1107,11 @@ _bfd_safe_read_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
       byte = bfd_get_8 (abfd, data);
       data++;
       num_read++;
-
-      result |= ((bfd_vma) (byte & 0x7f)) << shift;
-
-      shift += 7;
+      if (shift < 8 * sizeof (result))
+	{
+	  result |= ((bfd_vma) (byte & 0x7f)) << shift;
+	  shift += 7;
+	}
       if ((byte & 0x80) == 0)
 	break;
     }
@@ -1141,8 +1145,11 @@ _bfd_read_signed_leb128 (bfd *abfd ATTRIBUTE_UNUSED,
       byte = bfd_get_8 (abfd, buf);
       buf ++;
       num_read ++;
-      result |= (((bfd_vma) byte & 0x7f) << shift);
-      shift += 7;
+      if (shift < 8 * sizeof (result))
+	{
+	  result |= (((bfd_vma) byte & 0x7f) << shift);
+	  shift += 7;
+	}
     }
   while (byte & 0x80);
   if (shift < 8 * sizeof (result) && (byte & 0x40))

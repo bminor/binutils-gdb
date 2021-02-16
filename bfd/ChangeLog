@@ -1,3 +1,8 @@
+2021-02-16  Alan Modra  <amodra@gmail.com>
+
+	* libbfd.c (_bfd_read_unsigned_leb128): Avoid excessive shift.
+	(_bfd_safe_read_leb128, _bfd_read_signed_leb128): Likewise.
+
 2021-02-15  Jan Beulich  <jbeulich@suse.com>
 
 	* doc/Makefile.am: Replace "cp -p" by "$(LN_S)".
