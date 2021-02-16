@@ -1,3 +1,14 @@
+2021-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/27412
+	* config/obj-elf.c (obj_elf_change_section): Strip SHF_GNU_RETAIN
+	when checking incorrect section attributes.
+	* testsuite/gas/elf/elf.exp: Run section28 and section29.
+	* testsuite/gas/elf/section28.d: New file.
+	* testsuite/gas/elf/section28.s: Likewise.
+	* testsuite/gas/elf/section29.d: Likewise.
+	* testsuite/gas/elf/section29.s: Likewise.
+
 2021-02-16  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/sse-check.s,

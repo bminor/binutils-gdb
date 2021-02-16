@@ -667,39 +667,45 @@ obj_elf_change_section (const char *name,
 					| SHF_MASKPROC))
 			      & ~ssect->attr) != 0)
 	{
+	  /* Strip SHF_GNU_RETAIN.  */
+	  bfd_vma generic_attr = attr;
+	  if (elf_tdata (stdoutput)->has_gnu_osabi)
+	    generic_attr &= ~SHF_GNU_RETAIN;
+
 	  /* As a GNU extension, we permit a .note section to be
 	     allocatable.  If the linker sees an allocatable .note
 	     section, it will create a PT_NOTE segment in the output
 	     file.  We also allow "x" for .note.GNU-stack.  */
 	  if (ssect->type == SHT_NOTE
-	      && (attr == SHF_ALLOC || attr == SHF_EXECINSTR))
+	      && (generic_attr == SHF_ALLOC
+		  || generic_attr == SHF_EXECINSTR))
 	    ;
 	  /* Allow different SHF_MERGE and SHF_STRINGS if we have
 	     something like .rodata.str.  */
 	  else if (ssect->suffix_length == -2
 		   && name[ssect->prefix_length] == '.'
-		   && (attr
+		   && (generic_attr
 		       & ~ssect->attr
 		       & ~SHF_MERGE
 		       & ~SHF_STRINGS) == 0)
 	    ;
 	  /* .interp, .strtab and .symtab can have SHF_ALLOC.  */
-	  else if (attr == SHF_ALLOC
+	  else if (generic_attr == SHF_ALLOC
 		   && (strcmp (name, ".interp") == 0
 		       || strcmp (name, ".strtab") == 0
 		       || strcmp (name, ".symtab") == 0))
 	    override = TRUE;
 	  /* .note.GNU-stack can have SHF_EXECINSTR.  */
-	  else if (attr == SHF_EXECINSTR
+	  else if (generic_attr == SHF_EXECINSTR
 		   && strcmp (name, ".note.GNU-stack") == 0)
 	    override = TRUE;
 #ifdef TC_ALPHA
 	  /* A section on Alpha may have SHF_ALPHA_GPREL.  */
-	  else if ((attr & ~ssect->attr) == SHF_ALPHA_GPREL)
+	  else if ((generic_attr & ~ssect->attr) == SHF_ALPHA_GPREL)
 	    override = TRUE;
 #endif
 #ifdef TC_RX
-	  else if (attr == (SHF_EXECINSTR | SHF_WRITE | SHF_ALLOC)
+	  else if (generic_attr == (SHF_EXECINSTR | SHF_WRITE | SHF_ALLOC)
 		   && (ssect->type == SHT_INIT_ARRAY
 		       || ssect->type == SHT_FINI_ARRAY
 		       || ssect->type == SHT_PREINIT_ARRAY))
