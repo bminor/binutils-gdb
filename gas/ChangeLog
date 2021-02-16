@@ -1,3 +1,9 @@
+2021-02-16  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/enqcmd-16bit.s: Include enqcmd.s, not
+	movdir.s.
+	* testsuite/gas/i386/enqcmd-16bit.d: Adjust expectations.
+
 2021-02-16  Alan Modra  <amodra@gmail.com>
 
 	PR 27426
