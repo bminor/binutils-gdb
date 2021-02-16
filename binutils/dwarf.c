@@ -3693,7 +3693,7 @@ process_debug_info (struct dwarf_section *           section,
 	SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end);
 
       bfd_boolean do_dwo_id = FALSE;
-      uint64_t dwo_id;
+      uint64_t dwo_id = 0;
       if (compunit.cu_unit_type == DW_UT_split_compile
 	  || compunit.cu_unit_type == DW_UT_skeleton)
 	{

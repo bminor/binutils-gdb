@@ -1,3 +1,7 @@
+2021-02-16  Jan Beulich  <jbeulich@suse.com>
+
+	* dwarf.c (process_debug_info): Initialize "dwo_id".
+
 2021-02-15  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (load_specific_debug_section): Don't call
