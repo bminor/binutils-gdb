@@ -1,3 +1,15 @@
+2021-02-17  Alan Modra  <amodra@gmail.com>
+
+	* dwarf.c: Include limits.h.
+	(CHAR_BIT): Provide backup define.
+	(read_leb128): Use CHAR_BIT to size "result" in bits.  Correct
+	signed overflow checking.
+	* testsuite/binutils-all/pr26548.s,
+	* testsuite/binutils-all/pr26548.d,
+	* testsuite/binutils-all/pr26548e.d: New tests.
+	* testsuite/binutils-all/readelf.exp: Run them.
+	(readelf_test): Drop unused "xfails" parameter.  Update all uses.
+
 2021-02-16  Jan Beulich  <jbeulich@suse.com>
 
 	* dwarf.c (process_debug_info): Initialize "dwo_id".

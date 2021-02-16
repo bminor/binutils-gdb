@@ -1,3 +1,10 @@
+2021-02-17  Alan Modra  <amodra@gmail.com>
+
+	* wasm32-dis.c: Include limits.h.
+	(CHAR_BIT): Provide backup define.
+	(wasm_read_leb128): Use CHAR_BIT to size "result" in bits.
+	Correct signed overflow checking.
+
 2021-02-16  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl: Split CVTPI2PD template. Add SSE2AVX variant.

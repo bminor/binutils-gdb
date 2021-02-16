@@ -36,6 +36,13 @@
 #include <elfutils/debuginfod.h>
 #endif
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 #undef MAX
 #undef MIN
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -326,7 +333,7 @@ dwarf_vmatoa64 (dwarf_vma hvalue, dwarf_vma lvalue, char *buf,
 /* Read in a LEB128 encoded value starting at address DATA.
    If SIGN is true, return a signed LEB128 value.
    If LENGTH_RETURN is not NULL, return in it the number of bytes read.
-   If STATUS_RETURN in not NULL, return with bit 0 (LSB) set if the
+   If STATUS_RETURN is not NULL, return with bit 0 (LSB) set if the
    terminating byte was not found and with bit 1 set if the value
    overflows a dwarf_vma.
    No bytes will be read at address END or beyond.  */
@@ -346,37 +353,31 @@ read_leb128 (unsigned char *data,
   while (data < end)
     {
       unsigned char byte = *data++;
-      bfd_boolean cont = (byte & 0x80) ? TRUE : FALSE;
+      unsigned char lost, mask;
 
-      byte &= 0x7f;
       num_read++;
 
-      if (shift < sizeof (result) * 8)
+      if (shift < CHAR_BIT * sizeof (result))
 	{
-	  result |= ((dwarf_vma) byte) << shift;
-	  if (sign)
-	    {
-	      if ((((dwarf_signed_vma) result >> shift) & 0x7f) != byte)
-		/* Overflow.  */
-		status |= 2;
-	    }
-	  else if ((result >> shift) != byte)
-	    {
-	      /* Overflow.  */
-	      status |= 2;
-	    }
-
+	  result |= ((dwarf_vma) (byte & 0x7f)) << shift;
+	  /* These bits overflowed.  */
+	  lost = byte ^ (result >> shift);
+	  /* And this is the mask of possible overflow bits.  */
+	  mask = 0x7f ^ ((dwarf_vma) 0x7f << shift >> shift);
 	  shift += 7;
 	}
-      else if (byte != 0)
+      else
 	{
-	  status |= 2;
+	  lost = byte;
+	  mask = 0x7f;
 	}
+      if ((lost & mask) != (sign && (dwarf_signed_vma) result < 0 ? mask : 0))
+	status |= 2;
 
-      if (!cont)
+      if ((byte & 0x80) == 0)
 	{
 	  status &= ~1;
-	  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
+	  if (sign && shift < CHAR_BIT * sizeof (result) && (byte & 0x40))
 	    result |= -((dwarf_vma) 1 << shift);
 	  break;
 	}

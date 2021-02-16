@@ -29,6 +29,13 @@
 #include "elf/wasm32.h"
 #include "bfd_stdint.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 /* Type names for blocks and signatures.  */
 #define BLOCK_TYPE_NONE              0x40
 #define BLOCK_TYPE_I32               0x7f
@@ -192,27 +199,34 @@ wasm_read_leb128 (bfd_vma                   pc,
   unsigned int num_read = 0;
   unsigned int shift = 0;
   unsigned char byte = 0;
+  unsigned char lost, mask;
   int status = 1;
 
   while (info->read_memory_func (pc + num_read, &byte, 1, info) == 0)
     {
       num_read++;
 
-      if (shift < sizeof (result) * 8)
+      if (shift < CHAR_BIT * sizeof (result))
 	{
 	  result |= ((uint64_t) (byte & 0x7f)) << shift;
-	  if ((result >> shift) != (byte & 0x7f))
-	    /* Overflow.  */
-	    status |= 2;
+	  /* These bits overflowed.  */
+	  lost = byte ^ (result >> shift);
+	  /* And this is the mask of possible overflow bits.  */
+	  mask = 0x7f ^ ((uint64_t) 0x7f << shift >> shift);
 	  shift += 7;
 	}
-      else if ((byte & 0x7f) != 0)
+      else
+	{
+	  lost = byte;
+	  mask = 0x7f;
+	}
+      if ((lost & mask) != (sign && (int64_t) result < 0 ? mask : 0))
 	status |= 2;
 
       if ((byte & 0x80) == 0)
 	{
 	  status &= ~1;
-	  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
+	  if (sign && shift < CHAR_BIT * sizeof (result) && (byte & 0x40))
 	    result |= -((uint64_t) 1 << shift);
 	  break;
 	}

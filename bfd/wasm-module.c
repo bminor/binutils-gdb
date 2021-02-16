@@ -28,10 +28,16 @@
 #include "sysdep.h"
 #include "alloca-conf.h"
 #include "bfd.h"
-#include <limits.h>
 #include "libiberty.h"
 #include "libbfd.h"
 #include "wasm-module.h"
+
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
 
 typedef struct
 {
@@ -111,27 +117,34 @@ wasm_read_leb128 (bfd *		  abfd,
   unsigned int num_read = 0;
   unsigned int shift = 0;
   unsigned char byte = 0;
+  unsigned char lost, mask;
   int status = 1;
 
   while (bfd_bread (&byte, 1, abfd) == 1)
     {
       num_read++;
 
-      if (shift < sizeof (result) * 8)
+      if (shift < CHAR_BIT * sizeof (result))
 	{
 	  result |= ((bfd_vma) (byte & 0x7f)) << shift;
-	  if ((result >> shift) != (byte & 0x7f))
-	    /* Overflow.  */
-	    status |= 2;
+	  /* These bits overflowed.  */
+	  lost = byte ^ (result >> shift);
+	  /* And this is the mask of possible overflow bits.  */
+	  mask = 0x7f ^ ((bfd_vma) 0x7f << shift >> shift);
 	  shift += 7;
 	}
-      else if ((byte & 0x7f) != 0)
+      else
+	{
+	  lost = byte;
+	  mask = 0x7f;
+	}
+      if ((lost & mask) != (sign && (bfd_signed_vma) result < 0 ? mask : 0))
 	status |= 2;
 
       if ((byte & 0x80) == 0)
 	{
 	  status &= ~1;
-	  if (sign && (shift < 8 * sizeof (result)) && (byte & 0x40))
+	  if (sign && shift < CHAR_BIT * sizeof (result) && (byte & 0x40))
 	    result |= -((bfd_vma) 1 << shift);
 	  break;
 	}

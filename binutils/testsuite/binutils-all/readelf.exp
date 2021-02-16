@@ -76,7 +76,7 @@ proc readelf_find_size { binary_file test_iteration } {
 # Readelf's output is captured and then compared against the contents
 # of the regexp_file-readelf_size if it exists, else regexp_file.
 
-proc readelf_test { options binary_file regexp_file xfails } {
+proc readelf_test { options binary_file regexp_file } {
 
     global READELF
     global READELFFLAGS
@@ -88,10 +88,6 @@ proc readelf_test { options binary_file regexp_file xfails } {
 
     send_log "exec $READELF $READELFFLAGS $options $binary_file > readelf.out\n"
     set got [remote_exec host "$READELF $READELFFLAGS $options $binary_file" "" "/dev/null" "readelf.out"]
-
-    foreach xfail $xfails {
-	setup_xfail $xfail
-    }
 
     if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
 	fail "$testname (reason: unexpected output)"
@@ -342,11 +338,11 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     readelf_find_size $tempfile 1
 
     # Run the tests.
-    readelf_test -h $tempfile readelf.h  {}
-    readelf_test -S $tempfile readelf.s  {}
+    readelf_test -h $tempfile readelf.h
+    readelf_test -S $tempfile readelf.s
     setup_xfail "mips-*-*irix*"
-    readelf_test -s $tempfile readelf.ss {}
-    readelf_test -r $tempfile readelf.r  {}
+    readelf_test -s $tempfile readelf.ss
+    readelf_test -r $tempfile readelf.r
 }
 
 # Test demangling symbol names.
@@ -361,7 +357,7 @@ if {![binutils_assemble $srcdir/$subdir/mangled.s tmpdir/mangled.o]} then {
     }
 
     # Run the test.
-    readelf_test {--syms --demangle --wide} $tempfile readelf.demangled {}
+    readelf_test {--syms --demangle --wide} $tempfile readelf.demangled
 }
 
 readelf_wi_test
@@ -376,6 +372,19 @@ if {[which $AS] != 0} then {
     run_dump_test "retain1b"
     run_dump_test "readelf-maskos-1a"
     run_dump_test "readelf-maskos-1b"
+    if {$readelf_size == 64 && ![istarget *-*-hpux*]} then {
+	run_dump_test pr26548
+	if {![binutils_assemble_flags $srcdir/$subdir/pr26548.s tmpdir/pr26548e.o {--defsym ERROR=1}]} then {
+	    unsupported "pr26548e (failed to assemble)"
+	} else {
+	    if ![is_remote host] {
+		set tempfile tmpdir/pr26548e.o
+	    } else {
+		set tempfile [remote_download host tmpdir/pr26548e.o]
+	    }
+	    readelf_test -Wwi $tempfile pr26548e.d
+	}
+    }
 }
 
 # PR 13482 - Check for off-by-one errors when dumping .note sections.
@@ -389,7 +398,7 @@ if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {
 	set tempfile [remote_download host tmpdir/version.o]
     }
 
-    readelf_test -n $tempfile readelf.n  {}
+    readelf_test -n $tempfile readelf.n
 }
 
 
@@ -405,7 +414,7 @@ if {![binutils_assemble $srcdir/$subdir/pr18374.s tmpdir/pr18374.o]} then {
 	set tempfile [remote_download host tmpdir/pr18374.o]
     }
 
-    readelf_test --debug-dump=loc $tempfile readelf.pr18374  {}
+    readelf_test --debug-dump=loc $tempfile readelf.pr18374
 }
 
 
@@ -420,7 +429,7 @@ if {![binutils_assemble $srcdir/$subdir/locview-1.s tmpdir/locview-1.o]} then {
 	set tempfile [remote_download host tmpdir/locview-1.o]
     }
 
-    readelf_test --debug-dump=loc $tempfile readelf.locview-1  {}
+    readelf_test --debug-dump=loc $tempfile readelf.locview-1
 }
 if {![binutils_assemble $srcdir/$subdir/locview-2.s tmpdir/locview-2.o]} then {
     unsupported "readelf --debug-dump=loc locview-2 (failed to assemble)"
@@ -432,7 +441,7 @@ if {![binutils_assemble $srcdir/$subdir/locview-2.s tmpdir/locview-2.o]} then {
 	set tempfile [remote_download host tmpdir/locview-2.o]
     }
 
-    readelf_test --debug-dump=loc $tempfile readelf.locview-2  {}
+    readelf_test --debug-dump=loc $tempfile readelf.locview-2
 }
 
 
@@ -447,7 +456,7 @@ if {![binutils_assemble $srcdir/$subdir/z.s tmpdir/z.o]} then {
 	set tempfile [remote_download host tmpdir/z.o]
     }
 
-    readelf_test {--decompress --hex-dump .debug_loc} $tempfile readelf.z  {}
+    readelf_test {--decompress --hex-dump .debug_loc} $tempfile readelf.z
 }
 
 # Skip the next test for the RISCV architectures because they
@@ -475,7 +484,7 @@ if ![istarget "riscv*-*-*"] then {
 	readelf_find_size $tempfile 2
 
 	# Make sure that readelf can decode the contents.
-	readelf_test -wiaoRlL $tempfile dw5.W {}
+	readelf_test -wiaoRlL $tempfile dw5.W
     }
 }
 
@@ -494,7 +503,7 @@ if {![binutils_assemble_flags $srcdir/$subdir/dwarf-attributes.S tmpdir/dwarf-at
     readelf_find_size $tempfile 3
 
     # Make sure that readelf can decode the contents.
-    readelf_test -wi $tempfile dwarf-attributes.W {}
+    readelf_test -wi $tempfile dwarf-attributes.W
 }
 
 # Check that debug link sections can be dumped.
@@ -507,7 +516,7 @@ if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 	set tempfile [remote_download host tmpdir/debuglink.o]
     }
 
-    readelf_test {--debug-dump=links -wN} $tempfile readelf.k  {}
+    readelf_test {--debug-dump=links -wN} $tempfile readelf.k
 
     # Check that debug link sections can be followed.
     if {![binutils_assemble $srcdir/$subdir/linkdebug.s tmpdir/linkdebug.debug]} then {
@@ -517,7 +526,7 @@ if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 	    set tempfile2 [remote_download host tmpdir/linkdebug.debug]
 	}
 
-	readelf_test {-wKis} $tempfile readelf.wKis  {}
+	readelf_test {-wKis} $tempfile readelf.wKis
     }
 }
 
@@ -530,7 +539,7 @@ if {![binutils_assemble $srcdir/$subdir/dwo.s tmpdir/dwo.o]} then {
 	set tempfile [remote_download host tmpdir/dwo.o]
     }
 
-    readelf_test {--debug-dump=links --debug-dump=no-follow-links} $tempfile readelf.k2  {}
+    readelf_test {--debug-dump=links --debug-dump=no-follow-links} $tempfile readelf.k2
 }
 
 if {![binutils_assemble $srcdir/$subdir/zero-sec.s tmpdir/zero-sec.o]} then {
@@ -542,7 +551,7 @@ if {![binutils_assemble $srcdir/$subdir/zero-sec.s tmpdir/zero-sec.o]} then {
 	set tempfile [remote_download host tmpdir/zero-sec.o]
     }
 
-    readelf_test {--enable-checks --sections --wide} $tempfile zero-sec.r {}
+    readelf_test {--enable-checks --sections --wide} $tempfile zero-sec.r
 }
 
 if ![is_remote host] {
@@ -555,6 +564,6 @@ if ![is_remote host] {
     if {[catch "system \"bzip2 -dc $test > $tempfile\""] != 0} {
 	untested "bzip2 -dc ($testname)"
     } else {
-	readelf_test {--debug-dump=macro -wN} $tempfile pr26112.r {}
+	readelf_test {--debug-dump=macro -wN} $tempfile pr26112.r
     }
 }
