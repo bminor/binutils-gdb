@@ -9208,10 +9208,12 @@ output_insn (void)
 	  || i.tm.cpu_flags.bitfield.cpu687
 	  || i.tm.cpu_flags.bitfield.cpufisttp)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
+
       if ((i.xstate & xstate_mmx)
 	  || i.tm.base_opcode == 0xf77 /* emms */
 	  || i.tm.base_opcode == 0xf0e /* femms */)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
+
       if (i.index_reg)
 	{
 	  if (i.index_reg->reg_type.bitfield.zmmword)
@@ -9221,10 +9223,20 @@ output_insn (void)
 	  else if (i.index_reg->reg_type.bitfield.xmmword)
 	    i.xstate |= xstate_xmm;
 	}
+
+      /* vzeroall / vzeroupper */
+      if (i.tm.base_opcode == 0x77 && i.tm.cpu_flags.bitfield.cpuavx)
+	i.xstate |= xstate_ymm;
+
       if ((i.xstate & xstate_xmm)
+	  /* ldmxcsr / stmxcsr */
+	  || (i.tm.base_opcode == 0xfae && i.tm.cpu_flags.bitfield.cpusse)
+	  /* vldmxcsr / vstmxcsr */
+	  || (i.tm.base_opcode == 0xae && i.tm.cpu_flags.bitfield.cpuavx)
 	  || i.tm.cpu_flags.bitfield.cpuwidekl
 	  || i.tm.cpu_flags.bitfield.cpukl)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
+
       if ((i.xstate & xstate_ymm) == xstate_ymm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
       if ((i.xstate & xstate_zmm) == xstate_zmm)
