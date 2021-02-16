@@ -4874,7 +4874,7 @@ md_assemble (char *line)
   for (j = 0; j < i.operands; j++)
     {
       i.types[j] = operand_type_and (i.types[j], i.tm.operand_types[j]);
-      switch (i.types[j].bitfield.class)
+      switch (i.tm.operand_types[j].bitfield.class)
 	{
 	default:
 	  break;
@@ -4885,13 +4885,13 @@ md_assemble (char *line)
 	  i.xstate |= xstate_mask;
 	  break;
 	case RegSIMD:
-	  if (i.types[j].bitfield.tmmword)
+	  if (i.tm.operand_types[j].bitfield.tmmword)
 	    i.xstate |= xstate_tmm;
-	  else if (i.types[j].bitfield.zmmword)
+	  else if (i.tm.operand_types[j].bitfield.zmmword)
 	    i.xstate |= xstate_zmm;
-	  else if (i.types[j].bitfield.ymmword)
+	  else if (i.tm.operand_types[j].bitfield.ymmword)
 	    i.xstate |= xstate_ymm;
-	  else if (i.types[j].bitfield.xmmword)
+	  else if (i.tm.operand_types[j].bitfield.xmmword)
 	    i.xstate |= xstate_xmm;
 	  break;
 	}
