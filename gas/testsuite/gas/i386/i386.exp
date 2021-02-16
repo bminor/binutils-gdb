@@ -725,6 +725,8 @@ if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
     run_dump_test "property-11"
     run_dump_test "property-12"
     run_dump_test "property-13"
+    run_dump_test "property-cvtpi2pd"
+    run_dump_test "property-cvtpi2ps"
     run_dump_test "property-ldmxcsr"
     run_dump_test "property-vldmxcsr"
     run_dump_test "property-vzeroall"
