@@ -58,6 +58,9 @@
 
 #define RegBND Class=RegBND
 
+#define Mmword Qword
+#define Oword  Xmmword
+
 #define JumpByte         Jump=JUMP_BYTE
 #define JumpDword        Jump=JUMP_DWORD
 #define JumpAbsolute     Jump=JUMP_ABSOLUTE
@@ -105,6 +108,8 @@
 // the bit to mark commutative VEX encodings where swapping the source
 // operands may allow to switch from 3-byte to 2-byte VEX encoding.
 #define C StaticRounding
+
+#define CpuFP Cpu387|Cpu287|Cpu8087
 
 ### MARKER ###
 

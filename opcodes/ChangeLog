@@ -1,3 +1,9 @@
+2021-02-16  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (set_bitfield): Don't look for CpuFP, Mmword, nor
+	Oword.
+	* i386-opc.tbl (CpuFP, Mmword, Oword): Define.
+
 2021-02-15  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* s390-mkopc.c (main): Accept arch14 as cpu string.

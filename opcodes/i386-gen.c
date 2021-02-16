@@ -971,17 +971,6 @@ set_bitfield (char *f, bitfield *array, int value,
   if (*f == '\0')
     return;
 
-  if (strcmp (f, "CpuFP") == 0)
-    {
-      set_bitfield("Cpu387", array, value, size, lineno);
-      set_bitfield("Cpu287", array, value, size, lineno);
-      f = "Cpu8087";
-    }
-  else if (strcmp (f, "Mmword") == 0)
-    f= "Qword";
-  else if (strcmp (f, "Oword") == 0)
-    f= "Xmmword";
-
   for (i = 0; i < size; i++)
     if (strcasecmp (array[i].name, f) == 0)
       {
