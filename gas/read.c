@@ -5743,12 +5743,12 @@ demand_copy_C_string (int *len_pointer)
 
       for (len = *len_pointer; len > 0; len--)
 	{
-	  if (*s == 0)
+	  if (s[len - 1] == 0)
 	    {
 	      s = 0;
-	      len = 1;
 	      *len_pointer = 0;
 	      as_bad (_("this string may not contain \'\\0\'"));
+	      break;
 	    }
 	}
     }

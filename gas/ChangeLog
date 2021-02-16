@@ -1,3 +1,7 @@
+2021-02-16  Alan Modra  <amodra@gmail.com>
+
+	* read.c (demand_copy_C_string): Really check for embedded zeros.
+
 2021-02-15  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): New entry for arch14.
