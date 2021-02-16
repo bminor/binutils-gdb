@@ -812,10 +812,18 @@ allocate_filename_to_slot (const char *  dirname,
 	  file = get_basename (filename);
 	  if (filename_cmp (file, files[num].filename) == 0)
 	    {
+	      /* The filenames match, but the directory table entry is empty.
+		 Fill it with the provided directory name.  */
 	      if (file > filename)
-		/* The filenames match, but the directory table entry is empty.
-		   Fill it with the provided directory name.  */
-		dirs[files[num].dir] = xmemdup0 (filename, file - filename);
+		{
+		  if (dirs == NULL)
+		    {
+		      dirs_allocated = files[num].dir + 32;
+		      dirs = XCNEWVEC (char *, dirs_allocated);
+		    }
+
+		  dirs[files[num].dir] = xmemdup0 (filename, file - filename);
+		}
 	      return TRUE;
 	    }
 	}
