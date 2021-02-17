@@ -338,6 +338,9 @@ extern void ctf_arc_close (ctf_archive_t *);
 extern ctf_dict_t *ctf_arc_lookup_symbol (ctf_archive_t *,
 					  unsigned long symidx,
 					  ctf_id_t *, int *errp);
+extern ctf_dict_t *ctf_arc_lookup_symbol_name (ctf_archive_t *,
+					       const char *name,
+					       ctf_id_t *, int *errp);
 extern void ctf_arc_flush_caches (ctf_archive_t *);
 extern ctf_dict_t *ctf_dict_open (const ctf_archive_t *,
 				  const char *, int *);
@@ -388,6 +391,7 @@ extern int ctf_func_type_args (ctf_dict_t *, ctf_id_t, uint32_t, ctf_id_t *);
 
 extern ctf_id_t ctf_lookup_by_name (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_lookup_by_symbol (ctf_dict_t *, unsigned long);
+extern ctf_id_t ctf_lookup_by_symbol_name (ctf_dict_t *, const char *);
 extern ctf_id_t ctf_symbol_next (ctf_dict_t *, ctf_next_t **,
 				 const char **name, int functions);
 extern ctf_id_t ctf_lookup_variable (ctf_dict_t *, const char *);

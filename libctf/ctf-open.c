@@ -1737,6 +1737,7 @@ ctf_dict_close (ctf_dict_t *fp)
     }
   ctf_dynhash_destroy (fp->ctf_dvhash);
 
+  ctf_dynhash_destroy (fp->ctf_symhash);
   free (fp->ctf_funcidx_sxlate);
   free (fp->ctf_objtidx_sxlate);
   ctf_dynhash_destroy (fp->ctf_objthash);

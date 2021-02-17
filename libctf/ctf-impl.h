@@ -382,6 +382,8 @@ struct ctf_dict
   ctf_sect_t ctf_symtab;	    /* Symbol table from object file.  */
   ctf_sect_t ctf_strtab;	    /* String table from object file.  */
   int ctf_symsect_little_endian;    /* Endianness of the ctf_symtab.  */
+  ctf_dynhash_t *ctf_symhash;       /* (partial) hash, symsect name -> idx. */
+  size_t ctf_symhash_latest;	    /* Amount of symsect scanned so far.  */
   ctf_dynhash_t *ctf_prov_strtab;   /* Maps provisional-strtab offsets
 				       to names.  */
   ctf_dynhash_t *ctf_syn_ext_strtab; /* Maps ext-strtab offsets to names.  */
@@ -508,8 +510,9 @@ struct ctf_archive_internal
   ctf_dict_t *ctfi_dict;
   struct ctf_archive *ctfi_archive;
   ctf_dynhash_t *ctfi_dicts;	  /* Dicts we have opened and cached.  */
+  ctf_dict_t *ctfi_crossdict_cache; /* Cross-dict caching.  */
   ctf_dict_t **ctfi_symdicts;	  /* Array of index -> ctf_dict_t *.  */
-  ctf_id_t *ctfi_syms;		  /* Array of index -> ctf_id_t.  */
+  ctf_dynhash_t *ctfi_symnamedicts; /* Hash of name -> ctf_dict_t *.  */
   ctf_sect_t ctfi_symsect;
   int ctfi_symsect_little_endian; /* -1 for unknown / do not set.  */
   ctf_sect_t ctfi_strsect;
@@ -784,7 +787,6 @@ extern ctf_link_sym_t *ctf_elf32_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *ds
 					      const Elf32_Sym *src, uint32_t symidx);
 extern ctf_link_sym_t *ctf_elf64_to_link_sym (ctf_dict_t *fp, ctf_link_sym_t *dst,
 					      const Elf64_Sym *src, uint32_t symidx);
-extern const char *ctf_lookup_symbol_name (ctf_dict_t *fp, unsigned long symidx);
 
 /* Variables, all underscore-prepended. */
 

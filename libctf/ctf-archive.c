@@ -46,8 +46,8 @@ static int arc_mmap_writeout (int fd, void *header, size_t headersz,
 static int arc_mmap_unmap (void *header, size_t headersz, const char **errmsg);
 static void ctf_arc_import_parent (const ctf_archive_t *arc, ctf_dict_t *fp);
 
-/* Flag to indicate "symbol not present" in
-   ctf_archive_internal.ctfi_symdicts.  Never initialized.  */
+/* Flag to indicate "symbol not present" in ctf_archive_internal.ctfi_symdicts
+   and ctfi_symnamedicts.  Never initialized.  */
 static ctf_dict_t enosym;
 
 /* Write out a CTF archive to the start of the file referenced by the passed-in
@@ -529,8 +529,8 @@ ctf_arc_close (ctf_archive_t *arc)
     }
   else
     ctf_dict_close (arc->ctfi_dict);
-  free (arc->ctfi_syms);
   free (arc->ctfi_symdicts);
+  free (arc->ctfi_symnamedicts);
   ctf_dynhash_destroy (arc->ctfi_dicts);
   if (arc->ctfi_free_symsect)
     free ((void *) arc->ctfi_symsect.cts_data);
@@ -645,8 +645,9 @@ ctf_cached_dict_close (void *fp)
   ctf_dict_close ((ctf_dict_t *) fp);
 }
 
-/* Return the ctf_dict_t with the given name and cache it in the
-   archive's ctfi_dicts.  */
+/* Return the ctf_dict_t with the given name and cache it in the archive's
+   ctfi_dicts.  If this is the first cached dict, designate it the
+   crossdict_cache.  */
 static ctf_dict_t *
 ctf_dict_open_cached (ctf_archive_t *arc, const char *name, int *errp)
 {
@@ -678,6 +679,9 @@ ctf_dict_open_cached (ctf_archive_t *arc, const char *name, int *errp)
     goto oom;
   fp->ctf_refcnt++;
 
+  if (arc->ctfi_crossdict_cache == NULL)
+    arc->ctfi_crossdict_cache = fp;
+
   return fp;
 
  oom:
@@ -693,11 +697,12 @@ void
 ctf_arc_flush_caches (ctf_archive_t *wrapper)
 {
   free (wrapper->ctfi_symdicts);
-  free (wrapper->ctfi_syms);
+  free (wrapper->ctfi_symnamedicts);
   ctf_dynhash_destroy (wrapper->ctfi_dicts);
   wrapper->ctfi_symdicts = NULL;
-  wrapper->ctfi_syms = NULL;
+  wrapper->ctfi_symnamedicts = NULL;
   wrapper->ctfi_dicts = NULL;
+  wrapper->ctfi_crossdict_cache = NULL;
 }
 
 /* Return the ctf_dict_t at the given ctfa_ctfs-relative offset, or NULL if
@@ -778,31 +783,46 @@ ctf_archive_count (const ctf_archive_t *wrapper)
   return wrapper->ctfi_archive->ctfa_ndicts;
 }
 
-/* Look up a symbol in an archive.  Return the dict in the archive that the
-   symbol is found in, and (optionally) the ctf_id_t of the symbol in that dict
-   (so you don't have to look it up yourself).  The dict and mapping are both
-   cached, so repeated lookups are nearly free.
+/* Look up a symbol in an archive by name or index (if the name is set, a lookup
+   by name is done).  Return the dict in the archive that the symbol is found
+   in, and (optionally) the ctf_id_t of the symbol in that dict (so you don't
+   have to look it up yourself).  The dict is cached, so repeated lookups are
+   nearly free.
 
    As usual, you should ctf_dict_close() the returned dict once you are done
    with it.
 
    Returns NULL on error, and an error in errp (if set).  */
 
-ctf_dict_t *
-ctf_arc_lookup_symbol (ctf_archive_t *wrapper, unsigned long symidx,
-		       ctf_id_t *typep, int *errp)
+static ctf_dict_t *
+ctf_arc_lookup_sym_or_name (ctf_archive_t *wrapper, unsigned long symidx,
+			    const char *symname, ctf_id_t *typep, int *errp)
 {
   ctf_dict_t *fp;
+  void *fpkey;
   ctf_id_t type;
 
   /* The usual non-archive-transparent-wrapper special case.  */
   if (!wrapper->ctfi_is_archive)
     {
-      if ((type = ctf_lookup_by_symbol (wrapper->ctfi_dict, symidx)) == CTF_ERR)
+      if (!symname)
 	{
-	  if (errp)
-	    *errp = ctf_errno (wrapper->ctfi_dict);
-	  return NULL;
+	  if ((type = ctf_lookup_by_symbol (wrapper->ctfi_dict, symidx)) == CTF_ERR)
+	    {
+	      if (errp)
+		*errp = ctf_errno (wrapper->ctfi_dict);
+	      return NULL;
+	    }
+	}
+      else
+	{
+	  if ((type = ctf_lookup_by_symbol_name (wrapper->ctfi_dict,
+						 symname)) == CTF_ERR)
+	    {
+	      if (errp)
+		*errp = ctf_errno (wrapper->ctfi_dict);
+	      return NULL;
+	    }
 	}
       if (typep)
 	*typep = type;
@@ -820,22 +840,12 @@ ctf_arc_lookup_symbol (ctf_archive_t *wrapper, unsigned long symidx,
       return NULL;
     }
 
-  /* Make enough space for all possible symbols, if not already done.
-     We cache both the ctf_id_t and the originating dictionary of all symbols.
-     The dict links are weak, to the dictionaries cached in ctfi_dicts: their
-     refcnts are *not* bumped.  */
+  /* Make enough space for all possible symbol indexes, if not already done.  We
+     cache the originating dictionary of all symbols.  The dict links are weak,
+     to the dictionaries cached in ctfi_dicts: their refcnts are *not* bumped.
+     We also cache similar mappings for symbol names: these are ordinary
+     dynhashes, with weak links to dicts.  */
 
-  if (!wrapper->ctfi_syms)
-    {
-      if ((wrapper->ctfi_syms = calloc (wrapper->ctfi_symsect.cts_size
-					/ wrapper->ctfi_symsect.cts_entsize,
-					sizeof (ctf_id_t))) == NULL)
-	{
-	  if (errp)
-	    *errp = ENOMEM;
-	  return NULL;
-	}
-    }
   if (!wrapper->ctfi_symdicts)
     {
       if ((wrapper->ctfi_symdicts = calloc (wrapper->ctfi_symsect.cts_size
@@ -847,23 +857,50 @@ ctf_arc_lookup_symbol (ctf_archive_t *wrapper, unsigned long symidx,
 	  return NULL;
 	}
     }
-
-  /* Perhaps it's cached.  */
-  if (wrapper->ctfi_symdicts[symidx] != NULL)
+  if (!wrapper->ctfi_symnamedicts)
     {
-      if (wrapper->ctfi_symdicts[symidx] == &enosym)
+      if ((wrapper->ctfi_symnamedicts = ctf_dynhash_create (ctf_hash_string,
+							    ctf_hash_eq_string,
+							    free, NULL)) == NULL)
 	{
 	  if (errp)
-	    *errp = ECTF_NOTYPEDAT;
-	  if (typep)
-	    *typep = CTF_ERR;
+	    *errp = ENOMEM;
 	  return NULL;
+	}
+    }
+
+  /* Perhaps the dict in which we found a previous lookup is cached.  If it's
+     supposed to be cached but we don't find it, pretend it was always not
+     found: this should never happen, but shouldn't be allowed to cause trouble
+     if it does.  */
+
+  if ((symname && ctf_dynhash_lookup_kv (wrapper->ctfi_symnamedicts,
+					 symname, NULL, &fpkey))
+      || (!symname && wrapper->ctfi_symdicts[symidx] != NULL))
+    {
+      if (symname)
+	fp = (ctf_dict_t *) fpkey;
+      else
+	fp = wrapper->ctfi_symdicts[symidx];
+
+      if (fp == &enosym)
+	goto no_sym;
+
+      if (symname)
+	{
+	  if ((type = ctf_lookup_by_symbol_name (fp, symname)) == CTF_ERR)
+	    goto cache_no_sym;
+	}
+      else
+	{
+	  if ((type = ctf_lookup_by_symbol (fp, symidx)) == CTF_ERR)
+	    goto cache_no_sym;
 	}
 
       if (typep)
-	*typep = wrapper->ctfi_syms[symidx];
-      wrapper->ctfi_symdicts[symidx]->ctf_refcnt++;
-      return wrapper->ctfi_symdicts[symidx];
+	*typep = type;
+      fp->ctf_refcnt++;
+      return fp;
     }
 
   /* Not cached: find it and cache it.  We must track open errors ourselves even
@@ -882,15 +919,35 @@ ctf_arc_lookup_symbol (ctf_archive_t *wrapper, unsigned long symidx,
 
   while ((fp = ctf_archive_next (wrapper, &i, &name, 0, local_errp)) != NULL)
     {
-      if ((type = ctf_lookup_by_symbol (fp, symidx)) != CTF_ERR)
+      if (!symname)
 	{
-	  wrapper->ctfi_syms[symidx] = type;
-	  wrapper->ctfi_symdicts[symidx] = fp;
-	  ctf_next_destroy (i);
+	  if ((type = ctf_lookup_by_symbol (fp, symidx)) != CTF_ERR)
+	    wrapper->ctfi_symdicts[symidx] = fp;
+	}
+      else
+	{
+	  if ((type = ctf_lookup_by_symbol_name (fp, symname)) != CTF_ERR)
+	    {
+	      char *tmp;
+	      /* No error checking, as above.  */
+	      if ((tmp = strdup (symname)) != NULL)
+		ctf_dynhash_insert (wrapper->ctfi_symnamedicts, tmp, fp);
+	    }
+	}
 
+      if (type != CTF_ERR)
+	{
 	  if (typep)
 	    *typep = type;
+	  ctf_next_destroy (i);
 	  return fp;
+	}
+      if (ctf_errno (fp) != ECTF_NOTYPEDAT)
+	{
+	  if (errp)
+	    *errp = ctf_errno (fp);
+	  ctf_next_destroy (i);
+	  return NULL;				/* errno is set for us.  */
 	}
       ctf_dict_close (fp);
     }
@@ -899,16 +956,47 @@ ctf_arc_lookup_symbol (ctf_archive_t *wrapper, unsigned long symidx,
       ctf_next_destroy (i);
       return NULL;
     }
+
   /* Don't leak end-of-iteration to the caller.  */
   *local_errp = 0;
 
-  wrapper->ctfi_symdicts[symidx] = &enosym;
+ cache_no_sym:
+  if (!symname)
+    wrapper->ctfi_symdicts[symidx] = &enosym;
+  else
+    {
+      char *tmp;
 
+      /* No error checking: if caching fails, there is only a slight performance
+	 impact.  */
+      if ((tmp = strdup (symname)) != NULL)
+	if (ctf_dynhash_insert (wrapper->ctfi_symnamedicts, tmp, &enosym) < 0)
+	  free (tmp);
+    }
+
+ no_sym:
   if (errp)
     *errp = ECTF_NOTYPEDAT;
   if (typep)
     *typep = CTF_ERR;
   return NULL;
+}
+
+/* The public API for looking up a symbol by index.  */
+ctf_dict_t *
+ctf_arc_lookup_symbol (ctf_archive_t *wrapper, unsigned long symidx,
+		       ctf_id_t *typep, int *errp)
+{
+  return ctf_arc_lookup_sym_or_name (wrapper, symidx, NULL, typep, errp);
+}
+
+/* The public API for looking up a symbol by name. */
+
+ctf_dict_t *
+ctf_arc_lookup_symbol_name (ctf_archive_t *wrapper, const char *symname,
+			    ctf_id_t *typep, int *errp)
+{
+  return ctf_arc_lookup_sym_or_name (wrapper, 0, symname, typep, errp);
 }
 
 /* Raw iteration over all CTF files in an archive.  We pass the raw data for all

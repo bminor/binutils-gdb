@@ -98,6 +98,21 @@ try_maybe_reporting (int report)
   if (ctf_errno (fp) != ECTF_NEXT_END)
     goto iter_err;
 
+  /* Look up all the symbols by name and make sure that works.  */
+
+  if (ctf_lookup_by_symbol_name (fp, "data_a") != base2)
+    goto lookup_syms_err;
+  if (ctf_lookup_by_symbol_name (fp, "data_b") != base3)
+    goto lookup_syms_err;
+  if (ctf_lookup_by_symbol_name (fp, "data_c") != base)
+    goto lookup_syms_err;
+  if (ctf_lookup_by_symbol_name (fp, "func_a") != func2)
+    goto lookup_syms_err;
+  if (ctf_lookup_by_symbol_name (fp, "func_b") != func3)
+    goto lookup_syms_err;
+  if (ctf_lookup_by_symbol_name (fp, "func_c") != func)
+    goto lookup_syms_err;
+
   /* Possibly report some but not all of the symbols, as if we are a linker (no
      real program would do this without using the ctf_link APIs, but it's not
      *prohibited*, just useless, and if they do we don't want things to
@@ -121,6 +136,21 @@ try_maybe_reporting (int report)
       if (report_sym (fp, &sym, "func_c", 4, 2) < 0 ||
 	  report_sym (fp, &sym, "func_a", 5, 2) < 0)
 	goto report_err;
+
+      /* Look up all the symbols by name now we have reported symbols.  */
+
+      if (ctf_lookup_by_symbol_name (fp, "data_a") != base2)
+	goto lookup_syms_err;
+      if (ctf_lookup_by_symbol_name (fp, "data_b") != base3)
+	goto lookup_syms_err;
+      if (ctf_lookup_by_symbol_name (fp, "data_c") != base)
+	goto lookup_syms_err;
+      if (ctf_lookup_by_symbol_name (fp, "func_a") != func2)
+	goto lookup_syms_err;
+      if (ctf_lookup_by_symbol_name (fp, "func_b") != func3)
+	goto lookup_syms_err;
+      if (ctf_lookup_by_symbol_name (fp, "func_c") != func)
+	goto lookup_syms_err;
     }
 
   /* Write out, to memory.  */
@@ -202,6 +232,10 @@ try_maybe_reporting (int report)
   exit (1);
  expected_overshoot_err:
   fprintf (stderr, "Too many symbols in post-writeout comparison\n");
+  exit (1);
+ lookup_syms_err:
+  fprintf (stderr, "Explicit lookup of symbols by name failed: %s\n",
+	   ctf_errmsg (ctf_errno (fp)));
   exit (1);
  expected_compar_err:
   fprintf (stderr, "Non-dynamic iteration comparison failure: %s "

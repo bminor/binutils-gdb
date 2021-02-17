@@ -1,3 +1,8 @@
+2021-02-17  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_arc_lookup_symbol_name): New.
+	(ctf_lookup_by_symbol_name): Likewise.
+
 2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
 
 	PR 27158

@@ -1,3 +1,54 @@
+2021-02-17  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_dict_t) <ctf_symhash>: New.
+	<ctf_symhash_latest>: Likewise.
+	(struct ctf_archive_internal) <ctfi_crossdict_cache>: New.
+	<ctfi_symnamedicts>: New.
+	<ctfi_syms>: Remove.
+	(ctf_lookup_symbol_name): Remove.
+	* ctf-lookup.c (ctf_lookup_symbol_name): Propagate errors from
+	parent properly.  Make static.
+	(ctf_lookup_symbol_idx): New, linear search for the symbol name,
+	cached in the crossdict cache's ctf_symhash (if available), or
+	this dict's (otherwise).
+	(ctf_try_lookup_indexed): Allow the symname to be passed in.
+	(ctf_lookup_by_symbol): Turn into a wrapper around...
+	(ctf_lookup_by_sym_or_name): ... this, supporting name lookup too,
+	using ctf_lookup_symbol_idx in non-writable dicts.  Special-case
+	name lookup in dynamic dicts without reported symbols, which have
+	no symtab or dynsymidx but where name lookup should still work.
+	(ctf_lookup_by_symbol_name): New, another wrapper.
+	* ctf-archive.c (enosym): Note that this is present in
+	ctfi_symnamedicts too.
+	(ctf_arc_close): Adjust for removal of ctfi_syms.  Free the
+	ctfi_symnamedicts.
+	(ctf_arc_flush_caches): Likewise.
+	(ctf_dict_open_cached): Memoize the first cached dict in the
+	crossdict cache.
+	(ctf_arc_lookup_symbol): Turn into a wrapper around...
+	(ctf_arc_lookup_sym_or_name): ... this.  No longer cache
+	ctf_id_t lookups: just call ctf_lookup_by_symbol as needed (but
+	still cache the dicts those lookups succeed in).  Add
+	lookup-by-name support, with dicts of successful lookups cached in
+	ctfi_symnamedicts.  Refactor the caching code a bit.
+	(ctf_arc_lookup_symbol_name): New, another wrapper.
+	* ctf-open.c (ctf_dict_close): Free the ctf_symhash.
+	* libctf.ver (LIBCTF_1.2): New version.  Add
+	ctf_lookup_by_symbol_name, ctf_arc_lookup_symbol_name.
+	* testsuite/libctf-lookup/enum-symbol.c (main): Use
+	ctf_arc_lookup_symbol rather than looking up the name ourselves.
+	Fish it out repeatedly, to make sure that symbol caching isn't
+	broken.
+	(symidx_64): Remove.
+	(symidx_32): Remove.
+	* testsuite/libctf-lookup/enum-symbol-obj.lk: Test symbol lookup
+	in an unlinked object file (indexed symtypetab sections only).
+	* testsuite/libctf-writable/symtypetab-nonlinker-writeout.c
+	(try_maybe_reporting): Check symbol types via
+	ctf_lookup_by_symbol_name as well as ctf_symbol_next.
+	* testsuite/libctf-lookup/conflicting-type-syms.*: New test of
+	lookups in a multi-dict archive.
+
 2021-02-20  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/config/default.exp (ld_L_opt): Define.

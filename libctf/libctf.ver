@@ -196,3 +196,9 @@ LIBCTF_1.1 {
 	ctf_symsect_endianness;
 	ctf_arc_symsect_endianness;
 } LIBCTF_1.0;
+
+LIBCTF_1.2 {
+    global:
+	ctf_lookup_by_symbol_name;
+	ctf_arc_lookup_symbol_name;
+} LIBCTF_1.1;
