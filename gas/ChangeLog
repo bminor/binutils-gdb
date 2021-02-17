@@ -1,3 +1,7 @@
+2021-02-17  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/section28.d: xfail h8300.
+
 2021-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/27412
