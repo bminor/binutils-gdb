@@ -45,10 +45,10 @@ ctf_member_iter (ctf_dict_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
   ssize_t offset;
   const char *name;
   ctf_id_t membtype;
-  int rc;
 
   while ((offset = ctf_member_next (fp, type, &i, &name, &membtype, 0)) >= 0)
     {
+      int rc;
       if ((rc = func (name, membtype, offset, arg)) != 0)
 	{
 	  ctf_next_destroy (i);
@@ -255,47 +255,21 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 int
 ctf_enum_iter (ctf_dict_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
 {
-  ctf_dict_t *ofp = fp;
-  const ctf_type_t *tp;
-  const ctf_enum_t *ep;
-  ctf_dtdef_t *dtd;
-  ssize_t increment;
-  uint32_t n;
-  int rc;
+  ctf_next_t *i = NULL;
+  const char *name;
+  int val;
 
-  if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
-    return -1;			/* errno is set for us.  */
-
-  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
-    return -1;			/* errno is set for us.  */
-
-  if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ENUM)
-    return (ctf_set_errno (ofp, ECTF_NOTENUM));
-
-  (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
-
-  if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
+  while ((name = ctf_enum_next (fp, type, &i, &val)) != NULL)
     {
-      ep = (const ctf_enum_t *) ((uintptr_t) tp + increment);
-
-      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, ep++)
+      int rc;
+      if ((rc = func (name, val, arg)) != 0)
 	{
-	  const char *name = ctf_strptr (fp, ep->cte_name);
-	  if ((rc = func (name, ep->cte_value, arg)) != 0)
-	    return rc;
+	  ctf_next_destroy (i);
+	  return rc;
 	}
     }
-  else
-    {
-      ctf_dmdef_t *dmd;
-
-      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	   dmd != NULL; dmd = ctf_list_next (dmd))
-	{
-	  if ((rc = func (dmd->dmd_name, dmd->dmd_value, arg)) != 0)
-	    return rc;
-	}
-    }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return -1;					/* errno is set for us.  */
 
   return 0;
 }
@@ -424,16 +398,20 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 int
 ctf_type_iter (ctf_dict_t *fp, ctf_type_f *func, void *arg)
 {
-  ctf_id_t id, max = fp->ctf_typemax;
-  int rc, child = (fp->ctf_flags & LCTF_CHILD);
+  ctf_next_t *i = NULL;
+  ctf_id_t type;
 
-  for (id = 1; id <= max; id++)
+  while ((type = ctf_type_next (fp, &i, NULL, 0)) != CTF_ERR)
     {
-      const ctf_type_t *tp = LCTF_INDEX_TO_TYPEPTR (fp, id);
-      if (LCTF_INFO_ISROOT (fp, tp->ctt_info)
-	  && (rc = func (LCTF_INDEX_TO_TYPE (fp, id, child), arg)) != 0)
-	return rc;
+      int rc;
+      if ((rc = func (type, arg)) != 0)
+	{
+	  ctf_next_destroy (i);
+	  return rc;
+	}
     }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return -1;					/* errno is set for us.  */
 
   return 0;
 }
@@ -448,17 +426,21 @@ ctf_type_iter (ctf_dict_t *fp, ctf_type_f *func, void *arg)
 int
 ctf_type_iter_all (ctf_dict_t *fp, ctf_type_all_f *func, void *arg)
 {
-  ctf_id_t id, max = fp->ctf_typemax;
-  int rc, child = (fp->ctf_flags & LCTF_CHILD);
+  ctf_next_t *i = NULL;
+  ctf_id_t type;
+  int flag;
 
-  for (id = 1; id <= max; id++)
+  while ((type = ctf_type_next (fp, &i, &flag, 1)) != CTF_ERR)
     {
-      const ctf_type_t *tp = LCTF_INDEX_TO_TYPEPTR (fp, id);
-      if ((rc = func (LCTF_INDEX_TO_TYPE (fp, id, child),
-		      LCTF_INFO_ISROOT(fp, tp->ctt_info)
-		      ? CTF_ADD_ROOT : CTF_ADD_NONROOT, arg) != 0))
-	return rc;
+      int rc;
+      if ((rc = func (type, flag, arg)) != 0)
+	{
+	  ctf_next_destroy (i);
+	  return rc;
+	}
     }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return -1;					/* errno is set for us.  */
 
   return 0;
 }
@@ -518,30 +500,21 @@ ctf_type_next (ctf_dict_t *fp, ctf_next_t **it, int *flag, int want_hidden)
 int
 ctf_variable_iter (ctf_dict_t *fp, ctf_variable_f *func, void *arg)
 {
-  int rc;
+  ctf_next_t *i = NULL;
+  ctf_id_t type;
+  const char *name;
 
-  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent == NULL))
-    return (ctf_set_errno (fp, ECTF_NOPARENT));
-
-  if (!(fp->ctf_flags & LCTF_RDWR))
+  while ((type = ctf_variable_next (fp, &i, &name)) != CTF_ERR)
     {
-      unsigned long i;
-      for (i = 0; i < fp->ctf_nvars; i++)
-	if ((rc = func (ctf_strptr (fp, fp->ctf_vars[i].ctv_name),
-			fp->ctf_vars[i].ctv_type, arg)) != 0)
-	  return rc;
-    }
-  else
-    {
-      ctf_dvdef_t *dvd;
-
-      for (dvd = ctf_list_next (&fp->ctf_dvdefs); dvd != NULL;
-	   dvd = ctf_list_next (dvd))
+      int rc;
+      if ((rc = func (name, type, arg)) != 0)
 	{
-	  if ((rc = func (dvd->dvd_name, dvd->dvd_type, arg)) != 0)
-	    return rc;
+	  ctf_next_destroy (i);
+	  return rc;
 	}
     }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    return -1;					/* errno is set for us.  */
 
   return 0;
 }

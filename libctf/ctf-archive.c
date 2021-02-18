@@ -1043,68 +1043,30 @@ ctf_archive_raw_iter (const ctf_archive_t *arc,
   return -EINVAL;			 /* Not supported. */
 }
 
-/* Iterate over all CTF files in an archive.  We pass all CTF files in turn to
-   the specified callback function.  */
-static int
-ctf_archive_iter_internal (const ctf_archive_t *wrapper,
-			   const struct ctf_archive *arc,
-			   const ctf_sect_t *symsect,
-			   const ctf_sect_t *strsect,
-			   ctf_archive_member_f *func, void *data)
-{
-  int rc;
-  size_t i;
-  ctf_dict_t *f;
-  struct ctf_archive_modent *modent;
-  const char *nametbl;
-
-  modent = (ctf_archive_modent_t *) ((char *) arc
-				     + sizeof (struct ctf_archive));
-  nametbl = (((const char *) arc) + le64toh (arc->ctfa_names));
-
-  for (i = 0; i < le64toh (arc->ctfa_ndicts); i++)
-    {
-      const char *name;
-
-      name = &nametbl[le64toh (modent[i].name_offset)];
-      if ((f = ctf_dict_open_internal (arc, symsect, strsect,
-				       name,
-				       wrapper->ctfi_symsect_little_endian,
-				       &rc)) == NULL)
-	return rc;
-
-      f->ctf_archive = (ctf_archive_t *) wrapper;
-      ctf_arc_import_parent (wrapper, f);
-      if ((rc = func (f, name, data)) != 0)
-	{
-	  ctf_dict_close (f);
-	  return rc;
-	}
-
-      ctf_dict_close (f);
-    }
-  return 0;
-}
-
 /* Iterate over all CTF files in an archive: public entry point.  We pass all
    CTF files in turn to the specified callback function.  */
 int
 ctf_archive_iter (const ctf_archive_t *arc, ctf_archive_member_f *func,
 		  void *data)
 {
-  const ctf_sect_t *symsect = &arc->ctfi_symsect;
-  const ctf_sect_t *strsect = &arc->ctfi_strsect;
+  ctf_next_t *i = NULL;
+  ctf_dict_t *fp;
+  const char *name;
+  int err;
 
-  if (symsect->cts_name == NULL)
-    symsect = NULL;
-  if (strsect->cts_name == NULL)
-    strsect = NULL;
+  while ((fp = ctf_archive_next (arc, &i, &name, 0, &err)) != NULL)
+    {
+      int rc;
 
-  if (arc->ctfi_is_archive)
-    return ctf_archive_iter_internal (arc, arc->ctfi_archive, symsect, strsect,
-				      func, data);
-
-  return func (arc->ctfi_dict, _CTF_SECTION, data);
+      if ((rc = func (fp, name, data)) != 0)
+	{
+	  ctf_dict_close (fp);
+	  ctf_next_destroy (i);
+	  return rc;
+	}
+      ctf_dict_close (fp);
+    }
+  return 0;
 }
 
 /* Iterate over all CTF files in an archive, returning each dict in turn as a

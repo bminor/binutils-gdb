@@ -1,5 +1,15 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_member_iter): Move 'rc' to an inner scope.
+	(ctf_enum_iter): Reimplement in terms of ctf_enum_next.
+	(ctf_type_iter): Reimplement in terms of ctf_type_next.
+	(ctf_type_iter_all): Likewise.
+	(ctf_variable_iter): Reimplement in terms of ctf_variable_next.
+	* ctf-archive.c (ctf_archive_iter_internal): Remove.
+	(ctf_archive_iter): Reimplement in terms of ctf_archive_next.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c (ctf_archive_next): Set the name of parents in
 	single-member archives.
 
