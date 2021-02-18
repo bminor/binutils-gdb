@@ -2275,6 +2275,11 @@ merge_gnu_build_notes (bfd *          abfd,
 	  goto done;
 	}
 
+      if (start > end)
+	/* This can happen with PPC64LE binaries where empty notes are
+	   encoded as start = end + 4.  */
+	start = end;
+
       if (is_open_note (pnote))
 	{
 	  if (start)
