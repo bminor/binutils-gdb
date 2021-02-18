@@ -61,22 +61,8 @@ struct value *
 evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 int *pos, enum noside noside)
 {
-  struct value *retval;
-
-  gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
-  if (*pos == 0 && target_has_execution ()
-      && exp->language_defn->la_language == language_cplus
-      && !thread_stack_temporaries_enabled_p (inferior_thread ()))
-    stack_temporaries.emplace (inferior_thread ());
-
-  retval = (*exp->language_defn->expression_ops ()->evaluate_exp)
-    (expect_type, exp, pos, noside);
-
-  if (stack_temporaries.has_value ()
-      && value_in_thread_stack_temporaries (retval, inferior_thread ()))
-    retval = value_non_lval (retval);
-
-  return retval;
+  return ((*exp->language_defn->expression_ops ()->evaluate_exp)
+	  (expect_type, exp, pos, noside));
 }
 
 /* Parse the string EXP as a C expression, evaluate it,
@@ -121,14 +107,33 @@ parse_to_comma_and_eval (const char **expp)
 }
 
 
+/* See expression.h.  */
+
+struct value *
+expression::evaluate (struct type *expect_type, enum noside noside)
+{
+  gdb::optional<enable_thread_stack_temporaries> stack_temporaries;
+  if (target_has_execution ()
+      && language_defn->la_language == language_cplus
+      && !thread_stack_temporaries_enabled_p (inferior_thread ()))
+    stack_temporaries.emplace (inferior_thread ());
+
+  int pos = 0;
+  struct value *retval = evaluate_subexp (expect_type, this, &pos, noside);
+
+  if (stack_temporaries.has_value ()
+      && value_in_thread_stack_temporaries (retval, inferior_thread ()))
+    retval = value_non_lval (retval);
+
+  return retval;
+}
+
 /* See value.h.  */
 
 struct value *
 evaluate_expression (struct expression *exp, struct type *expect_type)
 {
-  int pc = 0;
-
-  return evaluate_subexp (expect_type, exp, &pc, EVAL_NORMAL);
+  return exp->evaluate (expect_type, EVAL_NORMAL);
 }
 
 /* Evaluate an expression, avoiding all memory references
@@ -137,9 +142,7 @@ evaluate_expression (struct expression *exp, struct type *expect_type)
 struct value *
 evaluate_type (struct expression *exp)
 {
-  int pc = 0;
-
-  return evaluate_subexp (nullptr, exp, &pc, EVAL_AVOID_SIDE_EFFECTS);
+  return exp->evaluate (nullptr, EVAL_AVOID_SIDE_EFFECTS);
 }
 
 /* Evaluate a subexpression, avoiding all memory references and

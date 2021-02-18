@@ -1,3 +1,10 @@
+2021-02-18  Tom Tromey  <tom@tromey.com>
+
+	* expression.h (struct expression) <evaluate>: Declare method.
+	* eval.c (evaluate_subexp): Simplify.
+	(expression::evaluate): New method.
+	(evaluate_expression, evaluate_type): Use expression::evaluate.
+
 2021-02-17  Kevin Buettner  <kevinb@redhat.com>
 
 	* ada-lang.c (ada_fold_name): Check for non-empty string prior

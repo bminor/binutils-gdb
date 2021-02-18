@@ -120,6 +120,11 @@ struct expression
       return elts[0].opcode;
   }
 
+  /* Evaluate the expression.  EXPECT_TYPE is the context type of the
+     expression; normally this should be nullptr.  NOSIDE controls how
+     evaluation is performed.  */
+  struct value *evaluate (struct type *expect_type, enum noside noside);
+
   /* Language it was entered in.  */
   const struct language_defn *language_defn;
   /* Architecture it was parsed in.  */
