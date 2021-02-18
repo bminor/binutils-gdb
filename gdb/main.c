@@ -1290,7 +1290,7 @@ This is the GNU debugger.  Usage:\n\n\
 "), stream);
   fputs_unfiltered (_("\
 Selection of debuggee and its files:\n\n\
-  --args             Arguments after executable-file are passed to inferior\n\
+  --args             Arguments after executable-file are passed to inferior.\n\
   --core=COREFILE    Analyze the core dump COREFILE.\n\
   --exec=EXECFILE    Use EXECFILE as the executable.\n\
   --pid=PID          Attach to running process PID.\n\
@@ -1319,7 +1319,7 @@ Initial commands and command files:\n\n\
 Output and user interface control:\n\n\
   --fullname         Output information used by emacs-GDB interface.\n\
   --interpreter=INTERP\n\
-		     Select a specific interpreter / user interface\n\
+		     Select a specific interpreter / user interface.\n\
   --tty=TTY          Use TTY for input/output by the program being debugged.\n\
   -w                 Use the GUI interface.\n\
   --nw               Do not use the GUI interface.\n\
