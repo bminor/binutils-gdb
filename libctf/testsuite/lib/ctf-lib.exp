@@ -18,12 +18,7 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-proc load_common_lib { name } {
-    global srcdir
-    load_file $srcdir/../../binutils/testsuite/lib/$name
-}
-
-load_common_lib binutils-common.exp
+load_file $srcdir/../../ld/testsuite/lib/ld-lib.exp
 
 proc run_native_host_cmd { command } {
     global link_output
@@ -51,149 +46,12 @@ proc run_native_host_cmd { command } {
     return "$run_output"
 }
 
-proc run_host_cmd { prog command } {
-    global link_output
-    global gcc_B_opt
-    global gcc_ld_B_opt_tested
-    global ld
-
-    if { ![is_remote host] && [which "$prog"] == 0 } then {
-	perror "$prog does not exist"
-	return 0
-    }
-
-    # If we are compiling with gcc, we want to add gcc_B_opt to flags.  However,
-    # if $prog already has -B options, which might be the case when running gcc
-    # out of a build directory, we want our -B options to come first.
-    set gccexe $prog
-    set gccparm [string first " " $gccexe]
-    set gccflags ""
-    if { $gccparm > 0 } then {
-	set gccflags [string range $gccexe $gccparm end]
-	set gccexe [string range $gccexe 0 $gccparm]
-	set prog $gccexe
-    }
-    set gccexe [string replace $gccexe 0 [string last "/" $gccexe] ""]
-    if {[string match "*cc*" $gccexe] || [string match "*++*" $gccexe]} then {
-	set gccflags "$gcc_B_opt $gccflags"
-	if {![info exists gcc_ld_B_opt_tested]} {
-	    set gcc_ld_B_opt_tested 1
-	    set ld_version_message [run_host_cmd "$ld" "--version"]
-	    set gcc_ld_version_message [run_host_cmd "$prog" "$gccflags -Wl,--version"]
-	    if {[string first $ld_version_message $gcc_ld_version_message] < 0} {
-		perror "************************************************************************"
-		perror "Your compiler driver ignores -B when choosing ld."
-		perror "You will not be testing the new ld in many of the following tests."
-		set gcc_ld_version [run_host_cmd "$prog" "$gccflags --print-prog-name=ld"]
-		if {![string match "" $gcc_ld_version] && ![string match "ld" $gcc_ld_version]} {
-		    perror "It seems you will be testing $gcc_ld_version instead."
-		}
-		perror "************************************************************************"
-	    }
-	}
-    }
-
-    verbose -log "$prog $gccflags $command"
-    set status [remote_exec host [concat sh -c [list "$prog $gccflags $command 2>&1"]] "" "/dev/null" "libctf.tmp"]
-    remote_upload host "libctf.tmp"
-    set run_output [file_contents "libctf.tmp"]
-    regsub "\n$" $run_output "" run_output
-    if { [lindex $status 0] != 0 && [string match "" $run_output] } then {
-	append run_output "child process exited abnormally"
-    }
-    remote_file build delete libctf.tmp
-    remote_file host delete libctf.tmp
-
-    if [string match "" $run_output] then {
-	return ""
-    }
-
-    verbose -log "$run_output"
-    return "$run_output"
-}
-
-proc run_host_cmd_yesno { prog command } {
-    global exec_output
-    global errcnt warncnt
-
-    set exec_output [prune_warnings [run_host_cmd "$prog" "$command"]]
-    # Ignore error and warning.
-    set errcnt 0
-    set warncnt 0
-    if [string match "" $exec_output] then {
-	return 1;
-    }
-    return 0;
-}
-
-# Return true if we can build a program with the compiler.
-# On some targets, CC might be defined, but libraries and startup
-# code might be missing or require special options that the ld test
-# harness doesn't know about.
-
-proc check_compiler_available { } {
-    global compiler_available_saved
-    global CC
-
-    if {![info exists compiler_available_saved]} {
-	if { [which $CC] == 0 } {
-	    set compiler_available_saved 0
-	    return 0
-	}
-
-	set flags ""
-	if [board_info [target_info name] exists cflags] {
-	    append flags " [board_info [target_info name] cflags]"
-	}
-	if [board_info [target_info name] exists ldflags] {
-	    append flags " [board_info [target_info name] ldflags]"
-	}
-
-	set basename "tmpdir/compiler[pid]"
-	set src ${basename}.c
-	set output ${basename}.out
-	set f [open $src "w"]
-	puts $f "int main (void)"
-	puts $f "{"
-	puts $f "  return 0; "
-	puts $f "}"
-	close $f
-	if [is_remote host] {
-	    set src [remote_download host $src]
-	}
-	set compiler_available_saved [run_host_cmd_yesno "$CC" "$flags $src -o $output"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
-    }
-    return $compiler_available_saved
-}
-
 # Compile and link a C source file for execution on the host.
 proc compile_link_one_host_cc { src output additional_args } {
     global CC_FOR_HOST
     global CFLAGS
 
     return [run_native_host_cmd "./libtool --quiet --tag=CC --mode=link $CC_FOR_HOST $CFLAGS $src -o $output $additional_args" ]
-}
-
-# Compile a C source file, with the specified additional_flags.
-proc compile_one_cc { src output additional_flags } {
-    global CC
-    global CFLAGS
-
-    set flags ""
-    if [board_info [target_info name] exists cflags] {
-	append flags " [board_info [target_info name] cflags]"
-    }
-    if [board_info [target_info name] exists ldflags] {
-	append flags " [board_info [target_info name] ldflags]"
-    }
-
-    if [is_remote host] {
-	set src [remote_download host $src]
-    }
-    return [run_host_cmd "$CC" "$flags $CFLAGS $additional_flags $src -o $output"]
 }
 
 # run_lookup_test FILE
@@ -234,7 +92,7 @@ proc compile_one_cc { src output additional_flags } {
 #	Assemble the file SOURCE.c and pass it to the LOOKUP program.
 #
 #   nonshared:
-#       If set, do not link with -shared.
+#	If set, do not link with -shared.
 #
 #   link:
 #	If set, link the SOURCE together even if only one file is specified.
@@ -392,32 +250,4 @@ proc run_lookup_test { name } {
 
     pass $testname
     return 0
-}
-
-# Returns true if the target compiler supports -gt
-proc check_ctf_available { } {
-    global ctf_available_saved
-
-    if {![info exists ctf_available_saved]} {
-	if { ![check_compiler_available] } {
-	    set ctf_available_saved 0
-	} else {
-	    set basename "tmpdir/ctf_available[pid]"
-	    set src ${basename}.c
-	    set output ${basename}.o
-	    set f [open $src "w"]
-	    puts $f "int main() { return 0; }"
-	    close $f
-	    set comp_output [compile_one_cc $src $output "-gt -c"]
-            if { $comp_output == ""} {
-                set ctf_available_saved 1
-            } else {
-                set ctf_available_saved 0
-            }
-	    remote_file host delete $src
-	    remote_file host delete $output
-	    file delete $src
-	}
-    }
-    return $ctf_available_saved
 }
