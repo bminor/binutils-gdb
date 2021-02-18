@@ -1165,6 +1165,8 @@ ctf_archive_next (const ctf_archive_t *wrapper, ctf_next_t **it, const char **na
       if (!skip_parent)
 	{
 	  wrapper->ctfi_dict->ctf_refcnt++;
+	  if (name)
+	    *name = _CTF_SECTION;
 	  return wrapper->ctfi_dict;
 	}
     }
