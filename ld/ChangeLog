@@ -1,3 +1,10 @@
+2021-02-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp: Whitespace.
+	(load_common_lib): Expand single use and delete this proc.
+	(run_host_cmd): Use -fno-lto when getting gcc's ld version.
+	Use -B for clang too.
+
 2021-02-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* testplugin.c (record_read_length): Remove debug fprintf.
