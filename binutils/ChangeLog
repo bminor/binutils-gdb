@@ -1,3 +1,17 @@
+2021-02-19  Siddhesh Poyarekar  <siddhesh@gotplt.org>
+
+	* ar.c (write_archive): Remove TARGET_STAT.  Adjust call to
+	SMART_RENAME.
+	* arsup.c (ar_save): Likewise.
+	* objcopy (strip_main): Don't copy TMPFD.  Don't set times on
+	temporary file and adjust call to SMART_RENAME.
+	(copy_main): Likewise.
+	* rename.c [!S_ISLNK]: Remove definitions.
+	(try_preserve_permissions): Remove function.
+	(smart_rename): Remove FD, PRESERVE_DATES arguments.  Use
+	rename system call only if TO does not exist.
+	* bucomm.h (smart_rename): Adjust declaration.
+
 2021-02-18  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (merge_gnu_build_notes): Handle notes with a start

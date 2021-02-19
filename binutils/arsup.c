@@ -343,18 +343,11 @@ ar_save (void)
     }
   else
     {
-      bfd_boolean skip_stat = FALSE;
       struct stat target_stat;
-      int ofd = real_ofd;
 
       if (deterministic > 0)
         obfd->flags |= BFD_DETERMINISTIC_OUTPUT;
 
-#if !defined (_WIN32) || defined (__CYGWIN32__)
-      /* It's OK to fail; at worst it will result in SMART_RENAME using a slow
-         copy fallback to write the output.  */
-      ofd = dup (ofd);
-#endif
       bfd_close (obfd);
 
       if (stat (real_name, &target_stat) != 0)
@@ -363,9 +356,6 @@ ar_save (void)
 	     Create the real empty output file here so smart_rename will
 	     update the mode according to the process umask.  */
 	  obfd = bfd_openw (real_name, NULL);
-	  if (obfd == NULL
-	      || bfd_stat (obfd, &target_stat) != 0)
-	    skip_stat = TRUE;
 	  if (obfd != NULL)
 	    {
 	      bfd_set_format (obfd, bfd_archive);
@@ -373,8 +363,7 @@ ar_save (void)
 	    }
 	}
 
-      smart_rename (temp_name, real_name, ofd,
-		    skip_stat ? NULL : &target_stat, 0);
+      smart_rename (temp_name, real_name, NULL);
       obfd = 0;
       free (temp_name);
       free (real_name);

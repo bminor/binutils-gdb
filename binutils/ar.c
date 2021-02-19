@@ -1253,7 +1253,6 @@ write_archive (bfd *iarch)
   char *old_name, *new_name;
   bfd *contents_head = iarch->archive_next;
   int ofd = -1;
-  struct stat target_stat;
 
   old_name = xstrdup (bfd_get_filename (iarch));
   new_name = make_tempname (old_name, &ofd);
@@ -1298,12 +1297,6 @@ write_archive (bfd *iarch)
   if (!bfd_set_archive_head (obfd, contents_head))
     bfd_fatal (old_name);
 
-#if !defined (_WIN32) || defined (__CYGWIN32__)
-  ofd = dup (ofd);
-#endif
-  if (ofd == -1 || bfd_stat (iarch, &target_stat) != 0)
-    bfd_fatal (old_name);
-
   if (!bfd_close (obfd))
     bfd_fatal (old_name);
 
@@ -1313,7 +1306,7 @@ write_archive (bfd *iarch)
   /* We don't care if this fails; we might be creating the archive.  */
   bfd_close (iarch);
 
-  if (smart_rename (new_name, old_name, ofd, &target_stat, 0) != 0)
+  if (smart_rename (new_name, old_name, NULL) != 0)
     xexit (1);
   free (old_name);
   free (new_name);
