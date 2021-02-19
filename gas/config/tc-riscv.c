@@ -2093,7 +2093,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_add_number >= 32
 		      || !VALID_CLTYPE_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		    ip->insn_opcode |= ENCODE_CLTYPE_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CLTYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case '6':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
@@ -2102,7 +2102,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_add_number >= 64
 		      || !VALID_CSSTYPE_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		    ip->insn_opcode |= ENCODE_CSSTYPE_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CSSTYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case '8':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
@@ -2111,7 +2111,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      || imm_expr->X_add_number >= 256
 		      || !VALID_CIWTYPE_IMM ((valueT) imm_expr->X_add_number))
 		    break;
-		    ip->insn_opcode |= ENCODE_CIWTYPE_IMM (imm_expr->X_add_number);
+		  ip->insn_opcode |= ENCODE_CIWTYPE_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'j':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
