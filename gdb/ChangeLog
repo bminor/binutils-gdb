@@ -1,3 +1,9 @@
+2021-02-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* nat/amd64-linux-siginfo.c: Include "gdbsupport/common-defs.h"
+	(which in turn includes <gnulib/config.h>) before include
+	of <signal.h>.
+
 2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
 
 	PR 27158
