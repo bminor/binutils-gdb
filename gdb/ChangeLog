@@ -1,5 +1,11 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* exec.c (set_section_command): Move variable declarations into
+	the function body, and use std::string instead of a fixed size
+	buffer.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* exec.c (exec_target::get_section_table): Delete member function.
 	(section_table_read_available_memory): Use current_top_target, not
 	just the exec_ops target.

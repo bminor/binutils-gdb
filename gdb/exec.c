@@ -989,27 +989,23 @@ static void
 set_section_command (const char *args, int from_tty)
 {
   const char *secname;
-  unsigned seclen;
-  unsigned long secaddr;
-  char secprint[100];
-  long offset;
 
   if (args == 0)
     error (_("Must specify section name and its virtual address"));
 
   /* Parse out section name.  */
   for (secname = args; !isspace (*args); args++);
-  seclen = args - secname;
+  unsigned seclen = args - secname;
 
   /* Parse out new virtual address.  */
-  secaddr = parse_and_eval_address (args);
+  CORE_ADDR secaddr = parse_and_eval_address (args);
 
   for (target_section &p : current_program_space->target_sections ())
     {
       if (!strncmp (secname, bfd_section_name (p.the_bfd_section), seclen)
 	  && bfd_section_name (p.the_bfd_section)[seclen] == '\0')
 	{
-	  offset = secaddr - p.addr;
+	  long offset = secaddr - p.addr;
 	  p.addr += offset;
 	  p.endaddr += offset;
 	  if (from_tty)
@@ -1017,11 +1013,9 @@ set_section_command (const char *args, int from_tty)
 	  return;
 	}
     }
-  if (seclen >= sizeof (secprint))
-    seclen = sizeof (secprint) - 1;
-  strncpy (secprint, secname, seclen);
-  secprint[seclen] = '\0';
-  error (_("Section %s not found"), secprint);
+
+  std::string secprint (secname, seclen);
+  error (_("Section %s not found"), secprint.c_str ());
 }
 
 /* If we can find a section in FILENAME with BFD index INDEX, adjust

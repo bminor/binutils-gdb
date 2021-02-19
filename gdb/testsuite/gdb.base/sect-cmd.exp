@@ -79,14 +79,16 @@ gdb_test_multiple "section FOOBARBAZ 0x1234" "" {
     }
 }
 
-# We "happen to know" that GDB uses a fixed size character buffer to
-# parse the section name into, and the buffer is declared to be 100
-# characters in length.  Verify that GDB gracefully handles section
-# names longer than that.  (The section is also non-existent.)
+# Check that GDB can still print the error message when the section
+# name is very long.  It used to be the case that GDB could only print
+# (up to) 100 character section names in this error message, but that
+# is no longer the case.
 #
-gdb_test_multiple "section A234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123 0x1234" \
+set long_sect_name \
+    "A234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123"
+gdb_test_multiple "section $long_sect_name 0x1234" \
     "non-existent too-long section disallowed" {
-	-re -wrap "Section A23456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789 not found" {
+	-re -wrap "Section $long_sect_name not found" {
 	    pass $gdb_test_name
 	}
     }

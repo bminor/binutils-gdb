@@ -1,5 +1,9 @@
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/sect-cmd.exp: Update expected results.
+
+2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.base/sect-cmd.exp: Rewrite using modern testsuite
 	techniques.  Enable the test for all targets.
 
