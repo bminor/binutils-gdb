@@ -19077,7 +19077,7 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
       if (type < GNU_PROPERTY_LOPROC)
 	printf (_("<unknown type %#x data: "), type);
       else if (type < GNU_PROPERTY_LOUSER)
-	printf (_("<procesor-specific type %#x data: "), type);
+	printf (_("<processor-specific type %#x data: "), type);
       else
 	printf (_("<application-specific type %#x data: "), type);
       for (j = 0; j < datasz; ++j)
