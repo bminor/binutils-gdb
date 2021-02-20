@@ -1,3 +1,9 @@
+2021-02-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp: Whitespace fixes throughout.
+	(run_dump_test): Fail if expecting errors from a file like we do
+	for error strings, if no error is seen.
+
 2021-02-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/readelf.exp (pr26548): Run for 32-bit too.
