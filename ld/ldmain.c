@@ -1074,7 +1074,9 @@ multiple_definition (struct bfd_link_info *info,
       nval = oval;
       obfd = NULL;
     }
-  einfo (_("%X%P: %C: multiple definition of `%pT'"),
+  if (!info->warn_multiple_definition)
+    einfo ("%X");
+  einfo (_("%P: %C: multiple definition of `%pT'"),
 	 nbfd, nsec, nval, name);
   if (obfd != NULL)
     einfo (_("; %D: first defined here"), obfd, osec, oval);

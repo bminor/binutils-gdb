@@ -1,3 +1,10 @@
+2021-02-21  Alan Modra  <amodra@gmail.com>
+
+	* ldexp.c (exp_fold_tree_1): Warn on script defining a symbol
+	defined in an object file.
+	* ldmain.c (multiple_definition): Heed info->warn_multiple_definition.
+	* testsuite/ld-scripts/defined5.d: Expect a warning.
+
 2021-02-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp: Whitespace.

@@ -1186,16 +1186,19 @@ exp_fold_tree_1 (etree_type *tree)
 		{
 		  if (expld.result.section == NULL)
 		    expld.result.section = expld.section;
-		  if (!update_definedness (tree->assign.dst, h) && 0)
+		  if (!update_definedness (tree->assign.dst, h)
+		      && expld.assign_name != NULL)
 		    {
-		      /* Symbol was already defined.  For now this error
-			 is disabled because it causes failures in the ld
-			 testsuite: ld-elf/var1, ld-scripts/defined5, and
-			 ld-scripts/pr14962.  Some of these no doubt
-			 reflect scripts used in the wild.  */
+		      /* Symbol was already defined, and the script isn't
+			 modifying the symbol value for some reason as in
+			 ld-elf/var1 and ld-scripts/pr14962.
+			 For now this is only a warning.  */
+		      unsigned int warn = link_info.warn_multiple_definition;
+		      link_info.warn_multiple_definition = 1;
 		      (*link_info.callbacks->multiple_definition)
 			(&link_info, h, link_info.output_bfd,
 			 expld.result.section, expld.result.value);
+		      link_info.warn_multiple_definition = warn;
 		    }
 		  if (expld.phase == lang_fixed_phase_enum)
 		    {

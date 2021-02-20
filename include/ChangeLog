@@ -1,3 +1,7 @@
+2021-02-21  Alan Modra  <amodra@gmail.com>
+
+	* bfdlink.h (struct bfd_link_info): Add warn_multiple_definition.
+
 2021-02-17  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (ctf_arc_lookup_symbol_name): New.

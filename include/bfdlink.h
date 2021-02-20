@@ -465,11 +465,15 @@ struct bfd_link_info
      statics.  */
   unsigned int task_link: 1;
 
-  /* TRUE if ok to have multiple definition.  */
+  /* TRUE if ok to have multiple definitions, without warning.  */
   unsigned int allow_multiple_definition: 1;
 
-  /* TRUE if ok to have prohibit multiple definition of absolute symbols.  */
+  /* TRUE if multiple definition of absolute symbols (eg. from -R) should
+     be reported.  */
   unsigned int prohibit_multiple_definition_absolute: 1;
+
+  /* TRUE if multiple definitions should only warn.  */
+  unsigned int warn_multiple_definition: 1;
 
   /* TRUE if ok to have version with no definition.  */
   unsigned int allow_undefined_version: 1;
