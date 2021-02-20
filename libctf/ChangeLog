@@ -1,3 +1,10 @@
+2021-02-21  Alan Modra  <amodra@gmail.com>
+
+	* configure.ac: Invoke AC_CANONICAL_TARGET, AC_CANONICAL_HOST
+	and AC_CANONICAL_BUILD.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2021-02-17  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_dict_t) <ctf_symhash>: New.
