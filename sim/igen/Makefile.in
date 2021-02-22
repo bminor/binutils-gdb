@@ -30,7 +30,6 @@ exec_prefix = @exec_prefix@
 
 host_alias = @host_alias@
 target_alias = @target_alias@
-program_transform_name = @program_transform_name@
 bindir = @bindir@
 libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
@@ -56,10 +55,8 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
-AR = @AR@
 CC = @CC@
 CFLAGS = @CFLAGS@
-RANLIB = @RANLIB@
 
 CC_FOR_BUILD = @CC_FOR_BUILD@
 CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@

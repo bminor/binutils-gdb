@@ -16,9 +16,7 @@ else
   CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-"-g"}
 fi
 
-
 AC_CANONICAL_SYSTEM
-AC_ARG_PROGRAM
 
 AC_CONFIG_HEADER(config.h:config.in)
 
@@ -28,10 +26,6 @@ AC_HEADER_DIRENT
 
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
-
-AC_SUBST(AR)
-AC_SUBST(CFLAGS)
-AC_PROG_RANLIB
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])

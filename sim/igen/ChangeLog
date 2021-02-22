@@ -1,5 +1,12 @@
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (program_transform_name, AR, RANLIB): Delete.
+	* configure.ac (AC_ARG_PROGRAM, AC_PROG_RANLIB): Delete calls.
+	(AC_SUBST): Delete AR & CFLAGS calls.
+	* configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (AR_FOR_BUILD, AR_FLAGS_FOR_BUILD,
 	RANLIB_FOR_BUILD): Delete.
 	* configure.ac: Likewise.
