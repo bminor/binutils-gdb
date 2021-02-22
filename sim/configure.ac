@@ -123,10 +123,8 @@ if test "${enable_sim}" != no; then
       sim_igen=yes
       ;;
   esac
-  if test "$sim_igen" = yes; then
-    AC_CONFIG_SUBDIRS(igen)
-  fi
 fi
+AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

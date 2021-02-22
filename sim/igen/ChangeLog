@@ -1,5 +1,10 @@
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* local.mk: New file.
+	* aclocal.m4, Makefile.in, configure.ac, configure: Removed.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* configure.ac: Call SIM_AC_TOOLCHAIN and AC_CONFIG_FILES.
 	(AC_PROG_INSTALL, AC_PROG_CC, AC_CANONICAL_SYSTEM, CC_FOR_BUILD,
 	CFLAGS_FOR_BUILD): Delete.

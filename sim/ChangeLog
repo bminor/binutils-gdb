@@ -1,5 +1,12 @@
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.am [SIM_ENABLE_IGEN]: Include igen/local.mk.
+	* configure.ac: Delete AC_CONFIG_SUBDIRS(igen) call.
+	(SIM_ENABLE_IGEN): Define.
+	* configure, Makefile.in: Regenerate.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.am (ACLOCAL_AMFLAGS): Add -Im4.
 	(COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
 	* configure.ac: Replace toolchain calls with SIM_AC_TOOLCHAIN.

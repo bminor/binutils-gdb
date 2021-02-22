@@ -22,6 +22,11 @@ srcroot = $(srcdir)/..
 
 SUBDIRS = @subdirs@
 
+# We don't set some of these vars here, but we need to define them so they may
+# be used consistently in local.mk files we include below.
+noinst_LIBRARIES =
+EXTRA_PROGRAMS =
+
 MOSTLYCLEANFILES = core
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
@@ -38,4 +43,7 @@ nltvals:
 	$(abs_srcdir)/common/gennltvals.py --cpp "$(CPP)" --output nltvals.def --srcroot $(srcroot)
 	$(SHELL) $(srcroot)/move-if-change nltvals.def $(abs_srcdir)/common/nltvals.def
 
+if SIM_ENABLE_IGEN
+include igen/local.mk
+endif
 include testsuite/local.mk

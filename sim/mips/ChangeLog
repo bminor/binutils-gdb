@@ -1,5 +1,10 @@
 2021-04-02  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (../igen/igen): Delete rule.
+	(tmp-igen, tmp-m16, tmp-micromips): Delete ../igen make.
+
+2021-04-02  Mike Frysinger  <vapier@gentoo.org>
+
 	* aclocal.m4, configure: Regenerate.
 
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>

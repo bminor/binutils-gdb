@@ -627,6 +627,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+SIM_ENABLE_IGEN_FALSE
+SIM_ENABLE_IGEN_TRUE
 subdirs
 AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
@@ -781,8 +783,7 @@ sh
 erc32
 ppc
 ft32
-v850
-igen'
+v850'
 
 # Initialize some variables set by options.
 ac_init_help=
@@ -4961,11 +4962,15 @@ subdirs="$subdirs aarch64"
       sim_igen=yes
       ;;
   esac
-  if test "$sim_igen" = yes; then
-    subdirs="$subdirs igen"
-
-  fi
 fi
+ if test "$sim_igen" = "yes"; then
+  SIM_ENABLE_IGEN_TRUE=
+  SIM_ENABLE_IGEN_FALSE='#'
+else
+  SIM_ENABLE_IGEN_TRUE='#'
+  SIM_ENABLE_IGEN_FALSE=
+fi
+
 
 ac_config_files="$ac_config_files Makefile"
 
@@ -5143,6 +5148,10 @@ else
   am__EXEEXT_FALSE=
 fi
 
+if test -z "${SIM_ENABLE_IGEN_TRUE}" && test -z "${SIM_ENABLE_IGEN_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_IGEN\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0
