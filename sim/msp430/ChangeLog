@@ -1,5 +1,9 @@
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* configure: Regenerate.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (SIM_EXTRA_LIBDEPS): Delete.
 
 2021-02-27  Mike Frysinger  <vapier@gentoo.org>

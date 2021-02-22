@@ -1,3 +1,7 @@
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-02-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
@@ -1773,4 +1777,3 @@ Thu Aug  1 17:05:24 1996  Martin M. Hunt  <hunt@pizza.cygnus.com>
 
 	* ChangeLog, Makefile.in, configure, configure.in, d10v_sim.h,
 	gencode.c, interp.c, simops.c: Created.
-

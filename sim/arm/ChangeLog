@@ -1,3 +1,7 @@
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-02-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
@@ -1843,5 +1847,3 @@ Thu Jun  8 14:37:14 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 Wed May 24 14:37:31 1995  Steve Chamberlain  <sac@slash.cygnus.com>
 
 	* New.
-
-

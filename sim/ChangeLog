@@ -1,5 +1,13 @@
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* m4/sim_ac_common.m4:
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Require AC_PROG_CPP.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* README-HACKING: Delete SIM_EXTRA_LIBDEPS.
 
 2021-02-27  Mike Frysinger  <vapier@gentoo.org>

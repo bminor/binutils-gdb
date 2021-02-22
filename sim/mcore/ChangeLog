@@ -1,3 +1,7 @@
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2021-02-21  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CONFIG_MACRO_DIRS): Replace common with m4.
@@ -593,4 +597,3 @@ Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
 	* configure: New file: Genreated.
 	* config,in: New file: Config support.
 	* Makefile.in: New file: Meta makefile for MCore simulator.
-
