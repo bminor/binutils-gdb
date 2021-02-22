@@ -1092,9 +1092,6 @@ _bfd_xcoff_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &xcoff_howto_table[8];
     case BFD_RELOC_PPC_TOC16:
       return &xcoff_howto_table[3];
-    case BFD_RELOC_16:
-      /* Note that this relocation is only internally used by gas.  */
-      return &xcoff_howto_table[0xc];
     case BFD_RELOC_PPC_B16:
       return &xcoff_howto_table[0x1d];
     case BFD_RELOC_32:
