@@ -34,7 +34,7 @@ static const target_info target_bfd_target_info = {
 class target_bfd : public target_ops
 {
 public:
-  explicit target_bfd (struct bfd *bfd);
+  explicit target_bfd (const gdb_bfd_ref_ptr &bfd);
 
   const target_info &info () const override
   { return target_bfd_target_info; }
@@ -88,14 +88,14 @@ target_bfd::get_section_table ()
   return &m_table;
 }
 
-target_bfd::target_bfd (struct bfd *abfd)
-  : m_bfd (gdb_bfd_ref_ptr::new_reference (abfd)),
-    m_table (build_section_table (abfd))
+target_bfd::target_bfd (const gdb_bfd_ref_ptr &abfd)
+  : m_bfd (abfd),
+    m_table (build_section_table (abfd.get ()))
 {
 }
 
 target_ops *
-target_bfd_reopen (struct bfd *abfd)
+target_bfd_reopen (const gdb_bfd_ref_ptr &abfd)
 {
   return new target_bfd (abfd);
 }

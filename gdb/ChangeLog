@@ -1,3 +1,11 @@
+2021-02-22  Tom Tromey  <tromey@adacore.com>
+
+	* solib-svr4.c (enable_break): Update.
+	* bfd-target.c (class target_bfd) <target_bfd>: Change parameter
+	type.
+	(target_bfd_reopen): Change parameter type.
+	* bfd-target.h (target_bfd_reopen): Change parameter type.
+
 2021-02-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* thread.c (add_thread_silent): Add assert.

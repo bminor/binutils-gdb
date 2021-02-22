@@ -2333,9 +2333,8 @@ enable_break (struct svr4_info *info, int from_tty)
 	goto bkpt_at_symbol;
 
       /* Now convert the TMP_BFD into a target.  That way target, as
-	 well as BFD operations can be used.  target_bfd_reopen
-	 acquires its own reference.  */
-      tmp_bfd_target = target_bfd_reopen (tmp_bfd.get ());
+	 well as BFD operations can be used.  */
+      tmp_bfd_target = target_bfd_reopen (tmp_bfd);
 
       /* On a running target, we can get the dynamic linker's base
 	 address from the shared library table.  */
