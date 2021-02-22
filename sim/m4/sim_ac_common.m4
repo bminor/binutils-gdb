@@ -41,8 +41,7 @@ fi
 AC_SUBST(CC_FOR_BUILD)
 
 AC_SUBST(CFLAGS)
-AR=${AR-ar}
-AC_SUBST(AR)
+AC_CHECK_TOOL(AR, ar)
 AC_PROG_RANLIB
 
 # Require C11 or newer.  Autoconf-2.70 provides ac_cv_prog_cc_c11 when using

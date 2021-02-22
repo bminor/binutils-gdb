@@ -1,6 +1,7 @@
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
-	* m4/sim_ac_common.m4:
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Replace AR assignment and
+	AC_SUBST(AR) with call to AC_CHECK_TOOL(AR, ar).
 
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
