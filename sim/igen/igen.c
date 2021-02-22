@@ -25,7 +25,6 @@
 #include "misc.h"
 #include "lf.h"
 #include "table.h"
-#include "config.h"
 #include "filter.h"
 
 #include "igen.h"

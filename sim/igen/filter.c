@@ -21,9 +21,6 @@
 
 
 #include <stdio.h>
-
-#include "config.h"
-
 #include <string.h>
 
 #include "misc.h"

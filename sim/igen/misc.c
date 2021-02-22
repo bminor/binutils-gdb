@@ -25,7 +25,6 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "config.h"
 #include "misc.h"
 
 #include <stdlib.h>

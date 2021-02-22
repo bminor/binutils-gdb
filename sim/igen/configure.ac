@@ -18,14 +18,7 @@ fi
 
 AC_CANONICAL_SYSTEM
 
-AC_CONFIG_HEADER(config.h:config.in)
-
-# NB: You can assume C11 headers exist.
-AC_CHECK_HEADERS(sys/stat.h sys/types.h unistd.h)
-AC_HEADER_DIRENT
-
 AC_SUBST(CC_FOR_BUILD)
 AC_SUBST(CFLAGS_FOR_BUILD)
 
-AC_OUTPUT(Makefile,
-[case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
+AC_OUTPUT(Makefile)

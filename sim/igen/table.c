@@ -27,14 +27,11 @@
 #include <fcntl.h>
 #include <ctype.h>
 
-#include "config.h"
 #include "misc.h"
 #include "lf.h"
 #include "table.h"
 
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #include <stdlib.h>
 
 typedef struct _open_table open_table;

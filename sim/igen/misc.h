@@ -23,9 +23,6 @@
 
 /* Frustrating header junk */
 
-#include "config.h"
-
-
 enum
 {
   default_insn_bit_size = 32,

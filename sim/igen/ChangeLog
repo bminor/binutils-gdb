@@ -1,5 +1,19 @@
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (filter_filename.o): Delete unused target.
+	(distclean): Remove config.h.
+	(config.h, stamp-h): Delete targets.
+	* configure.ac (AC_CONFIG_HEADER): Delete call.
+	(AC_CHECK_HEADERS, AC_HEADER_DIRENT): Likewise.
+	(AC_OUTPUT): Remove 2nd arg.
+	* filter.c: Remove config.h include.
+	* filter_host.c, igen.c, lf.c, misc.c, misc.h: Likewise.
+	* table.c: Likewise.  Remove HAVE_UNISTD_H check.
+	* configure: Regenerate.
+	* config.in: Removed.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (program_transform_name, AR, RANLIB): Delete.
 	* configure.ac (AC_ARG_PROGRAM, AC_PROG_RANLIB): Delete calls.
 	(AC_SUBST): Delete AR & CFLAGS calls.
