@@ -124,8 +124,6 @@ SIM_EXTRA_DEPS =
 SIM_EXTRA_CFLAGS =
 # List of extra libraries to link with.
 SIM_EXTRA_LIBS =
-# List of extra program dependencies.
-SIM_EXTRA_LIBDEPS =
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
 # Dependency of `install' to install any extra files.
@@ -244,8 +242,7 @@ OPCODES_LIB = ../../opcodes/libopcodes.a
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
 CONFIG_LIBS = @LIBS@ $(ZLIB)
-LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB) \
-	$(SIM_EXTRA_LIBDEPS)
+LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB)
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL)
 

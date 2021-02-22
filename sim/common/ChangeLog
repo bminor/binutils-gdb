@@ -1,3 +1,8 @@
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* Make-common.in (SIM_EXTRA_LIBDEPS): Delete.
+	(LIBDEPS): Delete $(SIM_EXTRA_LIBDEPS).
+
 2021-02-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* Make-common.in (SIM_EXTRA_ALL): Delete.

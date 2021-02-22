@@ -1,3 +1,7 @@
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* README-HACKING: Delete SIM_EXTRA_LIBDEPS.
+
 2021-02-27  Mike Frysinger  <vapier@gentoo.org>
 
 	* README-HACKING: Delete SIM_EXTRA_ALL.
