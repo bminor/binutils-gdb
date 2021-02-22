@@ -246,6 +246,8 @@ new_thread (struct inferior *inf, ptid_t ptid)
 struct thread_info *
 add_thread_silent (process_stratum_target *targ, ptid_t ptid)
 {
+  gdb_assert (targ != nullptr);
+
   inferior *inf = find_inferior_ptid (targ, ptid);
 
   /* We may have an old thread with the same id in the thread list.
@@ -535,6 +537,8 @@ find_thread_ptid (process_stratum_target *targ, ptid_t ptid)
 struct thread_info *
 find_thread_ptid (inferior *inf, ptid_t ptid)
 {
+  gdb_assert (inf != nullptr);
+
   for (thread_info *tp : inf->non_exited_threads ())
     if (tp->ptid == ptid)
       return tp;

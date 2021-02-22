@@ -1,5 +1,10 @@
 2021-02-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* thread.c (add_thread_silent): Add assert.
+	(find_thread_ptid): Add assert.
+
+2021-02-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	PR gdb/27435
 	* inf-ptrace.c (struct target_unpusher): Move to target.h.
 	(target_unpush_up): Likewise.
