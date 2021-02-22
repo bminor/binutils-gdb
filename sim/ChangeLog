@@ -1,5 +1,10 @@
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
+	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Delete CC_FOR_BUILD test.
+	Change CC_FOR_BUILD assignment.  Define CFLAGS_FOR_BUILD.
+
+2021-02-28  Mike Frysinger  <vapier@gentoo.org>
+
 	* m4/sim_ac_common.m4 (SIM_AC_COMMON): Replace AR assignment and
 	AC_SUBST(AR) with call to AC_CHECK_TOOL(AR, ar).
 

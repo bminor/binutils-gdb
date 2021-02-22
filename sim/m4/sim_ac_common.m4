@@ -30,15 +30,16 @@ AC_C_BIGENDIAN
 AC_ARG_PROGRAM
 AC_PROG_INSTALL
 
-# Put a plausible default for CC_FOR_BUILD in Makefile.
-if test -z "$CC_FOR_BUILD"; then
-  if test "x$cross_compiling" = "xno"; then
-    CC_FOR_BUILD='$(CC)'
-  else
-    CC_FOR_BUILD=gcc
-  fi
+dnl Setup toolchain settings for build-time tools..
+if test "x$cross_compiling" = "xno"; then
+  : "${CC_FOR_BUILD:=\$(CC)}"
+  : "${CFLAGS_FOR_BUILD:=\$(CFLAGS)}"
+else
+  : "${CC_FOR_BUILD:=gcc}"
+  : "${CFLAGS_FOR_BUILD:=-g -O}"
 fi
 AC_SUBST(CC_FOR_BUILD)
+AC_SUBST(CFLAGS_FOR_BUILD)
 
 AC_SUBST(CFLAGS)
 AC_CHECK_TOOL(AR, ar)
