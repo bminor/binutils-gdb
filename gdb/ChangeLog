@@ -1,3 +1,8 @@
+2021-03-26  Pedro Alves  <pedro@palves.net>
+
+	* target.c (target_always_non_stop_p): Also check whether the
+	target can async.
+
 2021-03-26  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (dwarf2_read_debug_names)
