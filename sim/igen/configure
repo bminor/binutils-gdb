@@ -623,11 +623,8 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 RANLIB
 AR
-RANLIB_FOR_BUILD
 CFLAGS_FOR_BUILD
 CC_FOR_BUILD
-AR_FLAGS_FOR_BUILD
-AR_FOR_BUILD
 EGREP
 GREP
 CPP
@@ -3072,17 +3069,11 @@ fi
 
 # Put a plausible default for CC_FOR_BUILD in Makefile.
 if test "x$cross_compiling" = "xno" -a "x$host" != "xi386-windows"; then
-  AR_FOR_BUILD='$(AR)'
-  AR_FLAGS_FOR_BUILD='$(AR_FLAGS)'
   CC_FOR_BUILD='$(CC)'
   CFLAGS_FOR_BUILD='$(CFLAGS)'
-  RANLIB_FOR_BUILD='$(RANLIB)'
 else
-  AR_FOR_BUILD=${AR_FOR_BUILD-ar}
-  AR_FLAGS_FOR_BUILD=${AR_FLAGS_FOR_BUILD-rc}
   CC_FOR_BUILD=${CC_FOR_BUILD-gcc}
   CFLAGS_FOR_BUILD=${CFLAGS_FOR_BUILD-"-g"}
-  RANLIB_FOR_BUILD=${RANLIB_FOR_BUILD-ranlib}
 fi
 
 
@@ -3779,9 +3770,6 @@ if test "$ac_res" != no; then :
 fi
 
 fi
-
-
-
 
 
 
