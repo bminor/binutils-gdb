@@ -1767,6 +1767,14 @@ procfs_target::attach (const char *args, int from_tty)
   if (pid == getpid ())
     error (_("Attaching GDB to itself is not a good idea..."));
 
+  /* Push the target if needed, ensure it gets un-pushed it if attach fails.  */
+  target_unpush_up unpusher;
+  if (!target_is_pushed (this))
+    {
+      push_target (this);
+      unpusher.reset (this);
+    }
+
   if (from_tty)
     {
       const char *exec_file = get_exec_file (0);
@@ -1780,9 +1788,11 @@ procfs_target::attach (const char *args, int from_tty)
 
       fflush (stdout);
     }
+
   do_attach (ptid_t (pid));
-  if (!target_is_pushed (this))
-    push_target (this);
+
+  /* Everything went fine, keep the target pushed.  */
+  unpusher.release ();
 }
 
 void
