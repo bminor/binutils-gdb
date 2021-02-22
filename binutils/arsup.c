@@ -351,7 +351,7 @@ ar_save (void)
 
       bfd_close (obfd);
 
-      smart_rename (ofilename, real_name, 0);
+      smart_rename (ofilename, real_name, NULL);
       obfd = 0;
       free (ofilename);
     }

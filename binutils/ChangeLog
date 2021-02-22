@@ -1,3 +1,16 @@
+2021-02-22  Siddhesh Poyarekar  <siddhesh@gotplt.org>
+
+	* ar.c (write_archive): Adjust call to SMART_RENAME.
+	* arsup.c (ar_save): Likewise.
+	* objcopy (strip_main): Don't set times on temporary file and
+	adjust call to SMART_RENAME.
+	(copy_main): Likewise.
+	* rename.c [!S_ISLNK]: Remove definitions.
+	(try_preserve_permissions): Remove function.
+	(smart_rename): Replace PRESERVE_DATES argument with
+	TARGET_STAT.  Use rename system call only if TO does not exist.
+	* bucomm.h (smart_rename): Adjust declaration.
+
 2021-02-09  Alan Modra  <amodra@gmail.com>
 
 	PR 27382

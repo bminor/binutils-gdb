@@ -4861,12 +4861,10 @@ strip_main (int argc, char *argv[])
 		 output_target, NULL);
       if (status == 0)
 	{
-	  if (preserve_dates)
-	    set_times (tmpname, &statbuf);
 	  if (output_file != tmpname)
 	    status = (smart_rename (tmpname,
 				    output_file ? output_file : argv[i],
-				    preserve_dates) != 0);
+				    preserve_dates ? &statbuf : NULL) != 0);
 	  if (status == 0)
 	    status = hold_status;
 	}
@@ -5931,11 +5929,9 @@ copy_main (int argc, char *argv[])
 	     output_target, input_arch);
   if (status == 0)
     {
-      if (preserve_dates)
-	set_times (tmpname, &statbuf);
       if (tmpname != output_filename)
 	status = (smart_rename (tmpname, input_filename,
-				preserve_dates) != 0);
+				preserve_dates ? &statbuf : NULL) != 0);
     }
   else
     unlink_if_ordinary (tmpname);

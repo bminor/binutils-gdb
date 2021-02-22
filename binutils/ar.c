@@ -1308,7 +1308,7 @@ write_archive (bfd *iarch)
   /* We don't care if this fails; we might be creating the archive.  */
   bfd_close (iarch);
 
-  if (smart_rename (new_name, old_name, 0) != 0)
+  if (smart_rename (new_name, old_name, NULL) != 0)
     xexit (1);
   free (old_name);
   free (new_name);
