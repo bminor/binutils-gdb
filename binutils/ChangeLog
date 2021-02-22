@@ -1,6 +1,11 @@
 2021-02-26  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline
+	2021-02-24  Alan Modra  <amodra@gmail.com>
+	PR 27456
+	* rename.c: Tidy throughout.
+	(smart_rename): Always copy.  Remove windows specific code.
+
 	2021-02-03  Alan Modra  <amodra@gmail.com>
 	PR 26945
 	* ar.c: Don't include libbfd.h.
