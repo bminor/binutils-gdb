@@ -128,8 +128,6 @@ SIM_EXTRA_LIBS =
 SIM_EXTRA_LIBDEPS =
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
-# Dependency of `all' to build any extra files.
-SIM_EXTRA_ALL =
 # Dependency of `install' to install any extra files.
 SIM_EXTRA_INSTALL =
 # Dependency of `clean' to clean any extra files.
@@ -258,7 +256,7 @@ RUNTESTFLAGS =
 callback_h = $(srcroot)/include/gdb/callback.h
 remote_sim_h = $(srcroot)/include/gdb/remote-sim.h
 
-all: $(SIM_EXTRA_ALL) libsim.a run$(EXEEXT) .gdbinit
+all: libsim.a run$(EXEEXT) .gdbinit
 
 libsim.a: $(LIB_OBJS)
 	rm -f libsim.a
