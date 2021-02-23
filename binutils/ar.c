@@ -1252,21 +1252,21 @@ write_archive (bfd *iarch)
   bfd *obfd;
   char *old_name, *new_name;
   bfd *contents_head = iarch->archive_next;
-  int ofd = -1;
+  int tmpfd = -1;
 
   old_name = xstrdup (bfd_get_filename (iarch));
-  new_name = make_tempname (old_name, &ofd);
+  new_name = make_tempname (old_name, &tmpfd);
 
   if (new_name == NULL)
     bfd_fatal (_("could not create temporary file whilst writing archive"));
 
   output_filename = new_name;
 
-  obfd = bfd_fdopenw (new_name, bfd_get_target (iarch), ofd);
+  obfd = bfd_fdopenw (new_name, bfd_get_target (iarch), tmpfd);
 
   if (obfd == NULL)
     {
-      close (ofd);
+      close (tmpfd);
       bfd_fatal (old_name);
     }
 
@@ -1297,6 +1297,7 @@ write_archive (bfd *iarch)
   if (!bfd_set_archive_head (obfd, contents_head))
     bfd_fatal (old_name);
 
+  tmpfd = dup (tmpfd);
   if (!bfd_close (obfd))
     bfd_fatal (old_name);
 
@@ -1306,7 +1307,7 @@ write_archive (bfd *iarch)
   /* We don't care if this fails; we might be creating the archive.  */
   bfd_close (iarch);
 
-  if (smart_rename (new_name, old_name, NULL) != 0)
+  if (smart_rename (new_name, old_name, tmpfd, NULL, FALSE) != 0)
     xexit (1);
   free (old_name);
   free (new_name);

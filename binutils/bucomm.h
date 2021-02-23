@@ -71,7 +71,8 @@ extern void print_version (const char *);
 /* In rename.c.  */
 extern void set_times (const char *, const struct stat *);
 
-extern int smart_rename (const char *, const char *, struct stat *);
+extern int smart_rename (const char *, const char *, int,
+			 struct stat *, bfd_boolean);
 
 
 /* In libiberty.  */

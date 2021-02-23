@@ -2,6 +2,23 @@
 
 	Backport from mainline
 	2021-02-24  Alan Modra  <amodra@gmail.com>
+		    Siddhesh Poyarekar  <siddhesh@gotplt.org>
+	PR 27456
+	* bucomm.h (smart_rename): Update prototype.
+	* rename.c (smart_rename): Add fromfd and preserve_dates params.
+	Pass fromfd and target_stat to simple_copy.  Call set_times
+	when preserve_dates.
+	(simple_copy): Accept fromfd rather than from filename.  Add
+	target_stat param.  Rewind fromfd rather than opening.  Open
+	"to" file without O_CREAT.  Try to preserve S_ISUID and S_ISGID.
+	* ar.c (write_archive): Rename ofd to tmpfd.  Dup tmpfd before
+	closing output temp file, and pass tmpfd to smart_rename.
+	* arsup.c (temp_fd): Rename from real_fd.
+	(ar_save): Dup temp_fd and pass to smart_rename.
+	* objcopy.c (strip_main, copy_main): Likewise, and pass
+	preserve_dates.
+
+	2021-02-24  Alan Modra  <amodra@gmail.com>
 	PR 27456
 	* rename.c: Tidy throughout.
 	(smart_rename): Always copy.  Remove windows specific code.

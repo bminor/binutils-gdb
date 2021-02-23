@@ -31,24 +31,21 @@
 /* The number of bytes to copy at once.  */
 #define COPY_BUF 8192
 
-/* Copy file FROM to file TO, performing no translations.
+/* Copy file FROMFD to file TO, performing no translations.
    Return 0 if ok, -1 if error.  */
 
 static int
-simple_copy (const char *from, const char *to)
+simple_copy (int fromfd, const char *to, struct stat *target_stat)
 {
-  int fromfd, tofd, nread;
+  int tofd, nread;
   int saved;
   char buf[COPY_BUF];
 
-  fromfd = open (from, O_RDONLY | O_BINARY);
-  if (fromfd < 0)
+  if (fromfd < 0
+      || lseek (fromfd, 0, SEEK_SET) != 0)
     return -1;
-#ifdef O_CREAT
-  tofd = open (to, O_CREAT | O_WRONLY | O_TRUNC | O_BINARY, 0777);
-#else
-  tofd = creat (to, 0777);
-#endif
+
+  tofd = open (to, O_WRONLY | O_TRUNC | O_BINARY);
   if (tofd < 0)
     {
       saved = errno;
@@ -56,6 +53,7 @@ simple_copy (const char *from, const char *to)
       errno = saved;
       return -1;
     }
+
   while ((nread = read (fromfd, buf, sizeof buf)) > 0)
     {
       if (write (tofd, buf, nread) != nread)
@@ -67,7 +65,16 @@ simple_copy (const char *from, const char *to)
 	  return -1;
 	}
     }
+
   saved = errno;
+
+#if !defined (_WIN32) || defined (__CYGWIN32__)
+  /* Writing to a setuid/setgid file may clear S_ISUID and S_ISGID.
+     Try to restore them, ignoring failure.  */
+  if (target_stat != NULL)
+    fchmod (tofd, target_stat->st_mode);
+#endif
+
   close (fromfd);
   close (tofd);
   if (nread < 0)
@@ -118,17 +125,17 @@ set_times (const char *destination, const struct stat *statbuf)
    various systems.  So now we just copy.  */
 
 int
-smart_rename (const char *from, const char *to,
-	      struct stat *target_stat)
+smart_rename (const char *from, const char *to, int fromfd,
+	      struct stat *target_stat, bfd_boolean preserve_dates)
 {
   int ret;
 
-  ret = simple_copy (from, to);
+  ret = simple_copy (fromfd, to, target_stat);
   if (ret != 0)
     non_fatal (_("unable to copy file '%s'; reason: %s"),
 	       to, strerror (errno));
 
-  if (target_stat != NULL)
+  if (preserve_dates)
     set_times (to, target_stat);
   unlink (from);
 
