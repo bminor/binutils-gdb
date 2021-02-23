@@ -9183,14 +9183,30 @@ queue_comp_unit (dwarf2_per_cu_data *per_cu,
   per_cu->per_bfd->queue.emplace (per_cu, per_objfile, pretend_language);
 }
 
-/* If PER_CU is not yet queued, add it to the queue.
+/* If PER_CU is not yet expanded of queued for expansion, add it to the queue.
+
    If DEPENDENT_CU is non-NULL, it has a reference to PER_CU so add a
    dependency.
-   The result is non-zero if PER_CU was queued, otherwise the result is zero
-   meaning either PER_CU is already queued or it is already loaded.
 
-   N.B. There is an invariant here that if a CU is queued then it is loaded.
-   The caller is required to load PER_CU if we return non-zero.  */
+   Return true if maybe_queue_comp_unit requires the caller to load the CU's
+   DIEs, false otherwise.
+
+   Explanation: there is an invariant that if a CU is queued for expansion
+   (present in `dwarf2_per_bfd::queue`), then its DIEs are loaded
+   (a dwarf2_cu object exists for this CU, and `dwarf2_per_objfile::get_cu`
+   returns non-nullptr).  If the CU gets enqueued by this function but its DIEs
+   are not yet loaded, the the caller must load the CU's DIEs to ensure the
+   invariant is respected.
+
+   The caller is therefore not required to load the CU's DIEs (we return false)
+   if:
+
+     - the CU is already expanded, and therefore does not get enqueued
+     - the CU gets enqueued for expansion, but its DIEs are already loaded
+
+   Note that the caller should not use this function's return value as an
+   indicator of whether the CU's DIEs are loaded right now, it should check
+   that by calling `dwarf2_per_objfile::get_cu` instead.  */
 
 static int
 maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
@@ -9221,22 +9237,32 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
       /* Verify the invariant that if a CU is queued for expansion, its DIEs are
 	 loaded.  */
       gdb_assert (per_objfile->get_cu (per_cu) != nullptr);
+
+      /* If the CU is queued for expansion, it should not already be
+	 expanded.  */
+      gdb_assert (!per_objfile->symtab_set_p (per_cu));
+
+      /* The DIEs are already loaded, the caller doesn't need to do it.  */
       return 0;
+    }
+
+  bool queued = false;
+  if (!per_objfile->symtab_set_p (per_cu))
+    {
+      /* Add it to the queue.  */
+      queue_comp_unit (per_cu, per_objfile,  pretend_language);
+      queued = true;
     }
 
   /* If the compilation unit is already loaded, just mark it as
      used.  */
   dwarf2_cu *cu = per_objfile->get_cu (per_cu);
   if (cu != nullptr)
-    {
-      cu->last_used = 0;
-      return 0;
-    }
+    cu->last_used = 0;
 
-  /* Add it to the queue.  */
-  queue_comp_unit (per_cu, per_objfile,  pretend_language);
-
-  return 1;
+  /* Ask the caller to load the CU's DIEs if the CU got enqueued for expansion
+     and the DIEs are not already loaded.  */
+  return queued && cu == nullptr;
 }
 
 /* Process the queue.  */
@@ -23704,12 +23730,18 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 				 sect_offset_str (per_cu->sect_off),
 				 per_objfile->get_cu (per_cu) != nullptr);
 
-      /* If necessary, add it to the queue and load its DIEs.  */
-      if (maybe_queue_comp_unit (cu, per_cu, per_objfile, cu->language))
+      /* If necessary, add it to the queue and load its DIEs.
+
+	 Even if maybe_queue_comp_unit doesn't require us to load the CU's DIEs,
+	 it doesn't mean they are currently loaded.  Since we require them
+	 to be loaded, we must check for ourselves.  */
+      if (maybe_queue_comp_unit (cu, per_cu, per_objfile, cu->language)
+	  || per_objfile->get_cu (per_cu) == nullptr)
 	load_full_comp_unit (per_cu, per_objfile, per_objfile->get_cu (per_cu),
 			     false, cu->language);
 
       target_cu = per_objfile->get_cu (per_cu);
+      gdb_assert (target_cu != nullptr);
     }
   else if (cu->dies == NULL)
     {
@@ -24083,10 +24115,14 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
      we can get here for DW_AT_imported_declaration where we need
      the DIE not the type.  */
 
-  /* If necessary, add it to the queue and load its DIEs.  */
+  /* If necessary, add it to the queue and load its DIEs.
 
+     Even if maybe_queue_comp_unit doesn't require us to load the CU's DIEs,
+     it doesn't mean they are currently loaded.  Since we require them
+     to be loaded, we must check for ourselves.  */
   if (maybe_queue_comp_unit (*ref_cu, &sig_type->per_cu, per_objfile,
-			     language_minimal))
+			     language_minimal)
+      || per_objfile->get_cu (&sig_type->per_cu) == nullptr)
     read_signatured_type (sig_type, per_objfile);
 
   sig_cu = per_objfile->get_cu (&sig_type->per_cu);

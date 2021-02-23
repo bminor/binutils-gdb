@@ -1,5 +1,13 @@
 2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	PR gdb/26828
+	* dwarf2/read.c (maybe_queue_comp_unit): Check if CU is expanded
+	to decide whether or not to enqueue it for expansion.
+	(follow_die_offset, follow_die_sig_1): Ensure we load the DIEs
+	after calling maybe_queue_comp_unit.
+
+2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* linux-nat.c (linux_nat_filter_event): Return void.
 
 2021-02-22  Tom Tromey  <tromey@adacore.com>
