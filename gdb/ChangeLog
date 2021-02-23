@@ -1,6 +1,17 @@
 2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26828
+	* dwarf2/read.c (dwarf2_queue_guard) <dwarf2_queue_guard>:
+	Instantiate queue.
+	(~dwarf2_queue_guard): Clear queue.
+	(queue_comp_unit): Assert that queue is
+	instantiated.
+	(process_queue): Adjust.
+	* dwarf2/read.h (struct dwarf2_per_bfd) <queue>: Make optional.
+
+2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26828
 	* dwarf2/read.c (maybe_queue_comp_unit): Check if CU is expanded
 	to decide whether or not to enqueue it for expansion.
 	(follow_die_offset, follow_die_sig_1): Ensure we load the DIEs

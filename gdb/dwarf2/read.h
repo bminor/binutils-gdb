@@ -250,7 +250,7 @@ public:
     abstract_to_concrete;
 
   /* CUs that are queued to be read.  */
-  std::queue<dwarf2_queue_item> queue;
+  gdb::optional<std::queue<dwarf2_queue_item>> queue;
 
   /* We keep a separate reference to the partial symtabs, in case we
      are sharing them between objfiles.  This is only set after
