@@ -4837,6 +4837,7 @@ strip_main (int argc, char *argv[])
       struct stat statbuf;
       char *tmpname;
       int tmpfd = -1;
+      int copyfd = -1;
 
       if (get_file_size (argv[i]) < 1)
 	{
@@ -4846,7 +4847,11 @@ strip_main (int argc, char *argv[])
 
       if (output_file == NULL
 	  || filename_cmp (argv[i], output_file) == 0)
-	tmpname = make_tempname (argv[i], &tmpfd);
+	{
+	  tmpname = make_tempname (argv[i], &tmpfd);
+	  if (tmpfd >= 0)
+	    copyfd = dup (tmpfd);
+	}
       else
 	tmpname = output_file;
 
@@ -4864,14 +4869,18 @@ strip_main (int argc, char *argv[])
       if (status == 0)
 	{
 	  if (output_file != tmpname)
-	    status = (smart_rename (tmpname,
-				    output_file ? output_file : argv[i],
-				    preserve_dates ? &statbuf : NULL) != 0);
+	    status = smart_rename (tmpname,
+				   output_file ? output_file : argv[i],
+				   copyfd, &statbuf, preserve_dates) != 0;
 	  if (status == 0)
 	    status = hold_status;
 	}
       else
-	unlink_if_ordinary (tmpname);
+	{
+	  if (copyfd >= 0)
+	    close (copyfd);
+	  unlink_if_ordinary (tmpname);
+	}
       if (output_file != tmpname)
 	free (tmpname);
     }
@@ -5078,7 +5087,9 @@ copy_main (int argc, char *argv[])
   bfd_boolean formats_info = FALSE;
   bfd_boolean use_globalize = FALSE;
   bfd_boolean use_keep_global = FALSE;
-  int c, tmpfd = -1;
+  int c;
+  int tmpfd = -1;
+  int copyfd;
   struct stat statbuf;
   const bfd_arch_info_type *input_arch = NULL;
 
@@ -5916,10 +5927,15 @@ copy_main (int argc, char *argv[])
     }
 
   /* If there is no destination file, or the source and destination files
-     are the same, then create a temp and rename the result into the input.  */
+     are the same, then create a temp and copy the result into the input.  */
+  copyfd = -1;
   if (output_filename == NULL
       || filename_cmp (input_filename, output_filename) == 0)
-    tmpname = make_tempname (input_filename, &tmpfd);
+    {
+      tmpname = make_tempname (input_filename, &tmpfd);
+      if (tmpfd >= 0)
+	copyfd = dup (tmpfd);
+    }
   else
     tmpname = output_filename;
 
@@ -5934,11 +5950,15 @@ copy_main (int argc, char *argv[])
   if (status == 0)
     {
       if (tmpname != output_filename)
-	status = (smart_rename (tmpname, input_filename,
-				preserve_dates ? &statbuf : NULL) != 0);
+	status = smart_rename (tmpname, input_filename, copyfd,
+			       &statbuf, preserve_dates) != 0;
     }
   else
-    unlink_if_ordinary (tmpname);
+    {
+      if (copyfd >= 0)
+	close (copyfd);
+      unlink_if_ordinary (tmpname);
+    }
 
   if (tmpname != output_filename)
     free (tmpname);
