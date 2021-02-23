@@ -1,3 +1,10 @@
+2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* linux-low.cc (linux_process_target::filter_event): Return
+	void.
+	* linux-low.h (class linux_process_target) <filter_event>:
+	Return void.
+
 2021-02-12  Tom Tromey  <tromey@adacore.com>
 
 	* gdbreplay.cc (remote_desc): Remove.

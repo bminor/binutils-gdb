@@ -2243,7 +2243,7 @@ linux_low_ptrace_options (int attached)
   return options;
 }
 
-lwp_info *
+void
 linux_process_target::filter_event (int lwpid, int wstat)
 {
   client_state &cs = get_client_state ();
@@ -2292,10 +2292,10 @@ linux_process_target::filter_event (int lwpid, int wstat)
   if (child == NULL && WIFSTOPPED (wstat))
     {
       add_to_pid_list (&stopped_pids, lwpid, wstat);
-      return NULL;
+      return;
     }
   else if (child == NULL)
-    return NULL;
+    return;
 
   thread = get_lwp_thread (child);
 
@@ -2325,12 +2325,12 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	     report this one right now.  Leave the status pending for
 	     the next time we're able to report it.  */
 	  mark_lwp_dead (child, wstat);
-	  return child;
+	  return;
 	}
       else
 	{
 	  delete_lwp (child);
-	  return NULL;
+	  return;
 	}
     }
 
@@ -2358,7 +2358,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 		 the first instruction.  */
 	      child->status_pending_p = 1;
 	      child->status_pending = wstat;
-	      return child;
+	      return;
 	    }
 	}
     }
@@ -2397,7 +2397,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	{
 	  /* The event has been handled, so just return without
 	     reporting it.  */
-	  return NULL;
+	  return;
 	}
     }
 
@@ -2433,7 +2433,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	    debug_printf ("LLW: SIGSTOP caught for %s "
 			  "while stopping threads.\n",
 			  target_pid_to_str (ptid_of (thread)));
-	  return NULL;
+	  return;
 	}
       else
 	{
@@ -2444,13 +2444,13 @@ linux_process_target::filter_event (int lwpid, int wstat)
 			  target_pid_to_str (ptid_of (thread)));
 
 	  resume_one_lwp (child, child->stepping, 0, NULL);
-	  return NULL;
+	  return;
 	}
     }
 
   child->status_pending_p = 1;
   child->status_pending = wstat;
-  return child;
+  return;
 }
 
 bool
