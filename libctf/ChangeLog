@@ -24,7 +24,7 @@
 	* configure: Regenerate.
 	* Makefile.in: Regenerate.
 
-2021-02-17  Nick Alcock  <nick.alcock@oracle.com>
+2021-02-20  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-impl.h (ctf_dict_t) <ctf_symhash>: New.
 	<ctf_symhash_latest>: Likewise.
