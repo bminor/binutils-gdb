@@ -429,7 +429,7 @@ changequote([,])dnl
     case ${cpu_type} in
 
       bfin)
-	for f in bfin-parse.o bfin-lex-wrapper.o; do
+	for f in config/bfin-parse.o config/bfin-lex-wrapper.o; do
 	  case " $extra_objects " in
 	    *" $f "*) ;;
 	    *) extra_objects="$extra_objects $f" ;;
@@ -454,7 +454,7 @@ changequote([,])dnl
 	using_cgen=yes
 	;;
       m68k)
-	f=m68k-parse.o
+	f=config/m68k-parse.o
 	case " $extra_objects " in
 	  *" $f "*) ;;
 	  *) extra_objects="$extra_objects $f" ;;
@@ -614,7 +614,7 @@ changequote([,])dnl
         ;;
 
       rl78)
-	f=rl78-parse.o
+	f=config/rl78-parse.o
 	case " $extra_objects " in
 	  *" $f "*) ;;
 	  *) extra_objects="$extra_objects $f" ;;
@@ -622,7 +622,7 @@ changequote([,])dnl
 	;;
 
       rx)
-	f=rx-parse.o
+	f=config/rx-parse.o
 	case " $extra_objects " in
 	  *" $f "*) ;;
 	  *) extra_objects="$extra_objects $f" ;;

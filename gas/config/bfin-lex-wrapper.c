@@ -22,4 +22,4 @@
    that config.h can set the correct values for various things.  */
 
 #include "sysdep.h"
-#include "bfin-lex.c"
+#include "config/bfin-lex.c"

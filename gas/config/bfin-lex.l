@@ -23,7 +23,7 @@
 
 #include "as.h"
 #include "bfin-defs.h"
-#include "bfin-parse.h"
+#include "config/bfin-parse.h"
 
 static long parse_int (char **end);
 static int parse_halfreg (Register *r, int cl, char *hr);

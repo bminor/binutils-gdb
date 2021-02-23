@@ -1,3 +1,26 @@
+2021-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR 23691
+	* Makefile.am (TARGET_CPU_CFILES): Split off config/xtensa-relax.c..
+	(TARGET_CPU_HFILES): ..and config/xtensa-relax.h..
+	(TARGET_EXTRA_FILES): ..to here.  Add config/bfin-lex-wrapper.c,
+	and use alongside TARGET_CPU_CFILES.
+	(EXTRA_DIST): Update location of generated .c files.
+	(config/m68k-parse.c): New rule replacing m68k-parse.c rule.
+	(config/bfin-parse.c, config/rl78-parse.cm config/rx-parse.c),
+	(config/bfin-lex.c, config/bfin-lex-wrapper.@OBJEXT@): Similarly.
+	(itbl-lex-wrapper.@OBJEXT@): Simplify to just the needed
+	dependencies.
+	(itbl-parse.@OBJEXT@): Delete rule using NO_WERROR.
+	(itbl-parse.c, itbl-parse.h): Tidy.
+	* config/bfin-lex-wrapper.c: Include config/bfin-lex.c.
+	* config/bfin-lex.l: Include config/bfin-parse.h.
+	* configure.ac (extra_objects): Move object files corresponding
+	to .y and .l files now in config/ to config/.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2021-02-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-riscv.c (riscv_ip): Fix compile time warnings about
