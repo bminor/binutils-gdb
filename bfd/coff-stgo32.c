@@ -304,7 +304,9 @@ go32exe_check_format (bfd *abfd)
 
   /* Confirm that this is a go32stub.  */
   header_end = H_GET_16 (abfd, filehdr_dos.e_cparhdr) * 16UL;
-  if (! CONST_STRNEQ (go32exe_temp_stub + header_end, "go32stub"))
+  if (go32exe_temp_stub_size < header_end
+      || go32exe_temp_stub_size - header_end < sizeof "go32stub" - 1
+      || !CONST_STRNEQ (go32exe_temp_stub + header_end, "go32stub"))
     goto fail_format;
 
   /* Set origin to where the COFF header starts and seek there.  */

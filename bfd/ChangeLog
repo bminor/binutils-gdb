@@ -1,3 +1,9 @@
+2021-02-24  Alan Modra  <amodra@gmail.com>
+
+	PR 27459
+	* coff-stgo32.c (go32exe_check_format): Sanity check size of
+	header to avoid a buffer overflow.
+
 2021-02-22  Alan Modra  <amodra@gmail.com>
 
 	* coff-rs6000.c (_bfd_xcoff_reloc_type_lookup): Remove BFD_RELOC_16.
