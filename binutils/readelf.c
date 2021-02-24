@@ -19907,17 +19907,8 @@ print_gnu_build_attribute_description (Elf_Internal_Note *  pnote,
       break;
 
     case 8:
-      if (is_32bit_elf)
-	{
-	  /* FIXME: We should check that version 3+ notes are being used here...  */
-	  start = byte_get ((unsigned char *) pnote->descdata, 4);
-	  end = byte_get ((unsigned char *) pnote->descdata + 4, 4);
-	}
-      else
-	{
-	  start = byte_get ((unsigned char *) pnote->descdata, 8);
-	  end = 0;
-	}
+      start = byte_get ((unsigned char *) pnote->descdata, 4);
+      end = byte_get ((unsigned char *) pnote->descdata + 4, 4);
       break;
 
     case 16:

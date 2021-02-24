@@ -2246,23 +2246,8 @@ merge_gnu_build_notes (bfd *          abfd,
 	  break;
 
 	case 8:
-	  if (! is_64bit (abfd))
-	    {
-	      start = bfd_get_32 (abfd, pnote->note.descdata);
-	      end = bfd_get_32 (abfd, pnote->note.descdata + 4);
-	    }
-	  else
-	    {
-	      start = bfd_get_64 (abfd, pnote->note.descdata);
-	      /* FIXME: For version 1 and 2 notes we should try to
-		 calculate the end address by finding a symbol whose
-		 value is START, and then adding in its size.
-
-		 For now though, since v1 and v2 was not intended to
-		 handle gaps, we chose an artificially large end
-		 address.  */
-	      end = (bfd_vma) -1;
-	    }
+	  start = bfd_get_32 (abfd, pnote->note.descdata);
+	  end = bfd_get_32 (abfd, pnote->note.descdata + 4);
 	  break;
 
 	case 16:
