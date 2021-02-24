@@ -279,6 +279,36 @@ write_to_memory (CORE_ADDR address, const gdb_byte *buffer,
 					 length, buffer);
 }
 
+/* Return the type used for DWARF operations where the type is
+   generic in the DWARF spec, the ARCH is a target architecture
+   of the type and ADDR_SIZE is expected size of the address.
+   Only certain sizes are supported.  */
+
+static type *
+address_type (gdbarch *arch, int addr_size)
+{
+  dwarf_gdbarch_types *types
+    = (dwarf_gdbarch_types *) gdbarch_data (arch, dwarf_arch_cookie);
+  int ndx;
+
+  if (addr_size == 2)
+    ndx = 0;
+  else if (addr_size == 4)
+    ndx = 1;
+  else if (addr_size == 8)
+    ndx = 2;
+  else
+    error (_("Unsupported address size in DWARF expressions: %d bits"),
+	   HOST_CHAR_BIT * addr_size);
+
+  if (types->dw_types[ndx] == nullptr)
+    types->dw_types[ndx]
+      = arch_integer_type (arch, HOST_CHAR_BIT * addr_size,
+			   0, "<signed DWARF address type>");
+
+  return types->dw_types[ndx];
+}
+
 class dwarf_location;
 class dwarf_value;
 
@@ -339,6 +369,27 @@ public:
   {
     ill_formed_expression ();
   }
+
+  /* Read contents from the described location.
+
+     The read operation is performed in the context of a FRAME.
+     BIT_SIZE is the number of bits to read.  The data read is copied
+     to the caller-managed buffer BUF.  BIG_ENDIAN defines the
+     endianness of the target.  BITS_TO_SKIP is a bit offset into the
+     location and BUF_BIT_OFFSET is buffer BUF's bit offset.
+     LOCATION_BIT_LIMIT is a maximum number of bits that location can
+     hold, where value zero signifies that there is no such
+     restriction.
+
+     Note that some location types can be read without a FRAME context.
+
+     If the location is optimized out or unavailable, the OPTIMIZED and
+     UNAVAILABLE outputs are set accordingly.  */
+  virtual void read (frame_info *frame, gdb_byte *buf,
+		     int buf_bit_offset, size_t bit_size,
+		     LONGEST bits_to_skip, size_t location_bit_limit,
+		     bool big_endian, int *optimized,
+		     int *unavailable) const = 0;
 
 protected:
   /* Architecture of the location.  */
@@ -422,6 +473,14 @@ public:
   dwarf_undefined (gdbarch *arch)
     : dwarf_location (arch, 0)
   {}
+
+  void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
+	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
+	     bool big_endian, int *optimized, int *unavailable) const override
+  {
+    *unavailable = 0;
+    *optimized = 1;
+  }
 };
 
 class dwarf_memory final : public dwarf_location
@@ -437,6 +496,11 @@ public:
   };
 
   dwarf_value_up to_value (struct type *type) const override;
+
+  void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
+	     size_t bit_size, LONGEST bits_to_skip,
+	     size_t location_bit_limit, bool big_endian,
+	     int *optimized, int *unavailable) const override;
 
 private:
   /* True if the location belongs to a stack memory region.  */
@@ -464,6 +528,46 @@ dwarf_memory::to_value (struct type *type) const
   return make_unique<dwarf_value> (m_offset, type);
 }
 
+void
+dwarf_memory::read (frame_info *frame, gdb_byte *buf,
+		    int buf_bit_offset, size_t bit_size,
+		    LONGEST bits_to_skip, size_t location_bit_limit,
+		    bool big_endian, int *optimized, int *unavailable) const
+{
+  LONGEST total_bits_to_skip = bits_to_skip;
+  CORE_ADDR start_address
+    = m_offset + (m_bit_suboffset + total_bits_to_skip) / HOST_CHAR_BIT;
+  gdb::byte_vector temp_buf;
+
+  *optimized = 0;
+  total_bits_to_skip += m_bit_suboffset;
+
+  if (total_bits_to_skip % HOST_CHAR_BIT == 0
+      && bit_size % HOST_CHAR_BIT == 0
+      && buf_bit_offset % HOST_CHAR_BIT == 0)
+    {
+      /* Everything is byte-aligned, no buffer needed.  */
+      read_from_memory (start_address,
+			buf + buf_bit_offset / HOST_CHAR_BIT,
+			bit_size / HOST_CHAR_BIT, m_stack, unavailable);
+    }
+  else
+    {
+      LONGEST this_size = bits_to_bytes (total_bits_to_skip, bit_size);
+      temp_buf.resize (this_size);
+
+      /* Can only read from memory on byte granularity so an
+	 additional buffer is required.  */
+      read_from_memory (start_address, temp_buf.data (), this_size,
+			m_stack, unavailable);
+
+      if (!*unavailable)
+	copy_bitwise (buf, buf_bit_offset, temp_buf.data (),
+		      total_bits_to_skip % HOST_CHAR_BIT,
+		      bit_size, big_endian);
+    }
+}
+
 /* Register location description entry.  */
 
 class dwarf_register final : public dwarf_location
@@ -473,10 +577,55 @@ public:
     : dwarf_location (arch, offset), m_regnum (regnum)
   {}
 
+  void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
+	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
+	     bool big_endian, int *optimized, int *unavailable) const override;
+
 private:
   /* DWARF register number.  */
   unsigned int m_regnum;
 };
+
+void
+dwarf_register::read (frame_info *frame, gdb_byte *buf,
+		      int buf_bit_offset, size_t bit_size,
+		      LONGEST bits_to_skip, size_t location_bit_limit,
+		      bool big_endian, int *optimized, int *unavailable) const
+{
+  LONGEST total_bits_to_skip = bits_to_skip;
+  size_t read_bit_limit = location_bit_limit;
+  gdbarch *frame_arch = get_frame_arch (frame);
+  int reg = dwarf_reg_to_regnum_or_error (frame_arch, m_regnum);
+  ULONGEST reg_bits = HOST_CHAR_BIT * register_size (frame_arch, reg);
+  gdb::byte_vector temp_buf;
+
+  if (big_endian)
+    {
+      if (!read_bit_limit || reg_bits <= read_bit_limit)
+	read_bit_limit = bit_size;
+
+      total_bits_to_skip += reg_bits - (m_offset * HOST_CHAR_BIT
+					+ m_bit_suboffset + read_bit_limit);
+    }
+  else
+    total_bits_to_skip += m_offset * HOST_CHAR_BIT + m_bit_suboffset;
+
+  LONGEST this_size = bits_to_bytes (total_bits_to_skip, bit_size);
+  temp_buf.resize (this_size);
+
+  if (frame == nullptr)
+    internal_error (__FILE__, __LINE__, _("invalid frame information"));
+
+  /* Can only read from a register on byte granularity so an
+     additional buffer is required.  */
+  read_from_register (frame, reg, total_bits_to_skip / HOST_CHAR_BIT,
+		      temp_buf, optimized, unavailable);
+
+  /* Only copy data if valid.  */
+  if (!*optimized && !*unavailable)
+    copy_bitwise (buf, buf_bit_offset, temp_buf.data (),
+		  total_bits_to_skip % HOST_CHAR_BIT, bit_size, big_endian);
+}
 
 /* Implicit location description entry.  Describes a location
    description not found on the target but instead saved in a
@@ -493,6 +642,10 @@ public:
       m_byte_order (byte_order)
   {}
 
+  void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
+	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
+	     bool big_endian, int *optimized, int *unavailable) const override;
+
 private:
   /* Implicit location contents as a stream of bytes in target byte-order.  */
   gdb::byte_vector m_contents;
@@ -500,6 +653,45 @@ private:
   /* Contents original byte order.  */
   bfd_endian m_byte_order;
 };
+
+void
+dwarf_implicit::read (frame_info *frame, gdb_byte *buf,
+		      int buf_bit_offset, size_t bit_size,
+		      LONGEST bits_to_skip, size_t location_bit_limit,
+		      bool big_endian, int *optimized, int *unavailable) const
+{
+  ULONGEST implicit_bit_size = HOST_CHAR_BIT * m_contents.size ();
+  LONGEST total_bits_to_skip = bits_to_skip;
+  size_t read_bit_limit = location_bit_limit;
+
+  *optimized = 0;
+  *unavailable = 0;
+
+  /* Cut off at the end of the implicit value.  */
+  if (m_byte_order == BFD_ENDIAN_BIG)
+    {
+      if (!read_bit_limit || read_bit_limit > implicit_bit_size)
+	read_bit_limit = bit_size;
+
+      total_bits_to_skip
+	+= implicit_bit_size - (m_offset * HOST_CHAR_BIT
+			       + m_bit_suboffset + read_bit_limit);
+    }
+  else
+    total_bits_to_skip += m_offset * HOST_CHAR_BIT + m_bit_suboffset;
+
+  if (total_bits_to_skip >= implicit_bit_size)
+    {
+      *unavailable = 1;
+      return;
+    }
+
+  if (bit_size > implicit_bit_size - total_bits_to_skip)
+    bit_size = implicit_bit_size - total_bits_to_skip;
+
+  copy_bitwise (buf, buf_bit_offset, m_contents.data (),
+		total_bits_to_skip, bit_size, big_endian);
+}
 
 /* Implicit pointer location description entry.  */
 
@@ -516,6 +708,10 @@ public:
       m_addr_size (addr_size), m_die_offset (die_offset)
   {}
 
+  void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
+	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
+	     bool big_endian, int *optimized, int *unavailable) const override;
+
 private:
   /* Per object file data of the implicit pointer.  */
   dwarf2_per_objfile *m_per_objfile;
@@ -529,6 +725,44 @@ private:
   /* DWARF die offset pointed by the implicit pointer.  */
   sect_offset m_die_offset;
 };
+
+void
+dwarf_implicit_pointer::read (frame_info *frame, gdb_byte *buf,
+			      int buf_bit_offset, size_t bit_size,
+                              LONGEST bits_to_skip, size_t location_bit_limit,
+			      bool big_endian, int *optimized,
+			      int *unavailable) const
+{
+  frame_info *actual_frame = frame;
+  LONGEST total_bits_to_skip = bits_to_skip + m_bit_suboffset;
+
+  if (actual_frame == nullptr)
+    actual_frame = get_selected_frame (_("No frame selected."));
+
+  struct type *type
+    = address_type (get_frame_arch (actual_frame), m_addr_size);
+
+  struct value *value
+    = indirect_synthetic_pointer (m_die_offset, m_offset, m_per_cu,
+				  m_per_objfile, actual_frame, type);
+
+  gdb_byte *value_contents = value_contents_raw (value).data ()
+			     + total_bits_to_skip / HOST_CHAR_BIT;
+
+  if (total_bits_to_skip % HOST_CHAR_BIT == 0
+      && bit_size % HOST_CHAR_BIT == 0
+      && buf_bit_offset % HOST_CHAR_BIT == 0)
+    {
+      memcpy (buf + buf_bit_offset / HOST_CHAR_BIT,
+	      value_contents, bit_size / HOST_CHAR_BIT);
+    }
+  else
+    {
+      copy_bitwise (buf, buf_bit_offset, value_contents,
+		    total_bits_to_skip % HOST_CHAR_BIT,
+		    bit_size, big_endian);
+    }
+}
 
 /* Composite location description entry.  */
 
@@ -544,6 +778,10 @@ public:
     gdb_assert (location != nullptr);
     m_pieces.emplace_back (std::move (location), bit_size);
   }
+
+  void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
+	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
+	     bool big_endian, int *optimized, int *unavailable) const override;
 
 private:
   /* Composite piece that contains a piece location
@@ -565,6 +803,50 @@ private:
   /* Vector of composite pieces.  */
   std::vector<piece> m_pieces;
 };
+
+void
+dwarf_composite::read (frame_info *frame, gdb_byte *buf,
+		       int buf_bit_offset, size_t bit_size,
+		       LONGEST bits_to_skip, size_t location_bit_limit,
+		       bool big_endian, int *optimized, int *unavailable) const
+{
+  unsigned int pieces_num = m_pieces.size ();
+  LONGEST total_bits_to_skip = bits_to_skip;
+  unsigned int i;
+
+  total_bits_to_skip += m_offset * HOST_CHAR_BIT + m_bit_suboffset;
+
+  /* Skip pieces covered by the read offset.  */
+  for (i = 0; i < pieces_num; i++)
+    {
+      LONGEST piece_bit_size = m_pieces[i].size;
+
+      if (total_bits_to_skip < piece_bit_size)
+        break;
+
+      total_bits_to_skip -= piece_bit_size;
+    }
+
+  for (; i < pieces_num; i++)
+    {
+      LONGEST piece_bit_size = m_pieces[i].size;
+      LONGEST actual_bit_size = piece_bit_size;
+
+      if (actual_bit_size > bit_size)
+        actual_bit_size = bit_size;
+
+      m_pieces[i].location->read (frame, buf, buf_bit_offset,
+				  actual_bit_size, total_bits_to_skip,
+				  piece_bit_size, big_endian,
+				  optimized, unavailable);
+
+      if (bit_size == actual_bit_size || *optimized || *unavailable)
+	break;
+
+      buf_bit_offset += actual_bit_size;
+      bit_size -= actual_bit_size;
+    }
+}
 
 struct piece_closure
 {
@@ -1181,27 +1463,8 @@ sect_variable_value (sect_offset sect_off,
 struct type *
 dwarf_expr_context::address_type () const
 {
-  gdbarch *arch = this->m_per_objfile->objfile->arch ();
-  dwarf_gdbarch_types *types
-    = (dwarf_gdbarch_types *) gdbarch_data (arch, dwarf_arch_cookie);
-  int ndx;
-
-  if (this->m_addr_size == 2)
-    ndx = 0;
-  else if (this->m_addr_size == 4)
-    ndx = 1;
-  else if (this->m_addr_size == 8)
-    ndx = 2;
-  else
-    error (_("Unsupported address size in DWARF expressions: %d bits"),
-	   8 * this->m_addr_size);
-
-  if (types->dw_types[ndx] == NULL)
-    types->dw_types[ndx]
-      = arch_integer_type (arch, 8 * this->m_addr_size,
-			   0, "<signed DWARF address type>");
-
-  return types->dw_types[ndx];
+  return ::address_type (this->m_per_objfile->objfile->arch (),
+			 this->m_addr_size);
 }
 
 /* Create a new context for the expression evaluator.  */
