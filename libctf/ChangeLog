@@ -1,3 +1,7 @@
+2021-02-26  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.in: Regenerate.
+
 2021-02-21  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Invoke AC_CANONICAL_TARGET, AC_CANONICAL_HOST
