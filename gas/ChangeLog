@@ -1,3 +1,12 @@
+2021-03-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* config/tc-riscv.c (ext_version_table): Add b, zba, zbb and zbc.
+	(riscv_multi_subset_supports): Add INSN_CLASS_ZB*.
+	* testsuite/gas/riscv/b-ext-64.s: Bitmanip test case.
+	* testsuite/gas/riscv/b-ext-64.d: Likewise.
+	* testsuite/gas/riscv/b-ext.s: Likewise.
+	* testsuite/gas/riscv/b-ext.d: Likewise.
+
 2021-03-12  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* testsuite/gas/aarch64/illegal-sysreg-7.d: New test.

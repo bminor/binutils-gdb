@@ -139,6 +139,10 @@ static const struct riscv_ext_version ext_version_table[] =
 
   {"zihintpause", ISA_SPEC_CLASS_DRAFT, 1, 0},
 
+  {"zbb",   ISA_SPEC_CLASS_DRAFT, 0, 93},
+  {"zba",   ISA_SPEC_CLASS_DRAFT, 0, 93},
+  {"zbc",   ISA_SPEC_CLASS_DRAFT, 0, 93},
+
   /* Terminate the list.  */
   {NULL, 0, 0, 0}
 };
@@ -329,6 +333,15 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
       return riscv_subset_supports ("zifencei");
     case INSN_CLASS_ZIHINTPAUSE:
       return riscv_subset_supports ("zihintpause");
+
+    case INSN_CLASS_ZBB:
+      return riscv_subset_supports ("zbb");
+
+    case INSN_CLASS_ZBA:
+      return riscv_subset_supports ("zba");
+
+    case INSN_CLASS_ZBC:
+      return riscv_subset_supports ("zbc");
 
     default:
       as_fatal ("internal: unreachable");

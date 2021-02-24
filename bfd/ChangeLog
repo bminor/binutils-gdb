@@ -1,3 +1,7 @@
+2021-03-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* elfxx-riscv.c (riscv_std_z_ext_strtab): Add zba, zbb and zbc.
+
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
 	* reloc.c (BFD_RELOC_PPC_TLS_LE, BFD_RELOC_PPC_TLS_IE,

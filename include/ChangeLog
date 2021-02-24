@@ -1,3 +1,8 @@
+2021-03-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* opcode/riscv-opc.h: Support zba, zbb and zbc extensions.
+	* opcode/riscv.h (riscv_insn_class): Add INSN_CLASS_ZB*.
+
 2021-03-12  Frederic Cambus  <fred@statdns.com>
 
 	* elf/common.h (NT_NETBSD_PAX, NT_NETBSD_PAX_MPROTECT)
