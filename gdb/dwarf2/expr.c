@@ -271,6 +271,8 @@ write_to_memory (CORE_ADDR address, const gdb_byte *buffer,
 					 length, buffer);
 }
 
+class dwarf_location;
+
 /* Base class that describes entries found on a DWARF expression
    evaluation stack.  */
 
@@ -283,6 +285,8 @@ protected:
 public:
   virtual ~dwarf_entry () = default;
 };
+
+using dwarf_entry_up = std::unique_ptr<dwarf_entry>;
 
 /* Location description entry found on a DWARF expression evaluation
    stack.
@@ -332,6 +336,8 @@ protected:
   bool m_initialised = true;
 };
 
+using dwarf_location_up = std::unique_ptr<dwarf_location>;
+
 /* Value entry found on a DWARF expression evaluation stack.  */
 
 class dwarf_value final : public dwarf_entry
@@ -373,6 +379,10 @@ public:
     return unpack_long (m_type, m_contents.data ());
   }
 
+  /* Convert DWARF value into a DWARF memory location description.
+     ARCH defines an architecture of the location described.  */
+  dwarf_location_up to_location (struct gdbarch *arch) const;
+
 private:
   /* Value contents as a stream of bytes in target byte order.  */
   gdb::byte_vector m_contents;
@@ -409,6 +419,21 @@ private:
   /* True if the location belongs to a stack memory region.  */
   bool m_stack;
 };
+
+dwarf_location_up
+dwarf_value::to_location (struct gdbarch *arch) const
+{
+  LONGEST offset;
+
+  if (gdbarch_integer_to_address_p (arch))
+    offset = gdbarch_integer_to_address (arch, m_type, m_contents.data ());
+  else
+    offset = extract_unsigned_integer (m_contents.data (),
+				       TYPE_LENGTH (m_type),
+				       type_byte_order (m_type));
+
+  return make_unique<dwarf_memory> (arch, offset);
+}
 
 /* Register location description entry.  */
 

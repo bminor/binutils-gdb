@@ -206,4 +206,22 @@ extern int hex2bin (const char *hex, gdb_byte *bin, int count);
 /* Like the above, but return a gdb::byte_vector.  */
 gdb::byte_vector hex2bin (const char *hex);
 
+#if __cplusplus >= 201402L
+#include <memory>
+
+using std::make_unique;
+#else
+namespace gdb {
+
+/* Stolen from libstdc++ and adjusted, so probably fine license-wise.  */
+template<typename _Tp, typename ... _Args>
+std::unique_ptr<_Tp>
+make_unique (_Args &&... __args)
+{
+  return std::unique_ptr<_Tp> (new _Tp (std::forward<_Args>(__args)...));
+}
+
+}
+#endif /* __cplusplus >= 201402L */
+
 #endif /* COMMON_COMMON_UTILS_H */
