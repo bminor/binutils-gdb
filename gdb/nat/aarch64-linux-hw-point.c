@@ -23,8 +23,8 @@
 #include "aarch64-linux-hw-point.h"
 
 #include <sys/uio.h>
-#include <asm/ptrace.h>
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 #include <elf.h>
 
 /* Number of hardware breakpoints/watchpoints the target supports.

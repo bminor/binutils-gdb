@@ -1,3 +1,8 @@
+2021-02-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* nat/aarch64-linux-hw-point.c: Include <asm/ptrace.h> after
+	<sys/ptrace.h>.
+
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* exec.c (set_section_command): Move variable declarations into
