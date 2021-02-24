@@ -1,3 +1,14 @@
+2021-02-24  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27336
+	* dwarf2/attribute.c (attribute::form_is_signed): New function
+	factored out of ...
+	* dwarf2/attribute.h (attribute::as_signed): ... here.
+	(attribute::is_nonnegative, attribute::as_nonnegative): New function.
+	(attribute::form_is_signed): Declare.
+	* dwarf2/read.c (new_symbol): Use is_nonnegative and as_nonnegative
+	for DW_AT_decl_file.
+
 2021-02-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* nat/aarch64-linux-hw-point.c: Add comment regarding include

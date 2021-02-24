@@ -22225,10 +22225,10 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       attr = dwarf2_attr (die,
 			  inlined_func ? DW_AT_call_file : DW_AT_decl_file,
 			  cu);
-      if (attr != nullptr && attr->form_is_unsigned ())
+      if (attr != nullptr && attr->is_nonnegative ())
 	{
 	  file_name_index file_index
-	    = (file_name_index) attr->as_unsigned ();
+	    = (file_name_index) attr->as_nonnegative ();
 	  struct file_entry *fe;
 
 	  if (cu->line_header != NULL)

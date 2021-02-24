@@ -70,7 +70,7 @@ struct attribute
      form.  */
   LONGEST as_signed () const
   {
-    gdb_assert (form == DW_FORM_sdata || form == DW_FORM_implicit_const);
+    gdb_assert (form_is_signed ());
     return u.snd;
   }
 
@@ -90,6 +90,28 @@ struct attribute
     gdb_assert (form_is_unsigned ());
     gdb_assert (!requires_reprocessing);
     return u.unsnd;
+  }
+
+  /* Return true if the value is nonnegative.  Requires that that
+     reprocessing not be needed.  */
+  bool is_nonnegative () const
+  {
+    if (form_is_unsigned ())
+      return true;
+    if (form_is_signed ())
+      return as_signed () >= 0;
+    return false;
+  }
+
+  /* Return the nonnegative value.  Requires that that reprocessing not be
+     needed.  */
+  ULONGEST as_nonnegative () const
+  {
+    if (form_is_unsigned ())
+      return as_unsigned ();
+    if (form_is_signed ())
+      return (ULONGEST)as_signed ();
+    gdb_assert (false);
   }
 
   /* Return non-zero if ATTR's value is a section offset --- classes
@@ -146,6 +168,9 @@ struct attribute
 
   /* Check if the attribute's form is an unsigned integer form.  */
   bool form_is_unsigned () const;
+
+  /* Check if the attribute's form is a signed integer form.  */
+  bool form_is_signed () const;
 
   /* Check if the attribute's form is a form that requires
      "reprocessing".  */
