@@ -799,6 +799,179 @@ fortran_value_subarray (struct value *array, struct expression *exp,
   return array;
 }
 
+/* Evaluate FORTRAN_ASSOCIATED expressions.  Both GDBARCH and LANG are
+   extracted from the expression being evaluated.  POINTER is the required
+   first argument to the 'associated' keyword, and TARGET is the optional
+   second argument, this will be nullptr if the user only passed one
+   argument to their use of 'associated'.  */
+
+static struct value *
+fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
+		    struct value *pointer, struct value *target = nullptr)
+{
+  struct type *result_type = language_bool_type (lang, gdbarch);
+
+  /* All Fortran pointers should have the associated property, this is
+     how we know the pointer is pointing at something or not.  */
+  struct type *pointer_type = check_typedef (value_type (pointer));
+  if (TYPE_ASSOCIATED_PROP (pointer_type) == nullptr
+      && pointer_type->code () != TYPE_CODE_PTR)
+    error (_("ASSOCIATED can only be applied to pointers"));
+
+  /* Get an address from POINTER.  Fortran (or at least gfortran) models
+     array pointers as arrays with a dynamic data address, so we need to
+     use two approaches here, for real pointers we take the contents of the
+     pointer as an address.  For non-pointers we take the address of the
+     content.  */
+  CORE_ADDR pointer_addr;
+  if (pointer_type->code () == TYPE_CODE_PTR)
+    pointer_addr = value_as_address (pointer);
+  else
+    pointer_addr = value_address (pointer);
+
+  /* The single argument case, is POINTER associated with anything?  */
+  if (target == nullptr)
+    {
+      bool is_associated = false;
+
+      /* If POINTER is an actual pointer and doesn't have an associated
+	 property then we need to figure out whether this pointer is
+	 associated by looking at the value of the pointer itself.  We make
+	 the assumption that a non-associated pointer will be set to 0.
+	 This is probably true for most targets, but might not be true for
+	 everyone.  */
+      if (pointer_type->code () == TYPE_CODE_PTR
+	  && TYPE_ASSOCIATED_PROP (pointer_type) == nullptr)
+	is_associated = (pointer_addr != 0);
+      else
+	is_associated = !type_not_associated (pointer_type);
+      return value_from_longest (result_type, is_associated ? 1 : 0);
+    }
+
+  /* The two argument case, is POINTER associated with TARGET?  */
+
+  struct type *target_type = check_typedef (value_type (target));
+
+  struct type *pointer_target_type;
+  if (pointer_type->code () == TYPE_CODE_PTR)
+    pointer_target_type = TYPE_TARGET_TYPE (pointer_type);
+  else
+    pointer_target_type = pointer_type;
+
+  struct type *target_target_type;
+  if (target_type->code () == TYPE_CODE_PTR)
+    target_target_type = TYPE_TARGET_TYPE (target_type);
+  else
+    target_target_type = target_type;
+
+  if (pointer_target_type->code () != target_target_type->code ()
+      || (pointer_target_type->code () != TYPE_CODE_ARRAY
+	  && (TYPE_LENGTH (pointer_target_type)
+	      != TYPE_LENGTH (target_target_type))))
+    error (_("arguments to associated must be of same type and kind"));
+
+  /* If TARGET is not in memory, or the original pointer is specifically
+     known to be not associated with anything, then the answer is obviously
+     false.  Alternatively, if POINTER is an actual pointer and has no
+     associated property, then we have to check if its associated by
+     looking the value of the pointer itself.  We make the assumption that
+     a non-associated pointer will be set to 0.  This is probably true for
+     most targets, but might not be true for everyone.  */
+  if (value_lval_const (target) != lval_memory
+      || type_not_associated (pointer_type)
+      || (TYPE_ASSOCIATED_PROP (pointer_type) == nullptr
+	  && pointer_type->code () == TYPE_CODE_PTR
+	  && pointer_addr == 0))
+    return value_from_longest (result_type, 0);
+
+  /* See the comment for POINTER_ADDR above.  */
+  CORE_ADDR target_addr;
+  if (target_type->code () == TYPE_CODE_PTR)
+    target_addr = value_as_address (target);
+  else
+    target_addr = value_address (target);
+
+  /* Wrap the following checks inside a do { ... } while (false) loop so
+     that we can use `break' to jump out of the loop.  */
+  bool is_associated = false;
+  do
+    {
+      /* If the addresses are different then POINTER is definitely not
+	 pointing at TARGET.  */
+      if (pointer_addr != target_addr)
+	break;
+
+      /* If POINTER is a real pointer (i.e. not an array pointer, which are
+	 implemented as arrays with a dynamic content address), then this
+	 is all the checking that is needed.  */
+      if (pointer_type->code () == TYPE_CODE_PTR)
+	{
+	  is_associated = true;
+	  break;
+	}
+
+      /* We have an array pointer.  Check the number of dimensions.  */
+      int pointer_dims = calc_f77_array_dims (pointer_type);
+      int target_dims = calc_f77_array_dims (target_type);
+      if (pointer_dims != target_dims)
+	break;
+
+      /* Now check that every dimension has the same upper bound, lower
+	 bound, and stride value.  */
+      int dim = 0;
+      while (dim < pointer_dims)
+	{
+	  LONGEST pointer_lowerbound, pointer_upperbound, pointer_stride;
+	  LONGEST target_lowerbound, target_upperbound, target_stride;
+
+	  pointer_type = check_typedef (pointer_type);
+	  target_type = check_typedef (target_type);
+
+	  struct type *pointer_range = pointer_type->index_type ();
+	  struct type *target_range = target_type->index_type ();
+
+	  if (!get_discrete_bounds (pointer_range, &pointer_lowerbound,
+				    &pointer_upperbound))
+	    break;
+
+	  if (!get_discrete_bounds (target_range, &target_lowerbound,
+				    &target_upperbound))
+	    break;
+
+	  if (pointer_lowerbound != target_lowerbound
+	      || pointer_upperbound != target_upperbound)
+	    break;
+
+	  /* Figure out the stride (in bits) for both pointer and target.
+	     If either doesn't have a stride then we take the element size,
+	     but we need to convert to bits (hence the * 8).  */
+	  pointer_stride = pointer_range->bounds ()->bit_stride ();
+	  if (pointer_stride == 0)
+	    pointer_stride
+	      = type_length_units (check_typedef
+				     (TYPE_TARGET_TYPE (pointer_type))) * 8;
+	  target_stride = target_range->bounds ()->bit_stride ();
+	  if (target_stride == 0)
+	    target_stride
+	      = type_length_units (check_typedef
+				     (TYPE_TARGET_TYPE (target_type))) * 8;
+	  if (pointer_stride != target_stride)
+	    break;
+
+	  ++dim;
+	}
+
+      if (dim < pointer_dims)
+	break;
+
+      is_associated = true;
+    }
+  while (false);
+
+  return value_from_longest (result_type, is_associated ? 1 : 0);
+}
+
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -999,6 +1172,32 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       }
       break;
 
+    case FORTRAN_ASSOCIATED:
+      {
+	int nargs = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 2;
+
+	/* This assertion should be enforced by the expression parser.  */
+	gdb_assert (nargs == 1 || nargs == 2);
+
+	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+
+	if (nargs == 1)
+	  {
+	    if (noside == EVAL_SKIP)
+	      return eval_skip_value (exp);
+	    return fortran_associated (exp->gdbarch, exp->language_defn,
+				       arg1);
+	  }
+
+	arg2 = evaluate_subexp (nullptr, exp, pos, noside);
+	if (noside == EVAL_SKIP)
+	  return eval_skip_value (exp);
+	return fortran_associated (exp->gdbarch, exp->language_defn,
+				   arg1, arg2);
+      }
+      break;
+
     case BINOP_FORTRAN_CMPLX:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
@@ -1143,6 +1342,7 @@ operator_length_f (const struct expression *exp, int pc, int *oplenp,
       args = 2;
       break;
 
+    case FORTRAN_ASSOCIATED:
     case FORTRAN_LBOUND:
     case FORTRAN_UBOUND:
       oplen = 3;
@@ -1191,6 +1391,27 @@ print_binop_subexp_f (struct expression *exp, int *pos,
   fputs_filtered (")", stream);
 }
 
+/* Helper for PRINT_SUBEXP_F.  Arguments are as for PRINT_SUBEXP_F, except
+   the extra argument NAME which is the text that should be printed as the
+   name of this operation.  */
+
+static void
+print_unop_or_binop_subexp_f (struct expression *exp, int *pos,
+			      struct ui_file *stream, enum precedence prec,
+			      const char *name)
+{
+  unsigned nargs = longest_to_int (exp->elts[*pos + 1].longconst);
+  (*pos) += 3;
+  fprintf_filtered (stream, "%s (", name);
+  for (unsigned tem = 0; tem < nargs; tem++)
+    {
+      if (tem != 0)
+	fputs_filtered (", ", stream);
+      print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
+    }
+  fputs_filtered (")", stream);
+}
+
 /* Special expression printing for Fortran.  */
 
 static void
@@ -1230,22 +1451,17 @@ print_subexp_f (struct expression *exp, int *pos,
       print_binop_subexp_f (exp, pos, stream, prec, "MODULO");
       return;
 
+    case FORTRAN_ASSOCIATED:
+      print_unop_or_binop_subexp_f (exp, pos, stream, prec, "ASSOCIATED");
+      return;
+
     case FORTRAN_LBOUND:
+      print_unop_or_binop_subexp_f (exp, pos, stream, prec, "LBOUND");
+      return;
+
     case FORTRAN_UBOUND:
-      {
-	unsigned nargs = longest_to_int (exp->elts[*pos + 1].longconst);
-	(*pos) += 3;
-	fprintf_filtered (stream, "%s (",
-			  ((op == FORTRAN_LBOUND) ? "LBOUND" : "UBOUND"));
-	for (unsigned tem = 0; tem < nargs; tem++)
-	  {
-	    if (tem != 0)
-	      fputs_filtered (", ", stream);
-	    print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
-	  }
-	fputs_filtered (")", stream);
-	return;
-      }
+      print_unop_or_binop_subexp_f (exp, pos, stream, prec, "UBOUND");
+      return;
 
     case OP_F77_UNDETERMINED_ARGLIST:
       (*pos)++;
@@ -1277,6 +1493,7 @@ dump_subexp_body_f (struct expression *exp,
       operator_length_f (exp, (elt + 1), &oplen, &nargs);
       break;
 
+    case FORTRAN_ASSOCIATED:
     case FORTRAN_LBOUND:
     case FORTRAN_UBOUND:
       operator_length_f (exp, (elt + 3), &oplen, &nargs);
@@ -1311,6 +1528,7 @@ operator_check_f (struct expression *exp, int pos,
     case UNOP_FORTRAN_ALLOCATED:
     case BINOP_FORTRAN_CMPLX:
     case BINOP_FORTRAN_MODULO:
+    case FORTRAN_ASSOCIATED:
     case FORTRAN_LBOUND:
     case FORTRAN_UBOUND:
       /* Any references to objfiles are held in the arguments to this

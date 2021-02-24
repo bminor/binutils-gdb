@@ -1,5 +1,18 @@
 2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.y (f77_keywords): Add 'associated'.
+	* f-lang.c (fortran_associated): New function.
+	(evaluate_subexp_f): Handle FORTRAN_ASSOCIATED.
+	(operator_length_f): Likewise.
+	(print_unop_or_binop_subexp_f): New function.
+	(print_subexp_f): Make use of print_unop_or_binop_subexp_f for
+	FORTRAN_ASSOCIATED, FORTRAN_LBOUND, and FORTRAN_UBOUND.
+	(dump_subexp_body_f): Handle FORTRAN_ASSOCIATED.
+	(operator_check_f): Likewise.
+	* std-operator.def: Add FORTRAN_ASSOCIATED.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.y (fortran_operators): Add ".xor.".
 
 2021-02-24  Tom de Vries  <tdevries@suse.de>

@@ -447,3 +447,4 @@ OP (BINOP_FORTRAN_MODULO)
 /* Builtins that take one or two operands.  */
 OP (FORTRAN_LBOUND)
 OP (FORTRAN_UBOUND)
+OP (FORTRAN_ASSOCIATED)

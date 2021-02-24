@@ -1,5 +1,10 @@
 2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/associated.exp: New file.
+	* gdb.fortran/associated.f90: New file.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/dot-ops.exp (dot_operations): Test ".xor.".
 
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
