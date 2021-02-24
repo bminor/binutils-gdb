@@ -413,6 +413,18 @@ public:
 		      bool big_endian, int *optimized,
 		      int *unavailable) const = 0;
 
+  /* Apply dereference operation on the DWARF location description.
+     Operation returns a DWARF value of a given TYPE type while FRAME
+     contains a frame context information of the location.  ADDR_INFO
+     (if present) describes a passed in memory buffer if a regular
+     memory read is not desired for certain address range.  If the SIZE
+     is specified, it must be equal or smaller than the TYPE type size.
+     If SIZE is smaller than the type size, the value will be zero
+     extended to the difference.  */
+  virtual std::unique_ptr<dwarf_value> deref
+    (frame_info *frame, const property_addr_info *addr_info,
+     struct type *type, size_t size = 0) const;
+
 protected:
   /* Architecture of the location.  */
   gdbarch *m_arch;
@@ -485,6 +497,43 @@ private:
 
 using dwarf_value_up = std::unique_ptr<dwarf_value>;
 
+std::unique_ptr<dwarf_value>
+dwarf_location::deref (frame_info *frame, const property_addr_info *addr_info,
+		       struct type *type, size_t size) const
+{
+  bool big_endian = type_byte_order (type) == BFD_ENDIAN_BIG;
+  size_t actual_size = size != 0 ? size : TYPE_LENGTH (type);
+
+  if (actual_size > TYPE_LENGTH (type))
+    ill_formed_expression ();
+
+  /* If the size of the object read from memory is different
+     from the type length, we need to zero-extend it.  */
+  gdb::byte_vector read_buf (TYPE_LENGTH (type), 0);
+  gdb_byte *buf_ptr = read_buf.data ();
+  int optimized, unavailable;
+
+  if (big_endian)
+    buf_ptr += TYPE_LENGTH (type) - actual_size;
+
+  this->read (frame, buf_ptr, 0, actual_size * HOST_CHAR_BIT,
+	      0, 0, big_endian, &optimized, &unavailable);
+
+  if (optimized)
+    throw_error (OPTIMIZED_OUT_ERROR,
+		 _("Can't dereference "
+		   "update bitfield; containing word "
+		   "has been optimized out"));
+  if (unavailable)
+    throw_error (NOT_AVAILABLE_ERROR,
+		 _("Can't dereference "
+		   "update bitfield; containing word "
+		   "is unavailable"));
+
+  return make_unique<dwarf_value>
+    (gdb::array_view<const gdb_byte> (read_buf), type);
+}
+
 /* Undefined location description entry.  This is a special location
    description type that describes the location description that is
    not known.  */
@@ -536,6 +585,11 @@ public:
 	      int buf_bit_offset, size_t bit_size, LONGEST bits_to_skip,
 	      size_t location_bit_limit, bool big_endian,
 	      int *optimized, int *unavailable) const override;
+
+  std::unique_ptr<dwarf_value> deref (frame_info *frame,
+				      const property_addr_info *addr_info,
+				      struct type *type,
+				      size_t size = 0) const override;
 
 private:
   /* True if the location belongs to a stack memory region.  */
@@ -657,6 +711,75 @@ dwarf_memory::write (frame_info *frame, const gdb_byte *buf,
       write_to_memory (start_address, temp_buf.data (), this_size,
 		       m_stack, unavailable);
     }
+}
+
+std::unique_ptr<dwarf_value>
+dwarf_memory::deref (frame_info *frame, const property_addr_info *addr_info,
+		     struct type *type, size_t size) const
+{
+  bool big_endian = type_byte_order (type) == BFD_ENDIAN_BIG;
+  size_t actual_size = size != 0 ? size : TYPE_LENGTH (type);
+
+  if (actual_size > TYPE_LENGTH (type))
+    ill_formed_expression ();
+
+  gdb::byte_vector read_buf (TYPE_LENGTH (type), 0);
+  size_t size_in_bits = actual_size * HOST_CHAR_BIT;
+  gdb_byte *buf_ptr = read_buf.data ();
+  bool passed_in_buf = false;
+
+  if (big_endian)
+    buf_ptr += TYPE_LENGTH (type) - actual_size;
+
+  /* Covers the case where we have a passed in memory that is not
+     part of the target and requires for the location description
+     to address it instead of addressing the actual target
+     memory.  */
+  LONGEST this_size = bits_to_bytes (m_bit_suboffset, size_in_bits);
+
+  /* We shouldn't have a case where we read from a passed in
+     memory and the same memory being marked as stack. */
+  if (!m_stack && this_size && addr_info != nullptr
+      && addr_info->valaddr.data () != nullptr)
+    {
+      CORE_ADDR offset = (CORE_ADDR) m_offset - addr_info->addr;
+
+      if (offset < addr_info->valaddr.size ()
+	  && offset + this_size <= addr_info->valaddr.size ())
+	{
+	  /* Using second buffer here because the copy_bitwise
+	     doesn't support in place copy.  */
+	  gdb::byte_vector temp_buf (this_size);
+
+	  memcpy (temp_buf.data (), addr_info->valaddr.data () + offset,
+		  this_size);
+	  copy_bitwise (buf_ptr, 0, temp_buf.data (),
+			m_bit_suboffset, size_in_bits, big_endian);
+	  passed_in_buf = true;
+	}
+    }
+
+  if (!passed_in_buf)
+    {
+      int optimized, unavailable;
+
+      this->read (frame, buf_ptr, 0, size_in_bits, 0, 0,
+		  big_endian, &optimized, &unavailable);
+
+      if (optimized)
+	throw_error (OPTIMIZED_OUT_ERROR,
+		     _("Can't dereference "
+		     "update bitfield; containing word "
+		     "has been optimized out"));
+      if (unavailable)
+	throw_error (NOT_AVAILABLE_ERROR,
+		     _("Can't dereference "
+		     "update bitfield; containing word "
+		     "is unavailable"));
+    }
+
+  return make_unique<dwarf_value>
+    (gdb::array_view<const gdb_byte> (read_buf), type);
 }
 
 /* Register location description entry.  */
