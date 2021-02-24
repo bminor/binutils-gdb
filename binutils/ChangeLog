@@ -1,6 +1,10 @@
 2021-02-26  Alan Modra  <amodra@gmail.com>
 
 	Backport from mainline
+	2021-02-25  Alan Modra  <amodra@gmail.com>
+	PR 27456
+	* rename.c (simple_copy): Mark target_stat ATTRIBUTE_UNUSED.
+
 	2021-02-24  Alan Modra  <amodra@gmail.com>
 		    Siddhesh Poyarekar  <siddhesh@gotplt.org>
 	PR 27456

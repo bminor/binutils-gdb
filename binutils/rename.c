@@ -35,7 +35,8 @@
    Return 0 if ok, -1 if error.  */
 
 static int
-simple_copy (int fromfd, const char *to, struct stat *target_stat)
+simple_copy (int fromfd, const char *to,
+	     struct stat *target_stat ATTRIBUTE_UNUSED)
 {
   int tofd, nread;
   int saved;
