@@ -1,5 +1,11 @@
 2021-02-24  Nick Clifton  <nickc@redhat.com>
 
+	PR 27285
+	* od-elf32_avr.c (elf32_avr_get_memory_usage): Check for overflows
+	when adding together the section sizes.
+
+2021-02-24  Nick Clifton  <nickc@redhat.com>
+
 	* objcopy.c (merge_gnu_build_notes): Remove support for v1/v2 GNU
 	build notes.
 	* readelf.c (print_gnu_build_attribute_description): Likewise.

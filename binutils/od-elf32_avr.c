@@ -166,9 +166,9 @@ elf32_avr_get_device_info (bfd *abfd, char *description,
 
 static void
 elf32_avr_get_memory_usage (bfd *abfd,
-        bfd_size_type *text_usage,
-        bfd_size_type *data_usage,
-        bfd_size_type *eeprom_usage)
+			    bfd_size_type *text_usage,
+			    bfd_size_type *data_usage,
+			    bfd_size_type *eeprom_usage)
 {
 
   bfd_size_type avr_datasize = 0;
@@ -177,6 +177,7 @@ elf32_avr_get_memory_usage (bfd *abfd,
   bfd_size_type bootloadersize = 0;
   bfd_size_type noinitsize = 0;
   bfd_size_type eepromsize = 0;
+  bfd_size_type res;
   asection *section;
 
   if ((section = bfd_get_section_by_name (abfd, ".data")) != NULL)
@@ -192,8 +193,50 @@ elf32_avr_get_memory_usage (bfd *abfd,
   if ((section = bfd_get_section_by_name (abfd, ".eeprom")) != NULL)
     eepromsize = bfd_section_size (section);
 
-  *text_usage = avr_textsize + avr_datasize + bootloadersize;
-  *data_usage = avr_datasize + avr_bsssize + noinitsize;
+  /* PR 27285: Check for overflow.  */
+  res = avr_textsize + avr_datasize;
+  if (res < avr_textsize || res < avr_datasize)
+    {
+      fprintf (stderr, _("Warning: textsize (%#lx) + datasize (%#lx) overflows size type\n"),
+	       (long) avr_textsize, (long) avr_datasize);
+      res = (bfd_size_type) -1;
+    }
+  else
+    {
+      bfd_size_type res2;
+      res2 = res + bootloadersize;
+      if (res2 < bootloadersize || res2 < res)
+	{
+	  fprintf (stderr, _("Warning: textsize (%#lx) + datasize (%#lx) + bootloadersize (%#lx) overflows size type\n"),
+		   (long) avr_textsize, (long) avr_datasize, (long) bootloadersize);
+	  res2 = (bfd_size_type) -1;
+	}
+      res = res2;
+    }
+  *text_usage = res;
+
+  res = avr_datasize + avr_bsssize;
+  if (res < avr_datasize || res < avr_bsssize)
+    {
+      fprintf (stderr, _("Warning: datatsize (%#lx) + bssssize (%#lx) overflows size type\n"),
+	       (long) avr_datasize, (long) avr_bsssize);
+      res = (bfd_size_type) -1;
+    }
+  else
+    {
+      bfd_size_type res2;
+
+      res2 = res + noinitsize;
+      if (res2 < res || res2 < noinitsize)
+	{
+	  fprintf (stderr, _("Warning: datasize (%#lx) + bsssize (%#lx) + noinitsize (%#lx) overflows size type\n"),
+		   (long) avr_datasize, (long) avr_bsssize, (long) noinitsize);
+	  res2 = (bfd_size_type) -1;
+	}
+      res = res2;
+    }
+  *data_usage = res;
+
   *eeprom_usage = eepromsize;
 }
 
@@ -220,21 +263,21 @@ elf32_avr_dump_mem_usage (bfd *abfd)
     }
 
   elf32_avr_get_memory_usage (abfd, &text_usage, &data_usage,
-     &eeprom_usage);
+			      &eeprom_usage);
 
   printf ("AVR Memory Usage\n"
           "----------------\n"
           "Device: %s\n\n", device.name);
 
   /* Text size */
-  printf ("Program:%8ld bytes", text_usage);
+  printf ("Program:%8lu bytes", text_usage);
   if (device.flash_size > 0)
     printf (" (%2.1f%% Full)", ((float) text_usage / device.flash_size) * 100);
 
   printf ("\n(.text + .data + .bootloader)\n\n");
 
   /* Data size */
-  printf ("Data:   %8ld bytes", data_usage);
+  printf ("Data:   %8lu bytes", data_usage);
   if (device.ram_size > 0)
     printf (" (%2.1f%% Full)", ((float) data_usage / device.ram_size) * 100);
 
@@ -243,7 +286,7 @@ elf32_avr_dump_mem_usage (bfd *abfd)
   /* EEPROM size */
   if (eeprom_usage > 0)
     {
-      printf ("EEPROM: %8ld bytes", eeprom_usage);
+      printf ("EEPROM: %8lu bytes", eeprom_usage);
       if (device.eeprom_size > 0)
         printf (" (%2.1f%% Full)", ((float) eeprom_usage / device.eeprom_size) * 100);
 
