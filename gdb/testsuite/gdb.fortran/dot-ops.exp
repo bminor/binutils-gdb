@@ -31,6 +31,7 @@ proc test_dot_operations {} {
 	    set not ".NOT."
 	    set eqv ".EQV."
 	    set neqv ".NEQV."
+	    set xor ".XOR."
 	    set eq ".EQ."
 	    set ne ".NE."
 	    set le ".LE."
@@ -45,6 +46,7 @@ proc test_dot_operations {} {
 	    set not ".not."
 	    set eqv ".eqv."
 	    set neqv ".neqv."
+	    set xor ".xor."
 	    set eq ".eq."
 	    set ne ".ne."
 	    set le ".le."
@@ -80,6 +82,12 @@ proc test_dot_operations {} {
 	gdb_test "p $true $neqv $false" " = .TRUE."
 	gdb_test "p $false $neqv $true" " = .TRUE."
 	gdb_test "p $false $neqv $false" " = .FALSE."
+
+	# And the legacy alias for NEQV, XOR
+	gdb_test "p $true $xor $true" " = .FALSE."
+	gdb_test "p $true $xor $false" " = .TRUE."
+	gdb_test "p $false $xor $true" " = .TRUE."
+	gdb_test "p $false $xor $false" " = .FALSE."
 
 	# Arithmetic EQ
 	gdb_test "p 5 $eq 4" " = .FALSE."

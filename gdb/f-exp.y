@@ -982,6 +982,7 @@ static const struct token fortran_operators[] =
   { ".eq.", EQUAL, BINOP_END, false },
   { ".eqv.", EQUAL, BINOP_END, false },
   { ".neqv.", NOTEQUAL, BINOP_END, false },
+  { ".xor.", NOTEQUAL, BINOP_END, false },
   { "==", EQUAL, BINOP_END, false },
   { ".ne.", NOTEQUAL, BINOP_END, false },
   { "/=", NOTEQUAL, BINOP_END, false },
