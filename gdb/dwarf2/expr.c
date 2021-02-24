@@ -90,6 +90,14 @@ bits_to_bytes (ULONGEST start, ULONGEST n_bits)
   return (start % HOST_CHAR_BIT + n_bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
 }
 
+/* Throw an exception about the invalid DWARF expression.  */
+
+static void ATTRIBUTE_NORETURN
+ill_formed_expression ()
+{
+  error (_("Ill-formed DWARF expression"));
+}
+
 /* See expr.h.  */
 
 CORE_ADDR
@@ -272,6 +280,7 @@ write_to_memory (CORE_ADDR address, const gdb_byte *buffer,
 }
 
 class dwarf_location;
+class dwarf_value;
 
 /* Base class that describes entries found on a DWARF expression
    evaluation stack.  */
@@ -320,6 +329,16 @@ public:
   {
     m_initialised = initialised;
   };
+
+  /* Convert DWARF entry into a DWARF value.  TYPE defines a desired type of
+     the returned DWARF value if it doesn't already have one.
+
+     If the conversion from that location description kind to a value is not
+     supported, throw an error.  */
+  virtual std::unique_ptr<dwarf_value> to_value (struct type *type) const
+  {
+    ill_formed_expression ();
+  }
 
 protected:
   /* Architecture of the location.  */
@@ -391,6 +410,8 @@ private:
   struct type *m_type;
 };
 
+using dwarf_value_up = std::unique_ptr<dwarf_value>;
+
 /* Undefined location description entry.  This is a special location
    description type that describes the location description that is
    not known.  */
@@ -415,6 +436,8 @@ public:
     m_stack = stack;
   };
 
+  dwarf_value_up to_value (struct type *type) const override;
+
 private:
   /* True if the location belongs to a stack memory region.  */
   bool m_stack;
@@ -433,6 +456,12 @@ dwarf_value::to_location (struct gdbarch *arch) const
 				       type_byte_order (m_type));
 
   return make_unique<dwarf_memory> (arch, offset);
+}
+
+dwarf_value_up
+dwarf_memory::to_value (struct type *type) const
+{
+  return make_unique<dwarf_value> (m_offset, type);
 }
 
 /* Register location description entry.  */
