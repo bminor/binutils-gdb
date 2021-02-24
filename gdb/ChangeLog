@@ -1,5 +1,10 @@
 2021-02-24  Kevin Buettner  <kevinb@redhat.com>
 
+	* nat/aarch64-linux-hw-point.c: Add comment regarding include
+	order for <sys/ptrace.h> and <asm/ptrace.h>.
+
+2021-02-24  Kevin Buettner  <kevinb@redhat.com>
+
 	* nat/aarch64-linux-hw-point.c: Include <asm/ptrace.h> after
 	<sys/ptrace.h>.
 
