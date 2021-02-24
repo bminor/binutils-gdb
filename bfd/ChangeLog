@@ -1,3 +1,11 @@
+2021-02-25  Alan Modra  <amodra@gmail.com>
+
+	PR 27441
+	* elf-bfd.h (struct elf_link_hash_entry): Add ref_ir_nonweak.
+	* elflink.c (elf_link_add_object_symbols): Set ref_ir_nonweak and
+	use when deciding an as-needed library should be loaded instead
+	of using the binding of the library definition.
+
 2021-02-24  Alan Modra  <amodra@gmail.com>
 
 	PR 27459

@@ -184,6 +184,8 @@ struct elf_link_hash_entry
   /* Symbol has a non-weak reference from a non-shared object (other than
      the object in which it is defined).  */
   unsigned int ref_regular_nonweak : 1;
+  /* Symbol has a non-weak reference from a LTO IR object file.  */
+  unsigned int ref_ir_nonweak : 1;
   /* Dynamic symbol has been adjustd.  */
   unsigned int dynamic_adjusted : 1;
   /* Symbol needs a copy reloc.  */
