@@ -425,6 +425,22 @@ public:
     (frame_info *frame, const property_addr_info *addr_info,
      struct type *type, size_t size = 0) const;
 
+/* Read data from the VALUE contents to the location specified by the
+   location description.
+
+   The read operation is performed in the context of a FRAME.  BIT_SIZE
+   is the number of bits to read.  VALUE_BIT_OFFSET is a bit offset
+   into a VALUE content and BITS_TO_SKIP is a bit offset into the
+   location.  LOCATION_BIT_LIMIT is a maximum number of bits that
+   location can hold, where value zero signifies that there is no such
+   restriction.
+
+   Note that some location types can be read without a FRAME context.  */
+  virtual void read_from_gdb_value (frame_info *frame, struct value *value,
+				    int value_bit_offset,
+				    LONGEST bits_to_skip, size_t bit_size,
+				    size_t location_bit_limit) const;
+
 protected:
   /* Architecture of the location.  */
   gdbarch *m_arch;
@@ -441,6 +457,31 @@ protected:
 };
 
 using dwarf_location_up = std::unique_ptr<dwarf_location>;
+
+void
+dwarf_location::read_from_gdb_value (frame_info *frame, struct value *value,
+				     int value_bit_offset,
+				     LONGEST bits_to_skip, size_t bit_size,
+				     size_t location_bit_limit) const
+{
+  int optimized, unavailable;
+  bool big_endian = type_byte_order (value_type (value)) == BFD_ENDIAN_BIG;
+
+  this->write (frame, value_contents (value).data (), value_bit_offset,
+	       bit_size, bits_to_skip, location_bit_limit,
+	       big_endian, &optimized, &unavailable);
+
+  if (optimized)
+    throw_error (OPTIMIZED_OUT_ERROR,
+		 _("Can't do read-modify-write to "
+		   "update bitfield; containing word "
+		   "has been optimized out"));
+  if (unavailable)
+    throw_error (NOT_AVAILABLE_ERROR,
+		 _("Can't do read-modify-write to "
+		   "update bitfield; containing word "
+		   "is unavailable"));
+}
 
 /* Value entry found on a DWARF expression evaluation stack.  */
 
@@ -996,6 +1037,16 @@ public:
     *unavailable = 0;
   }
 
+  /* Reading from and writing to an implicit pointer is not meaningful,
+     so we just skip them here.  */
+  void read_from_gdb_value (frame_info *frame, struct value *value,
+			    int value_bit_offset,
+			    LONGEST bits_to_skip, size_t bit_size,
+			    size_t location_bit_limit) const override
+  {
+    mark_value_bits_optimized_out (value, bits_to_skip, bit_size);
+  }
+
 private:
   /* Per object file data of the implicit pointer.  */
   dwarf2_per_objfile *m_per_objfile;
@@ -1071,6 +1122,11 @@ public:
 	      int buf_bit_offset, size_t bit_size, LONGEST bits_to_skip,
 	      size_t location_bit_limit, bool big_endian,
 	      int *optimized, int *unavailable) const override;
+
+  void read_from_gdb_value (frame_info *frame, struct value *value,
+			    int value_bit_offset,
+			    LONGEST bits_to_skip, size_t bit_size,
+			    size_t location_bit_limit) const override;
 
 private:
   /* Composite piece that contains a piece location
@@ -1179,6 +1235,49 @@ dwarf_composite::write (frame_info *frame, const gdb_byte *buf,
 
       buf_bit_offset += actual_bit_size;
       bit_size -= actual_bit_size;
+    }
+}
+
+void
+dwarf_composite::read_from_gdb_value (frame_info *frame, struct value *value,
+				      int value_bit_offset,
+				      LONGEST bits_to_skip, size_t bit_size,
+				      size_t location_bit_limit) const
+{
+  ULONGEST total_bits_to_skip
+    = bits_to_skip + HOST_CHAR_BIT * m_offset + m_bit_suboffset;
+  ULONGEST remaining_bit_size = bit_size;
+  ULONGEST bit_offset = value_bit_offset;
+  unsigned int pieces_num = m_pieces.size ();
+  unsigned int i;
+
+  /* Advance to the first non-skipped piece.  */
+  for (i = 0; i < pieces_num; i++)
+    {
+      ULONGEST piece_bit_size = m_pieces[i].size;
+
+      if (total_bits_to_skip < piece_bit_size)
+	break;
+
+      total_bits_to_skip -= piece_bit_size;
+    }
+
+  for (; i < pieces_num; i++)
+    {
+      const dwarf_location &location = *m_pieces[i].location;
+      ULONGEST piece_bit_size = m_pieces[i].size;
+      size_t this_bit_size = piece_bit_size - total_bits_to_skip;
+
+      if (this_bit_size > remaining_bit_size)
+	this_bit_size = remaining_bit_size;
+
+      location.read_from_gdb_value (frame, value, bit_offset,
+				    total_bits_to_skip, this_bit_size,
+				    piece_bit_size);
+
+      bit_offset += this_bit_size;
+      remaining_bit_size -= this_bit_size;
+      total_bits_to_skip = 0;
     }
 }
 
