@@ -1,3 +1,13 @@
+2021-02-25  Jan Matyas  <jmatyas@codasip.com>
+
+	PR gdb/26819
+	* remote.c (remote_target::start_remote): Ensure the single
+	thread, automatically added for remote targets without the
+	concept of threading, is initially in set to the "resumed"
+	state.
+	* remote.c (remote_target::add_current_inferior_and_thread):
+	Add return value - return the main thread.
+
 2021-02-25  Jan Vrany  <jan.vrany@labware.com>
 
 	* gdb/mi/mi-interp.c (mi_traceframe_changed): Remove trailing \n from output.

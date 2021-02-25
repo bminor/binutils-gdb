@@ -741,7 +741,7 @@ public: /* Remote specific methods.  */
   int remote_resume_with_vcont (ptid_t ptid, int step,
 				gdb_signal siggnal);
 
-  void add_current_inferior_and_thread (const char *wait_status);
+  thread_info *add_current_inferior_and_thread (const char *wait_status);
 
   ptid_t wait_ns (ptid_t ptid, struct target_waitstatus *status,
 		  target_wait_flags options);
@@ -4409,9 +4409,11 @@ remote_target::get_current_thread (const char *wait_status)
    whose response is a stop reply from which we can also try
    extracting the thread.  If the target doesn't support the explicit
    qC query, we infer the current thread from that stop reply, passed
-   in in WAIT_STATUS, which may be NULL.  */
+   in in WAIT_STATUS, which may be NULL.
 
-void
+   The function returns pointer to the main thread of the inferior. */
+
+thread_info *
 remote_target::add_current_inferior_and_thread (const char *wait_status)
 {
   struct remote_state *rs = get_remote_state ();
@@ -4445,6 +4447,8 @@ remote_target::add_current_inferior_and_thread (const char *wait_status)
      yet.  */
   thread_info *tp = add_thread_silent (this, curr_ptid);
   switch_to_thread_no_regs (tp);
+
+  return tp;
 }
 
 /* Print info about a thread that was found already stopped on
@@ -4800,7 +4804,8 @@ remote_target::start_remote (int from_tty, int extended_p)
 	  /* Target has no concept of threads at all.  GDB treats
 	     non-threaded target as single-threaded; add a main
 	     thread.  */
-	  add_current_inferior_and_thread (wait_status);
+	  thread_info *tp = add_current_inferior_and_thread (wait_status);
+	  get_remote_thread_info (tp)->set_resumed ();
 	}
       else
 	{

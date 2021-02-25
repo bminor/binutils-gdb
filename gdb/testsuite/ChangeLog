@@ -1,3 +1,10 @@
+2021-02-25  Jan Matyas  <jmatyas@codasip.com>
+
+	PR gdb/26819
+	* gdb.server/stop-reply-no-thread.exp: Add two test
+	scenarios that cover remote targets which do not have
+	the concept of threads.
+
 2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/associated.exp: Add missing '-wrap' argument.

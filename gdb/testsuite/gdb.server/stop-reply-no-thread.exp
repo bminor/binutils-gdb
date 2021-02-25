@@ -112,3 +112,13 @@ foreach_with_prefix to_disable { "" Tthread T } {
 	run_test $to_disable $t_nonstop
     }
 }
+
+# Regression for PR gdb/26819: Cover the case when GDBserver does not report
+# any threads (i.e. the remote target has no concept of threads).
+#
+# Scenario 1: Disable 'T' and 'qfThreadInfo' packets
+# Scenario 2: Disable all threading packets
+foreach_with_prefix to_disable { "T,qfThreadInfo" "threads" } {
+    # Non-stop mode not applicable - off.
+    run_test $to_disable off
+}
