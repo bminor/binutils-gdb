@@ -572,6 +572,8 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	    break;
 	}
 
+      if (name[0] == '\0')
+        goto skip_dup;
       if (name[0] == '~')
 	new_name_holder.reset (tilde_expand (name));
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM

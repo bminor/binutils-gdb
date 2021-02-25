@@ -1,3 +1,8 @@
+2021-02-27  Lancelot Six  <lsix@lancelotsix.com>
+
+	PR gdb/27393
+	* source.c (add_path): Skip empty dirnames.
+
 2021-02-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* nat/aarch64-sve-linux-ptrace.h: Add comment regarding
