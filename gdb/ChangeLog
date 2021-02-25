@@ -1,3 +1,8 @@
+2021-02-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* nat/aarch64-sve-linux-ptrace.h: Add comment regarding
+	include order for <sys/ptrace.h> and <asm/ptrace.h>.
+
 2021-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26861
