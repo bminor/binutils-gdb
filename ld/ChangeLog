@@ -1,3 +1,7 @@
+2021-02-25  Jan Beulich  <jbeulich@suse.com>
+
+	* ld.texi (PROVIDE): Downgrade "error" to "diagnostic".
+
 2021-02-21  Alan Modra  <amodra@gmail.com>
 
 	* ldexp.c (exp_fold_tree_1): Warn on script defining a symbol

@@ -4447,8 +4447,8 @@ SECTIONS
 @end smallexample
 
 In this example, if the program defines @samp{_etext} (with a leading
-underscore), the linker will give a multiple definition error.  If, on
-the other hand, the program defines @samp{etext} (with no leading
+underscore), the linker will give a multiple definition diagnostic.  If,
+on the other hand, the program defines @samp{etext} (with no leading
 underscore), the linker will silently use the definition in the program.
 If the program references @samp{etext} but does not define it, the
 linker will use the definition in the linker script.
