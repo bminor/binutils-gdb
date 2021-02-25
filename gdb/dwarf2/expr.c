@@ -465,6 +465,24 @@ public:
      return false;
   }
 
+  /* Recursive indirecting of the implicit pointer location description
+     if that location is or encapsulates an implicit pointer.  The
+     operation is performed in a given FRAME context, using the TYPE as
+     the type of the pointer.  Where POINTER_OFFSET is an offset
+     applied to that implicit pointer location description before the
+     operation.  BIT_OFFSET is a bit offset applied to the location and
+     BIT_LENGTH is a bit length of the read.
+
+     Indirecting is only performed on the implicit pointer location
+     description parts of the location.  */
+  virtual value *indirect_implicit_ptr (frame_info *frame, struct type *type,
+					LONGEST pointer_offset = 0,
+					LONGEST bit_offset = 0,
+					int bit_length = 0) const
+  {
+    return nullptr;
+  }
+
 protected:
   /* Architecture of the location.  */
   gdbarch *m_arch;
@@ -1101,6 +1119,11 @@ public:
      return true;
   }
 
+  value *indirect_implicit_ptr (frame_info *frame, struct type *type,
+				LONGEST pointer_offset = 0,
+				LONGEST bit_offset = 0,
+				int bit_length = 0) const override;
+
 private:
   /* Per object file data of the implicit pointer.  */
   dwarf2_per_objfile *m_per_objfile;
@@ -1153,6 +1176,17 @@ dwarf_implicit_pointer::read (frame_info *frame, gdb_byte *buf,
     }
 }
 
+value *
+dwarf_implicit_pointer::indirect_implicit_ptr (frame_info *frame,
+					       struct type *type,
+					       LONGEST pointer_offset,
+					       LONGEST bit_offset,
+					       int bit_length) const
+{
+  return indirect_synthetic_pointer (m_die_offset, m_offset + pointer_offset,
+				     m_per_cu, m_per_objfile, frame, type);
+}
+
 /* Composite location description entry.  */
 
 class dwarf_composite final : public dwarf_location
@@ -1188,6 +1222,11 @@ public:
 			   size_t location_bit_limit) const override;
 
   bool is_implicit_ptr_at (LONGEST bit_offset, int bit_length) const override;
+
+  value *indirect_implicit_ptr (frame_info *frame, struct type *type,
+				LONGEST pointer_offset = 0,
+				LONGEST bit_offset = 0,
+				int bit_length = 0) const override;
 
 private:
   /* Composite piece that contains a piece location
@@ -1420,6 +1459,40 @@ dwarf_composite::is_implicit_ptr_at (LONGEST bit_offset, int bit_length) const
     }
 
     return false;
+}
+
+value *
+dwarf_composite::indirect_implicit_ptr (frame_info *frame, struct type *type,
+					LONGEST pointer_offset,
+					LONGEST bit_offset,
+					int bit_length) const
+{
+  LONGEST total_bit_offset = HOST_CHAR_BIT * m_offset
+			     + m_bit_suboffset + bit_offset;
+
+  /* Advance to the first non-skipped piece.  */
+  for (const piece &piece : m_pieces)
+    {
+      ULONGEST read_bit_length = piece.size;
+
+      if (total_bit_offset >= read_bit_length)
+	{
+	  total_bit_offset -= read_bit_length;
+	  continue;
+	}
+
+      read_bit_length -= total_bit_offset;
+
+      if (bit_length < read_bit_length)
+	read_bit_length = bit_length;
+
+      return piece.location->indirect_implicit_ptr (frame, type,
+						    pointer_offset,
+						    total_bit_offset,
+						    read_bit_length);
+    }
+
+  return nullptr;
 }
 
 struct piece_closure
