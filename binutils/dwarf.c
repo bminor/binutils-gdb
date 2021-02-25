@@ -2131,6 +2131,10 @@ get_type_abbrev_from_form (unsigned long                 form,
 	}
       break;
 
+    case DW_FORM_ref_sup4:
+    case DW_FORM_ref_sup8:
+      break;
+
     case DW_FORM_ref1:
     case DW_FORM_ref2:
     case DW_FORM_ref4:
@@ -2387,7 +2391,7 @@ display_discr_list (unsigned long          form,
 
 	default:
 	  printf ("<corrupt>\n");
-	  warn (_("corrupt discr_list - unrecognised discriminant byte %#x\n"),
+	  warn (_("corrupt discr_list - unrecognized discriminant byte %#x\n"),
 		discriminant);
 	  return;
 	}
@@ -2460,6 +2464,7 @@ read_and_display_attr_value (unsigned long           attribute,
       SAFE_BYTE_GET_AND_INC (uvalue, data, pointer_size, end);
       break;
 
+    case DW_FORM_strp_sup:
     case DW_FORM_strp:
     case DW_FORM_line_strp:
     case DW_FORM_sec_offset:
@@ -2483,6 +2488,7 @@ read_and_display_attr_value (unsigned long           attribute,
       SAFE_BYTE_GET_AND_INC (uvalue, data, 2, end);
       break;
 
+    case DW_FORM_ref_sup4:
     case DW_FORM_ref4:
     case DW_FORM_data4:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 4, end);
@@ -2536,6 +2542,7 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_ref1:
     case DW_FORM_ref2:
     case DW_FORM_ref4:
+    case DW_FORM_ref_sup4:
     case DW_FORM_ref_udata:
       if (!do_loc)
 	printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x", uvalue + cu_offset));
@@ -2563,6 +2570,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	printf ("%c%s", delimiter, dwarf_vmatoa ("d", implicit_const));
       break;
 
+    case DW_FORM_ref_sup8:
     case DW_FORM_ref8:
     case DW_FORM_data8:
       if (!do_loc)
@@ -2755,8 +2763,13 @@ read_and_display_attr_value (unsigned long           attribute,
 	}
       break;
 
+    case DW_FORM_strp_sup:
+      if (!do_loc)
+	printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x", uvalue + cu_offset));
+      break;
+      
     default:
-      warn (_("Unrecognized form: %lu\n"), form);
+      warn (_("Unrecognized form: 0x%lx\n"), form);
       break;
     }
 
@@ -4332,6 +4345,81 @@ display_formatted_table (unsigned char *                   data,
       putchar ('\n');
     }
   return data;
+}
+
+static int
+display_debug_sup (struct dwarf_section *  section,
+		   void *                  file ATTRIBUTE_UNUSED)
+{
+  unsigned char * start = section->start;
+  unsigned char * end = section->start + section->size;
+  unsigned int version;
+  char is_supplementary;
+  const unsigned char * sup_filename;
+  size_t sup_filename_len;
+  unsigned int num_read;
+  int status;
+  dwarf_vma checksum_len;
+
+
+  introduce (section, TRUE);
+  if (section->size < 4)
+    {
+      error (_("corrupt .debug_sup section: size is too small\n"));
+      return 0;
+    }
+
+  /* Read the data.  */
+  SAFE_BYTE_GET_AND_INC (version, start, 2, end);
+  if (version < 5)
+    warn (_("corrupt .debug_sup section: version < 5"));
+
+  SAFE_BYTE_GET_AND_INC (is_supplementary, start, 1, end);
+  if (is_supplementary != 0 && is_supplementary != 1)
+    warn (_("corrupt .debug_sup section: is_supplementary not 0 or 1\n"));    
+
+  sup_filename = start;
+  if (is_supplementary && sup_filename[0] != 0)
+    warn (_("corrupt .debug_sup section: filename not empty in supplementary section\n"));
+
+  sup_filename_len = strnlen ((const char *) start, end - start);
+  if (sup_filename_len == (size_t) (end - start))
+    {
+      error (_("corrupt .debug_sup section: filename is not NUL terminated\n"));
+      return 0;
+    }
+  start += sup_filename_len + 1;
+
+  checksum_len = read_leb128 (start, end, FALSE /* unsigned */, & num_read, & status);
+  if (status)
+    {
+      error (_("corrupt .debug_sup section: bad LEB128 field for checksum length\n"));
+      checksum_len = 0;
+    }
+  start += num_read;
+  if (checksum_len > (dwarf_vma) (end - start))
+    {
+      error (_("corrupt .debug_sup section: checksum length is longer than the remaining section length\n"));
+      checksum_len = end - start;
+    }
+  else if (checksum_len < (dwarf_vma) (end - start))
+    {
+      warn (_("corrupt .debug_sup section: there are 0x%lx extra, unused bytes at the end of the section\n"),
+	    (long) ((end - start) - checksum_len));
+    }
+
+  printf (_("  Version:      %u\n"), version);
+  printf (_("  Is Supp:      %u\n"), is_supplementary);
+  printf (_("  Filename:     %s\n"), sup_filename);
+  printf (_("  Checksum Len: %lu\n"), (long) checksum_len);
+  if (checksum_len > 0)
+    {
+      printf (_("  Checksum:     "));
+      while (checksum_len--)
+	printf ("0x%x ", * start++ );
+      printf ("\n");
+    }
+  return 1;
 }
 
 static int
@@ -11131,9 +11219,62 @@ load_dwo_file (const char * main_filename, const char * name, const char * dir, 
   return separate_handle;
 }
 
+static void
+load_debug_sup_file (const char * main_filename, void * file)
+{
+  if (! load_debug_section (debug_sup, file))
+    return; /* No .debug_sup section.  */
+
+  struct dwarf_section * section;
+  section = & debug_displays [debug_sup].section;
+  assert (section != NULL);
+
+  if (section->start == NULL || section->size < 5)
+    {
+      warn (_(".debug_sup section is corrupt/empty\n"));
+      return;
+    }
+
+  if (section->start[2] != 0)
+    return; /* This is a supplementary file.  */
+
+  const char * filename = (const char *) section->start + 3;
+  if (strnlen (filename, section->size - 3) == section->size - 3)
+    {
+      warn (_("filename in .debug_sup section is corrupt\n"));
+      return;
+    }
+
+  if (filename[0] != '/' && strchr (main_filename, '/'))
+    {
+      char * new_name;
+      if (asprintf (& new_name, "%.*s/%s",
+		    (int) (strrchr (main_filename, '/') - main_filename),
+		    main_filename,
+		    filename) < 3)
+	warn (_("unable to construct path for supplementary debug file"));
+      else
+	filename = new_name;
+    }
+
+  void * handle;
+  handle = open_debug_file (filename);
+  if (handle == NULL)
+    {
+      warn (_("unable to open file '%s' referenced from .debug_sup section\n"), filename);
+      return;
+    }
+
+  printf (_("%s: Found supplementary debug file: %s\n\n"), main_filename, filename);
+
+  /* FIXME: Compare the checksums, if present.  */
+  add_separate_debug_file (filename, handle);
+}
+
 /* Load a debuglink section and/or a debugaltlink section, if either are present.
    Recursively check the loaded files for more of these sections.
-   FIXME: Should also check for DWO_* entries in the newlu loaded files.  */
+   Also follow any links in .debug_sup sections.
+   FIXME: Should also check for DWO_* entries in the newly loaded files.  */
 
 static void
 check_for_and_load_links (void * file, const char * filename)
@@ -11175,6 +11316,8 @@ check_for_and_load_links (void * file, const char * filename)
 				    first_separate_info->filename);
 	}
     }
+
+  load_debug_sup_file (filename, file);
 }
 
 /* Load the separate debug info file(s) attached to FILE, if any exist.
@@ -11541,6 +11684,7 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_tu_index",    "",			NO_ABBREVS },      display_cu_index,       &do_debug_cu_index,	FALSE },
   { { ".gnu_debuglink",     "",                 NO_ABBREVS },      display_debug_links,    &do_debug_links,     FALSE },
   { { ".gnu_debugaltlink",  "",                 NO_ABBREVS },      display_debug_links,    &do_debug_links,     FALSE },
+  { { ".debug_sup",         "",			NO_ABBREVS },      display_debug_sup,      &do_debug_links,	FALSE },
   /* Separate debug info files can containt their own .debug_str section,
      and this might be in *addition* to a .debug_str section already present
      in the main file.  Hence we need to have two entries for .debug_str.  */

@@ -120,6 +120,7 @@ enum dwarf_section_display_enum
   dwp_tu_index,
   gnu_debuglink,
   gnu_debugaltlink,
+  debug_sup,
   separate_debug_str,
   max
 };

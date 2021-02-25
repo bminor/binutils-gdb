@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Readelf and objdump can now display and use the contents of .debug_sup
+  sections.
+
 * Readelf and objdump will now follow links to separate debug info files by
   default.  This behaviour can be stopped via the use of the new -wN or
   --debug-dump=no-follow-links options for readelf and the -WN or

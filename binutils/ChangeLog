@@ -1,3 +1,20 @@
+2021-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (get_type_abbrev_from_form): Accept but ignore sup
+	forms.
+	(read_and_display_attr_value): Handle sup forms.
+	(display_debug_sup): New function.  Displays the contents of a
+	.debug_sup section.
+	(load_debug_sup_file): New function.  Loads the contents of a file
+	referenced by a .debug_sup section.
+	(check_for_and_load_links): Call load_debug_sup_file.
+	(debug_displays): Add entry for .debug_sup.
+	* dwarf.h (enum dwarf_section_display_enum): Add debug_sup.
+	* readelf.c (process_section_headers): Add support for debug_sup.
+	* doc/debug.options.texi: Note that the =links option will display
+	the contents of .debug_sup sections.
+	* NEWS: Mention the new support.
+
 2021-02-25  Alan Modra  <amodra@gmail.com>
 
 	PR 27456
