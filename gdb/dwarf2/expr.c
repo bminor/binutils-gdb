@@ -436,6 +436,10 @@ protected:
 public:
   virtual ~dwarf_location () = default;
 
+  /* Clone the location and return the result as a
+     dwarf_location pointer.  */
+  virtual std::unique_ptr<dwarf_location> clone_location () const = 0;
+
   /* Add bit offset to the location description.  */
   void add_bit_offset (LONGEST bit_offset)
   {
@@ -588,6 +592,16 @@ public:
     return false;
   }
 
+  /* Convert DWARF location description to the matching struct value
+     representation of the given TYPE type in a given FRAME.
+     SUBOBJ_TYPE information if specified, will be used for more
+     precise description of the source variable type information.
+     Where SUBOBJ_OFFSET defines an offset into the DWARF entry
+     contents.  */
+  virtual value *to_gdb_value (frame_info *frame, struct type *type,
+			       struct type *subobj_type,
+			       LONGEST subobj_offset) const = 0;
+
 protected:
   /* Architecture of the location.  */
   gdbarch *m_arch;
@@ -670,6 +684,15 @@ public:
     pack_long (m_contents.data (), type, value);
   }
 
+  dwarf_value (value *gdb_value)
+  {
+    m_type = value_type (gdb_value);
+    gdb::array_view<const gdb_byte> contents = value_contents_raw (gdb_value);
+    m_contents
+      = std::move (gdb::byte_vector (contents.begin (), contents.end ()));
+    m_gdb_value = gdb_value;
+  }
+
   gdb::array_view<const gdb_byte> contents () const
   {
     return m_contents;
@@ -694,12 +717,22 @@ public:
      ARCH defines an architecture of the location described.  */
   dwarf_location_up to_location (struct gdbarch *arch) const;
 
+  /* Convert DWARF value to the matching struct value representation
+     of the given TYPE type.  Where OFFSET defines an offset into the
+     DWARF value contents.  */
+  value *to_gdb_value (struct type *type, LONGEST offset = 0);
+
 private:
   /* Value contents as a stream of bytes in target byte order.  */
   gdb::byte_vector m_contents;
 
   /* Type of the value held by the entry.  */
   struct type *m_type;
+
+  /* Struct value representation of the DWARF value.   Only used until
+     a set of arithmethic/logic operations that works with this class
+     are implemented.  */
+  value *m_gdb_value = nullptr;
 };
 
 using dwarf_value_up = std::unique_ptr<dwarf_value>;
@@ -741,6 +774,23 @@ dwarf_location::deref (frame_info *frame, const property_addr_info *addr_info,
     (gdb::array_view<const gdb_byte> (read_buf), type);
 }
 
+value *
+dwarf_value::to_gdb_value (struct type *type, LONGEST offset)
+{
+  if (m_gdb_value != nullptr)
+    return m_gdb_value;
+
+  size_t type_len = TYPE_LENGTH (type);
+
+  if (offset + type_len > TYPE_LENGTH (m_type))
+    invalid_synthetic_pointer ();
+
+  m_gdb_value = allocate_value (type);
+  memcpy (value_contents_raw (m_gdb_value).data (),
+	  m_contents.data () + offset, type_len);
+  return m_gdb_value;
+}
+
 /* Undefined location description entry.  This is a special location
    description type that describes the location description that is
    not known.  */
@@ -751,6 +801,11 @@ public:
   dwarf_undefined (gdbarch *arch)
     : dwarf_location (arch, 0)
   {}
+
+  dwarf_location_up clone_location () const override
+  {
+    return make_unique<dwarf_undefined> (*this);
+  }
 
   void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
 	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
@@ -774,6 +829,19 @@ public:
   {
     return true;
   }
+
+  value *to_gdb_value (frame_info *frame, struct type *type,
+		       struct type *subobj_type,
+		       LONGEST subobj_offset) const override
+  {
+    gdb_assert (type != nullptr);
+    gdb_assert (subobj_type != nullptr);
+
+    value *retval = allocate_value (subobj_type);
+    mark_value_bytes_optimized_out (retval, subobj_offset,
+				    TYPE_LENGTH (subobj_type));
+    return retval;
+  }
 };
 
 class dwarf_memory final : public dwarf_location
@@ -782,6 +850,11 @@ public:
   dwarf_memory (gdbarch *arch, LONGEST offset, bool stack = false)
     : dwarf_location (arch, offset), m_stack (stack)
   {}
+
+  dwarf_location_up clone_location () const override
+  {
+    return make_unique<dwarf_memory> (*this);
+  }
 
   void set_stack (bool stack)
   {
@@ -804,6 +877,10 @@ public:
 				      const property_addr_info *addr_info,
 				      struct type *type,
 				      size_t size = 0) const override;
+
+  value *to_gdb_value (frame_info *frame, struct type *type,
+		       struct type *subobj_type,
+		       LONGEST subobj_offset) const override;
 
 private:
   /* True if the location belongs to a stack memory region.  */
@@ -996,6 +1073,27 @@ dwarf_memory::deref (frame_info *frame, const property_addr_info *addr_info,
     (gdb::array_view<const gdb_byte> (read_buf), type);
 }
 
+value *
+dwarf_memory::to_gdb_value (frame_info *frame, struct type *type,
+			    struct type *subobj_type,
+			    LONGEST subobj_offset) const
+{
+  gdb_assert (type != nullptr);
+  gdb_assert (subobj_type != nullptr);
+
+  struct type *ptr_type = builtin_type (m_arch)->builtin_data_ptr;
+
+  if (subobj_type->code () == TYPE_CODE_FUNC
+      || subobj_type->code () == TYPE_CODE_METHOD)
+    ptr_type = builtin_type (m_arch)->builtin_func_ptr;
+
+  CORE_ADDR address
+    = value_as_address (value_from_pointer (ptr_type, m_offset));
+  value *retval = value_at_lazy (subobj_type, address + subobj_offset);
+  set_value_stack (retval, m_stack);
+  return retval;
+}
+
 /* Register location description entry.  */
 
 class dwarf_register final : public dwarf_location
@@ -1004,6 +1102,11 @@ public:
   dwarf_register (gdbarch *arch, unsigned int regnum, LONGEST offset = 0)
     : dwarf_location (arch, offset), m_regnum (regnum)
   {}
+
+  dwarf_location_up clone_location () const override
+  {
+    return make_unique<dwarf_register> (*this);
+  }
 
   void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
 	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
@@ -1017,6 +1120,11 @@ public:
   bool is_optimized_out (frame_info *frame, bool big_endian,
 			 LONGEST bits_to_skip, size_t bit_size,
 			 size_t location_bit_limit) const override;
+
+  value *to_gdb_value (frame_info *frame, struct type *type,
+		       struct type *subobj_type,
+		       LONGEST subobj_offset) const override;
+
 
 private:
   /* DWARF register number.  */
@@ -1129,6 +1237,55 @@ dwarf_register::is_optimized_out (frame_info *frame, bool big_endian,
   return false;
 }
 
+value *
+dwarf_register::to_gdb_value (frame_info *frame, struct type *type,
+			      struct type *subobj_type,
+			      LONGEST subobj_offset) const
+{
+  gdb_assert (type != nullptr);
+  gdb_assert (subobj_type != nullptr);
+
+  gdbarch *frame_arch = get_frame_arch (frame);
+  int gdb_regnum = dwarf_reg_to_regnum_or_error (frame_arch, m_regnum);
+
+  if (frame == nullptr)
+    internal_error (__FILE__, __LINE__, _("invalid frame information"));
+
+  /* Construct the value.  */
+  value *retval
+    = gdbarch_value_from_register (frame_arch, type,
+				   gdb_regnum, get_frame_id (frame));
+
+  /* DWARF evaluator only supports targets with byte size of 8 bits,
+     while struct value offset is expressed in memory unit size.  */
+  int unit_size = gdbarch_addressable_memory_unit_size (m_arch);
+  LONGEST retval_offset = value_offset (retval) * unit_size;
+
+  if (type_byte_order (type) == BFD_ENDIAN_BIG
+      && TYPE_LENGTH (type) + m_offset < retval_offset)
+    /* Big-endian, and we want less than full size.  */
+    set_value_offset (retval, (retval_offset - m_offset) / unit_size);
+  else
+    set_value_offset (retval, (retval_offset + m_offset) / unit_size);
+
+  /* Get the data.  */
+  read_frame_register_value (retval, frame);
+
+  if (value_optimized_out (retval))
+    {
+      /* This means the register has undefined value / was not saved.
+	 As we're computing the location of some variable etc. in the
+	 program, not a value for inspecting a register ($pc, $sp, etc.),
+	 return a generic optimized out value instead, so that we show
+	 <optimized out> instead of <not saved>.  */
+      value *temp = allocate_value (subobj_type);
+      value_contents_copy (temp, 0, retval, 0, TYPE_LENGTH (subobj_type));
+      retval = temp;
+    }
+
+  return retval;
+}
+
 /* Implicit location description entry.  Describes a location
    description not found on the target but instead saved in a
    gdb-allocated buffer.  */
@@ -1143,6 +1300,11 @@ public:
       m_contents (contents.begin (), contents.end ()),
       m_byte_order (byte_order)
   {}
+
+  dwarf_location_up clone_location () const override
+  {
+    return make_unique<dwarf_implicit> (*this);
+  }
 
   void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
 	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
@@ -1163,6 +1325,10 @@ public:
   {
     return true;
   }
+
+  value *to_gdb_value (frame_info *frame, struct type *type,
+		       struct type *subobj_type,
+		       LONGEST subobj_offset) const override;
 
 private:
   /* Implicit location contents as a stream of bytes in target byte-order.  */
@@ -1211,6 +1377,36 @@ dwarf_implicit::read (frame_info *frame, gdb_byte *buf,
 		total_bits_to_skip, bit_size, big_endian);
 }
 
+value *
+dwarf_implicit::to_gdb_value (frame_info *frame, struct type *type,
+			      struct type *subobj_type,
+			      LONGEST subobj_offset) const
+{
+  gdb_assert (type != nullptr);
+  gdb_assert (subobj_type != nullptr);
+
+  size_t subtype_len = TYPE_LENGTH (subobj_type);
+  size_t type_len = TYPE_LENGTH (type);
+
+  /* To be compatible with expected error output of the existing
+     tests, the invalid synthetic pointer is not reported for
+     DW_OP_implicit_value operation.  */
+  if (subobj_offset + subtype_len > type_len
+      && m_byte_order != BFD_ENDIAN_UNKNOWN)
+    invalid_synthetic_pointer ();
+
+  value *retval = allocate_value (subobj_type);
+
+  /* The given offset is relative to the actual object.  */
+  if (m_byte_order == BFD_ENDIAN_BIG)
+    subobj_offset += m_contents.size () - type_len;
+
+  memcpy ((void *) value_contents_raw (retval).data (),
+	  (void *) (m_contents.data () + subobj_offset), subtype_len);
+
+  return retval;
+}
+
 /* Implicit pointer location description entry.  */
 
 class dwarf_implicit_pointer final : public dwarf_location
@@ -1225,6 +1421,11 @@ public:
       m_per_objfile (per_objfile), m_per_cu (per_cu),
       m_addr_size (addr_size), m_die_offset (die_offset)
   {}
+
+  dwarf_location_up clone_location () const override
+  {
+    return make_unique<dwarf_implicit_pointer> (*this);
+  }
 
   void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
 	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
@@ -1264,6 +1465,10 @@ public:
 				LONGEST pointer_offset = 0,
 				LONGEST bit_offset = 0,
 				int bit_length = 0) const override;
+
+  value *to_gdb_value (frame_info *frame, struct type *type,
+		       struct type *subobj_type,
+		       LONGEST subobj_offset) const override;
 
 private:
   /* Per object file data of the implicit pointer.  */
@@ -1328,6 +1533,26 @@ dwarf_implicit_pointer::indirect_implicit_ptr (frame_info *frame,
 				     m_per_cu, m_per_objfile, frame, type);
 }
 
+value *
+dwarf_implicit_pointer::to_gdb_value (frame_info *frame, struct type *type,
+				      struct type *subobj_type,
+				      LONGEST subobj_offset) const
+{
+  gdb_assert (type != nullptr);
+  gdb_assert (subobj_type != nullptr);
+
+  computed_closure *closure
+    = new computed_closure (make_unique<dwarf_implicit_pointer> (*this),
+			    get_frame_id (frame));
+  closure->incref ();
+
+  value *retval
+    = allocate_computed_value (subobj_type, &closure_value_funcs, closure);
+  set_value_offset (retval, subobj_offset);
+
+  return retval;
+}
+
 /* Composite location description entry.  */
 
 class dwarf_composite final : public dwarf_location
@@ -1336,6 +1561,11 @@ public:
   dwarf_composite (gdbarch *arch, dwarf2_per_cu_data *per_cu)
     : dwarf_location (arch, 0), m_per_cu (per_cu)
   {}
+
+  dwarf_location_up clone_location () const override
+  {
+    return make_unique<dwarf_composite> (*this);
+  }
 
   void add_piece (std::unique_ptr<dwarf_location> location, ULONGEST bit_size)
   {
@@ -1373,6 +1603,10 @@ public:
 			 LONGEST bits_to_skip, size_t bit_size,
 			 size_t location_bit_limit) const override;
 
+  value *to_gdb_value (frame_info *frame, struct type *type,
+		       struct type *subobj_type,
+		       LONGEST subobj_offset) const override;
+
 private:
   /* Composite piece that contains a piece location
      description and it's size.  */
@@ -1382,6 +1616,17 @@ private:
     piece (std::unique_ptr<dwarf_location> location, ULONGEST size)
       : location (std::move (location)), size (size)
     {}
+
+    /* We need to make a piece copyiable, because dwarf_composite can be
+       copied / cloned.  */
+    piece (const piece &other)
+      : location (other.location->clone_location ()), size (other.size)
+    {}
+
+    piece (piece &&) = default;
+
+    void operator=(const piece &) = delete;
+    void operator=(piece &&) = delete;
 
     std::unique_ptr<dwarf_location> location;
     ULONGEST size;
@@ -1680,6 +1925,44 @@ dwarf_composite::is_optimized_out (frame_info *frame, bool big_endian,
     }
 
   return false;
+}
+
+value *
+dwarf_composite::to_gdb_value (frame_info *frame, struct type *type,
+			       struct type *subobj_type,
+			       LONGEST subobj_offset) const
+{
+  gdb_assert (type != nullptr);
+  gdb_assert (subobj_type != nullptr);
+
+  ULONGEST bit_size = 0;
+
+  for (const piece &piece : m_pieces)
+    bit_size += piece.size;
+
+  /* Complain if the expression is larger than the size of the
+     outer type.  */
+  if (bit_size > HOST_CHAR_BIT * TYPE_LENGTH (type))
+    invalid_synthetic_pointer ();
+
+  computed_closure *closure;
+
+  /* If compilation unit information is not available
+     we are in a CFI context.  */
+  if (m_per_cu == nullptr)
+    closure = new computed_closure (make_unique<dwarf_composite> (*this),
+				    frame);
+  else
+    closure = new computed_closure (make_unique<dwarf_composite> (*this),
+				    get_frame_id (frame));
+
+  closure->incref ();
+
+  value *retval
+    = allocate_computed_value (subobj_type, &closure_value_funcs, closure);
+  set_value_offset (retval, subobj_offset);
+
+  return retval;
 }
 
 static void *
