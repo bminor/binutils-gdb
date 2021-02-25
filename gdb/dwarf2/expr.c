@@ -2420,7 +2420,7 @@ dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile,
 {
 }
 
-/* Push ENTRY onto the stack.  */
+/* See expr.h.  */
 
 void
 dwarf_expr_context::push (dwarf_entry_up entry)
@@ -2428,7 +2428,7 @@ dwarf_expr_context::push (dwarf_entry_up entry)
   this->m_stack.emplace_back (std::move (entry));
 }
 
-/* Push ADDR onto the stack.  */
+/* See expr.h.  */
 
 void
 dwarf_expr_context::push_address (CORE_ADDR addr, bool in_stack_memory)
@@ -2438,7 +2438,7 @@ dwarf_expr_context::push_address (CORE_ADDR addr, bool in_stack_memory)
 }
 
 
-/* Pop the top item off of the stack.  */
+/* See expr.h.  */
 
 dwarf_entry_up
 dwarf_expr_context::pop ()
@@ -2451,7 +2451,7 @@ dwarf_expr_context::pop ()
   return entry;
 }
 
-/* Retrieve the N'th item on the stack.  */
+/* See expr.h.  */
 
 dwarf_entry &
 dwarf_expr_context::fetch (int n)
@@ -2679,7 +2679,7 @@ get_signed_type (struct gdbarch *gdbarch, struct type *type)
     }
 }
 
-/* Return true if the expression stack is empty.  */
+/* See expr.h.  */
 
 bool
 dwarf_expr_context::stack_empty_p () const
@@ -2687,7 +2687,7 @@ dwarf_expr_context::stack_empty_p () const
   return this->m_stack.empty ();
 }
 
-/* Add a new piece to the composite on top of the stack.  */
+/* See expr.h.  */
 
 void
 dwarf_expr_context::add_piece (ULONGEST bit_size, ULONGEST bit_offset)
@@ -2741,7 +2741,7 @@ dwarf_expr_context::add_piece (ULONGEST bit_size, ULONGEST bit_offset)
 }
 
 
-/* Evaluate the expression at ADDR (LEN bytes long).  */
+/* See expr.h.  */
 
 void
 dwarf_expr_context::eval (const gdb_byte *addr, size_t len)
@@ -2755,7 +2755,7 @@ dwarf_expr_context::eval (const gdb_byte *addr, size_t len)
   gdb_assert (this->m_recursion_depth == old_recursion_depth);
 }
 
-/* Helper to read a uleb128 value or throw an error.  */
+/* See expr.h.  */
 
 const gdb_byte *
 safe_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
@@ -2767,7 +2767,7 @@ safe_read_uleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
   return buf;
 }
 
-/* Helper to read a sleb128 value or throw an error.  */
+/* See expr.h.  */
 
 const gdb_byte *
 safe_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
@@ -2779,6 +2779,8 @@ safe_read_sleb128 (const gdb_byte *buf, const gdb_byte *buf_end,
   return buf;
 }
 
+/* See expr.h.  */
+
 const gdb_byte *
 safe_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
 {
@@ -2788,9 +2790,7 @@ safe_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
   return buf;
 }
 
-/* Check that the current operator is either at the end of an
-   expression, or that it is followed by a composition operator or by
-   DW_OP_GNU_uninit (which should terminate the expression).  */
+/* See expr.h.  */
 
 void
 dwarf_expr_require_composition (const gdb_byte *op_ptr, const gdb_byte *op_end,
@@ -2818,8 +2818,7 @@ base_types_equal_p (struct type *t1, struct type *t2)
   return TYPE_LENGTH (t1) == TYPE_LENGTH (t2);
 }
 
-/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_reg* return the
-   DWARF register number.  Otherwise return -1.  */
+/* See expr.h.  */
 
 int
 dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
@@ -2859,10 +2858,7 @@ dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end)
   return dwarf_reg;
 }
 
-/* If <BUF..BUF_END] contains DW_FORM_block* with just DW_OP_breg*(0) and
-   DW_OP_deref* return the DWARF register number.  Otherwise return -1.
-   DEREF_SIZE_RETURN contains -1 for DW_OP_deref; otherwise it contains the
-   size from DW_OP_deref_size.  */
+/* See expr.h.  */
 
 int
 dwarf_block_to_dwarf_reg_deref (const gdb_byte *buf, const gdb_byte *buf_end,
@@ -2920,8 +2916,7 @@ dwarf_block_to_dwarf_reg_deref (const gdb_byte *buf, const gdb_byte *buf_end,
   return dwarf_reg;
 }
 
-/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_fbreg(X) fill
-   in FB_OFFSET_RETURN with the X offset and return 1.  Otherwise return 0.  */
+/* See expr.h.  */
 
 int
 dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
@@ -2946,9 +2941,7 @@ dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
   return 1;
 }
 
-/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_bregSP(X) fill
-   in SP_OFFSET_RETURN with the X offset and return 1.  Otherwise return 0.
-   The matched SP register number depends on GDBARCH.  */
+/* See expr.h.  */
 
 int
 dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
@@ -2988,8 +2981,7 @@ dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
   return 1;
 }
 
-/* The engine for the expression evaluator.  Using the context in this
-   object, evaluate the expression between OP_PTR and OP_END.  */
+/* See expr.h.  */
 
 void
 dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,

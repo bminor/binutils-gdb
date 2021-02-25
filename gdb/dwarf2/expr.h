@@ -48,10 +48,17 @@ struct dwarf2_per_objfile;
    its current state and its callbacks.  */
 struct dwarf_expr_context
 {
-  dwarf_expr_context (dwarf2_per_objfile *per_objfile,
-		      int addr_size);
+  /* Create a new context for the expression evaluator.
+
+     We should ever only pass in the PER_OBJFILE and the ADDR_SIZE
+     information should be retrievable from there.  The PER_OBJFILE
+     contains a pointer to the PER_BFD information anyway and the
+     address size information must be the same for the whole BFD.  */
+  dwarf_expr_context (dwarf2_per_objfile *per_objfile, int addr_size);
+
   virtual ~dwarf_expr_context () = default;
 
+  /* Push ADDR onto the stack.  */
   void push_address (CORE_ADDR addr, bool in_stack_memory);
 
   /* Evaluate the expression at ADDR (LEN bytes long) in a given PER_CU
@@ -96,13 +103,38 @@ private:
   /* Property address info used for the evaluation.  */
   const struct property_addr_info *m_addr_info = nullptr;
 
+  /* Evaluate the expression at ADDR (LEN bytes long).  */
   void eval (const gdb_byte *addr, size_t len);
+
+  /* Return the type used for DWARF operations where the type is
+     unspecified in the DWARF spec.  Only certain sizes are
+     supported.  */
   struct type *address_type () const;
-  void push (dwarf_entry_up value);
+
+  /* Push ENTRY onto the stack.  */
+  void push (dwarf_entry_up entry);
+
+  /* Return true if the expression stack is empty.  */
   bool stack_empty_p () const;
+
+  /* Pop a top element of the stack and add as a composite piece
+     with an BIT_OFFSET offset and of a BIT_SIZE size.
+
+     If the following top element of the stack is a composite
+     location description, the piece will be added to it.  Otherwise
+     a new composite location description will be created, pushed on
+     the stack and the piece will be added to that composite.  */
   void add_piece (ULONGEST bit_size, ULONGEST bit_offset);
+
+  /* The engine for the expression evaluator.  Using the context in
+      this object, evaluate the expression between OP_PTR and
+      OP_END.  */
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
+
+  /* Pop the top item off of the stack.  */
   dwarf_entry_up pop ();
+
+  /* Retrieve the N'th item on the stack.  */
   dwarf_entry &fetch (int n);
 
   /* Fetch the result of the expression evaluation in a form of
@@ -142,18 +174,32 @@ private:
    read as an address in a given FRAME.  */
 CORE_ADDR read_addr_from_reg (frame_info *frame, int reg);
 
+/* Check that the current operator is either at the end of an
+   expression, or that it is followed by a composition operator or by
+   DW_OP_GNU_uninit (which should terminate the expression).  */
 void dwarf_expr_require_composition (const gdb_byte *, const gdb_byte *,
 				     const char *);
 
+/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_reg* return the
+   DWARF register number.  Otherwise return -1.  */
 int dwarf_block_to_dwarf_reg (const gdb_byte *buf, const gdb_byte *buf_end);
 
+/* If <BUF..BUF_END] contains DW_FORM_block* with just DW_OP_breg*(0) and
+   DW_OP_deref* return the DWARF register number.  Otherwise return -1.
+   DEREF_SIZE_RETURN contains -1 for DW_OP_deref; otherwise it contains the
+   size from DW_OP_deref_size.  */
 int dwarf_block_to_dwarf_reg_deref (const gdb_byte *buf,
 				    const gdb_byte *buf_end,
 				    CORE_ADDR *deref_size_return);
 
+/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_fbreg(X) fill
+   in FB_OFFSET_RETURN with the X offset and return 1.  Otherwise return 0.  */
 int dwarf_block_to_fb_offset (const gdb_byte *buf, const gdb_byte *buf_end,
 			      CORE_ADDR *fb_offset_return);
 
+/* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_bregSP(X) fill
+   in SP_OFFSET_RETURN with the X offset and return 1.  Otherwise return 0.
+   The matched SP register number depends on GDBARCH.  */
 int dwarf_block_to_sp_offset (struct gdbarch *gdbarch, const gdb_byte *buf,
 			      const gdb_byte *buf_end,
 			      CORE_ADDR *sp_offset_return);
@@ -193,14 +239,17 @@ gdb_skip_leb128 (const gdb_byte *buf, const gdb_byte *buf_end)
   return buf + bytes_read;
 }
 
+/* Helper to read a uleb128 value or throw an error.  */
 extern const gdb_byte *safe_read_uleb128 (const gdb_byte *buf,
 					  const gdb_byte *buf_end,
 					  uint64_t *r);
 
+/* Helper to read a uleb128 value or throw an error.  */
 extern const gdb_byte *safe_read_sleb128 (const gdb_byte *buf,
 					  const gdb_byte *buf_end,
 					  int64_t *r);
 
+/* Helper to skip a leb128 value or throw an error.  */
 extern const gdb_byte *safe_skip_leb128 (const gdb_byte *buf,
 					 const gdb_byte *buf_end);
 
