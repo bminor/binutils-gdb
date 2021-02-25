@@ -312,6 +312,96 @@ address_type (gdbarch *arch, int addr_size)
 class dwarf_location;
 class dwarf_value;
 
+/* Closure callback functions.  */
+
+static void *
+copy_value_closure (const value *v);
+
+static void
+free_value_closure (value *v);
+
+static void
+rw_closure_value (value *v, value *from);
+
+static int
+check_synthetic_pointer (const value *value, LONGEST bit_offset,
+			 int bit_length);
+
+static void
+write_closure_value (value *to, value *from);
+
+static void
+read_closure_value (value *v);
+
+static bool
+is_optimized_out_closure_value (value *v);
+
+static value *
+indirect_closure_value (value *value);
+
+static value *
+coerce_closure_ref (const value *value);
+
+/* Functions for accessing a variable described by DW_OP_piece,
+   DW_OP_bit_piece or DW_OP_implicit_pointer.  */
+
+static const lval_funcs closure_value_funcs = {
+  read_closure_value,
+  write_closure_value,
+  is_optimized_out_closure_value,
+  indirect_closure_value,
+  coerce_closure_ref,
+  check_synthetic_pointer,
+  copy_value_closure,
+  free_value_closure
+};
+
+/* Closure class that encapsulates a DWARF location description and a
+   frame information used when that location description was created.
+   Used for lval_computed value abstraction.  */
+
+class computed_closure : public refcounted_object
+{
+public:
+  computed_closure (std::unique_ptr<dwarf_location> location,
+		    struct frame_id frame_id)
+    : m_location (std::move (location)), m_frame_id (frame_id)
+  {}
+
+  computed_closure (std::unique_ptr<dwarf_location> location,
+		    struct frame_info *frame)
+    : m_location (std::move (location)), m_frame (frame)
+  {}
+
+  const dwarf_location &get_location () const
+  {
+    return *m_location;
+  }
+
+  frame_id get_frame_id () const
+  {
+    gdb_assert (m_frame == nullptr);
+    return m_frame_id;
+  }
+
+  frame_info *get_frame () const
+  {
+    return m_frame;
+  }
+
+private:
+  /* Entry that this class encloses.  */
+  const std::unique_ptr<const dwarf_location> m_location;
+
+  /* Frame ID context of the closure.  */
+  frame_id m_frame_id;
+
+  /* In the case of frame expression evaluator the frame_id
+     is not safe to use because the frame itself is being built.
+     Only in these cases we set and use frame info directly.  */
+  frame_info *m_frame = nullptr;
+};
+
 /* Base class that describes entries found on a DWARF expression
    evaluation stack.  */
 
@@ -1590,6 +1680,240 @@ dwarf_composite::is_optimized_out (frame_info *frame, bool big_endian,
     }
 
   return false;
+}
+
+static void *
+copy_value_closure (const value *v)
+{
+  computed_closure *closure = ((computed_closure*) value_computed_closure (v));
+
+  if (closure == nullptr)
+    internal_error (__FILE__, __LINE__, _("invalid closure type"));
+
+  closure->incref ();
+  return closure;
+}
+
+static void
+free_value_closure (value *v)
+{
+  computed_closure *closure = ((computed_closure*) value_computed_closure (v));
+
+  if (closure == nullptr)
+    internal_error (__FILE__, __LINE__, _("invalid closure type"));
+
+  closure->decref ();
+
+  if (closure->refcount () == 0)
+    delete closure;
+}
+
+/* Read or write a closure value V.  If FROM != NULL, operate in "write
+   mode": copy FROM into the closure comprising V.  If FROM == NULL,
+   operate in "read mode": fetch the contents of the (lazy) value V by
+   composing it from its closure.  */
+
+static void
+rw_closure_value (value *v, value *from)
+{
+  LONGEST bit_offset = 0, max_bit_size;
+  computed_closure *closure = (computed_closure*) value_computed_closure (v);
+  struct type *v_type = value_type (v);
+  bool big_endian = type_byte_order (v_type) == BFD_ENDIAN_BIG;
+  const dwarf_location &location = closure->get_location ();
+  /* DWARF evaluator only supports targets with byte size of 8 bits,
+     while struct value offset is expressed in memory unit size.  */
+  int unit_size = gdbarch_addressable_memory_unit_size (v_type->arch ());
+
+  if (from == nullptr)
+    {
+      if (v_type != value_enclosing_type (v))
+        internal_error (__FILE__, __LINE__,
+			_("Should not be able to create a lazy value with "
+			  "an enclosing type"));
+    }
+
+  ULONGEST bits_to_skip = HOST_CHAR_BIT * unit_size * value_offset (v);
+
+  /* If there are bits that don't complete a byte, count them in.  */
+  if (value_bitsize (v))
+    {
+      bits_to_skip
+	+= HOST_CHAR_BIT * unit_size * value_offset (value_parent (v))
+	   + value_bitpos (v);
+      if (from != nullptr && big_endian)
+	{
+	  /* Use the least significant bits of FROM.  */
+	  max_bit_size = HOST_CHAR_BIT * TYPE_LENGTH (value_type (from));
+	  bit_offset = max_bit_size - value_bitsize (v);
+	}
+      else
+	max_bit_size = value_bitsize (v);
+    }
+  else
+    max_bit_size = HOST_CHAR_BIT * TYPE_LENGTH (v_type);
+
+  frame_info *frame = closure->get_frame ();
+
+  if (frame == nullptr)
+    frame = frame_find_by_id (closure->get_frame_id ());
+
+  if (from == nullptr)
+    {
+      location.write_to_gdb_value (frame, v, bit_offset, bits_to_skip,
+				   max_bit_size - bit_offset, 0);
+    }
+  else
+    {
+      location.read_from_gdb_value (frame, from, bit_offset, bits_to_skip,
+				    max_bit_size - bit_offset, 0);
+    }
+}
+
+static void
+read_closure_value (value *v)
+{
+  rw_closure_value (v, NULL);
+}
+
+static void
+write_closure_value (value *to, value *from)
+{
+  rw_closure_value (to, from);
+}
+
+/* Check if a closure value V describes any piece of the
+   underlying location description as optimized out.  */
+
+static bool
+is_optimized_out_closure_value (value *v)
+{
+  LONGEST max_bit_size;
+  computed_closure *closure = (computed_closure*) value_computed_closure (v);
+  struct type *v_type = value_type (v);
+  bool big_endian = type_byte_order (v_type) == BFD_ENDIAN_BIG;
+  const dwarf_location &location = closure->get_location ();
+  /* DWARF evaluator only supports targets with byte size of 8 bits,
+     while struct value offset is expressed in memory unit size.  */
+  int unit_size = gdbarch_addressable_memory_unit_size (v_type->arch ());
+
+  if (v_type != value_enclosing_type (v))
+    internal_error (__FILE__, __LINE__,
+		    _("Should not be able to create a lazy value with "
+		      "an enclosing type"));
+
+  ULONGEST bits_to_skip = HOST_CHAR_BIT * unit_size * value_offset (v);
+
+  /* If there are bits that don't complete a byte, count them in.  */
+  if (value_bitsize (v))
+    {
+      bits_to_skip
+	+= HOST_CHAR_BIT * unit_size * value_offset (value_parent (v))
+	   + value_bitpos (v);
+      max_bit_size = value_bitsize (v);
+    }
+  else
+    max_bit_size = HOST_CHAR_BIT * TYPE_LENGTH (v_type);
+
+  frame_info *frame = closure->get_frame ();
+
+  if (frame == nullptr)
+    frame = frame_find_by_id (closure->get_frame_id ());
+
+  return location.is_optimized_out (frame, big_endian, bits_to_skip,
+				    max_bit_size, 0);
+}
+
+/* An implementation of an lval_funcs method to see whether a value is
+   a synthetic pointer.  */
+
+static int
+check_synthetic_pointer (const value *value, LONGEST bit_offset,
+			 int bit_length)
+{
+  /* DWARF evaluator only supports targets with byte size of 8 bits,
+     while struct value offset is expressed in memory unit size.  */
+  int unit_size
+    = gdbarch_addressable_memory_unit_size (value_type (value)->arch ());
+  LONGEST total_bit_offset
+    = HOST_CHAR_BIT * unit_size * value_offset (value) + bit_offset;
+
+  if (value_bitsize (value))
+    total_bit_offset += value_bitpos (value);
+
+  computed_closure *closure
+    = (computed_closure *) value_computed_closure (value);
+
+  return closure->get_location ().is_implicit_ptr_at (total_bit_offset,
+						      bit_length);
+}
+
+/* An implementation of an lval_funcs method to indirect through a
+   pointer.  This handles the synthetic pointer case when needed.  */
+
+static value *
+indirect_closure_value (value *value)
+{
+  computed_closure *closure
+    = (computed_closure *) value_computed_closure (value);
+
+  struct type *type = check_typedef (value_type (value));
+  if (type->code () != TYPE_CODE_PTR)
+    return nullptr;
+
+  /* DWARF evaluator only supports targets with byte size of 8 bits,
+     while struct value offset is expressed in memory unit size.  */
+  int unit_size = gdbarch_addressable_memory_unit_size (type->arch ());
+  LONGEST bit_length = HOST_CHAR_BIT * TYPE_LENGTH (type);
+  LONGEST bit_offset = HOST_CHAR_BIT * unit_size * value_offset (value);
+
+  if (value_bitsize (value))
+    bit_offset += value_bitpos (value);
+
+  frame_info *frame = get_selected_frame (_("No frame selected."));
+
+  /* This is an offset requested by GDB, such as value subscripts.
+     However, due to how synthetic pointers are implemented, this is
+     always presented to us as a pointer type.  This means we have to
+     sign-extend it manually as appropriate.  Use raw
+     extract_signed_integer directly rather than value_as_address and
+     sign extend afterwards on architectures that would need it
+     (mostly everywhere except MIPS, which has signed addresses) as
+     the later would go through gdbarch_pointer_to_address and thus
+     return a CORE_ADDR with high bits set on architectures that
+     encode address spaces and other things in CORE_ADDR.  */
+  bfd_endian byte_order = gdbarch_byte_order (get_frame_arch (frame));
+  LONGEST pointer_offset
+    = extract_signed_integer (value_contents (value).data (),
+			      TYPE_LENGTH (type), byte_order);
+
+  return closure->get_location ().indirect_implicit_ptr (frame, type,
+							 pointer_offset,
+							 bit_offset, bit_length);
+}
+
+/* Implementation of the coerce_ref method of lval_funcs for synthetic C++
+   references.  */
+
+static value *
+coerce_closure_ref (const value *value)
+{
+  struct type *type = check_typedef (value_type (value));
+
+  if (value_bits_synthetic_pointer (value, value_embedded_offset (value),
+				    HOST_CHAR_BIT * TYPE_LENGTH (type)))
+    {
+      computed_closure *closure
+	= (computed_closure *) value_computed_closure (value);
+      frame_info *frame = get_selected_frame (_("No frame selected."));
+
+      return closure->get_location ().indirect_implicit_ptr (frame, type);
+    }
+  else
+    {
+      /* Else: not a synthetic reference; do nothing.  */
+      return nullptr;
+    }
 }
 
 struct piece_closure
