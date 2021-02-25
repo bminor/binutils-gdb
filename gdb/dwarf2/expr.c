@@ -1576,8 +1576,19 @@ public:
   void add_piece (std::unique_ptr<dwarf_location> location, ULONGEST bit_size)
   {
     gdb_assert (location != nullptr);
+    gdb_assert (!m_completed);
     m_pieces.emplace_back (std::move (location), bit_size);
   }
+
+  void set_completed (bool completed)
+  {
+    m_completed = completed;
+  };
+
+  bool is_completed () const
+  {
+    return m_completed;
+  };
 
   void read (frame_info *frame, gdb_byte *buf, int buf_bit_offset,
 	     size_t bit_size, LONGEST bits_to_skip, size_t location_bit_limit,
@@ -1643,6 +1654,9 @@ private:
 
   /* Vector of composite pieces.  */
   std::vector<piece> m_pieces;
+
+  /* True if location description is completed.  */
+  bool m_completed = false;
 };
 
 void
@@ -1654,6 +1668,9 @@ dwarf_composite::read (frame_info *frame, gdb_byte *buf,
   unsigned int pieces_num = m_pieces.size ();
   LONGEST total_bits_to_skip = bits_to_skip;
   unsigned int i;
+
+  if (!m_completed)
+    ill_formed_expression ();
 
   total_bits_to_skip += m_offset * HOST_CHAR_BIT + m_bit_suboffset;
 
@@ -1699,6 +1716,9 @@ dwarf_composite::write (frame_info *frame, const gdb_byte *buf,
   LONGEST total_bits_to_skip = bits_to_skip;
   unsigned int pieces_num = m_pieces.size ();
   unsigned int i;
+
+  if (!m_completed)
+    ill_formed_expression ();
 
   total_bits_to_skip += m_offset * HOST_CHAR_BIT + m_bit_suboffset;
 
@@ -1952,14 +1972,16 @@ dwarf_composite::to_gdb_value (frame_info *frame, struct type *type,
     invalid_synthetic_pointer ();
 
   computed_closure *closure;
+  std::unique_ptr<dwarf_composite> composite_copy
+    = make_unique<dwarf_composite> (*this);
+  composite_copy->set_completed (true);
 
   /* If compilation unit information is not available
      we are in a CFI context.  */
   if (m_per_cu == nullptr)
-    closure = new computed_closure (make_unique<dwarf_composite> (*this),
-				    frame);
+    closure = new computed_closure (std::move (composite_copy), frame);
   else
-    closure = new computed_closure (make_unique<dwarf_composite> (*this),
+    closure = new computed_closure (std::move (composite_copy),
 				    get_frame_id (frame));
 
   closure->incref ();
@@ -2472,13 +2494,35 @@ private:
   /* Return true if the expression stack is empty.  */
   bool stack_empty_p () const;
 
-  /* Pop a top element of the stack and add as a composite piece
-     with an BIT_OFFSET offset and of a BIT_SIZE size.
+  /* Pop a top element of the stack and add as a composite piece.
+     The action is based on the context:
 
-     If the following top element of the stack is a composite
-     location description, the piece will be added to it.  Otherwise
-     a new composite location description will be created, pushed on
-     the stack and the piece will be added to that composite.  */
+      - If the stack is empty, then an incomplete composite location
+	description (comprised of one undefined location description),
+	is pushed on the stack.
+
+      - Otherwise, if the top stack entry is an incomplete composite
+	location description, then it is updated to append a new piece
+	comprised of one undefined location description.  The
+	incomplete composite location description is then left on the
+	stack.
+
+      - Otherwise, if the top stack entry is a location description or
+	can be converted to one, it is popped. Then:
+
+	 - If the top stack entry (after popping) is a location
+	   description comprised of one incomplete composite location
+	   description, then it is updated to append a new piece
+	   specified by the previously popped location description.
+	   The incomplete composite location description is then left
+	   on the stack.
+
+	 - Otherwise, a new location description comprised of one
+	   incomplete composite location description, with a new piece
+	   specified by the previously popped location description, is
+	   pushed on the stack.
+
+      - Otherwise, the DWARF expression is ill-formed  */
   void add_piece (ULONGEST bit_size, ULONGEST bit_offset);
 
   /* The engine for the expression evaluator.  Using the context in this
@@ -2801,10 +2845,11 @@ dwarf_expr_context::add_piece (ULONGEST bit_size, ULONGEST bit_offset)
       dwarf_composite *top_entry_as_composite
 	= dynamic_cast <dwarf_composite *> (&top_entry);
 
-      if (top_entry_as_composite == nullptr)
-	piece = to_location (pop (), arch);
-      else
+      if (top_entry_as_composite != nullptr
+	  && !top_entry_as_composite->is_completed ())
 	piece = make_unique<dwarf_undefined> (arch);
+      else
+	piece = to_location (pop (), arch);
     }
 
   piece->add_bit_offset (bit_offset);
@@ -2824,9 +2869,13 @@ dwarf_expr_context::add_piece (ULONGEST bit_size, ULONGEST bit_offset)
   else
     {
       dwarf_entry &top_entry = fetch (0);
-      composite = dynamic_cast <dwarf_composite *> (&top_entry);
+      dwarf_composite *top_entry_as_composite
+	= dynamic_cast <dwarf_composite *> (&top_entry);
 
-      if (composite == nullptr)
+      if (top_entry_as_composite != nullptr
+	  && !top_entry_as_composite->is_completed ())
+	composite = top_entry_as_composite;
+      else
 	{
 	  std::unique_ptr<dwarf_composite> new_composite
 	    = make_unique<dwarf_composite> (arch, this->m_per_cu);
@@ -4054,6 +4103,19 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_LLVM_undefined:
 	  push (make_unique<dwarf_undefined> (arch));
 	  break;
+
+	case DW_OP_LLVM_piece_end:
+	  {
+	    dwarf_entry &entry = fetch (0);
+	    dwarf_composite *composite
+	      = dynamic_cast<dwarf_composite *> (&entry);
+
+	    if (composite == nullptr || composite->is_completed ())
+	      ill_formed_expression ();
+
+	    composite->set_completed (true);
+	    break;
+	  }
 
 	default:
 	  error (_("Unhandled dwarf expression opcode 0x%x"), op);

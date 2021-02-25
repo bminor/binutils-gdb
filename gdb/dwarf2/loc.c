@@ -1927,6 +1927,7 @@ dwarf2_get_symbol_read_needs (gdb::array_view<const gdb_byte> expr,
 	case DW_OP_LLVM_offset:
 	case DW_OP_LLVM_bit_offset:
 	case DW_OP_LLVM_undefined:
+	case DW_OP_LLVM_piece_end:
 	  break;
 
 	case DW_OP_form_tls_address:
