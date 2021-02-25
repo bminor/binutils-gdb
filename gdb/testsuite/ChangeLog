@@ -1,5 +1,9 @@
 2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.fortran/associated.exp: Add missing '-wrap' argument.
+
+2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR fortran/26155
 	* gdb.fortran/call-no-debug-func.f90: New file.
 	* gdb.fortran/call-no-debug-prog.f90: New file.

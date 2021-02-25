@@ -45,7 +45,7 @@ while { $test_count < 500 } {
 	    -re -wrap "! Test Breakpoint" {
 		# We can run a test from here.
 	    }
-	    -re "! Final Breakpoint" {
+	    -re -wrap "! Final Breakpoint" {
 		# We're done with the tests.
 		set found_final_breakpoint true
 	    }
