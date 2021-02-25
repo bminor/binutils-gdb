@@ -40,4 +40,4 @@ if ![runto_main] {
     return -1
 }
 gdb_test "p arraynoloc" " = <optimized out>"
-gdb_test "p arraycallnoloc" {Asked for position 0 of stack, stack only has 0 elements on it\.}
+gdb_test "p arraycallnoloc" {dwarf expression stack underflow}

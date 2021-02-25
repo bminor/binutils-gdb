@@ -64,5 +64,5 @@ if { $readnow_p } {
 }
 gdb_assert {$w1 && $w2}
 
-gdb_test "p underflow" {Asked for position 0 of stack, stack only has 0 elements on it\.}
+gdb_test "p underflow" {dwarf expression stack underflow}
 gdb_test "p overflow" " = 2"

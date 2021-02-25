@@ -32,4 +32,4 @@ if ![runto f] {
 
 # FAIL was printing:
 # [...] in f (bad=)
-gdb_test "frame" { f \(bad=<error reading variable: Asked for position 0 of stack, stack only has 0 elements on it\.>, good=23\)}
+gdb_test "frame" { f \(bad=<error reading variable: dwarf expression stack underflow>, good=23\)}
