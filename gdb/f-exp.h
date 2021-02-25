@@ -85,6 +85,30 @@ extern struct value *eval_op_f_rank (struct type *expect_type,
 				     enum exp_opcode op,
 				     struct value *arg1);
 
+/* Implement expression evaluation for Fortran's SIZE keyword. For
+   EXPECT_TYPE, EXP, and NOSIDE see expression::evaluate (in
+   expression.h).  OP will always for FORTRAN_ARRAY_SIZE.  ARG1 is the
+   value passed to SIZE if it is only passed a single argument.  For the
+   two argument form see the overload of this function below.  */
+
+extern struct value *eval_op_f_array_size (struct type *expect_type,
+					   struct expression *exp,
+					   enum noside noside,
+					   enum exp_opcode opcode,
+					   struct value *arg1);
+
+/* An overload of EVAL_OP_F_ARRAY_SIZE above, this version takes two
+   arguments, representing the two values passed to Fortran's SIZE
+   keyword.  */
+
+extern struct value *eval_op_f_array_size (struct type *expect_type,
+					   struct expression *exp,
+					   enum noside noside,
+					   enum exp_opcode opcode,
+					   struct value *arg1,
+					   struct value *arg2);
+
+
 namespace expr
 {
 
@@ -107,6 +131,10 @@ using fortran_associated_2arg = binop_operation<FORTRAN_ASSOCIATED,
 						eval_op_f_associated>;
 using fortran_rank_operation = unop_operation<UNOP_FORTRAN_RANK,
 					      eval_op_f_rank>;
+using fortran_array_size_1arg = unop_operation<FORTRAN_ARRAY_SIZE,
+					       eval_op_f_array_size>;
+using fortran_array_size_2arg = binop_operation<FORTRAN_ARRAY_SIZE,
+						eval_op_f_array_size>;
 
 /* The Fortran "complex" operation.  */
 class fortran_cmplx_operation

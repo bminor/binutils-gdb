@@ -260,6 +260,13 @@ exp	:	UNOP_OR_BINOP_INTRINSIC '('
 			      else
 				pstate->wrap2<fortran_associated_2arg> ();
 			    }
+			  else if ($1 == FORTRAN_ARRAY_SIZE)
+			    {
+			      if (n == 1)
+				pstate->wrap<fortran_array_size_1arg> ();
+			      else
+				pstate->wrap2<fortran_array_size_2arg> ();
+			    }
 			  else
 			    {
 			      std::vector<operation_up> args
@@ -1143,6 +1150,7 @@ static const struct token f77_keywords[] =
   { "allocated", UNOP_INTRINSIC, UNOP_FORTRAN_ALLOCATED, false },
   { "associated", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ASSOCIATED, false },
   { "rank", UNOP_INTRINSIC, UNOP_FORTRAN_RANK, false },
+  { "size", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ARRAY_SIZE, false },
 };
 
 /* Implementation of a dynamically expandable buffer for processing input

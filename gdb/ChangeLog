@@ -1,5 +1,18 @@
 2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.y (eval_op_f_array_size): Declare 1 and 2 argument forms
+	of this function.
+	(expr::fortran_array_size_1arg): New type.
+	(expr::fortran_array_size_2arg): Likewise.
+	* f-exp.y (exp): Handle FORTRAN_ARRAY_SIZE after parsing
+	UNOP_OR_BINOP_INTRINSIC.
+	(f77_keywords): Add "size" keyword.
+	* f-lang.c (fortran_array_size): New function.
+	(eval_op_f_array_size): New function, has a 1 arg and 2 arg form.
+	* std-operator.def (FORTRAN_ARRAY_SIZE): New operator.
+
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.h (eval_op_f_rank): Declare.
 	(expr::fortran_rank_operation): New typedef.
 	* f-exp.y (exp): Handle UNOP_FORTRAN_RANK after parsing an
