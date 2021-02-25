@@ -1,3 +1,9 @@
+2021-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/26861
+	* target.c (target_mourn_inferior): Only compare pids in
+	target_mourn_inferior.
+
 2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/26828
