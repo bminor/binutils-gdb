@@ -12987,7 +12987,7 @@ open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
     {
       create_debug_type_hash_table (per_objfile, dwo_file.get (),
 				    &dwo_file->sections.info, dwo_file->tus,
-				    rcuh_kind::TYPE);
+				    rcuh_kind::COMPILE);
     }
 
   dwarf_read_debug_printf ("DWO file found: %s", dwo_name);

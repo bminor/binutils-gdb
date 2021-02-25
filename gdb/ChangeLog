@@ -1,3 +1,9 @@
+2021-02-25  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/27354
+	* dwarf2/read.c (open_and_init_dwo_file): Use rcuh_kind::COMPILE as
+	section_kind for &dwo_file->sections.info.
+
 2021-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR fortran/26155
