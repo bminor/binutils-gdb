@@ -773,6 +773,26 @@ eval_op_f_allocated (struct type *expect_type, struct expression *exp,
   return value_from_longest (result_type, result_value);
 }
 
+/* See f-exp.h.  */
+
+struct value *
+eval_op_f_rank (struct type *expect_type,
+		struct expression *exp,
+		enum noside noside,
+		enum exp_opcode op,
+		struct value *arg1)
+{
+  gdb_assert (op == UNOP_FORTRAN_RANK);
+
+  struct type *result_type
+    = builtin_f_type (exp->gdbarch)->builtin_integer;
+  struct type *type = check_typedef (value_type (arg1));
+  if (type->code () != TYPE_CODE_ARRAY)
+    return value_from_longest (result_type, 0);
+  LONGEST ndim = calc_f77_array_dims (type);
+  return value_from_longest (result_type, ndim);
+}
+
 namespace expr
 {
 

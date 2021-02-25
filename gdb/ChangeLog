@@ -1,3 +1,13 @@
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* f-exp.h (eval_op_f_rank): Declare.
+	(expr::fortran_rank_operation): New typedef.
+	* f-exp.y (exp): Handle UNOP_FORTRAN_RANK after parsing an
+	UNOP_INTRINSIC.
+	(f77_keywords): Add "rank" keyword.
+	* f-lang.c (eval_op_f_rank): New function.
+	* std-operator.def (UNOP_FORTRAN_RANK): New operator.
+
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
 	* printcmd.c (set_command): Remove null check.

@@ -1,3 +1,8 @@
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/rank.exp: New file.
+	* gdb.fortran/rank.f90: New file.
+
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
 	* gdb.fortran/debug-expr.exp: Update tests.

@@ -320,6 +320,9 @@ exp	:	UNOP_INTRINSIC '(' exp ')'
 			    case UNOP_FORTRAN_ALLOCATED:
 			      pstate->wrap<fortran_allocated_operation> ();
 			      break;
+			    case UNOP_FORTRAN_RANK:
+			      pstate->wrap<fortran_rank_operation> ();
+			      break;
 			    default:
 			      gdb_assert_not_reached ("unhandled intrinsic");
 			    }
@@ -1139,6 +1142,7 @@ static const struct token f77_keywords[] =
   { "ubound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_UBOUND, false },
   { "allocated", UNOP_INTRINSIC, UNOP_FORTRAN_ALLOCATED, false },
   { "associated", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ASSOCIATED, false },
+  { "rank", UNOP_INTRINSIC, UNOP_FORTRAN_RANK, false },
 };
 
 /* Implementation of a dynamically expandable buffer for processing input

@@ -74,6 +74,17 @@ extern struct value * eval_op_f_allocated (struct type *expect_type,
 					   enum exp_opcode op,
 					   struct value *arg1);
 
+/* Implement the evaluation of UNOP_FORTRAN_RANK.  EXPECTED_TYPE, EXP, and
+   NOSIDE are as for expression::evaluate (see expression.h).  OP will
+   always be UNOP_FORTRAN_RANK, and ARG1 is the argument being passed to
+   the expression.   */
+
+extern struct value *eval_op_f_rank (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     enum exp_opcode op,
+				     struct value *arg1);
+
 namespace expr
 {
 
@@ -94,6 +105,8 @@ using fortran_associated_1arg = unop_operation<FORTRAN_ASSOCIATED,
 					       eval_op_f_associated>;
 using fortran_associated_2arg = binop_operation<FORTRAN_ASSOCIATED,
 						eval_op_f_associated>;
+using fortran_rank_operation = unop_operation<UNOP_FORTRAN_RANK,
+					      eval_op_f_rank>;
 
 /* The Fortran "complex" operation.  */
 class fortran_cmplx_operation
