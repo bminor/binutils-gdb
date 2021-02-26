@@ -566,6 +566,7 @@ msp430_return_value (struct gdbarch *gdbarch,
 		     struct value *function,
 		     struct type *valtype,
 		     struct regcache *regcache,
+		     struct value *value,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

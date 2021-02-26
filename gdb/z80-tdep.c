@@ -519,6 +519,7 @@ z80_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static enum return_value_convention
 z80_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *valtype, struct regcache *regcache,
+		  struct value *value,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   /* Byte are returned in L, word in HL, dword in DEHL.  */

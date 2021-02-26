@@ -3889,7 +3889,7 @@ struct_return_convention (struct gdbarch *gdbarch,
 
   /* Probe the architecture for the return-value convention.  */
   return gdbarch_return_value (gdbarch, function, value_type,
-			       NULL, NULL, NULL);
+			       NULL, NULL, NULL, NULL);
 }
 
 /* Return true if the function returning the specified type is using

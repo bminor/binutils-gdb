@@ -2069,6 +2069,7 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 static enum return_value_convention
 s390_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
+		   struct value *value,
 		   gdb_byte *out, const gdb_byte *in)
 {
   enum return_value_convention rvc;

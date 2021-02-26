@@ -1003,6 +1003,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
 enum return_value_convention
 ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
 			   struct type *valtype, struct regcache *regcache,
+			   struct value *value,
 			   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   return do_ppc_sysv_return_value (gdbarch,
@@ -1015,6 +1016,7 @@ ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
 				  struct value *function,
 				  struct type *valtype,
 				  struct regcache *regcache,
+				  struct value *value,
 				  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   return do_ppc_sysv_return_value (gdbarch,
@@ -1920,6 +1922,7 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 enum return_value_convention
 ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
 			     struct type *valtype, struct regcache *regcache,
+			     struct value *value,
 			     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);

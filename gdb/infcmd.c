@@ -1475,14 +1475,14 @@ get_return_value (struct symbol *func_symbol, struct value *function)
      calls are made async, this will likely be made the norm.  */
 
   switch (gdbarch_return_value (gdbarch, function, value_type,
-				NULL, NULL, NULL))
+				NULL, NULL, NULL, NULL))
     {
     case RETURN_VALUE_REGISTER_CONVENTION:
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
       gdbarch_return_value (gdbarch, function, value_type, stop_regs,
-			    value_contents_raw (value).data (), NULL);
+			    value, value_contents_raw (value).data (), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
       value = NULL;

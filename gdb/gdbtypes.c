@@ -5335,6 +5335,10 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_ENDIANITY_NOT_DEFAULT");
     }
+  if (type->contains_capability ())
+    {
+      puts_filtered (" TYPE_CONTAINS_CAPABILITY");
+    }
   if (type->is_stub ())
     {
       puts_filtered (" TYPE_STUB");
@@ -5962,6 +5966,11 @@ append_composite_type_field_raw (struct type *t, const char *name,
   memset (f, 0, sizeof f[0]);
   f[0].set_type (field);
   f[0].set_name (name);
+
+  if (field->contains_capability ()
+      || field->code () == TYPE_CODE_CAPABILITY)
+    t->set_contains_capability (true);
+
   return f;
 }
 

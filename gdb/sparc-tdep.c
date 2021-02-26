@@ -1506,6 +1506,7 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 static enum return_value_convention
 sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
 		      struct type *type, struct regcache *regcache,
+		      struct value *value,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

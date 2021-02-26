@@ -15877,6 +15877,15 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
     handle_variant_part (child_die, type, fi, template_args, cu);
   else if (child_die->tag == DW_TAG_variant)
     handle_variant (child_die, type, fi, template_args, cu);
+
+  struct type *child_type = die_type (child_die, cu);
+
+  /* If the composite type contains capabilities, cache that information.  */
+  if (child_type != nullptr
+      && (child_type->contains_capability ()
+	  || child_type->code () == TYPE_CODE_CAPABILITY
+	  || TYPE_CAPABILITY (child_type)))
+    type->set_contains_capability (true);
 }
 
 /* Finish creating a structure or union type, including filling in its

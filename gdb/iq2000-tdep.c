@@ -563,6 +563,7 @@ iq2000_extract_return_value (struct type *type, struct regcache *regcache,
 static enum return_value_convention
 iq2000_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
+		     struct value *value,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (iq2000_use_struct_convention (type))

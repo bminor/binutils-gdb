@@ -459,7 +459,7 @@ get_call_return_value (struct call_return_meta_info *ri)
     {
       retval = allocate_value (ri->value_type);
       gdbarch_return_value (ri->gdbarch, ri->function, ri->value_type,
-			    get_current_regcache (),
+			    get_current_regcache (), retval,
 			    value_contents_raw (retval).data (), NULL);
       if (stack_temporaries && class_or_union_p (ri->value_type))
 	{

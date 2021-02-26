@@ -935,6 +935,7 @@ typedef BP_MANIPULATION (avr_break_insn) avr_breakpoint;
 static enum return_value_convention
 avr_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *valtype, struct regcache *regcache,
+		  struct value *value,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   int i;

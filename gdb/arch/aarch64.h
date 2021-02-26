@@ -101,6 +101,9 @@ enum aarch64_regnum
 
 #define V_REGISTER_SIZE 16
 
+/* Size of a memory tag granule for Morello.  */
+#define MORELLO_MEMORY_TAG_GRANULE_SIZE 16
+
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
 #define AARCH64_D0_REGNUM (AARCH64_Q0_REGNUM + AARCH64_D_REGISTER_COUNT)

@@ -2835,7 +2835,8 @@ return_command (const char *retval_exp, int from_tty)
       gdb_assert (rv_conv != RETURN_VALUE_STRUCT_CONVENTION
 		  && rv_conv != RETURN_VALUE_ABI_RETURNS_ADDRESS);
       gdbarch_return_value (cache_arch, function, return_type,
-			    get_current_regcache (), NULL /*read*/,
+			    get_current_regcache (), return_value,
+			    NULL /*read*/,
 			    value_contents (return_value).data () /*write*/);
     }
 

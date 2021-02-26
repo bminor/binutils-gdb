@@ -8263,6 +8263,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 static enum return_value_convention
 arm_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *valtype, struct regcache *regcache,
+		  struct value *value,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);

@@ -4802,6 +4802,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
+			struct value *value,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   mips_gdbarch_tdep *tdep = (mips_gdbarch_tdep *) gdbarch_tdep (gdbarch);
@@ -5193,6 +5194,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
 			  struct type *type, struct regcache *regcache,
+			  struct value *value,
 			  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   mips_gdbarch_tdep *tdep = (mips_gdbarch_tdep *) gdbarch_tdep (gdbarch);
@@ -5686,6 +5688,7 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
 		       struct type *type, struct regcache *regcache,
+		       struct value *value,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   CORE_ADDR func_addr = function ? find_function_addr (function, NULL) : 0;
@@ -6132,6 +6135,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 mips_o64_return_value (struct gdbarch *gdbarch, struct value *function,
 		       struct type *type, struct regcache *regcache,
+		       struct value *value,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   CORE_ADDR func_addr = function ? find_function_addr (function, NULL) : 0;

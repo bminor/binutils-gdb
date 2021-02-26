@@ -1812,6 +1812,9 @@ struct stack_item_t
 
   /* Size in bytes of value to pass on stack.  */
   int len;
+
+  /* The argument value, in case further processing is needed.  */
+  struct value *arg_value;
 };
 
 /* Implement the gdbarch type alignment method, overrides the generic
@@ -2006,6 +2009,109 @@ struct aarch64_call_info
   std::vector<stack_item_t> si;
 };
 
+/* Helper function to set a TAG for a particular register REGNUM.  */
+
+static void
+set_register_tag (struct gdbarch *gdbarch, struct regcache *regcache,
+		  int regnum, bool tag)
+{
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  CORE_ADDR tag_map = 0;
+
+  /* Read the tag register, adjust and write back.  */
+  regcache->cooked_read (tdep->cap_reg_last - 1, (gdb_byte *) &tag_map);
+
+  /* The CSP/PCC tags are swapped in the tag_map because the ordering of CSP/PCC
+     in struct user_morello_state is different from GDB's register description.
+
+     Make sure we account for that when setting the tag from those
+     registers.  */
+  if (regnum == tdep->cap_reg_pcc)
+    regnum = tdep->cap_reg_csp;
+  else if (regnum == tdep->cap_reg_csp)
+    regnum = tdep->cap_reg_pcc;
+
+  int shift = regnum - tdep->cap_reg_base;
+  tag_map |= (1 << shift);
+  regcache->cooked_write (tdep->cap_reg_last - 1, (gdb_byte *) &tag_map);
+}
+
+/* Pass a value in a sequence of consecutive C registers.  The caller
+   is responsible for ensuring sufficient registers are available.  */
+
+static void
+pass_in_c (struct gdbarch *gdbarch, struct regcache *regcache,
+	   struct aarch64_call_info *info, struct type *type,
+	   struct value *arg)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  int regnum = tdep->cap_reg_base + info->ngrn;
+  const gdb_byte *buf = value_contents (arg).data ();
+  gdb_byte tmpbuf[C_REGISTER_SIZE];
+  size_t len = TYPE_LENGTH (type);
+  size_t xfer_len = 0;
+  CORE_ADDR address = value_address (arg);
+
+  /* One more argument allocated.  */
+  info->argnum++;
+
+  while (len > 0)
+    {
+      /* Determine the transfer size.  */
+      xfer_len = len < C_REGISTER_SIZE ? len : C_REGISTER_SIZE;
+      /* Zero out any unspecified bytes.  */
+      memset (tmpbuf, 0, C_REGISTER_SIZE);
+      memcpy (tmpbuf, buf, xfer_len);
+
+      if (aarch64_debug)
+	{
+	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+	  CORE_ADDR regval
+	    = extract_unsigned_integer (tmpbuf, xfer_len, byte_order);
+
+	  CORE_ADDR regval2;
+	  if (xfer_len > 8)
+	    regval2
+	      = extract_unsigned_integer (tmpbuf + 8, xfer_len, byte_order);
+	  else
+	    regval2 = 0;
+
+	  debug_printf ("arg %d in %s = 0x%s 0x%s\n", info->argnum,
+			gdbarch_register_name (gdbarch, regnum),
+			phex (regval, X_REGISTER_SIZE),
+			phex (regval2, X_REGISTER_SIZE));
+	}
+
+      /* Write the argument to the capability register.  */
+      regcache->raw_write (regnum, tmpbuf);
+
+      if (type->contains_capability ())
+	{
+	  /* We need to read the tags from memory.  */
+	  gdb::byte_vector cap = target_read_capability (address);
+	  bool tag = cap[0] == 0 ? false : true;
+	  set_register_tag (gdbarch, regcache, regnum, tag);
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s Read tag %s from address %s\n",
+			  __func__, tag == true ? "true" : "false",
+			  paddress (gdbarch, address));
+
+	  address += xfer_len;
+	}
+
+      len -= xfer_len;
+      buf += xfer_len;
+      regnum++;
+    }
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
+}
+
 /* Pass a value in a sequence of consecutive X registers.  The caller
    is responsible for ensuring sufficient registers are available.  */
 
@@ -2014,6 +2120,9 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	   struct aarch64_call_info *info, struct type *type,
 	   struct value *arg)
 {
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
   enum type_code typecode = type->code ();
@@ -2044,6 +2153,8 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
       buf += partial_len;
       regnum++;
     }
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
 }
 
 /* Attempt to marshall a value in a V register.  Return 1 if
@@ -2057,6 +2168,9 @@ pass_in_v (struct gdbarch *gdbarch,
 	   struct aarch64_call_info *info,
 	   int len, const bfd_byte *buf)
 {
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
   if (info->nsrn < 8)
     {
       int regnum = AARCH64_V0_REGNUM + info->nsrn;
@@ -2075,10 +2189,15 @@ pass_in_v (struct gdbarch *gdbarch,
 
       aarch64_debug_printf ("arg %d in %s", info->argnum,
 			    gdbarch_register_name (gdbarch, regnum));
-
+      if (aarch64_debug)
+	debug_printf ("aarch64: leaving %s\n", __func__);
       return 1;
     }
   info->nsrn = 8;
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
+
   return 0;
 }
 
@@ -2088,6 +2207,9 @@ static void
 pass_on_stack (struct aarch64_call_info *info, struct type *type,
 	       struct value *arg)
 {
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
   const bfd_byte *buf = value_contents (arg).data ();
   int len = TYPE_LENGTH (type);
   int align;
@@ -2110,6 +2232,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 
   item.len = len;
   item.data = buf;
+  item.arg_value = arg;
   info->si.push_back (item);
 
   info->nsaa += len;
@@ -2124,6 +2247,38 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
       info->si.push_back (item);
       info->nsaa += pad;
     }
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
+}
+
+/* Marshall an argument into a sequence of one or more consecutive C
+   registers or, if insufficient C registers are available then onto
+   the stack.  */
+
+static void
+pass_in_c_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
+		    struct aarch64_call_info *info, struct type *type,
+		    struct value *arg)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  int len = TYPE_LENGTH (type);
+  int nregs = (len + C_REGISTER_SIZE - 1) / C_REGISTER_SIZE;
+
+  if (info->ngrn + nregs <= 8)
+    {
+      pass_in_c (gdbarch, regcache, info, type, arg);
+      info->ngrn += nregs;
+    }
+  else
+    {
+      info->ngrn = 8;
+      pass_on_stack (info, type, arg);
+    }
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
 }
 
 /* Marshall an argument into a sequence of one or more consecutive X
@@ -2135,6 +2290,9 @@ pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
 		    struct aarch64_call_info *info, struct type *type,
 		    struct value *arg)
 {
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
   int len = TYPE_LENGTH (type);
   int nregs = (len + X_REGISTER_SIZE - 1) / X_REGISTER_SIZE;
 
@@ -2149,6 +2307,32 @@ pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
       info->ngrn = 8;
       pass_on_stack (info, type, arg);
     }
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
+}
+
+/* Morello: Marshall an argument into a sequence of one or more C registers.
+   If we should not pass arguments in C registers, then try X registers or
+   the stack.  */
+
+static void
+pass_in_c_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
+		      struct aarch64_call_info *info, struct type *type,
+		      struct value *arg)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  /* Check if we have a case where we need to pass arguments via the C
+     registers.  */
+  if (TYPE_CAPABILITY (type) || type->contains_capability ())
+    pass_in_c_or_stack (gdbarch, regcache, info, type, arg);
+  else
+    pass_in_x_or_stack (gdbarch, regcache, info, type, arg);
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
 }
 
 /* Pass a value, which is of type arg_type, in a V register.  Assumes value is a
@@ -2160,6 +2344,9 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 			 struct aarch64_call_info *info, struct type *arg_type,
 			 struct value *arg)
 {
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
   switch (arg_type->code ())
     {
     case TYPE_CODE_FLT:
@@ -2208,7 +2395,444 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 }
 
-/* Implement the "push_dummy_call" gdbarch method.  */
+static bool
+type_fields_overlap_capabilities (struct type *type)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  /* Types not containing capabilities and having sizes smaller than
+     8 bytes don't have members overlapping capabilities.  */
+  if (!type->contains_capability () || TYPE_LENGTH (type) < 8)
+    return false;
+
+  /* Byte range 8~15 */
+  int range_1_position = 8 * TARGET_CHAR_BIT;
+  /* Byte range 24~31 */
+  int range_2_position = 192 * TARGET_CHAR_BIT;
+  int range_bitsize = 8 * TARGET_CHAR_BIT;
+
+  for (int index = 0; index < type->num_fields (); index++)
+    {
+      if (type->field (index).type ()->code () == TYPE_CODE_CAPABILITY
+	  || type->field (index).type ()->code () == TYPE_CODE_PTR)
+	continue;
+
+      int bitpos = type->field (index).loc_bitpos ();
+      int bitsize = TYPE_FIELD_BITSIZE (type, index);
+
+      /* Test bytes 8~15.  */
+      if (range_1_position <= (bitpos + bitsize)
+	  && bitpos <= (range_1_position + range_bitsize))
+	return true;
+
+      /* Test bytes 24~31.  */
+      if (range_2_position <= (bitpos + bitsize)
+	  && bitpos <= (range_2_position + range_bitsize))
+	return true;
+    }
+  return false;
+}
+
+/* Convert a 64-bit pointer to a capability using the SOURCE capability.  */
+
+static struct value *
+convert_pointer_to_capability (struct gdbarch *gdbarch, struct value *source,
+			       CORE_ADDR pointer)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  gdb_assert (TYPE_CAPABILITY (value_type (source)));
+
+  if (source == nullptr)
+    return nullptr;
+
+  if (value_contents (source).data () == nullptr)
+    return nullptr;
+
+  capability cap;
+
+  memcpy (&cap.m_cap, value_contents (source).data (), sizeof (cap.m_cap));
+
+  if (value_tagged (source))
+    cap.set_tag (value_tag (source));
+
+  /* Adjust the capability value to that of the pointer.  This assumes the
+     capability has enough bounds to honor this value.  */
+  cap.set_value (pointer);
+
+  struct value *result = value_copy (source);
+
+  /* Adjust the contents of the new capability.  */
+  memcpy (value_contents_writeable (result).data (), &cap.m_cap,
+	  sizeof (cap.m_cap));
+  set_value_tag (result, cap.get_tag ());
+
+  return result;
+}
+
+/* Write the contents of ARG to DESTINATION, also taking care of copying the
+   tags from ARG's source location to the destination location.  */
+
+static void
+morello_write_memory_with_capabilities (CORE_ADDR destination,
+					struct value *arg)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  gdb_assert (arg != nullptr);
+
+  struct type *type = value_type (arg);
+  const gdb_byte *buffer = value_contents (arg).data ();
+  size_t size = TYPE_LENGTH (type);
+  CORE_ADDR source = value_address (arg);
+
+  write_memory (destination, buffer, size);
+
+  if (!type->contains_capability ())
+    return;
+
+  /* If the type contains capabilities, we need to copy the tags as well.
+     Given this type contains capabilities, the data should be aligned to
+     16-bytes, which matches the tag granule.  */
+  int granules = size / MORELLO_MEMORY_TAG_GRANULE_SIZE;
+
+  while (granules != 0)
+    {
+      /* Read both the source capability and the destination capability.  */
+      gdb::byte_vector source_cap = target_read_capability (source);
+      gdb::byte_vector dest_cap = target_read_capability (destination);
+
+      /* Copy the source tag granule to the destination tag granule.  */
+      dest_cap[0] = source_cap[0];
+      target_write_capability (destination, dest_cap);
+      granules--;
+
+      source += MORELLO_MEMORY_TAG_GRANULE_SIZE;
+      destination += MORELLO_MEMORY_TAG_GRANULE_SIZE;
+    }
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: Exiting %s\n", __func__);
+}
+
+/* Implement the "push_dummy_call" gdbarch method for Morello.  */
+
+static CORE_ADDR
+morello_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+			 struct regcache *regcache, CORE_ADDR bp_addr,
+			 int nargs,
+			 struct value **args, CORE_ADDR sp,
+			 function_call_return_method return_method,
+			 CORE_ADDR struct_addr)
+{
+  int argnum;
+  struct aarch64_call_info info;
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  /* We should only be here if this is a Morello architecture.  */
+  gdb_assert (tdep->has_capability ());
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: %s Number of arguments: %s\n", __func__,
+		  pulongest (nargs));
+
+  /* Morello AAPCS64-cap ABI.  */
+  bool aapcs64_cap = (tdep->abi == AARCH64_ABI_AAPCS64_CAP);
+
+  if (aarch64_debug)
+    {
+      if (aapcs64_cap)
+	debug_printf ("aarch64: %s ABI is AAPCS64-CAP\n", __func__);
+      else
+	debug_printf ("aarch64: %s ABI is AAPCS64\n", __func__);
+    }
+
+  /* We need to know what the type of the called function is in order
+     to determine the number of named/anonymous arguments for the
+     actual argument placement, and the return type in order to handle
+     return value correctly.
+
+     The generic code above us views the decision of return in memory
+     or return in registers as a two stage processes.  The language
+     handler is consulted first and may decide to return in memory (eg
+     class with copy constructor returned by value), this will cause
+     the generic code to allocate space AND insert an initial leading
+     argument.
+
+     If the language code does not decide to pass in memory then the
+     target code is consulted.
+
+     If the language code decides to pass in memory we want to move
+     the pointer inserted as the initial argument from the argument
+     list and into X8, the conventional AArch64 struct return pointer
+     register.  */
+
+  /* Set the return address.  For the AArch64, the return breakpoint
+     is always at BP_ADDR.  */
+
+  /* We should use CLR for AARCH64-CAP and LR for AAPCS64.  */
+  int regnum = AARCH64_LR_REGNUM;
+
+  if (aapcs64_cap)
+    {
+      regnum = tdep->cap_reg_clr;
+
+      /* For now, assume BP_ADDR is within the bounds of the CLR
+	 capability.  */
+      struct value *clr = regcache->cooked_read_value (regnum);
+      regcache->cooked_write (regnum, value_contents (clr).data ());
+      set_register_tag (gdbarch, regcache, regnum, value_tag (clr));
+    }
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: Breakpoint address in %s is %s\n",
+		  gdbarch_register_name (gdbarch, regnum),
+		  paddress (gdbarch, bp_addr));
+
+  regcache_cooked_write_unsigned (regcache, AARCH64_LR_REGNUM, bp_addr);
+
+  /* If we were given an initial argument for the return slot, lose it.  */
+  if (return_method == return_method_hidden_param)
+    {
+      args++;
+      nargs--;
+    }
+
+  /* The struct_return pointer occupies X8.  */
+  if (return_method != return_method_normal)
+    {
+      /* We should use C8 for AARCH64-CAP and X8 for AAPCS64.  */
+      regnum = AARCH64_STRUCT_RETURN_REGNUM;
+
+      if (aapcs64_cap)
+	{
+	  regnum = tdep->cap_reg_base + AARCH64_STRUCT_RETURN_REGNUM;
+
+	  /* For now, assume STRUCT_ADDR is within the bounds of the CSP
+	     capability.  */
+	  struct value *csp = regcache->cooked_read_value (regnum);
+	  regcache->cooked_write (regnum, value_contents (csp).data ());
+	  set_register_tag (gdbarch, regcache, regnum, value_tag (csp));
+	}
+
+      if (aarch64_debug)
+	{
+	  debug_printf ("aarch64: struct return in %s = 0x%s\n",
+			gdbarch_register_name (gdbarch,
+					       regnum),
+			paddress (gdbarch, struct_addr));
+	}
+
+      regcache_cooked_write_unsigned (regcache, AARCH64_STRUCT_RETURN_REGNUM,
+				      struct_addr);
+    }
+
+  for (argnum = 0; argnum < nargs; argnum++)
+    {
+      struct value *arg = args[argnum];
+      struct type *arg_type, *fundamental_type;
+      int len, elements;
+
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s Processing argument %s\n", __func__,
+		      pulongest (argnum));
+
+      arg_type = check_typedef (value_type (arg));
+      len = TYPE_LENGTH (arg_type);
+
+      /* If arg can be passed in v registers as per the AAPCS64, then do so if
+	 if there are enough spare registers.  */
+      if (aapcs_is_vfp_call_or_return_candidate (arg_type, &elements,
+						 &fundamental_type))
+	{
+	  if (info.nsrn + elements <= 8)
+	    {
+	      /* We know that we have sufficient registers available therefore
+		 this will never need to fallback to the stack.  */
+	      if (!pass_in_v_vfp_candidate (gdbarch, regcache, &info, arg_type,
+					    arg))
+		gdb_assert_not_reached ("Failed to push args");
+	    }
+	  else
+	    {
+	      info.nsrn = 8;
+	      pass_on_stack (&info, arg_type, arg);
+	    }
+	  continue;
+	}
+
+      switch (arg_type->code ())
+	{
+	case TYPE_CODE_INT:
+	case TYPE_CODE_BOOL:
+	case TYPE_CODE_CHAR:
+	case TYPE_CODE_RANGE:
+	case TYPE_CODE_ENUM:
+	  if (len < 4)
+	    {
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s Handling types with length < 4\n",
+			      __func__);
+
+	      /* Promote to 32 bit integer.  */
+	      if (arg_type->is_unsigned ())
+		arg_type = builtin_type (gdbarch)->builtin_uint32;
+	      else
+		arg_type = builtin_type (gdbarch)->builtin_int32;
+	      arg = value_cast (arg_type, arg);
+	    }
+	  if (aarch64_debug && len >= 4)
+	    debug_printf ("aarch64: %s Handling types with length >= 4\n",
+			  __func__);
+	  pass_in_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
+	  break;
+
+	case TYPE_CODE_STRUCT:
+	case TYPE_CODE_ARRAY:
+	case TYPE_CODE_UNION:
+	  /* Morello AAPCS: B.5:  */
+	  if (arg_type->contains_capability ()
+	      && (len > 32 || type_fields_overlap_capabilities (arg_type)))
+	    {
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s Composite type with capabilities "
+			      "and len > 32 or overlapping types\n", __func__);
+	      /* If the argument is a Composite Type containing Capabilities
+		 and the size is larger than 32 bytes or there are
+		 addressable members which are not Capabilities that
+		 overlap bytes 8-15 or 24-31 of the argument (if such bytes
+		 exist) then the argument is copied to memory allocated by
+		 the caller and the argument is replaced by a pointer to
+		 the copy in AAPCS64 or a capability to a copy in
+		 AAPCS64-cap.  */
+
+	      /* Allocate aligned storage.  */
+	      sp = align_down (sp - len, 16);
+
+	      /* Write the real data into the stack.  Since this type contains
+		 capabilities, we need to handle writing the capabilities and
+		 adjusting the memory tags.  */
+	      morello_write_memory_with_capabilities (sp, arg);
+
+	      /* Construct the indirection.  Create a capability or a pointer
+		 depending on the ELF ABI being used (AAPCS64-cap or
+		 AAPCS64).  */
+	      if (aapcs64_cap)
+		{
+		  /* Derive a capability from CSP and forge the indirection
+		     capability.  */
+		  struct value *csp
+		    = regcache->cooked_read_value (tdep->cap_reg_csp);
+		  arg = convert_pointer_to_capability (gdbarch, csp, sp);
+		  arg_type = value_type (csp);
+		}
+	      else
+		{
+		  /* Use a regular pointer.  */
+		  arg_type = lookup_pointer_type (arg_type);
+		  arg = value_from_pointer (arg_type, sp);
+		}
+	      pass_in_c_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
+	    }
+	  else if (len > 16 && !arg_type->contains_capability ())
+	    {
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s Composite type without capabilities "
+			      "and len > 16\n", __func__);
+	      /* Morello AAPCS B.3: Aggregates larger than 16 bytes, not
+		 containing capabilities, are passed by invisible reference.  */
+
+	      /* Allocate aligned storage.  */
+	      sp = align_down (sp - len, 16);
+
+	      /* Write the real data into the stack.  */
+	      write_memory (sp, value_contents (arg).data (), len);
+
+	      /* Construct the indirection.  Create a capability or a pointer
+		 depending on the ELF ABI being used (AAPCS64-cap or
+		 AAPCS64).  */
+	      if (aapcs64_cap)
+		{
+		  /* Derive a capability from CSP and forge the indirection
+		     capability.  */
+		  struct value *csp
+		    = regcache->cooked_read_value (tdep->cap_reg_csp);
+		  arg = convert_pointer_to_capability (gdbarch, csp, sp);
+		  arg_type = value_type (csp);
+		}
+	      else
+		{
+		  /* Use a regular pointer.  */
+		  arg_type = lookup_pointer_type (arg_type);
+		  arg = value_from_pointer (arg_type, sp);
+		}
+	      pass_in_c_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
+	    }
+	  else
+	    {
+	      /* PCS C.15 / C.18 multiple values pass.  */
+	      /* Morello AAPCS C.16 / C.8.  */
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s Composite type default case "
+			      "len is %s\n", __func__, pulongest (len));
+	      pass_in_c_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
+	    }
+	  break;
+
+	default:
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: %s default case\n", __func__);
+	  pass_in_c_x_or_stack (gdbarch, regcache, &info, arg_type, arg);
+	  break;
+	}
+    }
+
+  /* Make sure stack retains 16 byte alignment.  */
+  if (info.nsaa & 15)
+    sp -= 16 - (info.nsaa & 15);
+
+  while (!info.si.empty ())
+    {
+      const stack_item_t &si = info.si.back ();
+
+      sp -= si.len;
+      if (si.data != NULL)
+	morello_write_memory_with_capabilities (sp, si.arg_value);
+      info.si.pop_back ();
+    }
+
+  regnum = AARCH64_SP_REGNUM;
+
+  /* We should use CSP for AARCH64-CAP and SP for AAPCS64.  */
+  if (aapcs64_cap)
+    {
+      regnum = tdep->cap_reg_csp;
+
+      struct value *csp = regcache->cooked_read_value (regnum);
+      regcache->cooked_write (regnum, value_contents (csp).data ());
+      set_register_tag (gdbarch, regcache, regnum, value_tag (csp));
+    }
+
+    if (aarch64_debug)
+      debug_printf ("aarch64: Adjusting stack pointer in %s to %s\n",
+		    gdbarch_register_name (gdbarch, regnum),
+		    paddress (gdbarch, sp));
+
+  regcache_cooked_write_unsigned (regcache, AARCH64_SP_REGNUM, sp);
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: Exiting %s\n", __func__);
+
+  return sp;
+}
+
+/* Implement the "push_dummy_call" gdbarch method for generic AARCH64.  */
 
 static CORE_ADDR
 aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
@@ -2757,6 +3381,178 @@ typedef BP_MANIPULATION (aarch64_default_breakpoint) aarch64_breakpoint;
 
 /* Extract from an array REGS containing the (raw) register state a
    function return value of type TYPE, and copy that, in virtual
+   format, into VALBUF.  Morello version.  */
+
+static void
+morello_extract_return_value (struct value *value, struct regcache *regs,
+			      gdb_byte *valbuf)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  struct type *type = value_type (value);
+  struct gdbarch *gdbarch = regs->arch ();
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int elements;
+  struct type *fundamental_type;
+  /* Morello AAPCS64-cap ABI.  */
+  bool aapcs64_cap = (tdep->abi == AARCH64_ABI_AAPCS64_CAP);
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: %s: ABI is %s\n", __func__,
+		  aapcs64_cap ? "AAPCS64-CAP" : "AAPCS64");
+
+  if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
+					     &fundamental_type))
+    {
+      int len = TYPE_LENGTH (fundamental_type);
+
+      for (int i = 0; i < elements; i++)
+	{
+	  int regno = AARCH64_V0_REGNUM + i;
+	  /* Enough space for a full vector register.  */
+	  gdb_byte buf[register_size (gdbarch, regno)];
+	  gdb_assert (len <= sizeof (buf));
+
+	  if (aarch64_debug)
+	    {
+	      debug_printf ("read HFA or HVA return value element %d from %s\n",
+			    i + 1,
+			    gdbarch_register_name (gdbarch, regno));
+	    }
+	  regs->cooked_read (regno, buf);
+
+	  memcpy (valbuf, buf, len);
+	  valbuf += len;
+	}
+    }
+  else if (type->code () == TYPE_CODE_PTR
+	   || type->code () == TYPE_CODE_CAPABILITY
+	   || TYPE_IS_REFERENCE (type))
+    {
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Pointer/Capability types\n", __func__);
+
+      int regno;
+
+      if (aapcs64_cap)
+	{
+	  regno = tdep->cap_reg_base + AARCH64_X0_REGNUM;
+	  set_value_tagged (value, true);
+	  set_value_tag (value, true);
+	}
+      else
+	regno = AARCH64_X0_REGNUM;
+
+      regs->cooked_read (regno, valbuf);
+    }
+  else if (type->code () == TYPE_CODE_INT
+	   || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL
+	   || type->code () == TYPE_CODE_ENUM)
+    {
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Integral types, size %s\n", __func__,
+		      pulongest (TYPE_LENGTH (type)));
+
+      /* If the type is a plain integer, then the access is
+	 straight-forward.  Otherwise we have to play around a bit
+	 more.  */
+      int len = TYPE_LENGTH (type);
+      int regno = AARCH64_X0_REGNUM;
+      ULONGEST tmp;
+
+      while (len > 0)
+	{
+	  /* By using store_unsigned_integer we avoid having to do
+	     anything special for small big-endian values.  */
+	  regcache_cooked_read_unsigned (regs, regno++, &tmp);
+	  store_unsigned_integer (valbuf,
+				  (len > X_REGISTER_SIZE
+				   ? X_REGISTER_SIZE : len), byte_order, tmp);
+	  len -= X_REGISTER_SIZE;
+	  valbuf += X_REGISTER_SIZE;
+	}
+    }
+  else
+    {
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Composite types, size %s\n", __func__,
+		      pulongest (TYPE_LENGTH (type)));
+      /* For a structure or union the behaviour is as if the value had
+         been stored to word-aligned memory and then loaded into
+         registers with 64-bit load instruction(s).  */
+      int len = TYPE_LENGTH (type);
+      int regno = tdep->cap_reg_base + AARCH64_X0_REGNUM;
+      bfd_byte buf[C_REGISTER_SIZE];
+
+      while (len > 0)
+	{
+	  memset (valbuf, 0, C_REGISTER_SIZE);
+	  regs->cooked_read (regno++, buf);
+	  memcpy (valbuf, buf, len > C_REGISTER_SIZE ? C_REGISTER_SIZE : len);
+	  len -= C_REGISTER_SIZE;
+	  valbuf += C_REGISTER_SIZE;
+	}
+    }
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
+}
+
+
+/* Will a function return an aggregate type in memory or in a
+   register?  Return 0 if an aggregate type can be returned in a
+   register, 1 if it must be returned in memory.  Morello implementation.  */
+
+static bool
+morello_return_in_memory (struct gdbarch *gdbarch, struct type *type)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  type = check_typedef (type);
+  int elements;
+  struct type *fundamental_type;
+
+  if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
+					     &fundamental_type))
+    {
+      /* v0-v7 are used to return values and one register is allocated
+	 for one member.  However, HFA or HVA has at most four members.  */
+
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Morello AAPCS VFP\n", __func__);
+
+      return false;
+    }
+
+  size_t length = TYPE_LENGTH (type);
+
+  /* Morello AAPCS B.5 */
+  if (type->contains_capability ()
+      && (length > 32 || type_fields_overlap_capabilities (type)))
+    {
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Morello AAPCS B.5\n", __func__);
+
+      return true;
+    }
+
+  /* Morello AAPCS B.3 */
+  if (length > 16 && !type->contains_capability ())
+    {
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Morello AAPCS B.3\n", __func__);
+
+      return true;
+    }
+
+  return false;
+}
+
+/* Extract from an array REGS containing the (raw) register state a
+   function return value of type TYPE, and copy that, in virtual
    format, into VALBUF.  */
 
 static void
@@ -2835,7 +3631,6 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
     }
 }
 
-
 /* Will a function return an aggregate type in memory or in a
    register?  Return 0 if an aggregate type can be returned in a
    register, 1 if it must be returned in memory.  */
@@ -2865,6 +3660,167 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
     }
 
   return 0;
+}
+
+/* Write into appropriate registers a function return value of type
+   TYPE, given in virtual format.  Morello version.  */
+
+static void
+morello_store_return_value (struct value *value, struct regcache *regs,
+			    const gdb_byte *valbuf)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  struct type *type = value_type (value);
+  struct gdbarch *gdbarch = regs->arch ();
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int elements;
+  struct type *fundamental_type;
+  /* Morello AAPCS64-cap ABI.  */
+  bool aapcs64_cap = (tdep->abi == AARCH64_ABI_AAPCS64_CAP);
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: %s: ABI is %s\n", __func__,
+		  aapcs64_cap ? "AAPCS64-CAP" : "AAPCS64");
+
+  if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
+					     &fundamental_type))
+    {
+      int len = TYPE_LENGTH (fundamental_type);
+
+      for (int i = 0; i < elements; i++)
+	{
+	  int regno = AARCH64_V0_REGNUM + i;
+	  /* Enough space for a full vector register.  */
+	  gdb_byte tmpbuf[register_size (gdbarch, regno)];
+	  gdb_assert (len <= sizeof (tmpbuf));
+
+	  if (aarch64_debug)
+	    {
+	      debug_printf ("write HFA or HVA return value element %d to %s\n",
+			    i + 1,
+			    gdbarch_register_name (gdbarch, regno));
+	    }
+
+	  memcpy (tmpbuf, valbuf,
+		  len > V_REGISTER_SIZE ? V_REGISTER_SIZE : len);
+	  regs->cooked_write (regno, tmpbuf);
+	  valbuf += len;
+	}
+    }
+  else if (type->code () == TYPE_CODE_PTR
+	   || type->code () == TYPE_CODE_CAPABILITY
+	   || TYPE_IS_REFERENCE (type))
+    {
+      int regno;
+
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Pointer/Capability types\n", __func__);
+
+      if (aapcs64_cap || type->code () == TYPE_CODE_CAPABILITY)
+	regno = tdep->cap_reg_base + AARCH64_X0_REGNUM;
+      else
+	regno = AARCH64_X0_REGNUM;
+
+      regs->cooked_write (regno, valbuf);
+
+      /* Also store the tag if we are dealing with a capability.  */
+      if (aapcs64_cap || type->code () == TYPE_CODE_CAPABILITY)
+	set_register_tag (gdbarch, regs, regno, value_tag (value));
+    }
+  else if (type->code () == TYPE_CODE_INT
+	   || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL
+	   || type->code () == TYPE_CODE_ENUM)
+    {
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Integral types, size %s\n", __func__,
+		      pulongest (TYPE_LENGTH (type)));
+
+      if (TYPE_LENGTH (type) <= X_REGISTER_SIZE)
+	{
+	  /* Values of one word or less are zero/sign-extended and
+	     returned in r0.  */
+	  int regno = AARCH64_X0_REGNUM;
+	  bfd_byte tmpbuf[X_REGISTER_SIZE];
+	  LONGEST val = unpack_long (type, valbuf);
+
+	  memset (tmpbuf, 0, X_REGISTER_SIZE);
+	  store_signed_integer (tmpbuf, X_REGISTER_SIZE, byte_order, val);
+	  regs->cooked_write (regno, tmpbuf);
+	}
+      else
+	{
+	  /* Integral values greater than one word are stored in
+	     consecutive registers starting with r0.  This will always
+	     be a multiple of the register size.  */
+	  int len = TYPE_LENGTH (type);
+	  int regno = tdep->cap_reg_base + AARCH64_X0_REGNUM;
+
+	  while (len > 0)
+	    {
+	      regs->cooked_write (regno++, valbuf);
+	      len -= X_REGISTER_SIZE;
+	      valbuf += X_REGISTER_SIZE;
+	    }
+	}
+    }
+  else
+    {
+      if (aarch64_debug)
+	debug_printf ("aarch64: %s: Composite types, size %s\n", __func__,
+		      pulongest (TYPE_LENGTH (type)));
+      /* For a structure or union the behaviour is as if the value had
+	 been stored to word-aligned memory and then loaded into
+	 registers with 64-bit load instruction(s).  */
+
+      int regno;
+      size_t buffer_size;
+
+      if (aapcs64_cap || type->contains_capability ())
+	{
+	  regno = tdep->cap_reg_base + AARCH64_X0_REGNUM;
+	  buffer_size = C_REGISTER_SIZE;
+	}
+      else
+	{
+	  regno = AARCH64_X0_REGNUM;
+	  buffer_size = X_REGISTER_SIZE;
+	}
+
+      int len = TYPE_LENGTH (type);
+      bfd_byte tmpbuf[buffer_size];
+      CORE_ADDR address = value_address (value);
+
+      while (len > 0)
+	{
+	  memset (tmpbuf, 0, buffer_size);
+	  memcpy (tmpbuf, valbuf,
+		  len > buffer_size ? buffer_size : len);
+	  regs->cooked_write (regno++, tmpbuf);
+
+	  if (aapcs64_cap || type->contains_capability ())
+	    {
+	      /* We need to read the tags from memory.  */
+	      gdb::byte_vector cap = target_read_capability (address);
+	      bool tag = cap[0] == 0 ? false : true;
+	      set_register_tag (gdbarch, regs, regno, tag);
+
+	      if (aarch64_debug)
+		debug_printf ("aarch64: %s Read tag %s from address %s\n",
+			      __func__, tag == true ? "true" : "false",
+			      paddress (gdbarch, address));
+	      address += buffer_size;
+	    }
+
+	  len -= buffer_size;
+	  valbuf += buffer_size;
+	}
+    }
+  if (aarch64_debug)
+    debug_printf ("aarch64: leaving %s\n", __func__);
 }
 
 /* Write into appropriate registers a function return value of type
@@ -2954,11 +3910,54 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
     }
 }
 
-/* Implement the "return_value" gdbarch method.  */
+/* Implement the "return_value" gdbarch method for Morello.  */
+
+static enum return_value_convention
+morello_return_value (struct gdbarch *gdbarch, struct value *func_value,
+		      struct type *valtype, struct regcache *regcache,
+		      struct value *value,
+		      gdb_byte *readbuf, const gdb_byte *writebuf)
+{
+  if (aarch64_debug)
+    debug_printf ("aarch64: entering %s\n", __func__);
+
+  if (valtype->code () == TYPE_CODE_STRUCT
+      || valtype->code () == TYPE_CODE_UNION
+      || valtype->code () == TYPE_CODE_ARRAY)
+    {
+      if (morello_return_in_memory (gdbarch, valtype))
+	{
+	  if (aarch64_debug)
+	    debug_printf ("return value in memory\n");
+
+	  if (aarch64_debug)
+	    debug_printf ("aarch64: exiting %s\n", __func__);
+
+	  return RETURN_VALUE_STRUCT_CONVENTION;
+	}
+    }
+
+  if (writebuf)
+    morello_store_return_value (value, regcache, writebuf);
+
+  if (readbuf)
+    morello_extract_return_value (value, regcache, readbuf);
+
+  if (aarch64_debug)
+    debug_printf ("return value in registers\n");
+
+  if (aarch64_debug)
+    debug_printf ("aarch64: exiting %s\n", __func__);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
+/* Implement the "return_value" gdbarch method for generic AARCH64.  */
 
 static enum return_value_convention
 aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 		      struct type *valtype, struct regcache *regcache,
+		      struct value *value,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
 
@@ -4553,6 +5552,11 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       set_gdbarch_sp_regnum (gdbarch, tdep->cap_reg_csp);
       set_gdbarch_pc_regnum (gdbarch, tdep->cap_reg_pcc);
+
+      /* Morello-specific implementations for function calls and returning
+	 of results.  */
+      set_gdbarch_push_dummy_call (gdbarch, morello_push_dummy_call);
+      set_gdbarch_return_value (gdbarch, morello_return_value);
 
       /* Address manipulation.  */
       set_gdbarch_addr_bits_remove (gdbarch, aarch64_addr_bits_remove);

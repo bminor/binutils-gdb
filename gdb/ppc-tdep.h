@@ -33,12 +33,14 @@ enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
 							struct value *function,
 							struct type *valtype,
 							struct regcache *regcache,
+							struct value *value,
 							gdb_byte *readbuf,
 							const gdb_byte *writebuf);
 enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
 							       struct value *function,
 							       struct type *valtype,
 							       struct regcache *regcache,
+							       struct value *value,
 							       gdb_byte *readbuf,
 							       const gdb_byte *writebuf);
 
@@ -56,6 +58,7 @@ enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarc
 							  struct value *function,
 							  struct type *valtype,
 							  struct regcache *regcache,
+							  struct value *value,
 							  gdb_byte *readbuf,
 							  const gdb_byte *writebuf);
 

@@ -249,6 +249,7 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
 static enum return_value_convention
 ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *valtype, struct regcache *regcache,
+			struct value *value,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {  
   if ((valtype->code () == TYPE_CODE_STRUCT
@@ -258,7 +259,7 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     return ppc_sysv_abi_return_value (gdbarch, function, valtype, regcache,
-				      readbuf, writebuf);
+				      value, readbuf, writebuf);
 }
 
 /* PLT stub in an executable.  */

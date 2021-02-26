@@ -275,10 +275,11 @@ static const struct frame_unwind ppcfbsd_sigtramp_frame_unwind = {
 static enum return_value_convention
 ppcfbsd_return_value (struct gdbarch *gdbarch, struct value *function,
 		      struct type *valtype, struct regcache *regcache,
+		      struct value *value,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   return ppc_sysv_abi_broken_return_value (gdbarch, function, valtype,
-					   regcache, readbuf, writebuf);
+					   regcache, value, readbuf, writebuf);
 }
 
 /* Implement the "get_thread_local_address" gdbarch method.  */

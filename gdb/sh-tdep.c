@@ -1402,6 +1402,7 @@ sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
 static enum return_value_convention
 sh_return_value_nofpu (struct gdbarch *gdbarch, struct value *function,
 		       struct type *type, struct regcache *regcache,
+		       struct value *value,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct type *func_type = function ? value_type (function) : NULL;
@@ -1419,6 +1420,7 @@ sh_return_value_nofpu (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 sh_return_value_fpu (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
+		     struct value *value,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct type *func_type = function ? value_type (function) : NULL;

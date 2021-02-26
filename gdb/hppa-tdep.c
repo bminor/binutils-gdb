@@ -1121,6 +1121,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
+		     struct value *value,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (type) <= 2 * 4)
@@ -1159,6 +1160,7 @@ hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 hppa64_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
+		     struct value *value,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   int len = TYPE_LENGTH (type);

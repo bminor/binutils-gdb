@@ -72,6 +72,7 @@ ppcnbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 static enum return_value_convention
 ppcnbsd_return_value (struct gdbarch *gdbarch, struct value *function,
 		      struct type *valtype, struct regcache *regcache,
+		      struct value *value,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
 #if 0
@@ -87,7 +88,7 @@ ppcnbsd_return_value (struct gdbarch *gdbarch, struct value *function,
   else
 #endif
     return ppc_sysv_abi_broken_return_value (gdbarch, function, valtype,
-					     regcache, readbuf, writebuf);
+					     regcache, value, readbuf, writebuf);
 }
 
 

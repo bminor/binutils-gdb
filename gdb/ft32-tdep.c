@@ -419,6 +419,7 @@ ft32_extract_return_value (struct type *type, struct regcache *regcache,
 static enum return_value_convention
 ft32_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
+		   struct value *value,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (valtype) > 8)

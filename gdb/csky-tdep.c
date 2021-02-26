@@ -423,6 +423,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 csky_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *valtype, struct regcache *regcache,
+		   struct value *value,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   CORE_ADDR regval;

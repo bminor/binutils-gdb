@@ -236,6 +236,7 @@ mn10300_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 static enum return_value_convention
 mn10300_return_value (struct gdbarch *gdbarch, struct value *function,
 		      struct type *type, struct regcache *regcache,
+		      struct value *value,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (mn10300_use_struct_convention (type))

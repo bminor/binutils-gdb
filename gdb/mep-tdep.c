@@ -2146,6 +2146,7 @@ Try using the 'return' command with no argument."));
 static enum return_value_convention
 mep_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *type, struct regcache *regcache,
+		  struct value *value,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (mep_use_struct_convention (type))

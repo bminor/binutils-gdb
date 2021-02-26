@@ -1020,6 +1020,7 @@ arc_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 static enum return_value_convention
 arc_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *valtype, struct regcache *regcache,
+		  struct value *value,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   /* If the return type is a struct, or a union, or would occupy more than two

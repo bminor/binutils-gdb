@@ -3031,6 +3031,7 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 static enum return_value_convention
 i386_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
+		   struct value *value,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum type_code code = type->code ();
@@ -3083,7 +3084,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
   if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
       type = check_typedef (type->field (0).type ());
-      return i386_return_value (gdbarch, function, type, regcache,
+      return i386_return_value (gdbarch, function, type, regcache, value,
 				readbuf, writebuf);
     }
 

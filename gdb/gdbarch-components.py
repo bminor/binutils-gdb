@@ -853,6 +853,7 @@ for instance).
         ("struct value *", "function"),
         ("struct type *", "valtype"),
         ("struct regcache *", "regcache"),
+        ("struct value *", "value"),
         ("gdb_byte *", "readbuf"),
         ("const gdb_byte *", "writebuf"),
     ],
