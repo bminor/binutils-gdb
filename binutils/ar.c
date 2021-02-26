@@ -25,7 +25,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "libbfd.h"
 #include "libiberty.h"
 #include "progress.h"
 #include "getopt.h"
@@ -1255,8 +1254,7 @@ write_archive (bfd *iarch)
   bfd *contents_head = iarch->archive_next;
   int ofd = -1;
 
-  old_name = (char *) xmalloc (strlen (bfd_get_filename (iarch)) + 1);
-  strcpy (old_name, bfd_get_filename (iarch));
+  old_name = xstrdup (bfd_get_filename (iarch));
   new_name = make_tempname (old_name, &ofd);
 
   if (new_name == NULL)

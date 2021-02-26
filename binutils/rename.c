@@ -130,11 +130,11 @@ int
 smart_rename (const char *from, const char *to,
 	      struct stat *target_stat ATTRIBUTE_UNUSED)
 {
-  bfd_boolean exists;
-  struct stat s;
   int ret = 0;
+  struct stat to_stat;
+  bfd_boolean exists;
 
-  exists = lstat (to, &s) == 0;
+  exists = lstat (to, &to_stat) == 0;
 
 #if defined (_WIN32) && !defined (__CYGWIN32__)
   /* Win32, unlike unix, will not erase `to' in `rename(from, to)' but

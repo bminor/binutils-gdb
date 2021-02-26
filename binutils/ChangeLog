@@ -1,3 +1,16 @@
+2021-02-26  Alan Modra  <amodra@gmail.com>
+
+	Backport from mainline
+	2021-02-03  Alan Modra  <amodra@gmail.com>
+	PR 26945
+	* ar.c: Don't include libbfd.h.
+	(write_archive): Replace xmalloc+strcpy with xstrdup.
+	* arsup.c (temp_name, real_ofd): New static variables.
+	(ar_open): Use make_tempname and bfd_fdopenw.
+	(ar_save): Adjust to suit ar_open changes.
+	* objcopy.c: Don't include libbfd.h.
+	* rename.c: Rename and reorder variables.
+
 2021-02-22  Siddhesh Poyarekar  <siddhesh@gotplt.org>
 
 	* ar.c (write_archive): Adjust call to SMART_RENAME.

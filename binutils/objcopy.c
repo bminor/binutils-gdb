@@ -20,7 +20,6 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "libbfd.h"
 #include "progress.h"
 #include "getopt.h"
 #include "libiberty.h"
