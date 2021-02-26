@@ -2002,16 +2002,27 @@ skip_attr_bytes (unsigned long          form,
     case DW_FORM_ref1:
     case DW_FORM_flag:
     case DW_FORM_data1:
+    case DW_FORM_strx1:
+    case DW_FORM_addrx1:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
+      break;
+
+    case DW_FORM_strx3:
+    case DW_FORM_addrx3:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 3, end);
       break;
 
     case DW_FORM_ref2:
     case DW_FORM_data2:
+    case DW_FORM_strx2:
+    case DW_FORM_addrx2:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 2, end);
       break;
 
     case DW_FORM_ref4:
     case DW_FORM_data4:
+    case DW_FORM_strx4:
+    case DW_FORM_addrx4:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 4, end);
       break;
 
@@ -2023,7 +2034,9 @@ skip_attr_bytes (unsigned long          form,
     case DW_FORM_ref_udata:
     case DW_FORM_udata:
     case DW_FORM_GNU_str_index:
+    case DW_FORM_strx:
     case DW_FORM_GNU_addr_index:
+    case DW_FORM_addrx:
       READ_ULEB (uvalue, data, end);
       break;
 
@@ -2480,17 +2493,28 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_ref1:
     case DW_FORM_flag:
     case DW_FORM_data1:
+    case DW_FORM_strx1:
+    case DW_FORM_addrx1:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
       break;
 
     case DW_FORM_ref2:
     case DW_FORM_data2:
+    case DW_FORM_strx2:
+    case DW_FORM_addrx2:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 2, end);
+      break;
+
+    case DW_FORM_strx3:
+    case DW_FORM_addrx3:
+      SAFE_BYTE_GET_AND_INC (uvalue, data, 3, end);
       break;
 
     case DW_FORM_ref_sup4:
     case DW_FORM_ref4:
     case DW_FORM_data4:
+    case DW_FORM_strx4:
+    case DW_FORM_addrx4:
       SAFE_BYTE_GET_AND_INC (uvalue, data, 4, end);
       break;
 
@@ -2500,9 +2524,11 @@ read_and_display_attr_value (unsigned long           attribute,
       break;
 
     case DW_FORM_GNU_str_index:
+    case DW_FORM_strx:
     case DW_FORM_ref_udata:
     case DW_FORM_udata:
     case DW_FORM_GNU_addr_index:
+    case DW_FORM_addrx:
       READ_ULEB (uvalue, data, end);
       break;
 
@@ -2694,6 +2720,11 @@ read_and_display_attr_value (unsigned long           attribute,
       break;
 
     case DW_FORM_GNU_str_index:
+    case DW_FORM_strx:
+    case DW_FORM_strx1:
+    case DW_FORM_strx2:
+    case DW_FORM_strx3:
+    case DW_FORM_strx4:
       if (!do_loc)
 	{
 	  const char * suffix = strrchr (section->name, '.');
@@ -2749,17 +2780,34 @@ read_and_display_attr_value (unsigned long           attribute,
       break;
 
     case DW_FORM_GNU_addr_index:
+    case DW_FORM_addrx:
+    case DW_FORM_addrx1:
+    case DW_FORM_addrx2:
+    case DW_FORM_addrx3:
+    case DW_FORM_addrx4:
       if (!do_loc)
 	{
+	  dwarf_vma base;
+	  dwarf_vma offset;
+
+	  if (debug_info_p == NULL)
+	    base = 0;
+	  else if (debug_info_p->addr_base == DEBUG_INFO_UNAVAILABLE)
+	    base = 0;
+	  else
+	    base = debug_info_p->addr_base;
+
+	  offset = base + uvalue * pointer_size;
+
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
 	    printf (_("%c(index: 0x%s): %s"), delimiter,
 		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_value (uvalue * pointer_size, pointer_size));
+		    fetch_indexed_value (offset, pointer_size));
 	  else
 	    printf (_("%c(addr_index: 0x%s): %s"), delimiter,
 		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_value (uvalue * pointer_size, pointer_size));
+		    fetch_indexed_value (offset, pointer_size));
 	}
       break;
 
@@ -2858,6 +2906,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	  break;
 
 	case DW_AT_GNU_addr_base:
+	case DW_AT_addr_base:
 	  debug_info_p->addr_base = uvalue;
 	  break;
 
@@ -2899,6 +2948,11 @@ read_and_display_attr_value (unsigned long           attribute,
 		add_dwo_name ((const char *) fetch_alt_indirect_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_str_index:
+	      case DW_FORM_strx:
+	      case DW_FORM_strx1:
+	      case DW_FORM_strx2:
+	      case DW_FORM_strx3:
+	      case DW_FORM_strx4:
 		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, FALSE), cu_offset);
 		break;
 	      case DW_FORM_string:
@@ -2926,6 +2980,11 @@ read_and_display_attr_value (unsigned long           attribute,
 		add_dwo_dir ((const char *) fetch_indirect_line_string (uvalue), cu_offset);
 		break;
 	      case DW_FORM_GNU_str_index:
+	      case DW_FORM_strx:
+	      case DW_FORM_strx1:
+	      case DW_FORM_strx2:
+	      case DW_FORM_strx3:
+	      case DW_FORM_strx4:
 		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, FALSE), cu_offset);
 		break;
 	      case DW_FORM_string:
