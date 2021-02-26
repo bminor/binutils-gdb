@@ -1,3 +1,8 @@
+2021-02-26  Jan Vrany  <jan.vrany@labware.com>
+
+	* gdb.trace/mi-tsv-changed.exp (test_create_delete_modify_tsv):
+	Remove trailing \n from expected output.
+
 2021-02-26  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* lib/gdb.exp (use_gdb_stub): Extend comment.
