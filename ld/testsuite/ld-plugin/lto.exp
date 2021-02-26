@@ -448,6 +448,18 @@ set lto_link_elf_tests [list \
   [list {pr27311-2} \
    {tmpdir/pr27311d.o -Wl,--no-as-needed,--rpath-link=. tmpdir/pr27311b.so} {} \
    {dummy.c} {{readelf {--dyn-syms --wide} pr27311.d}} {pr27311-2}] \
+  [list {pr27441a.so} \
+   {-shared} {-fPIC} \
+   {pr27441a.c} {} {pr27441a.so}] \
+  [list {pr27441b.so} \
+   {-shared} {-fPIC} \
+   {pr27441b.c} {} {pr27441b.so}] \
+  [list {pr27441c.o} \
+   {} {-fPIC -flto} \
+   {pr27441c.c} {} {}] \
+  [list {pr27441c.so} \
+   {-shared -fPIC -Wl,--as-needed tmpdir/pr27441c.o tmpdir/pr27441b.so tmpdir/pr27441a.so} {-fPIC} \
+   {dummy.c} {{readelf {-dW} pr27441c.d}} {pr27441c.so}] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of

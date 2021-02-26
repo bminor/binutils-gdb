@@ -1,3 +1,12 @@
+2021-02-26  Alan Modra  <amodra@gmail.com>
+
+	PR 27441
+	* testsuite/ld-plugin/pr27441a.c,
+	* testsuite/ld-plugin/pr27441b.c,
+	* testsuite/ld-plugin/pr27441c.c,
+	* testsuite/ld-plugin/pr27441c.d: New test.
+	* testsuite/ld-plugin/lto.exp: Run it.
+
 2021-02-25  Jan Beulich  <jbeulich@suse.com>
 
 	* ld.texi (PROVIDE): Downgrade "error" to "diagnostic".
