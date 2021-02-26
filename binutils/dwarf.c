@@ -6063,8 +6063,8 @@ display_debug_macro (struct dwarf_section *section,
       SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
       if (version != 4 && version != 5)
 	{
-	  error (_("Only GNU extension to DWARF 4 or 5 of %s is currently supported.\n"),
-		 section->name);
+	  error (_("Expected to find a version number of 4 or 5 in section %s but found %d instead\n"),
+		 section->name, version);
 	  return 0;
 	}
 
@@ -7416,6 +7416,7 @@ display_debug_addr (struct dwarf_section *section,
   unsigned char *end;
   unsigned int i;
   unsigned int count;
+  unsigned char * header;
 
   if (section->size == 0)
     {
@@ -7456,6 +7457,7 @@ display_debug_addr (struct dwarf_section *section,
   debug_addr_info [count]->addr_base = section->size;
   qsort (debug_addr_info, count, sizeof (debug_info *), comp_addr_base);
 
+  header = section->start;
   for (i = 0; i < count; i++)
     {
       unsigned int idx;
@@ -7466,7 +7468,38 @@ display_debug_addr (struct dwarf_section *section,
 
       printf (_("\tIndex\tAddress\n"));
       entry = section->start + debug_addr_info [i]->addr_base;
-      end = section->start + debug_addr_info [i + 1]->addr_base;
+      if (debug_addr_info [i]->dwarf_version >= 5)
+	{
+	  size_t           header_size = entry - header;
+	  unsigned char *  curr_header = header;
+	  dwarf_vma        length;
+	  int              version;
+	  int              segment_selector_size;
+
+	  if (header_size != 8 && header_size != 16)
+	    {
+	      warn (_("Corrupt %s section: expecting header size of 8 or 16, but found %ld instead\n"),
+		    section->name, (long) header_size);
+	      return 0;
+	    }
+
+	  SAFE_BYTE_GET_AND_INC (length, curr_header, 4, entry);
+	  if (length == 0xffffffff)
+	    SAFE_BYTE_GET (length, curr_header, 8, entry);
+	  end = curr_header + length;
+
+	  SAFE_BYTE_GET_AND_INC (version, curr_header, 2, entry);
+	  if (version != 5)
+	    warn (_("Corrupt %s section: expecting version number 5 in header but found %d instead\n"),
+		  section->name, version);
+
+	  SAFE_BYTE_GET_AND_INC (address_size, curr_header, 1, entry);
+	  SAFE_BYTE_GET_AND_INC (segment_selector_size, curr_header, 1, entry);
+	  address_size += segment_selector_size;
+	}
+      else
+	end = section->start + debug_addr_info [i + 1]->addr_base;
+      header = end;
       idx = 0;
       while (entry < end)
 	{

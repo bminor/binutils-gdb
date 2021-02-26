@@ -1,5 +1,9 @@
 2021-02-26  Tom de Vries  <tdevries@suse.de>
 
+	* dwarf.c (display_debug_addr): Handle dwarf-5 .debug_addr bits.
+
+2021-02-26  Tom de Vries  <tdevries@suse.de>
+
 	PR 27390
 	* dwarf.c: (skip_attr_bytes): Add support for DW_FORM_str* and
 	DW_FORM_addrx*.
