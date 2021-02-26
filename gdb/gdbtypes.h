@@ -820,6 +820,7 @@ struct main_type
   unsigned int m_flag_fixed_instance : 1;
   unsigned int flag_objfile_owned : 1;
   unsigned int m_flag_endianity_not_default : 1;
+  unsigned int m_flag_contains_capability : 1;
 
   /* * True if this type was declared with "class" rather than
      "struct".  */
@@ -1194,6 +1195,18 @@ struct type
   void set_endianity_is_not_default (bool endianity_is_not_default)
   {
     this->main_type->m_flag_endianity_not_default = endianity_is_not_default;
+  }
+
+  /* Indicates whether this type contains a capability.  */
+
+  bool contains_capability () const
+  {
+    return this->main_type->m_flag_contains_capability;
+  }
+
+  void set_contains_capability (bool contains_capability)
+  {
+    this->main_type->m_flag_contains_capability = contains_capability;
   }
 
   /* * Return the dynamic property of the requested KIND from this type's

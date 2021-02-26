@@ -1,3 +1,89 @@
+2021-04-27  Luis Machado  <luis.machado@arm.com>
+
+	* aarch64-tdep.c (struct stack_item_t) <arg_value): New field.
+	(set_register_tag, pass_in_c, pass_in_c_or_stack,
+	pass_in_c_x_or_stack, type_fields_overlap_capabilities,
+	convert_pointer_to_capability,
+	morello_write_memory_with_capabilities,
+	morello_push_dummy_call, morello_extract_return_value,
+	morello_return_in_memory, morello_store_return_value,
+	morello_return_value): New functions.
+	(pass_in_x, pass_in_v, pass_on_stack, pass_in_x_or_stack,
+	pass_in_v_vfp_candidate): Update.
+	(aarch64_return_value): New argument value.
+	(aarch64_gdbarch_init): Conditionally set both gdbarch_push_dummy_call
+	and gdbarch_return_value.
+	* arch/aarch64.h (MORELLO_MEMORY_TAG_GRANULE_SIZE): New constant.
+	* dwarf2/read.c (handle_struct_member_die): Record whether the
+	composite type contains capabilities.
+	* gdbarch.sh (return_value): New argument value.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbtypes.c (recursive_dump_type): Dump extra information.
+	(append_composite_type_field_raw): Set whether the composite type
+	constains capabilities.
+	* gdbtypes.h (struct main_type) <m_flag_contains_capability>: New field.
+	<contains_capability>: New member function.
+	<set_contains_capability>: New member function.
+
+	* alpha-tdep.c: Update return_value hook prototype.
+	* amd64-tdep.c: Update return_value hook prototype.
+	* amd64-windows-tdep.c: Update return_value hook prototype.
+	* arc-tdep.c: Update return_value hook prototype.
+	* arm-tdep.c: Update return_value hook prototype.
+	* avr-tdep.c: Update return_value hook prototype.
+	* bfin-tdep.c: Update return_value hook prototype.
+	* bpf-tdep.c: Update return_value hook prototype.
+	* cris-tdep.c: Update return_value hook prototype.
+	* csky-tdep.c: Update return_value hook prototype.
+	* elfread.c: Update return_value hook prototype.
+	* frv-tdep.c: Update return_value hook prototype.
+	* ft32-tdep.c: Update return_value hook prototype.
+	* h8300-tdep.c: Update return_value hook prototype.
+	* hppa-tdep.c: Update return_value hook prototype.
+	* i386-tdep.c: Update return_value hook prototype.
+	* ia64-tdep.c: Update return_value hook prototype.
+	* infcall.c: Update return_value hook prototype.
+	* infcmd.c: Update return_value hook prototype.
+	* lm32-tdep.c: Update return_value hook prototype.
+	* m32c-tdep.c: Update return_value hook prototype.
+	* m32r-tdep.c: Update return_value hook prototype.
+	* m68hc11-tdep.c: Update return_value hook prototype.
+	* m68k-tdep.c: Update return_value hook prototype.
+	* mep-tdep.c: Update return_value hook prototype.
+	* microblaze-tdep.c: Update return_value hook prototype.
+	* mips-tdep.c: Update return_value hook prototype.
+	* mn10300-tdep.c: Update return_value hook prototype.
+	* moxie-tdep.c: Update return_value hook prototype.
+	* msp430-tdep.c: Update return_value hook prototype.
+	* nds32-tdep.c: Update return_value hook prototype.
+	* nios2-tdep.c: Update return_value hook prototype.
+	* or1k-tdep.c: Update return_value hook prototype.
+	* ppc-fbsd-tdep.c: Update return_value hook prototype.
+	* ppc-linux-tdep.c: Update return_value hook prototype.
+	* ppc-netbsd-tdep.c: Update return_value hook prototype.
+	* ppc-sysv-tdep.c: Update return_value hook prototype.
+	* riscv-tdep.c: Update return_value hook prototype.
+	* rl78-tdep.c: Update return_value hook prototype.
+	* rs6000-aix-tdep.c: Update return_value hook prototype.
+	* rs6000-lynx178-tdep.c: Update return_value hook prototype.
+	* rx-tdep.c: Update return_value hook prototype.
+	* s12z-tdep.c: Update return_value hook prototype.
+	* s390-tdep.c: Update return_value hook prototype.
+	* score-tdep.c: Update return_value hook prototype.
+	* sh-tdep.c: Update return_value hook prototype.
+	* sparc-tdep.c: Update return_value hook prototype.
+	* sparc64-tdep.c: Update return_value hook prototype.
+	* stack.c: Update return_value hook prototype.
+	* tic6x-tdep.c: Update return_value hook prototype.
+	* tilegx-tdep.c: Update return_value hook prototype.
+	* v850-tdep.c: Update return_value hook prototype.
+	* valprint.c: Update return_value hook prototype.
+	* value.c: Update return_value hook prototype.
+	* vax-tdep.c: Update return_value hook prototype.
+	* xstormy16-tdep.c: Update return_value hook prototype.
+	* xtensa-tdep.c: Update return_value hook prototype.
+
 2021-03-17  Luis Machado  <luis.machado@arm.com>
 
 	* aarch64-linux-nat.c (aarch64_linux_nat_target)

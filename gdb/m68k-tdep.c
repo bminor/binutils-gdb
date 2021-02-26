@@ -424,6 +424,7 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 static enum return_value_convention
 m68k_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
+		   struct value *value,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum type_code code = type->code ();
@@ -460,6 +461,7 @@ m68k_return_value (struct gdbarch *gdbarch, struct value *function,
 static enum return_value_convention
 m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
+			struct value *value,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum type_code code = type->code ();

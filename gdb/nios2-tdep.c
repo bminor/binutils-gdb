@@ -1784,6 +1784,7 @@ nios2_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
 static enum return_value_convention
 nios2_return_value (struct gdbarch *gdbarch, struct value *function,
 		    struct type *type, struct regcache *regcache,
+		    struct value *value,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (type) > 8)

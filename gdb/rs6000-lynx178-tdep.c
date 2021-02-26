@@ -262,6 +262,7 @@ ran_out_of_registers_for_arguments:
 static enum return_value_convention
 rs6000_lynx178_return_value (struct gdbarch *gdbarch, struct value *function,
 			     struct type *valtype, struct regcache *regcache,
+			     struct value *value,
 			     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);

@@ -512,7 +512,7 @@ M;CORE_ADDR;integer_to_address;struct type *type, const gdb_byte *buf;type, buf
 # stored into the appropriate register.  This can be used when we want
 # to force the value returned by a function (see the "return" command
 # for instance).
-M;enum return_value_convention;return_value;struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf;function, valtype, regcache, readbuf, writebuf
+M;enum return_value_convention;return_value;struct value *function, struct type *valtype, struct regcache *regcache, struct value *value, gdb_byte *readbuf, const gdb_byte *writebuf;function, valtype, regcache, value, readbuf, writebuf
 
 # Return true if the return value of function is stored in the first hidden
 # parameter.  In theory, this feature should be language-dependent, specified

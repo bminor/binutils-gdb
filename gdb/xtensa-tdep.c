@@ -1646,6 +1646,7 @@ xtensa_return_value (struct gdbarch *gdbarch,
 		     struct value *function,
 		     struct type *valtype,
 		     struct regcache *regcache,
+		     struct value *value,
 		     gdb_byte *readbuf,
 		     const gdb_byte *writebuf)
 {
