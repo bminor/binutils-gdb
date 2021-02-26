@@ -1692,6 +1692,8 @@ value_copy (struct value *arg)
   val->embedded_offset = value_embedded_offset (arg);
   val->pointed_to_offset = arg->pointed_to_offset;
   val->modifiable = arg->modifiable;
+  val->stack = arg->stack;
+  val->initialized = arg->initialized;
   if (!value_lazy (val))
     {
       memcpy (value_contents_all_raw (val), value_contents_all_raw (arg),
