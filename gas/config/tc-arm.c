@@ -11635,7 +11635,7 @@ do_t_add_sub (void)
 		  }
 		}
 	      else
-		constraint (inst.size_req == 2, BAD_HIREG);
+		constraint (inst.size_req == 2, _("cannot honor width suffix"));
 	    }
 	  if (inst.size_req == 4
 	      || (inst.size_req != 2 && !opcode))

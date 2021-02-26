@@ -1,3 +1,11 @@
+2021-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 27411
+	* config/tc-arm.c (do_t_add_sub): Correct error message.
+	* testsuite/gas/arm/pr27411.s: New test.
+	* testsuite/gas/arm/pr27411.d: New test driver.
+	* testsuite/gas/arm/pr27411.l: Expected error output for new test.
+
 2021-02-24  Alan Modra  <amodra@gmail.com>
 
 	PR 23691
