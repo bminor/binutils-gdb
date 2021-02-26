@@ -132,32 +132,32 @@ struct dwarf_expr_context
   std::vector<dwarf_stack_value> stack;
 
   /* Target architecture to use for address operations.  */
-  struct gdbarch *gdbarch;
+  struct gdbarch *gdbarch = nullptr;
 
   /* Target address size in bytes.  */
-  int addr_size;
+  int addr_size = 0;
 
   /* DW_FORM_ref_addr size in bytes.  If -1 DWARF is executed from a frame
      context and operations depending on DW_FORM_ref_addr are not allowed.  */
-  int ref_addr_size;
+  int ref_addr_size = 0;
 
   /* The current depth of dwarf expression recursion, via DW_OP_call*,
      DW_OP_fbreg, DW_OP_push_object_address, etc., and the maximum
      depth we'll tolerate before raising an error.  */
-  int recursion_depth, max_recursion_depth;
+  int recursion_depth = 0, max_recursion_depth = 0x100;
 
   /* Location of the value.  */
-  enum dwarf_value_location location;
+  dwarf_value_location location = DWARF_VALUE_MEMORY;
 
   /* For DWARF_VALUE_LITERAL, the current literal value's length and
      data.  For DWARF_VALUE_IMPLICIT_POINTER, LEN is the offset of the
      target DIE of sect_offset kind.  */
-  ULONGEST len;
-  const gdb_byte *data;
+  ULONGEST len = 0;
+  const gdb_byte *data = nullptr;
 
   /* Initialization status of variable: Non-zero if variable has been
      initialized; zero otherwise.  */
-  int initialized;
+  int initialized = 0;
 
   /* A vector of pieces.
 

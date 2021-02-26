@@ -90,16 +90,7 @@ dwarf_expr_context::address_type () const
 /* Create a new context for the expression evaluator.  */
 
 dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile)
-: gdbarch (NULL),
-  addr_size (0),
-  ref_addr_size (0),
-  recursion_depth (0),
-  max_recursion_depth (0x100),
-  location (DWARF_VALUE_MEMORY),
-  len (0),
-  data (NULL),
-  initialized (0),
-  per_objfile (per_objfile)
+: per_objfile (per_objfile)
 {
 }
 
