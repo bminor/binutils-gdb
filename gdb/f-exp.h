@@ -108,6 +108,16 @@ extern struct value *eval_op_f_array_size (struct type *expect_type,
 					   struct value *arg1,
 					   struct value *arg2);
 
+/* Implement the evaluation of Fortran's SHAPE keyword.  EXPECTED_TYPE,
+   EXP, and NOSIDE are as for expression::evaluate (see expression.h).  OP
+   will always be UNOP_FORTRAN_SHAPE, and ARG1 is the argument being passed
+   to the expression.  */
+
+extern struct value *eval_op_f_array_shape (struct type *expect_type,
+					    struct expression *exp,
+					    enum noside noside,
+					    enum exp_opcode op,
+					    struct value *arg1);
 
 namespace expr
 {
@@ -135,6 +145,8 @@ using fortran_array_size_1arg = unop_operation<FORTRAN_ARRAY_SIZE,
 					       eval_op_f_array_size>;
 using fortran_array_size_2arg = binop_operation<FORTRAN_ARRAY_SIZE,
 						eval_op_f_array_size>;
+using fortran_array_shape_operation = unop_operation<UNOP_FORTRAN_SHAPE,
+						     eval_op_f_array_shape>;
 
 /* The Fortran "complex" operation.  */
 class fortran_cmplx_operation

@@ -675,6 +675,87 @@ eval_op_f_array_size (struct type *expect_type,
   return fortran_array_size (exp->gdbarch, exp->language_defn, arg1, arg2);
 }
 
+/* Implement UNOP_FORTRAN_SHAPE expression.  Both GDBARCH and LANG are
+   extracted from the expression being evaluated.  VAL is the value on
+   which 'shape' was used, this can be any type.
+
+   Return an array of integers.  If VAL is not an array then the returned
+   array should have zero elements.  If VAL is an array then the returned
+   array should have one element per dimension, with the element
+   containing the extent of that dimension from VAL.  */
+
+static struct value *
+fortran_array_shape (struct gdbarch *gdbarch, const language_defn *lang,
+		     struct value *val)
+{
+  struct type *val_type = check_typedef (value_type (val));
+
+  /* If we are passed an array that is either not allocated, or not
+     associated, then this is explicitly not allowed according to the
+     Fortran specification.  */
+  if (val_type->code () == TYPE_CODE_ARRAY
+      && (type_not_associated (val_type) || type_not_allocated (val_type)))
+    error (_("The array passed to SHAPE must be allocated or associated"));
+
+  /* The Fortran specification allows non-array types to be passed to this
+     function, in which case we get back an empty array.
+
+     Calculate the number of dimensions for the resulting array.  */
+  int ndimensions = 0;
+  if (val_type->code () == TYPE_CODE_ARRAY)
+    ndimensions = calc_f77_array_dims (val_type);
+
+  /* Allocate a result value of the correct type.  */
+  struct type *range
+    = create_static_range_type (nullptr,
+				builtin_type (gdbarch)->builtin_int,
+				1, ndimensions);
+  struct type *elm_type = builtin_f_type (gdbarch)->builtin_integer;
+  struct type *result_type = create_array_type (nullptr, elm_type, range);
+  struct value *result = allocate_value (result_type);
+  LONGEST elm_len = TYPE_LENGTH (elm_type);
+
+  /* Walk the array dimensions backwards due to the way the array will be
+     laid out in memory, the first dimension will be the most inner.
+
+     If VAL was not an array then ndimensions will be 0, in which case we
+     will never go around this loop.  */
+  for (LONGEST dst_offset = elm_len * (ndimensions - 1);
+       dst_offset >= 0;
+       dst_offset -= elm_len)
+    {
+      LONGEST lbound, ubound;
+
+      if (!get_discrete_bounds (val_type->index_type (), &lbound, &ubound))
+	error (_("failed to find array bounds"));
+
+      LONGEST dim_size = (ubound - lbound + 1);
+
+      /* And copy the value into the result value.  */
+      struct value *v = value_from_longest (elm_type, dim_size);
+      gdb_assert (dst_offset + TYPE_LENGTH (value_type (v))
+		  <= TYPE_LENGTH (value_type (result)));
+      gdb_assert (TYPE_LENGTH (value_type (v)) == elm_len);
+      value_contents_copy (result, dst_offset, v, 0, elm_len);
+
+      /* Peel another dimension of the array.  */
+      val_type = TYPE_TARGET_TYPE (val_type);
+    }
+
+  return result;
+}
+
+/* See f-exp.h.  */
+
+struct value *
+eval_op_f_array_shape (struct type *expect_type, struct expression *exp,
+		       enum noside noside, enum exp_opcode opcode,
+		       struct value *arg1)
+{
+  gdb_assert (opcode == UNOP_FORTRAN_SHAPE);
+  return fortran_array_shape (exp->gdbarch, exp->language_defn, arg1);
+}
+
 /* A helper function for UNOP_ABS.  */
 
 struct value *

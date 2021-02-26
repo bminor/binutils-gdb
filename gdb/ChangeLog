@@ -1,5 +1,16 @@
 2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-exp.h (eval_op_f_array_shape): Declare.
+	(fortran_array_shape_operation): New type.
+	* f-exp.y (exp): Handle UNOP_FORTRAN_SHAPE after parsing
+	UNOP_INTRINSIC.
+	(f77_keywords): Add "shape" keyword.
+	* f-lang.c (fortran_array_shape): New function.
+	(eval_op_f_array_shape): New function.
+	* std-operator.def (UNOP_FORTRAN_SHAPE): New operator.
+
+2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* f-exp.y (eval_op_f_array_size): Declare 1 and 2 argument forms
 	of this function.
 	(expr::fortran_array_size_1arg): New type.
