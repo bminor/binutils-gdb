@@ -1,0 +1,101 @@
+# This testcase is part of GDB, the GNU debugger.
+#
+# Copyright 2024 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test that we stop replaying other threads when stepping a thread at the
+# end of its execution history.
+#
+# This is similar to the last test in multi-thread-step.exp, except that
+# we reverse-step instead of record goto begin to start replaying and we
+# step instead of continuing.
+#
+# This triggered a bug where GDB confused the execution direction and kept
+# stepping both threads backwards instead of forwards.
+
+require allow_btrace_tests
+
+standard_testfile multi-thread-step.c
+if [prepare_for_testing "failed to prepare" $testfile $srcfile \
+    {debug pthreads}] {
+    return -1
+}
+
+if ![runto_main] {
+    return -1
+}
+
+# Set up breakpoints.
+set bp_1 [gdb_get_line_number "bp.1" $srcfile]
+set bp_2 [gdb_get_line_number "bp.2" $srcfile]
+
+# Trace the code between the two breakpoints.
+gdb_breakpoint $srcfile:$bp_1
+gdb_continue_to_breakpoint "continue to bp.1" ".*$srcfile:$bp_1\r\n.*"
+
+# Make sure GDB knows about the new thread.
+gdb_test "info threads"
+gdb_test_no_output "record btrace"
+
+# We have two threads at or close to bp.1 but handled only one stop event.
+# Remove the breakpoint so we do not need to deal with the 2nd event.
+delete_breakpoints
+gdb_breakpoint $srcfile:$bp_2
+gdb_continue_to_breakpoint "continue to bp.2" ".*$srcfile:$bp_2\r\n.*"
+
+# Determine the thread that reported the breakpoint.
+set thread [get_integer_valueof "\$_thread" bad]
+
+# Determine the other thread.
+set other "bad"
+if { $thread == 1 } {
+    set other 2
+} elseif { $thread == 2 } {
+    set other 1
+}
+
+# This test only works for scheduler-locking 'replay'.
+gdb_test_no_output "set scheduler-locking replay"
+
+# Remove breakpoints or we might run into it right away.
+delete_breakpoints
+
+# Start replaying the other thread.
+gdb_test "thread apply $other reverse-stepi"
+gdb_test "thread apply $other info record" "Replay in progress.*" \
+    "other thread is replaying"
+
+# Step the thread that reported the breakpoint, which is not replaying.
+#
+# There is a chance that the other thread exits while we step.  We could
+# slow it down to make this less likely, but we can also handle this case.
+set other_exited 0
+gdb_test_multiple "next" {} {
+    -re "Thread.*exited" {
+	set other_exited 1
+	exp_continue
+    }
+    -re -wrap "return arg;.*" {
+	pass $gdb_test_name
+    }
+}
+
+# The other thread stopped replaying.  If it still exists.
+if {$other_exited == 1} {
+    pass "other thread stopped replaying"
+} else {
+    gdb_test "thread apply $other info record" "Recorded \[^\\\r\\\n\]*" \
+	"other thread stopped replaying"
+}
