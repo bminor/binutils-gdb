@@ -161,6 +161,7 @@ static int show_version = 0;	/* Show the version number.  */
 static int show_synthetic = 0;	/* Display synthesized symbols too.  */
 static int line_numbers = 0;	/* Print line numbers for symbols.  */
 static int allow_special_symbols = 0;  /* Allow special symbols.  */
+static int quiet = 0;		/* Suppress "no symbols" diagnostic.  */
 
 /* The characters to use for global and local ifunc symbols.  */
 #if DEFAULT_F_FOR_IFUNC_SYMBOLS
@@ -200,7 +201,8 @@ enum long_option_values
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
   OPTION_IFUNC_CHARS,
-  OPTION_WITH_SYMBOL_VERSIONS
+  OPTION_WITH_SYMBOL_VERSIONS,
+  OPTION_QUIET
 };
 
 static struct option long_options[] =
@@ -224,6 +226,7 @@ static struct option long_options[] =
   {"print-armap", no_argument, &print_armap, 1},
   {"print-file-name", no_argument, 0, 'o'},
   {"print-size", no_argument, 0, 'S'},
+  {"quiet", no_argument, 0, OPTION_QUIET},
   {"radix", required_argument, 0, 't'},
   {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
@@ -279,6 +282,7 @@ usage (FILE *stream, int status)
   fprintf (stream, _("\
   -S, --print-size       Print size of defined symbols\n\
   -s, --print-armap      Include index for symbols from archive members\n\
+      --quiet            Suppress \"no symbols\" diagnostic\n\
       --size-sort        Sort symbols by size\n\
       --special-syms     Include special symbols in the output\n\
       --synthetic        Display synthetic symbols as well\n\
@@ -1130,7 +1134,8 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
     {
       if (!(bfd_get_file_flags (abfd) & HAS_SYMS))
 	{
-	  non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
+	  if (!quiet)
+	    non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
 	  return;
 	}
     }
@@ -1140,7 +1145,8 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
     {
       if (dynamic && bfd_get_error () == bfd_error_no_symbols)
 	{
-	  non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
+	  if (!quiet)
+	    non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
 	  return;
 	}
 
@@ -1149,7 +1155,8 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 
   if (symcount == 0)
     {
-      non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
+      if (!quiet)
+	non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
       return;
     }
 
@@ -1775,6 +1782,9 @@ main (int argc, char **argv)
 	  break;
 	case OPTION_WITH_SYMBOL_VERSIONS:
 	  /* Ignored for backward compatibility.  */
+	  break;
+	case OPTION_QUIET:
+	  quiet = 1;
 	  break;
 	case 'D':
 	  dynamic = 1;

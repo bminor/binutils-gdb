@@ -1,3 +1,15 @@
+2021-02-26  Fangrui Song  <maskray@google.com>
+
+	PR 27408
+	* readelf.c (quiet): New option flag.
+	(enum long_option_values): New enum to hold long option value.
+	(long_options): Add --quiet.
+	(usage): Mention --quiet.
+	(display_rel_file): If quiet is enabled, suppress "no symbols".
+	(main): Handle the new option.
+	* NEWS: Mention --quiet.
+	* docs/binutils.texi: Document --quiet.
+
 2021-02-26  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf.c (display_debug_addr): Handle dwarf-5 .debug_addr bits.

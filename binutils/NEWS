@@ -10,6 +10,9 @@
   restored by the use of the --enable-follow-debug-links=no configure time
   option.
 
+* Nm has a new command line option: --quiet.  This suppresses "no symbols"
+  diagnostic.
+
 Changes in 2.36:
 
 * Update elfedit and readelf with LAM_U48 and LAM_U57 support.

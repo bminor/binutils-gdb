@@ -4741,6 +4741,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-s}|@option{--syms}|@option{--symbols}]
         [@option{--dyn-syms}|@option{--lto-syms}]
         [@option{--demangle@var{=style}}|@option{--no-demangle}]
+        [@option{--quiet}]
         [@option{--recurse-limit}|@option{--no-recurse-limit}]
         [@option{-n}|@option{--notes}]
         [@option{-r}|@option{--relocs}]
@@ -4821,6 +4822,10 @@ file.
 @cindex ELF segment information
 Displays the information contained in the file's segment headers, if it
 has any.
+
+@item --quiet
+@cindex quiet
+Suppress "no symbols" diagnostic.
 
 @item -S
 @itemx --sections
