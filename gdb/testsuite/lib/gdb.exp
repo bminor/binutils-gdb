@@ -7433,11 +7433,13 @@ gdb_caching_proc skip_ctf_tests {
 	return 1
     }
 
-    return ![gdb_can_simple_compile ctfdebug {
+    set can_ctf [gdb_can_simple_compile ctfdebug {
 	int main () {
 	    return 0;
 	}
     } executable "additional_flags=-gt"]
+
+    return [expr {!$can_ctf}]
 }
 
 # Return 1 if compiler supports -gstatement-frontiers.  Otherwise,
