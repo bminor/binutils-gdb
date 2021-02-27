@@ -1,3 +1,12 @@
+2021-03-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/pr25708.d: Add --with-symbol-versions to nm.
+	* testsuite/ld-elf/pr27128a.d: Likewise.
+	* testsuite/ld-elf/pr27128b.d: Likewise.
+	* testsuite/ld-elf/pr27128c.d: Likewise.
+	* testsuite/ld-elf/pr27128d.d: Likewise.
+	* testsuite/ld-elf/pr27128e.d: Likewise.
+
 2021-02-26  Alan Modra  <amodra@gmail.com>
 
 	PR 27441

@@ -161,6 +161,7 @@ static int show_version = 0;	/* Show the version number.  */
 static int show_synthetic = 0;	/* Display synthesized symbols too.  */
 static int line_numbers = 0;	/* Print line numbers for symbols.  */
 static int allow_special_symbols = 0;  /* Allow special symbols.  */
+static int with_symbol_versions = -1; /* Output symbol version information.  */
 static int quiet = 0;		/* Suppress "no symbols" diagnostic.  */
 
 /* The characters to use for global and local ifunc symbols.  */
@@ -201,7 +202,6 @@ enum long_option_values
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
   OPTION_IFUNC_CHARS,
-  OPTION_WITH_SYMBOL_VERSIONS,
   OPTION_QUIET
 };
 
@@ -238,8 +238,8 @@ static struct option long_options[] =
   {"defined-only", no_argument, &defined_only, 1},
   {"undefined-only", no_argument, &undefined_only, 1},
   {"version", no_argument, &show_version, 1},
-  {"with-symbol-versions", no_argument, NULL,
-   OPTION_WITH_SYMBOL_VERSIONS},
+  {"with-symbol-versions", no_argument, &with_symbol_versions, 1},
+  {"without-symbol-versions", no_argument, &with_symbol_versions, 0},
   {0, no_argument, 0, 0}
 };
 
@@ -412,9 +412,17 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	       const char *name, bfd *abfd)
 {
   char *alloc = NULL;
+  char *atver = NULL;
 
   if (name == NULL)
     name = info->sinfo->name;
+  if (!with_symbol_versions
+      && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      atver = strchr (name, '@');
+      if (atver)
+	*atver = 0;
+    }
   if (do_demangle && *name)
     {
       alloc = bfd_demangle (abfd, name, demangle_flags);
@@ -422,7 +430,7 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	name = alloc;
     }
 
-  if (info != NULL && info->elfinfo)
+  if (info != NULL && info->elfinfo && with_symbol_versions)
     {
       const char *version_string;
       bfd_boolean hidden;
@@ -441,6 +449,8 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	}
     }
   printf (form, name);
+  if (atver)
+    *atver = '@';
   free (alloc);
 }
 
@@ -1779,9 +1789,6 @@ main (int argc, char **argv)
 	  break;
 	case OPTION_NO_RECURSE_LIMIT:
 	  demangle_flags |= DMGL_NO_RECURSE_LIMIT;
-	  break;
-	case OPTION_WITH_SYMBOL_VERSIONS:
-	  /* Ignored for backward compatibility.  */
 	  break;
 	case OPTION_QUIET:
 	  quiet = 1;

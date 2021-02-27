@@ -808,7 +808,8 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--d
    [@option{--plugin} @var{name}]
    [@option{--no-recurse-limit}|@option{--recurse-limit}]]
    [@option{--size-sort}] [@option{--special-syms}]
-   [@option{--synthetic}] [@option{--target=}@var{bfdname}]
+   [@option{--synthetic}] [@option{--with-symbol-versions}]
+   [@option{--without-symbol-versions}] [@option{--target=}@var{bfdname}]
    [@var{objfile}@dots{}]
 @c man end
 @end smallexample
@@ -1168,6 +1169,16 @@ used to mark transitions between ARM code, THUMB code and data.
 Include synthetic symbols in the output.  These are special symbols
 created by the linker for various purposes.  They are not shown by
 default since they are not part of the binary's original source code.
+
+@item --with-symbol-versions
+@item --without-symbol-versions
+Enables or disables the display of symbol version information.  The
+version string is displayed as a suffix to the symbol name, preceded
+by an @@ character.  For example @samp{foo@@VER_1}.  If the version is
+the default version to be used when resolving unversioned references
+to the symbol then it is displayed as a suffix preceded by two @@
+characters.  For example @samp{foo@@@@VER_2}.  By default, symbol
+version information is displayed.
 
 @item --target=@var{bfdname}
 @cindex object code format

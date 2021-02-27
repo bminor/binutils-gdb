@@ -1,6 +1,6 @@
 #source: pr27128.s
 #ld: -shared -version-script pr27128.t
-#nm: -n --format=sysv
+#nm: -n --format=sysv --with-symbol-versions
 #target: [check_shared_lib_support]
 #notarget: [is_underscore_target]
 # _Zrm1XS_ doesn't have an extra underscore.

@@ -1,3 +1,16 @@
+2021-03-01  Alan Modra  <amodra@gmail.com>
+
+	PR 27128
+	* doc/binutils.texi: Add nm --with-symbol-versions and
+	--without-symbol-versions documentation.
+	* nm.c (with_symbol_versions): New variable.
+	(enum long_option_values): Delete OPTION_WITH_SYMBOL_VERSIONS.
+	(long_options): Make --with-symbol-versions entry twiddle the flag.
+	Add --without-symbol-versions.
+	(print_symname): Strip version when !with_symbol_versions.  Add
+	dynamic version info under control of with_symbol_versions.
+	(main): Remove OPTION_WITH_SYMBOL_VERSIONS case.
+
 2021-02-26  Fangrui Song  <maskray@google.com>
 
 	PR 27408
