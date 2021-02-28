@@ -760,6 +760,10 @@ fragment <<EOF
 	{
 	  link_info.flags_1 |= DF_1_GLOBAUDIT;
 	}
+      else if (CONST_STRNEQ (optarg, "start-stop-gc"))
+	link_info.start_stop_gc = TRUE;
+      else if (CONST_STRNEQ (optarg, "nostart-stop-gc"))
+	link_info.start_stop_gc = FALSE;
       else if (CONST_STRNEQ (optarg, "start-stop-visibility="))
 	{
 	  if (strcmp (optarg, "start-stop-visibility=default") == 0)

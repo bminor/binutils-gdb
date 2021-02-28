@@ -2070,8 +2070,6 @@ elf_shlib_list_options (FILE *file)
   -z common                   Generate common symbols with STT_COMMON type\n"));
   fprintf (file, _("\
   -z nocommon                 Generate common symbols with STT_OBJECT type\n"));
-  fprintf (file, _("\
-  -z stack-size=SIZE          Set size of stack segment\n"));
   if (link_info.textrel_check == textrel_check_error)
     fprintf (file, _("\
   -z text                     Treat DT_TEXTREL in output as error (default)\n"));
@@ -2116,7 +2114,11 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   -z defs                     Report unresolved symbols in object files\n"));
   fprintf (file, _("\
+  -z undefs                   Ignore unresolved symbols in object files\n"));
+  fprintf (file, _("\
   -z muldefs                  Allow multiple definitions\n"));
+  fprintf (file, _("\
+  -z stack-size=SIZE          Set size of stack segment\n"));
   fprintf (file, _("\
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
@@ -2127,6 +2129,13 @@ elf_static_list_options (FILE *file)
   -z nounique-symbol          Keep duplicated local symbol names (default)\n"));
   fprintf (file, _("\
   -z globalaudit              Mark executable requiring global auditing\n"));
+  fprintf (file, _("\
+  -z start-stop-gc            Enable garbage collection on __start/__stop\n"));
+  fprintf (file, _("\
+  -z nostart-stop-gc          Don't garbage collect __start/__stop (default)\n"));
+  fprintf (file, _("\
+  -z start-stop-visibility=V  Set visibility of built-in __start/__stop symbols\n\
+                                to DEFAULT, PROTECTED, HIDDEN or INTERNAL\n"));
 }
 
 static void

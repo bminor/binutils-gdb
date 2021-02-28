@@ -5,6 +5,9 @@
 * Add -z report-relative-reloc to x86 ELF linker to report dynamic
   relative relocations.
 
+* Add -z start-stop-gc to disable special treatment of __start_*/__stop_*
+  references when --gc-sections.
+
 Changes in 2.36:
 
 * Add libdep plugin, for linking dependencies of static libraries that

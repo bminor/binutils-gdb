@@ -1453,6 +1453,23 @@ Specify a stack size for an ELF @code{PT_GNU_STACK} segment.
 Specifying zero will override any default non-zero sized
 @code{PT_GNU_STACK} segment creation.
 
+@item start-stop-gc
+@itemx nostart-stop-gc
+@cindex start-stop-gc
+When @samp{--gc-sections} is in effect, a reference from a retained
+section to @code{__start_SECNAME} or @code{__stop_SECNAME} causes all
+input sections named @code{SECNAME} to also be retained, if
+@code{SECNAME} is representable as a C identifier and either
+@code{__start_SECNAME} or @code{__stop_SECNAME} is synthesized by the
+linker.  @samp{-z start-stop-gc} disables this effect, allowing
+sections to be garbage collected as if the special synthesized symbols
+were not defined.  @samp{-z start-stop-gc} has no effect on a
+definition of @code{__start_SECNAME} or @code{__stop_SECNAME} in an
+object file or linker script.  Such a definition will prevent the
+linker providing a synthesized @code{__start_SECNAME} or
+@code{__stop_SECNAME} respectively, and therefore the special
+treatment by garbage collection for those references.
+
 @item start-stop-visibility=@var{value}
 @cindex visibility
 @cindex ELF symbol visibility

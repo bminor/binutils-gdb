@@ -662,6 +662,10 @@ struct bfd_link_info
   /* May be used to set DT_GNU_FLAGS_1 for ELF. */
   bfd_vma gnu_flags_1;
 
+  /* TRUE if references to __start_/__stop_ synthesized symbols do not
+     specially retain C identifier named sections.  */
+  int start_stop_gc;
+
   /* May be used to set ELF visibility for __start_* / __stop_.  */
   unsigned int start_stop_visibility;
 

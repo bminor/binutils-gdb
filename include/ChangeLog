@@ -1,3 +1,8 @@
+2021-03-01  Alan Modra  <amodra@gmail.com>
+	    Fangrui Song <maskray@google.com>
+
+	* bfdlink.h (struct bfd_link_info): Add start_stop_gc.
+
 2021-02-21  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h (struct bfd_link_info): Add warn_multiple_definition.

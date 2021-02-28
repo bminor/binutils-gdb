@@ -13444,12 +13444,15 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	  hw->mark = 1;
 	}
 
-      if (start_stop != NULL)
+      if (h->start_stop && !h->root.ldscript_def)
 	{
+	  if (info->start_stop_gc)
+	    return NULL;
+
 	  /* To work around a glibc bug, mark XXX input sections
 	     when there is a reference to __start_XXX or __stop_XXX
 	     symbols.  */
-	  if (h->start_stop)
+	  else if (start_stop != NULL)
 	    {
 	      asection *s = h->u2.start_stop_section;
 	      *start_stop = !s->gc_mark;
@@ -13912,6 +13915,9 @@ bfd_elf_gc_mark_dynamic_ref_symbol (struct elf_link_hash_entry *h, void *inf)
 
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
+      && (!h->start_stop
+	  || h->root.ldscript_def
+	  || !info->start_stop_gc)
       && ((h->ref_dynamic && !h->forced_local)
 	  || ((h->def_regular || ELF_COMMON_DEF_P (h))
 	      && ELF_ST_VISIBILITY (h->other) != STV_INTERNAL
@@ -14984,6 +14990,7 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
 			    FALSE, FALSE, TRUE);
   /* NB: Common symbols will be turned into definition later.  */
   if (h != NULL
+      && !h->root.ldscript_def
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak
 	  || ((h->ref_regular || h->def_dynamic)

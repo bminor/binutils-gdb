@@ -1,4 +1,17 @@
 2021-03-01  Alan Modra  <amodra@gmail.com>
+	    Fangrui Song <maskray@google.com>
+
+	* emultempl/elf.em: Handle -z start-stop-gc and -z nostart-stop-gc.
+	* lexsup.c (elf_static_list_options): Display help for them.  Move
+	help for -z stack-size to here from elf_shlib_list_options. Add
+	help for -z start-stop-visibility and -z undefs.
+	* ld.texi: Document -z start-stop-gc and -z nostart-stop-gc.
+	* NEWS: Mention -z start-stop-gc.
+	* testsuite/ld-gc/start2.s,
+	* testsuite/ld-gc/start2.d: New test.
+	* testsuite/ld-gc/gc.exp: Run it.
+
+2021-03-01  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (undef_start_stop): For ELF make undefined start/stop
 	symbols undefweak if that was how they were referenced.  Undo

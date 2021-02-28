@@ -1,3 +1,12 @@
+2021-03-01  Alan Modra  <amodra@gmail.com>
+	    Fangrui Song <maskray@google.com>
+
+	* elflink.c (_bfd_elf_gc_mark_rsec): Ignore synthesized linker
+	defined start/stop symbols when start_stop_gc.
+	(bfd_elf_gc_mark_dynamic_ref_symbol): Likewise.
+	(bfd_elf_define_start_stop): Don't modify ldscript_def syms.
+	* linker.c (bfd_generic_define_start_stop): Likewise.
+
 2021-02-25  Alan Modra  <amodra@gmail.com>
 
 	PR 27441

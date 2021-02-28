@@ -3188,6 +3188,7 @@ bfd_generic_define_start_stop (struct bfd_link_info *info,
 
   h = bfd_link_hash_lookup (info->hash, symbol, FALSE, FALSE, TRUE);
   if (h != NULL
+      && !h->ldscript_def
       && (h->type == bfd_link_hash_undefined
 	  || h->type == bfd_link_hash_undefweak))
     {
