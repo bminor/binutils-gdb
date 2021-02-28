@@ -1,3 +1,8 @@
+2021-03-12  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.def: Remove all-sim dependency on configure-gdb.
+	* Makefile.in: Regenerated.
+
 2021-02-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26766
