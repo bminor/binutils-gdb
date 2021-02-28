@@ -1,3 +1,11 @@
+2021-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26766
+	* Makefile.tpl (PGO_BUILD_TRAINING_FLAGS_TO_PASS): Add
+	PGO_BUILD_TRAINING=yes.
+	(PGO_BUILD_TRAINING_MFLAGS): New.
+	(all): Pass $(PGO_BUILD_TRAINING_MFLAGS) to the PGO build.
+
 2021-02-09  Alan Modra  <amodra@gmail.com>
 
 	* configure.ac: Delete arm*-*-symbianelf* entry.
