@@ -11210,44 +11210,52 @@ load_separate_debug_info (const char *            main_filename,
   }
 #endif
 
-  /* Failed to find the file.  */
-  warn (_("could not find separate debug file '%s'\n"), separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+  if (do_debug_links)
+    {
+      /* Failed to find the file.  */
+      warn (_("could not find separate debug file '%s'\n"),
+	    separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 
 #ifdef EXTRA_DEBUG_ROOT2
-  sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT2, separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+      sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT2,
+	       separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 #endif
 
 #ifdef EXTRA_DEBUG_ROOT1
-  sprintf (debug_filename, "%s/%s/%s", EXTRA_DEBUG_ROOT1, canon_dir, separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+      sprintf (debug_filename, "%s/%s/%s", EXTRA_DEBUG_ROOT1,
+	       canon_dir, separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 
-  sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT1, separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+      sprintf (debug_filename, "%s/%s", EXTRA_DEBUG_ROOT1,
+	       separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 #endif
 
-  sprintf (debug_filename, "%s.debug/%s", canon_dir, separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+      sprintf (debug_filename, "%s.debug/%s", canon_dir,
+	       separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 
-  sprintf (debug_filename, "%s%s", canon_dir, separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+      sprintf (debug_filename, "%s%s", canon_dir, separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 
-  sprintf (debug_filename, ".debug/%s", separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+      sprintf (debug_filename, ".debug/%s", separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 
-  sprintf (debug_filename, "%s", separate_filename);
-  warn (_("tried: %s\n"), debug_filename);
+      sprintf (debug_filename, "%s", separate_filename);
+      warn (_("tried: %s\n"), debug_filename);
 
 #if HAVE_LIBDEBUGINFOD
-  {
-    char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
-    if (urls == NULL)
-      urls = "";
+      {
+	char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
+	if (urls == NULL)
+	  urls = "";
 
-    warn (_("tried: DEBUGINFOD_URLS=%s\n"), urls);
-  }
+	warn (_("tried: DEBUGINFOD_URLS=%s\n"), urls);
+      }
 #endif
+    }
 
   free (canon_dir);
   free (debug_filename);

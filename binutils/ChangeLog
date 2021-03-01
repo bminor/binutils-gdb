@@ -1,3 +1,11 @@
+2021-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27486
+	* dwarf.c (load_separate_debug_info): Issue warning only if
+	do_debug_links is set.
+	* testsuite/binutils-all/compress.exp: Run objdump and readelf
+	with missing debug file.
+
 2021-03-01  Alan Modra  <amodra@gmail.com>
 
 	PR 27128

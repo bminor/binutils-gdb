@@ -676,6 +676,7 @@ proc test_gnu_debuglink {} {
     global STRIP
     global OBJCOPY
     global OBJDUMP
+    global READELF
     global gcc_gas_flag
 
     set test "gnu-debuglink"
@@ -756,6 +757,20 @@ proc test_gnu_debuglink {} {
 	fail "$test (objdump 2)"
     } else {
 	pass "$test (objdump 2)"
+    }
+
+    remote_file host delete tmpdir/testprog.compress
+    set got [remote_exec host [concat sh -c [list "$OBJDUMP --syms tmpdir/testprog > /dev/null"]]]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "$test (objdump with missing link)"
+    } else {
+	pass "$test (objdump with missing link)"
+    }
+    set got [remote_exec host [concat sh -c [list "$READELF -S tmpdir/testprog > /dev/null"]]]
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "$test (readelf with missing link)"
+    } else {
+	pass "$test (readelf with missing link)"
     }
 }
 
