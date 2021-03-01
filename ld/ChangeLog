@@ -1,3 +1,10 @@
+2021-03-01  Hannes Domani  <ssbssa@sourceware.org>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 27268
+	* scripttempl/pe.sc: Add DWARF-5 section names.
+	* scripttempl/pep.sc: Likewise.
+
 2021-03-01  Alan Modra  <amodra@gmail.com>
 	    Fangrui Song <maskray@google.com>
 
