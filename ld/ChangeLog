@@ -1,5 +1,11 @@
 2021-03-01  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (undef_start_stop): For ELF make undefined start/stop
+	symbols undefweak if that was how they were referenced.  Undo
+	dynamic state too.
+
+2021-03-01  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/pr25708.d: Add --with-symbol-versions to nm.
 	* testsuite/ld-elf/pr27128a.d: Likewise.
 	* testsuite/ld-elf/pr27128b.d: Likewise.

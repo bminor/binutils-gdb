@@ -6808,6 +6808,19 @@ undef_start_stop (struct bfd_link_hash_entry *h)
 	}
       h->type = bfd_link_hash_undefined;
       h->u.undef.abfd = NULL;
+      if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+	{
+	  const struct elf_backend_data *bed;
+	  struct elf_link_hash_entry *eh = (struct elf_link_hash_entry *) h;
+	  unsigned int was_forced = eh->forced_local;
+
+	  bed = get_elf_backend_data (link_info.output_bfd);
+	  (*bed->elf_backend_hide_symbol) (&link_info, eh, TRUE);
+	  if (!eh->ref_regular_nonweak)
+	    h->type = bfd_link_hash_undefweak;
+	  eh->def_regular = 0;
+	  eh->forced_local = was_forced;
+	}
     }
 }
 
