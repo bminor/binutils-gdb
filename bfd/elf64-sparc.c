@@ -1004,4 +1004,24 @@ const struct elf_size_info elf64_sparc_size_info =
 #undef elf_backend_static_tls_alignment
 #define elf_backend_static_tls_alignment	16
 
+#undef  elf_backend_strtab_flags
+#define elf_backend_strtab_flags       SHF_STRINGS
+
+static bfd_boolean
+elf64_sparc_copy_solaris_special_section_fields (const bfd *ibfd ATTRIBUTE_UNUSED,
+                                  bfd *obfd ATTRIBUTE_UNUSED,
+                                  const Elf_Internal_Shdr *isection ATTRIBUTE_UNUSED,
+                                  Elf_Internal_Shdr *osection ATTRIBUTE_UNUSED)
+{
+  /* PR 19938: FIXME: Need to add code for setting the sh_info
+     and sh_link fields of Solaris specific section types.  */
+  return FALSE;
+}
+
+#undef  elf_backend_copy_special_section_fields
+#define elf_backend_copy_special_section_fields elf64_sparc_copy_solaris_special_section_fields
+
 #include "elf64-target.h"
+
+#undef  elf_backend_strtab_flags
+#undef  elf_backend_copy_special_section_fields
