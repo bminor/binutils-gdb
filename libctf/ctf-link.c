@@ -1580,7 +1580,7 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
   if (!ctf_dynhash_elements (fp->ctf_dynsyms))
     {
       ctf_dprintf ("No symbols: not a final link.\n");
-      free (fp->ctf_dynsyms);
+      ctf_dynhash_destroy (fp->ctf_dynsyms);
       fp->ctf_dynsyms = NULL;
       return 0;
     }

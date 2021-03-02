@@ -1,5 +1,9 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_shuffle_syms): Free ctf_dynsyms properly.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_format_type): Fix signed/unsigned confusion.
 
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
