@@ -1,3 +1,8 @@
+2021-03-02  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (add_nonlocal_symbols): Handle case where objfile->sf
+	is null.
+
 2021-02-27  Lancelot Six  <lsix@lancelotsix.com>
 
 	PR gdb/27393

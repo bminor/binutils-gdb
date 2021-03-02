@@ -5629,10 +5629,11 @@ add_nonlocal_symbols (struct obstack *obstackp,
     {
       data.objfile = objfile;
 
-      objfile->sf->qf->map_matching_symbols (objfile, lookup_name,
-					     domain, global, callback,
-					     (is_wild_match
-					      ? NULL : compare_names));
+      if (objfile->sf != nullptr)
+	objfile->sf->qf->map_matching_symbols (objfile, lookup_name,
+					       domain, global, callback,
+					       (is_wild_match
+						? NULL : compare_names));
 
       for (compunit_symtab *cu : objfile->compunits ())
 	{
@@ -5654,9 +5655,10 @@ add_nonlocal_symbols (struct obstack *obstackp,
       for (objfile *objfile : current_program_space->objfiles ())
 	{
 	  data.objfile = objfile;
-	  objfile->sf->qf->map_matching_symbols (objfile, name1,
-						 domain, global, callback,
-						 compare_names);
+	  if (objfile->sf != nullptr)
+	    objfile->sf->qf->map_matching_symbols (objfile, name1,
+						   domain, global, callback,
+						   compare_names);
 	}
     }      	
 }
