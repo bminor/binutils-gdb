@@ -1,0 +1,84 @@
+# This testcase is part of GDB, the GNU debugger.
+#
+# Copyright 2024 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test that we cancel an in-flight step-over at the end of the execution
+# history as long as some other thread is still replaying.
+#
+# This used to cause GDB to hang in poll ().
+
+require allow_btrace_tests
+
+standard_testfile multi-thread-step.c
+if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}] {
+    return -1
+}
+
+if ![runto_main] {
+    return -1
+}
+
+# Set up breakpoints.
+set bp_1 [gdb_get_line_number "bp.1" $srcfile]
+set bp_2 [gdb_get_line_number "bp.2" $srcfile]
+
+# Trace the code between the two breakpoints.
+gdb_breakpoint $srcfile:$bp_1
+gdb_continue_to_breakpoint "continue to bp.1" ".*$srcfile:$bp_1\r\n.*"
+
+gdb_test_no_output "record btrace"
+
+# We have two threads at or close to bp.1 but handled only one stop event.
+# Remove the breakpoint so we do not need to deal with the 2nd event.
+delete_breakpoints
+gdb_breakpoint $srcfile:$bp_2
+gdb_continue_to_breakpoint "continue to bp.2" ".*$srcfile:$bp_2\r\n.*"
+
+# Determine the thread that reported the breakpoint.
+set thread [get_integer_valueof "\$_thread" bad]
+
+# Determine the other thread.
+set other "bad"
+if { $thread == 1 } {
+    set other 2
+} elseif { $thread == 2 } {
+    set other 1
+}
+
+# This test requires scheduler-locking 'on' or 'step'; 'replay' would
+# implicitly stop replaying, avoiding the problem; 'off' would step one
+# and resume the other.
+#
+# With the current record-btrace implementation that steps all resumed
+# threads in lock-step, 'off' might actually pass but we don't want to
+# bake that behavior into tests.
+gdb_test_no_output "set scheduler-locking step"
+
+# Start replaying the other thread.  This will prevent stepping the thread
+# that reported the event.
+gdb_test "thread apply $other record goto begin"
+gdb_test "thread apply $other info record" "Replay in progress.*"
+
+# We're at a breakpoint so this triggers step-over.  Since we're at the
+# end of the trace, the step will fail.
+gdb_test "stepi" "Reached end of recorded history.*" "stepi.1"
+
+# We used to hang at the second step since step-over insisted on polling
+# the next event.
+gdb_test "stepi" "Reached end of recorded history.*" "stepi.2"
+
+# Do one more just in case.
+gdb_test "stepi" "Reached end of recorded history.*" "stepi.3"

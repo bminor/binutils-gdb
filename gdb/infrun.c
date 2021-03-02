@@ -78,6 +78,8 @@
 #include "disasm.h"
 #include "interps.h"
 
+struct execution_control_state;
+
 /* Prototypes for local functions */
 
 static void sig_print_info (enum gdb_signal);
@@ -6573,6 +6575,16 @@ handle_inferior_event (struct execution_control_state *ecs)
 	return;
 
       interps_notify_no_history ();
+
+      /* Cancel an in-flight step-over.  It will not succeed since we
+	 won't be able to step at the end of the execution history.  */
+      {
+	/* finish_step_over may call restart_threads, which may change the
+	   current thread.  make sure we leave the event thread as the
+	   current thread.  */
+	scoped_restore_current_thread restore_thread;
+	finish_step_over (ecs);
+      }
       stop_waiting (ecs);
       return;
     }
