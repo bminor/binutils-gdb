@@ -1,5 +1,29 @@
 2021-03-02  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.h (ada_lookup_symbol_list): Return a vector.
+	* ada-lang.c (resolve_subexp): Update.
+	(ada_resolve_function): Accept a vector.
+	(is_nonfunction, add_defn_to_vec)
+	(add_symbols_from_enclosing_procs): Likewise.
+	(num_defns_collected, defns_collected): Remove.
+	(remove_extra_symbols): Return a vector.
+	(remove_irrelevant_renamings): Return void.
+	(ada_add_local_symbols): Accept a vector.
+	(struct match_data) <obstackp>: Remove.
+	<resultp>: New member.
+	(aux_add_nonlocal_symbols): Update.
+	(ada_add_block_renamings, add_nonlocal_symbols)
+	(ada_add_all_symbols): Accept a vector.
+	(ada_lookup_symbol_list_worker, ada_lookup_symbol_list): Return a
+	vector.
+	(ada_lookup_symbol): Update.
+	(ada_add_block_symbols): Accept a vector.
+	(get_var_value, iterate_over_symbols): Update.
+	* ada-exp.y (block_lookup, write_var_or_type, write_name_assoc):
+	Update.
+
+2021-03-02  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (resolve_subexp): Use any_of and erase-remove idiom.
 
 2021-03-02  Tom Tromey  <tromey@adacore.com>

@@ -218,9 +218,8 @@ extern const char *ada_decode_symbol (const struct general_symbol_info *);
 
 extern std::string ada_decode (const char*);
 
-extern int ada_lookup_symbol_list (const char *, const struct block *,
-				   domain_enum,
-				   std::vector<struct block_symbol> *);
+extern std::vector<struct block_symbol> ada_lookup_symbol_list
+     (const char *, const struct block *, domain_enum);
 
 extern struct block_symbol ada_lookup_symbol (const char *,
 					      const struct block *,

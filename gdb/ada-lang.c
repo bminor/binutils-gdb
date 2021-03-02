@@ -100,23 +100,21 @@ static int ada_args_match (struct symbol *, struct value **, int);
 
 static struct value *make_array_descriptor (struct type *, struct value *);
 
-static void ada_add_block_symbols (struct obstack *,
+static void ada_add_block_symbols (std::vector<struct block_symbol> &,
 				   const struct block *,
 				   const lookup_name_info &lookup_name,
 				   domain_enum, struct objfile *);
 
-static void ada_add_all_symbols (struct obstack *, const struct block *,
+static void ada_add_all_symbols (std::vector<struct block_symbol> &,
+				 const struct block *,
 				 const lookup_name_info &lookup_name,
 				 domain_enum, int, int *);
 
-static int is_nonfunction (struct block_symbol *, int);
+static int is_nonfunction (const std::vector<struct block_symbol> &);
 
-static void add_defn_to_vec (struct obstack *, struct symbol *,
+static void add_defn_to_vec (std::vector<struct block_symbol> &,
+			     struct symbol *,
 			     const struct block *);
-
-static int num_defns_collected (struct obstack *);
-
-static struct block_symbol *defns_collected (struct obstack *, int);
 
 static struct value *resolve_subexp (expression_up *, int *, int,
 				     struct type *, int,
@@ -205,7 +203,7 @@ static struct value *ada_search_struct_field (const char *, struct value *, int,
 static int find_struct_field (const char *, struct type *, int,
 			      struct type **, int *, int *, int *, int *);
 
-static int ada_resolve_function (struct block_symbol *, int,
+static int ada_resolve_function (std::vector<struct block_symbol> &,
 				 struct value **, int, const char *,
 				 struct type *, int);
 
@@ -3653,15 +3651,9 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
     case OP_VAR_VALUE:
       if (SYMBOL_DOMAIN (exp->elts[pc + 2].symbol) == UNDEF_DOMAIN)
 	{
-	  std::vector<struct block_symbol> candidates;
-	  int n_candidates;
-
-	  n_candidates =
-	    ada_lookup_symbol_list (exp->elts[pc + 2].symbol->linkage_name (),
-				    exp->elts[pc + 1].block, VAR_DOMAIN,
-				    &candidates);
-	  /* Paranoia.  */
-	  candidates.resize (n_candidates);
+	  std::vector<struct block_symbol> candidates
+	    = ada_lookup_symbol_list (exp->elts[pc + 2].symbol->linkage_name (),
+				      exp->elts[pc + 1].block, VAR_DOMAIN);
 
 	  if (std::any_of (candidates.begin (),
 			   candidates.end (),
@@ -3693,19 +3685,17 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 		    return SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF;
 		  }),
 		 candidates.end ());
-	      n_candidates = candidates.size ();
 	    }
 
-	  if (n_candidates == 0)
+	  if (candidates.empty ())
 	    error (_("No definition found for %s"),
 		   exp->elts[pc + 2].symbol->print_name ());
-	  else if (n_candidates == 1)
+	  else if (candidates.size () == 1)
 	    i = 0;
-	  else if (deprocedure_p
-		   && !is_nonfunction (candidates.data (), n_candidates))
+	  else if (deprocedure_p && !is_nonfunction (candidates))
 	    {
 	      i = ada_resolve_function
-		(candidates.data (), n_candidates, NULL, 0,
+		(candidates, NULL, 0,
 		 exp->elts[pc + 2].symbol->linkage_name (),
 		 context_type, parse_completion);
 	      if (i < 0)
@@ -3716,7 +3706,7 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 	    {
 	      printf_filtered (_("Multiple matches for %s\n"),
 			       exp->elts[pc + 2].symbol->print_name ());
-	      user_select_syms (candidates.data (), n_candidates, 1);
+	      user_select_syms (candidates.data (), candidates.size (), 1);
 	      i = 0;
 	    }
 
@@ -3741,20 +3731,16 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 	if (exp->elts[pc + 3].opcode == OP_VAR_VALUE
 	    && SYMBOL_DOMAIN (exp->elts[pc + 5].symbol) == UNDEF_DOMAIN)
 	  {
-	    std::vector<struct block_symbol> candidates;
-	    int n_candidates;
+	    std::vector<struct block_symbol> candidates
+	      = ada_lookup_symbol_list (exp->elts[pc + 5].symbol->linkage_name (),
+					exp->elts[pc + 4].block, VAR_DOMAIN);
 
-	    n_candidates =
-	      ada_lookup_symbol_list (exp->elts[pc + 5].symbol->linkage_name (),
-				      exp->elts[pc + 4].block, VAR_DOMAIN,
-				      &candidates);
-
-	    if (n_candidates == 1)
+	    if (candidates.size () == 1)
 	      i = 0;
 	    else
 	      {
 		i = ada_resolve_function
-		  (candidates.data (), n_candidates,
+		  (candidates,
 		   argvec, nargs,
 		   exp->elts[pc + 5].symbol->linkage_name (),
 		   context_type, parse_completion);
@@ -3792,15 +3778,11 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
     case UNOP_ABS:
       if (possible_user_operator_p (op, argvec))
 	{
-	  std::vector<struct block_symbol> candidates;
-	  int n_candidates;
+	  std::vector<struct block_symbol> candidates
+	    = ada_lookup_symbol_list (ada_decoded_op_name (op),
+				      NULL, VAR_DOMAIN);
 
-	  n_candidates =
-	    ada_lookup_symbol_list (ada_decoded_op_name (op),
-				    NULL, VAR_DOMAIN,
-				    &candidates);
-
-	  i = ada_resolve_function (candidates.data (), n_candidates, argvec,
+	  i = ada_resolve_function (candidates, argvec,
 				    nargs, ada_decoded_op_name (op), NULL,
 				    parse_completion);
 	  if (i < 0)
@@ -3966,8 +3948,8 @@ return_match (struct type *func_type, struct type *context_type)
    the process; the index returned is for the modified vector.  */
 
 static int
-ada_resolve_function (struct block_symbol syms[],
-		      int nsyms, struct value **args, int nargs,
+ada_resolve_function (std::vector<struct block_symbol> &syms,
+		      struct value **args, int nargs,
 		      const char *name, struct type *context_type,
 		      int parse_completion)
 {
@@ -3981,7 +3963,7 @@ ada_resolve_function (struct block_symbol syms[],
      where every function is accepted.  */
   for (fallback = 0; m == 0 && fallback < 2; fallback++)
     {
-      for (k = 0; k < nsyms; k += 1)
+      for (k = 0; k < syms.size (); k += 1)
 	{
 	  struct type *type = ada_check_typedef (SYMBOL_TYPE (syms[k].symbol));
 
@@ -4003,7 +3985,7 @@ ada_resolve_function (struct block_symbol syms[],
   else if (m > 1 && !parse_completion)
     {
       printf_filtered (_("Multiple matches for %s\n"), name);
-      user_select_syms (syms, m, 1);
+      user_select_syms (syms.data (), m, 1);
       return 0;
     }
   return 0;
@@ -4737,14 +4719,12 @@ standard_lookup (const char *name, const struct block *block,
    in the symbol fields of SYMS[0..N-1].  We treat enumerals as functions, 
    since they contend in overloading in the same way.  */
 static int
-is_nonfunction (struct block_symbol syms[], int n)
+is_nonfunction (const std::vector<struct block_symbol> &syms)
 {
-  int i;
-
-  for (i = 0; i < n; i += 1)
-    if (SYMBOL_TYPE (syms[i].symbol)->code () != TYPE_CODE_FUNC
-	&& (SYMBOL_TYPE (syms[i].symbol)->code () != TYPE_CODE_ENUM
-	    || SYMBOL_CLASS (syms[i].symbol) != LOC_CONST))
+  for (const block_symbol &sym : syms)
+    if (SYMBOL_TYPE (sym.symbol)->code () != TYPE_CODE_FUNC
+	&& (SYMBOL_TYPE (sym.symbol)->code () != TYPE_CODE_ENUM
+	    || SYMBOL_CLASS (sym.symbol) != LOC_CONST))
       return 1;
 
   return 0;
@@ -4817,17 +4797,14 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
     }
 }
 
-/* Append (SYM,BLOCK,SYMTAB) to the end of the array of struct block_symbol
-   records in OBSTACKP.  Do nothing if SYM is a duplicate.  */
+/* Append (SYM,BLOCK) to the end of the array of struct block_symbol
+   records in RESULT.  Do nothing if SYM is a duplicate.  */
 
 static void
-add_defn_to_vec (struct obstack *obstackp,
+add_defn_to_vec (std::vector<struct block_symbol> &result,
 		 struct symbol *sym,
 		 const struct block *block)
 {
-  int i;
-  struct block_symbol *prevDefns = defns_collected (obstackp, 0);
-
   /* Do not try to complete stub types, as the debugger is probably
      already scanning all symbols matching a certain name at the
      time when this function is called.  Trying to replace the stub
@@ -4837,46 +4814,22 @@ add_defn_to_vec (struct obstack *obstackp,
      matches, with at least one of them complete.  It can then filter
      out the stub ones if needed.  */
 
-  for (i = num_defns_collected (obstackp) - 1; i >= 0; i -= 1)
+  for (int i = result.size () - 1; i >= 0; i -= 1)
     {
-      if (lesseq_defined_than (sym, prevDefns[i].symbol))
+      if (lesseq_defined_than (sym, result[i].symbol))
 	return;
-      else if (lesseq_defined_than (prevDefns[i].symbol, sym))
+      else if (lesseq_defined_than (result[i].symbol, sym))
 	{
-	  prevDefns[i].symbol = sym;
-	  prevDefns[i].block = block;
+	  result[i].symbol = sym;
+	  result[i].block = block;
 	  return;
 	}
     }
 
-  {
-    struct block_symbol info;
-
-    info.symbol = sym;
-    info.block = block;
-    obstack_grow (obstackp, &info, sizeof (struct block_symbol));
-  }
-}
-
-/* Number of block_symbol structures currently collected in current vector in
-   OBSTACKP.  */
-
-static int
-num_defns_collected (struct obstack *obstackp)
-{
-  return obstack_object_size (obstackp) / sizeof (struct block_symbol);
-}
-
-/* Vector of block_symbol structures currently collected in current vector in
-   OBSTACKP.  If FINISH, close off the vector and return its final address.  */
-
-static struct block_symbol *
-defns_collected (struct obstack *obstackp, int finish)
-{
-  if (finish)
-    return (struct block_symbol *) obstack_finish (obstackp);
-  else
-    return (struct block_symbol *) obstack_base (obstackp);
+  struct block_symbol info;
+  info.symbol = sym;
+  info.block = block;
+  result.push_back (info);
 }
 
 /* Return a bound minimal symbol matching NAME according to Ada
@@ -4922,7 +4875,7 @@ ada_lookup_simple_minsym (const char *name)
    with a wildcard prefix.  */
 
 static void
-add_symbols_from_enclosing_procs (struct obstack *obstackp,
+add_symbols_from_enclosing_procs (std::vector<struct block_symbol> &result,
 				  const lookup_name_info &lookup_name,
 				  domain_enum domain)
 {
@@ -5048,7 +5001,7 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
    debugging symbols)).  Modifies SYMS to squeeze out deleted entries.
    Returns the number of items in the modified list.  */
 
-static int
+static void
 remove_extra_symbols (std::vector<struct block_symbol> *syms)
 {
   int i, j;
@@ -5057,7 +5010,7 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
      cannot be any extra symbol in that case.  But it's easy to
      handle, since we have nothing to do in that case.  */
   if (syms->size () < 2)
-    return syms->size ();
+    return;
 
   i = 0;
   while (i < syms->size ())
@@ -5122,8 +5075,6 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
      isn't missing some choices that were identical and yet distinct.  */
   if (symbols_are_identical_enums (*syms))
     syms->resize (1);
-
-  return syms->size ();
 }
 
 /* Given a type that corresponds to a renaming entity, use the type name
@@ -5215,8 +5166,8 @@ old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
    is not visible from the function associated with CURRENT_BLOCK or
    that is superfluous due to the presence of more specific renaming
    information.  Places surviving symbols in the initial entries of
-   SYMS and returns the number of surviving symbols.
-   
+   SYMS.
+
    Rationale:
    First, in cases where an object renaming is implemented as a
    reference variable, GNAT may produce both the actual reference
@@ -5248,7 +5199,7 @@ old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
 	has been changed by an "Export" pragma.  As a consequence,
 	the user will be unable to print such rename entities.  */
 
-static int
+static void
 remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
 			     const struct block *current_block)
 {
@@ -5297,22 +5248,23 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
 	      (*syms)[k] = (*syms)[j];
 	      k += 1;
 	    }
-      return k;
+      syms->resize (k);
+      return;
     }
 
   /* Extract the function name associated to CURRENT_BLOCK.
      Abort if unable to do so.  */
 
   if (current_block == NULL)
-    return syms->size ();
+    return;
 
   current_function = block_linkage_function (current_block);
   if (current_function == NULL)
-    return syms->size ();
+    return;
 
   current_function_name = current_function->linkage_name ();
   if (current_function_name == NULL)
-    return syms->size ();
+    return;
 
   /* Check each of the symbols, and remove it from the list if it is
      a type corresponding to a renaming that is out of the scope of
@@ -5329,11 +5281,9 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
       else
 	i += 1;
     }
-
-  return syms->size ();
 }
 
-/* Add to OBSTACKP all symbols from BLOCK (and its super-blocks)
+/* Add to RESULT all symbols from BLOCK (and its super-blocks)
    whose name and domain match NAME and DOMAIN respectively.
    If no match was found, then extend the search to "enclosing"
    routines (in other words, if we're inside a nested function,
@@ -5341,10 +5291,10 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
    If WILD_MATCH_P is nonzero, perform the naming matching in
    "wild" mode (see function "wild_match" for more info).
 
-   Note: This function assumes that OBSTACKP has 0 (zero) element in it.  */
+   Note: This function assumes that RESULT has 0 (zero) element in it.  */
 
 static void
-ada_add_local_symbols (struct obstack *obstackp,
+ada_add_local_symbols (std::vector<struct block_symbol> &result,
 		       const lookup_name_info &lookup_name,
 		       const struct block *block, domain_enum domain)
 {
@@ -5353,11 +5303,10 @@ ada_add_local_symbols (struct obstack *obstackp,
   while (block != NULL)
     {
       block_depth += 1;
-      ada_add_block_symbols (obstackp, block, lookup_name, domain, NULL);
+      ada_add_block_symbols (result, block, lookup_name, domain, NULL);
 
       /* If we found a non-function match, assume that's the one.  */
-      if (is_nonfunction (defns_collected (obstackp, 0),
-			  num_defns_collected (obstackp)))
+      if (is_nonfunction (result))
 	return;
 
       block = BLOCK_SUPERBLOCK (block);
@@ -5365,8 +5314,8 @@ ada_add_local_symbols (struct obstack *obstackp,
 
   /* If no luck so far, try to find NAME as a local symbol in some lexically
      enclosing subprogram.  */
-  if (num_defns_collected (obstackp) == 0 && block_depth > 2)
-    add_symbols_from_enclosing_procs (obstackp, lookup_name, domain);
+  if (result.empty () && block_depth > 2)
+    add_symbols_from_enclosing_procs (result, lookup_name, domain);
 }
 
 /* An object of this type is used as the user_data argument when
@@ -5375,7 +5324,7 @@ ada_add_local_symbols (struct obstack *obstackp,
 struct match_data
 {
   struct objfile *objfile;
-  struct obstack *obstackp;
+  std::vector<struct block_symbol> *resultp;
   struct symbol *arg_sym;
   int found_sym;
 };
@@ -5399,7 +5348,7 @@ aux_add_nonlocal_symbols (struct block_symbol *bsym,
   if (sym == NULL)
     {
       if (!data->found_sym && data->arg_sym != NULL) 
-	add_defn_to_vec (data->obstackp,
+	add_defn_to_vec (*data->resultp,
 			 fixup_symbol_section (data->arg_sym, data->objfile),
 			 block);
       data->found_sym = 0;
@@ -5414,7 +5363,7 @@ aux_add_nonlocal_symbols (struct block_symbol *bsym,
       else
 	{
 	  data->found_sym = 1;
-	  add_defn_to_vec (data->obstackp,
+	  add_defn_to_vec (*data->resultp,
 			   fixup_symbol_section (sym, data->objfile),
 			   block);
 	}
@@ -5427,13 +5376,13 @@ aux_add_nonlocal_symbols (struct block_symbol *bsym,
    symbols to OBSTACKP.  Return whether we found such symbols.  */
 
 static int
-ada_add_block_renamings (struct obstack *obstackp,
+ada_add_block_renamings (std::vector<struct block_symbol> &result,
 			 const struct block *block,
 			 const lookup_name_info &lookup_name,
 			 domain_enum domain)
 {
   struct using_direct *renaming;
-  int defns_mark = num_defns_collected (obstackp);
+  int defns_mark = result.size ();
 
   symbol_name_matcher_ftype *name_match
     = ada_get_symbol_name_matcher (lookup_name);
@@ -5471,12 +5420,12 @@ ada_add_block_renamings (struct obstack *obstackp,
 	{
 	  lookup_name_info decl_lookup_name (renaming->declaration,
 					     lookup_name.match_type ());
-	  ada_add_all_symbols (obstackp, block, decl_lookup_name, domain,
+	  ada_add_all_symbols (result, block, decl_lookup_name, domain,
 			       1, NULL);
 	}
       renaming->searched = 0;
     }
-  return num_defns_collected (obstackp) != defns_mark;
+  return result.size () != defns_mark;
 }
 
 /* Implements compare_names, but only applying the comparision using
@@ -5579,14 +5528,14 @@ ada_lookup_name (const lookup_name_info &lookup_name)
    symbols otherwise.  */
 
 static void
-add_nonlocal_symbols (struct obstack *obstackp,
+add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 		      const lookup_name_info &lookup_name,
 		      domain_enum domain, int global)
 {
   struct match_data data;
 
   memset (&data, 0, sizeof data);
-  data.obstackp = obstackp;
+  data.resultp = &result;
 
   bool is_wild_match = lookup_name.ada ().wild_match_p ();
 
@@ -5610,13 +5559,13 @@ add_nonlocal_symbols (struct obstack *obstackp,
 	  const struct block *global_block
 	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cu), GLOBAL_BLOCK);
 
-	  if (ada_add_block_renamings (obstackp, global_block, lookup_name,
+	  if (ada_add_block_renamings (result, global_block, lookup_name,
 				       domain))
 	    data.found_sym = 1;
 	}
     }
 
-  if (num_defns_collected (obstackp) == 0 && global && !is_wild_match)
+  if (result.empty () && global && !is_wild_match)
     {
       const char *name = ada_lookup_name (lookup_name);
       std::string bracket_name = std::string ("<_ada_") + name + '>';
@@ -5651,7 +5600,7 @@ add_nonlocal_symbols (struct obstack *obstackp,
    to lookup global symbols.  */
 
 static void
-ada_add_all_symbols (struct obstack *obstackp,
+ada_add_all_symbols (std::vector<struct block_symbol> &result,
 		     const struct block *block,
 		     const lookup_name_info &lookup_name,
 		     domain_enum domain,
@@ -5678,15 +5627,15 @@ ada_add_all_symbols (struct obstack *obstackp,
   if (block != NULL)
     {
       if (full_search)
-	ada_add_local_symbols (obstackp, lookup_name, block, domain);
+	ada_add_local_symbols (result, lookup_name, block, domain);
       else
 	{
 	  /* In the !full_search case we're are being called by
 	     iterate_over_symbols, and we don't want to search
 	     superblocks.  */
-	  ada_add_block_symbols (obstackp, block, lookup_name, domain, NULL);
+	  ada_add_block_symbols (result, block, lookup_name, domain, NULL);
 	}
-      if (num_defns_collected (obstackp) > 0 || !full_search)
+      if (!result.empty () || !full_search)
 	return;
     }
 
@@ -5698,7 +5647,7 @@ ada_add_all_symbols (struct obstack *obstackp,
 			    domain, &sym, &block))
     {
       if (sym != NULL)
-	add_defn_to_vec (obstackp, sym, block);
+	add_defn_to_vec (result, sym, block);
       return;
     }
 
@@ -5707,21 +5656,20 @@ ada_add_all_symbols (struct obstack *obstackp,
 
   /* Search symbols from all global blocks.  */
  
-  add_nonlocal_symbols (obstackp, lookup_name, domain, 1);
+  add_nonlocal_symbols (result, lookup_name, domain, 1);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
      (not strictly correct, but perhaps better than an error).  */
 
-  if (num_defns_collected (obstackp) == 0)
-    add_nonlocal_symbols (obstackp, lookup_name, domain, 0);
+  if (result.empty ())
+    add_nonlocal_symbols (result, lookup_name, domain, 0);
 }
 
 /* Find symbols in DOMAIN matching LOOKUP_NAME, in BLOCK and, if FULL_SEARCH
-   is non-zero, enclosing scope and in global scopes, returning the number of
-   matches.
-   Fills *RESULTS with (SYM,BLOCK) tuples, indicating the symbols
-   found and the blocks and symbol tables (if any) in which they were
-   found.
+   is non-zero, enclosing scope and in global scopes.
+
+   Returns (SYM,BLOCK) tuples, indicating the symbols found and the
+   blocks and symbol tables (if any) in which they were found.
 
    When full_search is non-zero, any non-function/non-enumeral
    symbol match within the nest of blocks whose innermost member is BLOCK,
@@ -5732,55 +5680,44 @@ ada_add_all_symbols (struct obstack *obstackp,
    Names prefixed with "standard__" are handled specially: "standard__"
    is first stripped off, and only static and global symbols are searched.  */
 
-static int
+static std::vector<struct block_symbol>
 ada_lookup_symbol_list_worker (const lookup_name_info &lookup_name,
 			       const struct block *block,
 			       domain_enum domain,
-			       std::vector<struct block_symbol> *results,
 			       int full_search)
 {
   int syms_from_global_search;
-  int ndefns;
-  auto_obstack obstack;
+  std::vector<struct block_symbol> results;
 
-  ada_add_all_symbols (&obstack, block, lookup_name,
+  ada_add_all_symbols (results, block, lookup_name,
 		       domain, full_search, &syms_from_global_search);
 
-  ndefns = num_defns_collected (&obstack);
+  remove_extra_symbols (&results);
 
-  struct block_symbol *base = defns_collected (&obstack, 1);
-  for (int i = 0; i < ndefns; ++i)
-    results->push_back (base[i]);
-
-  ndefns = remove_extra_symbols (results);
-
-  if (ndefns == 0 && full_search && syms_from_global_search)
+  if (results.empty () && full_search && syms_from_global_search)
     cache_symbol (ada_lookup_name (lookup_name), domain, NULL, NULL);
 
-  if (ndefns == 1 && full_search && syms_from_global_search)
+  if (results.size () == 1 && full_search && syms_from_global_search)
     cache_symbol (ada_lookup_name (lookup_name), domain,
-		  (*results)[0].symbol, (*results)[0].block);
+		  results[0].symbol, results[0].block);
 
-  ndefns = remove_irrelevant_renamings (results, block);
-
-  return ndefns;
+  remove_irrelevant_renamings (&results, block);
+  return results;
 }
 
 /* Find symbols in DOMAIN matching NAME, in BLOCK and enclosing scope and
-   in global scopes, returning the number of matches, and filling *RESULTS
-   with (SYM,BLOCK) tuples.
+   in global scopes, returning (SYM,BLOCK) tuples.
 
    See ada_lookup_symbol_list_worker for further details.  */
 
-int
+std::vector<struct block_symbol>
 ada_lookup_symbol_list (const char *name, const struct block *block,
-			domain_enum domain,
-			std::vector<struct block_symbol> *results)
+			domain_enum domain)
 {
   symbol_name_match_type name_match_type = name_match_type_from_name (name);
   lookup_name_info lookup_name (name, name_match_type);
 
-  return ada_lookup_symbol_list_worker (lookup_name, block, domain, results, 1);
+  return ada_lookup_symbol_list_worker (lookup_name, block, domain, 1);
 }
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
@@ -5816,12 +5753,10 @@ struct block_symbol
 ada_lookup_symbol (const char *name, const struct block *block0,
 		   domain_enum domain)
 {
-  std::vector<struct block_symbol> candidates;
-  int n_candidates;
+  std::vector<struct block_symbol> candidates
+    = ada_lookup_symbol_list (name, block0, domain);
 
-  n_candidates = ada_lookup_symbol_list (name, block0, domain, &candidates);
-
-  if (n_candidates == 0)
+  if (candidates.empty ())
     return {};
 
   block_symbol info = candidates[0];
@@ -6080,12 +6015,11 @@ wild_match (const char *name, const char *patn)
     }
 }
 
-/* Add symbols from BLOCK matching LOOKUP_NAME in DOMAIN to vector
-   *defn_symbols, updating the list of symbols in OBSTACKP (if
+/* Add symbols from BLOCK matching LOOKUP_NAME in DOMAIN to RESULT (if
    necessary).  OBJFILE is the section containing BLOCK.  */
 
 static void
-ada_add_block_symbols (struct obstack *obstackp,
+ada_add_block_symbols (std::vector<struct block_symbol> &result,
 		       const struct block *block,
 		       const lookup_name_info &lookup_name,
 		       domain_enum domain, struct objfile *objfile)
@@ -6112,7 +6046,7 @@ ada_add_block_symbols (struct obstack *obstackp,
 	      else
 		{
 		  found_sym = 1;
-		  add_defn_to_vec (obstackp,
+		  add_defn_to_vec (result,
 				   fixup_symbol_section (sym, objfile),
 				   block);
 		}
@@ -6122,12 +6056,12 @@ ada_add_block_symbols (struct obstack *obstackp,
 
   /* Handle renamings.  */
 
-  if (ada_add_block_renamings (obstackp, block, lookup_name, domain))
+  if (ada_add_block_renamings (result, block, lookup_name, domain))
     found_sym = 1;
 
   if (!found_sym && arg_sym != NULL)
     {
-      add_defn_to_vec (obstackp,
+      add_defn_to_vec (result,
 		       fixup_symbol_section (arg_sym, objfile),
 		       block);
     }
@@ -6166,7 +6100,7 @@ ada_add_block_symbols (struct obstack *obstackp,
 		    else
 		      {
 			found_sym = 1;
-			add_defn_to_vec (obstackp,
+			add_defn_to_vec (result,
 					 fixup_symbol_section (sym, objfile),
 					 block);
 		      }
@@ -6179,7 +6113,7 @@ ada_add_block_symbols (struct obstack *obstackp,
 	 They aren't parameters, right?  */
       if (!found_sym && arg_sym != NULL)
 	{
-	  add_defn_to_vec (obstackp,
+	  add_defn_to_vec (result,
 			   fixup_symbol_section (arg_sym, objfile),
 			   block);
 	}
@@ -11319,12 +11253,12 @@ get_var_value (const char *name, const char *err_msg)
 
   lookup_name_info lookup_name (quoted_name, symbol_name_match_type::FULL);
 
-  std::vector<struct block_symbol> syms;
-  int nsyms = ada_lookup_symbol_list_worker (lookup_name,
-					     get_selected_block (0),
-					     VAR_DOMAIN, &syms, 1);
+  std::vector<struct block_symbol> syms
+    = ada_lookup_symbol_list_worker (lookup_name,
+				     get_selected_block (0),
+				     VAR_DOMAIN, 1);
 
-  if (nsyms != 1)
+  if (syms.size () != 1)
     {
       if (err_msg == NULL)
 	return 0;
@@ -13854,9 +13788,8 @@ public:
 	 domain_enum domain,
 	 gdb::function_view<symbol_found_callback_ftype> callback) const override
   {
-    std::vector<struct block_symbol> results;
-
-    ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
+    std::vector<struct block_symbol> results
+      = ada_lookup_symbol_list_worker (name, block, domain, 0);
     for (block_symbol &sym : results)
       {
 	if (!callback (&sym))

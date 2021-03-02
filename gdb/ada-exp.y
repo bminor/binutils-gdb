@@ -948,8 +948,6 @@ static const struct block*
 block_lookup (const struct block *context, const char *raw_name)
 {
   const char *name;
-  std::vector<struct block_symbol> syms;
-  int nsyms;
   struct symtab *symtab;
   const struct block *result = NULL;
 
@@ -965,17 +963,18 @@ block_lookup (const struct block *context, const char *raw_name)
       name = name_storage.c_str ();
     }
 
-  nsyms = ada_lookup_symbol_list (name, context, VAR_DOMAIN, &syms);
+  std::vector<struct block_symbol> syms
+    = ada_lookup_symbol_list (name, context, VAR_DOMAIN);
 
   if (context == NULL
-      && (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK))
+      && (syms.empty () || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK))
     symtab = lookup_symtab (name);
   else
     symtab = NULL;
 
   if (symtab != NULL)
     result = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
-  else if (nsyms == 0 || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
+  else if (syms.empty () || SYMBOL_CLASS (syms[0].symbol) != LOC_BLOCK)
     {
       if (context == NULL)
 	error (_("No file or function \"%s\"."), raw_name);
@@ -984,7 +983,7 @@ block_lookup (const struct block *context, const char *raw_name)
     }
   else
     {
-      if (nsyms > 1)
+      if (syms.size () > 1)
 	warning (_("Function name \"%s\" ambiguous here"), raw_name);
       result = SYMBOL_BLOCK_VALUE (syms[0].symbol);
     }
@@ -1216,8 +1215,6 @@ write_var_or_type (struct parser_state *par_state,
       tail_index = name_len;
       while (tail_index > 0)
 	{
-	  int nsyms;
-	  std::vector<struct block_symbol> syms;
 	  struct symbol *type_sym;
 	  struct symbol *renaming_sym;
 	  const char* renaming;
@@ -1226,15 +1223,15 @@ write_var_or_type (struct parser_state *par_state,
 	  int terminator = encoded_name[tail_index];
 
 	  encoded_name[tail_index] = '\0';
-	  nsyms = ada_lookup_symbol_list (encoded_name, block,
-					  VAR_DOMAIN, &syms);
+	  std::vector<struct block_symbol> syms
+	    = ada_lookup_symbol_list (encoded_name, block, VAR_DOMAIN);
 	  encoded_name[tail_index] = terminator;
 
 	  type_sym = select_possible_type_sym (syms);
 
 	  if (type_sym != NULL)
 	    renaming_sym = type_sym;
-	  else if (nsyms == 1)
+	  else if (syms.size () == 1)
 	    renaming_sym = syms[0].symbol;
 	  else 
 	    renaming_sym = NULL;
@@ -1285,7 +1282,7 @@ write_var_or_type (struct parser_state *par_state,
 		error (_("Invalid attempt to select from type: \"%s\"."),
 		       name0.ptr);
 	    }
-	  else if (tail_index == name_len && nsyms == 0)
+	  else if (tail_index == name_len && syms.empty ())
 	    {
 	      struct type *type = find_primitive_type (par_state,
 						       encoded_name);
@@ -1294,13 +1291,13 @@ write_var_or_type (struct parser_state *par_state,
 		return type;
 	    }
 
-	  if (nsyms == 1)
+	  if (syms.size () == 1)
 	    {
 	      write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
 	      write_selectors (par_state, encoded_name + tail_index);
 	      return NULL;
 	    }
-	  else if (nsyms == 0) 
+	  else if (syms.empty ()) 
 	    {
 	      struct bound_minimal_symbol msym
 		= ada_lookup_simple_minsym (encoded_name);
@@ -1362,12 +1359,12 @@ write_name_assoc (struct parser_state *par_state, struct stoken name)
 {
   if (strchr (name.ptr, '.') == NULL)
     {
-      std::vector<struct block_symbol> syms;
-      int nsyms = ada_lookup_symbol_list (name.ptr,
-					  par_state->expression_context_block,
-					  VAR_DOMAIN, &syms);
+      std::vector<struct block_symbol> syms
+	= ada_lookup_symbol_list (name.ptr,
+				  par_state->expression_context_block,
+				  VAR_DOMAIN);
 
-      if (nsyms != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)
+      if (syms.size () != 1 || SYMBOL_CLASS (syms[0].symbol) == LOC_TYPEDEF)
 	write_exp_op_with_string (par_state, OP_NAME, name);
       else
 	write_var_from_sym (par_state, syms[0].block, syms[0].symbol);
