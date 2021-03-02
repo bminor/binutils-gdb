@@ -1,3 +1,7 @@
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
+	* elf-strtab.c (_bfd_elf_strtab_str): Skip strings with zero refcount.
+
 2021-03-02  Alan Modra  <amodra@gmail.com>
 
 	PR 27451

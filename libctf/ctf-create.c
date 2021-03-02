@@ -318,18 +318,22 @@ symtypetab_density (ctf_dict_t *fp, ctf_dict_t *symfp, ctf_dynhash_t *symhash,
 	  if ((flags & CTF_SYMTYPETAB_EMIT_FUNCTION)
 	      && sym->st_type != STT_FUNC)
 	    {
-	      ctf_err_warn (fp, 1, 0, _("Symbol %x added to CTF as a function "
-					"but is of type %x\n"),
-			    sym->st_symidx, sym->st_type);
+	      ctf_err_warn (fp, 1, 0, _("symbol %s (%x) added to CTF as a "
+					"function but is of type %x.  "
+					"The symbol type lookup tables "
+					"are probably corrupted"),
+			    sym->st_name, sym->st_symidx, sym->st_type);
 	      ctf_dynhash_remove (symhash, name);
 	      continue;
 	    }
 	  else if (!(flags & CTF_SYMTYPETAB_EMIT_FUNCTION)
 		   && sym->st_type != STT_OBJECT)
 	    {
-	      ctf_err_warn (fp, 1, 0, _("Symbol %x added to CTF as a data "
-					"object but is of type %x\n"),
-			    sym->st_symidx, sym->st_type);
+	      ctf_err_warn (fp, 1, 0, _("symbol %s (%x) added to CTF as a "
+					"data object but is of type %x.  "
+					"The symbol type lookup tables "
+					"are probably corrupted"),
+			    sym->st_name, sym->st_symidx, sym->st_type);
 	      ctf_dynhash_remove (symhash, name);
 	      continue;
 	    }

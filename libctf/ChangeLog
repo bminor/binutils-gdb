@@ -1,5 +1,13 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (symtypetab_density): Report the symbol name as
+	well as index in the name != object error; note the likely
+	consequences.
+	* ctf-link.c (ctf_link_shuffle_syms): Report the symbol index
+	as well as name.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_shuffle_syms): Free ctf_dynsyms properly.
 
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>

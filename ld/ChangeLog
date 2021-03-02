@@ -1,3 +1,7 @@
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ldelfgen.c (ldelf_ctf_strtab_iter_cb): Skip zero-refcount strings.
+
 2021-03-02  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/startstop.d,

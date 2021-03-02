@@ -1552,7 +1552,8 @@ ctf_link_shuffle_syms (ctf_dict_t *fp)
 	 for skippability here.  */
       if (!ctf_symtab_skippable (&did->cid_sym))
 	{
-	  ctf_dprintf ("symbol name from linker: %s\n", did->cid_sym.st_name);
+	  ctf_dprintf ("symbol from linker: %s (%x)\n", did->cid_sym.st_name,
+		       did->cid_sym.st_symidx);
 
 	  if ((new_sym = malloc (sizeof (ctf_link_sym_t))) == NULL)
 	    goto local_oom;

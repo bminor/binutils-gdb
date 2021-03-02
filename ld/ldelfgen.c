@@ -375,13 +375,20 @@ ldelf_ctf_strtab_iter_cb (uint32_t *offset, void *arg_)
   if (arg->next_i == 0)
     arg->next_i = 1;
 
-  if (arg->next_i >= _bfd_elf_strtab_len (arg->strtab))
+  /* Hunt through strings until we fall off the end or find one with
+     a nonzero refcount.  */
+  do
     {
-      arg->next_i = 0;
-      return NULL;
-    }
+      if (arg->next_i >= _bfd_elf_strtab_len (arg->strtab))
+	{
+	  arg->next_i = 0;
+	  return NULL;
+	}
 
-  ret = _bfd_elf_strtab_str (arg->strtab, arg->next_i++, &off);
+      ret = _bfd_elf_strtab_str (arg->strtab, arg->next_i++, &off);
+    }
+  while (ret == NULL);
+
   *offset = off;
 
   /* If we've overflowed, we cannot share any further strings: the CTF

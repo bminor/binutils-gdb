@@ -299,9 +299,11 @@ _bfd_elf_strtab_str (struct elf_strtab_hash *tab, size_t idx,
 		     bfd_size_type *offset)
 {
   if (idx == 0)
-    return 0;
+    return NULL;
   BFD_ASSERT (idx < tab->size);
   BFD_ASSERT (tab->sec_size);
+  if (tab->array[idx]->refcount == 0)
+    return NULL;
   if (offset)
     *offset = tab->array[idx]->u.index;
   return tab->array[idx]->root.string;
