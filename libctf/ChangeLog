@@ -1,5 +1,10 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_one_variable): Remove reference to
+	"unconflicted link mode".
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_create_per_cu): Drop FILENAME now that it is
 	always identical to CUNAME.
 	(ctf_link_deduplicating_one_symtypetab): Adjust.

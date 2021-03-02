@@ -499,9 +499,9 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
 	return 0;
     }
 
-  /* In unconflicted link mode, if this type is mapped to a type in the parent
-     dict, we want to try to add to that first: if it reports a duplicate,
-     or if the type is in a child already, add straight to the child.  */
+  /* If this type is mapped to a type in the parent dict, we want to try to add
+     to that first: if it reports a duplicate, or if the type is in a child
+     already, add straight to the child.  */
 
   insert_fp = arg->out_fp;
 
