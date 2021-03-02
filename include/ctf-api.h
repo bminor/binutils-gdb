@@ -94,7 +94,8 @@ typedef struct ctf_link_sym
 /* Share only types that are used by multiple inputs.  */
 #define CTF_LINK_SHARE_DUPLICATED 0x1
 
-/* Do a nondeduplicating link.  */
+/* Do a nondeduplicating link, or otherwise deduplicate "less hard", trading off
+   CTF output size for link time.  */
 #define CTF_LINK_NONDEDUP 0x2
 
 /* Create empty outputs for all registered CU mappings even if no types are

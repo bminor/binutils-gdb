@@ -1,5 +1,24 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_create_per_cu): Drop FILENAME now that it is
+	always identical to CUNAME.
+	(ctf_link_deduplicating_one_symtypetab): Adjust.
+	(ctf_link_one_type): Remove.
+	(ctf_link_one_input_archive_member): Likewise.
+	(ctf_link_close_one_input_archive): Likewise.
+	(ctf_link_one_input_archive): Likewise.
+	(ctf_link): No longer call it.  Drop CTF_LINK_NONDEDUP path.
+	Improve header comment a bit (dicts, not files).  Adjust
+	ctf_create_per_cu call.
+	(ctf_link_deduplicating_variables): Simplify.
+	(ctf_link_in_member_cb_arg_t) <cu_name>: Remove.
+	<in_input_cu_file>: Likewise.
+	<in_fp_parent>: Likewise.
+	<done_parent>: Likewise.
+	(ctf_link_one_variable): Turn uses of in_file_name to in_cuname.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_member_iter): Move 'rc' to an inner scope.
 	(ctf_enum_iter): Reimplement in terms of ctf_enum_next.
 	(ctf_type_iter): Reimplement in terms of ctf_type_next.

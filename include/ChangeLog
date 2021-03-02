@@ -1,3 +1,8 @@
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (CTF_LINK_SHARE_DUPLICATED): Note that this might
+	merely change how much deduplication is done.
+
 2021-03-01  Alan Modra  <amodra@gmail.com>
 	    Fangrui Song <maskray@google.com>
 
