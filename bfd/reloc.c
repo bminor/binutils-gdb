@@ -51,7 +51,7 @@ SECTION
 #include "bfdlink.h"
 #include "libbfd.h"
 #include "bfdver.h"
-#include "coff/internal.h"
+#include "coff/x86_64.h"
 /*
 DOCDD
 INODE

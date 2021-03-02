@@ -1,3 +1,7 @@
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c: Include x86_64.h rather than internal.h.
+
 2021-03-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 27484

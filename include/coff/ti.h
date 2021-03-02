@@ -549,12 +549,20 @@ struct external_reloc
   do memset (dst->r_reserved, 0, sizeof (dst->r_reserved)); while (0)
 
 /* various relocation types.  */
-#define R_ABS     0x0000            /* no relocation */
-#define R_REL13   0x002A            /* 13-bit direct reference (???) */
-#define R_PARTLS7 0x0028            /* 7 LSBs of an address */
-#define R_PARTMS9 0x0029            /* 9MSBs of an address */
-#define R_EXTWORD 0x002B            /* 23-bit direct reference */
-#define R_EXTWORD16 0x002C          /* 16-bit direct reference to 23-bit addr*/
-#define R_EXTWORDMS7 0x002D         /* upper 7 bits of 23-bit address */
+#define R_REL24		 5
+#define R_RELWORD	16
+#define R_RELLONG	17
+#define R_PCRWORD	19
+#define R_PCR24		21
+#define R_PARTLS16	32
+#define R_PARTMS8	33
+
+#define R_ABS		 0	/* no relocation */
+#define R_REL13       0x2A	/* 13-bit direct reference (???) */
+#define R_PARTLS7     0x28	/* 7 LSBs of an address */
+#define R_PARTMS9     0x29	/* 9MSBs of an address */
+#define R_EXTWORD     0x2B	/* 23-bit direct reference */
+#define R_EXTWORD16   0x2C	/* 16-bit direct reference to 23-bit addr*/
+#define R_EXTWORDMS7  0x2D	/* upper 7 bits of 23-bit address */
 
 #endif /* COFF_TI_H */

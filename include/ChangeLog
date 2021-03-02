@@ -1,3 +1,13 @@
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
+	* coff/internal.h: Delete obsolete relocation defines.  Move used
+	relocation defines..
+	* coff/i386.h: ..to here..
+	* coff/ti.h: ..and here..
+	* coff/x86_64.h: ..and here..
+	* coff/z80.h: ..and here..
+	* coff/z8k.h: ..and here.
+
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (CTF_LINK_SHARE_DUPLICATED): Note that this might
