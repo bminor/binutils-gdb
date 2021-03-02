@@ -347,6 +347,11 @@ typedef struct ctf_dedup
   /* A set (a hash) of hash values of conflicting types.  */
   ctf_dynset_t *cd_conflicting_types;
 
+  /* A hash mapping fp *'s of inputs to their input_nums.  Used only by
+     functions outside the core ctf_dedup / ctf_dedup_emit machinery which do
+     not take an inputs array.  */
+  ctf_dynhash_t *cd_input_nums;
+
   /* Maps type hashes to ctf_id_t's in this dictionary.  Populated only at
      emission time, in the dictionary where emission is taking place.  */
   ctf_dynhash_t *cd_output_emission_hashes;
@@ -455,9 +460,8 @@ struct ctf_dict
   ctf_dynhash_t *ctf_link_inputs; /* Inputs to this link.  */
   ctf_dynhash_t *ctf_link_outputs; /* Additional outputs from this link.  */
 
-  /* Map input types to output types: populated in each output dict.
-     Key is a ctf_link_type_key_t: value is a type ID.  Used by
-     nondeduplicating links and ad-hoc ctf_add_type calls only.  */
+  /* Map input types to output types for ctf_add_type.  Key is a
+     ctf_link_type_key_t: value is a type ID.  */
   ctf_dynhash_t *ctf_link_type_mapping;
 
   /* Map input CU names to output CTF dict names: populated in the top-level
@@ -703,11 +707,6 @@ extern ctf_id_t ctf_add_encoded (ctf_dict_t *, uint32_t, const char *,
 extern ctf_id_t ctf_add_reftype (ctf_dict_t *, uint32_t, ctf_id_t,
 				 uint32_t kind);
 
-extern void ctf_add_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
-				  ctf_dict_t *dst_fp, ctf_id_t dst_type);
-extern ctf_id_t ctf_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
-				  ctf_dict_t **dst_fp);
-
 extern int ctf_dedup_atoms_init (ctf_dict_t *);
 extern int ctf_dedup (ctf_dict_t *, ctf_dict_t **, uint32_t ninputs,
 		      uint32_t *parents, int cu_mapped);
@@ -715,6 +714,8 @@ extern void ctf_dedup_fini (ctf_dict_t *, ctf_dict_t **, uint32_t);
 extern ctf_dict_t **ctf_dedup_emit (ctf_dict_t *, ctf_dict_t **,
 				    uint32_t ninputs, uint32_t *parents,
 				    uint32_t *noutputs, int cu_mapped);
+extern ctf_id_t ctf_dedup_type_mapping (ctf_dict_t *fp, ctf_dict_t *src_fp,
+					ctf_id_t src_type);
 
 extern void ctf_decl_init (ctf_decl_t *);
 extern void ctf_decl_fini (ctf_decl_t *);

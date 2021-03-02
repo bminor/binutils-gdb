@@ -24,118 +24,18 @@
 #pragma weak ctf_open
 #endif
 
-/* Type tracking machinery.  */
-
-/* Record the correspondence between a source and ctf_add_type()-added
-   destination type: both types are translated into parent type IDs if need be,
-   so they relate to the actual dictionary they are in.  Outside controlled
-   circumstances (like linking) it is probably not useful to do more than
-   compare these pointers, since there is nothing stopping the user closing the
-   source dict whenever they want to.
-
-   Our OOM handling here is just to not do anything, because this is called deep
-   enough in the call stack that doing anything useful is painfully difficult:
-   the worst consequence if we do OOM is a bit of type duplication anyway.  */
-
-void
-ctf_add_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
-		      ctf_dict_t *dst_fp, ctf_id_t dst_type)
-{
-  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
-    src_fp = src_fp->ctf_parent;
-
-  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
-
-  if (LCTF_TYPE_ISPARENT (dst_fp, dst_type) && dst_fp->ctf_parent)
-    dst_fp = dst_fp->ctf_parent;
-
-  dst_type = LCTF_TYPE_TO_INDEX(dst_fp, dst_type);
-
-  if (dst_fp->ctf_link_type_mapping == NULL)
-    {
-      ctf_hash_fun f = ctf_hash_type_key;
-      ctf_hash_eq_fun e = ctf_hash_eq_type_key;
-
-      if ((dst_fp->ctf_link_type_mapping = ctf_dynhash_create (f, e, free,
-							       NULL)) == NULL)
-	return;
-    }
-
-  ctf_link_type_key_t *key;
-  key = calloc (1, sizeof (struct ctf_link_type_key));
-  if (!key)
-    return;
-
-  key->cltk_fp = src_fp;
-  key->cltk_idx = src_type;
-
-  /* No OOM checking needed, because if this doesn't work the worst we'll do is
-     add a few more duplicate types (which will probably run out of memory
-     anyway).  */
-  ctf_dynhash_insert (dst_fp->ctf_link_type_mapping, key,
-		      (void *) (uintptr_t) dst_type);
-}
-
-/* Look up a type mapping: return 0 if none.  The DST_FP is modified to point to
-   the parent if need be.  The ID returned is from the dst_fp's perspective.  */
-ctf_id_t
-ctf_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type, ctf_dict_t **dst_fp)
-{
-  ctf_link_type_key_t key;
-  ctf_dict_t *target_fp = *dst_fp;
-  ctf_id_t dst_type = 0;
-
-  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
-    src_fp = src_fp->ctf_parent;
-
-  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
-  key.cltk_fp = src_fp;
-  key.cltk_idx = src_type;
-
-  if (target_fp->ctf_link_type_mapping)
-    dst_type = (uintptr_t) ctf_dynhash_lookup (target_fp->ctf_link_type_mapping,
-					       &key);
-
-  if (dst_type != 0)
-    {
-      dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
-				     target_fp->ctf_parent != NULL);
-      *dst_fp = target_fp;
-      return dst_type;
-    }
-
-  if (target_fp->ctf_parent)
-    target_fp = target_fp->ctf_parent;
-  else
-    return 0;
-
-  if (target_fp->ctf_link_type_mapping)
-    dst_type = (uintptr_t) ctf_dynhash_lookup (target_fp->ctf_link_type_mapping,
-					       &key);
-
-  if (dst_type)
-    dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
-				   target_fp->ctf_parent != NULL);
-
-  *dst_fp = target_fp;
-  return dst_type;
-}
-
-/* Linker machinery.
-
-   CTF linking consists of adding CTF archives full of content to be merged into
+/* CTF linking consists of adding CTF archives full of content to be merged into
    this one to the current file (which must be writable) by calling
-   ctf_link_add_ctf().  Once this is done, a call to ctf_link() will merge the
-   type tables together, generating new CTF files as needed, with this one as a
-   parent, to contain types from the inputs which conflict.
-   ctf_link_add_strtab() takes a callback which provides string/offset pairs to
-   be added to the external symbol table and deduplicated from all CTF string
-   tables in the output link; ctf_link_shuffle_syms() takes a callback which
-   provides symtab entries in ascending order, and shuffles the function and
-   data sections to match; and ctf_link_write() emits a CTF file (if there are
-   no conflicts requiring per-compilation-unit sub-CTF files) or CTF archives
-   (otherwise) and returns it, suitable for addition in the .ctf section of the
-   output.  */
+   ctf_link_add_ctf.  Once this is done, a call to ctf_link will merge the type
+   tables together, generating new CTF files as needed, with this one as a
+   parent, to contain types from the inputs which conflict.  ctf_link_add_strtab
+   takes a callback which provides string/offset pairs to be added to the
+   external symbol table and deduplicated from all CTF string tables in the
+   output link; ctf_link_shuffle_syms takes a callback which provides symtab
+   entries in ascending order, and shuffles the function and data sections to
+   match; and ctf_link_write emits a CTF file (if there are no conflicts
+   requiring per-compilation-unit sub-CTF files) or CTF archives (otherwise) and
+   returns it, suitable for addition in the .ctf section of the output.  */
 
 /* Return the name of the compilation unit this CTF dict or its parent applies
    to, or a non-null string otherwise: prefer the parent.  Used in debugging
@@ -149,6 +49,19 @@ ctf_link_input_name (ctf_dict_t *fp)
     return fp->ctf_cuname;
   else
     return "(unnamed)";
+}
+
+/* Return the cuname of a dict, or the string "unnamed-CU" if none.  */
+
+static const char *
+ctf_unnamed_cuname (ctf_dict_t *fp)
+{
+  const char *cuname = ctf_cuname (fp);
+
+  if (!cuname)
+    cuname = "unnamed-CU";
+
+  return cuname;
 }
 
 /* The linker inputs look like this.  clin_fp is used for short-circuited
@@ -279,6 +192,7 @@ ctf_link_add_ctf (ctf_dict_t *fp, ctf_archive_t *ctf, const char *name)
 /* Return a per-CU output CTF dictionary suitable for the given CU, creating and
    interning it if need be.  */
 
+_libctf_nonnull_((1,2))
 static ctf_dict_t *
 ctf_create_per_cu (ctf_dict_t *fp, const char *cu_name)
 {
@@ -429,21 +343,6 @@ ctf_link_set_memb_name_changer (ctf_dict_t *fp,
   fp->ctf_link_memb_name_changer_arg = arg;
 }
 
-typedef struct ctf_link_in_member_cb_arg
-{
-  /* The shared output dictionary.  */
-  ctf_dict_t *out_fp;
-
-  /* The cuname of the input file, and an fp to each dictionary in that file
-     in turn.  */
-  const char *in_cuname;
-  ctf_dict_t *in_fp;
-
-  /* If true, this is the CU-mapped portion of a deduplicating link: no child
-     dictionaries should be created.  */
-  int cu_mapped;
-} ctf_link_in_member_cb_arg_t;
-
 /* Set a function which is used to filter out unwanted variables from the link.  */
 int
 ctf_link_set_variable_filter (ctf_dict_t *fp, ctf_link_variable_filter_f *filter,
@@ -479,23 +378,22 @@ check_variable (const char *name, ctf_dict_t *fp, ctf_id_t type,
   return 0;				      /* Already exists.  */
 }
 
-/* Link one variable in.  */
+/* Link one variable named NAME of type TYPE found in IN_FP into FP.  */
 
 static int
-ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
+ctf_link_one_variable (ctf_dict_t *fp, ctf_dict_t *in_fp, const char *name,
+		       ctf_id_t type, int cu_mapped)
 {
-  ctf_link_in_member_cb_arg_t *arg = (ctf_link_in_member_cb_arg_t *) arg_;
   ctf_dict_t *per_cu_out_fp;
   ctf_id_t dst_type = 0;
-  ctf_dict_t *insert_fp;
   ctf_dvdef_t *dvd;
 
   /* See if this variable is filtered out.  */
 
-  if (arg->out_fp->ctf_link_variable_filter)
+  if (fp->ctf_link_variable_filter)
     {
-      void *farg = arg->out_fp->ctf_link_variable_filter_arg;
-      if (arg->out_fp->ctf_link_variable_filter (arg->in_fp, name, type, farg))
+      void *farg = fp->ctf_link_variable_filter_arg;
+      if (fp->ctf_link_variable_filter (in_fp, name, type, farg))
 	return 0;
     }
 
@@ -503,25 +401,25 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
      to that first: if it reports a duplicate, or if the type is in a child
      already, add straight to the child.  */
 
-  insert_fp = arg->out_fp;
+  if ((dst_type = ctf_dedup_type_mapping (fp, in_fp, type)) == CTF_ERR)
+    return -1;					/* errno is set for us.  */
 
-  dst_type = ctf_type_mapping (arg->in_fp, type, &insert_fp);
   if (dst_type != 0)
     {
-      if (insert_fp == arg->out_fp)
-	{
-	  if (check_variable (name, insert_fp, dst_type, &dvd))
-	    {
-	      /* No variable here: we can add it.  */
-	      if (ctf_add_variable (insert_fp, name, dst_type) < 0)
-		return (ctf_set_errno (arg->out_fp, ctf_errno (insert_fp)));
-	      return 0;
-	    }
+      if (!ctf_assert (fp, ctf_type_isparent (fp, dst_type)))
+	return -1;				/* errno is set for us.  */
 
-	  /* Already present?  Nothing to do.  */
-	  if (dvd && dvd->dvd_type == dst_type)
-	    return 0;
+      if (check_variable (name, fp, dst_type, &dvd))
+	{
+	  /* No variable here: we can add it.  */
+	  if (ctf_add_variable (fp, name, dst_type) < 0)
+	    return -1; 				/* errno is set for us.  */
+	  return 0;
 	}
+
+      /* Already present?  Nothing to do.  */
+      if (dvd && dvd->dvd_type == dst_type)
+	return 0;
     }
 
   /* Can't add to the parent due to a name clash, or because it references a
@@ -529,29 +427,29 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
      be.  If we can't do that, skip it.  Don't add to a child if we're doing a
      CU-mapped link, since that has only one output.  */
 
-  if (arg->cu_mapped)
+  if (cu_mapped)
     {
       ctf_dprintf ("Variable %s in input file %s depends on a type %lx hidden "
-		   "due to conflicts: skipped.\n", name, arg->in_cuname,
-		   type);
+		   "due to conflicts: skipped.\n", name,
+		   ctf_unnamed_cuname (in_fp), type);
       return 0;
     }
 
-  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->in_cuname)) == NULL)
-    return -1;					/* Errno is set for us.  */
+  if ((per_cu_out_fp = ctf_create_per_cu (fp, ctf_unnamed_cuname (in_fp))) == NULL)
+    return -1;					/* errno is set for us.  */
 
   /* If the type was not found, check for it in the child too.  */
   if (dst_type == 0)
     {
-      insert_fp = per_cu_out_fp;
-      dst_type = ctf_type_mapping (arg->in_fp, type, &insert_fp);
+      if ((dst_type = ctf_dedup_type_mapping (per_cu_out_fp,
+					      in_fp, type)) == CTF_ERR)
+	return -1;				/* errno is set for us.   */
 
       if (dst_type == 0)
 	{
-	  ctf_err_warn (arg->out_fp, 1, 0,
-			_("type %lx for variable %s in input file %s "
-			  "not found: skipped"), type, name,
-			arg->in_cuname);
+	  ctf_err_warn (fp, 1, 0, _("type %lx for variable %s in input file %s "
+				    "not found: skipped"), type, name,
+			ctf_unnamed_cuname (in_fp));
 	  /* Do not terminate the link: just skip the variable.  */
 	  return 0;
 	}
@@ -559,19 +457,8 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
 
   if (check_variable (name, per_cu_out_fp, dst_type, &dvd))
     if (ctf_add_variable (per_cu_out_fp, name, dst_type) < 0)
-      return (ctf_set_errno (arg->out_fp, ctf_errno (per_cu_out_fp)));
+      return (ctf_set_errno (fp, ctf_errno (per_cu_out_fp)));
   return 0;
-}
-
-/* Dump the unnecessary link type mapping after one input file is processed.  */
-static void
-empty_link_type_mapping (void *key _libctf_unused_, void *value,
-			 void *arg _libctf_unused_)
-{
-  ctf_dict_t *fp = (ctf_dict_t *) value;
-
-  if (fp->ctf_link_type_mapping)
-    ctf_dynhash_empty (fp->ctf_link_type_mapping);
 }
 
 /* Lazily open a CTF archive for linking, if not already open.
@@ -925,21 +812,24 @@ static int
 ctf_link_deduplicating_variables (ctf_dict_t *fp, ctf_dict_t **inputs,
 				  size_t ninputs, int cu_mapped)
 {
-  ctf_link_in_member_cb_arg_t arg;
   size_t i;
-
-  arg.cu_mapped = cu_mapped;
-  arg.out_fp = fp;
 
   for (i = 0; i < ninputs; i++)
     {
-      arg.in_fp = inputs[i];
-      if (ctf_cuname (inputs[i]) != NULL)
-	arg.in_cuname = ctf_cuname (inputs[i]);
-      else
-	arg.in_cuname = "unnamed-CU";
-      if (ctf_variable_iter (arg.in_fp, ctf_link_one_variable, &arg) < 0)
-	return ctf_set_errno (fp, ctf_errno (arg.in_fp));
+      ctf_next_t *it = NULL;
+      ctf_id_t type;
+      const char *name;
+
+      while ((type = ctf_variable_next (inputs[i], &it, &name)) != CTF_ERR)
+	{
+	  if (ctf_link_one_variable (fp, inputs[i], name, type, cu_mapped) < 0)
+	    {
+	      ctf_next_destroy (it);
+	      return -1;			/* errno is set for us.  */
+	    }
+	}
+      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
+	return ctf_set_errno (fp, ctf_errno (inputs[i]));
     }
   return 0;
 }
@@ -982,40 +872,35 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
   ctf_next_t *it = NULL;
   const char *name;
   ctf_id_t type;
-  const char *in_file_name;
-
-  if (ctf_cuname (input) != NULL)
-    in_file_name = ctf_cuname (input);
-  else
-    in_file_name = "unnamed-CU";
 
   while ((type = ctf_symbol_next (input, &it, &name, functions)) != CTF_ERR)
     {
       ctf_id_t dst_type;
       ctf_dict_t *per_cu_out_fp;
-      ctf_dict_t *insert_fp = fp;
       int sym;
 
       /* Look in the parent first.  */
 
-      dst_type = ctf_type_mapping (input, type, &insert_fp);
+      if ((dst_type = ctf_dedup_type_mapping (fp, input, type)) == CTF_ERR)
+	return -1;				/* errno is set for us.  */
+
       if (dst_type != 0)
 	{
-	  if (insert_fp == fp)
-	    {
-	      sym = check_sym (fp, name, dst_type, functions);
+	  if (!ctf_assert (fp, ctf_type_isparent (fp, dst_type)))
+	    return -1;				/* errno is set for us.  */
 
-	      /* Already present: next symbol.  */
-	      if (sym == 0)
-		continue;
-	      /* Not present: add it.  */
-	      else if (sym > 0)
-		{
-		  if (ctf_add_funcobjt_sym (fp, functions,
-					    name, dst_type) < 0)
-		    return -1; 			/* errno is set for us.  */
-		  continue;
-		}
+	  sym = check_sym (fp, name, dst_type, functions);
+
+	  /* Already present: next symbol.  */
+	  if (sym == 0)
+	    continue;
+	  /* Not present: add it.  */
+	  else if (sym > 0)
+	    {
+	      if (ctf_add_funcobjt_sym (fp, functions,
+					name, dst_type) < 0)
+		return -1; 			/* errno is set for us.  */
+	      continue;
 	    }
 	}
 
@@ -1028,24 +913,26 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 	{
 	  ctf_dprintf ("Symbol %s in input file %s depends on a type %lx "
 		       "hidden due to conflicts: skipped.\n", name,
-		       in_file_name, type);
+		       ctf_unnamed_cuname (input), type);
 	  continue;
 	}
 
-      if ((per_cu_out_fp = ctf_create_per_cu (fp, in_file_name)) == NULL)
+      if ((per_cu_out_fp = ctf_create_per_cu (fp, ctf_unnamed_cuname (input))) == NULL)
 	return -1;				/* errno is set for us.  */
 
       /* If the type was not found, check for it in the child too.  */
       if (dst_type == 0)
 	{
-	  insert_fp = per_cu_out_fp;
-	  dst_type = ctf_type_mapping (input, type, &insert_fp);
+	  if ((dst_type = ctf_dedup_type_mapping (per_cu_out_fp,
+						  input, type)) == CTF_ERR)
+	    return -1;				/* errno is set for us.  */
 
 	  if (dst_type == 0)
 	    {
 	      ctf_err_warn (fp, 1, 0,
 			    _("type %lx for symbol %s in input file %s "
-			      "not found: skipped"), type, name, in_file_name);
+			      "not found: skipped"), type, name,
+			    ctf_unnamed_cuname (input));
 	      continue;
 	    }
 	}
@@ -1068,7 +955,7 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 	  ctf_err_warn (fp, 0, ECTF_DUPLICATE,
 			_("symbol %s in input file %s found conflicting "
 			  "even when trying in per-CU dict."), name,
-			in_file_name);
+			ctf_unnamed_cuname (input));
 	  return (ctf_set_errno (fp, ECTF_DUPLICATE));
 	}
     }
@@ -1258,6 +1145,8 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 	  goto err_inputs_outputs;
 	}
 
+      ctf_dedup_fini (out, outputs, noutputs);
+
       /* For now, we omit symbol section linking for CU-mapped links, until it
 	 is clear how to unify the symbol table across such links.  (Perhaps we
 	 should emit an unconditionally indexed symtab, like the compiler
@@ -1420,6 +1309,8 @@ ctf_link_deduplicating (ctf_dict_t *fp)
       goto err_clean_outputs;
     }
 
+  ctf_dedup_fini (fp, outputs, noutputs);
+
   /* Now close all the inputs, including per-CU intermediates.  */
 
   if (ctf_link_deduplicating_close_inputs (fp, NULL, inputs, ninputs) < 0)
@@ -1452,12 +1343,9 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 int
 ctf_link (ctf_dict_t *fp, int flags)
 {
-  ctf_link_in_member_cb_arg_t arg;
   ctf_next_t *i = NULL;
   int err;
 
-  memset (&arg, 0, sizeof (struct ctf_link_in_member_cb_arg));
-  arg.out_fp = fp;
   fp->ctf_link_flags = flags;
 
   if (fp->ctf_link_inputs == NULL)
@@ -1503,11 +1391,6 @@ ctf_link (ctf_dict_t *fp, int flags)
 
   ctf_link_deduplicating (fp);
 
-  /* Discard the now-unnecessary mapping table data from all the outputs.  */
-  if (fp->ctf_link_type_mapping)
-    ctf_dynhash_empty (fp->ctf_link_type_mapping);
-  ctf_dynhash_iter (fp->ctf_link_outputs, empty_link_type_mapping, NULL);
-
   fp->ctf_flags &= ~LCTF_LINKING;
   if ((ctf_errno (fp) != 0) && (ctf_errno (fp) != ECTF_NOCTFDATA))
     return -1;
@@ -1537,8 +1420,8 @@ ctf_link_intern_extern_string (void *key _libctf_unused_, void *value,
 /* Repeatedly call ADD_STRING to acquire strings from the external string table,
    adding them to the atoms table for this CU and all subsidiary CUs.
 
-   If ctf_link() is also called, it must be called first if you want the new CTF
-   files ctf_link() can create to get their strings dedupped against the ELF
+   If ctf_link is also called, it must be called first if you want the new CTF
+   files ctf_link can create to get their strings dedupped against the ELF
    strtab properly.  */
 int
 ctf_link_add_strtab (ctf_dict_t *fp, ctf_link_strtab_string_f *add_string,

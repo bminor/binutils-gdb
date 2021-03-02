@@ -1,5 +1,46 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dict_t) <ctf_link_type_mapping>: No longer used
+	by the nondeduplicating linker.
+	(ctf_add_type_mapping): Removed, now static.
+	(ctf_type_mapping): Likewise.
+	(ctf_dedup_type_mapping): New.
+	(ctf_dedup_t) <cd_input_nums>: New.
+	* ctf-dedup.c (ctf_dedup_init): Populate it.
+	(ctf_dedup_fini): Free it again.  Emphasise that this has to be
+	the last thing called.
+	(ctf_dedup): Populate it.
+	(ctf_dedup_populate_type_mapping): Removed.
+	(ctf_dedup_populate_type_mappings): Likewise.
+	(ctf_dedup_emit): No longer call it.  No longer call
+	ctf_dedup_fini either.
+	(ctf_dedup_type_mapping): New.
+	* ctf-link.c (ctf_unnamed_cuname): New.
+	(ctf_create_per_cu): Arguments must be non-null now.
+	(ctf_in_member_cb_arg): Removed.
+	(ctf_link): No longer populate it.  No longer discard the
+	mapping table.
+	(ctf_link_deduplicating_one_symtypetab): Use
+	ctf_dedup_type_mapping, not ctf_type_mapping.  Use
+	ctf_unnamed_cuname.
+	(ctf_link_one_variable): Likewise.  Pass in args individually: no
+	longer a ctf_variable_iter callback.
+	(empty_link_type_mapping): Removed.
+	(ctf_link_deduplicating_variables): Use ctf_variable_next, not
+	ctf_variable_iter.  No longer pack arguments to
+	ctf_link_one_variable into a struct.
+	(ctf_link_deduplicating_per_cu): Call ctf_dedup_fini once
+	all link phases are done.
+	(ctf_link_deduplicating): Likewise.
+	(ctf_link_intern_extern_string): Improve comment.
+	(ctf_add_type_mapping): Migrate...
+	(ctf_type_mapping): ... these functions...
+	* ctf-create.c (ctf_add_type_mapping): ... here...
+	(ctf_type_mapping): ... and make static, for the sole use of
+	ctf_add_type.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_one_variable): Remove reference to
 	"unconflicted link mode".
 

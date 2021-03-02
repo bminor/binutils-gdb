@@ -2471,6 +2471,101 @@ membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
   return 0;
 }
 
+/* Record the correspondence between a source and ctf_add_type()-added
+   destination type: both types are translated into parent type IDs if need be,
+   so they relate to the actual dictionary they are in.  Outside controlled
+   circumstances (like linking) it is probably not useful to do more than
+   compare these pointers, since there is nothing stopping the user closing the
+   source dict whenever they want to.
+
+   Our OOM handling here is just to not do anything, because this is called deep
+   enough in the call stack that doing anything useful is painfully difficult:
+   the worst consequence if we do OOM is a bit of type duplication anyway.  */
+
+static void
+ctf_add_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type,
+		      ctf_dict_t *dst_fp, ctf_id_t dst_type)
+{
+  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
+    src_fp = src_fp->ctf_parent;
+
+  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
+
+  if (LCTF_TYPE_ISPARENT (dst_fp, dst_type) && dst_fp->ctf_parent)
+    dst_fp = dst_fp->ctf_parent;
+
+  dst_type = LCTF_TYPE_TO_INDEX(dst_fp, dst_type);
+
+  if (dst_fp->ctf_link_type_mapping == NULL)
+    {
+      ctf_hash_fun f = ctf_hash_type_key;
+      ctf_hash_eq_fun e = ctf_hash_eq_type_key;
+
+      if ((dst_fp->ctf_link_type_mapping = ctf_dynhash_create (f, e, free,
+							       NULL)) == NULL)
+	return;
+    }
+
+  ctf_link_type_key_t *key;
+  key = calloc (1, sizeof (struct ctf_link_type_key));
+  if (!key)
+    return;
+
+  key->cltk_fp = src_fp;
+  key->cltk_idx = src_type;
+
+  /* No OOM checking needed, because if this doesn't work the worst we'll do is
+     add a few more duplicate types (which will probably run out of memory
+     anyway).  */
+  ctf_dynhash_insert (dst_fp->ctf_link_type_mapping, key,
+		      (void *) (uintptr_t) dst_type);
+}
+
+/* Look up a type mapping: return 0 if none.  The DST_FP is modified to point to
+   the parent if need be.  The ID returned is from the dst_fp's perspective.  */
+static ctf_id_t
+ctf_type_mapping (ctf_dict_t *src_fp, ctf_id_t src_type, ctf_dict_t **dst_fp)
+{
+  ctf_link_type_key_t key;
+  ctf_dict_t *target_fp = *dst_fp;
+  ctf_id_t dst_type = 0;
+
+  if (LCTF_TYPE_ISPARENT (src_fp, src_type) && src_fp->ctf_parent)
+    src_fp = src_fp->ctf_parent;
+
+  src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
+  key.cltk_fp = src_fp;
+  key.cltk_idx = src_type;
+
+  if (target_fp->ctf_link_type_mapping)
+    dst_type = (uintptr_t) ctf_dynhash_lookup (target_fp->ctf_link_type_mapping,
+					       &key);
+
+  if (dst_type != 0)
+    {
+      dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
+				     target_fp->ctf_parent != NULL);
+      *dst_fp = target_fp;
+      return dst_type;
+    }
+
+  if (target_fp->ctf_parent)
+    target_fp = target_fp->ctf_parent;
+  else
+    return 0;
+
+  if (target_fp->ctf_link_type_mapping)
+    dst_type = (uintptr_t) ctf_dynhash_lookup (target_fp->ctf_link_type_mapping,
+					       &key);
+
+  if (dst_type)
+    dst_type = LCTF_INDEX_TO_TYPE (target_fp, dst_type,
+				   target_fp->ctf_parent != NULL);
+
+  *dst_fp = target_fp;
+  return dst_type;
+}
+
 /* The ctf_add_type routine is used to copy a type from a source CTF dictionary
    to a dynamic destination dictionary.  This routine operates recursively by
    following the source type's links and embedded member types.  If the
