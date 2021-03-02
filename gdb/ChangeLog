@@ -1,5 +1,27 @@
 2021-03-02  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (cast_from_gnat_encoded_fixed_point_type)
+	(cast_to_gnat_encoded_fixed_point_type): Remove.
+	(ada_value_cast, ada_evaluate_subexp): Update.
+	(gnat_encoded_fixed_point_type_info)
+	(ada_is_gnat_encoded_fixed_point_type)
+	(gnat_encoded_fixed_point_delta)
+	(gnat_encoded_fixed_point_scaling_factor): Remove.
+	* ada-lang.h (ada_is_gnat_encoded_fixed_point_type)
+	(gnat_encoded_fixed_point_delta)
+	(gnat_encoded_fixed_point_scaling_factor): Don't declare.
+	* ada-typeprint.c (print_gnat_encoded_fixed_point_type): Remove.
+	(ada_print_type): Update.
+	* ada-valprint.c (ada_value_print_num): Update.
+	* dwarf2/read.c (ada_get_gnat_encoded_number)
+	(ada_get_gnat_encoded_ratio): New functions.
+	(finish_fixed_point_type): Use them.  Add parameters.
+	(GNAT_FIXED_POINT_SUFFIX): New define.
+	(gnat_encoded_fixed_point_type_info): New function.
+	(read_base_type): Handle gnat encodings.
+
+2021-03-02  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_fold_name, ada_variant_discrim_name)
 	(ada_enum_name, scan_discrim_bound, to_fixed_range_type): Use
 	std::string.

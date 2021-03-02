@@ -18408,24 +18408,77 @@ get_dwarf2_unsigned_rational_constant (struct die_info *die,
   *denominator = std::move (denom);
 }
 
+/* Assuming that ENCODING is a string whose contents starting at the
+   K'th character is "_nn" where "nn" is a decimal number, scan that
+   number and set RESULT to the value. K is updated to point to the
+   character immediately following the number.
+
+   If the string does not conform to the format described above, false
+   is returned, and K may or may not be changed.  */
+
+static bool
+ada_get_gnat_encoded_number (const char *encoding, int &k, gdb_mpz *result)
+{
+  /* The next character should be an underscore ('_') followed
+     by a digit.  */
+  if (encoding[k] != '_' || !isdigit (encoding[k + 1]))
+    return false;
+
+  /* Skip the underscore.  */
+  k++;
+  int start = k;
+
+  /* Determine the number of digits for our number.  */
+  while (isdigit (encoding[k]))
+    k++;
+  if (k == start)
+    return false;
+
+  std::string copy (&encoding[start], k - start);
+  if (mpz_set_str (result->val, copy.c_str (), 10) == -1)
+    return false;
+
+  return true;
+}
+
+/* Scan two numbers from ENCODING at OFFSET, assuming the string is of
+   the form _NN_DD, where NN and DD are decimal numbers.  Set NUM and
+   DENOM, update OFFSET, and return true on success.  Return false on
+   failure.  */
+
+static bool
+ada_get_gnat_encoded_ratio (const char *encoding, int &offset,
+			    gdb_mpz *num, gdb_mpz *denom)
+{
+  if (!ada_get_gnat_encoded_number (encoding, offset, num))
+    return false;
+  return ada_get_gnat_encoded_number (encoding, offset, denom);
+}
+
 /* Assuming DIE corresponds to a fixed point type, finish the creation
-   of the corresponding TYPE by setting its type-specific data.
-   CU is the DIE's CU.  */
+   of the corresponding TYPE by setting its type-specific data.  CU is
+   the DIE's CU.  SUFFIX is the "XF" type name suffix coming from GNAT
+   encodings.  It is nullptr if the GNAT encoding should be
+   ignored.  */
 
 static void
-finish_fixed_point_type (struct type *type, struct die_info *die,
-			 struct dwarf2_cu *cu)
+finish_fixed_point_type (struct type *type, const char *suffix,
+			 struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct attribute *attr;
-
   gdb_assert (type->code () == TYPE_CODE_FIXED_POINT
 	      && TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FIXED_POINT);
 
-  attr = dwarf2_attr (die, DW_AT_binary_scale, cu);
-  if (!attr)
-    attr = dwarf2_attr (die, DW_AT_decimal_scale, cu);
-  if (!attr)
-    attr = dwarf2_attr (die, DW_AT_small, cu);
+  /* If GNAT encodings are preferred, don't examine the
+     attributes.  */
+  struct attribute *attr = nullptr;
+  if (suffix == nullptr)
+    {
+      attr = dwarf2_attr (die, DW_AT_binary_scale, cu);
+      if (attr == nullptr)
+	attr = dwarf2_attr (die, DW_AT_decimal_scale, cu);
+      if (attr == nullptr)
+	attr = dwarf2_attr (die, DW_AT_small, cu);
+    }
 
   /* Numerator and denominator of our fixed-point type's scaling factor.
      The default is a scaling factor of 1, which we use as a fallback
@@ -18438,11 +18491,29 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
 
   if (attr == nullptr)
     {
-      /* Scaling factor not found.  Assume a scaling factor of 1,
-	 and hope for the best.  At least the user will be able to see
-	 the encoded value.  */
-      complaint (_("no scale found for fixed-point type (DIE at %s)"),
-		 sect_offset_str (die->sect_off));
+      int offset = 0;
+      if (suffix != nullptr
+	  && ada_get_gnat_encoded_ratio (suffix, offset, &scale_num,
+					 &scale_denom)
+	  /* The number might be encoded as _nn_dd_nn_dd, where the
+	     second ratio is the 'small value.  In this situation, we
+	     want the second value.  */
+	  && (suffix[offset] != '_'
+	      || ada_get_gnat_encoded_ratio (suffix, offset, &scale_num,
+					     &scale_denom)))
+	{
+	  /* Found it.  */
+	}
+      else
+	{
+	  /* Scaling factor not found.  Assume a scaling factor of 1,
+	     and hope for the best.  At least the user will be able to
+	     see the encoded value.  */
+	  scale_num = 1;
+	  scale_denom = 1;
+	  complaint (_("no scale found for fixed-point type (DIE at %s)"),
+		     sect_offset_str (die->sect_off));
+	}
     }
   else if (attr->name == DW_AT_binary_scale)
     {
@@ -18484,6 +18555,20 @@ finish_fixed_point_type (struct type *type, struct die_info *die,
   mpz_set (mpq_numref (scaling_factor.val), scale_num.val);
   mpz_set (mpq_denref (scaling_factor.val), scale_denom.val);
   mpq_canonicalize (scaling_factor.val);
+}
+
+/* The gnat-encoding suffix for fixed point.  */
+
+#define GNAT_FIXED_POINT_SUFFIX "___XF_"
+
+/* If NAME encodes an Ada fixed-point type, return a pointer to the
+   "XF" suffix of the name.  The text after this is what encodes the
+   'small and 'delta information.  Otherwise, return nullptr.  */
+
+static const char *
+gnat_encoded_fixed_point_type_info (const char *name)
+{
+  return strstr (name, GNAT_FIXED_POINT_SUFFIX);
 }
 
 /* Allocate a floating-point type of size BITS and name NAME.  Pass NAME_HINT
@@ -18674,18 +18759,36 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	 of fixed point types for which GNAT is unable to provide
 	 the scaling factor via the standard DWARF mechanisms, and
 	 for which the info is provided via the GNAT encodings instead.
-	 This is likely what this DIE is about.
-
-	 Ideally, GNAT should be declaring this type the same way
-	 it declares other fixed point types when using the legacy
-	 GNAT encoding, which is to use a simple signed or unsigned
-	 base type.  A report to the GNAT team has been created to
-	 look into it.  In the meantime, pretend this type is a simple
-	 signed or unsigned integral, rather than a fixed point type,
-	 to avoid any confusion later on as to how to process this type.  */
+	 This is likely what this DIE is about.  */
       encoding = (encoding == DW_ATE_signed_fixed
 		  ? DW_ATE_signed
 		  : DW_ATE_unsigned);
+    }
+
+  /* With GNAT encodings, fixed-point information will be encoded in
+     the type name.  Note that this can also occur with the above
+     zero-over-zero case, which is why this is a separate "if" rather
+     than an "else if".  */
+  const char *gnat_encoding_suffix = nullptr;
+  if ((encoding == DW_ATE_signed || encoding == DW_ATE_unsigned)
+      && cu->language == language_ada
+      && name != nullptr)
+    {
+      gnat_encoding_suffix = gnat_encoded_fixed_point_type_info (name);
+      if (gnat_encoding_suffix != nullptr)
+	{
+	  gdb_assert (startswith (gnat_encoding_suffix,
+				  GNAT_FIXED_POINT_SUFFIX));
+	  name = obstack_strndup (&cu->per_objfile->objfile->objfile_obstack,
+				  name, gnat_encoding_suffix - name);
+	  /* Use -1 here so that SUFFIX points at the "_" after the
+	     "XF".  */
+	  gnat_encoding_suffix += strlen (GNAT_FIXED_POINT_SUFFIX) - 1;
+
+	  encoding = (encoding == DW_ATE_signed
+		      ? DW_ATE_signed_fixed
+		      : DW_ATE_unsigned_fixed);
+	}
     }
 
   switch (encoding)
@@ -18766,11 +18869,11 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	break;
       case DW_ATE_signed_fixed:
 	type = init_fixed_point_type (objfile, bits, 0, name);
-	finish_fixed_point_type (type, die, cu);
+	finish_fixed_point_type (type, gnat_encoding_suffix, die, cu);
 	break;
       case DW_ATE_unsigned_fixed:
 	type = init_fixed_point_type (objfile, bits, 1, name);
-	finish_fixed_point_type (type, die, cu);
+	finish_fixed_point_type (type, gnat_encoding_suffix, die, cu);
 	break;
 
       default:
