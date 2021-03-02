@@ -1134,7 +1134,12 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
 	  goto err_inputs;
 	}
       if (!ctf_assert (fp, noutputs == 1))
-	goto err_inputs_outputs;
+	{
+	  size_t j;
+	  for (j = 1; j < noutputs; j++)
+	    ctf_dict_close (outputs[j]);
+	  goto err_inputs_outputs;
+	}
 
       if (!(fp->ctf_link_flags & CTF_LINK_OMIT_VARIABLES_SECTION)
 	  && ctf_link_deduplicating_variables (out, inputs, ninputs, 1) < 0)
@@ -1263,7 +1268,11 @@ ctf_link_deduplicating (ctf_dict_t *fp)
     }
 
   if (!ctf_assert (fp, outputs[0] == fp))
-    goto err;
+    {
+      for (i = 1; i < noutputs; i++)
+	ctf_dict_close (outputs[i]);
+      goto err;
+    }
 
   for (i = 0; i < noutputs; i++)
     {

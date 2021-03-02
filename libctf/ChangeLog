@@ -1,5 +1,15 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dedup.c (ctf_dedup): Pass on errors from ctf_dedup_hash_type.
+	Call ctf_dedup_fini properly on other errors.
+	(ctf_dedup_emit_type): Set the errno on dynhash insertion failure.
+	* ctf-link.c (ctf_link_deduplicating_per_cu): Close outputs beyond
+	output 0 when asserting because >1 output is found.
+	(ctf_link_deduplicating): Likewise, when asserting because the
+	shared output is not the same as the passed-in fp.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dict_t) <ctf_link_type_mapping>: No longer used
 	by the nondeduplicating linker.
 	(ctf_add_type_mapping): Removed, now static.

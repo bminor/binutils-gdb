@@ -1924,15 +1924,17 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
       while ((id = ctf_type_next (inputs[i], &it, NULL, 1)) != CTF_ERR)
 	{
-	  ctf_dedup_hash_type (output, inputs[i], inputs, parents,
-			       i, id, 0, 0, ctf_dedup_populate_mappings);
+	  if (ctf_dedup_hash_type (output, inputs[i], inputs,
+				   parents, i, id, 0, 0,
+				   ctf_dedup_populate_mappings) == NULL)
+	    goto err;				/* errno is set for us.  */
 	}
       if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
 	{
 	  ctf_set_errno (output, ctf_errno (inputs[i]));
 	  ctf_err_warn (output, 0, 0, _("iteration failure "
 					"computing type hashes"));
-	  return -1;
+	  goto err;
 	}
     }
 
@@ -1943,7 +1945,7 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
 
   ctf_dprintf ("Detecting type name ambiguity\n");
   if (ctf_dedup_detect_name_ambiguity (output, inputs) < 0)
-    return -1;					/* errno is set for us.  */
+      goto err;					/* errno is set for us.  */
 
   /* If the link mode is CTF_LINK_SHARE_DUPLICATED, we change any unconflicting
      types whose output mapping references only one input dict into a
@@ -1953,7 +1955,7 @@ ctf_dedup (ctf_dict_t *output, ctf_dict_t **inputs, uint32_t ninputs,
     {
       ctf_dprintf ("Conflictifying unshared types\n");
       if (ctf_dedup_conflictify_unshared (output, inputs) < 0)
-	return -1;				/* errno is set for us.  */
+	goto err;				/* errno is set for us.  */
     }
   return 0;
 
@@ -2882,7 +2884,10 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 		     id, out_id);
 	/* Record the need to emit the members of this structure later.  */
 	if (ctf_dynhash_insert (d->cd_emission_struct_members, id, out_id) < 0)
-	  goto err_target;
+	  {
+	    ctf_set_errno (target, errno);
+	    goto err_target;
+	  }
 	break;
       }
     default:
