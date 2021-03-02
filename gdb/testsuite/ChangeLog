@@ -1,5 +1,14 @@
 2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-prettyprint.c (struct container): Add 'is_array_p'
+	member.
+	(make_container): Initialise is_array_p.
+	* gdb.python/py-prettyprint.exp: Add new tests.
+	* gdb.python/py-prettyprint.py (ContainerPrinter.display_hint):
+	Check is_array_p and possibly return 'array'.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.cp/breakpoint.exp: Extend test names to make them unique.
 	* gdb.cp/casts.exp: Give tests unique names.
 	* gdb.cp/filename.exp: Likewise.

@@ -57,8 +57,13 @@ class ContainerPrinter (object):
         return _iterator(self.val['elements'], self.val['len'])
 
     def display_hint (self):
+        if (self.val['is_map_p'] and self.val['is_array_p']):
+            raise Exception ("invalid object state found in display_hint")
+
         if (self.val['is_map_p']):
             return 'map'
+        elif (self.val['is_array_p']):
+            return 'array'
         else:
             return None
 
