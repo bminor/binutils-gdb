@@ -1,5 +1,11 @@
 2021-03-02  Alan Modra  <amodra@gmail.com>
 
+	PR 27451
+	* elf64-ppc.c (ppc64_elf_gc_mark_dynamic_ref): Ignore synthesized
+	linker defined start/stop symbols when start_stop_gc.
+
+2021-03-02  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't optimise got
 	indirect to pc-relative or toc-relative for undefined symbols.
 

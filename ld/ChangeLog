@@ -1,5 +1,12 @@
 2021-03-02  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/startstop.d,
+	* testsuite/ld-powerpc/startstop.r,
+	* testsuite/ld-powerpc/startstop.s: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run it.
+
+2021-03-02  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/weak1.d,
 	* testsuite/ld-powerpc/weak1.r,
 	* testsuite/ld-powerpc/weak1.s,
