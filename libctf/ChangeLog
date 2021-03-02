@@ -1,5 +1,9 @@
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_dump_format_type): Fix signed/unsigned confusion.
+
+2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dedup.c (ctf_dedup): Pass on errors from ctf_dedup_hash_type.
 	Call ctf_dedup_fini properly on other errors.
 	(ctf_dedup_emit_type): Set the errno on dynhash insertion failure.

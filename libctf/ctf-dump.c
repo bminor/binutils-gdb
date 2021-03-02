@@ -144,7 +144,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 
       if (ctf_type_encoding (fp, id, &ep) == 0)
 	{
-	  if (ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
+	  if ((ssize_t) ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
 	      && flag & CTF_FT_BITFIELD)
 	    {
 	      if (asprintf (&bit, ":%i", ep.cte_bits) < 0)
@@ -154,7 +154,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	      bit = NULL;
 	    }
 
-	  if (ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
+	  if ((ssize_t) ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
 	      || ep.cte_offset != 0)
 	    {
 	      const char *slice = "";
