@@ -475,29 +475,6 @@ add_angle_brackets (const char *str)
   return string_printf ("<%s>", str);
 }
 
-/* Assuming V points to an array of S objects,  make sure that it contains at
-   least M objects, updating V and S as necessary.  */
-
-#define GROW_VECT(v, s, m)                                    \
-   if ((s) < (m)) (v) = (char *) grow_vect (v, &(s), m, sizeof *(v));
-
-/* Assuming VECT points to an array of *SIZE objects of size
-   ELEMENT_SIZE, grow it to contain at least MIN_SIZE objects,
-   updating *SIZE as necessary and returning the (new) array.  */
-
-static void *
-grow_vect (void *vect, size_t *size, size_t min_size, int element_size)
-{
-  if (*size < min_size)
-    {
-      *size *= 2;
-      if (*size < min_size)
-	*size = min_size;
-      vect = xrealloc (vect, *size * element_size);
-    }
-  return vect;
-}
-
 /* True (non-zero) iff TARGET matches FIELD_NAME up to any trailing
    suffix of FIELD_NAME beginning "___".  */
 
@@ -961,30 +938,21 @@ ada_encode (const char *decoded)
    quotes, unfolded, but with the quotes stripped away.  Result good
    to next call.  */
 
-static char *
+static const char *
 ada_fold_name (gdb::string_view name)
 {
-  static char *fold_buffer = NULL;
-  static size_t fold_buffer_size = 0;
-
-  int len = name.size ();
-  GROW_VECT (fold_buffer, fold_buffer_size, len + 1);
+  static std::string fold_storage;
 
   if (!name.empty () && name[0] == '\'')
-    {
-      strncpy (fold_buffer, name.data () + 1, len - 2);
-      fold_buffer[len - 2] = '\000';
-    }
+    fold_storage = to_string (name.substr (1, name.size () - 2));
   else
     {
-      int i;
-
-      for (i = 0; i < len; i += 1)
-	fold_buffer[i] = tolower (name[i]);
-      fold_buffer[i] = '\0';
+      fold_storage = to_string (name);
+      for (int i = 0; i < name.size (); i += 1)
+	fold_storage[i] = tolower (fold_storage[i]);
     }
 
-  return fold_buffer;
+  return fold_storage.c_str ();
 }
 
 /* Return nonzero if C is either a digit or a lowercase alphabet character.  */
@@ -6695,8 +6663,7 @@ ada_is_others_clause (struct type *type, int field_num)
 const char *
 ada_variant_discrim_name (struct type *type0)
 {
-  static char *result = NULL;
-  static size_t result_len = 0;
+  static std::string result;
   struct type *type;
   const char *name;
   const char *discrim_end;
@@ -6732,10 +6699,8 @@ ada_variant_discrim_name (struct type *type0)
 	break;
     }
 
-  GROW_VECT (result, result_len, discrim_end - discrim_start + 1);
-  strncpy (result, discrim_start, discrim_end - discrim_start);
-  result[discrim_end - discrim_start] = '\0';
-  return result;
+  result = std::string (discrim_start, discrim_end - discrim_start);
+  return result.c_str ();
 }
 
 /* Scan STR for a subtype-encoded number, beginning at position K.
@@ -9048,8 +9013,7 @@ ada_aligned_value_addr (struct type *type, const gdb_byte *valaddr)
 const char *
 ada_enum_name (const char *name)
 {
-  static char *result;
-  static size_t result_len = 0;
+  static std::string storage;
   const char *tmp;
 
   /* First, unqualify the enumeration name:
@@ -9088,22 +9052,20 @@ ada_enum_name (const char *name)
 		|| (name[1] >= 'a' && name[1] <= 'z'))
 	       && name[2] == '\0')
 	{
-	  GROW_VECT (result, result_len, 4);
-	  xsnprintf (result, result_len, "'%c'", name[1]);
-	  return result;
+	  storage = string_printf ("'%c'", name[1]);
+	  return storage.c_str ();
 	}
       else
 	return name;
 
-      GROW_VECT (result, result_len, 16);
       if (isascii (v) && isprint (v))
-	xsnprintf (result, result_len, "'%c'", v);
+	storage = string_printf ("'%c'", v);
       else if (name[1] == 'U')
-	xsnprintf (result, result_len, "[\"%02x\"]", v);
+	storage = string_printf ("[\"%02x\"]", v);
       else
-	xsnprintf (result, result_len, "[\"%04x\"]", v);
+	storage = string_printf ("[\"%04x\"]", v);
 
-      return result;
+      return storage.c_str ();
     }
   else
     {
@@ -9112,10 +9074,8 @@ ada_enum_name (const char *name)
 	tmp = strstr (name, "$");
       if (tmp != NULL)
 	{
-	  GROW_VECT (result, result_len, tmp - name + 1);
-	  strncpy (result, name, tmp - name);
-	  result[tmp - name] = '\0';
-	  return result;
+	  storage = std::string (name, tmp - name);
+	  return storage.c_str ();
 	}
 
       return name;
@@ -11204,8 +11164,7 @@ static int
 scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
 		    int *pnew_k)
 {
-  static char *bound_buffer = NULL;
-  static size_t bound_buffer_len = 0;
+  static std::string storage;
   const char *pstart, *pend, *bound;
   struct value *bound_val;
 
@@ -11224,11 +11183,8 @@ scan_discrim_bound (const char *str, int k, struct value *dval, LONGEST * px,
       int len = pend - pstart;
 
       /* Strip __ and beyond.  */
-      GROW_VECT (bound_buffer, bound_buffer_len, len + 1);
-      strncpy (bound_buffer, pstart, len);
-      bound_buffer[len] = '\0';
-
-      bound = bound_buffer;
+      storage = std::string (pstart, len);
+      bound = storage.c_str ();
       k = pend - str;
     }
 
@@ -11325,17 +11281,11 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
     }
   else
     {
-      static char *name_buf = NULL;
-      static size_t name_len = 0;
       int prefix_len = subtype_info - name;
       LONGEST L, U;
       struct type *type;
       const char *bounds_str;
       int n;
-
-      GROW_VECT (name_buf, name_len, prefix_len + 5);
-      strncpy (name_buf, name, prefix_len);
-      name_buf[prefix_len] = '\0';
 
       subtype_info += 5;
       bounds_str = strchr (subtype_info, '_');
@@ -11354,8 +11304,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 	}
       else
 	{
-	  strcpy (name_buf + prefix_len, "___L");
-	  if (!get_int_var_value (name_buf, L))
+	  std::string name_buf = std::string (name, prefix_len) + "___L";
+	  if (!get_int_var_value (name_buf.c_str (), L))
 	    {
 	      lim_warning (_("Unknown lower bound, using 1."));
 	      L = 1;
@@ -11370,8 +11320,8 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
 	}
       else
 	{
-	  strcpy (name_buf + prefix_len, "___U");
-	  if (!get_int_var_value (name_buf, U))
+	  std::string name_buf = std::string (name, prefix_len) + "___U";
+	  if (!get_int_var_value (name_buf.c_str (), U))
 	    {
 	      lim_warning (_("Unknown upper bound, using %ld."), (long) L);
 	      U = L;

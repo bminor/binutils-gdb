@@ -1,5 +1,13 @@
 2021-03-02  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_fold_name, ada_variant_discrim_name)
+	(ada_enum_name, scan_discrim_bound, to_fixed_range_type): Use
+	std::string.
+	(GROW_VECT): Remove.
+	(grow_vect): Remove.
+
+2021-03-02  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.h (ada_lookup_symbol_list): Return a vector.
 	* ada-lang.c (resolve_subexp): Update.
 	(ada_resolve_function): Accept a vector.
