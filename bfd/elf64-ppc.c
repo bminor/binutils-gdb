@@ -16071,6 +16071,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x8000 < 0x10000
+	      && sec != NULL
+	      && sec->output_section != NULL
+	      && !discarded_section (sec)
 	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
@@ -16091,6 +16094,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x80008000ULL < 0x100000000ULL
+	      && sec != NULL
+	      && sec->output_section != NULL
+	      && !discarded_section (sec)
 	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
@@ -16119,6 +16125,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  + input_section->output_section->vma
 		  + input_section->output_offset);
 	  if (!(relocation - from + (1ULL << 33) < 1ULL << 34
+		&& sec != NULL
+		&& sec->output_section != NULL
+		&& !discarded_section (sec)
 		&& (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf))))
 	    break;
 

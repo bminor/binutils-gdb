@@ -1,3 +1,12 @@
+2021-03-02  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/weak1.d,
+	* testsuite/ld-powerpc/weak1.r,
+	* testsuite/ld-powerpc/weak1.s,
+	* testsuite/ld-powerpc/weak1so.d,
+	* testsuite/ld-powerpc/weak1so.r: New tests.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
 2021-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27358
