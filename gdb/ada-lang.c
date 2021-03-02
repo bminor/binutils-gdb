@@ -283,13 +283,11 @@ struct cache_entry
 struct ada_symbol_cache
 {
   /* An obstack used to store the entries in our cache.  */
-  struct obstack cache_space;
+  struct auto_obstack cache_space;
 
   /* The root of the hash table used to implement our symbol cache.  */
-  struct cache_entry *root[HASH_SIZE];
+  struct cache_entry *root[HASH_SIZE] {};
 };
-
-static void ada_free_symbol_cache (struct ada_symbol_cache *sym_cache);
 
 /* Maximum-sized dynamic type.  */
 static unsigned int varsize_limit;
@@ -385,14 +383,8 @@ ada_inferior_exit (struct inferior *inf)
 /* This module's per-program-space data.  */
 struct ada_pspace_data
 {
-  ~ada_pspace_data ()
-  {
-    if (sym_cache != NULL)
-      ada_free_symbol_cache (sym_cache);
-  }
-
   /* The Ada symbol cache.  */
-  struct ada_symbol_cache *sym_cache = nullptr;
+  std::unique_ptr<ada_symbol_cache> sym_cache;
 };
 
 /* Key to our per-program-space data.  */
@@ -4604,24 +4596,6 @@ make_array_descriptor (struct type *type, struct value *arr)
    even in this case, some expensive name-based symbol searches are still
    sometimes necessary - to find an XVZ variable, mostly.  */
 
-/* Initialize the contents of SYM_CACHE.  */
-
-static void
-ada_init_symbol_cache (struct ada_symbol_cache *sym_cache)
-{
-  obstack_init (&sym_cache->cache_space);
-  memset (sym_cache->root, '\000', sizeof (sym_cache->root));
-}
-
-/* Free the memory used by SYM_CACHE.  */
-
-static void
-ada_free_symbol_cache (struct ada_symbol_cache *sym_cache)
-{
-  obstack_free (&sym_cache->cache_space, NULL);
-  xfree (sym_cache);
-}
-
 /* Return the symbol cache associated to the given program space PSPACE.
    If not allocated for this PSPACE yet, allocate and initialize one.  */
 
@@ -4630,25 +4604,22 @@ ada_get_symbol_cache (struct program_space *pspace)
 {
   struct ada_pspace_data *pspace_data = get_ada_pspace_data (pspace);
 
-  if (pspace_data->sym_cache == NULL)
-    {
-      pspace_data->sym_cache = XCNEW (struct ada_symbol_cache);
-      ada_init_symbol_cache (pspace_data->sym_cache);
-    }
+  if (pspace_data->sym_cache == nullptr)
+    pspace_data->sym_cache.reset (new ada_symbol_cache);
 
-  return pspace_data->sym_cache;
+  return pspace_data->sym_cache.get ();
 }
 
 /* Clear all entries from the symbol cache.  */
 
 static void
-ada_clear_symbol_cache (void)
+ada_clear_symbol_cache ()
 {
-  struct ada_symbol_cache *sym_cache
-    = ada_get_symbol_cache (current_program_space);
+  struct ada_pspace_data *pspace_data
+    = get_ada_pspace_data (current_program_space);
 
-  obstack_free (&sym_cache->cache_space, NULL);
-  ada_init_symbol_cache (sym_cache);
+  if (pspace_data->sym_cache != nullptr)
+    pspace_data->sym_cache.reset ();
 }
 
 /* Search our cache for an entry matching NAME and DOMAIN.

@@ -1,5 +1,16 @@
 2021-03-02  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (struct ada_symbol_cache) <cache_space>: Now an
+	auto_obstack.
+	<root>: Initialize.
+	(ada_pspace_data): Remove destructor.
+	<sym_cache>: Now a unique_ptr.
+	(ada_init_symbol_cache, ada_free_symbol_cache): Remove.
+	(ada_get_symbol_cache): Use 'new'.
+	(ada_clear_symbol_cache): Rewrite.
+
+2021-03-02  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (add_nonlocal_symbols): Handle case where objfile->sf
 	is null.
 
