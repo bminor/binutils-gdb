@@ -3660,41 +3660,40 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 	    ada_lookup_symbol_list (exp->elts[pc + 2].symbol->linkage_name (),
 				    exp->elts[pc + 1].block, VAR_DOMAIN,
 				    &candidates);
+	  /* Paranoia.  */
+	  candidates.resize (n_candidates);
 
-	  if (n_candidates > 1)
+	  if (std::any_of (candidates.begin (),
+			   candidates.end (),
+			   [] (block_symbol &sym)
+			   {
+			     switch (SYMBOL_CLASS (sym.symbol))
+			       {
+			       case LOC_REGISTER:
+			       case LOC_ARG:
+			       case LOC_REF_ARG:
+			       case LOC_REGPARM_ADDR:
+			       case LOC_LOCAL:
+			       case LOC_COMPUTED:
+				 return true;
+			       default:
+				 return false;
+			       }
+			   }))
 	    {
 	      /* Types tend to get re-introduced locally, so if there
 		 are any local symbols that are not types, first filter
 		 out all types.  */
-	      int j;
-	      for (j = 0; j < n_candidates; j += 1)
-		switch (SYMBOL_CLASS (candidates[j].symbol))
+	      candidates.erase
+		(std::remove_if
+		 (candidates.begin (),
+		  candidates.end (),
+		  [] (block_symbol &sym)
 		  {
-		  case LOC_REGISTER:
-		  case LOC_ARG:
-		  case LOC_REF_ARG:
-		  case LOC_REGPARM_ADDR:
-		  case LOC_LOCAL:
-		  case LOC_COMPUTED:
-		    goto FoundNonType;
-		  default:
-		    break;
-		  }
-	    FoundNonType:
-	      if (j < n_candidates)
-		{
-		  j = 0;
-		  while (j < n_candidates)
-		    {
-		      if (SYMBOL_CLASS (candidates[j].symbol) == LOC_TYPEDEF)
-			{
-			  candidates[j] = candidates[n_candidates - 1];
-			  n_candidates -= 1;
-			}
-		      else
-			j += 1;
-		    }
-		}
+		    return SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF;
+		  }),
+		 candidates.end ());
+	      n_candidates = candidates.size ();
 	    }
 
 	  if (n_candidates == 0)

@@ -1,5 +1,9 @@
 2021-03-02  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (resolve_subexp): Use any_of and erase-remove idiom.
+
+2021-03-02  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (struct ada_symbol_cache) <cache_space>: Now an
 	auto_obstack.
 	<root>: Initialize.
