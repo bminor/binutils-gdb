@@ -1,3 +1,7 @@
+2021-03-02  Tom Tromey  <tom@tromey.com>
+
+	* Import readline 8.1.
+
 2020-06-30  Tom Tromey  <tom@tromey.com>
 
 	* README: Update instructions.
