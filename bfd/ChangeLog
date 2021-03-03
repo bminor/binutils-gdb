@@ -1,3 +1,7 @@
+2021-03-04  Alan Modra  <amodra@gmail.com>
+
+	* rs6000-core.c (rs6000coff_core_p): Correct prototype.
+
 2021-03-03  Alan Modra  <amodra@gmail.com>
 
 	PR 27500

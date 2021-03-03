@@ -277,7 +277,7 @@ typedef union
 /* Define prototypes for certain functions, to avoid a compiler warning
    saying that they are missing.  */
 
-const bfd_cleanup rs6000coff_core_p (bfd *abfd);
+bfd_cleanup rs6000coff_core_p (bfd *abfd);
 bfd_boolean rs6000coff_core_file_matches_executable_p (bfd *core_bfd,
 						       bfd *exec_bfd);
 char * rs6000coff_core_file_failing_command (bfd *abfd);
