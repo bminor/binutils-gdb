@@ -3903,7 +3903,7 @@ return_match (struct type *func_type, struct type *context_type)
 }
 
 
-/* Returns the index in SYMS[0..NSYMS-1] that contains  the symbol for the
+/* Returns the index in SYMS that contains the symbol for the
    function (if any) that matches the types of the NARGS arguments in
    ARGS.  If CONTEXT_TYPE is non-null and there is at least one match
    that returns that type, then eliminate matches that don't.  If
@@ -4684,7 +4684,7 @@ standard_lookup (const char *name, const struct block *block,
 
 
 /* Non-zero iff there is at least one non-function/non-enumeral symbol
-   in the symbol fields of SYMS[0..N-1].  We treat enumerals as functions, 
+   in the symbol fields of SYMS.  We treat enumerals as functions, 
    since they contend in overloading in the same way.  */
 static int
 is_nonfunction (const std::vector<struct block_symbol> &syms)
@@ -4838,7 +4838,7 @@ ada_lookup_simple_minsym (const char *name)
 
 /* For all subprograms that statically enclose the subprogram of the
    selected frame, add symbols matching identifier NAME in DOMAIN
-   and their blocks to the list of data in OBSTACKP, as for
+   and their blocks to the list of data in RESULT, as for
    ada_add_block_symbols (q.v.).   If WILD_MATCH_P, treat as NAME
    with a wildcard prefix.  */
 
@@ -4966,8 +4966,7 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
    duplicate other symbols in the list (The only case I know of where
    this happens is when object files containing stabs-in-ecoff are
    linked with files containing ordinary ecoff debugging symbols (or no
-   debugging symbols)).  Modifies SYMS to squeeze out deleted entries.
-   Returns the number of items in the modified list.  */
+   debugging symbols)).  Modifies SYMS to squeeze out deleted entries.  */
 
 static void
 remove_extra_symbols (std::vector<struct block_symbol> *syms)
@@ -5291,15 +5290,21 @@ ada_add_local_symbols (std::vector<struct block_symbol> &result,
 
 struct match_data
 {
-  struct objfile *objfile;
+  explicit match_data (std::vector<struct block_symbol> *rp)
+    : resultp (rp)
+  {
+  }
+  DISABLE_COPY_AND_ASSIGN (match_data);
+
+  struct objfile *objfile = nullptr;
   std::vector<struct block_symbol> *resultp;
-  struct symbol *arg_sym;
-  int found_sym;
+  struct symbol *arg_sym = nullptr;
+  int found_sym = 0;
 };
 
 /* A callback for add_nonlocal_symbols that adds symbol, found in BSYM,
    to a list of symbols.  DATA is a pointer to a struct match_data *
-   containing the obstack that collects the symbol list, the file that SYM
+   containing the vector that collects the symbol list, the file that SYM
    must come from, a flag indicating whether a non-argument symbol has
    been found in the current block, and the last argument symbol
    passed in SYM within the current block (if any).  When SYM is null,
@@ -5341,7 +5346,7 @@ aux_add_nonlocal_symbols (struct block_symbol *bsym,
 
 /* Helper for add_nonlocal_symbols.  Find symbols in DOMAIN which are
    targeted by renamings matching LOOKUP_NAME in BLOCK.  Add these
-   symbols to OBSTACKP.  Return whether we found such symbols.  */
+   symbols to RESULT.  Return whether we found such symbols.  */
 
 static int
 ada_add_block_renamings (std::vector<struct block_symbol> &result,
@@ -5490,7 +5495,7 @@ ada_lookup_name (const lookup_name_info &lookup_name)
   return lookup_name.ada ().lookup_name ().c_str ();
 }
 
-/* Add to OBSTACKP all non-local symbols whose name and domain match
+/* Add to RESULT all non-local symbols whose name and domain match
    LOOKUP_NAME and DOMAIN respectively.  The search is performed on
    GLOBAL_BLOCK symbols if GLOBAL is non-zero, or on STATIC_BLOCK
    symbols otherwise.  */
@@ -5500,10 +5505,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 		      const lookup_name_info &lookup_name,
 		      domain_enum domain, int global)
 {
-  struct match_data data;
-
-  memset (&data, 0, sizeof data);
-  data.resultp = &result;
+  struct match_data data (&result);
 
   bool is_wild_match = lookup_name.ada ().wild_match_p ();
 
@@ -5552,7 +5554,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 
 /* Find symbols in DOMAIN matching LOOKUP_NAME, in BLOCK and, if
    FULL_SEARCH is non-zero, enclosing scope and in global scopes,
-   returning the number of matches.  Add these to OBSTACKP.
+   returning the number of matches.  Add these to RESULT.
 
    When FULL_SEARCH is non-zero, any non-function/non-enumeral
    symbol match within the nest of blocks whose innermost member is BLOCK,

@@ -1297,7 +1297,7 @@ write_var_or_type (struct parser_state *par_state,
 	      write_selectors (par_state, encoded_name + tail_index);
 	      return NULL;
 	    }
-	  else if (syms.empty ()) 
+	  else if (syms.empty ())
 	    {
 	      struct bound_minimal_symbol msym
 		= ada_lookup_simple_minsym (encoded_name);

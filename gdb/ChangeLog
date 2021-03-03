@@ -1,3 +1,15 @@
+2021-03-03  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_resolve_function): Update comment.
+	(is_nonfunction, add_symbols_from_enclosing_procs)
+	(remove_extra_symbols): Likewise.
+	(struct match_data): Add constructor, initializers.
+	(add_nonlocal_symbols): Remove memset.
+	(aux_add_nonlocal_symbols): Update comment.
+	(ada_add_block_renamings, add_nonlocal_symbols)
+	(ada_add_all_symbols): Likewise.
+	* ada-exp.y (write_var_or_type): Clean up trailing whitespace.
+
 2021-03-02  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (cast_from_gnat_encoded_fixed_point_type)
