@@ -1,3 +1,9 @@
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
+	PR 27493
+	* objcopy.c (filter_symbols): Apply --weaken to undefined symbols.
+	* NEWS: Mention feature.
+
 2021-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/27486

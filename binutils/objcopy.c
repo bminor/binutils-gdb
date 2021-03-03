@@ -1673,7 +1673,8 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       if (keep)
 	{
-	  if ((flags & BSF_GLOBAL) != 0
+	  if (((flags & BSF_GLOBAL) != 0
+	       || undefined)
 	      && (weaken || is_specified_symbol (name, weaken_specific_htab)))
 	    {
 	      sym->flags &= ~ BSF_GLOBAL;

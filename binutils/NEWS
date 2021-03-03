@@ -1,5 +1,8 @@
 -*- text -*-
 
+* objcopy --weaken, --weaken-symbol and --weaken-symbols now make undefined
+  symbols weak on targets that support weak symbols.
+
 * Readelf and objdump can now display and use the contents of .debug_sup
   sections.
 
