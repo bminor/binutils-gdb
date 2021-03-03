@@ -1,3 +1,16 @@
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-gc/gc.exp: Define UNDERSCORE in ASFLAGS.
+	Move tests with ELF section directives to is_elf_format block.
+	* testsuite/ld-gc/abi-note.d: Run on more targets.
+	* testsuite/ld-gc/pr19167.d: Likewise and adjust xfails.
+	* testsuite/ld-gc/start.d: Likewise.
+	* testsuite/ld-gc/start2.d: Likewise.
+	* testsuite/ld-gc/stop.d: Likewise.
+	* testsuite/ld-gc/pr19167a.s: Add support for underscore targets.
+	* testsuite/ld-gc/start.s: Likewise.
+	* testsuite/ld-gc/start2.s: Likewise.
+
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ldelfgen.c (ldelf_ctf_strtab_iter_cb): Skip zero-refcount strings.

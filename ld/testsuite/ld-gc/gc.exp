@@ -86,15 +86,21 @@ test_gc "Check --gc-section/-q" "gcrexe" $ld "--gc-sections -q -e main"
 test_gc "Check --gc-section/-r/-e" "gcrel" $ld "-r --gc-sections -e main"
 test_gc "Check --gc-section/-r/-u" "gcrel" $ld "-r --gc-sections -u used_func"
 
+set old_asflags $ASFLAGS
+if [is_underscore_target] {
+    set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
+}
+
 run_dump_test "noent"
-run_dump_test "abi-note"
-run_dump_test "start"
-run_dump_test "start2"
-run_dump_test "stop"
-run_dump_test "pr19167"
+
 if { [is_elf_format] } then {
+    run_dump_test "abi-note"
     run_dump_test "all-debug-sections"
+    run_dump_test "pr19167"
     run_dump_test "pr20882"
+    run_dump_test "stop"
+    run_dump_test "start"
+    run_dump_test "start2"
 }
 
 if { [is_elf_format] && [check_shared_lib_support] } then {
@@ -175,3 +181,5 @@ if { [is_elf_format] && [check_shared_lib_support] \
 if { [is_elf_format] } then {
     run_dump_test "skip-map-discarded"
 }
+
+set ASFLAGS $old_asflags
