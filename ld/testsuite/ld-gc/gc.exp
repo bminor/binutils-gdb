@@ -101,6 +101,8 @@ if { [is_elf_format] } then {
     run_dump_test "stop"
     run_dump_test "start"
     run_dump_test "start2"
+    run_dump_test "start3"
+    run_dump_test "start4"
 }
 
 if { [is_elf_format] && [check_shared_lib_support] } then {

@@ -13422,6 +13422,8 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
   if (r_symndx >= cookie->locsymcount
       || ELF_ST_BIND (cookie->locsyms[r_symndx].st_info) != STB_LOCAL)
     {
+      bfd_boolean was_marked;
+
       h = cookie->sym_hashes[r_symndx - cookie->extsymoff];
       if (h == NULL)
 	{
@@ -13432,6 +13434,8 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
       while (h->root.type == bfd_link_hash_indirect
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+      was_marked = h->mark;
       h->mark = 1;
       /* Keep all aliases of the symbol too.  If an object symbol
 	 needs to be copied into .dynbss then all of its aliases
@@ -13444,7 +13448,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	  hw->mark = 1;
 	}
 
-      if (h->start_stop && !h->root.ldscript_def)
+      if (!was_marked && h->start_stop && !h->root.ldscript_def)
 	{
 	  if (info->start_stop_gc)
 	    return NULL;
@@ -13455,7 +13459,7 @@ _bfd_elf_gc_mark_rsec (struct bfd_link_info *info, asection *sec,
 	  else if (start_stop != NULL)
 	    {
 	      asection *s = h->u2.start_stop_section;
-	      *start_stop = !s->gc_mark;
+	      *start_stop = TRUE;
 	      return s;
 	    }
 	}

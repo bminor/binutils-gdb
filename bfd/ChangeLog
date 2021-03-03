@@ -1,5 +1,12 @@
 2021-03-03  Alan Modra  <amodra@gmail.com>
 
+	PR 27500
+	* elflink.c (_bfd_elf_gc_mark_rsec): Do special start/stop
+	processing not when start/stop symbol section is unmarked but
+	on first time a start/stop symbol is processed.
+
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
 	* reloc.c: Include x86_64.h rather than internal.h.
 
 2021-03-02  Nick Clifton  <nickc@redhat.com>

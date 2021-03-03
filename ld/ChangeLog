@@ -1,5 +1,17 @@
 2021-03-03  Alan Modra  <amodra@gmail.com>
 
+	PR 27500
+	* ldlang.c (insert_undefined): Don't mark symbols here.
+	(lang_mark_undefineds): Do so here instead, new function.
+	(lang_process): Call lang_mark_undefineds.
+	* testsuite/ld-gc/start3.d,
+	* testsuite/ld-gc/start3.s: New test.
+	* testsuite/ld-gc/start4.d,
+	* testsuite/ld-gc/start4.s: New test.
+	* testsuite/ld-gc/gc.exp: Run them.
+
+2021-03-03  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-gc/gc.exp: Define UNDERSCORE in ASFLAGS.
 	Move tests with ELF section directives to is_elf_format block.
 	* testsuite/ld-gc/abi-note.d: Run on more targets.

@@ -3986,8 +3986,6 @@ insert_undefined (const char *name)
       h->type = bfd_link_hash_undefined;
       h->u.undef.abfd = NULL;
       h->non_ir_ref_regular = TRUE;
-      if (is_elf_hash_table (link_info.hash))
-	((struct elf_link_hash_entry *) h)->mark = 1;
       bfd_link_add_undef (link_info.hash, h);
     }
 }
@@ -4003,6 +4001,23 @@ lang_place_undefineds (void)
 
   for (ptr = ldlang_undef_chain_list_head; ptr != NULL; ptr = ptr->next)
     insert_undefined (ptr->name);
+}
+
+/* Mark -u symbols against garbage collection.  */
+
+static void
+lang_mark_undefineds (void)
+{
+  ldlang_undef_chain_list_type *ptr;
+
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour)
+    for (ptr = ldlang_undef_chain_list_head; ptr != NULL; ptr = ptr->next)
+      {
+	struct elf_link_hash_entry *h = (struct elf_link_hash_entry *)
+	  bfd_link_hash_lookup (link_info.hash, ptr->name, FALSE, FALSE, TRUE);
+	if (h != NULL)
+	  h->mark = 1;
+      }
 }
 
 /* Structure used to build the list of symbols that the user has required
@@ -8115,6 +8130,8 @@ lang_process (void)
 
   /* Remove unreferenced sections if asked to.  */
   lang_gc_sections ();
+
+  lang_mark_undefineds ();
 
   /* Check relocations.  */
   lang_check_relocs ();
