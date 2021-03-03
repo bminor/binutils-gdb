@@ -1359,11 +1359,8 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 		    char *last, int lineno)
 {
   unsigned int i;
-  char *operands, *base_opcode, *extension_opcode, *opcode_length;
+  char *base_opcode, *extension_opcode, *opcode_length;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
-
-  /* Find number of operands.  */
-  operands = next_field (str, ',', &str, last);
 
   /* Find base_opcode.  */
   base_opcode = next_field (str, ',', &str, last);
@@ -1385,46 +1382,36 @@ output_i386_opcode (FILE *table, const char *name, char *str,
   if (*str != '{')
     abort ();
   str = remove_leading_whitespaces (str + 1);
+  remove_trailing_whitespaces (str);
 
+  /* Remove } and trailing white space. */
   i = strlen (str);
-
-  /* There are at least "X}".  */
-  if (i < 2)
+  if (!i || str[i - 1] != '}')
     abort ();
+  str[--i] = '\0';
+  remove_trailing_whitespaces (str);
 
-  /* Remove trailing white spaces and }. */
-  do
+  if (!*str)
+    operand_types [i = 0] = NULL;
+  else
     {
-      i--;
-      if (ISSPACE (str[i]) || str[i] == '}')
-	str[i] = '\0';
-      else
-	break;
-    }
-  while (i != 0);
+      last = str + strlen (str);
 
-  last = str + i;
-
-  /* Find operand_types.  */
-  for (i = 0; i < ARRAY_SIZE (operand_types); i++)
-    {
-      if (str >= last)
+      /* Find operand_types.  */
+      for (i = 0; i < ARRAY_SIZE (operand_types); i++)
 	{
-	  operand_types [i] = NULL;
-	  break;
-	}
+	  if (str >= last)
+	    {
+	      operand_types [i] = NULL;
+	      break;
+	    }
 
-      operand_types [i] = next_field (str, ',', &str, last);
-      if (*operand_types[i] == '0')
-	{
-	  if (i != 0)
-	    operand_types[i] = NULL;
-	  break;
+	  operand_types [i] = next_field (str, ',', &str, last);
 	}
     }
 
-  fprintf (table, "  { \"%s\", %s, %s, %s, %s,\n",
-	   name, base_opcode, extension_opcode, opcode_length, operands);
+  fprintf (table, "  { \"%s\", %s, %s, %s, %u,\n",
+	   name, base_opcode, extension_opcode, opcode_length, i);
 
   process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
 
@@ -1469,7 +1456,7 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 
   for (i = 0; i < ARRAY_SIZE (operand_types); i++)
     {
-      if (operand_types[i] == NULL || *operand_types[i] == '0')
+      if (!operand_types[i])
 	{
 	  if (i == 0)
 	    process_i386_operand_type (table, "0", stage_opcodes, "\t  ",

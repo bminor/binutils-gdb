@@ -1,3 +1,10 @@
+2021-03-03  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (output_i386_opcode): Don't get operand count. Look
+	for {} instead of {0}. Don't look for '0'.
+	* i386-opc.tbl: Drop operand count field. Drop redundant operand
+	size specifiers.
+
 2021-02-19  Nelson Chu  <nelson.chu@sifive.com>
 
 	PR 27158
