@@ -75,14 +75,14 @@ coff_amd64_reloc (bfd *abfd,
 {
   symvalue diff;
 
-#if !defined(COFF_WITH_PE)
+#if !defined (COFF_WITH_PE)
   if (output_bfd == NULL)
     return bfd_reloc_continue;
 #endif
 
   if (bfd_is_com_section (symbol->section))
     {
-#if !defined(COFF_WITH_PE)
+#if !defined (COFF_WITH_PE)
       /* We are relocating a common symbol.  The current value in the
 	 object file is ORIG + OFFSET, where ORIG is the value of the
 	 common symbol as seen by the object file when it was compiled
@@ -106,21 +106,10 @@ coff_amd64_reloc (bfd *abfd,
 	 ignores the addend for a COFF target when producing
 	 relocatable output.  This seems to be always wrong for 386
 	 COFF, so we handle the addend here instead.  */
-#if defined(COFF_WITH_PE)
+#if defined (COFF_WITH_PE)
       if (output_bfd == NULL)
 	{
-	  reloc_howto_type *howto = reloc_entry->howto;
-
-	  /* Although PC relative relocations are very similar between
-	     PE and non-PE formats, but they are off by 1 << howto->size
-	     bytes. For the external relocation, PE is very different
-	     from others. See md_apply_fix3 () in gas/config/tc-amd64.c.
-	     When we link PE and non-PE object files together to
-	     generate a non-PE executable, we have to compensate it
-	     here.  */
-	  if(howto->pc_relative && howto->pcrel_offset)
-	    diff = -(1 << howto->size);
-	  else if(symbol->flags & BSF_WEAK)
+	  if (symbol->flags & BSF_WEAK)
 	    diff = reloc_entry->addend - symbol->value;
 	  else
 	    diff = -reloc_entry->addend;
@@ -130,7 +119,18 @@ coff_amd64_reloc (bfd *abfd,
 	diff = reloc_entry->addend;
     }
 
-#if defined(COFF_WITH_PE)
+#if defined (COFF_WITH_PE)
+  if (output_bfd == NULL)
+    {
+      /* PC relative relocations are off by their size.  */
+      if (reloc_entry->howto->pc_relative)
+	diff -= bfd_get_reloc_size (reloc_entry->howto);
+
+      if (reloc_entry->howto->type >= R_AMD64_PCRLONG_1
+	  && reloc_entry->howto->type <= R_AMD64_PCRLONG_5)
+	diff -= reloc_entry->howto->type - R_AMD64_PCRLONG;
+    }
+
   /* FIXME: How should this case be handled?  */
   if (reloc_entry->howto->type == R_AMD64_IMAGEBASE
       && output_bfd != NULL
