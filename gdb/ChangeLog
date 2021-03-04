@@ -1,3 +1,9 @@
+2021-03-04  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (struct match_data) <found_sym>: Now bool.
+	(aux_add_nonlocal_symbols): Update.
+	(ada_add_block_symbols): Change "found_sym" to bool.
+
 2021-03-03  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_resolve_function): Update comment.

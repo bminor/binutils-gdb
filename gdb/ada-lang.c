@@ -5299,7 +5299,7 @@ struct match_data
   struct objfile *objfile = nullptr;
   std::vector<struct block_symbol> *resultp;
   struct symbol *arg_sym = nullptr;
-  int found_sym = 0;
+  bool found_sym = false;
 };
 
 /* A callback for add_nonlocal_symbols that adds symbol, found in BSYM,
@@ -5324,7 +5324,7 @@ aux_add_nonlocal_symbols (struct block_symbol *bsym,
 	add_defn_to_vec (*data->resultp,
 			 fixup_symbol_section (data->arg_sym, data->objfile),
 			 block);
-      data->found_sym = 0;
+      data->found_sym = false;
       data->arg_sym = NULL;
     }
   else 
@@ -5335,7 +5335,7 @@ aux_add_nonlocal_symbols (struct block_symbol *bsym,
 	data->arg_sym = sym;
       else
 	{
-	  data->found_sym = 1;
+	  data->found_sym = true;
 	  add_defn_to_vec (*data->resultp,
 			   fixup_symbol_section (sym, data->objfile),
 			   block);
@@ -5531,7 +5531,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 
 	  if (ada_add_block_renamings (result, global_block, lookup_name,
 				       domain))
-	    data.found_sym = 1;
+	    data.found_sym = true;
 	}
     }
 
@@ -5998,11 +5998,11 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
   /* A matching argument symbol, if any.  */
   struct symbol *arg_sym;
   /* Set true when we find a matching non-argument symbol.  */
-  int found_sym;
+  bool found_sym;
   struct symbol *sym;
 
   arg_sym = NULL;
-  found_sym = 0;
+  found_sym = false;
   for (sym = block_iter_match_first (block, lookup_name, &iter);
        sym != NULL;
        sym = block_iter_match_next (lookup_name, &iter))
@@ -6015,7 +6015,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 		arg_sym = sym;
 	      else
 		{
-		  found_sym = 1;
+		  found_sym = true;
 		  add_defn_to_vec (result,
 				   fixup_symbol_section (sym, objfile),
 				   block);
@@ -6027,7 +6027,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
   /* Handle renamings.  */
 
   if (ada_add_block_renamings (result, block, lookup_name, domain))
-    found_sym = 1;
+    found_sym = true;
 
   if (!found_sym && arg_sym != NULL)
     {
@@ -6039,7 +6039,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
   if (!lookup_name.ada ().wild_match_p ())
     {
       arg_sym = NULL;
-      found_sym = 0;
+      found_sym = false;
       const std::string &ada_lookup_name = lookup_name.ada ().lookup_name ();
       const char *name = ada_lookup_name.c_str ();
       size_t name_len = ada_lookup_name.size ();
@@ -6069,7 +6069,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 		      arg_sym = sym;
 		    else
 		      {
-			found_sym = 1;
+			found_sym = true;
 			add_defn_to_vec (result,
 					 fixup_symbol_section (sym, objfile),
 					 block);
