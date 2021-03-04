@@ -1,5 +1,11 @@
 2021-03-04  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/ld-scripts/map-address.exp: Set image base to zero
+	for PE/COFF.
+	* testsuite/ld-scripts/map-address.t: Place .text.
+
+2021-03-04  Jan Beulich  <jbeulich@suse.com>
+
 	* ldexp.c (ldexp_is_final_sym_absolute): New.
 	* ldexp.h (ldexp_is_final_sym_absolute): Declare.
 	* pe-dll.c (generate_reloc): Skip absolute symbols.
