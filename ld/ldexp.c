@@ -1699,6 +1699,28 @@ ldexp_finalize_syms (void)
   bfd_hash_traverse (&definedness_table, set_sym_sections, NULL);
 }
 
+/* Determine whether a symbol is going to remain absolute even after
+   ldexp_finalize_syms() has run.  */
+
+bfd_boolean
+ldexp_is_final_sym_absolute (const struct bfd_link_hash_entry *h)
+{
+  if (h->type == bfd_link_hash_defined
+      && h->u.def.section == bfd_abs_section_ptr)
+    {
+      const struct definedness_hash_entry *def;
+
+      if (!h->ldscript_def)
+	return TRUE;
+
+      def = symbol_defined (h->root.string);
+      if (def != NULL)
+	return def->final_sec == bfd_abs_section_ptr;
+    }
+
+  return FALSE;
+}
+
 void
 ldexp_finish (void)
 {

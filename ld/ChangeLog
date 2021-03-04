@@ -1,3 +1,11 @@
+2021-03-04  Jan Beulich  <jbeulich@suse.com>
+
+	* ldexp.c (ldexp_is_final_sym_absolute): New.
+	* ldexp.h (ldexp_is_final_sym_absolute): Declare.
+	* pe-dll.c (generate_reloc): Skip absolute symbols.
+	* testsuite/ld-pe/reloc.s, testsuite/ld-pe/reloc.d: New.
+	* testsuite/ld-pe/pe.exp: Run new test.
+
 2021-03-03  Alan Modra  <amodra@gmail.com>
 
 	PR 27500

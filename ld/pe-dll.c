@@ -1579,13 +1579,13 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  && relocs[i]->howto->type != pe_details->imagebase_reloc)
 		{
 		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
+		  const struct bfd_link_hash_entry *blhe
+		    = bfd_wrapped_link_hash_lookup (abfd, info, sym->name,
+						    FALSE, FALSE, FALSE);
 
 		  /* Don't create relocs for undefined weak symbols.  */
 		  if (sym->flags == BSF_WEAK)
 		    {
-		      struct bfd_link_hash_entry *blhe
-			= bfd_wrapped_link_hash_lookup (abfd, info, sym->name,
-						FALSE, FALSE, FALSE);
 		      if (blhe && blhe->type == bfd_link_hash_undefweak)
 			{
 			  /* Check aux sym and see if it is defined or not. */
@@ -1617,6 +1617,12 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		      if (!strcmp (s->name, ".eh_frame"))
 			continue;
 		    }
+		  /* Nor for absolute symbols.  */
+		  else if (blhe && ldexp_is_final_sym_absolute (blhe)
+			   && (!blhe->linker_def
+			       || (strcmp (sym->name, "__image_base__")
+				   && strcmp (sym->name, U ("__ImageBase")))))
+		    continue;
 
 		  reloc_data[total_relocs].vma = sec_vma + relocs[i]->address;
 		  reloc_data[total_relocs].idx = total_relocs;

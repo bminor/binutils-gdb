@@ -239,6 +239,7 @@ bfd_vma exp_get_abs_int
   (etree_type *, int, char *);
 void ldexp_init (void);
 void ldexp_finalize_syms (void);
+bfd_boolean ldexp_is_final_sym_absolute (const struct bfd_link_hash_entry *);
 void ldexp_finish (void);
 
 #endif
