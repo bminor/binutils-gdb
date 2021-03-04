@@ -672,22 +672,31 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
   /* skip ROM */
   /* skip constRUCTOR */
   /* skip CONTENTS */
+#ifndef COFF_IMAGE_WITH_PE
+  /* I don't think any of the IMAGE_SCN_LNK_* flags set below should be set
+     when the output is PE. Only object files should have them, for the linker
+     to consume.  */
   if ((sec_flags & SEC_IS_COMMON) != 0)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
+#endif
   if ((sec_flags & SEC_DEBUGGING) != 0)
     styp_flags |= IMAGE_SCN_MEM_DISCARDABLE;
-  if ((sec_flags & SEC_EXCLUDE) != 0 && !is_dbg)
+  if ((sec_flags & (SEC_EXCLUDE | SEC_NEVER_LOAD)) != 0 && !is_dbg)
+#ifdef COFF_IMAGE_WITH_PE
+    styp_flags |= IMAGE_SCN_MEM_DISCARDABLE;
+#else
     styp_flags |= IMAGE_SCN_LNK_REMOVE;
-  if ((sec_flags & SEC_NEVER_LOAD) != 0 && !is_dbg)
-    styp_flags |= IMAGE_SCN_LNK_REMOVE;
+#endif
   /* skip IN_MEMORY */
   /* skip SORT */
+#ifndef COFF_IMAGE_WITH_PE
   if (sec_flags & SEC_LINK_ONCE)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
   if ((sec_flags
        & (SEC_LINK_DUPLICATES_DISCARD | SEC_LINK_DUPLICATES_SAME_CONTENTS
 	  | SEC_LINK_DUPLICATES_SAME_SIZE)) != 0)
     styp_flags |= IMAGE_SCN_LNK_COMDAT;
+#endif
 
   /* skip LINKER_CREATED */
 

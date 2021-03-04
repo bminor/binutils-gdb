@@ -1,3 +1,8 @@
+2021-03-04  Jan Beulich  <jbeulich@suse.com>
+
+	* coffcode.h (sec_to_styp_flags): Don't set IMAGE_SCN_LNK_* in
+	final PE images.
+
 2021-03-04  Alan Modra  <amodra@gmail.com>
 
 	* rs6000-core.c (rs6000coff_core_p): Correct prototype.
