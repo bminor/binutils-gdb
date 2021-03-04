@@ -1,3 +1,21 @@
+2021-03-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27147
+	* sparc-nat.h (sparc_fetch_inferior_registers): Add
+	process_stratum_target parameter,
+	sparc_store_inferior_registers): update callers.
+	* sparc-nat.c (sparc_fetch_inferior_registers,
+	sparc_store_inferior_registers): Add process_stratum_target
+	parameter.  Switch current thread before calling
+	sparc_supply_gregset / sparc_collect_rwindow.
+	(sparc_store_inferior_registers): Likewise.
+	* sparc-obsd-tdep.c (sparc32obsd_supply_uthread): Add assertion.
+	(sparc32obsd_collect_uthread): Likewise.
+	* sparc-tdep.c (sparc_supply_rwindow, sparc_collect_rwindow):
+	Add assertion.
+	* sparc64-obsd-tdep.c (sparc64obsd_collect_uthread,
+	sparc64obsd_supply_uthread): Add assertion.
+
 2021-03-04  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (struct match_data) <found_sym>: Now bool.
