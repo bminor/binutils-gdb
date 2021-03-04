@@ -1210,6 +1210,8 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-g}|@option{--strip-debug}]
         [@option{--strip-unneeded}]
         [@option{-K} @var{symbolname}|@option{--keep-symbol=}@var{symbolname}]
+        [@option{--keep-file-symbols}]
+        [@option{--keep-section-symbols}]
         [@option{-N} @var{symbolname}|@option{--strip-symbol=}@var{symbolname}]
         [@option{--strip-unneeded-symbol=}@var{symbolname}]
         [@option{-G} @var{symbolname}|@option{--keep-global-symbol=}@var{symbolname}]
@@ -1266,7 +1268,6 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--prefix-sections=}@var{string}]
         [@option{--prefix-alloc-sections=}@var{string}]
         [@option{--add-gnu-debuglink=}@var{path-to-file}]
-        [@option{--keep-file-symbols}]
         [@option{--only-keep-debug}]
         [@option{--strip-dwo}]
         [@option{--extract-dwo}]
@@ -1967,6 +1968,11 @@ As long as the debug info file has been installed into one of these
 locations before the debugger is run everything should work
 correctly.
 
+@item --keep-section-symbils
+When stripping a file, perhaps with @option{--strip-debug} or
+@option{--strip-unneeded}, retain any symbols specifying section names,
+which would otherwise get stripped.
+
 @item --keep-file-symbols
 When stripping a file, perhaps with @option{--strip-debug} or
 @option{--strip-unneeded}, retain any symbols specifying source file names,
@@ -2202,6 +2208,7 @@ objdump [@option{-a}|@option{--archive-headers}]
          @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
         [@option{-WK}|@option{--dwarf=follow-links}]
         [@option{-WN}|@option{--dwarf=no-follow-links}]
+        [@option{-L}|@option{--process-links}]
         [@option{--ctf=}@var{section}]
         [@option{-G}|@option{--stabs}]
         [@option{-t}|@option{--syms}]
@@ -2440,6 +2447,13 @@ for specification with @option{-b} or @option{-m}.
 @itemx --section=@var{name}
 @cindex section information
 Display information only for section @var{name}.
+
+@item -L
+@itemx --process-links
+Display the contents of non-debug sections found in separate debuginfo
+files that are linked to the main file.  This option automatically
+implies the @option{-WK} option, and only sections requested by other
+command line options will be displayed.
 
 @item -l
 @itemx --line-numbers
@@ -3321,6 +3335,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-D}|@option{--enable-deterministic-archives}]
       [@option{-U}|@option{--disable-deterministic-archives}]
+      [@option{--keep-section-symbols}]
       [@option{--keep-file-symbols}]
       [@option{--only-keep-debug}]
       [@option{-v} |@option{--verbose}] [@option{-V}|@option{--version}]
@@ -3515,6 +3530,11 @@ Remove non-global symbols.
 @itemx --discard-locals
 Remove compiler-generated local symbols.
 (These usually start with @samp{L} or @samp{.}.)
+
+@item --keep-section-symbols
+When stripping a file, perhaps with @option{--strip-debug} or
+@option{--strip-unneeded}, retain any symbols specifying section names,
+which would otherwise get stripped.
 
 @item --keep-file-symbols
 When stripping a file, perhaps with @option{--strip-debug} or
@@ -4771,6 +4791,7 @@ readelf [@option{-a}|@option{--all}]
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
         [@option{-wK}|@option{--debug-dump=follow-links}]
         [@option{-wN}|@option{--debug-dump=no-follow-links}]
+        [@option{-P}|@option{--process-links}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
         [@option{--ctf=}@var{section}]
@@ -5002,6 +5023,13 @@ command to @command{ar}, but without using the BFD library.  @xref{ar}.
 @item -w[lLiaprmfFsOoRtUuTgAckK]
 @itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
 @include debug.options.texi
+
+@item -P
+@itemx --process-links
+Display the contents of non-debug sections found in separate debuginfo
+files that are linked to the main file.  This option automatically
+implies the @option{-wK} option, and only sections requested by other
+command line options will be displayed.
 
 @include ctf.options.texi
 @item --ctf-symbols=@var{section}

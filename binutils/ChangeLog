@@ -1,3 +1,66 @@
+2021-03-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 27478
+	* objdump.c (process_links): New variable.
+	(usage): Add --process-links.
+	(long_options): Likewise.
+	(dump_bfd): Stop processing once the bfd has been loaded unless
+	this is the main file or process_links has been enabled.
+	(main): Handle the process-links option.
+	* readelf.c (process_links): New variable.
+	(struct filedata): Add is_separate field.
+	(options): Add --process-links.
+	(usage): Likewise.
+	(parse_args): Likewise.
+	(process_file_header): Include the filename when dumping
+	information for separate debuginfo files.
+	(process_program_headers): Likewise.
+	(process_section_headers): Likewise.
+	(process_section_groups): Likewise.
+	(process_relocs): Likewise.
+	(process_dynamic_section): Likewise.
+	(process_version_sections): Likewise.
+	(display_lto_symtab): Likewise.
+	(process_symbol_table): Likewise.
+	(process_syminfo): Likewise.
+	(initialise_dumps_by_name): Likewise.
+	(process_section_contents): Likewise.
+	(process_notes_at): Likewise.
+	(process_notes): Likewise.
+	(open_file): Add is_separate parameter.  Use to initialise the
+	is_separate field in the filedata structure.
+	(open_deug): Update call to open_file.
+	(process_object): Add processing of the contents of separate
+	debuginfo files, gated by the process_links variable.
+	(process_archive): Update call to open_file.
+	(process_file): Initialise the is_separate field in the filedata
+	structure.
+	* dwarf.c (load_separate_debug_info_file): Only report the
+	loading of a separate file if debug links are being dumped.
+	* objcopy.c (keep_section_symbols): New variable.
+	(enum command_line_switch): Add OPTION_KEEP_SYMBOLS.
+	(strip_options): Add keep-section-symbols.
+	(copy_options): Likewise.
+	(copy_usage): Likewise.
+	(strip_usage): Likewise.
+	(copy_object): Keep section symbols if requested by command line
+	option.
+	(strip_main): Handle --keep-section-symbols.
+	(copy_main): Likewise.
+	* doc/binutils.texi: Document the new options.
+	* NEWS: Mention the new features.
+	* testsuite/binutils-all/compress.exp (test_gnu_debuglink):
+	Update options passed to objdump.  Use diff rather than cmp to
+	compare the dumped data.
+	* testsuite/binutils-all/objdump.WK2: Update regexp.
+	* testsuite/binutils-all/objdump.WK3: Update regexp.
+	* testsuite/binutils-all/objdump.exp: Use --process-links
+	instead of --dwarf=follow-links.
+	* testsuite/binutils-all/readelf.exp (readelf_test): Include
+	readelf's output in the log when the test fails.
+	Add the -P option to the -wKis test.
+	* testsuite/binutils-all/readelf.wKis: Update expected output.
+
 2021-03-03  Alan Modra  <amodra@gmail.com>
 
 	PR 27493

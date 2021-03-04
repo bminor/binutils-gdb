@@ -128,6 +128,7 @@ static const char * source_comment;     /* --source_comment.  */
 static bfd_boolean visualize_jumps = FALSE;          /* --visualize-jumps.  */
 static bfd_boolean color_output = FALSE;             /* --visualize-jumps=color.  */
 static bfd_boolean extended_color_output = FALSE;    /* --visualize-jumps=extended-color.  */
+static bfd_boolean process_links = FALSE;   /* --process-links.  */
 
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
@@ -247,6 +248,9 @@ usage (FILE *stream, int status)
   -WN,--dwarf=no-follow-links  Do not follow links to separate debug info files (default)\n\
 "));
 #endif
+  fprintf (stream, _("\
+  -L, --process-links          Display the contents of non-debug sections in separate debuginfo files.\n\
+"));
 #ifdef ENABLE_LIBCTF
   fprintf (stream, _("\
   --ctf=SECTION            Display CTF info from SECTION\n\
@@ -383,6 +387,7 @@ static struct option long_options[]=
   {"line-numbers", no_argument, NULL, 'l'},
   {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
   {"no-addresses", no_argument, &no_addresses, 1},
+  {"process-links", no_argument, &process_links, TRUE},
   {"prefix-addresses", no_argument, &prefix_addresses, 1},
   {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
@@ -4843,6 +4848,9 @@ dump_bfd (bfd *abfd, bfd_boolean is_mainfile)
       bfd_map_over_sections (abfd, adjust_addresses, &has_reloc);
     }
 
+  if (! is_mainfile && ! process_links)
+    return;
+
   if (! dump_debugging_tags && ! suppress_bfd_header)
     printf (_("\n%s:     file format %s\n"),
 	    sanitize_string (bfd_get_filename (abfd)),
@@ -5356,6 +5364,10 @@ main (int argc, char **argv)
 	  dump_debugging_tags = 1;
 	  do_demangle = TRUE;
 	  seenflag = TRUE;
+	  break;
+	case 'L':
+	  process_links = TRUE;
+	  do_follow_links = TRUE;
 	  break;
 	case 'W':
 	  dump_dwarf_section_info = TRUE;

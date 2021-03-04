@@ -11277,7 +11277,8 @@ load_separate_debug_info (const char *            main_filename,
   /* FIXME: We do not check to see if there are any other separate debug info
      files that would also match.  */
 
-  printf (_("%s: Found separate debug info file: %s\n\n"), main_filename, debug_filename);
+  if (do_debug_links)
+    printf (_("\n%s: Found separate debug info file: %s\n"), main_filename, debug_filename);
   add_separate_debug_file (debug_filename, debug_handle);
 
   /* Do not free debug_filename - it might be referenced inside

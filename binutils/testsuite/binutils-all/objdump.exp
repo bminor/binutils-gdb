@@ -671,8 +671,8 @@ proc test_follow_debuglink { options dumpfile } {
 }
 
 if {[is_elf_format]} then {
-    test_follow_debuglink "--dwarf=follow-links --dwarf=info --dwarf=str" objdump.WK2
-    test_follow_debuglink "--dwarf=follow-links --headers --wide" objdump.WK3
+    test_follow_debuglink "--process-links --dwarf=info --dwarf=str" objdump.WK2
+    test_follow_debuglink "--process-links --headers --wide" objdump.WK3
 }
 
 # Test objdump output with start and stop address limits for the specified

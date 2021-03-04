@@ -118,8 +118,9 @@ proc readelf_test { options binary_file regexp_file } {
     }
 
     if { [regexp_diff readelf.out $srcdir/$subdir/$regexp_file] } then {
+	send_log [file_contents readelf.out]
+	send_log "\n"
 	fail $testname
-	verbose "output is \n[file_contents readelf.out]" 2
 	return
     }
 
@@ -526,7 +527,7 @@ if {![binutils_assemble $srcdir/$subdir/debuglink.s tmpdir/debuglink.o]} then {
 	    set tempfile2 [remote_download host tmpdir/linkdebug.debug]
 	}
 
-	readelf_test {-wKis} $tempfile readelf.wKis
+	readelf_test "-wKis -P" $tempfile readelf.wKis
     }
 }
 
