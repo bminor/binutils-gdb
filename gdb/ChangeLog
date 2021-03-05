@@ -1,3 +1,7 @@
+2021-03-06  Weimin Pan  <weimin.pan@oracle.com>
+
+	* ctfread.c (read_func_kind_type): Set up function arguments.
+
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
