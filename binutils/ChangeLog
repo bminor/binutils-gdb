@@ -1,3 +1,10 @@
+2021-03-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 27387
+	* dwarf.c (display_debug_macro): Handle the displaying of
+	DW_MACRO_define_strp and DW_MACRO_undef_strp in v4
+	.debug_macro.dwo sections.
+
 2021-03-04  Nick Clifton  <nickc@redhat.com>
 
 	PR 27478
