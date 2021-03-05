@@ -1,3 +1,11 @@
+2021-03-05  Nick Clifton  <nickc@redhat.com>
+
+	PR 27521
+	* dwarf2.c (is_str_attr): Add DW_FORM_strx* forms.
+	(read_indexed_string): Placeholder function.
+	(read_attribute_value): Handle DW_FORM_strx* and DW_FORM_addrx*
+	forms.
+
 2021-03-05  Alan Modra  <amodra@gmail.com>
 
 	* reloc.c (bfd_perform_relocation): Revert 2021-01-12 and
