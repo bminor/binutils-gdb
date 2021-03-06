@@ -1340,7 +1340,8 @@ static const struct cu_partial_die_info find_partial_die (sect_offset, int,
 							  struct dwarf2_cu *);
 
 static const gdb_byte *read_attribute (const struct die_reader_specs *,
-				       struct attribute *, struct attr_abbrev *,
+				       struct attribute *,
+				       const struct attr_abbrev *,
 				       const gdb_byte *);
 
 static void read_attribute_reprocess (const struct die_reader_specs *reader,
@@ -20836,7 +20837,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 
 static const gdb_byte *
 read_attribute (const struct die_reader_specs *reader,
-		struct attribute *attr, struct attr_abbrev *abbrev,
+		struct attribute *attr, const struct attr_abbrev *abbrev,
 		const gdb_byte *info_ptr)
 {
   attr->name = abbrev->name;

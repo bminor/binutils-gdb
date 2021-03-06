@@ -1,3 +1,13 @@
+2021-03-06  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (read_attribute): Make 'abbrev' const.
+	* dwarf2/abbrev.c (abbrev_table::alloc_abbrev): Remove.
+	(abbrev_table::read): Update.
+	* dwarf2/abbrev.h (struct attr_abbrev): Move earlier.
+	(struct abbrev_info): Reformat.
+	<attrs>: Now an array.
+	(struct abbrev_table) <alloc_abbrev>: Remove.
+
 2021-03-06  Weimin Pan  <weimin.pan@oracle.com>
 
 	* ctfread.c (ctf_psymtab_add_enums): New function.
