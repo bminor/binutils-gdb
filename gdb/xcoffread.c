@@ -47,6 +47,7 @@
 #include "expression.h"
 #include "complaints.h"
 #include "psympriv.h"
+#include "dwarf2/sect-names.h"
 
 #include "gdb-stabs.h"
 
