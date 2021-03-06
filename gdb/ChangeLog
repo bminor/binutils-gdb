@@ -1,5 +1,9 @@
 2021-03-06  Tom Tromey  <tom@tromey.com>
 
+	* debuginfod-support.h: Include scoped_fd.h.
+
+2021-03-06  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (dwarf2_get_dwz_file): Add 'require' parameter.
 	* dwarf2/read.c (dwarf2_get_dwz_file): Add 'require' parameter.
 	(get_abbrev_section_for_cu, read_attribute_value)
