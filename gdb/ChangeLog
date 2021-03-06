@@ -1,5 +1,17 @@
 2021-03-06  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/sect-names.h (struct dwarf2_section_names) <matches>: New
+	method.
+	* dwarf2/read.c (section_is_p): Remove.
+	(dwarf2_per_bfd::locate_sections)
+	(dwarf2_per_bfd::locate_sections, locate_dwz_sections)
+	(locate_v1_virtual_dwo_sections, dwarf2_locate_dwo_sections)
+	(dwarf2_locate_common_dwp_sections)
+	(dwarf2_locate_v2_dwp_sections, dwarf2_locate_v5_dwp_sections):
+	Update.
+
+2021-03-06  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c: Include sect-names.h.
 	* symfile.h (struct dwarf2_section_names, struct
 	dwarf2_debug_sections): Move to dwarf2/sect-names.h.

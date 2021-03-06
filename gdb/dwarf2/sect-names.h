@@ -31,6 +31,13 @@
 struct dwarf2_section_names {
   const char *normal;
   const char *compressed;
+
+  /* Return true if NAME matches either of this section's names.  */
+  bool matches (const char *name) const
+  {
+    return ((normal != nullptr && strcmp (name, normal) == 0)
+	    || (compressed != nullptr && strcmp (name, compressed) == 0));
+  }
 };
 
 /* List of names for dward2 debugging sections.  Also most object file formats
