@@ -1,5 +1,10 @@
 2021-03-06  Weimin Pan  <weimin.pan@oracle.com>
 
+	* ctfread.c (ctf_psymtab_add_enums): New function.
+	(ctf_psymtab_type_cb): call ctf_psymtab_add_enums.
+
+2021-03-06  Weimin Pan  <weimin.pan@oracle.com>
+
 	* ctfread.c (read_func_kind_type): Set up function arguments.
 
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>

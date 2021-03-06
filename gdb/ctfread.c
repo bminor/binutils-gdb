@@ -1245,6 +1245,27 @@ ctf_end_symtab (ctf_psymtab *pst,
   return result;
 }
 
+/* Add all members of an enum with type TID to partial symbol table.  */
+
+static void
+ctf_psymtab_add_enums (struct ctf_context *ccp, ctf_id_t tid)
+{
+  int val;
+  const char *ename;
+  ctf_next_t *i = nullptr;
+
+  while ((ename = ctf_enum_next (ccp->fp, tid, &i, &val)) != nullptr)
+    {
+      ccp->pst->add_psymbol (ename, true,
+			     VAR_DOMAIN, LOC_CONST, -1,
+			     psymbol_placement::GLOBAL,
+			     0, language_c, ccp->of);
+    }
+  if (ctf_errno (ccp->fp) != ECTF_NEXT_END)
+    complaint (_("ctf_enum_next ctf_psymtab_add_enums failed - %s"),
+	       ctf_errmsg (ctf_errno (ccp->fp)));
+}
+
 /* Read in full symbols for PST, and anything it depends on.  */
 
 void
@@ -1366,17 +1387,17 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
 
   ccp = (struct ctf_context *) arg;
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (ccp->fp, tid));
-  if (name == nullptr || strlen (name.get ()) == 0)
-    return 0;
 
   domain_enum domain = UNDEF_DOMAIN;
   enum address_class aclass = LOC_UNDEF;
   kind = ctf_type_kind (ccp->fp, tid);
   switch (kind)
     {
+      case CTF_K_ENUM:
+	ctf_psymtab_add_enums (ccp, tid);
+	/* FALL THROUGH */
       case CTF_K_STRUCT:
       case CTF_K_UNION:
-      case CTF_K_ENUM:
 	domain = STRUCT_DOMAIN;
 	aclass = LOC_TYPEDEF;
 	break;
@@ -1406,6 +1427,9 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
       case CTF_K_UNKNOWN:
 	return 0;
     }
+
+  if (name == nullptr || strlen (name.get ()) == 0)
+    return 0;
 
   ccp->pst->add_psymbol (name.get (), true,
 			 domain, aclass, section,
