@@ -1,3 +1,8 @@
+2021-03-06  Chernov Sergey  <klen_s@mail.ru>
+
+	PR gdb/27528:
+	* ada-lang.c (ada_fold_name): Use gdb::to_string.
+
 2021-03-06  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/sect-names.h (dwarf2_elf_names): Declare.

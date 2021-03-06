@@ -944,10 +944,10 @@ ada_fold_name (gdb::string_view name)
   static std::string fold_storage;
 
   if (!name.empty () && name[0] == '\'')
-    fold_storage = to_string (name.substr (1, name.size () - 2));
+    fold_storage = gdb::to_string (name.substr (1, name.size () - 2));
   else
     {
-      fold_storage = to_string (name);
+      fold_storage = gdb::to_string (name);
       for (int i = 0; i < name.size (); i += 1)
 	fold_storage[i] = tolower (fold_storage[i]);
     }
