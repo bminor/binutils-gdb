@@ -72,4 +72,7 @@ struct dwarf2_debug_sections {
   int sentinel;
 };
 
+/* Section names for ELF.  */
+extern const struct dwarf2_debug_sections dwarf2_elf_names;
+
 #endif /* GDB_DWARF2_SECT_NAMES_H */
