@@ -1,3 +1,7 @@
+2021-03-05  Mark Wielaard  <mark@klomp.org>
+
+	* lib/valgrind.exp (vgdb_start): Add --wait=1 to vgdbcmd.
+
 2021-03-06  Weimin Pan  <weimin.pan@oracle.com>
 
 	* gdb.base/ctf-ptype.exp: Add function tests and fix typos.

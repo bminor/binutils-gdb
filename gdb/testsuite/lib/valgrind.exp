@@ -87,7 +87,7 @@ proc vgdb_start { {active_at_startup 1} } {
     # gdbserver and connect to it.
     gdb_test "disconnect" ".*"
 
-    set vgdbcmd "target remote | vgdb --pid=$vgdbpid"
+    set vgdbcmd "target remote | vgdb --wait=1 --pid=$vgdbpid"
     if { $active_at_startup } {
 	gdb_test "$vgdbcmd" " in \\.?_start .*" "target remote for vgdb"
     } else {
