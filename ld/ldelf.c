@@ -2206,3 +2206,11 @@ ldelf_before_place_orphans (void)
 	  }
       }
 }
+
+void
+ldelf_set_output_arch (void)
+{
+  set_output_arch_default ();
+  if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour)
+    elf_link_info (link_info.output_bfd) = &link_info;
+}

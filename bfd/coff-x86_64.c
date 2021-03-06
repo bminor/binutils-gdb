@@ -131,11 +131,38 @@ coff_amd64_reloc (bfd *abfd,
 	diff -= reloc_entry->howto->type - R_AMD64_PCRLONG;
     }
 
-  /* FIXME: How should this case be handled?  */
   if (reloc_entry->howto->type == R_AMD64_IMAGEBASE
-      && output_bfd != NULL
-      && bfd_get_flavour (output_bfd) == bfd_target_coff_flavour)
-    diff -= pe_data (output_bfd)->pe_opthdr.ImageBase;
+      && output_bfd == NULL)
+    {
+      bfd *obfd = input_section->output_section->owner;
+      struct bfd_link_info *link_info;
+      struct bfd_link_hash_entry *h;
+      switch (bfd_get_flavour (obfd))
+	{
+	case bfd_target_coff_flavour:
+	  diff -= pe_data (obfd)->pe_opthdr.ImageBase;
+	  break;
+	case bfd_target_elf_flavour:
+	  /* Subtract __ImageBase.  */
+	  link_info = _bfd_get_link_info (obfd);
+	  if (link_info == NULL)
+	    return bfd_reloc_dangerous;
+	  h = bfd_link_hash_lookup (link_info->hash, "__ImageBase",
+				    FALSE, FALSE, FALSE);
+	  if (h == NULL)
+	    return bfd_reloc_dangerous;
+	  while (h->type == bfd_link_hash_indirect)
+	    h = h->u.i.link;
+	  /* ELF symbols in relocatable files are section relative,
+	     but in nonrelocatable files they are virtual addresses.  */
+	  diff -= (h->u.def.value
+		   + h->u.def.section->output_offset
+		   + h->u.def.section->output_section->vma);
+	  break;
+	default:
+	  break;
+	}
+    }
 #endif
 
 #define DOIT(x) \

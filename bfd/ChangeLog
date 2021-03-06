@@ -1,3 +1,18 @@
+2021-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27425
+	PR ld/27432
+	* bfd.c (_bfd_get_link_info): New function.
+	* elf-bfd.h (output_elf_obj_tdata): Add link_info.
+	(elf_link_info): New.
+	* libbfd-in.h (_bfd_get_link_info): New prototype.
+	* coff-x86_64.c (coff_amd64_reloc): Also subtract __ImageBase for
+	R_AMD64_IMAGEBASE when generating x86-64 ELF executable.
+	* pe-x86_64.c: Include "coff/internal.h" and "libcoff.h".
+	(pex64_link_add_symbols): New function.
+	(coff_bfd_link_add_symbols): New macro.
+	* libbfd.h: Regenerated.
+
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

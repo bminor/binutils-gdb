@@ -1,3 +1,21 @@
+2021-03-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27425
+	PR ld/27432
+	* ldelf.c (ldelf_set_output_arch): New function.
+	* ldelf.h (ldelf_set_output_arch): New prototype.
+	* emultempl/elf.em (LDEMUL_SET_OUTPUT_ARCH): Default to
+	ldelf_set_output_arch.
+	* ld-x86-64/pe-x86-64-1.od: Expect __executable_start.
+	* testsuite/ld-x86-64/pe-x86-64-2.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-3.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-4.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-5.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-5.rd: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64-6.obj.bz2: New file.
+	* testsuite/ld-x86-64/pe-x86-64-6.od: Likewise.
+	* testsuite/ld-x86-64/pe-x86-64.exp: Run ld/27425 test.
+
 2021-03-04  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/ld-scripts/map-address.exp: Set image base to zero

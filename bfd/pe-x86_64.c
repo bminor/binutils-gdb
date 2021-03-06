@@ -22,6 +22,8 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "coff/internal.h"
+#include "libcoff.h"
 
 #define TARGET_SYM		x86_64_pe_vec
 #define TARGET_NAME		"pe-x86-64"
@@ -66,5 +68,33 @@ extern bfd_boolean pex64_bfd_print_pdata (bfd *, void *);
 
 #define bfd_pe_print_pdata   pex64_bfd_print_pdata
 
-#include "coff-x86_64.c"
+static bfd_boolean
+pex64_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
+{
+  if (bfd_link_pde (info)
+      && bfd_get_flavour (info->output_bfd) == bfd_target_elf_flavour)
+    {
+      /* NB: When linking Windows x86-64 relocatable object files to
+	 generate ELF executable, create an indirect reference to
+	 __executable_start for __ImageBase to support R_AMD64_IMAGEBASE
+	 relocation which is relative to __ImageBase.  */
+      struct bfd_link_hash_entry *h, *hi;
+      hi = bfd_link_hash_lookup (info->hash, "__ImageBase", TRUE, FALSE,
+				 FALSE);
+      if (hi->type == bfd_link_hash_new
+	  || hi->type == bfd_link_hash_undefined
+	  || hi->type == bfd_link_hash_undefweak)
+	{
+	  h = bfd_link_hash_lookup (info->hash, "__executable_start",
+				    TRUE, FALSE, TRUE);
+	  hi->type = bfd_link_hash_indirect;
+	  hi->u.i.link = h;
+	}
+    }
 
+  return _bfd_coff_link_add_symbols (abfd, info);
+}
+
+#define coff_bfd_link_add_symbols pex64_link_add_symbols
+
+#include "coff-x86_64.c"

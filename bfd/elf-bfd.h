@@ -1887,6 +1887,9 @@ struct output_elf_obj_tdata
   /* Used when laying out sections.  */
   file_ptr next_file_pos;
 
+  /* Linker information.  */
+  struct bfd_link_info *link_info;
+
   int num_section_syms;
   unsigned int shstrtab_section, strtab_section;
 
@@ -2064,6 +2067,7 @@ struct elf_obj_tdata
 #define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
 #define elf_numsections(bfd)	(elf_tdata(bfd) -> num_elf_sections)
 #define elf_seg_map(bfd)	(elf_tdata(bfd) -> o->seg_map)
+#define elf_link_info(bfd)	(elf_tdata(bfd) -> o->link_info)
 #define elf_next_file_pos(bfd)	(elf_tdata(bfd) -> o->next_file_pos)
 #define elf_eh_frame_hdr(bfd)	(elf_tdata(bfd) -> o->eh_frame_hdr)
 #define elf_stack_flags(bfd)	(elf_tdata(bfd) -> o->stack_flags)

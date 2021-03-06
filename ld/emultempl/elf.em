@@ -919,7 +919,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_AFTER_CHECK_RELOCS-after_check_relocs_default},
   ${LDEMUL_BEFORE_PLACE_ORPHANS-ldelf_before_place_orphans},
   ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
-  ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
+  ${LDEMUL_SET_OUTPUT_ARCH-ldelf_set_output_arch},
   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
   ${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation},
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},

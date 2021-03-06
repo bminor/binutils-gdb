@@ -2808,3 +2808,14 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   *ptr_size = size;
   return TRUE;
 }
+
+/* Get the linker information.  */
+
+struct bfd_link_info *
+_bfd_get_link_info (bfd *abfd)
+{
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return NULL;
+
+  return elf_link_info (abfd);
+}
