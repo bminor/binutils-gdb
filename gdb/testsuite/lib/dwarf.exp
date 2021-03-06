@@ -456,6 +456,8 @@ namespace eval Dwarf {
 		_op .${size}byte $value
 	    }
 
+	    DW_FORM_GNU_ref_alt -
+	    DW_FORM_GNU_strp_alt -
 	    DW_FORM_sec_offset {
 		variable _cu_offset_size
 		_op .${_cu_offset_size}byte $value
@@ -553,8 +555,6 @@ namespace eval Dwarf {
 
 	    DW_FORM_GNU_addr_index -
 	    DW_FORM_GNU_str_index -
-	    DW_FORM_GNU_ref_alt -
-	    DW_FORM_GNU_strp_alt -
 
 	    default {
 		error "unhandled form $form"

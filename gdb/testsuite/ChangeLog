@@ -1,3 +1,9 @@
+2021-03-06  Tom Tromey  <tom@tromey.com>
+
+	* lib/dwarf.exp (_handle_DW_FORM): Treat DW_FORM_GNU_ref_alt and
+	DW_FORM_GNU_strp_alt like DW_FORM_sec_offset.
+	* gdb.dwarf2/dwznolink.exp: New file.
+
 2021-03-05  Mark Wielaard  <mark@klomp.org>
 
 	* lib/valgrind.exp (vgdb_start): Add --wait=1 to vgdbcmd.

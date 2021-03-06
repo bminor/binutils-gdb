@@ -2285,7 +2285,7 @@ dwz_search_other_debugdirs (std::string &filename, bfd_byte *buildid,
 /* See dwarf2read.h.  */
 
 struct dwz_file *
-dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd)
+dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd, bool require)
 {
   bfd_size_type buildid_len_arg;
   size_t buildid_len;
@@ -2301,7 +2301,11 @@ dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd)
   if (data == NULL)
     {
       if (bfd_get_error () == bfd_error_no_error)
-	return NULL;
+	{
+	  if (!require)
+	    return nullptr;
+	  error (_("could not read '.gnu_debugaltlink' section"));
+	}
       error (_("could not read '.gnu_debugaltlink' section: %s"),
 	     bfd_errmsg (bfd_get_error ()));
     }
@@ -6308,7 +6312,7 @@ get_abbrev_section_for_cu (struct dwarf2_per_cu_data *this_cu)
   dwarf2_per_bfd *per_bfd = this_cu->per_bfd;
 
   if (this_cu->is_dwz)
-    abbrev = &dwarf2_get_dwz_file (per_bfd)->abbrev;
+    abbrev = &dwarf2_get_dwz_file (per_bfd, true)->abbrev;
   else
     abbrev = &per_bfd->abbrev;
 
@@ -20654,7 +20658,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       /* FALLTHROUGH */
     case DW_FORM_GNU_strp_alt:
       {
-	dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+	dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd, true);
 	LONGEST str_offset = cu_header->read_offset (abfd, info_ptr,
 						     &bytes_read);
 
@@ -21252,7 +21256,7 @@ get_debug_line_section (struct dwarf2_cu *cu)
     section = &cu->dwo_unit->dwo_file->sections.line;
   else if (cu->per_cu->is_dwz)
     {
-      dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+      dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd, true);
 
       section = &dwz->line;
     }
