@@ -1,3 +1,9 @@
+2021-03-10  Alan Modra  <amodra@gmail.com>
+	    Jan Beulich  <jbeulich@suse.com>
+
+	* elf.c (bfd_elf_generic_reloc): Make references between debug
+	sections use section relative values.
+
 2021-03-09  Jan Beulich  <jbeulich@suse.com>
 
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Diagnose out of range RVA.

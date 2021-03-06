@@ -1302,8 +1302,7 @@ const char *const bfd_elf_section_type_names[] =
    change anything about the way the reloc is handled, since it will
    all be done at final link time.  Rather than put special case code
    into bfd_perform_relocation, all the reloc types use this howto
-   function.  It just short circuits the reloc if producing
-   relocatable output against an external symbol.  */
+   function, or should call this function for relocatable output.  */
 
 bfd_reloc_status_type
 bfd_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED,
@@ -1322,6 +1321,20 @@ bfd_elf_generic_reloc (bfd *abfd ATTRIBUTE_UNUSED,
       reloc_entry->address += input_section->output_offset;
       return bfd_reloc_ok;
     }
+
+  /* In some cases the relocation should be treated as output section
+     relative, as when linking ELF DWARF into PE COFF.  Many ELF
+     targets lack section relative relocations and instead use
+     ordinary absolute relocations for references between DWARF
+     sections.  That is arguably a bug in those targets but it happens
+     to work for the usual case of linking to non-loaded ELF debug
+     sections with VMAs forced to zero.  PE COFF on the other hand
+     doesn't allow a section VMA of zero.  */
+  if (output_bfd == NULL
+      && !reloc_entry->howto->pc_relative
+      && (symbol->section->flags & SEC_DEBUGGING) != 0
+      && (input_section->flags & SEC_DEBUGGING) != 0)
+    reloc_entry->addend -= symbol->section->output_section->vma;
 
   return bfd_reloc_continue;
 }
