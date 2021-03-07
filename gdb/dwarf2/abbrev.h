@@ -44,9 +44,12 @@ struct abbrev_info
   /* Number identifying abbrev.  */
   unsigned int number;
   /* DWARF tag.  */
-  enum dwarf_tag tag;
+  ENUM_BITFIELD (dwarf_tag) tag : 16;
   /* True if the DIE has children.  */
-  unsigned short has_children;
+  bool has_children;
+  bool interesting;
+  unsigned short size_if_constant;
+  unsigned short sibling_offset;
   /* Number of attributes.  */
   unsigned short num_attrs;
   /* An array of attribute descriptions, allocated using the struct

@@ -76,6 +76,44 @@ abbrev_table::add_abbrev (struct abbrev_info *abbrev)
   *slot = abbrev;
 }
 
+/* Helper function that returns true if a DIE with the given tag might
+   plausibly be indexed.  */
+
+static bool
+tag_interesting_for_index (dwarf_tag tag)
+{
+  switch (tag)
+    {
+    case DW_TAG_array_type:
+    case DW_TAG_base_type:
+    case DW_TAG_class_type:
+    case DW_TAG_constant:
+    case DW_TAG_enumeration_type:
+    case DW_TAG_enumerator:
+    case DW_TAG_imported_declaration:
+    case DW_TAG_imported_unit:
+    case DW_TAG_inlined_subroutine:
+    case DW_TAG_interface_type:
+    case DW_TAG_module:
+    case DW_TAG_namespace:
+    case DW_TAG_ptr_to_member_type:
+    case DW_TAG_set_type:
+    case DW_TAG_string_type:
+    case DW_TAG_structure_type:
+    case DW_TAG_subprogram:
+    case DW_TAG_subrange_type:
+    case DW_TAG_generic_subrange:
+    case DW_TAG_subroutine_type:
+    case DW_TAG_typedef:
+    case DW_TAG_union_type:
+    case DW_TAG_unspecified_type:
+    case DW_TAG_variable:
+      return true;
+    }
+
+  return false;
+}
+
 /* Read in an abbrev table.  */
 
 abbrev_table_up
@@ -116,6 +154,17 @@ abbrev_table::read (struct dwarf2_section_info *section,
       cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr);
       abbrev_ptr += 1;
 
+      unsigned int size = 0;
+      unsigned int sibling_offset = -1;
+      bool is_csize = true;
+
+      bool has_hardcoded_declaration = false;
+      bool has_specification_or_origin = false;
+      bool has_name = false;
+      bool has_linkage_name = false;
+      bool has_location = false;
+      bool has_external = false;
+
       /* Now read in declarations.  */
       int num_attrs = 0;
       for (;;)
@@ -142,12 +191,117 @@ abbrev_table::read (struct dwarf2_section_info *section,
 	  if (cur_attr.name == 0)
 	    break;
 
+	  switch (cur_attr.name)
+	    {
+	    case DW_AT_declaration:
+	      if (cur_attr.form == DW_FORM_flag_present)
+		has_hardcoded_declaration = true;
+	      break;
+
+	    case DW_AT_external:
+	      has_external = true;
+	      break;
+
+	    case DW_AT_specification:
+	    case DW_AT_abstract_origin:
+	    case DW_AT_extension:
+	      has_specification_or_origin = true;
+	      break;
+
+	    case DW_AT_name:
+	      has_name = true;
+	      break;
+
+	    case DW_AT_MIPS_linkage_name:
+	    case DW_AT_linkage_name:
+	      has_linkage_name = true;
+	      break;
+
+	    case DW_AT_const_value:
+	    case DW_AT_location:
+	      has_location = true;
+	      break;
+
+	    case DW_AT_sibling:
+	      if (is_csize && cur_attr.form == DW_FORM_ref4)
+		sibling_offset = size;
+	      break;
+	    }
+
+	  switch (cur_attr.form)
+	    {
+	    case DW_FORM_data1:
+	    case DW_FORM_ref1:
+	    case DW_FORM_flag:
+	    case DW_FORM_strx1:
+	      size += 1;
+	      break;
+	    case DW_FORM_flag_present:
+	    case DW_FORM_implicit_const:
+	      break;
+	    case DW_FORM_data2:
+	    case DW_FORM_ref2:
+	    case DW_FORM_strx2:
+	      size += 2;
+	      break;
+	    case DW_FORM_strx3:
+	      size += 3;
+	      break;
+	    case DW_FORM_data4:
+	    case DW_FORM_ref4:
+	    case DW_FORM_strx4:
+	      size += 4;
+	      break;
+	    case DW_FORM_data8:
+	    case DW_FORM_ref8:
+	    case DW_FORM_ref_sig8:
+	      size += 8;
+	      break;
+	    case DW_FORM_data16:
+	      size += 16;
+	      break;
+
+	    default:
+	      is_csize = false;
+	      break;
+	    }
+
 	  ++num_attrs;
 	  obstack_grow (obstack, &cur_attr, sizeof (cur_attr));
 	}
 
       cur_abbrev = (struct abbrev_info *) obstack_finish (obstack);
       cur_abbrev->num_attrs = num_attrs;
+
+      if (!has_name && !has_linkage_name && !has_specification_or_origin)
+	{
+	  /* Some anonymous DIEs are worth examining.  */
+	  cur_abbrev->interesting
+	    = (cur_abbrev->tag == DW_TAG_namespace
+	       || cur_abbrev->tag == DW_TAG_enumeration_type);
+	}
+      else if (has_hardcoded_declaration
+	       && (cur_abbrev->tag != DW_TAG_variable || !has_external))
+	cur_abbrev->interesting = false;
+      else if (!tag_interesting_for_index (cur_abbrev->tag))
+	cur_abbrev->interesting = false;
+      else if (!has_location && !has_specification_or_origin && !has_external
+	       && cur_abbrev->tag == DW_TAG_variable)
+	cur_abbrev->interesting = false;
+      else
+	cur_abbrev->interesting = true;
+
+      /* If there are no children, and the abbrev has a constant size,
+	 then we don't care about the sibling offset, because it's
+	 simple to just skip the entire DIE without reading a sibling
+	 offset.  */
+      if ((!cur_abbrev->has_children && is_csize)
+	  /* Overflow.  */
+	  || sibling_offset != (unsigned short) sibling_offset)
+	sibling_offset = -1;
+      cur_abbrev->size_if_constant = is_csize ? size : 0;
+      cur_abbrev->sibling_offset = sibling_offset;
+
       abbrev_table->add_abbrev (cur_abbrev);
     }
 
