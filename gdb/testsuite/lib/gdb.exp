@@ -4977,6 +4977,62 @@ proc gdb_load { arg } {
     return 0
 }
 
+#
+# with_complaints -- Execute BODY and set complaints temporary to N for the
+# duration.
+#
+proc with_complaints { n body } {
+    global decimal
+
+    # Save current setting of complaints.
+    set save ""
+    set show_complaints_re \
+	"Max number of complaints about incorrect symbols is ($decimal)\\."
+    gdb_test_multiple "show complaints" "" {
+	-re -wrap $show_complaints_re {
+	    set save $expect_out(1,string)
+	}
+    }
+
+    if { $save == "" } {
+	perror "Did not manage to set complaints"
+    } else {
+	# Set complaints.
+	gdb_test_no_output "set complaints $n" ""
+    }
+
+    set code [catch {uplevel 1 $body} result]
+
+    # Restore saved setting of complaints.
+    if { $save != "" } {
+	gdb_test_no_output "set complaints $save" ""
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
+#
+# gdb_load_no_complaints -- As gdb_load, but in addition verifies that
+# loading caused no symbol reading complaints.
+#
+proc gdb_load_no_complaints { arg } {
+    global gdb_prompt gdb_file_cmd_msg decimal
+
+    # Temporarily set complaint to a small non-zero number.
+    with_complaints 5 {
+	gdb_load $arg
+    }
+
+    # Verify that there were no complaints.
+    set re "^Reading symbols from \[^\r\n\]*\r\n$gdb_prompt $"
+    gdb_assert {[regexp $re $gdb_file_cmd_msg]} "No complaints"
+}
+
 # gdb_reload -- load a file into the target.  Called before "running",
 # either the first time or after already starting the program once,
 # for remote targets.  Most files that override gdb_load should now
