@@ -1,5 +1,13 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.h (ada_find_operator_symbol, ada_resolve_funcall)
+	(ada_resolve_variable): Declare.
+	* ada-lang.c (ada_find_operator_symbol, ada_resolve_funcall)
+	(ada_resolve_variable): New functions.
+	(resolve_subexp): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* opencl-lang.c (opencl_ternop_cond_operation::evaluate): New
 	method.
 	* c-exp.h (class opencl_ternop_cond_operation): New.

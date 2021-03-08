@@ -3414,6 +3414,126 @@ See set/show multiple-symbol."));
   return n_chosen;
 }
 
+/* See ada-lang.h.  */
+
+block_symbol
+ada_find_operator_symbol (enum exp_opcode op, int parse_completion,
+			  int nargs, value *argvec[])
+{
+  if (possible_user_operator_p (op, argvec))
+    {
+      std::vector<struct block_symbol> candidates
+	= ada_lookup_symbol_list (ada_decoded_op_name (op),
+				  NULL, VAR_DOMAIN);
+
+      int i = ada_resolve_function (candidates, argvec,
+				    nargs, ada_decoded_op_name (op), NULL,
+				    parse_completion);
+      if (i >= 0)
+	return candidates[i];
+    }
+  return {};
+}
+
+/* See ada-lang.h.  */
+
+block_symbol
+ada_resolve_funcall (struct symbol *sym, const struct block *block,
+		     struct type *context_type,
+		     int parse_completion,
+		     int nargs, value *argvec[],
+		     innermost_block_tracker *tracker)
+{
+  std::vector<struct block_symbol> candidates
+    = ada_lookup_symbol_list (sym->linkage_name (), block, VAR_DOMAIN);
+
+  int i;
+  if (candidates.size () == 1)
+    i = 0;
+  else
+    {
+      i = ada_resolve_function
+	(candidates,
+	 argvec, nargs,
+	 sym->linkage_name (),
+	 context_type, parse_completion);
+      if (i < 0)
+	error (_("Could not find a match for %s"), sym->print_name ());
+    }
+
+  tracker->update (candidates[i]);
+  return candidates[i];
+}
+
+/* See ada-lang.h.  */
+
+block_symbol
+ada_resolve_variable (struct symbol *sym, const struct block *block,
+		      struct type *context_type,
+		      int parse_completion,
+		      int deprocedure_p,
+		      innermost_block_tracker *tracker)
+{
+  std::vector<struct block_symbol> candidates
+    = ada_lookup_symbol_list (sym->linkage_name (), block, VAR_DOMAIN);
+
+  if (std::any_of (candidates.begin (),
+		   candidates.end (),
+		   [] (block_symbol &bsym)
+		   {
+		     switch (SYMBOL_CLASS (bsym.symbol))
+		       {
+		       case LOC_REGISTER:
+		       case LOC_ARG:
+		       case LOC_REF_ARG:
+		       case LOC_REGPARM_ADDR:
+		       case LOC_LOCAL:
+		       case LOC_COMPUTED:
+			 return true;
+		       default:
+			 return false;
+		       }
+		   }))
+    {
+      /* Types tend to get re-introduced locally, so if there
+	 are any local symbols that are not types, first filter
+	 out all types.  */
+      candidates.erase
+	(std::remove_if
+	 (candidates.begin (),
+	  candidates.end (),
+	  [] (block_symbol &bsym)
+	  {
+	    return SYMBOL_CLASS (bsym.symbol) == LOC_TYPEDEF;
+	  }),
+	 candidates.end ());
+    }
+
+  int i;
+  if (candidates.empty ())
+    error (_("No definition found for %s"), sym->print_name ());
+  else if (candidates.size () == 1)
+    i = 0;
+  else if (deprocedure_p && !is_nonfunction (candidates))
+    {
+      i = ada_resolve_function
+	(candidates, NULL, 0,
+	 sym->linkage_name (),
+	 context_type, parse_completion);
+      if (i < 0)
+	error (_("Could not find a match for %s"), sym->print_name ());
+    }
+  else
+    {
+      printf_filtered (_("Multiple matches for %s\n"), sym->print_name ());
+      user_select_syms (candidates.data (), candidates.size (), 1);
+      i = 0;
+    }
+
+  tracker->update (candidates[i]);
+  return candidates[i];
+}
+
 /* Resolve the operator of the subexpression beginning at
    position *POS of *EXPP.  "Resolving" consists of replacing
    the symbols that have undefined namespaces in OP_VAR_VALUE nodes
@@ -3618,68 +3738,13 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
     case OP_VAR_VALUE:
       if (SYMBOL_DOMAIN (exp->elts[pc + 2].symbol) == UNDEF_DOMAIN)
 	{
-	  std::vector<struct block_symbol> candidates
-	    = ada_lookup_symbol_list (exp->elts[pc + 2].symbol->linkage_name (),
-				      exp->elts[pc + 1].block, VAR_DOMAIN);
-
-	  if (std::any_of (candidates.begin (),
-			   candidates.end (),
-			   [] (block_symbol &sym)
-			   {
-			     switch (SYMBOL_CLASS (sym.symbol))
-			       {
-			       case LOC_REGISTER:
-			       case LOC_ARG:
-			       case LOC_REF_ARG:
-			       case LOC_REGPARM_ADDR:
-			       case LOC_LOCAL:
-			       case LOC_COMPUTED:
-				 return true;
-			       default:
-				 return false;
-			       }
-			   }))
-	    {
-	      /* Types tend to get re-introduced locally, so if there
-		 are any local symbols that are not types, first filter
-		 out all types.  */
-	      candidates.erase
-		(std::remove_if
-		 (candidates.begin (),
-		  candidates.end (),
-		  [] (block_symbol &sym)
-		  {
-		    return SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF;
-		  }),
-		 candidates.end ());
-	    }
-
-	  if (candidates.empty ())
-	    error (_("No definition found for %s"),
-		   exp->elts[pc + 2].symbol->print_name ());
-	  else if (candidates.size () == 1)
-	    i = 0;
-	  else if (deprocedure_p && !is_nonfunction (candidates))
-	    {
-	      i = ada_resolve_function
-		(candidates, NULL, 0,
-		 exp->elts[pc + 2].symbol->linkage_name (),
-		 context_type, parse_completion);
-	      if (i < 0)
-		error (_("Could not find a match for %s"),
-		       exp->elts[pc + 2].symbol->print_name ());
-	    }
-	  else
-	    {
-	      printf_filtered (_("Multiple matches for %s\n"),
-			       exp->elts[pc + 2].symbol->print_name ());
-	      user_select_syms (candidates.data (), candidates.size (), 1);
-	      i = 0;
-	    }
-
-	  exp->elts[pc + 1].block = candidates[i].block;
-	  exp->elts[pc + 2].symbol = candidates[i].symbol;
-	  tracker->update (candidates[i]);
+	  block_symbol resolved
+	    = ada_resolve_variable (exp->elts[pc + 2].symbol,
+				    exp->elts[pc + 1].block,
+				    context_type, parse_completion,
+				    deprocedure_p, tracker);
+	  exp->elts[pc + 1].block = resolved.block;
+	  exp->elts[pc + 2].symbol = resolved.symbol;
 	}
 
       if (deprocedure_p
@@ -3698,27 +3763,14 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
 	if (exp->elts[pc + 3].opcode == OP_VAR_VALUE
 	    && SYMBOL_DOMAIN (exp->elts[pc + 5].symbol) == UNDEF_DOMAIN)
 	  {
-	    std::vector<struct block_symbol> candidates
-	      = ada_lookup_symbol_list (exp->elts[pc + 5].symbol->linkage_name (),
-					exp->elts[pc + 4].block, VAR_DOMAIN);
-
-	    if (candidates.size () == 1)
-	      i = 0;
-	    else
-	      {
-		i = ada_resolve_function
-		  (candidates,
-		   argvec, nargs,
-		   exp->elts[pc + 5].symbol->linkage_name (),
-		   context_type, parse_completion);
-		if (i < 0)
-		  error (_("Could not find a match for %s"),
-			 exp->elts[pc + 5].symbol->print_name ());
-	      }
-
-	    exp->elts[pc + 4].block = candidates[i].block;
-	    exp->elts[pc + 5].symbol = candidates[i].symbol;
-	    tracker->update (candidates[i]);
+	    block_symbol resolved
+	      = ada_resolve_funcall (exp->elts[pc + 5].symbol,
+				     exp->elts[pc + 4].block,
+				     context_type, parse_completion,
+				     nargs, argvec,
+				     tracker);
+	    exp->elts[pc + 4].block = resolved.block;
+	    exp->elts[pc + 5].symbol = resolved.symbol;
 	  }
       }
       break;
@@ -3743,23 +3795,16 @@ resolve_subexp (expression_up *expp, int *pos, int deprocedure_p,
     case UNOP_PLUS:
     case UNOP_LOGICAL_NOT:
     case UNOP_ABS:
-      if (possible_user_operator_p (op, argvec))
-	{
-	  std::vector<struct block_symbol> candidates
-	    = ada_lookup_symbol_list (ada_decoded_op_name (op),
-				      NULL, VAR_DOMAIN);
+      {
+	block_symbol found = ada_find_operator_symbol (op, parse_completion,
+						       nargs, argvec);
+	if (found.symbol == nullptr)
+	  break;
 
-	  i = ada_resolve_function (candidates, argvec,
-				    nargs, ada_decoded_op_name (op), NULL,
-				    parse_completion);
-	  if (i < 0)
-	    break;
-
-	  replace_operator_with_call (expp, pc, nargs, 1,
-				      candidates[i].symbol,
-				      candidates[i].block);
-	  exp = expp->get ();
-	}
+	replace_operator_with_call (expp, pc, nargs, 1,
+				    found.symbol, found.block);
+	exp = expp->get ();
+      }
       break;
 
     case OP_TYPE:
