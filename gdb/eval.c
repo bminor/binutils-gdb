@@ -1787,6 +1787,24 @@ eval_op_neg (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for UNOP_COMPLEMENT.  */
+
+static struct value *
+eval_op_complement (struct type *expect_type, struct expression *exp,
+		    enum noside noside, enum exp_opcode op,
+		    struct value *arg1)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (unop_user_defined_p (UNOP_COMPLEMENT, arg1))
+    return value_x_unop (arg1, UNOP_COMPLEMENT, noside);
+  else
+    {
+      unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+      return value_complement (arg1);
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2646,15 +2664,7 @@ evaluate_subexp_standard (struct type *expect_type,
       /* C++: check for and handle destructor names.  */
 
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (unop_user_defined_p (UNOP_COMPLEMENT, arg1))
-	return value_x_unop (arg1, UNOP_COMPLEMENT, noside);
-      else
-	{
-	  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
-	  return value_complement (arg1);
-	}
+      return eval_op_complement (expect_type, exp, noside, op, arg1);
 
     case UNOP_LOGICAL_NOT:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
