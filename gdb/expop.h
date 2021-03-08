@@ -579,6 +579,24 @@ public:
   { return OP_FUNC_STATIC_VAR; }
 };
 
+class last_operation
+  : public tuple_holding_operation<int>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return access_value_history (std::get<0> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_LAST; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
