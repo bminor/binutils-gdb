@@ -1966,6 +1966,22 @@ using dynamic_cast_operation = cxx_cast_operation<UNOP_DYNAMIC_CAST,
 using reinterpret_cast_operation = cxx_cast_operation<UNOP_REINTERPRET_CAST,
 						      value_reinterpret_cast>;
 
+/* Multi-dimensional subscripting.  */
+class multi_subscript_operation
+  : public tuple_holding_operation<operation_up, std::vector<operation_up>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return MULTI_SUBSCRIPT; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

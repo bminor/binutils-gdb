@@ -2472,8 +2472,21 @@ objc_msgcall_operation::evaluate (struct type *expect_type,
 						     args.size () + 3));
 }
 
+value *
+multi_subscript_operation::evaluate (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
+  std::vector<operation_up> &values = std::get<1> (m_storage);
+  value **argvec = XALLOCAVEC (struct value *, values.size ());
+  for (int ix = 0; ix < values.size (); ++ix)
+    argvec[ix] = values[ix]->evaluate_with_coercion (exp, noside);
+  return eval_multi_subscript (expect_type, exp, noside, arg1,
+			       gdb::make_array_view (argvec, values.size ()));
 }
 
+}
 
 struct value *
 evaluate_subexp_standard (struct type *expect_type,

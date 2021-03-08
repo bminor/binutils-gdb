@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class multi_subscript_operation): New.
+	* eval.c (multi_subscript_operation::evaluate): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (objc_msgcall_operation::evaluate): New method.
 	* c-exp.h (class objc_msgcall_operation): New.
 
