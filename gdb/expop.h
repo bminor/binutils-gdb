@@ -1445,6 +1445,31 @@ public:
   { return true; }
 };
 
+/* Implement the "typeof" operation.  */
+class typeof_operation
+  : public maybe_constant_operation<operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (noside == EVAL_SKIP)
+      return eval_skip_value (exp);
+    else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+      return std::get<0> (m_storage)->evaluate (nullptr, exp,
+						EVAL_AVOID_SIDE_EFFECTS);
+    else
+      error (_("Attempt to use a type as an expression"));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_TYPEOF; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
