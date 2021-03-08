@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* parser-defs.h (struct parser_state) <push, push_new,
+	push_c_string, push_symbol, push_dollar, pop, pop_vector, wrap,
+	wrap2>: New methods.
+	<m_operations>: New member.
+	* parse.c (parser_state::push_c_string)
+	(parser_state::push_symbol, parser_state::push_dollar): New
+	methods.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* parser-defs.h (struct expr_completion_state) <expout_last_op>:
 	New member.
 	(struct parser_state) <mark_struct_expression>: New method.

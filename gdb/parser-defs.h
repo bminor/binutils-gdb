@@ -173,6 +173,66 @@ struct parser_state : public expr_builder
 
   void mark_completion_tag (enum type_code tag, const char *ptr, int length);
 
+  /* Push an operation on the stack.  */
+  void push (expr::operation_up &&op)
+  {
+    m_operations.push_back (std::move (op));
+  }
+
+  /* Create a new operation and push it on the stack.  */
+  template<typename T, typename... Arg>
+  void push_new (Arg... args)
+  {
+    m_operations.emplace_back (new T (std::forward<Arg> (args)...));
+  }
+
+  /* Push a new C string operation.  */
+  void push_c_string (int, struct stoken_vector *vec);
+
+  /* Push a symbol reference.  If SYM is nullptr, look for a minimal
+     symbol.  */
+  void push_symbol (const char *name, block_symbol sym);
+
+  /* Push a reference to $mumble.  This may result in a convenience
+     variable, a history reference, or a register.  */
+  void push_dollar (struct stoken str);
+
+  /* Pop an operation from the stack.  */
+  expr::operation_up pop ()
+  {
+    expr::operation_up result = std::move (m_operations.back ());
+    m_operations.pop_back ();
+    return result;
+  }
+
+  /* Pop N elements from the stack and return a vector.  */
+  std::vector<expr::operation_up> pop_vector (int n)
+  {
+    std::vector<expr::operation_up> result (n);
+    for (int i = 1; i <= n; ++i)
+      result[n - i] = pop ();
+    return result;
+  }
+
+  /* A helper that pops an operation, wraps it in some other
+     operation, and pushes it again.  */
+  template<typename T>
+  void wrap ()
+  {
+    using namespace expr;
+    operation_up v = ::expr::make_operation<T> (pop ());
+    push (std::move (v));
+  }
+
+  /* A helper that pops two operations, wraps them in some other
+     operation, and pushes the result.  */
+  template<typename T>
+  void wrap2 ()
+  {
+    expr::operation_up rhs = pop ();
+    expr::operation_up lhs = pop ();
+    push (expr::make_operation<T> (std::move (lhs), std::move (rhs)));
+  }
 
   /* If this is nonzero, this block is used as the lexical context for
      symbol names.  */
@@ -221,6 +281,9 @@ private:
      arguments contain other function calls.  */
 
   std::vector<int> m_funcall_chain;
+
+  /* Stack of operations.  */
+  std::vector<expr::operation_up> m_operations;
 };
 
 /* When parsing expressions we track the innermost block that was

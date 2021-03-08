@@ -545,6 +545,133 @@ parser_state::mark_completion_tag (enum type_code tag, const char *ptr,
   m_completion_state.expout_completion_name.reset (xstrndup (ptr, length));
 }
 
+/* See parser-defs.h.  */
+
+void
+parser_state::push_c_string (int kind, struct stoken_vector *vec)
+{
+  std::vector<std::string> data (vec->len);
+  for (int i = 0; i < vec->len; ++i)
+    data[i] = std::string (vec->tokens[i].ptr, vec->tokens[i].length);
+
+  push_new<expr::c_string_operation> ((enum c_string_type_values) kind,
+				      std::move (data));
+}
+
+/* See parser-defs.h.  */
+
+void
+parser_state::push_symbol (const char *name, block_symbol sym)
+{
+  if (sym.symbol != nullptr)
+    {
+      if (symbol_read_needs_frame (sym.symbol))
+	block_tracker->update (sym);
+      push_new<expr::var_value_operation> (sym.symbol, sym.block);
+    }
+  else
+    {
+      struct bound_minimal_symbol msymbol = lookup_bound_minimal_symbol (name);
+      if (msymbol.minsym != NULL)
+	push_new<expr::var_msym_value_operation> (msymbol.minsym,
+						  msymbol.objfile);
+      else if (!have_full_symbols () && !have_partial_symbols ())
+	error (_("No symbol table is loaded.  Use the \"file\" command."));
+      else
+	error (_("No symbol \"%s\" in current context."), name);
+    }
+}
+
+/* See parser-defs.h.  */
+
+void
+parser_state::push_dollar (struct stoken str)
+{
+  struct block_symbol sym;
+  struct bound_minimal_symbol msym;
+  struct internalvar *isym = NULL;
+  std::string copy;
+
+  /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
+     and $$digits (equivalent to $<-digits> if you could type that).  */
+
+  int negate = 0;
+  int i = 1;
+  /* Double dollar means negate the number and add -1 as well.
+     Thus $$ alone means -1.  */
+  if (str.length >= 2 && str.ptr[1] == '$')
+    {
+      negate = 1;
+      i = 2;
+    }
+  if (i == str.length)
+    {
+      /* Just dollars (one or two).  */
+      i = -negate;
+      goto handle_last;
+    }
+  /* Is the rest of the token digits?  */
+  for (; i < str.length; i++)
+    if (!(str.ptr[i] >= '0' && str.ptr[i] <= '9'))
+      break;
+  if (i == str.length)
+    {
+      i = atoi (str.ptr + 1 + negate);
+      if (negate)
+	i = -i;
+      goto handle_last;
+    }
+
+  /* Handle tokens that refer to machine registers:
+     $ followed by a register name.  */
+  i = user_reg_map_name_to_regnum (gdbarch (),
+				   str.ptr + 1, str.length - 1);
+  if (i >= 0)
+    goto handle_register;
+
+  /* Any names starting with $ are probably debugger internal variables.  */
+
+  copy = copy_name (str);
+  isym = lookup_only_internalvar (copy.c_str () + 1);
+  if (isym)
+    {
+      push_new<expr::internalvar_operation> (isym);
+      return;
+    }
+
+  /* On some systems, such as HP-UX and hppa-linux, certain system routines
+     have names beginning with $ or $$.  Check for those, first.  */
+
+  sym = lookup_symbol (copy.c_str (), NULL, VAR_DOMAIN, NULL);
+  if (sym.symbol)
+    {
+      push_new<expr::var_value_operation> (sym.symbol, sym.block);
+      return;
+    }
+  msym = lookup_bound_minimal_symbol (copy.c_str ());
+  if (msym.minsym)
+    {
+      push_new<expr::var_msym_value_operation> (msym.minsym, msym.objfile);
+      return;
+    }
+
+  /* Any other names are assumed to be debugger internal variables.  */
+
+  push_new<expr::internalvar_operation>
+    (create_internalvar (copy.c_str () + 1));
+  return;
+handle_last:
+  push_new<expr::last_operation> (i);
+  return;
+handle_register:
+  str.length--;
+  str.ptr++;
+  push_new<expr::register_operation> (copy_name (str));
+  block_tracker->update (expression_context_block,
+			 INNERMOST_BLOCK_FOR_REGISTERS);
+  return;
+}
+
 
 /* Recognize tokens that start with '$'.  These include:
 
