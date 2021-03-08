@@ -10065,6 +10065,26 @@ ada_abs (struct type *expect_type,
     return arg1;
 }
 
+/* A helper function for BINOP_MUL.  */
+
+static value *
+ada_mult_binop (struct type *expect_type,
+		struct expression *exp,
+		enum noside noside, enum exp_opcode op,
+		struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      return value_zero (value_type (arg1), not_lval);
+    }
+  else
+    {
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      return ada_value_binop (arg1, arg2, op);
+    }
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10223,17 +10243,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	{
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  return value_zero (value_type (arg1), not_lval);
-	}
-      else
-	{
-	  type = builtin_type (exp->gdbarch)->builtin_double;
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  return ada_value_binop (arg1, arg2, op);
-	}
+      return ada_mult_binop (expect_type, exp, noside, op,
+			     arg1, arg2);
 
     case BINOP_EQUAL:
     case BINOP_NOTEQUAL:
