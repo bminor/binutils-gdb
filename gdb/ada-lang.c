@@ -10114,7 +10114,7 @@ ada_abs (struct type *expect_type,
 
 /* A helper function for BINOP_MUL.  */
 
-static value *
+value *
 ada_mult_binop (struct type *expect_type,
 		struct expression *exp,
 		enum noside noside, enum exp_opcode op,

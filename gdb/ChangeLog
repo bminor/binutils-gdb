@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_mult_binop): No longer static.
+	* ada-exp.h (ada_binop_mul_operation ada_binop_div_operation)
+	(ada_binop_rem_operation, ada_binop_mod_operation): New typedefs.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_binop_addsub_operation::evaluate): New method.
 	* ada-exp.h (class ada_binop_addsub_operation): New.
 

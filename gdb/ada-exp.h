@@ -42,6 +42,10 @@ extern struct value *ada_unop_in_range (struct type *expect_type,
 					struct expression *exp,
 					enum noside noside, enum exp_opcode op,
 					struct value *arg1, struct type *type);
+extern struct value *ada_mult_binop (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside, enum exp_opcode op,
+				     struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -149,6 +153,11 @@ public:
   enum exp_opcode opcode () const override
   { return std::get<0> (m_storage); }
 };
+
+using ada_binop_mul_operation = binop_operation<BINOP_MUL, ada_mult_binop>;
+using ada_binop_div_operation = binop_operation<BINOP_DIV, ada_mult_binop>;
+using ada_binop_rem_operation = binop_operation<BINOP_REM, ada_mult_binop>;
+using ada_binop_mod_operation = binop_operation<BINOP_MOD, ada_mult_binop>;
 
 } /* namespace expr */
 
