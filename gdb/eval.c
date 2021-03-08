@@ -1940,6 +1940,37 @@ eval_op_preinc (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for UNOP_PREDECREMENT.  */
+
+static struct value *
+eval_op_predec (struct type *expect_type, struct expression *exp,
+		enum noside noside, enum exp_opcode op,
+		struct value *arg1)
+{
+  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+    return arg1;
+  else if (unop_user_defined_p (op, arg1))
+    {
+      return value_x_unop (arg1, op, noside);
+    }
+  else
+    {
+      struct value *arg2;
+      if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
+	arg2 = value_ptradd (arg1, -1);
+      else
+	{
+	  struct value *tmp = arg1;
+
+	  arg2 = value_one (value_type (arg1));
+	  binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
+	  arg2 = value_binop (tmp, arg2, BINOP_SUB);
+	}
+
+      return value_assign (arg1, arg2);
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2878,27 +2909,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case UNOP_PREDECREMENT:
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
-	return arg1;
-      else if (unop_user_defined_p (op, arg1))
-	{
-	  return value_x_unop (arg1, op, noside);
-	}
-      else
-	{
-	  if (ptrmath_type_p (exp->language_defn, value_type (arg1)))
-	    arg2 = value_ptradd (arg1, -1);
-	  else
-	    {
-	      struct value *tmp = arg1;
-
-	      arg2 = value_one (value_type (arg1));
-	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
-	      arg2 = value_binop (tmp, arg2, BINOP_SUB);
-	    }
-
-	  return value_assign (arg1, arg2);
-	}
+      return eval_op_predec (expect_type, exp, noside, op, arg1);
 
     case UNOP_POSTINCREMENT:
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
