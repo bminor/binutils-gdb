@@ -1175,6 +1175,22 @@ eval_op_f_kind (struct type *expect_type, struct expression *exp,
 			     TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
 }
 
+/* A helper function for UNOP_FORTRAN_ALLOCATED.  */
+
+static struct value *
+eval_op_f_allocated (struct type *expect_type, struct expression *exp,
+		     enum noside noside, enum exp_opcode op,
+		     struct value *arg1)
+{
+  struct type *type = check_typedef (value_type (arg1));
+  if (type->code () != TYPE_CODE_ARRAY)
+    error (_("ALLOCATED can only be applied to arrays"));
+  struct type *result_type
+    = builtin_f_type (exp->gdbarch)->builtin_logical;
+  LONGEST result_value = type_not_allocated (type) ? 0 : 1;
+  return value_from_longest (result_type, result_value);
+}
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -1218,13 +1234,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
 	if (noside == EVAL_SKIP)
 	  return eval_skip_value (exp);
-	type = check_typedef (value_type (arg1));
-	if (type->code () != TYPE_CODE_ARRAY)
-	  error (_("ALLOCATED can only be applied to arrays"));
-	struct type *result_type
-	  = builtin_f_type (exp->gdbarch)->builtin_logical;
-	LONGEST result_value = type_not_allocated (type) ? 0 : 1;
-	return value_from_longest (result_type, result_value);
+	return eval_op_f_allocated (expect_type, exp, noside, op, arg1);
       }
 
     case BINOP_FORTRAN_MODULO:
