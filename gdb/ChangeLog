@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* c-lang.c (c_string_operation::evaluate): New method.
+	* c-exp.h: New file.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class ternop_cond_operation): New.
 	* ax-gdb.c (ternop_cond_operation::do_generate_ax): New method.
 
