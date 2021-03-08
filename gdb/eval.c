@@ -2089,6 +2089,277 @@ eval_binop_assign_modify (struct type *expect_type, struct expression *exp,
   return value_assign (arg1, arg2);
 }
 
+/* Note that ARGS needs 2 empty slots up front and must end with a
+   null pointer.  */
+static struct value *
+eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
+		      enum noside noside, CORE_ADDR selector,
+		      value *target, gdb::array_view<value *> args)
+{
+  CORE_ADDR responds_selector = 0;
+  CORE_ADDR method_selector = 0;
+
+  int struct_return = 0;
+
+  struct value *msg_send = NULL;
+  struct value *msg_send_stret = NULL;
+  int gnu_runtime = 0;
+
+  struct value *method = NULL;
+  struct value *called_method = NULL;
+
+  struct type *selector_type = NULL;
+  struct type *long_type;
+  struct type *type;
+
+  struct value *ret = NULL;
+  CORE_ADDR addr = 0;
+
+  value *argvec[5];
+
+  long_type = builtin_type (exp->gdbarch)->builtin_long;
+  selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
+
+  if (value_as_long (target) == 0)
+    return value_from_longest (long_type, 0);
+
+  if (lookup_minimal_symbol ("objc_msg_lookup", 0, 0).minsym)
+    gnu_runtime = 1;
+
+  /* Find the method dispatch (Apple runtime) or method lookup
+     (GNU runtime) function for Objective-C.  These will be used
+     to lookup the symbol information for the method.  If we
+     can't find any symbol information, then we'll use these to
+     call the method, otherwise we can call the method
+     directly.  The msg_send_stret function is used in the special
+     case of a method that returns a structure (Apple runtime
+     only).  */
+  if (gnu_runtime)
+    {
+      type = selector_type;
+
+      type = lookup_function_type (type);
+      type = lookup_pointer_type (type);
+      type = lookup_function_type (type);
+      type = lookup_pointer_type (type);
+
+      msg_send = find_function_in_inferior ("objc_msg_lookup", NULL);
+      msg_send_stret
+	= find_function_in_inferior ("objc_msg_lookup", NULL);
+
+      msg_send = value_from_pointer (type, value_as_address (msg_send));
+      msg_send_stret = value_from_pointer (type,
+					   value_as_address (msg_send_stret));
+    }
+  else
+    {
+      msg_send = find_function_in_inferior ("objc_msgSend", NULL);
+      /* Special dispatcher for methods returning structs.  */
+      msg_send_stret
+	= find_function_in_inferior ("objc_msgSend_stret", NULL);
+    }
+
+  /* Verify the target object responds to this method.  The
+     standard top-level 'Object' class uses a different name for
+     the verification method than the non-standard, but more
+     often used, 'NSObject' class.  Make sure we check for both.  */
+
+  responds_selector
+    = lookup_child_selector (exp->gdbarch, "respondsToSelector:");
+  if (responds_selector == 0)
+    responds_selector
+      = lookup_child_selector (exp->gdbarch, "respondsTo:");
+
+  if (responds_selector == 0)
+    error (_("no 'respondsTo:' or 'respondsToSelector:' method"));
+
+  method_selector
+    = lookup_child_selector (exp->gdbarch, "methodForSelector:");
+  if (method_selector == 0)
+    method_selector
+      = lookup_child_selector (exp->gdbarch, "methodFor:");
+
+  if (method_selector == 0)
+    error (_("no 'methodFor:' or 'methodForSelector:' method"));
+
+  /* Call the verification method, to make sure that the target
+     class implements the desired method.  */
+
+  argvec[0] = msg_send;
+  argvec[1] = target;
+  argvec[2] = value_from_longest (long_type, responds_selector);
+  argvec[3] = value_from_longest (long_type, selector);
+  argvec[4] = 0;
+
+  ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
+  if (gnu_runtime)
+    {
+      /* Function objc_msg_lookup returns a pointer.  */
+      argvec[0] = ret;
+      ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
+    }
+  if (value_as_long (ret) == 0)
+    error (_("Target does not respond to this message selector."));
+
+  /* Call "methodForSelector:" method, to get the address of a
+     function method that implements this selector for this
+     class.  If we can find a symbol at that address, then we
+     know the return type, parameter types etc.  (that's a good
+     thing).  */
+
+  argvec[0] = msg_send;
+  argvec[1] = target;
+  argvec[2] = value_from_longest (long_type, method_selector);
+  argvec[3] = value_from_longest (long_type, selector);
+  argvec[4] = 0;
+
+  ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
+  if (gnu_runtime)
+    {
+      argvec[0] = ret;
+      ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
+    }
+
+  /* ret should now be the selector.  */
+
+  addr = value_as_long (ret);
+  if (addr)
+    {
+      struct symbol *sym = NULL;
+
+      /* The address might point to a function descriptor;
+	 resolve it to the actual code address instead.  */
+      addr = gdbarch_convert_from_func_ptr_addr (exp->gdbarch, addr,
+						 current_top_target ());
+
+      /* Is it a high_level symbol?  */
+      sym = find_pc_function (addr);
+      if (sym != NULL)
+	method = value_of_variable (sym, 0);
+    }
+
+  /* If we found a method with symbol information, check to see
+     if it returns a struct.  Otherwise assume it doesn't.  */
+
+  if (method)
+    {
+      CORE_ADDR funaddr;
+      struct type *val_type;
+
+      funaddr = find_function_addr (method, &val_type);
+
+      block_for_pc (funaddr);
+
+      val_type = check_typedef (val_type);
+
+      if ((val_type == NULL)
+	  || (val_type->code () == TYPE_CODE_ERROR))
+	{
+	  if (expect_type != NULL)
+	    val_type = expect_type;
+	}
+
+      struct_return = using_struct_return (exp->gdbarch, method,
+					   val_type);
+    }
+  else if (expect_type != NULL)
+    {
+      struct_return = using_struct_return (exp->gdbarch, NULL,
+					   check_typedef (expect_type));
+    }
+
+  /* Found a function symbol.  Now we will substitute its
+     value in place of the message dispatcher (obj_msgSend),
+     so that we call the method directly instead of thru
+     the dispatcher.  The main reason for doing this is that
+     we can now evaluate the return value and parameter values
+     according to their known data types, in case we need to
+     do things like promotion, dereferencing, special handling
+     of structs and doubles, etc.
+
+     We want to use the type signature of 'method', but still
+     jump to objc_msgSend() or objc_msgSend_stret() to better
+     mimic the behavior of the runtime.  */
+
+  if (method)
+    {
+      if (value_type (method)->code () != TYPE_CODE_FUNC)
+	error (_("method address has symbol information "
+		 "with non-function type; skipping"));
+
+      /* Create a function pointer of the appropriate type, and
+	 replace its value with the value of msg_send or
+	 msg_send_stret.  We must use a pointer here, as
+	 msg_send and msg_send_stret are of pointer type, and
+	 the representation may be different on systems that use
+	 function descriptors.  */
+      if (struct_return)
+	called_method
+	  = value_from_pointer (lookup_pointer_type (value_type (method)),
+				value_as_address (msg_send_stret));
+      else
+	called_method
+	  = value_from_pointer (lookup_pointer_type (value_type (method)),
+				value_as_address (msg_send));
+    }
+  else
+    {
+      if (struct_return)
+	called_method = msg_send_stret;
+      else
+	called_method = msg_send;
+    }
+
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      /* If the return type doesn't look like a function type,
+	 call an error.  This can happen if somebody tries to
+	 turn a variable into a function call.  This is here
+	 because people often want to call, eg, strcmp, which
+	 gdb doesn't know is a function.  If gdb isn't asked for
+	 it's opinion (ie. through "whatis"), it won't offer
+	 it.  */
+
+      struct type *callee_type = value_type (called_method);
+
+      if (callee_type && callee_type->code () == TYPE_CODE_PTR)
+	callee_type = TYPE_TARGET_TYPE (callee_type);
+      callee_type = TYPE_TARGET_TYPE (callee_type);
+
+      if (callee_type)
+	{
+	  if ((callee_type->code () == TYPE_CODE_ERROR) && expect_type)
+	    return allocate_value (expect_type);
+	  else
+	    return allocate_value (callee_type);
+	}
+      else
+	error (_("Expression of type other than "
+		 "\"method returning ...\" used as a method"));
+    }
+
+  /* Now depending on whether we found a symbol for the method,
+     we will either call the runtime dispatcher or the method
+     directly.  */
+
+  args[0] = target;
+  args[1] = value_from_longest (long_type, selector);
+
+  if (gnu_runtime && (method != NULL))
+    {
+      /* Function objc_msg_lookup returns a pointer.  */
+      struct type *tem_type = value_type (called_method);
+      tem_type = lookup_pointer_type (lookup_function_type (tem_type));
+      deprecated_set_value_type (called_method, tem_type);
+      called_method = call_function_by_hand (called_method, NULL, args);
+    }
+
+  return call_function_by_hand (called_method, NULL, args);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2376,36 +2647,20 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_OBJC_MSGCALL:
       {				/* Objective C message (method) call.  */
-
-	CORE_ADDR responds_selector = 0;
-	CORE_ADDR method_selector = 0;
-
 	CORE_ADDR selector = 0;
 
-	int struct_return = 0;
 	enum noside sub_no_side = EVAL_NORMAL;
 
-	struct value *msg_send = NULL;
-	struct value *msg_send_stret = NULL;
-	int gnu_runtime = 0;
-
 	struct value *target = NULL;
-	struct value *method = NULL;
-	struct value *called_method = NULL; 
 
 	struct type *selector_type = NULL;
-	struct type *long_type;
-
-	struct value *ret = NULL;
-	CORE_ADDR addr = 0;
 
 	selector = exp->elts[pc + 1].longconst;
 	nargs = exp->elts[pc + 2].longconst;
-	argvec = XALLOCAVEC (struct value *, nargs + 5);
+	argvec = XALLOCAVEC (struct value *, nargs + 3);
 
 	(*pos) += 3;
 
-	long_type = builtin_type (exp->gdbarch)->builtin_long;
 	selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
 
 	if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -2416,249 +2671,26 @@ evaluate_subexp_standard (struct type *expect_type,
 	target = evaluate_subexp (selector_type, exp, pos, sub_no_side);
 
 	if (value_as_long (target) == 0)
- 	  return value_from_longest (long_type, 0);
-	
-	if (lookup_minimal_symbol ("objc_msg_lookup", 0, 0).minsym)
-	  gnu_runtime = 1;
-	
-	/* Find the method dispatch (Apple runtime) or method lookup
-	   (GNU runtime) function for Objective-C.  These will be used
-	   to lookup the symbol information for the method.  If we
-	   can't find any symbol information, then we'll use these to
-	   call the method, otherwise we can call the method
-	   directly.  The msg_send_stret function is used in the special
-	   case of a method that returns a structure (Apple runtime 
-	   only).  */
-	if (gnu_runtime)
-	  {
-	    type = selector_type;
-
-	    type = lookup_function_type (type);
-	    type = lookup_pointer_type (type);
-	    type = lookup_function_type (type);
-	    type = lookup_pointer_type (type);
-
-	    msg_send = find_function_in_inferior ("objc_msg_lookup", NULL);
-	    msg_send_stret
-	      = find_function_in_inferior ("objc_msg_lookup", NULL);
-
-	    msg_send = value_from_pointer (type, value_as_address (msg_send));
-	    msg_send_stret = value_from_pointer (type, 
-					value_as_address (msg_send_stret));
-	  }
+	  sub_no_side = EVAL_SKIP;
 	else
-	  {
-	    msg_send = find_function_in_inferior ("objc_msgSend", NULL);
-	    /* Special dispatcher for methods returning structs.  */
-	    msg_send_stret
-	      = find_function_in_inferior ("objc_msgSend_stret", NULL);
-	  }
-
-	/* Verify the target object responds to this method.  The
-	   standard top-level 'Object' class uses a different name for
-	   the verification method than the non-standard, but more
-	   often used, 'NSObject' class.  Make sure we check for both.  */
-
-	responds_selector
-	  = lookup_child_selector (exp->gdbarch, "respondsToSelector:");
-	if (responds_selector == 0)
-	  responds_selector
-	    = lookup_child_selector (exp->gdbarch, "respondsTo:");
-	
-	if (responds_selector == 0)
-	  error (_("no 'respondsTo:' or 'respondsToSelector:' method"));
-	
-	method_selector
-	  = lookup_child_selector (exp->gdbarch, "methodForSelector:");
-	if (method_selector == 0)
-	  method_selector
-	    = lookup_child_selector (exp->gdbarch, "methodFor:");
-	
-	if (method_selector == 0)
-	  error (_("no 'methodFor:' or 'methodForSelector:' method"));
-
-	/* Call the verification method, to make sure that the target
-	 class implements the desired method.  */
-
-	argvec[0] = msg_send;
-	argvec[1] = target;
-	argvec[2] = value_from_longest (long_type, responds_selector);
-	argvec[3] = value_from_longest (long_type, selector);
-	argvec[4] = 0;
-
-	ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
-	if (gnu_runtime)
-	  {
-	    /* Function objc_msg_lookup returns a pointer.  */
-	    argvec[0] = ret;
-	    ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
-	  }
-	if (value_as_long (ret) == 0)
-	  error (_("Target does not respond to this message selector."));
-
-	/* Call "methodForSelector:" method, to get the address of a
-	   function method that implements this selector for this
-	   class.  If we can find a symbol at that address, then we
-	   know the return type, parameter types etc.  (that's a good
-	   thing).  */
-
-	argvec[0] = msg_send;
-	argvec[1] = target;
-	argvec[2] = value_from_longest (long_type, method_selector);
-	argvec[3] = value_from_longest (long_type, selector);
-	argvec[4] = 0;
-
-	ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
-	if (gnu_runtime)
-	  {
-	    argvec[0] = ret;
-	    ret = call_function_by_hand (argvec[0], NULL, {argvec + 1, 3});
-	  }
-
-	/* ret should now be the selector.  */
-
-	addr = value_as_long (ret);
-	if (addr)
-	  {
-	    struct symbol *sym = NULL;
-
-	    /* The address might point to a function descriptor;
-	       resolve it to the actual code address instead.  */
-	    addr = gdbarch_convert_from_func_ptr_addr (exp->gdbarch, addr,
-						       current_top_target ());
-
-	    /* Is it a high_level symbol?  */
-	    sym = find_pc_function (addr);
-	    if (sym != NULL) 
-	      method = value_of_variable (sym, 0);
-	  }
-
-	/* If we found a method with symbol information, check to see
-	   if it returns a struct.  Otherwise assume it doesn't.  */
-
-	if (method)
-	  {
-	    CORE_ADDR funaddr;
-	    struct type *val_type;
-
-	    funaddr = find_function_addr (method, &val_type);
-
-	    block_for_pc (funaddr);
-
-	    val_type = check_typedef (val_type);
-
-	    if ((val_type == NULL)
-		|| (val_type->code () == TYPE_CODE_ERROR))
-	      {
-		if (expect_type != NULL)
-		  val_type = expect_type;
-	      }
-
-	    struct_return = using_struct_return (exp->gdbarch, method,
-						 val_type);
-	  }
-	else if (expect_type != NULL)
-	  {
-	    struct_return = using_struct_return (exp->gdbarch, NULL,
-						 check_typedef (expect_type));
-	  }
-
-	/* Found a function symbol.  Now we will substitute its
-	   value in place of the message dispatcher (obj_msgSend),
-	   so that we call the method directly instead of thru
-	   the dispatcher.  The main reason for doing this is that
-	   we can now evaluate the return value and parameter values
-	   according to their known data types, in case we need to
-	   do things like promotion, dereferencing, special handling
-	   of structs and doubles, etc.
-	  
-	   We want to use the type signature of 'method', but still
-	   jump to objc_msgSend() or objc_msgSend_stret() to better
-	   mimic the behavior of the runtime.  */
-	
-	if (method)
-	  {
-	    if (value_type (method)->code () != TYPE_CODE_FUNC)
-	      error (_("method address has symbol information "
-		       "with non-function type; skipping"));
-
-	    /* Create a function pointer of the appropriate type, and
-	       replace its value with the value of msg_send or
-	       msg_send_stret.  We must use a pointer here, as
-	       msg_send and msg_send_stret are of pointer type, and
-	       the representation may be different on systems that use
-	       function descriptors.  */
-	    if (struct_return)
-	      called_method
-		= value_from_pointer (lookup_pointer_type (value_type (method)),
-				      value_as_address (msg_send_stret));
-	    else
-	      called_method
-		= value_from_pointer (lookup_pointer_type (value_type (method)),
-				      value_as_address (msg_send));
-	  }
-	else
-	  {
-	    if (struct_return)
-	      called_method = msg_send_stret;
-	    else
-	      called_method = msg_send;
-	  }
-
-	if (noside == EVAL_SKIP)
-	  return eval_skip_value (exp);
-
-	if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	  {
-	    /* If the return type doesn't look like a function type,
-	       call an error.  This can happen if somebody tries to
-	       turn a variable into a function call.  This is here
-	       because people often want to call, eg, strcmp, which
-	       gdb doesn't know is a function.  If gdb isn't asked for
-	       it's opinion (ie. through "whatis"), it won't offer
-	       it.  */
-
-	    struct type *callee_type = value_type (called_method);
-
-	    if (callee_type && callee_type->code () == TYPE_CODE_PTR)
-	      callee_type = TYPE_TARGET_TYPE (callee_type);
-	    callee_type = TYPE_TARGET_TYPE (callee_type);
-
-	    if (callee_type)
-	    {
-	      if ((callee_type->code () == TYPE_CODE_ERROR) && expect_type)
-		return allocate_value (expect_type);
-	      else
-		return allocate_value (callee_type);
-	    }
-	    else
-	      error (_("Expression of type other than "
-		       "\"method returning ...\" used as a method"));
-	  }
+	  sub_no_side = noside;
 
 	/* Now depending on whether we found a symbol for the method,
 	   we will either call the runtime dispatcher or the method
 	   directly.  */
 
-	argvec[0] = called_method;
-	argvec[1] = target;
-	argvec[2] = value_from_longest (long_type, selector);
+	argvec[0] = nullptr;
+	argvec[1] = nullptr;
 	/* User-supplied arguments.  */
 	for (tem = 0; tem < nargs; tem++)
-	  argvec[tem + 3] = evaluate_subexp_with_coercion (exp, pos, noside);
+	  argvec[tem + 2] = evaluate_subexp_with_coercion (exp, pos,
+							   sub_no_side);
 	argvec[tem + 3] = 0;
 
-	auto call_args = gdb::make_array_view (argvec + 1, nargs + 2);
+	auto call_args = gdb::make_array_view (argvec, nargs + 3);
 
-	if (gnu_runtime && (method != NULL))
-	  {
-	    /* Function objc_msg_lookup returns a pointer.  */
-	    deprecated_set_value_type (argvec[0],
-				       lookup_pointer_type (lookup_function_type (value_type (argvec[0]))));
-	    argvec[0] = call_function_by_hand (argvec[0], NULL, call_args);
-	  }
-
-	return call_function_by_hand (argvec[0], NULL, call_args);
+	return eval_op_objc_msgcall (expect_type, exp, noside, selector,
+				     target, call_args);
       }
       break;
 
