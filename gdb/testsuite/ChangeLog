@@ -1,5 +1,9 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-finish-breakpoint.exp: Make test names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-strfns.exp: Use with_test_prefix to make test
 	names unique.
 
