@@ -1,5 +1,9 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ax-gdb.c (comma_operation::do_generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class repeat_operation): New.
 	* eval.c (eval_op_repeat): No longer static.  Remove "op"
 	parameter.

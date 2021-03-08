@@ -1208,6 +1208,37 @@ protected:
     override;
 };
 
+/* C-style comma operator.  */
+class comma_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    /* The left-hand-side is only evaluated for side effects, so don't
+       bother in other modes.  */
+    if (noside == EVAL_NORMAL)
+      std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  { return BINOP_COMMA; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

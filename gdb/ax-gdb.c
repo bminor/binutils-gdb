@@ -2469,6 +2469,28 @@ repeat_operation::do_generate_ax (struct expression *exp,
   value->type = array;
 }
 
+void
+comma_operation::do_generate_ax (struct expression *exp,
+				 struct agent_expr *ax,
+				 struct axs_value *value,
+				 struct type *cast_type)
+{
+  /* Note that we need to be a little subtle about generating code
+     for comma.  In C, we can do some optimizations here because
+     we know the left operand is only being evaluated for effect.
+     However, if the tracing kludge is in effect, then we always
+     need to evaluate the left hand side fully, so that all the
+     variables it mentions get traced.  */
+  struct axs_value value1;
+  std::get<0> (m_storage)->generate_ax (exp, ax, &value1);
+  /* Don't just dispose of the left operand.  We might be tracing,
+     in which case we want to emit code to trace it if it's an
+     lvalue.  */
+  gen_traced_pop (ax, &value1);
+  std::get<1> (m_storage)->generate_ax (exp, ax, value);
+  /* It's the consumer's responsibility to trace the right operand.  */
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary
