@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-exp.y: Create operations.
+	(rust_parser::convert_params_to_expression): Change return type.
+	(binop_maker_ftype): New typedef.
+	(maker_map): New global.
+	(rust_parser::convert_ast_to_expression): Change return type.
+	(rust_language::parser): Update.
+	(_initialize_rust_exp): Initialize maker_map.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* stap-probe.c (binop_maker_ftype): New typedef.
 	(stap_maker_map): New global.
 	(stap_make_binop): New function.

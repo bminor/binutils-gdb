@@ -41,6 +41,8 @@
 #include "gdbsupport/selftest.h"
 #include "value.h"
 #include "gdbarch.h"
+#include "rust-exp.h"
+#include <unordered_map>
 
 #define GDB_YY_REMAP_PREFIX rust
 #include "yy-remap.h"
@@ -246,11 +248,11 @@ struct rust_parser
   std::vector<struct type *> convert_params_to_types (rust_op_vector *params);
   struct type *convert_ast_to_type (const struct rust_op *operation);
   const char *convert_name (const struct rust_op *operation);
-  void convert_params_to_expression (rust_op_vector *params,
-				     const struct rust_op *top);
-  void convert_ast_to_expression (const struct rust_op *operation,
-				  const struct rust_op *top,
-				  bool want_type = false);
+  std::vector<expr::operation_up> convert_params_to_expression
+       (rust_op_vector *params, const struct rust_op *top);
+  expr::operation_up convert_ast_to_expression (const struct rust_op *opn,
+						const struct rust_op *top,
+						bool want_type = false);
 
   struct rust_op *ast_basic_type (enum type_code typecode);
   const struct rust_op *ast_operation (enum exp_opcode opcode,
@@ -2183,13 +2185,24 @@ rust_parser::convert_name (const struct rust_op *operation)
 /* A helper function that converts a vec of rust_ops to a gdb
    expression.  */
 
-void
+std::vector<expr::operation_up>
 rust_parser::convert_params_to_expression (rust_op_vector *params,
 					   const struct rust_op *top)
 {
+  std::vector<expr::operation_up> result;
   for (const rust_op *elem : *params)
-    convert_ast_to_expression (elem, top);
+    result.push_back (convert_ast_to_expression (elem, top));
+  result.shrink_to_fit ();
+  return result;
 }
+
+typedef expr::operation_up binop_maker_ftype (expr::operation_up &&,
+					      expr::operation_up &&);
+
+/* Map from an expression opcode to a function that will create an
+   instance of the appropriate operation subclass.  Only binary
+   operations are handled this way.  */
+static std::unordered_map<exp_opcode, binop_maker_ftype *> maker_map;
 
 /* Lower a rust_op to a gdb expression.  STATE is the parser state.
    OPERATION is the operation to lower.  TOP is a pointer to the
@@ -2200,62 +2213,87 @@ rust_parser::convert_params_to_expression (rust_op_vector *params,
    erroring).  If WANT_TYPE is set, then the similar TOP handling is
    not done.  */
 
-void
+expr::operation_up
 rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 					const struct rust_op *top,
 					bool want_type)
 {
+  using namespace expr;
+
   switch (operation->opcode)
     {
     case OP_LONG:
-      write_exp_elt_opcode (pstate, OP_LONG);
-      write_exp_elt_type (pstate, operation->left.typed_val_int.type);
-      write_exp_elt_longcst (pstate, operation->left.typed_val_int.val);
-      write_exp_elt_opcode (pstate, OP_LONG);
-      break;
+      return operation_up
+	(new long_const_operation (operation->left.typed_val_int.type,
+				   operation->left.typed_val_int.val));
 
     case OP_FLOAT:
-      write_exp_elt_opcode (pstate, OP_FLOAT);
-      write_exp_elt_type (pstate, operation->left.typed_val_float.type);
-      write_exp_elt_floatcst (pstate, operation->left.typed_val_float.val);
-      write_exp_elt_opcode (pstate, OP_FLOAT);
-      break;
+      {
+	float_data data;
+	memcpy (data.data (), operation->left.typed_val_float.val,
+		sizeof (operation->left.typed_val_float.val));
+	return operation_up
+	  (new float_const_operation (operation->left.typed_val_float.type,
+				      data));
+      }
 
     case STRUCTOP_STRUCT:
       {
-	convert_ast_to_expression (operation->left.op, top);
-
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	auto result = new rust_structop (std::move (lhs),
+					 operation->right.sval.ptr);
 	if (operation->completing)
-	  pstate->mark_struct_expression ();
-	write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
-	write_exp_string (pstate, operation->right.sval);
-	write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
+	  pstate->mark_struct_expression (result);
+	return operation_up (result);
       }
-      break;
 
     case STRUCTOP_ANONYMOUS:
       {
-	convert_ast_to_expression (operation->left.op, top);
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
 
-	write_exp_elt_opcode (pstate, STRUCTOP_ANONYMOUS);
-	write_exp_elt_longcst (pstate, operation->right.typed_val_int.val);
-	write_exp_elt_opcode (pstate, STRUCTOP_ANONYMOUS);
+	return operation_up
+	  (new rust_struct_anon (operation->right.typed_val_int.val,
+				 std::move (lhs)));
       }
-      break;
 
     case UNOP_SIZEOF:
-      convert_ast_to_expression (operation->left.op, top, true);
-      write_exp_elt_opcode (pstate, UNOP_SIZEOF);
-      break;
+      {
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top,
+						      true);
+	return operation_up
+	  (new unop_sizeof_operation (std::move (lhs)));
+      }
 
     case UNOP_PLUS:
+      {
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	return operation_up
+	  (new unary_plus_operation (std::move (lhs)));
+      }
     case UNOP_NEG:
+      {
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	return operation_up
+	  (new unary_neg_operation (std::move (lhs)));
+      }
     case UNOP_COMPLEMENT:
+      {
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	return operation_up
+	  (new rust_unop_compl_operation (std::move (lhs)));
+      }
     case UNOP_IND:
+      {
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	return operation_up
+	  (new rust_unop_ind_operation (std::move (lhs)));
+      }
     case UNOP_ADDR:
-      convert_ast_to_expression (operation->left.op, top);
-      write_exp_elt_opcode (pstate, operation->opcode);
-      break;
+      {
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	return operation_up
+	  (new rust_unop_addr_operation (std::move (lhs)));
+      }
 
     case BINOP_SUBSCRIPT:
     case BINOP_MUL:
@@ -2279,45 +2317,45 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
     case BINOP_RSH:
     case BINOP_ASSIGN:
     case OP_RUST_ARRAY:
-      convert_ast_to_expression (operation->left.op, top);
-      convert_ast_to_expression (operation->right.op, top);
-      if (operation->compound_assignment)
-	{
-	  write_exp_elt_opcode (pstate, BINOP_ASSIGN_MODIFY);
-	  write_exp_elt_opcode (pstate, operation->opcode);
-	  write_exp_elt_opcode (pstate, BINOP_ASSIGN_MODIFY);
-	}
-      else
-	write_exp_elt_opcode (pstate, operation->opcode);
+      {
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	operation_up rhs = convert_ast_to_expression (operation->right.op,
+						      top);
+	operation_up result;
+	if (operation->compound_assignment)
+	  result = (operation_up
+		    (new assign_modify_operation (operation->opcode,
+						  std::move (lhs),
+						  std::move (rhs))));
+	else
+	  {
+	    auto iter = maker_map.find (operation->opcode);
+	    gdb_assert (iter != maker_map.end ());
+	    result = iter->second (std::move (lhs), std::move (rhs));
+	  }
 
-      if (operation->compound_assignment
-	  || operation->opcode == BINOP_ASSIGN)
-	{
-	  struct type *type;
+	if (operation->compound_assignment
+	    || operation->opcode == BINOP_ASSIGN)
+	  {
+	    struct type *type
+	      = language_lookup_primitive_type (pstate->language (),
+						pstate->gdbarch (),
+						"()");
 
-	  type = language_lookup_primitive_type (pstate->language (),
-						 pstate->gdbarch (),
-						 "()");
+	    operation_up nil (new long_const_operation (type, 0));
+	    result.reset (new comma_operation (std::move (result),
+					       std::move (nil)));
+	  }
 
-	  write_exp_elt_opcode (pstate, OP_LONG);
-	  write_exp_elt_type (pstate, type);
-	  write_exp_elt_longcst (pstate, 0);
-	  write_exp_elt_opcode (pstate, OP_LONG);
-
-	  write_exp_elt_opcode (pstate, BINOP_COMMA);
-	}
-      break;
+	return result;
+      }
 
     case UNOP_CAST:
       {
 	struct type *type = convert_ast_to_type (operation->right.op);
-
-	convert_ast_to_expression (operation->left.op, top);
-	write_exp_elt_opcode (pstate, UNOP_CAST);
-	write_exp_elt_type (pstate, type);
-	write_exp_elt_opcode (pstate, UNOP_CAST);
+	operation_up lhs = convert_ast_to_expression (operation->left.op, top);
+	return operation_up (new unop_cast_operation (std::move (lhs), type));
       }
-      break;
 
     case OP_FUNCALL:
       {
@@ -2339,42 +2377,39 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 		    if (!rust_tuple_struct_type_p (type))
 		      error (_("Type %s is not a tuple struct"), varname);
 
+		    std::vector<std::pair<std::string, operation_up>> args
+		      (params->size ());
 		    for (int i = 0; i < params->size (); ++i)
 		      {
 			char *cell = get_print_cell ();
 
+			operation_up op
+			  = convert_ast_to_expression ((*params)[i], top);
 			xsnprintf (cell, PRINT_CELL_SIZE, "__%d", i);
-			write_exp_elt_opcode (pstate, OP_NAME);
-			write_exp_string (pstate, make_stoken (cell));
-			write_exp_elt_opcode (pstate, OP_NAME);
-
-			convert_ast_to_expression ((*params)[i], top);
+			args[i] = { cell, std::move (op) };
 		      }
 
-		    write_exp_elt_opcode (pstate, OP_AGGREGATE);
-		    write_exp_elt_type (pstate, type);
-		    write_exp_elt_longcst (pstate, 2 * params->size ());
-		    write_exp_elt_opcode (pstate, OP_AGGREGATE);
-		    break;
+		    return make_operation<rust_aggregate_operation>
+		      (type, operation_up (), std::move (args));
 		  }
 	      }
 	  }
-	convert_ast_to_expression (operation->left.op, top);
-	convert_params_to_expression (operation->right.params, top);
-	write_exp_elt_opcode (pstate, OP_FUNCALL);
-	write_exp_elt_longcst (pstate, operation->right.params->size ());
-	write_exp_elt_longcst (pstate, OP_FUNCALL);
+	operation_up callee = convert_ast_to_expression (operation->left.op,
+							 top);
+	std::vector<operation_up> args
+	  = convert_params_to_expression (operation->right.params, top);
+	return make_operation<funcall_operation> (std::move (callee),
+						  std::move (args));
       }
-      break;
 
     case OP_ARRAY:
-      gdb_assert (operation->left.op == NULL);
-      convert_params_to_expression (operation->right.params, top);
-      write_exp_elt_opcode (pstate, OP_ARRAY);
-      write_exp_elt_longcst (pstate, 0);
-      write_exp_elt_longcst (pstate, operation->right.params->size () - 1);
-      write_exp_elt_longcst (pstate, OP_ARRAY);
-      break;
+      {
+	gdb_assert (operation->left.op == NULL);
+	std::vector<operation_up> subexps
+	  = convert_params_to_expression (operation->right.params, top);
+	return make_operation<array_operation>
+	  (0, operation->right.params->size () - 1, std::move (subexps));
+      }
 
     case OP_VAR_VALUE:
       {
@@ -2383,20 +2418,16 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 
 	if (operation->left.sval.ptr[0] == '$')
 	  {
-	    write_dollar_variable (pstate, operation->left.sval);
-	    break;
+	    pstate->push_dollar (operation->left.sval);
+	    return pstate->pop ();
 	  }
 
 	varname = convert_name (operation);
 	sym = lookup_symbol (varname, pstate->expression_context_block,
 			     VAR_DOMAIN);
+	operation_up result;
 	if (sym.symbol != NULL && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
-	  {
-	    write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-	    write_exp_elt_block (pstate, sym.block);
-	    write_exp_elt_sym (pstate, sym.symbol);
-	    write_exp_elt_opcode (pstate, OP_VAR_VALUE);
-	  }
+	  result.reset (new var_value_operation (sym.symbol, sym.block));
 	else
 	  {
 	    struct type *type = NULL;
@@ -2417,52 +2448,35 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 		&& type->num_fields () == 0)
 	      {
 		/* A unit-like struct.  */
-		write_exp_elt_opcode (pstate, OP_AGGREGATE);
-		write_exp_elt_type (pstate, type);
-		write_exp_elt_longcst (pstate, 0);
-		write_exp_elt_opcode (pstate, OP_AGGREGATE);
+		result.reset (new rust_aggregate_operation (type, {}, {}));
 	      }
 	    else if (want_type || operation == top)
-	      {
-		write_exp_elt_opcode (pstate, OP_TYPE);
-		write_exp_elt_type (pstate, type);
-		write_exp_elt_opcode (pstate, OP_TYPE);
-	      }
+	      result.reset (new type_operation (type));
 	    else
 	      error (_("Found type '%s', which can't be "
 		       "evaluated in this context"),
 		     varname);
 	  }
+
+	return result;
       }
-      break;
 
     case OP_AGGREGATE:
       {
-	int length;
 	rust_set_vector *fields = operation->right.field_inits;
 	struct type *type;
 	const char *name;
 
-	length = 0;
+	operation_up others;
+	std::vector<std::pair<std::string, operation_up>> field_v;
 	for (const set_field &init : *fields)
 	  {
-	    if (init.name.ptr != NULL)
-	      {
-		write_exp_elt_opcode (pstate, OP_NAME);
-		write_exp_string (pstate, init.name);
-		write_exp_elt_opcode (pstate, OP_NAME);
-		++length;
-	      }
-
-	    convert_ast_to_expression (init.init, top);
-	    ++length;
+	    operation_up expr = convert_ast_to_expression (init.init, top);
 
 	    if (init.name.ptr == NULL)
-	      {
-		/* This is handled differently from Ada in our
-		   evaluator.  */
-		write_exp_elt_opcode (pstate, OP_OTHERS);
-	      }
+	      others = std::move (expr);
+	    else
+	      field_v.emplace_back (init.name.ptr, std::move (expr));
 	  }
 
 	name = convert_name (operation->left.op);
@@ -2475,34 +2489,29 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	    || rust_tuple_struct_type_p (type))
 	  error (_("Struct expression applied to non-struct type"));
 
-	write_exp_elt_opcode (pstate, OP_AGGREGATE);
-	write_exp_elt_type (pstate, type);
-	write_exp_elt_longcst (pstate, length);
-	write_exp_elt_opcode (pstate, OP_AGGREGATE);
+	return operation_up
+	  (new rust_aggregate_operation (type, std::move (others),
+					 std::move (field_v)));
       }
-      break;
 
     case OP_STRING:
-      {
-	write_exp_elt_opcode (pstate, OP_STRING);
-	write_exp_string (pstate, operation->left.sval);
-	write_exp_elt_opcode (pstate, OP_STRING);
-      }
-      break;
+      return (operation_up
+	      (new string_operation (::copy_name (operation->left.sval))));
 
     case OP_RANGE:
       {
 	enum range_flag kind = (RANGE_HIGH_BOUND_DEFAULT
 				| RANGE_LOW_BOUND_DEFAULT);
+	operation_up lhs, rhs;
 
 	if (operation->left.op != NULL)
 	  {
-	    convert_ast_to_expression (operation->left.op, top);
+	    lhs = convert_ast_to_expression (operation->left.op, top);
 	    kind &= ~RANGE_LOW_BOUND_DEFAULT;
 	  }
 	if (operation->right.op != NULL)
 	  {
-	    convert_ast_to_expression (operation->right.op, top);
+	    rhs = convert_ast_to_expression (operation->right.op, top);
 	    if (kind == (RANGE_HIGH_BOUND_DEFAULT | RANGE_LOW_BOUND_DEFAULT))
 	      {
 		kind = RANGE_LOW_BOUND_DEFAULT;
@@ -2524,11 +2533,10 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	    gdb_assert (!operation->inclusive);
 	  }
 
-	write_exp_elt_opcode (pstate, OP_RANGE);
-	write_exp_elt_longcst (pstate, kind);
-	write_exp_elt_opcode (pstate, OP_RANGE);
+	return operation_up (new rust_range_operation (kind,
+						       std::move (lhs),
+						       std::move (rhs)));
       }
-      break;
 
     default:
       gdb_assert_not_reached ("unhandled opcode in convert_ast_to_expression");
@@ -2551,7 +2559,11 @@ rust_language::parser (struct parser_state *state) const
   result = rustyyparse (&parser);
 
   if (!result || (state->parse_completion && parser.rust_ast != NULL))
-    parser.convert_ast_to_expression (parser.rust_ast, parser.rust_ast);
+    {
+      expr::operation_up op
+	= parser.convert_ast_to_expression (parser.rust_ast, parser.rust_ast);
+      state->set_operation (std::move (op));
+    }
 
   return result;
 }
@@ -2839,6 +2851,30 @@ _initialize_rust_exp ()
   /* If the regular expression was incorrect, it was a programming
      error.  */
   gdb_assert (code == 0);
+
+  using namespace expr;
+  maker_map[BINOP_SUBSCRIPT] = make_operation<rust_subscript_operation>;
+  maker_map[BINOP_MUL] = make_operation<mul_operation>;
+  maker_map[BINOP_REPEAT] = make_operation<repeat_operation>;
+  maker_map[BINOP_DIV] = make_operation<div_operation>;
+  maker_map[BINOP_REM] = make_operation<rem_operation>;
+  maker_map[BINOP_LESS] = make_operation<less_operation>;
+  maker_map[BINOP_GTR] = make_operation<gtr_operation>;
+  maker_map[BINOP_BITWISE_AND] = make_operation<bitwise_and_operation>;
+  maker_map[BINOP_BITWISE_IOR] = make_operation<bitwise_ior_operation>;
+  maker_map[BINOP_BITWISE_XOR] = make_operation<bitwise_xor_operation>;
+  maker_map[BINOP_ADD] = make_operation<add_operation>;
+  maker_map[BINOP_SUB] = make_operation<sub_operation>;
+  maker_map[BINOP_LOGICAL_OR] = make_operation<logical_or_operation>;
+  maker_map[BINOP_LOGICAL_AND] = make_operation<logical_and_operation>;
+  maker_map[BINOP_EQUAL] = make_operation<equal_operation>;
+  maker_map[BINOP_NOTEQUAL] = make_operation<notequal_operation>;
+  maker_map[BINOP_LEQ] = make_operation<leq_operation>;
+  maker_map[BINOP_GEQ] = make_operation<geq_operation>;
+  maker_map[BINOP_LSH] = make_operation<lsh_operation>;
+  maker_map[BINOP_RSH] = make_operation<rsh_operation>;
+  maker_map[BINOP_ASSIGN] = make_operation<assign_operation>;
+  maker_map[OP_RUST_ARRAY] = make_operation<rust_array_operation>;
 
 #if GDB_SELF_TEST
   selftests::register_test ("rust-lex", rust_lex_tests);
