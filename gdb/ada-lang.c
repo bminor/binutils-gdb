@@ -9939,6 +9939,27 @@ ada_evaluate_subexp_for_cast (expression *exp, int *pos,
   return ada_value_cast (to_type, val);
 }
 
+/* A helper function for TERNOP_IN_RANGE.  */
+
+static value *
+eval_ternop_in_range (struct type *expect_type, struct expression *exp,
+		      enum noside noside,
+		      value *arg1, value *arg2, value *arg3)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
+  struct type *type = language_bool_type (exp->language_defn, exp->gdbarch);
+  return
+    value_from_longest (type,
+			(value_less (arg1, arg3)
+			 || value_equal (arg1, arg3))
+			&& (value_less (arg2, arg1)
+			    || value_equal (arg2, arg1)));
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10551,18 +10572,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
       arg3 = evaluate_subexp (nullptr, exp, pos, noside);
 
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-
-      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
-      type = language_bool_type (exp->language_defn, exp->gdbarch);
-      return
-	value_from_longest (type,
-			    (value_less (arg1, arg3)
-			     || value_equal (arg1, arg3))
-			    && (value_less (arg2, arg1)
-				|| value_equal (arg2, arg1)));
+      return eval_ternop_in_range (expect_type, exp, noside, arg1, arg2, arg3);
 
     case OP_ATR_FIRST:
     case OP_ATR_LAST:
