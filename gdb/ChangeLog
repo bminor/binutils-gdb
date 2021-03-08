@@ -1,5 +1,25 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-exp.y: Create operations.
+	(empty_stoken): Remove.
+	(ada_pop, ada_wrap, ada_addrof, ada_un_wrap2, ada_wrap2)
+	(ada_wrap_op, ada_wrap3, ada_funcall): New functions.
+	(components): New global.
+	(push_component, choice_component, pop_component, pop_components):
+	New functions.
+	(associations): New global
+	(push_association, pop_association, pop_associations): New
+	functions.
+	(ada_parse): Update.
+	(write_var_from_sym, write_int): Create operations.
+	(write_exp_op_with_string): Remove.
+	(write_object_renaming, write_selectors, write_ambiguous_var)
+	(write_var_or_type, write_name_assoc): Create operations.
+	* ada-lang.h (ada_index_type): Declare.
+	* ada-lang.c (ada_index_type): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* f-exp.y: Create operations.
 	(f_language::parser): Update.
 

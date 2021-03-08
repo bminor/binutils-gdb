@@ -2898,13 +2898,9 @@ ada_array_element_type (struct type *type, int nindices)
   return NULL;
 }
 
-/* The type of nth index in arrays of given type (n numbering from 1).
-   Does not examine memory.  Throws an error if N is invalid or TYPE
-   is not an array type.  NAME is the name of the Ada attribute being
-   evaluated ('range, 'first, 'last, or 'length); it is used in building
-   the error message.  */
+/* See ada-lang.h.  */
 
-static struct type *
+struct type *
 ada_index_type (struct type *type, int n, const char *name)
 {
   struct type *result_type;
