@@ -984,6 +984,54 @@ opencl_structop_operation::evaluate (struct type *expect_type,
     }
 }
 
+value *
+opencl_logical_binop_operation::evaluate (struct type *expect_type,
+					  struct expression *exp,
+					  enum noside noside)
+{
+  enum exp_opcode op = std::get<0> (m_storage);
+  value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+
+  /* For scalar operations we need to avoid evaluating operands
+     unnecessarily.  However, for vector operations we always need to
+     evaluate both operands.  Unfortunately we only know which of the
+     two cases apply after we know the type of the second operand.
+     Therefore we evaluate it once using EVAL_AVOID_SIDE_EFFECTS.  */
+  value *arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp,
+						   EVAL_AVOID_SIDE_EFFECTS);
+  struct type *type1 = check_typedef (value_type (arg1));
+  struct type *type2 = check_typedef (value_type (arg2));
+
+  if ((type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
+      || (type2->code () == TYPE_CODE_ARRAY && type2->is_vector ()))
+    {
+      arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+
+      return opencl_relop (nullptr, exp, noside, op, arg1, arg2);
+    }
+  else
+    {
+      /* For scalar built-in types, only evaluate the right
+	 hand operand if the left hand operand compares
+	 unequal(&&)/equal(||) to 0.  */
+      int tmp = value_logical_not (arg1);
+
+      if (op == BINOP_LOGICAL_OR)
+	tmp = !tmp;
+
+      if (!tmp)
+	{
+	  arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+	  tmp = value_logical_not (arg2);
+	  if (op == BINOP_LOGICAL_OR)
+	    tmp = !tmp;
+	}
+
+      type1 = language_bool_type (exp->language_defn, exp->gdbarch);
+      return value_from_longest (type1, tmp);
+    }
+}
+
 } /* namespace expr */
 
 const struct exp_descriptor exp_descriptor_opencl =

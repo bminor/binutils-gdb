@@ -186,6 +186,23 @@ public:
   { return STRUCTOP_STRUCT; }
 };
 
+/* This handles the "&&" and "||" operations for OpenCL.  */
+class opencl_logical_binop_operation
+  : public tuple_holding_operation<enum exp_opcode,
+				   operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return std::get<0> (m_storage); }
+};
+
 }/* namespace expr */
 
 #endif /* C_EXP_H */
