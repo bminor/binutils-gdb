@@ -1,5 +1,9 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-block.exp: Give tests unique names.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-pp-maint.exp: Extend test names to make them
 	unique.
 
