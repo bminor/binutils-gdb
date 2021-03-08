@@ -39,6 +39,7 @@
 #include <vector>
 #include "cli/cli-style.h"
 #include "parser-defs.h"
+#include "rust-exp.h"
 
 /* See rust-lang.h.  */
 
@@ -1339,9 +1340,10 @@ eval_op_rust_ind (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_COMPLEMENT.  */
 
-static struct value *
+struct value *
 eval_op_rust_complement (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
+			 enum exp_opcode opcode,
 			 struct value *value)
 {
   if (noside == EVAL_SKIP)
@@ -1356,9 +1358,10 @@ eval_op_rust_complement (struct type *expect_type, struct expression *exp,
 
 /* A helper function for OP_ARRAY.  */
 
-static struct value *
+struct value *
 eval_op_rust_array (struct type *expect_type, struct expression *exp,
 		    enum noside noside,
+		    enum exp_opcode opcode,
 		    struct value *elt, struct value *ncopies)
 {
   int copies = value_as_long (ncopies);
@@ -1505,8 +1508,9 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		      int *pos, enum noside noside)
 {
   struct value *result;
+  enum exp_opcode op = exp->elts[*pos].opcode;
 
-  switch (exp->elts[*pos].opcode)
+  switch (op)
     {
     case UNOP_IND:
       {
@@ -1528,7 +1532,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	++*pos;
 	value = evaluate_subexp (nullptr, exp, pos, noside);
-	result = eval_op_rust_complement (expect_type, exp, noside, value);
+	result = eval_op_rust_complement (expect_type, exp, noside, op, value);
       }
       break;
 
@@ -1621,7 +1625,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	elt = rust_evaluate_subexp (NULL, exp, pos, noside);
 	ncopies = rust_evaluate_subexp (NULL, exp, pos, noside);
-	return eval_op_rust_array (expect_type, exp, noside, elt, ncopies);
+	return eval_op_rust_array (expect_type, exp, noside, op, elt, ncopies);
       }
       break;
 
