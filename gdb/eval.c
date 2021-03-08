@@ -636,6 +636,24 @@ fake_method::~fake_method ()
   xfree (m_type.fields ());
 }
 
+namespace expr
+{
+
+value *
+type_instance_operation::evaluate (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside)
+{
+  type_instance_flags flags = std::get<0> (m_storage);
+  std::vector<type *> &types = std::get<1> (m_storage);
+
+  fake_method fake_expect_type (flags, types.size (), types.data ());
+  return std::get<2> (m_storage)->evaluate (fake_expect_type.type (),
+					    exp, noside);
+}
+
+}
+
 /* Helper for evaluating an OP_VAR_VALUE.  */
 
 value *

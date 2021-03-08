@@ -1740,6 +1740,23 @@ protected:
     override;
 };
 
+/* Implement the "type instance" operation.  */
+class type_instance_operation
+  : public tuple_holding_operation<type_instance_flags, std::vector<type *>,
+				   operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return TYPE_INSTANCE; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
