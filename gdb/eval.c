@@ -2572,6 +2572,206 @@ adl_func_operation::evaluate (struct type *expect_type,
 
 }
 
+/* This function evaluates brace-initializers (in C/C++) for
+   structure types.  */
+
+struct value *
+array_operation::evaluate_struct_tuple (struct value *struct_val,
+					struct expression *exp,
+					enum noside noside, int nargs)
+{
+  const std::vector<operation_up> &in_args = std::get<2> (m_storage);
+  struct type *struct_type = check_typedef (value_type (struct_val));
+  struct type *field_type;
+  int fieldno = -1;
+
+  int idx = 0;
+  while (--nargs >= 0)
+    {
+      struct value *val = NULL;
+      int bitpos, bitsize;
+      bfd_byte *addr;
+
+      fieldno++;
+      /* Skip static fields.  */
+      while (fieldno < struct_type->num_fields ()
+	     && field_is_static (&struct_type->field (fieldno)))
+	fieldno++;
+      if (fieldno >= struct_type->num_fields ())
+	error (_("too many initializers"));
+      field_type = struct_type->field (fieldno).type ();
+      if (field_type->code () == TYPE_CODE_UNION
+	  && TYPE_FIELD_NAME (struct_type, fieldno)[0] == '0')
+	error (_("don't know which variant you want to set"));
+
+      /* Here, struct_type is the type of the inner struct,
+	 while substruct_type is the type of the inner struct.
+	 These are the same for normal structures, but a variant struct
+	 contains anonymous union fields that contain substruct fields.
+	 The value fieldno is the index of the top-level (normal or
+	 anonymous union) field in struct_field, while the value
+	 subfieldno is the index of the actual real (named inner) field
+	 in substruct_type.  */
+
+      field_type = struct_type->field (fieldno).type ();
+      if (val == 0)
+	val = in_args[idx++]->evaluate (field_type, exp, noside);
+
+      /* Now actually set the field in struct_val.  */
+
+      /* Assign val to field fieldno.  */
+      if (value_type (val) != field_type)
+	val = value_cast (field_type, val);
+
+      bitsize = TYPE_FIELD_BITSIZE (struct_type, fieldno);
+      bitpos = TYPE_FIELD_BITPOS (struct_type, fieldno);
+      addr = value_contents_writeable (struct_val) + bitpos / 8;
+      if (bitsize)
+	modify_field (struct_type, addr,
+		      value_as_long (val), bitpos % 8, bitsize);
+      else
+	memcpy (addr, value_contents (val),
+		TYPE_LENGTH (value_type (val)));
+
+    }
+  return struct_val;
+}
+
+value *
+array_operation::evaluate (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside)
+{
+  int tem;
+  int tem2 = std::get<0> (m_storage);
+  int tem3 = std::get<1> (m_storage);
+  const std::vector<operation_up> &in_args = std::get<2> (m_storage);
+  int nargs = tem3 - tem2 + 1;
+  struct type *type = expect_type ? check_typedef (expect_type) : nullptr;
+
+  if (expect_type != nullptr && noside != EVAL_SKIP
+      && type->code () == TYPE_CODE_STRUCT)
+    {
+      struct value *rec = allocate_value (expect_type);
+
+      memset (value_contents_raw (rec), '\0', TYPE_LENGTH (type));
+      return evaluate_struct_tuple (rec, exp, noside, nargs);
+    }
+
+  if (expect_type != nullptr && noside != EVAL_SKIP
+      && type->code () == TYPE_CODE_ARRAY)
+    {
+      struct type *range_type = type->index_type ();
+      struct type *element_type = TYPE_TARGET_TYPE (type);
+      struct value *array = allocate_value (expect_type);
+      int element_size = TYPE_LENGTH (check_typedef (element_type));
+      LONGEST low_bound, high_bound, index;
+
+      if (!get_discrete_bounds (range_type, &low_bound, &high_bound))
+	{
+	  low_bound = 0;
+	  high_bound = (TYPE_LENGTH (type) / element_size) - 1;
+	}
+      index = low_bound;
+      memset (value_contents_raw (array), 0, TYPE_LENGTH (expect_type));
+      for (tem = nargs; --nargs >= 0;)
+	{
+	  struct value *element;
+
+	  element = in_args[index - low_bound]->evaluate (element_type,
+							  exp, noside);
+	  if (value_type (element) != element_type)
+	    element = value_cast (element_type, element);
+	  if (index > high_bound)
+	    /* To avoid memory corruption.  */
+	    error (_("Too many array elements"));
+	  memcpy (value_contents_raw (array)
+		  + (index - low_bound) * element_size,
+		  value_contents (element),
+		  element_size);
+	  index++;
+	}
+      return array;
+    }
+
+  if (expect_type != nullptr && noside != EVAL_SKIP
+      && type->code () == TYPE_CODE_SET)
+    {
+      struct value *set = allocate_value (expect_type);
+      gdb_byte *valaddr = value_contents_raw (set);
+      struct type *element_type = type->index_type ();
+      struct type *check_type = element_type;
+      LONGEST low_bound, high_bound;
+
+      /* Get targettype of elementtype.  */
+      while (check_type->code () == TYPE_CODE_RANGE
+	     || check_type->code () == TYPE_CODE_TYPEDEF)
+	check_type = TYPE_TARGET_TYPE (check_type);
+
+      if (!get_discrete_bounds (element_type, &low_bound, &high_bound))
+	error (_("(power)set type with unknown size"));
+      memset (valaddr, '\0', TYPE_LENGTH (type));
+      int idx = 0;
+      for (tem = 0; tem < nargs; tem++)
+	{
+	  LONGEST range_low, range_high;
+	  struct type *range_low_type, *range_high_type;
+	  struct value *elem_val;
+
+	  elem_val = in_args[idx++]->evaluate (element_type, exp, noside);
+	  range_low_type = range_high_type = value_type (elem_val);
+	  range_low = range_high = value_as_long (elem_val);
+
+	  /* Check types of elements to avoid mixture of elements from
+	     different types. Also check if type of element is "compatible"
+	     with element type of powerset.  */
+	  if (range_low_type->code () == TYPE_CODE_RANGE)
+	    range_low_type = TYPE_TARGET_TYPE (range_low_type);
+	  if (range_high_type->code () == TYPE_CODE_RANGE)
+	    range_high_type = TYPE_TARGET_TYPE (range_high_type);
+	  if ((range_low_type->code () != range_high_type->code ())
+	      || (range_low_type->code () == TYPE_CODE_ENUM
+		  && (range_low_type != range_high_type)))
+	    /* different element modes.  */
+	    error (_("POWERSET tuple elements of different mode"));
+	  if ((check_type->code () != range_low_type->code ())
+	      || (check_type->code () == TYPE_CODE_ENUM
+		  && range_low_type != check_type))
+	    error (_("incompatible POWERSET tuple elements"));
+	  if (range_low > range_high)
+	    {
+	      warning (_("empty POWERSET tuple range"));
+	      continue;
+	    }
+	  if (range_low < low_bound || range_high > high_bound)
+	    error (_("POWERSET tuple element out of range"));
+	  range_low -= low_bound;
+	  range_high -= low_bound;
+	  for (; range_low <= range_high; range_low++)
+	    {
+	      int bit_index = (unsigned) range_low % TARGET_CHAR_BIT;
+
+	      if (gdbarch_byte_order (exp->gdbarch) == BFD_ENDIAN_BIG)
+		bit_index = TARGET_CHAR_BIT - 1 - bit_index;
+	      valaddr[(unsigned) range_low / TARGET_CHAR_BIT]
+		|= 1 << bit_index;
+	    }
+	}
+      return set;
+    }
+
+  value **argvec = XALLOCAVEC (struct value *, nargs);
+  for (tem = 0; tem < nargs; tem++)
+    {
+      /* Ensure that array expressions are coerced into pointer
+	 objects.  */
+      argvec[tem] = in_args[tem]->evaluate_with_coercion (exp, noside);
+    }
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  return value_array (tem2, tem3, argvec);
+}
+
 }
 
 struct value *

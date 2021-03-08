@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class array_operation): New.
+	* eval.c (array_operation::evaluate_struct_tuple)
+	(array_operation::evaluate): New methods.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class adl_func_operation): New.
 	* eval.c (adl_func_operation::evaluate): New method.
 

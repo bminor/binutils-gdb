@@ -2049,6 +2049,28 @@ public:
   { return OP_ADL_FUNC; }
 };
 
+/* The OP_ARRAY operation.  */
+class array_operation
+  : public tuple_holding_operation<int, int, std::vector<operation_up>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_ARRAY; }
+
+private:
+
+  struct value *evaluate_struct_tuple (struct value *struct_val,
+				       struct expression *exp,
+				       enum noside noside, int nargs);
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
