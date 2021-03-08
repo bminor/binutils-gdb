@@ -1209,7 +1209,7 @@ eval_op_f_kind (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_FORTRAN_ALLOCATED.  */
 
-static struct value *
+struct value *
 eval_op_f_allocated (struct type *expect_type, struct expression *exp,
 		     enum noside noside, enum exp_opcode op,
 		     struct value *arg1)

@@ -1,6 +1,6 @@
 /* Definitions for Fortran expressions
 
-   Copyright (C) 2020 Free Software Foundation, Inc.
+   Copyright (C) 2020, 2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -68,6 +68,11 @@ extern struct value *eval_op_f_associated (struct type *expect_type,
 					   enum exp_opcode opcode,
 					   struct value *arg1,
 					   struct value *arg2);
+extern struct value * eval_op_f_allocated (struct type *expect_type,
+					   struct expression *exp,
+					   enum noside noside,
+					   enum exp_opcode op,
+					   struct value *arg1);
 
 namespace expr
 {
@@ -79,6 +84,8 @@ using fortran_floor_operation = unop_operation<UNOP_FORTRAN_FLOOR,
 					       eval_op_f_floor>;
 using fortran_kind_operation = unop_operation<UNOP_FORTRAN_KIND,
 					      eval_op_f_kind>;
+using fortran_allocated_operation = unop_operation<UNOP_FORTRAN_ALLOCATED,
+						   eval_op_f_allocated>;
 
 using fortran_mod_operation = binop_operation<BINOP_MOD, eval_op_f_mod>;
 using fortran_modulo_operation = binop_operation<BINOP_FORTRAN_MODULO,
