@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* opencl-lang.c (opencl_value_cast): No longer static.
+	* c-exp.h (opencl_cast_type_operation): New typedef.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* f-exp.h (eval_op_f_allocated): Declare.
 	(fortran_allocated_operation): New typedef.
 	* f-lang.c (eval_op_f_allocated): No longer static.

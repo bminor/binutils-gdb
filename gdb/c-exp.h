@@ -27,6 +27,8 @@ extern struct value *eval_op_objc_selector (struct type *expect_type,
 					    struct expression *exp,
 					    enum noside noside,
 					    const char *sel);
+extern struct value *opencl_value_cast (struct type *type, struct value *arg);
+
 namespace expr
 {
 
@@ -104,6 +106,9 @@ public:
   enum exp_opcode opcode () const override
   { return OP_OBJC_MSGCALL; }
 };
+
+using opencl_cast_type_operation = cxx_cast_operation<UNOP_CAST_TYPE,
+						      opencl_value_cast>;
 
 }/* namespace expr */
 

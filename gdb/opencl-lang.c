@@ -27,6 +27,7 @@
 #include "varobj.h"
 #include "c-lang.h"
 #include "gdbarch.h"
+#include "c-exp.h"
 
 /* Returns the corresponding OpenCL vector type from the given type code,
    the length of the element type, the unsigned flag and the amount of
@@ -581,7 +582,7 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
    behaviour of scalar to vector casting.  As far as possibly we're going
    to try and delegate back to the standard value_cast function. */
 
-static struct value *
+struct value *
 opencl_value_cast (struct type *type, struct value *arg)
 {
   if (type != value_type (arg))
