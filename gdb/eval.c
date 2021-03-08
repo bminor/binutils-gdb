@@ -1298,7 +1298,7 @@ eval_op_string (struct type *expect_type, struct expression *exp,
 
 /* Helper function that implements the body of OP_OBJC_SELECTOR.  */
 
-static struct value *
+struct value *
 eval_op_objc_selector (struct type *expect_type, struct expression *exp,
 		       enum noside noside,
 		       const char *sel)

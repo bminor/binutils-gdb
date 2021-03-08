@@ -23,6 +23,10 @@
 #include "expop.h"
 #include "objc-lang.h"
 
+extern struct value *eval_op_objc_selector (struct type *expect_type,
+					    struct expression *exp,
+					    enum noside noside,
+					    const char *sel);
 namespace expr
 {
 
@@ -61,6 +65,27 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_OBJC_NSSTRING; }
+};
+
+class objc_selector_operation
+  : public tuple_holding_operation<std::string>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (noside == EVAL_SKIP)
+      return eval_skip_value (exp);
+    return eval_op_objc_selector (expect_type, exp, noside,
+				  std::get<0> (m_storage).c_str ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_OBJC_SELECTOR; }
 };
 
 }/* namespace expr */
