@@ -973,11 +973,6 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return c_op_print_tab; }
 };
 
 /* Single instance of the OpenCL language class.  */

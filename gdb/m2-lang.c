@@ -113,43 +113,6 @@ eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
 
 
 
-/* Table of operators and their precedences for printing expressions.  */
-
-const struct op_print m2_language::op_print_tab[] =
-{
-  {"+", BINOP_ADD, PREC_ADD, 0},
-  {"+", UNOP_PLUS, PREC_PREFIX, 0},
-  {"-", BINOP_SUB, PREC_ADD, 0},
-  {"-", UNOP_NEG, PREC_PREFIX, 0},
-  {"*", BINOP_MUL, PREC_MUL, 0},
-  {"/", BINOP_DIV, PREC_MUL, 0},
-  {"DIV", BINOP_INTDIV, PREC_MUL, 0},
-  {"MOD", BINOP_REM, PREC_MUL, 0},
-  {":=", BINOP_ASSIGN, PREC_ASSIGN, 1},
-  {"OR", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
-  {"AND", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
-  {"NOT", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
-  {"=", BINOP_EQUAL, PREC_EQUAL, 0},
-  {"<>", BINOP_NOTEQUAL, PREC_EQUAL, 0},
-  {"<=", BINOP_LEQ, PREC_ORDER, 0},
-  {">=", BINOP_GEQ, PREC_ORDER, 0},
-  {">", BINOP_GTR, PREC_ORDER, 0},
-  {"<", BINOP_LESS, PREC_ORDER, 0},
-  {"^", UNOP_IND, PREC_PREFIX, 0},
-  {"@", BINOP_REPEAT, PREC_REPEAT, 0},
-  {"CAP", UNOP_CAP, PREC_BUILTIN_FUNCTION, 0},
-  {"CHR", UNOP_CHR, PREC_BUILTIN_FUNCTION, 0},
-  {"ORD", UNOP_ORD, PREC_BUILTIN_FUNCTION, 0},
-  {"FLOAT", UNOP_FLOAT, PREC_BUILTIN_FUNCTION, 0},
-  {"HIGH", UNOP_HIGH, PREC_BUILTIN_FUNCTION, 0},
-  {"MAX", UNOP_MAX, PREC_BUILTIN_FUNCTION, 0},
-  {"MIN", UNOP_MIN, PREC_BUILTIN_FUNCTION, 0},
-  {"ODD", UNOP_ODD, PREC_BUILTIN_FUNCTION, 0},
-  {"TRUNC", UNOP_TRUNC, PREC_BUILTIN_FUNCTION, 0},
-  {NULL, OP_NULL, PREC_BUILTIN_FUNCTION, 0}
-};
-
-
 /* Single instance of the M2 language.  */
 
 static m2_language m2_language_defn;

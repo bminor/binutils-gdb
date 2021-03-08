@@ -209,11 +209,6 @@ public:
   bool range_checking_on_by_default () const override
   { return true; }
 
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return c_op_print_tab; }
-
 private:
 
   /* Helper for value_print_inner, arguments are as for that function.

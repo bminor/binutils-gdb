@@ -103,34 +103,6 @@ f_language::get_encoding (struct type *type)
 
 
 
-/* Table of operators and their precedences for printing expressions.  */
-
-const struct op_print f_language::op_print_tab[] =
-{
-  {"+", BINOP_ADD, PREC_ADD, 0},
-  {"+", UNOP_PLUS, PREC_PREFIX, 0},
-  {"-", BINOP_SUB, PREC_ADD, 0},
-  {"-", UNOP_NEG, PREC_PREFIX, 0},
-  {"*", BINOP_MUL, PREC_MUL, 0},
-  {"/", BINOP_DIV, PREC_MUL, 0},
-  {"DIV", BINOP_INTDIV, PREC_MUL, 0},
-  {"MOD", BINOP_REM, PREC_MUL, 0},
-  {"=", BINOP_ASSIGN, PREC_ASSIGN, 1},
-  {".OR.", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
-  {".AND.", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
-  {".NOT.", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
-  {".EQ.", BINOP_EQUAL, PREC_EQUAL, 0},
-  {".NE.", BINOP_NOTEQUAL, PREC_EQUAL, 0},
-  {".LE.", BINOP_LEQ, PREC_ORDER, 0},
-  {".GE.", BINOP_GEQ, PREC_ORDER, 0},
-  {".GT.", BINOP_GTR, PREC_ORDER, 0},
-  {".LT.", BINOP_LESS, PREC_ORDER, 0},
-  {"**", UNOP_IND, PREC_PREFIX, 0},
-  {"@", BINOP_REPEAT, PREC_REPEAT, 0},
-  {NULL, OP_NULL, PREC_REPEAT, 0}
-};
-
-
 /* A helper function for the "bound" intrinsics that checks that TYPE
    is an array.  LBOUND_P is true for lower bound; this is used for
    the error message, if any.  */

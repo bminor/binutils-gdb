@@ -147,15 +147,6 @@ public:
 
   bool range_checking_on_by_default () const override
   { return true; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return op_print_tab; }
-
-private:
-  /* Table of opcode data for use by OPCODE_PRINT_TABLE member function.  */
-  static const struct op_print op_print_tab[];
 };
 
 #endif /* M2_LANG_H */

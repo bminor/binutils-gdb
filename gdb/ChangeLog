@@ -1,5 +1,77 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* value.h (evaluate_subexp_with_coercion): Don't declare.
+	* parse.c (exp_descriptor_standard): Remove.
+	(expr_builder::expr_builder, expr_builder::release): Update.
+	(expression::expression): Remove size_t parameter.
+	(expression::~expression): Simplify.
+	(expression::resize): Remove.
+	(write_exp_elt, write_exp_elt_opcode, write_exp_elt_sym)
+	(write_exp_elt_msym, write_exp_elt_block, write_exp_elt_objfile)
+	(write_exp_elt_longcst, write_exp_elt_floatcst)
+	(write_exp_elt_type, write_exp_elt_intern, write_exp_string)
+	(write_exp_string_vector, write_exp_bitstring): Remove.
+	* p-lang.h (class pascal_language) <opcode_print_table,
+	op_print_tab>: Remove.
+	* p-lang.c (pascal_language::op_print_tab): Remove.
+	* opencl-lang.c (class opencl_language) <opcode_print_table>:
+	Remove.
+	* objc-lang.c (objc_op_print_tab): Remove.
+	(class objc_language) <opcode_print_table>: Remove.
+	* m2-lang.h (class m2_language) <opcode_print_table,
+	op_print_tab>: Remove.
+	* m2-lang.c (m2_language::op_print_tab): Remove.
+	* language.h (struct language_defn) <post_parser, expression_ops,
+	opcode_print_table>: Remove.
+	* language.c (language_defn::expression_ops)
+	(auto_or_unknown_language::opcode_print_table): Remove.
+	* go-lang.h (class go_language) <opcode_print_table,
+	op_print_tab>: Remove.
+	* go-lang.c (go_language::op_print_tab): Remove.
+	* f-lang.h (class f_language) <opcode_print_table>: Remove
+	<op_print_tab>: Remove.
+	* f-lang.c (f_language::op_print_tab): Remove.
+	* expression.h (union exp_element): Remove.
+	(struct expression): Remove size_t parameter from constructor.
+	<resize>: Remove.
+	<first_opcode>: Update.
+	<nelts, elts>: Remove.
+	(EXP_ELEM_TO_BYTES, BYTES_TO_EXP_ELEM): Remove.
+	(evaluate_subexp_standard, print_expression, op_string)
+	(dump_raw_expression): Don't declare.
+	* expprint.c (print_expression, print_subexp)
+	(print_subexp_funcall, print_subexp_standard, op_string)
+	(dump_raw_expression, dump_subexp, dump_subexp_body)
+	(dump_subexp_body_funcall, dump_subexp_body_standard): Remove.
+	(dump_prefix_expression): Update.
+	* eval.c (evaluate_subexp): Remove.
+	(evaluate_expression, evaluate_type): Update.
+	(evaluate_subexpression_type): Remove.
+	(fetch_subexp_value): Remove "pc" parameter.  Update.
+	(extract_field_op, evaluate_struct_tuple, evaluate_funcall)
+	(evaluate_subexp_standard, evaluate_subexp_for_address)
+	(evaluate_subexp_with_coercion, evaluate_subexp_for_sizeof)
+	(evaluate_subexp_for_cast): Remove.
+	(parse_and_eval_type): Update.
+	* dtrace-probe.c (dtrace_probe::compile_to_ax): Update.
+	* d-lang.c (d_op_print_tab): Remove.
+	(class d_language) <opcode_print_table>: Remove.
+	* c-lang.h (c_op_print_tab): Don't declare.
+	* c-lang.c (c_op_print_tab): Remove.
+	(class c_language, class cplus_language, class asm_language, class
+	minimal_language) <opcode_print_table>: Remove.
+	* breakpoint.c (update_watchpoint, watchpoint_check)
+	(watchpoint_exp_is_const, watch_command_1): Update.
+	* ax-gdb.h (union exp_element): Don't declare.
+	* ax-gdb.c (const_var_ref, const_expr, maybe_const_expr)
+	(gen_repeat, gen_sizeof, gen_expr_for_cast, gen_expr)
+	(gen_expr_binop_rest): Remove.
+	(gen_trace_for_expr, gen_eval_for_expr, gen_printf): Update.
+	* ada-lang.c (ada_op_print_tab): Remove.
+	(class ada_language) <post_parser, opcode_print_table>: Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* go-lang.c (go_language::expression_ops): Don't declare.
 	* go-lang.h (class go_language) <expression_ops>: Remove.
 	* opencl-lang.c (evaluate_subexp_opencl, exp_descriptor_opencl):

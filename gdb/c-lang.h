@@ -106,8 +106,6 @@ extern void c_language_arch_info (struct gdbarch *gdbarch,
 extern void c_emit_char (int c, struct type *type,
 			 struct ui_file *stream, int quoter);
 
-extern const struct op_print c_op_print_tab[];
-
 /* These are in c-typeprint.c: */
 
 extern void c_type_print_base (struct type *, struct ui_file *,

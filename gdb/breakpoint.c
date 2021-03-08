@@ -1898,12 +1898,11 @@ update_watchpoint (struct watchpoint *b, int reparse)
     }
   else if (within_current_scope && b->exp)
     {
-      int pc = 0;
       std::vector<value_ref_ptr> val_chain;
       struct value *v, *result;
       struct program_space *frame_pspace;
 
-      fetch_subexp_value (b->exp.get (), &pc, b->exp->op.get (), &v, &result,
+      fetch_subexp_value (b->exp.get (), b->exp->op.get (), &v, &result,
 			  &val_chain, false);
 
       /* Avoid setting b->val if it's already set.  The meaning of
@@ -5012,7 +5011,6 @@ watchpoint_check (bpstat bs)
 	 free_all_values.  We can't call free_all_values because we
 	 might be in the middle of evaluating a function call.  */
 
-      int pc = 0;
       struct value *mark;
       struct value *new_val;
 
@@ -5023,7 +5021,7 @@ watchpoint_check (bpstat bs)
 	return WP_VALUE_CHANGED;
 
       mark = value_mark ();
-      fetch_subexp_value (b->exp.get (), &pc, b->exp->op.get (), &new_val,
+      fetch_subexp_value (b->exp.get (), b->exp->op.get (), &new_val,
 			  NULL, NULL, false);
 
       if (b->val_bitsize != 0)
@@ -10124,112 +10122,7 @@ break_range_command (const char *arg, int from_tty)
 static bool
 watchpoint_exp_is_const (const struct expression *exp)
 {
-  if (exp->op != nullptr)
-    return exp->op->constant_p ();
-
-  int i = exp->nelts;
-
-  while (i > 0)
-    {
-      int oplenp, argsp;
-
-      /* We are only interested in the descriptor of each element.  */
-      operator_length (exp, i, &oplenp, &argsp);
-      i -= oplenp;
-
-      switch (exp->elts[i].opcode)
-	{
-	case BINOP_ADD:
-	case BINOP_SUB:
-	case BINOP_MUL:
-	case BINOP_DIV:
-	case BINOP_REM:
-	case BINOP_MOD:
-	case BINOP_LSH:
-	case BINOP_RSH:
-	case BINOP_LOGICAL_AND:
-	case BINOP_LOGICAL_OR:
-	case BINOP_BITWISE_AND:
-	case BINOP_BITWISE_IOR:
-	case BINOP_BITWISE_XOR:
-	case BINOP_EQUAL:
-	case BINOP_NOTEQUAL:
-	case BINOP_LESS:
-	case BINOP_GTR:
-	case BINOP_LEQ:
-	case BINOP_GEQ:
-	case BINOP_REPEAT:
-	case BINOP_COMMA:
-	case BINOP_EXP:
-	case BINOP_MIN:
-	case BINOP_MAX:
-	case BINOP_INTDIV:
-	case BINOP_CONCAT:
-	case TERNOP_COND:
-	case TERNOP_SLICE:
-
-	case OP_LONG:
-	case OP_FLOAT:
-	case OP_LAST:
-	case OP_COMPLEX:
-	case OP_STRING:
-	case OP_ARRAY:
-	case OP_TYPE:
-	case OP_TYPEOF:
-	case OP_DECLTYPE:
-	case OP_TYPEID:
-	case OP_NAME:
-	case OP_OBJC_NSSTRING:
-
-	case UNOP_NEG:
-	case UNOP_LOGICAL_NOT:
-	case UNOP_COMPLEMENT:
-	case UNOP_ADDR:
-	case UNOP_HIGH:
-	case UNOP_CAST:
-
-	case UNOP_CAST_TYPE:
-	case UNOP_REINTERPRET_CAST:
-	case UNOP_DYNAMIC_CAST:
-	  /* Unary, binary and ternary operators: We have to check
-	     their operands.  If they are constant, then so is the
-	     result of that operation.  For instance, if A and B are
-	     determined to be constants, then so is "A + B".
-
-	     UNOP_IND is one exception to the rule above, because the
-	     value of *ADDR is not necessarily a constant, even when
-	     ADDR is.  */
-	  break;
-
-	case OP_VAR_VALUE:
-	  /* Check whether the associated symbol is a constant.
-
-	     We use SYMBOL_CLASS rather than TYPE_CONST because it's
-	     possible that a buggy compiler could mark a variable as
-	     constant even when it is not, and TYPE_CONST would return
-	     true in this case, while SYMBOL_CLASS wouldn't.
-
-	     We also have to check for function symbols because they
-	     are always constant.  */
-	  {
-	    struct symbol *s = exp->elts[i + 2].symbol;
-
-	    if (SYMBOL_CLASS (s) != LOC_BLOCK
-		&& SYMBOL_CLASS (s) != LOC_CONST
-		&& SYMBOL_CLASS (s) != LOC_CONST_BYTES)
-	      return false;
-	    break;
-	  }
-
-	/* The default action is to return 0 because we are using
-	   the optimistic approach here: If we don't know something,
-	   then it is not a constant.  */
-	default:
-	  return false;
-	}
-    }
-
-  return true;
+  return exp->op->constant_p ();
 }
 
 /* Watchpoint destructor.  */
@@ -10730,7 +10623,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   const char *cond_end = NULL;
   enum bptype bp_type;
   int thread = -1;
-  int pc = 0;
   /* Flag to indicate whether we are going to use masks for
      the hardware watchpoint.  */
   bool use_mask = false;
@@ -10847,8 +10739,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   exp_valid_block = tracker.block ();
   struct value *mark = value_mark ();
   struct value *val_as_value = nullptr;
-  fetch_subexp_value (exp.get (), &pc, exp->op.get (), &val_as_value, &result,
-		      NULL, just_location);
+  fetch_subexp_value (exp.get (), exp->op.get (), &val_as_value, &result, NULL,
+		      just_location);
 
   if (val_as_value != NULL && just_location)
     {

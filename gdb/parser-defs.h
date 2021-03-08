@@ -71,29 +71,15 @@ struct expr_builder
     expout->op = std::move (op);
   }
 
-  /* The size of the expression above.  */
-
-  size_t expout_size;
-
   /* The expression related to this parser state.  */
 
   expression_up expout;
-
-  /* The number of elements already in the expression.  This is used
-     to know where to put new elements.  */
-
-  size_t expout_ptr;
 };
 
 /* This is used for expression completion.  */
 
 struct expr_completion_state
 {
-  /* The index of the last struct expression directly before a '.' or
-     '->'.  This is set when parsing and is only used when completing a
-     field name.  It is -1 if no dereference operation was found.  */
-  int expout_last_struct = -1;
-
   /* The last struct expression directly before a '.' or '->'.  This
      is set when parsing and is only used when completing a field
      name.  It is nullptr if no dereference operation was found.  */
@@ -156,11 +142,6 @@ struct parser_state : public expr_builder
     m_funcall_chain.pop_back ();
     return val;
   }
-
-  /* Mark the current index as the starting location of a structure
-     expression.  This is used when completing on field names.  */
-
-  void mark_struct_expression ();
 
   /* Mark the given operation as the starting location of a structure
      expression.  This is used when completing on field names.  */
@@ -376,173 +357,13 @@ struct objc_class_str
     int theclass;
   };
 
-/* Reverse an expression from suffix form (in which it is constructed)
-   to prefix form (in which we can conveniently print or execute it).
-   Ordinarily this always returns -1.  However, if LAST_STRUCT
-   is not -1 (i.e., we are trying to complete a field name), it will
-   return the index of the subexpression which is the left-hand-side
-   of the struct operation at LAST_STRUCT.  */
-
-extern int prefixify_expression (struct expression *expr,
-				 int last_struct = -1);
-
-extern void write_exp_elt_opcode (struct expr_builder *, enum exp_opcode);
-
-extern void write_exp_elt_sym (struct expr_builder *, struct symbol *);
-
-extern void write_exp_elt_longcst (struct expr_builder *, LONGEST);
-
-extern void write_exp_elt_floatcst (struct expr_builder *, const gdb_byte *);
-
-extern void write_exp_elt_type (struct expr_builder *, struct type *);
-
-extern void write_exp_elt_intern (struct expr_builder *, struct internalvar *);
-
-extern void write_exp_string (struct expr_builder *, struct stoken);
-
-void write_exp_string_vector (struct expr_builder *, int type,
-			      struct stoken_vector *vec);
-
-extern void write_exp_bitstring (struct expr_builder *, struct stoken);
-
-extern void write_exp_elt_block (struct expr_builder *, const struct block *);
-
-extern void write_exp_elt_objfile (struct expr_builder *,
-				   struct objfile *objfile);
-
-extern void write_exp_msymbol (struct expr_builder *,
-			       struct bound_minimal_symbol);
-
-extern void write_dollar_variable (struct parser_state *, struct stoken str);
-
-/* Write a reference to a symbol to the expression being built in PS.
-   NAME is the name of the symbol to write; SYM is the symbol.  If SYM
-   is nullptr (meaning the 'symbol' member), a minimal symbol will be
-   searched for and used if available.  Throws an exception if SYM is
-   nullptr and no minimal symbol can be found.  */
-
-extern void write_exp_symbol_reference (struct parser_state *ps,
-					const char *name,
-					struct block_symbol sym);
-
 extern const char *find_template_name_end (const char *);
 
 extern std::string copy_name (struct stoken);
 
-extern int dump_subexp (struct expression *, struct ui_file *, int);
-
-extern int dump_subexp_body_standard (struct expression *, 
-				      struct ui_file *, int);
-
-/* Dump (to STREAM) a function call like expression at position ELT in the
-   expression array EXP.  Return a new value for ELT just after the
-   function call expression.  */
-
-extern int dump_subexp_body_funcall (struct expression *exp,
-				     struct ui_file *stream, int elt);
-
-extern void operator_length (const struct expression *, int, int *, int *);
-
-extern void operator_length_standard (const struct expression *, int, int *,
-				      int *);
-
-extern int operator_check_standard (struct expression *exp, int pos,
-				    int (*objfile_func)
-				      (struct objfile *objfile, void *data),
-				    void *data);
-
 extern bool parse_float (const char *p, int len,
 			 const struct type *type, gdb_byte *data);
 
-/* These codes indicate operator precedences for expression printing,
-   least tightly binding first.  */
-/* Adding 1 to a precedence value is done for binary operators,
-   on the operand which is more tightly bound, so that operators
-   of equal precedence within that operand will get parentheses.  */
-/* PREC_HYPER and PREC_ABOVE_COMMA are not the precedence of any operator;
-   they are used as the "surrounding precedence" to force
-   various kinds of things to be parenthesized.  */
-enum precedence
-  {
-    PREC_NULL, PREC_COMMA, PREC_ABOVE_COMMA, PREC_ASSIGN, PREC_LOGICAL_OR,
-    PREC_LOGICAL_AND, PREC_BITWISE_IOR, PREC_BITWISE_AND, PREC_BITWISE_XOR,
-    PREC_EQUAL, PREC_ORDER, PREC_SHIFT, PREC_ADD, PREC_MUL, PREC_REPEAT,
-    PREC_HYPER, PREC_PREFIX, PREC_SUFFIX, PREC_BUILTIN_FUNCTION
-  };
-
-/* Table mapping opcodes into strings for printing operators
-   and precedences of the operators.  */
-
-struct op_print
-  {
-    const char *string;
-    enum exp_opcode opcode;
-    /* Precedence of operator.  These values are used only by comparisons.  */
-    enum precedence precedence;
-
-    /* For a binary operator:  1 iff right associate.
-       For a unary operator:  1 iff postfix.  */
-    int right_assoc;
-  };
-
-/* Information needed to print, prefixify, and evaluate expressions for 
-   a given language.  */
-
-struct exp_descriptor
-  {
-    /* Print subexpression.  */
-    void (*print_subexp) (struct expression *, int *, struct ui_file *,
-			  enum precedence);
-
-    /* Returns number of exp_elements needed to represent an operator and
-       the number of subexpressions it takes.  */
-    void (*operator_length) (const struct expression*, int, int*, int *);
-
-    /* Call OBJFILE_FUNC for any objfile found being referenced by the
-       single operator of EXP at position POS.  Operator parameters are
-       located at positive (POS + number) offsets in EXP.  OBJFILE_FUNC
-       should never be called with NULL OBJFILE.  OBJFILE_FUNC should
-       get passed an arbitrary caller supplied DATA pointer.  If it
-       returns non-zero value then (any other) non-zero value should be
-       immediately returned to the caller.  Otherwise zero should be
-       returned.  */
-    int (*operator_check) (struct expression *exp, int pos,
-			   int (*objfile_func) (struct objfile *objfile,
-						void *data),
-			   void *data);
-
-    /* Dump the rest of this (prefix) expression after the operator
-       itself has been printed.  See dump_subexp_body_standard in
-       (expprint.c).  */
-    int (*dump_subexp_body) (struct expression *, struct ui_file *, int);
-
-    /* Evaluate an expression.  */
-    struct value *(*evaluate_exp) (struct type *, struct expression *,
-				   int *, enum noside);
-  };
-
-
-/* Default descriptor containing standard definitions of all
-   elements.  */
-extern const struct exp_descriptor exp_descriptor_standard;
-
-/* Functions used by language-specific extended operators to (recursively)
-   print/dump subexpressions.  */
-
-extern void print_subexp (struct expression *, int *, struct ui_file *,
-			  enum precedence);
-
-extern void print_subexp_standard (struct expression *, int *, 
-				   struct ui_file *, enum precedence);
-
-/* Print a function call like expression to STREAM.  This is called as a
-   helper function by which point the expression node identifying this as a
-   function call has already been stripped off and POS should point to the
-   number of function call arguments.  EXP is the object containing the
-   list of expression elements.  */
-
-extern void print_subexp_funcall (struct expression *exp, int *pos,
-				  struct ui_file *stream);
 
 /* Function used to avoid direct calls to fprintf
    in the code generated by the bison parser.  */

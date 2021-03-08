@@ -1375,14 +1375,8 @@ set_command (const char *exp, int from_tty)
 {
   expression_up expr = parse_expression (exp);
 
-  enum exp_opcode opcode = OP_NULL;
   if (expr->op != nullptr)
-    opcode = expr->op->opcode ();
-  else if (expr->nelts >= 1)
-    opcode = expr->elts[0].opcode;
-
-  if (opcode != OP_NULL)
-    switch (opcode)
+    switch (expr->op->opcode ())
       {
       case UNOP_PREINCREMENT:
       case UNOP_POSTINCREMENT:

@@ -515,17 +515,6 @@ struct language_defn
 
   virtual int parser (struct parser_state *ps) const;
 
-  /* Given an expression *EXPP created by prefixifying the result of
-     la_parser, perform any remaining processing necessary to complete its
-     translation.  *EXPP may change; la_post_parser is responsible for
-     releasing its previous contents, if necessary.  */
-
-  virtual void post_parser (expression_up *expp, struct parser_state *ps)
-    const
-  {
-    /* By default the post-parser does nothing.  */
-  }
-
   /* Print the character CH (of type CHTYPE) on STREAM as part of the
      contents of a literal string whose delimiter is QUOTER.  */
 
@@ -641,15 +630,6 @@ struct language_defn
      for this language.  */
 
   virtual const struct lang_varobj_ops *varobj_ops () const;
-
-  /* Definitions related to expression printing, prefixifying, and
-     dumping.  */
-
-  virtual const struct exp_descriptor *expression_ops () const;
-
-  /* Table for printing expressions.  */
-
-  virtual const struct op_print *opcode_print_table () const = 0;
 
 protected:
 

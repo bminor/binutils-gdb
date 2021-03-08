@@ -1441,15 +1441,10 @@ stap_probe::compile_to_ax (struct agent_expr *expr, struct axs_value *value,
 			   unsigned n)
 {
   struct stap_probe_arg *arg;
-  union exp_element *pc;
 
   arg = this->get_arg_by_number (n, expr->gdbarch);
 
-  pc = arg->aexpr->elts;
-  if (arg->aexpr->op != nullptr)
-    arg->aexpr->op->generate_ax (arg->aexpr.get (), expr, value);
-  else
-    gen_expr (arg->aexpr.get (), &pc, expr, value);
+  arg->aexpr->op->generate_ax (arg->aexpr.get (), expr, value);
 
   require_rvalue (expr, value);
   value->type = arg->atype;

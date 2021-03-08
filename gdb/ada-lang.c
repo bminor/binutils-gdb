@@ -12652,43 +12652,6 @@ info_exceptions_command (const char *regexp, int from_tty)
     printf_filtered ("%s: %s\n", info.name, paddress (gdbarch, info.addr));
 }
 
-/* Table mapping opcodes into strings for printing operators
-   and precedences of the operators.  */
-
-static const struct op_print ada_op_print_tab[] = {
-  {":=", BINOP_ASSIGN, PREC_ASSIGN, 1},
-  {"or else", BINOP_LOGICAL_OR, PREC_LOGICAL_OR, 0},
-  {"and then", BINOP_LOGICAL_AND, PREC_LOGICAL_AND, 0},
-  {"or", BINOP_BITWISE_IOR, PREC_BITWISE_IOR, 0},
-  {"xor", BINOP_BITWISE_XOR, PREC_BITWISE_XOR, 0},
-  {"and", BINOP_BITWISE_AND, PREC_BITWISE_AND, 0},
-  {"=", BINOP_EQUAL, PREC_EQUAL, 0},
-  {"/=", BINOP_NOTEQUAL, PREC_EQUAL, 0},
-  {"<=", BINOP_LEQ, PREC_ORDER, 0},
-  {">=", BINOP_GEQ, PREC_ORDER, 0},
-  {">", BINOP_GTR, PREC_ORDER, 0},
-  {"<", BINOP_LESS, PREC_ORDER, 0},
-  {">>", BINOP_RSH, PREC_SHIFT, 0},
-  {"<<", BINOP_LSH, PREC_SHIFT, 0},
-  {"+", BINOP_ADD, PREC_ADD, 0},
-  {"-", BINOP_SUB, PREC_ADD, 0},
-  {"&", BINOP_CONCAT, PREC_ADD, 0},
-  {"*", BINOP_MUL, PREC_MUL, 0},
-  {"/", BINOP_DIV, PREC_MUL, 0},
-  {"rem", BINOP_REM, PREC_MUL, 0},
-  {"mod", BINOP_MOD, PREC_MUL, 0},
-  {"**", BINOP_EXP, PREC_REPEAT, 0},
-  {"@", BINOP_REPEAT, PREC_REPEAT, 0},
-  {"-", UNOP_NEG, PREC_PREFIX, 0},
-  {"+", UNOP_PLUS, PREC_PREFIX, 0},
-  {"not ", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
-  {"not ", UNOP_COMPLEMENT, PREC_PREFIX, 0},
-  {"abs ", UNOP_ABS, PREC_PREFIX, 0},
-  {".all", UNOP_IND, PREC_SUFFIX, 1},
-  {"'access", UNOP_ADDR, PREC_SUFFIX, 1},
-  {"'size", OP_ATR_SIZE, PREC_SUFFIX, 1},
-  {NULL, OP_NULL, PREC_SUFFIX, 0}
-};
 
 				/* Language vector */
 
@@ -13275,22 +13238,6 @@ public:
     return ada_parse (ps);
   }
 
-  /* See language.h.
-
-     Same as evaluate_type (*EXP), but resolves ambiguous symbol references
-     (marked by OP_VAR_VALUE nodes in which the symbol has an undefined
-     namespace) and converts operators that are user-defined into
-     appropriate function calls.  If CONTEXT_TYPE is non-null, it provides
-     a preferred result type [at the moment, only type void has any
-     effect---causing procedures to be preferred over functions in calls].
-     A null CONTEXT_TYPE indicates that a non-void return type is
-     preferred.  May change (expand) *EXP.  */
-
-  void post_parser (expression_up *expp, struct parser_state *ps)
-    const override
-  {
-  }
-
   /* See language.h.  */
 
   void emitchar (int ch, struct type *chtype,
@@ -13352,11 +13299,6 @@ public:
 
   const struct lang_varobj_ops *varobj_ops () const override
   { return &ada_varobj_ops; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return ada_op_print_tab; }
 
 protected:
   /* See language.h.  */

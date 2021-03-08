@@ -40,21 +40,6 @@ enum innermost_block_tracker_type
 DEF_ENUM_FLAGS_TYPE (enum innermost_block_tracker_type,
 		     innermost_block_tracker_types);
 
-/* Definitions for saved C expressions.  */
-
-/* An expression is represented as a vector of union exp_element's.
-   Each exp_element is an opcode, except that some opcodes cause
-   the following exp_element to be treated as a long or double constant
-   or as a variable.  The opcodes are obeyed, using a stack for temporaries.
-   The value is left on the temporary stack at the end.  */
-
-/* When it is necessary to include a string,
-   it can occupy as many exp_elements as it needs.
-   We find the length of the string using strlen,
-   divide to find out how many exp_elements are used up,
-   and skip that many.  Strings, like numbers, are indicated
-   by the preceding opcode.  */
-
 enum exp_opcode : uint8_t
   {
 #define OP(name) name ,
@@ -212,37 +197,17 @@ make_operation (Arg... args)
 
 }
 
-union exp_element
-  {
-    enum exp_opcode opcode;
-    struct symbol *symbol;
-    struct minimal_symbol *msymbol;
-    LONGEST longconst;
-    gdb_byte floatconst[16];
-    /* Really sizeof (union exp_element) characters (or less for the last
-       element of a string).  */
-    char string;
-    struct type *type;
-    struct internalvar *internalvar;
-    const struct block *block;
-    struct objfile *objfile;
-  };
-
 struct expression
 {
-  expression (const struct language_defn *, struct gdbarch *, size_t);
+  expression (const struct language_defn *, struct gdbarch *);
   ~expression ();
   DISABLE_COPY_AND_ASSIGN (expression);
-
-  void resize (size_t);
 
   /* Return the opcode for the outermost sub-expression of this
      expression.  */
   enum exp_opcode first_opcode () const
   {
-    if (op != nullptr)
-      return op->opcode ();
-    return elts[0].opcode;
+    return op->opcode ();
   }
 
   /* Evaluate the expression.  EXPECT_TYPE is the context type of the
@@ -255,19 +220,9 @@ struct expression
   /* Architecture it was parsed in.  */
   struct gdbarch *gdbarch;
   expr::operation_up op;
-  int nelts = 0;
-  union exp_element *elts;
 };
 
 typedef std::unique_ptr<expression> expression_up;
-
-/* Macros for converting between number of expression elements and bytes
-   to store that many expression elements.  */
-
-#define EXP_ELEM_TO_BYTES(elements) \
-    ((elements) * sizeof (union exp_element))
-#define BYTES_TO_EXP_ELEM(bytes) \
-    (((bytes) + sizeof (union exp_element) - 1) / sizeof (union exp_element))
 
 /* From parse.c */
 
@@ -289,9 +244,6 @@ extern expression_up parse_exp_1 (const char **, CORE_ADDR pc,
 
 /* From eval.c */
 
-extern struct value *evaluate_subexp_standard
-  (struct type *, struct expression *, int *, enum noside);
-
 /* Evaluate a function call.  The function to be called is in CALLEE and
    the arguments passed to the function are in ARGVEC.
    FUNCTION_NAME is the name of the function, if known.
@@ -307,14 +259,8 @@ extern struct value *evaluate_subexp_do_call (expression *exp,
 
 /* From expprint.c */
 
-extern void print_expression (struct expression *, struct ui_file *);
-
 extern const char *op_name (enum exp_opcode opcode);
 
-extern const char *op_string (enum exp_opcode);
-
-extern void dump_raw_expression (struct expression *,
-				 struct ui_file *, const char *);
 extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 /* In an OP_RANGE expression, either bound could be empty, indicating

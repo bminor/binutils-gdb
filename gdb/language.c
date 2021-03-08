@@ -774,14 +774,6 @@ language_defn::varobj_ops () const
   return &c_varobj_ops;
 }
 
-/* See language.h.  */
-
-const struct exp_descriptor *
-language_defn::expression_ops () const
-{
-  return &exp_descriptor_standard;
-}
-
 /* Parent class for both the "auto" and "unknown" languages.  These two
    pseudo-languages are very similar so merging their implementations like
    this makes sense.  */
@@ -901,18 +893,6 @@ public:
 
   const char *name_of_this () const override
   { return "this"; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  {
-    static const struct op_print unk_op_print_tab[] =
-      {
-	{NULL, OP_NULL, PREC_NULL, 0}
-      };
-
-    return unk_op_print_tab;
-  }
 };
 
 /* Class representing the fake "auto" language.  */

@@ -2015,29 +2015,19 @@ init_if_undefined_command (const char* args, int from_tty)
   /* Validate the expression.
      Was the expression an assignment?
      Or even an expression at all?  */
-  if ((expr->nelts == 0 && expr->op == nullptr)
-      || expr->first_opcode () != BINOP_ASSIGN)
+  if (expr->op == nullptr || expr->first_opcode () != BINOP_ASSIGN)
     error (_("Init-if-undefined requires an assignment expression."));
 
-  /* Extract the variable from the parsed expression.
-     In the case of an assign the lvalue will be in elts[1] and elts[2].  */
-  if (expr->op == nullptr)
+  /* Extract the variable from the parsed expression.  */
+  expr::assign_operation *assign
+    = dynamic_cast<expr::assign_operation *> (expr->op.get ());
+  if (assign != nullptr)
     {
-      if (expr->elts[1].opcode == OP_INTERNALVAR)
-	intvar = expr->elts[2].internalvar;
-    }
-  else
-    {
-      expr::assign_operation *assign
-	= dynamic_cast<expr::assign_operation *> (expr->op.get ());
-      if (assign != nullptr)
-	{
-	  expr::operation *lhs = assign->get_lhs ();
-	  expr::internalvar_operation *ivarop
-	    = dynamic_cast<expr::internalvar_operation *> (lhs);
-	  if (ivarop != nullptr)
-	    intvar = ivarop->get_internalvar ();
-	}
+      expr::operation *lhs = assign->get_lhs ();
+      expr::internalvar_operation *ivarop
+	= dynamic_cast<expr::internalvar_operation *> (lhs);
+      if (ivarop != nullptr)
+	intvar = ivarop->get_internalvar ();
     }
 
   if (intvar == nullptr)

@@ -218,11 +218,6 @@ public:
   enum array_ordering array_ordering () const override
   { return array_column_major; }
 
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return op_print_tab; }
-
 protected:
 
   /* See language.h.  */
@@ -231,10 +226,6 @@ protected:
 	(const lookup_name_info &lookup_name) const override;
 
 private:
-  /* Table of opcode data for use by OPCODE_PRINT_TABLE member function.  */
-
-  static const struct op_print op_print_tab[];
-
   /* Return the encoding that should be used for the character type
      TYPE.  */
 
