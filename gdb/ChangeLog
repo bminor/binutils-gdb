@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* f-lang.c (eval_op_f_associated): New functions.
+	* f-exp.h (fortran_associated_1arg, fortran_associated_2arg): New
+	typedefs.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* f-lang.c (fortran_bound_1arg::evaluate)
 	(fortran_bound_2arg::evaluate): New methods.
 	* f-exp.h (class fortran_bound_1arg, class fortran_bound_2arg):

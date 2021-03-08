@@ -995,6 +995,26 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
   return value_from_longest (result_type, is_associated ? 1 : 0);
 }
 
+struct value *
+eval_op_f_associated (struct type *expect_type,
+		      struct expression *exp,
+		      enum noside noside,
+		      enum exp_opcode opcode,
+		      struct value *arg1)
+{
+  return fortran_associated (exp->gdbarch, exp->language_defn, arg1);
+}
+
+struct value *
+eval_op_f_associated (struct type *expect_type,
+		      struct expression *exp,
+		      enum noside noside,
+		      enum exp_opcode opcode,
+		      struct value *arg1,
+		      struct value *arg2)
+{
+  return fortran_associated (exp->gdbarch, exp->language_defn, arg1, arg2);
+}
 
 /* A helper function for UNOP_ABS.  */
 

@@ -57,6 +57,17 @@ extern struct value *eval_op_f_kind (struct type *expect_type,
 				     enum noside noside,
 				     enum exp_opcode opcode,
 				     struct value *arg1);
+extern struct value *eval_op_f_associated (struct type *expect_type,
+					   struct expression *exp,
+					   enum noside noside,
+					   enum exp_opcode opcode,
+					   struct value *arg1);
+extern struct value *eval_op_f_associated (struct type *expect_type,
+					   struct expression *exp,
+					   enum noside noside,
+					   enum exp_opcode opcode,
+					   struct value *arg1,
+					   struct value *arg2);
 
 namespace expr
 {
@@ -72,6 +83,10 @@ using fortran_kind_operation = unop_operation<UNOP_FORTRAN_KIND,
 using fortran_mod_operation = binop_operation<BINOP_MOD, eval_op_f_mod>;
 using fortran_modulo_operation = binop_operation<BINOP_FORTRAN_MODULO,
 						 eval_op_f_modulo>;
+using fortran_associated_1arg = unop_operation<FORTRAN_ASSOCIATED,
+					       eval_op_f_associated>;
+using fortran_associated_2arg = binop_operation<FORTRAN_ASSOCIATED,
+						eval_op_f_associated>;
 
 /* The Fortran "complex" operation.  */
 class fortran_cmplx_operation
