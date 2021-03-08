@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (eval_op_rust_ind): No longer static.  Add "opcode"
+	parameter.
+	(rust_evaluate_subexp): Update.
+	* rust-exp.h (class rust_unop_ind_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (eval_op_rust_complement, eval_op_rust_array): No
 	longer static.  Add "opcode" parameter.
 	(rust_evaluate_subexp): Update.

@@ -33,6 +33,11 @@ extern struct value *eval_op_rust_array (struct type *expect_type,
 					 enum exp_opcode opcode,
 					 struct value *ncopies,
 					 struct value *elt);
+extern struct value *eval_op_rust_ind (struct type *expect_type,
+				       struct expression *exp,
+				       enum noside noside,
+				       enum exp_opcode opcode,
+				       struct value *value);
 
 namespace expr
 {
@@ -41,6 +46,26 @@ using rust_unop_compl_operation = unop_operation<UNOP_COMPLEMENT,
 						  eval_op_rust_complement>;
 using rust_array_operation = binop_operation<OP_RUST_ARRAY,
 					     eval_op_rust_array>;
+
+/* The Rust indirection operation.  */
+class rust_unop_ind_operation
+  : public unop_ind_operation
+{
+public:
+
+  using unop_ind_operation::unop_ind_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (noside != EVAL_NORMAL)
+      return unop_ind_operation::evaluate (expect_type, exp, noside);
+
+    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_rust_ind (expect_type, exp, noside, UNOP_IND, arg1);
+  }
+};
 
 } /* namespace expr */
 

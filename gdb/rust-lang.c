@@ -1325,9 +1325,10 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_IND.  */
 
-static struct value *
+struct value *
 eval_op_rust_ind (struct type *expect_type, struct expression *exp,
 		  enum noside noside,
+		  enum exp_opcode opcode,
 		  struct value *value)
 {
   gdb_assert (noside == EVAL_NORMAL);
@@ -1521,7 +1522,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	    ++*pos;
 	    struct value *value = evaluate_subexp (expect_type, exp, pos,
 						   noside);
-	    result = eval_op_rust_ind (expect_type, exp, noside, value);
+	    result = eval_op_rust_ind (expect_type, exp, noside, op, value);
 	  }
       }
       break;
