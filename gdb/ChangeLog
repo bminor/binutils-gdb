@@ -1,5 +1,17 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.h (class rust_language) <expression_ops,
+	exp_descriptor_tab>: Remove.
+	* rust-lang.c (rust_evaluate_funcall): Remove.
+	(rust_range, rust_subscript, eval_op_rust_complement): Don't use
+	EVAL_SKIP.
+	(rust_evaluate_subexp): Remove.
+	(rust_aggregate_operation::evaluate): Don't use EVAL_SKIP.
+	(rust_operator_length, rust_dump_subexp_body, rust_print_subexp)
+	(rust_operator_check, rust_language::exp_descriptor_tab): Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-exp.y: Create operations.
 	(empty_stoken): Remove.
 	(ada_pop, ada_wrap, ada_addrof, ada_un_wrap2, ada_wrap2)
