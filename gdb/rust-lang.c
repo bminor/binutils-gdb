@@ -1388,7 +1388,7 @@ eval_op_rust_array (struct type *expect_type, struct expression *exp,
 
 /* A helper function for STRUCTOP_ANONYMOUS.  */
 
-static struct value *
+struct value *
 eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
 			  enum noside noside,
 			  int field_number, struct value *lhs)
@@ -1455,7 +1455,7 @@ tuple structs, and tuple-like enum variants"));
 
 /* A helper function for STRUCTOP_STRUCT.  */
 
-static struct value *
+struct value *
 eval_op_rust_structop (struct type *expect_type, struct expression *exp,
 		       enum noside noside,
 		       struct value *lhs, const char *field_name)

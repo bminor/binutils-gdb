@@ -46,6 +46,16 @@ extern struct value *rust_range (struct type *expect_type,
 				 struct expression *exp,
 				 enum noside noside, enum range_flag kind,
 				 struct value *low, struct value *high);
+extern struct value *eval_op_rust_struct_anon (struct type *expect_type,
+					       struct expression *exp,
+					       enum noside noside,
+					       int field_number,
+					       struct value *lhs);
+extern struct value *eval_op_rust_structop (struct type *expect_type,
+					    struct expression *exp,
+					    enum noside noside,
+					    struct value *lhs,
+					    const char *field_name);
 
 namespace expr
 {
@@ -152,6 +162,49 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_RANGE; }
+};
+
+/* Tuple field reference (using an integer).  */
+class rust_struct_anon
+  : public tuple_holding_operation<int, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_rust_struct_anon (expect_type, exp, noside,
+				     std::get<0> (m_storage), lhs);
+
+  }
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_ANONYMOUS; }
+};
+
+/* Structure (or union or enum) field reference.  */
+class rust_structop
+  : public structop_base_operation
+{
+public:
+
+  using structop_base_operation::structop_base_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_rust_structop (expect_type, exp, noside, lhs,
+				  std::get<1> (m_storage).c_str ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_STRUCT; }
 };
 
 } /* namespace expr */

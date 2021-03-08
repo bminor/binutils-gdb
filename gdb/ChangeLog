@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (eval_op_rust_struct_anon, eval_op_rust_structop):
+	No longer static.
+	* rust-exp.h (class rust_struct_anon): New.
+	(class rust_structop): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_range): No longer static.
 	* rust-exp.h (class rust_range_operation): New.
 
