@@ -1,5 +1,10 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-symtab.exp: Extend test names to make them
+	unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-prompt.exp: Add with_test_prefix to make test
 	names unique.
 

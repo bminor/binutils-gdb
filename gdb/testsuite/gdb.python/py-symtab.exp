@@ -95,8 +95,10 @@ gdb_test_multiple "python print (\"simple_struct\" in static_symbols)" \
 # Test is_valid when the objfile is unloaded.  This must be the last
 # test as it unloads the object file in GDB.
 gdb_unload
-gdb_test "python print (sal.is_valid())" "False" "test sal.is_valid"
-gdb_test "python print (symtab.is_valid())" "False" "test symtab.is_valid()"
+gdb_test "python print (sal.is_valid())" "False" \
+    "test sal.is_valid after unload"
+gdb_test "python print (symtab.is_valid())" "False" \
+    "test symtab.is_valid() after unload"
 
 gdb_test_no_output "python sal = None" "test sal destructor"
 gdb_test_no_output "python symtab = None" "test symtab destructor"
