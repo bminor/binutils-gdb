@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* f-lang.c (eval_op_f_abs): New function.
+	(evaluate_subexp_f): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (eval_op_type): New function.
 	(evaluate_subexp_standard): Use it.
 

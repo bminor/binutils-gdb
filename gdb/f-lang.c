@@ -974,6 +974,35 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
 }
 
 
+/* A helper function for UNOP_ABS.  */
+
+static struct value *
+eval_op_f_abs (struct type *expect_type, struct expression *exp,
+	       enum noside noside,
+	       struct value *arg1)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct type *type = value_type (arg1);
+  switch (type->code ())
+    {
+    case TYPE_CODE_FLT:
+      {
+	double d
+	  = fabs (target_float_to_host_double (value_contents (arg1),
+					       value_type (arg1)));
+	return value_from_host_double (type, d);
+      }
+    case TYPE_CODE_INT:
+      {
+	LONGEST l = value_as_long (arg1);
+	l = llabs (l);
+	return value_from_longest (type, l);
+      }
+    }
+  error (_("ABS of type %s not supported"), TYPE_SAFE_NAME (type));
+}
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -997,26 +1026,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
     case UNOP_ABS:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      type = value_type (arg1);
-      switch (type->code ())
-	{
-	case TYPE_CODE_FLT:
-	  {
-	    double d
-	      = fabs (target_float_to_host_double (value_contents (arg1),
-						   value_type (arg1)));
-	    return value_from_host_double (type, d);
-	  }
-	case TYPE_CODE_INT:
-	  {
-	    LONGEST l = value_as_long (arg1);
-	    l = llabs (l);
-	    return value_from_longest (type, l);
-	  }
-	}
-      error (_("ABS of type %s not supported"), TYPE_SAFE_NAME (type));
+      return eval_op_f_abs (expect_type, exp, noside, arg1);
 
     case BINOP_MOD:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
