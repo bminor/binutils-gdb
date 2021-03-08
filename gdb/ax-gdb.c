@@ -2609,6 +2609,48 @@ assign_operation::do_generate_ax (struct expression *exp,
 	     "may not assign to it"), name);
 }
 
+void
+assign_modify_operation::do_generate_ax (struct expression *exp,
+					 struct agent_expr *ax,
+					 struct axs_value *value,
+					 struct type *cast_type)
+{
+  operation *subop = std::get<1> (m_storage).get ();
+  if (subop->opcode () != OP_INTERNALVAR)
+    error (_("May only assign to trace state variables"));
+
+  internalvar_operation *ivarop
+    = dynamic_cast<internalvar_operation *> (subop);
+  gdb_assert (ivarop != nullptr);
+
+  const char *name = internalvar_name (ivarop->get_internalvar ());
+  struct trace_state_variable *tsv;
+
+  tsv = find_trace_state_variable (name);
+  if (tsv)
+    {
+      /* The tsv will be the left half of the binary operation.  */
+      ax_tsv (ax, aop_getv, tsv->number);
+      if (ax->tracing)
+	ax_tsv (ax, aop_tracev, tsv->number);
+      /* Trace state variables are always 64-bit integers.  */
+      struct axs_value value1, value2;
+      value1.kind = axs_rvalue;
+      value1.type = builtin_type (ax->gdbarch)->builtin_long_long;
+      /* Now do right half of expression.  */
+      std::get<2> (m_storage)->generate_ax (exp, ax, &value2);
+      gen_expr_binop_rest (exp, std::get<0> (m_storage), ax,
+			   value, &value1, &value2);
+      /* We have a result of the binary op, set the tsv.  */
+      ax_tsv (ax, aop_setv, tsv->number);
+      if (ax->tracing)
+	ax_tsv (ax, aop_tracev, tsv->number);
+    }
+  else
+    error (_("$%s is not a trace state variable, "
+	     "may not assign to it"), name);
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

@@ -197,6 +197,12 @@ extern struct value *eval_op_memval (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
 				     struct value *arg1, struct type *type);
+extern struct value *eval_binop_assign_modify (struct type *expect_type,
+					       struct expression *exp,
+					       enum noside noside,
+					       enum exp_opcode op,
+					       struct value *arg1,
+					       struct value *arg2);
 
 namespace expr
 {
@@ -1790,6 +1796,36 @@ public:
 
   enum exp_opcode opcode () const override
   { return BINOP_ASSIGN; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
+/* Assignment with modification, like "+=".  */
+class assign_modify_operation
+  : public tuple_holding_operation<exp_opcode, operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    value *rhs = std::get<2> (m_storage)->evaluate (expect_type, exp, noside);
+    return eval_binop_assign_modify (expect_type, exp, noside,
+				     std::get<0> (m_storage), lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return BINOP_ASSIGN_MODIFY; }
 
 protected:
 

@@ -2074,7 +2074,7 @@ eval_op_type (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_ASSIGN_MODIFY.  */
 
-static struct value *
+struct value *
 eval_binop_assign_modify (struct type *expect_type, struct expression *exp,
 			  enum noside noside, enum exp_opcode op,
 			  struct value *arg1, struct value *arg2)
