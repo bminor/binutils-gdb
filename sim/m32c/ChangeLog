@@ -1,3 +1,8 @@
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (opc2c.o, safe-fgets.o): Call COMPILE_FOR_BUILD.
+	(opc2c): Call LINK_FOR_BUILD.
+
 2021-03-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (opc2c): Delete $(BUILD_LIBS).

@@ -1,3 +1,8 @@
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gencode.o, cr16-opc.o): Call COMPILE_FOR_BUILD.
+	(gencode): Call LINK_FOR_BUILD.
+
 2021-03-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (gencode): Delete $(BUILD_LIB).

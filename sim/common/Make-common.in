@@ -248,6 +248,9 @@ EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 
 LIB_OBJS = callback.o syscall.o targ-map.o version.o $(SIM_OBJS)
 
+COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS)
+LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o $@
+
 RUNTESTFLAGS =
 
 callback_h = $(srcroot)/include/gdb/callback.h
@@ -269,8 +272,11 @@ run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 # devo/libremote because this directory would contain more than just
 # a library).
 
-gentmap: Makefile $(srccom)/gentmap.c $(srccom)/nltvals.def
-	$(CC_FOR_BUILD) $(srccom)/gentmap.c -o gentmap $(BUILD_CFLAGS) $(NL_TARGET)
+gentmap.o: Makefile $(srccom)/gentmap.c $(srccom)/nltvals.def
+	$(COMPILE_FOR_BUILD) -o $@ -c $(srccom)/gentmap.c $(NL_TARGET)
+
+gentmap: gentmap.o
+	$(LINK_FOR_BUILD) $<
 
 targ-vals.h targ-map.c: stamp-tvals
 stamp-tvals: gentmap

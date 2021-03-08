@@ -1,3 +1,8 @@
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gencode.o): New rule.
+	(gencode): Call LINK_FOR_BUILD.
+
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

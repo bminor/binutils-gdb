@@ -1,3 +1,10 @@
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
+	Change $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) to
+	$(LINK_FOR_BUILD).  Change $(CC_FOR_BUILD) $(BUILD_CFLAGS) to
+	$(COMPILE_FOR_BUILD).
+
 2021-03-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (gentmap, dgen, igen, tmp-filter, tmp-ld-decode,

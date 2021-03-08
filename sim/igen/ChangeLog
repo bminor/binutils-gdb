@@ -1,3 +1,10 @@
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
+	(.c.o, igen.o): Call COMPILE_FOR_BUILD.
+	(igen, tmp-table, tmp-filter, tmp-ld-decode, tmp-ld-cache, tmp-ld-insn,
+	tmp-gen): Call LINK_FOR_BUILD.
+
 2021-03-08  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (tmp-table, tmp-filter, tmp-ld-decode, tmp-ld-cache,
