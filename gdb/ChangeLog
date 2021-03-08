@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* eval.c (objc_msgcall_operation::evaluate): New method.
+	* c-exp.h (class objc_msgcall_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class var_value_operation): New.
 	* eval.c (var_value_operation::evaluate)
 	(var_value_operation::evaluate_for_address)

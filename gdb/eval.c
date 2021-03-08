@@ -2436,6 +2436,45 @@ eval_multi_subscript (struct type *expect_type, struct expression *exp,
   return (arg1);
 }
 
+namespace expr
+{
+
+value *
+objc_msgcall_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
+{
+  enum noside sub_no_side = EVAL_NORMAL;
+  struct type *selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    sub_no_side = EVAL_NORMAL;
+  else
+    sub_no_side = noside;
+  value *target
+    = std::get<1> (m_storage)->evaluate (selector_type, exp, sub_no_side);
+
+  if (value_as_long (target) == 0)
+    sub_no_side = EVAL_AVOID_SIDE_EFFECTS;
+  else
+    sub_no_side = noside;
+  std::vector<operation_up> &args = std::get<2> (m_storage);
+  value **argvec = XALLOCAVEC (struct value *, args.size () + 3);
+  argvec[0] = nullptr;
+  argvec[1] = nullptr;
+  for (int i = 0; i < args.size (); ++i)
+    argvec[i + 2] = args[i]->evaluate_with_coercion (exp, sub_no_side);
+  argvec[args.size () + 2] = nullptr;
+
+  return eval_op_objc_msgcall (expect_type, exp, noside, std::
+			       get<0> (m_storage), target,
+			       gdb::make_array_view (argvec,
+						     args.size () + 3));
+}
+
+}
+
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,

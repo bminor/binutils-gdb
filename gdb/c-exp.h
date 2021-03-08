@@ -88,6 +88,23 @@ public:
   { return OP_OBJC_SELECTOR; }
 };
 
+/* An Objective C message call.  */
+class objc_msgcall_operation
+  : public tuple_holding_operation<CORE_ADDR, operation_up,
+				   std::vector<operation_up>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_OBJC_MSGCALL; }
+};
+
 }/* namespace expr */
 
 #endif /* C_EXP_H */
