@@ -10703,6 +10703,91 @@ ada_atr_val_operation::evaluate (struct type *expect_type,
   return ada_val_atr (noside, std::get<0> (m_storage), arg);
 }
 
+value *
+ada_unop_ind_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+
+  struct type *type = ada_check_typedef (value_type (arg1));
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      if (ada_is_array_descriptor_type (type))
+	/* GDB allows dereferencing GNAT array descriptors.  */
+	{
+	  struct type *arrType = ada_type_of_array (arg1, 0);
+
+	  if (arrType == NULL)
+	    error (_("Attempt to dereference null array pointer."));
+	  return value_at_lazy (arrType, 0);
+	}
+      else if (type->code () == TYPE_CODE_PTR
+	       || type->code () == TYPE_CODE_REF
+	       /* In C you can dereference an array to get the 1st elt.  */
+	       || type->code () == TYPE_CODE_ARRAY)
+	{
+	  /* As mentioned in the OP_VAR_VALUE case, tagged types can
+	     only be determined by inspecting the object's tag.
+	     This means that we need to evaluate completely the
+	     expression in order to get its type.  */
+
+	  if ((type->code () == TYPE_CODE_REF
+	       || type->code () == TYPE_CODE_PTR)
+	      && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0))
+	    {
+	      arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp,
+							EVAL_NORMAL);
+	      type = value_type (ada_value_ind (arg1));
+	    }
+	  else
+	    {
+	      type = to_static_fixed_type
+		(ada_aligned_type
+		 (ada_check_typedef (TYPE_TARGET_TYPE (type))));
+	    }
+	  ada_ensure_varsize_limit (type);
+	  return value_zero (type, lval_memory);
+	}
+      else if (type->code () == TYPE_CODE_INT)
+	{
+	  /* GDB allows dereferencing an int.  */
+	  if (expect_type == NULL)
+	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+			       lval_memory);
+	  else
+	    {
+	      expect_type =
+		to_static_fixed_type (ada_aligned_type (expect_type));
+	      return value_zero (expect_type, lval_memory);
+	    }
+	}
+      else
+	error (_("Attempt to take contents of a non-pointer value."));
+    }
+  arg1 = ada_coerce_ref (arg1);     /* FIXME: What is this for??  */
+  type = ada_check_typedef (value_type (arg1));
+
+  if (type->code () == TYPE_CODE_INT)
+    /* GDB allows dereferencing an int.  If we were given
+       the expect_type, then use that as the target type.
+       Otherwise, assume that the target type is an int.  */
+    {
+      if (expect_type != NULL)
+	return ada_value_ind (value_cast (lookup_pointer_type (expect_type),
+					  arg1));
+      else
+	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
+			      (CORE_ADDR) value_as_address (arg1));
+    }
+
+  if (ada_is_array_descriptor_type (type))
+    /* GDB allows dereferencing GNAT array descriptors.  */
+    return ada_coerce_to_simple_array (arg1);
+  else
+    return ada_value_ind (arg1);
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure

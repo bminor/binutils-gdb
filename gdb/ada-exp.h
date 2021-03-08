@@ -358,6 +358,19 @@ public:
   { return OP_ATR_VAL; }
 };
 
+/* The indirection operator for Ada.  */
+class ada_unop_ind_operation
+  : public unop_ind_base_operation
+{
+public:
+
+  using unop_ind_base_operation::unop_ind_base_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */

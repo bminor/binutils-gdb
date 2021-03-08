@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_unop_ind_operation::evaluate): New method.
+	* ada-exp.h (class ada_unop_ind_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_binop_exp): No longer static.
 	* ada-exp.h (ada_binop_exp_operation): New typedef.
 
