@@ -1120,6 +1120,19 @@ eval_op_f_modulo (struct type *expect_type, struct expression *exp,
   error (_("MODULO of type %s not supported"), TYPE_SAFE_NAME (type));
 }
 
+/* A helper function for BINOP_FORTRAN_CMPLX.  */
+
+static struct value *
+eval_op_f_cmplx (struct type *expect_type, struct expression *exp,
+		 enum noside noside,
+		 struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct type *type = builtin_f_type(exp->gdbarch)->builtin_complex_s16;
+  return value_literal_complex (arg1, arg2, type);
+}
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -1247,10 +1260,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
     case BINOP_FORTRAN_CMPLX:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      type = builtin_f_type(exp->gdbarch)->builtin_complex_s16;
-      return value_literal_complex (arg1, arg2, type);
+      return eval_op_f_cmplx (expect_type, exp, noside, arg1, arg2);
 
     case UNOP_FORTRAN_KIND:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
