@@ -29,6 +29,37 @@
 #include "valprint.h"
 #include "gdbarch.h"
 
+/* A helper function for UNOP_HIGH.  */
+
+static struct value *
+eval_op_m2_high (struct type *expect_type, struct expression *exp,
+		 enum noside noside,
+		 struct value *arg1)
+{
+  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+    return arg1;
+  else
+    {
+      arg1 = coerce_ref (arg1);
+      struct type *type = check_typedef (value_type (arg1));
+
+      if (m2_is_unbounded_array (type))
+	{
+	  struct value *temp = arg1;
+
+	  type = type->field (1).type ();
+	  /* i18n: Do not translate the "_m2_high" part!  */
+	  arg1 = value_struct_elt (&temp, NULL, "_m2_high", NULL,
+				   _("unbounded structure "
+				     "missing _m2_high field"));
+
+	  if (value_type (arg1) != type)
+	    arg1 = value_cast (type, arg1);
+	}
+    }
+  return arg1;
+}
+
 static struct value *
 evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 			 int *pos, enum noside noside)
@@ -43,29 +74,7 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
     case UNOP_HIGH:
       (*pos)++;
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
-	return arg1;
-      else
-	{
-	  arg1 = coerce_ref (arg1);
-	  type = check_typedef (value_type (arg1));
-
-	  if (m2_is_unbounded_array (type))
-	    {
-	      struct value *temp = arg1;
-
-	      type = type->field (1).type ();
-	      /* i18n: Do not translate the "_m2_high" part!  */
-	      arg1 = value_struct_elt (&temp, NULL, "_m2_high", NULL,
-				       _("unbounded structure "
-					 "missing _m2_high field"));
-	  
-	      if (value_type (arg1) != type)
-		arg1 = value_cast (type, arg1);
-	    }
-	}
-      return arg1;
+      return eval_op_m2_high (expect_type, exp, noside, arg1);
 
     case BINOP_SUBSCRIPT:
       (*pos)++;

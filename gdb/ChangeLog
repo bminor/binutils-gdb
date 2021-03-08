@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* m2-lang.c (eval_op_m2_high): New function.
+	(evaluate_subexp_modula2): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (evaluate_subexp_for_address_base): New function.
 	(evaluate_subexp_for_address): Use it.
 	(evaluate_subexp_for_sizeof_base): New function.
