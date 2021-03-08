@@ -135,6 +135,11 @@ extern struct value *eval_op_leq (struct type *expect_type,
 				  enum noside noside, enum exp_opcode op,
 				  struct value *arg1,
 				  struct value *arg2);
+extern struct value *eval_op_repeat (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside, enum exp_opcode op,
+				     struct value *arg1,
+				     struct value *arg2);
 
 namespace expr
 {
@@ -1187,6 +1192,21 @@ using less_operation = comparison_operation<BINOP_LESS, eval_op_less>;
 using gtr_operation = comparison_operation<BINOP_GTR, eval_op_gtr>;
 using geq_operation = comparison_operation<BINOP_GEQ, eval_op_geq>;
 using leq_operation = comparison_operation<BINOP_LEQ, eval_op_leq>;
+
+/* Implement the GDB '@' repeat operator.  */
+class repeat_operation
+  : public binop_operation<BINOP_REPEAT, eval_op_repeat>
+{
+  using binop_operation<BINOP_REPEAT, eval_op_repeat>::binop_operation;
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
 
 } /* namespace expr */
 

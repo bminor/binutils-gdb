@@ -2419,6 +2419,56 @@ ternop_cond_operation::do_generate_ax (struct expression *exp,
   value->kind = value2.kind;
 }
 
+/* Generate code for GDB's magical `repeat' operator.
+   LVALUE @ INT creates an array INT elements long, and whose elements
+   have the same type as LVALUE, located in memory so that LVALUE is
+   its first element.  For example, argv[0]@argc gives you the array
+   of command-line arguments.
+
+   Unfortunately, because we have to know the types before we actually
+   have a value for the expression, we can't implement this perfectly
+   without changing the type system, having values that occupy two
+   stack slots, doing weird things with sizeof, etc.  So we require
+   the right operand to be a constant expression.  */
+void
+repeat_operation::do_generate_ax (struct expression *exp,
+				  struct agent_expr *ax,
+				  struct axs_value *value,
+				  struct type *cast_type)
+{
+  struct axs_value value1;
+
+  /* We don't want to turn this into an rvalue, so no conversions
+     here.  */
+  std::get<0> (m_storage)->generate_ax (exp, ax, &value1);
+  if (value1.kind != axs_lvalue_memory)
+    error (_("Left operand of `@' must be an object in memory."));
+
+  /* Evaluate the length; it had better be a constant.  */
+  if (!std::get<1> (m_storage)->constant_p ())
+    error (_("Right operand of `@' must be a "
+	     "constant, in agent expressions."));
+
+  struct value *v
+    = std::get<1> (m_storage)->evaluate (nullptr, exp,
+					 EVAL_AVOID_SIDE_EFFECTS);
+  if (value_type (v)->code () != TYPE_CODE_INT)
+    error (_("Right operand of `@' must be an integer."));
+  int length = value_as_long (v);
+  if (length <= 0)
+    error (_("Right operand of `@' must be positive."));
+
+  /* The top of the stack is already the address of the object, so
+     all we need to do is frob the type of the lvalue.  */
+  /* FIXME-type-allocation: need a way to free this type when we are
+     done with it.  */
+  struct type *array
+    = lookup_array_range_type (value1.type, 0, length - 1);
+
+  value->kind = axs_lvalue_memory;
+  value->type = array;
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

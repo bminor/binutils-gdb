@@ -1732,9 +1732,9 @@ eval_op_leq (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_REPEAT.  */
 
-static struct value *
+struct value *
 eval_op_repeat (struct type *expect_type, struct expression *exp,
-		enum noside noside,
+		enum noside noside, enum exp_opcode op,
 		struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_SKIP)
@@ -2946,7 +2946,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_REPEAT:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
-      return eval_op_repeat (expect_type, exp, noside, arg1, arg2);
+      return eval_op_repeat (expect_type, exp, noside, op, arg1, arg2);
 
     case BINOP_COMMA:
       evaluate_subexp (nullptr, exp, pos, noside);
