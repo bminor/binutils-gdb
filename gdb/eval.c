@@ -1894,6 +1894,21 @@ eval_op_alignof (struct type *expect_type, struct expression *exp,
   return value_from_longest (size_type, align);
 }
 
+/* A helper function for UNOP_MEMVAL.  */
+
+static struct value *
+eval_op_memval (struct type *expect_type, struct expression *exp,
+		enum noside noside,
+		struct value *arg1, struct type *type)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (type, lval_memory);
+  else
+    return value_at_lazy (type, value_as_address (arg1));
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2817,24 +2832,14 @@ evaluate_subexp_standard (struct type *expect_type,
     case UNOP_MEMVAL:
       (*pos) += 2;
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (exp->elts[pc + 1].type, lval_memory);
-      else
-	return value_at_lazy (exp->elts[pc + 1].type,
-			      value_as_address (arg1));
+      return eval_op_memval (expect_type, exp, noside, arg1,
+			     exp->elts[pc + 1].type);
 
     case UNOP_MEMVAL_TYPE:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
       type = value_type (arg1);
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (type, lval_memory);
-      else
-	return value_at_lazy (type, value_as_address (arg1));
+      return eval_op_memval (expect_type, exp, noside, arg1, type);
 
     case UNOP_PREINCREMENT:
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
