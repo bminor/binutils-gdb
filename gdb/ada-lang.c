@@ -10134,7 +10134,7 @@ ada_mult_binop (struct type *expect_type,
 
 /* A helper function for BINOP_EQUAL and BINOP_NOTEQUAL.  */
 
-static value *
+value *
 ada_equal_binop (struct type *expect_type,
 		 struct expression *exp,
 		 enum noside noside, enum exp_opcode op,

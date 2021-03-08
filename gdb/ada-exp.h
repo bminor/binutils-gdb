@@ -46,6 +46,10 @@ extern struct value *ada_mult_binop (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1, struct value *arg2);
+extern struct value *ada_equal_binop (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside, enum exp_opcode op,
+				      struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -158,6 +162,29 @@ using ada_binop_mul_operation = binop_operation<BINOP_MUL, ada_mult_binop>;
 using ada_binop_div_operation = binop_operation<BINOP_DIV, ada_mult_binop>;
 using ada_binop_rem_operation = binop_operation<BINOP_REM, ada_mult_binop>;
 using ada_binop_mod_operation = binop_operation<BINOP_MOD, ada_mult_binop>;
+
+/* Implement the equal and not-equal operations for Ada.  */
+class ada_binop_equal_operation
+  : public tuple_holding_operation<enum exp_opcode, operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    value *arg2 = std::get<2> (m_storage)->evaluate (value_type (arg1),
+						     exp, noside);
+    return ada_equal_binop (expect_type, exp, noside, std::get<0> (m_storage),
+			    arg1, arg2);
+  }
+
+  enum exp_opcode opcode () const override
+  { return std::get<0> (m_storage); }
+};
 
 } /* namespace expr */
 
