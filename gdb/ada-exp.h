@@ -267,6 +267,22 @@ public:
   { return BINOP_IN_BOUNDS; }
 };
 
+/* Implement several unary Ada OP_ATR_* operations.  */
+class ada_unop_atr_operation
+  : public maybe_constant_operation<operation_up, enum exp_opcode, int>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return std::get<1> (m_storage); }
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */

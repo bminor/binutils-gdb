@@ -10532,6 +10532,27 @@ ada_binop_addsub_operation::evaluate (struct type *expect_type,
   return arg1;
 }
 
+value *
+ada_unop_atr_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
+{
+  struct type *type_arg = nullptr;
+  value *val = nullptr;
+
+  if (std::get<0> (m_storage)->opcode () == OP_TYPE)
+    {
+      value *tem = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						      EVAL_AVOID_SIDE_EFFECTS);
+      type_arg = value_type (tem);
+    }
+  else
+    val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+
+  return ada_unop_atr (exp, noside, std::get<1> (m_storage),
+		       val, type_arg, std::get<2> (m_storage));
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure
