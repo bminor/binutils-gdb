@@ -21,6 +21,7 @@
 #define C_EXP_H
 
 #include "expop.h"
+#include "objc-lang.h"
 
 namespace expr
 {
@@ -39,6 +40,27 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_STRING; }
+};
+
+class objc_nsstring_operation
+  : public tuple_holding_operation<std::string>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (noside == EVAL_SKIP)
+      return eval_skip_value (exp);
+    const std::string &str = std::get<0> (m_storage);
+    return value_nsstring (exp->gdbarch, str.c_str (), str.size () + 1);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_OBJC_NSSTRING; }
 };
 
 }/* namespace expr */

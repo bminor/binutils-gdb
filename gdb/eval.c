@@ -41,6 +41,7 @@
 #include "typeprint.h"
 #include <ctype.h>
 #include "expop.h"
+#include "c-exp.h"
 
 /* Prototypes for local functions.  */
 

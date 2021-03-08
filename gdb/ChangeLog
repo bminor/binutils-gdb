@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* eval.c: Include c-exp.h.
+	* c-exp.h (class objc_nsstring_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* c-lang.c (c_string_operation::evaluate): New method.
 	* c-exp.h: New file.
 
