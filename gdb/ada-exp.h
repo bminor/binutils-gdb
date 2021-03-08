@@ -55,6 +55,22 @@ public:
 		   enum noside noside) override;
 };
 
+/* The Ada TYPE'(EXP) construct.  */
+class ada_qual_operation
+  : public tuple_holding_operation<operation_up, struct type *>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return UNOP_QUAL; }
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */

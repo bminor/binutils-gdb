@@ -10427,6 +10427,15 @@ ada_string_operation::evaluate (struct type *expect_type,
   return result;
 }
 
+value *
+ada_qual_operation::evaluate (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside)
+{
+  struct type *type = std::get<1> (m_storage);
+  return std::get<0> (m_storage)->evaluate (type, exp, noside);
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure
