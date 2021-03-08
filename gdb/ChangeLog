@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* f-lang.h (class f_language) <expresssion_ops>: Remove.
+	<exp_descriptor_tab>: Remove.
+	* f-lang.c (fortran_value_subarray, evaluate_subexp_f)
+	(operator_length_f, print_unop_subexp_f, print_binop_subexp_f)
+	(print_subexp_f, dump_subexp_body_f, operator_check_f)
+	(f_language::exp_descriptor_tab, fortran_prepare_argument):
+	Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.h (class rust_language) <expression_ops,
 	exp_descriptor_tab>: Remove.
 	* rust-lang.c (rust_evaluate_funcall): Remove.

@@ -220,11 +220,6 @@ public:
 
   /* See language.h.  */
 
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_tab; }
-
-  /* See language.h.  */
-
   const struct op_print *opcode_print_table () const override
   { return op_print_tab; }
 
@@ -236,11 +231,6 @@ protected:
 	(const lookup_name_info &lookup_name) const override;
 
 private:
-  /* Table of expression handling functions for use by EXPRESSION_OPS
-     member function.  */
-
-  static const struct exp_descriptor exp_descriptor_tab;
-
   /* Table of opcode data for use by OPCODE_PRINT_TABLE member function.  */
 
   static const struct op_print op_print_tab[];
