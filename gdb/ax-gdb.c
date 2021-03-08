@@ -2579,6 +2579,36 @@ op_this_operation::do_generate_ax (struct expression *exp,
 	   sym->print_name ());
 }
 
+void
+assign_operation::do_generate_ax (struct expression *exp,
+				  struct agent_expr *ax,
+				  struct axs_value *value,
+				  struct type *cast_type)
+{
+  operation *subop = std::get<0> (m_storage).get ();
+  if (subop->opcode () != OP_INTERNALVAR)
+    error (_("May only assign to trace state variables"));
+
+  internalvar_operation *ivarop
+    = dynamic_cast<internalvar_operation *> (subop);
+  gdb_assert (ivarop != nullptr);
+
+  const char *name = internalvar_name (ivarop->get_internalvar ());
+  struct trace_state_variable *tsv;
+
+  std::get<1> (m_storage)->generate_ax (exp, ax, value);
+  tsv = find_trace_state_variable (name);
+  if (tsv)
+    {
+      ax_tsv (ax, aop_setv, tsv->number);
+      if (ax->tracing)
+	ax_tsv (ax, aop_tracev, tsv->number);
+    }
+  else
+    error (_("$%s is not a trace state variable, "
+	     "may not assign to it"), name);
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

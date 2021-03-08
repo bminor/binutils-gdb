@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class assign_operation): New.
+	* ax-gdb.c (assign_operation::do_generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class type_instance_operation): New.
 	* eval.c (type_instance_operation::evaluate): New method.
 

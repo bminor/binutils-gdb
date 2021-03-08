@@ -1757,6 +1757,49 @@ public:
   { return TYPE_INSTANCE; }
 };
 
+/* The assignment operator.  */
+class assign_operation
+  : public tuple_holding_operation<operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    /* Special-case assignments where the left-hand-side is a
+       convenience variable -- in these, don't bother setting an
+       expected type.  This avoids a weird case where re-assigning a
+       string or array to an internal variable could error with "Too
+       many array elements".  */
+    struct type *xtype = (VALUE_LVAL (lhs) == lval_internalvar
+			  ? nullptr
+			  : value_type (lhs));
+    value *rhs = std::get<1> (m_storage)->evaluate (xtype, exp, noside);
+
+    if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+      return lhs;
+    if (binop_user_defined_p (BINOP_ASSIGN, lhs, rhs))
+      return value_x_binop (lhs, rhs, BINOP_ASSIGN, OP_NULL, noside);
+    else
+      return value_assign (lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return BINOP_ASSIGN; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
