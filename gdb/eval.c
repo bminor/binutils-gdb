@@ -1511,7 +1511,7 @@ eval_op_sub (struct type *expect_type, struct expression *exp,
 
 /* Helper function for several different binary operations.  */
 
-static struct value *
+struct value *
 eval_op_binary (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1, struct value *arg2)

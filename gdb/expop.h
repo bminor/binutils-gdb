@@ -96,6 +96,10 @@ extern struct value *eval_op_sub (struct type *expect_type,
 				  struct expression *exp,
 				  enum noside noside,
 				  struct value *arg1, struct value *arg2);
+extern struct value *eval_op_binary (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside, enum exp_opcode op,
+				     struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -1040,6 +1044,73 @@ protected:
 		    ax, value);
   }
 };
+
+typedef struct value *binary_ftype (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside, enum exp_opcode op,
+				    struct value *arg1, struct value *arg2);
+
+template<enum exp_opcode OP, binary_ftype FUNC>
+class binop_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs
+      = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *rhs
+      = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return FUNC (expect_type, exp, noside, OP, lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP; }
+};
+
+template<enum exp_opcode OP, binary_ftype FUNC>
+class usual_ax_binop_operation
+  : public binop_operation<OP, FUNC>
+{
+public:
+
+  using binop_operation<OP, FUNC>::binop_operation;
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_binop (exp, OP,
+		    std::get<0> (this->m_storage).get (),
+		    std::get<1> (this->m_storage).get (),
+		    ax, value);
+  }
+};
+
+using exp_operation = binop_operation<BINOP_EXP, eval_op_binary>;
+using intdiv_operation = binop_operation<BINOP_INTDIV, eval_op_binary>;
+using mod_operation = binop_operation<BINOP_MOD, eval_op_binary>;
+
+using mul_operation = usual_ax_binop_operation<BINOP_MUL, eval_op_binary>;
+using div_operation = usual_ax_binop_operation<BINOP_DIV, eval_op_binary>;
+using rem_operation = usual_ax_binop_operation<BINOP_REM, eval_op_binary>;
+using lsh_operation = usual_ax_binop_operation<BINOP_LSH, eval_op_binary>;
+using rsh_operation = usual_ax_binop_operation<BINOP_RSH, eval_op_binary>;
+using bitwise_and_operation
+     = usual_ax_binop_operation<BINOP_BITWISE_AND, eval_op_binary>;
+using bitwise_ior_operation
+     = usual_ax_binop_operation<BINOP_BITWISE_IOR, eval_op_binary>;
+using bitwise_xor_operation
+     = usual_ax_binop_operation<BINOP_BITWISE_XOR, eval_op_binary>;
 
 } /* namespace expr */
 

@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class binop_operation, class usual_ax_binop_operation):
+	New.
+	(exp_operation, intdiv_operation, mod_operation, mul_operation)
+	(div_operation, rem_operation, lsh_operation, rsh_operation)
+	(bitwise_and_operation, bitwise_ior_operation)
+	(bitwise_xor_operation): New typedefs.
+	* eval.c (eval_op_binary): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class sub_operation): New.
 	* eval.c (eval_op_sub): No longer static.  Remove "op" parameter.
 	(evaluate_subexp_standard): Update.
