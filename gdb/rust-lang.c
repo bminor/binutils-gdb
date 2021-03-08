@@ -1337,6 +1337,23 @@ eval_op_rust_ind (struct type *expect_type, struct expression *exp,
   return value_ind (value);
 }
 
+/* A helper function for UNOP_COMPLEMENT.  */
+
+static struct value *
+eval_op_rust_complement (struct type *expect_type, struct expression *exp,
+			 enum noside noside,
+			 struct value *value)
+{
+  if (noside == EVAL_SKIP)
+    {
+      /* Preserving the type is enough.  */
+      return value;
+    }
+  if (value_type (value)->code () == TYPE_CODE_BOOL)
+    return value_from_longest (value_type (value), value_logical_not (value));
+  return value_complement (value);
+}
+
 /* evaluate_exp implementation for Rust.  */
 
 static struct value *
@@ -1367,16 +1384,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	++*pos;
 	value = evaluate_subexp (nullptr, exp, pos, noside);
-	if (noside == EVAL_SKIP)
-	  {
-	    /* Preserving the type is enough.  */
-	    return value;
-	  }
-	if (value_type (value)->code () == TYPE_CODE_BOOL)
-	  result = value_from_longest (value_type (value),
-				       value_logical_not (value));
-	else
-	  result = value_complement (value);
+	result = eval_op_rust_complement (expect_type, exp, noside, value);
       }
       break;
 
