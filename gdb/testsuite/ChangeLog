@@ -1,5 +1,10 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/lib-types.exp: Update the test to check the correct
+	python variable.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-explore-cc.exp: Extend test names to make them
 	unique.
 
