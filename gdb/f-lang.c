@@ -130,6 +130,23 @@ const struct op_print f_language::op_print_tab[] =
 };
 
 
+/* A helper function for the "bound" intrinsics that checks that TYPE
+   is an array.  LBOUND_P is true for lower bound; this is used for
+   the error message, if any.  */
+
+static void
+fortran_require_array (struct type *type, bool lbound_p)
+{
+  type = check_typedef (type);
+  if (type->code () != TYPE_CODE_ARRAY)
+    {
+      if (lbound_p)
+	error (_("LBOUND can only be applied to arrays"));
+      else
+	error (_("UBOUND can only be applied to arrays"));
+    }
+}
+
 /* Create an array containing the lower bounds (when LBOUND_P is true) or
    the upper bounds (when LBOUND_P is false) of ARRAY (which must be of
    array type).  GDBARCH is the current architecture.  */
@@ -1228,14 +1245,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
 	/* Check that the first argument is array like.  */
 	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-	type = check_typedef (value_type (arg1));
-	if (type->code () != TYPE_CODE_ARRAY)
-	  {
-	    if (lbound_p)
-	      error (_("LBOUND can only be applied to arrays"));
-	    else
-	      error (_("UBOUND can only be applied to arrays"));
-	  }
+	fortran_require_array (value_type (arg1), lbound_p);
 
 	if (nargs == 1)
 	  return fortran_bounds_all_dims (lbound_p, exp->gdbarch, arg1);
