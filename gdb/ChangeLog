@@ -1,5 +1,38 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expprint.c (dump_for_expression): New overload.
+	* expop.h (check_objfile, dump_for_expression): Declare new
+	overloads.
+	* ada-lang.c (check_objfile): New overload.
+	(assign_component, ada_aggregate_component::uses_objfile)
+	(ada_aggregate_component::dump, ada_aggregate_component::assign)
+	(ada_aggregate_component::assign_aggregate)
+	(ada_positional_component::uses_objfile)
+	(ada_positional_component::dump, ada_positional_component::assign)
+	(ada_discrete_range_association::uses_objfile)
+	(ada_discrete_range_association::dump)
+	(ada_discrete_range_association::assign)
+	(ada_name_association::uses_objfile, ada_name_association::dump)
+	(ada_name_association::assign)
+	(ada_choices_component::uses_objfile, ada_choices_component::dump)
+	(ada_choices_component::assign)
+	(ada_others_component::uses_objfile, ada_others_component::dump)
+	(ada_others_component::assign, ada_assign_operation::evaluate):
+	New methods.
+	* ada-exp.h (ada_string_operation) <get_name>: New method.
+	(class ada_assign_operation): New.
+	(class ada_component): New.
+	(ada_component_up): New typedef.
+	(class ada_aggregate_operation, class ada_aggregate_component)
+	(class ada_positional_component, class ada_others_component)
+	(class ada_association): New.
+	(ada_association_up): New typedef.
+	(class ada_choices_component)
+	(class ada_discrete_range_association)
+	(class ada_name_association): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_var_value_operation::resolve)
 	(ada_funcall_operation::resolve)
 	(ada_ternop_slice_operation::resolve): New methods.

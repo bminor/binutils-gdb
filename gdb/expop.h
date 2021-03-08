@@ -207,6 +207,8 @@ extern struct value *eval_binop_assign_modify (struct type *expect_type,
 namespace expr
 {
 
+class ada_component;
+
 /* The check_objfile overloads are used to check whether a particular
    component of some operation references an objfile.  The passed-in
    objfile will never be a debug objfile.  */
@@ -306,6 +308,9 @@ check_objfile (const std::pair<S, T> &item, struct objfile *objfile)
 	  || check_objfile (item.second, objfile));
 }
 
+extern bool check_objfile (const std::unique_ptr<ada_component> &comp,
+			   struct objfile *objfile);
+
 static inline void
 dump_for_expression (struct ui_file *stream, int depth,
 		     const operation_up &op)
@@ -337,6 +342,8 @@ extern void dump_for_expression (struct ui_file *stream, int depth,
 				 enum range_flag flags);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 objfile *objf);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 const std::unique_ptr<ada_component> &comp);
 
 template<typename T>
 void

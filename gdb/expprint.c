@@ -32,6 +32,7 @@
 #include "cli/cli-style.h"
 #include "c-lang.h"
 #include "expop.h"
+#include "ada-exp.h"
 
 #include <ctype.h>
 
@@ -1281,6 +1282,13 @@ dump_for_expression (struct ui_file *stream, int depth,
   if ((flags & RANGE_HAS_STRIDE) != 0)
     fputs_unfiltered (_("has-stride"), stream);
   fprintf_filtered (stream, "\n");
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth,
+		     const std::unique_ptr<ada_component> &comp)
+{
+  comp->dump (stream, depth);
 }
 
 void

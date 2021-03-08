@@ -122,6 +122,12 @@ public:
 
   using string_operation::string_operation;
 
+  /* Return the underlying string.  */
+  const char *get_name () const
+  {
+    return std::get<0> (m_storage).c_str ();
+  }
+
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
 		   enum noside noside) override;
@@ -445,6 +451,279 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_FUNCALL; }
+};
+
+/* An Ada assignment operation.  */
+class ada_assign_operation
+  : public assign_operation
+{
+public:
+
+  using assign_operation::assign_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return BINOP_ASSIGN; }
+};
+
+/* This abstract class represents a single component in an Ada
+   aggregate assignment.  */
+class ada_component
+{
+public:
+
+  /* Assign to LHS, which is part of CONTAINER.  EXP is the expression
+     being evaluated.  INDICES, LOW, and HIGH indicate which
+     sub-components have already been assigned; INDICES should be
+     updated by this call.  */
+  virtual void assign (struct value *container,
+		       struct value *lhs, struct expression *exp,
+		       std::vector<LONGEST> &indices,
+		       LONGEST low, LONGEST high) = 0;
+
+  /* Same as operation::uses_objfile.  */
+  virtual bool uses_objfile (struct objfile *objfile) = 0;
+
+  /* Same as operation::dump.  */
+  virtual void dump (ui_file *stream, int depth) = 0;
+
+  virtual ~ada_component () = default;
+
+protected:
+
+  ada_component () = default;
+  DISABLE_COPY_AND_ASSIGN (ada_component);
+};
+
+/* Unique pointer specialization for Ada assignment components.  */
+typedef std::unique_ptr<ada_component> ada_component_up;
+
+/* An operation that holds a single component.  */
+class ada_aggregate_operation
+  : public tuple_holding_operation<ada_component_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  /* Assuming that LHS represents an lvalue having a record or array
+     type, evaluate an assignment of this aggregate's value to LHS.
+     CONTAINER is an lvalue containing LHS (possibly LHS itself).
+     Does not modify the inferior's memory, nor does it modify the
+     contents of LHS (unless == CONTAINER).  */
+
+  void assign_aggregate (struct value *container,
+			 struct value *lhs,
+			 struct expression *exp);
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    error (_("Aggregates only allowed on the right of an assignment"));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_AGGREGATE; }
+};
+
+/* A component holding a vector of other components to assign.  */
+class ada_aggregate_component : public ada_component
+{
+public:
+
+  explicit ada_aggregate_component (std::vector<ada_component_up> &&components)
+    : m_components (std::move (components))
+  {
+  }
+
+  void assign (struct value *container,
+	       struct value *lhs, struct expression *exp,
+	       std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high) override;
+
+  bool uses_objfile (struct objfile *objfile) override;
+
+  void dump (ui_file *stream, int depth) override;
+
+private:
+
+  std::vector<ada_component_up> m_components;
+};
+
+/* A component that assigns according to a provided index (which is
+   relative to the "low" value).  */
+class ada_positional_component : public ada_component
+{
+public:
+
+  ada_positional_component (int index, operation_up &&op)
+    : m_index (index),
+      m_op (std::move (op))
+  {
+  }
+
+  void assign (struct value *container,
+	       struct value *lhs, struct expression *exp,
+	       std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high) override;
+
+  bool uses_objfile (struct objfile *objfile) override;
+
+  void dump (ui_file *stream, int depth) override;
+
+private:
+
+  int m_index;
+  operation_up m_op;
+};
+
+/* A component which handles an "others" clause.  */
+class ada_others_component : public ada_component
+{
+public:
+
+  explicit ada_others_component (operation_up &&op)
+    : m_op (std::move (op))
+  {
+  }
+
+  void assign (struct value *container,
+	       struct value *lhs, struct expression *exp,
+	       std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high) override;
+
+  bool uses_objfile (struct objfile *objfile) override;
+
+  void dump (ui_file *stream, int depth) override;
+
+private:
+
+  operation_up m_op;
+};
+
+/* An interface that represents an association that is used in
+   aggregate assignment.  */
+class ada_association
+{
+public:
+
+  /* Like ada_component::assign, but takes an operation as a
+     parameter.  The operation is evaluated and then assigned into LHS
+     according to the rules of the concrete implementation.  */
+  virtual void assign (struct value *container,
+		       struct value *lhs,
+		       struct expression *exp,
+		       std::vector<LONGEST> &indices,
+		       LONGEST low, LONGEST high,
+		       operation_up &op) = 0;
+
+  /* Same as operation::uses_objfile.  */
+  virtual bool uses_objfile (struct objfile *objfile) = 0;
+
+  /* Same as operation::dump.  */
+  virtual void dump (ui_file *stream, int depth) = 0;
+
+  virtual ~ada_association () = default;
+
+protected:
+
+  ada_association () = default;
+  DISABLE_COPY_AND_ASSIGN (ada_association);
+};
+
+/* Unique pointer specialization for Ada assignment associations.  */
+typedef std::unique_ptr<ada_association> ada_association_up;
+
+/* A component that holds a vector of associations and an operation.
+   The operation is re-evaluated for each choice.  */
+class ada_choices_component : public ada_component
+{
+public:
+
+  explicit ada_choices_component (operation_up &&op)
+    : m_op (std::move (op))
+  {
+  }
+
+  /* Set the vector of associations.  This is done separately from the
+     constructor because it was simpler for the implementation of the
+     parser.  */
+  void set_associations (std::vector<ada_association_up> &&assoc)
+  {
+    m_assocs = std::move (assoc);
+  }
+
+  void assign (struct value *container,
+	       struct value *lhs, struct expression *exp,
+	       std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high) override;
+
+  bool uses_objfile (struct objfile *objfile) override;
+
+  void dump (ui_file *stream, int depth) override;
+
+private:
+
+  std::vector<ada_association_up> m_assocs;
+  operation_up m_op;
+};
+
+/* An association that uses a discrete range.  */
+class ada_discrete_range_association : public ada_association
+{
+public:
+
+  ada_discrete_range_association (operation_up &&low, operation_up &&high)
+    : m_low (std::move (low)),
+      m_high (std::move (high))
+  {
+  }
+
+  void assign (struct value *container,
+	       struct value *lhs, struct expression *exp,
+	       std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high,
+	       operation_up &op) override;
+
+  bool uses_objfile (struct objfile *objfile) override;
+
+  void dump (ui_file *stream, int depth) override;
+
+private:
+
+  operation_up m_low;
+  operation_up m_high;
+};
+
+/* An association that uses a name.  The name may be an expression
+   that evaluates to an integer (for arrays), or an Ada string or
+   variable value operation.  */
+class ada_name_association : public ada_association
+{
+public:
+
+  explicit ada_name_association (operation_up val)
+    : m_val (std::move (val))
+  {
+  }
+
+  void assign (struct value *container,
+	       struct value *lhs, struct expression *exp,
+	       std::vector<LONGEST> &indices,
+	       LONGEST low, LONGEST high,
+	       operation_up &op) override;
+
+  bool uses_objfile (struct objfile *objfile) override;
+
+  void dump (ui_file *stream, int depth) override;
+
+private:
+
+  operation_up m_val;
 };
 
 } /* namespace expr */

@@ -9634,6 +9634,346 @@ aggregate_assign_others (struct value *container,
   ada_evaluate_subexp (NULL, exp, pos, EVAL_SKIP);
 }
 
+namespace expr
+{
+
+bool
+check_objfile (const std::unique_ptr<ada_component> &comp,
+	       struct objfile *objfile)
+{
+  return comp->uses_objfile (objfile);
+}
+
+/* Assign the result of evaluating ARG starting at *POS to the INDEXth
+   component of LHS (a simple array or a record).  Does not modify the
+   inferior's memory, nor does it modify LHS (unless LHS ==
+   CONTAINER).  */
+
+static void
+assign_component (struct value *container, struct value *lhs, LONGEST index,
+		  struct expression *exp, operation_up &arg)
+{
+  scoped_value_mark mark;
+
+  struct value *elt;
+  struct type *lhs_type = check_typedef (value_type (lhs));
+
+  if (lhs_type->code () == TYPE_CODE_ARRAY)
+    {
+      struct type *index_type = builtin_type (exp->gdbarch)->builtin_int;
+      struct value *index_val = value_from_longest (index_type, index);
+
+      elt = unwrap_value (ada_value_subscript (lhs, 1, &index_val));
+    }
+  else
+    {
+      elt = ada_index_struct_field (index, lhs, 0, value_type (lhs));
+      elt = ada_to_fixed_value (elt);
+    }
+
+  ada_aggregate_operation *ag_op
+    = dynamic_cast<ada_aggregate_operation *> (arg.get ());
+  if (ag_op != nullptr)
+    ag_op->assign_aggregate (container, elt, exp);
+  else
+    value_assign_to_component (container, elt,
+			       arg->evaluate (nullptr, exp,
+					      EVAL_NORMAL));
+}
+
+bool
+ada_aggregate_component::uses_objfile (struct objfile *objfile)
+{
+  for (const auto &item : m_components)
+    if (item->uses_objfile (objfile))
+      return true;
+  return false;
+}
+
+void
+ada_aggregate_component::dump (ui_file *stream, int depth)
+{
+  fprintf_filtered (stream, _("%*sAggregate\n"), depth, "");
+  for (const auto &item : m_components)
+    item->dump (stream, depth + 1);
+}
+
+void
+ada_aggregate_component::assign (struct value *container,
+				 struct value *lhs, struct expression *exp,
+				 std::vector<LONGEST> &indices,
+				 LONGEST low, LONGEST high)
+{
+  for (auto &item : m_components)
+    item->assign (container, lhs, exp, indices, low, high);
+}
+
+void
+ada_aggregate_operation::assign_aggregate (struct value *container,
+					   struct value *lhs,
+					   struct expression *exp)
+{
+  struct type *lhs_type;
+  LONGEST low_index, high_index;
+
+  container = ada_coerce_ref (container);
+  if (ada_is_direct_array_type (value_type (container)))
+    container = ada_coerce_to_simple_array (container);
+  lhs = ada_coerce_ref (lhs);
+  if (!deprecated_value_modifiable (lhs))
+    error (_("Left operand of assignment is not a modifiable lvalue."));
+
+  lhs_type = check_typedef (value_type (lhs));
+  if (ada_is_direct_array_type (lhs_type))
+    {
+      lhs = ada_coerce_to_simple_array (lhs);
+      lhs_type = check_typedef (value_type (lhs));
+      low_index = lhs_type->bounds ()->low.const_val ();
+      high_index = lhs_type->bounds ()->high.const_val ();
+    }
+  else if (lhs_type->code () == TYPE_CODE_STRUCT)
+    {
+      low_index = 0;
+      high_index = num_visible_fields (lhs_type) - 1;
+    }
+  else
+    error (_("Left-hand side must be array or record."));
+
+  std::vector<LONGEST> indices (4);
+  indices[0] = indices[1] = low_index - 1;
+  indices[2] = indices[3] = high_index + 1;
+
+  std::get<0> (m_storage)->assign (container, lhs, exp, indices,
+				   low_index, high_index);
+}
+
+bool
+ada_positional_component::uses_objfile (struct objfile *objfile)
+{
+  return m_op->uses_objfile (objfile);
+}
+
+void
+ada_positional_component::dump (ui_file *stream, int depth)
+{
+  fprintf_filtered (stream, _("%*sPositional, index = %d\n"),
+		    depth, "", m_index);
+  m_op->dump (stream, depth + 1);
+}
+
+/* Assign into the component of LHS indexed by the OP_POSITIONAL
+   construct, given that the positions are relative to lower bound
+   LOW, where HIGH is the upper bound.  Record the position in
+   INDICES.  CONTAINER is as for assign_aggregate.  */
+void
+ada_positional_component::assign (struct value *container,
+				  struct value *lhs, struct expression *exp,
+				  std::vector<LONGEST> &indices,
+				  LONGEST low, LONGEST high)
+{
+  LONGEST ind = m_index + low;
+
+  if (ind - 1 == high)
+    warning (_("Extra components in aggregate ignored."));
+  if (ind <= high)
+    {
+      add_component_interval (ind, ind, indices);
+      assign_component (container, lhs, ind, exp, m_op);
+    }
+}
+
+bool
+ada_discrete_range_association::uses_objfile (struct objfile *objfile)
+{
+  return m_low->uses_objfile (objfile) || m_high->uses_objfile (objfile);
+}
+
+void
+ada_discrete_range_association::dump (ui_file *stream, int depth)
+{
+  fprintf_filtered (stream, _("%*sDiscrete range:\n"), depth, "");
+  m_low->dump (stream, depth + 1);
+  m_high->dump (stream, depth + 1);
+}
+
+void
+ada_discrete_range_association::assign (struct value *container,
+					struct value *lhs,
+					struct expression *exp,
+					std::vector<LONGEST> &indices,
+					LONGEST low, LONGEST high,
+					operation_up &op)
+{
+  LONGEST lower = value_as_long (m_low->evaluate (nullptr, exp, EVAL_NORMAL));
+  LONGEST upper = value_as_long (m_high->evaluate (nullptr, exp, EVAL_NORMAL));
+
+  if (lower <= upper && (lower < low || upper > high))
+    error (_("Index in component association out of bounds."));
+
+  add_component_interval (lower, upper, indices);
+  while (lower <= upper)
+    {
+      assign_component (container, lhs, lower, exp, op);
+      lower += 1;
+    }
+}
+
+bool
+ada_name_association::uses_objfile (struct objfile *objfile)
+{
+  return m_val->uses_objfile (objfile);
+}
+
+void
+ada_name_association::dump (ui_file *stream, int depth)
+{
+  fprintf_filtered (stream, _("%*sName:\n"), depth, "");
+  m_val->dump (stream, depth + 1);
+}
+
+void
+ada_name_association::assign (struct value *container,
+			      struct value *lhs,
+			      struct expression *exp,
+			      std::vector<LONGEST> &indices,
+			      LONGEST low, LONGEST high,
+			      operation_up &op)
+{
+  int index;
+
+  if (ada_is_direct_array_type (value_type (lhs)))
+    index = longest_to_int (value_as_long (m_val->evaluate (nullptr, exp,
+							    EVAL_NORMAL)));
+  else
+    {
+      ada_string_operation *strop
+	= dynamic_cast<ada_string_operation *> (m_val.get ());
+
+      const char *name;
+      if (strop != nullptr)
+	name = strop->get_name ();
+      else
+	{
+	  ada_var_value_operation *vvo
+	    = dynamic_cast<ada_var_value_operation *> (m_val.get ());
+	  if (vvo != nullptr)
+	    error (_("Invalid record component association."));
+	  name = vvo->get_symbol ()->natural_name ();
+	}
+
+      index = 0;
+      if (! find_struct_field (name, value_type (lhs), 0,
+			       NULL, NULL, NULL, NULL, &index))
+	error (_("Unknown component name: %s."), name);
+    }
+
+  add_component_interval (index, index, indices);
+  assign_component (container, lhs, index, exp, op);
+}
+
+bool
+ada_choices_component::uses_objfile (struct objfile *objfile)
+{
+  if (m_op->uses_objfile (objfile))
+    return true;
+  for (const auto &item : m_assocs)
+    if (item->uses_objfile (objfile))
+      return true;
+  return false;
+}
+
+void
+ada_choices_component::dump (ui_file *stream, int depth)
+{
+  fprintf_filtered (stream, _("%*sChoices:\n"), depth, "");
+  m_op->dump (stream, depth + 1);
+  for (const auto &item : m_assocs)
+    item->dump (stream, depth + 1);
+}
+
+/* Assign into the components of LHS indexed by the OP_CHOICES
+   construct at *POS, updating *POS past the construct, given that
+   the allowable indices are LOW..HIGH.  Record the indices assigned
+   to in INDICES.  CONTAINER is as for assign_aggregate.  */
+void
+ada_choices_component::assign (struct value *container,
+			       struct value *lhs, struct expression *exp,
+			       std::vector<LONGEST> &indices,
+			       LONGEST low, LONGEST high)
+{
+  for (auto &item : m_assocs)
+    item->assign (container, lhs, exp, indices, low, high, m_op);
+}
+
+bool
+ada_others_component::uses_objfile (struct objfile *objfile)
+{
+  return m_op->uses_objfile (objfile);
+}
+
+void
+ada_others_component::dump (ui_file *stream, int depth)
+{
+  fprintf_filtered (stream, _("%*sOthers:\n"), depth, "");
+  m_op->dump (stream, depth + 1);
+}
+
+/* Assign the value of the expression in the OP_OTHERS construct in
+   EXP at *POS into the components of LHS indexed from LOW .. HIGH that
+   have not been previously assigned.  The index intervals already assigned
+   are in INDICES.  CONTAINER is as for assign_aggregate.  */
+void
+ada_others_component::assign (struct value *container,
+			      struct value *lhs, struct expression *exp,
+			      std::vector<LONGEST> &indices,
+			      LONGEST low, LONGEST high)
+{
+  int num_indices = indices.size ();
+  for (int i = 0; i < num_indices - 2; i += 2)
+    {
+      for (LONGEST ind = indices[i + 1] + 1; ind < indices[i + 2]; ind += 1)
+	assign_component (container, lhs, ind, exp, m_op);
+    }
+}
+
+struct value *
+ada_assign_operation::evaluate (struct type *expect_type,
+				struct expression *exp,
+				enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+
+  ada_aggregate_operation *ag_op
+    = dynamic_cast<ada_aggregate_operation *> (std::get<1> (m_storage).get ());
+  if (ag_op != nullptr)
+    {
+      if (noside != EVAL_NORMAL)
+	return arg1;
+
+      ag_op->assign_aggregate (arg1, arg1, exp);
+      return ada_value_assign (arg1, arg1);
+    }
+  /* Force the evaluation of the rhs ARG2 to the type of the lhs ARG1,
+     except if the lhs of our assignment is a convenience variable.
+     In the case of assigning to a convenience variable, the lhs
+     should be exactly the result of the evaluation of the rhs.  */
+  struct type *type = value_type (arg1);
+  if (VALUE_LVAL (arg1) == lval_internalvar)
+    type = NULL;
+  value *arg2 = std::get<1> (m_storage)->evaluate (type, exp, noside);
+  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+    return arg1;
+  if (VALUE_LVAL (arg1) == lval_internalvar)
+    {
+      /* Nothing.  */
+    }
+  else
+    arg2 = coerce_for_assign (value_type (arg1), arg2);
+  return ada_value_assign (arg1, arg2);
+}
+
+} /* namespace expr */
+
 /* Add the interval [LOW .. HIGH] to the sorted set of intervals
    [ INDICES[0] .. INDICES[1] ],...  The resulting intervals do not
    overlap.  */
