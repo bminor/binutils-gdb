@@ -1313,15 +1313,14 @@ eval_op_objc_selector (struct type *expect_type, struct expression *exp,
 
 /* Helper function that implements the body of BINOP_CONCAT.  */
 
-static struct value *
+struct value *
 eval_op_concat (struct type *expect_type, struct expression *exp,
-		enum noside noside,
-		enum exp_opcode op, struct value *arg1, struct value *arg2)
+		enum noside noside, struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_SKIP)
     return eval_skip_value (exp);
-  if (binop_user_defined_p (op, arg1, arg2))
-    return value_x_binop (arg1, arg2, op, OP_NULL, noside);
+  if (binop_user_defined_p (BINOP_CONCAT, arg1, arg2))
+    return value_x_binop (arg1, arg2, BINOP_CONCAT, OP_NULL, noside);
   else
     return value_concat (arg1, arg2);
 }
@@ -2791,7 +2790,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_CONCAT:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-      return eval_op_concat (expect_type, exp, noside, op, arg1, arg2);
+      return eval_op_concat (expect_type, exp, noside, arg1, arg2);
 
     case BINOP_ASSIGN:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);

@@ -84,6 +84,10 @@ extern struct value *eval_op_member (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
 				     struct value *arg1, struct value *arg2);
+extern struct value *eval_op_concat (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -933,6 +937,28 @@ public:
 
   enum exp_opcode opcode () const override
   { return STRUCTOP_MPTR; }
+};
+
+class concat_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs
+      = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *rhs
+      = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+    return eval_op_concat (expect_type, exp, noside, lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return BINOP_CONCAT; }
 };
 
 } /* namespace expr */

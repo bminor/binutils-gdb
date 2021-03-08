@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class concat_operation): New.
+	* eval.c (eval_op_concat): No longer static.  Remove "op"
+	parameter.
+	(evaluate_subexp_standard): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class structop_member_operation)
 	(class structop_mptr_operation): New.
 	* eval.c (eval_op_member): No longer static.
