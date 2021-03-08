@@ -1,5 +1,9 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* eval.c: Merge "namespace" scopes.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* parser-defs.h (struct expr_builder) <expr_builder>: Inline.
 	<release>: Inline.
 	* parse.c (expr_builder::expr_builder, expr_builder::release):

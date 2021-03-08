@@ -2639,11 +2639,6 @@ unop_memval_type_operation::evaluate_for_address (struct expression *exp,
 		     std::get<1> (m_storage)->evaluate (nullptr, exp, noside));
 }
 
-}
-
-namespace expr
-{
-
 value *
 var_value_operation::evaluate_for_address (struct expression *exp,
 					   enum noside noside)
@@ -2825,11 +2820,6 @@ var_value_operation::evaluate_for_sizeof (struct expression *exp,
     }
   return evaluate_subexp_for_sizeof_base (exp, type);
 }
-
-}
-
-namespace expr
-{
 
 value *
 var_msym_value_operation::evaluate_for_cast (struct type *to_type,
