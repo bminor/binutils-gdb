@@ -71,7 +71,10 @@ extern struct value *ada_pos_atr (struct type *expect_type,
 				  struct value *arg);
 extern struct value *ada_val_atr (enum noside noside, struct type *type,
 				  struct value *arg);
-
+extern struct value *ada_binop_exp (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside, enum exp_opcode op,
+				    struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -188,6 +191,8 @@ using ada_binop_mod_operation = binop_operation<BINOP_MOD, ada_mult_binop>;
 
 using ada_binop_min_operation = binop_operation<OP_ATR_MIN, ada_binop_minmax>;
 using ada_binop_max_operation = binop_operation<OP_ATR_MAX, ada_binop_minmax>;
+
+using ada_binop_exp_operation = binop_operation<BINOP_EXP, ada_binop_exp>;
 
 /* Implement the equal and not-equal operations for Ada.  */
 class ada_binop_equal_operation

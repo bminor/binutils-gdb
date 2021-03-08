@@ -10416,7 +10416,7 @@ ada_binop_minmax (struct type *expect_type,
 
 /* A helper function for BINOP_EXP.  */
 
-static struct value *
+struct value *
 ada_binop_exp (struct type *expect_type,
 	       struct expression *exp,
 	       enum noside noside, enum exp_opcode op,
