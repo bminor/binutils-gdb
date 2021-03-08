@@ -1234,6 +1234,23 @@ eval_op_var_msym_value (struct type *expect_type, struct expression *exp,
   return val;
 }
 
+/* Helper function that implements the body of OP_FUNC_STATIC_VAR.  */
+
+static struct value *
+eval_op_func_static_var (struct type *expect_type, struct expression *exp,
+			 enum noside noside,
+			 value *func, const char *var)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  CORE_ADDR addr = value_address (func);
+  const block *blk = block_for_pc (addr);
+  struct block_symbol sym = lookup_symbol (var, blk, VAR_DOMAIN, NULL);
+  if (sym.symbol == NULL)
+    error (_("No symbol \"%s\" in specified context."), var);
+  return evaluate_var_value (noside, sym.block, sym.symbol);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1318,17 +1335,9 @@ evaluate_subexp_standard (struct type *expect_type,
 
       {
 	value *func = evaluate_subexp_standard (NULL, exp, pos, noside);
-	CORE_ADDR addr = value_address (func);
 
-	const block *blk = block_for_pc (addr);
-	const char *var = &exp->elts[pc + 2].string;
-
-	struct block_symbol sym = lookup_symbol (var, blk, VAR_DOMAIN, NULL);
-
-	if (sym.symbol == NULL)
-	  error (_("No symbol \"%s\" in specified context."), var);
-
-	return evaluate_var_value (noside, sym.block, sym.symbol);
+	return eval_op_func_static_var (expect_type, exp, noside, func,
+					&exp->elts[pc + 2].string);
       }
 
     case OP_LAST:
