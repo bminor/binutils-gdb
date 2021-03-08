@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* eval.c (eval_multi_subscript): New function.
+	(evaluate_subexp_standard): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_binop_exp): New function.
 	(ada_evaluate_subexp): Use it.
 

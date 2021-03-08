@@ -2360,6 +2360,46 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
   return call_function_by_hand (called_method, NULL, args);
 }
 
+/* Helper function for MULTI_SUBSCRIPT.  */
+
+static struct value *
+eval_multi_subscript (struct type *expect_type, struct expression *exp,
+		      enum noside noside, value *arg1,
+		      gdb::array_view<value *> args)
+{
+  if (noside == EVAL_SKIP)
+    return arg1;
+  for (value *arg2 : args)
+    {
+      if (binop_user_defined_p (MULTI_SUBSCRIPT, arg1, arg2))
+	{
+	  arg1 = value_x_binop (arg1, arg2, MULTI_SUBSCRIPT, OP_NULL, noside);
+	}
+      else
+	{
+	  arg1 = coerce_ref (arg1);
+	  struct type *type = check_typedef (value_type (arg1));
+
+	  switch (type->code ())
+	    {
+	    case TYPE_CODE_PTR:
+	    case TYPE_CODE_ARRAY:
+	    case TYPE_CODE_STRING:
+	      arg1 = value_subscript (arg1, value_as_long (arg2));
+	      break;
+
+	    default:
+	      if (type->name ())
+		error (_("cannot subscript something of type `%s'"),
+		       type->name ());
+	      else
+		error (_("cannot subscript requested type"));
+	    }
+	}
+    }
+  return (arg1);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2815,39 +2855,8 @@ evaluate_subexp_standard (struct type *expect_type,
       argvec = XALLOCAVEC (struct value *, nargs);
       for (ix = 0; ix < nargs; ++ix)
 	argvec[ix] = evaluate_subexp_with_coercion (exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return arg1;
-      for (ix = 0; ix < nargs; ++ix)
-	{
-	  arg2 = argvec[ix];
-
-	  if (binop_user_defined_p (op, arg1, arg2))
-	    {
-	      arg1 = value_x_binop (arg1, arg2, op, OP_NULL, noside);
-	    }
-	  else
-	    {
-	      arg1 = coerce_ref (arg1);
-	      type = check_typedef (value_type (arg1));
-
-	      switch (type->code ())
-		{
-		case TYPE_CODE_PTR:
-		case TYPE_CODE_ARRAY:
-		case TYPE_CODE_STRING:
-		  arg1 = value_subscript (arg1, value_as_long (arg2));
-		  break;
-
-		default:
-		  if (type->name ())
-		    error (_("cannot subscript something of type `%s'"),
-			   type->name ());
-		  else
-		    error (_("cannot subscript requested type"));
-		}
-	    }
-	}
-      return (arg1);
+      return eval_multi_subscript (expect_type, exp, noside, arg1,
+				   gdb::make_array_view (argvec, nargs));
 
     case BINOP_LOGICAL_AND:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
