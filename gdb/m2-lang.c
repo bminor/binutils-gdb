@@ -60,6 +60,56 @@ eval_op_m2_high (struct type *expect_type, struct expression *exp,
   return arg1;
 }
 
+/* A helper function for BINOP_SUBSCRIPT.  */
+
+static struct value *
+eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
+		      enum noside noside,
+		      struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  /* If the user attempts to subscript something that is not an
+     array or pointer type (like a plain int variable for example),
+     then report this as an error.  */
+
+  arg1 = coerce_ref (arg1);
+  struct type *type = check_typedef (value_type (arg1));
+
+  if (m2_is_unbounded_array (type))
+    {
+      struct value *temp = arg1;
+      type = type->field (0).type ();
+      if (type == NULL || (type->code () != TYPE_CODE_PTR))
+	error (_("internal error: unbounded "
+		 "array structure is unknown"));
+      /* i18n: Do not translate the "_m2_contents" part!  */
+      arg1 = value_struct_elt (&temp, NULL, "_m2_contents", NULL,
+			       _("unbounded structure "
+				 "missing _m2_contents field"));
+	  
+      if (value_type (arg1) != type)
+	arg1 = value_cast (type, arg1);
+
+      check_typedef (value_type (arg1));
+      return value_ind (value_ptradd (arg1, value_as_long (arg2)));
+    }
+  else
+    if (type->code () != TYPE_CODE_ARRAY)
+      {
+	if (type->name ())
+	  error (_("cannot subscript something of type `%s'"),
+		 type->name ());
+	else
+	  error (_("cannot subscript requested type"));
+      }
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+  else
+    return value_subscript (arg1, value_as_long (arg2));
+}
+
 static struct value *
 evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 			 int *pos, enum noside noside)
@@ -67,7 +117,6 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
   enum exp_opcode op = exp->elts[*pos].opcode;
   struct value *arg1;
   struct value *arg2;
-  struct type *type;
 
   switch (op)
     {
@@ -80,57 +129,11 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
       (*pos)++;
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      /* If the user attempts to subscript something that is not an
-	 array or pointer type (like a plain int variable for example),
-	 then report this as an error.  */
-
-      arg1 = coerce_ref (arg1);
-      type = check_typedef (value_type (arg1));
-
-      if (m2_is_unbounded_array (type))
-	{
-	  struct value *temp = arg1;
-	  type = type->field (0).type ();
-	  if (type == NULL || (type->code () != TYPE_CODE_PTR))
-	    {
-	      warning (_("internal error: unbounded "
-			 "array structure is unknown"));
-	      return evaluate_subexp_standard (expect_type, exp, pos, noside);
-	    }
-	  /* i18n: Do not translate the "_m2_contents" part!  */
-	  arg1 = value_struct_elt (&temp, NULL, "_m2_contents", NULL,
-				   _("unbounded structure "
-				     "missing _m2_contents field"));
-	  
-	  if (value_type (arg1) != type)
-	    arg1 = value_cast (type, arg1);
-
-	  check_typedef (value_type (arg1));
-	  return value_ind (value_ptradd (arg1, value_as_long (arg2)));
-	}
-      else
-	if (type->code () != TYPE_CODE_ARRAY)
-	  {
-	    if (type->name ())
-	      error (_("cannot subscript something of type `%s'"),
-		     type->name ());
-	    else
-	      error (_("cannot subscript requested type"));
-	  }
-
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
-      else
-	return value_subscript (arg1, value_as_long (arg2));
+      return eval_op_m2_subscript (expect_type, exp, noside, arg1, arg2);
 
     default:
       return evaluate_subexp_standard (expect_type, exp, pos, noside);
     }
-
- nosideret:
-  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
 }
 
 
