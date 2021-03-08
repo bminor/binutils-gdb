@@ -609,6 +609,43 @@ protected:
     override;
 };
 
+/* Compute the value of a variable.  */
+class var_value_operation
+  : public maybe_constant_operation<symbol *, const block *>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  value *evaluate_with_coercion (struct expression *exp,
+				 enum noside noside) override;
+
+  value *evaluate_for_sizeof (struct expression *exp, enum noside noside)
+    override;
+
+  value *evaluate_for_cast (struct type *expect_type,
+			    struct expression *exp,
+			    enum noside noside) override;
+
+  value *evaluate_for_address (struct expression *exp, enum noside noside)
+    override;
+
+  enum exp_opcode opcode () const override
+  { return OP_VAR_VALUE; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 class long_const_operation
   : public tuple_holding_operation<struct type *, LONGEST>
 {

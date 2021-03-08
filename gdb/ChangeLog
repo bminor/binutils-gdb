@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class var_value_operation): New.
+	* eval.c (var_value_operation::evaluate)
+	(var_value_operation::evaluate_for_address)
+	(var_value_operation::evaluate_with_coercion)
+	(var_value_operation::evaluate_for_sizeof)
+	(var_value_operation::evaluate_for_cast): New methods.
+	* ax-gdb.c (var_value_operation::do_generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (cxx_cast_ftype): New typedef.
 	(cxx_cast_operation): New template.
 	(dynamic_cast_operation, reinterpret_cast_operation): New

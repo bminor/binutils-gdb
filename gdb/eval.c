@@ -686,6 +686,23 @@ evaluate_var_value (enum noside noside, const block *blk, symbol *var)
   return ret;
 }
 
+namespace expr
+
+{
+
+value *
+var_value_operation::evaluate (struct type *expect_type,
+			       struct expression *exp,
+			       enum noside noside)
+{
+  symbol *var = std::get<0> (m_storage);
+  if (SYMBOL_TYPE (var)->code () == TYPE_CODE_ERROR)
+    error_unknown_type (var->print_name ());
+  return evaluate_var_value (noside, std::get<1> (m_storage), var);
+}
+
+} /* namespace expr */
+
 /* Helper for evaluating an OP_VAR_MSYM_VALUE.  */
 
 value *
@@ -3417,6 +3434,54 @@ evaluate_subexp_with_coercion (struct expression *exp,
     }
 }
 
+namespace expr
+{
+
+value *
+var_value_operation::evaluate_for_address (struct expression *exp,
+					   enum noside noside)
+{
+  symbol *var = std::get<0> (m_storage);
+
+  /* C++: The "address" of a reference should yield the address
+   * of the object pointed to.  Let value_addr() deal with it.  */
+  if (TYPE_IS_REFERENCE (SYMBOL_TYPE (var)))
+    return operation::evaluate_for_address (exp, noside);
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *type = lookup_pointer_type (SYMBOL_TYPE (var));
+      enum address_class sym_class = SYMBOL_CLASS (var);
+
+      if (sym_class == LOC_CONST
+	  || sym_class == LOC_CONST_BYTES
+	  || sym_class == LOC_REGISTER)
+	error (_("Attempt to take address of register or constant."));
+
+      return value_zero (type, not_lval);
+    }
+  else
+    return address_of_variable (var, std::get<1> (m_storage));
+}
+
+value *
+var_value_operation::evaluate_with_coercion (struct expression *exp,
+					     enum noside noside)
+{
+  struct symbol *var = std::get<0> (m_storage);
+  struct type *type = check_typedef (SYMBOL_TYPE (var));
+  if (type->code () == TYPE_CODE_ARRAY
+      && !type->is_vector ()
+      && CAST_IS_CONVERSION (exp->language_defn))
+    {
+      struct value *val = address_of_variable (var, std::get<1> (m_storage));
+      return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)), val);
+    }
+  return evaluate (nullptr, exp, noside);
+}
+
+}
+
 /* Helper function for evaluating the size of a type.  */
 
 static value *
@@ -3657,6 +3722,29 @@ unop_memval_type_operation::evaluate_for_sizeof (struct expression *exp,
   return evaluate_subexp_for_sizeof_base (exp, value_type (typeval));
 }
 
+value *
+var_value_operation::evaluate_for_sizeof (struct expression *exp,
+					  enum noside noside)
+{
+  struct type *type = SYMBOL_TYPE (std::get<0> (m_storage));
+  if (is_dynamic_type (type))
+    {
+      value *val = evaluate (nullptr, exp, EVAL_NORMAL);
+      type = value_type (val);
+      if (type->code () == TYPE_CODE_ARRAY)
+	{
+	  /* FIXME: This should be size_t.  */
+	  struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
+	  if (type_not_allocated (type) || type_not_associated (type))
+	    return value_zero (size_type, not_lval);
+	  else if (is_dynamic_type (type->index_type ())
+		   && type->bounds ()->high.kind () == PROP_UNDEFINED)
+	    return allocate_optimized_out_value (size_type);
+	}
+    }
+  return evaluate_subexp_for_sizeof_base (exp, type);
+}
+
 }
 
 /* Evaluate a subexpression of EXP, at index *POS, and return a value
@@ -3728,6 +3816,30 @@ var_msym_value_operation::evaluate_for_cast (struct type *to_type,
   value *val = evaluate_var_msym_value (noside,
 					std::get<1> (m_storage),
 					std::get<0> (m_storage));
+
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  val = value_cast (to_type, val);
+
+  /* Don't allow e.g. '&(int)var_with_no_debug_info'.  */
+  if (VALUE_LVAL (val) == lval_memory)
+    {
+      if (value_lazy (val))
+	value_fetch_lazy (val);
+      VALUE_LVAL (val) = not_lval;
+    }
+  return val;
+}
+
+value *
+var_value_operation::evaluate_for_cast (struct type *to_type,
+					struct expression *exp,
+					enum noside noside)
+{
+  value *val = evaluate_var_value (noside,
+				   std::get<1> (m_storage),
+				   std::get<0> (m_storage));
 
   if (noside == EVAL_SKIP)
     return eval_skip_value (exp);
