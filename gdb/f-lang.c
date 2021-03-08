@@ -1079,6 +1079,47 @@ eval_op_f_floor (struct type *expect_type, struct expression *exp,
   return value_from_host_double (type, val);
 }
 
+/* A helper function for BINOP_FORTRAN_MODULO.  */
+
+static struct value *
+eval_op_f_modulo (struct type *expect_type, struct expression *exp,
+		  enum noside noside,
+		  struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct type *type = value_type (arg1);
+  if (type->code () != value_type (arg2)->code ())
+    error (_("non-matching types for parameters to MODULO ()"));
+  /* MODULO(A, P) = A - FLOOR (A / P) * P */
+  switch (type->code ())
+    {
+    case TYPE_CODE_INT:
+      {
+	LONGEST a = value_as_long (arg1);
+	LONGEST p = value_as_long (arg2);
+	LONGEST result = a - (a / p) * p;
+	if (result != 0 && (a < 0) != (p < 0))
+	  result += p;
+	return value_from_longest (value_type (arg1), result);
+      }
+    case TYPE_CODE_FLT:
+      {
+	double a
+	  = target_float_to_host_double (value_contents (arg1),
+					 value_type (arg1));
+	double p
+	  = target_float_to_host_double (value_contents (arg2),
+					 value_type (arg2));
+	double result = fmod (a, p);
+	if (result != 0 && (a < 0.0) != (p < 0.0))
+	  result += p;
+	return value_from_host_double (type, result);
+      }
+    }
+  error (_("MODULO of type %s not supported"), TYPE_SAFE_NAME (type));
+}
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -1132,42 +1173,9 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       }
 
     case BINOP_FORTRAN_MODULO:
-      {
-	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-	arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-	if (noside == EVAL_SKIP)
-	  return eval_skip_value (exp);
-	type = value_type (arg1);
-	if (type->code () != value_type (arg2)->code ())
-	  error (_("non-matching types for parameters to MODULO ()"));
-	/* MODULO(A, P) = A - FLOOR (A / P) * P */
-	switch (type->code ())
-	  {
-	  case TYPE_CODE_INT:
-	    {
-	      LONGEST a = value_as_long (arg1);
-	      LONGEST p = value_as_long (arg2);
-	      LONGEST result = a - (a / p) * p;
-	      if (result != 0 && (a < 0) != (p < 0))
-		result += p;
-	      return value_from_longest (value_type (arg1), result);
-	    }
-	  case TYPE_CODE_FLT:
-	    {
-	      double a
-		= target_float_to_host_double (value_contents (arg1),
-					       value_type (arg1));
-	      double p
-		= target_float_to_host_double (value_contents (arg2),
-					       value_type (arg2));
-	      double result = fmod (a, p);
-	      if (result != 0 && (a < 0.0) != (p < 0.0))
-		result += p;
-	      return value_from_host_double (type, result);
-	    }
-	  }
-	error (_("MODULO of type %s not supported"), TYPE_SAFE_NAME (type));
-      }
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+      arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
+      return eval_op_f_modulo (expect_type, exp, noside, arg1, arg2);
 
     case FORTRAN_LBOUND:
     case FORTRAN_UBOUND:
