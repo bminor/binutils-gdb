@@ -1558,7 +1558,7 @@ eval_op_binary (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_SUBSCRIPT.  */
 
-static struct value *
+struct value *
 eval_op_subscript (struct type *expect_type, struct expression *exp,
 		   enum noside noside, enum exp_opcode op,
 		   struct value *arg1, struct value *arg2)
@@ -3534,6 +3534,39 @@ var_msym_value_operation::evaluate_for_sizeof (struct expression *exp,
   /* FIXME: This should be size_t.  */
   struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
   return value_from_longest (size_type, TYPE_LENGTH (type));
+}
+
+value *
+subscript_operation::evaluate_for_sizeof (struct expression *exp,
+					  enum noside noside)
+{
+  if (noside == EVAL_NORMAL)
+    {
+      value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						      EVAL_AVOID_SIDE_EFFECTS);
+      struct type *type = check_typedef (value_type (val));
+      if (type->code () == TYPE_CODE_ARRAY)
+	{
+	  type = check_typedef (TYPE_TARGET_TYPE (type));
+	  if (type->code () == TYPE_CODE_ARRAY)
+	    {
+	      type = type->index_type ();
+	      /* Only re-evaluate the right hand side if the resulting type
+		 is a variable length type.  */
+	      if (type->bounds ()->flag_bound_evaluated)
+		{
+		  val = evaluate (nullptr, exp, EVAL_NORMAL);
+		  /* FIXME: This should be size_t.  */
+		  struct type *size_type
+		    = builtin_type (exp->gdbarch)->builtin_int;
+		  return value_from_longest
+		    (size_type, (LONGEST) TYPE_LENGTH (value_type (val)));
+		}
+	    }
+	}
+    }
+
+  return operation::evaluate_for_sizeof (exp, noside);
 }
 
 }

@@ -100,6 +100,11 @@ extern struct value *eval_op_binary (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1, struct value *arg2);
+extern struct value *eval_op_subscript (struct type *expect_type,
+					struct expression *exp,
+					enum noside noside, enum exp_opcode op,
+					struct value *arg1,
+					struct value *arg2);
 
 namespace expr
 {
@@ -1111,6 +1116,17 @@ using bitwise_ior_operation
      = usual_ax_binop_operation<BINOP_BITWISE_IOR, eval_op_binary>;
 using bitwise_xor_operation
      = usual_ax_binop_operation<BINOP_BITWISE_XOR, eval_op_binary>;
+
+class subscript_operation
+  : public usual_ax_binop_operation<BINOP_SUBSCRIPT, eval_op_subscript>
+{
+public:
+  using usual_ax_binop_operation<BINOP_SUBSCRIPT,
+				 eval_op_subscript>::usual_ax_binop_operation;
+
+  value *evaluate_for_sizeof (struct expression *exp,
+			      enum noside noside) override;
+};
 
 } /* namespace expr */
 

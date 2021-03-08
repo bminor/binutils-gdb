@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class subscript_operation): New.
+	* eval.c (eval_op_subscript): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class binop_operation, class usual_ax_binop_operation):
 	New.
 	(exp_operation, intdiv_operation, mod_operation, mul_operation)
