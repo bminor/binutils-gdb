@@ -2515,6 +2515,16 @@ unop_sizeof_operation::do_generate_ax (struct expression *exp,
 }
 
 void
+unop_cast_operation::do_generate_ax (struct expression *exp,
+				     struct agent_expr *ax,
+				     struct axs_value *value,
+				     struct type *cast_type)
+{
+  std::get<0> (m_storage)->generate_ax (exp, ax, value,
+					std::get<1> (m_storage));
+}
+
+void
 unop_memval_operation::do_generate_ax (struct expression *exp,
 				       struct agent_expr *ax,
 				       struct axs_value *value,

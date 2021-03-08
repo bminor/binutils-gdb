@@ -1836,6 +1836,34 @@ protected:
     override;
 };
 
+/* A type cast.  */
+class unop_cast_operation
+  : public maybe_constant_operation<operation_up, struct type *>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return std::get<0> (m_storage)->evaluate_for_cast (std::get<1> (m_storage),
+						       exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  { return UNOP_CAST; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

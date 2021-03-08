@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class unop_cast_operation): New.
+	* ax-gdb.c (unop_cast_operation::do_generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class assign_modify_operation): New.
 	* eval.c (eval_binop_assign_modify): No longer static.
 	* ax-gdb.c (assign_modify_operation::do_generate_ax): New method.
