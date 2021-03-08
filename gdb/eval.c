@@ -1284,7 +1284,7 @@ eval_op_register (struct type *expect_type, struct expression *exp,
 
 /* Helper function that implements the body of OP_STRING.  */
 
-static struct value *
+struct value *
 eval_op_string (struct type *expect_type, struct expression *exp,
 		enum noside noside, int len, const char *string)
 {

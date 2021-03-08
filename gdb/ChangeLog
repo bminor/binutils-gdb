@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class string_operation): New.
+	* eval.c (eval_op_string): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class internalvar_operation): New.
 	* ax-gdb.c (internalvar_operation::do_generate_ax): New method.
 

@@ -61,6 +61,10 @@ extern struct value *eval_op_func_static_var (struct type *expect_type,
 extern struct value *eval_op_register (struct type *expect_type,
 				       struct expression *exp,
 				       enum noside noside, const char *name);
+extern struct value *eval_op_string (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside, int len,
+				     const char *string);
 
 namespace expr
 {
@@ -679,6 +683,26 @@ protected:
 		       struct axs_value *value,
 		       struct type *cast_type)
     override;
+};
+
+class string_operation
+  : public tuple_holding_operation<std::string>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    const std::string &str = std::get<0> (m_storage);
+    return eval_op_string (expect_type, exp, noside,
+			   str.size (), str.c_str ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_STRING; }
 };
 
 } /* namespace expr */
