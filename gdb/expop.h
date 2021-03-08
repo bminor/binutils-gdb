@@ -765,6 +765,27 @@ protected:
     override;
 };
 
+class complex_operation
+  : public maybe_constant_operation<operation_up, operation_up, struct type *>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *real = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *imag = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return value_literal_complex (real, imag,
+				  std::get<2> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_COMPLEX; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

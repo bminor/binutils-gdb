@@ -1,5 +1,9 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class complex_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (eval_op_objc_selector): No longer static.
 	* c-exp.h (class objc_selector_operation): New.
 
