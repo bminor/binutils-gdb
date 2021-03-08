@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class structop_ptr_operation): New.
+	* eval.c (eval_op_structop_ptr): No longer static.  Remove "op"
+	parameter.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class structop_base_operation)
 	(class structop_operation): New.
 	* eval.c (eval_op_structop_struct): No longer static.

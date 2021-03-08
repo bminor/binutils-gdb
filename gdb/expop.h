@@ -75,6 +75,11 @@ extern struct value *eval_op_structop_struct (struct type *expect_type,
 					      enum noside noside,
 					      struct value *arg1,
 					      const char *string);
+extern struct value *eval_op_structop_ptr (struct type *expect_type,
+					   struct expression *exp,
+					   enum noside noside,
+					   struct value *arg1,
+					   const char *string);
 
 namespace expr
 {
@@ -842,6 +847,40 @@ protected:
     override
   {
     gen_expr_structop (exp, STRUCTOP_STRUCT,
+		       std::get<0> (this->m_storage).get (),
+		       std::get<1> (this->m_storage).c_str (),
+		       ax, value);
+  }
+};
+
+class structop_ptr_operation
+  : public structop_base_operation
+{
+public:
+
+  using structop_base_operation::structop_base_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_structop_ptr (expect_type, exp, noside, val,
+				 std::get<1> (m_storage).c_str ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_PTR; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_structop (exp, STRUCTOP_PTR,
 		       std::get<0> (this->m_storage).get (),
 		       std::get<1> (this->m_storage).c_str (),
 		       ax, value);

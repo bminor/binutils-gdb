@@ -1358,9 +1358,9 @@ eval_op_structop_struct (struct type *expect_type, struct expression *exp,
 
 /* A helper function for STRUCTOP_PTR.  */
 
-static struct value *
+struct value *
 eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
-		      enum noside noside, enum exp_opcode op,
+		      enum noside noside,
 		      struct value *arg1, const char *string)
 {
   if (noside == EVAL_SKIP)
@@ -1368,12 +1368,12 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
 
   /* Check to see if operator '->' has been overloaded.  If so replace
      arg1 with the value returned by evaluating operator->().  */
-  while (unop_user_defined_p (op, arg1))
+  while (unop_user_defined_p (STRUCTOP_PTR, arg1))
     {
       struct value *value = NULL;
       try
 	{
-	  value = value_x_unop (arg1, op, noside);
+	  value = value_x_unop (arg1, STRUCTOP_PTR, noside);
 	}
 
       catch (const gdb_exception_error &except)
@@ -2759,7 +2759,7 @@ evaluate_subexp_standard (struct type *expect_type,
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      return eval_op_structop_ptr (expect_type, exp, noside, op, arg1,
+      return eval_op_structop_ptr (expect_type, exp, noside, arg1,
 				   &exp->elts[pc + 2].string);
 
     case STRUCTOP_MEMBER:
