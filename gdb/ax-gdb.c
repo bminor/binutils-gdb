@@ -2270,6 +2270,32 @@ gen_expr (struct expression *exp, union exp_element **pc,
     }
 }
 
+namespace expr
+{
+
+void
+operation::generate_ax (struct expression *exp,
+			struct agent_expr *ax,
+			struct axs_value *value,
+			struct type *cast_type)
+{
+  if (constant_p ())
+    {
+      struct value *v = evaluate (nullptr, exp, EVAL_AVOID_SIDE_EFFECTS);
+      ax_const_l (ax, value_as_long (v));
+      value->kind = axs_rvalue;
+      value->type = check_typedef (value_type (v));
+    }
+  else
+    {
+      do_generate_ax (exp, ax, value, cast_type);
+      if (cast_type != nullptr)
+	gen_cast (ax, value, cast_type);
+    }
+}
+
+}
+
 /* This handles the middle-to-right-side of code generation for binary
    expressions, which is shared between regular binary operations and
    assign-modify (+= and friends) expressions.  */

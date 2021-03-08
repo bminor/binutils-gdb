@@ -89,6 +89,105 @@ enum noside
 				   does in many situations.  */
   };
 
+struct expression;
+struct agent_expr;
+struct axs_value;
+struct type;
+struct ui_file;
+
+namespace expr
+{
+
+class operation;
+typedef std::unique_ptr<operation> operation_up;
+
+/* Base class for an operation.  An operation is a single component of
+   an expression.  */
+
+class operation
+{
+protected:
+
+  operation () = default;
+  DISABLE_COPY_AND_ASSIGN (operation);
+
+public:
+
+  virtual ~operation () = default;
+
+  /* Evaluate this operation.  */
+  virtual value *evaluate (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside) = 0;
+
+  /* Evaluate this operation in a context where C-like coercion is
+     needed.  */
+  virtual value *evaluate_with_coercion (struct expression *exp,
+					 enum noside noside)
+  {
+    return evaluate (nullptr, exp, noside);
+  }
+
+  /* Evaluate this expression in the context of a cast to
+     EXPECT_TYPE.  */
+  virtual value *evaluate_for_cast (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside);
+
+  /* Evaluate this expression in the context of a sizeof
+     operation.  */
+  virtual value *evaluate_for_sizeof (struct expression *exp,
+				      enum noside noside);
+
+  /* Evaluate this expression in the context of an address-of
+     operation.  Must return the address.  */
+  virtual value *evaluate_for_address (struct expression *exp,
+				       enum noside noside);
+
+  /* True if this is a constant expression.  */
+  virtual bool constant_p () const
+  { return false; }
+
+  /* Return true if this operation uses OBJFILE (and will become
+     dangling when OBJFILE is unloaded), otherwise return false.
+     OBJFILE must not be a separate debug info file.  */
+  virtual bool uses_objfile (struct objfile *objfile) const
+  { return false; }
+
+  /* Generate agent expression bytecodes for this operation.  */
+  void generate_ax (struct expression *exp, struct agent_expr *ax,
+		    struct axs_value *value,
+		    struct type *cast_type = nullptr);
+
+  /* Return the opcode that is implemented by this operation.  */
+  virtual enum exp_opcode opcode () const = 0;
+
+  /* Print this operation to STREAM.  */
+  virtual void dump (struct ui_file *stream, int depth) const = 0;
+
+protected:
+
+  /* Called by generate_ax to do the work for this particular
+     operation.  */
+  virtual void do_generate_ax (struct expression *exp,
+			       struct agent_expr *ax,
+			       struct axs_value *value,
+			       struct type *cast_type)
+  {
+    error (_("Cannot translate to agent expression"));
+  }
+};
+
+/* A helper function for creating an operation_up, given a type.  */
+template<typename T, typename... Arg>
+operation_up
+make_operation (Arg... args)
+{
+  return operation_up (new T (std::forward<Arg> (args)...));
+}
+
+}
+
 union exp_element
   {
     enum exp_opcode opcode;

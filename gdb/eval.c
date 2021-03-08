@@ -40,6 +40,7 @@
 #include "objfiles.h"
 #include "typeprint.h"
 #include <ctype.h>
+#include "expop.h"
 
 /* Prototypes for local functions.  */
 
@@ -3267,6 +3268,29 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
     }
 }
 
+namespace expr
+{
+
+value *
+operation::evaluate_for_cast (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside)
+{
+  value *val = evaluate (expect_type, exp, noside);
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  return value_cast (expect_type, val);
+}
+
+value *
+operation::evaluate_for_address (struct expression *exp, enum noside noside)
+{
+  value *val = evaluate (nullptr, exp, noside);
+  return evaluate_subexp_for_address_base (exp, noside, val);
+}
+
+}
+
 /* Evaluate like `evaluate_subexp' except coercing arrays to pointers.
    When used in contexts where arrays will be coerced anyway, this is
    equivalent to `evaluate_subexp' but much faster because it avoids
@@ -3453,6 +3477,18 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
     }
 
   return evaluate_subexp_for_sizeof_base (exp, type);
+}
+
+namespace expr
+{
+
+value *
+operation::evaluate_for_sizeof (struct expression *exp, enum noside noside)
+{
+  value *val = evaluate (nullptr, exp, EVAL_AVOID_SIDE_EFFECTS);
+  return evaluate_subexp_for_sizeof_base (exp, value_type (val));
+}
+
 }
 
 /* Evaluate a subexpression of EXP, at index *POS, and return a value

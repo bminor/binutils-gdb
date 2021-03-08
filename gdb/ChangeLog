@@ -1,5 +1,16 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expression.h (expr::operation): New class.
+	(expr::make_operation): New function.
+	(expr::operation_up): New typedef.
+	* expop.h: New file.
+	* eval.c (operation::evaluate_for_cast)
+	(operation::evaluate_for_address, operation::evaluate_for_sizeof):
+	New methods.
+	* ax-gdb.c (operation::generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ax-gdb.c (gen_expr_binop_rest): Remove "pc" parameter.
 	(gen_expr_binop_rest): New overload.
 
