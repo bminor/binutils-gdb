@@ -1,5 +1,11 @@
 2021-03-07  Mike Frysinger  <vapier@gentoo.org>
 
+	* gen.c (main): Delete options arg to INIT_OPTIONS.
+	* ld-decode.c (main): Likewise.
+	* ld-insn.c (main): Likewise.
+
+2021-03-07  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (check): Define.
 
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>

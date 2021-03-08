@@ -1643,7 +1643,7 @@ main (int argc, char **argv)
     error (NULL,
 	   "Usage: insn <filter-in> <hi-bit-nr> <insn-bit-size> <widths> <decode-table> <insn-table>\n");
 
-  INIT_OPTIONS (options);
+  INIT_OPTIONS ();
 
   filter_parse (&options.flags_filter, argv[1]);
 

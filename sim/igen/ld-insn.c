@@ -1803,7 +1803,7 @@ main (int argc, char **argv)
   insn_table *isa;
   lf *l;
 
-  INIT_OPTIONS (options);
+  INIT_OPTIONS ();
 
   if (argc == 3)
     filter_parse (&options.flags_filter, argv[2]);
