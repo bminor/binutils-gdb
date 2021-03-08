@@ -65,6 +65,10 @@ extern struct value *ada_binop_minmax (struct type *expect_type,
 				       enum noside noside, enum exp_opcode op,
 				       struct value *arg1,
 				       struct value *arg2);
+extern struct value *ada_pos_atr (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside, enum exp_opcode op,
+				  struct value *arg);
 
 namespace expr
 {
@@ -135,6 +139,7 @@ using ada_neg_operation = unop_operation<UNOP_NEG, ada_unop_neg>;
 using ada_atr_tag_operation = unop_operation<OP_ATR_TAG, ada_atr_tag>;
 using ada_atr_size_operation = unop_operation<OP_ATR_SIZE, ada_atr_size>;
 using ada_abs_operation = unop_operation<UNOP_ABS, ada_abs>;
+using ada_pos_operation = unop_operation<OP_ATR_POS, ada_pos_atr>;
 
 /* The in-range operation, given a type.  */
 class ada_unop_range_operation

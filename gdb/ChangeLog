@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_pos_atr): No longer static.
+	* ada-exp.h (ada_pos_operation): New typedef.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_pos_atr): Rename from value_pos_atr.  Change
 	parameters.
 	(ada_evaluate_subexp): Use it.

@@ -8863,7 +8863,7 @@ pos_atr (struct value *arg)
   return *result;
 }
 
-static struct value *
+struct value *
 ada_pos_atr (struct type *expect_type,
 	     struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
