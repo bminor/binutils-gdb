@@ -1,5 +1,13 @@
 2021-03-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* Makefile.in (LDFLAGS_FOR_BUILD): Define.
+	(BUILD_LDFLAGS): Delete.
+	(LINK_FOR_BUILD): Change BUILD_LDFLAGS to LDFLAGS_FOR_BUILD.
+	* configure.ac (LDFLAGS_FOR_BUILD): Define.
+	* configure: Regenerate.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* Makefile.in (COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
 	(.c.o, igen.o): Call COMPILE_FOR_BUILD.
 	(igen, tmp-table, tmp-filter, tmp-ld-decode, tmp-ld-cache, tmp-ld-insn,

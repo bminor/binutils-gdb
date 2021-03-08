@@ -1,5 +1,10 @@
 2021-03-13  Mike Frysinger  <vapier@gentoo.org>
 
+	* Make-common.in (LINK_FOR_BUILD): Change BUILD_LDFLAGS to
+	LDFLAGS_FOR_BUILD.
+
+2021-03-13  Mike Frysinger  <vapier@gentoo.org>
+
 	* Make-common.in (COMPILE_FOR_BUILD, LINK_FOR_BUILD): Define.
 	(gentmap.o): New rule.
 	(gentmap): Call LINK_FOR_BUILD.
