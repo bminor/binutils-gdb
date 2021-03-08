@@ -2039,6 +2039,20 @@ eval_op_postdec (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for OP_TYPE.  */
+
+static struct value *
+eval_op_type (struct type *expect_type, struct expression *exp,
+	      enum noside noside, struct type *type)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return allocate_value (type);
+  else
+    error (_("Attempt to use a type name as an expression"));
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2994,12 +3008,7 @@ evaluate_subexp_standard (struct type *expect_type,
       /* The value is not supposed to be used.  This is here to make it
 	 easier to accommodate expressions that contain types.  */
       (*pos) += 2;
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return allocate_value (exp->elts[pc + 1].type);
-      else
-	error (_("Attempt to use a type name as an expression"));
+      return eval_op_type (expect_type, exp, noside, exp->elts[pc + 1].type);
 
     case OP_TYPEOF:
     case OP_DECLTYPE:
