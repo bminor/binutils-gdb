@@ -1508,6 +1508,53 @@ eval_op_sub (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* Helper function for several different binary operations.  */
+
+static struct value *
+eval_op_binary (struct type *expect_type, struct expression *exp,
+		enum noside noside, enum exp_opcode op,
+		struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (binop_user_defined_p (op, arg1, arg2))
+    return value_x_binop (arg1, arg2, op, OP_NULL, noside);
+  else
+    {
+      /* If EVAL_AVOID_SIDE_EFFECTS and we're dividing by zero,
+	 fudge arg2 to avoid division-by-zero, the caller is
+	 (theoretically) only looking for the type of the result.  */
+      if (noside == EVAL_AVOID_SIDE_EFFECTS
+	  /* ??? Do we really want to test for BINOP_MOD here?
+	     The implementation of value_binop gives it a well-defined
+	     value.  */
+	  && (op == BINOP_DIV
+	      || op == BINOP_INTDIV
+	      || op == BINOP_REM
+	      || op == BINOP_MOD)
+	  && value_logical_not (arg2))
+	{
+	  struct value *v_one;
+
+	  v_one = value_one (value_type (arg2));
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &v_one);
+	  return value_binop (arg1, v_one, op);
+	}
+      else
+	{
+	  /* For shift and integer exponentiation operations,
+	     only promote the first argument.  */
+	  if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
+	      && is_integral_type (value_type (arg2)))
+	    unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+	  else
+	    binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+
+	  return value_binop (arg1, arg2, op);
+	}
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2214,44 +2261,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_BITWISE_XOR:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
-      else
-	{
-	  /* If EVAL_AVOID_SIDE_EFFECTS and we're dividing by zero,
-	     fudge arg2 to avoid division-by-zero, the caller is
-	     (theoretically) only looking for the type of the result.  */
-	  if (noside == EVAL_AVOID_SIDE_EFFECTS
-	      /* ??? Do we really want to test for BINOP_MOD here?
-		 The implementation of value_binop gives it a well-defined
-		 value.  */
-	      && (op == BINOP_DIV
-		  || op == BINOP_INTDIV
-		  || op == BINOP_REM
-		  || op == BINOP_MOD)
-	      && value_logical_not (arg2))
-	    {
-	      struct value *v_one;
-
-	      v_one = value_one (value_type (arg2));
-	      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &v_one);
-	      return value_binop (arg1, v_one, op);
-	    }
-	  else
-	    {
-	      /* For shift and integer exponentiation operations,
-		 only promote the first argument.  */
-	      if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
-		  && is_integral_type (value_type (arg2)))
-		unop_promote (exp->language_defn, exp->gdbarch, &arg1);
-	      else
-		binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-
-	      return value_binop (arg1, arg2, op);
-	    }
-	}
+      return eval_op_binary (expect_type, exp, noside, op, arg1, arg2);
 
     case BINOP_SUBSCRIPT:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
