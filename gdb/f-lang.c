@@ -1133,6 +1133,31 @@ eval_op_f_cmplx (struct type *expect_type, struct expression *exp,
   return value_literal_complex (arg1, arg2, type);
 }
 
+/* A helper function for UNOP_FORTRAN_KIND.  */
+
+static struct value *
+eval_op_f_kind (struct type *expect_type, struct expression *exp,
+		enum noside noside,
+		struct value *arg1)
+{
+  struct type *type = value_type (arg1);
+
+  switch (type->code ())
+    {
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_MODULE:
+    case TYPE_CODE_FUNC:
+      error (_("argument to kind must be an intrinsic type"));
+    }
+
+  if (!TYPE_TARGET_TYPE (type))
+    return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+			       TYPE_LENGTH (type));
+  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+			     TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+}
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -1264,23 +1289,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
     case UNOP_FORTRAN_KIND:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-      type = value_type (arg1);
-
-      switch (type->code ())
-	{
-	  case TYPE_CODE_STRUCT:
-	  case TYPE_CODE_UNION:
-	  case TYPE_CODE_MODULE:
-	  case TYPE_CODE_FUNC:
-	    error (_("argument to kind must be an intrinsic type"));
-	}
-
-      if (!TYPE_TARGET_TYPE (type))
-	return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-				   TYPE_LENGTH (type));
-      return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-				 TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
-
+      return eval_op_f_kind (expect_type, exp, noside, arg1);
 
     case OP_F77_UNDETERMINED_ARGLIST:
       /* Remember that in F77, functions, substring ops and array subscript
