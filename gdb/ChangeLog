@@ -1,5 +1,18 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (resolve_subexp, replace_operator_with_call)
+	(evaluate_subexp_type, assign_aggregate)
+	(aggregate_assign_positional, aggregate_assign_from_choices)
+	(aggregate_assign_others, ada_evaluate_subexp_for_cast)
+	(ada_evaluate_subexp, ADA_OPERATORS, ada_operator_length)
+	(ada_operator_check, ada_forward_operator_length)
+	(ada_dump_subexp_body, ada_print_subexp, ada_exp_descriptor):
+	Remove.
+	(post_parser): Update.
+	(class ada_language) <expresssion_ops>: Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* m2-lang.h (class m2_language) <expresssion_ops,
 	exp_descriptor_modula2>: Remove.
 	* m2-lang.c (evaluate_subexp_modula2)
