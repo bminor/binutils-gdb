@@ -213,8 +213,8 @@ using ada_binop_div_operation = binop_operation<BINOP_DIV, ada_mult_binop>;
 using ada_binop_rem_operation = binop_operation<BINOP_REM, ada_mult_binop>;
 using ada_binop_mod_operation = binop_operation<BINOP_MOD, ada_mult_binop>;
 
-using ada_binop_min_operation = binop_operation<OP_ATR_MIN, ada_binop_minmax>;
-using ada_binop_max_operation = binop_operation<OP_ATR_MAX, ada_binop_minmax>;
+using ada_binop_min_operation = binop_operation<BINOP_MIN, ada_binop_minmax>;
+using ada_binop_max_operation = binop_operation<BINOP_MAX, ada_binop_minmax>;
 
 using ada_binop_exp_operation = binop_operation<BINOP_EXP, ada_binop_exp>;
 

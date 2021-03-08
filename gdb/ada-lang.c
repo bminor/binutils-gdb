@@ -10096,8 +10096,7 @@ ada_binop_minmax (struct type *expect_type,
   else
     {
       binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-      return value_binop (arg1, arg2,
-			  op == OP_ATR_MIN ? BINOP_MIN : BINOP_MAX);
+      return value_binop (arg1, arg2, op);
     }
 }
 

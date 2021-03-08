@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* std-operator.def (OP_ATR_MIN, OP_ATR_MAX): Remove.
+	* ada-lang.c (ada_binop_minmax): Update.
+	* ada-exp.h (ada_binop_min_operation, ada_binop_max_operation):
+	Use BINOP_MIN and BINOP_MAX.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* value.h (evaluate_subexp_with_coercion): Don't declare.
 	* parse.c (exp_descriptor_standard): Remove.
 	(expr_builder::expr_builder, expr_builder::release): Update.
