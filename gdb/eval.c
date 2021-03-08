@@ -1555,6 +1555,42 @@ eval_op_binary (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for BINOP_SUBSCRIPT.  */
+
+static struct value *
+eval_op_subscript (struct type *expect_type, struct expression *exp,
+		   enum noside noside, enum exp_opcode op,
+		   struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (binop_user_defined_p (op, arg1, arg2))
+    return value_x_binop (arg1, arg2, op, OP_NULL, noside);
+  else
+    {
+      /* If the user attempts to subscript something that is not an
+	 array or pointer type (like a plain int variable for example),
+	 then report this as an error.  */
+
+      arg1 = coerce_ref (arg1);
+      struct type *type = check_typedef (value_type (arg1));
+      if (type->code () != TYPE_CODE_ARRAY
+	  && type->code () != TYPE_CODE_PTR)
+	{
+	  if (type->name ())
+	    error (_("cannot subscript something of type `%s'"),
+		   type->name ());
+	  else
+	    error (_("cannot subscript requested type"));
+	}
+
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+      else
+	return value_subscript (arg1, value_as_long (arg2));
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2266,33 +2302,8 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_SUBSCRIPT:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
-      else
-	{
-	  /* If the user attempts to subscript something that is not an
-	     array or pointer type (like a plain int variable for example),
-	     then report this as an error.  */
+      return eval_op_subscript (expect_type, exp, noside, op, arg1, arg2);
 
-	  arg1 = coerce_ref (arg1);
-	  type = check_typedef (value_type (arg1));
-	  if (type->code () != TYPE_CODE_ARRAY
-	      && type->code () != TYPE_CODE_PTR)
-	    {
-	      if (type->name ())
-		error (_("cannot subscript something of type `%s'"),
-		       type->name ());
-	      else
-		error (_("cannot subscript requested type"));
-	    }
-
-	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	    return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
-	  else
-	    return value_subscript (arg1, value_as_long (arg2));
-	}
     case MULTI_SUBSCRIPT:
       (*pos) += 2;
       nargs = longest_to_int (exp->elts[pc + 1].longconst);
