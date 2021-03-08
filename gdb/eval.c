@@ -1294,6 +1294,21 @@ eval_op_string (struct type *expect_type, struct expression *exp,
   return value_string (string, len, type);
 }
 
+/* Helper function that implements the body of OP_OBJC_SELECTOR.  */
+
+static struct value *
+eval_op_objc_selector (struct type *expect_type, struct expression *exp,
+		       enum noside noside,
+		       const char *sel)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  struct type *selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
+  return value_from_longest (selector_type,
+			     lookup_child_selector (exp->gdbarch, sel));
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1577,18 +1592,12 @@ evaluate_subexp_standard (struct type *expect_type,
       {				/* Objective C @selector operator.  */
 	char *sel = &exp->elts[pc + 2].string;
 	int len = longest_to_int (exp->elts[pc + 1].longconst);
-	struct type *selector_type;
 
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (len + 1);
-	if (noside == EVAL_SKIP)
-	  return eval_skip_value (exp);
-
 	if (sel[len] != 0)
 	  sel[len] = 0;		/* Make sure it's terminated.  */
 
-	selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
-	return value_from_longest (selector_type,
-				   lookup_child_selector (exp->gdbarch, sel));
+	return eval_op_objc_selector (expect_type, exp, noside, sel);
       }
 
     case OP_OBJC_MSGCALL:
