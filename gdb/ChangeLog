@@ -1,5 +1,16 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (unary_ftype): New typedef.
+	(unop_operation, usual_ax_binop_operation): New templates.
+	(unary_plus_operation, unary_neg_operation)
+	(unary_complement_operation, unary_logical_not_operation): New
+	typedefs.
+	* eval.c (eval_op_plus, eval_op_neg, eval_op_complement)
+	(eval_op_lognot): No longer static.
+	* ax-gdb.c (gen_expr_unop): New function.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ax-gdb.c (comma_operation::do_generate_ax): New method.
 
 2021-03-08  Tom Tromey  <tom@tromey.com>

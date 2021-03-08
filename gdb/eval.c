@@ -1754,7 +1754,7 @@ eval_op_repeat (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_PLUS.  */
 
-static struct value *
+struct value *
 eval_op_plus (struct type *expect_type, struct expression *exp,
 	      enum noside noside, enum exp_opcode op,
 	      struct value *arg1)
@@ -1772,7 +1772,7 @@ eval_op_plus (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_NEG.  */
 
-static struct value *
+struct value *
 eval_op_neg (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1)
@@ -1790,7 +1790,7 @@ eval_op_neg (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_COMPLEMENT.  */
 
-static struct value *
+struct value *
 eval_op_complement (struct type *expect_type, struct expression *exp,
 		    enum noside noside, enum exp_opcode op,
 		    struct value *arg1)
@@ -1808,7 +1808,7 @@ eval_op_complement (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_LOGICAL_NOT.  */
 
-static struct value *
+struct value *
 eval_op_lognot (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1)

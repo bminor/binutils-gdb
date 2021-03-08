@@ -40,6 +40,10 @@ extern void gen_expr_structop (struct expression *exp,
 			       expr::operation *lhs,
 			       const char *name,
 			       struct agent_expr *ax, struct axs_value *value);
+extern void gen_expr_unop (struct expression *exp,
+			   enum exp_opcode op,
+			   expr::operation *lhs,
+			   struct agent_expr *ax, struct axs_value *value);
 
 extern struct value *eval_op_scope (struct type *expect_type,
 				    struct expression *exp,
@@ -140,6 +144,24 @@ extern struct value *eval_op_repeat (struct type *expect_type,
 				     enum noside noside, enum exp_opcode op,
 				     struct value *arg1,
 				     struct value *arg2);
+extern struct value *eval_op_plus (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside, enum exp_opcode op,
+				   struct value *arg1);
+extern struct value *eval_op_neg (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside, enum exp_opcode op,
+				  struct value *arg1);
+extern struct value *eval_op_complement (struct type *expect_type,
+					 struct expression *exp,
+					 enum noside noside,
+					 enum exp_opcode op,
+					 struct value *arg1);
+extern struct value *eval_op_lognot (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     enum exp_opcode op,
+				     struct value *arg1);
 
 namespace expr
 {
@@ -1238,6 +1260,61 @@ protected:
 		       struct type *cast_type)
     override;
 };
+
+typedef struct value *unary_ftype (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside, enum exp_opcode op,
+				   struct value *arg1);
+
+/* Base class for unary operations.  */
+template<enum exp_opcode OP, unary_ftype FUNC>
+class unop_operation
+  : public maybe_constant_operation<operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return FUNC (expect_type, exp, noside, OP, val);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP; }
+};
+
+/* Unary operations that can also be turned into agent expressions in
+   the "usual" way.  */
+template<enum exp_opcode OP, unary_ftype FUNC>
+class usual_ax_unop_operation
+  : public unop_operation<OP, FUNC>
+{
+  using unop_operation<OP, FUNC>::unop_operation;
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_unop (exp, OP,
+		   std::get<0> (this->m_storage).get (),
+		   ax, value);
+  }
+};
+
+using unary_plus_operation = usual_ax_unop_operation<UNOP_PLUS, eval_op_plus>;
+using unary_neg_operation = usual_ax_unop_operation<UNOP_NEG, eval_op_neg>;
+using unary_complement_operation
+     = usual_ax_unop_operation<UNOP_COMPLEMENT, eval_op_complement>;
+using unary_logical_not_operation
+     = usual_ax_unop_operation<UNOP_LOGICAL_NOT, eval_op_lognot>;
 
 } /* namespace expr */
 

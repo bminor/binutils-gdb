@@ -2694,6 +2694,53 @@ gen_expr_structop (struct expression *exp,
     internal_error (__FILE__, __LINE__,
 		    _("gen_expr: unhandled struct case"));
 }
+
+/* A helper function that emits a unary operation.  */
+
+void
+gen_expr_unop (struct expression *exp,
+	       enum exp_opcode op,
+	       expr::operation *lhs,
+	       struct agent_expr *ax, struct axs_value *value)
+{
+  struct axs_value value1, value2;
+
+  switch (op)
+    {
+    case UNOP_NEG:
+      gen_int_literal (ax, &value1, 0,
+		       builtin_type (ax->gdbarch)->builtin_int);
+      gen_usual_unary (ax, &value1);	/* shouldn't do much */
+      lhs->generate_ax (exp, ax, &value2);
+      gen_usual_unary (ax, &value2);
+      gen_usual_arithmetic (ax, &value1, &value2);
+      gen_binop (ax, value, &value1, &value2, aop_sub, aop_sub, 1, "negation");
+      break;
+
+    case UNOP_PLUS:
+      /* + FOO is equivalent to 0 + FOO, which can be optimized.  */
+      lhs->generate_ax (exp, ax, value);
+      gen_usual_unary (ax, value);
+      break;
+
+    case UNOP_LOGICAL_NOT:
+      lhs->generate_ax (exp, ax, value);
+      gen_usual_unary (ax, value);
+      gen_logical_not (ax, value,  builtin_type (ax->gdbarch)->builtin_int);
+      break;
+
+    case UNOP_COMPLEMENT:
+      lhs->generate_ax (exp, ax, value);
+      gen_usual_unary (ax, value);
+      gen_integral_promotions (ax, value);
+      gen_complement (ax, value);
+      break;
+
+    default:
+      gdb_assert_not_reached ("invalid case in gen_expr_unop");
+    }
+}
+
 
 
 /* Given a single variable and a scope, generate bytecodes to trace
