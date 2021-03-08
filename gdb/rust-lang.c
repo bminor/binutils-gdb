@@ -1041,7 +1041,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
 
 /* A helper for rust_evaluate_subexp that handles OP_RANGE.  */
 
-static struct value *
+struct value *
 rust_range (struct type *expect_type, struct expression *exp,
 	    enum noside noside, enum range_flag kind,
 	    struct value *low, struct value *high)

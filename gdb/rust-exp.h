@@ -42,6 +42,10 @@ extern struct value *rust_subscript (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, bool for_addr,
 				     struct value *lhs, struct value *rhs);
+extern struct value *rust_range (struct type *expect_type,
+				 struct expression *exp,
+				 enum noside noside, enum range_flag kind,
+				 struct value *low, struct value *high);
 
 namespace expr
 {
@@ -122,6 +126,32 @@ public:
 
   enum exp_opcode opcode () const override
   { return UNOP_ADDR; }
+};
+
+/* The Rust range operators.  */
+class rust_range_operation
+  : public tuple_holding_operation<enum range_flag, operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    auto kind = std::get<0> (m_storage);
+    value *low = nullptr;
+    if (std::get<1> (m_storage) != nullptr)
+      low = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    value *high = nullptr;
+    if (std::get<2> (m_storage) != nullptr)
+      high = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+    return rust_range (expect_type, exp, noside, kind, low, high);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_RANGE; }
 };
 
 } /* namespace expr */

@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_range): No longer static.
+	* rust-exp.h (class rust_range_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_subscript): No longer static.
 	* rust-exp.h (class rust_subscript_operation): New.
 
