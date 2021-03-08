@@ -958,6 +958,34 @@ Cannot perform conditional operation on vectors with different sizes"));
   return evaluate_subexp_c (expect_type, exp, pos, noside);
 }
 
+namespace expr
+{
+
+value *
+opencl_structop_operation::evaluate (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type1 = check_typedef (value_type (arg1));
+
+  if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
+    return opencl_component_ref (exp, arg1, std::get<1> (m_storage).c_str (),
+				 noside);
+  else
+    {
+      struct value *v = value_struct_elt (&arg1, NULL,
+					  std::get<1> (m_storage).c_str (),
+					  NULL, "structure");
+
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	v = value_zero (value_type (v), VALUE_LVAL (v));
+      return v;
+    }
+}
+
+} /* namespace expr */
+
 const struct exp_descriptor exp_descriptor_opencl =
 {
   print_subexp_standard,

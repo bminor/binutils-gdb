@@ -170,6 +170,22 @@ using opencl_leq_operation = opencl_binop_operation<BINOP_LEQ,
 using opencl_not_operation = unop_operation<UNOP_LOGICAL_NOT,
 					    opencl_logical_not>;
 
+/* STRUCTOP_STRUCT implementation for OpenCL.  */
+class opencl_structop_operation
+  : public structop_base_operation
+{
+public:
+
+  using structop_base_operation::structop_base_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_STRUCT; }
+};
+
 }/* namespace expr */
 
 #endif /* C_EXP_H */
