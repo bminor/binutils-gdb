@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* parser-defs.h (struct expr_builder) <expr_builder>: Inline.
+	<release>: Inline.
+	* parse.c (expr_builder::expr_builder, expr_builder::release):
+	Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* parse.c (expression::expression, expression::~expression):
 	Remove.
 	* expression.h (struct expression): Inline constructor.  Remove

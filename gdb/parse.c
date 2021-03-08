@@ -91,20 +91,6 @@ innermost_block_tracker::update (const struct block *b,
 
 
 
-/* See definition in parser-defs.h.  */
-
-expr_builder::expr_builder (const struct language_defn *lang,
-			    struct gdbarch *gdbarch)
-  : expout (new expression (lang, gdbarch))
-{
-}
-
-expression_up
-expr_builder::release ()
-{
-  return std::move (expout);
-}
-
 /* Return the type of MSYMBOL, a minimal symbol of OBJFILE.  If
    ADDRESS_P is not NULL, set it to the MSYMBOL's resolved
    address.  */

@@ -42,13 +42,19 @@ struct expr_builder
      And GDBARCH is the gdbarch to use during parsing.  */
 
   expr_builder (const struct language_defn *lang,
-		struct gdbarch *gdbarch);
+		struct gdbarch *gdbarch)
+    : expout (new expression (lang, gdbarch))
+  {
+  }
 
   DISABLE_COPY_AND_ASSIGN (expr_builder);
 
   /* Resize the allocated expression to the correct size, and return
      it as an expression_up -- passing ownership to the caller.  */
-  ATTRIBUTE_UNUSED_RESULT expression_up release ();
+  ATTRIBUTE_UNUSED_RESULT expression_up release ()
+  {
+    return std::move (expout);
+  }
 
   /* Return the gdbarch that was passed to the constructor.  */
 
