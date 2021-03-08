@@ -1700,6 +1700,64 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
   return result;
 }
 
+namespace expr
+{
+
+value *
+rust_aggregate_operation::evaluate (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside)
+{
+  struct type *type = std::get<0> (m_storage);
+  CORE_ADDR addr = 0;
+  struct value *addrval = NULL;
+  value *result;
+
+  if (noside == EVAL_NORMAL)
+    {
+      addrval = value_allocate_space_in_inferior (TYPE_LENGTH (type));
+      addr = value_as_long (addrval);
+      result = value_at_lazy (type, addr);
+    }
+
+  if (std::get<1> (m_storage) != nullptr)
+    {
+      struct value *init = std::get<1> (m_storage)->evaluate (nullptr, exp,
+							      noside);
+
+      if (noside == EVAL_NORMAL)
+	{
+	  /* This isn't quite right but will do for the time
+	     being, seeing that we can't implement the Copy
+	     trait anyway.  */
+	  value_assign (result, init);
+	}
+    }
+
+  for (const auto &item : std::get<2> (m_storage))
+    {
+      value *val = item.second->evaluate (nullptr, exp, noside);
+      if (noside == EVAL_NORMAL)
+	{
+	  const char *fieldname = item.first.c_str ();
+	  value *field = value_struct_elt (&result, nullptr, fieldname,
+					   nullptr, "structure");
+	  value_assign (field, val);
+	}
+    }
+
+  if (noside == EVAL_SKIP)
+    result = value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
+  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    result = allocate_value (type);
+  else
+    result = value_at_lazy (type, addr);
+
+  return result;
+}
+
+}
+
 /* operator_length implementation for Rust.  */
 
 static void

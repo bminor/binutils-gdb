@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_aggregate_operation::evaluate): New method.
+	* rust-exp.h (class rust_aggregate_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (eval_op_rust_struct_anon, eval_op_rust_structop):
 	No longer static.
 	* rust-exp.h (class rust_struct_anon): New.

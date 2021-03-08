@@ -207,6 +207,24 @@ public:
   { return STRUCTOP_STRUCT; }
 };
 
+/* Rust aggregate initialization.  */
+class rust_aggregate_operation
+  : public tuple_holding_operation<struct type *, operation_up,
+				   std::vector<std::pair<std::string,
+							 operation_up>>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_AGGREGATE; }
+};
+
 } /* namespace expr */
 
 #endif /* RUST_EXP_H */
