@@ -1824,6 +1824,60 @@ eval_op_lognot (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for UNOP_IND.  */
+
+static struct value *
+eval_op_ind (struct type *expect_type, struct expression *exp,
+	     enum noside noside, enum exp_opcode op,
+	     struct value *arg1)
+{
+  struct type *type = check_typedef (value_type (arg1));
+  if (type->code () == TYPE_CODE_METHODPTR
+      || type->code () == TYPE_CODE_MEMBERPTR)
+    error (_("Attempt to dereference pointer "
+	     "to member without an object"));
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (unop_user_defined_p (op, arg1))
+    return value_x_unop (arg1, op, noside);
+  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      type = check_typedef (value_type (arg1));
+
+      /* If the type pointed to is dynamic then in order to resolve the
+	 dynamic properties we must actually dereference the pointer.
+	 There is a risk that this dereference will have side-effects
+	 in the inferior, but being able to print accurate type
+	 information seems worth the risk. */
+      if ((type->code () != TYPE_CODE_PTR
+	   && !TYPE_IS_REFERENCE (type))
+	  || !is_dynamic_type (TYPE_TARGET_TYPE (type)))
+	{
+	  if (type->code () == TYPE_CODE_PTR
+	      || TYPE_IS_REFERENCE (type)
+	      /* In C you can dereference an array to get the 1st elt.  */
+	      || type->code () == TYPE_CODE_ARRAY)
+	    return value_zero (TYPE_TARGET_TYPE (type),
+			       lval_memory);
+	  else if (type->code () == TYPE_CODE_INT)
+	    /* GDB allows dereferencing an int.  */
+	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+			       lval_memory);
+	  else
+	    error (_("Attempt to take contents of a non-pointer value."));
+	}
+    }
+
+  /* Allow * on an integer so we can cast it to whatever we want.
+     This returns an int, which seems like the most C-like thing to
+     do.  "long long" variables are rare enough that
+     BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
+  if (type->code () == TYPE_CODE_INT)
+    return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
+			  (CORE_ADDR) value_as_address (arg1));
+  return value_ind (arg1);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2693,51 +2747,7 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type && expect_type->code () == TYPE_CODE_PTR)
 	expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      type = check_typedef (value_type (arg1));
-      if (type->code () == TYPE_CODE_METHODPTR
-	  || type->code () == TYPE_CODE_MEMBERPTR)
-	error (_("Attempt to dereference pointer "
-		 "to member without an object"));
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op, noside);
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	{
-	  type = check_typedef (value_type (arg1));
-
-	  /* If the type pointed to is dynamic then in order to resolve the
-	     dynamic properties we must actually dereference the pointer.
-	     There is a risk that this dereference will have side-effects
-	     in the inferior, but being able to print accurate type
-	     information seems worth the risk. */
-	  if ((type->code () != TYPE_CODE_PTR
-	       && !TYPE_IS_REFERENCE (type))
-	      || !is_dynamic_type (TYPE_TARGET_TYPE (type)))
-	    {
-	      if (type->code () == TYPE_CODE_PTR
-		  || TYPE_IS_REFERENCE (type)
-		  /* In C you can dereference an array to get the 1st elt.  */
-		  || type->code () == TYPE_CODE_ARRAY)
-		return value_zero (TYPE_TARGET_TYPE (type),
-				   lval_memory);
-	      else if (type->code () == TYPE_CODE_INT)
-		/* GDB allows dereferencing an int.  */
-		return value_zero (builtin_type (exp->gdbarch)->builtin_int,
-				   lval_memory);
-	      else
-		error (_("Attempt to take contents of a non-pointer value."));
-	    }
-	}
-
-      /* Allow * on an integer so we can cast it to whatever we want.
-	 This returns an int, which seems like the most C-like thing to
-	 do.  "long long" variables are rare enough that
-	 BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
-      if (type->code () == TYPE_CODE_INT)
-	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
-			      (CORE_ADDR) value_as_address (arg1));
-      return value_ind (arg1);
+      return eval_op_ind (expect_type, exp, noside, op, arg1);
 
     case UNOP_ADDR:
       /* C++: check for and handle pointer to members.  */
