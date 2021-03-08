@@ -670,6 +670,24 @@ opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
   return val;
 }
 
+/* A helper function for BINOP_ASSIGN.  */
+
+static struct value *
+eval_opencl_assign (struct type *expect_type, struct expression *exp,
+		    enum noside noside,
+		    struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+    return arg1;
+
+  struct type *type1 = value_type (arg1);
+  if (deprecated_value_modifiable (arg1)
+      && VALUE_LVAL (arg1) != lval_internalvar)
+    arg2 = opencl_value_cast (type1, arg2);
+
+  return value_assign (arg1, arg2);
+}
+
 /* Expression evaluator for the OpenCL.  Most operations are delegated to
    evaluate_subexp_standard; see that function for a description of the
    arguments.  */
@@ -693,14 +711,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
       type1 = value_type (arg1);
       arg2 = evaluate_subexp (type1, exp, pos, noside);
 
-      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
-	return arg1;
-
-      if (deprecated_value_modifiable (arg1)
-	  && VALUE_LVAL (arg1) != lval_internalvar)
-	arg2 = opencl_value_cast (type1, arg2);
-
-      return value_assign (arg1, arg2);
+      return eval_opencl_assign (expect_type, exp, noside, arg1, arg2);
 
     case UNOP_CAST:
       type1 = exp->elts[*pos + 1].type;

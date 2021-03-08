@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* opencl-lang.c (eval_opencl_assign): New function.
+	(evaluate_subexp_opencl): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (eval_op_objc_msgcall): New function.
 	(evaluate_subexp_standard): Use it.
 
