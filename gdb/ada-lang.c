@@ -192,8 +192,6 @@ static struct value *value_pos_atr (struct type *, struct value *);
 
 static struct value *val_atr (struct type *, LONGEST);
 
-static struct value *value_val_atr (struct type *, struct value *);
-
 static struct symbol *standard_lookup (const char *, const struct block *,
 				       domain_enum);
 
@@ -8845,8 +8843,11 @@ val_atr (struct type *type, LONGEST val)
 }
 
 static struct value *
-value_val_atr (struct type *type, struct value *arg)
+ada_val_atr (enum noside noside, struct type *type, struct value *arg)
 {
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (type, not_lval);
+
   if (!discrete_type_p (type))
     error (_("'VAL only defined on discrete types"));
   if (!integer_type_p (value_type (arg)))
@@ -10918,10 +10919,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       type = exp->elts[pc + 2].type;
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (type, not_lval);
-      else
-	return value_val_atr (type, arg1);
+      return ada_val_atr (noside, type, arg1);
 
     case BINOP_EXP:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
