@@ -2314,6 +2314,16 @@ scope_operation::do_generate_ax (struct expression *exp,
     error (_("There is no field named %s"), name.c_str ());
 }
 
+void
+long_const_operation::do_generate_ax (struct expression *exp,
+				      struct agent_expr *ax,
+				      struct axs_value *value,
+				      struct type *cast_type)
+{
+  gen_int_literal (ax, value, std::get<1> (m_storage),
+		   std::get<0> (m_storage));
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

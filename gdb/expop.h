@@ -451,6 +451,36 @@ protected:
     override;
 };
 
+class long_const_operation
+  : public tuple_holding_operation<struct type *, LONGEST>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return value_from_longest (std::get<0> (m_storage),
+			       std::get<1> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_LONG; }
+
+  bool constant_p () const override
+  { return true; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
