@@ -69,6 +69,9 @@ extern struct value *ada_pos_atr (struct type *expect_type,
 				  struct expression *exp,
 				  enum noside noside, enum exp_opcode op,
 				  struct value *arg);
+extern struct value *ada_val_atr (enum noside noside, struct type *type,
+				  struct value *arg);
+
 
 namespace expr
 {
@@ -332,6 +335,22 @@ public:
 protected:
 
   using operation::do_generate_ax;
+};
+
+/* Implement the Ada 'val attribute.  */
+class ada_atr_val_operation
+  : public tuple_holding_operation<struct type *, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_ATR_VAL; }
 };
 
 } /* namespace expr */

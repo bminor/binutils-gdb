@@ -8892,7 +8892,7 @@ val_atr (struct type *type, LONGEST val)
   return value_from_longest (type, val);
 }
 
-static struct value *
+struct value *
 ada_val_atr (enum noside noside, struct type *type, struct value *arg)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -10692,6 +10692,15 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 
   value *arg1 = var_value_operation::evaluate (expect_type, exp, noside);
   return ada_to_fixed_value (arg1);
+}
+
+value *
+ada_atr_val_operation::evaluate (struct type *expect_type,
+				 struct expression *exp,
+				 enum noside noside)
+{
+  value *arg = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  return ada_val_atr (noside, std::get<0> (m_storage), arg);
 }
 
 }
