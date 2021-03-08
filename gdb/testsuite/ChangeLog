@@ -1,5 +1,10 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-explore-cc.exp: Extend test names to make them
+	unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-lookup-type.exp: Remove duplicate test.
 
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
