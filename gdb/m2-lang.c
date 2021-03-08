@@ -111,31 +111,6 @@ eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
     return value_subscript (arg1, value_as_long (arg2));
 }
 
-static struct value *
-evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
-			 int *pos, enum noside noside)
-{
-  enum exp_opcode op = exp->elts[*pos].opcode;
-  struct value *arg1;
-  struct value *arg2;
-
-  switch (op)
-    {
-    case UNOP_HIGH:
-      (*pos)++;
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      return eval_op_m2_high (expect_type, exp, noside, arg1);
-
-    case BINOP_SUBSCRIPT:
-      (*pos)++;
-      arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
-      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-      return eval_op_m2_subscript (expect_type, exp, noside, arg1, arg2);
-
-    default:
-      return evaluate_subexp_standard (expect_type, exp, pos, noside);
-    }
-}
 
 
 /* Table of operators and their precedences for printing expressions.  */
@@ -174,15 +149,6 @@ const struct op_print m2_language::op_print_tab[] =
   {NULL, OP_NULL, PREC_BUILTIN_FUNCTION, 0}
 };
 
-
-const struct exp_descriptor m2_language::exp_descriptor_modula2 =
-{
-  print_subexp_standard,
-  operator_length_standard,
-  operator_check_standard,
-  dump_subexp_body_standard,
-  evaluate_subexp_modula2
-};
 
 /* Single instance of the M2 language.  */
 

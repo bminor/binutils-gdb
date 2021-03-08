@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* m2-lang.h (class m2_language) <expresssion_ops,
+	exp_descriptor_modula2>: Remove.
+	* m2-lang.c (evaluate_subexp_modula2)
+	(m2_language::exp_descriptor_modula2): Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* f-lang.h (class f_language) <expresssion_ops>: Remove.
 	<exp_descriptor_tab>: Remove.
 	* f-lang.c (fortran_value_subarray, evaluate_subexp_f)
