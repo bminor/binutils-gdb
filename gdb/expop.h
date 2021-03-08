@@ -133,6 +133,57 @@ check_objfile (const std::pair<S, T> &item, struct objfile *objfile)
 	  || check_objfile (item.second, objfile));
 }
 
+static inline void
+dump_for_expression (struct ui_file *stream, int depth,
+		     const operation_up &op)
+{
+  op->dump (stream, depth);
+}
+
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 enum exp_opcode op);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 const std::string &str);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 struct type *type);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 CORE_ADDR addr);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 internalvar *ivar);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 symbol *sym);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 minimal_symbol *msym);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 const block *bl);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 type_instance_flags flags);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 enum c_string_type_values flags);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 enum range_flag flags);
+extern void dump_for_expression (struct ui_file *stream, int depth,
+				 objfile *objf);
+
+template<typename T>
+void
+dump_for_expression (struct ui_file *stream, int depth,
+		     const std::vector<T> &vals)
+{
+  fprintf_filtered (stream, _("%*sVector:\n"), depth, "");
+  for (auto &item : vals)
+    dump_for_expression (stream, depth + 1, item);
+}
+
+template<typename X, typename Y>
+void
+dump_for_expression (struct ui_file *stream, int depth,
+		     const std::pair<X, Y> &vals)
+{
+  dump_for_expression (stream, depth, vals.first);
+  dump_for_expression (stream, depth, vals.second);
+}
+
 /* Base class for most concrete operations.  This class holds data,
    specified via template parameters, and supplies generic
    implementations of the 'dump' and 'uses_objfile' methods.  */
@@ -155,7 +206,8 @@ public:
 
   void dump (struct ui_file *stream, int depth) const override
   {
-    do_dump<0, Arg...> (stream, depth, m_storage);
+    dump_for_expression (stream, depth, opcode ());
+    do_dump<0, Arg...> (stream, depth + 1, m_storage);
   }
 
 protected:
@@ -178,6 +230,7 @@ private:
   do_dump (struct ui_file *stream, int depth, const std::tuple<T...> &value)
     const
   {
+    dump_for_expression (stream, depth, std::get<I> (value));
     do_dump<I + 1, T...> (stream, depth, value);
   }
 

@@ -30,6 +30,8 @@
 #include "objfiles.h"
 #include "valprint.h"
 #include "cli/cli-style.h"
+#include "c-lang.h"
+#include "expop.h"
 
 #include <ctype.h>
 
@@ -1160,3 +1162,125 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream)
     elt = dump_subexp (exp, stream, elt);
   fputs_filtered ("\n", stream);
 }
+
+namespace expr
+{
+
+void
+dump_for_expression (struct ui_file *stream, int depth, enum exp_opcode op)
+{
+  fprintf_filtered (stream, _("%*sOperation: %s\n"), depth, "", op_name (op));
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, const std::string &str)
+{
+  fprintf_filtered (stream, _("%*sString: %s\n"), depth, "", str.c_str ());
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, struct type *type)
+{
+  fprintf_filtered (stream, _("%*sType: "), depth, "");
+  type_print (type, nullptr, stream, 0);
+  fprintf_filtered (stream, "\n");
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, CORE_ADDR addr)
+{
+  fprintf_filtered (stream, _("%*sConstant: %s\n"), depth, "",
+		     core_addr_to_string (addr));
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, internalvar *ivar)
+{
+  fprintf_filtered (stream, _("%*sInternalvar: $%s\n"), depth, "",
+		     internalvar_name (ivar));
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, symbol *sym)
+{
+  fprintf_filtered (stream, _("%*sSymbol: %s\n"), depth, "",
+		     sym->print_name ());
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, minimal_symbol *msym)
+{
+  fprintf_filtered (stream, _("%*sMinsym: %s\n"), depth, "",
+		     msym->print_name ());
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, const block *bl)
+{
+  fprintf_filtered (stream, _("%*sBlock: %p\n"), depth, "", bl);
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth,
+		     type_instance_flags flags)
+{
+  fprintf_filtered (stream, _("%*sType flags: "), depth, "");
+  if (flags & TYPE_INSTANCE_FLAG_CONST)
+    fputs_unfiltered ("const ", stream);
+  if (flags & TYPE_INSTANCE_FLAG_VOLATILE)
+    fputs_unfiltered ("volatile", stream);
+  fprintf_filtered (stream, "\n");
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth,
+		     enum c_string_type_values flags)
+{
+  fprintf_filtered (stream, _("%*sC string flags: "), depth, "");
+  switch (flags & ~C_CHAR)
+    {
+    case C_WIDE_STRING:
+      fputs_unfiltered (_("wide "), stream);
+      break;
+    case C_STRING_16:
+      fputs_unfiltered (_("u16 "), stream);
+      break;
+    case C_STRING_32:
+      fputs_unfiltered (_("u32 "), stream);
+      break;
+    default:
+      fputs_unfiltered (_("ordinary "), stream);
+      break;
+    }
+
+  if ((flags & C_CHAR) != 0)
+    fputs_unfiltered (_("char"), stream);
+  else
+    fputs_unfiltered (_("string"), stream);
+  fputs_unfiltered ("\n", stream);
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth, objfile *objf)
+{
+  fprintf_filtered (stream, _("%*sObjfile: %s\n"), depth, "",
+		     objfile_name (objf));
+}
+
+void
+dump_for_expression (struct ui_file *stream, int depth,
+		     enum range_flag flags)
+{
+  fprintf_filtered (stream, _("%*sRange:"), depth, "");
+  if ((flags & RANGE_LOW_BOUND_DEFAULT) != 0)
+    fputs_unfiltered (_("low-default "), stream);
+  if ((flags & RANGE_HIGH_BOUND_DEFAULT) != 0)
+    fputs_unfiltered (_("high-default "), stream);
+  if ((flags & RANGE_HIGH_BOUND_EXCLUSIVE) != 0)
+    fputs_unfiltered (_("high-exclusive "), stream);
+  if ((flags & RANGE_HAS_STRIDE) != 0)
+    fputs_unfiltered (_("has-stride"), stream);
+  fprintf_filtered (stream, "\n");
+}
+
+} /* namespace expr */
