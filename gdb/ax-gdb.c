@@ -2554,6 +2554,31 @@ unop_memval_type_operation::do_generate_ax (struct expression *exp,
   value->kind = axs_lvalue_memory;
 }
 
+void
+op_this_operation::do_generate_ax (struct expression *exp,
+				   struct agent_expr *ax,
+				   struct axs_value *value,
+				   struct type *cast_type)
+{
+  struct symbol *sym, *func;
+  const struct block *b;
+  const struct language_defn *lang;
+
+  b = block_for_pc (ax->scope);
+  func = block_linkage_function (b);
+  lang = language_def (func->language ());
+
+  sym = lookup_language_this (lang, b).symbol;
+  if (!sym)
+    error (_("no `%s' found"), lang->name_of_this ());
+
+  gen_var_ref (ax, value, sym);
+
+  if (value->optimized_out)
+    error (_("`%s' has been optimized out, cannot use"),
+	   sym->print_name ());
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary
