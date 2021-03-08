@@ -87,9 +87,6 @@ OP (BINOP_VAL)
    the second operand with itself that many times.  */
 OP (BINOP_CONCAT)
 
-/* This must be the highest BINOP_ value, for expprint.c.  */
-OP (BINOP_END)
-
 /* Operates on three values computed by following subexpressions.  */
 OP (TERNOP_COND)		/* ?: */
 

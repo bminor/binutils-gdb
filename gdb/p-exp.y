@@ -1048,25 +1048,25 @@ struct token
 
 static const struct token tokentab3[] =
   {
-    {"shr", RSH, BINOP_END},
-    {"shl", LSH, BINOP_END},
-    {"and", ANDAND, BINOP_END},
-    {"div", DIV, BINOP_END},
-    {"not", NOT, BINOP_END},
-    {"mod", MOD, BINOP_END},
-    {"inc", INCREMENT, BINOP_END},
-    {"dec", DECREMENT, BINOP_END},
-    {"xor", XOR, BINOP_END}
+    {"shr", RSH, OP_NULL},
+    {"shl", LSH, OP_NULL},
+    {"and", ANDAND, OP_NULL},
+    {"div", DIV, OP_NULL},
+    {"not", NOT, OP_NULL},
+    {"mod", MOD, OP_NULL},
+    {"inc", INCREMENT, OP_NULL},
+    {"dec", DECREMENT, OP_NULL},
+    {"xor", XOR, OP_NULL}
   };
 
 static const struct token tokentab2[] =
   {
-    {"or", OR, BINOP_END},
-    {"<>", NOTEQUAL, BINOP_END},
-    {"<=", LEQ, BINOP_END},
-    {">=", GEQ, BINOP_END},
-    {":=", ASSIGN, BINOP_END},
-    {"::", COLONCOLON, BINOP_END} };
+    {"or", OR, OP_NULL},
+    {"<>", NOTEQUAL, OP_NULL},
+    {"<=", LEQ, OP_NULL},
+    {">=", GEQ, OP_NULL},
+    {":=", ASSIGN, OP_NULL},
+    {"::", COLONCOLON, OP_NULL} };
 
 /* Allocate uppercased var: */
 /* make an uppercased copy of tokstart.  */

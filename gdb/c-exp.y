@@ -2479,8 +2479,8 @@ static const struct token tokentab3[] =
   {
     {">>=", ASSIGN_MODIFY, BINOP_RSH, 0},
     {"<<=", ASSIGN_MODIFY, BINOP_LSH, 0},
-    {"->*", ARROW_STAR, BINOP_END, FLAG_CXX},
-    {"...", DOTDOTDOT, BINOP_END, 0}
+    {"->*", ARROW_STAR, OP_NULL, FLAG_CXX},
+    {"...", DOTDOTDOT, OP_NULL, 0}
   };
 
 static const struct token tokentab2[] =
@@ -2493,21 +2493,21 @@ static const struct token tokentab2[] =
     {"|=", ASSIGN_MODIFY, BINOP_BITWISE_IOR, 0},
     {"&=", ASSIGN_MODIFY, BINOP_BITWISE_AND, 0},
     {"^=", ASSIGN_MODIFY, BINOP_BITWISE_XOR, 0},
-    {"++", INCREMENT, BINOP_END, 0},
-    {"--", DECREMENT, BINOP_END, 0},
-    {"->", ARROW, BINOP_END, 0},
-    {"&&", ANDAND, BINOP_END, 0},
-    {"||", OROR, BINOP_END, 0},
+    {"++", INCREMENT, OP_NULL, 0},
+    {"--", DECREMENT, OP_NULL, 0},
+    {"->", ARROW, OP_NULL, 0},
+    {"&&", ANDAND, OP_NULL, 0},
+    {"||", OROR, OP_NULL, 0},
     /* "::" is *not* only C++: gdb overrides its meaning in several
        different ways, e.g., 'filename'::func, function::variable.  */
-    {"::", COLONCOLON, BINOP_END, 0},
-    {"<<", LSH, BINOP_END, 0},
-    {">>", RSH, BINOP_END, 0},
-    {"==", EQUAL, BINOP_END, 0},
-    {"!=", NOTEQUAL, BINOP_END, 0},
-    {"<=", LEQ, BINOP_END, 0},
-    {">=", GEQ, BINOP_END, 0},
-    {".*", DOT_STAR, BINOP_END, FLAG_CXX}
+    {"::", COLONCOLON, OP_NULL, 0},
+    {"<<", LSH, OP_NULL, 0},
+    {">>", RSH, OP_NULL, 0},
+    {"==", EQUAL, OP_NULL, 0},
+    {"!=", NOTEQUAL, OP_NULL, 0},
+    {"<=", LEQ, OP_NULL, 0},
+    {">=", GEQ, OP_NULL, 0},
+    {".*", DOT_STAR, OP_NULL, FLAG_CXX}
   };
 
 /* Identifier-like tokens.  Only type-specifiers than can appear in
@@ -2546,14 +2546,14 @@ static const struct token ident_tokens[] =
     {"delete", DELETE, OP_NULL, FLAG_CXX},
     {"operator", OPERATOR, OP_NULL, FLAG_CXX},
 
-    {"and", ANDAND, BINOP_END, FLAG_CXX},
+    {"and", ANDAND, OP_NULL, FLAG_CXX},
     {"and_eq", ASSIGN_MODIFY, BINOP_BITWISE_AND, FLAG_CXX},
     {"bitand", '&', OP_NULL, FLAG_CXX},
     {"bitor", '|', OP_NULL, FLAG_CXX},
     {"compl", '~', OP_NULL, FLAG_CXX},
     {"not", '!', OP_NULL, FLAG_CXX},
-    {"not_eq", NOTEQUAL, BINOP_END, FLAG_CXX},
-    {"or", OROR, BINOP_END, FLAG_CXX},
+    {"not_eq", NOTEQUAL, OP_NULL, FLAG_CXX},
+    {"or", OROR, OP_NULL, FLAG_CXX},
     {"or_eq", ASSIGN_MODIFY, BINOP_BITWISE_IOR, FLAG_CXX},
     {"xor", '^', OP_NULL, FLAG_CXX},
     {"xor_eq", ASSIGN_MODIFY, BINOP_BITWISE_XOR, FLAG_CXX},
