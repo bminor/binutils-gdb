@@ -1805,6 +1805,25 @@ eval_op_complement (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for UNOP_LOGICAL_NOT.  */
+
+static struct value *
+eval_op_lognot (struct type *expect_type, struct expression *exp,
+		enum noside noside, enum exp_opcode op,
+		struct value *arg1)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (unop_user_defined_p (op, arg1))
+    return value_x_unop (arg1, op, noside);
+  else
+    {
+      struct type *type = language_bool_type (exp->language_defn,
+					      exp->gdbarch);
+      return value_from_longest (type, (LONGEST) value_logical_not (arg1));
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2668,15 +2687,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case UNOP_LOGICAL_NOT:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (unop_user_defined_p (op, arg1))
-	return value_x_unop (arg1, op, noside);
-      else
-	{
-	  type = language_bool_type (exp->language_defn, exp->gdbarch);
-	  return value_from_longest (type, (LONGEST) value_logical_not (arg1));
-	}
+      return eval_op_lognot (expect_type, exp, noside, op, arg1);
 
     case UNOP_IND:
       if (expect_type && expect_type->code () == TYPE_CODE_PTR)
