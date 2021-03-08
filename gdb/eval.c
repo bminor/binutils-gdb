@@ -1237,7 +1237,7 @@ eval_op_var_msym_value (struct type *expect_type, struct expression *exp,
 
 /* Helper function that implements the body of OP_FUNC_STATIC_VAR.  */
 
-static struct value *
+struct value *
 eval_op_func_static_var (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
 			 value *func, const char *var)

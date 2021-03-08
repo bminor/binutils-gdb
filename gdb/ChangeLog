@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class func_static_var_operation): New.
+	* eval.c (eval_op_func_static_var): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class var_entry_value_operation): New.
 	* eval.c (eval_op_var_entry_value): No longer static.
 

@@ -54,6 +54,10 @@ extern struct value *eval_op_var_msym_value (struct type *expect_type,
 extern struct value *eval_op_var_entry_value (struct type *expect_type,
 					      struct expression *exp,
 					      enum noside noside, symbol *sym);
+extern struct value *eval_op_func_static_var (struct type *expect_type,
+					      struct expression *exp,
+					      enum noside noside,
+					      value *func, const char *var);
 
 namespace expr
 {
@@ -553,6 +557,26 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_VAR_ENTRY_VALUE; }
+};
+
+class func_static_var_operation
+  : public maybe_constant_operation<operation_up, std::string>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *func = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_func_static_var (expect_type, exp, noside, func,
+				    std::get<1> (m_storage).c_str ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_FUNC_STATIC_VAR; }
 };
 
 } /* namespace expr */
