@@ -10011,6 +10011,20 @@ ada_unop_in_range (struct type *expect_type,
     }
 }
 
+/* A helper function for OP_ATR_TAG.  */
+
+static value *
+ada_atr_tag (struct type *expect_type,
+	     struct expression *exp,
+	     enum noside noside, enum exp_opcode op,
+	     struct value *arg1)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (ada_tag_type (arg1), not_lval);
+
+  return ada_value_tag (arg1);
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10741,11 +10755,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (ada_tag_type (arg1), not_lval);
-
-      return ada_value_tag (arg1);
+      return ada_atr_tag (expect_type, exp, noside, op, arg1);
 
     case OP_ATR_MIN:
     case OP_ATR_MAX:
