@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ax-gdb.c (gen_expr_binop_rest): Remove "pc" parameter.
+	(gen_expr_binop_rest): New overload.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (eval_multi_subscript): New function.
 	(evaluate_subexp_standard): Use it.
 

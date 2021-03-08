@@ -2276,13 +2276,12 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
 static void
 gen_expr_binop_rest (struct expression *exp,
-		     enum exp_opcode op, union exp_element **pc,
+		     enum exp_opcode op,
 		     struct agent_expr *ax, struct axs_value *value,
 		     struct axs_value *value1, struct axs_value *value2)
 {
   struct type *int_type = builtin_type (ax->gdbarch)->builtin_int;
 
-  gen_expr (exp, pc, ax, value2);
   gen_usual_unary (ax, value2);
   gen_usual_arithmetic (ax, value1, value2);
   switch (op)
@@ -2419,6 +2418,19 @@ gen_expr_binop_rest (struct expression *exp,
       internal_error (__FILE__, __LINE__,
 		      _("gen_expr: op case sets don't match"));
     }
+}
+
+/* Variant of gen_expr_binop_rest that first generates the
+   right-hand-side.  */
+
+static void
+gen_expr_binop_rest (struct expression *exp,
+		     enum exp_opcode op, union exp_element **pc,
+		     struct agent_expr *ax, struct axs_value *value,
+		     struct axs_value *value1, struct axs_value *value2)
+{
+  gen_expr (exp, pc, ax, value2);
+  gen_expr_binop_rest (exp, op, ax, value, value1, value2);
 }
 
 
