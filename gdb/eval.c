@@ -1354,6 +1354,65 @@ eval_op_structop_struct (struct type *expect_type, struct expression *exp,
   return arg3;
 }
 
+/* A helper function for STRUCTOP_PTR.  */
+
+static struct value *
+eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
+		      enum noside noside, enum exp_opcode op,
+		      struct value *arg1, const char *string)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  /* Check to see if operator '->' has been overloaded.  If so replace
+     arg1 with the value returned by evaluating operator->().  */
+  while (unop_user_defined_p (op, arg1))
+    {
+      struct value *value = NULL;
+      try
+	{
+	  value = value_x_unop (arg1, op, noside);
+	}
+
+      catch (const gdb_exception_error &except)
+	{
+	  if (except.error == NOT_FOUND_ERROR)
+	    break;
+	  else
+	    throw;
+	}
+
+      arg1 = value;
+    }
+
+  /* JYG: if print object is on we need to replace the base type
+     with rtti type in order to continue on with successful
+     lookup of member / method only available in the rtti type.  */
+  {
+    struct type *arg_type = value_type (arg1);
+    struct type *real_type;
+    int full, using_enc;
+    LONGEST top;
+    struct value_print_options opts;
+
+    get_user_print_options (&opts);
+    if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
+	&& (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
+      {
+	real_type = value_rtti_indirect_type (arg1, &full, &top,
+					      &using_enc);
+	if (real_type)
+	  arg1 = value_cast (real_type, arg1);
+      }
+  }
+
+  struct value *arg3 = value_struct_elt (&arg1, NULL, string,
+					 NULL, "structure pointer");
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
+  return arg3;
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1952,56 +2011,8 @@ evaluate_subexp_standard (struct type *expect_type,
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-
-      /* Check to see if operator '->' has been overloaded.  If so replace
-	 arg1 with the value returned by evaluating operator->().  */
-      while (unop_user_defined_p (op, arg1))
-	{
-	  struct value *value = NULL;
-	  try
-	    {
-	      value = value_x_unop (arg1, op, noside);
-	    }
-
-	  catch (const gdb_exception_error &except)
-	    {
-	      if (except.error == NOT_FOUND_ERROR)
-		break;
-	      else
-		throw;
-	    }
-
-	  arg1 = value;
-	}
-
-      /* JYG: if print object is on we need to replace the base type
-	 with rtti type in order to continue on with successful
-	 lookup of member / method only available in the rtti type.  */
-      {
-	struct type *arg_type = value_type (arg1);
-	struct type *real_type;
-	int full, using_enc;
-	LONGEST top;
-	struct value_print_options opts;
-
-	get_user_print_options (&opts);
-	if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
-	    && (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
-	  {
-	    real_type = value_rtti_indirect_type (arg1, &full, &top,
-						  &using_enc);
-	    if (real_type)
-		arg1 = value_cast (real_type, arg1);
-	  }
-      }
-
-      arg3 = value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
-			       NULL, "structure pointer");
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
-      return arg3;
+      return eval_op_structop_ptr (expect_type, exp, noside, op, arg1,
+				   &exp->elts[pc + 2].string);
 
     case STRUCTOP_MEMBER:
     case STRUCTOP_MPTR:
