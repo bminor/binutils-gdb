@@ -9964,7 +9964,7 @@ eval_ternop_in_range (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_NEG.  */
 
-static value *
+value *
 ada_unop_neg (struct type *expect_type,
 	      struct expression *exp,
 	      enum noside noside, enum exp_opcode op,
@@ -10015,7 +10015,7 @@ ada_unop_in_range (struct type *expect_type,
 
 /* A helper function for OP_ATR_TAG.  */
 
-static value *
+value *
 ada_atr_tag (struct type *expect_type,
 	     struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
@@ -10029,7 +10029,7 @@ ada_atr_tag (struct type *expect_type,
 
 /* A helper function for OP_ATR_SIZE.  */
 
-static value *
+value *
 ada_atr_size (struct type *expect_type,
 	      struct expression *exp,
 	      enum noside noside, enum exp_opcode op,
@@ -10054,7 +10054,7 @@ ada_atr_size (struct type *expect_type,
 
 /* A helper function for UNOP_ABS.  */
 
-static value *
+value *
 ada_abs (struct type *expect_type,
 	 struct expression *exp,
 	 enum noside noside, enum exp_opcode op,

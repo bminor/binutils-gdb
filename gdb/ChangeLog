@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_unop_neg, ada_atr_tag, ada_atr_size, ada_abs):
+	No longer static.
+	* ada-exp.h (ada_neg_operation, ada_atr_tag_operation)
+	(ada_atr_size_operation, ada_abs_operation): New typedefs.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class logical_and_operation)
 	(class logical_or_operation): New.
 	* eval.c (logical_and_operation::evaluate)

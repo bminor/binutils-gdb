@@ -22,6 +22,23 @@
 
 #include "expop.h"
 
+extern struct value *ada_unop_neg (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside, enum exp_opcode op,
+				   struct value *arg1);
+extern struct value *ada_atr_tag (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside, enum exp_opcode op,
+				  struct value *arg1);
+extern struct value *ada_atr_size (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside, enum exp_opcode op,
+				   struct value *arg1);
+extern struct value *ada_abs (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside, enum exp_opcode op,
+			      struct value *arg1);
+
 namespace expr
 {
 
@@ -86,6 +103,11 @@ public:
   enum exp_opcode opcode () const override
   { return TERNOP_IN_RANGE; }
 };
+
+using ada_neg_operation = unop_operation<UNOP_NEG, ada_unop_neg>;
+using ada_atr_tag_operation = unop_operation<OP_ATR_TAG, ada_atr_tag>;
+using ada_atr_size_operation = unop_operation<OP_ATR_SIZE, ada_atr_size>;
+using ada_abs_operation = unop_operation<UNOP_ABS, ada_abs>;
 
 } /* namespace expr */
 
