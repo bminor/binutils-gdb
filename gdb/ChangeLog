@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* parser-defs.h (exp_uses_objfile): Return bool.
+	* parse.c (exp_uses_objfile): Return bool.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* value.h (eval_skip_value): Don't declare.
 	* opencl-lang.c (eval_opencl_assign): Update.
 	* m2-lang.c (eval_op_m2_high, eval_op_m2_subscript): Update.
