@@ -1,5 +1,10 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-prompt.exp: Add with_test_prefix to make test
+	names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-block.exp: Give tests unique names.
 
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
