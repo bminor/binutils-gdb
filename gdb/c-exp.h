@@ -28,6 +28,16 @@ extern struct value *eval_op_objc_selector (struct type *expect_type,
 					    enum noside noside,
 					    const char *sel);
 extern struct value *opencl_value_cast (struct type *type, struct value *arg);
+extern struct value *eval_opencl_assign (struct type *expect_type,
+					 struct expression *exp,
+					 enum noside noside,
+					 enum exp_opcode op,
+					 struct value *arg1,
+					 struct value *arg2);
+extern struct value *opencl_relop (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside, enum exp_opcode op,
+				   struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -109,6 +119,48 @@ public:
 
 using opencl_cast_type_operation = cxx_cast_operation<UNOP_CAST_TYPE,
 						      opencl_value_cast>;
+
+/* Binary operations, as needed for OpenCL.  */
+template<enum exp_opcode OP, binary_ftype FUNC,
+	 typename BASE = maybe_constant_operation<operation_up, operation_up>>
+class opencl_binop_operation
+  : public BASE
+{
+public:
+
+  using BASE::BASE;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs
+      = std::get<0> (this->m_storage)->evaluate (nullptr, exp, noside);
+    value *rhs
+      = std::get<1> (this->m_storage)->evaluate (value_type (lhs), exp,
+						 noside);
+    return FUNC (expect_type, exp, noside, OP, lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP; }
+};
+
+using opencl_assign_operation = opencl_binop_operation<BINOP_ASSIGN,
+						       eval_opencl_assign,
+						       assign_operation>;
+using opencl_equal_operation = opencl_binop_operation<BINOP_EQUAL,
+						      opencl_relop>;
+using opencl_notequal_operation = opencl_binop_operation<BINOP_NOTEQUAL,
+							 opencl_relop>;
+using opencl_less_operation = opencl_binop_operation<BINOP_LESS,
+						     opencl_relop>;
+using opencl_gtr_operation = opencl_binop_operation<BINOP_GTR,
+						    opencl_relop>;
+using opencl_geq_operation = opencl_binop_operation<BINOP_GEQ,
+						    opencl_relop>;
+using opencl_leq_operation = opencl_binop_operation<BINOP_LEQ,
+						    opencl_relop>;
 
 }/* namespace expr */
 

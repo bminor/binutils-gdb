@@ -1,5 +1,17 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* opencl-lang.c (opencl_relop, eval_opencl_assign): No longer
+	static.  Change parameters.
+	(eval_opencl_assign): No longer static.  Add "op" parameter.
+	(evaluate_subexp_opencl): Update.
+	* c-exp.h (opencl_binop_operation): New template class.
+	(opencl_assign_operation, opencl_equal_operation)
+	(opencl_notequal_operation, opencl_less_operation)
+	(opencl_gtr_operation, opencl_geq_operation)
+	(opencl_leq_operation): New typedefs.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* opencl-lang.c (opencl_value_cast): No longer static.
 	* c-exp.h (opencl_cast_type_operation): New typedef.
 

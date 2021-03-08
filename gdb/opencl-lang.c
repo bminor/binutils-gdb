@@ -631,9 +631,10 @@ opencl_value_cast (struct type *type, struct value *arg)
 
 /* Perform a relational operation on two operands.  */
 
-static struct value *
-opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
-	      enum exp_opcode op)
+struct value *
+opencl_relop (struct type *expect_type, struct expression *exp,
+	      enum noside noside, enum exp_opcode op,
+	      struct value *arg1, struct value *arg2)
 {
   struct value *val;
   struct type *type1 = check_typedef (value_type (arg1));
@@ -673,9 +674,9 @@ opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
 
 /* A helper function for BINOP_ASSIGN.  */
 
-static struct value *
+struct value *
 eval_opencl_assign (struct type *expect_type, struct expression *exp,
-		    enum noside noside,
+		    enum noside noside, enum exp_opcode op,
 		    struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -712,7 +713,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
       type1 = value_type (arg1);
       arg2 = evaluate_subexp (type1, exp, pos, noside);
 
-      return eval_opencl_assign (expect_type, exp, noside, arg1, arg2);
+      return eval_opencl_assign (expect_type, exp, noside, op, arg1, arg2);
 
     case UNOP_CAST:
       type1 = exp->elts[*pos + 1].type;
@@ -753,7 +754,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	return value_from_longest (builtin_type (exp->gdbarch)->
 				   builtin_int, 1);
 
-      return opencl_relop (exp, arg1, arg2, op);
+      return opencl_relop (expect_type, exp, noside, op, arg1, arg2);
 
     /* Handle the logical unary operator not(!).  */
     case UNOP_LOGICAL_NOT:
@@ -798,7 +799,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	    {
 	      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
 
-	      return opencl_relop (exp, arg1, arg2, op);
+	      return opencl_relop (nullptr, exp, noside, op, arg1, arg2);
 	    }
 	  else
 	    {
