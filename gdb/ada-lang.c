@@ -189,8 +189,6 @@ static struct value *ada_coerce_ref (struct value *);
 
 static LONGEST pos_atr (struct value *);
 
-static struct value *value_pos_atr (struct type *, struct value *);
-
 static struct value *val_atr (struct type *, LONGEST);
 
 static struct symbol *standard_lookup (const char *, const struct block *,
@@ -8866,8 +8864,14 @@ pos_atr (struct value *arg)
 }
 
 static struct value *
-value_pos_atr (struct type *type, struct value *arg)
+ada_pos_atr (struct type *expect_type,
+	     struct expression *exp,
+	     enum noside noside, enum exp_opcode op,
+	     struct value *arg)
 {
+  struct type *type = builtin_type (exp->gdbarch)->builtin_int;
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (type, not_lval);
   return value_from_longest (type, pos_atr (arg));
 }
 
@@ -11231,11 +11235,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      type = builtin_type (exp->gdbarch)->builtin_int;
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (type, not_lval);
-      else
-	return value_pos_atr (type, arg1);
+      return ada_pos_atr (expect_type, exp, noside, op, arg1);
 
     case OP_ATR_SIZE:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);

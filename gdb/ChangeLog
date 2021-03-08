@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_pos_atr): Rename from value_pos_atr.  Change
+	parameters.
+	(ada_evaluate_subexp): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_binop_minmax): No longer static.
 	* ada-exp.h (ada_binop_min_operation, ada_binop_max_operation):
 	New typedefs.
