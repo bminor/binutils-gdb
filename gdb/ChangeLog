@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* eval.c (evaluate_subexp_for_address_base): New function.
+	(evaluate_subexp_for_address): Use it.
+	(evaluate_subexp_for_sizeof_base): New function.
+	(evaluate_subexp_for_sizeof): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (eval_op_rust_structop): New function.
 	(rust_evaluate_subexp): Use it.
 

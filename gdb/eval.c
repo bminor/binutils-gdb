@@ -3081,6 +3081,29 @@ evaluate_subexp_standard (struct type *expect_type,
   gdb_assert_not_reached ("missed return?");
 }
 
+/* Helper for evaluate_subexp_for_address.  */
+
+static value *
+evaluate_subexp_for_address_base (struct expression *exp, enum noside noside,
+				  value *x)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *type = check_typedef (value_type (x));
+
+      if (TYPE_IS_REFERENCE (type))
+	return value_zero (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+			   not_lval);
+      else if (VALUE_LVAL (x) == lval_memory || value_must_coerce_to_target (x))
+	return value_zero (lookup_pointer_type (value_type (x)),
+			   not_lval);
+      else
+	error (_("Attempt to take address of "
+		 "value not located in memory."));
+    }
+  return value_addr (x);
+}
+
 /* Evaluate a subexpression of EXP, at index *POS,
    and return the address of that subexpression.
    Advance *POS over the subexpression.
@@ -3188,21 +3211,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
     default_case:
       x = evaluate_subexp (nullptr, exp, pos, noside);
     default_case_after_eval:
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	{
-	  struct type *type = check_typedef (value_type (x));
-
-	  if (TYPE_IS_REFERENCE (type))
-	    return value_zero (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
-			       not_lval);
-	  else if (VALUE_LVAL (x) == lval_memory || value_must_coerce_to_target (x))
-	    return value_zero (lookup_pointer_type (value_type (x)),
-			       not_lval);
-	  else
-	    error (_("Attempt to take address of "
-		     "value not located in memory."));
-	}
-      return value_addr (x);
+      return evaluate_subexp_for_address_base (exp, noside, x);
     }
 }
 
@@ -3249,6 +3258,23 @@ evaluate_subexp_with_coercion (struct expression *exp,
     default:
       return evaluate_subexp (nullptr, exp, pos, noside);
     }
+}
+
+/* Helper function for evaluating the size of a type.  */
+
+static value *
+evaluate_subexp_for_sizeof_base (struct expression *exp, struct type *type)
+{
+  /* FIXME: This should be size_t.  */
+  struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
+  /* $5.3.3/2 of the C++ Standard (n3290 draft) says of sizeof:
+     "When applied to a reference or a reference type, the result is
+     the size of the referenced type."  */
+  type = check_typedef (type);
+  if (exp->language_defn->la_language == language_cplus
+      && (TYPE_IS_REFERENCE (type)))
+    type = check_typedef (TYPE_TARGET_TYPE (type));
+  return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 }
 
 /* Evaluate a subexpression of EXP, at index *POS,
@@ -3374,14 +3400,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
       break;
     }
 
-  /* $5.3.3/2 of the C++ Standard (n3290 draft) says of sizeof:
-     "When applied to a reference or a reference type, the result is
-     the size of the referenced type."  */
-  type = check_typedef (type);
-  if (exp->language_defn->la_language == language_cplus
-      && (TYPE_IS_REFERENCE (type)))
-    type = check_typedef (TYPE_TARGET_TYPE (type));
-  return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+  return evaluate_subexp_for_sizeof_base (exp, type);
 }
 
 /* Evaluate a subexpression of EXP, at index *POS, and return a value
