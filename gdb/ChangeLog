@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class ternop_cond_operation): New.
+	* ax-gdb.c (ternop_cond_operation::do_generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class ternop_slice_operation): New.
 	* eval.c (eval_op_ternop): No longer static.
 

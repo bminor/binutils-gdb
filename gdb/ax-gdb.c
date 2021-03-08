@@ -2390,6 +2390,35 @@ internalvar_operation::do_generate_ax (struct expression *exp,
 	     "expressions cannot use convenience variables."), name);
 }
 
+void
+ternop_cond_operation::do_generate_ax (struct expression *exp,
+				       struct agent_expr *ax,
+				       struct axs_value *value,
+				       struct type *cast_type)
+{
+  struct axs_value value1, value2, value3;
+  int if1, end;
+
+  std::get<0> (m_storage)->generate_ax (exp, ax, &value1);
+  gen_usual_unary (ax, &value1);
+  /* For (A ? B : C), it's easiest to generate subexpression
+     bytecodes in order, but if_goto jumps on true, so we invert
+     the sense of A.  Then we can do B by dropping through, and
+     jump to do C.  */
+  gen_logical_not (ax, &value1, builtin_type (ax->gdbarch)->builtin_int);
+  if1 = ax_goto (ax, aop_if_goto);
+  std::get<1> (m_storage)->generate_ax (exp, ax, &value2);
+  gen_usual_unary (ax, &value2);
+  end = ax_goto (ax, aop_goto);
+  ax_label (ax, if1, ax->len);
+  std::get<2> (m_storage)->generate_ax (exp, ax, &value3);
+  gen_usual_unary (ax, &value3);
+  ax_label (ax, end, ax->len);
+  /* This is arbitrary - what if B and C are incompatible types? */
+  value->type = value2.type;
+  value->kind = value2.kind;
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary
