@@ -80,6 +80,10 @@ extern struct value *eval_op_structop_ptr (struct type *expect_type,
 					   enum noside noside,
 					   struct value *arg1,
 					   const char *string);
+extern struct value *eval_op_member (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -885,6 +889,50 @@ protected:
 		       std::get<1> (this->m_storage).c_str (),
 		       ax, value);
   }
+};
+
+class structop_member_operation
+  : public tuple_holding_operation<operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs
+      = std::get<0> (m_storage)->evaluate_for_address (exp, noside);
+    value *rhs
+      = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_member (expect_type, exp, noside, lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_MEMBER; }
+};
+
+class structop_mptr_operation
+  : public tuple_holding_operation<operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs
+      = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *rhs
+      = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_member (expect_type, exp, noside, lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_MPTR; }
 };
 
 } /* namespace expr */

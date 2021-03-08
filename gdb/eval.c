@@ -1417,7 +1417,7 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
 
 /* A helper function for STRUCTOP_MEMBER.  */
 
-static struct value *
+struct value *
 eval_op_member (struct type *expect_type, struct expression *exp,
 		enum noside noside,
 		struct value *arg1, struct value *arg2)
