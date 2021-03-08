@@ -10694,6 +10694,31 @@ ada_var_value_operation::evaluate (struct type *expect_type,
   return ada_to_fixed_value (arg1);
 }
 
+bool
+ada_var_value_operation::resolve (struct expression *exp,
+				  bool deprocedure_p,
+				  bool parse_completion,
+				  innermost_block_tracker *tracker,
+				  struct type *context_type)
+{
+  symbol *sym = std::get<0> (m_storage);
+  if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
+    {
+      block_symbol resolved
+	= ada_resolve_variable (sym, std::get<1> (m_storage),
+				context_type, parse_completion,
+				deprocedure_p, tracker);
+      std::get<0> (m_storage) = resolved.symbol;
+      std::get<1> (m_storage) = resolved.block;
+    }
+
+  if (deprocedure_p
+      && SYMBOL_TYPE (std::get<0> (m_storage))->code () == TYPE_CODE_FUNC)
+    return true;
+
+  return false;
+}
+
 value *
 ada_atr_val_operation::evaluate (struct type *expect_type,
 				 struct expression *exp,
@@ -10970,6 +10995,60 @@ ada_funcall_operation::evaluate (struct type *expect_type,
       error (_("Attempt to index or call something other than an "
 	       "array or function"));
     }
+}
+
+bool
+ada_funcall_operation::resolve (struct expression *exp,
+				bool deprocedure_p,
+				bool parse_completion,
+				innermost_block_tracker *tracker,
+				struct type *context_type)
+{
+  operation_up &callee_op = std::get<0> (m_storage);
+
+  ada_var_value_operation *avv
+    = dynamic_cast<ada_var_value_operation *> (callee_op.get ());
+  if (avv == nullptr)
+    return false;
+
+  symbol *sym = avv->get_symbol ();
+  if (SYMBOL_DOMAIN (sym) != UNDEF_DOMAIN)
+    return false;
+
+  const std::vector<operation_up> &args_up = std::get<1> (m_storage);
+  int nargs = args_up.size ();
+  std::vector<value *> argvec (nargs);
+
+  for (int i = 0; i < args_up.size (); ++i)
+    argvec[i] = args_up[i]->evaluate (nullptr, exp, EVAL_AVOID_SIDE_EFFECTS);
+
+  const block *block = avv->get_block ();
+  block_symbol resolved
+    = ada_resolve_funcall (sym, block,
+			   context_type, parse_completion,
+			   nargs, argvec.data (),
+			   tracker);
+
+  std::get<0> (m_storage)
+    = make_operation<ada_var_value_operation> (resolved.symbol,
+					       resolved.block);
+  return false;
+}
+
+bool
+ada_ternop_slice_operation::resolve (struct expression *exp,
+				     bool deprocedure_p,
+				     bool parse_completion,
+				     innermost_block_tracker *tracker,
+				     struct type *context_type)
+{
+  /* Historically this check was done during resolution, so we
+     continue that here.  */
+  value *v = std::get<0> (m_storage)->evaluate (context_type, exp,
+						EVAL_AVOID_SIDE_EFFECTS);
+  if (ada_is_any_packed_array_type (value_type (v)))
+    error (_("cannot slice a packed array"));
+  return false;
 }
 
 }

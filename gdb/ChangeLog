@@ -1,5 +1,18 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_var_value_operation::resolve)
+	(ada_funcall_operation::resolve)
+	(ada_ternop_slice_operation::resolve): New methods.
+	* ada-exp.h (struct ada_resolvable): New.
+	(class ada_var_value_operation): Derive from ada_resolvable.
+	<get_block, resolve>: New methods.
+	(class ada_funcall_operation): Derive from ada_resolvable.
+	<resolve>: New method.
+	(class ada_ternop_slice_operation): Derive from ada_resolvable.
+	<resolve>: New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_funcall_operation::evaluate): New method.
 	* ada-exp.h (class ada_var_msym_value_operation) <get_symbol>: New
 	method.

@@ -79,6 +79,24 @@ extern struct value *ada_binop_exp (struct type *expect_type,
 namespace expr
 {
 
+/* The base class for Ada type resolution.  Ada operations that want
+   to participate in resolution implement this interface.  */
+struct ada_resolvable
+{
+  /* Resolve this object.  EXP is the expression being resolved.
+     DEPROCEDURE_P is true if a symbol that refers to a zero-argument
+     function may be turned into a function call.  PARSE_COMPLETION
+     and TRACKER are passed in from the parser context.  CONTEXT_TYPE
+     is the expected type of the expression, or nullptr if none is
+     known.  This method should return true if the operation should be
+     replaced by a function call with this object as the callee.  */
+  virtual bool resolve (struct expression *exp,
+			bool deprocedure_p,
+			bool parse_completion,
+			innermost_block_tracker *tracker,
+			struct type *context_type) = 0;
+};
+
 /* In Ada, some generic operations must be wrapped with a handler that
    handles some Ada-specific type conversions.  */
 class ada_wrapped_operation
@@ -246,7 +264,8 @@ using ada_bitwise_xor_operation = ada_bitwise_operation<BINOP_BITWISE_XOR>;
 
 /* Ada array- or string-slice operation.  */
 class ada_ternop_slice_operation
-  : public maybe_constant_operation<operation_up, operation_up, operation_up>
+  : public maybe_constant_operation<operation_up, operation_up, operation_up>,
+    public ada_resolvable
 {
 public:
 
@@ -264,6 +283,12 @@ public:
 
   enum exp_opcode opcode () const override
   { return TERNOP_SLICE; }
+
+  bool resolve (struct expression *exp,
+		bool deprocedure_p,
+		bool parse_completion,
+		innermost_block_tracker *tracker,
+		struct type *context_type) override;
 };
 
 /* Implement BINOP_IN_BOUNDS for Ada.  */
@@ -306,7 +331,7 @@ public:
 
 /* Variant of var_value_operation for Ada.  */
 class ada_var_value_operation
-  : public var_value_operation
+  : public var_value_operation, public ada_resolvable
 {
 public:
 
@@ -322,6 +347,15 @@ public:
 
   symbol *get_symbol () const
   { return std::get<0> (m_storage); }
+
+  const block *get_block () const
+  { return std::get<1> (m_storage); }
+
+  bool resolve (struct expression *exp,
+		bool deprocedure_p,
+		bool parse_completion,
+		innermost_block_tracker *tracker,
+		struct type *context_type) override;
 
 protected:
 
@@ -392,7 +426,8 @@ public:
 
 /* Function calls for Ada.  */
 class ada_funcall_operation
-  : public tuple_holding_operation<operation_up, std::vector<operation_up>>
+  : public tuple_holding_operation<operation_up, std::vector<operation_up>>,
+    public ada_resolvable
 {
 public:
 
@@ -401,6 +436,12 @@ public:
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
 		   enum noside noside) override;
+
+  bool resolve (struct expression *exp,
+		bool deprocedure_p,
+		bool parse_completion,
+		innermost_block_tracker *tracker,
+		struct type *context_type) override;
 
   enum exp_opcode opcode () const override
   { return OP_FUNCALL; }
