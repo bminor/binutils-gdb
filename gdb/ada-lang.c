@@ -10188,6 +10188,36 @@ ada_ternop_slice (struct expression *exp,
 			    longest_to_int (high_bound));
 }
 
+/* A helper function for BINOP_IN_BOUNDS.  */
+
+static value *
+ada_binop_in_bounds (struct expression *exp, enum noside noside,
+		     struct value *arg1, struct value *arg2, int n)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *type = language_bool_type (exp->language_defn,
+					      exp->gdbarch);
+      return value_zero (type, not_lval);
+    }
+
+  struct type *type = ada_index_type (value_type (arg2), n, "range");
+  if (!type)
+    type = value_type (arg1);
+
+  value *arg3 = value_from_longest (type, ada_array_bound (arg2, n, 1));
+  arg2 = value_from_longest (type, ada_array_bound (arg2, n, 0));
+
+  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
+  type = language_bool_type (exp->language_defn, exp->gdbarch);
+  return value_from_longest (type,
+			     (value_less (arg1, arg3)
+			      || value_equal (arg1, arg3))
+			     && (value_less (arg2, arg1)
+				 || value_equal (arg2, arg1)));
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10651,30 +10681,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
 	goto nosideret;
 
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	{
-	  type = language_bool_type (exp->language_defn, exp->gdbarch);
-	  return value_zero (type, not_lval);
-	}
-
       tem = longest_to_int (exp->elts[pc + 1].longconst);
 
-      type = ada_index_type (value_type (arg2), tem, "range");
-      if (!type)
-	type = value_type (arg1);
-
-      arg3 = value_from_longest (type, ada_array_bound (arg2, tem, 1));
-      arg2 = value_from_longest (type, ada_array_bound (arg2, tem, 0));
-
-      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
-      type = language_bool_type (exp->language_defn, exp->gdbarch);
-      return
-	value_from_longest (type,
-			    (value_less (arg1, arg3)
-			     || value_equal (arg1, arg3))
-			    && (value_less (arg2, arg1)
-				|| value_equal (arg2, arg1)));
+      return ada_binop_in_bounds (exp, noside, arg1, arg2, tem);
 
     case TERNOP_IN_RANGE:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
