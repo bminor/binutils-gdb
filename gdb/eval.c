@@ -1729,6 +1729,28 @@ eval_op_leq (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for BINOP_REPEAT.  */
+
+static struct value *
+eval_op_repeat (struct type *expect_type, struct expression *exp,
+		enum noside noside,
+		struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct type *type = check_typedef (value_type (arg2));
+  if (type->code () != TYPE_CODE_INT
+      && type->code () != TYPE_CODE_ENUM)
+    error (_("Non-integral right operand for \"@\" operator."));
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      return allocate_repeat_value (value_type (arg1),
+				    longest_to_int (value_as_long (arg2)));
+    }
+  else
+    return value_repeat (arg1, longest_to_int (value_as_long (arg2)));
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2570,19 +2592,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_REPEAT:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      type = check_typedef (value_type (arg2));
-      if (type->code () != TYPE_CODE_INT
-	  && type->code () != TYPE_CODE_ENUM)
-	error (_("Non-integral right operand for \"@\" operator."));
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	{
-	  return allocate_repeat_value (value_type (arg1),
-				     longest_to_int (value_as_long (arg2)));
-	}
-      else
-	return value_repeat (arg1, longest_to_int (value_as_long (arg2)));
+      return eval_op_repeat (expect_type, exp, noside, arg1, arg2);
 
     case BINOP_COMMA:
       evaluate_subexp (nullptr, exp, pos, noside);
