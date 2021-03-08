@@ -1251,6 +1251,36 @@ eval_op_func_static_var (struct type *expect_type, struct expression *exp,
   return evaluate_var_value (noside, sym.block, sym.symbol);
 }
 
+/* Helper function that implements the body of OP_REGISTER.  */
+
+static struct value *
+eval_op_register (struct type *expect_type, struct expression *exp,
+		  enum noside noside, const char *name)
+{
+  int regno;
+  struct value *val;
+
+  regno = user_reg_map_name_to_regnum (exp->gdbarch,
+				       name, strlen (name));
+  if (regno == -1)
+    error (_("Register $%s not available."), name);
+
+  /* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
+     a value with the appropriate register type.  Unfortunately,
+     we don't have easy access to the type of user registers.
+     So for these registers, we fetch the register value regardless
+     of the evaluation mode.  */
+  if (noside == EVAL_AVOID_SIDE_EFFECTS
+      && regno < gdbarch_num_cooked_regs (exp->gdbarch))
+    val = value_zero (register_type (exp->gdbarch, regno), not_lval);
+  else
+    val = value_of_register (regno, get_selected_frame (NULL));
+  if (val == NULL)
+    error (_("Value of register %s not available."), name);
+  else
+    return val;
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1348,29 +1378,9 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_REGISTER:
       {
 	const char *name = &exp->elts[pc + 2].string;
-	int regno;
-	struct value *val;
 
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (exp->elts[pc + 1].longconst + 1);
-	regno = user_reg_map_name_to_regnum (exp->gdbarch,
-					     name, strlen (name));
-	if (regno == -1)
-	  error (_("Register $%s not available."), name);
-
-	/* In EVAL_AVOID_SIDE_EFFECTS mode, we only need to return
-	   a value with the appropriate register type.  Unfortunately,
-	   we don't have easy access to the type of user registers.
-	   So for these registers, we fetch the register value regardless
-	   of the evaluation mode.  */
-	if (noside == EVAL_AVOID_SIDE_EFFECTS
-	    && regno < gdbarch_num_cooked_regs (exp->gdbarch))
-	  val = value_zero (register_type (exp->gdbarch, regno), not_lval);
-	else
-	  val = value_of_register (regno, get_selected_frame (NULL));
-	if (val == NULL)
-	  error (_("Value of register %s not available."), name);
-	else
-	  return val;
+	return eval_op_register (expect_type, exp, noside, name);
       }
     case OP_BOOL:
       (*pos) += 2;
