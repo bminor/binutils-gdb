@@ -1281,6 +1281,19 @@ eval_op_register (struct type *expect_type, struct expression *exp,
     return val;
 }
 
+/* Helper function that implements the body of OP_STRING.  */
+
+static struct value *
+eval_op_string (struct type *expect_type, struct expression *exp,
+		enum noside noside, int len, const char *string)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct type *type = language_string_char_type (exp->language_defn,
+						 exp->gdbarch);
+  return value_string (string, len, type);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1395,10 +1408,8 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_STRING:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      type = language_string_char_type (exp->language_defn, exp->gdbarch);
-      return value_string (&exp->elts[pc + 2].string, tem, type);
+      return eval_op_string (expect_type, exp, noside, tem,
+			     &exp->elts[pc + 2].string);
 
     case OP_OBJC_NSSTRING:		/* Objective C Foundation Class
 					   NSString constant.  */
