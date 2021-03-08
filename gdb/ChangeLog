@@ -1,5 +1,9 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_value_binop): Do not use op_string.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expprint.c (dump_for_expression): New overload.
 	* expop.h (check_objfile, dump_for_expression): Declare new
 	overloads.

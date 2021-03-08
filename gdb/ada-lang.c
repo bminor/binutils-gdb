@@ -9321,7 +9321,20 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   v2 = value_as_long (arg2);
   if (v2 == 0)
-    error (_("second operand of %s must not be zero."), op_string (op));
+    {
+      const char *name;
+      if (op == BINOP_MOD)
+	name = "mod";
+      else if (op == BINOP_DIV)
+	name = "/";
+      else
+	{
+	  gdb_assert (op == BINOP_REM);
+	  name = "rem";
+	}
+
+      error (_("second operand of %s must not be zero."), name);
+    }
 
   if (type1->is_unsigned () || op == BINOP_MOD)
     return value_binop (arg1, arg2, op);
