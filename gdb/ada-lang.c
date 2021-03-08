@@ -10788,6 +10788,48 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
     return ada_value_ind (arg1);
 }
 
+value *
+ada_structop_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  const char *str = std::get<1> (m_storage).c_str ();
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *type;
+      struct type *type1 = value_type (arg1);
+
+      if (ada_is_tagged_type (type1, 1))
+	{
+	  type = ada_lookup_struct_elt_type (type1, str, 1, 1);
+
+	  /* If the field is not found, check if it exists in the
+	     extension of this object's type. This means that we
+	     need to evaluate completely the expression.  */
+
+	  if (type == NULL)
+	    {
+	      arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp,
+							EVAL_NORMAL);
+	      arg1 = ada_value_struct_elt (arg1, str, 0);
+	      arg1 = unwrap_value (arg1);
+	      type = value_type (ada_to_fixed_value (arg1));
+	    }
+	}
+      else
+	type = ada_lookup_struct_elt_type (type1, str, 1, 0);
+
+      return value_zero (ada_aligned_type (type), lval_memory);
+    }
+  else
+    {
+      arg1 = ada_value_struct_elt (arg1, str, 0);
+      arg1 = unwrap_value (arg1);
+      return ada_to_fixed_value (arg1);
+    }
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure

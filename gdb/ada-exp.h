@@ -371,6 +371,22 @@ public:
 		   enum noside noside) override;
 };
 
+/* Implement STRUCTOP_STRUCT for Ada.  */
+class ada_structop_operation
+  : public structop_base_operation
+{
+public:
+
+  using structop_base_operation::structop_base_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_STRUCT; }
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */
