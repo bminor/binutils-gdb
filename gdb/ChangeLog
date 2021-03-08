@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_wrapped_operation::evaluate): New method.
+	* ada-exp.h: New file.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class multi_subscript_operation): New.
 	* eval.c (multi_subscript_operation::evaluate): New method.
 

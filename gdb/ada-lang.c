@@ -57,6 +57,7 @@
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/byte-vector.h"
 #include <algorithm>
+#include "ada-exp.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -10385,6 +10386,34 @@ ada_binop_exp (struct type *expect_type,
 
       return value_binop (arg1, arg2, op);
     }
+}
+
+namespace expr
+{
+
+value *
+ada_wrapped_operation::evaluate (struct type *expect_type,
+				 struct expression *exp,
+				 enum noside noside)
+{
+  value *result = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+  if (noside == EVAL_NORMAL)
+    result = unwrap_value (result);
+
+  /* If evaluating an OP_FLOAT and an EXPECT_TYPE was provided,
+     then we need to perform the conversion manually, because
+     evaluate_subexp_standard doesn't do it.  This conversion is
+     necessary in Ada because the different kinds of float/fixed
+     types in Ada have different representations.
+
+     Similarly, we need to perform the conversion from OP_LONG
+     ourselves.  */
+  if ((opcode () == OP_FLOAT || opcode () == OP_LONG) && expect_type != NULL)
+    result = ada_value_cast (expect_type, result);
+
+  return result;
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure
