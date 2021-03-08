@@ -1168,20 +1168,17 @@ rust_compute_range (struct type *type, struct value *range,
 /* A helper for rust_evaluate_subexp that handles BINOP_SUBSCRIPT.  */
 
 static struct value *
-rust_subscript (struct expression *exp, int *pos, enum noside noside,
-		int for_addr)
+rust_subscript (struct type *expect_type, struct expression *exp,
+		enum noside noside, bool for_addr,
+		struct value *lhs, struct value *rhs)
 {
-  struct value *lhs, *rhs, *result;
+  struct value *result;
   struct type *rhstype;
   LONGEST low, high_bound;
   /* Initialized to appease the compiler.  */
   range_flags kind = RANGE_LOW_BOUND_DEFAULT | RANGE_HIGH_BOUND_DEFAULT;
   LONGEST high = 0;
   int want_slice = 0;
-
-  ++*pos;
-  lhs = evaluate_subexp (nullptr, exp, pos, noside);
-  rhs = evaluate_subexp (nullptr, exp, pos, noside);
 
   if (noside == EVAL_SKIP)
     return lhs;
@@ -1374,7 +1371,12 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
       break;
 
     case BINOP_SUBSCRIPT:
-      result = rust_subscript (exp, pos, noside, 0);
+      {
+	++*pos;
+	struct value *lhs = evaluate_subexp (nullptr, exp, pos, noside);
+	struct value *rhs = evaluate_subexp (nullptr, exp, pos, noside);
+	result = rust_subscript (expect_type, exp, noside, false, lhs, rhs);
+      }
       break;
 
     case OP_FUNCALL:
@@ -1628,7 +1630,11 @@ tuple structs, and tuple-like enum variants"));
       if (exp->elts[*pos + 1].opcode == BINOP_SUBSCRIPT)
 	{
 	  ++*pos;
-	  result = rust_subscript (exp, pos, noside, 1);
+	  ++*pos;
+	  struct value *lhs = evaluate_subexp (nullptr, exp, pos, noside);
+	  struct value *rhs = evaluate_subexp (nullptr, exp, pos, noside);
+
+	  result = rust_subscript (expect_type, exp, noside, true, lhs, rhs);
 	  break;
 	}
       /* Fall through.  */
