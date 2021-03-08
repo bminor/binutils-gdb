@@ -1,5 +1,13 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* f-lang.c (eval_op_f_abs, eval_op_f_mod, eval_op_f_ceil)
+	(eval_op_f_floor, eval_op_f_modulo, eval_op_f_cmplx)
+	(eval_op_f_kind): No longer static.  Add "opcode" parameter.
+	(evaluate_subexp_f): Update.
+	* f-exp.h: New file.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_ternop_range_operation::evaluate): New method.
 	* ada-exp.h (class ada_ternop_range_operation): New.
 

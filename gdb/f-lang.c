@@ -38,6 +38,7 @@
 #include "gdbarch.h"
 #include "gdbcmd.h"
 #include "f-array-walker.h"
+#include "f-exp.h"
 
 #include <math.h>
 
@@ -993,9 +994,10 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
 
 /* A helper function for UNOP_ABS.  */
 
-static struct value *
+struct value *
 eval_op_f_abs (struct type *expect_type, struct expression *exp,
 	       enum noside noside,
+	       enum exp_opcode opcode,
 	       struct value *arg1)
 {
   if (noside == EVAL_SKIP)
@@ -1022,9 +1024,10 @@ eval_op_f_abs (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_MOD.  */
 
-static struct value *
+struct value *
 eval_op_f_mod (struct type *expect_type, struct expression *exp,
 	       enum noside noside,
+	       enum exp_opcode opcode,
 	       struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_SKIP)
@@ -1060,9 +1063,10 @@ eval_op_f_mod (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_FORTRAN_CEILING.  */
 
-static struct value *
+struct value *
 eval_op_f_ceil (struct type *expect_type, struct expression *exp,
 		enum noside noside,
+		enum exp_opcode opcode,
 		struct value *arg1)
 {
   if (noside == EVAL_SKIP)
@@ -1079,9 +1083,10 @@ eval_op_f_ceil (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_FORTRAN_FLOOR.  */
 
-static struct value *
+struct value *
 eval_op_f_floor (struct type *expect_type, struct expression *exp,
 		 enum noside noside,
+		 enum exp_opcode opcode,
 		 struct value *arg1)
 {
   if (noside == EVAL_SKIP)
@@ -1098,9 +1103,10 @@ eval_op_f_floor (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_FORTRAN_MODULO.  */
 
-static struct value *
+struct value *
 eval_op_f_modulo (struct type *expect_type, struct expression *exp,
 		  enum noside noside,
+		  enum exp_opcode opcode,
 		  struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_SKIP)
@@ -1139,9 +1145,10 @@ eval_op_f_modulo (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_FORTRAN_CMPLX.  */
 
-static struct value *
+struct value *
 eval_op_f_cmplx (struct type *expect_type, struct expression *exp,
 		 enum noside noside,
+		 enum exp_opcode opcode,
 		 struct value *arg1, struct value *arg2)
 {
   if (noside == EVAL_SKIP)
@@ -1152,9 +1159,10 @@ eval_op_f_cmplx (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_FORTRAN_KIND.  */
 
-static struct value *
+struct value *
 eval_op_f_kind (struct type *expect_type, struct expression *exp,
 		enum noside noside,
+		enum exp_opcode opcode,
 		struct value *arg1)
 {
   struct type *type = value_type (arg1);
@@ -1214,20 +1222,20 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
     case UNOP_ABS:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      return eval_op_f_abs (expect_type, exp, noside, arg1);
+      return eval_op_f_abs (expect_type, exp, noside, op, arg1);
 
     case BINOP_MOD:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-      return eval_op_f_mod (expect_type, exp, noside, arg1, arg2);
+      return eval_op_f_mod (expect_type, exp, noside, op, arg1, arg2);
 
     case UNOP_FORTRAN_CEILING:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      return eval_op_f_ceil (expect_type, exp, noside, arg1);
+      return eval_op_f_ceil (expect_type, exp, noside, op, arg1);
 
     case UNOP_FORTRAN_FLOOR:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      return eval_op_f_floor (expect_type, exp, noside, arg1);
+      return eval_op_f_floor (expect_type, exp, noside, op, arg1);
 
     case UNOP_FORTRAN_ALLOCATED:
       {
@@ -1240,7 +1248,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
     case BINOP_FORTRAN_MODULO:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-      return eval_op_f_modulo (expect_type, exp, noside, arg1, arg2);
+      return eval_op_f_modulo (expect_type, exp, noside, op, arg1, arg2);
 
     case FORTRAN_LBOUND:
     case FORTRAN_UBOUND:
@@ -1305,11 +1313,11 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
     case BINOP_FORTRAN_CMPLX:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-      return eval_op_f_cmplx (expect_type, exp, noside, arg1, arg2);
+      return eval_op_f_cmplx (expect_type, exp, noside, op, arg1, arg2);
 
     case UNOP_FORTRAN_KIND:
       arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-      return eval_op_f_kind (expect_type, exp, noside, arg1);
+      return eval_op_f_kind (expect_type, exp, noside, op, arg1);
 
     case OP_F77_UNDETERMINED_ARGLIST:
       /* Remember that in F77, functions, substring ops and array subscript
