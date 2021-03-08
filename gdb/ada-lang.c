@@ -9960,6 +9960,20 @@ eval_ternop_in_range (struct type *expect_type, struct expression *exp,
 			    || value_equal (arg2, arg1)));
 }
 
+/* A helper function for UNOP_NEG.  */
+
+static value *
+ada_unop_neg (struct type *expect_type,
+	      struct expression *exp,
+	      enum noside noside, enum exp_opcode op,
+	      struct value *arg1)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+  return value_neg (arg1);
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10150,13 +10164,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case UNOP_NEG:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      else
-	{
-	  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
-	  return value_neg (arg1);
-	}
+      return ada_unop_neg (expect_type, exp, noside, op, arg1);
 
     case BINOP_LOGICAL_AND:
     case BINOP_LOGICAL_OR:
