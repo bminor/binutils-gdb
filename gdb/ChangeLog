@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (gen_expr_binop, gen_expr_structop): Declare.
+	* ax-gdb.c (gen_expr_binop): New function.
+	(gen_expr_structop): Likewise.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expprint.c (expr::dump_for_expression): New functions.
 	* expop.h (dump_for_expression): New overloads.
 	(tuple_holding_operation::dump, tuple_holding_operation::do_dump):

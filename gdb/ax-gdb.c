@@ -45,6 +45,7 @@
 #include "typeprint.h"
 #include "valprint.h"
 #include "c-lang.h"
+#include "expop.h"
 
 #include "gdbsupport/format.h"
 
@@ -154,6 +155,12 @@ static void gen_sizeof (struct expression *exp, union exp_element **pc,
 			struct type *size_type);
 static void gen_expr_binop_rest (struct expression *exp,
 				 enum exp_opcode op, union exp_element **pc,
+				 struct agent_expr *ax,
+				 struct axs_value *value,
+				 struct axs_value *value1,
+				 struct axs_value *value2);
+static void gen_expr_binop_rest (struct expression *exp,
+				 enum exp_opcode op,
 				 struct agent_expr *ax,
 				 struct axs_value *value,
 				 struct axs_value *value1,
@@ -2457,6 +2464,45 @@ gen_expr_binop_rest (struct expression *exp,
 {
   gen_expr (exp, pc, ax, value2);
   gen_expr_binop_rest (exp, op, ax, value, value1, value2);
+}
+
+/* A helper function that emits a binop based on two operations.  */
+
+void
+gen_expr_binop (struct expression *exp,
+		enum exp_opcode op,
+		expr::operation *lhs, expr::operation *rhs,
+		struct agent_expr *ax, struct axs_value *value)
+{
+  struct axs_value value1, value2;
+
+  lhs->generate_ax (exp, ax, &value1);
+  gen_usual_unary (ax, &value1);
+  rhs->generate_ax (exp, ax, &value2);
+  gen_expr_binop_rest (exp, op, ax, value, &value1, &value2);
+}
+
+/* A helper function that emits a structop based on an operation and a
+   member name.  */
+
+void
+gen_expr_structop (struct expression *exp,
+		   enum exp_opcode op,
+		   expr::operation *lhs,
+		   const char *name,
+		   struct agent_expr *ax, struct axs_value *value)
+{
+  lhs->generate_ax (exp, ax, value);
+  if (op == STRUCTOP_STRUCT)
+    gen_struct_ref (ax, value, name, ".", "structure or union");
+  else if (op == STRUCTOP_PTR)
+    gen_struct_ref (ax, value, name, "->",
+		    "pointer to a structure or union");
+  else
+    /* If this `if' chain doesn't handle it, then the case list
+       shouldn't mention it, and we shouldn't be here.  */
+    internal_error (__FILE__, __LINE__,
+		    _("gen_expr: unhandled struct case"));
 }
 
 

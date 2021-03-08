@@ -31,6 +31,16 @@
 struct agent_expr;
 struct axs_value;
 
+extern void gen_expr_binop (struct expression *exp,
+			    enum exp_opcode op,
+			    expr::operation *lhs, expr::operation *rhs,
+			    struct agent_expr *ax, struct axs_value *value);
+extern void gen_expr_structop (struct expression *exp,
+			       enum exp_opcode op,
+			       expr::operation *lhs,
+			       const char *name,
+			       struct agent_expr *ax, struct axs_value *value);
+
 namespace expr
 {
 
