@@ -28,10 +28,11 @@
 #include "c-lang.h"
 #include "valprint.h"
 #include "gdbarch.h"
+#include "m2-exp.h"
 
 /* A helper function for UNOP_HIGH.  */
 
-static struct value *
+struct value *
 eval_op_m2_high (struct type *expect_type, struct expression *exp,
 		 enum noside noside,
 		 struct value *arg1)
@@ -62,7 +63,7 @@ eval_op_m2_high (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_SUBSCRIPT.  */
 
-static struct value *
+struct value *
 eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
 		      enum noside noside,
 		      struct value *arg1, struct value *arg2)

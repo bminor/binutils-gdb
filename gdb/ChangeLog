@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* m2-lang.c (eval_op_m2_high, eval_op_m2_subscript): No longer
+	static.
+	* m2-exp.h: New file.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_aggregate_operation::evaluate): New method.
 	* rust-exp.h (class rust_aggregate_operation): New.
 
