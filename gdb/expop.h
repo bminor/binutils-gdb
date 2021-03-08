@@ -189,6 +189,10 @@ extern struct value *eval_op_ind (struct type *expect_type,
 extern struct value *eval_op_type (struct type *expect_type,
 				   struct expression *exp,
 				   enum noside noside, struct type *type);
+extern struct value *eval_op_alignof (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside,
+				      struct value *arg1);
 
 namespace expr
 {
@@ -1609,6 +1613,27 @@ protected:
 		       struct axs_value *value,
 		       struct type *cast_type)
     override;
+};
+
+/* Implement 'alignof'.  */
+class unop_alignof_operation
+  : public maybe_constant_operation<operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						    EVAL_AVOID_SIDE_EFFECTS);
+    return eval_op_alignof (expect_type, exp, noside, val);
+  }
+
+  enum exp_opcode opcode () const override
+  { return UNOP_ALIGNOF; }
 };
 
 } /* namespace expr */

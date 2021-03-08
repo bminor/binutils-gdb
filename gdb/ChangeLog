@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class unop_alignof_operation): New.
+	* eval.c (eval_op_alignof): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class unop_sizeof_operation): New.
 	* ax-gdb.c (unop_sizeof_operation::do_generate_ax): New method.
 

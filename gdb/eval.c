@@ -1881,7 +1881,7 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_ALIGNOF.  */
 
-static struct value *
+struct value *
 eval_op_alignof (struct type *expect_type, struct expression *exp,
 		 enum noside noside,
 		 struct value *arg1)
