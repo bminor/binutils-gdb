@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_binop_minmax): New function.
+	(ada_evaluate_subexp): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_unop_atr): New function.
 	(ada_evaluate_subexp): Use it.
 

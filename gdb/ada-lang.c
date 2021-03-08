@@ -10345,6 +10345,24 @@ ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
     }
 }
 
+/* A helper function for OP_ATR_MIN and OP_ATR_MAX.  */
+
+static struct value *
+ada_binop_minmax (struct type *expect_type,
+		  struct expression *exp,
+		  enum noside noside, enum exp_opcode op,
+		  struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (value_type (arg1), not_lval);
+  else
+    {
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      return value_binop (arg1, arg2,
+			  op == OP_ATR_MIN ? BINOP_MIN : BINOP_MAX);
+    }
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10861,14 +10879,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (value_type (arg1), not_lval);
-      else
-	{
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  return value_binop (arg1, arg2,
-			      op == OP_ATR_MIN ? BINOP_MIN : BINOP_MAX);
-	}
+      return ada_binop_minmax (expect_type, exp, noside, op, arg1, arg2);
 
     case OP_ATR_MODULUS:
       {
