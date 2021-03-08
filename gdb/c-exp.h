@@ -203,6 +203,22 @@ public:
   { return std::get<0> (m_storage); }
 };
 
+/* The ?: ternary operator for OpenCL.  */
+class opencl_ternop_cond_operation
+  : public tuple_holding_operation<operation_up, operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return TERNOP_COND; }
+};
+
 }/* namespace expr */
 
 #endif /* C_EXP_H */

@@ -1032,6 +1032,91 @@ opencl_logical_binop_operation::evaluate (struct type *expect_type,
     }
 }
 
+value *
+opencl_ternop_cond_operation::evaluate (struct type *expect_type,
+					struct expression *exp,
+					enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type1 = check_typedef (value_type (arg1));
+  if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
+    {
+      struct value *arg2, *arg3, *tmp, *ret;
+      struct type *eltype2, *type2, *type3, *eltype3;
+      int t2_is_vec, t3_is_vec, i;
+      LONGEST lowb1, lowb2, lowb3, highb1, highb2, highb3;
+
+      arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+      arg3 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+      type2 = check_typedef (value_type (arg2));
+      type3 = check_typedef (value_type (arg3));
+      t2_is_vec
+	= type2->code () == TYPE_CODE_ARRAY && type2->is_vector ();
+      t3_is_vec
+	= type3->code () == TYPE_CODE_ARRAY && type3->is_vector ();
+
+      /* Widen the scalar operand to a vector if necessary.  */
+      if (t2_is_vec || !t3_is_vec)
+	{
+	  arg3 = opencl_value_cast (type2, arg3);
+	  type3 = value_type (arg3);
+	}
+      else if (!t2_is_vec || t3_is_vec)
+	{
+	  arg2 = opencl_value_cast (type3, arg2);
+	  type2 = value_type (arg2);
+	}
+      else if (!t2_is_vec || !t3_is_vec)
+	{
+	  /* Throw an error if arg2 or arg3 aren't vectors.  */
+	  error (_("\
+Cannot perform conditional operation on incompatible types"));
+	}
+
+      eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
+      eltype3 = check_typedef (TYPE_TARGET_TYPE (type3));
+
+      if (!get_array_bounds (type1, &lowb1, &highb1)
+	  || !get_array_bounds (type2, &lowb2, &highb2)
+	  || !get_array_bounds (type3, &lowb3, &highb3))
+	error (_("Could not determine the vector bounds"));
+
+      /* Throw an error if the types of arg2 or arg3 are incompatible.  */
+      if (eltype2->code () != eltype3->code ()
+	  || TYPE_LENGTH (eltype2) != TYPE_LENGTH (eltype3)
+	  || eltype2->is_unsigned () != eltype3->is_unsigned ()
+	  || lowb2 != lowb3 || highb2 != highb3)
+	error (_("\
+Cannot perform operation on vectors with different types"));
+
+      /* Throw an error if the sizes of arg1 and arg2/arg3 differ.  */
+      if (lowb1 != lowb2 || lowb1 != lowb3
+	  || highb1 != highb2 || highb1 != highb3)
+	error (_("\
+Cannot perform conditional operation on vectors with different sizes"));
+
+      ret = allocate_value (type2);
+
+      for (i = 0; i < highb1 - lowb1 + 1; i++)
+	{
+	  tmp = value_logical_not (value_subscript (arg1, i)) ?
+	    value_subscript (arg3, i) : value_subscript (arg2, i);
+	  memcpy (value_contents_writeable (ret) +
+		  i * TYPE_LENGTH (eltype2), value_contents_all (tmp),
+		  TYPE_LENGTH (eltype2));
+	}
+
+      return ret;
+    }
+  else
+    {
+      if (value_logical_not (arg1))
+	return std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+      else
+	return std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    }
+}
+
 } /* namespace expr */
 
 const struct exp_descriptor exp_descriptor_opencl =

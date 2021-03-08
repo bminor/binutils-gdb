@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* opencl-lang.c (opencl_ternop_cond_operation::evaluate): New
+	method.
+	* c-exp.h (class opencl_ternop_cond_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* opencl-lang.c (opencl_logical_binop_operation::evaluate): New
 	method.
 	* c-exp.h (class opencl_logical_binop_operation): New.
