@@ -1878,6 +1878,22 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
   return value_ind (arg1);
 }
 
+/* A helper function for UNOP_ALIGNOF.  */
+
+static struct value *
+eval_op_alignof (struct type *expect_type, struct expression *exp,
+		 enum noside noside,
+		 struct value *arg1)
+{
+  struct type *type = value_type (arg1);
+  /* FIXME: This should be size_t.  */
+  struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
+  ULONGEST align = type_align (type);
+  if (align == 0)
+    error (_("could not determine alignment of type"));
+  return value_from_longest (size_type, align);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2769,16 +2785,8 @@ evaluate_subexp_standard (struct type *expect_type,
       return evaluate_subexp_for_sizeof (exp, pos, noside);
 
     case UNOP_ALIGNOF:
-      {
-	type = value_type (
-	  evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS));
-	/* FIXME: This should be size_t.  */
-	struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
-	ULONGEST align = type_align (type);
-	if (align == 0)
-	  error (_("could not determine alignment of type"));
-	return value_from_longest (size_type, align);
-      }
+      arg1 = evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+      return eval_op_alignof (expect_type, exp, noside, arg1);
 
     case UNOP_CAST:
       (*pos) += 2;
