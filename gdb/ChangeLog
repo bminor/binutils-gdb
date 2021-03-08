@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class type_operation): New.
+	* eval.c (eval_op_type): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class unop_ind_base_operation)
 	(class unop_ind_operation): New.
 	* eval.c (eval_op_ind): No longer static.  Remove "op" parameter.

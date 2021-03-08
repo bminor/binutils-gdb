@@ -2042,7 +2042,7 @@ eval_op_postdec (struct type *expect_type, struct expression *exp,
 
 /* A helper function for OP_TYPE.  */
 
-static struct value *
+struct value *
 eval_op_type (struct type *expect_type, struct expression *exp,
 	      enum noside noside, struct type *type)
 {

@@ -186,6 +186,9 @@ extern struct value *eval_op_ind (struct type *expect_type,
 				  struct expression *exp,
 				  enum noside noside,
 				  struct value *arg1);
+extern struct value *eval_op_type (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside, struct type *type);
 
 namespace expr
 {
@@ -1418,6 +1421,28 @@ protected:
 		   std::get<0> (this->m_storage).get (),
 		   ax, value);
   }
+};
+
+/* Implement OP_TYPE.  */
+class type_operation
+  : public tuple_holding_operation<struct type *>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return eval_op_type (expect_type, exp, noside, std::get<0> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_TYPE; }
+
+  bool constant_p () const override
+  { return true; }
 };
 
 } /* namespace expr */
