@@ -10436,6 +10436,17 @@ ada_qual_operation::evaluate (struct type *expect_type,
   return std::get<0> (m_storage)->evaluate (type, exp, noside);
 }
 
+value *
+ada_ternop_range_operation::evaluate (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside)
+{
+  value *arg0 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  value *arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+  return eval_ternop_in_range (expect_type, exp, noside, arg0, arg1, arg2);
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure

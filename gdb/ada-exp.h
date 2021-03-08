@@ -71,6 +71,22 @@ public:
   { return UNOP_QUAL; }
 };
 
+/* Ternary in-range operator.  */
+class ada_ternop_range_operation
+  : public tuple_holding_operation<operation_up, operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return TERNOP_IN_RANGE; }
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */
