@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* parser-defs.h (struct expr_completion_state) <expout_last_op>:
+	New member.
+	(struct parser_state) <mark_struct_expression>: New method.
+	* parse.c (parser_state::mark_struct_expression): Update assert.
+	(parser_state::mark_struct_expression): New method.
+	(parser_state::mark_completion_tag): Update assert.
+	(parse_expression_for_completion): Handle expout_last_op.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-exp.h (class ada_var_value_operation) <get_symbol>: Remove;
 	now in superclass.
 	* value.h (fetch_subexp_value): Add "op" parameter.

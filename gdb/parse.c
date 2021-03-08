@@ -507,8 +507,21 @@ parser_state::mark_struct_expression ()
 {
   gdb_assert (parse_completion
 	      && (m_completion_state.expout_tag_completion_type
-		  == TYPE_CODE_UNDEF));
+		  == TYPE_CODE_UNDEF)
+	      && m_completion_state.expout_last_op == nullptr);
   m_completion_state.expout_last_struct = expout_ptr;
+}
+
+/* See parser-defs.h.  */
+
+void
+parser_state::mark_struct_expression (expr::structop_base_operation *op)
+{
+  gdb_assert (parse_completion
+	      && (m_completion_state.expout_tag_completion_type
+		  == TYPE_CODE_UNDEF)
+	      && m_completion_state.expout_last_struct == -1);
+  m_completion_state.expout_last_op = op;
 }
 
 /* Indicate that the current parser invocation is completing a tag.
@@ -523,7 +536,8 @@ parser_state::mark_completion_tag (enum type_code tag, const char *ptr,
 	      && (m_completion_state.expout_tag_completion_type
 		  == TYPE_CODE_UNDEF)
 	      && m_completion_state.expout_completion_name == NULL
-	      && m_completion_state.expout_last_struct == -1);
+	      && m_completion_state.expout_last_struct == -1
+	      && m_completion_state.expout_last_op == nullptr);
   gdb_assert (tag == TYPE_CODE_UNION
 	      || tag == TYPE_CODE_STRUCT
 	      || tag == TYPE_CODE_ENUM);
@@ -1260,6 +1274,14 @@ parse_expression_for_completion (const char *string,
       *code = cstate.expout_tag_completion_type;
       *name = std::move (cstate.expout_completion_name);
       return NULL;
+    }
+
+  if (cstate.expout_last_op != nullptr)
+    {
+      expr::structop_base_operation *op = cstate.expout_last_op;
+      const std::string &fld = op->get_string ();
+      *name = make_unique_xstrdup (fld.c_str ());
+      return value_type (op->evaluate_lhs (exp.get ()));
     }
 
   if (cstate.expout_last_struct == -1)

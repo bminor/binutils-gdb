@@ -25,6 +25,7 @@
 
 #include "expression.h"
 #include "symtab.h"
+#include "expop.h"
 
 struct block;
 struct language_defn;
@@ -93,6 +94,11 @@ struct expr_completion_state
      field name.  It is -1 if no dereference operation was found.  */
   int expout_last_struct = -1;
 
+  /* The last struct expression directly before a '.' or '->'.  This
+     is set when parsing and is only used when completing a field
+     name.  It is nullptr if no dereference operation was found.  */
+  expr::structop_base_operation *expout_last_op = nullptr;
+
   /* If we are completing a tagged type name, this will be nonzero.  */
   enum type_code expout_tag_completion_type = TYPE_CODE_UNDEF;
 
@@ -155,6 +161,11 @@ struct parser_state : public expr_builder
      expression.  This is used when completing on field names.  */
 
   void mark_struct_expression ();
+
+  /* Mark the given operation as the starting location of a structure
+     expression.  This is used when completing on field names.  */
+
+  void mark_struct_expression (expr::structop_base_operation *op);
 
   /* Indicate that the current parser invocation is completing a tag.
      TAG is the type code of the tag, and PTR and LENGTH represent the
