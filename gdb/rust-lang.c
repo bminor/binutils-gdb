@@ -1449,6 +1449,55 @@ eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
 tuple structs, and tuple-like enum variants"));
 }
 
+/* A helper function for STRUCTOP_STRUCT.  */
+
+static struct value *
+eval_op_rust_structop (struct type *expect_type, struct expression *exp,
+		       enum noside noside,
+		       struct value *lhs, const char *field_name)
+{
+  struct value *result;
+  struct type *type = value_type (lhs);
+  if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
+    {
+      gdb::array_view<const gdb_byte> view (value_contents (lhs),
+					    TYPE_LENGTH (type));
+      type = resolve_dynamic_type (type, view, value_address (lhs));
+
+      if (rust_empty_enum_p (type))
+	error (_("Cannot access field %s of empty enum %s"),
+	       field_name, type->name ());
+
+      int fieldno = rust_enum_variant (type);
+      lhs = value_primitive_field (lhs, 0, fieldno, type);
+
+      struct type *outer_type = type;
+      type = value_type (lhs);
+      if (rust_tuple_type_p (type) || rust_tuple_struct_type_p (type))
+	error (_("Attempting to access named field %s of tuple "
+		 "variant %s::%s, which has only anonymous fields"),
+	       field_name, outer_type->name (),
+	       rust_last_path_segment (type->name ()));
+
+      try
+	{
+	  result = value_struct_elt (&lhs, NULL, field_name,
+				     NULL, "structure");
+	}
+      catch (const gdb_exception_error &except)
+	{
+	  error (_("Could not find field %s of struct variant %s::%s"),
+		 field_name, outer_type->name (),
+		 rust_last_path_segment (type->name ()));
+	}
+    }
+  else
+    result = value_struct_elt (&lhs, NULL, field_name, NULL, "structure");
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    result = value_zero (value_type (result), VALUE_LVAL (result));
+  return result;
+}
+
 /* evaluate_exp implementation for Rust.  */
 
 static struct value *
@@ -1595,7 +1644,6 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case STRUCTOP_STRUCT:
       {
 	struct value *lhs;
-	struct type *type;
 	int tem, pc;
 
 	pc = (*pos)++;
@@ -1604,44 +1652,8 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	lhs = evaluate_subexp (nullptr, exp, pos, noside);
 
 	const char *field_name = &exp->elts[pc + 2].string;
-	type = value_type (lhs);
-	if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
-	  {
-	    gdb::array_view<const gdb_byte> view (value_contents (lhs),
-						  TYPE_LENGTH (type));
-	    type = resolve_dynamic_type (type, view, value_address (lhs));
-
-	    if (rust_empty_enum_p (type))
-	      error (_("Cannot access field %s of empty enum %s"),
-		     field_name, type->name ());
-
-	    int fieldno = rust_enum_variant (type);
-	    lhs = value_primitive_field (lhs, 0, fieldno, type);
-
-	    struct type *outer_type = type;
-	    type = value_type (lhs);
-	    if (rust_tuple_type_p (type) || rust_tuple_struct_type_p (type))
-		error (_("Attempting to access named field %s of tuple "
-			 "variant %s::%s, which has only anonymous fields"),
-		       field_name, outer_type->name (),
-		       rust_last_path_segment (type->name ()));
-
-	    try
-	      {
-		result = value_struct_elt (&lhs, NULL, field_name,
-					   NULL, "structure");
-	      }
-	    catch (const gdb_exception_error &except)
-	      {
-		error (_("Could not find field %s of struct variant %s::%s"),
-		       field_name, outer_type->name (),
-		       rust_last_path_segment (type->name ()));
-	      }
-	  }
-	else
-	  result = value_struct_elt (&lhs, NULL, field_name, NULL, "structure");
-	if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	  result = value_zero (value_type (result), VALUE_LVAL (result));
+	return eval_op_rust_structop (expect_type, exp, noside, lhs,
+				      field_name);
       }
       break;
 
