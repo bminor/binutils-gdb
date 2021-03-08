@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class adl_func_operation): New.
+	* eval.c (adl_func_operation::evaluate): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_unop_in_range): No longer static.
 	* ada-exp.h (class ada_unop_range_operation): New.
 

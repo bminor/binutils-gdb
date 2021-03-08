@@ -2030,6 +2030,25 @@ protected:
     override;
 };
 
+/* This class implements ADL (aka Koenig) function calls for C++.  It
+   holds the name of the function to call, the block in which the
+   lookup should be done, and a vector of arguments.  */
+class adl_func_operation
+  : public tuple_holding_operation<std::string, const block *,
+				   std::vector<operation_up>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_ADL_FUNC; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

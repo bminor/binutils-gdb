@@ -2549,6 +2549,29 @@ logical_or_operation::evaluate (struct type *expect_type,
     }
 }
 
+value *
+adl_func_operation::evaluate (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside)
+{
+  std::vector<operation_up> &arg_ops = std::get<2> (m_storage);
+  std::vector<value *> args (arg_ops.size ());
+  for (int i = 0; i < arg_ops.size (); ++i)
+    args[i] = arg_ops[i]->evaluate_with_coercion (exp, noside);
+
+  struct symbol *symp;
+  find_overload_match (args, std::get<0> (m_storage).c_str (),
+		       NON_METHOD,
+		       nullptr, nullptr,
+		       nullptr, &symp, nullptr, 0, noside);
+  if (SYMBOL_TYPE (symp)->code () == TYPE_CODE_ERROR)
+    error_unknown_type (symp->print_name ());
+  value *callee = evaluate_var_value (noside, std::get<1> (m_storage), symp);
+  return evaluate_subexp_do_call (exp, noside, callee, args,
+				  nullptr, expect_type);
+
+}
+
 }
 
 struct value *
