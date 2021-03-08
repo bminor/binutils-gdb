@@ -1382,6 +1382,73 @@ eval_op_rust_array (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for STRUCTOP_ANONYMOUS.  */
+
+static struct value *
+eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
+			  enum noside noside,
+			  int field_number, struct value *lhs)
+{
+  struct type *type = value_type (lhs);
+
+  if (type->code () == TYPE_CODE_STRUCT)
+    {
+      struct type *outer_type = NULL;
+
+      if (rust_enum_p (type))
+	{
+	  gdb::array_view<const gdb_byte> view (value_contents (lhs),
+						TYPE_LENGTH (type));
+	  type = resolve_dynamic_type (type, view, value_address (lhs));
+
+	  if (rust_empty_enum_p (type))
+	    error (_("Cannot access field %d of empty enum %s"),
+		   field_number, type->name ());
+
+	  int fieldno = rust_enum_variant (type);
+	  lhs = value_primitive_field (lhs, 0, fieldno, type);
+	  outer_type = type;
+	  type = value_type (lhs);
+	}
+
+      /* Tuples and tuple structs */
+      int nfields = type->num_fields ();
+
+      if (field_number >= nfields || field_number < 0)
+	{
+	  if (outer_type != NULL)
+	    error(_("Cannot access field %d of variant %s::%s, "
+		    "there are only %d fields"),
+		  field_number, outer_type->name (),
+		  rust_last_path_segment (type->name ()),
+		  nfields);
+	  else
+	    error(_("Cannot access field %d of %s, "
+		    "there are only %d fields"),
+		  field_number, type->name (), nfields);
+	}
+
+      /* Tuples are tuple structs too.  */
+      if (!rust_tuple_struct_type_p (type))
+	{
+	  if (outer_type != NULL)
+	    error(_("Variant %s::%s is not a tuple variant"),
+		  outer_type->name (),
+		  rust_last_path_segment (type->name ()));
+	  else
+	    error(_("Attempting to access anonymous field %d "
+		    "of %s, which is not a tuple, tuple struct, or "
+		    "tuple-like variant"),
+		  field_number, type->name ());
+	}
+
+      return value_primitive_field (lhs, 0, field_number, type);
+    }
+  else
+    error(_("Anonymous field access is only allowed on tuples, \
+tuple structs, and tuple-like enum variants"));
+}
+
 /* evaluate_exp implementation for Rust.  */
 
 static struct value *
@@ -1513,72 +1580,15 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
       {
 	/* Anonymous field access, i.e. foo.1.  */
 	struct value *lhs;
-	int pc, field_number, nfields;
-	struct type *type;
+	int pc, field_number;
 
 	pc = (*pos)++;
 	field_number = longest_to_int (exp->elts[pc + 1].longconst);
 	(*pos) += 2;
 	lhs = evaluate_subexp (nullptr, exp, pos, noside);
 
-	type = value_type (lhs);
-
-	if (type->code () == TYPE_CODE_STRUCT)
-	  {
-	    struct type *outer_type = NULL;
-
-	    if (rust_enum_p (type))
-	      {
-		gdb::array_view<const gdb_byte> view (value_contents (lhs),
-						      TYPE_LENGTH (type));
-		type = resolve_dynamic_type (type, view, value_address (lhs));
-
-		if (rust_empty_enum_p (type))
-		  error (_("Cannot access field %d of empty enum %s"),
-			 field_number, type->name ());
-
-		int fieldno = rust_enum_variant (type);
-		lhs = value_primitive_field (lhs, 0, fieldno, type);
-		outer_type = type;
-		type = value_type (lhs);
-	      }
-
-	    /* Tuples and tuple structs */
-	    nfields = type->num_fields ();
-
-	    if (field_number >= nfields || field_number < 0)
-	      {
-		if (outer_type != NULL)
-		  error(_("Cannot access field %d of variant %s::%s, "
-			  "there are only %d fields"),
-			field_number, outer_type->name (),
-			rust_last_path_segment (type->name ()),
-			nfields);
-		else
-		  error(_("Cannot access field %d of %s, "
-			  "there are only %d fields"),
-			field_number, type->name (), nfields);
-	      }
-
-	    /* Tuples are tuple structs too.  */
-	    if (!rust_tuple_struct_type_p (type))
-	      {
-		if (outer_type != NULL)
-		  error(_("Variant %s::%s is not a tuple variant"),
-			outer_type->name (),
-			rust_last_path_segment (type->name ()));
-		else
-		  error(_("Attempting to access anonymous field %d "
-			  "of %s, which is not a tuple, tuple struct, or "
-			  "tuple-like variant"),
-		      field_number, type->name ());
-	      }
-
-	    result = value_primitive_field (lhs, 0, field_number, type);
-	  }
-	else
-	  error(_("Anonymous field access is only allowed on tuples, \
-tuple structs, and tuple-like enum variants"));
+	return eval_op_rust_struct_anon (expect_type, exp, noside,
+					 field_number, lhs);
       }
       break;
 
