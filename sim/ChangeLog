@@ -1,3 +1,8 @@
+2021-03-08  Tom Tromey  <tromey@adacore.com>
+
+	* aclocal.m4, configure, Makefile.in: Rebuild.
+	* configure.ac: Use AM_MAINTAINER_MODE.
+
 2021-03-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CONFIG_FILES): Delete testsuite/Makefile.
