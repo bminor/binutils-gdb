@@ -386,14 +386,6 @@ go_language::demangle_symbol (const char *mangled_name, int options) const
   return result;
 }
 
-/* See language.h.  */
-
-const struct exp_descriptor *
-go_language::expression_ops () const
-{
-  return &exp_descriptor_c;
-}
-
 /* Given a Go symbol, return its package or NULL if unknown.
    Space for the result is malloc'd, caller must free.  */
 

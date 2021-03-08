@@ -1,5 +1,18 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* go-lang.c (go_language::expression_ops): Don't declare.
+	* go-lang.h (class go_language) <expression_ops>: Remove.
+	* opencl-lang.c (evaluate_subexp_opencl, exp_descriptor_opencl):
+	Remove.
+	(class opencl_language) <expression_ops>: Remove.
+	* d-lang.c (class d_language) <expression_ops>: Remove.
+	* c-lang.h (evaluate_subexp_c, exp_descriptor_c): Don't declare.
+	* c-lang.c (evaluate_subexp_c, exp_descriptor_c): Remove.
+	(class c_language, class cplus_language, class asm_language)
+	(class minimal_language) <expression_ops>: Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (resolve_subexp, replace_operator_with_call)
 	(evaluate_subexp_type, assign_aggregate)
 	(aggregate_assign_positional, aggregate_assign_from_choices)

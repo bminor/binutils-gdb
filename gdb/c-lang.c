@@ -579,157 +579,6 @@ parse_one_string (struct obstack *output, const char *data, int len,
     }
 }
 
-/* Expression evaluator for the C language family.  Most operations
-   are delegated to evaluate_subexp_standard; see that function for a
-   description of the arguments.  */
-
-struct value *
-evaluate_subexp_c (struct type *expect_type, struct expression *exp,
-		   int *pos, enum noside noside)
-{
-  enum exp_opcode op = exp->elts[*pos].opcode;
-
-  switch (op)
-    {
-    case OP_STRING:
-      {
-	int oplen, limit;
-	struct type *type;
-	struct value *result;
-	c_string_type dest_type;
-	const char *dest_charset;
-	int satisfy_expected = 0;
-
-	auto_obstack output;
-
-	++*pos;
-	oplen = longest_to_int (exp->elts[*pos].longconst);
-
-	++*pos;
-	limit = *pos + BYTES_TO_EXP_ELEM (oplen + 1);
-	dest_type = ((enum c_string_type_values)
-		     longest_to_int (exp->elts[*pos].longconst));
-	switch (dest_type & ~C_CHAR)
-	  {
-	  case C_STRING:
-	    type = language_string_char_type (exp->language_defn,
-					      exp->gdbarch);
-	    break;
-	  case C_WIDE_STRING:
-	    type = lookup_typename (exp->language_defn, "wchar_t", NULL, 0);
-	    break;
-	  case C_STRING_16:
-	    type = lookup_typename (exp->language_defn, "char16_t", NULL, 0);
-	    break;
-	  case C_STRING_32:
-	    type = lookup_typename (exp->language_defn, "char32_t", NULL, 0);
-	    break;
-	  default:
-	    internal_error (__FILE__, __LINE__, _("unhandled c_string_type"));
-	  }
-
-	/* Ensure TYPE_LENGTH is valid for TYPE.  */
-	check_typedef (type);
-
-	/* If the caller expects an array of some integral type,
-	   satisfy them.  If something odder is expected, rely on the
-	   caller to cast.  */
-	if (expect_type && expect_type->code () == TYPE_CODE_ARRAY)
-	  {
-	    struct type *element_type
-	      = check_typedef (TYPE_TARGET_TYPE (expect_type));
-
-	    if (element_type->code () == TYPE_CODE_INT
-		|| element_type->code () == TYPE_CODE_CHAR)
-	      {
-		type = element_type;
-		satisfy_expected = 1;
-	      }
-	  }
-
-	dest_charset = charset_for_string_type (dest_type, exp->gdbarch);
-
-	++*pos;
-	while (*pos < limit)
-	  {
-	    int len;
-
-	    len = longest_to_int (exp->elts[*pos].longconst);
-
-	    ++*pos;
-	    if (noside != EVAL_SKIP)
-	      parse_one_string (&output, &exp->elts[*pos].string, len,
-				dest_charset, type);
-	    *pos += BYTES_TO_EXP_ELEM (len);
-	  }
-
-	/* Skip the trailing length and opcode.  */
-	*pos += 2;
-
-	if (noside == EVAL_SKIP)
-	  {
-	    /* Return a dummy value of the appropriate type.  */
-	    if (expect_type != NULL)
-	      result = allocate_value (expect_type);
-	    else if ((dest_type & C_CHAR) != 0)
-	      result = allocate_value (type);
-	    else
-	      result = value_cstring ("", 0, type);
-	    return result;
-	  }
-
-	if ((dest_type & C_CHAR) != 0)
-	  {
-	    LONGEST value;
-
-	    if (obstack_object_size (&output) != TYPE_LENGTH (type))
-	      error (_("Could not convert character "
-		       "constant to target character set"));
-	    value = unpack_long (type, (gdb_byte *) obstack_base (&output));
-	    result = value_from_longest (type, value);
-	  }
-	else
-	  {
-	    int i;
-
-	    /* Write the terminating character.  */
-	    for (i = 0; i < TYPE_LENGTH (type); ++i)
-	      obstack_1grow (&output, 0);
-
-	    if (satisfy_expected)
-	      {
-		LONGEST low_bound, high_bound;
-		int element_size = TYPE_LENGTH (type);
-
-		if (!get_discrete_bounds (expect_type->index_type (),
-					  &low_bound, &high_bound))
-		  {
-		    low_bound = 0;
-		    high_bound = (TYPE_LENGTH (expect_type) / element_size) - 1;
-		  }
-		if (obstack_object_size (&output) / element_size
-		    > (high_bound - low_bound + 1))
-		  error (_("Too many array elements"));
-
-		result = allocate_value (expect_type);
-		memcpy (value_contents_raw (result), obstack_base (&output),
-			obstack_object_size (&output));
-	      }
-	    else
-	      result = value_cstring ((const char *) obstack_base (&output),
-				      obstack_object_size (&output),
-				      type);
-	  }
-	return result;
-      }
-      break;
-
-    default:
-      break;
-    }
-  return evaluate_subexp_standard (expect_type, exp, pos, noside);
-}
-
 namespace expr
 {
 
@@ -969,15 +818,6 @@ c_language_arch_info (struct gdbarch *gdbarch,
   lai->set_bool_type (builtin->builtin_int);
 }
 
-const struct exp_descriptor exp_descriptor_c = 
-{
-  print_subexp_standard,
-  operator_length_standard,
-  operator_check_standard,
-  dump_subexp_body_standard,
-  evaluate_subexp_c
-};
-
 /* Class representing the C language.  */
 
 class c_language : public language_defn
@@ -1046,11 +886,6 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
-
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_c; }
 
   /* See language.h.  */
 
@@ -1232,11 +1067,6 @@ public:
 
   /* See language.h.  */
 
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_c; }
-
-  /* See language.h.  */
-
   const struct op_print *opcode_print_table () const override
   { return c_op_print_tab; }
 
@@ -1313,11 +1143,6 @@ public:
 
   /* See language.h.  */
 
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_c; }
-
-  /* See language.h.  */
-
   const struct op_print *opcode_print_table () const override
   { return c_op_print_tab; }
 };
@@ -1372,11 +1197,6 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
-
-  /* See language.h.  */
-
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_c; }
 
   /* See language.h.  */
 

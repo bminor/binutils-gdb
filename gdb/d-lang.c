@@ -219,11 +219,6 @@ public:
 
   /* See language.h.  */
 
-  const struct exp_descriptor *expression_ops () const override
-  { return &exp_descriptor_c; }
-
-  /* See language.h.  */
-
   const struct op_print *opcode_print_table () const override
   { return d_op_print_tab; }
 };
