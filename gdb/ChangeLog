@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class structop_base_operation)
+	(class structop_operation): New.
+	* eval.c (eval_op_structop_struct): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class complex_operation): New.
 
 2021-03-08  Tom Tromey  <tom@tromey.com>

@@ -70,6 +70,11 @@ extern struct value *eval_op_ternop (struct type *expect_type,
 				     enum noside noside,
 				     struct value *array, struct value *low,
 				     struct value *upper);
+extern struct value *eval_op_structop_struct (struct type *expect_type,
+					      struct expression *exp,
+					      enum noside noside,
+					      struct value *arg1,
+					      const char *string);
 
 namespace expr
 {
@@ -784,6 +789,63 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_COMPLEX; }
+};
+
+class structop_base_operation
+  : public tuple_holding_operation<operation_up, std::string>
+{
+public:
+
+  /* Used for completion.  Return the field name.  */
+  const std::string &get_string () const
+  {
+    return std::get<1> (m_storage);
+  }
+
+  /* Used for completion.  Evaluate the LHS for type.  */
+  value *evaluate_lhs (struct expression *exp)
+  {
+    return std::get<0> (m_storage)->evaluate (nullptr, exp,
+					      EVAL_AVOID_SIDE_EFFECTS);
+  }
+
+protected:
+
+  using tuple_holding_operation::tuple_holding_operation;
+};
+
+class structop_operation
+  : public structop_base_operation
+{
+public:
+
+  using structop_base_operation::structop_base_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val =std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_structop_struct (expect_type, exp, noside, val,
+				    std::get<1> (m_storage).c_str ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return STRUCTOP_STRUCT; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_structop (exp, STRUCTOP_STRUCT,
+		       std::get<0> (this->m_storage).get (),
+		       std::get<1> (this->m_storage).c_str (),
+		       ax, value);
+  }
 };
 
 } /* namespace expr */

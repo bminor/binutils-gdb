@@ -1342,7 +1342,7 @@ eval_op_ternop (struct type *expect_type, struct expression *exp,
 
 /* A helper function for STRUCTOP_STRUCT.  */
 
-static struct value *
+struct value *
 eval_op_structop_struct (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
 			 struct value *arg1, const char *string)
