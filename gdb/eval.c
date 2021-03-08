@@ -1324,6 +1324,20 @@ eval_op_concat (struct type *expect_type, struct expression *exp,
     return value_concat (arg1, arg2);
 }
 
+/* A helper function for TERNOP_SLICE.  */
+
+static struct value *
+eval_op_ternop (struct type *expect_type, struct expression *exp,
+		enum noside noside,
+		struct value *array, struct value *low, struct value *upper)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  int lowbound = value_as_long (low);
+  int upperbound = value_as_long (upper);
+  return value_slice (array, lowbound, upperbound - lowbound + 1);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1579,13 +1593,9 @@ evaluate_subexp_standard (struct type *expect_type,
     case TERNOP_SLICE:
       {
 	struct value *array = evaluate_subexp (nullptr, exp, pos, noside);
-	int lowbound
-	  = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-	int upper = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-
-	if (noside == EVAL_SKIP)
-	  return eval_skip_value (exp);
-	return value_slice (array, lowbound, upper - lowbound + 1);
+	struct value *low = evaluate_subexp (nullptr, exp, pos, noside);
+	struct value *upper = evaluate_subexp (nullptr, exp, pos, noside);
+	return eval_op_ternop (expect_type, exp, noside, array, low, upper);
       }
 
     case TERNOP_COND:
