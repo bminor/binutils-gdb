@@ -110,10 +110,11 @@ dump_for_expression (struct ui_file *stream, int depth, symbol *sym)
 }
 
 void
-dump_for_expression (struct ui_file *stream, int depth, minimal_symbol *msym)
+dump_for_expression (struct ui_file *stream, int depth,
+		     bound_minimal_symbol msym)
 {
-  fprintf_filtered (stream, _("%*sMinsym: %s\n"), depth, "",
-		     msym->print_name ());
+  fprintf_filtered (stream, _("%*sMinsym %s in objfile %s\n"), depth, "",
+		    msym.minsym->print_name (), objfile_name (msym.objfile));
 }
 
 void
@@ -160,13 +161,6 @@ dump_for_expression (struct ui_file *stream, int depth,
   else
     fputs_unfiltered (_("string"), stream);
   fputs_unfiltered ("\n", stream);
-}
-
-void
-dump_for_expression (struct ui_file *stream, int depth, objfile *objf)
-{
-  fprintf_filtered (stream, _("%*sObjfile: %s\n"), depth, "",
-		     objfile_name (objf));
 }
 
 void

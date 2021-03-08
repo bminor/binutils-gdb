@@ -581,7 +581,7 @@ variable:	name_not_typename
 				lookup_bound_minimal_symbol (arg.c_str ());
 			      if (msymbol.minsym != NULL)
 				pstate->push_new<var_msym_value_operation>
-				  (msymbol.minsym, msymbol.objfile);
+				  (msymbol);
 			      else if (!have_full_symbols ()
 				       && !have_partial_symbols ())
 				error (_("No symbol table is loaded.  "

@@ -1195,7 +1195,7 @@ variable:	name_not_typename
 				= find_gnu_ifunc (sym.symbol);
 			      if (resolver.minsym != NULL)
 				pstate->push_new<var_msym_value_operation>
-				  (resolver.minsym, resolver.objfile);
+				  (resolver);
 			      else
 				pstate->push_new<var_value_operation>
 				  (sym.symbol, sym.block);
@@ -1243,7 +1243,7 @@ variable:	name_not_typename
 				  (alias_target, SYMBOL_BLOCK_VALUE (alias_target));
 			      else
 				pstate->push_new<var_msym_value_operation>
-				  (msymbol.minsym, msymbol.objfile);
+				  (msymbol);
 			    }
 			}
 	;

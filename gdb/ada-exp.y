@@ -1550,8 +1550,7 @@ write_var_or_type (struct parser_state *par_state,
 		= ada_lookup_simple_minsym (encoded_name);
 	      if (msym.minsym != NULL)
 		{
-		  par_state->push_new<ada_var_msym_value_operation>
-		    (msym.minsym, msym.objfile);
+		  par_state->push_new<ada_var_msym_value_operation> (msym);
 		  /* Maybe cause error here rather than later? FIXME? */
 		  write_selectors (par_state, encoded_name + tail_index);
 		  return NULL;

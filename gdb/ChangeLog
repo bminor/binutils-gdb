@@ -1,5 +1,30 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* parse.c (parser_state::push_symbol, parser_state::push_dollar):
+	Update.
+	* p-exp.y (variable): Update.
+	* go-exp.y (variable): Update.
+	* expprint.c (dump_for_expression): Use bound_minimal_symbol.
+	Remove overload for objfile.
+	* expop.h (eval_op_var_msym_value): Use bound_minimal_symbol
+	parameter.
+	(check_objfile): Likewise.
+	(dump_for_expression): Likewise.  Remove overload for objfile.
+	(class var_msym_value_operation): Use bound_minimal_symbol.
+	* eval.c (eval_op_var_msym_value): Use bound_minimal_symbol
+	parameter.
+	(var_msym_value_operation::evaluate_for_address)
+	(var_msym_value_operation::evaluate_for_sizeof)
+	(var_msym_value_operation::evaluate_for_cast): Update.
+	* d-exp.y (PrimaryExpression): Update.
+	* c-exp.y (variable): Update.
+	* ax-gdb.c (var_msym_value_operation::do_generate_ax): Update.
+	* ada-lang.c (ada_var_msym_value_operation::evaluate_for_cast):
+	Update.
+	* ada-exp.y (write_var_or_type): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* parser-defs.h (exp_uses_objfile): Return bool.
 	* parse.c (exp_uses_objfile): Return bool.
 

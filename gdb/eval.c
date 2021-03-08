@@ -1005,14 +1005,15 @@ eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
 struct value *
 eval_op_var_msym_value (struct type *expect_type, struct expression *exp,
 			enum noside noside, bool outermost_p,
-			minimal_symbol *msymbol, struct objfile *objfile)
+			bound_minimal_symbol msymbol)
 {
-  value *val = evaluate_var_msym_value (noside, objfile, msymbol);
+  value *val = evaluate_var_msym_value (noside, msymbol.objfile,
+					msymbol.minsym);
 
   struct type *type = value_type (val);
   if (type->code () == TYPE_CODE_ERROR
       && (noside != EVAL_AVOID_SIDE_EFFECTS || !outermost_p))
-    error_unknown_type (msymbol->print_name ());
+    error_unknown_type (msymbol.minsym->print_name ());
   return val;
 }
 
@@ -2529,9 +2530,8 @@ value *
 var_msym_value_operation::evaluate_for_address (struct expression *exp,
 						enum noside noside)
 {
-  value *val = evaluate_var_msym_value (noside,
-					std::get<1> (m_storage),
-					std::get<0> (m_storage));
+  const bound_minimal_symbol &b = std::get<0> (m_storage);
+  value *val = evaluate_var_msym_value (noside, b.objfile, b.minsym);
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *type = lookup_pointer_type (value_type (val));
@@ -2637,14 +2637,12 @@ var_msym_value_operation::evaluate_for_sizeof (struct expression *exp,
 					       enum noside noside)
 
 {
-  minimal_symbol *msymbol = std::get<0> (m_storage);
-  value *mval = evaluate_var_msym_value (noside,
-					 std::get<1> (m_storage),
-					 msymbol);
+  const bound_minimal_symbol &b = std::get<0> (m_storage);
+  value *mval = evaluate_var_msym_value (noside, b.objfile, b.minsym);
 
   struct type *type = value_type (mval);
   if (type->code () == TYPE_CODE_ERROR)
-    error_unknown_type (msymbol->print_name ());
+    error_unknown_type (b.minsym->print_name ());
 
   /* FIXME: This should be size_t.  */
   struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
@@ -2750,9 +2748,8 @@ var_msym_value_operation::evaluate_for_cast (struct type *to_type,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return value_zero (to_type, not_lval);
 
-  value *val = evaluate_var_msym_value (noside,
-					std::get<1> (m_storage),
-					std::get<0> (m_storage));
+  const bound_minimal_symbol &b = std::get<0> (m_storage);
+  value *val = evaluate_var_msym_value (noside, b.objfile, b.minsym);
 
   val = value_cast (to_type, val);
 

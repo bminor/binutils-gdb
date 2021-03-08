@@ -10241,9 +10241,8 @@ ada_var_msym_value_operation::evaluate_for_cast (struct type *expect_type,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return value_zero (expect_type, not_lval);
 
-  value *val = evaluate_var_msym_value (noside,
-					std::get<1> (m_storage),
-					std::get<0> (m_storage));
+  const bound_minimal_symbol &b = std::get<0> (m_storage);
+  value *val = evaluate_var_msym_value (noside, b.objfile, b.minsym);
 
   val = ada_value_cast (expect_type, val);
 

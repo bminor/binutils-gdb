@@ -53,8 +53,7 @@ extern struct value *eval_op_var_msym_value (struct type *expect_type,
 					     struct expression *exp,
 					     enum noside noside,
 					     bool outermost_p,
-					     minimal_symbol *msymbol,
-					     struct objfile *objfile);
+					     bound_minimal_symbol msymbol);
 extern struct value *eval_op_var_entry_value (struct type *expect_type,
 					      struct expression *exp,
 					      enum noside noside, symbol *sym);
@@ -244,11 +243,9 @@ check_objfile (const struct block *block, struct objfile *objfile)
 }
 
 static inline bool
-check_objfile (minimal_symbol *minsym, struct objfile *objfile)
+check_objfile (bound_minimal_symbol minsym, struct objfile *objfile)
 {
-  /* This may seem strange but minsyms are only used with an objfile
-     as well.  */
-  return false;
+  return check_objfile (minsym.objfile, objfile);
 }
 
 static inline bool
@@ -331,7 +328,7 @@ extern void dump_for_expression (struct ui_file *stream, int depth,
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 symbol *sym);
 extern void dump_for_expression (struct ui_file *stream, int depth,
-				 minimal_symbol *msym);
+				 bound_minimal_symbol msym);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 const block *bl);
 extern void dump_for_expression (struct ui_file *stream, int depth,
@@ -340,8 +337,6 @@ extern void dump_for_expression (struct ui_file *stream, int depth,
 				 enum c_string_type_values flags);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 enum range_flag flags);
-extern void dump_for_expression (struct ui_file *stream, int depth,
-				 objfile *objf);
 extern void dump_for_expression (struct ui_file *stream, int depth,
 				 const std::unique_ptr<ada_component> &comp);
 
@@ -446,7 +441,7 @@ check_constant (const operation_up &item)
 }
 
 static inline bool
-check_constant (struct minimal_symbol *msym)
+check_constant (bound_minimal_symbol msym)
 {
   return false;
 }
@@ -465,12 +460,6 @@ check_constant (const struct block *block)
 
 static inline bool
 check_constant (const std::string &str)
-{
-  return true;
-}
-
-static inline bool
-check_constant (struct objfile *objfile)
 {
   return true;
 }
@@ -700,7 +689,7 @@ protected:
 };
 
 class var_msym_value_operation
-  : public maybe_constant_operation<minimal_symbol *, struct objfile *>
+  : public maybe_constant_operation<bound_minimal_symbol>
 {
 public:
 
@@ -711,8 +700,7 @@ public:
 		   enum noside noside) override
   {
     return eval_op_var_msym_value (expect_type, exp, noside, m_outermost,
-				   std::get<0> (m_storage),
-				   std::get<1> (m_storage));
+				   std::get<0> (m_storage));
   }
 
   value *evaluate_for_sizeof (struct expression *exp, enum noside noside)
@@ -730,7 +718,7 @@ public:
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override
   {
-    const char *name = std::get<0> (m_storage)->print_name ();
+    const char *name = std::get<0> (m_storage).minsym->print_name ();
     return operation::evaluate_funcall (expect_type, exp, noside, name, args);
   }
 

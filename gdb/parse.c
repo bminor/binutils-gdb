@@ -230,8 +230,7 @@ parser_state::push_symbol (const char *name, block_symbol sym)
     {
       struct bound_minimal_symbol msymbol = lookup_bound_minimal_symbol (name);
       if (msymbol.minsym != NULL)
-	push_new<expr::var_msym_value_operation> (msymbol.minsym,
-						  msymbol.objfile);
+	push_new<expr::var_msym_value_operation> (msymbol);
       else if (!have_full_symbols () && !have_partial_symbols ())
 	error (_("No symbol table is loaded.  Use the \"file\" command."));
       else
@@ -308,7 +307,7 @@ parser_state::push_dollar (struct stoken str)
   msym = lookup_bound_minimal_symbol (copy.c_str ());
   if (msym.minsym)
     {
-      push_new<expr::var_msym_value_operation> (msym.minsym, msym.objfile);
+      push_new<expr::var_msym_value_operation> (msym);
       return;
     }
 

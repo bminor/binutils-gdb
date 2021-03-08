@@ -1631,13 +1631,13 @@ var_msym_value_operation::do_generate_ax (struct expression *exp,
 					  struct axs_value *value,
 					  struct type *cast_type)
 {
-  gen_msym_var_ref (ax, value, std::get<0> (m_storage),
-		    std::get<1> (m_storage));
+  const bound_minimal_symbol &b = std::get<0> (m_storage);
+  gen_msym_var_ref (ax, value, b.minsym, b.objfile);
 
   if (value->type->code () == TYPE_CODE_ERROR)
     {
       if (cast_type == nullptr)
-	error_unknown_type (std::get<0> (m_storage)->linkage_name ());
+	error_unknown_type (b.minsym->linkage_name ());
       value->type = cast_type;
     }
 }
