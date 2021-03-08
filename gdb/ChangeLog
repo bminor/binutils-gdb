@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* p-exp.y: Create operations.
+	(pascal_language::parser): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* d-exp.y: Create operations.
 	(d_parse): Update.
 
