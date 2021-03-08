@@ -1614,6 +1614,29 @@ eval_op_equal (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for BINOP_NOTEQUAL.  */
+
+static struct value *
+eval_op_notequal (struct type *expect_type, struct expression *exp,
+		  enum noside noside, enum exp_opcode op,
+		  struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (binop_user_defined_p (op, arg1, arg2))
+    {
+      return value_x_binop (arg1, arg2, op, OP_NULL, noside);
+    }
+  else
+    {
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      int tem = value_equal (arg1, arg2);
+      struct type *type = language_bool_type (exp->language_defn,
+					      exp->gdbarch);
+      return value_from_longest (type, (LONGEST) ! tem);
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2430,19 +2453,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_NOTEQUAL:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (binop_user_defined_p (op, arg1, arg2))
-	{
-	  return value_x_binop (arg1, arg2, op, OP_NULL, noside);
-	}
-      else
-	{
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  tem = value_equal (arg1, arg2);
-	  type = language_bool_type (exp->language_defn, exp->gdbarch);
-	  return value_from_longest (type, (LONGEST) ! tem);
-	}
+      return eval_op_notequal (expect_type, exp, noside, op, arg1, arg2);
 
     case BINOP_LESS:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
