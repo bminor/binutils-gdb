@@ -1470,6 +1470,53 @@ public:
   { return OP_TYPEOF; }
 };
 
+/* Implement 'decltype'.  */
+class decltype_operation
+  : public maybe_constant_operation<operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (noside == EVAL_SKIP)
+      return eval_skip_value (exp);
+    else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+      {
+	value *result
+	  = std::get<0> (m_storage)->evaluate (nullptr, exp,
+					       EVAL_AVOID_SIDE_EFFECTS);
+	enum exp_opcode sub_op = std::get<0> (m_storage)->opcode ();
+	if (sub_op == BINOP_SUBSCRIPT
+	    || sub_op == STRUCTOP_MEMBER
+	    || sub_op == STRUCTOP_MPTR
+	    || sub_op == UNOP_IND
+	    || sub_op == STRUCTOP_STRUCT
+	    || sub_op == STRUCTOP_PTR
+	    || sub_op == OP_SCOPE)
+	  {
+	    struct type *type = value_type (result);
+
+	    if (!TYPE_IS_REFERENCE (type))
+	      {
+		type = lookup_lvalue_reference_type (type);
+		result = allocate_value (type);
+	      }
+	  }
+
+	return result;
+      }
+    else
+      error (_("Attempt to use a type as an expression"));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_DECLTYPE; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

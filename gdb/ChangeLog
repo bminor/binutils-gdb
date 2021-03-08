@@ -1,5 +1,9 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class decltype_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class typeof_operation): New.
 
 2021-03-08  Tom Tromey  <tom@tromey.com>
