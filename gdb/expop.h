@@ -41,6 +41,11 @@ extern void gen_expr_structop (struct expression *exp,
 			       const char *name,
 			       struct agent_expr *ax, struct axs_value *value);
 
+extern struct value *eval_op_scope (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside,
+				    struct type *type, const char *string);
+
 namespace expr
 {
 
@@ -413,6 +418,37 @@ private:
 
   struct type *m_type;
   float_data m_data;
+};
+
+class scope_operation
+  : public maybe_constant_operation<struct type *, std::string>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return eval_op_scope (expect_type, exp, noside,
+			  std::get<0> (m_storage),
+			  std::get<1> (m_storage).c_str ());
+  }
+
+  value *evaluate_for_address (struct expression *exp,
+			       enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_SCOPE; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
 };
 
 } /* namespace expr */

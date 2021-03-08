@@ -1185,7 +1185,7 @@ is_integral_or_integral_reference (struct type *type)
 
 /* Helper function that implements the body of OP_SCOPE.  */
 
-static struct value *
+struct value *
 eval_op_scope (struct type *expect_type, struct expression *exp,
 	       enum noside noside,
 	       struct type *type, const char *string)
@@ -3287,6 +3287,18 @@ operation::evaluate_for_address (struct expression *exp, enum noside noside)
 {
   value *val = evaluate (nullptr, exp, noside);
   return evaluate_subexp_for_address_base (exp, noside, val);
+}
+
+value *
+scope_operation::evaluate_for_address (struct expression *exp,
+				       enum noside noside)
+{
+  value *x = value_aggregate_elt (std::get<0> (m_storage),
+				  std::get<1> (m_storage).c_str (),
+				  NULL, 1, noside);
+  if (x == NULL)
+    error (_("There is no field named %s"), std::get<1> (m_storage).c_str ());
+  return x;
 }
 
 }

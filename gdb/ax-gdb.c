@@ -2301,6 +2301,19 @@ operation::generate_ax (struct expression *exp,
     }
 }
 
+void
+scope_operation::do_generate_ax (struct expression *exp,
+				 struct agent_expr *ax,
+				 struct axs_value *value,
+				 struct type *cast_type)
+{
+  struct type *type = std::get<0> (m_storage);
+  const std::string &name = std::get<1> (m_storage);
+  int found = gen_aggregate_elt_ref (ax, value, type, name.c_str ());
+  if (!found)
+    error (_("There is no field named %s"), name.c_str ());
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

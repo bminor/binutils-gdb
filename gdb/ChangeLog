@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class scope_operation): New.
+	* eval.c (eval_op_scope): No longer static.
+	(scope_operation::evaluate_for_address): New method.
+	* ax-gdb.c (scope_operation::do_generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expprint.c (float_const_operation::dump): New method.
 	* expop.h (float_data): New typedef.
 	(class float_const_operation): New.
