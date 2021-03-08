@@ -1283,4 +1283,12 @@ dump_for_expression (struct ui_file *stream, int depth,
   fprintf_filtered (stream, "\n");
 }
 
+void
+float_const_operation::dump (struct ui_file *stream, int depth) const
+{
+  fprintf_filtered (stream, _("%*sFloat: "), depth, "");
+  print_floating (m_data.data (), m_type, stream);
+  fprintf_filtered (stream, "\n");
+}
+
 } /* namespace expr */

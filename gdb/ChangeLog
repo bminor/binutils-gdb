@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expprint.c (float_const_operation::dump): New method.
+	* expop.h (float_data): New typedef.
+	(class float_const_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (gen_expr_binop, gen_expr_structop): Declare.
 	* ax-gdb.c (gen_expr_binop): New function.
 	(gen_expr_structop): Likewise.

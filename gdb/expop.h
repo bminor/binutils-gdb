@@ -373,6 +373,48 @@ private:
   }
 };
 
+/* A floating-point constant.  The constant is encoded in the target
+   format.  */
+
+typedef std::array<gdb_byte, 16> float_data;
+
+/* An operation that holds a floating-point constant of a given
+   type.
+
+   This does not need the facilities provided by
+   tuple_holding_operation, so it does not use it.  */
+class float_const_operation
+  : public operation
+{
+public:
+
+  float_const_operation (struct type *type, float_data data)
+    : m_type (type),
+      m_data (data)
+  {
+  }
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return value_from_contents (m_type, m_data.data ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_FLOAT; }
+
+  bool constant_p () const override
+  { return true; }
+
+  void dump (struct ui_file *stream, int depth) const override;
+
+private:
+
+  struct type *m_type;
+  float_data m_data;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
