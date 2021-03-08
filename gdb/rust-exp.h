@@ -203,6 +203,11 @@ public:
 				  std::get<1> (m_storage).c_str ());
   }
 
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const std::vector<operation_up> &args) override;
+
   enum exp_opcode opcode () const override
   { return STRUCTOP_STRUCT; }
 };

@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_structop::evaluate_funcall): New method.
+	* rust-exp.h (class rust_structop) <evaluate_funcall>: Declare
+	method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expression.h (class operation) <evaluate_funcall>: New methods.
 	* expop.h (class scope_operation) <evaluate_funcall>: New method.
 	(class var_value_operation) <evaluate_funcall>: New method.

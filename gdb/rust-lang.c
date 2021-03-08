@@ -1756,6 +1756,56 @@ rust_aggregate_operation::evaluate (struct type *expect_type,
   return result;
 }
 
+value *
+rust_structop::evaluate_funcall (struct type *expect_type,
+				 struct expression *exp,
+				 enum noside noside,
+				 const std::vector<operation_up> &ops)
+{
+  std::vector<struct value *> args (ops.size () + 1);
+
+  /* Evaluate the argument to STRUCTOP_STRUCT, then find its
+     type in order to look up the method.  */
+  args[0] = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  /* We don't yet implement real Deref semantics.  */
+  while (value_type (args[0])->code () == TYPE_CODE_PTR)
+    args[0] = value_ind (args[0]);
+
+  struct type *type = value_type (args[0]);
+  if ((type->code () != TYPE_CODE_STRUCT
+       && type->code () != TYPE_CODE_UNION
+       && type->code () != TYPE_CODE_ENUM)
+      || rust_tuple_type_p (type))
+    error (_("Method calls only supported on struct or enum types"));
+  if (type->name () == NULL)
+    error (_("Method call on nameless type"));
+
+  std::string name = (std::string (type->name ()) + "::"
+		      + std::get<1> (m_storage));
+
+  const struct block *block = get_selected_block (0);
+  struct block_symbol sym = lookup_symbol (name.c_str (), block,
+					   VAR_DOMAIN, NULL);
+  if (sym.symbol == NULL)
+    error (_("Could not find function named '%s'"), name.c_str ());
+
+  struct type *fn_type = SYMBOL_TYPE (sym.symbol);
+  if (fn_type->num_fields () == 0)
+    error (_("Function '%s' takes no arguments"), name.c_str ());
+
+  if (fn_type->field (0).type ()->code () == TYPE_CODE_PTR)
+    args[0] = value_addr (args[0]);
+
+  value *function = address_of_variable (sym.symbol, block);
+
+  for (int i = 0; i < ops.size (); ++i)
+    args[i + 1] = ops[i]->evaluate (nullptr, exp, noside);
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (TYPE_TARGET_TYPE (fn_type), not_lval);
+  return call_function_by_hand (function, NULL, args);
+}
+
 }
 
 /* operator_length implementation for Rust.  */
