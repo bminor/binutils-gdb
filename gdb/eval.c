@@ -1221,7 +1221,7 @@ eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
 
 /* Helper function that implements the body of OP_VAR_MSYM_VALUE.  */
 
-static struct value *
+struct value *
 eval_op_var_msym_value (struct type *expect_type, struct expression *exp,
 			enum noside noside, bool outermost_p,
 			minimal_symbol *msymbol, struct objfile *objfile)
@@ -3301,6 +3301,22 @@ scope_operation::evaluate_for_address (struct expression *exp,
   return x;
 }
 
+value *
+var_msym_value_operation::evaluate_for_address (struct expression *exp,
+						enum noside noside)
+{
+  value *val = evaluate_var_msym_value (noside,
+					std::get<1> (m_storage),
+					std::get<0> (m_storage));
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *type = lookup_pointer_type (value_type (val));
+      return value_zero (type, not_lval);
+    }
+  else
+    return value_addr (val);
+}
+
 }
 
 /* Evaluate like `evaluate_subexp' except coercing arrays to pointers.
@@ -3501,6 +3517,25 @@ operation::evaluate_for_sizeof (struct expression *exp, enum noside noside)
   return evaluate_subexp_for_sizeof_base (exp, value_type (val));
 }
 
+value *
+var_msym_value_operation::evaluate_for_sizeof (struct expression *exp,
+					       enum noside noside)
+
+{
+  minimal_symbol *msymbol = std::get<0> (m_storage);
+  value *mval = evaluate_var_msym_value (noside,
+					 std::get<1> (m_storage),
+					 msymbol);
+
+  struct type *type = value_type (mval);
+  if (type->code () == TYPE_CODE_ERROR)
+    error_unknown_type (msymbol->print_name ());
+
+  /* FIXME: This should be size_t.  */
+  struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
+  return value_from_longest (size_type, TYPE_LENGTH (type));
+}
+
 }
 
 /* Evaluate a subexpression of EXP, at index *POS, and return a value
@@ -3556,6 +3591,38 @@ evaluate_subexp_for_cast (expression *exp, int *pos,
   if (noside == EVAL_SKIP)
     return eval_skip_value (exp);
   return value_cast (to_type, val);
+}
+
+namespace expr
+{
+
+value *
+var_msym_value_operation::evaluate_for_cast (struct type *to_type,
+					     struct expression *exp,
+					     enum noside noside)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (to_type, not_lval);
+
+  value *val = evaluate_var_msym_value (noside,
+					std::get<1> (m_storage),
+					std::get<0> (m_storage));
+
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  val = value_cast (to_type, val);
+
+  /* Don't allow e.g. '&(int)var_with_no_debug_info'.  */
+  if (VALUE_LVAL (val) == lval_memory)
+    {
+      if (value_lazy (val))
+	value_fetch_lazy (val);
+      VALUE_LVAL (val) = not_lval;
+    }
+  return val;
+}
+
 }
 
 /* Parse a type expression in the string [P..P+LENGTH).  */

@@ -45,6 +45,12 @@ extern struct value *eval_op_scope (struct type *expect_type,
 				    struct expression *exp,
 				    enum noside noside,
 				    struct type *type, const char *string);
+extern struct value *eval_op_var_msym_value (struct type *expect_type,
+					     struct expression *exp,
+					     enum noside noside,
+					     bool outermost_p,
+					     minimal_symbol *msymbol,
+					     struct objfile *objfile);
 
 namespace expr
 {
@@ -473,6 +479,52 @@ public:
   { return true; }
 
 protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
+class var_msym_value_operation
+  : public maybe_constant_operation<minimal_symbol *, struct objfile *>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return eval_op_var_msym_value (expect_type, exp, noside, m_outermost,
+				   std::get<0> (m_storage),
+				   std::get<1> (m_storage));
+  }
+
+  value *evaluate_for_sizeof (struct expression *exp, enum noside noside)
+    override;
+
+  value *evaluate_for_address (struct expression *exp, enum noside noside)
+    override;
+
+  value *evaluate_for_cast (struct type *expect_type,
+			    struct expression *exp,
+			    enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_VAR_MSYM_VALUE; }
+
+  void set_outermost () override
+  {
+    m_outermost = true;
+  }
+
+protected:
+
+  /* True if this is the outermost operation in the expression.  */
+  bool m_outermost = false;
 
   void do_generate_ax (struct expression *exp,
 		       struct agent_expr *ax,

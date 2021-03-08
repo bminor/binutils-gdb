@@ -1,5 +1,16 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expression.h (class operation) <set_outermost>: New method.
+	* expop.h (class var_msym_value_operation): New.
+	* eval.c (eval_op_var_msym_value): No longer static.
+	(var_msym_value_operation::evaluate_for_address)
+	(var_msym_value_operation::evaluate_for_sizeof)
+	(var_msym_value_operation::evaluate_for_cast): New methods.
+	* ax-gdb.c (var_msym_value_operation::do_generate_ax): New
+	method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class long_const_operation): New.
 	* ax-gdb.c (long_const_operation::do_generate_ax): New method.
 

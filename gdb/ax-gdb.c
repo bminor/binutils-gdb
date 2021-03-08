@@ -2324,6 +2324,23 @@ long_const_operation::do_generate_ax (struct expression *exp,
 		   std::get<0> (m_storage));
 }
 
+void
+var_msym_value_operation::do_generate_ax (struct expression *exp,
+					  struct agent_expr *ax,
+					  struct axs_value *value,
+					  struct type *cast_type)
+{
+  gen_msym_var_ref (ax, value, std::get<0> (m_storage),
+		    std::get<1> (m_storage));
+
+  if (value->type->code () == TYPE_CODE_ERROR)
+    {
+      if (cast_type == nullptr)
+	error_unknown_type (std::get<0> (m_storage)->linkage_name ());
+      value->type = cast_type;
+    }
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

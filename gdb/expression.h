@@ -165,6 +165,10 @@ public:
   /* Print this operation to STREAM.  */
   virtual void dump (struct ui_file *stream, int depth) const = 0;
 
+  /* Call to indicate that this is the outermost operation in the
+     expression.  This should almost never be overridden.  */
+  virtual void set_outermost () { }
+
 protected:
 
   /* Called by generate_ax to do the work for this particular
