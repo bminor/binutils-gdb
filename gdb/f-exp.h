@@ -159,6 +159,38 @@ private:
 			 enum noside noside);
 };
 
+/* Single-argument form of Fortran ubound/lbound intrinsics.  */
+class fortran_bound_1arg
+  : public tuple_holding_operation<exp_opcode, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return std::get<0> (m_storage); }
+};
+
+/* Two-argument form of Fortran ubound/lbound intrinsics.  */
+class fortran_bound_2arg
+  : public tuple_holding_operation<exp_opcode, operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return std::get<0> (m_storage); }
+};
+
 } /* namespace expr */
 
 #endif /* FORTRAN_EXP_H */

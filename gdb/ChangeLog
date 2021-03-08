@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* f-lang.c (fortran_bound_1arg::evaluate)
+	(fortran_bound_2arg::evaluate): New methods.
+	* f-exp.h (class fortran_bound_1arg, class fortran_bound_2arg):
+	New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class unop_addr_operation) <get_expression>: New
 	method.
 	* f-lang.c (fortran_undetermined::value_subarray)

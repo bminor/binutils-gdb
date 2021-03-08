@@ -1865,6 +1865,40 @@ fortran_undetermined::evaluate (struct type *expect_type,
     }
 }
 
+value *
+fortran_bound_1arg::evaluate (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside)
+{
+  bool lbound_p = std::get<0> (m_storage) == FORTRAN_LBOUND;
+  value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  fortran_require_array (value_type (arg1), lbound_p);
+  return fortran_bounds_all_dims (lbound_p, exp->gdbarch, arg1);
+}
+
+value *
+fortran_bound_2arg::evaluate (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside)
+{
+  bool lbound_p = std::get<0> (m_storage) == FORTRAN_LBOUND;
+  value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  fortran_require_array (value_type (arg1), lbound_p);
+
+  /* User asked for the bounds of a specific dimension of the array.  */
+  value *arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type = check_typedef (value_type (arg2));
+  if (type->code () != TYPE_CODE_INT)
+    {
+      if (lbound_p)
+	error (_("LBOUND second argument should be an integer"));
+      else
+	error (_("UBOUND second argument should be an integer"));
+    }
+
+  return fortran_bounds_for_dimension (lbound_p, exp->gdbarch, arg1, arg2);
+}
+
 } /* namespace expr */
 
 /* Special expression lengths for Fortran.  */
