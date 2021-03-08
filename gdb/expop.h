@@ -105,6 +105,36 @@ extern struct value *eval_op_subscript (struct type *expect_type,
 					enum noside noside, enum exp_opcode op,
 					struct value *arg1,
 					struct value *arg2);
+extern struct value *eval_op_equal (struct type *expect_type,
+				    struct expression *exp,
+				    enum noside noside, enum exp_opcode op,
+				    struct value *arg1,
+				    struct value *arg2);
+extern struct value *eval_op_notequal (struct type *expect_type,
+				       struct expression *exp,
+				       enum noside noside, enum exp_opcode op,
+				       struct value *arg1,
+				       struct value *arg2);
+extern struct value *eval_op_less (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside, enum exp_opcode op,
+				   struct value *arg1,
+				   struct value *arg2);
+extern struct value *eval_op_gtr (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside, enum exp_opcode op,
+				  struct value *arg1,
+				  struct value *arg2);
+extern struct value *eval_op_geq (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside, enum exp_opcode op,
+				  struct value *arg1,
+				  struct value *arg2);
+extern struct value *eval_op_leq (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside, enum exp_opcode op,
+				  struct value *arg1,
+				  struct value *arg2);
 
 namespace expr
 {
@@ -1127,6 +1157,36 @@ public:
   value *evaluate_for_sizeof (struct expression *exp,
 			      enum noside noside) override;
 };
+
+/* Implementation of comparison operations.  */
+template<enum exp_opcode OP, binary_ftype FUNC>
+class comparison_operation
+  : public usual_ax_binop_operation<OP, FUNC>
+{
+public:
+
+  using usual_ax_binop_operation<OP, FUNC>::usual_ax_binop_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs
+      = std::get<0> (this->m_storage)->evaluate (nullptr, exp, noside);
+    value *rhs
+      = std::get<1> (this->m_storage)->evaluate (value_type (lhs), exp,
+						 noside);
+    return FUNC (expect_type, exp, noside, OP, lhs, rhs);
+  }
+};
+
+using equal_operation = comparison_operation<BINOP_EQUAL, eval_op_equal>;
+using notequal_operation
+     = comparison_operation<BINOP_NOTEQUAL, eval_op_notequal>;
+using less_operation = comparison_operation<BINOP_LESS, eval_op_less>;
+using gtr_operation = comparison_operation<BINOP_GTR, eval_op_gtr>;
+using geq_operation = comparison_operation<BINOP_GEQ, eval_op_geq>;
+using leq_operation = comparison_operation<BINOP_LEQ, eval_op_leq>;
 
 } /* namespace expr */
 

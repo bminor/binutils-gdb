@@ -1594,7 +1594,7 @@ eval_op_subscript (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_EQUAL.  */
 
-static struct value *
+struct value *
 eval_op_equal (struct type *expect_type, struct expression *exp,
 	       enum noside noside, enum exp_opcode op,
 	       struct value *arg1, struct value *arg2)
@@ -1617,7 +1617,7 @@ eval_op_equal (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_NOTEQUAL.  */
 
-static struct value *
+struct value *
 eval_op_notequal (struct type *expect_type, struct expression *exp,
 		  enum noside noside, enum exp_opcode op,
 		  struct value *arg1, struct value *arg2)
@@ -1640,7 +1640,7 @@ eval_op_notequal (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_LESS.  */
 
-static struct value *
+struct value *
 eval_op_less (struct type *expect_type, struct expression *exp,
 	      enum noside noside, enum exp_opcode op,
 	      struct value *arg1, struct value *arg2)
@@ -1663,7 +1663,7 @@ eval_op_less (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_GTR.  */
 
-static struct value *
+struct value *
 eval_op_gtr (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1, struct value *arg2)
@@ -1686,7 +1686,7 @@ eval_op_gtr (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_GEQ.  */
 
-static struct value *
+struct value *
 eval_op_geq (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1, struct value *arg2)
@@ -1709,7 +1709,7 @@ eval_op_geq (struct type *expect_type, struct expression *exp,
 
 /* A helper function for BINOP_LEQ.  */
 
-static struct value *
+struct value *
 eval_op_leq (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1, struct value *arg2)

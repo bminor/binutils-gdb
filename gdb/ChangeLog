@@ -1,5 +1,13 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class comparison_operation): New.
+	(equal_operation, notequal_operation, less_operation)
+	(gtr_operation, geq_operation, leq_operation): New typedefs.
+	* eval.c (eval_op_equal, eval_op_notequal, eval_op_less)
+	(eval_op_gtr, eval_op_geq, eval_op_leq): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class subscript_operation): New.
 	* eval.c (eval_op_subscript): No longer static.
 
