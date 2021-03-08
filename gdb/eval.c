@@ -1338,6 +1338,22 @@ eval_op_ternop (struct type *expect_type, struct expression *exp,
   return value_slice (array, lowbound, upperbound - lowbound + 1);
 }
 
+/* A helper function for STRUCTOP_STRUCT.  */
+
+static struct value *
+eval_op_structop_struct (struct type *expect_type, struct expression *exp,
+			 enum noside noside,
+			 struct value *arg1, const char *string)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct value *arg3 = value_struct_elt (&arg1, NULL, string,
+					 NULL, "structure");
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
+  return arg3;
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1929,13 +1945,8 @@ evaluate_subexp_standard (struct type *expect_type,
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      arg3 = value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
-			       NULL, "structure");
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	arg3 = value_zero (value_type (arg3), VALUE_LVAL (arg3));
-      return arg3;
+      return eval_op_structop_struct (expect_type, exp, noside, arg1,
+				      &exp->elts[pc + 2].string);
 
     case STRUCTOP_PTR:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
