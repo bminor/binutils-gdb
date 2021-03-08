@@ -1182,6 +1182,22 @@ is_integral_or_integral_reference (struct type *type)
 	  && is_integral_type (TYPE_TARGET_TYPE (type)));
 }
 
+/* Helper function that implements the body of OP_SCOPE.  */
+
+static struct value *
+eval_op_scope (struct type *expect_type, struct expression *exp,
+	       enum noside noside,
+	       struct type *type, const char *string)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct value *arg1 = value_aggregate_elt (type, string, expect_type,
+					    0, noside);
+  if (arg1 == NULL)
+    error (_("There is no field named %s"), string);
+  return arg1;
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1208,14 +1224,9 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_SCOPE:
       tem = longest_to_int (exp->elts[pc + 2].longconst);
       (*pos) += 4 + BYTES_TO_EXP_ELEM (tem + 1);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      arg1 = value_aggregate_elt (exp->elts[pc + 1].type,
-				  &exp->elts[pc + 3].string,
-				  expect_type, 0, noside);
-      if (arg1 == NULL)
-	error (_("There is no field named %s"), &exp->elts[pc + 3].string);
-      return arg1;
+      return eval_op_scope (expect_type, exp, noside,
+			    exp->elts[pc + 1].type,
+			    &exp->elts[pc + 3].string);
 
     case OP_LONG:
       (*pos) += 3;
