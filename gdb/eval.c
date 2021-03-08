@@ -1413,6 +1413,49 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
   return arg3;
 }
 
+/* A helper function for STRUCTOP_MEMBER.  */
+
+static struct value *
+eval_op_member (struct type *expect_type, struct expression *exp,
+		enum noside noside,
+		struct value *arg1, struct value *arg2)
+{
+  long mem_offset;
+
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  struct value *arg3;
+  struct type *type = check_typedef (value_type (arg2));
+  switch (type->code ())
+    {
+    case TYPE_CODE_METHODPTR:
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (TYPE_TARGET_TYPE (type), not_lval);
+      else
+	{
+	  arg2 = cplus_method_ptr_to_value (&arg1, arg2);
+	  gdb_assert (value_type (arg2)->code () == TYPE_CODE_PTR);
+	  return value_ind (arg2);
+	}
+
+    case TYPE_CODE_MEMBERPTR:
+      /* Now, convert these values to an address.  */
+      arg1 = value_cast_pointers (lookup_pointer_type (TYPE_SELF_TYPE (type)),
+				  arg1, 1);
+
+      mem_offset = value_as_long (arg2);
+
+      arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+				 value_as_long (arg1) + mem_offset);
+      return value_ind (arg3);
+
+    default:
+      error (_("non-pointer-to-member value used "
+	       "in pointer-to-member construct"));
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1428,7 +1471,6 @@ evaluate_subexp_standard (struct type *expect_type,
   int nargs;
   struct value **argvec;
   int ix;
-  long mem_offset;
   struct type **arg_types;
 
   pc = (*pos)++;
@@ -2023,37 +2065,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
 
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-
-      type = check_typedef (value_type (arg2));
-      switch (type->code ())
-	{
-	case TYPE_CODE_METHODPTR:
-	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	    return value_zero (TYPE_TARGET_TYPE (type), not_lval);
-	  else
-	    {
-	      arg2 = cplus_method_ptr_to_value (&arg1, arg2);
-	      gdb_assert (value_type (arg2)->code () == TYPE_CODE_PTR);
-	      return value_ind (arg2);
-	    }
-
-	case TYPE_CODE_MEMBERPTR:
-	  /* Now, convert these values to an address.  */
-	  arg1 = value_cast_pointers (lookup_pointer_type (TYPE_SELF_TYPE (type)),
-				      arg1, 1);
-
-	  mem_offset = value_as_long (arg2);
-
-	  arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
-				     value_as_long (arg1) + mem_offset);
-	  return value_ind (arg3);
-
-	default:
-	  error (_("non-pointer-to-member value used "
-		   "in pointer-to-member construct"));
-	}
+      return eval_op_member (expect_type, exp, noside, arg1, arg2);
 
     case TYPE_INSTANCE:
       {
