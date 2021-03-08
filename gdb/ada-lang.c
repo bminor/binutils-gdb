@@ -9974,6 +9974,43 @@ ada_unop_neg (struct type *expect_type,
   return value_neg (arg1);
 }
 
+/* A helper function for UNOP_IN_RANGE.  */
+
+static value *
+ada_unop_in_range (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside, enum exp_opcode op,
+		   struct value *arg1, struct type *type)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  struct value *arg2, *arg3;
+  switch (type->code ())
+    {
+    default:
+      lim_warning (_("Membership test incompletely implemented; "
+		     "always returns true"));
+      type = language_bool_type (exp->language_defn, exp->gdbarch);
+      return value_from_longest (type, (LONGEST) 1);
+
+    case TYPE_CODE_RANGE:
+      arg2 = value_from_longest (type,
+				 type->bounds ()->low.const_val ());
+      arg3 = value_from_longest (type,
+				 type->bounds ()->high.const_val ());
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
+      type = language_bool_type (exp->language_defn, exp->gdbarch);
+      return
+	value_from_longest (type,
+			    (value_less (arg1, arg3)
+			     || value_equal (arg1, arg3))
+			    && (value_less (arg2, arg1)
+				|| value_equal (arg2, arg1)));
+    }
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10514,33 +10551,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       (*pos) += 2;
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       type = check_typedef (exp->elts[pc + 1].type);
-
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-
-      switch (type->code ())
-	{
-	default:
-	  lim_warning (_("Membership test incompletely implemented; "
-			 "always returns true"));
-	  type = language_bool_type (exp->language_defn, exp->gdbarch);
-	  return value_from_longest (type, (LONGEST) 1);
-
-	case TYPE_CODE_RANGE:
-	  arg2 = value_from_longest (type,
-				     type->bounds ()->low.const_val ());
-	  arg3 = value_from_longest (type,
-				     type->bounds ()->high.const_val ());
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
-	  type = language_bool_type (exp->language_defn, exp->gdbarch);
-	  return
-	    value_from_longest (type,
-				(value_less (arg1, arg3)
-				 || value_equal (arg1, arg3))
-				&& (value_less (arg2, arg1)
-				    || value_equal (arg2, arg1)));
-	}
+      return ada_unop_in_range (expect_type, exp, noside, op, arg1, type);
 
     case BINOP_IN_BOUNDS:
       (*pos) += 2;
