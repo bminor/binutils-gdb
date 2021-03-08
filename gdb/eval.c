@@ -2053,6 +2053,42 @@ eval_op_type (struct type *expect_type, struct expression *exp,
     error (_("Attempt to use a type name as an expression"));
 }
 
+/* A helper function for BINOP_ASSIGN_MODIFY.  */
+
+static struct value *
+eval_binop_assign_modify (struct type *expect_type, struct expression *exp,
+			  enum noside noside, enum exp_opcode op,
+			  struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+    return arg1;
+  if (binop_user_defined_p (op, arg1, arg2))
+    return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op, noside);
+  else if (op == BINOP_ADD && ptrmath_type_p (exp->language_defn,
+					      value_type (arg1))
+	   && is_integral_type (value_type (arg2)))
+    arg2 = value_ptradd (arg1, value_as_long (arg2));
+  else if (op == BINOP_SUB && ptrmath_type_p (exp->language_defn,
+					      value_type (arg1))
+	   && is_integral_type (value_type (arg2)))
+    arg2 = value_ptradd (arg1, - value_as_long (arg2));
+  else
+    {
+      struct value *tmp = arg1;
+
+      /* For shift and integer exponentiation operations,
+	 only promote the first argument.  */
+      if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
+	  && is_integral_type (value_type (arg2)))
+	unop_promote (exp->language_defn, exp->gdbarch, &tmp);
+      else
+	binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
+
+      arg2 = value_binop (tmp, arg2, op);
+    }
+  return value_assign (arg1, arg2);
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2706,34 +2742,9 @@ evaluate_subexp_standard (struct type *expect_type,
       (*pos) += 2;
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
-	return arg1;
       op = exp->elts[pc + 1].opcode;
-      if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op, noside);
-      else if (op == BINOP_ADD && ptrmath_type_p (exp->language_defn,
-						  value_type (arg1))
-	       && is_integral_type (value_type (arg2)))
-	arg2 = value_ptradd (arg1, value_as_long (arg2));
-      else if (op == BINOP_SUB && ptrmath_type_p (exp->language_defn,
-						  value_type (arg1))
-	       && is_integral_type (value_type (arg2)))
-	arg2 = value_ptradd (arg1, - value_as_long (arg2));
-      else
-	{
-	  struct value *tmp = arg1;
-
-	  /* For shift and integer exponentiation operations,
-	     only promote the first argument.  */
-	  if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
-	      && is_integral_type (value_type (arg2)))
-	    unop_promote (exp->language_defn, exp->gdbarch, &tmp);
-	  else
-	    binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
-
-	  arg2 = value_binop (tmp, arg2, op);
-	}
-      return value_assign (arg1, arg2);
+      return eval_binop_assign_modify (expect_type, exp, noside, op,
+				       arg1, arg2);
 
     case BINOP_ADD:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
