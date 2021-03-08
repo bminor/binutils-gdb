@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* std-operator.def (OP_NAME, OP_ATR_IMAGE, OP_ATR_MODULUS)
+	(OP_OTHERS, OP_CHOICES, OP_POSITIONAL, OP_DISCRETE_RANGE):
+	Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* std-operator.def (UNOP_CAP, UNOP_CHR, UNOP_ORD, UNOP_FLOAT)
 	(UNOP_MAX, UNOP_MIN, UNOP_ODD, UNOP_TRUNC, OP_M2_STRING): Remove.
 
