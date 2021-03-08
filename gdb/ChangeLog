@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_funcall_operation::evaluate): New method.
+	* ada-exp.h (class ada_var_msym_value_operation) <get_symbol>: New
+	method.
+	(class ada_funcall_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_structop_operation::evaluate): New method.
 	* ada-exp.h (class ada_structop_operation): New.
 

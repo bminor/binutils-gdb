@@ -320,6 +320,9 @@ public:
 			    struct expression *exp,
 			    enum noside noside) override;
 
+  symbol *get_symbol () const
+  { return std::get<0> (m_storage); }
+
 protected:
 
   using operation::do_generate_ax;
@@ -385,6 +388,22 @@ public:
 
   enum exp_opcode opcode () const override
   { return STRUCTOP_STRUCT; }
+};
+
+/* Function calls for Ada.  */
+class ada_funcall_operation
+  : public tuple_holding_operation<operation_up, std::vector<operation_up>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_FUNCALL; }
 };
 
 } /* namespace expr */

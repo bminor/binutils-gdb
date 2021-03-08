@@ -10830,6 +10830,148 @@ ada_structop_operation::evaluate (struct type *expect_type,
     }
 }
 
+value *
+ada_funcall_operation::evaluate (struct type *expect_type,
+				 struct expression *exp,
+				 enum noside noside)
+{
+  const std::vector<operation_up> &args_up = std::get<1> (m_storage);
+  int nargs = args_up.size ();
+  std::vector<value *> argvec (nargs);
+  operation_up &callee_op = std::get<0> (m_storage);
+
+  ada_var_value_operation *avv
+    = dynamic_cast<ada_var_value_operation *> (callee_op.get ());
+  if (avv != nullptr
+      && SYMBOL_DOMAIN (avv->get_symbol ()) == UNDEF_DOMAIN)
+    error (_("Unexpected unresolved symbol, %s, during evaluation"),
+	   avv->get_symbol ()->print_name ());
+
+  value *callee = callee_op->evaluate (nullptr, exp, noside);
+  for (int i = 0; i < args_up.size (); ++i)
+    argvec[i] = args_up[i]->evaluate (nullptr, exp, noside);
+
+  if (ada_is_constrained_packed_array_type
+      (desc_base_type (value_type (callee))))
+    callee = ada_coerce_to_simple_array (callee);
+  else if (value_type (callee)->code () == TYPE_CODE_ARRAY
+	   && TYPE_FIELD_BITSIZE (value_type (callee), 0) != 0)
+    /* This is a packed array that has already been fixed, and
+       therefore already coerced to a simple array.  Nothing further
+       to do.  */
+    ;
+  else if (value_type (callee)->code () == TYPE_CODE_REF)
+    {
+      /* Make sure we dereference references so that all the code below
+	 feels like it's really handling the referenced value.  Wrapping
+	 types (for alignment) may be there, so make sure we strip them as
+	 well.  */
+      callee = ada_to_fixed_value (coerce_ref (callee));
+    }
+  else if (value_type (callee)->code () == TYPE_CODE_ARRAY
+	   && VALUE_LVAL (callee) == lval_memory)
+    callee = value_addr (callee);
+
+  struct type *type = ada_check_typedef (value_type (callee));
+
+  /* Ada allows us to implicitly dereference arrays when subscripting
+     them.  So, if this is an array typedef (encoding use for array
+     access types encoded as fat pointers), strip it now.  */
+  if (type->code () == TYPE_CODE_TYPEDEF)
+    type = ada_typedef_target_type (type);
+
+  if (type->code () == TYPE_CODE_PTR)
+    {
+      switch (ada_check_typedef (TYPE_TARGET_TYPE (type))->code ())
+	{
+	case TYPE_CODE_FUNC:
+	  type = ada_check_typedef (TYPE_TARGET_TYPE (type));
+	  break;
+	case TYPE_CODE_ARRAY:
+	  break;
+	case TYPE_CODE_STRUCT:
+	  if (noside != EVAL_AVOID_SIDE_EFFECTS)
+	    callee = ada_value_ind (callee);
+	  type = ada_check_typedef (TYPE_TARGET_TYPE (type));
+	  break;
+	default:
+	  error (_("cannot subscript or call something of type `%s'"),
+		 ada_type_name (value_type (callee)));
+	  break;
+	}
+    }
+
+  switch (type->code ())
+    {
+    case TYPE_CODE_FUNC:
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  if (TYPE_TARGET_TYPE (type) == NULL)
+	    error_call_unknown_return_type (NULL);
+	  return allocate_value (TYPE_TARGET_TYPE (type));
+	}
+      return call_function_by_hand (callee, NULL, argvec);
+    case TYPE_CODE_INTERNAL_FUNCTION:
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	/* We don't know anything about what the internal
+	   function might return, but we have to return
+	   something.  */
+	return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+			   not_lval);
+      else
+	return call_internal_function (exp->gdbarch, exp->language_defn,
+				       callee, nargs,
+				       argvec.data ());
+
+    case TYPE_CODE_STRUCT:
+      {
+	int arity;
+
+	arity = ada_array_arity (type);
+	type = ada_array_element_type (type, nargs);
+	if (type == NULL)
+	  error (_("cannot subscript or call a record"));
+	if (arity != nargs)
+	  error (_("wrong number of subscripts; expecting %d"), arity);
+	if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  return value_zero (ada_aligned_type (type), lval_memory);
+	return
+	  unwrap_value (ada_value_subscript
+			(callee, nargs, argvec.data ()));
+      }
+    case TYPE_CODE_ARRAY:
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  type = ada_array_element_type (type, nargs);
+	  if (type == NULL)
+	    error (_("element type of array unknown"));
+	  else
+	    return value_zero (ada_aligned_type (type), lval_memory);
+	}
+      return
+	unwrap_value (ada_value_subscript
+		      (ada_coerce_to_simple_array (callee),
+		       nargs, argvec.data ()));
+    case TYPE_CODE_PTR:     /* Pointer to array */
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	{
+	  type = to_fixed_array_type (TYPE_TARGET_TYPE (type), NULL, 1);
+	  type = ada_array_element_type (type, nargs);
+	  if (type == NULL)
+	    error (_("element type of array unknown"));
+	  else
+	    return value_zero (ada_aligned_type (type), lval_memory);
+	}
+      return
+	unwrap_value (ada_value_ptr_subscript (callee, nargs,
+					       argvec.data ()));
+
+    default:
+      error (_("Attempt to index or call something other than an "
+	       "array or function"));
+    }
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure
