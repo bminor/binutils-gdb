@@ -73,6 +73,10 @@ static value *fortran_prepare_argument (struct expression *exp, int *pos,
 					int arg_num, bool is_internal_call_p,
 					struct type *func_type,
 					enum noside noside);
+static value *fortran_prepare_argument (struct expression *exp,
+					expr::operation *subexp,
+					int arg_num, bool is_internal_call_p,
+					struct type *func_type, enum noside noside);
 
 /* Return the encoding that should be used for the character type
    TYPE.  */
@@ -1395,6 +1399,474 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
   return nullptr;
 }
 
+namespace expr
+{
+
+/* Called from evaluate to perform array indexing, and sub-range
+   extraction, for Fortran.  As well as arrays this function also
+   handles strings as they can be treated like arrays of characters.
+   ARRAY is the array or string being accessed.  EXP and NOSIDE are as
+   for evaluate.  */
+
+value *
+fortran_undetermined::value_subarray (value *array,
+				      struct expression *exp,
+				      enum noside noside)
+{
+  type *original_array_type = check_typedef (value_type (array));
+  bool is_string_p = original_array_type->code () == TYPE_CODE_STRING;
+  const std::vector<operation_up> &ops = std::get<1> (m_storage);
+  int nargs = ops.size ();
+
+  /* Perform checks for ARRAY not being available.  The somewhat overly
+     complex logic here is just to keep backward compatibility with the
+     errors that we used to get before FORTRAN_VALUE_SUBARRAY was
+     rewritten.  Maybe a future task would streamline the error messages we
+     get here, and update all the expected test results.  */
+  if (ops[0]->opcode () != OP_RANGE)
+    {
+      if (type_not_associated (original_array_type))
+	error (_("no such vector element (vector not associated)"));
+      else if (type_not_allocated (original_array_type))
+	error (_("no such vector element (vector not allocated)"));
+    }
+  else
+    {
+      if (type_not_associated (original_array_type))
+	error (_("array not associated"));
+      else if (type_not_allocated (original_array_type))
+	error (_("array not allocated"));
+    }
+
+  /* First check that the number of dimensions in the type we are slicing
+     matches the number of arguments we were passed.  */
+  int ndimensions = calc_f77_array_dims (original_array_type);
+  if (nargs != ndimensions)
+    error (_("Wrong number of subscripts"));
+
+  /* This will be initialised below with the type of the elements held in
+     ARRAY.  */
+  struct type *inner_element_type;
+
+  /* Extract the types of each array dimension from the original array
+     type.  We need these available so we can fill in the default upper and
+     lower bounds if the user requested slice doesn't provide that
+     information.  Additionally unpacking the dimensions like this gives us
+     the inner element type.  */
+  std::vector<struct type *> dim_types;
+  {
+    dim_types.reserve (ndimensions);
+    struct type *type = original_array_type;
+    for (int i = 0; i < ndimensions; ++i)
+      {
+	dim_types.push_back (type);
+	type = TYPE_TARGET_TYPE (type);
+      }
+    /* TYPE is now the inner element type of the array, we start the new
+       array slice off as this type, then as we process the requested slice
+       (from the user) we wrap new types around this to build up the final
+       slice type.  */
+    inner_element_type = type;
+  }
+
+  /* As we analyse the new slice type we need to understand if the data
+     being referenced is contiguous.  Do decide this we must track the size
+     of an element at each dimension of the new slice array.  Initially the
+     elements of the inner most dimension of the array are the same inner
+     most elements as the original ARRAY.  */
+  LONGEST slice_element_size = TYPE_LENGTH (inner_element_type);
+
+  /* Start off assuming all data is contiguous, this will be set to false
+     if access to any dimension results in non-contiguous data.  */
+  bool is_all_contiguous = true;
+
+  /* The TOTAL_OFFSET is the distance in bytes from the start of the
+     original ARRAY to the start of the new slice.  This is calculated as
+     we process the information from the user.  */
+  LONGEST total_offset = 0;
+
+  /* A structure representing information about each dimension of the
+     resulting slice.  */
+  struct slice_dim
+  {
+    /* Constructor.  */
+    slice_dim (LONGEST l, LONGEST h, LONGEST s, struct type *idx)
+      : low (l),
+	high (h),
+	stride (s),
+	index (idx)
+    { /* Nothing.  */ }
+
+    /* The low bound for this dimension of the slice.  */
+    LONGEST low;
+
+    /* The high bound for this dimension of the slice.  */
+    LONGEST high;
+
+    /* The byte stride for this dimension of the slice.  */
+    LONGEST stride;
+
+    struct type *index;
+  };
+
+  /* The dimensions of the resulting slice.  */
+  std::vector<slice_dim> slice_dims;
+
+  /* Process the incoming arguments.   These arguments are in the reverse
+     order to the array dimensions, that is the first argument refers to
+     the last array dimension.  */
+  if (fortran_array_slicing_debug)
+    debug_printf ("Processing array access:\n");
+  for (int i = 0; i < nargs; ++i)
+    {
+      /* For each dimension of the array the user will have either provided
+	 a ranged access with optional lower bound, upper bound, and
+	 stride, or the user will have supplied a single index.  */
+      struct type *dim_type = dim_types[ndimensions - (i + 1)];
+      fortran_range_operation *range_op
+	= dynamic_cast<fortran_range_operation *> (ops[i].get ());
+      if (range_op != nullptr)
+	{
+	  enum range_flag range_flag = range_op->get_flags ();
+
+	  LONGEST low, high, stride;
+	  low = high = stride = 0;
+
+	  if ((range_flag & RANGE_LOW_BOUND_DEFAULT) == 0)
+	    low = value_as_long (range_op->evaluate0 (exp, noside));
+	  else
+	    low = f77_get_lowerbound (dim_type);
+	  if ((range_flag & RANGE_HIGH_BOUND_DEFAULT) == 0)
+	    high = value_as_long (range_op->evaluate1 (exp, noside));
+	  else
+	    high = f77_get_upperbound (dim_type);
+	  if ((range_flag & RANGE_HAS_STRIDE) == RANGE_HAS_STRIDE)
+	    stride = value_as_long (range_op->evaluate2 (exp, noside));
+	  else
+	    stride = 1;
+
+	  if (stride == 0)
+	    error (_("stride must not be 0"));
+
+	  /* Get information about this dimension in the original ARRAY.  */
+	  struct type *target_type = TYPE_TARGET_TYPE (dim_type);
+	  struct type *index_type = dim_type->index_type ();
+	  LONGEST lb = f77_get_lowerbound (dim_type);
+	  LONGEST ub = f77_get_upperbound (dim_type);
+	  LONGEST sd = index_type->bit_stride ();
+	  if (sd == 0)
+	    sd = TYPE_LENGTH (target_type) * 8;
+
+	  if (fortran_array_slicing_debug)
+	    {
+	      debug_printf ("|-> Range access\n");
+	      std::string str = type_to_string (dim_type);
+	      debug_printf ("|   |-> Type: %s\n", str.c_str ());
+	      debug_printf ("|   |-> Array:\n");
+	      debug_printf ("|   |   |-> Low bound: %s\n", plongest (lb));
+	      debug_printf ("|   |   |-> High bound: %s\n", plongest (ub));
+	      debug_printf ("|   |   |-> Bit stride: %s\n", plongest (sd));
+	      debug_printf ("|   |   |-> Byte stride: %s\n", plongest (sd / 8));
+	      debug_printf ("|   |   |-> Type size: %s\n",
+			    pulongest (TYPE_LENGTH (dim_type)));
+	      debug_printf ("|   |   '-> Target type size: %s\n",
+			    pulongest (TYPE_LENGTH (target_type)));
+	      debug_printf ("|   |-> Accessing:\n");
+	      debug_printf ("|   |   |-> Low bound: %s\n",
+			    plongest (low));
+	      debug_printf ("|   |   |-> High bound: %s\n",
+			    plongest (high));
+	      debug_printf ("|   |   '-> Element stride: %s\n",
+			    plongest (stride));
+	    }
+
+	  /* Check the user hasn't asked for something invalid.  */
+	  if (high > ub || low < lb)
+	    error (_("array subscript out of bounds"));
+
+	  /* Calculate what this dimension of the new slice array will look
+	     like.  OFFSET is the byte offset from the start of the
+	     previous (more outer) dimension to the start of this
+	     dimension.  E_COUNT is the number of elements in this
+	     dimension.  REMAINDER is the number of elements remaining
+	     between the last included element and the upper bound.  For
+	     example an access '1:6:2' will include elements 1, 3, 5 and
+	     have a remainder of 1 (element #6).  */
+	  LONGEST lowest = std::min (low, high);
+	  LONGEST offset = (sd / 8) * (lowest - lb);
+	  LONGEST e_count = std::abs (high - low) + 1;
+	  e_count = (e_count + (std::abs (stride) - 1)) / std::abs (stride);
+	  LONGEST new_low = 1;
+	  LONGEST new_high = new_low + e_count - 1;
+	  LONGEST new_stride = (sd * stride) / 8;
+	  LONGEST last_elem = low + ((e_count - 1) * stride);
+	  LONGEST remainder = high - last_elem;
+	  if (low > high)
+	    {
+	      offset += std::abs (remainder) * TYPE_LENGTH (target_type);
+	      if (stride > 0)
+		error (_("incorrect stride and boundary combination"));
+	    }
+	  else if (stride < 0)
+	    error (_("incorrect stride and boundary combination"));
+
+	  /* Is the data within this dimension contiguous?  It is if the
+	     newly computed stride is the same size as a single element of
+	     this dimension.  */
+	  bool is_dim_contiguous = (new_stride == slice_element_size);
+	  is_all_contiguous &= is_dim_contiguous;
+
+	  if (fortran_array_slicing_debug)
+	    {
+	      debug_printf ("|   '-> Results:\n");
+	      debug_printf ("|       |-> Offset = %s\n", plongest (offset));
+	      debug_printf ("|       |-> Elements = %s\n", plongest (e_count));
+	      debug_printf ("|       |-> Low bound = %s\n", plongest (new_low));
+	      debug_printf ("|       |-> High bound = %s\n",
+			    plongest (new_high));
+	      debug_printf ("|       |-> Byte stride = %s\n",
+			    plongest (new_stride));
+	      debug_printf ("|       |-> Last element = %s\n",
+			    plongest (last_elem));
+	      debug_printf ("|       |-> Remainder = %s\n",
+			    plongest (remainder));
+	      debug_printf ("|       '-> Contiguous = %s\n",
+			    (is_dim_contiguous ? "Yes" : "No"));
+	    }
+
+	  /* Figure out how big (in bytes) an element of this dimension of
+	     the new array slice will be.  */
+	  slice_element_size = std::abs (new_stride * e_count);
+
+	  slice_dims.emplace_back (new_low, new_high, new_stride,
+				   index_type);
+
+	  /* Update the total offset.  */
+	  total_offset += offset;
+	}
+      else
+	{
+	  /* There is a single index for this dimension.  */
+	  LONGEST index
+	    = value_as_long (ops[i]->evaluate_with_coercion (exp, noside));
+
+	  /* Get information about this dimension in the original ARRAY.  */
+	  struct type *target_type = TYPE_TARGET_TYPE (dim_type);
+	  struct type *index_type = dim_type->index_type ();
+	  LONGEST lb = f77_get_lowerbound (dim_type);
+	  LONGEST ub = f77_get_upperbound (dim_type);
+	  LONGEST sd = index_type->bit_stride () / 8;
+	  if (sd == 0)
+	    sd = TYPE_LENGTH (target_type);
+
+	  if (fortran_array_slicing_debug)
+	    {
+	      debug_printf ("|-> Index access\n");
+	      std::string str = type_to_string (dim_type);
+	      debug_printf ("|   |-> Type: %s\n", str.c_str ());
+	      debug_printf ("|   |-> Array:\n");
+	      debug_printf ("|   |   |-> Low bound: %s\n", plongest (lb));
+	      debug_printf ("|   |   |-> High bound: %s\n", plongest (ub));
+	      debug_printf ("|   |   |-> Byte stride: %s\n", plongest (sd));
+	      debug_printf ("|   |   |-> Type size: %s\n",
+			    pulongest (TYPE_LENGTH (dim_type)));
+	      debug_printf ("|   |   '-> Target type size: %s\n",
+			    pulongest (TYPE_LENGTH (target_type)));
+	      debug_printf ("|   '-> Accessing:\n");
+	      debug_printf ("|       '-> Index: %s\n",
+			    plongest (index));
+	    }
+
+	  /* If the array has actual content then check the index is in
+	     bounds.  An array without content (an unbound array) doesn't
+	     have a known upper bound, so don't error check in that
+	     situation.  */
+	  if (index < lb
+	      || (dim_type->index_type ()->bounds ()->high.kind () != PROP_UNDEFINED
+		  && index > ub)
+	      || (VALUE_LVAL (array) != lval_memory
+		  && dim_type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED))
+	    {
+	      if (type_not_associated (dim_type))
+		error (_("no such vector element (vector not associated)"));
+	      else if (type_not_allocated (dim_type))
+		error (_("no such vector element (vector not allocated)"));
+	      else
+		error (_("no such vector element"));
+	    }
+
+	  /* Calculate using the type stride, not the target type size.  */
+	  LONGEST offset = sd * (index - lb);
+	  total_offset += offset;
+	}
+    }
+
+  /* Build a type that represents the new array slice in the target memory
+     of the original ARRAY, this type makes use of strides to correctly
+     find only those elements that are part of the new slice.  */
+  struct type *array_slice_type = inner_element_type;
+  for (const auto &d : slice_dims)
+    {
+      /* Create the range.  */
+      dynamic_prop p_low, p_high, p_stride;
+
+      p_low.set_const_val (d.low);
+      p_high.set_const_val (d.high);
+      p_stride.set_const_val (d.stride);
+
+      struct type *new_range
+	= create_range_type_with_stride ((struct type *) NULL,
+					 TYPE_TARGET_TYPE (d.index),
+					 &p_low, &p_high, 0, &p_stride,
+					 true);
+      array_slice_type
+	= create_array_type (nullptr, array_slice_type, new_range);
+    }
+
+  if (fortran_array_slicing_debug)
+    {
+      debug_printf ("'-> Final result:\n");
+      debug_printf ("    |-> Type: %s\n",
+		    type_to_string (array_slice_type).c_str ());
+      debug_printf ("    |-> Total offset: %s\n",
+		    plongest (total_offset));
+      debug_printf ("    |-> Base address: %s\n",
+		    core_addr_to_string (value_address (array)));
+      debug_printf ("    '-> Contiguous = %s\n",
+		    (is_all_contiguous ? "Yes" : "No"));
+    }
+
+  /* Should we repack this array slice?  */
+  if (!is_all_contiguous && (repack_array_slices || is_string_p))
+    {
+      /* Build a type for the repacked slice.  */
+      struct type *repacked_array_type = inner_element_type;
+      for (const auto &d : slice_dims)
+	{
+	  /* Create the range.  */
+	  dynamic_prop p_low, p_high, p_stride;
+
+	  p_low.set_const_val (d.low);
+	  p_high.set_const_val (d.high);
+	  p_stride.set_const_val (TYPE_LENGTH (repacked_array_type));
+
+	  struct type *new_range
+	    = create_range_type_with_stride ((struct type *) NULL,
+					     TYPE_TARGET_TYPE (d.index),
+					     &p_low, &p_high, 0, &p_stride,
+					     true);
+	  repacked_array_type
+	    = create_array_type (nullptr, repacked_array_type, new_range);
+	}
+
+      /* Now copy the elements from the original ARRAY into the packed
+	 array value DEST.  */
+      struct value *dest = allocate_value (repacked_array_type);
+      if (value_lazy (array)
+	  || (total_offset + TYPE_LENGTH (array_slice_type)
+	      > TYPE_LENGTH (check_typedef (value_type (array)))))
+	{
+	  fortran_array_walker<fortran_lazy_array_repacker_impl> p
+	    (array_slice_type, value_address (array) + total_offset, dest);
+	  p.walk ();
+	}
+      else
+	{
+	  fortran_array_walker<fortran_array_repacker_impl> p
+	    (array_slice_type, value_address (array) + total_offset,
+	     total_offset, array, dest);
+	  p.walk ();
+	}
+      array = dest;
+    }
+  else
+    {
+      if (VALUE_LVAL (array) == lval_memory)
+	{
+	  /* If the value we're taking a slice from is not yet loaded, or
+	     the requested slice is outside the values content range then
+	     just create a new lazy value pointing at the memory where the
+	     contents we're looking for exist.  */
+	  if (value_lazy (array)
+	      || (total_offset + TYPE_LENGTH (array_slice_type)
+		  > TYPE_LENGTH (check_typedef (value_type (array)))))
+	    array = value_at_lazy (array_slice_type,
+				   value_address (array) + total_offset);
+	  else
+	    array = value_from_contents_and_address (array_slice_type,
+						     (value_contents (array)
+						      + total_offset),
+						     (value_address (array)
+						      + total_offset));
+	}
+      else if (!value_lazy (array))
+	array = value_from_component (array, array_slice_type, total_offset);
+      else
+	error (_("cannot subscript arrays that are not in memory"));
+    }
+
+  return array;
+}
+
+value *
+fortran_undetermined::evaluate (struct type *expect_type,
+				struct expression *exp,
+				enum noside noside)
+{
+  value *callee = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type = check_typedef (value_type (callee));
+  enum type_code code = type->code ();
+
+  if (code == TYPE_CODE_PTR)
+    {
+      /* Fortran always passes variable to subroutines as pointer.
+	 So we need to look into its target type to see if it is
+	 array, string or function.  If it is, we need to switch
+	 to the target value the original one points to.  */
+      struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
+
+      if (target_type->code () == TYPE_CODE_ARRAY
+	  || target_type->code () == TYPE_CODE_STRING
+	  || target_type->code () == TYPE_CODE_FUNC)
+	{
+	  callee = value_ind (callee);
+	  type = check_typedef (value_type (callee));
+	  code = type->code ();
+	}
+    }
+
+  switch (code)
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRING:
+      return value_subarray (callee, exp, noside);
+
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_INTERNAL_FUNCTION:
+      {
+	/* It's a function call.  Allocate arg vector, including
+	   space for the function to be called in argvec[0] and a
+	   termination NULL.  */
+	const std::vector<operation_up> &actual (std::get<1> (m_storage));
+	std::vector<value *> argvec (actual.size ());
+	bool is_internal_func = (code == TYPE_CODE_INTERNAL_FUNCTION);
+	for (int tem = 0; tem < argvec.size (); tem++)
+	  argvec[tem] = fortran_prepare_argument (exp, actual[tem].get (),
+						  tem, is_internal_func,
+						  value_type (callee),
+						  noside);
+	return evaluate_subexp_do_call (exp, noside, callee, argvec,
+					nullptr, expect_type);
+      }
+
+    default:
+      error (_("Cannot perform substring on this type"));
+    }
+}
+
+} /* namespace expr */
+
 /* Special expression lengths for Fortran.  */
 
 static void
@@ -1912,6 +2384,65 @@ fortran_prepare_argument (struct expression *exp, int *pos,
     }
 
   struct value *arg_val = evaluate_subexp_with_coercion (exp, pos, noside);
+  return fortran_argument_convert (arg_val, is_artificial);
+}
+
+/* Prepare (and return) an argument value ready for an inferior function
+   call to a Fortran function.  EXP and POS are the expressions describing
+   the argument to prepare.  ARG_NUM is the argument number being
+   prepared, with 0 being the first argument and so on.  FUNC_TYPE is the
+   type of the function being called.
+
+   IS_INTERNAL_CALL_P is true if this is a call to a function of type
+   TYPE_CODE_INTERNAL_FUNCTION, otherwise this parameter is false.
+
+   NOSIDE has its usual meaning for expression parsing (see eval.c).
+
+   Arguments in Fortran are normally passed by address, we coerce the
+   arguments here rather than in value_arg_coerce as otherwise the call to
+   malloc (to place the non-lvalue parameters in target memory) is hit by
+   this Fortran specific logic.  This results in malloc being called with a
+   pointer to an integer followed by an attempt to malloc the arguments to
+   malloc in target memory.  Infinite recursion ensues.  */
+
+static value *
+fortran_prepare_argument (struct expression *exp,
+			  expr::operation *subexp,
+			  int arg_num, bool is_internal_call_p,
+			  struct type *func_type, enum noside noside)
+{
+  if (is_internal_call_p)
+    return subexp->evaluate_with_coercion (exp, noside);
+
+  bool is_artificial = ((arg_num >= func_type->num_fields ())
+			? true
+			: TYPE_FIELD_ARTIFICIAL (func_type, arg_num));
+
+  /* If this is an artificial argument, then either, this is an argument
+     beyond the end of the known arguments, or possibly, there are no known
+     arguments (maybe missing debug info).
+
+     For these artificial arguments, if the user has prefixed it with '&'
+     (for address-of), then lets always allow this to succeed, even if the
+     argument is not actually in inferior memory.  This will allow the user
+     to pass arguments to a Fortran function even when there's no debug
+     information.
+
+     As we already pass the address of non-artificial arguments, all we
+     need to do if skip the UNOP_ADDR operator in the expression and mark
+     the argument as non-artificial.  */
+  if (is_artificial)
+    {
+      expr::unop_addr_operation *addrop
+	= dynamic_cast<expr::unop_addr_operation *> (subexp);
+      if (addrop != nullptr)
+	{
+	  subexp = addrop->get_expression ().get ();
+	  is_artificial = false;
+	}
+    }
+
+  struct value *arg_val = subexp->evaluate_with_coercion (exp, noside);
   return fortran_argument_convert (arg_val, is_artificial);
 }
 

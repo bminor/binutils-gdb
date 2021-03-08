@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class unop_addr_operation) <get_expression>: New
+	method.
+	* f-lang.c (fortran_undetermined::value_subarray)
+	(fortran_undetermined::evaluate): New methods.
+	(fortran_prepare_argument): New overload.
+	* f-exp.h (class fortran_range_operation)
+	(class fortran_undetermined): New classes.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_structop::evaluate_funcall): New method.
 	* rust-exp.h (class rust_structop) <evaluate_funcall>: Declare
 	method.

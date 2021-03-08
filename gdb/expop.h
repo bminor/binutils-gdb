@@ -1656,6 +1656,12 @@ public:
   enum exp_opcode opcode () const override
   { return UNOP_ADDR; }
 
+  /* Return the subexpression.  */
+  const operation_up &get_expression () const
+  {
+    return std::get<0> (m_storage);
+  }
+
 protected:
 
   void do_generate_ax (struct expression *exp,

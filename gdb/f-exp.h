@@ -96,6 +96,69 @@ public:
   { return BINOP_FORTRAN_CMPLX; }
 };
 
+/* OP_RANGE for Fortran.  */
+class fortran_range_operation
+  : public tuple_holding_operation<enum range_flag, operation_up, operation_up,
+				   operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    error (_("ranges not allowed in this context"));
+  }
+
+  range_flag get_flags () const
+  {
+    return std::get<0> (m_storage);
+  }
+
+  value *evaluate0 (struct expression *exp, enum noside noside) const
+  {
+    return std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  }
+
+  value *evaluate1 (struct expression *exp, enum noside noside) const
+  {
+    return std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+  }
+
+  value *evaluate2 (struct expression *exp, enum noside noside) const
+  {
+    return std::get<3> (m_storage)->evaluate (nullptr, exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_RANGE; }
+};
+
+/* In F77, functions, substring ops and array subscript operations
+   cannot be disambiguated at parse time.  This operation handles
+   both, deciding which do to at evaluation time.  */
+class fortran_undetermined
+  : public tuple_holding_operation<operation_up, std::vector<operation_up>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return OP_F77_UNDETERMINED_ARGLIST; }
+
+private:
+
+  value *value_subarray (value *array, struct expression *exp,
+			 enum noside noside);
+};
+
 } /* namespace expr */
 
 #endif /* FORTRAN_EXP_H */
