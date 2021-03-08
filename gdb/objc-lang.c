@@ -43,6 +43,7 @@
 #include "infcall.h"
 #include "valprint.h"
 #include "cli/cli-utils.h"
+#include "c-exp.h"
 
 #include <ctype.h>
 #include <algorithm>
@@ -507,15 +508,20 @@ end_msglist (struct parser_state *ps)
   char *p = msglist_sel;
   CORE_ADDR selid;
 
+  std::vector<expr::operation_up> args = ps->pop_vector (val);
+  expr::operation_up target = ps->pop ();
+
   selname_chain = sel->next;
   msglist_len = sel->msglist_len;
   msglist_sel = sel->msglist_sel;
   selid = lookup_child_selector (ps->gdbarch (), p);
   if (!selid)
     error (_("Can't find selector \"%s\""), p);
-  write_exp_elt_longcst (ps, selid);
+
+  ps->push_new<expr::objc_msgcall_operation> (selid, std::move (target),
+					      std::move (args));
+
   xfree(p);
-  write_exp_elt_longcst (ps, val);	/* Number of args */
   xfree(sel);
 
   return val;

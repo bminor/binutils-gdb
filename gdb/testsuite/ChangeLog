@@ -1,3 +1,7 @@
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/debug-expr.exp: Update expected dump output.
+
 2021-03-06  Tom Tromey  <tom@tromey.com>
 
 	* lib/dwarf.exp (_handle_DW_FORM): Treat DW_FORM_GNU_ref_alt and

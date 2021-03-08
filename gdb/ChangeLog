@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* objc-lang.c (end_msglist): Create operations.
+	* c-exp.y: Change parser to create operations.
+	(write_destructor_name): Remove.
+	(c_parse): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-exp.y: Create operations.
 	(rust_parser::convert_params_to_expression): Change return type.
 	(binop_maker_ftype): New typedef.
