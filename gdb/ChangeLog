@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* std-operator.def (UNOP_CAP, UNOP_CHR, UNOP_ORD, UNOP_FLOAT)
+	(UNOP_MAX, UNOP_MIN, UNOP_ODD, UNOP_TRUNC, OP_M2_STRING): Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* std-operator.def (OP_ATR_MIN, OP_ATR_MAX): Remove.
 	* ada-lang.c (ada_binop_minmax): Update.
 	* ada-exp.h (ada_binop_min_operation, ada_binop_max_operation):

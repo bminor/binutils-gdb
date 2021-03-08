@@ -230,19 +230,10 @@ OP (UNOP_ALIGNOF)		/* Unary alignof (followed by expression) */
 
 OP (UNOP_PLUS)			/* Unary plus */
 
-OP (UNOP_CAP)			/* Modula-2 standard (unary) procedures */
-OP (UNOP_CHR)
-OP (UNOP_ORD)
 OP (UNOP_ABS)
-OP (UNOP_FLOAT)
 OP (UNOP_HIGH)
-OP (UNOP_MAX)
-OP (UNOP_MIN)
-OP (UNOP_ODD)
-OP (UNOP_TRUNC)
 
 OP (OP_BOOL)			/* Modula-2 builtin BOOLEAN type */
-OP (OP_M2_STRING)		/* Modula-2 string constants */
 
 /* STRUCTOP_... operate on a value from a following subexpression
    by extracting a structure component specified by a string
