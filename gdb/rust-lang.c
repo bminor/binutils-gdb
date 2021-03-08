@@ -1168,7 +1168,7 @@ rust_compute_range (struct type *type, struct value *range,
 
 /* A helper for rust_evaluate_subexp that handles BINOP_SUBSCRIPT.  */
 
-static struct value *
+struct value *
 rust_subscript (struct type *expect_type, struct expression *exp,
 		enum noside noside, bool for_addr,
 		struct value *lhs, struct value *rhs)

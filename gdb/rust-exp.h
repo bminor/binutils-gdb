@@ -38,6 +38,10 @@ extern struct value *eval_op_rust_ind (struct type *expect_type,
 				       enum noside noside,
 				       enum exp_opcode opcode,
 				       struct value *value);
+extern struct value *rust_subscript (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside, bool for_addr,
+				     struct value *lhs, struct value *rhs);
 
 namespace expr
 {
@@ -65,6 +69,59 @@ public:
     value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
     return eval_op_rust_ind (expect_type, exp, noside, UNOP_IND, arg1);
   }
+};
+
+/* Subscript operator for Rust.  */
+class rust_subscript_operation
+  : public tuple_holding_operation<operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return rust_subscript (expect_type, exp, noside, false, arg1, arg2);
+  }
+
+  value *slice (struct type *expect_type,
+		struct expression *exp,
+		enum noside noside)
+  {
+    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return rust_subscript (expect_type, exp, noside, true, arg1, arg2);
+  }
+
+  enum exp_opcode opcode () const override
+  { return BINOP_SUBSCRIPT; }
+};
+
+class rust_unop_addr_operation
+  : public tuple_holding_operation<operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    operation *oper = std::get<0> (m_storage).get ();
+    rust_subscript_operation *sub_op
+      = dynamic_cast<rust_subscript_operation *> (oper);
+    if (sub_op != nullptr)
+      return sub_op->slice (expect_type, exp, noside);
+    return oper->evaluate_for_address (exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  { return UNOP_ADDR; }
 };
 
 } /* namespace expr */
