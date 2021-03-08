@@ -65,6 +65,11 @@ extern struct value *eval_op_string (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, int len,
 				     const char *string);
+extern struct value *eval_op_ternop (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     struct value *array, struct value *low,
+				     struct value *upper);
 
 namespace expr
 {
@@ -703,6 +708,30 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_STRING; }
+};
+
+class ternop_slice_operation
+  : public maybe_constant_operation<operation_up, operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    struct value *array
+      = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    struct value *low
+      = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    struct value *upper
+      = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+    return eval_op_ternop (expect_type, exp, noside, array, low, upper);
+  }
+
+  enum exp_opcode opcode () const override
+  { return TERNOP_SLICE; }
 };
 
 } /* namespace expr */

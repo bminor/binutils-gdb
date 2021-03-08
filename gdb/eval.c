@@ -1327,7 +1327,7 @@ eval_op_concat (struct type *expect_type, struct expression *exp,
 
 /* A helper function for TERNOP_SLICE.  */
 
-static struct value *
+struct value *
 eval_op_ternop (struct type *expect_type, struct expression *exp,
 		enum noside noside,
 		struct value *array, struct value *low, struct value *upper)
