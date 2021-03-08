@@ -1375,21 +1375,20 @@ set_command (const char *exp, int from_tty)
 {
   expression_up expr = parse_expression (exp);
 
-  if (expr->op != nullptr)
-    switch (expr->op->opcode ())
-      {
-      case UNOP_PREINCREMENT:
-      case UNOP_POSTINCREMENT:
-      case UNOP_PREDECREMENT:
-      case UNOP_POSTDECREMENT:
-      case BINOP_ASSIGN:
-      case BINOP_ASSIGN_MODIFY:
-      case BINOP_COMMA:
-	break;
-      default:
-	warning
-	  (_("Expression is not an assignment (and might have no effect)"));
-      }
+  switch (expr->op->opcode ())
+    {
+    case UNOP_PREINCREMENT:
+    case UNOP_POSTINCREMENT:
+    case UNOP_PREDECREMENT:
+    case UNOP_POSTDECREMENT:
+    case BINOP_ASSIGN:
+    case BINOP_ASSIGN_MODIFY:
+    case BINOP_COMMA:
+      break;
+    default:
+      warning
+	(_("Expression is not an assignment (and might have no effect)"));
+    }
 
   evaluate_expression (expr.get ());
 }

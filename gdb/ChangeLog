@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (set_command): Remove null check.
+	* value.c (init_if_undefined_command): Remove null check.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* parse.c (parser_state::push_symbol, parser_state::push_dollar):
 	Update.
 	* p-exp.y (variable): Update.
