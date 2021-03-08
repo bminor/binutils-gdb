@@ -1,5 +1,13 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (unop_incr_operation): New template.
+	(preinc_operation, predec_operation, postinc_operation)
+	(postdec_operation): New typedefs.
+	* eval.c (eval_op_preinc, eval_op_predec, eval_op_postinc)
+	(eval_op_postdec): No longer static.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (unary_ftype): New typedef.
 	(unop_operation, usual_ax_binop_operation): New templates.
 	(unary_plus_operation, unary_neg_operation)

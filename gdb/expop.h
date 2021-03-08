@@ -162,6 +162,26 @@ extern struct value *eval_op_lognot (struct type *expect_type,
 				     enum noside noside,
 				     enum exp_opcode op,
 				     struct value *arg1);
+extern struct value *eval_op_preinc (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     enum exp_opcode op,
+				     struct value *arg1);
+extern struct value *eval_op_predec (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     enum exp_opcode op,
+				     struct value *arg1);
+extern struct value *eval_op_postinc (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside,
+				      enum exp_opcode op,
+				      struct value *arg1);
+extern struct value *eval_op_postdec (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside,
+				      enum exp_opcode op,
+				      struct value *arg1);
 
 namespace expr
 {
@@ -1315,6 +1335,36 @@ using unary_complement_operation
      = usual_ax_unop_operation<UNOP_COMPLEMENT, eval_op_complement>;
 using unary_logical_not_operation
      = usual_ax_unop_operation<UNOP_LOGICAL_NOT, eval_op_lognot>;
+
+/* Handle pre- and post- increment and -decrement.  */
+template<enum exp_opcode OP, unary_ftype FUNC>
+class unop_incr_operation
+  : public tuple_holding_operation<operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+    return FUNC (expect_type, exp, noside, OP, val);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP; }
+};
+
+using preinc_operation
+     = unop_incr_operation<UNOP_PREINCREMENT, eval_op_preinc>;
+using predec_operation
+     = unop_incr_operation<UNOP_PREDECREMENT, eval_op_predec>;
+using postinc_operation
+     = unop_incr_operation<UNOP_POSTINCREMENT, eval_op_postinc>;
+using postdec_operation
+     = unop_incr_operation<UNOP_POSTDECREMENT, eval_op_postdec>;
 
 } /* namespace expr */
 

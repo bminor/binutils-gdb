@@ -1912,7 +1912,7 @@ eval_op_memval (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_PREINCREMENT.  */
 
-static struct value *
+struct value *
 eval_op_preinc (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1)
@@ -1943,7 +1943,7 @@ eval_op_preinc (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_PREDECREMENT.  */
 
-static struct value *
+struct value *
 eval_op_predec (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1)
@@ -1974,7 +1974,7 @@ eval_op_predec (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_POSTINCREMENT.  */
 
-static struct value *
+struct value *
 eval_op_postinc (struct type *expect_type, struct expression *exp,
 		 enum noside noside, enum exp_opcode op,
 		 struct value *arg1)
@@ -2008,7 +2008,7 @@ eval_op_postinc (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_POSTDECREMENT.  */
 
-static struct value *
+struct value *
 eval_op_postdec (struct type *expect_type, struct expression *exp,
 		 enum noside noside, enum exp_opcode op,
 		 struct value *arg1)
