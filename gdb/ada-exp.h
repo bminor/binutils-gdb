@@ -38,6 +38,10 @@ extern struct value *ada_abs (struct type *expect_type,
 			      struct expression *exp,
 			      enum noside noside, enum exp_opcode op,
 			      struct value *arg1);
+extern struct value *ada_unop_in_range (struct type *expect_type,
+					struct expression *exp,
+					enum noside noside, enum exp_opcode op,
+					struct value *arg1, struct type *type);
 
 namespace expr
 {
@@ -108,6 +112,27 @@ using ada_neg_operation = unop_operation<UNOP_NEG, ada_unop_neg>;
 using ada_atr_tag_operation = unop_operation<OP_ATR_TAG, ada_atr_tag>;
 using ada_atr_size_operation = unop_operation<OP_ATR_SIZE, ada_atr_size>;
 using ada_abs_operation = unop_operation<UNOP_ABS, ada_abs>;
+
+/* The in-range operation, given a type.  */
+class ada_unop_range_operation
+  : public tuple_holding_operation<operation_up, struct type *>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    return ada_unop_in_range (expect_type, exp, noside, UNOP_IN_RANGE,
+			      val, std::get<1> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return UNOP_IN_RANGE; }
+};
 
 } /* namespace expr */
 

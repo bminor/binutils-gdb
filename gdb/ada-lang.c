@@ -9978,7 +9978,7 @@ ada_unop_neg (struct type *expect_type,
 
 /* A helper function for UNOP_IN_RANGE.  */
 
-static value *
+value *
 ada_unop_in_range (struct type *expect_type,
 		   struct expression *exp,
 		   enum noside noside, enum exp_opcode op,
