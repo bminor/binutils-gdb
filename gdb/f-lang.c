@@ -1041,6 +1041,25 @@ eval_op_f_mod (struct type *expect_type, struct expression *exp,
   error (_("MOD of type %s not supported"), TYPE_SAFE_NAME (type));
 }
 
+/* A helper function for UNOP_FORTRAN_CEILING.  */
+
+static struct value *
+eval_op_f_ceil (struct type *expect_type, struct expression *exp,
+		enum noside noside,
+		struct value *arg1)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct type *type = value_type (arg1);
+  if (type->code () != TYPE_CODE_FLT)
+    error (_("argument to CEILING must be of type float"));
+  double val
+    = target_float_to_host_double (value_contents (arg1),
+				   value_type (arg1));
+  val = ceil (val);
+  return value_from_host_double (type, val);
+}
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -1072,19 +1091,8 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       return eval_op_f_mod (expect_type, exp, noside, arg1, arg2);
 
     case UNOP_FORTRAN_CEILING:
-      {
-	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-	if (noside == EVAL_SKIP)
-	  return eval_skip_value (exp);
-	type = value_type (arg1);
-	if (type->code () != TYPE_CODE_FLT)
-	  error (_("argument to CEILING must be of type float"));
-	double val
-	  = target_float_to_host_double (value_contents (arg1),
-					 value_type (arg1));
-	val = ceil (val);
-	return value_from_host_double (type, val);
-      }
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+      return eval_op_f_ceil (expect_type, exp, noside, arg1);
 
     case UNOP_FORTRAN_FLOOR:
       {
