@@ -1041,9 +1041,10 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
 /* A helper for rust_evaluate_subexp that handles OP_RANGE.  */
 
 static struct value *
-rust_range (struct expression *exp, int *pos, enum noside noside)
+rust_range (struct type *expect_type, struct expression *exp,
+	    enum noside noside, enum range_flag kind,
+	    struct value *low, struct value *high)
 {
-  struct value *low = NULL, *high = NULL;
   struct value *addrval, *result;
   CORE_ADDR addr;
   struct type *range_type;
@@ -1051,14 +1052,6 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
   struct type *temp_type;
   const char *name;
 
-  auto kind
-    = (enum range_flag) longest_to_int (exp->elts[*pos + 1].longconst);
-  *pos += 3;
-
-  if (!(kind & RANGE_LOW_BOUND_DEFAULT))
-    low = evaluate_subexp (nullptr, exp, pos, noside);
-  if (!(kind & RANGE_HIGH_BOUND_DEFAULT))
-    high = evaluate_subexp (nullptr, exp, pos, noside);
   bool inclusive = !(kind & RANGE_HIGH_BOUND_EXCLUSIVE);
 
   if (noside == EVAL_SKIP)
@@ -1614,7 +1607,19 @@ tuple structs, and tuple-like enum variants"));
       break;
 
     case OP_RANGE:
-      result = rust_range (exp, pos, noside);
+      {
+	struct value *low = NULL, *high = NULL;
+	auto kind
+	  = (enum range_flag) longest_to_int (exp->elts[*pos + 1].longconst);
+	*pos += 3;
+
+	if (!(kind & RANGE_LOW_BOUND_DEFAULT))
+	  low = evaluate_subexp (nullptr, exp, pos, noside);
+	if (!(kind & RANGE_HIGH_BOUND_DEFAULT))
+	  high = evaluate_subexp (nullptr, exp, pos, noside);
+
+	result = rust_range (expect_type, exp, noside, kind, low, high);
+      }
       break;
 
     case UNOP_ADDR:

@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (rust_range): Change parameters.
+	(rust_evaluate_subexp): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* f-lang.c (eval_op_f_allocated): New function.
 	(evaluate_subexp_f): Use it.
 
