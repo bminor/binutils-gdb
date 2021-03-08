@@ -1,5 +1,15 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* gdbarch.sh (dtrace_parse_probe_argument): Change return type.
+	* gdbarch.h: Rebuild.
+	* gdbarch.c: Rebuild.
+	* dtrace-probe.c (dtrace_probe::build_arg_exprs): Update.
+	* amd64-linux-tdep.c (amd64_dtrace_parse_probe_argument): Change
+	return type.
+	(amd64_dtrace_parse_probe_argument): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* parser-defs.h (struct parser_state) <push, push_new,
 	push_c_string, push_symbol, push_dollar, pop, pop_vector, wrap,
 	wrap2>: New methods.

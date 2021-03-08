@@ -32,6 +32,7 @@
 #include "language.h"
 #include "parser-defs.h"
 #include "inferior.h"
+#include "expop.h"
 
 /* The type of the ELF sections where we will find the DOF programs
    with information about probes.  */
@@ -629,20 +630,18 @@ dtrace_probe::build_arg_exprs (struct gdbarch *gdbarch)
 
       /* The argument value, which is ABI dependent and casted to
 	 `long int'.  */
-      gdbarch_dtrace_parse_probe_argument (gdbarch, &builder, argc);
+      expr::operation_up op = gdbarch_dtrace_parse_probe_argument (gdbarch,
+								   argc);
 
       /* Casting to the expected type, but only if the type was
 	 recognized at probe load time.  Otherwise the argument will
 	 be evaluated as the long integer passed to the probe.  */
       if (arg.type != NULL)
-	{
-	  write_exp_elt_opcode (&builder, UNOP_CAST);
-	  write_exp_elt_type (&builder, arg.type);
-	  write_exp_elt_opcode (&builder, UNOP_CAST);
-	}
+	op = expr::make_operation<expr::unop_cast_operation> (std::move (op),
+							      arg.type);
 
+      builder.set_operation (std::move (op));
       arg.expr = builder.release ();
-      prefixify_expression (arg.expr.get ());
       ++argc;
     }
 }

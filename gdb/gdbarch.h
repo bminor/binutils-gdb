@@ -1386,8 +1386,8 @@ extern void set_gdbarch_stap_adjust_register (struct gdbarch *gdbarch, gdbarch_s
 
 extern bool gdbarch_dtrace_parse_probe_argument_p (struct gdbarch *gdbarch);
 
-typedef void (gdbarch_dtrace_parse_probe_argument_ftype) (struct gdbarch *gdbarch, struct expr_builder *builder, int narg);
-extern void gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, struct expr_builder *builder, int narg);
+typedef expr::operation_up (gdbarch_dtrace_parse_probe_argument_ftype) (struct gdbarch *gdbarch, int narg);
+extern expr::operation_up gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, int narg);
 extern void set_gdbarch_dtrace_parse_probe_argument (struct gdbarch *gdbarch, gdbarch_dtrace_parse_probe_argument_ftype *dtrace_parse_probe_argument);
 
 /* True if the given ADDR does not contain the instruction sequence

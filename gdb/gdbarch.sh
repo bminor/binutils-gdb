@@ -1025,7 +1025,7 @@ M;std::string;stap_adjust_register;struct stap_parse_info *p, const std::string 
 
 # The expression to compute the NARTGth+1 argument to a DTrace USDT probe.
 # NARG must be >= 0.
-M;void;dtrace_parse_probe_argument;struct expr_builder *builder, int narg;builder, narg
+M;expr::operation_up;dtrace_parse_probe_argument;int narg;narg
 
 # True if the given ADDR does not contain the instruction sequence
 # corresponding to a disabled DTrace is-enabled probe.

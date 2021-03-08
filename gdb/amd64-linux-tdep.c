@@ -41,6 +41,7 @@
 #include "glibc-tdep.h"
 #include "arch/amd64.h"
 #include "target-descriptions.h"
+#include "expop.h"
 
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
@@ -1733,16 +1734,15 @@ amd64_dtrace_disable_probe (struct gdbarch *gdbarch, CORE_ADDR addr)
 /* Implementation of `gdbarch_dtrace_parse_probe_argument', as defined
    in gdbarch.h.  */
 
-static void
+static expr::operation_up
 amd64_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
-				   struct expr_builder *builder,
 				   int narg)
 {
-  struct stoken str;
-
   /* DTrace probe arguments can be found on the ABI-defined places for
      regular arguments at the current PC.  The probe abstraction
      currently supports up to 12 arguments for probes.  */
+
+  using namespace expr;
 
   if (narg < 6)
     {
@@ -1757,12 +1757,7 @@ amd64_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
 	};
       int regno = arg_reg_map[narg];
       const char *regname = user_reg_map_regnum_to_name (gdbarch, regno);
-
-      write_exp_elt_opcode (builder, OP_REGISTER);
-      str.ptr = regname;
-      str.length = strlen (regname);
-      write_exp_string (builder, str);
-      write_exp_elt_opcode (builder, OP_REGISTER);
+      return make_operation<register_operation> (regname);
     }
   else
     {
@@ -1770,27 +1765,21 @@ amd64_dtrace_parse_probe_argument (struct gdbarch *gdbarch,
       const char *regname = user_reg_map_regnum_to_name (gdbarch, AMD64_RSP_REGNUM);
 
       /* Displacement.  */
-      write_exp_elt_opcode (builder, OP_LONG);
-      write_exp_elt_type (builder, builtin_type (gdbarch)->builtin_long);
-      write_exp_elt_longcst (builder, narg - 6);
-      write_exp_elt_opcode (builder, OP_LONG);
+      struct type *long_type = builtin_type (gdbarch)->builtin_long;
+      operation_up disp	= make_operation<long_const_operation> (long_type,
+								narg - 6);
 
       /* Register: SP.  */
-      write_exp_elt_opcode (builder, OP_REGISTER);
-      str.ptr = regname;
-      str.length = strlen (regname);
-      write_exp_string (builder, str);
-      write_exp_elt_opcode (builder, OP_REGISTER);
+      operation_up reg = make_operation<register_operation> (regname);
 
-      write_exp_elt_opcode (builder, BINOP_ADD);
+      operation_up add = make_operation<add_operation> (std::move (disp),
+							std::move (reg));
 
       /* Cast to long. */
-      write_exp_elt_opcode (builder, UNOP_CAST);
-      write_exp_elt_type (builder,
-			  lookup_pointer_type (builtin_type (gdbarch)->builtin_long));
-      write_exp_elt_opcode (builder, UNOP_CAST);
+      operation_up cast = make_operation<unop_cast_operation> (std::move (add),
+							       long_type);
 
-      write_exp_elt_opcode (builder, UNOP_IND);
+      return make_operation<unop_ind_operation> (std::move (cast));
     }
 }
 
