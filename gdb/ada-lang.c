@@ -10364,6 +10364,29 @@ ada_binop_minmax (struct type *expect_type,
     }
 }
 
+/* A helper function for BINOP_EXP.  */
+
+static struct value *
+ada_binop_exp (struct type *expect_type,
+	       struct expression *exp,
+	       enum noside noside, enum exp_opcode op,
+	       struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (value_type (arg1), not_lval);
+  else
+    {
+      /* For integer exponentiation operations,
+	 only promote the first argument.  */
+      if (is_integral_type (value_type (arg2)))
+	unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+      else
+	binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+
+      return value_binop (arg1, arg2, op);
+    }
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10926,19 +10949,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg2 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (value_type (arg1), not_lval);
-      else
-	{
-	  /* For integer exponentiation operations,
-	     only promote the first argument.  */
-	  if (is_integral_type (value_type (arg2)))
-	    unop_promote (exp->language_defn, exp->gdbarch, &arg1);
-	  else
-	    binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-
-	  return value_binop (arg1, arg2, op);
-	}
+      return ada_binop_exp (expect_type, exp, noside, op, arg1, arg2);
 
     case UNOP_PLUS:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);

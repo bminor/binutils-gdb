@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_binop_exp): New function.
+	(ada_evaluate_subexp): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_val_atr): Rename from value_val_atr.  Change
 	parameters.
 	(ada_evaluate_subexp): Use it.
