@@ -994,7 +994,7 @@ M;int;stap_is_single_operand;const char *s;s
 # if the token was not recognized as a special token (in this case, returning
 # zero means that the special parser is deferring the parsing to the generic
 # parser), and should advance the buffer pointer (p->arg).
-M;int;stap_parse_special_token;struct stap_parse_info *p;p
+M;expr::operation_up;stap_parse_special_token;struct stap_parse_info *p;p
 
 # Perform arch-dependent adjustments to a register name.
 #

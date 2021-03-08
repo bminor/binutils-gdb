@@ -22,6 +22,7 @@
 
 #include "gdbarch.h"
 #include "infrun.h"
+#include "expression.h"
 
 struct frame_info;
 struct gdbarch;
@@ -485,7 +486,7 @@ extern int i386bsd_sc_reg_offset[];
 extern int i386_stap_is_single_operand (struct gdbarch *gdbarch,
 					const char *s);
 
-extern int i386_stap_parse_special_token (struct gdbarch *gdbarch,
-					  struct stap_parse_info *p);
+extern expr::operation_up i386_stap_parse_special_token
+     (struct gdbarch *gdbarch, struct stap_parse_info *p);
 
 #endif /* i386-tdep.h */

@@ -4589,7 +4589,7 @@ gdbarch_stap_parse_special_token_p (struct gdbarch *gdbarch)
   return gdbarch->stap_parse_special_token != NULL;
 }
 
-int
+expr::operation_up
 gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p)
 {
   gdb_assert (gdbarch != NULL);

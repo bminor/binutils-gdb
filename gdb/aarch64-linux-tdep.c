@@ -31,6 +31,7 @@
 #include "tramp-frame.h"
 #include "trad-frame.h"
 #include "target/target.h"
+#include "expop.h"
 
 #include "regcache.h"
 #include "regset.h"
@@ -753,7 +754,7 @@ aarch64_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
    It returns one if the special token has been parsed successfully,
    or zero if the current token is not considered special.  */
 
-static int
+static expr::operation_up
 aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 				  struct stap_parse_info *p)
 {
@@ -764,11 +765,9 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
       char *endp;
       /* Used to save the register name.  */
       const char *start;
-      char *regname;
       int len;
       int got_minus = 0;
       long displacement;
-      struct stoken str;
 
       ++tmp;
       start = tmp;
@@ -778,17 +777,14 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	++tmp;
 
       if (*tmp != ',')
-	return 0;
+	return {};
 
       len = tmp - start;
-      regname = (char *) alloca (len + 2);
+      std::string regname (start, len);
 
-      strncpy (regname, start, len);
-      regname[len] = '\0';
-
-      if (user_reg_map_name_to_regnum (gdbarch, regname, len) == -1)
+      if (user_reg_map_name_to_regnum (gdbarch, regname.c_str (), len) == -1)
 	error (_("Invalid register name `%s' on expression `%s'."),
-	       regname, p->saved_arg);
+	       regname.c_str (), p->saved_arg);
 
       ++tmp;
       tmp = skip_spaces (tmp);
@@ -806,45 +802,39 @@ aarch64_stap_parse_special_token (struct gdbarch *gdbarch,
 	++tmp;
 
       if (!isdigit (*tmp))
-	return 0;
+	return {};
 
       displacement = strtol (tmp, &endp, 10);
       tmp = endp;
 
       /* Skipping last `]'.  */
       if (*tmp++ != ']')
-	return 0;
+	return {};
+      p->arg = tmp;
+
+      using namespace expr;
 
       /* The displacement.  */
-      write_exp_elt_opcode (&p->pstate, OP_LONG);
-      write_exp_elt_type (&p->pstate, builtin_type (gdbarch)->builtin_long);
-      write_exp_elt_longcst (&p->pstate, displacement);
-      write_exp_elt_opcode (&p->pstate, OP_LONG);
+      struct type *long_type = builtin_type (gdbarch)->builtin_long;
       if (got_minus)
-	write_exp_elt_opcode (&p->pstate, UNOP_NEG);
+	displacement = -displacement;
+      operation_up disp = make_operation<long_const_operation> (long_type,
+								displacement);
 
       /* The register name.  */
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-      str.ptr = regname;
-      str.length = len;
-      write_exp_string (&p->pstate, str);
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
+      operation_up reg
+	= make_operation<register_operation> (std::move (regname));
 
-      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
+      operation_up sum
+	= make_operation<add_operation> (std::move (reg), std::move (disp));
 
       /* Casting to the expected type.  */
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-      write_exp_elt_type (&p->pstate, lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_IND);
-
-      p->arg = tmp;
+      struct type *arg_ptr_type = lookup_pointer_type (p->arg_type);
+      sum = make_operation<unop_cast_operation> (std::move (sum),
+						 arg_ptr_type);
+      return make_operation<unop_ind_operation> (std::move (sum));
     }
-  else
-    return 0;
-
-  return 1;
+  return {};
 }
 
 /* AArch64 process record-replay constructs: syscall, signal etc.  */

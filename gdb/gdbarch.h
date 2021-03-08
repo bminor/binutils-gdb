@@ -1346,8 +1346,8 @@ extern void set_gdbarch_stap_is_single_operand (struct gdbarch *gdbarch, gdbarch
 
 extern bool gdbarch_stap_parse_special_token_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_stap_parse_special_token_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p);
-extern int gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p);
+typedef expr::operation_up (gdbarch_stap_parse_special_token_ftype) (struct gdbarch *gdbarch, struct stap_parse_info *p);
+extern expr::operation_up gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, struct stap_parse_info *p);
 extern void set_gdbarch_stap_parse_special_token (struct gdbarch *gdbarch, gdbarch_stap_parse_special_token_ftype *stap_parse_special_token);
 
 /* Perform arch-dependent adjustments to a register name.

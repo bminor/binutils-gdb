@@ -32,6 +32,7 @@
 #include "breakpoint.h"
 #include "auxv.h"
 #include "xml-syscall.h"
+#include "expop.h"
 
 #include "aarch32-tdep.h"
 #include "arch/arm.h"
@@ -1146,7 +1147,7 @@ arm_stap_is_single_operand (struct gdbarch *gdbarch, const char *s)
    It returns one if the special token has been parsed successfully,
    or zero if the current token is not considered special.  */
 
-static int
+static expr::operation_up
 arm_stap_parse_special_token (struct gdbarch *gdbarch,
 			      struct stap_parse_info *p)
 {
@@ -1161,7 +1162,6 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
       int len, offset;
       int got_minus = 0;
       long displacement;
-      struct stoken str;
 
       ++tmp;
       start = tmp;
@@ -1171,7 +1171,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 	++tmp;
 
       if (*tmp != ',')
-	return 0;
+	return {};
 
       len = tmp - start;
       regname = (char *) alloca (len + 2);
@@ -1212,38 +1212,33 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 
       /* Skipping last `]'.  */
       if (*tmp++ != ']')
-	return 0;
+	return {};
+      p->arg = tmp;
+
+      using namespace expr;
 
       /* The displacement.  */
-      write_exp_elt_opcode (&p->pstate, OP_LONG);
-      write_exp_elt_type (&p->pstate, builtin_type (gdbarch)->builtin_long);
-      write_exp_elt_longcst (&p->pstate, displacement);
-      write_exp_elt_opcode (&p->pstate, OP_LONG);
+      struct type *long_type = builtin_type (gdbarch)->builtin_long;
       if (got_minus)
-	write_exp_elt_opcode (&p->pstate, UNOP_NEG);
+	displacement = -displacement;
+      operation_up disp = make_operation<long_const_operation> (long_type,
+								displacement);
 
       /* The register name.  */
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
-      str.ptr = regname;
-      str.length = len;
-      write_exp_string (&p->pstate, str);
-      write_exp_elt_opcode (&p->pstate, OP_REGISTER);
+      operation_up reg
+	= make_operation<register_operation> (regname);
 
-      write_exp_elt_opcode (&p->pstate, BINOP_ADD);
+      operation_up sum
+	= make_operation<add_operation> (std::move (reg), std::move (disp));
 
       /* Casting to the expected type.  */
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-      write_exp_elt_type (&p->pstate, lookup_pointer_type (p->arg_type));
-      write_exp_elt_opcode (&p->pstate, UNOP_CAST);
-
-      write_exp_elt_opcode (&p->pstate, UNOP_IND);
-
-      p->arg = tmp;
+      struct type *arg_ptr_type = lookup_pointer_type (p->arg_type);
+      sum = make_operation<unop_cast_operation> (std::move (sum),
+						 arg_ptr_type);
+      return make_operation<unop_ind_operation> (std::move (sum));
     }
-  else
-    return 0;
 
-  return 1;
+  return {};
 }
 
 /* ARM process record-replay constructs: syscall, signal etc.  */

@@ -1,5 +1,31 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* stap-probe.c (binop_maker_ftype): New typedef.
+	(stap_maker_map): New global.
+	(stap_make_binop): New function.
+	(stap_parse_register_operand): Return operation_up.
+	(stap_parse_single_operand, stap_parse_argument_conditionally)
+	(stap_parse_argument_1): Likewise.
+	(stap_parse_argument): Create operations.
+	(stap_probe::parse_arguments): Update.
+	(_initialize_stap_probe): Initialize stap_maker_map.
+	* ppc-linux-tdep.c (ppc_stap_parse_special_token): Change return
+	type.
+	* i386-tdep.h (i386_stap_parse_special_token): Change return
+	type.
+	* i386-tdep.c (i386_stap_parse_special_token_triplet)
+	(i386_stap_parse_special_token_three_arg_disp)
+	(i386_stap_parse_special_token): Change return type.
+	* gdbarch.sh (stap_parse_special_token): Change return type.
+	* gdbarch.c: Rebuild.
+	* gdbarch.h: Rebuild.
+	* arm-linux-tdep.c (arm_stap_parse_special_token): Change return
+	type.
+	* aarch64-linux-tdep.c (aarch64_stap_parse_special_token): Change
+	return type.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* gdbarch.sh (dtrace_parse_probe_argument): Change return type.
 	* gdbarch.h: Rebuild.
 	* gdbarch.c: Rebuild.
