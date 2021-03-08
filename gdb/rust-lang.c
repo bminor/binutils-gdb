@@ -1354,6 +1354,34 @@ eval_op_rust_complement (struct type *expect_type, struct expression *exp,
   return value_complement (value);
 }
 
+/* A helper function for OP_ARRAY.  */
+
+static struct value *
+eval_op_rust_array (struct type *expect_type, struct expression *exp,
+		    enum noside noside,
+		    struct value *elt, struct value *ncopies)
+{
+  int copies = value_as_long (ncopies);
+  if (copies < 0)
+    error (_("Array with negative number of elements"));
+
+  if (noside == EVAL_NORMAL)
+    {
+      int i;
+      std::vector<struct value *> eltvec (copies);
+
+      for (i = 0; i < copies; ++i)
+	eltvec[i] = elt;
+      return value_array (0, copies - 1, eltvec.data ());
+    }
+  else
+    {
+      struct type *arraytype
+	= lookup_array_range_type (value_type (elt), 0, copies - 1);
+      return allocate_value (arraytype);
+    }
+}
+
 /* evaluate_exp implementation for Rust.  */
 
 static struct value *
@@ -1472,31 +1500,12 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case OP_RUST_ARRAY:
       {
 	(*pos)++;
-	int copies;
 	struct value *elt;
 	struct value *ncopies;
 
 	elt = rust_evaluate_subexp (NULL, exp, pos, noside);
 	ncopies = rust_evaluate_subexp (NULL, exp, pos, noside);
-	copies = value_as_long (ncopies);
-	if (copies < 0)
-	  error (_("Array with negative number of elements"));
-
-	if (noside == EVAL_NORMAL)
-	  {
-	    int i;
-	    std::vector<struct value *> eltvec (copies);
-
-	    for (i = 0; i < copies; ++i)
-	      eltvec[i] = elt;
-	    result = value_array (0, copies - 1, eltvec.data ());
-	  }
-	else
-	  {
-	    struct type *arraytype
-	      = lookup_array_range_type (value_type (elt), 0, copies - 1);
-	    result = allocate_value (arraytype);
-	  }
+	return eval_op_rust_array (expect_type, exp, noside, elt, ncopies);
       }
       break;
 
