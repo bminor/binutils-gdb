@@ -2693,6 +2693,62 @@ var_value_operation::do_generate_ax (struct expression *exp,
     }
 }
 
+void
+logical_and_operation::do_generate_ax (struct expression *exp,
+				       struct agent_expr *ax,
+				       struct axs_value *value,
+				       struct type *cast_type)
+{
+  struct axs_value value1, value2;
+  int if1, go1, if2, go2, end;
+
+  /* Generate the obvious sequence of tests and jumps.  */
+  std::get<0> (m_storage)->generate_ax (exp, ax, &value1);
+  gen_usual_unary (ax, &value1);
+  if1 = ax_goto (ax, aop_if_goto);
+  go1 = ax_goto (ax, aop_goto);
+  ax_label (ax, if1, ax->len);
+  std::get<1> (m_storage)->generate_ax (exp, ax, &value2);
+  gen_usual_unary (ax, &value2);
+  if2 = ax_goto (ax, aop_if_goto);
+  go2 = ax_goto (ax, aop_goto);
+  ax_label (ax, if2, ax->len);
+  ax_const_l (ax, 1);
+  end = ax_goto (ax, aop_goto);
+  ax_label (ax, go1, ax->len);
+  ax_label (ax, go2, ax->len);
+  ax_const_l (ax, 0);
+  ax_label (ax, end, ax->len);
+  value->kind = axs_rvalue;
+  value->type = builtin_type (ax->gdbarch)->builtin_int;
+}
+
+void
+logical_or_operation::do_generate_ax (struct expression *exp,
+				      struct agent_expr *ax,
+				      struct axs_value *value,
+				      struct type *cast_type)
+{
+  struct axs_value value1, value2;
+  int if1, if2, end;
+
+  /* Generate the obvious sequence of tests and jumps.  */
+  std::get<0> (m_storage)->generate_ax (exp, ax, &value1);
+  gen_usual_unary (ax, &value1);
+  if1 = ax_goto (ax, aop_if_goto);
+  std::get<1> (m_storage)->generate_ax (exp, ax, &value2);
+  gen_usual_unary (ax, &value2);
+  if2 = ax_goto (ax, aop_if_goto);
+  ax_const_l (ax, 0);
+  end = ax_goto (ax, aop_goto);
+  ax_label (ax, if1, ax->len);
+  ax_label (ax, if2, ax->len);
+  ax_const_l (ax, 1);
+  ax_label (ax, end, ax->len);
+  value->kind = axs_rvalue;
+  value->type = builtin_type (ax->gdbarch)->builtin_int;
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

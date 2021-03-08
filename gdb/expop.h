@@ -1982,6 +1982,54 @@ public:
   { return MULTI_SUBSCRIPT; }
 };
 
+/* The "&&" operator.  */
+class logical_and_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return BINOP_LOGICAL_AND; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
+/* The "||" operator.  */
+class logical_or_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return BINOP_LOGICAL_OR; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

@@ -2486,6 +2486,69 @@ multi_subscript_operation::evaluate (struct type *expect_type,
 			       gdb::make_array_view (argvec, values.size ()));
 }
 
+value *
+logical_and_operation::evaluate (struct type *expect_type,
+				 struct expression *exp,
+				 enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp,
+						   EVAL_AVOID_SIDE_EFFECTS);
+
+  if (binop_user_defined_p (BINOP_LOGICAL_AND, arg1, arg2))
+    {
+      arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+      return value_x_binop (arg1, arg2, BINOP_LOGICAL_AND, OP_NULL, noside);
+    }
+  else
+    {
+      int tem = value_logical_not (arg1);
+      if (!tem)
+	{
+	  arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+	  tem = value_logical_not (arg2);
+	}
+      struct type *type = language_bool_type (exp->language_defn,
+					      exp->gdbarch);
+      return value_from_longest (type, !tem);
+    }
+}
+
+value *
+logical_or_operation::evaluate (struct type *expect_type,
+				struct expression *exp,
+				enum noside noside)
+{
+  value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+
+  value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp,
+						   EVAL_AVOID_SIDE_EFFECTS);
+
+  if (binop_user_defined_p (BINOP_LOGICAL_OR, arg1, arg2))
+    {
+      arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+      return value_x_binop (arg1, arg2, BINOP_LOGICAL_OR, OP_NULL, noside);
+    }
+  else
+    {
+      int tem = value_logical_not (arg1);
+      if (tem)
+	{
+	  arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+	  tem = value_logical_not (arg2);
+	}
+
+      struct type *type = language_bool_type (exp->language_defn,
+					      exp->gdbarch);
+      return value_from_longest (type, !tem);
+    }
+}
+
 }
 
 struct value *

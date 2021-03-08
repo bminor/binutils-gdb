@@ -1,5 +1,14 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class logical_and_operation)
+	(class logical_or_operation): New.
+	* eval.c (logical_and_operation::evaluate)
+	(logical_or_operation::evaluate): New methods.
+	* ax-gdb.c (logical_and_operation::do_generate_ax)
+	(logical_or_operation::do_generate_ax): New methods.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* m2-lang.c (eval_op_m2_high, eval_op_m2_subscript): No longer
 	static.
 	* m2-exp.h: New file.
