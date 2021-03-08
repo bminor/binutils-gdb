@@ -1,3 +1,8 @@
+2021-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gentmap, dgen, igen, tmp-filter, tmp-ld-decode,
+	tmp-ld-cache, tmp-ld-insn): Delete $(BUILD_LIBS).
+
 2021-03-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (check): Define.

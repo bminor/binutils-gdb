@@ -619,7 +619,7 @@ mon.o: mon.c $(BASICS_H) $(CPU_H) $(MON_H)
 # As a kludge, build the common stuff here for now.
 gentmap: $(srcdir)/../common/gentmap.c Makefile targ-vals.def
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -I. -I../common -I$(srcdir)/../common \
-		-o gentmap $(srcdir)/../common/gentmap.c $(BUILD_LIBS)
+		-o gentmap $(srcdir)/../common/gentmap.c
 
 targ-vals.def: $(srcdir)/../common/nltvals.def
 	rm -f targ-vals.def tmp-def
@@ -709,10 +709,10 @@ itable.h itable.c icache.h icache.c idecode.h idecode.c semantics.h semantics.c 
 spreg.h spreg.c: tmp-dgen
 
 dgen: dgen.o table.o lf.o misc.o filter_host.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_host.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -o dgen dgen.o table.o lf.o misc.o filter_host.o
 
 igen: igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o igen igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
 
 filter_host.c: filter_filename.c
 	cat $(srcdir)/filter_filename.c > filter_host.c
@@ -729,22 +729,22 @@ lf.o: lf.c $(CONFIG_H) $(MISC_H) $(LF_H)
 filter.o: filter.c $(CONFIG_H) $(MISC_H) $(FILTER_H)
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/filter.c
 tmp-filter: filter.c $(MISC_H) misc.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-filter -DMAIN $(srcdir)/filter.c misc.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-filter -DMAIN $(srcdir)/filter.c misc.o
 
 ld-decode.o: ld-decode.c $(MISC_H) $(LF_H) $(TABLE_H) $(LD_DECODE_H)
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/ld-decode.c
 tmp-ld-decode: ld-decode.c misc.o lf.o table.o filter_host.o 
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-decode -DMAIN $(srcdir)/ld-decode.c misc.o lf.o table.o filter_host.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-decode -DMAIN $(srcdir)/ld-decode.c misc.o lf.o table.o filter_host.o
 
 ld-cache.o: ld-cache.c $(MISC_H) $(LF_H) $(TABLE_H) $(LD_CACHE_H)
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/ld-cache.c
 tmp-ld-cache: ld-cache.c misc.o lf.o table.o filter_host.o 
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-cache -DMAIN $(srcdir)/ld-cache.c misc.o lf.o table.o filter_host.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-cache -DMAIN $(srcdir)/ld-cache.c misc.o lf.o table.o filter_host.o
 
 ld-insn.o: ld-insn.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H)
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/ld-insn.c
 tmp-ld-insn: ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c ld-cache.o misc.o lf.o table.o ld-decode.o filter_host.o filter.o
 
 gen-model.o: gen-model.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(GEN_MODEL_H)
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/gen-model.c

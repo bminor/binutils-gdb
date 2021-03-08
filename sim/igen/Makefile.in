@@ -112,22 +112,22 @@ igen.o: igen.c misc.h filter_host.h lf.h table.h ld-decode.h ld-cache.h ld-insn.
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/igen.c
 
 tmp-table: table.c table.h misc.o lf.o filter_host.o 
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-table -DMAIN $(srcdir)/table.c misc.o lf.o  filter_host.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-table -DMAIN $(srcdir)/table.c misc.o lf.o  filter_host.o
 
 tmp-filter: filter.c filter.h lf.o misc.o filter_host.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-filter -DMAIN $(srcdir)/filter.c lf.o misc.o filter_host.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-filter -DMAIN $(srcdir)/filter.c lf.o misc.o filter_host.o
 
 tmp-ld-decode: ld-decode.h ld-decode.c filter.o misc.o lf.o table.o filter_host.o gen.h igen.h
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-decode -DMAIN $(srcdir)/ld-decode.c filter.o misc.o lf.o table.o filter_host.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-decode -DMAIN $(srcdir)/ld-decode.c filter.o misc.o lf.o table.o filter_host.o
 
 tmp-ld-cache: ld-cache.c ld-cache.h ld-insn.o misc.o lf.o table.o filter_host.o gen.h igen.h
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-cache -DMAIN $(srcdir)/ld-cache.c ld-insn.o filter.o misc.o lf.o table.o filter_host.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-cache -DMAIN $(srcdir)/ld-cache.c ld-insn.o filter.o misc.o lf.o table.o filter_host.o
 
 tmp-ld-insn: ld-insn.c ld-insn.h misc.o lf.o table.o filter_host.o filter.o gen.h igen.h
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c misc.o lf.o table.o filter_host.o filter.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-ld-insn -DMAIN $(srcdir)/ld-insn.c misc.o lf.o table.o filter_host.o filter.o
 
 tmp-gen: gen.c gen.h ld-insn.o ld-decode.o misc.o lf.o table.o filter_host.o filter.o gen.h igen.h
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-gen -DMAIN $(srcdir)/gen.c misc.o ld-insn.o ld-decode.o lf.o table.o filter_host.o filter.o $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o tmp-gen -DMAIN $(srcdir)/gen.c misc.o ld-insn.o ld-decode.o lf.o table.o filter_host.o filter.o
 
 filter_host.o: filter_host.c filter_host.h
 table.o: table.c misc.h filter_host.h lf.h table.h

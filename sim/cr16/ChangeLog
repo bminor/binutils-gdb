@@ -1,3 +1,7 @@
+2021-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (gencode): Delete $(BUILD_LIB).
+
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

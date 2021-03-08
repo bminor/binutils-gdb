@@ -53,7 +53,7 @@ m32c.c : m32c.opc opc2c
 	./opc2c -l m32c.out $(srcdir)/m32c.opc > m32c.c
 
 opc2c : opc2c.o safe-fgets.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) $^ -o $@ $(BUILD_LIBS)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) $^ -o $@
 
 encodings:
 	grep '/\* [01]' $(srcdir)/r8c.opc | sort

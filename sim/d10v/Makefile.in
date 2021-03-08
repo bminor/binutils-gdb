@@ -49,7 +49,7 @@ d10v-opc.o: $(srcdir)/../../opcodes/d10v-opc.c
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(WARN_CFLAGS) -c $(srcdir)/../../opcodes/d10v-opc.c
 
 gencode: gencode.o d10v-opc.o
-	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o gencode gencode.o d10v-opc.o $(BUILD_LIB)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o gencode gencode.o d10v-opc.o
 
 clean-extra:
 	rm -f table.c simops.h gencode

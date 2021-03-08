@@ -1,3 +1,7 @@
+2021-03-08  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (opc2c): Delete $(BUILD_LIBS).
+
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
