@@ -55,6 +55,11 @@ extern struct value *ada_ternop_slice (struct expression *exp,
 				       struct value *array,
 				       struct value *low_bound_val,
 				       struct value *high_bound_val);
+extern struct value *ada_binop_in_bounds (struct expression *exp,
+					  enum noside noside,
+					  struct value *arg1,
+					  struct value *arg2,
+					  int n);
 
 namespace expr
 {
@@ -238,6 +243,28 @@ public:
 
   enum exp_opcode opcode () const override
   { return TERNOP_SLICE; }
+};
+
+/* Implement BINOP_IN_BOUNDS for Ada.  */
+class ada_binop_in_bounds_operation
+  : public maybe_constant_operation<operation_up, operation_up, int>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    return ada_binop_in_bounds (exp, noside, arg1, arg2,
+				std::get<2> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return BINOP_IN_BOUNDS; }
 };
 
 } /* namespace expr */

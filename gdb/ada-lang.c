@@ -10237,7 +10237,7 @@ ada_ternop_slice (struct expression *exp,
 
 /* A helper function for BINOP_IN_BOUNDS.  */
 
-static value *
+value *
 ada_binop_in_bounds (struct expression *exp, enum noside noside,
 		     struct value *arg1, struct value *arg2, int n)
 {
