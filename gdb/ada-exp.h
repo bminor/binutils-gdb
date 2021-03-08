@@ -304,6 +304,23 @@ protected:
   using operation::do_generate_ax;
 };
 
+/* Variant of var_msym_value_operation for Ada.  */
+class ada_var_msym_value_operation
+  : public var_msym_value_operation
+{
+public:
+
+  using var_msym_value_operation::var_msym_value_operation;
+
+  value *evaluate_for_cast (struct type *expect_type,
+			    struct expression *exp,
+			    enum noside noside) override;
+
+protected:
+
+  using operation::do_generate_ax;
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */

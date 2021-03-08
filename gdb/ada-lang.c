@@ -10554,6 +10554,31 @@ ada_unop_atr_operation::evaluate (struct type *expect_type,
 }
 
 value *
+ada_var_msym_value_operation::evaluate_for_cast (struct type *expect_type,
+						 struct expression *exp,
+						 enum noside noside)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (expect_type, not_lval);
+
+  value *val = evaluate_var_msym_value (noside,
+					std::get<1> (m_storage),
+					std::get<0> (m_storage));
+
+  val = ada_value_cast (expect_type, val);
+
+  /* Follow the Ada language semantics that do not allow taking
+     an address of the result of a cast (view conversion in Ada).  */
+  if (VALUE_LVAL (val) == lval_memory)
+    {
+      if (value_lazy (val))
+	value_fetch_lazy (val);
+      VALUE_LVAL (val) = not_lval;
+    }
+  return val;
+}
+
+value *
 ada_var_value_operation::evaluate_for_cast (struct type *expect_type,
 					    struct expression *exp,
 					    enum noside noside)
