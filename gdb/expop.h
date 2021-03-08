@@ -193,6 +193,10 @@ extern struct value *eval_op_alignof (struct type *expect_type,
 				      struct expression *exp,
 				      enum noside noside,
 				      struct value *arg1);
+extern struct value *eval_op_memval (struct type *expect_type,
+				     struct expression *exp,
+				     enum noside noside,
+				     struct value *arg1, struct type *type);
 
 namespace expr
 {
@@ -1634,6 +1638,79 @@ public:
 
   enum exp_opcode opcode () const override
   { return UNOP_ALIGNOF; }
+};
+
+/* Implement UNOP_MEMVAL.  */
+class unop_memval_operation
+  : public tuple_holding_operation<operation_up, struct type *>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+    return eval_op_memval (expect_type, exp, noside, val,
+			   std::get<1> (m_storage));
+  }
+
+  value *evaluate_for_sizeof (struct expression *exp,
+			      enum noside noside) override;
+
+  value *evaluate_for_address (struct expression *exp,
+			       enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return UNOP_MEMVAL; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
+/* Implement UNOP_MEMVAL_TYPE.  */
+class unop_memval_type_operation
+  : public tuple_holding_operation<operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *typeval
+      = std::get<0> (m_storage)->evaluate (expect_type, exp,
+					   EVAL_AVOID_SIDE_EFFECTS);
+    struct type *type = value_type (typeval);
+    value *val = std::get<1> (m_storage)->evaluate (expect_type, exp, noside);
+    return eval_op_memval (expect_type, exp, noside, val, type);
+  }
+
+  value *evaluate_for_sizeof (struct expression *exp,
+			      enum noside noside) override;
+
+  value *evaluate_for_address (struct expression *exp,
+			       enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return UNOP_MEMVAL_TYPE; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
 };
 
 } /* namespace expr */

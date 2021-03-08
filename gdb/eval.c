@@ -1897,7 +1897,7 @@ eval_op_alignof (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_MEMVAL.  */
 
-static struct value *
+struct value *
 eval_op_memval (struct type *expect_type, struct expression *exp,
 		enum noside noside,
 		struct value *arg1, struct type *type)
@@ -3333,6 +3333,25 @@ var_msym_value_operation::evaluate_for_address (struct expression *exp,
     return value_addr (val);
 }
 
+value *
+unop_memval_operation::evaluate_for_address (struct expression *exp,
+					     enum noside noside)
+{
+  return value_cast (lookup_pointer_type (std::get<1> (m_storage)),
+		     std::get<0> (m_storage)->evaluate (nullptr, exp, noside));
+}
+
+value *
+unop_memval_type_operation::evaluate_for_address (struct expression *exp,
+						  enum noside noside)
+{
+  value *typeval = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						      EVAL_AVOID_SIDE_EFFECTS);
+  struct type *type = value_type (typeval);
+  return value_cast (lookup_pointer_type (type),
+		     std::get<1> (m_storage)->evaluate (nullptr, exp, noside));
+}
+
 }
 
 /* Evaluate like `evaluate_subexp' except coercing arrays to pointers.
@@ -3602,6 +3621,22 @@ unop_ind_base_operation::evaluate_for_sizeof (struct expression *exp,
   /* FIXME: This should be size_t.  */
   struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
   return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+}
+
+value *
+unop_memval_operation::evaluate_for_sizeof (struct expression *exp,
+					    enum noside noside)
+{
+  return evaluate_subexp_for_sizeof_base (exp, std::get<1> (m_storage));
+}
+
+value *
+unop_memval_type_operation::evaluate_for_sizeof (struct expression *exp,
+						 enum noside noside)
+{
+  value *typeval = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						      EVAL_AVOID_SIDE_EFFECTS);
+  return evaluate_subexp_for_sizeof_base (exp, value_type (typeval));
 }
 
 }

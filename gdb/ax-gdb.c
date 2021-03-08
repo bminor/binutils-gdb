@@ -2514,6 +2514,46 @@ unop_sizeof_operation::do_generate_ax (struct expression *exp,
   value->type = builtin_type (ax->gdbarch)->builtin_int;
 }
 
+void
+unop_memval_operation::do_generate_ax (struct expression *exp,
+				       struct agent_expr *ax,
+				       struct axs_value *value,
+				       struct type *cast_type)
+{
+  std::get<0> (m_storage)->generate_ax (exp, ax, value);
+  /* If we have an axs_rvalue or an axs_lvalue_memory, then we
+     already have the right value on the stack.  For
+     axs_lvalue_register, we must convert.  */
+  if (value->kind == axs_lvalue_register)
+    require_rvalue (ax, value);
+
+  value->type = std::get<1> (m_storage);
+  value->kind = axs_lvalue_memory;
+}
+
+void
+unop_memval_type_operation::do_generate_ax (struct expression *exp,
+					    struct agent_expr *ax,
+					    struct axs_value *value,
+					    struct type *cast_type)
+{
+  struct value *val
+    = std::get<0> (m_storage)->evaluate (nullptr, exp,
+					 EVAL_AVOID_SIDE_EFFECTS);
+  struct type *type = value_type (val);
+
+  std::get<1> (m_storage)->generate_ax (exp, ax, value);
+
+  /* If we have an axs_rvalue or an axs_lvalue_memory, then we
+     already have the right value on the stack.  For
+     axs_lvalue_register, we must convert.  */
+  if (value->kind == axs_lvalue_register)
+    require_rvalue (ax, value);
+
+  value->type = type;
+  value->kind = axs_lvalue_memory;
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary

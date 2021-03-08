@@ -1,5 +1,17 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class unop_memval_operation)
+	(class unop_memval_type_operation): New.
+	* eval.c (eval_op_memval): No longer static.
+	(unop_memval_operation::evaluate_for_address)
+	(unop_memval_type_operation::evaluate_for_address)
+	(unop_memval_operation::evaluate_for_sizeof)
+	(unop_memval_type_operation::evaluate_for_sizeof): New methods.
+	* ax-gdb.c (unop_memval_operation::do_generate_ax)
+	(unop_memval_type_operation::do_generate_ax): New methods.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class unop_alignof_operation): New.
 	* eval.c (eval_op_alignof): No longer static.
 
