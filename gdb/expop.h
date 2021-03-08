@@ -88,6 +88,10 @@ extern struct value *eval_op_concat (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
 				     struct value *arg1, struct value *arg2);
+extern struct value *eval_op_add (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside,
+				  struct value *arg1, struct value *arg2);
 
 namespace expr
 {
@@ -959,6 +963,42 @@ public:
 
   enum exp_opcode opcode () const override
   { return BINOP_CONCAT; }
+};
+
+class add_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *lhs
+      = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
+    value *rhs
+      = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+    return eval_op_add (expect_type, exp, noside, lhs, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return BINOP_ADD; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_binop (exp, BINOP_ADD,
+		    std::get<0> (this->m_storage).get (),
+		    std::get<1> (this->m_storage).get (),
+		    ax, value);
+  }
 };
 
 } /* namespace expr */
