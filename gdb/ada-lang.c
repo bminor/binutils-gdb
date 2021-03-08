@@ -10414,6 +10414,19 @@ ada_wrapped_operation::evaluate (struct type *expect_type,
   return result;
 }
 
+value *
+ada_string_operation::evaluate (struct type *expect_type,
+				struct expression *exp,
+				enum noside noside)
+{
+  value *result = string_operation::evaluate (expect_type, exp, noside);
+  /* The result type will have code OP_STRING, bashed there from 
+     OP_ARRAY.  Bash it back.  */
+  if (value_type (result)->code () == TYPE_CODE_STRING)
+    value_type (result)->set_code (TYPE_CODE_ARRAY);
+  return result;
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure

@@ -42,6 +42,19 @@ public:
   { return std::get<0> (m_storage)->opcode (); }
 };
 
+/* An Ada string constant.  */
+class ada_string_operation
+  : public string_operation
+{
+public:
+
+  using string_operation::string_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */
