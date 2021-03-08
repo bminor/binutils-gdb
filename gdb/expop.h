@@ -1517,6 +1517,35 @@ public:
   { return OP_DECLTYPE; }
 };
 
+/* Implement 'typeid'.  */
+class typeid_operation
+  : public tuple_holding_operation<operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    enum exp_opcode sub_op = std::get<0> (m_storage)->opcode ();
+    enum noside sub_noside
+      = ((sub_op == OP_TYPE || sub_op == OP_DECLTYPE || sub_op == OP_TYPEOF)
+	 ? EVAL_AVOID_SIDE_EFFECTS
+	 : noside);
+
+    value *result = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						       sub_noside);
+    if (noside != EVAL_NORMAL)
+      return allocate_value (cplus_typeid_type (exp->gdbarch));
+    return cplus_typeid (result);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_TYPEID; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
