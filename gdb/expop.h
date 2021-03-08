@@ -1864,6 +1864,37 @@ protected:
     override;
 };
 
+/* A cast, but the type comes from an expression, not a "struct
+   type".  */
+class unop_cast_type_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						    EVAL_AVOID_SIDE_EFFECTS);
+    return std::get<1> (m_storage)->evaluate_for_cast (value_type (val),
+						       exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  { return UNOP_CAST_TYPE; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

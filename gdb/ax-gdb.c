@@ -2661,6 +2661,18 @@ assign_modify_operation::do_generate_ax (struct expression *exp,
 	     "may not assign to it"), name);
 }
 
+void
+unop_cast_type_operation::do_generate_ax (struct expression *exp,
+					  struct agent_expr *ax,
+					  struct axs_value *value,
+					  struct type *cast_type)
+{
+  struct value *val
+    = std::get<0> (m_storage)->evaluate (nullptr, exp,
+					 EVAL_AVOID_SIDE_EFFECTS);
+  std::get<1> (m_storage)->generate_ax (exp, ax, value, value_type (val));
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary
