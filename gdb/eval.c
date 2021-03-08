@@ -1456,6 +1456,30 @@ eval_op_member (struct type *expect_type, struct expression *exp,
     }
 }
 
+/* A helper function for BINOP_ADD.  */
+
+static struct value *
+eval_op_add (struct type *expect_type, struct expression *exp,
+	     enum noside noside, enum exp_opcode op,
+	     struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  if (binop_user_defined_p (op, arg1, arg2))
+    return value_x_binop (arg1, arg2, op, OP_NULL, noside);
+  else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
+	   && is_integral_or_integral_reference (value_type (arg2)))
+    return value_ptradd (arg1, value_as_long (arg2));
+  else if (ptrmath_type_p (exp->language_defn, value_type (arg2))
+	   && is_integral_or_integral_reference (value_type (arg1)))
+    return value_ptradd (arg2, value_as_long (arg1));
+  else
+    {
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      return value_binop (arg1, arg2, BINOP_ADD);
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -2142,21 +2166,7 @@ evaluate_subexp_standard (struct type *expect_type,
     case BINOP_ADD:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      if (binop_user_defined_p (op, arg1, arg2))
-	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
-      else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
-	       && is_integral_or_integral_reference (value_type (arg2)))
-	return value_ptradd (arg1, value_as_long (arg2));
-      else if (ptrmath_type_p (exp->language_defn, value_type (arg2))
-	       && is_integral_or_integral_reference (value_type (arg1)))
-	return value_ptradd (arg2, value_as_long (arg1));
-      else
-	{
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  return value_binop (arg1, arg2, BINOP_ADD);
-	}
+      return eval_op_add (expect_type, exp, noside, op, arg1, arg2);
 
     case BINOP_SUB:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
