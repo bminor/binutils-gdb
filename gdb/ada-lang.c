@@ -10050,6 +10050,21 @@ ada_atr_size (struct type *expect_type,
 			       TARGET_CHAR_BIT * TYPE_LENGTH (type));
 }
 
+/* A helper function for UNOP_ABS.  */
+
+static value *
+ada_abs (struct type *expect_type,
+	 struct expression *exp,
+	 enum noside noside, enum exp_opcode op,
+	 struct value *arg1)
+{
+  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+  if (value_less (arg1, value_zero (value_type (arg1), not_lval)))
+    return value_neg (arg1);
+  else
+    return arg1;
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10870,11 +10885,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      unop_promote (exp->language_defn, exp->gdbarch, &arg1);
-      if (value_less (arg1, value_zero (value_type (arg1), not_lval)))
-	return value_neg (arg1);
-      else
-	return arg1;
+      return ada_abs (expect_type, exp, noside, op, arg1);
 
     case UNOP_IND:
       preeval_pos = *pos;
