@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class sub_operation): New.
+	* eval.c (eval_op_sub): No longer static.  Remove "op" parameter.
+	(evaluate_subexp_standard): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class add_operation): New.
 	* eval.c (eval_op_add): No longer static.  Remove "op" parameter.
 	(evaluate_subexp_standard): Update.
