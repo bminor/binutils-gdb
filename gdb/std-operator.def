@@ -326,10 +326,6 @@ OP (OP_TYPEID)
    takes two expression arguments.  */
 OP (OP_RUST_ARRAY)
 
-/* First extension operator.  Some language modules define extra
-   operators below with numbers higher than OP_EXTENDED0.  */
-OP (OP_EXTENDED0)
-
 /* ================ Ada operators ================ */
 
 /* X IN A'RANGE(N).  N is an immediate operand, surrounded by 
