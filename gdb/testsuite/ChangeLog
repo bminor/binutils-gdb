@@ -1,5 +1,15 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-bad-printers.exp: Extend test names to make them
+	unique.
+	* gdb.python/py-events.exp: Likewise.
+	* gdb.python/py-finish-breakpoint2.exp: Likewise.
+	* gdb.python/py-frame-inline.exp: Likewise.
+	* gdb.python/py-frame.exp: Likewise.
+	* gdb.python/py-infthread.exp: Likewise.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-value-cc.exp: Remove a duplicate test.
 
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>

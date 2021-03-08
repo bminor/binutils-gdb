@@ -89,4 +89,5 @@ gdb_test "python print ('result = %s' % t0.is_exited ())" " = False" "test Infer
 
 gdb_test "python print ('result = %s' % t0.is_valid ())" " = True" "test InferiorThread.is_valid"
 gdb_test_no_output "kill inferior 1" "kill inferior 1"
-gdb_test "python print ('result = %s' % t0.is_valid ())" " = False" "test InferiorThread.is_valid"
+gdb_test "python print ('result = %s' % t0.is_valid ())" " = False" \
+    "test InferiorThread.is_valid after thread has been killed"

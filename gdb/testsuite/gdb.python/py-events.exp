@@ -234,4 +234,4 @@ gdb_test_no_output "set variable \$x = 32" "do something"
 gdb_test "python print(count)" 2 "check for before_prompt event"
 
 gdb_test_no_output "xxz" "run a canned sequence"
-gdb_test "python print(count)" 4 "check for before_prompt event"
+gdb_test "python print(count)" 4 "check for before_prompt event again"

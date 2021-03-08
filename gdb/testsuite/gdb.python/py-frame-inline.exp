@@ -48,7 +48,7 @@ gdb_test "python print (gdb.selected_frame().read_var('l'))" "\r\n42"
 # the frame cache is flushed somehow after setting the limit, to force
 # frame id recomputation.
 gdb_test_no_output "set backtrace limit 1"
-gdb_continue_to_breakpoint "Block break here."
+gdb_continue_to_breakpoint "Block break here again."
 
 gdb_test "python print (gdb.newest_frame())" ".*"
 

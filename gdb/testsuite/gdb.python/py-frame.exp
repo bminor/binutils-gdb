@@ -83,7 +83,8 @@ gdb_test "python print ('result = %s' % (f0 != f0))" " = False" "test inequality
 gdb_test "python print ('result = %s' % f0.is_valid ())" " = True" "test Frame.is_valid"
 gdb_test "python print ('result = %s' % f0.name ())" " = f2" "test Frame.name"
 gdb_test "python print ('result = %s' % (f0.type () == gdb.NORMAL_FRAME))" " = True" "test Frame.type"
-gdb_test "python print ('result = %s' % (f0.unwind_stop_reason () == gdb.FRAME_UNWIND_NO_REASON))" " = True" "test Frame.type"
+gdb_test "python print ('result = %s' % (f0.unwind_stop_reason () == gdb.FRAME_UNWIND_NO_REASON))" \
+    " = True" "test Frame.unwind_stop_reason"
 gdb_test "python print ('result = %s' % gdb.frame_stop_reason_string (gdb.FRAME_UNWIND_INNER_ID))" " = previous frame inner to this frame \\(corrupt stack\\?\\)" "test gdb.frame_stop_reason_string"
 gdb_test "python print ('result = %s' % f0.pc ())" " = \[0-9\]+" "test Frame.pc"
 gdb_test "python print ('result = %s' % (f0.older () == f1))" " = True" "test Frame.older"
