@@ -441,8 +441,10 @@ opencl_component_ref (struct expression *exp, struct value *val,
 
 /* Perform the unary logical not (!) operation.  */
 
-static struct value *
-opencl_logical_not (struct expression *exp, struct value *arg)
+struct value *
+opencl_logical_not (struct type *expect_type, struct expression *exp,
+		    enum noside noside, enum exp_opcode op,
+		    struct value *arg)
 {
   struct type *type = check_typedef (value_type (arg));
   struct type *rettype;
@@ -765,7 +767,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	return value_from_longest (builtin_type (exp->gdbarch)->
 				   builtin_int, 1);
 
-      return opencl_logical_not (exp, arg1);
+      return opencl_logical_not (expect_type, exp, noside, op, arg1);
 
     /* Handle the logical operator and(&&) and or(||).  */
     case BINOP_LOGICAL_AND:

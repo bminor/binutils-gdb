@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* opencl-lang.c (opencl_logical_not): No longer static.  Change
+	parameters.
+	(evaluate_subexp_opencl): Update.
+	* c-exp.h (opencl_notequal_operation): New typedef.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* opencl-lang.c (opencl_relop, eval_opencl_assign): No longer
 	static.  Change parameters.
 	(eval_opencl_assign): No longer static.  Add "op" parameter.

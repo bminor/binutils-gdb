@@ -38,6 +38,11 @@ extern struct value *opencl_relop (struct type *expect_type,
 				   struct expression *exp,
 				   enum noside noside, enum exp_opcode op,
 				   struct value *arg1, struct value *arg2);
+extern struct value *opencl_logical_not (struct type *expect_type,
+					 struct expression *exp,
+					 enum noside noside,
+					 enum exp_opcode op,
+					 struct value *arg);
 
 namespace expr
 {
@@ -161,6 +166,9 @@ using opencl_geq_operation = opencl_binop_operation<BINOP_GEQ,
 						    opencl_relop>;
 using opencl_leq_operation = opencl_binop_operation<BINOP_LEQ,
 						    opencl_relop>;
+
+using opencl_not_operation = unop_operation<UNOP_LOGICAL_NOT,
+					    opencl_logical_not>;
 
 }/* namespace expr */
 
