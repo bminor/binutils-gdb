@@ -10553,6 +10553,118 @@ ada_unop_atr_operation::evaluate (struct type *expect_type,
 		       val, type_arg, std::get<2> (m_storage));
 }
 
+value *
+ada_var_value_operation::evaluate_for_cast (struct type *expect_type,
+					    struct expression *exp,
+					    enum noside noside)
+{
+  value *val = evaluate_var_value (noside,
+				   std::get<1> (m_storage),
+				   std::get<0> (m_storage));
+
+  val = ada_value_cast (expect_type, val);
+
+  /* Follow the Ada language semantics that do not allow taking
+     an address of the result of a cast (view conversion in Ada).  */
+  if (VALUE_LVAL (val) == lval_memory)
+    {
+      if (value_lazy (val))
+	value_fetch_lazy (val);
+      VALUE_LVAL (val) = not_lval;
+    }
+  return val;
+}
+
+value *
+ada_var_value_operation::evaluate (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside)
+{
+  symbol *sym = std::get<0> (m_storage);
+
+  if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
+    /* Only encountered when an unresolved symbol occurs in a
+       context other than a function call, in which case, it is
+       invalid.  */
+    error (_("Unexpected unresolved symbol, %s, during evaluation"),
+	   sym->print_name ());
+
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      struct type *type = static_unwrap_type (SYMBOL_TYPE (sym));
+      /* Check to see if this is a tagged type.  We also need to handle
+	 the case where the type is a reference to a tagged type, but
+	 we have to be careful to exclude pointers to tagged types.
+	 The latter should be shown as usual (as a pointer), whereas
+	 a reference should mostly be transparent to the user.  */
+      if (ada_is_tagged_type (type, 0)
+	  || (type->code () == TYPE_CODE_REF
+	      && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0)))
+	{
+	  /* Tagged types are a little special in the fact that the real
+	     type is dynamic and can only be determined by inspecting the
+	     object's tag.  This means that we need to get the object's
+	     value first (EVAL_NORMAL) and then extract the actual object
+	     type from its tag.
+
+	     Note that we cannot skip the final step where we extract
+	     the object type from its tag, because the EVAL_NORMAL phase
+	     results in dynamic components being resolved into fixed ones.
+	     This can cause problems when trying to print the type
+	     description of tagged types whose parent has a dynamic size:
+	     We use the type name of the "_parent" component in order
+	     to print the name of the ancestor type in the type description.
+	     If that component had a dynamic size, the resolution into
+	     a fixed type would result in the loss of that type name,
+	     thus preventing us from printing the name of the ancestor
+	     type in the type description.  */
+	  value *arg1 = var_value_operation::evaluate (nullptr, exp,
+						       EVAL_NORMAL);
+
+	  if (type->code () != TYPE_CODE_REF)
+	    {
+	      struct type *actual_type;
+
+	      actual_type = type_from_tag (ada_value_tag (arg1));
+	      if (actual_type == NULL)
+		/* If, for some reason, we were unable to determine
+		   the actual type from the tag, then use the static
+		   approximation that we just computed as a fallback.
+		   This can happen if the debugging information is
+		   incomplete, for instance.  */
+		actual_type = type;
+	      return value_zero (actual_type, not_lval);
+	    }
+	  else
+	    {
+	      /* In the case of a ref, ada_coerce_ref takes care
+		 of determining the actual type.  But the evaluation
+		 should return a ref as it should be valid to ask
+		 for its address; so rebuild a ref after coerce.  */
+	      arg1 = ada_coerce_ref (arg1);
+	      return value_ref (arg1, TYPE_CODE_REF);
+	    }
+	}
+
+      /* Records and unions for which GNAT encodings have been
+	 generated need to be statically fixed as well.
+	 Otherwise, non-static fixing produces a type where
+	 all dynamic properties are removed, which prevents "ptype"
+	 from being able to completely describe the type.
+	 For instance, a case statement in a variant record would be
+	 replaced by the relevant components based on the actual
+	 value of the discriminants.  */
+      if ((type->code () == TYPE_CODE_STRUCT
+	   && dynamic_template_type (type) != NULL)
+	  || (type->code () == TYPE_CODE_UNION
+	      && ada_find_parallel_type (type, "___XVU") != NULL))
+	return value_zero (to_static_fixed_type (type), not_lval);
+    }
+
+  value *arg1 = var_value_operation::evaluate (expect_type, exp, noside);
+  return ada_to_fixed_value (arg1);
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure

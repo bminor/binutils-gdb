@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_var_value_operation::evaluate_for_cast)
+	(ada_var_value_operation::evaluate): New methods.
+	* ada-exp.h (class ada_var_value_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_unop_atr_operation::evaluate): New method.
 	* ada-exp.h (class ada_unop_atr_operation): New.
 

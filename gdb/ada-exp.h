@@ -283,6 +283,27 @@ public:
   { return std::get<1> (m_storage); }
 };
 
+/* Variant of var_value_operation for Ada.  */
+class ada_var_value_operation
+  : public var_value_operation
+{
+public:
+
+  using var_value_operation::var_value_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  value *evaluate_for_cast (struct type *expect_type,
+			    struct expression *exp,
+			    enum noside noside) override;
+
+protected:
+
+  using operation::do_generate_ax;
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */
