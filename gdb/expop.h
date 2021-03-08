@@ -1582,6 +1582,35 @@ protected:
   }
 };
 
+/* Implement 'sizeof'.  */
+class unop_sizeof_operation
+  : public maybe_constant_operation<operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (noside == EVAL_SKIP)
+      return eval_skip_value (exp);
+    return std::get<0> (m_storage)->evaluate_for_sizeof (exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  { return UNOP_SIZEOF; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

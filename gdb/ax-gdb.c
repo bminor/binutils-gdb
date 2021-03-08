@@ -2491,6 +2491,29 @@ comma_operation::do_generate_ax (struct expression *exp,
   /* It's the consumer's responsibility to trace the right operand.  */
 }
 
+void
+unop_sizeof_operation::do_generate_ax (struct expression *exp,
+				       struct agent_expr *ax,
+				       struct axs_value *value,
+				       struct type *cast_type)
+{
+  /* We don't care about the value of the operand expression; we only
+     care about its type.  However, in the current arrangement, the
+     only way to find an expression's type is to generate code for it.
+     So we generate code for the operand, and then throw it away,
+     replacing it with code that simply pushes its size.  */
+  int start = ax->len;
+
+  std::get<0> (m_storage)->generate_ax (exp, ax, value);
+
+  /* Throw away the code we just generated.  */
+  ax->len = start;
+
+  ax_const_l (ax, TYPE_LENGTH (value->type));
+  value->kind = axs_rvalue;
+  value->type = builtin_type (ax->gdbarch)->builtin_int;
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary
