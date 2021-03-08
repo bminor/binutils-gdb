@@ -240,7 +240,9 @@ struct expression
      expression.  */
   enum exp_opcode first_opcode () const
   {
-      return elts[0].opcode;
+    if (op != nullptr)
+      return op->opcode ();
+    return elts[0].opcode;
   }
 
   /* Evaluate the expression.  EXPECT_TYPE is the context type of the
@@ -252,6 +254,7 @@ struct expression
   const struct language_defn *language_defn;
   /* Architecture it was parsed in.  */
   struct gdbarch *gdbarch;
+  expr::operation_up op;
   int nelts = 0;
   union exp_element *elts;
 };

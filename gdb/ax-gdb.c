@@ -3064,7 +3064,10 @@ gen_trace_for_expr (CORE_ADDR scope, struct expression *expr,
   ax->tracing = 1;
   ax->trace_string = trace_string;
   value.optimized_out = 0;
-  gen_expr (expr, &pc, ax.get (), &value);
+  if (expr->op != nullptr)
+    expr->op->generate_ax (expr, ax.get (), &value);
+  else
+    gen_expr (expr, &pc, ax.get (), &value);
 
   /* Make sure we record the final object, and get rid of it.  */
   gen_traced_pop (ax.get (), &value);
@@ -3092,7 +3095,10 @@ gen_eval_for_expr (CORE_ADDR scope, struct expression *expr)
   pc = expr->elts;
   ax->tracing = 0;
   value.optimized_out = 0;
-  gen_expr (expr, &pc, ax.get (), &value);
+  if (expr->op != nullptr)
+    expr->op->generate_ax (expr, ax.get (), &value);
+  else
+    gen_expr (expr, &pc, ax.get (), &value);
 
   require_rvalue (ax.get (), &value);
 
@@ -3145,9 +3151,14 @@ gen_printf (CORE_ADDR scope, struct gdbarch *gdbarch,
      for simplicity of collecting them on the target side.  */
   for (tem = nargs - 1; tem >= 0; --tem)
     {
-      pc = exprs[tem]->elts;
       value.optimized_out = 0;
-      gen_expr (exprs[tem], &pc, ax.get (), &value);
+      if (exprs[tem]->op != nullptr)
+	exprs[tem]->op->generate_ax (exprs[tem], ax.get (), &value);
+      else
+	{
+	  pc = exprs[tem]->elts;
+	  gen_expr (exprs[tem], &pc, ax.get (), &value);
+	}
       require_rvalue (ax.get (), &value);
     }
 

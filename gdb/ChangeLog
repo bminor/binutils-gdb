@@ -1,5 +1,39 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-exp.h (class ada_var_value_operation) <get_symbol>: Remove;
+	now in superclass.
+	* value.h (fetch_subexp_value): Add "op" parameter.
+	* value.c (init_if_undefined_command): Update.
+	* tracepoint.c (validate_actionline, encode_actions_1): Update.
+	* stap-probe.c (stap_probe::compile_to_ax): Update.
+	* printcmd.c (set_command): Update.
+	* ppc-linux-nat.c (ppc_linux_nat_target::check_condition):
+	Update.
+	* parser-defs.h (struct expr_builder) <set_operation>: New
+	method.
+	* parse.c (parse_exp_in_context, exp_uses_objfile): Update.
+	* expression.h (struct expression) <first_opcode>: Update.
+	<op>: New member.
+	* expprint.c (dump_raw_expression, dump_prefix_expression):
+	Update.
+	* expop.h (class var_value_operation) <get_symbol>: New method.
+	(class register_operation) <get_name>: New method.
+	(class equal_operation): No longer a typedef, now a subclass.
+	(class unop_memval_operation) <get_type>: New method.
+	(class assign_operation) <get_lhs>: New method.
+	(class unop_cast_operation) <get_type>: New method.
+	* eval.c (evaluate_expression, evaluate_type)
+	(evaluate_subexpression_type): Update.
+	(fetch_subexp_value): Add "op" parameter.
+	(parse_and_eval_type): Update.
+	* dtrace-probe.c (dtrace_probe::compile_to_ax): Update.
+	* breakpoint.c (update_watchpoint, watchpoint_check)
+	(watchpoint_exp_is_const, watch_command_1): Update.
+	* ax-gdb.c (gen_trace_for_expr, gen_eval_for_expr, gen_printf):
+	Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_value_binop): Do not use op_string.
 
 2021-03-08  Tom Tromey  <tom@tromey.com>

@@ -44,6 +44,7 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/array-view.h"
 #include "cli/cli-style.h"
+#include "expop.h"
 
 /* Definition of a user function.  */
 struct internal_function
@@ -2006,7 +2007,7 @@ static struct internalvar *internalvars;
 static void
 init_if_undefined_command (const char* args, int from_tty)
 {
-  struct internalvar* intvar;
+  struct internalvar *intvar = nullptr;
 
   /* Parse the expression - this is taken from set_command().  */
   expression_up expr = parse_expression (args);
@@ -2014,15 +2015,34 @@ init_if_undefined_command (const char* args, int from_tty)
   /* Validate the expression.
      Was the expression an assignment?
      Or even an expression at all?  */
-  if (expr->nelts == 0 || expr->first_opcode () != BINOP_ASSIGN)
+  if ((expr->nelts == 0 && expr->op == nullptr)
+      || expr->first_opcode () != BINOP_ASSIGN)
     error (_("Init-if-undefined requires an assignment expression."));
 
   /* Extract the variable from the parsed expression.
      In the case of an assign the lvalue will be in elts[1] and elts[2].  */
-  if (expr->elts[1].opcode != OP_INTERNALVAR)
+  if (expr->op == nullptr)
+    {
+      if (expr->elts[1].opcode == OP_INTERNALVAR)
+	intvar = expr->elts[2].internalvar;
+    }
+  else
+    {
+      expr::assign_operation *assign
+	= dynamic_cast<expr::assign_operation *> (expr->op.get ());
+      if (assign != nullptr)
+	{
+	  expr::operation *lhs = assign->get_lhs ();
+	  expr::internalvar_operation *ivarop
+	    = dynamic_cast<expr::internalvar_operation *> (lhs);
+	  if (ivarop != nullptr)
+	    intvar = ivarop->get_internalvar ();
+	}
+    }
+
+  if (intvar == nullptr)
     error (_("The first parameter to init-if-undefined "
 	     "should be a GDB variable."));
-  intvar = expr->elts[2].internalvar;
 
   /* Only evaluate the expression if the lvalue is void.
      This may still fail if the expression is invalid.  */

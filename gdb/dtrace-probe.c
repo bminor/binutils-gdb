@@ -730,8 +730,13 @@ dtrace_probe::compile_to_ax (struct agent_expr *expr, struct axs_value *value,
 
   arg = this->get_arg_by_number (n, expr->gdbarch);
 
-  pc = arg->expr->elts;
-  gen_expr (arg->expr.get (), &pc, expr, value);
+  if (arg->expr->op != nullptr)
+    arg->expr->op->generate_ax (arg->expr.get (), expr, value);
+  else
+    {
+      pc = arg->expr->elts;
+      gen_expr (arg->expr.get (), &pc, expr, value);
+    }
 
   require_rvalue (expr, value);
   value->type = arg->type;

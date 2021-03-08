@@ -120,8 +120,14 @@ expression::evaluate (struct type *expect_type, enum noside noside)
       && !thread_stack_temporaries_enabled_p (inferior_thread ()))
     stack_temporaries.emplace (inferior_thread ());
 
-  int pos = 0;
-  struct value *retval = evaluate_subexp (expect_type, this, &pos, noside);
+  struct value *retval;
+  if (op != nullptr)
+    retval = op->evaluate (expect_type, this, noside);
+  else
+    {
+      int pos = 0;
+      retval = evaluate_subexp (expect_type, this, &pos, noside);
+    }
 
   if (stack_temporaries.has_value ()
       && value_in_thread_stack_temporaries (retval, inferior_thread ()))
@@ -153,6 +159,8 @@ evaluate_type (struct expression *exp)
 struct value *
 evaluate_subexpression_type (struct expression *exp, int subexp)
 {
+  if (exp->op != nullptr)
+    return exp->op->evaluate (nullptr, exp, EVAL_AVOID_SIDE_EFFECTS);
   return evaluate_subexp (nullptr, exp, &subexp, EVAL_AVOID_SIDE_EFFECTS);
 }
 
@@ -179,8 +187,9 @@ evaluate_subexpression_type (struct expression *exp, int subexp)
    values will be left on the value chain.  */
 
 void
-fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
-		    struct value **resultp,
+fetch_subexp_value (struct expression *exp, int *pc,
+		    expr::operation *op,
+		    struct value **valp, struct value **resultp,
 		    std::vector<value_ref_ptr> *val_chain,
 		    bool preserve_errors)
 {
@@ -198,7 +207,10 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
 
   try
     {
-      result = evaluate_subexp (nullptr, exp, pc, EVAL_NORMAL);
+      if (op == nullptr)
+	result = evaluate_subexp (nullptr, exp, pc, EVAL_NORMAL);
+      else
+	result = op->evaluate (nullptr, exp, EVAL_NORMAL);
     }
   catch (const gdb_exception &ex)
     {
@@ -4491,5 +4503,13 @@ parse_and_eval_type (const char *p, int length)
   expression_up expr = parse_expression (tmp);
   if (expr->first_opcode () != UNOP_CAST)
     error (_("Internal error in eval_type."));
+
+  if (expr->op != nullptr)
+    {
+      expr::unop_cast_operation *op
+	= dynamic_cast<expr::unop_cast_operation *> (expr->op.get ());
+      return op->get_type ();
+    }
+
   return expr->elts[1].type;
 }

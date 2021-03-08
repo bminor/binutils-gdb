@@ -725,6 +725,9 @@ dump_raw_expression (struct expression *exp, struct ui_file *stream,
   char *eltscan;
   int eltsize;
 
+  if (exp->op != nullptr)
+    return;
+
   fprintf_filtered (stream, "Dump of expression @ ");
   gdb_print_host_address (exp, stream);
   if (note)
@@ -1150,9 +1153,22 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream)
 {
   int elt;
 
+  if (exp->op != nullptr)
+    {
+      exp->op->dump (stream, 0);
+      return;
+    }
+
   fprintf_filtered (stream, "Dump of expression @ ");
   gdb_print_host_address (exp, stream);
   fputs_filtered (", after conversion to prefix form:\nExpression: `", stream);
+
+  if (exp->op != nullptr)
+    {
+      exp->op->dump (stream, 0);
+      return;
+    }
+
   print_expression (exp, stream);
   fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
 		    exp->language_defn->name (), exp->nelts,

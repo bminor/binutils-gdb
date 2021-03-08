@@ -63,6 +63,13 @@ struct expr_builder
     return expout->language_defn;
   }
 
+  /* Set the root operation of the expression that is currently being
+     built.  */
+  void set_operation (expr::operation_up &&op)
+  {
+    expout->op = std::move (op);
+  }
+
   /* The size of the expression above.  */
 
   size_t expout_size;

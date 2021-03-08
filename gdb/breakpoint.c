@@ -1903,7 +1903,8 @@ update_watchpoint (struct watchpoint *b, int reparse)
       struct value *v, *result;
       struct program_space *frame_pspace;
 
-      fetch_subexp_value (b->exp.get (), &pc, &v, &result, &val_chain, false);
+      fetch_subexp_value (b->exp.get (), &pc, b->exp->op.get (), &v, &result,
+			  &val_chain, false);
 
       /* Avoid setting b->val if it's already set.  The meaning of
 	 b->val is 'the last value' user saw, and we should update
@@ -5022,7 +5023,8 @@ watchpoint_check (bpstat bs)
 	return WP_VALUE_CHANGED;
 
       mark = value_mark ();
-      fetch_subexp_value (b->exp.get (), &pc, &new_val, NULL, NULL, false);
+      fetch_subexp_value (b->exp.get (), &pc, b->exp->op.get (), &new_val,
+			  NULL, NULL, false);
 
       if (b->val_bitsize != 0)
 	new_val = extract_bitfield_from_watchpoint_value (b, new_val);
@@ -10122,6 +10124,9 @@ break_range_command (const char *arg, int from_tty)
 static bool
 watchpoint_exp_is_const (const struct expression *exp)
 {
+  if (exp->op != nullptr)
+    return exp->op->constant_p ();
+
   int i = exp->nelts;
 
   while (i > 0)
@@ -10842,8 +10847,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   exp_valid_block = tracker.block ();
   struct value *mark = value_mark ();
   struct value *val_as_value = nullptr;
-  fetch_subexp_value (exp.get (), &pc, &val_as_value, &result, NULL,
-		      just_location);
+  fetch_subexp_value (exp.get (), &pc, exp->op.get (), &val_as_value, &result,
+		      NULL, just_location);
 
   if (val_as_value != NULL && just_location)
     {

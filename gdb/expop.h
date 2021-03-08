@@ -654,6 +654,12 @@ public:
   enum exp_opcode opcode () const override
   { return OP_VAR_VALUE; }
 
+  /* Return the symbol referenced by this object.  */
+  symbol *get_symbol () const
+  {
+    return std::get<0> (m_storage);
+  }
+
 protected:
 
   void do_generate_ax (struct expression *exp,
@@ -822,6 +828,12 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_REGISTER; }
+
+  /* Return the name of the register.  */
+  const char *get_name () const
+  {
+    return std::get<0> (m_storage).c_str ();
+  }
 
 protected:
 
@@ -1329,7 +1341,24 @@ public:
   }
 };
 
-using equal_operation = comparison_operation<BINOP_EQUAL, eval_op_equal>;
+class equal_operation
+  : public comparison_operation<BINOP_EQUAL, eval_op_equal>
+{
+public:
+
+  using comparison_operation::comparison_operation;
+
+  operation *get_lhs () const
+  {
+    return std::get<0> (m_storage).get ();
+  }
+
+  operation *get_rhs () const
+  {
+    return std::get<1> (m_storage).get ();
+  }
+};
+
 using notequal_operation
      = comparison_operation<BINOP_NOTEQUAL, eval_op_notequal>;
 using less_operation = comparison_operation<BINOP_LESS, eval_op_less>;
@@ -1759,6 +1788,12 @@ public:
   enum exp_opcode opcode () const override
   { return UNOP_MEMVAL; }
 
+  /* Return the type referenced by this object.  */
+  struct type *get_type () const
+  {
+    return std::get<1> (m_storage);
+  }
+
 protected:
 
   void do_generate_ax (struct expression *exp,
@@ -1884,6 +1919,12 @@ public:
   enum exp_opcode opcode () const override
   { return BINOP_ASSIGN; }
 
+  /* Return the left-hand-side of the assignment.  */
+  operation *get_lhs () const
+  {
+    return std::get<0> (m_storage).get ();
+  }
+
 protected:
 
   void do_generate_ax (struct expression *exp,
@@ -1941,6 +1982,12 @@ public:
 
   enum exp_opcode opcode () const override
   { return UNOP_CAST; }
+
+  /* Return the type referenced by this object.  */
+  struct type *get_type () const
+  {
+    return std::get<1> (m_storage);
+  }
 
 protected:
 

@@ -351,9 +351,6 @@ public:
 			    struct expression *exp,
 			    enum noside noside) override;
 
-  symbol *get_symbol () const
-  { return std::get<0> (m_storage); }
-
   const block *get_block () const
   { return std::get<1> (m_storage); }
 

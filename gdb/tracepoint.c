@@ -57,6 +57,7 @@
 #include "location.h"
 #include <algorithm>
 #include "cli/cli-style.h"
+#include "expop.h"
 
 #include <unistd.h>
 
@@ -689,19 +690,29 @@ validate_actionline (const char *line, struct breakpoint *b)
 
 	      if (exp->first_opcode () == OP_VAR_VALUE)
 		{
-		  if (SYMBOL_CLASS (exp->elts[2].symbol) == LOC_CONST)
+		  symbol *sym;
+		  if (exp->op != nullptr)
+		    {
+		      expr::var_value_operation *vvop
+			= (dynamic_cast<expr::var_value_operation *>
+			   (exp->op.get ()));
+		      sym = vvop->get_symbol ();
+		    }
+		  else
+		    sym = exp->elts[2].symbol;
+
+		  if (SYMBOL_CLASS (sym) == LOC_CONST)
 		    {
 		      error (_("constant `%s' (value %s) "
 			       "will not be collected."),
-			     exp->elts[2].symbol->print_name (),
-			     plongest (SYMBOL_VALUE (exp->elts[2].symbol)));
+			     sym->print_name (),
+			     plongest (SYMBOL_VALUE (sym)));
 		    }
-		  else if (SYMBOL_CLASS (exp->elts[2].symbol)
-			   == LOC_OPTIMIZED_OUT)
+		  else if (SYMBOL_CLASS (sym) == LOC_OPTIMIZED_OUT)
 		    {
 		      error (_("`%s' is optimized away "
 			       "and cannot be collected."),
-			     exp->elts[2].symbol->print_name ());
+			     sym->print_name ());
 		    }
 		}
 
@@ -1384,7 +1395,16 @@ encode_actions_1 (struct command_line *action,
 		    {
 		    case OP_REGISTER:
 		      {
-			const char *name = &exp->elts[2].string;
+			const char *name;
+			if (exp->op != nullptr)
+			  {
+			    expr::register_operation *regop
+			      = (dynamic_cast<expr::register_operation *>
+				 (exp->op.get ()));
+			    name = regop->get_name ();
+			  }
+			else
+			  name = &exp->elts[2].string;
 
 			i = user_reg_map_name_to_regnum (target_gdbarch (),
 							 name, strlen (name));
@@ -1400,25 +1420,47 @@ encode_actions_1 (struct command_line *action,
 		      }
 
 		    case UNOP_MEMVAL:
-		      /* Safe because we know it's a simple expression.  */
-		      tempval = evaluate_expression (exp.get ());
-		      addr = value_address (tempval);
-		      /* Initialize the TYPE_LENGTH if it is a typedef.  */
-		      check_typedef (exp->elts[1].type);
-		      collect->add_memrange (target_gdbarch (),
-					     memrange_absolute, addr,
-					     TYPE_LENGTH (exp->elts[1].type),
-					     tloc->address);
-		      collect->append_exp (std::string (exp_start,
-							action_exp));
+		      {
+			/* Safe because we know it's a simple expression.  */
+			tempval = evaluate_expression (exp.get ());
+			addr = value_address (tempval);
+			struct type *type;
+			if (exp->op != nullptr)
+			  {
+			    expr::unop_memval_operation *memop
+			      = (dynamic_cast<expr::unop_memval_operation *>
+				 (exp->op.get ()));
+			    type = memop->get_type ();
+			  }
+			else
+			  type = exp->elts[1].type;
+			/* Initialize the TYPE_LENGTH if it is a typedef.  */
+			check_typedef (type);
+			collect->add_memrange (target_gdbarch (),
+					       memrange_absolute, addr,
+					       TYPE_LENGTH (type),
+					       tloc->address);
+			collect->append_exp (std::string (exp_start,
+							  action_exp));
+		      }
 		      break;
 
 		    case OP_VAR_VALUE:
 		      {
-			struct symbol *sym = exp->elts[2].symbol;
+			struct symbol *sym;
+
+			if (exp->op != nullptr)
+			  {
+			    expr::var_value_operation *vvo
+			      = (dynamic_cast<expr::var_value_operation *>
+				 (exp->op.get ()));
+			    sym = vvo->get_symbol ();
+			  }
+			else
+			  sym = exp->elts[2].symbol;
 			const char *name = sym->natural_name ();
 
-			collect->collect_symbol (exp->elts[2].symbol,
+			collect->collect_symbol (sym,
 						 target_gdbarch (),
 						 frame_reg,
 						 frame_offset,

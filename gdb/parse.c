@@ -50,6 +50,7 @@
 #include "user-regs.h"
 #include <algorithm>
 #include "gdbsupport/gdb_optional.h"
+#include "c-exp.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,
  * and evaluating expressions.  */
@@ -1073,7 +1074,6 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      expr_completion_state *cstate)
 {
   const struct language_defn *lang = NULL;
-  int subexp;
 
   if (*stringptr == 0 || **stringptr == 0)
     error_no_arg (_("expression to compute"));
@@ -1153,7 +1153,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
       /* If parsing for completion, allow this to succeed; but if no
 	 expression elements have been written, then there's nothing
 	 to do, so fail.  */
-      if (! ps.parse_completion || ps.expout_ptr == 0)
+      if (! ps.parse_completion
+	  || (ps.expout->op == nullptr && ps.expout_ptr == 0))
 	throw;
     }
 
@@ -1168,12 +1169,17 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
     dump_raw_expression (result.get (), gdb_stdlog,
 			 "before conversion to prefix form");
 
-  subexp = prefixify_expression (result.get (),
-				 ps.m_completion_state.expout_last_struct);
-  if (out_subexp)
-    *out_subexp = subexp;
+  if (result->op == nullptr)
+    {
+      int subexp = prefixify_expression (result.get (),
+					 ps.m_completion_state.expout_last_struct);
+      if (out_subexp)
+	*out_subexp = subexp;
 
-  lang->post_parser (&result, &ps);
+      lang->post_parser (&result, &ps);
+    }
+  else
+    result->op->set_outermost ();
 
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);
@@ -1440,6 +1446,9 @@ int
 exp_uses_objfile (struct expression *exp, struct objfile *objfile)
 {
   gdb_assert (objfile->separate_debug_objfile_backlink == NULL);
+
+  if (exp->op != nullptr)
+    return exp->op->uses_objfile (objfile);
 
   return exp_iterate (exp, exp_uses_objfile_iter, objfile);
 }
