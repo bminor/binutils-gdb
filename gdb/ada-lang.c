@@ -10085,6 +10085,28 @@ ada_mult_binop (struct type *expect_type,
     }
 }
 
+/* A helper function for BINOP_EQUAL and BINOP_NOTEQUAL.  */
+
+static value *
+ada_equal_binop (struct type *expect_type,
+		 struct expression *exp,
+		 enum noside noside, enum exp_opcode op,
+		 struct value *arg1, struct value *arg2)
+{
+  int tem;
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    tem = 0;
+  else
+    {
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      tem = ada_value_equal (arg1, arg2);
+    }
+  if (op == BINOP_NOTEQUAL)
+    tem = !tem;
+  struct type *type = language_bool_type (exp->language_defn, exp->gdbarch);
+  return value_from_longest (type, (LONGEST) tem);
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10252,17 +10274,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	tem = 0;
-      else
-	{
-	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
-	  tem = ada_value_equal (arg1, arg2);
-	}
-      if (op == BINOP_NOTEQUAL)
-	tem = !tem;
-      type = language_bool_type (exp->language_defn, exp->gdbarch);
-      return value_from_longest (type, (LONGEST) tem);
+      return ada_equal_binop (expect_type, exp, noside, op, arg1, arg2);
 
     case UNOP_NEG:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
