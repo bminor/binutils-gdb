@@ -1,5 +1,24 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expression.h (class operation) <evaluate_funcall>: New methods.
+	* expop.h (class scope_operation) <evaluate_funcall>: New method.
+	(class var_value_operation) <evaluate_funcall>: New method.
+	(class structop_base_operation) <evaluate_funcall>: New method.
+	(class var_msym_value_operation) <evaluate_funcall>: New method.
+	(class structop_member_base): New class.
+	(class structop_member_operation): Derive from
+	structop_member_base.
+	(class structop_mptr_operation): Derive from
+	structop_member_base.
+	(class funcall_operation): New class.
+	* eval.c (operation::evaluate_funcall)
+	(var_value_operation::evaluate_funcall)
+	(scope_operation::evaluate_funcall)
+	(structop_member_base::evaluate_funcall)
+	(structop_base_operation::evaluate_funcall): New methods.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class array_operation): New.
 	* eval.c (array_operation::evaluate_struct_tuple)
 	(array_operation::evaluate): New methods.

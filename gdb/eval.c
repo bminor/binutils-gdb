@@ -1205,6 +1205,286 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 				  var_func_name, expect_type);
 }
 
+namespace expr
+{
+
+value *
+operation::evaluate_funcall (struct type *expect_type,
+			     struct expression *exp,
+			     enum noside noside,
+			     const char *function_name,
+			     const std::vector<operation_up> &args)
+{
+  std::vector<value *> vals (args.size ());
+
+  value *callee = evaluate_with_coercion (exp, noside);
+  for (int i = 0; i < args.size (); ++i)
+    vals[i] = args[i]->evaluate_with_coercion (exp, noside);
+
+  return evaluate_subexp_do_call (exp, noside, callee, vals,
+				  function_name, expect_type);
+}
+
+value *
+var_value_operation::evaluate_funcall (struct type *expect_type,
+				       struct expression *exp,
+				       enum noside noside,
+				       const std::vector<operation_up> &args)
+{
+  if (!overload_resolution
+      || exp->language_defn->la_language != language_cplus)
+    return operation::evaluate_funcall (expect_type, exp, noside, args);
+
+  std::vector<value *> argvec (args.size ());
+  for (int i = 0; i < args.size (); ++i)
+    argvec[i] = args[i]->evaluate_with_coercion (exp, noside);
+
+  struct symbol *symp;
+  find_overload_match (argvec, NULL, NON_METHOD,
+		       NULL, std::get<0> (m_storage),
+		       NULL, &symp, NULL, 0, noside);
+
+  if (SYMBOL_TYPE (symp)->code () == TYPE_CODE_ERROR)
+    error_unknown_type (symp->print_name ());
+  value *callee = evaluate_var_value (noside, std::get<1> (m_storage), symp);
+
+  return evaluate_subexp_do_call (exp, noside, callee, argvec,
+				  nullptr, expect_type);
+}
+
+value *
+scope_operation::evaluate_funcall (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside,
+				   const std::vector<operation_up> &args)
+{
+  if (!overload_resolution
+      || exp->language_defn->la_language != language_cplus)
+    return operation::evaluate_funcall (expect_type, exp, noside, args);
+
+  /* Unpack it locally so we can properly handle overload
+     resolution.  */
+  const std::string &name = std::get<1> (m_storage);
+  struct type *type = std::get<0> (m_storage);
+
+  symbol *function = NULL;
+  const char *function_name = NULL;
+  std::vector<value *> argvec (1 + args.size ());
+  if (type->code () == TYPE_CODE_NAMESPACE)
+    {
+      function = cp_lookup_symbol_namespace (type->name (),
+					     name.c_str (),
+					     get_selected_block (0),
+					     VAR_DOMAIN).symbol;
+      if (function == NULL)
+	error (_("No symbol \"%s\" in namespace \"%s\"."),
+	       name.c_str (), type->name ());
+    }
+  else
+    {
+      gdb_assert (type->code () == TYPE_CODE_STRUCT
+		  || type->code () == TYPE_CODE_UNION);
+      function_name = name.c_str ();
+
+      /* We need a properly typed value for method lookup.  */
+      argvec[0] = value_zero (type, lval_memory);
+    }
+
+  for (int i = 0; i < args.size (); ++i)
+    argvec[i + 1] = args[i]->evaluate_with_coercion (exp, noside);
+  gdb::array_view<value *> arg_view = argvec;
+
+  value *callee = nullptr;
+  if (function_name != nullptr)
+    {
+      int static_memfuncp;
+
+      find_overload_match (arg_view, function_name, METHOD,
+			   &argvec[0], nullptr, &callee, nullptr,
+			   &static_memfuncp, 0, noside);
+      if (!static_memfuncp)
+	{
+	  /* For the time being, we don't handle this.  */
+	  error (_("Call to overloaded function %s requires "
+		   "`this' pointer"),
+		 function_name);
+	}
+
+      arg_view = arg_view.slice (1);
+    }
+  else
+    {
+      symbol *symp;
+      arg_view = arg_view.slice (1);
+      find_overload_match (arg_view, nullptr,
+			   NON_METHOD, nullptr, function,
+			   nullptr, &symp, nullptr, 1, noside);
+      callee = value_of_variable (symp, get_selected_block (0));
+    }
+
+  return evaluate_subexp_do_call (exp, noside, callee, arg_view,
+				  nullptr, expect_type);
+}
+
+value *
+structop_member_base::evaluate_funcall (struct type *expect_type,
+					struct expression *exp,
+					enum noside noside,
+					const std::vector<operation_up> &args)
+{
+  /* First, evaluate the structure into lhs.  */
+  value *lhs;
+  if (opcode () == STRUCTOP_MEMBER)
+    lhs = std::get<0> (m_storage)->evaluate_for_address (exp, noside);
+  else
+    lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+
+  std::vector<value *> vals (args.size () + 1);
+  gdb::array_view<value *> val_view = vals;
+  /* If the function is a virtual function, then the aggregate
+     value (providing the structure) plays its part by providing
+     the vtable.  Otherwise, it is just along for the ride: call
+     the function directly.  */
+  value *rhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  value *callee;
+
+  type *a1_type = check_typedef (value_type (rhs));
+  if (a1_type->code () == TYPE_CODE_METHODPTR)
+    {
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	callee = value_zero (TYPE_TARGET_TYPE (a1_type), not_lval);
+      else
+	callee = cplus_method_ptr_to_value (&lhs, rhs);
+
+      vals[0] = lhs;
+    }
+  else if (a1_type->code () == TYPE_CODE_MEMBERPTR)
+    {
+      struct type *type_ptr
+	= lookup_pointer_type (TYPE_SELF_TYPE (a1_type));
+      struct type *target_type_ptr
+	= lookup_pointer_type (TYPE_TARGET_TYPE (a1_type));
+
+      /* Now, convert this value to an address.  */
+      lhs = value_cast (type_ptr, lhs);
+
+      long mem_offset = value_as_long (rhs);
+
+      callee = value_from_pointer (target_type_ptr,
+				   value_as_long (lhs) + mem_offset);
+      callee = value_ind (callee);
+
+      val_view = val_view.slice (1);
+    }
+  else
+    error (_("Non-pointer-to-member value used in pointer-to-member "
+	     "construct"));
+
+  for (int i = 0; i < args.size (); ++i)
+    vals[i + 1] = args[i]->evaluate_with_coercion (exp, noside);
+
+  return evaluate_subexp_do_call (exp, noside, callee, val_view,
+				  nullptr, expect_type);
+
+}
+
+value *
+structop_base_operation::evaluate_funcall
+     (struct type *expect_type, struct expression *exp, enum noside noside,
+      const std::vector<operation_up> &args)
+{
+  std::vector<value *> vals (args.size () + 1);
+  /* First, evaluate the structure into vals[0].  */
+  enum exp_opcode op = opcode ();
+  if (op == STRUCTOP_STRUCT)
+    {
+      /* If v is a variable in a register, and the user types
+	 v.method (), this will produce an error, because v has no
+	 address.
+
+	 A possible way around this would be to allocate a copy of
+	 the variable on the stack, copy in the contents, call the
+	 function, and copy out the contents.  I.e. convert this
+	 from call by reference to call by copy-return (or
+	 whatever it's called).  However, this does not work
+	 because it is not the same: the method being called could
+	 stash a copy of the address, and then future uses through
+	 that address (after the method returns) would be expected
+	 to use the variable itself, not some copy of it.  */
+      vals[0] = std::get<0> (m_storage)->evaluate_for_address (exp, noside);
+    }
+  else
+    {
+      vals[0] = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+      /* Check to see if the operator '->' has been overloaded.
+	 If the operator has been overloaded replace vals[0] with the
+	 value returned by the custom operator and continue
+	 evaluation.  */
+      while (unop_user_defined_p (op, vals[0]))
+	{
+	  struct value *value = nullptr;
+	  try
+	    {
+	      value = value_x_unop (vals[0], op, noside);
+	    }
+	  catch (const gdb_exception_error &except)
+	    {
+	      if (except.error == NOT_FOUND_ERROR)
+		break;
+	      else
+		throw;
+	    }
+
+	  vals[0] = value;
+	}
+    }
+
+  for (int i = 0; i < args.size (); ++i)
+    vals[i + 1] = args[i]->evaluate_with_coercion (exp, noside);
+  gdb::array_view<value *> arg_view = vals;
+
+  int static_memfuncp;
+  value *callee;
+  const char *tstr = std::get<1> (m_storage).c_str ();
+  if (overload_resolution
+      && exp->language_defn->la_language == language_cplus)
+    {
+      /* Language is C++, do some overload resolution before
+	 evaluation.  */
+      value *val0 = vals[0];
+      find_overload_match (arg_view, tstr, METHOD,
+			   &val0, nullptr, &callee, nullptr,
+			   &static_memfuncp, 0, noside);
+      vals[0] = val0;
+    }
+  else
+    /* Non-C++ case -- or no overload resolution.  */
+    {
+      struct value *temp = vals[0];
+
+      callee = value_struct_elt (&temp, &vals[1], tstr,
+				 &static_memfuncp,
+				 op == STRUCTOP_STRUCT
+				 ? "structure" : "structure pointer");
+      /* value_struct_elt updates temp with the correct value of the
+	 ``this'' pointer if necessary, so modify it to reflect any
+	 ``this'' changes.  */
+      vals[0] = value_from_longest (lookup_pointer_type (value_type (temp)),
+				    value_address (temp)
+				    + value_embedded_offset (temp));
+    }
+
+  /* Take out `this' if needed.  */
+  if (static_memfuncp)
+    arg_view = arg_view.slice (1);
+
+  return evaluate_subexp_do_call (exp, noside, callee, arg_view,
+				  nullptr, expect_type);
+}
+
+
+} /* namespace expr */
+
 /* Return true if type is integral or reference to integral */
 
 static bool

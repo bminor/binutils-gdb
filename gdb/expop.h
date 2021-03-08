@@ -597,6 +597,11 @@ public:
   value *evaluate_for_address (struct expression *exp,
 			       enum noside noside) override;
 
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const std::vector<operation_up> &args) override;
+
   enum exp_opcode opcode () const override
   { return OP_SCOPE; }
 
@@ -633,6 +638,11 @@ public:
 
   value *evaluate_for_address (struct expression *exp, enum noside noside)
     override;
+
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const std::vector<operation_up> &args) override;
 
   enum exp_opcode opcode () const override
   { return OP_VAR_VALUE; }
@@ -701,6 +711,15 @@ public:
   value *evaluate_for_cast (struct type *expect_type,
 			    struct expression *exp,
 			    enum noside noside) override;
+
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const std::vector<operation_up> &args) override
+  {
+    const char *name = std::get<0> (m_storage)->print_name ();
+    return operation::evaluate_funcall (expect_type, exp, noside, name, args);
+  }
 
   enum exp_opcode opcode () const override
   { return OP_VAR_MSYM_VALUE; }
@@ -974,6 +993,11 @@ public:
 					      EVAL_AVOID_SIDE_EFFECTS);
   }
 
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const std::vector<operation_up> &args) override;
+
 protected:
 
   using tuple_holding_operation::tuple_holding_operation;
@@ -1047,12 +1071,25 @@ protected:
   }
 };
 
-class structop_member_operation
+class structop_member_base
   : public tuple_holding_operation<operation_up, operation_up>
 {
 public:
 
   using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const std::vector<operation_up> &args) override;
+};
+
+class structop_member_operation
+  : public structop_member_base
+{
+public:
+
+  using structop_member_base::structop_member_base;
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
@@ -1070,11 +1107,11 @@ public:
 };
 
 class structop_mptr_operation
-  : public tuple_holding_operation<operation_up, operation_up>
+  : public structop_member_base
 {
 public:
 
-  using tuple_holding_operation::tuple_holding_operation;
+  using structop_member_base::structop_member_base;
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
@@ -2069,6 +2106,27 @@ private:
   struct value *evaluate_struct_tuple (struct value *struct_val,
 				       struct expression *exp,
 				       enum noside noside, int nargs);
+};
+
+/* A function call.  This holds the callee operation and the
+   arguments.  */
+class funcall_operation
+  : public tuple_holding_operation<operation_up, std::vector<operation_up>>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return std::get<0> (m_storage)->evaluate_funcall (expect_type, exp, noside,
+						      std::get<1> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_FUNCALL; }
 };
 
 } /* namespace expr */

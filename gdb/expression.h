@@ -144,6 +144,19 @@ public:
   virtual value *evaluate_for_address (struct expression *exp,
 				       enum noside noside);
 
+  /* Evaluate a function call, with this object as the callee.
+     EXPECT_TYPE, EXP, and NOSIDE have the same meaning as in
+     'evaluate'.  ARGS holds the operations that should be evaluated
+     to get the arguments to the call.  */
+  virtual value *evaluate_funcall (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside,
+				   const std::vector<operation_up> &args)
+  {
+    /* Defer to the helper overload.  */
+    return evaluate_funcall (expect_type, exp, noside, nullptr, args);
+  }
+
   /* True if this is a constant expression.  */
   virtual bool constant_p () const
   { return false; }
@@ -170,6 +183,13 @@ public:
   virtual void set_outermost () { }
 
 protected:
+
+  /* A helper overload that wraps evaluate_subexp_do_call.  */
+  value *evaluate_funcall (struct type *expect_type,
+			   struct expression *exp,
+			   enum noside noside,
+			   const char *function_name,
+			   const std::vector<operation_up> &args);
 
   /* Called by generate_ax to do the work for this particular
      operation.  */
