@@ -10218,6 +10218,133 @@ ada_binop_in_bounds (struct expression *exp, enum noside noside,
 				 || value_equal (arg2, arg1)));
 }
 
+/* A helper function for some attribute operations.  */
+
+static value *
+ada_unop_atr (struct expression *exp, enum noside noside, enum exp_opcode op,
+	      struct value *arg1, struct type *type_arg, int tem)
+{
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    {
+      if (type_arg == NULL)
+	type_arg = value_type (arg1);
+
+      if (ada_is_constrained_packed_array_type (type_arg))
+	type_arg = decode_constrained_packed_array_type (type_arg);
+
+      if (!discrete_type_p (type_arg))
+	{
+	  switch (op)
+	    {
+	    default:          /* Should never happen.  */
+	      error (_("unexpected attribute encountered"));
+	    case OP_ATR_FIRST:
+	    case OP_ATR_LAST:
+	      type_arg = ada_index_type (type_arg, tem,
+					 ada_attribute_name (op));
+	      break;
+	    case OP_ATR_LENGTH:
+	      type_arg = builtin_type (exp->gdbarch)->builtin_int;
+	      break;
+	    }
+	}
+
+      return value_zero (type_arg, not_lval);
+    }
+  else if (type_arg == NULL)
+    {
+      arg1 = ada_coerce_ref (arg1);
+
+      if (ada_is_constrained_packed_array_type (value_type (arg1)))
+	arg1 = ada_coerce_to_simple_array (arg1);
+
+      struct type *type;
+      if (op == OP_ATR_LENGTH)
+	type = builtin_type (exp->gdbarch)->builtin_int;
+      else
+	{
+	  type = ada_index_type (value_type (arg1), tem,
+				 ada_attribute_name (op));
+	  if (type == NULL)
+	    type = builtin_type (exp->gdbarch)->builtin_int;
+	}
+
+      switch (op)
+	{
+	default:          /* Should never happen.  */
+	  error (_("unexpected attribute encountered"));
+	case OP_ATR_FIRST:
+	  return value_from_longest
+	    (type, ada_array_bound (arg1, tem, 0));
+	case OP_ATR_LAST:
+	  return value_from_longest
+	    (type, ada_array_bound (arg1, tem, 1));
+	case OP_ATR_LENGTH:
+	  return value_from_longest
+	    (type, ada_array_length (arg1, tem));
+	}
+    }
+  else if (discrete_type_p (type_arg))
+    {
+      struct type *range_type;
+      const char *name = ada_type_name (type_arg);
+
+      range_type = NULL;
+      if (name != NULL && type_arg->code () != TYPE_CODE_ENUM)
+	range_type = to_fixed_range_type (type_arg, NULL);
+      if (range_type == NULL)
+	range_type = type_arg;
+      switch (op)
+	{
+	default:
+	  error (_("unexpected attribute encountered"));
+	case OP_ATR_FIRST:
+	  return value_from_longest 
+	    (range_type, ada_discrete_type_low_bound (range_type));
+	case OP_ATR_LAST:
+	  return value_from_longest
+	    (range_type, ada_discrete_type_high_bound (range_type));
+	case OP_ATR_LENGTH:
+	  error (_("the 'length attribute applies only to array types"));
+	}
+    }
+  else if (type_arg->code () == TYPE_CODE_FLT)
+    error (_("unimplemented type attribute"));
+  else
+    {
+      LONGEST low, high;
+
+      if (ada_is_constrained_packed_array_type (type_arg))
+	type_arg = decode_constrained_packed_array_type (type_arg);
+
+      struct type *type;
+      if (op == OP_ATR_LENGTH)
+	type = builtin_type (exp->gdbarch)->builtin_int;
+      else
+	{
+	  type = ada_index_type (type_arg, tem, ada_attribute_name (op));
+	  if (type == NULL)
+	    type = builtin_type (exp->gdbarch)->builtin_int;
+	}
+
+      switch (op)
+	{
+	default:
+	  error (_("unexpected attribute encountered"));
+	case OP_ATR_FIRST:
+	  low = ada_array_bound_from_type (type_arg, tem, 0);
+	  return value_from_longest (type, low);
+	case OP_ATR_LAST:
+	  high = ada_array_bound_from_type (type_arg, tem, 1);
+	  return value_from_longest (type, high);
+	case OP_ATR_LENGTH:
+	  low = ada_array_bound_from_type (type_arg, tem, 0);
+	  high = ada_array_bound_from_type (type_arg, tem, 1);
+	  return value_from_longest (type, high - low + 1);
+	}
+    }
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10717,123 +10844,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 	if (noside == EVAL_SKIP)
 	  goto nosideret;
-	else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	  {
-	    if (type_arg == NULL)
-	      type_arg = value_type (arg1);
 
-	    if (ada_is_constrained_packed_array_type (type_arg))
-	      type_arg = decode_constrained_packed_array_type (type_arg);
-
-	    if (!discrete_type_p (type_arg))
-	      {
-		switch (op)
-		  {
-		  default:          /* Should never happen.  */
-		    error (_("unexpected attribute encountered"));
-		  case OP_ATR_FIRST:
-		  case OP_ATR_LAST:
-		    type_arg = ada_index_type (type_arg, tem,
-					       ada_attribute_name (op));
-		    break;
-		  case OP_ATR_LENGTH:
-		    type_arg = builtin_type (exp->gdbarch)->builtin_int;
-		    break;
-		  }
-	      }
-
-	    return value_zero (type_arg, not_lval);
-	  }
-	else if (type_arg == NULL)
-	  {
-	    arg1 = ada_coerce_ref (arg1);
-
-	    if (ada_is_constrained_packed_array_type (value_type (arg1)))
-	      arg1 = ada_coerce_to_simple_array (arg1);
-
-	    if (op == OP_ATR_LENGTH)
-	      type = builtin_type (exp->gdbarch)->builtin_int;
-	    else
-	      {
-		type = ada_index_type (value_type (arg1), tem,
-				       ada_attribute_name (op));
-		if (type == NULL)
-		  type = builtin_type (exp->gdbarch)->builtin_int;
-	      }
-
-	    switch (op)
-	      {
-	      default:          /* Should never happen.  */
-		error (_("unexpected attribute encountered"));
-	      case OP_ATR_FIRST:
-		return value_from_longest
-			(type, ada_array_bound (arg1, tem, 0));
-	      case OP_ATR_LAST:
-		return value_from_longest
-			(type, ada_array_bound (arg1, tem, 1));
-	      case OP_ATR_LENGTH:
-		return value_from_longest
-			(type, ada_array_length (arg1, tem));
-	      }
-	  }
-	else if (discrete_type_p (type_arg))
-	  {
-	    struct type *range_type;
-	    const char *name = ada_type_name (type_arg);
-
-	    range_type = NULL;
-	    if (name != NULL && type_arg->code () != TYPE_CODE_ENUM)
-	      range_type = to_fixed_range_type (type_arg, NULL);
-	    if (range_type == NULL)
-	      range_type = type_arg;
-	    switch (op)
-	      {
-	      default:
-		error (_("unexpected attribute encountered"));
-	      case OP_ATR_FIRST:
-		return value_from_longest 
-		  (range_type, ada_discrete_type_low_bound (range_type));
-	      case OP_ATR_LAST:
-		return value_from_longest
-		  (range_type, ada_discrete_type_high_bound (range_type));
-	      case OP_ATR_LENGTH:
-		error (_("the 'length attribute applies only to array types"));
-	      }
-	  }
-	else if (type_arg->code () == TYPE_CODE_FLT)
-	  error (_("unimplemented type attribute"));
-	else
-	  {
-	    LONGEST low, high;
-
-	    if (ada_is_constrained_packed_array_type (type_arg))
-	      type_arg = decode_constrained_packed_array_type (type_arg);
-
-	    if (op == OP_ATR_LENGTH)
-	      type = builtin_type (exp->gdbarch)->builtin_int;
-	    else
-	      {
-		type = ada_index_type (type_arg, tem, ada_attribute_name (op));
-		if (type == NULL)
-		  type = builtin_type (exp->gdbarch)->builtin_int;
-	      }
-
-	    switch (op)
-	      {
-	      default:
-		error (_("unexpected attribute encountered"));
-	      case OP_ATR_FIRST:
-		low = ada_array_bound_from_type (type_arg, tem, 0);
-		return value_from_longest (type, low);
-	      case OP_ATR_LAST:
-		high = ada_array_bound_from_type (type_arg, tem, 1);
-		return value_from_longest (type, high);
-	      case OP_ATR_LENGTH:
-		low = ada_array_bound_from_type (type_arg, tem, 0);
-		high = ada_array_bound_from_type (type_arg, tem, 1);
-		return value_from_longest (type, high - low + 1);
-	      }
-	  }
+	return ada_unop_atr (exp, noside, op, arg1, type_arg, tem);
       }
 
     case OP_ATR_TAG:
