@@ -134,6 +134,22 @@ public:
   { return UNOP_IN_RANGE; }
 };
 
+/* The Ada + and - operators.  */
+class ada_binop_addsub_operation
+  : public tuple_holding_operation<enum exp_opcode, operation_up, operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return std::get<0> (m_storage); }
+};
+
 } /* namespace expr */
 
 #endif /* ADA_EXP_H */

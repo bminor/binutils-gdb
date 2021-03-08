@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_binop_addsub_operation::evaluate): New method.
+	* ada-exp.h (class ada_binop_addsub_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.h (ada_find_operator_symbol, ada_resolve_funcall)
 	(ada_resolve_variable): Declare.
 	* ada-lang.c (ada_find_operator_symbol, ada_resolve_funcall)

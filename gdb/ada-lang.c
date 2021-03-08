@@ -10492,6 +10492,46 @@ ada_ternop_range_operation::evaluate (struct type *expect_type,
   return eval_ternop_in_range (expect_type, exp, noside, arg0, arg1, arg2);
 }
 
+value *
+ada_binop_addsub_operation::evaluate (struct type *expect_type,
+				      struct expression *exp,
+				      enum noside noside)
+{
+  value *arg1 = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
+  value *arg2 = std::get<2> (m_storage)->evaluate_with_coercion (exp, noside);
+
+  auto do_op = [=] (LONGEST x, LONGEST y)
+    {
+      if (std::get<0> (m_storage) == BINOP_ADD)
+	return x + y;
+      return x - y;
+    };
+
+  if (value_type (arg1)->code () == TYPE_CODE_PTR)
+    return (value_from_longest
+	    (value_type (arg1),
+	     do_op (value_as_long (arg1), value_as_long (arg2))));
+  if (value_type (arg2)->code () == TYPE_CODE_PTR)
+    return (value_from_longest
+	    (value_type (arg2),
+	     do_op (value_as_long (arg1), value_as_long (arg2))));
+  /* Preserve the original type for use by the range case below.
+     We cannot cast the result to a reference type, so if ARG1 is
+     a reference type, find its underlying type.  */
+  struct type *type = value_type (arg1);
+  while (type->code () == TYPE_CODE_REF)
+    type = TYPE_TARGET_TYPE (type);
+  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+  arg1 = value_binop (arg1, arg2, std::get<0> (m_storage));
+  /* We need to special-case the result with a range.
+     This is done for the benefit of "ptype".  gdb's Ada support
+     historically used the LHS to set the result type here, so
+     preserve this behavior.  */
+  if (type->code () == TYPE_CODE_RANGE)
+    arg1 = value_cast (type, arg1);
+  return arg1;
+}
+
 }
 
 /* Implement the evaluate_exp routine in the exp_descriptor structure
