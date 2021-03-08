@@ -196,8 +196,12 @@ make_operation (Arg... args)
 
 struct expression
 {
-  expression (const struct language_defn *, struct gdbarch *);
-  ~expression ();
+  expression (const struct language_defn *lang, struct gdbarch *arch)
+    : language_defn (lang),
+      gdbarch (arch)
+  {
+  }
+
   DISABLE_COPY_AND_ASSIGN (expression);
 
   /* Return the opcode for the outermost sub-expression of this

@@ -105,16 +105,6 @@ expr_builder::release ()
   return std::move (expout);
 }
 
-expression::expression (const struct language_defn *lang, struct gdbarch *arch)
-  : language_defn (lang),
-    gdbarch (arch)
-{
-}
-
-expression::~expression ()
-{
-}
-
 /* Return the type of MSYMBOL, a minimal symbol of OBJFILE.  If
    ADDRESS_P is not NULL, set it to the MSYMBOL's resolved
    address.  */

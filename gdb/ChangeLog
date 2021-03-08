@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* parse.c (expression::expression, expression::~expression):
+	Remove.
+	* expression.h (struct expression): Inline constructor.  Remove
+	destructor.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* std-operator.def (BINOP_END): Remove.
 	* p-exp.y (tokentab3, tokentab2): Use OP_NULL, not BINOP_END.
 	* go-exp.y (tokentab2): Use OP_NULL, not BINOP_END.
