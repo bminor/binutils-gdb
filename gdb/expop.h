@@ -627,6 +627,28 @@ protected:
     override;
 };
 
+class bool_operation
+  : public tuple_holding_operation<bool>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    struct type *type = language_bool_type (exp->language_defn, exp->gdbarch);
+    return value_from_longest (type, std::get<0> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_BOOL; }
+
+  bool constant_p () const override
+  { return true; }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */
