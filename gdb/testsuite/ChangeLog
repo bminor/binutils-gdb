@@ -1,5 +1,9 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* gdb.fortran/debug-expr.exp: Update tests.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/debug-expr.exp: Update expected dump output.
 
 2021-03-06  Tom Tromey  <tom@tromey.com>

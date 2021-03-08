@@ -42,10 +42,10 @@ gdb_continue_to_breakpoint "Break Here"
 gdb_test_no_output "set debug expression 1"
 gdb_test_debug_expr "print obj%three(1)%two(1)%one(1)%i" "\\\$$decimal = 1"
 gdb_test_debug_expr "print .TRUE."  [multi_line \
-					 "" \
-					 "\\s+0\\s+OP_BOOL\\s+TRUE" \
+					 "Operation: OP_BOOL" \
+					 " Constant: .*1" \
 					 "\\\$$decimal = \.TRUE\."]
 gdb_test_debug_expr "print .FALSE."  [multi_line \
-					  "" \
-					  "\\s+0\\s+OP_BOOL\\s+FALSE" \
+					 "Operation: OP_BOOL" \
+					 " Constant: .*0" \
 					  "\\\$$decimal = \.FALSE\."]
