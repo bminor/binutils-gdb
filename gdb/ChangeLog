@@ -1,5 +1,9 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expression.h (enum exp_opcode) <OP_UNUSED_LAST>: Remove.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* std-operator.def (OP_EXTENDED0): Remove.
 
 2021-03-08  Tom Tromey  <tom@tromey.com>

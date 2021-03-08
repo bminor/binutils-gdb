@@ -47,9 +47,6 @@ enum exp_opcode : uint8_t
 #include "std-operator.def"
 
 #undef OP
-
-    /* Existing only to swallow the last comma (',') from last .inc file.  */
-    OP_UNUSED_LAST
   };
 
 /* Values of NOSIDE argument to eval_subexp.  */
