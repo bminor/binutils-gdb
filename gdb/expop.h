@@ -182,6 +182,10 @@ extern struct value *eval_op_postdec (struct type *expect_type,
 				      enum noside noside,
 				      enum exp_opcode op,
 				      struct value *arg1);
+extern struct value *eval_op_ind (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside,
+				  struct value *arg1);
 
 namespace expr
 {
@@ -1365,6 +1369,56 @@ using postinc_operation
      = unop_incr_operation<UNOP_POSTINCREMENT, eval_op_postinc>;
 using postdec_operation
      = unop_incr_operation<UNOP_POSTDECREMENT, eval_op_postdec>;
+
+/* Base class for implementations of UNOP_IND.  */
+class unop_ind_base_operation
+  : public tuple_holding_operation<operation_up>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    if (expect_type != nullptr && expect_type->code () == TYPE_CODE_PTR)
+      expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
+    value *val = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+    return eval_op_ind (expect_type, exp, noside, val);
+  }
+
+  value *evaluate_for_address (struct expression *exp,
+			       enum noside noside) override;
+
+  value *evaluate_for_sizeof (struct expression *exp,
+			      enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return UNOP_IND; }
+};
+
+/* Ordinary UNOP_IND implementation.  */
+class unop_ind_operation
+  : public unop_ind_base_operation
+{
+public:
+
+  using unop_ind_base_operation::unop_ind_base_operation;
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_unop (exp, UNOP_IND,
+		   std::get<0> (this->m_storage).get (),
+		   ax, value);
+  }
+};
 
 } /* namespace expr */
 

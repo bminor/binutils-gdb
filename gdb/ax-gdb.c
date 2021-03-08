@@ -2736,6 +2736,14 @@ gen_expr_unop (struct expression *exp,
       gen_complement (ax, value);
       break;
 
+    case UNOP_IND:
+      lhs->generate_ax (exp, ax, value);
+      gen_usual_unary (ax, value);
+      if (!pointer_type (value->type))
+	error (_("Argument of unary `*' is not a pointer."));
+      gen_deref (value);
+      break;
+
     default:
       gdb_assert_not_reached ("invalid case in gen_expr_unop");
     }

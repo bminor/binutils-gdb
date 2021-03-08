@@ -1,5 +1,14 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class unop_ind_base_operation)
+	(class unop_ind_operation): New.
+	* eval.c (eval_op_ind): No longer static.  Remove "op" parameter.
+	(unop_ind_base_operation::evaluate_for_address)
+	(unop_ind_base_operation::evaluate_for_sizeof): New method.
+	* ax-gdb.c (gen_expr_unop) <case UNOP_IND>: New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (unop_incr_operation): New template.
 	(preinc_operation, predec_operation, postinc_operation)
 	(postdec_operation): New typedefs.

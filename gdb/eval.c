@@ -1827,9 +1827,9 @@ eval_op_lognot (struct type *expect_type, struct expression *exp,
 
 /* A helper function for UNOP_IND.  */
 
-static struct value *
+struct value *
 eval_op_ind (struct type *expect_type, struct expression *exp,
-	     enum noside noside, enum exp_opcode op,
+	     enum noside noside,
 	     struct value *arg1)
 {
   struct type *type = check_typedef (value_type (arg1));
@@ -1839,8 +1839,8 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
 	     "to member without an object"));
   if (noside == EVAL_SKIP)
     return eval_skip_value (exp);
-  if (unop_user_defined_p (op, arg1))
-    return value_x_unop (arg1, op, noside);
+  if (unop_user_defined_p (UNOP_IND, arg1))
+    return value_x_unop (arg1, UNOP_IND, noside);
   else if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       type = check_typedef (value_type (arg1));
@@ -2974,7 +2974,7 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type && expect_type->code () == TYPE_CODE_PTR)
 	expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
-      return eval_op_ind (expect_type, exp, noside, op, arg1);
+      return eval_op_ind (expect_type, exp, noside, arg1);
 
     case UNOP_ADDR:
       /* C++: check for and handle pointer to members.  */
@@ -3302,6 +3302,22 @@ scope_operation::evaluate_for_address (struct expression *exp,
 }
 
 value *
+unop_ind_base_operation::evaluate_for_address (struct expression *exp,
+					       enum noside noside)
+{
+  value *x = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+
+  /* We can't optimize out "&*" if there's a user-defined operator*.  */
+  if (unop_user_defined_p (UNOP_IND, x))
+    {
+      x = value_x_unop (x, UNOP_IND, noside);
+      return evaluate_subexp_for_address_base (exp, noside, x);
+    }
+
+  return coerce_array (x);
+}
+
+value *
 var_msym_value_operation::evaluate_for_address (struct expression *exp,
 						enum noside noside)
 {
@@ -3567,6 +3583,25 @@ subscript_operation::evaluate_for_sizeof (struct expression *exp,
     }
 
   return operation::evaluate_for_sizeof (exp, noside);
+}
+
+value *
+unop_ind_base_operation::evaluate_for_sizeof (struct expression *exp,
+					      enum noside noside)
+{
+  value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						  EVAL_AVOID_SIDE_EFFECTS);
+  struct type *type = check_typedef (value_type (val));
+  if (type->code () != TYPE_CODE_PTR
+      && !TYPE_IS_REFERENCE (type)
+      && type->code () != TYPE_CODE_ARRAY)
+    error (_("Attempt to take contents of a non-pointer value."));
+  type = TYPE_TARGET_TYPE (type);
+  if (is_dynamic_type (type))
+    type = value_type (value_ind (val));
+  /* FIXME: This should be size_t.  */
+  struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
+  return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 }
 
 }
