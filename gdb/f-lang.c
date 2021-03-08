@@ -1003,6 +1003,44 @@ eval_op_f_abs (struct type *expect_type, struct expression *exp,
   error (_("ABS of type %s not supported"), TYPE_SAFE_NAME (type));
 }
 
+/* A helper function for BINOP_MOD.  */
+
+static struct value *
+eval_op_f_mod (struct type *expect_type, struct expression *exp,
+	       enum noside noside,
+	       struct value *arg1, struct value *arg2)
+{
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  struct type *type = value_type (arg1);
+  if (type->code () != value_type (arg2)->code ())
+    error (_("non-matching types for parameters to MOD ()"));
+  switch (type->code ())
+    {
+    case TYPE_CODE_FLT:
+      {
+	double d1
+	  = target_float_to_host_double (value_contents (arg1),
+					 value_type (arg1));
+	double d2
+	  = target_float_to_host_double (value_contents (arg2),
+					 value_type (arg2));
+	double d3 = fmod (d1, d2);
+	return value_from_host_double (type, d3);
+      }
+    case TYPE_CODE_INT:
+      {
+	LONGEST v1 = value_as_long (arg1);
+	LONGEST v2 = value_as_long (arg2);
+	if (v2 == 0)
+	  error (_("calling MOD (N, 0) is undefined"));
+	LONGEST v3 = v1 - (v1 / v2) * v2;
+	return value_from_longest (value_type (arg1), v3);
+      }
+    }
+  error (_("MOD of type %s not supported"), TYPE_SAFE_NAME (type));
+}
+
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -1031,35 +1069,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
     case BINOP_MOD:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
-      if (noside == EVAL_SKIP)
-	return eval_skip_value (exp);
-      type = value_type (arg1);
-      if (type->code () != value_type (arg2)->code ())
-	error (_("non-matching types for parameters to MOD ()"));
-      switch (type->code ())
-	{
-	case TYPE_CODE_FLT:
-	  {
-	    double d1
-	      = target_float_to_host_double (value_contents (arg1),
-					     value_type (arg1));
-	    double d2
-	      = target_float_to_host_double (value_contents (arg2),
-					     value_type (arg2));
-	    double d3 = fmod (d1, d2);
-	    return value_from_host_double (type, d3);
-	  }
-	case TYPE_CODE_INT:
-	  {
-	    LONGEST v1 = value_as_long (arg1);
-	    LONGEST v2 = value_as_long (arg2);
-	    if (v2 == 0)
-	      error (_("calling MOD (N, 0) is undefined"));
-	    LONGEST v3 = v1 - (v1 / v2) * v2;
-	    return value_from_longest (value_type (arg1), v3);
-	  }
-	}
-      error (_("MOD of type %s not supported"), TYPE_SAFE_NAME (type));
+      return eval_op_f_mod (expect_type, exp, noside, arg1, arg2);
 
     case UNOP_FORTRAN_CEILING:
       {
