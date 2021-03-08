@@ -2365,6 +2365,31 @@ register_operation::do_generate_ax (struct expression *exp,
   value->type = register_type (ax->gdbarch, reg);
 }
 
+void
+internalvar_operation::do_generate_ax (struct expression *exp,
+				       struct agent_expr *ax,
+				       struct axs_value *value,
+				       struct type *cast_type)
+{
+  struct internalvar *var = std::get<0> (m_storage);
+  const char *name = internalvar_name (var);
+  struct trace_state_variable *tsv;
+
+  tsv = find_trace_state_variable (name);
+  if (tsv)
+    {
+      ax_tsv (ax, aop_getv, tsv->number);
+      if (ax->tracing)
+	ax_tsv (ax, aop_tracev, tsv->number);
+      /* Trace state variables are always 64-bit integers.  */
+      value->kind = axs_rvalue;
+      value->type = builtin_type (ax->gdbarch)->builtin_long_long;
+    }
+  else if (! compile_internalvar_to_ax (var, ax, value))
+    error (_("$%s is not a trace state variable; GDB agent "
+	     "expressions cannot use convenience variables."), name);
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary
