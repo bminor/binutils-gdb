@@ -1546,6 +1546,42 @@ public:
   { return OP_TYPEID; }
 };
 
+/* Implement the address-of operation.  */
+class unop_addr_operation
+  : public maybe_constant_operation<operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    /* C++: check for and handle pointer to members.  */
+    if (noside == EVAL_SKIP)
+      return eval_skip_value (exp);
+    else
+      return std::get<0> (m_storage)->evaluate_for_address (exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  { return UNOP_ADDR; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override
+  {
+    gen_expr_unop (exp, UNOP_ADDR,
+		   std::get<0> (this->m_storage).get (),
+		   ax, value);
+  }
+};
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

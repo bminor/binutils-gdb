@@ -2744,6 +2744,11 @@ gen_expr_unop (struct expression *exp,
       gen_deref (value);
       break;
 
+    case UNOP_ADDR:
+      lhs->generate_ax (exp, ax, value);
+      gen_address_of (value);
+      break;
+
     default:
       gdb_assert_not_reached ("invalid case in gen_expr_unop");
     }
