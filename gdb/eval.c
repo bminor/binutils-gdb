@@ -1254,7 +1254,7 @@ eval_op_func_static_var (struct type *expect_type, struct expression *exp,
 
 /* Helper function that implements the body of OP_REGISTER.  */
 
-static struct value *
+struct value *
 eval_op_register (struct type *expect_type, struct expression *exp,
 		  enum noside noside, const char *name)
 {

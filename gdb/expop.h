@@ -58,6 +58,9 @@ extern struct value *eval_op_func_static_var (struct type *expect_type,
 					      struct expression *exp,
 					      enum noside noside,
 					      value *func, const char *var);
+extern struct value *eval_op_register (struct type *expect_type,
+				       struct expression *exp,
+				       enum noside noside, const char *name);
 
 namespace expr
 {
@@ -595,6 +598,33 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_LAST; }
+};
+
+class register_operation
+  : public tuple_holding_operation<std::string>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return eval_op_register (expect_type, exp, noside,
+			     std::get<0> (m_storage).c_str ());
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_REGISTER; }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type)
+    override;
 };
 
 } /* namespace expr */

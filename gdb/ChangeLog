@@ -1,5 +1,11 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (class register_operation): New.
+	* eval.c (eval_op_register): No longer static.
+	* ax-gdb.c (register_operation::do_generate_ax): New method.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class last_operation): New.
 
 2021-03-08  Tom Tromey  <tom@tromey.com>

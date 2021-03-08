@@ -2341,6 +2341,30 @@ var_msym_value_operation::do_generate_ax (struct expression *exp,
     }
 }
 
+void
+register_operation::do_generate_ax (struct expression *exp,
+				    struct agent_expr *ax,
+				    struct axs_value *value,
+				    struct type *cast_type)
+{
+  const char *name = std::get<0> (m_storage).c_str ();
+  int len = std::get<0> (m_storage).size ();
+  int reg;
+
+  reg = user_reg_map_name_to_regnum (ax->gdbarch, name, len);
+  if (reg == -1)
+    internal_error (__FILE__, __LINE__,
+		    _("Register $%s not available"), name);
+  /* No support for tracing user registers yet.  */
+  if (reg >= gdbarch_num_cooked_regs (ax->gdbarch))
+    error (_("'%s' is a user-register; "
+	     "GDB cannot yet trace user-register contents."),
+	   name);
+  value->kind = axs_lvalue_register;
+  value->u.reg = reg;
+  value->type = register_type (ax->gdbarch, reg);
+}
+
 }
 
 /* This handles the middle-to-right-side of code generation for binary
