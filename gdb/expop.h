@@ -1895,6 +1895,40 @@ protected:
     override;
 };
 
+typedef value *cxx_cast_ftype (struct type *, value *);
+
+/* This implements dynamic_cast and reinterpret_cast.  static_cast and
+   const_cast are handled by the ordinary case operations.  */
+template<exp_opcode OP, cxx_cast_ftype FUNC>
+class cxx_cast_operation
+  : public maybe_constant_operation<operation_up, operation_up>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    value *val = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						    EVAL_AVOID_SIDE_EFFECTS);
+    struct type *type = value_type (val);
+    value *rhs = std::get<1> (m_storage)->evaluate (type, exp, noside);
+    if (noside == EVAL_SKIP)
+      return eval_skip_value (exp);
+    return FUNC (type, rhs);
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP; }
+};
+
+using dynamic_cast_operation = cxx_cast_operation<UNOP_DYNAMIC_CAST,
+						  value_dynamic_cast>;
+using reinterpret_cast_operation = cxx_cast_operation<UNOP_REINTERPRET_CAST,
+						      value_reinterpret_cast>;
+
 } /* namespace expr */
 
 #endif /* EXPOP_H */

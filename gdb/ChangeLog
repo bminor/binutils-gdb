@@ -1,5 +1,12 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* expop.h (cxx_cast_ftype): New typedef.
+	(cxx_cast_operation): New template.
+	(dynamic_cast_operation, reinterpret_cast_operation): New
+	typedefs.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* expop.h (class unop_cast_type_operation): New.
 	* ax-gdb.c (unop_cast_type_operation::do_generate_ax): New
 	method.
