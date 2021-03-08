@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* eval.c (eval_op_var_msym_value): New function.
+	(evaluate_subexp_standard): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c (eval_op_var_entry_value): New function.
 	(evaluate_subexp_standard): Use it.
 

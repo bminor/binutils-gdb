@@ -1218,6 +1218,22 @@ eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
   return SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry (sym, frame);
 }
 
+/* Helper function that implements the body of OP_VAR_MSYM_VALUE.  */
+
+static struct value *
+eval_op_var_msym_value (struct type *expect_type, struct expression *exp,
+			enum noside noside, bool outermost_p,
+			minimal_symbol *msymbol, struct objfile *objfile)
+{
+  value *val = evaluate_var_msym_value (noside, objfile, msymbol);
+
+  struct type *type = value_type (val);
+  if (type->code () == TYPE_CODE_ERROR
+      && (noside != EVAL_AVOID_SIDE_EFFECTS || !outermost_p))
+    error_unknown_type (msymbol->print_name ());
+  return val;
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1280,15 +1296,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	(*pos) += 3;
 
 	minimal_symbol *msymbol = exp->elts[pc + 2].msymbol;
-	value *val = evaluate_var_msym_value (noside,
-					      exp->elts[pc + 1].objfile,
-					      msymbol);
-
-	type = value_type (val);
-	if (type->code () == TYPE_CODE_ERROR
-	    && (noside != EVAL_AVOID_SIDE_EFFECTS || pc != 0))
-	  error_unknown_type (msymbol->print_name ());
-	return val;
+	return eval_op_var_msym_value (expect_type, exp, noside,
+				       pc == 0, msymbol,
+				       exp->elts[pc + 1].objfile);
       }
 
     case OP_VAR_ENTRY_VALUE:
