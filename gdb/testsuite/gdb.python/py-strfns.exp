@@ -88,7 +88,9 @@ proc test_strfns_core_file { } {
 	    }
 	}
 
-    test_all_strfns
+    with_test_prefix "for corefile" {
+	test_all_strfns
+    }
 }
 
 test_strfns_core_file

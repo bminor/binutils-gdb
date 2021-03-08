@@ -1,5 +1,10 @@
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-strfns.exp: Use with_test_prefix to make test
+	names unique.
+
+2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-format-string.exp: Use proc_with_prefix to make
 	test names unique.
 
