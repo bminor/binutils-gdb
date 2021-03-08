@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* d-exp.y: Create operations.
+	(d_parse): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* go-exp.y: Create operations.
 	(go_language::parser): Update.
 
