@@ -51,6 +51,9 @@ extern struct value *eval_op_var_msym_value (struct type *expect_type,
 					     bool outermost_p,
 					     minimal_symbol *msymbol,
 					     struct objfile *objfile);
+extern struct value *eval_op_var_entry_value (struct type *expect_type,
+					      struct expression *exp,
+					      enum noside noside, symbol *sym);
 
 namespace expr
 {
@@ -531,6 +534,25 @@ protected:
 		       struct axs_value *value,
 		       struct type *cast_type)
     override;
+};
+
+class var_entry_value_operation
+  : public tuple_holding_operation<symbol *>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return eval_op_var_entry_value (expect_type, exp, noside,
+				    std::get<0> (m_storage));
+  }
+
+  enum exp_opcode opcode () const override
+  { return OP_VAR_ENTRY_VALUE; }
 };
 
 } /* namespace expr */

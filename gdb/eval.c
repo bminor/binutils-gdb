@@ -1201,7 +1201,7 @@ eval_op_scope (struct type *expect_type, struct expression *exp,
 
 /* Helper function that implements the body of OP_VAR_ENTRY_VALUE.  */
 
-static struct value *
+struct value *
 eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
 			 enum noside noside, symbol *sym)
 {
