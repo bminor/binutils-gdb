@@ -10025,6 +10025,31 @@ ada_atr_tag (struct type *expect_type,
   return ada_value_tag (arg1);
 }
 
+/* A helper function for OP_ATR_SIZE.  */
+
+static value *
+ada_atr_size (struct type *expect_type,
+	      struct expression *exp,
+	      enum noside noside, enum exp_opcode op,
+	      struct value *arg1)
+{
+  struct type *type = value_type (arg1);
+
+  /* If the argument is a reference, then dereference its type, since
+     the user is really asking for the size of the actual object,
+     not the size of the pointer.  */
+  if (type->code () == TYPE_CODE_REF)
+    type = TYPE_TARGET_TYPE (type);
+
+  if (noside == EVAL_SKIP)
+    return eval_skip_value (exp);
+  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    return value_zero (builtin_type (exp->gdbarch)->builtin_int, not_lval);
+  else
+    return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
+			       TARGET_CHAR_BIT * TYPE_LENGTH (type));
+}
+
 /* Implement the evaluate_exp routine in the exp_descriptor structure
    for the Ada language.  */
 
@@ -10802,21 +10827,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case OP_ATR_SIZE:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      type = value_type (arg1);
-
-      /* If the argument is a reference, then dereference its type, since
-	 the user is really asking for the size of the actual object,
-	 not the size of the pointer.  */
-      if (type->code () == TYPE_CODE_REF)
-	type = TYPE_TARGET_TYPE (type);
-
-      if (noside == EVAL_SKIP)
-	goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (builtin_type (exp->gdbarch)->builtin_int, not_lval);
-      else
-	return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-				   TARGET_CHAR_BIT * TYPE_LENGTH (type));
+      return ada_atr_size (expect_type, exp, noside, op, arg1);
 
     case OP_ATR_VAL:
       evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);

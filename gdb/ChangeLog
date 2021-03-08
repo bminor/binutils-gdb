@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_atr_size): New function.
+	(ada_evaluate_subexp): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-lang.c (ada_atr_tag): New function.
 	(ada_evaluate_subexp): Use it.
 
