@@ -10156,7 +10156,7 @@ ada_equal_binop (struct type *expect_type,
 
 /* A helper function for TERNOP_SLICE.  */
 
-static value *
+value *
 ada_ternop_slice (struct expression *exp,
 		  enum noside noside,
 		  struct value *array, struct value *low_bound_val,

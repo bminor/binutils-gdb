@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (ada_ternop_slice): No longer static.
+	* ada-exp.h (class ada_ternop_slice_operation): New.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* ada-exp.h (ada_bitwise_operation): New template class.
 	(ada_bitwise_and_operation, ada_bitwise_ior_operation)
 	(ada_bitwise_xor_operation): New typedefs.
