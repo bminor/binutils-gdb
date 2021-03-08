@@ -1,5 +1,41 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* value.h (eval_skip_value): Don't declare.
+	* opencl-lang.c (eval_opencl_assign): Update.
+	* m2-lang.c (eval_op_m2_high, eval_op_m2_subscript): Update.
+	* f-lang.c (eval_op_f_abs, eval_op_f_mod, eval_op_f_ceil)
+	(eval_op_f_floor, eval_op_f_modulo, eval_op_f_cmplx): Remove.
+	* expression.h (enum noside) <EVAL_SKIP>: Remove.
+	* expop.h (typeof_operation::evaluate)
+	(decltype_operation::evaluate, unop_addr_operation::evaluate)
+	(unop_sizeof_operation::evaluate, assign_operation::evaluate)
+	(cxx_cast_operation::evaluate): Update.
+	* eval.c (eval_skip_value): Remove.
+	(eval_op_scope, eval_op_var_entry_value)
+	(eval_op_func_static_var, eval_op_string, eval_op_objc_selector)
+	(eval_op_concat, eval_op_ternop, eval_op_structop_struct)
+	(eval_op_structop_ptr, eval_op_member, eval_op_add, eval_op_sub)
+	(eval_op_binary, eval_op_subscript, eval_op_equal)
+	(eval_op_notequal, eval_op_less, eval_op_gtr, eval_op_geq)
+	(eval_op_leq, eval_op_repeat, eval_op_plus, eval_op_neg)
+	(eval_op_complement, eval_op_lognot, eval_op_ind)
+	(eval_op_memval, eval_op_preinc, eval_op_predec)
+	(eval_op_postinc, eval_op_postdec, eval_op_type)
+	(eval_binop_assign_modify, eval_op_objc_msgcall)
+	(eval_multi_subscript, logical_and_operation::evaluate)
+	(logical_or_operation::evaluate, array_operation::evaluate)
+	(operation::evaluate_for_cast)
+	(var_msym_value_operation::evaluate_for_cast)
+	(var_value_operation::evaluate_for_cast): Update.
+	* c-lang.c (c_string_operation::evaluate): Update.
+	* c-exp.h (objc_nsstring_operation::evaluate)
+	(objc_selector_operation::evaluate): Update.
+	* ada-lang.c (ada_assign_operation::evaluate)
+	(eval_ternop_in_range, ada_unop_neg, ada_unop_in_range)
+	(ada_atr_size): Update.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* eval.c: Merge "namespace" scopes.
 
 2021-03-08  Tom Tromey  <tom@tromey.com>

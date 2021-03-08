@@ -601,14 +601,6 @@ evaluate_var_msym_value (enum noside noside,
     return value_at_lazy (the_type, address);
 }
 
-/* Helper for returning a value when handling EVAL_SKIP.  */
-
-value *
-eval_skip_value (expression *exp)
-{
-  return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
-}
-
 /* See expression.h.  */
 
 value *
@@ -983,8 +975,6 @@ eval_op_scope (struct type *expect_type, struct expression *exp,
 	       enum noside noside,
 	       struct type *type, const char *string)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct value *arg1 = value_aggregate_elt (type, string, expect_type,
 					    0, noside);
   if (arg1 == NULL)
@@ -998,8 +988,6 @@ struct value *
 eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
 			 enum noside noside, symbol *sym)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return value_zero (SYMBOL_TYPE (sym), not_lval);
 
@@ -1035,8 +1023,6 @@ eval_op_func_static_var (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
 			 value *func, const char *var)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   CORE_ADDR addr = value_address (func);
   const block *blk = block_for_pc (addr);
   struct block_symbol sym = lookup_symbol (var, blk, VAR_DOMAIN, NULL);
@@ -1081,8 +1067,6 @@ struct value *
 eval_op_string (struct type *expect_type, struct expression *exp,
 		enum noside noside, int len, const char *string)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = language_string_char_type (exp->language_defn,
 						 exp->gdbarch);
   return value_string (string, len, type);
@@ -1095,9 +1079,6 @@ eval_op_objc_selector (struct type *expect_type, struct expression *exp,
 		       enum noside noside,
 		       const char *sel)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-
   struct type *selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
   return value_from_longest (selector_type,
 			     lookup_child_selector (exp->gdbarch, sel));
@@ -1109,8 +1090,6 @@ struct value *
 eval_op_concat (struct type *expect_type, struct expression *exp,
 		enum noside noside, struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (BINOP_CONCAT, arg1, arg2))
     return value_x_binop (arg1, arg2, BINOP_CONCAT, OP_NULL, noside);
   else
@@ -1124,8 +1103,6 @@ eval_op_ternop (struct type *expect_type, struct expression *exp,
 		enum noside noside,
 		struct value *array, struct value *low, struct value *upper)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   int lowbound = value_as_long (low);
   int upperbound = value_as_long (upper);
   return value_slice (array, lowbound, upperbound - lowbound + 1);
@@ -1138,8 +1115,6 @@ eval_op_structop_struct (struct type *expect_type, struct expression *exp,
 			 enum noside noside,
 			 struct value *arg1, const char *string)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct value *arg3 = value_struct_elt (&arg1, NULL, string,
 					 NULL, "structure");
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -1154,9 +1129,6 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
 		      enum noside noside,
 		      struct value *arg1, const char *string)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-
   /* Check to see if operator '->' has been overloaded.  If so replace
      arg1 with the value returned by evaluating operator->().  */
   while (unop_user_defined_p (STRUCTOP_PTR, arg1))
@@ -1215,9 +1187,6 @@ eval_op_member (struct type *expect_type, struct expression *exp,
 {
   long mem_offset;
 
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-
   struct value *arg3;
   struct type *type = check_typedef (value_type (arg2));
   switch (type->code ())
@@ -1256,8 +1225,6 @@ eval_op_add (struct type *expect_type, struct expression *exp,
 	     enum noside noside,
 	     struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (BINOP_ADD, arg1, arg2))
     return value_x_binop (arg1, arg2, BINOP_ADD, OP_NULL, noside);
   else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
@@ -1280,8 +1247,6 @@ eval_op_sub (struct type *expect_type, struct expression *exp,
 	     enum noside noside,
 	     struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (BINOP_SUB, arg1, arg2))
     return value_x_binop (arg1, arg2, BINOP_SUB, OP_NULL, noside);
   else if (ptrmath_type_p (exp->language_defn, value_type (arg1))
@@ -1308,8 +1273,6 @@ eval_op_binary (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     return value_x_binop (arg1, arg2, op, OP_NULL, noside);
   else
@@ -1355,8 +1318,6 @@ eval_op_subscript (struct type *expect_type, struct expression *exp,
 		   enum noside noside, enum exp_opcode op,
 		   struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     return value_x_binop (arg1, arg2, op, OP_NULL, noside);
   else
@@ -1391,8 +1352,6 @@ eval_op_equal (struct type *expect_type, struct expression *exp,
 	       enum noside noside, enum exp_opcode op,
 	       struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     {
       return value_x_binop (arg1, arg2, op, OP_NULL, noside);
@@ -1414,8 +1373,6 @@ eval_op_notequal (struct type *expect_type, struct expression *exp,
 		  enum noside noside, enum exp_opcode op,
 		  struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     {
       return value_x_binop (arg1, arg2, op, OP_NULL, noside);
@@ -1437,8 +1394,6 @@ eval_op_less (struct type *expect_type, struct expression *exp,
 	      enum noside noside, enum exp_opcode op,
 	      struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     {
       return value_x_binop (arg1, arg2, op, OP_NULL, noside);
@@ -1460,8 +1415,6 @@ eval_op_gtr (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     {
       return value_x_binop (arg1, arg2, op, OP_NULL, noside);
@@ -1483,8 +1436,6 @@ eval_op_geq (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     {
       return value_x_binop (arg1, arg2, op, OP_NULL, noside);
@@ -1506,8 +1457,6 @@ eval_op_leq (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (binop_user_defined_p (op, arg1, arg2))
     {
       return value_x_binop (arg1, arg2, op, OP_NULL, noside);
@@ -1529,8 +1478,6 @@ eval_op_repeat (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = check_typedef (value_type (arg2));
   if (type->code () != TYPE_CODE_INT
       && type->code () != TYPE_CODE_ENUM)
@@ -1551,8 +1498,6 @@ eval_op_plus (struct type *expect_type, struct expression *exp,
 	      enum noside noside, enum exp_opcode op,
 	      struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (unop_user_defined_p (op, arg1))
     return value_x_unop (arg1, op, noside);
   else
@@ -1569,8 +1514,6 @@ eval_op_neg (struct type *expect_type, struct expression *exp,
 	     enum noside noside, enum exp_opcode op,
 	     struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (unop_user_defined_p (op, arg1))
     return value_x_unop (arg1, op, noside);
   else
@@ -1587,8 +1530,6 @@ eval_op_complement (struct type *expect_type, struct expression *exp,
 		    enum noside noside, enum exp_opcode op,
 		    struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (unop_user_defined_p (UNOP_COMPLEMENT, arg1))
     return value_x_unop (arg1, UNOP_COMPLEMENT, noside);
   else
@@ -1605,8 +1546,6 @@ eval_op_lognot (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (unop_user_defined_p (op, arg1))
     return value_x_unop (arg1, op, noside);
   else
@@ -1629,8 +1568,6 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
       || type->code () == TYPE_CODE_MEMBERPTR)
     error (_("Attempt to dereference pointer "
 	     "to member without an object"));
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (unop_user_defined_p (UNOP_IND, arg1))
     return value_x_unop (arg1, UNOP_IND, noside);
   else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -1694,8 +1631,6 @@ eval_op_memval (struct type *expect_type, struct expression *exp,
 		enum noside noside,
 		struct value *arg1, struct type *type)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return value_zero (type, lval_memory);
   else
@@ -1709,7 +1644,7 @@ eval_op_preinc (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1)
 {
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
   else if (unop_user_defined_p (op, arg1))
     {
@@ -1740,7 +1675,7 @@ eval_op_predec (struct type *expect_type, struct expression *exp,
 		enum noside noside, enum exp_opcode op,
 		struct value *arg1)
 {
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
   else if (unop_user_defined_p (op, arg1))
     {
@@ -1771,7 +1706,7 @@ eval_op_postinc (struct type *expect_type, struct expression *exp,
 		 enum noside noside, enum exp_opcode op,
 		 struct value *arg1)
 {
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
   else if (unop_user_defined_p (op, arg1))
     {
@@ -1805,7 +1740,7 @@ eval_op_postdec (struct type *expect_type, struct expression *exp,
 		 enum noside noside, enum exp_opcode op,
 		 struct value *arg1)
 {
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
   else if (unop_user_defined_p (op, arg1))
     {
@@ -1838,9 +1773,7 @@ struct value *
 eval_op_type (struct type *expect_type, struct expression *exp,
 	      enum noside noside, struct type *type)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return allocate_value (type);
   else
     error (_("Attempt to use a type name as an expression"));
@@ -1853,7 +1786,7 @@ eval_binop_assign_modify (struct type *expect_type, struct expression *exp,
 			  enum noside noside, enum exp_opcode op,
 			  struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
   if (binop_user_defined_p (op, arg1, arg2))
     return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op, noside);
@@ -2103,8 +2036,6 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
 	called_method = msg_send;
     }
 
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
@@ -2160,8 +2091,6 @@ eval_multi_subscript (struct type *expect_type, struct expression *exp,
 		      enum noside noside, value *arg1,
 		      gdb::array_view<value *> args)
 {
-  if (noside == EVAL_SKIP)
-    return arg1;
   for (value *arg2 : args)
     {
       if (binop_user_defined_p (MULTI_SUBSCRIPT, arg1, arg2))
@@ -2249,8 +2178,6 @@ logical_and_operation::evaluate (struct type *expect_type,
 				 enum noside noside)
 {
   value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
 
   value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp,
 						   EVAL_AVOID_SIDE_EFFECTS);
@@ -2280,8 +2207,6 @@ logical_or_operation::evaluate (struct type *expect_type,
 				enum noside noside)
 {
   value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
 
   value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp,
 						   EVAL_AVOID_SIDE_EFFECTS);
@@ -2406,7 +2331,7 @@ array_operation::evaluate (struct type *expect_type,
   int nargs = tem3 - tem2 + 1;
   struct type *type = expect_type ? check_typedef (expect_type) : nullptr;
 
-  if (expect_type != nullptr && noside != EVAL_SKIP
+  if (expect_type != nullptr
       && type->code () == TYPE_CODE_STRUCT)
     {
       struct value *rec = allocate_value (expect_type);
@@ -2415,7 +2340,7 @@ array_operation::evaluate (struct type *expect_type,
       return evaluate_struct_tuple (rec, exp, noside, nargs);
     }
 
-  if (expect_type != nullptr && noside != EVAL_SKIP
+  if (expect_type != nullptr
       && type->code () == TYPE_CODE_ARRAY)
     {
       struct type *range_type = type->index_type ();
@@ -2451,7 +2376,7 @@ array_operation::evaluate (struct type *expect_type,
       return array;
     }
 
-  if (expect_type != nullptr && noside != EVAL_SKIP
+  if (expect_type != nullptr
       && type->code () == TYPE_CODE_SET)
     {
       struct value *set = allocate_value (expect_type);
@@ -2524,8 +2449,6 @@ array_operation::evaluate (struct type *expect_type,
 	 objects.  */
       argvec[tem] = in_args[tem]->evaluate_with_coercion (exp, noside);
     }
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   return value_array (tem2, tem3, argvec);
 }
 
@@ -2564,8 +2487,6 @@ operation::evaluate_for_cast (struct type *expect_type,
 			      enum noside noside)
 {
   value *val = evaluate (expect_type, exp, noside);
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   return value_cast (expect_type, val);
 }
 
@@ -2833,9 +2754,6 @@ var_msym_value_operation::evaluate_for_cast (struct type *to_type,
 					std::get<1> (m_storage),
 					std::get<0> (m_storage));
 
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-
   val = value_cast (to_type, val);
 
   /* Don't allow e.g. '&(int)var_with_no_debug_info'.  */
@@ -2856,9 +2774,6 @@ var_value_operation::evaluate_for_cast (struct type *to_type,
   value *val = evaluate_var_value (noside,
 				   std::get<1> (m_storage),
 				   std::get<0> (m_storage));
-
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
 
   val = value_cast (to_type, val);
 

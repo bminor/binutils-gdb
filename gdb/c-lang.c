@@ -637,24 +637,9 @@ c_string_operation::evaluate (struct type *expect_type,
 
   dest_charset = charset_for_string_type (dest_type, exp->gdbarch);
 
-  if (noside != EVAL_SKIP)
-    {
-      for (const std::string &item : std::get<1> (m_storage))
-	parse_one_string (&output, item.c_str (), item.size (),
-			  dest_charset, type);
-    }
-
-  if (noside == EVAL_SKIP)
-    {
-      /* Return a dummy value of the appropriate type.  */
-      if (expect_type != NULL)
-	result = allocate_value (expect_type);
-      else if ((dest_type & C_CHAR) != 0)
-	result = allocate_value (type);
-      else
-	result = value_cstring ("", 0, type);
-      return result;
-    }
+  for (const std::string &item : std::get<1> (m_storage))
+    parse_one_string (&output, item.c_str (), item.size (),
+		      dest_charset, type);
 
   if ((dest_type & C_CHAR) != 0)
     {

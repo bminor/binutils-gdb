@@ -586,8 +586,6 @@ eval_op_f_abs (struct type *expect_type, struct expression *exp,
 	       enum exp_opcode opcode,
 	       struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = value_type (arg1);
   switch (type->code ())
     {
@@ -616,8 +614,6 @@ eval_op_f_mod (struct type *expect_type, struct expression *exp,
 	       enum exp_opcode opcode,
 	       struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = value_type (arg1);
   if (type->code () != value_type (arg2)->code ())
     error (_("non-matching types for parameters to MOD ()"));
@@ -655,8 +651,6 @@ eval_op_f_ceil (struct type *expect_type, struct expression *exp,
 		enum exp_opcode opcode,
 		struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = value_type (arg1);
   if (type->code () != TYPE_CODE_FLT)
     error (_("argument to CEILING must be of type float"));
@@ -675,8 +669,6 @@ eval_op_f_floor (struct type *expect_type, struct expression *exp,
 		 enum exp_opcode opcode,
 		 struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = value_type (arg1);
   if (type->code () != TYPE_CODE_FLT)
     error (_("argument to FLOOR must be of type float"));
@@ -695,8 +687,6 @@ eval_op_f_modulo (struct type *expect_type, struct expression *exp,
 		  enum exp_opcode opcode,
 		  struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = value_type (arg1);
   if (type->code () != value_type (arg2)->code ())
     error (_("non-matching types for parameters to MODULO ()"));
@@ -737,8 +727,6 @@ eval_op_f_cmplx (struct type *expect_type, struct expression *exp,
 		 enum exp_opcode opcode,
 		 struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   struct type *type = builtin_f_type(exp->gdbarch)->builtin_complex_s16;
   return value_literal_complex (arg1, arg2, type);
 }

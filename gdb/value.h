@@ -921,8 +921,6 @@ extern value *evaluate_var_msym_value (enum noside noside,
 				       struct objfile *objfile,
 				       minimal_symbol *msymbol);
 
-extern value *eval_skip_value (expression *exp);
-
 namespace expr { class operation; };
 extern void fetch_subexp_value (struct expression *exp,
 				expr::operation *op,

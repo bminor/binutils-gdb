@@ -681,7 +681,7 @@ eval_opencl_assign (struct type *expect_type, struct expression *exp,
 		    enum noside noside, enum exp_opcode op,
 		    struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
 
   struct type *type1 = value_type (arg1);

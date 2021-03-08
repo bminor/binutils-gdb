@@ -74,8 +74,6 @@ public:
 		   struct expression *exp,
 		   enum noside noside) override
   {
-    if (noside == EVAL_SKIP)
-      return eval_skip_value (exp);
     const std::string &str = std::get<0> (m_storage);
     return value_nsstring (exp->gdbarch, str.c_str (), str.size () + 1);
   }
@@ -95,8 +93,6 @@ public:
 		   struct expression *exp,
 		   enum noside noside) override
   {
-    if (noside == EVAL_SKIP)
-      return eval_skip_value (exp);
     return eval_op_objc_selector (expect_type, exp, noside,
 				  std::get<0> (m_storage).c_str ());
   }

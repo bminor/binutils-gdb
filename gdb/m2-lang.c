@@ -37,7 +37,7 @@ eval_op_m2_high (struct type *expect_type, struct expression *exp,
 		 enum noside noside,
 		 struct value *arg1)
 {
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
   else
     {
@@ -68,8 +68,6 @@ eval_op_m2_subscript (struct type *expect_type, struct expression *exp,
 		      enum noside noside,
 		      struct value *arg1, struct value *arg2)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   /* If the user attempts to subscript something that is not an
      array or pointer type (like a plain int variable for example),
      then report this as an error.  */

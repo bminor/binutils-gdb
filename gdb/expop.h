@@ -1581,9 +1581,7 @@ public:
 		   struct expression *exp,
 		   enum noside noside) override
   {
-    if (noside == EVAL_SKIP)
-      return eval_skip_value (exp);
-    else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    if (noside == EVAL_AVOID_SIDE_EFFECTS)
       return std::get<0> (m_storage)->evaluate (nullptr, exp,
 						EVAL_AVOID_SIDE_EFFECTS);
     else
@@ -1606,9 +1604,7 @@ public:
 		   struct expression *exp,
 		   enum noside noside) override
   {
-    if (noside == EVAL_SKIP)
-      return eval_skip_value (exp);
-    else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+    if (noside == EVAL_AVOID_SIDE_EFFECTS)
       {
 	value *result
 	  = std::get<0> (m_storage)->evaluate (nullptr, exp,
@@ -1683,10 +1679,7 @@ public:
 		   enum noside noside) override
   {
     /* C++: check for and handle pointer to members.  */
-    if (noside == EVAL_SKIP)
-      return eval_skip_value (exp);
-    else
-      return std::get<0> (m_storage)->evaluate_for_address (exp, noside);
+    return std::get<0> (m_storage)->evaluate_for_address (exp, noside);
   }
 
   enum exp_opcode opcode () const override
@@ -1724,8 +1717,6 @@ public:
 		   struct expression *exp,
 		   enum noside noside) override
   {
-    if (noside == EVAL_SKIP)
-      return eval_skip_value (exp);
     return std::get<0> (m_storage)->evaluate_for_sizeof (exp, noside);
   }
 
@@ -1908,7 +1899,7 @@ public:
 			  : value_type (lhs));
     value *rhs = std::get<1> (m_storage)->evaluate (xtype, exp, noside);
 
-    if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+    if (noside == EVAL_AVOID_SIDE_EFFECTS)
       return lhs;
     if (binop_user_defined_p (BINOP_ASSIGN, lhs, rhs))
       return value_x_binop (lhs, rhs, BINOP_ASSIGN, OP_NULL, noside);
@@ -2049,8 +2040,6 @@ public:
 						    EVAL_AVOID_SIDE_EFFECTS);
     struct type *type = value_type (val);
     value *rhs = std::get<1> (m_storage)->evaluate (type, exp, noside);
-    if (noside == EVAL_SKIP)
-      return eval_skip_value (exp);
     return FUNC (type, rhs);
   }
 

@@ -9360,7 +9360,7 @@ ada_assign_operation::evaluate (struct type *expect_type,
   if (VALUE_LVAL (arg1) == lval_internalvar)
     type = NULL;
   value *arg2 = std::get<1> (m_storage)->evaluate (type, exp, noside);
-  if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return arg1;
   if (VALUE_LVAL (arg1) == lval_internalvar)
     {
@@ -9684,9 +9684,6 @@ eval_ternop_in_range (struct type *expect_type, struct expression *exp,
 		      enum noside noside,
 		      value *arg1, value *arg2, value *arg3)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-
   binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
   binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
   struct type *type = language_bool_type (exp->language_defn, exp->gdbarch);
@@ -9706,8 +9703,6 @@ ada_unop_neg (struct type *expect_type,
 	      enum noside noside, enum exp_opcode op,
 	      struct value *arg1)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
   unop_promote (exp->language_defn, exp->gdbarch, &arg1);
   return value_neg (arg1);
 }
@@ -9720,9 +9715,6 @@ ada_unop_in_range (struct type *expect_type,
 		   enum noside noside, enum exp_opcode op,
 		   struct value *arg1, struct type *type)
 {
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-
   struct value *arg2, *arg3;
   switch (type->code ())
     {
@@ -9779,9 +9771,7 @@ ada_atr_size (struct type *expect_type,
   if (type->code () == TYPE_CODE_REF)
     type = TYPE_TARGET_TYPE (type);
 
-  if (noside == EVAL_SKIP)
-    return eval_skip_value (exp);
-  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+  if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return value_zero (builtin_type (exp->gdbarch)->builtin_int, not_lval);
   else
     return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
