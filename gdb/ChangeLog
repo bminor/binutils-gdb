@@ -1,5 +1,10 @@
 2021-03-08  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (eval_op_rust_ind): New function.
+	(rust_evaluate_subexp): Use it.
+
+2021-03-08  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (rust_subscript): Change parameters.
 	(rust_evaluate_subexp): Update.
 

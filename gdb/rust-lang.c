@@ -1322,6 +1322,21 @@ rust_subscript (struct type *expect_type, struct expression *exp,
   return result;
 }
 
+/* A helper function for UNOP_IND.  */
+
+static struct value *
+eval_op_rust_ind (struct type *expect_type, struct expression *exp,
+		  enum noside noside,
+		  struct value *value)
+{
+  gdb_assert (noside == EVAL_NORMAL);
+  struct value *trait_ptr = rust_get_trait_object_pointer (value);
+  if (trait_ptr != NULL)
+    value = trait_ptr;
+
+  return value_ind (value);
+}
+
 /* evaluate_exp implementation for Rust.  */
 
 static struct value *
@@ -1341,12 +1356,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	    ++*pos;
 	    struct value *value = evaluate_subexp (expect_type, exp, pos,
 						   noside);
-
-	    struct value *trait_ptr = rust_get_trait_object_pointer (value);
-	    if (trait_ptr != NULL)
-	      value = trait_ptr;
-
-	    result = value_ind (value);
+	    result = eval_op_rust_ind (expect_type, exp, noside, value);
 	  }
       }
       break;
