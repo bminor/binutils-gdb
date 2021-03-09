@@ -1,7 +1,9 @@
 	.text
 	sysenter
-	sysexit
+	sysexitl
+	sysexitq
 
 	.intel_syntax noprefix
 	sysenter
-	sysexit
+	sysexitd
+	sysexitq

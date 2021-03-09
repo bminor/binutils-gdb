@@ -124,6 +124,7 @@
 .*:[1-9][0-9]*: Warning: .* `sub'
 .*:[1-9][0-9]*: Warning: .* `sub'
 .*:[1-9][0-9]*: Warning: .* `sub'
+.*:[1-9][0-9]*: Warning: .* `sysexit'
 .*:[1-9][0-9]*: Warning: .* `sysret'
 .*:[1-9][0-9]*: Warning: .* `test'
 .*:[1-9][0-9]*: Warning: .* `test'

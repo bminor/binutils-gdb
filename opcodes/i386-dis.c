@@ -2180,7 +2180,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "rdmsr",		{ XX }, 0 },
   { "rdpmc",		{ XX }, 0 },
   { "sysenter",		{ SEP }, 0 },
-  { "sysexit",		{ SEP }, 0 },
+  { "sysexit%LQ",	{ SEP }, 0 },
   { Bad_Opcode },
   { "getsec",		{ XX }, 0 },
   /* 38 */

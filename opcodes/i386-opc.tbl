@@ -877,7 +877,7 @@ cmpxchg8b, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf
 // Pentium II/Pentium Pro extensions.
 sysenter, 0xf34, None, 2, Cpu64, Intel64Only|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 sysenter, 0xf34, None, 2, Cpu686|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-sysexit, 0xf35, None, 2, Cpu64, Intel64Only|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+sysexit, 0xf35, None, 2, Cpu64, Intel64Only|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, {}
 sysexit, 0xf35, None, 2, Cpu686|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 fxsave, 0xfae, 0x0, 2, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
 fxsave64, 0xfae, 0x0, 2, CpuFXSR|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }

@@ -1,3 +1,10 @@
+2021-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* opcodes/i386-dis.c (dis386_twobyte): Add %LQ to sysexit.
+	* opcodes/i386-opc.tbl (sysexit): Drop No_lSuf and No_qSuf from
+	64-bit form.
+	* opcodes/i386-tbl.h: Re-generate.
+
 2021-03-03  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (output_i386_opcode): Don't get operand count. Look
