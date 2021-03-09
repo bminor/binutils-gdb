@@ -415,8 +415,25 @@ value_cast (struct type *type, struct value *arg2)
 
   int convert_to_boolean = 0;
 
-  if (value_type (arg2) == type)
-    return arg2;
+  /* TYPE might be equal in meaning to the existing type of ARG2, but for
+     many reasons, might be a different type object (e.g. TYPE might be a
+     gdbarch owned type, while VALUE_TYPE (ARG2) could be an objfile owned
+     type).
+
+     In this case we want to preserve the LVAL of ARG2 as this allows the
+     resulting value to be used in more places.  We do this by calling
+     VALUE_COPY if appropriate.  */
+  if (types_deeply_equal (value_type (arg2), type))
+    {
+      /* If the types are exactly equal then we can avoid creating a new
+	 value completely.  */
+      if (value_type (arg2) != type)
+	{
+	  arg2 = value_copy (arg2);
+	  deprecated_set_value_type (arg2, type);
+	}
+      return arg2;
+    }
 
   if (is_fixed_point_type (type))
     return value_cast_to_fixed_point (type, arg2);

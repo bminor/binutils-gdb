@@ -1,5 +1,10 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* valops.c (value_cast): Call value_deeply_equal before performing
+	any cast.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdbtypes.c (types_equal): Move pointer equality check earlier in
 	the function.
 

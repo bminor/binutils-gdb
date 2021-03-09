@@ -1,5 +1,14 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.cp/rvalue-ref-params.cc (f3): New function.
+	(f4): New function.
+	(global_int): New global variable.
+	(global_float): Likeiwse.
+	(main): Call both new functions.
+	* gdb.cp/rvalue-ref-params.exp: Add new tests.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.dwarf2/fission-relative-dwo.c: New file.
 	* gdb.dwarf2/fission-relative-dwo.exp: New file.
 
