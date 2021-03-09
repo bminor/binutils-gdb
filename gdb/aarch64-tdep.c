@@ -2639,12 +2639,112 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return -1;
 }
 
+/* Search for the mapping symbol covering MEMADDR.  If one is found,
+   return its type.  Otherwise, return 0.  If START is non-NULL,
+   set *START to the location of the mapping symbol.  */
+
+static char
+aarch64_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
+{
+  struct obj_section *sec;
+
+  /* If there are mapping symbols, consult them.  */
+  sec = find_pc_section (memaddr);
+  if (sec != NULL)
+    {
+      aarch64_per_bfd *data = aarch64_bfd_data_key.get (sec->objfile->obfd);
+      if (data != NULL)
+	{
+	  unsigned int section_idx = sec->the_bfd_section->index;
+	  aarch64_mapping_symbol_vec &map
+	    = data->section_maps[section_idx];
+
+	  /* Sort the vector on first use.  */
+	  if (!data->section_maps_sorted[section_idx])
+	    {
+	      std::sort (map.begin (), map.end ());
+	      data->section_maps_sorted[section_idx] = true;
+	    }
+
+	  aarch64_mapping_symbol map_key = { memaddr - sec->addr (), 0 };
+	  aarch64_mapping_symbol_vec::const_iterator it
+	    = std::lower_bound (map.begin (), map.end (), map_key);
+
+	  /* std::lower_bound finds the earliest ordered insertion
+	     point.  If the symbol at this position starts at this exact
+	     address, we use that; otherwise, the preceding
+	     mapping symbol covers this address.  */
+	  if (it < map.end ())
+	    {
+	      if (it->value == map_key.value)
+		{
+		  if (start)
+		    *start = it->value + sec->addr ();
+		  return it->type;
+		}
+	    }
+
+	  if (it > map.begin ())
+	    {
+	      aarch64_mapping_symbol_vec::const_iterator prev_it
+		= it - 1;
+
+	      if (start)
+		*start = prev_it->value + sec->addr ();
+	      return prev_it->type;
+	    }
+	}
+    }
+
+  return 0;
+}
+
+/* Determine if the program counter specified in MEMADDR is in a C64
+   function.  This function should be called for addresses unrelated to
+   any executing frame.  */
+
+static bool
+aarch64_pc_is_c64 (struct gdbarch *gdbarch, CORE_ADDR memaddr)
+{
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  /* If we're using the AAPCS64-CAP ABI, then this is pure-cap and it is
+     always C64.  */
+  if (tdep->abi == AARCH64_ABI_AAPCS64_CAP)
+    return true;
+
+  /* If there are mapping symbols, consult them.  */
+  char type = aarch64_find_mapping_symbol (memaddr, NULL);
+  if (type)
+    return type == 'c';
+
+  /* C64 functions have a "special" bit set in minimal symbols.  */
+  struct bound_minimal_symbol sym;
+  sym = lookup_minimal_symbol_by_pc (memaddr);
+  if (sym.minsym)
+    return (MSYMBOL_IS_SPECIAL (sym.minsym));
+
+  /* Otherwise we're out of luck; we assume A64.  */
+  return false;
+}
+
 /* Implement the "print_insn" gdbarch method.  */
 
 static int
 aarch64_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
 {
+  gdb_disassembler *di
+    = static_cast<gdb_disassembler *>(info->application_data);
+  struct gdbarch *gdbarch = di->arch ();
+  struct aarch64_private_data data;
+
+  info->private_data = static_cast<void *> (&data);
+
+  if (aarch64_pc_is_c64 (gdbarch, memaddr))
+    data.instruction_type = MAP_TYPE_C64;
+
   info->symbols = NULL;
+
   return default_print_insn (memaddr, info);
 }
 

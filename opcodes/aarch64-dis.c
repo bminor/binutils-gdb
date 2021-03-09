@@ -29,21 +29,13 @@
 
 #define INSNLEN 4
 
-/* Cached mapping symbol state.  */
-enum map_type
-{
-  MAP_INSN,
-  MAP_DATA,
-  MAP_C64
-};
-
 static aarch64_feature_set arch_variant; /* See select_aarch64_variant.  */
 static enum map_type last_type;
 static int last_mapping_sym = -1;
 static bfd_vma last_stop_offset = 0;
 static bfd_vma last_mapping_addr = 0;
 
-#define MAYBE_C64 (last_type == MAP_C64 ? AARCH64_FEATURE_C64 : 0)
+#define MAYBE_C64 (last_type == MAP_TYPE_C64 ? AARCH64_FEATURE_C64 : 0)
 
 /* Other options */
 static int no_aliases = 0;	/* If set disassemble as most general inst.  */
@@ -3786,7 +3778,7 @@ get_sym_code_type (struct disassemble_info *info, int n,
   if (type == STT_FUNC && !(es->symbol.flags & BSF_SYNTHETIC))
     {
       *map_type = (es->internal_elf_sym.st_target_internal & ST_BRANCH_TO_C64
-		   ? MAP_C64 : MAP_INSN);
+		   ? MAP_TYPE_C64 : MAP_TYPE_INSN);
       return true;
     }
 
@@ -3799,13 +3791,13 @@ get_sym_code_type (struct disassemble_info *info, int n,
       switch (name[1])
 	{
 	case 'd':
-	  *map_type = MAP_DATA;
+	  *map_type = MAP_TYPE_DATA;
 	  break;
 	case 'x':
-	  *map_type = MAP_INSN;
+	  *map_type = MAP_TYPE_INSN;
 	  break;
 	case 'c':
-	  *map_type = MAP_C64;
+	  *map_type = MAP_TYPE_C64;
 	  break;
 	default:
 	  abort ();
@@ -3871,17 +3863,28 @@ print_insn_aarch64 (bfd_vma pc,
   /* Aarch64 instructions are always little-endian */
   info->endian_code = BFD_ENDIAN_LITTLE;
 
-  /* Default to DATA.  A text section is required by the ABI to contain an
-     INSN mapping symbol at the start.  A data section has no such
-     requirement, hence if no mapping symbol is found the section must
-     contain only data.  This however isn't very useful if the user has
-     fully stripped the binaries.  If this is the case use the section
-     attributes to determine the default.  If we have no section default to
-     INSN as well, as we may be disassembling some raw bytes on a baremetal
-     HEX file or similar.  */
-  enum map_type type = MAP_DATA;
-  if ((info->section && info->section->flags & SEC_CODE) || !info->section)
-    type = last_type == MAP_C64 ? MAP_C64 : MAP_INSN;
+  enum map_type type;
+
+  if (info->private_data != NULL)
+    {
+      struct aarch64_private_data *aarch64_data
+	= (struct aarch64_private_data *) info->private_data;
+      type = aarch64_data->instruction_type;
+    }
+  else
+    {
+      /* Default to DATA.  A text section is required by the ABI to contain an
+	 INSN mapping symbol at the start.  A data section has no such
+	 requirement, hence if no mapping symbol is found the section must
+	 contain only data.  This however isn't very useful if the user has
+	 fully stripped the binaries.  If this is the case use the section
+	 attributes to determine the default.  If we have no section default to
+	 INSN as well, as we may be disassembling some raw bytes on a baremetal
+	 HEX file or similar.  */
+      type = MAP_TYPE_DATA;
+      if ((info->section && info->section->flags & SEC_CODE) || !info->section)
+	type = last_type == MAP_TYPE_C64 ? MAP_TYPE_C64 : MAP_TYPE_INSN;
+    }
 
   /* First check the full symtab for a mapping symbol, even if there
      are no usable non-mapping symbols for this address.  */
@@ -3963,7 +3966,7 @@ print_insn_aarch64 (bfd_vma pc,
 	 less than four bytes of data.  If there's a symbol,
 	 mapping or otherwise, after two bytes then don't
 	 print more.  */
-      if (last_type == MAP_DATA)
+      if (last_type == MAP_TYPE_DATA)
 	{
 	  size = 4 - (pc & 3);
 	  for (n = last_sym + 1; n < info->symtab_size; n++)
@@ -3987,7 +3990,7 @@ print_insn_aarch64 (bfd_vma pc,
     last_type = type;
 
   /* PR 10263: Disassemble data if requested to do so by the user.  */
-  if (last_type == MAP_DATA && ((info->flags & DISASSEMBLE_DATA) == 0))
+  if (last_type == MAP_TYPE_DATA && ((info->flags & DISASSEMBLE_DATA) == 0))
     {
       /* size was set above.  */
       info->bytes_per_chunk = size;

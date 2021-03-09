@@ -1453,6 +1453,20 @@ struct aarch64_instr_sequence
   int num_allocated_insns;
 };
 
+/* Cached mapping symbol state.  */
+enum map_type
+{
+  MAP_TYPE_INSN,
+  MAP_TYPE_DATA,
+  MAP_TYPE_C64
+};
+
+/* AArch64-specific data to help proper disassembling of instructions.  */
+struct aarch64_private_data
+{
+  enum map_type instruction_type;
+};
+
 /* Encoding entrypoint.  */
 
 extern bool
