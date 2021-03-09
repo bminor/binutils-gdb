@@ -505,27 +505,21 @@ enum
   RegMem,
   /* quick test if branch instruction is MPX supported */
   BNDPrefixOk,
-  /* quick test if NOTRACK prefix is supported */
-  NoTrackPrefixOk,
-  /* quick test for lockable instructions */
-  IsLockable,
   /* fake an extra reg operand for clr, imul and special register
      processing for some instructions.  */
   RegKludge,
   /* An implicit xmm0 as the first operand */
   Implicit1stXmm0,
-  /* The HLE prefix is OK:
-     1. With a LOCK prefix.
-     2. With or without a LOCK prefix.
-     3. With a RELEASE (0xf3) prefix.
-   */
-#define HLEPrefixNone		0
-#define HLEPrefixLock		1
-#define HLEPrefixAny		2
-#define HLEPrefixRelease	3
-  HLEPrefixOk,
-  /* An instruction on which a "rep" prefix is acceptable.  */
-  RepPrefixOk,
+#define PrefixNone		0
+#define PrefixRep		1
+#define PrefixHLERelease	2 /* Okay with an XRELEASE (0xf3) prefix. */
+#define PrefixNoTrack		3
+  /* Prefixes implying "LOCK okay" must come after Lock. All others have
+     to come before.  */
+#define PrefixLock		4
+#define PrefixHLELock		5 /* Okay with a LOCK prefix.  */
+#define PrefixHLEAny		6 /* Okay with or without a LOCK prefix.  */
+  PrefixOk,
   /* Convert to DWORD */
   ToDword,
   /* Convert to QWORD */
@@ -734,12 +728,9 @@ typedef struct i386_opcode_modifier
   unsigned int isstring:2;
   unsigned int regmem:1;
   unsigned int bndprefixok:1;
-  unsigned int notrackprefixok:1;
-  unsigned int islockable:1;
   unsigned int regkludge:1;
   unsigned int implicit1stxmm0:1;
-  unsigned int hleprefixok:2;
-  unsigned int repprefixok:1;
+  unsigned int prefixok:3;
   unsigned int todword:1;
   unsigned int toqword:1;
   unsigned int addrprefixopreg:1;

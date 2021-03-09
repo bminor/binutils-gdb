@@ -1,5 +1,12 @@
 2021-03-09  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (check_hle): Replace HLEPrefix* by Prefix*.
+	(md_assemble): Replace use of repprefixok, islockable, and
+	notrackprefixok.
+	(i386_index_check): Replace use of repprefixok.
+
+2021-03-09  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/noreg64.s: Add sysexit.
 	* testsuite/gas/i386/x86-64-sysenter-amd.s: Split sysexit into
 	sysexitl and sysexitq.

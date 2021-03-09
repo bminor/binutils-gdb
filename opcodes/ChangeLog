@@ -1,5 +1,24 @@
 2021-03-09  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-gen.c (opcode_modifiers): Delete NoTrackPrefixOk,
+	IsLockable, RepPrefixOk, and HLEPrefixOk elements. Add PrefixOk
+	element.
+	* opcodes/i386-opc.h (NoTrackPrefixOk, IsLockable, HLEPrefixNone,
+	HLEPrefixLock, HLEPrefixAny, HLEPrefixRelease): Delete.
+	(PrefixNone, PrefixRep, PrefixHLERelease, PrefixNoTrack,
+	PrefixLock, PrefixHLELock, PrefixHLEAny): Define.
+	(struct i386_opcode_modifier): Delete notrackprefixok,
+	islockable, hleprefixok, and repprefixok fields. Add prefixok
+	field.
+	* opcodes/i386-opc.tbl (RepPrefixOk, LockPrefixOk, HLEPrefixAny,
+	HLEPrefixLock, HLEPrefixRelease, NoTrackPrefixOk): Define.
+	(mov, xchg, add, inc, sub, dec, sbb, and, or, xor, adc, neg,
+	not, btc, btr, bts, xadd, cmpxchg, cmpxchg8b, movq, cmpxchg16b):
+	Replace HLEPrefixOk.
+	* opcodes/i386-tbl.h: Re-generate.
+
+2021-03-09  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/i386-dis.c (dis386_twobyte): Add %LQ to sysexit.
 	* opcodes/i386-opc.tbl (sysexit): Drop No_lSuf and No_qSuf from
 	64-bit form.
