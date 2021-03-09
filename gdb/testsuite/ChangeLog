@@ -1,3 +1,7 @@
+2020-03-04  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+        * gdb.fortran/intrinsics.exp: Add LOC tests.
+
 2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/shape.exp: New file.

@@ -971,6 +971,25 @@ eval_op_f_rank (struct type *expect_type,
   return value_from_longest (result_type, ndim);
 }
 
+/* A helper function for UNOP_FORTRAN_LOC.  */
+
+struct value *
+eval_op_f_loc (struct type *expect_type, struct expression *exp,
+		     enum noside noside, enum exp_opcode op,
+		     struct value *arg1)
+{
+  struct type *result_type;
+  if (gdbarch_ptr_bit (exp->gdbarch) == 16)
+    result_type = builtin_f_type (exp->gdbarch)->builtin_integer_s2;
+  else if (gdbarch_ptr_bit (exp->gdbarch) == 32)
+    result_type = builtin_f_type (exp->gdbarch)->builtin_integer;
+  else
+    result_type = builtin_f_type (exp->gdbarch)->builtin_integer_s8;
+
+  LONGEST result_value = value_address (arg1);
+  return value_from_longest (result_type, result_value);
+}
+
 namespace expr
 {
 

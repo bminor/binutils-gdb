@@ -1,3 +1,13 @@
+2021-03-09  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+        * f-exp.h (eval_op_f_loc): Declare.
+        (expr::fortran_loc_operation): New typedef.
+        * f-exp.y (exp): Handle UNOP_FORTRAN_LOC after parsing an
+        UNOP_INTRINSIC.
+        (f77_keywords): Add LOC keyword.
+        * f-lang.c (eval_op_f_loc): New function.
+        * std-operator.def (UNOP_FORTRAN_LOC): New operator.
+
 2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-exp.h (eval_op_f_array_shape): Declare.

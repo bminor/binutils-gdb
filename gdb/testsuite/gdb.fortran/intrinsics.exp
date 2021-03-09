@@ -84,3 +84,8 @@ gdb_test "ptype MODULO (3.0,2.0)" "type = real\\*8"
 # Test CMPLX
 
 gdb_test "p CMPLX (4.1, 2.0)" " = \\(4.$decimal,2\\)"
+
+# Test LOC
+
+gdb_test "p/x LOC(l)" "= $hex"
+gdb_test "ptype loc(l)" "type = integer(\\*$decimal)?"

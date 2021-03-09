@@ -333,6 +333,9 @@ exp	:	UNOP_INTRINSIC '(' exp ')'
 			    case UNOP_FORTRAN_SHAPE:
 			      pstate->wrap<fortran_array_shape_operation> ();
 			      break;
+			    case UNOP_FORTRAN_LOC:
+			      pstate->wrap<fortran_loc_operation> ();
+			      break;
 			    default:
 			      gdb_assert_not_reached ("unhandled intrinsic");
 			    }
@@ -1155,6 +1158,7 @@ static const struct token f77_keywords[] =
   { "rank", UNOP_INTRINSIC, UNOP_FORTRAN_RANK, false },
   { "size", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ARRAY_SIZE, false },
   { "shape", UNOP_INTRINSIC, UNOP_FORTRAN_SHAPE, false },
+  { "loc", UNOP_INTRINSIC, UNOP_FORTRAN_LOC, false },
 };
 
 /* Implementation of a dynamically expandable buffer for processing input
