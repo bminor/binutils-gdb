@@ -1,3 +1,8 @@
+2021-03-09  Tom Tromey  <tromey@adacore.com>
+
+	* eval.c (operation::evaluate_funcall): Use function formal
+	parameter types when evaluating.
+
 2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb-gdb.py.in (StructMainTypePrettyPrinter) <owner_to_string>:

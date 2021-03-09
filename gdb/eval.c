@@ -687,8 +687,16 @@ operation::evaluate_funcall (struct type *expect_type,
   std::vector<value *> vals (args.size ());
 
   value *callee = evaluate_with_coercion (exp, noside);
+  struct type *type = value_type (callee);
+  if (type->code () == TYPE_CODE_PTR)
+    type = TYPE_TARGET_TYPE (type);
   for (int i = 0; i < args.size (); ++i)
-    vals[i] = args[i]->evaluate_with_coercion (exp, noside);
+    {
+      if (i < type->num_fields ())
+	vals[i] = args[i]->evaluate (type->field (i).type (), exp, noside);
+      else
+	vals[i] = args[i]->evaluate_with_coercion (exp, noside);
+    }
 
   return evaluate_subexp_do_call (exp, noside, callee, vals,
 				  function_name, expect_type);

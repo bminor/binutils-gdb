@@ -1,3 +1,8 @@
+2021-03-09  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.base/cast-call.exp: New file.
+	* gdb.base/cast-call.c: New file.
+
 2021-03-09  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.gdb/python-helper.exp: New file.
