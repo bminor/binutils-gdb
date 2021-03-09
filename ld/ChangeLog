@@ -1,3 +1,18 @@
+2021-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/ld-scripts/alignof.exp,
+	testsuite/ld-scripts/data.exp,
+	testsuite/ld-scripts/default-script.exp,
+	testsuite/ld-scripts/log2.exp,
+	testsuite/ld-scripts/print-memory-usage.exp,
+	testsuite/ld-scripts/sizeof.exp,
+	testsuite/ld-undefined/weak-undef.exp: Set image base to zero
+	for PE/COFF.
+	* testsuite/ld-scripts/default-script1.d,
+	testsuite/ld-scripts/default-script2.d,
+	testsuite/ld-scripts/default-script3.d,
+	testsuite/ld-scripts/default-script4.d: Drop xfail and comment.
+
 2021-03-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27425

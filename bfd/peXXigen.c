@@ -933,11 +933,13 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 
   memcpy (scnhdr_ext->s_name, scnhdr_int->s_name, sizeof (scnhdr_int->s_name));
 
-  PUT_SCNHDR_VADDR (abfd,
-		    ((scnhdr_int->s_vaddr
-		      - pe_data (abfd)->pe_opthdr.ImageBase)
-		     & 0xffffffff),
-		    scnhdr_ext->s_vaddr);
+  ss = scnhdr_int->s_vaddr - pe_data (abfd)->pe_opthdr.ImageBase;
+  if (scnhdr_int->s_vaddr < pe_data (abfd)->pe_opthdr.ImageBase)
+    _bfd_error_handler ("%pB:%.8s: section below image base",
+                        abfd, scnhdr_int->s_name);
+  else if(ss != (ss & 0xffffffff))
+    _bfd_error_handler ("%pB:%.8s: RVA truncated", abfd, scnhdr_int->s_name);
+  PUT_SCNHDR_VADDR (abfd, ss & 0xffffffff, scnhdr_ext->s_vaddr);
 
   /* NT wants the size data to be rounded up to the next
      NT_FILE_ALIGNMENT, but zero if it has no content (as in .bss,

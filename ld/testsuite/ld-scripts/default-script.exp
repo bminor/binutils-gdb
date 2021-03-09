@@ -21,6 +21,8 @@
 set old_ldflags $LDFLAGS
 if { [istarget spu*-*-*] } {
     set LDFLAGS "$LDFLAGS --local-store 0:0"
+} elseif { [is_pecoff_format] } {
+    set LDFLAGS "$LDFLAGS --image-base 0"
 } elseif { [is_xcoff_format] } {
     set LDFLAGS "$LDFLAGS -bnogc"
 }

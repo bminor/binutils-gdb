@@ -33,6 +33,11 @@ if { [istarget mips*-*-*]
     return
 }
 
+set old_LDFLAGS $LDFLAGS
+if { [is_pecoff_format] } {
+    set LDFLAGS "$LDFLAGS --image-base 0"
+}
+
 run_ld_link_tests {
     {
 	"print-memory-usage-1"
@@ -66,3 +71,4 @@ run_ld_link_tests {
 
 }
 
+set LDFLAGS $old_LDFLAGS

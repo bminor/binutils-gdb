@@ -23,14 +23,20 @@
 # some a.out targets too.
 set testname "weak undefined data symbols"
 
+if { [is_pecoff_format] } then {
+    set IMAGE_BASE "--image-base 0"
+} else {
+    set IMAGE_BASE ""
+}
+
 if { ![is_elf_format] && ![is_pecoff_format] } then {
     unsupported $testname
 } elseif {![ld_assemble $as $srcdir/$subdir/weak-undef.s \
 	    tmpdir/weak-undef.o]} then {
     # It's OK if .weak doesn't work on this target.
     unsupported $testname
-} elseif {![ld_link $ld tmpdir/weak-undef \
-		"tmpdir/weak-undef.o -T $srcdir/$subdir/weak-undef.t"]} then {
+} elseif {![ld_link $ld tmpdir/weak-undef "tmpdir/weak-undef.o \
+		-T $srcdir/$subdir/weak-undef.t $IMAGE_BASE"]} then {
     # Weak symbols are broken for non-i386 PE targets.
     if {! [istarget i?86-*-*]} {
 	setup_xfail *-*-pe*
