@@ -1,5 +1,12 @@
+	.text
+	.global _start
+	.global _mainCRTStartup
+_start:
+_mainCRTStartup:
+	.byte 1
+
 	.data
-	.p2align 4
+	.p2align 12
 start:
 	.dc.a	__image_base__
 	.dc.a	start

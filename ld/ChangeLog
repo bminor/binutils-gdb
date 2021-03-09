@@ -1,5 +1,11 @@
 2021-03-09  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/ld-pe/reloc.s: Add entry point symbols. Increase
+	alignment to 4k.
+	* testsuite/ld-pe/reloc.d: xfail for mcore.
+
+2021-03-09  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/ld-scripts/alignof.exp,
 	testsuite/ld-scripts/data.exp,
 	testsuite/ld-scripts/default-script.exp,

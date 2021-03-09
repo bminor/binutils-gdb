@@ -1,6 +1,7 @@
 #name: PE base relocations
 #ld: --enable-reloc-section
 #objdump: -p
+#xfail: mcore-*-*
 
 .*:     file format .*
 
