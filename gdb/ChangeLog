@@ -1,3 +1,15 @@
+2021-03-12  Christian Biesinger  <cbiesinger@google.com>
+
+	PR threads/27239
+	* cp-support.c: Use scoped_segv_handler_restore.
+	* event-top.c (thread_local_segv_handler): Made static.
+	(scoped_segv_handler_restore::scoped_segv_handler_restore):
+	New function.
+	(scoped_segv_handler_restore::~scoped_segv_handler_restore): New
+	function.
+	* event-top.h (class scoped_segv_handler_restore): New class.
+	(thread_local_segv_handler): Removed.
+
 2021-03-10  Tom Tromey  <tromey@adacore.com>
 
 	* parser-defs.h (parser_state): Change completion to bool.

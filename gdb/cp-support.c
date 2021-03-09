@@ -1615,11 +1615,10 @@ gdb_demangle (const char *name, int options)
   int crash_signal = 0;
 
 #ifdef HAVE_WORKING_FORK
-  scoped_restore restore_segv
-    = make_scoped_restore (&thread_local_segv_handler,
-			   catch_demangler_crashes
-			   ? gdb_demangle_signal_handler
-			   : nullptr);
+  scoped_segv_handler_restore restore_segv
+    (catch_demangler_crashes
+     ? gdb_demangle_signal_handler
+     : nullptr);
 
   bool core_dump_allowed = gdb_demangle_attempt_core_dump;
   SIGJMP_BUF jmp_buf;
