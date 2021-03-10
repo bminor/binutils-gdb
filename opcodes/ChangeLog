@@ -1,5 +1,15 @@
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-dis.c (EVEX_LEN_0F3A00_W_1, EVEX_LEN_0F3A01_W_1):
+	Rename to EVEX_LEN_0F3A00 and EVEX_LEN_0F3A01 respectively.
+	EVEX_W_0F3A00, EVEX_W_0F3A01): Delete.
+	* i386-dis-evex.h (evex_table): Adjust opcode 0F3A00 and 0F3A01
+	entries.
+	* i386-dis-evex-len.h (evex_len_table): Likewise.
+	* i386-dis-evex-w.h: Remove opcode 0F3A00 and 0F3A01 entries.
+
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/i386-dis.c (REG_EVEX_0F38C6, REG_EVEX_0F38C7,
 	MOD_EVEX_0F381A_W_0, MOD_EVEX_0F381A_W_1, MOD_EVEX_0F381B_W_0,
 	MOD_EVEX_0F381B_W_1, MOD_EVEX_0F385A_W_0, MOD_EVEX_0F385A_W_1,

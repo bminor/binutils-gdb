@@ -580,16 +580,6 @@
     { REG_TABLE (REG_EVEX_0F38C7_M_0_L_2_W_0) },
     { REG_TABLE (REG_EVEX_0F38C7_M_0_L_2_W_1) },
   },
-  /* EVEX_W_0F3A00 */
-  {
-    { Bad_Opcode },
-    { EVEX_LEN_TABLE (EVEX_LEN_0F3A00_W_1) },
-  },
-  /* EVEX_W_0F3A01 */
-  {
-    { Bad_Opcode },
-    { EVEX_LEN_TABLE (EVEX_LEN_0F3A01_W_1) },
-  },
   /* EVEX_W_0F3A05 */
   {
     { Bad_Opcode },

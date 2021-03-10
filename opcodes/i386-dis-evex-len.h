@@ -92,18 +92,18 @@ static const struct dis386 evex_len_table[][3] = {
     { VEX_W_TABLE (EVEX_W_0F38C7_M_0_L_2) },
   },
 
-  /* EVEX_LEN_0F3A00_W_1 */
+  /* EVEX_LEN_0F3A00 */
   {
     { Bad_Opcode },
-    { "vpermq",	{ XM, EXx, Ib }, PREFIX_DATA },
-    { "vpermq",	{ XM, EXx, Ib }, PREFIX_DATA },
+    { VEX_W_TABLE (VEX_W_0F3A00_L_1) },
+    { VEX_W_TABLE (VEX_W_0F3A00_L_1) },
   },
 
-  /* EVEX_LEN_0F3A01_W_1 */
+  /* EVEX_LEN_0F3A01 */
   {
     { Bad_Opcode },
-    { "vpermpd",	{ XM, EXx, Ib }, PREFIX_DATA },
-    { "vpermpd",	{ XM, EXx, Ib }, PREFIX_DATA },
+    { VEX_W_TABLE (VEX_W_0F3A01_L_1) },
+    { VEX_W_TABLE (VEX_W_0F3A01_L_1) },
   },
 
   /* EVEX_LEN_0F3A14 */

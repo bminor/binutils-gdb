@@ -584,8 +584,8 @@ static const struct dis386 evex_table[][256] = {
   /* EVEX_0F3A */
   {
     /* 00 */
-    { VEX_W_TABLE (EVEX_W_0F3A00) },
-    { VEX_W_TABLE (EVEX_W_0F3A01) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A00) },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A01) },
     { Bad_Opcode },
     { "valign%DQ",	{ XM, Vex, EXx, Ib }, PREFIX_DATA },
     { VEX_W_TABLE (VEX_W_0F3A04) },
