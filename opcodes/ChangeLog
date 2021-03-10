@@ -1,5 +1,20 @@
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-dis.c (REG_0F71, REG_0F72, REG_0F73): Rename to
+	REG_0F71_MOD_0, REG_0F72_MOD_0, and REG_0F73_MOD_0 respectively.
+	(MOD_0F71_REG_2, MOD_0F71_REG_4, MOD_0F71_REG_6, MOD_0F72_REG_2,
+	MOD_0F72_REG_4, MOD_0F72_REG_6, MOD_0F73_REG_2, MOD_0F73_REG_3,
+	MOD_0F73_REG_6, MOD_0F73_REG_7): Delete.
+	(MOD_0F71, MOD_0F72, MOD_0F73): New.
+	(dis386_twobyte): Link to mod_table[] for opcodes 71, 72, and
+	73.
+	(reg_table): No longer link to mod_table[] for opcodes 0F71,
+	0F72, and 0F73.
+	(mod_table): Link to reg_table[] for opcodes 0F71, 0F72, and
+	0F73.
+
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/i386-dis.c (MOD_0F18_REG_4, MOD_0F18_REG_5,
 	MOD_0F18_REG_6, MOD_0F18_REG_7): Delete.
 	(reg_table): Don't link to mod_table[] where not needed. Add

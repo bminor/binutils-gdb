@@ -693,9 +693,9 @@ enum
   REG_0F1E_P_1_MOD_3,
   REG_0F38D8_PREFIX_1,
   REG_0F3A0F_PREFIX_1_MOD_3,
-  REG_0F71,
-  REG_0F72,
-  REG_0F73,
+  REG_0F71_MOD_0,
+  REG_0F72_MOD_0,
+  REG_0F73_MOD_0,
   REG_0FA6,
   REG_0FA7,
   REG_0FAE,
@@ -753,16 +753,9 @@ enum
   MOD_0F2B_PREFIX_2,
   MOD_0F2B_PREFIX_3,
   MOD_0F50,
-  MOD_0F71_REG_2,
-  MOD_0F71_REG_4,
-  MOD_0F71_REG_6,
-  MOD_0F72_REG_2,
-  MOD_0F72_REG_4,
-  MOD_0F72_REG_6,
-  MOD_0F73_REG_2,
-  MOD_0F73_REG_3,
-  MOD_0F73_REG_6,
-  MOD_0F73_REG_7,
+  MOD_0F71,
+  MOD_0F72,
+  MOD_0F73,
   MOD_0FAE_REG_0,
   MOD_0FAE_REG_1,
   MOD_0FAE_REG_2,
@@ -2244,9 +2237,9 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F6F) },
   /* 70 */
   { PREFIX_TABLE (PREFIX_0F70) },
-  { REG_TABLE (REG_0F71) },
-  { REG_TABLE (REG_0F72) },
-  { REG_TABLE (REG_0F73) },
+  { MOD_TABLE (MOD_0F71) },
+  { MOD_TABLE (MOD_0F72) },
+  { MOD_TABLE (MOD_0F73) },
   { "pcmpeqb",		{ MX, EM }, PREFIX_OPCODE },
   { "pcmpeqw",		{ MX, EM }, PREFIX_OPCODE },
   { "pcmpeqd",		{ MX, EM }, PREFIX_OPCODE },
@@ -2941,36 +2934,36 @@ static const struct dis386 reg_table[][8] = {
   {
     { RM_TABLE (RM_0F3A0F_P_1_MOD_3_REG_0) },
   },
-  /* REG_0F71 */
+  /* REG_0F71_MOD_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F71_REG_2) },
+    { "psrlw",		{ MS, Ib }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F71_REG_4) },
+    { "psraw",		{ MS, Ib }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F71_REG_6) },
+    { "psllw",		{ MS, Ib }, PREFIX_OPCODE },
   },
-  /* REG_0F72 */
+  /* REG_0F72_MOD_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F72_REG_2) },
+    { "psrld",		{ MS, Ib }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F72_REG_4) },
+    { "psrad",		{ MS, Ib }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F72_REG_6) },
+    { "pslld",		{ MS, Ib }, PREFIX_OPCODE },
   },
-  /* REG_0F73 */
+  /* REG_0F73_MOD_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F73_REG_2) },
-    { MOD_TABLE (MOD_0F73_REG_3) },
+    { "psrlq",		{ MS, Ib }, PREFIX_OPCODE },
+    { "psrldq",		{ XS, Ib }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
-    { MOD_TABLE (MOD_0F73_REG_6) },
-    { MOD_TABLE (MOD_0F73_REG_7) },
+    { "psllq",		{ MS, Ib }, PREFIX_OPCODE },
+    { "pslldq",		{ XS, Ib }, PREFIX_DATA },
   },
   /* REG_0FA6 */
   {
@@ -8261,54 +8254,19 @@ static const struct dis386 mod_table[][2] = {
     { "movmskpX",	{ Gdq, XS }, PREFIX_OPCODE },
   },
   {
-    /* MOD_0F71_REG_2 */
+    /* MOD_0F71 */
     { Bad_Opcode },
-    { "psrlw",		{ MS, Ib }, PREFIX_OPCODE },
+    { REG_TABLE (REG_0F71_MOD_0) },
   },
   {
-    /* MOD_0F71_REG_4 */
+    /* MOD_0F72 */
     { Bad_Opcode },
-    { "psraw",		{ MS, Ib }, PREFIX_OPCODE },
+    { REG_TABLE (REG_0F72_MOD_0) },
   },
   {
-    /* MOD_0F71_REG_6 */
+    /* MOD_0F73 */
     { Bad_Opcode },
-    { "psllw",		{ MS, Ib }, PREFIX_OPCODE },
-  },
-  {
-    /* MOD_0F72_REG_2 */
-    { Bad_Opcode },
-    { "psrld",		{ MS, Ib }, PREFIX_OPCODE },
-  },
-  {
-    /* MOD_0F72_REG_4 */
-    { Bad_Opcode },
-    { "psrad",		{ MS, Ib }, PREFIX_OPCODE },
-  },
-  {
-    /* MOD_0F72_REG_6 */
-    { Bad_Opcode },
-    { "pslld",		{ MS, Ib }, PREFIX_OPCODE },
-  },
-  {
-    /* MOD_0F73_REG_2 */
-    { Bad_Opcode },
-    { "psrlq",		{ MS, Ib }, PREFIX_OPCODE },
-  },
-  {
-    /* MOD_0F73_REG_3 */
-    { Bad_Opcode },
-    { "psrldq",		{ XS, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_0F73_REG_6 */
-    { Bad_Opcode },
-    { "psllq",		{ MS, Ib }, PREFIX_OPCODE },
-  },
-  {
-    /* MOD_0F73_REG_7 */
-    { Bad_Opcode },
-    { "pslldq",		{ XS, Ib }, PREFIX_DATA },
+    { REG_TABLE (REG_0F73_MOD_0) },
   },
   {
     /* MOD_0FAE_REG_0 */
