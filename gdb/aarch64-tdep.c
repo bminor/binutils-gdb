@@ -4189,6 +4189,16 @@ aarch64_register_tag (struct gdbarch *gdbarch,
       regnum > tdep->cap_reg_last - 2)
     return false;
 
+  /* The CSP/PCC tags are swapped in the tag_map because the ordering of CSP/PCC
+     in struct user_morello_state is different from GDB's register description.
+
+     Make sure we account for that when extracting the tag from those
+     registers.  */
+  if (regnum == tdep->cap_reg_pcc)
+    regnum = tdep->cap_reg_csp;
+  else if (regnum == tdep->cap_reg_csp)
+    regnum = tdep->cap_reg_pcc;
+
   /* Find the proper bit within the tag_map.  */
   int shift = regnum - tdep->cap_reg_base;
   ULONGEST tag_map = 0;
