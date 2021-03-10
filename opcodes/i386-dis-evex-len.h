@@ -59,7 +59,7 @@ static const struct dis386 evex_len_table[][3] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0F38C7_M_0_L_2) },
+    { REG_TABLE (REG_EVEX_0F38C7_M_0_L_2) },
   },
 
   /* EVEX_LEN_0F3A00 */

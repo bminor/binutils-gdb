@@ -1,5 +1,26 @@
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-dis.c (MVexVSIBDQWpX, MVexVSIBQDWpX,
+	vex_vsib_d_w_d_mode, vex_vsib_q_w_d_mode,
+	REG_EVEX_0F38C7_M_0_L_2_W_0, REG_EVEX_0F38C7_M_0_L_2_W_1,
+	EVEX_W_0F3891, EVEX_W_0F3893, EVEX_W_0F38A1, EVEX_W_0F38A3,
+	EVEX_W_0F38C7_M_0_L_2): Delete.
+	(REG_EVEX_0F38C7_M_0_L_2): New.
+	(intel_operand_size): Handle VEX and EVEX the same for
+	vex_vsib_d_w_dq_mode and vex_vsib_q_w_dq_mode. Drop
+	vex_vsib_d_w_d_mode and vex_vsib_q_w_d_mode cases.
+	(OP_E_memory, OP_XMM, OP_VEX): Drop vex_vsib_d_w_d_mode and
+	vex_vsib_q_w_d_mode uses.
+	* i386-dis-evex.h (evex_table): Adjust opcode 0F3891, 0F3893,
+	0F38A1, and 0F38A3 entries.
+	* i386-dis-evex-len.h (evex_len_table): Adjust opcode 0F38C7
+	entry.
+	* i386-dis-evex-reg.h: Fold opcode 0F38C7 entries.
+	* i386-dis-evex-w.h: Delete opcode 0F3891, 0F3893, 0F38A1, and
+	0F38A3 entries.
+
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/i386-dis.c (REG_0FXOP_09_01_L_0, REG_0FXOP_09_02_L_0,
 	REG_0FXOP_09_12_M_1_L_0, REG_0FXOP_0A_12_L_0,
 	MOD_VEX_0FXOP_09_12): Rename to ...

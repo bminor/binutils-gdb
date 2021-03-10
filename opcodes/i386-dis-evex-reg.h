@@ -42,20 +42,10 @@
   /* REG_EVEX_0F38C7_M_0_L_2_W_0 */
   {
     { Bad_Opcode },
-    { "vgatherpf0qps",  { MVexVSIBDQWpX }, PREFIX_DATA },
-    { "vgatherpf1qps",  { MVexVSIBDQWpX }, PREFIX_DATA },
+    { "vgatherpf0qp%XW",  { MVexVSIBQWpX }, PREFIX_DATA },
+    { "vgatherpf1qp%XW",  { MVexVSIBQWpX }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vscatterpf0qps",  { MVexVSIBDQWpX }, PREFIX_DATA },
-    { "vscatterpf1qps",  { MVexVSIBDQWpX }, PREFIX_DATA },
-  },
-  /* REG_EVEX_0F38C7_M_0_L_2_W_1 */
-  {
-    { Bad_Opcode },
-    { "vgatherpf0qpd",  { MVexVSIBQWpX }, PREFIX_DATA },
-    { "vgatherpf1qpd",  { MVexVSIBQWpX }, PREFIX_DATA },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "vscatterpf0qpd",  { MVexVSIBQWpX }, PREFIX_DATA },
-    { "vscatterpf1qpd",  { MVexVSIBQWpX }, PREFIX_DATA },
+    { "vscatterpf0qp%XW",  { MVexVSIBQWpX }, PREFIX_DATA },
+    { "vscatterpf1qp%XW",  { MVexVSIBQWpX }, PREFIX_DATA },
   },

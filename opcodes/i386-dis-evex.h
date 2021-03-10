@@ -456,9 +456,9 @@ static const struct dis386 evex_table[][256] = {
     { "vpshufbitqmb",  { XMask, Vex, EXx }, PREFIX_DATA },
     /* 90 */
     { "vpgatherd%DQ",	{ XM, MVexVSIBDWpX }, PREFIX_DATA },
-    { VEX_W_TABLE (EVEX_W_0F3891) },
+    { "vpgatherq%DQ",	{ XMGatherQ, MVexVSIBQWpX }, PREFIX_DATA },
     { "vgatherdp%XW",	{ XM, MVexVSIBDWpX}, PREFIX_DATA },
-    { VEX_W_TABLE (EVEX_W_0F3893) },
+    { "vgatherqp%XW",	{ XMGatherQ, MVexVSIBQWpX }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
     { "vfmaddsub132p%XW", { XM, Vex, EXx, EXxEVexR }, PREFIX_DATA },
@@ -474,9 +474,9 @@ static const struct dis386 evex_table[][256] = {
     { "vfnmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, PREFIX_DATA },
     /* A0 */
     { "vpscatterd%DQ",	{ MVexVSIBDWpX, XM }, PREFIX_DATA },
-    { VEX_W_TABLE (EVEX_W_0F38A1) },
+    { "vpscatterq%DQ",	{ MVexVSIBQWpX, XMGatherQ }, PREFIX_DATA },
     { "vscatterdp%XW",	{ MVexVSIBDWpX, XM }, PREFIX_DATA },
-    { VEX_W_TABLE (EVEX_W_0F38A3) },
+    { "vscatterqp%XW",	{ MVexVSIBQWpX, XMGatherQ }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
     { "vfmaddsub213p%XW", { XM, Vex, EXx, EXxEVexR }, PREFIX_DATA },

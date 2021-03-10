@@ -555,31 +555,6 @@
     { Bad_Opcode },
     { "vpmultishiftqb",	{ XM, Vex, EXx }, PREFIX_DATA },
   },
-  /* EVEX_W_0F3891 */
-  {
-    { "vpgatherqd",	{ XMxmmq, MVexVSIBQDWpX }, PREFIX_DATA },
-    { "vpgatherqq",	{ XM, MVexVSIBQWpX }, 0 },
-  },
-  /* EVEX_W_0F3893 */
-  {
-    { "vgatherqps",	{ XMxmmq, MVexVSIBQDWpX }, PREFIX_DATA },
-    { "vgatherqpd",	{ XM, MVexVSIBQWpX }, 0 },
-  },
-  /* EVEX_W_0F38A1 */
-  {
-    { "vpscatterqd",	{ MVexVSIBQDWpX, XMxmmq }, PREFIX_DATA },
-    { "vpscatterqq",	{ MVexVSIBQWpX, XM }, 0 },
-  },
-  /* EVEX_W_0F38A3 */
-  {
-    { "vscatterqps",	{ MVexVSIBQDWpX, XMxmmq }, PREFIX_DATA },
-    { "vscatterqpd",	{ MVexVSIBQWpX, XM }, 0 },
-  },
-  /* EVEX_W_0F38C7_M_0_L_2 */
-  {
-    { REG_TABLE (REG_EVEX_0F38C7_M_0_L_2_W_0) },
-    { REG_TABLE (REG_EVEX_0F38C7_M_0_L_2_W_1) },
-  },
   /* EVEX_W_0F3A05 */
   {
     { Bad_Opcode },

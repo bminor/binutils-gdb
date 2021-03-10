@@ -1,5 +1,14 @@
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/avx512f-intel.d,
+	testsuite/gas/i386/avx512f_vl-intel.d,
+	testsuite/gas/i386/avx512pf-intel.d,
+	testsuite/gas/i386/x86-64-avx512f-intel.d,
+	testsuite/gas/i386/x86-64-avx512f_vl-intel.d,
+	testsuite/gas/i386/x86-64-avx512pf-intel.d: Adjust expectations.
+
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/prefetch.d,
 	testsuite/gas/i386/prefetch-intel.d,
 	testsuite/gas/i386/x86-64-prefetch.d,
