@@ -1,5 +1,10 @@
 2021-03-17  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (aarch64_register_tag): Handle PCC/CSP tag
+	extraction.
+
+2021-03-17  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_find_mapping_symbol, aarch64_pc_is_c64): New
 	functions.
 	(aarch64_gdb_print_insn): Pass map type to disassembler.
