@@ -1,5 +1,26 @@
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-dis.c (REG_0FXOP_09_01_L_0, REG_0FXOP_09_02_L_0,
+	REG_0FXOP_09_12_M_1_L_0, REG_0FXOP_0A_12_L_0,
+	MOD_VEX_0FXOP_09_12): Rename to ...
+	(REG_XOP_09_01_L_0, REG_XOP_09_02_L_0, REG_XOP_09_12_M_1_L_0,
+	REG_XOP_0A_12_L_0, MOD_XOP_09_12): ... these.
+	(MOD_62_32BIT, MOD_8D, MOD_C4_32BIT, MOD_C5_32BIT,
+	RM_0F3A0F_P_1_MOD_3_REG_0, X86_64_0F24, X86_64_0F26,
+	X86_64_VEX_0F3849, X86_64_VEX_0F384B, X86_64_VEX_0F385C,
+	X86_64_VEX_0F385E, X86_64_0FC7_REG_6_MOD_3_PREFIX_1): Move.
+	(reg_table): Adjust comments.
+	(x86_64_table): Move X86_64_0F24, X86_64_0F26,
+	X86_64_VEX_0F3849, X86_64_VEX_0F384B, X86_64_VEX_0F385C,
+	X86_64_VEX_0F385E, and X86_64_0FC7_REG_6_MOD_3_PREFIX_1 entries.
+	(xop_table): Adjust opcode 09_01, 09_02, and 09_12 entries.
+	(vex_len_table): Adjust opcode 0A_12 entry.
+	(mod_table): Move MOD_62_32BIT, MOD_8D, MOD_C4_32BIT,
+	MOD_C5_32BIT, and MOD_XOP_09_12 entries.
+	(rm_table): Move hreset entry.
+
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/i386-dis.c (EVEX_LEN_0F6E, EVEX_LEN_0F7E_P_1,
 	EVEX_LEN_0F7E_P_2, EVEX_LEN_0FC4, EVEX_LEN_0FC5, EVEX_LEN_0FD6,
 	EVEX_LEN_0F3816, EVEX_LEN_0F3A14, EVEX_LEN_0F3A15,
