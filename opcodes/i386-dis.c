@@ -743,10 +743,6 @@ enum
   MOD_0F18_REG_1,
   MOD_0F18_REG_2,
   MOD_0F18_REG_3,
-  MOD_0F18_REG_4,
-  MOD_0F18_REG_5,
-  MOD_0F18_REG_6,
-  MOD_0F18_REG_7,
   MOD_0F1A_PREFIX_0,
   MOD_0F1B_PREFIX_0,
   MOD_0F1B_PREFIX_1,
@@ -2907,10 +2903,10 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_1) },
     { MOD_TABLE (MOD_0F18_REG_2) },
     { MOD_TABLE (MOD_0F18_REG_3) },
-    { MOD_TABLE (MOD_0F18_REG_4) },
-    { MOD_TABLE (MOD_0F18_REG_5) },
-    { MOD_TABLE (MOD_0F18_REG_6) },
-    { MOD_TABLE (MOD_0F18_REG_7) },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
   /* REG_0F1C_P_0_MOD_0 */
   {
@@ -2925,13 +2921,13 @@ static const struct dis386 reg_table[][8] = {
   },
   /* REG_0F1E_P_1_MOD_3 */
   {
-    { "nopQ",		{ Ev }, 0 },
-    { "rdsspK",		{ Edq }, PREFIX_OPCODE },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "rdsspK",		{ Edq }, 0 },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
     { RM_TABLE (RM_0F1E_P_1_MOD_3_REG_7) },
   },
   /* REG_0F38D8_PREFIX_1 */
@@ -3287,17 +3283,17 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F1C */
   {
     { MOD_TABLE (MOD_0F1C_PREFIX_0) },
-    { "nopQ",	{ Ev }, PREFIX_OPCODE },
-    { "nopQ",	{ Ev }, PREFIX_OPCODE },
-    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { "nopQ",	{ Ev }, PREFIX_IGNORED },
+    { "nopQ",	{ Ev }, 0 },
+    { "nopQ",	{ Ev }, PREFIX_IGNORED },
   },
 
   /* PREFIX_0F1E */
   {
-    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { "nopQ",	{ Ev }, 0 },
     { MOD_TABLE (MOD_0F1E_PREFIX_1) },
-    { "nopQ",	{ Ev }, PREFIX_OPCODE },
-    { "nopQ",	{ Ev }, PREFIX_OPCODE },
+    { "nopQ",	{ Ev }, 0 },
+    { NULL,	{ XX }, PREFIX_IGNORED },
   },
 
   /* PREFIX_0F2A */
@@ -8201,34 +8197,22 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F18_REG_0 */
     { "prefetchnta",	{ Mb }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
   {
     /* MOD_0F18_REG_1 */
     { "prefetcht0",	{ Mb }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
   {
     /* MOD_0F18_REG_2 */
     { "prefetcht1",	{ Mb }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
   {
     /* MOD_0F18_REG_3 */
     { "prefetcht2",	{ Mb }, 0 },
-  },
-  {
-    /* MOD_0F18_REG_4 */
-    { "nop/reserved",	{ Mb }, 0 },
-  },
-  {
-    /* MOD_0F18_REG_5 */
-    { "nop/reserved",	{ Mb }, 0 },
-  },
-  {
-    /* MOD_0F18_REG_6 */
-    { "nop/reserved",	{ Mb }, 0 },
-  },
-  {
-    /* MOD_0F18_REG_7 */
-    { "nop/reserved",	{ Mb }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
   {
     /* MOD_0F1A_PREFIX_0 */
@@ -8243,7 +8227,7 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F1B_PREFIX_1 */
     { "bndmk",		{ Gbnd, Mv_bnd }, 0 },
-    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
   },
   {
     /* MOD_0F1C_PREFIX_0 */
@@ -8252,7 +8236,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F1E_PREFIX_1 */
-    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
     { REG_TABLE (REG_0F1E_P_1_MOD_3) },
   },
   {
@@ -9034,14 +9018,14 @@ static const struct dis386 rm_table[][8] = {
   },
   {
     /* RM_0F1E_P_1_MOD_3_REG_7 */
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
-    { "endbr64",	{ Skip_MODRM },  PREFIX_OPCODE },
-    { "endbr32",	{ Skip_MODRM },  PREFIX_OPCODE },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "endbr64",	{ Skip_MODRM }, 0 },
+    { "endbr32",	{ Skip_MODRM }, 0 },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
+    { "nopQ",		{ Ev }, PREFIX_IGNORED },
   },
   {
     /* RM_0F3A0F_P_1_MOD_3_REG_0 */
@@ -9471,7 +9455,8 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	      /* Check if prefix should be ignored.  */
 	      if ((((prefix_table[dp->op[1].bytemode][vindex].prefix_requirement
 		     & PREFIX_IGNORED) >> PREFIX_IGNORED_SHIFT)
-		   & prefix) != 0)
+		   & prefix) != 0
+		  && !prefix_table[dp->op[1].bytemode][vindex].name)
 		vindex = 0;
 	    }
 
@@ -10244,6 +10229,18 @@ print_insn (bfd_vma pc, disassemble_info *info)
 	  (*info->fprintf_func) (info->stream, "(bad)");
 	  return end_codep - priv.the_buffer;
 	}
+      break;
+
+    case PREFIX_IGNORED:
+      /* Zap data size and rep prefixes from used_prefixes and reinstate their
+	 origins in all_prefixes.  */
+      used_prefixes &= ~PREFIX_OPCODE;
+      if (last_data_prefix >= 0)
+	all_prefixes[last_repz_prefix] = 0x66;
+      if (last_repz_prefix >= 0)
+	all_prefixes[last_repz_prefix] = 0xf3;
+      if (last_repnz_prefix >= 0)
+	all_prefixes[last_repnz_prefix] = 0xf2;
       break;
     }
 

@@ -1,3 +1,19 @@
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
+	* opcodes/i386-dis.c (MOD_0F18_REG_4, MOD_0F18_REG_5,
+	MOD_0F18_REG_6, MOD_0F18_REG_7): Delete.
+	(reg_table): Don't link to mod_table[] where not needed. Add
+	PREFIX_IGNORED to nop entries.
+	(prefix_table): Replace PREFIX_OPCODE in nop entries.
+	(mod_table): Add nop entries next to prefetch ones. Drop
+	MOD_0F18_REG_4, MOD_0F18_REG_5, MOD_0F18_REG_6, and
+	MOD_0F18_REG_7 entries. Add PREFIX_IGNORED to nop entries.
+	(rm_table): Add PREFIX_IGNORED to nop entries. Drop
+	PREFIX_OPCODE from endbr* entries.
+	(get_valid_dis386): Also consider entry's name when zapping
+	vindex.
+	(print_insn): Handle PREFIX_IGNORED.
+
 2021-03-09  Jan Beulich  <jbeulich@suse.com>
 
 	* opcodes/i386-gen.c (opcode_modifiers): Delete NoTrackPrefixOk,
