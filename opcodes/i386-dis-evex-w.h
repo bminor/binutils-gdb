@@ -251,7 +251,7 @@
   /* EVEX_W_0F7E_P_1 */
   {
     { Bad_Opcode },
-    { "vmovq",	{ XMScalar, EXxmm_mq }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0F7E_P_1) },
   },
   /* EVEX_W_0F7F_P_1 */
   {
@@ -291,10 +291,10 @@
     { Bad_Opcode },
     { "vpaddq",		{ XM, Vex, EXx }, PREFIX_DATA },
   },
-  /* EVEX_W_0FD6_L_0 */
+  /* EVEX_W_0FD6 */
   {
     { Bad_Opcode },
-    { "vmovq",	{ EXqS, XMScalar }, PREFIX_DATA },
+    { VEX_LEN_TABLE (VEX_LEN_0FD6) },
   },
   /* EVEX_W_0FE6_P_1 */
   {
@@ -625,7 +625,7 @@
   },
   /* EVEX_W_0F3A21 */
   {
-    { EVEX_LEN_TABLE (EVEX_LEN_0F3A21_W_0) },
+    { VEX_LEN_TABLE (VEX_LEN_0F3A21) },
   },
   /* EVEX_W_0F3A23_L_n */
   {

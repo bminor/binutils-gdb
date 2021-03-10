@@ -1,5 +1,24 @@
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-dis.c (EVEX_LEN_0F6E, EVEX_LEN_0F7E_P_1,
+	EVEX_LEN_0F7E_P_2, EVEX_LEN_0FC4, EVEX_LEN_0FC5, EVEX_LEN_0FD6,
+	EVEX_LEN_0F3816, EVEX_LEN_0F3A14, EVEX_LEN_0F3A15,
+	EVEX_LEN_0F3A16, EVEX_LEN_0F3A17, EVEX_LEN_0F3A20,
+	EVEX_LEN_0F3A21_W_0, EVEX_LEN_0F3A22, EVEX_W_0FD6_L_0): Delete.
+	(EVEX_LEN_0F3816, EVEX_W_0FD6): New.
+	(get_valid_dis386): Also handle 512-bit vector length when
+	vectoring into vex_len_table[].
+	* i386-dis-evex.h (evex_table): Adjust opcode 0F6E, 0FC4, 0FC5,
+	0FD6, 0F3A14, 0F3A15, 0F3A16, 0F3A17, 0F3A20, and 0F3A22
+	entries.
+	* i386-dis-evex-len.h: Delete opcode 0F6E, 0FC4, 0FC5, 0FD6,
+	0F3A14, 0F3A15, 0F3A16, 0F3A17, 0F3A20, and 0F3A22 entries.
+	* i386-dis-evex-prefix.h: Adjust 0F7E entry.
+	* i386-dis-evex-w.h: Adjust 0F7E, 0F7F, 0FD6, and 0F3A21
+	entries.
+
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/i386-dis.c (EVEX_LEN_0F3A00_W_1, EVEX_LEN_0F3A01_W_1):
 	Rename to EVEX_LEN_0F3A00 and EVEX_LEN_0F3A01 respectively.
 	EVEX_W_0F3A00, EVEX_W_0F3A01): Delete.

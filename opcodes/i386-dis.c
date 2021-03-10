@@ -1334,13 +1334,7 @@ enum
 
 enum
 {
-  EVEX_LEN_0F6E = 0,
-  EVEX_LEN_0F7E_P_1,
-  EVEX_LEN_0F7E_P_2,
-  EVEX_LEN_0FC4,
-  EVEX_LEN_0FC5,
-  EVEX_LEN_0FD6,
-  EVEX_LEN_0F3816,
+  EVEX_LEN_0F3816 = 0,
   EVEX_LEN_0F3819,
   EVEX_LEN_0F381A_M_0,
   EVEX_LEN_0F381B_M_0,
@@ -1351,17 +1345,10 @@ enum
   EVEX_LEN_0F38C7_M_0,
   EVEX_LEN_0F3A00,
   EVEX_LEN_0F3A01,
-  EVEX_LEN_0F3A14,
-  EVEX_LEN_0F3A15,
-  EVEX_LEN_0F3A16,
-  EVEX_LEN_0F3A17,
   EVEX_LEN_0F3A18,
   EVEX_LEN_0F3A19,
   EVEX_LEN_0F3A1A,
   EVEX_LEN_0F3A1B,
-  EVEX_LEN_0F3A20,
-  EVEX_LEN_0F3A21_W_0,
-  EVEX_LEN_0F3A22,
   EVEX_LEN_0F3A23,
   EVEX_LEN_0F3A38,
   EVEX_LEN_0F3A39,
@@ -1549,7 +1536,7 @@ enum
   EVEX_W_0FD2,
   EVEX_W_0FD3,
   EVEX_W_0FD4,
-  EVEX_W_0FD6_L_0,
+  EVEX_W_0FD6,
   EVEX_W_0FE6_P_1,
   EVEX_W_0FE6_P_2,
   EVEX_W_0FE6_P_3,
@@ -9063,9 +9050,16 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	case 128:
 	  vindex = 0;
 	  break;
+	case 512:
+	  /* This allows re-using in particular table entries where only
+	     128-bit operand size (VEX.L=0 / EVEX.L'L=0) are valid.  */
+	  if (vex.evex)
+	    {
 	case 256:
-	  vindex = 1;
-	  break;
+	      vindex = 1;
+	      break;
+	    }
+	/* Fall through.  */
 	default:
 	  abort ();
 	  break;
