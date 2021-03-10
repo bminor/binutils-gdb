@@ -1,5 +1,39 @@
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
+	* opcodes/i386-dis.c (VEX_REG_0F71, VEX_REG_0F72, VEX_REG_0F73):
+	Rename to REG_VEX_0F71_M_0, REG_VEX_0F72_M_0, and
+	REG_VEX_0F73_M_0 respectively.
+	(MOD_VEX_0F71_REG_2, MOD_VEX_0F71_REG_4, MOD_VEX_0F71_REG_6,
+	MOD_VEX_0F72_REG_2, MOD_VEX_0F72_REG_4, MOD_VEX_0F72_REG_6,
+	MOD_VEX_0F73_REG_2, MOD_VEX_0F73_REG_3, MOD_VEX_0F73_REG_6,
+	MOD_VEX_0F73_REG_7): Delete.
+	(MOD_VEX_0F71, MOD_VEX_0F72, MOD_VEX_0F73): New.
+	(PREFIX_VEX_0F38F5, PREFIX_VEX_0F38F6, PREFIX_VEX_0F38F7,
+	PREFIX_VEX_0F3AF0): Rename to PREFIX_VEX_0F38F5_L_0,
+	PREFIX_VEX_0F38F6_L_0, PREFIX_VEX_0F38F7_L_0,
+	PREFIX_VEX_0F3AF0_L_0 respectively.
+	(VEX_LEN_0F38F3_R_1, VEX_LEN_0F38F3_R_2, VEX_LEN_0F38F3_R_3,
+	VEX_LEN_0F38F5_P_0, VEX_LEN_0F38F5_P_1, VEX_LEN_0F38F5_P_3,
+	VEX_LEN_0F38F6_P_3, VEX_LEN_0F38F7_P_0, VEX_LEN_0F38F7_P_1,
+	VEX_LEN_0F38F7_P_2, VEX_LEN_0F38F7_P_3): Delete.
+	(VEX_LEN_0F38F3, VEX_LEN_0F38F5, VEX_LEN_0F38F6,
+	VEX_LEN_0F38F7): New.
+	(VEX_LEN_0F3AF0_P_3): Rename to VEX_LEN_0F3AF0.
+	(reg_table): No longer link to mod_table[] for VEX opcodes 0F71,
+	0F72, and 0F73. No longer link to vex_len_table[] for opcode
+	0F38F3.
+	(prefix_table): No longer link to vex_len_table[] for opcodes
+	0F38F5, 0F38F6, 0F38F7, and 0F3AF0.
+	(vex_table): Link to mod_table[] for opcodes 0F71, 0F72, and
+	0F73. Link to vex_len_table[] for opcodes 0F38F3, 0F38F5,
+	0F38F6, 0F38F7, and 0F3AF0.
+	(vex_len_table): Link to reg_table[] for opcode 0F38F3. Link to
+	prefix_table[] for opcodes 0F38F5, 0F38F6, 0F38F7, and 0F3AF0.
+	(mod_table): Link to reg_table[] for VEX opcodes 0F71, 0F72, and
+	0F73.
+
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
 	* opcodes/i386-dis.c (REG_0F71, REG_0F72, REG_0F73): Rename to
 	REG_0F71_MOD_0, REG_0F72_MOD_0, and REG_0F73_MOD_0 respectively.
 	(MOD_0F71_REG_2, MOD_0F71_REG_4, MOD_0F71_REG_6, MOD_0F72_REG_2,
