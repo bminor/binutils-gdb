@@ -113,7 +113,7 @@ struct parser_state : public expr_builder
 		CORE_ADDR context_pc,
 		int comma,
 		const char *input,
-		int completion,
+		bool completion,
 		innermost_block_tracker *tracker,
 		bool void_p)
     : expr_builder (lang, gdbarch),
@@ -251,7 +251,7 @@ struct parser_state : public expr_builder
   int arglist_len = 0;
 
   /* True if parsing an expression to attempt completion.  */
-  int parse_completion;
+  bool parse_completion;
 
   /* Completion state is updated here.  */
   expr_completion_state m_completion_state;

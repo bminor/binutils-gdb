@@ -1,3 +1,14 @@
+2021-03-10  Tom Tromey  <tromey@adacore.com>
+
+	* parser-defs.h (parser_state): Change completion to bool.
+	<parse_completion>: Likewise.
+	* ada-lang.h (ada_find_operator_symbol, ada_resolve_funcall)
+	(ada_resolve_variable, ada_resolve_function): Update.
+	* ada-lang.c (ada_find_operator_symbol): Change
+	parse_completion to bool.
+	(ada_resolve_funcall, ada_resolve_variable)
+	(ada_resolve_function): Likewise.
+
 2021-03-09  Tom Tromey  <tromey@adacore.com>
 
 	* eval.c (operation::evaluate_funcall): Use function formal

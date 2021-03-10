@@ -380,17 +380,17 @@ extern void print_ada_task_info (struct ui_out *uiout,
 				 struct inferior *inf);
 
 /* Look for a symbol for an overloaded operator for the operation OP.
-   PARSE_COMPLETION is nonzero if currently parsing for completion.
+   PARSE_COMPLETION is true if currently parsing for completion.
    NARGS and ARGVEC describe the arguments to the call.  Returns a
    "null" block_symbol if no such operator is found.  */
 
 extern block_symbol ada_find_operator_symbol (enum exp_opcode op,
-					      int parse_completion,
+					      bool parse_completion,
 					      int nargs, value *argvec[]);
 
 /* Resolve a function call, selecting among possible function symbols.
    SYM and BLOCK are passed to ada_lookup_symbol_list.  CONTEXT_TYPE
-   describes the calling context.  PARSE_COMPLETION is nonzero if
+   describes the calling context.  PARSE_COMPLETION is true if
    currently parsing for completion.  NARGS and ARGVEC describe the
    arguments to the call.  This returns the chosen symbol and will
    update TRACKER accordingly.  */
@@ -398,13 +398,13 @@ extern block_symbol ada_find_operator_symbol (enum exp_opcode op,
 extern block_symbol ada_resolve_funcall (struct symbol *sym,
 					 const struct block *block,
 					 struct type *context_type,
-					 int parse_completion,
+					 bool parse_completion,
 					 int nargs, value *argvec[],
 					 innermost_block_tracker *tracker);
 
 /* Resolve a symbol reference, selecting among possible values.  SYM
    and BLOCK are passed to ada_lookup_symbol_list.  CONTEXT_TYPE
-   describes the calling context.  PARSE_COMPLETION is nonzero if
+   describes the calling context.  PARSE_COMPLETION is true if
    currently parsing for completion.  If DEPROCEDURE_P is nonzero,
    then a symbol that names a zero-argument function will be passed
    through ada_resolve_function.  This returns the chosen symbol and
@@ -413,7 +413,7 @@ extern block_symbol ada_resolve_funcall (struct symbol *sym,
 extern block_symbol ada_resolve_variable (struct symbol *sym,
 					  const struct block *block,
 					  struct type *context_type,
-					  int parse_completion,
+					  bool parse_completion,
 					  int deprocedure_p,
 					  innermost_block_tracker *tracker);
 

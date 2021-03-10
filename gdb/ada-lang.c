@@ -193,7 +193,7 @@ static int find_struct_field (const char *, struct type *, int,
 
 static int ada_resolve_function (std::vector<struct block_symbol> &,
 				 struct value **, int, const char *,
-				 struct type *, int);
+				 struct type *, bool);
 
 static int ada_is_direct_array_type (struct type *);
 
@@ -3375,7 +3375,7 @@ See set/show multiple-symbol."));
 /* See ada-lang.h.  */
 
 block_symbol
-ada_find_operator_symbol (enum exp_opcode op, int parse_completion,
+ada_find_operator_symbol (enum exp_opcode op, bool parse_completion,
 			  int nargs, value *argvec[])
 {
   if (possible_user_operator_p (op, argvec))
@@ -3398,7 +3398,7 @@ ada_find_operator_symbol (enum exp_opcode op, int parse_completion,
 block_symbol
 ada_resolve_funcall (struct symbol *sym, const struct block *block,
 		     struct type *context_type,
-		     int parse_completion,
+		     bool parse_completion,
 		     int nargs, value *argvec[],
 		     innermost_block_tracker *tracker)
 {
@@ -3428,7 +3428,7 @@ ada_resolve_funcall (struct symbol *sym, const struct block *block,
 block_symbol
 ada_resolve_variable (struct symbol *sym, const struct block *block,
 		      struct type *context_type,
-		      int parse_completion,
+		      bool parse_completion,
 		      int deprocedure_p,
 		      innermost_block_tracker *tracker)
 {
@@ -3634,7 +3634,7 @@ static int
 ada_resolve_function (std::vector<struct block_symbol> &syms,
 		      struct value **args, int nargs,
 		      const char *name, struct type *context_type,
-		      int parse_completion)
+		      bool parse_completion)
 {
   int fallback;
   int k;
