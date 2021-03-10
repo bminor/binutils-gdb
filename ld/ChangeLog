@@ -1,3 +1,11 @@
+2021-03-10  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/ld-scripts/pr22267.t: Avoid symbol value with more
+	than 32 set bits.
+	* testsuite/ld-scripts/pr22267.d: Adjust expectation and drop
+	comment.
+	* scripttempl/mcorepe.sc: Use PROVIDE() for _stack.
+
 2021-03-09  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/ld-pe/reloc.s: Add entry point symbols. Increase

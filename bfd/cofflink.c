@@ -2602,6 +2602,17 @@ _bfd_coff_write_global_sym (struct bfd_hash_entry *bh, void *data)
 			+ h->root.u.def.section->output_offset);
 	if (! obj_pe (flaginfo->output_bfd))
 	  isym.n_value += sec->vma;
+#ifdef BFD64
+	if (isym.n_value > (bfd_vma) 0xffffffff)
+	  {
+	    if (! h->root.linker_def)
+	      _bfd_error_handler
+	        (_("%pB: stripping non-representable symbol '%s' (value "
+                  "%" BFD_VMA_FMT "x)"),
+	         output_bfd, h->root.root.string, isym.n_value);
+	    return TRUE;
+	  }
+#endif
       }
       break;
 

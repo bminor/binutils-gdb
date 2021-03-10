@@ -168,7 +168,7 @@ SECTIONS
 
   .stack 0x80000 :
   {
-    _stack = .;
+    PROVIDE(_stack = .);
     *(.stack)
   }
 }
