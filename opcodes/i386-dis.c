@@ -10749,7 +10749,7 @@ putop (const char *in_template, int sizeflag)
 	    }
 	  else if (l == 1 && last[0] == 'X')
 	    {
-	      if (!need_vex || !vex.evex)
+	      if (!vex.evex)
 		abort ();
 	      if (intel_syntax
 		  || ((modrm.mod == 3 || vex.b) && !(sizeflag & SUFFIX_ALWAYS)))
@@ -10951,8 +10951,7 @@ print_displacement (char *buf, bfd_vma disp)
 static void
 intel_operand_size (int bytemode, int sizeflag)
 {
-  if (vex.evex
-      && vex.b
+  if (vex.b
       && (bytemode == x_mode
 	  || bytemode == evex_half_bcst_xmmq_mode))
     {
@@ -11845,7 +11844,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	  oappend (scratchbuf);
 	}
     }
-  if (vex.evex && vex.b
+  if (vex.b
       && (bytemode == x_mode
 	  || bytemode == evex_half_bcst_xmmq_mode))
     {
