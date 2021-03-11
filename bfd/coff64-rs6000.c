@@ -180,34 +180,56 @@ static xcoff_reloc_function xcoff64_reloc_type_br;
 xcoff_reloc_function *const
 xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
 {
-  xcoff_reloc_type_pos,	 /* R_POS   (0x00) */
-  xcoff_reloc_type_neg,	 /* R_NEG   (0x01) */
-  xcoff_reloc_type_rel,	 /* R_REL   (0x02) */
-  xcoff_reloc_type_toc,	 /* R_TOC   (0x03) */
-  xcoff_reloc_type_fail, /* R_RTB   (0x04) */
-  xcoff_reloc_type_toc,	 /* R_GL    (0x05) */
-  xcoff_reloc_type_toc,	 /* R_TCL   (0x06) */
-  xcoff_reloc_type_fail, /*	    (0x07) */
-  xcoff_reloc_type_ba,	 /* R_BA    (0x08) */
-  xcoff_reloc_type_fail, /*	    (0x09) */
-  xcoff64_reloc_type_br, /* R_BR    (0x0a) */
-  xcoff_reloc_type_fail, /*	    (0x0b) */
-  xcoff_reloc_type_pos,	 /* R_RL    (0x0c) */
-  xcoff_reloc_type_pos,	 /* R_RLA   (0x0d) */
-  xcoff_reloc_type_fail, /*	    (0x0e) */
-  xcoff_reloc_type_noop, /* R_REF   (0x0f) */
-  xcoff_reloc_type_fail, /*	    (0x10) */
-  xcoff_reloc_type_fail, /*	    (0x11) */
-  xcoff_reloc_type_toc,	 /* R_TRL   (0x12) */
-  xcoff_reloc_type_toc,	 /* R_TRLA  (0x13) */
-  xcoff_reloc_type_fail, /* R_RRTBI (0x14) */
-  xcoff_reloc_type_fail, /* R_RRTBA (0x15) */
-  xcoff_reloc_type_ba,	 /* R_CAI   (0x16) */
-  xcoff_reloc_type_crel, /* R_CREL  (0x17) */
-  xcoff_reloc_type_ba,	 /* R_RBA   (0x18) */
-  xcoff_reloc_type_ba,	 /* R_RBAC  (0x19) */
-  xcoff64_reloc_type_br, /* R_RBR   (0x1a) */
-  xcoff_reloc_type_ba,	 /* R_RBRC  (0x1b) */
+  xcoff_reloc_type_pos,  /* R_POS     (0x00) */
+  xcoff_reloc_type_neg,  /* R_NEG     (0x01) */
+  xcoff_reloc_type_rel,  /* R_REL     (0x02) */
+  xcoff_reloc_type_toc,  /* R_TOC     (0x03) */
+  xcoff_reloc_type_toc,  /* R_TRL     (0x04) */
+  xcoff_reloc_type_toc,  /* R_GL      (0x05) */
+  xcoff_reloc_type_toc,  /* R_TCL     (0x06) */
+  xcoff_reloc_type_fail, /*           (0x07) */
+  xcoff_reloc_type_ba,   /* R_BA      (0x08) */
+  xcoff_reloc_type_fail, /*           (0x09) */
+  xcoff64_reloc_type_br, /* R_BR      (0x0a) */
+  xcoff_reloc_type_fail, /*           (0x0b) */
+  xcoff_reloc_type_pos,  /* R_RL      (0x0c) */
+  xcoff_reloc_type_pos,  /* R_RLA     (0x0d) */
+  xcoff_reloc_type_fail, /*           (0x0e) */
+  xcoff_reloc_type_noop, /* R_REF     (0x0f) */
+  xcoff_reloc_type_fail, /*           (0x10) */
+  xcoff_reloc_type_fail, /*           (0x11) */
+  xcoff_reloc_type_fail, /*           (0x12) */
+  xcoff_reloc_type_toc,  /* R_TRLA    (0x13) */
+  xcoff_reloc_type_fail, /* R_RRTBI   (0x14) */
+  xcoff_reloc_type_fail, /* R_RRTBA   (0x15) */
+  xcoff_reloc_type_ba,   /* R_CAI     (0x16) */
+  xcoff_reloc_type_crel, /* R_CREL    (0x17) */
+  xcoff_reloc_type_ba,   /* R_RBA     (0x18) */
+  xcoff_reloc_type_ba,   /* R_RBAC    (0x19) */
+  xcoff64_reloc_type_br, /* R_RBR     (0x1a) */
+  xcoff_reloc_type_ba,   /* R_RBRC    (0x1b) */
+  xcoff_reloc_type_fail, /*           (0x1c) */
+  xcoff_reloc_type_fail, /*           (0x1d) */
+  xcoff_reloc_type_fail, /*           (0x1e) */
+  xcoff_reloc_type_fail, /*           (0x1f) */
+  xcoff_reloc_type_fail, /* R_TLS     (0x20) */
+  xcoff_reloc_type_fail, /* R_TLS_IE  (0x21) */
+  xcoff_reloc_type_fail, /* R_TLS_LD  (0x22) */
+  xcoff_reloc_type_fail, /* R_TLS_LE  (0x23) */
+  xcoff_reloc_type_fail, /* R_TLSM    (0x24) */
+  xcoff_reloc_type_fail, /* R_TLSML   (0x25) */
+  xcoff_reloc_type_fail, /*           (0x26) */
+  xcoff_reloc_type_fail, /*           (0x27) */
+  xcoff_reloc_type_fail, /*           (0x28) */
+  xcoff_reloc_type_fail, /*           (0x29) */
+  xcoff_reloc_type_fail, /*           (0x2a) */
+  xcoff_reloc_type_fail, /*           (0x2b) */
+  xcoff_reloc_type_fail, /*           (0x2c) */
+  xcoff_reloc_type_fail, /*           (0x2d) */
+  xcoff_reloc_type_fail, /*           (0x2e) */
+  xcoff_reloc_type_fail, /*           (0x2f) */
+  xcoff_reloc_type_fail, /* R_TOCU    (0x30) */
+  xcoff_reloc_type_fail, /* R_TOCL    (0x31) */
 };
 
 /* coffcode.h needs these to be defined.  */
@@ -816,11 +838,8 @@ xcoff64_reloc_type_br (bfd *input_bfd,
 
 
 
-/* The XCOFF reloc table.  Actually, XCOFF relocations specify the
-   bitsize and whether they are signed or not, along with a
-   conventional type.  This table is for the types, which are used for
-   different algorithms for putting in the reloc.  Many of these
-   relocs need special_function entries, which I have not written.  */
+/* The XCOFF reloc table.
+   Cf xcoff_howto_table comments.  */
 
 reloc_howto_type xcoff64_howto_table[] =
 {
@@ -854,19 +873,19 @@ reloc_howto_type xcoff64_howto_table[] =
 	 MINUS_ONE,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 0x02: 32 bit PC relative relocation.  */
+  /* 0x02: 64 bit PC relative relocation.  */
   HOWTO (R_REL,			/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "R_REL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* 0x03: 16 bit TOC relative relocation.  */
@@ -884,19 +903,19 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 0x04: I don't really know what this is.	*/
-  HOWTO (R_RTB,			/* type */
-	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+  /* 0x04: Same as R_TOC.  */
+  HOWTO (R_TRL,			/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
-	 "R_RTB",		/* name */
+	 "R_TRL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* 0x05: External TOC relative symbol.  */
@@ -931,7 +950,7 @@ reloc_howto_type xcoff64_howto_table[] =
 
   EMPTY_HOWTO (7),
 
-  /* 0x08: Non modifiable absolute branch.  */
+  /* 0x08: Same as R_RBA.  */
   HOWTO (R_BA,			/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -948,7 +967,7 @@ reloc_howto_type xcoff64_howto_table[] =
 
   EMPTY_HOWTO (9),
 
-  /* 0x0a: Non modifiable relative branch.  */
+  /* 0x0a: Same as R_RBR.  */
   HOWTO (R_BR,			/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -965,34 +984,34 @@ reloc_howto_type xcoff64_howto_table[] =
 
   EMPTY_HOWTO (0xb),
 
-  /* 0x0c: Indirect load.  */
+  /* 0x0c: Same as R_POS.  */
   HOWTO (R_RL,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "R_RL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 0x0d: Load address.  */
+  /* 0x0d: Same as R_POS.  */
   HOWTO (R_RLA,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "R_RLA",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   EMPTY_HOWTO (0xe),
@@ -1014,23 +1033,9 @@ reloc_howto_type xcoff64_howto_table[] =
 
   EMPTY_HOWTO (0x10),
   EMPTY_HOWTO (0x11),
+  EMPTY_HOWTO (0x12),
 
-  /* 0x12: TOC relative indirect load.  */
-  HOWTO (R_TRL,			/* type */
-	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
-	 "R_TRL",		/* name */
-	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
-
-  /* 0x13: TOC relative load address.	 */
+  /* 0x13: Same as R_TOC  */
   HOWTO (R_TRLA,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1075,7 +1080,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 0x16: Modifiable call absolute indirect.	 */
+  /* 0x16: Modifiable call absolute indirect.  */
   HOWTO (R_CAI,			/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1090,7 +1095,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 0x17: Modifiable call relative.	*/
+  /* 0x17: Modifiable call relative.  */
   HOWTO (R_CREL,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -1225,12 +1230,48 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+
+  /* 0x20: General-dynamic TLS relocation.  */
+  EMPTY_HOWTO (R_TLS),
+
+  /* 0x21: Initial-exec TLS relocation.  */
+  EMPTY_HOWTO (R_TLS_IE),
+
+  /* 0x22: Local-dynamic TLS relocation.  */
+  EMPTY_HOWTO (R_TLS_LD),
+
+  /* 0x23: Local-exec TLS relocation.  */
+  EMPTY_HOWTO (R_TLS_LE),
+
+  /* 0x24: TLS relocation.  */
+  EMPTY_HOWTO(R_TLSM),
+
+  /* 0x25: TLS module relocation.  */
+  EMPTY_HOWTO(R_TLSML),
+
+  EMPTY_HOWTO(0x26),
+  EMPTY_HOWTO(0x27),
+  EMPTY_HOWTO(0x28),
+  EMPTY_HOWTO(0x29),
+  EMPTY_HOWTO(0x2a),
+  EMPTY_HOWTO(0x2b),
+  EMPTY_HOWTO(0x2c),
+  EMPTY_HOWTO(0x2d),
+  EMPTY_HOWTO(0x2e),
+  EMPTY_HOWTO(0x2f),
+
+  /* 0x30: High-order 16 bit TOC relative relocation.  */
+  EMPTY_HOWTO (R_TOCU),
+
+  /* 0x31: Low-order 16 bit TOC relative relocation.  */
+  EMPTY_HOWTO (R_TOCL),
+
 };
 
 void
 xcoff64_rtype2howto (arelent *relent, struct internal_reloc *internal)
 {
-  if (internal->r_type > R_RBRC)
+  if (internal->r_type > R_TOCL)
     abort ();
 
   /* Default howto layout works most of the time */
@@ -1345,21 +1386,34 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
       if (rel->r_type == R_REF)
 	continue;
 
-      /* howto */
-      howto.type = rel->r_type;
-      howto.rightshift = 0;
-      howto.bitsize = (rel->r_size & 0x3f) + 1;
-      howto.size = howto.bitsize > 16 ? (howto.bitsize > 32 ? 4 : 2) : 1;
-      howto.pc_relative = FALSE;
-      howto.bitpos = 0;
+      /* Retrieve default value in HOWTO table and fix up according
+	 to r_size field, if it can be different.
+	 This should be made during relocation reading but the algorithms
+	 are expecting constant howtos.  */
+      memcpy (&howto, &xcoff64_howto_table[rel->r_type], sizeof (howto));
+      if (howto.bitsize != (rel->r_size & 0x3f) + 1)
+	{
+	  switch (rel->r_type)
+	    {
+	    case R_POS:
+	    case R_NEG:
+	      howto.bitsize = (rel->r_size & 0x3f) + 1;
+	      howto.size = howto.bitsize > 16 ? (howto.bitsize > 32 ? 4 : 2) : 1;
+	      howto.src_mask = howto.dst_mask = N_ONES (howto.bitsize);
+	      break;
+
+	    default:
+	      _bfd_error_handler
+		(_("%pB: relocatation (%d) at (0x%" BFD_VMA_FMT "x) has wrong"
+		   " r_rsize (0x%x)\n"),
+		 input_bfd, rel->r_type, rel->r_vaddr, rel->r_size);
+	      return FALSE;
+	    }
+	}
+
       howto.complain_on_overflow = (rel->r_size & 0x80
 				    ? complain_overflow_signed
 				    : complain_overflow_bitfield);
-      howto.special_function = NULL;
-      howto.name = "internal";
-      howto.partial_inplace = TRUE;
-      howto.src_mask = howto.dst_mask = N_ONES (howto.bitsize);
-      howto.pcrel_offset = FALSE;
 
       /* symbol */
       val = 0;
@@ -1394,7 +1448,7 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 	    {
 	      if (info->unresolved_syms_in_objects != RM_IGNORE
 		  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
-                info->callbacks->undefined_symbol
+		info->callbacks->undefined_symbol
 		  (info, h->root.root.string, input_bfd, input_section,
 		   rel->r_vaddr - input_section->vma,
 		   info->unresolved_syms_in_objects == RM_DIAGNOSE

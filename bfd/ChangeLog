@@ -1,5 +1,20 @@
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
+	* coff-rs6000.c (xcoff_calculate_relocation): Correct and
+	add new relocations.
+	(xcoff_howto_table): Likewise.
+	(xcoff_rtype2howto): Increase r_type maximum value.
+	(xcoff_ppc_relocate_section): Reuse predefined HOWTOs instead
+	of create a new one from scratch.  Enable only some relocations
+	to have a changing r_size.
+	* coff64-rs6000.c (xcoff64_calculate_relocation): Likewise.
+	(xcoff64_howto_table): Likewise.
+	(xcoff64_rtype2howto): Likewise.
+	(xcoff64_ppc_relocate_section): Likewise.
+	* libxcoff.h (XCOFF_MAX_CALCULATE_RELOCATION): Fix value.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
 	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Move.
 
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>

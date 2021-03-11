@@ -1,3 +1,7 @@
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
+	* od-xcoff.c: Replace RTB by TRL entry.
+
 2021-03-05  Craig Blackmore  <craig.blackmore@embecosm.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

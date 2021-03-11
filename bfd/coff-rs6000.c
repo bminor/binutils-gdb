@@ -158,34 +158,56 @@ static xcoff_complain_function xcoff_complain_overflow_unsigned_func;
 xcoff_reloc_function *const
 xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
 {
-  xcoff_reloc_type_pos,	 /* R_POS   (0x00) */
-  xcoff_reloc_type_neg,	 /* R_NEG   (0x01) */
-  xcoff_reloc_type_rel,	 /* R_REL   (0x02) */
-  xcoff_reloc_type_toc,	 /* R_TOC   (0x03) */
-  xcoff_reloc_type_fail, /* R_RTB   (0x04) */
-  xcoff_reloc_type_toc,	 /* R_GL    (0x05) */
-  xcoff_reloc_type_toc,	 /* R_TCL   (0x06) */
-  xcoff_reloc_type_fail, /*	    (0x07) */
-  xcoff_reloc_type_ba,	 /* R_BA    (0x08) */
-  xcoff_reloc_type_fail, /*	    (0x09) */
-  xcoff_reloc_type_br,	 /* R_BR    (0x0a) */
-  xcoff_reloc_type_fail, /*	    (0x0b) */
-  xcoff_reloc_type_pos,	 /* R_RL    (0x0c) */
-  xcoff_reloc_type_pos,	 /* R_RLA   (0x0d) */
-  xcoff_reloc_type_fail, /*	    (0x0e) */
+  xcoff_reloc_type_pos,  /* R_POS   (0x00) */
+  xcoff_reloc_type_neg,  /* R_NEG   (0x01) */
+  xcoff_reloc_type_rel,  /* R_REL   (0x02) */
+  xcoff_reloc_type_toc,  /* R_TOC   (0x03) */
+  xcoff_reloc_type_toc,  /* R_TRL   (0x04) */
+  xcoff_reloc_type_toc,  /* R_GL    (0x05) */
+  xcoff_reloc_type_toc,  /* R_TCL   (0x06) */
+  xcoff_reloc_type_fail, /*         (0x07) */
+  xcoff_reloc_type_ba,   /* R_BA    (0x08) */
+  xcoff_reloc_type_fail, /*         (0x09) */
+  xcoff_reloc_type_br,   /* R_BR    (0x0a) */
+  xcoff_reloc_type_fail, /*         (0x0b) */
+  xcoff_reloc_type_pos,  /* R_RL    (0x0c) */
+  xcoff_reloc_type_pos,  /* R_RLA   (0x0d) */
+  xcoff_reloc_type_fail, /*         (0x0e) */
   xcoff_reloc_type_noop, /* R_REF   (0x0f) */
-  xcoff_reloc_type_fail, /*	    (0x10) */
-  xcoff_reloc_type_fail, /*	    (0x11) */
-  xcoff_reloc_type_toc,	 /* R_TRL   (0x12) */
-  xcoff_reloc_type_toc,	 /* R_TRLA  (0x13) */
+  xcoff_reloc_type_fail, /*         (0x10) */
+  xcoff_reloc_type_fail, /*         (0x11) */
+  xcoff_reloc_type_fail, /*         (0x12) */
+  xcoff_reloc_type_toc,  /* R_TRLA  (0x13) */
   xcoff_reloc_type_fail, /* R_RRTBI (0x14) */
   xcoff_reloc_type_fail, /* R_RRTBA (0x15) */
-  xcoff_reloc_type_ba,	 /* R_CAI   (0x16) */
+  xcoff_reloc_type_ba,   /* R_CAI   (0x16) */
   xcoff_reloc_type_crel, /* R_CREL  (0x17) */
-  xcoff_reloc_type_ba,	 /* R_RBA   (0x18) */
-  xcoff_reloc_type_ba,	 /* R_RBAC  (0x19) */
-  xcoff_reloc_type_br,	 /* R_RBR   (0x1a) */
-  xcoff_reloc_type_ba,	 /* R_RBRC  (0x1b) */
+  xcoff_reloc_type_ba,   /* R_RBA   (0x18) */
+  xcoff_reloc_type_ba,   /* R_RBAC  (0x19) */
+  xcoff_reloc_type_br,   /* R_RBR   (0x1a) */
+  xcoff_reloc_type_ba,   /* R_RBRC  (0x1b) */
+  xcoff_reloc_type_fail, /*           (0x1c) */
+  xcoff_reloc_type_fail, /*           (0x1d) */
+  xcoff_reloc_type_fail, /*           (0x1e) */
+  xcoff_reloc_type_fail, /*           (0x1f) */
+  xcoff_reloc_type_fail, /* R_TLS     (0x20) */
+  xcoff_reloc_type_fail, /* R_TLS_IE  (0x21) */
+  xcoff_reloc_type_fail, /* R_TLS_LD  (0x22) */
+  xcoff_reloc_type_fail, /* R_TLS_LE  (0x23) */
+  xcoff_reloc_type_fail, /* R_TLSM    (0x24) */
+  xcoff_reloc_type_fail, /* R_TLSML   (0x25) */
+  xcoff_reloc_type_fail, /*           (0x26) */
+  xcoff_reloc_type_fail, /*           (0x27) */
+  xcoff_reloc_type_fail, /*           (0x28) */
+  xcoff_reloc_type_fail, /*           (0x29) */
+  xcoff_reloc_type_fail, /*           (0x2a) */
+  xcoff_reloc_type_fail, /*           (0x2b) */
+  xcoff_reloc_type_fail, /*           (0x2c) */
+  xcoff_reloc_type_fail, /*           (0x2d) */
+  xcoff_reloc_type_fail, /*           (0x2e) */
+  xcoff_reloc_type_fail, /*           (0x2f) */
+  xcoff_reloc_type_fail, /* R_TOCU    (0x30) */
+  xcoff_reloc_type_fail, /* R_TOCL    (0x31) */
 };
 
 xcoff_complain_function *const
@@ -652,11 +674,18 @@ _bfd_xcoff_swap_aux_out (bfd *abfd, void * inp, int type, int in_class,
   return bfd_coff_auxesz (abfd);
 }
 
-/* The XCOFF reloc table.  Actually, XCOFF relocations specify the
-   bitsize and whether they are signed or not, along with a
-   conventional type.  This table is for the types, which are used for
-   different algorithms for putting in the reloc.  Many of these
-   relocs need special_function entries, which I have not written.  */
+/* The XCOFF reloc table.
+   XCOFF relocations aren't defined only by the type field r_type.
+   The bitsize and whether they are signed or not, are defined by
+   r_size field.  Thus, it's complicated to create a constant
+   table reference every possible relocation.
+   This table contains the "default" relocation and few modified
+   relocations what were already there.  It's enough when
+   xcoff_rtype2howto is called.
+   For relocations from an input bfd to an output bfd, the default
+   relocation is retrieved and when manually adapted.
+
+   For now, it seems to be enought.  */
 
 reloc_howto_type xcoff_howto_table[] =
 {
@@ -720,19 +749,19 @@ reloc_howto_type xcoff_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 0x04: I don't really know what this is.  */
-  HOWTO (R_RTB,			/* type */
-	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
+  /* 0x04: Same as R_TOC  */
+  HOWTO (R_TRL,			/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
-	 "R_RTB",		/* name */
+	 "R_TRL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffffffff,		/* src_mask */
-	 0xffffffff,		/* dst_mask */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   /* 0x05: External TOC relative symbol.  */
@@ -767,7 +796,7 @@ reloc_howto_type xcoff_howto_table[] =
 
   EMPTY_HOWTO (7),
 
-  /* 0x08: Non modifiable absolute branch.  */
+  /* 0x08: Same as R_RBA.  */
   HOWTO (R_BA,			/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -784,7 +813,7 @@ reloc_howto_type xcoff_howto_table[] =
 
   EMPTY_HOWTO (9),
 
-  /* 0x0a: Non modifiable relative branch.  */
+  /* 0x0a: Same as R_RBR.  */
   HOWTO (R_BR,			/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -801,34 +830,34 @@ reloc_howto_type xcoff_howto_table[] =
 
   EMPTY_HOWTO (0xb),
 
-  /* 0x0c: Indirect load.  */
+  /* 0x0c: Same as R_POS.  */
   HOWTO (R_RL,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "R_RL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* 0x0d: Load address.  */
+  /* 0x0d: Same as R_POS.  */
   HOWTO (R_RLA,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 0,			/* special_function */
 	 "R_RLA",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   EMPTY_HOWTO (0xe),
@@ -850,23 +879,9 @@ reloc_howto_type xcoff_howto_table[] =
 
   EMPTY_HOWTO (0x10),
   EMPTY_HOWTO (0x11),
+  EMPTY_HOWTO (0x12),
 
-  /* 0x12: TOC relative indirect load.  */
-  HOWTO (R_TRL,			/* type */
-	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
-	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 0,			/* special_function */
-	 "R_TRL",		/* name */
-	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
-	 0xffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
-
-  /* 0x13: TOC relative load address.  */
+  /* 0x13: Same as R_TOC.  */
   HOWTO (R_TRLA,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -882,7 +897,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 FALSE),		/* pcrel_offset */
 
   /* 0x14: Modifiable relative branch.  */
-  HOWTO (R_RRTBI,		 /* type */
+  HOWTO (R_RRTBI,		/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -897,7 +912,7 @@ reloc_howto_type xcoff_howto_table[] =
 	 FALSE),		/* pcrel_offset */
 
   /* 0x15: Modifiable absolute branch.  */
-  HOWTO (R_RRTBA,		 /* type */
+  HOWTO (R_RRTBA,		/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
@@ -1045,12 +1060,50 @@ reloc_howto_type xcoff_howto_table[] =
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
+
+  EMPTY_HOWTO (0x1f),
+
+  /* 0x20: General-dynamic TLS relocation.  */
+  EMPTY_HOWTO (R_TLS),
+
+  /* 0x21: Initial-exec TLS relocation.  */
+  EMPTY_HOWTO (R_TLS_IE),
+
+  /* 0x22: Local-dynamic TLS relocation.  */
+  EMPTY_HOWTO (R_TLS_LD),
+
+  /* 0x23: Local-exec TLS relocation.  */
+  EMPTY_HOWTO (R_TLS_LE),
+
+  /* 0x24: TLS relocation.  */
+  EMPTY_HOWTO(R_TLSM),
+
+  /* 0x25: TLS module relocation.  */
+  EMPTY_HOWTO(R_TLSML),
+
+  EMPTY_HOWTO(0x26),
+  EMPTY_HOWTO(0x27),
+  EMPTY_HOWTO(0x28),
+  EMPTY_HOWTO(0x29),
+  EMPTY_HOWTO(0x2a),
+  EMPTY_HOWTO(0x2b),
+  EMPTY_HOWTO(0x2c),
+  EMPTY_HOWTO(0x2d),
+  EMPTY_HOWTO(0x2e),
+  EMPTY_HOWTO(0x2f),
+
+  /* 0x30: High-order 16 bit TOC relative relocation.  */
+  EMPTY_HOWTO (R_TOCU),
+
+  /* 0x31: Low-order 16 bit TOC relative relocation.  */
+  EMPTY_HOWTO (R_TOCL),
+
 };
 
 void
 xcoff_rtype2howto (arelent *relent, struct internal_reloc *internal)
 {
-  if (internal->r_type > R_RBRC)
+  if (internal->r_type > R_TOCL)
     abort ();
 
   /* Default howto layout works most of the time */
@@ -3225,11 +3278,14 @@ xcoff_complain_overflow_unsigned_func (bfd *input_bfd,
    This is currently the only processor which uses XCOFF; I hope that
    will never change.
 
-   I took the relocation type definitions from two documents:
+   The original version was based on two documents:
    the PowerPC AIX Version 4 Application Binary Interface, First
    Edition (April 1992), and the PowerOpen ABI, Big-Endian
    32-Bit Hardware Implementation (June 30, 1994).  Differences
    between the documents are noted below.
+   Now, IBM has released an official documentation about XCOFF
+   format:
+   https://www.ibm.com/support/knowledgecenter/ssw_aix_72/filesreference/XCOFF.html
 
    Unsupported r_type's
 
@@ -3242,6 +3298,15 @@ xcoff_complain_overflow_unsigned_func (bfd *input_bfd,
    between the symbol and the program counter.  I can't
    quite figure out when this is useful.  These relocs are
    not defined by the PowerOpen ABI.
+
+   R_TOCU
+   R_TOCL
+   R_TLS
+   R_TLS_IE
+   R_TLS_LD
+   R_TLSLE
+
+   Not yet implemented.
 
    Supported r_type's
 
@@ -3264,38 +3329,68 @@ xcoff_complain_overflow_unsigned_func (bfd *input_bfd,
    osym = oTOC + on
    oinsn = on + o
    so we must change insn by on - in.
+   This relocation allows the linker to perform optimizations
+   by transforming a load instruction into a add-immediate
+   when possible. The relocation is, then, changed to R_TRLA
+   in the output file.
+   TODO: Currently, the optimisation isn't implemented.
+
+   R_TRL:
+   TOC relative relocation.  Same as R_TOC, except that
+   the optimization isn't allowed
+
+   R_TRLA:
+   TOC relative relocation.  This is a TOC relative load
+   address instruction which have been changed to an add-
+   immediate instruction.
 
    R_GL:
    GL linkage relocation.  The value of this relocation
-   is the address of the entry in the TOC section.
+   is the address of the external symbol in the TOC
+   section.
 
    R_TCL:
    Local object TOC address.  I can't figure out the
    difference between this and case R_GL.
 
-   R_TRL:
-   TOC relative relocation.  A TOC relative load instruction
-   which may be changed to a load address instruction.
-   FIXME: We don't currently implement this optimization.
+   R_RL:
+   The PowerPC AIX ABI describes this as a load which may be
+   changed to a load address.  The PowerOpen ABI says this
+   is the same as case R_POS.
 
-   R_TRLA:
-   TOC relative relocation.  This is a TOC relative load
-   address instruction which may be changed to a load
-   instruction.  FIXME: I don't know if this is the correct
-   implementation.
+   R_RLA:
+   The PowerPC AIX ABI describes this as a load address
+   which may be changed to a load.  The PowerOpen ABI says
+   this is the same as R_POS.
+
+   R_REF:
+   Not a relocation but a way to prevent the garbage
+   collector of AIX linker to remove symbols.
+   This is not needed in our case.
 
    R_BA:
-   Absolute branch.  We don't want to mess with the lower
-   two bits of the instruction.
+   The PowerOpen ABI says this is the same as R_RBA.
+
+   R_RBA:
+   Absolute branch which may be modified to become a
+   relative branch.
+
+   R_BR:
+   The PowerOpen ABI says this is the same as R_RBR.
+
+   R_RBR:
+   A relative branch which may be modified to become an
+   absolute branch.
 
    R_CAI:
    The PowerPC ABI defines this as an absolute call which
    may be modified to become a relative call.  The PowerOpen
    ABI does not define this relocation type.
 
-   R_RBA:
-   Absolute branch which may be modified to become a
-   relative branch.
+   R_CREL:
+   The PowerPC ABI defines this as a relative call which may
+   be modified to become an absolute call.  The PowerOpen
+   ABI does not define this relocation type.
 
    R_RBAC:
    The PowerPC ABI defines this as an absolute branch to a
@@ -3307,29 +3402,6 @@ xcoff_complain_overflow_unsigned_func (bfd *input_bfd,
    The PowerPC ABI defines this as an absolute branch to a
    fixed address which may be modified to a relative branch.
    The PowerOpen ABI does not define this relocation type.
-
-   R_BR:
-   Relative branch.  We don't want to mess with the lower
-   two bits of the instruction.
-
-   R_CREL:
-   The PowerPC ABI defines this as a relative call which may
-   be modified to become an absolute call.  The PowerOpen
-   ABI does not define this relocation type.
-
-   R_RBR:
-   A relative branch which may be modified to become an
-   absolute branch.
-
-   R_RL:
-   The PowerPC AIX ABI describes this as a load which may be
-   changed to a load address.  The PowerOpen ABI says this
-   is the same as case R_POS.
-
-   R_RLA:
-   The PowerPC AIX ABI describes this as a load address
-   which may be changed to a load.  The PowerOpen ABI says
-   this is the same as R_POS.
 */
 
 bfd_boolean
@@ -3366,21 +3438,34 @@ xcoff_ppc_relocate_section (bfd *output_bfd,
       if (rel->r_type == R_REF)
 	continue;
 
-      /* howto */
-      howto.type = rel->r_type;
-      howto.rightshift = 0;
-      howto.bitsize = (rel->r_size & 0x1f) + 1;
-      howto.size = howto.bitsize > 16 ? 2 : 1;
-      howto.pc_relative = FALSE;
-      howto.bitpos = 0;
+      /* Retrieve default value in HOWTO table and fix up according
+	 to r_size field, if it can be different.
+	 This should be made during relocation reading but the algorithms
+	 are expecting constant howtos.  */
+      memcpy (&howto, &xcoff_howto_table[rel->r_type], sizeof (howto));
+      if (howto.bitsize != (rel->r_size & 0x1f) + 1)
+	{
+	  switch (rel->r_type)
+	    {
+	    case R_POS:
+	    case R_NEG:
+	      howto.bitsize = (rel->r_size & 0x1f) + 1;
+	      howto.size = howto.bitsize > 16 ? 2 : 1;
+	      howto.src_mask = howto.dst_mask = N_ONES (howto.bitsize);
+	      break;
+
+	    default:
+	      _bfd_error_handler
+		(_("%pB: relocatation (%d) at (0x%" BFD_VMA_FMT "x) has wrong"
+		   " r_rsize (0x%x)\n"),
+		 input_bfd, rel->r_type, rel->r_vaddr, rel->r_size);
+	      return FALSE;
+	    }
+	}
+
       howto.complain_on_overflow = (rel->r_size & 0x80
 				    ? complain_overflow_signed
 				    : complain_overflow_bitfield);
-      howto.special_function = NULL;
-      howto.name = "internal";
-      howto.partial_inplace = TRUE;
-      howto.src_mask = howto.dst_mask = N_ONES (howto.bitsize);
-      howto.pcrel_offset = FALSE;
 
       /* symbol */
       val = 0;
