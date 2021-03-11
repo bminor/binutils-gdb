@@ -135,7 +135,7 @@ proc shared_test { progname testname main sh1 sh2 dat args } {
     # On AIX, we need to use an export file.
     set shared -shared
     if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
-	set shared "-bM:SRE -bE:$tmpdir/xcoff.exp"
+	append shared " -Wl,-bE:$tmpdir/xcoff.exp"
     }
     if { [is_elf_format] && [check_shared_lib_support] } {
 	append shared " -Wl,-z,notext"
