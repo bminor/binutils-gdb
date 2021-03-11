@@ -814,194 +814,6 @@ xcoff64_reloc_type_br (bfd *input_bfd,
   return TRUE;
 }
 
-/* This is the relocation function for the PowerPC64.
-   See xcoff_ppc_relocation_section for more information. */
-
-bfd_boolean
-xcoff64_ppc_relocate_section (bfd *output_bfd,
-			      struct bfd_link_info *info,
-			      bfd *input_bfd,
-			      asection *input_section,
-			      bfd_byte *contents,
-			      struct internal_reloc *relocs,
-			      struct internal_syment *syms,
-			      asection **sections)
-{
-  struct internal_reloc *rel;
-  struct internal_reloc *relend;
-
-  rel = relocs;
-  relend = rel + input_section->reloc_count;
-  for (; rel < relend; rel++)
-    {
-      long symndx;
-      struct xcoff_link_hash_entry *h;
-      struct internal_syment *sym;
-      bfd_vma addend;
-      bfd_vma val;
-      struct reloc_howto_struct howto;
-      bfd_vma relocation;
-      bfd_vma value_to_relocate;
-      bfd_vma address;
-      bfd_byte *location;
-
-      /* Relocation type R_REF is a special relocation type which is
-	 merely used to prevent garbage collection from occurring for
-	 the csect including the symbol which it references.  */
-      if (rel->r_type == R_REF)
-	continue;
-
-      /* howto */
-      howto.type = rel->r_type;
-      howto.rightshift = 0;
-      howto.bitsize = (rel->r_size & 0x3f) + 1;
-      howto.size = howto.bitsize > 16 ? (howto.bitsize > 32 ? 4 : 2) : 1;
-      howto.pc_relative = FALSE;
-      howto.bitpos = 0;
-      howto.complain_on_overflow = (rel->r_size & 0x80
-				    ? complain_overflow_signed
-				    : complain_overflow_bitfield);
-      howto.special_function = NULL;
-      howto.name = "internal";
-      howto.partial_inplace = TRUE;
-      howto.src_mask = howto.dst_mask = N_ONES (howto.bitsize);
-      howto.pcrel_offset = FALSE;
-
-      /* symbol */
-      val = 0;
-      addend = 0;
-      h = NULL;
-      sym = NULL;
-      symndx = rel->r_symndx;
-
-      if (-1 != symndx)
-	{
-	  asection *sec;
-
-	  h = obj_xcoff_sym_hashes (input_bfd)[symndx];
-	  sym = syms + symndx;
-	  addend = - sym->n_value;
-
-	  if (NULL == h)
-	    {
-	      sec = sections[symndx];
-	      /* Hack to make sure we use the right TOC anchor value
-		 if this reloc is against the TOC anchor.  */
-	      if (sec->name[3] == '0'
-		  && strcmp (sec->name, ".tc0") == 0)
-		val = xcoff_data (output_bfd)->toc;
-	      else
-		val = (sec->output_section->vma
-		       + sec->output_offset
-		       + sym->n_value
-		       - sec->vma);
-	    }
-	  else
-	    {
-	      if (info->unresolved_syms_in_objects != RM_IGNORE
-		  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
-                info->callbacks->undefined_symbol
-		  (info, h->root.root.string, input_bfd, input_section,
-		   rel->r_vaddr - input_section->vma,
-		   info->unresolved_syms_in_objects == RM_DIAGNOSE
-		   && !info->warn_unresolved_syms);
-
-	      if (h->root.type == bfd_link_hash_defined
-		  || h->root.type == bfd_link_hash_defweak)
-		{
-		  sec = h->root.u.def.section;
-		  val = (h->root.u.def.value
-			 + sec->output_section->vma
-			 + sec->output_offset);
-		}
-	      else if (h->root.type == bfd_link_hash_common)
-		{
-		  sec = h->root.u.c.p->section;
-		  val = (sec->output_section->vma
-			 + sec->output_offset);
-		}
-	      else
-		{
-		  BFD_ASSERT (bfd_link_relocatable (info)
-			      || (h->flags & XCOFF_DEF_DYNAMIC) != 0
-			      || (h->flags & XCOFF_IMPORT) != 0);
-		}
-	    }
-	}
-
-      if (rel->r_type >= XCOFF_MAX_CALCULATE_RELOCATION
-	  || !((*xcoff64_calculate_relocation[rel->r_type])
-	      (input_bfd, input_section, output_bfd, rel, sym, &howto, val,
-	       addend, &relocation, contents)))
-	return FALSE;
-
-      /* address */
-      address = rel->r_vaddr - input_section->vma;
-      location = contents + address;
-
-      if (address > input_section->size)
-	abort ();
-
-      /* Get the value we are going to relocate.  */
-      if (1 == howto.size)
-	value_to_relocate = bfd_get_16 (input_bfd, location);
-      else if (2 == howto.size)
-	value_to_relocate = bfd_get_32 (input_bfd, location);
-      else
-	value_to_relocate = bfd_get_64 (input_bfd, location);
-
-      /* overflow.
-
-	 FIXME: We may drop bits during the addition
-	 which we don't check for.  We must either check at every single
-	 operation, which would be tedious, or we must do the computations
-	 in a type larger than bfd_vma, which would be inefficient.  */
-
-      if (((*xcoff_complain_overflow[howto.complain_on_overflow])
-	   (input_bfd, value_to_relocate, relocation, &howto)))
-	{
-	  const char *name;
-	  char buf[SYMNMLEN + 1];
-	  char reloc_type_name[10];
-
-	  if (symndx == -1)
-	    {
-	      name = "*ABS*";
-	    }
-	  else if (h != NULL)
-	    {
-	      name = NULL;
-	    }
-	  else
-	    {
-	      name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
-	      if (name == NULL)
-		name = "UNKNOWN";
-	    }
-	  sprintf (reloc_type_name, "0x%02x", rel->r_type);
-
-	  (*info->callbacks->reloc_overflow)
-	    (info, (h ? &h->root : NULL), name, reloc_type_name,
-	     (bfd_vma) 0, input_bfd, input_section,
-	     rel->r_vaddr - input_section->vma);
-	}
-
-      /* Add RELOCATION to the right bits of VALUE_TO_RELOCATE.  */
-      value_to_relocate = ((value_to_relocate & ~howto.dst_mask)
-			   | (((value_to_relocate & howto.src_mask)
-			       + relocation) & howto.dst_mask));
-
-      /* Put the value back in the object file.  */
-      if (1 == howto.size)
-	bfd_put_16 (input_bfd, value_to_relocate, location);
-      else if (2 == howto.size)
-	bfd_put_32 (input_bfd, value_to_relocate, location);
-      else
-	bfd_put_64 (input_bfd, value_to_relocate, location);
-
-    }
-  return TRUE;
-}
 
 
 /* The XCOFF reloc table.  Actually, XCOFF relocations specify the
@@ -1495,6 +1307,196 @@ xcoff64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
   return NULL;
 }
+
+/* This is the relocation function for the PowerPC64.
+   See xcoff_ppc_relocation_section for more information. */
+
+bfd_boolean
+xcoff64_ppc_relocate_section (bfd *output_bfd,
+			      struct bfd_link_info *info,
+			      bfd *input_bfd,
+			      asection *input_section,
+			      bfd_byte *contents,
+			      struct internal_reloc *relocs,
+			      struct internal_syment *syms,
+			      asection **sections)
+{
+  struct internal_reloc *rel;
+  struct internal_reloc *relend;
+
+  rel = relocs;
+  relend = rel + input_section->reloc_count;
+  for (; rel < relend; rel++)
+    {
+      long symndx;
+      struct xcoff_link_hash_entry *h;
+      struct internal_syment *sym;
+      bfd_vma addend;
+      bfd_vma val;
+      struct reloc_howto_struct howto;
+      bfd_vma relocation;
+      bfd_vma value_to_relocate;
+      bfd_vma address;
+      bfd_byte *location;
+
+      /* Relocation type R_REF is a special relocation type which is
+	 merely used to prevent garbage collection from occurring for
+	 the csect including the symbol which it references.  */
+      if (rel->r_type == R_REF)
+	continue;
+
+      /* howto */
+      howto.type = rel->r_type;
+      howto.rightshift = 0;
+      howto.bitsize = (rel->r_size & 0x3f) + 1;
+      howto.size = howto.bitsize > 16 ? (howto.bitsize > 32 ? 4 : 2) : 1;
+      howto.pc_relative = FALSE;
+      howto.bitpos = 0;
+      howto.complain_on_overflow = (rel->r_size & 0x80
+				    ? complain_overflow_signed
+				    : complain_overflow_bitfield);
+      howto.special_function = NULL;
+      howto.name = "internal";
+      howto.partial_inplace = TRUE;
+      howto.src_mask = howto.dst_mask = N_ONES (howto.bitsize);
+      howto.pcrel_offset = FALSE;
+
+      /* symbol */
+      val = 0;
+      addend = 0;
+      h = NULL;
+      sym = NULL;
+      symndx = rel->r_symndx;
+
+      if (-1 != symndx)
+	{
+	  asection *sec;
+
+	  h = obj_xcoff_sym_hashes (input_bfd)[symndx];
+	  sym = syms + symndx;
+	  addend = - sym->n_value;
+
+	  if (NULL == h)
+	    {
+	      sec = sections[symndx];
+	      /* Hack to make sure we use the right TOC anchor value
+		 if this reloc is against the TOC anchor.  */
+	      if (sec->name[3] == '0'
+		  && strcmp (sec->name, ".tc0") == 0)
+		val = xcoff_data (output_bfd)->toc;
+	      else
+		val = (sec->output_section->vma
+		       + sec->output_offset
+		       + sym->n_value
+		       - sec->vma);
+	    }
+	  else
+	    {
+	      if (info->unresolved_syms_in_objects != RM_IGNORE
+		  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
+                info->callbacks->undefined_symbol
+		  (info, h->root.root.string, input_bfd, input_section,
+		   rel->r_vaddr - input_section->vma,
+		   info->unresolved_syms_in_objects == RM_DIAGNOSE
+		   && !info->warn_unresolved_syms);
+
+	      if (h->root.type == bfd_link_hash_defined
+		  || h->root.type == bfd_link_hash_defweak)
+		{
+		  sec = h->root.u.def.section;
+		  val = (h->root.u.def.value
+			 + sec->output_section->vma
+			 + sec->output_offset);
+		}
+	      else if (h->root.type == bfd_link_hash_common)
+		{
+		  sec = h->root.u.c.p->section;
+		  val = (sec->output_section->vma
+			 + sec->output_offset);
+		}
+	      else
+		{
+		  BFD_ASSERT (bfd_link_relocatable (info)
+			      || (h->flags & XCOFF_DEF_DYNAMIC) != 0
+			      || (h->flags & XCOFF_IMPORT) != 0);
+		}
+	    }
+	}
+
+      if (rel->r_type >= XCOFF_MAX_CALCULATE_RELOCATION
+	  || !((*xcoff64_calculate_relocation[rel->r_type])
+	      (input_bfd, input_section, output_bfd, rel, sym, &howto, val,
+	       addend, &relocation, contents)))
+	return FALSE;
+
+      /* address */
+      address = rel->r_vaddr - input_section->vma;
+      location = contents + address;
+
+      if (address > input_section->size)
+	abort ();
+
+      /* Get the value we are going to relocate.  */
+      if (1 == howto.size)
+	value_to_relocate = bfd_get_16 (input_bfd, location);
+      else if (2 == howto.size)
+	value_to_relocate = bfd_get_32 (input_bfd, location);
+      else
+	value_to_relocate = bfd_get_64 (input_bfd, location);
+
+      /* overflow.
+
+	 FIXME: We may drop bits during the addition
+	 which we don't check for.  We must either check at every single
+	 operation, which would be tedious, or we must do the computations
+	 in a type larger than bfd_vma, which would be inefficient.  */
+
+      if (((*xcoff_complain_overflow[howto.complain_on_overflow])
+	   (input_bfd, value_to_relocate, relocation, &howto)))
+	{
+	  const char *name;
+	  char buf[SYMNMLEN + 1];
+	  char reloc_type_name[10];
+
+	  if (symndx == -1)
+	    {
+	      name = "*ABS*";
+	    }
+	  else if (h != NULL)
+	    {
+	      name = NULL;
+	    }
+	  else
+	    {
+	      name = _bfd_coff_internal_syment_name (input_bfd, sym, buf);
+	      if (name == NULL)
+		name = "UNKNOWN";
+	    }
+	  sprintf (reloc_type_name, "0x%02x", rel->r_type);
+
+	  (*info->callbacks->reloc_overflow)
+	    (info, (h ? &h->root : NULL), name, reloc_type_name,
+	     (bfd_vma) 0, input_bfd, input_section,
+	     rel->r_vaddr - input_section->vma);
+	}
+
+      /* Add RELOCATION to the right bits of VALUE_TO_RELOCATE.  */
+      value_to_relocate = ((value_to_relocate & ~howto.dst_mask)
+			   | (((value_to_relocate & howto.src_mask)
+			       + relocation) & howto.dst_mask));
+
+      /* Put the value back in the object file.  */
+      if (1 == howto.size)
+	bfd_put_16 (input_bfd, value_to_relocate, location);
+      else if (2 == howto.size)
+	bfd_put_32 (input_bfd, value_to_relocate, location);
+      else
+	bfd_put_64 (input_bfd, value_to_relocate, location);
+
+    }
+  return TRUE;
+}
+
 
 /* PR 21786:  The PE/COFF standard does not require NUL termination for any of
    the ASCII fields in the archive headers.  So in order to be able to extract

@@ -1,5 +1,9 @@
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
+	* coff64-rs6000.c (xcoff64_ppc_relocate_section): Move.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
 	* coff64-rs6000.c (xcoff64_write_object_contents): Remove.
 	* coffcode.h (coff_write_object_contents): Add bfd_mach_ppc_620
 	support for o_cputype field.  Avoid creating an empty a.out header
