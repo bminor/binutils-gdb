@@ -5903,16 +5903,21 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
+  dwarf_read_debug_printf ("called");
+
   /* If we're about to read full symbols, don't bother with the
      indices.  In this case we also don't care if some other debug
      format is making psymtabs, because they are all about to be
      expanded anyway.  */
   if ((objfile->flags & OBJF_READNOW))
     {
+      dwarf_read_debug_printf ("readnow requested");
+
       /* When using READNOW, the using_index flag (set below) indicates that
 	 PER_BFD was already initialized, when we loaded some other objfile.  */
       if (per_bfd->using_index)
 	{
+	  dwarf_read_debug_printf ("using_index already set");
 	  *index_kind = dw_index_kind::GDB_INDEX;
 	  per_objfile->resize_symtabs ();
 	  return true;
@@ -5945,6 +5950,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
      PER_BFD?  */
   if (per_bfd->debug_names_table != nullptr)
     {
+      dwarf_read_debug_printf ("re-using shared debug names table");
       *index_kind = dw_index_kind::DEBUG_NAMES;
       per_objfile->objfile->partial_symtabs = per_bfd->partial_symtabs;
       per_objfile->resize_symtabs ();
@@ -5955,6 +5961,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
      PER_BFD?  */
   if (per_bfd->index_table != nullptr)
     {
+      dwarf_read_debug_printf ("re-using shared index table");
       *index_kind = dw_index_kind::GDB_INDEX;
       per_objfile->objfile->partial_symtabs = per_bfd->partial_symtabs;
       per_objfile->resize_symtabs ();
@@ -5967,10 +5974,14 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
      be completed in dwarf2_build_psymtabs, in the standard partial symtabs
      code path.  */
   if (per_bfd->partial_symtabs != nullptr)
-    return false;
+    {
+      dwarf_read_debug_printf ("re-using shared partial symtabs");
+      return false;
+    }
 
   if (dwarf2_read_debug_names (per_objfile))
     {
+      dwarf_read_debug_printf ("found debug names");
       *index_kind = dw_index_kind::DEBUG_NAMES;
       per_objfile->resize_symtabs ();
       return true;
@@ -5980,6 +5991,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 			     get_gdb_index_contents_from_section<struct dwarf2_per_bfd>,
 			     get_gdb_index_contents_from_section<dwz_file>))
     {
+      dwarf_read_debug_printf ("found gdb index from file");
       *index_kind = dw_index_kind::GDB_INDEX;
       per_objfile->resize_symtabs ();
       return true;
@@ -5990,6 +6002,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 			     get_gdb_index_contents_from_cache,
 			     get_gdb_index_contents_from_cache_dwz))
     {
+      dwarf_read_debug_printf ("found gdb index from cache");
       global_index_cache.hit ();
       *index_kind = dw_index_kind::GDB_INDEX;
       per_objfile->resize_symtabs ();
