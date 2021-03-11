@@ -11418,7 +11418,6 @@ OP_E_memory (int bytemode, int sizeflag)
       /* In EVEX, if operand doesn't allow broadcast, vex.b should be 0.  */
       if (vex.b
 	  && bytemode != x_mode
-	  && bytemode != xmmq_mode
 	  && bytemode != evex_half_bcst_xmmq_mode)
 	{
 	  BadOp ();
@@ -11455,7 +11454,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	  break;
 	case x_mode:
 	case evex_half_bcst_xmmq_mode:
-	case xmmq_mode:
 	  if (vex.b)
 	    {
 	      shift = vex.w ? 3 : 2;
@@ -11464,6 +11462,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	  /* Fall through.  */
 	case xmmqd_mode:
 	case xmmdw_mode:
+	case xmmq_mode:
 	case ymmq_mode:
 	case evex_x_nobcst_mode:
 	case x_swap_mode:
@@ -11848,11 +11847,9 @@ OP_E_memory (int bytemode, int sizeflag)
     }
   if (vex.evex && vex.b
       && (bytemode == x_mode
-	  || bytemode == xmmq_mode
 	  || bytemode == evex_half_bcst_xmmq_mode))
     {
       if (vex.w
-	  || bytemode == xmmq_mode
 	  || bytemode == evex_half_bcst_xmmq_mode)
 	{
 	  switch (vex.length)

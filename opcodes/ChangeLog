@@ -1,3 +1,8 @@
+2021-03-11  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (OP_E_memory): Drop xmmq_mode from broadcast
+	checks. Move case label past broadcast check.
+
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
 	* opcodes/i386-dis.c (MVexVSIBDQWpX, MVexVSIBQDWpX,
