@@ -238,7 +238,10 @@ proc run_srec_test { test objs } {
     # poorly with a.out.
 
     if { $sizeof_headers } {
-	set flags "$flags -Ttext 0x1000"
+	append flags " -Ttext 0x1000"
+	if [is_pecoff_format] {
+	    append flags " --image-base 0"
+	}
     }
 
     # ARM targets cannot convert format in the linker
@@ -295,12 +298,12 @@ proc run_srec_test { test objs } {
 
     # Xtensa ELF targets relax by default; S-Record linker does not
     if [istarget xtensa*-*-*] {
-	set flags "$flags -no-relax"
+	append flags " -no-relax"
     }
 
     # PRU ELF target relaxes by default; S-Record linker does not
     if [istarget pru*-*-*] {
-	set flags "$flags -no-relax"
+	append flags " -no-relax"
     }
 
     if { ![ld_link $ld tmpdir/sr1 "$flags $objs"] \

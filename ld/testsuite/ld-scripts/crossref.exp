@@ -76,7 +76,11 @@ set flags [big_or_little_endian]
 
 # arc-elf32 requires the symbol __SDATA_BEGIN__ to always be present.
 if [istarget arc*-*-elf32] {
-    set flags "$flags --defsym=__SDATA_BEGIN__=0"
+    append flags " --defsym __SDATA_BEGIN__=0"
+}
+
+if [is_pecoff_format] {
+    append flags " --image-base 0"
 }
 
 set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross1 -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o"]

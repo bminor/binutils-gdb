@@ -380,7 +380,7 @@ proc ld_link_defsyms {} {
     }
 
     # Windows targets need __main, some prefixed with underscore.
-    if {[istarget *-*-cygwin* ] || [istarget *-*-mingw*]} {
+    if [is_pecoff_format] {
 	append flags " --defsym __main=main --defsym ___main=main"
     }
 
