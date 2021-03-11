@@ -275,6 +275,16 @@ set aix7tests {
 	"" {aix-largetoc-1.s}
 	{{objdump -dr aix-largetoc-1-SIZE.d}}
 	"aix-largetoc-1.so"}
+
+    {"TLS relocations" "-shared -bE:aix-tls-reloc.ex"
+	"" {aix-tls-reloc.s}
+	{{objdump -dr aix-tls-reloc-SIZE.d}}
+	"aix-tls-reloc.so"}
+
+    {"TLS section" "-shared -bE:aix-tls-section.ex"
+	"" {aix-tls-section.s}
+	{{objdump -hw aix-tls-section-SIZE.d}}
+	"aix-tls-section.so"}
 }
 
 foreach test $aix7tests {

@@ -1,5 +1,34 @@
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
+	* reloc.c (BFD_RELOC_PPC_TLS_LE, BFD_RELOC_PPC_TLS_IE,
+	BFD_RELOC_PPC_TLS_M, BFD_RELOC_PPC_TLS_ML, BFD_RELOC_PPC64_TLS_GD,
+	BFD_RELOC_PPC64_TLS_LD, BFD_RELOC_PPC64_TLS_LE,
+	BFD_RELOC_PPC64_TLS_IE, BFD_RELOC_PPC64_TLS_M,
+	BFD_RELOC_PPC64_TLS_ML): New relocations.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* coff-rs6000.c (xcoff_calculate_relocation): Call
+	xcoff_reloc_type_tls for TLS relocations.
+	(xcoff_howto_table): Implement TLS relocations.
+	(_bfd_xcoff_reloc_type_lookup): Add cases TLS relocations.
+	(xcoff_reloc_type_tls): New function.
+	* coff64-rs6000.c (xcoff_calculate_relocation): Likewise.
+	(xcoff_howto_table): Likewise.
+	(_bfd_xcoff_reloc_type_lookup): Likewise.
+	* coffcode.h (sec_to_styp_flags): Handle TLS sections.
+	(styp_to_sec_flags): Likewise.
+	(coff_compute_section_file_positions): Avoid file offset
+	optimisation for .data when the previous section is .tdata.
+	(coff_write_object_contents): Handle TLS sections.
+	* coffswap.h (coff_swap_aouthdr_out): Add support for
+	new fields in aouthdr.
+	* libxcoff.h (xcoff_reloc_type_tls): Add prototype.
+	* xcofflink.c (xcoff_link_add_symbols): Handle XMC_UL.
+	(xcoff_need_ldrel_p): Add cases for TLS relocations.
+	(xcoff_create_ldrel): Add l_symndx for TLS sections.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
 	* reloc.c (BFD_RELOC_PPC_TOC16_HI, BFD_RELOC_PPC_TOC16_LO):
 	New relocations.
 	* bfd-in2.h: Regenerate.

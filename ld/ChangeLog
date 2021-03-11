@@ -1,5 +1,20 @@
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
+	* emultempl/aix.em: Ensure .tdata section is removed
+	if empty, even with -r flag.
+	* scripttempl/aix.sc: Handle TLS sections.
+	* testsuite/ld-powerpc/aix52.exp: Add new tests.
+	* testsuite/ld-powerpc/aix-tls-reloc-32.d: New test.
+	* testsuite/ld-powerpc/aix-tls-reloc-64.d: New test.
+	* testsuite/ld-powerpc/aix-tls-reloc.ex: New test.
+	* testsuite/ld-powerpc/aix-tls-reloc.s: New test.
+	* testsuite/ld-powerpc/aix-tls-section-32.d: New test.
+	* testsuite/ld-powerpc/aix-tls-section-64.d: New test.
+	* testsuite/ld-powerpc/aix-tls-section.ex: New test.
+	* testsuite/ld-powerpc/aix-tls-section.s: New test.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
 	* scripttempl/aix.sc: Add .te to .data section.
 	* testsuite/ld-powerpc/aix52.exp: Add test structure for AIX7+.
 	Add aix-largetoc-1 test.

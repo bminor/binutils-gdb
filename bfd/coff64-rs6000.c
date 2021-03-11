@@ -212,12 +212,12 @@ xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
   xcoff_reloc_type_fail, /*           (0x1d) */
   xcoff_reloc_type_fail, /*           (0x1e) */
   xcoff_reloc_type_fail, /*           (0x1f) */
-  xcoff_reloc_type_fail, /* R_TLS     (0x20) */
-  xcoff_reloc_type_fail, /* R_TLS_IE  (0x21) */
-  xcoff_reloc_type_fail, /* R_TLS_LD  (0x22) */
-  xcoff_reloc_type_fail, /* R_TLS_LE  (0x23) */
-  xcoff_reloc_type_fail, /* R_TLSM    (0x24) */
-  xcoff_reloc_type_fail, /* R_TLSML   (0x25) */
+  xcoff_reloc_type_tls,  /* R_TLS     (0x20) */
+  xcoff_reloc_type_tls,  /* R_TLS_IE  (0x21) */
+  xcoff_reloc_type_tls,  /* R_TLS_LD  (0x22) */
+  xcoff_reloc_type_tls,  /* R_TLS_LE  (0x23) */
+  xcoff_reloc_type_tls,  /* R_TLSM    (0x24) */
+  xcoff_reloc_type_tls,  /* R_TLSML   (0x25) */
   xcoff_reloc_type_fail, /*           (0x26) */
   xcoff_reloc_type_fail, /*           (0x27) */
   xcoff_reloc_type_fail, /*           (0x28) */
@@ -1230,24 +1230,95 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-
   /* 0x20: General-dynamic TLS relocation.  */
-  EMPTY_HOWTO (R_TLS),
+  HOWTO (R_TLS,			/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS",		/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x21: Initial-exec TLS relocation.  */
-  EMPTY_HOWTO (R_TLS_IE),
+  HOWTO (R_TLS_IE,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS_IE",		/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x22: Local-dynamic TLS relocation.  */
-  EMPTY_HOWTO (R_TLS_LD),
+  HOWTO (R_TLS_LD,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS_LD",		/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x23: Local-exec TLS relocation.  */
-  EMPTY_HOWTO (R_TLS_LE),
+  HOWTO (R_TLS_LE,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS_LE",		/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x24: TLS relocation.  */
-  EMPTY_HOWTO(R_TLSM),
+  HOWTO (R_TLSM,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLSM",		/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x25: TLS module relocation.  */
-  EMPTY_HOWTO(R_TLSML),
+  HOWTO (R_TLSML,		/* type */
+	 0,			/* rightshift */
+	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLSM",		/* name */
+	 TRUE,			/* partial_inplace */
+	 MINUS_ONE,		/* src_mask */
+	 MINUS_ONE,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   EMPTY_HOWTO(0x26),
   EMPTY_HOWTO(0x27),
@@ -1355,6 +1426,18 @@ xcoff64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &xcoff64_howto_table[0];
     case BFD_RELOC_NONE:
       return &xcoff64_howto_table[0xf];
+    case BFD_RELOC_PPC64_TLSGD:
+      return &xcoff64_howto_table[0x20];
+    case BFD_RELOC_PPC64_TLSIE:
+      return &xcoff64_howto_table[0x21];
+    case BFD_RELOC_PPC64_TLSLD:
+      return &xcoff64_howto_table[0x22];
+    case BFD_RELOC_PPC64_TLSLE:
+      return &xcoff64_howto_table[0x23];
+    case BFD_RELOC_PPC64_TLSM:
+      return &xcoff64_howto_table[0x24];
+    case BFD_RELOC_PPC64_TLSML:
+      return &xcoff64_howto_table[0x25];
     default:
       return NULL;
     }

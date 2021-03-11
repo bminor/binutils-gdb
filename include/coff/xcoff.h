@@ -46,6 +46,8 @@
 #define _TEXT	".text"
 #define _DATA	".data"
 #define _BSS	".bss"
+#define _TDATA	".tdata"
+#define _TBSS	".tbss"
 #define _PAD	".pad"
 #define _LOADER	".loader"
 #define _EXCEPT ".except"
@@ -93,8 +95,19 @@
 #define	RS6K_AOUTHDR_NMAGIC 0x0108 /* new: text r/o, data r/w */
 #define	RS6K_AOUTHDR_ZMAGIC 0x010B /* paged: text r/o, both page-aligned */
 
-/* XCOFF relocation types.  
-   The relocations are described in the function  
+/* Flags for aouthdr o_flags */
+#define RS6K_AOUTHDR_TLS_LE    0x80  /* TLS local-exec code was generated */
+#define RS6K_AOUTHDR_RAS       0x40  /* kernel module is key & recovery safe */
+#define RS6K_AOUTHDR_ALGNTDATA 0xf   /* TLS alignment */
+
+/* Flags for aouthdr o_x64flags */
+#define RS6K_AOUTHDR_SHR_SYMTAB  0x8000
+#define RS6K_AOUTHDR_FORK_POLICY 0x4000
+#define RS6K_AOUTHDR_FORK_COR    0x2000
+
+
+/* XCOFF relocation types.
+   The relocations are described in the function
    xcoff[64]_ppc_relocate_section in coff64-rs6000.c and coff-rs6000.c  */
 
 #define R_POS    (0x00)
@@ -171,7 +184,7 @@
 #define	XMC_SV3264 18		/* Read-only 32 or 64 bit supervisor call */
 /*                19   ??? */
 #define XMC_TL     20          /* Read-write initialized TLS data */
-#define XMC_TU     21          /* Read-write uninitialized TLS data */
+#define XMC_UL     21          /* Read-write uninitialized TLS data */
 #define XMC_TE     22          /* Same as XMC_TC but mapped after it */
 
 /* The ldhdr structure.  This appears at the start of the .loader

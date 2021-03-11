@@ -263,8 +263,13 @@ struct internal_aouthdr
   short o_algndata;		/* max alignment for data	*/
   short o_modtype;		/* Module type field, 1R,RE,RO	*/
   short o_cputype;		/* Encoded CPU type		*/
-  bfd_vma o_maxstack;	/* max stack size allowed.	*/
-  bfd_vma o_maxdata;	/* max data size allowed.	*/
+  bfd_vma o_maxstack;		/* max stack size allowed.	*/
+  bfd_vma o_maxdata;		/* max data size allowed.	*/
+  char o_flags;			/* Flags and TLS alignment	*/
+  short o_sntdata;		/* section number for tdata	*/
+  short o_sntbss;		/* section number for tbss	*/
+  short o_x64flags;		/* XCOFF64 flags		*/
+
 
   /* ECOFF stuff */
   bfd_vma bss_start;		/* Base of bss section.		*/

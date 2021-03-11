@@ -189,6 +189,23 @@ do {								\
 extern void ppc_xcoff_end (void);
 #define md_end ppc_xcoff_end
 
+#define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES)	\
+  ppc_xcoff_parse_cons (EXP, NBYTES)
+extern bfd_reloc_code_real_type ppc_xcoff_parse_cons (expressionS *,
+						    unsigned int);
+/* XCOFF format allows only few predefined sections. Gather all
+   information in a common structure.  */
+struct ppc_xcoff_section {
+  /* Main segment of the section.  */
+  segT segment;
+
+  /* Next subsegment to allocate within the segment.  */
+  subsegT next_subsegment;
+
+  /* Linked list of csects in the section.  */
+  symbolS *csects;
+};
+
 #endif /* OBJ_XCOFF */
 
 #define tc_new_dot_label(sym) ppc_new_dot_label (sym)

@@ -548,6 +548,14 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
     }
 #endif
 #ifdef RS6000COFF_C
+  else if (!strcmp (sec_name, _TDATA))
+    {
+      styp_flags = STYP_TDATA;
+    }
+  else if (!strcmp (sec_name, _TBSS))
+    {
+      styp_flags = STYP_TBSS;
+    }
   else if (!strcmp (sec_name, _PAD))
     {
       styp_flags = STYP_PAD;
@@ -787,6 +795,22 @@ styp_to_sec_flags (bfd *abfd,
   else if (styp_flags & STYP_PAD)
     sec_flags = 0;
 #ifdef RS6000COFF_C
+  else if (styp_flags & STYP_TDATA)
+    {
+      if (sec_flags & SEC_NEVER_LOAD)
+	sec_flags |= SEC_DATA | SEC_THREAD_LOCAL | SEC_COFF_SHARED_LIBRARY;
+      else
+	sec_flags |= SEC_DATA | SEC_THREAD_LOCAL | SEC_LOAD | SEC_ALLOC;
+    }
+  else if (styp_flags & STYP_TBSS)
+    {
+#ifdef BSS_NOLOAD_IS_SHARED_LIBRARY
+      if (sec_flags & SEC_NEVER_LOAD)
+	sec_flags |= SEC_ALLOC | SEC_THREAD_LOCAL | SEC_COFF_SHARED_LIBRARY;
+      else
+#endif
+	sec_flags |= SEC_ALLOC | SEC_THREAD_LOCAL;
+    }
   else if (styp_flags & STYP_EXCEPT)
     sec_flags |= SEC_LOAD;
   else if (styp_flags & STYP_LOADER)
@@ -3168,10 +3192,15 @@ coff_compute_section_file_positions (bfd * abfd)
 
 	     0 .text	     000054cc  10000128	 10000128  00000128  2**5
 			     CONTENTS, ALLOC, LOAD, CODE
+
+	     Don't perform the above tweak if the previous one is .tdata,
+	     as it will increase the memory allocated for every threads
+	     created and not just improve performances with gdb.
 	  */
 
-	  if (!strcmp (current->name, _TEXT)
-	      || !strcmp (current->name, _DATA))
+	  if ((!strcmp (current->name, _TEXT)
+	       || !strcmp (current->name, _DATA))
+	      && (previous == NULL || strcmp(previous->name, _TDATA)))
 	    {
 	      bfd_vma align = 4096;
 	      bfd_vma sofar_off = sofar % align;
@@ -3381,6 +3410,10 @@ coff_write_object_contents (bfd * abfd)
   asection *text_sec = NULL;
   asection *data_sec = NULL;
   asection *bss_sec = NULL;
+#ifdef RS6000COFF_C
+  asection *tdata_sec = NULL;
+  asection *tbss_sec = NULL;
+#endif
   struct internal_filehdr internal_f;
   struct internal_aouthdr internal_a;
 #ifdef COFF_LONG_SECTION_NAMES
@@ -3603,6 +3636,13 @@ coff_write_object_contents (bfd * abfd)
 	data_sec = current;
       else if (!strcmp (current->name, _BSS))
 	bss_sec = current;
+#ifdef RS6000COFF_C
+      else if (!strcmp (current->name, _TDATA))
+	tdata_sec = current;
+      else if (!strcmp (current->name, _TBSS))
+	tbss_sec = current;
+#endif
+
 
 #ifdef COFF_ENCODE_ALIGNMENT
       COFF_ENCODE_ALIGNMENT(section, current->alignment_power);
@@ -4040,6 +4080,29 @@ coff_write_object_contents (bfd * abfd)
 	internal_a.o_snbss = bss_sec->target_index;
       else
 	internal_a.o_snbss = 0;
+
+      if (tdata_sec != NULL)
+	{
+	  internal_a.o_sntdata = tdata_sec->target_index;
+	  /* TODO: o_flags should be set to RS6K_AOUTHDR_TLS_LE
+	     if there is at least one R_TLS_LE relocations.  */
+	  internal_a.o_flags = 0;
+#ifdef XCOFF64
+	  internal_a.o_x64flags = 0;
+#endif
+	}
+      else
+	{
+	  internal_a.o_sntdata = 0;
+	  internal_a.o_flags = 0;
+#ifdef XCOFF64
+	  internal_a.o_x64flags = 0;
+#endif
+	}
+      if (tbss_sec != NULL)
+	  internal_a.o_sntbss = tbss_sec->target_index;
+      else
+	  internal_a.o_sntbss = 0;
 
       toc = xcoff_data (abfd)->toc;
       internal_a.o_toc = toc;

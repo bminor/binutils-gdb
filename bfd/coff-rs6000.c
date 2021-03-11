@@ -190,12 +190,12 @@ xcoff_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
   xcoff_reloc_type_fail, /*           (0x1d) */
   xcoff_reloc_type_fail, /*           (0x1e) */
   xcoff_reloc_type_fail, /*           (0x1f) */
-  xcoff_reloc_type_fail, /* R_TLS     (0x20) */
-  xcoff_reloc_type_fail, /* R_TLS_IE  (0x21) */
-  xcoff_reloc_type_fail, /* R_TLS_LD  (0x22) */
-  xcoff_reloc_type_fail, /* R_TLS_LE  (0x23) */
-  xcoff_reloc_type_fail, /* R_TLSM    (0x24) */
-  xcoff_reloc_type_fail, /* R_TLSML   (0x25) */
+  xcoff_reloc_type_tls,  /* R_TLS     (0x20) */
+  xcoff_reloc_type_tls,  /* R_TLS_IE  (0x21) */
+  xcoff_reloc_type_tls,  /* R_TLS_LD  (0x22) */
+  xcoff_reloc_type_tls,  /* R_TLS_LE  (0x23) */
+  xcoff_reloc_type_tls,  /* R_TLSM    (0x24) */
+  xcoff_reloc_type_tls,  /* R_TLSML   (0x25) */
   xcoff_reloc_type_fail, /*           (0x26) */
   xcoff_reloc_type_fail, /*           (0x27) */
   xcoff_reloc_type_fail, /*           (0x28) */
@@ -1064,22 +1064,95 @@ reloc_howto_type xcoff_howto_table[] =
   EMPTY_HOWTO (0x1f),
 
   /* 0x20: General-dynamic TLS relocation.  */
-  EMPTY_HOWTO (R_TLS),
+  HOWTO (R_TLS,			/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x21: Initial-exec TLS relocation.  */
-  EMPTY_HOWTO (R_TLS_IE),
+  HOWTO (R_TLS_IE,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS_IE",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x22: Local-dynamic TLS relocation.  */
-  EMPTY_HOWTO (R_TLS_LD),
+  HOWTO (R_TLS_LD,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS_LD",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x23: Local-exec TLS relocation.  */
-  EMPTY_HOWTO (R_TLS_LE),
+  HOWTO (R_TLS_LE,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLS_LE",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x24: TLS relocation.  */
-  EMPTY_HOWTO(R_TLSM),
+  HOWTO (R_TLSM,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLSM",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
 
   /* 0x25: TLS module relocation.  */
-  EMPTY_HOWTO(R_TLSML),
+  HOWTO (R_TLSML,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TLSM",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   EMPTY_HOWTO(0x26),
   EMPTY_HOWTO(0x27),
@@ -1180,6 +1253,18 @@ _bfd_xcoff_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &xcoff_howto_table[0];
     case BFD_RELOC_NONE:
       return &xcoff_howto_table[0xf];
+    case BFD_RELOC_PPC_TLSGD:
+      return &xcoff_howto_table[0x20];
+    case BFD_RELOC_PPC_TLSIE:
+      return &xcoff_howto_table[0x21];
+    case BFD_RELOC_PPC_TLSLD:
+      return &xcoff_howto_table[0x22];
+    case BFD_RELOC_PPC_TLSLE:
+      return &xcoff_howto_table[0x23];
+    case BFD_RELOC_PPC_TLSM:
+      return &xcoff_howto_table[0x24];
+    case BFD_RELOC_PPC_TLSML:
+      return &xcoff_howto_table[0x25];
     default:
       return NULL;
     }
@@ -3127,6 +3212,88 @@ xcoff_reloc_type_crel (bfd *input_bfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+bfd_boolean
+xcoff_reloc_type_tls (bfd *input_bfd ATTRIBUTE_UNUSED,
+		      asection *input_section ATTRIBUTE_UNUSED,
+		      bfd *output_bfd ATTRIBUTE_UNUSED,
+		      struct internal_reloc *rel ATTRIBUTE_UNUSED,
+		      struct internal_syment *sym ATTRIBUTE_UNUSED,
+		      struct reloc_howto_struct *howto,
+		      bfd_vma val,
+		      bfd_vma addend,
+		      bfd_vma *relocation,
+		      bfd_byte *contents ATTRIBUTE_UNUSED)
+{
+  struct xcoff_link_hash_entry *h;
+
+  if (0 > rel->r_symndx)
+    return FALSE;
+
+  h = obj_xcoff_sym_hashes (input_bfd)[rel->r_symndx];
+
+  /* FIXME: R_TLSML is targeting a internal TOC symbol, which will
+     make the following checks failing. It should be moved with
+     R_TLSM bellow once it works.  */
+  if (howto->type == R_TLSML)
+    {
+      *relocation = 0;
+      return TRUE;
+    }
+
+  /* FIXME: h is sometimes null, if the TLS symbol is not exported.  */
+  if (!h)
+    {
+      _bfd_error_handler
+	(_("%pB: TLS relocation at (0x%" BFD_VMA_FMT "x) over "
+	   "internal symbols (C_HIDEXT) not yet possible\n"),
+	 input_bfd, rel->r_vaddr);
+      return FALSE;
+    }
+
+
+  /* TLS relocations must target a TLS symbol.  */
+  if (h->smclas != XMC_TL && h->smclas != XMC_UL)
+    {
+      _bfd_error_handler
+	(_("%pB: TLS relocation at (0x%" BFD_VMA_FMT "x) over "
+	   "non-TLS symbol %s (0x%x)\n"),
+	 input_bfd, rel->r_vaddr, h->root.root.string, h->smclas);
+      return FALSE;
+    }
+
+  /* Local TLS relocations must target a local symbol, ie
+     non-imported. */
+  if ((rel->r_type == R_TLS_LD || rel->r_type == R_TLS_LE)
+      && (((h->flags & XCOFF_DEF_REGULAR) == 0
+       && (h->flags & XCOFF_DEF_DYNAMIC) != 0)
+	  || (h->flags & XCOFF_IMPORT) != 0))
+    {
+      _bfd_error_handler
+	(_("%pB: TLS local relocation at (0x%" BFD_VMA_FMT "x) over "
+	   "imported symbol %s\n"),
+	 input_bfd, rel->r_vaddr, h->root.root.string);
+      return FALSE;
+    }
+
+  /* R_TLSM and R_TLSML are relocations used by the loader.
+     The value must be 0.
+     FIXME: move R_TLSML here.  */
+  if (howto->type == R_TLSM)
+    {
+      *relocation = 0;
+      return TRUE;
+    }
+
+  /* Other TLS relocations aims to put offsets from TLS pointers
+     starting at -0x7c00 (or -0x7800 in XCOFF64).  It becomes a
+     simple R_POS relocation as long as .tdata and .tbss addresses
+     start at the same value. This is done in aix ld scripts.
+     TODO: implement optimization when tls size is < 62K.  */
+  *relocation = val + addend;
+
+  return TRUE;
+}
+
 static bfd_boolean
 xcoff_complain_overflow_dont_func (bfd *input_bfd ATTRIBUTE_UNUSED,
 				   bfd_vma val ATTRIBUTE_UNUSED,
@@ -3335,13 +3502,6 @@ xcoff_complain_overflow_unsigned_func (bfd *input_bfd,
    quite figure out when this is useful.  These relocs are
    not defined by the PowerOpen ABI.
 
-   R_TLS
-   R_TLS_IE
-   R_TLS_LD
-   R_TLSLE
-
-   Not yet implemented.
-
    Supported r_type's
 
    R_POS:
@@ -3436,6 +3596,25 @@ xcoff_complain_overflow_unsigned_func (bfd *input_bfd,
    The PowerPC ABI defines this as an absolute branch to a
    fixed address which may be modified to a relative branch.
    The PowerOpen ABI does not define this relocation type.
+
+   R_TLS:
+   Thread-local storage relocation using general-dynamic
+   model.
+
+   R_TLS_IE:
+   Thread-local storage relocation using initial-exec model.
+
+   R_TLS_LD:
+   Thread-local storage relocation using local-dynamic model.
+
+   R_TLS_LE:
+   Thread-local storage relocation using local-exec model.
+
+   R_TLS:
+   Tread-local storage relocation used by the loader.
+
+   R_TLSM:
+   Tread-local storage relocation used by the loader.
 
    R_TOCU:
    Upper TOC relative relocation. The value is the

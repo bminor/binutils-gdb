@@ -234,6 +234,7 @@ extern xcoff_reloc_function xcoff_reloc_type_rel;
 extern xcoff_reloc_function xcoff_reloc_type_toc;
 extern xcoff_reloc_function xcoff_reloc_type_ba;
 extern xcoff_reloc_function xcoff_reloc_type_crel;
+extern xcoff_reloc_function xcoff_reloc_type_tls;
 
 /* Structure to describe dwarf sections.
    Useful to convert from XCOFF section name to flag and vice-versa.

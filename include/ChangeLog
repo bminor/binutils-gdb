@@ -1,5 +1,17 @@
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
+	* coff/internal.h (struct internal_aouthdr): Add new fields.
+	* coff/rs6000.h (AOUTHDRÃ): Add new fields.
+	* coff/rs6k64.h (struct external_filehdr): Likewise.
+	* coff/xcoff.h (_TDATA), _TBSS): New defines
+	(RS6K_AOUTHDR_TLS_LE, RS6K_AOUTHDR_RAS, RS6K_AOUTHDR_ALGNTDATA,
+	RS6K_AOUTHDR_SHR_SYMTAB, RS6K_AOUTHDR_FORK_POLICY,
+	RS6K_AOUTHDR_FORK_COR): New defines.
+	(XMC_TU): Removed.
+	(XMC_UL): New define.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
 	* coff/xcoff.h (R_RTB): Remove.
 	(R_TRL): Fix value.
 

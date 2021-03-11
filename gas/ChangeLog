@@ -1,5 +1,28 @@
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
+	* config/tc-ppc.c (ppc_xcoff_text_section, ppc_xcoff_data_section,
+	(ppc_xcoff_bss_section, ppc_xcoff_tdata_section,
+	(ppc_xcoff_tbss_section): New variables.
+	(ppc_text_subsegment, ppc_text_csects, ppc_data_subgments,
+	(ppc_data_csects): Removed.
+	(ppc_xcoff_section_is_initialized, ppc_init_xcoff_section,
+	ppc_xcoff_parse_cons): New functions.
+	(md_being): Initialize XCOFF sections.
+	(ppc_xcoff_suffix): Add support for TLS relocations
+	(fixup_size, md_apply_fix): Add support for new BFD_RELOC.
+	(ppc_change_csect): Handle XMC_TL, XMC_UL.  Correctly, add XMC_BS
+	to .bss section.  Handle new XCOFF section variables.
+	(ppc_comm): Likewise.
+	(ppc_toc): Likewise.
+	(ppc_symbol_new_hook): Likewise.
+	(ppc_frob_symbol): Likewise.
+	(ppc_fix_adjustable): Add tbss support.
+	* config/tc-ppc.h (TC_PARSE_CONS_EXPRESSION): New define.
+	(ppc_xcoff_parse_cons): Add prototype.
+	(struct ppc_xcoff_section): New structure.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
 	* config/tc-ppc.c (ppc_xcoff_suffix): New function.
 	(MAP, MAP32, MAP64): New macros for XCOFF.
 	(ppc_xcoff_fixup_addis): New function.
