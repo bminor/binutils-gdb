@@ -1,3 +1,13 @@
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
+	* scripttempl/aix.sc: Add .te to .data section.
+	* testsuite/ld-powerpc/aix52.exp: Add test structure for AIX7+.
+	Add aix-largetoc-1 test.
+	* testsuite/ld-powerpc/aix-largetoc-1-32.d: New test.
+	* testsuite/ld-powerpc/aix-largetoc-1-64.d: New test.
+	* testsuite/ld-powerpc/aix-largetoc-1.ex: New test.
+	* testsuite/ld-powerpc/aix-largetoc-1.s: New test.
+
 2021-03-12  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-gc/gc.exp: Pass "-image-base 0" to ld for PE, and

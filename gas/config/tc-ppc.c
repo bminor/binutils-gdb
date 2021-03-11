@@ -2646,6 +2646,87 @@ ppc_elf_adjust_symtab (void)
     }
 }
 #endif /* OBJ_ELF */
+
+#ifdef OBJ_XCOFF
+/* Parse XCOFF relocations.  */
+static bfd_reloc_code_real_type
+ppc_xcoff_suffix (char **str_p)
+{
+  struct map_bfd {
+    const char *string;
+    unsigned int length : 8;
+    unsigned int valid32 : 1;
+    unsigned int valid64 : 1;
+    unsigned int reloc;
+  };
+
+  char ident[20];
+  char *str = *str_p;
+  char *str2;
+  int ch;
+  int len;
+  const struct map_bfd *ptr;
+
+#define MAP(str, reloc)   { str, sizeof (str) - 1, 1, 1, reloc }
+#define MAP32(str, reloc) { str, sizeof (str) - 1, 1, 0, reloc }
+#define MAP64(str, reloc) { str, sizeof (str) - 1, 0, 1, reloc }
+
+  static const struct map_bfd mapping[] = {
+    MAP ("l",			BFD_RELOC_PPC_TOC16_LO),
+    MAP ("u",			BFD_RELOC_PPC_TOC16_HI),
+  };
+
+  if (*str++ != '@')
+    return BFD_RELOC_NONE;
+
+  for (ch = *str, str2 = ident;
+       (str2 < ident + sizeof (ident) - 1
+	&& (ISALNUM (ch) || ch == '@'));
+       ch = *++str)
+    {
+      *str2++ = TOLOWER (ch);
+    }
+
+  *str2 = '\0';
+  len = str2 - ident;
+
+  ch = ident[0];
+  for (ptr = &mapping[0]; ptr->length > 0; ptr++)
+    if (ch == ptr->string[0]
+	&& len == ptr->length
+	&& memcmp (ident, ptr->string, ptr->length) == 0
+	&& (ppc_obj64 ? ptr->valid64 : ptr->valid32))
+      {
+	*str_p = str;
+	return (bfd_reloc_code_real_type) ptr->reloc;
+      }
+
+  return BFD_RELOC_NONE;
+}
+
+/* Restore XCOFF addis instruction to ELF format.
+   AIX often generates addis instructions using "addis RT,D(RA)"
+   format instead of the ELF "addis RT,RA,SI" one.
+   On entry RT_E is at the comma after RT, D_E is at the open
+   parenthesis after D, and RA_E is at the close parenthesis after RA.  */
+static void
+ppc_xcoff_fixup_addis (char *rt_e, char *d_e, char *ra_e)
+{
+  size_t ra_size = ra_e - d_e - 1;
+  char *save_ra = xmalloc (ra_size);
+
+  /* Copy RA.  */
+  memcpy (save_ra, d_e + 1, ra_size);
+  /* Shuffle D to make room for RA, copying the comma too.  */
+  memmove (rt_e + ra_size + 1, rt_e, d_e - rt_e);
+  /* Erase the trailing ')', keeping any rubbish for potential errors.  */
+  memmove (ra_e, ra_e + 1, strlen (ra_e));
+  /* Write RA back.  */
+  memcpy (rt_e + 1, save_ra, ra_size);
+  free (save_ra);
+}
+
+#endif /* OBJ_XCOFF */
 
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
 /* See whether a symbol is in the TOC section.  */
@@ -2655,6 +2736,7 @@ ppc_is_toc_sym (symbolS *sym)
 {
 #ifdef OBJ_XCOFF
   return (symbol_get_tc (sym)->symbol_class == XMC_TC
+	  || symbol_get_tc (sym)->symbol_class == XMC_TE
 	  || symbol_get_tc (sym)->symbol_class == XMC_TC0);
 #endif
 #ifdef OBJ_ELF
@@ -2920,6 +3002,8 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_PPC_GOT_TPREL16_HI:
     case BFD_RELOC_PPC_GOT_TPREL16_LO:
     case BFD_RELOC_PPC_TOC16:
+    case BFD_RELOC_PPC_TOC16_HI:
+    case BFD_RELOC_PPC_TOC16_LO:
     case BFD_RELOC_PPC_TPREL16:
     case BFD_RELOC_PPC_TPREL16_HA:
     case BFD_RELOC_PPC_TPREL16_HI:
@@ -3161,6 +3245,28 @@ md_assemble (char *str)
   str = s;
   while (ISSPACE (*str))
     ++str;
+
+#ifdef OBJ_XCOFF
+  /* AIX often generates addis instructions using "addis RT, D(RA)"
+     format instead of the classic "addis RT, RA, SI" one.
+     Restore it to the default format as it's the one encoded
+     in ppc opcodes.  */
+    if (!strcmp (opcode->name, "addis"))
+      {
+	char *rt_e = strchr (str, ',');
+	if (rt_e != NULL
+	    && strchr (rt_e + 1, ',') == NULL)
+	  {
+	    char *d_e = strchr (rt_e + 1, '(');
+	    if (d_e != NULL && d_e != rt_e + 1)
+	      {
+		char *ra_e = strrchr (d_e + 1, ')');
+		if (ra_e != NULL && ra_e != d_e + 1)
+		  ppc_xcoff_fixup_addis (rt_e, d_e, ra_e);
+	      }
+	  }
+      }
+#endif
 
   /* PowerPC operands are just expressions.  The only real issue is
      that a few operand types are optional.  If an instruction has
@@ -3558,6 +3664,9 @@ md_assemble (char *str)
 		}
 	    }
 #endif /* OBJ_ELF */
+#ifdef OBJ_XCOFF
+	  reloc = ppc_xcoff_suffix (&str);
+#endif /* OBJ_XCOFF */
 
 	  if (reloc != BFD_RELOC_NONE)
 	    ;
@@ -4336,6 +4445,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
 	case XMC_RW:
 	case XMC_TC0:
 	case XMC_TC:
+	case XMC_TE:
 	case XMC_DS:
 	case XMC_UA:
 	case XMC_BS:
@@ -5383,7 +5493,21 @@ ppc_tc (int ignore ATTRIBUTE_UNUSED)
     S_SET_SEGMENT (sym, now_seg);
     symbol_set_frag (sym, frag_now);
     S_SET_VALUE (sym, (valueT) frag_now_fix ());
-    symbol_get_tc (sym)->symbol_class = XMC_TC;
+
+    /* AIX assembler seems to allow any storage class to be set in .tc.
+       But for now, only XMC_TC and XMC_TE are supported by us.  */
+    switch (symbol_get_tc (sym)->symbol_class)
+      {
+      case XMC_TC:
+      case XMC_TE:
+	break;
+
+      default:
+	as_bad (_(".tc with storage class %d not yet supported"),
+		symbol_get_tc (sym)->symbol_class);
+	ignore_rest_of_line ();
+	return;
+      }
     symbol_get_tc (sym)->output = 1;
 
     ppc_frob_label (sym);
@@ -5585,6 +5709,8 @@ ppc_symbol_new_hook (symbolS *sym)
 	tc->symbol_class = XMC_TB;
       else if (strcmp (s, "TC0]") == 0 || strcmp (s, "T0]") == 0)
 	tc->symbol_class = XMC_TC0;
+      else if (strcmp (s, "TE]") == 0)
+	tc->symbol_class = XMC_TE;
       break;
     case 'U':
       if (strcmp (s, "UA]") == 0)
@@ -5757,7 +5883,7 @@ ppc_frob_symbol (symbolS *sym)
 	  a->x_csect.x_scnlen.l = 0;
 	  a->x_csect.x_smtyp = XTY_ER;
 	}
-      else if (symbol_get_tc (sym)->symbol_class == XMC_TC)
+      else if (ppc_is_toc_sym (sym))
 	{
 	  symbolS *next;
 
@@ -5767,7 +5893,7 @@ ppc_frob_symbol (symbolS *sym)
 	  while (symbol_get_tc (next)->symbol_class == XMC_TC0)
 	    next = symbol_next (next);
 	  if (next == (symbolS *) NULL
-	      || symbol_get_tc (next)->symbol_class != XMC_TC)
+	      || (!ppc_is_toc_sym (next)))
 	    {
 	      if (ppc_after_toc_frag == (fragS *) NULL)
 		a->x_csect.x_scnlen.l = (bfd_section_size (data_section)
@@ -6053,7 +6179,8 @@ ppc_fix_adjustable (fixS *fix)
 
 	  if (sy_tc->symbol_class == XMC_TC0)
 	    continue;
-	  if (sy_tc->symbol_class != XMC_TC)
+	  if (sy_tc->symbol_class != XMC_TC
+	      && sy_tc->symbol_class != XMC_TE)
 	    break;
 	  if (val == resolve_symbol_value (sy))
 	    {
@@ -6072,6 +6199,7 @@ ppc_fix_adjustable (fixS *fix)
   if (tc->subseg == 0
       && tc->symbol_class != XMC_TC0
       && tc->symbol_class != XMC_TC
+      && tc->symbol_class != XMC_TE
       && symseg != bss_section
       /* Don't adjust if this is a reloc in the toc section.  */
       && (symseg != data_section
@@ -6516,8 +6644,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	  && (operand->insert == NULL || ppc_obj64)
 	  && fixP->fx_addsy != NULL
 	  && symbol_get_tc (fixP->fx_addsy)->subseg != 0
-	  && symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TC
-	  && symbol_get_tc (fixP->fx_addsy)->symbol_class != XMC_TC0
+	  && !ppc_is_toc_sym (fixP->fx_addsy)
 	  && S_GET_SEGMENT (fixP->fx_addsy) != bss_section)
 	{
 	  value = fixP->fx_offset;
@@ -6531,7 +6658,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
        if (fixP->fx_r_type == BFD_RELOC_16
            && fixP->fx_addsy != NULL
            && ppc_is_toc_sym (fixP->fx_addsy))
-         fixP->fx_r_type = BFD_RELOC_PPC_TOC16;
+	 fixP->fx_r_type = BFD_RELOC_PPC_TOC16;
 #endif
     }
 
@@ -6984,6 +7111,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC_EMB_RELSDA:
 	case BFD_RELOC_PPC64_TOC:
 	case BFD_RELOC_PPC_TOC16:
+	case BFD_RELOC_PPC_TOC16_LO:
+	case BFD_RELOC_PPC_TOC16_HI:
 	case BFD_RELOC_PPC64_TOC16_LO:
 	case BFD_RELOC_PPC64_TOC16_HI:
 	case BFD_RELOC_PPC64_TOC16_HA:
@@ -7061,7 +7190,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	symbol_get_bfdsym (fixP->fx_addsy)->flags |= BSF_KEEP;
     }
 #else
-  if (fixP->fx_r_type != BFD_RELOC_PPC_TOC16)
+  if (fixP->fx_r_type != BFD_RELOC_PPC_TOC16
+      && fixP->fx_r_type != BFD_RELOC_PPC_TOC16_HI
+      && fixP->fx_r_type != BFD_RELOC_PPC_TOC16_LO)
     fixP->fx_addnumber = 0;
   else
     {
@@ -7069,6 +7200,12 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	 of the symbol.  */
       fixP->fx_addnumber = (- bfd_section_vma (S_GET_SEGMENT (fixP->fx_addsy))
 			    - S_GET_VALUE (ppc_toc_csect));
+
+      /* The high bits must be adjusted for the low bits being signed.  */
+      if (fixP->fx_r_type == BFD_RELOC_PPC_TOC16_HI) {
+	fixP->fx_addnumber += 0x8000;
+      }
+
       /* Set *valP to avoid errors.  */
       *valP = value;
     }

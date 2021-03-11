@@ -52,6 +52,7 @@ SECTIONS
     *(.tc0)
     *(.tc)
     *(.td)
+    *(.te)
     ${RELOCATING+PROVIDE (_edata = .);}
   }
   .bss : {

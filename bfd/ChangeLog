@@ -1,5 +1,24 @@
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
+	* reloc.c (BFD_RELOC_PPC_TOC16_HI, BFD_RELOC_PPC_TOC16_LO):
+	New relocations.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* coff-rs6000.c (xcoff_calculate_relocation): Call
+	xcoff_reloc_type_toc for R_TOCU and R_TOCL.
+	(xcoff_howto_table): Remove src_mask for TOC relocations.
+	Add R_TOCU and R_TOCL howtos.
+	(_bfd_xcoff_reloc_type_lookup): Add cases for
+	BFD_RELOC_PPC_TOC16_HI and BFD_RELOC_PPC_TOC16_LO.
+	(xcoff_reloc_type_toc): Compute the whole offset.
+	Implement R_TOCU and R_TOCL.
+	* coff64-rs6000.c (xcoff64_calculate_relocation):
+	Likewise.
+	(xcoff64_howto_table): Likewise.
+	(xcoff64_reloc_type_lookup): Likewise.
+
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
 	* coff-rs6000.c (xcoff_calculate_relocation): Correct and
 	add new relocations.
 	(xcoff_howto_table): Likewise.

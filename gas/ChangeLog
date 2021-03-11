@@ -1,3 +1,21 @@
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
+	* config/tc-ppc.c (ppc_xcoff_suffix): New function.
+	(MAP, MAP32, MAP64): New macros for XCOFF.
+	(ppc_xcoff_fixup_addis): New function.
+	(ppc_is_toc_sym): Handle XMC_TE.
+	(fixup_size): Add cases for BFD_RELOC_PPC_TOC16_HI and
+	BFD_RELOC_PPC_TOC16_LO.
+	(md_assemble): Call ppc_xcoff_fixup_addis for XCOFF.
+	(ppc_change_csect): Handle XMC_TE.
+	(ppc_tc): Enable .tc symbols to have only a XMC_TC or XMC_TE
+	storage class.
+	(ppc_symbol_new_hook): Handle XMC_TE.
+	(ppc_frob_symbol): Likewise.
+	(ppc_fix_adjustable): Likewise.
+	(md_apply_fix): Handle BFD_RELOC_PPC_TOC16_HI and
+	BFD_RELOC_PPC_TOC16_LO.
+
 2021-03-10  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/avx512f-intel.d,

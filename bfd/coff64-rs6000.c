@@ -228,8 +228,8 @@ xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION] =
   xcoff_reloc_type_fail, /*           (0x2d) */
   xcoff_reloc_type_fail, /*           (0x2e) */
   xcoff_reloc_type_fail, /*           (0x2f) */
-  xcoff_reloc_type_fail, /* R_TOCU    (0x30) */
-  xcoff_reloc_type_fail, /* R_TOCL    (0x31) */
+  xcoff_reloc_type_toc, /* R_TOCU    (0x30) */
+  xcoff_reloc_type_toc, /* R_TOCL    (0x31) */
 };
 
 /* coffcode.h needs these to be defined.  */
@@ -899,7 +899,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0,			/* special_function */
 	 "R_TOC",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -914,7 +914,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0,			/* special_function */
 	 "R_TRL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -929,7 +929,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0,			/* special_function */
 	 "R_GL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -944,7 +944,7 @@ reloc_howto_type xcoff64_howto_table[] =
 	 0,			/* special_function */
 	 "R_TCL",		/* name */
 	 TRUE,			/* partial_inplace */
-	 0xffff,		/* src_mask */
+	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
@@ -1260,11 +1260,34 @@ reloc_howto_type xcoff64_howto_table[] =
   EMPTY_HOWTO(0x2e),
   EMPTY_HOWTO(0x2f),
 
-  /* 0x30: High-order 16 bit TOC relative relocation.  */
-  EMPTY_HOWTO (R_TOCU),
+  HOWTO (R_TOCU,		/* type */
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TOCU",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* 0x31: Low-order 16 bit TOC relative relocation.  */
-  EMPTY_HOWTO (R_TOCL),
+  HOWTO (R_TOCL,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 0,			/* special_function */
+	 "R_TOCL",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
 };
 
@@ -1319,6 +1342,10 @@ xcoff64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &xcoff64_howto_table[8];
     case BFD_RELOC_PPC_TOC16:
       return &xcoff64_howto_table[3];
+    case BFD_RELOC_PPC_TOC16_HI:
+      return &xcoff64_howto_table[0x30];
+    case BFD_RELOC_PPC_TOC16_LO:
+      return &xcoff64_howto_table[0x31];
     case BFD_RELOC_PPC_B16:
       return &xcoff64_howto_table[0x1e];
     case BFD_RELOC_32:
