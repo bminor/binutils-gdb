@@ -12598,13 +12598,37 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	reg += 16;
     }
 
-  if (need_vex
-      && bytemode != xmm_mode
-      && bytemode != xmmq_mode
-      && bytemode != evex_half_bcst_xmmq_mode
-      && bytemode != ymm_mode
-      && bytemode != tmm_mode
-      && bytemode != scalar_mode)
+  if (bytemode == xmmq_mode
+      || bytemode == evex_half_bcst_xmmq_mode)
+    {
+      switch (vex.length)
+	{
+	case 128:
+	case 256:
+	  names = names_xmm;
+	  break;
+	case 512:
+	  names = names_ymm;
+	  break;
+	default:
+	  abort ();
+	}
+    }
+  else if (bytemode == ymm_mode)
+    names = names_ymm;
+  else if (bytemode == tmm_mode)
+    {
+      modrm.reg = reg;
+      if (reg >= 8)
+	{
+	  oappend ("(bad)");
+	  return;
+	}
+      names = names_tmm;
+    }
+  else if (need_vex
+	   && bytemode != xmm_mode
+	   && bytemode != scalar_mode)
     {
       switch (vex.length)
 	{
@@ -12629,34 +12653,6 @@ OP_XMM (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	  abort ();
 	}
     }
-  else if (bytemode == xmmq_mode
-	   || bytemode == evex_half_bcst_xmmq_mode)
-    {
-      switch (vex.length)
-	{
-	case 128:
-	case 256:
-	  names = names_xmm;
-	  break;
-	case 512:
-	  names = names_ymm;
-	  break;
-	default:
-	  abort ();
-	}
-    }
-  else if (bytemode == tmm_mode)
-    {
-      modrm.reg = reg;
-      if (reg >= 8)
-	{
-	  oappend ("(bad)");
-	  return;
-	}
-      names = names_tmm;
-    }
-  else if (bytemode == ymm_mode)
-    names = names_ymm;
   else
     names = names_xmm;
   oappend (names[reg]);
