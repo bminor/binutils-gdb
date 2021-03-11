@@ -1,3 +1,8 @@
+2021-03-12  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff64-rs6000.c (xcoff64_create_csect_from_smclas): Add
+	missing smclass.
+
 2021-03-11  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_link_hash_table): New boolean

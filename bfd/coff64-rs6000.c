@@ -2127,14 +2127,14 @@ xcoff64_create_csect_from_smclas (bfd *abfd, union internal_auxent *aux,
   /* Changes from 32 :
      .sv == 8, is only for 32 bit programs
      .ti == 12 and .tb == 13 are now reserved.  */
-  static const char *names[19] =
+  static const char * const names[] =
   {
     ".pr", ".ro", ".db", ".tc", ".ua", ".rw", ".gl", ".xo",
     NULL, ".bs", ".ds", ".uc", NULL,  NULL,  NULL,  ".tc0",
-    ".td", ".sv64", ".sv3264"
+    ".td", ".sv64", ".sv3264", NULL, ".tl", ".ul", ".te"
   };
 
-  if ((19 >= aux->x_csect.x_smclas)
+  if ((aux->x_csect.x_smclas < ARRAY_SIZE (names))
       && (NULL != names[aux->x_csect.x_smclas]))
     {
 
