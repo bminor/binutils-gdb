@@ -1,3 +1,12 @@
+2021-03-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-auto-load-chaining-f1.c: New file.
+	* gdb.python/py-auto-load-chaining-f1.o-gdb.py: New file.
+	* gdb.python/py-auto-load-chaining-f2.c: New file.
+	* gdb.python/py-auto-load-chaining-f2.o-gdb.py: New file.
+	* gdb.python/py-auto-load-chaining.c: New file.
+	* gdb.python/py-auto-load-chaining.exp: New file.
+
 2021-03-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-bad-printers.exp: Extend test names to make them

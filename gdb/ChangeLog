@@ -1,3 +1,9 @@
+2021-03-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/python.c (gdbpy_source_objfile_script): Use
+	make_scoped_restore to restore gdbpy_current_objfile.
+	(gdbpy_execute_objfile_script): Likewise.
+
 2021-03-14  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (read_attribute_value): Use cu_header
