@@ -1,3 +1,9 @@
+2021-03-12  Frederic Cambus  <fred@statdns.com>
+
+	* elf/common.h (NT_NETBSD_PAX, NT_NETBSD_PAX_MPROTECT)
+	(NT_NETBSD_PAX_NOMPROTECT, NT_NETBSD_PAX_GUARD, NT_NETBSD_PAX_NOGUARD)
+	(NT_NETBSD_PAX_ASLR, NT_NETBSD_PAX_NOASLR): Define.
+
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
 	* coff/internal.h (struct internal_aouthdr): Add new fields.
