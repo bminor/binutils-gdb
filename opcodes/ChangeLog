@@ -1,3 +1,7 @@
+2021-03-12  Alan Modra  <amodra@gmail.com>
+
+	* i386-dis.c (print_insn <PREFIX_IGNORED>): Correct typo.
+
 2021-03-11  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (OP_XMM): Re-order checks.
