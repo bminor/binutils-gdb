@@ -262,12 +262,6 @@ ALL_EMULATION_SOURCES = \
 	eelf32ppcsim.c \
 	eelf32ppcvxworks.c \
 	eelf32ppcwindiss.c \
-	eelf32lriscv.c \
-	eelf32lriscv_ilp32f.c \
-	eelf32lriscv_ilp32.c \
-	eelf32briscv.c \
-	eelf32briscv_ilp32f.c \
-	eelf32briscv_ilp32.c \
 	eelf32rl78.c \
 	eelf32rx.c \
 	eelf32rx_linux.c \
@@ -416,6 +410,12 @@ ALL_64_EMULATION_SOURCES = \
 	eelf32ltsmipn32.c \
 	eelf32ltsmipn32_fbsd.c \
 	eelf32mipswindiss.c \
+	eelf32lriscv.c \
+	eelf32lriscv_ilp32f.c \
+	eelf32lriscv_ilp32.c \
+	eelf32briscv.c \
+	eelf32briscv_ilp32f.c \
+	eelf32briscv_ilp32.c \
 	eelf64_aix.c \
 	eelf64bpf.c \
 	eelf64_ia64.c \

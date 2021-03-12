@@ -1,3 +1,9 @@
+2021-03-12  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Move riscv files to..
+	(ALL_64_EMULATION_SOURCES): ..here.
+	* Makefile.in: Regenerate.
+
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
 	* emultempl/aix.em: Ensure .tdata section is removed
