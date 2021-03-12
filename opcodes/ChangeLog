@@ -1,3 +1,8 @@
+2021-03-12  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-opc.c: Add lorc_el1, lorea_el1, lorn_el1, lorsa_el1,
+	icc_ctlr_el3, icc_sre_elx, ich_vtr_el2 system registers.
+
 2021-03-12  Alan Modra  <amodra@gmail.com>
 
 	* i386-dis.c (print_insn <PREFIX_IGNORED>): Correct typo.

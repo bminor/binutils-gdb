@@ -4570,6 +4570,16 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_CORE ("csrptr_el2",    CPENC (2,4,C8,C0,1),  0),
   SR_CORE ("csrptridx_el2", CPENC (2,4,C8,C0,3),  F_REG_READ),
 
+  SR_CORE ("lorc_el1",      CPENC (3,0,C10,C4,3),  0),
+  SR_CORE ("lorea_el1",     CPENC (3,0,C10,C4,1),  0),
+  SR_CORE ("lorn_el1",      CPENC (3,0,C10,C4,2),  0),
+  SR_CORE ("lorsa_el1",     CPENC (3,0,C10,C4,0),  0),
+  SR_CORE ("icc_ctlr_el3",  CPENC (3,6,C12,C12,4), 0),
+  SR_CORE ("icc_sre_el1",   CPENC (3,0,C12,C12,5), 0),
+  SR_CORE ("icc_sre_el2",   CPENC (3,4,C12,C9,5),  0),
+  SR_CORE ("icc_sre_el3",   CPENC (3,6,C12,C12,5), 0),
+  SR_CORE ("ich_vtr_el2",   CPENC (3,4,C12,C11,1), F_REG_READ),
+
   SR_CORE ("brbcr_el1",     CPENC (2,1,C9,C0,0),  0),
   SR_CORE ("brbcr_el12",    CPENC (2,5,C9,C0,0),  0),
   SR_CORE ("brbfcr_el1",    CPENC (2,1,C9,C0,1),  0),

@@ -1,3 +1,11 @@
+2021-03-12  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* testsuite/gas/aarch64/illegal-sysreg-7.d: New test.
+	* testsuite/gas/aarch64/illegal-sysreg-7.l: New test.
+	* testsuite/gas/aarch64/illegal-sysreg-7.s: New test.
+	* testsuite/gas/aarch64/sysreg-7.d: New test.
+	* testsuite/gas/aarch64/sysreg-7.s: New test.
+
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
 	* config/tc-ppc.c (ppc_xcoff_text_section, ppc_xcoff_data_section,
