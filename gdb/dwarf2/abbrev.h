@@ -71,7 +71,7 @@ struct abbrev_table
   /* Look up an abbrev in the table.
      Returns NULL if the abbrev is not found.  */
 
-  struct abbrev_info *lookup_abbrev (unsigned int abbrev_number)
+  const struct abbrev_info *lookup_abbrev (unsigned int abbrev_number) const
   {
     struct abbrev_info search;
     search.number = abbrev_number;

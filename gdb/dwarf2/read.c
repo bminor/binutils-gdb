@@ -1024,7 +1024,7 @@ private:
    need this much information.  */
 struct partial_die_info : public allocate_on_obstack
   {
-    partial_die_info (sect_offset sect_off, struct abbrev_info *abbrev);
+    partial_die_info (sect_offset sect_off, const struct abbrev_info *abbrev);
 
     /* Disable assign but still keep copy ctor, which is needed
        load_partial_dies.   */
@@ -1624,7 +1624,7 @@ static void dwarf2_symbol_mark_computed (const struct attribute *attr,
 
 static const gdb_byte *skip_one_die (const struct die_reader_specs *reader,
 				     const gdb_byte *info_ptr,
-				     struct abbrev_info *abbrev);
+				     const struct abbrev_info *abbrev);
 
 static hashval_t partial_die_hash (const void *item);
 
@@ -8697,7 +8697,7 @@ peek_abbrev_code (bfd *abfd, const gdb_byte *info_ptr)
    an empty DIE).  In either case *BYTES_READ will be set to the length of
    the initial number.  */
 
-static struct abbrev_info *
+static const struct abbrev_info *
 peek_die_abbrev (const die_reader_specs &reader,
 		 const gdb_byte *info_ptr, unsigned int *bytes_read)
 {
@@ -8709,7 +8709,8 @@ peek_die_abbrev (const die_reader_specs &reader,
   if (abbrev_number == 0)
     return NULL;
 
-  abbrev_info *abbrev = reader.abbrev_table->lookup_abbrev (abbrev_number);
+  const abbrev_info *abbrev
+    = reader.abbrev_table->lookup_abbrev (abbrev_number);
   if (!abbrev)
     {
       error (_("Dwarf Error: Could not find abbrev number %d in %s"
@@ -8731,7 +8732,8 @@ skip_children (const struct die_reader_specs *reader, const gdb_byte *info_ptr)
   while (1)
     {
       unsigned int bytes_read;
-      abbrev_info *abbrev = peek_die_abbrev (*reader, info_ptr, &bytes_read);
+      const abbrev_info *abbrev = peek_die_abbrev (*reader, info_ptr,
+						   &bytes_read);
 
       if (abbrev == NULL)
 	return info_ptr + bytes_read;
@@ -8748,7 +8750,7 @@ skip_children (const struct die_reader_specs *reader, const gdb_byte *info_ptr)
 
 static const gdb_byte *
 skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
-	      struct abbrev_info *abbrev)
+	      const struct abbrev_info *abbrev)
 {
   unsigned int bytes_read;
   struct attribute attr;
@@ -19169,7 +19171,7 @@ read_full_die_1 (const struct die_reader_specs *reader,
 		 int num_extra_attrs)
 {
   unsigned int abbrev_number, bytes_read, i;
-  struct abbrev_info *abbrev;
+  const struct abbrev_info *abbrev;
   struct die_info *die;
   struct dwarf2_cu *cu = reader->cu;
   bfd *abfd = reader->abfd;
@@ -19333,7 +19335,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 
   while (1)
     {
-      abbrev_info *abbrev = peek_die_abbrev (*reader, info_ptr, &bytes_read);
+      const abbrev_info *abbrev = peek_die_abbrev (*reader, info_ptr,
+						   &bytes_read);
 
       /* A NULL abbrev means the end of a series of children.  */
       if (abbrev == NULL)
@@ -19565,7 +19568,7 @@ load_partial_dies (const struct die_reader_specs *reader,
 }
 
 partial_die_info::partial_die_info (sect_offset sect_off_,
-				    struct abbrev_info *abbrev)
+				    const struct abbrev_info *abbrev)
   : partial_die_info (sect_off_, abbrev->tag, abbrev->has_children)
 {
 }

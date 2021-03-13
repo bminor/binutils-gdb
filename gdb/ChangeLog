@@ -1,5 +1,12 @@
 2021-03-13  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (struct partial_die_info): Update.
+	(peek_die_abbrev, skip_children, skip_one_die, read_full_die_1)
+	(load_partial_dies, partial_die_info::partial_die_info): Update.
+	* dwarf2/abbrev.h (lookup_abbrev): Constify.
+
+2021-03-13  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/abbrev.c (abbrev_table::read): Remove Irix 6 workaround.
 
 2021-03-12  Christian Biesinger  <cbiesinger@google.com>
