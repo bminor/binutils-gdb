@@ -84,7 +84,6 @@ abbrev_table::read (struct dwarf2_section_info *section,
   bfd *abfd = section->get_bfd_owner ();
   const gdb_byte *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
-  unsigned int abbrev_number, bytes_read;
 
   abbrev_table_up abbrev_table (new struct abbrev_table (sect_off));
   struct obstack *obstack = &abbrev_table->m_abbrev_obstack;
@@ -92,12 +91,17 @@ abbrev_table::read (struct dwarf2_section_info *section,
   /* Caller must ensure this.  */
   gdb_assert (section->readin);
   abbrev_ptr = section->buffer + to_underlying (sect_off);
-  abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-  abbrev_ptr += bytes_read;
 
-  /* Loop until we reach an abbrev number of 0.  */
-  while (abbrev_number)
+  while (true)
     {
+      unsigned int bytes_read;
+      /* Loop until we reach an abbrev number of 0.  */
+      unsigned int abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr,
+							 &bytes_read);
+      if (abbrev_number == 0)
+	break;
+      abbrev_ptr += bytes_read;
+
       /* Start without any attrs.  */
       obstack_blank (obstack, offsetof (abbrev_info, attrs));
       cur_abbrev = (struct abbrev_info *) obstack_base (obstack);
@@ -144,20 +148,6 @@ abbrev_table::read (struct dwarf2_section_info *section,
       cur_abbrev = (struct abbrev_info *) obstack_finish (obstack);
       cur_abbrev->num_attrs = num_attrs;
       abbrev_table->add_abbrev (cur_abbrev);
-
-      /* Get next abbreviation.
-	 Under Irix6 the abbreviations for a compilation unit are not
-	 always properly terminated with an abbrev number of 0.
-	 Exit loop if we encounter an abbreviation which we have
-	 already read (which means we are about to read the abbreviations
-	 for the next compile unit) or if the end of the abbreviation
-	 table is reached.  */
-      if ((unsigned int) (abbrev_ptr - section->buffer) >= section->size)
-	break;
-      abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-      abbrev_ptr += bytes_read;
-      if (abbrev_table->lookup_abbrev (abbrev_number) != NULL)
-	break;
     }
 
   return abbrev_table;

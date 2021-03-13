@@ -1,3 +1,7 @@
+2021-03-13  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/abbrev.c (abbrev_table::read): Remove Irix 6 workaround.
+
 2021-03-12  Christian Biesinger  <cbiesinger@google.com>
 
 	PR threads/27239
