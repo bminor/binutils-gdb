@@ -8393,6 +8393,24 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
   const gdb_byte *buffer_end = reader->buffer_end;
   unsigned int form, i;
 
+  if (do_skip_children && abbrev->sibling_offset != (unsigned short) -1)
+    {
+      /* We only handle DW_FORM_ref4 here.  */
+      const gdb_byte *sibling_data = info_ptr + abbrev->sibling_offset;
+      unsigned int offset = read_4_bytes (abfd, sibling_data);
+      const gdb_byte *sibling_ptr = buffer + offset;
+      if (sibling_ptr >= info_ptr && sibling_ptr < reader->buffer_end)
+	return sibling_ptr;
+      /* Fall through to the slow way.  */
+    }
+  else if (abbrev->size_if_constant != 0)
+    {
+      info_ptr += abbrev->size_if_constant;
+      if (do_skip_children && abbrev->has_children)
+	return skip_children (reader, info_ptr);
+      return info_ptr;
+    }
+
   for (i = 0; i < abbrev->num_attrs; i++)
     {
       /* The only abbrev we care about is DW_AT_sibling.  */
