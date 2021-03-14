@@ -955,7 +955,7 @@ struct dwp_file
 struct die_reader_specs
 {
   /* The bfd of die_section.  */
-  bfd* abfd;
+  bfd *abfd;
 
   /* The CU of the DIE we are parsing.  */
   struct dwarf2_cu *cu;
@@ -8702,7 +8702,7 @@ peek_die_abbrev (const die_reader_specs &reader,
 		 const gdb_byte *info_ptr, unsigned int *bytes_read)
 {
   dwarf2_cu *cu = reader.cu;
-  bfd *abfd = cu->per_objfile->objfile->obfd;
+  bfd *abfd = reader.abfd;
   unsigned int abbrev_number
     = read_unsigned_leb128 (abfd, info_ptr, bytes_read);
 
