@@ -24758,6 +24758,8 @@ dwarf2_per_cu_data::get_header () const
 
       read_comp_unit_head (&m_header, info_ptr, this->section,
 			   rcuh_kind::COMPILE);
+
+      m_header_read_in = true;
     }
 
   return &m_header;

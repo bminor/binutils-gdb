@@ -1,3 +1,8 @@
+2021-03-14  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf2_per_cu_data::get_header): Set
+	m_header_read_in.
+
 2021-03-13  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (struct partial_die_info): Update.
