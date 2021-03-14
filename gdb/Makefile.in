@@ -1047,6 +1047,7 @@ COMMON_SFILES = \
 	dwarf2/abbrev-cache.c \
 	dwarf2/attribute.c \
 	dwarf2/comp-unit-head.c \
+	dwarf2/cooked-index.c \
 	dwarf2/cu.c \
 	dwarf2/dwz.c \
 	dwarf2/expr.c \
@@ -1294,6 +1295,7 @@ HFILES_NO_SRCDIR = \
 	disasm-flags.h \
 	disasm.h \
 	dummy-frame.h \
+	dwarf2/cooked-index.h \
 	dwarf2/cu.h \
 	dwarf2/frame-tailcall.h \
 	dwarf2/frame.h \
