@@ -20332,23 +20332,23 @@ read_attribute_value (const struct die_reader_specs *reader,
   switch (form)
     {
     case DW_FORM_ref_addr:
-      if (cu->header.version == 2)
-	attr->set_unsigned (cu->header.read_address (abfd, info_ptr,
+      if (cu_header->version == 2)
+	attr->set_unsigned (cu_header->read_address (abfd, info_ptr,
 						     &bytes_read));
       else
-	attr->set_unsigned (cu->header.read_offset (abfd, info_ptr,
+	attr->set_unsigned (cu_header->read_offset (abfd, info_ptr,
 						    &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_GNU_ref_alt:
-      attr->set_unsigned (cu->header.read_offset (abfd, info_ptr,
+      attr->set_unsigned (cu_header->read_offset (abfd, info_ptr,
 						  &bytes_read));
       info_ptr += bytes_read;
       break;
     case DW_FORM_addr:
       {
 	struct gdbarch *gdbarch = objfile->arch ();
-	CORE_ADDR addr = cu->header.read_address (abfd, info_ptr, &bytes_read);
+	CORE_ADDR addr = cu_header->read_address (abfd, info_ptr, &bytes_read);
 	addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr);
 	attr->set_address (addr);
 	info_ptr += bytes_read;
@@ -20390,7 +20390,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       attr->set_block (blk);
       break;
     case DW_FORM_sec_offset:
-      attr->set_unsigned (cu->header.read_offset (abfd, info_ptr,
+      attr->set_unsigned (cu_header->read_offset (abfd, info_ptr,
 						  &bytes_read));
       info_ptr += bytes_read;
       break;
@@ -20479,22 +20479,22 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += bytes_read;
       break;
     case DW_FORM_ref1:
-      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+      attr->set_unsigned ((to_underlying (cu_header->sect_off)
 			   + read_1_byte (abfd, info_ptr)));
       info_ptr += 1;
       break;
     case DW_FORM_ref2:
-      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+      attr->set_unsigned ((to_underlying (cu_header->sect_off)
 			   + read_2_bytes (abfd, info_ptr)));
       info_ptr += 2;
       break;
     case DW_FORM_ref4:
-      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+      attr->set_unsigned ((to_underlying (cu_header->sect_off)
 			   + read_4_bytes (abfd, info_ptr)));
       info_ptr += 4;
       break;
     case DW_FORM_ref8:
-      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+      attr->set_unsigned ((to_underlying (cu_header->sect_off)
 			   + read_8_bytes (abfd, info_ptr)));
       info_ptr += 8;
       break;
@@ -20503,7 +20503,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:
-      attr->set_unsigned ((to_underlying (cu->header.sect_off)
+      attr->set_unsigned ((to_underlying (cu_header->sect_off)
 			   + read_unsigned_leb128 (abfd, info_ptr,
 						   &bytes_read)));
       info_ptr += bytes_read;
