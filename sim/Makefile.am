@@ -27,9 +27,12 @@ AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 
 # We don't set some of these vars here, but we need to define them so they may
 # be used consistently in local.mk files we include below.
+check_PROGRAMS =
 noinst_LIBRARIES =
 EXTRA_PROGRAMS =
 
+CLEANFILES =
+DISTCLEANFILES =
 MOSTLYCLEANFILES = core
 
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)

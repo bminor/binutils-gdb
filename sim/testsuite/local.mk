@@ -32,3 +32,5 @@ check-DEJAGNU: site.exp
 
 MOSTLYCLEANFILES += \
 	site-srcdir.exp testrun.log testrun.sum
+
+include %D%/common/local.mk

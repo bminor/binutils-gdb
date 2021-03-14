@@ -67,6 +67,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Copyright (C) 1997-2021 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -142,10 +157,17 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-EXTRA_PROGRAMS = $(am__EXEEXT_2)
+check_PROGRAMS = $(am__EXEEXT_3)
+EXTRA_PROGRAMS = $(am__EXEEXT_2) testsuite/common/bits-gen$(EXEEXT) \
+	testsuite/common/fpu-tst$(EXEEXT)
 @SIM_ENABLE_IGEN_TRUE@am__append_1 = igen/libigen.a
 @SIM_ENABLE_IGEN_TRUE@am__append_2 = $(igen_IGEN_TOOLS)
 @SIM_ENABLE_IGEN_TRUE@am__append_3 = $(igen_IGEN_TOOLS)
+TESTS = testsuite/common/bits32m0$(EXEEXT) \
+	testsuite/common/bits32m31$(EXEEXT) \
+	testsuite/common/bits64m0$(EXEEXT) \
+	testsuite/common/bits64m63$(EXEEXT) \
+	testsuite/common/alu-tst$(EXEEXT)
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
@@ -195,6 +217,11 @@ igen_libigen_a_OBJECTS = $(am_igen_libigen_a_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@	igen/ld-insn$(EXEEXT) \
 @SIM_ENABLE_IGEN_TRUE@	igen/table$(EXEEXT)
 @SIM_ENABLE_IGEN_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
+am__EXEEXT_3 = testsuite/common/bits32m0$(EXEEXT) \
+	testsuite/common/bits32m31$(EXEEXT) \
+	testsuite/common/bits64m0$(EXEEXT) \
+	testsuite/common/bits64m63$(EXEEXT) \
+	testsuite/common/alu-tst$(EXEEXT)
 am_igen_filter_OBJECTS =
 igen_filter_OBJECTS = $(am_igen_filter_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@igen_filter_DEPENDENCIES = igen/filter-main.o \
@@ -222,6 +249,32 @@ am_igen_table_OBJECTS =
 igen_table_OBJECTS = $(am_igen_table_OBJECTS)
 @SIM_ENABLE_IGEN_TRUE@igen_table_DEPENDENCIES = igen/table-main.o \
 @SIM_ENABLE_IGEN_TRUE@	igen/libigen.a
+testsuite_common_alu_tst_SOURCES = testsuite/common/alu-tst.c
+testsuite_common_alu_tst_OBJECTS = testsuite/common/alu-tst.$(OBJEXT)
+testsuite_common_alu_tst_LDADD = $(LDADD)
+testsuite_common_bits_gen_SOURCES = testsuite/common/bits-gen.c
+testsuite_common_bits_gen_OBJECTS =  \
+	testsuite/common/bits-gen.$(OBJEXT)
+testsuite_common_bits_gen_LDADD = $(LDADD)
+testsuite_common_bits32m0_SOURCES = testsuite/common/bits32m0.c
+testsuite_common_bits32m0_OBJECTS =  \
+	testsuite/common/bits32m0.$(OBJEXT)
+testsuite_common_bits32m0_LDADD = $(LDADD)
+testsuite_common_bits32m31_SOURCES = testsuite/common/bits32m31.c
+testsuite_common_bits32m31_OBJECTS =  \
+	testsuite/common/bits32m31.$(OBJEXT)
+testsuite_common_bits32m31_LDADD = $(LDADD)
+testsuite_common_bits64m0_SOURCES = testsuite/common/bits64m0.c
+testsuite_common_bits64m0_OBJECTS =  \
+	testsuite/common/bits64m0.$(OBJEXT)
+testsuite_common_bits64m0_LDADD = $(LDADD)
+testsuite_common_bits64m63_SOURCES = testsuite/common/bits64m63.c
+testsuite_common_bits64m63_OBJECTS =  \
+	testsuite/common/bits64m63.$(OBJEXT)
+testsuite_common_bits64m63_LDADD = $(LDADD)
+testsuite_common_fpu_tst_SOURCES = testsuite/common/fpu-tst.c
+testsuite_common_fpu_tst_OBJECTS = testsuite/common/fpu-tst.$(OBJEXT)
+testsuite_common_fpu_tst_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -253,7 +306,11 @@ am__v_CCLD_1 =
 SOURCES = $(igen_libigen_a_SOURCES) $(igen_filter_SOURCES) \
 	$(igen_gen_SOURCES) $(igen_igen_SOURCES) \
 	$(igen_ld_cache_SOURCES) $(igen_ld_decode_SOURCES) \
-	$(igen_ld_insn_SOURCES) $(igen_table_SOURCES)
+	$(igen_ld_insn_SOURCES) $(igen_table_SOURCES) \
+	testsuite/common/alu-tst.c testsuite/common/bits-gen.c \
+	testsuite/common/bits32m0.c testsuite/common/bits32m31.c \
+	testsuite/common/bits64m0.c testsuite/common/bits64m63.c \
+	testsuite/common/fpu-tst.c
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -274,7 +331,7 @@ am__recursive_targets = \
   $(RECURSIVE_CLEAN_TARGETS) \
   $(am__extra_recursive_targets)
 AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
-	cscope
+	cscope check recheck
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -299,6 +356,209 @@ DEJATOOL = $(PACKAGE)
 RUNTESTDEFAULTFLAGS = --tool $$tool --srcdir $$srcdir
 EXPECT = expect
 RUNTEST = runtest
+am__tty_colors_dummy = \
+  mgn= red= grn= lgn= blu= brg= std=; \
+  am__color_tests=no
+am__tty_colors = { \
+  $(am__tty_colors_dummy); \
+  if test "X$(AM_COLOR_TESTS)" = Xno; then \
+    am__color_tests=no; \
+  elif test "X$(AM_COLOR_TESTS)" = Xalways; then \
+    am__color_tests=yes; \
+  elif test "X$$TERM" != Xdumb && { test -t 1; } 2>/dev/null; then \
+    am__color_tests=yes; \
+  fi; \
+  if test $$am__color_tests = yes; then \
+    red='[0;31m'; \
+    grn='[0;32m'; \
+    lgn='[1;32m'; \
+    blu='[1;34m'; \
+    mgn='[0;35m'; \
+    brg='[1m'; \
+    std='[m'; \
+  fi; \
+}
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+am__recheck_rx = ^[ 	]*:recheck:[ 	]*
+am__global_test_result_rx = ^[ 	]*:global-test-result:[ 	]*
+am__copy_in_global_log_rx = ^[ 	]*:copy-in-global-log:[ 	]*
+# A command that, given a newline-separated list of test names on the
+# standard input, print the name of the tests that are to be re-run
+# upon "make recheck".
+am__list_recheck_tests = $(AWK) '{ \
+  recheck = 1; \
+  while ((rc = (getline line < ($$0 ".trs"))) != 0) \
+    { \
+      if (rc < 0) \
+        { \
+          if ((getline line2 < ($$0 ".log")) < 0) \
+	    recheck = 0; \
+          break; \
+        } \
+      else if (line ~ /$(am__recheck_rx)[nN][Oo]/) \
+        { \
+          recheck = 0; \
+          break; \
+        } \
+      else if (line ~ /$(am__recheck_rx)[yY][eE][sS]/) \
+        { \
+          break; \
+        } \
+    }; \
+  if (recheck) \
+    print $$0; \
+  close ($$0 ".trs"); \
+  close ($$0 ".log"); \
+}'
+# A command that, given a newline-separated list of test names on the
+# standard input, create the global log from their .trs and .log files.
+am__create_global_log = $(AWK) ' \
+function fatal(msg) \
+{ \
+  print "fatal: making $@: " msg | "cat >&2"; \
+  exit 1; \
+} \
+function rst_section(header) \
+{ \
+  print header; \
+  len = length(header); \
+  for (i = 1; i <= len; i = i + 1) \
+    printf "="; \
+  printf "\n\n"; \
+} \
+{ \
+  copy_in_global_log = 1; \
+  global_test_result = "RUN"; \
+  while ((rc = (getline line < ($$0 ".trs"))) != 0) \
+    { \
+      if (rc < 0) \
+         fatal("failed to read from " $$0 ".trs"); \
+      if (line ~ /$(am__global_test_result_rx)/) \
+        { \
+          sub("$(am__global_test_result_rx)", "", line); \
+          sub("[ 	]*$$", "", line); \
+          global_test_result = line; \
+        } \
+      else if (line ~ /$(am__copy_in_global_log_rx)[nN][oO]/) \
+        copy_in_global_log = 0; \
+    }; \
+  if (copy_in_global_log) \
+    { \
+      rst_section(global_test_result ": " $$0); \
+      while ((rc = (getline line < ($$0 ".log"))) != 0) \
+      { \
+        if (rc < 0) \
+          fatal("failed to read from " $$0 ".log"); \
+        print line; \
+      }; \
+      printf "\n"; \
+    }; \
+  close ($$0 ".trs"); \
+  close ($$0 ".log"); \
+}'
+# Restructured Text title.
+am__rst_title = { sed 's/.*/   &   /;h;s/./=/g;p;x;s/ *$$//;p;g' && echo; }
+# Solaris 10 'make', and several other traditional 'make' implementations,
+# pass "-e" to $(SHELL), and POSIX 2008 even requires this.  Work around it
+# by disabling -e (using the XSI extension "set +e") if it's set.
+am__sh_e_setup = case $$- in *e*) set +e;; esac
+# Default flags passed to test drivers.
+am__common_driver_flags = \
+  --color-tests "$$am__color_tests" \
+  --enable-hard-errors "$$am__enable_hard_errors" \
+  --expect-failure "$$am__expect_failure"
+# To be inserted before the command running the test.  Creates the
+# directory for the log if needed.  Stores in $dir the directory
+# containing $f, in $tst the test, in $log the log.  Executes the
+# developer- defined test setup AM_TESTS_ENVIRONMENT (if any), and
+# passes TESTS_ENVIRONMENT.  Set up options for the wrapper that
+# will run the test scripts (or their associated LOG_COMPILER, if
+# thy have one).
+am__check_pre = \
+$(am__sh_e_setup);					\
+$(am__vpath_adj_setup) $(am__vpath_adj)			\
+$(am__tty_colors);					\
+srcdir=$(srcdir); export srcdir;			\
+case "$@" in						\
+  */*) am__odir=`echo "./$@" | sed 's|/[^/]*$$||'`;;	\
+    *) am__odir=.;; 					\
+esac;							\
+test "x$$am__odir" = x"." || test -d "$$am__odir" 	\
+  || $(MKDIR_P) "$$am__odir" || exit $$?;		\
+if test -f "./$$f"; then dir=./;			\
+elif test -f "$$f"; then dir=;				\
+else dir="$(srcdir)/"; fi;				\
+tst=$$dir$$f; log='$@'; 				\
+if test -n '$(DISABLE_HARD_ERRORS)'; then		\
+  am__enable_hard_errors=no; 				\
+else							\
+  am__enable_hard_errors=yes; 				\
+fi; 							\
+case " $(XFAIL_TESTS) " in				\
+  *[\ \	]$$f[\ \	]* | *[\ \	]$$dir$$f[\ \	]*) \
+    am__expect_failure=yes;;				\
+  *)							\
+    am__expect_failure=no;;				\
+esac; 							\
+$(AM_TESTS_ENVIRONMENT) $(TESTS_ENVIRONMENT)
+# A shell command to get the names of the tests scripts with any registered
+# extension removed (i.e., equivalently, the names of the test logs, with
+# the '.log' extension removed).  The result is saved in the shell variable
+# '$bases'.  This honors runtime overriding of TESTS and TEST_LOGS.  Sadly,
+# we cannot use something simpler, involving e.g., "$(TEST_LOGS:.log=)",
+# since that might cause problem with VPATH rewrites for suffix-less tests.
+# See also 'test-harness-vpath-rewrite.sh' and 'test-trs-basic.sh'.
+am__set_TESTS_bases = \
+  bases='$(TEST_LOGS)'; \
+  bases=`for i in $$bases; do echo $$i; done | sed 's/\.log$$//'`; \
+  bases=`echo $$bases`
+RECHECK_LOGS = $(TEST_LOGS)
+TEST_SUITE_LOG = test-suite.log
+TEST_EXTENSIONS = @EXEEXT@ .test
+LOG_DRIVER = $(SHELL) $(top_srcdir)/../test-driver
+LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
+am__set_b = \
+  case '$@' in \
+    */*) \
+      case '$*' in \
+        */*) b='$*';; \
+          *) b=`echo '$@' | sed 's/\.log$$//'`; \
+       esac;; \
+    *) \
+      b='$*';; \
+  esac
+am__test_logs1 = $(TESTS:=.log)
+am__test_logs2 = $(am__test_logs1:@EXEEXT@.log=.log)
+TEST_LOGS = $(am__test_logs2:.test.log=.log)
+TEST_LOG_DRIVER = $(SHELL) $(top_srcdir)/../test-driver
+TEST_LOG_COMPILE = $(TEST_LOG_COMPILER) $(AM_TEST_LOG_FLAGS) \
+	$(TEST_LOG_FLAGS)
 DIST_SUBDIRS = $(SUBDIRS)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -413,10 +673,11 @@ ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@
 AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
-
-# We don't set some of these vars here, but we need to define them so they may
-# be used consistently in local.mk files we include below.
 noinst_LIBRARIES = $(am__append_1)
+CLEANFILES = testsuite/common/bits-gen testsuite/common/bits32m0.c \
+	testsuite/common/bits32m31.c testsuite/common/bits64m0.c \
+	testsuite/common/bits64m63.c
+DISTCLEANFILES = 
 MOSTLYCLEANFILES = core $(am__append_3) site-srcdir.exp testrun.log \
 	testrun.sum
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
@@ -465,13 +726,17 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
 # Tweak the site.exp so it works with plain `runtest` from user.
 EXTRA_DEJAGNU_SITE_CONFIG = site-srcdir.exp
+testsuite_common_CPPFLAGS = \
+	-I$(srcdir)/common \
+	-I$(srcroot)/include
+
 all: all-recursive
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .c .log .o .obj .test .test$(EXEEXT) .trs
 am--refresh: Makefile
 	@:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -493,7 +758,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $@ $(am__depfiles_maybe);; \
 	esac;
-$(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(am__empty):
+$(srcdir)/igen/local.mk $(srcdir)/testsuite/local.mk $(srcdir)/testsuite/common/local.mk $(am__empty):
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	$(SHELL) ./config.status --recheck
@@ -549,6 +814,9 @@ igen/libigen.a: $(igen_libigen_a_OBJECTS) $(igen_libigen_a_DEPENDENCIES) $(EXTRA
 	$(AM_V_AR)$(igen_libigen_a_AR) igen/libigen.a $(igen_libigen_a_OBJECTS) $(igen_libigen_a_LIBADD)
 	$(AM_V_at)$(RANLIB) igen/libigen.a
 
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+
 igen/filter$(EXEEXT): $(igen_filter_OBJECTS) $(igen_filter_DEPENDENCIES) $(EXTRA_igen_filter_DEPENDENCIES) igen/$(am__dirstamp)
 	@rm -f igen/filter$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(igen_filter_OBJECTS) $(igen_filter_LDADD) $(LIBS)
@@ -578,10 +846,33 @@ igen/ld-insn$(EXEEXT): $(igen_ld_insn_OBJECTS) $(igen_ld_insn_DEPENDENCIES) $(EX
 igen/table$(EXEEXT): $(igen_table_OBJECTS) $(igen_table_DEPENDENCIES) $(EXTRA_igen_table_DEPENDENCIES) igen/$(am__dirstamp)
 	@rm -f igen/table$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(igen_table_OBJECTS) $(igen_table_LDADD) $(LIBS)
+testsuite/common/$(am__dirstamp):
+	@$(MKDIR_P) testsuite/common
+	@: > testsuite/common/$(am__dirstamp)
+testsuite/common/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) testsuite/common/$(DEPDIR)
+	@: > testsuite/common/$(DEPDIR)/$(am__dirstamp)
+testsuite/common/alu-tst.$(OBJEXT): testsuite/common/$(am__dirstamp) \
+	testsuite/common/$(DEPDIR)/$(am__dirstamp)
+testsuite/common/bits-gen.$(OBJEXT): testsuite/common/$(am__dirstamp) \
+	testsuite/common/$(DEPDIR)/$(am__dirstamp)
+testsuite/common/bits32m0.$(OBJEXT): testsuite/common/$(am__dirstamp) \
+	testsuite/common/$(DEPDIR)/$(am__dirstamp)
+testsuite/common/bits32m31.$(OBJEXT):  \
+	testsuite/common/$(am__dirstamp) \
+	testsuite/common/$(DEPDIR)/$(am__dirstamp)
+testsuite/common/bits64m0.$(OBJEXT): testsuite/common/$(am__dirstamp) \
+	testsuite/common/$(DEPDIR)/$(am__dirstamp)
+testsuite/common/bits64m63.$(OBJEXT):  \
+	testsuite/common/$(am__dirstamp) \
+	testsuite/common/$(DEPDIR)/$(am__dirstamp)
+testsuite/common/fpu-tst.$(OBJEXT): testsuite/common/$(am__dirstamp) \
+	testsuite/common/$(DEPDIR)/$(am__dirstamp)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f igen/*.$(OBJEXT)
+	-rm -f testsuite/common/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
@@ -603,6 +894,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/lf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/misc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/alu-tst.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/bits-gen.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/bits32m0.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/bits32m31.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/bits64m0.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/bits64m63.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@testsuite/common/$(DEPDIR)/fpu-tst.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -757,8 +1055,200 @@ distclean-DEJAGNU:
 	-l='$(DEJATOOL)'; for tool in $$l; do \
 	  rm -f $$tool.sum $$tool.log; \
 	done
+
+# Recover from deleted '.trs' file; this should ensure that
+# "rm -f foo.log; make foo.trs" re-run 'foo.test', and re-create
+# both 'foo.log' and 'foo.trs'.  Break the recipe in two subshells
+# to avoid problems with "make -n".
+.log.trs:
+	rm -f $< $@
+	$(MAKE) $(AM_MAKEFLAGS) $<
+
+# Leading 'am--fnord' is there to ensure the list of targets does not
+# expand to empty, as could happen e.g. with make check TESTS=''.
+am--fnord $(TEST_LOGS) $(TEST_LOGS:.log=.trs): $(am__force_recheck)
+am--force-recheck:
+	@:
+
+$(TEST_SUITE_LOG): $(TEST_LOGS)
+	@$(am__set_TESTS_bases); \
+	am__f_ok () { test -f "$$1" && test -r "$$1"; }; \
+	redo_bases=`for i in $$bases; do \
+	              am__f_ok $$i.trs && am__f_ok $$i.log || echo $$i; \
+	            done`; \
+	if test -n "$$redo_bases"; then \
+	  redo_logs=`for i in $$redo_bases; do echo $$i.log; done`; \
+	  redo_results=`for i in $$redo_bases; do echo $$i.trs; done`; \
+	  if $(am__make_dryrun); then :; else \
+	    rm -f $$redo_logs && rm -f $$redo_results || exit 1; \
+	  fi; \
+	fi; \
+	if test -n "$$am__remaking_logs"; then \
+	  echo "fatal: making $(TEST_SUITE_LOG): possible infinite" \
+	       "recursion detected" >&2; \
+	elif test -n "$$redo_logs"; then \
+	  am__remaking_logs=yes $(MAKE) $(AM_MAKEFLAGS) $$redo_logs; \
+	fi; \
+	if $(am__make_dryrun); then :; else \
+	  st=0;  \
+	  errmsg="fatal: making $(TEST_SUITE_LOG): failed to create"; \
+	  for i in $$redo_bases; do \
+	    test -f $$i.trs && test -r $$i.trs \
+	      || { echo "$$errmsg $$i.trs" >&2; st=1; }; \
+	    test -f $$i.log && test -r $$i.log \
+	      || { echo "$$errmsg $$i.log" >&2; st=1; }; \
+	  done; \
+	  test $$st -eq 0 || exit 1; \
+	fi
+	@$(am__sh_e_setup); $(am__tty_colors); $(am__set_TESTS_bases); \
+	ws='[ 	]'; \
+	results=`for b in $$bases; do echo $$b.trs; done`; \
+	test -n "$$results" || results=/dev/null; \
+	all=`  grep "^$$ws*:test-result:"           $$results | wc -l`; \
+	pass=` grep "^$$ws*:test-result:$$ws*PASS"  $$results | wc -l`; \
+	fail=` grep "^$$ws*:test-result:$$ws*FAIL"  $$results | wc -l`; \
+	skip=` grep "^$$ws*:test-result:$$ws*SKIP"  $$results | wc -l`; \
+	xfail=`grep "^$$ws*:test-result:$$ws*XFAIL" $$results | wc -l`; \
+	xpass=`grep "^$$ws*:test-result:$$ws*XPASS" $$results | wc -l`; \
+	error=`grep "^$$ws*:test-result:$$ws*ERROR" $$results | wc -l`; \
+	if test `expr $$fail + $$xpass + $$error` -eq 0; then \
+	  success=true; \
+	else \
+	  success=false; \
+	fi; \
+	br='==================='; br=$$br$$br$$br$$br; \
+	result_count () \
+	{ \
+	    if test x"$$1" = x"--maybe-color"; then \
+	      maybe_colorize=yes; \
+	    elif test x"$$1" = x"--no-color"; then \
+	      maybe_colorize=no; \
+	    else \
+	      echo "$@: invalid 'result_count' usage" >&2; exit 4; \
+	    fi; \
+	    shift; \
+	    desc=$$1 count=$$2; \
+	    if test $$maybe_colorize = yes && test $$count -gt 0; then \
+	      color_start=$$3 color_end=$$std; \
+	    else \
+	      color_start= color_end=; \
+	    fi; \
+	    echo "$${color_start}# $$desc $$count$${color_end}"; \
+	}; \
+	create_testsuite_report () \
+	{ \
+	  result_count $$1 "TOTAL:" $$all   "$$brg"; \
+	  result_count $$1 "PASS: " $$pass  "$$grn"; \
+	  result_count $$1 "SKIP: " $$skip  "$$blu"; \
+	  result_count $$1 "XFAIL:" $$xfail "$$lgn"; \
+	  result_count $$1 "FAIL: " $$fail  "$$red"; \
+	  result_count $$1 "XPASS:" $$xpass "$$red"; \
+	  result_count $$1 "ERROR:" $$error "$$mgn"; \
+	}; \
+	{								\
+	  echo "$(PACKAGE_STRING): $(subdir)/$(TEST_SUITE_LOG)" |	\
+	    $(am__rst_title);						\
+	  create_testsuite_report --no-color;				\
+	  echo;								\
+	  echo ".. contents:: :depth: 2";				\
+	  echo;								\
+	  for b in $$bases; do echo $$b; done				\
+	    | $(am__create_global_log);					\
+	} >$(TEST_SUITE_LOG).tmp || exit 1;				\
+	mv $(TEST_SUITE_LOG).tmp $(TEST_SUITE_LOG);			\
+	if $$success; then						\
+	  col="$$grn";							\
+	 else								\
+	  col="$$red";							\
+	  test x"$$VERBOSE" = x || cat $(TEST_SUITE_LOG);		\
+	fi;								\
+	echo "$${col}$$br$${std}"; 					\
+	echo "$${col}Testsuite summary for $(PACKAGE_STRING)$${std}";	\
+	echo "$${col}$$br$${std}"; 					\
+	create_testsuite_report --maybe-color;				\
+	echo "$$col$$br$$std";						\
+	if $$success; then :; else					\
+	  echo "$${col}See $(subdir)/$(TEST_SUITE_LOG)$${std}";		\
+	  if test -n "$(PACKAGE_BUGREPORT)"; then			\
+	    echo "$${col}Please report to $(PACKAGE_BUGREPORT)$${std}";	\
+	  fi;								\
+	  echo "$$col$$br$$std";					\
+	fi;								\
+	$$success || exit 1
+
+check-TESTS:
+	@list='$(RECHECK_LOGS)';           test -z "$$list" || rm -f $$list
+	@list='$(RECHECK_LOGS:.log=.trs)'; test -z "$$list" || rm -f $$list
+	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
+	@set +e; $(am__set_TESTS_bases); \
+	log_list=`for i in $$bases; do echo $$i.log; done`; \
+	trs_list=`for i in $$bases; do echo $$i.trs; done`; \
+	log_list=`echo $$log_list`; trs_list=`echo $$trs_list`; \
+	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_LOG) TEST_LOGS="$$log_list"; \
+	exit $$?;
+recheck: all $(check_PROGRAMS)
+	@test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
+	@set +e; $(am__set_TESTS_bases); \
+	bases=`for i in $$bases; do echo $$i; done \
+	         | $(am__list_recheck_tests)` || exit 1; \
+	log_list=`for i in $$bases; do echo $$i.log; done`; \
+	log_list=`echo $$log_list`; \
+	$(MAKE) $(AM_MAKEFLAGS) $(TEST_SUITE_LOG) \
+	        am__force_recheck=am--force-recheck \
+	        TEST_LOGS="$$log_list"; \
+	exit $$?
+testsuite/common/bits32m0.log: testsuite/common/bits32m0$(EXEEXT)
+	@p='testsuite/common/bits32m0$(EXEEXT)'; \
+	b='testsuite/common/bits32m0'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testsuite/common/bits32m31.log: testsuite/common/bits32m31$(EXEEXT)
+	@p='testsuite/common/bits32m31$(EXEEXT)'; \
+	b='testsuite/common/bits32m31'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testsuite/common/bits64m0.log: testsuite/common/bits64m0$(EXEEXT)
+	@p='testsuite/common/bits64m0$(EXEEXT)'; \
+	b='testsuite/common/bits64m0'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testsuite/common/bits64m63.log: testsuite/common/bits64m63$(EXEEXT)
+	@p='testsuite/common/bits64m63$(EXEEXT)'; \
+	b='testsuite/common/bits64m63'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+testsuite/common/alu-tst.log: testsuite/common/alu-tst$(EXEEXT)
+	@p='testsuite/common/alu-tst$(EXEEXT)'; \
+	b='testsuite/common/alu-tst'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+.test.log:
+	@p='$<'; \
+	$(am__set_b); \
+	$(am__check_pre) $(TEST_LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_TEST_LOG_DRIVER_FLAGS) $(TEST_LOG_DRIVER_FLAGS) -- $(TEST_LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+@am__EXEEXT_TRUE@.test$(EXEEXT).log:
+@am__EXEEXT_TRUE@	@p='$<'; \
+@am__EXEEXT_TRUE@	$(am__set_b); \
+@am__EXEEXT_TRUE@	$(am__check_pre) $(TEST_LOG_DRIVER) --test-name "$$f" \
+@am__EXEEXT_TRUE@	--log-file $$b.log --trs-file $$b.trs \
+@am__EXEEXT_TRUE@	$(am__common_driver_flags) $(AM_TEST_LOG_DRIVER_FLAGS) $(TEST_LOG_DRIVER_FLAGS) -- $(TEST_LOG_COMPILE) \
+@am__EXEEXT_TRUE@	"$$tst" $(AM_TESTS_FD_REDIRECT)
 check-am: all-am
-	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-DEJAGNU check-TESTS
 check: check-recursive
 all-am: Makefile $(LIBRARIES)
 installdirs: installdirs-recursive
@@ -784,25 +1274,33 @@ install-strip:
 	fi
 mostlyclean-generic:
 	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
+	-test -z "$(TEST_LOGS)" || rm -f $(TEST_LOGS)
+	-test -z "$(TEST_LOGS:.log=.trs)" || rm -f $(TEST_LOGS:.log=.trs)
+	-test -z "$(TEST_SUITE_LOG)" || rm -f $(TEST_SUITE_LOG)
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f igen/$(DEPDIR)/$(am__dirstamp)
 	-rm -f igen/$(am__dirstamp)
+	-rm -f testsuite/common/$(DEPDIR)/$(am__dirstamp)
+	-rm -f testsuite/common/$(am__dirstamp)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-generic clean-noinstLIBRARIES mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-noinstLIBRARIES \
+	mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf igen/$(DEPDIR)
+	-rm -rf igen/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-tags
@@ -850,7 +1348,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf igen/$(DEPDIR)
+	-rm -rf igen/$(DEPDIR) testsuite/common/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
@@ -871,9 +1369,10 @@ uninstall-am:
 .MAKE: $(am__recursive_targets) check-am install-am install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
-	am--refresh check check-DEJAGNU check-am clean clean-cscope \
-	clean-generic clean-noinstLIBRARIES cscope cscopelist-am ctags \
-	ctags-am distclean distclean-DEJAGNU distclean-compile \
+	am--refresh check check-DEJAGNU check-TESTS check-am clean \
+	clean-checkPROGRAMS clean-cscope clean-generic \
+	clean-noinstLIBRARIES cscope cscopelist-am ctags ctags-am \
+	distclean distclean-DEJAGNU distclean-compile \
 	distclean-generic distclean-tags dvi dvi-am html html-am info \
 	info-am install install-am install-data install-data-am \
 	install-dvi install-dvi-am install-exec install-exec-am \
@@ -882,8 +1381,8 @@ uninstall-am:
 	install-ps-am install-strip installcheck installcheck-am \
 	installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am
+	mostlyclean-generic pdf pdf-am ps ps-am recheck tags tags-am \
+	uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
@@ -928,6 +1427,51 @@ check-DEJAGNU: site.exp
 	  $$runtest $(RUNTESTFLAGS); \
 	else echo "WARNING: could not find \`runtest'" 1>&2; :;\
 	fi
+
+# These tests are build-time only tools.  Override the default rules for them.
+testsuite/common/%.o: testsuite/common/%.c
+	$(AM_V_CC)$(COMPILE_FOR_BUILD) $(testsuite_common_CPPFLAGS) -c $< -o $@
+
+testsuite/common/alu-tst$(EXEEXT): $(testsuite_common_alu_tst_OBJECTS) $(testsuite_common_alu_tst_DEPENDENCIES) testsuite/common/$(am__dirstamp)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_alu_tst_OBJECTS) $(testsuite_common_alu_tst_LDADD)
+
+testsuite/common/fpu-tst$(EXEEXT): $(testsuite_common_fpu_tst_OBJECTS) $(testsuite_common_fpu_tst_DEPENDENCIES) testsuite/common/$(am__dirstamp)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_fpu_tst_OBJECTS) $(testsuite_common_fpu_tst_LDADD)
+
+testsuite/common/bits-gen$(EXEEXT): $(testsuite_common_bits_gen_OBJECTS) $(testsuite_common_bits_gen_DEPENDENCIES) testsuite/common/$(am__dirstamp)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits_gen_OBJECTS) $(testsuite_common_bits_gen_LDADD)
+
+testsuite/common/bits32m0$(EXEEXT): $(testsuite_common_bits32m0_OBJECTS) $(testsuite_common_bits32m0_DEPENDENCIES) testsuite/common/$(am__dirstamp)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits32m0_OBJECTS) $(testsuite_common_bits32m0_LDADD)
+
+testsuite/common/bits32m0.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+	$< 32 0 big > $@.tmp
+	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	mv $@.tmp $@
+
+testsuite/common/bits32m31$(EXEEXT): $(testsuite_common_bits32m31_OBJECTS) $(testsuite_common_bits32m31_DEPENDENCIES) testsuite/common/$(am__dirstamp)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits32m31_OBJECTS) $(testsuite_common_bits32m31_LDADD)
+
+testsuite/common/bits32m31.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+	$< 32 31 little > $@.tmp
+	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	mv $@.tmp $@
+
+testsuite/common/bits64m0$(EXEEXT): $(testsuite_common_bits64m0_OBJECTS) $(testsuite_common_bits64m0_DEPENDENCIES) testsuite/common/$(am__dirstamp)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits64m0_OBJECTS) $(testsuite_common_bits64m0_LDADD)
+
+testsuite/common/bits64m0.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+	$< 64 0 big > $@.tmp
+	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	mv $@.tmp $@
+
+testsuite/common/bits64m63$(EXEEXT): $(testsuite_common_bits64m63_OBJECTS) $(testsuite_common_bits64m63_DEPENDENCIES) testsuite/common/$(am__dirstamp)
+	$(AM_V_CCLD)$(LINK_FOR_BUILD) $(testsuite_common_bits64m63_OBJECTS) $(testsuite_common_bits64m63_LDADD)
+
+testsuite/common/bits64m63.c: testsuite/common/bits-gen testsuite/common/bits-tst.c
+	$< 64 63 little > $@.tmp
+	cat $(srcdir)/testsuite/common/bits-tst.c >> $@.tmp
+	mv $@.tmp $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
