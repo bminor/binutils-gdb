@@ -3082,7 +3082,6 @@ dwarf2_read_gdb_index
 
 static void
 dw2_get_file_names_reader (const struct die_reader_specs *reader,
-			   const gdb_byte *info_ptr,
 			   struct die_info *comp_unit_die)
 {
   struct dwarf2_cu *cu = reader->cu;
@@ -3182,7 +3181,7 @@ dw2_get_file_names (dwarf2_per_cu_data *this_cu,
 
   cutu_reader reader (this_cu, per_objfile);
   if (!reader.dummy_p)
-    dw2_get_file_names_reader (&reader, reader.info_ptr, reader.comp_unit_die);
+    dw2_get_file_names_reader (&reader, reader.comp_unit_die);
 
   if (this_cu->v.quick->no_file_data)
     return NULL;

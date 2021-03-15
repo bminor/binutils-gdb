@@ -1,3 +1,8 @@
+2021-03-15  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (dw2_get_file_names_reader): Remove info_ptr
+	parameter, adjust caller.
+
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
 	* ada-exp.y (simple_exp): Always push a result for unary '+'.
