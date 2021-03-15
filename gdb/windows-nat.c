@@ -510,7 +510,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
 static void
 windows_init_thread_list (void)
 {
-  DEBUG_EVENTS ("");
+  DEBUG_EVENTS ("called");
   init_thread_list ();
 
   for (windows_thread_info *here : thread_list)
