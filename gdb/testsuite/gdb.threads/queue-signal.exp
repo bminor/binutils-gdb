@@ -60,16 +60,20 @@ gdb_test_no_output "set scheduler-locking on"
 gdb_test_no_output "set var ready = 1"
 
 # Thread sigusr1_thread gets a SIGUSR1 which we leave alone.
-gdb_test "thread $sigusr1_thread" ""
-gdb_test "continue" "SIGUSR1.*"
+gdb_test "thread $sigusr1_thread" "" \
+    "switch to SIGUSR1 thread"
+gdb_test "continue" "SIGUSR1.*" \
+    "continue until we get SIGUSR1"
 
 # Inject SIGUSR2 into thread sigusr2_thread.
-gdb_test "thread $sigusr2_thread" ""
+gdb_test "thread $sigusr2_thread" ""  \
+    "switch to SIGUSR2 thread"
 gdb_test_no_output "queue-signal SIGUSR2"
 
 # The main thread gets SIGABRT which we then throw away.
 gdb_test "thread 1" ""
-gdb_test "continue" "SIGABRT.*"
+gdb_test "continue" "SIGABRT.*"  \
+    "continue until we get SIGABRT"
 gdb_test_no_output "queue-signal 0"
 
 # Now let every thread run.

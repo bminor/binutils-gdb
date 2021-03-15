@@ -1,3 +1,23 @@
+2021-03-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.threads/execl.exp: Remove duplicate 'info threads' test.
+	Make use of $gdb_test_name instead of creating a separate $test
+	variable.
+	* gdb.threads/print-threads.exp: Add a with_test_prefix instead of
+	adding a '($name)' at the end of each test.  This also catches the
+	one place where '($name)' was missing, and so caused a duplicate
+	test name.
+	* gdb.threads/queue-signal.exp: Give tests unique names to avoid
+	duplicate test names based on the command being tested.
+	* gdb.threads/signal-command-multiple-signals-pending.exp:
+	Likewise.
+	* lib/gdb.exp (gdb_compile_shlib_pthreads): Tweak test name to
+	avoid duplicate testnames when a test script uses this proc and
+	also gdb_compile_pthreads.
+	* lib/prelink-support.exp (build_executable_own_libs): Use
+	with_test_prefix to avoid duplicate test names when we call
+	build_executable twice.
+
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/fixed_points.exp: Add tests of unary + and -.

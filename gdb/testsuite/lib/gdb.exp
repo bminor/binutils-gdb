@@ -4529,7 +4529,7 @@ proc gdb_compile_shlib_pthreads {sources dest options} {
                 set why_msg "missing runtime threads library"
             }
             {^$} {
-                pass "successfully compiled posix threads test case"
+                pass "successfully compiled posix threads shlib test case"
                 set built_binfile 1
                 break
             }
