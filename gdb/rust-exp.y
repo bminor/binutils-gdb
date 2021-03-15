@@ -43,6 +43,7 @@
 #include "gdbarch.h"
 #include "rust-exp.h"
 #include <unordered_map>
+#include "gdbsupport/hash_enum.h"
 
 #define GDB_YY_REMAP_PREFIX rust
 #include "yy-remap.h"
@@ -2202,7 +2203,8 @@ typedef expr::operation_up binop_maker_ftype (expr::operation_up &&,
 /* Map from an expression opcode to a function that will create an
    instance of the appropriate operation subclass.  Only binary
    operations are handled this way.  */
-static std::unordered_map<exp_opcode, binop_maker_ftype *> maker_map;
+static std::unordered_map<exp_opcode, binop_maker_ftype *,
+			  gdb::hash_enum<exp_opcode>> maker_map;
 
 /* Lower a rust_op to a gdb expression.  STATE is the parser state.
    OPERATION is the operation to lower.  TOP is a pointer to the

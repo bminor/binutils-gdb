@@ -1,3 +1,9 @@
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
+	PR build/27579:
+	* rust-exp.y (maker_map): Use gdb::hash_enum.
+	* stap-probe.c (stap_maker_map): Use gdb::hash_enum.
+
 2021-03-15  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.c (create_debug_type_hash_table): Remove colon at
