@@ -3690,6 +3690,7 @@ numeric_type_p (struct type *type)
 	{
 	case TYPE_CODE_INT:
 	case TYPE_CODE_FLT:
+	case TYPE_CODE_FIXED_POINT:
 	  return 1;
 	case TYPE_CODE_RANGE:
 	  return (type == TYPE_TARGET_TYPE (type)
@@ -3737,6 +3738,7 @@ scalar_type_p (struct type *type)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_FLT:
+	case TYPE_CODE_FIXED_POINT:
 	  return 1;
 	default:
 	  return 0;

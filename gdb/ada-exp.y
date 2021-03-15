@@ -166,17 +166,77 @@ ada_addrof (struct type *type = nullptr)
   pstate->push (std::move (wrapped));
 }
 
+/* Handle operator overloading.  Either returns a function all
+   operation wrapping the arguments, or it returns null, leaving the
+   caller to construct the appropriate operation.  If RHS is null, a
+   unary operator is assumed.  */
+static operation_up
+maybe_overload (enum exp_opcode op, operation_up &lhs, operation_up &rhs)
+{
+  struct value *args[2];
+
+  int nargs = 1;
+  args[0] = lhs->evaluate (nullptr, pstate->expout.get (),
+			   EVAL_AVOID_SIDE_EFFECTS);
+  if (rhs == nullptr)
+    args[1] = nullptr;
+  else
+    {
+      args[1] = rhs->evaluate (nullptr, pstate->expout.get (),
+			       EVAL_AVOID_SIDE_EFFECTS);
+      ++nargs;
+    }
+
+  block_symbol fn = ada_find_operator_symbol (op, pstate->parse_completion,
+					      nargs, args);
+  if (fn.symbol == nullptr)
+    return {};
+
+  if (symbol_read_needs_frame (fn.symbol))
+    pstate->block_tracker->update (fn.block, INNERMOST_BLOCK_FOR_SYMBOLS);
+  operation_up callee
+    = make_operation<ada_var_value_operation> (fn.symbol, fn.block);
+
+  std::vector<operation_up> argvec;
+  argvec.push_back (std::move (lhs));
+  if (rhs != nullptr)
+    argvec.push_back (std::move (rhs));
+  return make_operation<ada_funcall_operation> (std::move (callee),
+						std::move (argvec));
+}
+
+/* Like parser_state::wrap, but use ada_pop to pop the value, and
+   handle unary overloading.  */
+template<typename T>
+void
+ada_wrap_overload (enum exp_opcode op)
+{
+  operation_up arg = ada_pop ();
+  operation_up empty;
+
+  operation_up call = maybe_overload (op, arg, empty);
+  if (call == nullptr)
+    call = make_operation<T> (std::move (arg));
+  pstate->push (std::move (call));
+}
+
 /* A variant of parser_state::wrap2 that uses ada_pop to pop both
    operands, and then pushes a new Ada-wrapped operation of the
    template type T.  */
 template<typename T>
 void
-ada_un_wrap2 ()
+ada_un_wrap2 (enum exp_opcode op)
 {
   operation_up rhs = ada_pop ();
   operation_up lhs = ada_pop ();
-  operation_up wrapped = make_operation<T> (std::move (lhs), std::move (rhs));
-  pstate->push_new<ada_wrapped_operation> (std::move (wrapped));
+
+  operation_up wrapped = maybe_overload (op, lhs, rhs);
+  if (wrapped == nullptr)
+    {
+      wrapped = make_operation<T> (std::move (lhs), std::move (rhs));
+      wrapped = make_operation<ada_wrapped_operation> (std::move (wrapped));
+    }
+  pstate->push (std::move (wrapped));
 }
 
 /* A variant of parser_state::wrap2 that uses ada_pop to pop both
@@ -184,11 +244,14 @@ ada_un_wrap2 ()
    used.  */
 template<typename T>
 void
-ada_wrap2 ()
+ada_wrap2 (enum exp_opcode op)
 {
   operation_up rhs = ada_pop ();
   operation_up lhs = ada_pop ();
-  pstate->push_new<T> (std::move (lhs), std::move (rhs));
+  operation_up call = maybe_overload (op, lhs, rhs);
+  if (call == nullptr)
+    call = make_operation<T> (std::move (lhs), std::move (rhs));
+  pstate->push (std::move (call));
 }
 
 /* A variant of parser_state::wrap2 that uses ada_pop to pop both
@@ -200,7 +263,10 @@ ada_wrap_op (enum exp_opcode op)
 {
   operation_up rhs = ada_pop ();
   operation_up lhs = ada_pop ();
-  pstate->push_new<T> (op, std::move (lhs), std::move (rhs));
+  operation_up call = maybe_overload (op, lhs, rhs);
+  if (call == nullptr)
+    call = make_operation<T> (op, std::move (lhs), std::move (rhs));
+  pstate->push (std::move (call));
 }
 
 /* Pop three operands using ada_pop, then construct a new ternary
@@ -411,7 +477,7 @@ start   :	exp1
 /* Expressions, including the sequencing operator.  */
 exp1	:	exp
 	|	exp1 ';' exp
-			{ ada_wrap2<comma_operation> (); }
+			{ ada_wrap2<comma_operation> (BINOP_COMMA); }
 	| 	primary ASSIGN exp   /* Extension for convenience */
 			{
 			  operation_up rhs = pstate->pop ();
@@ -515,21 +581,32 @@ simple_exp : 	primary
 	;
 
 simple_exp :	'-' simple_exp    %prec UNARY
-			{ ada_wrap<ada_neg_operation> (); }
+			{ ada_wrap_overload<ada_neg_operation> (UNOP_NEG); }
 	;
 
 simple_exp :	'+' simple_exp    %prec UNARY
 			{
-			  /* No need to do anything.  */
+			  operation_up arg = ada_pop ();
+			  operation_up empty;
+
+			  /* We only need to handle the overloading
+			     case here, not anything else.  */
+			  operation_up call = maybe_overload (UNOP_PLUS, arg,
+							      empty);
+			  if (call != nullptr)
+			    pstate->push (std::move (call));
 			}
 	;
 
 simple_exp :	NOT simple_exp    %prec UNARY
-			{ ada_wrap<unary_logical_not_operation> (); }
+			{
+			  ada_wrap_overload<unary_logical_not_operation>
+			    (UNOP_LOGICAL_NOT);
+			}
 	;
 
 simple_exp :    ABS simple_exp	   %prec UNARY
-			{ ada_wrap<ada_abs_operation> (); }
+			{ ada_wrap_overload<ada_abs_operation> (UNOP_ABS); }
 	;
 
 arglist	:		{ $$ = 0; }
@@ -559,27 +636,27 @@ primary :	'{' var_or_type '}' primary  %prec '.'
 /* Binary operators in order of decreasing precedence.  */
 
 simple_exp 	: 	simple_exp STARSTAR simple_exp
-			{ ada_wrap2<ada_binop_exp_operation> (); }
+			{ ada_wrap2<ada_binop_exp_operation> (BINOP_EXP); }
 	;
 
 simple_exp	:	simple_exp '*' simple_exp
-			{ ada_wrap2<ada_binop_mul_operation> (); }
+			{ ada_wrap2<ada_binop_mul_operation> (BINOP_MUL); }
 	;
 
 simple_exp	:	simple_exp '/' simple_exp
-			{ ada_wrap2<ada_binop_div_operation> (); }
+			{ ada_wrap2<ada_binop_div_operation> (BINOP_DIV); }
 	;
 
 simple_exp	:	simple_exp REM simple_exp /* May need to be fixed to give correct Ada REM */
-			{ ada_wrap2<ada_binop_rem_operation> (); }
+			{ ada_wrap2<ada_binop_rem_operation> (BINOP_REM); }
 	;
 
 simple_exp	:	simple_exp MOD simple_exp
-			{ ada_wrap2<ada_binop_mod_operation> (); }
+			{ ada_wrap2<ada_binop_mod_operation> (BINOP_MOD); }
 	;
 
 simple_exp	:	simple_exp '@' simple_exp	/* GDB extension */
-			{ ada_wrap2<repeat_operation> (); }
+			{ ada_wrap2<repeat_operation> (BINOP_REPEAT); }
 	;
 
 simple_exp	:	simple_exp '+' simple_exp
@@ -587,7 +664,7 @@ simple_exp	:	simple_exp '+' simple_exp
 	;
 
 simple_exp	:	simple_exp '&' simple_exp
-			{ ada_wrap2<concat_operation> (); }
+			{ ada_wrap2<concat_operation> (BINOP_CONCAT); }
 	;
 
 simple_exp	:	simple_exp '-' simple_exp
@@ -606,7 +683,7 @@ relation :	simple_exp NOTEQUAL simple_exp
 	;
 
 relation :	simple_exp LEQ simple_exp
-			{ ada_un_wrap2<leq_operation> (); }
+			{ ada_un_wrap2<leq_operation> (BINOP_LEQ); }
 	;
 
 relation :	simple_exp IN simple_exp DOTDOT simple_exp
@@ -649,15 +726,15 @@ relation :	simple_exp IN simple_exp DOTDOT simple_exp
 	;
 
 relation :	simple_exp GEQ simple_exp
-			{ ada_un_wrap2<geq_operation> (); }
+			{ ada_un_wrap2<geq_operation> (BINOP_GEQ); }
 	;
 
 relation :	simple_exp '<' simple_exp
-			{ ada_un_wrap2<less_operation> (); }
+			{ ada_un_wrap2<less_operation> (BINOP_LESS); }
 	;
 
 relation :	simple_exp '>' simple_exp
-			{ ada_un_wrap2<gtr_operation> (); }
+			{ ada_un_wrap2<gtr_operation> (BINOP_GTR); }
 	;
 
 exp	:	relation
@@ -670,36 +747,44 @@ exp	:	relation
 
 and_exp :
 		relation _AND_ relation 
-			{ ada_wrap2<ada_bitwise_and_operation> (); }
+			{ ada_wrap2<ada_bitwise_and_operation>
+			    (BINOP_BITWISE_AND); }
 	|	and_exp _AND_ relation
-			{ ada_wrap2<ada_bitwise_and_operation> (); }
+			{ ada_wrap2<ada_bitwise_and_operation>
+			    (BINOP_BITWISE_AND); }
 	;
 
 and_then_exp :
 	       relation _AND_ THEN relation
-			{ ada_wrap2<logical_and_operation> (); }
+			{ ada_wrap2<logical_and_operation>
+			    (BINOP_LOGICAL_AND); }
 	|	and_then_exp _AND_ THEN relation
-			{ ada_wrap2<logical_and_operation> (); }
+			{ ada_wrap2<logical_and_operation>
+			    (BINOP_LOGICAL_AND); }
 	;
 
 or_exp :
 		relation OR relation 
-			{ ada_wrap2<ada_bitwise_ior_operation> (); }
+			{ ada_wrap2<ada_bitwise_ior_operation>
+			    (BINOP_BITWISE_IOR); }
 	|	or_exp OR relation
-			{ ada_wrap2<ada_bitwise_ior_operation> (); }
+			{ ada_wrap2<ada_bitwise_ior_operation>
+			    (BINOP_BITWISE_IOR); }
 	;
 
 or_else_exp :
 	       relation OR ELSE relation
-			{ ada_wrap2<logical_or_operation> (); }
+			{ ada_wrap2<logical_or_operation> (BINOP_LOGICAL_OR); }
 	|      or_else_exp OR ELSE relation
-			{ ada_wrap2<logical_or_operation> (); }
+			{ ada_wrap2<logical_or_operation> (BINOP_LOGICAL_OR); }
 	;
 
 xor_exp :       relation XOR relation
-			{ ada_wrap2<ada_bitwise_xor_operation> (); }
+			{ ada_wrap2<ada_bitwise_xor_operation>
+			    (BINOP_BITWISE_XOR); }
 	|	xor_exp XOR relation
-			{ ada_wrap2<ada_bitwise_xor_operation> (); }
+			{ ada_wrap2<ada_bitwise_xor_operation>
+			    (BINOP_BITWISE_XOR); }
 	;
 
 /* Primaries can denote types (OP_TYPE).  In cases such as 
@@ -737,9 +822,9 @@ primary :	primary TICK_ACCESS
 	|	primary TICK_TAG
 			{ ada_wrap<ada_atr_tag_operation> (); }
 	|       opt_type_prefix TICK_MIN '(' exp ',' exp ')'
-			{ ada_wrap2<ada_binop_min_operation> (); }
+			{ ada_wrap2<ada_binop_min_operation> (BINOP_MIN); }
 	|       opt_type_prefix TICK_MAX '(' exp ',' exp ')'
-			{ ada_wrap2<ada_binop_max_operation> (); }
+			{ ada_wrap2<ada_binop_max_operation> (BINOP_MAX); }
 	| 	opt_type_prefix TICK_POS '(' exp ')'
 			{ ada_wrap<ada_pos_operation> (); }
 	|	type_prefix TICK_VAL '(' exp ')'
@@ -970,7 +1055,7 @@ primary	:	'*' primary		%prec '.'
 			{ ada_addrof (); }
 	|	primary '[' exp ']'
 			{
-			  ada_wrap2<subscript_operation> ();
+			  ada_wrap2<subscript_operation> (BINOP_SUBSCRIPT);
 			  ada_wrap<ada_wrapped_operation> ();
 			}
 	;
