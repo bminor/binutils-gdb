@@ -1,3 +1,20 @@
+2021-03-15  Nick Clifton  <nickc@redhat.com>
+
+	PR 27487
+	* nm.c (FORMAT_JUST_SYMBOLS): Define.
+	(struct optput_fns): Add entry for FORMAT_JUST_SYMBOLS.
+	(long_options): Add just-symbols.
+	(set_output_format): Add support for just-symbols.
+	(get_print_format): Likewise.
+	(do_not_print_object_filename): New function.
+	(do_not_print_archive_filename): New function.
+	(do_not_print_archive_member): New function.
+	(do_not_print_symbol_filename): New function.
+	(just_print_symbol_name): New function.
+	(main): Handle --just-symbols.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+
 2021-03-12  Clément Chigot  <clement.chigot@atos.net>
 
 	* od-xcoff.c: Replace RTB by TRL entry.

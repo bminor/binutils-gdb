@@ -79,41 +79,63 @@ struct extended_symbol_info
 static void print_object_filename_bsd (const char *);
 static void print_object_filename_sysv (const char *);
 static void print_object_filename_posix (const char *);
+static void do_not_print_object_filename (const char *);
+
 static void print_archive_filename_bsd (const char *);
 static void print_archive_filename_sysv (const char *);
 static void print_archive_filename_posix (const char *);
+static void do_not_print_archive_filename (const char *);
+
 static void print_archive_member_bsd (const char *, const char *);
 static void print_archive_member_sysv (const char *, const char *);
 static void print_archive_member_posix (const char *, const char *);
+static void do_not_print_archive_member (const char *, const char *);
+
 static void print_symbol_filename_bsd (bfd *, bfd *);
 static void print_symbol_filename_sysv (bfd *, bfd *);
 static void print_symbol_filename_posix (bfd *, bfd *);
-static void print_value (bfd *, bfd_vma);
+static void do_not_print_symbol_filename (bfd *, bfd *);
+
 static void print_symbol_info_bsd (struct extended_symbol_info *, bfd *);
 static void print_symbol_info_sysv (struct extended_symbol_info *, bfd *);
 static void print_symbol_info_posix (struct extended_symbol_info *, bfd *);
+static void just_print_symbol_name (struct extended_symbol_info *, bfd *);
+
+static void print_value (bfd *, bfd_vma);
 
 /* Support for different output formats.  */
 struct output_fns
-  {
-    /* Print the name of an object file given on the command line.  */
-    void (*print_object_filename) (const char *);
+{
+  /* Print the name of an object file given on the command line.  */
+  void (*print_object_filename) (const char *);
 
-    /* Print the name of an archive file given on the command line.  */
-    void (*print_archive_filename) (const char *);
+  /* Print the name of an archive file given on the command line.  */
+  void (*print_archive_filename) (const char *);
 
-    /* Print the name of an archive member file.  */
-    void (*print_archive_member) (const char *, const char *);
+  /* Print the name of an archive member file.  */
+  void (*print_archive_member) (const char *, const char *);
 
-    /* Print the name of the file (and archive, if there is one)
-       containing a symbol.  */
-    void (*print_symbol_filename) (bfd *, bfd *);
+  /* Print the name of the file (and archive, if there is one)
+     containing a symbol.  */
+  void (*print_symbol_filename) (bfd *, bfd *);
 
-    /* Print a line of information about a symbol.  */
-    void (*print_symbol_info) (struct extended_symbol_info *, bfd *);
-  };
+  /* Print a line of information about a symbol.  */
+  void (*print_symbol_info) (struct extended_symbol_info *, bfd *);
+};
 
-static struct output_fns formats[] =
+/* Indices in `formats'.  */
+enum formats
+{
+  FORMAT_BSD = 0,
+  FORMAT_SYSV,
+  FORMAT_POSIX,
+  FORMAT_JUST_SYMBOLS,
+  FORMAT_MAX
+};
+
+#define FORMAT_DEFAULT FORMAT_BSD
+
+static struct output_fns formats[FORMAT_MAX] =
 {
   {print_object_filename_bsd,
    print_archive_filename_bsd,
@@ -129,14 +151,14 @@ static struct output_fns formats[] =
    print_archive_filename_posix,
    print_archive_member_posix,
    print_symbol_filename_posix,
-   print_symbol_info_posix}
+   print_symbol_info_posix},
+  {do_not_print_object_filename,
+   do_not_print_archive_filename,
+   do_not_print_archive_member,
+   do_not_print_symbol_filename,
+   just_print_symbol_name}
 };
 
-/* Indices in `formats'.  */
-#define FORMAT_BSD 0
-#define FORMAT_SYSV 1
-#define FORMAT_POSIX 2
-#define FORMAT_DEFAULT FORMAT_BSD
 
 /* The output format to use.  */
 static struct output_fns *format = &formats[FORMAT_DEFAULT];
@@ -214,6 +236,7 @@ static struct option long_options[] =
   {"format", required_argument, 0, 'f'},
   {"help", no_argument, 0, 'h'},
   {"ifunc-chars", required_argument, 0, OPTION_IFUNC_CHARS},
+  {"just-symbols", no_argument, 0, 'j'},
   {"line-numbers", no_argument, 0, 'l'},
   {"no-cplus", no_argument, &do_demangle, 0},  /* Linux compatibility.  */
   {"no-demangle", no_argument, &do_demangle, 0},
@@ -265,9 +288,10 @@ usage (FILE *stream, int status)
       --defined-only     Display only defined symbols\n\
   -e                     (ignored)\n\
   -f, --format=FORMAT    Use the output format FORMAT.  FORMAT can be `bsd',\n\
-                           `sysv' or `posix'.  The default is `bsd'\n\
+                           `sysv', `posix' or 'just-symbols'.  The default is `bsd'\n\
   -g, --extern-only      Display only external symbols\n\
     --ifunc-chars=CHARS  Characters to use when displaying ifunc symbols\n\
+  -j, --just-symbols     Same as --format=just-symbols\n\
   -l, --line-numbers     Use debugging information to find a filename and\n\
                            line number for each symbol\n\
   -n, --numeric-sort     Sort symbols numerically by address\n\
@@ -337,6 +361,10 @@ set_output_format (char *f)
     case 's':
     case 'S':
       i = FORMAT_SYSV;
+      break;
+    case 'j':
+    case 'J':
+      i = FORMAT_JUST_SYMBOLS;
       break;
     default:
       fatal (_("%s: invalid output format"), f);
@@ -1268,7 +1296,7 @@ static const char *
 get_print_format (void)
 {
   const char * padding;
-  if (print_format == FORMAT_POSIX)
+  if (print_format == FORMAT_POSIX || print_format == FORMAT_JUST_SYMBOLS)
     {
       /* POSIX compatible output does not have any padding.  */
       padding = "";
@@ -1477,6 +1505,11 @@ print_object_filename_posix (const char *filename)
   if (filename_per_file && !filename_per_symbol)
     printf ("%s:\n", filename);
 }
+
+static void
+do_not_print_object_filename (const char *filename ATTRIBUTE_UNUSED)
+{
+}
 
 /* Print the name of an archive file given on the command line.  */
 
@@ -1494,6 +1527,11 @@ print_archive_filename_sysv (const char *filename ATTRIBUTE_UNUSED)
 
 static void
 print_archive_filename_posix (const char *filename ATTRIBUTE_UNUSED)
+{
+}
+
+static void
+do_not_print_archive_filename (const char *filename ATTRIBUTE_UNUSED)
 {
 }
 
@@ -1528,6 +1566,13 @@ print_archive_member_posix (const char *archive, const char *filename)
   if (!filename_per_symbol)
     printf ("%s[%s]:\n", archive, filename);
 }
+
+static void
+do_not_print_archive_member (const char *archive ATTRIBUTE_UNUSED,
+			     const char *filename ATTRIBUTE_UNUSED)
+{
+}
+
 
 /* Print the name of the file (and archive, if there is one)
    containing a symbol.  */
@@ -1566,6 +1611,13 @@ print_symbol_filename_posix (bfd *archive_bfd, bfd *abfd)
 	printf ("%s: ", bfd_get_filename (abfd));
     }
 }
+
+static void
+do_not_print_symbol_filename (bfd *archive_bfd ATTRIBUTE_UNUSED,
+			      bfd *abfd ATTRIBUTE_UNUSED)
+{
+}
+
 
 /* Print a symbol value.  */
 
@@ -1723,6 +1775,12 @@ print_symbol_info_posix (struct extended_symbol_info *info, bfd *abfd)
 	print_value (abfd, SYM_SIZE (info));
     }
 }
+
+static void
+just_print_symbol_name (struct extended_symbol_info *info, bfd *abfd)
+{
+  print_symname ("%s", info, NULL, abfd);
+}
 
 int
 main (int argc, char **argv)
@@ -1755,7 +1813,7 @@ main (int argc, char **argv)
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:gHhlnopPrSst:uvVvX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uvVvX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -1829,6 +1887,9 @@ main (int argc, char **argv)
 	  break;
 	case 'P':
 	  set_output_format ("posix");
+	  break;
+	case 'j':
+	  set_output_format ("just-symbols");
 	  break;
 	case 'r':
 	  reverse_sort = 1;

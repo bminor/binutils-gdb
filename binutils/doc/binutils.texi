@@ -793,23 +793,37 @@ The @sc{gnu} linker @command{ld} is now described in a separate manual.
 
 @smallexample
 @c man begin SYNOPSIS nm
-nm [@option{-A}|@option{-o}|@option{--print-file-name}] [@option{-a}|@option{--debug-syms}]
-   [@option{-B}|@option{--format=bsd}] [@option{-C}|@option{--demangle}[=@var{style}]]
-   [@option{-D}|@option{--dynamic}] [@option{-f}@var{format}|@option{--format=}@var{format}]
-   [@option{-g}|@option{--extern-only}] [@option{-h}|@option{--help}]
+nm [@option{-A}|@option{-o}|@option{--print-file-name}]
+   [@option{-a}|@option{--debug-syms}]
+   [@option{-B}|@option{--format=bsd}]
+   [@option{-C}|@option{--demangle}[=@var{style}]]
+   [@option{-D}|@option{--dynamic}]
+   [@option{-f}@var{format}|@option{--format=}@var{format}]
+   [@option{-g}|@option{--extern-only}]
+   [@option{-h}|@option{--help}]
    [@option{--ifunc-chars=@var{CHARS}}]
+   [@option{-j}|@option{--format=just-symbols}]
    [@option{-l}|@option{--line-numbers}] [@option{--inlines}]
    [@option{-n}|@option{-v}|@option{--numeric-sort}]
-   [@option{-P}|@option{--portability}] [@option{-p}|@option{--no-sort}]
-   [@option{-r}|@option{--reverse-sort}] [@option{-S}|@option{--print-size}]
-   [@option{-s}|@option{--print-armap}] [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
-   [@option{-u}|@option{--undefined-only}] [@option{-V}|@option{--version}]
-   [@option{-X 32_64}] [@option{--defined-only}] [@option{--no-demangle}]
-   [@option{--plugin} @var{name}]
+   [@option{-P}|@option{--portability}]
+   [@option{-p}|@option{--no-sort}]
+   [@option{-r}|@option{--reverse-sort}]
+   [@option{-S}|@option{--print-size}]
+   [@option{-s}|@option{--print-armap}]
+   [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
+   [@option{-u}|@option{--undefined-only}]
+   [@option{-V}|@option{--version}]
+   [@option{-X 32_64}]
+   [@option{--defined-only}]
+   [@option{--no-demangle}]
    [@option{--no-recurse-limit}|@option{--recurse-limit}]]
-   [@option{--size-sort}] [@option{--special-syms}]
-   [@option{--synthetic}] [@option{--with-symbol-versions}]
-   [@option{--without-symbol-versions}] [@option{--target=}@var{bfdname}]
+   [@option{--plugin} @var{name}]
+   [@option{--size-sort}]
+   [@option{--special-syms}]
+   [@option{--synthetic}]
+   [@option{--target=}@var{bfdname}]
+   [@option{--with-symbol-versions}]
+   [@option{--without-symbol-versions}]
    [@var{objfile}@dots{}]
 @c man end
 @end smallexample
@@ -1027,7 +1041,7 @@ libraries.
 @cindex @command{nm} format
 @cindex @command{nm} compatibility
 Use the output format @var{format}, which can be @code{bsd},
-@code{sysv}, or @code{posix}.  The default is @code{bsd}.
+@code{sysv}, @code{posix} or @code{just-symbols}.  The default is @code{bsd}.
 Only the first character of @var{format} is significant; it can be
 either upper or lower case.
 
@@ -1048,6 +1062,9 @@ the user to specify a string containing one or two characters. The
 first character will be used for global indirect function symbols and
 the second character, if present, will be used for local indirect
 function symbols.
+
+@item j
+The same as @option{--format=just-symbols}.
 
 @item -l
 @itemx --line-numbers

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* A new format has been added to the nm program.  Specifying
+  --format=just-symbols (or just using -j) will tell the program to only
+  display symbol names and nothing else.
+
 * A new command line --keep-section-symbols has been added to objcopy and
   strip.  This stops the removal of unused section symbols when the file is
   copied.  Removing these symbols saves space, but sometimes they are needed by
