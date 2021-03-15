@@ -1,5 +1,10 @@
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
+	* ada-exp.y (exp1): Handle resolution of the right hand side of an
+	assignment.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_aggregate_operation::assign_aggregate): Return
 	container.
 	(ada_assign_operation::evaluate): Update.

@@ -1,5 +1,12 @@
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/enums_overload/enums_overload_main.adb: New file.
+	* gdb.ada/enums_overload/enums_overload.ads: New file.
+	* gdb.ada/enums_overload/enums_overload.adb: New file.
+	* gdb.ada/enums_overload.exp: New file.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/assign_arr/target_wrapper.ads (IArray, Put, Do_Nothing):
 	Declare.
 	* gdb.ada/assign_arr/target_wrapper.adb: New file.

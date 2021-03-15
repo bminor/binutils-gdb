@@ -413,7 +413,17 @@ exp1	:	exp
 	|	exp1 ';' exp
 			{ ada_wrap2<comma_operation> (); }
 	| 	primary ASSIGN exp   /* Extension for convenience */
-			{ ada_wrap2<ada_assign_operation> (); }
+			{
+			  operation_up rhs = pstate->pop ();
+			  operation_up lhs = ada_pop ();
+			  value *lhs_val
+			    = lhs->evaluate (nullptr, pstate->expout.get (),
+					     EVAL_AVOID_SIDE_EFFECTS);
+			  rhs = resolve (std::move (rhs), true,
+					 value_type (lhs_val));
+			  pstate->push_new<ada_assign_operation>
+			    (std::move (lhs), std::move (rhs));
+			}
 	;
 
 /* Expressions, not including the sequencing operator.  */
