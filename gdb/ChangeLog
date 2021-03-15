@@ -1,5 +1,9 @@
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
+	* ada-exp.y (simple_exp): Always push a result for unary '+'.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_unop_ind_operation::evaluate): Call
 	ada_ensure_varsize_limit.
 

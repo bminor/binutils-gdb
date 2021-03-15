@@ -1,5 +1,9 @@
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/fixed_points.exp: Add tests of unary + and -.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/varsize_limit.exp: Add new test.
 	* gdb.ada/varsize_limit/vsizelim.adb: Update.
 

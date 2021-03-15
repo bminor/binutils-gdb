@@ -589,12 +589,14 @@ simple_exp :	'+' simple_exp    %prec UNARY
 			  operation_up arg = ada_pop ();
 			  operation_up empty;
 
-			  /* We only need to handle the overloading
-			     case here, not anything else.  */
+			  /* If an overloaded operator was found, use
+			     it.  Otherwise, unary + has no effect and
+			     the argument can be pushed instead.  */
 			  operation_up call = maybe_overload (UNOP_PLUS, arg,
 							      empty);
 			  if (call != nullptr)
-			    pstate->push (std::move (call));
+			    arg = std::move (call);
+			  pstate->push (std::move (arg));
 			}
 	;
 
