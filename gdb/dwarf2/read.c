@@ -6286,7 +6286,7 @@ create_debug_type_hash_table (dwarf2_per_objfile *per_objfile,
 		    ? &dwo_file->sections.abbrev
 		    : &per_objfile->per_bfd->abbrev);
 
-  dwarf_read_debug_printf ("Reading %s for %s:",
+  dwarf_read_debug_printf ("Reading %s for %s",
 			   section->get_name (),
 			   abbrev_section->get_file_name ());
 
