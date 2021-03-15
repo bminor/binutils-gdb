@@ -1,3 +1,15 @@
+2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* objc-lang.c (objc_demangle): Renamed to
+	objc_language::demangle_symbol, and moved later in the file.
+	(objc_language::sniff_from_mangled_name): Call demangle_symbol
+	member function.
+	(objc_language::demangle_symbol): Defined outside of class
+	declaration.  The definition is the old objc_demangle with NULL
+	changed to nullptr, and if conditions relating to nullptr pointers
+	or null character checks made explicit.
+	* objc-lang.h (objc_demangle): Delete declaration.
+
 2021-03-22  Martin Liska  <mliska@suse.cz>
 
 	* arm-tdep.c (show_disassembly_style_sfunc): Replace usage of CONST_STRNEQ with startswith.

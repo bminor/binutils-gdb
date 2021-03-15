@@ -216,72 +216,6 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   return nsstringValue;
 }
 
-/* Objective-C name demangling.  */
-
-char *
-objc_demangle (const char *mangled, int options)
-{
-  char *demangled, *cp;
-
-  if (mangled[0] == '_' &&
-     (mangled[1] == 'i' || mangled[1] == 'c') &&
-      mangled[2] == '_')
-    {
-      cp = demangled = (char *) xmalloc (strlen (mangled) + 2);
-
-      if (mangled[1] == 'i')
-	*cp++ = '-';		/* for instance method */
-      else
-	*cp++ = '+';		/* for class    method */
-
-      *cp++ = '[';		/* opening left brace  */
-      strcpy(cp, mangled+3);	/* Tack on the rest of the mangled name.  */
-
-      while (*cp && *cp == '_')
-	cp++;			/* Skip any initial underbars in class
-				   name.  */
-
-      cp = strchr(cp, '_');
-      if (!cp)	                /* Find first non-initial underbar.  */
-	{
-	  xfree(demangled);	/* not mangled name */
-	  return NULL;
-	}
-      if (cp[1] == '_')		/* Easy case: no category name.    */
-	{
-	  *cp++ = ' ';		/* Replace two '_' with one ' '.   */
-	  strcpy(cp, mangled + (cp - demangled) + 2);
-	}
-      else
-	{
-	  *cp++ = '(';		/* Less easy case: category name.  */
-	  cp = strchr(cp, '_');
-	  if (!cp)
-	    {
-	      xfree(demangled);	/* not mangled name */
-	      return NULL;
-	    }
-	  *cp++ = ')';
-	  *cp++ = ' ';		/* Overwriting 1st char of method name...  */
-	  strcpy(cp, mangled + (cp - demangled));	/* Get it back.  */
-	}
-
-      while (*cp && *cp == '_')
-	cp++;			/* Skip any initial underbars in
-				   method name.  */
-
-      for (; *cp; cp++)
-	if (*cp == '_')
-	  *cp = ':';		/* Replace remaining '_' with ':'.  */
-
-      *cp++ = ']';		/* closing right brace */
-      *cp++ = 0;		/* string terminator */
-      return demangled;
-    }
-  else
-    return NULL;	/* Not an objc mangled name.  */
-}
-
 /* Class representing the Objective-C language.  */
 
 class objc_language : public language_defn
@@ -320,16 +254,13 @@ public:
   bool sniff_from_mangled_name (const char *mangled,
 				char **demangled) const override
   {
-    *demangled = objc_demangle (mangled, 0);
+    *demangled = demangle_symbol (mangled, 0);
     return *demangled != NULL;
   }
 
   /* See language.h.  */
 
-  char *demangle_symbol (const char *mangled, int options) const override
-  {
-    return objc_demangle (mangled, options);
-  }
+  char *demangle_symbol (const char *mangled, int options) const override;
 
   /* See language.h.  */
 
@@ -384,6 +315,72 @@ public:
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
 };
+
+/* See declaration of objc_language::demangle_symbol above.  */
+
+char *
+objc_language::demangle_symbol (const char *mangled, int options) const
+{
+  char *demangled, *cp;
+
+  if (mangled[0] == '_'
+      && (mangled[1] == 'i' || mangled[1] == 'c')
+      && mangled[2] == '_')
+    {
+      cp = demangled = (char *) xmalloc (strlen (mangled) + 2);
+
+      if (mangled[1] == 'i')
+	*cp++ = '-';		/* for instance method */
+      else
+	*cp++ = '+';		/* for class    method */
+
+      *cp++ = '[';		/* opening left brace  */
+      strcpy(cp, mangled+3);	/* Tack on the rest of the mangled name.  */
+
+      while (*cp != '\0' && *cp == '_')
+	cp++;			/* Skip any initial underbars in class
+				   name.  */
+
+      cp = strchr(cp, '_');
+      if (cp == nullptr)	/* Find first non-initial underbar.  */
+	{
+	  xfree(demangled);	/* not mangled name */
+	  return nullptr;
+	}
+      if (cp[1] == '_')		/* Easy case: no category name.    */
+	{
+	  *cp++ = ' ';		/* Replace two '_' with one ' '.   */
+	  strcpy(cp, mangled + (cp - demangled) + 2);
+	}
+      else
+	{
+	  *cp++ = '(';		/* Less easy case: category name.  */
+	  cp = strchr(cp, '_');
+	  if (cp == nullptr)
+	    {
+	      xfree(demangled);	/* not mangled name */
+	      return nullptr;
+	    }
+	  *cp++ = ')';
+	  *cp++ = ' ';		/* Overwriting 1st char of method name...  */
+	  strcpy(cp, mangled + (cp - demangled));	/* Get it back.  */
+	}
+
+      while (*cp != '\0' && *cp == '_')
+	cp++;			/* Skip any initial underbars in
+				   method name.  */
+
+      for (; *cp != '\0'; cp++)
+	if (*cp == '_')
+	  *cp = ':';		/* Replace remaining '_' with ':'.  */
+
+      *cp++ = ']';		/* closing right brace */
+      *cp++ = 0;		/* string terminator */
+      return demangled;
+    }
+  else
+    return nullptr;	/* Not an objc mangled name.  */
+}
 
 /* Single instance of the class representing the Objective-C language.  */
 

@@ -31,8 +31,6 @@ extern CORE_ADDR lookup_objc_class     (struct gdbarch *gdbarch,
 extern CORE_ADDR lookup_child_selector (struct gdbarch *gdbarch,
 					const char *methodname);
 
-extern char *objc_demangle (const char *mangled, int options);
-
 extern int find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc);
 
 extern const char *find_imps (const char *method,
