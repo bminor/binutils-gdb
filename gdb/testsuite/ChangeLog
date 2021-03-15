@@ -1,5 +1,11 @@
 2021-03-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-framefilter-addr.c: New file.
+	* gdb.python/py-framefilter-addr.exp: New file.
+	* gdb.python/py-framefilter-addr.py: New file.
+
+2021-03-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.threads/execl.exp: Remove duplicate 'info threads' test.
 	Make use of $gdb_test_name instead of creating a separate $test
 	variable.
