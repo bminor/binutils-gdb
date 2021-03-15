@@ -9101,13 +9101,9 @@ ada_aggregate_component::assign (struct value *container,
     item->assign (container, lhs, exp, indices, low, high);
 }
 
-/* Assuming that LHS represents an lvalue having a record or array
-   type, evaluate an assignment of this aggregate's value to LHS.
-   CONTAINER is an lvalue containing LHS (possibly LHS itself).  Does
-   not modify the inferior's memory, nor does it modify the contents
-   of LHS (unless == CONTAINER).  */
+/* See ada-exp.h.  */
 
-void
+value *
 ada_aggregate_operation::assign_aggregate (struct value *container,
 					   struct value *lhs,
 					   struct expression *exp)
@@ -9144,6 +9140,8 @@ ada_aggregate_operation::assign_aggregate (struct value *container,
 
   std::get<0> (m_storage)->assign (container, lhs, exp, indices,
 				   low_index, high_index);
+
+  return container;
 }
 
 bool
@@ -9349,7 +9347,7 @@ ada_assign_operation::evaluate (struct type *expect_type,
       if (noside != EVAL_NORMAL)
 	return arg1;
 
-      ag_op->assign_aggregate (arg1, arg1, exp);
+      arg1 = ag_op->assign_aggregate (arg1, arg1, exp);
       return ada_value_assign (arg1, arg1);
     }
   /* Force the evaluation of the rhs ARG2 to the type of the lhs ARG1,

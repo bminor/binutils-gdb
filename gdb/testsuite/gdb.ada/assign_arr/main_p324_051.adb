@@ -16,6 +16,8 @@
 with target_wrapper; use target_wrapper;
 
 procedure Main_P324_051 is
+   IValue : IArray (1 .. 3) := (8, 10, 12);
 begin
    Assign_Arr_Input.u2 := (0.2,0.3,0.4);  -- STOP
+   Put (IValue);
 end Main_P324_051;

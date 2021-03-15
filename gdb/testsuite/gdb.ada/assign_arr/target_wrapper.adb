@@ -1,4 +1,4 @@
---  Copyright 2016-2021 Free Software Foundation, Inc.
+--  Copyright 2021 Free Software Foundation, Inc.
 --
 --  This program is free software; you can redistribute it and/or modify
 --  it under the terms of the GNU General Public License as published by
@@ -13,22 +13,16 @@
 --  You should have received a copy of the GNU General Public License
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-with System;
+package body target_wrapper is
 
-package target_wrapper is
+   procedure Do_Nothing (A : System.Address) is
+   begin
+      null;
+   end Do_Nothing;
 
-   type Float_Array_3 is array (1 .. 3) of Float;
-
-   type parameters is record
-      u2 : Float_Array_3;
-   end record;
-
-   Assign_Arr_Input : parameters;
-
-   type IArray is array (Integer range <>) of Integer;
-
-   procedure Put (A : in out IArray);
-
-   procedure Do_Nothing (A : System.Address);
+   procedure Put (A : in out IArray) is
+   begin
+      Do_Nothing (A'Address); -- STOP2
+   end Put;
 
 end target_wrapper;

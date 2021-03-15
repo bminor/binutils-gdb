@@ -1,3 +1,11 @@
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_aggregate_operation::assign_aggregate): Return
+	container.
+	(ada_assign_operation::evaluate): Update.
+	* ada-exp.h (class ada_aggregate_operation) <assign_aggregate>:
+	Change return type.
+
 2021-03-15  Felix Willgerodt  <felix.willgerodt@intel.com>
 
 	* i386-tdep.c (i386_floatformat_for_type): Add COMPLEX*32 and REAL*16.

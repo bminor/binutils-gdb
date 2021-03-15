@@ -510,11 +510,12 @@ public:
      type, evaluate an assignment of this aggregate's value to LHS.
      CONTAINER is an lvalue containing LHS (possibly LHS itself).
      Does not modify the inferior's memory, nor does it modify the
-     contents of LHS (unless == CONTAINER).  */
+     contents of LHS (unless == CONTAINER).  Returns the modified
+     CONTAINER.  */
 
-  void assign_aggregate (struct value *container,
-			 struct value *lhs,
-			 struct expression *exp);
+  value *assign_aggregate (struct value *container,
+			   struct value *lhs,
+			   struct expression *exp);
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
