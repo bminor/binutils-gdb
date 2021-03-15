@@ -1,5 +1,11 @@
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
+	PR ada/27545:
+	* ada-lang.c (ada_var_value_operation::evaluate): Use recursive
+	call for tagged type.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
 	* ada-exp.y (exp1): Handle resolution of the right hand side of an
 	assignment.
 

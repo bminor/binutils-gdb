@@ -10320,8 +10320,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 	     a fixed type would result in the loss of that type name,
 	     thus preventing us from printing the name of the ancestor
 	     type in the type description.  */
-	  value *arg1 = var_value_operation::evaluate (nullptr, exp,
-						       EVAL_NORMAL);
+	  value *arg1 = evaluate (nullptr, exp, EVAL_NORMAL);
 
 	  if (type->code () != TYPE_CODE_REF)
 	    {
