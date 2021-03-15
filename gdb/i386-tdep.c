@@ -8162,9 +8162,12 @@ i386_floatformat_for_type (struct gdbarch *gdbarch,
 	|| strcmp (name, "_Float128") == 0
 	|| strcmp (name, "complex _Float128") == 0
 	|| strcmp (name, "complex(kind=16)") == 0
+	|| strcmp (name, "complex*32") == 0
+	|| strcmp (name, "COMPLEX*32") == 0
 	|| strcmp (name, "quad complex") == 0
 	|| strcmp (name, "real(kind=16)") == 0
-	|| strcmp (name, "real*16") == 0)
+	|| strcmp (name, "real*16") == 0
+	|| strcmp (name, "REAL*16") == 0)
       return floatformats_ia64_quad;
 
   return default_floatformat_for_type (gdbarch, name, len);

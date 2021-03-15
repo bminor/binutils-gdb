@@ -1,3 +1,7 @@
+2021-03-15  Felix Willgerodt  <felix.willgerodt@intel.com>
+
+	* i386-tdep.c (i386_floatformat_for_type): Add COMPLEX*32 and REAL*16.
+
 2021-03-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/python.c (gdbpy_source_objfile_script): Use
