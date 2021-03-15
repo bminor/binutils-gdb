@@ -1752,9 +1752,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
   if (page_ptr != (bfd_vma) -1)
     bfd_put_32 (abfd, reloc_sz - page_ptr, reloc_d + page_ptr + 4);
-
-  while (reloc_sz < reloc_s->size)
-    reloc_d[reloc_sz++] = 0;
 }
 
 /* Given the exiting def_file structure, print out a .DEF file that
