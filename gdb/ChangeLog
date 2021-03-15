@@ -1,5 +1,10 @@
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_unop_ind_operation::evaluate): Call
+	ada_ensure_varsize_limit.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (numeric_type_p, integer_type_p): Return true for
 	fixed-point.
 	* ada-exp.y (maybe_overload): New function.

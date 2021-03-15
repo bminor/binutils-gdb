@@ -10480,6 +10480,11 @@ ada_unop_ind_operation::evaluate (struct type *expect_type,
 			      (CORE_ADDR) value_as_address (arg1));
     }
 
+  struct type *target_type = (to_static_fixed_type
+			      (ada_aligned_type
+			       (ada_check_typedef (TYPE_TARGET_TYPE (type)))));
+  ada_ensure_varsize_limit (target_type);
+
   if (ada_is_array_descriptor_type (type))
     /* GDB allows dereferencing GNAT array descriptors.  */
     return ada_coerce_to_simple_array (arg1);

@@ -1,5 +1,10 @@
 2021-03-15  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/varsize_limit.exp: Add new test.
+	* gdb.ada/varsize_limit/vsizelim.adb: Update.
+
+2021-03-15  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/operator_call/twovecs.ads: New file.
 	* gdb.ada/operator_call/twovecs.adb: New file.
 	* gdb.ada/operator_call/opcall.adb: New file.

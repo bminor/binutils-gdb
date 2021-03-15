@@ -37,4 +37,4 @@ gdb_test "print small" " = \"1234567890\""
 
 gdb_test "print larger" "object size is larger than varsize-limit.*"
 
-
+gdb_test "print name.all" "object size is larger than varsize-limit.*"

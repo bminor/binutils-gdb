@@ -14,10 +14,24 @@
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 with Pck; use Pck;
+with System;
+with Unchecked_Conversion;
+
 procedure VsizeLim is
    Small : String := Ident ("1234567890");
    Larger : String := Ident ("1234567890|1234567890|1234567890");
+
+   type String_Ptr is access all String;
+   type Big_String_Ptr is access all String (Positive);
+
+   function To_Ptr is
+     new Unchecked_Conversion (System.Address, Big_String_Ptr);
+
+   Name_Str : String_Ptr := new String'(Larger);
+   Name : Big_String_Ptr := To_Ptr (Name_Str.all'Address);
+
 begin
    Do_Nothing (Small'Address); -- STOP
    Do_Nothing (Larger'Address);
+   Do_Nothing (Name'Address);
 end VsizeLim;
