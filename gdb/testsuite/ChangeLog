@@ -1,5 +1,12 @@
 2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.cp/gdb2384.cc (main): Change comments used for breakpoints.
+	* gdb.cp/gdb2384.exp: Change and extend test names to avoid
+	duplicates, and also to avoid having a string inside parentheses
+	at the end of test names.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.cp/nsusing.exp: Rewrite test, remove a duplicate test block.
 	Avoid repeated uses of 'runto', and instread just progress once
 	through the test stopping at different breakpoints.  Give comments

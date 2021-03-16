@@ -49,8 +49,8 @@ if ![runto_main] then {
     return -1
 }
 
-gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
-gdb_continue_to_breakpoint "set breakpoint here"
+gdb_breakpoint [gdb_get_line_number "First breakpoint"]
+gdb_continue_to_breakpoint "run to 'First breakpoint', first time"
 
 gdb_test "print d1.meth ()" \
     ".*42.*"
@@ -58,25 +58,25 @@ gdb_test "print d1.meth ()" \
 # Now try again.  gdb's without the fix will hopefully segv here
 
 runto_main
-gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
-gdb_continue_to_breakpoint "set breakpoint here"
+gdb_breakpoint [gdb_get_line_number "First breakpoint"]
+gdb_continue_to_breakpoint "run to 'First breakpoint', second time"
 gdb_test "print d1.meth ()" \
     ".*42.*" \
-    "gdb2384"
+    "gdb2384 at 'First breakpoint'"
 
 # second case
 
 runto_main
-gdb_breakpoint [gdb_get_line_number "set breakpoint here (second)"]
-gdb_continue_to_breakpoint "set breakpoint here (second)"
+gdb_breakpoint [gdb_get_line_number "Second breakpoint"]
+gdb_continue_to_breakpoint "run to 'Second breakpoint', first time"
 gdb_test "print d2.meth ()" \
     ".*24.*" \
     "print d2.meth()"
 
 runto_main
-gdb_breakpoint [gdb_get_line_number "set breakpoint here (second)"]
-gdb_continue_to_breakpoint "set breakpoint here (second)"
+gdb_breakpoint [gdb_get_line_number "Second breakpoint"]
+gdb_continue_to_breakpoint "run to 'Second breakpoint', second time"
 gdb_test "print d2.meth ()" \
     ".*24.*" \
-    "gdb2384 (second)"
+    "gdb2384 at 'Second breakpoint'"
 
