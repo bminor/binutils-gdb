@@ -961,3 +961,11 @@ const struct riscv_opcode riscv_insn_types[] =
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };
+
+/* Extended extensions.  */
+
+/* The supported extended extensions.  */
+const struct riscv_opcode *riscv_extended_opcodes[] =
+{
+  NULL
+};

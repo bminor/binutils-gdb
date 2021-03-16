@@ -174,25 +174,46 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
     pd->print_addr = (bfd_vma)(int32_t) pd->print_addr;
 }
 
+/* Print insn arguments for extended extensions.  */
+
+static bool
+print_extended_insn_args (const char **opcode_args,
+			  insn_t l ATTRIBUTE_UNUSED,
+			  disassemble_info *info ATTRIBUTE_UNUSED)
+{
+  const char *oparg = *opcode_args;
+
+  switch (*oparg)
+    {
+    default:
+      return false;
+    }
+
+  *opcode_args = oparg;
+  return true;
+}
+
 /* Print insn arguments for 32/64-bit code.  */
 
 static void
-print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
+print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info)
 {
   struct riscv_private_data *pd = info->private_data;
   int rs1 = (l >> OP_SH_RS1) & OP_MASK_RS1;
   int rd = (l >> OP_SH_RD) & OP_MASK_RD;
   fprintf_ftype print = info->fprintf_func;
+  const char *opargStart;
 
-  if (*d != '\0')
+  if (*oparg != '\0')
     print (info->stream, "\t");
 
-  for (; *d != '\0'; d++)
+  for (; *oparg != '\0'; oparg++)
     {
-      switch (*d)
+      opargStart = oparg;
+      switch (*oparg)
 	{
 	case 'C': /* RVC */
-	  switch (*++d)
+	  switch (*++oparg)
 	    {
 	    case 's': /* RS1 x8-x15.  */
 	    case 'w': /* RS1 x8-x15.  */
@@ -281,12 +302,12 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	case ')':
 	case '[':
 	case ']':
-	  print (info->stream, "%c", *d);
+	  print (info->stream, "%c", *oparg);
 	  break;
 
 	case '0':
 	  /* Only print constant 0 if it is the last argument.  */
-	  if (!d[1])
+	  if (!oparg[1])
 	    print (info->stream, "0");
 	  break;
 
@@ -415,6 +436,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 #define DECLARE_CSR_ALIAS(name, num, class, define_version, abort_version) \
 		DECLARE_CSR (name, num, class, define_version, abort_version)
 #include "opcode/riscv-opc.h"
+#include "opcode/riscv-opc-extended.h"
 #undef DECLARE_CSR
 	      }
 
@@ -430,12 +452,84 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	  break;
 
 	default:
-	  /* xgettext:c-format */
-	  print (info->stream, _("# internal error, undefined modifier (%c)"),
-		 *d);
-	  return;
+	  oparg = opargStart;
+	  if (!print_extended_insn_args (&oparg, l, info))
+	    {
+	      /* xgettext:c-format */
+	      print (info->stream,
+		     _("# internal error, undefined modifier (%s)"), opargStart);
+	      return;
+	    }
 	}
     }
+}
+
+/* Find the right opcode name when disassembling.  */
+
+static const struct riscv_opcode *
+riscv_disassemble_opcode (insn_t word,
+			  disassemble_info *info)
+{
+  static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
+  const struct riscv_opcode *op;
+  static bool init = 0;
+  unsigned xlen = 0;
+  unsigned int i;
+
+#define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
+
+  /* Build a hash table to shorten the search time.  For now we just build
+     the hash for the standard instructions.  */
+  if (! init)
+    {
+      for (op = riscv_opcodes; op->name; op++)
+	if (!riscv_hash[OP_HASH_IDX (op->match)])
+	  riscv_hash[OP_HASH_IDX (op->match)] = op;
+
+      init = 1;
+    }
+
+  /* Search the standard instructions first.  */
+  op = riscv_hash[OP_HASH_IDX (word)];
+  i = 0;
+  do
+    {
+      /* The hash table entry might be NULL.  */
+      if (op != NULL)
+	{
+	  /* If XLEN is not known, get its value from the ELF class.  */
+	  if (info->mach == bfd_mach_riscv64)
+	    xlen = 64;
+	  else if (info->mach == bfd_mach_riscv32)
+	    xlen = 32;
+	  else if (info->section != NULL)
+	    {
+	      Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
+	      xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
+	    }
+
+	  for (; op->name; op++)
+	    {
+	      /* Does the opcode match?  */
+	      if (! (op->match_func) (op, word))
+		continue;
+	      /* Is this a pseudo-instruction and may we print it as such?  */
+	      if (no_aliases && (op->pinfo & INSN_ALIAS))
+		continue;
+	      /* Is this instruction restricted to a certain value of XLEN?  */
+	      if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
+		continue;
+
+	      /* It's a match.  */
+	      return op;
+	    }
+	}
+      /* Keep searching extended opcode tables.  */
+      op = riscv_extended_opcodes[i++];
+    }
+  while (op != NULL);
+
+  return NULL;
 }
 
 /* Print the RISC-V instruction at address MEMADDR in debugged memory,
@@ -447,22 +541,8 @@ static int
 riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
   const struct riscv_opcode *op;
-  static bool init = 0;
-  static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
   int insnlen;
-
-#define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
-
-  /* Build a hash table to shorten the search time.  */
-  if (! init)
-    {
-      for (op = riscv_opcodes; op->name; op++)
-	if (!riscv_hash[OP_HASH_IDX (op->match)])
-	  riscv_hash[OP_HASH_IDX (op->match)] = op;
-
-      init = 1;
-    }
 
   if (info->private_data == NULL)
     {
@@ -497,75 +577,48 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   info->target = 0;
   info->target2 = 0;
 
-  op = riscv_hash[OP_HASH_IDX (word)];
+  op = riscv_disassemble_opcode (word, info);
   if (op != NULL)
     {
-      unsigned xlen = 0;
+      (*info->fprintf_func) (info->stream, "%s", op->name);
+      print_insn_args (op->args, word, memaddr, info);
 
-      /* If XLEN is not known, get its value from the ELF class.  */
-      if (info->mach == bfd_mach_riscv64)
-	xlen = 64;
-      else if (info->mach == bfd_mach_riscv32)
-	xlen = 32;
-      else if (info->section != NULL)
+      /* Try to disassemble multi-instruction addressing sequences.  */
+      if (pd->print_addr != (bfd_vma)-1)
 	{
-	  Elf_Internal_Ehdr *ehdr = elf_elfheader (info->section->owner);
-	  xlen = ehdr->e_ident[EI_CLASS] == ELFCLASS64 ? 64 : 32;
+	  info->target = pd->print_addr;
+	  (*info->fprintf_func) (info->stream, " # ");
+	  (*info->print_address_func) (info->target, info);
+	  pd->print_addr = -1;
 	}
 
-      for (; op->name; op++)
+      /* Finish filling out insn_info fields.  */
+      switch (op->pinfo & INSN_TYPE)
 	{
-	  /* Does the opcode match?  */
-	  if (! (op->match_func) (op, word))
-	    continue;
-	  /* Is this a pseudo-instruction and may we print it as such?  */
-	  if (no_aliases && (op->pinfo & INSN_ALIAS))
-	    continue;
-	  /* Is this instruction restricted to a certain value of XLEN?  */
-	  if ((op->xlen_requirement != 0) && (op->xlen_requirement != xlen))
-	    continue;
-
-	  /* It's a match.  */
-	  (*info->fprintf_func) (info->stream, "%s", op->name);
-	  print_insn_args (op->args, word, memaddr, info);
-
-	  /* Try to disassemble multi-instruction addressing sequences.  */
-	  if (pd->print_addr != (bfd_vma)-1)
-	    {
-	      info->target = pd->print_addr;
-	      (*info->fprintf_func) (info->stream, " # ");
-	      (*info->print_address_func) (info->target, info);
-	      pd->print_addr = -1;
-	    }
-
-	  /* Finish filling out insn_info fields.  */
-	  switch (op->pinfo & INSN_TYPE)
-	    {
-	    case INSN_BRANCH:
-	      info->insn_type = dis_branch;
-	      break;
-	    case INSN_CONDBRANCH:
-	      info->insn_type = dis_condbranch;
-	      break;
-	    case INSN_JSR:
-	      info->insn_type = dis_jsr;
-	      break;
-	    case INSN_DREF:
-	      info->insn_type = dis_dref;
-	      break;
-	    default:
-	      break;
-	    }
-
-	  if (op->pinfo & INSN_DATA_SIZE)
-	    {
-	      int size = ((op->pinfo & INSN_DATA_SIZE)
-			  >> INSN_DATA_SIZE_SHIFT);
-	      info->data_size = 1 << (size - 1);
-	    }
-
-	  return insnlen;
+	case INSN_BRANCH:
+	  info->insn_type = dis_branch;
+	  break;
+	case INSN_CONDBRANCH:
+	  info->insn_type = dis_condbranch;
+	  break;
+	case INSN_JSR:
+	  info->insn_type = dis_jsr;
+	  break;
+	case INSN_DREF:
+	  info->insn_type = dis_dref;
+	  break;
+	default:
+	  break;
 	}
+
+      if (op->pinfo & INSN_DATA_SIZE)
+	{
+	  int size = ((op->pinfo & INSN_DATA_SIZE)
+		      >> INSN_DATA_SIZE_SHIFT);
+	  info->data_size = 1 << (size - 1);
+	}
+
+      return insnlen;
     }
 
   /* We did not find a match, so just print the instruction bits.  */
