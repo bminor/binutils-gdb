@@ -1,5 +1,11 @@
 2021-03-16  Nick Clifton  <nickc@redhat.com>
 
+	PR 27534
+	* readelf.c (display_debug_section): Also retain .debug_addr
+	sections.
+
+2021-03-16  Nick Clifton  <nickc@redhat.com>
+
 	PR 27533
 	* readelf.c (process_section_contents): Only dump debug
 	information for separate files unless process_links is enabled.

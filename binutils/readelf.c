@@ -15442,7 +15442,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
 
 	      section_subset = NULL;
 
-	      if (secondary || (id != info && id != abbrev))
+	      if (secondary || (id != info && id != abbrev && id != debug_addr))
 		free_debug_section (id);
 	    }
 	  break;
