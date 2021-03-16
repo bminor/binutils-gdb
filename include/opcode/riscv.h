@@ -22,6 +22,7 @@
 #define _RISCV_H_
 
 #include "riscv-opc.h"
+#include "riscv-opc-extended.h"
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -303,7 +304,6 @@ static const char * const riscv_pred_succ[16] =
 enum riscv_insn_class
 {
   INSN_CLASS_NONE,
-
   INSN_CLASS_I,
   INSN_CLASS_C,
   INSN_CLASS_A,
@@ -319,6 +319,7 @@ enum riscv_insn_class
   INSN_CLASS_ZBA,
   INSN_CLASS_ZBB,
   INSN_CLASS_ZBC,
+  INSN_CLASS_EXTENDED
 };
 
 /* This structure holds information for a particular instruction.  */
@@ -332,7 +333,7 @@ struct riscv_opcode
 
   /* Class to which this instruction belongs.  Used to decide whether or
      not this instruction is legal in the current -march context.  */
-  enum riscv_insn_class insn_class;
+  int insn_class;
 
   /* A string describing the arguments for this instruction.  */
   const char *args;
@@ -422,9 +423,8 @@ enum
   M_ZEXTW,
   M_SEXTB,
   M_SEXTH,
-  M_NUM_MACROS
+  M_EXTENDED
 };
-
 
 extern const char * const riscv_gpr_names_numeric[NGPR];
 extern const char * const riscv_gpr_names_abi[NGPR];
@@ -433,5 +433,9 @@ extern const char * const riscv_fpr_names_abi[NFPR];
 
 extern const struct riscv_opcode riscv_opcodes[];
 extern const struct riscv_opcode riscv_insn_types[];
+
+/* Extended extensions.  */
+
+extern const struct riscv_opcode *riscv_extended_opcodes[];
 
 #endif /* _RISCV_H_ */

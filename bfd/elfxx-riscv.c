@@ -1095,6 +1095,11 @@ static const char * const riscv_std_zxm_ext_strtab[] =
   NULL
 };
 
+static const char * const riscv_std_draft_ext_strtab[] =
+{
+  NULL
+};
+
 /* ISA extension prefixed name class.  Must define them in parsing order.  */
 enum riscv_prefix_ext_class
 {
@@ -1168,7 +1173,8 @@ riscv_valid_prefixed_ext (const char *ext)
   switch (class)
   {
   case RV_ISA_CLASS_Z:
-    return riscv_known_prefixed_ext (ext, riscv_std_z_ext_strtab);
+    return (riscv_known_prefixed_ext (ext, riscv_std_z_ext_strtab)
+	    || riscv_known_prefixed_ext (ext, riscv_std_draft_ext_strtab));
   case RV_ISA_CLASS_ZXM:
     return riscv_known_prefixed_ext (ext, riscv_std_zxm_ext_strtab);
   case RV_ISA_CLASS_S:
