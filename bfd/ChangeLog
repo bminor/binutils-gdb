@@ -1,3 +1,9 @@
+2021-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (_bfd_XXi_swap_aux_out): Avoid potential buffer
+	overrun by using sizeof of the destination x_fname field as the
+	limit for a memcpy.
+
 2021-03-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* elfxx-riscv.c (riscv_std_z_ext_strtab): Add zba, zbb and zbc.

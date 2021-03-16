@@ -380,7 +380,7 @@ _bfd_XXi_swap_aux_out (bfd *  abfd,
 	  H_PUT_32 (abfd, in->x_file.x_n.x_offset, ext->x_file.x_n.x_offset);
 	}
       else
-	memcpy (ext->x_file.x_fname, in->x_file.x_fname, FILNMLEN);
+	memcpy (ext->x_file.x_fname, in->x_file.x_fname, sizeof (ext->x_file.x_fname));
 
       return AUXESZ;
 
