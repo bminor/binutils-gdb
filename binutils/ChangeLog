@@ -1,3 +1,11 @@
+2021-03-16  Nick Clifton  <nickc@redhat.com>
+
+	PR 27533
+	* readelf.c (process_section_contents): Only dump debug
+	information for separate files unless process_links is enabled.
+	(process_object): Always call process_section_contents for
+	separate info files.
+
 2021-03-15  Nick Clifton  <nickc@redhat.com>
 
 	PR 27487
