@@ -1270,11 +1270,11 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	      }
 	  }
 
-	if (dlls_changed)
+	if (current_process ()->dlls_changed)
 	  {
 	    strcpy (buf, "library:;");
 	    buf += strlen (buf);
-	    dlls_changed = 0;
+	    current_process ()->dlls_changed = false;
 	  }
 
 	current_thread = saved_thread;

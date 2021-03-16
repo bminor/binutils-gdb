@@ -20,6 +20,7 @@
 #define GDBSERVER_INFERIORS_H
 
 #include "gdbsupport/gdb_vecs.h"
+#include "dll.h"
 #include <list>
 
 struct thread_info;
@@ -68,6 +69,12 @@ struct process_info
 
   /* Private target data.  */
   struct process_info_private *priv = NULL;
+
+  /* DLLs thats are loaded for this proc.  */
+  std::list<dll_info> all_dlls;
+
+  /* Flag to mark that the DLL list has changed.  */
+  bool dlls_changed = false;
 };
 
 /* Get the pid of PROC.  */

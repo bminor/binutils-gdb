@@ -1470,7 +1470,8 @@ handle_qxfer_libraries (const char *annex,
 
   std::string document = "<library-list version=\"1.0\">\n";
 
-  for (const dll_info &dll : all_dlls)
+  process_info *proc = current_process ();
+  for (const dll_info &dll : proc->all_dlls)
     document += string_printf
       ("  <library name=\"%s\"><segment address=\"0x%s\"/></library>\n",
        dll.name.c_str (), paddress (dll.base_addr));
@@ -2848,7 +2849,7 @@ handle_v_attach (char *own_buf)
 	 some libraries are preloaded.  GDB will always poll the
 	 library list.  Avoids the "stopped by shared library event"
 	 notice on the GDB side.  */
-      dlls_changed = 0;
+      current_process ()->dlls_changed = false;
 
       if (non_stop)
 	{
@@ -3796,7 +3797,8 @@ captured_main (int argc, char *argv[])
   /* Don't report shared library events on the initial connection,
      even if some libraries are preloaded.  Avoids the "stopped by
      shared library event" notice on gdb side.  */
-  dlls_changed = 0;
+  if (current_thread != nullptr)
+    current_process ()->dlls_changed = false;
 
   if (cs.last_status.kind == TARGET_WAITKIND_EXITED
       || cs.last_status.kind == TARGET_WAITKIND_SIGNALLED)

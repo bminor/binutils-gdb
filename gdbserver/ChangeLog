@@ -1,3 +1,20 @@
+2021-03-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* inferiors.h (struct process_info) <all_dlls, dlls_changed>: New
+	fields.
+	* dll.h (loaded_dll)
+	(unloaded_dll): Declare an overloaded version that takes a proc
+	parameter.
+	* dll.cc (loaded_dll)
+	(unloaded_dll): Implement the overloaded versions.
+	(clear_dlls): Clear all process' dll lists.
+	(all_dlls, dlls_changed): Remove the global variables.
+	* remote-utils.cc (prepare_resume_reply): Update to consider a dll
+	list per proc.
+	* server.cc (handle_qxfer_libraries): Ditto.
+	(handle_v_attach): Ditto.
+	(captured_main): Ditto.
+
 2021-02-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* linux-low.cc (linux_process_target::filter_event): Return
