@@ -388,13 +388,15 @@ foreach type $all_types {
 # is set to "cancel"
 gdb_test_no_output "set multiple-symbols cancel"
 gdb_test "break foo::foofunc" \
-         "canceled.*"
+    "canceled.*" \
+    "break on ambiguous symbol when multiple-symbols is set to cancel"
 
 # Test breaking on an overloaded function when multiple-symbols
 # is set to "all"
 gdb_test_no_output "set multiple-symbols all"
 gdb_test "break foo::foofunc" \
-         "Breakpoint \[0-9\]+ at ${hex}: foo::foofunc. .2 locations..*"
+    "Breakpoint \[0-9\]+ at ${hex}: foo::foofunc. .2 locations..*" \
+    "break on ambiguous symbol when multiple-symbols is set to all"
 
 # That's all, folks.
 

@@ -1,5 +1,20 @@
 2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.cp/breakpoint.exp: Extend test names to make them unique.
+	* gdb.cp/casts.exp: Give tests unique names.
+	* gdb.cp/filename.exp: Likewise.
+	* gdb.cp/gdb2495.exp: Likewise.
+	* gdb.cp/mb-ctor.exp: Extend test names to make them unique.
+	* gdb.cp/misc.exp: Rename test to make it unique.
+	* gdb.cp/nsnested.exp: Give tests unique names.
+	* gdb.cp/ovldbreak.exp: Likewise.
+	* gdb.cp/pr17494.exp: Rename test to reflect what is actually
+	being tested.  This also removes the duplicate test name.
+	* gdb.cp/ref-types.exp: Likewise.
+	* gdb.cp/temargs.exp: Likewise.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.cp/cplusfuncs.exp (test_paddr_operator_functions): Escape
 	square brackets in test.
 

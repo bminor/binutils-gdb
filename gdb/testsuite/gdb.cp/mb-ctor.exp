@@ -51,13 +51,13 @@ gdb_test "continue" \
     ".*Breakpoint.*Derived.*i=7.*" \
     "run to breakpoint 1 v1"
 
-gdb_continue_to_breakpoint "set breakpoint here" ".* breakpoint here"
+gdb_continue_to_breakpoint "set breakpoint here, first time" ".* breakpoint here"
 
 gdb_test "continue" \
     ".*Breakpoint.*Derived.*i=15.*" \
     "run to breakpoint 1 v2"
 
-gdb_continue_to_breakpoint "set breakpoint here" ".* breakpoint here"
+gdb_continue_to_breakpoint "set breakpoint here, second time" ".* breakpoint here"
 
 gdb_test "continue" \
     ".*Breakpoint.*~Derived.*" \
