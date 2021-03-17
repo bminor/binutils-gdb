@@ -1,5 +1,11 @@
 2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.cp/maint.exp (test_first_component): Run more tests with a
+	variable number of spaces, this removes the duplicate testing of
+	'operator ->' which existed before.
+
+2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.cp/gdb2384.cc (main): Change comments used for breakpoints.
 	* gdb.cp/gdb2384.exp: Change and extend test names to avoid
 	duplicates, and also to avoid having a string inside parentheses

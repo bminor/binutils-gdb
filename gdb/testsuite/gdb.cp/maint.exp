@@ -61,21 +61,22 @@ proc test_first_component {} {
     gdb_test_no_output "set complaints 1000"
 
     test_single_component "foo"
-    test_single_component "operator<<"
-    test_single_component "operator>>"
-    test_single_component "operator ->"
-    test_single_component "operator()"
-    test_single_component "operator>"
-    test_single_component "operator<"
-    test_single_component "operator ->"
-    test_single_component "operator  ->"
 
-    test_single_component "foo()"
-    test_single_component "foo(int)"
-    test_single_component "foo(X::Y)"
-    test_single_component "foo(X::Y, A::B)"
-    test_single_component "foo(std::basic_streambuf<wchar_t,std::char_traits<wchar_t> >)"
-    test_single_component "operator>(X::Y)"
+    foreach spc [list "" " " "  "] {
+	test_single_component "operator${spc}<<"
+	test_single_component "operator${spc}>>"
+	test_single_component "operator${spc}->"
+	test_single_component "operator${spc}()"
+	test_single_component "operator${spc}>"
+	test_single_component "operator${spc}<"
+
+	test_single_component "foo${spc}()"
+	test_single_component "foo${spc}(int)"
+	test_single_component "foo${spc}(X::Y)"
+	test_single_component "foo${spc}(X::Y, A::B)"
+	test_single_component "foo${spc}(std::basic_streambuf<wchar_t,std::char_traits<wchar_t> >)"
+	test_single_component "operator>${spc}(X::Y)"
+    }
 
     # Operator names can show up in weird places.
 
