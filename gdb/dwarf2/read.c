@@ -12723,6 +12723,13 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
   else
     search_path = debug_file_directory;
 
+  /* Add the path for the executable binary to the list of search paths.  */
+  std::string objfile_dir = ldirname (objfile_name (per_objfile->objfile));
+  search_path_holder.reset (concat (objfile_dir.c_str (),
+				    dirname_separator_string,
+				    search_path, nullptr));
+  search_path = search_path_holder.get ();
+
   openp_flags flags = OPF_RETURN_REALPATH;
   if (is_dwp)
     flags |= OPF_SEARCH_IN_PATH;

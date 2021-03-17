@@ -1,5 +1,10 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/fission-relative-dwo.c: New file.
+	* gdb.dwarf2/fission-relative-dwo.exp: New file.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.dwarf2/fission-absolute-dwo.c: New file.
 	* gdb.dwarf2/fission-absolute-dwo.exp: New file.
 	* gdb.dwarf2/fission-base.exp: Use build_executable_and_dwo_files
