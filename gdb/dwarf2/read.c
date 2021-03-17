@@ -7737,7 +7737,10 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
       this_cu->unit_type = DW_UT_type;
       break;
     default:
-      abort ();
+      error (_("Dwarf Error: unexpected tag '%s' at offset %s [in module %s]"),
+	     dwarf_tag_name (reader.comp_unit_die->tag),
+	     sect_offset_str (reader.cu->per_cu->sect_off),
+	     objfile_name (per_objfile->objfile));
     }
 
   if (reader.dummy_p)
@@ -9993,6 +9996,21 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
   cu->language_defn = language_def (cu->language);
 
   dwarf2_find_base_address (cu->dies, cu);
+
+  /* Before we start reading the top-level DIE, ensure it has a valid tag
+     type.  */
+  switch (cu->dies->tag)
+    {
+    case DW_TAG_compile_unit:
+    case DW_TAG_partial_unit:
+    case DW_TAG_type_unit:
+      break;
+    default:
+      error (_("Dwarf Error: unexpected tag '%s' at offset %s [in module %s]"),
+	     dwarf_tag_name (cu->dies->tag),
+	     sect_offset_str (cu->per_cu->sect_off),
+	     objfile_name (per_objfile->objfile));
+    }
 
   /* Do line number decoding in read_file_scope () */
   process_die (cu->dies, cu);
@@ -13628,6 +13646,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
     }
 
+  gdb_assert (cu->get_builder () != nullptr);
   newobj = cu->get_builder ()->push_context (0, lowpc);
   newobj->name = new_symbol (die, read_type_die (die, cu), cu,
 			     (struct symbol *) templ_func);

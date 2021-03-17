@@ -1,5 +1,13 @@
 2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2/read.c (process_psymtab_comp_unit): Replace abort with an
+	error.
+	(process_full_comp_unit): Validate the top-level tag before
+	processing the first DIE.
+	(read_func_scope): Ensure we have a valid builder.
+
+2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* objc-lang.c (objc_demangle): Renamed to
 	objc_language::demangle_symbol, and moved later in the file.
 	(objc_language::sniff_from_mangled_name): Call demangle_symbol
