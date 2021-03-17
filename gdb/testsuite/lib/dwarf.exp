@@ -507,7 +507,7 @@ namespace eval Dwarf {
 
 		if {![info exists _strings($value)]} {
 		    set _strings($value) [new_label strp]
-		    _defer_output .debug_string {
+		    _defer_output .debug_str {
 			define_label $_strings($value)
 			_op .ascii [_quote $value]
 		    }

@@ -1,3 +1,10 @@
+2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-using-debug-str.c: New file.
+	* gdb.dwarf2/dw2-using-debug-str.exp: New file.
+	* lib/dwarf.exp (Dwarf::DW_FORM_strp): Create .debug_str section,
+	not .debug_string.
+
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/maint.exp: Update "maint print statistics" output.
