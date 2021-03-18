@@ -1,3 +1,10 @@
+2021-03-18  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/stringify.c (dwarf_unit_type_name): New function.  Use
+	get_DW_UT_name.
+	* dwarf2/stringify.h (dwarf_unit_type_name): Declare.
+	* dwarf2/comp-unit.c (dwarf_unit_type_name): Remove.
+
 2021-03-18  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-param.c (get_set_value): Update header comment.
