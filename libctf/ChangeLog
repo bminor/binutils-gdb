@@ -1,5 +1,10 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-serialize.c (ctf_serialize): Preserve ctf_typemax across
+	serialization.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dtdef_t) <dtd_u.dtu_argv>: Remove.
 	* ctf-create.c (ctf_dtd_delete): No longer free it.
 	(ctf_add_function): Use the dtd_vlen, not dtu_argv.  Properly align.

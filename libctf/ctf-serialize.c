@@ -1113,6 +1113,7 @@ ctf_serialize (ctf_dict_t *fp)
   nfp->ctf_dynsyms = fp->ctf_dynsyms;
   nfp->ctf_ptrtab = fp->ctf_ptrtab;
   nfp->ctf_pptrtab = fp->ctf_pptrtab;
+  nfp->ctf_typemax = fp->ctf_typemax;
   nfp->ctf_dynsymidx = fp->ctf_dynsymidx;
   nfp->ctf_dynsymmax = fp->ctf_dynsymmax;
   nfp->ctf_ptrtab_len = fp->ctf_ptrtab_len;
