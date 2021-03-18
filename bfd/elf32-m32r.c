@@ -3615,8 +3615,8 @@ m32r_elf_section_flags (const Elf_Internal_Shdr *hdr)
 {
   const char *name = hdr->bfd_section->name;
 
-  if (strncmp (name, ".sbss", 5) == 0
-      || strncmp (name, ".sdata", 6) == 0)
+  if (startswith (name, ".sbss")
+      || startswith (name, ".sdata"))
     hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return true;

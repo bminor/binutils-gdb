@@ -821,7 +821,7 @@ slurp_dynamic_symtab (bfd *abfd)
 static bool
 is_significant_symbol_name (const char * name)
 {
-  return strncmp (name, ".plt", 4) == 0 || strcmp (name, ".got") == 0;
+  return startswith (name, ".plt") || startswith (name, ".got");
 }
 
 /* Filter out (in place) symbols that are useless for disassembly.

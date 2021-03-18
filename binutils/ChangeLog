@@ -1,5 +1,13 @@
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
+	* dllwrap.c: Use startswith function.
+	* objcopy.c (is_dwo_section): Likewise.
+	(handle_remove_section_option): Likewise.
+	(copy_main): Likewise.
+	* objdump.c (is_significant_symbol_name): Likewise.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
 	* dwarf.c (display_debug_lines_raw): Replace const_strneq with
 	startswith.
 	(display_debug_lines_decoded): Likewise.

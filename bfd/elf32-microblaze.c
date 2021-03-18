@@ -3050,7 +3050,7 @@ microblaze_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_section_name (s);
 
-      if (strncmp (name, ".rela", 5) == 0)
+      if (startswith (name, ".rela"))
 	{
 	  if (s->size == 0)
 	    {

@@ -1084,19 +1084,19 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	 not any sort of flag.  Their SEC_ALLOC bits are cleared.  */
       if (name [0] == '.')
 	{
-	  if (strncmp (name, ".debug", 6) == 0
-	      || strncmp (name, ".gnu.debuglto_.debug_", 21) == 0
-	      || strncmp (name, ".gnu.linkonce.wi.", 17) == 0
-	      || strncmp (name, ".zdebug", 7) == 0)
+	  if (startswith (name, ".debug")
+	      || startswith (name, ".gnu.debuglto_.debug_")
+	      || startswith (name, ".gnu.linkonce.wi.")
+	      || startswith (name, ".zdebug"))
 	    flags |= SEC_DEBUGGING | SEC_ELF_OCTETS;
-	  else if (strncmp (name, GNU_BUILD_ATTRS_SECTION_NAME, 21) == 0
-		   || strncmp (name, ".note.gnu", 9) == 0)
+	  else if (startswith (name, GNU_BUILD_ATTRS_SECTION_NAME)
+		   || startswith (name, ".note.gnu"))
 	    {
 	      flags |= SEC_ELF_OCTETS;
 	      opb = 1;
 	    }
-	  else if (strncmp (name, ".line", 5) == 0
-		   || strncmp (name, ".stab", 5) == 0
+	  else if (startswith (name, ".line")
+		   || startswith (name, ".stab")
 		   || strcmp (name, ".gdb_index") == 0)
 	    flags |= SEC_DEBUGGING;
 	}
@@ -1277,8 +1277,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   /* GCC uses .gnu.lto_.lto.<some_hash> as a LTO bytecode information
      section.  */
-  const char *lto_section_name = ".gnu.lto_.lto.";
-  if (strncmp (name, lto_section_name, strlen (lto_section_name)) == 0)
+  if (startswith (name, ".gnu.lto_.lto."))
     {
       struct lto_section lsection;
       if (bfd_get_section_contents (abfd, newsect, &lsection, 0,
@@ -3677,7 +3676,7 @@ elf_get_reloc_section (asection *reloc_sec)
 
   /* We look up the section the relocs apply to by name.  */
   name = reloc_sec->name;
-  if (strncmp (name, ".rel", 4) != 0)
+  if (!startswith (name, ".rel"))
     return NULL;
   name += 4;
   if (type == SHT_RELA && *name++ != 'a')

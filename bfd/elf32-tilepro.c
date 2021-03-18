@@ -2332,7 +2332,7 @@ tilepro_elf_size_dynamic_sections (bfd *output_bfd,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (strncmp (s->name, ".rela", 5) == 0)
+      else if (startswith (s->name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {

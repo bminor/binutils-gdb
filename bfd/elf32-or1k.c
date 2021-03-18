@@ -2110,7 +2110,7 @@ or1k_elf_check_relocs (bfd *abfd,
 		    if (name == NULL)
 		      return false;
 
-		    if (strncmp (name, ".rela", 5) != 0
+		    if (!startswith (name, ".rela")
 			|| strcmp (bfd_section_name (sec), name + 5) != 0)
 		      {
 			_bfd_error_handler

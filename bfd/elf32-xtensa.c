@@ -11260,7 +11260,7 @@ xtensa_property_section_name (asection *sec, const char *base_name,
 	suffix = 0;
       prop_sec_name = xtensa_add_names (base_name, suffix);
     }
-  else if (strncmp (sec->name, ".gnu.linkonce.", linkonce_len) == 0)
+  else if (startswith (sec->name, ".gnu.linkonce."))
     {
       char *linkonce_kind = 0;
 

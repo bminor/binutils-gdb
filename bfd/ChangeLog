@@ -1,3 +1,41 @@
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* elf-bfd.h (bfd_section_is_ctf): Use startswith function.
+	* elf.c (_bfd_elf_make_section_from_shdr): Likewise.
+	(elf_get_reloc_section): Likewise.
+	* elf32-arc.c (elf_arc_size_dynamic_sections): Likewise.
+	* elf32-m32r.c (m32r_elf_section_flags): Likewise.
+	* elf32-microblaze.c (microblaze_elf_size_dynamic_sections): Likewise.
+	* elf32-nds32.c (nds32_elf_size_dynamic_sections): Likewise.
+	(nds32_elf_relocate_section): Likewise.
+	(nds32_elf_action_discarded): Likewise.
+	(nds32_elf_check_relocs): Likewise.
+	(nds32_elf_section_flags): Likewise.
+	* elf32-or1k.c (or1k_elf_check_relocs): Likewise.
+	* elf32-ppc.c (ppc_elf_section_from_shdr): Likewise.
+	* elf32-rx.c (rx_table_find): Likewise.
+	(rx_table_map): Likewise.
+	* elf32-spu.c (spu_elf_backend_symbol_processing): Likewise.
+	(spu_elf_find_overlays): Likewise.
+	(needs_ovl_stub): Likewise.
+	(allocate_spuear_stubs): Likewise.
+	(build_spuear_stubs): Likewise.
+	(mark_overlay_section): Likewise.
+	(spu_elf_auto_overlay): Likewise.
+	(spu_elf_output_symbol_hook): Likewise.
+	* elf32-tilepro.c (tilepro_elf_size_dynamic_sections): Likewise.
+	* elf32-xtensa.c (xtensa_property_section_name): Likewise.
+	* elf64-ppc.c (ppc64_elf_section_flags): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* elflink.c (resolve_section): Likewise.
+	(UNARY_OP): Likewise.
+	(BINARY_OP_HEAD): Likewise.
+	(elf_link_input_bfd): Likewise.
+	* elfnn-riscv.c (riscv_elf_size_dynamic_sections): Likewise.
+	* elfxx-riscv.c (riscv_parse_subset): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_size_dynamic_sections): Likewise.
+	* opncls.c (get_build_id): Likewise.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	PR 27671

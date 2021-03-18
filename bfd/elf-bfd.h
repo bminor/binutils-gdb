@@ -3093,7 +3093,7 @@ static inline bool
 bfd_section_is_ctf (const asection *sec)
 {
   const char *name = bfd_section_name (sec);
-  return strncmp (name, ".ctf", 4) == 0 && (name[4] == 0 || name[4] == '.');
+  return startswith (name, ".ctf") && (name[4] == 0 || name[4] == '.');
 }
 
 #ifdef __cplusplus
