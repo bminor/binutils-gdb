@@ -1,3 +1,8 @@
+2021-03-18  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (apply_fix): Handle 7-bit relocations correctly.
+	Problem found by Tadashi G. Takaoka <tadashi.g.takaoka@gmail.com>.
+
 2021-03-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* config/tc-riscv.c (ext_version_table): Add b, zba, zbb and zbc.
