@@ -189,6 +189,52 @@ ctf_link_add_ctf (ctf_dict_t *fp, ctf_archive_t *ctf, const char *name)
   return ctf_link_add (fp, ctf, name, NULL, 0);
 }
 
+/* Lazily open a CTF archive for linking, if not already open.
+
+   Returns the number of files contained within the opened archive (0 for none),
+   or -1 on error, as usual.  */
+static ssize_t
+ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
+{
+  size_t count;
+  int err;
+
+  if (input->clin_arc)
+    return ctf_archive_count (input->clin_arc);
+
+  if (input->clin_fp)
+    return 1;
+
+  /* See ctf_link_add_ctf.  */
+#if defined (PIC) || !NOBFD
+  input->clin_arc = ctf_open (input->clin_filename, NULL, &err);
+#else
+  ctf_err_warn (fp, 0, ECTF_NEEDSBFD, _("cannot open %s lazily"),
+		input->clin_filename);
+  ctf_set_errno (fp, ECTF_NEEDSBFD);
+  return -1;
+#endif
+
+  /* Having no CTF sections is not an error.  We just don't need to do
+     anything.  */
+
+  if (!input->clin_arc)
+    {
+      if (err == ECTF_NOCTFDATA)
+	return 0;
+
+      ctf_err_warn (fp, 0, err, _("opening CTF %s failed"),
+		    input->clin_filename);
+      ctf_set_errno (fp, err);
+      return -1;
+    }
+
+  if ((count = ctf_archive_count (input->clin_arc)) == 0)
+    ctf_arc_close (input->clin_arc);
+
+  return (ssize_t) count;
+}
+
 /* Return a per-CU output CTF dictionary suitable for the given CU, creating and
    interning it if need be.  */
 
@@ -459,52 +505,6 @@ ctf_link_one_variable (ctf_dict_t *fp, ctf_dict_t *in_fp, const char *name,
     if (ctf_add_variable (per_cu_out_fp, name, dst_type) < 0)
       return (ctf_set_errno (fp, ctf_errno (per_cu_out_fp)));
   return 0;
-}
-
-/* Lazily open a CTF archive for linking, if not already open.
-
-   Returns the number of files contained within the opened archive (0 for none),
-   or -1 on error, as usual.  */
-static ssize_t
-ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
-{
-  size_t count;
-  int err;
-
-  if (input->clin_arc)
-    return ctf_archive_count (input->clin_arc);
-
-  if (input->clin_fp)
-    return 1;
-
-  /* See ctf_link_add_ctf.  */
-#if defined (PIC) || !NOBFD
-  input->clin_arc = ctf_open (input->clin_filename, NULL, &err);
-#else
-  ctf_err_warn (fp, 0, ECTF_NEEDSBFD, _("cannot open %s lazily"),
-		input->clin_filename);
-  ctf_set_errno (fp, ECTF_NEEDSBFD);
-  return -1;
-#endif
-
-  /* Having no CTF sections is not an error.  We just don't need to do
-     anything.  */
-
-  if (!input->clin_arc)
-    {
-      if (err == ECTF_NOCTFDATA)
-	return 0;
-
-      ctf_err_warn (fp, 0, err, _("opening CTF %s failed"),
-		    input->clin_filename);
-      ctf_set_errno (fp, err);
-      return -1;
-    }
-
-  if ((count = ctf_archive_count (input->clin_arc)) == 0)
-    ctf_arc_close (input->clin_arc);
-
-  return (ssize_t) count;
 }
 
 typedef struct link_sort_inputs_cb_arg

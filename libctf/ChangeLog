@@ -1,3 +1,12 @@
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-link.c (ctf_link_lazy_open): Move up in the file, to near
+	ctf_link_add_ctf.
+	* ctf-lookup.c (ctf_lookup_symbol_idx): Repair tabdamage.
+	(ctf_lookup_by_sym_or_name): Likewise.
+	* testsuite/libctf-lookup/struct-iteration.c: Likewise.
+	* testsuite/libctf-regression/type-add-unnamed-struct.c: Likewise.
+
 2021-03-02  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-create.c (symtypetab_density): Report the symbol name as

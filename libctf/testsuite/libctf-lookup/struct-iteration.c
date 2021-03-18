@@ -4,13 +4,13 @@
 
 static int
 print_struct (const char *name, ctf_id_t membtype, unsigned long offset,
-              void *fp_)
+	      void *fp_)
 {
   ctf_dict_t *fp = (ctf_dict_t *) fp_;
   char *type_name = ctf_type_aname (fp, membtype);
 
   printf ("iter test: %s, offset %lx, has type %lx/%s\n",
-          name, offset, membtype, type_name);
+	  name, offset, membtype, type_name);
   free (type_name);
 
   return 0;
@@ -54,7 +54,7 @@ main (int argc, char *argv[])
       char *type_name = ctf_type_aname (fp, membtype);
 
       printf ("next test: %s, offset %lx, has type %lx/%s\n",
-              name, offset, membtype, type_name);
+	      name, offset, membtype, type_name);
       free (type_name);
     }
   if (ctf_errno (fp) != ECTF_NEXT_END)
