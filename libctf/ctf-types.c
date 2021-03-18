@@ -1168,7 +1168,7 @@ ctf_type_reference (ctf_dict_t *fp, ctf_id_t type)
 	    sp = (const ctf_slice_t *) ((uintptr_t) tp + increment);
 	  }
 	else
-	  sp = &dtd->dtd_u.dtu_slice;
+	  sp = (const ctf_slice_t *) dtd->dtd_vlen;
 
 	return sp->cts_type;
       }
@@ -1218,52 +1218,30 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
   ctf_dtdef_t *dtd;
   const ctf_type_t *tp;
   ssize_t increment;
+  const unsigned char *vlen;
   uint32_t data;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return -1;			/* errno is set for us.  */
 
   if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
+    vlen = dtd->dtd_vlen;
+  else
     {
-      switch (LCTF_INFO_KIND (fp, tp->ctt_info))
-	{
-	case CTF_K_INTEGER:
-	case CTF_K_FLOAT:
-	  *ep = dtd->dtd_u.dtu_enc;
-	  break;
-	case CTF_K_SLICE:
-	  {
-	    const ctf_slice_t *slice;
-	    ctf_encoding_t underlying_en;
-	    ctf_id_t underlying;
-
-	    slice = &dtd->dtd_u.dtu_slice;
-	    underlying = ctf_type_resolve (fp, slice->cts_type);
-	    data = ctf_type_encoding (fp, underlying, &underlying_en);
-
-	    ep->cte_format = underlying_en.cte_format;
-	    ep->cte_offset = slice->cts_offset;
-	    ep->cte_bits = slice->cts_bits;
-	    break;
-	  }
-	default:
-	  return (ctf_set_errno (ofp, ECTF_NOTINTFP));
-	}
-      return 0;
+      ctf_get_ctt_size (fp, tp, NULL, &increment);
+      vlen = (const unsigned char *) ((uintptr_t) tp + increment);
     }
-
-  (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
 
   switch (LCTF_INFO_KIND (fp, tp->ctt_info))
     {
     case CTF_K_INTEGER:
-      data = *(const uint32_t *) ((uintptr_t) tp + increment);
+      data = *(const uint32_t *) vlen;
       ep->cte_format = CTF_INT_ENCODING (data);
       ep->cte_offset = CTF_INT_OFFSET (data);
       ep->cte_bits = CTF_INT_BITS (data);
       break;
     case CTF_K_FLOAT:
-      data = *(const uint32_t *) ((uintptr_t) tp + increment);
+      data = *(const uint32_t *) vlen;
       ep->cte_format = CTF_FP_ENCODING (data);
       ep->cte_offset = CTF_FP_OFFSET (data);
       ep->cte_bits = CTF_FP_BITS (data);
@@ -1274,9 +1252,10 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 	ctf_encoding_t underlying_en;
 	ctf_id_t underlying;
 
-	slice = (ctf_slice_t *) ((uintptr_t) tp + increment);
+	slice = (ctf_slice_t *) vlen;
 	underlying = ctf_type_resolve (fp, slice->cts_type);
-	data = ctf_type_encoding (fp, underlying, &underlying_en);
+	if (ctf_type_encoding (fp, underlying, &underlying_en) < 0)
+	  return -1;				/* errno is set for us.  */
 
 	ep->cte_format = underlying_en.cte_format;
 	ep->cte_offset = slice->cts_offset;

@@ -752,7 +752,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	citer = hval;
 
 	if ((dtd = ctf_dynamic_type (input, type)) != NULL)
-	  slice = &dtd->dtd_u.dtu_slice;
+	  slice = (ctf_slice_t *) dtd->dtd_vlen;
 	else
 	  slice = (ctf_slice_t *) ((uintptr_t) tp + increment);
 

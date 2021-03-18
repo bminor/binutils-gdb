@@ -858,7 +858,6 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
       uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
 
       ctf_array_t cta;
-      uint32_t encoding;
       size_t len;
       ctf_stype_t *copied;
       const char *name;
@@ -879,24 +878,12 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	{
 	case CTF_K_INTEGER:
 	case CTF_K_FLOAT:
-	  if (kind == CTF_K_INTEGER)
-	    {
-	      encoding = CTF_INT_DATA (dtd->dtd_u.dtu_enc.cte_format,
-				       dtd->dtd_u.dtu_enc.cte_offset,
-				       dtd->dtd_u.dtu_enc.cte_bits);
-	    }
-	  else
-	    {
-	      encoding = CTF_FP_DATA (dtd->dtd_u.dtu_enc.cte_format,
-				      dtd->dtd_u.dtu_enc.cte_offset,
-				      dtd->dtd_u.dtu_enc.cte_bits);
-	    }
-	  memcpy (t, &encoding, sizeof (encoding));
-	  t += sizeof (encoding);
+	  memcpy (t, dtd->dtd_vlen, sizeof (uint32_t));
+	  t += sizeof (uint32_t);
 	  break;
 
 	case CTF_K_SLICE:
-	  memcpy (t, &dtd->dtd_u.dtu_slice, sizeof (struct ctf_slice));
+	  memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_slice));
 	  t += sizeof (struct ctf_slice);
 	  break;
 

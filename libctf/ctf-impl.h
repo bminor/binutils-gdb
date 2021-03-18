@@ -192,13 +192,12 @@ typedef struct ctf_dtdef
   ctf_list_t dtd_list;		/* List forward/back pointers.  */
   ctf_id_t dtd_type;		/* Type identifier for this definition.  */
   ctf_type_t dtd_data;		/* Type node, including name.  */
+  unsigned char *dtd_vlen;	/* Variable-length data for this type.  */
   union
   {
     ctf_list_t dtu_members;	/* struct, union, or enum */
     ctf_arinfo_t dtu_arr;	/* array */
-    ctf_encoding_t dtu_enc;	/* integer or float */
     uint32_t *dtu_argv;		/* function */
-    ctf_slice_t dtu_slice;	/* slice */
   } dtd_u;
 } ctf_dtdef_t;
 

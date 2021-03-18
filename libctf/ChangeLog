@@ -1,5 +1,24 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dtdef_t) <dtd_u.dtu_enc>: Remove.
+	<dtd_u.dtu_slice>: Likewise.
+	<dtd_vlen>: New.
+	* ctf-create.c (ctf_add_generic): Perhaps allocate it.  All
+	callers adjusted.
+	(ctf_dtd_delete): Free it.
+	(ctf_add_slice): Use the dtd_vlen, not dtu_enc.
+	(ctf_add_encoded): Likewise.  Assert that this must be an int or
+	float.
+	* ctf-serialize.c (ctf_emit_type_sect): Just copy the dtd_vlen.
+	* ctf-dedup.c (ctf_dedup_rhash_type): Use the dtd_vlen, not
+	dtu_slice.
+	* ctf-types.c (ctf_type_reference): Likewise.
+	(ctf_type_encoding): Remove most dynamic-type-specific code: just
+	get the vlen from the right place.  Report failure to look up the
+	underlying type's encoding.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c (ctf_archive_next): GNU style fix for do {} while.
 	* ctf-dedup.c (ctf_dedup_rhash_type): Likewise.
 	(ctf_dedup_rwalk_one_output_mapping): Likewise.

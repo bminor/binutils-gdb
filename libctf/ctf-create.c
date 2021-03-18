@@ -226,6 +226,7 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
   const char *name;
 
   ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
+  free (dtd->dtd_vlen);
 
   switch (kind)
     {
@@ -406,7 +407,7 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
 
 static ctf_id_t
 ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
-		 ctf_dtdef_t **rp)
+		 size_t vlen, ctf_dtdef_t **rp)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
@@ -425,33 +426,42 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
 
   /* Make sure ptrtab always grows to be big enough for all types.  */
   if (ctf_grow_ptrtab (fp) < 0)
-      return CTF_ERR;		/* errno is set for us. */
+      return CTF_ERR;				/* errno is set for us. */
 
-  if ((dtd = malloc (sizeof (ctf_dtdef_t))) == NULL)
+  if ((dtd = calloc (1, sizeof (ctf_dtdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
+
+  if (vlen > 0)
+    {
+      if ((dtd->dtd_vlen = calloc (1, vlen)) == NULL)
+	goto oom;
+    }
+  else
+    dtd->dtd_vlen = NULL;
 
   type = ++fp->ctf_typemax;
   type = LCTF_INDEX_TO_TYPE (fp, type, (fp->ctf_flags & LCTF_CHILD));
 
-  memset (dtd, 0, sizeof (ctf_dtdef_t));
   dtd->dtd_data.ctt_name = ctf_str_add_ref (fp, name, &dtd->dtd_data.ctt_name);
   dtd->dtd_type = type;
 
   if (dtd->dtd_data.ctt_name == 0 && name != NULL && name[0] != '\0')
-    {
-      free (dtd);
-      return (ctf_set_errno (fp, EAGAIN));
-    }
+    goto oom;
 
   if (ctf_dtd_insert (fp, dtd, flag, kind) < 0)
-    {
-      free (dtd);
-      return CTF_ERR;			/* errno is set for us.  */
-    }
+    goto err;					/* errno is set for us.  */
+
   fp->ctf_flags |= LCTF_DIRTY;
 
   *rp = dtd;
   return type;
+
+ oom:
+  ctf_set_errno (fp, EAGAIN);
+ err:
+  free (dtd->dtd_vlen);
+  free (dtd);
+  return CTF_ERR;
 }
 
 /* When encoding integer sizes, we want to convert a byte count in the range
@@ -477,6 +487,7 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type;
+  uint32_t encoding;
 
   if (ep == NULL)
     return (ctf_set_errno (fp, EINVAL));
@@ -484,13 +495,26 @@ ctf_add_encoded (ctf_dict_t *fp, uint32_t flag,
   if (name == NULL || name[0] == '\0')
     return (ctf_set_errno (fp, ECTF_NONAME));
 
-  if ((type = ctf_add_generic (fp, flag, name, kind, &dtd)) == CTF_ERR)
+  if (!ctf_assert (fp, kind == CTF_K_INTEGER || kind == CTF_K_FLOAT))
+    return -1;					/* errno is set for us.  */
+
+  if ((type = ctf_add_generic (fp, flag, name, kind, sizeof (uint32_t),
+			       &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, flag, 0);
   dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT)
 				 / CHAR_BIT);
-  dtd->dtd_u.dtu_enc = *ep;
+  switch (kind)
+    {
+    case CTF_K_INTEGER:
+      encoding = CTF_INT_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
+      break;
+    case CTF_K_FLOAT:
+      encoding = CTF_FP_DATA (ep->cte_format, ep->cte_offset, ep->cte_bits);
+      break;
+    }
+  memcpy (dtd->dtd_vlen, &encoding, sizeof (encoding));
 
   return type;
 }
@@ -509,7 +533,7 @@ ctf_add_reftype (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
   if (ref != 0 && ctf_lookup_by_id (&tmp, ref) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  if ((type = ctf_add_generic (fp, flag, NULL, kind, &dtd)) == CTF_ERR)
+  if ((type = ctf_add_generic (fp, flag, NULL, kind, 0, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, flag, 0);
@@ -539,6 +563,7 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
 	       const ctf_encoding_t *ep)
 {
   ctf_dtdef_t *dtd;
+  ctf_slice_t slice;
   ctf_id_t resolved_ref = ref;
   ctf_id_t type;
   int kind;
@@ -569,15 +594,19 @@ ctf_add_slice (ctf_dict_t *fp, uint32_t flag, ctf_id_t ref,
       && (ref != 0))
     return (ctf_set_errno (fp, ECTF_NOTINTFP));
 
-  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_SLICE, &dtd)) == CTF_ERR)
+  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_SLICE,
+			       sizeof (ctf_slice_t), &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
+
+  memset (&slice, 0, sizeof (ctf_slice_t));
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_SLICE, flag, 0);
   dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT)
 				 / CHAR_BIT);
-  dtd->dtd_u.dtu_slice.cts_type = (uint32_t) ref;
-  dtd->dtd_u.dtu_slice.cts_bits = ep->cte_bits;
-  dtd->dtd_u.dtu_slice.cts_offset = ep->cte_offset;
+  slice.cts_type = (uint32_t) ref;
+  slice.cts_bits = ep->cte_bits;
+  slice.cts_offset = ep->cte_offset;
+  memcpy (dtd->dtd_vlen, &slice, sizeof (ctf_slice_t));
 
   return type;
 }
@@ -628,7 +657,8 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
       return (ctf_set_errno (fp, ECTF_INCOMPLETE));
     }
 
-  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_ARRAY, &dtd)) == CTF_ERR)
+  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_ARRAY,
+			       0, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_ARRAY, flag, 0);
@@ -700,7 +730,7 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
     }
 
   if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_FUNCTION,
-			       &dtd)) == CTF_ERR)
+			       0, &dtd)) == CTF_ERR)
     {
       free (vdat);
       return CTF_ERR;		   /* errno is set for us.  */
@@ -730,7 +760,7 @@ ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_STRUCT,
-				    &dtd)) == CTF_ERR)
+				    0, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_STRUCT, flag, 0);
@@ -767,7 +797,7 @@ ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_UNION,
-				    &dtd)) == CTF_ERR)
+				    0, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_UNION, flag, 0);
@@ -803,7 +833,7 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_ENUM,
-				    &dtd)) == CTF_ERR)
+				    0, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_ENUM, flag, 0);
@@ -861,7 +891,7 @@ ctf_add_forward (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type)
     return type;
 
-  if ((type = ctf_add_generic (fp, flag, name, kind, &dtd)) == CTF_ERR)
+  if ((type = ctf_add_generic (fp, flag, name, kind, 0, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_FORWARD, flag, 0);
@@ -887,7 +917,7 @@ ctf_add_typedef (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (ref != 0 && ctf_lookup_by_id (&tmp, ref) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  if ((type = ctf_add_generic (fp, flag, name, CTF_K_TYPEDEF,
+  if ((type = ctf_add_generic (fp, flag, name, CTF_K_TYPEDEF, 0,
 			       &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
@@ -1783,7 +1813,7 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	   manually so as to avoid repeated lookups in ctf_add_member
 	   and to ensure the exact same member offsets as in src_type.  */
 
-	dst_type = ctf_add_generic (dst_fp, flag, name, kind, &dtd);
+	dst_type = ctf_add_generic (dst_fp, flag, name, kind, 0, &dtd);
 	if (dst_type == CTF_ERR)
 	  return CTF_ERR;			/* errno is set for us.  */
 
