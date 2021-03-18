@@ -1,5 +1,14 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dtdef_t) <dtd_u.dtu_argv>: Remove.
+	* ctf-create.c (ctf_dtd_delete): No longer free it.
+	(ctf_add_function): Use the dtd_vlen, not dtu_argv.  Properly align.
+	* ctf-serialize.c (ctf_emit_type_sect): Just copy the dtd_vlen.
+	* ctf-types.c (ctf_func_type_info): Just use the vlen.
+	(ctf_func_type_args): Likewise.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dtdef_t) <dtd_u.dtu_arr>: Remove.
 	* ctf-create.c (ctf_add_array): Use the dtd_vlen, not dtu_arr.
 	(ctf_set_array): Likewise.

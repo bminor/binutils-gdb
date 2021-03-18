@@ -196,7 +196,6 @@ typedef struct ctf_dtdef
   union
   {
     ctf_list_t dtu_members;	/* struct, union, or enum */
-    uint32_t *dtu_argv;		/* function */
   } dtd_u;
 } ctf_dtdef_t;
 

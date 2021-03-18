@@ -1678,7 +1678,7 @@ ctf_func_type_info (ctf_dict_t *fp, ctf_id_t type, ctf_funcinfo_t *fip)
   if ((dtd = ctf_dynamic_type (fp, type)) == NULL)
     args = (uint32_t *) ((uintptr_t) tp + increment);
   else
-    args = dtd->dtd_u.dtu_argv;
+    args = (uint32_t *) dtd->dtd_vlen;
 
   if (fip->ctc_argc != 0 && args[fip->ctc_argc - 1] == 0)
     {
@@ -1715,7 +1715,7 @@ ctf_func_type_args (ctf_dict_t *fp, ctf_id_t type, uint32_t argc, ctf_id_t *argv
   if ((dtd = ctf_dynamic_type (fp, type)) == NULL)
     args = (uint32_t *) ((uintptr_t) tp + increment);
   else
-    args = dtd->dtd_u.dtu_argv;
+    args = (uint32_t *) dtd->dtd_vlen;
 
   for (argc = MIN (argc, f.ctc_argc); argc != 0; argc--)
     *argv++ = *args++;

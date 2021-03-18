@@ -892,19 +892,9 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  break;
 
 	case CTF_K_FUNCTION:
-	  {
-	    uint32_t *argv = (uint32_t *) (uintptr_t) t;
-	    uint32_t argc;
-
-	    for (argc = 0; argc < vlen; argc++)
-	      *argv++ = dtd->dtd_u.dtu_argv[argc];
-
-	    if (vlen & 1)
-	      *argv++ = 0;	/* Pad to 4-byte boundary.  */
-
-	    t = (unsigned char *) argv;
-	    break;
-	  }
+	  memcpy (t, dtd->dtd_vlen, sizeof (uint32_t) * (vlen + (vlen & 1)));
+	  t += sizeof (uint32_t) * (vlen + (vlen & 1));
+	  break;
 
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:

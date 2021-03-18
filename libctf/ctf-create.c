@@ -242,9 +242,6 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 	  free (dmd);
 	}
       break;
-    case CTF_K_FUNCTION:
-      free (dtd->dtd_u.dtu_argv);
-      break;
     case CTF_K_FORWARD:
       name_kind = dtd->dtd_data.ctt_type;
       break;
@@ -703,8 +700,9 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
   ctf_dtdef_t *dtd;
   ctf_id_t type;
   uint32_t vlen;
-  uint32_t *vdat = NULL;
+  uint32_t *vdat;
   ctf_dict_t *tmp = fp;
+  size_t initial_vlen;
   size_t i;
 
   if (!(fp->ctf_flags & LCTF_RDWR))
@@ -720,30 +718,28 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
 
   if (ctc->ctc_return != 0
       && ctf_lookup_by_id (&tmp, ctc->ctc_return) == NULL)
-    return CTF_ERR;		/* errno is set for us.  */
+    return CTF_ERR;				/* errno is set for us.  */
 
   if (vlen > CTF_MAX_VLEN)
     return (ctf_set_errno (fp, EOVERFLOW));
 
-  if (vlen != 0 && (vdat = malloc (sizeof (ctf_id_t) * vlen)) == NULL)
-    return (ctf_set_errno (fp, EAGAIN));
+  /* One word extra allocated for padding for 4-byte alignment if need be.
+     Not reflected in vlen: we don't want to copy anything into it, and
+     it's in addition to (e.g.) the trailing 0 indicating varargs.  */
+
+  initial_vlen = (sizeof (uint32_t) * (vlen + (vlen & 1)));
+  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_FUNCTION,
+			       initial_vlen, &dtd)) == CTF_ERR)
+    return CTF_ERR;				/* errno is set for us.  */
+
+  vdat = (uint32_t *) dtd->dtd_vlen;
 
   for (i = 0; i < ctc->ctc_argc; i++)
     {
       tmp = fp;
       if (argv[i] != 0 && ctf_lookup_by_id (&tmp, argv[i]) == NULL)
-	{
-	  free (vdat);
-	  return CTF_ERR;	   /* errno is set for us.  */
-	}
+	return CTF_ERR;				/* errno is set for us.  */
       vdat[i] = (uint32_t) argv[i];
-    }
-
-  if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_FUNCTION,
-			       0, &dtd)) == CTF_ERR)
-    {
-      free (vdat);
-      return CTF_ERR;		   /* errno is set for us.  */
     }
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_FUNCTION, flag, vlen);
@@ -751,7 +747,6 @@ ctf_add_function (ctf_dict_t *fp, uint32_t flag,
 
   if (ctc->ctc_flags & CTF_FUNC_VARARG)
     vdat[vlen - 1] = 0;		   /* Add trailing zero to indicate varargs.  */
-  dtd->dtd_u.dtu_argv = vdat;
 
   return type;
 }
