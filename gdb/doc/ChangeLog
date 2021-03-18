@@ -1,3 +1,8 @@
+2021-03-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python.texinfo (Parameters In Python): Return empty string in
+	small example code.
+
 2021-02-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Files): Document new 'maint info target-sections'

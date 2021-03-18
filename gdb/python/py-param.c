@@ -368,11 +368,10 @@ call_doc_function (PyObject *obj, PyObject *method, PyObject *arg)
 }
 
 /* A callback function that is registered against the respective
-   add_setshow_* set_doc prototype.  This function will either call
-   the Python function "get_set_string" or extract the Python
-   attribute "set_doc" and return the contents as a string.  If
-   neither exist, insert a string indicating the Parameter is not
-   documented.  */
+   add_setshow_* set_doc prototype.  This function calls the Python function
+   "get_set_string" if it exists, which will return a string.  That string
+   is then printed.  If "get_set_string" does not exist, or returns an
+   empty string, then nothing is printed.  */
 static void
 get_set_value (const char *args, int from_tty,
 	       struct cmd_list_element *c)

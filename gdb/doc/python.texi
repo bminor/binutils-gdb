@@ -4041,6 +4041,7 @@ class ExampleParam (gdb.Parameter):
         self.value = self.saved_value
         raise gdb.GdbError('Failed to validate')
       self.saved_value = self.value
+      return ""
 @end smallexample
 @end defun
 

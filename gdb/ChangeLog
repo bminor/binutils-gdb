@@ -1,3 +1,7 @@
+2021-03-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-param.c (get_set_value): Update header comment.
+
 2021-03-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.c (check_multi_target_resumption): Remove argument to
