@@ -448,13 +448,20 @@ dependencies = { module=all-binutils; on=all-intl; };
 dependencies = { module=all-binutils; on=all-gas; };
 dependencies = { module=all-binutils; on=all-libctf; };
 dependencies = { module=all-ld; on=all-libctf; };
-dependencies = { module=install-ld; on=install-libctf; };
 
 // We put install-opcodes before install-binutils because the installed
 // binutils might be on PATH, and they might need the shared opcodes
 // library.
 dependencies = { module=install-binutils; on=install-opcodes; };
 dependencies = { module=install-strip-binutils; on=install-strip-opcodes; };
+
+// Likewise for ld, libctf, and bfd.
+dependencies = { module=install-libctf; on=install-bfd; };
+dependencies = { module=install-ld; on=install-bfd; };
+dependencies = { module=install-ld; on=install-libctf; };
+dependencies = { module=install-strip-libctf; on=install-strip-bfd; };
+dependencies = { module=install-strip-ld; on=install-strip-bfd; };
+dependencies = { module=install-strip-ld; on=install-strip-libctf; };
 
 // libopcodes depends on libbfd
 dependencies = { module=install-opcodes; on=install-bfd; };
