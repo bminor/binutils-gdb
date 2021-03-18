@@ -372,11 +372,12 @@ typedef struct ctf_dedup
    ctf_dict_t typedef appears in <ctf-api.h> and declares a forward tag.
    (A ctf_file_t typedef also appears there, for historical reasons.)
 
-   NOTE: ctf_serialize() requires that everything inside of ctf_dict either be
-   an immediate value, a pointer to dynamically allocated data *outside* of the
-   ctf_dict itself, or a pointer to statically allocated data.  If you add a
-   pointer to ctf_dict that points to something within the ctf_dict itself, you
-   must make corresponding changes to ctf_serialize().  */
+   NOTE: ctf_serialize requires that everything inside of ctf_dict either be an
+   immediate value, a pointer to dynamically allocated data *outside* of the
+   ctf_dict itself, a pointer to statically allocated data, or specially handled
+   in ctf_serialize.  If you add a pointer to ctf_dict that points to something
+   within the ctf_dict itself, you must make corresponding changes to
+   ctf_serialize.  */
 
 struct ctf_dict
 {

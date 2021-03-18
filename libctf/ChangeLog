@@ -1,5 +1,9 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dict_t): Fix comment.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (symtypetab_delete_nonstatic_vars): Move
 	into ctf-serialize.c.
 	(ctf_symtab_skippable): Likewise.
