@@ -1,5 +1,31 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-hash.c (ctf_dynset_elements): New.
+	* ctf-impl.h (ctf_dynset_elements): Declare it.
+	(ctf_str_add_pending): Likewise.
+	(ctf_dict_t) <ctf_str_pending_ref>: New, set of refs that must be
+	added during serialization.
+	* ctf-string.c (ctf_str_create_atoms): Initialize it.
+	(CTF_STR_ADD_REF): New flag.
+	(CTF_STR_MAKE_PROVISIONAL): Likewise.
+	(CTF_STR_PENDING_REF): Likewise.
+	(ctf_str_add_ref_internal): Take a flags word rather than int
+	params.  Populate, and clear out, ctf_str_pending_ref.
+	(ctf_str_add): Adjust accordingly.
+	(ctf_str_add_external): Likewise.
+	(ctf_str_add_pending): New.
+	(ctf_str_remove_ref): Also remove the potential ref if it is a
+	pending ref.
+	* ctf-serialize.c (ctf_serialize): Prohibit addition of strings
+	with ctf_str_add_ref before serialization.  Ensure that the
+	ctf_str_pending_ref set is empty before strtab finalization.
+	(ctf_emit_type_sect): Add a ref to the ctt_name.
+	* ctf-create.c (ctf_add_generic): Add the ctt_name as a pending
+	ref.
+	* testsuite/libctf-writable/reserialize-strtab-corruption.*: New test.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-serialize.c (ctf_serialize): Preserve ctf_typemax across
 	serialization.
 

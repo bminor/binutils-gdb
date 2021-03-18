@@ -439,7 +439,8 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
   type = ++fp->ctf_typemax;
   type = LCTF_INDEX_TO_TYPE (fp, type, (fp->ctf_flags & LCTF_CHILD));
 
-  dtd->dtd_data.ctt_name = ctf_str_add_ref (fp, name, &dtd->dtd_data.ctt_name);
+  dtd->dtd_data.ctt_name = ctf_str_add_pending (fp, name,
+						&dtd->dtd_data.ctt_name);
   dtd->dtd_type = type;
 
   if (dtd->dtd_data.ctt_name == 0 && name != NULL && name[0] != '\0')
