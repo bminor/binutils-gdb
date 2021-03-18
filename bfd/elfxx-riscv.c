@@ -1802,12 +1802,12 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
     }
 
   p = arch;
-  if (strncmp (p, "rv32", 4) == 0)
+  if (startswith (p, "rv32"))
     {
       *rps->xlen = 32;
       p += 4;
     }
-  else if (strncmp (p, "rv64", 4) == 0)
+  else if (startswith (p, "rv64"))
     {
       *rps->xlen = 64;
       p += 4;

@@ -1285,7 +1285,7 @@ is_dwo_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
   if (len < 5)
     return false;
 
-  return strncmp (name + len - 4, ".dwo", 4) == 0;
+  return startswith (name + len - 4, ".dwo");
 }
 
 /* Return TRUE if section SEC is in the update list.  */
@@ -4261,7 +4261,7 @@ static void
 handle_remove_section_option (const char *section_pattern)
 {
   find_section_list (section_pattern, true, SECTION_CONTEXT_REMOVE);
-  if (strncmp (section_pattern, ".rel", 4) == 0)
+  if (startswith (section_pattern, ".rel"))
     {
       section_pattern += 4;
       if (*section_pattern == 'a')
@@ -5875,15 +5875,15 @@ copy_main (int argc, char *argv[])
 
   /* Convert input EFI target to PEI target.  */
   if (input_target != NULL
-      && strncmp (input_target, "efi-", 4) == 0)
+      && startswith (input_target, "efi-"))
     {
       char *efi;
 
       efi = xstrdup (output_target + 4);
-      if (strncmp (efi, "bsdrv-", 6) == 0
-	  || strncmp (efi, "rtdrv-", 6) == 0)
+      if (startswith (efi, "bsdrv-")
+	  || startswith (efi, "rtdrv-"))
 	efi += 2;
-      else if (strncmp (efi, "app-", 4) != 0)
+      else if (!startswith (efi, "app-"))
 	fatal (_("unknown input EFI target: %s"), input_target);
 
       input_target = efi;
@@ -5892,23 +5892,23 @@ copy_main (int argc, char *argv[])
 
   /* Convert output EFI target to PEI target.  */
   if (output_target != NULL
-      && strncmp (output_target, "efi-", 4) == 0)
+      && startswith (output_target, "efi-"))
     {
       char *efi;
 
       efi = xstrdup (output_target + 4);
-      if (strncmp (efi, "app-", 4) == 0)
+      if (startswith (efi, "app-"))
 	{
 	  if (pe_subsystem == -1)
 	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_APPLICATION;
 	}
-      else if (strncmp (efi, "bsdrv-", 6) == 0)
+      else if (startswith (efi, "bsdrv-"))
 	{
 	  if (pe_subsystem == -1)
 	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER;
 	  efi += 2;
 	}
-      else if (strncmp (efi, "rtdrv-", 6) == 0)
+      else if (startswith (efi, "rtdrv-"))
 	{
 	  if (pe_subsystem == -1)
 	    pe_subsystem = IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER;

@@ -1338,10 +1338,10 @@ ppc_elf_section_from_shdr (bfd *abfd,
   if (hdr->sh_type == SHT_ORDERED)
     flags |= SEC_SORT_ENTRIES;
 
-  if (strncmp (name, ".PPC.EMB", 8) == 0)
+  if (startswith (name, ".PPC.EMB"))
     name += 8;
-  if (strncmp (name, ".sbss", 5) == 0
-      || strncmp (name, ".sdata", 6) == 0)
+  if (startswith (name, ".sbss")
+      || startswith (name, ".sdata"))
     flags |= SEC_SMALL_DATA;
 
   return (flags == 0

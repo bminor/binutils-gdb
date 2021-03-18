@@ -2759,7 +2759,7 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  /* Strip this section if we don't need it.  */
 	}
-      else if (strncmp (s->name, ".rela", 5) == 0)
+      else if (startswith (s->name, ".rela"))
 	{
 	  if (s->size != 0 && s != htab->srelplt)
 	    relocs_exist = true;

@@ -4439,7 +4439,7 @@ nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	{
 	  got_size += s->size;
 	}
-      else if (strncmp (bfd_section_name (s), ".rela", 5) == 0)
+      else if (startswith (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != elf_hash_table (info)->srelplt)
 	    relocs = true;
@@ -5426,7 +5426,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 		  if (name == NULL)
 		    return false;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (startswith (name, ".rela")
 			      && strcmp (bfd_section_name (input_section),
 					 name + 5) == 0);
 
@@ -6870,8 +6870,7 @@ static unsigned int
 nds32_elf_action_discarded (asection *sec)
 {
 
-  if (strncmp
-      (".gcc_except_table", sec->name, sizeof (".gcc_except_table") - 1) == 0)
+  if (startswith (sec->name, ".gcc_except_table"))
     return 0;
 
   return _bfd_elf_default_action_discarded (sec);
@@ -7239,7 +7238,7 @@ nds32_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (name == NULL)
 		    return false;
 
-		  BFD_ASSERT (strncmp (name, ".rela", 5) == 0
+		  BFD_ASSERT (startswith (name, ".rela")
 			      && strcmp (bfd_section_name (sec),
 					 name + 5) == 0);
 
@@ -12450,8 +12449,8 @@ nds32_elf_section_flags (const Elf_Internal_Shdr *hdr)
 {
   const char *name = hdr->bfd_section->name;
 
-  if (strncmp (name, ".sbss", 5) == 0
-      || strncmp (name, ".sdata", 6) == 0)
+  if (startswith (name, ".sbss")
+      || startswith (name, ".sdata"))
     hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return true;

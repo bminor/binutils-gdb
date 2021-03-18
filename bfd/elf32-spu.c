@@ -307,7 +307,7 @@ spu_elf_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *sym)
 {
   if (sym->name != NULL
       && sym->section != bfd_abs_section_ptr
-      && strncmp (sym->name, "_EAR_", 5) == 0)
+      && startswith (sym->name, "_EAR_"))
     sym->flags |= BSF_KEEP;
 }
 
@@ -725,7 +725,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	     an overlay, in the sense that it might be loaded in
 	     by the overlay manager, but rather the initial
 	     section contents for the overlay buffer.  */
-	  if (strncmp (s->name, ".ovl.init", 9) != 0)
+	  if (!startswith (s->name, ".ovl.init"))
 	    {
 	      num_buf = ((s->vma - vma_start) >> htab->line_size_log2) + 1;
 	      set_id = (num_buf == prev_buf)? set_id + 1 : 0;
@@ -785,7 +785,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 	      if (spu_elf_section_data (s0)->u.o.ovl_index == 0)
 		{
 		  ++num_buf;
-		  if (strncmp (s0->name, ".ovl.init", 9) != 0)
+		  if (!startswith (s0->name, ".ovl.init"))
 		    {
 		      alloc_sec[ovl_index] = s0;
 		      spu_elf_section_data (s0)->u.o.ovl_index = ++ovl_index;
@@ -794,7 +794,7 @@ spu_elf_find_overlays (struct bfd_link_info *info)
 		  else
 		    ovl_end = s->vma + s->size;
 		}
-	      if (strncmp (s->name, ".ovl.init", 9) != 0)
+	      if (!startswith (s->name, ".ovl.init"))
 		{
 		  alloc_sec[ovl_index] = s;
 		  spu_elf_section_data (s)->u.o.ovl_index = ++ovl_index;
@@ -970,7 +970,7 @@ needs_ovl_stub (struct elf_link_hash_entry *h,
       /* setjmp always goes via an overlay stub, because then the return
 	 and hence the longjmp goes via __ovly_return.  That magically
 	 makes setjmp/longjmp between overlays work.  */
-      if (strncmp (h->root.root.string, "setjmp", 6) == 0
+      if (startswith (h->root.root.string, "setjmp")
 	  && (h->root.root.string[6] == '\0' || h->root.root.string[6] == '@'))
 	ret = call_ovl_stub;
     }
@@ -1496,7 +1496,7 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && h->def_regular
-      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0
+      && startswith (h->root.root.string, "_SPUEAR_")
       && (sym_sec = h->root.u.def.section) != NULL
       && sym_sec->output_section != bfd_abs_section_ptr
       && spu_elf_section_data (sym_sec->output_section) != NULL
@@ -1521,7 +1521,7 @@ build_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && h->def_regular
-      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0
+      && startswith (h->root.root.string, "_SPUEAR_")
       && (sym_sec = h->root.u.def.section) != NULL
       && sym_sec->output_section != bfd_abs_section_ptr
       && spu_elf_section_data (sym_sec->output_section) != NULL
@@ -3455,7 +3455,7 @@ mark_overlay_section (struct function_info *fun,
   if (!fun->sec->linker_mark
       && (htab->params->ovly_flavour != ovly_soft_icache
 	  || htab->params->non_ia_text
-	  || strncmp (fun->sec->name, ".text.ia.", 9) == 0
+	  || startswith (fun->sec->name, ".text.ia.")
 	  || strcmp (fun->sec->name, ".init") == 0
 	  || strcmp (fun->sec->name, ".fini") == 0))
     {
@@ -3483,7 +3483,7 @@ mark_overlay_section (struct function_info *fun,
 		return false;
 	      memcpy (name, ".rodata", sizeof (".rodata"));
 	    }
-	  else if (strncmp (fun->sec->name, ".text.", 6) == 0)
+	  else if (startswith (fun->sec->name, ".text."))
 	    {
 	      size_t len = strlen (fun->sec->name);
 	      name = bfd_malloc (len + 3);
@@ -3492,7 +3492,7 @@ mark_overlay_section (struct function_info *fun,
 	      memcpy (name, ".rodata", sizeof (".rodata"));
 	      memcpy (name + 7, fun->sec->name + 5, len - 4);
 	    }
-	  else if (strncmp (fun->sec->name, ".gnu.linkonce.t.", 16) == 0)
+	  else if (startswith (fun->sec->name, ".gnu.linkonce.t."))
 	    {
 	      size_t len = strlen (fun->sec->name) + 1;
 	      name = bfd_malloc (len);
@@ -3583,7 +3583,7 @@ mark_overlay_section (struct function_info *fun,
      a stack!  Also, don't mark .ovl.init as an overlay.  */
   if (fun->lo + fun->sec->output_offset + fun->sec->output_section->vma
       == info->output_bfd->start_address
-      || strncmp (fun->sec->output_section->name, ".ovl.init", 9) == 0)
+      || startswith (fun->sec->output_section->name, ".ovl.init"))
     {
       fun->sec->linker_mark = 0;
       if (fun->rodata != NULL)
@@ -4317,7 +4317,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
 	  }
 	else if ((sec->flags & (SEC_ALLOC | SEC_LOAD)) == (SEC_ALLOC | SEC_LOAD)
 		 && sec->output_section->owner == info->output_bfd
-		 && strncmp (sec->output_section->name, ".ovl.init", 9) == 0)
+		 && startswith (sec->output_section->name, ".ovl.init"))
 	  fixed_size -= sec->size;
       if (count != old_count)
 	bfd_arr[bfd_count++] = ibfd;
@@ -5156,7 +5156,7 @@ spu_elf_output_symbol_hook (struct bfd_link_info *info,
       && (h->root.type == bfd_link_hash_defined
 	  || h->root.type == bfd_link_hash_defweak)
       && h->def_regular
-      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0)
+      && startswith (h->root.root.string, "_SPUEAR_"))
     {
       struct got_entry *g;
 

@@ -2042,8 +2042,8 @@ ppc64_elf_section_flags (const Elf_Internal_Shdr *hdr)
 {
   const char *name = hdr->bfd_section->name;
 
-  if (strncmp (name, ".sbss", 5) == 0
-      || strncmp (name, ".sdata", 6) == 0)
+  if (startswith (name, ".sbss")
+      || startswith (name, ".sdata"))
     hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return true;
@@ -15873,7 +15873,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (*name == '.')
 		    ++name;
 
-		  if (strncmp (name, "__libc_start_main", 17) == 0
+		  if (startswith (name, "__libc_start_main")
 		      && (name[17] == 0 || name[17] == '@'))
 		    {
 		      /* Allow crt1 branch to go via a toc adjusting

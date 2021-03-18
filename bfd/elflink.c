@@ -8719,7 +8719,7 @@ resolve_section (const char *name,
 
       if (strncmp (curr->name, name, len) == 0)
 	{
-	  if (strncmp (".end", name + len, 4) == 0)
+	  if (startswith (name + len, ".end"))
 	    {
 	      *result = (curr->vma
 			 + curr->size / bfd_octets_per_byte (abfd, curr));
@@ -8832,7 +8832,7 @@ eval_symbol (bfd_vma *result,
       /* All that remains are operators.  */
 
 #define UNARY_OP(op)						\
-  if (strncmp (sym, #op, strlen (#op)) == 0)			\
+  if (startswith (sym, #op))					\
     {								\
       sym += strlen (#op);					\
       if (*sym == ':')						\
@@ -8849,7 +8849,7 @@ eval_symbol (bfd_vma *result,
     }
 
 #define BINARY_OP_HEAD(op)					\
-  if (strncmp (sym, #op, strlen (#op)) == 0)			\
+  if (startswith (sym, #op))					\
     {								\
       sym += strlen (#op);					\
       if (*sym == ':')						\
@@ -11196,10 +11196,10 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  /* We need to reverse-copy input .ctors/.dtors sections if
 	     they are placed in .init_array/.finit_array for output.  */
 	  if (o->size > address_size
-	      && ((strncmp (o->name, ".ctors", 6) == 0
+	      && ((startswith (o->name, ".ctors")
 		   && strcmp (o->output_section->name,
 			      ".init_array") == 0)
-		  || (strncmp (o->name, ".dtors", 6) == 0
+		  || (startswith (o->name, ".dtors")
 		      && strcmp (o->output_section->name,
 				 ".fini_array") == 0))
 	      && (o->name[6] == 0 || o->name[6] == '.'))

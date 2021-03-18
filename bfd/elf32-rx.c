@@ -557,7 +557,7 @@ rx_elf_relocate_section
 	  name = h->root.root.string;
 	}
 
-      if (strncmp (name, "$tableentry$default$", 20) == 0)
+      if (startswith (name, "$tableentry$default$"))
 	{
 	  bfd_vma entry_vma;
 	  int idx;
@@ -3759,7 +3759,7 @@ rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
   sec = ent->u.def.section;
   abfd = sec->owner;
 
-  if (strncmp (name, "$tablestart$", 12))
+  if (!startswith (name, "$tablestart$"))
     return true;
 
   sec->flags |= SEC_KEEP;
@@ -3895,7 +3895,7 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 
   name = ent->root.string;
 
-  if (strncmp (name, "$tablestart$", 12))
+  if (!startswith (name, "$tablestart$"))
     return true;
 
   tname = name + 12;

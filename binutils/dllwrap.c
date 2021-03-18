@@ -840,11 +840,11 @@ Creating one, but that may not be what you want"));
   else
     which_target = UNKNOWN_TARGET;
 
-  if (! strncmp (target, "arm", 3))
+  if (startswith (target, "arm"))
     which_cpu = ARM_CPU;
-  else if (!strncmp (target, "x86_64", 6)
-	   || !strncmp (target, "athlon64", 8)
-	   || !strncmp (target, "amd64", 5))
+  else if (startswith (target, "x86_64")
+	   || startswith (target, "athlon64")
+	   || startswith (target, "amd64"))
     which_cpu = X64_CPU;
   else if (target[0] == 'i' && (target[1] >= '3' && target[1] <= '6')
 	   && target[2] == '8' && target[3] == '6')
