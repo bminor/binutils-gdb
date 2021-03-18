@@ -14457,7 +14457,13 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 
   num_bytes = section->sh_size;
 
-  printf (_("\nString dump of section '%s':\n"), printable_section_name (filedata, section));
+  if (filedata->is_separate)
+    printf (_("\nString dump of section '%s' in linked file %s:\n"),
+	    printable_section_name (filedata, section),
+	    filedata->file_name);
+  else
+    printf (_("\nString dump of section '%s':\n"),
+	    printable_section_name (filedata, section));
 
   if (decompress_dumps)
     {
@@ -14667,7 +14673,13 @@ dump_section_as_bytes (Elf_Internal_Shdr *  section,
 
   section_size = section->sh_size;
 
-  printf (_("\nHex dump of section '%s':\n"), printable_section_name (filedata, section));
+  if (filedata->is_separate)
+    printf (_("\nHex dump of section '%s' in linked file %s:\n"),
+	    printable_section_name (filedata, section),
+	    filedata->file_name);
+  else
+    printf (_("\nHex dump of section '%s':\n"),
+	    printable_section_name (filedata, section));
 
   if (decompress_dumps)
     {
@@ -14956,6 +14968,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       symsectp = shdr_to_ctf_sect (&symsect, symtab_sec, filedata);
       symsect.cts_data = symdata;
     }
+
   if (dump_ctf_strtab_name && dump_ctf_strtab_name[0] != 0)
     {
       if ((strtab_sec = find_section (filedata, dump_ctf_strtab_name)) == NULL)
@@ -14972,6 +14985,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       strsectp = shdr_to_ctf_sect (&strsect, strtab_sec, filedata);
       strsect.cts_data = strdata;
     }
+
   if (dump_ctf_parent_name)
     {
       if ((parent_sec = find_section (filedata, dump_ctf_parent_name)) == NULL)
@@ -15028,8 +15042,13 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
 
   ret = TRUE;
 
-  printf (_("\nDump of CTF section '%s':\n"),
-	  printable_section_name (filedata, section));
+  if (filedata->is_separate)
+    printf (_("\nDump of CTF section '%s' in linked file %s:\n"),
+	    printable_section_name (filedata, section),
+	    filedata->file_name);
+  else
+    printf (_("\nDump of CTF section '%s':\n"),
+	    printable_section_name (filedata, section));
 
   if ((err = ctf_archive_iter (ctfa, dump_ctf_archive_member, parent)) != 0)
     {
@@ -15479,15 +15498,9 @@ initialise_dumps_byname (Filedata * filedata)
 	    any = TRUE;
 	  }
 
-      if (!any)
-	{
-	  if (filedata->is_separate)
-	    warn (_("Section '%s' in linked file '%s' was not dumped because it does not exist\n"),
-		  cur->name, filedata->file_name);
-	  else
-	    warn (_("Section '%s' was not dumped because it does not exist\n"),
-		  cur->name);
-	}
+      if (!any && !filedata->is_separate)
+	warn (_("Section '%s' was not dumped because it does not exist\n"),
+	      cur->name);
     }
 }
 
@@ -15552,20 +15565,16 @@ process_section_contents (Filedata * filedata)
 #endif
     }
 
-  /* Check to see if the user requested a
-     dump of a section that does not exist.  */
-  while (i < filedata->dump.num_dump_sects)
+  if (! filedata->is_separate)
     {
-      if (filedata->dump.dump_sects[i])
-	{
-	  if (filedata->is_separate)
-	    warn (_("Section %d in linked file '%s' was not dumped because it does not exist!\n"),
-		  i, filedata->file_name);
-	  else
+      /* Check to see if the user requested a
+	 dump of a section that does not exist.  */
+      for (; i < filedata->dump.num_dump_sects; i++)
+	if (filedata->dump.dump_sects[i])
+	  {
 	    warn (_("Section %d was not dumped because it does not exist!\n"), i);
-	  res = FALSE;
-	}
-      i++;
+	    res = FALSE;
+	  }
     }
 
   return res;
@@ -21119,6 +21128,29 @@ open_debug_file (const char * pathname)
   return open_file (pathname, TRUE);
 }
 
+static void
+initialise_dump_sects (Filedata * filedata)
+{
+  /* Initialise the dump_sects array from the cmdline_dump_sects array.
+     Note we do this even if cmdline_dump_sects is empty because we
+     must make sure that the dump_sets array is zeroed out before each
+     object file is processed.  */
+  if (filedata->dump.num_dump_sects > cmdline.num_dump_sects)
+    memset (filedata->dump.dump_sects, 0,
+	    filedata->dump.num_dump_sects * sizeof (*filedata->dump.dump_sects));
+
+  if (cmdline.num_dump_sects > 0)
+    {
+      if (filedata->dump.num_dump_sects == 0)
+	/* A sneaky way of allocating the dump_sects array.  */
+	request_dump_bynumber (&filedata->dump, cmdline.num_dump_sects, 0);
+
+      assert (filedata->dump.num_dump_sects >= cmdline.num_dump_sects);
+      memcpy (filedata->dump.dump_sects, cmdline.dump_sects,
+	      cmdline.num_dump_sects * sizeof (*filedata->dump.dump_sects));
+    }
+}
+
 /* Process one ELF object file according to the command line options.
    This file may actually be stored in an archive.  The file is
    positioned at the start of the ELF object.  Returns TRUE if no
@@ -21150,24 +21182,7 @@ process_object (Filedata * filedata)
   if (show_name)
     printf (_("\nFile: %s\n"), filedata->file_name);
 
-  /* Initialise the dump_sects array from the cmdline_dump_sects array.
-     Note we do this even if cmdline_dump_sects is empty because we
-     must make sure that the dump_sets array is zeroed out before each
-     object file is processed.  */
-  if (filedata->dump.num_dump_sects > cmdline.num_dump_sects)
-    memset (filedata->dump.dump_sects, 0,
-	    filedata->dump.num_dump_sects * sizeof (*filedata->dump.dump_sects));
-
-  if (cmdline.num_dump_sects > 0)
-    {
-      if (filedata->dump.num_dump_sects == 0)
-	/* A sneaky way of allocating the dump_sects array.  */
-	request_dump_bynumber (&filedata->dump, cmdline.num_dump_sects, 0);
-
-      assert (filedata->dump.num_dump_sects >= cmdline.num_dump_sects);
-      memcpy (filedata->dump.dump_sects, cmdline.dump_sects,
-	      cmdline.num_dump_sects * sizeof (*filedata->dump.dump_sects));
-    }
+  initialise_dump_sects (filedata);
 
   if (! process_file_header (filedata))
     return FALSE;
@@ -21221,6 +21236,8 @@ process_object (Filedata * filedata)
 
       for (d = first_separate_info; d != NULL; d = d->next)
 	{
+	  initialise_dump_sects (d->handle);
+
 	  if (process_links && ! process_file_header (d->handle))
 	    res = FALSE;
 	  else if (! process_section_headers (d->handle))

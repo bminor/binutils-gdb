@@ -1,3 +1,18 @@
+2021-03-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 27478
+	* readelf.c (dump_section_as_strings): Mention separate filename.
+	(dump_section_as_bytes): Likewise.
+	(dump_section_as_ctf): Likewise.
+	(initialise_dumkps_byname): Only issue a warning for missing
+	sections if processing the main file.
+	(process_section_contents): Only issue a warning for unsumped
+	section numbers in the main file.
+	(initialise_dump_sects): New function.  Contains code extracted
+	from ...
+	(process_object): ... here.  Also call initialise_dump_sects for
+	separate files.
+
 2021-03-16  Nick Clifton  <nickc@redhat.com>
 
 	PR 27534
