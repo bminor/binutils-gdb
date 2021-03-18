@@ -1,5 +1,17 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_next_t) <ctn_tp>: New.
+	<u.ctn_mp>: Remove.
+	<u.ctn_lmp>: Remove.
+	<u.ctn_vlen>: New.
+	* ctf-types.c (ctf_struct_member): New.
+	(ctf_member_next): Use it, dropping separate large/small code paths.
+	(ctf_type_align): Likewise.
+	(ctf_member_info): Likewise.
+	(ctf_type_rvisit): Likewise.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dtdef_t) <dtu_members>: Remove.
 	<dtd_u>: Likewise.
 	(ctf_dmdef_t): Remove.

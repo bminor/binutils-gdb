@@ -35,6 +35,36 @@ ctf_type_ischild (ctf_dict_t * fp, ctf_id_t id)
   return (LCTF_TYPE_ISCHILD (fp, id));
 }
 
+/* Expand a structure element into the passed-in ctf_lmember_t.  */
+
+static int
+ctf_struct_member (ctf_dict_t *fp, ctf_lmember_t *dst, const ctf_type_t *tp,
+		   unsigned char *vlen, size_t vbytes, size_t n)
+{
+  if (!ctf_assert (fp, n < LCTF_INFO_VLEN (fp, tp->ctt_info)))
+    return -1;					/* errno is set for us.  */
+
+  /* Already large.  */
+  if (tp->ctt_size == CTF_LSIZE_SENT)
+    {
+      ctf_lmember_t *lmp = (ctf_lmember_t *) vlen;
+
+      if (!ctf_assert (fp, (n + 1) * sizeof (ctf_lmember_t) <= vbytes))
+	return -1;				/* errno is set for us.  */
+
+      memcpy (dst, &lmp[n], sizeof (ctf_lmember_t));
+    }
+  else
+    {
+      ctf_member_t *mp = (ctf_member_t *) vlen;
+      dst->ctlm_name = mp[n].ctm_name;
+      dst->ctlm_type = mp[n].ctm_type;
+      dst->ctlm_offsetlo = mp[n].ctm_offset;
+      dst->ctlm_offsethi = 0;
+    }
+  return 0;
+}
+
 /* Iterate over the members of a STRUCT or UNION.  We pass the name, member
    type, and offset of each member to the specified callback function.  */
 
@@ -72,12 +102,14 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   ctf_dict_t *ofp = fp;
   uint32_t kind;
   ssize_t offset;
+  uint32_t max_vlen;
   ctf_next_t *i = *it;
 
   if (!i)
     {
       const ctf_type_t *tp;
       ctf_dtdef_t *dtd;
+      ssize_t size;
       ssize_t increment;
 
       if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
@@ -89,8 +121,9 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       if ((i = ctf_next_create ()) == NULL)
 	return ctf_set_errno (ofp, ENOMEM);
       i->cu.ctn_fp = ofp;
+      i->ctn_tp = tp;
 
-      (void) ctf_get_ctt_size (fp, tp, &i->ctn_size, &increment);
+      ctf_get_ctt_size (fp, tp, &size, &increment);
       kind = LCTF_INFO_KIND (fp, tp->ctt_info);
 
       if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
@@ -99,20 +132,20 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 	  return (ctf_set_errno (ofp, ECTF_NOTSOU));
 	}
 
-      dtd = ctf_dynamic_type (fp, type);
-      i->ctn_iter_fun = (void (*) (void)) ctf_member_next;
-      i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
-
-      if (dtd == NULL)
+      if ((dtd = ctf_dynamic_type (fp, type)) != NULL)
 	{
-	  if (i->ctn_size < CTF_LSTRUCT_THRESH)
-	    i->u.ctn_mp = (const ctf_member_t *) ((uintptr_t) tp + increment);
-	  else
-	    i->u.ctn_lmp = (const ctf_lmember_t *) ((uintptr_t) tp + increment);
+	  i->u.ctn_vlen = dtd->dtd_vlen;
+	  i->ctn_size = dtd->dtd_vlen_alloc;
 	}
       else
-	i->u.ctn_lmp = (const ctf_lmember_t *) dtd->dtd_vlen;
+	{
+	  unsigned long vlen = LCTF_INFO_VLEN (fp, tp->ctt_info);
 
+	  i->u.ctn_vlen = (unsigned char *) tp + increment;
+	  i->ctn_size = LCTF_VBYTES (fp, kind, size, vlen);;
+	}
+      i->ctn_iter_fun = (void (*) (void)) ctf_member_next;
+      i->ctn_n = 0;
       *it = i;
     }
 
@@ -126,6 +159,8 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
   if ((fp = ctf_get_dict (ofp, type)) == NULL)
     return (ctf_set_errno (ofp, ECTF_NOPARENT));
 
+  max_vlen = LCTF_INFO_VLEN (fp, i->ctn_tp->ctt_info);
+
   /* When we hit an unnamed struct/union member, we set ctn_type to indicate
      that we are inside one, then return the unnamed member: on the next call,
      we must skip over top-level member iteration in favour of iteration within
@@ -134,46 +169,29 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
  retry:
   if (!i->ctn_type)
     {
-      if (i->ctn_n == 0)
+      ctf_lmember_t memb;
+      const char *membname;
+
+      if (i->ctn_n == max_vlen)
 	goto end_iter;
 
-      /* Dynamic structures in read-write dicts always use lmembers.  */
-      if (i->ctn_size < CTF_LSTRUCT_THRESH
-	  && !(fp->ctf_flags & LCTF_RDWR))
-	{
-	  const char *membname = ctf_strptr (fp, i->u.ctn_mp->ctm_name);
+      if (ctf_struct_member (fp, &memb, i->ctn_tp, i->u.ctn_vlen, i->ctn_size,
+			     i->ctn_n) < 0)
+	return -1;				/* errno is set for us.  */
 
-	  if (name)
-	    *name = membname;
-	  if (membtype)
-	    *membtype = i->u.ctn_mp->ctm_type;
-	  offset = i->u.ctn_mp->ctm_offset;
+      membname = ctf_strptr (fp, memb.ctlm_name);
 
-	  if (membname[0] == 0
-	      && (ctf_type_kind (fp, i->u.ctn_mp->ctm_type) == CTF_K_STRUCT
-		  || ctf_type_kind (fp, i->u.ctn_mp->ctm_type) == CTF_K_UNION))
-	    i->ctn_type = i->u.ctn_mp->ctm_type;
+      if (name)
+	*name = membname;
+      if (membtype)
+	*membtype = memb.ctlm_type;
+      offset = (unsigned long) CTF_LMEM_OFFSET (&memb);
 
-	  i->u.ctn_mp++;
-	}
-      else
-	{
-	  const char *membname = ctf_strptr (fp, i->u.ctn_lmp->ctlm_name);
-
-	  if (name)
-	    *name = membname;
-	  if (membtype)
-	    *membtype = i->u.ctn_lmp->ctlm_type;
-	  offset = (unsigned long) CTF_LMEM_OFFSET (i->u.ctn_lmp);
-
-	  if (membname[0] == 0
-	      && (ctf_type_kind (fp, i->u.ctn_lmp->ctlm_type) == CTF_K_STRUCT
-		  || ctf_type_kind (fp, i->u.ctn_lmp->ctlm_type) == CTF_K_UNION))
-	    i->ctn_type = i->u.ctn_lmp->ctlm_type;
-
-	  i->u.ctn_lmp++;
-	}
-      i->ctn_n--;
+      if (membname[0] == 0
+	  && (ctf_type_kind (fp, memb.ctlm_type) == CTF_K_STRUCT
+	      || ctf_type_kind (fp, memb.ctlm_type) == CTF_K_UNION))
+	i->ctn_type = memb.ctlm_type;
+      i->ctn_n++;
 
       /* The callers might want automatic recursive sub-struct traversal.  */
       if (!(flags & CTF_MN_RECURSE))
@@ -964,43 +982,36 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_UNION:
       {
 	size_t align = 0;
-	int dynamic = 0;
 	ctf_dtdef_t *dtd;
+	unsigned char *vlen;
+	uint32_t i = 0, n = LCTF_INFO_VLEN (fp, tp->ctt_info);
+	ssize_t size, increment, vbytes;
 
-	if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
-	  dynamic = 1;
+	ctf_get_ctt_size (fp, tp, &size, &increment);
 
-	uint32_t n = LCTF_INFO_VLEN (fp, tp->ctt_info);
-	ssize_t size, increment;
-	const void *vmp;
-
-	(void) ctf_get_ctt_size (fp, tp, &size, &increment);
-
-	if (!dynamic)
-	  vmp = (unsigned char *) tp + increment;
+	if ((dtd = ctf_dynamic_type (fp, type)) != NULL)
+	  {
+	    vlen = dtd->dtd_vlen;
+	    vbytes = dtd->dtd_vlen_alloc;
+	  }
 	else
-	  vmp = dtd->dtd_vlen;
+	  {
+	    vlen = (unsigned char *) tp + increment;
+	    vbytes = LCTF_VBYTES (fp, kind, size, n);
+	  }
 
 	if (kind == CTF_K_STRUCT)
 	  n = MIN (n, 1);	/* Only use first member for structs.  */
 
-	if (size < CTF_LSTRUCT_THRESH && !dynamic)
+	for (; n != 0; n--, i++)
 	  {
-	    const ctf_member_t *mp = vmp;
-	    for (; n != 0; n--, mp++)
-	      {
-		ssize_t am = ctf_type_align (ofp, mp->ctm_type);
-		align = MAX (align, (size_t) am);
-	      }
-	  }
-	else
-	  {
-	    const ctf_lmember_t *lmp = vmp;
-	    for (; n != 0; n--, lmp++)
-	      {
-		ssize_t am = ctf_type_align (ofp, lmp->ctlm_type);
-		align = MAX (align, (size_t) am);
-	      }
+	    ctf_lmember_t memb;
+
+	    if (ctf_struct_member (fp, &memb, tp, vlen, vbytes, i) < 0)
+	      return -1;				/* errno is set for us.  */
+
+	    ssize_t am = ctf_type_align (ofp, memb.ctlm_type);
+	    align = MAX (align, (size_t) am);
 	  }
 	return align;
       }
@@ -1349,10 +1360,9 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   ctf_dtdef_t *dtd;
-  const void *vmp;
-  ssize_t size, increment;
-  uint32_t kind, n;
-  int dynamic = 0;
+  unsigned char *vlen;
+  ssize_t size, increment, vbytes;
+  uint32_t kind, n, i = 0;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
@@ -1360,62 +1370,45 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return -1;			/* errno is set for us.  */
 
-  (void) ctf_get_ctt_size (fp, tp, &size, &increment);
+  ctf_get_ctt_size (fp, tp, &size, &increment);
   kind = LCTF_INFO_KIND (fp, tp->ctt_info);
 
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
     return (ctf_set_errno (ofp, ECTF_NOTSOU));
 
-  if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
-    dynamic = 1;
-
-  if (!dynamic)
-    vmp = (unsigned char *) tp + increment;
-  else
-    vmp = dtd->dtd_vlen;
-
-  if (size < CTF_LSTRUCT_THRESH && !dynamic)
+  n = LCTF_INFO_VLEN (fp, tp->ctt_info);
+  if ((dtd = ctf_dynamic_type (fp, type)) != NULL)
     {
-      const ctf_member_t *mp = vmp;
-
-      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, mp++)
-	{
-	  const char *membname = ctf_strptr (fp, mp->ctm_name);
-
-	  if (membname[0] == 0
-	      && (ctf_type_kind (fp, mp->ctm_type) == CTF_K_STRUCT
-		  || ctf_type_kind (fp, mp->ctm_type) == CTF_K_UNION)
-	      && (ctf_member_info (fp, mp->ctm_type, name, mip) == 0))
-	    return 0;
-
-	  if (strcmp (membname, name) == 0)
-	    {
-	      mip->ctm_type = mp->ctm_type;
-	      mip->ctm_offset = mp->ctm_offset;
-	      return 0;
-	    }
-	}
+      vlen = dtd->dtd_vlen;
+      vbytes = dtd->dtd_vlen_alloc;
     }
   else
     {
-      const ctf_lmember_t *lmp = vmp;
+      vlen = (unsigned char *) tp + increment;
+      vbytes = LCTF_VBYTES (fp, kind, size, n);
+    }
 
-      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, lmp++)
+  for (; n != 0; n--, i++)
+    {
+      ctf_lmember_t memb;
+      const char *membname;
+
+      if (ctf_struct_member (fp, &memb, tp, vlen, vbytes, i) < 0)
+	return -1;				/* errno is set for us.  */
+
+      membname = ctf_strptr (fp, memb.ctlm_name);
+
+      if (membname[0] == 0
+	  && (ctf_type_kind (fp, memb.ctlm_type) == CTF_K_STRUCT
+	      || ctf_type_kind (fp, memb.ctlm_type) == CTF_K_UNION)
+	  && (ctf_member_info (fp, memb.ctlm_type, name, mip) == 0))
+	return 0;
+
+      if (strcmp (membname, name) == 0)
 	{
-	  const char *membname = ctf_strptr (fp, lmp->ctlm_name);
-
-	  if (membname[0] == 0
-	      && (ctf_type_kind (fp, lmp->ctlm_type) == CTF_K_STRUCT
-		  || ctf_type_kind (fp, lmp->ctlm_type) == CTF_K_UNION)
-	      && (ctf_member_info (fp, lmp->ctlm_type, name, mip) == 0))
-	    return 0;
-
-	  if (strcmp (membname, name) == 0)
-	    {
-	      mip->ctm_type = lmp->ctlm_type;
-	      mip->ctm_offset = (unsigned long) CTF_LMEM_OFFSET (lmp);
-	      return 0;
-	    }
+	  mip->ctm_type = memb.ctlm_type;
+	  mip->ctm_offset = (unsigned long) CTF_LMEM_OFFSET (&memb);
+	  return 0;
 	}
     }
 
@@ -1630,10 +1623,9 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
   ctf_id_t otype = type;
   const ctf_type_t *tp;
   const ctf_dtdef_t *dtd;
-  const void *vmp;
-  ssize_t size, increment;
-  uint32_t kind, n;
-  int dynamic = 0;
+  unsigned char *vlen;
+  ssize_t size, increment, vbytes;
+  uint32_t kind, n, i = 0;
   int rc;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
@@ -1650,43 +1642,32 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
     return 0;
 
-  (void) ctf_get_ctt_size (fp, tp, &size, &increment);
+  ctf_get_ctt_size (fp, tp, &size, &increment);
 
+  n = LCTF_INFO_VLEN (fp, tp->ctt_info);
   if ((dtd = ctf_dynamic_type (fp, type)) != NULL)
-    dynamic = 1;
-
-  if (!dynamic)
-    vmp = (unsigned char *) tp + increment;
-  else
-    vmp = dtd->dtd_vlen;
-
-  if (size < CTF_LSTRUCT_THRESH && !dynamic)
     {
-      const ctf_member_t *mp = vmp;
-
-      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, mp++)
-	{
-	  if ((rc = ctf_type_rvisit (fp, mp->ctm_type,
-				     func, arg, ctf_strptr (fp,
-							    mp->ctm_name),
-				     offset + mp->ctm_offset,
-				     depth + 1)) != 0)
-	    return rc;
-	}
+      vlen = dtd->dtd_vlen;
+      vbytes = dtd->dtd_vlen_alloc;
     }
   else
     {
-      const ctf_lmember_t *lmp = vmp;
+      vlen = (unsigned char *) tp + increment;
+      vbytes = LCTF_VBYTES (fp, kind, size, n);
+    }
 
-      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, lmp++)
-	{
-	  if ((rc = ctf_type_rvisit (fp, lmp->ctlm_type,
-				     func, arg, ctf_strptr (fp,
-							    lmp->ctlm_name),
-				     offset + (unsigned long) CTF_LMEM_OFFSET (lmp),
-				     depth + 1)) != 0)
-	    return rc;
-	}
+  for (; n != 0; n--, i++)
+    {
+      ctf_lmember_t memb;
+
+      if (ctf_struct_member (fp, &memb, tp, vlen, vbytes, i) < 0)
+	return -1;				/* errno is set for us.  */
+
+      if ((rc = ctf_type_rvisit (fp, memb.ctlm_type,
+				 func, arg, ctf_strptr (fp, memb.ctlm_name),
+				 offset + (unsigned long) CTF_LMEM_OFFSET (&memb),
+				 depth + 1)) != 0)
+	return rc;
     }
 
   return 0;

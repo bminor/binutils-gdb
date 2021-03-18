@@ -530,6 +530,7 @@ struct ctf_next
   ctf_id_t ctn_type;
   ssize_t ctn_size;
   ssize_t ctn_increment;
+  const ctf_type_t *ctn_tp;
   uint32_t ctn_n;
 
   /* Some iterators contain other iterators, in addition to their other
@@ -542,8 +543,7 @@ struct ctf_next
      members, and the structure, variable and enum members, etc.  */
   union
   {
-    const ctf_member_t *ctn_mp;
-    const ctf_lmember_t *ctn_lmp;
+    unsigned char *ctn_vlen;
     const ctf_enum_t *ctn_en;
     const ctf_dvdef_t *ctn_dvd;
     ctf_next_hkv_t *ctn_sorted_hkv;
