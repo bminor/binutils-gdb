@@ -30,6 +30,12 @@
 #define roundup(x, y)  ((((x) + ((y) - 1)) / (y)) * (y))
 #endif
 
+/* The initial size of a dynamic type's vlen in members.  Arbitrary: the bigger
+   this is, the less allocation needs to be done for small structure
+   initialization, and the more memory is wasted for small structures during CTF
+   construction.  No effect on generated CTF or ctf_open()ed CTF. */
+#define INITIAL_VLEN 16
+
 /* Make sure the ptrtab has enough space for at least one more type.
 
    We start with 4KiB of ptrtab, enough for a thousand types, then grow it 25%
@@ -244,7 +250,6 @@ ctf_dtd_insert (ctf_dict_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 void
 ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 {
-  ctf_dmdef_t *dmd, *nmd;
   int kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
   size_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
   int name_kind = kind;
@@ -256,14 +261,14 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
     {
     case CTF_K_STRUCT:
     case CTF_K_UNION:
-      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	   dmd != NULL; dmd = nmd)
-	{
-	  if (dmd->dmd_name != NULL)
-	      free (dmd->dmd_name);
-	  nmd = ctf_list_next (dmd);
-	  free (dmd);
-	}
+      {
+	ctf_lmember_t *memb = (ctf_lmember_t *) dtd->dtd_vlen;
+	size_t i;
+
+	for (i = 0; i < vlen; i++)
+	  ctf_str_remove_ref (fp, ctf_strraw (fp, memb[i].ctlm_name),
+			      &memb[i].ctlm_name);
+      }
       break;
     case CTF_K_ENUM:
       {
@@ -797,6 +802,7 @@ ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
+  size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
   /* Promote root-visible forwards to structs.  */
   if (name != NULL)
@@ -805,19 +811,21 @@ ctf_add_struct_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_STRUCT,
-				    0, &dtd)) == CTF_ERR)
+				    initial_vlen, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_STRUCT, flag, 0);
-
-  if (size > CTF_MAX_SIZE)
+  /* Forwards won't have any vlen yet.  */
+  if (dtd->dtd_vlen_alloc == 0)
     {
-      dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
-      dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
-      dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
+      if ((dtd->dtd_vlen = calloc (1, initial_vlen)) == NULL)
+	return (ctf_set_errno (fp, ENOMEM));
+      dtd->dtd_vlen_alloc = initial_vlen;
     }
-  else
-    dtd->dtd_data.ctt_size = (uint32_t) size;
+
+  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_STRUCT, flag, 0);
+  dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
+  dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
+  dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
 
   return type;
 }
@@ -834,6 +842,7 @@ ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
+  size_t initial_vlen = sizeof (ctf_lmember_t) * INITIAL_VLEN;
 
   /* Promote root-visible forwards to unions.  */
   if (name != NULL)
@@ -842,19 +851,21 @@ ctf_add_union_sized (ctf_dict_t *fp, uint32_t flag, const char *name,
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_UNION,
-				    0, &dtd)) == CTF_ERR)
+				    initial_vlen, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us */
 
-  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_UNION, flag, 0);
-
-  if (size > CTF_MAX_SIZE)
+  /* Forwards won't have any vlen yet.  */
+  if (dtd->dtd_vlen_alloc == 0)
     {
-      dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
-      dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
-      dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
+      if ((dtd->dtd_vlen = calloc (1, initial_vlen)) == NULL)
+	return (ctf_set_errno (fp, ENOMEM));
+      dtd->dtd_vlen_alloc = initial_vlen;
     }
-  else
-    dtd->dtd_data.ctt_size = (uint32_t) size;
+
+  dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_UNION, flag, 0);
+  dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
+  dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
+  dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
 
   return type;
 }
@@ -870,7 +881,7 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
-  size_t initial_vlen = sizeof (ctf_enum_t) * 16;
+  size_t initial_vlen = sizeof (ctf_enum_t) * INITIAL_VLEN;
 
   /* Promote root-visible forwards to enums.  */
   if (name != NULL)
@@ -1066,12 +1077,13 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 		       ctf_id_t type, unsigned long bit_offset)
 {
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, souid);
-  ctf_dmdef_t *dmd;
 
   ssize_t msize, malign, ssize;
   uint32_t kind, vlen, root;
-  char *s = NULL;
+  size_t i;
   int is_incomplete = 0;
+  unsigned char *old_vlen;
+  ctf_lmember_t *memb;
 
   if (!(fp->ctf_flags & LCTF_RDWR))
     return (ctf_set_errno (fp, ECTF_RDONLY));
@@ -1092,14 +1104,26 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
   if (vlen == CTF_MAX_VLEN)
     return (ctf_set_errno (fp, ECTF_DTFULL));
 
+  old_vlen = dtd->dtd_vlen;
+  if (ctf_grow_vlen (fp, dtd, sizeof (ctf_lmember_t) * (vlen + 1)) < 0)
+    return -1;					/* errno is set for us.  */
+  memb = (ctf_lmember_t *) dtd->dtd_vlen;
+
+  if (dtd->dtd_vlen != old_vlen)
+    {
+      ptrdiff_t move = (signed char *) dtd->dtd_vlen - (signed char *) old_vlen;
+
+      /* Remove pending refs in the old vlen region and reapply them.  */
+
+      for (i = 0; i < vlen; i++)
+	ctf_str_move_pending (fp, &memb[i].ctlm_name, move);
+    }
+
   if (name != NULL)
     {
-      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	   dmd != NULL; dmd = ctf_list_next (dmd))
-	{
-	  if (dmd->dmd_name != NULL && strcmp (dmd->dmd_name, name) == 0)
-	    return (ctf_set_errno (fp, ECTF_DUPLICATE));
-	}
+      for (i = 0; i < vlen; i++)
+	if (strcmp (ctf_strptr (fp, memb[i].ctlm_name), name) == 0)
+	  return (ctf_set_errno (fp, ECTF_DUPLICATE));
     }
 
   if ((msize = ctf_type_size (fp, type)) < 0 ||
@@ -1124,18 +1148,10 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	return -1;		/* errno is set for us.  */
     }
 
-  if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
-    return (ctf_set_errno (fp, EAGAIN));
-
-  if (name != NULL && (s = strdup (name)) == NULL)
-    {
-      free (dmd);
-      return (ctf_set_errno (fp, EAGAIN));
-    }
-
-  dmd->dmd_name = s;
-  dmd->dmd_type = type;
-  dmd->dmd_value = -1;
+  memb[vlen].ctlm_name = ctf_str_add_pending (fp, name, &memb[vlen].ctlm_name);
+  memb[vlen].ctlm_type = type;
+  if (memb[vlen].ctlm_name == 0 && name != NULL && name[0] != '\0')
+    return -1;			/* errno is set for us.  */
 
   if (kind == CTF_K_STRUCT && vlen != 0)
     {
@@ -1143,9 +1159,8 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	{
 	  /* Natural alignment.  */
 
-	  ctf_dmdef_t *lmd = ctf_list_prev (&dtd->dtd_u.dtu_members);
-	  ctf_id_t ltype = ctf_type_resolve (fp, lmd->dmd_type);
-	  size_t off = lmd->dmd_offset;
+	  ctf_id_t ltype = ctf_type_resolve (fp, memb[vlen - 1].ctlm_type);
+	  size_t off = CTF_LMEM_OFFSET(&memb[vlen - 1]);
 
 	  ctf_encoding_t linfo;
 	  ssize_t lsize;
@@ -1155,10 +1170,7 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	     cannot insert right after such a member without explicit offset
 	     specification, because its alignment and size is not known.  */
 	  if (ltype == CTF_ERR)
-	    {
-	      free (dmd);
-	      return -1;	/* errno is set for us.  */
-	    }
+	    return -1;	/* errno is set for us.  */
 
 	  if (is_incomplete)
 	    {
@@ -1176,14 +1188,15 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 	    off += lsize * CHAR_BIT;
 	  else if (lsize == -1 && ctf_errno (fp) == ECTF_INCOMPLETE)
 	    {
+	      const char *lname = ctf_strraw (fp, memb[vlen - 1].ctlm_name);
+
 	      ctf_err_warn (fp, 1, ECTF_INCOMPLETE,
 			    _("ctf_add_member_offset: cannot add member %s of "
 			      "type %lx to struct %lx without specifying "
 			      "explicit offset after member %s of type %lx, "
 			      "which is an incomplete type\n"),
 			    name ? name : _("(unnamed member)"), type, souid,
-			    lmd->dmd_name ? lmd->dmd_name
-			    : _("(unnamed member)"), ltype);
+			    lname ? lname : _("(unnamed member)"), ltype);
 	      return -1;			/* errno is set for us.  */
 	    }
 
@@ -1198,36 +1211,32 @@ ctf_add_member_offset (ctf_dict_t *fp, ctf_id_t souid, const char *name,
 
 	  off = roundup (off, CHAR_BIT) / CHAR_BIT;
 	  off = roundup (off, MAX (malign, 1));
-	  dmd->dmd_offset = off * CHAR_BIT;
+	  memb[vlen].ctlm_offsethi = CTF_OFFSET_TO_LMEMHI (off * CHAR_BIT);
+	  memb[vlen].ctlm_offsetlo = CTF_OFFSET_TO_LMEMLO (off * CHAR_BIT);
 	  ssize = off + msize;
 	}
       else
 	{
 	  /* Specified offset in bits.  */
 
-	  dmd->dmd_offset = bit_offset;
+	  memb[vlen].ctlm_offsethi = CTF_OFFSET_TO_LMEMHI (bit_offset);
+	  memb[vlen].ctlm_offsetlo = CTF_OFFSET_TO_LMEMLO (bit_offset);
 	  ssize = ctf_get_ctt_size (fp, &dtd->dtd_data, NULL, NULL);
 	  ssize = MAX (ssize, ((signed) bit_offset / CHAR_BIT) + msize);
 	}
     }
   else
     {
-      dmd->dmd_offset = 0;
+      memb[vlen].ctlm_offsethi = 0;
+      memb[vlen].ctlm_offsetlo = 0;
       ssize = ctf_get_ctt_size (fp, &dtd->dtd_data, NULL, NULL);
       ssize = MAX (ssize, msize);
     }
 
-  if ((size_t) ssize > CTF_MAX_SIZE)
-    {
-      dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
-      dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (ssize);
-      dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (ssize);
-    }
-  else
-    dtd->dtd_data.ctt_size = (uint32_t) ssize;
-
+  dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
+  dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (ssize);
+  dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (ssize);
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
-  ctf_list_append (&dtd->dtd_u.dtu_members, dmd);
 
   fp->ctf_flags |= LCTF_DIRTY;
   return 0;
@@ -1408,41 +1417,6 @@ membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
 		    name, ctm.ctm_offset, offset);
       return 1;
     }
-  return 0;
-}
-
-static int
-membadd (const char *name, ctf_id_t type, unsigned long offset, void *arg)
-{
-  ctf_bundle_t *ctb = arg;
-  ctf_dmdef_t *dmd;
-  char *s = NULL;
-
-  if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
-    return (ctf_set_errno (ctb->ctb_dict, EAGAIN));
-
-  /* Unnamed members in non-dynamic dicts have a name of "", while dynamic dicts
-     use NULL.  Adapt.  */
-
-  if (name[0] == 0)
-    name = NULL;
-
-  if (name != NULL && (s = strdup (name)) == NULL)
-    {
-      free (dmd);
-      return (ctf_set_errno (ctb->ctb_dict, EAGAIN));
-    }
-
-  /* For now, dmd_type is copied as the src_fp's type; it is reset to an
-    equivalent dst_fp type by a final loop in ctf_add_type(), below.  */
-  dmd->dmd_name = s;
-  dmd->dmd_type = type;
-  dmd->dmd_offset = offset;
-  dmd->dmd_value = -1;
-
-  ctf_list_append (&ctb->ctb_dtd->dtd_u.dtu_members, dmd);
-
-  ctb->ctb_dict->ctf_flags |= LCTF_DIRTY;
   return 0;
 }
 
@@ -1828,11 +1802,10 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
     case CTF_K_STRUCT:
     case CTF_K_UNION:
       {
-	ctf_dmdef_t *dmd;
-	int errs = 0;
-	size_t size;
-	ssize_t ssize;
-	ctf_dtdef_t *dtd;
+	ctf_next_t *i = NULL;
+	ssize_t offset;
+	const char *membname;
+	ctf_id_t src_membtype;
 
 	/* Technically to match a struct or union we need to check both
 	   ways (src members vs. dst, dst members vs. src) but we make
@@ -1867,67 +1840,44 @@ ctf_add_type_internal (ctf_dict_t *dst_fp, ctf_dict_t *src_fp, ctf_id_t src_type
 	    break;
 	  }
 
-	/* Unlike the other cases, copying structs and unions is done
-	   manually so as to avoid repeated lookups in ctf_add_member
-	   and to ensure the exact same member offsets as in src_type.  */
-
-	dst_type = ctf_add_generic (dst_fp, flag, name, kind, 0, &dtd);
+	dst_type = ctf_add_struct_sized (dst_fp, flag, name,
+					 ctf_type_size (src_fp, src_type));
 	if (dst_type == CTF_ERR)
 	  return CTF_ERR;			/* errno is set for us.  */
-
-	dst.ctb_type = dst_type;
-	dst.ctb_dtd = dtd;
 
 	/* Pre-emptively add this struct to the type mapping so that
 	   structures that refer to themselves work.  */
 	ctf_add_type_mapping (src_fp, src_type, dst_fp, dst_type);
 
-	if (ctf_member_iter (src_fp, src_type, membadd, &dst) != 0)
-	  errs++;	       /* Increment errs and fail at bottom of case.  */
-
-	if ((ssize = ctf_type_size (src_fp, src_type)) < 0)
-	  return CTF_ERR;			/* errno is set for us.  */
-
-	size = (size_t) ssize;
-	if (size > CTF_MAX_SIZE)
-	  {
-	    dtd->dtd_data.ctt_size = CTF_LSIZE_SENT;
-	    dtd->dtd_data.ctt_lsizehi = CTF_SIZE_TO_LSIZE_HI (size);
-	    dtd->dtd_data.ctt_lsizelo = CTF_SIZE_TO_LSIZE_LO (size);
-	  }
-	else
-	  dtd->dtd_data.ctt_size = (uint32_t) size;
-
-	dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, flag, vlen);
-
-	/* Make a final pass through the members changing each dmd_type (a
-	   src_fp type) to an equivalent type in dst_fp.  We pass through all
-	   members, leaving any that fail set to CTF_ERR, unless they fail
-	   because they are marking a member of type not representable in this
-	   version of CTF, in which case we just want to silently omit them:
-	   no consumer can do anything with them anyway.  */
-	for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	     dmd != NULL; dmd = ctf_list_next (dmd))
+	while ((offset = ctf_member_next (src_fp, src_type, &i, &membname,
+					  &src_membtype, 0)) >= 0)
 	  {
 	    ctf_dict_t *dst = dst_fp;
-	    ctf_id_t memb_type;
+	    ctf_id_t dst_membtype = ctf_type_mapping (src_fp, src_membtype, &dst);
 
-	    memb_type = ctf_type_mapping (src_fp, dmd->dmd_type, &dst);
-	    if (memb_type == 0)
+	    if (dst_membtype == 0)
 	      {
-		if ((dmd->dmd_type =
-		     ctf_add_type_internal (dst_fp, src_fp, dmd->dmd_type,
-					    proc_tracking_fp)) == CTF_ERR)
+		dst_membtype = ctf_add_type_internal (dst_fp, src_fp,
+						      src_membtype,
+						      proc_tracking_fp);
+		if (dst_membtype == CTF_ERR)
 		  {
 		    if (ctf_errno (dst_fp) != ECTF_NONREPRESENTABLE)
-		      errs++;
+		      {
+			ctf_next_destroy (i);
+			break;
+		      }
 		  }
 	      }
-	    else
-	      dmd->dmd_type = memb_type;
-	  }
 
-	if (errs)
+	    if (ctf_add_member_offset (dst_fp, dst_type, membname,
+				       dst_membtype, offset) < 0)
+	      {
+		ctf_next_destroy (i);
+		break;
+	      }
+	  }
+	if (ctf_errno (src_fp) != ECTF_NEXT_END)
 	  return CTF_ERR;			/* errno is set for us.  */
 	break;
       }

@@ -719,57 +719,6 @@ symerr:
 
 /* Type section.  */
 
-static unsigned char *
-ctf_copy_smembers (ctf_dict_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
-{
-  ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-  ctf_member_t ctm;
-
-  for (; dmd != NULL; dmd = ctf_list_next (dmd))
-    {
-      ctf_member_t *copied;
-
-      ctm.ctm_name = 0;
-      ctm.ctm_type = (uint32_t) dmd->dmd_type;
-      ctm.ctm_offset = (uint32_t) dmd->dmd_offset;
-
-      memcpy (t, &ctm, sizeof (ctm));
-      copied = (ctf_member_t *) t;
-      if (dmd->dmd_name)
-	ctf_str_add_ref (fp, dmd->dmd_name, &copied->ctm_name);
-
-      t += sizeof (ctm);
-    }
-
-  return t;
-}
-
-static unsigned char *
-ctf_copy_lmembers (ctf_dict_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
-{
-  ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-  ctf_lmember_t ctlm;
-
-  for (; dmd != NULL; dmd = ctf_list_next (dmd))
-    {
-      ctf_lmember_t *copied;
-
-      ctlm.ctlm_name = 0;
-      ctlm.ctlm_type = (uint32_t) dmd->dmd_type;
-      ctlm.ctlm_offsethi = CTF_OFFSET_TO_LMEMHI (dmd->dmd_offset);
-      ctlm.ctlm_offsetlo = CTF_OFFSET_TO_LMEMLO (dmd->dmd_offset);
-
-      memcpy (t, &ctlm, sizeof (ctlm));
-      copied = (ctf_lmember_t *) t;
-      if (dmd->dmd_name)
-	ctf_str_add_ref (fp, dmd->dmd_name, &copied->ctlm_name);
-
-      t += sizeof (ctlm);
-    }
-
-  return t;
-}
-
 /* Iterate through the dynamic type definition list and compute the
    size of the CTF type section.  */
 
@@ -784,8 +733,20 @@ ctf_type_sect_size (ctf_dict_t *fp)
     {
       uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
       uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
+      size_t type_ctt_size = dtd->dtd_data.ctt_size;
 
-      if (dtd->dtd_data.ctt_size != CTF_LSIZE_SENT)
+      /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
+	 if possible.  */
+
+      if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
+	{
+	  size_t lsize = CTF_TYPE_LSIZE (&dtd->dtd_data);
+
+	  if (lsize <= CTF_MAX_SIZE)
+	    type_ctt_size = lsize;
+	}
+
+      if (type_ctt_size != CTF_LSIZE_SENT)
 	type_size += sizeof (ctf_stype_t);
       else
 	type_size += sizeof (ctf_type_t);
@@ -807,7 +768,7 @@ ctf_type_sect_size (ctf_dict_t *fp)
 	  break;
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
-	  if (dtd->dtd_data.ctt_size < CTF_LSTRUCT_THRESH)
+	  if (type_ctt_size < CTF_LSTRUCT_THRESH)
 	    type_size += sizeof (ctf_member_t) * vlen;
 	  else
 	    type_size += sizeof (ctf_lmember_t) * vlen;
@@ -836,13 +797,24 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
     {
       uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
       uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
-
+      size_t type_ctt_size = dtd->dtd_data.ctt_size;
       size_t len;
       ctf_stype_t *copied;
       const char *name;
       size_t i;
 
-      if (dtd->dtd_data.ctt_size != CTF_LSIZE_SENT)
+      /* Shrink ctf_type_t-using types from a ctf_type_t to a ctf_stype_t
+	 if possible.  */
+
+      if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
+	{
+	  size_t lsize = CTF_TYPE_LSIZE (&dtd->dtd_data);
+
+	  if (lsize <= CTF_MAX_SIZE)
+	    type_ctt_size = lsize;
+	}
+
+      if (type_ctt_size != CTF_LSIZE_SENT)
 	len = sizeof (ctf_stype_t);
       else
 	len = sizeof (ctf_type_t);
@@ -855,6 +827,7 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  ctf_str_add_ref (fp, name, &copied->ctt_name);
 	  ctf_str_add_ref (fp, name, &dtd->dtd_data.ctt_name);
 	}
+      copied->ctt_size = type_ctt_size;
       t += len;
 
       switch (kind)
@@ -880,12 +853,40 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  t += sizeof (uint32_t) * (vlen + (vlen & 1));
 	  break;
 
+	  /* These need to be copied across element by element, depending on
+	     their ctt_size.  */
 	case CTF_K_STRUCT:
 	case CTF_K_UNION:
-	  if (dtd->dtd_data.ctt_size < CTF_LSTRUCT_THRESH)
-	    t = ctf_copy_smembers (fp, dtd, t);
+	  {
+	    ctf_lmember_t *dtd_vlen = (ctf_lmember_t *) dtd->dtd_vlen;
+	    ctf_lmember_t *t_lvlen = (ctf_lmember_t *) t;
+	    ctf_member_t *t_vlen = (ctf_member_t *) t;
+
+	    for (i = 0; i < vlen; i++)
+	      {
+		const char *name = ctf_strraw (fp, dtd_vlen[i].ctlm_name);
+
+		ctf_str_add_ref (fp, name, &dtd_vlen[i].ctlm_name);
+
+		if (type_ctt_size < CTF_LSTRUCT_THRESH)
+		  {
+		    t_vlen[i].ctm_name = dtd_vlen[i].ctlm_name;
+		    t_vlen[i].ctm_type = dtd_vlen[i].ctlm_type;
+		    t_vlen[i].ctm_offset = CTF_LMEM_OFFSET (&dtd_vlen[i]);
+		    ctf_str_add_ref (fp, name, &t_vlen[i].ctm_name);
+		  }
+		else
+		  {
+		    t_lvlen[i] = dtd_vlen[i];
+		    ctf_str_add_ref (fp, name, &t_lvlen[i].ctlm_name);
+		  }
+	      }
+	  }
+
+	  if (type_ctt_size < CTF_LSTRUCT_THRESH)
+	    t += sizeof (ctf_member_t) * vlen;
 	  else
-	    t = ctf_copy_lmembers (fp, dtd, t);
+	    t += sizeof (ctf_lmember_t) * vlen;
 	  break;
 
 	case CTF_K_ENUM:

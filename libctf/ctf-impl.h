@@ -179,15 +179,6 @@ typedef struct ctf_decl
   int cd_enomem;		     /* Nonzero if OOM during printing.  */
 } ctf_decl_t;
 
-typedef struct ctf_dmdef
-{
-  ctf_list_t dmd_list;		/* List forward/back pointers.  */
-  char *dmd_name;		/* Name of this member.  */
-  ctf_id_t dmd_type;		/* Type of this member (for sou).  */
-  unsigned long dmd_offset;	/* Offset of this member in bits (for sou).  */
-  int dmd_value;		/* Value of this member (for enum).  */
-} ctf_dmdef_t;
-
 typedef struct ctf_dtdef
 {
   ctf_list_t dtd_list;		/* List forward/back pointers.  */
@@ -195,10 +186,6 @@ typedef struct ctf_dtdef
   ctf_type_t dtd_data;		/* Type node, including name.  */
   size_t dtd_vlen_alloc;	/* Total vlen space allocated.  */
   unsigned char *dtd_vlen;	/* Variable-length data for this type.  */
-  union
-  {
-    ctf_list_t dtu_members;	/* struct, union, or enum */
-  } dtd_u;
 } ctf_dtdef_t;
 
 typedef struct ctf_dvdef
@@ -557,7 +544,6 @@ struct ctf_next
   {
     const ctf_member_t *ctn_mp;
     const ctf_lmember_t *ctn_lmp;
-    const ctf_dmdef_t *ctn_dmd;
     const ctf_enum_t *ctn_en;
     const ctf_dvdef_t *ctn_dvd;
     ctf_next_hkv_t *ctn_sorted_hkv;

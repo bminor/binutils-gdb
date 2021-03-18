@@ -101,24 +101,17 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 
       dtd = ctf_dynamic_type (fp, type);
       i->ctn_iter_fun = (void (*) (void)) ctf_member_next;
-
-      /* We depend below on the RDWR state indicating whether the DTD-related
-	 fields or the DMD-related fields have been initialized.  */
-
-      assert ((dtd && (fp->ctf_flags & LCTF_RDWR))
-	      || (!dtd && (!(fp->ctf_flags & LCTF_RDWR))));
+      i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
 
       if (dtd == NULL)
 	{
-	  i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
-
 	  if (i->ctn_size < CTF_LSTRUCT_THRESH)
 	    i->u.ctn_mp = (const ctf_member_t *) ((uintptr_t) tp + increment);
 	  else
 	    i->u.ctn_lmp = (const ctf_lmember_t *) ((uintptr_t) tp + increment);
 	}
       else
-	i->u.ctn_dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
+	i->u.ctn_lmp = (const ctf_lmember_t *) dtd->dtd_vlen;
 
       *it = i;
     }
@@ -141,71 +134,46 @@ ctf_member_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
  retry:
   if (!i->ctn_type)
     {
-      if (!(fp->ctf_flags & LCTF_RDWR))
+      if (i->ctn_n == 0)
+	goto end_iter;
+
+      /* Dynamic structures in read-write dicts always use lmembers.  */
+      if (i->ctn_size < CTF_LSTRUCT_THRESH
+	  && !(fp->ctf_flags & LCTF_RDWR))
 	{
-	  if (i->ctn_n == 0)
-	    goto end_iter;
+	  const char *membname = ctf_strptr (fp, i->u.ctn_mp->ctm_name);
 
-	  if (i->ctn_size < CTF_LSTRUCT_THRESH)
-	    {
-	      const char *membname = ctf_strptr (fp, i->u.ctn_mp->ctm_name);
+	  if (name)
+	    *name = membname;
+	  if (membtype)
+	    *membtype = i->u.ctn_mp->ctm_type;
+	  offset = i->u.ctn_mp->ctm_offset;
 
-	      if (name)
-		*name = membname;
-	      if (membtype)
-		*membtype = i->u.ctn_mp->ctm_type;
-	      offset = i->u.ctn_mp->ctm_offset;
+	  if (membname[0] == 0
+	      && (ctf_type_kind (fp, i->u.ctn_mp->ctm_type) == CTF_K_STRUCT
+		  || ctf_type_kind (fp, i->u.ctn_mp->ctm_type) == CTF_K_UNION))
+	    i->ctn_type = i->u.ctn_mp->ctm_type;
 
-	      if (membname[0] == 0
-		  && (ctf_type_kind (fp, i->u.ctn_mp->ctm_type) == CTF_K_STRUCT
-		      || ctf_type_kind (fp, i->u.ctn_mp->ctm_type) == CTF_K_UNION))
-		i->ctn_type = i->u.ctn_mp->ctm_type;
-
-	      i->u.ctn_mp++;
-	    }
-	  else
-	    {
-	      const char *membname = ctf_strptr (fp, i->u.ctn_lmp->ctlm_name);
-
-	      if (name)
-		*name = membname;
-	      if (membtype)
-		*membtype = i->u.ctn_lmp->ctlm_type;
-	      offset = (unsigned long) CTF_LMEM_OFFSET (i->u.ctn_lmp);
-
-	      if (membname[0] == 0
-		  && (ctf_type_kind (fp, i->u.ctn_lmp->ctlm_type) == CTF_K_STRUCT
-		      || ctf_type_kind (fp, i->u.ctn_lmp->ctlm_type) == CTF_K_UNION))
-		i->ctn_type = i->u.ctn_lmp->ctlm_type;
-
-	      i->u.ctn_lmp++;
-	    }
-	  i->ctn_n--;
+	  i->u.ctn_mp++;
 	}
       else
 	{
-	  if (i->u.ctn_dmd == NULL)
-	    goto end_iter;
-	  /* The dmd contains a NULL for unnamed dynamic members.  Don't inflict
-	     this on our callers.  */
+	  const char *membname = ctf_strptr (fp, i->u.ctn_lmp->ctlm_name);
+
 	  if (name)
-	    {
-	      if (i->u.ctn_dmd->dmd_name)
-		*name = i->u.ctn_dmd->dmd_name;
-	      else
-		*name = "";
-	    }
+	    *name = membname;
 	  if (membtype)
-	    *membtype = i->u.ctn_dmd->dmd_type;
-	  offset = i->u.ctn_dmd->dmd_offset;
+	    *membtype = i->u.ctn_lmp->ctlm_type;
+	  offset = (unsigned long) CTF_LMEM_OFFSET (i->u.ctn_lmp);
 
-	  if (i->u.ctn_dmd->dmd_name == NULL
-	      && (ctf_type_kind (fp, i->u.ctn_dmd->dmd_type) == CTF_K_STRUCT
-		  || ctf_type_kind (fp, i->u.ctn_dmd->dmd_type) == CTF_K_UNION))
-	    i->ctn_type = i->u.ctn_dmd->dmd_type;
+	  if (membname[0] == 0
+	      && (ctf_type_kind (fp, i->u.ctn_lmp->ctlm_type) == CTF_K_STRUCT
+		  || ctf_type_kind (fp, i->u.ctn_lmp->ctlm_type) == CTF_K_UNION))
+	    i->ctn_type = i->u.ctn_lmp->ctlm_type;
 
-	  i->u.ctn_dmd = ctf_list_next (i->u.ctn_dmd);
+	  i->u.ctn_lmp++;
 	}
+      i->ctn_n--;
 
       /* The callers might want automatic recursive sub-struct traversal.  */
       if (!(flags & CTF_MN_RECURSE))
@@ -996,53 +964,44 @@ ctf_type_align (ctf_dict_t *fp, ctf_id_t type)
     case CTF_K_UNION:
       {
 	size_t align = 0;
+	int dynamic = 0;
 	ctf_dtdef_t *dtd;
 
-	if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
+	if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
+	  dynamic = 1;
+
+	uint32_t n = LCTF_INFO_VLEN (fp, tp->ctt_info);
+	ssize_t size, increment;
+	const void *vmp;
+
+	(void) ctf_get_ctt_size (fp, tp, &size, &increment);
+
+	if (!dynamic)
+	  vmp = (unsigned char *) tp + increment;
+	else
+	  vmp = dtd->dtd_vlen;
+
+	if (kind == CTF_K_STRUCT)
+	  n = MIN (n, 1);	/* Only use first member for structs.  */
+
+	if (size < CTF_LSTRUCT_THRESH && !dynamic)
 	  {
-	    uint32_t n = LCTF_INFO_VLEN (fp, tp->ctt_info);
-	    ssize_t size, increment;
-	    const void *vmp;
-
-	    (void) ctf_get_ctt_size (fp, tp, &size, &increment);
-	    vmp = (unsigned char *) tp + increment;
-
-	    if (kind == CTF_K_STRUCT)
-	      n = MIN (n, 1);	/* Only use first member for structs.  */
-
-	    if (size < CTF_LSTRUCT_THRESH)
+	    const ctf_member_t *mp = vmp;
+	    for (; n != 0; n--, mp++)
 	      {
-		const ctf_member_t *mp = vmp;
-		for (; n != 0; n--, mp++)
-		  {
-		    ssize_t am = ctf_type_align (ofp, mp->ctm_type);
-		    align = MAX (align, (size_t) am);
-		  }
-	      }
-	    else
-	      {
-		const ctf_lmember_t *lmp = vmp;
-		for (; n != 0; n--, lmp++)
-		  {
-		    ssize_t am = ctf_type_align (ofp, lmp->ctlm_type);
-		    align = MAX (align, (size_t) am);
-		  }
+		ssize_t am = ctf_type_align (ofp, mp->ctm_type);
+		align = MAX (align, (size_t) am);
 	      }
 	  }
 	else
 	  {
-	      ctf_dmdef_t *dmd;
-
-	      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-		   dmd != NULL; dmd = ctf_list_next (dmd))
-		{
-		  ssize_t am = ctf_type_align (ofp, dmd->dmd_type);
-		  align = MAX (align, (size_t) am);
-		  if (kind == CTF_K_STRUCT)
-		    break;
-		}
+	    const ctf_lmember_t *lmp = vmp;
+	    for (; n != 0; n--, lmp++)
+	      {
+		ssize_t am = ctf_type_align (ofp, lmp->ctlm_type);
+		align = MAX (align, (size_t) am);
+	      }
 	  }
-
 	return align;
       }
 
@@ -1390,8 +1349,10 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
   ctf_dtdef_t *dtd;
+  const void *vmp;
   ssize_t size, increment;
   uint32_t kind, n;
+  int dynamic = 0;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
     return -1;			/* errno is set for us.  */
@@ -1405,73 +1366,54 @@ ctf_member_info (ctf_dict_t *fp, ctf_id_t type, const char *name,
   if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
     return (ctf_set_errno (ofp, ECTF_NOTSOU));
 
-  if ((dtd = ctf_dynamic_type (fp, type)) == NULL)
+  if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
+    dynamic = 1;
+
+  if (!dynamic)
+    vmp = (unsigned char *) tp + increment;
+  else
+    vmp = dtd->dtd_vlen;
+
+  if (size < CTF_LSTRUCT_THRESH && !dynamic)
     {
-      if (size < CTF_LSTRUCT_THRESH)
+      const ctf_member_t *mp = vmp;
+
+      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, mp++)
 	{
-	  const ctf_member_t *mp = (const ctf_member_t *) ((uintptr_t) tp +
-							   increment);
+	  const char *membname = ctf_strptr (fp, mp->ctm_name);
 
-	  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, mp++)
+	  if (membname[0] == 0
+	      && (ctf_type_kind (fp, mp->ctm_type) == CTF_K_STRUCT
+		  || ctf_type_kind (fp, mp->ctm_type) == CTF_K_UNION)
+	      && (ctf_member_info (fp, mp->ctm_type, name, mip) == 0))
+	    return 0;
+
+	  if (strcmp (membname, name) == 0)
 	    {
-	      const char *membname = ctf_strptr (fp, mp->ctm_name);
-
-	      if (membname[0] == 0
-		  && (ctf_type_kind (fp, mp->ctm_type) == CTF_K_STRUCT
-		      || ctf_type_kind (fp, mp->ctm_type) == CTF_K_UNION)
-		  && (ctf_member_info (fp, mp->ctm_type, name, mip) == 0))
-		return 0;
-
-	      if (strcmp (membname, name) == 0)
-		{
-		  mip->ctm_type = mp->ctm_type;
-		  mip->ctm_offset = mp->ctm_offset;
-		  return 0;
-		}
-	    }
-	}
-      else
-	{
-	  const ctf_lmember_t *lmp = (const ctf_lmember_t *) ((uintptr_t) tp +
-							      increment);
-
-	  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, lmp++)
-	    {
-	      const char *membname = ctf_strptr (fp, lmp->ctlm_name);
-
-	      if (membname[0] == 0
-		  && (ctf_type_kind (fp, lmp->ctlm_type) == CTF_K_STRUCT
-		      || ctf_type_kind (fp, lmp->ctlm_type) == CTF_K_UNION)
-		  && (ctf_member_info (fp, lmp->ctlm_type, name, mip) == 0))
-		return 0;
-
-	      if (strcmp (membname, name) == 0)
-		{
-		  mip->ctm_type = lmp->ctlm_type;
-		  mip->ctm_offset = (unsigned long) CTF_LMEM_OFFSET (lmp);
-		  return 0;
-		}
+	      mip->ctm_type = mp->ctm_type;
+	      mip->ctm_offset = mp->ctm_offset;
+	      return 0;
 	    }
 	}
     }
   else
     {
-      ctf_dmdef_t *dmd;
+      const ctf_lmember_t *lmp = vmp;
 
-      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	   dmd != NULL; dmd = ctf_list_next (dmd))
+      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, lmp++)
 	{
-	  if (dmd->dmd_name == NULL
-	      && (ctf_type_kind (fp, dmd->dmd_type) == CTF_K_STRUCT
-		  || ctf_type_kind (fp, dmd->dmd_type) == CTF_K_UNION)
-	      && (ctf_member_info (fp, dmd->dmd_type, name, mip) == 0))
+	  const char *membname = ctf_strptr (fp, lmp->ctlm_name);
+
+	  if (membname[0] == 0
+	      && (ctf_type_kind (fp, lmp->ctlm_type) == CTF_K_STRUCT
+		  || ctf_type_kind (fp, lmp->ctlm_type) == CTF_K_UNION)
+	      && (ctf_member_info (fp, lmp->ctlm_type, name, mip) == 0))
 	    return 0;
 
-	  if (dmd->dmd_name != NULL
-	      && strcmp (dmd->dmd_name, name) == 0)
+	  if (strcmp (membname, name) == 0)
 	    {
-	      mip->ctm_type = dmd->dmd_type;
-	      mip->ctm_offset = dmd->dmd_offset;
+	      mip->ctm_type = lmp->ctlm_type;
+	      mip->ctm_offset = (unsigned long) CTF_LMEM_OFFSET (lmp);
 	      return 0;
 	    }
 	}
@@ -1688,8 +1630,10 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
   ctf_id_t otype = type;
   const ctf_type_t *tp;
   const ctf_dtdef_t *dtd;
+  const void *vmp;
   ssize_t size, increment;
   uint32_t kind, n;
+  int dynamic = 0;
   int rc;
 
   if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
@@ -1708,48 +1652,38 @@ ctf_type_rvisit (ctf_dict_t *fp, ctf_id_t type, ctf_visit_f *func,
 
   (void) ctf_get_ctt_size (fp, tp, &size, &increment);
 
-  if ((dtd = ctf_dynamic_type (fp, type)) == NULL)
+  if ((dtd = ctf_dynamic_type (fp, type)) != NULL)
+    dynamic = 1;
+
+  if (!dynamic)
+    vmp = (unsigned char *) tp + increment;
+  else
+    vmp = dtd->dtd_vlen;
+
+  if (size < CTF_LSTRUCT_THRESH && !dynamic)
     {
-      if (size < CTF_LSTRUCT_THRESH)
-	{
-	  const ctf_member_t *mp = (const ctf_member_t *) ((uintptr_t) tp +
-							   increment);
+      const ctf_member_t *mp = vmp;
 
-	  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, mp++)
-	    {
-	      if ((rc = ctf_type_rvisit (fp, mp->ctm_type,
-					 func, arg, ctf_strptr (fp,
-								mp->ctm_name),
-					 offset + mp->ctm_offset,
-					 depth + 1)) != 0)
-		return rc;
-	    }
-	}
-      else
+      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, mp++)
 	{
-	  const ctf_lmember_t *lmp = (const ctf_lmember_t *) ((uintptr_t) tp +
-							      increment);
-
-	  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, lmp++)
-	    {
-	      if ((rc = ctf_type_rvisit (fp, lmp->ctlm_type,
-					 func, arg, ctf_strptr (fp,
-								lmp->ctlm_name),
-					 offset + (unsigned long) CTF_LMEM_OFFSET (lmp),
-					 depth + 1)) != 0)
-		return rc;
-	    }
+	  if ((rc = ctf_type_rvisit (fp, mp->ctm_type,
+				     func, arg, ctf_strptr (fp,
+							    mp->ctm_name),
+				     offset + mp->ctm_offset,
+				     depth + 1)) != 0)
+	    return rc;
 	}
     }
   else
     {
-      ctf_dmdef_t *dmd;
+      const ctf_lmember_t *lmp = vmp;
 
-      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	   dmd != NULL; dmd = ctf_list_next (dmd))
+      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, lmp++)
 	{
-	  if ((rc = ctf_type_rvisit (fp, dmd->dmd_type, func, arg,
-				     dmd->dmd_name, dmd->dmd_offset,
+	  if ((rc = ctf_type_rvisit (fp, lmp->ctlm_type,
+				     func, arg, ctf_strptr (fp,
+							    lmp->ctlm_name),
+				     offset + (unsigned long) CTF_LMEM_OFFSET (lmp),
 				     depth + 1)) != 0)
 	    return rc;
 	}

@@ -13,7 +13,7 @@ main (int argc, char *argv[])
   ctf_id_t newtype;
   const char *memb;
   ctf_membinfo_t mi;
-  const char *membs[] = { "bar", "baz", NULL };
+  const char *membs[] = { "bar", "baz", "foo", NULL };
   const char **walk;
   int err;
 

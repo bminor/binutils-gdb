@@ -1,5 +1,45 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dtdef_t) <dtu_members>: Remove.
+	<dtd_u>: Likewise.
+	(ctf_dmdef_t): Remove.
+	(struct ctf_next) <u.ctn_dmd>: Remove.
+	* ctf-create.c (INITIAL_VLEN): New, more-or-less arbitrary initial
+	vlen size.
+	(ctf_add_enum): Use it.
+	(ctf_dtd_delete): Do not free the (removed) dmd; remove string
+	refs from the vlen on struct deletion.
+	(ctf_add_struct_sized): Populate the vlen: do it by hand if
+	promoting forwards.  Always populate the full-size
+	lsizehi/lsizelo members.
+	(ctf_add_union_sized): Likewise.
+	(ctf_add_member_offset): Set up the vlen rather than the dmd.
+	Expand it as needed, repointing string refs via
+	ctf_str_move_pending. Add the member names as pending strings.
+	Always populate the full-size lsizehi/lsizelo members.
+	(membadd): Remove, folding back into...
+	(ctf_add_type_internal): ... here, adding via an ordinary
+	ctf_add_struct_sized and _next iteration rather than doing
+	everything by hand.
+	* ctf-serialize.c (ctf_copy_smembers): Remove this...
+	(ctf_copy_lmembers): ... and this...
+	(ctf_emit_type_sect): ... folding into here. Figure out if a
+	ctf_stype_t is needed here, not in ctf_add_*_sized.
+	(ctf_type_sect_size): Figure out the ctf_stype_t stuff the same
+	way here.
+	* ctf-types.c (ctf_member_next): Remove the dmd path and always
+	use the vlen.  Force large-structure usage for dynamic types.
+	(ctf_type_align): Likewise.
+	(ctf_member_info): Likewise.
+	(ctf_type_rvisit): Likewise.
+	* testsuite/libctf-regression/type-add-unnamed-struct-ctf.c: Add a
+	self-referential type to this test.
+	* testsuite/libctf-regression/type-add-unnamed-struct.c: Adjusted
+	accordingly.
+	* testsuite/libctf-regression/type-add-unnamed-struct.lk: Likewise.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dtdef_t) <dtd_vlen_alloc>: New.
 	(ctf_str_move_pending): Declare.
 	* ctf-string.c (ctf_str_add_ref_internal): Fix error return.

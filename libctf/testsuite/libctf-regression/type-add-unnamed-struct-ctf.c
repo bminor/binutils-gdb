@@ -12,6 +12,7 @@ struct foo
     struct
     {
       int baz;
+      struct foo *foo;
     };
   };
 };
