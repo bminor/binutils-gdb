@@ -64,6 +64,30 @@ ctf_grow_ptrtab (ctf_dict_t *fp)
   return 0;
 }
 
+/* Make sure a vlen has enough space: expand it otherwise.  Unlike the ptrtab,
+   which grows quite slowly, the vlen grows in big jumps because it is quite
+   expensive to expand: the caller has to scan the old vlen for string refs
+   first and remove them, then re-add them afterwards.  The initial size is
+   more or less arbitrary.  */
+static int
+ctf_grow_vlen (ctf_dict_t *fp, ctf_dtdef_t *dtd, size_t vlen)
+{
+  unsigned char *old = dtd->dtd_vlen;
+
+  if (dtd->dtd_vlen_alloc > vlen)
+    return 0;
+
+  if ((dtd->dtd_vlen = realloc (dtd->dtd_vlen,
+				dtd->dtd_vlen_alloc * 2)) == NULL)
+    {
+      dtd->dtd_vlen = old;
+      return (ctf_set_errno (fp, ENOMEM));
+    }
+  memset (dtd->dtd_vlen + dtd->dtd_vlen_alloc, 0, dtd->dtd_vlen_alloc);
+  dtd->dtd_vlen_alloc *= 2;
+  return 0;
+}
+
 /* To create an empty CTF dict, we just declare a zeroed header and call
    ctf_bufopen() on it.  If ctf_bufopen succeeds, we mark the new dict r/w and
    initialize the dynamic members.  We start assigning type IDs at 1 because
@@ -222,17 +246,16 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 {
   ctf_dmdef_t *dmd, *nmd;
   int kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
+  size_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
   int name_kind = kind;
   const char *name;
 
   ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
-  free (dtd->dtd_vlen);
 
   switch (kind)
     {
     case CTF_K_STRUCT:
     case CTF_K_UNION:
-    case CTF_K_ENUM:
       for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
 	   dmd != NULL; dmd = nmd)
 	{
@@ -242,10 +265,22 @@ ctf_dtd_delete (ctf_dict_t *fp, ctf_dtdef_t *dtd)
 	  free (dmd);
 	}
       break;
+    case CTF_K_ENUM:
+      {
+	ctf_enum_t *en = (ctf_enum_t *) dtd->dtd_vlen;
+	size_t i;
+
+	for (i = 0; i < vlen; i++)
+	  ctf_str_remove_ref (fp, ctf_strraw (fp, en[i].cte_name),
+			      &en[i].cte_name);
+      }
+      break;
     case CTF_K_FORWARD:
       name_kind = dtd->dtd_data.ctt_type;
       break;
     }
+  free (dtd->dtd_vlen);
+  dtd->dtd_vlen_alloc = 0;
 
   if (dtd->dtd_data.ctt_name
       && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL
@@ -402,6 +437,9 @@ ctf_rollback (ctf_dict_t *fp, ctf_snapshot_id_t id)
   return 0;
 }
 
+/* Note: vlen is the amount of space *allocated* for the vlen.  It may well not
+   be the amount of space used (yet): the space used is declared in per-kind
+   fashion in the dtd_data's info word.  */
 static ctf_id_t
 ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
 		 size_t vlen, ctf_dtdef_t **rp)
@@ -428,6 +466,7 @@ ctf_add_generic (ctf_dict_t *fp, uint32_t flag, const char *name, int kind,
   if ((dtd = calloc (1, sizeof (ctf_dtdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
 
+  dtd->dtd_vlen_alloc = vlen;
   if (vlen > 0)
     {
       if ((dtd->dtd_vlen = calloc (1, vlen)) == NULL)
@@ -831,6 +870,7 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
 {
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
+  size_t initial_vlen = sizeof (ctf_enum_t) * 16;
 
   /* Promote root-visible forwards to enums.  */
   if (name != NULL)
@@ -839,8 +879,16 @@ ctf_add_enum (ctf_dict_t *fp, uint32_t flag, const char *name)
   if (type != 0 && ctf_type_kind (fp, type) == CTF_K_FORWARD)
     dtd = ctf_dtd_lookup (fp, type);
   else if ((type = ctf_add_generic (fp, flag, name, CTF_K_ENUM,
-				    0, &dtd)) == CTF_ERR)
+				    initial_vlen, &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
+
+  /* Forwards won't have any vlen yet.  */
+  if (dtd->dtd_vlen_alloc == 0)
+    {
+      if ((dtd->dtd_vlen = calloc (1, initial_vlen)) == NULL)
+	return (ctf_set_errno (fp, ENOMEM));
+      dtd->dtd_vlen_alloc = initial_vlen;
+    }
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_ENUM, flag, 0);
   dtd->dtd_data.ctt_size = fp->ctf_dmodel->ctd_int;
@@ -956,10 +1004,11 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
 		    int value)
 {
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, enid);
-  ctf_dmdef_t *dmd;
+  unsigned char *old_vlen;
+  ctf_enum_t *en;
+  size_t i;
 
   uint32_t kind, vlen, root;
-  char *s;
 
   if (name == NULL)
     return (ctf_set_errno (fp, EINVAL));
@@ -980,29 +1029,32 @@ ctf_add_enumerator (ctf_dict_t *fp, ctf_id_t enid, const char *name,
   if (vlen == CTF_MAX_VLEN)
     return (ctf_set_errno (fp, ECTF_DTFULL));
 
-  for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-       dmd != NULL; dmd = ctf_list_next (dmd))
+  old_vlen = dtd->dtd_vlen;
+  if (ctf_grow_vlen (fp, dtd, sizeof (ctf_enum_t) * (vlen + 1)) < 0)
+    return -1;					/* errno is set for us.  */
+  en = (ctf_enum_t *) dtd->dtd_vlen;
+
+  if (dtd->dtd_vlen != old_vlen)
     {
-      if (strcmp (dmd->dmd_name, name) == 0)
-	return (ctf_set_errno (fp, ECTF_DUPLICATE));
+      ptrdiff_t move = (signed char *) dtd->dtd_vlen - (signed char *) old_vlen;
+
+      /* Remove pending refs in the old vlen region and reapply them.  */
+
+      for (i = 0; i < vlen; i++)
+	ctf_str_move_pending (fp, &en[i].cte_name, move);
     }
 
-  if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
-    return (ctf_set_errno (fp, EAGAIN));
+  for (i = 0; i < vlen; i++)
+    if (strcmp (ctf_strptr (fp, en[i].cte_name), name) == 0)
+      return (ctf_set_errno (fp, ECTF_DUPLICATE));
 
-  if ((s = strdup (name)) == NULL)
-    {
-      free (dmd);
-      return (ctf_set_errno (fp, EAGAIN));
-    }
+  en[i].cte_name = ctf_str_add_pending (fp, name, &en[i].cte_name);
+  en[i].cte_value = value;
 
-  dmd->dmd_name = s;
-  dmd->dmd_type = CTF_ERR;
-  dmd->dmd_offset = 0;
-  dmd->dmd_value = value;
+  if (en[i].cte_name == 0 && name != NULL && name[0] != '\0')
+    return -1;					/* errno is set for us. */
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (kind, root, vlen + 1);
-  ctf_list_append (&dtd->dtd_u.dtu_members, dmd);
 
   fp->ctf_flags |= LCTF_DIRTY;
 

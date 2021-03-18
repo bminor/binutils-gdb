@@ -19,6 +19,7 @@
 
 #include <ctf-impl.h>
 #include <string.h>
+#include <assert.h>
 
 /* Convert an encoded CTF string name into a pointer to a C string, using an
   explicit internal strtab rather than the fp-based one.  */
@@ -228,6 +229,7 @@ ctf_str_add_ref_internal (ctf_dict_t *fp, const char *str,
   free (atom);
   free (aref);
   free (newstr);
+  ctf_set_errno (fp, ENOMEM);
   return NULL;
 }
 
@@ -286,6 +288,21 @@ ctf_str_add_pending (ctf_dict_t *fp, const char *str, uint32_t *ref)
     return 0;
 
   return atom->csa_offset;
+}
+
+/* Note that a pending ref now located at NEW_REF has moved by BYTES bytes.  */
+int
+ctf_str_move_pending (ctf_dict_t *fp, uint32_t *new_ref, ptrdiff_t bytes)
+{
+  if (bytes == 0)
+    return 0;
+
+  if (ctf_dynset_insert (fp->ctf_str_pending_ref, (void *) new_ref) < 0)
+    return (ctf_set_errno (fp, ENOMEM));
+
+  ctf_dynset_remove (fp->ctf_str_pending_ref,
+		     (void *) ((signed char *) new_ref - bytes));
+  return 0;
 }
 
 /* Add an external strtab reference at OFFSET.  Returns zero if the addition

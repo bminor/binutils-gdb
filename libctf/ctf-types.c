@@ -318,22 +318,13 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
 
       dtd = ctf_dynamic_type (fp, type);
       i->ctn_iter_fun = (void (*) (void)) ctf_enum_next;
-
-      /* We depend below on the RDWR state indicating whether the DTD-related
-	 fields or the DMD-related fields have been initialized.  */
-
-      assert ((dtd && (fp->ctf_flags & LCTF_RDWR))
-	      || (!dtd && (!(fp->ctf_flags & LCTF_RDWR))));
+      i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
 
       if (dtd == NULL)
-	{
-	  i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
-
-	  i->u.ctn_en = (const ctf_enum_t *) ((uintptr_t) tp +
-					      i->ctn_increment);
-	}
+	i->u.ctn_en = (const ctf_enum_t *) ((uintptr_t) tp +
+					    i->ctn_increment);
       else
-	i->u.ctn_dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
+	i->u.ctn_en = (const ctf_enum_t *) dtd->dtd_vlen;
 
       *it = i;
     }
@@ -357,27 +348,14 @@ ctf_enum_next (ctf_dict_t *fp, ctf_id_t type, ctf_next_t **it,
       return NULL;
     }
 
-  if (!(fp->ctf_flags & LCTF_RDWR))
-    {
-      if (i->ctn_n == 0)
-	goto end_iter;
+  if (i->ctn_n == 0)
+    goto end_iter;
 
-      name = ctf_strptr (fp, i->u.ctn_en->cte_name);
-      if (val)
-	*val = i->u.ctn_en->cte_value;
-      i->u.ctn_en++;
-      i->ctn_n--;
-    }
-  else
-    {
-      if (i->u.ctn_dmd == NULL)
-	goto end_iter;
-
-      name = i->u.ctn_dmd->dmd_name;
-      if (val)
-	*val = i->u.ctn_dmd->dmd_value;
-      i->u.ctn_dmd = ctf_list_next (i->u.ctn_dmd);
-    }
+  name = ctf_strptr (fp, i->u.ctn_en->cte_name);
+  if (val)
+    *val = i->u.ctn_en->cte_value;
+  i->u.ctn_en++;
+  i->ctn_n--;
 
   return name;
 
@@ -1554,35 +1532,24 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int value)
 
   if (LCTF_INFO_KIND (fp, tp->ctt_info) != CTF_K_ENUM)
     {
-      (void) ctf_set_errno (ofp, ECTF_NOTENUM);
+      ctf_set_errno (ofp, ECTF_NOTENUM);
       return NULL;
     }
 
-  (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
+  ctf_get_ctt_size (fp, tp, NULL, &increment);
 
   if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
-    {
-      ep = (const ctf_enum_t *) ((uintptr_t) tp + increment);
-
-      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, ep++)
-	{
-	  if (ep->cte_value == value)
-	    return (ctf_strptr (fp, ep->cte_name));
-	}
-    }
+    ep = (const ctf_enum_t *) ((uintptr_t) tp + increment);
   else
-    {
-      ctf_dmdef_t *dmd;
+    ep = (const ctf_enum_t *) dtd->dtd_vlen;
 
-      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	   dmd != NULL; dmd = ctf_list_next (dmd))
-	{
-	  if (dmd->dmd_value == value)
-	    return dmd->dmd_name;
-	}
+  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, ep++)
+    {
+      if (ep->cte_value == value)
+	return (ctf_strptr (fp, ep->cte_name));
     }
 
-  (void) ctf_set_errno (ofp, ECTF_NOENUMNAM);
+  ctf_set_errno (ofp, ECTF_NOENUMNAM);
   return NULL;
 }
 
@@ -1590,7 +1557,7 @@ ctf_enum_name (ctf_dict_t *fp, ctf_id_t type, int value)
    matching name can be found.  Otherwise CTF_ERR is returned.  */
 
 int
-ctf_enum_value (ctf_dict_t * fp, ctf_id_t type, const char *name, int *valp)
+ctf_enum_value (ctf_dict_t *fp, ctf_id_t type, const char *name, int *valp)
 {
   ctf_dict_t *ofp = fp;
   const ctf_type_t *tp;
@@ -1611,39 +1578,24 @@ ctf_enum_value (ctf_dict_t * fp, ctf_id_t type, const char *name, int *valp)
       return -1;
     }
 
-  (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
-
-  ep = (const ctf_enum_t *) ((uintptr_t) tp + increment);
+  ctf_get_ctt_size (fp, tp, NULL, &increment);
 
   if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
-    {
-      for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, ep++)
-	{
-	  if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
-	    {
-	      if (valp != NULL)
-		*valp = ep->cte_value;
-	      return 0;
-	    }
-	}
-    }
+    ep = (const ctf_enum_t *) ((uintptr_t) tp + increment);
   else
-    {
-      ctf_dmdef_t *dmd;
+    ep = (const ctf_enum_t *) dtd->dtd_vlen;
 
-      for (dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-	   dmd != NULL; dmd = ctf_list_next (dmd))
+  for (n = LCTF_INFO_VLEN (fp, tp->ctt_info); n != 0; n--, ep++)
+    {
+      if (strcmp (ctf_strptr (fp, ep->cte_name), name) == 0)
 	{
-	  if (strcmp (dmd->dmd_name, name) == 0)
-	    {
-	      if (valp != NULL)
-		*valp = dmd->dmd_value;
-	      return 0;
-	    }
+	  if (valp != NULL)
+	    *valp = ep->cte_value;
+	  return 0;
 	}
     }
 
-  (void) ctf_set_errno (ofp, ECTF_NOENUMNAM);
+  ctf_set_errno (ofp, ECTF_NOENUMNAM);
   return -1;
 }
 

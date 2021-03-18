@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <limits.h>
@@ -192,6 +193,7 @@ typedef struct ctf_dtdef
   ctf_list_t dtd_list;		/* List forward/back pointers.  */
   ctf_id_t dtd_type;		/* Type identifier for this definition.  */
   ctf_type_t dtd_data;		/* Type node, including name.  */
+  size_t dtd_vlen_alloc;	/* Total vlen space allocated.  */
   unsigned char *dtd_vlen;	/* Variable-length data for this type.  */
   union
   {
@@ -734,6 +736,7 @@ extern void ctf_str_free_atoms (ctf_dict_t *);
 extern uint32_t ctf_str_add (ctf_dict_t *, const char *);
 extern uint32_t ctf_str_add_ref (ctf_dict_t *, const char *, uint32_t *ref);
 extern uint32_t ctf_str_add_pending (ctf_dict_t *, const char *, uint32_t *);
+extern int ctf_str_move_pending (ctf_dict_t *, uint32_t *, ptrdiff_t);
 extern int ctf_str_add_external (ctf_dict_t *, const char *, uint32_t offset);
 extern void ctf_str_remove_ref (ctf_dict_t *, const char *, uint32_t *ref);
 extern void ctf_str_rollback (ctf_dict_t *, ctf_snapshot_id_t);

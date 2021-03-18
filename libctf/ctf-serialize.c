@@ -770,26 +770,6 @@ ctf_copy_lmembers (ctf_dict_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
   return t;
 }
 
-static unsigned char *
-ctf_copy_emembers (ctf_dict_t *fp, ctf_dtdef_t *dtd, unsigned char *t)
-{
-  ctf_dmdef_t *dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
-  ctf_enum_t cte;
-
-  for (; dmd != NULL; dmd = ctf_list_next (dmd))
-    {
-      ctf_enum_t *copied;
-
-      cte.cte_value = dmd->dmd_value;
-      memcpy (t, &cte, sizeof (cte));
-      copied = (ctf_enum_t *) t;
-      ctf_str_add_ref (fp, dmd->dmd_name, &copied->cte_name);
-      t += sizeof (cte);
-    }
-
-  return t;
-}
-
 /* Iterate through the dynamic type definition list and compute the
    size of the CTF type section.  */
 
@@ -860,6 +840,7 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
       size_t len;
       ctf_stype_t *copied;
       const char *name;
+      size_t i;
 
       if (dtd->dtd_data.ctt_size != CTF_LSIZE_SENT)
 	len = sizeof (ctf_stype_t);
@@ -908,8 +889,22 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  break;
 
 	case CTF_K_ENUM:
-	  t = ctf_copy_emembers (fp, dtd, t);
-	  break;
+	  {
+	    ctf_enum_t *dtd_vlen = (struct ctf_enum *) dtd->dtd_vlen;
+	    ctf_enum_t *t_vlen = (struct ctf_enum *) t;
+
+	    memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_enum) * vlen);
+	    for (i = 0; i < vlen; i++)
+	      {
+		const char *name = ctf_strraw (fp, dtd_vlen[i].cte_name);
+
+		ctf_str_add_ref (fp, name, &t_vlen[i].cte_name);
+		ctf_str_add_ref (fp, name, &dtd_vlen[i].cte_name);
+	      }
+	    t += sizeof (struct ctf_enum) * vlen;
+
+	    break;
+	  }
 	}
     }
 

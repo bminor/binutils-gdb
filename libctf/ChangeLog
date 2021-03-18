@@ -1,5 +1,30 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dtdef_t) <dtd_vlen_alloc>: New.
+	(ctf_str_move_pending): Declare.
+	* ctf-string.c (ctf_str_add_ref_internal): Fix error return.
+	(ctf_str_move_pending): New.
+	* ctf-create.c (ctf_grow_vlen): New.
+	(ctf_dtd_delete): Zero out the vlen_alloc after free.  Free the
+	vlen later: iterate over it and free enum name refs first.
+	(ctf_add_generic): Populate dtd_vlen_alloc from vlen.
+	(ctf_add_enum): populate the vlen; do it by hand if promoting
+	forwards.
+	(ctf_add_enumerator): Set up the vlen rather than the dmd.  Expand
+	it as needed, repointing string refs via ctf_str_move_pending. Add
+	the enumerand names as pending strings.
+	* ctf-serialize.c (ctf_copy_emembers): Remove.
+	(ctf_emit_type_sect): Copy the vlen into place and ref the
+	strings.
+	* ctf-types.c (ctf_enum_next): The dynamic portion now uses
+	the same code as the non-dynamic.
+	(ctf_enum_name): Likewise.
+	(ctf_enum_value): Likewise.
+	* testsuite/libctf-lookup/enum-many-ctf.c: New test.
+	* testsuite/libctf-lookup/enum-many.lk: New test.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-hash.c (ctf_dynset_elements): New.
 	* ctf-impl.h (ctf_dynset_elements): Declare it.
 	(ctf_str_add_pending): Likewise.
