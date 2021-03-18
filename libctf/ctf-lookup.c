@@ -723,7 +723,8 @@ ctf_symbol_next (ctf_dict_t *fp, ctf_next_t **it, const char **name,
 
 	  *name = ctf_strptr (fp, idx[i->ctn_n]);
 	  sym = tab[i->ctn_n++];
-	} while (sym == -1u || sym == 0);
+	}
+      while (sym == -1u || sym == 0);
     }
   else
     {

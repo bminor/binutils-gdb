@@ -1,5 +1,14 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_archive_next): GNU style fix for do {} while.
+	* ctf-dedup.c (ctf_dedup_rhash_type): Likewise.
+	(ctf_dedup_rwalk_one_output_mapping): Likewise.
+	* ctf-dump.c (ctf_dump_format_type): Likewise.
+	* ctf-lookup.c (ctf_symbol_next): Likewise.
+	* swap.h (swap_thing): Likewise.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-serialize.c: General reshuffling, and...
 	(emit_symtypetab_state_t): New, migrated from
 	local variables in ctf_serialize.

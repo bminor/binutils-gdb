@@ -1156,7 +1156,8 @@ ctf_archive_next (const ctf_archive_t *wrapper, ctf_next_t **it, const char **na
 
       name_ = &nametbl[le64toh (modent[i->ctn_n].name_offset)];
       i->ctn_n++;
-    } while (skip_parent && strcmp (name_, _CTF_SECTION) == 0);
+    }
+  while (skip_parent && strcmp (name_, _CTF_SECTION) == 0);
 
   if (name)
     *name = name_;

@@ -220,7 +220,8 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	new_id = ctf_type_reference (fp, id);
       if (new_id != CTF_ERR)
 	str = str_append (str, " -> ");
-    } while (new_id != CTF_ERR);
+    }
+  while (new_id != CTF_ERR);
 
   if (ctf_errno (fp) != ECTF_NOTREF)
     {

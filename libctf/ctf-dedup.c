@@ -589,7 +589,8 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  goto oom;							\
       if (ctf_dynset_cinsert (citers, hval) < 0)			\
 	goto oom;							\
-    } while (0)
+    }									\
+  while (0)
 
   /* If this is a named struct or union or a forward to one, and this is a child
      traversal, treat this type as if it were a forward -- do not recurse to
@@ -2029,42 +2030,44 @@ ctf_dedup_rwalk_one_output_mapping (ctf_dict_t *output,
      times, which is worse.  */
 
 #define CTF_TYPE_WALK(type, errlabel, errmsg)				\
-  do {									\
-    void *type_id;							\
-    const char *hashval;						\
-    int cited_type_input_num = input_num;				\
+  do									\
+    {									\
+      void *type_id;							\
+      const char *hashval;						\
+      int cited_type_input_num = input_num;				\
 									\
-    if ((fp->ctf_flags & LCTF_CHILD) && (LCTF_TYPE_ISPARENT (fp, type))) \
-      cited_type_input_num = parents[input_num];			\
+      if ((fp->ctf_flags & LCTF_CHILD) && (LCTF_TYPE_ISPARENT (fp, type))) \
+	cited_type_input_num = parents[input_num];			\
 									\
-    type_id = CTF_DEDUP_GID (output, cited_type_input_num, type);	\
+      type_id = CTF_DEDUP_GID (output, cited_type_input_num, type);	\
 									\
-    if (type == 0)							\
-      {									\
-	ctf_dprintf ("Walking: unimplemented type\n");			\
-	break;								\
-      }									\
+      if (type == 0)							\
+	{								\
+	  ctf_dprintf ("Walking: unimplemented type\n");		\
+	  break;							\
+	}								\
 									\
-    ctf_dprintf ("Looking up ID %i/%lx in type hashes\n",		\
-		 cited_type_input_num, type);				\
-    hashval = ctf_dynhash_lookup (d->cd_type_hashes, type_id);		\
-    if (!ctf_assert (output, hashval))					\
-      {									\
-	whaterr = N_("error looking up ID in type hashes");		\
-	goto errlabel;							\
-      }									\
-    ctf_dprintf ("ID %i/%lx has hash %s\n", cited_type_input_num, type,	\
-		 hashval);						\
+      ctf_dprintf ("Looking up ID %i/%lx in type hashes\n",		\
+		   cited_type_input_num, type);				\
+      hashval = ctf_dynhash_lookup (d->cd_type_hashes, type_id);	\
+      if (!ctf_assert (output, hashval))				\
+	{								\
+	  whaterr = N_("error looking up ID in type hashes");		\
+	  goto errlabel;						\
+	}								\
+      ctf_dprintf ("ID %i/%lx has hash %s\n", cited_type_input_num, type, \
+		   hashval);						\
 									\
-    ret = ctf_dedup_rwalk_output_mapping (output, inputs, ninputs, parents, \
-					  already_visited, hashval,	\
-					  visit_fun, arg, depth);	\
-    if (ret < 0)							\
-      {									\
-	whaterr = errmsg;						\
-	goto errlabel;							\
-      }									\
-  } while (0)
+      ret = ctf_dedup_rwalk_output_mapping (output, inputs, ninputs, parents, \
+					    already_visited, hashval,	\
+					    visit_fun, arg, depth);	\
+      if (ret < 0)							\
+	{								\
+	  whaterr = errmsg;						\
+	  goto errlabel;						\
+	}								\
+    }									\
+  while (0)
 
   switch (ctf_type_kind_unsliced (fp, type))
     {
