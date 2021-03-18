@@ -1,3 +1,9 @@
+2021-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/27397
+	* cet.m4 (GCC_CET_HOST_FLAGS): Check if host supports multi-byte
+	NOPs.
+
 2021-02-13  Mike Frysinger  <vapier@gentoo.org>
 
 	* debuginfod.m4: Delete m4_include(../config/pkg.m4).
