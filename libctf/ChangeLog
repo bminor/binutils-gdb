@@ -1,5 +1,29 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (symtypetab_delete_nonstatic_vars): Move
+	into ctf-serialize.c.
+	(ctf_symtab_skippable): Likewise.
+	(CTF_SYMTYPETAB_EMIT_FUNCTION): Likewise.
+	(CTF_SYMTYPETAB_EMIT_PAD): Likewise.
+	(CTF_SYMTYPETAB_FORCE_INDEXED): Likewise.
+	(symtypetab_density): Likewise.
+	(emit_symtypetab): Likewise.
+	(emit_symtypetab_index): Likewise.
+	(ctf_copy_smembers): Likewise.
+	(ctf_copy_lmembers): Likewise.
+	(ctf_copy_emembers): Likewise.
+	(ctf_sort_var): Likewise.
+	(ctf_serialize): Likewise.
+	(ctf_gzwrite): Likewise.
+	(ctf_compress_write): Likewise.
+	(ctf_write_mem): Likewise.
+	(ctf_write): Likewise.
+	* ctf-serialize.c: New file.
+	* Makefile.am (libctf_nobfd_la_SOURCES): Add it.
+	* Makefile.in: Regenerate.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_lazy_open): Move up in the file, to near
 	ctf_link_add_ctf.
 	* ctf-lookup.c (ctf_lookup_symbol_idx): Repair tabdamage.

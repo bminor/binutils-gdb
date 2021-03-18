@@ -46,8 +46,8 @@ libctf_nobfd_la_LDFLAGS = -version-info 0:0:0 @SHARED_LDFLAGS@ @VERSION_FLAGS@
 libctf_nobfd_la_CPPFLAGS = $(AM_CPPFLAGS) -DNOBFD=1
 libctf_nobfd_la_SOURCES = ctf-archive.c ctf-dump.c ctf-create.c ctf-decl.c ctf-error.c \
 			  ctf-hash.c ctf-labels.c ctf-dedup.c ctf-link.c ctf-lookup.c \
-			  ctf-open.c ctf-sha1.c ctf-string.c ctf-subr.c ctf-types.c \
-			  ctf-util.c
+			  ctf-open.c ctf-serialize.c ctf-sha1.c ctf-string.c ctf-subr.c \
+			  ctf-types.c ctf-util.c
 if NEED_CTF_QSORT_R
 libctf_nobfd_la_SOURCES += ctf-qsort_r.c
 endif
