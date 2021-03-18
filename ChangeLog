@@ -1,3 +1,12 @@
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/27482
+	* Makefile.def: Add install-bfd dependencies for install-libctf and
+	install-ld, and install-strip-bfd dependencies for
+	install-strip-libctf and install-strip-ld; move the install-ld
+	dependency on install-libctf to join it.
+	* Makefile.in: Regenerated.
+
 2021-03-12  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.def: Remove all-sim dependency on configure-gdb.
