@@ -857,7 +857,6 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
       uint32_t kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
       uint32_t vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
 
-      ctf_array_t cta;
       size_t len;
       ctf_stype_t *copied;
       const char *name;
@@ -888,11 +887,8 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  break;
 
 	case CTF_K_ARRAY:
-	  cta.cta_contents = (uint32_t) dtd->dtd_u.dtu_arr.ctr_contents;
-	  cta.cta_index = (uint32_t) dtd->dtd_u.dtu_arr.ctr_index;
-	  cta.cta_nelems = dtd->dtd_u.dtu_arr.ctr_nelems;
-	  memcpy (t, &cta, sizeof (cta));
-	  t += sizeof (cta);
+	  memcpy (t, dtd->dtd_vlen, sizeof (struct ctf_array));
+	  t += sizeof (struct ctf_array);
 	  break;
 
 	case CTF_K_FUNCTION:

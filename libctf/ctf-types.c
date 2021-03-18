@@ -1520,14 +1520,12 @@ ctf_array_info (ctf_dict_t *fp, ctf_id_t type, ctf_arinfo_t *arp)
     return (ctf_set_errno (ofp, ECTF_NOTARRAY));
 
   if ((dtd = ctf_dynamic_type (ofp, type)) != NULL)
+    ap = (const ctf_array_t *) dtd->dtd_vlen;
+  else
     {
-      *arp = dtd->dtd_u.dtu_arr;
-      return 0;
+      ctf_get_ctt_size (fp, tp, NULL, &increment);
+      ap = (const ctf_array_t *) ((uintptr_t) tp + increment);
     }
-
-  (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
-
-  ap = (const ctf_array_t *) ((uintptr_t) tp + increment);
   arp->ctr_contents = ap->cta_contents;
   arp->ctr_index = ap->cta_index;
   arp->ctr_nelems = ap->cta_nelems;

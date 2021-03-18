@@ -635,6 +635,7 @@ ctf_id_t
 ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
 {
   ctf_dtdef_t *dtd;
+  ctf_array_t cta;
   ctf_id_t type;
   ctf_dict_t *tmp = fp;
 
@@ -658,12 +659,17 @@ ctf_add_array (ctf_dict_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
     }
 
   if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_ARRAY,
-			       0, &dtd)) == CTF_ERR)
+			       sizeof (ctf_array_t), &dtd)) == CTF_ERR)
     return CTF_ERR;		/* errno is set for us.  */
+
+  memset (&cta, 0, sizeof (ctf_array_t));
 
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_ARRAY, flag, 0);
   dtd->dtd_data.ctt_size = 0;
-  dtd->dtd_u.dtu_arr = *arp;
+  cta.cta_contents = (uint32_t) arp->ctr_contents;
+  cta.cta_index = (uint32_t) arp->ctr_index;
+  cta.cta_nelems = arp->ctr_nelems;
+  memcpy (dtd->dtd_vlen, &cta, sizeof (ctf_array_t));
 
   return type;
 }
@@ -672,6 +678,7 @@ int
 ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
 {
   ctf_dtdef_t *dtd = ctf_dtd_lookup (fp, type);
+  ctf_array_t *vlen;
 
   if (!(fp->ctf_flags & LCTF_RDWR))
     return (ctf_set_errno (fp, ECTF_RDONLY));
@@ -680,8 +687,11 @@ ctf_set_array (ctf_dict_t *fp, ctf_id_t type, const ctf_arinfo_t *arp)
       || LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info) != CTF_K_ARRAY)
     return (ctf_set_errno (fp, ECTF_BADID));
 
+  vlen = (ctf_array_t *) dtd->dtd_vlen;
   fp->ctf_flags |= LCTF_DIRTY;
-  dtd->dtd_u.dtu_arr = *arp;
+  vlen->cta_contents = (uint32_t) arp->ctr_contents;
+  vlen->cta_index = (uint32_t) arp->ctr_index;
+  vlen->cta_nelems = arp->ctr_nelems;
 
   return 0;
 }
