@@ -1,5 +1,17 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-serialize.c: General reshuffling, and...
+	(emit_symtypetab_state_t): New, migrated from
+	local variables in ctf_serialize.
+	(ctf_serialize): Split out most section sizing and
+	emission.
+	(ctf_symtypetab_sect_sizes): New (split out).
+	(ctf_emit_symtypetab_sects): Likewise.
+	(ctf_type_sect_size): Likewise.
+	(ctf_emit_type_sect): Likewise.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dict_t): Fix comment.
 
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
