@@ -572,7 +572,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
   char hashbuf[CTF_SHA1_SIZE];
   const char *hval = NULL;
   const char *whaterr;
-  int err;
+  int err = 0;
 
   const char *citer = NULL;
   ctf_dynset_t *citers = NULL;
@@ -697,7 +697,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_type_encoding (input, type, &ep) < 0)
 	  {
 	    whaterr = N_("error getting encoding");
-	    goto err;
+	    goto input_err;
 	  }
 	ctf_dedup_sha1_add (&hash, &ep, sizeof (ctf_encoding_t), "encoding",
 			    depth);
@@ -770,7 +770,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_array_info (input, type, &ar) < 0)
 	  {
 	    whaterr = N_("error getting array info");
-	    goto err;
+	    goto input_err;
 	  }
 
 	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
@@ -808,7 +808,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_func_type_info (input, type, &fi) < 0)
 	  {
 	    whaterr = N_("error getting func type info");
-	    goto err;
+	    goto input_err;
 	  }
 
 	if ((hval = ctf_dedup_hash_type (fp, input, inputs, parents, input_num,
@@ -828,6 +828,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 
 	if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
 	  {
+	    err = ENOMEM;
 	    whaterr = N_("error doing memory allocation");
 	    goto err;
 	  }
@@ -836,7 +837,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	  {
 	    free (args);
 	    whaterr = N_("error getting func arg type");
-	    goto err;
+	    goto input_err;
 	  }
 	for (j = 0; j < fi.ctc_argc; j++)
 	  {
@@ -871,7 +872,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
 	    whaterr = N_("error doing enum member iteration");
-	    goto err;
+	    goto input_err;
 	  }
 	break;
       }
@@ -916,7 +917,7 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 	if (ctf_errno (input) != ECTF_NEXT_END)
 	  {
 	    whaterr = N_("error doing struct/union member iteration");
-	    goto err;
+	    goto input_err;
 	  }
 	break;
       }
@@ -971,10 +972,12 @@ ctf_dedup_rhash_type (ctf_dict_t *fp, ctf_dict_t *input, ctf_dict_t **inputs,
 
  iterr:
   ctf_next_destroy (i);
+ input_err:
+  err = ctf_errno (input);
  err:
   ctf_sha1_fini (&hash, NULL);
-  ctf_err_warn (fp, 0, 0, _("%s (%i): %s: during type hashing for type %lx, "
-			    "kind %i"), ctf_link_input_name (input),
+  ctf_err_warn (fp, 0, err, _("%s (%i): %s: during type hashing for type %lx, "
+			      "kind %i"), ctf_link_input_name (input),
 		input_num, gettext (whaterr), type, kind);
   return NULL;
  oom:

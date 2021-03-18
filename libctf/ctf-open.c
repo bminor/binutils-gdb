@@ -1545,7 +1545,12 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
      ctf_set_base().  */
 
   ctf_set_version (fp, hp, hp->cth_version);
-  ctf_str_create_atoms (fp);
+  if (ctf_str_create_atoms (fp) < 0)
+    {
+      err = ENOMEM;
+      goto bad;
+    }
+
   fp->ctf_parmax = CTF_MAX_PTYPE;
   memcpy (&fp->ctf_data, ctfsect, sizeof (ctf_sect_t));
 

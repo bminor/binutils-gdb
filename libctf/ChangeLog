@@ -1,5 +1,12 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dedup.c (ctf_dedup_rhash_type): Report errors on the input
+	dict properly.
+	* ctf-open.c (ctf_bufopen_internal): Report errors initializing
+	the atoms table.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_next_t) <ctn_tp>: New.
 	<u.ctn_mp>: Remove.
 	<u.ctn_lmp>: Remove.
