@@ -1157,7 +1157,7 @@ ctf_type_pointer (ctf_dict_t *fp, ctf_id_t type)
   return (ctf_set_errno (ofp, ECTF_NOTYPE));
 }
 
-/* Return the encoding for the specified INTEGER or FLOAT.  */
+/* Return the encoding for the specified INTEGER, FLOAT, or ENUM.  */
 
 int
 ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
@@ -1193,6 +1193,12 @@ ctf_type_encoding (ctf_dict_t *fp, ctf_id_t type, ctf_encoding_t *ep)
       ep->cte_format = CTF_FP_ENCODING (data);
       ep->cte_offset = CTF_FP_OFFSET (data);
       ep->cte_bits = CTF_FP_BITS (data);
+      break;
+    case CTF_K_ENUM:
+      /* v3 only: we must guess at the underlying integral format.  */
+      ep->cte_format = CTF_INT_SIGNED;
+      ep->cte_offset = 0;
+      ep->cte_bits = 0;
       break;
     case CTF_K_SLICE:
       {

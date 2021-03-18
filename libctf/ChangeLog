@@ -1,5 +1,11 @@
 2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_encoding): Support, after a fashion, for enums.
+	* ctf-dump.c (ctf_dump_format_type): Do not report enums' degenerate
+	encoding.
+
+2021-03-18  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dedup.c (ctf_dedup_rhash_type): Report errors on the input
 	dict properly.
 	* ctf-open.c (ctf_bufopen_internal): Report errors initializing

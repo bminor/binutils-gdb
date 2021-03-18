@@ -142,7 +142,10 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       unsliced_kind = ctf_type_kind_unsliced (fp, id);
       kind = ctf_type_kind (fp, id);
 
-      if (ctf_type_encoding (fp, id, &ep) == 0)
+      /* Report encodings of everything with an encoding other than enums:
+	 base-type enums cannot have a nonzero cte_offset or cte_bits value.
+	 (Slices of them can, but they are of kind CTF_K_SLICE.)  */
+      if (unsliced_kind != CTF_K_ENUM && ctf_type_encoding (fp, id, &ep) == 0)
 	{
 	  if ((ssize_t) ep.cte_bits != ctf_type_size (fp, id) * CHAR_BIT
 	      && flag & CTF_FT_BITFIELD)
