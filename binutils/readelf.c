@@ -2549,6 +2549,7 @@ get_machine_name (unsigned e_machine)
     case EM_BA2:		return "Beyond BA2 CPU architecture";
     case EM_XCORE:		return "XMOS xCORE processor family";
     case EM_MCHP_PIC:		return "Microchip 8-bit PIC(r) family";
+    case EM_INTELGT:		return "Intel Graphics Technology";
       /* 210 */
     case EM_KM32:		return "KM211 KM32 32-bit processor";
     case EM_KMX32:		return "KM211 KMX32 32-bit processor";

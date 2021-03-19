@@ -1,3 +1,7 @@
+2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_machine_name): Add EM_INTELGT.
+
 2021-03-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 27478

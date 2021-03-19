@@ -317,7 +317,7 @@
 #define EM_BA2 		202 	/* Beyond BA2 CPU architecture */
 #define EM_XCORE 	203 	/* XMOS xCORE processor family */
 #define EM_MCHP_PIC 	204 	/* Microchip 8-bit PIC(r) family */
-#define EM_INTEL205	205	/* Reserved by Intel */
+#define EM_INTELGT	205	/* Intel Graphics Technology */
 #define EM_INTEL206	206	/* Reserved by Intel */
 #define EM_INTEL207	207	/* Reserved by Intel */
 #define EM_INTEL208	208	/* Reserved by Intel */

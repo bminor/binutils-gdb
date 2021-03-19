@@ -1,3 +1,8 @@
+2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf/common.h (EM_INTEL205): Renamed to ...
+	(EM_INTELGT): This.
+
 2021-03-16  Nick Clifton  <nickc@redhat.com>
 
 	* coff/internal.h (struct internal_auxent): Fix a couple of typos
