@@ -21,8 +21,11 @@ standard_testfile
 set test_macros 0
 set options debug
 get_compiler_info
-if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
+if { [test_compiler_info "gcc-*"] } {
     lappend options additional_flags=-g3
+    set test_macros 1
+} elseif { [test_compiler_info "clang-*"] } {
+    lappend options additional_flags=-fdebug-macro
     set test_macros 1
 }
 

@@ -22,14 +22,16 @@ if [using_fission] {
 }
 
 get_compiler_info
-if ![test_compiler_info gcc*] {
-  untested "no compiler info"
-  return -1
+if { [test_compiler_info gcc*] } {
+    # Don't use "debug" here.  Otherwise "-g" would be appended to the gcc
+    # command line, possibly overriding "-g3" (depending on gcc version).
+    set options "additional_flags=-g3"
+} elseif { [test_compiler_info clang*] } {
+    set options "additional_flags=-fdebug-macro"
+} else {
+    untested "no compiler info"
+    return -1
 }
-
-# Don't use "debug" here.  Otherwise "-g" would be appended to the gcc
-# command line, possibly overriding "-g3" (depending on gcc version).
-set options "additional_flags=-g3"
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $options] } {
     return -1
