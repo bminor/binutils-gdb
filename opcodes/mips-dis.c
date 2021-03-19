@@ -923,7 +923,7 @@ set_default_mips_dis_options (struct disassemble_info *info)
 static bfd_boolean
 parse_mips_ase_option (const char *option)
 {
-  if (CONST_STRNEQ (option, "msa"))
+  if (startswith (option, "msa"))
     {
       mips_ase |= ASE_MSA;
       if ((mips_isa & INSN_ISA_MASK) == ISA_MIPS64R2
@@ -934,7 +934,7 @@ parse_mips_ase_option (const char *option)
       return TRUE;
     }
 
-  if (CONST_STRNEQ (option, "virt"))
+  if (startswith (option, "virt"))
     {
       mips_ase |= ASE_VIRT;
       if (mips_isa & ISA_MIPS64R2
@@ -945,38 +945,38 @@ parse_mips_ase_option (const char *option)
       return TRUE;
     }
 
-  if (CONST_STRNEQ (option, "xpa"))
+  if (startswith (option, "xpa"))
     {
       mips_ase |= ASE_XPA;
       return TRUE;
     }
 
-  if (CONST_STRNEQ (option, "ginv"))
+  if (startswith (option, "ginv"))
     {
       mips_ase |= ASE_GINV;
       return TRUE;
     }
 
-  if (CONST_STRNEQ (option, "loongson-mmi"))
+  if (startswith (option, "loongson-mmi"))
     {
       mips_ase |= ASE_LOONGSON_MMI;
       return TRUE;
     }
 
-  if (CONST_STRNEQ (option, "loongson-cam"))
+  if (startswith (option, "loongson-cam"))
     {
       mips_ase |= ASE_LOONGSON_CAM;
       return TRUE;
     }
   
   /* Put here for match ext2 frist */
-  if (CONST_STRNEQ (option, "loongson-ext2"))
+  if (startswith (option, "loongson-ext2"))
     {
       mips_ase |= ASE_LOONGSON_EXT2;
       return TRUE;
     }
 
-  if (CONST_STRNEQ (option, "loongson-ext"))
+  if (startswith (option, "loongson-ext"))
     {
       mips_ase |= ASE_LOONGSON_EXT;
       return TRUE;
@@ -994,7 +994,7 @@ parse_mips_dis_option (const char *option, unsigned int len)
   const struct mips_arch_choice *chosen_arch;
 
   /* Try to match options that are simple flags */
-  if (CONST_STRNEQ (option, "no-aliases"))
+  if (startswith (option, "no-aliases"))
     {
       no_aliases = 1;
       return;

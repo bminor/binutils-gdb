@@ -1855,8 +1855,8 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 		 the start of the next section.  */
 	      || (isym->st_value == toaddr
 		  && name != NULL
-		  && (CONST_STRNEQ (name, ".Letext")
-		      || CONST_STRNEQ (name, ".LFE")))))
+		  && (startswith (name, ".Letext")
+		      || startswith (name, ".LFE")))))
 	{
 	  if (debug_relocs)
 	    printf ("      adjusting value of local symbol %s from 0x%lx ",

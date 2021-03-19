@@ -281,7 +281,7 @@ build_link_order (lang_statement_union_type *statement)
 static bfd_boolean
 unsplittable_name (const char *name)
 {
-  if (CONST_STRNEQ (name, ".stab"))
+  if (startswith (name, ".stab"))
     {
       /* There are several stab like string sections. We pattern match on
 	 ".stab...str"  */
@@ -326,7 +326,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
     {
       /* Some section names cannot be truncated, as the name is
 	 used to locate some other section.  */
-      if (CONST_STRNEQ (name, ".stab")
+      if (startswith (name, ".stab")
 	  || strcmp (name, "$GDB_SYMBOLS$") == 0)
 	{
 	  einfo (_ ("%F%P: cannot create split section name for %s\n"), name);

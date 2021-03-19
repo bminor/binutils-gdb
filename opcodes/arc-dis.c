@@ -795,7 +795,7 @@ parse_option (const char *option)
       add_to_decodelist (FLOAT, DP);
       add_to_decodelist (FLOAT, CVT);
     }
-  else if (CONST_STRNEQ (option, "hex"))
+  else if (startswith (option, "hex"))
     print_hex = TRUE;
   else
     /* xgettext:c-format */

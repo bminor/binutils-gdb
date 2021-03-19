@@ -287,7 +287,7 @@ gld${EMULATION_NAME}_parse_args (int argc, char **argv)
   if (indx == 0)
     indx = 1;
 
-  if (indx < argc && CONST_STRNEQ (argv[indx], "-b"))
+  if (indx < argc && startswith (argv[indx], "-b"))
     {
       char *s;
 

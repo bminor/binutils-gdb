@@ -1316,7 +1316,7 @@ is_mergeable_note_section (bfd * abfd, asection * sec)
       && elf_section_data (sec)->this_hdr.sh_type == SHT_NOTE
       /* FIXME: We currently only support merging GNU_BUILD_NOTEs.
 	 We should add support for more note types.  */
-      && (CONST_STRNEQ (sec->name, GNU_BUILD_ATTRS_SECTION_NAME)))
+      && (startswith (sec->name, GNU_BUILD_ATTRS_SECTION_NAME)))
     return TRUE;
 
   return FALSE;

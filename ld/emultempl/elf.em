@@ -712,7 +712,7 @@ fragment <<EOF
 	link_info.unresolved_syms_in_objects = RM_IGNORE;
       else if (strcmp (optarg, "muldefs") == 0)
 	link_info.allow_multiple_definition = TRUE;
-      else if (CONST_STRNEQ (optarg, "max-page-size="))
+      else if (startswith (optarg, "max-page-size="))
 	{
 	  char *end;
 
@@ -722,7 +722,7 @@ fragment <<EOF
 	    einfo (_("%F%P: invalid maximum page size \`%s'\n"),
 		   optarg + 14);
 	}
-      else if (CONST_STRNEQ (optarg, "common-page-size="))
+      else if (startswith (optarg, "common-page-size="))
 	{
 	  char *end;
 	  link_info.commonpagesize = strtoul (optarg + 17, &end, 0);
@@ -731,7 +731,7 @@ fragment <<EOF
 	    einfo (_("%F%P: invalid common page size \`%s'\n"),
 		   optarg + 17);
 	}
-      else if (CONST_STRNEQ (optarg, "stack-size="))
+      else if (startswith (optarg, "stack-size="))
 	{
 	  char *end;
 	  link_info.stacksize = strtoul (optarg + 11, &end, 0);
@@ -760,11 +760,11 @@ fragment <<EOF
 	{
 	  link_info.flags_1 |= DF_1_GLOBAUDIT;
 	}
-      else if (CONST_STRNEQ (optarg, "start-stop-gc"))
+      else if (startswith (optarg, "start-stop-gc"))
 	link_info.start_stop_gc = TRUE;
-      else if (CONST_STRNEQ (optarg, "nostart-stop-gc"))
+      else if (startswith (optarg, "nostart-stop-gc"))
 	link_info.start_stop_gc = FALSE;
-      else if (CONST_STRNEQ (optarg, "start-stop-visibility="))
+      else if (startswith (optarg, "start-stop-visibility="))
 	{
 	  if (strcmp (optarg, "start-stop-visibility=default") == 0)
 	    link_info.start_stop_visibility = STV_DEFAULT;

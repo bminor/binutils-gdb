@@ -3748,7 +3748,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
   const char *match;
   int i;
 
-  if (CONST_STRNEQ (name, ".gnu.linkonce.wi."))
+  if (startswith (name, ".gnu.linkonce.wi."))
     match = ".debug_info";
   else
     match = name;

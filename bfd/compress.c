@@ -431,7 +431,7 @@ bfd_is_section_compressed_with_header (bfd *abfd, sec_ptr sec,
       if (compression_header_size == 0)
 	/* In this case, it should be "ZLIB" followed by the uncompressed
 	   section size, 8 bytes in big-endian order.  */
-	compressed = CONST_STRNEQ ((char*) header , "ZLIB");
+	compressed = startswith ((char*) header , "ZLIB");
       else
 	compressed = TRUE;
     }
@@ -536,7 +536,7 @@ bfd_init_section_decompress_status (bfd *abfd, sec_ptr sec)
     {
       /* In this case, it should be "ZLIB" followed by the uncompressed
 	 section size, 8 bytes in big-endian order.  */
-      if (! CONST_STRNEQ ((char*) header, "ZLIB"))
+      if (! startswith ((char*) header, "ZLIB"))
 	{
 	  bfd_set_error (bfd_error_wrong_format);
 	  return FALSE;

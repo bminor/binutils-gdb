@@ -58,32 +58,32 @@ static void
 parse_aarch64_dis_option (const char *option, unsigned int len ATTRIBUTE_UNUSED)
 {
   /* Try to match options that are simple flags */
-  if (CONST_STRNEQ (option, "no-aliases"))
+  if (startswith (option, "no-aliases"))
     {
       no_aliases = 1;
       return;
     }
 
-  if (CONST_STRNEQ (option, "aliases"))
+  if (startswith (option, "aliases"))
     {
       no_aliases = 0;
       return;
     }
 
-  if (CONST_STRNEQ (option, "no-notes"))
+  if (startswith (option, "no-notes"))
     {
       no_notes = 1;
       return;
     }
 
-  if (CONST_STRNEQ (option, "notes"))
+  if (startswith (option, "notes"))
     {
       no_notes = 0;
       return;
     }
 
 #ifdef DEBUG_AARCH64
-  if (CONST_STRNEQ (option, "debug_dump"))
+  if (startswith (option, "debug_dump"))
     {
       debug_dump = 1;
       return;

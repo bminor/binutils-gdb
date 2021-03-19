@@ -1746,7 +1746,7 @@ bfd_get_sign_extend_vma (bfd *abfd)
      no place to store this information in the COFF back end.
      Should enough other COFF targets add support for DWARF2,
      a place will have to be found.  Until then, this hack will do.  */
-  if (CONST_STRNEQ (name, "coff-go32")
+  if (startswith (name, "coff-go32")
       || strcmp (name, "pe-i386") == 0
       || strcmp (name, "pei-i386") == 0
       || strcmp (name, "pe-x86-64") == 0
@@ -1757,7 +1757,7 @@ bfd_get_sign_extend_vma (bfd *abfd)
       || strcmp (name, "aix5coff64-rs6000") == 0)
     return 1;
 
-  if (CONST_STRNEQ (name, "mach-o"))
+  if (startswith (name, "mach-o"))
     return 0;
 
   bfd_set_error (bfd_error_wrong_format);
@@ -2660,7 +2660,7 @@ bfd_convert_section_size (bfd *ibfd, sec_ptr isec, bfd *obfd,
     return size;
 
   /* Convert GNU property size.  */
-  if (CONST_STRNEQ (isec->name, NOTE_GNU_PROPERTY_SECTION_NAME))
+  if (startswith (isec->name, NOTE_GNU_PROPERTY_SECTION_NAME))
     return _bfd_elf_convert_gnu_property_size (ibfd, obfd);
 
   /* Do nothing if input file will be decompressed.  */
@@ -2718,7 +2718,7 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
     return TRUE;
 
   /* Convert GNU properties.  */
-  if (CONST_STRNEQ (isec->name, NOTE_GNU_PROPERTY_SECTION_NAME))
+  if (startswith (isec->name, NOTE_GNU_PROPERTY_SECTION_NAME))
     return _bfd_elf_convert_gnu_properties (ibfd, isec, obfd, ptr,
 					    ptr_size);
 

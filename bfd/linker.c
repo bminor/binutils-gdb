@@ -579,7 +579,7 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
 #define REAL "__real_"
 
       if (*l == '_'
-	  && CONST_STRNEQ (l, REAL)
+	  && startswith (l, REAL)
 	  && bfd_hash_lookup (info->wrap_hash, l + sizeof REAL - 1,
 			      FALSE, FALSE) != NULL)
 	{
@@ -623,7 +623,7 @@ unwrap_hash_lookup (struct bfd_link_info *info,
       || *l == info->wrap_char)
     ++l;
 
-  if (CONST_STRNEQ (l, WRAP))
+  if (startswith (l, WRAP))
     {
       l += sizeof WRAP - 1;
 
@@ -964,7 +964,7 @@ _bfd_generic_link_add_archive_symbols
 
 	  if (h == NULL
 	      && info->pei386_auto_import
-	      && CONST_STRNEQ (arsym->name, "__imp_"))
+	      && startswith (arsym->name, "__imp_"))
 	    h = bfd_link_hash_lookup (info->hash, arsym->name + 6,
 				      FALSE, FALSE, TRUE);
 	  if (h == NULL)
@@ -1536,7 +1536,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 		s = name + 1;
 		while (*s == '_')
 		  ++s;
-		if (s[0] == 'G' && CONST_STRNEQ (s, CONS_PREFIX))
+		if (s[0] == 'G' && startswith (s, CONS_PREFIX))
 		  {
 		    char c;
 

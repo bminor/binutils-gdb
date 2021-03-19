@@ -1754,13 +1754,13 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	  ;
 	}
       else if (strcmp (name, ".opd") == 0
-	       || CONST_STRNEQ (name, ".dlt")
+	       || startswith (name, ".dlt")
 	       || strcmp (name, ".stub") == 0
 	       || strcmp (name, ".got") == 0)
 	{
 	  /* Strip this section if we don't need it; see the comment below.  */
 	}
-      else if (CONST_STRNEQ (name, ".rela"))
+      else if (startswith (name, ".rela"))
 	{
 	  if (sec->size != 0)
 	    {

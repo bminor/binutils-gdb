@@ -2540,7 +2540,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
 	}
-      else if (CONST_STRNEQ (s->name, ".rela"))
+      else if (startswith (s->name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {

@@ -5070,7 +5070,7 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
 	  /* Remember whether there is a PLT.  */
 	  ;
 	}
-      else if (CONST_STRNEQ (name, ".rela"))
+      else if (startswith (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -5084,7 +5084,7 @@ _bfd_mn10300_elf_size_dynamic_sections (bfd * output_bfd,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".got")
+      else if (! startswith (name, ".got")
 	       && ! streq (name, ".dynbss"))
 	/* It's not one of our sections, so don't allocate space.  */
 	continue;

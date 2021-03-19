@@ -1760,12 +1760,12 @@ parse_stab_range_type (void *                dhandle,
 #define ULLHIGH "01777777777777777777777;"
       if (index_type == DEBUG_TYPE_NULL)
 	{
-	  if (CONST_STRNEQ (s2, LLLOW)
-	      && CONST_STRNEQ (s3, LLHIGH))
+	  if (startswith (s2, LLLOW)
+	      && startswith (s3, LLHIGH))
 	    return debug_make_int_type (dhandle, 8, FALSE);
 	  if (! ov2
 	      && n2 == 0
-	      && CONST_STRNEQ (s3, ULLHIGH))
+	      && startswith (s3, ULLHIGH))
 	    return debug_make_int_type (dhandle, 8, TRUE);
 	}
 
@@ -2987,7 +2987,7 @@ parse_stab_argtypes (void *dhandle, struct stab_handle *info,
 				   && (ISDIGIT (argtypes[2])
 				       || argtypes[2] == 'Q'
 				       || argtypes[2] == 't'))
-				  || CONST_STRNEQ (argtypes, "__ct"));
+				  || startswith (argtypes, "__ct"));
 
   is_constructor = (is_full_physname_constructor
 		    || (tagname != NULL
@@ -2995,7 +2995,7 @@ parse_stab_argtypes (void *dhandle, struct stab_handle *info,
   is_destructor = ((argtypes[0] == '_'
 		    && (argtypes[1] == '$' || argtypes[1] == '.')
 		    && argtypes[2] == '_')
-		   || CONST_STRNEQ (argtypes, "__dt"));
+		   || startswith (argtypes, "__dt"));
   is_v3 = argtypes[0] == '_' && argtypes[1] == 'Z';
 
   if (!(is_destructor || is_full_physname_constructor || is_v3))
@@ -3995,7 +3995,7 @@ stab_demangle_function_name (struct stab_demangle_info *minfo,
   *pp = scan + 2;
 
   if (*pp - name >= 5
-	   && CONST_STRNEQ (name, "type")
+	   && startswith (name, "type")
 	   && (name[4] == '$' || name[4] == '.'))
     {
       const char *tem;

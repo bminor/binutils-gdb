@@ -113,7 +113,7 @@ ldfile_add_library_path (const char *name, bfd_boolean cmdline)
      now.  */
   if (name[0] == '=')
     new_dirs->name = concat (ld_sysroot, name + 1, (const char *) NULL);
-  else if (CONST_STRNEQ (name, "$SYSROOT"))
+  else if (startswith (name, "$SYSROOT"))
     new_dirs->name = concat (ld_sysroot, name + strlen ("$SYSROOT"), (const char *) NULL);
   else
     new_dirs->name = xstrdup (name);

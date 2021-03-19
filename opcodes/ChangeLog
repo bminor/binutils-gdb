@@ -1,3 +1,21 @@
+2021-03-22  Martin Liska  <mliska@suse.cz>
+
+	* aarch64-dis.c (parse_aarch64_dis_option): Replace usage of CONST_STRNEQ with startswith.
+	* arc-dis.c (parse_option): Likewise.
+	* arm-dis.c (parse_arm_disassembler_options): Likewise.
+	* cris-dis.c (print_with_operands): Likewise.
+	* h8300-dis.c (bfd_h8_disassemble): Likewise.
+	* i386-dis.c (print_insn): Likewise.
+	* ia64-gen.c (fetch_insn_class): Likewise.
+	(parse_resource_users): Likewise.
+	(in_iclass): Likewise.
+	(lookup_specifier): Likewise.
+	(insert_opcode_dependencies): Likewise.
+	* mips-dis.c (parse_mips_ase_option): Likewise.
+	(parse_mips_dis_option): Likewise.
+	* s390-dis.c (disassemble_init_s390): Likewise.
+	* wasm32-dis.c (parse_wasm32_disassembler_options): Likewise.
+
 2021-03-16  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* riscv-opc.c (riscv_opcodes): Add zba, zbb and zbc instructions.

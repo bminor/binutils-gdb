@@ -1501,7 +1501,7 @@ gld_${EMULATION_NAME}_after_open (void)
 	      {
 		if (strcmp (sec->name, ".idata\$2") == 0)
 		  idata2 = 1;
-		if (CONST_STRNEQ (sec->name, ".idata\$"))
+		if (startswith (sec->name, ".idata\$"))
 		  is_imp = 1;
 		reloc_count += sec->reloc_count;
 	      }

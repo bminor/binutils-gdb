@@ -2866,7 +2866,7 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
      bfd_slurp_armap, but that seems inappropriate since no other
      target uses this format.  Instead, we check directly for a COFF
      armap.  */
-  if (CONST_STRNEQ (nextname, "/               "))
+  if (startswith (nextname, "/               "))
     return bfd_slurp_armap (abfd);
 
   /* See if the first element is an armap.  */

@@ -2859,7 +2859,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_section_name (s);
 
-      if (CONST_STRNEQ (name, ".rela"))
+      if (startswith (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -2873,7 +2873,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".got")
+      else if (! startswith (name, ".got")
 	       && strcmp (name, ".plt") != 0
 	       && strcmp (name, ".dynbss") != 0)
 	{
@@ -2890,7 +2890,7 @@ elf64_alpha_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	     linker does that before adjust_dynamic_symbol is called, and
 	     it is that function which decides whether anything needs to
 	     go into these sections.  */
-	  if (!CONST_STRNEQ (name, ".got"))
+	  if (!startswith (name, ".got"))
 	    s->flags |= SEC_EXCLUDE;
 	}
       else if ((s->flags & SEC_HAS_CONTENTS) != 0)

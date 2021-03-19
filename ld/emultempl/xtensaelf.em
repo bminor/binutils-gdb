@@ -262,7 +262,7 @@ replace_instruction_table_sections (bfd *abfd, asection *sec)
       insn_sec_name = INSN_SEC_BASE_NAME;
       prop_sec_name = PROP_SEC_BASE_NAME;
     }
-  else if (CONST_STRNEQ (sec_name, LINKONCE_SEC_OLD_TEXT_BASE_NAME))
+  else if (startswith (sec_name, LINKONCE_SEC_OLD_TEXT_BASE_NAME))
     {
       insn_sec_name = sec_name;
       owned_prop_sec_name = (char *) xmalloc (strlen (sec_name) + 20);
@@ -1320,7 +1320,7 @@ is_inconsistent_linkonce_section (asection *sec)
   /* Check if this is an Xtensa property section or an exception table
      for Tensilica's XCC compiler.  */
   name = sec_name + linkonce_len;
-  if (CONST_STRNEQ (name, "prop."))
+  if (startswith (name, "prop."))
     name = strchr (name + 5, '.') ? strchr (name + 5, '.') + 1 : name + 5;
   else if (name[1] == '.'
 	   && (name[0] == 'p' || name[0] == 'e' || name[0] == 'h'))

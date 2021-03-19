@@ -1,3 +1,9 @@
+2021-03-22  Martin Liska  <mliska@suse.cz>
+
+	* config/tc-i386.c (md_parse_option): Replace usage of CONST_STRNEQ with startswith.
+	(x86_64_section_word): Likewise.
+	* config/tc-sparc.c (md_parse_option): Likewise.
+
 2021-03-19  Alan Modra  <amodra@gmail.com>
 
 	* app.c (do_scrub_chars): Don't lose spaces before a slash.

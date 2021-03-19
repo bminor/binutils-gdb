@@ -1113,7 +1113,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
      The symbols will be defined as weak, so that multiple definitions
      are permitted.  The GNU linker extension is to actually discard
      all but one of the sections.  */
-  if (CONST_STRNEQ (name, ".gnu.linkonce")
+  if (startswith (name, ".gnu.linkonce")
       && elf_next_in_group (newsect) == NULL)
     flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
@@ -3942,7 +3942,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	     string section.  We look for a section with the same name
 	     but without the trailing ``str'', and set its sh_link
 	     field to point to this section.  */
-	  if (CONST_STRNEQ (sec->name, ".stab")
+	  if (startswith (sec->name, ".stab")
 	      && strcmp (sec->name + strlen (sec->name) - 3, "str") == 0)
 	    {
 	      size_t len;
@@ -10190,7 +10190,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
   if (note->descsz < 4)
     return TRUE;
 
-  if (! CONST_STRNEQ (note->namedata, "win32"))
+  if (! startswith (note->namedata, "win32"))
     return TRUE;
 
   type = bfd_get_32 (abfd, note->descdata);

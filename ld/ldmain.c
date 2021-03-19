@@ -648,7 +648,7 @@ get_sysroot (int argc, char **argv)
   const char *path = NULL;
 
   for (i = 1; i < argc; i++)
-    if (CONST_STRNEQ (argv[i], "--sysroot="))
+    if (startswith (argv[i], "--sysroot="))
       path = argv[i] + strlen ("--sysroot=");
 
   if (!path)
@@ -681,7 +681,7 @@ get_emulation (int argc, char **argv)
 
   for (i = 1; i < argc; i++)
     {
-      if (CONST_STRNEQ (argv[i], "-m"))
+      if (startswith (argv[i], "-m"))
 	{
 	  if (argv[i][2] == '\0')
 	    {
@@ -935,7 +935,7 @@ add_archive_element (struct bfd_link_info *info,
       h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, TRUE);
       if (h == NULL
 	  && info->pei386_auto_import
-	  && CONST_STRNEQ (name, "__imp_"))
+	  && startswith (name, "__imp_"))
 	h = bfd_link_hash_lookup (info->hash, name + 6, FALSE, FALSE, TRUE);
 
       if (h == NULL)

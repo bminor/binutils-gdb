@@ -1,3 +1,104 @@
+2021-03-22  Martin Liska  <mliska@suse.cz>
+
+	* bfd-in.h (startswith): Add startswith function.
+	(CONST_STRNEQ): Remove.
+	* bfd-in2.h (startswith): Regenerate with make headers.
+	* archive.c (bfd_slurp_armap): Replace usage of CONST_STRNEQ with startswith.
+	(_bfd_slurp_extended_name_table): Likewise.
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Likewise.
+	* bfd.c (bfd_get_sign_extend_vma): Likewise.
+	(bfd_convert_section_size): Likewise.
+	(bfd_convert_section_contents): Likewise.
+	* coff-stgo32.c (go32exe_create_stub): Likewise.
+	(go32exe_check_format): Likewise.
+	* coffcode.h (styp_to_sec_flags): Likewise.
+	(GNU_DEBUGALTLINK): Likewise.
+	* coffgen.c (_bfd_coff_section_already_linked): Likewise.
+	(coff_gc_sweep): Likewise.
+	(bfd_coff_gc_sections): Likewise.
+	* cofflink.c (coff_link_add_symbols): Likewise.
+	(process_embedded_commands): Likewise.
+	* compress.c (bfd_is_section_compressed_with_header): Likewise.
+	(bfd_init_section_decompress_status): Likewise.
+	* dwarf2.c (find_debug_info): Likewise.
+	(place_sections): Likewise.
+	* ecoff.c (_bfd_ecoff_slurp_armap): Likewise.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Likewise.
+	* elf.c (_bfd_elf_make_section_from_shdr): Likewise.
+	(assign_section_numbers): Likewise.
+	(elfcore_grok_win32pstatus): Likewise.
+	* elf32-arm.c (cmse_scan): Likewise.
+	(elf32_arm_gc_mark_extra_sections): Likewise.
+	(elf32_arm_size_dynamic_sections): Likewise.
+	(is_arm_elf_unwind_section_name): Likewise.
+	* elf32-bfin.c (bfin_size_dynamic_sections): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_size_dynamic_sections): Likewise.
+	* elf32-cris.c (elf_cris_size_dynamic_sections): Likewise.
+	* elf32-csky.c (csky_elf_size_dynamic_sections): Likewise.
+	* elf32-hppa.c (elf32_hppa_size_dynamic_sections): Likewise.
+	* elf32-iq2000.c (iq2000_elf_check_relocs): Likewise.
+	* elf32-lm32.c (lm32_elf_size_dynamic_sections): Likewise.
+	* elf32-m32r.c (m32r_elf_size_dynamic_sections): Likewise.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Likewise.
+	* elf32-metag.c (elf_metag_size_dynamic_sections): Likewise.
+	* elf32-msp430.c (msp430_elf_relax_delete_bytes): Likewise.
+	* elf32-nios2.c (nios2_elf32_size_dynamic_sections): Likewise.
+	* elf32-or1k.c (or1k_elf_size_dynamic_sections): Likewise.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Likewise.
+	* elf32-s390.c (elf_s390_size_dynamic_sections): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_size_dynamic_sections): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_size_dynamic_sections): Likewise.
+	* elf32-sh.c (sh_elf_size_dynamic_sections): Likewise.
+	* elf32-tic6x.c (is_tic6x_elf_unwind_section_name): Likewise.
+	(elf32_tic6x_size_dynamic_sections): Likewise.
+	* elf32-vax.c (elf_vax_size_dynamic_sections): Likewise.
+	* elf32-xtensa.c (elf_xtensa_size_dynamic_sections): Likewise.
+	(xtensa_is_insntable_section): Likewise.
+	(xtensa_is_littable_section): Likewise.
+	(xtensa_is_proptable_section): Likewise.
+	(xtensa_property_section_name): Likewise.
+	(xtensa_callback_required_dependence): Likewise.
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Likewise.
+	* elf64-hppa.c (elf64_hppa_size_dynamic_sections): Likewise.
+	* elf64-ia64-vms.c (is_unwind_section_name): Likewise.
+	(get_reloc_section): Likewise.
+	(elf64_ia64_size_dynamic_sections): Likewise.
+	(elf64_ia64_object_p): Likewise.
+	* elf64-mmix.c (mmix_elf_add_symbol_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_size_dynamic_sections): Likewise.
+	* elf64-s390.c (elf_s390_size_dynamic_sections): Likewise.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+	(_bfd_elf_gc_mark_extra_sections): Likewise.
+	(bfd_elf_parse_eh_frame_entries): Likewise.
+	(_bfd_elf_section_already_linked): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_size_dynamic_sections): Likewise.
+	* elfnn-ia64.c (is_unwind_section_name): Likewise.
+	(elfNN_ia64_size_dynamic_sections): Likewise.
+	(elfNN_ia64_object_p): Likewise.
+	* elfxx-mips.c (FN_STUB_P): Likewise.
+	(CALL_STUB_P): Likewise.
+	(CALL_FP_STUB_P): Likewise.
+	(_bfd_mips_elf_section_from_shdr): Likewise.
+	(_bfd_mips_elf_fake_sections): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_final_write_processing): Likewise.
+	(_bfd_mips_elf_final_link): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Likewise.
+	* elfxx-x86.c (elf_i386_is_reloc_section): Likewise.
+	(elf_x86_64_is_reloc_section): Likewise.
+	* hpux-core.c (thread_section_p): Likewise.
+	* libcoff.h (bfd_pei_p): Likewise.
+	* linker.c (REAL): Likewise.
+	(unwrap_hash_lookup): Likewise.
+	(_bfd_generic_link_add_one_symbol): Likewise.
+	* mmo.c (mmo_internal_write_section): Likewise.
+	* osf-core.c (osf_core_core_file_p): Likewise.
+	* pef.c (bfd_pef_print_symbol): Likewise.
+	* pei-x86_64.c (pex64_print_all_pdata_sections): Likewise.
+	* som.c (som_slurp_symbol_table): Likewise.
+	(som_slurp_armap): Likewise.
+	* wasm-module.c (wasm_compute_custom_section_file_position): Likewise.
+
 2021-03-22  Jan Beulich  <jbeulich@suse.com>
 
 	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Add missing

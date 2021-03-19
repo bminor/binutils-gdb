@@ -4129,7 +4129,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       const char *name;
 
       name = bfd_section_name (s);
-      if (CONST_STRNEQ (name, ".gnu.warning."))
+      if (startswith (name, ".gnu.warning."))
 	{
 	  char *msg;
 	  bfd_size_type sz;
@@ -5693,7 +5693,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  asection *stab;
 
 	  for (stab = abfd->sections; stab; stab = stab->next)
-	    if (CONST_STRNEQ (stab->name, ".stab")
+	    if (startswith (stab->name, ".stab")
 		&& (!stab->name[5] ||
 		    (stab->name[5] == '.' && ISDIGIT (stab->name[6])))
 		&& (stab->flags & SEC_MERGE) == 0
@@ -13698,7 +13698,7 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 
 	  if (!debug_frag_seen
 	      && (isec->flags & SEC_DEBUGGING)
-	      && CONST_STRNEQ (isec->name, ".debug_line."))
+	      && startswith (isec->name, ".debug_line."))
 	    debug_frag_seen = TRUE;
 	  else if (strcmp (bfd_section_name (isec),
 			   "__patchable_function_entries") == 0
@@ -14015,7 +14015,7 @@ bfd_elf_parse_eh_frame_entries (bfd *abfd ATTRIBUTE_UNUSED,
 
       for (sec = ibfd->sections; sec; sec = sec->next)
 	{
-	  if (CONST_STRNEQ (bfd_section_name (sec), ".eh_frame_entry")
+	  if (startswith (bfd_section_name (sec), ".eh_frame_entry")
 	      && init_reloc_cookie_rels (&cookie, info, ibfd, sec))
 	    {
 	      _bfd_elf_parse_eh_frame_entry (info, sec, &cookie);
@@ -14722,7 +14722,7 @@ _bfd_elf_section_already_linked (bfd *abfd,
   else
     {
       /* Otherwise we should have a .gnu.linkonce.<type>.<key> section.  */
-      if (CONST_STRNEQ (name, ".gnu.linkonce.")
+      if (startswith (name, ".gnu.linkonce.")
 	  && (key = strchr (name + sizeof (".gnu.linkonce.") - 1, '.')) != NULL)
 	key++;
       else
@@ -14821,10 +14821,10 @@ _bfd_elf_section_already_linked (bfd *abfd,
      `.gnu.linkonce.r.F' section.  The order of sections in a bfd does not
      matter as here were are looking only for cross-bfd sections.  */
 
-  if ((flags & SEC_GROUP) == 0 && CONST_STRNEQ (name, ".gnu.linkonce.r."))
+  if ((flags & SEC_GROUP) == 0 && startswith (name, ".gnu.linkonce.r."))
     for (l = already_linked_list->entry; l != NULL; l = l->next)
       if ((l->sec->flags & SEC_GROUP) == 0
-	  && CONST_STRNEQ (l->sec->name, ".gnu.linkonce.t."))
+	  && startswith (l->sec->name, ".gnu.linkonce.t."))
 	{
 	  if (abfd != l->sec->owner)
 	    sec->output_section = bfd_abs_section_ptr;

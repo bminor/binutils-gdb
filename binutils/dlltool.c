@@ -1367,7 +1367,7 @@ scan_drectve_symbols (bfd *abfd)
   while (p < e)
     {
       if (p[0] == '-'
-	  && CONST_STRNEQ (p, "-export:"))
+	  && startswith (p, "-export:"))
 	{
 	  char * name;
 	  char * c;
@@ -1399,7 +1399,7 @@ scan_drectve_symbols (bfd *abfd)
 	      char *tag_start = ++p;
 	      while (p < e && *p != ' ' && *p != '-')
 		p++;
-	      if (CONST_STRNEQ (tag_start, "data"))
+	      if (startswith (tag_start, "data"))
 		flags &= ~BSF_FUNCTION;
 	    }
 

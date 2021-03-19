@@ -686,13 +686,13 @@ elf_x86_link_hash_table_free (bfd *obfd)
 static bfd_boolean
 elf_i386_is_reloc_section (const char *secname)
 {
-  return CONST_STRNEQ (secname, ".rel");
+  return startswith (secname, ".rel");
 }
 
 static bfd_boolean
 elf_x86_64_is_reloc_section (const char *secname)
 {
-  return CONST_STRNEQ (secname, ".rela");
+  return startswith (secname, ".rela");
 }
 
 /* Create an x86 ELF linker hash table.  */

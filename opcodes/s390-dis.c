@@ -65,11 +65,11 @@ disassemble_init_s390 (struct disassemble_info *info)
 
   for (p = info->disassembler_options; p != NULL; )
     {
-      if (CONST_STRNEQ (p, "esa"))
+      if (startswith (p, "esa"))
 	current_arch_mask = 1 << S390_OPCODE_ESA;
-      else if (CONST_STRNEQ (p, "zarch"))
+      else if (startswith (p, "zarch"))
 	current_arch_mask = 1 << S390_OPCODE_ZARCH;
-      else if (CONST_STRNEQ (p, "insnlength"))
+      else if (startswith (p, "insnlength"))
 	option_use_insn_len_bits_p = 1;
       else
 	/* xgettext:c-format */

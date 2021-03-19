@@ -62,10 +62,10 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
     return FALSE;
 
   /* Archives with traditional armaps are still permitted.  */
-  if (CONST_STRNEQ (nextname, "/               "))
+  if (startswith (nextname, "/               "))
     return bfd_slurp_armap (abfd);
 
-  if (! CONST_STRNEQ (nextname, "/SYM64/         "))
+  if (! startswith (nextname, "/SYM64/         "))
     {
       abfd->has_armap = FALSE;
       return TRUE;

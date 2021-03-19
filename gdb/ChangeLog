@@ -1,3 +1,8 @@
+2021-03-22  Martin Liska  <mliska@suse.cz>
+
+	* arm-tdep.c (show_disassembly_style_sfunc): Replace usage of CONST_STRNEQ with startswith.
+	(_initialize_arm_tdep): Likewise.
+
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
 	* xcoffread.c (xcoff_initial_scan): Create partial symtabs.

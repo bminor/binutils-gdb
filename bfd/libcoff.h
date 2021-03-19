@@ -977,7 +977,7 @@ typedef struct
 /* Macro: Returns true if the bfd is a PE executable as opposed to a
    PE object file.  */
 #define bfd_pei_p(abfd) \
-  (CONST_STRNEQ ((abfd)->xvec->name, "pei-"))
+  (startswith ((abfd)->xvec->name, "pei-"))
 #ifdef __cplusplus
 }
 #endif

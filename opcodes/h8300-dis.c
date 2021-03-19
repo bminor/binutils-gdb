@@ -655,7 +655,7 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 		   regno[1]);
 	  return qi->length;
 	}
-      if (CONST_STRNEQ (q->name, "mova"))
+      if (startswith (q->name, "mova"))
 	{
 	  const op_type *args = q->args.nib;
 

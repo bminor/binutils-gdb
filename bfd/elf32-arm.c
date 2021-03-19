@@ -5961,7 +5961,7 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 	  sym_name = bfd_elf_string_from_elf_section (input_bfd,
 						      symtab_hdr->sh_link,
 						      cmse_sym->st_name);
-	  if (!sym_name || !CONST_STRNEQ (sym_name, CMSE_PREFIX))
+	  if (!sym_name || !startswith (sym_name, CMSE_PREFIX))
 	    continue;
 
 	  /* Special symbol with local binding.  */
@@ -5971,7 +5971,7 @@ cmse_scan (bfd *input_bfd, struct elf32_arm_link_hash_table *htab,
 	{
 	  cmse_hash = elf32_arm_hash_entry (sym_hashes[i - ext_start]);
 	  sym_name = (char *) cmse_hash->root.root.root.string;
-	  if (!CONST_STRNEQ (sym_name, CMSE_PREFIX))
+	  if (!startswith (sym_name, CMSE_PREFIX))
 	    continue;
 
 	  /* Special symbol has incorrect binding or type.  */
@@ -15847,7 +15847,7 @@ elf32_arm_gc_mark_extra_sections (struct bfd_link_info *info,
 
 		  /* Assume it is a special symbol.  If not, cmse_scan will
 		     warn about it and user can do something about it.  */
-		  if (CONST_STRNEQ (cmse_hash->root.root.root.string,
+		  if (startswith (cmse_hash->root.root.root.string,
 				    CMSE_PREFIX))
 		    {
 		      cmse_sec = cmse_hash->root.root.u.def.section;
@@ -16902,7 +16902,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	  /* Remember whether there is a PLT.  */
 	  ;
 	}
-      else if (CONST_STRNEQ (name, ".rel"))
+      else if (startswith (name, ".rel"))
 	{
 	  if (s->size != 0)
 	    {
@@ -17564,8 +17564,8 @@ elf32_arm_final_write_processing (bfd *abfd)
 static bfd_boolean
 is_arm_elf_unwind_section_name (bfd * abfd ATTRIBUTE_UNUSED, const char * name)
 {
-  return (CONST_STRNEQ (name, ELF_STRING_ARM_unwind)
-	  || CONST_STRNEQ (name, ELF_STRING_ARM_unwind_once));
+  return (startswith (name, ELF_STRING_ARM_unwind)
+	  || startswith (name, ELF_STRING_ARM_unwind_once));
 }
 
 

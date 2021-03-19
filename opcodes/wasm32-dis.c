@@ -120,9 +120,9 @@ parse_wasm32_disassembler_options (struct disassemble_info *info,
 
   while (opts != NULL)
     {
-      if (CONST_STRNEQ (opts, "registers"))
+      if (startswith (opts, "registers"))
         private->print_registers = TRUE;
-      else if (CONST_STRNEQ (opts, "globals"))
+      else if (startswith (opts, "globals"))
         private->print_well_known_globals = TRUE;
 
       opts = strchr (opts, ',');

@@ -3090,7 +3090,7 @@ s7_bfd_score_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_section_name (s);
 
-      if (CONST_STRNEQ (name, ".rel"))
+      if (startswith (name, ".rel"))
 	{
 	  if (s->size == 0)
 	    {
@@ -3128,7 +3128,7 @@ s7_bfd_score_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 		s->reloc_count = 0;
 	    }
 	}
-      else if (CONST_STRNEQ (name, ".got"))
+      else if (startswith (name, ".got"))
 	{
 	  /* s7_bfd_score_elf_always_size_sections() has already done
 	     most of the work, but some symbols may have been mapped
@@ -3141,7 +3141,7 @@ s7_bfd_score_elf_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 	     of .text section. So put a dummy. XXX  */
 	  s->size += SCORE_FUNCTION_STUB_SIZE;
 	}
-      else if (! CONST_STRNEQ (name, ".init"))
+      else if (! startswith (name, ".init"))
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;

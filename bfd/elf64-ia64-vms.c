@@ -809,9 +809,9 @@ elf64_ia64_relax_section (bfd *abfd, asection *sec,
 static inline bfd_boolean
 is_unwind_section_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
 {
-  return ((CONST_STRNEQ (name, ELF_STRING_ia64_unwind)
-	   && ! CONST_STRNEQ (name, ELF_STRING_ia64_unwind_info))
-	  || CONST_STRNEQ (name, ELF_STRING_ia64_unwind_once));
+  return ((startswith (name, ELF_STRING_ia64_unwind)
+	   && ! startswith (name, ELF_STRING_ia64_unwind_info))
+	  || startswith (name, ELF_STRING_ia64_unwind_once));
 }
 
 
@@ -1847,9 +1847,9 @@ get_reloc_section (bfd *abfd,
   if (srel_name == NULL)
     return NULL;
 
-  BFD_ASSERT ((CONST_STRNEQ (srel_name, ".rela")
+  BFD_ASSERT ((startswith (srel_name, ".rela")
 	       && strcmp (bfd_section_name (sec), srel_name+5) == 0)
-	      || (CONST_STRNEQ (srel_name, ".rel")
+	      || (startswith (srel_name, ".rel")
 		  && strcmp (bfd_section_name (sec), srel_name+4) == 0));
 
   dynobj = ia64_info->root.dynobj;
@@ -2745,7 +2745,7 @@ elf64_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  if (strcmp (name, ".got.plt") == 0)
 	    strip = FALSE;
-	  else if (CONST_STRNEQ (name, ".rel"))
+	  else if (startswith (name, ".rel"))
 	    {
 	      if (!strip)
 		{
@@ -4387,7 +4387,7 @@ elf64_ia64_object_p (bfd *abfd)
       if (elf_sec_group (sec) == NULL
 	  && ((sec->flags & (SEC_LINK_ONCE | SEC_CODE | SEC_GROUP))
 	      == (SEC_LINK_ONCE | SEC_CODE))
-	  && CONST_STRNEQ (sec->name, ".gnu.linkonce.t."))
+	  && startswith (sec->name, ".gnu.linkonce.t."))
 	{
 	  name = sec->name + 16;
 

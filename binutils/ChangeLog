@@ -1,3 +1,17 @@
+2021-03-22  Martin Liska  <mliska@suse.cz>
+
+	* dlltool.c (scan_drectve_symbols): Replace usage of CONST_STRNEQ with startswith.
+	* emul_aix.c (ar_emul_aix_parse_arg): Likewise.
+	* objcopy.c (is_mergeable_note_section): Likewise.
+	* objdump.c (dump_dwarf_section): Likewise.
+	* prdbg.c (pr_method_type): Likewise.
+	(pr_class_baseclass): Likewise.
+	(tg_class_baseclass): Likewise.
+	* readelf.c (process_lto_symbol_tables): Likewise.
+	* stabs.c (ULLHIGH): Likewise.
+	(parse_stab_argtypes): Likewise.
+	(stab_demangle_function_name): Likewise.
+
 2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (get_machine_name): Add EM_INTELGT.

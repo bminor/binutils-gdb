@@ -461,8 +461,8 @@ sort_by_section_name (const void *a, const void *b)
      FIXME stripping images with a .rsrc section still needs to be fixed.  */
   if (i != 0)
     {
-      if ((CONST_STRNEQ (sna, ".stab"))
-	  && (!CONST_STRNEQ (snb, ".stab")))
+      if ((startswith (sna, ".stab"))
+	  && (!startswith (snb, ".stab")))
 	return 1;
     }
   return i;
@@ -536,7 +536,7 @@ sort_sections (lang_statement_union_type *s)
 	    {
 	      /* Is this the .idata section?  */
 	      if (sec->spec.name != NULL
-		  && CONST_STRNEQ (sec->spec.name, ".idata"))
+		  && startswith (sec->spec.name, ".idata"))
 		{
 		  /* Sort the children.  We want to sort any objects in
 		     the same archive.  In order to handle the case of

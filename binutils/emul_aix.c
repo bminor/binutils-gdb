@@ -91,25 +91,25 @@ ar_emul_aix_replace (bfd **after_bfd, bfd *new_bfd,
 static bfd_boolean
 ar_emul_aix_parse_arg (char *arg)
 {
-  if (CONST_STRNEQ (arg, "-X32_64"))
+  if (startswith (arg, "-X32_64"))
     {
       big_archive = TRUE;
       X32 = TRUE;
       X64 = TRUE;
     }
-  else if (CONST_STRNEQ (arg, "-X32"))
+  else if (startswith (arg, "-X32"))
     {
       big_archive = TRUE;
       X32 = TRUE;
       X64 = FALSE;
     }
-  else if (CONST_STRNEQ (arg, "-X64"))
+  else if (startswith (arg, "-X64"))
     {
       big_archive = TRUE;
       X32 = FALSE;
       X64 = TRUE;
     }
-  else if (CONST_STRNEQ (arg, "-g"))
+  else if (startswith (arg, "-g"))
     {
       big_archive = FALSE;
       X32 = TRUE;

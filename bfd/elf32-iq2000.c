@@ -507,9 +507,9 @@ iq2000_elf_check_relocs (bfd *abfd,
 
 	case R_IQ2000_32:
 	  /* For debug section, change to special harvard-aware relocations.  */
-	  if (CONST_STRNEQ (sec->name, ".debug")
-	      || CONST_STRNEQ (sec->name, ".stab")
-	      || CONST_STRNEQ (sec->name, ".eh_frame"))
+	  if (startswith (sec->name, ".debug")
+	      || startswith (sec->name, ".stab")
+	      || startswith (sec->name, ".eh_frame"))
 	    {
 	      ((Elf_Internal_Rela *) rel)->r_info
 		= ELF32_R_INFO (ELF32_R_SYM (rel->r_info), R_IQ2000_32_DEBUG);

@@ -397,7 +397,7 @@ coff_link_add_symbols (bfd *abfd,
 		  || classification == COFF_SYMBOL_PE_SECTION)
 	      && coff_section_data (abfd, section) != NULL
 	      && coff_section_data (abfd, section)->comdat != NULL
-	      && CONST_STRNEQ (name, "??_")
+	      && startswith (name, "??_")
 	      && strcmp (name, coff_section_data (abfd, section)->comdat->name) == 0)
 	    {
 	      if (*sym_hash == NULL)
@@ -546,7 +546,7 @@ coff_link_add_symbols (bfd *abfd,
 	  asection *stab;
 
 	  for (stab = abfd->sections; stab; stab = stab->next)
-	    if (CONST_STRNEQ (stab->name, ".stab")
+	    if (startswith (stab->name, ".stab")
 		&& (!stab->name[5]
 		    || (stab->name[5] == '.' && ISDIGIT (stab->name[6]))))
 	    {
@@ -1274,7 +1274,7 @@ process_embedded_commands (bfd *output_bfd,
 	  s++;
 	  continue;
 	}
-      if (CONST_STRNEQ (s, "-attr"))
+      if (startswith (s, "-attr"))
 	{
 	  char *name;
 	  char *attribs;
@@ -1314,14 +1314,14 @@ process_embedded_commands (bfd *output_bfd,
 		asec->flags |= SEC_READONLY;
 	    }
 	}
-      else if (CONST_STRNEQ (s, "-heap"))
+      else if (startswith (s, "-heap"))
 	s = dores_com (s + 5, output_bfd, 1);
 
-      else if (CONST_STRNEQ (s, "-stack"))
+      else if (startswith (s, "-stack"))
 	s = dores_com (s + 6, output_bfd, 0);
 
       /* GNU extension for aligned commons.  */
-      else if (CONST_STRNEQ (s, "-aligncomm:"))
+      else if (startswith (s, "-aligncomm:"))
 	{
 	  /* Common symbols must be aligned on reading, as it
 	  is too late to do anything here, after they have

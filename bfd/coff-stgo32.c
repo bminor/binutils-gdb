@@ -176,7 +176,7 @@ go32exe_create_stub (bfd *abfd)
 	  close (f);
 	  goto stub_end;
 	}
-      if (! CONST_STRNEQ (magic, "go32stub"))
+      if (! startswith (magic, "go32stub"))
 	{
 	  close (f);
 	  goto stub_end;
@@ -306,7 +306,7 @@ go32exe_check_format (bfd *abfd)
   header_end = H_GET_16 (abfd, filehdr_dos.e_cparhdr) * 16UL;
   if (go32exe_temp_stub_size < header_end
       || go32exe_temp_stub_size - header_end < sizeof "go32stub" - 1
-      || !CONST_STRNEQ (go32exe_temp_stub + header_end, "go32stub"))
+      || !startswith (go32exe_temp_stub + header_end, "go32stub"))
     goto fail_format;
 
   /* Set origin to where the COFF header starts and seek there.  */

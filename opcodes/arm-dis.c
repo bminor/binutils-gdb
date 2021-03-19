@@ -11600,7 +11600,7 @@ parse_arm_disassembler_options (const char *options)
 
   FOR_EACH_DISASSEMBLER_OPTION (opt, options)
     {
-      if (CONST_STRNEQ (opt, "reg-names-"))
+      if (startswith (opt, "reg-names-"))
 	{
 	  unsigned int i;
 	  for (i = 0; i < NUM_ARM_OPTIONS; i++)
@@ -11615,11 +11615,11 @@ parse_arm_disassembler_options (const char *options)
 	    opcodes_error_handler (_("unrecognised register name set: %s"),
 				   opt);
 	}
-      else if (CONST_STRNEQ (opt, "force-thumb"))
+      else if (startswith (opt, "force-thumb"))
 	force_thumb = 1;
-      else if (CONST_STRNEQ (opt, "no-force-thumb"))
+      else if (startswith (opt, "no-force-thumb"))
 	force_thumb = 0;
-      else if (CONST_STRNEQ (opt, "coproc"))
+      else if (startswith (opt, "coproc"))
 	{
 	  const char *procptr = opt + sizeof ("coproc") - 1;
 	  char *endptr;
@@ -11637,10 +11637,10 @@ parse_arm_disassembler_options (const char *options)
 	      continue;
 	    }
 	  endptr += 1;
-	  if (CONST_STRNEQ (endptr, "generic"))
+	  if (startswith (endptr, "generic"))
 	    cde_coprocs &= ~(1 << coproc_number);
-	  else if (CONST_STRNEQ (endptr, "cde")
-		   || CONST_STRNEQ (endptr, "CDE"))
+	  else if (startswith (endptr, "cde")
+		   || startswith (endptr, "CDE"))
 	    cde_coprocs |= (1 << coproc_number);
 	  else
 	    {

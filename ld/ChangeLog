@@ -1,3 +1,28 @@
+2021-03-22  Martin Liska  <mliska@suse.cz>
+
+	* emultempl/aix.em: Replace usage of CONST_STRNEQ with startswith.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+	* ldctor.c (ctor_prio): Likewise.
+	* ldelf.c (ldelf_try_needed): Likewise.
+	(ldelf_parse_ld_so_conf): Likewise.
+	(ldelf_after_open): Likewise.
+	(output_rel_find): Likewise.
+	(ldelf_place_orphan): Likewise.
+	* ldfile.c (ldfile_add_library_path): Likewise.
+	* ldlang.c (lang_add_input_file): Likewise.
+	* ldmain.c (get_sysroot): Likewise.
+	(get_emulation): Likewise.
+	(add_archive_element): Likewise.
+	* ldwrite.c (unsplittable_name): Likewise.
+	(clone_section): Likewise.
+	* lexsup.c (parse_args): Likewise.
+	* pe-dll.c (is_import): Likewise.
+	(pe_implied_import_dll): Likewise.
+
 2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27590

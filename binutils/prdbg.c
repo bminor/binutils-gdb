@@ -937,10 +937,10 @@ pr_method_type (void *p, bfd_boolean domain, int argcount, bfd_boolean varargs)
       domain_type = pop_type (info);
       if (domain_type == NULL)
 	return FALSE;
-      if (CONST_STRNEQ (domain_type, "class ")
+      if (startswith (domain_type, "class ")
 	  && strchr (domain_type + sizeof "class " - 1, ' ') == NULL)
 	domain_type += sizeof "class " - 1;
-      else if (CONST_STRNEQ (domain_type, "union class ")
+      else if (startswith (domain_type, "union class ")
 	       && (strchr (domain_type + sizeof "union class " - 1, ' ')
 		   == NULL))
 	domain_type += sizeof "union class " - 1;
@@ -1349,7 +1349,7 @@ pr_class_baseclass (void *p, bfd_vma bitpos, bfd_boolean is_virtual,
   if (t == NULL)
     return FALSE;
 
-  if (CONST_STRNEQ (t, "class "))
+  if (startswith (t, "class "))
     t += sizeof "class " - 1;
 
   /* Push it back on to take advantage of the prepend_type and
@@ -2238,7 +2238,7 @@ tg_class_baseclass (void *p, bfd_vma bitpos ATTRIBUTE_UNUSED,
   if (t == NULL)
     return FALSE;
 
-  if (CONST_STRNEQ (t, "class "))
+  if (startswith (t, "class "))
     t += sizeof "class " - 1;
 
   /* Push it back on to take advantage of the prepend_type and

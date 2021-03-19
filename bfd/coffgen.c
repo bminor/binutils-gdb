@@ -2635,7 +2635,7 @@ _bfd_coff_section_already_linked (bfd *abfd,
     key = s_comdat->name;
   else
     {
-      if (CONST_STRNEQ (name, ".gnu.linkonce.")
+      if (startswith (name, ".gnu.linkonce.")
 	  && (key = strchr (name + sizeof (".gnu.linkonce.") - 1, '.')) != NULL)
 	key++;
       else
@@ -2995,10 +2995,10 @@ coff_gc_sweep (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	  if ((o->flags & (SEC_DEBUGGING | SEC_LINKER_CREATED)) != 0
 	      || (o->flags & (SEC_ALLOC | SEC_LOAD | SEC_RELOC)) == 0)
 	    o->gc_mark = 1;
-	  else if (CONST_STRNEQ (o->name, ".idata")
-		   || CONST_STRNEQ (o->name, ".pdata")
-		   || CONST_STRNEQ (o->name, ".xdata")
-		   || CONST_STRNEQ (o->name, ".rsrc"))
+	  else if (startswith (o->name, ".idata")
+		   || startswith (o->name, ".pdata")
+		   || startswith (o->name, ".xdata")
+		   || startswith (o->name, ".rsrc"))
 	    o->gc_mark = 1;
 
 	  if (o->gc_mark)
@@ -3109,9 +3109,9 @@ bfd_coff_gc_sections (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       for (o = sub->sections; o != NULL; o = o->next)
 	{
 	  if (((o->flags & (SEC_EXCLUDE | SEC_KEEP)) == SEC_KEEP
-	       || CONST_STRNEQ (o->name, ".vectors")
-	       || CONST_STRNEQ (o->name, ".ctors")
-	       || CONST_STRNEQ (o->name, ".dtors"))
+	       || startswith (o->name, ".vectors")
+	       || startswith (o->name, ".ctors")
+	       || startswith (o->name, ".dtors"))
 	      && !o->gc_mark)
 	    {
 	      if (!_bfd_coff_gc_mark (info, o, _bfd_coff_gc_mark_hook))

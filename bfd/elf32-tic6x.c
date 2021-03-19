@@ -1938,8 +1938,8 @@ elf32_tic6x_gc_mark_extra_sections (struct bfd_link_info *info,
 static bfd_boolean
 is_tic6x_elf_unwind_section_name (const char *name)
 {
-  return (CONST_STRNEQ (name, ELF_STRING_C6000_unwind)
-	  || CONST_STRNEQ (name, ELF_STRING_C6000_unwind_once));
+  return (startswith (name, ELF_STRING_C6000_unwind)
+	  || startswith (name, ELF_STRING_C6000_unwind_once));
 }
 
 
@@ -3284,7 +3284,7 @@ elf32_tic6x_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	  if (s == htab->elf.splt && s->size > 0)
 	    s->size = (s->size + 31) & ~(bfd_vma)31;
 	}
-      else if (CONST_STRNEQ (bfd_section_name (s), ".rela"))
+      else if (startswith (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0
 	      && s != htab->elf.srelplt)

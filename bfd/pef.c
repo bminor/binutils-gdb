@@ -219,7 +219,7 @@ bfd_pef_print_symbol (bfd *abfd,
     default:
       bfd_print_symbol_vandf (abfd, (void *) file, symbol);
       fprintf (file, " %-5s %s", symbol->section->name, symbol->name);
-      if (CONST_STRNEQ (symbol->name, "__traceback_"))
+      if (startswith (symbol->name, "__traceback_"))
 	{
 	  unsigned char *buf;
 	  size_t offset = symbol->value + 4;

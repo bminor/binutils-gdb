@@ -835,7 +835,7 @@ static void
 pex64_print_all_pdata_sections (bfd *abfd, asection *pdata, void *arg)
 {
   struct pex64_paps *paps = arg;
-  if (CONST_STRNEQ (pdata->name, ".pdata"))
+  if (startswith (pdata->name, ".pdata"))
     {
       if (pex64_bfd_print_pdata_section (abfd, paps->obj, pdata))
 	paps->pdata_count++;

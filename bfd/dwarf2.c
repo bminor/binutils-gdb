@@ -4234,7 +4234,7 @@ find_debug_info (bfd *abfd, const struct dwarf_debug_section *debug_sections,
 	}
 
       for (msec = abfd->sections; msec != NULL; msec = msec->next)
-	if (CONST_STRNEQ (msec->name, GNU_LINKONCE_INFO))
+	if (startswith (msec->name, GNU_LINKONCE_INFO))
 	  return msec;
 
       return NULL;
@@ -4250,7 +4250,7 @@ find_debug_info (bfd *abfd, const struct dwarf_debug_section *debug_sections,
       if (look != NULL && strcmp (msec->name, look) == 0)
 	return msec;
 
-      if (CONST_STRNEQ (msec->name, GNU_LINKONCE_INFO))
+      if (startswith (msec->name, GNU_LINKONCE_INFO))
 	return msec;
     }
 
@@ -4375,7 +4375,7 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 	    continue;
 
 	  is_debug_info = (strcmp (sect->name, debug_info_name) == 0
-			   || CONST_STRNEQ (sect->name, GNU_LINKONCE_INFO));
+			   || startswith (sect->name, GNU_LINKONCE_INFO));
 
 	  if (!((sect->flags & SEC_ALLOC) != 0 && abfd == orig_bfd)
 	      && !is_debug_info)
@@ -4419,7 +4419,7 @@ place_sections (bfd *orig_bfd, struct dwarf2_debug *stash)
 		continue;
 
 	      is_debug_info = (strcmp (sect->name, debug_info_name) == 0
-			       || CONST_STRNEQ (sect->name, GNU_LINKONCE_INFO));
+			       || startswith (sect->name, GNU_LINKONCE_INFO));
 
 	      if (!((sect->flags & SEC_ALLOC) != 0 && abfd == orig_bfd)
 		  && !is_debug_info)

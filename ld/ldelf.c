@@ -321,7 +321,7 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
 	      struct bfd_link_needed_list *l;
 
 	      for (l = needs; l != NULL; l = l->next)
-		if (CONST_STRNEQ (l->name, "libc.so"))
+		if (startswith (l->name, "libc.so"))
 		  break;
 	      if (l == NULL)
 		{
@@ -837,7 +837,7 @@ ldelf_parse_ld_so_conf (struct ldelf_ld_so_conf *info, const char *filename)
       if (p[0] == '\0')
 	continue;
 
-      if (CONST_STRNEQ (p, "include") && (p[7] == ' ' || p[7] == '\t'))
+      if (startswith (p, "include") && (p[7] == ' ' || p[7] == '\t'))
 	{
 	  char *dir, c;
 	  p += 8;
@@ -1089,7 +1089,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 
 	      if (bfd_is_abs_section (s->output_section))
 		continue;
-	      if (CONST_STRNEQ (name, ".eh_frame_entry"))
+	      if (startswith (name, ".eh_frame_entry"))
 		type = COMPACT_EH_HDR;
 	      else if (strcmp (name, ".eh_frame") == 0 && s->size > 8)
 		type = DWARF2_EH_HDR;
@@ -1820,7 +1820,7 @@ output_rel_find (int isdyn, int rela)
        lookup = lookup->next)
     {
       if (lookup->constraint >= 0
-	  && CONST_STRNEQ (lookup->name, ".rel"))
+	  && startswith (lookup->name, ".rel"))
 	{
 	  int lookrela = lookup->name[4] == 'a';
 
@@ -1971,7 +1971,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 	  default:
 	    break;
 	  }
-      else if (CONST_STRNEQ (secname, ".rel"))
+      else if (startswith (secname, ".rel"))
 	{
 	  secname = secname[4] == 'a' ? ".rela.dyn" : ".rel.dyn";
 	  isdyn = 1;
@@ -2084,7 +2084,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
   /* If this is a final link, then always put .gnu.warning.SYMBOL
      sections into the .text section to get them out of the way.  */
   if (bfd_link_executable (&link_info)
-      && CONST_STRNEQ (s->name, ".gnu.warning.")
+      && startswith (s->name, ".gnu.warning.")
       && hold[orphan_text].os != NULL)
     {
       os = hold[orphan_text].os;
@@ -2124,7 +2124,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
   else if ((flags & SEC_LOAD) != 0
 	   && (elfinput
 	       ? sh_type == SHT_NOTE
-	       : CONST_STRNEQ (secname, ".note")))
+	       : startswith (secname, ".note")))
     place = &hold[orphan_interp];
   else if ((flags & (SEC_LOAD | SEC_HAS_CONTENTS | SEC_THREAD_LOCAL)) == 0)
     place = &hold[orphan_bss];
@@ -2137,7 +2137,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
   else if ((flags & SEC_LOAD) != 0
 	   && (elfinput
 	       ? sh_type == SHT_RELA || sh_type == SHT_REL
-	       : CONST_STRNEQ (secname, ".rel")))
+	       : startswith (secname, ".rel")))
     place = &hold[orphan_rel];
   else if ((flags & SEC_CODE) == 0)
     place = &hold[orphan_rodata];

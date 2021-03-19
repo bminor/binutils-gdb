@@ -1186,7 +1186,7 @@ lang_add_input_file (const char *name,
 		     const char *target)
 {
   if (name != NULL
-      && (*name == '=' || CONST_STRNEQ (name, "$SYSROOT")))
+      && (*name == '=' || startswith (name, "$SYSROOT")))
     {
       lang_input_statement_type *ret;
       char *sysrooted_name

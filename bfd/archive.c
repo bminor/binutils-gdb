@@ -1175,12 +1175,12 @@ bfd_slurp_armap (bfd *abfd)
   if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
     return FALSE;
 
-  if (CONST_STRNEQ (nextname, "__.SYMDEF       ")
-      || CONST_STRNEQ (nextname, "__.SYMDEF/      ")) /* Old Linux archives.  */
+  if (startswith (nextname, "__.SYMDEF       ")
+      || startswith (nextname, "__.SYMDEF/      ")) /* Old Linux archives.  */
     return do_slurp_bsd_armap (abfd);
-  else if (CONST_STRNEQ (nextname, "/               "))
+  else if (startswith (nextname, "/               "))
     return do_slurp_coff_armap (abfd);
-  else if (CONST_STRNEQ (nextname, "/SYM64/         "))
+  else if (startswith (nextname, "/SYM64/         "))
     {
       /* 64bit (Irix 6) archive.  */
 #ifdef BFD64
@@ -1190,7 +1190,7 @@ bfd_slurp_armap (bfd *abfd)
       return FALSE;
 #endif
     }
-  else if (CONST_STRNEQ (nextname, "#1/20           "))
+  else if (startswith (nextname, "#1/20           "))
     {
       /* Mach-O has a special name for armap when the map is sorted by name.
 	 However because this name has a space it is slightly more difficult
@@ -1206,8 +1206,8 @@ bfd_slurp_armap (bfd *abfd)
       if (bfd_seek (abfd, -(file_ptr) (sizeof (hdr) + 20), SEEK_CUR) != 0)
 	return FALSE;
       extname[20] = 0;
-      if (CONST_STRNEQ (extname, "__.SYMDEF SORTED")
-	  || CONST_STRNEQ (extname, "__.SYMDEF"))
+      if (startswith (extname, "__.SYMDEF SORTED")
+	  || startswith (extname, "__.SYMDEF"))
 	return do_slurp_bsd_armap (abfd);
     }
 
@@ -1246,8 +1246,8 @@ _bfd_slurp_extended_name_table (bfd *abfd)
       if (bfd_seek (abfd, (file_ptr) -16, SEEK_CUR) != 0)
 	return FALSE;
 
-      if (! CONST_STRNEQ (nextname, "ARFILENAMES/    ")
-	  && ! CONST_STRNEQ (nextname, "//              "))
+      if (! startswith (nextname, "ARFILENAMES/    ")
+	  && ! startswith (nextname, "//              "))
 	{
 	  bfd_ardata (abfd)->extended_names = NULL;
 	  bfd_ardata (abfd)->extended_names_size = 0;

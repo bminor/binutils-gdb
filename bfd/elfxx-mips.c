@@ -1030,9 +1030,9 @@ static bfd *reldyn_sorting_bfd;
 #define CALL_STUB ".mips16.call."
 #define CALL_FP_STUB ".mips16.call.fp."
 
-#define FN_STUB_P(name) CONST_STRNEQ (name, FN_STUB)
-#define CALL_STUB_P(name) CONST_STRNEQ (name, CALL_STUB)
-#define CALL_FP_STUB_P(name) CONST_STRNEQ (name, CALL_FP_STUB)
+#define FN_STUB_P(name) startswith (name, FN_STUB)
+#define CALL_STUB_P(name) startswith (name, CALL_STUB)
+#define CALL_FP_STUB_P(name) startswith (name, CALL_FP_STUB)
 
 /* The format of the first PLT entry in an O32 executable.  */
 static const bfd_vma mips_o32_exec_plt0_entry[] =
@@ -7411,7 +7411,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_GPTAB:
-      if (! CONST_STRNEQ (name, ".gptab."))
+      if (! startswith (name, ".gptab."))
 	return FALSE;
       break;
     case SHT_MIPS_UCODE:
@@ -7434,7 +7434,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_CONTENT:
-      if (! CONST_STRNEQ (name, ".MIPS.content"))
+      if (! startswith (name, ".MIPS.content"))
 	return FALSE;
       break;
     case SHT_MIPS_OPTIONS:
@@ -7447,8 +7447,8 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
       flags = (SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_SIZE);
       break;
     case SHT_MIPS_DWARF:
-      if (! CONST_STRNEQ (name, ".debug_")
-	  && ! CONST_STRNEQ (name, ".zdebug_"))
+      if (! startswith (name, ".debug_")
+	  && ! startswith (name, ".zdebug_"))
 	return FALSE;
       break;
     case SHT_MIPS_SYMBOL_LIB:
@@ -7456,8 +7456,8 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_EVENTS:
-      if (! CONST_STRNEQ (name, ".MIPS.events")
-	  && ! CONST_STRNEQ (name, ".MIPS.post_rel"))
+      if (! startswith (name, ".MIPS.events")
+	  && ! startswith (name, ".MIPS.post_rel"))
 	return FALSE;
       break;
     case SHT_MIPS_XHASH:
@@ -7594,7 +7594,7 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
     }
   else if (strcmp (name, ".conflict") == 0)
     hdr->sh_type = SHT_MIPS_CONFLICT;
-  else if (CONST_STRNEQ (name, ".gptab."))
+  else if (startswith (name, ".gptab."))
     {
       hdr->sh_type = SHT_MIPS_GPTAB;
       hdr->sh_entsize = sizeof (Elf32_External_gptab);
@@ -7651,7 +7651,7 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_type = SHT_MIPS_IFACE;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
-  else if (CONST_STRNEQ (name, ".MIPS.content"))
+  else if (startswith (name, ".MIPS.content"))
     {
       hdr->sh_type = SHT_MIPS_CONTENT;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
@@ -7663,20 +7663,20 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_entsize = 1;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
-  else if (CONST_STRNEQ (name, ".MIPS.abiflags"))
+  else if (startswith (name, ".MIPS.abiflags"))
     {
       hdr->sh_type = SHT_MIPS_ABIFLAGS;
       hdr->sh_entsize = sizeof (Elf_External_ABIFlags_v0);
     }
-  else if (CONST_STRNEQ (name, ".debug_")
-	   || CONST_STRNEQ (name, ".zdebug_"))
+  else if (startswith (name, ".debug_")
+	   || startswith (name, ".zdebug_"))
     {
       hdr->sh_type = SHT_MIPS_DWARF;
 
       /* Irix facilities such as libexc expect a single .debug_frame
 	 per executable, the system ones have NOSTRIP set and the linker
 	 doesn't merge sections with different flags so ...  */
-      if (SGI_COMPAT (abfd) && CONST_STRNEQ (name, ".debug_frame"))
+      if (SGI_COMPAT (abfd) && startswith (name, ".debug_frame"))
 	hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
   else if (strcmp (name, ".MIPS.symlib") == 0)
@@ -7685,8 +7685,8 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       /* The sh_link and sh_info fields are set in
 	 final_write_processing.  */
     }
-  else if (CONST_STRNEQ (name, ".MIPS.events")
-	   || CONST_STRNEQ (name, ".MIPS.post_rel"))
+  else if (startswith (name, ".MIPS.events")
+	   || startswith (name, ".MIPS.post_rel"))
     {
       hdr->sh_type = SHT_MIPS_EVENTS;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
@@ -10007,7 +10007,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
       if ((s->flags & SEC_LINKER_CREATED) == 0)
 	continue;
 
-      if (CONST_STRNEQ (name, ".rel"))
+      if (startswith (name, ".rel"))
 	{
 	  if (s->size != 0)
 	    {
@@ -10044,14 +10044,14 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	}
       else if (bfd_link_executable (info)
 	       && ! mips_elf_hash_table (info)->use_rld_obj_head
-	       && CONST_STRNEQ (name, ".rld_map"))
+	       && startswith (name, ".rld_map"))
 	{
 	  /* We add a room for __rld_map.  It will be filled in by the
 	     rtld to contain a pointer to the _r_debug structure.  */
 	  s->size += MIPS_ELF_RLD_MAP_SIZE (output_bfd);
 	}
       else if (SGI_COMPAT (output_bfd)
-	       && CONST_STRNEQ (name, ".compact_rel"))
+	       && startswith (name, ".compact_rel"))
 	s->size += mips_elf_hash_table (info)->compact_rel_size;
       else if (s == htab->root.splt)
 	{
@@ -10063,7 +10063,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	      && s->size > 0)
 	    s->size += 4;
 	}
-      else if (! CONST_STRNEQ (name, ".init")
+      else if (! startswith (name, ".init")
 	       && s != htab->root.sgot
 	       && s != htab->root.sgotplt
 	       && s != htab->sstubs
@@ -12422,7 +12422,7 @@ _bfd_mips_final_write_processing (bfd *abfd)
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_section_name ((*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL
-		      && CONST_STRNEQ (name, ".gptab."));
+		      && startswith (name, ".gptab."));
 	  sec = bfd_get_section_by_name (abfd, name + sizeof ".gptab" - 1);
 	  BFD_ASSERT (sec != NULL);
 	  (*hdrpp)->sh_info = elf_section_data (sec)->this_idx;
@@ -12432,7 +12432,7 @@ _bfd_mips_final_write_processing (bfd *abfd)
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_section_name ((*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL
-		      && CONST_STRNEQ (name, ".MIPS.content"));
+		      && startswith (name, ".MIPS.content"));
 	  sec = bfd_get_section_by_name (abfd,
 					 name + sizeof ".MIPS.content" - 1);
 	  BFD_ASSERT (sec != NULL);
@@ -12452,12 +12452,12 @@ _bfd_mips_final_write_processing (bfd *abfd)
 	  BFD_ASSERT ((*hdrpp)->bfd_section != NULL);
 	  name = bfd_section_name ((*hdrpp)->bfd_section);
 	  BFD_ASSERT (name != NULL);
-	  if (CONST_STRNEQ (name, ".MIPS.events"))
+	  if (startswith (name, ".MIPS.events"))
 	    sec = bfd_get_section_by_name (abfd,
 					   name + sizeof ".MIPS.events" - 1);
 	  else
 	    {
-	      BFD_ASSERT (CONST_STRNEQ (name, ".MIPS.post_rel"));
+	      BFD_ASSERT (startswith (name, ".MIPS.post_rel"));
 	      sec = bfd_get_section_by_name (abfd,
 					     (name
 					      + sizeof ".MIPS.post_rel" - 1));
@@ -15085,7 +15085,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  mdebug_sec = o;
 	}
 
-      if (CONST_STRNEQ (o->name, ".gptab."))
+      if (startswith (o->name, ".gptab."))
 	{
 	  const char *subname;
 	  unsigned int c;

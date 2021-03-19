@@ -4803,12 +4803,12 @@ som_slurp_symbol_table (bfd *abfd)
 	  && sym->symbol.name[strlen (sym->symbol.name) - 1] == '$'
 	  && !strcmp (sym->symbol.name, sym->symbol.section->name))
 	sym->symbol.flags |= BSF_SECTION_SYM;
-      else if (CONST_STRNEQ (sym->symbol.name, "L$0\002"))
+      else if (startswith (sym->symbol.name, "L$0\002"))
 	{
 	  sym->symbol.flags |= BSF_SECTION_SYM;
 	  sym->symbol.name = sym->symbol.section->name;
 	}
-      else if (CONST_STRNEQ (sym->symbol.name, "L$0\001"))
+      else if (startswith (sym->symbol.name, "L$0\001"))
 	sym->symbol.flags |= BSF_DEBUGGING;
 
       /* Note increment at bottom of loop, since we skip some symbols
@@ -6186,7 +6186,7 @@ som_slurp_armap (bfd *abfd)
     return FALSE;
 
   /* For archives without .o files there is no symbol table.  */
-  if (! CONST_STRNEQ (nextname, "/               "))
+  if (! startswith (nextname, "/               "))
     {
       abfd->has_armap = FALSE;
       return TRUE;

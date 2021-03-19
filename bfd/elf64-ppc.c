@@ -10226,7 +10226,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	    /* Not sized yet.  */
 	    continue;
 	}
-      else if (CONST_STRNEQ (s->name, ".rela"))
+      else if (startswith (s->name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {

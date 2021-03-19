@@ -893,9 +893,9 @@ is_unwind_section_name (bfd *abfd, const char *name)
       && !strcmp (name, ELF_STRING_ia64_unwind_hdr))
     return FALSE;
 
-  return ((CONST_STRNEQ (name, ELF_STRING_ia64_unwind)
-	   && ! CONST_STRNEQ (name, ELF_STRING_ia64_unwind_info))
-	  || CONST_STRNEQ (name, ELF_STRING_ia64_unwind_once));
+  return ((startswith (name, ELF_STRING_ia64_unwind)
+	   && ! startswith (name, ELF_STRING_ia64_unwind_info))
+	  || startswith (name, ELF_STRING_ia64_unwind_once));
 }
 
 /* Handle an IA-64 specific section when reading an object file.  This
@@ -3161,7 +3161,7 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 	  if (strcmp (name, ".got.plt") == 0)
 	    strip = FALSE;
-	  else if (CONST_STRNEQ (name, ".rel"))
+	  else if (startswith (name, ".rel"))
 	    {
 	      if (!strip)
 		{
@@ -4859,7 +4859,7 @@ elfNN_ia64_object_p (bfd *abfd)
       if (elf_sec_group (sec) == NULL
 	  && ((sec->flags & (SEC_LINK_ONCE | SEC_CODE | SEC_GROUP))
 	      == (SEC_LINK_ONCE | SEC_CODE))
-	  && CONST_STRNEQ (sec->name, ".gnu.linkonce.t."))
+	  && startswith (sec->name, ".gnu.linkonce.t."))
 	{
 	  name = sec->name + 16;
 

@@ -548,12 +548,12 @@ md_parse_option (int c, const char *arg)
 	  {
 	    if (sparc_arch_size == 32)
 	      {
-		if (CONST_STRNEQ (*l, "elf32-sparc"))
+		if (startswith (*l, "elf32-sparc"))
 		  break;
 	      }
 	    else
 	      {
-		if (CONST_STRNEQ (*l, "elf64-sparc"))
+		if (startswith (*l, "elf64-sparc"))
 		  break;
 	      }
 	  }

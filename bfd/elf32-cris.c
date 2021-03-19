@@ -3593,7 +3593,7 @@ elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  s->size += htab->dtpmod_refcount != 0
 	    ? 8 : 0;
 	}
-      else if (CONST_STRNEQ (name, ".rela"))
+      else if (startswith (name, ".rela"))
 	{
 	  if (strcmp (name, ".rela.got") == 0
 	      && htab->dtpmod_refcount != 0
@@ -3612,7 +3612,7 @@ elf_cris_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".got")
+      else if (! startswith (name, ".got")
 	       && strcmp (name, ".dynbss") != 0
 	       && s != htab->root.sdynrelro)
 	{

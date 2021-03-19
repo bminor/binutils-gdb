@@ -12708,7 +12708,7 @@ process_lto_symbol_tables (Filedata * filedata)
        i < filedata->file_header.e_shnum;
        i++, section++)
     if (SECTION_NAME_VALID (section)
-	&& CONST_STRNEQ (SECTION_NAME (section), ".gnu.lto_.symtab."))
+	&& startswith (SECTION_NAME (section), ".gnu.lto_.symtab."))
       res &= display_lto_symtab (filedata, section);
 
   return res;

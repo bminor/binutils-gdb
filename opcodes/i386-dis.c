@@ -9413,38 +9413,38 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   for (p = info->disassembler_options; p != NULL; )
     {
-      if (CONST_STRNEQ (p, "amd64"))
+      if (startswith (p, "amd64"))
 	isa64 = amd64;
-      else if (CONST_STRNEQ (p, "intel64"))
+      else if (startswith (p, "intel64"))
 	isa64 = intel64;
-      else if (CONST_STRNEQ (p, "x86-64"))
+      else if (startswith (p, "x86-64"))
 	{
 	  address_mode = mode_64bit;
 	  priv.orig_sizeflag |= AFLAG | DFLAG;
 	}
-      else if (CONST_STRNEQ (p, "i386"))
+      else if (startswith (p, "i386"))
 	{
 	  address_mode = mode_32bit;
 	  priv.orig_sizeflag |= AFLAG | DFLAG;
 	}
-      else if (CONST_STRNEQ (p, "i8086"))
+      else if (startswith (p, "i8086"))
 	{
 	  address_mode = mode_16bit;
 	  priv.orig_sizeflag &= ~(AFLAG | DFLAG);
 	}
-      else if (CONST_STRNEQ (p, "intel"))
+      else if (startswith (p, "intel"))
 	{
 	  intel_syntax = 1;
-	  if (CONST_STRNEQ (p + 5, "-mnemonic"))
+	  if (startswith (p + 5, "-mnemonic"))
 	    intel_mnemonic = 1;
 	}
-      else if (CONST_STRNEQ (p, "att"))
+      else if (startswith (p, "att"))
 	{
 	  intel_syntax = 0;
-	  if (CONST_STRNEQ (p + 3, "-mnemonic"))
+	  if (startswith (p + 3, "-mnemonic"))
 	    intel_mnemonic = 0;
 	}
-      else if (CONST_STRNEQ (p, "addr"))
+      else if (startswith (p, "addr"))
 	{
 	  if (address_mode == mode_64bit)
 	    {
@@ -9461,14 +9461,14 @@ print_insn (bfd_vma pc, disassemble_info *info)
 		priv.orig_sizeflag |= AFLAG;
 	    }
 	}
-      else if (CONST_STRNEQ (p, "data"))
+      else if (startswith (p, "data"))
 	{
 	  if (p[4] == '1' && p[5] == '6')
 	    priv.orig_sizeflag &= ~DFLAG;
 	  else if (p[4] == '3' && p[5] == '2')
 	    priv.orig_sizeflag |= DFLAG;
 	}
-      else if (CONST_STRNEQ (p, "suffix"))
+      else if (startswith (p, "suffix"))
 	priv.orig_sizeflag |= SUFFIX_ALWAYS;
 
       p = strchr (p, ',');

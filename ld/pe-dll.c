@@ -545,7 +545,7 @@ pe_dll_add_excludes (const char *new_excludes, const exclude_type type)
 static bfd_boolean
 is_import (const char* n)
 {
-  return (CONST_STRNEQ (n, "__imp_"));
+  return (startswith (n, "__imp_"));
 }
 
 /* abfd is a bfd containing n (or NULL)
@@ -3531,7 +3531,7 @@ pe_implied_import_dll (const char *filename)
 
       /* Skip unwanted symbols, which are
 	 exported in buggy auto-import releases.  */
-      if (! CONST_STRNEQ (erva + name_rva, "__nm_"))
+      if (! startswith (erva + name_rva, "__nm_"))
 	{
 	  int is_dup = 0;
 	  /* is_data is true if the address is in the data, rdata or bss

@@ -786,7 +786,7 @@ print_with_operands (const struct cris_opcode *opcodep,
      better way).  */
   if (opcodep->name[0] == 'j')
     {
-      if (CONST_STRNEQ (opcodep->name, "jsr"))
+      if (startswith (opcodep->name, "jsr"))
 	/* It's "jsr" or "jsrc".  */
 	info->insn_type = dis_jsr;
       else
@@ -1360,16 +1360,16 @@ print_with_operands (const struct cris_opcode *opcodep,
      itself or in a "move.d const,rN, sub.d rN,rM"-like sequence.  */
   if (TRACE_CASE && case_offset_counter == 0)
     {
-      if (CONST_STRNEQ (opcodep->name, "sub"))
+      if (startswith (opcodep->name, "sub"))
 	case_offset = last_immediate;
 
       /* It could also be an "add", if there are negative case-values.  */
-      else if (CONST_STRNEQ (opcodep->name, "add"))
+      else if (startswith (opcodep->name, "add"))
 	/* The first case is the negated operand to the add.  */
 	case_offset = -last_immediate;
 
       /* A bound insn will tell us the number of cases.  */
-      else if (CONST_STRNEQ (opcodep->name, "bound"))
+      else if (startswith (opcodep->name, "bound"))
 	no_of_case_offsets = last_immediate + 1;
 
       /* A jump or jsr or branch breaks the chain of insns for a

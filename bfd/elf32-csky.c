@@ -2045,7 +2045,7 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (htab->elf.hplt != NULL)
 	    strip_section = FALSE;
 	}
-      else if (CONST_STRNEQ (bfd_section_name (s), ".rel") )
+      else if (startswith (bfd_section_name (s), ".rel") )
 	{
 	  if (s->size != 0 )
 	    relocs = TRUE;

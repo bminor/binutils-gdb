@@ -1691,7 +1691,7 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 of the dynobj section names depend upon the input files.  */
       name = bfd_section_name (s);
 
-      if (CONST_STRNEQ (name, ".rela"))
+      if (startswith (name, ".rela"))
 	{
 	  if (s->size != 0)
 	    {
@@ -1705,8 +1705,8 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      s->reloc_count = 0;
 	    }
 	}
-      else if (! CONST_STRNEQ (name, ".plt.")
-	       && ! CONST_STRNEQ (name, ".got.plt.")
+      else if (! startswith (name, ".plt.")
+	       && ! startswith (name, ".got.plt.")
 	       && strcmp (name, ".got") != 0
 	       && strcmp (name, ".plt") != 0
 	       && strcmp (name, ".got.plt") != 0
@@ -11144,8 +11144,8 @@ xtensa_is_property_section (asection *sec)
 static bfd_boolean
 xtensa_is_insntable_section (asection *sec)
 {
-  if (CONST_STRNEQ (sec->name, XTENSA_INSN_SEC_NAME)
-      || CONST_STRNEQ (sec->name, ".gnu.linkonce.x."))
+  if (startswith (sec->name, XTENSA_INSN_SEC_NAME)
+      || startswith (sec->name, ".gnu.linkonce.x."))
     return TRUE;
 
   return FALSE;
@@ -11155,8 +11155,8 @@ xtensa_is_insntable_section (asection *sec)
 static bfd_boolean
 xtensa_is_littable_section (asection *sec)
 {
-  if (CONST_STRNEQ (sec->name, XTENSA_LIT_SEC_NAME)
-      || CONST_STRNEQ (sec->name, ".gnu.linkonce.p."))
+  if (startswith (sec->name, XTENSA_LIT_SEC_NAME)
+      || startswith (sec->name, ".gnu.linkonce.p."))
     return TRUE;
 
   return FALSE;
@@ -11166,8 +11166,8 @@ xtensa_is_littable_section (asection *sec)
 static bfd_boolean
 xtensa_is_proptable_section (asection *sec)
 {
-  if (CONST_STRNEQ (sec->name, XTENSA_PROP_SEC_NAME)
-      || CONST_STRNEQ (sec->name, ".gnu.linkonce.prop."))
+  if (startswith (sec->name, XTENSA_PROP_SEC_NAME)
+      || startswith (sec->name, ".gnu.linkonce.prop."))
     return TRUE;
 
   return FALSE;
@@ -11281,7 +11281,7 @@ xtensa_property_section_name (asection *sec, const char *base_name,
       suffix = sec->name + linkonce_len;
       /* For backward compatibility, replace "t." instead of inserting
 	 the new linkonce_kind (but not for "prop" sections).  */
-      if (CONST_STRNEQ (suffix, "t.") && linkonce_kind[1] == '.')
+      if (startswith (suffix, "t.") && linkonce_kind[1] == '.')
 	suffix += 2;
       strcat (prop_sec_name + linkonce_len, suffix);
     }
@@ -11396,7 +11396,7 @@ xtensa_callback_required_dependence (bfd *abfd,
   /* ".plt*" sections have no explicit relocations but they contain L32R
      instructions that reference the corresponding ".got.plt*" sections.  */
   if ((sec->flags & SEC_LINKER_CREATED) != 0
-      && CONST_STRNEQ (sec->name, ".plt"))
+      && startswith (sec->name, ".plt"))
     {
       asection *sgotplt;
 

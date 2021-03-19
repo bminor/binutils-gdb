@@ -536,7 +536,7 @@ wasm_compute_custom_section_file_position (bfd *abfd,
   if (idx != 0)
     return;
 
-  if (CONST_STRNEQ (asect->name, WASM_SECTION_PREFIX))
+  if (startswith (asect->name, WASM_SECTION_PREFIX))
     {
       const char *name = asect->name + strlen (WASM_SECTION_PREFIX);
       bfd_size_type payload_len = asect->size;

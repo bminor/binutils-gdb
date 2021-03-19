@@ -131,7 +131,7 @@ ctor_prio (const char *name)
   while (*name == '_')
     ++name;
 
-  if (!CONST_STRNEQ (name, "GLOBAL_"))
+  if (!startswith (name, "GLOBAL_"))
     return -1;
 
   name += sizeof "GLOBAL_" - 1;
