@@ -1213,7 +1213,7 @@ read_attribute_value (struct attribute *  attr,
     case DW_FORM_ref_addr:
       /* DW_FORM_ref_addr is an address in DWARF2, and an offset in
 	 DWARF3.  */
-      if (unit->version == 3 || unit->version == 4)
+      if (unit->version >= 3)
 	{
 	  if (unit->offset_size == 4)
 	    attr->u.val = read_4_bytes (unit->abfd, info_ptr, info_ptr_end);
