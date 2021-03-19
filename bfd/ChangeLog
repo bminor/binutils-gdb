@@ -1,5 +1,16 @@
 2021-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/27590
+	* elf.c (_bfd_elf_make_section_from_shdr): Treate
+	.gnu.debuglto_.debug_ section as debugging section unless it is
+	marked with SHF_EXCLUDE.
+	* elflink.c (elf_create_symbuf): Revert commit 994b2513281.
+	(bfd_elf_match_symbols_in_sections): Ignore section symbols when
+	matching non-debugging sections or linkonce section with comdat
+	section.
+
+2021-03-18  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/27587
 	* dwarf2.c (read_attribute_value): Check version >= 3 for
 	DW_FORM_ref_addr.

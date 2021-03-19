@@ -1085,6 +1085,10 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       if (name [0] == '.')
 	{
 	  if (strncmp (name, ".debug", 6) == 0
+	      /* NB: Treate .gnu.debuglto_.debug_ section as debugging
+		 section unless it is marked with SHF_EXCLUDE.  */
+	      || ((flags & SEC_EXCLUDE) == 0
+		  && strncmp (name, ".gnu.debuglto_.debug_", 21) == 0)
 	      || strncmp (name, ".gnu.linkonce.wi.", 17) == 0
 	      || strncmp (name, ".zdebug", 7) == 0)
 	    flags |= SEC_DEBUGGING | SEC_ELF_OCTETS;

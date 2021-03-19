@@ -8135,12 +8135,8 @@ elf_create_symbuf (size_t symcount, Elf_Internal_Sym *isymbuf)
   if (indbuf == NULL)
     return NULL;
 
-  /* NB: When checking if 2 sections define the same set of local and
-     global symbols, ignore both undefined and section symbols in the
-     symbol table.  */
   for (ind = indbuf, i = 0; i < symcount; i++)
-    if (isymbuf[i].st_shndx != SHN_UNDEF
-	&& ELF_ST_TYPE (isymbuf[i].st_info) != STT_SECTION)
+    if (isymbuf[i].st_shndx != SHN_UNDEF)
       *ind++ = &isymbuf[i];
   indbufend = ind;
 
@@ -8203,9 +8199,10 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
   struct elf_symbuf_head *ssymbuf1, *ssymbuf2;
   Elf_Internal_Sym *isym, *isymend;
   struct elf_symbol *symtable1 = NULL, *symtable2 = NULL;
-  size_t count1, count2, i;
+  size_t count1, count2, sec_count1, sec_count2, i;
   unsigned int shndx1, shndx2;
   bfd_boolean result;
+  bfd_boolean ignore_section_symbol_p;
 
   bfd1 = sec1->owner;
   bfd2 = sec2->owner;
@@ -8238,6 +8235,13 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
   isymbuf2 = NULL;
   ssymbuf1 = (struct elf_symbuf_head *) elf_tdata (bfd1)->symbuf;
   ssymbuf2 = (struct elf_symbuf_head *) elf_tdata (bfd2)->symbuf;
+
+  /* Ignore section symbols only when matching non-debugging sections
+     or linkonce section with comdat section.  */
+  ignore_section_symbol_p
+    = ((sec1->flags & SEC_DEBUGGING) == 0
+       || ((elf_section_flags (sec1) & SHF_GROUP)
+	   != (elf_section_flags (sec2) & SHF_GROUP)));
 
   if (ssymbuf1 == NULL)
     {
@@ -8278,6 +8282,7 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
       hi = ssymbuf1->count;
       ssymbuf1++;
       count1 = 0;
+      sec_count1 = 0;
       while (lo < hi)
 	{
 	  mid = (lo + hi) / 2;
@@ -8292,11 +8297,19 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 	      break;
 	    }
 	}
+      if (ignore_section_symbol_p)
+	{
+	  for (i = 0; i < count1; i++)
+	    if (ELF_ST_TYPE (ssymbuf1->ssym[i].st_info) == STT_SECTION)
+	      sec_count1++;
+	  count1 -= sec_count1;
+	}
 
       lo = 0;
       hi = ssymbuf2->count;
       ssymbuf2++;
       count2 = 0;
+      sec_count2 = 0;
       while (lo < hi)
 	{
 	  mid = (lo + hi) / 2;
@@ -8311,6 +8324,13 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 	      break;
 	    }
 	}
+      if (ignore_section_symbol_p)
+	{
+	  for (i = 0; i < count2; i++)
+	    if (ELF_ST_TYPE (ssymbuf2->ssym[i].st_info) == STT_SECTION)
+	      sec_count2++;
+	  count2 -= sec_count2;
+	}
 
       if (count1 == 0 || count2 == 0 || count1 != count2)
 	goto done;
@@ -8323,24 +8343,30 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 	goto done;
 
       symp = symtable1;
-      for (ssym = ssymbuf1->ssym, ssymend = ssym + count1;
-	   ssym < ssymend; ssym++, symp++)
-	{
-	  symp->u.ssym = ssym;
-	  symp->name = bfd_elf_string_from_elf_section (bfd1,
-							hdr1->sh_link,
-							ssym->st_name);
-	}
+      for (ssym = ssymbuf1->ssym, ssymend = ssym + count1 + sec_count1;
+	   ssym < ssymend; ssym++)
+	if (sec_count1 == 0
+	    || ELF_ST_TYPE (ssym->st_info) != STT_SECTION)
+	  {
+	    symp->u.ssym = ssym;
+	    symp->name = bfd_elf_string_from_elf_section (bfd1,
+							  hdr1->sh_link,
+							  ssym->st_name);
+	    symp++;
+	  }
 
       symp = symtable2;
-      for (ssym = ssymbuf2->ssym, ssymend = ssym + count2;
-	   ssym < ssymend; ssym++, symp++)
-	{
-	  symp->u.ssym = ssym;
-	  symp->name = bfd_elf_string_from_elf_section (bfd2,
-							hdr2->sh_link,
-							ssym->st_name);
-	}
+      for (ssym = ssymbuf2->ssym, ssymend = ssym + count2 + sec_count2;
+	   ssym < ssymend; ssym++)
+	if (sec_count2 == 0
+	    || ELF_ST_TYPE (ssym->st_info) != STT_SECTION)
+	  {
+	    symp->u.ssym = ssym;
+	    symp->name = bfd_elf_string_from_elf_section (bfd2,
+							  hdr2->sh_link,
+							  ssym->st_name);
+	    symp++;
+	  }
 
       /* Sort symbol by name.  */
       qsort (symtable1, count1, sizeof (struct elf_symbol),
@@ -8369,12 +8395,16 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
   /* Count definitions in the section.  */
   count1 = 0;
   for (isym = isymbuf1, isymend = isym + symcount1; isym < isymend; isym++)
-    if (isym->st_shndx == shndx1)
+    if (isym->st_shndx == shndx1
+	&& (!ignore_section_symbol_p
+	    || ELF_ST_TYPE (isym->st_info) != STT_SECTION))
       symtable1[count1++].u.isym = isym;
 
   count2 = 0;
   for (isym = isymbuf2, isymend = isym + symcount2; isym < isymend; isym++)
-    if (isym->st_shndx == shndx2)
+    if (isym->st_shndx == shndx2
+	&& (!ignore_section_symbol_p
+	    || ELF_ST_TYPE (isym->st_info) != STT_SECTION))
       symtable2[count2++].u.isym = isym;
 
   if (count1 == 0 || count2 == 0 || count1 != count2)
