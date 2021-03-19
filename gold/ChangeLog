@@ -1,8 +1,14 @@
-2021-03-19  Duncan Simpson <dr.duncan.p.simpson@gmail.com>
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/26585
+	* main.cc (main): Fix typo in previous patch.
+
+2021-03-19  Duncan Simpson  <dr.duncan.p.simpson@gmail.com>
 
 	PR gold/26585
 	* configure.ac: Add check for mallinfo2.
 	* configure: Regenerate.
+	* config.in: Regenerate from previous commit.
 	* main.cc (main): Use mallinfo2 if available.
 
 2021-03-19  Cary Coutant  <ccoutant@gmail.com>

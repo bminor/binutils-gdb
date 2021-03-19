@@ -291,7 +291,7 @@ main(int argc, char** argv)
               elapsed.wall / 1000, (elapsed.wall % 1000) * 1000);
 
 #if defined(HAVE_MALLINFO2)
-      struct mallinfo m = mallinfo2();
+      struct mallinfo2 m = mallinfo2();
       fprintf(stderr, _("%s: total space allocated by malloc: %lld bytes\n"),
 	      program_name, static_cast<long long>(m.arena));
 #elif defined(HAVE_MALLINFO)
