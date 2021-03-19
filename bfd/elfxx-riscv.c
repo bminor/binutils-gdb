@@ -1130,7 +1130,7 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"j",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"t",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"p",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"v",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
+  {"v",		ISA_SPEC_CLASS_DRAFT,		0, 10, 0 },		/* draft.  */
   {"n",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {NULL, 0, 0, 0, 0}
 };
@@ -1146,6 +1146,8 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zba",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbs",               ISA_SPEC_CLASS_DRAFT,           1, 0,  0 },
+  {"zvamo",		ISA_SPEC_CLASS_DRAFT,		0, 10, 0 },	/* draft.  */
+  {"zvlsseg",		ISA_SPEC_CLASS_DRAFT,		0, 10, 0 },	/* draft.  */
   {NULL, 0, 0, 0, 0}
 };
 

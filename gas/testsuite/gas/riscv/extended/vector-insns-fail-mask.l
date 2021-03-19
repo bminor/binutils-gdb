@@ -1,0 +1,10 @@
+.*: Assembler messages:
+.*Error: illegal operands vd cannot overlap vs2 `vmsbf.m v4,v4'
+.*Error: illegal operands vd cannot overlap vm `vmsbf.m v0,v4,v0.t'
+.*Error: illegal operands vd cannot overlap vs2 `vmsif.m v4,v4'
+.*Error: illegal operands vd cannot overlap vm `vmsif.m v0,v4,v0.t'
+.*Error: illegal operands vd cannot overlap vs2 `vmsof.m v4,v4'
+.*Error: illegal operands vd cannot overlap vm `vmsof.m v0,v4,v0.t'
+.*Error: illegal operands vd cannot overlap vs2 `viota.m v4,v4'
+.*Error: illegal operands vd cannot overlap vm `viota.m v0,v4,v0.t'
+.*Error: illegal operands vd cannot overlap vm `vid.v v0,v0.t'
