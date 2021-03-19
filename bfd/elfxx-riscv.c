@@ -1097,7 +1097,7 @@ static const char * const riscv_std_zxm_ext_strtab[] =
 
 static const char * const riscv_std_draft_ext_strtab[] =
 {
-  NULL
+  "zvamo", "zvlsseg", NULL
 };
 
 /* ISA extension prefixed name class.  Must define them in parsing order.  */
