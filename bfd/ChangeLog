@@ -1,7 +1,13 @@
+2021-03-20  Alan Modra  <amodra@gmail.com>
+
+	PR 27590
+	* elf.c (_bfd_elf_make_section_from_shdr): Remove SHF_EXCLUDE
+	test for .gnu.debuglto*.
+
 2021-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27590
-	* elf.c (_bfd_elf_make_section_from_shdr): Treate
+	* elf.c (_bfd_elf_make_section_from_shdr): Treat
 	.gnu.debuglto_.debug_ section as debugging section unless it is
 	marked with SHF_EXCLUDE.
 	* elflink.c (elf_create_symbuf): Revert commit 994b2513281.
