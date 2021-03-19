@@ -1,3 +1,9 @@
+2021-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27587
+	* dwarf2.c (read_attribute_value): Check version >= 3 for
+	DW_FORM_ref_addr.
+
 2021-03-02  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Don't optimise got

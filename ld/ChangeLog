@@ -1,3 +1,11 @@
+2021-03-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27587
+	* testsuite/ld-x86-64/pr27587.err: New file.
+	* testsuite/ld-x86-64/pr27587a.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pr27587b.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run PR ld/27587 test.
+
 2021-03-02  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/weak1.d,
