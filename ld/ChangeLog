@@ -1,3 +1,10 @@
+2021-03-19  Alan Modra  <amodra@gmail.com>
+
+	PR 27590
+	* testsuite/ld-elf/pr27590a.d: Match relocs using label, and
+	R_MIPS_NONE.
+	* testsuite/ld-elf/pr27590b.d: Likewise.
+
 2021-03-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27590
