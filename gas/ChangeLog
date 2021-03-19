@@ -1,3 +1,7 @@
+2021-03-19  Alan Modra  <amodra@gmail.com>
+
+	* app.c (do_scrub_chars): Don't lose spaces before a slash.
+
 2021-03-18  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (apply_fix): Handle 7-bit relocations correctly.
