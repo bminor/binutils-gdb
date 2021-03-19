@@ -141,12 +141,14 @@ gold_fallocate(int o, off_t offset, off_t len)
 
 #ifdef HAVE_FALLOCATE
   {
+    errno = 0;
     int err = ::fallocate(o, 0, offset, len);
-    if (err != EINVAL && err != ENOSYS && err != EOPNOTSUPP)
-      return err;
+    if (err < 0 && errno != EINVAL && errno != ENOSYS && errno != EOPNOTSUPP)
+      return errno;
   }
 #endif // defined(HAVE_FALLOCATE)
 
+  errno = 0;
   if (::ftruncate(o, offset + len) < 0)
     return errno;
   return 0;
