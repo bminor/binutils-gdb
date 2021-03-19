@@ -72,7 +72,6 @@ extern "C" {
    definition of strncmp is provided here.
 
    Note - these macros do NOT work if STR2 is not a constant string.  */
-#define CONST_STRNEQ(STR1,STR2) (strncmp ((STR1), (STR2), sizeof (STR2) - 1) == 0)
   /* strcpy() can have a similar problem, but since we know we are
      copying a constant string, we can use memcpy which will be faster
      since there is no need to check for a NUL byte inside STR.  We
@@ -571,6 +570,15 @@ struct ecoff_debug_swap;
 struct ecoff_extr;
 struct bfd_link_info;
 struct bfd_link_hash_entry;
+
+/* Return TRUE if the start of STR matches PREFIX, FALSE otherwise.  */
+
+static inline bfd_boolean
+startswith (const char *str, const char *prefix)
+{
+  return strncmp (str, prefix, strlen (prefix)) == 0;
+}
+#define CONST_STRNEQ(STR1,STR2) startswith (STR1, STR2)
 /* Extracted from init.c.  */
 unsigned int bfd_init (void);
 

@@ -32,6 +32,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include <limits.h>
 #include <ctype.h>
 #include <elf.h>

@@ -1,3 +1,7 @@
+2021-03-21  Alan Modra  <amodra@gmail.com>
+
+	* common-utils.h (startswith): Delete version now supplied by bfd.h.
+
 2021-02-05  Paul E. Murphy  <murphy@linux.ibm.com>
 
 	* common-defs.h (ATTRIBUTE_PRINTF): Rename

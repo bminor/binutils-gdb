@@ -116,16 +116,8 @@ std::string extract_string_maybe_quoted (const char **arg);
 
 extern const char *safe_strerror (int);
 
-/* Return true if the start of STRING matches PATTERN, false otherwise.  */
-
-static inline bool
-startswith (const char *string, const char *pattern)
-{
-  return strncmp (string, pattern, strlen (pattern)) == 0;
-}
-
-/* Version of startswith that takes string_view arguments.  See comment
-   above.  */
+/* Version of startswith that takes string_view arguments.  Return
+   true if the start of STRING matches PATTERN, false otherwise.  */
 
 static inline bool
 startswith (gdb::string_view string, gdb::string_view pattern)
