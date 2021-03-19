@@ -1,3 +1,8 @@
+2021-03-19  Kevin Buettner  <kevinb@redhat.com>
+
+	* lib/gdbserver-support.exp (gdbserver_exit): Use the
+	"-nowait" flag when waiting for gdbserver to exit.
+
 2021-03-19  Sourabh Singh Tomar  <SourabhSingh.Tomar@amd.com>
 
 	* gdb.base/info-macros.exp: Append -fdebug-macro to

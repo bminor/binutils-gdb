@@ -421,7 +421,12 @@ proc close_gdbserver {} {
     verbose "Quitting GDBserver"
 
     catch "close -i $server_spawn_id"
-    catch "wait -i $server_spawn_id"
+
+    # If gdbserver misbehaves, and ignores the close, waiting for it
+    # without the -nowait flag will cause testing to hang.  Passing
+    # -nowait makes expect tell Tcl to wait for the process in the
+    # background.
+    catch "wait -nowait -i $server_spawn_id"
     unset server_spawn_id
 }
 
