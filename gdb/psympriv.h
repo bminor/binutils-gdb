@@ -535,6 +535,23 @@ struct psymbol_functions : public quick_symbol_functions
   void map_symbol_filenames (struct objfile *objfile,
 			     symbol_filename_ftype *fun, void *data,
 			     int need_fullname) override;
+
+  void relocated () override
+  {
+    m_psymbol_map.clear ();
+  }
+
+private:
+
+  void fill_psymbol_map (struct objfile *objfile,
+			 struct partial_symtab *psymtab,
+			 std::set<CORE_ADDR> *seen_addrs,
+			 const std::vector<partial_symbol *> &symbols);
+
+  /* Map symbol addresses to the partial symtab that defines the
+     object at that address.  */
+
+  std::vector<std::pair<CORE_ADDR, partial_symtab *>> m_psymbol_map;
 };
 
 #endif /* PSYMPRIV_H */

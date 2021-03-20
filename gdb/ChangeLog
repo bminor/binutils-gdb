@@ -1,5 +1,19 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* quick-symbol.h (struct quick_symbol_functions)
+	<relocated>: New method.
+	* psymtab.h (struct psymbol_functions) <relocated>: New
+	method.
+	<fill_psymbol_map>: Declare method.
+	<m_psymbol_map>: New member.
+	* psymtab.c (psymbol_functions::fill_psymbol_map): Rename.
+	(psymbol_functions::find_compunit_symtab_by_address): Update.
+	* objfiles.h (reset_psymtabs): Don't clear psymbol_map.
+	(struct objfile) <psymbol_map>: Remove.
+	* objfiles.c (objfile_relocate1): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* psympriv.h (struct psymbol_functions): New.
 	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
 	* symfile-debug.c (objfile::find_compunit_symtab_by_address)

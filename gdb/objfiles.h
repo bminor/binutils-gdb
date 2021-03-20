@@ -459,7 +459,6 @@ public:
 
   void reset_psymtabs ()
   {
-    psymbol_map.clear ();
     partial_symtabs.reset (new psymtab_storage ());
   }
 
@@ -664,11 +663,6 @@ public:
      table from this object file.  */
 
   struct obstack objfile_obstack {};
-
-  /* Map symbol addresses to the partial symtab that defines the
-     object at that address.  */
-
-  std::vector<std::pair<CORE_ADDR, partial_symtab *>> psymbol_map;
 
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.e. the function to read partial

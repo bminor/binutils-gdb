@@ -703,9 +703,9 @@ objfile_relocate1 (struct objfile *objfile,
       }
   }
 
-  /* This stores relocated addresses and so must be cleared.  This
-     will cause it to be recreated on demand.  */
-  objfile->psymbol_map.clear ();
+  /* Notify the quick symbol object.  */
+  if (objfile->qf)
+    objfile->qf->relocated ();
 
   /* Relocate isolated symbols.  */
   {

@@ -228,6 +228,13 @@ struct quick_symbol_functions
   virtual void map_symbol_filenames (struct objfile *objfile,
 				     symbol_filename_ftype *fun, void *data,
 				     int need_fullname) = 0;
+
+  /* This is called when the objfile is relocated.  It can be used to
+     clean up any internal caches.  */
+  virtual void relocated ()
+  {
+    /* Do nothing.  */
+  }
 };
 
 typedef std::unique_ptr<quick_symbol_functions> quick_symbol_functions_up;

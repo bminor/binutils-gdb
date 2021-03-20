@@ -1346,13 +1346,14 @@ psymbol_functions::has_symbols (struct objfile *objfile)
 }
 
 /* Helper function for psym_find_compunit_symtab_by_address that fills
-   in psymbol_map for a given range of psymbols.  */
+   in m_psymbol_map for a given range of psymbols.  */
 
-static void
-psym_fill_psymbol_map (struct objfile *objfile,
-		       struct partial_symtab *psymtab,
-		       std::set<CORE_ADDR> *seen_addrs,
-		       const std::vector<partial_symbol *> &symbols)
+void
+psymbol_functions::fill_psymbol_map
+     (struct objfile *objfile,
+      struct partial_symtab *psymtab,
+      std::set<CORE_ADDR> *seen_addrs,
+      const std::vector<partial_symbol *> &symbols)
 {
   for (partial_symbol *psym : symbols)
     {
@@ -1362,7 +1363,7 @@ psym_fill_psymbol_map (struct objfile *objfile,
 	  if (seen_addrs->find (addr) == seen_addrs->end ())
 	    {
 	      seen_addrs->insert (addr);
-	      objfile->psymbol_map.emplace_back (addr, psymtab);
+	      m_psymbol_map.emplace_back (addr, psymtab);
 	    }
 	}
     }
@@ -1375,23 +1376,23 @@ compunit_symtab *
 psymbol_functions::find_compunit_symtab_by_address (struct objfile *objfile,
 						    CORE_ADDR address)
 {
-  if (objfile->psymbol_map.empty ())
+  if (m_psymbol_map.empty ())
     {
       std::set<CORE_ADDR> seen_addrs;
 
       for (partial_symtab *pst : require_partial_symbols (objfile, true))
 	{
-	  psym_fill_psymbol_map (objfile, pst,
-				 &seen_addrs,
-				 pst->global_psymbols);
-	  psym_fill_psymbol_map (objfile, pst,
-				 &seen_addrs,
-				 pst->static_psymbols);
+	  fill_psymbol_map (objfile, pst,
+			    &seen_addrs,
+			    pst->global_psymbols);
+	  fill_psymbol_map (objfile, pst,
+			    &seen_addrs,
+			    pst->static_psymbols);
 	}
 
-      objfile->psymbol_map.shrink_to_fit ();
+      m_psymbol_map.shrink_to_fit ();
 
-      std::sort (objfile->psymbol_map.begin (), objfile->psymbol_map.end (),
+      std::sort (m_psymbol_map.begin (), m_psymbol_map.end (),
 		 [] (const std::pair<CORE_ADDR, partial_symtab *> &a,
 		     const std::pair<CORE_ADDR, partial_symtab *> &b)
 		 {
@@ -1400,14 +1401,14 @@ psymbol_functions::find_compunit_symtab_by_address (struct objfile *objfile,
     }
 
   auto iter = std::lower_bound
-    (objfile->psymbol_map.begin (), objfile->psymbol_map.end (), address,
+    (m_psymbol_map.begin (), m_psymbol_map.end (), address,
      [] (const std::pair<CORE_ADDR, partial_symtab *> &a,
 	 CORE_ADDR b)
      {
        return a.first < b;
      });
 
-  if (iter == objfile->psymbol_map.end () || iter->first != address)
+  if (iter == m_psymbol_map.end () || iter->first != address)
     return NULL;
 
   return psymtab_to_symtab (objfile, iter->second);
