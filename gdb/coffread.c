@@ -2180,7 +2180,6 @@ static const struct sym_fns coff_sym_fns =
   default_symfile_relocate,	/* sym_relocate: Relocate a debug
 				   section.  */
   NULL,				/* sym_probe_fns */
-  &psym_functions
 };
 
 void _initialize_coffread ();

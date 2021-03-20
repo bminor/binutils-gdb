@@ -54,8 +54,6 @@
 #include "dwarf2/public.h"
 
 /* Forward declarations.  */
-extern const struct sym_fns elf_sym_fns_gdb_index;
-extern const struct sym_fns elf_sym_fns_debug_names;
 extern const struct sym_fns elf_sym_fns_lazy_psyms;
 
 /* The struct elfinfo is available only during ELF symbol table and
@@ -1272,10 +1270,10 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  switch (index_kind)
 	    {
 	    case dw_index_kind::GDB_INDEX:
-	      objfile_set_sym_fns (objfile, &elf_sym_fns_gdb_index);
+	      objfile->qf = &dwarf2_gdb_index_functions;
 	      break;
 	    case dw_index_kind::DEBUG_NAMES:
-	      objfile_set_sym_fns (objfile, &elf_sym_fns_debug_names);
+	      objfile->qf = &dwarf2_debug_names_functions;
 	      break;
 	    }
 	}
@@ -1437,7 +1435,6 @@ static const struct sym_fns elf_sym_fns =
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
   &elf_probe_fns,		/* sym_probe_fns */
-  &psym_functions
 };
 
 /* The same as elf_sym_fns, but not registered and lazily reads
@@ -1455,41 +1452,6 @@ const struct sym_fns elf_sym_fns_lazy_psyms =
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
   &elf_probe_fns,		/* sym_probe_fns */
-  &psym_functions
-};
-
-/* The same as elf_sym_fns, but not registered and uses the
-   DWARF-specific GNU index rather than psymtab.  */
-const struct sym_fns elf_sym_fns_gdb_index =
-{
-  elf_new_init,			/* init anything gbl to entire symab */
-  elf_symfile_init,		/* read initial info, setup for sym_red() */
-  elf_symfile_read,		/* read a symbol file into symtab */
-  NULL,				/* sym_read_psymbols */
-  elf_symfile_finish,		/* finished with file, cleanup */
-  default_symfile_offsets,	/* Translate ext. to int. relocation */
-  elf_symfile_segments,		/* Get segment information from a file.  */
-  NULL,
-  default_symfile_relocate,	/* Relocate a debug section.  */
-  &elf_probe_fns,		/* sym_probe_fns */
-  &dwarf2_gdb_index_functions
-};
-
-/* The same as elf_sym_fns, but not registered and uses the
-   DWARF-specific .debug_names index rather than psymtab.  */
-const struct sym_fns elf_sym_fns_debug_names =
-{
-  elf_new_init,			/* init anything gbl to entire symab */
-  elf_symfile_init,		/* read initial info, setup for sym_red() */
-  elf_symfile_read,		/* read a symbol file into symtab */
-  NULL,				/* sym_read_psymbols */
-  elf_symfile_finish,		/* finished with file, cleanup */
-  default_symfile_offsets,	/* Translate ext. to int. relocation */
-  elf_symfile_segments,		/* Get segment information from a file.  */
-  NULL,
-  default_symfile_relocate,	/* Relocate a debug section.  */
-  &elf_probe_fns,		/* sym_probe_fns */
-  &dwarf2_debug_names_functions
 };
 
 /* STT_GNU_IFUNC resolver vector to be installed to gnu_ifunc_fns_p.  */

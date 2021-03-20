@@ -1,5 +1,36 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (require_partial_symbols): Check that 'sf' is not
+	null.
+	* xcoffread.c (xcoff_sym_fns): Update.
+	* symfile.h (struct sym_fns) <qf>: Remove.
+	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
+	* symfile-debug.c (objfile::has_partial_symbols)
+	(objfile::find_last_source_symtab)
+	(objfile::forget_cached_source_info)
+	(objfile::map_symtabs_matching_filename, objfile::lookup_symbol)
+	(objfile::print_stats, objfile::dump)
+	(objfile::expand_symtabs_for_function)
+	(objfile::expand_all_symtabs)
+	(objfile::expand_symtabs_with_fullname)
+	(objfile::map_matching_symbols)
+	(objfile::expand_symtabs_matching)
+	(objfile::find_pc_sect_compunit_symtab)
+	(objfile::map_symbol_filenames)
+	(objfile::find_compunit_symtab_by_address)
+	(objfile::lookup_global_symbol_language, debug_sym_fns)
+	(install_symfile_debug_logging): Update.
+	* objfiles.h (struct objfile) <qf>: New member.
+	* mipsread.c (ecoff_sym_fns): Update.
+	* machoread.c (macho_sym_fns): Update.
+	* elfread.c (elf_sym_fns_gdb_index, elf_sym_fns_debug_names):
+	Don't declare.
+	(elf_symfile_read, elf_sym_fns, elf_sym_fns_lazy_psyms): Update.
+	* dbxread.c (aout_sym_fns): Update.
+	* coffread.c (coff_sym_fns): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* symfile.h (symbol_compare_ftype, symbol_filename_ftype)
 	(expand_symtabs_file_matcher_ftype)
 	(expand_symtabs_symbol_matcher_ftype)

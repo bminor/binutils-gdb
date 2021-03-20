@@ -3006,7 +3006,6 @@ static const struct sym_fns xcoff_sym_fns =
   aix_process_linenos,
   default_symfile_relocate,	/* Relocate a debug section.  */
   NULL,				/* sym_probe_fns */
-  &psym_functions
 };
 
 /* Same as xcoff_get_n_import_files, but for core files.  */

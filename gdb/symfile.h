@@ -180,10 +180,6 @@ struct sym_fns
   /* If non-NULL, this objfile has probe support, and all the probe
      functions referred to here will be non-NULL.  */
   const struct sym_probe_fns *sym_probe_fns;
-
-  /* The "quick" (aka partial) symbol functions for this symbol
-     reader.  */
-  const struct quick_symbol_functions *qf;
 };
 
 extern section_addr_info

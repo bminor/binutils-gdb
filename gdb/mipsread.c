@@ -376,7 +376,6 @@ static const struct sym_fns ecoff_sym_fns =
   NULL,
   default_symfile_relocate,	/* Relocate a debug section.  */
   NULL,				/* sym_probe_fns */
-  &psym_functions
 };
 
 void _initialize_mipsread ();

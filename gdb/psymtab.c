@@ -84,7 +84,8 @@ require_partial_symbols (struct objfile *objfile, bool verbose)
     {
       objfile->flags |= OBJF_PSYMTABS_READ;
 
-      if (objfile->sf->sym_read_psymbols)
+      if (objfile->sf != nullptr
+	  && objfile->sf->sym_read_psymbols)
 	{
 	  if (verbose)
 	    printf_filtered (_("Reading symbols from %s...\n"),

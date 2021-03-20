@@ -958,7 +958,6 @@ static const struct sym_fns macho_sym_fns = {
   NULL,
   macho_symfile_relocate,	/* Relocate a debug section.  */
   NULL,				/* sym_get_probes */
-  &psym_functions
 };
 
 void _initialize_machoread ();

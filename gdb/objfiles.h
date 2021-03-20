@@ -677,6 +677,10 @@ public:
 
   const struct sym_fns *sf = nullptr;
 
+  /* The "quick" (aka partial) symbol functions for this symbol
+     reader.  */
+  const struct quick_symbol_functions *qf = nullptr;
+
   /* Per objfile data-pointers required by other GDB modules.  */
 
   REGISTRY_FIELDS {};
