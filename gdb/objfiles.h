@@ -446,14 +446,6 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
-  /* A range adapter that makes it possible to iterate over all
-     psymtabs in one objfile.  */
-
-  psymtab_storage::partial_symtab_range psymtabs ()
-  {
-    return partial_symtabs->range ();
-  }
-
   /* Reset the storage for the partial symbol tables.  */
 
   void reset_psymtabs ()

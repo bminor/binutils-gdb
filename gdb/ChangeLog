@@ -1,5 +1,9 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct objfile) <psymtabs>: Remove method.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (psymbol_functions::count_psyms): Rename.
 	(psymbol_functions::print_stats): Update.
 	* psympriv.h (struct psymbol_functions) <count_psyms>: Declare
