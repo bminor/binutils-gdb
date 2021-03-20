@@ -2946,7 +2946,9 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
 
-  psymtab_storage *partial_symtabs = objfile->partial_symtabs.get ();
+  psymbol_functions *psf = new psymbol_functions ();
+  psymtab_storage *partial_symtabs = psf->get_partial_symtabs ().get ();
+  objfile->qf.emplace_front (psf);
   scan_xcoff_symtab (reader, partial_symtabs, objfile);
 
   /* Install any minimal symbols that have been collected as the current

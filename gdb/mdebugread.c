@@ -360,7 +360,9 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
 	(*swap->swap_fdr_in) (objfile->obfd, fdr_src, fdr_ptr);
     }
 
-  psymtab_storage *partial_symtabs = objfile->partial_symtabs.get ();
+  psymbol_functions *psf = new psymbol_functions ();
+  psymtab_storage *partial_symtabs = psf->get_partial_symtabs ().get ();
+  objfile->qf.emplace_front (psf);
   parse_partial_symbols (reader, partial_symtabs, objfile);
 
 #if 0

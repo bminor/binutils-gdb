@@ -545,7 +545,9 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   /* Read stabs data from executable file and define symbols.  */
 
-  psymtab_storage *partial_symtabs = objfile->partial_symtabs.get ();
+  psymbol_functions *psf = new psymbol_functions ();
+  psymtab_storage *partial_symtabs = psf->get_partial_symtabs ().get ();
+  objfile->qf.emplace_front (psf);
   read_dbx_symtab (reader, partial_symtabs, objfile);
 
   /* Install any minimal symbols that have been collected as the current

@@ -67,7 +67,7 @@ struct lazy_dwarf_reader : public psymbol_functions
   void read_partial_symbols (struct objfile *objfile) override
   {
     if (dwarf2_has_info (objfile, nullptr))
-      dwarf2_build_psymtabs (objfile);
+      dwarf2_build_psymtabs (objfile, this);
   }
 };
 
@@ -1278,16 +1278,11 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     {
       dw_index_kind index_kind;
 
-      /* elf_sym_fns_gdb_index cannot handle simultaneous non-DWARF
-	 debug information present in OBJFILE.  If there is such debug
-	 info present never use an index.  */
-      if (!objfile->has_partial_symbols ()
-	  && dwarf2_initialize_objfile (objfile, &index_kind))
+      if (dwarf2_initialize_objfile (objfile, &index_kind))
 	{
 	  switch (index_kind)
 	    {
 	    case dw_index_kind::GDB_INDEX:
-	      objfile->qf.clear ();
 	      objfile->qf.push_front (make_dwarf_gdb_index ());
 	      break;
 	    case dw_index_kind::DEBUG_NAMES:
@@ -1297,15 +1292,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	    }
 	}
       else
-	{
-	  /* It is ok to do this even if the stabs reader made some
-	     partial symbols, because OBJF_PSYMTABS_READ has not been
-	     set, and so our lazy reader function will still be called
-	     when needed.  */
-	  objfile->qf.clear ();
-	  objfile->qf.emplace_front
-	    (new lazy_dwarf_reader (objfile->partial_symtabs));
-	}
+	objfile->qf.emplace_front (new lazy_dwarf_reader);
     }
   /* If the file has its own symbol tables it has no separate debug
      info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to

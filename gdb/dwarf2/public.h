@@ -40,7 +40,9 @@ enum class dw_index_kind
 extern bool dwarf2_initialize_objfile (struct objfile *objfile,
 				       dw_index_kind *index_kind);
 
-extern void dwarf2_build_psymtabs (struct objfile *);
+struct psymbol_functions;
+extern void dwarf2_build_psymtabs (struct objfile *,
+				   psymbol_functions *psf = nullptr);
 extern void dwarf2_build_frame_info (struct objfile *);
 
 extern quick_symbol_functions_up make_dwarf_gdb_index ();

@@ -495,6 +495,11 @@ struct psymbol_functions : public quick_symbol_functions
   {
   }
 
+  psymbol_functions ()
+    : m_partial_symtabs (new psymtab_storage)
+  {
+  }
+
   bool has_symbols (struct objfile *objfile) override;
 
   struct symtab *find_last_source_symtab (struct objfile *objfile) override;

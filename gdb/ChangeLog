@@ -1,5 +1,29 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_initial_scan): Create partial symtabs.
+	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
+	* psymtab.h (make_psymbol_functions): Don't declare.
+	* psymtab.c (make_psymbol_functions): Remove.
+	(maintenance_print_psymbols): Update.
+	* psympriv.h (struct psymbol_functions): Add no-argument
+	constructor.
+	* objfiles.h (struct objfile) <reset_psymtabs>: Remove.
+	<partial_symtabs>: Remove.
+	* mdebugread.c (mdebug_build_psymtabs): Create partial symtabs.
+	* elfread.c (read_partial_symbols): Update.
+	(elf_symfile_read): Remove check for existing partial symbols.
+	Don't clear "qf".
+	* dwarf2/read.c (dwarf2_has_info): Remove check for existing
+	partial symbols.
+	(dwarf2_build_psymtabs): Add psymbol_functions parameter.  Create
+	partial symtabs.
+	* dwarf2/public.h (dwarf2_build_psymtabs): Add psymbol_functions
+	parameter.
+	* dbxread.c (dbx_symfile_read): Create partial symtabs.
+	* ctfread.c (elfctf_build_psymtabs): Create partial symtabs.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_build_psymtabs): Update.
 	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
 	* symfile-debug.c (objfile::has_partial_symbols)

@@ -1952,10 +1952,8 @@ dwarf2_has_info (struct objfile *objfile,
       dwarf2_per_bfd *per_bfd;
 
       /* We can share a "dwarf2_per_bfd" with other objfiles if the BFD
-	 doesn't require relocations and if there aren't partial symbols
-	 from some other reader.  */
-      if (!objfile->has_partial_symbols ()
-	  && !gdb_bfd_requires_relocations (objfile->obfd))
+	 doesn't require relocations.  */
+      if (!gdb_bfd_requires_relocations (objfile->obfd))
 	{
 	  /* See if one has been created for this BFD yet.  */
 	  per_bfd = dwarf2_per_bfd_bfd_data_key.get (objfile->obfd);
@@ -6118,7 +6116,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 /* Build a partial symbol table.  */
 
 void
-dwarf2_build_psymtabs (struct objfile *objfile)
+dwarf2_build_psymtabs (struct objfile *objfile, psymbol_functions *psf)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -6127,29 +6125,37 @@ dwarf2_build_psymtabs (struct objfile *objfile)
     {
       /* Partial symbols were already read, so now we can simply
 	 attach them.  */
-      objfile->partial_symtabs = per_bfd->partial_symtabs;
-      /* This is a temporary hack to ensure that the objfile and 'qf'
-	 psymtabs are identical.  */
-      psymbol_functions *psf
-	= dynamic_cast<psymbol_functions *> (objfile->qf.front ().get ());
-      gdb_assert (psf != nullptr);
-      psf->set_partial_symtabs (per_bfd->partial_symtabs);
+      if (psf == nullptr)
+	{
+	  psf = new psymbol_functions (per_bfd->partial_symtabs);
+	  objfile->qf.emplace_front (psf);
+	}
+      else
+	psf->set_partial_symtabs (per_bfd->partial_symtabs);
       per_objfile->resize_symtabs ();
       return;
     }
+
+  if (psf == nullptr)
+    {
+      psf = new psymbol_functions;
+      objfile->qf.emplace_front (psf);
+    }
+  const std::shared_ptr<psymtab_storage> &partial_symtabs
+    = psf->get_partial_symtabs ();
 
   /* Set the local reference to partial symtabs, so that we don't try
      to read them again if reading another objfile with the same BFD.
      If we can't in fact share, this won't make a difference anyway as
      the dwarf2_per_bfd object won't be shared.  */
-  per_bfd->partial_symtabs = objfile->partial_symtabs;
+  per_bfd->partial_symtabs = partial_symtabs;
 
   try
     {
       /* This isn't really ideal: all the data we allocate on the
 	 objfile's obstack is still uselessly kept around.  However,
 	 freeing it seems unsafe.  */
-      psymtab_discarder psymtabs (objfile->partial_symtabs.get ());
+      psymtab_discarder psymtabs (partial_symtabs.get ());
       dwarf2_build_psymtabs_hard (per_objfile);
       psymtabs.keep ();
 

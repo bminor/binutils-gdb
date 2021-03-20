@@ -145,8 +145,4 @@ private:
   gdb::optional<auto_obstack> m_obstack;
 };
 
-
-extern quick_symbol_functions_up make_psymbol_functions
-     (const std::shared_ptr<psymtab_storage> &);
-
 #endif /* PSYMTAB_H */

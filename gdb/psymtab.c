@@ -1430,12 +1430,6 @@ psymbol_functions::find_compunit_symtab_by_address (struct objfile *objfile,
   return psymtab_to_symtab (objfile, iter->second);
 }
 
-quick_symbol_functions_up
-make_psymbol_functions (const std::shared_ptr<psymtab_storage> &storage)
-{
-  return quick_symbol_functions_up (new psymbol_functions (storage));
-}
-
 
 
 /* Partially fill a partial symtab.  It will be completely filled at

@@ -447,13 +447,6 @@ public:
 
   DISABLE_COPY_AND_ASSIGN (objfile);
 
-  /* Reset the storage for the partial symbol tables.  */
-
-  void reset_psymtabs ()
-  {
-    partial_symtabs.reset (new psymtab_storage ());
-  }
-
   typedef next_adapter<struct compunit_symtab> compunits_range;
 
   /* A range adapter that makes it possible to iterate over all
@@ -634,10 +627,6 @@ public:
      These are used to do symbol lookups and file/line-number lookups.  */
 
   struct compunit_symtab *compunit_symtabs = nullptr;
-
-  /* The partial symbol tables.  */
-
-  std::shared_ptr<psymtab_storage> partial_symtabs;
 
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols, e.g. the run time common symbols for SunOS4.  */

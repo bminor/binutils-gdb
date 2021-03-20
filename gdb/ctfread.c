@@ -1546,7 +1546,9 @@ elfctf_build_psymtabs (struct objfile *of)
 	   bfd_get_filename (abfd), ctf_errmsg (err));
   ctf_dict_key.emplace (of, fp);
 
-  psymtab_storage *partial_symtabs = of->partial_symtabs.get ();
+  psymbol_functions *psf = new psymbol_functions ();
+  psymtab_storage *partial_symtabs = psf->get_partial_symtabs ().get ();
+  of->qf.emplace_front (psf);
   scan_partial_symbols (fp, partial_symtabs, of);
 }
 
