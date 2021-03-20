@@ -252,7 +252,8 @@ static struct symbol *mylookup_symbol (const char *, const struct block *,
 
 static void sort_blocks (struct symtab *);
 
-static legacy_psymtab *new_psymtab (const char *, struct objfile *);
+static legacy_psymtab *new_psymtab (const char *, psymtab_storage *,
+				    struct objfile *);
 
 static void mdebug_expand_psymtab (legacy_psymtab *pst,
 				  struct objfile *objfile);
@@ -265,7 +266,8 @@ static int add_line (struct linetable *, int, CORE_ADDR, int);
 
 static struct linetable *shrink_linetable (struct linetable *);
 
-static void handle_psymbol_enumerators (struct objfile *, partial_symtab *,
+static void handle_psymbol_enumerators (struct objfile *, psymtab_storage *,
+					partial_symtab *,
 					FDR *, int, CORE_ADDR);
 
 static const char *mdebug_next_symbol_text (struct objfile *);
@@ -2365,7 +2367,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   fdr_to_pst = fdr_to_pst_holder.data ();
   fdr_to_pst++;
   {
-    legacy_psymtab *new_pst = new_psymtab ("", objfile);
+    legacy_psymtab *new_pst = new_psymtab ("", partial_symtabs, objfile);
 
     fdr_to_pst[-1].pst = new_pst;
     FDR_IDX (new_pst) = -1;
@@ -2601,7 +2603,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	textlow = fh->adr;
       else
 	textlow = 0;
-      pst = new legacy_psymtab (fdr_name (fh), objfile, textlow);
+      pst = new legacy_psymtab (fdr_name (fh), partial_symtabs, objfile,
+				textlow);
       pst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
       memset (pst->read_symtab_private, 0, sizeof (struct symloc));
 
@@ -3038,7 +3041,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  SECT_OFF_DATA (objfile),
 					  psymbol_placement::STATIC,
 					  sh.value,
-					  psymtab_language, objfile);
+					  psymtab_language,
+					  partial_symtabs, objfile);
 			continue;
 		      case 'G':
 			/* The addresses in these entries are reported
@@ -3050,7 +3054,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  SECT_OFF_DATA (objfile),
 					  psymbol_placement::GLOBAL,
 					  sh.value,
-					  psymtab_language, objfile);
+					  psymtab_language,
+					  partial_symtabs, objfile);
 			continue;
 
 		      case 'T':
@@ -3068,7 +3073,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 			      (gdb::string_view (namestring, p - namestring),
 			       true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 			       psymbol_placement::STATIC, 0, psymtab_language,
-			       objfile);
+			       partial_symtabs, objfile);
 			    if (p[2] == 't')
 			      {
 				/* Also a typedef with the same name.  */
@@ -3077,7 +3082,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 						     p - namestring),
 				   true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 				   psymbol_placement::STATIC, 0,
-				   psymtab_language, objfile);
+				   psymtab_language,
+				   partial_symtabs, objfile);
 				p += 1;
 			      }
 			  }
@@ -3091,7 +3097,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 						 p - namestring),
 			       true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 			       psymbol_placement::STATIC, 0, psymtab_language,
-			       objfile);
+			       partial_symtabs, objfile);
 			  }
 		      check_enum:
 			/* If this is an enumerated type, we need to add
@@ -3158,7 +3164,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 						  LOC_CONST, -1,
 						  psymbol_placement::STATIC,
 						  0, psymtab_language,
-						  objfile);
+						  partial_symtabs, objfile);
 				/* Point past the name.  */
 				p = q;
 				/* Skip over the value.  */
@@ -3176,7 +3182,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_CONST, -1,
 					  psymbol_placement::STATIC,
-					  0, psymtab_language, objfile);
+					  0, psymtab_language,
+					  partial_symtabs, objfile);
 			continue;
 
 		      case 'f':
@@ -3192,7 +3199,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  SECT_OFF_TEXT (objfile),
 					  psymbol_placement::STATIC,
 					  sh.value,
-					  psymtab_language, objfile);
+					  psymtab_language,
+					  partial_symtabs, objfile);
 			continue;
 
 			/* Global functions were ignored here, but now they
@@ -3212,7 +3220,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 					  SECT_OFF_TEXT (objfile),
 					  psymbol_placement::GLOBAL,
 					  sh.value,
-					  psymtab_language, objfile);
+					  psymtab_language,
+					  partial_symtabs, objfile);
 			continue;
 
 			/* Two things show up here (hopefully); static
@@ -3446,13 +3455,15 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				      VAR_DOMAIN, LOC_BLOCK,
 				      section,
 				      psymbol_placement::GLOBAL,
-				      sh.value, psymtab_language, objfile);
+				      sh.value, psymtab_language,
+				      partial_symtabs, objfile);
 		  else
 		    pst->add_psymbol (sym_name, true,
 				      VAR_DOMAIN, LOC_BLOCK,
 				      section,
 				      psymbol_placement::STATIC,
-				      sh.value, psymtab_language, objfile);
+				      sh.value, psymtab_language,
+				      partial_symtabs, objfile);
 
 		  procaddr = sh.value;
 
@@ -3518,10 +3529,11 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		      pst->add_psymbol (sym_name, true,
 					STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 					psymbol_placement::STATIC,
-					0, psymtab_language, objfile);
+					0, psymtab_language,
+					partial_symtabs, objfile);
 		    }
-		  handle_psymbol_enumerators (objfile, pst, fh,
-					      sh.st, sh.value);
+		  handle_psymbol_enumerators (objfile, partial_symtabs,
+					      pst, fh, sh.st, sh.value);
 
 		  /* Skip over the block.  */
 		  new_sdx = sh.index;
@@ -3559,7 +3571,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      pst->add_psymbol (sym_name, true,
 				VAR_DOMAIN, theclass, section,
 				psymbol_placement::STATIC,
-				sh.value, psymtab_language, objfile);
+				sh.value, psymtab_language,
+				partial_symtabs, objfile);
 	    skip:
 	      cur_sdx++;	/* Go to next file symbol.  */
 	    }
@@ -3638,7 +3651,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 				VAR_DOMAIN, theclass,
 				section,
 				psymbol_placement::GLOBAL,
-				svalue, psymtab_language, objfile);
+				svalue, psymtab_language,
+				partial_symtabs, objfile);
 	    }
 	}
 
@@ -3740,7 +3754,9 @@ parse_partial_symbols (minimal_symbol_reader &reader,
    all the enum constants to the partial symbol table.  */
 
 static void
-handle_psymbol_enumerators (struct objfile *objfile, partial_symtab *pst,
+handle_psymbol_enumerators (struct objfile *objfile,
+			    psymtab_storage *partial_symtabs,
+			    partial_symtab *pst,
 			    FDR *fh, int stype, CORE_ADDR svalue)
 {
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
@@ -3799,7 +3815,7 @@ handle_psymbol_enumerators (struct objfile *objfile, partial_symtab *pst,
       pst->add_psymbol (name, true,
 			VAR_DOMAIN, LOC_CONST, -1,
 			psymbol_placement::STATIC, 0,
-			psymtab_language, objfile);
+			psymtab_language, partial_symtabs, objfile);
       ext_sym += external_sym_size;
     }
 }
@@ -4623,11 +4639,12 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
 /* Allocate a new partial_symtab NAME.  */
 
 static legacy_psymtab *
-new_psymtab (const char *name, struct objfile *objfile)
+new_psymtab (const char *name, psymtab_storage *partial_symtabs,
+	     struct objfile *objfile)
 {
   legacy_psymtab *psymtab;
 
-  psymtab = new legacy_psymtab (name, objfile);
+  psymtab = new legacy_psymtab (name, partial_symtabs, objfile);
 
   /* Keep a backpointer to the file's symbols.  */
 

@@ -1960,11 +1960,13 @@ static unsigned int first_fun_line_offset;
    (normal).  */
 
 static legacy_psymtab *
-xcoff_start_psymtab (struct objfile *objfile,
+xcoff_start_psymtab (psymtab_storage *partial_symtabs,
+		     struct objfile *objfile,
 		     const char *filename, int first_symnum)
 {
   /* We fill in textlow later.  */
-  legacy_psymtab *result = new legacy_psymtab (filename, objfile, 0);
+  legacy_psymtab *result = new legacy_psymtab (filename, partial_symtabs,
+					       objfile, 0);
 
   result->read_symtab_private =
     XOBNEW (&objfile->objfile_obstack, struct symloc);
@@ -2020,7 +2022,7 @@ xcoff_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
   for (i = 0; i < num_includes; i++)
     {
       legacy_psymtab *subpst =
-	new legacy_psymtab (include_list[i], objfile);
+	new legacy_psymtab (include_list[i], partial_symtabs, objfile);
 
       subpst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
       ((struct symloc *) subpst->read_symtab_private)->first_symnum = 0;
@@ -2244,7 +2246,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			    /* Give all psymtabs for this source file the same
 			       name.  */
 			    pst = xcoff_start_psymtab
-			      (objfile,
+			      (partial_symtabs, objfile,
 			       filestring,
 			       symnum_before);
 			  }
@@ -2427,7 +2429,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	    else
 	      filestring = namestring;
 
-	    pst = xcoff_start_psymtab (objfile,
+	    pst = xcoff_start_psymtab (partial_symtabs, objfile,
 				       filestring,
 				       symnum_before);
 	    last_csect_name = NULL;
@@ -2586,7 +2588,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  SECT_OFF_DATA (objfile),
 				  psymbol_placement::STATIC,
 				  symbol.n_value,
-				  psymtab_language, objfile);
+				  psymtab_language,
+				  partial_symtabs, objfile);
 		continue;
 
 	      case 'G':
@@ -2598,7 +2601,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  SECT_OFF_DATA (objfile),
 				  psymbol_placement::GLOBAL,
 				  symbol.n_value,
-				  psymtab_language, objfile);
+				  psymtab_language,
+				  partial_symtabs, objfile);
 		continue;
 
 	      case 'T':
@@ -2616,7 +2620,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 							p - namestring),
 				      true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
-				      0, psymtab_language, objfile);
+				      0, psymtab_language,
+				      partial_symtabs, objfile);
 		    if (p[2] == 't')
 		      {
 			/* Also a typedef with the same name.  */
@@ -2624,7 +2629,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 							    p - namestring),
 					  true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 					  psymbol_placement::STATIC,
-					  0, psymtab_language, objfile);
+					  0, psymtab_language,
+					  partial_symtabs, objfile);
 			p += 1;
 		      }
 		  }
@@ -2637,7 +2643,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 							p - namestring),
 				      true, VAR_DOMAIN, LOC_TYPEDEF, -1,
 				      psymbol_placement::STATIC,
-				      0, psymtab_language, objfile);
+				      0, psymtab_language,
+				      partial_symtabs, objfile);
 		  }
 	      check_enum:
 		/* If this is an enumerated type, we need to
@@ -2699,7 +2706,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			pst->add_psymbol (gdb::string_view (p, q - p), true,
 					  VAR_DOMAIN, LOC_CONST, -1,
 					  psymbol_placement::STATIC,
-					  0, psymtab_language, objfile);
+					  0, psymtab_language,
+					  partial_symtabs, objfile);
 			/* Point past the name.  */
 			p = q;
 			/* Skip over the value.  */
@@ -2718,7 +2726,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 						    p - namestring),
 				  true, VAR_DOMAIN, LOC_CONST, -1,
 				  psymbol_placement::STATIC,
-				  0, psymtab_language, objfile);
+				  0, psymtab_language,
+				  partial_symtabs, objfile);
 		continue;
 
 	      case 'f':
@@ -2738,7 +2747,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::STATIC,
 				  symbol.n_value,
-				  psymtab_language, objfile);
+				  psymtab_language,
+				  partial_symtabs, objfile);
 		continue;
 
 		/* Global functions were ignored here, but now they
@@ -2769,7 +2779,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 				  SECT_OFF_TEXT (objfile),
 				  psymbol_placement::GLOBAL,
 				  symbol.n_value,
-				  psymtab_language, objfile);
+				  psymtab_language,
+				  partial_symtabs, objfile);
 		continue;
 
 		/* Two things show up here (hopefully); static symbols of

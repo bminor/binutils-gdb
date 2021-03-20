@@ -115,6 +115,7 @@ struct ctf_context
 {
   ctf_dict_t *fp;
   struct objfile *of;
+  psymtab_storage *partial_symtabs;
   partial_symtab *pst;
   struct buildsym_compunit *builder;
 };
@@ -122,8 +123,11 @@ struct ctf_context
 /* A partial symtab, specialized for this module.  */
 struct ctf_psymtab : public standard_psymtab
 {
-  ctf_psymtab (const char *filename, struct objfile *objfile, CORE_ADDR addr)
-    : standard_psymtab (filename, objfile, addr)
+  ctf_psymtab (const char *filename,
+	       psymtab_storage *partial_symtabs,
+	       struct objfile *objfile,
+	       CORE_ADDR addr)
+    : standard_psymtab (filename, partial_symtabs, objfile, addr)
   {
   }
 
@@ -1259,7 +1263,7 @@ ctf_psymtab_add_enums (struct ctf_context *ccp, ctf_id_t tid)
       ccp->pst->add_psymbol (ename, true,
 			     VAR_DOMAIN, LOC_CONST, -1,
 			     psymbol_placement::GLOBAL,
-			     0, language_c, ccp->of);
+			     0, language_c, ccp->partial_symtabs, ccp->of);
     }
   if (ctf_errno (ccp->fp) != ECTF_NEXT_END)
     complaint (_("ctf_enum_next ctf_psymtab_add_enums failed - %s"),
@@ -1359,16 +1363,18 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
 static ctf_psymtab *
 create_partial_symtab (const char *name,
 		       ctf_dict_t *cfp,
+		       psymtab_storage *partial_symtabs,
 		       struct objfile *objfile)
 {
   ctf_psymtab *pst;
   struct ctf_context *ccx;
 
-  pst = new ctf_psymtab (name, objfile, 0);
+  pst = new ctf_psymtab (name, partial_symtabs, objfile, 0);
 
   ccx = XOBNEW (&objfile->objfile_obstack, struct ctf_context);
   ccx->fp = cfp;
   ccx->of = objfile;
+  ccx->partial_symtabs = partial_symtabs;
   ccx->pst = pst;
   ccx->builder = nullptr;
   pst->context = ccx;
@@ -1434,7 +1440,7 @@ ctf_psymtab_type_cb (ctf_id_t tid, void *arg)
   ccp->pst->add_psymbol (name.get (), true,
 			 domain, aclass, section,
 			 psymbol_placement::GLOBAL,
-			 0, language_c, ccp->of);
+			 0, language_c, ccp->partial_symtabs, ccp->of);
 
   return 0;
 }
@@ -1449,7 +1455,7 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
   ccp->pst->add_psymbol (name, true,
 			 VAR_DOMAIN, LOC_STATIC, -1,
 			 psymbol_placement::GLOBAL,
-			 0, language_c, ccp->of);
+			 0, language_c, ccp->partial_symtabs, ccp->of);
   return 0;
 }
 
@@ -1457,11 +1463,12 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
    debugging information is available.  */
 
 static void
-scan_partial_symbols (ctf_dict_t *cfp, struct objfile *of)
+scan_partial_symbols (ctf_dict_t *cfp, psymtab_storage *partial_symtabs,
+		      struct objfile *of)
 {
   bfd *abfd = of->obfd;
   const char *name = bfd_get_filename (abfd);
-  ctf_psymtab *pst = create_partial_symtab (name, cfp, of);
+  ctf_psymtab *pst = create_partial_symtab (name, cfp, partial_symtabs, of);
 
   struct ctf_context *ccx = pst->context;
 
@@ -1512,7 +1519,7 @@ scan_partial_symbols (ctf_dict_t *cfp, struct objfile *of)
       pst->add_psymbol (tname.get (), true,
 			tdomain, aclass, -1,
 			psymbol_placement::STATIC,
-			0, language_c, of);
+			0, language_c, partial_symtabs, of);
     }
 
   pst->end ();
@@ -1539,7 +1546,8 @@ elfctf_build_psymtabs (struct objfile *of)
 	   bfd_get_filename (abfd), ctf_errmsg (err));
   ctf_dict_key.emplace (of, fp);
 
-  scan_partial_symbols (fp, of);
+  psymtab_storage *partial_symtabs = of->partial_symtabs.get ();
+  scan_partial_symbols (fp, partial_symtabs, of);
 }
 
 #else

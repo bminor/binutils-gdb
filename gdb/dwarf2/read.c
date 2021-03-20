@@ -6237,8 +6237,10 @@ read_abbrev_offset (dwarf2_per_objfile *per_objfile,
 /* A partial symtab that is used only for include files.  */
 struct dwarf2_include_psymtab : public partial_symtab
 {
-  dwarf2_include_psymtab (const char *filename, struct objfile *objfile)
-    : partial_symtab (filename, objfile)
+  dwarf2_include_psymtab (const char *filename,
+			  psymtab_storage *partial_symtabs,
+			  struct objfile *objfile)
+    : partial_symtab (filename, partial_symtabs, objfile)
   {
   }
 
@@ -6291,10 +6293,13 @@ private:
 
 static void
 dwarf2_create_include_psymtab (dwarf2_per_bfd *per_bfd,
-			       const char *name, dwarf2_psymtab *pst,
+			       const char *name,
+			       dwarf2_psymtab *pst,
+			       psymtab_storage *partial_symtabs,
 			       struct objfile *objfile)
 {
-  dwarf2_include_psymtab *subpst = new dwarf2_include_psymtab (name, objfile);
+  dwarf2_include_psymtab *subpst
+    = new dwarf2_include_psymtab (name, partial_symtabs, objfile);
 
   if (!IS_ABSOLUTE_PATH (subpst->filename))
     subpst->dirname = pst->dirname;
@@ -7549,7 +7554,8 @@ create_partial_symtab (dwarf2_per_cu_data *per_cu,
   struct objfile *objfile = per_objfile->objfile;
   dwarf2_psymtab *pst;
 
-  pst = new dwarf2_psymtab (name, objfile, per_cu);
+  pst = new dwarf2_psymtab (name, per_objfile->per_bfd->partial_symtabs.get (),
+			    objfile, per_cu);
 
   pst->psymtabs_addrmap_supported = true;
 
@@ -8663,7 +8669,9 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 					    &objfile->objfile_obstack);
 	  psymbol.ginfo.set_linkage_name (pdi->linkage_name);
 	}
-      cu->per_cu->v.psymtab->add_psymbol (psymbol, *where, objfile);
+      cu->per_cu->v.psymtab->add_psymbol
+	(psymbol, *where, per_objfile->per_bfd->partial_symtabs.get (),
+	 objfile);
     }
 }
 
@@ -21972,8 +21980,10 @@ dwarf_decode_lines (struct line_header *lh, const char *comp_dir,
 	      psymtab_include_file_name (lh, file_entry, pst,
 					 comp_dir, &name_holder);
 	    if (include_name != NULL)
-	      dwarf2_create_include_psymtab (cu->per_objfile->per_bfd,
-					     include_name, pst, objfile);
+	      dwarf2_create_include_psymtab
+		(cu->per_objfile->per_bfd, include_name, pst,
+		 cu->per_objfile->per_bfd->partial_symtabs.get (),
+		 objfile);
 	  }
     }
   else

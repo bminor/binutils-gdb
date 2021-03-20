@@ -1447,9 +1447,10 @@ make_psymbol_functions (const std::shared_ptr<psymtab_storage> &storage)
    the end of the symbol list.  */
 
 partial_symtab::partial_symtab (const char *filename,
+				psymtab_storage *partial_symtabs,
 				struct objfile *objfile,
 				CORE_ADDR textlow)
-  : partial_symtab (filename, objfile)
+  : partial_symtab (filename, partial_symtabs, objfile)
 {
   set_text_low (textlow);
   set_text_high (raw_text_low ()); /* default */
@@ -1514,33 +1515,21 @@ psymbol_bcache::compare (const void *addr1, const void *addr2, int length)
 	  && sym1->ginfo.linkage_name () == sym2->ginfo.linkage_name ());
 }
 
-/* Helper function, initialises partial symbol structure and stashes
-   it into objfile's bcache.  Note that our caching mechanism will
-   use all fields of struct partial_symbol to determine hash value of the
-   structure.  In other words, having two symbols with the same name but
-   different domain (or address) is possible and correct.  */
-
-static struct partial_symbol *
-add_psymbol_to_bcache (const partial_symbol &psymbol, struct objfile *objfile,
-		       bool *added)
-{
-  /* Stash the partial symbol away in the cache.  */
-  return ((struct partial_symbol *)
-	  objfile->partial_symtabs->psymbol_cache.insert
-	  (&psymbol, sizeof (struct partial_symbol), added));
-}
-
 /* See psympriv.h.  */
 
 void
 partial_symtab::add_psymbol (const partial_symbol &psymbol,
 			     psymbol_placement where,
+			     psymtab_storage *partial_symtabs,
 			     struct objfile *objfile)
 {
   bool added;
 
   /* Stash the partial symbol away in the cache.  */
-  partial_symbol *psym = add_psymbol_to_bcache (psymbol, objfile, &added);
+  partial_symbol *psym
+    = ((struct partial_symbol *)
+       partial_symtabs->psymbol_cache.insert
+       (&psymbol, sizeof (struct partial_symbol), &added));
 
   /* Do not duplicate global partial symbols.  */
   if (where == psymbol_placement::GLOBAL && !added)
@@ -1563,7 +1552,9 @@ partial_symtab::add_psymbol (gdb::string_view name, bool copy_name,
 			     short section,
 			     psymbol_placement where,
 			     CORE_ADDR coreaddr,
-			     enum language language, struct objfile *objfile)
+			     enum language language,
+			     psymtab_storage *partial_symtabs,
+			     struct objfile *objfile)
 {
   struct partial_symbol psymbol;
   memset (&psymbol, 0, sizeof (psymbol));
@@ -1572,20 +1563,22 @@ partial_symtab::add_psymbol (gdb::string_view name, bool copy_name,
   psymbol.ginfo.set_section_index (section);
   psymbol.domain = domain;
   psymbol.aclass = theclass;
-  psymbol.ginfo.set_language (language, objfile->partial_symtabs->obstack ());
+  psymbol.ginfo.set_language (language, partial_symtabs->obstack ());
   psymbol.ginfo.compute_and_set_names (name, copy_name, objfile->per_bfd);
 
-  add_psymbol (psymbol, where, objfile);
+  add_psymbol (psymbol, where, partial_symtabs, objfile);
 }
 
 /* See psympriv.h.  */
 
-partial_symtab::partial_symtab (const char *filename_, struct objfile *objfile)
+partial_symtab::partial_symtab (const char *filename_,
+				psymtab_storage *partial_symtabs,
+				struct objfile *objfile)
   : searched_flag (PST_NOT_SEARCHED),
     text_low_valid (0),
     text_high_valid (0)
 {
-  objfile->partial_symtabs->install_psymtab (this);
+  partial_symtabs->install_psymtab (this);
 
   filename = objfile->intern (filename_);
 

@@ -1,5 +1,39 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_start_psymtab): Add partial_symtabs parameter.
+	(xcoff_end_psymtab, scan_xcoff_symtab): Update.
+	* psymtab.c (partial_symtab::partial_symtab): Add partial_symtabs
+	parameter.
+	(add_psymbol_to_bcache): Remove.
+	(partial_symtab::add_psymbol): Add partial_symtabs parameter.
+	(partial_symtab::add_psymbol, partial_symtab::partial_symtab):
+	Likewise.
+	* psympriv.h (partial_symtab): Add partial_symtabs parameter.
+	<add_psymbol>: Likewise.
+	(standard_psymtab, legacy_psymtab): Likewise.
+	* mdebugread.c (parse_partial_symbols): Update.
+	(handle_psymbol_enumerators): Add partial_symtabs parameter.
+	(handle_psymbol_enumerators): Update.
+	(new_psymtab): Add partial_symtabs parameter.
+	* dwarf2/read.h (dwarf2_psymtab): Add partial_symtabs parameter.
+	* dwarf2/read.c (dwarf2_include_psymtab): Add partial_symtabs
+	parameter.
+	(dwarf2_create_include_psymtab): Add partial_symtabs parameter.
+	(create_partial_symtab, add_partial_symbol, dwarf_decode_lines):
+	Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	(start_psymtab): Add partial_symtabs parameter.
+	(dbx_end_psymtab): Update.
+	* ctfread.c (struct ctf_context) <partial_symtabs>: New member.
+	(ctf_psymtab): Add partial_symtabs parameter.
+	(create_partial_symtab, ctf_psymtab_type_cb, ctf_psymtab_var_cb):
+	Update.
+	(scan_partial_symbols): Add partial_symtabs parameter.
+	(scan_partial_symbols, elfctf_build_psymtabs)
+	(ctf_psymtab_add_enums): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (read_symbols): Use objfile method.
 	* symfile-debug.c (objfile::require_partial_symbols): New method.
 	* psymtab.h (require_partial_symbols): Don't declare.

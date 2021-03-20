@@ -117,14 +117,18 @@ struct partial_symtab
      partial symtab will also be installed using
      psymtab_storage::install.  */
 
-  partial_symtab (const char *filename, struct objfile *objfile)
+  partial_symtab (const char *filename,
+		  psymtab_storage *partial_symtabs,
+		  struct objfile *objfile)
     ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
 
   /* Like the above, but also sets the initial text low and text high
      from the ADDR argument, and sets the global- and
      static-offsets.  */
 
-  partial_symtab (const char *filename, struct objfile *objfile,
+  partial_symtab (const char *filename,
+		  psymtab_storage *partial_symtabs,
+		  struct objfile *objfile,
 		  CORE_ADDR addr)
     ATTRIBUTE_NONNULL (2) ATTRIBUTE_NONNULL (3);
 
@@ -236,6 +240,7 @@ struct partial_symtab
 		    psymbol_placement where,
 		    CORE_ADDR coreaddr,
 		    enum language language,
+		    psymtab_storage *partial_symtabs,
 		    struct objfile *objfile);
 
   /* Add a symbol to this partial symbol table of OBJFILE.  The psymbol
@@ -244,6 +249,7 @@ struct partial_symtab
 
   void add_psymbol (const partial_symbol &psym,
 		    psymbol_placement where,
+		    psymtab_storage *partial_symtabs,
 		    struct objfile *objfile);
 
 
@@ -361,14 +367,18 @@ struct partial_symtab
    object.  */
 struct standard_psymtab : public partial_symtab
 {
-  standard_psymtab (const char *filename, struct objfile *objfile)
-    : partial_symtab (filename, objfile)
+  standard_psymtab (const char *filename,
+		    psymtab_storage *partial_symtabs,
+		    struct objfile *objfile)
+    : partial_symtab (filename, partial_symtabs, objfile)
   {
   }
 
-  standard_psymtab (const char *filename, struct objfile *objfile,
+  standard_psymtab (const char *filename,
+		    psymtab_storage *partial_symtabs,
+		    struct objfile *objfile,
 		    CORE_ADDR addr)
-    : partial_symtab (filename, objfile, addr)
+    : partial_symtab (filename, partial_symtabs, objfile, addr)
   {
   }
 
@@ -399,14 +409,18 @@ struct standard_psymtab : public partial_symtab
 
 struct legacy_psymtab : public standard_psymtab
 {
-  legacy_psymtab (const char *filename, struct objfile *objfile)
-    : standard_psymtab (filename, objfile)
+  legacy_psymtab (const char *filename,
+		  psymtab_storage *partial_symtabs,
+		  struct objfile *objfile)
+    : standard_psymtab (filename, partial_symtabs, objfile)
   {
   }
 
-  legacy_psymtab (const char *filename, struct objfile *objfile,
+  legacy_psymtab (const char *filename,
+		  psymtab_storage *partial_symtabs,
+		  struct objfile *objfile,
 		  CORE_ADDR addr)
-    : standard_psymtab (filename, objfile, addr)
+    : standard_psymtab (filename, partial_symtabs, objfile, addr)
   {
   }
 
