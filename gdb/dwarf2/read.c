@@ -6137,6 +6137,12 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       return;
     }
 
+  /* Set the local reference to partial symtabs, so that we don't try
+     to read them again if reading another objfile with the same BFD.
+     If we can't in fact share, this won't make a difference anyway as
+     the dwarf2_per_bfd object won't be shared.  */
+  per_bfd->partial_symtabs = objfile->partial_symtabs;
+
   try
     {
       /* This isn't really ideal: all the data we allocate on the
@@ -6155,12 +6161,6 @@ dwarf2_build_psymtabs (struct objfile *objfile)
     {
       exception_print (gdb_stderr, except);
     }
-
-  /* Finish by setting the local reference to partial symtabs, so that
-     we don't try to read them again if reading another objfile with the same
-     BFD.  If we can't in fact share, this won't make a difference anyway as
-     the dwarf2_per_bfd object won't be shared.  */
-  per_bfd->partial_symtabs = objfile->partial_symtabs;
 }
 
 /* Find the base address of the compilation unit for range lists and

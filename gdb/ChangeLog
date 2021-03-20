@@ -1,5 +1,10 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_build_psymtabs): Set partial_symtabs
+	earlier.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* psympriv.h (psymtab_discarder): Take psymtab_storage parameter.
 	(~psymtab_discarder, keep): Update.
 	<m_objfile>: Remove.
