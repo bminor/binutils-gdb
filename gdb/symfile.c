@@ -904,7 +904,7 @@ syms_from_objfile_1 (struct objfile *objfile,
   const int mainline = add_flags & SYMFILE_MAINLINE;
 
   objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd));
-  objfile->qf = make_psymbol_functions ();
+  objfile->qf = make_psymbol_functions (objfile->partial_symtabs);
 
   if (objfile->sf == NULL)
     {
@@ -2555,7 +2555,7 @@ reread_symbols (void)
 	     based on whether .gdb_index is present, and we need it to
 	     start over.  PR symtab/15885  */
 	  objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd));
-	  objfile->qf = make_psymbol_functions ();
+	  objfile->qf = make_psymbol_functions (objfile->partial_symtabs);
 
 	  build_objfile_section_table (objfile);
 

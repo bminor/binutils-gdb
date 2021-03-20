@@ -275,7 +275,9 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
    psymtab that contains a symbol whose address is closest to PC.  */
 
 static struct partial_symtab *
-find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
+find_pc_sect_psymtab (struct objfile *objfile,
+		      psymtab_storage *partial_symtabs,
+		      CORE_ADDR pc,
 		      struct obj_section *section,
 		      struct bound_minimal_symbol msymbol)
 {
@@ -291,14 +293,14 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
      partial symtabs then we will end up returning a pointer to an object
      that is not a partial_symtab, which doesn't end well.  */
 
-  if (objfile->partial_symtabs->psymtabs != NULL
-      && objfile->partial_symtabs->psymtabs_addrmap != NULL)
+  if (partial_symtabs->psymtabs != NULL
+      && partial_symtabs->psymtabs_addrmap != NULL)
     {
       CORE_ADDR baseaddr = objfile->text_section_offset ();
 
       struct partial_symtab *pst
 	= ((struct partial_symtab *)
-	   addrmap_find (objfile->partial_symtabs->psymtabs_addrmap,
+	   addrmap_find (partial_symtabs->psymtabs_addrmap,
 			 pc - baseaddr));
       if (pst != NULL)
 	{
@@ -367,7 +369,9 @@ psymbol_functions::find_pc_sect_compunit_symtab
       struct obj_section *section,
       int warn_if_readin)
 {
-  struct partial_symtab *ps = find_pc_sect_psymtab (objfile, pc, section,
+  struct partial_symtab *ps = find_pc_sect_psymtab (objfile,
+						    m_partial_symtabs.get (),
+						    pc, section,
 						    msymbol);
   if (ps != NULL)
     {
@@ -1013,12 +1017,12 @@ psymbol_functions::print_stats (struct objfile *objfile, bool print_bcache)
       printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"),
 		       i);
       printf_filtered (_("  Total memory used for psymbol cache: %d\n"),
-		       objfile->partial_symtabs->psymbol_cache.memory_used ());
+		       m_partial_symtabs->psymbol_cache.memory_used ());
     }
   else
     {
       printf_filtered (_("Psymbol byte cache statistics:\n"));
-      objfile->partial_symtabs->psymbol_cache.print_statistics
+      m_partial_symtabs->psymbol_cache.print_statistics
 	("partial symbol cache");
     }
 }
@@ -1031,10 +1035,10 @@ psymbol_functions::dump (struct objfile *objfile)
 {
   struct partial_symtab *psymtab;
 
-  if (objfile->partial_symtabs->psymtabs)
+  if (m_partial_symtabs->psymtabs)
     {
       printf_filtered ("Psymtabs:\n");
-      for (psymtab = objfile->partial_symtabs->psymtabs;
+      for (psymtab = m_partial_symtabs->psymtabs;
 	   psymtab != NULL;
 	   psymtab = psymtab->next)
 	{
@@ -1321,7 +1325,7 @@ psymbol_functions::expand_symtabs_matching
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     ps->searched_flag = PST_NOT_SEARCHED;
 
-  for (partial_symtab *ps : objfile->psymtabs ())
+  for (partial_symtab *ps : m_partial_symtabs->range ())
     {
       QUIT;
 
@@ -1373,7 +1377,7 @@ psymbol_functions::expand_symtabs_matching
 bool
 psymbol_functions::has_symbols (struct objfile *objfile)
 {
-  return objfile->partial_symtabs->psymtabs != NULL;
+  return m_partial_symtabs->psymtabs != NULL;
 }
 
 /* Helper function for psym_find_compunit_symtab_by_address that fills
@@ -1446,9 +1450,9 @@ psymbol_functions::find_compunit_symtab_by_address (struct objfile *objfile,
 }
 
 quick_symbol_functions_up
-make_psymbol_functions ()
+make_psymbol_functions (const std::shared_ptr<psymtab_storage> &storage)
 {
-  return quick_symbol_functions_up (new psymbol_functions);
+  return quick_symbol_functions_up (new psymbol_functions (storage));
 }
 
 
@@ -1724,14 +1728,16 @@ dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
    of PSYMTAB.  If PSYMTAB is NULL print the entire addrmap.  */
 
 static void
-dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
+dump_psymtab_addrmap (struct objfile *objfile,
+		      psymtab_storage *partial_symtabs,
+		      struct partial_symtab *psymtab,
 		      struct ui_file *outfile)
 {
   struct dump_psymtab_addrmap_data addrmap_dump_data;
 
   if ((psymtab == NULL
        || psymtab->psymtabs_addrmap_supported)
-      && objfile->partial_symtabs->psymtabs_addrmap != NULL)
+      && partial_symtabs->psymtabs_addrmap != NULL)
     {
       addrmap_dump_data.objfile = objfile;
       addrmap_dump_data.psymtab = psymtab;
@@ -1739,7 +1745,7 @@ dump_psymtab_addrmap (struct objfile *objfile, struct partial_symtab *psymtab,
       addrmap_dump_data.previous_matched = 0;
       fprintf_filtered (outfile, "%sddress map:\n",
 			psymtab == NULL ? "Entire a" : "  A");
-      addrmap_foreach (objfile->partial_symtabs->psymtabs_addrmap,
+      addrmap_foreach (partial_symtabs->psymtabs_addrmap,
 		       dump_psymtab_addrmap_1, &addrmap_dump_data);
     }
 }
@@ -1830,14 +1836,17 @@ maintenance_print_psymbols (const char *args, int from_tty)
       if (!print_for_objfile)
 	continue;
 
+      psymtab_storage *partial_symtabs = objfile->partial_symtabs.get ();
+
       if (address_arg != NULL)
 	{
 	  struct bound_minimal_symbol msymbol = { NULL, NULL };
 
 	  /* We don't assume each pc has a unique objfile (this is for
 	     debugging).  */
-	  struct partial_symtab *ps = find_pc_sect_psymtab (objfile, pc,
-							    section, msymbol);
+	  struct partial_symtab *ps
+	    = find_pc_sect_psymtab (objfile, partial_symtabs, pc,
+				    section, msymbol);
 	  if (ps != NULL)
 	    {
 	      if (!printed_objfile_header)
@@ -1847,7 +1856,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
 		  printed_objfile_header = 1;
 		}
 	      dump_psymtab (objfile, ps, outfile);
-	      dump_psymtab_addrmap (objfile, ps, outfile);
+	      dump_psymtab_addrmap (objfile, partial_symtabs, ps, outfile);
 	      found = 1;
 	    }
 	}
@@ -1874,7 +1883,8 @@ maintenance_print_psymbols (const char *args, int from_tty)
 		      printed_objfile_header = 1;
 		    }
 		  dump_psymtab (objfile, ps, outfile);
-		  dump_psymtab_addrmap (objfile, ps, outfile);
+		  dump_psymtab_addrmap (objfile, partial_symtabs, ps,
+					outfile);
 		}
 	    }
 	}
@@ -1886,7 +1896,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
 	  && objfile->partial_symtabs->psymtabs_addrmap != NULL)
 	{
 	  outfile->puts ("\n");
-	  dump_psymtab_addrmap (objfile, NULL, outfile);
+	  dump_psymtab_addrmap (objfile, partial_symtabs, NULL, outfile);
 	}
     }
 

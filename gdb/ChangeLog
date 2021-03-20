@@ -1,5 +1,25 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_build_psymtabs): Call
+	set_partial_symtabs.
+	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
+	* psymtab.h (make_psymbol_functions): Add partial_symtabs
+	parameter.
+	* psymtab.c (find_pc_sect_psymtab): Add partial_symtabs
+	parameter.
+	(psymbol_functions::find_pc_sect_compunit_symtab)
+	(psymbol_functions::print_stats, psymbol_functions::dump)
+	(psymbol_functions::has_symbols): Update.
+	(make_psymbol_functions, dump_psymtab_addrmap): Add
+	partial_symtabs parameter.
+	(maintenance_print_psymbols): Update.
+	(psymbol_functions::expand_symtabs_matching): Update.
+	* psympriv.h (struct psymbol_functions): Add constructor.
+	<m_partial_symtabs>: New member.
+	<set_partial_symtabs>: New method.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_create_include_psymtab): Add per_bfd
 	parameter.
 	(process_psymtab_comp_unit_reader)

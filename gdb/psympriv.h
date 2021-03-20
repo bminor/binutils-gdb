@@ -476,6 +476,11 @@ class psymtab_discarder
    partial symbols.  */
 struct psymbol_functions : public quick_symbol_functions
 {
+  explicit psymbol_functions (const std::shared_ptr<psymtab_storage> &storage)
+    : m_partial_symtabs (storage)
+  {
+  }
+
   bool has_symbols (struct objfile *objfile) override;
 
   struct symtab *find_last_source_symtab (struct objfile *objfile) override;
@@ -540,12 +545,22 @@ struct psymbol_functions : public quick_symbol_functions
     m_psymbol_map.clear ();
   }
 
+  /* Replace the partial symbol table storage in this object with
+     SYMS.  */
+  void set_partial_symtabs (const std::shared_ptr<psymtab_storage> &syms)
+  {
+    m_partial_symtabs = syms;
+  }
+
 private:
 
   void fill_psymbol_map (struct objfile *objfile,
 			 struct partial_symtab *psymtab,
 			 std::set<CORE_ADDR> *seen_addrs,
 			 const std::vector<partial_symbol *> &symbols);
+
+  /* Storage for the partial symbols.  */
+  std::shared_ptr<psymtab_storage> m_partial_symtabs;
 
   /* Map symbol addresses to the partial symtab that defines the
      object at that address.  */

@@ -154,6 +154,7 @@ private:
 extern psymtab_storage::partial_symtab_range require_partial_symbols
     (struct objfile *objfile, bool verbose);
 
-extern quick_symbol_functions_up make_psymbol_functions ();
+extern quick_symbol_functions_up make_psymbol_functions
+     (const std::shared_ptr<psymtab_storage> &);
 
 #endif /* PSYMTAB_H */

@@ -6128,6 +6128,12 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       /* Partial symbols were already read, so now we can simply
 	 attach them.  */
       objfile->partial_symtabs = per_bfd->partial_symtabs;
+      /* This is a temporary hack to ensure that the objfile and 'qf'
+	 psymtabs are identical.  */
+      psymbol_functions *psf
+	= dynamic_cast<psymbol_functions *> (objfile->qf.get ());
+      gdb_assert (psf != nullptr);
+      psf->set_partial_symtabs (per_bfd->partial_symtabs);
       per_objfile->resize_symtabs ();
       return;
     }
