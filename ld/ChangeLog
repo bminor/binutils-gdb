@@ -1,3 +1,11 @@
+2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/27590
+	* testsuite/ld-x86-64/pr27590.rd: New file.
+	* testsuite/ld-x86-64/pr27590a.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/pr27590b.obj.bz2: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run ld/27590 test.
+
 2021-03-20  Alan Modra  <amodra@gmail.com>
 
 	PR 27590

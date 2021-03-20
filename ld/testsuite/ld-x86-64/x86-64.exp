@@ -226,6 +226,11 @@ set x86_64tests {
      "" ""
      { pr27587a.obj.bz2 pr27587b.obj.bz2 }
      {{ld "pr27587.err"}} "pr27587"}
+    {"Build pr27590.o"
+     "-r -melf_x86_64"
+     "" ""
+     { pr27590a.obj.bz2 pr27590b.obj.bz2 }
+     {{readelf -SW pr27590.rd}} "pr27590.o"}
 }
 
 run_ld_link_tests $x86_64tests
