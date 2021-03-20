@@ -812,11 +812,11 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
 
 /* See objfiles.h.  */
 
-int
+bool
 objfile::has_partial_symbols ()
 {
   if (!sf)
-    return 0;
+    return false;
 
   /* If we have not read psymbols, but we have a function capable of reading
      them, then that is an indication that they are in fact available.  Without
@@ -824,7 +824,7 @@ objfile::has_partial_symbols ()
      not be present in this objfile.  */
   if ((flags & OBJF_PSYMTABS_READ) == 0
       && sf->sym_read_psymbols != NULL)
-    return 1;
+    return true;
 
   return sf->qf->has_symbols (this);
 }

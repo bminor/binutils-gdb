@@ -1,5 +1,15 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* objfiles.h (struct objfile) <has_partial_symbols>: Return bool.
+	* symfile.h (struct quick_symbol_functions) <has_symbols>: Return
+	bool.
+	* symfile-debug.c (debug_qf_has_symbols): Return bool.
+	* psymtab.c (psym_has_symbols): Return bool.
+	* objfiles.c (objfile::has_partial_symbols): Return bool.
+	* dwarf2/read.c (dw2_has_symbols): Return bool.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (read_symbols): Update.
 	* objfiles.h (struct objfile) <has_partial_symbols>: New method.
 	(objfile_has_partial_symbols): Don't declare.

@@ -70,12 +70,12 @@ debug_symtab_name (struct symtab *symtab)
 
 /* Debugging version of struct quick_symbol_functions.  */
 
-static int
+static bool
 debug_qf_has_symbols (struct objfile *objfile)
 {
   const struct debug_sym_fns_data *debug_data
     = symfile_debug_objfile_data_key.get (objfile);
-  int retval;
+  bool retval;
 
   retval = debug_data->real_sf->qf->has_symbols (objfile);
 

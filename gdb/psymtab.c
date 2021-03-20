@@ -1334,7 +1334,7 @@ psym_expand_symtabs_matching
 /* Psymtab version of has_symbols.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
-static int
+static bool
 psym_has_symbols (struct objfile *objfile)
 {
   return objfile->partial_symtabs->psymtabs != NULL;

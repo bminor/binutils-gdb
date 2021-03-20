@@ -550,7 +550,7 @@ public:
 
   /* Return true if OBJFILE has partial symbols.  */
 
-  int has_partial_symbols ();
+  bool has_partial_symbols ();
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized

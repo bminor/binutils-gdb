@@ -150,7 +150,7 @@ struct quick_symbol_functions
 {
   /* Return true if this objfile has any "partial" symbols
      available.  */
-  int (*has_symbols) (struct objfile *objfile);
+  bool (*has_symbols) (struct objfile *objfile);
 
   /* Return the symbol table for the "last" file appearing in
      OBJFILE.  */

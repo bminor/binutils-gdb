@@ -4872,10 +4872,10 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
     });
 }
 
-static int
+static bool
 dw2_has_symbols (struct objfile *objfile)
 {
-  return 1;
+  return true;
 }
 
 const struct quick_symbol_functions dwarf2_gdb_index_functions =
