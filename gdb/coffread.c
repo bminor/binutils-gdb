@@ -708,7 +708,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   dwarf2_build_frame_info (objfile);
 
   /* Try to add separate debug file if no symbols table found.   */
-  if (!objfile_has_partial_symbols (objfile))
+  if (!objfile->has_partial_symbols ())
     {
       std::string debugfile = find_separate_debug_file_by_buildid (objfile);
 

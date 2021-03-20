@@ -1954,7 +1954,7 @@ dwarf2_has_info (struct objfile *objfile,
       /* We can share a "dwarf2_per_bfd" with other objfiles if the BFD
 	 doesn't require relocations and if there aren't partial symbols
 	 from some other reader.  */
-      if (!objfile_has_partial_symbols (objfile)
+      if (!objfile->has_partial_symbols ()
 	  && !gdb_bfd_requires_relocations (objfile->obfd))
 	{
 	  /* See if one has been created for this BFD yet.  */

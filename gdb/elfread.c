@@ -1266,7 +1266,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       /* elf_sym_fns_gdb_index cannot handle simultaneous non-DWARF
 	 debug information present in OBJFILE.  If there is such debug
 	 info present never use an index.  */
-      if (!objfile_has_partial_symbols (objfile)
+      if (!objfile->has_partial_symbols ()
 	  && dwarf2_initialize_objfile (objfile, &index_kind))
 	{
 	  switch (index_kind)
@@ -1293,14 +1293,14 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
      SYMTABS/PSYMTABS.  `.gnu_debuglink' may no longer be present with
      `.note.gnu.build-id'.
 
-     .gnu_debugdata is !objfile_has_partial_symbols because it contains only
+     .gnu_debugdata is !objfile::has_partial_symbols because it contains only
      .symtab, not .debug_* section.  But if we already added .gnu_debugdata as
      an objfile via find_separate_debug_file_in_section there was no separate
      debug info available.  Therefore do not attempt to search for another one,
      objfile->separate_debug_objfile->separate_debug_objfile GDB guarantees to
      be NULL and we would possibly violate it.  */
 
-  else if (!objfile_has_partial_symbols (objfile)
+  else if (!objfile->has_partial_symbols ()
 	   && objfile->separate_debug_objfile == NULL
 	   && objfile->separate_debug_objfile_backlink == NULL)
     {

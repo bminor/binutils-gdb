@@ -810,23 +810,23 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
     breakpoint_re_set ();
 }
 
-/* Return non-zero if OBJFILE has partial symbols.  */
+/* See objfiles.h.  */
 
 int
-objfile_has_partial_symbols (struct objfile *objfile)
+objfile::has_partial_symbols ()
 {
-  if (!objfile->sf)
+  if (!sf)
     return 0;
 
   /* If we have not read psymbols, but we have a function capable of reading
      them, then that is an indication that they are in fact available.  Without
      this function the symbols may have been already read in but they also may
      not be present in this objfile.  */
-  if ((objfile->flags & OBJF_PSYMTABS_READ) == 0
-      && objfile->sf->sym_read_psymbols != NULL)
+  if ((flags & OBJF_PSYMTABS_READ) == 0
+      && sf->sym_read_psymbols != NULL)
     return 1;
 
-  return objfile->sf->qf->has_symbols (objfile);
+  return sf->qf->has_symbols (this);
 }
 
 /* Return non-zero if OBJFILE has full symbols.  */
@@ -844,7 +844,7 @@ int
 objfile_has_symbols (struct objfile *objfile)
 {
   for (::objfile *o : objfile->separate_debug_objfiles ())
-    if (objfile_has_partial_symbols (o) || objfile_has_full_symbols (o))
+    if (o->has_partial_symbols () || objfile_has_full_symbols (o))
       return 1;
   return 0;
 }
@@ -859,7 +859,7 @@ have_partial_symbols (void)
 {
   for (objfile *ofp : current_program_space->objfiles ())
     {
-      if (objfile_has_partial_symbols (ofp))
+      if (ofp->has_partial_symbols ())
 	return 1;
     }
   return 0;

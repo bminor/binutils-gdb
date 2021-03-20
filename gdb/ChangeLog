@@ -1,5 +1,17 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (read_symbols): Update.
+	* objfiles.h (struct objfile) <has_partial_symbols>: New method.
+	(objfile_has_partial_symbols): Don't declare.
+	* objfiles.c (objfile::has_partial_symbols): Rename from
+	objfile_has_partial_symbols.
+	(objfile_has_symbols, have_partial_symbols): Update.
+	* elfread.c (elf_symfile_read): Update.
+	* dwarf2/read.c (dwarf2_has_info): Update.
+	* coffread.c (coff_symfile_read): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* coffread.c: Include dwarf2/public.h.
 	* dwarf2/frame.c: Include dwarf2/public.h.
 	* dwarf2/index-write.h: Include dwarf2/public.h, not symfile.h.

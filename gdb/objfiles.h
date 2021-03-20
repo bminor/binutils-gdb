@@ -548,6 +548,9 @@ public:
     return per_bfd->gdbarch;
   }
 
+  /* Return true if OBJFILE has partial symbols.  */
+
+  int has_partial_symbols ();
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
@@ -737,8 +740,6 @@ extern void free_objfile_separate_debug (struct objfile *);
 
 extern void objfile_relocate (struct objfile *, const section_offsets &);
 extern void objfile_rebase (struct objfile *, CORE_ADDR);
-
-extern int objfile_has_partial_symbols (struct objfile *objfile);
 
 extern int objfile_has_full_symbols (struct objfile *objfile);
 
