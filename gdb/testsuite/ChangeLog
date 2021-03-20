@@ -1,3 +1,7 @@
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/maint.exp: Update "maint print statistics" output.
+
 2021-03-19  Kevin Buettner  <kevinb@redhat.com>
 
 	* lib/gdbserver-support.exp (gdbserver_exit): Use the

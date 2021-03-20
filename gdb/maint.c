@@ -518,7 +518,6 @@ static void
 maintenance_print_statistics (const char *args, int from_tty)
 {
   print_objfile_statistics ();
-  print_symbol_bcache_statistics ();
 }
 
 static void

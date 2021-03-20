@@ -126,8 +126,10 @@ struct quick_symbol_functions
 
   /* Print statistics about any indices loaded for OBJFILE.  The
      statistics should be printed to gdb_stdout.  This is used for
-     "maint print statistics".  */
-  virtual void print_stats (struct objfile *objfile) = 0;
+     "maint print statistics".  Statistics are printed in two
+     sections.  PRINT_BCACHE is false when printing the first section
+     of general statistics, and true when printing bcache statistics.  */
+  virtual void print_stats (struct objfile *objfile, bool print_bcache) = 0;
 
   /* Dump any indices loaded for OBJFILE.  The dump should go to
      gdb_stdout.  This is used for "maint print objfiles".  */

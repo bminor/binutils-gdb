@@ -38,9 +38,6 @@
 #include "source.h"
 #include "readline/tilde.h"
 
-#include "psymtab.h"
-#include "psympriv.h"
-
 /* Prototypes for local functions */
 
 static int block_depth (const struct block *);
@@ -48,35 +45,6 @@ static int block_depth (const struct block *);
 static void print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			  int depth, ui_file *outfile);
 
-
-void
-print_symbol_bcache_statistics (void)
-{
-  for (struct program_space *pspace : program_spaces)
-    for (objfile *objfile : pspace->objfiles ())
-      {
-	QUIT;
-	printf_filtered (_("Byte cache statistics for '%s':\n"),
-			 objfile_name (objfile));
-	objfile->partial_symtabs->psymbol_cache.print_statistics
-	  ("partial symbol cache");
-	objfile->per_bfd->string_cache.print_statistics ("string cache");
-      }
-}
-
-/* Count the number of partial symbols in OBJFILE.  */
-
-static int
-count_psyms (struct objfile *objfile)
-{
-  int count = 0;
-  for (partial_symtab *pst : objfile->psymtabs ())
-    {
-      count += pst->global_psymbols.size ();
-      count += pst->static_psymbols.size ();
-    }
-  return count;
-}
 
 void
 print_objfile_statistics (void)
@@ -94,18 +62,13 @@ print_objfile_statistics (void)
 	if (objfile->per_bfd->n_minsyms > 0)
 	  printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
 			   objfile->per_bfd->n_minsyms);
-
-	int n_psyms = count_psyms (objfile);
-	if (n_psyms > 0)
-	  printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
-			   n_psyms);
 	if (OBJSTAT (objfile, n_syms) > 0)
 	  printf_filtered (_("  Number of \"full\" symbols read: %d\n"),
 			   OBJSTAT (objfile, n_syms));
 	if (OBJSTAT (objfile, n_types) > 0)
 	  printf_filtered (_("  Number of \"types\" defined: %d\n"),
 			   OBJSTAT (objfile, n_types));
-	objfile->print_stats ();
+
 	i = linetables = 0;
 	for (compunit_symtab *cu : objfile->compunits ())
 	  {
@@ -124,6 +87,8 @@ print_objfile_statistics (void)
 	printf_filtered (_("  Number of symbol tables with blockvectors: %d\n"),
 			 blockvectors);
 
+	objfile->print_stats (false);
+
 	if (OBJSTAT (objfile, sz_strtab) > 0)
 	  printf_filtered (_("  Space used by string tables: %d\n"),
 			   OBJSTAT (objfile, sz_strtab));
@@ -133,11 +98,13 @@ print_objfile_statistics (void)
 	printf_filtered (_("  Total memory used for BFD obstack: %s\n"),
 			 pulongest (obstack_memory_used (&objfile->per_bfd
 							 ->storage_obstack)));
-	printf_filtered
-	  (_("  Total memory used for psymbol cache: %d\n"),
-	   objfile->partial_symtabs->psymbol_cache.memory_used ());
+
 	printf_filtered (_("  Total memory used for string cache: %d\n"),
 			 objfile->per_bfd->string_cache.memory_used ());
+	printf_filtered (_("Byte cache statistics for '%s':\n"),
+			 objfile_name (objfile));
+	objfile->per_bfd->string_cache.print_statistics ("string cache");
+	objfile->print_stats (true);
       }
 }
 

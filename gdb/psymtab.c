@@ -975,21 +975,52 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
   fprintf_filtered (outfile, "\n");
 }
 
+/* Count the number of partial symbols in OBJFILE.  */
+
+static int
+count_psyms (struct objfile *objfile)
+{
+  int count = 0;
+  for (partial_symtab *pst : objfile->psymtabs ())
+    {
+      count += pst->global_psymbols.size ();
+      count += pst->static_psymbols.size ();
+    }
+  return count;
+}
+
 /* Psymtab version of print_stats.  See its definition in
    the definition of quick_symbol_functions in symfile.h.  */
 
 void
-psymbol_functions::print_stats (struct objfile *objfile)
+psymbol_functions::print_stats (struct objfile *objfile, bool print_bcache)
 {
   int i;
 
-  i = 0;
-  for (partial_symtab *ps : require_partial_symbols (objfile, true))
+  if (!print_bcache)
     {
-      if (!ps->readin_p (objfile))
-	i++;
+      int n_psyms = count_psyms (objfile);
+      if (n_psyms > 0)
+	printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
+			 n_psyms);
+
+      i = 0;
+      for (partial_symtab *ps : require_partial_symbols (objfile, true))
+	{
+	  if (!ps->readin_p (objfile))
+	    i++;
+	}
+      printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"),
+		       i);
+      printf_filtered (_("  Total memory used for psymbol cache: %d\n"),
+		       objfile->partial_symtabs->psymbol_cache.memory_used ());
     }
-  printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"), i);
+  else
+    {
+      printf_filtered (_("Psymbol byte cache statistics:\n"));
+      objfile->partial_symtabs->psymbol_cache.print_statistics
+	("partial symbol cache");
+    }
 }
 
 /* Psymtab version of dump.  See its definition in

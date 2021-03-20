@@ -174,14 +174,14 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
 }
 
 void
-objfile::print_stats ()
+objfile::print_stats (bool print_bcache)
 {
   if (debug_symfile)
-    fprintf_filtered (gdb_stdlog, "qf->print_stats (%s)\n",
-		      objfile_debug_name (this));
+    fprintf_filtered (gdb_stdlog, "qf->print_stats (%s, %d)\n",
+		      objfile_debug_name (this), print_bcache);
 
   if (qf != nullptr)
-    qf->print_stats (this);
+    qf->print_stats (this, print_bcache);
 }
 
 void

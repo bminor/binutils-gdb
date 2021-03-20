@@ -211,7 +211,6 @@ struct objstats
 #define OBJSTAT(objfile, expr) (objfile -> stats.expr)
 #define OBJSTATS struct objstats stats
 extern void print_objfile_statistics (void);
-extern void print_symbol_bcache_statistics (void);
 
 /* Number of entries in the minimal symbol hash table.  */
 #define MINIMAL_SYMBOL_HASH_SIZE 2039
@@ -568,7 +567,7 @@ public:
 					 domain_enum domain);
 
   /* See quick_symbol_functions.  */
-  void print_stats ();
+  void print_stats (bool print_bcache);
 
   /* See quick_symbol_functions.  */
   void dump ();

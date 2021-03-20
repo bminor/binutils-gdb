@@ -1,5 +1,23 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_base_index_functions::print_stats): Add
+	print_bcache parameter.
+	* symfile-debug.c (objfile::print_stats): Add print_bcache
+	parameter.
+	* quick-symbol.h (struct quick_symbol_functions)
+	<print_stats>: Add print_bcache parameter.
+	* symmisc.c (print_symbol_bcache_statistics, count_psyms): Move
+	code to psymtab.c.
+	(print_objfile_statistics): Move psymtab code to psymtab.c.
+	* psymtab.c (count_psyms): Move from symmisc.c.
+	(psymbol_functions::print_stats): Print partial symbol and bcache
+	statistics.  Add print_bcache parameter.
+	* objfiles.h (print_symbol_bcache_statistics): Don't declare.
+	(struct objfile) <print_stats>: Add print_bcache parameter.
+	* maint.c (maintenance_print_statistics): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct dwarf2_per_bfd) <psymtabs_addrmap>: New
 	member.
 	* dwarf2/read.c (create_addrmap_from_index)

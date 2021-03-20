@@ -2214,7 +2214,7 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
     return language_unknown;
   }
 
-  void print_stats (struct objfile *objfile) override;
+  void print_stats (struct objfile *objfile, bool print_bcache) override;
 
   void expand_all_symtabs (struct objfile *objfile) override;
 
@@ -3681,8 +3681,12 @@ dwarf2_gdb_index::lookup_symbol (struct objfile *objfile,
 }
 
 void
-dwarf2_base_index_functions::print_stats (struct objfile *objfile)
+dwarf2_base_index_functions::print_stats (struct objfile *objfile,
+					  bool print_bcache)
 {
+  if (print_bcache)
+    return;
+
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   int total = (per_objfile->per_bfd->all_comp_units.size ()
 	       + per_objfile->per_bfd->all_type_units.size ());

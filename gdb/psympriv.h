@@ -496,7 +496,7 @@ struct psymbol_functions : public quick_symbol_functions
 					       domain_enum domain,
 					       bool *symbol_found_p) override;
 
-  void print_stats (struct objfile *objfile) override;
+  void print_stats (struct objfile *objfile, bool print_bcache) override;
 
   void dump (struct objfile *objfile) override;
 
