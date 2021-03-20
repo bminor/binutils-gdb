@@ -1,3 +1,10 @@
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
+	* symfile.h (enum dwarf2_section_enum)
+	(dwarf2_get_section_info): Move to dwarf2/read.h.
+	* dwarf2/read.h (enum dwarf2_section_enum)
+	(dwarf2_get_section_info): Move from symfile.h.
+
 2021-03-19  Pedro Alves  <pedro@palves.net>
 
 	* thread.c (any_thread_of_inferior): Check if there's a selected

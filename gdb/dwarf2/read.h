@@ -688,4 +688,15 @@ struct type *dwarf2_fetch_die_type_sect_off
 /* When non-zero, dump line number entries as they are read in.  */
 extern unsigned int dwarf_line_debug;
 
+/* Dwarf2 sections that can be accessed by dwarf2_get_section_info.  */
+enum dwarf2_section_enum {
+  DWARF2_DEBUG_FRAME,
+  DWARF2_EH_FRAME
+};
+
+extern void dwarf2_get_section_info (struct objfile *,
+                                     enum dwarf2_section_enum,
+				     asection **, const gdb_byte **,
+				     bfd_size_type *);
+
 #endif /* DWARF2READ_H */
