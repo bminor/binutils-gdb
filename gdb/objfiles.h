@@ -38,6 +38,7 @@
 #include "gdbsupport/refcounted-object.h"
 #include "jit.h"
 #include "quick-symbol.h"
+#include <forward_list>
 
 struct htab;
 struct objfile_data;
@@ -668,7 +669,7 @@ public:
 
   /* The "quick" (aka partial) symbol functions for this symbol
      reader.  */
-  quick_symbol_functions_up qf;
+  std::forward_list<quick_symbol_functions_up> qf;
 
   /* Per objfile data-pointers required by other GDB modules.  */
 

@@ -1,5 +1,30 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_build_psymtabs): Update.
+	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
+	* symfile-debug.c (objfile::has_partial_symbols)
+	(objfile::find_last_source_symtab)
+	(objfile::forget_cached_source_info)
+	(objfile::map_symtabs_matching_filename, objfile::lookup_symbol)
+	(objfile::print_stats, objfile::dump)
+	(objfile::expand_symtabs_for_function)
+	(objfile::expand_all_symtabs)
+	(objfile::expand_symtabs_with_fullname)
+	(objfile::map_matching_symbols)
+	(objfile::expand_symtabs_matching)
+	(objfile::find_pc_sect_compunit_symtab)
+	(objfile::map_symbol_filenames)
+	(objfile::find_compunit_symtab_by_address)
+	(objfile::lookup_global_symbol_language)
+	(objfile::require_partial_symbols): Update.
+	* psymtab.c (maintenance_print_psymbols)
+	(maintenance_info_psymtabs, maintenance_check_psymtabs): Update.
+	* objfiles.h (struct objfile) <qf>: Now a forward_list.
+	* objfiles.c (objfile_relocate1): Update.
+	* elfread.c (elf_symfile_read): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (struct objfile) <psymtabs>: Remove method.
 
 2021-03-20  Tom Tromey  <tom@tromey.com>

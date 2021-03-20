@@ -1287,10 +1287,12 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  switch (index_kind)
 	    {
 	    case dw_index_kind::GDB_INDEX:
-	      objfile->qf = make_dwarf_gdb_index ();
+	      objfile->qf.clear ();
+	      objfile->qf.push_front (make_dwarf_gdb_index ());
 	      break;
 	    case dw_index_kind::DEBUG_NAMES:
-	      objfile->qf = make_dwarf_debug_names ();
+	      objfile->qf.clear ();
+	      objfile->qf.push_front (make_dwarf_debug_names ());
 	      break;
 	    }
 	}
@@ -1300,7 +1302,8 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	     partial symbols, because OBJF_PSYMTABS_READ has not been
 	     set, and so our lazy reader function will still be called
 	     when needed.  */
-	  objfile->qf.reset
+	  objfile->qf.clear ();
+	  objfile->qf.emplace_front
 	    (new lazy_dwarf_reader (objfile->partial_symtabs));
 	}
     }

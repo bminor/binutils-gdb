@@ -6131,7 +6131,7 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       /* This is a temporary hack to ensure that the objfile and 'qf'
 	 psymtabs are identical.  */
       psymbol_functions *psf
-	= dynamic_cast<psymbol_functions *> (objfile->qf.get ());
+	= dynamic_cast<psymbol_functions *> (objfile->qf.front ().get ());
       gdb_assert (psf != nullptr);
       psf->set_partial_symtabs (per_bfd->partial_symtabs);
       per_objfile->resize_symtabs ();

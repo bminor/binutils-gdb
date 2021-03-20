@@ -703,8 +703,8 @@ objfile_relocate1 (struct objfile *objfile,
   }
 
   /* Notify the quick symbol object.  */
-  if (objfile->qf)
-    objfile->qf->relocated ();
+  for (const auto &iter : objfile->qf)
+    iter->relocated ();
 
   /* Relocate isolated symbols.  */
   {

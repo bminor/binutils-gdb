@@ -80,12 +80,16 @@ objfile::has_partial_symbols ()
      them, then that is an indication that they are in fact available.  Without
      this function the symbols may have been already read in but they also may
      not be present in this objfile.  */
-  if ((flags & OBJF_PSYMTABS_READ) == 0
-      && qf != nullptr
-      && qf->can_lazily_read_symbols ())
-    retval = true;
-  else if (qf != nullptr)
-    retval = qf->has_symbols (this);
+  for (const auto &iter : qf)
+    {
+      if ((flags & OBJF_PSYMTABS_READ) == 0
+	  && iter->can_lazily_read_symbols ())
+	retval = true;
+      else
+	retval = iter->has_symbols (this);
+      if (retval)
+	break;
+    }
 
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog, "qf->has_symbols (%s) = %d\n",
@@ -103,8 +107,12 @@ objfile::find_last_source_symtab ()
     fprintf_filtered (gdb_stdlog, "qf->find_last_source_symtab (%s)\n",
 		      objfile_debug_name (this));
 
-  if (qf != nullptr)
-    retval = qf->find_last_source_symtab (this);
+  for (const auto &iter : qf)
+    {
+      retval = iter->find_last_source_symtab (this);
+      if (retval != nullptr)
+	break;
+    }
 
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog, "qf->find_last_source_symtab (...) = %s\n",
@@ -120,8 +128,8 @@ objfile::forget_cached_source_info ()
     fprintf_filtered (gdb_stdlog, "qf->forget_cached_source_info (%s)\n",
 		      objfile_debug_name (this));
 
-  if (qf != nullptr)
-    qf->forget_cached_source_info (this);
+  for (const auto &iter : qf)
+    iter->forget_cached_source_info (this);
 }
 
 bool
@@ -138,9 +146,13 @@ objfile::map_symtabs_matching_filename
 		      host_address_to_string (&callback));
 
   bool retval = false;
-  if (qf != nullptr)
-    retval = (qf->map_symtabs_matching_filename
-	      (this, name, real_path, callback));
+  for (const auto &iter : qf)
+    {
+      retval = (iter->map_symtabs_matching_filename
+		(this, name, real_path, callback));
+      if (retval)
+	break;
+    }
 
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog,
@@ -161,8 +173,12 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
 		      objfile_debug_name (this), kind, name,
 		      domain_name (domain));
 
-  if (qf != nullptr)
-    retval = qf->lookup_symbol (this, kind, name, domain);
+  for (const auto &iter : qf)
+    {
+      retval = iter->lookup_symbol (this, kind, name, domain);
+      if (retval != nullptr)
+	break;
+    }
 
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog, "qf->lookup_symbol (...) = %s\n",
@@ -180,8 +196,8 @@ objfile::print_stats (bool print_bcache)
     fprintf_filtered (gdb_stdlog, "qf->print_stats (%s, %d)\n",
 		      objfile_debug_name (this), print_bcache);
 
-  if (qf != nullptr)
-    qf->print_stats (this, print_bcache);
+  for (const auto &iter : qf)
+    iter->print_stats (this, print_bcache);
 }
 
 void
@@ -191,8 +207,8 @@ objfile::dump ()
     fprintf_filtered (gdb_stdlog, "qf->dump (%s)\n",
 		      objfile_debug_name (this));
 
-  if (qf != nullptr)
-    qf->dump (this);
+  for (const auto &iter : qf)
+    iter->dump (this);
 }
 
 void
@@ -203,8 +219,8 @@ objfile::expand_symtabs_for_function (const char *func_name)
 		      "qf->expand_symtabs_for_function (%s, \"%s\")\n",
 		      objfile_debug_name (this), func_name);
 
-  if (qf != nullptr)
-    qf->expand_symtabs_for_function (this, func_name);
+  for (const auto &iter : qf)
+    iter->expand_symtabs_for_function (this, func_name);
 }
 
 void
@@ -214,8 +230,8 @@ objfile::expand_all_symtabs ()
     fprintf_filtered (gdb_stdlog, "qf->expand_all_symtabs (%s)\n",
 		      objfile_debug_name (this));
 
-  if (qf != nullptr)
-    qf->expand_all_symtabs (this);
+  for (const auto &iter : qf)
+    iter->expand_all_symtabs (this);
 }
 
 void
@@ -226,8 +242,8 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
 		      "qf->expand_symtabs_with_fullname (%s, \"%s\")\n",
 		      objfile_debug_name (this), fullname);
 
-  if (qf != nullptr)
-    qf->expand_symtabs_with_fullname (this, fullname);
+  for (const auto &iter : qf)
+    iter->expand_symtabs_with_fullname (this, fullname);
 }
 
 void
@@ -244,9 +260,9 @@ objfile::map_matching_symbols
 		      domain_name (domain), global,
 		      host_address_to_string (ordered_compare));
 
-  if (qf != nullptr)
-    qf->map_matching_symbols (this, name, domain, global,
-			      callback, ordered_compare);
+  for (const auto &iter : qf)
+    iter->map_matching_symbols (this, name, domain, global,
+				callback, ordered_compare);
 }
 
 void
@@ -266,9 +282,9 @@ objfile::expand_symtabs_matching
 		      host_address_to_string (&expansion_notify),
 		      search_domain_name (kind));
 
-  if (qf != nullptr)
-    qf->expand_symtabs_matching (this, file_matcher, lookup_name,
-				 symbol_matcher, expansion_notify, kind);
+  for (const auto &iter : qf)
+    iter->expand_symtabs_matching (this, file_matcher, lookup_name,
+				   symbol_matcher, expansion_notify, kind);
 }
 
 struct compunit_symtab *
@@ -288,9 +304,13 @@ objfile::find_pc_sect_compunit_symtab (struct bound_minimal_symbol msymbol,
 		      host_address_to_string (section),
 		      warn_if_readin);
 
-  if (qf != nullptr)
-    retval = qf->find_pc_sect_compunit_symtab (this, msymbol, pc, section,
-					       warn_if_readin);
+  for (const auto &iter : qf)
+    {
+      retval = iter->find_pc_sect_compunit_symtab (this, msymbol, pc, section,
+						   warn_if_readin);
+      if (retval != nullptr)
+	break;
+    }
 
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog,
@@ -314,8 +334,8 @@ objfile::map_symbol_filenames (symbol_filename_ftype *fun, void *data,
 		      host_address_to_string (data),
 		      need_fullname);
 
-  if (qf != nullptr)
-    qf->map_symbol_filenames (this, fun, data, need_fullname);
+  for (const auto &iter : qf)
+    iter->map_symbol_filenames (this, fun, data, need_fullname);
 }
 
 struct compunit_symtab *
@@ -328,8 +348,12 @@ objfile::find_compunit_symtab_by_address (CORE_ADDR address)
 		      hex_string (address));
 
   struct compunit_symtab *result = NULL;
-  if (qf != nullptr)
-    result = qf->find_compunit_symtab_by_address (this, address);
+  for (const auto &iter : qf)
+    {
+      result = iter->find_compunit_symtab_by_address (this, address);
+      if (result != nullptr)
+	break;
+    }
 
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog,
@@ -347,12 +371,15 @@ objfile::lookup_global_symbol_language (const char *name,
 					bool *symbol_found_p)
 {
   enum language result = language_unknown;
+  *symbol_found_p = false;
 
-  if (qf != nullptr)
-    result = qf->lookup_global_symbol_language (this, name, domain,
-						symbol_found_p);
-  else
-    *symbol_found_p = false;
+  for (const auto &iter : qf)
+    {
+      result = iter->lookup_global_symbol_language (this, name, domain,
+						    symbol_found_p);
+      if (*symbol_found_p)
+	break;
+    }
 
   return result;
 }
@@ -364,17 +391,23 @@ objfile::require_partial_symbols (bool verbose)
     {
       flags |= OBJF_PSYMTABS_READ;
 
-      if (qf->can_lazily_read_symbols ())
+      bool printed = false;
+      for (const auto &iter : qf)
 	{
-	  if (verbose)
-	    printf_filtered (_("Reading symbols from %s...\n"),
-			     objfile_name (this));
-	  qf->read_partial_symbols (this);
-
-	  if (verbose && !objfile_has_symbols (this))
-	    printf_filtered (_("(No debugging symbols found in %s)\n"),
-			     objfile_name (this));
+	  if (iter->can_lazily_read_symbols ())
+	    {
+	      if (verbose && !printed)
+		{
+		  printf_filtered (_("Reading symbols from %s...\n"),
+				   objfile_name (this));
+		  printed = true;
+		}
+	      iter->read_partial_symbols (this);
+	    }
 	}
+      if (printed && !objfile_has_symbols (this))
+	printf_filtered (_("(No debugging symbols found in %s)\n"),
+			 objfile_name (this));
     }
 }
 
