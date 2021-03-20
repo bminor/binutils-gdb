@@ -1,5 +1,12 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (syms_from_objfile_1): Call reset_psymtabs.
+	(reread_symbols): Move reset_psymtabs call later.
+	* objfiles.c (objfile::objfile): Don't initialize
+	partial_symtabs.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_build_psymtabs): Call
 	set_partial_symtabs.
 	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
