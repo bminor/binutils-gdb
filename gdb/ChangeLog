@@ -1,5 +1,15 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (psymbol_functions::require_partial_symbols): Rename.
+	(psymbol_functions::find_pc_sect_psymtab): Rename.
+	(psymbol_functions::find_pc_sect_compunit_symtab)
+	(maintenance_print_psymbols, maintenance_check_psymtabs): Update.
+	* psympriv.h (struct psymbol_functions) <require_partial_symbols>:
+	Declare new method.
+	<get_partial_symtabs, find_pc_sect_psymtab>: Likewise.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_start_psymtab): Add partial_symtabs parameter.
 	(xcoff_end_psymtab, scan_xcoff_symtab): Update.
 	* psymtab.c (partial_symtab::partial_symtab): Add partial_symtabs

@@ -559,12 +559,35 @@ struct psymbol_functions : public quick_symbol_functions
     m_psymbol_map.clear ();
   }
 
+  /* Ensure the partial symbols for OBJFILE have been loaded.  Return
+     a range adapter for the psymtabs.  */
+  psymtab_storage::partial_symtab_range require_partial_symbols
+       (struct objfile *objfile);
+
+  /* Return the partial symbol storage associated with this
+     object.  */
+  const std::shared_ptr<psymtab_storage> &get_partial_symtabs () const
+  {
+    return m_partial_symtabs;
+  }
+
   /* Replace the partial symbol table storage in this object with
      SYMS.  */
   void set_partial_symtabs (const std::shared_ptr<psymtab_storage> &syms)
   {
     m_partial_symtabs = syms;
   }
+
+  /* Find which partial symtab contains PC and SECTION.  Return NULL if
+     none.  We return the psymtab that contains a symbol whose address
+     exactly matches PC, or, if we cannot find an exact match, the
+     psymtab that contains a symbol whose address is closest to PC.  */
+
+  struct partial_symtab *find_pc_sect_psymtab
+       (struct objfile *objfile,
+	CORE_ADDR pc,
+	struct obj_section *section,
+	struct bound_minimal_symbol msymbol);
 
 private:
 
