@@ -473,4 +473,68 @@ class psymtab_discarder
   struct partial_symtab *m_psymtab;
 };
 
+/* An implementation of quick_symbol_functions, specialized for
+   partial symbols.  */
+struct psymbol_functions : public quick_symbol_functions
+{
+  bool has_symbols (struct objfile *objfile) override;
+
+  struct symtab *find_last_source_symtab (struct objfile *objfile) override;
+
+  void forget_cached_source_info (struct objfile *objfile) override;
+
+  bool map_symtabs_matching_filename
+    (struct objfile *objfile, const char *name, const char *real_path,
+     gdb::function_view<bool (symtab *)> callback) override;
+
+  struct compunit_symtab *lookup_symbol (struct objfile *objfile,
+					 block_enum block_index,
+					 const char *name,
+					 domain_enum domain) override;
+
+  enum language lookup_global_symbol_language (struct objfile *objfile,
+					       const char *name,
+					       domain_enum domain,
+					       bool *symbol_found_p) override;
+
+  void print_stats (struct objfile *objfile) override;
+
+  void dump (struct objfile *objfile) override;
+
+  void expand_symtabs_for_function (struct objfile *objfile,
+				    const char *func_name) override;
+
+  void expand_all_symtabs (struct objfile *objfile) override;
+
+  void expand_symtabs_with_fullname (struct objfile *objfile,
+				     const char *fullname) override;
+
+  void map_matching_symbols
+    (struct objfile *,
+     const lookup_name_info &lookup_name,
+     domain_enum domain,
+     int global,
+     gdb::function_view<symbol_found_callback_ftype> callback,
+     symbol_compare_ftype *ordered_compare) override;
+
+  void expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     enum search_domain kind) override;
+
+  struct compunit_symtab *find_pc_sect_compunit_symtab
+    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
+
+  struct compunit_symtab *find_compunit_symtab_by_address
+    (struct objfile *objfile, CORE_ADDR address) override;
+
+  void map_symbol_filenames (struct objfile *objfile,
+			     symbol_filename_ftype *fun, void *data,
+			     int need_fullname) override;
+};
+
 #endif /* PSYMPRIV_H */

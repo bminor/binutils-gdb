@@ -66,16 +66,20 @@ typedef void (expand_symtabs_exp_notify_ftype) (compunit_symtab *symtab);
 
 struct quick_symbol_functions
 {
+  virtual ~quick_symbol_functions ()
+  {
+  }
+
   /* Return true if this objfile has any "partial" symbols
      available.  */
-  bool (*has_symbols) (struct objfile *objfile);
+  virtual bool has_symbols (struct objfile *objfile) = 0;
 
   /* Return the symbol table for the "last" file appearing in
      OBJFILE.  */
-  struct symtab *(*find_last_source_symtab) (struct objfile *objfile);
+  virtual struct symtab *find_last_source_symtab (struct objfile *objfile) = 0;
 
   /* Forget all cached full file names for OBJFILE.  */
-  void (*forget_cached_source_info) (struct objfile *objfile);
+  virtual void forget_cached_source_info (struct objfile *objfile) = 0;
 
   /* Expand and iterate over each "partial" symbol table in OBJFILE
      where the source file is named NAME.
@@ -89,9 +93,9 @@ struct quick_symbol_functions
      Then, this calls iterate_over_some_symtabs (or equivalent) over
      all newly-created symbol tables, passing CALLBACK to it.
      The result of this call is returned.  */
-  bool (*map_symtabs_matching_filename)
+  virtual bool map_symtabs_matching_filename
     (struct objfile *objfile, const char *name, const char *real_path,
-     gdb::function_view<bool (symtab *)> callback);
+     gdb::function_view<bool (symtab *)> callback) = 0;
 
   /* Check to see if the symbol is defined in a "partial" symbol table
      of OBJFILE.  BLOCK_INDEX should be either GLOBAL_BLOCK or STATIC_BLOCK,
@@ -103,10 +107,10 @@ struct quick_symbol_functions
      defined, or NULL if no such symbol table exists.  If OBJFILE
      contains !TYPE_OPAQUE symbol prefer its compunit.  If it contains
      only TYPE_OPAQUE symbol(s), return at least that compunit.  */
-  struct compunit_symtab *(*lookup_symbol) (struct objfile *objfile,
-					    block_enum block_index,
-					    const char *name,
-					    domain_enum domain);
+  virtual struct compunit_symtab *lookup_symbol (struct objfile *objfile,
+						 block_enum block_index,
+						 const char *name,
+						 domain_enum domain) = 0;
 
   /* Check to see if the global symbol is defined in a "partial" symbol table
      of OBJFILE. NAME is the name of the symbol to look for.  DOMAIN
@@ -114,35 +118,36 @@ struct quick_symbol_functions
 
      If found, sets *symbol_found_p to true and returns the symbol language.
      defined, or NULL if no such symbol table exists.  */
-  enum language (*lookup_global_symbol_language) (struct objfile *objfile,
-						  const char *name,
-						  domain_enum domain,
-						  bool *symbol_found_p);
+  virtual enum language lookup_global_symbol_language
+       (struct objfile *objfile,
+	const char *name,
+	domain_enum domain,
+	bool *symbol_found_p) = 0;
 
   /* Print statistics about any indices loaded for OBJFILE.  The
      statistics should be printed to gdb_stdout.  This is used for
      "maint print statistics".  */
-  void (*print_stats) (struct objfile *objfile);
+  virtual void print_stats (struct objfile *objfile) = 0;
 
   /* Dump any indices loaded for OBJFILE.  The dump should go to
      gdb_stdout.  This is used for "maint print objfiles".  */
-  void (*dump) (struct objfile *objfile);
+  virtual void dump (struct objfile *objfile) = 0;
 
   /* Find all the symbols in OBJFILE named FUNC_NAME, and ensure that
      the corresponding symbol tables are loaded.  */
-  void (*expand_symtabs_for_function) (struct objfile *objfile,
-				       const char *func_name);
+  virtual void expand_symtabs_for_function (struct objfile *objfile,
+					    const char *func_name) = 0;
 
   /* Read all symbol tables associated with OBJFILE.  */
-  void (*expand_all_symtabs) (struct objfile *objfile);
+  virtual void expand_all_symtabs (struct objfile *objfile) = 0;
 
   /* Read all symbol tables associated with OBJFILE which have
      symtab_to_fullname equal to FULLNAME.
      This is for the purposes of examining code only, e.g., expand_line_sal.
      The routine may ignore debug info that is known to not be useful with
      code, e.g., DW_TAG_type_unit for dwarf debug info.  */
-  void (*expand_symtabs_with_fullname) (struct objfile *objfile,
-					const char *fullname);
+  virtual void expand_symtabs_with_fullname (struct objfile *objfile,
+					     const char *fullname) = 0;
 
   /* Find global or static symbols in all tables that are in DOMAIN
      and for which MATCH (symbol name, NAME) == 0, passing each to 
@@ -161,13 +166,13 @@ struct quick_symbol_functions
      CALLBACK returns true to indicate that the scan should continue, or
      false to indicate that the scan should be terminated.  */
 
-  void (*map_matching_symbols)
+  virtual void map_matching_symbols
     (struct objfile *,
      const lookup_name_info &lookup_name,
      domain_enum domain,
      int global,
      gdb::function_view<symbol_found_callback_ftype> callback,
-     symbol_compare_ftype *ordered_compare);
+     symbol_compare_ftype *ordered_compare) = 0;
 
   /* Expand all symbol tables in OBJFILE matching some criteria.
 
@@ -190,13 +195,13 @@ struct quick_symbol_functions
      If SYMBOL_MATCHER returns false, then the symbol is skipped.
 
      Otherwise, the symbol's symbol table is expanded.  */
-  void (*expand_symtabs_matching)
+  virtual void expand_symtabs_matching
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
      const lookup_name_info *lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
-     enum search_domain kind);
+     enum search_domain kind) = 0;
 
   /* Return the comp unit from OBJFILE that contains PC and
      SECTION.  Return NULL if there is no such compunit.  This
@@ -204,25 +209,27 @@ struct quick_symbol_functions
      address exactly matches PC, or, if there is no exact match, the
      compunit that contains a symbol whose address is closest to
      PC.  */
-  struct compunit_symtab *(*find_pc_sect_compunit_symtab)
+  virtual struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin);
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) = 0;
 
   /* Return the comp unit from OBJFILE that contains a symbol at
      ADDRESS.  Return NULL if there is no such comp unit.  Unlike
      find_pc_sect_compunit_symtab, any sort of symbol (not just text
      symbols) can be considered, and only exact address matches are
-     considered.  This pointer may be NULL.  */
-  struct compunit_symtab *(*find_compunit_symtab_by_address)
-    (struct objfile *objfile, CORE_ADDR address);
+     considered.  */
+  virtual struct compunit_symtab *find_compunit_symtab_by_address
+    (struct objfile *objfile, CORE_ADDR address) = 0;
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
      not already read in.  FUN is the callback.  It is passed the file's
      FILENAME, the file's FULLNAME (if need_fullname is non-zero), and
      the DATA passed to this function.  */
-  void (*map_symbol_filenames) (struct objfile *objfile,
-				symbol_filename_ftype *fun, void *data,
-				int need_fullname);
+  virtual void map_symbol_filenames (struct objfile *objfile,
+				     symbol_filename_ftype *fun, void *data,
+				     int need_fullname) = 0;
 };
+
+typedef std::unique_ptr<quick_symbol_functions> quick_symbol_functions_up;
 
 #endif /* GDB_QUICK_SYMBOL_H */

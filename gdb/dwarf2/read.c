@@ -2150,7 +2150,7 @@ dwarf2_get_section_info (struct objfile *objfile,
 }
 
 
-/* DWARF quick_symbols_functions support.  */
+/* DWARF quick_symbol_functions support.  */
 
 /* TUs can share .debug_line entries, and there can be a lot more TUs than
    unique line tables, so we maintain a separate table of all .debug_line
@@ -2192,6 +2192,119 @@ struct dwarf2_per_cu_quick_data
      There will be no point in trying to read it again next time.  */
   unsigned int no_file_data : 1;
 };
+
+struct dwarf2_base_index_functions : public quick_symbol_functions
+{
+  bool has_symbols (struct objfile *objfile) override;
+
+  struct symtab *find_last_source_symtab (struct objfile *objfile) override;
+
+  void forget_cached_source_info (struct objfile *objfile) override;
+
+  bool map_symtabs_matching_filename
+    (struct objfile *objfile, const char *name, const char *real_path,
+     gdb::function_view<bool (symtab *)> callback) override;
+
+  enum language lookup_global_symbol_language (struct objfile *objfile,
+					       const char *name,
+					       domain_enum domain,
+					       bool *symbol_found_p) override
+  {
+    *symbol_found_p = false;
+    return language_unknown;
+  }
+
+  void print_stats (struct objfile *objfile) override;
+
+  void expand_all_symtabs (struct objfile *objfile) override;
+
+  void expand_symtabs_with_fullname (struct objfile *objfile,
+				     const char *fullname) override;
+
+  struct compunit_symtab *find_pc_sect_compunit_symtab
+    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
+
+  struct compunit_symtab *find_compunit_symtab_by_address
+    (struct objfile *objfile, CORE_ADDR address) override
+  {
+    return nullptr;
+  }
+
+  void map_symbol_filenames (struct objfile *objfile,
+			     symbol_filename_ftype *fun, void *data,
+			     int need_fullname) override;
+};
+
+struct dwarf2_gdb_index : public dwarf2_base_index_functions
+{
+  struct compunit_symtab *lookup_symbol (struct objfile *objfile,
+					 block_enum block_index,
+					 const char *name,
+					 domain_enum domain) override;
+
+  void dump (struct objfile *objfile) override;
+
+  void expand_symtabs_for_function (struct objfile *objfile,
+				    const char *func_name) override;
+
+  void map_matching_symbols
+    (struct objfile *,
+     const lookup_name_info &lookup_name,
+     domain_enum domain,
+     int global,
+     gdb::function_view<symbol_found_callback_ftype> callback,
+     symbol_compare_ftype *ordered_compare) override;
+
+  void expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     enum search_domain kind) override;
+};
+
+struct dwarf2_debug_names_index : public dwarf2_base_index_functions
+{
+  struct compunit_symtab *lookup_symbol (struct objfile *objfile,
+					 block_enum block_index,
+					 const char *name,
+					 domain_enum domain) override;
+
+  void dump (struct objfile *objfile) override;
+
+  void expand_symtabs_for_function (struct objfile *objfile,
+				    const char *func_name) override;
+
+  void map_matching_symbols
+    (struct objfile *,
+     const lookup_name_info &lookup_name,
+     domain_enum domain,
+     int global,
+     gdb::function_view<symbol_found_callback_ftype> callback,
+     symbol_compare_ftype *ordered_compare) override;
+
+  void expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     enum search_domain kind) override;
+};
+
+quick_symbol_functions_up
+make_dwarf_gdb_index ()
+{
+  return quick_symbol_functions_up (new dwarf2_gdb_index);
+}
+
+quick_symbol_functions_up
+make_dwarf_debug_names ()
+{
+  return quick_symbol_functions_up (new dwarf2_debug_names_index);
+}
 
 /* Utility hash function for a stmt_list_hash.  */
 
@@ -3206,8 +3319,8 @@ dw2_get_real_path (dwarf2_per_objfile *per_objfile,
   return qfn->real_names[index];
 }
 
-static struct symtab *
-dw2_find_last_source_symtab (struct objfile *objfile)
+struct symtab *
+dwarf2_base_index_functions::find_last_source_symtab (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   dwarf2_per_cu_data *dwarf_cu = per_objfile->per_bfd->all_comp_units.back ();
@@ -3240,8 +3353,9 @@ dw2_free_cached_file_names (void **slot, void *info)
   return 1;
 }
 
-static void
-dw2_forget_cached_source_info (struct objfile *objfile)
+void
+dwarf2_base_index_functions::forget_cached_source_info
+     (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -3275,8 +3389,8 @@ dw2_map_expand_apply (struct objfile *objfile,
 
 /* Implementation of the map_symtabs_matching_filename method.  */
 
-static bool
-dw2_map_symtabs_matching_filename
+bool
+dwarf2_base_index_functions::map_symtabs_matching_filename
   (struct objfile *objfile, const char *name, const char *real_path,
    gdb::function_view<bool (symtab *)> callback)
 {
@@ -3525,9 +3639,10 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
   return NULL;
 }
 
-static struct compunit_symtab *
-dw2_lookup_symbol (struct objfile *objfile, block_enum block_index,
-		   const char *name, domain_enum domain)
+struct compunit_symtab *
+dwarf2_gdb_index::lookup_symbol (struct objfile *objfile,
+				 block_enum block_index,
+				 const char *name, domain_enum domain)
 {
   struct compunit_symtab *stab_best = NULL;
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
@@ -3568,8 +3683,8 @@ dw2_lookup_symbol (struct objfile *objfile, block_enum block_index,
   return stab_best;
 }
 
-static void
-dw2_print_stats (struct objfile *objfile)
+void
+dwarf2_base_index_functions::print_stats (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   int total = (per_objfile->per_bfd->all_comp_units.size ()
@@ -3592,8 +3707,8 @@ dw2_print_stats (struct objfile *objfile)
    One use is to verify .gdb_index has been loaded by the
    gdb.dwarf2/gdb-index.exp testcase.  */
 
-static void
-dw2_dump (struct objfile *objfile)
+void
+dwarf2_gdb_index::dump (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -3609,9 +3724,9 @@ dw2_dump (struct objfile *objfile)
   printf_filtered ("\n");
 }
 
-static void
-dw2_expand_symtabs_for_function (struct objfile *objfile,
-				 const char *func_name)
+void
+dwarf2_gdb_index::expand_symtabs_for_function (struct objfile *objfile,
+					       const char *func_name)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -3625,8 +3740,8 @@ dw2_expand_symtabs_for_function (struct objfile *objfile,
 
 }
 
-static void
-dw2_expand_all_symtabs (struct objfile *objfile)
+void
+dwarf2_base_index_functions::expand_all_symtabs (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   int total_units = (per_objfile->per_bfd->all_comp_units.size ()
@@ -3645,9 +3760,9 @@ dw2_expand_all_symtabs (struct objfile *objfile)
     }
 }
 
-static void
-dw2_expand_symtabs_with_fullname (struct objfile *objfile,
-				  const char *fullname)
+void
+dwarf2_base_index_functions::expand_symtabs_with_fullname
+     (struct objfile *objfile, const char *fullname)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -3751,6 +3866,18 @@ dw2_map_matching_symbols
 					    domain, callback))
 	return;
     }
+}
+
+void
+dwarf2_gdb_index::map_matching_symbols
+  (struct objfile *objfile,
+   const lookup_name_info &name, domain_enum domain,
+   int global,
+   gdb::function_view<symbol_found_callback_ftype> callback,
+   symbol_compare_ftype *ordered_compare)
+{
+  dw2_map_matching_symbols (objfile, name, domain, global, callback,
+			    ordered_compare);
 }
 
 /* Starting from a search name, return the string that finds the upper
@@ -4746,6 +4873,19 @@ dw2_expand_symtabs_matching
     }, per_objfile);
 }
 
+void
+dwarf2_gdb_index::expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     enum search_domain kind)
+{
+  dw2_expand_symtabs_matching (objfile, file_matcher, lookup_name,
+			       symbol_matcher, expansion_notify, kind);
+}
+
 /* A helper for dw2_find_pc_sect_compunit_symtab which finds the most specific
    symtab.  */
 
@@ -4774,12 +4914,13 @@ recursively_find_pc_sect_compunit_symtab (struct compunit_symtab *cust,
   return NULL;
 }
 
-static struct compunit_symtab *
-dw2_find_pc_sect_compunit_symtab (struct objfile *objfile,
-				  struct bound_minimal_symbol msymbol,
-				  CORE_ADDR pc,
-				  struct obj_section *section,
-				  int warn_if_readin)
+struct compunit_symtab *
+dwarf2_base_index_functions::find_pc_sect_compunit_symtab
+     (struct objfile *objfile,
+      struct bound_minimal_symbol msymbol,
+      CORE_ADDR pc,
+      struct obj_section *section,
+      int warn_if_readin)
 {
   struct dwarf2_per_cu_data *data;
   struct compunit_symtab *result;
@@ -4805,9 +4946,11 @@ dw2_find_pc_sect_compunit_symtab (struct objfile *objfile,
   return result;
 }
 
-static void
-dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
-			  void *data, int need_fullname)
+void
+dwarf2_base_index_functions::map_symbol_filenames (struct objfile *objfile,
+						   symbol_filename_ftype *fun,
+						   void *data,
+						   int need_fullname)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -4872,31 +5015,11 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
     });
 }
 
-static bool
-dw2_has_symbols (struct objfile *objfile)
+bool
+dwarf2_base_index_functions::has_symbols (struct objfile *objfile)
 {
   return true;
 }
-
-const struct quick_symbol_functions dwarf2_gdb_index_functions =
-{
-  dw2_has_symbols,
-  dw2_find_last_source_symtab,
-  dw2_forget_cached_source_info,
-  dw2_map_symtabs_matching_filename,
-  dw2_lookup_symbol,
-  NULL,
-  dw2_print_stats,
-  dw2_dump,
-  dw2_expand_symtabs_for_function,
-  dw2_expand_all_symtabs,
-  dw2_expand_symtabs_with_fullname,
-  dw2_map_matching_symbols,
-  dw2_expand_symtabs_matching,
-  dw2_find_pc_sect_compunit_symtab,
-  NULL,
-  dw2_map_symbol_filenames
-};
 
 /* DWARF-5 debug_names reader.  */
 
@@ -5632,9 +5755,10 @@ dw2_debug_names_iterator::next ()
   return per_cu;
 }
 
-static struct compunit_symtab *
-dw2_debug_names_lookup_symbol (struct objfile *objfile, block_enum block_index,
-			       const char *name, domain_enum domain)
+struct compunit_symtab *
+dwarf2_debug_names_index::lookup_symbol
+     (struct objfile *objfile, block_enum block_index,
+      const char *name, domain_enum domain)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -5683,8 +5807,8 @@ dw2_debug_names_lookup_symbol (struct objfile *objfile, block_enum block_index,
    via "mt print objfiles".  The gdb.dwarf2/gdb-index.exp testcase
    uses this to verify that .debug_names has been loaded.  */
 
-static void
-dw2_debug_names_dump (struct objfile *objfile)
+void
+dwarf2_debug_names_index::dump (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -5697,9 +5821,9 @@ dw2_debug_names_dump (struct objfile *objfile)
   printf_filtered ("\n");
 }
 
-static void
-dw2_debug_names_expand_symtabs_for_function (struct objfile *objfile,
-					     const char *func_name)
+void
+dwarf2_debug_names_index::expand_symtabs_for_function
+     (struct objfile *objfile, const char *func_name)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -5717,8 +5841,8 @@ dw2_debug_names_expand_symtabs_for_function (struct objfile *objfile,
     }
 }
 
-static void
-dw2_debug_names_map_matching_symbols
+void
+dwarf2_debug_names_index::map_matching_symbols
   (struct objfile *objfile,
    const lookup_name_info &name, domain_enum domain,
    int global,
@@ -5775,8 +5899,8 @@ dw2_debug_names_map_matching_symbols
     }
 }
 
-static void
-dw2_debug_names_expand_symtabs_matching
+void
+dwarf2_debug_names_index::expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    const lookup_name_info *lookup_name,
@@ -5821,26 +5945,6 @@ dw2_debug_names_expand_symtabs_matching
       return true;
     }, per_objfile);
 }
-
-const struct quick_symbol_functions dwarf2_debug_names_functions =
-{
-  dw2_has_symbols,
-  dw2_find_last_source_symtab,
-  dw2_forget_cached_source_info,
-  dw2_map_symtabs_matching_filename,
-  dw2_debug_names_lookup_symbol,
-  NULL,
-  dw2_print_stats,
-  dw2_debug_names_dump,
-  dw2_debug_names_expand_symtabs_for_function,
-  dw2_expand_all_symtabs,
-  dw2_expand_symtabs_with_fullname,
-  dw2_debug_names_map_matching_symbols,
-  dw2_debug_names_expand_symtabs_matching,
-  dw2_find_pc_sect_compunit_symtab,
-  NULL,
-  dw2_map_symbol_filenames
-};
 
 /* Get the content of the .gdb_index section of OBJ.  SECTION_OWNER should point
    to either a dwarf2_per_bfd or dwz_file object.  */

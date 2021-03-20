@@ -43,4 +43,7 @@ extern bool dwarf2_initialize_objfile (struct objfile *objfile,
 extern void dwarf2_build_psymtabs (struct objfile *);
 extern void dwarf2_build_frame_info (struct objfile *);
 
+extern quick_symbol_functions_up make_dwarf_gdb_index ();
+extern quick_symbol_functions_up make_dwarf_debug_names ();
+
 #endif /* DWARF2_PUBLIC_H */

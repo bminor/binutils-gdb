@@ -1,5 +1,64 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* psympriv.h (struct psymbol_functions): New.
+	* symfile.c (syms_from_objfile_1, reread_symbols): Update.
+	* symfile-debug.c (objfile::find_compunit_symtab_by_address)
+	(objfile::lookup_global_symbol_language): Update.
+	* quick-symbol.h (struct quick_symbol_functions): Convert function
+	pointers to methods.  Add virtual destructor.
+	(quick_symbol_functions_up): New typedef.
+	* psymtab.h (psym_functions, dwarf2_gdb_index_functions)
+	(dwarf2_debug_names_functions): Don't declare.
+	(make_psymbol_functions): Declare.
+	* psymtab.c (psymbol_functions::map_symtabs_matching_filename)
+	(psymbol_functions::find_pc_sect_compunit_symtab)
+	(psymbol_functions::lookup_symbol)
+	(psymbol_functions::lookup_global_symbol_language)
+	(psymbol_functions::find_last_source_symtab)
+	(psymbol_functions::forget_cached_source_info)
+	(psymbol_functions::print_stats, psymbol_functions::dump)
+	(psymbol_functions::expand_symtabs_for_function)
+	(psymbol_functions::expand_all_symtabs)
+	(psymbol_functions::expand_symtabs_with_fullname)
+	(psymbol_functions::map_symbol_filenames)
+	(psymbol_functions::map_matching_symbols)
+	(psymbol_functions::expand_symtabs_matching)
+	(psymbol_functions::has_symbols)
+	(psymbol_functions::find_compunit_symtab_by_address): Rename.
+	(psym_functions): Remove.
+	(make_psymbol_functions): New function.
+	* objfiles.h (struct objfile) <qf>: Change type.
+	* elfread.c (elf_symfile_read): Update.
+	* dwarf2/read.c (struct dwarf2_base_index_functions)
+	(struct dwarf2_gdb_index, struct dwarf2_debug_names_index): New.
+	(make_dwarf_gdb_index, make_dwarf_debug_names): New functions.
+	(dwarf2_base_index_functions::find_last_source_symtab)
+	(dwarf2_base_index_functions::forget_cached_source_info)
+	(dwarf2_base_index_functions::map_symtabs_matching_filename)
+	(dwarf2_gdb_index::lookup_symbol)
+	(dwarf2_base_index_functions::print_stats)
+	(dwarf2_gdb_index::dump)
+	(dwarf2_gdb_index::expand_symtabs_for_function)
+	(dwarf2_base_index_functions::expand_all_symtabs)
+	(dwarf2_base_index_functions::expand_symtabs_with_fullname):
+	Rename.
+	(dwarf2_gdb_index::map_matching_symbols): New method.
+	(dwarf2_gdb_index::expand_symtabs_matching): New method.
+	(dwarf2_base_index_functions::find_pc_sect_compunit_symtab)
+	(dwarf2_base_index_functions::map_symbol_filenames)
+	(dwarf2_base_index_functions::has_symbols): Rename.
+	(dwarf2_gdb_index_functions): Remove.
+	(dwarf2_debug_names_index::lookup_symbol)
+	(dwarf2_debug_names_index::dump)
+	(dwarf2_debug_names_index::expand_symtabs_for_function)
+	(dwarf2_debug_names_index::map_matching_symbols)
+	(dwarf2_debug_names_index::expand_symtabs_matching): Rename.
+	(dwarf2_debug_names_functions): Remove.
+	* dwarf2/public.h (make_dwarf_gdb_index, make_dwarf_debug_names):
+	Declare.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (require_partial_symbols): Check that 'sf' is not
 	null.
 	* xcoffread.c (xcoff_sym_fns): Update.

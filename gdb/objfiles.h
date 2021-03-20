@@ -37,6 +37,7 @@
 #include "gdbarch.h"
 #include "gdbsupport/refcounted-object.h"
 #include "jit.h"
+#include "quick-symbol.h"
 
 struct htab;
 struct objfile_data;
@@ -679,7 +680,7 @@ public:
 
   /* The "quick" (aka partial) symbol functions for this symbol
      reader.  */
-  const struct quick_symbol_functions *qf = nullptr;
+  quick_symbol_functions_up qf;
 
   /* Per objfile data-pointers required by other GDB modules.  */
 

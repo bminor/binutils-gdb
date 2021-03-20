@@ -1270,10 +1270,10 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  switch (index_kind)
 	    {
 	    case dw_index_kind::GDB_INDEX:
-	      objfile->qf = &dwarf2_gdb_index_functions;
+	      objfile->qf = make_dwarf_gdb_index ();
 	      break;
 	    case dw_index_kind::DEBUG_NAMES:
-	      objfile->qf = &dwarf2_debug_names_functions;
+	      objfile->qf = make_dwarf_debug_names ();
 	      break;
 	    }
 	}

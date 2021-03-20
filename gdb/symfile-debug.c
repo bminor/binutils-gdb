@@ -328,7 +328,7 @@ objfile::find_compunit_symtab_by_address (CORE_ADDR address)
 		      hex_string (address));
 
   struct compunit_symtab *result = NULL;
-  if (qf != nullptr && qf->find_compunit_symtab_by_address != NULL)
+  if (qf != nullptr)
     result = qf->find_compunit_symtab_by_address (this, address);
 
   if (debug_symfile)
@@ -348,7 +348,7 @@ objfile::lookup_global_symbol_language (const char *name,
 {
   enum language result = language_unknown;
 
-  if (qf != nullptr && qf->lookup_global_symbol_language != nullptr)
+  if (qf != nullptr)
     result = qf->lookup_global_symbol_language (this, name, domain,
 						symbol_found_p);
   else
