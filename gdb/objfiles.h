@@ -615,6 +615,9 @@ public:
 					       domain_enum domain,
 					       bool *symbol_found_p);
 
+  /* See quick_symbol_functions.  */
+  void require_partial_symbols (bool verbose);
+
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized

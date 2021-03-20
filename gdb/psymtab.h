@@ -146,14 +146,6 @@ private:
 };
 
 
-/* Ensure that the partial symbols for OBJFILE have been loaded.  If
-   VERBOSE is true, then this will print a message when symbols
-   are loaded.  This function returns a range adapter suitable for
-   iterating over the psymtabs of OBJFILE.  */
-
-extern psymtab_storage::partial_symtab_range require_partial_symbols
-    (struct objfile *objfile, bool verbose);
-
 extern quick_symbol_functions_up make_psymbol_functions
      (const std::shared_ptr<psymtab_storage> &);
 

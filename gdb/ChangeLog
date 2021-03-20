@@ -1,5 +1,30 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* symfile.c (read_symbols): Use objfile method.
+	* symfile-debug.c (objfile::require_partial_symbols): New method.
+	* psymtab.h (require_partial_symbols): Don't declare.
+	* psymtab.c (require_partial_symbols): Use objfile method.  Now
+	static.
+	(psymbol_functions::map_symtabs_matching_filename, OBJFILE)
+	(psymbol_functions::lookup_symbol)
+	(psymbol_functions::lookup_global_symbol_language)
+	(psymbol_functions::find_last_source_symtab)
+	(psymbol_functions::forget_cached_source_info)
+	(psymbol_functions::print_stats)
+	(psymbol_functions::expand_symtabs_for_function)
+	(psymbol_functions::expand_all_symtabs)
+	(psymbol_functions::expand_symtabs_with_fullname)
+	(psymbol_functions::map_symbol_filenames)
+	(psymbol_functions::map_matching_symbols)
+	(psymbol_functions::expand_symtabs_matching)
+	(psymbol_functions::find_compunit_symtab_by_address)
+	(maintenance_print_psymbols, maintenance_info_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* objfiles.h (struct objfile) <require_partial_symbols>: Declare
+	new method.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (xcoff_sym_fns): Update.
 	* symfile.h (struct sym_fns) <sym_read_psymbols>: Remove.
 	* symfile-debug.c (objfile::has_partial_symbols): Use

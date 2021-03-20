@@ -357,6 +357,27 @@ objfile::lookup_global_symbol_language (const char *name,
   return result;
 }
 
+void
+objfile::require_partial_symbols (bool verbose)
+{
+  if ((flags & OBJF_PSYMTABS_READ) == 0)
+    {
+      flags |= OBJF_PSYMTABS_READ;
+
+      if (qf->can_lazily_read_symbols ())
+	{
+	  if (verbose)
+	    printf_filtered (_("Reading symbols from %s...\n"),
+			     objfile_name (this));
+	  qf->read_partial_symbols (this);
+
+	  if (verbose && !objfile_has_symbols (this))
+	    printf_filtered (_("(No debugging symbols found in %s)\n"),
+			     objfile_name (this));
+	}
+    }
+}
+
 
 /* Debugging version of struct sym_probe_fns.  */
 

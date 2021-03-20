@@ -69,8 +69,6 @@
 #include <chrono>
 #include <algorithm>
 
-#include "psymtab.h"
-
 int (*deprecated_ui_load_progress_hook) (const char *section,
 					 unsigned long num);
 void (*deprecated_show_load_progress) (const char *section,
@@ -793,7 +791,7 @@ read_symbols (struct objfile *objfile, symfile_add_flags add_flags)
 	}
     }
   if ((add_flags & SYMFILE_NO_READ) == 0)
-    require_partial_symbols (objfile, false);
+    objfile->require_partial_symbols (false);
 }
 
 /* Initialize entry point information for this objfile.  */
