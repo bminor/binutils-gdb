@@ -1,5 +1,14 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* symfile.h (symbol_compare_ftype, symbol_filename_ftype)
+	(expand_symtabs_file_matcher_ftype)
+	(expand_symtabs_symbol_matcher_ftype)
+	(expand_symtabs_exp_notify_ftype, struct quick_symbol_functions):
+	Move to quick-symbol.h.
+	* quick-symbol.h: New file.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (iterate_over_symtabs, expand_symtab_containing_pc)
 	(lookup_symbol_via_quick_fns, find_quick_global_symbol_language)
 	(basic_lookup_transparent_type_quick)
