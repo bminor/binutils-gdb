@@ -1,5 +1,17 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct dwarf2_per_bfd) <psymtabs_addrmap>: New
+	member.
+	* dwarf2/read.c (create_addrmap_from_index)
+	(create_addrmap_from_aranges): Set per_bfd addrmap.
+	(dwarf2_read_gdb_index): Don't set partial_symtabs.
+	(dwarf2_base_index_functions::find_pc_sect_compunit_symtab): Use
+	per_bfd addrmap.
+	(dwarf2_read_debug_names): Don't set partial_symtabs.
+	(dwarf2_initialize_objfile): Likewise.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_build_psymtabs): Set partial_symtabs
 	earlier.
 

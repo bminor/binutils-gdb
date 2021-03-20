@@ -257,6 +257,9 @@ public:
      partial symbols have been read the first time.  */
   std::shared_ptr<psymtab_storage> partial_symtabs;
 
+  /* The address map that is used by the DWARF index code.  */
+  struct addrmap *index_addrmap = nullptr;
+
 private:
 
   /* The total number of per_cu and signatured_type objects that have

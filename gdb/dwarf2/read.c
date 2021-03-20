@@ -2700,13 +2700,14 @@ create_signatured_type_table_from_debug_names
 }
 
 /* Read the address map data from the mapped index, and use it to
-   populate the objfile's psymtabs_addrmap.  */
+   populate the psymtabs_addrmap.  */
 
 static void
 create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
 			   struct mapped_index *index)
 {
   struct objfile *objfile = per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct gdbarch *gdbarch = objfile->arch ();
   const gdb_byte *iter, *end;
   struct addrmap *mutable_map;
@@ -2738,7 +2739,7 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
 	  continue;
 	}
 
-      if (cu_index >= per_objfile->per_bfd->all_comp_units.size ())
+      if (cu_index >= per_bfd->all_comp_units.size ())
 	{
 	  complaint (_(".gdb_index address table has invalid CU number %u"),
 		     (unsigned) cu_index);
@@ -2748,15 +2749,15 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
       lo = gdbarch_adjust_dwarf2_addr (gdbarch, lo + baseaddr) - baseaddr;
       hi = gdbarch_adjust_dwarf2_addr (gdbarch, hi + baseaddr) - baseaddr;
       addrmap_set_empty (mutable_map, lo, hi - 1,
-			 per_objfile->per_bfd->get_cu (cu_index));
+			 per_bfd->get_cu (cu_index));
     }
 
-  objfile->partial_symtabs->psymtabs_addrmap
-    = addrmap_create_fixed (mutable_map, objfile->partial_symtabs->obstack ());
+  per_bfd->index_addrmap = addrmap_create_fixed (mutable_map,
+						 &per_bfd->obstack);
 }
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it to
-   populate the objfile's psymtabs_addrmap.  */
+   populate the psymtabs_addrmap.  */
 
 static void
 create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
@@ -2766,6 +2767,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
   bfd *abfd = objfile->obfd;
   struct gdbarch *gdbarch = objfile->arch ();
   const CORE_ADDR baseaddr = objfile->text_section_offset ();
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   auto_obstack temp_obstack;
   addrmap *mutable_map = addrmap_create_mutable (&temp_obstack);
@@ -2902,7 +2904,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	  addr += address_size;
 	  if (start == 0 && length == 0)
 	    break;
-	  if (start == 0 && !per_objfile->per_bfd->has_section_at_zero)
+	  if (start == 0 && !per_bfd->has_section_at_zero)
 	    {
 	      /* Symbol was eliminated due to a COMDAT group.  */
 	      continue;
@@ -2916,8 +2918,8 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	}
     }
 
-  objfile->partial_symtabs->psymtabs_addrmap
-    = addrmap_create_fixed (mutable_map, objfile->partial_symtabs->obstack ());
+  per_bfd->index_addrmap = addrmap_create_fixed (mutable_map,
+						 &per_bfd->obstack);
 }
 
 /* Find a slot in the mapped index INDEX for the object named NAME.
@@ -3183,11 +3185,6 @@ dwarf2_read_gdb_index
   per_bfd->using_index = 1;
   per_bfd->quick_file_names_table =
     create_quick_file_names_table (per_bfd->all_comp_units.size ());
-
-  /* Save partial symtabs in the per_bfd object, for the benefit of subsequent
-     objfiles using the same BFD.  */
-  gdb_assert (per_bfd->partial_symtabs == nullptr);
-  per_bfd->partial_symtabs = objfile->partial_symtabs;
 
   return 1;
 }
@@ -4925,16 +4922,17 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
   struct dwarf2_per_cu_data *data;
   struct compunit_symtab *result;
 
-  if (!objfile->partial_symtabs->psymtabs_addrmap)
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  if (per_objfile->per_bfd->index_addrmap == nullptr)
     return NULL;
 
   CORE_ADDR baseaddr = objfile->text_section_offset ();
-  data = (struct dwarf2_per_cu_data *) addrmap_find
-    (objfile->partial_symtabs->psymtabs_addrmap, pc - baseaddr);
+  data = ((struct dwarf2_per_cu_data *)
+	  addrmap_find (per_objfile->per_bfd->index_addrmap,
+			pc - baseaddr));
   if (!data)
     return NULL;
 
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   if (warn_if_readin && per_objfile->symtab_set_p (data))
     warning (_("(Internal error: pc %s in read in CU, but not in symtab.)"),
 	     paddress (objfile->arch (), pc));
@@ -5344,11 +5342,6 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
   per_bfd->using_index = 1;
   per_bfd->quick_file_names_table =
     create_quick_file_names_table (per_objfile->per_bfd->all_comp_units.size ());
-
-  /* Save partial symtabs in the per_bfd object, for the benefit of subsequent
-     objfiles using the same BFD.  */
-  gdb_assert (per_bfd->partial_symtabs == nullptr);
-  per_bfd->partial_symtabs = objfile->partial_symtabs;
 
   return true;
 }
@@ -6057,7 +6050,6 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
     {
       dwarf_read_debug_printf ("re-using shared debug names table");
       *index_kind = dw_index_kind::DEBUG_NAMES;
-      per_objfile->objfile->partial_symtabs = per_bfd->partial_symtabs;
       per_objfile->resize_symtabs ();
       return true;
     }
@@ -6068,7 +6060,6 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
     {
       dwarf_read_debug_printf ("re-using shared index table");
       *index_kind = dw_index_kind::GDB_INDEX;
-      per_objfile->objfile->partial_symtabs = per_bfd->partial_symtabs;
       per_objfile->resize_symtabs ();
       return true;
     }
@@ -14504,7 +14495,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
 
 /* Get low and high pc attributes from DW_AT_ranges attribute value OFFSET.
    Return 1 if the attributes are present and valid, otherwise, return 0.
-   If RANGES_PST is not NULL we should setup `objfile->psymtabs_addrmap'.  */
+   If RANGES_PST is not NULL we should set up the `psymtabs_addrmap'.  */
 
 static int
 dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
