@@ -84,13 +84,12 @@ require_partial_symbols (struct objfile *objfile, bool verbose)
     {
       objfile->flags |= OBJF_PSYMTABS_READ;
 
-      if (objfile->sf != nullptr
-	  && objfile->sf->sym_read_psymbols)
+      if (objfile->qf->can_lazily_read_symbols ())
 	{
 	  if (verbose)
 	    printf_filtered (_("Reading symbols from %s...\n"),
 			     objfile_name (objfile));
-	  (*objfile->sf->sym_read_psymbols) (objfile);
+	  objfile->qf->read_partial_symbols (objfile);
 
 	  if (verbose && !objfile_has_symbols (objfile))
 	    printf_filtered (_("(No debugging symbols found in %s)\n"),

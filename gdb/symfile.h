@@ -137,13 +137,6 @@ struct sym_fns
 
   void (*sym_read) (struct objfile *, symfile_add_flags);
 
-  /* Read the partial symbols for an objfile.  This may be NULL, in which case
-     gdb has to check other ways if this objfile has any symbols.  This may
-     only be non-NULL if the objfile actually does have debuginfo available.
-     */
-
-  void (*sym_read_psymbols) (struct objfile *);
-
   /* Called when we are finished with an objfile.  Should do all
      cleanup that is specific to the object file format for the
      particular objfile.  */

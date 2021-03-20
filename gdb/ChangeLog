@@ -1,5 +1,26 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_sym_fns): Update.
+	* symfile.h (struct sym_fns) <sym_read_psymbols>: Remove.
+	* symfile-debug.c (objfile::has_partial_symbols): Use
+	can_lazily_read_symbols.
+	(debug_sym_read_psymbols): Remove.
+	(debug_sym_fns, install_symfile_debug_logging): Update.
+	* quick-symbol.h (struct quick_symbol_functions)
+	<can_lazily_read_symbols, read_partial_symbols>: New methods.
+	* psymtab.c (require_partial_symbols): Use new 'qf' methods.
+	* mipsread.c (ecoff_sym_fns): Update.
+	* machoread.c (macho_sym_fns): Update.
+	* elfread.c (struct lazy_dwarf_reader): New.
+	(elf_symfile_read): Update.
+	(read_psyms): Now a method of lazy_dwarf_reader.
+	(elf_sym_fns): Update.
+	(elf_sym_fns_lazy_psyms): Remove.
+	* dbxread.c (aout_sym_fns): Update.
+	* coffread.c (coff_sym_fns): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* symfile.c (syms_from_objfile_1): Call reset_psymtabs.
 	(reread_symbols): Move reset_psymtabs call later.
 	* objfiles.c (objfile::objfile): Don't initialize

@@ -237,6 +237,20 @@ struct quick_symbol_functions
   {
     /* Do nothing.  */
   }
+
+  /* Return true if this class can lazily read the symbols.  This may
+     only return true if there are in fact symbols to be read, because
+     this is used in the implementation of 'has_partial_symbols'.  */
+  virtual bool can_lazily_read_symbols ()
+  {
+    return false;
+  }
+
+  /* Read the partial symbols for OBJFILE.  This will only ever be
+     called if can_lazily_read_symbols returns true.  */
+  virtual void read_partial_symbols (struct objfile *objfile)
+  {
+  }
 };
 
 typedef std::unique_ptr<quick_symbol_functions> quick_symbol_functions_up;

@@ -81,8 +81,8 @@ objfile::has_partial_symbols ()
      this function the symbols may have been already read in but they also may
      not be present in this objfile.  */
   if ((flags & OBJF_PSYMTABS_READ) == 0
-      && sf != nullptr
-      && sf->sym_read_psymbols != NULL)
+      && qf != nullptr
+      && qf->can_lazily_read_symbols ())
     retval = true;
   else if (qf != nullptr)
     retval = qf->has_symbols (this);
@@ -421,18 +421,6 @@ debug_sym_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 }
 
 static void
-debug_sym_read_psymbols (struct objfile *objfile)
-{
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
-
-  fprintf_filtered (gdb_stdlog, "sf->sym_read_psymbols (%s)\n",
-		    objfile_debug_name (objfile));
-
-  debug_data->real_sf->sym_read_psymbols (objfile);
-}
-
-static void
 debug_sym_finish (struct objfile *objfile)
 {
   const struct debug_sym_fns_data *debug_data
@@ -508,7 +496,6 @@ static const struct sym_fns debug_sym_fns =
   debug_sym_new_init,
   debug_sym_init,
   debug_sym_read,
-  debug_sym_read_psymbols,
   debug_sym_finish,
   debug_sym_offsets,
   debug_sym_segments,
@@ -543,8 +530,6 @@ install_symfile_debug_logging (struct objfile *objfile)
   COPY_SF_PTR (real_sf, debug_data, sym_new_init, debug_sym_new_init);
   COPY_SF_PTR (real_sf, debug_data, sym_init, debug_sym_init);
   COPY_SF_PTR (real_sf, debug_data, sym_read, debug_sym_read);
-  COPY_SF_PTR (real_sf, debug_data, sym_read_psymbols,
-	       debug_sym_read_psymbols);
   COPY_SF_PTR (real_sf, debug_data, sym_finish, debug_sym_finish);
   COPY_SF_PTR (real_sf, debug_data, sym_offsets, debug_sym_offsets);
   COPY_SF_PTR (real_sf, debug_data, sym_segments, debug_sym_segments);
