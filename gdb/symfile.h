@@ -552,32 +552,6 @@ void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
    optional offset to apply to each section.  */
 extern void generic_load (const char *args, int from_tty);
 
-/* From dwarf2read.c */
-
-struct dwarf2_debug_sections;
-extern int dwarf2_has_info (struct objfile *,
-			    const struct dwarf2_debug_sections *,
-			    bool = false);
-
-/* A DWARF names index variant.  */
-enum class dw_index_kind
-{
-  /* GDB's own .gdb_index format.   */
-  GDB_INDEX,
-
-  /* DWARF5 .debug_names.  */
-  DEBUG_NAMES,
-};
-
-/* Initialize for reading DWARF for OBJFILE.  Return false if this
-   file will use psymtabs, or true if using an index, in which case
-   *INDEX_KIND is set to the index variant in use.  */
-extern bool dwarf2_initialize_objfile (struct objfile *objfile,
-				       dw_index_kind *index_kind);
-
-extern void dwarf2_build_psymtabs (struct objfile *);
-extern void dwarf2_build_frame_info (struct objfile *);
-
 /* From minidebug.c.  */
 
 extern gdb_bfd_ref_ptr find_separate_debug_file_in_section (struct objfile *);

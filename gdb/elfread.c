@@ -51,6 +51,7 @@
 #include "gdbsupport/gdb_string_view.h"
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
+#include "dwarf2/public.h"
 
 /* Forward declarations.  */
 extern const struct sym_fns elf_sym_fns_gdb_index;

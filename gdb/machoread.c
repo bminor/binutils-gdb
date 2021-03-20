@@ -32,6 +32,7 @@
 #include "gdb_bfd.h"
 #include <string>
 #include <algorithm>
+#include "dwarf2/public.h"
 
 /* If non-zero displays debugging message.  */
 static unsigned int mach_o_debug_level = 0;

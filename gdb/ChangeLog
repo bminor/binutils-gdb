@@ -1,5 +1,19 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* coffread.c: Include dwarf2/public.h.
+	* dwarf2/frame.c: Include dwarf2/public.h.
+	* dwarf2/index-write.h: Include dwarf2/public.h, not symfile.h.
+	* dwarf2/public.h: New file.
+	* dwarf2/read.c: Include dwarf2/public.h.
+	* elfread.c: Include dwarf2/public.h.
+	* machoread.c: Include dwarf2/public.h.
+	* symfile.h (dwarf2_has_info, enum dw_index_kind)
+	(dwarf2_initialize_objfile, dwarf2_build_psymtabs)
+	(dwarf2_build_frame_info): Move to dwarf2/public.h.
+	* xcoffread.c: Include dwarf2/public.h.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* symfile.h (enum dwarf2_section_enum)
 	(dwarf2_get_section_info): Move to dwarf2/read.h.
 	* dwarf2/read.h (enum dwarf2_section_enum)

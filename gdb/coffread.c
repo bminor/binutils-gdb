@@ -36,6 +36,7 @@
 #include "target.h"
 #include "block.h"
 #include "dictionary.h"
+#include "dwarf2/public.h"
 
 #include "coff-pe-read.h"
 

@@ -37,6 +37,7 @@
 #include "complaints.h"
 #include "dwarf2/frame.h"
 #include "dwarf2/read.h"
+#include "dwarf2/public.h"
 #include "ax.h"
 #include "dwarf2/loc.h"
 #include "dwarf2/frame-tailcall.h"

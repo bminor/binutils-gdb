@@ -42,6 +42,7 @@
 #include "dwarf2/die.h"
 #include "dwarf2/sect-names.h"
 #include "dwarf2/stringify.h"
+#include "dwarf2/public.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "symtab.h"
