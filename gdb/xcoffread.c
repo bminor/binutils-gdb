@@ -203,6 +203,7 @@ eb_complaint (int arg1)
 static void xcoff_initial_scan (struct objfile *, symfile_add_flags);
 
 static void scan_xcoff_symtab (minimal_symbol_reader &,
+			       psymtab_storage *partial_symtabs,
 			       struct objfile *);
 
 static const char *xcoff_next_symbol_text (struct objfile *);
@@ -1986,7 +1987,8 @@ xcoff_start_psymtab (struct objfile *objfile,
    are the information for includes and dependencies.  */
 
 static legacy_psymtab *
-xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
+xcoff_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
+		   legacy_psymtab *pst,
 		   const char **include_list, int num_includes,
 		   int capping_symbol_number,
 		   legacy_psymtab **dependency_list,
@@ -2008,7 +2010,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
   if (number_dependencies)
     {
       pst->dependencies
-	= objfile->partial_symtabs->allocate_dependencies (number_dependencies);
+	= partial_symtabs->allocate_dependencies (number_dependencies);
       memcpy (pst->dependencies, dependency_list,
 	      number_dependencies * sizeof (legacy_psymtab *));
     }
@@ -2027,7 +2029,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       /* We could save slight bits of space by only making one of these,
 	 shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies =
-	objfile->partial_symtabs->allocate_dependencies (1);
+	partial_symtabs->allocate_dependencies (1);
       subpst->dependencies[0] = pst;
       subpst->number_of_dependencies = 1;
 
@@ -2043,7 +2045,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       /* Empty psymtabs happen as a result of header files which don't have
 	 any symbols in them.  There can be a lot of them.  */
 
-      objfile->partial_symtabs->discard_psymtab (pst);
+      partial_symtabs->discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = NULL;
@@ -2112,6 +2114,7 @@ function_outside_compilation_unit_complaint (const char *arg1)
 
 static void
 scan_xcoff_symtab (minimal_symbol_reader &reader,
+		   psymtab_storage *partial_symtabs,
 		   struct objfile *objfile)
 {
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section.  */
@@ -2233,7 +2236,7 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 			       each program csect, because their text
 			       sections need not be adjacent.  */
 			    xcoff_end_psymtab
-			      (objfile, pst, psymtab_include_list,
+			      (objfile, partial_symtabs, pst, psymtab_include_list,
 			       includes_used, symnum_before, dependency_list,
 			       dependencies_used, textlow_not_set);
 			    includes_used = 0;
@@ -2402,7 +2405,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
 	    if (pst)
 	      {
-		xcoff_end_psymtab (objfile, pst, psymtab_include_list,
+		xcoff_end_psymtab (objfile, partial_symtabs,
+				   pst, psymtab_include_list,
 				   includes_used, symnum_before,
 				   dependency_list, dependencies_used,
 				   textlow_not_set);
@@ -2819,7 +2823,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 
   if (pst)
     {
-      xcoff_end_psymtab (objfile, pst, psymtab_include_list, includes_used,
+      xcoff_end_psymtab (objfile, partial_symtabs,
+			 pst, psymtab_include_list, includes_used,
 			 ssymnum, dependency_list,
 			 dependencies_used, textlow_not_set);
     }
@@ -2930,7 +2935,8 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
   /* Now that the symbol table data of the executable file are all in core,
      process them and define symbols accordingly.  */
 
-  scan_xcoff_symtab (reader, objfile);
+  psymtab_storage *partial_symtabs = objfile->partial_symtabs.get ();
+  scan_xcoff_symtab (reader, partial_symtabs, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */

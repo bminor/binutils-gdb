@@ -222,6 +222,7 @@ static int upgrade_type (int, struct type **, int, union aux_ext *,
 			 int, const char *);
 
 static void parse_partial_symbols (minimal_symbol_reader &,
+				   psymtab_storage *,
 				   struct objfile *);
 
 static int has_opaque_xref (FDR *, SYMR *);
@@ -357,7 +358,8 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
 	(*swap->swap_fdr_in) (objfile->obfd, fdr_src, fdr_ptr);
     }
 
-  parse_partial_symbols (reader, objfile);
+  psymtab_storage *partial_symtabs = objfile->partial_symtabs.get ();
+  parse_partial_symbols (reader, partial_symtabs, objfile);
 
 #if 0
   /* Check to make sure file was compiled with -g.  If not, warn the
@@ -2281,6 +2283,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
 
 static void
 parse_partial_symbols (minimal_symbol_reader &reader,
+		       psymtab_storage *partial_symtabs,
 		       struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();
@@ -3642,7 +3645,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       /* Link pst to FDR.  dbx_end_psymtab returns NULL if the psymtab was
 	 empty and put on the free list.  */
       fdr_to_pst[f_idx].pst
-	= dbx_end_psymtab (objfile, save_pst,
+	= dbx_end_psymtab (objfile, partial_symtabs, save_pst,
 			   psymtab_include_list, includes_used,
 			   -1, save_pst->raw_text_high (),
 			   dependency_list, dependencies_used,
@@ -3666,7 +3669,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	  && save_pst->text_low_valid
 	  && !(objfile->flags & OBJF_REORDERED))
 	{
-	  for (partial_symtab *iter : objfile->psymtabs ())
+	  for (partial_symtab *iter : partial_symtabs->range ())
 	    {
 	      if (save_pst != iter
 		  && save_pst->raw_text_low () >= iter->raw_text_low ()
@@ -3697,7 +3700,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	 source files or a reverse .h -> .c dependency for header files.  */
       pst->number_of_dependencies = 0;
       pst->dependencies
-	= objfile->partial_symtabs->allocate_dependencies (fh->crfd - 1);
+	= partial_symtabs->allocate_dependencies (fh->crfd - 1);
       for (s_idx = 1; s_idx < fh->crfd; s_idx++)
 	{
 	  RFDT rh;
@@ -3726,11 +3729,11 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 
   /* Remove the dummy psymtab created for -O3 images above, if it is
      still empty, to enable the detection of stripped executables.  */
-  partial_symtab *pst_del = objfile->partial_symtabs->psymtabs;
+  partial_symtab *pst_del = partial_symtabs->psymtabs;
   if (pst_del->next == NULL
       && pst_del->number_of_dependencies == 0
       && pst_del->empty ())
-    objfile->partial_symtabs->discard_psymtab (pst_del);
+    partial_symtabs->discard_psymtab (pst_del);
 }
 
 /* If the current psymbol has an enumerated type, we need to add

@@ -270,7 +270,8 @@ static void dbx_read_symtab (legacy_psymtab *self,
 
 static void dbx_expand_psymtab (legacy_psymtab *, struct objfile *);
 
-static void read_dbx_symtab (minimal_symbol_reader &, struct objfile *);
+static void read_dbx_symtab (minimal_symbol_reader &, psymtab_storage *,
+			     struct objfile *);
 
 static legacy_psymtab *find_corresponding_bincl_psymtab (const char *,
 								int);
@@ -544,7 +545,8 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
   /* Read stabs data from executable file and define symbols.  */
 
-  read_dbx_symtab (reader, objfile);
+  psymtab_storage *partial_symtabs = objfile->partial_symtabs.get ();
+  read_dbx_symtab (reader, partial_symtabs, objfile);
 
   /* Install any minimal symbols that have been collected as the current
      minimal symbols for this objfile.  */
@@ -946,7 +948,9 @@ function_outside_compilation_unit_complaint (const char *arg1)
    debugging information is available.  */
 
 static void
-read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
+read_dbx_symtab (minimal_symbol_reader &reader,
+		 psymtab_storage *partial_symtabs,
+		 struct objfile *objfile)
 {
   struct gdbarch *gdbarch = objfile->arch ();
   struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch.  */
@@ -1127,7 +1131,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 		     which are not the address.  */
 		  && nlist.n_value >= pst->raw_text_low ())
 		{
-		  dbx_end_psymtab (objfile, pst, psymtab_include_list,
+		  dbx_end_psymtab (objfile, partial_symtabs,
+				   pst, psymtab_include_list,
 				   includes_used, symnum * symbol_size,
 				   nlist.n_value > pst->raw_text_high ()
 				   ? nlist.n_value : pst->raw_text_high (),
@@ -1242,7 +1247,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 
 		if (pst)
 		  {
-		    dbx_end_psymtab (objfile, pst, psymtab_include_list,
+		    dbx_end_psymtab (objfile, partial_symtabs,
+				     pst, psymtab_include_list,
 				     includes_used, symnum * symbol_size,
 				     (valu > pst->raw_text_high ()
 				      ? valu : pst->raw_text_high ()),
@@ -1813,7 +1819,7 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	     compiled without debugging info follows this module.  */
 	  if (pst && gdbarch_sofun_address_maybe_missing (gdbarch))
 	    {
-	      dbx_end_psymtab (objfile, pst,
+	      dbx_end_psymtab (objfile, partial_symtabs, pst,
 			       psymtab_include_list, includes_used,
 			       symnum * symbol_size,
 			       (CORE_ADDR) 0, dependency_list,
@@ -1879,7 +1885,8 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	 : lowest_text_address)
 	+ text_size;
 
-      dbx_end_psymtab (objfile, pst, psymtab_include_list, includes_used,
+      dbx_end_psymtab (objfile, partial_symtabs,
+		       pst, psymtab_include_list, includes_used,
 		       symnum * symbol_size,
 		       (text_end > pst->raw_text_high ()
 			? text_end : pst->raw_text_high ()),
@@ -1923,7 +1930,8 @@ start_psymtab (struct objfile *objfile, const char *filename, CORE_ADDR textlow,
    FIXME:  List variables and peculiarities of same.  */
 
 legacy_psymtab *
-dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
+dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
+		 legacy_psymtab *pst,
 		 const char **include_list, int num_includes,
 		 int capping_symbol_offset, CORE_ADDR capping_text,
 		 legacy_psymtab **dependency_list,
@@ -1997,7 +2005,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 	 address, set it to our starting address.  Take care to not set our
 	 own ending address to our starting address.  */
 
-      for (partial_symtab *p1 : objfile->psymtabs ())
+      for (partial_symtab *p1 : partial_symtabs->range ())
 	if (!p1->text_high_valid && p1->text_low_valid && p1 != pst)
 	  p1->set_text_high (pst->raw_text_low ());
     }
@@ -2010,7 +2018,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
   if (number_dependencies)
     {
       pst->dependencies
-	= objfile->partial_symtabs->allocate_dependencies (number_dependencies);
+	= partial_symtabs->allocate_dependencies (number_dependencies);
       memcpy (pst->dependencies, dependency_list,
 	      number_dependencies * sizeof (legacy_psymtab *));
     }
@@ -2030,7 +2038,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       /* We could save slight bits of space by only making one of these,
 	 shared by the entire set of include files.  FIXME-someday.  */
       subpst->dependencies =
-	objfile->partial_symtabs->allocate_dependencies (1);
+	partial_symtabs->allocate_dependencies (1);
       subpst->dependencies[0] = pst;
       subpst->number_of_dependencies = 1;
 
@@ -2050,7 +2058,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 	 is not empty, but we don't realize that.  Fixing that without slowing
 	 things down might be tricky.  */
 
-      objfile->partial_symtabs->discard_psymtab (pst);
+      partial_symtabs->discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = NULL;

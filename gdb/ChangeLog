@@ -1,5 +1,19 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* xcoffread.c (xcoff_end_psymtab): Add partial_symtabs parameter.
+	(xcoff_end_psymtab): Update.
+	(scan_xcoff_symtab): Add partial_symtabs parameter.
+	(xcoff_initial_scan): Update.
+	* stabsread.h (dbx_end_psymtab): Add partial_symtabs parameter.
+	* mdebugread.c (mdebug_build_psymtabs): Update.
+	(parse_partial_symbols): Add partial_symtabs parameter.
+	* dbxread.c (dbx_symfile_read): Update.
+	(read_dbx_symtab): Add partial_symtabs parameter.
+	(read_dbx_symtab): Update.
+	(dbx_end_psymtab): Add partial_symtabs parameter.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* quick-symbol.h (struct quick_symbol_functions)
 	<relocated>: New method.
 	* psymtab.h (struct psymbol_functions) <relocated>: New
