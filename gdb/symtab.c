@@ -555,11 +555,8 @@ iterate_over_symtabs (const char *name,
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      if (objfile->sf
-	  && objfile->sf->qf->map_symtabs_matching_filename (objfile,
-							     name,
-							     real_path.get (),
-							     callback))
+      if (objfile->map_symtabs_matching_filename (name, real_path.get (),
+						  callback))
 	return;
     }
 }
@@ -1114,11 +1111,8 @@ expand_symtab_containing_pc (CORE_ADDR pc, struct obj_section *section)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      struct compunit_symtab *cust = NULL;
-
-      if (objfile->sf)
-	cust = objfile->sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
-							      pc, section, 0);
+      struct compunit_symtab *cust
+	= objfile->find_pc_sect_compunit_symtab (msymbol, pc, section, 0);
       if (cust)
 	return;
     }
@@ -2369,9 +2363,6 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
   const struct block *block;
   struct block_symbol result;
 
-  if (!objfile->sf)
-    return {};
-
   if (symbol_lookup_debug > 1)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -2382,7 +2373,7 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
 			  name, domain_name (domain));
     }
 
-  cust = objfile->sf->qf->lookup_symbol (objfile, block_index, name, domain);
+  cust = objfile->lookup_symbol (block_index, name, domain);
   if (cust == NULL)
     {
       if (symbol_lookup_debug > 1)
@@ -2551,21 +2542,11 @@ find_quick_global_symbol_language (const char *name, const domain_enum domain)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      if (objfile->sf && objfile->sf->qf
-	  && objfile->sf->qf->lookup_global_symbol_language)
-	continue;
-      return language_unknown;
-    }
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
       bool symbol_found_p;
       enum language lang
-	= objfile->sf->qf->lookup_global_symbol_language (objfile, name, domain,
-							  &symbol_found_p);
-      if (!symbol_found_p)
-	continue;
-      return lang;
+	= objfile->lookup_global_symbol_language (name, domain, &symbol_found_p);
+      if (symbol_found_p)
+	return lang;
     }
 
   return language_unknown;
@@ -2749,10 +2730,7 @@ basic_lookup_transparent_type_quick (struct objfile *objfile,
   const struct block *block;
   struct symbol *sym;
 
-  if (!objfile->sf)
-    return NULL;
-  cust = objfile->sf->qf->lookup_symbol (objfile, block_index, name,
-					 STRUCT_DOMAIN);
+  cust = objfile->lookup_symbol (block_index, name, STRUCT_DOMAIN);
   if (cust == NULL)
     return NULL;
 
@@ -2955,16 +2933,15 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	  /* In order to better support objfiles that contain both
 	     stabs and coff debugging info, we continue on if a psymtab
 	     can't be found.  */
-	  if ((obj_file->flags & OBJF_REORDERED) && obj_file->sf)
+	  if ((obj_file->flags & OBJF_REORDERED) != 0)
 	    {
 	      struct compunit_symtab *result;
 
 	      result
-		= obj_file->sf->qf->find_pc_sect_compunit_symtab (obj_file,
-								  msymbol,
-								  pc,
-								  section,
-								  0);
+		= obj_file->find_pc_sect_compunit_symtab (msymbol,
+							  pc,
+							  section,
+							  0);
 	      if (result != NULL)
 		return result;
 	    }
@@ -3005,14 +2982,8 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
   for (objfile *objf : current_program_space->objfiles ())
     {
-      struct compunit_symtab *result;
-
-      if (!objf->sf)
-	continue;
-      result = objf->sf->qf->find_pc_sect_compunit_symtab (objf,
-							   msymbol,
-							   pc, section,
-							   1);
+      struct compunit_symtab *result
+	= objf->find_pc_sect_compunit_symtab (msymbol, pc, section, 1);
       if (result != NULL)
 	return result;
     }
@@ -3059,11 +3030,9 @@ find_symbol_at_address (CORE_ADDR address)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      /* If this objfile doesn't have "quick" functions, then it may
-	 have been read with -readnow, in which case we need to search
-	 the symtabs directly.  */
-      if (objfile->sf == NULL
-	  || objfile->sf->qf->find_compunit_symtab_by_address == NULL)
+      /* If this objfile was read with -readnow, then we need to
+	 search the symtabs directly.  */
+      if ((objfile->flags & OBJF_READNOW) != 0)
 	{
 	  for (compunit_symtab *symtab : objfile->compunits ())
 	    {
@@ -3075,8 +3044,7 @@ find_symbol_at_address (CORE_ADDR address)
       else
 	{
 	  struct compunit_symtab *symtab
-	    = objfile->sf->qf->find_compunit_symtab_by_address (objfile,
-								address);
+	    = objfile->find_compunit_symtab_by_address (address);
 	  if (symtab != NULL)
 	    {
 	      struct symbol *sym = search_symtab (symtab, address);
@@ -3451,11 +3419,7 @@ find_line_symtab (struct symtab *sym_tab, int line,
 	best = 0;
 
       for (objfile *objfile : current_program_space->objfiles ())
-	{
-	  if (objfile->sf)
-	    objfile->sf->qf->expand_symtabs_with_fullname
-	      (objfile, symtab_to_fullname (sym_tab));
-	}
+	objfile->expand_symtabs_with_fullname (symtab_to_fullname (sym_tab));
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{
@@ -4576,21 +4540,19 @@ global_symbol_searcher::expand_symtabs
   enum search_domain kind = m_kind;
   bool found_msymbol = false;
 
-  if (objfile->sf)
-    objfile->sf->qf->expand_symtabs_matching
-      (objfile,
-       [&] (const char *filename, bool basenames)
-       {
-	 return file_matches (filename, filenames, basenames);
-       },
-       &lookup_name_info::match_any (),
-       [&] (const char *symname)
-       {
-	 return (!preg.has_value ()
-		 || preg->exec (symname, 0, NULL, 0) == 0);
-       },
-       NULL,
-       kind);
+  objfile->expand_symtabs_matching
+    ([&] (const char *filename, bool basenames)
+     {
+       return file_matches (filename, filenames, basenames);
+     },
+     &lookup_name_info::match_any (),
+     [&] (const char *symname)
+     {
+       return (!preg.has_value ()
+	       || preg->exec (symname, 0, NULL, 0) == 0);
+     },
+     NULL,
+     kind);
 
   /* Here, we search through the minimal symbol tables for functions and
      variables that match, and force their symbols to be read.  This is in

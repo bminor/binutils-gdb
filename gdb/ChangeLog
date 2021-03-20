@@ -1,5 +1,43 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (iterate_over_symtabs, expand_symtab_containing_pc)
+	(lookup_symbol_via_quick_fns, find_quick_global_symbol_language)
+	(basic_lookup_transparent_type_quick)
+	(find_pc_sect_compunit_symtab, find_symbol_at_address)
+	(find_line_symtab, global_symbol_searcher::expand_symtabs):
+	Update.
+	* symmisc.c (print_objfile_statistics, dump_objfile)
+	(maintenance_expand_symtabs): Update.
+	* symfile.c (symbol_file_add_with_addrs)
+	(expand_symtabs_matching, map_symbol_filenames): Update.
+	* symfile-debug.c (objfile::has_partial_symbols)
+	(objfile::find_last_source_symtab)
+	(objfile::forget_cached_source_info)
+	(objfile::map_symtabs_matching_filename, objfile::lookup_symbol)
+	(objfile::print_stats, objfile::dump)
+	(objfile::expand_symtabs_for_function)
+	(objfile::expand_all_symtabs)
+	(objfile::expand_symtabs_with_fullname)
+	(objfile::map_matching_symbols)
+	(objfile::expand_symtabs_matching)
+	(objfile::find_pc_sect_compunit_symtab)
+	(objfile::map_symbol_filenames)
+	(objfile::find_compunit_symtab_by_address)
+	(objfile::lookup_global_symbol_language): New methods.
+	(debug_sym_quick_functions): Remove.
+	(debug_sym_fns, install_symfile_debug_logging): Update.
+	* source.c (forget_cached_source_info_for_objfile)
+	(select_source_symtab): Update.
+	* objfiles.h (struct objfile): Add methods corresponding to
+	quick_symbol_functions.
+	* objfiles.c (objfile::has_partial_symbols): Move to
+	symfile-debug.c.
+	* linespec.c (iterate_over_all_matching_symtabs): Update.
+	* cp-support.c (add_symbol_overload_list_qualified): Update.
+	* ada-lang.c (add_nonlocal_symbols): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* objfiles.h (struct objfile) <has_partial_symbols>: Return bool.
 	* symfile.h (struct quick_symbol_functions) <has_symbols>: Return
 	bool.

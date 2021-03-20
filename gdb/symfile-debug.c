@@ -68,312 +68,296 @@ debug_symtab_name (struct symtab *symtab)
   return symtab_to_filename_for_display (symtab);
 }
 
-/* Debugging version of struct quick_symbol_functions.  */
 
-static bool
-debug_qf_has_symbols (struct objfile *objfile)
+/* See objfiles.h.  */
+
+bool
+objfile::has_partial_symbols ()
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
-  bool retval;
+  bool retval = false;
 
-  retval = debug_data->real_sf->qf->has_symbols (objfile);
+  /* If we have not read psymbols, but we have a function capable of reading
+     them, then that is an indication that they are in fact available.  Without
+     this function the symbols may have been already read in but they also may
+     not be present in this objfile.  */
+  if ((flags & OBJF_PSYMTABS_READ) == 0
+      && sf != nullptr
+      && sf->sym_read_psymbols != NULL)
+    retval = true;
+  else if (sf != nullptr)
+    retval = sf->qf->has_symbols (this);
 
-  fprintf_filtered (gdb_stdlog, "qf->has_symbols (%s) = %d\n",
-		    objfile_debug_name (objfile), retval);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->has_symbols (%s) = %d\n",
+		      objfile_debug_name (this), retval);
 
   return retval;
 }
 
-static struct symtab *
-debug_qf_find_last_source_symtab (struct objfile *objfile)
+struct symtab *
+objfile::find_last_source_symtab ()
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
-  struct symtab *retval;
+  struct symtab *retval = nullptr;
 
-  fprintf_filtered (gdb_stdlog, "qf->find_last_source_symtab (%s)\n",
-		    objfile_debug_name (objfile));
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->find_last_source_symtab (%s)\n",
+		      objfile_debug_name (this));
 
-  retval = debug_data->real_sf->qf->find_last_source_symtab (objfile);
+  if (sf != nullptr)
+    retval = sf->qf->find_last_source_symtab (this);
 
-  fprintf_filtered (gdb_stdlog, "qf->find_last_source_symtab (...) = %s\n",
-		    retval ? debug_symtab_name (retval) : "NULL");
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->find_last_source_symtab (...) = %s\n",
+		      retval ? debug_symtab_name (retval) : "NULL");
 
   return retval;
 }
 
-static void
-debug_qf_forget_cached_source_info (struct objfile *objfile)
+void
+objfile::forget_cached_source_info ()
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->forget_cached_source_info (%s)\n",
+		      objfile_debug_name (this));
 
-  fprintf_filtered (gdb_stdlog, "qf->forget_cached_source_info (%s)\n",
-		    objfile_debug_name (objfile));
-
-  debug_data->real_sf->qf->forget_cached_source_info (objfile);
+  if (sf != nullptr)
+    sf->qf->forget_cached_source_info (this);
 }
 
-static bool
-debug_qf_map_symtabs_matching_filename
-  (struct objfile *objfile, const char *name, const char *real_path,
+bool
+objfile::map_symtabs_matching_filename
+  (const char *name, const char *real_path,
    gdb::function_view<bool (symtab *)> callback)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->map_symtabs_matching_filename (%s, \"%s\", "
+		      "\"%s\", %s)\n",
+		      objfile_debug_name (this), name,
+		      real_path ? real_path : NULL,
+		      host_address_to_string (&callback));
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->map_symtabs_matching_filename (%s, \"%s\", \"%s\", %s)\n",
-		    objfile_debug_name (objfile), name,
-		    real_path ? real_path : NULL,
-		    host_address_to_string (&callback));
+  bool retval = false;
+  if (sf != nullptr)
+    retval = (sf->qf->map_symtabs_matching_filename
+	      (this, name, real_path, callback));
 
-  bool retval = (debug_data->real_sf->qf->map_symtabs_matching_filename
-		 (objfile, name, real_path, callback));
-
-  fprintf_filtered (gdb_stdlog,
-		    "qf->map_symtabs_matching_filename (...) = %d\n",
-		    retval);
-
-  return retval;
-}
-
-static struct compunit_symtab *
-debug_qf_lookup_symbol (struct objfile *objfile, block_enum kind,
-			const char *name, domain_enum domain)
-{
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
-  struct compunit_symtab *retval;
-
-  fprintf_filtered (gdb_stdlog,
-		    "qf->lookup_symbol (%s, %d, \"%s\", %s)\n",
-		    objfile_debug_name (objfile), kind, name,
-		    domain_name (domain));
-
-  retval = debug_data->real_sf->qf->lookup_symbol (objfile, kind, name,
-						   domain);
-
-  fprintf_filtered (gdb_stdlog, "qf->lookup_symbol (...) = %s\n",
-		    retval
-		    ? debug_symtab_name (compunit_primary_filetab (retval))
-		    : "NULL");
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->map_symtabs_matching_filename (...) = %d\n",
+		      retval);
 
   return retval;
 }
 
-static void
-debug_qf_print_stats (struct objfile *objfile)
+struct compunit_symtab *
+objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  struct compunit_symtab *retval = nullptr;
 
-  fprintf_filtered (gdb_stdlog, "qf->print_stats (%s)\n",
-		    objfile_debug_name (objfile));
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->lookup_symbol (%s, %d, \"%s\", %s)\n",
+		      objfile_debug_name (this), kind, name,
+		      domain_name (domain));
 
-  debug_data->real_sf->qf->print_stats (objfile);
+  if (sf != nullptr)
+    retval = sf->qf->lookup_symbol (this, kind, name, domain);
+
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->lookup_symbol (...) = %s\n",
+		      retval
+		      ? debug_symtab_name (compunit_primary_filetab (retval))
+		      : "NULL");
+
+  return retval;
 }
 
-static void
-debug_qf_dump (struct objfile *objfile)
+void
+objfile::print_stats ()
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->print_stats (%s)\n",
+		      objfile_debug_name (this));
 
-  fprintf_filtered (gdb_stdlog, "qf->dump (%s)\n",
-		    objfile_debug_name (objfile));
-
-  debug_data->real_sf->qf->dump (objfile);
+  if (sf != nullptr)
+    sf->qf->print_stats (this);
 }
 
-static void
-debug_qf_expand_symtabs_for_function (struct objfile *objfile,
-				      const char *func_name)
+void
+objfile::dump ()
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->dump (%s)\n",
+		      objfile_debug_name (this));
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->expand_symtabs_for_function (%s, \"%s\")\n",
-		    objfile_debug_name (objfile), func_name);
-
-  debug_data->real_sf->qf->expand_symtabs_for_function (objfile, func_name);
+  if (sf != nullptr)
+    sf->qf->dump (this);
 }
 
-static void
-debug_qf_expand_all_symtabs (struct objfile *objfile)
+void
+objfile::expand_symtabs_for_function (const char *func_name)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->expand_symtabs_for_function (%s, \"%s\")\n",
+		      objfile_debug_name (this), func_name);
 
-  fprintf_filtered (gdb_stdlog, "qf->expand_all_symtabs (%s)\n",
-		    objfile_debug_name (objfile));
-
-  debug_data->real_sf->qf->expand_all_symtabs (objfile);
+  if (sf != nullptr)
+    sf->qf->expand_symtabs_for_function (this, func_name);
 }
 
-static void
-debug_qf_expand_symtabs_with_fullname (struct objfile *objfile,
-				       const char *fullname)
+void
+objfile::expand_all_symtabs ()
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog, "qf->expand_all_symtabs (%s)\n",
+		      objfile_debug_name (this));
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->expand_symtabs_with_fullname (%s, \"%s\")\n",
-		    objfile_debug_name (objfile), fullname);
-
-  debug_data->real_sf->qf->expand_symtabs_with_fullname (objfile, fullname);
+  if (sf != nullptr)
+    sf->qf->expand_all_symtabs (this);
 }
 
-static void
-debug_qf_map_matching_symbols
-  (struct objfile *objfile,
-   const lookup_name_info &name, domain_enum domain,
+void
+objfile::expand_symtabs_with_fullname (const char *fullname)
+{
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->expand_symtabs_with_fullname (%s, \"%s\")\n",
+		      objfile_debug_name (this), fullname);
+
+  if (sf != nullptr)
+    sf->qf->expand_symtabs_with_fullname (this, fullname);
+}
+
+void
+objfile::map_matching_symbols
+  (const lookup_name_info &name, domain_enum domain,
    int global,
    gdb::function_view<symbol_found_callback_ftype> callback,
    symbol_compare_ftype *ordered_compare)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->map_matching_symbols (%s, %s, %d, %s)\n",
+		      objfile_debug_name (this),
+		      domain_name (domain), global,
+		      host_address_to_string (ordered_compare));
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->map_matching_symbols (%s, %s, %d, %s)\n",
-		    objfile_debug_name (objfile),
-		    domain_name (domain), global,
-		    host_address_to_string (ordered_compare));
-
-  debug_data->real_sf->qf->map_matching_symbols (objfile, name,
-						 domain, global,
-						 callback,
-						 ordered_compare);
+  if (sf != nullptr)
+    sf->qf->map_matching_symbols (this, name, domain, global,
+				  callback, ordered_compare);
 }
 
-static void
-debug_qf_expand_symtabs_matching
-  (struct objfile *objfile,
-   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+void
+objfile::expand_symtabs_matching
+  (gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
    const lookup_name_info *lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->expand_symtabs_matching (%s, %s, %s, %s, %s)\n",
+		      objfile_debug_name (this),
+		      host_address_to_string (&file_matcher),
+		      host_address_to_string (&symbol_matcher),
+		      host_address_to_string (&expansion_notify),
+		      search_domain_name (kind));
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->expand_symtabs_matching (%s, %s, %s, %s, %s)\n",
-		    objfile_debug_name (objfile),
-		    host_address_to_string (&file_matcher),
-		    host_address_to_string (&symbol_matcher),
-		    host_address_to_string (&expansion_notify),
-		    search_domain_name (kind));
-
-  debug_data->real_sf->qf->expand_symtabs_matching (objfile,
-						    file_matcher,
-						    lookup_name,
-						    symbol_matcher,
-						    expansion_notify,
-						    kind);
+  if (sf != nullptr)
+    sf->qf->expand_symtabs_matching (this, file_matcher, lookup_name,
+				     symbol_matcher, expansion_notify, kind);
 }
 
-static struct compunit_symtab *
-debug_qf_find_pc_sect_compunit_symtab (struct objfile *objfile,
-				       struct bound_minimal_symbol msymbol,
+struct compunit_symtab *
+objfile::find_pc_sect_compunit_symtab (struct bound_minimal_symbol msymbol,
 				       CORE_ADDR pc,
 				       struct obj_section *section,
 				       int warn_if_readin)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
-  struct compunit_symtab *retval;
+  struct compunit_symtab *retval = nullptr;
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->find_pc_sect_compunit_symtab (%s, %s, %s, %s, %d)\n",
-		    objfile_debug_name (objfile),
-		    host_address_to_string (msymbol.minsym),
-		    hex_string (pc),
-		    host_address_to_string (section),
-		    warn_if_readin);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->find_pc_sect_compunit_symtab (%s, %s, %s, %s, %d)\n",
+		      objfile_debug_name (this),
+		      host_address_to_string (msymbol.minsym),
+		      hex_string (pc),
+		      host_address_to_string (section),
+		      warn_if_readin);
 
-  retval
-    = debug_data->real_sf->qf->find_pc_sect_compunit_symtab (objfile, msymbol,
-							     pc, section,
-							     warn_if_readin);
+  if (sf != nullptr)
+    retval
+      = sf->qf->find_pc_sect_compunit_symtab (this, msymbol, pc, section,
+					      warn_if_readin);
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->find_pc_sect_compunit_symtab (...) = %s\n",
-		    retval
-		    ? debug_symtab_name (compunit_primary_filetab (retval))
-		    : "NULL");
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->find_pc_sect_compunit_symtab (...) = %s\n",
+		      retval
+		      ? debug_symtab_name (compunit_primary_filetab (retval))
+		      : "NULL");
 
   return retval;
 }
 
-static void
-debug_qf_map_symbol_filenames (struct objfile *objfile,
-			       symbol_filename_ftype *fun, void *data,
+void
+objfile::map_symbol_filenames (symbol_filename_ftype *fun, void *data,
 			       int need_fullname)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
-  fprintf_filtered (gdb_stdlog,
-		    "qf->map_symbol_filenames (%s, %s, %s, %d)\n",
-		    objfile_debug_name (objfile),
-		    host_address_to_string (fun),
-		    host_address_to_string (data),
-		    need_fullname);
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->map_symbol_filenames (%s, %s, %s, %d)\n",
+		      objfile_debug_name (this),
+		      host_address_to_string (fun),
+		      host_address_to_string (data),
+		      need_fullname);
 
-  debug_data->real_sf->qf->map_symbol_filenames (objfile, fun, data,
-						 need_fullname);
+  if (sf != nullptr)
+    sf->qf->map_symbol_filenames (this, fun, data, need_fullname);
 }
 
-static struct compunit_symtab *
-debug_qf_find_compunit_symtab_by_address (struct objfile *objfile,
-					  CORE_ADDR address)
+struct compunit_symtab *
+objfile::find_compunit_symtab_by_address (CORE_ADDR address)
 {
-  const struct debug_sym_fns_data *debug_data
-    = symfile_debug_objfile_data_key.get (objfile);
-  fprintf_filtered (gdb_stdlog,
-		    "qf->find_compunit_symtab_by_address (%s, %s)\n",
-		    objfile_debug_name (objfile),
-		    hex_string (address));
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->find_compunit_symtab_by_address (%s, %s)\n",
+		      objfile_debug_name (this),
+		      hex_string (address));
 
   struct compunit_symtab *result = NULL;
-  if (debug_data->real_sf->qf->map_symbol_filenames != NULL)
-    result
-      = debug_data->real_sf->qf->find_compunit_symtab_by_address (objfile,
-								  address);
+  if (sf != nullptr && sf->qf->find_compunit_symtab_by_address != NULL)
+    result = sf->qf->find_compunit_symtab_by_address (this, address);
 
-  fprintf_filtered (gdb_stdlog,
-		    "qf->find_compunit_symtab_by_address (...) = %s\n",
-		    result
-		    ? debug_symtab_name (compunit_primary_filetab (result))
-		    : "NULL");
+  if (debug_symfile)
+    fprintf_filtered (gdb_stdlog,
+		      "qf->find_compunit_symtab_by_address (...) = %s\n",
+		      result
+		      ? debug_symtab_name (compunit_primary_filetab (result))
+		      : "NULL");
 
   return result;
 }
 
-static const struct quick_symbol_functions debug_sym_quick_functions =
+enum language
+objfile::lookup_global_symbol_language (const char *name,
+					domain_enum domain,
+					bool *symbol_found_p)
 {
-  debug_qf_has_symbols,
-  debug_qf_find_last_source_symtab,
-  debug_qf_forget_cached_source_info,
-  debug_qf_map_symtabs_matching_filename,
-  debug_qf_lookup_symbol,
-  NULL,
-  debug_qf_print_stats,
-  debug_qf_dump,
-  debug_qf_expand_symtabs_for_function,
-  debug_qf_expand_all_symtabs,
-  debug_qf_expand_symtabs_with_fullname,
-  debug_qf_map_matching_symbols,
-  debug_qf_expand_symtabs_matching,
-  debug_qf_find_pc_sect_compunit_symtab,
-  debug_qf_find_compunit_symtab_by_address,
-  debug_qf_map_symbol_filenames
-};
+  enum language result = language_unknown;
+
+  if (sf != nullptr && sf->qf->lookup_global_symbol_language != nullptr)
+    result = sf->qf->lookup_global_symbol_language (this, name, domain,
+						    symbol_found_p);
+  else
+    *symbol_found_p = false;
+
+  return result;
+}
+
 
 /* Debugging version of struct sym_probe_fns.  */
 
@@ -532,7 +516,7 @@ static const struct sym_fns debug_sym_fns =
   debug_sym_read_linetable,
   debug_sym_relocate,
   &debug_sym_probe_fns,
-  &debug_sym_quick_functions
+  nullptr
 };
 
 /* Install the debugging versions of the symfile functions for OBJFILE.
@@ -571,7 +555,7 @@ install_symfile_debug_logging (struct objfile *objfile)
   COPY_SF_PTR (real_sf, debug_data, sym_relocate, debug_sym_relocate);
   if (real_sf->sym_probe_fns)
     debug_data->debug_sf.sym_probe_fns = &debug_sym_probe_fns;
-  debug_data->debug_sf.qf = &debug_sym_quick_functions;
+  debug_data->debug_sf.qf = real_sf->qf;
 
 #undef COPY_SF_PTR
 

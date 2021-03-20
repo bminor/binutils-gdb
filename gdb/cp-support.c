@@ -1452,10 +1452,7 @@ add_symbol_overload_list_qualified (const char *func_name,
      matching FUNC_NAME.  Make sure we read that symbol table in.  */
 
   for (objfile *objf : current_program_space->objfiles ())
-    {
-      if (objf->sf)
-	objf->sf->qf->expand_symtabs_for_function (objf, func_name);
-    }
+    objf->expand_symtabs_for_function (func_name);
 
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */

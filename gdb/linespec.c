@@ -1168,12 +1168,8 @@ iterate_over_all_matching_symtabs
 
       for (objfile *objfile : current_program_space->objfiles ())
 	{
-	  if (objfile->sf)
-	    objfile->sf->qf->expand_symtabs_matching (objfile,
-						      NULL,
-						      &lookup_name,
-						      NULL, NULL,
-						      search_domain);
+	  objfile->expand_symtabs_matching (NULL, &lookup_name, NULL, NULL,
+					    search_domain);
 
 	  for (compunit_symtab *cu : objfile->compunits ())
 	    {

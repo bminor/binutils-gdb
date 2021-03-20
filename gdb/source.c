@@ -342,8 +342,7 @@ select_source_symtab (struct symtab *s)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      if (objfile->sf)
-	s = objfile->sf->qf->find_last_source_symtab (objfile);
+      s = objfile->find_last_source_symtab ();
       if (s)
 	new_symtab = s;
     }
@@ -417,8 +416,7 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
 	}
     }
 
-  if (objfile->sf)
-    objfile->sf->qf->forget_cached_source_info (objfile);
+  objfile->forget_cached_source_info ();
 }
 
 /* See source.h.  */

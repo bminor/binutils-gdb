@@ -105,8 +105,7 @@ print_objfile_statistics (void)
 	if (OBJSTAT (objfile, n_types) > 0)
 	  printf_filtered (_("  Number of \"types\" defined: %d\n"),
 			   OBJSTAT (objfile, n_types));
-	if (objfile->sf)
-	  objfile->sf->qf->print_stats (objfile);
+	objfile->print_stats ();
 	i = linetables = 0;
 	for (compunit_symtab *cu : objfile->compunits ())
 	  {
@@ -153,8 +152,7 @@ dump_objfile (struct objfile *objfile)
   printf_filtered (", %d minsyms\n\n",
 		   objfile->per_bfd->minimal_symbol_count);
 
-  if (objfile->sf)
-    objfile->sf->qf->dump (objfile);
+  objfile->dump ();
 
   if (objfile->compunit_symtabs != NULL)
     {
@@ -963,23 +961,17 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 
   for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
-      {
-	if (objfile->sf)
-	  {
-	    objfile->sf->qf->expand_symtabs_matching
-	      (objfile,
-	       [&] (const char *filename, bool basenames)
-	       {
-		 /* KISS: Only apply the regexp to the complete file name.  */
-		 return (!basenames
-			 && (regexp == NULL || re_exec (filename)));
-	       },
-	       NULL,
-	       NULL,
-	       NULL,
-	       ALL_DOMAIN);
-	  }
-      }
+      objfile->expand_symtabs_matching
+	([&] (const char *filename, bool basenames)
+	 {
+	   /* KISS: Only apply the regexp to the complete file name.  */
+	   return (!basenames
+		   && (regexp == NULL || re_exec (filename)));
+	 },
+	 NULL,
+	 NULL,
+	 NULL,
+	 ALL_DOMAIN);
 }
 
 

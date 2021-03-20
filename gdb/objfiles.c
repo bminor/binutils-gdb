@@ -810,25 +810,6 @@ objfile_rebase (struct objfile *objfile, CORE_ADDR slide)
     breakpoint_re_set ();
 }
 
-/* See objfiles.h.  */
-
-bool
-objfile::has_partial_symbols ()
-{
-  if (!sf)
-    return false;
-
-  /* If we have not read psymbols, but we have a function capable of reading
-     them, then that is an indication that they are in fact available.  Without
-     this function the symbols may have been already read in but they also may
-     not be present in this objfile.  */
-  if ((flags & OBJF_PSYMTABS_READ) == 0
-      && sf->sym_read_psymbols != NULL)
-    return true;
-
-  return sf->qf->has_symbols (this);
-}
-
 /* Return non-zero if OBJFILE has full symbols.  */
 
 int
