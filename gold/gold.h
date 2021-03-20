@@ -99,6 +99,10 @@ gold_warning(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 extern void
 gold_info(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 
+// This function is called to print a trace message.
+extern void
+gold_trace(const char* msg, ...) ATTRIBUTE_PRINTF_1;
+
 // This function is called to emit an error message and then
 // immediately exit with fallback status (e.g., when
 // --incremental-update fails and the link needs to be restarted

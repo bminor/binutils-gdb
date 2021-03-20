@@ -128,6 +128,15 @@ Errors::info(const char* format, va_list args)
   fputc('\n', stderr);
 }
 
+// Print a trace message.
+
+void
+Errors::trace(const char* format, va_list args)
+{
+  vfprintf(stdout, format, args);
+  fputc('\n', stdout);
+}
+
 // Report an error at a reloc location.
 
 template<int size, bool big_endian>
@@ -272,6 +281,17 @@ gold_info(const char* format, ...)
   va_list args;
   va_start(args, format);
   parameters->errors()->info(format, args);
+  va_end(args);
+}
+
+// Print a trace message (to stdout).
+
+void
+gold_trace(const char* format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  parameters->errors()->trace(format, args);
   va_end(args);
 }
 

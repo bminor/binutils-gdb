@@ -1,5 +1,15 @@
 2021-03-19  Cary Coutant  <ccoutant@gmail.com>
 
+	PR gold/27615
+	* errors.cc (Errors::trace): New method.
+	(gold_trace): New function.
+	* errors.h (Errors::trace): New method.
+	* gold.h (gold_trace): New function.
+	* object.cc (Input_objects::add_object): Use gold_trace to print
+	object file names.
+
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
 	PR gold/pr23870
 	* testsuite/aarch64_pr23870_bar.c: Return a magic value.
 	* testsuite/aarch64_pr23870_foo.c: Check the magic value and return
