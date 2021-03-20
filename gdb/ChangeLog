@@ -1,5 +1,14 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/index-write.c (struct addrmap_index_data) <objfile>:
+	Remove.
+	(add_address_entry): Remove objfile parameter.
+	(add_address_entry_worker): Update.
+	(write_address_map): Replace objfile parameter with per_bfd.
+	(write_gdbindex, write_psymtabs_to_index): Update.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_base_index_functions::print_stats): Add
 	print_bcache parameter.
 	* symfile-debug.c (objfile::print_stats): Add print_bcache

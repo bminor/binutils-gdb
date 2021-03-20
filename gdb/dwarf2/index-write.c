@@ -413,7 +413,6 @@ struct addrmap_index_data
     : addr_vec (addr_vec_), cu_index_htab (cu_index_htab_)
   {}
 
-  struct objfile *objfile;
   data_buf &addr_vec;
   psym_index_map &cu_index_htab;
 
@@ -430,7 +429,7 @@ struct addrmap_index_data
 /* Write an address entry to ADDR_VEC.  */
 
 static void
-add_address_entry (struct objfile *objfile, data_buf &addr_vec,
+add_address_entry (data_buf &addr_vec,
 		   CORE_ADDR start, CORE_ADDR end, unsigned int cu_index)
 {
   addr_vec.append_uint (8, BFD_ENDIAN_LITTLE, start);
@@ -447,7 +446,7 @@ add_address_entry_worker (void *datap, CORE_ADDR start_addr, void *obj)
   partial_symtab *pst = (partial_symtab *) obj;
 
   if (data->previous_valid)
-    add_address_entry (data->objfile, data->addr_vec,
+    add_address_entry (data->addr_vec,
 		       data->previous_cu_start, start_addr,
 		       data->previous_cu_index);
 
@@ -465,12 +464,12 @@ add_address_entry_worker (void *datap, CORE_ADDR start_addr, void *obj)
   return 0;
 }
 
-/* Write OBJFILE's address map to ADDR_VEC.
+/* Write PER_BFD's address map to ADDR_VEC.
    CU_INDEX_HTAB is used to map addrmap entries to their CU indices
    in the index file.  */
 
 static void
-write_address_map (struct objfile *objfile, data_buf &addr_vec,
+write_address_map (dwarf2_per_bfd *per_bfd, data_buf &addr_vec,
 		   psym_index_map &cu_index_htab)
 {
   struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab);
@@ -479,10 +478,9 @@ write_address_map (struct objfile *objfile, data_buf &addr_vec,
      the addrmap iterator only provides the start of a region; we have to
      wait until the next invocation to get the start of the next region.  */
 
-  addrmap_index_data.objfile = objfile;
   addrmap_index_data.previous_valid = 0;
 
-  addrmap_foreach (objfile->partial_symtabs->psymtabs_addrmap,
+  addrmap_foreach (per_bfd->partial_symtabs->psymtabs_addrmap,
 		   add_address_entry_worker, &addrmap_index_data);
 
   /* It's highly unlikely the last entry (end address = 0xff...ff)
@@ -491,7 +489,7 @@ write_address_map (struct objfile *objfile, data_buf &addr_vec,
      doesn't work here.  To cope we pass 0xff...ff, this is a rare situation
      anyway.  */
   if (addrmap_index_data.previous_valid)
-    add_address_entry (objfile, addr_vec,
+    add_address_entry (addr_vec,
 		       addrmap_index_data.previous_cu_start, (CORE_ADDR) -1,
 		       addrmap_index_data.previous_cu_index);
 }
@@ -1463,7 +1461,7 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 
   /* Dump the address map.  */
   data_buf addr_vec;
-  write_address_map (objfile, addr_vec, cu_index_htab);
+  write_address_map (per_objfile->per_bfd, addr_vec, cu_index_htab);
 
   /* Write out the .debug_type entries, if any.  */
   data_buf types_cu_list;
@@ -1686,6 +1684,7 @@ write_psymtabs_to_index (dwarf2_per_objfile *per_objfile, const char *dir,
 			 const char *basename, const char *dwz_basename,
 			 dw_index_kind index_kind)
 {
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct objfile *objfile = per_objfile->objfile;
 
   if (per_objfile->per_bfd->using_index)
@@ -1694,8 +1693,8 @@ write_psymtabs_to_index (dwarf2_per_objfile *per_objfile, const char *dir,
   if (per_objfile->per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
 
-  if (!objfile->partial_symtabs->psymtabs
-      || !objfile->partial_symtabs->psymtabs_addrmap)
+  if (!per_bfd->partial_symtabs->psymtabs
+      || !per_bfd->partial_symtabs->psymtabs_addrmap)
     return;
 
   struct stat st;
