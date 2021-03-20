@@ -1,5 +1,12 @@
 2021-03-20  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (psymbol_functions::count_psyms): Rename.
+	(psymbol_functions::print_stats): Update.
+	* psympriv.h (struct psymbol_functions) <count_psyms>: Declare
+	method.
+
+2021-03-20  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (psymbol_functions::require_partial_symbols): Rename.
 	(psymbol_functions::find_pc_sect_psymtab): Rename.
 	(psymbol_functions::find_pc_sect_compunit_symtab)

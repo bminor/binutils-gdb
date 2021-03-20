@@ -591,6 +591,9 @@ struct psymbol_functions : public quick_symbol_functions
 
 private:
 
+  /* Count the number of partial symbols in *THIS.  */
+  int count_psyms ();
+
   void fill_psymbol_map (struct objfile *objfile,
 			 struct partial_symtab *psymtab,
 			 std::set<CORE_ADDR> *seen_addrs,

@@ -962,11 +962,11 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 
 /* Count the number of partial symbols in OBJFILE.  */
 
-static int
-count_psyms (struct objfile *objfile)
+int
+psymbol_functions::count_psyms ()
 {
   int count = 0;
-  for (partial_symtab *pst : objfile->psymtabs ())
+  for (partial_symtab *pst : m_partial_symtabs->range ())
     {
       count += pst->global_psymbols.size ();
       count += pst->static_psymbols.size ();
@@ -984,7 +984,7 @@ psymbol_functions::print_stats (struct objfile *objfile, bool print_bcache)
 
   if (!print_bcache)
     {
-      int n_psyms = count_psyms (objfile);
+      int n_psyms = count_psyms ();
       if (n_psyms > 0)
 	printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
 			 n_psyms);
