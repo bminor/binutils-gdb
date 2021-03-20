@@ -1,3 +1,10 @@
+2021-03-19  Cary Coutant  <ccoutant@gmail.com>
+
+	PR gold/pr23870
+	* testsuite/aarch64_pr23870_bar.c: Return a magic value.
+	* testsuite/aarch64_pr23870_foo.c: Check the magic value and return
+	success or failure.
+
 2021-03-19  Holger Berger  <holger.berger@googlemail.com>
 
 	PR gold/26541

@@ -1,6 +1,6 @@
-void bar (void);
+int bar (void);
 
-void bar ()
+int bar ()
 {
-  return;
+  return 0x55;
 }
