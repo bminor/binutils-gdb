@@ -446,29 +446,28 @@ class psymtab_discarder
 {
  public:
 
-  psymtab_discarder (struct objfile *objfile)
-    : m_objfile (objfile),
-      m_psymtab (objfile->partial_symtabs->psymtabs)
+  psymtab_discarder (psymtab_storage *partial_symtabs)
+    : m_partial_symtabs (partial_symtabs),
+      m_psymtab (partial_symtabs->psymtabs)
   {
   }
 
   ~psymtab_discarder ()
   {
-    if (m_objfile != NULL)
-      m_objfile->partial_symtabs->discard_psymtabs_to (m_psymtab);
+    if (m_partial_symtabs != nullptr)
+      m_partial_symtabs->discard_psymtabs_to (m_psymtab);
   }
 
   /* Keep any partial symbol tables that were built.  */
   void keep ()
   {
-    m_objfile = NULL;
+    m_partial_symtabs = nullptr;
   }
 
  private:
 
-  /* The objfile.  If NULL this serves as a sentinel to indicate that
-     the psymtabs should be kept.  */
-  struct objfile *m_objfile;
+  /* The partial symbol storage object.  */
+  psymtab_storage *m_partial_symtabs;
   /* How far back to free.  */
   struct partial_symtab *m_psymtab;
 };

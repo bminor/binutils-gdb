@@ -6142,7 +6142,7 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       /* This isn't really ideal: all the data we allocate on the
 	 objfile's obstack is still uselessly kept around.  However,
 	 freeing it seems unsafe.  */
-      psymtab_discarder psymtabs (objfile);
+      psymtab_discarder psymtabs (objfile->partial_symtabs.get ());
       dwarf2_build_psymtabs_hard (per_objfile);
       psymtabs.keep ();
 
