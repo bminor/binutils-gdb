@@ -1160,6 +1160,7 @@ COMMON_SFILES = \
 	solib-target.c \
 	source.c \
 	source-cache.c \
+	split-name.c \
 	stabsread.c \
 	stack.c \
 	std-regs.c \
@@ -1448,6 +1449,7 @@ HFILES_NO_SRCDIR = \
 	sparc-ravenscar-thread.h \
 	sparc-tdep.h \
 	sparc64-tdep.h \
+	split-name.h \
 	stabsread.h \
 	stack.h \
 	stap-probe.h \

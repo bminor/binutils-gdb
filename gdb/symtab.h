@@ -36,6 +36,7 @@
 #include "gdbsupport/iterator-range.h"
 #include "completer.h"
 #include "gdb-demangle.h"
+#include "split-name.h"
 
 /* Opaque declarations.  */
 struct ui_file;
@@ -120,6 +121,21 @@ class ada_lookup_name_info final
   /* Return true if doing a verbatim match.  */
   bool verbatim_p () const
   { return m_verbatim_p; }
+
+  /* A wrapper for ::split_name that handles some Ada-specific
+     peculiarities.  */
+  std::vector<gdb::string_view> split_name () const
+  {
+    if (m_verbatim_p || m_standard_p)
+      {
+	std::vector<gdb::string_view> result;
+	if (m_standard_p)
+	  result.emplace_back ("standard");
+	result.emplace_back (m_encoded_name);
+	return result;
+      }
+    return ::split_name (m_encoded_name.c_str (), split_style::UNDERSCORE);
+  }
 
 private:
   /* The Ada-encoded lookup name.  */
@@ -270,6 +286,27 @@ class lookup_name_info final
       default:
 	return m_name.data ();
       }
+  }
+
+  /* A wrapper for ::split_name (see split-name.h) that splits this
+     name, and that handles any language-specific peculiarities.  */  
+  std::vector<gdb::string_view> split_name (language lang) const
+  {
+    if (lang == language_ada)
+      return ada ().split_name ();
+    split_style style = split_style::NONE;
+    switch (lang)
+      {
+      case language_cplus:
+      case language_rust:
+	style = split_style::CXX;
+	break;
+      case language_d:
+      case language_go:
+	style = split_style::DOT;
+	break;
+      }
+    return ::split_name (language_lookup_name (lang), style);
   }
 
   /* Get the Ada-specific lookup info.  */
