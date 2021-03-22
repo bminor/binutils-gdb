@@ -6589,8 +6589,8 @@ process_section_headers (Filedata * filedata)
 	   || do_debug_str || do_debug_str_offsets || do_debug_loc
 	   || do_debug_ranges
 	   || do_debug_addr || do_debug_cu_index || do_debug_links)
-	  && (const_strneq (name, ".debug_")
-	      || const_strneq (name, ".zdebug_")))
+	  && (startswith (name, ".debug_")
+	      || startswith (name, ".zdebug_")))
 	{
           if (name[1] == 'z')
             name += sizeof (".zdebug_") - 1;
@@ -6598,35 +6598,35 @@ process_section_headers (Filedata * filedata)
             name += sizeof (".debug_") - 1;
 
 	  if (do_debugging
-	      || (do_debug_info     && const_strneq (name, "info"))
-	      || (do_debug_info     && const_strneq (name, "types"))
-	      || (do_debug_abbrevs  && const_strneq (name, "abbrev"))
+	      || (do_debug_info     && startswith (name, "info"))
+	      || (do_debug_info     && startswith (name, "types"))
+	      || (do_debug_abbrevs  && startswith (name, "abbrev"))
 	      || (do_debug_lines    && strcmp (name, "line") == 0)
-	      || (do_debug_lines    && const_strneq (name, "line."))
-	      || (do_debug_pubnames && const_strneq (name, "pubnames"))
-	      || (do_debug_pubtypes && const_strneq (name, "pubtypes"))
-	      || (do_debug_pubnames && const_strneq (name, "gnu_pubnames"))
-	      || (do_debug_pubtypes && const_strneq (name, "gnu_pubtypes"))
-	      || (do_debug_aranges  && const_strneq (name, "aranges"))
-	      || (do_debug_ranges   && const_strneq (name, "ranges"))
-	      || (do_debug_ranges   && const_strneq (name, "rnglists"))
-	      || (do_debug_frames   && const_strneq (name, "frame"))
-	      || (do_debug_macinfo  && const_strneq (name, "macinfo"))
-	      || (do_debug_macinfo  && const_strneq (name, "macro"))
-	      || (do_debug_str      && const_strneq (name, "str"))
-	      || (do_debug_links    && const_strneq (name, "sup"))
-	      || (do_debug_str_offsets && const_strneq (name, "str_offsets"))
-	      || (do_debug_loc      && const_strneq (name, "loc"))
-	      || (do_debug_loc      && const_strneq (name, "loclists"))
-	      || (do_debug_addr     && const_strneq (name, "addr"))
-	      || (do_debug_cu_index && const_strneq (name, "cu_index"))
-	      || (do_debug_cu_index && const_strneq (name, "tu_index"))
+	      || (do_debug_lines    && startswith (name, "line."))
+	      || (do_debug_pubnames && startswith (name, "pubnames"))
+	      || (do_debug_pubtypes && startswith (name, "pubtypes"))
+	      || (do_debug_pubnames && startswith (name, "gnu_pubnames"))
+	      || (do_debug_pubtypes && startswith (name, "gnu_pubtypes"))
+	      || (do_debug_aranges  && startswith (name, "aranges"))
+	      || (do_debug_ranges   && startswith (name, "ranges"))
+	      || (do_debug_ranges   && startswith (name, "rnglists"))
+	      || (do_debug_frames   && startswith (name, "frame"))
+	      || (do_debug_macinfo  && startswith (name, "macinfo"))
+	      || (do_debug_macinfo  && startswith (name, "macro"))
+	      || (do_debug_str      && startswith (name, "str"))
+	      || (do_debug_links    && startswith (name, "sup"))
+	      || (do_debug_str_offsets && startswith (name, "str_offsets"))
+	      || (do_debug_loc      && startswith (name, "loc"))
+	      || (do_debug_loc      && startswith (name, "loclists"))
+	      || (do_debug_addr     && startswith (name, "addr"))
+	      || (do_debug_cu_index && startswith (name, "cu_index"))
+	      || (do_debug_cu_index && startswith (name, "tu_index"))
 	      )
 	    request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
 	}
       /* Linkonce section to be combined with .debug_info at link time.  */
       else if ((do_debugging || do_debug_info)
-	       && const_strneq (name, ".gnu.linkonce.wi."))
+	       && startswith (name, ".gnu.linkonce.wi."))
 	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
 	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
@@ -6636,7 +6636,7 @@ process_section_headers (Filedata * filedata)
       /* Trace sections for Itanium VMS.  */
       else if ((do_debugging || do_trace_info || do_trace_abbrevs
                 || do_trace_aranges)
-	       && const_strneq (name, ".trace_"))
+	       && startswith (name, ".trace_"))
 	{
           name += sizeof (".trace_") - 1;
 
@@ -6648,8 +6648,8 @@ process_section_headers (Filedata * filedata)
 	    request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
 	}
       else if ((do_debugging || do_debug_links)
-	       && (const_strneq (name, ".gnu_debuglink")
-		   || const_strneq (name, ".gnu_debugaltlink")))
+	       && (startswith (name, ".gnu_debuglink")
+		   || startswith (name, ".gnu_debugaltlink")))
 	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
     }
 
@@ -8107,7 +8107,7 @@ slurp_ia64_unwind_table (Filedata *                  filedata,
 	      continue;
 	    }
 
-	  if (! const_strneq (relname, "R_IA64_SEGREL"))
+	  if (! startswith (relname, "R_IA64_SEGREL"))
 	    {
 	      warn (_("Skipping unexpected relocation type: %s\n"), relname);
 	      continue;
@@ -8574,7 +8574,7 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 	    }
 
 	  /* R_PARISC_SEGREL32 or R_PARISC_SEGREL64.  */
-	  if (! const_strneq (relname, "R_PARISC_SEGREL"))
+	  if (! startswith (relname, "R_PARISC_SEGREL"))
 	    {
 	      warn (_("Skipping unexpected relocation type: %s\n"), relname);
 	      continue;
@@ -9476,10 +9476,10 @@ decode_arm_unwind (Filedata *                 filedata,
 	 encoding, starting with one byte giving the number of
 	 words.  */
       if (procname != NULL
-	  && (const_strneq (procname, "__gcc_personality_v0")
-	      || const_strneq (procname, "__gxx_personality_v0")
-	      || const_strneq (procname, "__gcj_personality_v0")
-	      || const_strneq (procname, "__gnu_objc_personality_v0")))
+	  && (startswith (procname, "__gcc_personality_v0")
+	      || startswith (procname, "__gxx_personality_v0")
+	      || startswith (procname, "__gcj_personality_v0")
+	      || startswith (procname, "__gnu_objc_personality_v0")))
 	{
 	  remaining = 0;
 	  more_words = 1;
@@ -15297,7 +15297,7 @@ malformed note encountered in section %s whilst scanning for build-id note\n"),
       /* Check if this is the build-id note. If so then convert the build-id
          bytes to a hex string.  */
       if (inote.namesz > 0
-          && const_strneq (inote.namedata, "GNU")
+          && startswith (inote.namedata, "GNU")
           && inote.type == NT_GNU_BUILD_ID)
         {
           unsigned long j;
@@ -15425,7 +15425,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
       return false;
     }
 
-  if (const_strneq (name, ".gnu.linkonce.wi."))
+  if (startswith (name, ".gnu.linkonce.wi."))
     name = ".debug_info";
 
   /* See if we know how to display the contents of this section.  */
@@ -15436,7 +15436,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
       struct dwarf_section *           sec = & display->section;
 
       if (streq (sec->uncompressed_name, name)
-	  || (id == line && const_strneq (name, ".debug_line."))
+	  || (id == line && startswith (name, ".debug_line."))
 	  || streq (sec->compressed_name, name))
 	{
 	  bool secondary = (section != find_section (filedata, name));
@@ -15444,7 +15444,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
 	  if (secondary)
 	    free_debug_section (id);
 
-	  if (i == line && const_strneq (name, ".debug_line."))
+	  if (i == line && startswith (name, ".debug_line."))
 	    sec->name = name;
 	  else if (streq (sec->uncompressed_name, name))
 	    sec->name = sec->uncompressed_name;
@@ -20429,23 +20429,23 @@ process_note (Elf_Internal_Note *  pnote,
        note type strings.  */
     nt = get_note_type (filedata, pnote->type);
 
-  else if (const_strneq (pnote->namedata, "GNU"))
+  else if (startswith (pnote->namedata, "GNU"))
     /* GNU-specific object file notes.  */
     nt = get_gnu_elf_note_type (pnote->type);
 
-  else if (const_strneq (pnote->namedata, "FreeBSD"))
+  else if (startswith (pnote->namedata, "FreeBSD"))
     /* FreeBSD-specific core file notes.  */
     nt = get_freebsd_elfcore_note_type (filedata, pnote->type);
 
-  else if (const_strneq (pnote->namedata, "NetBSD-CORE"))
+  else if (startswith (pnote->namedata, "NetBSD-CORE"))
     /* NetBSD-specific core file notes.  */
     nt = get_netbsd_elfcore_note_type (filedata, pnote->type);
 
-  else if (const_strneq (pnote->namedata, "NetBSD"))
+  else if (startswith (pnote->namedata, "NetBSD"))
     /* NetBSD-specific core file notes.  */
     return process_netbsd_elf_note (pnote);
 
-  else if (const_strneq (pnote->namedata, "PaX"))
+  else if (startswith (pnote->namedata, "PaX"))
     /* NetBSD-specific core file notes.  */
     return process_netbsd_elf_note (pnote);
 
@@ -20456,11 +20456,11 @@ process_note (Elf_Internal_Note *  pnote,
       name = "SPU";
     }
 
-  else if (const_strneq (pnote->namedata, "IPF/VMS"))
+  else if (startswith (pnote->namedata, "IPF/VMS"))
     /* VMS/ia64-specific file notes.  */
     nt = get_ia64_vms_note_type (pnote->type);
 
-  else if (const_strneq (pnote->namedata, "stapsdt"))
+  else if (startswith (pnote->namedata, "stapsdt"))
     nt = get_stapsdt_note_type (pnote->type);
 
   else
@@ -20470,7 +20470,7 @@ process_note (Elf_Internal_Note *  pnote,
 
   printf ("  ");
 
-  if (((const_strneq (pnote->namedata, "GA")
+  if (((startswith (pnote->namedata, "GA")
 	&& strchr ("*$!+", pnote->namedata[2]) != NULL)
        || strchr ("*$!+", pnote->namedata[0]) != NULL)
       && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
@@ -20484,15 +20484,15 @@ process_note (Elf_Internal_Note *  pnote,
   else
     printf (" 0x%08lx\t%s\n", pnote->descsz, nt);
 
-  if (const_strneq (pnote->namedata, "IPF/VMS"))
+  if (startswith (pnote->namedata, "IPF/VMS"))
     return print_ia64_vms_note (pnote);
-  else if (const_strneq (pnote->namedata, "GNU"))
+  else if (startswith (pnote->namedata, "GNU"))
     return print_gnu_note (filedata, pnote);
-  else if (const_strneq (pnote->namedata, "stapsdt"))
+  else if (startswith (pnote->namedata, "stapsdt"))
     return print_stapsdt_note (pnote);
-  else if (const_strneq (pnote->namedata, "CORE"))
+  else if (startswith (pnote->namedata, "CORE"))
     return print_core_note (pnote);
-  else if (((const_strneq (pnote->namedata, "GA")
+  else if (((startswith (pnote->namedata, "GA")
 	     && strchr ("*$!+", pnote->namedata[2]) != NULL)
 	    || strchr ("*$!+", pnote->namedata[0]) != NULL)
 	   && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN

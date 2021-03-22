@@ -4500,7 +4500,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
       unsigned char *end_of_sequence;
       int i;
 
-      if (const_strneq (section->name, ".debug_line.")
+      if (startswith (section->name, ".debug_line.")
 	  /* Note: the following does not apply to .debug_line.dwo sections.
 	     These are full debug_line sections.  */
 	  && strcmp (section->name, ".debug_line.dwo") != 0)
@@ -4924,7 +4924,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
       unsigned char **directory_table = NULL;
       dwarf_vma n_directories = 0;
 
-      if (const_strneq (section->name, ".debug_line.")
+      if (startswith (section->name, ".debug_line.")
 	  /* Note: the following does not apply to .debug_line.dwo sections.
 	     These are full debug_line sections.  */
 	  && strcmp (section->name, ".debug_line.dwo") != 0)
@@ -10031,7 +10031,7 @@ display_debug_links (struct dwarf_section *  section,
 
   printf (_("  Separate debug info file: %s\n"), filename);
 
-  if (const_strneq (section->name, ".gnu_debuglink"))
+  if (startswith (section->name, ".gnu_debuglink"))
     {
       unsigned int          crc32;
       unsigned int          crc_offset;
@@ -10055,7 +10055,7 @@ display_debug_links (struct dwarf_section *  section,
 	  return 0;
 	}
     }
-  else /* const_strneq (section->name, ".gnu_debugaltlink") */
+  else /* startswith (section->name, ".gnu_debugaltlink") */
     {
       const unsigned char * build_id = section->start + filelen + 1;
       bfd_size_type         build_id_len = section->size - (filelen + 1);

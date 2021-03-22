@@ -27,6 +27,7 @@
 
 #include "sysdep.h"
 #include "libiberty.h"
+#include "bfd.h"
 #include "filenames.h"
 #include "aout/ar.h"
 #include "elfcomm.h"
@@ -611,12 +612,12 @@ setup_archive (struct archive_info *arch, const char *file_name,
     }
 
   /* See if this is the archive symbol table.  */
-  if (const_strneq (arch->arhdr.ar_name, "/               "))
+  if (startswith (arch->arhdr.ar_name, "/               "))
     {
       if (! process_archive_index_and_symbols (arch, 4, read_symbols))
 	return 1;
     }
-  else if (const_strneq (arch->arhdr.ar_name, "/SYM64/         "))
+  else if (startswith (arch->arhdr.ar_name, "/SYM64/         "))
     {
       arch->uses_64bit_indices = 1;
       if (! process_archive_index_and_symbols (arch, 8, read_symbols))
@@ -625,7 +626,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
   else if (read_symbols)
     printf (_("%s has no archive index\n"), file_name);
 
-  if (const_strneq (arch->arhdr.ar_name, "//              "))
+  if (startswith (arch->arhdr.ar_name, "//              "))
     {
       /* This is the archive string table holding long member names.  */
       char fmag_save = arch->arhdr.ar_fmag[0];
