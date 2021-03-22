@@ -942,10 +942,10 @@ avr_ldi_expression (expressionS *exp)
 
 	      ++str;
 
-	      if (strncmp ("pm(", str, 3) == 0
-                  || strncmp ("gs(",str,3) == 0
-                  || strncmp ("-(gs(",str,5) == 0
-		  || strncmp ("-(pm(", str, 5) == 0)
+	      if (startswith (str, "pm(")
+                  || startswith (str, "gs(")
+                  || startswith (str, "-(gs(")
+		  || startswith (str, "-(pm("))
 		{
 		  if (HAVE_PM_P (mod))
 		    {

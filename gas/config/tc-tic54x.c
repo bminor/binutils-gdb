@@ -609,7 +609,7 @@ stag_add_field (struct stag *parent,
       sf->next = sfield;
     }
   /* Only create a symbol for this field if the parent has no name.  */
-  if (!strncmp (".fake", parent->name, 5))
+  if (startswith (parent->name, ".fake"))
     {
       symbolS *sym = symbol_new (name, absolute_section, &zero_address_frag,
 				 offset);
@@ -705,7 +705,7 @@ tic54x_endstruct (int is_union)
 {
   int size;
   const char *path =
-    !strncmp (current_stag->name, ".fake", 5) ? "" : current_stag->name;
+    startswith (current_stag->name, ".fake") ? "" : current_stag->name;
 
   if (!current_stag || current_stag->is_union != is_union)
     {

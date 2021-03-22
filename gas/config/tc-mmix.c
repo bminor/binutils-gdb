@@ -3171,7 +3171,7 @@ mmix_handle_mmixal (void)
     }
   else if (s[0] == 'G'
 	   && s[1] == 'R'
-	   && strncmp (s, "GREG", 4) == 0
+	   && startswith (s, "GREG")
 	   && (ISSPACE (s[4]) || is_end_of_line[(unsigned char) s[4]]))
     {
       input_line_pointer = s + 4;

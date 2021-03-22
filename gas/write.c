@@ -880,8 +880,7 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 		    /* The GNU toolchain uses an extension for ELF: a
 		       section beginning with the magic string
 		       .gnu.linkonce is a linkonce section.  */
-		    && strncmp (segment_name (symsec), ".gnu.linkonce",
-				sizeof ".gnu.linkonce" - 1) == 0))
+		    && startswith (segment_name (symsec), ".gnu.linkonce")))
 	      continue;
 	  }
 
@@ -1450,7 +1449,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     return;
 
   section_name = bfd_section_name (sec);
-  if (strncmp (section_name, ".debug_", 7) != 0)
+  if (!startswith (section_name, ".debug_"))
     return;
 
   strm = compress_init ();
@@ -2039,7 +2038,7 @@ maybe_generate_build_notes (void)
 	/* Skip linkonce sections - we cannot use these section symbols as they may disappear.  */
 	&& (bsym->section->flags & (SEC_CODE | SEC_LINK_ONCE)) == SEC_CODE
 	/* Not all linkonce sections are flagged...  */
-	&& strncmp (S_GET_NAME (sym), ".gnu.linkonce", sizeof ".gnu.linkonce" - 1) != 0)
+	&& !startswith (S_GET_NAME (sym), ".gnu.linkonce"))
       {
 	/* Create a version note.  */
 	frag_now_fix ();

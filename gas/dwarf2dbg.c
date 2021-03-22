@@ -1097,7 +1097,7 @@ dwarf2_directive_filename (void)
 	  SKIP_WHITESPACE ();
 	}
 
-      if (strncmp (input_line_pointer, "md5", 3) == 0)
+      if (startswith (input_line_pointer, "md5"))
 	{
 	  input_line_pointer += 3;
 	  SKIP_WHITESPACE ();

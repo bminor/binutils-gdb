@@ -1293,7 +1293,7 @@ get_directive (directiveE *directive, bool *negated)
   unsigned i;
   const char *directive_string;
 
-  if (strncmp (input_line_pointer, "no-", 3) != 0)
+  if (!startswith (input_line_pointer, "no-"))
     *negated = false;
   else
     {
@@ -1308,12 +1308,12 @@ get_directive (directiveE *directive, bool *negated)
      equivalent to .begin [no-]transform.  We should remove it when
      we stop accepting those options.  */
 
-  if (strncmp (input_line_pointer, "generics", strlen ("generics")) == 0)
+  if (startswith (input_line_pointer, "generics"))
     {
       as_warn (_("[no-]generics is deprecated; use [no-]transform instead"));
       directive_string = "transform";
     }
-  else if (strncmp (input_line_pointer, "relax", strlen ("relax")) == 0)
+  else if (startswith (input_line_pointer, "relax"))
     {
       as_warn (_("[no-]relax is deprecated; use [no-]transform instead"));
       directive_string = "transform";
@@ -2893,7 +2893,7 @@ static bool
 xg_instruction_matches_option_term (TInsn *insn, const ReqOrOption *option)
 {
   if (strcmp (option->option_name, "realnop") == 0
-      || strncmp (option->option_name, "IsaUse", 6) == 0)
+      || startswith (option->option_name, "IsaUse"))
     {
       /* These conditions were evaluated statically when building the
 	 relaxation table.  There's no need to reevaluate them now.  */
@@ -4552,7 +4552,7 @@ is_unaligned_label (symbolS *sym)
       && (name[fake_size] == 'F'
 	  || name[fake_size] == 'L'
 	  || (name[fake_size] == 'e'
-	      && strncmp ("endfunc", name+fake_size, 7) == 0)))
+	      && startswith (name + fake_size, "endfunc"))))
     return true;
 
   return false;
@@ -11690,11 +11690,11 @@ cache_literal_section (bool use_abs_literals)
       size_t len = strlen (text_name);
       if (len >= 5
 	  && (strcmp (text_name + len - 5, ".text") == 0
-	      || strncmp (text_name, ".text", 5) == 0))
+	      || startswith (text_name, ".text")))
 	len -= 5;
 
       name = XNEWVEC (char, len + strlen (base_name) + 1);
-      if (strncmp (text_name, ".text", 5) == 0)
+      if (startswith (text_name, ".text"))
 	{
 	  strcpy (name, base_name);
 	  strcat (name, text_name + 5);

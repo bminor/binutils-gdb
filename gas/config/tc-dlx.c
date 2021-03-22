@@ -592,14 +592,14 @@ parse_operand (char *s, expressionS *operandp)
   the_insn.HI = the_insn.LO = 0;
 
   /* Search for %hi and %lo, make a mark and skip it.  */
-  if (strncmp (s, "%hi", 3) == 0)
+  if (startswith (s, "%hi"))
     {
       s += 3;
       the_insn.HI = 1;
     }
   else
     {
-      if (strncmp (s, "%lo", 3) == 0)
+      if (startswith (s, "%lo"))
 	{
 	  s += 3;
 	  the_insn.LO = 1;

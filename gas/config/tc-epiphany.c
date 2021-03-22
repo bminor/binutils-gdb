@@ -529,13 +529,13 @@ md_assemble (char *str)
   int regmask=0, push=0, pop=0;
 
   /* Special-case push/pop instruction macros.  */
-  if (0 == strncmp (str, "push {", 6))
+  if (startswith (str, "push {"))
     {
       char * s = str + 6;
       push = 1;
       pperr = parse_reglist (s, &regmask);
     }
-  else if (0 == strncmp (str, "pop {", 5))
+  else if (startswith (str, "pop {"))
     {
       char * s = str + 5;
       pop = 1;

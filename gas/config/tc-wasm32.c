@@ -381,20 +381,20 @@ wasm32_leb128 (char **line, int bits, int sign)
       reloc->u.a.addend = 0;
     }
   /* i32.const fpointer@gotcode */
-  if (strncmp (input_line_pointer, "@gotcode", 8) == 0)
+  if (startswith (input_line_pointer, "@gotcode"))
     {
       gotrel = 1;
       code = 1;
       input_line_pointer += 8;
     }
   /* i32.const data@got */
-  else if (strncmp (input_line_pointer, "@got", 4) == 0)
+  else if (startswith (input_line_pointer, "@got"))
     {
       gotrel = 1;
       input_line_pointer += 4;
     }
   /* call f@plt{__sigchar_FiiiiE} */
-  else if (strncmp (input_line_pointer, "@plt", 4) == 0)
+  else if (startswith (input_line_pointer, "@plt"))
     {
       char *end_of_sig;
 
@@ -402,7 +402,7 @@ wasm32_leb128 (char **line, int bits, int sign)
       code = 1;
       input_line_pointer += 4;
 
-      if (strncmp (input_line_pointer, "{", 1) == 0
+      if (startswith (input_line_pointer, "{")
           && (end_of_sig = strchr (input_line_pointer, '}')))
 	{
 	  char *signature;

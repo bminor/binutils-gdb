@@ -239,7 +239,7 @@ evax_shorten_name (char *id)
   prefix [0] = 0;
 
   /* Check for ..xx suffix and save it.  */
-  if (strncmp (&id[len-4], "..", 2) == 0)
+  if (startswith (&id[len-4], ".."))
     {
       suffix_dotdot = len - 4;
       strncpy (suffix, &id[len-4], 4);

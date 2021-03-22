@@ -1282,9 +1282,9 @@ parse_precond (const char *s, precond_e *precond)
   p = skip_white (p);
 
   /* Check for "==" and "!=".  */
-  if (strncmp (p, "==", 2) == 0)
+  if (startswith (p, "=="))
     precond->cmpop = OP_EQUAL;
-  else if (strncmp (p, "!=", 2) == 0)
+  else if (startswith (p, "!="))
     precond->cmpop = OP_NOTEQUAL;
   else
     return false;
@@ -1392,7 +1392,7 @@ parse_option_cond (const char *s, ReqOption *option)
       ReqOrOption *req;
       ReqOrOption **r_p;
 
-      if (strncmp (option_name, "no-", 3) == 0)
+      if (startswith (option_name, "no-"))
 	{
 	  option_name = xstrdup (&option_name[3]);
 	  is_true = false;
@@ -1558,7 +1558,7 @@ transition_applies (insn_pattern *initial_insn,
 	  || req_or_option->next != NULL)
 	continue;
 
-      if (strncmp (req_or_option->option_name, "IsaUse", 6) == 0)
+      if (startswith (req_or_option->option_name, "IsaUse"))
 	{
 	  bool option_available = false;
 	  char *option_name = req_or_option->option_name + 6;
@@ -1607,7 +1607,7 @@ wide_branch_opcode (const char *opcode_name,
   xtensa_opcode opcode;
   static char wbr_name_buf[20];
 
-  if (strncmp (opcode_name, "WIDE.", 5) != 0)
+  if (!startswith (opcode_name, "WIDE."))
     return false;
 
   strcpy (wbr_name_buf, opcode_name + 5);

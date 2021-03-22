@@ -312,7 +312,7 @@ s390_parse_cpu (const char *arg,
   char *ilp_bak;
 
   icpu = S390_OPCODE_MAXCPU;
-  if (strncmp (arg, "all", 3) == 0 && (arg[3] == 0 || arg[3] == '+'))
+  if (startswith (arg, "all") && (arg[3] == 0 || arg[3] == '+'))
     {
       icpu = S390_OPCODE_MAXCPU - 1;
       arg += 3;
@@ -427,7 +427,7 @@ md_parse_option (int c, const char *arg)
 	  current_mode_mask = 1 << S390_OPCODE_ZARCH;
 	}
 
-      else if (arg != NULL && strncmp (arg, "arch=", 5) == 0)
+      else if (arg != NULL && startswith (arg, "arch="))
 	{
 	  current_cpu = s390_parse_cpu (arg + 5, &current_flags, false);
 	  if (current_cpu == S390_OPCODE_MAXCPU)

@@ -1504,16 +1504,16 @@ md_parse_option (int c, const char * arg)
 static void
 msp430_make_init_symbols (const char * name)
 {
-  if (strncmp (name, ".bss", 4) == 0
-      || strncmp (name, ".lower.bss", 10) == 0
-      || strncmp (name, ".either.bss", 11) == 0
-      || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
+  if (startswith (name, ".bss")
+      || startswith (name, ".lower.bss")
+      || startswith (name, ".either.bss")
+      || startswith (name, ".gnu.linkonce.b."))
     (void) symbol_find_or_make ("__crt0_init_bss");
 
-  if (strncmp (name, ".data", 5) == 0
-      || strncmp (name, ".lower.data", 11) == 0
-      || strncmp (name, ".either.data", 12) == 0
-      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
+  if (startswith (name, ".data")
+      || startswith (name, ".lower.data")
+      || startswith (name, ".either.data")
+      || startswith (name, ".gnu.linkonce.d."))
     (void) symbol_find_or_make ("__crt0_movedata");
   /* Note - data assigned to the .either.data section may end up being
      placed in the .upper.data section if the .lower.data section is
@@ -1521,14 +1521,14 @@ msp430_make_init_symbols (const char * name)
      The linker may create upper or either data sections, even when none exist
      at the moment, so use the value of the data-region flag to determine if
      the symbol is needed.  */
-  if (strncmp (name, ".either.data", 12) == 0
-      || strncmp (name, ".upper.data", 11) == 0
+  if (startswith (name, ".either.data")
+      || startswith (name, ".upper.data")
       || upper_data_region_in_use)
     (void) symbol_find_or_make ("__crt0_move_highdata");
 
   /* See note about .either.data above.  */
-  if (strncmp (name, ".upper.bss", 10) == 0
-      || strncmp (name, ".either.bss", 11) == 0
+  if (startswith (name, ".upper.bss")
+      || startswith (name, ".either.bss")
       || upper_data_region_in_use)
     (void) symbol_find_or_make ("__crt0_init_highbss");
 
@@ -1542,17 +1542,17 @@ msp430_make_init_symbols (const char * name)
      exit() or returning from main.
      __crt0_run_array is required to actually call the functions in the above
      arrays.  */
-  if (strncmp (name, ".init_array", 11) == 0)
+  if (startswith (name, ".init_array"))
     {
       (void) symbol_find_or_make ("__crt0_run_init_array");
       (void) symbol_find_or_make ("__crt0_run_array");
     }
-  else if (strncmp (name, ".preinit_array", 14) == 0)
+  else if (startswith (name, ".preinit_array"))
     {
       (void) symbol_find_or_make ("__crt0_run_preinit_array");
       (void) symbol_find_or_make ("__crt0_run_array");
     }
-  else if (strncmp (name, ".fini_array", 11) == 0)
+  else if (startswith (name, ".fini_array"))
     {
       (void) symbol_find_or_make ("__crt0_run_fini_array");
       (void) symbol_find_or_make ("__crt0_run_array");

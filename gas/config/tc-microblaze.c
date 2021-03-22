@@ -740,7 +740,7 @@ parse_imm (char * s, expressionS * e, offsetT min, offsetT max)
 
   new_pointer = parse_exp (s, e);
 
-  if (!GOT_symbol && ! strncmp (s, GOT_SYMBOL_NAME, 20))
+  if (!GOT_symbol && startswith (s, GOT_SYMBOL_NAME))
     {
       GOT_symbol = symbol_find_or_make (GOT_SYMBOL_NAME);
     }
@@ -785,17 +785,17 @@ check_got (int * got_type, int * got_len)
     if (is_end_of_line[(unsigned char) *atp])
       return NULL;
 
-  if (strncmp (atp + 1, "GOTOFF", 5) == 0)
+  if (startswith (atp + 1, "GOTOFF"))
     {
       *got_len = 6;
       *got_type = IMM_GOTOFF;
     }
-  else if (strncmp (atp + 1, "GOT", 3) == 0)
+  else if (startswith (atp + 1, "GOT"))
     {
       *got_len = 3;
       *got_type = IMM_GOT;
     }
-  else if (strncmp (atp + 1, "PLT", 3) == 0)
+  else if (startswith (atp + 1, "PLT"))
     {
       *got_len = 3;
       *got_type = IMM_PLT;
@@ -2025,9 +2025,8 @@ md_apply_fix (fixS *   fixP,
 	  || (symbol_used_in_reloc_p (fixP->fx_addsy)
 	      && (((bfd_section_flags (S_GET_SEGMENT (fixP->fx_addsy))
 		    & SEC_LINK_ONCE) != 0)
-		  || !strncmp (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
-			       ".gnu.linkonce",
-			       sizeof (".gnu.linkonce") - 1))))
+		  || startswith (segment_name (S_GET_SEGMENT (fixP->fx_addsy)),
+				 ".gnu.linkonce"))))
 	{
 	  val -= S_GET_VALUE (fixP->fx_addsy);
 	  if (val != 0 && ! fixP->fx_pcrel)

@@ -1304,7 +1304,7 @@ is_ppc64_target (const bfd_target *targ, void *data ATTRIBUTE_UNUSED)
     {
 #ifdef OBJ_ELF
     case bfd_target_elf_flavour:
-      return strncmp (targ->name, "elf64-powerpc", 13) == 0;
+      return startswith (targ->name, "elf64-powerpc");
 #endif
 #ifdef OBJ_XCOFF
     case bfd_target_xcoff_flavour:
@@ -1458,14 +1458,14 @@ ppc_set_cpu (void)
 	else
 	  /* The minimum supported cpu for 64-bit little-endian is power8.  */
 	  ppc_cpu |= ppc_parse_cpu (ppc_cpu, &sticky, "power8");
-      else if (strncmp (default_os, "aix", 3) == 0
+      else if (startswith (default_os, "aix")
 	       && default_os[3] >= '4' && default_os[3] <= '9')
 	ppc_cpu |= PPC_OPCODE_COMMON;
-      else if (strncmp (default_os, "aix3", 4) == 0)
+      else if (startswith (default_os, "aix3"))
 	ppc_cpu |= PPC_OPCODE_POWER;
       else if (strcmp (default_cpu, "rs6000") == 0)
 	ppc_cpu |= PPC_OPCODE_POWER;
-      else if (strncmp (default_cpu, "powerpc", 7) == 0)
+      else if (startswith (default_cpu, "powerpc"))
 	ppc_cpu |= PPC_OPCODE_PPC;
       else
 	as_fatal (_("unknown default cpu = %s, os = %s"),
@@ -1492,7 +1492,7 @@ ppc_arch (void)
     {
       if (strcmp (default_cpu, "rs6000") == 0)
 	return bfd_arch_rs6000;
-      else if (strncmp (default_cpu, "powerpc", 7) == 0)
+      else if (startswith (default_cpu, "powerpc"))
 	return bfd_arch_powerpc;
     }
 
@@ -4183,7 +4183,7 @@ ppc_macro (char *str, const struct powerpc_macro *macro)
 int
 ppc_section_type (char *str, size_t len)
 {
-  if (len == 7 && strncmp (str, "ordered", 7) == 0)
+  if (len == 7 && startswith (str, "ordered"))
     return SHT_ORDERED;
 
   return -1;

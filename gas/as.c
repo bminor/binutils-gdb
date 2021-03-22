@@ -158,7 +158,7 @@ select_emulation_mode (int argc, char **argv)
   const char *em = NULL;
 
   for (i = 1; i < argc; i++)
-    if (!strncmp ("--em", argv[i], 4))
+    if (startswith (argv[i], "--em"))
       break;
 
   if (i == argc)
@@ -819,8 +819,7 @@ This program has absolutely no warranty.\n"));
 	  /* We end up here for any -gsomething-not-already-a-long-option.
 	     give some useful feedback on not (yet) supported -gdwarfxxx
 	     versions/sections/options.  */
-	  if (strncmp (old_argv[optind - 1], "-gdwarf",
-		       strlen ("-gdwarf")) == 0)
+	  if (startswith (old_argv[optind - 1], "-gdwarf"))
 	    as_fatal (_("unknown DWARF option %s\n"), old_argv[optind - 1]);
 
 	  if (md_debug_format_selector)

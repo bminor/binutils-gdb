@@ -519,8 +519,8 @@ insn_to_subtype (int inum, const CGEN_INSN *insn)
   unsigned int i;
 
   if (insn
-      && (strncmp (insn->base->mnemonic, "adjnz", 5) == 0
-	  || strncmp (insn->base->mnemonic, "sbjnz", 5) == 0))
+      && (startswith (insn->base->mnemonic, "adjnz")
+	  || startswith (insn->base->mnemonic, "sbjnz")))
     {
       i = 23 + insn->base->bitsize/8 - 3;
       /*printf("mapping %d used for %s\n", i, insn->base->mnemonic);*/

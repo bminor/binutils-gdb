@@ -1353,7 +1353,7 @@ create_register_alias (char *newname, char *p)
   /* The input scrubber ensures that whitespace after the mnemonic is
      collapsed to single spaces.  */
   oldname = p;
-  if (strncmp (oldname, " .req ", 6) != 0)
+  if (!startswith (oldname, " .req "))
     return false;
 
   oldname += 6;
@@ -2372,7 +2372,7 @@ parse_aarch64_imm_float (char **ccp, int *immed, bool dp_p,
   fpnum = str;
   skip_whitespace (fpnum);
 
-  if (strncmp (fpnum, "0x", 2) == 0)
+  if (startswith (fpnum, "0x"))
     {
       /* Support the hexadecimal representation of the IEEE754 encoding.
 	 Double-precision is expected when DP_P is TRUE, otherwise the
@@ -7253,7 +7253,7 @@ aarch64_frob_section (asection *sec ATTRIBUTE_UNUSED)
 int
 aarch64_data_in_code (void)
 {
-  if (!strncmp (input_line_pointer + 1, "data:", 5))
+  if (startswith (input_line_pointer + 1, "data:"))
     {
       *input_line_pointer = '/';
       input_line_pointer += 5;
@@ -9287,7 +9287,7 @@ aarch64_parse_features (const char *str, const aarch64_feature_set **opt_p,
       else
 	optlen = strlen (str);
 
-      if (optlen >= 2 && strncmp (str, "no", 2) == 0)
+      if (optlen >= 2 && startswith (str, "no"))
 	{
 	  if (adding_value != 0)
 	    adding_value = 0;
@@ -9504,8 +9504,7 @@ md_parse_option (int c, const char *arg)
 	  /* These options are expected to have an argument.  */
 	  if (c == lopt->option[0]
 	      && arg != NULL
-	      && strncmp (arg, lopt->option + 1,
-			  strlen (lopt->option + 1)) == 0)
+	      && startswith (arg, lopt->option + 1))
 	    {
 	      /* If the option is deprecated, tell the user.  */
 	      if (lopt->deprecated != NULL)
