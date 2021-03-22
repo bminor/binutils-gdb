@@ -30,13 +30,12 @@
 #endif
 
 #define streq(a,b)     strcmp ((a), (b)) == 0
-#define strneq(a,b,n)  strncmp ((a), (b), (n)) == 0
 
 bool
 validate_build_id_style (const char *style)
 {
   if ((streq (style, "md5")) || (streq (style, "sha1"))
-      || (streq (style, "uuid")) || (strneq (style, "0x", 2)))
+      || (streq (style, "uuid")) || (startswith (style, "0x")))
     return true;
 
   return false;
@@ -51,7 +50,7 @@ compute_build_id_size (const char *style)
   if (streq (style, "sha1"))
     return 160 / 8;
 
-  if (strneq (style, "0x", 2))
+  if (startswith (style, "0x"))
     {
       bfd_size_type size = 0;
       /* ID is in string form (hex).  Count the bytes.  */
@@ -156,7 +155,7 @@ generate_build_id (bfd *abfd,
 	      (size_t) size < sizeof (UUID) ? (size_t) size : sizeof (UUID));
 #endif /* __MINGW32__ */
     }
-  else if (strneq (style, "0x", 2))
+  else if (startswith (style, "0x"))
     {
       /* ID is in string form (hex).  Convert to bits.  */
       const char *id = style + 2;

@@ -1,3 +1,9 @@
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* ldbuildid.c (strneq): Remove strneq and use startswith.
+	(validate_build_id_style): Likewise.
+	(compute_build_id_size): Likewise.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* sysdep.h (POISON_BFD_BOOLEAN): Define.

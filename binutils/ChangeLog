@@ -1,5 +1,11 @@
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
+	* elfcomm.h (strneq): Remove strneq and use startswith.
+	* readelf.c (ia64_process_unwind): Likewise.
+	(process_note): Likewise.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
 	* dllwrap.c: Use startswith function.
 	* objcopy.c (is_dwo_section): Likewise.
 	(handle_remove_section_option): Likewise.

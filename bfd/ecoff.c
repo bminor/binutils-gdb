@@ -46,7 +46,6 @@
 #include "libiberty.h"
 
 #define streq(a, b)	(strcmp ((a), (b)) == 0)
-#define strneq(a, b, n)	(strncmp ((a), (b), (n)) == 0)
 
 
 /* This stuff is somewhat copied from coffcode.h.  */
@@ -2870,14 +2869,14 @@ _bfd_ecoff_slurp_armap (bfd *abfd)
     return bfd_slurp_armap (abfd);
 
   /* See if the first element is an armap.  */
-  if (! strneq (nextname, ecoff_backend (abfd)->armap_start, ARMAP_START_LENGTH)
+  if (strncmp (nextname, ecoff_backend (abfd)->armap_start, ARMAP_START_LENGTH) != 0
       || nextname[ARMAP_HEADER_MARKER_INDEX] != ARMAP_MARKER
       || (nextname[ARMAP_HEADER_ENDIAN_INDEX] != ARMAP_BIG_ENDIAN
 	  && nextname[ARMAP_HEADER_ENDIAN_INDEX] != ARMAP_LITTLE_ENDIAN)
       || nextname[ARMAP_OBJECT_MARKER_INDEX] != ARMAP_MARKER
       || (nextname[ARMAP_OBJECT_ENDIAN_INDEX] != ARMAP_BIG_ENDIAN
 	  && nextname[ARMAP_OBJECT_ENDIAN_INDEX] != ARMAP_LITTLE_ENDIAN)
-      || ! strneq (nextname + ARMAP_END_INDEX, ARMAP_END, sizeof ARMAP_END - 1))
+      || strncmp (nextname + ARMAP_END_INDEX, ARMAP_END, sizeof ARMAP_END - 1) != 0)
     {
       abfd->has_armap = false;
       return true;

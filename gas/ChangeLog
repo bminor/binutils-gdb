@@ -1,5 +1,13 @@
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
+	* config/obj-coff.c (strneq): Remove strneq and use startswith.
+	(weak_is_altname): Likewise.
+	(obj_coff_section): Likewise.
+	* config/tc-cr16.c (process_label_constant): Likewise.
+	* config/tc-crx.c (strneq): Likewise.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
 	* as.c (select_emulation_mode): Use startswith.
 	* config/m68k-parse.y: Likewise.
 	* config/obj-aout.c (obj_aout_type): Likewise.

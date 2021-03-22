@@ -8235,8 +8235,8 @@ ia64_process_unwind (Filedata * filedata)
 	    }
 	}
       else if (SECTION_NAME_VALID (unwsec)
-	       && strneq (SECTION_NAME (unwsec),
-			  ELF_STRING_ia64_unwind_once, len))
+	       && startswith (SECTION_NAME (unwsec),
+			      ELF_STRING_ia64_unwind_once))
 	{
 	  /* .gnu.linkonce.ia64unw.FOO -> .gnu.linkonce.ia64unwi.FOO.  */
 	  len2 = sizeof (ELF_STRING_ia64_unwind_info_once) - 1;
@@ -8245,8 +8245,8 @@ ia64_process_unwind (Filedata * filedata)
 	       i < filedata->file_header.e_shnum;
 	       ++i, ++sec)
 	    if (SECTION_NAME_VALID (sec)
-		&& strneq (SECTION_NAME (sec),
-			   ELF_STRING_ia64_unwind_info_once, len2)
+		&& startswith (SECTION_NAME (sec),
+			       ELF_STRING_ia64_unwind_info_once)
 		&& streq (SECTION_NAME (sec) + len2, suffix))
 	      break;
 	}
@@ -8258,13 +8258,13 @@ ia64_process_unwind (Filedata * filedata)
 	  len2 = sizeof (ELF_STRING_ia64_unwind_info) - 1;
 	  suffix = "";
 	  if (SECTION_NAME_VALID (unwsec)
-	      && strneq (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind, len))
+	      && startswith (SECTION_NAME (unwsec), ELF_STRING_ia64_unwind))
 	    suffix = SECTION_NAME (unwsec) + len;
 	  for (i = 0, sec = filedata->section_headers;
 	       i < filedata->file_header.e_shnum;
 	       ++i, ++sec)
 	    if (SECTION_NAME_VALID (sec)
-		&& strneq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info, len2)
+		&& startswith (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info)
 		&& streq (SECTION_NAME (sec) + len2, suffix))
 	      break;
 	}
@@ -20449,7 +20449,7 @@ process_note (Elf_Internal_Note *  pnote,
     /* NetBSD-specific core file notes.  */
     return process_netbsd_elf_note (pnote);
 
-  else if (strneq (pnote->namedata, "SPU/", 4))
+  else if (startswith (pnote->namedata, "SPU/"))
     {
       /* SPU-specific core file notes.  */
       nt = pnote->namedata + 4;

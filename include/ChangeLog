@@ -1,3 +1,7 @@
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* opcode/cr16.h (strneq): Remove strneq and use startswith.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* bfdlink.h: Replace bfd_boolean with bool throughout.

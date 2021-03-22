@@ -1,5 +1,10 @@
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
+	* ecoff.c (strneq): Remove strneq and use startswith.
+	(_bfd_ecoff_slurp_armap): Likewise.
+
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
 	* elf-bfd.h (bfd_section_is_ctf): Use startswith function.
 	* elf.c (_bfd_elf_make_section_from_shdr): Likewise.
 	(elf_get_reloc_section): Likewise.
