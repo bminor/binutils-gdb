@@ -136,7 +136,7 @@ md_operand (expressionS * e)
   if (*input_line_pointer != '@')
     return;
 
-  if (strncmp (input_line_pointer + 1, "fptr", 4) == 0)
+  if (startswith (input_line_pointer + 1, "fptr"))
     {
       input_line_pointer += 5;
       SKIP_WHITESPACE ();

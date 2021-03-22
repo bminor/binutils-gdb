@@ -3553,7 +3553,7 @@ pa_ip (char *str)
 		/* Handle load cache hint completer.  */
 		case 'c':
 		  cmpltr = 0;
-		  if (!strncmp (s, ",sl", 3))
+		  if (startswith (s, ",sl"))
 		    {
 		      s += 3;
 		      cmpltr = 2;
@@ -3563,12 +3563,12 @@ pa_ip (char *str)
 		/* Handle store cache hint completer.  */
 		case 'C':
 		  cmpltr = 0;
-		  if (!strncmp (s, ",sl", 3))
+		  if (startswith (s, ",sl"))
 		    {
 		      s += 3;
 		      cmpltr = 2;
 		    }
-		  else if (!strncmp (s, ",bc", 3))
+		  else if (startswith (s, ",bc"))
 		    {
 		      s += 3;
 		      cmpltr = 1;
@@ -3578,7 +3578,7 @@ pa_ip (char *str)
 		/* Handle load and clear cache hint completer.  */
 		case 'd':
 		  cmpltr = 0;
-		  if (!strncmp (s, ",co", 3))
+		  if (startswith (s, ",co"))
 		    {
 		      s += 3;
 		      cmpltr = 1;
@@ -3587,7 +3587,7 @@ pa_ip (char *str)
 
 		/* Handle load ordering completer.  */
 		case 'o':
-		  if (strncmp (s, ",o", 2) != 0)
+		  if (!startswith (s, ",o"))
 		    break;
 		  s += 2;
 		  continue;
@@ -4098,12 +4098,12 @@ pa_ip (char *str)
 			else if (*s == '*')
 			  break;
 
-			if (strncmp (s, "<", 1) == 0)
+			if (startswith (s, "<"))
 			  {
 			    cmpltr = 0;
 			    s++;
 			  }
-			else if (strncmp (s, ">=", 2) == 0)
+			else if (startswith (s, ">="))
 			  {
 			    cmpltr = 1;
 			    s += 2;
@@ -6813,25 +6813,25 @@ pa_level (int unused ATTRIBUTE_UNUSED)
   char *level;
 
   level = input_line_pointer;
-  if (strncmp (level, "1.0", 3) == 0)
+  if (startswith (level, "1.0"))
     {
       input_line_pointer += 3;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 10))
 	as_warn (_("could not set architecture and machine"));
     }
-  else if (strncmp (level, "1.1", 3) == 0)
+  else if (startswith (level, "1.1"))
     {
       input_line_pointer += 3;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 11))
 	as_warn (_("could not set architecture and machine"));
     }
-  else if (strncmp (level, "2.0w", 4) == 0)
+  else if (startswith (level, "2.0w"))
     {
       input_line_pointer += 4;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 25))
 	as_warn (_("could not set architecture and machine"));
     }
-  else if (strncmp (level, "2.0", 3) == 0)
+  else if (startswith (level, "2.0"))
     {
       input_line_pointer += 3;
       if (!bfd_set_arch_mach (stdoutput, bfd_arch_hppa, 20))
@@ -7202,7 +7202,7 @@ pa_space (int unused ATTRIBUTE_UNUSED)
 	 and place them into a subroutine or something similar?  */
       /* FIXME Is this (and the next IF stmt) really right?
 	 What if INPUT_LINE_POINTER points to "$TEXT$FOO"?  */
-      if (strncmp (input_line_pointer, "$TEXT$", 6) == 0)
+      if (startswith (input_line_pointer, "$TEXT$"))
 	{
 	  input_line_pointer += 6;
 	  sd_chain = is_defined_space ("$TEXT$");
@@ -7219,7 +7219,7 @@ pa_space (int unused ATTRIBUTE_UNUSED)
 	  demand_empty_rest_of_line ();
 	  return;
 	}
-      if (strncmp (input_line_pointer, "$PRIVATE$", 9) == 0)
+      if (startswith (input_line_pointer, "$PRIVATE$"))
 	{
 	  input_line_pointer += 9;
 	  sd_chain = is_defined_space ("$PRIVATE$");

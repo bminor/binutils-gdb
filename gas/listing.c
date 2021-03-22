@@ -318,8 +318,8 @@ listing_newline (char *ps)
       const char *segname;
 
       segname = segment_name (now_seg);
-      if (strncmp (segname, ".debug", sizeof ".debug" - 1) == 0
-	  || strncmp (segname, ".line", sizeof ".line" - 1) == 0)
+      if (startswith (segname, ".debug")
+	  || startswith (segname, ".line"))
 	listing_tail->debugging = 1;
     }
 #endif
@@ -433,8 +433,8 @@ listing_newline (char *ps)
       const char *segname;
 
       segname = segment_name (now_seg);
-      if (strncmp (segname, ".debug", sizeof ".debug" - 1) == 0
-	  || strncmp (segname, ".line", sizeof ".line" - 1) == 0)
+      if (startswith (segname, ".debug")
+	  || startswith (segname, ".line"))
 	new_i->debugging = 1;
     }
 #endif
@@ -1160,29 +1160,29 @@ debugging_pseudo (list_info_type *list, const char *line)
 
   line++;
 
-  if (strncmp (line, "def", 3) == 0)
+  if (startswith (line, "def"))
     return 1;
-  if (strncmp (line, "val", 3) == 0)
+  if (startswith (line, "val"))
     return 1;
-  if (strncmp (line, "scl", 3) == 0)
+  if (startswith (line, "scl"))
     return 1;
-  if (strncmp (line, "line", 4) == 0)
+  if (startswith (line, "line"))
     return 1;
-  if (strncmp (line, "endef", 5) == 0)
+  if (startswith (line, "endef"))
     return 1;
-  if (strncmp (line, "ln", 2) == 0)
+  if (startswith (line, "ln"))
     return 1;
-  if (strncmp (line, "type", 4) == 0)
+  if (startswith (line, "type"))
     return 1;
-  if (strncmp (line, "size", 4) == 0)
+  if (startswith (line, "size"))
     return 1;
-  if (strncmp (line, "dim", 3) == 0)
+  if (startswith (line, "dim"))
     return 1;
-  if (strncmp (line, "tag", 3) == 0)
+  if (startswith (line, "tag"))
     return 1;
-  if (strncmp (line, "stabs", 5) == 0)
+  if (startswith (line, "stabs"))
     return 1;
-  if (strncmp (line, "stabn", 5) == 0)
+  if (startswith (line, "stabn"))
     return 1;
 
   return 0;

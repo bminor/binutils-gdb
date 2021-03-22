@@ -481,8 +481,8 @@ v850_comm (int area)
 	input_line_pointer++;
 
       /* @@ Some say data, some say bss.  */
-      if (strncmp (input_line_pointer, "bss\"", 4)
-	  && strncmp (input_line_pointer, "data\"", 5))
+      if (!startswith (input_line_pointer, "bss\"")
+	  && !startswith (input_line_pointer, "data\""))
 	{
 	  while (*--input_line_pointer != '"')
 	    ;
@@ -1888,7 +1888,7 @@ md_begin (void)
   const char *prev_name = "";
   const struct v850_opcode *op;
 
-  if (strncmp (TARGET_CPU, "v850e3v5", 8) == 0)
+  if (startswith (TARGET_CPU, "v850e3v5"))
     {
       if (machine == -1)
 	machine = bfd_mach_v850e3v5;
@@ -1896,7 +1896,7 @@ md_begin (void)
       if (!processor_mask)
 	SET_PROCESSOR_MASK (processor_mask, PROCESSOR_V850E3V5);
     }
-  else if (strncmp (TARGET_CPU, "v850e2v4", 8) == 0)
+  else if (startswith (TARGET_CPU, "v850e2v4"))
     {
       if (machine == -1)
 	machine = bfd_mach_v850e3v5;
@@ -1904,7 +1904,7 @@ md_begin (void)
       if (!processor_mask)
 	SET_PROCESSOR_MASK (processor_mask, PROCESSOR_V850E3V5);
     }
-  else if (strncmp (TARGET_CPU, "v850e2v3", 8) == 0)
+  else if (startswith (TARGET_CPU, "v850e2v3"))
     {
       if (machine == -1)
         machine = bfd_mach_v850e2v3;
@@ -1912,7 +1912,7 @@ md_begin (void)
       if (!processor_mask)
         SET_PROCESSOR_MASK (processor_mask, PROCESSOR_V850E2V3);
     }
-  else if (strncmp (TARGET_CPU, "v850e2", 6) == 0)
+  else if (startswith (TARGET_CPU, "v850e2"))
     {
       if (machine == -1)
 	machine = bfd_mach_v850e2;
@@ -1920,7 +1920,7 @@ md_begin (void)
       if (!processor_mask)
 	SET_PROCESSOR_MASK (processor_mask, PROCESSOR_V850E2);
     }
-  else if (strncmp (TARGET_CPU, "v850e1", 6) == 0)
+  else if (startswith (TARGET_CPU, "v850e1"))
     {
       if (machine == -1)
         machine = bfd_mach_v850e1;
@@ -1928,7 +1928,7 @@ md_begin (void)
       if (!processor_mask)
         SET_PROCESSOR_MASK (processor_mask, PROCESSOR_V850E1);
     }
-  else if (strncmp (TARGET_CPU, "v850e", 5) == 0)
+  else if (startswith (TARGET_CPU, "v850e"))
     {
       if (machine == -1)
 	machine = bfd_mach_v850e;
@@ -1936,7 +1936,7 @@ md_begin (void)
       if (!processor_mask)
 	SET_PROCESSOR_MASK (processor_mask, PROCESSOR_V850E);
     }
-  else if (strncmp (TARGET_CPU, "v850", 4) == 0)
+  else if (startswith (TARGET_CPU, "v850"))
     {
       if (machine == -1)
 	machine = 0;
@@ -2348,9 +2348,9 @@ md_assemble (char *str)
 
       if (no_stld23)
 	{
-	  if ((strncmp (opcode->name, "st.", 3) == 0
+	  if ((startswith (opcode->name, "st.")
 	       && v850_operands[opcode->operands[1]].bits == 23)
-	      || (strncmp (opcode->name, "ld.", 3) == 0
+	      || (startswith (opcode->name, "ld.")
 		  && v850_operands[opcode->operands[0]].bits == 23))
 	    {
 	      errmsg = _("st/ld offset 23 instruction was disabled .");
@@ -2949,8 +2949,8 @@ md_assemble (char *str)
                      value does not fit into the bits available then create a
                      fake error so that the next ld/st instruction will be
                      selected.  */
-                  if ( (  (strncmp (opcode->name, "st.", 3) == 0)
-		       || (strncmp (opcode->name, "ld.", 3) == 0))
+                  if ( (  (startswith (opcode->name, "st."))
+		       || (startswith (opcode->name, "ld.")))
                       && ex.X_op == O_constant
                       && (ex.X_add_number < (-(1 << (operand->bits - 1)))
 			  || ex.X_add_number > ((1 << (operand->bits - 1)) - 1)))

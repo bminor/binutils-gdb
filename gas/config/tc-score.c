@@ -4832,8 +4832,8 @@ s3_nopic_need_relax (symbolS * sym, int before_relaxing)
       segname = segment_name (S_GET_SEGMENT (sym));
       return (strcmp (segname, ".sdata") != 0
 	      && strcmp (segname, ".sbss") != 0
-	      && strncmp (segname, ".sdata.", 7) != 0
-	      && strncmp (segname, ".gnu.linkonce.s.", 16) != 0);
+	      && !startswith (segname, ".sdata.")
+	      && !startswith (segname, ".gnu.linkonce.s."));
     }
   /* We are not optimizing for the $gp register.  */
   else
@@ -5313,8 +5313,7 @@ s3_pic_need_relax (symbolS *sym, asection *segtype)
       /* The GNU toolchain uses an extension for ELF: a section
 	 beginning with the magic string .gnu.linkonce is a linkonce
 	 section.  */
-      if (strncmp (segment_name (symsec), ".gnu.linkonce",
-		   sizeof ".gnu.linkonce" - 1) == 0)
+      if (startswith (segment_name (symsec), ".gnu.linkonce"))
 	linkonce = true;
     }
 

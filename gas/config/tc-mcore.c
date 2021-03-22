@@ -361,7 +361,7 @@ mcore_s_section (int ignore)
   while (*ilp != 0 && ISSPACE (*ilp))
     ++ ilp;
 
-  if (strncmp (ilp, ".line", 5) == 0
+  if (startswith (ilp, ".line")
       && (ISSPACE (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
     ;
   else

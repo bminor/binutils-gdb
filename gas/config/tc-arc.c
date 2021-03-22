@@ -4723,17 +4723,17 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
       input_line_pointer++;
       mode = input_line_pointer;
 
-      if (!strncmp (mode, "r|w", 3))
+      if (startswith (mode, "r|w"))
 	{
 	  imode = 0;
 	  input_line_pointer += 3;
 	}
-      else if (!strncmp (mode, "r", 1))
+      else if (startswith (mode, "r"))
 	{
 	  imode = ARC_REGISTER_READONLY;
 	  input_line_pointer += 1;
 	}
-      else if (strncmp (mode, "w", 1))
+      else if (!startswith (mode, "w"))
 	{
 	  as_bad (_("invalid mode"));
 	  ignore_rest_of_line ();
@@ -4761,12 +4761,12 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
 
       input_line_pointer++;
 
-      if (!strncmp (input_line_pointer, "cannot_shortcut", 15))
+      if (startswith (input_line_pointer, "cannot_shortcut"))
 	{
 	  imode |= ARC_REGISTER_NOSHORT_CUT;
 	  input_line_pointer += 15;
 	}
-      else if (strncmp (input_line_pointer, "can_shortcut", 12))
+      else if (!startswith (input_line_pointer, "can_shortcut"))
 	{
 	  as_bad (_("shortcut designator invalid"));
 	  ignore_rest_of_line ();

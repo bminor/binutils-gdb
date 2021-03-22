@@ -1177,19 +1177,19 @@ get_operand (operand *oper, int which, long opmode)
 
       mode = M6811_OP_IMM16;
       p++;
-      if (strncmp (p, "%hi", 3) == 0)
+      if (startswith (p, "%hi"))
 	{
 	  p += 3;
 	  mode |= M6811_OP_HIGH_ADDR;
 	}
-      else if (strncmp (p, "%lo", 3) == 0)
+      else if (startswith (p, "%lo"))
 	{
 	  p += 3;
 	  mode |= M6811_OP_LOW_ADDR;
 	}
       /* %page modifier is used to obtain only the page number
          of the address of a function.  */
-      else if (strncmp (p, "%page", 5) == 0)
+      else if (startswith (p, "%page"))
 	{
 	  p += 5;
 	  mode |= M6811_OP_PAGE_ADDR;
@@ -1200,7 +1200,7 @@ get_operand (operand *oper, int which, long opmode)
          mapped in the 16K window at 0x8000 and the value will be
          within that window (although the function address may not fit
          in 16-bit).  See bfd/elf32-m68hc12.c for the translation.  */
-      else if (strncmp (p, "%addr", 5) == 0)
+      else if (startswith (p, "%addr"))
 	{
 	  p += 5;
 	  mode |= M6811_OP_CALL_ADDR;
@@ -1238,7 +1238,7 @@ get_operand (operand *oper, int which, long opmode)
       return -1;
     }
   /* Handle 68HC12 page specification in 'call foo,%page(bar)'.  */
-  else if ((opmode & M6812_OP_PAGE) && strncmp (p, "%page", 5) == 0)
+  else if ((opmode & M6812_OP_PAGE) && startswith (p, "%page"))
     {
       p += 5;
       mode = M6811_OP_PAGE_ADDR | M6812_OP_PAGE | M6811_OP_IND16;
@@ -2873,7 +2873,7 @@ md_assemble (char *str)
         }
 
       /* Special handling of TFR. */
-      if (strncmp (opc->opcode->name, "tfr",3) == 0)
+      if (startswith (opc->opcode->name, "tfr"))
         {
           /* There must be two operands with a comma. */
           input_line_pointer = skip_whites (input_line_pointer);
@@ -2995,7 +2995,7 @@ md_assemble (char *str)
 	}
 
       /* Special handling of SIF. */
-      if (strncmp (opc->opcode->name, "sif",3) == 0)
+      if (startswith (opc->opcode->name, "sif"))
         {
           /* Either OP_NONE or OP_RS. */
           if (*input_line_pointer != '\n')
@@ -3040,13 +3040,13 @@ md_assemble (char *str)
                   opcode = find (opc, operands, 1);
                   if (opcode)
 		    {
-                      if ((strncmp (opc->opcode->name, "com",3) == 0)
-                          || (strncmp (opc->opcode->name, "neg",3) == 0))
+                      if ((startswith (opc->opcode->name, "com"))
+                          || (startswith (opc->opcode->name, "neg")))
                         /* Special case for com RD as alias for sub RD,R0,RS */
                         /* Special case for neg RD as alias for sub RD,R0,RS */
                         opcode_local.opcode = opcode->opcode
                           | (operands[0].reg1 << 8) | (operands[0].reg1 << 2);
-		      else if (strncmp (opc->opcode->name, "tst",3) == 0)
+		      else if (startswith (opc->opcode->name, "tst"))
                         /* Special case for tst RS alias for sub R0, RS, R0 */
                         opcode_local.opcode = opcode->opcode
                           | (operands[0].reg1 << 5);
@@ -3128,12 +3128,12 @@ md_assemble (char *str)
             {
               input_line_pointer++;
               input_line_pointer = skip_whites (input_line_pointer);
-              if (strncmp (input_line_pointer, "%hi", 3) == 0)
+              if (startswith (input_line_pointer, "%hi"))
                 {
                   input_line_pointer += 3;
                   operands[0].mode = M6811_OP_HIGH_ADDR;
                 }
-              else if (strncmp (input_line_pointer, "%lo", 3) == 0)
+              else if (startswith (input_line_pointer, "%lo"))
                 {
 		  input_line_pointer += 3;
 		  operands[0].mode = M6811_OP_LOW_ADDR;
@@ -3216,9 +3216,9 @@ md_assemble (char *str)
                   opcode = find (opc, operands, 1);
                   if (opcode)
                     {
-                      if ((strncmp (opc->opcode->name, "com",3) == 0)
-			  || (strncmp (opc->opcode->name, "mov",3) == 0)
-			  || (strncmp (opc->opcode->name, "neg",3) == 0))
+                      if ((startswith (opc->opcode->name, "com"))
+			  || (startswith (opc->opcode->name, "mov"))
+			  || (startswith (opc->opcode->name, "neg")))
                         {
                           /* Special cases for:
                              com RD, RS alias for xnor RD,R0,RS
@@ -3227,8 +3227,8 @@ md_assemble (char *str)
                           opcode_local.opcode = opcode->opcode
                             | (operands[0].reg1 << 8) | (operands[1].reg1 << 2);
                         }
-                      else if ((strncmp (opc->opcode->name, "cmp",3) == 0)
-			       || (strncmp (opc->opcode->name, "cpc",3) == 0))
+                      else if ((startswith (opc->opcode->name, "cmp"))
+			       || (startswith (opc->opcode->name, "cpc")))
                         {
                           /* special cases for:
                              cmp RS1, RS2 alias for sub R0, RS1, RS2

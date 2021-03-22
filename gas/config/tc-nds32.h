@@ -158,7 +158,7 @@ extern void nds32_do_align (int);
 #define md_do_align(N, FILL, LEN, MAX, LABEL)	\
   nds32_pre_do_align (N, FILL, LEN, MAX);	\
   if ((N) > 1 && (subseg_text_p (now_seg)	\
-      || strncmp (now_seg->name, ".gcc_except_table", sizeof(".gcc_except_table") - 1) == 0)) \
+      || startswith (now_seg->name, ".gcc_except_table"))) \
     nds32_do_align (N);				\
   goto LABEL;
 #define md_elf_section_change_hook()		nds32_elf_section_change_hook ()

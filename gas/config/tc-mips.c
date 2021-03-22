@@ -513,8 +513,8 @@ static int mips_32bitmode = 0;
 
 /* Return true if the given CPU supports the MIPS16 ASE.  */
 #define CPU_HAS_MIPS16(cpu)						\
-   (strncmp (TARGET_CPU, "mips16", sizeof ("mips16") - 1) == 0		\
-    || strncmp (TARGET_CANONICAL, "mips-lsi-elf", sizeof ("mips-lsi-elf") - 1) == 0)
+   (startswith (TARGET_CPU, "mips16")					\
+    || startswith (TARGET_CANONICAL, "mips-lsi-elf"))
 
 /* Return true if the given CPU supports the microMIPS ASE.  */
 #define CPU_HAS_MICROMIPS(cpu)	0
@@ -3842,8 +3842,8 @@ md_begin (void)
   /* On a native system other than VxWorks, sections must be aligned
      to 16 byte boundaries.  When configured for an embedded ELF
      target, we don't bother.  */
-  if (strncmp (TARGET_OS, "elf", 3) != 0
-      && strncmp (TARGET_OS, "vxworks", 7) != 0)
+  if (!startswith (TARGET_OS, "elf")
+      && !startswith (TARGET_OS, "vxworks"))
     {
       bfd_set_section_alignment (text_section, 4);
       bfd_set_section_alignment (data_section, 4);
@@ -3865,7 +3865,7 @@ md_begin (void)
        running program can access it.  However, we don't load it
        if we are configured for an embedded target.  */
     flags = SEC_READONLY | SEC_DATA;
-    if (strncmp (TARGET_OS, "elf", 3) != 0)
+    if (!startswith (TARGET_OS, "elf"))
       flags |= SEC_ALLOC | SEC_LOAD;
 
     if (mips_abi != N64_ABI)
@@ -4457,8 +4457,7 @@ s_is_linkonce (symbolS *sym, segT from_seg)
       /* The GNU toolchain uses an extension for ELF: a section
 	 beginning with the magic string .gnu.linkonce is a
 	 linkonce section.  */
-      if (strncmp (segment_name (symseg), ".gnu.linkonce",
-		   sizeof ".gnu.linkonce" - 1) == 0)
+      if (startswith (segment_name (symseg), ".gnu.linkonce"))
 	linkonce = true;
     }
   return linkonce;
@@ -5114,12 +5113,12 @@ check_regno (struct mips_arg_info *arg,
       length = strlen (name);
       if ((regno & 1) != 0
 	  && ((length >= 3 && strcmp (name + length - 3, ".ps") == 0)
-	      || (length >= 5 && strncmp (name + length - 5, "any2", 4) == 0)))
+	      || (length >= 5 && startswith (name + length - 5, "any2"))))
 	as_warn (_("condition code register should be even for %s, was %d"),
 		 name, regno);
 
       if ((regno & 3) != 0
-	  && (length >= 5 && strncmp (name + length - 5, "any4", 4) == 0))
+	  && (length >= 5 && startswith (name + length - 5, "any4")))
 	as_warn (_("condition code register should be 0 or 4 for %s, was %d"),
 		 name, regno);
     }
@@ -6166,7 +6165,7 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
   bfd_set_section_flags (new_seg,
 			 SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA);
   frag_align (length == 4 ? 2 : 3, 0, 0);
-  if (strncmp (TARGET_OS, "elf", 3) != 0)
+  if (!startswith (TARGET_OS, "elf"))
     record_alignment (new_seg, 4);
   else
     record_alignment (new_seg, length == 4 ? 2 : 3);
@@ -6348,13 +6347,13 @@ reg_needs_delay (unsigned int reg)
 static unsigned int
 classify_vr4120_insn (const char *name)
 {
-  if (strncmp (name, "macc", 4) == 0)
+  if (startswith (name, "macc"))
     return FIX_VR4120_MACC;
-  if (strncmp (name, "dmacc", 5) == 0)
+  if (startswith (name, "dmacc"))
     return FIX_VR4120_DMACC;
-  if (strncmp (name, "mult", 4) == 0)
+  if (startswith (name, "mult"))
     return FIX_VR4120_MULT;
-  if (strncmp (name, "dmult", 5) == 0)
+  if (startswith (name, "dmult"))
     return FIX_VR4120_DMULT;
   if (strstr (name, "div"))
     return FIX_VR4120_DIV;
@@ -8294,7 +8293,7 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    return true;
 	  clear_insn_error ();
 	  if (arg.dest_regno == arg.last_regno
-	      && strncmp (insn->insn_mo->name, "jalr", 4) == 0)
+	      && startswith (insn->insn_mo->name, "jalr"))
 	    {
 	      if (arg.opnum == 2)
 		set_insn_error
@@ -8304,8 +8303,8 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 		  (0, _("a destination register must be supplied"));
 	    }
 	  else if (arg.last_regno == 31
-		   && (strncmp (insn->insn_mo->name, "bltzal", 6) == 0
-		       || strncmp (insn->insn_mo->name, "bgezal", 6) == 0))
+		   && (startswith (insn->insn_mo->name, "bltzal")
+		       || startswith (insn->insn_mo->name, "bgezal")))
 	    set_insn_error (0, _("the source register must not be $31"));
 	  check_completed_insn (&arg);
 	  return true;
@@ -15250,7 +15249,7 @@ mips_after_parse_args (void)
   const struct mips_cpu_info *tune_info = 0;
 
   /* GP relative stuff not working for PE.  */
-  if (strncmp (TARGET_OS, "pe", 2) == 0)
+  if (startswith (TARGET_OS, "pe"))
     {
       if (g_switch_seen && g_switch_value != 0)
 	as_bad (_("-G not supported in this configuration"));
@@ -16339,7 +16338,7 @@ s_change_sec (int sec)
 			(subsegT) get_absolute_expression ());
       bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 				   | SEC_RELOC | SEC_DATA));
-      if (strncmp (TARGET_OS, "elf", 3) != 0)
+      if (!startswith (TARGET_OS, "elf"))
 	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
@@ -16348,7 +16347,7 @@ s_change_sec (int sec)
       seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
       bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
 				   | SEC_DATA | SEC_SMALL_DATA));
-      if (strncmp (TARGET_OS, "elf", 3) != 0)
+      if (!startswith (TARGET_OS, "elf"))
 	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
@@ -16356,7 +16355,7 @@ s_change_sec (int sec)
     case 'B':
       seg = subseg_new (".sbss", (subsegT) get_absolute_expression ());
       bfd_set_section_flags (seg, SEC_ALLOC | SEC_SMALL_DATA);
-      if (strncmp (TARGET_OS, "elf", 3) != 0)
+      if (!startswith (TARGET_OS, "elf"))
 	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
@@ -16565,7 +16564,7 @@ s_option (int x ATTRIBUTE_UNUSED)
     {
       /* FIXME: What does this mean?  */
     }
-  else if (strncmp (opt, "pic", 3) == 0 && ISDIGIT (opt[3]) && opt[4] == '\0')
+  else if (startswith (opt, "pic") && ISDIGIT (opt[3]) && opt[4] == '\0')
     {
       int i;
 
@@ -16630,7 +16629,7 @@ parse_code_option (char * name)
   bool isa_set = false;
   const struct mips_ase *ase;
 
-  if (strncmp (name, "at=", 3) == 0)
+  if (startswith (name, "at="))
     {
       char *s = name + 3;
 
@@ -16687,11 +16686,11 @@ parse_code_option (char * name)
     mips_set_ase (ase, &mips_opts, false);
   else if ((ase = mips_lookup_ase (name)))
     mips_set_ase (ase, &mips_opts, true);
-  else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
+  else if (startswith (name, "mips") || startswith (name, "arch="))
     {
       /* Permit the user to change the ISA and architecture on the fly.
 	 Needless to say, misuse can cause serious problems.  */
-      if (strncmp (name, "arch=", 5) == 0)
+      if (startswith (name, "arch="))
 	{
 	  const struct mips_cpu_info *p;
 
@@ -16706,7 +16705,7 @@ parse_code_option (char * name)
 	      mips_opts.init_ase = p->ase;
 	    }
 	}
-      else if (strncmp (name, "mips", 4) == 0)
+      else if (startswith (name, "mips"))
 	{
 	  const struct mips_cpu_info *p;
 
@@ -17626,7 +17625,7 @@ md_section_align (asection *seg, valueT addr)
      However, Irix 5 may prefer that we align them at least to a 16
      byte boundary.  We don't bother to align the sections if we
      are targeted for an embedded system.  */
-  if (strncmp (TARGET_OS, "elf", 3) == 0)
+  if (startswith (TARGET_OS, "elf"))
     return addr;
   if (align > 4)
     align = 4;
@@ -17694,10 +17693,10 @@ nopic_need_relax (symbolS *sym, int before_relaxing)
 		  && strcmp (segname, ".lit4") != 0);
 	  change = (strcmp (segname, ".sdata") != 0
 		    && strcmp (segname, ".sbss") != 0
-		    && strncmp (segname, ".sdata.", 7) != 0
-		    && strncmp (segname, ".sbss.", 6) != 0
-		    && strncmp (segname, ".gnu.linkonce.sb.", 17) != 0
-		    && strncmp (segname, ".gnu.linkonce.s.", 16) != 0);
+		    && !startswith (segname, ".sdata.")
+		    && !startswith (segname, ".sbss.")
+		    && !startswith (segname, ".gnu.linkonce.sb.")
+		    && !startswith (segname, ".gnu.linkonce.s."));
 	}
       return change;
     }

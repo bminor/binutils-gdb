@@ -3712,7 +3712,7 @@ nds32_parse_option (int c, const char *arg)
 	  int disable = 0;
 
 	  /* Filter out the Disable option first.  */
-	  if (strncmp (arg, "no-", 3) == 0)
+	  if (startswith (arg, "no-"))
 	    {
 	      disable = 1;
 	      arg += 3;

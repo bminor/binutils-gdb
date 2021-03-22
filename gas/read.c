@@ -1322,7 +1322,7 @@ read_a_source_file (const char *name)
 	      char *tmp_buf = 0;
 
 	      s = input_line_pointer;
-	      if (strncmp (s, "APP\n", 4))
+	      if (!startswith (s, "APP\n"))
 		{
 		  /* We ignore it.  */
 		  ignore_rest_of_line ();

@@ -140,9 +140,9 @@ extern void sh_frob_file (void);
 
 /* We align most sections to a 16 byte boundary.  */
 #define SUB_SEGMENT_ALIGN(SEG, FRCHAIN)			\
-  (strncmp (SEG_NAME (SEG), ".stabstr", 8) == 0		\
+  (startswith (SEG_NAME (SEG), ".stabstr")		\
    ? 0							\
-   : ((strncmp (SEG_NAME (SEG), ".stab", 5) == 0	\
+   : ((startswith (SEG_NAME (SEG), ".stab")	\
        || strcmp (SEG_NAME (SEG), ".ctors") == 0	\
        || strcmp (SEG_NAME (SEG), ".dtors") == 0)	\
       ? 2						\

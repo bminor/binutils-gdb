@@ -2624,7 +2624,7 @@ create_register_alias (char * newname, char *p)
   /* The input scrubber ensures that whitespace after the mnemonic is
      collapsed to single spaces.  */
   oldname = p;
-  if (strncmp (oldname, " .req ", 6) != 0)
+  if (!startswith (oldname, " .req "))
     return false;
 
   oldname += 6;
@@ -2715,9 +2715,9 @@ create_neon_reg_alias (char *newname, char *p)
 
   nameend = p;
 
-  if (strncmp (p, " .dn ", 5) == 0)
+  if (startswith (p, " .dn "))
     basetype = REG_TYPE_VFD;
-  else if (strncmp (p, " .qn ", 5) == 0)
+  else if (startswith (p, " .qn "))
     basetype = REG_TYPE_NQ;
   else
     return false;
@@ -5401,7 +5401,7 @@ parse_ifimm_zero (char **in)
     ++*in;
 
   /* Accept #0x0 as a synonym for #0.  */
-  if (strncmp (*in, "0x", 2) == 0)
+  if (startswith (*in, "0x"))
     {
       int val;
       if (parse_immediate (in, &val, 0, 0, true) == FAIL)
@@ -5445,7 +5445,7 @@ parse_qfloat_immediate (char **ccp, int *immed)
   fpnum = str;
   skip_whitespace (fpnum);
 
-  if (strncmp (fpnum, "0x", 2) == 0)
+  if (startswith (fpnum, "0x"))
     return FAIL;
   else
     {
@@ -23727,7 +23727,7 @@ arm_frob_label (symbolS * sym)
 bool
 arm_data_in_code (void)
 {
-  if (thumb_mode && ! strncmp (input_line_pointer + 1, "data:", 5))
+  if (thumb_mode && startswith (input_line_pointer + 1, "data:"))
     {
       *input_line_pointer = '/';
       input_line_pointer += 5;
@@ -27418,7 +27418,7 @@ arm_elf_change_section (void)
 int
 arm_elf_section_type (const char * str, size_t len)
 {
-  if (len == 5 && strncmp (str, "exidx", 5) == 0)
+  if (len == 5 && startswith (str, "exidx"))
     return SHT_ARM_EXIDX;
 
   return -1;
@@ -27588,8 +27588,7 @@ start_unwind_section (const segT text_seg, int idx)
   if (streq (text_name, ".text"))
     text_name = "";
 
-  if (strncmp (text_name, ".gnu.linkonce.t.",
-	       strlen (".gnu.linkonce.t.")) == 0)
+  if (startswith (text_name, ".gnu.linkonce.t."))
     {
       prefix = prefix_once;
       text_name += strlen (".gnu.linkonce.t.");
@@ -32213,7 +32212,7 @@ arm_parse_extension (const char *str, const arm_feature_set *opt_set,
       else
 	len = strlen (str);
 
-      if (len >= 2 && strncmp (str, "no", 2) == 0)
+      if (len >= 2 && startswith (str, "no"))
 	{
 	  if (adding_value != 0)
 	    {
@@ -33007,7 +33006,7 @@ aeabi_set_public_attributes (void)
       char *q;
 
       q = selected_cpu_name;
-      if (strncmp (q, "armv", 4) == 0)
+      if (startswith (q, "armv"))
 	{
 	  int i;
 
@@ -33300,7 +33299,7 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
   *input_line_pointer = 0;
 
   if (strlen (name) >= 2
-      && strncmp (name, "no", 2) == 0)
+      && startswith (name, "no"))
     {
       adding_value = 0;
       name += 2;

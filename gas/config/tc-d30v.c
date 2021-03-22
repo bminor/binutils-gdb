@@ -1339,7 +1339,7 @@ do_assemble (char *str,
     opcode->ecc = ECC_AL;
 
   /* CMP and CMPU change their name based on condition codes.  */
-  if (!strncmp (name, "cmp", 3))
+  if (startswith (name, "cmp"))
     {
       int p, i;
       char **d30v_str = (char **) d30v_cc_names;

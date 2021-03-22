@@ -2802,17 +2802,17 @@ tb_reg_rel  (const struct instruction *insn)
   if (reg == REG_Y)
     lb |= 0x01;
 
-  if (0 == strncmp (insn->name + 2, "ne", 2))
+  if (startswith (insn->name + 2, "ne"))
     lb |= 0x00 << 4;
-  else if (0 == strncmp (insn->name + 2, "eq", 2))
+  else if (startswith (insn->name + 2, "eq"))
     lb |= 0x01 << 4;
-  else if (0 == strncmp (insn->name + 2, "pl", 2))
+  else if (startswith (insn->name + 2, "pl"))
     lb |= 0x02 << 4;
-  else if (0 == strncmp (insn->name + 2, "mi", 2))
+  else if (startswith (insn->name + 2, "mi"))
     lb |= 0x03 << 4;
-  else if (0 == strncmp (insn->name + 2, "gt", 2))
+  else if (startswith (insn->name + 2, "gt"))
     lb |= 0x04 << 4;
-  else if (0 == strncmp (insn->name + 2, "le", 2))
+  else if (startswith (insn->name + 2, "le"))
     lb |= 0x05 << 4;
 
   switch (insn->name[0])
@@ -2863,17 +2863,17 @@ tb_opr_rel  (const struct instruction *insn)
 
   uint8_t lb = 0x0C;
 
-  if (0 == strncmp (insn->name + 2, "ne", 2))
+  if (startswith (insn->name + 2, "ne"))
     lb |= 0x00 << 4;
-  else if (0 == strncmp (insn->name + 2, "eq", 2))
+  else if (startswith (insn->name + 2, "eq"))
     lb |= 0x01 << 4;
-  else if (0 == strncmp (insn->name + 2, "pl", 2))
+  else if (startswith (insn->name + 2, "pl"))
     lb |= 0x02 << 4;
-  else if (0 == strncmp (insn->name + 2, "mi", 2))
+  else if (startswith (insn->name + 2, "mi"))
     lb |= 0x03 << 4;
-  else if (0 == strncmp (insn->name + 2, "gt", 2))
+  else if (startswith (insn->name + 2, "gt"))
     lb |= 0x04 << 4;
-  else if (0 == strncmp (insn->name + 2, "le", 2))
+  else if (startswith (insn->name + 2, "le"))
     lb |= 0x05 << 4;
 
   switch (insn->name[0])

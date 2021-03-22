@@ -1219,14 +1219,13 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
 	saved_ilp = input_line_pointer;
 	c = get_symbol_name (& name);
 
-	if (strncmp (name, ".eh_frame", sizeof ".eh_frame") == 0
+	if (startswith (name, ".eh_frame")
 	    && name[9] != '_')
 	  sections |= CFI_EMIT_eh_frame;
-	else if (strncmp (name, ".debug_frame", sizeof ".debug_frame") == 0)
+	else if (startswith (name, ".debug_frame"))
 	  sections |= CFI_EMIT_debug_frame;
 #if SUPPORT_COMPACT_EH
-	else if (strncmp (name, ".eh_frame_entry",
-			  sizeof ".eh_frame_entry") == 0)
+	else if (startswith (name, ".eh_frame_entry"))
 	  {
 	    compact_eh = true;
 	    sections |= CFI_EMIT_eh_frame_compact;

@@ -300,29 +300,24 @@ md_atof (int type, char *litP, int *sizeP)
   return NULL;
 }
 
-/* Return true if STR starts with PREFIX, which should be a string literal.  */
-#define strprefix(STR, PREFIX) \
-  (strncmp ((STR), PREFIX, strlen (PREFIX)) == 0)
-
-
 /* Return true if STR is prefixed with a special relocation operator.  */
 static int
 nios2_special_relocation_p (const char *str)
 {
-  return (strprefix (str, "%lo")
-	  || strprefix (str, "%hi")
-	  || strprefix (str, "%hiadj")
-	  || strprefix (str, "%gprel")
-	  || strprefix (str, "%got")
-	  || strprefix (str, "%call")
-	  || strprefix (str, "%gotoff_lo")
-	  || strprefix (str, "%gotoff_hiadj")
-	  || strprefix (str, "%tls_gd")
-	  || strprefix (str, "%tls_ldm")
-	  || strprefix (str, "%tls_ldo")
-	  || strprefix (str, "%tls_ie")
-	  || strprefix (str, "%tls_le")
-	  || strprefix (str, "%gotoff"));
+  return (startswith (str, "%lo")
+	  || startswith (str, "%hi")
+	  || startswith (str, "%hiadj")
+	  || startswith (str, "%gprel")
+	  || startswith (str, "%got")
+	  || startswith (str, "%call")
+	  || startswith (str, "%gotoff_lo")
+	  || startswith (str, "%gotoff_hiadj")
+	  || startswith (str, "%tls_gd")
+	  || startswith (str, "%tls_ldm")
+	  || startswith (str, "%tls_ldo")
+	  || startswith (str, "%tls_ie")
+	  || startswith (str, "%tls_le")
+	  || startswith (str, "%gotoff"));
 }
 
 
@@ -1678,7 +1673,7 @@ nios2_parse_base_register (char *str, int *direction, int *writeback, int *ret)
   *ret = 0;
 
   /* Check for --.  */
-  if (strncmp (str, "--", 2) == 0)
+  if (startswith (str, "--"))
     {
       str += 2;
       *direction -= 1;
@@ -1705,7 +1700,7 @@ nios2_parse_base_register (char *str, int *direction, int *writeback, int *ret)
     return NULL;
 
   /* Check for ++.  */
-  if (strncmp (str, "++", 2) == 0)
+  if (startswith (str, "++"))
     {
       str += 2;
       *direction += 1;
@@ -1723,12 +1718,12 @@ nios2_parse_base_register (char *str, int *direction, int *writeback, int *ret)
     {
       while (*str == ' ')
 	str++;
-      if (strncmp (str, "writeback", 9) == 0)
+      if (startswith (str, "writeback"))
 	{
 	  *writeback = 1;
 	  str += 9;
 	}
-      else if (strncmp (str, "ret", 3) == 0)
+      else if (startswith (str, "ret"))
 	{
 	  *ret = 1;
 	  str += 3;
@@ -3987,7 +3982,7 @@ nios2_cons (expressionS *exp, int size)
   SKIP_WHITESPACE ();
   if (input_line_pointer[0] == '%')
     {
-      if (strprefix (input_line_pointer + 1, "tls_ldo"))
+      if (startswith (input_line_pointer + 1, "tls_ldo"))
 	{
 	  reloc_name = "%tls_ldo";
 	  if (size != 4)
@@ -3999,7 +3994,7 @@ nios2_cons (expressionS *exp, int size)
 	      explicit_reloc = BFD_RELOC_NIOS2_TLS_DTPREL;
 	    }
 	}
-      else if (strprefix (input_line_pointer + 1, "gotoff"))
+      else if (startswith (input_line_pointer + 1, "gotoff"))
 	{
 	  reloc_name = "%gotoff";
 	  if (size != 4)

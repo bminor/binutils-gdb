@@ -324,9 +324,9 @@ elf_common_parse (int ignore ATTRIBUTE_UNUSED, symbolS *symbolP, addressT size)
 	  if (*input_line_pointer == '.')
 	    input_line_pointer++;
 	  /* Some say data, some say bss.  */
-	  if (strncmp (input_line_pointer, "bss\"", 4) == 0)
+	  if (startswith (input_line_pointer, "bss\""))
 	    input_line_pointer += 4;
-	  else if (strncmp (input_line_pointer, "data\"", 5) == 0)
+	  else if (startswith (input_line_pointer, "data\""))
 	    input_line_pointer += 5;
 	  else
 	    {
@@ -949,17 +949,17 @@ obj_elf_parse_section_letters (char *str, size_t len,
 static int
 obj_elf_section_type (char *str, size_t len, bool warn)
 {
-  if (len == 8 && strncmp (str, "progbits", 8) == 0)
+  if (len == 8 && startswith (str, "progbits"))
     return SHT_PROGBITS;
-  if (len == 6 && strncmp (str, "nobits", 6) == 0)
+  if (len == 6 && startswith (str, "nobits"))
     return SHT_NOBITS;
-  if (len == 4 && strncmp (str, "note", 4) == 0)
+  if (len == 4 && startswith (str, "note"))
     return SHT_NOTE;
-  if (len == 10 && strncmp (str, "init_array", 10) == 0)
+  if (len == 10 && startswith (str, "init_array"))
     return SHT_INIT_ARRAY;
-  if (len == 10 && strncmp (str, "fini_array", 10) == 0)
+  if (len == 10 && startswith (str, "fini_array"))
     return SHT_FINI_ARRAY;
-  if (len == 13 && strncmp (str, "preinit_array", 13) == 0)
+  if (len == 13 && startswith (str, "preinit_array"))
     return SHT_PREINIT_ARRAY;
 
 #ifdef md_elf_section_type
@@ -991,15 +991,15 @@ obj_elf_section_word (char *str, size_t len, int *type)
 {
   int ret;
 
-  if (len == 5 && strncmp (str, "write", 5) == 0)
+  if (len == 5 && startswith (str, "write"))
     return SHF_WRITE;
-  if (len == 5 && strncmp (str, "alloc", 5) == 0)
+  if (len == 5 && startswith (str, "alloc"))
     return SHF_ALLOC;
-  if (len == 9 && strncmp (str, "execinstr", 9) == 0)
+  if (len == 9 && startswith (str, "execinstr"))
     return SHF_EXECINSTR;
-  if (len == 7 && strncmp (str, "exclude", 7) == 0)
+  if (len == 7 && startswith (str, "exclude"))
     return SHF_EXCLUDE;
-  if (len == 3 && strncmp (str, "tls", 3) == 0)
+  if (len == 3 && startswith (str, "tls"))
     return SHF_TLS;
 
 #ifdef md_elf_section_word
@@ -1291,13 +1291,13 @@ obj_elf_section (int push)
 		{
 		  ++input_line_pointer;
 		  SKIP_WHITESPACE ();
-		  if (strncmp (input_line_pointer, "comdat", 6) == 0)
+		  if (startswith (input_line_pointer, "comdat"))
 		    {
 		      input_line_pointer += 6;
 		      linkonce = 1;
 		    }
 		}
-	      else if (strncmp (name, ".gnu.linkonce", 13) == 0)
+	      else if (startswith (name, ".gnu.linkonce"))
 		linkonce = 1;
 	    }
 	  else if ((attr & SHF_GROUP) != 0)
@@ -1345,7 +1345,7 @@ obj_elf_section (int push)
 
 	      ++input_line_pointer;
 	      SKIP_WHITESPACE ();
-	      if (strncmp (input_line_pointer, "unique", 6) == 0)
+	      if (startswith (input_line_pointer, "unique"))
 		{
 		  input_line_pointer += 6;
 		  SKIP_WHITESPACE ();
@@ -1748,17 +1748,17 @@ obj_elf_symver (int ignore ATTRIBUTE_UNUSED)
 
       ++input_line_pointer;
       SKIP_WHITESPACE ();
-      if (strncmp (input_line_pointer, "local", 5) == 0)
+      if (startswith (input_line_pointer, "local"))
 	{
 	  input_line_pointer += 5;
 	  sy_obj->visibility = visibility_local;
 	}
-      else if (strncmp (input_line_pointer, "hidden", 6) == 0)
+      else if (startswith (input_line_pointer, "hidden"))
 	{
 	  input_line_pointer += 6;
 	  sy_obj->visibility = visibility_hidden;
 	}
-      else if (strncmp (input_line_pointer, "remove", 6) == 0)
+      else if (startswith (input_line_pointer, "remove"))
 	{
 	  input_line_pointer += 6;
 	  sy_obj->visibility = visibility_remove;
@@ -2508,7 +2508,7 @@ adjust_stab_sections (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   char *p;
   int strsz, nsyms;
 
-  if (strncmp (".stab", sec->name, 5))
+  if (!startswith (sec->name, ".stab"))
     return;
   if (!strcmp ("str", sec->name + strlen (sec->name) - 3))
     return;

@@ -1,3 +1,144 @@
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* as.c (select_emulation_mode): Use startswith.
+	* config/m68k-parse.y: Likewise.
+	* config/obj-aout.c (obj_aout_type): Likewise.
+	* config/obj-elf.c (elf_common_parse): Likewise.
+	(obj_elf_section_type): Likewise.
+	(obj_elf_section_word): Likewise.
+	(obj_elf_section): Likewise.
+	(obj_elf_symver): Likewise.
+	(adjust_stab_sections): Likewise.
+	* config/obj-evax.c (evax_shorten_name): Likewise.
+	* config/obj-macho.c (obj_mach_o_is_frame_section): Likewise.
+	* config/tc-aarch64.c (parse_aarch64_imm_float): Likewise.
+	(aarch64_parse_features): Likewise.
+	(create_register_alias): Likewise.
+	(aarch64_data_in_code): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-alpha.c (s_alpha_section_word): Likewise.
+	(s_alpha_pdesc): Likewise.
+	* config/tc-arc.c (tokenize_extregister): Likewise.
+	* config/tc-arm.c (create_register_alias): Likewise.
+	(create_neon_reg_alias): Likewise.
+	(parse_ifimm_zero): Likewise.
+	(parse_qfloat_immediate): Likewise.
+	(arm_elf_section_type): Likewise.
+	(arm_parse_extension): Likewise.
+	(aeabi_set_public_attributes): Likewise.
+	(s_arm_arch_extension): Likewise.
+	(arm_data_in_code): Likewise.
+	(start_unwind_section): Likewise.
+	* config/tc-avr.c (avr_ldi_expression): Likewise.
+	* config/tc-csky.c (is_freglist_legal): Likewise.
+	(csky_s_section): Likewise.
+	* config/tc-d30v.c (do_assemble): Likewise.
+	* config/tc-dlx.c (parse_operand): Likewise.
+	* config/tc-epiphany.c (md_assemble): Likewise.
+	* config/tc-h8300.c (h8300_elf_section): Likewise.
+	(get_operand): Likewise.
+	* config/tc-hppa.c (pa_ip): Likewise.
+	(pa_level): Likewise.
+	(pa_space): Likewise.
+	* config/tc-i386.c (i386_mach): Likewise.
+	(md_assemble): Likewise.
+	(check_VecOperations): Likewise.
+	(i386_target_format): Likewise.
+	(i386_elf_section_type): Likewise.
+	* config/tc-ia64.c (start_unwind_section): Likewise.
+	(md_parse_option): Likewise.
+	(is_taken_branch): Likewise.
+	(idesc->name,): Likewise.
+	(note_register_values): Likewise.
+	(do_alias): Likewise.
+	* config/tc-m32c.c (insn_to_subtype): Likewise.
+	* config/tc-m68hc11.c (get_operand): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-m68k.c (m68k_ip): Likewise.
+	(m68k_elf_suffix): Likewise.
+	* config/tc-mcore.c (mcore_s_section): Likewise.
+	* config/tc-metag.c (parse_get_set): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-microblaze.c (parse_imm): Likewise.
+	(check_got): Likewise.
+	(md_apply_fix): Likewise.
+	* config/tc-mips.c (CPU_HAS_MIPS16): Likewise.
+	(md_begin): Likewise.
+	(s_is_linkonce): Likewise.
+	(check_regno): Likewise.
+	(match_float_constant): Likewise.
+	(classify_vr4120_insn): Likewise.
+	(match_insn): Likewise.
+	(mips_after_parse_args): Likewise.
+	(s_change_sec): Likewise.
+	(s_option): Likewise.
+	(parse_code_option): Likewise.
+	(md_section_align): Likewise.
+	(nopic_need_relax): Likewise.
+	* config/tc-mmix.c (mmix_handle_mmixal): Likewise.
+	* config/tc-mn10300.c (mn10300_fix_adjustable): Likewise.
+	(mn10300_end_of_match): Likewise.
+	* config/tc-msp430.c (msp430_make_init_symbols): Likewise.
+	* config/tc-nds32.c (nds32_parse_option): Likewise.
+	* config/tc-nds32.h (md_do_align): Likewise.
+	* config/tc-nios2.c (strprefix): Likewise.
+	(nios2_special_relocation_p): Likewise.
+	(nios2_parse_base_register): Likewise.
+	(nios2_cons): Likewise.
+	* config/tc-ns32k.c (addr_mode): Likewise.
+	* config/tc-pdp11.c (set_option): Likewise.
+	(parse_reg): Likewise.
+	(parse_ac5): Likewise.
+	(parse_op_no_deferred): Likewise.
+	(set_cpu_model): Likewise.
+	(set_machine_model): Likewise.
+	* config/tc-pj.c (md_operand): Likewise.
+	* config/tc-ppc.c (ppc_set_cpu): Likewise.
+	(ppc_arch): Likewise.
+	(ppc_section_type): Likewise.
+	* config/tc-s12z.c (tb_reg_rel): Likewise.
+	(tb_opr_rel): Likewise.
+	* config/tc-s390.c (s390_parse_cpu): Likewise.
+	(md_parse_option): Likewise.
+	* config/tc-score.c (s3_nopic_need_relax): Likewise.
+	(s3_pic_need_relax): Likewise.
+	* config/tc-score7.c (s7_nopic_need_relax): Likewise.
+	(s7_pic_need_relax): Likewise.
+	* config/tc-sh.h (SUB_SEGMENT_ALIGN): Likewise.
+	* config/tc-sparc.c (md_parse_option): Likewise.
+	(sparc_ip): Likewise.
+	(s_reserve): Likewise.
+	(s_common): Likewise.
+	(s_seg): Likewise.
+	(sparc_cons): Likewise.
+	* config/tc-tic54x.c (stag_add_field): Likewise.
+	(tic54x_endstruct): Likewise.
+	* config/tc-tic6x.c (tic6x_start_unwind_section): Likewise.
+	* config/tc-v850.c (v850_comm): Likewise.
+	(md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-vax.c (vax_cons): Likewise.
+	* config/tc-wasm32.c (wasm32_leb128): Likewise.
+	* config/tc-xstormy16.c (md_operand): Likewise.
+	* config/tc-xtensa.c (get_directive): Likewise.
+	(xg_instruction_matches_option_term): Likewise.
+	(is_unaligned_label): Likewise.
+	(cache_literal_section): Likewise.
+	* config/xtensa-relax.c (parse_precond): Likewise.
+	(parse_option_cond): Likewise.
+	(transition_applies): Likewise.
+	(wide_branch_opcode): Likewise.
+	* dw2gencfi.c: Likewise.
+	* dwarf2dbg.c (dwarf2_directive_filename): Likewise.
+	* ehopt.c (get_cie_info): Likewise.
+	* input-file.c (input_file_open): Likewise.
+	* listing.c (listing_newline): Likewise.
+	(debugging_pseudo): Likewise.
+	* read.c (read_a_source_file): Likewise.
+	* write.c (adjust_reloc_syms): Likewise.
+	(compress_debug): Likewise.
+	(maybe_generate_build_notes): Likewise.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* itbl-lex-wrapper.c: Include as.h not sysdep.h.

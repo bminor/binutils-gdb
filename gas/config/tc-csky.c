@@ -2781,8 +2781,8 @@ is_freglist_legal (char **oper)
   reg2 = reg2 - reg1;
   /* The fldm/fstm in CSKY_ISA_FLOAT_7E60 has 5 bits frz(reg1).  */
   shift = 4;
-  if (strncmp (csky_insn.opcode->mnemonic, "fstm", 4) == 0
-      || strncmp (csky_insn.opcode->mnemonic, "fldm", 4) == 0)
+  if (startswith (csky_insn.opcode->mnemonic, "fstm")
+      || startswith (csky_insn.opcode->mnemonic, "fldm"))
     {
       if ((!(isa_flag & CSKY_ISA_FLOAT_7E60)
 	   && (reg2 > (int)15 || reg1 > 15))
@@ -7758,7 +7758,7 @@ csky_s_section (int ignore)
   while (*ilp != 0 && ISSPACE (*ilp))
     ++ ilp;
 
-  if (strncmp (ilp, ".line", 5) == 0
+  if (startswith (ilp, ".line")
       && (ISSPACE (ilp[5]) || *ilp == '\n' || *ilp == '\r'))
     ;
   else
