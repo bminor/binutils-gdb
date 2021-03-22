@@ -99,3 +99,44 @@ if ![runto_main] {
 # fictional, it only exists in the DWARF, but it contains lots of nice
 # field names, all of which are stored in the .debug_str section.
 gdb_test "p global_var" " = \\{aa = 0, bb = 0, cc = 0\\}"
+
+# Now copy the executable, and remove the .debug_str section.  This
+# creates an executable with an invalid DWARF configuration.  GDB
+# should give an error when trying to read the debug information from
+# this executable.
+set binfile_no_debug_str "${binfile}-no-debug-str"
+set args "--remove-section .debug_str $binfile ${binfile_no_debug_str}"
+if {[run_on_host "objcopy" [gdb_find_objcopy] "$args"]} {
+    perror "failed to run objcopy"
+    return -1
+}
+
+# Restart GDB, but don't load an executable.  When we do load the
+# executable we're going to get an error, which we check for below.
+clean_restart
+
+# This pattern is hit when GDB does not use -readnow (i.e. the default
+# behaviour).
+set pattern1 \
+    [multi_line \
+        "Reading symbols from \[^\r\n\]+" \
+        "Dwarf Error: DW_FORM_strp used without required section" \
+        "\\(No debugging symbols \[^\r\n\]+\\)"]
+
+# This pattern is hit when GDB does use -readnow (e.g. running with
+# --target_board=readnow).
+set pattern2 \
+    [multi_line \
+        "Reading symbols from \[^\r\n\]+" \
+        "Expanding full symbols from \[^\r\n\]+" \
+        "Dwarf Error: DW_FORM_strp used without required section"]
+
+# Load the executable, we expect an error from the DWARF parser.
+gdb_test_multiple "file $binfile_no_debug_str" "file $testfile" {
+    -wrap -re $pattern1 {
+       pass $gdb_test_name
+    }
+    -re -wrap "$pattern2" {
+       pass $gdb_test_name
+    }
+}

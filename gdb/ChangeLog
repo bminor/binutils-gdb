@@ -1,5 +1,13 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2/section.c (dwarf2_section_info::get_bfd_owner): Add an
+	assert.
+	(dwarf2_section_info::get_file_name): Add an assert.
+	(dwarf2_section_info::read_string): Display a minimal, sane error
+	when the dwarf2_section_info is not associated with a bfd section.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* top.c (staged_gdb_datadir): Update comment.
 	(set_gdb_datadir): Copy the value of gdb_datadir back into
 	staged_datadir.

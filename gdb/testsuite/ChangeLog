@@ -1,5 +1,9 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/dw2-using-debug-str.exp: Add an additional test.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-parameter.exp: Add test for reading data-directory
 	using gdb.parameter API.
 
