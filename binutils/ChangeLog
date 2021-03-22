@@ -1,3 +1,18 @@
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* dwarf.c (display_debug_lines_raw): Replace const_strneq with
+	startswith.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_links): Likewise.
+	* elfcomm.c (setup_archive): Likewise.
+	* elfcomm.h (const_strneq): Likewise.
+	* readelf.c (process_section_headers): Likewise.
+	(slurp_ia64_unwind_table): Likewise.
+	(slurp_hppa_unwind_table): Likewise.
+	(decode_arm_unwind): Likewise.
+	(display_debug_section): Likewise.
+	(process_note): Likewise.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* sysdep.h (POISON_BFD_BOOLEAN): Define.
