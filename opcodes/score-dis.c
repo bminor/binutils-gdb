@@ -477,14 +477,6 @@ static struct score_opcode score_opcodes[] =
 };
 
 
-#ifndef streq
-#define streq(a,b)    (strcmp ((a), (b)) == 0)
-#endif
-
-#ifndef strneq
-#define strneq(a,b,n)    (strncmp ((a), (b), (n)) == 0)
-#endif
-
 #ifndef NUM_ELEM
 #define NUM_ELEM(a)     (sizeof (a) / sizeof (a)[0])
 #endif

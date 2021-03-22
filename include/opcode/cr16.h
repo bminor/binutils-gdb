@@ -425,7 +425,6 @@ extern const char * cr16_no_op_insn[];
 
 /* Utility macros for string comparison.  */
 #define streq(a, b)           (strcmp (a, b) == 0)
-#define strneq(a, b, c)       (strncmp (a, b, c) == 0)
 
 /* Long long type handling.  */
 /* Replace all appearances of 'long long int' with LONGLONG.  */

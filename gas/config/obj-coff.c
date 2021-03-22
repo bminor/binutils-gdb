@@ -33,7 +33,6 @@
 #endif
 
 #define streq(a,b)     (strcmp ((a), (b)) == 0)
-#define strneq(a,b,n)  (strncmp ((a), (b), (n)) == 0)
 
 /* I think this is probably always correct.  */
 #ifndef KEEP_RELOC_INFO
@@ -1058,7 +1057,7 @@ obj_coff_val (int ignore ATTRIBUTE_UNUSED)
 static int
 weak_is_altname (const char * name)
 {
-  return strneq (name, weak_altprefix, sizeof (weak_altprefix) - 1);
+  return startswith (name, weak_altprefix);
 }
 
 /* Return the name of the alternate symbol
@@ -1667,7 +1666,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
       /* Add SEC_LINK_ONCE and SEC_LINK_DUPLICATES_DISCARD to .gnu.linkonce
          sections so adjust_reloc_syms in write.c will correctly handle
          relocs which refer to non-local symbols in these sections.  */
-      if (strneq (name, ".gnu.linkonce", sizeof (".gnu.linkonce") - 1))
+      if (startswith (name, ".gnu.linkonce"))
 	flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 #endif
 

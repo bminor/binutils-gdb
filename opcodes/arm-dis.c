@@ -39,11 +39,6 @@
 #include "elf/arm.h"
 #include "mach-o.h"
 
-/* FIXME: Belongs in global header.  */
-#ifndef strneq
-#define strneq(a,b,n)	(strncmp ((a), (b), (n)) == 0)
-#endif
-
 /* Cached mapping symbol state.  */
 enum map_type
 {

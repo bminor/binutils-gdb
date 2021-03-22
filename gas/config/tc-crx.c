@@ -43,7 +43,6 @@
 
 /* Utility macros for string comparison.  */
 #define streq(a, b)           (strcmp (a, b) == 0)
-#define strneq(a, b, c)       (strncmp (a, b, c) == 0)
 
 /* Assign a number NUM, shifted by SHIFT bytes, into a location
    pointed by index BYTE of array 'output_opcode'.  */
