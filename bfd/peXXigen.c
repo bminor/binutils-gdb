@@ -935,10 +935,10 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
 
   ss = scnhdr_int->s_vaddr - pe_data (abfd)->pe_opthdr.ImageBase;
   if (scnhdr_int->s_vaddr < pe_data (abfd)->pe_opthdr.ImageBase)
-    _bfd_error_handler ("%pB:%.8s: section below image base",
+    _bfd_error_handler (_("%pB:%.8s: section below image base"),
                         abfd, scnhdr_int->s_name);
   else if(ss != (ss & 0xffffffff))
-    _bfd_error_handler ("%pB:%.8s: RVA truncated", abfd, scnhdr_int->s_name);
+    _bfd_error_handler (_("%pB:%.8s: RVA truncated"), abfd, scnhdr_int->s_name);
   PUT_SCNHDR_VADDR (abfd, ss & 0xffffffff, scnhdr_ext->s_vaddr);
 
   /* NT wants the size data to be rounded up to the next

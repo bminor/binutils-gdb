@@ -1,3 +1,9 @@
+2021-03-22  Jan Beulich  <jbeulich@suse.com>
+
+	* peXXigen.c (_bfd_XXi_swap_scnhdr_out): Add missing
+	language translation wrapping to _bfd_error_handler()
+	invocations.
+
 2021-03-21  Alan Modra  <amodra@gmail.com>
 
 	* bfd-in.h (startswith): New inline.
