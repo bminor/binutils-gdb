@@ -3239,7 +3239,7 @@ pi (const char *line, i386_insn *x)
 static void
 pte (insn_template *t)
 {
-  static const unsigned char opc_pfx[] = { 0, 0x66, 0xf2, 0xf3 };
+  static const unsigned char opc_pfx[] = { 0, 0x66, 0xf3, 0xf2 };
   static const char *const opc_spc[] = {
     NULL, "0f", "0f38", "0f3a", NULL, NULL, NULL, NULL,
     "XOP08", "XOP09", "XOP0A",

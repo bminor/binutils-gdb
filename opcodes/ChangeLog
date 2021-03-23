@@ -1,5 +1,11 @@
 2021-03-23  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.h (PREFIX_0XF2, PREFIX_0XF3): Excahnge values. Extend
+	comment.
+	* i386-tbl.h: Re-generate.
+
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.h (struct insn_template): Move cpu_flags field past
 	opcode_modifier one.
 	* i386-tbl.h: Re-generate.

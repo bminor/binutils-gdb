@@ -1,5 +1,9 @@
 2021-03-23  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (pte): Re-order opc_pfx[] entries.
+
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (output_i386_opcode): Invoke
 	process_i386_cpu_flag() slightly later.
 	(process_i386_opcodes): Likewise.

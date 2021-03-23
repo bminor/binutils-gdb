@@ -593,16 +593,17 @@ enum
 #define SPACE_XOP09	9
 #define SPACE_XOP0A	0xA
   OpcodeSpace,
-  /* Opcode prefix:
+  /* Opcode prefix (values chosen to be usable directly in
+     VEX/XOP/EVEX pp fields):
      0: None
      1: Add 0x66 opcode prefix.
-     2: Add 0xf2 opcode prefix.
-     3: Add 0xf3 opcode prefix.
+     2: Add 0xf3 opcode prefix.
+     3: Add 0xf2 opcode prefix.
    */
 #define PREFIX_NONE	0
 #define PREFIX_0X66	1
-#define PREFIX_0XF2	2
-#define PREFIX_0XF3	3
+#define PREFIX_0XF3	2
+#define PREFIX_0XF2	3
   OpcodePrefix,
   /* number of VEX source operands:
      0: <= 2 source operands.
