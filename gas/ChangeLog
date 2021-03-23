@@ -1,5 +1,11 @@
 2021-03-23  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (load_insn_p): Use PREFIX_NONE. Fold two
+	if()-s.
+	(match_template, output_insn): Use PREFIX_NONE.
+
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_index_check): New local variable t.
 	Correct MPX insn check.
 	* config/tc-i386-intel.c (i386_intel_simplify_register): Correct

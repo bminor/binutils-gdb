@@ -4446,10 +4446,11 @@ load_insn_p (void)
 	  && i.tm.extension_opcode != 6)
 	return 1;
 
-      /* cmpxchg8b, cmpxchg16b, xrstors.  */
+      /* cmpxchg8b, cmpxchg16b, xrstors, vmptrld.  */
       if (i.tm.base_opcode == 0xfc7
-	  && i.tm.opcode_modifier.opcodeprefix == 0
-	  && (i.tm.extension_opcode == 1 || i.tm.extension_opcode == 3))
+	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_NONE
+	  && (i.tm.extension_opcode == 1 || i.tm.extension_opcode == 3
+	      || i.tm.extension_opcode == 6))
 	return 1;
 
       /* fxrstor, ldmxcsr, xrstor.  */
@@ -4464,12 +4465,6 @@ load_insn_p (void)
 	  && (i.tm.extension_opcode == 2
 	      || i.tm.extension_opcode == 3
 	      || i.tm.extension_opcode == 6))
-	return 1;
-
-      /* vmptrld */
-      if (i.tm.base_opcode == 0xfc7
-	  && i.tm.opcode_modifier.opcodeprefix == 0
-	  && i.tm.extension_opcode == 6)
 	return 1;
 
       /* Check for x87 instructions.  */
@@ -6337,7 +6332,7 @@ match_template (char mnem_suffix)
       if (((i.suffix == QWORD_MNEM_SUFFIX
 	    && flag_code != CODE_64BIT
 	    && !(t->base_opcode == 0xfc7
-		 && i.tm.opcode_modifier.opcodeprefix == 0
+		 && i.tm.opcode_modifier.opcodeprefix == PREFIX_NONE
 		 && t->extension_opcode == 1) /* cmpxchg8b */)
 	   || (i.suffix == LONG_MNEM_SUFFIX
 	       && !cpu_arch_flags.bitfield.cpui386))
@@ -9259,7 +9254,7 @@ output_insn (void)
 	  || i.tm.cpu_flags.bitfield.cpucmov
 	  || i.tm.cpu_flags.bitfield.cpusyscall
 	  || (i.tm.base_opcode == 0xfc7
-	      && i.tm.opcode_modifier.opcodeprefix == 0
+	      && i.tm.opcode_modifier.opcodeprefix == PREFIX_NONE
 	      && i.tm.extension_opcode == 1) /* cmpxchg8b */)
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_BASELINE;
       if (i.tm.cpu_flags.bitfield.cpusse3
