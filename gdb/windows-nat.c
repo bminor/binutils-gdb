@@ -2028,7 +2028,7 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
   inf = current_inferior ();
-  if (!target_is_pushed (this))
+  if (!inf->target_is_pushed (this))
     inf->push_target (this);
   disable_breakpoints_in_shlibs ();
   windows_clear_solib ();

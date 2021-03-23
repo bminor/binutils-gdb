@@ -1658,7 +1658,7 @@ darwin_attach_pid (struct inferior *inf)
     }
 
   target_ops *darwin_ops = get_native_target ();
-  if (!target_is_pushed (darwin_ops))
+  if (!inf->target_is_pushed (darwin_ops))
     inf->push_target (darwin_ops);
 }
 

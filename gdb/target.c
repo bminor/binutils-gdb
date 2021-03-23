@@ -647,15 +647,6 @@ pop_all_targets (void)
   pop_all_targets_above (dummy_stratum);
 }
 
-/* Return true if T is now pushed in the current inferior's target
-   stack.  Return false otherwise.  */
-
-bool
-target_is_pushed (target_ops *t)
-{
-  return current_inferior ()->target_is_pushed (t);
-}
-
 void
 target_unpusher::operator() (struct target_ops *ops) const
 {
@@ -3097,7 +3088,7 @@ debug_target::info () const
 void
 target_close (struct target_ops *targ)
 {
-  gdb_assert (!target_is_pushed (targ));
+  gdb_assert (!current_inferior ()->target_is_pushed (targ));
 
   fileio_handles_invalidate_target (targ);
 

@@ -74,15 +74,17 @@ inf_ptrace_target::create_inferior (const char *exec_file,
 				    const std::string &allargs,
 				    char **env, int from_tty)
 {
+  inferior *inf = current_inferior ();
+
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
-  int ops_already_pushed = target_is_pushed (this);
+  int ops_already_pushed = inf->target_is_pushed (this);
 
   target_unpush_up unpusher;
   if (! ops_already_pushed)
     {
       /* Clear possible core file with its process_stratum.  */
-      current_inferior ()->push_target (this);
+      inf->push_target (this);
       unpusher.reset (this);
     }
 
@@ -127,19 +129,16 @@ inf_ptrace_target::mourn_inferior ()
 void
 inf_ptrace_target::attach (const char *args, int from_tty)
 {
-  pid_t pid;
-  struct inferior *inf;
+  inferior *inf = current_inferior ();
 
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
-  int ops_already_pushed = target_is_pushed (this);
+  int ops_already_pushed = inf->target_is_pushed (this);
 
-  pid = parse_pid_to_attach (args);
+  pid_t pid = parse_pid_to_attach (args);
 
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
-
-  inf = current_inferior ();
 
   target_unpush_up unpusher;
   if (! ops_already_pushed)

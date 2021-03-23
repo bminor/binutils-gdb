@@ -1,5 +1,11 @@
 2021-03-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target.h (target_is_pushed): Remove, update callers to use
+	inferior::target_is_pushed instead.
+	* target.c (target_is_pushed): Remove.
+
+2021-03-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target.h (push_target): Remove, update callers to use
 	inferior::push_target.
 	* target.c (push_target): Remove.
