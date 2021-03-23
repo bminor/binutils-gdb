@@ -2078,7 +2078,7 @@ record_full_core_target::kill ()
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog, "Process record: record_full_core_kill\n");
 
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
 }
 
 /* "fetch_registers" method for prec over corefile.  */

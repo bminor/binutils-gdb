@@ -699,7 +699,7 @@ gdbsim_target_open (const char *args, int from_tty)
      operation until after we complete those operations which could
      error out.  */
   if (gdbsim_is_open)
-    unpush_target (&gdbsim_ops);
+    current_inferior ()->unpush_target (&gdbsim_ops);
 
   len = (7 + 1			/* gdbsim */
 	 + strlen (" -E little")
@@ -834,7 +834,7 @@ gdbsim_target::detach (inferior *inf, int from_tty)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "gdbsim_detach\n");
 
-  unpush_target (this);		/* calls gdbsim_close to do the real work */
+  inf->unpush_target (this);		/* calls gdbsim_close to do the real work */
   if (from_tty)
     printf_filtered ("Ending simulator %s debugging\n", target_shortname);
 }

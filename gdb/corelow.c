@@ -580,7 +580,7 @@ core_target::detach (inferior *inf, int from_tty)
   /* Note that 'this' is dangling after this call.  unpush_target
      closes the target, and our close implementation deletes
      'this'.  */
-  unpush_target (this);
+  inf->unpush_target (this);
 
   /* Clear the register cache and the frame cache.  */
   registers_changed ();

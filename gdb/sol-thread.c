@@ -387,7 +387,7 @@ sol_thread_target::detach (inferior *inf, int from_tty)
 
   sol_thread_active = 0;
   inferior_ptid = ptid_t (main_ph.ptid.pid ());
-  unpush_target (this);
+  inf->unpush_target (this);
   beneath->detach (inf, from_tty);
 }
 
@@ -681,7 +681,7 @@ sol_thread_target::mourn_inferior ()
 
   sol_thread_active = 0;
 
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
 
   beneath->mourn_inferior ();
 }

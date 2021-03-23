@@ -1,3 +1,11 @@
+2021-03-23  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* target.h (unpush_target): Remove, update all callers
+	to use `inferior::unpush_target` instead.
+	(struct target_unpusher) <operator()>: Just declare.
+	* target.c (unpush_target): Remove.
+	(target_unpusher::operator()): New.
+
 2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2/read.c (process_psymtab_comp_unit): Replace abort with an

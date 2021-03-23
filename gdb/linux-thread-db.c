@@ -1364,7 +1364,7 @@ thread_db_target::detach (inferior *inf, int from_tty)
   /* NOTE: From this point on, inferior_ptid is null_ptid.  */
 
   /* Detach the thread_db target from this inferior.  */
-  unpush_target (this);
+  inf->unpush_target (this);
 }
 
 ptid_t
@@ -1398,7 +1398,7 @@ thread_db_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       /* New image, it may or may not end up using thread_db.  Assume
 	 not unless we find otherwise.  */
       delete_thread_db_info (beneath, ptid.pid ());
-      unpush_target (this);
+      current_inferior ()->unpush_target (this);
 
       return ptid;
     }
@@ -1420,7 +1420,7 @@ thread_db_target::mourn_inferior ()
   target_beneath->mourn_inferior ();
 
   /* Detach the thread_db target from this inferior.  */
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
 }
 
 struct callback_data

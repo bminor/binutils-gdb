@@ -207,7 +207,7 @@ void
 inf_child_target::maybe_unpush_target ()
 {
   if (!inf_child_explicitly_opened)
-    unpush_target (this);
+    current_inferior ()->unpush_target (this);
 }
 
 void

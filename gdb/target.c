@@ -160,7 +160,7 @@ set_targetdebug  (const char *args, int from_tty, struct cmd_list_element *c)
   if (targetdebug)
     push_target (the_debug_target);
   else
-    unpush_target (the_debug_target);
+    current_inferior ()->unpush_target (the_debug_target);
 }
 
 static void
@@ -589,14 +589,6 @@ push_target (target_ops_up &&t)
 
 /* See target.h.  */
 
-int
-unpush_target (struct target_ops *t)
-{
-  return current_inferior ()->unpush_target (t);
-}
-
-/* See target.h.  */
-
 bool
 target_stack::unpush (target_ops *t)
 {
@@ -640,7 +632,7 @@ target_stack::unpush (target_ops *t)
 static void
 unpush_target_and_assert (struct target_ops *target)
 {
-  if (!unpush_target (target))
+  if (!current_inferior ()->unpush_target (target))
     {
       fprintf_unfiltered (gdb_stderr,
 			  "pop_all_targets couldn't find target %s\n",
@@ -679,6 +671,12 @@ bool
 target_is_pushed (target_ops *t)
 {
   return current_inferior ()->target_is_pushed (t);
+}
+
+void
+target_unpusher::operator() (struct target_ops *ops) const
+{
+  current_inferior ()->unpush_target (ops);
 }
 
 /* Default implementation of to_get_thread_local_address.  */

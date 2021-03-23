@@ -671,7 +671,7 @@ program_space::remove_target_sections (void *owner)
 	    continue;
 
 	  switch_to_inferior_no_thread (inf);
-	  unpush_target (&exec_ops);
+	  inf->unpush_target (&exec_ops);
 	}
     }
 }

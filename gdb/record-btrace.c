@@ -428,7 +428,7 @@ record_btrace_target::disconnect (const char *args,
   struct target_ops *beneath = this->beneath ();
 
   /* Do not stop recording, just clean up GDB side.  */
-  unpush_target (this);
+  current_inferior ()->unpush_target (this);
 
   /* Forward disconnect.  */
   beneath->disconnect (args, from_tty);

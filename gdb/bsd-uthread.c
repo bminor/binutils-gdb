@@ -259,7 +259,7 @@ bsd_uthread_deactivate (void)
   if (!bsd_uthread_active)
     return;
 
-  unpush_target (&bsd_uthread_ops);
+  current_inferior ()->unpush_target (&bsd_uthread_ops);
 }
 
 static void

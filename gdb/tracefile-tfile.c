@@ -481,7 +481,7 @@ tfile_target_open (const char *arg, int from_tty)
 
   /* Looks semi-reasonable.  Toss the old trace file and work on the new.  */
 
-  unpush_target (&tfile_ops);
+  current_inferior ()->unpush_target (&tfile_ops);
 
   trace_filename = filename.release ();
   trace_fd = scratch_chan;
@@ -551,7 +551,7 @@ tfile_target_open (const char *arg, int from_tty)
   catch (const gdb_exception &ex)
     {
       /* Remove the partially set up target.  */
-      unpush_target (&tfile_ops);
+      current_inferior ()->unpush_target (&tfile_ops);
       throw;
     }
 

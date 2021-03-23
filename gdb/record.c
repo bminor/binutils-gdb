@@ -166,7 +166,7 @@ record_unpush (struct target_ops *t)
 {
   DEBUG ("unpush %s", t->shortname ());
 
-  unpush_target (t);
+  current_inferior ()->unpush_target (t);
 }
 
 /* See record.h.  */
