@@ -1771,7 +1771,7 @@ procfs_target::attach (const char *args, int from_tty)
   target_unpush_up unpusher;
   if (!target_is_pushed (this))
     {
-      push_target (this);
+      current_inferior ()->push_target (this);
       unpusher.reset (this);
     }
 
@@ -2863,7 +2863,7 @@ procfs_target::create_inferior (const char *exec_file,
     }
 
   if (!target_is_pushed (this))
-    push_target (this);
+    current_inferior ()->push_target (this);
 
   pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
 		       NULL, procfs_pre_trace, shell_file, NULL);

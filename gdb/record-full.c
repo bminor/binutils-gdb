@@ -924,7 +924,7 @@ record_full_core_open_1 (const char *name, int from_tty)
 
   record_full_core_sections = build_section_table (core_bfd);
 
-  push_target (&record_full_core_ops);
+  current_inferior ()->push_target (&record_full_core_ops);
   record_full_restore ();
 }
 
@@ -947,7 +947,7 @@ record_full_open_1 (const char *name, int from_tty)
     error (_("Process record: the current architecture doesn't support "
 	     "record function."));
 
-  push_target (&record_full_ops);
+  current_inferior ()->push_target (&record_full_ops);
 }
 
 static void record_full_init_record_breakpoints (void);

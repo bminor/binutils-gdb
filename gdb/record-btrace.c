@@ -337,7 +337,7 @@ record_btrace_push_target (void)
 
   record_btrace_auto_enable ();
 
-  push_target (&record_btrace_ops);
+  current_inferior ()->push_target (&record_btrace_ops);
 
   record_btrace_async_inferior_event_handler
     = create_async_event_handler (record_btrace_handle_async_inferior_event,

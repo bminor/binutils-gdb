@@ -616,7 +616,7 @@ program_space::add_target_sections (void *owner,
 	    continue;
 
 	  switch_to_inferior_no_thread (inf);
-	  push_target (&exec_ops);
+	  inf->push_target (&exec_ops);
 	}
     }
 }
@@ -682,7 +682,7 @@ void
 exec_on_vfork ()
 {
   if (!current_program_space->target_sections ().empty ())
-    push_target (&exec_ops);
+    current_inferior ()->push_target (&exec_ops);
 }
 
 

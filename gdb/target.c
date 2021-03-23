@@ -158,7 +158,7 @@ static void
 set_targetdebug  (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (targetdebug)
-    push_target (the_debug_target);
+    current_inferior ()->push_target (the_debug_target);
   else
     current_inferior ()->unpush_target (the_debug_target);
 }
@@ -568,23 +568,6 @@ target_stack::push (target_ops *t)
 
   if (m_top < stratum)
     m_top = stratum;
-}
-
-/* See target.h.  */
-
-void
-push_target (struct target_ops *t)
-{
-  current_inferior ()->push_target (t);
-}
-
-/* See target.h.  */
-
-void
-push_target (target_ops_up &&t)
-{
-  current_inferior ()->push_target (t.get ());
-  t.release ();
 }
 
 /* See target.h.  */

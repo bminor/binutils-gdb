@@ -1925,7 +1925,7 @@ cooked_write_test (struct gdbarch *gdbarch)
 
   /* Push the process_stratum target so we can mock accessing
      registers.  */
-  push_target (&mock_target);
+  current_inferior ()->push_target (&mock_target);
 
   /* Pop it again on exit (return/exception).  */
   struct on_exit

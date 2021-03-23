@@ -763,7 +763,7 @@ gdbsim_target_open (const char *args, int from_tty)
 
   sim_data->gdbsim_desc = gdbsim_desc;
 
-  push_target (&gdbsim_ops);
+  current_inferior ()->push_target (&gdbsim_ops);
   printf_filtered ("Connected to the simulator.\n");
 
   /* There's nothing running after "target sim" or "load"; not until

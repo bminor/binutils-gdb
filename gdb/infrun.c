@@ -477,7 +477,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  set_current_inferior (child_inf);
 	  switch_to_no_thread ();
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
-	  push_target (parent_inf->process_target ());
+	  child_inf->push_target (parent_inf->process_target ());
 	  thread_info *child_thr
 	    = add_thread_silent (child_inf->process_target (), child_ptid);
 
@@ -627,7 +627,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	   informing the solib layer about this new process.  */
 
 	set_current_inferior (child_inf);
-	push_target (target);
+	child_inf->push_target (target);
       }
 
       thread_info *child_thr = add_thread_silent (target, child_ptid);
@@ -1183,7 +1183,7 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
 
       inferior *org_inferior = current_inferior ();
       switch_to_inferior_no_thread (inf);
-      push_target (org_inferior->process_target ());
+      inf->push_target (org_inferior->process_target ());
       thread_info *thr = add_thread (inf->process_target (), ptid);
       switch_to_thread (thr);
     }

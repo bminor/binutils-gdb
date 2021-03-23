@@ -718,7 +718,7 @@ nto_procfs_target::attach (const char *args, int from_tty)
   inf->attach_flag = 1;
 
   if (!target_is_pushed (ops))
-    push_target (ops);
+    inf->push_target (ops);
 
   update_thread_list ();
 
@@ -1319,7 +1319,7 @@ nto_procfs_target::create_inferior (const char *exec_file,
 	 errn, safe_strerror(errn) ); */
     }
   if (!target_is_pushed (ops))
-    push_target (ops);
+    inf->push_target (ops);
   target_terminal::init ();
 
   if (current_program_space->exec_bfd () != NULL

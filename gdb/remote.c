@@ -2474,7 +2474,7 @@ remote_target::remote_add_inferior (bool fake_pid_p, int pid, int attached,
 	  inf = add_inferior_with_spaces ();
 	}
       switch_to_inferior_no_thread (inf);
-      push_target (this);
+      inf->push_target (this);
       inferior_appeared (inf, pid);
     }
 
@@ -5673,7 +5673,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
     }
 
   /* Switch to using the remote target now.  */
-  push_target (std::move (target_holder));
+  current_inferior ()->push_target (std::move (target_holder));
 
   /* Register extra event sources in the event loop.  */
   rs->remote_async_inferior_event_token

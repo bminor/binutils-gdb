@@ -82,7 +82,7 @@ inf_ptrace_target::create_inferior (const char *exec_file,
   if (! ops_already_pushed)
     {
       /* Clear possible core file with its process_stratum.  */
-      push_target (this);
+      current_inferior ()->push_target (this);
       unpusher.reset (this);
     }
 
@@ -139,12 +139,14 @@ inf_ptrace_target::attach (const char *args, int from_tty)
   if (pid == getpid ())		/* Trying to masturbate?  */
     error (_("I refuse to debug myself!"));
 
+  inf = current_inferior ();
+
   target_unpush_up unpusher;
   if (! ops_already_pushed)
     {
       /* target_pid_to_str already uses the target.  Also clear possible core
 	 file with its process_stratum.  */
-      push_target (this);
+      inf->push_target (this);
       unpusher.reset (this);
     }
 
@@ -169,7 +171,6 @@ inf_ptrace_target::attach (const char *args, int from_tty)
   error (_("This system does not support attaching to a process"));
 #endif
 
-  inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
 

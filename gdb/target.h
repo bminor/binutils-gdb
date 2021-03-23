@@ -2385,11 +2385,6 @@ extern void add_target (const target_info &info,
 extern void add_deprecated_target_alias (const target_info &info,
 					 const char *alias);
 
-extern void push_target (struct target_ops *);
-
-/* An overload that deletes the target on failure.  */
-extern void push_target (target_ops_up &&);
-
 /* A unique_ptr helper to unpush a target.  */
 
 struct target_unpusher

@@ -641,7 +641,7 @@ check_for_thread_db (void)
       printf_unfiltered (_("[Thread debugging using libthread_db enabled]\n"));
 
       /* The thread library was detected.  Activate the sol_thread target.  */
-      push_target (&sol_thread_ops);
+      current_inferior ()->push_target (&sol_thread_ops);
       sol_thread_active = 1;
 
       main_ph.ptid = inferior_ptid; /* Save for xfer_memory.  */

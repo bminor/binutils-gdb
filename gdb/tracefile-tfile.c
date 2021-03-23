@@ -498,7 +498,7 @@ tfile_target_open (const char *arg, int from_tty)
 	&& (startswith (header + 1, "TRACE0\n"))))
     error (_("File is not a valid trace file."));
 
-  push_target (&tfile_ops);
+  current_inferior ()->push_target (&tfile_ops);
 
   trace_regblock_size = 0;
   ts = current_trace_status ();

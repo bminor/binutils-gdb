@@ -2027,8 +2027,9 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
 #endif
   current_event.dwProcessId = pid;
   memset (&current_event, 0, sizeof (current_event));
+  inf = current_inferior ();
   if (!target_is_pushed (this))
-    push_target (this);
+    inf->push_target (this);
   disable_breakpoints_in_shlibs ();
   windows_clear_solib ();
   clear_proceed_status (0);
@@ -2049,7 +2050,6 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
       windows_set_segment_register_p (i386_windows_segment_register_p);
     }
 
-  inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = attaching;
 

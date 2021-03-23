@@ -674,7 +674,7 @@ ravenscar_inferior_created (inferior *inf)
     }
 
   ravenscar_thread_target *rtarget = new ravenscar_thread_target ();
-  push_target (target_ops_up (rtarget));
+  inf->push_target (target_ops_up (rtarget));
   thread_info *thr = rtarget->add_active_thread ();
   if (thr != nullptr)
     switch_to_thread (thr);

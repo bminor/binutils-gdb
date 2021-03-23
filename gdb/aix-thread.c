@@ -974,7 +974,7 @@ pd_enable (void)
     return;
 
   /* Prepare for thread debugging.  */
-  push_target (&aix_thread_ops);
+  current_inferior ()->push_target (&aix_thread_ops);
   pd_able = 1;
 
   /* If we're debugging a core file or an attached inferior, the

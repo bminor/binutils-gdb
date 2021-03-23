@@ -944,7 +944,7 @@ try_thread_db_load_1 (struct thread_db_info *info)
 
   /* The thread library was detected.  Activate the thread_db target
      for this process.  */
-  push_target (&the_thread_db_target);
+  current_inferior ()->push_target (&the_thread_db_target);
   return true;
 }
 
