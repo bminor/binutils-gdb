@@ -3239,8 +3239,18 @@ pi (const char *line, i386_insn *x)
 static void
 pte (insn_template *t)
 {
+  static const unsigned char opc_pfx[] = { 0, 0x66, 0xf2, 0xf3 };
+  static const char *const opc_spc[] = {
+    NULL, "0f", "0f38", "0f3a", NULL, NULL, NULL, NULL,
+    "XOP08", "XOP09", "XOP0A",
+  };
   unsigned int j;
+
   fprintf (stdout, " %d operands ", t->operands);
+  if (opc_pfx[t->opcode_modifier.opcodeprefix])
+    fprintf (stdout, "pfx %x ", opc_pfx[t->opcode_modifier.opcodeprefix]);
+  if (opc_spc[t->opcode_modifier.opcodespace])
+    fprintf (stdout, "space %s ", opc_spc[t->opcode_modifier.opcodespace]);
   fprintf (stdout, "opcode %x ", t->base_opcode);
   if (t->extension_opcode != None)
     fprintf (stdout, "ext %x ", t->extension_opcode);
@@ -3599,7 +3609,7 @@ build_vex_prefix (const insn_template *t)
       && i.dir_encoding == dir_encoding_default
       && i.operands == i.reg_operands
       && operand_type_equal (&i.types[0], &i.types[i.operands - 1])
-      && i.tm.opcode_modifier.opcodeprefix == VEX0F
+      && i.tm.opcode_modifier.opcodespace == SPACE_0F
       && (i.tm.opcode_modifier.load || i.tm.opcode_modifier.d)
       && i.rex == REX_B)
     {
@@ -3644,7 +3654,7 @@ build_vex_prefix (const insn_template *t)
       union i386_op temp_op;
       i386_operand_type temp_type;
 
-      gas_assert (i.tm.opcode_modifier.opcodeprefix == VEX0F);
+      gas_assert (i.tm.opcode_modifier.opcodespace == SPACE_0F);
       gas_assert (!i.tm.opcode_modifier.sae);
       gas_assert (operand_type_equal (&i.types[i.operands - 2],
                                       &i.types[i.operands - 3]));
@@ -3715,7 +3725,7 @@ build_vex_prefix (const insn_template *t)
   /* Use 2-byte VEX prefix if possible.  */
   if (w == 0
       && i.vec_encoding != vex_encoding_vex3
-      && i.tm.opcode_modifier.opcodeprefix == VEX0F
+      && i.tm.opcode_modifier.opcodespace == SPACE_0F
       && (i.rex & (REX_W | REX_X | REX_B)) == 0)
     {
       /* 2-byte VEX prefix.  */
@@ -3734,34 +3744,18 @@ build_vex_prefix (const insn_template *t)
   else
     {
       /* 3-byte VEX prefix.  */
-      unsigned int m;
-
       i.vex.length = 3;
 
-      switch (i.tm.opcode_modifier.opcodeprefix)
+      switch (i.tm.opcode_modifier.opcodespace)
 	{
-	case VEX0F:
-	  m = 0x1;
+	case SPACE_0F:
+	case SPACE_0F38:
+	case SPACE_0F3A:
 	  i.vex.bytes[0] = 0xc4;
 	  break;
-	case VEX0F38:
-	  m = 0x2;
-	  i.vex.bytes[0] = 0xc4;
-	  break;
-	case VEX0F3A:
-	  m = 0x3;
-	  i.vex.bytes[0] = 0xc4;
-	  break;
-	case XOP08:
-	  m = 0x8;
-	  i.vex.bytes[0] = 0x8f;
-	  break;
-	case XOP09:
-	  m = 0x9;
-	  i.vex.bytes[0] = 0x8f;
-	  break;
-	case XOP0A:
-	  m = 0xa;
+	case SPACE_XOP08:
+	case SPACE_XOP09:
+	case SPACE_XOP0A:
 	  i.vex.bytes[0] = 0x8f;
 	  break;
 	default:
@@ -3770,7 +3764,7 @@ build_vex_prefix (const insn_template *t)
 
       /* The high 3 bits of the second VEX byte are 1's compliment
 	 of RXB bits from REX.  */
-      i.vex.bytes[1] = (~i.rex & 0x7) << 5 | m;
+      i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_modifier.opcodespace;
 
       i.vex.bytes[2] = (w << 7
 			| register_specifier << 3
@@ -3799,8 +3793,7 @@ static void
 build_evex_prefix (void)
 {
   unsigned int register_specifier;
-  unsigned int implied_prefix;
-  unsigned int m, w;
+  unsigned int implied_prefix, w;
   rex_byte vrex_used = 0;
 
   /* Check register specifier.  */
@@ -3851,26 +3844,11 @@ build_evex_prefix (void)
   i.vex.length = 4;
   i.vex.bytes[0] = 0x62;
 
-  /* mmmm bits.  */
-  switch (i.tm.opcode_modifier.opcodeprefix)
-    {
-    case VEX0F:
-      m = 1;
-      break;
-    case VEX0F38:
-      m = 2;
-      break;
-    case VEX0F3A:
-      m = 3;
-      break;
-    default:
-      abort ();
-      break;
-    }
-
   /* The high 3 bits of the second EVEX byte are 1's compliment of RXB
      bits from REX.  */
-  i.vex.bytes[1] = (~i.rex & 0x7) << 5 | m;
+  gas_assert (i.tm.opcode_modifier.opcodespace >= SPACE_0F);
+  gas_assert (i.tm.opcode_modifier.opcodespace <= SPACE_0F3A);
+  i.vex.bytes[1] = (~i.rex & 0x7) << 5 | i.tm.opcode_modifier.opcodespace;
 
   /* The fifth bit of the second EVEX byte is 1's compliment of the
      REX_R bit in VREX.  */
@@ -4416,7 +4394,7 @@ load_insn_p (void)
       /* vldmxcsr.  */
       if (i.tm.base_opcode == 0xae
 	  && i.tm.opcode_modifier.vex
-	  && i.tm.opcode_modifier.opcodeprefix == VEX0F
+	  && i.tm.opcode_modifier.opcodespace == SPACE_0F
 	  && i.tm.extension_opcode == 2)
 	return 1;
     }

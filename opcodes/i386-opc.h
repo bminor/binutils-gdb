@@ -575,7 +575,25 @@ enum
 #define VEXW1	2
 #define VEXWIG	3
   VexW,
-  /* Regular opcode prefix:
+  /* Opcode encoding space (values chosen to be usable directly in
+     VEX/XOP mmmmm and EVEX mm fields):
+     0: Base opcode space.
+     1: 0F opcode prefix / space.
+     2: 0F38 opcode prefix / space.
+     3: 0F3A opcode prefix / space.
+     8: XOP 08 opcode space.
+     9: XOP 09 opcode space.
+     A: XOP 0A opcode space.
+   */
+#define SPACE_BASE	0
+#define SPACE_0F	1
+#define SPACE_0F38	2
+#define SPACE_0F3A	3
+#define SPACE_XOP08	8
+#define SPACE_XOP09	9
+#define SPACE_XOP0A	0xA
+  OpcodeSpace,
+  /* Opcode prefix:
      0: None
      1: Add 0x66 opcode prefix.
      2: Add 0xf2 opcode prefix.
@@ -585,20 +603,6 @@ enum
 #define PREFIX_0X66	1
 #define PREFIX_0XF2	2
 #define PREFIX_0XF3	3
-  /* VEX opcode prefix:
-     0: VEX 0x0F opcode prefix.
-     1: VEX 0x0F38 opcode prefix.
-     2: VEX 0x0F3A opcode prefix
-     3: XOP 0x08 opcode prefix.
-     4: XOP 0x09 opcode prefix
-     5: XOP 0x0A opcode prefix.
-   */
-#define VEX0F		0
-#define VEX0F38		1
-#define VEX0F3A		2
-#define XOP08		3
-#define XOP09		4
-#define XOP0A		5
   OpcodePrefix,
   /* number of VEX source operands:
      0: <= 2 source operands.
@@ -742,7 +746,8 @@ typedef struct i386_opcode_modifier
   unsigned int vex:2;
   unsigned int vexvvvv:2;
   unsigned int vexw:2;
-  unsigned int opcodeprefix:3;
+  unsigned int opcodespace:4;
+  unsigned int opcodeprefix:2;
   unsigned int vexsources:2;
   unsigned int sib:3;
   unsigned int sse2avx:1;

@@ -1,5 +1,12 @@
 2021-03-23  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (pte): Print prefix and encoding space.
+	(build_vex_prefix): Check opcodespace instead of opcodeprefix.
+	(build_evex_prefix): Likewise.
+	(load_insn_p): Likewise.
+
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (load_insn_p): Use PREFIX_NONE. Fold two
 	if()-s.
 	(match_template, output_insn): Use PREFIX_NONE.

@@ -1,3 +1,17 @@
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (opcode_modifiers): New OpcodeSpace element.
+	* i386-opc.h (OpcodeSpace): New enumerator.
+	(VEX0F, VEX0F38, VEX0F3A, XOP08, XOP09, XOP0A): Rename to ...
+	(SPACE_BASE, SPACE_0F, SPACE_0F38, SPACE_0F3A, SPACE_XOP08,
+	SPACE_XOP09, SPACE_XOP0A): ... respectively.
+	(struct i386_opcode_modifier): New field opcodespace. Shrink
+	opcodeprefix field.
+	i386-opc.tbl (Space0F, Space0F38, Space0F3A, SpaceXOP08,
+	SpaceXOP09, SpaceXOP0A): Define. Use them to replace
+	OpcodePrefix uses.
+	* i386-tbl.h: Re-generate.
+
 2021-03-22  Martin Liska  <mliska@suse.cz>
 
 	* aarch64-dis.c (parse_aarch64_dis_option): Replace usage of CONST_STRNEQ with startswith.
