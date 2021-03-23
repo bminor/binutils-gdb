@@ -1986,7 +1986,7 @@ munge_name_and_block (const char **name, const struct block **block)
 {
   /* If it is a global reference, skip the current block in favor of
      the static block.  */
-  if (strncmp (*name, "::", 2) == 0)
+  if (startswith (*name, "::"))
     {
       *name += 2;
       *block = block_static_block (*block);

@@ -1886,8 +1886,8 @@ command_notifies_uscc_observer (struct mi_parse *command)
   if (command->op == CLI_COMMAND)
     {
       /* CLI commands "thread" and "inferior" already send it.  */
-      return (strncmp (command->command, "thread ", 7) == 0
-	      || strncmp (command->command, "inferior ", 9) == 0);
+      return (startswith (command->command, "thread ")
+	      || startswith (command->command, "inferior "));
     }
   else /* MI_COMMAND */
     {
@@ -1895,8 +1895,8 @@ command_notifies_uscc_observer (struct mi_parse *command)
 	  && command->argc > 1)
 	{
 	  /* "thread" and "inferior" again, but through -interpreter-exec.  */
-	  return (strncmp (command->argv[1], "thread ", 7) == 0
-		  || strncmp (command->argv[1], "inferior ", 9) == 0);
+	  return (startswith (command->argv[1], "thread ")
+		  || startswith (command->argv[1], "inferior "));
 	}
 
       else

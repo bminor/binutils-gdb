@@ -976,12 +976,12 @@ yylex (void)
     else
     {
        /* Built-in BOOLEAN type.  This is sort of a hack.  */
-       if (strncmp (tokstart, "TRUE", 4) == 0)
+       if (startswith (tokstart, "TRUE"))
        {
 	  yylval.ulval = 1;
 	  return M2_TRUE;
        }
-       else if (strncmp (tokstart, "FALSE", 5) == 0)
+       else if (startswith (tokstart, "FALSE"))
        {
 	  yylval.ulval = 0;
 	  return M2_FALSE;
