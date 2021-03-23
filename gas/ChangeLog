@@ -1,3 +1,13 @@
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (i386_index_check): New local variable t.
+	Correct MPX insn check.
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Correct
+	MPX insn check.
+	* testsuite/gas/i386/x86-64-mpx.s: Add RIP-relative cases. Test
+	index scaling by other than 1.
+	* testsuite/gas/i386/x86-64-mpx.d: Adjust expectations.
+
 2021-03-22  Martin Liska  <mliska@suse.cz>
 
 	* config/tc-i386.c (md_parse_option): Replace usage of CONST_STRNEQ with startswith.

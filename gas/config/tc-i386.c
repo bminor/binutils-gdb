@@ -11031,9 +11031,10 @@ i386_index_check (const char *operand_string)
 {
   const char *kind = "base/index";
   enum flag_code addr_mode = i386_addressing_mode ();
+  const insn_template *t = current_templates->start;
 
-  if (current_templates->start->opcode_modifier.isstring
-      && !current_templates->start->cpu_flags.bitfield.cpupadlock
+  if (t->opcode_modifier.isstring
+      && !t->cpu_flags.bitfield.cpupadlock
       && (current_templates->end[-1].opcode_modifier.isstring
 	  || i.mem_operands))
     {
@@ -11050,7 +11051,7 @@ i386_index_check (const char *operand_string)
 
       kind = "string address";
 
-      if (current_templates->start->opcode_modifier.prefixok == PrefixRep)
+      if (t->opcode_modifier.prefixok == PrefixRep)
 	{
 	  int es_op = current_templates->end[-1].opcode_modifier.isstring
 		      - IS_STRING_ES_OP0;
@@ -11130,9 +11131,11 @@ i386_index_check (const char *operand_string)
 	    goto bad_address;
 
 	  /* bndmk, bndldx, bndstx and mandatory non-vector SIB have special restrictions. */
-	  if (current_templates->start->base_opcode == 0xf30f1b
-	      || (current_templates->start->base_opcode & ~1) == 0x0f1a
-	      || current_templates->start->opcode_modifier.sib == SIBMEM)
+	  if ((t->opcode_modifier.opcodeprefix == PREFIX_0XF3
+	       && t->base_opcode == 0x0f1b)
+	      || (t->opcode_modifier.opcodeprefix == PREFIX_NONE
+		  && (t->base_opcode & ~1) == 0x0f1a)
+	      || t->opcode_modifier.sib == SIBMEM)
 	    {
 	      /* They cannot use RIP-relative addressing. */
 	      if (i.base_reg && i.base_reg->reg_num == RegIP)
@@ -11142,7 +11145,8 @@ i386_index_check (const char *operand_string)
 		}
 
 	      /* bndldx and bndstx ignore their scale factor. */
-	      if ((current_templates->start->base_opcode & ~1) == 0x0f1a
+	      if (t->opcode_modifier.opcodeprefix == PREFIX_NONE
+		  && (t->base_opcode & ~1) == 0x0f1a
 		  && i.log2_scale_factor)
 		as_warn (_("register scaling is being ignored here"));
 	    }
