@@ -1,5 +1,11 @@
 2021-03-23  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.h (struct insn_template): Move cpu_flags field past
+	opcode_modifier one.
+	* i386-tbl.h: Re-generate.
+
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (opcode_modifiers): New OpcodeSpace element.
 	* i386-opc.h (OpcodeSpace): New enumerator.
 	(VEX0F, VEX0F38, VEX0F3A, XOP08, XOP09, XOP0A): Rename to ...

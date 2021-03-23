@@ -951,13 +951,13 @@ typedef struct insn_template
   /* how many operands */
   unsigned char operands;
 
-  /* cpu feature flags */
-  i386_cpu_flags cpu_flags;
-
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
      the same instruction */
   i386_opcode_modifier opcode_modifier;
+
+  /* cpu feature flags */
+  i386_cpu_flags cpu_flags;
 
   /* operand_types[i] describes the type of operand i.  This is made
      by OR'ing together all of the possible type masks.  (e.g.

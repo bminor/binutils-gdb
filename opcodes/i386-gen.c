@@ -1411,8 +1411,6 @@ output_i386_opcode (FILE *table, const char *name, char *str,
   fprintf (table, "  { \"%s\", %s, %s, %s, %u,\n",
 	   name, base_opcode, extension_opcode, opcode_length, i);
 
-  process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
-
   if (process_i386_opcode_modifier (table, opcode_modifier,
 				    operand_types, lineno))
     {
@@ -1449,6 +1447,8 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	  break;
 	}
     }
+
+  process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
 
   fprintf (table, "    { ");
 
@@ -1837,9 +1837,9 @@ process_i386_opcodes (FILE *table)
 
   fprintf (table, "  { NULL, 0, 0, 0, 0,\n");
 
-  process_i386_cpu_flag (table, "0", 0, ",", "    ", -1);
-
   process_i386_opcode_modifier (table, "0", NULL, -1);
+
+  process_i386_cpu_flag (table, "0", 0, ",", "    ", -1);
 
   fprintf (table, "    { ");
   process_i386_operand_type (table, "0", stage_opcodes, "\t  ", -1);
