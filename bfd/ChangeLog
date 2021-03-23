@@ -1,3 +1,7 @@
+2021-03-23  Jan Beulich  <jbeulich@suse.com>
+
+	* dwarf2.c (read_indexed_string): Rename index to idx.
+
 2021-03-22  Martin Liska  <mliska@suse.cz>
 
 	* bfd-in.h (startswith): Add startswith function.

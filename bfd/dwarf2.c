@@ -1172,7 +1172,7 @@ is_str_attr (enum dwarf_form form)
 }
 
 static const char *
-read_indexed_string (bfd_uint64_t index ATTRIBUTE_UNUSED,
+read_indexed_string (bfd_uint64_t idx ATTRIBUTE_UNUSED,
 		     struct comp_unit * unit ATTRIBUTE_UNUSED)
 {
   /* FIXME: Add support for indexed strings.  */
