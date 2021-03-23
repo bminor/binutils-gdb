@@ -1364,7 +1364,6 @@ extern target_ops *get_dummy_target ();
 /* Define easy words for doing these operations on our current target.  */
 
 #define	target_shortname	(current_top_target ()->shortname ())
-#define	target_longname		(current_top_target ()->longname ())
 
 /* Does whatever cleanup is required for a target that we are no
    longer going to be calling.  This routine is automatically always
