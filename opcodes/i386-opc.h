@@ -949,9 +949,6 @@ typedef struct insn_template
 #define Prefix_REX		8	/* {rex} */
 #define Prefix_NoOptimize	9	/* {nooptimize} */
 
-  /* Opcode length.  */
-  unsigned char opcode_length;
-
   /* how many operands */
   unsigned char operands;
 

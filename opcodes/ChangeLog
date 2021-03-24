@@ -1,5 +1,15 @@
 2021-03-24  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (output_i386_opcode): Drop processing of
+	opcode_length. Calculate length from base_opcode. Adjust prefix
+	encoding determination.
+	(process_i386_opcodes): Drop output of fake opcode_length.
+	* i386-opc.h (struct insn_template): Drop opcode_length field.
+	* i386-opc.tbl: Drop opcode length field from all templates.
+	* i386-tbl.h: Re-generate.
+
+2021-03-24  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (process_i386_opcode_modifier): Return void. New
 	parameter "prefix". Drop local variable "regular_encoding".
 	Record prefix setting / check for consistency.

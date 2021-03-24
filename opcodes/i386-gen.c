@@ -1355,19 +1355,16 @@ static void
 output_i386_opcode (FILE *table, const char *name, char *str,
 		    char *last, int lineno)
 {
-  unsigned int i, prefix = 0;
-  char *base_opcode, *extension_opcode, *opcode_length, *end;
+  unsigned int i, length, prefix = 0;
+  char *base_opcode, *extension_opcode, *end;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
-  unsigned long int opcode, length;
+  unsigned long int opcode;
 
   /* Find base_opcode.  */
   base_opcode = next_field (str, ',', &str, last);
 
   /* Find extension_opcode.  */
   extension_opcode = next_field (str, ',', &str, last);
-
-  /* Find opcode_length.  */
-  opcode_length = next_field (str, ',', &str, last);
 
   /* Find cpu_flags.  */
   cpu_flags = next_field (str, ',', &str, last);
@@ -1408,29 +1405,30 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	}
     }
 
-  length = strtoul (opcode_length, &end, 0);
   opcode = strtoul (base_opcode, &end, 0);
+
+  /* Determine opcode length.  */
+  for (length = 1; length < 4; ++length)
+    if (!(opcode >> (8 * length)))
+       break;
 
   /* Transform prefixes encoded in the opcode into opcode modifier
      representation.  */
-  if (length < 4)
+  if (length > 1)
     {
-      switch (opcode >> (8 * length))
+      switch (opcode >> (8 * length - 8))
 	{
-	case 0: break;
 	case 0x66: prefix = PREFIX_0X66; break;
 	case 0xF3: prefix = PREFIX_0XF3; break;
 	case 0xF2: prefix = PREFIX_0XF2; break;
-	default:
-	  fail (_("%s:%d: %s: Unexpected opcode prefix %02lx\n"),
-		filename, lineno, name, opcode >> (8 * length));
 	}
 
-      opcode &= (1UL << (8 * length)) - 1;
+      if (prefix)
+	opcode &= (1UL << (8 * --length)) - 1;
     }
 
-  fprintf (table, "  { \"%s\", 0x%0*lx%s, %s, %lu, %u,\n",
-	   name, 2 * (int)length, opcode, end, extension_opcode, length, i);
+  fprintf (table, "  { \"%s\", 0x%0*lx%s, %s, %lu,\n",
+	   name, 2 * (int)length, opcode, end, extension_opcode, i);
 
   process_i386_opcode_modifier (table, opcode_modifier, prefix,
 				operand_types, lineno);
@@ -1822,7 +1820,7 @@ process_i386_opcodes (FILE *table)
 
   fclose (fp);
 
-  fprintf (table, "  { NULL, 0, 0, 0, 0,\n");
+  fprintf (table, "  { NULL, 0, 0, 0,\n");
 
   process_i386_opcode_modifier (table, "0", 0, NULL, -1);
 

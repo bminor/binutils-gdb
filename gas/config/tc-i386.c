@@ -314,6 +314,9 @@ struct _i386_insn
        or qword, if given.  */
     char suffix;
 
+    /* OPCODE_LENGTH holds the number of base opcode bytes.  */
+    unsigned char opcode_length;
+
     /* OPERANDS gives the number of given operands.  */
     unsigned int operands;
 
@@ -3065,8 +3068,6 @@ md_begin (void)
 
     while (1)
       {
-	gas_assert (optab->opcode_length == 4
-		    || !(optab->base_opcode >> (8 * optab->opcode_length)));
 	++optab;
 	if (optab->name == NULL
 	    || strcmp (optab->name, (optab - 1)->name) != 0)
@@ -3584,6 +3585,22 @@ intel_float_operand (const char *mnemonic)
   return 1;
 }
 
+static INLINE void
+install_template (const insn_template *t)
+{
+  unsigned int l;
+
+  i.tm = *t;
+
+  /* Note that for pseudo prefixes this produces a length of 1. But for them
+     the length isn't interesting at all.  */
+  for (l = 1; l < 4; ++l)
+    if (!(t->base_opcode >> (8 * l)))
+      break;
+
+  i.opcode_length = l;
+}
+
 /* Build the VEX prefix.  */
 
 static void
@@ -3636,7 +3653,7 @@ build_vex_prefix (const insn_template *t)
 	i.tm.base_opcode ^= (i.tm.base_opcode & 0xee) != 0x6e
 			    ? Opcode_SIMD_FloatD : Opcode_SIMD_IntD;
       else /* Use the next insn.  */
-	i.tm = t[1];
+	install_template (&t[1]);
     }
 
   /* Use 2-byte VEX prefix by swapping commutative source operands if there
@@ -6665,7 +6682,7 @@ match_template (char mnem_suffix)
     }
 
   /* Copy the template we found.  */
-  i.tm = *t;
+  install_template (t);
 
   if (addr_prefix_disp != -1)
     i.tm.operand_types[addr_prefix_disp]
@@ -7661,10 +7678,10 @@ process_operands (void)
 		  i.tm.name, register_prefix, i.op[0].regs->reg_name);
 	  return 0;
 	}
-      if ( i.op[0].regs->reg_num > 3 && i.tm.opcode_length == 1 )
+      if ( i.op[0].regs->reg_num > 3 && i.opcode_length == 1 )
 	{
 	  i.tm.base_opcode ^= POP_SEG_SHORT ^ POP_SEG386_SHORT;
-	  i.tm.opcode_length = 2;
+	  i.opcode_length = 2;
 	}
       i.tm.base_opcode |= (i.op[0].regs->reg_num << 3);
     }
@@ -8657,12 +8674,12 @@ output_jump (void)
 
   if (now_seg == absolute_section)
     {
-      abs_section_offset += i.tm.opcode_length + size;
+      abs_section_offset += i.opcode_length + size;
       return;
     }
 
-  p = frag_more (i.tm.opcode_length + size);
-  switch (i.tm.opcode_length)
+  p = frag_more (i.opcode_length + size);
+  switch (i.opcode_length)
     {
     case 2:
       *p++ = i.tm.base_opcode >> 8;
@@ -9385,14 +9402,15 @@ output_insn (void)
 		add_prefix (0xf3);
 	      break;
 	    case PREFIX_NONE:
-	      switch (i.tm.opcode_length)
+	      switch (i.opcode_length)
 		{
 		case 3:
 		case 2:
-		case 1:
 		  break;
-		case 0:
+		case 1:
 		  /* Check for pseudo prefixes.  */
+		  if (!i.tm.opcode_modifier.isprefix || i.tm.base_opcode)
+		    break;
 		  as_bad_where (insn_start_frag->fr_file,
 				insn_start_frag->fr_line,
 				_("pseudo prefix without instruction"));
@@ -9458,14 +9476,14 @@ output_insn (void)
 
       /* Now the opcode; be careful about word order here!  */
       if (now_seg == absolute_section)
-	abs_section_offset += i.tm.opcode_length;
-      else if (i.tm.opcode_length == 1)
+	abs_section_offset += i.opcode_length;
+      else if (i.opcode_length == 1)
 	{
 	  FRAG_APPEND_1_CHAR (i.tm.base_opcode);
 	}
       else
 	{
-	  switch (i.tm.opcode_length)
+	  switch (i.opcode_length)
 	    {
 	    case 4:
 	      p = frag_more (4);
@@ -9541,7 +9559,7 @@ output_insn (void)
 
 	      /* Count prefixes for extended opcode maps.  */
 	      if (!i.vex.length)
-		switch (i.tm.opcode_length)
+		switch (i.opcode_length)
 		  {
 		  case 3:
 		    if (((i.tm.base_opcode >> 16) & 0xff) == 0xf)

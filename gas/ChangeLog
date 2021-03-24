@@ -1,5 +1,17 @@
 2021-03-24  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (struct _i386_insn): New field
+	opcode_length.
+	(md_begin): Drop assertion.
+	(install_template): New.
+	(build_vex_prefix): Call install_template.
+	(match_template): Likewise.
+	(process_operands): Use new opcode_length field.
+	(output_jump): Likewise.
+	(output_insn): Likewise. Adjust psedo prefix check.
+
+2021-03-24  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (md_begin): Add assertion.
 	(build_vex_prefix): Drop implied prefix calculation.
 	(build_evex_prefix): Likewise.
