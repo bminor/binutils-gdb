@@ -5101,10 +5101,11 @@ parse_insn (char *line, char *mnemonic)
 		      current_templates->start->name);
 	      return NULL;
 	    }
-	  if (current_templates->start->opcode_length == 0)
+
+	  if (current_templates->start->base_opcode == PSEUDO_PREFIX)
 	    {
 	      /* Handle pseudo prefixes.  */
-	      switch (current_templates->start->base_opcode)
+	      switch (current_templates->start->extension_opcode)
 		{
 		case Prefix_Disp8:
 		  /* {disp8} */

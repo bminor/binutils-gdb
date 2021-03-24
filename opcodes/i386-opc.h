@@ -926,6 +926,17 @@ typedef struct insn_template
 #define Opcode_SIMD_FloatD 0x1 /* Direction bit for SIMD fp insns. */
 #define Opcode_SIMD_IntD 0x10 /* Direction bit for SIMD int insns. */
 
+/* (Fake) base opcode value for pseudo prefixes.  */
+#define PSEUDO_PREFIX 0
+
+  /* extension_opcode is the 3 bit extension for group <n> insns.
+     This field is also used to store the 8-bit opcode suffix for the
+     AMD 3DNow! instructions.
+     If this template has no extension opcode (the usual case) use None
+     Instructions */
+  unsigned short extension_opcode;
+#define None 0xffff		/* If no extension_opcode is possible.  */
+
 /* Pseudo prefixes.  */
 #define Prefix_Disp8		0	/* {disp8} */
 #define Prefix_Disp16		1	/* {disp16} */
@@ -937,14 +948,6 @@ typedef struct insn_template
 #define Prefix_EVEX		7	/* {evex} */
 #define Prefix_REX		8	/* {rex} */
 #define Prefix_NoOptimize	9	/* {nooptimize} */
-
-  /* extension_opcode is the 3 bit extension for group <n> insns.
-     This field is also used to store the 8-bit opcode suffix for the
-     AMD 3DNow! instructions.
-     If this template has no extension opcode (the usual case) use None
-     Instructions */
-  unsigned short extension_opcode;
-#define None 0xffff		/* If no extension_opcode is possible.  */
 
   /* Opcode length.  */
   unsigned char opcode_length;

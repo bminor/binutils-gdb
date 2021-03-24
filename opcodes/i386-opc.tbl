@@ -856,19 +856,14 @@ rex.wrb, 0x4d, None, 1, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|
 rex.wrx, 0x4e, None, 1, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
 rex.wrxb, 0x4f, None, 1, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
 
-// Pseudo prefixes (opcode_length == 0)
+// Pseudo prefixes (base_opcode == PSEUDO_PREFIX)
 
-{disp8}, Prefix_Disp8, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{disp16}, Prefix_Disp16, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{disp32}, Prefix_Disp32, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{load}, Prefix_Load, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{store}, Prefix_Store, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{vex}, Prefix_VEX, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{vex2}, Prefix_VEX, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{vex3}, Prefix_VEX3, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{evex}, Prefix_EVEX, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{rex}, Prefix_REX, None, 0, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
-{nooptimize}, Prefix_NoOptimize, None, 0, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
+<pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:0, disp32:Disp32:0, \
+                      load:Load:0, store:Store:0, \
+                      vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, \
+                      rex:REX:Cpu64, nooptimize:NoOptimize:0>
+
+{<pseudopfx>}, PSEUDO_PREFIX, Prefix_<pseudopfx:ident>, 0, <pseudopfx:cpu>, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
 
 // 486 extensions.
 

@@ -1,3 +1,8 @@
+2021-03-24  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (parse_insn): Recognize pseudo prefixes by
+	base_opcode and extension_opcode.
+
 2021-03-23  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (pte): Re-order opc_pfx[] entries.

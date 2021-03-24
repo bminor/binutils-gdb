@@ -1209,8 +1209,7 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 		       || strncasecmp(str, "EVex=", 5) == 0
 		       || strncasecmp(str, "Disp8MemShift=", 14) == 0
 		       || strncasecmp(str, "Masking=", 8) == 0
-		       || strcasecmp(str, "SAE") == 0
-		       || strcasecmp(str, "IsPrefix") == 0)
+		       || strcasecmp(str, "SAE") == 0)
 		regular_encoding = 0;
 
 	      set_bitfield (str, modifiers, val, ARRAY_SIZE (modifiers),
