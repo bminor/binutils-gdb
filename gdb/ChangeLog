@@ -1,3 +1,7 @@
+2021-03-29  Luis Machado  <luis.machado@linaro.org>
+
+	* compile/compile.c (get_args): Don't add empty argv entries.
+
 2021-03-29  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	gdb:

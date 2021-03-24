@@ -600,8 +600,14 @@ static gdb_argv
 get_args (const compile_instance *compiler, struct gdbarch *gdbarch)
 {
   const char *cs_producer_options;
+  gdb_argv result;
 
-  gdb_argv result (gdbarch_gcc_target_options (gdbarch).c_str ());
+  std::string gcc_options = gdbarch_gcc_target_options (gdbarch);
+
+  /* Make sure we have a non-empty set of options, otherwise GCC will
+     error out trying to look for a filename that is an empty string.  */
+  if (!gcc_options.empty ())
+    result = gdb_argv (gcc_options.c_str ());
 
   cs_producer_options = get_selected_pc_producer_options ();
   if (cs_producer_options != NULL)
