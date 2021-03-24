@@ -756,14 +756,10 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 			      (gdb_byte *) &ex_ui, sizeof (ex_ui)) != 0)
 	return;
 
-      if (frame_debug)
-	fprintf_unfiltered
-	  (gdb_stdlog,
-	   "amd64_windows_frame_decodes_insn: "
-	   "%s: ver: %02x, plgsz: %02x, cnt: %02x, frame: %02x\n",
-	   paddress (gdbarch, unwind_info),
-	   ex_ui.Version_Flags, ex_ui.SizeOfPrologue,
-	   ex_ui.CountOfCodes, ex_ui.FrameRegisterOffset);
+      frame_debug_printf ("%s: ver: %02x, plgsz: %02x, cnt: %02x, frame: %02x",
+			  paddress (gdbarch, unwind_info),
+			  ex_ui.Version_Flags, ex_ui.SizeOfPrologue,
+			  ex_ui.CountOfCodes, ex_ui.FrameRegisterOffset);
 
       /* Check version.  */
       if (PEX64_UWI_VERSION (ex_ui.Version_Flags) != 1
@@ -801,10 +797,9 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	  get_frame_register (this_frame, frreg, buf);
 	  save_addr = extract_unsigned_integer (buf, 8, byte_order);
 
-	  if (frame_debug)
-	    fprintf_unfiltered (gdb_stdlog, "   frame_reg=%s, val=%s\n",
-				gdbarch_register_name (gdbarch, frreg),
-				paddress (gdbarch, save_addr));
+	  frame_debug_printf ("   frame_reg=%s, val=%s",
+			      gdbarch_register_name (gdbarch, frreg),
+			      paddress (gdbarch, save_addr));
 	}
 
       /* Read opcodes.  */
@@ -835,10 +830,8 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	     prologue has been fully executed.  */
 	  if (cache->pc >= start + p[0] || cache->pc < start)
 	    {
-	      if (frame_debug)
-		fprintf_unfiltered
-		  (gdb_stdlog, "   op #%u: off=0x%02x, insn=0x%02x\n",
-		   (unsigned) (p - insns), p[0], p[1]);
+	      frame_debug_printf ("   op #%u: off=0x%02x, insn=0x%02x",
+				  (unsigned) (p - insns), p[0], p[1]);
 
 	      /* If there is no frame registers defined, the current value of
 		 rsp is used instead.  */
@@ -912,11 +905,11 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 		}
 
 	      /* Display address where the register was saved.  */
-	      if (frame_debug && reg >= 0)
-		fprintf_unfiltered
-		  (gdb_stdlog, "     [reg %s at %s]\n",
-		   gdbarch_register_name (gdbarch, reg),
-		   paddress (gdbarch, cache->prev_reg_addr[reg]));
+	      if (reg >= 0)
+		frame_debug_printf ("     [reg %s at %s]",
+				    gdbarch_register_name (gdbarch, reg),
+				    paddress (gdbarch,
+					      cache->prev_reg_addr[reg]));
 	    }
 
 	  /* Adjust with the length of the opcode.  */
@@ -978,14 +971,11 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	  unwind_info =
 	    extract_unsigned_integer (d.rva_UnwindData, 4, byte_order);
 
-	  if (frame_debug)
-	    fprintf_unfiltered
-	      (gdb_stdlog,
-	       "amd64_windows_frame_decodes_insn (next in chain):"
-	       " unwind_data=%s, start_rva=%s, end_rva=%s\n",
-	       paddress (gdbarch, unwind_info),
-	       paddress (gdbarch, cache->start_rva),
-	       paddress (gdbarch, cache->end_rva));
+	  frame_debug_printf ("next in chain: unwind_data=%s, start_rva=%s, "
+			      "end_rva=%s",
+			      paddress (gdbarch, unwind_info),
+			      paddress (gdbarch, cache->start_rva),
+			      paddress (gdbarch, cache->end_rva));
 	}
 
       /* Allow the user to break this loop.  */
@@ -996,10 +986,9 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
     cache->prev_rip_addr = cur_sp;
   cache->prev_sp = cur_sp + 8;
 
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "   prev_sp: %s, prev_pc @%s\n",
-			paddress (gdbarch, cache->prev_sp),
-			paddress (gdbarch, cache->prev_rip_addr));
+  frame_debug_printf ("   prev_sp: %s, prev_pc @%s",
+		      paddress (gdbarch, cache->prev_sp),
+		      paddress (gdbarch, cache->prev_rip_addr));
 }
 
 /* Find SEH unwind info for PC, returning 0 on success.
@@ -1073,11 +1062,9 @@ amd64_windows_find_unwind_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 	break;
     }
 
-  if (frame_debug)
-    fprintf_unfiltered
-      (gdb_stdlog,
-       "amd64_windows_find_unwind_data:  image_base=%s, unwind_data=%s\n",
-       paddress (gdbarch, base), paddress (gdbarch, *unwind_info));
+  frame_debug_printf ("image_base=%s, unwind_data=%s",
+		      paddress (gdbarch, base),
+		      paddress (gdbarch, *unwind_info));
 
   return 0;
 }
@@ -1139,11 +1126,9 @@ amd64_windows_frame_prev_register (struct frame_info *this_frame,
     amd64_windows_frame_cache (this_frame, this_cache);
   CORE_ADDR prev;
 
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"amd64_windows_frame_prev_register %s for sp=%s\n",
-			gdbarch_register_name (gdbarch, regnum),
-			paddress (gdbarch, cache->prev_sp));
+  frame_debug_printf ("%s for sp=%s",
+		      gdbarch_register_name (gdbarch, regnum),
+		      paddress (gdbarch, cache->prev_sp));
 
   if (regnum >= AMD64_XMM0_REGNUM && regnum <= AMD64_XMM0_REGNUM + 15)
       prev = cache->prev_xmm_addr[regnum - AMD64_XMM0_REGNUM];
@@ -1160,8 +1145,8 @@ amd64_windows_frame_prev_register (struct frame_info *this_frame,
   else
     prev = 0;
 
-  if (prev && frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "  -> at %s\n", paddress (gdbarch, prev));
+  if (prev != 0)
+    frame_debug_printf ("  -> at %s", paddress (gdbarch, prev));
 
   if (prev)
     {
