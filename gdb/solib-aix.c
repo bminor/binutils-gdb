@@ -246,7 +246,8 @@ solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
     return data->library_list;
 
   gdb::optional<gdb::char_vector> library_document
-    = target_read_stralloc (current_top_target (), TARGET_OBJECT_LIBRARIES_AIX,
+    = target_read_stralloc (current_inferior ()->top_target (),
+			    TARGET_OBJECT_LIBRARIES_AIX,
 			    NULL);
   if (!library_document && warning_msg != NULL)
     {

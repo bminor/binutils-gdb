@@ -5077,7 +5077,8 @@ ppc_process_record_op31 (struct gdbarch *gdbarch, struct regcache *regcache,
       return 0;
 
     case 1014:		/* Data Cache Block set to Zero */
-      if (target_auxv_search (current_top_target (), AT_DCACHEBSIZE, &at_dcsz) <= 0
+      if (target_auxv_search (current_inferior ()->top_target (),
+			      AT_DCACHEBSIZE, &at_dcsz) <= 0
 	  || at_dcsz == 0)
 	at_dcsz = 128; /* Assume 128-byte cache line size (POWER8)  */
 

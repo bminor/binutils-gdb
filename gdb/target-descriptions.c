@@ -553,11 +553,13 @@ target_find_description (void)
   /* Next try to read the description from the current target using
      target objects.  */
   if (current_target_desc == NULL)
-    current_target_desc = target_read_description_xml (current_top_target ());
+    current_target_desc = target_read_description_xml
+      (current_inferior ()->top_target ());
 
   /* If that failed try a target-specific hook.  */
   if (current_target_desc == NULL)
-    current_target_desc = target_read_description (current_top_target ());
+    current_target_desc = target_read_description
+      (current_inferior ()->top_target ());
 
   /* If a non-NULL description was returned, then update the current
      architecture.  */

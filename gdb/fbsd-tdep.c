@@ -593,7 +593,7 @@ static gdb::optional<gdb::byte_vector>
 fbsd_make_note_desc (enum target_object object, uint32_t structsize)
 {
   gdb::optional<gdb::byte_vector> buf =
-    target_read_alloc (current_top_target (), object, NULL);
+    target_read_alloc (current_inferior ()->top_target (), object, NULL);
   if (!buf || buf->empty ())
     return {};
 

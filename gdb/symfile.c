@@ -838,10 +838,8 @@ init_entry_point_info (struct objfile *objfile)
 
       /* Make certain that the address points at real code, and not a
 	 function descriptor.  */
-      entry_point
-	= gdbarch_convert_from_func_ptr_addr (objfile->arch (),
-					      entry_point,
-					      current_top_target ());
+      entry_point = gdbarch_convert_from_func_ptr_addr
+	(objfile->arch (), entry_point, current_inferior ()->top_target ());
 
       /* Remove any ISA markers, so that this matches entries in the
 	 symbol table.  */

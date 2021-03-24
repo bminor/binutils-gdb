@@ -775,7 +775,7 @@ section_table_read_available_memory (gdb_byte *readbuf, ULONGEST offset,
 				     ULONGEST len, ULONGEST *xfered_len)
 {
   const target_section_table *table
-    = target_get_section_table (current_top_target ());
+    = target_get_section_table (current_inferior ()->top_target ());
   std::vector<mem_range> available_memory
     = section_table_available_memory (offset, len, *table);
 

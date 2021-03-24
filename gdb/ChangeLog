@@ -1,5 +1,11 @@
 2021-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* target.h (current_top_target): Remove, make callers use the
+	current inferior instead.
+	* target.c (current_top_target): Remove.
+
+2021-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* target.h (target_shortname): Change to function declaration.
 	(target_longname): Likewise.
 	(target_attach_no_wait): Likewise.

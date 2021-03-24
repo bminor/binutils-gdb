@@ -42,6 +42,7 @@
 #include "count-one-bits.h"
 #include "c-lang.h"
 #include "cp-abi.h"
+#include "inferior.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -1848,9 +1849,8 @@ print_function_pointer_address (const struct value_print_options *options,
 				CORE_ADDR address,
 				struct ui_file *stream)
 {
-  CORE_ADDR func_addr
-    = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
-					  current_top_target ());
+  CORE_ADDR func_addr = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, address, current_inferior ()->top_target ());
 
   /* If the function pointer is represented by a description, print
      the address of the description.  */

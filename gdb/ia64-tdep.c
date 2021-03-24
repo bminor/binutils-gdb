@@ -2653,8 +2653,8 @@ getunwind_table ()
      we should find a way to override the corefile layer's
      xfer_partial method.  */
 
-  return target_read_alloc (current_top_target (), TARGET_OBJECT_UNWIND_TABLE,
-			    NULL);
+  return target_read_alloc (current_inferior ()->top_target (),
+			    TARGET_OBJECT_UNWIND_TABLE, NULL);
 }
 
 /* Get the kernel unwind table.  */				 

@@ -1385,11 +1385,6 @@ private:
   target_ops *m_stack[(int) debug_stratum + 1] {};
 };
 
-/* The ops structure for our "current" target process.  This should
-   never be NULL.  If there is no target, it points to the dummy_target.  */
-
-extern target_ops *current_top_target ();
-
 /* Return the dummy target.  */
 extern target_ops *get_dummy_target ();
 

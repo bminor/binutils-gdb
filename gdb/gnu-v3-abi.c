@@ -31,6 +31,7 @@
 #include <algorithm>
 #include "cli/cli-style.h"
 #include "dwarf2/loc.h"
+#include "inferior.h"
 
 static struct cp_abi_ops gnu_v3_abi_ops;
 
@@ -1243,8 +1244,8 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
      (powerpc 64 for example).  Make sure to retrieve the address
      of the real function from the function descriptor before passing on
      the address to other layers of GDB.  */
-  func_addr = gdbarch_convert_from_func_ptr_addr (gdbarch, method_stop_pc,
-						  current_top_target ());
+  func_addr = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, method_stop_pc, current_inferior ()->top_target ());
   if (func_addr != 0)
     method_stop_pc = func_addr;
 

@@ -410,9 +410,10 @@ int
 linux_is_uclinux (void)
 {
   CORE_ADDR dummy;
+  target_ops *target = current_inferior ()->top_target ();
 
-  return (target_auxv_search (current_top_target (), AT_NULL, &dummy) > 0
-	  && target_auxv_search (current_top_target (), AT_PAGESZ, &dummy) == 0);
+  return (target_auxv_search (target, AT_NULL, &dummy) > 0
+	  && target_auxv_search (target, AT_PAGESZ, &dummy) == 0);
 }
 
 static int
@@ -1735,7 +1736,8 @@ linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
 
   gdb::byte_vector buf (TYPE_LENGTH (siginfo_type));
 
-  bytes_read = target_read (current_top_target (), TARGET_OBJECT_SIGNAL_INFO, NULL,
+  bytes_read = target_read (current_inferior ()->top_target (),
+			    TARGET_OBJECT_SIGNAL_INFO, NULL,
 			    buf.data (), 0, TYPE_LENGTH (siginfo_type));
   if (bytes_read != TYPE_LENGTH (siginfo_type))
     buf.clear ();
@@ -2037,7 +2039,8 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 
   /* Auxillary vector.  */
   gdb::optional<gdb::byte_vector> auxv =
-    target_read_alloc (current_top_target (), TARGET_OBJECT_AUXV, NULL);
+    target_read_alloc (current_inferior ()->top_target (),
+		       TARGET_OBJECT_AUXV, NULL);
   if (auxv && !auxv->empty ())
     {
       note_data.reset (elfcore_write_note (obfd, note_data.release (),
@@ -2317,7 +2320,8 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
   char filename[100];
   long pid;
 
-  if (target_auxv_search (current_top_target (), AT_SYSINFO_EHDR, &range->start) <= 0)
+  if (target_auxv_search (current_inferior ()->top_target (),
+			  AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
 
   /* It doesn't make sense to access the host's /proc when debugging a
@@ -2507,14 +2511,15 @@ linux_displaced_step_location (struct gdbarch *gdbarch)
      local-store address and is thus not usable as displaced stepping
      location.  The auxiliary vector gets us the PowerPC-side entry
      point address instead.  */
-  if (target_auxv_search (current_top_target (), AT_ENTRY, &addr) <= 0)
+  if (target_auxv_search (current_inferior ()->top_target (),
+			  AT_ENTRY, &addr) <= 0)
     throw_error (NOT_SUPPORTED_ERROR,
 		 _("Cannot find AT_ENTRY auxiliary vector entry."));
 
   /* Make certain that the address points at real code, and not a
      function descriptor.  */
-  addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
-					     current_top_target ());
+  addr = gdbarch_convert_from_func_ptr_addr
+    (gdbarch, addr, current_inferior ()->top_target ());
 
   /* Inferior calls also use the entry point as a breakpoint location.
      We don't want displaced stepping to interfere with those

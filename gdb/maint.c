@@ -40,6 +40,7 @@
 #include "top.h"
 #include "maint.h"
 #include "gdbsupport/selftest.h"
+#include "inferior.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
@@ -472,7 +473,7 @@ maintenance_info_target_sections (const char *arg, int from_tty)
   bfd *abfd = nullptr;
   int digits = 0;
   const target_section_table *table
-    = target_get_section_table (current_top_target ());
+    = target_get_section_table (current_inferior ()->top_target ());
   if (table == nullptr)
     return;
 

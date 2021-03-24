@@ -47,6 +47,7 @@
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/def-vector.h"
 #include <algorithm>
+#include "inferior.h"
 
 /* An enumeration of the various things a user might attempt to
    complete for a linespec location.  */
@@ -2314,7 +2315,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 				= (gdbarch_convert_from_func_ptr_addr
 				   (gdbarch,
 				    msym_addr,
-				    current_top_target ()));
+				    current_inferior ()->top_target ()));
 			    }
 
 			  if (msym_addr == addr)

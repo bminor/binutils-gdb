@@ -42,6 +42,7 @@
 #include <ctype.h>
 #include "expop.h"
 #include "c-exp.h"
+#include "inferior.h"
 
 
 /* Parse the string EXP as a C expression, evaluate it,
@@ -1964,8 +1965,8 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
 
       /* The address might point to a function descriptor;
 	 resolve it to the actual code address instead.  */
-      addr = gdbarch_convert_from_func_ptr_addr (exp->gdbarch, addr,
-						 current_top_target ());
+      addr = gdbarch_convert_from_func_ptr_addr
+	(exp->gdbarch, addr, current_inferior ()->top_target ());
 
       /* Is it a high_level symbol?  */
       sym = find_pc_function (addr);

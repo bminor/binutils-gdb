@@ -280,7 +280,8 @@ dsbt_get_initial_loadmaps (void)
 {
   struct dsbt_info *info = get_dsbt_info ();
   gdb::optional<gdb::byte_vector> buf
-    = target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "exec");
+    = target_read_alloc (current_inferior ()->top_target (),
+			 TARGET_OBJECT_FDPIC, "exec");
 
   if (!buf || buf->empty ())
     {
@@ -291,7 +292,8 @@ dsbt_get_initial_loadmaps (void)
   if (solib_dsbt_debug)
     dsbt_print_loadmap (info->exec_loadmap);
 
-  buf = target_read_alloc (current_top_target (), TARGET_OBJECT_FDPIC, "exec");
+  buf = target_read_alloc (current_inferior ()->top_target (),
+			   TARGET_OBJECT_FDPIC, "exec");
   if (!buf || buf->empty ())
     {
       info->interp_loadmap = NULL;

@@ -1777,7 +1777,7 @@ displaced_step_finish (thread_info *event_thread, enum gdb_signal signal)
   /* Fixup may need to read memory/registers.  Switch to the thread
      that we're fixing up.  Also, target_stopped_by_watchpoint checks
      the current thread, and displaced_step_restore performs ptid-dependent
-     memory accesses using current_inferior() and current_top_target().  */
+     memory accesses using current_inferior().  */
   switch_to_thread (event_thread);
 
   displaced_step_reset_cleanup cleanup (displaced);
@@ -5813,7 +5813,8 @@ handle_signal_stop (struct execution_control_state *ecs)
 
 	  infrun_debug_printf ("stopped by watchpoint");
 
-	  if (target_stopped_data_address (current_top_target (), &addr))
+	  if (target_stopped_data_address (current_inferior ()->top_target (),
+					   &addr))
 	    infrun_debug_printf ("stopped data address=%s",
 				 paddress (reg_gdbarch, addr));
 	  else
@@ -8835,7 +8836,8 @@ siginfo_value_read (struct value *v)
   validate_registers_access ();
 
   transferred =
-    target_read (current_top_target (), TARGET_OBJECT_SIGNAL_INFO,
+    target_read (current_inferior ()->top_target (),
+		 TARGET_OBJECT_SIGNAL_INFO,
 		 NULL,
 		 value_contents_all_raw (v),
 		 value_offset (v),
@@ -8857,7 +8859,7 @@ siginfo_value_write (struct value *v, struct value *fromval)
      vice versa.  */
   validate_registers_access ();
 
-  transferred = target_write (current_top_target (),
+  transferred = target_write (current_inferior ()->top_target (),
 			      TARGET_OBJECT_SIGNAL_INFO,
 			      NULL,
 			      value_contents_all_raw (fromval),
@@ -8921,7 +8923,8 @@ public:
 
 	siginfo_data.reset ((gdb_byte *) xmalloc (len));
 
-	if (target_read (current_top_target (), TARGET_OBJECT_SIGNAL_INFO, NULL,
+	if (target_read (current_inferior ()->top_target (),
+			 TARGET_OBJECT_SIGNAL_INFO, NULL,
 			 siginfo_data.get (), 0, len) != len)
 	  {
 	    /* Errors ignored.  */
@@ -8956,7 +8959,8 @@ public:
 	struct type *type = gdbarch_get_siginfo_type (gdbarch);
 
 	/* Errors ignored.  */
-	target_write (current_top_target (), TARGET_OBJECT_SIGNAL_INFO, NULL,
+	target_write (current_inferior ()->top_target (),
+		      TARGET_OBJECT_SIGNAL_INFO, NULL,
 		      m_siginfo_data.get (), 0, TYPE_LENGTH (type));
       }
 

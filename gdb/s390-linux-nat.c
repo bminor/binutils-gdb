@@ -1002,7 +1002,7 @@ s390_linux_nat_target::read_description ()
      that mode, report s390 architecture with 64-bit GPRs.  */
 #ifdef __s390x__
   {
-    CORE_ADDR hwcap = linux_get_hwcap (current_top_target ());
+    CORE_ADDR hwcap = linux_get_hwcap (current_inferior ()->top_target ());
 
     have_regset_tdb = (hwcap & HWCAP_S390_TE)
       && check_regset (tid, NT_S390_TDB, s390_sizeof_tdbregset);

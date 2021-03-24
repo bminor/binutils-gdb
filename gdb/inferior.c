@@ -507,7 +507,7 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
 
       uiout->field_signed ("number", inf->num);
 
-      /* Because target_pid_to_str uses current_top_target,
+      /* Because target_pid_to_str uses the current inferior,
 	 switch the inferior.  */
       switch_to_inferior_no_thread (inf);
 

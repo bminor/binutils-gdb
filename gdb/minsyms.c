@@ -54,6 +54,7 @@
 #include <algorithm>
 #include "safe-ctype.h"
 #include "gdbsupport/parallel-for.h"
+#include "inferior.h"
 
 #if CXX_STD_THREAD
 #include <mutex>
@@ -78,9 +79,8 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
     case mst_data_gnu_ifunc:
       {
 	struct gdbarch *gdbarch = objfile->arch ();
-	CORE_ADDR pc
-	  = gdbarch_convert_from_func_ptr_addr (gdbarch, msym_addr,
-						current_top_target ());
+	CORE_ADDR pc = gdbarch_convert_from_func_ptr_addr
+	  (gdbarch, msym_addr, current_inferior ()->top_target ());
 	if (pc != msym_addr)
 	  {
 	    if (func_address_p != NULL)
