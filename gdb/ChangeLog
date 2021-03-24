@@ -1,3 +1,8 @@
+2021-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbarch.sh (gdbarch_data_registry): Make static.
+	* gdbarch.c: Re-generate.
+
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
 	* NEWS: Mention memory tagging changes.
