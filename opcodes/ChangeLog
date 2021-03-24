@@ -1,5 +1,18 @@
 2021-03-24  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (process_i386_opcode_modifier): Return void. New
+	parameter "prefix". Drop local variable "regular_encoding".
+	Record prefix setting / check for consistency.
+	(output_i386_opcode): Parse opcode_length and base_opcode
+	earlier. Derive prefix encoding. Drop no longer applicable
+	consistency checking. Adjust process_i386_opcode_modifier()
+	invocation.
+	(process_i386_opcodes): Adjust process_i386_opcode_modifier()
+	invocation.
+	* i386-tbl.h: Re-generate.
+
+2021-03-24  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (process_i386_opcode_modifier): Drop IsPrefix
 	check.
 	* i386-opc.h (Prefix_*): Move #define-s.

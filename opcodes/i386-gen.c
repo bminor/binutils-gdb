@@ -1175,12 +1175,12 @@ adjust_broadcast_modifier (char **opnd)
   return bcst_type;
 }
 
-static int
-process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
+static void
+process_i386_opcode_modifier (FILE *table, char *mod, unsigned int prefix,
+			      char **opnd, int lineno)
 {
   char *str, *next, *last;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
-  unsigned int regular_encoding = 1;
 
   active_isstring = 0;
 
@@ -1199,18 +1199,7 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 	    {
 	      int val = 1;
 	      if (strcasecmp(str, "Broadcast") == 0)
-		{
-		  val = adjust_broadcast_modifier (opnd);
-		  regular_encoding = 0;
-		}
-	      else if (strcasecmp(str, "Vex") == 0
-		       || strncasecmp(str, "Vex=", 4) == 0
-		       || strcasecmp(str, "EVex") == 0
-		       || strncasecmp(str, "EVex=", 5) == 0
-		       || strncasecmp(str, "Disp8MemShift=", 14) == 0
-		       || strncasecmp(str, "Masking=", 8) == 0
-		       || strcasecmp(str, "SAE") == 0)
-		regular_encoding = 0;
+		val = adjust_broadcast_modifier (opnd);
 
 	      set_bitfield (str, modifiers, val, ARRAY_SIZE (modifiers),
 			    lineno);
@@ -1231,6 +1220,19 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 	    }
 	}
 
+      if (prefix)
+	{
+	  if (!modifiers[OpcodePrefix].value)
+	    modifiers[OpcodePrefix].value = prefix;
+	  else if (modifiers[OpcodePrefix].value != prefix)
+	    fail (_("%s:%d: Conflicting prefix specifications\n"),
+		  filename, lineno);
+	  else
+	    fprintf (stderr,
+		     _("%s:%d: Warning: redundant prefix specification\n"),
+		     filename, lineno);
+	}
+
       if (have_w && !bwlq_suf)
 	fail ("%s: %d: stray W modifier\n", filename, lineno);
       if (have_w && !(bwlq_suf & 1))
@@ -1242,8 +1244,6 @@ process_i386_opcode_modifier (FILE *table, char *mod, char **opnd, int lineno)
 		 filename, lineno);
     }
   output_opcode_modifier (table, modifiers, ARRAY_SIZE (modifiers));
-
-  return regular_encoding;
 }
 
 enum stage {
@@ -1355,9 +1355,10 @@ static void
 output_i386_opcode (FILE *table, const char *name, char *str,
 		    char *last, int lineno)
 {
-  unsigned int i;
-  char *base_opcode, *extension_opcode, *opcode_length;
+  unsigned int i, prefix = 0;
+  char *base_opcode, *extension_opcode, *opcode_length, *end;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
+  unsigned long int opcode, length;
 
   /* Find base_opcode.  */
   base_opcode = next_field (str, ',', &str, last);
@@ -1407,45 +1408,32 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	}
     }
 
-  fprintf (table, "  { \"%s\", %s, %s, %s, %u,\n",
-	   name, base_opcode, extension_opcode, opcode_length, i);
+  length = strtoul (opcode_length, &end, 0);
+  opcode = strtoul (base_opcode, &end, 0);
 
-  if (process_i386_opcode_modifier (table, opcode_modifier,
-				    operand_types, lineno))
+  /* Transform prefixes encoded in the opcode into opcode modifier
+     representation.  */
+  if (length < 4)
     {
-      char *end;
-      unsigned long int length = strtoul (opcode_length, &end, 0);
-      unsigned long int opcode = strtoul (base_opcode, &end, 0);
-      switch (length)
+      switch (opcode >> (8 * length))
 	{
-	case 4:
-	  break;
-	case 3:
-	  if ((opcode >> 24) != 0)
-	    fail (_("%s: %s: (base_opcode >> 24) != 0: %s\n"),
-		  filename, name, base_opcode);
-	  break;
-	case 2:
-	  if ((opcode >> 16) != 0)
-	    fail (_("%s: %s: (base_opcode >> 16) != 0: %s\n"),
-		  filename, name, base_opcode);
-	  break;
-	case 1:
-	  if ((opcode >> 8) != 0)
-	    fail (_("%s: %s: (base_opcode >> 8) != 0: %s\n"),
-		  filename, name, base_opcode);
-	  break;
-	case 0:
-	  if (opcode != 0)
-	    fail (_("%s: %s: base_opcode != 0: %s\n"),
-		  filename, name, base_opcode);
-	  break;
+	case 0: break;
+	case 0x66: prefix = PREFIX_0X66; break;
+	case 0xF3: prefix = PREFIX_0XF3; break;
+	case 0xF2: prefix = PREFIX_0XF2; break;
 	default:
-	  fail (_("%s: %s: invalid opcode length: %s\n"),
-		filename, name, opcode_length);
-	  break;
+	  fail (_("%s:%d: %s: Unexpected opcode prefix %02lx\n"),
+		filename, lineno, name, opcode >> (8 * length));
 	}
+
+      opcode &= (1UL << (8 * length)) - 1;
     }
+
+  fprintf (table, "  { \"%s\", 0x%0*lx%s, %s, %lu, %u,\n",
+	   name, 2 * (int)length, opcode, end, extension_opcode, length, i);
+
+  process_i386_opcode_modifier (table, opcode_modifier, prefix,
+				operand_types, lineno);
 
   process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
 
@@ -1836,7 +1824,7 @@ process_i386_opcodes (FILE *table)
 
   fprintf (table, "  { NULL, 0, 0, 0, 0,\n");
 
-  process_i386_opcode_modifier (table, "0", NULL, -1);
+  process_i386_opcode_modifier (table, "0", 0, NULL, -1);
 
   process_i386_cpu_flag (table, "0", 0, ",", "    ", -1);
 

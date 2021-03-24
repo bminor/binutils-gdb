@@ -3065,6 +3065,8 @@ md_begin (void)
 
     while (1)
       {
+	gas_assert (optab->opcode_length == 4
+		    || !(optab->base_opcode >> (8 * optab->opcode_length)));
 	++optab;
 	if (optab->name == NULL
 	    || strcmp (optab->name, (optab - 1)->name) != 0)
@@ -3588,7 +3590,6 @@ static void
 build_vex_prefix (const insn_template *t)
 {
   unsigned int register_specifier;
-  unsigned int implied_prefix;
   unsigned int vector_length;
   unsigned int w;
 
@@ -3696,24 +3697,6 @@ build_vex_prefix (const insn_template *t)
 	  }
     }
 
-  switch ((i.tm.base_opcode >> (i.tm.opcode_length << 3)) & 0xff)
-    {
-    case 0:
-      implied_prefix = 0;
-      break;
-    case DATA_PREFIX_OPCODE:
-      implied_prefix = 1;
-      break;
-    case REPE_PREFIX_OPCODE:
-      implied_prefix = 2;
-      break;
-    case REPNE_PREFIX_OPCODE:
-      implied_prefix = 3;
-      break;
-    default:
-      abort ();
-    }
-
   /* Check the REX.W bit and VEXW.  */
   if (i.tm.opcode_modifier.vexw == VEXWIG)
     w = (vexwig == vexw1 || (i.rex & REX_W)) ? 1 : 0;
@@ -3739,7 +3722,7 @@ build_vex_prefix (const insn_template *t)
       i.vex.bytes[1] = (r << 7
 			| register_specifier << 3
 			| vector_length << 2
-			| implied_prefix);
+			| i.tm.opcode_modifier.opcodeprefix);
     }
   else
     {
@@ -3769,7 +3752,7 @@ build_vex_prefix (const insn_template *t)
       i.vex.bytes[2] = (w << 7
 			| register_specifier << 3
 			| vector_length << 2
-			| implied_prefix);
+			| i.tm.opcode_modifier.opcodeprefix);
     }
 }
 
@@ -3792,8 +3775,7 @@ is_any_vex_encoding (const insn_template *t)
 static void
 build_evex_prefix (void)
 {
-  unsigned int register_specifier;
-  unsigned int implied_prefix, w;
+  unsigned int register_specifier, w;
   rex_byte vrex_used = 0;
 
   /* Check register specifier.  */
@@ -3820,24 +3802,6 @@ build_evex_prefix (void)
 	i.vex.bytes[3] = 0x8;
       else
 	vrex_used |= REX_X;
-    }
-
-  switch ((i.tm.base_opcode >> 8) & 0xff)
-    {
-    case 0:
-      implied_prefix = 0;
-      break;
-    case DATA_PREFIX_OPCODE:
-      implied_prefix = 1;
-      break;
-    case REPE_PREFIX_OPCODE:
-      implied_prefix = 2;
-      break;
-    case REPNE_PREFIX_OPCODE:
-      implied_prefix = 3;
-      break;
-    default:
-      abort ();
     }
 
   /* 4 byte EVEX prefix.  */
@@ -3882,11 +3846,11 @@ build_evex_prefix (void)
   else
     w = (flag_code == CODE_64BIT ? i.rex & REX_W : evexwig == evexw1) ? 1 : 0;
 
-  /* Encode the U bit.  */
-  implied_prefix |= 0x4;
-
   /* The third byte of the EVEX prefix.  */
-  i.vex.bytes[2] = (w << 7 | register_specifier << 3 | implied_prefix);
+  i.vex.bytes[2] = ((w << 7)
+		    | (register_specifier << 3)
+		    | 4 /* Encode the U bit.  */
+		    | i.tm.opcode_modifier.opcodeprefix);
 
   /* The fourth byte of the EVEX prefix.  */
   /* The zeroing-masking bit.  */
@@ -4192,19 +4156,15 @@ optimize_encoding (void)
 		       || (i.tm.operand_types[2].bitfield.zmmword
 			   && i.types[2].bitfield.ymmword))))
 	   && ((i.tm.base_opcode == 0x55
-		|| i.tm.base_opcode == 0x6655
-		|| i.tm.base_opcode == 0x66df
 		|| i.tm.base_opcode == 0x57
-		|| i.tm.base_opcode == 0x6657
-		|| i.tm.base_opcode == 0x66ef
-		|| i.tm.base_opcode == 0x66f8
-		|| i.tm.base_opcode == 0x66f9
-		|| i.tm.base_opcode == 0x66fa
-		|| i.tm.base_opcode == 0x66fb
+		|| i.tm.base_opcode == 0xdf
+		|| i.tm.base_opcode == 0xef
+		|| i.tm.base_opcode == 0xf8
+		|| i.tm.base_opcode == 0xf9
+		|| i.tm.base_opcode == 0xfa
+		|| i.tm.base_opcode == 0xfb
 		|| i.tm.base_opcode == 0x42
-		|| i.tm.base_opcode == 0x6642
-		|| i.tm.base_opcode == 0x47
-		|| i.tm.base_opcode == 0x6647)
+		|| i.tm.base_opcode == 0x47)
 	       && i.tm.extension_opcode == None))
     {
       /* Optimize: -O1:
@@ -4257,7 +4217,7 @@ optimize_encoding (void)
 	}
       else if (i.tm.operand_types[0].bitfield.class == RegMask)
 	{
-	  i.tm.base_opcode &= 0xff;
+	  i.tm.opcode_modifier.opcodeprefix = PREFIX_NONE;
 	  i.tm.opcode_modifier.vexw = VEXW0;
 	}
       else
@@ -4276,11 +4236,9 @@ optimize_encoding (void)
 	   && !i.mask
 	   && !i.broadcast
 	   && is_evex_encoding (&i.tm)
-	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x666f
-	       || (i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf36f
-	       || (i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf26f
-	       || (i.tm.base_opcode & ~4) == 0x66db
-	       || (i.tm.base_opcode & ~4) == 0x66eb)
+	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x6f
+	       || (i.tm.base_opcode & ~4) == 0xdb
+	       || (i.tm.base_opcode & ~4) == 0xeb)
 	   && i.tm.extension_opcode == None)
     {
       /* Optimize: -O1:
@@ -4331,13 +4289,14 @@ optimize_encoding (void)
 	    i.types[j].bitfield.disp8 = vex_disp8;
 	    break;
 	  }
-      if ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0xf26f)
-	i.tm.base_opcode ^= 0xf36f ^ 0xf26f;
+      if ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x6f
+	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_0XF2)
+	i.tm.opcode_modifier.opcodeprefix = PREFIX_0XF3;
       i.tm.opcode_modifier.vex
 	= i.types[0].bitfield.ymmword ? VEX256 : VEX128;
       i.tm.opcode_modifier.vexw = VEXW0;
       /* VPAND, VPOR, and VPXOR are commutative.  */
-      if (i.reg_operands == 3 && i.tm.base_opcode != 0x66df)
+      if (i.reg_operands == 3 && i.tm.base_opcode != 0xdf)
 	i.tm.opcode_modifier.commutative = 1;
       i.tm.opcode_modifier.evex = 0;
       i.tm.opcode_modifier.masking = 0;
@@ -4395,6 +4354,7 @@ load_insn_p (void)
       if (i.tm.base_opcode == 0xae
 	  && i.tm.opcode_modifier.vex
 	  && i.tm.opcode_modifier.opcodespace == SPACE_0F
+	  && i.tm.opcode_modifier.opcodeprefix == PREFIX_NONE
 	  && i.tm.extension_opcode == 2)
 	return 1;
     }
@@ -6388,7 +6348,9 @@ match_template (char mnem_suffix)
 	}
 
       /* Force 0x8b encoding for "mov foo@GOT, %eax".  */
-      if (i.reloc[0] == BFD_RELOC_386_GOT32 && t->base_opcode == 0xa0)
+      if (i.reloc[0] == BFD_RELOC_386_GOT32
+	  && t->base_opcode == 0xa0
+	  && t->opcode_modifier.opcodespace == SPACE_BASE)
 	continue;
 
       /* We check register size if needed.  */
@@ -6415,6 +6377,7 @@ match_template (char mnem_suffix)
 	     zero-extend %eax to %rax.  */
 	  if (flag_code == CODE_64BIT
 	      && t->base_opcode == 0x90
+	      && t->opcode_modifier.opcodespace == SPACE_BASE
 	      && i.types[0].bitfield.instance == Accum
 	      && i.types[0].bitfield.dword
 	      && i.types[1].bitfield.instance == Accum
@@ -6425,6 +6388,7 @@ match_template (char mnem_suffix)
 	  if (flag_code != CODE_64BIT
 	      && i.hle_prefix
 	      && t->base_opcode == 0xa0
+	      && t->opcode_modifier.opcodespace == SPACE_BASE
 	      && i.types[0].bitfield.instance == Accum
 	      && (i.flags[1] & Operand_Mem))
 	    continue;
@@ -6780,7 +6744,9 @@ process_suffix (void)
 	 ambiguity checking below.  The suffix will be replaced afterwards
 	 to represent the destination (register).  */
       if (((i.tm.base_opcode | 8) == 0xfbe && i.tm.opcode_modifier.w)
-	  || (i.tm.base_opcode == 0x63 && i.tm.cpu_flags.bitfield.cpu64))
+	  || (i.tm.base_opcode == 0x63
+	      && i.tm.opcode_modifier.opcodespace == SPACE_BASE
+	      && i.tm.cpu_flags.bitfield.cpu64))
 	--i.operands;
 
       /* crc32 needs REX.W set regardless of suffix / source operand size.  */
@@ -7028,6 +6994,7 @@ process_suffix (void)
 	    i.suffix = SHORT_MNEM_SUFFIX;
 	  else if ((i.tm.base_opcode | 8) == 0xfbe
 		   || (i.tm.base_opcode == 0x63
+		       && i.tm.opcode_modifier.opcodespace == SPACE_BASE
 		       && i.tm.cpu_flags.bitfield.cpu64))
 	    /* handled below */;
 	  else if (evex)
@@ -7042,7 +7009,9 @@ process_suffix (void)
     }
 
   if ((i.tm.base_opcode | 8) == 0xfbe
-      || (i.tm.base_opcode == 0x63 && i.tm.cpu_flags.bitfield.cpu64))
+      || (i.tm.base_opcode == 0x63
+	  && i.tm.opcode_modifier.opcodespace == SPACE_BASE
+	  && i.tm.cpu_flags.bitfield.cpu64))
     {
       /* In Intel syntax, movsx/movzx must have a "suffix" (checked above).
 	 In AT&T syntax, if there is no suffix (warned about above), the default
@@ -7741,6 +7710,7 @@ process_operands (void)
 
   if ((i.seg[0] || i.prefix[SEG_PREFIX])
       && i.tm.base_opcode == 0x8d /* lea */
+      && i.tm.opcode_modifier.opcodespace == SPACE_BASE
       && !is_any_vex_encoding(&i.tm))
     {
       if (!quiet_warnings)
@@ -9244,7 +9214,8 @@ output_insn (void)
 	  || i.tm.cpu_flags.bitfield.cpupopcnt
 	  /* LAHF-SAHF insns in 64-bit mode.  */
 	  || (flag_code == CODE_64BIT
-	      && (i.tm.base_opcode | 1) == 0x9f))
+	      && (i.tm.base_opcode | 1) == 0x9f
+	      && i.tm.opcode_modifier.opcodespace == SPACE_BASE))
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V2;
       if (i.tm.cpu_flags.bitfield.cpuavx
 	  || i.tm.cpu_flags.bitfield.cpuavx2
@@ -9354,7 +9325,8 @@ output_insn (void)
 	 assembler ignore LOCK prefix and serves as a workaround.  */
       if (omit_lock_prefix)
 	{
-	  if (i.tm.base_opcode == LOCK_PREFIX_OPCODE)
+	  if (i.tm.base_opcode == LOCK_PREFIX_OPCODE
+	      && i.tm.opcode_modifier.isprefix)
 	    return;
 	  i.prefix[LOCK_PREFIX] = 0;
 	}

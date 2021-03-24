@@ -1,5 +1,20 @@
 2021-03-24  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (md_begin): Add assertion.
+	(build_vex_prefix): Drop implied prefix calculation.
+	(build_evex_prefix): Likewise.
+	(optimize_encoding): Adjust opcode checks.
+	(load_insn_p): Also check opcodeprefix.
+	(match_template): Also check opcodespace.
+	(process_suffix): Likewise.
+	(process_operands): Likewise.
+	(output_insn): Likewise. Also check isprefix when discaring
+	standalone LOCK.
+	* config/tc-i386-intel.c (i386_intel_operand): Also check
+	opcodespace.
+
+2021-03-24  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (parse_insn): Recognize pseudo prefixes by
 	base_opcode and extension_opcode.
 

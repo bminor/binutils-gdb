@@ -642,7 +642,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
     return 0;
 
   if (intel_state.op_modifier != O_absent
-      && current_templates->start->base_opcode != 0x8d /* lea */)
+      && (current_templates->start->opcode_modifier.opcodespace != SPACE_BASE
+          || current_templates->start->base_opcode != 0x8d /* lea */))
     {
       i.types[this_operand].bitfield.unspecified = 0;
 
@@ -666,7 +667,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  if ((current_templates->start->name[0] == 'l'
 	       && current_templates->start->name[2] == 's'
 	       && current_templates->start->name[3] == 0)
-	      || current_templates->start->base_opcode == 0x62 /* bound */)
+	      || (current_templates->start->opcode_modifier.opcodespace == SPACE_BASE
+		  && current_templates->start->base_opcode == 0x62 /* bound */))
 	    suffix = WORD_MNEM_SUFFIX;
 	  else if (flag_code != CODE_32BIT
 		   && (current_templates->start->opcode_modifier.jump == JUMP
@@ -696,7 +698,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	case O_qword_ptr: /* O_mmword_ptr */
 	  i.types[this_operand].bitfield.qword = 1;
-	  if (current_templates->start->base_opcode == 0x62 /* bound */
+	  if ((current_templates->start->opcode_modifier.opcodespace == SPACE_BASE
+	       && current_templates->start->base_opcode == 0x62 /* bound */)
 	      || got_a_float == 1)	/* "f..." */
 	    suffix = LONG_MNEM_SUFFIX;
 	  else
