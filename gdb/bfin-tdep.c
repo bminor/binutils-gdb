@@ -597,7 +597,7 @@ bfin_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 
   *size = kind;
 
-  if (strcmp (target_shortname, "sim") == 0)
+  if (strcmp (target_shortname (), "sim") == 0)
     return bfin_sim_breakpoint;
   else
     return bfin_breakpoint;

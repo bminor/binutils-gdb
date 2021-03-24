@@ -836,7 +836,7 @@ gdbsim_target::detach (inferior *inf, int from_tty)
 
   inf->unpush_target (this);		/* calls gdbsim_close to do the real work */
   if (from_tty)
-    printf_filtered ("Ending simulator %s debugging\n", target_shortname);
+    printf_filtered ("Ending simulator %s debugging\n", target_shortname ());
 }
 
 /* Resume execution of the target process.  STEP says whether to single-step
@@ -1119,7 +1119,7 @@ gdbsim_target::files_info ()
   if (current_program_space->exec_bfd ())
     {
       fprintf_unfiltered (gdb_stdlog, "\tAttached to %s running program %s\n",
-			  target_shortname, file);
+			  target_shortname (), file);
       sim_info (sim_data->gdbsim_desc, 0);
     }
 }

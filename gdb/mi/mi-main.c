@@ -322,7 +322,7 @@ exec_reverse_continue (char **argv, int argc)
     error (_("Already in reverse mode."));
 
   if (!target_can_execute_reverse ())
-    error (_("Target %s does not support this command."), target_shortname);
+    error (_("Target %s does not support this command."), target_shortname ());
 
   scoped_restore save_exec_dir = make_scoped_restore (&execution_direction,
 						      EXEC_REVERSE);

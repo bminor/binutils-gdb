@@ -215,6 +215,584 @@ target_has_execution (inferior *inf)
   return false;
 }
 
+const char *
+target_shortname ()
+{
+  return current_top_target ()->shortname ();
+}
+
+/* See target.h.  */
+
+bool
+target_attach_no_wait ()
+{
+  return current_top_target ()->attach_no_wait ();
+}
+
+/* See target.h.  */
+
+void
+target_post_attach (int pid)
+{
+  return current_top_target ()->post_attach (pid);
+}
+
+/* See target.h.  */
+
+void
+target_prepare_to_store (regcache *regcache)
+{
+  return current_top_target ()->prepare_to_store (regcache);
+}
+
+/* See target.h.  */
+
+bool
+target_supports_enable_disable_tracepoint ()
+{
+  return current_top_target ()->supports_enable_disable_tracepoint ();
+}
+
+bool
+target_supports_string_tracing ()
+{
+  return current_top_target ()->supports_string_tracing ();
+}
+
+/* See target.h.  */
+
+bool
+target_supports_evaluation_of_breakpoint_conditions ()
+{
+  return current_top_target ()->supports_evaluation_of_breakpoint_conditions ();
+}
+
+/* See target.h.  */
+
+bool
+target_supports_dumpcore ()
+{
+  return current_top_target ()->supports_dumpcore ();
+}
+
+/* See target.h.  */
+
+void
+target_dumpcore (const char *filename)
+{
+  return current_top_target ()->dumpcore (filename);
+}
+
+/* See target.h.  */
+
+bool
+target_can_run_breakpoint_commands ()
+{
+  return current_top_target ()->can_run_breakpoint_commands ();
+}
+
+/* See target.h.  */
+
+void
+target_files_info ()
+{
+  return current_top_target ()->files_info ();
+}
+
+/* See target.h.  */
+
+void
+target_post_startup_inferior (ptid_t ptid)
+{
+  return current_top_target ()->post_startup_inferior (ptid);
+}
+
+/* See target.h.  */
+
+int
+target_insert_fork_catchpoint (int pid)
+{
+  return current_top_target ()->insert_fork_catchpoint (pid);
+}
+
+/* See target.h.  */
+
+int
+target_remove_fork_catchpoint (int pid)
+{
+  return current_top_target ()->remove_fork_catchpoint (pid);
+}
+
+/* See target.h.  */
+
+int
+target_insert_vfork_catchpoint (int pid)
+{
+  return current_top_target ()->insert_vfork_catchpoint (pid);
+}
+
+/* See target.h.  */
+
+int
+target_remove_vfork_catchpoint (int pid)
+{
+  return current_top_target ()->remove_vfork_catchpoint (pid);
+}
+
+/* See target.h.  */
+
+int
+target_insert_exec_catchpoint (int pid)
+{
+  return current_top_target ()->insert_exec_catchpoint (pid);
+}
+
+/* See target.h.  */
+
+int
+target_remove_exec_catchpoint (int pid)
+{
+  return current_top_target ()->remove_exec_catchpoint (pid);
+}
+
+/* See target.h.  */
+
+int
+target_set_syscall_catchpoint (int pid, bool needed, int any_count,
+			       gdb::array_view<const int> syscall_counts)
+{
+  return current_top_target ()->set_syscall_catchpoint (pid, needed, any_count,
+							syscall_counts);
+}
+
+/* See target.h.  */
+
+void
+target_rcmd (const char *command, struct ui_file *outbuf)
+{
+  return current_top_target ()->rcmd (command, outbuf);
+}
+
+/* See target.h.  */
+
+bool
+target_can_lock_scheduler ()
+{
+  return (current_top_target ()->get_thread_control_capabilities ()
+	  & tc_schedlock) != 0;
+}
+
+/* See target.h.  */
+
+bool
+target_can_async_p ()
+{
+  return current_top_target ()->can_async_p ();
+}
+
+/* See target.h.  */
+
+bool
+target_is_async_p ()
+{
+  return current_top_target ()->is_async_p ();
+}
+
+exec_direction_kind
+target_execution_direction ()
+{
+  return current_top_target ()->execution_direction ();
+}
+
+/* See target.h.  */
+
+const char *
+target_extra_thread_info (thread_info *tp)
+{
+  return current_top_target ()->extra_thread_info (tp);
+}
+
+/* See target.h.  */
+
+char *
+target_pid_to_exec_file (int pid)
+{
+  return current_top_target ()->pid_to_exec_file (pid);
+}
+
+/* See target.h.  */
+
+gdbarch *
+target_thread_architecture (ptid_t ptid)
+{
+  return current_top_target ()->thread_architecture (ptid);
+}
+
+/* See target.h.  */
+
+int
+target_find_memory_regions (find_memory_region_ftype func, void *data)
+{
+  return current_top_target ()->find_memory_regions (func, data);
+}
+
+/* See target.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+target_make_corefile_notes (bfd *bfd, int *size_p)
+{
+  return current_top_target ()->make_corefile_notes (bfd, size_p);
+}
+
+gdb_byte *
+target_get_bookmark (const char *args, int from_tty)
+{
+  return current_top_target ()->get_bookmark (args, from_tty);
+}
+
+void
+target_goto_bookmark (const gdb_byte *arg, int from_tty)
+{
+  return current_top_target ()->goto_bookmark (arg, from_tty);
+}
+
+/* See target.h.  */
+
+bool
+target_stopped_by_watchpoint ()
+{
+  return current_top_target ()->stopped_by_watchpoint ();
+}
+
+/* See target.h.  */
+
+bool
+target_stopped_by_sw_breakpoint ()
+{
+  return current_top_target ()->stopped_by_sw_breakpoint ();
+}
+
+bool
+target_supports_stopped_by_sw_breakpoint ()
+{
+  return current_top_target ()->supports_stopped_by_sw_breakpoint ();
+}
+
+bool
+target_stopped_by_hw_breakpoint ()
+{
+  return current_top_target ()->stopped_by_hw_breakpoint ();
+}
+
+bool
+target_supports_stopped_by_hw_breakpoint ()
+{
+  return current_top_target ()->supports_stopped_by_hw_breakpoint ();
+}
+
+/* See target.h.  */
+
+bool
+target_have_steppable_watchpoint ()
+{
+  return current_top_target ()->have_steppable_watchpoint ();
+}
+
+/* See target.h.  */
+
+int
+target_can_use_hardware_watchpoint (bptype type, int cnt, int othertype)
+{
+  return current_top_target ()->can_use_hw_breakpoint (type, cnt, othertype);
+}
+
+/* See target.h.  */
+
+int
+target_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+{
+  return current_top_target ()->region_ok_for_hw_watchpoint (addr, len);
+}
+
+
+int
+target_can_do_single_step ()
+{
+  return current_top_target ()->can_do_single_step ();
+}
+
+/* See target.h.  */
+
+int
+target_insert_watchpoint (CORE_ADDR addr, int len, target_hw_bp_type type,
+			  expression *cond)
+{
+  return current_top_target ()->insert_watchpoint (addr, len, type, cond);
+}
+
+/* See target.h.  */
+
+int
+target_remove_watchpoint (CORE_ADDR addr, int len, target_hw_bp_type type,
+			  expression *cond)
+{
+  return current_top_target ()->remove_watchpoint (addr, len, type, cond);
+}
+
+/* See target.h.  */
+
+int
+target_insert_hw_breakpoint (gdbarch *gdbarch, bp_target_info *bp_tgt)
+{
+  return current_top_target ()->insert_hw_breakpoint (gdbarch, bp_tgt);
+}
+
+/* See target.h.  */
+
+int
+target_remove_hw_breakpoint (gdbarch *gdbarch, bp_target_info *bp_tgt)
+{
+  return current_top_target ()->remove_hw_breakpoint (gdbarch, bp_tgt);
+}
+
+/* See target.h.  */
+
+bool
+target_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int type,
+				       expression *cond)
+{
+  return current_top_target ()->can_accel_watchpoint_condition (addr, len, type, cond);
+}
+
+/* See target.h.  */
+
+bool
+target_can_execute_reverse ()
+{
+  return current_top_target ()->can_execute_reverse ();
+}
+
+ptid_t
+target_get_ada_task_ptid (long lwp, long tid)
+{
+  return current_top_target ()->get_ada_task_ptid (lwp, tid);
+}
+
+bool
+target_filesystem_is_local ()
+{
+  return current_top_target ()->filesystem_is_local ();
+}
+
+void
+target_trace_init ()
+{
+  return current_top_target ()->trace_init ();
+}
+
+void
+target_download_tracepoint (bp_location *location)
+{
+  return current_top_target ()->download_tracepoint (location);
+}
+
+bool
+target_can_download_tracepoint ()
+{
+  return current_top_target ()->can_download_tracepoint ();
+}
+
+void
+target_download_trace_state_variable (const trace_state_variable &tsv)
+{
+  return current_top_target ()->download_trace_state_variable (tsv);
+}
+
+void
+target_enable_tracepoint (bp_location *loc)
+{
+  return current_top_target ()->enable_tracepoint (loc);
+}
+
+void
+target_disable_tracepoint (bp_location *loc)
+{
+  return current_top_target ()->disable_tracepoint (loc);
+}
+
+void
+target_trace_start ()
+{
+  return current_top_target ()->trace_start ();
+}
+
+void
+target_trace_set_readonly_regions ()
+{
+  current_top_target ()->trace_set_readonly_regions ();
+}
+
+int
+target_get_trace_status (trace_status *ts)
+{
+  return current_top_target ()->get_trace_status (ts);
+}
+
+void
+target_get_tracepoint_status (breakpoint *tp, uploaded_tp *utp)
+{
+  return current_top_target ()->get_tracepoint_status (tp, utp);
+}
+
+void
+target_trace_stop ()
+{
+  return current_top_target ()->trace_stop ();
+}
+
+int
+target_trace_find (trace_find_type type, int num,
+		   CORE_ADDR addr1, CORE_ADDR addr2, int *tpp)
+{
+  return current_top_target ()->trace_find (type, num, addr1, addr2, tpp);
+}
+
+bool
+target_get_trace_state_variable_value (int tsv, LONGEST *val)
+{
+  return current_top_target ()->get_trace_state_variable_value (tsv, val);
+}
+
+int
+target_save_trace_data (const char *filename)
+{
+  return current_top_target ()->save_trace_data (filename);
+}
+
+int
+target_upload_tracepoints (uploaded_tp **utpp)
+{
+  return current_top_target ()->upload_tracepoints (utpp);
+}
+
+int
+target_upload_trace_state_variables (uploaded_tsv **utsvp)
+{
+  return current_top_target ()->upload_trace_state_variables (utsvp);
+}
+
+LONGEST
+target_get_raw_trace_data (gdb_byte *buf, ULONGEST offset, LONGEST len)
+{
+  return current_top_target ()->get_raw_trace_data (buf, offset, len);
+}
+
+int
+target_get_min_fast_tracepoint_insn_len ()
+{
+  return current_top_target ()->get_min_fast_tracepoint_insn_len ();
+}
+
+void
+target_set_disconnected_tracing (int val)
+{
+  return current_top_target ()->set_disconnected_tracing (val);
+}
+
+void
+target_set_circular_trace_buffer (int val)
+{
+  return current_top_target ()->set_circular_trace_buffer (val);
+}
+
+void
+target_set_trace_buffer_size (LONGEST val)
+{
+  return current_top_target ()->set_trace_buffer_size (val);
+}
+
+bool
+target_set_trace_notes (const char *user, const char *notes,
+			const char *stopnotes)
+{
+  return current_top_target ()->set_trace_notes (user, notes, stopnotes);
+}
+
+bool
+target_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+{
+  return current_top_target ()->get_tib_address (ptid, addr);
+}
+
+void
+target_set_permissions ()
+{
+  return current_top_target ()->set_permissions ();
+}
+
+bool
+target_static_tracepoint_marker_at (CORE_ADDR addr,
+				    static_tracepoint_marker *marker)
+{
+  return current_top_target ()->static_tracepoint_marker_at (addr, marker);
+}
+
+std::vector<static_tracepoint_marker>
+target_static_tracepoint_markers_by_strid (const char *marker_id)
+{
+  return current_top_target ()->static_tracepoint_markers_by_strid (marker_id);
+}
+
+traceframe_info_up
+target_traceframe_info ()
+{
+  return current_top_target ()->traceframe_info ();
+}
+
+bool
+target_use_agent (bool use)
+{
+  return current_top_target ()->use_agent (use);
+}
+
+bool
+target_can_use_agent ()
+{
+  return current_top_target ()->can_use_agent ();
+}
+
+bool
+target_augmented_libraries_svr4_read ()
+{
+  return current_top_target ()->augmented_libraries_svr4_read ();
+}
+
+bool
+target_supports_memory_tagging ()
+{
+  return current_top_target ()->supports_memory_tagging ();
+}
+
+bool
+target_fetch_memtags (CORE_ADDR address, size_t len, gdb::byte_vector &tags,
+		      int type)
+{
+  return current_top_target ()->fetch_memtags (address, len, tags, type);
+}
+
+bool
+target_store_memtags (CORE_ADDR address, size_t len,
+		      const gdb::byte_vector &tags, int type)
+{
+  return current_top_target ()->store_memtags (address, len, tags, type);
+}
+
+void
+target_log_command (const char *p)
+{
+  return current_top_target ()->log_command (p);
+}
+
 /* This is used to implement the various target commands.  */
 
 static void

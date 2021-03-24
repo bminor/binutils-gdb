@@ -77,7 +77,7 @@ tui_locator_window::make_status_line () const
       pid_name = pid_name_holder.c_str ();
     }
 
-  target_width = strlen (target_shortname);
+  target_width = strlen (target_shortname ());
   if (target_width > MAX_TARGET_WIDTH)
     target_width = MAX_TARGET_WIDTH;
 
@@ -149,7 +149,7 @@ tui_locator_window::make_status_line () const
   string_file string;
 
   if (target_width > 0)
-    string.printf ("%*.*s ", -target_width, target_width, target_shortname);
+    string.printf ("%*.*s ", -target_width, target_width, target_shortname ());
   if (pid_width > 0)
     string.printf ("%*.*s ", -pid_width, pid_width, pid_name);
 
