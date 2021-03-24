@@ -4075,6 +4075,10 @@ types_equal (struct type *a, struct type *b)
   if (b->code () == TYPE_CODE_TYPEDEF)
     b = check_typedef (b);
 
+  /* Check if identical after resolving typedefs.  */
+  if (a == b)
+    return true;
+
   /* If after resolving typedefs a and b are not of the same type
      code then they are not equal.  */
   if (a->code () != b->code ())
@@ -4095,10 +4099,6 @@ types_equal (struct type *a, struct type *b)
 
   if (a->name () && b->name ()
       && strcmp (a->name (), b->name ()) == 0)
-    return true;
-
-  /* Check if identical after resolving typedefs.  */
-  if (a == b)
     return true;
 
   /* Two function types are equal if their argument and return types

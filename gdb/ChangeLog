@@ -1,3 +1,8 @@
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbtypes.c (types_equal): Move pointer equality check earlier in
+	the function.
+
 2021-04-07  Caroline Tice  <cmtice@google.com>
 
 	* dwarf2/read.c (try_open_dwop_file): Add path for the binary to
