@@ -1,3 +1,9 @@
+2021-03-24  Keith Seitz  <keiths@redhat.com>
+
+	* compile/compile-cplus-types.c
+	(compile_cplus_convert_struct_or_union): Fix TYPE_DECLARED_CLASS
+	thinko.
+
 2021-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbarch.sh (gdbarch_data_registry): Make static.

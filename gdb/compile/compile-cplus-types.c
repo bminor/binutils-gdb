@@ -828,7 +828,7 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
   gcc_decl resuld;
   if (type->code () == TYPE_CODE_STRUCT)
     {
-      const char *what = TYPE_DECLARED_CLASS (type) ? "struct" : "class";
+      const char *what = TYPE_DECLARED_CLASS (type) ? "class" : "struct";
 
       resuld = instance->plugin ().build_decl
 	(what, name.get (), (GCC_CP_SYMBOL_CLASS | nested_access
