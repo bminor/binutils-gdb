@@ -1,3 +1,8 @@
+2021-05-10  Lancelot Six  <lsix@lancelotsix.com>
+
+	PR gdb/27614
+	* gdb.dwarf2/gdb-add-index-symlink.exp: New test.
+
 2021-05-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.guile/guile.exp: Don't use the source directory as a
