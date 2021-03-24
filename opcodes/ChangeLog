@@ -1,3 +1,8 @@
+2021-03-25  Abid Qadeer  <abidh@codesourcery.com>
+
+	* nios2-dis.c (nios2_print_insn_arg): Fix sign extension of
+	immediate in br.n instruction.
+
 2021-03-25  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (XMGatherD, VexGatherD): New.

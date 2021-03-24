@@ -694,7 +694,7 @@ nios2_print_insn_arg (const char *argptr,
       switch (op->format)
 	{
 	case iw_I10_type:
-	  o = (((GET_IW_I10_IMM10 (opcode) & 0x3ff) ^ 0x400) - 0x400) * 2;
+	  o = (((GET_IW_I10_IMM10 (opcode) & 0x3ff) ^ 0x200) - 0x200) * 2;
 	  break;
 	default:
 	  bad_opcode (op);
