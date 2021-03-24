@@ -3798,7 +3798,6 @@ dw2_expand_symtabs_matching_symbol
   (mapped_index_base &index,
    const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   enum search_domain kind,
    gdb::function_view<bool (offset_type)> match_callback,
    dwarf2_per_objfile *per_objfile);
 
@@ -3834,7 +3833,7 @@ dw2_map_matching_symbols
 	  return ordered_compare (symname, match_name) == 0;
 	};
 
-      dw2_expand_symtabs_matching_symbol (index, name, matcher, ALL_DOMAIN,
+      dw2_expand_symtabs_matching_symbol (index, name, matcher,
 					  [&] (offset_type namei)
       {
 	struct dw2_symtab_iterator iter;
@@ -4114,7 +4113,6 @@ dw2_expand_symtabs_matching_symbol
   (mapped_index_base &index,
    const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
-   enum search_domain kind,
    gdb::function_view<bool (offset_type)> match_callback,
    dwarf2_per_objfile *per_objfile)
 {
@@ -4288,7 +4286,7 @@ check_match (const char *file, int line,
   auto expected_end = expected_list.end ();
 
   dw2_expand_symtabs_matching_symbol (mock_index, lookup_name,
-				      NULL, ALL_DOMAIN,
+				      nullptr,
 				      [&] (offset_type idx)
   {
     const char *matched_name = mock_index.symbol_name_at (idx, per_objfile);
@@ -4864,7 +4862,7 @@ dw2_expand_symtabs_matching
 
   dw2_expand_symtabs_matching_symbol (index, *lookup_name,
 				      symbol_matcher,
-				      kind, [&] (offset_type idx)
+				      [&] (offset_type idx)
     {
       dw2_expand_marked_cus (per_objfile, idx, file_matcher, expansion_notify,
 			     kind);
@@ -5861,7 +5859,7 @@ dwarf2_debug_names_index::map_matching_symbols
       return ordered_compare (symname, match_name) == 0;
     };
 
-  dw2_expand_symtabs_matching_symbol (map, name, matcher, ALL_DOMAIN,
+  dw2_expand_symtabs_matching_symbol (map, name, matcher,
 				      [&] (offset_type namei)
     {
       /* The name was matched, now expand corresponding CUs that were
@@ -5927,7 +5925,7 @@ dwarf2_debug_names_index::expand_symtabs_matching
 
   dw2_expand_symtabs_matching_symbol (map, *lookup_name,
 				      symbol_matcher,
-				      kind, [&] (offset_type namei)
+				      [&] (offset_type namei)
     {
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */

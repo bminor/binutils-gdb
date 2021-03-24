@@ -1,3 +1,11 @@
+2021-03-24  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dw2_map_matching_symbols): Update.
+	(dw2_expand_symtabs_matching_symbol): Remove 'kind' parameter.
+	(check_match, dw2_expand_symtabs_matching)
+	(dwarf2_debug_names_index::map_matching_symbols)
+	(dwarf2_debug_names_index::expand_symtabs_matching): Update.
+
 2021-03-24  Keith Seitz  <keiths@redhat.com>
 
 	* compile/compile-cplus-types.c
