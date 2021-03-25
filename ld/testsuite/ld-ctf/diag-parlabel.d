@@ -13,8 +13,8 @@ Contents of CTF section .ctf:
     Version: 4 \(CTF_VERSION_3\)
 #...
     Compilation unit name: .*A.c
-    Data object section:	0x0 -- 0x3 \(0x4 bytes\)
-    Type section:	0x4 -- 0x33 \(0x30 bytes\)
+    Data object section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
+    Type section:	.* \(0x30 bytes\)
     String section:	.*
 
   Labels:

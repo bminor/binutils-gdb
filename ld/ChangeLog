@@ -1,3 +1,13 @@
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* testsuite/ld-ctf/array.d: Only check that the data object
+	section is nonempty: do not check its exact size.
+	* testsuite/ld-ctf/diag-parlabel.d: Likewise.
+	* testsuite/ld-ctf/slice.d: Likewise.
+	* testsuite/ld-ctf/data-func-conflicted.d: Likewise, and for the
+	func info section too.
+	* testsuite/ld-ctf/function.d: Likewise, for the func info section.
+
 2021-03-22  Martin Liska  <mliska@suse.cz>
 
 	* emultempl/aix.em: Replace usage of CONST_STRNEQ with startswith.

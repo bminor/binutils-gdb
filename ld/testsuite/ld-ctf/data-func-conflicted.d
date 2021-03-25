@@ -13,8 +13,8 @@ Contents of CTF section \.ctf:
     Magic number: 0xdff2
     Version: 4 \(CTF_VERSION_3\)
 #...
-    Data object section:	.* \(0xc bytes\)
-    Function info section:	.* \(0x44 bytes\)
+    Data object section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
+    Function info section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
     Object index section:	.* \(0xc bytes\)
     Type section:	.* \(0xf4 bytes\)
     String section:	.*
@@ -39,7 +39,7 @@ CTF archive member: .*/data-func-1\.c:
 #...
     Parent name: \.ctf
     Compilation unit name: .*/data-func-1\.c
-    Data object section:	.* \(0xfa4 bytes\)
+    Data object section:	.* \(0x[1-9a-f][0-9a-f]* bytes\)
     Type section:	.* \(0xc bytes\)
     String section:	.*
 
