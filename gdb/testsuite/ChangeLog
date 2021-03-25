@@ -1,3 +1,8 @@
+2021-03-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/ada.exp (gnat_runtime_has_debug_info): Use -wrap with
+	gdb_test_multiple.
+
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.arch/aarch64-mte.c: New file.

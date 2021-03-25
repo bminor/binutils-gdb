@@ -188,8 +188,8 @@ gdb_caching_proc gnat_runtime_has_debug_info {
     set has_debug_info 0
 
     gdb_test_multiple "whatis __gnat_debug_raise_exception" "" {
-	-re "type = <text variable, no debug info>" { }
-	-re "type = void" {
+	-re -wrap "type = <text variable, no debug info>" { }
+	-re -wrap "type = void" {
 	    set has_debug_info 1
 	}
 	default {
