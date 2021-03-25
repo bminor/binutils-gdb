@@ -1,5 +1,9 @@
 2021-03-25  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (match_template): Use t instead of i.tm.
+
+2021-03-25  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/avx512f-nondef.s: Add vgather cases.
 	* testsuite/gas/i386/x86-64-vgather-check.s: Add cases with
 	colliding registers in the upper half of the space.

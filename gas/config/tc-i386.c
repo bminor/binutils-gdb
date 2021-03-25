@@ -6290,7 +6290,7 @@ match_template (char mnem_suffix)
       if (((i.suffix == QWORD_MNEM_SUFFIX
 	    && flag_code != CODE_64BIT
 	    && !(t->base_opcode == 0xfc7
-		 && i.tm.opcode_modifier.opcodeprefix == PREFIX_NONE
+		 && t->opcode_modifier.opcodeprefix == PREFIX_NONE
 		 && t->extension_opcode == 1) /* cmpxchg8b */)
 	   || (i.suffix == LONG_MNEM_SUFFIX
 	       && !cpu_arch_flags.bitfield.cpui386))
