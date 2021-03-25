@@ -4679,16 +4679,18 @@ md_assemble (char *line)
      operands at hand.  */
 
   /* All Intel opcodes have reversed operands except for "bound", "enter",
-     "monitor*", "mwait*", "tpause", and "umwait".  We also don't reverse
-     intersegment "jmp" and "call" instructions with 2 immediate operands so
-     that the immediate segment precedes the offset, as it does when in AT&T
-     mode.  */
+     "invlpg*", "monitor*", "mwait*", "tpause", "umwait", "pvalidate",
+     "rmpadjust", and "rmpupdate".  We also don't reverse intersegment "jmp"
+     and "call" instructions with 2 immediate operands so that the immediate
+     segment precedes the offset consistently in Intel and AT&T modes.  */
   if (intel_syntax
       && i.operands > 1
       && (strcmp (mnemonic, "bound") != 0)
-      && (strcmp (mnemonic, "invlpga") != 0)
+      && (strncmp (mnemonic, "invlpg", 6) != 0)
       && (strncmp (mnemonic, "monitor", 7) != 0)
       && (strncmp (mnemonic, "mwait", 5) != 0)
+      && (strcmp (mnemonic, "pvalidate") != 0)
+      && (strncmp (mnemonic, "rmp", 3) != 0)
       && (strcmp (mnemonic, "tpause") != 0)
       && (strcmp (mnemonic, "umwait") != 0)
       && !(operand_type_check (i.types[0], imm)

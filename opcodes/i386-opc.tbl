@@ -3979,7 +3979,7 @@ vpclmulhqhqdq, 0x6644, 0x11, CpuVPCLMULQDQ|CpuAVX512F, Modrm|Space0F3A|VexWIG|Ve
 // INVLPGB instructions
 
 invlpgb, 0xf01fe, None, CpuINVLPGB, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-invlpgb, 0xf01fe, None, CpuINVLPGB, AddrPrefixOpReg, { Acc|Word|Dword|Qword, RegD|Dword }
+invlpgb, 0xf01fe, None, CpuINVLPGB, AddrPrefixOpReg, { Acc|Word|Dword|Qword, RegC|Dword, RegD|Dword }
 
 // INVLPGB instructions end
 
@@ -4126,10 +4126,14 @@ mcommit, 0x0f01fa, None, CpuMCOMMIT, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf
 psmash, 0xf01ff, None, CpuSNP|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 psmash, 0xf01ff, None, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF3, { Acc|Dword|Qword }
 pvalidate, 0xf01ff, None, CpuSNP, Prefix_0XF2|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-pvalidate, 0xf01ff, None, CpuSNP, AddrPrefixOpReg|Prefix_0XF2, { Acc|Word|Dword|Qword }
+pvalidate, 0xf01ff, None, CpuSNP, AddrPrefixOpReg|Prefix_0XF2, { Acc|Word|Dword|Qword, RegC|Dword, RegD|Dword }
 rmpupdate, 0xf01fe, None, CpuSNP|Cpu64, Prefix_0XF2|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-rmpupdate, 0xf01fe, None, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF2, { Acc|Dword|Qword }
+rmpupdate, 0xf01fe, None, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF2, { Acc|Dword|Qword, RegC|Qword }
 rmpadjust, 0xf01fe, None, CpuSNP|Cpu64, Prefix_0XF3|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+rmpadjust, 0xf01fe, None, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF3, { Acc|Dword|Qword, RegC|Qword, RegD|Qword }
+// The single-operand forms exist only for compatibility with older gas.
+pvalidate, 0xf01ff, None, CpuSNP, AddrPrefixOpReg|Prefix_0XF2, { Acc|Word|Dword|Qword }
+rmpupdate, 0xf01fe, None, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF2, { Acc|Dword|Qword }
 rmpadjust, 0xf01fe, None, CpuSNP|Cpu64, AddrPrefixOpReg|Prefix_0XF3, { Acc|Dword|Qword }
 
 // SNP instructions end

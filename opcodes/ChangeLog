@@ -1,3 +1,10 @@
+2021-03-25  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (invlpgb): Fix multi-operand form.
+	(pvalidate, rmpupdate, rmpadjust): Add multi-operand forms. Mark
+	single-operand forms as deprecated.
+	* i386-tbl.h: Re-generate.
+
 2021-03-25  Alan Modra  <amodra@gmail.com>
 
 	PR 27647

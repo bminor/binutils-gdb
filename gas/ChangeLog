@@ -1,5 +1,18 @@
 2021-03-25  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (md_assemble): Widen set of insns to avoid
+	swapping operands for.
+	* testsuite/gas/i386/invlpgb.s: Fix, re-arrange, and add Intel
+	syntax tests.
+	* testsuite/gas/i386/snp.s: Re-arrange and add multi-operand as
+	well as Intel syntax tests.
+	* testsuite/gas/i386/invlpgb.d, testsuite/gas/i386/snp.d: Adjust
+	expectations.
+	* testsuite/gas/i386/invlpgb64.d, testsuite/gas/i386/snp64.d: 
+	Likewise. Drop passing --def-sym to as.
+
+2021-03-25  Jan Beulich  <jbeulich@suse.com>
+
 	PR/gas 27419
 	* config/tc-i386.c (process_suffix): Restrict (%rip) -> (%eip)
 	conversion to x32 mode.
