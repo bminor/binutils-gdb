@@ -1,3 +1,8 @@
+2021-03-24  Changbin Du  <changbin.du@gmail.com>
+
+	* riscv-tdep.c (riscv_breakpoint_kind_from_pc): Remove call to
+	read_code.
+
 2021-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target.h (current_top_target): Remove, make callers use the

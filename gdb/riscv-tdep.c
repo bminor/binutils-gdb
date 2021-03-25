@@ -706,7 +706,6 @@ riscv_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 	     user.  */
 	  if (target_read_code (*pcptr, buf, 1) == -1)
 	    buf[0] = 0;
-	  read_code (*pcptr, buf, 1);
 	}
 
       if (riscv_debug_breakpoints)
