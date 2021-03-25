@@ -1,3 +1,10 @@
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	PR libctf/27628
+	* ctf-api.h: Fix some indentation.
+	(CTF_SET_STID): Always do an unsigned shift, even if STID is
+	signed.
+
 2021-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf/common.h (EM_INTEL205): Renamed to ...
