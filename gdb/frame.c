@@ -330,7 +330,8 @@ scoped_restore_selected_frame::~scoped_restore_selected_frame ()
 
 /* Flag to control debugging.  */
 
-unsigned int frame_debug;
+bool frame_debug;
+
 static void
 show_frame_debug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -565,6 +566,8 @@ skip_tailcall_frames (struct frame_info *frame)
 static void
 compute_frame_id (struct frame_info *fi)
 {
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
+
   gdb_assert (fi->this_id.p == frame_id_status::NOT_COMPUTED);
 
   unsigned int entry_generation = get_frame_cache_generation ();
@@ -2170,10 +2173,9 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 static struct frame_info *
 get_prev_frame_always_1 (struct frame_info *this_frame)
 {
-  struct gdbarch *gdbarch;
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
 
   gdb_assert (this_frame != NULL);
-  gdbarch = get_frame_arch (this_frame);
 
   if (frame_debug)
     {
@@ -2188,6 +2190,8 @@ get_prev_frame_always_1 (struct frame_info *this_frame)
 
       frame_debug_printf ("%s", debug_file.c_str ());
     }
+
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
   /* Only try to do the unwind once.  */
   if (this_frame->prev_p)
@@ -2544,6 +2548,8 @@ inside_entry_func (frame_info *this_frame)
 struct frame_info *
 get_prev_frame (struct frame_info *this_frame)
 {
+  FRAME_SCOPED_DEBUG_ENTER_EXIT;
+
   CORE_ADDR frame_pc;
   int frame_pc_p;
 
@@ -3242,11 +3248,11 @@ Literal \"unlimited\" or zero means no limit."),
      set_backtrace_option_defs, &set_backtrace_cmdlist, &show_backtrace_cmdlist);
 
   /* Debug this files internals.  */
-  add_setshow_zuinteger_cmd ("frame", class_maintenance, &frame_debug,  _("\
+  add_setshow_boolean_cmd ("frame", class_maintenance, &frame_debug,  _("\
 Set frame debugging."), _("\
 Show frame debugging."), _("\
 When non-zero, frame specific internal debugging is enabled."),
-			     NULL,
-			     show_frame_debug,
-			     &setdebuglist, &showdebuglist);
+			   NULL,
+			   show_frame_debug,
+			   &setdebuglist, &showdebuglist);
 }
