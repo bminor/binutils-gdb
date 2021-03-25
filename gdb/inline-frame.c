@@ -263,6 +263,7 @@ inline_frame_sniffer (const struct frame_unwind *self,
 }
 
 const struct frame_unwind inline_frame_unwind = {
+  "inline",
   INLINE_FRAME,
   default_frame_unwind_stop_reason,
   inline_frame_this_id,

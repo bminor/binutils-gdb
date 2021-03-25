@@ -1968,6 +1968,7 @@ sh_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static const struct frame_unwind sh_frame_unwind = {
+  "sh prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   sh_frame_this_id,
@@ -2034,6 +2035,7 @@ sh_stub_unwind_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind sh_stub_unwind =
 {
+  "sh stub",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   sh_stub_this_id,

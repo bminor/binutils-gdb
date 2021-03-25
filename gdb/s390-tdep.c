@@ -2634,6 +2634,7 @@ s390_frame_prev_register (struct frame_info *this_frame,
 /* Default S390 frame unwinder.  */
 
 static const struct frame_unwind s390_frame_unwind = {
+  "s390 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   s390_frame_this_id,
@@ -2727,6 +2728,7 @@ s390_stub_frame_sniffer (const struct frame_unwind *self,
 /* S390 stub frame unwinder.  */
 
 static const struct frame_unwind s390_stub_frame_unwind = {
+  "s390 stub",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   s390_stub_frame_this_id,

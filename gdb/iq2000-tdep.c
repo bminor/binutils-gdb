@@ -426,6 +426,7 @@ iq2000_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static const struct frame_unwind iq2000_frame_unwind = {
+  "iq2000 prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   iq2000_frame_this_id,

@@ -158,6 +158,7 @@ typedef struct gdbarch *(frame_prev_arch_ftype) (struct frame_info *this_frame,
 
 struct frame_unwind
 {
+  const char *name;
   /* The frame's type.  Should this instead be a collection of
      predicates that test the frame for various attributes?  */
   enum frame_type type;

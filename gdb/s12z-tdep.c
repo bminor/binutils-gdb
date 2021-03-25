@@ -467,6 +467,7 @@ s12z_frame_prev_register (struct frame_info *this_frame,
 
 /* Data structures for the normal prologue-analysis-based unwinder.  */
 static const struct frame_unwind s12z_frame_unwind = {
+  "s12z prologue",
   NORMAL_FRAME,
   default_frame_unwind_stop_reason,
   s12z_frame_this_id,

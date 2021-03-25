@@ -182,6 +182,7 @@ sparc32_sol2_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
 static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind =
 {
+  "sparc32 solaris sigtramp",
   SIGTRAMP_FRAME,
   default_frame_unwind_stop_reason,
   sparc32_sol2_sigtramp_frame_this_id,

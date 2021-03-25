@@ -1117,6 +1117,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
 /* AArch64 prologue unwinder.  */
 static frame_unwind aarch64_prologue_unwind =
 {
+  "aarch64 prologue",
   NORMAL_FRAME,
   aarch64_prologue_frame_unwind_stop_reason,
   aarch64_prologue_this_id,
@@ -1211,6 +1212,7 @@ aarch64_stub_unwind_sniffer (const struct frame_unwind *self,
 /* AArch64 stub unwinder.  */
 static frame_unwind aarch64_stub_unwind =
 {
+  "aarch64 stub",
   NORMAL_FRAME,
   aarch64_stub_frame_unwind_stop_reason,
   aarch64_stub_this_id,
