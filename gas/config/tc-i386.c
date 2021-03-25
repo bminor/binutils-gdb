@@ -7169,7 +7169,7 @@ process_suffix (void)
 
 	  /* Check the register operand for the address size prefix if
 	     the memory operand has no real registers, like symbol, DISP
-	     or symbol(%rip).  */
+	     or bogus (x32-only) symbol(%rip) when symbol(%eip) is meant.  */
 	  if (i.mem_operands == 1
 	      && i.reg_operands == 1
 	      && i.operands == 2
@@ -7178,9 +7178,14 @@ process_suffix (void)
 		  ? i.op[1].regs->reg_type.bitfield.word
 		  : i.op[1].regs->reg_type.bitfield.dword)
 	      && ((i.base_reg == NULL && i.index_reg == NULL)
-		  || (i.base_reg
+#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+		  || (x86_elf_abi == X86_64_X32_ABI
+		      && i.base_reg
 		      && i.base_reg->reg_num == RegIP
 		      && i.base_reg->reg_type.bitfield.qword))
+#else
+		  || 0)
+#endif
 	      && !add_prefix (ADDR_PREFIX_OPCODE))
 	    return 0;
 

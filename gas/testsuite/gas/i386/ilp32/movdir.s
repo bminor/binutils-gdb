@@ -1,4 +1,4 @@
-# Check MOVDIR[I,64B] 64-bit instructions
+# Check MOVDIR[I,64B] 64-bit instructions in x32 mode
 
 	.allow_index_reg
 	.text
@@ -7,6 +7,7 @@ _start:
 	movdir64b (%rcx),%rax
 	movdir64b (%ecx),%eax
 	movdir64b foo(%rip),%rcx
+	movdir64b foo(%rip),%ecx
 	movdir64b foo(%eip),%ecx
 	movdir64b foo, %ecx
 	movdir64b 0x12345678, %ecx
@@ -19,6 +20,7 @@ _start:
 	movdir64b rax,[rcx]
 	movdir64b eax,[ecx]
 	movdir64b rcx,[rip+foo]
+	movdir64b ecx,[rip+foo]
 	movdir64b ecx,[eip+foo]
 	movdir64b ecx,ds:foo
 	movdir64b ecx,ds:0x12345678
