@@ -68,7 +68,7 @@ ACX_PROG_CC_WARNING_OPTS([-Wall], [ac_libctf_warn_cflags])
 
 AC_FUNC_MMAP
 # Needed for BFD capability checks.
-AC_SEARCH_LIBS(dlopen, dl)
+AC_SEARCH_LIBS(dlsym, dl)
 AM_ZLIB
 
 GCC_ENABLE([libctf-hash-debugging], [no], [], [Enable expensive debugging of CTF deduplication type hashing])

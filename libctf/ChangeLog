@@ -1,5 +1,10 @@
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
+	* configure.ac: Check for dlsym, not dlopen.
+	* configure: Regenerate.
+
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
 	* testsuite/libctf-writable/symtypetab-nonlinker-writeout.c: Don't
 	leak buf.
 
