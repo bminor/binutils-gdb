@@ -455,9 +455,9 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { "vpshufbitqmb",  { XMask, Vex, EXx }, PREFIX_DATA },
     /* 90 */
-    { "vpgatherd%DQ",	{ XM, MVexVSIBDWpX }, PREFIX_DATA },
+    { "vpgatherd%DQ",	{ XMGatherD, MVexVSIBDWpX }, PREFIX_DATA },
     { "vpgatherq%DQ",	{ XMGatherQ, MVexVSIBQWpX }, PREFIX_DATA },
-    { "vgatherdp%XW",	{ XM, MVexVSIBDWpX}, PREFIX_DATA },
+    { "vgatherdp%XW",	{ XMGatherD, MVexVSIBDWpX }, PREFIX_DATA },
     { "vgatherqp%XW",	{ XMGatherQ, MVexVSIBQWpX }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },

@@ -1,5 +1,19 @@
 2021-03-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (XMGatherD, VexGatherD): New.
+	(vex_table): Use VexGatherD for vpgatherd* and vgatherdp*.
+	(print_insn): Check masking for S/G insns.
+	(OP_E_memory): New local variable check_gather. Extend mandatory
+	SIB check. Check register conflicts for (EVEX-encoded) gathers.
+	Extend check for disallowed 16-bit addressing.
+	(OP_VEX): New local variables modrm_reg and sib_index. Convert
+	if()s to switch(). Check register conflicts for (VEX-encoded)
+	gathers. Drop no longer reachable cases.
+	* i386-dis-evex.h (evex_table): Use XMGatherD for vpgatherd* and
+	vgatherdp*.
+
+2021-03-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (print_insn): Mark as bad EVEX encodings specifying
 	zeroing-masking without masking.
 

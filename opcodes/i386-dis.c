@@ -345,6 +345,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define MX { OP_MMX, 0 }
 #define XM { OP_XMM, 0 }
 #define XMScalar { OP_XMM, scalar_mode }
+#define XMGatherD { OP_XMM, vex_vsib_d_w_dq_mode }
 #define XMGatherQ { OP_XMM, vex_vsib_q_w_dq_mode }
 #define XMM { OP_XMM, xmm_mode }
 #define TMM { OP_XMM, tmm_mode }
@@ -390,6 +391,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VexW { OP_VexW, vex_mode }
 #define VexScalar { OP_VEX, vex_scalar_mode }
 #define VexScalarR { OP_VexR, vex_scalar_mode }
+#define VexGatherD { OP_VEX, vex_vsib_d_w_dq_mode }
 #define VexGatherQ { OP_VEX, vex_vsib_q_w_dq_mode }
 #define VexGdq { OP_VEX, dq_mode }
 #define VexTmm { OP_VEX, tmm_mode }
@@ -6309,9 +6311,9 @@ static const struct dis386 vex_table[][256] = {
     { MOD_TABLE (MOD_VEX_0F388E) },
     { Bad_Opcode },
     /* 90 */
-    { "vpgatherd%DQ", { XM, MVexVSIBDWpX, Vex }, PREFIX_DATA },
+    { "vpgatherd%DQ", { XM, MVexVSIBDWpX, VexGatherD }, PREFIX_DATA },
     { "vpgatherq%DQ", { XMGatherQ, MVexVSIBQWpX, VexGatherQ }, PREFIX_DATA },
-    { "vgatherdp%XW", { XM, MVexVSIBDWpX, Vex }, PREFIX_DATA },
+    { "vgatherdp%XW", { XM, MVexVSIBDWpX, VexGatherD }, PREFIX_DATA },
     { "vgatherqp%XW", { XMGatherQ, MVexVSIBQWpX, VexGatherQ }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -9682,6 +9684,13 @@ print_insn (bfd_vma pc, disassemble_info *info)
 		    }
 		  if (vex.zeroing)
 		    oappend ("{z}");
+
+		  /* S/G insns require a mask and don't allow
+		     zeroing-masking.  */
+		  if ((dp->op[0].bytemode == vex_vsib_d_w_dq_mode
+		       || dp->op[0].bytemode == vex_vsib_q_w_dq_mode)
+		      && (vex.mask_register_specifier == 0 || vex.zeroing))
+		    oappend ("/(bad)");
 		}
 	    }
 	}
@@ -11539,6 +11548,7 @@ OP_E_memory (int bytemode, int sizeflag)
 			 || bytemode == v_bndmk_mode
 			 || bytemode == bnd_mode
 			 || bytemode == bnd_swap_mode);
+      bfd_boolean check_gather = FALSE;
       const char **indexes64 = names64;
       const char **indexes32 = names32;
 
@@ -11564,6 +11574,7 @@ OP_E_memory (int bytemode, int sizeflag)
 		{
 		  if (!vex.v)
 		    vindex += 16;
+		  check_gather = obufp == op_out[1];
 		}
 
 	      haveindex = 1;
@@ -11600,8 +11611,10 @@ OP_E_memory (int bytemode, int sizeflag)
 	}
       else
 	{
-	  /* mandatory non-vector SIB must have sib */
-	  if (bytemode == vex_sibmem_mode)
+	  /* Check for mandatory SIB.  */
+	  if (bytemode == vex_vsib_d_w_dq_mode
+	      || bytemode == vex_vsib_q_w_dq_mode
+	      || bytemode == vex_sibmem_mode)
 	    {
 	      oappend ("(bad)");
 	      return;
@@ -11754,6 +11767,19 @@ OP_E_memory (int bytemode, int sizeflag)
 
 	  *obufp++ = close_char;
 	  *obufp = '\0';
+
+	  if (check_gather)
+	    {
+	      /* Both XMM/YMM/ZMM registers must be distinct.  */
+	      int modrm_reg = modrm.reg;
+
+	      if (rex & REX_R)
+	        modrm_reg += 8;
+	      if (!vex.r)
+	        modrm_reg += 16;
+	      if (vindex == modrm_reg)
+		oappend ("/(bad)");
+	    }
 	}
       else if (intel_syntax)
 	{
@@ -11772,7 +11798,9 @@ OP_E_memory (int bytemode, int sizeflag)
   else if (bytemode == v_bnd_mode
 	   || bytemode == v_bndmk_mode
 	   || bytemode == bnd_mode
-	   || bytemode == bnd_swap_mode)
+	   || bytemode == bnd_swap_mode
+	   || bytemode == vex_vsib_d_w_dq_mode
+	   || bytemode == vex_vsib_q_w_dq_mode)
     {
       oappend ("(bad)");
       return;
@@ -13308,7 +13336,7 @@ FXSAVE_Fixup (int bytemode, int sizeflag)
 static void
 OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
-  int reg;
+  int reg, modrm_reg, sib_index = -1;
   const char **names;
 
   if (!need_vex)
@@ -13321,14 +13349,46 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   else if (vex.evex && !vex.v)
     reg += 16;
 
-  if (bytemode == vex_scalar_mode)
+  switch (bytemode)
     {
+    case vex_scalar_mode:
       oappend (names_xmm[reg]);
       return;
-    }
 
-  if (bytemode == tmm_mode)
-    {
+    case vex_vsib_d_w_dq_mode:
+    case vex_vsib_q_w_dq_mode:
+      /* This must be the 3rd operand.  */
+      if (obufp != op_out[2])
+	abort ();
+      if (vex.length == 128
+	  || (bytemode != vex_vsib_d_w_dq_mode
+	      && !vex.w))
+	oappend (names_xmm[reg]);
+      else
+	oappend (names_ymm[reg]);
+
+      /* All 3 XMM/YMM registers must be distinct.  */
+      modrm_reg = modrm.reg;
+      if (rex & REX_R)
+	modrm_reg += 8;
+
+      if (modrm.rm == 4)
+	{
+	  sib_index = sib.index;
+	  if (rex & REX_X)
+	    sib_index += 8;
+	}
+
+      if (reg == modrm_reg || reg == sib_index)
+	strcpy (obufp, "/(bad)");
+      if (modrm_reg == sib_index || modrm_reg == reg)
+	strcat (op_out[0], "/(bad)");
+      if (sib_index == modrm_reg || sib_index == reg)
+	strcat (op_out[1], "/(bad)");
+
+      return;
+
+    case tmm_mode:
       /* All 3 TMM registers must be distinct.  */
       if (reg >= 8)
 	oappend ("(bad)");
@@ -13361,7 +13421,6 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       switch (bytemode)
 	{
 	case vex_mode:
-	case vex_vsib_q_w_dq_mode:
 	  names = names_xmm;
 	  break;
 	case dq_mode:
@@ -13389,9 +13448,6 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	{
 	case vex_mode:
 	  names = names_ymm;
-	  break;
-	case vex_vsib_q_w_dq_mode:
-	  names = vex.w ? names_ymm : names_xmm;
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
