@@ -1,5 +1,10 @@
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/libctf-writable/symtypetab-nonlinker-writeout.c: Don't
+	leak buf.
+
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
 	PR libctf/27628
 	* ctf-lookup.c (isqualifier): Don't dereference out-of-bounds
 	qhash values.

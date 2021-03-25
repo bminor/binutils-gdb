@@ -202,6 +202,7 @@ try_maybe_reporting (int report)
     }
 
   ctf_file_close (fp);
+  free (buf);
 
   return;
 
