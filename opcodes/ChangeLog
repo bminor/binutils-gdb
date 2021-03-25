@@ -1,3 +1,12 @@
+2021-03-25  Alan Modra  <amodra@gmail.com>
+
+	PR 27647
+	* ppc-opc.c (XLOCB_MASK): Delete.
+	(XLBOBB_MASK, XLBOBIBB_MASK, XLBOCBBB_MASK): Define using
+	XLBH_MASK.
+	(powerpc_opcodes): Accept a BH field on all extended forms of
+	bclr, bclrl, bcctr, bcctrl, bctar, bctarl.
+
 2021-03-24  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (output_i386_opcode): Drop processing of
