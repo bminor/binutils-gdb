@@ -99,6 +99,8 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
   char *strtab_alloc = NULL;
   int symsect_endianness = -1;
 
+  libctf_init_debug();
+
 #ifdef HAVE_BFD_ELF
   ctf_sect_t symsect, strsect;
   Elf_Internal_Shdr *symhdr;
