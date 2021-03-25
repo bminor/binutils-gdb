@@ -1,5 +1,11 @@
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
+	PR libctf/27628
+	* ctf-serialize.c (ctf_emit_type_sect): Allow for a NULL vlen in
+	CTF_K_FUNCTION types.
+
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_format_type): Don't emit size or alignment
 	on error.
 

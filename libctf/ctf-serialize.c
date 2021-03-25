@@ -849,7 +849,9 @@ ctf_emit_type_sect (ctf_dict_t *fp, unsigned char **tptr)
 	  break;
 
 	case CTF_K_FUNCTION:
-	  memcpy (t, dtd->dtd_vlen, sizeof (uint32_t) * (vlen + (vlen & 1)));
+	  /* Functions with no args also have no vlen.  */
+	  if (dtd->dtd_vlen)
+	    memcpy (t, dtd->dtd_vlen, sizeof (uint32_t) * (vlen + (vlen & 1)));
 	  t += sizeof (uint32_t) * (vlen + (vlen & 1));
 	  break;
 
