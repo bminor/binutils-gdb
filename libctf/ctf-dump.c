@@ -100,6 +100,7 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
       ctf_encoding_t ep;
       ctf_arinfo_t ar;
       int kind, unsliced_kind;
+      ssize_t size, align;
       const char *nonroot_leader = "";
       const char *nonroot_trailer = "";
       const char *idstr = "";
@@ -180,10 +181,10 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	  bit = NULL;
 	}
 
-      if (kind != CTF_K_FUNCTION && kind != CTF_K_FORWARD)
+      size = ctf_type_size (fp, id);
+      if (kind != CTF_K_FUNCTION && size >= 0)
 	{
-	  if (asprintf (&bit, " (size 0x%lx)",
-			(unsigned long) ctf_type_size (fp, id)) < 0)
+	  if (asprintf (&bit, " (size 0x%lx)", (unsigned long int) size) < 0)
 	    goto oom;
 
 	  str = str_append (str, bit);
@@ -191,10 +192,11 @@ ctf_dump_format_type (ctf_dict_t *fp, ctf_id_t id, int flag)
 	  bit = NULL;
 	}
 
-      if (kind != CTF_K_FORWARD)
+      align = ctf_type_align (fp, id);
+      if (align >= 0)
 	{
 	  if (asprintf (&bit, " (aligned at 0x%lx)",
-			(unsigned long) ctf_type_align (fp, id)) < 0)
+			(unsigned long int) align) < 0)
 	    goto oom;
 
 	  str = str_append (str, bit);

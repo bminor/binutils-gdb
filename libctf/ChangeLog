@@ -1,3 +1,8 @@
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-dump.c (ctf_dump_format_type): Don't emit size or alignment
+	on error.
+
 2021-03-21  Alan Modra  <amodra@gmail.com>
 
 	* ctf-impl.h: Include string.h.
