@@ -1,5 +1,10 @@
 2021-03-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (print_insn): Mark as bad EVEX encodings specifying
+	zeroing-masking without masking.
+
+2021-03-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (invlpgb): Fix multi-operand form.
 	(pvalidate, rmpupdate, rmpadjust): Add multi-operand forms. Mark
 	single-operand forms as deprecated.

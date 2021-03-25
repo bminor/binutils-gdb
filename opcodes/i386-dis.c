@@ -9739,6 +9739,13 @@ print_insn (bfd_vma pc, disassemble_info *info)
       return end_codep - priv.the_buffer;
     }
 
+  /* If EVEX.z is set, there must be an actual mask register in use.  */
+  if (vex.zeroing && vex.mask_register_specifier == 0)
+    {
+      (*info->fprintf_func) (info->stream, "(bad)");
+      return end_codep - priv.the_buffer;
+    }
+
   switch (dp->prefix_requirement)
     {
     case PREFIX_DATA:
