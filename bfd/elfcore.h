@@ -410,6 +410,13 @@ NAME(_bfd_elf, core_find_build_id)
 	{
 	  elf_read_notes (abfd, offset + i_phdr->p_offset,
 			  i_phdr->p_filesz, i_phdr->p_align);
+
+	  /* Make sure ABFD returns to processing the program headers.  */
+	  if (bfd_seek (abfd, (file_ptr) (offset + i_ehdr.e_phoff
+					  + (i + 1) * sizeof (x_phdr)),
+			SEEK_SET) != 0)
+	    goto fail;
+
 	  if (abfd->build_id != NULL)
 	    return TRUE;
 	}
