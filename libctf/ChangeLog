@@ -1,5 +1,11 @@
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
+	PR libctf/27628
+	* ctf-lookup.c (isqualifier): Don't dereference out-of-bounds
+	qhash values.
+
+2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open-bfd.c (ctf_bfdopen_ctfsect): Initialize debugging.
 
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>

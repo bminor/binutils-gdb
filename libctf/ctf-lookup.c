@@ -111,10 +111,14 @@ isqualifier (const char *s, size_t len)
   };
 
   int h = s[len - 1] + (int) len - 105;
-  const struct qual *qp = &qhash[h];
+  const struct qual *qp;
 
-  return (h >= 0 && (size_t) h < sizeof (qhash) / sizeof (qhash[0])
-	  && (size_t) len == qp->q_len &&
+  if (h < 0 || (size_t) h >= sizeof (qhash) / sizeof (qhash[0]))
+    return 0;
+
+  qp = &qhash[h];
+
+  return ((size_t) len == qp->q_len &&
 	  strncmp (qp->q_name, s, qp->q_len) == 0);
 }
 
