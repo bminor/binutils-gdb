@@ -323,19 +323,17 @@ objfile::find_pc_sect_compunit_symtab (struct bound_minimal_symbol msymbol,
 }
 
 void
-objfile::map_symbol_filenames (symbol_filename_ftype *fun, void *data,
-			       int need_fullname)
+objfile::map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
+			       bool need_fullname)
 {
   if (debug_symfile)
     fprintf_filtered (gdb_stdlog,
-		      "qf->map_symbol_filenames (%s, %s, %s, %d)\n",
+		      "qf->map_symbol_filenames (%s, ..., %d)\n",
 		      objfile_debug_name (this),
-		      host_address_to_string (fun),
-		      host_address_to_string (data),
 		      need_fullname);
 
   for (const auto &iter : qf)
-    iter->map_symbol_filenames (this, fun, data, need_fullname);
+    iter->map_symbol_filenames (this, fun, need_fullname);
 }
 
 struct compunit_symtab *

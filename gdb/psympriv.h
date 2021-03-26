@@ -556,8 +556,8 @@ struct psymbol_functions : public quick_symbol_functions
     (struct objfile *objfile, CORE_ADDR address) override;
 
   void map_symbol_filenames (struct objfile *objfile,
-			     symbol_filename_ftype *fun, void *data,
-			     int need_fullname) override;
+			     gdb::function_view<symbol_filename_ftype> fun,
+			     bool need_fullname) override;
 
   void relocated () override
   {

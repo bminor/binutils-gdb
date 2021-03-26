@@ -4227,15 +4227,21 @@ struct output_source_filename_data
 
   /* Flag of whether we're printing the first one.  */
   int first;
+
+  /* Worker for sources_info.  Force line breaks at ,'s.
+     NAME is the name to print.  */
+  void output (const char *name);
+
+  /* An overload suitable for use as a callback to
+     quick_symbol_functions::map_symbol_filenames.  */
+  void operator() (const char *filename, const char *fullname)
+  {
+    output (fullname != nullptr ? fullname : filename);
+  }
 };
 
-/* Slave routine for sources_info.  Force line breaks at ,'s.
-   NAME is the name to print.
-   DATA contains the state for printing and watching for duplicates.  */
-
-static void
-output_source_filename (const char *name,
-			struct output_source_filename_data *data)
+void
+output_source_filename_data::output (const char *name)
 {
   /* Since a single source file can result in several partial symbol
      tables, we need to avoid printing it more than once.  Note: if
@@ -4247,49 +4253,39 @@ output_source_filename (const char *name,
      symtabs; it doesn't hurt to check.  */
 
   /* Was NAME already seen?  */
-  if (data->filename_seen_cache->seen (name))
+  if (filename_seen_cache->seen (name))
     {
       /* Yes; don't print it again.  */
       return;
     }
 
-  /* Does it match data->regexp?  */
-  if (data->c_regexp.has_value ())
+  /* Does it match regexp?  */
+  if (c_regexp.has_value ())
     {
       const char *to_match;
       std::string dirname;
 
-      if (data->partial_match.dirname)
+      if (partial_match.dirname)
 	{
 	  dirname = ldirname (name);
 	  to_match = dirname.c_str ();
 	}
-      else if (data->partial_match.basename)
+      else if (partial_match.basename)
 	to_match = lbasename (name);
       else
 	to_match = name;
 
-      if (data->c_regexp->exec (to_match, 0, NULL, 0) != 0)
+      if (c_regexp->exec (to_match, 0, NULL, 0) != 0)
 	return;
     }
 
   /* Print it and reset *FIRST.  */
-  if (! data->first)
+  if (! first)
     printf_filtered (", ");
-  data->first = 0;
+  first = 0;
 
   wrap_here ("");
   fputs_styled (name, file_name_style.style (), gdb_stdout);
-}
-
-/* A callback for map_partial_symbol_filenames.  */
-
-static void
-output_partial_symbol_filename (const char *filename, const char *fullname,
-				void *data)
-{
-  output_source_filename (fullname ? fullname : filename,
-			  (struct output_source_filename_data *) data);
 }
 
 using isrc_flag_option_def
@@ -4410,7 +4406,7 @@ info_sources_command (const char *args, int from_tty)
 	    {
 	      const char *fullname = symtab_to_fullname (s);
 
-	      output_source_filename (fullname, &data);
+	      data.output (fullname);
 	    }
 	}
     }
@@ -4421,8 +4417,7 @@ info_sources_command (const char *args, int from_tty)
 
   filenames_seen.clear ();
   data.first = 1;
-  map_symbol_filenames (output_partial_symbol_filename, &data,
-			1 /*need_fullname*/);
+  map_symbol_filenames (data, true /*need_fullname*/);
   printf_filtered ("\n");
 }
 
@@ -5957,7 +5952,7 @@ not_interesting_fname (const char *fname)
   return 0;
 }
 
-/* An object of this type is passed as the user_data argument to
+/* An object of this type is passed as the callback argument to
    map_partial_symbol_filenames.  */
 struct add_partial_filename_data
 {
@@ -5966,34 +5961,33 @@ struct add_partial_filename_data
   const char *word;
   int text_len;
   completion_list *list;
+
+  void operator() (const char *filename, const char *fullname);
 };
 
 /* A callback for map_partial_symbol_filenames.  */
 
-static void
-maybe_add_partial_symtab_filename (const char *filename, const char *fullname,
-				   void *user_data)
+void
+add_partial_filename_data::operator() (const char *filename,
+				       const char *fullname)
 {
-  struct add_partial_filename_data *data
-    = (struct add_partial_filename_data *) user_data;
-
   if (not_interesting_fname (filename))
     return;
-  if (!data->filename_seen_cache->seen (filename)
-      && filename_ncmp (filename, data->text, data->text_len) == 0)
+  if (!filename_seen_cache->seen (filename)
+      && filename_ncmp (filename, text, text_len) == 0)
     {
       /* This file matches for a completion; add it to the
 	 current list of matches.  */
-      add_filename_to_list (filename, data->text, data->word, data->list);
+      add_filename_to_list (filename, text, word, list);
     }
   else
     {
       const char *base_name = lbasename (filename);
 
       if (base_name != filename
-	  && !data->filename_seen_cache->seen (base_name)
-	  && filename_ncmp (base_name, data->text, data->text_len) == 0)
-	add_filename_to_list (base_name, data->text, data->word, data->list);
+	  && !filename_seen_cache->seen (base_name)
+	  && filename_ncmp (base_name, text, text_len) == 0)
+	add_filename_to_list (base_name, text, word, list);
     }
 }
 
@@ -6050,8 +6044,7 @@ make_source_files_completion_list (const char *text, const char *word)
   datum.word = word;
   datum.text_len = text_len;
   datum.list = &list;
-  map_symbol_filenames (maybe_add_partial_symtab_filename, &datum,
-			0 /*need_fullname*/);
+  map_symbol_filenames (datum, false /*need_fullname*/);
 
   return list;
 }

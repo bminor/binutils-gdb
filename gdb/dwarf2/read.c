@@ -2230,8 +2230,8 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
   }
 
   void map_symbol_filenames (struct objfile *objfile,
-			     symbol_filename_ftype *fun, void *data,
-			     int need_fullname) override;
+			     gdb::function_view<symbol_filename_ftype> fun,
+			     bool need_fullname) override;
 };
 
 struct dwarf2_gdb_index : public dwarf2_base_index_functions
@@ -4945,10 +4945,10 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
 }
 
 void
-dwarf2_base_index_functions::map_symbol_filenames (struct objfile *objfile,
-						   symbol_filename_ftype *fun,
-						   void *data,
-						   int need_fullname)
+dwarf2_base_index_functions::map_symbol_filenames
+     (struct objfile *objfile,
+      gdb::function_view<symbol_filename_ftype> fun,
+      bool need_fullname)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
@@ -5009,7 +5009,7 @@ dwarf2_base_index_functions::map_symbol_filenames (struct objfile *objfile,
 
       if (need_fullname)
 	this_real_name = gdb_realpath (filename);
-      (*fun) (filename, this_real_name.get (), data);
+      fun (filename, this_real_name.get ());
     });
 }
 

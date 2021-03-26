@@ -328,8 +328,8 @@ void expand_symtabs_matching
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind);
 
-void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
-			   int need_fullname);
+void map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
+			   bool need_fullname);
 
 /* Target-agnostic function to load the sections of an executable into memory.
 

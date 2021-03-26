@@ -28,7 +28,7 @@ typedef int (symbol_compare_ftype) (const char *string1,
 /* Callback for quick_symbol_functions->map_symbol_filenames.  */
 
 typedef void (symbol_filename_ftype) (const char *filename,
-				      const char *fullname, void *data);
+				      const char *fullname);
 
 /* Callback for quick_symbol_functions->expand_symtabs_matching
    to match a file name.  */
@@ -224,12 +224,13 @@ struct quick_symbol_functions
     (struct objfile *objfile, CORE_ADDR address) = 0;
 
   /* Call a callback for every file defined in OBJFILE whose symtab is
-     not already read in.  FUN is the callback.  It is passed the file's
-     FILENAME, the file's FULLNAME (if need_fullname is non-zero), and
-     the DATA passed to this function.  */
-  virtual void map_symbol_filenames (struct objfile *objfile,
-				     symbol_filename_ftype *fun, void *data,
-				     int need_fullname) = 0;
+     not already read in.  FUN is the callback.  It is passed the
+     file's FILENAME and the file's FULLNAME (if need_fullname is
+     non-zero).  */
+  virtual void map_symbol_filenames
+       (struct objfile *objfile,
+	gdb::function_view<symbol_filename_ftype> fun,
+	bool need_fullname) = 0;
 
   /* This is called when the objfile is relocated.  It can be used to
      clean up any internal caches.  */

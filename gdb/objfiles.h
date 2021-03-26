@@ -590,8 +590,8 @@ public:
      int warn_if_readin);
 
   /* See quick_symbol_functions.  */
-  void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
-			     int need_fullname);
+  void map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
+			     bool need_fullname);
 
   /* See quick_symbol_functions.  */
   struct compunit_symtab *find_compunit_symtab_by_address (CORE_ADDR address);

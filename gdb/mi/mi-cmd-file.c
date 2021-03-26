@@ -65,8 +65,7 @@ mi_cmd_file_list_exec_source_file (const char *command, char **argv, int argc)
 /* A callback for map_partial_symbol_filenames.  */
 
 static void
-print_partial_file_name (const char *filename, const char *fullname,
-			 void *ignore)
+print_partial_file_name (const char *filename, const char *fullname)
 {
   struct ui_out *uiout = current_uiout;
 
@@ -108,8 +107,7 @@ mi_cmd_file_list_exec_source_files (const char *command, char **argv, int argc)
 	}
     }
 
-  map_symbol_filenames (print_partial_file_name, NULL,
-			1 /*need_fullname*/);
+  map_symbol_filenames (print_partial_file_name, true /*need_fullname*/);
 
   uiout->end (ui_out_type_list);
 }

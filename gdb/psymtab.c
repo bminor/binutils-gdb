@@ -1092,10 +1092,10 @@ psymbol_functions::expand_symtabs_with_fullname (struct objfile *objfile,
    the definition of quick_symbol_functions in symfile.h.  */
 
 void
-psymbol_functions::map_symbol_filenames (struct objfile *objfile,
-					 symbol_filename_ftype *fun,
-					 void *data,
-					 int need_fullname)
+psymbol_functions::map_symbol_filenames
+     (struct objfile *objfile,
+      gdb::function_view<symbol_filename_ftype> fun,
+      bool need_fullname)
 {
   for (partial_symtab *ps : require_partial_symbols (objfile))
     {
@@ -1118,7 +1118,7 @@ psymbol_functions::map_symbol_filenames (struct objfile *objfile,
 	fullname = psymtab_to_fullname (ps);
       else
 	fullname = NULL;
-      (*fun) (ps->filename, fullname, data);
+      fun (ps->filename, fullname);
     }
 }
 

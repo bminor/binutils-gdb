@@ -3737,11 +3737,11 @@ expand_symtabs_matching
    See quick_symbol_functions.map_symbol_filenames for details.  */
 
 void
-map_symbol_filenames (symbol_filename_ftype *fun, void *data,
-		      int need_fullname)
+map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
+		      bool need_fullname)
 {
   for (objfile *objfile : current_program_space->objfiles ())
-    objfile->map_symbol_filenames (fun, data, need_fullname);
+    objfile->map_symbol_filenames (fun, need_fullname);
 }
 
 #if GDB_SELF_TEST
