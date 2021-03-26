@@ -4970,7 +4970,7 @@ ada_add_local_symbols (std::vector<struct block_symbol> &result,
     add_symbols_from_enclosing_procs (result, lookup_name, domain);
 }
 
-/* An object of this type is used as the user_data argument when
+/* An object of this type is used as the callback argument when
    calling the map_matching_symbols method.  */
 
 struct match_data
@@ -4981,48 +4981,43 @@ struct match_data
   }
   DISABLE_COPY_AND_ASSIGN (match_data);
 
+  bool operator() (struct block_symbol *bsym);
+
   struct objfile *objfile = nullptr;
   std::vector<struct block_symbol> *resultp;
   struct symbol *arg_sym = nullptr;
   bool found_sym = false;
 };
 
-/* A callback for add_nonlocal_symbols that adds symbol, found in BSYM,
-   to a list of symbols.  DATA is a pointer to a struct match_data *
-   containing the vector that collects the symbol list, the file that SYM
-   must come from, a flag indicating whether a non-argument symbol has
-   been found in the current block, and the last argument symbol
-   passed in SYM within the current block (if any).  When SYM is null,
-   marking the end of a block, the argument symbol is added if no
-   other has been found.  */
+/* A callback for add_nonlocal_symbols that adds symbol, found in
+   BSYM, to a list of symbols.  */
 
-static bool
-aux_add_nonlocal_symbols (struct block_symbol *bsym,
-			  struct match_data *data)
+bool
+match_data::operator() (struct block_symbol *bsym)
 {
   const struct block *block = bsym->block;
   struct symbol *sym = bsym->symbol;
 
   if (sym == NULL)
     {
-      if (!data->found_sym && data->arg_sym != NULL) 
-	add_defn_to_vec (*data->resultp,
-			 fixup_symbol_section (data->arg_sym, data->objfile),
+      if (!found_sym && arg_sym != NULL)
+	add_defn_to_vec (*resultp,
+			 fixup_symbol_section (arg_sym, objfile),
 			 block);
-      data->found_sym = false;
-      data->arg_sym = NULL;
+      found_sym = false;
+      arg_sym = NULL;
     }
   else 
     {
       if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
 	return true;
       else if (SYMBOL_IS_ARGUMENT (sym))
-	data->arg_sym = sym;
+	arg_sym = sym;
       else
 	{
-	  data->found_sym = true;
-	  add_defn_to_vec (*data->resultp,
-			   fixup_symbol_section (sym, data->objfile),
+	  found_sym = true;
+	  add_defn_to_vec (*resultp,
+			   fixup_symbol_section (sym, objfile),
 			   block);
 	}
     }
@@ -5194,16 +5189,11 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
 
   bool is_wild_match = lookup_name.ada ().wild_match_p ();
 
-  auto callback = [&] (struct block_symbol *bsym)
-    {
-      return aux_add_nonlocal_symbols (bsym, &data);
-    };
-
   for (objfile *objfile : current_program_space->objfiles ())
     {
       data.objfile = objfile;
 
-      objfile->map_matching_symbols (lookup_name, domain, global, callback,
+      objfile->map_matching_symbols (lookup_name, domain, global, data,
 				     is_wild_match ? NULL : compare_names);
 
       for (compunit_symtab *cu : objfile->compunits ())
@@ -5226,7 +5216,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
       for (objfile *objfile : current_program_space->objfiles ())
 	{
 	  data.objfile = objfile;
-	  objfile->map_matching_symbols (name1, domain, global, callback,
+	  objfile->map_matching_symbols (name1, domain, global, data,
 					 compare_names);
 	}
     }      	

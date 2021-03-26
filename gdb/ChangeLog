@@ -1,5 +1,11 @@
 2021-03-26  Tom Tromey  <tom@tromey.com>
 
+	* ada-lang.c (struct match_data): Add operator().
+	(match_data::operator()): Rename from aux_add_nonlocal_symbols.
+	(callback): Remove 'callback'.
+
+2021-03-26  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (psymbol_functions::expand_symtabs_matching): Only
 	call make_ignore_params once.
 
