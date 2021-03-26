@@ -10118,6 +10118,7 @@ being passed the type of @var{arg} as the argument.
 * Arrays::                      Artificial arrays
 * Output Formats::              Output formats
 * Memory::                      Examining memory
+* Memory Tagging::              Memory Tagging
 * Auto Display::                Automatic display
 * Print Settings::              Print settings
 * Pretty Printing::             Python pretty printing
@@ -10886,7 +10887,7 @@ target supports computing the CRC checksum of a block of memory
 @end table
 
 @node Memory Tagging
-@subsection Memory Tagging
+@section Memory Tagging
 
 Memory tagging is a memory protection technology that uses a pair of tags to
 validate memory accesses through pointers.  The tags are integer values

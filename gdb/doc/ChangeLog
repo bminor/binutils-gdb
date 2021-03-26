@@ -1,3 +1,7 @@
+2021-03-29  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.textinfo (Memory Tagging): Make it a @section.
+
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.texinfo (Data): Document memory tagging changes to the "print"
