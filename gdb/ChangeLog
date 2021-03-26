@@ -1,3 +1,8 @@
+2021-03-26  Lancelot Six  <lsix@lancelotsix.com>
+
+	* contrib/gdb-add-index.sh: Avoid variable shadowing and get
+	rid of 'local'.
+
 2021-03-26  Tom Tromey  <tom@tromey.com>
 
 	* symtab.c (struct output_source_filename_data): Add 'output'

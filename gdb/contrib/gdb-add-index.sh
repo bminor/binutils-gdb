@@ -60,13 +60,13 @@ fi
 
 set_files ()
 {
-    local file="$1"
+    fpath="$1"
 
-    index4="${file}.gdb-index"
-    index5="${file}.debug_names"
-    debugstr="${file}.debug_str"
-    debugstrmerge="${file}.debug_str.merge"
-    debugstrerr="${file}.debug_str.err"
+    index4="${fpath}.gdb-index"
+    index5="${fpath}.debug_names"
+    debugstr="${fpath}.debug_str"
+    debugstrmerge="${fpath}.debug_str.merge"
+    debugstrerr="${fpath}.debug_str.err"
 }
 
 tmp_files=
@@ -99,13 +99,12 @@ status=0
 
 handle_file ()
 {
-    local file
-    file="$1"
+    fpath="$1"
 
-    set_files "$file"
+    set_files "$fpath"
 
     if test -f "$index4" -a -f "$index5"; then
-	echo "$myname: Both index types were created for $file" 1>&2
+	echo "$myname: Both index types were created for $fpath" 1>&2
 	status=1
     elif test -f "$index4" -o -f "$index5"; then
 	if test -f "$index4"; then
@@ -118,7 +117,7 @@ handle_file ()
 	debugstradd=false
 	debugstrupdate=false
 	if test -s "$debugstr"; then
-	    if ! $OBJCOPY --dump-section .debug_str="$debugstrmerge" "$file" \
+	    if ! $OBJCOPY --dump-section .debug_str="$debugstrmerge" "$fpath" \
 		 /dev/null 2>$debugstrerr; then
 		cat >&2 $debugstrerr
 		exit 1
@@ -142,11 +141,11 @@ handle_file ()
 		   if $debugstrupdate; then \
 		       echo --update-section .debug_str="$debugstrmerge"; \
 		   fi) \
-		 "$file" "$file"
+		 "$fpath" "$fpath"
 
 	status=$?
     else
-	echo "$myname: No index was created for $file" 1>&2
+	echo "$myname: No index was created for $fpath" 1>&2
 	echo "$myname: [Was there no debuginfo? Was there already an index?]" \
 	     1>&2
     fi
