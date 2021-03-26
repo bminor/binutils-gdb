@@ -1313,11 +1313,6 @@ psymbol_functions::expand_symtabs_matching
       if (ps->readin_p (objfile))
 	continue;
 
-      /* We skip shared psymtabs because file-matching doesn't apply
-	 to them; but we search them later in the loop.  */
-      if (ps->user != NULL)
-	continue;
-
       if (file_matcher)
 	{
 	  bool match;

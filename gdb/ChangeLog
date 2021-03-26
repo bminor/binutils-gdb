@@ -1,3 +1,8 @@
+2021-03-26  Tom Tromey  <tom@tromey.com>
+
+	* psymtab.c (psymbol_functions::expand_symtabs_matching): Remove
+	"user" check.
+
 2021-03-26  Simon Marchi  <simon.marchi@efficios.com>
 	    Pedro Alves  <pedro@palves.net>
 
