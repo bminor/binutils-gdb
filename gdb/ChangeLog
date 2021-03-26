@@ -1,3 +1,10 @@
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* top.c (staged_gdb_datadir): Update comment.
+	(set_gdb_datadir): Copy the value of gdb_datadir back into
+	staged_datadir.
+	(init_main): Initialise staged_gdb_datadir.
+
 2021-04-06  Tom de Vries  <tdevries@suse.de>
 
 	PR breakpoints/25884

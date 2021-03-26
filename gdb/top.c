@@ -2111,7 +2111,10 @@ show_exec_done_display_p (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* New values of the "data-directory" parameter are staged here.  */
+/* New values of the "data-directory" parameter are staged here.
+   Extension languages, for example Python's gdb.parameter API, will read
+   the value directory from this variable, so we must ensure that this
+   always contains the correct value.  */
 static char *staged_gdb_datadir;
 
 /* "set" command for the gdb_datadir configuration variable.  */
@@ -2120,6 +2123,14 @@ static void
 set_gdb_datadir (const char *args, int from_tty, struct cmd_list_element *c)
 {
   set_gdb_data_directory (staged_gdb_datadir);
+
+  /* SET_GDB_DATA_DIRECTORY will resolve relative paths in
+     STAGED_GDB_DATADIR, so we now copy the value from GDB_DATADIR
+     back into STAGED_GDB_DATADIR so the extension languages can read the
+     correct value.  */
+  free (staged_gdb_datadir);
+  staged_gdb_datadir = strdup (gdb_datadir.c_str ());
+
   gdb::observers::gdb_datadir_changed.notify ();
 }
 
@@ -2290,7 +2301,9 @@ Use \"on\" to enable the notification, and \"off\" to disable it."),
 When set, GDB uses the specified path to search for data files."),
 			   set_gdb_datadir, show_gdb_datadir,
 			   &setlist,
-			   &showlist);
+			    &showlist);
+  /* Prime the initial value for data-directory.  */
+  staged_gdb_datadir = strdup (gdb_datadir.c_str ());
 
   add_setshow_auto_boolean_cmd ("interactive-mode", class_support,
 				&interactive_mode, _("\
