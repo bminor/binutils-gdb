@@ -1306,6 +1306,10 @@ psymbol_functions::expand_symtabs_matching
   for (partial_symtab *ps : require_partial_symbols (objfile))
     ps->searched_flag = PST_NOT_SEARCHED;
 
+  gdb::optional<lookup_name_info> psym_lookup_name;
+  if (lookup_name != nullptr)
+    psym_lookup_name = lookup_name->make_ignore_params ();
+
   for (partial_symtab *ps : m_partial_symtabs->range ())
     {
       QUIT;
@@ -1335,7 +1339,7 @@ psymbol_functions::expand_symtabs_matching
 
       if ((symbol_matcher == NULL && lookup_name == NULL)
 	  || recursively_search_psymtabs (ps, objfile, domain,
-					  lookup_name->make_ignore_params (),
+					  *psym_lookup_name,
 					  symbol_matcher))
 	{
 	  struct compunit_symtab *symtab =

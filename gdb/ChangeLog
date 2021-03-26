@@ -1,5 +1,10 @@
 2021-03-26  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (psymbol_functions::expand_symtabs_matching): Only
+	call make_ignore_params once.
+
+2021-03-26  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (psymbol_functions::expand_symtabs_matching): Remove
 	"user" check.
 
