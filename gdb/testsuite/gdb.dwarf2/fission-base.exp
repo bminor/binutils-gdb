@@ -32,11 +32,12 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
 
 standard_testfile .S
 
-set dwo [standard_output_file "fission-base.dwo"]
-
-if [build_executable_from_fission_assembler \
-	"$testfile.exp" "$binfile" "$srcfile" \
-	[list nodebug additional_flags=-DDWO=$dwo]] {
+set obj [standard_output_file "${testfile}.o"]
+set dwo [standard_output_file "${testfile}.dwo"]
+if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" {nodebug} \
+	[list $srcfile \
+	     [list nodebug split-dwo additional_flags=-DDWO=$dwo] \
+	     $obj]] {
     return -1
 }
 

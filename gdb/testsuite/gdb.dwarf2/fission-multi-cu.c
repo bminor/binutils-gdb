@@ -15,10 +15,27 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-void func ();
+#define LL(N) asm ("line_label_" #N ": .globl line_label_" #N)
+
+/* Fake parameter location.  */
+int global_param = 0;
+
+int
+func (int arg)
+{
+  asm ("func_label: .globl func_label");
+  LL(4);
+  return arg + 1;
+}
 
 int
 main ()
 {
+  asm ("main_label: .globl main_label");
+  LL(1);
+  global_param = -1;
+  LL(2);
   func (-1);
+  LL(3);
+  return 0;
 }

@@ -1,5 +1,37 @@
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/fission-absolute-dwo.c: New file.
+	* gdb.dwarf2/fission-absolute-dwo.exp: New file.
+	* gdb.dwarf2/fission-base.exp: Use build_executable_and_dwo_files
+	instead of build_executable_from_fission_assembler.
+	* gdb.dwarf2/fission-loclists-pie.exp: Likewise.
+	* gdb.dwarf2/fission-loclists.exp: Likewise.
+
+	* gdb.dwarf2/fission-multi-cu.S: Delete file.
+	* gdb.dwarf2/fission-multi-cu.c: New file based on old
+	fission-multi-cu1.c and fission-multi-cu2.c files.
+	* gdb.dwarf2/fission-multi-cu1.c: Delete file.
+	* gdb.dwarf2/fission-multi-cu2.c: Delete file.
+	* gdb.dwarf2/fission-multi-cu.exp: Rewrite to use Dwarf assembler.
+	* gdb.dwarf2/fission-reread.exp: Likewise.
+	* lib/dwarf.exp (extract_dwo_information): New proc.
+	(strip_dwo_information): New proc.
+	(build_executable_and_dwo_files): New proc.
+	(build_executable_from_fission_assembler): Delete.
+	(Dwarf::_debug_addr_index): New variable.
+	(Dwarf::_cu_is_fission): New variable.
+	(Dwarf::_handle_DW_FORM): Handle DW_OP_GNU_addr_index.
+	(Dwarf::_default_form): Supply a default for DW_AT_GNU_addr_base.
+	(Dwarf::_handle_macro_at_range): Use form DW_FORM_GNU_addr_index
+	if this is a fission CU.
+	(Dwarf::_location): Handle DW_OP_GNU_addr_index.
+	(Dwarf::debug_addr_label): New proc.
+	(Dwarf::cu): Initialise _cu_is_fission.
+	(Dwarf::tu): Likewise.
+	(Dwarf::assemble): Initialise _debug_addr_index.
+
+2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.dwarf2/dw2-using-debug-str.exp: Add an additional test.
 
 2021-04-07  Andrew Burgess  <andrew.burgess@embecosm.com>

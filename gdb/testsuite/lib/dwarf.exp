@@ -28,39 +28,12 @@ proc dwarf2_support {} {
     return 0
 }
 
-# Build an executable from a fission-based .S file.
-# This handles the extra work of splitting the .o into non-dwo and dwo
-# pieces, making sure the .dwo is available if we're using cc-with-tweaks.sh
-# to build a .dwp file.
-# The arguments and results are the same as for build_executable.
+# Use 'objcopy --extract-dwo to extract DWO information from
+# OBJECT_FILE and place it into DWO_FILE.
 #
-# Current restrictions:
-# - only supports one source file
-# - cannot be run on remote hosts
-
-proc build_executable_from_fission_assembler { testname executable sources options } {
-    verbose -log "build_executable_from_fission_assembler $testname $executable $sources $options"
-    if { [llength $sources] != 1 } {
-	error "Only one source file supported."
-    }
-    if [is_remote host] {
-	error "Remote hosts are not supported."
-    }
-
-    global srcdir subdir
-    set source_file ${srcdir}/${subdir}/${sources}
-    set root_name [file rootname [file tail $source_file]]
-    set output_base [standard_output_file $root_name]
-    set object_file ${output_base}.o
-    set dwo_file ${output_base}.dwo
-    set object_options "object $options"
+# Return 0 on success, otherwise, return -1.
+proc extract_dwo_information { object_file dwo_file } {
     set objcopy [gdb_find_objcopy]
-
-    set result [gdb_compile $source_file $object_file object $options]
-    if { "$result" != "" } {
-	return -1
-    }
-
     set command "$objcopy --extract-dwo $object_file $dwo_file"
     verbose -log "Executing $command"
     set result [catch "exec $command" output]
@@ -68,18 +41,156 @@ proc build_executable_from_fission_assembler { testname executable sources optio
     if { $result == 1 } {
 	return -1
     }
+    return 0
+}
 
-    set command "$objcopy --strip-dwo $object_file"
+# Use 'objcopy --strip-dwo to remove DWO information from
+# FILENAME.
+#
+# Return 0 on success, otherwise, return -1.
+proc strip_dwo_information { filename } {
+    set objcopy [gdb_find_objcopy]
+    set command "$objcopy --strip-dwo $filename"
     verbose -log "Executing $command"
     set result [catch "exec $command" output]
     verbose -log "objcopy --strip-dwo output: $output"
     if { $result == 1 } {
 	return -1
     }
+    return 0
+}
 
-    set result [gdb_compile $object_file $executable executable $options]
-    if { "$result" != "" } {
+# Build an executable, with the debug information split out into a
+# separate .dwo file.
+#
+# This function is based on build_executable_from_specs in
+# lib/gdb.exp, but with threading support, and rust support removed.
+#
+# TESTNAME is the name of the test; this is passed to 'untested' if
+# something fails.
+#
+# EXECUTABLE is the executable to create, this can be an absolute
+# path, or a relative path, in which case the EXECUTABLE will be
+# created in the standard output directory.
+#
+# OPTIONS is passed to the final link, using gdb_compile.  If OPTIONS
+# contains any option that indicates threads is required, of if the
+# option rust is included, then this function will return failure.
+#
+# ARGS is a series of lists.  Each list is a spec for one source file
+# that will be compiled to make EXECUTABLE.  Each spec in ARGS has the
+# form:
+#	[ SOURCE OPTIONS ]
+# or:
+#       [ SOURCE OPTIONS OBJFILE ]
+#
+# Where SOURCE is the path to the source file to compile.  This can be
+# absolute, or relative to the standard global ${subdir}/${srcdir}/
+# path.
+#
+# OPTIONS are the options to use when compiling SOURCE into an object
+# file.
+#
+# OBJFILE is optional, if present this is the name of the object file
+# to create for SOURCE.  If this is not provided then a suitable name
+# will be auto-generated.
+#
+# If OPTIONS contains the option 'split-dwo' then the debug
+# information is extracted from the object file created by compiling
+# SOURCE and placed into a file with a dwo extension.  The name of
+# this file is generated based on the name of the object file that was
+# created (with the .o replaced with .dwo).
+proc build_executable_and_dwo_files { testname executable options args } {
+    global subdir
+    global srcdir
+
+    if { ! [regexp "^/" "$executable"] } then {
+	set binfile [standard_output_file $executable]
+    } else {
+	set binfile $executable
+    }
+
+    set info_options ""
+    if { [lsearch -exact $options "c++"] >= 0 } {
+	set info_options "c++"
+    }
+    if [get_compiler_info ${info_options}] {
+        return -1
+    }
+
+    set func gdb_compile
+    if {[lsearch -regexp $options \
+	     {^(pthreads|shlib|shlib_pthreads|openmp)$}] != -1} {
+	# Currently don't support compiling thread based tests here.
+	# If this is required then look to build_executable_from_specs
+	# for inspiration.
 	return -1
+    }
+    if {[lsearch -exact $options rust] != -1} {
+	# Currently don't support compiling rust tests here.  If this
+	# is required then look to build_executable_from_specs for
+	# inspiration.
+	return -1
+    }
+
+    # Must be run on local host due to use of objcopy.
+    if [is_remote host] {
+	return -1
+    }
+
+    set objects {}
+    set i 0
+    foreach spec $args {
+	if {[llength $spec] < 2} {
+	    error "invalid spec length"
+	    return -1
+	}
+
+	verbose -log "APB: SPEC: $spec"
+
+	set s [lindex $spec 0]
+	set local_options [lindex $spec 1]
+
+	if { ! [regexp "^/" "$s"] } then {
+	    set s "$srcdir/$subdir/$s"
+	}
+
+	if {[llength $spec] > 2} {
+	    set objfile [lindex $spec 2]
+	} else {
+	    set objfile "${binfile}${i}.o"
+	    incr i
+	}
+
+	if  { [$func "${s}" "${objfile}" object $local_options] != "" } {
+	    untested $testname
+	    return -1
+	}
+
+	lappend objects "$objfile"
+
+	if {[lsearch -exact $local_options "split-dwo"] >= 0} {
+	    # Split out the DWO file.
+	    set dwo_file "[file rootname ${objfile}].dwo"
+
+	    if { [extract_dwo_information $objfile $dwo_file] == -1 } {
+		untested $testname
+		return -1
+	    }
+
+	    if { [strip_dwo_information $objfile] == -1 } {
+		untested $testname
+		return -1
+	    }
+	}
+    }
+
+    verbose -log "APB: OBJECTS = $objects"
+
+    set ret [$func $objects "${binfile}" executable $options]
+    if  { $ret != "" } {
+        untested $testname
+        return -1
     }
 
     return 0
@@ -329,6 +440,14 @@ namespace eval Dwarf {
     # The address size for debug ranges section.
     variable _debug_ranges_64_bit
 
+    # The index into the .debug_addr section (used for fission
+    # generation).
+    variable _debug_addr_index
+
+    # Flag, true if the current CU is contains fission information,
+    # otherwise false.
+    variable _cu_is_fission
+
     proc _process_one_constant {name value} {
 	variable _constants
 	variable _AT
@@ -486,6 +605,18 @@ namespace eval Dwarf {
 		_op .${_cu_addr_size}byte $value
 	    }
 
+	    DW_FORM_GNU_addr_index {
+		variable _debug_addr_index
+		variable _cu_addr_size
+
+		_op .uleb128 ${_debug_addr_index}
+		incr _debug_addr_index
+
+		_defer_output .debug_addr {
+		    _op .${_cu_addr_size}byte $value
+		}
+	    }
+
 	    DW_FORM_data2 -
 	    DW_FORM_ref2 {
 		_op .2byte $value
@@ -553,7 +684,6 @@ namespace eval Dwarf {
 	    DW_FORM_strx3 -
 	    DW_FORM_strx4 -
 
-	    DW_FORM_GNU_addr_index -
 	    DW_FORM_GNU_str_index -
 
 	    default {
@@ -609,6 +739,9 @@ namespace eval Dwarf {
 	    DW_AT_name {
 		return DW_FORM_string
 	    }
+	    DW_AT_GNU_addr_base {
+		return DW_FORM_sec_offset
+	    }
 	}
 	return ""
     }
@@ -649,6 +782,8 @@ namespace eval Dwarf {
     # Handle macro attribute MACRO_AT_range.
 
     proc _handle_macro_at_range { attr_value } {
+	variable _cu_is_fission
+
 	if {[llength $attr_value] != 1} {
 	    error "usage: MACRO_AT_range { func }"
 	}
@@ -658,10 +793,14 @@ namespace eval Dwarf {
 	set src ${srcdir}/${subdir}/${srcfile}
 	set result [function_range $func $src]
 
-	_handle_attribute DW_AT_low_pc [lindex $result 0] \
-	    DW_FORM_addr
+	set form DW_FORM_addr
+	if { $_cu_is_fission } {
+	    set form DW_FORM_GNU_addr_index
+	}
+
+	_handle_attribute DW_AT_low_pc [lindex $result 0] $form
 	_handle_attribute DW_AT_high_pc \
-	    "[lindex $result 0] + [lindex $result 1]" DW_FORM_addr
+	    "[lindex $result 0] + [lindex $result 1]" $form
     }
 
     # Handle macro attribute MACRO_AT_func.
@@ -945,6 +1084,18 @@ namespace eval Dwarf {
 		    _op .${addr_size}byte $argvec(size)
 		}
 
+		DW_OP_GNU_addr_index {
+		    variable _debug_addr_index
+		    variable _cu_addr_size
+
+		    _op .uleb128 ${_debug_addr_index}
+		    incr _debug_addr_index
+
+		    _defer_output .debug_addr {
+			_op .${_cu_addr_size}byte [lindex $line 1]
+		    }
+		}
+
 		DW_OP_regx {
 		    _get_args $line $opcode register
 		    _op .uleb128 $argvec(register)
@@ -1069,6 +1220,23 @@ namespace eval Dwarf {
 	}
     }
 
+    # Return a label that references the current position in the
+    # .debug_addr table.  When a user is creating split DWARF they
+    # will define two CUs, the first will be the split DWARF content,
+    # and the second will be the non-split stub CU.  The split DWARF
+    # CU fills in the .debug_addr section, but the non-split CU
+    # includes a reference to the start of the section.  The label
+    # returned by this proc provides that reference.
+    proc debug_addr_label {} {
+	variable _debug_addr_index
+
+	set lbl [new_label "debug_addr_idx_${_debug_addr_index}_"]
+	_defer_output .debug_addr {
+	    define_label $lbl
+	}
+	return $lbl
+    }
+
     # Emit a DWARF CU.
     # OPTIONS is a list with an even number of elements containing
     # option-name and option-value pairs.
@@ -1092,12 +1260,13 @@ namespace eval Dwarf {
 	variable _cu_version
 	variable _cu_addr_size
 	variable _cu_offset_size
+	variable _cu_is_fission
 
 	# Establish the defaults.
 	set is_64 0
 	set _cu_version 4
 	set _cu_addr_size default
-	set fission 0
+	set _cu_is_fission 0
 	set section ".debug_info"
 	set _abbrev_section ".debug_abbrev"
 
@@ -1107,7 +1276,7 @@ namespace eval Dwarf {
 		is_64 { set is_64 $value }
 		version { set _cu_version $value }
 		addr_size { set _cu_addr_size $value }
-		fission { set fission $value }
+		fission { set _cu_is_fission $value }
 		default { error "unknown option $name" }
 	    }
 	}
@@ -1119,7 +1288,7 @@ namespace eval Dwarf {
 	    }
 	}
 	set _cu_offset_size [expr { $is_64 ? 8 : 4 }]
-	if { $fission } {
+	if { $_cu_is_fission } {
 	    set section ".debug_info.dwo"
 	    set _abbrev_section ".debug_abbrev.dwo"
 	}
@@ -1199,12 +1368,13 @@ namespace eval Dwarf {
 	variable _cu_version
 	variable _cu_addr_size
 	variable _cu_offset_size
+	variable _cu_is_fission
 
 	# Establish the defaults.
 	set is_64 0
 	set _cu_version 4
 	set _cu_addr_size default
-	set fission 0
+	set _cu_is_fission 0
 	set section ".debug_types"
 	set _abbrev_section ".debug_abbrev"
 
@@ -1213,7 +1383,7 @@ namespace eval Dwarf {
 		is_64 { set is_64 $value }
 		version { set _cu_version $value }
 		addr_size { set _cu_addr_size $value }
-		fission { set fission $value }
+		fission { set _cu_is_fission $value }
 		default { error "unknown option $name" }
 	    }
 	}
@@ -1225,7 +1395,7 @@ namespace eval Dwarf {
 	    }
 	}
 	set _cu_offset_size [expr { $is_64 ? 8 : 4 }]
-	if { $fission } {
+	if { $_cu_is_fission } {
 	    set section ".debug_types.dwo"
 	    set _abbrev_section ".debug_abbrev.dwo"
 	}
@@ -2075,6 +2245,7 @@ namespace eval Dwarf {
 	variable _line_saw_program
 	variable _line_header_end_label
 	variable _debug_ranges_64_bit
+	variable _debug_addr_index
 
 	if {!$_initialized} {
 	    _read_constants
@@ -2092,6 +2263,8 @@ namespace eval Dwarf {
 	set _line_saw_file 0
 	set _line_saw_program 0
 	set _debug_ranges_64_bit [is_64_target]
+
+	set _debug_addr_index 0
 
 	# Not "uplevel" here, because we want to evaluate in this
 	# namespace.  This is somewhat bad because it means we can't

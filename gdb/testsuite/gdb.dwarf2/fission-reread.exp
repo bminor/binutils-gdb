@@ -30,17 +30,20 @@ set additional_flags [gdb_target_symbol_prefix_flags_asm]
 
 standard_testfile .S
 
-set dwo [standard_output_file "fission-reread.dwo"]
+set obj [standard_output_file "${testfile}.o"]
+set dwo [standard_output_file "${testfile}.dwo"]
 
-set options [list]
-lappend options nodebug
+set options [list nodebug]
 if { $additional_flags != "" } {
     lappend options $additional_flags
 }
-lappend options additional_flags=-DDWO=$dwo
 
-if [build_executable_from_fission_assembler \
-	"$testfile.exp" "$binfile" "$srcfile" $options] {
+set dwo_options $options
+lappend dwo_options split-dwo
+lappend dwo_options additional_flags=-DDWO=$dwo
+
+if [build_executable_and_dwo_files "$testfile.exp" "${binfile}" $options \
+	[list $srcfile $dwo_options $obj]] {
     return -1
 }
 

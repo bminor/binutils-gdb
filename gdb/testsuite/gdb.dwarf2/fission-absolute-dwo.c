@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2012-2021 Free Software Foundation, Inc.
+   Copyright 2021 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -13,10 +13,16 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see
+   <http://www.gnu.org/licenses/>.  */
+
+/* Our fake object.  */
+int global_var[100];
 
 int
-func (int arg)
+main (int argc, char **argv)
 {
-  return arg + 1;
+  asm ("main_label: .globl main_label");
+
+  return 0;
 }
