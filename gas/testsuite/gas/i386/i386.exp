@@ -826,6 +826,7 @@ if [gas_64_check] then {
     run_list_test "noreg-intel64" "-I${srcdir}/$subdir -mintel64"
     run_list_test "movx64" "-al"
     run_list_test "cvtsi2sX"
+    run_list_test "x86-64-nosse2" "-al"
     run_dump_test "x86-64-sse4_1"
     run_dump_test "x86-64-sse4_1-intel"
     run_dump_test "x86-64-sse4_2"

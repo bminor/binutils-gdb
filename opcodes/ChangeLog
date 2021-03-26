@@ -1,3 +1,9 @@
+2021-03-26  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (movq): Add CpuSSE2 to SSE2 form. Add CpuMMX to
+	MMX form.
+	* i386-tbl.h: Re-generate.
+
 2021-03-25  Abid Qadeer  <abidh@codesourcery.com>
 
 	* nios2-dis.c (nios2_print_insn_arg): Fix sign extension of

@@ -972,9 +972,9 @@ movq, 0x66d6, None, CpuAVX, Modrm|Vex=1|Space0F|VexWIG|No_bSuf|No_wSuf|No_lSuf|N
 movq, 0x666e, None, CpuAVX|Cpu64, D|Modrm|Vex=1|Space0F|VexW1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64|SSE2AVX, { Reg64|Unspecified|BaseIndex, RegXMM }
 movq, 0x0f7e, None, CpuSSE2, Prefix_0XF3|Load|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Unspecified|Qword|BaseIndex|RegXMM, RegXMM }
 movq, 0x0fd6, None, CpuSSE2, Prefix_0X66|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { RegXMM, Unspecified|Qword|BaseIndex|RegXMM }
-movq, 0x0f6e, None, Cpu64, Prefix_0X66|D|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64|Unspecified|BaseIndex, RegXMM }
+movq, 0x0f6e, None, CpuSSE2|Cpu64, Prefix_0X66|D|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64|Unspecified|BaseIndex, RegXMM }
 movq, 0xf6f, None, CpuMMX, D|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Unspecified|Qword|BaseIndex|RegMMX, RegMMX }
-movq, 0xf6e, None, Cpu64, D|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64|Unspecified|BaseIndex, RegMMX }
+movq, 0xf6e, None, CpuMMX|Cpu64, D|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64|Unspecified|BaseIndex, RegMMX }
 // The segment register moves accept Reg64 so that a segment register
 // can be copied to a 64 bit register, and vice versa.
 movq, 0x8c, None, Cpu64, D|RegMem|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg, Reg64 }
