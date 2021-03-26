@@ -1,3 +1,10 @@
+2021-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf2_read_debug_names)
+	(dwarf2_build_psymtabs_hard, create_addrmap_from_aranges)
+	(dw2_debug_names_iterator::next, create_type_unit_group):
+	Simplify.
+
 2021-03-25  Pedro Alves  <pedro@palves.net>
 
 	* gdb.server/bkpt-other-inferior.exp: Only enable remote output

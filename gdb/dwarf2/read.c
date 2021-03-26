@@ -2774,7 +2774,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		     dwarf2_per_cu_data *,
 		     gdb::hash_enum<sect_offset>>
     debug_info_offset_to_per_cu;
-  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
+  for (dwarf2_per_cu_data *per_cu : per_bfd->all_comp_units)
     {
       const auto insertpair
 	= debug_info_offset_to_per_cu.emplace (per_cu->sect_off, per_cu);
@@ -5299,7 +5299,7 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   if (!read_debug_names_from_section (objfile, objfile_name (objfile),
-				      &per_objfile->per_bfd->debug_names, *map))
+				      &per_bfd->debug_names, *map))
     return false;
 
   /* Don't use the index if it's empty.  */
@@ -5341,7 +5341,7 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
   per_bfd->debug_names_table = std::move (map);
   per_bfd->using_index = 1;
   per_bfd->quick_file_names_table =
-    create_quick_file_names_table (per_objfile->per_bfd->all_comp_units.size ());
+    create_quick_file_names_table (per_bfd->all_comp_units.size ());
 
   return true;
 }
@@ -5596,7 +5596,7 @@ dw2_debug_names_iterator::next ()
 	{
 	case DW_IDX_compile_unit:
 	  /* Don't crash on bad data.  */
-	  if (ull >= m_per_objfile->per_bfd->all_comp_units.size ())
+	  if (ull >= per_bfd->all_comp_units.size ())
 	    {
 	      complaint (_(".debug_names entry has bad CU index %s"
 			   " [in module %s]"),
@@ -7455,7 +7455,7 @@ create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
   struct dwarf2_per_cu_data *per_cu;
   struct type_unit_group *tu_group;
 
-  tu_group = OBSTACK_ZALLOC (&per_objfile->per_bfd->obstack, type_unit_group);
+  tu_group = OBSTACK_ZALLOC (&per_bfd->obstack, type_unit_group);
   per_cu = &tu_group->per_cu;
   per_cu->per_bfd = per_bfd;
 
@@ -8081,8 +8081,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 			   objfile_name (objfile));
 
   scoped_restore restore_reading_psyms
-    = make_scoped_restore (&per_objfile->per_bfd->reading_partial_symbols,
-			   true);
+    = make_scoped_restore (&per_bfd->reading_partial_symbols, true);
 
   per_bfd->info.read (objfile);
 
