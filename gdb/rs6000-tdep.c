@@ -2355,6 +2355,7 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
       /* The type we're building is this
 
 	 type = union __ppc_builtin_type_vec128 {
+	     float128_t float128;
 	     uint128_t uint128;
 	     double v2_double[2];
 	     float v4_float[4];
@@ -2364,10 +2365,15 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
 	 }
       */
 
+      /* PPC specific type for IEEE 128-bit float field */
+      struct type *t_float128
+	= arch_float_type (gdbarch, 128, "float128_t", floatformats_ia64_quad);
+
       struct type *t;
 
       t = arch_composite_type (gdbarch,
 			       "__ppc_builtin_type_vec128", TYPE_CODE_UNION);
+      append_composite_type_field (t, "float128", t_float128);
       append_composite_type_field (t, "uint128", bt->builtin_uint128);
       append_composite_type_field (t, "v2_double",
 				   init_vector_type (bt->builtin_double, 2));

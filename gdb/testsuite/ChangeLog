@@ -1,3 +1,8 @@
+2021-4-12  Carl Love  <cel@us.ibm.com>
+
+	* gdb.arch/vsx-vsr-float128.c: New test file.
+	* gdb.arch/vsx-vsr-float128.exp: New expect file.
+
 2021-04-12  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/reconnect.exp: Relax expected stepi output.

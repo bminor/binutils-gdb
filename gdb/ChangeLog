@@ -1,3 +1,9 @@
+2021-4-12  Carl Love  <cel@us.ibm.com>
+
+	* rs6000-tdep.c (rs6000_builtin_type_vec128): Add t_float128 variable.
+	(rs6000_builtin_type_vec128): Add append_composite_type_field for
+	float128.
+
 2021-04-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* nat/windows-nat.c: Remove all code guarded by _WIN32_WCE.
