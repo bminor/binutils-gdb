@@ -1286,7 +1286,6 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	      objfile->qf.push_front (make_dwarf_gdb_index ());
 	      break;
 	    case dw_index_kind::DEBUG_NAMES:
-	      objfile->qf.clear ();
 	      objfile->qf.push_front (make_dwarf_debug_names ());
 	      break;
 	    }
