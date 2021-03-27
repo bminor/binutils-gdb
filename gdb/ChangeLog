@@ -1,5 +1,9 @@
 2021-03-27  Tom Tromey  <tom@tromey.com>
 
+	* elfread.c (elf_sym_fns_lazy_psyms): Don't declare.
+
+2021-03-27  Tom Tromey  <tom@tromey.com>
+
 	* elfread.c (elf_symfile_read): Don't clear 'qf'.
 
 2021-03-26  Lancelot Six  <lsix@lancelotsix.com>

@@ -71,8 +71,6 @@ struct lazy_dwarf_reader : public psymbol_functions
   }
 };
 
-extern const struct sym_fns elf_sym_fns_lazy_psyms;
-
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
    It's local to elf_symfile_read.  */
