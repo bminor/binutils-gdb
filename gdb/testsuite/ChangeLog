@@ -1,3 +1,10 @@
+2021-03-26  Will Schmidt  <will_schmidt@vnet.ibm.com>
+
+	* gdb.arch/powerpc-disassembler-options.exp: Extend some test
+	names for uniqueness.
+	* gdb.arch/powerpc-fpscr-gcore.exp: Add more test names for
+	uniqueness.
+
 2021-03-26  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-prettyprint.c (struct container): Add 'is_array_p'
