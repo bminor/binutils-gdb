@@ -53,24 +53,6 @@
 #include "debuginfod-support.h"
 #include "dwarf2/public.h"
 
-/* A subclass of psymbol_functions that arranges to read the DWARF
-   partial symbols when needed.  */
-struct lazy_dwarf_reader : public psymbol_functions
-{
-  using psymbol_functions::psymbol_functions;
-
-  bool can_lazily_read_symbols () override
-  {
-    return true;
-  }
-
-  void read_partial_symbols (struct objfile *objfile) override
-  {
-    if (dwarf2_has_info (objfile, nullptr))
-      dwarf2_build_psymtabs (objfile, this);
-  }
-};
-
 /* The struct elfinfo is available only during ELF symbol table and
    psymtab reading.  It is destroyed at the completion of psymtab-reading.
    It's local to elf_symfile_read.  */
@@ -1273,24 +1255,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
     }
 
   if (dwarf2_has_info (objfile, NULL, true))
-    {
-      dw_index_kind index_kind;
-
-      if (dwarf2_initialize_objfile (objfile, &index_kind))
-	{
-	  switch (index_kind)
-	    {
-	    case dw_index_kind::GDB_INDEX:
-	      objfile->qf.push_front (make_dwarf_gdb_index ());
-	      break;
-	    case dw_index_kind::DEBUG_NAMES:
-	      objfile->qf.push_front (make_dwarf_debug_names ());
-	      break;
-	    }
-	}
-      else
-	objfile->qf.emplace_front (new lazy_dwarf_reader);
-    }
+    dwarf2_initialize_objfile (objfile);
   /* If the file has its own symbol tables it has no separate debug
      info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
      SYMTABS/PSYMTABS.  `.gnu_debuglink' may no longer be present with

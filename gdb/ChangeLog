@@ -1,3 +1,16 @@
+2021-03-28  Tom Tromey  <tom@tromey.com>
+
+	* elfread.c (can_lazily_read_symbols): Move to dwarf2/read.c.
+	(elf_symfile_read): Simplify.
+	* dwarf2/read.c (struct lazy_dwarf_reader): Move from elfread.c.
+	(make_lazy_dwarf_reader): New function.
+	(make_dwarf_gdb_index, make_dwarf_debug_names): Now static.
+	(dwarf2_initialize_objfile): Return void.  Remove index_kind
+	parameter.  Push on 'qf' list.
+	* dwarf2/public.h (dwarf2_initialize_objfile): Change return
+	type.  Remove 'index_kind' parameter.
+	(make_dwarf_gdb_index, make_dwarf_debug_names): Don't declare.
+
 2021-03-27  Tom Tromey  <tom@tromey.com>
 
 	* elfread.c (elf_sym_fns_lazy_psyms): Don't declare.

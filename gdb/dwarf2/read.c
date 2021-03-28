@@ -2191,6 +2191,30 @@ struct dwarf2_per_cu_quick_data
   unsigned int no_file_data : 1;
 };
 
+/* A subclass of psymbol_functions that arranges to read the DWARF
+   partial symbols when needed.  */
+struct lazy_dwarf_reader : public psymbol_functions
+{
+  using psymbol_functions::psymbol_functions;
+
+  bool can_lazily_read_symbols () override
+  {
+    return true;
+  }
+
+  void read_partial_symbols (struct objfile *objfile) override
+  {
+    if (dwarf2_has_info (objfile, nullptr))
+      dwarf2_build_psymtabs (objfile, this);
+  }
+};
+
+static quick_symbol_functions_up
+make_lazy_dwarf_reader ()
+{
+  return quick_symbol_functions_up (new lazy_dwarf_reader);
+}
+
 struct dwarf2_base_index_functions : public quick_symbol_functions
 {
   bool has_symbols (struct objfile *objfile) override;
@@ -2292,13 +2316,13 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
      enum search_domain kind) override;
 };
 
-quick_symbol_functions_up
+static quick_symbol_functions_up
 make_dwarf_gdb_index ()
 {
   return quick_symbol_functions_up (new dwarf2_gdb_index);
 }
 
-quick_symbol_functions_up
+static quick_symbol_functions_up
 make_dwarf_debug_names ()
 {
   return quick_symbol_functions_up (new dwarf2_debug_names_index);
@@ -5993,10 +6017,10 @@ get_gdb_index_contents_from_cache_dwz (objfile *obj, dwz_file *dwz)
   return global_index_cache.lookup_gdb_index (build_id, &dwz->index_cache_res);
 }
 
-/* See symfile.h.  */
+/* See dwarf2/public.h.  */
 
-bool
-dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
+void
+dwarf2_initialize_objfile (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -6016,9 +6040,9 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
       if (per_bfd->using_index)
 	{
 	  dwarf_read_debug_printf ("using_index already set");
-	  *index_kind = dw_index_kind::GDB_INDEX;
 	  per_objfile->resize_symtabs ();
-	  return true;
+	  objfile->qf.push_front (make_dwarf_gdb_index ());
+	  return;
 	}
 
       per_bfd->using_index = 1;
@@ -6037,11 +6061,11 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 					    struct dwarf2_per_cu_quick_data);
 	}
 
-      /* Return 1 so that gdb sees the "quick" functions.  However,
-	 these functions will be no-ops because we will have expanded
-	 all symtabs.  */
-      *index_kind = dw_index_kind::GDB_INDEX;
-      return true;
+      /* Arrange for gdb to see the "quick" functions.  However, these
+	 functions will be no-ops because we will have expanded all
+	 symtabs.  */
+      objfile->qf.push_front (make_dwarf_gdb_index ());
+      return;
     }
 
   /* Was a debug names index already read when we processed an objfile sharing
@@ -6049,9 +6073,9 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
   if (per_bfd->debug_names_table != nullptr)
     {
       dwarf_read_debug_printf ("re-using shared debug names table");
-      *index_kind = dw_index_kind::DEBUG_NAMES;
       per_objfile->resize_symtabs ();
-      return true;
+      objfile->qf.push_front (make_dwarf_debug_names ());
+      return;
     }
 
   /* Was a GDB index already read when we processed an objfile sharing
@@ -6059,9 +6083,9 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
   if (per_bfd->index_table != nullptr)
     {
       dwarf_read_debug_printf ("re-using shared index table");
-      *index_kind = dw_index_kind::GDB_INDEX;
       per_objfile->resize_symtabs ();
-      return true;
+      objfile->qf.push_front (make_dwarf_gdb_index ());
+      return;
     }
 
   /* There might already be partial symtabs built for this BFD.  This happens
@@ -6072,15 +6096,16 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
   if (per_bfd->partial_symtabs != nullptr)
     {
       dwarf_read_debug_printf ("re-using shared partial symtabs");
-      return false;
+      objfile->qf.push_front (make_lazy_dwarf_reader ());
+      return;
     }
 
   if (dwarf2_read_debug_names (per_objfile))
     {
       dwarf_read_debug_printf ("found debug names");
-      *index_kind = dw_index_kind::DEBUG_NAMES;
       per_objfile->resize_symtabs ();
-      return true;
+      objfile->qf.push_front (make_dwarf_debug_names ());
+      return;
     }
 
   if (dwarf2_read_gdb_index (per_objfile,
@@ -6088,9 +6113,9 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 			     get_gdb_index_contents_from_section<dwz_file>))
     {
       dwarf_read_debug_printf ("found gdb index from file");
-      *index_kind = dw_index_kind::GDB_INDEX;
       per_objfile->resize_symtabs ();
-      return true;
+      objfile->qf.push_front (make_dwarf_gdb_index ());
+      return;
     }
 
   /* ... otherwise, try to find the index in the index cache.  */
@@ -6100,13 +6125,13 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
     {
       dwarf_read_debug_printf ("found gdb index from cache");
       global_index_cache.hit ();
-      *index_kind = dw_index_kind::GDB_INDEX;
       per_objfile->resize_symtabs ();
-      return true;
+      objfile->qf.push_front (make_dwarf_gdb_index ());
+      return;
     }
 
   global_index_cache.miss ();
-  return false;
+  objfile->qf.push_front (make_lazy_dwarf_reader ());
 }
 
 

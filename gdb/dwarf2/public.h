@@ -34,18 +34,13 @@ enum class dw_index_kind
   DEBUG_NAMES,
 };
 
-/* Initialize for reading DWARF for OBJFILE.  Return false if this
-   file will use psymtabs, or true if using an index, in which case
-   *INDEX_KIND is set to the index variant in use.  */
-extern bool dwarf2_initialize_objfile (struct objfile *objfile,
-				       dw_index_kind *index_kind);
+/* Initialize for reading DWARF for OBJFILE, and push the appropriate
+   entry on the objfile's "qf" list.  */
+extern void dwarf2_initialize_objfile (struct objfile *objfile);
 
 struct psymbol_functions;
 extern void dwarf2_build_psymtabs (struct objfile *,
 				   psymbol_functions *psf = nullptr);
 extern void dwarf2_build_frame_info (struct objfile *);
-
-extern quick_symbol_functions_up make_dwarf_gdb_index ();
-extern quick_symbol_functions_up make_dwarf_debug_names ();
 
 #endif /* DWARF2_PUBLIC_H */
