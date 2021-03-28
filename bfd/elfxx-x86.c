@@ -534,7 +534,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 /* Allocate space in .plt, .got and associated reloc sections for
    local dynamic relocs.  */
 
-static bfd_boolean
+static int
 elf_x86_allocate_local_dynreloc (void **slot, void *inf)
 {
   struct elf_link_hash_entry *h

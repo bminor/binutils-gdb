@@ -2345,7 +2345,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 /* Allocate space in .plt, .got and associated reloc sections for
    local dynamic relocs.  */
 
-static bfd_boolean
+static int
 allocate_local_dynrelocs (void **slot, void *inf)
 {
   struct elf_link_hash_entry *h
@@ -4658,7 +4658,7 @@ sparc_vxworks_finish_shared_plt (bfd *output_bfd, struct bfd_link_info *info)
 /* Finish up local dynamic symbol handling.  We set the contents of
    various dynamic sections here.  */
 
-static bfd_boolean
+static int
 finish_local_dynamic_symbol (void **slot, void *inf)
 {
   struct elf_link_hash_entry *h

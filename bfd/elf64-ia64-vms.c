@@ -1010,7 +1010,7 @@ elf64_ia64_global_dyn_info_free (void **xentry,
 
 /* Free the local elf64_ia64_dyn_sym_info array.  */
 
-static bfd_boolean
+static int
 elf64_ia64_local_dyn_info_free (void **slot,
 				void * unused ATTRIBUTE_UNUSED)
 {
@@ -1111,7 +1111,7 @@ elf64_ia64_global_dyn_sym_thunk (struct bfd_hash_entry *xentry,
   return TRUE;
 }
 
-static bfd_boolean
+static int
 elf64_ia64_local_dyn_sym_thunk (void **slot, void * xdata)
 {
   struct elf64_ia64_local_hash_entry *entry

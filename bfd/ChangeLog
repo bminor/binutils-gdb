@@ -1,5 +1,24 @@
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
+	* elf32-i386.c (elf_i386_finish_local_dynamic_symbol): Return int.
+	* elf64-ia64-vms.c (elf64_ia64_local_dyn_info_free): Likewise.
+	(elf64_ia64_local_dyn_sym_thunk): Likewise.
+	* elf64-x86-64.c (elf_x86_64_finish_local_dynamic_symbol): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_local_ifunc_dynrelocs),
+	(elfNN_aarch64_finish_local_dynamic_symbol): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_local_dyn_info_free): Likewise.
+	(elfNN_ia64_local_dyn_sym_thunk): Likewise.
+	* elfnn-riscv.c (allocate_local_ifunc_dynrelocs): Likewise.
+	(riscv_pcrel_reloc_eq): Likewise.
+	(riscv_elf_finish_local_dynamic_symbol): Likewise.
+	* elfxx-sparc.c (allocate_local_dynrelocs): Likewise.
+	(finish_local_dynamic_symbol): Likewise.
+	* elfxx-x86.c (elf_x86_allocate_local_dynreloc): Likewise.
+	* elfxx-mips.c (mips_elf_resolve_got_page_ref): Likewise.
+	(mips_elf_count_got_symbols): Change return type to bfd_boolean.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (elf_link_output_symstrtab): Make flinfo parameter
 	a void pointer.
 	(bfd_elf_final_link): Delete out_sym_func typedef and don't cast

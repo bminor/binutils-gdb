@@ -4574,7 +4574,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 /* Finish up local dynamic symbol handling.  We set the contents of
    various dynamic sections here.  */
 
-static bfd_boolean
+static int
 elf_x86_64_finish_local_dynamic_symbol (void **slot, void *inf)
 {
   struct elf_link_hash_entry *h
