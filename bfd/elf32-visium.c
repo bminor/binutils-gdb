@@ -548,7 +548,7 @@ visium_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 /* Relocate a VISIUM ELF section.  */
 
-static bfd_boolean
+static int
 visium_elf_relocate_section (bfd *output_bfd,
 			     struct bfd_link_info *info, bfd *input_bfd,
 			     asection *input_section, bfd_byte *contents,

@@ -1350,7 +1350,7 @@ mmix_elf_reloc (bfd *abfd,
 /* Relocate an MMIX ELF section.  Modified from elf32-fr30.c; look to it
    for guidance if you're thinking of copying this.  */
 
-static bfd_boolean
+static int
 mmix_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

@@ -561,7 +561,7 @@ iq2000_elf_check_relocs (bfd *abfd,
    section, which means that the addend must be adjusted
    accordingly.	 */
 
-static bfd_boolean
+static int
 iq2000_elf_relocate_section (bfd *		     output_bfd ATTRIBUTE_UNUSED,
 			     struct bfd_link_info *  info,
 			     bfd *		     input_bfd,

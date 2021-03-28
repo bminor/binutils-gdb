@@ -3376,7 +3376,7 @@ install_movi20_field (bfd *output_bfd, unsigned long relocation,
 
 /* Relocate an SH ELF section.  */
 
-static bfd_boolean
+static int
 sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			 bfd *input_bfd, asection *input_section,
 			 bfd_byte *contents, Elf_Internal_Rela *relocs,

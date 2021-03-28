@@ -6933,7 +6933,7 @@ is_insn_dq_form (unsigned int insn)
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 ppc_elf_relocate_section (bfd *output_bfd,
 			  struct bfd_link_info *info,
 			  bfd *input_bfd,

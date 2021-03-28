@@ -2796,7 +2796,7 @@ static const bfd_byte *insn_addx_Y0Y1 = insn_tls_ie_addx_Y0Y1;
    section, which means that the addend must be adjusted
    accordingly.  */
 
-bfd_boolean
+int
 tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			     bfd *input_bfd, asection *input_section,
 			     bfd_byte *contents, Elf_Internal_Rela *relocs,

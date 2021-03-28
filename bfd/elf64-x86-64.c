@@ -2411,7 +2411,7 @@ elf_x86_64_tpoff (struct bfd_link_info *info, bfd_vma address)
 
 /* Relocate an x86_64 ELF section.  */
 
-static bfd_boolean
+static int
 elf_x86_64_relocate_section (bfd *output_bfd,
 			     struct bfd_link_info *info,
 			     bfd *input_bfd,

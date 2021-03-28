@@ -56,7 +56,7 @@ extern bfd_boolean _bfd_mips_elf_always_size_sections
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_mips_elf_size_dynamic_sections
   (bfd *, struct bfd_link_info *);
-extern bfd_boolean _bfd_mips_elf_relocate_section
+extern int _bfd_mips_elf_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
 extern bfd_boolean _bfd_mips_elf_finish_dynamic_symbol

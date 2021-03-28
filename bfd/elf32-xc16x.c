@@ -341,7 +341,7 @@ elf32_xc16x_final_link_relocate (unsigned long r_type,
     }
 }
 
-static bfd_boolean
+static int
 elf32_xc16x_relocate_section (bfd *output_bfd,
 			      struct bfd_link_info *info,
 			      bfd *input_bfd,

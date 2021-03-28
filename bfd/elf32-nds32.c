@@ -4935,7 +4935,7 @@ fls (register unsigned int x)
 #define nds32_elf_local_tlsdesc_gotent(bfd) \
   (elf_nds32_tdata (bfd)->local_tlsdesc_gotent)
 
-static bfd_boolean
+static int
 nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info * info,
 			    bfd *		   input_bfd,

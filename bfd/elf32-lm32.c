@@ -715,7 +715,7 @@ _lm32fdpic_osec_readonly_p (bfd *output_bfd, asection *osec)
 
 /* Relocate a section */
 
-static bfd_boolean
+static int
 lm32_elf_relocate_section (bfd *output_bfd,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

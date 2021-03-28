@@ -481,7 +481,7 @@ static unsigned int rx_stack_top;
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 rx_elf_relocate_section
     (bfd *		     output_bfd,
      struct bfd_link_info *  info,

@@ -6697,7 +6697,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 
 /* Relocate an AArch64 ELF section.  */
 
-static bfd_boolean
+static int
 elfNN_aarch64_relocate_section (bfd *output_bfd,
 				struct bfd_link_info *info,
 				bfd *input_bfd,

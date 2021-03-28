@@ -1423,7 +1423,7 @@ arc_do_relocation (bfd_byte * contents,
 	      local_section : is an array giving the section in the input file
 			      corresponding to the st_shndx field of each
 			      local symbol.  */
-static bfd_boolean
+static int
 elf_arc_relocate_section (bfd *			  output_bfd,
 			  struct bfd_link_info *  info,
 			  bfd *			  input_bfd,

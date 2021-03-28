@@ -4254,7 +4254,7 @@ tpoff (struct bfd_link_info *info, bfd_vma address)
 
 /* Relocate a csky section.  */
 
-static bfd_boolean
+static int
 csky_elf_relocate_section (bfd *                  output_bfd,
 			   struct bfd_link_info * info,
 			   bfd *                  input_bfd,

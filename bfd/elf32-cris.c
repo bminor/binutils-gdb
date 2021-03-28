@@ -968,7 +968,7 @@ static int additional_relocation_error_msg_count = 10;
 /* Relocate an CRIS ELF section.  See elf32-fr30.c, from where this was
    copied, for further comments.  */
 
-static bfd_boolean
+static int
 cris_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

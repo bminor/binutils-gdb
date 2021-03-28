@@ -123,7 +123,7 @@ extern bfd_boolean _bfd_sparc_elf_new_section_hook
   (bfd *, asection *);
 extern bfd_boolean _bfd_sparc_elf_relax_section
   (bfd *, struct bfd_section *, struct bfd_link_info *, bfd_boolean *);
-extern bfd_boolean _bfd_sparc_elf_relocate_section
+extern int _bfd_sparc_elf_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
 extern bfd_boolean _bfd_sparc_elf_finish_dynamic_symbol

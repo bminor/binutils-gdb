@@ -10319,7 +10319,7 @@ mips_reloc_against_discarded_section (bfd *output_bfd,
 
 /* Relocate a MIPS ELF section.  */
 
-bfd_boolean
+int
 _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 				bfd *input_bfd, asection *input_section,
 				bfd_byte *contents, Elf_Internal_Rela *relocs,

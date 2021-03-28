@@ -386,7 +386,7 @@ insert_rel_addend (bfd *abfd,
 
 /* Relocate a D10V ELF section.  */
 
-static bfd_boolean
+static int
 elf32_d10v_relocate_section (bfd *output_bfd,
 			     struct bfd_link_info *info,
 			     bfd *input_bfd,

@@ -1963,7 +1963,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 
 /* Relocate an MN10300 ELF section.  */
 
-static bfd_boolean
+static int
 mn10300_elf_relocate_section (bfd *output_bfd,
 			      struct bfd_link_info *info,
 			      bfd *input_bfd,

@@ -3735,7 +3735,7 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 
 /* Relocate an HPPA ELF section.  */
 
-static bfd_boolean
+static int
 elf64_hppa_relocate_section (bfd *output_bfd,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

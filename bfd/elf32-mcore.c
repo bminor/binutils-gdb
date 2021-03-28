@@ -390,7 +390,7 @@ mcore_elf_info_to_howto (bfd * abfd,
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 mcore_elf_relocate_section (bfd * output_bfd,
 			    struct bfd_link_info * info,
 			    bfd * input_bfd,

@@ -3675,7 +3675,7 @@ nios2_elf32_callr_relocate (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
 
 /* Implement elf_backend_relocate_section.  */
-static bfd_boolean
+static int
 nios2_elf32_relocate_section (bfd *output_bfd,
 			      struct bfd_link_info *info,
 			      bfd *input_bfd,

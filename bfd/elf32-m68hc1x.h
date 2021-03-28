@@ -161,7 +161,7 @@ bfd_reloc_status_type m68hc11_elf_special_reloc
 bfd_boolean elf32_m68hc11_check_relocs
   (bfd * abfd, struct bfd_link_info * info,
    asection * sec, const Elf_Internal_Rela * relocs);
-bfd_boolean elf32_m68hc11_relocate_section
+int elf32_m68hc11_relocate_section
   (bfd *output_bfd, struct bfd_link_info *info,
    bfd *input_bfd, asection *input_section,
    bfd_byte *contents, Elf_Internal_Rela *relocs,

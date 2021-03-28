@@ -1242,7 +1242,7 @@ or1k_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 or1k_elf_relocate_section (bfd *output_bfd,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

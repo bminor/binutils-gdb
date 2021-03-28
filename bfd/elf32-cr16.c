@@ -1335,7 +1335,7 @@ elf32_cr16_relax_delete_bytes (struct bfd_link_info *link_info, bfd *abfd,
 
 /* Relocate a CR16 ELF section.  */
 
-static bfd_boolean
+static int
 elf32_cr16_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			     bfd *input_bfd, asection *input_section,
 			     bfd_byte *contents, Elf_Internal_Rela *relocs,

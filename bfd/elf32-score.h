@@ -33,7 +33,7 @@ s7_bfd_score_elf_hide_symbol (struct bfd_link_info *,
 extern bfd_boolean
 s7_bfd_score_info_to_howto (bfd *, arelent *, Elf_Internal_Rela *);
 
-extern bfd_boolean
+extern int
 s7_bfd_score_elf_relocate_section (bfd *,
 				   struct bfd_link_info *,
 				   bfd *,

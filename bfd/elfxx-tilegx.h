@@ -59,7 +59,7 @@ tilegx_elf_omit_section_dynsym (bfd *,
 extern bfd_boolean
 tilegx_elf_size_dynamic_sections (bfd *, struct bfd_link_info *);
 
-extern bfd_boolean
+extern int
 tilegx_elf_relocate_section (bfd *, struct bfd_link_info *,
 			     bfd *, asection *,
 			     bfd_byte *, Elf_Internal_Rela *,

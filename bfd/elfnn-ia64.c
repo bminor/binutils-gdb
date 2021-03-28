@@ -3757,7 +3757,7 @@ elfNN_ia64_final_link (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-static bfd_boolean
+static int
 elfNN_ia64_relocate_section (bfd *output_bfd,
 			     struct bfd_link_info *info,
 			     bfd *input_bfd,

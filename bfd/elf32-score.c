@@ -2400,7 +2400,7 @@ s3_bfd_score_info_to_howto (bfd *abfd,
 }
 
 /* Relocate an score ELF section.  */
-static bfd_boolean
+static int
 s3_bfd_score_elf_relocate_section (bfd *output_bfd,
 				   struct bfd_link_info *info,
 				   bfd *input_bfd,
@@ -4082,7 +4082,7 @@ _bfd_score_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED,
     return s7_bfd_score_info_to_howto (abfd, bfd_reloc, elf_reloc);
 }
 
-static bfd_boolean
+static int
 _bfd_score_elf_relocate_section (bfd *output_bfd,
 				 struct bfd_link_info *info,
 				 bfd *input_bfd,

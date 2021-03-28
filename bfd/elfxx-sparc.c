@@ -2764,7 +2764,7 @@ gdop_relative_offset_ok (struct bfd_link_info *info,
 
 /* Relocate a SPARC ELF section.  */
 
-bfd_boolean
+int
 _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 				 struct bfd_link_info *info,
 				 bfd *input_bfd,

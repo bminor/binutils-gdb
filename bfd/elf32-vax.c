@@ -37,10 +37,10 @@ static bfd_boolean elf_vax_check_relocs (bfd *, struct bfd_link_info *,
 static bfd_boolean elf_vax_adjust_dynamic_symbol (struct bfd_link_info *,
 						  struct elf_link_hash_entry *);
 static bfd_boolean elf_vax_size_dynamic_sections (bfd *, struct bfd_link_info *);
-static bfd_boolean elf_vax_relocate_section (bfd *, struct bfd_link_info *,
-					     bfd *, asection *, bfd_byte *,
-					     Elf_Internal_Rela *,
-					     Elf_Internal_Sym *, asection **);
+static int elf_vax_relocate_section (bfd *, struct bfd_link_info *,
+				     bfd *, asection *, bfd_byte *,
+				     Elf_Internal_Rela *,
+				     Elf_Internal_Sym *, asection **);
 static bfd_boolean elf_vax_finish_dynamic_symbol (bfd *, struct bfd_link_info *,
 						  struct elf_link_hash_entry *,
 						  Elf_Internal_Sym *);
@@ -1199,7 +1199,7 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
 
 /* Relocate an VAX ELF section.  */
 
-static bfd_boolean
+static int
 elf_vax_relocate_section (bfd *output_bfd,
 			  struct bfd_link_info *info,
 			  bfd *input_bfd,

@@ -1413,7 +1413,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
 
 /* Relocate an AVR ELF section.  */
 
-static bfd_boolean
+static int
 elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info,
 			    bfd *input_bfd,

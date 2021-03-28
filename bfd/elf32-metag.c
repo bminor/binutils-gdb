@@ -1452,7 +1452,7 @@ going to be the section symbol corresponding to the output
 section, which means that the addend must be adjusted
 accordingly.  */
 
-static bfd_boolean
+static int
 elf_metag_relocate_section (bfd *output_bfd,
 			    struct bfd_link_info *info,
 			    bfd *input_bfd,

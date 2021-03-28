@@ -673,7 +673,7 @@ rl78_special_reloc (bfd *      input_bfd,
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 rl78_elf_relocate_section
     (bfd *		     output_bfd,
      struct bfd_link_info *  info,

@@ -4037,7 +4037,7 @@ elf64_alpha_emit_dynrel (bfd *abfd, struct bfd_link_info *info,
    symbol, in which case we have to adjust according to where the section
    symbol winds up in the output section.  */
 
-static bfd_boolean
+static int
 elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 				struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				bfd *input_bfd, asection *input_section,
@@ -4119,7 +4119,7 @@ elf64_alpha_relocate_section_r (bfd *output_bfd ATTRIBUTE_UNUSED,
 
 /* Relocate an Alpha ELF section.  */
 
-static bfd_boolean
+static int
 elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			      bfd *input_bfd, asection *input_section,
 			      bfd_byte *contents, Elf_Internal_Rela *relocs,

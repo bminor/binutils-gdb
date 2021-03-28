@@ -1970,7 +1970,7 @@ invalid_tls_insn (bfd *input_bfd,
 
 /* Relocate a 390 ELF section.  */
 
-static bfd_boolean
+static int
 elf_s390_relocate_section (bfd *output_bfd,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

@@ -383,7 +383,7 @@ z80_elf_final_link_relocate (unsigned long r_type,
   return r ? bfd_reloc_ok : bfd_reloc_notsupported;
 }
 
-static bfd_boolean
+static int
 z80_elf_relocate_section (bfd *output_bfd,
 			  struct bfd_link_info *info,
 			  bfd *input_bfd,

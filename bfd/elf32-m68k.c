@@ -3420,7 +3420,7 @@ elf_m68k_init_got_entry_local_shared (struct bfd_link_info *info,
 
 /* Relocate an M68K ELF section.  */
 
-static bfd_boolean
+static int
 elf_m68k_relocate_section (bfd *output_bfd,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

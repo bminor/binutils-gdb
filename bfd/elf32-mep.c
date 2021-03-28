@@ -424,7 +424,7 @@ mep_info_to_howto_rela (bfd *		    abfd,
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 mep_elf_relocate_section
     (bfd *		     output_bfd ATTRIBUTE_UNUSED,
      struct bfd_link_info *  info,

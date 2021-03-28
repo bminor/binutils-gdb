@@ -14897,7 +14897,7 @@ ppc64_glibc_dynamic_reloc (enum elf_ppc64_reloc_type r_type)
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 ppc64_elf_relocate_section (bfd *output_bfd,
 			    struct bfd_link_info *info,
 			    bfd *input_bfd,

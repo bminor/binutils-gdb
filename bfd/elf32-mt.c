@@ -38,7 +38,7 @@ static bfd_reloc_status_type mt_final_link_relocate
   (reloc_howto_type *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, bfd_vma);
 
-static bfd_boolean mt_elf_relocate_section
+static int mt_elf_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
 
@@ -297,7 +297,7 @@ mt_final_link_relocate
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 mt_elf_relocate_section
     (bfd *		     output_bfd ATTRIBUTE_UNUSED,
      struct bfd_link_info *  info,

@@ -2240,7 +2240,7 @@ s7_bfd_score_info_to_howto (bfd *abfd,
 
 /* Relocate an score ELF section.  */
 
-bfd_boolean
+int
 s7_bfd_score_elf_relocate_section (bfd *output_bfd,
 				   struct bfd_link_info *info,
 				   bfd *input_bfd,

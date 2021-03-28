@@ -2493,7 +2493,7 @@ replace_tls_insn (Elf_Internal_Rela *rel,
 /* Relocate an Xtensa ELF section.  This is invoked by the linker for
    both relocatable and final links.  */
 
-static bfd_boolean
+static int
 elf_xtensa_relocate_section (bfd *output_bfd,
 			     struct bfd_link_info *info,
 			     bfd *input_bfd,

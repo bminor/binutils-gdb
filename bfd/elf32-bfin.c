@@ -1357,7 +1357,7 @@ bfin_final_link_relocate (Elf_Internal_Rela *rel, reloc_howto_type *howto,
 
 }
 
-static bfd_boolean
+static int
 bfin_relocate_section (bfd * output_bfd,
 		       struct bfd_link_info *info,
 		       bfd * input_bfd,
@@ -2487,7 +2487,7 @@ _bfinfdpic_emit_got_relocs_plt_entries (struct bfinfdpic_relocs_info *entry,
    section, which means that the addend must be adjusted
    accordingly.  */
 
-static bfd_boolean
+static int
 bfinfdpic_relocate_section (bfd * output_bfd,
 			    struct bfd_link_info *info,
 			    bfd * input_bfd,

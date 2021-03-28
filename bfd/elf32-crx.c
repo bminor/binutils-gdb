@@ -36,7 +36,7 @@ static bfd_reloc_status_type crx_elf_final_link_relocate
   (reloc_howto_type *, bfd *, bfd *, asection *,
    bfd_byte *, bfd_vma, bfd_vma, bfd_vma,
    struct bfd_link_info *, asection *, int);
-static bfd_boolean elf32_crx_relocate_section
+static int elf32_crx_relocate_section
   (bfd *, struct bfd_link_info *, bfd *, asection *, bfd_byte *,
    Elf_Internal_Rela *, Elf_Internal_Sym *, asection **);
 static bfd_boolean elf32_crx_relax_section
@@ -818,7 +818,7 @@ elf32_crx_get_relocated_section_contents (bfd *output_bfd,
 
 /* Relocate a CRX ELF section.  */
 
-static bfd_boolean
+static int
 elf32_crx_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			    bfd *input_bfd, asection *input_section,
 			    bfd_byte *contents, Elf_Internal_Rela *relocs,

@@ -1993,7 +1993,7 @@ elf_i386_tpoff (struct bfd_link_info *info, bfd_vma address)
 
 /* Relocate an i386 ELF section.  */
 
-static bfd_boolean
+static int
 elf_i386_relocate_section (bfd *output_bfd,
 			   struct bfd_link_info *info,
 			   bfd *input_bfd,

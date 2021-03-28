@@ -364,7 +364,7 @@ bpf_info_to_howto (bfd *abfd, arelent *bfd_reloc,
 
 #define sec_addr(sec) ((sec)->output_section->vma + (sec)->output_offset)
 
-static bfd_boolean
+static int
 bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                           struct bfd_link_info *info,
                           bfd *input_bfd,

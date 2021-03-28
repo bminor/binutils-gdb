@@ -1411,7 +1411,7 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
 
 /* Relocate an MSP430 ELF section.  */
 
-static bfd_boolean
+static int
 elf32_msp430_relocate_section (bfd * output_bfd ATTRIBUTE_UNUSED,
 			       struct bfd_link_info * info,
 			       bfd * input_bfd,

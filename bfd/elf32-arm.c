@@ -13024,7 +13024,7 @@ arm_add_to_rel (bfd *		   abfd,
 
 /* Relocate an ARM ELF section.  */
 
-static bfd_boolean
+static int
 elf32_arm_relocate_section (bfd *		   output_bfd,
 			    struct bfd_link_info * info,
 			    bfd *		   input_bfd,
