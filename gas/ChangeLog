@@ -1,3 +1,23 @@
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-arm.c (struct arm_long_option_table <func>): Return
+	bfd_boolean.
+	* config/tc-arm.h (arm_optimize_expr, arm_data_in_code): Likewise.
+	* config/tc-metag.c (parse_mov_port): Replace unsigned int variable
+	with bfd_boolean.
+	(parse_mmov, parse_mov_ct, parse_alu, parse_shift, parse_bitop),
+	(parse_cmp, parse_fmmov, parse_fmov_data, parse_fearith),
+	(parse_dget_set, parse_dalu): Likewise, ensuring assignment from
+	logical expressions.
+	(struct metag_long_option <func>): Return bfd_boolean.
+	(metag_parse_cpu, metag_parse_fpu, metag_parse_dsp): Likewise.
+	* config/tc-msp430.c (msp430_dstoperand): Correct dummy type.
+	* config/tc-s12z.c (parse_operand_func): Return bfd_boolean.
+	(no_operands, lex_force_match, lex_reg_list): Likewise.
+	(size_from_suffix): Return int.
+	(s12z_relax_frag, md_estimate_size_before_relax): Return 0.
+	* config/tc-s12z.h (tc_s12z_fix_adjustable): Likewise.
+
 2021-03-26  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/x86-64-nosse2.s,

@@ -82,7 +82,7 @@ extern unsigned int arm_frag_max_var (struct frag *);
 extern int arm_relax_frag (asection *, struct frag *, long);
 
 #define md_optimize_expr(l,o,r)		arm_optimize_expr (l, o, r)
-extern int arm_optimize_expr (expressionS *, operatorT, expressionS *);
+extern bfd_boolean arm_optimize_expr (expressionS *, operatorT, expressionS *);
 
 #define md_cleanup() arm_cleanup ()
 
@@ -348,7 +348,7 @@ extern int arm_force_relocation (struct fix *);
 extern void arm_cleanup (void);
 extern void arm_start_line_hook (void);
 extern void arm_frob_label (symbolS *);
-extern int arm_data_in_code (void);
+extern bfd_boolean arm_data_in_code (void);
 extern char * arm_canonicalize_symbol_name (char *);
 extern void arm_adjust_symtab (void);
 extern void armelf_frob_symbol (symbolS *, int *);

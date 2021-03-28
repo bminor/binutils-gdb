@@ -472,7 +472,7 @@ parse_mov_port (const char *line, metag_insn *insn,
 		const insn_template *template)
 {
   const char *l = line;
-  unsigned int is_movl = MINOR_OPCODE (template->meta_opcode) == MOVL_MINOR;
+  bfd_boolean is_movl = MINOR_OPCODE (template->meta_opcode) == MOVL_MINOR;
   const metag_reg *dest_regs[2];
   const metag_reg *port_regs[1];
 
@@ -1501,10 +1501,9 @@ parse_mmov (const char *line, metag_insn *insn,
 	    const insn_template *template)
 {
   const char *l = line;
-  unsigned int is_fpu = template->insn_type == INSN_FPU;
-  unsigned int is_prime = ((MINOR_OPCODE (template->meta_opcode) & 0x2) &&
-			   !is_fpu);
-  unsigned int is_64bit = MINOR_OPCODE (template->meta_opcode) & 0x1;
+  bfd_boolean is_fpu = template->insn_type == INSN_FPU;
+  bfd_boolean is_prime = (MINOR_OPCODE (template->meta_opcode) & 0x2) != 0 && !is_fpu;
+  bfd_boolean is_64bit = (MINOR_OPCODE (template->meta_opcode) & 0x1) != 0;
   unsigned int rmask = 0;
 
   if (is_prime)
@@ -1966,9 +1965,9 @@ parse_mov_ct (const char *line, metag_insn *insn,
 {
   const char *l = line;
   const metag_reg *regs[1];
-  unsigned int top = template->meta_opcode & 0x1;
-  unsigned int is_trace = (template->meta_opcode >> 2) & 0x1;
-  unsigned int sign_extend = 0;
+  bfd_boolean top = (template->meta_opcode & 0x1) != 0;
+  bfd_boolean is_trace = ((template->meta_opcode >> 2) & 0x1) != 0;
+  bfd_boolean sign_extend = 0;
   int value = 0;
 
   l = parse_gp_regs (l, regs, 1);
@@ -2005,7 +2004,7 @@ parse_mov_ct (const char *line, metag_insn *insn,
 		(regs[0]->no << 19) |
 		((value & IMM16_MASK) << 3));
 
-  if (sign_extend == 1 && top == 0)
+  if (sign_extend && !top)
     insn->bits |= (1 << 1);
 
   insn->len = 4;
@@ -2291,16 +2290,16 @@ parse_alu (const char *line, metag_insn *insn,
   const metag_reg *dest_regs[1];
   const metag_reg *src_regs[2];
   int value = 0;
-  unsigned int o1z = 0;
-  unsigned int imm = (template->meta_opcode >> 25) & 0x1;
-  unsigned int cond = (template->meta_opcode >> 26) & 0x1;
-  unsigned int ca = (template->meta_opcode >> 5) & 0x1;
-  unsigned int top = template->meta_opcode & 0x1;
-  unsigned int sign_extend = 0;
-  unsigned int is_addr_op = MAJOR_OPCODE (template->meta_opcode) == OPC_ADDR;
-  unsigned int is_mul = MAJOR_OPCODE (template->meta_opcode) == OPC_MUL;
+  bfd_boolean o1z = 0;
+  bfd_boolean imm = ((template->meta_opcode >> 25) & 0x1) != 0;
+  bfd_boolean cond = ((template->meta_opcode >> 26) & 0x1) != 0;
+  bfd_boolean ca = ((template->meta_opcode >> 5) & 0x1) != 0;
+  bfd_boolean top = (template->meta_opcode & 0x1) != 0;
+  bfd_boolean sign_extend = 0;
+  bfd_boolean is_addr_op = MAJOR_OPCODE (template->meta_opcode) == OPC_ADDR;
+  bfd_boolean is_mul = MAJOR_OPCODE (template->meta_opcode) == OPC_MUL;
   unsigned int unit_bit = 0;
-  bfd_boolean is_quickrot = template->arg_type & GP_ARGS_QR;
+  bfd_boolean is_quickrot = (template->arg_type & GP_ARGS_QR) != 0;
 
   l = parse_gp_regs (l, dest_regs, 1);
 
@@ -2511,7 +2510,7 @@ parse_alu (const char *line, metag_insn *insn,
     }
   else
     {
-      unsigned int o2r = 0;
+      bfd_boolean o2r = 0;
       int rs2;
 
       if (cond || !o1z)
@@ -2690,7 +2689,7 @@ parse_alu (const char *line, metag_insn *insn,
 	}
     }
 
-  if (sign_extend == 1 && top == 0)
+  if (sign_extend && !top)
     insn->bits |= (1 << 1);
 
   insn->bits |= unit_bit << 24;
@@ -2787,8 +2786,8 @@ parse_shift (const char *line, metag_insn *insn,
   const metag_reg *regs[2];
   const metag_reg *src2_regs[1];
   int value = 0;
-  unsigned int cond = (template->meta_opcode >> 26) & 0x1;
-  unsigned int ca = (template->meta_opcode >> 5) & 0x1;
+  bfd_boolean cond = ((template->meta_opcode >> 26) & 0x1) != 0;
+  bfd_boolean ca = ((template->meta_opcode >> 5) & 0x1) != 0;
   unsigned int unit_bit = 0;
 
   l = parse_gp_regs (l, regs, 2);
@@ -2910,11 +2909,10 @@ parse_bitop (const char *line, metag_insn *insn,
 {
   const char *l = line;
   const metag_reg *regs[2];
-  unsigned int swap_inst = MAJOR_OPCODE (template->meta_opcode) == OPC_MISC;
-  unsigned int is_bexl = 0;
+  bfd_boolean swap_inst = MAJOR_OPCODE (template->meta_opcode) == OPC_MISC;
+  bfd_boolean is_bexl = 0;
 
-  if (swap_inst &&
-      ((template->meta_opcode >> 1) & 0xb) == 0xa)
+  if (swap_inst && ((template->meta_opcode >> 1) & 0xb) == 0xa)
     is_bexl = 1;
 
   l = parse_gp_regs (l, regs, 2);
@@ -2966,10 +2964,10 @@ parse_cmp (const char *line, metag_insn *insn,
   const metag_reg *dest_regs[1];
   const metag_reg *src_regs[1];
   int value = 0;
-  unsigned int imm = (template->meta_opcode >> 25) & 0x1;
-  unsigned int cond = (template->meta_opcode >> 26) & 0x1;
-  unsigned int top = template->meta_opcode & 0x1;
-  unsigned int sign_extend = 0;
+  bfd_boolean imm = ((template->meta_opcode >> 25) & 0x1) != 0;
+  bfd_boolean cond = ((template->meta_opcode >> 26) & 0x1) != 0;
+  bfd_boolean top = (template->meta_opcode & 0x1) != 0;
+  bfd_boolean sign_extend = 0;
   unsigned int unit_bit = 0;
 
   l = parse_gp_regs (l, dest_regs, 1);
@@ -3039,7 +3037,7 @@ parse_cmp (const char *line, metag_insn *insn,
     }
   else
     {
-      unsigned int o2r = 0;
+      bfd_boolean o2r = 0;
       int rs2;
 
       l = parse_gp_regs (l, src_regs, 1);
@@ -3069,7 +3067,7 @@ parse_cmp (const char *line, metag_insn *insn,
 	insn->bits |= 1;
     }
 
-  if (sign_extend == 1 && top == 0)
+  if (sign_extend && !top)
     insn->bits |= (1 << 1);
 
   insn->bits |= unit_bit << 24;
@@ -3346,7 +3344,7 @@ parse_fmmov (const char *line, metag_insn *insn,
 {
   const char *l = line;
   bfd_boolean to_fpu = MAJOR_OPCODE (template->meta_opcode) == OPC_GET;
-  bfd_boolean is_mmovl = MINOR_OPCODE (template->meta_opcode) & 0x1;
+  bfd_boolean is_mmovl = (MINOR_OPCODE (template->meta_opcode) & 0x1) != 0;
   size_t regs_read = 0;
   const metag_reg *regs[16];
   unsigned int lowest_data_reg = 0xffffffff;
@@ -3457,7 +3455,7 @@ parse_fmov_data (const char *line, metag_insn *insn,
 	    const insn_template *template)
 {
   const char *l = line;
-  unsigned int to_fpu = ((template->meta_opcode >> 7) & 0x1);
+  bfd_boolean to_fpu = ((template->meta_opcode >> 7) & 0x1) != 0;
   const metag_reg *regs[2];
   unsigned int base_unit;
 
@@ -3864,11 +3862,11 @@ parse_fearith (const char *line, metag_insn *insn,
 {
   const char *l = line;
   const metag_reg *regs[3];
-  bfd_boolean is_muz = (MINOR_OPCODE (template->meta_opcode) == 0x6 &&
-			((template->meta_opcode >> 4) & 0x1));
-  unsigned int is_o3o = template->meta_opcode & 0x1;
-  unsigned int is_mac = 0;
-  unsigned int is_maw = 0;
+  bfd_boolean is_muz = (MINOR_OPCODE (template->meta_opcode) == 0x6
+			&& ((template->meta_opcode >> 4) & 0x1) != 0);
+  bfd_boolean is_o3o = (template->meta_opcode & 0x1) != 0;
+  bfd_boolean is_mac = 0;
+  bfd_boolean is_maw = 0;
 
   if (!strncasecmp (template->name, "MAW", 3))
     is_maw = 1;
@@ -4477,8 +4475,8 @@ parse_dget_set (const char *line, metag_insn *insn,
   metag_addr addr;
   int unit = 0;
   int rd_reg = 0;
-  bfd_boolean is_get = (template->meta_opcode & 0x100);
-  bfd_boolean is_dual = (template->meta_opcode & 0x4);
+  bfd_boolean is_get = (template->meta_opcode & 0x100) != 0;
+  bfd_boolean is_dual = (template->meta_opcode & 0x4) != 0;
   bfd_boolean is_template = FALSE;
   const metag_reg *regs[2];
   unsigned int size;
@@ -4966,7 +4964,7 @@ parse_dalu (const char *line, metag_insn *insn,
   bfd_boolean is_mov = MAJOR_OPCODE (template->meta_opcode) == OPC_ADD;
   bfd_boolean is_cmp = ((MAJOR_OPCODE (template->meta_opcode) == OPC_CMP) &&
 			((template->meta_opcode & 0xee) == 0));
-  bfd_boolean is_dual = (insn->dsp_width == DSP_WIDTH_DUAL);
+  bfd_boolean is_dual = insn->dsp_width == DSP_WIDTH_DUAL;
   bfd_boolean is_quickrot64 = ((insn->dsp_action_flags & DSP_ACTION_QR64) != 0);
   int l1_shift = INVALID_SHIFT;
   bfd_boolean load = FALSE;
@@ -5005,7 +5003,7 @@ parse_dalu (const char *line, metag_insn *insn,
   int mx_shift = INVALID_SHIFT;
   int size = is_dual ? 8 : 4;
   bfd_boolean dspram;
-  bfd_boolean conditional = (MINOR_OPCODE (template->meta_opcode) & 0x4);
+  bfd_boolean conditional = (MINOR_OPCODE (template->meta_opcode) & 0x4) != 0;
 
   /* XFIXME: check the flags are valid with the instruction.  */
   if (is_quickrot64 && !(template->arg_type & DSP_ARGS_QR))
@@ -5311,10 +5309,10 @@ parse_dalu (const char *line, metag_insn *insn,
   /* Group 2.  */
   if (template->arg_type & DSP_ARGS_2)
     {
-      bfd_boolean is_xsd = ((MAJOR_OPCODE (template->meta_opcode) == OPC_MISC) &&
-			    (MINOR_OPCODE (template->meta_opcode) == 0xa));
+      bfd_boolean is_xsd = (MAJOR_OPCODE (template->meta_opcode) == OPC_MISC
+			    && MINOR_OPCODE (template->meta_opcode) == 0xa);
       bfd_boolean is_fpu_mov = template->insn_type == INSN_DSP_FPU;
-      bfd_boolean to_fpu = (template->meta_opcode >> 7) & 0x1;
+      bfd_boolean to_fpu = ((template->meta_opcode >> 7) & 0x1) != 0;
 
       if (is_xsd)
 	du_shift = 0;
@@ -5821,7 +5819,7 @@ static const struct metag_core_option metag_dsps[] =
   };
 
 /* Parse a CPU command line option.  */
-static int
+static bfd_boolean
 metag_parse_cpu (const char * str)
 {
   const struct metag_core_option * opt;
@@ -5847,7 +5845,7 @@ metag_parse_cpu (const char * str)
 }
 
 /* Parse an FPU command line option.  */
-static int
+static bfd_boolean
 metag_parse_fpu (const char * str)
 {
   const struct metag_core_option * opt;
@@ -5873,7 +5871,7 @@ metag_parse_fpu (const char * str)
 }
 
 /* Parse a DSP command line option.  */
-static int
+static bfd_boolean
 metag_parse_dsp (const char * str)
 {
   const struct metag_core_option * opt;
@@ -5900,10 +5898,10 @@ metag_parse_dsp (const char * str)
 
 struct metag_long_option
 {
-  const char * option;                /* Substring to match.  */
-  const char * help;                  /* Help information.  */
-  int (* func) (const char * subopt); /* Function to decode sub-option.  */
-  const char * deprecated;            /* If non-null, print this message.  */
+  const char *option;			/* Substring to match.  */
+  const char *help;			/* Help information.  */
+  bfd_boolean (*func) (const char *subopt);	/* Function to decode sub-option.  */
+  const char *deprecated;		/* If non-null, print this message.  */
 };
 
 struct metag_long_option metag_long_opts[] =

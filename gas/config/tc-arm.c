@@ -32175,7 +32175,7 @@ struct arm_long_option_table
 {
   const char * option;			/* Substring to match.	*/
   const char * help;			/* Help information.  */
-  int (* func) (const char * subopt);	/* Function to decode sub-option.  */
+  bfd_boolean (*func) (const char *subopt);	/* Function to decode sub-option.  */
   const char * deprecated;		/* If non-null, print this message.  */
 };
 

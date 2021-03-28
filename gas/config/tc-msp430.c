@@ -2377,7 +2377,7 @@ msp430_dstoperand (struct msp430_operand_s * op,
 		   bfd_boolean allow_20bit_values,
 		   bfd_boolean constants_allowed)
 {
-  int dummy;
+  bfd_boolean dummy;
   int ret = msp430_srcoperand (op, l, bin, & dummy,
 			       allow_20bit_values,
 			       constants_allowed);

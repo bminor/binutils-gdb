@@ -425,7 +425,7 @@ lex_reg_name (uint16_t which, int *reg)
   return false;
 }
 
-static int
+static bfd_boolean
 lex_force_match (char x)
 {
   char *p = input_line_pointer;
@@ -783,7 +783,7 @@ lex_offset (long *val)
 
 struct instruction;
 
-typedef int (*parse_operand_func) (const struct instruction *);
+typedef bfd_boolean (*parse_operand_func) (const struct instruction *);
 
 struct instruction
 {
@@ -805,7 +805,7 @@ struct instruction
   uint8_t alt_opc;
 };
 
-static int
+static bfd_boolean
 no_operands (const struct instruction *insn)
 {
   if (*input_line_pointer != '\0')
@@ -1031,7 +1031,7 @@ clr_xy (const struct instruction *insn ATTRIBUTE_UNUSED)
 
 /* Some instructions have a suffix like ".l", ".b", ".w" etc
    which indicates the size of the operands. */
-static bfd_boolean
+static int
 size_from_suffix  (const struct instruction *insn, int idx)
 {
   const char *dot = strchr (insn->name, '.');
@@ -1342,7 +1342,7 @@ static const uint8_t reg_map [] =
     0x00
   };
 
-static  int
+static bfd_boolean
 lex_reg_list (uint16_t grp, uint16_t *reg_bits)
 {
   if (lex_match (','))
@@ -3858,7 +3858,7 @@ long
 s12z_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS *fragP ATTRIBUTE_UNUSED,
 		   long stretch ATTRIBUTE_UNUSED)
 {
-  return false;
+  return 0;
 }
 
 void
@@ -3877,7 +3877,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec ATTRIBUTE_UNUSED,
 int
 md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED, asection *segment ATTRIBUTE_UNUSED)
 {
-  return false;
+  return 0;
 }
 
 
