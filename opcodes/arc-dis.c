@@ -694,7 +694,7 @@ extract_operand_value (const struct arc_operand *operand,
   else
     {
       if (operand->extract)
-        value = (*operand->extract) (insn, (int *) NULL);
+	value = (*operand->extract) (insn, (bfd_boolean *) NULL);
       else
         {
           if (operand->flags & ARC_OPERAND_ALIGNED32)

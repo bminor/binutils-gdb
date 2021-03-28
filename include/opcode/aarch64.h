@@ -1264,7 +1264,7 @@ struct aarch64_instr_sequence
 
 /* Encoding entrypoint.  */
 
-extern int
+extern bfd_boolean
 aarch64_opcode_encode (const aarch64_opcode *, const aarch64_inst *,
 		       aarch64_insn *, aarch64_opnd_qualifier_t *,
 		       aarch64_operand_error *, aarch64_instr_sequence *);

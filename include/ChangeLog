@@ -1,3 +1,7 @@
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* opcode/aarch64.h (aarch64_opcode_encode): Correct prototype.
+
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
 	PR libctf/27628
