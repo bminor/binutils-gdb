@@ -4930,7 +4930,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command,
 
   cmd = bfd_h_get_32 (abfd, raw.cmd);
   command->type = cmd & ~BFD_MACH_O_LC_REQ_DYLD;
-  command->type_required = cmd & BFD_MACH_O_LC_REQ_DYLD ? TRUE : FALSE;
+  command->type_required = (cmd & BFD_MACH_O_LC_REQ_DYLD) != 0;
   command->len = bfd_h_get_32 (abfd, raw.cmdsize);
   if (command->len < 8 || command->len % 4 != 0)
     return FALSE;

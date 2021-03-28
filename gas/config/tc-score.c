@@ -2551,7 +2551,7 @@ s3_gen_insn_frag (struct s3_score_it *part_1, struct s3_score_it *part_2)
   struct s3_score_it *inst2 = part_2;
   struct s3_score_it backup_inst1;
 
-  pce_p = (inst2) ? TRUE : FALSE;
+  pce_p = inst2 != NULL;
   memcpy (&backup_inst1, inst1, sizeof (struct s3_score_it));
 
   /* Adjust instruction opcode and to be relaxed instruction opcode.  */

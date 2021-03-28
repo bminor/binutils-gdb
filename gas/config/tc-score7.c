@@ -2672,7 +2672,7 @@ s7_gen_insn_frag (struct s7_score_it *part_1, struct s7_score_it *part_2)
   struct s7_score_it *inst2 = part_2;
   struct s7_score_it backup_inst1;
 
-  pce_p = (inst2) ? TRUE : FALSE;
+  pce_p = inst2 != NULL;
   memcpy (&backup_inst1, inst1, sizeof (struct s7_score_it));
 
   /* Adjust instruction opcode and to be relaxed instruction opcode.  */
@@ -6355,7 +6355,7 @@ s7_relax_frag (asection * sec ATTRIBUTE_UNUSED,
 	}
     }
 
-  word_align_p = ((fragp->fr_address + fragp->insn_addr) % 4 == 0) ? TRUE : FALSE;
+  word_align_p = (fragp->fr_address + fragp->insn_addr) % 4 == 0;
 
   /* Get instruction size and relax size after the last relaxation.  */
   if (fragp->fr_opcode)

@@ -1,5 +1,27 @@
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
+	* atof-generic.c (FALSE, TRUE): Don't define.
+	* config/obj-elf.h (FALSE, TRUE): Don't define.
+	* config/obj-som.h (FALSE, TRUE): Don't define.
+	* config/tc-hppa.h (FALSE, TRUE): Don't define.
+	* config/tc-pdp11.c (FALSE, TRUE): Don't define.
+	* config/tc-iq2000.h (obj_fix_adjustable): Delete.
+	* config/tc-m32r.h (TC_FIX_ADJUSTABLE): Delete.
+	* config/tc-mt.h (obj_fix_adjustable): Delete.
+	* config/tc-nds32.h (TC_FIX_ADJUSTABLE): Delete.
+	* config/tc-arc.c (parse_opcode_flags): Simplify boolean expression.
+	(relaxable_flag, relaxable_operand, assemble_insn): Likewise.
+	(tokenize_extregister): Likewise.
+	* config/tc-csky.c (parse_opcode, get_operand_value): Likewise.
+	(parse_operands_op, parse_operands, md_assemble): Likewise.
+	* config/tc-d10v.c (build_insn): Likewise.
+	* config/tc-score.c (s3_gen_insn_frag): Likewise.
+	* config/tc-score7.c (s7_gen_insn_frag, s7_relax_frag): Likewise.
+	* config/tc-tic6x.c (tic6x_update_features, md_assemble): Likewise.
+	* config/tc-z80.c (emit_byte): Likewise.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-arm.c (struct arm_long_option_table <func>): Return
 	bfd_boolean.
 	* config/tc-arm.h (arm_optimize_expr, arm_data_in_code): Likewise.

@@ -245,37 +245,37 @@ verify_constraints (const struct aarch64_inst *, const aarch64_insn, bfd_vma,
 static inline bfd_boolean
 operand_has_inserter (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_HAS_INSERTER) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_HAS_INSERTER) != 0;
 }
 
 static inline bfd_boolean
 operand_has_extractor (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_HAS_EXTRACTOR) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_HAS_EXTRACTOR) != 0;
 }
 
 static inline bfd_boolean
 operand_need_sign_extension (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_SEXT) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_SEXT) != 0;
 }
 
 static inline bfd_boolean
 operand_need_shift_by_two (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_SHIFT_BY_2) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_SHIFT_BY_2) != 0;
 }
 
 static inline bfd_boolean
 operand_need_shift_by_four (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_SHIFT_BY_4) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_SHIFT_BY_4) != 0;
 }
 
 static inline bfd_boolean
 operand_maybe_stack_pointer (const aarch64_operand *operand)
 {
-  return (operand->flags & OPD_F_MAYBE_SP) ? TRUE : FALSE;
+  return (operand->flags & OPD_F_MAYBE_SP) != 0;
 }
 
 /* Return the value of the operand-specific data field (OPD_F_OD_MASK).  */

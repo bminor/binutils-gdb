@@ -9038,7 +9038,7 @@ insert_nds32_elf_blank (nds32_elf_blank_t **blank_p, bfd_vma addr, bfd_vma len)
   if (!*blank_p)
     {
       *blank_p = create_nds32_elf_blank (addr, len);
-      return *blank_p ? TRUE : FALSE;
+      return *blank_p != NULL;
     }
 
   blank_t = search_nds32_elf_blank (*blank_p, addr);

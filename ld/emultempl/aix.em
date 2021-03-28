@@ -834,9 +834,8 @@ gld${EMULATION_NAME}_before_allocation (void)
   /* Let the XCOFF backend set up the .loader section.  */
   if (!bfd_xcoff_size_dynamic_sections
       (link_info.output_bfd, &link_info, libpath, entry_symbol.name, file_align,
-       maxstack, maxdata, gc && !unix_ld ? TRUE : FALSE,
-       modtype, textro ? TRUE : FALSE, flags, special_sections,
-       rtld ? TRUE : FALSE))
+       maxstack, maxdata, gc && !unix_ld,
+       modtype, textro, flags, special_sections, rtld))
     einfo (_("%F%P: failed to set dynamic section sizes: %E\n"));
 
   /* Look through the special sections, and put them in the right

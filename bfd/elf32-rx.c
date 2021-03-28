@@ -3541,8 +3541,8 @@ rx_set_section_contents (bfd *	       abfd,
 			 file_ptr      offset,
 			 bfd_size_type count)
 {
-  bfd_boolean exec = (abfd->flags & EXEC_P) ? TRUE : FALSE;
-  bfd_boolean s_code = (section->flags & SEC_CODE) ? TRUE : FALSE;
+  bfd_boolean exec = (abfd->flags & EXEC_P) != 0;
+  bfd_boolean s_code = (section->flags & SEC_CODE) != 0;
   bfd_boolean rv;
   char * swapped_data = NULL;
   bfd_size_type i;

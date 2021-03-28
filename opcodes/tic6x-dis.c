@@ -214,17 +214,16 @@ tic6x_check_fetch_packet_header (unsigned char *fp,
 
   for (i = 0; i < 7; i++)
     header->word_compact[i]
-      = (header->header & (1u << (21 + i))) ? TRUE : FALSE;
+      = (header->header & (1u << (21 + i))) != 0;
 
-  header->prot = (header->header & (1u << 20)) ? TRUE : FALSE;
-  header->rs = (header->header & (1u << 19)) ? TRUE : FALSE;
+  header->prot = (header->header & (1u << 20)) != 0;
+  header->rs = (header->header & (1u << 19)) != 0;
   header->dsz = (header->header >> 16) & 0x7;
-  header->br = (header->header & (1u << 15)) ? TRUE : FALSE;
-  header->sat = (header->header & (1u << 14)) ? TRUE : FALSE;
+  header->br = (header->header & (1u << 15)) != 0;
+  header->sat = (header->header & (1u << 14)) != 0;
 
   for (i = 0; i < 14; i++)
-    header->p_bits[i]
-      = (header->header & (1u << i)) ? TRUE : FALSE;
+    header->p_bits[i] = (header->header & (1u << i)) != 0;
 
   return TRUE;
 }
@@ -490,7 +489,7 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 	    {
 	      unsigned int prev_opcode
 		= tic6x_extract_32 (fp + (fp_offset & 0x1c) - 4, info);
-	      p_bit = (prev_opcode & 0x1) ? TRUE : FALSE;
+	      p_bit = (prev_opcode & 0x1) != 0;
 	    }
 	}
       else
@@ -518,14 +517,14 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		    {
 		      unsigned int prev_opcode = tic6x_extract_32 (fp_prev + 24,
 								   info);
-		      p_bit = (prev_opcode & 0x1) ? TRUE : FALSE;
+		      p_bit = (prev_opcode & 0x1) != 0;
 		    }
 		}
 	      else
 		{
 		  unsigned int prev_opcode = tic6x_extract_32 (fp_prev + 28,
 							       info);
-		  p_bit = (prev_opcode & 0x1) ? TRUE : FALSE;
+		  p_bit = (prev_opcode & 0x1) != 0;
 		}
 	    }
 	}
@@ -654,7 +653,7 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		  printf ("opcode %x: illegal cross path specifier in adda opcode!\n", opcode);
 		  abort ();
 		}
-	      func_unit_cross = (func_unit_side == 1 ? TRUE : FALSE);
+	      func_unit_cross = func_unit_side == 1;
 	    }
 
 	  switch (opc->func_unit)
@@ -1344,7 +1343,7 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		  side = func_unit_side == 2 ? 'b' : 'a';
 		  snprintf (base, 4, "%c%u", side, mem_base_reg);
 
-		  offset_is_reg = ((mem_mode & 4) ? TRUE : FALSE);
+		  offset_is_reg = (mem_mode & 4) != 0;
 		  if (offset_is_reg)
 		    {
 
@@ -1355,7 +1354,7 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		      snprintf (offset, 4, "%c%u", side, reg_base + mem_offset);
 		      if (opc->operand_info[op_num].form
 			  == tic6x_operand_mem_ndw)
-			offset_scaled = mem_scaled ? TRUE : FALSE;
+			offset_scaled = mem_scaled != 0;
 		      else
 			offset_scaled = TRUE;
 		    }
@@ -1364,7 +1363,7 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		      if (opc->operand_info[op_num].form
 			  == tic6x_operand_mem_ndw)
 			{
-			  offset_scaled = mem_scaled ? TRUE : FALSE;
+			  offset_scaled = mem_scaled != 0;
 			  snprintf (offset, 4, "%u", mem_offset);
 			}
 		      else

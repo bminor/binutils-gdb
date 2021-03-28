@@ -105,17 +105,15 @@ const char *const aarch64_sve_prfop_array[16] = {
 static inline bfd_boolean
 vector_qualifier_p (enum aarch64_opnd_qualifier qualifier)
 {
-  return ((qualifier >= AARCH64_OPND_QLF_V_8B
-	  && qualifier <= AARCH64_OPND_QLF_V_1Q) ? TRUE
-	  : FALSE);
+  return (qualifier >= AARCH64_OPND_QLF_V_8B
+	  && qualifier <= AARCH64_OPND_QLF_V_1Q);
 }
 
 static inline bfd_boolean
 fp_qualifier_p (enum aarch64_opnd_qualifier qualifier)
 {
-  return ((qualifier >= AARCH64_OPND_QLF_S_B
-	  && qualifier <= AARCH64_OPND_QLF_S_Q) ? TRUE
-	  : FALSE);
+  return (qualifier >= AARCH64_OPND_QLF_S_B
+	  && qualifier <= AARCH64_OPND_QLF_S_Q);
 }
 
 enum data_pattern
@@ -144,12 +142,12 @@ static const char significant_operand_index [] =
 static enum data_pattern
 get_data_pattern (const aarch64_opnd_qualifier_seq_t qualifiers)
 {
-  if (vector_qualifier_p (qualifiers[0]) == TRUE)
+  if (vector_qualifier_p (qualifiers[0]))
     {
       /* e.g. v.4s, v.4s, v.4s
 	   or v.4h, v.4h, v.h[3].  */
       if (qualifiers[0] == qualifiers[1]
-	  && vector_qualifier_p (qualifiers[2]) == TRUE
+	  && vector_qualifier_p (qualifiers[2])
 	  && (aarch64_get_qualifier_esize (qualifiers[0])
 	      == aarch64_get_qualifier_esize (qualifiers[1]))
 	  && (aarch64_get_qualifier_esize (qualifiers[0])
@@ -158,14 +156,14 @@ get_data_pattern (const aarch64_opnd_qualifier_seq_t qualifiers)
       /* e.g. v.8h, v.8b, v.8b.
            or v.4s, v.4h, v.h[2].
 	   or v.8h, v.16b.  */
-      if (vector_qualifier_p (qualifiers[1]) == TRUE
+      if (vector_qualifier_p (qualifiers[1])
 	  && aarch64_get_qualifier_esize (qualifiers[0]) != 0
 	  && (aarch64_get_qualifier_esize (qualifiers[0])
 	      == aarch64_get_qualifier_esize (qualifiers[1]) << 1))
 	return DP_VECTOR_LONG;
       /* e.g. v.8h, v.8h, v.8b.  */
       if (qualifiers[0] == qualifiers[1]
-	  && vector_qualifier_p (qualifiers[2]) == TRUE
+	  && vector_qualifier_p (qualifiers[2])
 	  && aarch64_get_qualifier_esize (qualifiers[0]) != 0
 	  && (aarch64_get_qualifier_esize (qualifiers[0])
 	      == aarch64_get_qualifier_esize (qualifiers[2]) << 1)
@@ -173,10 +171,10 @@ get_data_pattern (const aarch64_opnd_qualifier_seq_t qualifiers)
 	      == aarch64_get_qualifier_esize (qualifiers[1])))
 	return DP_VECTOR_WIDE;
     }
-  else if (fp_qualifier_p (qualifiers[0]) == TRUE)
+  else if (fp_qualifier_p (qualifiers[0]))
     {
       /* e.g. SADDLV <V><d>, <Vn>.<T>.  */
-      if (vector_qualifier_p (qualifiers[1]) == TRUE
+      if (vector_qualifier_p (qualifiers[1])
 	  && qualifiers[2] == AARCH64_OPND_QLF_NIL)
 	return DP_VECTOR_ACROSS_LANES;
     }
@@ -427,7 +425,7 @@ enum aarch64_modifier_kind
 aarch64_get_operand_modifier_from_value (aarch64_insn value,
 					 bfd_boolean extend_p)
 {
-  if (extend_p == TRUE)
+  if (extend_p)
     return AARCH64_MOD_UXTB + value;
   else
     return AARCH64_MOD_LSL - value;
@@ -436,15 +434,13 @@ aarch64_get_operand_modifier_from_value (aarch64_insn value,
 bfd_boolean
 aarch64_extend_operator_p (enum aarch64_modifier_kind kind)
 {
-  return (kind > AARCH64_MOD_LSL && kind <= AARCH64_MOD_SXTX)
-    ? TRUE : FALSE;
+  return kind > AARCH64_MOD_LSL && kind <= AARCH64_MOD_SXTX;
 }
 
 static inline bfd_boolean
 aarch64_shift_operator_p (enum aarch64_modifier_kind kind)
 {
-  return (kind >= AARCH64_MOD_ROR && kind <= AARCH64_MOD_LSL)
-    ? TRUE : FALSE;
+  return kind >= AARCH64_MOD_ROR && kind <= AARCH64_MOD_LSL;
 }
 
 const struct aarch64_name_value_pair aarch64_barrier_options[16] =
@@ -767,15 +763,13 @@ struct operand_qualifier_data aarch64_opnd_qualifiers[] =
 static inline bfd_boolean
 operand_variant_qualifier_p (aarch64_opnd_qualifier_t qualifier)
 {
-  return (aarch64_opnd_qualifiers[qualifier].kind == OQK_OPD_VARIANT)
-    ? TRUE : FALSE;
+  return aarch64_opnd_qualifiers[qualifier].kind == OQK_OPD_VARIANT;
 }
 
 static inline bfd_boolean
 qualifier_value_in_range_constraint_p (aarch64_opnd_qualifier_t qualifier)
 {
-  return (aarch64_opnd_qualifiers[qualifier].kind == OQK_VALUE_IN_RANGE)
-    ? TRUE : FALSE;
+  return aarch64_opnd_qualifiers[qualifier].kind == OQK_VALUE_IN_RANGE;
 }
 
 const char*
@@ -789,35 +783,35 @@ aarch64_get_qualifier_name (aarch64_opnd_qualifier_t qualifier)
 unsigned char
 aarch64_get_qualifier_esize (aarch64_opnd_qualifier_t qualifier)
 {
-  assert (operand_variant_qualifier_p (qualifier) == TRUE);
+  assert (operand_variant_qualifier_p (qualifier));
   return aarch64_opnd_qualifiers[qualifier].data0;
 }
 
 unsigned char
 aarch64_get_qualifier_nelem (aarch64_opnd_qualifier_t qualifier)
 {
-  assert (operand_variant_qualifier_p (qualifier) == TRUE);
+  assert (operand_variant_qualifier_p (qualifier));
   return aarch64_opnd_qualifiers[qualifier].data1;
 }
 
 aarch64_insn
 aarch64_get_qualifier_standard_value (aarch64_opnd_qualifier_t qualifier)
 {
-  assert (operand_variant_qualifier_p (qualifier) == TRUE);
+  assert (operand_variant_qualifier_p (qualifier));
   return aarch64_opnd_qualifiers[qualifier].data2;
 }
 
 static int
 get_lower_bound (aarch64_opnd_qualifier_t qualifier)
 {
-  assert (qualifier_value_in_range_constraint_p (qualifier) == TRUE);
+  assert (qualifier_value_in_range_constraint_p (qualifier));
   return aarch64_opnd_qualifiers[qualifier].data0;
 }
 
 static int
 get_upper_bound (aarch64_opnd_qualifier_t qualifier)
 {
-  assert (qualifier_value_in_range_constraint_p (qualifier) == TRUE);
+  assert (qualifier_value_in_range_constraint_p (qualifier));
   return aarch64_opnd_qualifiers[qualifier].data1;
 }
 
@@ -951,7 +945,7 @@ aarch64_find_best_match (const aarch64_inst *inst,
 
       /* Most opcodes has much fewer patterns in the list.
 	 First NIL qualifier indicates the end in the list.   */
-      if (empty_qualifier_sequence_p (qualifiers) == TRUE)
+      if (empty_qualifier_sequence_p (qualifiers))
 	{
 	  DEBUG_TRACE_IF (i == 0, "SUCCEED: empty qualifier list");
 	  if (i)
@@ -1023,7 +1017,7 @@ aarch64_find_best_match (const aarch64_inst *inst,
    Return 1 if the operand qualifier(s) in *INST match one of the qualifier
    sequences in INST->OPCODE->qualifiers_list; otherwise return 0.
 
-   if UPDATE_P == TRUE, update the qualifier(s) in *INST after the matching
+   if UPDATE_P, update the qualifier(s) in *INST after the matching
    succeeds.  */
 
 static int
@@ -1049,7 +1043,7 @@ match_operands_qualifier (aarch64_inst *inst, bfd_boolean update_p)
     }
 
   /* Update the qualifiers.  */
-  if (update_p == TRUE)
+  if (update_p)
     for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
       {
 	if (inst->opcode->operands[i] == AARCH64_OPND_NIL)
@@ -3539,7 +3533,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_UIMM4_ADDG:
     case AARCH64_OPND_UIMM7:
     case AARCH64_OPND_UIMM10:
-      if (optional_operand_p (opcode, idx) == TRUE
+      if (optional_operand_p (opcode, idx)
 	  && (opnd->imm.value ==
 	      (int64_t) get_optional_operand_default_value (opcode)))
 	/* Omit the operand, e.g. DCPS1.  */

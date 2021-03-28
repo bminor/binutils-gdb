@@ -1,3 +1,10 @@
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/aix.em (gld${EMULATION_NAME}_before_allocation): Simplify
+	boolean expression.
+	* lexsup.c (parse_args): Likewise.
+	* pe-dll.c (pe_dll_id_target): Likewise.
+
 2021-03-25  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/array.d: Only check that the data object

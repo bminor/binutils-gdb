@@ -16395,7 +16395,7 @@ _bfd_mips_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 bfd_boolean
 _bfd_mips_elf_ignore_undef_symbol (struct elf_link_hash_entry *h)
 {
-  return ELF_MIPS_IS_OPTIONAL (h->other) ? TRUE : FALSE;
+  return ELF_MIPS_IS_OPTIONAL (h->other) != 0;
 }
 
 bfd_boolean

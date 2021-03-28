@@ -439,7 +439,7 @@ pe_dll_id_target (const char *target)
 	  bfd_get_target_info (target, NULL, NULL, &u, NULL);
 	if (u == -1)
 	  abort ();
-	pe_detail_list[i].underscored = (u != 0 ? TRUE : FALSE);
+	pe_detail_list[i].underscored = u != 0;
 	pe_details = pe_detail_list + i;
 	pe_leading_underscore = (u != 0 ? 1 : 0);
 	return;

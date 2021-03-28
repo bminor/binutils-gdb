@@ -4950,7 +4950,7 @@ dump_bfd (bfd *abfd, bfd_boolean is_mainfile)
 	{
 	  if (!print_debugging_info (stdout, dhandle, abfd, syms,
 				     bfd_demangle,
-				     dump_debugging_tags ? TRUE : FALSE))
+				     dump_debugging_tags != 0))
 	    {
 	      non_fatal (_("%s: printing debugging information failed"),
 			 bfd_get_filename (abfd));

@@ -55,7 +55,7 @@ name_for_global_symbol (struct elf_link_hash_entry *h)
     Elf_Internal_Rela _rel;						\
     bfd_byte * _loc;							\
 									\
-    if (_htab->dynamic_sections_created == TRUE)				\
+    if (_htab->dynamic_sections_created)				\
       {									\
 	BFD_ASSERT (_htab->srel##SECTION &&_htab->srel##SECTION->contents); \
 	_loc = _htab->srel##SECTION->contents				\
@@ -128,13 +128,13 @@ bfd_put_32_me (bfd *abfd, bfd_vma value,unsigned char *data)
 static ATTRIBUTE_UNUSED bfd_boolean
 is_reloc_PC_relative (reloc_howto_type *howto)
 {
-  return (strstr (howto->name, "PC") != NULL) ? TRUE : FALSE;
+  return strstr (howto->name, "PC") != NULL;
 }
 
 static bfd_boolean
 is_reloc_SDA_relative (reloc_howto_type *howto)
 {
-  return (strstr (howto->name, "SDA") != NULL) ? TRUE : FALSE;
+  return strstr (howto->name, "SDA") != NULL;
 }
 
 static bfd_boolean
@@ -142,19 +142,19 @@ is_reloc_for_GOT (reloc_howto_type * howto)
 {
   if (strstr (howto->name, "TLS") != NULL)
     return FALSE;
-  return (strstr (howto->name, "GOT") != NULL) ? TRUE : FALSE;
+  return strstr (howto->name, "GOT") != NULL;
 }
 
 static bfd_boolean
 is_reloc_for_PLT (reloc_howto_type * howto)
 {
-  return (strstr (howto->name, "PLT") != NULL) ? TRUE : FALSE;
+  return strstr (howto->name, "PLT") != NULL;
 }
 
 static bfd_boolean
 is_reloc_for_TLS (reloc_howto_type *howto)
 {
-  return (strstr (howto->name, "TLS") != NULL) ? TRUE : FALSE;
+  return strstr (howto->name, "TLS") != NULL;
 }
 
 struct arc_relocation_data

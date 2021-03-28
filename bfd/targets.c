@@ -1654,8 +1654,7 @@ bfd_get_target_info (const char *target_name, bfd *abfd,
   if (! target_vec)
     return NULL;
   if (is_bigendian)
-    *is_bigendian = ((target_vec->byteorder == BFD_ENDIAN_BIG) ? TRUE
-							       : FALSE);
+    *is_bigendian = target_vec->byteorder == BFD_ENDIAN_BIG;
   if (underscoring)
     *underscoring = ((int) target_vec->symbol_leading_char) & 0xff;
 

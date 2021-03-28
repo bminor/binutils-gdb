@@ -21,13 +21,6 @@
 #include "as.h"
 #include "safe-ctype.h"
 
-#ifndef FALSE
-#define FALSE (0)
-#endif
-#ifndef TRUE
-#define TRUE  (1)
-#endif
-
 #ifdef TRACE
 static void flonum_print (const FLONUM_TYPE *);
 #endif

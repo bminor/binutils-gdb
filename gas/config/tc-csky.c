@@ -3314,7 +3314,7 @@ parse_opcode (char *str)
     {
       /* Is csky force 32 or 16 instruction?  */
       if (IS_CSKY_V2 (mach_flag)
-	  && *opcode_end == '.' && has_suffix == FALSE)
+	  && *opcode_end == '.' && !has_suffix)
 	{
 	  has_suffix = TRUE;
 	  if (IS_OPCODE32F (opcode_end))
@@ -3334,7 +3334,7 @@ parse_opcode (char *str)
     }
 
   /* Is csky force 32 or 16 instruction?  */
-  if (has_suffix == FALSE)
+  if (!has_suffix)
     {
       if (IS_CSKY_V2 (mach_flag) && IS_OPCODE32F (opcode_end))
 	{
@@ -3350,7 +3350,7 @@ parse_opcode (char *str)
   name[nlen] = '\0';
 
   /* Generate macro_name for finding hash in macro hash_table.  */
-  if (has_suffix == TRUE)
+  if (has_suffix)
     nlen += 2;
   strncpy (macro_name, str, nlen);
   macro_name[nlen] = '\0';
@@ -3439,7 +3439,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  return FALSE;
 	}
 
-      if (get_operand_value (op, oper, &soprnd->subs[0]) == FALSE)
+      if (!get_operand_value (op, oper, &soprnd->subs[0]))
 	{
 	  *s = rc;
 	  return FALSE;
@@ -3452,7 +3452,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  return FALSE;
 	}
 
-      if (get_operand_value (op, oper, &soprnd->subs[1]) == FALSE)
+      if (!get_operand_value (op, oper, &soprnd->subs[1]))
 	{
 	  *s = rc;
 	  return FALSE;
@@ -3610,7 +3610,7 @@ get_operand_value (struct csky_opcode_info *op,
 	  int val = csky_insn.val[csky_insn.idx - 1];
 	  log = csky_log_2 (val);
 	  csky_insn.val[csky_insn.idx - 1] = log;
-	  return (log == -1 ? FALSE : TRUE);
+	  return log != -1;
 	}
       else
 	return FALSE;
@@ -3632,7 +3632,7 @@ get_operand_value (struct csky_opcode_info *op,
 	      }
 	    else
 	      csky_insn.val[csky_insn.idx - 1] = log;
-	    return (log == -1 ? FALSE : TRUE);
+	    return log != -1;
 	  }
 	else
 	  return FALSE;
@@ -3794,11 +3794,11 @@ get_operand_value (struct csky_opcode_info *op,
 	else
 	  {
 	    csky_insn.val[csky_insn.idx] = 0;
-	    if (is_psr_bit (oper) != FALSE)
+	    if (is_psr_bit (oper))
 	      while (**oper == ',')
 		{
 		  *oper += 1;
-		  if (is_psr_bit (oper) == FALSE)
+		  if (!is_psr_bit (oper))
 		    {
 		      ret = FALSE;
 		      break;
@@ -3806,7 +3806,7 @@ get_operand_value (struct csky_opcode_info *op,
 		}
 	    else
 	      ret = FALSE;
-	    if (ret == TRUE && IS_CSKY_V1 (mach_flag)
+	    if (ret && IS_CSKY_V1 (mach_flag)
 		&& csky_insn.val[csky_insn.idx] > 8)
 	      ret = FALSE;
 	  }
@@ -4315,7 +4315,7 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 	    oper++;
 	  flag_pass = get_operand_value (&op[i], &oper,
 					 &op[i].oprnd.oprnds[j]);
-	  if (flag_pass == FALSE)
+	  if (!flag_pass)
 	    break;
 	  while (ISSPACE (*oper))
 	    oper++;
@@ -4342,7 +4342,7 @@ parse_operands_op (char *str, struct csky_opcode_info *op)
 	}
       /* Parse operands in one table end.  */
 
-      if (flag_pass == TRUE)
+      if (flag_pass)
 	{
 	  /* Parse operands success, set opcode_idx.  */
 	  csky_insn.opcode_idx = i;
@@ -4366,7 +4366,7 @@ parse_operands (char *str)
   if (csky_insn.flag_force == INSN_OPCODE16F
       && (csky_insn.opcode->isa_flag16 & isa_flag) != 0)
     {
-      if (parse_operands_op (oper, csky_insn.opcode->op16) == TRUE)
+      if (parse_operands_op (oper, csky_insn.opcode->op16))
 	{
 	  csky_insn.isize = 2;
 	  return TRUE;
@@ -4376,7 +4376,7 @@ parse_operands (char *str)
   else if (csky_insn.flag_force == INSN_OPCODE32F
 	   && (csky_insn.opcode->isa_flag32 & isa_flag) != 0)
     {
-      if (parse_operands_op (oper, csky_insn.opcode->op32) == TRUE)
+      if (parse_operands_op (oper, csky_insn.opcode->op32))
 	{
 	  csky_insn.isize = 4;
 	  return TRUE;
@@ -4386,13 +4386,13 @@ parse_operands (char *str)
   else
     {
       if ((csky_insn.opcode->isa_flag16 & isa_flag) != 0
-	  && parse_operands_op (oper, csky_insn.opcode->op16) == TRUE)
+	  && parse_operands_op (oper, csky_insn.opcode->op16))
 	{
 	  csky_insn.isize = 2;
 	  return TRUE;
 	}
       if ((csky_insn.opcode->isa_flag32 & isa_flag) != 0
-	  && parse_operands_op (oper, csky_insn.opcode->op32) == TRUE)
+	  && parse_operands_op (oper, csky_insn.opcode->op32))
 	{
 	  csky_insn.isize = 4;
 	  return TRUE;
@@ -4559,7 +4559,7 @@ md_assemble (char *str)
   while (ISSPACE (* str))
     str++;
   /* Get opcode from str.  */
-  if (parse_opcode (str) == FALSE)
+  if (!parse_opcode (str))
     {
       csky_show_error (ERROR_OPCODE_ILLEGAL, 0, NULL, NULL);
       return;
@@ -4586,7 +4586,7 @@ md_assemble (char *str)
     }
 
   /* Parse the operands according to operand type.  */
-  if (parse_operands (csky_insn.opcode_end) == FALSE)
+  if (!parse_operands (csky_insn.opcode_end))
     {
       csky_show_error (error_state.err_num, error_state.opnum,
 		       (void *)error_state.arg1, (void *)error_state.arg1);
@@ -4608,7 +4608,7 @@ md_assemble (char *str)
     }
 
   /* Adjust for xtrb0/xtrb1/xtrb2/xtrb3/divs/divu in csky v1 ISA.  */
-  if (mov_r1_after == TRUE)
+  if (mov_r1_after)
     {
       unsigned int mov_insn = CSKYV1_INST_MOV_RX_R1;
       mov_insn |= csky_insn.val[0];
@@ -4618,7 +4618,7 @@ md_assemble (char *str)
       md_number_to_chars (csky_insn.output, mov_insn, 2);
       csky_insn.isize += 2;
     }
-  if (mov_r1_before == TRUE)
+  if (mov_r1_before)
     csky_insn.isize += 2;
 
   /* Check literal.  */

@@ -1732,7 +1732,7 @@ parse_opcode_flags (const struct arc_opcode *opcode,
     }
 
   /* Did I check all the parsed flags?  */
-  return lnflg ? FALSE : TRUE;
+  return lnflg == 0;
 }
 
 
@@ -3754,7 +3754,7 @@ relaxable_flag (const struct arc_relaxable_ins *ins,
     }
 
   /* If counttrue == nflgs, then all flags have been found.  */
-  return (counttrue == nflgs ? TRUE : FALSE);
+  return counttrue == nflgs;
 }
 
 /* Checks if operands are in line with relaxable insn.  */
@@ -3831,7 +3831,7 @@ relaxable_operand (const struct arc_relaxable_ins *ins,
       operand = &ins->operands[i];
     }
 
-  return (i == ntok ? TRUE : FALSE);
+  return i == ntok;
 }
 
 /* Return TRUE if this OPDCODE is a candidate for relaxation.  */
@@ -4073,8 +4073,7 @@ assemble_insn (const struct arc_opcode *opcode,
 	      pcrel = reloc_howto->pc_relative;
 	    }
 	  fixup->pcrel = pcrel;
-	  fixup->islong = (operand->flags & ARC_OPERAND_LIMM) ?
-	    TRUE : FALSE;
+	  fixup->islong = (operand->flags & ARC_OPERAND_LIMM) != 0;
 	  break;
 	}
     }
@@ -4675,9 +4674,8 @@ tokenize_extregister (extRegister_t *ereg, int opertype)
   char c;
   char *p;
   int number, imode = 0;
-  bfd_boolean isCore_p = (opertype == EXT_CORE_REGISTER) ? TRUE : FALSE;
-  bfd_boolean isReg_p  = (opertype == EXT_CORE_REGISTER
-			  || opertype == EXT_AUX_REGISTER) ? TRUE : FALSE;
+  bfd_boolean isCore_p = opertype == EXT_CORE_REGISTER;
+  bfd_boolean isReg_p = opertype == EXT_CORE_REGISTER || opertype == EXT_AUX_REGISTER;
 
   /* 1st: get register name.  */
   SKIP_WHITESPACE ();

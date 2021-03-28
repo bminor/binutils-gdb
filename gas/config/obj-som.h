@@ -30,11 +30,6 @@
 #include "som/reloc.h"
 #include "targ-cpu.h"
 
-#ifndef FALSE
-#define FALSE 0
-#define TRUE !FALSE
-#endif
-
 /* should be conditional on address size!  */
 #define som_symbol(asymbol) ((som_symbol_type *) (&(asymbol)->the_bfd))
 

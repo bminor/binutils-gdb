@@ -114,11 +114,6 @@ struct elf_section_match
 
 #define OBJ_SYMFIELD_TYPE struct elf_obj_sy
 
-#ifndef FALSE
-#define FALSE 0
-#define TRUE  !FALSE
-#endif
-
 #ifndef obj_begin
 #define obj_begin() elf_begin ()
 #endif

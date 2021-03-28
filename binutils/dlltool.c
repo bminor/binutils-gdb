@@ -3957,7 +3957,7 @@ main (int ac, char **av)
       bfd_get_target_info (mtable[machine].how_bfd_target, NULL,
                            NULL, &u, NULL);
     if (u != -1)
-      leading_underscore = (u != 0 ? TRUE : FALSE);
+      leading_underscore = u != 0;
   }
 
   if (!dll_name && exp_name)

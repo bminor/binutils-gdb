@@ -2698,7 +2698,7 @@ or1k_set_got_and_rela_sizes (const unsigned char tls_type,
       is_tls_entry = TRUE;
     }
 
-  if (is_tls_entry == FALSE)
+  if (!is_tls_entry)
     *got_size += 4;
 
   if (dynamic)
@@ -2709,7 +2709,7 @@ or1k_set_got_and_rela_sizes (const unsigned char tls_type,
       if ((tls_type & TLS_IE) != 0)
 	*rela_size += sizeof (Elf32_External_Rela);
 
-      if (is_tls_entry == FALSE)
+      if (!is_tls_entry)
 	*rela_size += sizeof (Elf32_External_Rela);
     }
 }

@@ -24,9 +24,6 @@
 
 extern int flonum_gen2vax (int, FLONUM_TYPE * f, LITTLENUM_TYPE *);
 
-#define TRUE  1
-#define FALSE 0
-
 /* A representation for PDP-11 machine code.  */
 struct pdp11_code
 {

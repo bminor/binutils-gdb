@@ -1,5 +1,23 @@
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h (aout_link_write_symbols): Don't cast boolean expression
+	to bfd_boolean.
+	* elf32-or1k.c (or1k_set_got_and_rela_sizes): Dont compare booleans
+	against FALSE.
+	* elf32-arc.c (name_for_global_symbol): Don't compare boolean to TRUE.
+	(is_reloc_PC_relative): Don't use "boolean_condition ? TRUE : FALSE".
+	(is_reloc_SDA_relative, is_reloc_for_GOT): Likewise.
+	(is_reloc_for_PLT, is_reloc_for_TLS): Likewise.
+	* elf32-arm.c (stm32l4xx_need_create_replacing_stub): Likewise.
+	* elf32-nds32.c (insert_nds32_elf_blank): Likewise.
+	* elf32-rx.c (rx_set_section_contents): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_ignore_undef_symbol): Likewise.
+	* mach-o.c (bfd_mach_o_read_command): Likewise.
+	* targets.c (bfd_get_target_info): Likewise.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
 	* coff-z80.c (z80_is_local_label_name): Return bfd_boolean.
 	* elf32-z80.c (z80_is_local_label_name): Likewise.
 	* elf32-spu.c (spu_elf_modify_headers): Likewise.

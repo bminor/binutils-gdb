@@ -1226,7 +1226,7 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
     {
       /* For symbols only, constants are stored at begin of function.  */
       fix_new_exp (frag_now, p - frag_now->fr_literal, 1, val,
-		   (r_type == BFD_RELOC_8_PCREL) ? TRUE : FALSE, r_type);
+		   r_type == BFD_RELOC_8_PCREL, r_type);
     }
 }
 

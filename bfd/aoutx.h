@@ -5209,7 +5209,7 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
 	      /* If we have already included a header file with the
 		 same value, then replace this one with an N_EXCL
 		 symbol.  */
-	      copy = (bfd_boolean) (! flaginfo->info->keep_memory);
+	      copy = !flaginfo->info->keep_memory;
 	      incl_entry = aout_link_includes_lookup (&flaginfo->includes,
 						      name, TRUE, copy);
 	      if (incl_entry == NULL)

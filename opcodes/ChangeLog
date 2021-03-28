@@ -1,5 +1,26 @@
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
+	* aarch64-opc.c (vector_qualifier_p): Simplify boolean expression.
+	(fp_qualifier_p, get_data_pattern): Likewise.
+	(aarch64_get_operand_modifier_from_value): Likewise.
+	(aarch64_extend_operator_p, aarch64_shift_operator_p): Likewise.
+	(operand_variant_qualifier_p): Likewise.
+	(qualifier_value_in_range_constraint_p): Likewise.
+	(aarch64_get_qualifier_esize): Likewise.
+	(aarch64_get_qualifier_nelem): Likewise.
+	(aarch64_get_qualifier_standard_value): Likewise.
+	(get_lower_bound, get_upper_bound): Likewise.
+	(aarch64_find_best_match, match_operands_qualifier): Likewise.
+	(aarch64_print_operand): Likewise.
+	* aarch64-opc.h (operand_has_inserter, operand_has_extractor): Likewise.
+	(operand_need_sign_extension, operand_need_shift_by_two): Likewise.
+	(operand_need_shift_by_four, operand_maybe_stack_pointer): Likewise.
+	* arm-dis.c (print_insn_mve, print_insn_thumb32): Likewise.
+	* tic6x-dis.c (tic6x_check_fetch_packet_header): Likewise.
+	(print_insn_tic6x): Likewise.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
 	* arc-dis.c (extract_operand_value): Correct NULL cast.
 	* frv-opc.h: Regenerate.
 

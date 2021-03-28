@@ -49,9 +49,6 @@ extern void mt_apply_fix (struct fix *, valueT *, segT);
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
 
-#define obj_fix_adjustable(fixP) iq2000_fix_adjustable (fixP)
-extern bfd_boolean mt_fix_adjustable (struct fix *);
-
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 

@@ -350,16 +350,14 @@ tic6x_update_features (void)
   tic6x_num_registers
     = (tic6x_arch_enable & (TIC6X_INSN_C64X | TIC6X_INSN_C67XP)) ? 32 : 16;
 
-  tic6x_predicate_a0 = (tic6x_arch_enable & TIC6X_INSN_C64X) ? TRUE : FALSE;
+  tic6x_predicate_a0 = (tic6x_arch_enable & TIC6X_INSN_C64X) != 0;
 
   tic6x_can_cross_fp_boundary
-    = (tic6x_arch_enable
-       & (TIC6X_INSN_C64X | TIC6X_INSN_C67XP)) ? TRUE : FALSE;
+    = (tic6x_arch_enable & (TIC6X_INSN_C64X | TIC6X_INSN_C67XP)) != 0;
 
-  tic6x_long_data_constraints
-    = (tic6x_arch_enable & TIC6X_INSN_C64X) ? FALSE : TRUE;
+  tic6x_long_data_constraints = (tic6x_arch_enable & TIC6X_INSN_C64X) == 0;
 
-  tic6x_compact_insns = (tic6x_arch_enable & TIC6X_INSN_C64XP) ? TRUE : FALSE;
+  tic6x_compact_insns = (tic6x_arch_enable & TIC6X_INSN_C64XP) != 0;
 }
 
 /* Do configuration after all options have been parsed.  */
@@ -3620,7 +3618,7 @@ md_assemble (char *str)
 				       seginfo->tc_segment_info_data.sploop_ii,
 				       &fix_exp, &fix_pcrel, &fx_r_type,
 				       &fix_adda, &fix_needed, &encoded_ok,
-				       (try_rank == min_rank ? TRUE : FALSE),
+				       try_rank == min_rank,
 				       str, opc_len);
       if (encoded_ok)
 	{

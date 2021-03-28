@@ -9887,11 +9887,11 @@ print_insn_mve (struct disassemble_info *info, long given)
 	  if (is_undefined)
 	    print_mve_undefined (info, undefined_cond);
 
-	  if ((vpt_block_state.in_vpt_block == FALSE)
+	  if (!vpt_block_state.in_vpt_block
 	      && !ifthen_state
-	      && (is_vpt_instruction (given) == TRUE))
+	      && is_vpt_instruction (given))
 	    mark_inside_vpt_block (given);
-	  else if (vpt_block_state.in_vpt_block == TRUE)
+	  else if (vpt_block_state.in_vpt_block)
 	    update_vpt_block_state ();
 
 	  return TRUE;
@@ -10841,7 +10841,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
   if (print_insn_coprocessor (pc, info, given, TRUE))
     return;
 
-  if ((is_mve == FALSE) && print_insn_neon (info, given, TRUE))
+  if (!is_mve && print_insn_neon (info, given, TRUE))
     return;
 
   if (is_mve && print_insn_mve (info, given))

@@ -1091,7 +1091,7 @@ parse_args (unsigned argc, char **argv)
 	     getopt can't handle two args to an option without kludges.  */
 
 	  /* Enable optimizations of output files.  */
-	  link_info.optimize = strtoul (optarg, NULL, 0) ? TRUE : FALSE;
+	  link_info.optimize = strtoul (optarg, NULL, 0) != 0;
 	  break;
 	case 'o':
 	  lang_add_output (optarg, 0);

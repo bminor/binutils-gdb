@@ -900,13 +900,13 @@ extern aarch64_opcode aarch64_opcode_table[];
 static inline bfd_boolean
 alias_opcode_p (const aarch64_opcode *opcode)
 {
-  return (opcode->flags & F_ALIAS) ? TRUE : FALSE;
+  return (opcode->flags & F_ALIAS) != 0;
 }
 
 static inline bfd_boolean
 opcode_has_alias (const aarch64_opcode *opcode)
 {
-  return (opcode->flags & F_HAS_ALIAS) ? TRUE : FALSE;
+  return (opcode->flags & F_HAS_ALIAS) != 0;
 }
 
 /* Priority for disassembling preference.  */
@@ -919,14 +919,13 @@ opcode_priority (const aarch64_opcode *opcode)
 static inline bfd_boolean
 pseudo_opcode_p (const aarch64_opcode *opcode)
 {
-  return (opcode->flags & F_PSEUDO) != 0lu ? TRUE : FALSE;
+  return (opcode->flags & F_PSEUDO) != 0lu;
 }
 
 static inline bfd_boolean
 optional_operand_p (const aarch64_opcode *opcode, unsigned int idx)
 {
-  return (((opcode->flags >> 12) & 0x7) == idx + 1)
-    ? TRUE : FALSE;
+  return ((opcode->flags >> 12) & 0x7) == idx + 1;
 }
 
 static inline aarch64_insn
@@ -945,8 +944,7 @@ static inline bfd_boolean
 opcode_has_special_coder (const aarch64_opcode *opcode)
 {
   return (opcode->flags & (F_SF | F_LSE_SZ | F_SIZEQ | F_FPTYPE | F_SSIZE | F_T
-	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND)) ? TRUE
-    : FALSE;
+	  | F_GPRSIZE_IN_Q | F_LDS_SIZE | F_MISC | F_N | F_COND)) != 0;
 }
 
 struct aarch64_name_value_pair

@@ -45,8 +45,6 @@
 
 #define tc_frob_file() iq2000_frob_file ()
 
-#define obj_fix_adjustable(fixP) iq2000_fix_adjustable (fixP)
-
 /* After creating a fixup for an instruction operand, we need to check
    for HI16 relocs and queue them up for later sorting.  */
 #define md_cgen_record_fixup_exp  iq2000_cgen_record_fixup_exp

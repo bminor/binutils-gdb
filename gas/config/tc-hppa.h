@@ -80,12 +80,6 @@
 #define WARN_COMMENTS 1
 #endif
 
-/* FIXME.  Why oh why aren't these defined somewhere globally?  */
-#ifndef FALSE
-#define FALSE   (0)
-#define TRUE    (!FALSE)
-#endif
-
 #define ASEC_NULL (asection *)0
 
 /* pa_define_label gets used outside of tc-hppa.c via tc_frob_label.  */

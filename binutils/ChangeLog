@@ -1,5 +1,14 @@
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
+	* dlltool.c (main): Don't use "boolean_condition ? TRUE : FALSE".
+	* dwarf.c (read_and_display_attr_value): Likewise.
+	(display_debug_str_offsets): Likewise.
+	* objdump.c (dump_bfd): Likewise.
+	* readelf.c (dump_section_as_strings): Likewise.
+	(dump_section_as_bytes): Likewise.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
 	* objdump.c (process_links): Use type int.
 	* readelf.c (request_dump): Don't increment do_dump, set it.
 	* windint.h (target_is_bigendian): Use type bfd_boolean.

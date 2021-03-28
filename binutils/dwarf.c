@@ -2727,8 +2727,8 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_strx4:
       if (!do_loc)
 	{
-	  const char * suffix = strrchr (section->name, '.');
-	  bfd_boolean  dwo = (suffix && strcmp (suffix, ".dwo") == 0) ? TRUE : FALSE;
+	  const char *suffix = strrchr (section->name, '.');
+	  bfd_boolean dwo = suffix && strcmp (suffix, ".dwo") == 0;
 
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
@@ -7545,8 +7545,8 @@ display_debug_str_offsets (struct dwarf_section *section,
   unsigned char *end = start + section->size;
   unsigned char *curr = start;
 
-  const char * suffix = strrchr (section->name, '.');
-  bfd_boolean  dwo = (suffix && strcmp (suffix, ".dwo") == 0) ? TRUE : FALSE;
+  const char *suffix = strrchr (section->name, '.');
+  bfd_boolean dwo = suffix && strcmp (suffix, ".dwo") == 0;
 
   if (dwo)
     load_debug_section_with_follow (str_dwo, file);

@@ -8796,9 +8796,9 @@ stm32l4xx_need_create_replacing_stub (const insn32 insn,
 
   /* DEFAULT mode accounts for the real bug condition situation,
      ALL mode inserts stubs for each LDM/VLDM instruction (testing).  */
-  return
-    (stm32l4xx_fix == BFD_ARM_STM32L4XX_FIX_DEFAULT) ? nb_words > 8 :
-    (stm32l4xx_fix == BFD_ARM_STM32L4XX_FIX_ALL) ? TRUE : FALSE;
+  return (stm32l4xx_fix == BFD_ARM_STM32L4XX_FIX_DEFAULT
+	  ? nb_words > 8
+	  : stm32l4xx_fix == BFD_ARM_STM32L4XX_FIX_ALL);
 }
 
 /* Look for potentially-troublesome code sequences which might trigger

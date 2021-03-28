@@ -214,9 +214,6 @@ extern int tc_nds32_regname_to_dw2regnum (char *);
 	&& S_IS_DEFINED ((FIX)->fx_addsy)			\
 	&& ! S_IS_COMMON ((FIX)->fx_addsy)))
 #define TC_HANDLES_FX_DONE
-/* This arranges for gas/write.c to not apply a relocation if
-   obj_fix_adjustable() says it is not adjustable.  */
-#define TC_FIX_ADJUSTABLE(fixP) obj_fix_adjustable (fixP)
 #endif
 
 /* Because linker may relax the code, assemble-time expression

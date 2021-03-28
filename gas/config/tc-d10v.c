@@ -581,8 +581,7 @@ build_insn (struct d10v_opcode *opcode,
 
 	  fixups->fix[fixups->fc].exp = opers[i];
 	  fixups->fix[fixups->fc].operand = opcode->operands[i];
-	  fixups->fix[fixups->fc].pcrel =
-	    (flags & OPERAND_ADDR) ? TRUE : FALSE;
+	  fixups->fix[fixups->fc].pcrel = (flags & OPERAND_ADDR) != 0;
 	  (fixups->fc)++;
 	}
 

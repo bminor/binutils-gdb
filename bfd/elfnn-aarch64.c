@@ -5769,7 +5769,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		 relocate the text and data segments independently,
 		 so the symbol does not matter.  */
 	      symbol = 0;
-	      relocate = globals->no_apply_dynamic_relocs ? FALSE : TRUE;
+	      relocate = !globals->no_apply_dynamic_relocs;
 	      outrel.r_info = ELFNN_R_INFO (symbol, AARCH64_R (RELATIVE));
 	      outrel.r_addend += value;
 	    }
