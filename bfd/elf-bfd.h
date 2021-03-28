@@ -1259,16 +1259,16 @@ struct elf_backend_data
      not handled in the hash table.  */
   bfd_boolean (*elf_backend_output_arch_local_syms)
     (bfd *, struct bfd_link_info *, void *,
-     bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *,
-		      struct elf_link_hash_entry *));
+     int (*) (void *, const char *, Elf_Internal_Sym *, asection *,
+	      struct elf_link_hash_entry *));
 
   /* This function, if defined, is called after all symbols are emitted
      into the symtab section.  It allows the backend to emit special
      global symbols not handled in the hash table.  */
   bfd_boolean (*elf_backend_output_arch_syms)
     (bfd *, struct bfd_link_info *, void *,
-     bfd_boolean (*) (void *, const char *, Elf_Internal_Sym *, asection *,
-		      struct elf_link_hash_entry *));
+     int (*) (void *, const char *, Elf_Internal_Sym *, asection *,
+	      struct elf_link_hash_entry *));
 
   /* Filter what symbols of the output file to include in the import
      library if one is created.  */

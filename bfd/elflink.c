@@ -9767,12 +9767,13 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 /* Add a symbol to the output symbol string table.  */
 
 static int
-elf_link_output_symstrtab (struct elf_final_link_info *flinfo,
+elf_link_output_symstrtab (void *finf,
 			   const char *name,
 			   Elf_Internal_Sym *elfsym,
 			   asection *input_sec,
 			   struct elf_link_hash_entry *h)
 {
+  struct elf_final_link_info *flinfo = finf;
   int (*output_symbol_hook)
     (struct bfd_link_info *, const char *, Elf_Internal_Sym *, asection *,
      struct elf_link_hash_entry *);
@@ -12662,13 +12663,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (bed->elf_backend_output_arch_local_syms
       && (info->strip != strip_all || emit_relocs))
     {
-      typedef int (*out_sym_func)
-	(void *, const char *, Elf_Internal_Sym *, asection *,
-	 struct elf_link_hash_entry *);
-
       if (! ((*bed->elf_backend_output_arch_local_syms)
-	     (abfd, info, &flinfo,
-	      (out_sym_func) elf_link_output_symstrtab)))
+	     (abfd, info, &flinfo, elf_link_output_symstrtab)))
 	{
 	  ret = FALSE;
 	  goto return_local_hash_table;
@@ -12796,13 +12792,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (bed->elf_backend_output_arch_syms
       && (info->strip != strip_all || emit_relocs))
     {
-      typedef int (*out_sym_func)
-	(void *, const char *, Elf_Internal_Sym *, asection *,
-	 struct elf_link_hash_entry *);
-
       if (! ((*bed->elf_backend_output_arch_syms)
-	     (abfd, info, &flinfo,
-	      (out_sym_func) elf_link_output_symstrtab)))
+	     (abfd, info, &flinfo, elf_link_output_symstrtab)))
 	{
 	  ret = FALSE;
 	  goto return_local_hash_table;

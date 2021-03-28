@@ -1,5 +1,20 @@
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (elf_link_output_symstrtab): Make flinfo parameter
+	a void pointer.
+	(bfd_elf_final_link): Delete out_sym_func typedef and don't cast
+	elf_link_output_symstrtab when calling output_arch_syms and
+	output_arch_local_syms.
+	* elf-bfd.h (struct elf_backend_data <elf_backend_output_arch_syms,
+	elf_backend_output_arch_local_syms>): Change return type of func
+	arg to match elf_link_output_symstrtab.
+	* elf-vxworks.h (elf_vxworks_link_output_symbol_hook): Correct
+	return type.
+	* elf32-nds32.c (nds32_elf_output_symbol_hook): Correct return type.
+	(nds32_elf_output_arch_syms): Correct func return type.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
 	* elf-m10200.c (mn10200_elf_relocate_section): Return int.
 	* elf-m10300.c (mn10300_elf_relocate_section): Likewise.
 	* elf32-arc.c (elf_arc_relocate_section): Likewise.
