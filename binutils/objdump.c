@@ -128,7 +128,7 @@ static const char * source_comment;     /* --source_comment.  */
 static bfd_boolean visualize_jumps = FALSE;          /* --visualize-jumps.  */
 static bfd_boolean color_output = FALSE;             /* --visualize-jumps=color.  */
 static bfd_boolean extended_color_output = FALSE;    /* --visualize-jumps=extended-color.  */
-static bfd_boolean process_links = FALSE;   /* --process-links.  */
+static int process_links = FALSE;       /* --process-links.  */
 
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 

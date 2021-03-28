@@ -48,7 +48,7 @@
 
 int verbose = 0;
 
-int target_is_bigendian = 0;
+bfd_boolean target_is_bigendian = 0;
 const char *def_target_arch;
 
 static void set_endianness (bfd *, const char *);

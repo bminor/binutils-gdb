@@ -4747,7 +4747,7 @@ request_dump (struct dump_data *dumpdata, dump_type type)
   int section;
   char * cp;
 
-  do_dump++;
+  do_dump = TRUE;
   section = strtoul (optarg, & cp, 0);
 
   if (! *cp && section >= 0)

@@ -1,6 +1,15 @@
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (process_links): Use type int.
+	* readelf.c (request_dump): Don't increment do_dump, set it.
+	* windint.h (target_is_bigendian): Use type bfd_boolean.
+	* windmc.c (target_is_bigendian): Likewise.
+	* windres.c (target_is_bigendian): Likewise.
+
 2021-03-22  Martin Liska  <mliska@suse.cz>
 
-	* dlltool.c (scan_drectve_symbols): Replace usage of CONST_STRNEQ with startswith.
+	* dlltool.c (scan_drectve_symbols): Replace usage of CONST_STRNEQ
+	with startswith.
 	* emul_aix.c (ar_emul_aix_parse_arg): Likewise.
 	* objcopy.c (is_mergeable_note_section): Likewise.
 	* objdump.c (dump_dwarf_section): Likewise.
