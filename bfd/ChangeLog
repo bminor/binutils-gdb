@@ -1,5 +1,15 @@
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
+	* coff-z80.c (z80_is_local_label_name): Return bfd_boolean.
+	* elf32-z80.c (z80_is_local_label_name): Likewise.
+	* elf32-spu.c (spu_elf_modify_headers): Likewise.
+	* elf32-nds32.h (struct elf_nds32_link_hash_table <hyper_relax>):
+	Change type to int.
+	* vms-lib.c (_bfd_vms_lib_write_archive_contents): Correct test
+	for error return from vms_write_data_block.
+
+2021-03-29  Alan Modra  <amodra@gmail.com>
+
 	* elf32-i386.c (elf_i386_finish_local_dynamic_symbol): Return int.
 	* elf64-ia64-vms.c (elf64_ia64_local_dyn_info_free): Likewise.
 	(elf64_ia64_local_dyn_sym_thunk): Likewise.

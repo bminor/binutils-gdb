@@ -5346,7 +5346,7 @@ spu_elf_fake_sections (bfd *obfd ATTRIBUTE_UNUSED,
 
 /* Tweak phdrs before writing them out.  */
 
-static int
+static bfd_boolean
 spu_elf_modify_headers (bfd *abfd, struct bfd_link_info *info)
 {
   if (info != NULL)

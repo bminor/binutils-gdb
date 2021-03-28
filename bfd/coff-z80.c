@@ -452,7 +452,7 @@ extra_case (bfd *in_abfd,
     }
 }
 
-static int
+static bfd_boolean
 z80_is_local_label_name (bfd *        abfd ATTRIBUTE_UNUSED,
                          const char * name)
 {

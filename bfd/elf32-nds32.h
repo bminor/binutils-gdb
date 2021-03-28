@@ -126,7 +126,7 @@ struct elf_nds32_link_hash_table
   int relax_fp_as_gp;		/* --mrelax-omit-fp.  */
   int eliminate_gc_relocs;	/* --meliminate-gc-relocs.  */
   FILE *sym_ld_script;		/* --mgen-symbol-ld-script=<file>.  */
-  bfd_boolean hyper_relax;	/* Relax for symbol not in RW sections.  */
+  int hyper_relax;		/* Relax for symbol not in RW sections.  */
   int tls_desc_trampoline;	/* --m[no-]tlsdesc-trampoline.  */
   /* Disable if linking a dynamically linked executable.  */
   int load_store_relax;

@@ -550,7 +550,7 @@ z80_elf_object_p (bfd *abfd)
   return bfd_default_set_arch_mach (abfd, bfd_arch_z80, mach);
 }
 
-static int
+static bfd_boolean
 z80_is_local_label_name (bfd *	abfd ATTRIBUTE_UNUSED,
 			 const char * name)
 {

@@ -2280,7 +2280,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
       else
 	{
 	  /* Write the MHD.  */
-	  if (vms_write_data_block (arch, &data, &off, blk, sz, 0) < 0)
+	  if (!vms_write_data_block (arch, &data, &off, blk, sz, 0))
 	    goto input_err;
 
 	  /* Write the member.  */
@@ -2289,13 +2289,13 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
 	      sz = bfd_bread (blk, sizeof (blk), current);
 	      if (sz == 0)
 		break;
-	      if (vms_write_data_block (arch, &data, &off, blk, sz, 0) < 0)
+	      if (!vms_write_data_block (arch, &data, &off, blk, sz, 0))
 		goto input_err;
 	    }
 
 	  /* Write the end of module marker.  */
-	  if (vms_write_data_block (arch, &data, &off,
-				    eotdesc, sizeof (eotdesc), 1) < 0)
+	  if (!vms_write_data_block (arch, &data, &off,
+				     eotdesc, sizeof (eotdesc), 1))
 	    goto input_err;
 	}
     }
