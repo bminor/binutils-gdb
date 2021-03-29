@@ -1,5 +1,11 @@
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/x86-64-sse2avx.s: Add vpsadbw case.
+	* testsuite/gas/i386/x86-64-avx-swap-2.d.
+	testsuite/gas/i386/x86-64-sse2avx.d: Adjust expectations.
+
+2021-03-29  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (optimize_encoding): Replace VEX-encoding
 	checks by opcodespace ones.
 	(insert_lfence_before): Likewise.

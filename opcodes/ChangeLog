@@ -1,5 +1,11 @@
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (psadbw): Add <sse2:comm>.
+	(vpsadbw): Add C.
+	* i386-tbl.h: Re-generate.
+
+2021-03-29  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (mmx, sse, sse2, sse3, ssse3, sse41, sse42, aes,
 	pclmul, gfni): New templates. Use them wherever possible. Move
 	SSE4.1 pextrw into respective section.

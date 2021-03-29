@@ -280,6 +280,7 @@ _start:
 	por %xmm14,%xmm6
 	por (%rcx),%xmm6
 	psadbw %xmm4,%xmm6
+	psadbw %xmm14,%xmm6
 	psadbw (%rcx),%xmm6
 	pshufb %xmm4,%xmm6
 	pshufb (%rcx),%xmm6

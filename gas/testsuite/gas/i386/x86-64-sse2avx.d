@@ -273,6 +273,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 89 eb f6          	vpor   %xmm6,%xmm14,%xmm6
 [ 	]*[a-f0-9]+:	c5 c9 eb 31          	vpor   \(%rcx\),%xmm6,%xmm6
 [ 	]*[a-f0-9]+:	c5 c9 f6 f4          	vpsadbw %xmm4,%xmm6,%xmm6
+[ 	]*[a-f0-9]+:	c5 89 f6 f6          	vpsadbw %xmm6,%xmm14,%xmm6
 [ 	]*[a-f0-9]+:	c5 c9 f6 31          	vpsadbw \(%rcx\),%xmm6,%xmm6
 [ 	]*[a-f0-9]+:	c4 e2 49 00 f4       	vpshufb %xmm4,%xmm6,%xmm6
 [ 	]*[a-f0-9]+:	c4 e2 49 00 31       	vpshufb \(%rcx\),%xmm6,%xmm6
