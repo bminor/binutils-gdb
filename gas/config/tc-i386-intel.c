@@ -318,9 +318,11 @@ i386_intel_simplify_register (expressionS *e)
 
       if (intel_state.in_scale
 	  || (t->opcode_modifier.opcodeprefix == PREFIX_0XF3
-	      && t->base_opcode == 0x0f1b /* bndmk */)
+	      && t->opcode_modifier.opcodespace == SPACE_0F
+	      && t->base_opcode == 0x1b /* bndmk */)
 	  || (t->opcode_modifier.opcodeprefix == PREFIX_NONE
-	      && (t->base_opcode & ~1) == 0x0f1a /* bnd{ld,st}x */)
+	      && t->opcode_modifier.opcodespace == SPACE_0F
+	      && (t->base_opcode & ~1) == 0x1a /* bnd{ld,st}x */)
 	  || i386_regtab[reg_num].reg_type.bitfield.baseindex)
 	intel_state.index = i386_regtab + reg_num;
       else

@@ -1176,8 +1176,8 @@ adjust_broadcast_modifier (char **opnd)
 }
 
 static void
-process_i386_opcode_modifier (FILE *table, char *mod, unsigned int prefix,
-			      char **opnd, int lineno)
+process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
+			      unsigned int prefix, char **opnd, int lineno)
 {
   char *str, *next, *last;
   bitfield modifiers [ARRAY_SIZE (opcode_modifiers)];
@@ -1218,6 +1218,19 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int prefix,
 	      if (strcasecmp(str, "No_qSuf") == 0)
 		bwlq_suf &= ~8;
 	    }
+	}
+
+      if (space)
+	{
+	  if (!modifiers[OpcodeSpace].value)
+	    modifiers[OpcodeSpace].value = space;
+	  else if (modifiers[OpcodeSpace].value != space)
+	    fail (_("%s:%d: Conflicting opcode space specifications\n"),
+		  filename, lineno);
+	  else
+	    fprintf (stderr,
+		     _("%s:%d: Warning: redundant opcode space specification\n"),
+		     filename, lineno);
 	}
 
       if (prefix)
@@ -1355,7 +1368,7 @@ static void
 output_i386_opcode (FILE *table, const char *name, char *str,
 		    char *last, int lineno)
 {
-  unsigned int i, length, prefix = 0;
+  unsigned int i, length, prefix = 0, space = 0;
   char *base_opcode, *extension_opcode, *end;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
   unsigned long int opcode;
@@ -1427,10 +1440,27 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	opcode &= (1UL << (8 * --length)) - 1;
     }
 
+  /* Transform opcode space encoded in the opcode into opcode modifier
+     representation.  */
+  if (length > 1 && (opcode >> (8 * length - 8)) == 0xf)
+    {
+      switch ((opcode >> (8 * length - 16)) & 0xff)
+	{
+	default:   space = SPACE_0F;   break;
+	case 0x38: space = SPACE_0F38; break;
+	case 0x3A: space = SPACE_0F3A; break;
+	}
+
+      if (space != SPACE_0F && --length == 1)
+	fail (_("%s:%d: %s: unrecognized opcode encoding space\n"),
+	      filename, lineno, name);
+      opcode &= (1UL << (8 * --length)) - 1;
+    }
+
   fprintf (table, "  { \"%s\", 0x%0*lx%s, %s, %lu,\n",
 	   name, 2 * (int)length, opcode, end, extension_opcode, i);
 
-  process_i386_opcode_modifier (table, opcode_modifier, prefix,
+  process_i386_opcode_modifier (table, opcode_modifier, space, prefix,
 				operand_types, lineno);
 
   process_i386_cpu_flag (table, cpu_flags, 0, ",", "    ", lineno);
@@ -1822,7 +1852,7 @@ process_i386_opcodes (FILE *table)
 
   fprintf (table, "  { NULL, 0, 0, 0,\n");
 
-  process_i386_opcode_modifier (table, "0", 0, NULL, -1);
+  process_i386_opcode_modifier (table, "0", 0, 0, NULL, -1);
 
   process_i386_cpu_flag (table, "0", 0, ",", "    ", -1);
 

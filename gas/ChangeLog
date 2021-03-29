@@ -1,3 +1,26 @@
+2021-03-29  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (optimize_encoding): Replace VEX-encoding
+	checks by opcodespace ones.
+	(insert_lfence_before): Likewise.
+	(maybe_fused_with_jcc_p): Likewise.
+	(add_branch_padding_frag_p): Likewise.
+	(output_disp): Likewise.
+	(load_insn_p): Re-arrange checks to key applicable ones off of
+	an opcodespace check.
+	(md_assemble): Adjust opcode checks.
+	(check_byte_reg): Likewise.
+	(process_operands): Likewise.
+	(i386_index_check): Likewise.
+	(process_suffix): Likewise. New local variable is_movx. Adjust
+	movsx/movzx and crc32 handling.
+	(output_insn): Adjust opcode checks. Drop no longer reachable
+	case labels. Output legacy encoding prefixes in addition to the
+	base_opcode byte(s). Rework counting of prefixes for extended
+	opcode maps.
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Adjust
+	opcode checks.
+
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
 	* atof-generic.c (FALSE, TRUE): Don't define.
