@@ -1,5 +1,15 @@
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (movq, movabs): Move next to mov counterparts.
+	(cmpsd): Move next to cmps.
+	(movsd): Move next to movs.
+	(cmpxchg16b): Move to separate section.
+	(fisttp, fisttpll): Likewise.
+	(monitor, mwait): Likewise.
+	* i386-tbl.h: Re-generate.
+
+2021-03-29  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (psadbw): Add <sse2:comm>.
 	(vpsadbw): Add C.
 	* i386-tbl.h: Re-generate.
