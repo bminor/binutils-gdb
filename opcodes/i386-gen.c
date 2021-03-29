@@ -1371,7 +1371,7 @@ output_i386_opcode (FILE *table, const char *name, char *str,
   unsigned int i, length, prefix = 0, space = 0;
   char *base_opcode, *extension_opcode, *end;
   char *cpu_flags, *opcode_modifier, *operand_types [MAX_OPERANDS];
-  unsigned long int opcode;
+  unsigned long long opcode;
 
   /* Find base_opcode.  */
   base_opcode = next_field (str, ',', &str, last);
@@ -1418,10 +1418,10 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	}
     }
 
-  opcode = strtoul (base_opcode, &end, 0);
+  opcode = strtoull (base_opcode, &end, 0);
 
   /* Determine opcode length.  */
-  for (length = 1; length < 4; ++length)
+  for (length = 1; length < 8; ++length)
     if (!(opcode >> (8 * length)))
        break;
 
@@ -1437,7 +1437,7 @@ output_i386_opcode (FILE *table, const char *name, char *str,
 	}
 
       if (prefix)
-	opcode &= (1UL << (8 * --length)) - 1;
+	opcode &= (1ULL << (8 * --length)) - 1;
     }
 
   /* Transform opcode space encoded in the opcode into opcode modifier
@@ -1454,10 +1454,14 @@ output_i386_opcode (FILE *table, const char *name, char *str,
       if (space != SPACE_0F && --length == 1)
 	fail (_("%s:%d: %s: unrecognized opcode encoding space\n"),
 	      filename, lineno, name);
-      opcode &= (1UL << (8 * --length)) - 1;
+      opcode &= (1ULL << (8 * --length)) - 1;
     }
 
-  fprintf (table, "  { \"%s\", 0x%0*lx%s, %s, %lu,\n",
+  if (length > 2)
+    fail (_("%s:%d: %s: residual opcode (0x%0*llx) too large\n"),
+	  filename, lineno, name, 2 * length, opcode);
+
+  fprintf (table, "  { \"%s\", 0x%0*llx%s, %s, %lu,\n",
 	   name, 2 * (int)length, opcode, end, extension_opcode, i);
 
   process_i386_opcode_modifier (table, opcode_modifier, space, prefix,

@@ -1,5 +1,13 @@
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (output_i386_opcode): Widen type of "opcode". Use
+	strtoull(). Bump upper loop bound. Widen masks. Sanity check
+	"length".
+	* i386-opc.tbl (Prefix_0X66, Prefix_0XF2, Prefix_0XF3): Delete.
+	Convert all of their uses to representation in opcode.
+
+2021-03-29  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.h (struct insn_template): Shrink base_opcode to 16
 	bits. Shrink extension_opcode to 9 bits. Make it signed. Change
 	value of None. Shrink operands to 3 bits.
