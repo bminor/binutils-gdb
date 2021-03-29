@@ -77,6 +77,10 @@ struct mapped_index_base
     return false;
   }
 
+  /* Return a quick_symbol_functions instance that refers back to this
+     mapped_index_base.  */
+  virtual quick_symbol_functions_up make_quick_functions () const = 0;
+
   /* Build the symbol name component sorted vector, if we haven't
      yet.  */
   void build_name_components (dwarf2_per_objfile *per_objfile);

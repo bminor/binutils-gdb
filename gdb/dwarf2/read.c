@@ -243,6 +243,8 @@ struct mapped_index final : public mapped_index_base
 
   size_t symbol_name_count () const override
   { return this->symbol_table.size () / 2; }
+
+  quick_symbol_functions_up make_quick_functions () const override;
 };
 
 /* A description of the mapped .debug_names.
@@ -292,6 +294,8 @@ struct mapped_debug_names final : public mapped_index_base
 
   size_t symbol_name_count () const override
   { return this->name_count; }
+
+  quick_symbol_functions_up make_quick_functions () const override;
 };
 
 /* See dwarf2/read.h.  */
@@ -1887,8 +1891,14 @@ make_dwarf_gdb_index ()
   return quick_symbol_functions_up (new dwarf2_gdb_index);
 }
 
-static quick_symbol_functions_up
-make_dwarf_debug_names ()
+quick_symbol_functions_up
+mapped_index::make_quick_functions () const
+{
+  return quick_symbol_functions_up (new dwarf2_gdb_index);
+}
+
+quick_symbol_functions_up
+mapped_debug_names::make_quick_functions () const
 {
   return quick_symbol_functions_up (new dwarf2_debug_names_index);
 }
@@ -3492,6 +3502,11 @@ public:
     (offset_type idx, dwarf2_per_objfile *per_objfile) const override
   {
     return m_symbol_table[idx];
+  }
+
+  quick_symbol_functions_up make_quick_functions () const override
+  {
+    return nullptr;
   }
 
 private:
@@ -5281,7 +5296,8 @@ dwarf2_initialize_objfile (struct objfile *objfile)
   if (per_bfd->debug_names_table != nullptr)
     {
       dwarf_read_debug_printf ("re-using shared debug names table");
-      objfile->qf.push_front (make_dwarf_debug_names ());
+      objfile->qf.push_front
+	(per_bfd->debug_names_table->make_quick_functions ());
       return;
     }
 
@@ -5290,7 +5306,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
   if (per_bfd->index_table != nullptr)
     {
       dwarf_read_debug_printf ("re-using shared index table");
-      objfile->qf.push_front (make_dwarf_gdb_index ());
+      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
       return;
     }
 
@@ -5304,7 +5320,8 @@ dwarf2_initialize_objfile (struct objfile *objfile)
   if (dwarf2_read_debug_names (per_objfile))
     {
       dwarf_read_debug_printf ("found debug names");
-      objfile->qf.push_front (make_dwarf_debug_names ());
+      objfile->qf.push_front
+	(per_bfd->debug_names_table->make_quick_functions ());
       return;
     }
 
@@ -5313,7 +5330,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 			     get_gdb_index_contents_from_section<dwz_file>))
     {
       dwarf_read_debug_printf ("found gdb index from file");
-      objfile->qf.push_front (make_dwarf_gdb_index ());
+      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
       return;
     }
 
@@ -5324,7 +5341,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
     {
       dwarf_read_debug_printf ("found gdb index from cache");
       global_index_cache.hit ();
-      objfile->qf.push_front (make_dwarf_gdb_index ());
+      objfile->qf.push_front (per_bfd->index_table->make_quick_functions ());
       return;
     }
 
