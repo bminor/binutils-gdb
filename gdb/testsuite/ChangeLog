@@ -1,3 +1,8 @@
+2021-03-29  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.mi/user-selected-context-sync.exp: Spin on a variable in
+	the infinite loop to avoid a Clang bug.
+
 2021-03-26  Will Schmidt  <will_schmidt@vnet.ibm.com>
 
 	* gdb.arch/powerpc-disassembler-options.exp: Extend some test
