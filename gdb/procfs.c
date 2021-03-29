@@ -1768,10 +1768,11 @@ procfs_target::attach (const char *args, int from_tty)
     error (_("Attaching GDB to itself is not a good idea..."));
 
   /* Push the target if needed, ensure it gets un-pushed it if attach fails.  */
+  inferior *inf = current_inferior ();
   target_unpush_up unpusher;
   if (!inf->target_is_pushed (this))
     {
-      current_inferior ()->push_target (this);
+      inf->push_target (this);
       unpusher.reset (this);
     }
 
@@ -2862,8 +2863,9 @@ procfs_target::create_inferior (const char *exec_file,
       shell_file = tryname;
     }
 
+  inferior *inf = current_inferior ();
   if (!inf->target_is_pushed (this))
-    current_inferior ()->push_target (this);
+    inf->push_target (this);
 
   pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
 		       NULL, procfs_pre_trace, shell_file, NULL);

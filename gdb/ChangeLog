@@ -1,3 +1,10 @@
+2021-03-29  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	gdb:
+	* procfs.c (procfs_target::attach): Define inf.
+	Use it.
+	(procfs_target::create_inferior): Likewise.
+
 2021-03-28  Tom Tromey  <tom@tromey.com>
 
 	* elfread.c (can_lazily_read_symbols): Move to dwarf2/read.c.
