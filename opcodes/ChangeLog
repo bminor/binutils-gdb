@@ -1,5 +1,11 @@
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.h (struct insn_template): Shrink base_opcode to 16
+	bits. Shrink extension_opcode to 9 bits. Make it signed. Change
+	value of None. Shrink operands to 3 bits.
+
+2021-03-29  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (process_i386_opcode_modifier): New parameter
 	"space". 
 	(output_i386_opcode): New local variable "space". Adjust

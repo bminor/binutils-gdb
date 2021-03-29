@@ -917,7 +917,7 @@ typedef struct insn_template
 
   /* base_opcode is the fundamental opcode byte without optional
      prefix(es).  */
-  unsigned int base_opcode;
+  unsigned int base_opcode:16;
 #define Opcode_D	0x2 /* Direction bit:
 			       set if Reg --> Regmem;
 			       unset if Regmem --> Reg. */
@@ -934,8 +934,8 @@ typedef struct insn_template
      AMD 3DNow! instructions.
      If this template has no extension opcode (the usual case) use None
      Instructions */
-  unsigned short extension_opcode;
-#define None 0xffff		/* If no extension_opcode is possible.  */
+  signed int extension_opcode:9;
+#define None (-1)		/* If no extension_opcode is possible.  */
 
 /* Pseudo prefixes.  */
 #define Prefix_Disp8		0	/* {disp8} */
@@ -950,7 +950,7 @@ typedef struct insn_template
 #define Prefix_NoOptimize	9	/* {nooptimize} */
 
   /* how many operands */
-  unsigned char operands;
+  unsigned int operands:3;
 
   /* the bits in opcode_modifier are used to generate the final opcode from
      the base_opcode.  These bits also are used to detect alternate forms of
