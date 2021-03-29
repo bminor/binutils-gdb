@@ -1573,7 +1573,7 @@ parse_template (char *buf, int lineno)
       inst->args = NULL;
 
       cur = next_field (buf, ':', &next, end);
-      inst->name = xstrdup (cur);
+      inst->name = *cur != '$' ? xstrdup (cur) : "";
 
       for (param = tmpl->params; param; param = param->next)
 	{
