@@ -982,13 +982,13 @@ handle_general_set (char *own_buf)
 
       require_running_or_return (own_buf);
 
-      int ret = parse_store_memtags_request (own_buf, &addr, &len, tags,
+      bool ret = parse_store_memtags_request (own_buf, &addr, &len, tags,
 					     &type);
 
-      if (ret == 0)
+      if (ret)
 	ret = the_target->store_memtags (addr, len, tags, type);
 
-      if (ret)
+      if (!ret)
 	write_enn (own_buf);
       else
 	write_ok (own_buf);
@@ -2730,12 +2730,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       parse_fetch_memtags_request (own_buf, &addr, &len, &type);
 
-      int ret = the_target->fetch_memtags (addr, len, tags, type);
+      bool ret = the_target->fetch_memtags (addr, len, tags, type);
 
       if (ret)
 	ret = create_fetch_memtags_reply (own_buf, tags);
 
-      if (ret)
+      if (!ret)
 	write_enn (own_buf);
 
       *new_packet_len_p = strlen (own_buf);
