@@ -733,7 +733,10 @@ struct symbol *
 				  (LANG)->la_language == language_cplus || \
 				  (LANG)->la_language == language_objc)
 
-extern void language_info (int);
+/* Print out the current language settings: language, range and
+   type checking.  */
+
+extern void language_info ();
 
 extern enum language set_language (enum language);
 

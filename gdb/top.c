@@ -482,7 +482,8 @@ check_frame_language_change (void)
     {
       if (language_mode == language_mode_auto && info_verbose)
 	{
-	  language_info (1);	/* Print what changed.  */
+	  /* Print what changed.  */
+	  language_info ();
 	}
       warned = 0;
     }

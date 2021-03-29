@@ -374,26 +374,17 @@ set_language (enum language lang)
 }
 
 
-/* Print out the current language settings: language, range and
-   type checking.  If QUIETLY, print only what has changed.  */
+/* See language.h.  */
 
 void
-language_info (int quietly)
+language_info ()
 {
-  if (quietly && expected_language == current_language)
+  if (expected_language == current_language)
     return;
 
   expected_language = current_language;
   printf_unfiltered (_("Current language:  %s\n"), language);
   show_language_command (NULL, 1, NULL, NULL);
-
-  if (!quietly)
-    {
-      printf_unfiltered (_("Range checking:    %s\n"), range);
-      show_range_command (NULL, 1, NULL, NULL);
-      printf_unfiltered (_("Case sensitivity:  %s\n"), case_sensitive);
-      show_case_command (NULL, 1, NULL, NULL);
-    }
 }
 
 
