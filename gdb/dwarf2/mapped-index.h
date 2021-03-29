@@ -53,6 +53,7 @@ struct name_component
 struct mapped_index_base
 {
   mapped_index_base () = default;
+  virtual ~mapped_index_base() = default;
   DISABLE_COPY_AND_ASSIGN (mapped_index_base);
 
   /* The name_component table (a sorted vector).  See name_component's
@@ -88,10 +89,6 @@ struct mapped_index_base
     find_name_components_bounds (const lookup_name_info &ln_no_params,
 				 enum language lang,
 				 dwarf2_per_objfile *per_objfile) const;
-
-  /* Prevent deleting/destroying via a base class pointer.  */
-protected:
-  ~mapped_index_base() = default;
 };
 
 #endif /* GDB_DWARF2_MAPPED_INDEX_H */
