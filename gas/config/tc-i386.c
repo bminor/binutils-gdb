@@ -177,7 +177,7 @@ static const reg_entry *parse_register (char *, char **);
 static char *parse_insn (char *, char *);
 static char *parse_operands (char *, const char *);
 static void swap_operands (void);
-static void swap_2_operands (int, int);
+static void swap_2_operands (unsigned int, unsigned int);
 static enum flag_code i386_addressing_mode (void);
 static void optimize_imm (void);
 static void optimize_disp (void);
@@ -225,7 +225,7 @@ struct RC_Operation
       rz,
       saeonly
     } type;
-  int operand;
+  unsigned int operand;
 };
 
 static struct RC_Operation rc_op;
@@ -238,7 +238,7 @@ struct Mask_Operation
   const reg_entry *mask;
   unsigned int zeroing;
   /* The operand where this operation is associated.  */
-  int operand;
+  unsigned int operand;
 };
 
 static struct Mask_Operation mask_op;
@@ -251,7 +251,7 @@ struct Broadcast_Operation
   int type;
 
   /* Index of broadcasted operand.  */
-  int operand;
+  unsigned int operand;
 
   /* Number of bytes to broadcast.  */
   int bytes;
@@ -3907,7 +3907,7 @@ build_evex_prefix (void)
 		    i.tm.opcode_modifier.evex = EVEX128;
 		    break;
 		  }
-		else if (i.broadcast && (int) op == i.broadcast->operand)
+		else if (i.broadcast && op == i.broadcast->operand)
 		  {
 		    switch (i.broadcast->bytes)
 		      {
@@ -5438,7 +5438,7 @@ parse_operands (char *l, const char *mnemonic)
 }
 
 static void
-swap_2_operands (int xchg1, int xchg2)
+swap_2_operands (unsigned int xchg1, unsigned int xchg2)
 {
   union i386_op temp_op;
   i386_operand_type temp_type;
@@ -6018,7 +6018,7 @@ check_VecOperands (const insn_template *t)
     }
 
   /* Check if masking is applied to dest operand.  */
-  if (i.mask && (i.mask->operand != (int) (i.operands - 1)))
+  if (i.mask && (i.mask->operand != i.operands - 1))
     {
       i.error = mask_not_on_destination;
       return 1;
@@ -6037,7 +6037,7 @@ check_VecOperands (const insn_template *t)
 	 them is rounding, the rounding operand should be the last
 	 immediate operand.  */
       if (i.imm_operands > 1
-	  && i.rounding->operand != (int) (i.imm_operands - 1))
+	  && i.rounding->operand != i.imm_operands - 1)
 	{
 	  i.error = rc_sae_operand_not_last_imm;
 	  return 1;
@@ -7965,7 +7965,7 @@ build_modrm_byte (void)
 	  /* RC/SAE operand could be between DEST and SRC.  That happens
 	     when one operand is GPR and the other one is XMM/YMM/ZMM
 	     register.  */
-	  if (i.rounding && i.rounding->operand == (int) dest)
+	  if (i.rounding && i.rounding->operand == dest)
 	    dest++;
 
 	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
@@ -9865,7 +9865,7 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
   for (n = 0; n < i.operands; n++)
     {
       /* Skip SAE/RC Imm operand in EVEX.  They are already handled.  */
-      if (i.rounding && (int) n == i.rounding->operand)
+      if (i.rounding && n == i.rounding->operand)
 	continue;
 
       if (operand_type_check (i.types[n], imm))
@@ -10447,7 +10447,7 @@ check_VecOperations (char *op_string, char *op_end)
 
 		  /* Only "{z}" is allowed here.  No need to check
 		     zeroing mask explicitly.  */
-		  if (i.mask->operand != this_operand)
+		  if (i.mask->operand != (unsigned int) this_operand)
 		    {
 		      as_bad (_("invalid write mask `%s'"), saved);
 		      return NULL;
@@ -10479,7 +10479,7 @@ check_VecOperations (char *op_string, char *op_end)
 
 		  /* Only "{%k}" is allowed here.  No need to check mask
 		     register explicitly.  */
-		  if (i.mask->operand != this_operand)
+		  if (i.mask->operand != (unsigned int) this_operand)
 		    {
 		      as_bad (_("invalid zeroing-masking `%s'"),
 			      saved);

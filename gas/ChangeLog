@@ -1,3 +1,16 @@
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (swap_2_operands): Switch parameters to
+	unsigned.
+	(struct RC_Operation): Switch operand field to unsigned.
+	(struct Mask_Operation): Likewise.
+	(struct Broadcast_Operation): Likewise.
+	(build_evex_prefix): Drop cast.
+	(check_VecOperands): Likewise.
+	(build_modrm_byte): Likewise.
+	(output_imm): Likewise.
+	(check_VecOperations): Add casts to unsigned.
+
 2021-03-29  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/x86-64-sse2avx.s: Add vpsadbw case.
