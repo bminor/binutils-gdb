@@ -104,3 +104,6 @@
 
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
+
+	.byte		0x0			/* Terminator .debug_abbrev
+						   section.  */
