@@ -1,3 +1,16 @@
+2021-03-30  Alan Modra  <amodra@gmail.com>
+
+	PR gold/27625
+	* powerpc.cc (Powerpc_relobj): Add no_tls_marker_, tls_marker_,
+	and tls_opt_error_ variables and accessors.
+	(Target_powerpc::Scan::local, global): Call set_tls_marker and
+	set_no_tls_marker for GD and LD code sequence relocations.
+	(Target_powerpc::Relocate::relocate): Downgrade the "lacks marker
+	reloc" error to a warning when safe to do so, and omit the error
+	entirely if not optimising TLS sequences.  Do not optimise GD and
+	LD sequences for objects lacking marker relocs.
+	(Target_powerpc::relocate_relocs): Heed no_tls_marker here too.
+
 2021-03-19  Cary Coutant  <ccoutant@gmail.com>
 
 	PR gold/27615
