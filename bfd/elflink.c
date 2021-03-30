@@ -4968,12 +4968,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	     || h->root.type == bfd_link_hash_warning)
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
+      *sym_hash = h;
+
       /* Setting the index to -3 tells elf_link_output_extsym that
 	 this symbol is defined in a discarded section.  */
-      if (discarded)
+      if (discarded && is_elf_hash_table (htab))
 	h->indx = -3;
-
-      *sym_hash = h;
 
       new_weak = (flags & BSF_WEAK) != 0;
       if (dynamic
