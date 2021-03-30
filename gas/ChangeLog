@@ -1,5 +1,19 @@
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (broadcast_op): Delete.
+	(struct Broadcast_Operation): Move ...
+	(struct _i386_insn): ... here. Change field "broadcast".
+	(match_mem_size): Adjust check for broadcast.
+	(optimize_encoding): Likewise.
+	(process_suffix): Likewise.
+	(build_evex_prefix): Adjust broadcast processing.
+	(swap_2_operands): Likewise.
+	(check_VecOperations): Likewise.
+	(match_template): Likewise.
+	(check_VecOperands): Likewise.
+
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (reg_k0): New.
 	(mask_op): Delete.
 	(struct Mask_Operation): Move ...

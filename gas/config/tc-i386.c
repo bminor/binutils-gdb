@@ -232,22 +232,6 @@ struct RC_Operation
 
 static struct RC_Operation rc_op;
 
-/* The struct describes broadcasting, applied to OPERAND.  FACTOR is
-   broadcast factor.  */
-struct Broadcast_Operation
-{
-  /* Type of broadcast: {1to2}, {1to4}, {1to8}, or {1to16}.  */
-  int type;
-
-  /* Index of broadcasted operand.  */
-  unsigned int operand;
-
-  /* Number of bytes to broadcast.  */
-  int bytes;
-};
-
-static struct Broadcast_Operation broadcast_op;
-
 /* VEX prefix.  */
 typedef struct
 {
@@ -398,8 +382,21 @@ struct _i386_insn
     /* Rounding control and SAE attributes.  */
     struct RC_Operation *rounding;
 
-    /* Broadcasting attributes.  */
-    struct Broadcast_Operation *broadcast;
+    /* Broadcasting attributes.
+
+       The struct describes broadcasting, applied to OPERAND.  TYPE is
+       expresses the broadcast factor.  */
+    struct Broadcast_Operation
+    {
+      /* Type of broadcast: {1to2}, {1to4}, {1to8}, or {1to16}.  */
+      unsigned int type;
+
+      /* Index of broadcasted operand.  */
+      unsigned int operand;
+
+      /* Number of bytes to broadcast.  */
+      unsigned int bytes;
+    } broadcast;
 
     /* Compressed disp8*N attribute.  */
     unsigned int memshift;
@@ -2211,7 +2208,7 @@ match_mem_size (const insn_template *t, unsigned int wanted,
 {
   return (match_operand_size (t, wanted, given)
 	  && !((i.types[given].bitfield.unspecified
-		&& !i.broadcast
+		&& !i.broadcast.type
 		&& !t->operand_types[wanted].bitfield.unspecified)
 	       || (i.types[given].bitfield.fword
 		   && !t->operand_types[wanted].bitfield.fword)
@@ -3911,9 +3908,9 @@ build_evex_prefix (void)
 		    i.tm.opcode_modifier.evex = EVEX128;
 		    break;
 		  }
-		else if (i.broadcast && op == i.broadcast->operand)
+		else if (i.broadcast.type && op == i.broadcast.operand)
 		  {
-		    switch (i.broadcast->bytes)
+		    switch (i.broadcast.bytes)
 		      {
 			case 64:
 			  i.tm.opcode_modifier.evex = EVEX512;
@@ -3955,7 +3952,7 @@ build_evex_prefix (void)
 	}
       i.vex.bytes[3] |= vec_length;
       /* Encode the broadcast bit.  */
-      if (i.broadcast)
+      if (i.broadcast.type)
 	i.vex.bytes[3] |= 0x10;
     }
   else
@@ -4255,7 +4252,7 @@ optimize_encoding (void)
 	   && !i.types[0].bitfield.zmmword
 	   && !i.types[1].bitfield.zmmword
 	   && !i.mask.reg
-	   && !i.broadcast
+	   && !i.broadcast.type
 	   && is_evex_encoding (&i.tm)
 	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x6f
 	       || (i.tm.base_opcode & ~4) == 0xdb
@@ -5472,12 +5469,12 @@ swap_2_operands (unsigned int xchg1, unsigned int xchg2)
       else if (i.mask.operand == xchg2)
 	i.mask.operand = xchg1;
     }
-  if (i.broadcast)
+  if (i.broadcast.type)
     {
-      if (i.broadcast->operand == xchg1)
-	i.broadcast->operand = xchg2;
-      else if (i.broadcast->operand == xchg2)
-	i.broadcast->operand = xchg1;
+      if (i.broadcast.operand == xchg1)
+	i.broadcast.operand = xchg2;
+      else if (i.broadcast.operand == xchg2)
+	i.broadcast.operand = xchg1;
     }
   if (i.rounding)
     {
@@ -5892,13 +5889,13 @@ check_VecOperands (const insn_template *t)
 
   /* Check if broadcast is supported by the instruction and is applied
      to the memory operand.  */
-  if (i.broadcast)
+  if (i.broadcast.type)
     {
       i386_operand_type type, overlap;
 
       /* Check if specified broadcast is supported in this instruction,
 	 and its broadcast bytes match the memory operand.  */
-      op = i.broadcast->operand;
+      op = i.broadcast.operand;
       if (!t->opcode_modifier.broadcast
 	  || !(i.flags[op] & Operand_Mem)
 	  || (!i.types[op].bitfield.unspecified
@@ -5909,10 +5906,10 @@ check_VecOperands (const insn_template *t)
 	  return 1;
 	}
 
-      i.broadcast->bytes = ((1 << (t->opcode_modifier.broadcast - 1))
-			    * i.broadcast->type);
+      i.broadcast.bytes = ((1 << (t->opcode_modifier.broadcast - 1))
+			   * i.broadcast.type);
       operand_type_set (&type, 0);
-      switch (i.broadcast->bytes)
+      switch (i.broadcast.bytes)
 	{
 	case 2:
 	  type.bitfield.word = 1;
@@ -6066,7 +6063,7 @@ check_VecOperands (const insn_template *t)
   if (t->opcode_modifier.disp8memshift
       && i.disp_encoding != disp_encoding_32bit)
     {
-      if (i.broadcast)
+      if (i.broadcast.type)
 	i.memshift = t->opcode_modifier.broadcast - 1;
       else if (t->opcode_modifier.disp8memshift != DISP8_SHIFT_VL)
 	i.memshift = t->opcode_modifier.disp8memshift;
@@ -6394,8 +6391,8 @@ match_template (char mnem_suffix)
       if (t->opcode_modifier.checkregsize)
 	{
 	  check_register = (1 << t->operands) - 1;
-	  if (i.broadcast)
-	    check_register &= ~(1 << i.broadcast->operand);
+	  if (i.broadcast.type)
+	    check_register &= ~(1 << i.broadcast.operand);
 	}
       else
 	check_register = 0;
@@ -6961,7 +6958,7 @@ process_suffix (void)
       /* For [XYZ]MMWORD operands inspect operand sizes.  While generally
 	 also suitable for AT&T syntax mode, it was requested that this be
 	 restricted to just Intel syntax.  */
-      if (intel_syntax && is_any_vex_encoding (&i.tm) && !i.broadcast)
+      if (intel_syntax && is_any_vex_encoding (&i.tm) && !i.broadcast.type)
 	{
 	  unsigned int op;
 
@@ -10391,9 +10388,9 @@ check_VecOperations (char *op_string, char *op_end)
 	  /* Check broadcasts.  */
 	  if (strncmp (op_string, "1to", 3) == 0)
 	    {
-	      int bcst_type;
+	      unsigned int bcst_type;
 
-	      if (i.broadcast)
+	      if (i.broadcast.type)
 		goto duplicated_vec_op;
 
 	      op_string += 3;
@@ -10416,10 +10413,8 @@ check_VecOperations (char *op_string, char *op_end)
 		}
 	      op_string++;
 
-	      broadcast_op.type = bcst_type;
-	      broadcast_op.operand = this_operand;
-	      broadcast_op.bytes = 0;
-	      i.broadcast = &broadcast_op;
+	      i.broadcast.type = bcst_type;
+	      i.broadcast.operand = this_operand;
 	    }
 	  /* Check masking operation.  */
 	  else if ((mask = parse_register (op_string, &end_op)) != NULL)
