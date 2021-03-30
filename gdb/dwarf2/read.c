@@ -1841,6 +1841,40 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 			     bool need_fullname) override;
 };
 
+/* With OBJF_READNOW, the DWARF reader expands all CUs immediately.
+   It's handy in this case to have an empty implementation of the
+   quick symbol functions, to avoid special cases in the rest of the
+   code.  */
+
+struct readnow_functions : public dwarf2_base_index_functions
+{
+  void dump (struct objfile *objfile) override
+  {
+  }
+
+  void expand_matching_symbols
+    (struct objfile *,
+     const lookup_name_info &lookup_name,
+     domain_enum domain,
+     int global,
+     symbol_compare_ftype *ordered_compare) override
+  {
+  }
+
+  bool expand_symtabs_matching
+    (struct objfile *objfile,
+     gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+     const lookup_name_info *lookup_name,
+     gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+     gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
+     block_search_flags search_flags,
+     domain_enum domain,
+     enum search_domain kind) override
+  {
+    return true;
+  }
+};
+
 struct dwarf2_gdb_index : public dwarf2_base_index_functions
 {
   void dump (struct objfile *objfile) override;
@@ -1884,12 +1918,6 @@ struct dwarf2_debug_names_index : public dwarf2_base_index_functions
      domain_enum domain,
      enum search_domain kind) override;
 };
-
-static quick_symbol_functions_up
-make_dwarf_gdb_index ()
-{
-  return quick_symbol_functions_up (new dwarf2_gdb_index);
-}
 
 quick_symbol_functions_up
 mapped_index::make_quick_functions () const
@@ -2910,9 +2938,6 @@ dw2_symtab_iter_init (struct dw2_symtab_iterator *iter,
   iter->length = 0;
 
   mapped_index *index = per_objfile->per_bfd->index_table.get ();
-  /* index is NULL if OBJF_READNOW.  */
-  if (index == NULL)
-    return;
 
   gdb_assert (!index->symbol_name_slot_invalid (namei));
   offset_type vec_idx = index->symbol_vec_index (namei);
@@ -3048,14 +3073,8 @@ dwarf2_gdb_index::dump (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  gdb_printf (".gdb_index:");
-  if (per_objfile->per_bfd->index_table != NULL)
-    {
-      gdb_printf (" version %d\n",
-		  per_objfile->per_bfd->index_table->version);
-    }
-  else
-    gdb_printf (" faked for \"readnow\"\n");
+  gdb_printf (".gdb_index: version %d\n",
+	      per_objfile->per_bfd->index_table->version);
   gdb_printf ("\n");
 }
 
@@ -3105,37 +3124,28 @@ dwarf2_gdb_index::expand_matching_symbols
 
   const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
 
-  if (per_objfile->per_bfd->index_table != nullptr)
+  mapped_index &index = *per_objfile->per_bfd->index_table;
+
+  const char *match_name = name.ada ().lookup_name ().c_str ();
+  auto matcher = [&] (const char *symname)
+  {
+    if (ordered_compare == nullptr)
+      return true;
+    return ordered_compare (symname, match_name) == 0;
+  };
+
+  dw2_expand_symtabs_matching_symbol (index, name, matcher,
+				      [&] (offset_type namei)
     {
-      mapped_index &index = *per_objfile->per_bfd->index_table;
+      struct dw2_symtab_iterator iter;
+      struct dwarf2_per_cu_data *per_cu;
 
-      const char *match_name = name.ada ().lookup_name ().c_str ();
-      auto matcher = [&] (const char *symname)
-	{
-	  if (ordered_compare == nullptr)
-	    return true;
-	  return ordered_compare (symname, match_name) == 0;
-	};
-
-      dw2_expand_symtabs_matching_symbol (index, name, matcher,
-					  [&] (offset_type namei)
-      {
-	struct dw2_symtab_iterator iter;
-	struct dwarf2_per_cu_data *per_cu;
-
-	dw2_symtab_iter_init (&iter, per_objfile, block_kind, domain,
-			      namei);
-	while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
-	  dw2_expand_symtabs_matching_one (per_cu, per_objfile, nullptr,
-					   nullptr);
-	return true;
-      }, per_objfile);
-    }
-  else
-    {
-      /* We have -readnow: no .gdb_index, but no partial symtabs either.  So,
-	 proceed assuming all symtabs have been read in.  */
-    }
+      dw2_symtab_iter_init (&iter, per_objfile, block_kind, domain, namei);
+      while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
+	dw2_expand_symtabs_matching_one (per_cu, per_objfile, nullptr,
+					 nullptr);
+      return true;
+    }, per_objfile);
 }
 
 /* Starting from a search name, return the string that finds the upper
@@ -4150,10 +4160,6 @@ dwarf2_gdb_index::expand_symtabs_matching
      enum search_domain kind)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-
-  /* index_table is NULL if OBJF_READNOW.  */
-  if (!per_objfile->per_bfd->index_table)
-    return true;
 
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
 
@@ -5269,10 +5275,7 @@ dwarf2_initialize_objfile (struct objfile *objfile)
       per_bfd->quick_file_names_table
 	= create_quick_file_names_table (per_bfd->all_comp_units.size ());
 
-      /* Arrange for gdb to see the "quick" functions.  However, these
-	 functions will be no-ops because we will have expanded all
-	 symtabs.  */
-      objfile->qf.push_front (make_dwarf_gdb_index ());
+      objfile->qf.emplace_front (new readnow_functions);
       return;
     }
 
