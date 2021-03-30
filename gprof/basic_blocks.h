@@ -22,7 +22,7 @@
 #define basic_blocks_h
 
 /* Options:  */
-extern bfd_boolean bb_annotate_all_lines; /* Force annotation of all lines?  */
+extern bool bb_annotate_all_lines;	/* Force annotation of all lines?  */
 extern int bb_table_length;		/* Length of most-used bb table.  */
 extern unsigned long bb_min_calls;	/* Minimum execution count.  */
 

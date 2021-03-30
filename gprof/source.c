@@ -28,7 +28,7 @@
 #define EXT_ANNO "-ann"		/* Postfix of annotated files.  */
 
 /* Default option values.  */
-bfd_boolean create_annotation_files = FALSE;
+bool create_annotation_files = false;
 
 Search_List src_search_list = {0, 0};
 Source_File *first_src_file = 0;
@@ -93,9 +93,9 @@ annotate_source (Source_File *sf, unsigned int max_width,
      void (*annote) (char *, unsigned int, int, void *),
      void *arg)
 {
-  static bfd_boolean first_file = TRUE;
+  static bool first_file = true;
   int i, line_num, nread;
-  bfd_boolean new_line;
+  bool new_line;
   char buf[8192];
   char fname[PATH_MAX];
   char *annotation, *name_only;
@@ -110,7 +110,7 @@ annotate_source (Source_File *sf, unsigned int max_width,
     sle = 0;			/* Don't use search list for absolute paths.  */
 
   name_only = 0;
-  while (TRUE)
+  while (true)
     {
       DBG (SRCDEBUG, printf ("[annotate_source]: looking for %s, trying %s\n",
 			     sf->name, fname));
@@ -225,12 +225,12 @@ annotate_source (Source_File *sf, unsigned int max_width,
   if (ofp == stdout)
     {
       if (first_file)
-	first_file = FALSE;
+	first_file = false;
       else
 	fputc ('\n', ofp);
 
       if (first_output)
-	first_output = FALSE;
+	first_output = false;
       else
 	fprintf (ofp, "\f\n");
 
@@ -239,7 +239,7 @@ annotate_source (Source_File *sf, unsigned int max_width,
 
   annotation = (char *) xmalloc (max_width + 1);
   line_num = 1;
-  new_line = TRUE;
+  new_line = true;
 
   while ((nread = fread (buf, 1, sizeof (buf), ifp)) > 0)
     {

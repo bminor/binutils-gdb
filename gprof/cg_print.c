@@ -64,7 +64,7 @@ static void
 print_header (void)
 {
   if (first_output)
-    first_output = FALSE;
+    first_output = false;
   else
     printf ("\f\n");
 

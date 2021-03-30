@@ -1,3 +1,24 @@
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* basic_blocks.c: Replace bfd_boolean with bool, FALSE with false,
+	and TRUE with true throughout.
+	* basic_blocks.h: Likewise.
+	* cg_arcs.c: Likewise.
+	* cg_dfn.c: Likewise.
+	* cg_print.c: Likewise.
+	* corefile.c: Likewise.
+	* gmon_io.c: Likewise.
+	* gprof.c: Likewise.
+	* gprof.h: Likewise.
+	* hist.c: Likewise.
+	* mips.c: Likewise.
+	* source.c: Likewise.
+	* source.h: Likewise.
+	* sym_ids.c: Likewise.
+	* sym_ids.h: Likewise.
+	* symtab.h: Likewise.
+	* vax.c: Likewise.
+
 2021-01-13  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.in: Regenerate.

@@ -36,7 +36,7 @@ Source_File;
 /* Options.  */
 
 /* Create annotated output files?  */
-extern bfd_boolean create_annotation_files;
+extern bool create_annotation_files;
 
 /* List of directories to search for source files.  */
 extern Search_List src_search_list;
