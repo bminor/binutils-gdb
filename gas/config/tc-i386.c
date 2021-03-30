@@ -214,6 +214,8 @@ static const char *default_arch = DEFAULT_ARCH;
 static const reg_entry bad_reg = { "<bad>", OPERAND_TYPE_NONE, 0, 0,
 				   { Dw2Inval, Dw2Inval } };
 
+static const reg_entry *reg_k0;
+
 /* This struct describes rounding control and SAE in the instruction.  */
 struct RC_Operation
 {
@@ -229,19 +231,6 @@ struct RC_Operation
 };
 
 static struct RC_Operation rc_op;
-
-/* The struct describes masking, applied to OPERAND in the instruction.
-   MASK is a pointer to the corresponding mask register.  ZEROING tells
-   whether merging or zeroing mask is used.  */
-struct Mask_Operation
-{
-  const reg_entry *mask;
-  unsigned int zeroing;
-  /* The operand where this operation is associated.  */
-  unsigned int operand;
-};
-
-static struct Mask_Operation mask_op;
 
 /* The struct describes broadcasting, applied to OPERAND.  FACTOR is
    broadcast factor.  */
@@ -393,8 +382,18 @@ struct _i386_insn
     sib_byte sib;
     vex_prefix vex;
 
-    /* Masking attributes.  */
-    struct Mask_Operation *mask;
+    /* Masking attributes.
+
+       The struct describes masking, applied to OPERAND in the instruction.
+       REG is a pointer to the corresponding mask register.  ZEROING tells
+       whether merging or zeroing mask is used.  */
+    struct Mask_Operation
+    {
+      const reg_entry *reg;
+      unsigned int zeroing;
+      /* The operand where this operation is associated.  */
+      unsigned int operand;
+    } mask;
 
     /* Rounding control and SAE attributes.  */
     struct RC_Operation *rounding;
@@ -3093,8 +3092,13 @@ md_begin (void)
     unsigned int regtab_size = i386_regtab_size;
 
     for (regtab = i386_regtab; regtab_size--; regtab++)
-      if (str_hash_insert (reg_hash, regtab->reg_name, regtab, 0) != NULL)
-	as_fatal (_("duplicate %s"), regtab->reg_name);
+      {
+	if (str_hash_insert (reg_hash, regtab->reg_name, regtab, 0) != NULL)
+	  as_fatal (_("duplicate %s"), regtab->reg_name);
+
+	if (regtab->reg_type.bitfield.class == RegMask && !regtab->reg_num)
+	  reg_k0 = regtab;
+      }
   }
 
   /* Fill in lexical tables:  mnemonic_chars, operand_chars.  */
@@ -3871,7 +3875,7 @@ build_evex_prefix (void)
 
   /* The fourth byte of the EVEX prefix.  */
   /* The zeroing-masking bit.  */
-  if (i.mask && i.mask->zeroing)
+  if (i.mask.reg && i.mask.zeroing)
     i.vex.bytes[3] |= 0x80;
 
   /* Don't always set the broadcast bit if there is no RC.  */
@@ -3962,8 +3966,8 @@ build_evex_prefix (void)
 	i.vex.bytes[3] |= 0x10 | (evexrcig << 5);
     }
 
-  if (i.mask && i.mask->mask)
-    i.vex.bytes[3] |= i.mask->mask->reg_num;
+  if (i.mask.reg)
+    i.vex.bytes[3] |= i.mask.reg->reg_num;
 }
 
 static void
@@ -4164,7 +4168,7 @@ optimize_encoding (void)
 	   && i.op[0].regs == i.op[1].regs
 	   && !i.types[2].bitfield.xmmword
 	   && (i.tm.opcode_modifier.vex
-	       || ((!i.mask || i.mask->zeroing)
+	       || ((!i.mask.reg || i.mask.zeroing)
 		   && !i.rounding
 		   && is_evex_encoding (&i.tm)
 		   && (i.vec_encoding != vex_encoding_evex
@@ -4250,7 +4254,7 @@ optimize_encoding (void)
   else if (i.vec_encoding != vex_encoding_evex
 	   && !i.types[0].bitfield.zmmword
 	   && !i.types[1].bitfield.zmmword
-	   && !i.mask
+	   && !i.mask.reg
 	   && !i.broadcast
 	   && is_evex_encoding (&i.tm)
 	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x6f
@@ -5461,12 +5465,12 @@ swap_2_operands (unsigned int xchg1, unsigned int xchg2)
   i.reloc[xchg2] = i.reloc[xchg1];
   i.reloc[xchg1] = temp_reloc;
 
-  if (i.mask)
+  if (i.mask.reg)
     {
-      if (i.mask->operand == xchg1)
-	i.mask->operand = xchg2;
-      else if (i.mask->operand == xchg2)
-	i.mask->operand = xchg1;
+      if (i.mask.operand == xchg1)
+	i.mask.operand = xchg2;
+      else if (i.mask.operand == xchg2)
+	i.mask.operand = xchg1;
     }
   if (i.broadcast)
     {
@@ -5802,7 +5806,7 @@ check_VecOperands (const insn_template *t)
 
   /* Check if default mask is allowed.  */
   if (t->opcode_modifier.nodefmask
-      && (!i.mask || i.mask->mask->reg_num == 0))
+      && (!i.mask.reg || i.mask.reg->reg_num == 0))
     {
       i.error = no_default_mask;
       return 1;
@@ -5824,8 +5828,8 @@ check_VecOperands (const insn_template *t)
 	return 1;
       }
 
-      gas_assert (i.reg_operands == 2 || i.mask);
-      if (i.reg_operands == 2 && !i.mask)
+      gas_assert (i.reg_operands == 2 || i.mask.reg);
+      if (i.reg_operands == 2 && !i.mask.reg)
 	{
 	  gas_assert (i.types[0].bitfield.class == RegSIMD);
 	  gas_assert (i.types[0].bitfield.xmmword
@@ -5849,7 +5853,7 @@ check_VecOperands (const insn_template *t)
 	    }
 	  as_warn (_("mask, index, and destination registers should be distinct"));
 	}
-      else if (i.reg_operands == 1 && i.mask)
+      else if (i.reg_operands == 1 && i.mask.reg)
 	{
 	  if (i.types[1].bitfield.class == RegSIMD
 	      && (i.types[1].bitfield.xmmword
@@ -5982,14 +5986,14 @@ check_VecOperands (const insn_template *t)
     op = MAX_OPERANDS - 1; /* Avoid uninitialized variable warning.  */
 
   /* Check if requested masking is supported.  */
-  if (i.mask)
+  if (i.mask.reg)
     {
       switch (t->opcode_modifier.masking)
 	{
 	case BOTH_MASKING:
 	  break;
 	case MERGING_MASKING:
-	  if (i.mask->zeroing)
+	  if (i.mask.zeroing)
 	    {
 	case 0:
 	      i.error = unsupported_masking;
@@ -5998,7 +6002,7 @@ check_VecOperands (const insn_template *t)
 	  break;
 	case DYNAMIC_MASKING:
 	  /* Memory destinations allow only merging masking.  */
-	  if (i.mask->zeroing && i.mem_operands)
+	  if (i.mask.zeroing && i.mem_operands)
 	    {
 	      /* Find memory operand.  */
 	      for (op = 0; op < i.operands; op++)
@@ -6018,7 +6022,7 @@ check_VecOperands (const insn_template *t)
     }
 
   /* Check if masking is applied to dest operand.  */
-  if (i.mask && (i.mask->operand != i.operands - 1))
+  if (i.mask.reg && (i.mask.operand != i.operands - 1))
     {
       i.error = mask_not_on_destination;
       return 1;
@@ -9230,7 +9234,7 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
       if ((i.xstate & xstate_zmm) == xstate_zmm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
-      if (i.mask || (i.xstate & xstate_mask) == xstate_mask)
+      if (i.mask.reg || (i.xstate & xstate_mask) == xstate_mask)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MASK;
       if (i.tm.cpu_flags.bitfield.cpufxsr)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;
@@ -10431,23 +10435,20 @@ check_VecOperations (char *op_string, char *op_end)
 		  return NULL;
 		}
 
-	      if (!i.mask)
+	      if (!i.mask.reg)
 		{
-		  mask_op.mask = mask;
-		  mask_op.zeroing = 0;
-		  mask_op.operand = this_operand;
-		  i.mask = &mask_op;
+		  i.mask.reg = mask;
+		  i.mask.operand = this_operand;
 		}
+	      else if (i.mask.reg->reg_num)
+		goto duplicated_vec_op;
 	      else
 		{
-		  if (i.mask->mask)
-		    goto duplicated_vec_op;
-
-		  i.mask->mask = mask;
+		  i.mask.reg = mask;
 
 		  /* Only "{z}" is allowed here.  No need to check
 		     zeroing mask explicitly.  */
-		  if (i.mask->operand != (unsigned int) this_operand)
+		  if (i.mask.operand != (unsigned int) this_operand)
 		    {
 		      as_bad (_("invalid write mask `%s'"), saved);
 		      return NULL;
@@ -10459,27 +10460,26 @@ check_VecOperations (char *op_string, char *op_end)
 	  /* Check zeroing-flag for masking operation.  */
 	  else if (*op_string == 'z')
 	    {
-	      if (!i.mask)
+	      if (!i.mask.reg)
 		{
-		  mask_op.mask = NULL;
-		  mask_op.zeroing = 1;
-		  mask_op.operand = this_operand;
-		  i.mask = &mask_op;
+		  i.mask.reg = reg_k0;
+		  i.mask.zeroing = 1;
+		  i.mask.operand = this_operand;
 		}
 	      else
 		{
-		  if (i.mask->zeroing)
+		  if (i.mask.zeroing)
 		    {
 		    duplicated_vec_op:
 		      as_bad (_("duplicated `%s'"), saved);
 		      return NULL;
 		    }
 
-		  i.mask->zeroing = 1;
+		  i.mask.zeroing = 1;
 
 		  /* Only "{%k}" is allowed here.  No need to check mask
 		     register explicitly.  */
-		  if (i.mask->operand != (unsigned int) this_operand)
+		  if (i.mask.operand != (unsigned int) this_operand)
 		    {
 		      as_bad (_("invalid zeroing-masking `%s'"),
 			      saved);
@@ -10512,7 +10512,7 @@ check_VecOperations (char *op_string, char *op_end)
       return NULL;
     }
 
-  if (i.mask && i.mask->zeroing && !i.mask->mask)
+  if (i.mask.reg && i.mask.zeroing && !i.mask.reg->reg_num)
     {
       as_bad (_("zeroing-masking only allowed with write mask"));
       return NULL;

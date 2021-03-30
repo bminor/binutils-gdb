@@ -1,5 +1,19 @@
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (reg_k0): New.
+	(mask_op): Delete.
+	(struct Mask_Operation): Move ...
+	(struct _i386_insn): ... here. Change field "mask".
+	(md_begin): Initialize reg_k0.
+	(build_evex_prefix): Adjust mask processing.
+	(swap_2_operands): Likewise.
+	(check_VecOperands): Likewise.
+	(check_VecOperations): Likewise.
+	(optimize_encoding): Adjust checks for masking.
+	(output_insn): Likewise.
+
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (swap_2_operands): Switch parameters to
 	unsigned.
 	(struct RC_Operation): Switch operand field to unsigned.
