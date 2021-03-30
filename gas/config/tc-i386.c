@@ -214,6 +214,7 @@ static const char *default_arch = DEFAULT_ARCH;
 static const reg_entry bad_reg = { "<bad>", OPERAND_TYPE_NONE, 0, 0,
 				   { Dw2Inval, Dw2Inval } };
 
+static const reg_entry *reg_st0;
 static const reg_entry *reg_k0;
 
 /* VEX prefix.  */
@@ -3087,11 +3088,27 @@ md_begin (void)
 
     for (regtab = i386_regtab; regtab_size--; regtab++)
       {
+	switch (regtab->reg_type.bitfield.class)
+	  {
+	  case Reg:
+	    if (regtab->reg_type.bitfield.tbyte)
+	      {
+		/* There's no point inserting st(<N>) in the hash table, as
+		   parentheses aren't included in register_chars[] anyway.  */
+		if (regtab->reg_type.bitfield.instance != Accum)
+		  continue;
+		reg_st0 = regtab;
+	      }
+	    break;
+
+	  case RegMask:
+	    if (!regtab->reg_num)
+	      reg_k0 = regtab;
+	    break;
+	  }
+
 	if (str_hash_insert (reg_hash, regtab->reg_name, regtab, 0) != NULL)
 	  as_fatal (_("duplicate %s"), regtab->reg_name);
-
-	if (regtab->reg_type.bitfield.class == RegMask && !regtab->reg_num)
-	  reg_k0 = regtab;
       }
   }
 
@@ -12712,7 +12729,7 @@ parse_real_register (char *reg_string, char **end_op)
   r = (const reg_entry *) str_hash_find (reg_hash, reg_name_given);
 
   /* Handle floating point regs, allowing spaces in the (i) part.  */
-  if (r == i386_regtab /* %st is first entry of table  */)
+  if (r == reg_st0)
     {
       if (!cpu_arch_flags.bitfield.cpu8087
 	  && !cpu_arch_flags.bitfield.cpu287
@@ -12736,8 +12753,7 @@ parse_real_register (char *reg_string, char **end_op)
 	      if (*s == ')')
 		{
 		  *end_op = s + 1;
-		  r = (const reg_entry *) str_hash_find (reg_hash, "st(0)");
-		  know (r);
+		  know (r[fpr].reg_num == fpr);
 		  return r + fpr;
 		}
 	    }

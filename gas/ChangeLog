@@ -1,5 +1,12 @@
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (reg_st0): New.
+	(md_begin): Convert to switch(). Initialize reg_st0. Don't
+	insert other st(N).
+	(parse_real_register): Adjust st(N) processing.
+
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (rc_op): Delete.
 	(struct Rounding_Operation): Move ...
 	(struct _i386_insn): ... here. Change field "rounding".
