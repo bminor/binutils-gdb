@@ -1,3 +1,9 @@
+2021-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR gdb/27541
+	* dwarf2/read.c (dwarf2_has_info): Don't share dwarf2_per_bfd
+	with objfiles using READNOW.
+
 2021-03-12  Christian Biesinger  <cbiesinger@google.com>
 
 	PR threads/27239

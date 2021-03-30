@@ -1911,9 +1911,14 @@ dwarf2_has_info (struct objfile *objfile,
 
       /* We can share a "dwarf2_per_bfd" with other objfiles if the BFD
          doesn't require relocations and if there aren't partial symbols
-	 from some other reader.  */
+	 from some other reader.
+
+	 We don't share with objfiles for which -readnow was requested,
+	 because it would complicate things when loading the same BFD with
+	 -readnow and then without -readnow.  */
       if (!objfile_has_partial_symbols (objfile)
-	  && !gdb_bfd_requires_relocations (objfile->obfd))
+	  && !gdb_bfd_requires_relocations (objfile->obfd)
+	  && (objfile->flags & OBJF_READNOW) == 0)
 	{
 	  /* See if one has been created for this BFD yet.  */
 	  per_bfd = dwarf2_per_bfd_bfd_data_key.get (objfile->obfd);
