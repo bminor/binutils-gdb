@@ -15,8 +15,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+static
+int foo (int a, int b)
+{
+  return a + b;
+}
+
 int
 main (void)
 {
-  return 0;
+  return foo (2, 3);
 }

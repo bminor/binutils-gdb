@@ -1951,9 +1951,14 @@ dwarf2_has_info (struct objfile *objfile,
     {
       dwarf2_per_bfd *per_bfd;
 
-      /* We can share a "dwarf2_per_bfd" with other objfiles if the BFD
-	 doesn't require relocations.  */
-      if (!gdb_bfd_requires_relocations (objfile->obfd))
+      /* We can share a "dwarf2_per_bfd" with other objfiles if the
+	 BFD doesn't require relocations.
+
+	 We don't share with objfiles for which -readnow was requested,
+	 because it would complicate things when loading the same BFD with
+	 -readnow and then without -readnow.  */
+      if (!gdb_bfd_requires_relocations (objfile->obfd)
+	  && (objfile->flags & OBJF_READNOW) == 0)
 	{
 	  /* See if one has been created for this BFD yet.  */
 	  per_bfd = dwarf2_per_bfd_bfd_data_key.get (objfile->obfd);
