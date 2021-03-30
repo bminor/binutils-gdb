@@ -1,3 +1,7 @@
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* prdbg.c (pr_function_type): Replace LITSTTCPY with strcpy.
+
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
 	* dlltool.c (main): Don't use "boolean_condition ? TRUE : FALSE".

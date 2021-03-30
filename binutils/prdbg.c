@@ -752,7 +752,7 @@ pr_function_type (void *p, int argcount, bfd_boolean varargs)
   /* Now the return type is on the top of the stack.  */
 
   s = (char *) xmalloc (len);
-  LITSTRCPY (s, "(|) (");
+  strcpy (s, "(|) (");
 
   if (argcount < 0)
     strcat (s, "/* unknown */");

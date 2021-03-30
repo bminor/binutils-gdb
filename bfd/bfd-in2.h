@@ -44,6 +44,7 @@ extern "C" {
 #include "bfd_stdint.h"
 #include "diagnostics.h"
 #include <stdarg.h>
+#include <string.h>
 #include <sys/stat.h>
 
 #if defined (__STDC__) || defined (ALMOST_STDC) || defined (HAVE_STRINGIZE)
@@ -63,13 +64,6 @@ extern "C" {
    comma and then the length of the string.  Doing this by hand
    is error prone, so using this macro is safer.  */
 #define STRING_COMMA_LEN(STR) (STR), (sizeof (STR) - 1)
-
-  /* strcpy() can have a similar problem, but since we know we are
-     copying a constant string, we can use memcpy which will be faster
-     since there is no need to check for a NUL byte inside STR.  We
-     can also save time if we do not need to copy the terminating NUL.  */
-#define LITMEMCPY(DEST,STR2) memcpy ((DEST), (STR2), sizeof (STR2) - 1)
-#define LITSTRCPY(DEST,STR2) memcpy ((DEST), (STR2), sizeof (STR2))
 
 #define BFD_SUPPORTS_PLUGINS @supports_plugins@
 
