@@ -1,5 +1,19 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* bfdlink.h: Replace bfd_boolean with bool throughout.
+	* coff/ecoff.h: Likewise.
+	* coff/xcoff.h: Likewise.
+	* dis-asm.h: Likewise.
+	* elf/mmix.h: Likewise.
+	* elf/xtensa.h: Likewise.
+	* opcode/aarch64.h: Likewise, and FALSE with false, TRUE with true.
+	* opcode/arc.h: Likewise.
+	* opcode/mips.h: Likewise.
+	* opcode/tic6x-opcode-table.h: Likewise.
+	* opcode/tic6x.h: Likewise.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* cgen/basic-modes.h: Include stdint.h in place of bfd_stdint.h.
 	* elf/nfp.h: Likewise.
 	* opcode/aarch64.h: Likewise.

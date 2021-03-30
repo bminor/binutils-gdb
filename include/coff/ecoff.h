@@ -407,7 +407,7 @@ struct ecoff_debug_swap
   /* Function to read symbol data and set up pointers in
      ecoff_debug_info structure.  The section argument is used for
      ELF, not straight ECOFF.  */
-  bfd_boolean (*read_debug_info) (bfd *, asection *, struct ecoff_debug_info *);
+  bool (*read_debug_info) (bfd *, asection *, struct ecoff_debug_info *);
 };
 
 #endif /* ! defined (ECOFF_H) */

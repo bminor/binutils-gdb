@@ -406,7 +406,7 @@ struct xcoff_link_hash_entry
 struct xcoff_loader_info
 {
   /* Set if a problem occurred.  */
-  bfd_boolean failed;
+  bool failed;
 
   /* Output BFD.  */
   bfd *output_bfd;
