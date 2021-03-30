@@ -992,17 +992,4 @@ reg_entry;
 
 extern const reg_entry i386_regtab[];
 extern const unsigned int i386_regtab_size;
-
-typedef struct
-{
-  char *seg_name;
-  unsigned int seg_prefix;
-}
-seg_entry;
-
-extern const seg_entry cs;
-extern const seg_entry ds;
-extern const seg_entry ss;
-extern const seg_entry es;
-extern const seg_entry fs;
-extern const seg_entry gs;
+extern const unsigned char i386_seg_prefixes[6];

@@ -1,5 +1,20 @@
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (build_modrm_byte): Change return type.
+	Change type of "default_seg". Use NULL. Adjust setting of
+	"default_seg".
+	(reg_ds, reg_es, reg_ss): New.
+	(struct _i386_insn): Change type of seg[].
+	(md_begin): Initialize reg_ds, reg_es, and reg_ss.
+	(swap_operands): Change type of "temp_seg".
+	(check_string): Adjust %es check.
+	(process_operands): Change type of "default_seg". Use NULL.
+	Adjust segment override processing..
+	(i386_att_operand): Adjust segment override handling.
+	* config/tc-i386-intel.c (i386_intel_operand): Likewise.
+
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (reg_eax): New.
 	(md_begin): Initialize reg_eax.
 	* config/tc-i386-intel.c (i386_intel_simplify_register): Use

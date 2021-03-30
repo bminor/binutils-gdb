@@ -1028,16 +1028,10 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      as_warn (_("redundant segment overrides"));
 	      break;
 	    }
-	  switch (i386_regtab[expP->X_add_number].reg_num)
-	    {
-	    case 0: i.seg[i.mem_operands] = &es; break;
-	    case 1: i.seg[i.mem_operands] = &cs; break;
-	    case 2: i.seg[i.mem_operands] = &ss; break;
-	    case 3: i.seg[i.mem_operands] = &ds; break;
-	    case 4: i.seg[i.mem_operands] = &fs; break;
-	    case 5: i.seg[i.mem_operands] = &gs; break;
-	    case RegFlat: i.seg[i.mem_operands] = NULL; break;
-	    }
+	  if (i386_regtab[expP->X_add_number].reg_num == RegFlat)
+	    i.seg[i.mem_operands] = NULL;
+	  else
+	    i.seg[i.mem_operands] = &i386_regtab[expP->X_add_number];
 	}
 
       if (!i386_index_check (operand_string))

@@ -190,7 +190,7 @@ static int check_qword_reg (void);
 static int check_word_reg (void);
 static int finalize_imm (void);
 static int process_operands (void);
-static const seg_entry *build_modrm_byte (void);
+static const reg_entry *build_modrm_byte (void);
 static void output_insn (void);
 static void output_imm (fragS *, offsetT);
 static void output_disp (fragS *, offsetT);
@@ -215,6 +215,9 @@ static const reg_entry bad_reg = { "<bad>", OPERAND_TYPE_NONE, 0, 0,
 				   { Dw2Inval, Dw2Inval } };
 
 static const reg_entry *reg_eax;
+static const reg_entry *reg_ds;
+static const reg_entry *reg_es;
+static const reg_entry *reg_ss;
 static const reg_entry *reg_st0;
 static const reg_entry *reg_k0;
 
@@ -308,7 +311,7 @@ struct _i386_insn
 
     /* SEG gives the seg_entries of this insn.  They are zero unless
        explicit segment overrides are given.  */
-    const seg_entry *seg[2];
+    const reg_entry *seg[2];
 
     /* Copied first memory operand string, for re-checking.  */
     char *memop1_string;
@@ -3107,6 +3110,15 @@ md_begin (void)
 	      }
 	    break;
 
+	  case SReg:
+	    switch (regtab->reg_num)
+	      {
+	      case 0: reg_es = regtab; break;
+	      case 2: reg_ss = regtab; break;
+	      case 3: reg_ds = regtab; break;
+	      }
+	    break;
+
 	  case RegMask:
 	    if (!regtab->reg_num)
 	      reg_k0 = regtab;
@@ -5522,7 +5534,7 @@ swap_operands (void)
 
   if (i.mem_operands == 2)
     {
-      const seg_entry *temp_seg;
+      const reg_entry *temp_seg;
       temp_seg = i.seg[0];
       i.seg[0] = i.seg[1];
       i.seg[1] = temp_seg;
@@ -6752,7 +6764,7 @@ check_string (void)
   unsigned int es_op = i.tm.opcode_modifier.isstring - IS_STRING_ES_OP0;
   unsigned int op = i.tm.operand_types[0].bitfield.baseindex ? es_op : 0;
 
-  if (i.seg[op] != NULL && i.seg[op] != &es)
+  if (i.seg[op] != NULL && i.seg[op] != reg_es)
     {
       as_bad (_("`%s' operand %u must use `%ses' segment"),
 	      i.tm.name,
@@ -7543,7 +7555,7 @@ process_operands (void)
   /* Default segment register this instruction will use for memory
      accesses.  0 means unknown.  This is only for optimizing out
      unnecessary segment overrides.  */
-  const seg_entry *default_seg = 0;
+  const reg_entry *default_seg = NULL;
 
   if (i.tm.opcode_modifier.sse2avx)
     {
@@ -7730,13 +7742,13 @@ process_operands (void)
   else if (i.tm.opcode_modifier.opcodespace == SPACE_BASE
 	   && (i.tm.base_opcode & ~3) == MOV_AX_DISP32)
     {
-      default_seg = &ds;
+      default_seg = reg_ds;
     }
   else if (i.tm.opcode_modifier.isstring)
     {
       /* For the string instructions that allow a segment override
 	 on one of their operands, the default segment is ds.  */
-      default_seg = &ds;
+      default_seg = reg_ds;
     }
   else if (i.short_form)
     {
@@ -7789,9 +7801,9 @@ process_operands (void)
      point, and the specified segment prefix will always be used.  */
   if (i.seg[0]
       && i.seg[0] != default_seg
-      && i.seg[0]->seg_prefix != i.prefix[SEG_PREFIX])
+      && i386_seg_prefixes[i.seg[0]->reg_num] != i.prefix[SEG_PREFIX])
     {
-      if (!add_prefix (i.seg[0]->seg_prefix))
+      if (!add_prefix (i386_seg_prefixes[i.seg[0]->reg_num]))
 	return 0;
     }
   return 1;
@@ -7816,10 +7828,10 @@ static INLINE void set_rex_vrex (const reg_entry *r, unsigned int rex_bit,
     i.vrex |= rex_bit;
 }
 
-static const seg_entry *
+static const reg_entry *
 build_modrm_byte (void)
 {
-  const seg_entry *default_seg = 0;
+  const reg_entry *default_seg = NULL;
   unsigned int source, dest;
   int vex_3_sources;
 
@@ -8103,7 +8115,7 @@ build_modrm_byte (void)
 		}
 	    }
 
-	  default_seg = &ds;
+	  default_seg = reg_ds;
 
 	  if (i.base_reg == 0)
 	    {
@@ -8197,7 +8209,7 @@ build_modrm_byte (void)
 		    i.rm.regmem = i.index_reg->reg_num - 6;
 		  break;
 		case 5: /* (%bp)  */
-		  default_seg = &ss;
+		  default_seg = reg_ss;
 		  if (i.index_reg == 0)
 		    {
 		      i.rm.regmem = 6;
@@ -8258,7 +8270,7 @@ build_modrm_byte (void)
 	      if (!(i.base_reg->reg_flags & RegRex)
 		  && (i.base_reg->reg_num == EBP_REG_NUM
 		   || i.base_reg->reg_num == ESP_REG_NUM))
-		  default_seg = &ss;
+		  default_seg = reg_ss;
 	      if (i.base_reg->reg_num == 5 && i.disp_operands == 0)
 		{
 		  fake_zero_displacement = 1;
@@ -11325,27 +11337,7 @@ i386_att_operand (char *operand_string)
 	++op_string;
       if (*op_string == ':' && r->reg_type.bitfield.class == SReg)
 	{
-	  switch (r->reg_num)
-	    {
-	    case 0:
-	      i.seg[i.mem_operands] = &es;
-	      break;
-	    case 1:
-	      i.seg[i.mem_operands] = &cs;
-	      break;
-	    case 2:
-	      i.seg[i.mem_operands] = &ss;
-	      break;
-	    case 3:
-	      i.seg[i.mem_operands] = &ds;
-	      break;
-	    case 4:
-	      i.seg[i.mem_operands] = &fs;
-	      break;
-	    case 5:
-	      i.seg[i.mem_operands] = &gs;
-	      break;
-	    }
+	  i.seg[i.mem_operands] = r;
 
 	  /* Skip the ':' and whitespace.  */
 	  ++op_string;
