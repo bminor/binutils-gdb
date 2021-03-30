@@ -1,5 +1,13 @@
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (reg_eax): New.
+	(md_begin): Initialize reg_eax.
+	* config/tc-i386-intel.c (i386_intel_simplify_register): Use
+	reg_eax.
+	(i386_intel_simplify): Likewise.
+
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (reg_st0): New.
 	(md_begin): Convert to switch(). Initialize reg_st0. Don't
 	insert other st(N).

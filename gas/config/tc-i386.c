@@ -214,6 +214,7 @@ static const char *default_arch = DEFAULT_ARCH;
 static const reg_entry bad_reg = { "<bad>", OPERAND_TYPE_NONE, 0, 0,
 				   { Dw2Inval, Dw2Inval } };
 
+static const reg_entry *reg_eax;
 static const reg_entry *reg_st0;
 static const reg_entry *reg_k0;
 
@@ -3091,7 +3092,12 @@ md_begin (void)
 	switch (regtab->reg_type.bitfield.class)
 	  {
 	  case Reg:
-	    if (regtab->reg_type.bitfield.tbyte)
+	    if (regtab->reg_type.bitfield.dword)
+	      {
+		if (regtab->reg_type.bitfield.instance == Accum)
+		  reg_eax = regtab;
+	      }
+	    else if (regtab->reg_type.bitfield.tbyte)
 	      {
 		/* There's no point inserting st(<N>) in the hash table, as
 		   parentheses aren't included in register_chars[] anyway.  */

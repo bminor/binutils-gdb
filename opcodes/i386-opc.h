@@ -990,11 +990,6 @@ typedef struct
 }
 reg_entry;
 
-/* Entries in i386_regtab.  */
-#define REGNAM_AL 0
-#define REGNAM_AX 24
-#define REGNAM_EAX 40
-
 extern const reg_entry i386_regtab[];
 extern const unsigned int i386_regtab_size;
 

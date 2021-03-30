@@ -1,5 +1,9 @@
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.h (REGNAM_AL, REGNAM_AX, REGNAM_EAX): Delete.
+
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.h (REGNAM_AL, REGNAM_AX, REGNAM_EAX): Adjust values.
 	* i386-reg.tbl (st): Move down.
 	(st(0)): Delete. Extend comment.

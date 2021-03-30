@@ -335,7 +335,7 @@ i386_intel_simplify_register (expressionS *e)
   else
     {
       /* esp is invalid as index */
-      intel_state.index = i386_regtab + REGNAM_EAX + ESP_REG_NUM;
+      intel_state.index = reg_eax + ESP_REG_NUM;
     }
   return 2;
 }
@@ -500,7 +500,7 @@ static int i386_intel_simplify (expressionS *e)
 		break;
 	      default:
 		/* esp is invalid as index */
-		intel_state.index = i386_regtab + REGNAM_EAX + ESP_REG_NUM;
+		intel_state.index = reg_eax + ESP_REG_NUM;
 		break;
 	      }
 
