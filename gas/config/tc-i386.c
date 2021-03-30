@@ -216,22 +216,6 @@ static const reg_entry bad_reg = { "<bad>", OPERAND_TYPE_NONE, 0, 0,
 
 static const reg_entry *reg_k0;
 
-/* This struct describes rounding control and SAE in the instruction.  */
-struct RC_Operation
-{
-  enum rc_type
-    {
-      rne = 0,
-      rd,
-      ru,
-      rz,
-      saeonly
-    } type;
-  unsigned int operand;
-};
-
-static struct RC_Operation rc_op;
-
 /* VEX prefix.  */
 typedef struct
 {
@@ -380,7 +364,20 @@ struct _i386_insn
     } mask;
 
     /* Rounding control and SAE attributes.  */
-    struct RC_Operation *rounding;
+    struct RC_Operation
+    {
+      enum rc_type
+	{
+	  rc_none = -1,
+	  rne,
+	  rd,
+	  ru,
+	  rz,
+	  saeonly
+	} type;
+
+      unsigned int operand;
+    } rounding;
 
     /* Broadcasting attributes.
 
@@ -3876,7 +3873,7 @@ build_evex_prefix (void)
     i.vex.bytes[3] |= 0x80;
 
   /* Don't always set the broadcast bit if there is no RC.  */
-  if (!i.rounding)
+  if (i.rounding.type == rc_none)
     {
       /* Encode the vector length.  */
       unsigned int vec_length;
@@ -3955,13 +3952,10 @@ build_evex_prefix (void)
       if (i.broadcast.type)
 	i.vex.bytes[3] |= 0x10;
     }
+  else if (i.rounding.type != saeonly)
+    i.vex.bytes[3] |= 0x10 | (i.rounding.type << 5);
   else
-    {
-      if (i.rounding->type != saeonly)
-	i.vex.bytes[3] |= 0x10 | (i.rounding->type << 5);
-      else
-	i.vex.bytes[3] |= 0x10 | (evexrcig << 5);
-    }
+    i.vex.bytes[3] |= 0x10 | (evexrcig << 5);
 
   if (i.mask.reg)
     i.vex.bytes[3] |= i.mask.reg->reg_num;
@@ -4166,7 +4160,7 @@ optimize_encoding (void)
 	   && !i.types[2].bitfield.xmmword
 	   && (i.tm.opcode_modifier.vex
 	       || ((!i.mask.reg || i.mask.zeroing)
-		   && !i.rounding
+		   && i.rounding.type == rc_none
 		   && is_evex_encoding (&i.tm)
 		   && (i.vec_encoding != vex_encoding_evex
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl
@@ -4666,6 +4660,7 @@ md_assemble (char *line)
 
   /* Initialize globals.  */
   memset (&i, '\0', sizeof (i));
+  i.rounding.type = rc_none;
   for (j = 0; j < MAX_OPERANDS; j++)
     i.reloc[j] = NO_RELOC;
   memset (disp_expressions, '\0', sizeof (disp_expressions));
@@ -5476,12 +5471,12 @@ swap_2_operands (unsigned int xchg1, unsigned int xchg2)
       else if (i.broadcast.operand == xchg2)
 	i.broadcast.operand = xchg1;
     }
-  if (i.rounding)
+  if (i.rounding.type != rc_none)
     {
-      if (i.rounding->operand == xchg1)
-	i.rounding->operand = xchg2;
-      else if (i.rounding->operand == xchg2)
-	i.rounding->operand = xchg1;
+      if (i.rounding.operand == xchg1)
+	i.rounding.operand = xchg2;
+      else if (i.rounding.operand == xchg2)
+	i.rounding.operand = xchg1;
     }
 }
 
@@ -6026,10 +6021,10 @@ check_VecOperands (const insn_template *t)
     }
 
   /* Check RC/SAE.  */
-  if (i.rounding)
+  if (i.rounding.type != rc_none)
     {
       if (!t->opcode_modifier.sae
-	  || (i.rounding->type != saeonly && !t->opcode_modifier.staticrounding))
+	  || (i.rounding.type != saeonly && !t->opcode_modifier.staticrounding))
 	{
 	  i.error = unsupported_rc_sae;
 	  return 1;
@@ -6038,7 +6033,7 @@ check_VecOperands (const insn_template *t)
 	 them is rounding, the rounding operand should be the last
 	 immediate operand.  */
       if (i.imm_operands > 1
-	  && i.rounding->operand != i.imm_operands - 1)
+	  && i.rounding.operand != i.imm_operands - 1)
 	{
 	  i.error = rc_sae_operand_not_last_imm;
 	  return 1;
@@ -7925,7 +7920,7 @@ build_modrm_byte (void)
 			  && i.imm_operands == 1
 			  && (i.types[0].bitfield.imm8
 			      || i.types[i.operands - 1].bitfield.imm8
-			      || i.rounding)));
+			      || i.rounding.type != rc_none)));
 	  if (i.imm_operands == 2)
 	    source = 2;
 	  else
@@ -7966,7 +7961,7 @@ build_modrm_byte (void)
 	  /* RC/SAE operand could be between DEST and SRC.  That happens
 	     when one operand is GPR and the other one is XMM/YMM/ZMM
 	     register.  */
-	  if (i.rounding && i.rounding->operand == dest)
+	  if (i.rounding.type != rc_none && i.rounding.operand == dest)
 	    dest++;
 
 	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
@@ -9866,7 +9861,7 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
   for (n = 0; n < i.operands; n++)
     {
       /* Skip SAE/RC Imm operand in EVEX.  They are already handled.  */
-      if (i.rounding && n == i.rounding->operand)
+      if (i.rounding.type != rc_none && n == i.rounding.operand)
 	continue;
 
       if (operand_type_check (i.types[n], imm))
@@ -11185,17 +11180,15 @@ RC_SAE_immediate (const char *imm_start)
     {
       if (!strncmp (pstr, RC_NamesTable[j].name, RC_NamesTable[j].len))
 	{
-	  if (!i.rounding)
-	    {
-	      rc_op.type = RC_NamesTable[j].type;
-	      rc_op.operand = this_operand;
-	      i.rounding = &rc_op;
-	    }
-	  else
+	  if (i.rounding.type != rc_none)
 	    {
 	      as_bad (_("duplicated `%s'"), imm_start);
 	      return 0;
 	    }
+
+	  i.rounding.type = RC_NamesTable[j].type;
+	  i.rounding.operand = this_operand;
+
 	  pstr += RC_NamesTable[j].len;
 	  match_found = 1;
 	  break;

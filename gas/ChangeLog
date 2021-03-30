@@ -1,5 +1,19 @@
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (rc_op): Delete.
+	(struct Rounding_Operation): Move ...
+	(struct _i386_insn): ... here. Change field "rounding".
+	(build_evex_prefix): Adjust rounding processing.
+	(swap_2_operands): Likewise.
+	(check_VecOperands): Likewise.
+	(RC_SAE_immediate): Likewise.
+	(optimize_encoding): Adjust check for rounding.
+	(build_modrm_byte): Likewise.
+	(output_imm): Likewise.
+	(md_assemble): Initialize rounding type.
+
+2021-03-30  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (broadcast_op): Delete.
 	(struct Broadcast_Operation): Move ...
 	(struct _i386_insn): ... here. Change field "broadcast".
