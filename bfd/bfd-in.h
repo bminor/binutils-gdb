@@ -35,6 +35,7 @@ extern "C" {
 #include "ansidecl.h"
 #include "symcat.h"
 #include <stdint.h>
+#include <stdbool.h>
 #include "diagnostics.h"
 #include <stdarg.h>
 #include <string.h>
@@ -114,20 +115,19 @@ typedef BFD_HOSTPTR_T bfd_hostptr_t;
 /* Forward declaration.  */
 typedef struct bfd bfd;
 
-/* Boolean type used in bfd.  Too many systems define their own
-   versions of "boolean" for us to safely typedef a "boolean" of
-   our own.  Using an enum for "bfd_boolean" has its own set of
-   problems, with strange looking casts required to avoid warnings
-   on some older compilers.  Thus we just use an int.
-
+/* Boolean type used in bfd.
    General rule: Functions which are bfd_boolean return TRUE on
    success and FALSE on failure (unless they're a predicate).  */
 
-typedef int bfd_boolean;
-#undef FALSE
-#undef TRUE
-#define FALSE 0
-#define TRUE 1
+#ifdef POISON_BFD_BOOLEAN
+# pragma GCC poison bfd_boolean FALSE TRUE
+#else
+# define bfd_boolean bool
+# undef FALSE
+# undef TRUE
+# define FALSE 0
+# define TRUE 1
+#endif
 
 #ifdef BFD64
 

@@ -1,5 +1,11 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* bfd-in.h: Include stdbool.h.
+	(bfd_boolean): Define as bool
+	* bfd-in2.h: Regenerate.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* .gitignore: Delete bfd_stdint.h entry.
 	* Makefile.am (bfdinclude_HEADERS): Delete bfd_stdint.h.
 	(BUILD_HFILES, LOCAL_H_DEPS): Likewise.
