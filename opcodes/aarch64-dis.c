@@ -19,7 +19,7 @@
    see <http://www.gnu.org/licenses/>.  */
 
 #include "sysdep.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "disassemble.h"
 #include "libiberty.h"
 #include "opintl.h"

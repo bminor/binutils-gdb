@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <stdarg.h>
 #include <inttypes.h>
 

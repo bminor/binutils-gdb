@@ -1,3 +1,17 @@
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* aarch64-dis.c: Include stdint.h in place of bfd_stdint.h.
+	* aarch64-dis.h: Likewise.
+	* aarch64-opc.c: Likewise.
+	* avr-dis.c: Likewise.
+	* csky-dis.c: Likewise.
+	* nds32-asm.c: Likewise.
+	* nds32-dis.c: Likewise.
+	* nfp-dis.c: Likewise.
+	* riscv-dis.c: Likewise.
+	* s12z-dis.c: Likewise.
+	* wasm32-dis.c: Likewise.
+
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.c (cs, ds, ss, es, fs, gs): Delete.

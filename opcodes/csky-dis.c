@@ -22,7 +22,7 @@
 #include "sysdep.h"
 #include "config.h"
 #include <stdio.h>
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <elf/csky.h>
 #include "disassemble.h"
 #include "elf-bfd.h"

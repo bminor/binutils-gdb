@@ -1,3 +1,23 @@
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* elf-hints-local.h: Include stdint.h in place of bfd_stdint.h.
+	* emultempl/nds32elf.em: Likewise.
+	* testsuite/ld-elf/mbind2b.c: Likewise.
+	* testsuite/ld-elf/pr18718.c: Likewise.
+	* testsuite/ld-elf/pr18720a.c: Likewise.
+	* testsuite/ld-elf/pr25749-1.c: Likewise.
+	* testsuite/ld-elf/pr25749-1a.c: Likewise.
+	* testsuite/ld-elf/pr25749-1b.c: Likewise.
+	* testsuite/ld-elf/pr25749-1c.c: Likewise.
+	* testsuite/ld-elf/pr25749-1d.c: Likewise.
+	* testsuite/ld-elf/pr25749-2.c: Likewise.
+	* testsuite/ld-elf/pr25754-1a.c: Likewise.
+	* testsuite/ld-elf/pr25754-2a.c: Likewise.
+	* testsuite/ld-elf/pr25754-3a.c: Likewise.
+	* testsuite/ld-elf/pr25754-4a.c: Likewise.
+	* testsuite/ld-elf/pr25754-5a.c: Likewise.
+	* testsuite/ld-elf/pr25754-6a.c: Likewise.
+
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/aix.em (gld${EMULATION_NAME}_before_allocation): Simplify

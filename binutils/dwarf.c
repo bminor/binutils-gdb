@@ -21,7 +21,7 @@
 #include "sysdep.h"
 #include "libiberty.h"
 #include "bfd.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "bucomm.h"
 #include "elfcomm.h"
 #include "elf/common.h"

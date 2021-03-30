@@ -22,7 +22,7 @@
 #include "as.h"
 #include <limits.h>
 #include <stdarg.h>
-#include "bfd_stdint.h"
+#include <stdint.h>
 #define	 NO_RELOC 0
 #include "safe-ctype.h"
 #include "subsegs.h"

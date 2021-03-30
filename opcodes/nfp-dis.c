@@ -33,7 +33,7 @@
 #include "opintl.h"
 #include "elf-bfd.h"
 #include "bfd.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 #define _NFP_ERR_STOP -1
 #define _NFP_ERR_CONT -8

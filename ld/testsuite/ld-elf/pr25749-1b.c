@@ -1,4 +1,4 @@
-#include <bfd_stdint.h>
+#include <stdint.h>
 
 extern void *_binary_pr25749_1_c_size;
 

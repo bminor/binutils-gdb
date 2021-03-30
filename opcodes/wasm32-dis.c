@@ -27,7 +27,7 @@
 #include "elf-bfd.h"
 #include "elf/internal.h"
 #include "elf/wasm32.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>

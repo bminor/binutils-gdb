@@ -22,7 +22,7 @@
 #ifndef PPC_H
 #define PPC_H
 
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {

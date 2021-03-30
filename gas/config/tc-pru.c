@@ -21,7 +21,7 @@
    02110-1301, USA.  */
 
 #include "as.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "opcode/pru.h"
 #include "elf/pru.h"
 #include "tc-pru.h"

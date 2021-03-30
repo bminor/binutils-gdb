@@ -24,12 +24,10 @@
 
 /* This file doesn't contain all modes,
    just the basic/portable ones.
-   It also provides access to stdint.h (*1) so the includer doesn't have
-   to deal with the portability issues.
-   (*1): To the extent that bfd_stdint.h does for now.  */
+   It also provides access to stdint.h so the includer doesn't have
+   to deal with the portability issues.  */
 
-/* IWBN to avoid unnecessary dependencies on bfd-anything.  */
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 typedef int8_t QI;
 typedef uint8_t UQI;

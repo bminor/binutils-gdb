@@ -1,3 +1,9 @@
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-aarch64.c: Include stdint.h in place of bfd_stdint.h.
+	* config/tc-crx.c: Likewise.
+	* config/tc-nds32.h: Likewise.
+
 2021-03-30  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (build_modrm_byte): Change return type.

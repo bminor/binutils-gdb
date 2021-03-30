@@ -26,7 +26,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "libiberty.h"
 #include "bucomm.h"
 

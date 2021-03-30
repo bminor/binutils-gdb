@@ -24,8 +24,7 @@
 #include "symcat.h"
 #include "cgen/bitset.h"
 
-/* ??? IWBN to replace bfd in the name.  */
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {

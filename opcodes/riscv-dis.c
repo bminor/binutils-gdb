@@ -29,7 +29,7 @@
 #include "elf/riscv.h"
 #include "cpu-riscv.h"
 
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <ctype.h>
 
 static enum riscv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;

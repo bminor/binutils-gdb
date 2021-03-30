@@ -23,7 +23,7 @@
    MA 02110-1301, USA.  */
 
 #include "as.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "safe-ctype.h"
 #include "dwarf2dbg.h"
 #include "opcode/crx.h"

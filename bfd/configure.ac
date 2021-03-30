@@ -246,7 +246,6 @@ BFD_CC_FOR_BUILD
 AC_CHECK_HEADERS(alloca.h fcntl.h limits.h stddef.h stdlib.h string.h \
 		 strings.h sys/file.h sys/resource.h sys/stat.h sys/time.h \
 		 time.h unistd.h wchar.h wctype.h)
-GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 

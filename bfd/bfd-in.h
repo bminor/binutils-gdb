@@ -34,7 +34,7 @@ extern "C" {
 
 #include "ansidecl.h"
 #include "symcat.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "diagnostics.h"
 #include <stdarg.h>
 #include <string.h>

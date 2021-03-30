@@ -23,7 +23,7 @@
 #define OPCODE_AARCH64_H
 
 #include "bfd.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
 

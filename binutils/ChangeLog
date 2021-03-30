@@ -1,5 +1,10 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* coffdump.c: Include stdint.h in place of bfd_stdint.h.
+	* dwarf.c: Likewise.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* prdbg.c (pr_function_type): Replace LITSTTCPY with strcpy.
 
 2021-03-29  Alan Modra  <amodra@gmail.com>

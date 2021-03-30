@@ -1,5 +1,21 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* .gitignore: Delete bfd_stdint.h entry.
+	* Makefile.am (bfdinclude_HEADERS): Delete bfd_stdint.h.
+	(BUILD_HFILES, LOCAL_H_DEPS): Likewise.
+	* bfd-in.h: Include stdint.h in place of bfd_stdint.h.
+	* configure.ac: Don't invoke GCC_HEADER_STDINT.
+	* configure.com: Don't create bfd_stdint.h.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* bfd-in.h: Include string.h.
 	(LITMEMCPY, LITSTRCPY): Delete.
 	* bfd-in2.h: Regenerate.

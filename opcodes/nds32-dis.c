@@ -27,7 +27,7 @@
 #include "symcat.h"
 #include "libiberty.h"
 #include "opintl.h"
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include "hashtab.h"
 #include "nds32-asm.h"
 #include "opcode/nds32.h"

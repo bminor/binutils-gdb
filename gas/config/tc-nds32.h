@@ -22,7 +22,7 @@
 #ifndef TC_NDS32
 #define TC_NDS32
 
-#include "bfd_stdint.h"
+#include <stdint.h>
 
 /* Enum mapping symbol.  */
 enum mstate

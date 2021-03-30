@@ -1,3 +1,12 @@
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
+	* cgen/basic-modes.h: Include stdint.h in place of bfd_stdint.h.
+	* elf/nfp.h: Likewise.
+	* opcode/aarch64.h: Likewise.
+	* opcode/cgen.h: Likewise.
+	* opcode/nfp.h: Likewise.
+	* opcode/ppc.h: Likewise.
+
 2021-03-29  Alan Modra  <amodra@gmail.com>
 
 	* opcode/aarch64.h (alias_opcode_p): Simplify boolean expression.

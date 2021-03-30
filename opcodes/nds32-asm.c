@@ -22,7 +22,7 @@
 
 #include "sysdep.h"
 
-#include "bfd_stdint.h"
+#include <stdint.h>
 #include <assert.h>
 
 #include "safe-ctype.h"

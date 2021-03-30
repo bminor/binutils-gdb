@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <bfd_stdint.h>
+#include <stdint.h>
 
 extern uintptr_t *get_bar (void);
 
