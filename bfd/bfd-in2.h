@@ -127,7 +127,7 @@ typedef struct bfd bfd;
    success and FALSE on failure (unless they're a predicate).  */
 
 #ifdef POISON_BFD_BOOLEAN
-# pragma GCC poison bfd_boolean FALSE TRUE
+# pragma GCC poison bfd_boolean
 #else
 # define bfd_boolean bool
 # undef FALSE

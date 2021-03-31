@@ -1,5 +1,11 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	PR 27671
+	* bfd-in.h: Don't poison FALSE or TRUE.
+	* bfd-in2.h: Regenerate.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* sysdep.h: POISON_BFD_BOOLEAN: Define.
 	* aix5ppc-core.c, * aout-cris.c, * aout-ns32k.c, * aout-target.h,
 	* aoutx.h, * arc-got.h, * archive.c, * archive64.c, * archures.c,
