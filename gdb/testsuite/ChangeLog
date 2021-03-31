@@ -1,3 +1,8 @@
+2021-03-31  Tom Tromey  <tromey@adacore.com>
+
+	* lib/dwarf.exp (Dwarf::_get_args): New proc.
+	(Dwarf::_location): Use it.
+
 2021-03-31  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/27667

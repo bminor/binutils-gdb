@@ -890,6 +890,20 @@ namespace eval Dwarf {
 	}
     }
 
+    # Assign elements from LINE to the elements of an array named
+    # "argvec" in the caller scope.  The keys used are named in ARGS.
+    # If the wrong number of elements appear in LINE, error.
+    proc _get_args {line op args} {
+	if {[llength $line] != [llength $args] + 1} {
+	    error "usage: $op [string toupper $args]"
+	}
+
+	upvar argvec argvec
+	foreach var $args value [lreplace $line 0 0] {
+	    set argvec($var) $value
+	}
+    }
+
     # This is a miniature assembler for location expressions.  It is
     # suitable for use in the attributes to a DIE.  Its output is
     # prefixed with "=" to make it automatically use DW_FORM_block.
@@ -924,59 +938,72 @@ namespace eval Dwarf {
 	    set opcode [_map_name [lindex $line 0] _OP]
 	    _op .byte $_constants($opcode) $opcode
 
+	    array unset argvec *
 	    switch -exact -- $opcode {
 		DW_OP_addr {
-		    _op .${addr_size}byte [lindex $line 1]
+		    _get_args $line $opcode size
+		    _op .${addr_size}byte $argvec(size)
 		}
 
 		DW_OP_regx {
-		    _op .uleb128 [lindex $line 1]
+		    _get_args $line $opcode register
+		    _op .uleb128 $argvec(register)
 		}
 
 		DW_OP_pick -
 		DW_OP_const1u -
 		DW_OP_const1s {
-		    _op .byte [lindex $line 1]
+		    _get_args $line $opcode const
+		    _op .byte $argvec(const)
 		}
 
 		DW_OP_const2u -
 		DW_OP_const2s {
-		    _op .2byte [lindex $line 1]
+		    _get_args $line $opcode const
+		    _op .2byte $argvec(const)
 		}
 
 		DW_OP_const4u -
 		DW_OP_const4s {
-		    _op .4byte [lindex $line 1]
+		    _get_args $line $opcode const
+		    _op .4byte $argvec(const)
 		}
 
 		DW_OP_const8u -
 		DW_OP_const8s {
-		    _op .8byte [lindex $line 1]
+		    _get_args $line $opcode const
+		    _op .8byte $argvec(const)
 		}
 
 		DW_OP_constu {
-		    _op .uleb128 [lindex $line 1]
+		    _get_args $line $opcode const
+		    _op .uleb128 $argvec(const)
 		}
 		DW_OP_consts {
-		    _op .sleb128 [lindex $line 1]
+		    _get_args $line $opcode const
+		    _op .sleb128 $argvec(const)
 		}
 
 		DW_OP_plus_uconst {
-		    _op .uleb128 [lindex $line 1]
+		    _get_args $line $opcode const
+		    _op .uleb128 $argvec(const)
 		}
 
 		DW_OP_piece {
-		    _op .uleb128 [lindex $line 1]
+		    _get_args $line $opcode size
+		    _op .uleb128 $argvec(size)
 		}
 
 		DW_OP_bit_piece {
-		    _op .uleb128 [lindex $line 1]
-		    _op .uleb128 [lindex $line 2]
+		    _get_args $line $opcode size offset
+		    _op .uleb128 $argvec(size)
+		    _op .uleb128 $argvec(offset)
 		}
 
 		DW_OP_skip -
 		DW_OP_bra {
-		    _op .2byte [lindex $line 1]
+		    _get_args $line $opcode label
+		    _op .2byte $argvec(label)
 		}
 
 		DW_OP_implicit_value {
@@ -1000,45 +1027,37 @@ namespace eval Dwarf {
 
 		DW_OP_implicit_pointer -
 		DW_OP_GNU_implicit_pointer {
-		    if {[llength $line] != 3} {
-			error "usage: $opcode LABEL OFFSET"
-		    }
+		    _get_args $line $opcode label offset
 
 		    # Here label is a section offset.
-		    set label [lindex $line 1]
 		    if { $dwarf_version == 2 } {
-			_op .${addr_size}byte $label
+			_op .${addr_size}byte $argvec(label)
 		    } else {
-			_op .${offset_size}byte $label
+			_op .${offset_size}byte $argvec(label)
 		    }
-		    _op .sleb128 [lindex $line 2]
+		    _op .sleb128 $argvec(offset)
 		}
 
 		DW_OP_GNU_variable_value {
-		    if {[llength $line] != 2} {
-			error "usage: $opcode LABEL"
-		    }
+		    _get_args $line $opcode label
 
 		    # Here label is a section offset.
-		    set label [lindex $line 1]
 		    if { $dwarf_version == 2 } {
-			_op .${addr_size}byte $label
+			_op .${addr_size}byte $argvec(label)
 		    } else {
-			_op .${offset_size}byte $label
+			_op .${offset_size}byte $argvec(label)
 		    }
 		}
 
 		DW_OP_deref_size {
-		    if {[llength $line] != 2} {
-			error "usage: DW_OP_deref_size SIZE"
-		    }
-
-		    _op .byte [lindex $line 1]
+		    _get_args $line $opcode size
+		    _op .byte $argvec(size)
 		}
 
 		DW_OP_bregx {
-		    _op .uleb128 [lindex $line 1]
-		    _op .sleb128 [lindex $line 2]
+		    _get_args $line $opcode register offset
+		    _op .uleb128 $argvec(register)
+		    _op .sleb128 $argvec(offset)
 		}
 
 		default {
