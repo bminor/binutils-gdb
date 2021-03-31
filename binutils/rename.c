@@ -127,7 +127,7 @@ set_times (const char *destination, const struct stat *statbuf)
 
 int
 smart_rename (const char *from, const char *to, int fromfd,
-	      struct stat *target_stat, bfd_boolean preserve_dates)
+	      struct stat *target_stat, bool preserve_dates)
 {
   int ret;
 

@@ -201,4 +201,6 @@ size_t strnlen (const char *, size_t);
 #define HOST_WIDEST_INT long
 #endif
 
+#define POISON_BFD_BOOLEAN 1
+
 #endif /* _BIN_SYSDEP_H */

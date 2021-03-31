@@ -78,8 +78,8 @@ typedef struct dwo_info
   struct dwo_info * next;
 } dwo_info;
 
-static dwo_info *   first_dwo_info = NULL;
-static bfd_boolean  need_dwo_info;
+static dwo_info *first_dwo_info = NULL;
+static bool need_dwo_info;
 
 separate_info * first_separate_info = NULL;
 
@@ -107,7 +107,7 @@ int do_debug_cu_index;
 int do_wide;
 int do_debug_links;
 int do_follow_links = DEFAULT_FOR_FOLLOW_LINKS;
-bfd_boolean do_checks;
+bool do_checks;
 
 int dwarf_cutoff_level = -1;
 unsigned long dwarf_start_die;
@@ -145,13 +145,13 @@ static int tu_count = 0;
 static struct cu_tu_set *cu_sets = NULL;
 static struct cu_tu_set *tu_sets = NULL;
 
-static bfd_boolean load_cu_tu_indexes (void *);
+static bool load_cu_tu_indexes (void *);
 
 /* An array that indicates for a given level of CU nesting whether
    the latest DW_AT_type seen for that level was a signed type or
    an unsigned type.  */
 #define MAX_CU_NESTING (1 << 8)
-static bfd_boolean level_type_signed[MAX_CU_NESTING];
+static bool level_type_signed[MAX_CU_NESTING];
 
 /* Values for do_debug_lines.  */
 #define FLAG_DEBUG_LINES_RAW	 1
@@ -341,7 +341,7 @@ dwarf_vmatoa64 (dwarf_vma hvalue, dwarf_vma lvalue, char *buf,
 dwarf_vma
 read_leb128 (unsigned char *data,
 	     const unsigned char *const end,
-	     bfd_boolean sign,
+	     bool sign,
 	     unsigned int *length_return,
 	     int *status_return)
 {
@@ -737,7 +737,7 @@ fetch_indirect_line_string (dwarf_vma offset)
 
 static const char *
 fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
-		      dwarf_vma offset_size, bfd_boolean dwo)
+		      dwarf_vma offset_size, bool dwo)
 {
   enum dwarf_section_display_enum str_sec_idx = dwo ? str_dwo : str;
   enum dwarf_section_display_enum idx_sec_idx = dwo ? str_index_dwo : str_index;
@@ -2214,20 +2214,20 @@ get_type_abbrev_from_form (unsigned long                 form,
    found starting at DATA.  */
 
 static void
-get_type_signedness (abbrev_entry *         entry,
-		     const struct dwarf_section * section,
-		     unsigned char *        data,
-		     unsigned const char *  end,
-		     dwarf_vma              cu_offset,
-		     dwarf_vma              pointer_size,
-		     dwarf_vma              offset_size,
-		     int                    dwarf_version,
-		     bfd_boolean *          is_signed,
-		     unsigned int	    nesting)
+get_type_signedness (abbrev_entry *entry,
+		     const struct dwarf_section *section,
+		     unsigned char *data,
+		     unsigned const char *end,
+		     dwarf_vma cu_offset,
+		     dwarf_vma pointer_size,
+		     dwarf_vma offset_size,
+		     int dwarf_version,
+		     bool *is_signed,
+		     unsigned int nesting)
 {
   abbrev_attr *   attr;
 
-  * is_signed = FALSE;
+  * is_signed = false;
 
 #define MAX_NESTING 20
   if (nesting > MAX_NESTING)
@@ -2295,7 +2295,7 @@ get_type_signedness (abbrev_entry *         entry,
 	    case DW_ATE_unsigned:
 	    case DW_ATE_unsigned_char:
 	    case DW_ATE_unsigned_fixed:
-	      * is_signed = FALSE;
+	      * is_signed = false;
 	      break;
 
 	    default:
@@ -2306,7 +2306,7 @@ get_type_signedness (abbrev_entry *         entry,
 	    case DW_ATE_imaginary_float:
 	    case DW_ATE_decimal_float:
 	    case DW_ATE_signed_fixed:
-	      * is_signed = TRUE;
+	      * is_signed = true;
 	      break;
 	    }
 	  break;
@@ -2315,10 +2315,10 @@ get_type_signedness (abbrev_entry *         entry,
 }
 
 static void
-read_and_print_leb128 (unsigned char *        data,
-		       unsigned int *         bytes_read,
-		       unsigned const char *  end,
-		       bfd_boolean            is_signed)
+read_and_print_leb128 (unsigned char *data,
+		       unsigned int *bytes_read,
+		       unsigned const char *end,
+		       bool is_signed)
 {
   int status;
   dwarf_vma val = read_leb128 (data, end, is_signed, bytes_read, &status);
@@ -2363,9 +2363,9 @@ display_discr_list (unsigned long          form,
       return;
     }
 
-  bfd_boolean is_signed =
+  bool is_signed =
     (level > 0 && level <= MAX_CU_NESTING)
-    ? level_type_signed [level - 1] : FALSE;
+    ? level_type_signed [level - 1] : false;
 
   printf ("(");
   while (uvalue)
@@ -2728,7 +2728,7 @@ read_and_display_attr_value (unsigned long           attribute,
       if (!do_loc)
 	{
 	  const char *suffix = strrchr (section->name, '.');
-	  bfd_boolean dwo = suffix && strcmp (suffix, ".dwo") == 0;
+	  bool dwo = suffix && strcmp (suffix, ".dwo") == 0;
 
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
@@ -2953,7 +2953,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx2:
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
-		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, FALSE), cu_offset);
+		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, false), cu_offset);
 		break;
 	      case DW_FORM_string:
 		add_dwo_name ((const char *) orig_data, cu_offset);
@@ -2985,7 +2985,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx2:
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
-		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, FALSE), cu_offset);
+		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, false), cu_offset);
 		break;
 	      case DW_FORM_string:
 		add_dwo_dir ((const char *) orig_data, cu_offset);
@@ -3027,10 +3027,10 @@ read_and_display_attr_value (unsigned long           attribute,
       if (level >= 0 && level < MAX_CU_NESTING
 	  && uvalue < (size_t) (end - start))
 	{
-	  bfd_boolean is_signed = FALSE;
-	  abbrev_entry *  type_abbrev;
-	  unsigned char * type_data;
-	  unsigned long   type_cu_offset;
+	  bool is_signed = false;
+	  abbrev_entry *type_abbrev;
+	  unsigned char *type_data;
+	  unsigned long type_cu_offset;
 
 	  type_abbrev = get_type_abbrev_from_form (form, uvalue, cu_offset,
 						   section, NULL, & type_data, & type_cu_offset);
@@ -3422,7 +3422,7 @@ read_and_display_attr (unsigned long           attribute,
    following debug links, then attempt to load the requested section
    from one of the separate debug info files.  */
 
-static bfd_boolean
+static bool
 load_debug_section_with_follow (enum dwarf_section_display_enum sec_enum,
 				void * handle)
 {
@@ -3441,7 +3441,7 @@ load_debug_section_with_follow (enum dwarf_section_display_enum sec_enum,
 	      }
 	}
 
-      return TRUE;
+      return true;
     }
 
   if (do_follow_links)
@@ -3456,16 +3456,16 @@ load_debug_section_with_follow (enum dwarf_section_display_enum sec_enum,
 
 	      /* FIXME: We should check to see if any of the remaining debug info
 		 files also contain this section, and, umm, do something about it.  */
-	      return TRUE;
+	      return true;
 	    }
 	}
     }
 
-  return FALSE;
+  return false;
 }
 
 static void
-introduce (struct dwarf_section * section, bfd_boolean raw)
+introduce (struct dwarf_section * section, bool raw)
 {
   if (raw)
     {
@@ -3495,12 +3495,12 @@ introduce (struct dwarf_section * section, bfd_boolean raw)
    Returns TRUE upon success.  Otherwise an error or warning message is
    printed and FALSE is returned.  */
 
-static bfd_boolean
-process_debug_info (struct dwarf_section *           section,
-		    void *                           file,
-		    enum dwarf_section_display_enum  abbrev_sec,
-		    bfd_boolean                      do_loc,
-		    bfd_boolean                      do_types)
+static bool
+process_debug_info (struct dwarf_section * section,
+		    void *file,
+		    enum dwarf_section_display_enum abbrev_sec,
+		    bool do_loc,
+		    bool do_types)
 {
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
@@ -3532,7 +3532,7 @@ process_debug_info (struct dwarf_section *           section,
 	    {
 	      warn (_("Reserved length value (0x%s) found in section %s\n"),
 		    dwarf_vmatoa ("x", length), section->name);
-	      return FALSE;
+	      return false;
 	    }
 	  else
 	    section_begin += length + 4;
@@ -3544,14 +3544,14 @@ process_debug_info (struct dwarf_section *           section,
 	    {
 	      warn (_("Corrupt unit length (0x%s) found in section %s\n"),
 		    dwarf_vmatoa ("x", length), section->name);
-	      return FALSE;
+	      return false;
 	    }
 	}
 
       if (num_units == 0)
 	{
 	  error (_("No comp units in %s section ?\n"), section->name);
-	  return FALSE;
+	  return false;
 	}
 
       /* Then allocate an array to hold the information.  */
@@ -3562,7 +3562,7 @@ process_debug_info (struct dwarf_section *           section,
 	  error (_("Not enough memory for a debug info array of %u entries\n"),
 		 num_units);
 	  alloc_num_debug_info_entries = num_debug_info_entries = 0;
-	  return FALSE;
+	  return false;
 	}
 
       /* PR 17531: file: 92ca3797.
@@ -3590,11 +3590,11 @@ process_debug_info (struct dwarf_section *           section,
     {
       warn (_("Unable to locate %s section!\n"),
 	    debug_displays [abbrev_sec].section.uncompressed_name);
-      return FALSE;
+      return false;
     }
 
   if (!do_loc && dwarf_start_die == 0)
-    introduce (section, FALSE);
+    introduce (section, false);
 
   free_all_abbrevs ();
   free (cu_abbrev_map);
@@ -3765,13 +3765,13 @@ process_debug_info (struct dwarf_section *           section,
       if (compunit.cu_version < 5)
 	SAFE_BYTE_GET_AND_INC (compunit.cu_pointer_size, hdrptr, 1, end);
 
-      bfd_boolean do_dwo_id = FALSE;
+      bool do_dwo_id = false;
       uint64_t dwo_id = 0;
       if (compunit.cu_unit_type == DW_UT_split_compile
 	  || compunit.cu_unit_type == DW_UT_skeleton)
 	{
 	  SAFE_BYTE_GET_AND_INC (dwo_id, hdrptr, 8, end);
-	  do_dwo_id = TRUE;
+	  do_dwo_id = true;
 	}
 
       /* PR 17512: file: 001-108546-0.001:0.1.  */
@@ -3985,7 +3985,7 @@ process_debug_info (struct dwarf_section *           section,
 		    }
 		}
 	      if (dwarf_start_die != 0 && level < saved_level)
-		return TRUE;
+		return true;
 	      continue;
 	    }
 
@@ -4027,7 +4027,7 @@ process_debug_info (struct dwarf_section *           section,
 		}
 	      warn (_("DIE at offset 0x%lx refers to abbreviation number %lu which does not exist\n"),
 		    die_offset, abbrev_number);
-	      return FALSE;
+	      return false;
 	    }
 
 	  if (!do_loc && do_printing)
@@ -4127,7 +4127,7 @@ process_debug_info (struct dwarf_section *           section,
   if (!do_loc)
     printf ("\n");
 
-  return TRUE;
+  return true;
 }
 
 /* Locate and scan the .debug_info section in the file and record the pointer
@@ -4152,12 +4152,12 @@ load_debug_info (void * file)
   (void) load_cu_tu_indexes (file);
 
   if (load_debug_section_with_follow (info, file)
-      && process_debug_info (&debug_displays [info].section, file, abbrev, TRUE, FALSE))
+      && process_debug_info (&debug_displays [info].section, file, abbrev, true, false))
     return num_debug_info_entries;
 
   if (load_debug_section_with_follow (info_dwo, file)
       && process_debug_info (&debug_displays [info_dwo].section, file,
-			     abbrev_dwo, TRUE, FALSE))
+			     abbrev_dwo, true, false))
     return num_debug_info_entries;
 
   num_debug_info_entries = DEBUG_INFO_UNAVAILABLE;
@@ -4282,12 +4282,12 @@ read_debug_line_header (struct dwarf_section * section,
 }
 
 static unsigned char *
-display_formatted_table (unsigned char *                   data,
-			 unsigned char *                   start,
-			 unsigned char *                   end,
-			 const DWARF2_Internal_LineInfo *  linfo,
-			 struct dwarf_section *            section,
-			 bfd_boolean                       is_dir)
+display_formatted_table (unsigned char *data,
+			 unsigned char *start,
+			 unsigned char *end,
+			 const DWARF2_Internal_LineInfo *linfo,
+			 struct dwarf_section *section,
+			 bool is_dir)
 {
   unsigned char *format_start, format_count, *format, formati;
   dwarf_vma data_count, datai;
@@ -4421,7 +4421,7 @@ display_debug_sup (struct dwarf_section *  section,
   dwarf_vma checksum_len;
 
 
-  introduce (section, TRUE);
+  introduce (section, true);
   if (section->size < 4)
     {
       error (_("corrupt .debug_sup section: size is too small\n"));
@@ -4449,7 +4449,7 @@ display_debug_sup (struct dwarf_section *  section,
     }
   start += sup_filename_len + 1;
 
-  checksum_len = read_leb128 (start, end, FALSE /* unsigned */, & num_read, & status);
+  checksum_len = read_leb128 (start, end, false /* unsigned */, & num_read, & status);
   if (status)
     {
       error (_("corrupt .debug_sup section: bad LEB128 field for checksum length\n"));
@@ -4490,7 +4490,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
   unsigned char *start = section->start;
   int verbose_view = 0;
 
-  introduce (section, TRUE);
+  introduce (section, true);
 
   while (data < end)
     {
@@ -4586,9 +4586,9 @@ display_debug_lines_raw (struct dwarf_section *  section,
 	      load_debug_section_with_follow (line_str, file);
 
 	      data = display_formatted_table (data, start, end, &linfo, section,
-					      TRUE);
+					      true);
 	      data = display_formatted_table (data, start, end, &linfo, section,
-					      FALSE);
+					      false);
 	    }
 	  else
 	    {
@@ -4910,7 +4910,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 {
   static DWARF2_Internal_LineInfo saved_linfo;
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   while (data < end)
     {
@@ -5738,7 +5738,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
      we test for that later on.  */
   load_debug_info (file);
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   while (start < end)
     {
@@ -5883,7 +5883,7 @@ display_debug_macinfo (struct dwarf_section *section,
   unsigned char *curr = start;
   enum dwarf_macinfo_record_type op;
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   while (curr < end)
     {
@@ -6045,17 +6045,17 @@ display_debug_macro (struct dwarf_section *section,
   unsigned char *end = start + section->size;
   unsigned char *curr = start;
   unsigned char *extended_op_buf[256];
-  bfd_boolean is_dwo = FALSE;
+  bool is_dwo = false;
   const char *suffix = strrchr (section->name, '.');
 
   if (suffix && strcmp (suffix, ".dwo") == 0)
-    is_dwo = TRUE;
+    is_dwo = true;
 
   load_debug_section_with_follow (str, file);
   load_debug_section_with_follow (line, file);
   load_debug_section_with_follow (str_index, file);
   
-  introduce (section, FALSE);
+  introduce (section, false);
 
   while (curr < end)
     {
@@ -6257,7 +6257,7 @@ display_debug_macro (struct dwarf_section *section,
 	      READ_ULEB (lineno, curr, end);
 	      READ_ULEB (offset, curr, end);
 	      string = (const unsigned char *)
-		fetch_indexed_string (offset, NULL, offset_size, FALSE);
+		fetch_indexed_string (offset, NULL, offset_size, false);
 	      if (op == DW_MACRO_define_strx)
 		printf (" DW_MACRO_define_strx ");
 	      else
@@ -6326,7 +6326,7 @@ display_debug_abbrev (struct dwarf_section *section,
   unsigned char *start = section->start;
   const unsigned char *end = start + section->size;
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   do
     {
@@ -6379,7 +6379,7 @@ display_debug_abbrev (struct dwarf_section *section,
 /* Return true when ADDR is the maximum address, when addresses are
    POINTER_SIZE bytes long.  */
 
-static bfd_boolean
+static bool
 is_max_address (dwarf_vma addr, unsigned int pointer_size)
 {
   dwarf_vma mask = ~(~(dwarf_vma) 1 << (pointer_size * 8 - 1));
@@ -6944,12 +6944,12 @@ display_debug_loc (struct dwarf_section *section, void *file)
   unsigned char *next = start, *vnext = vstart;
   unsigned int *array = NULL;
   const char *suffix = strrchr (section->name, '.');
-  bfd_boolean is_dwo = FALSE;
+  bool is_dwo = false;
   int is_loclists = strstr (section->name, "debug_loclists") != NULL;
   dwarf_vma expected_start = 0;
 
   if (suffix && strcmp (suffix, ".dwo") == 0)
-    is_dwo = TRUE;
+    is_dwo = true;
 
   bytes = section->size;
 
@@ -7066,7 +7066,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
   if (!locs_sorted)
     array = (unsigned int *) xcmalloc (num_loc_list, sizeof (unsigned int));
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   if (reloc_at (section, 0))
     printf (_(" Warning: This section has relocations - addresses seen here may not be accurate.\n\n"));
@@ -7212,7 +7212,7 @@ display_debug_str (struct dwarf_section *section,
       return 0;
     }
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   while (bytes)
     {
@@ -7259,19 +7259,19 @@ display_debug_str (struct dwarf_section *section,
 static int
 display_debug_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, FALSE, FALSE);
+  return process_debug_info (section, file, section->abbrev_sec, false, false);
 }
 
 static int
 display_debug_types (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, FALSE, TRUE);
+  return process_debug_info (section, file, section->abbrev_sec, false, true);
 }
 
 static int
 display_trace_info (struct dwarf_section *section, void *file)
 {
-  return process_debug_info (section, file, section->abbrev_sec, FALSE, TRUE);
+  return process_debug_info (section, file, section->abbrev_sec, false, true);
 }
 
 static int
@@ -7281,7 +7281,7 @@ display_debug_aranges (struct dwarf_section *section,
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   /* It does not matter if this load fails,
      we test for that later on.  */
@@ -7441,7 +7441,7 @@ display_debug_addr (struct dwarf_section *section,
       return 0;
     }
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   /* PR  17531: file: cf38d01b.
      We use xcalloc because a corrupt file may not have initialised all of the
@@ -7546,14 +7546,14 @@ display_debug_str_offsets (struct dwarf_section *section,
   unsigned char *curr = start;
 
   const char *suffix = strrchr (section->name, '.');
-  bfd_boolean dwo = suffix && strcmp (suffix, ".dwo") == 0;
+  bool dwo = suffix && strcmp (suffix, ".dwo") == 0;
 
   if (dwo)
     load_debug_section_with_follow (str_dwo, file);
   else
     load_debug_section_with_follow (str, file);
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   while (curr < end)
     {
@@ -7925,7 +7925,7 @@ display_debug_ranges (struct dwarf_section *section,
     warn (_("Range lists in %s section start at 0x%lx\n"),
 	  section->name, (unsigned long) range_entries[0].ranges_offset);
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   printf (_("    Offset   Begin    End\n"));
 
@@ -8667,12 +8667,12 @@ display_debug_frames (struct dwarf_section *section,
   Frame_Chunk *chunks = NULL, *forward_refs = NULL;
   Frame_Chunk *remembered_state = NULL;
   Frame_Chunk *rs;
-  bfd_boolean is_eh = strcmp (section->name, ".eh_frame") == 0;
+  bool is_eh = strcmp (section->name, ".eh_frame") == 0;
   unsigned int max_regs = 0;
   const char *bad_reg = _("bad register: ");
   unsigned int saved_eh_addr_size = eh_addr_size;
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   while (start < end)
     {
@@ -8688,7 +8688,7 @@ display_debug_frames (struct dwarf_section *section,
       unsigned int encoded_ptr_size = saved_eh_addr_size;
       unsigned int offset_size;
       unsigned int initial_length_size;
-      bfd_boolean all_nops;
+      bool all_nops;
       static Frame_Chunk fde_fc;
 
       saved_start = start;
@@ -9117,7 +9117,7 @@ display_debug_frames (struct dwarf_section *section,
 	  start = tmp;
 	}
 
-      all_nops = TRUE;
+      all_nops = true;
 
       /* Now we know what registers are used, make a second pass over
 	 the chunk, this time actually printing out the info.  */
@@ -9143,7 +9143,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	  /* Make a note if something other than DW_CFA_nop happens.  */
 	  if (op != DW_CFA_nop)
-	    all_nops = FALSE;
+	    all_nops = false;
 
 	  /* Warning: if you add any more cases to this switch, be
 	     sure to add them to the corresponding switch above.  */
@@ -9654,7 +9654,7 @@ display_debug_names (struct dwarf_section *section, void *file)
   const unsigned char *const section_end = section->start + section->size;
   unsigned char *unit_end;
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   load_debug_section_with_follow (str, file);
 
@@ -9667,7 +9667,7 @@ display_debug_names (struct dwarf_section *section, void *file)
       uint32_t augmentation_string_size;
       unsigned int i;
       unsigned long sec_off;
-      bfd_boolean augmentation_printable;
+      bool augmentation_printable;
       const char *augmentation_string;
 
       unit_start = hdrptr;
@@ -9735,7 +9735,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 
       printf (_("Augmentation string:"));
 
-      augmentation_printable = TRUE;
+      augmentation_printable = true;
       augmentation_string = (const char *) hdrptr;
 
       for (i = 0; i < augmentation_string_size; i++)
@@ -9746,7 +9746,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  printf (" %02x", uc);
 
 	  if (uc != 0 && !ISPRINT (uc))
-	    augmentation_printable = FALSE;
+	    augmentation_printable = false;
 	}
 
       if (augmentation_printable)
@@ -10010,7 +10010,7 @@ display_debug_links (struct dwarf_section *  section,
   const unsigned char * filename;
   unsigned int          filelen;
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   /* The .gnu_debuglink section is formatted as:
       (c-string)  Filename.
@@ -10093,7 +10093,7 @@ display_gdb_index (struct dwarf_section *section,
 
   /* The documentation for the format of this file is in gdb/dwarf2read.c.  */
 
-  introduce (section, FALSE);
+  introduce (section, false);
 
   if (section->size < 6 * sizeof (uint32_t))
     {
@@ -10432,7 +10432,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
   if (do_display)
     {
-      introduce (section, FALSE);
+      introduce (section, false);
 
       printf (_("  Version:                 %u\n"), version);
       if (version >= 2)
@@ -10514,7 +10514,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       unsigned char *poffsets = ppool + (size_t) ncols * 4;
       unsigned char *psizes = poffsets + (size_t) nused * ncols * 4;
       unsigned char *pend = psizes + (size_t) nused * ncols * 4;
-      bfd_boolean is_tu_index;
+      bool is_tu_index;
       struct cu_tu_set *this_set = NULL;
       unsigned int row;
       unsigned char *prow;
@@ -10706,25 +10706,25 @@ static int cu_tu_indexes_read = -1; /* Tri-state variable.  */
    section sets that we can use to associate a .debug_info.dwo section
    with its associated .debug_abbrev.dwo section in a .dwp file.  */
 
-static bfd_boolean
+static bool
 load_cu_tu_indexes (void *file)
 {
   /* If we have already loaded (or tried to load) the CU and TU indexes
      then do not bother to repeat the task.  */
   if (cu_tu_indexes_read == -1)
     {
-      cu_tu_indexes_read = TRUE;
+      cu_tu_indexes_read = true;
 
       if (load_debug_section_with_follow (dwp_cu_index, file))
 	if (! process_cu_tu_index (&debug_displays [dwp_cu_index].section, 0))
-	  cu_tu_indexes_read = FALSE;
+	  cu_tu_indexes_read = false;
 
       if (load_debug_section_with_follow (dwp_tu_index, file))
 	if (! process_cu_tu_index (&debug_displays [dwp_tu_index].section, 0))
-	  cu_tu_indexes_read = FALSE;
+	  cu_tu_indexes_read = false;
     }
 
-  return (bfd_boolean) cu_tu_indexes_read;
+  return (bool) cu_tu_indexes_read;
 }
 
 /* Find the set of sections that includes section SHNDX.  */
@@ -10905,10 +10905,10 @@ calc_gnu_debuglink_crc32 (unsigned long          crc,
   return ~crc & 0xffffffff;
 }
 
-typedef bfd_boolean (*   check_func_type) (const char *, void *);
-typedef const char * (*  parse_func_type) (struct dwarf_section *, void *);
+typedef bool (*check_func_type) (const char *, void *);
+typedef const char *(* parse_func_type) (struct dwarf_section *, void *);
 
-static bfd_boolean
+static bool
 check_gnu_debuglink (const char * pathname, void * crc_pointer)
 {
   static unsigned char buffer [8 * 1024];
@@ -10919,7 +10919,7 @@ check_gnu_debuglink (const char * pathname, void * crc_pointer)
 
   sep_data = open_debug_file (pathname);
   if (sep_data == NULL)
-    return FALSE;
+    return false;
 
   /* Yes - we are opening the file twice...  */
   f = fopen (pathname, "rb");
@@ -10928,7 +10928,7 @@ check_gnu_debuglink (const char * pathname, void * crc_pointer)
       /* Paranoia: This should never happen.  */
       close_debug_file (sep_data);
       warn (_("Unable to reopen separate debug info file: %s\n"), pathname);
-      return FALSE;
+      return false;
     }
 
   while ((count = fread (buffer, 1, sizeof (buffer), f)) > 0)
@@ -10941,10 +10941,10 @@ check_gnu_debuglink (const char * pathname, void * crc_pointer)
       close_debug_file (sep_data);
       warn (_("Separate debug info file %s found, but CRC does not match - ignoring\n"),
 	    pathname);
-      return FALSE;
+      return false;
     }
 
-  return TRUE;
+  return true;
 }
 
 static const char *
@@ -10967,18 +10967,18 @@ parse_gnu_debuglink (struct dwarf_section * section, void * data)
   return name;
 }
 
-static bfd_boolean
+static bool
 check_gnu_debugaltlink (const char * filename, void * data ATTRIBUTE_UNUSED)
 {
   void * sep_data = open_debug_file (filename);
 
   if (sep_data == NULL)
-    return FALSE;
+    return false;
 
   /* FIXME: We should now extract the build-id in the separate file
      and check it...  */
 
-  return TRUE;
+  return true;
 }
 
 typedef struct build_id_data
@@ -11030,7 +11030,7 @@ add_separate_debug_file (const char * filename, void * handle)
    file. If successful, store the path of the file in filename and
    return TRUE, otherwise return FALSE.  */
 
-static bfd_boolean
+static bool
 debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
                                       char ** filename,
                                       void * file)
@@ -11052,16 +11052,16 @@ debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
       filelen = strnlen ((const char *)section->start, section->size);
       if (filelen == section->size)
         /* Corrupt debugaltlink.  */
-        return FALSE;
+        return false;
 
       build_id = section->start + filelen + 1;
       build_id_len = section->size - (filelen + 1);
 
       if (build_id_len == 0)
-        return FALSE;
+        return false;
     }
   else
-    return FALSE;
+    return false;
 
   if (build_id)
     {
@@ -11070,7 +11070,7 @@ debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
 
       client = debuginfod_begin ();
       if (client == NULL)
-        return FALSE;
+        return false;
 
       /* Query debuginfod servers for the target file. If found its path
          will be stored in filename.  */
@@ -11087,11 +11087,11 @@ debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
           /* File successfully retrieved. Close fd since we want to
              use open_debug_file () on filename instead.  */
           close (fd);
-          return TRUE;
+          return true;
         }
     }
 
-  return FALSE;
+  return false;
 }
 #endif
 
@@ -11436,12 +11436,12 @@ check_for_and_load_links (void * file, const char * filename)
    If TRUE is returned then the linked list starting at first_separate_info
    will be populated with open file handles.  */
 
-bfd_boolean
+bool
 load_separate_debug_files (void * file, const char * filename)
 {
   /* Skip this operation if we are not interested in debug links.  */
   if (! do_follow_links && ! do_debug_links)
-    return FALSE;
+    return false;
 
   /* See if there are any dwo links.  */
   if (load_debug_section (str, file)
@@ -11451,13 +11451,13 @@ load_separate_debug_files (void * file, const char * filename)
       free_dwo_info ();
 
       if (process_debug_info (& debug_displays[info].section, file, abbrev,
-			      TRUE, FALSE))
+			      true, false))
 	{
-	  bfd_boolean introduced = FALSE;
-	  dwo_info *   dwinfo;
-	  const char * dir = NULL;
-	  const char * id = NULL;
-	  const char * name = NULL;
+	  bool introduced = false;
+	  dwo_info *dwinfo;
+	  const char *dir = NULL;
+	  const char *id = NULL;
+	  const char *name = NULL;
 
 	  for (dwinfo = first_dwo_info; dwinfo != NULL; dwinfo = dwinfo->next)
 	    {
@@ -11500,7 +11500,7 @@ load_separate_debug_files (void * file, const char * filename)
 			{
 			  printf (_("The %s section contains link(s) to dwo file(s):\n\n"),
 				  debug_displays [info].section.uncompressed_name);
-			  introduced = TRUE;
+			  introduced = true;
 			}
 
 		      printf (_("  Name:      %s\n"), name);
@@ -11524,7 +11524,7 @@ load_separate_debug_files (void * file, const char * filename)
   if (! do_follow_links)
     /* The other debug links will be displayed by display_debug_links()
        so we do not need to do any further processing here.  */
-    return FALSE;
+    return false;
 
   /* FIXME: We do not check for the presence of both link sections in the same file.  */
   /* FIXME: We do not check for the presence of multiple, same-name debuglink sections.  */
@@ -11532,10 +11532,10 @@ load_separate_debug_files (void * file, const char * filename)
 
   check_for_and_load_links (file, filename);
   if (first_separate_info != NULL)
-    return TRUE;
+    return true;
 
   do_follow_links = 0;
-  return FALSE;
+  return false;
 }
 
 void
@@ -11753,53 +11753,53 @@ dwarf_select_sections_all (void)
 
 struct dwarf_section_display debug_displays[] =
 {
-  { { ".debug_abbrev",	    ".zdebug_abbrev",	NO_ABBREVS },      display_debug_abbrev,   &do_debug_abbrevs,	FALSE },
-  { { ".debug_aranges",	    ".zdebug_aranges",	NO_ABBREVS },      display_debug_aranges,  &do_debug_aranges,	TRUE },
-  { { ".debug_frame",       ".zdebug_frame",	NO_ABBREVS },      display_debug_frames,   &do_debug_frames,	TRUE },
-  { { ".debug_info",	    ".zdebug_info",	ABBREV (abbrev)},  display_debug_info,	   &do_debug_info,	TRUE },
-  { { ".debug_line",	    ".zdebug_line",	NO_ABBREVS },      display_debug_lines,    &do_debug_lines,	TRUE },
-  { { ".debug_pubnames",    ".zdebug_pubnames",	NO_ABBREVS },      display_debug_pubnames, &do_debug_pubnames,	FALSE },
-  { { ".debug_gnu_pubnames", ".zdebug_gnu_pubnames", NO_ABBREVS }, display_debug_gnu_pubnames, &do_debug_pubnames, FALSE },
-  { { ".eh_frame",	    "",			NO_ABBREVS },      display_debug_frames,   &do_debug_frames,	TRUE },
-  { { ".debug_macinfo",	    ".zdebug_macinfo",	NO_ABBREVS },      display_debug_macinfo,  &do_debug_macinfo,	FALSE },
-  { { ".debug_macro",	    ".zdebug_macro",	NO_ABBREVS },      display_debug_macro,    &do_debug_macinfo,	TRUE },
-  { { ".debug_str",	    ".zdebug_str",	NO_ABBREVS },      display_debug_str,	   &do_debug_str,	FALSE },
-  { { ".debug_line_str",    ".zdebug_line_str",	NO_ABBREVS },      display_debug_str,	   &do_debug_str,	FALSE },
-  { { ".debug_loc",	    ".zdebug_loc",	NO_ABBREVS },      display_debug_loc,	   &do_debug_loc,	TRUE },
-  { { ".debug_loclists",    ".zdebug_loclists",	NO_ABBREVS },      display_debug_loc,	   &do_debug_loc,	TRUE },
-  { { ".debug_pubtypes",    ".zdebug_pubtypes",	NO_ABBREVS },      display_debug_pubnames, &do_debug_pubtypes,	FALSE },
-  { { ".debug_gnu_pubtypes", ".zdebug_gnu_pubtypes", NO_ABBREVS }, display_debug_gnu_pubnames, &do_debug_pubtypes, FALSE },
-  { { ".debug_ranges",	    ".zdebug_ranges",	NO_ABBREVS },      display_debug_ranges,   &do_debug_ranges,	TRUE },
-  { { ".debug_rnglists",    ".zdebug_rnglists",	NO_ABBREVS },      display_debug_ranges,   &do_debug_ranges,	TRUE },
-  { { ".debug_static_func", ".zdebug_static_func", NO_ABBREVS },   display_debug_not_supported, NULL,		FALSE },
-  { { ".debug_static_vars", ".zdebug_static_vars", NO_ABBREVS },   display_debug_not_supported, NULL,		FALSE },
-  { { ".debug_types",	    ".zdebug_types",	ABBREV (abbrev) }, display_debug_types,    &do_debug_info,	TRUE },
-  { { ".debug_weaknames",   ".zdebug_weaknames", NO_ABBREVS },     display_debug_not_supported, NULL,		FALSE },
-  { { ".gdb_index",	    "",			NO_ABBREVS },      display_gdb_index,      &do_gdb_index,	FALSE },
-  { { ".debug_names",	    "",			NO_ABBREVS },      display_debug_names,    &do_gdb_index,	FALSE },
-  { { ".trace_info",	    "",			ABBREV (trace_abbrev) }, display_trace_info, &do_trace_info,	TRUE },
-  { { ".trace_abbrev",	    "",			NO_ABBREVS },      display_debug_abbrev,   &do_trace_abbrevs,	FALSE },
-  { { ".trace_aranges",	    "",			NO_ABBREVS },      display_debug_aranges,  &do_trace_aranges,	FALSE },
-  { { ".debug_info.dwo",    ".zdebug_info.dwo",	ABBREV (abbrev_dwo) }, display_debug_info, &do_debug_info,	TRUE },
-  { { ".debug_abbrev.dwo",  ".zdebug_abbrev.dwo", NO_ABBREVS },    display_debug_abbrev,   &do_debug_abbrevs,	FALSE },
-  { { ".debug_types.dwo",   ".zdebug_types.dwo", ABBREV (abbrev_dwo) }, display_debug_types, &do_debug_info,	TRUE },
-  { { ".debug_line.dwo",    ".zdebug_line.dwo", NO_ABBREVS },      display_debug_lines,    &do_debug_lines,	TRUE },
-  { { ".debug_loc.dwo",	    ".zdebug_loc.dwo",	NO_ABBREVS },      display_debug_loc,	   &do_debug_loc,	TRUE },
-  { { ".debug_macro.dwo",   ".zdebug_macro.dwo", NO_ABBREVS },     display_debug_macro,    &do_debug_macinfo,	TRUE },
-  { { ".debug_macinfo.dwo", ".zdebug_macinfo.dwo", NO_ABBREVS },   display_debug_macinfo,  &do_debug_macinfo,	FALSE },
-  { { ".debug_str.dwo",     ".zdebug_str.dwo",  NO_ABBREVS },      display_debug_str,      &do_debug_str,	TRUE },
-  { { ".debug_str_offsets", ".zdebug_str_offsets", NO_ABBREVS },   display_debug_str_offsets, &do_debug_str_offsets, TRUE },
-  { { ".debug_str_offsets.dwo", ".zdebug_str_offsets.dwo", NO_ABBREVS }, display_debug_str_offsets, &do_debug_str_offsets, TRUE },
-  { { ".debug_addr",	    ".zdebug_addr",     NO_ABBREVS },      display_debug_addr,     &do_debug_addr,	TRUE },
-  { { ".debug_cu_index",    "",			NO_ABBREVS },      display_cu_index,       &do_debug_cu_index,	FALSE },
-  { { ".debug_tu_index",    "",			NO_ABBREVS },      display_cu_index,       &do_debug_cu_index,	FALSE },
-  { { ".gnu_debuglink",     "",                 NO_ABBREVS },      display_debug_links,    &do_debug_links,     FALSE },
-  { { ".gnu_debugaltlink",  "",                 NO_ABBREVS },      display_debug_links,    &do_debug_links,     FALSE },
-  { { ".debug_sup",         "",			NO_ABBREVS },      display_debug_sup,      &do_debug_links,	FALSE },
+  { { ".debug_abbrev",	    ".zdebug_abbrev",	NO_ABBREVS },      display_debug_abbrev,   &do_debug_abbrevs,	false },
+  { { ".debug_aranges",	    ".zdebug_aranges",	NO_ABBREVS },      display_debug_aranges,  &do_debug_aranges,	true },
+  { { ".debug_frame",       ".zdebug_frame",	NO_ABBREVS },      display_debug_frames,   &do_debug_frames,	true },
+  { { ".debug_info",	    ".zdebug_info",	ABBREV (abbrev)},  display_debug_info,	   &do_debug_info,	true },
+  { { ".debug_line",	    ".zdebug_line",	NO_ABBREVS },      display_debug_lines,    &do_debug_lines,	true },
+  { { ".debug_pubnames",    ".zdebug_pubnames",	NO_ABBREVS },      display_debug_pubnames, &do_debug_pubnames,	false },
+  { { ".debug_gnu_pubnames", ".zdebug_gnu_pubnames", NO_ABBREVS }, display_debug_gnu_pubnames, &do_debug_pubnames, false },
+  { { ".eh_frame",	    "",			NO_ABBREVS },      display_debug_frames,   &do_debug_frames,	true },
+  { { ".debug_macinfo",	    ".zdebug_macinfo",	NO_ABBREVS },      display_debug_macinfo,  &do_debug_macinfo,	false },
+  { { ".debug_macro",	    ".zdebug_macro",	NO_ABBREVS },      display_debug_macro,    &do_debug_macinfo,	true },
+  { { ".debug_str",	    ".zdebug_str",	NO_ABBREVS },      display_debug_str,	   &do_debug_str,	false },
+  { { ".debug_line_str",    ".zdebug_line_str",	NO_ABBREVS },      display_debug_str,	   &do_debug_str,	false },
+  { { ".debug_loc",	    ".zdebug_loc",	NO_ABBREVS },      display_debug_loc,	   &do_debug_loc,	true },
+  { { ".debug_loclists",    ".zdebug_loclists",	NO_ABBREVS },      display_debug_loc,	   &do_debug_loc,	true },
+  { { ".debug_pubtypes",    ".zdebug_pubtypes",	NO_ABBREVS },      display_debug_pubnames, &do_debug_pubtypes,	false },
+  { { ".debug_gnu_pubtypes", ".zdebug_gnu_pubtypes", NO_ABBREVS }, display_debug_gnu_pubnames, &do_debug_pubtypes, false },
+  { { ".debug_ranges",	    ".zdebug_ranges",	NO_ABBREVS },      display_debug_ranges,   &do_debug_ranges,	true },
+  { { ".debug_rnglists",    ".zdebug_rnglists",	NO_ABBREVS },      display_debug_ranges,   &do_debug_ranges,	true },
+  { { ".debug_static_func", ".zdebug_static_func", NO_ABBREVS },   display_debug_not_supported, NULL,		false },
+  { { ".debug_static_vars", ".zdebug_static_vars", NO_ABBREVS },   display_debug_not_supported, NULL,		false },
+  { { ".debug_types",	    ".zdebug_types",	ABBREV (abbrev) }, display_debug_types,    &do_debug_info,	true },
+  { { ".debug_weaknames",   ".zdebug_weaknames", NO_ABBREVS },     display_debug_not_supported, NULL,		false },
+  { { ".gdb_index",	    "",			NO_ABBREVS },      display_gdb_index,      &do_gdb_index,	false },
+  { { ".debug_names",	    "",			NO_ABBREVS },      display_debug_names,    &do_gdb_index,	false },
+  { { ".trace_info",	    "",			ABBREV (trace_abbrev) }, display_trace_info, &do_trace_info,	true },
+  { { ".trace_abbrev",	    "",			NO_ABBREVS },      display_debug_abbrev,   &do_trace_abbrevs,	false },
+  { { ".trace_aranges",	    "",			NO_ABBREVS },      display_debug_aranges,  &do_trace_aranges,	false },
+  { { ".debug_info.dwo",    ".zdebug_info.dwo",	ABBREV (abbrev_dwo) }, display_debug_info, &do_debug_info,	true },
+  { { ".debug_abbrev.dwo",  ".zdebug_abbrev.dwo", NO_ABBREVS },    display_debug_abbrev,   &do_debug_abbrevs,	false },
+  { { ".debug_types.dwo",   ".zdebug_types.dwo", ABBREV (abbrev_dwo) }, display_debug_types, &do_debug_info,	true },
+  { { ".debug_line.dwo",    ".zdebug_line.dwo", NO_ABBREVS },      display_debug_lines,    &do_debug_lines,	true },
+  { { ".debug_loc.dwo",	    ".zdebug_loc.dwo",	NO_ABBREVS },      display_debug_loc,	   &do_debug_loc,	true },
+  { { ".debug_macro.dwo",   ".zdebug_macro.dwo", NO_ABBREVS },     display_debug_macro,    &do_debug_macinfo,	true },
+  { { ".debug_macinfo.dwo", ".zdebug_macinfo.dwo", NO_ABBREVS },   display_debug_macinfo,  &do_debug_macinfo,	false },
+  { { ".debug_str.dwo",     ".zdebug_str.dwo",  NO_ABBREVS },      display_debug_str,      &do_debug_str,	true },
+  { { ".debug_str_offsets", ".zdebug_str_offsets", NO_ABBREVS },   display_debug_str_offsets, &do_debug_str_offsets, true },
+  { { ".debug_str_offsets.dwo", ".zdebug_str_offsets.dwo", NO_ABBREVS }, display_debug_str_offsets, &do_debug_str_offsets, true },
+  { { ".debug_addr",	    ".zdebug_addr",     NO_ABBREVS },      display_debug_addr,     &do_debug_addr,	true },
+  { { ".debug_cu_index",    "",			NO_ABBREVS },      display_cu_index,       &do_debug_cu_index,	false },
+  { { ".debug_tu_index",    "",			NO_ABBREVS },      display_cu_index,       &do_debug_cu_index,	false },
+  { { ".gnu_debuglink",     "",                 NO_ABBREVS },      display_debug_links,    &do_debug_links,     false },
+  { { ".gnu_debugaltlink",  "",                 NO_ABBREVS },      display_debug_links,    &do_debug_links,     false },
+  { { ".debug_sup",         "",			NO_ABBREVS },      display_debug_sup,      &do_debug_links,	false },
   /* Separate debug info files can containt their own .debug_str section,
      and this might be in *addition* to a .debug_str section already present
      in the main file.  Hence we need to have two entries for .debug_str.  */
-  { { ".debug_str",	    ".zdebug_str",	NO_ABBREVS },      display_debug_str,	   &do_debug_str,	FALSE },
+  { { ".debug_str",	    ".zdebug_str",	NO_ABBREVS },      display_debug_str,	   &do_debug_str,	false },
 };
 
 /* A static assertion.  */

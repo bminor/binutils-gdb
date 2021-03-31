@@ -50,7 +50,7 @@ typedef struct mc_msg_item
   struct bin_messagetable_item *res;
 } mc_msg_item;
 
-bfd_boolean target_is_bigendian = 0;
+bool target_is_bigendian = 0;
 const char *def_target_arch;
 
 /* Globals and static variable definitions. */

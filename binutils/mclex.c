@@ -34,9 +34,9 @@
 #include <assert.h>
 
 /* Exported globals.  */
-bfd_boolean mclex_want_nl = FALSE;
-bfd_boolean mclex_want_line = FALSE;
-bfd_boolean mclex_want_filename = FALSE;
+bool mclex_want_nl = false;
+bool mclex_want_line = false;
+bool mclex_want_filename = false;
 
 /* Local globals.  */
 static unichar *input_stream = NULL;
@@ -365,7 +365,7 @@ yylex (void)
 	  && (input_stream_pos[1] == '\n'
 	      || (input_stream_pos[1] == '\r' && input_stream_pos[2] == '\n')))
 	{
-	  mclex_want_line = FALSE;
+	  mclex_want_line = false;
           return skip_until_eol () ? MCENDLINE : -1;
 	}
       if (!skip_until_eol ())
@@ -383,7 +383,7 @@ yylex (void)
 	input_line += 1;
       if (mclex_want_nl && ch == '\n')
 	{
-	  mclex_want_nl = FALSE;
+	  mclex_want_nl = false;
 	  return NL;
 	}
     }
@@ -391,7 +391,7 @@ yylex (void)
   ++input_stream_pos;
   if (mclex_want_filename)
     {
-      mclex_want_filename = FALSE;
+      mclex_want_filename = false;
       if (ch == '"')
 	{
 	  start_token++;

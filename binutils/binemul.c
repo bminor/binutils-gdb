@@ -38,9 +38,9 @@ ar_emul_default_usage (FILE *fp)
   fprintf (fp, _("  No emulation specific options\n"));
 }
 
-bfd_boolean
+bool
 ar_emul_append (bfd **after_bfd, char *file_name, const char *target,
-		bfd_boolean verbose, bfd_boolean flatten)
+		bool verbose, bool flatten)
 {
   bfd *new_bfd;
 
@@ -50,45 +50,45 @@ ar_emul_append (bfd **after_bfd, char *file_name, const char *target,
     return bin_dummy_emulation.ar_append (after_bfd, new_bfd,
 					  verbose, flatten);
 
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 ar_emul_append_bfd (bfd **after_bfd, bfd *new_bfd,
-		bfd_boolean verbose, bfd_boolean flatten)
+		bool verbose, bool flatten)
 {
   if (bin_dummy_emulation.ar_append)
     return bin_dummy_emulation.ar_append (after_bfd, new_bfd,
 					  verbose, flatten);
 
-  return FALSE;
+  return false;
 }
 
-static bfd_boolean
+static bool
 any_ok (bfd *new_bfd ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 do_ar_emul_append (bfd **after_bfd, bfd *new_bfd,
-		   bfd_boolean verbose, bfd_boolean flatten,
-		   bfd_boolean (*check) (bfd *))
+		   bool verbose, bool flatten,
+		   bool (*check) (bfd *))
 {
   /* When flattening, add the members of an archive instead of the
      archive itself.  */
   if (flatten && bfd_check_format (new_bfd, bfd_archive))
     {
       bfd *elt;
-      bfd_boolean added = FALSE;
+      bool added = false;
 
       for (elt = bfd_openr_next_archived_file (new_bfd, NULL);
            elt;
            elt = bfd_openr_next_archived_file (new_bfd, elt))
         {
-          if (do_ar_emul_append (after_bfd, elt, verbose, TRUE, check))
+          if (do_ar_emul_append (after_bfd, elt, verbose, true, check))
             {
-              added = TRUE;
+              added = true;
               after_bfd = &((*after_bfd)->archive_next);
             }
         }
@@ -97,26 +97,26 @@ do_ar_emul_append (bfd **after_bfd, bfd *new_bfd,
     }
 
   if (!check (new_bfd))
-    return FALSE;
+    return false;
 
   AR_EMUL_APPEND_PRINT_VERBOSE (verbose, bfd_get_filename (new_bfd));
 
   new_bfd->archive_next = *after_bfd;
   *after_bfd = new_bfd;
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 ar_emul_default_append (bfd **after_bfd, bfd *new_bfd,
-			bfd_boolean verbose, bfd_boolean flatten)
+			bool verbose, bool flatten)
 {
   return do_ar_emul_append (after_bfd, new_bfd, verbose, flatten, any_ok);
 }
 
-bfd_boolean
+bool
 ar_emul_replace (bfd **after_bfd, char *file_name, const char *target,
-		 bfd_boolean verbose)
+		 bool verbose)
 {
   bfd *new_bfd;
 
@@ -127,43 +127,43 @@ ar_emul_replace (bfd **after_bfd, char *file_name, const char *target,
     return bin_dummy_emulation.ar_replace (after_bfd, new_bfd,
 					   verbose);
 
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 ar_emul_replace_bfd (bfd **after_bfd, bfd *new_bfd,
-		 bfd_boolean verbose)
+		 bool verbose)
 {
   if (bin_dummy_emulation.ar_replace)
     return bin_dummy_emulation.ar_replace (after_bfd, new_bfd,
 					   verbose);
 
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 ar_emul_default_replace (bfd **after_bfd, bfd *new_bfd,
-			 bfd_boolean verbose)
+			 bool verbose)
 {
   AR_EMUL_REPLACE_PRINT_VERBOSE (verbose, bfd_get_filename (new_bfd));
 
   new_bfd->archive_next = *after_bfd;
   *after_bfd = new_bfd;
 
-  return TRUE;
+  return true;
 }
 
-bfd_boolean
+bool
 ar_emul_parse_arg (char *arg)
 {
   if (bin_dummy_emulation.ar_parse_arg)
     return bin_dummy_emulation.ar_parse_arg (arg);
 
-  return FALSE;
+  return false;
 }
 
-bfd_boolean
+bool
 ar_emul_default_parse_arg (char *arg ATTRIBUTE_UNUSED)
 {
-  return FALSE;
+  return false;
 }

@@ -1,5 +1,18 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* sysdep.h (POISON_BFD_BOOLEAN): Define.
+	* addr2line.c, * ar.c, * arsup.c, * bfdtest2.c, * binemul.c,
+	* binemul.h, * bucomm.c, * bucomm.h, * budbg.h, * coffgrok.c,
+	* debug.c, * debug.h, * dlltool.c, * dwarf.c, * dwarf.h,
+	* elfedit.c, * emul_aix.c, * mclex.c, * nm.c, * objcopy.c,
+	* objdump.c, * od-macho.c, * prdbg.c, * rdcoff.c, * rddbg.c,
+	* readelf.c, * rename.c, * stabs.c, * strings.c, * windint.h,
+	* windmc.c, * windmc.h, * windres.c, * winduni.c,
+	* wrstabs.c: Replace bfd_boolean with bool, FALSE with false,
+	and TRUE with true throughout.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* coffdump.c: Include stdint.h in place of bfd_stdint.h.
 	* dwarf.c: Likewise.
 

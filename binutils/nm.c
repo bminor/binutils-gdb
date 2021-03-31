@@ -461,11 +461,11 @@ print_symname (const char *form, struct extended_symbol_info *info,
   if (info != NULL && info->elfinfo && with_symbol_versions)
     {
       const char *version_string;
-      bfd_boolean hidden;
+      bool hidden;
 
       version_string
 	= bfd_get_symbol_version_string (abfd, &info->elfinfo->symbol,
-					 FALSE, &hidden);
+					 false, &hidden);
       if (version_string && version_string[0])
 	{
 	  const char *at = "@@";
@@ -487,7 +487,7 @@ print_symdef_entry (bfd *abfd)
 {
   symindex idx = BFD_NO_MORE_SYMBOLS;
   carsym *thesym;
-  bfd_boolean everprinted = FALSE;
+  bool everprinted = false;
 
   for (idx = bfd_get_next_mapent (abfd, idx, &thesym);
        idx != BFD_NO_MORE_SYMBOLS;
@@ -497,7 +497,7 @@ print_symdef_entry (bfd *abfd)
       if (!everprinted)
 	{
 	  printf (_("\nArchive index:\n"));
-	  everprinted = TRUE;
+	  everprinted = true;
 	}
       elt = bfd_get_elt_at_index (abfd, idx);
       if (elt == NULL)
@@ -512,14 +512,14 @@ print_symdef_entry (bfd *abfd)
 
 
 /* True when we can report missing plugin error.  */
-bfd_boolean report_plugin_err = TRUE;
+bool report_plugin_err = true;
 
 /* Choose which symbol entries to print;
    compact them downward to get rid of the rest.
    Return the number of symbols to be printed.  */
 
 static long
-filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
+filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
 		long symcount, unsigned int size)
 {
   bfd_byte *from, *fromend, *to;
@@ -549,7 +549,7 @@ filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 	  && strcmp (sym->name + (sym->name[2] == '_'), "__gnu_lto_slim") == 0
 	  && report_plugin_err)
 	{
-	  report_plugin_err = FALSE;
+	  report_plugin_err = false;
 	  non_fatal (_("%s: plugin needed to handle lto object"),
 		     bfd_get_filename (abfd));
 	}
@@ -603,7 +603,7 @@ filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 /* These globals are used to pass information into the sorting
    routines.  */
 static bfd *sort_bfd;
-static bfd_boolean sort_dynamic;
+static bool sort_dynamic;
 static asymbol *sort_x;
 static asymbol *sort_y;
 
@@ -794,7 +794,7 @@ size_forward2 (const void *P_x, const void *P_y)
    size.  */
 
 static long
-sort_symbols_by_size (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
+sort_symbols_by_size (bfd *abfd, bool is_dynamic, void *minisyms,
 		      long symcount, unsigned int size,
 		      struct size_sym **symsizesp)
 {
@@ -1088,11 +1088,11 @@ print_symbol (bfd *        abfd,
 /* Print the symbols when sorting by size.  */
 
 static void
-print_size_symbols (bfd *              abfd,
-		    bfd_boolean        is_dynamic,
-		    struct size_sym *  symsizes,
-		    long               symcount,
-		    bfd *              archive_bfd)
+print_size_symbols (bfd *abfd,
+		    bool is_dynamic,
+		    struct size_sym *symsizes,
+		    long symcount,
+		    bfd *archive_bfd)
 {
   asymbol *store;
   struct size_sym *from;
@@ -1127,12 +1127,12 @@ print_size_symbols (bfd *              abfd,
    SIZE is the size of a symbol in MINISYMS.  */
 
 static void
-print_symbols (bfd *         abfd,
-	       bfd_boolean   is_dynamic,
-	       void *        minisyms,
-	       long          symcount,
-	       unsigned int  size,
-	       bfd *         archive_bfd)
+print_symbols (bfd *abfd,
+	       bool is_dynamic,
+	       void *minisyms,
+	       long symcount,
+	       unsigned int size,
+	       bfd *archive_bfd)
 {
   asymbol *store;
   bfd_byte *from;
@@ -1250,7 +1250,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
      LTO plugin.  */
   if (abfd->lto_slim_object)
     {
-      report_plugin_err = FALSE;
+      report_plugin_err = false;
       non_fatal (_("%s: plugin needed to handle lto object"),
 		 bfd_get_filename (abfd));
     }
@@ -1418,21 +1418,21 @@ display_archive (bfd *file)
     }
 }
 
-static bfd_boolean
+static bool
 display_file (char *filename)
 {
-  bfd_boolean retval = TRUE;
+  bool retval = true;
   bfd *file;
   char **matching;
 
   if (get_file_size (filename) < 1)
-    return FALSE;
+    return false;
 
   file = bfd_openr (filename, target ? target : plugin_target);
   if (file == NULL)
     {
       bfd_nonfatal (filename);
-      return FALSE;
+      return false;
     }
 
   /* If printing line numbers, decompress the debug sections.  */
@@ -1457,7 +1457,7 @@ display_file (char *filename)
 	  list_matching_formats (matching);
 	  free (matching);
 	}
-      retval = FALSE;
+      retval = false;
     }
 
   if (!bfd_close (file))

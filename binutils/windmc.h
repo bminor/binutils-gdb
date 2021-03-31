@@ -89,9 +89,9 @@ void mc_set_inputfile (const char *);
 void mc_set_content (const unichar *);
 
 /* Lexer control variables. Used by mcparser.y file.  */
-extern bfd_boolean mclex_want_nl;
-extern bfd_boolean mclex_want_line;
-extern bfd_boolean mclex_want_filename;
+extern bool mclex_want_nl;
+extern bool mclex_want_line;
+extern bool mclex_want_filename;
 
 void mc_fatal (const char *, ...);
 void mc_warn (const char *, ...);

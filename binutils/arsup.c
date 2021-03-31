@@ -74,7 +74,7 @@ map_over_list (bfd *arch, void (*function) (bfd *, bfd *), struct list *list)
 	 want to hack multiple references.  */
       for (ptr = list; ptr; ptr = ptr->next)
 	{
-	  bfd_boolean found = FALSE;
+	  bool found = false;
 	  bfd *prev = arch;
 
 	  for (head = arch->archive_next; head; head = head->archive_next)
@@ -82,7 +82,7 @@ map_over_list (bfd *arch, void (*function) (bfd *, bfd *), struct list *list)
 	      if (bfd_get_filename (head) != NULL
 		  && FILENAME_CMP (ptr->name, bfd_get_filename (head)) == 0)
 		{
-		  found = TRUE;
+		  found = true;
 		  function (head, prev);
 		}
 	      prev = head;
@@ -98,7 +98,7 @@ map_over_list (bfd *arch, void (*function) (bfd *, bfd *), struct list *list)
 static void
 ar_directory_doer (bfd *abfd, bfd *ignore ATTRIBUTE_UNUSED)
 {
-  print_arelt_descr(outfile, abfd, verbose, FALSE);
+  print_arelt_descr(outfile, abfd, verbose, false);
 }
 
 void
@@ -364,7 +364,7 @@ ar_save (void)
 	    }
 	}
 
-      smart_rename (temp_name, real_name, temp_fd, NULL, FALSE);
+      smart_rename (temp_name, real_name, temp_fd, NULL, false);
       obfd = 0;
       free (temp_name);
       free (real_name);

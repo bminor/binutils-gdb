@@ -97,16 +97,16 @@ static int address_radix;
 static int string_min;
 
 /* Whether or not we include all whitespace as a graphic char.   */
-static bfd_boolean include_all_whitespace;
+static bool include_all_whitespace;
 
 /* TRUE means print address within file for each string.  */
-static bfd_boolean print_addresses;
+static bool print_addresses;
 
 /* TRUE means print filename for each string.  */
-static bfd_boolean print_filenames;
+static bool print_filenames;
 
 /* TRUE means for object files scan only the data section.  */
-static bfd_boolean datasection_only;
+static bool datasection_only;
 
 /* The BFD object file format.  */
 static char *target;
@@ -134,7 +134,7 @@ static struct option long_options[] =
   {NULL, 0, NULL, 0}
 };
 
-static bfd_boolean strings_file (char *);
+static bool strings_file (char *);
 static void print_strings (const char *, FILE *, file_ptr, int, int, char *);
 static void usage (FILE *, int) ATTRIBUTE_NORETURN;
 
@@ -145,7 +145,7 @@ main (int argc, char **argv)
 {
   int optc;
   int exit_status = 0;
-  bfd_boolean files_given = FALSE;
+  bool files_given = false;
   char *s;
   int numeric_opt = 0;
 
@@ -162,13 +162,13 @@ main (int argc, char **argv)
   expandargv (&argc, &argv);
 
   string_min = 4;
-  include_all_whitespace = FALSE;
-  print_addresses = FALSE;
-  print_filenames = FALSE;
+  include_all_whitespace = false;
+  print_addresses = false;
+  print_filenames = false;
   if (DEFAULT_STRINGS_ALL)
-    datasection_only = FALSE;
+    datasection_only = false;
   else
-    datasection_only = TRUE;
+    datasection_only = true;
   target = NULL;
   encoding = 's';
   output_separator = NULL;
@@ -179,15 +179,15 @@ main (int argc, char **argv)
       switch (optc)
 	{
 	case 'a':
-	  datasection_only = FALSE;
+	  datasection_only = false;
 	  break;
 
 	case 'd':
-	  datasection_only = TRUE;
+	  datasection_only = true;
 	  break;
 
 	case 'f':
-	  print_filenames = TRUE;
+	  print_filenames = true;
 	  break;
 
 	case 'H':
@@ -201,16 +201,16 @@ main (int argc, char **argv)
 	  break;
 
 	case 'w':
-	  include_all_whitespace = TRUE;
+	  include_all_whitespace = true;
 	  break;
 
 	case 'o':
-	  print_addresses = TRUE;
+	  print_addresses = true;
 	  address_radix = 8;
 	  break;
 
 	case 't':
-	  print_addresses = TRUE;
+	  print_addresses = true;
 	  if (optarg[1] != '\0')
 	    usage (stderr, 1);
 	  switch (optarg[0])
@@ -293,20 +293,20 @@ main (int argc, char **argv)
 
   if (optind >= argc)
     {
-      datasection_only = FALSE;
+      datasection_only = false;
       SET_BINARY (fileno (stdin));
       print_strings ("{standard input}", stdin, 0, 0, 0, (char *) NULL);
-      files_given = TRUE;
+      files_given = true;
     }
   else
     {
       for (; optind < argc; ++optind)
 	{
 	  if (strcmp (argv[optind], "-") == 0)
-	    datasection_only = FALSE;
+	    datasection_only = false;
 	  else
 	    {
-	      files_given = TRUE;
+	      files_given = true;
 	      exit_status |= !strings_file (argv[optind]);
 	    }
 	}
@@ -324,7 +324,7 @@ main (int argc, char **argv)
 
 static void
 strings_a_section (bfd *abfd, asection *sect, const char *filename,
-		   bfd_boolean *got_a_section)
+		   bool *got_a_section)
 {
   bfd_size_type sectsize;
   bfd_byte *mem;
@@ -343,7 +343,7 @@ strings_a_section (bfd *abfd, asection *sect, const char *filename,
       return;
     }
 
-  *got_a_section = TRUE;
+  *got_a_section = true;
   print_strings (filename, NULL, sect->filepos, 0, sectsize, (char *) mem);
   free (mem);
 }
@@ -354,18 +354,18 @@ strings_a_section (bfd *abfd, asection *sect, const char *filename,
    Return TRUE if successful,
    FALSE if not (such as if FILE is not an object file).  */
 
-static bfd_boolean
+static bool
 strings_object_file (const char *file)
 {
   bfd *abfd;
   asection *s;
-  bfd_boolean got_a_section;
+  bool got_a_section;
 
   abfd = bfd_openr (file, target);
 
   if (abfd == NULL)
     /* Treat the file as a non-object file.  */
-    return FALSE;
+    return false;
 
   /* This call is mainly for its side effect of reading in the sections.
      We follow the traditional behavior of `strings' in that we don't
@@ -373,17 +373,17 @@ strings_object_file (const char *file)
   if (!bfd_check_format (abfd, bfd_object))
     {
       bfd_close (abfd);
-      return FALSE;
+      return false;
     }
 
-  got_a_section = FALSE;
+  got_a_section = false;
   for (s = abfd->sections; s != NULL; s = s->next)
     strings_a_section (abfd, s, file, &got_a_section);
 
   if (!bfd_close (abfd))
     {
       bfd_nonfatal (file);
-      return FALSE;
+      return false;
     }
 
   return got_a_section;
@@ -391,7 +391,7 @@ strings_object_file (const char *file)
 
 /* Print the strings in FILE.  Return TRUE if ok, FALSE if an error occurs.  */
 
-static bfd_boolean
+static bool
 strings_file (char *file)
 {
   struct stat st;
@@ -405,12 +405,12 @@ strings_file (char *file)
       else
 	non_fatal (_("Warning: could not locate '%s'.  reason: %s"),
 		   file, strerror (errno));
-      return FALSE;
+      return false;
     }
   else if (S_ISDIR (st.st_mode))
     {
       non_fatal (_("Warning: '%s' is a directory"), file);
-      return FALSE;
+      return false;
     }
 
   /* If we weren't told to scan the whole file,
@@ -426,7 +426,7 @@ strings_file (char *file)
 	{
 	  fprintf (stderr, "%s: ", program_name);
 	  perror (file);
-	  return FALSE;
+	  return false;
 	}
 
       print_strings (file, stream, (file_ptr) 0, 0, 0, (char *) 0);
@@ -435,11 +435,11 @@ strings_file (char *file)
 	{
 	  fprintf (stderr, "%s: ", program_name);
 	  perror (file);
-	  return FALSE;
+	  return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Read the next character, return EOF if none available.

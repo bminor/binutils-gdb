@@ -48,7 +48,7 @@
 
 int verbose = 0;
 
-bfd_boolean target_is_bigendian = 0;
+bool target_is_bigendian = 0;
 const char *def_target_arch;
 
 static void set_endianness (bfd *, const char *);
@@ -713,12 +713,12 @@ quot (const char *string)
 #if defined (_WIN32) && !defined (__CYGWIN__)
   /* For Windows shells, quote "like this".   */
   {
-    bfd_boolean quoted = FALSE;
+    bool quoted = false;
 
     dest = buf;
     if (strchr (string, ' '))
       {
-	quoted = TRUE;
+	quoted = true;
 	*dest++ = '"';
       }
 

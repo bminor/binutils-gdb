@@ -540,7 +540,7 @@ process_object (const char *file_name, FILE *file)
 
 static int
 process_archive (const char * file_name, FILE * file,
-		 bfd_boolean is_thin_archive)
+		 bool is_thin_archive)
 {
   struct archive_info arch;
   struct archive_info nested_arch;
@@ -566,7 +566,7 @@ process_archive (const char * file_name, FILE * file,
 
   if (fstat (fileno (file), &statbuf) < 0
       || setup_archive (&arch, file_name, file, statbuf.st_size,
-			is_thin_archive, FALSE) != 0)
+			is_thin_archive, false) != 0)
     {
       ret = 1;
       goto out;
@@ -770,9 +770,9 @@ process_file (const char *file_name)
     }
 
   if (memcmp (armag, ARMAG, SARMAG) == 0)
-    ret = process_archive (file_name, file, FALSE);
+    ret = process_archive (file_name, file, false);
   else if (memcmp (armag, ARMAGT, SARMAG) == 0)
-    ret = process_archive (file_name, file, TRUE);
+    ret = process_archive (file_name, file, true);
   else
     {
       rewind (file);
