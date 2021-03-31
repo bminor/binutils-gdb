@@ -1,3 +1,7 @@
+2021-03-31  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/stringify.h: Fix typo.
+
 2021-03-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR gdb/27541
