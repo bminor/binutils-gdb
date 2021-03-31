@@ -1,5 +1,12 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* itbl-lex-wrapper.c: Include as.h not sysdep.h.
+	* config/bfin-lex-wrapper.c: Likewise.
+	* itbl-lex.l: Don't include as.h.
+	* config/bfin-lex.l: Likewise.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* as.h (POISON_BFD_BOOLEAN): Define.
 	* as.c, * as.h, * atof-generic.c, * config/atof-ieee.c,
 	* config/bfin-aux.h, * config/obj-coff.c, * config/obj-ecoff.c,

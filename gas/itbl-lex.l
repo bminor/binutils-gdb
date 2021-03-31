@@ -21,7 +21,6 @@
    02110-1301, USA.  */
 
 %{
-#include "as.h"
 #include "itbl-lex.h"
 #include <itbl-parse.h>
 
