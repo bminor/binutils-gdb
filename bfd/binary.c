@@ -43,10 +43,10 @@
 
 /* Create a binary object.  Invoked via bfd_set_format.  */
 
-static bfd_boolean
+static bool
 binary_mkobject (bfd *abfd ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }
 
 /* Any file may be considered to be a binary file, provided the target
@@ -95,7 +95,7 @@ binary_object_p (bfd *abfd)
 
 /* Get contents of the only section.  */
 
-static bfd_boolean
+static bool
 binary_get_section_contents (bfd *abfd,
 			     asection *section,
 			     void * location,
@@ -104,8 +104,8 @@ binary_get_section_contents (bfd *abfd,
 {
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
       || bfd_bread (location, count, abfd) != count)
-    return FALSE;
-  return TRUE;
+    return false;
+  return true;
 }
 
 /* Return the amount of memory needed to read the symbol table.  */
@@ -218,7 +218,7 @@ binary_get_symbol_info (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 
 /* Write section contents of a binary file.  */
 
-static bfd_boolean
+static bool
 binary_set_section_contents (bfd *abfd,
 			     asection *sec,
 			     const void * data,
@@ -226,18 +226,18 @@ binary_set_section_contents (bfd *abfd,
 			     bfd_size_type size)
 {
   if (size == 0)
-    return TRUE;
+    return true;
 
   if (! abfd->output_has_begun)
     {
-      bfd_boolean found_low;
+      bool found_low;
       bfd_vma low;
       asection *s;
 
       /* The lowest section LMA sets the virtual address of the start
 	 of the file.  We use this to set the file position of all the
 	 sections.  */
-      found_low = FALSE;
+      found_low = false;
       low = 0;
       for (s = abfd->sections; s != NULL; s = s->next)
 	if (((s->flags
@@ -247,7 +247,7 @@ binary_set_section_contents (bfd *abfd,
 	    && (! found_low || s->lma < low))
 	  {
 	    low = s->lma;
-	    found_low = TRUE;
+	    found_low = true;
 	  }
 
       for (s = abfd->sections; s != NULL; s = s->next)
@@ -278,16 +278,16 @@ binary_set_section_contents (bfd *abfd,
 	       s);
 	}
 
-      abfd->output_has_begun = TRUE;
+      abfd->output_has_begun = true;
     }
 
   /* We don't want to output anything for a section that is neither
      loaded nor allocated.  The contents of such a section are not
      meaningful in the binary format.  */
   if ((sec->flags & (SEC_LOAD | SEC_ALLOC)) == 0)
-    return TRUE;
+    return true;
   if ((sec->flags & SEC_NEVER_LOAD) != 0)
-    return TRUE;
+    return true;
 
   return _bfd_generic_set_section_contents (abfd, sec, data, offset, size);
 }

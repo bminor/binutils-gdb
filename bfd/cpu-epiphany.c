@@ -42,8 +42,7 @@
   }
 
 const bfd_arch_info_type bfd_epiphany16_arch =
-  N (bfd_mach_epiphany16, "epiphany16", 1, FALSE, NULL);
+  N (bfd_mach_epiphany16, "epiphany16", 1, false, NULL);
 
 const bfd_arch_info_type bfd_epiphany_arch =
-  N (bfd_mach_epiphany32, "epiphany32", 2, TRUE, & bfd_epiphany16_arch);
-
+  N (bfd_mach_epiphany32, "epiphany32", 2, true, &bfd_epiphany16_arch);

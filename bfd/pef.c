@@ -254,10 +254,10 @@ bfd_pef_convert_architecture (unsigned long architecture,
     *type = bfd_arch_m68k;
 }
 
-static bfd_boolean
+static bool
 bfd_pef_mkobject (bfd *abfd ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }
 
 static const char *bfd_pef_section_name (bfd_pef_section *section)

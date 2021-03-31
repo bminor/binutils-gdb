@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_xgate_arch =
   "xgate",
   "xgate",
   4,	/* Section alignment power.  */
-  TRUE,
+  true,
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,

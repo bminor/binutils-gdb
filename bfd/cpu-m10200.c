@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_mn10200_arch =
   "mn10200",
   "mn10200",
   2,
-  TRUE,   /* The one and only.  */
+  true,   /* The one and only.  */
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,

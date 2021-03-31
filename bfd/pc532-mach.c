@@ -77,7 +77,7 @@
 reloc_howto_type *MY_bfd_reloc_type_lookup
   (bfd *abfd, bfd_reloc_code_real_type code);
 
-static bfd_boolean
+static bool
 MY(write_object_contents) (bfd *abfd)
 {
   struct external_exec exec_bytes;
@@ -100,7 +100,7 @@ MY(write_object_contents) (bfd *abfd)
 
   WRITE_HEADERS (abfd, execp);
 
-  return TRUE;
+  return true;
 }
 
 #define MY_write_object_contents MY(write_object_contents)

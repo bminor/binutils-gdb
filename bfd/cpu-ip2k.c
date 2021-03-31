@@ -41,8 +41,8 @@
   }
 
 const bfd_arch_info_type bfd_ip2k_nonext_arch =
-  N (bfd_mach_ip2022, "ip2022", FALSE, NULL);
+  N (bfd_mach_ip2022, "ip2022", false, NULL);
 
 const bfd_arch_info_type bfd_ip2k_arch =
-  N (bfd_mach_ip2022ext, "ip2022ext", TRUE, & bfd_ip2k_nonext_arch);
+  N (bfd_mach_ip2022ext, "ip2022ext", true, & bfd_ip2k_nonext_arch);
 

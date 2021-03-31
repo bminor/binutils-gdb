@@ -33,7 +33,7 @@ const bfd_arch_info_type bfd_vax_arch =
   "vax",
   "vax",
   3,
-  TRUE, /* The one and only.  */
+  true, /* The one and only.  */
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,

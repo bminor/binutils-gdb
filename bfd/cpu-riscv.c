@@ -39,11 +39,11 @@ riscv_compatible (const bfd_arch_info_type *a, const bfd_arch_info_type *b)
 
 /* Return TRUE if STRING matches the architecture described by INFO.  */
 
-static bfd_boolean
+static bool
 riscv_scan (const struct bfd_arch_info *info, const char *string)
 {
   if (bfd_default_scan (info, string))
-    return TRUE;
+    return true;
 
   /* The incoming STRING might take the form of riscv:rvXXzzz, where XX is
      32 or 64, and zzz are one or more extension characters.  As we
@@ -59,9 +59,9 @@ riscv_scan (const struct bfd_arch_info *info, const char *string)
   if (!info->the_default
       && strncasecmp (string, info->printable_name,
                       strlen (info->printable_name)) == 0)
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 #define N(BITS, NUMBER, PRINT, DEFAULT, NEXT)			\
@@ -95,13 +95,13 @@ enum
    and each entry except the last should end with NN (my enum value).  */
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (64, bfd_mach_riscv64, "riscv:rv64", FALSE, NN (I_riscv64)),
-  N (32, bfd_mach_riscv32, "riscv:rv32", FALSE, NULL)
+  N (64, bfd_mach_riscv64, "riscv:rv64", false, NN (I_riscv64)),
+  N (32, bfd_mach_riscv32, "riscv:rv32", false, NULL)
 };
 
 /* The default architecture is riscv:rv64.  */
 const bfd_arch_info_type bfd_riscv_arch =
-  N (64, 0, "riscv", TRUE, &arch_info_struct[0]);
+  N (64, 0, "riscv", true, &arch_info_struct[0]);
 
 /* List for all supported ISA spec versions.  */
 const struct riscv_spec riscv_isa_specs[] =

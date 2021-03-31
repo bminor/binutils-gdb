@@ -30,7 +30,7 @@
 
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
-#define PCRELOFFSET	   TRUE
+#define PCRELOFFSET	   true
 /* Long section names not allowed in executable images, only object files.  */
 #define COFF_LONG_SECTION_NAMES 0
 

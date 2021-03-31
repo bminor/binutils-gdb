@@ -97,7 +97,7 @@ typedef struct ppcboot_data
 
 /* Create a ppcboot object.  Invoked via bfd_set_format.  */
 
-static bfd_boolean
+static bool
 ppcboot_mkobject (bfd *abfd)
 {
   if (!ppcboot_get_tdata (abfd))
@@ -106,12 +106,12 @@ ppcboot_mkobject (bfd *abfd)
       ppcboot_set_tdata (abfd, bfd_zalloc (abfd, amt));
     }
 
-  return TRUE;
+  return true;
 }
 
 
 /* Set the architecture to PowerPC */
-static bfd_boolean
+static bool
 ppcboot_set_arch_mach (bfd *abfd,
 		       enum bfd_architecture arch,
 		       unsigned long machine)
@@ -120,7 +120,7 @@ ppcboot_set_arch_mach (bfd *abfd,
     arch = bfd_arch_powerpc;
 
   else if (arch != bfd_arch_powerpc)
-    return FALSE;
+    return false;
 
   return bfd_default_set_arch_mach (abfd, arch, machine);
 }
@@ -217,7 +217,7 @@ ppcboot_object_p (bfd *abfd)
 
 /* Get contents of the only section.  */
 
-static bfd_boolean
+static bool
 ppcboot_get_section_contents (bfd *abfd,
 			      asection *section ATTRIBUTE_UNUSED,
 			      void * location,
@@ -226,8 +226,8 @@ ppcboot_get_section_contents (bfd *abfd,
 {
   if (bfd_seek (abfd, offset + (file_ptr) sizeof (ppcboot_hdr_t), SEEK_SET) != 0
       || bfd_bread (location, count, abfd) != count)
-    return FALSE;
-  return TRUE;
+    return false;
+  return true;
 }
 
 
@@ -280,7 +280,7 @@ ppcboot_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 
   syms = (asymbol *) bfd_alloc (abfd, amt);
   if (syms == NULL)
-    return FALSE;
+    return false;
 
   /* Start symbol.  */
   syms[0].the_bfd = abfd;
@@ -340,7 +340,7 @@ ppcboot_get_symbol_info (bfd *ignore_abfd ATTRIBUTE_UNUSED,
 
 /* Write section contents of a ppcboot file.  */
 
-static bfd_boolean
+static bool
 ppcboot_set_section_contents (bfd *abfd,
 			      asection *sec,
 			      const void * data,
@@ -363,7 +363,7 @@ ppcboot_set_section_contents (bfd *abfd,
       for (s = abfd->sections; s != NULL; s = s->next)
 	s->filepos = s->vma - low;
 
-      abfd->output_has_begun = TRUE;
+      abfd->output_has_begun = true;
     }
 
   return _bfd_generic_set_section_contents (abfd, sec, data, offset, size);
@@ -380,7 +380,7 @@ ppcboot_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Print out the program headers.  */
 
-static bfd_boolean
+static bool
 ppcboot_bfd_print_private_bfd_data (bfd *abfd, void * farg)
 {
   FILE *f = (FILE *)farg;
@@ -445,7 +445,7 @@ ppcboot_bfd_print_private_bfd_data (bfd *abfd, void * farg)
     }
 
   fprintf (f, "\n");
-  return TRUE;
+  return true;
 }
 
 

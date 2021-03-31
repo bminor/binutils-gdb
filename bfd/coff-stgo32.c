@@ -54,12 +54,12 @@
 #include "coff/msdos.h"
 
 static bfd_cleanup go32exe_check_format (bfd *);
-static bfd_boolean go32exe_write_object_contents (bfd *);
-static bfd_boolean go32exe_mkobject (bfd *);
-static bfd_boolean go32exe_copy_private_bfd_data (bfd *, bfd *);
+static bool go32exe_write_object_contents (bfd *);
+static bool go32exe_mkobject (bfd *);
+static bool go32exe_copy_private_bfd_data (bfd *, bfd *);
 
 /* Defined in coff-go32.c.  */
-bfd_boolean _bfd_go32_mkobject (bfd *);
+bool _bfd_go32_mkobject (bfd *);
 void _bfd_go32_swap_scnhdr_in (bfd *, void *, void *);
 unsigned int _bfd_go32_swap_scnhdr_out (bfd *, void *, void *);
 
@@ -217,12 +217,12 @@ go32exe_create_stub (bfd *abfd)
 /* If ibfd was a stubbed coff image, copy the stub from that bfd
    to the new obfd.  */
 
-static bfd_boolean
+static bool
 go32exe_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   /* Check if both are the same targets.  */
   if (ibfd->xvec != obfd->xvec)
-    return TRUE;
+    return true;
 
   /* Make sure we have a source stub.  */
   BFD_ASSERT (coff_data (ibfd)->stub != NULL);
@@ -231,7 +231,7 @@ go32exe_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (coff_data (ibfd)->stub_size > coff_data (obfd)->stub_size)
     coff_data (obfd)->stub = bfd_alloc (obfd, coff_data (ibfd)->stub_size);
   if (coff_data (obfd)->stub == NULL)
-    return FALSE;
+    return false;
 
   /* Now copy the stub.  */
   memcpy (coff_data (obfd)->stub, coff_data (ibfd)->stub,
@@ -239,7 +239,7 @@ go32exe_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   coff_data (obfd)->stub_size = coff_data (ibfd)->stub_size;
   obfd->origin = coff_data (obfd)->stub_size;
 
-  return TRUE;
+  return true;
 }
 
 /* Cleanup function, returned from check_format hook.  */
@@ -332,7 +332,7 @@ go32exe_check_format (bfd *abfd)
 
 /* Write the stub to the output file, then call coff_write_object_contents.  */
 
-static bfd_boolean
+static bool
 go32exe_write_object_contents (bfd *abfd)
 {
   const bfd_size_type pos = bfd_tell (abfd);
@@ -345,14 +345,14 @@ go32exe_write_object_contents (bfd *abfd)
   /* Write the stub.  */
   abfd->origin = 0;
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
-    return FALSE;
+    return false;
   if (bfd_bwrite (coff_data (abfd)->stub, stubsize, abfd) != stubsize)
-    return FALSE;
+    return false;
 
   /* Seek back to where we were.  */
   abfd->origin = stubsize;
   if (bfd_seek (abfd, pos, SEEK_SET) != 0)
-    return FALSE;
+    return false;
 
   return coff_write_object_contents (abfd);
 }
@@ -360,23 +360,23 @@ go32exe_write_object_contents (bfd *abfd)
 /* mkobject hook.  Called directly through bfd_set_format or via
    coff_mkobject_hook etc from bfd_check_format.  */
 
-static bfd_boolean
+static bool
 go32exe_mkobject (bfd *abfd)
 {
   /* Don't output to an archive.  */
   if (abfd->my_archive != NULL)
-    return FALSE;
+    return false;
 
   if (!_bfd_go32_mkobject (abfd))
-    return FALSE;
+    return false;
 
   go32exe_create_stub (abfd);
   if (coff_data (abfd)->stub == NULL)
     {
       bfd_release (abfd, coff_data (abfd));
-      return FALSE;
+      return false;
     }
   abfd->origin = coff_data (abfd)->stub_size;
 
-  return TRUE;
+  return true;
 }

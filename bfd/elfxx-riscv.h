@@ -58,7 +58,7 @@ riscv_add_subset (riscv_subset_list_t *,
 		  const char *,
 		  int, int);
 
-extern bfd_boolean
+extern bool
 riscv_lookup_subset (const riscv_subset_list_t *,
 		     const char *,
 		     riscv_subset_t **);
@@ -74,7 +74,7 @@ typedef struct
 			       int *);
 } riscv_parse_subset_t;
 
-extern bfd_boolean
+extern bool
 riscv_parse_subset (riscv_parse_subset_t *,
 		    const char *);
 
@@ -106,8 +106,8 @@ riscv_get_prefix_class (const char *);
 extern int
 riscv_compare_subsets (const char *, const char *);
 
-extern bfd_boolean
+extern bool
 bfd_elf32_riscv_restart_relax_sections (struct bfd_link_info *);
 
-extern bfd_boolean
+extern bool
 bfd_elf64_riscv_restart_relax_sections (struct bfd_link_info *);

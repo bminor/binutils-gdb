@@ -49,173 +49,173 @@ static reloc_howto_type howto_table[] =
 	 0,				/* rightshift */
 	 3,				/* size */
 	 0,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_NONE",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 32 bit relocation.  */
   HOWTO (R_RISCV_32,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_32",			/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 64 bit relocation.  */
   HOWTO (R_RISCV_64,			/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_64",			/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Relocation against a local symbol in a shared object.  */
   HOWTO (R_RISCV_RELATIVE,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_RELATIVE",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   HOWTO (R_RISCV_COPY,			/* type */
 	 0,				/* rightshift */
 	 0,				/* this one is variable size */
 	 0,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_COPY",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   HOWTO (R_RISCV_JUMP_SLOT,		/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_bitfield,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_JUMP_SLOT",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Dynamic TLS relocations.  */
   HOWTO (R_RISCV_TLS_DTPMOD32,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_DTPMOD32",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_DTPMOD64,		/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_DTPMOD64",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_DTPREL32,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_DTPREL32",	/* name */
-	 TRUE,				/* partial_inplace */
+	 true,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_DTPREL64,		/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_DTPREL64",	/* name */
-	 TRUE,				/* partial_inplace */
+	 true,				/* partial_inplace */
 	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_TPREL32,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_TPREL32",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   HOWTO (R_RISCV_TLS_TPREL64,		/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_TPREL64",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Reserved for future relocs that the dynamic linker must understand.  */
   EMPTY_HOWTO (12),
@@ -228,407 +228,407 @@ static reloc_howto_type howto_table[] =
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_BRANCH",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_BTYPE_IMM (-1U),	/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 true),				/* pcrel_offset */
 
   /* 20-bit PC-relative jump offset.  */
   HOWTO (R_RISCV_JAL,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_JAL",			/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_JTYPE_IMM (-1U),	/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 true),				/* pcrel_offset */
 
   /* 32-bit PC-relative function call (AUIPC/JALR).  */
   HOWTO (R_RISCV_CALL,			/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_CALL",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U) | ((bfd_vma) ENCODE_ITYPE_IMM (-1U) << 32),
 					/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 true),				/* pcrel_offset */
 
   /* Like R_RISCV_CALL, but not locally binding.  */
   HOWTO (R_RISCV_CALL_PLT,		/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_CALL_PLT",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U) | ((bfd_vma) ENCODE_ITYPE_IMM (-1U) << 32),
 					/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 true),				/* pcrel_offset */
 
   /* High 20 bits of 32-bit PC-relative GOT access.  */
   HOWTO (R_RISCV_GOT_HI20,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_GOT_HI20",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* High 20 bits of 32-bit PC-relative TLS IE GOT access.  */
   HOWTO (R_RISCV_TLS_GOT_HI20,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_GOT_HI20",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* High 20 bits of 32-bit PC-relative TLS GD GOT reference.  */
   HOWTO (R_RISCV_TLS_GD_HI20,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TLS_GD_HI20",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* High 20 bits of 32-bit PC-relative reference.  */
   HOWTO (R_RISCV_PCREL_HI20,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_PCREL_HI20",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 true),				/* pcrel_offset */
 
   /* Low 12 bits of a 32-bit PC-relative load or add.  */
   HOWTO (R_RISCV_PCREL_LO12_I,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_PCREL_LO12_I",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Low 12 bits of a 32-bit PC-relative store.  */
   HOWTO (R_RISCV_PCREL_LO12_S,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_PCREL_LO12_S",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* High 20 bits of 32-bit absolute address.  */
   HOWTO (R_RISCV_HI20,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_HI20",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* High 12 bits of 32-bit load or add.  */
   HOWTO (R_RISCV_LO12_I,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_LO12_I",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* High 12 bits of 32-bit store.  */
   HOWTO (R_RISCV_LO12_S,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_LO12_S",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* High 20 bits of TLS LE thread pointer offset.  */
   HOWTO (R_RISCV_TPREL_HI20,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TPREL_HI20",		/* name */
-	 TRUE,				/* partial_inplace */
+	 true,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_UTYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Low 12 bits of TLS LE thread pointer offset for loads and adds.  */
   HOWTO (R_RISCV_TPREL_LO12_I,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TPREL_LO12_I",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Low 12 bits of TLS LE thread pointer offset for stores.  */
   HOWTO (R_RISCV_TPREL_LO12_S,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TPREL_LO12_S",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* TLS LE thread pointer usage.  May be relaxed.  */
   HOWTO (R_RISCV_TPREL_ADD,		/* type */
 	 0,				/* rightshift */
 	 3,				/* size */
 	 0,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TPREL_ADD",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 8-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD8,			/* type */
 	 0,				/* rightshift */
 	 0,				/* size */
 	 8,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_ADD8",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xff,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 16-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD16,			/* type */
 	 0,				/* rightshift */
 	 1,				/* size */
 	 16,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_ADD16",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 32-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD32,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_ADD32",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 64-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD64,			/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_ADD64",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 8-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB8,			/* type */
 	 0,				/* rightshift */
 	 0,				/* size */
 	 8,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_SUB8",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xff,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 16-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB16,			/* type */
 	 0,				/* rightshift */
 	 1,				/* size */
 	 16,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_SUB16",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 32-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB32,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_SUB32",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 64-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB64,			/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 64,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_SUB64",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 MINUS_ONE,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_RISCV_GNU_VTINHERIT,		/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 0,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 NULL,				/* special_function */
 	 "R_RISCV_GNU_VTINHERIT",	/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_RISCV_GNU_VTENTRY,		/* type */
 	 0,				/* rightshift */
 	 4,				/* size */
 	 0,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 _bfd_elf_rel_vtable_reloc_fn,	/* special_function */
 	 "R_RISCV_GNU_VTENTRY",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Indicates an alignment statement.  The addend field encodes how many
      bytes of NOPs follow the statement.  The desired alignment is the
@@ -637,240 +637,240 @@ static reloc_howto_type howto_table[] =
 	 0,				/* rightshift */
 	 3,				/* size */
 	 0,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_ALIGN",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 8-bit PC-relative branch offset.  */
   HOWTO (R_RISCV_RVC_BRANCH,		/* type */
 	 0,				/* rightshift */
 	 1,				/* size */
 	 16,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_RVC_BRANCH",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_CBTYPE_IMM (-1U),	/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 true),				/* pcrel_offset */
 
   /* 11-bit PC-relative jump offset.  */
   HOWTO (R_RISCV_RVC_JUMP,		/* type */
 	 0,				/* rightshift */
 	 1,				/* size */
 	 16,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_RVC_JUMP",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_CJTYPE_IMM (-1U),	/* dst_mask */
-	 TRUE),				/* pcrel_offset */
+	 true),				/* pcrel_offset */
 
   /* High 6 bits of 18-bit absolute address.  */
   HOWTO (R_RISCV_RVC_LUI,		/* type */
 	 0,				/* rightshift */
 	 1,				/* size */
 	 16,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_RVC_LUI",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_CITYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* GP-relative load.  */
   HOWTO (R_RISCV_GPREL_I,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_GPREL_I",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* GP-relative store.  */
   HOWTO (R_RISCV_GPREL_S,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_GPREL_S",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* TP-relative TLS LE load.  */
   HOWTO (R_RISCV_TPREL_I,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TPREL_I",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_ITYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* TP-relative TLS LE store.  */
   HOWTO (R_RISCV_TPREL_S,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_signed,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_TPREL_S",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 ENCODE_STYPE_IMM (-1U),	/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* The paired relocation may be relaxed.  */
   HOWTO (R_RISCV_RELAX,			/* type */
 	 0,				/* rightshift */
 	 3,				/* size */
 	 0,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_RELAX",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 6-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB6,			/* type */
 	 0,				/* rightshift */
 	 0,				/* size */
 	 8,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 riscv_elf_add_sub_reloc,	/* special_function */
 	 "R_RISCV_SUB6",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0x3f,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 6-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET6,			/* type */
 	 0,				/* rightshift */
 	 0,				/* size */
 	 8,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_SET6",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0x3f,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 8-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET8,			/* type */
 	 0,				/* rightshift */
 	 0,				/* size */
 	 8,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_SET8",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xff,				/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 16-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET16,			/* type */
 	 0,				/* rightshift */
 	 1,				/* size */
 	 16,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_SET16",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 32-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET32,			/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_SET32",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* 32-bit PC relative.  */
   HOWTO (R_RISCV_32_PCREL,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 TRUE,				/* pc_relative */
+	 true,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_32_PCREL",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 
   /* Relocation against a local ifunc symbol in a shared object.  */
   HOWTO (R_RISCV_IRELATIVE,		/* type */
 	 0,				/* rightshift */
 	 2,				/* size */
 	 32,				/* bitsize */
-	 FALSE,				/* pc_relative */
+	 false,				/* pc_relative */
 	 0,				/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,		/* special_function */
 	 "R_RISCV_IRELATIVE",		/* name */
-	 FALSE,				/* partial_inplace */
+	 false,				/* partial_inplace */
 	 0,				/* src_mask */
 	 0xffffffff,			/* dst_mask */
-	 FALSE),			/* pcrel_offset */
+	 false),			/* pcrel_offset */
 };
 
 /* A mapping from BFD reloc types to RISC-V ELF reloc types.  */
@@ -1071,7 +1071,7 @@ riscv_compare_subsets (const char *subset1, const char *subset2)
    `current` means we should insert the subset at the head of subset list,
    if needed.  */
 
-bfd_boolean
+bool
 riscv_lookup_subset (const riscv_subset_list_t *subset_list,
 		     const char *subset,
 		     riscv_subset_t **current)
@@ -1086,13 +1086,13 @@ riscv_lookup_subset (const riscv_subset_list_t *subset_list,
       if (cmp == 0)
 	{
 	  *current = s;
-	  return TRUE;
+	  return true;
 	}
       else if (cmp > 0)
 	break;
     }
   *current = pre_s;
-  return FALSE;
+  return false;
 }
 
 /* Add extension from ISA string to the last of the subset list.  */
@@ -1155,14 +1155,14 @@ riscv_add_implicit_subset (riscv_subset_list_t *subset_list,
    Therefore, we won't output them to the output ISA string in the
    riscv_arch_str1, if the versions are unknown.  */
 
-static bfd_boolean
+static bool
 riscv_ext_dont_care_version (const char *subset)
 {
   if (strcmp (subset, "g") == 0
       || strcmp (subset, "zicsr") == 0
       || strcmp (subset, "zifencei") == 0)
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 /* We have to add all extensions from ISA string first, and then start to
@@ -1179,7 +1179,7 @@ riscv_parse_add_subset (riscv_parse_subset_t *rps,
 			const char *subset,
 			int major,
 			int minor,
-			bfd_boolean implicit)
+			bool implicit)
 {
   int major_version = major;
   int minor_version = minor;
@@ -1252,9 +1252,9 @@ riscv_parsing_subset_version (riscv_parse_subset_t *rps,
 			      const char *p,
 			      int *major_version,
 			      int *minor_version,
-			      bfd_boolean std_ext_p)
+			      bool std_ext_p)
 {
-  bfd_boolean major_p = TRUE;
+  bool major_p = true;
   int version = 0;
   char np;
 
@@ -1285,7 +1285,7 @@ riscv_parsing_subset_version (riscv_parse_subset_t *rps,
 	    }
 
 	  *major_version = version;
-	  major_p = FALSE;
+	  major_p = false;
 	  version = 0;
 	}
       else if (ISDIGIT (*p))
@@ -1345,23 +1345,23 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
       case 'i':
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
-					  &minor_version, TRUE);
+					  &minor_version, true);
 	riscv_parse_add_subset (rps, "i",
 				major_version,
-				minor_version, FALSE);
+				minor_version, false);
 	break;
 
       case 'e':
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
-					  &minor_version, TRUE);
+					  &minor_version, true);
 	riscv_parse_add_subset (rps, "e",
 				major_version,
-				minor_version, FALSE);
+				minor_version, false);
 	/* i-ext must be enabled.  */
 	riscv_parse_add_subset (rps, "i",
 				RISCV_UNKNOWN_VERSION,
-				RISCV_UNKNOWN_VERSION, FALSE);
+				RISCV_UNKNOWN_VERSION, false);
 
 	if (*rps->xlen > 32)
 	  {
@@ -1375,22 +1375,22 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
       case 'g':
 	p = riscv_parsing_subset_version (rps, march, ++p,
 					  &major_version,
-					  &minor_version, TRUE);
+					  &minor_version, true);
 	/* i-ext must be enabled.  */
 	riscv_parse_add_subset (rps, "i",
 				RISCV_UNKNOWN_VERSION,
-				RISCV_UNKNOWN_VERSION, FALSE);
+				RISCV_UNKNOWN_VERSION, false);
 	/* g-ext is used to add the implicit extensions, but will
 	   not be output to the ISA string.  */
 	riscv_parse_add_subset (rps, "g",
 				major_version,
-				minor_version, FALSE);
+				minor_version, false);
 	for ( ; *std_exts != 'q'; std_exts++)
 	  {
 	    subset[0] = *std_exts;
 	    riscv_parse_add_subset (rps, subset,
 				    RISCV_UNKNOWN_VERSION,
-				    RISCV_UNKNOWN_VERSION, FALSE);
+				    RISCV_UNKNOWN_VERSION, false);
 	  }
 	break;
 
@@ -1434,10 +1434,10 @@ riscv_parse_std_ext (riscv_parse_subset_t *rps,
       subset[0] = std_ext;
       p = riscv_parsing_subset_version (rps, march, ++p,
 					&major_version,
-					&minor_version, TRUE);
+					&minor_version, true);
       riscv_parse_add_subset (rps, subset,
 			      major_version,
-			      minor_version, FALSE);
+			      minor_version, false);
     }
 
   return p;
@@ -1472,7 +1472,7 @@ typedef struct riscv_parse_config
   /* Predicate which is used for checking whether this is a "known"
      extension. For 'x', it always returns true since they are by
      definition non-standard and cannot be known.  */
-  bfd_boolean (*ext_valid_p) (const char *);
+  bool (*ext_valid_p) (const char *);
 } riscv_parse_config_t;
 
 /* Parsing function for prefixed extensions.
@@ -1523,7 +1523,7 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
       end_of_version =
 	riscv_parsing_subset_version (rps, march, q,
 				      &major_version,
-				      &minor_version, FALSE);
+				      &minor_version, false);
       *q = '\0';
 
       if (end_of_version == NULL)
@@ -1572,7 +1572,7 @@ riscv_parse_prefixed_ext (riscv_parse_subset_t *rps,
 
       riscv_parse_add_subset (rps, subset,
 			      major_version,
-			      minor_version, FALSE);
+			      minor_version, false);
       p += end_of_version - subset;
       free (subset);
 
@@ -1614,7 +1614,7 @@ static const char * const riscv_std_h_ext_strtab[] =
 /* For the extension `ext`, search through the list of known extensions
    `known_exts` for a match, and return TRUE if found.  */
 
-static bfd_boolean
+static bool
 riscv_multi_letter_ext_valid_p (const char *ext,
 				const char *const *known_exts)
 {
@@ -1622,27 +1622,27 @@ riscv_multi_letter_ext_valid_p (const char *ext,
 
   for (i = 0; known_exts[i]; ++i)
     if (!strcmp (ext, known_exts[i]))
-      return TRUE;
+      return true;
 
-  return FALSE;
+  return false;
 }
 
 /* Predicator function for x-prefixed extensions.
    Anything goes, except the literal 'x'.  */
 
-static bfd_boolean
+static bool
 riscv_ext_x_valid_p (const char *arg)
 {
   if (!strcasecmp (arg, "x"))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Predicator functions for z-prefixed extensions.
    Only known z-extensions are permitted.  */
 
-static bfd_boolean
+static bool
 riscv_ext_z_valid_p (const char *arg)
 {
   return riscv_multi_letter_ext_valid_p (arg, riscv_std_z_ext_strtab);
@@ -1651,7 +1651,7 @@ riscv_ext_z_valid_p (const char *arg)
 /* Predicator function for 's' prefixed extensions.
    Only known s-extensions are permitted.  */
 
-static bfd_boolean
+static bool
 riscv_ext_s_valid_p (const char *arg)
 {
   return riscv_multi_letter_ext_valid_p (arg, riscv_std_s_ext_strtab);
@@ -1660,7 +1660,7 @@ riscv_ext_s_valid_p (const char *arg)
 /* Predicator function for 'h' prefixed extensions.
    Only known h-extensions are permitted.  */
 
-static bfd_boolean
+static bool
 riscv_ext_h_valid_p (const char *arg)
 {
   return riscv_multi_letter_ext_valid_p (arg, riscv_std_h_ext_strtab);
@@ -1682,7 +1682,7 @@ static const riscv_parse_config_t parse_config[] =
 static void
 riscv_init_ext_order (void)
 {
-  static bfd_boolean inited = FALSE;
+  static bool inited = false;
   const char *std_base_exts = "eig";
   const char *std_remain_exts = riscv_supported_std_ext ();
   const char *ext;
@@ -1711,7 +1711,7 @@ riscv_init_ext_order (void)
       riscv_ext_order[(*ext - 'a')] = order--;
     }
 
-  inited = TRUE;
+  inited = true;
 }
 
 /* Add the implicit extensions.  */
@@ -1729,46 +1729,46 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
     {
       riscv_parse_add_subset (rps, "zicsr",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
       riscv_parse_add_subset (rps, "zifencei",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
     }
 
   if ((riscv_lookup_subset (rps->subset_list, "q", &subset)))
     {
       riscv_parse_add_subset (rps, "d",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
       riscv_parse_add_subset (rps, "f",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
       riscv_parse_add_subset (rps, "zicsr",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
     }
   else if ((riscv_lookup_subset (rps->subset_list, "d", &subset)))
     {
       riscv_parse_add_subset (rps, "f",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
       riscv_parse_add_subset (rps, "zicsr",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
     }
   else if ((riscv_lookup_subset (rps->subset_list, "f", &subset)))
     riscv_parse_add_subset (rps, "zicsr",
 			    RISCV_UNKNOWN_VERSION,
-			    RISCV_UNKNOWN_VERSION, TRUE);
+			    RISCV_UNKNOWN_VERSION, true);
 
   if ((riscv_lookup_subset (rps->subset_list, "g", &subset)))
     {
       riscv_parse_add_subset (rps, "zicsr",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
       riscv_parse_add_subset (rps, "zifencei",
 			      RISCV_UNKNOWN_VERSION,
-			      RISCV_UNKNOWN_VERSION, TRUE);
+			      RISCV_UNKNOWN_VERSION, true);
     }
 }
 
@@ -1781,14 +1781,14 @@ riscv_parse_add_implicit_subsets (riscv_parse_subset_t *rps)
      `rps`: Hooks and status for parsing extensions.
      `arch`: Full ISA string.  */
 
-bfd_boolean
+bool
 riscv_parse_subset (riscv_parse_subset_t *rps,
 		    const char *arch)
 {
   riscv_subset_t *subset = NULL;
   const char *p;
   size_t i;
-  bfd_boolean no_conflict = TRUE;
+  bool no_conflict = true;
 
   for (p = arch; *p != '\0'; p++)
     {
@@ -1797,7 +1797,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
 	  rps->error_handler
 	    (_("-march=%s: ISA string cannot contain uppercase letters"),
 	     arch);
-	  return FALSE;
+	  return false;
 	}
     }
 
@@ -1823,7 +1823,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
 	rps->error_handler (
 	  _("-march=%s: ISA string must begin with rv32 or rv64"),
 	  arch);
-      return FALSE;
+      return false;
     }
 
   /* Init the riscv_ext_order array to compare the order of extensions
@@ -1834,7 +1834,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
   p = riscv_parse_std_ext (rps, arch, p);
 
   if (p == NULL)
-    return FALSE;
+    return false;
 
   /* Parse the different classes of extensions in the specified order.  */
   for (i = 0; i < ARRAY_SIZE (parse_config); ++i)
@@ -1842,14 +1842,14 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       p = riscv_parse_prefixed_ext (rps, arch, p, &parse_config[i]);
 
       if (p == NULL)
-	return FALSE;
+	return false;
     }
 
   if (*p != '\0')
     {
       rps->error_handler (_("-march=%s: unexpected ISA string at end: %s"),
 			  arch, p);
-      return FALSE;
+      return false;
     }
 
   /* Finally add implicit extensions according to the current
@@ -1863,7 +1863,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       rps->error_handler
 	(_("-march=%s: rv32e does not support the `f' extension"),
 	 arch);
-      no_conflict = FALSE;
+      no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "q", &subset)
       && *rps->xlen < 64)
@@ -1871,7 +1871,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
       rps->error_handler
 	(_("-march=%s: rv32 does not support the `q' extension"),
 	 arch);
-      no_conflict = FALSE;
+      no_conflict = false;
     }
   return no_conflict;
 }

@@ -25,7 +25,7 @@ reloc_howto_type *ia64_elf_reloc_name_lookup (bfd *, const char *);
 
 reloc_howto_type *ia64_elf_lookup_howto (unsigned int rtype);
 
-bfd_boolean ia64_elf_relax_br (bfd_byte *contents, bfd_vma off);
+bool ia64_elf_relax_br (bfd_byte *contents, bfd_vma off);
 void ia64_elf_relax_brl (bfd_byte *contents, bfd_vma off);
 void ia64_elf_relax_ldxmov (bfd_byte *contents, bfd_vma off);
 

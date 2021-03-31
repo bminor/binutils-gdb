@@ -75,19 +75,19 @@ struct ppc64_elf_params
   int object_in_toc;
 };
 
-bfd_boolean ppc64_elf_init_stub_bfd
+bool ppc64_elf_init_stub_bfd
   (struct bfd_link_info *, struct ppc64_elf_params *);
-bfd_boolean ppc64_elf_edit_opd
+bool ppc64_elf_edit_opd
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_inline_plt
+bool ppc64_elf_inline_plt
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_tls_setup
+bool ppc64_elf_tls_setup
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_tls_optimize
+bool ppc64_elf_tls_optimize
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_edit_toc
+bool ppc64_elf_edit_toc
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_has_small_toc_reloc
+bool ppc64_elf_has_small_toc_reloc
   (asection *);
 bfd_vma ppc64_elf_set_toc
   (struct bfd_link_info *, bfd *);
@@ -95,17 +95,17 @@ int ppc64_elf_setup_section_lists
   (struct bfd_link_info *);
 void ppc64_elf_start_multitoc_partition
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_next_toc_section
+bool ppc64_elf_next_toc_section
   (struct bfd_link_info *, asection *);
-bfd_boolean ppc64_elf_layout_multitoc
+bool ppc64_elf_layout_multitoc
   (struct bfd_link_info *);
 void ppc64_elf_finish_multitoc_partition
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_check_init_fini
+bool ppc64_elf_check_init_fini
   (struct bfd_link_info *);
-bfd_boolean ppc64_elf_next_input_section
+bool ppc64_elf_next_input_section
   (struct bfd_link_info *, asection *);
-bfd_boolean ppc64_elf_size_stubs
+bool ppc64_elf_size_stubs
 (struct bfd_link_info *);
-bfd_boolean ppc64_elf_build_stubs
+bool ppc64_elf_build_stubs
   (struct bfd_link_info *, char **);

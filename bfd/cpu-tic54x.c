@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_tic54x_arch =
   "tic54x",
   "tms320c54x",
   1,
-  TRUE,				/* The one and only.  */
+  true,				/* The one and only.  */
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,

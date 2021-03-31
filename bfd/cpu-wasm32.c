@@ -29,8 +29,8 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_wasm32, "wasm32", TRUE, NULL)
+  N (bfd_mach_wasm32, "wasm32", true, NULL)
 };
 
 const bfd_arch_info_type bfd_wasm32_arch =
-  N (bfd_mach_wasm32, "wasm32", TRUE, & arch_info_struct[0]);
+  N (bfd_mach_wasm32, "wasm32", true, & arch_info_struct[0]);

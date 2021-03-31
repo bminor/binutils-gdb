@@ -231,4 +231,6 @@ size_t strnlen (const char *, size_t);
 #define getgid() 0
 #endif
 
+#define POISON_BFD_BOOLEAN 1
+
 #endif /* ! defined (BFD_SYSDEP_H) */

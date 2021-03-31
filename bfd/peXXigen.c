@@ -218,7 +218,7 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 #endif
 }
 
-static bfd_boolean
+static bool
 abs_finder (bfd * abfd ATTRIBUTE_UNUSED, asection * sec, void * data)
 {
   bfd_vma abs_val = * (bfd_vma *) data;
@@ -1237,7 +1237,7 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
   N_("Reserved")
 };
 
-static bfd_boolean
+static bool
 pe_print_idata (bfd * abfd, void * vfile)
 {
   FILE *file = (FILE *) vfile;
@@ -1261,12 +1261,12 @@ pe_print_idata (bfd * abfd, void * vfile)
       /* Maybe the extra header isn't there.  Look for the section.  */
       section = bfd_get_section_by_name (abfd, ".idata");
       if (section == NULL)
-	return TRUE;
+	return true;
 
       addr = section->vma;
       datasize = section->size;
       if (datasize == 0)
-	return TRUE;
+	return true;
     }
   else
     {
@@ -1282,14 +1282,14 @@ pe_print_idata (bfd * abfd, void * vfile)
 	{
 	  fprintf (file,
 		   _("\nThere is an import table, but the section containing it could not be found\n"));
-	  return TRUE;
+	  return true;
 	}
       else if (!(section->flags & SEC_HAS_CONTENTS))
 	{
 	  fprintf (file,
 		   _("\nThere is an import table in %s, but that section has no contents\n"),
 		   section->name);
-	  return TRUE;
+	  return true;
 	}
     }
 
@@ -1311,7 +1311,7 @@ pe_print_idata (bfd * abfd, void * vfile)
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       free (data);
-      return FALSE;
+      return false;
     }
 
   adj = section->vma - extra->ImageBase;
@@ -1510,10 +1510,10 @@ pe_print_idata (bfd * abfd, void * vfile)
 
   free (data);
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 pe_print_edata (bfd * abfd, void * vfile)
 {
   FILE *file = (FILE *) vfile;
@@ -1550,13 +1550,13 @@ pe_print_edata (bfd * abfd, void * vfile)
       /* Maybe the extra header isn't there.  Look for the section.  */
       section = bfd_get_section_by_name (abfd, ".edata");
       if (section == NULL)
-	return TRUE;
+	return true;
 
       addr = section->vma;
       dataoff = 0;
       datasize = section->size;
       if (datasize == 0)
-	return TRUE;
+	return true;
     }
   else
     {
@@ -1570,14 +1570,14 @@ pe_print_edata (bfd * abfd, void * vfile)
 	{
 	  fprintf (file,
 		   _("\nThere is an export table, but the section containing it could not be found\n"));
-	  return TRUE;
+	  return true;
 	}
       else if (!(section->flags & SEC_HAS_CONTENTS))
 	{
 	  fprintf (file,
 		   _("\nThere is an export table in %s, but that section has no contents\n"),
 		   section->name);
-	  return TRUE;
+	  return true;
 	}
 
       dataoff = addr - section->vma;
@@ -1588,7 +1588,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 	  fprintf (file,
 		   _("\nThere is an export table in %s, but it does not fit into that section\n"),
 		   section->name);
-	  return TRUE;
+	  return true;
 	}
     }
 
@@ -1599,7 +1599,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 	       /* xgettext:c-format */
 	       _("\nThere is an export table in %s, but it is too small (%d)\n"),
 	       section->name, (int) datasize);
-      return TRUE;
+      return true;
     }
 
   /* xgettext:c-format */
@@ -1608,11 +1608,11 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   data = (bfd_byte *) bfd_malloc (datasize);
   if (data == NULL)
-    return FALSE;
+    return false;
 
   if (! bfd_get_section_contents (abfd, section, data,
 				  (file_ptr) dataoff, datasize))
-    return FALSE;
+    return false;
 
   /* Go get Export Directory Table.  */
   edt.export_flags   = bfd_get_32 (abfd, data +	 0);
@@ -1786,7 +1786,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 
   free (data);
 
-  return TRUE;
+  return true;
 }
 
 /* This really is architecture dependent.  On IA-64, a .pdata entry
@@ -1801,7 +1801,7 @@ pe_print_edata (bfd * abfd, void * vfile)
 
    This is the version for uncompressed data.  */
 
-static bfd_boolean
+static bool
 pe_print_pdata (bfd * abfd, void * vfile)
 {
 #if defined(COFF_WITH_pep) && !defined(COFF_WITH_pex64)
@@ -1820,7 +1820,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
   if (section == NULL
       || coff_section_data (abfd, section) == NULL
       || pei_section_data (abfd, section) == NULL)
-    return TRUE;
+    return true;
 
   stop = pei_section_data (abfd, section)->virt_size;
   if ((stop % onaline) != 0)
@@ -1842,7 +1842,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
 
   datasize = section->size;
   if (datasize == 0)
-    return TRUE;
+    return true;
 
   /* PR 17512: file: 002-193900-0.004.  */
   if (datasize < stop)
@@ -1850,13 +1850,13 @@ pe_print_pdata (bfd * abfd, void * vfile)
       /* xgettext:c-format */
       fprintf (file, _("Virtual size of .pdata section (%ld) larger than real size (%ld)\n"),
 	       (long) stop, (long) datasize);
-      return FALSE;
+      return false;
     }
 
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
       free (data);
-      return FALSE;
+      return false;
     }
 
   start = 0;
@@ -1908,7 +1908,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
 
   free (data);
 
-  return TRUE;
+  return true;
 #undef PDATA_ROW_SIZE
 }
 
@@ -1973,7 +1973,7 @@ cleanup_syms (sym_cache *psc)
 
 /* This is the version for "compressed" pdata.  */
 
-bfd_boolean
+bool
 _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 {
 # define PDATA_ROW_SIZE	(2 * 4)
@@ -1989,7 +1989,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
   if (section == NULL
       || coff_section_data (abfd, section) == NULL
       || pei_section_data (abfd, section) == NULL)
-    return TRUE;
+    return true;
 
   stop = pei_section_data (abfd, section)->virt_size;
   if ((stop % onaline) != 0)
@@ -2007,12 +2007,12 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 
   datasize = section->size;
   if (datasize == 0)
-    return TRUE;
+    return true;
 
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
       free (data);
-      return FALSE;
+      return false;
     }
 
   start = 0;
@@ -2087,7 +2087,7 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
 
   cleanup_syms (& cache);
 
-  return TRUE;
+  return true;
 #undef PDATA_ROW_SIZE
 }
 
@@ -2110,7 +2110,7 @@ static const char * const tbl[] =
   "UNKNOWN",   /* MUST be last.  */
 };
 
-static bfd_boolean
+static bool
 pe_print_reloc (bfd * abfd, void * vfile)
 {
   FILE *file = (FILE *) vfile;
@@ -2119,7 +2119,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
   bfd_byte *p, *end;
 
   if (section == NULL || section->size == 0 || !(section->flags & SEC_HAS_CONTENTS))
-    return TRUE;
+    return true;
 
   fprintf (file,
 	   _("\n\nPE File Base Relocations (interpreted .reloc section contents)\n"));
@@ -2127,7 +2127,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
   if (! bfd_malloc_and_get_section (abfd, section, &data))
     {
       free (data);
-      return FALSE;
+      return false;
     }
 
   p = data;
@@ -2190,7 +2190,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 
   free (data);
 
-  return TRUE;
+  return true;
 }
 
 /* A data structure describing the regions of a .rsrc section.
@@ -2215,13 +2215,13 @@ rsrc_print_resource_directory (FILE * , bfd *, unsigned int, bfd_byte *,
    or section_end + 1 upon failure.  */
 
 static bfd_byte *
-rsrc_print_resource_entries (FILE *	    file,
-			     bfd *	    abfd,
-			     unsigned int   indent,
-			     bfd_boolean    is_name,
-			     bfd_byte *	    data,
-			     rsrc_regions * regions,
-			     bfd_vma	    rva_bias)
+rsrc_print_resource_entries (FILE *file,
+			     bfd *abfd,
+			     unsigned int indent,
+			     bool is_name,
+			     bfd_byte *data,
+			     rsrc_regions *regions,
+			     bfd_vma rva_bias)
 {
   unsigned long entry, addr, size;
   bfd_byte * leaf;
@@ -2377,7 +2377,7 @@ rsrc_print_resource_directory (FILE *	      file,
     {
       bfd_byte * entry_end;
 
-      entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, TRUE,
+      entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, true,
 					       data, regions, rva_bias);
       data += 8;
       highest_data = max (highest_data, entry_end);
@@ -2389,7 +2389,7 @@ rsrc_print_resource_directory (FILE *	      file,
     {
       bfd_byte * entry_end;
 
-      entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, FALSE,
+      entry_end = rsrc_print_resource_entries (file, abfd, indent + 1, false,
 					       data, regions, rva_bias);
       data += 8;
       highest_data = max (highest_data, entry_end);
@@ -2404,7 +2404,7 @@ rsrc_print_resource_directory (FILE *	      file,
    reproduce the resources, windres does that.  Instead we dump
    the tables in a human readable format.  */
 
-static bfd_boolean
+static bool
 rsrc_print_section (bfd * abfd, void * vfile)
 {
   bfd_vma rva_bias;
@@ -2417,24 +2417,24 @@ rsrc_print_section (bfd * abfd, void * vfile)
 
   pe = pe_data (abfd);
   if (pe == NULL)
-    return TRUE;
+    return true;
 
   section = bfd_get_section_by_name (abfd, ".rsrc");
   if (section == NULL)
-    return TRUE;
+    return true;
   if (!(section->flags & SEC_HAS_CONTENTS))
-    return TRUE;
+    return true;
 
   datasize = section->size;
   if (datasize == 0)
-    return TRUE;
+    return true;
 
   rva_bias = section->vma - pe->pe_opthdr.ImageBase;
 
   if (! bfd_malloc_and_get_section (abfd, section, & data))
     {
       free (data);
-      return FALSE;
+      return false;
     }
 
   regions.section_start = data;
@@ -2489,7 +2489,7 @@ rsrc_print_section (bfd * abfd, void * vfile)
 	     (int) (regions.resource_start - regions.section_start));
 
   free (regions.section_start);
-  return TRUE;
+  return true;
 }
 
 #define IMAGE_NUMBEROF_DEBUG_TYPES 17
@@ -2515,7 +2515,7 @@ static char * debug_type_names[IMAGE_NUMBEROF_DEBUG_TYPES] =
   "Repro",
 };
 
-static bfd_boolean
+static bool
 pe_print_debugdata (bfd * abfd, void * vfile)
 {
   FILE *file = (FILE *) vfile;
@@ -2530,7 +2530,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
   bfd_size_type size = extra->DataDirectory[PE_DEBUG_DATA].Size;
 
   if (size == 0)
-    return TRUE;
+    return true;
 
   addr += extra->ImageBase;
   for (section = abfd->sections; section != NULL; section = section->next)
@@ -2543,21 +2543,21 @@ pe_print_debugdata (bfd * abfd, void * vfile)
     {
       fprintf (file,
 	       _("\nThere is a debug directory, but the section containing it could not be found\n"));
-      return TRUE;
+      return true;
     }
   else if (!(section->flags & SEC_HAS_CONTENTS))
     {
       fprintf (file,
 	       _("\nThere is a debug directory in %s, but that section has no contents\n"),
 	       section->name);
-      return TRUE;
+      return true;
     }
   else if (section->size < size)
     {
       fprintf (file,
 	       _("\nError: section %s contains the debug data starting address but it is too small\n"),
 	       section->name);
-      return FALSE;
+      return false;
     }
 
   fprintf (file, _("\nThere is a debug directory in %s at 0x%lx\n\n"),
@@ -2568,7 +2568,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
   if (size > (section->size - dataoff))
     {
       fprintf (file, _("The debug data size field in the data directory is too big for the section"));
-      return FALSE;
+      return false;
     }
 
   fprintf (file,
@@ -2578,7 +2578,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       free (data);
-      return FALSE;
+      return false;
     }
 
   for (i = 0; i < size / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
@@ -2631,10 +2631,10 @@ pe_print_debugdata (bfd * abfd, void * vfile)
     fprintf (file,
 	    _("The debug directory size is not a multiple of the debug directory entry size\n"));
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 pe_is_repro (bfd * abfd)
 {
   pe_data_type *pe = pe_data (abfd);
@@ -2643,13 +2643,13 @@ pe_is_repro (bfd * abfd)
   bfd_byte *data = 0;
   bfd_size_type dataoff;
   unsigned int i;
-  bfd_boolean res = FALSE;
+  bool res = false;
 
   bfd_vma addr = extra->DataDirectory[PE_DEBUG_DATA].VirtualAddress;
   bfd_size_type size = extra->DataDirectory[PE_DEBUG_DATA].Size;
 
   if (size == 0)
-    return FALSE;
+    return false;
 
   addr += extra->ImageBase;
   for (section = abfd->sections; section != NULL; section = section->next)
@@ -2662,20 +2662,20 @@ pe_is_repro (bfd * abfd)
       || (!(section->flags & SEC_HAS_CONTENTS))
       || (section->size < size))
     {
-      return FALSE;
+      return false;
     }
 
   dataoff = addr - section->vma;
 
   if (size > (section->size - dataoff))
     {
-      return FALSE;
+      return false;
     }
 
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
       free (data);
-      return FALSE;
+      return false;
     }
 
   for (i = 0; i < size / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
@@ -2688,7 +2688,7 @@ pe_is_repro (bfd * abfd)
 
       if (idd.Type == PE_IMAGE_DEBUG_TYPE_REPRO)
         {
-          res = TRUE;
+          res = true;
           break;
         }
     }
@@ -2700,7 +2700,7 @@ pe_is_repro (bfd * abfd)
 
 /* Print out the program headers.  */
 
-bfd_boolean
+bool
 _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
 {
   FILE *file = (FILE *) vfile;
@@ -2884,10 +2884,10 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
 
   rsrc_print_section (abfd, vfile);
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 is_vma_in_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
 {
   bfd_vma addr = * (bfd_vma *) obj;
@@ -2903,7 +2903,7 @@ find_section_by_vma (bfd *abfd, bfd_vma addr)
 /* Copy any private info we understand from the input bfd
    to the output bfd.  */
 
-bfd_boolean
+bool
 _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 {
   pe_data_type *ipe, *ope;
@@ -2911,7 +2911,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_coff_flavour
       || obfd->xvec->flavour != bfd_target_coff_flavour)
-    return TRUE;
+    return true;
 
   ipe = pe_data (ibfd);
   ope = pe_data (obfd);
@@ -2963,7 +2963,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	       "extends across section boundary at %" PRIx64),
 	     obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
 	     (uint64_t) addr, (uint64_t) section->vma);
-	  return FALSE;
+	  return false;
 	}
 
       if (section && bfd_malloc_and_get_section (obfd, section, &data))
@@ -2998,23 +2998,23 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	    {
 	      _bfd_error_handler (_("failed to update file offsets in debug directory"));
 	      free (data);
-	      return FALSE;
+	      return false;
 	    }
 	  free (data);
 	}
       else if (section)
 	{
 	  _bfd_error_handler (_("%pB: failed to read debug data section"), obfd);
-	  return FALSE;
+	  return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Copy private section data.  */
 
-bfd_boolean
+bool
 _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 				       asection *isec,
 				       bfd *obfd,
@@ -3022,7 +3022,7 @@ _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 {
   if (bfd_get_flavour (ibfd) != bfd_target_coff_flavour
       || bfd_get_flavour (obfd) != bfd_target_coff_flavour)
-    return TRUE;
+    return true;
 
   if (coff_section_data (ibfd, isec) != NULL
       && pei_section_data (ibfd, isec) != NULL)
@@ -3032,7 +3032,7 @@ _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 	  size_t amt = sizeof (struct coff_section_tdata);
 	  osec->used_by_bfd = bfd_zalloc (obfd, amt);
 	  if (osec->used_by_bfd == NULL)
-	    return FALSE;
+	    return false;
 	}
 
       if (pei_section_data (obfd, osec) == NULL)
@@ -3040,7 +3040,7 @@ _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 	  size_t amt = sizeof (struct pei_section_tdata);
 	  coff_section_data (obfd, osec)->tdata = bfd_zalloc (obfd, amt);
 	  if (coff_section_data (obfd, osec)->tdata == NULL)
-	    return FALSE;
+	    return false;
 	}
 
       pei_section_data (obfd, osec)->virt_size =
@@ -3049,7 +3049,7 @@ _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 	pei_section_data (ibfd, isec)->pe_flags;
     }
 
-  return TRUE;
+  return true;
 }
 
 void
@@ -3083,12 +3083,12 @@ static bfd_byte *
 rsrc_count_directory (bfd *, bfd_byte *, bfd_byte *, bfd_byte *, bfd_vma);
 
 static bfd_byte *
-rsrc_count_entries (bfd *	   abfd,
-		    bfd_boolean	   is_name,
-		    bfd_byte *	   datastart,
-		    bfd_byte *	   data,
-		    bfd_byte *	   dataend,
-		    bfd_vma	   rva_bias)
+rsrc_count_entries (bfd *abfd,
+		    bool is_name,
+		    bfd_byte *datastart,
+		    bfd_byte *data,
+		    bfd_byte *dataend,
+		    bfd_vma rva_bias)
 {
   unsigned long entry, addr, size;
 
@@ -3205,14 +3205,14 @@ typedef struct rsrc_leaf
 
 typedef struct rsrc_entry
 {
-  bfd_boolean is_name;
+  bool is_name;
   union
   {
     unsigned int	  id;
     struct rsrc_string	  name;
   } name_id;
 
-  bfd_boolean is_dir;
+  bool is_dir;
   union
   {
     struct rsrc_directory * directory;
@@ -3228,14 +3228,14 @@ rsrc_parse_directory (bfd *, rsrc_directory *, bfd_byte *,
 		      bfd_byte *, bfd_byte *, bfd_vma, rsrc_entry *);
 
 static bfd_byte *
-rsrc_parse_entry (bfd *		   abfd,
-		  bfd_boolean	   is_name,
-		  rsrc_entry *	   entry,
-		  bfd_byte *	   datastart,
-		  bfd_byte *	   data,
-		  bfd_byte *	   dataend,
-		  bfd_vma	   rva_bias,
-		  rsrc_directory * parent)
+rsrc_parse_entry (bfd *abfd,
+		  bool is_name,
+		  rsrc_entry *entry,
+		  bfd_byte *datastart,
+		  bfd_byte * data,
+		  bfd_byte *dataend,
+		  bfd_vma rva_bias,
+		  rsrc_directory *parent)
 {
   unsigned long val, addr, size;
 
@@ -3272,7 +3272,7 @@ rsrc_parse_entry (bfd *		   abfd,
 
   if (HighBitSet (val))
     {
-      entry->is_dir = TRUE;
+      entry->is_dir = true;
       entry->value.directory = bfd_malloc (sizeof * entry->value.directory);
       if (entry->value.directory == NULL)
 	return dataend;
@@ -3283,7 +3283,7 @@ rsrc_parse_entry (bfd *		   abfd,
 				   dataend, rva_bias, entry);
     }
 
-  entry->is_dir = FALSE;
+  entry->is_dir = false;
   entry->value.leaf = bfd_malloc (sizeof * entry->value.leaf);
   if (entry->value.leaf == NULL)
     return dataend;
@@ -3306,15 +3306,15 @@ rsrc_parse_entry (bfd *		   abfd,
 }
 
 static bfd_byte *
-rsrc_parse_entries (bfd *	     abfd,
-		    rsrc_dir_chain * chain,
-		    bfd_boolean	     is_name,
-		    bfd_byte *	     highest_data,
-		    bfd_byte *	     datastart,
-		    bfd_byte *	     data,
-		    bfd_byte *	     dataend,
-		    bfd_vma	     rva_bias,
-		    rsrc_directory * parent)
+rsrc_parse_entries (bfd *abfd,
+		    rsrc_dir_chain *chain,
+		    bool is_name,
+		    bfd_byte *highest_data,
+		    bfd_byte *datastart,
+		    bfd_byte *data,
+		    bfd_byte *dataend,
+		    bfd_vma rva_bias,
+		    rsrc_directory *parent)
 {
   unsigned int i;
   rsrc_entry * entry;
@@ -3382,11 +3382,11 @@ rsrc_parse_directory (bfd *	       abfd,
 
   data += 16;
 
-  highest_data = rsrc_parse_entries (abfd, & table->names, TRUE, data,
+  highest_data = rsrc_parse_entries (abfd, & table->names, true, data,
 				     datastart, data, dataend, rva_bias, table);
   data += table->names.num_entries * 8;
 
-  highest_data = rsrc_parse_entries (abfd, & table->ids, FALSE, highest_data,
+  highest_data = rsrc_parse_entries (abfd, & table->ids, false, highest_data,
 				     datastart, data, dataend, rva_bias, table);
   data += table->ids.num_entries * 8;
 
@@ -3593,7 +3593,7 @@ u16_mbtouc (wchar_t * puc, const unsigned short * s, unsigned int n)
 
 /* Perform a comparison of two entries.  */
 static signed int
-rsrc_cmp (bfd_boolean is_name, rsrc_entry * a, rsrc_entry * b)
+rsrc_cmp (bool is_name, rsrc_entry * a, rsrc_entry * b)
 {
   signed int    res;
   bfd_byte *    astring;
@@ -3685,7 +3685,7 @@ rsrc_print_name (char * buffer, rsrc_string string)
 static const char *
 rsrc_resource_name (rsrc_entry *entry, rsrc_directory *dir, char *buffer)
 {
-  bfd_boolean is_string = FALSE;
+  bool is_string = false;
 
   buffer[0] = 0;
 
@@ -3708,7 +3708,7 @@ rsrc_resource_name (rsrc_entry *entry, rsrc_directory *dir, char *buffer)
 	    case 3: strcat (buffer, " (ICON)"); break;
 	    case 4: strcat (buffer, " (MENU)"); break;
 	    case 5: strcat (buffer, " (DIALOG)"); break;
-	    case 6: strcat (buffer, " (STRING)"); is_string = TRUE; break;
+	    case 6: strcat (buffer, " (STRING)"); is_string = true; break;
 	    case 7: strcat (buffer, " (FONTDIR)"); break;
 	    case 8: strcat (buffer, " (FONT)"); break;
 	    case 9: strcat (buffer, " (ACCELERATOR)"); break;
@@ -3772,7 +3772,7 @@ rsrc_resource_name (rsrc_entry *entry, rsrc_directory *dir, char *buffer)
    them and return FALSE.  Otherwise we copy any strings from B into A and
    then return TRUE.  */
 
-static bfd_boolean
+static bool
 rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
 			   rsrc_entry * b ATTRIBUTE_UNUSED)
 {
@@ -3821,11 +3821,11 @@ rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
 	  && !a->parent->entry->is_name)
 	_bfd_error_handler (_(".rsrc merge failure: duplicate string resource: %d"),
 			    ((a->parent->entry->name_id.id - 1) << 4) + i);
-      return FALSE;
+      return false;
     }
 
   if (copy_needed == 0)
-    return TRUE;
+    return true;
 
   /* If we reach here then A and B must both have non-colliding strings.
      (We never get string resources with fully empty string tables).
@@ -3833,7 +3833,7 @@ rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
      in B's strings.  */
   new_data = bfd_malloc (a->value.leaf->size + copy_needed);
   if (new_data == NULL)
-    return FALSE;
+    return false;
 
   nstring = new_data;
   astring = a->value.leaf->data;
@@ -3870,7 +3870,7 @@ rsrc_merge_string_entries (rsrc_entry * a ATTRIBUTE_UNUSED,
   a->value.leaf->data = new_data;
   a->value.leaf->size += copy_needed;
 
-  return TRUE;
+  return true;
 }
 
 static void rsrc_merge (rsrc_entry *, rsrc_entry *);
@@ -3880,21 +3880,21 @@ static void rsrc_merge (rsrc_entry *, rsrc_entry *);
    with lists and we want to handle matches specially.  */
 
 static void
-rsrc_sort_entries (rsrc_dir_chain *  chain,
-		   bfd_boolean       is_name,
-		   rsrc_directory *  dir)
+rsrc_sort_entries (rsrc_dir_chain *chain,
+		   bool is_name,
+		   rsrc_directory *dir)
 {
   rsrc_entry * entry;
   rsrc_entry * next;
   rsrc_entry ** points_to_entry;
-  bfd_boolean swapped;
+  bool swapped;
 
   if (chain->num_entries < 2)
     return;
 
   do
     {
-      swapped = FALSE;
+      swapped = false;
       points_to_entry = & chain->first_entry;
       entry = * points_to_entry;
       next  = entry->next_entry;
@@ -3910,7 +3910,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 	      * points_to_entry = next;
 	      points_to_entry = & next->next_entry;
 	      next = entry->next_entry;
-	      swapped = TRUE;
+	      swapped = true;
 	    }
 	  else if (cmp == 0)
 	    {
@@ -3950,7 +3950,7 @@ rsrc_sort_entries (rsrc_dir_chain *  chain,
 			  * points_to_entry = next;
 			  points_to_entry = & next->next_entry;
 			  next = entry->next_entry;
-			  swapped = TRUE;
+			  swapped = true;
 			}
 		      else
 			{
@@ -4105,8 +4105,8 @@ rsrc_merge (struct rsrc_entry * a, struct rsrc_entry * b)
   rsrc_attach_chain (& adir->ids, & bdir->ids);
 
   /* Now sort A's entries.  */
-  rsrc_sort_entries (& adir->names, TRUE, adir);
-  rsrc_sort_entries (& adir->ids, FALSE, adir);
+  rsrc_sort_entries (& adir->names, true, adir);
+  rsrc_sort_entries (& adir->ids, false, adir);
 }
 
 /* Check the .rsrc section.  If it contains multiple concatenated
@@ -4273,7 +4273,7 @@ rsrc_process_section (bfd * abfd,
   for (indx = 0; indx < num_resource_sets; indx++)
     rsrc_attach_chain (& new_table.names, & type_tables[indx].names);
 
-  rsrc_sort_entries (& new_table.names, TRUE, & new_table);
+  rsrc_sort_entries (& new_table.names, true, & new_table);
 
   /* Chain the ID entries onto the table.  */
   new_table.ids.first_entry = NULL;
@@ -4282,7 +4282,7 @@ rsrc_process_section (bfd * abfd,
   for (indx = 0; indx < num_resource_sets; indx++)
     rsrc_attach_chain (& new_table.ids, & type_tables[indx].ids);
 
-  rsrc_sort_entries (& new_table.ids, FALSE, & new_table);
+  rsrc_sort_entries (& new_table.ids, false, & new_table);
 
   /* Step four: Create new contents for the .rsrc section.  */
   /* Step four point one: Compute the size of each region of the .rsrc section.
@@ -4324,12 +4324,12 @@ rsrc_process_section (bfd * abfd,
 /* Handle the .idata section and other things that need symbol table
    access.  */
 
-bfd_boolean
+bool
 _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 {
   struct coff_link_hash_entry *h1;
   struct bfd_link_info *info = pfinfo->info;
-  bfd_boolean result = TRUE;
+  bool result = true;
 
   /* There are a few fields that need to be filled in now while we
      have symbol table access.
@@ -4340,7 +4340,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
   /* The import directory.  This is the address of .idata$2, with size
      of .idata$2 + .idata$3.  */
   h1 = coff_link_hash_lookup (coff_hash_table (info),
-			      ".idata$2", FALSE, FALSE, TRUE);
+			      ".idata$2", false, false, true);
   if (h1 != NULL)
     {
       /* PR ld/2729: We cannot rely upon all the output sections having been
@@ -4359,11 +4359,11 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  _bfd_error_handler
 	    (_("%pB: unable to fill in DataDictionary[1] because .idata$2 is missing"),
 	     abfd);
-	  result = FALSE;
+	  result = false;
 	}
 
       h1 = coff_link_hash_lookup (coff_hash_table (info),
-				  ".idata$4", FALSE, FALSE, TRUE);
+				  ".idata$4", false, false, true);
       if (h1 != NULL
 	  && (h1->root.type == bfd_link_hash_defined
 	   || h1->root.type == bfd_link_hash_defweak)
@@ -4379,13 +4379,13 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  _bfd_error_handler
 	    (_("%pB: unable to fill in DataDictionary[1] because .idata$4 is missing"),
 	     abfd);
-	  result = FALSE;
+	  result = false;
 	}
 
       /* The import address table.  This is the size/address of
 	 .idata$5.  */
       h1 = coff_link_hash_lookup (coff_hash_table (info),
-				  ".idata$5", FALSE, FALSE, TRUE);
+				  ".idata$5", false, false, true);
       if (h1 != NULL
 	  && (h1->root.type == bfd_link_hash_defined
 	   || h1->root.type == bfd_link_hash_defweak)
@@ -4400,11 +4400,11 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  _bfd_error_handler
 	    (_("%pB: unable to fill in DataDictionary[12] because .idata$5 is missing"),
 	     abfd);
-	  result = FALSE;
+	  result = false;
 	}
 
       h1 = coff_link_hash_lookup (coff_hash_table (info),
-				  ".idata$6", FALSE, FALSE, TRUE);
+				  ".idata$6", false, false, true);
       if (h1 != NULL
 	  && (h1->root.type == bfd_link_hash_defined
 	   || h1->root.type == bfd_link_hash_defweak)
@@ -4420,13 +4420,13 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  _bfd_error_handler
 	    (_("%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE (12)] because .idata$6 is missing"),
 	     abfd);
-	  result = FALSE;
+	  result = false;
 	}
     }
   else
     {
       h1 = coff_link_hash_lookup (coff_hash_table (info),
-				  "__IAT_start__", FALSE, FALSE, TRUE);
+				  "__IAT_start__", false, false, true);
       if (h1 != NULL
 	  && (h1->root.type == bfd_link_hash_defined
 	   || h1->root.type == bfd_link_hash_defweak)
@@ -4441,7 +4441,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	     + h1->root.u.def.section->output_offset);
 
 	  h1 = coff_link_hash_lookup (coff_hash_table (info),
-				      "__IAT_end__", FALSE, FALSE, TRUE);
+				      "__IAT_end__", false, false, true);
 	  if (h1 != NULL
 	      && (h1->root.type == bfd_link_hash_defined
 	       || h1->root.type == bfd_link_hash_defweak)
@@ -4462,7 +4462,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	      _bfd_error_handler
 		(_("%pB: unable to fill in DataDictionary[PE_IMPORT_ADDRESS_TABLE(12)]"
 		   " because .idata$6 is missing"), abfd);
-	      result = FALSE;
+	      result = false;
 	    }
 	}
     }
@@ -4470,7 +4470,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
   h1 = coff_link_hash_lookup (coff_hash_table (info),
 			      (bfd_get_symbol_leading_char (abfd) != 0
 			       ? "__tls_used" : "_tls_used"),
-			      FALSE, FALSE, TRUE);
+			      false, false, true);
   if (h1 != NULL)
     {
       if ((h1->root.type == bfd_link_hash_defined
@@ -4487,7 +4487,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	  _bfd_error_handler
 	    (_("%pB: unable to fill in DataDictionary[9] because __tls_used is missing"),
 	     abfd);
-	  result = FALSE;
+	  result = false;
 	}
      /* According to PECOFF sepcifications by Microsoft version 8.2
 	the TLS data directory consists of 4 pointers, followed
@@ -4527,7 +4527,7 @@ _bfd_XXi_final_link_postscript (bfd * abfd, struct coff_final_link_info *pfinfo)
 	    free (tmp_data);
 	  }
 	else
-	  result = FALSE;
+	  result = false;
       }
   }
 #endif

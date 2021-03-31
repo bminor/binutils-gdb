@@ -42,11 +42,11 @@
 
 const bfd_arch_info_type arch_info_struct[2] =
 {
-  N (bfd_mach_mrisc2, "ms1-003", FALSE, arch_info_struct + 1),
-  N (bfd_mach_ms2,    "ms2",     FALSE, NULL)
+  N (bfd_mach_mrisc2, "ms1-003", false, arch_info_struct + 1),
+  N (bfd_mach_ms2,    "ms2",     false, NULL)
 };
 
 const bfd_arch_info_type bfd_mt_arch =
-  N (bfd_mach_ms1,    "ms1",     TRUE, arch_info_struct);
+  N (bfd_mach_ms1,    "ms1",     true, arch_info_struct);
 
 

@@ -31,11 +31,11 @@
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (32532, "ns32k:32532", TRUE, 0), /* The word ns32k will match this too.  */
+  N (32532, "ns32k:32532", true, 0), /* The word ns32k will match this too.  */
 };
 
 const bfd_arch_info_type bfd_ns32k_arch =
-  N (32032, "ns32k:32032", FALSE, &arch_info_struct[0]);
+  N (32032, "ns32k:32032", false, &arch_info_struct[0]);
 
 bfd_vma
 _bfd_ns32k_get_displacement (bfd_byte *buffer, int size)
@@ -572,7 +572,7 @@ _bfd_do_ns32k_reloc_contents (reloc_howto_type *howto,
 {
   int size;
   bfd_vma x;
-  bfd_boolean overflow;
+  bool overflow;
 
   if (howto->negate)
     relocation = -relocation;
@@ -599,7 +599,7 @@ _bfd_do_ns32k_reloc_contents (reloc_howto_type *howto,
      which we don't check for.  We must either check at every single
      operation, which would be tedious, or we must do the computations
      in a type larger than bfd_vma, which would be inefficient.  */
-  overflow = FALSE;
+  overflow = false;
   if (howto->complain_on_overflow != complain_overflow_dont)
     {
       bfd_vma check;
@@ -674,7 +674,7 @@ _bfd_do_ns32k_reloc_contents (reloc_howto_type *howto,
 
 	    if (signed_check > reloc_signed_max
 		|| signed_check < reloc_signed_min)
-	      overflow = TRUE;
+	      overflow = true;
 	  }
 	  break;
 	case complain_overflow_unsigned:
@@ -686,7 +686,7 @@ _bfd_do_ns32k_reloc_contents (reloc_howto_type *howto,
 	    (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
 
 	    if (check > reloc_unsigned_max)
-	      overflow = TRUE;
+	      overflow = true;
 	  }
 	  break;
 	case complain_overflow_bitfield:
@@ -699,7 +699,7 @@ _bfd_do_ns32k_reloc_contents (reloc_howto_type *howto,
 	    if ((check & ~reloc_bits) != 0
 		&& (((bfd_vma) signed_check & ~reloc_bits)
 		    != (-(bfd_vma) 1 & ~reloc_bits)))
-	      overflow = TRUE;
+	      overflow = true;
 	  }
 	  break;
 	default:

@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_mcore_arch =
   "MCore",			/* Architecture name.  */
   "MCore",			/* Machine name.  */
   3,				/* Section align power.  */
-  TRUE,				/* Is this the default architecture ?  */
+  true,				/* Is this the default architecture ?  */
   bfd_default_compatible,	/* Architecture comparison function.  */
   bfd_default_scan,		/* String to architecture conversion.  */
   bfd_arch_default_fill,	/* Default fill.  */

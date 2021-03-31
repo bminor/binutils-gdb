@@ -64,7 +64,7 @@
 #define MY_entry_is_text_address 1
 
 #define MY_write_object_contents MY (write_object_contents)
-static bfd_boolean MY (write_object_contents) (bfd *);
+static bool MY (write_object_contents) (bfd *);
 
 #define MY_text_includes_header 1
 
@@ -74,7 +74,7 @@ static bfd_boolean MY (write_object_contents) (bfd *);
    Section contents have already been written.  We write the
    file header, symbols, and relocation.  */
 
-static bfd_boolean
+static bool
 MY (write_object_contents) (bfd *abfd)
 {
   struct external_exec exec_bytes;
@@ -110,5 +110,5 @@ MY (write_object_contents) (bfd *abfd)
 
   WRITE_HEADERS (abfd, execp);
 
-  return TRUE;
+  return true;
 }

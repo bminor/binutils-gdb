@@ -29,7 +29,7 @@
 #include "elf/ft32.h"
 #include "opcode/ft32.h"
 
-static bfd_boolean debug_relax = FALSE;
+static bool debug_relax = false;
 
 static bfd_reloc_status_type
 bfd_elf_ft32_diff_reloc (bfd *, arelent *, asymbol *, void *,
@@ -42,15 +42,15 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_NONE",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0,			/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   /* A 32 bit absolute relocation.  */
 
@@ -58,166 +58,166 @@ static reloc_howto_type ft32_elf_howto_table [] =
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_32",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_16,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 16,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_16",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x0000ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_8,		/* type */
 	 0,			/* rightshift */
 	 0,			/* size (0 = byte, 1 = short, 2 = long) */
 	 8,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_8",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x000000ff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_10,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 10,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 4,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_10",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x00003ff0,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_20,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 20,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_20",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x000fffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_17,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 17,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_17",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x0001ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_18,		/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 18,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_18",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x0003ffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_RELAX,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 10,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 4,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_RELAX",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x00000000,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 
   HOWTO (R_FT32_SC0,		/* type */
 	 0,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
 	 10,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 4,			/* bitpos */
 	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_SC0",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x00000000,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
   HOWTO (R_FT32_SC1,		/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 22,			/* bitsize */
-	 TRUE,			/* pc_relative */
+	 true,			/* pc_relative */
 	 7,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_SC1",		/* name */
-	 TRUE,			/* partial_inplace */
+	 true,			/* partial_inplace */
 	 0x07ffff80,		/* src_mask */
 	 0x07ffff80,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
   HOWTO (R_FT32_15,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 15,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_FT32_15",		/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0x00000000,		/* src_mask */
 	 0x00007fff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
   HOWTO (R_FT32_DIFF32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
+	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont, /* complain_on_overflow */
 	 bfd_elf_ft32_diff_reloc, /* special_function */
 	 "R_FT32_DIFF32",	/* name */
-	 FALSE,			/* partial_inplace */
+	 false,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffffffff,		/* dst_mask */
-	 FALSE),		/* pcrel_offset */
+	 false),		/* pcrel_offset */
 };
 
 
@@ -291,7 +291,7 @@ ft32_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 
 /* Set the howto pointer for an FT32 ELF reloc.  */
 
-static bfd_boolean
+static bool
 ft32_info_to_howto_rela (bfd *abfd,
 			  arelent *cache_ptr,
 			  Elf_Internal_Rela *dst)
@@ -305,7 +305,7 @@ ft32_info_to_howto_rela (bfd *abfd,
       _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
 			  abfd, r_type);
       bfd_set_error (bfd_error_bad_value);
-      return FALSE;
+      return false;
     }
 
   cache_ptr->howto = & ft32_elf_howto_table [r_type];
@@ -392,7 +392,7 @@ ft32_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc, warned, ignored;
+	  bool unresolved_reloc, warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
@@ -486,7 +486,7 @@ ft32_elf_relocate_section (bfd *output_bfd,
 
 	    case bfd_reloc_undefined:
 	      (*info->callbacks->undefined_symbol)
-		(info, name, input_bfd, input_section, rel->r_offset, TRUE);
+		(info, name, input_bfd, input_section, rel->r_offset, true);
 	      break;
 
 	    case bfd_reloc_outofrange:
@@ -512,12 +512,12 @@ ft32_elf_relocate_section (bfd *output_bfd,
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Relaxation.  */
 
-static bfd_boolean
+static bool
 ft32_reloc_shortable
     (bfd *		    abfd,
      asection *		    sec,
@@ -571,7 +571,7 @@ ft32_reloc_shortable
 	/* This appears to be a reference to an undefined
 	   symbol.  Just ignore it--it will be caught by the
 	   regular reloc processing.  */
-	return FALSE;
+	return false;
 
       symval = (h->root.u.def.value
 		+ h->root.u.def.section->output_section->vma
@@ -586,7 +586,7 @@ ft32_reloc_shortable
       case R_FT32_20:
       case R_FT32_RELAX:
 	if (symval != 0)
-	  return FALSE;
+	  return false;
 	insn = bfd_get_32 (abfd, contents + irel->r_offset);
 	insn |= ((symval + irel->r_addend) << howto->bitpos) & howto->dst_mask;
 	return ft32_shortcode (insn, sc);
@@ -603,23 +603,23 @@ ft32_reloc_shortable
 	  {
 	    switch (insn)
 	      {
-		case 0x00200000: *sc = (3 << 13) | (0  << 9); return TRUE;
-		case 0x00280000: *sc = (3 << 13) | (1  << 9); return TRUE;
-		case 0x00600000: *sc = (3 << 13) | (2  << 9); return TRUE;
-		case 0x00680000: *sc = (3 << 13) | (3  << 9); return TRUE;
-		case 0x00a00000: *sc = (3 << 13) | (4  << 9); return TRUE;
-		case 0x00a80000: *sc = (3 << 13) | (5  << 9); return TRUE;
-		case 0x00e00000: *sc = (3 << 13) | (6  << 9); return TRUE;
-		case 0x00e80000: *sc = (3 << 13) | (7  << 9); return TRUE;
-		case 0x01200000: *sc = (3 << 13) | (8  << 9); return TRUE;
-		case 0x01280000: *sc = (3 << 13) | (9  << 9); return TRUE;
-		case 0x01600000: *sc = (3 << 13) | (10 << 9); return TRUE;
-		case 0x01680000: *sc = (3 << 13) | (11 << 9); return TRUE;
-		case 0x01a00000: *sc = (3 << 13) | (12 << 9); return TRUE;
-		case 0x01a80000: *sc = (3 << 13) | (13 << 9); return TRUE;
+		case 0x00200000: *sc = (3 << 13) | (0  << 9); return true;
+		case 0x00280000: *sc = (3 << 13) | (1  << 9); return true;
+		case 0x00600000: *sc = (3 << 13) | (2  << 9); return true;
+		case 0x00680000: *sc = (3 << 13) | (3  << 9); return true;
+		case 0x00a00000: *sc = (3 << 13) | (4  << 9); return true;
+		case 0x00a80000: *sc = (3 << 13) | (5  << 9); return true;
+		case 0x00e00000: *sc = (3 << 13) | (6  << 9); return true;
+		case 0x00e80000: *sc = (3 << 13) | (7  << 9); return true;
+		case 0x01200000: *sc = (3 << 13) | (8  << 9); return true;
+		case 0x01280000: *sc = (3 << 13) | (9  << 9); return true;
+		case 0x01600000: *sc = (3 << 13) | (10 << 9); return true;
+		case 0x01680000: *sc = (3 << 13) | (11 << 9); return true;
+		case 0x01a00000: *sc = (3 << 13) | (12 << 9); return true;
+		case 0x01a80000: *sc = (3 << 13) | (13 << 9); return true;
 
-		case 0x00300000: *sc = (3 << 13) | (14 << 9); return TRUE;
-		case 0x00340000: *sc = (3 << 13) | (15 << 9); return TRUE;
+		case 0x00300000: *sc = (3 << 13) | (14 << 9); return true;
+		case 0x00340000: *sc = (3 << 13) | (15 << 9); return true;
 
 		default:
 		  break;
@@ -630,12 +630,12 @@ ft32_reloc_shortable
       default:
 	break;
     }
-  return FALSE;
+  return false;
 }
 
 /* Returns whether the relocation type passed is a diff reloc.  */
 
-static bfd_boolean
+static bool
 elf32_ft32_is_diff_reloc (Elf_Internal_Rela *irel)
 {
   return (ELF32_R_TYPE (irel->r_info) == R_FT32_DIFF32);
@@ -645,7 +645,7 @@ elf32_ft32_is_diff_reloc (Elf_Internal_Rela *irel)
    insn address happens to fall between the two symbols for which this
    diff reloc was emitted.  */
 
-static bfd_boolean
+static bool
 elf32_ft32_adjust_diff_reloc_value (bfd *abfd,
 				   struct bfd_section *isec,
 				   Elf_Internal_Rela *irel,
@@ -665,7 +665,7 @@ elf32_ft32_adjust_diff_reloc_value (bfd *abfd,
   if (isec_contents == NULL)
     {
       if (! bfd_malloc_and_get_section (abfd, isec, &isec_contents))
-	return FALSE;
+	return false;
 
       elf_section_data (isec)->this_hdr.contents = isec_contents;
     }
@@ -680,7 +680,7 @@ elf32_ft32_adjust_diff_reloc_value (bfd *abfd,
       break;
 
     default:
-      return FALSE;
+      return false;
     }
 
   /* For a diff reloc sym1 - sym2 the diff at assembly time (x) is written
@@ -713,14 +713,14 @@ elf32_ft32_adjust_diff_reloc_value (bfd *abfd,
 	  break;
 
 	default:
-	  return FALSE;
+	  return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 elf32_ft32_adjust_reloc_if_spans_insn (bfd *abfd,
 				      asection *isec,
 				      Elf_Internal_Rela *irel,  bfd_vma symval,
@@ -735,32 +735,32 @@ elf32_ft32_adjust_reloc_if_spans_insn (bfd *abfd,
 					       symval,
 					       shrinked_insn_address,
 					       count))
-	return FALSE;
+	return false;
     }
   else
     {
       bfd_vma reloc_value = symval + irel->r_addend;
-      bfd_boolean addend_within_shrink_boundary =
+      bool addend_within_shrink_boundary =
 	(reloc_value <= shrink_boundary);
-      bfd_boolean reloc_spans_insn =
+      bool reloc_spans_insn =
 	(symval <= shrinked_insn_address
 	 && reloc_value > shrinked_insn_address
 	 && addend_within_shrink_boundary);
 
       if (! reloc_spans_insn)
-	return TRUE;
+	return true;
 
       irel->r_addend -= count;
 
       if (debug_relax)
 	printf ("Relocation's addend needed to be fixed \n");
     }
-  return TRUE;
+  return true;
 }
 
 /* Delete some bytes from a section while relaxing.  */
 
-static bfd_boolean
+static bool
 elf32_ft32_relax_delete_bytes (struct bfd_link_info *link_info, bfd * abfd,
 			       asection * sec, bfd_vma addr, int count)
 {
@@ -825,7 +825,7 @@ elf32_ft32_relax_delete_bytes (struct bfd_link_info *link_info, bfd * abfd,
 	irel = elf_section_data (isec)->relocs;
 	/* PR 12161: Read in the relocs for this section if necessary.  */
 	if (irel == NULL)
-	  irel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, TRUE);
+	  irel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, true);
 
 	for (irelend = irel + isec->reloc_count; irel < irelend; irel++)
 	  {
@@ -839,7 +839,7 @@ elf32_ft32_relax_delete_bytes (struct bfd_link_info *link_info, bfd * abfd,
 						  symtab_hdr->sh_info, 0,
 						  NULL, NULL, NULL);
 		if (isymbuf == NULL)
-		  return FALSE;
+		  return false;
 	      }
 
 	    /* Get the value of the symbol referred to by the reloc.  */
@@ -886,7 +886,7 @@ elf32_ft32_relax_delete_bytes (struct bfd_link_info *link_info, bfd * abfd,
 								    shrinked_insn_address,
 								    shrink_boundary,
 								    count))
-			  return FALSE;
+			  return false;
 		      }
 		  }
 		/* else reference symbol is absolute. No adjustment needed. */
@@ -952,12 +952,12 @@ elf32_ft32_relax_delete_bytes (struct bfd_link_info *link_info, bfd * abfd,
 	sym_hash->root.u.def.value -= count;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Return TRUE if LOC can be a target of a branch, jump or call.  */
 
-static bfd_boolean
+static bool
 elf32_ft32_relax_is_branch_target (struct bfd_link_info *link_info,
 				   bfd * abfd, asection * sec,
 				   bfd_vma loc)
@@ -981,7 +981,7 @@ elf32_ft32_relax_is_branch_target (struct bfd_link_info *link_info,
     {
       irel = elf_section_data (isec)->relocs;
       if (irel == NULL)
-	irel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, TRUE);
+	irel = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL, true);
 
       irelend = irel + isec->reloc_count;
 
@@ -997,7 +997,7 @@ elf32_ft32_relax_is_branch_target (struct bfd_link_info *link_info,
 						symtab_hdr->sh_info, 0,
 						NULL, NULL, NULL);
 	      if (isymbuf == NULL)
-		return FALSE;
+		return false;
 	    }
 
 	  /* Get the value of the symbol referred to by the reloc.  */
@@ -1023,7 +1023,7 @@ elf32_ft32_relax_is_branch_target (struct bfd_link_info *link_info,
 			    (unsigned int) symval,
 			    (unsigned int) (symval + irel->r_addend));
 		  if ((irel->r_addend) == loc)
-		    return TRUE;
+		    return true;
 		}
 	    }
 	}
@@ -1066,18 +1066,17 @@ elf32_ft32_relax_is_branch_target (struct bfd_link_info *link_info,
 	  || sym_hash->root.type == bfd_link_hash_defweak)
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value == loc)
-	return TRUE;
+	return true;
     }
 
-  return FALSE;
+  return false;
 }
 
-static bfd_boolean
-ft32_elf_relax_section
-    (bfd *		    abfd,
-     asection *		    sec,
-     struct bfd_link_info * link_info,
-     bfd_boolean *	    again)
+static bool
+ft32_elf_relax_section (bfd *abfd,
+			asection *sec,
+			struct bfd_link_info *link_info,
+			bool *again)
 {
   Elf_Internal_Rela * free_relocs = NULL;
   Elf_Internal_Rela * internal_relocs;
@@ -1088,7 +1087,7 @@ ft32_elf_relax_section
   Elf_Internal_Sym *  isymbuf = NULL;
 
   /* Assume nothing changes.  */
-  *again = FALSE;
+  *again = false;
 
   /* We don't have to do anything for a relocatable link, if
      this section does not have relocs, or if this is not a
@@ -1097,7 +1096,7 @@ ft32_elf_relax_section
       || (sec->flags & SEC_RELOC) == 0
       || sec->reloc_count == 0
       || (sec->flags & SEC_CODE) == 0)
-    return TRUE;
+    return true;
 
   /* Get the section contents.  */
   if (elf_section_data (sec)->this_hdr.contents != NULL)
@@ -1198,7 +1197,7 @@ ft32_elf_relax_section
 
 	  /* That will change things, so, we should relax again.
 	     Note that this is not required, and it may be slow.  */
-	  *again = TRUE;
+	  *again = true;
 
 	  irel += 2;
 	}
@@ -1232,12 +1231,12 @@ ft32_elf_relax_section
   if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  return TRUE;
+  return true;
 
  error_return:
   free (free_relocs);
 
-  return TRUE;
+  return true;
 }
 
 #define ELF_ARCH		bfd_arch_ft32

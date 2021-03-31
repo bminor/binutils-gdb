@@ -24,7 +24,7 @@
 #define TARGET_SHL_SYM sh_pe_le_vec
 #define TARGET_SHL_NAME "pe-shl"
 #define COFF_WITH_PE
-#define PCRELOFFSET TRUE
+#define PCRELOFFSET true
 #define TARGET_UNDERSCORE '_'
 #define COFF_LONG_SECTION_NAMES
 

@@ -76,7 +76,7 @@ _bfd_elf_get_property (bfd *abfd, unsigned int type, unsigned int datasz)
 
 /* Parse GNU properties.  */
 
-bfd_boolean
+bool
 _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
@@ -90,7 +90,7 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
       _bfd_error_handler
 	(_("warning: %pB: corrupt GNU_PROPERTY_TYPE (%ld) size: %#lx"),
 	 abfd, note->type, note->descsz);
-      return FALSE;
+      return false;
     }
 
   while (ptr != ptr_end)
@@ -113,7 +113,7 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 	     abfd, note->type, type, datasz);
 	  /* Clear all properties.  */
 	  elf_properties (abfd) = NULL;
-	  return FALSE;
+	  return false;
 	}
 
       if (type >= GNU_PROPERTY_LOPROC)
@@ -134,7 +134,7 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 		{
 		  /* Clear all properties.  */
 		  elf_properties (abfd) = NULL;
-		  return FALSE;
+		  return false;
 		}
 	      else if (kind != property_ignored)
 		goto next;
@@ -152,7 +152,7 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 		     abfd, datasz);
 		  /* Clear all properties.  */
 		  elf_properties (abfd) = NULL;
-		  return FALSE;
+		  return false;
 		}
 	      prop = _bfd_elf_get_property (abfd, type, datasz);
 	      if (datasz == 8)
@@ -170,10 +170,10 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
 		     abfd, datasz);
 		  /* Clear all properties.  */
 		  elf_properties (abfd) = NULL;
-		  return FALSE;
+		  return false;
 		}
 	      prop = _bfd_elf_get_property (abfd, type, datasz);
-	      elf_has_no_copy_on_protected (abfd) = TRUE;
+	      elf_has_no_copy_on_protected (abfd) = true;
 	      prop->pr_kind = property_number;
 	      goto next;
 
@@ -190,14 +190,14 @@ _bfd_elf_parse_gnu_properties (bfd *abfd, Elf_Internal_Note *note)
       ptr += (datasz + (align_size - 1)) & ~ (align_size - 1);
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Merge GNU property BPROP with APROP.  If APROP isn't NULL, return TRUE
    if APROP is updated.  Otherwise, return TRUE if BPROP should be merged
    with ABFD.  */
 
-static bfd_boolean
+static bool
 elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
 			  elf_property *aprop, elf_property *bprop)
 {
@@ -217,7 +217,7 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
 	  if (bprop->u.number > aprop->u.number)
 	    {
 	      aprop->u.number = bprop->u.number;
-	      return TRUE;
+	      return true;
 	    }
 	  break;
 	}
@@ -233,7 +233,7 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
       abort ();
     }
 
-  return FALSE;
+  return false;
 }
 
 /* Return the property of TYPE on *LISTP and remove it from *LISTP if RM is
@@ -241,7 +241,7 @@ elf_merge_gnu_properties (struct bfd_link_info *info, bfd *abfd, bfd *bbfd,
 
 static elf_property *
 elf_find_and_remove_property (elf_property_list **listp,
-			      unsigned int type, bfd_boolean rm)
+			      unsigned int type, bool rm)
 {
   elf_property_list *list;
 
@@ -270,7 +270,7 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
 {
   elf_property_list *p, **lastp;
   elf_property *pr;
-  bfd_boolean number_p;
+  bool number_p;
   bfd_vma number = 0;
 
   /* Merge each GNU property in FIRST_PBFD with the one on *LISTP.  */
@@ -280,13 +280,13 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
       {
 	if (p->property.pr_kind == property_number)
 	  {
-	    number_p = TRUE;
+	    number_p = true;
 	    number = p->property.u.number;
 	  }
 	else
-	  number_p = FALSE;
+	  number_p = false;
 	pr = elf_find_and_remove_property (listp, p->property.pr_type,
-					   TRUE);
+					   true);
 	/* Pass NULL to elf_merge_gnu_properties for the property which
 	   isn't on *LISTP.  */
 	elf_merge_gnu_properties (info, first_pbfd, abfd, &p->property, pr);
@@ -357,16 +357,16 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
     {
       if (p->property.pr_kind == property_number)
 	{
-	  number_p = TRUE;
+	  number_p = true;
 	  number = p->property.u.number;
 	}
       else
-	number_p = FALSE;
+	number_p = false;
 
       if (elf_merge_gnu_properties (info, first_pbfd, abfd, NULL, &p->property))
 	{
 	  if (p->property.pr_type == GNU_PROPERTY_NO_COPY_ON_PROTECTED)
-	    elf_has_no_copy_on_protected (first_pbfd) = TRUE;
+	    elf_has_no_copy_on_protected (first_pbfd) = true;
 
 	  pr = _bfd_elf_get_property (first_pbfd, p->property.pr_type,
 				      p->property.pr_datasz);
@@ -380,7 +380,7 @@ elf_merge_gnu_property_list (struct bfd_link_info *info, bfd *first_pbfd,
 	{
 	  pr = elf_find_and_remove_property (&elf_properties (first_pbfd),
 					     p->property.pr_type,
-					     FALSE);
+					     false);
 	  if (pr == NULL)
 	    {
 	      if (number_p)
@@ -511,7 +511,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
   bfd *abfd, *first_pbfd = NULL;
   elf_property_list *list;
   asection *sec;
-  bfd_boolean has_properties = FALSE;
+  bool has_properties = false;
   const struct elf_backend_data *bed
     = get_elf_backend_data (info->output_bfd);
   unsigned int elfclass = bed->s->elfclass;
@@ -523,7 +523,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
 	&& (abfd->flags & DYNAMIC) == 0
 	&& elf_properties (abfd) != NULL)
       {
-	has_properties = TRUE;
+	has_properties = true;
 
 	/* Ignore GNU properties from ELF objects with different machine
 	   code or class.  Also skip objects without a GNU_PROPERTY note
@@ -656,7 +656,7 @@ _bfd_elf_link_setup_gnu_properties (struct bfd_link_info *info)
       /* If GNU_PROPERTY_NO_COPY_ON_PROTECTED is set, protected data
 	 symbol is defined in the shared object.  */
       if (elf_has_no_copy_on_protected (first_pbfd))
-	info->extern_protected_data = FALSE;
+	info->extern_protected_data = false;
     }
 
   return first_pbfd;
@@ -680,7 +680,7 @@ _bfd_elf_convert_gnu_property_size (bfd *ibfd, bfd *obfd)
 
 /* Convert GNU properties.  */
 
-bfd_boolean
+bool
 _bfd_elf_convert_gnu_properties (bfd *ibfd, asection *isec,
 				 bfd *obfd, bfd_byte **ptr,
 				 bfd_size_type *ptr_size)
@@ -704,7 +704,7 @@ _bfd_elf_convert_gnu_properties (bfd *ibfd, asection *isec,
     {
       contents = (bfd_byte *) bfd_malloc (size);
       if (contents == NULL)
-	return FALSE;
+	return false;
       free (*ptr);
       *ptr = contents;
     }
@@ -716,5 +716,5 @@ _bfd_elf_convert_gnu_properties (bfd *ibfd, asection *isec,
   /* Generate the output .note.gnu.property section.  */
   elf_write_gnu_properties (ibfd, contents, list, size, 1 << align_shift);
 
-  return TRUE;
+  return true;
 }

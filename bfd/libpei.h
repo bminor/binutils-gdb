@@ -338,34 +338,36 @@
 #define coff_final_link_postscript _bfd_XXi_final_link_postscript
 #endif
 
-void	    _bfd_XXi_swap_sym_in (bfd *, void *, void *);
-unsigned    _bfd_XXi_swap_sym_out (bfd *, void *, void *);
-void	    _bfd_XXi_swap_aux_in (bfd *, void *, int, int, int, int, void *);
-unsigned    _bfd_XXi_swap_aux_out (bfd *, void *, int, int, int, int, void *);
-void	    _bfd_XXi_swap_lineno_in (bfd *, void *, void *);
-unsigned    _bfd_XXi_swap_lineno_out (bfd *, void *, void *);
-void	    _bfd_XXi_swap_aouthdr_in (bfd *, void *, void *);
-unsigned    _bfd_XXi_swap_aouthdr_out (bfd *, void *, void *);
-unsigned    _bfd_XXi_swap_scnhdr_out (bfd *, void *, void *);
-bfd_boolean _bfd_XX_print_private_bfd_data_common (bfd *, void *);
-bfd_boolean _bfd_XX_bfd_copy_private_bfd_data_common (bfd *, bfd *);
-void	    _bfd_XX_get_symbol_info (bfd *, asymbol *, symbol_info *);
-bfd_boolean _bfd_XXi_final_link_postscript (bfd *, struct coff_final_link_info *);
-void	    _bfd_XXi_swap_debugdir_in (bfd *, void *, void *);
-unsigned    _bfd_XXi_swap_debugdir_out (bfd *, void *, void *);
-unsigned    _bfd_XXi_write_codeview_record (bfd *, file_ptr, CODEVIEW_INFO *);
-CODEVIEW_INFO * _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo);
+void _bfd_XXi_swap_sym_in (bfd *, void *, void *);
+unsigned _bfd_XXi_swap_sym_out (bfd *, void *, void *);
+void _bfd_XXi_swap_aux_in (bfd *, void *, int, int, int, int, void *);
+unsigned _bfd_XXi_swap_aux_out (bfd *, void *, int, int, int, int, void *);
+void _bfd_XXi_swap_lineno_in (bfd *, void *, void *);
+unsigned _bfd_XXi_swap_lineno_out (bfd *, void *, void *);
+void _bfd_XXi_swap_aouthdr_in (bfd *, void *, void *);
+unsigned _bfd_XXi_swap_aouthdr_out (bfd *, void *, void *);
+unsigned _bfd_XXi_swap_scnhdr_out (bfd *, void *, void *);
+bool _bfd_XX_print_private_bfd_data_common (bfd *, void *);
+bool _bfd_XX_bfd_copy_private_bfd_data_common (bfd *, bfd *);
+void _bfd_XX_get_symbol_info (bfd *, asymbol *, symbol_info *);
+bool _bfd_XXi_final_link_postscript (bfd *, struct coff_final_link_info *);
+void _bfd_XXi_swap_debugdir_in (bfd *, void *, void *);
+unsigned _bfd_XXi_swap_debugdir_out (bfd *, void *, void *);
+unsigned _bfd_XXi_write_codeview_record (bfd *, file_ptr, CODEVIEW_INFO *);
+CODEVIEW_INFO *_bfd_XXi_slurp_codeview_record
+  (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo);
 
 /* The following are needed only for ONE of pe or pei, but don't
    otherwise vary; peicode.h fixes up ifdefs but we provide the
    prototype.  */
 
-unsigned    _bfd_XX_only_swap_filehdr_out  (bfd *, void *, void *);
-unsigned    _bfd_XXi_only_swap_filehdr_out (bfd *, void *, void *);
-bfd_boolean _bfd_XX_bfd_copy_private_section_data (bfd *, asection *, bfd *, asection *);
+unsigned _bfd_XX_only_swap_filehdr_out  (bfd *, void *, void *);
+unsigned _bfd_XXi_only_swap_filehdr_out (bfd *, void *, void *);
+bool _bfd_XX_bfd_copy_private_section_data
+  (bfd *, asection *, bfd *, asection *);
 
-bfd_boolean _bfd_pe_print_ce_compressed_pdata (bfd *, void *);
-bfd_boolean _bfd_pe64_print_ce_compressed_pdata (bfd *, void *);
-bfd_boolean _bfd_pex64_print_ce_compressed_pdata (bfd *, void *);
-bfd_boolean _bfd_pep_print_ce_compressed_pdata (bfd *, void *);
+bool _bfd_pe_print_ce_compressed_pdata (bfd *, void *);
+bool _bfd_pe64_print_ce_compressed_pdata (bfd *, void *);
+bool _bfd_pex64_print_ce_compressed_pdata (bfd *, void *);
+bool _bfd_pep_print_ce_compressed_pdata (bfd *, void *);
 

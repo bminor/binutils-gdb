@@ -25,5 +25,5 @@ struct s390_elf_params
   int pgste;
 };
 
-bfd_boolean bfd_elf_s390_set_options (struct bfd_link_info *info,
-				      struct s390_elf_params *params);
+bool bfd_elf_s390_set_options (struct bfd_link_info *info,
+			       struct s390_elf_params *params);

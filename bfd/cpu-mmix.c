@@ -35,7 +35,7 @@ bfd_mmix_arch =
   "mmix",			/* Architecture name.  */
   "mmix",			/* Printable name.  */
   3,				/* Section align power.  */
-  TRUE,			/* This is the default architecture.  */
+  true,				/* This is the default architecture.  */
   bfd_default_compatible,	/* Architecture comparison function.  */
   bfd_default_scan,		/* String to architecture conversion.  */
   bfd_arch_default_fill,	/* Default fill.  */

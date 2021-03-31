@@ -26,7 +26,7 @@ extern int elf32_tic6x_merge_arch_attributes (int, int);
 
 /* This function is provided for use from the assembler.  */
 
-extern void elf32_tic6x_set_use_rela_p (bfd *, bfd_boolean);
+extern void elf32_tic6x_set_use_rela_p (bfd *, bool);
 
 struct elf32_tic6x_params
 {
@@ -38,10 +38,10 @@ extern void elf32_tic6x_setup (struct bfd_link_info *,
 			       struct elf32_tic6x_params *);
 
 /* C6x unwind section editing support.  */
-extern bfd_boolean elf32_tic6x_fix_exidx_coverage (struct bfd_section **,
-						   unsigned int,
-						   struct bfd_link_info *,
-						   bfd_boolean);
+extern bool elf32_tic6x_fix_exidx_coverage (struct bfd_section **,
+					    unsigned int,
+					    struct bfd_link_info *,
+					    bool);
 #ifdef __cplusplus
 }
 #endif

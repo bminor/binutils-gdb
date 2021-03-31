@@ -384,8 +384,8 @@ DESCRIPTION
 	This is used to fill in an empty howto entry in an array.
 
 .#define EMPTY_HOWTO(C) \
-.  HOWTO ((C), 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL, \
-.	  NULL, FALSE, 0, 0, FALSE)
+.  HOWTO ((C), 0, 0, 0, false, 0, complain_overflow_dont, NULL, \
+.	  NULL, false, 0, 0, false)
 .
 */
 
@@ -520,7 +520,7 @@ FUNCTION
 	bfd_reloc_offset_in_range
 
 SYNOPSIS
-	bfd_boolean bfd_reloc_offset_in_range
+	bool bfd_reloc_offset_in_range
 	  (reloc_howto_type *howto,
 	   bfd *abfd,
 	   asection *section,
@@ -535,7 +535,7 @@ DESCRIPTION
 /* HOWTO describes a relocation, at offset OCTET.  Return whether the
    relocation field is within SECTION of ABFD.  */
 
-bfd_boolean
+bool
 bfd_reloc_offset_in_range (reloc_howto_type *howto,
 			   bfd *abfd,
 			   asection *section,
@@ -8205,7 +8205,7 @@ bfd_reloc_name_lookup (bfd *abfd, const char *reloc_name)
 }
 
 static reloc_howto_type bfd_howto_32 =
-HOWTO (0, 00, 2, 32, FALSE, 0, complain_overflow_dont, 0, "VRT32", FALSE, 0xffffffff, 0xffffffff, TRUE);
+HOWTO (0, 00, 2, 32, false, 0, complain_overflow_dont, 0, "VRT32", false, 0xffffffff, 0xffffffff, true);
 
 /*
 INTERNAL_FUNCTION
@@ -8256,29 +8256,29 @@ INTERNAL_FUNCTION
 	bfd_generic_relax_section
 
 SYNOPSIS
-	bfd_boolean bfd_generic_relax_section
+	bool bfd_generic_relax_section
 	  (bfd *abfd,
 	   asection *section,
 	   struct bfd_link_info *,
-	   bfd_boolean *);
+	   bool *);
 
 DESCRIPTION
 	Provides default handling for relaxing for back ends which
 	don't do relaxing.
 */
 
-bfd_boolean
+bool
 bfd_generic_relax_section (bfd *abfd ATTRIBUTE_UNUSED,
 			   asection *section ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
-			   bfd_boolean *again)
+			   bool *again)
 {
   if (bfd_link_relocatable (link_info))
     (*link_info->callbacks->einfo)
       (_("%P%F: --relax and -r may not be used together\n"));
 
-  *again = FALSE;
-  return TRUE;
+  *again = false;
+  return true;
 }
 
 /*
@@ -8286,7 +8286,7 @@ INTERNAL_FUNCTION
 	bfd_generic_gc_sections
 
 SYNOPSIS
-	bfd_boolean bfd_generic_gc_sections
+	bool bfd_generic_gc_sections
 	  (bfd *, struct bfd_link_info *);
 
 DESCRIPTION
@@ -8294,11 +8294,11 @@ DESCRIPTION
 	don't do section gc -- i.e., does nothing.
 */
 
-bfd_boolean
+bool
 bfd_generic_gc_sections (bfd *abfd ATTRIBUTE_UNUSED,
 			 struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }
 
 /*
@@ -8306,7 +8306,7 @@ INTERNAL_FUNCTION
 	bfd_generic_lookup_section_flags
 
 SYNOPSIS
-	bfd_boolean bfd_generic_lookup_section_flags
+	bool bfd_generic_lookup_section_flags
 	  (struct bfd_link_info *, struct flag_info *, asection *);
 
 DESCRIPTION
@@ -8315,7 +8315,7 @@ DESCRIPTION
 	Returns FALSE if the section should be omitted, otherwise TRUE.
 */
 
-bfd_boolean
+bool
 bfd_generic_lookup_section_flags (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				  struct flag_info *flaginfo,
 				  asection *section ATTRIBUTE_UNUSED)
@@ -8323,9 +8323,9 @@ bfd_generic_lookup_section_flags (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   if (flaginfo != NULL)
     {
       _bfd_error_handler (_("INPUT_SECTION_FLAGS are not supported"));
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 /*
@@ -8333,7 +8333,7 @@ INTERNAL_FUNCTION
 	bfd_generic_merge_sections
 
 SYNOPSIS
-	bfd_boolean bfd_generic_merge_sections
+	bool bfd_generic_merge_sections
 	  (bfd *, struct bfd_link_info *);
 
 DESCRIPTION
@@ -8341,11 +8341,11 @@ DESCRIPTION
 	which don't have SEC_MERGE support -- i.e., does nothing.
 */
 
-bfd_boolean
+bool
 bfd_generic_merge_sections (bfd *abfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *link_info ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }
 
 /*
@@ -8358,7 +8358,7 @@ SYNOPSIS
 	   struct bfd_link_info *link_info,
 	   struct bfd_link_order *link_order,
 	   bfd_byte *data,
-	   bfd_boolean relocatable,
+	   bool relocatable,
 	   asymbol **symbols);
 
 DESCRIPTION
@@ -8372,7 +8372,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 					    struct bfd_link_info *link_info,
 					    struct bfd_link_order *link_order,
 					    bfd_byte *data,
-					    bfd_boolean relocatable,
+					    bool relocatable,
 					    asymbol **symbols)
 {
   bfd *input_bfd = link_order->u.indirect.section->owner;
@@ -8443,8 +8443,8 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	    {
 	      bfd_vma off;
 	      static reloc_howto_type none_howto
-		= HOWTO (0, 0, 0, 0, FALSE, 0, complain_overflow_dont, NULL,
-			 "unused", FALSE, 0, 0, FALSE);
+		= HOWTO (0, 0, 0, 0, false, 0, complain_overflow_dont, NULL,
+			 "unused", false, 0, 0, false);
 
 	      off = ((*parent)->address
 		     * bfd_octets_per_byte (input_bfd, input_section));
@@ -8479,7 +8479,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 		case bfd_reloc_undefined:
 		  (*link_info->callbacks->undefined_symbol)
 		    (link_info, bfd_asymbol_name (*(*parent)->sym_ptr_ptr),
-		     input_bfd, input_section, (*parent)->address, TRUE);
+		     input_bfd, input_section, (*parent)->address, true);
 		  break;
 		case bfd_reloc_dangerous:
 		  BFD_ASSERT (error_message != NULL);
@@ -8567,7 +8567,7 @@ INTERNAL_FUNCTION
 	_bfd_unrecognized_reloc
 
 SYNOPSIS
-	bfd_boolean _bfd_unrecognized_reloc
+	bool _bfd_unrecognized_reloc
 	  (bfd * abfd,
 	   sec_ptr section,
 	   unsigned int r_type);
@@ -8578,7 +8578,7 @@ DESCRIPTION
 	Returns FALSE so that it can be called from a return statement.
 */
 
-bfd_boolean
+bool
 _bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
 {
    /* xgettext:c-format */
@@ -8590,7 +8590,7 @@ _bfd_unrecognized_reloc (bfd * abfd, sec_ptr section, unsigned int r_type)
 		      BFD_VERSION_STRING);
 
   bfd_set_error (bfd_error_bad_value);
-  return FALSE;
+  return false;
 }
 
 reloc_howto_type *

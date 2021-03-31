@@ -130,13 +130,13 @@
 #define elf_backend_extern_protected_data 0
 #endif
 #ifndef elf_backend_always_renumber_dynsyms
-#define elf_backend_always_renumber_dynsyms FALSE
+#define elf_backend_always_renumber_dynsyms false
 #endif
 #ifndef elf_backend_linux_prpsinfo32_ugid16
-#define elf_backend_linux_prpsinfo32_ugid16 FALSE
+#define elf_backend_linux_prpsinfo32_ugid16 false
 #endif
 #ifndef elf_backend_linux_prpsinfo64_ugid16
-#define elf_backend_linux_prpsinfo64_ugid16 FALSE
+#define elf_backend_linux_prpsinfo64_ugid16 false
 #endif
 #ifndef elf_backend_stack_align
 #define elf_backend_stack_align 16
@@ -408,10 +408,10 @@
 #endif
 
 #ifndef elf_backend_collect
-#define elf_backend_collect FALSE
+#define elf_backend_collect false
 #endif
 #ifndef elf_backend_type_change_ok
-#define elf_backend_type_change_ok FALSE
+#define elf_backend_type_change_ok false
 #endif
 
 #ifndef elf_backend_sym_is_global

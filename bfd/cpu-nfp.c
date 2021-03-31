@@ -55,7 +55,7 @@ bfd_nfp_compatible (const bfd_arch_info_type * a,
 }
 
 static const bfd_arch_info_type arch_info_struct =
-  N (bfd_mach_nfp3200, "NFP-32xx", FALSE, NULL);
+  N (bfd_mach_nfp3200, "NFP-32xx", false, NULL);
 
 const bfd_arch_info_type bfd_nfp_arch =
-  N (bfd_mach_nfp6000, "NFP-6xxx", TRUE, &arch_info_struct);
+  N (bfd_mach_nfp6000, "NFP-6xxx", true, &arch_info_struct);

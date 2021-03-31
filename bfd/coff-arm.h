@@ -19,11 +19,11 @@
    MA 02110-1301, USA.  */
 
 /* ARM Interworking support.  Called from linker.  */
-extern bfd_boolean bfd_arm_allocate_interworking_sections
+extern bool bfd_arm_allocate_interworking_sections
   (struct bfd_link_info *);
 
-extern bfd_boolean bfd_arm_process_before_allocation
+extern bool bfd_arm_process_before_allocation
   (bfd *, struct bfd_link_info *, int);
 
-extern bfd_boolean bfd_arm_get_bfd_for_interworking
+extern bool bfd_arm_get_bfd_for_interworking
   (bfd *, struct bfd_link_info *);

@@ -41,10 +41,10 @@
   }
 
 const bfd_arch_info_type bfd_am33_2_arch =
-  N (bfd_mach_am33_2, "am33_2", "am33-2", FALSE, NULL);
+  N (bfd_mach_am33_2, "am33_2", "am33-2", false, NULL);
 
 const bfd_arch_info_type bfd_am33_arch =
-  N (bfd_mach_am33, "am33", "am33", FALSE, &bfd_am33_2_arch);
+  N (bfd_mach_am33, "am33", "am33", false, &bfd_am33_2_arch);
 
 const bfd_arch_info_type bfd_mn10300_arch =
-  N (bfd_mach_mn10300, "mn10300", "mn10300", TRUE, &bfd_am33_arch);
+  N (bfd_mach_mn10300, "mn10300", "mn10300", true, &bfd_am33_arch);

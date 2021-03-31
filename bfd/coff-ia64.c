@@ -53,11 +53,11 @@ static reloc_howto_type howto_table[] =
 /* Return TRUE if this relocation should
    appear in the output .reloc section.  */
 
-static bfd_boolean
+static bool
 in_reloc_p (bfd * abfd ATTRIBUTE_UNUSED,
 	    reloc_howto_type *howto ATTRIBUTE_UNUSED)
 {
-  return FALSE;			/* We don't do relocs for now...  */
+  return false;			/* We don't do relocs for now...  */
 }
 #endif
 

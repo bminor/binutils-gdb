@@ -100,7 +100,7 @@ compute_offset (unsigned long first_page,
   return (page_number * page_size) + page_offset;
 }
 
-bfd_boolean
+bool
 bfd_sym_mkobject (bfd *abfd ATTRIBUTE_UNUSED)
 {
   return 1;
@@ -115,7 +115,7 @@ bfd_sym_print_symbol (bfd *abfd ATTRIBUTE_UNUSED,
   return;
 }
 
-bfd_boolean
+bool
 bfd_sym_valid (bfd *abfd)
 {
   if (abfd == NULL || abfd->xvec == NULL)
@@ -131,7 +131,7 @@ bfd_sym_read_name_table (bfd *abfd, bfd_sym_header_block *dshb)
   size_t table_offset = dshb->dshb_nte.dti_first_page * dshb->dshb_page_size;
 
   if (bfd_seek (abfd, table_offset, SEEK_SET) != 0)
-    return FALSE;
+    return false;
   return _bfd_alloc_and_read (abfd, table_size, table_size);
 }
 

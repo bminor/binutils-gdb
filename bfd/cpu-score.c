@@ -63,8 +63,8 @@ compatible (const bfd_arch_info_type * a, const bfd_arch_info_type * b)
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  N (bfd_mach_score3, "score3", FALSE, NULL),
+  N (bfd_mach_score3, "score3", false, NULL),
 };
 
 const bfd_arch_info_type bfd_score_arch =
-  N (bfd_mach_score7, "score7", TRUE, & arch_info_struct[0]);
+  N (bfd_mach_score7, "score7", true, & arch_info_struct[0]);

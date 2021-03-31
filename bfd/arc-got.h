@@ -49,8 +49,8 @@ struct got_entry
   struct got_entry *next;
   enum tls_type_e type;
   bfd_vma offset;
-  bfd_boolean processed;
-  bfd_boolean created_dyn_relocation;
+  bool processed;
+  bool created_dyn_relocation;
   enum tls_got_entries existing_entries;
 };
 
@@ -114,8 +114,8 @@ new_got_entry_to_list (struct got_entry **list,
   entry->type = type;
   entry->offset = offset;
   entry->next = NULL;
-  entry->processed = FALSE;
-  entry->created_dyn_relocation = FALSE;
+  entry->processed = false;
+  entry->created_dyn_relocation = false;
   entry->existing_entries = existing_entries;
 
   ARC_DEBUG ("New GOT got entry added to list: "
@@ -210,11 +210,11 @@ arc_got_entry_type_for_reloc (reloc_howto_type *howto)
     if (H)								\
       if (H->dynindx == -1 && !H->forced_local)				\
 	if (! bfd_elf_link_record_dynamic_symbol (info, H))		\
-	  return FALSE;							\
+	  return false;							\
      htab->s##SECNAME->size += 4;					\
    }									\
 
-static bfd_boolean
+static bool
 arc_fill_got_info_for_reloc (enum tls_type_e type,
 			     struct got_entry **list,
 			     struct bfd_link_info *  info,
@@ -223,7 +223,7 @@ arc_fill_got_info_for_reloc (enum tls_type_e type,
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   if (got_entry_for_type (list, type) != NULL)
-    return TRUE;
+    return true;
 
   switch (type)
     {
@@ -240,9 +240,9 @@ arc_fill_got_info_for_reloc (enum tls_type_e type,
       case GOT_TLS_GD:
 	{
 	  bfd_vma offset
-	    = ADD_SYMBOL_REF_SEC_AND_RELOC (got, TRUE, h);
+	    = ADD_SYMBOL_REF_SEC_AND_RELOC (got, true, h);
 	  bfd_vma ATTRIBUTE_UNUSED notneeded
-	    = ADD_SYMBOL_REF_SEC_AND_RELOC (got, TRUE, h);
+	    = ADD_SYMBOL_REF_SEC_AND_RELOC (got, true, h);
 	  new_got_entry_to_list (list, type, offset, TLS_GOT_MOD_AND_OFF);
 	}
 	break;
@@ -250,16 +250,16 @@ arc_fill_got_info_for_reloc (enum tls_type_e type,
       case GOT_TLS_LE:
 	{
 	  bfd_vma offset
-	    = ADD_SYMBOL_REF_SEC_AND_RELOC (got, TRUE, h);
+	    = ADD_SYMBOL_REF_SEC_AND_RELOC (got, true, h);
 	  new_got_entry_to_list (list, type, offset, TLS_GOT_OFF);
 	}
 	break;
 
       default:
-	return FALSE;
+	return false;
 	break;
     }
-  return TRUE;
+  return true;
 }
 
 
@@ -284,7 +284,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
   BFD_ASSERT (entry);
 
   if (h == NULL
-      || h->forced_local == TRUE
+      || h->forced_local == true
       || (! elf_hash_table (info)->dynamic_sections_created
 	  || (bfd_link_pic (info)
 	      && SYMBOL_REFERENCES_LOCAL (info, h))))
@@ -425,7 +425,7 @@ relocate_fix_got_relocs_for_got_info (struct got_entry **	   list_p,
 	      BFD_ASSERT (0);
 	      break;
 	    }
-	  entry->processed = TRUE;
+	  entry->processed = true;
 	}
     }
 
@@ -460,7 +460,7 @@ create_got_dynrelocs_for_single_entry (struct got_entry *list,
 	{
 	  ADD_RELA (output_bfd, got, got_offset, h->dynindx, R_ARC_GLOB_DAT, 0);
 	}
-      list->created_dyn_relocation = TRUE;
+      list->created_dyn_relocation = true;
     }
   else if (list->existing_entries != TLS_GOT_NONE
 	   && !list->created_dyn_relocation)
@@ -515,7 +515,7 @@ GOT_OFFSET = %#lx, GOT_VMA = %#lx, INDEX = %ld, ADDEND = %#lx\n",
 			     + htab->sgot->output_offset + got_offset),
 		     (long) dynindx, (long) addend);
 	}
-      list->created_dyn_relocation = TRUE;
+      list->created_dyn_relocation = true;
     }
 }
 

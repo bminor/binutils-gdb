@@ -32,7 +32,7 @@ const bfd_arch_info_type bfd_tilepro_arch =
   "tilepro",
   "tilepro",
   3,
-  TRUE,
+  true,
   bfd_default_compatible,
   bfd_default_scan,
   bfd_arch_default_fill,

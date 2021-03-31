@@ -44,7 +44,7 @@ const bfd_arch_info_type bfd_spu_arch =
   "spu",		/* Architecture name.  */
   "spu:256K",		/* Printable name.  */
   3,			/* Section alignment power.  */
-  TRUE,			/* Default machine.  */
+  true,			/* Default machine.  */
   spu_compatible,	/* The spu is only compatible with itself, see above.  */
   bfd_default_scan,
   bfd_arch_default_fill,

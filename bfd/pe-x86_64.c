@@ -32,7 +32,7 @@
 #define COFF_WITH_PE
 #define COFF_WITH_pex64
 #define COFF_WITH_PE_BIGOBJ
-#define PCRELOFFSET		TRUE
+#define PCRELOFFSET		true
 #if defined (USE_MINGW64_LEADING_UNDERSCORES)
 #define TARGET_UNDERSCORE	'_'
 #else
@@ -64,11 +64,11 @@
 
 /* The function pex64_bfd_print_pdata is implemented in pei-x86_64.c
    source, but has be extended to also handle pe objects.  */
-extern bfd_boolean pex64_bfd_print_pdata (bfd *, void *);
+extern bool pex64_bfd_print_pdata (bfd *, void *);
 
 #define bfd_pe_print_pdata   pex64_bfd_print_pdata
 
-static bfd_boolean
+static bool
 pex64_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 {
   if (bfd_link_pde (info)
@@ -79,14 +79,14 @@ pex64_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	 __executable_start for __ImageBase to support R_AMD64_IMAGEBASE
 	 relocation which is relative to __ImageBase.  */
       struct bfd_link_hash_entry *h, *hi;
-      hi = bfd_link_hash_lookup (info->hash, "__ImageBase", TRUE, FALSE,
-				 FALSE);
+      hi = bfd_link_hash_lookup (info->hash, "__ImageBase", true, false,
+				 false);
       if (hi->type == bfd_link_hash_new
 	  || hi->type == bfd_link_hash_undefined
 	  || hi->type == bfd_link_hash_undefweak)
 	{
 	  h = bfd_link_hash_lookup (info->hash, "__executable_start",
-				    TRUE, FALSE, TRUE);
+				    true, false, true);
 	  hi->type = bfd_link_hash_indirect;
 	  hi->u.i.link = h;
 	}

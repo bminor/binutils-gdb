@@ -108,10 +108,10 @@ wasm_section_name_to_code (const char *name)
    incomplete numbers).  SIGN means interpret the number as SLEB128. */
 
 static bfd_vma
-wasm_read_leb128 (bfd *		  abfd,
-		  bfd_boolean *	  error_return,
-		  unsigned int *  length_return,
-		  bfd_boolean	  sign)
+wasm_read_leb128 (bfd *abfd,
+		  bool *error_return,
+		  unsigned int *length_return,
+		  bool sign)
 {
   bfd_vma result = 0;
   unsigned int num_read = 0;
@@ -161,7 +161,7 @@ wasm_read_leb128 (bfd *		  abfd,
 /* Encode an integer V as LEB128 and write it to ABFD, return TRUE on
    success.  */
 
-static bfd_boolean
+static bool
 wasm_write_uleb128 (bfd *abfd, bfd_vma v)
 {
   do
@@ -173,11 +173,11 @@ wasm_write_uleb128 (bfd *abfd, bfd_vma v)
 	c |= 0x80;
 
       if (bfd_bwrite (&c, 1, abfd) != 1)
-	return FALSE;
+	return false;
     }
   while (v);
 
-  return TRUE;
+  return true;
 }
 
 /* Read the LEB128 integer at P, saving it to X; at end of buffer,
@@ -187,7 +187,7 @@ wasm_write_uleb128 (bfd *abfd, bfd_vma v)
     {									\
       unsigned int length_read;						\
       (x) = _bfd_safe_read_leb128 (abfd, (p), &length_read,		\
-				   FALSE, (end));			\
+				   false, (end));			\
       (p) += length_read;						\
       if (length_read == 0)						\
 	goto error_return;						\
@@ -197,25 +197,25 @@ wasm_write_uleb128 (bfd *abfd, bfd_vma v)
 /* Verify the magic number at the beginning of a WebAssembly module
    ABFD, setting ERRORPTR if there's a mismatch.  */
 
-static bfd_boolean
-wasm_read_magic (bfd *abfd, bfd_boolean *errorptr)
+static bool
+wasm_read_magic (bfd *abfd, bool *errorptr)
 {
   bfd_byte magic_const[SIZEOF_WASM_MAGIC] = WASM_MAGIC;
   bfd_byte magic[SIZEOF_WASM_MAGIC];
 
   if (bfd_bread (magic, sizeof (magic), abfd) == sizeof (magic)
       && memcmp (magic, magic_const, sizeof (magic)) == 0)
-    return TRUE;
+    return true;
 
-  *errorptr = TRUE;
-  return FALSE;
+  *errorptr = true;
+  return false;
 }
 
 /* Read the version number from ABFD, returning TRUE if it's a supported
    version. Set ERRORPTR otherwise.  */
 
-static bfd_boolean
-wasm_read_version (bfd *abfd, bfd_boolean *errorptr)
+static bool
+wasm_read_version (bfd *abfd, bool *errorptr)
 {
   bfd_byte vers_const[SIZEOF_WASM_VERSION] = WASM_VERSION;
   bfd_byte vers[SIZEOF_WASM_VERSION];
@@ -224,31 +224,31 @@ wasm_read_version (bfd *abfd, bfd_boolean *errorptr)
       /* Don't attempt to parse newer versions, which are likely to
 	 require code changes.  */
       && memcmp (vers, vers_const, sizeof (vers)) == 0)
-    return TRUE;
+    return true;
 
-  *errorptr = TRUE;
-  return FALSE;
+  *errorptr = true;
+  return false;
 }
 
 /* Read the WebAssembly header (magic number plus version number) from
    ABFD, setting ERRORPTR to TRUE if there is a mismatch.  */
 
-static bfd_boolean
-wasm_read_header (bfd *abfd, bfd_boolean *errorptr)
+static bool
+wasm_read_header (bfd *abfd, bool *errorptr)
 {
   if (! wasm_read_magic (abfd, errorptr))
-    return FALSE;
+    return false;
 
   if (! wasm_read_version (abfd, errorptr))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Scan the "function" subsection of the "name" section ASECT in the
    wasm module ABFD. Create symbols. Return TRUE on success.  */
 
-static bfd_boolean
+static bool
 wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
 {
   bfd_byte *p;
@@ -264,7 +264,7 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
   end = asect->contents + asect->size;
 
   if (!p)
-    return FALSE;
+    return false;
 
   while (p < end)
     {
@@ -276,23 +276,23 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
 	 it has to be a single byte in the 0 - 127 range.  If it isn't,
 	 the spec must have changed underneath us, so give up.  */
       if (subsection_code & 0x80)
-	return FALSE;
+	return false;
 
       READ_LEB128 (payload_size, p, end);
 
       if (payload_size > (size_t) (end - p))
-	return FALSE;
+	return false;
 
       p += payload_size;
     }
 
   if (p >= end)
-    return FALSE;
+    return false;
 
   READ_LEB128 (payload_size, p, end);
 
   if (payload_size > (size_t) (end - p))
-    return FALSE;
+    return false;
 
   end = p + payload_size;
 
@@ -300,7 +300,7 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
 
   /* Sanity check: each symbol has at least two bytes.  */
   if (symcount > payload_size / 2)
-    return FALSE;
+    return false;
 
   tdata->symcount = symcount;
 
@@ -313,16 +313,16 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
       = bfd_get_section_by_name (abfd, WASM_SECTION_FUNCTION_INDEX);
 
   if (!space_function_index)
-    return FALSE;
+    return false;
 
   if (_bfd_mul_overflow (tdata->symcount, sizeof (asymbol), &amt))
     {
       bfd_set_error (bfd_error_file_too_big);
-      return FALSE;
+      return false;
     }
   symbols = bfd_alloc (abfd, amt);
   if (!symbols)
-    return FALSE;
+    return false;
 
   for (symcount = 0; p < end && symcount < tdata->symcount; symcount++)
     {
@@ -360,25 +360,25 @@ wasm_scan_name_function_section (bfd *abfd, sec_ptr asect)
   tdata->symbols = symbols;
   abfd->symcount = symcount;
 
-  return TRUE;
+  return true;
 
  error_return:
   bfd_release (abfd, symbols);
-  return FALSE;
+  return false;
 }
 
 /* Read a byte from ABFD and return it, or EOF for EOF or error.
    Set ERRORPTR on non-EOF error.  */
 
 static int
-wasm_read_byte (bfd *abfd, bfd_boolean *errorptr)
+wasm_read_byte (bfd *abfd, bool *errorptr)
 {
   bfd_byte byte;
 
   if (bfd_bread (&byte, (bfd_size_type) 1, abfd) != 1)
     {
       if (bfd_get_error () != bfd_error_file_truncated)
-	*errorptr = TRUE;
+	*errorptr = true;
       return EOF;
     }
 
@@ -388,10 +388,10 @@ wasm_read_byte (bfd *abfd, bfd_boolean *errorptr)
 /* Scan the wasm module ABFD, creating sections and symbols.
    Return TRUE on success.  */
 
-static bfd_boolean
+static bool
 wasm_scan (bfd *abfd)
 {
-  bfd_boolean error = FALSE;
+  bool error = false;
   /* Fake VMAs for now. Choose 0x80000000 as base to avoid clashes
      with actual data addresses.  */
   bfd_vma vma = 0x80000000;
@@ -419,7 +419,7 @@ wasm_scan (bfd *abfd)
 	  if (bfdsec == NULL)
 	    goto error_return;
 
-	  bfdsec->size = wasm_read_leb128 (abfd, &error, &bytes_read, FALSE);
+	  bfdsec->size = wasm_read_leb128 (abfd, &error, &bytes_read, false);
 	  if (error)
 	    goto error_return;
 	}
@@ -432,10 +432,10 @@ wasm_scan (bfd *abfd)
 	  size_t prefixlen = strlen (prefix);
 	  ufile_ptr filesize;
 
-	  payload_len = wasm_read_leb128 (abfd, &error, &bytes_read, FALSE);
+	  payload_len = wasm_read_leb128 (abfd, &error, &bytes_read, false);
 	  if (error)
 	    goto error_return;
-	  namelen = wasm_read_leb128 (abfd, &error, &bytes_read, FALSE);
+	  namelen = wasm_read_leb128 (abfd, &error, &bytes_read, false);
 	  if (error || bytes_read > payload_len
 	      || namelen > payload_len - bytes_read)
 	    goto error_return;
@@ -444,7 +444,7 @@ wasm_scan (bfd *abfd)
 	  if (filesize != 0 && namelen > filesize)
 	    {
 	      bfd_set_error (bfd_error_file_truncated);
-	      return FALSE;
+	      return false;
 	    }
 	  name = bfd_alloc (abfd, namelen + prefixlen + 1);
 	  if (!name)
@@ -482,10 +482,10 @@ wasm_scan (bfd *abfd)
   if (error)
     goto error_return;
 
-  return TRUE;
+  return true;
 
  error_return:
-  return FALSE;
+  return false;
 }
 
 /* Put a numbered section ASECT of ABFD into the table of numbered
@@ -508,7 +508,7 @@ wasm_register_section (bfd *abfd ATTRIBUTE_UNUSED,
 struct compute_section_arg
 {
   bfd_vma pos;
-  bfd_boolean failed;
+  bool failed;
 };
 
 /* Compute the file position of ABFD's section ASECT.  FSARG is a
@@ -570,7 +570,7 @@ wasm_compute_custom_section_file_position (bfd *abfd,
   return;
 
  error_return:
-  fs->failed = TRUE;
+  fs->failed = true;
 }
 
 /* Compute the file positions for the sections of ABFD.  Currently,
@@ -581,7 +581,7 @@ wasm_compute_custom_section_file_position (bfd *abfd,
    their ids, but custom sections can appear in any position and any
    order, and more than once. FIXME: support that.  */
 
-static bfd_boolean
+static bool
 wasm_compute_section_file_positions (bfd *abfd)
 {
   bfd_byte magic[SIZEOF_WASM_MAGIC] = WASM_MAGIC;
@@ -594,7 +594,7 @@ wasm_compute_section_file_positions (bfd *abfd)
 
   if (bfd_bwrite (magic, sizeof (magic), abfd) != (sizeof magic)
       || bfd_bwrite (vers, sizeof (vers), abfd) != sizeof (vers))
-    return FALSE;
+    return false;
 
   for (i = 0; i < WASM_NUMBERED_SECTIONS; i++)
     numbered_sections[i] = NULL;
@@ -611,27 +611,27 @@ wasm_compute_section_file_positions (bfd *abfd)
 	continue;
       size = sec->size;
       if (bfd_seek (abfd, fs.pos, SEEK_SET) != 0)
-	return FALSE;
+	return false;
       if (! wasm_write_uleb128 (abfd, i)
 	  || ! wasm_write_uleb128 (abfd, size))
-	return FALSE;
+	return false;
       fs.pos = sec->filepos = bfd_tell (abfd);
       fs.pos += size;
     }
 
-  fs.failed = FALSE;
+  fs.failed = false;
 
   bfd_map_over_sections (abfd, wasm_compute_custom_section_file_position, &fs);
 
   if (fs.failed)
-    return FALSE;
+    return false;
 
-  abfd->output_has_begun = TRUE;
+  abfd->output_has_begun = true;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 wasm_set_section_contents (bfd *abfd,
 			   sec_ptr section,
 			   const void *location,
@@ -639,49 +639,49 @@ wasm_set_section_contents (bfd *abfd,
 			   bfd_size_type count)
 {
   if (count == 0)
-    return TRUE;
+    return true;
 
   if (! abfd->output_has_begun
       && ! wasm_compute_section_file_positions (abfd))
-    return FALSE;
+    return false;
 
   if (bfd_seek (abfd, section->filepos + offset, SEEK_SET) != 0
       || bfd_bwrite (location, count, abfd) != count)
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 wasm_write_object_contents (bfd* abfd)
 {
   bfd_byte magic[] = WASM_MAGIC;
   bfd_byte vers[] = WASM_VERSION;
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0)
-    return FALSE;
+    return false;
 
   if (bfd_bwrite (magic, sizeof (magic), abfd) != sizeof (magic)
       || bfd_bwrite (vers, sizeof (vers), abfd) != sizeof (vers))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 wasm_mkobject (bfd *abfd)
 {
   tdata_type *tdata = (tdata_type *) bfd_alloc (abfd, sizeof (tdata_type));
 
   if (! tdata)
-    return FALSE;
+    return false;
 
   tdata->symbols = NULL;
   tdata->symcount = 0;
 
   abfd->tdata.any = tdata;
 
-  return TRUE;
+  return true;
 }
 
 static long
@@ -750,7 +750,7 @@ wasm_get_symbol_info (bfd *abfd ATTRIBUTE_UNUSED,
 static bfd_cleanup
 wasm_object_p (bfd *abfd)
 {
-  bfd_boolean error;
+  bool error;
   asection *s;
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)

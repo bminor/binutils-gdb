@@ -17,6 +17,6 @@
    along with this program; if not, write to the Free Software Foundation,
    Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  */
 
-extern bfd_boolean bfd_cr16_elf32_create_embedded_relocs
+extern bool bfd_cr16_elf32_create_embedded_relocs
   (bfd *, struct bfd_link_info *, struct bfd_section *, struct bfd_section *,
    char **);
