@@ -260,13 +260,13 @@ set_pe_stack_heap (char *resname, char *comname)
 }
 
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case OPTION_BASE_FILE:
       link_info.base_file = fopen (optarg, FOPEN_WB);
@@ -315,7 +315,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       set_pe_value ("__image_base__");
       break;
     }
-  return TRUE;
+  return true;
 }
 
 /* Assign values to the special symbols before the linker script is
@@ -349,7 +349,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
     {
       long val = init[j].value;
       lang_add_assignment (exp_assign (init[j].symbol, exp_intop (val),
-				       FALSE));
+				       false));
       if (init[j].size == sizeof(short))
 	*(short *)init[j].ptr = val;
       else if (init[j].size == sizeof(int))
@@ -678,7 +678,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   output_secname = xstrdup (secname);
   ps = strchr (output_secname + 1, '\$');
   *ps = 0;
-  os = lang_output_section_statement_lookup (output_secname, constraint, TRUE);
+  os = lang_output_section_statement_lookup (output_secname, constraint, true);
 
   /* Find the '\$' wild statement for this section.  We currently require the
      linker script to explicitly mention "*(.foo\$)".  */

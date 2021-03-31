@@ -74,13 +74,13 @@ gld${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --thumb-entry=<sym>         Set the entry point to be Thumb symbol <sym>\n"));
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case OPTION_SUPPORT_OLD_CODE:
       support_old_code = 1;
@@ -91,7 +91,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     }
 
-  return TRUE;
+  return true;
 }
 
 static void
@@ -164,7 +164,7 @@ gld${EMULATION_NAME}_finish (void)
       struct bfd_link_hash_entry * h;
 
       h = bfd_link_hash_lookup (link_info.hash, thumb_entry_symbol,
-				FALSE, FALSE, TRUE);
+				false, false, true);
 
       if (h != (struct bfd_link_hash_entry *) NULL
 	  && (h->type == bfd_link_hash_defined

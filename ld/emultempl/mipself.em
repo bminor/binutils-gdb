@@ -20,10 +20,10 @@
 
 case ${target} in
   *-*-*gnu*)
-    gnu_target=TRUE
+    gnu_target=true
     ;;
   *)
-    gnu_target=FALSE
+    gnu_target=false
     ;;
 esac
 
@@ -42,9 +42,9 @@ fragment <<EOF
 static lang_input_statement_type *stub_file;
 static bfd *stub_bfd;
 
-static bfd_boolean insn32;
-static bfd_boolean ignore_branch_isa;
-static bfd_boolean compact_branches;
+static bool insn32;
+static bool ignore_branch_isa;
+static bool compact_branches;
 
 struct hook_stub_info
 {
@@ -54,11 +54,11 @@ struct hook_stub_info
 
 /* Traverse the linker tree to find the spot where the stub goes.  */
 
-static bfd_boolean
+static bool
 hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 {
   lang_statement_union_type *l;
-  bfd_boolean ret;
+  bool ret;
 
   for (; (l = *lp) != NULL; lp = &l->header.next)
     {
@@ -97,7 +97,7 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 		 before its associated input section.  */
 	      *lp = info->add.head;
 	      *(info->add.tail) = l;
-	      return TRUE;
+	      return true;
 	    }
 	  break;
 
@@ -118,7 +118,7 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 	  break;
 	}
     }
-  return FALSE;
+  return false;
 }
 
 /* Create a new stub section called STUB_SEC_NAME and arrange for it to
@@ -278,27 +278,27 @@ PARSE_AND_LIST_OPTIONS='
 
 PARSE_AND_LIST_ARGS_CASES='
     case OPTION_INSN32:
-      insn32 = TRUE;
+      insn32 = true;
       break;
 
     case OPTION_NO_INSN32:
-      insn32 = FALSE;
+      insn32 = false;
       break;
 
     case OPTION_IGNORE_BRANCH_ISA:
-      ignore_branch_isa = TRUE;
+      ignore_branch_isa = true;
       break;
 
     case OPTION_NO_IGNORE_BRANCH_ISA:
-      ignore_branch_isa = FALSE;
+      ignore_branch_isa = false;
       break;
 
     case OPTION_COMPACT_BRANCHES:
-      compact_branches = TRUE;
+      compact_branches = true;
       break;
 
     case OPTION_NO_COMPACT_BRANCHES:
-      compact_branches = FALSE;
+      compact_branches = false;
       break;
 '
 

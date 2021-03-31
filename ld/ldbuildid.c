@@ -32,14 +32,14 @@
 #define streq(a,b)     strcmp ((a), (b)) == 0
 #define strneq(a,b,n)  strncmp ((a), (b), (n)) == 0
 
-bfd_boolean
+bool
 validate_build_id_style (const char *style)
 {
   if ((streq (style, "md5")) || (streq (style, "sha1"))
       || (streq (style, "uuid")) || (strneq (style, "0x", 2)))
-    return TRUE;
+    return true;
 
-  return FALSE;
+  return false;
 }
 
 bfd_size_type
@@ -94,7 +94,7 @@ read_hex (const char xdigit)
   return 0;
 }
 
-bfd_boolean
+bool
 generate_build_id (bfd *abfd,
 		   const char *style,
 		   checksum_fn checksum_contents,
@@ -107,7 +107,7 @@ generate_build_id (bfd *abfd,
 
       md5_init_ctx (&ctx);
       if (!(*checksum_contents) (abfd, (sum_fn) &md5_process_bytes, &ctx))
-	return FALSE;
+	return false;
       md5_finish_ctx (&ctx, id_bits);
     }
   else if (streq (style, "sha1"))
@@ -116,7 +116,7 @@ generate_build_id (bfd *abfd,
 
       sha1_init_ctx (&ctx);
       if (!(*checksum_contents) (abfd, (sum_fn) &sha1_process_bytes, &ctx))
-	return FALSE;
+	return false;
       sha1_finish_ctx (&ctx, id_bits);
     }
   else if (streq (style, "uuid"))
@@ -126,11 +126,11 @@ generate_build_id (bfd *abfd,
       int fd = open ("/dev/urandom", O_RDONLY);
 
       if (fd < 0)
-	return FALSE;
+	return false;
       n = read (fd, id_bits, size);
       close (fd);
       if (n < size)
-	return FALSE;
+	return false;
 #else /* __MINGW32__ */
       typedef RPC_STATUS (RPC_ENTRY * UuidCreateFn) (UUID *);
       UUID          uuid;
@@ -138,18 +138,18 @@ generate_build_id (bfd *abfd,
       HMODULE       rpc_library = LoadLibrary ("rpcrt4.dll");
 
       if (!rpc_library)
-	return FALSE;
+	return false;
       uuid_create = (UuidCreateFn) (void (WINAPI *)(void)) GetProcAddress (rpc_library, "UuidCreate");
       if (!uuid_create)
 	{
 	  FreeLibrary (rpc_library);
-	  return FALSE;
+	  return false;
 	}
 
       if (uuid_create (&uuid) != RPC_S_OK)
 	{
 	  FreeLibrary (rpc_library);
-	  return FALSE;
+	  return false;
 	}
       FreeLibrary (rpc_library);
       memcpy (id_bits, &uuid,
@@ -179,5 +179,5 @@ generate_build_id (bfd *abfd,
   else
     abort ();			/* Should have been validated earlier.  */
 
-  return TRUE;
+  return true;
 }

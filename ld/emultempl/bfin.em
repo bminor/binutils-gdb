@@ -28,10 +28,10 @@ fragment <<EOF
 #include "elf32-bfin.h"
 
 /* Whether to put code in Blackfin L1 SRAM.  */
-extern bfd_boolean elf32_bfin_code_in_l1;
+extern bool elf32_bfin_code_in_l1;
 
 /* Whether to put (writable) data in Blackfin L1 SRAM.  */
-extern bfd_boolean elf32_bfin_data_in_l1;
+extern bool elf32_bfin_data_in_l1;
 
 EOF
 
@@ -58,9 +58,9 @@ PARSE_AND_LIST_OPTIONS='
 
 PARSE_AND_LIST_ARGS_CASES='
     case OPTION_CODE_IN_L1:
-      elf32_bfin_code_in_l1 = TRUE;
+      elf32_bfin_code_in_l1 = true;
       break;
     case OPTION_DATA_IN_L1:
-      elf32_bfin_data_in_l1 = TRUE;
+      elf32_bfin_data_in_l1 = true;
       break;
 '

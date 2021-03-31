@@ -1,5 +1,45 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* sysdep.h (POISON_BFD_BOOLEAN): Define.
+	* configure.ac (elf_list_options, elf_shlib_list_options=false),
+	(elf_plt_unwind_list_options=false): Replace FALSE with false,
+	and TRUE with true.
+	* emulparams/call_nop.sh, * emulparams/cet.sh,
+	* emulparams/dynamic_undefined_weak.sh,
+	* emulparams/elf32b4300.sh, * emulparams/elf32lm32.sh,
+	* emulparams/elf32lr5900.sh, * emulparams/elf32lr5900n32.sh,
+	* emulparams/elf32visium.sh, * emulparams/elf_x86_64.sh,
+	* emulparams/extern_protected_data.sh, * emulparams/plt_unwind.sh,
+	* emulparams/reloc_overflow.sh, * emulparams/static.sh,
+	* emulparams/x86-64-lam.sh, * emultempl/aarch64elf.em,
+	* emultempl/aix.em, * emultempl/alphaelf.em,
+	* emultempl/armcoff.em, * emultempl/armelf.em,
+	* emultempl/avrelf.em, * emultempl/beos.em, * emultempl/bfin.em,
+	* emultempl/cr16elf.em, * emultempl/crxelf.em,
+	* emultempl/cskyelf.em, * emultempl/elf.em, * emultempl/genelf.em,
+	* emultempl/hppaelf.em, * emultempl/linux.em,
+	* emultempl/m68hc1xelf.em, * emultempl/metagelf.em,
+	* emultempl/mipself.em, * emultempl/mmix-elfnmmo.em,
+	* emultempl/mmixelf.em, * emultempl/mmo.em, * emultempl/msp430.em,
+	* emultempl/nios2elf.em, * emultempl/pdp11.em, * emultempl/pe.em,
+	* emultempl/pep.em, * emultempl/ppc32elf.em,
+	* emultempl/ppc64elf.em, * emultempl/rxelf.em,
+	* emultempl/rxlinux.em, * emultempl/scoreelf.em,
+	* emultempl/solaris2.em, * emultempl/spuelf.em,
+	* emultempl/ticoff.em, * emultempl/v850elf.em, * emultempl/vms.em,
+	* emultempl/xtensaelf.em, * emultempl/z80.em, * ld.h,
+	* ldbuildid.c, * ldbuildid.h, * ldcref.c, * ldctor.c, * ldctor.h,
+	* ldelf.c, * ldelf.h, * ldelfgen.c, * ldelfgen.h, * ldemul.c,
+	* ldemul.h, * ldexp.c, * ldexp.h, * ldfile.c, * ldfile.h,
+	* ldgram.y, * ldlang.c, * ldlang.h, * ldmain.c, * ldmain.h,
+	* ldmisc.c, * ldmisc.h, * ldwrite.c, * lexsup.c, * mri.c,
+	* pe-dll.c, * pe-dll.h, * pep-dll.h, * plugin.c, * plugin.h,
+	* testplug.c, * testplug2.c, * testplug3.c, * testplug4.c: Replace
+	bfd_boolean with bool, FALSE with false, and TRUE with true.
+	* configure: Regenerate.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* elf-hints-local.h: Include stdint.h in place of bfd_stdint.h.
 	* emultempl/nds32elf.em: Likewise.
 	* testsuite/ld-elf/mbind2b.c: Likewise.

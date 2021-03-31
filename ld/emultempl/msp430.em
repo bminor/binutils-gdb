@@ -61,7 +61,7 @@ enum { ROM, RAM };
 
 static int data_region = REGION_NONE;
 static int code_region = REGION_NONE;
-static bfd_boolean disable_sec_transformation = FALSE;
+static bool disable_sec_transformation = false;
 
 #define MAX_PREFIX_LENGTH 7
 
@@ -228,21 +228,21 @@ scan_children (lang_statement_union_type * l)
 static void
 warn_no_output_section (const char *name)
 {
-  static bfd_boolean warned[2][4] = {{FALSE, FALSE, FALSE, FALSE},
-				     {FALSE, FALSE, FALSE, FALSE}};
+  static bool warned[2][4] = {{false, false, false, false},
+			      {false, false, false, false}};
   int i = WARN_LOWER;
 
   if (strncmp (name, ".upper.", 7) == 0)
     i = WARN_UPPER;
 
   if (!warned[i][WARN_TEXT] && strcmp (name + 6, ".text") == 0)
-    warned[i][WARN_TEXT] = TRUE;
+    warned[i][WARN_TEXT] = true;
   else if (!warned[i][WARN_DATA] && strcmp (name + 6, ".data") == 0)
-    warned[i][WARN_DATA] = TRUE;
+    warned[i][WARN_DATA] = true;
   else if (!warned[i][WARN_BSS] && strcmp (name + 6, ".bss") == 0)
-    warned[i][WARN_BSS] = TRUE;
+    warned[i][WARN_BSS] = true;
   else if (!warned[i][WARN_RODATA] && strcmp (name + 6, ".rodata") == 0)
-    warned[i][WARN_RODATA] = TRUE;
+    warned[i][WARN_RODATA] = true;
   else
     return;
   einfo ("%P: warning: no input section rule matches %s in linker script\n",
@@ -336,7 +336,7 @@ fi
 
 fragment <<EOF
 
-static bfd_boolean
+static bool
 change_output_section (lang_statement_union_type **head,
 		       asection *s,
 		       lang_output_section_statement_type *new_os,
@@ -371,13 +371,13 @@ change_output_section (lang_statement_union_type **head,
 	      if (old_list->tail == (lang_statement_union_type **) curr)
 		old_list->tail = (lang_statement_union_type **) prev;
 
-	      return TRUE;
+	      return true;
 	    }
 	  break;
 	case lang_wild_statement_enum:
 	  if (change_output_section (&(curr->wild_statement.children.head),
 				     s, new_os, old_os))
-	    return TRUE;
+	    return true;
 	  break;
 	default:
 	  break;
@@ -385,7 +385,7 @@ change_output_section (lang_statement_union_type **head,
       prev = curr;
       curr = curr->header.next;
     }
-  return FALSE;
+  return false;
 }
 
 static void
@@ -483,7 +483,7 @@ gld${EMULATION_NAME}_list_options (FILE * file)
         add the {either,lower,upper,none} prefixes\n"));
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
@@ -501,13 +501,13 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	{
 	  einfo (_("%P: --code-region requires an argument: "
 		   "{upper,lower,either,none}\n"));
-	  return FALSE;
+	  return false;
 	}
       else
 	{
 	  einfo (_("%P: error: unrecognized argument to --code-region= option: "
 		   "\"%s\"\n"), optarg);
-	  return FALSE;
+	  return false;
 	}
       break;
 
@@ -524,24 +524,24 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	{
 	  einfo (_("%P: --data-region requires an argument: "
 		   "{upper,lower,either,none}\n"));
-	  return FALSE;
+	  return false;
 	}
       else
 	{
 	  einfo (_("%P: error: unrecognized argument to --data-region= option: "
 		   "\"%s\"\n"), optarg);
-	  return FALSE;
+	  return false;
 	}
       break;
 
     case OPTION_DISABLE_TRANS:
-      disable_sec_transformation = TRUE;
+      disable_sec_transformation = true;
       break;
 
     default:
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 static void
@@ -730,7 +730,7 @@ intermediate_relax_sections (void)
 
   while (i--)
     {
-      bfd_boolean relax_again;
+      bool relax_again;
 
       link_info.relax_trip = -1;
       do
@@ -741,8 +741,8 @@ intermediate_relax_sections (void)
 
 	  lang_reset_memory_regions ();
 
-	  relax_again = FALSE;
-	  lang_size_sections (&relax_again, FALSE);
+	  relax_again = false;
+	  lang_size_sections (&relax_again, false);
 	}
       while (relax_again);
 
@@ -840,12 +840,12 @@ input_section_exists (lang_statement_union_type * l, const char * name)
 	  if ((l->input_section.section->flags & SEC_ALLOC)
 	      && l->input_section.section->size > 0
 	      && !strcmp (l->input_section.section->name, name))
-	    return TRUE;
+	    return true;
 	  break;
 
 	case lang_wild_statement_enum:
 	  if (input_section_exists (l->wild_statement.children.head, name))
-	    return TRUE;
+	    return true;
 	  break;
 
 	default:
@@ -853,7 +853,7 @@ input_section_exists (lang_statement_union_type * l, const char * name)
 	}
       l = l->header.next;
     }
-  return FALSE;
+  return false;
 }
 
 /* Some MSP430 linker scripts do not include ALIGN directives to ensure
@@ -889,7 +889,7 @@ check_array_section_alignment (void)
 	   || (rodata2_sec && input_section_exists (rodata2_sec->children.head,
 						    array_names[i][0])))
 	  && (sym = bfd_link_hash_lookup (link_info.hash, array_names[i][1],
-					  FALSE, FALSE, TRUE))
+					  false, false, true))
 	  && sym->type == bfd_link_hash_defined
 	  && sym->u.def.value % 2)
 	{

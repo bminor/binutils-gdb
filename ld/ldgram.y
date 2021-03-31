@@ -49,7 +49,7 @@
 static enum section_type sectype;
 static lang_memory_region_type *region;
 
-static bfd_boolean ldgram_had_keep = FALSE;
+static bool ldgram_had_keep = false;
 static char *ldgram_vers_current_lang = NULL;
 
 #define ERROR_NAME_MAX 20
@@ -77,8 +77,8 @@ static int error_index;
   union etree_union *etree;
   struct phdr_info
     {
-      bfd_boolean filehdr;
-      bfd_boolean phdrs;
+      bool filehdr;
+      bool phdrs;
       union etree_union *at;
       union etree_union *flags;
     } phdr;
@@ -252,7 +252,7 @@ mri_script_command:
 		mri_script_lines END
 		{ ldlex_popstate (); }
 	|	START NAME
-		{ lang_add_entry ($2, FALSE); }
+		{ lang_add_entry ($2, false); }
 	|
 	;
 
@@ -289,11 +289,11 @@ extern_name_list:
 
 extern_name_list_body:
 	  NAME
-			{ ldlang_add_undef ($1, FALSE); }
+			{ ldlang_add_undef ($1, false); }
 	| extern_name_list_body NAME
-			{ ldlang_add_undef ($2, FALSE); }
+			{ ldlang_add_undef ($2, false); }
 	| extern_name_list_body ',' NAME
-			{ ldlang_add_undef ($3, FALSE); }
+			{ ldlang_add_undef ($3, false); }
 	;
 
 script_file:
@@ -322,7 +322,7 @@ ifile_p1:
 	|	TARGET_K '(' NAME ')'
 		{ lang_add_target($3); }
 	|	SEARCH_DIR '(' filename ')'
-		{ ldfile_add_library_path ($3, FALSE); }
+		{ ldfile_add_library_path ($3, false); }
 	|	OUTPUT '(' filename ')'
 		{ lang_add_output($3, 1); }
 	|	OUTPUT_FORMAT '(' NAME ')'
@@ -333,11 +333,11 @@ ifile_p1:
 	|	OUTPUT_ARCH '(' NAME ')'
 		  { ldfile_set_output_arch ($3, bfd_arch_unknown); }
 	|	FORCE_COMMON_ALLOCATION
-		{ command_line.force_common_definition = TRUE ; }
+		{ command_line.force_common_definition = true ; }
 	|	FORCE_GROUP_ALLOCATION
-		{ command_line.force_group_allocation = TRUE ; }
+		{ command_line.force_group_allocation = true ; }
 	|	INHIBIT_COMMON_ALLOCATION
-		{ link_info.inhibit_common_definition = TRUE ; }
+		{ link_info.inhibit_common_definition = true ; }
 	|	INPUT '(' input_list ')'
 	|	GROUP
 		  { lang_enter_group (); }
@@ -394,17 +394,17 @@ input_list1:
 				 (char *)NULL); }
 	|	AS_NEEDED '('
 		  { $<integer>$ = input_flags.add_DT_NEEDED_for_regular;
-		    input_flags.add_DT_NEEDED_for_regular = TRUE; }
+		    input_flags.add_DT_NEEDED_for_regular = true; }
 		     input_list1 ')'
 		  { input_flags.add_DT_NEEDED_for_regular = $<integer>3; }
 	|	input_list1 ',' AS_NEEDED '('
 		  { $<integer>$ = input_flags.add_DT_NEEDED_for_regular;
-		    input_flags.add_DT_NEEDED_for_regular = TRUE; }
+		    input_flags.add_DT_NEEDED_for_regular = true; }
 		     input_list1 ')'
 		  { input_flags.add_DT_NEEDED_for_regular = $<integer>5; }
 	|	input_list1 AS_NEEDED '('
 		  { $<integer>$ = input_flags.add_DT_NEEDED_for_regular;
-		    input_flags.add_DT_NEEDED_for_regular = TRUE; }
+		    input_flags.add_DT_NEEDED_for_regular = true; }
 		     input_list1 ')'
 		  { input_flags.add_DT_NEEDED_for_regular = $<integer>4; }
 	;
@@ -421,7 +421,7 @@ sec_or_group_p1:
 
 statement_anywhere:
 		ENTRY '(' NAME ')'
-		{ lang_add_entry ($3, FALSE); }
+		{ lang_add_entry ($3, false); }
 	|	assignment end
 	|	ASSERT_K  {ldlex_expression ();} '(' exp ',' NAME ')'
 		{ ldlex_popstate ();
@@ -534,7 +534,7 @@ sect_flag_list:	NAME
 			      n->with = with_flags;
 			      n->name = $1;
 			    }
-			  n->valid = FALSE;
+			  n->valid = false;
 			  n->next = NULL;
 			  $$ = n;
 			}
@@ -552,7 +552,7 @@ sect_flag_list:	NAME
 			      n->with = with_flags;
 			      n->name = $3;
 			    }
-			  n->valid = FALSE;
+			  n->valid = false;
 			  n->next = $1;
 			  $$ = n;
 			}
@@ -564,7 +564,7 @@ sect_flags:
 			  struct flag_info *n;
 			  n = ((struct flag_info *) xmalloc (sizeof *n));
 			  n->flag_list = $3;
-			  n->flags_initialized = FALSE;
+			  n->flags_initialized = false;
 			  n->not_with_flags = 0;
 			  n->only_with_flags = 0;
 			  $$ = n;
@@ -657,9 +657,9 @@ input_section_spec_no_keep:
 input_section_spec:
 		input_section_spec_no_keep
 	|	KEEP '('
-			{ ldgram_had_keep = TRUE; }
+			{ ldgram_had_keep = true; }
 		input_section_spec_no_keep ')'
-			{ ldgram_had_keep = FALSE; }
+			{ ldgram_had_keep = false; }
 	;
 
 statement:
@@ -676,7 +676,7 @@ statement:
 		}
 	| SORT_BY_NAME '(' CONSTRUCTORS ')'
 		{
-		  constructors_sorted = TRUE;
+		  constructors_sorted = true;
 		  lang_add_attribute (lang_constructors_statement_enum);
 		}
 	| input_section_spec
@@ -761,7 +761,7 @@ end:	';' | ','
 assignment:
 		NAME '=' mustbe_exp
 		{
-		  lang_add_assignment (exp_assign ($1, $3, FALSE));
+		  lang_add_assignment (exp_assign ($1, $3, false));
 		}
 	|	NAME assign_op mustbe_exp
 		{
@@ -769,19 +769,19 @@ assignment:
 						   exp_binop ($2,
 							      exp_nameop (NAME,
 									  $1),
-							      $3), FALSE));
+							      $3), false));
 		}
 	|	HIDDEN '(' NAME '=' mustbe_exp ')'
 		{
-		  lang_add_assignment (exp_assign ($3, $5, TRUE));
+		  lang_add_assignment (exp_assign ($3, $5, true));
 		}
 	|	PROVIDE '(' NAME '=' mustbe_exp ')'
 		{
-		  lang_add_assignment (exp_provide ($3, $5, FALSE));
+		  lang_add_assignment (exp_provide ($3, $5, false));
 		}
 	|	PROVIDE_HIDDEN '(' NAME '=' mustbe_exp ')'
 		{
-		  lang_add_assignment (exp_provide ($3, $5, TRUE));
+		  lang_add_assignment (exp_provide ($3, $5, true));
 		}
 	;
 
@@ -803,7 +803,7 @@ memory_spec_list:
 
 
 memory_spec:	NAME
-		{ region = lang_memory_region_lookup ($1, TRUE); }
+		{ region = lang_memory_region_lookup ($1, true); }
 		attributes_opt ':'
 		origin_spec opt_comma length_spec
 		{}
@@ -875,9 +875,9 @@ low_level_library_NAME_list:
 
 floating_point_support:
 		FLOAT
-			{ lang_float(TRUE); }
+			{ lang_float(true); }
 	|	NOFLOAT
-			{ lang_float(FALSE); }
+			{ lang_float(false); }
 	;
 
 nocrossref_list:
@@ -1108,7 +1108,7 @@ section:	NAME		{ ldlex_expression(); }
 		opt_exp_with_type
 		{
 		  ldlex_popstate ();
-		  lang_add_assignment (exp_assign (".", $3, FALSE));
+		  lang_add_assignment (exp_assign (".", $3, false));
 		}
 		'{' sec_or_group_p1 '}'
 	|	INCLUDE filename
@@ -1173,7 +1173,7 @@ phdr_opt:
 		  n = ((struct lang_output_section_phdr_list *)
 		       xmalloc (sizeof *n));
 		  n->name = $3;
-		  n->used = FALSE;
+		  n->used = false;
 		  n->next = $1;
 		  $$ = n;
 		}
@@ -1269,9 +1269,9 @@ phdr_qualifiers:
 		{
 		  $$ = $3;
 		  if (strcmp ($1, "FILEHDR") == 0 && $2 == NULL)
-		    $$.filehdr = TRUE;
+		    $$.filehdr = true;
 		  else if (strcmp ($1, "PHDRS") == 0 && $2 == NULL)
-		    $$.phdrs = TRUE;
+		    $$.phdrs = true;
 		  else if (strcmp ($1, "FLAGS") == 0 && $2 != NULL)
 		    $$.flags = $2;
 		  else
@@ -1407,19 +1407,19 @@ vers_tag:
 vers_defns:
 		VERS_IDENTIFIER
 		{
-		  $$ = lang_new_vers_pattern (NULL, $1, ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern (NULL, $1, ldgram_vers_current_lang, false);
 		}
 	|	NAME
 		{
-		  $$ = lang_new_vers_pattern (NULL, $1, ldgram_vers_current_lang, TRUE);
+		  $$ = lang_new_vers_pattern (NULL, $1, ldgram_vers_current_lang, true);
 		}
 	|	vers_defns ';' VERS_IDENTIFIER
 		{
-		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang, false);
 		}
 	|	vers_defns ';' NAME
 		{
-		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang, TRUE);
+		  $$ = lang_new_vers_pattern ($1, $3, ldgram_vers_current_lang, true);
 		}
 	|	vers_defns ';' EXTERN NAME '{'
 			{
@@ -1446,27 +1446,27 @@ vers_defns:
 			}
 	|	GLOBAL
 		{
-		  $$ = lang_new_vers_pattern (NULL, "global", ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern (NULL, "global", ldgram_vers_current_lang, false);
 		}
 	|	vers_defns ';' GLOBAL
 		{
-		  $$ = lang_new_vers_pattern ($1, "global", ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern ($1, "global", ldgram_vers_current_lang, false);
 		}
 	|	LOCAL
 		{
-		  $$ = lang_new_vers_pattern (NULL, "local", ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern (NULL, "local", ldgram_vers_current_lang, false);
 		}
 	|	vers_defns ';' LOCAL
 		{
-		  $$ = lang_new_vers_pattern ($1, "local", ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern ($1, "local", ldgram_vers_current_lang, false);
 		}
 	|	EXTERN
 		{
-		  $$ = lang_new_vers_pattern (NULL, "extern", ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern (NULL, "extern", ldgram_vers_current_lang, false);
 		}
 	|	vers_defns ';' EXTERN
 		{
-		  $$ = lang_new_vers_pattern ($1, "extern", ldgram_vers_current_lang, FALSE);
+		  $$ = lang_new_vers_pattern ($1, "extern", ldgram_vers_current_lang, false);
 		}
 	;
 

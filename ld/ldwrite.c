@@ -278,7 +278,7 @@ build_link_order (lang_statement_union_type *statement)
 /* Return true if NAME is the name of an unsplittable section. These
    are the stabs strings, dwarf strings.  */
 
-static bfd_boolean
+static bool
 unsplittable_name (const char *name)
 {
   if (startswith (name, ".stab"))
@@ -287,11 +287,11 @@ unsplittable_name (const char *name)
 	 ".stab...str"  */
       unsigned len = strlen (name);
       if (strcmp (&name[len-3], "str") == 0)
-	return TRUE;
+	return true;
     }
   else if (strcmp (name, "$GDB_STRINGS$") == 0)
-    return TRUE;
-  return FALSE;
+    return true;
+  return false;
 }
 
 /* Wander around the input sections, make sure that
@@ -339,7 +339,7 @@ clone_section (bfd *abfd, asection *s, const char *name, int *count)
   if ((sname = bfd_get_unique_section_name (abfd, tname, count)) == NULL
       || (n = bfd_make_section_anyway (abfd, sname)) == NULL
       || (h = bfd_link_hash_lookup (link_info.hash,
-				    sname, TRUE, TRUE, FALSE)) == NULL)
+				    sname, true, true, false)) == NULL)
     {
       einfo (_("%F%P: clone section failed: %E\n"));
       /* Silence gcc warnings.  einfo exits, so we never reach here.  */

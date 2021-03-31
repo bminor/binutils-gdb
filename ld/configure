@@ -17613,16 +17613,16 @@ _ACEOF
   fi
 fi
 
-elf_list_options=FALSE
-elf_shlib_list_options=FALSE
-elf_plt_unwind_list_options=FALSE
+elf_list_options=false
+elf_shlib_list_options=false
+elf_plt_unwind_list_options=false
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
   if test "$targ_alias" = "all"; then
     all_targets=true
-    elf_list_options=TRUE
-    elf_shlib_list_options=TRUE
-    elf_plt_unwind_list_options=TRUE
+    elf_list_options=true
+    elf_shlib_list_options=true
+    elf_plt_unwind_list_options=true
   else
     # Canonicalize the secondary target names.
     result=`$ac_config_sub $targ_alias 2>/dev/null`
@@ -17658,25 +17658,25 @@ do
 tdir_$i=$result"
 	  case "${i}" in
 	  *elf*)
-	    elf_list_options=TRUE
+	    elf_list_options=true
 	    ;;
 	  *)
 	    if $GREP "TEMPLATE_NAME=elf" ${srcdir}/emulparams/${i}.sh >/dev/null 2>/dev/null; then
-	      elf_list_options=TRUE
+	      elf_list_options=true
 	    fi
 	    ;;
 	  esac
-	  if test "$elf_list_options" = "TRUE"; then
+	  if test "$elf_list_options" = "true"; then
 	    source_sh()
 	    {
 	      . $1
 	    }
 	    source_sh ${srcdir}/emulparams/${i}.sh
 	    if test x${GENERATE_SHLIB_SCRIPT} = xyes; then
-	      elf_shlib_list_options=TRUE
+	      elf_shlib_list_options=true
 	    fi
 	    if test x${PLT_UNWIND} = xyes; then
-	      elf_plt_unwind_list_options=TRUE
+	      elf_plt_unwind_list_options=true
 	    fi
 	  fi
 	  ;;

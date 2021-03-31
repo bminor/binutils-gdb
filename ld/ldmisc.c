@@ -66,9 +66,9 @@
 */
 
 void
-vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
+vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 {
-  bfd_boolean fatal = FALSE;
+  bool fatal = false;
   const char *scan;
   int arg_type;
   unsigned int arg_count = 0;
@@ -235,7 +235,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 
 	    case 'X':
 	      /* no object output, fail return */
-	      config.make_executable = FALSE;
+	      config.make_executable = false;
 	      break;
 
 	    case 'V':
@@ -291,7 +291,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 
 	    case 'F':
 	      /* Error is fatal.  */
-	      fatal = TRUE;
+	      fatal = true;
 	      break;
 
 	    case 'P':
@@ -321,8 +321,8 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		const char *filename;
 		const char *functionname;
 		unsigned int linenumber;
-		bfd_boolean discard_last;
-		bfd_boolean done;
+		bool discard_last;
+		bool done;
 		bfd_error_type last_bfd_error = bfd_get_error ();
 
 		abfd = args[arg_no].reladdr.abfd;
@@ -346,7 +346,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		   We do not always have a line number available so if
 		   we cannot find them we print out the section name and
 		   offset instead.  */
-		discard_last = TRUE;
+		discard_last = true;
 		if (abfd != NULL
 		    && bfd_find_nearest_line (abfd, section, asymbols, offset,
 					      &filename, &functionname,
@@ -383,7 +383,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 			    free (last_function);
 			    last_function = xstrdup (functionname);
 			  }
-			discard_last = FALSE;
+			discard_last = false;
 		      }
 		    else
 		      lfinfo (fp, "%pB:", abfd);
@@ -397,12 +397,12 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		    else if (filename != NULL && linenumber != 0)
 		      fprintf (fp, "%u%s", linenumber, done ? "" : ":");
 		    else
-		      done = FALSE;
+		      done = false;
 		  }
 		else
 		  {
 		    lfinfo (fp, "%pB:", abfd);
-		    done = FALSE;
+		    done = false;
 		  }
 		if (!done)
 		  lfinfo (fp, "(%pA+0x%v)", section, offset);
@@ -581,7 +581,7 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
     }
 
   if (is_warning && config.fatal_warnings)
-    config.make_executable = FALSE;
+    config.make_executable = false;
 
   if (fatal)
     xexit (1);
@@ -598,7 +598,7 @@ info_msg (const char *fmt, ...)
   va_list arg;
 
   va_start (arg, fmt);
-  vfinfo (stdout, fmt, arg, FALSE);
+  vfinfo (stdout, fmt, arg, false);
   va_end (arg);
 }
 
@@ -611,7 +611,7 @@ einfo (const char *fmt, ...)
 
   fflush (stdout);
   va_start (arg, fmt);
-  vfinfo (stderr, fmt, arg, TRUE);
+  vfinfo (stderr, fmt, arg, true);
   va_end (arg);
   fflush (stderr);
 }
@@ -647,7 +647,7 @@ minfo (const char *fmt, ...)
 	  asneeded_list_tail = &m->next;
 	}
       else
-	vfinfo (config.map_file, fmt, arg, FALSE);
+	vfinfo (config.map_file, fmt, arg, false);
       va_end (arg);
     }
 }
@@ -658,7 +658,7 @@ lfinfo (FILE *file, const char *fmt, ...)
   va_list arg;
 
   va_start (arg, fmt);
-  vfinfo (file, fmt, arg, FALSE);
+  vfinfo (file, fmt, arg, false);
   va_end (arg);
 }
 

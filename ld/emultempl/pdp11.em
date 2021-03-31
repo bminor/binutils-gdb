@@ -28,8 +28,8 @@ gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("`echo ${ARCH}`", bfd_arch_unknown);
   /* for PDP11 Unix compatibility, default to --omagic */
-  config.magic_demand_paged = FALSE;
-  config.text_read_only = FALSE;
+  config.magic_demand_paged = false;
+  config.text_read_only = false;
 }
 
 /* PDP11 specific options.  */
@@ -67,13 +67,13 @@ gld${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --no-omagic    Equivalent to --nmagic\n"));
 }
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case 'z':
     case OPTION_IMAGIC:
@@ -84,7 +84,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     }
 
-  return TRUE;
+  return true;
 }
 
 /* We need a special case to prepare an additional linker script for option

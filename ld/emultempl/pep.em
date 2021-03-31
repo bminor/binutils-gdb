@@ -152,7 +152,7 @@ static flagword real_flags = IMAGE_FILE_LARGE_ADDRESS_AWARE;
 static int support_old_code = 0;
 static lang_assignment_statement_type *image_base_statement = 0;
 static unsigned short pe_dll_characteristics = DEFAULT_DLL_CHARACTERISTICS;
-static bfd_boolean insert_timestamp = TRUE;
+static bool insert_timestamp = true;
 static const char *emit_build_id;
 
 #ifdef DLL_SUPPORT
@@ -186,7 +186,7 @@ gld_${EMULATION_NAME}_before_parse (void)
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   output_filename = "${EXECUTABLE_NAME:-a.exe}";
 #ifdef DLL_SUPPORT
-  input_flags.dynamic = TRUE;
+  input_flags.dynamic = true;
   config.has_shared = 1;
   link_info.pei386_auto_import = 1;
   link_info.pei386_runtime_pseudo_reloc = 2; /* Use by default version 2.  */
@@ -372,7 +372,7 @@ typedef struct
   /* FALSE for an assembly level symbol and TRUE for a C visible symbol.
      C visible symbols can be prefixed by underscore dependent on target's
      settings.  */
-  bfd_boolean is_c_symbol;
+  bool is_c_symbol;
 } definfo;
 
 #define GET_INIT_SYMBOL_NAME(IDX) \
@@ -389,27 +389,27 @@ static definfo init[] =
 {
   /* imagebase must be first */
 #define IMAGEBASEOFF 0
-  D(ImageBase,"__image_base__", NT_EXE_IMAGE_BASE, FALSE),
+  D(ImageBase,"__image_base__", NT_EXE_IMAGE_BASE, false),
 #define DLLOFF 1
-  {&dll, sizeof(dll), 0, "__dll__", 0, FALSE},
+  {&dll, sizeof(dll), 0, "__dll__", 0, false},
 #define MSIMAGEBASEOFF	2
-  D(ImageBase, "___ImageBase", NT_EXE_IMAGE_BASE, TRUE),
-  D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT, FALSE),
-  D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT, FALSE),
-  D(MajorOperatingSystemVersion,"__major_os_version__", 4, FALSE),
-  D(MinorOperatingSystemVersion,"__minor_os_version__", 0, FALSE),
-  D(MajorImageVersion,"__major_image_version__", 0, FALSE),
-  D(MinorImageVersion,"__minor_image_version__", 0, FALSE),
-  D(MajorSubsystemVersion,"__major_subsystem_version__", 5, FALSE),
-  D(MinorSubsystemVersion,"__minor_subsystem_version__", 2, FALSE),
-  D(Subsystem,"__subsystem__", ${SUBSYSTEM}, FALSE),
-  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x200000, FALSE),
-  D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000, FALSE),
-  D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000, FALSE),
-  D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000, FALSE),
-  D(LoaderFlags,"__loader_flags__", 0x0, FALSE),
-  D(DllCharacteristics, "__dll_characteristics__", DEFAULT_DLL_CHARACTERISTICS, FALSE),
-  { NULL, 0, 0, NULL, 0, FALSE}
+  D(ImageBase, "___ImageBase", NT_EXE_IMAGE_BASE, true),
+  D(SectionAlignment,"__section_alignment__", PE_DEF_SECTION_ALIGNMENT, false),
+  D(FileAlignment,"__file_alignment__", PE_DEF_FILE_ALIGNMENT, false),
+  D(MajorOperatingSystemVersion,"__major_os_version__", 4, false),
+  D(MinorOperatingSystemVersion,"__minor_os_version__", 0, false),
+  D(MajorImageVersion,"__major_image_version__", 0, false),
+  D(MinorImageVersion,"__minor_image_version__", 0, false),
+  D(MajorSubsystemVersion,"__major_subsystem_version__", 5, false),
+  D(MinorSubsystemVersion,"__minor_subsystem_version__", 2, false),
+  D(Subsystem,"__subsystem__", ${SUBSYSTEM}, false),
+  D(SizeOfStackReserve,"__size_of_stack_reserve__", 0x200000, false),
+  D(SizeOfStackCommit,"__size_of_stack_commit__", 0x1000, false),
+  D(SizeOfHeapReserve,"__size_of_heap_reserve__", 0x100000, false),
+  D(SizeOfHeapCommit,"__size_of_heap_commit__", 0x1000, false),
+  D(LoaderFlags,"__loader_flags__", 0x0, false),
+  D(DllCharacteristics, "__dll_characteristics__", DEFAULT_DLL_CHARACTERISTICS, false),
+  { NULL, 0, 0, NULL, 0, false}
 };
 
 
@@ -679,14 +679,14 @@ set_pep_stack_heap (char *resname, char *comname)
 
 #define DEFAULT_BUILD_ID_STYLE	"md5"
 
-static bfd_boolean
+static bool
 gld${EMULATION_NAME}_handle_option (int optc)
 {
   is_underscoring ();
   switch (optc)
     {
     default:
-      return FALSE;
+      return false;
 
     case OPTION_BASE_FILE:
       link_info.base_file = fopen (optarg, FOPEN_WB);
@@ -738,7 +738,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
       support_old_code = 1;
       break;
     case OPTION_USE_NUL_PREFIXED_IMPORT_TABLES:
-      pep_use_nul_prefixed_import_tables = TRUE;
+      pep_use_nul_prefixed_import_tables = true;
       break;
     case OPTION_NO_LEADING_UNDERSCORE:
       pep_leading_underscore = 0;
@@ -747,10 +747,10 @@ gld${EMULATION_NAME}_handle_option (int optc)
       pep_leading_underscore = 1;
       break;
     case OPTION_INSERT_TIMESTAMP:
-      insert_timestamp = TRUE;
+      insert_timestamp = true;
       break;
     case OPTION_NO_INSERT_TIMESTAMP:
-      insert_timestamp = FALSE;
+      insert_timestamp = false;
       break;
 #ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:
@@ -900,7 +900,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
   /*  Set DLLCharacteristics bits  */
   set_pep_name ("__dll_characteristics__", pe_dll_characteristics);
 
-  return TRUE;
+  return true;
 }
 
 
@@ -982,7 +982,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
       lang_assignment_statement_type *rv;
 
       rv = lang_add_assignment (exp_assign (GET_INIT_SYMBOL_NAME (j),
-					    exp_intop (val), FALSE));
+					    exp_intop (val), false));
       if (init[j].size == sizeof (short))
 	*(short *) init[j].ptr = (short) val;
       else if (init[j].size == sizeof (int))
@@ -1025,7 +1025,7 @@ gld_${EMULATION_NAME}_after_parse (void)
 #ifdef DLL_SUPPORT
 static struct bfd_link_hash_entry *pep_undef_found_sym;
 
-static bfd_boolean
+static bool
 pep_undef_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
 {
   int sl;
@@ -1040,9 +1040,9 @@ pep_undef_cdecl_match (struct bfd_link_hash_entry *h, void *inf)
       && h->root.string[sl] == '@')
     {
       pep_undef_found_sym = h;
-      return FALSE;
+      return false;
     }
-  return TRUE;
+  return true;
 }
 
 static void
@@ -1181,12 +1181,12 @@ make_import_fixup (arelent *rel, asection *s, char *name, const char *symname)
   pep_create_import_fixup (rel, s, _addend, name, symname);
 }
 
-static bfd_boolean
+static bool
 pr_sym (struct bfd_hash_entry *h, void *inf ATTRIBUTE_UNUSED)
 {
   printf ("+%s\n", h->string);
 
-  return TRUE;
+  return true;
 }
 #endif /* DLL_SUPPORT */
 
@@ -1199,7 +1199,7 @@ debug_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *sect, void *obj)
     *found = 1;
 }
 
-static bfd_boolean
+static bool
 pecoff_checksum_contents (bfd *abfd,
 			  void (*process) (const void *, size_t, void *),
 			  void *arg)
@@ -1224,10 +1224,10 @@ pecoff_checksum_contents (bfd *abfd,
       filepos += 1;
     }
 
-  return TRUE;
+  return true;
 }
 
-static bfd_boolean
+static bool
 write_build_id (bfd *abfd)
 {
   struct pe_tdata *t = pe_data (abfd);
@@ -1262,7 +1262,7 @@ write_build_id (bfd *abfd)
     {
       einfo (_("%P: warning: .buildid section discarded,"
 	       " --build-id ignored\n"));
-      return TRUE;
+      return true;
     }
 
   if (t->build_id.sec->contents == NULL)
@@ -1321,11 +1321,11 @@ write_build_id (bfd *abfd)
   pe_data (link_info.output_bfd)->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
     = sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
 
-  return TRUE;
+  return true;
 }
 
 /* Make .buildid section, and set up coff_tdata->build_id. */
-static bfd_boolean
+static bool
 setup_build_id (bfd *ibfd)
 {
   asection *s;
@@ -1334,7 +1334,7 @@ setup_build_id (bfd *ibfd)
   if (!validate_build_id_style (emit_build_id))
     {
       einfo (_("%P: warning: unrecognized --build-id style ignored\n"));
-      return FALSE;
+      return false;
     }
 
   flags = (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
@@ -1354,12 +1354,12 @@ setup_build_id (bfd *ibfd)
       s->size = sizeof (struct external_IMAGE_DEBUG_DIRECTORY)
 	+ sizeof (CV_INFO_PDB70) + 1;
 
-      return TRUE;
+      return true;
     }
 
   einfo (_("%P: warning: cannot create .buildid section,"
 	   " --build-id ignored\n"));
-  return FALSE;
+  return false;
 }
 
 static void
@@ -1554,7 +1554,7 @@ gld_${EMULATION_NAME}_after_open (void)
 			/* Thunk section with reloc to another bfd.  */
 			blhe = bfd_link_hash_lookup (link_info.hash,
 						     s->name,
-						     FALSE, FALSE, TRUE);
+						     false, false, true);
 
 			if (blhe == NULL
 			    || blhe->type != bfd_link_hash_defined)
@@ -1715,7 +1715,7 @@ saw_option (char *option)
 }
 #endif /* DLL_SUPPORT */
 
-static bfd_boolean
+static bool
 gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
 {
 #ifdef DLL_SUPPORT
@@ -1746,7 +1746,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 	      sprintf (buf, "%s%s", U (""),
 		       pep_def_file->exports[i].internal_name);
 
-	      h = bfd_link_hash_lookup (link_info.hash, buf, TRUE, TRUE, TRUE);
+	      h = bfd_link_hash_lookup (link_info.hash, buf, true, true, true);
 	      if (h == (struct bfd_link_hash_entry *) NULL)
 		einfo (_("%F%P: bfd_link_hash_lookup failed: %E\n"));
 	      if (h->type == bfd_link_hash_new)
@@ -1772,7 +1772,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 	      if (image_base_statement)
 		image_base_statement->exp
 		  = exp_assign ("__image_base__", exp_intop (pep.ImageBase),
-				FALSE);
+				false);
 	    }
 
 	  if (pep_def_file->stack_reserve != -1
@@ -1789,14 +1789,14 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 	      if (pep_def_file->heap_commit != -1)
 		pep.SizeOfHeapCommit = pep_def_file->heap_commit;
 	    }
-	  return TRUE;
+	  return true;
 	}
     }
 #endif
-  return FALSE;
+  return false;
 }
 
-static bfd_boolean
+static bool
 gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
 {
   is_underscoring ();
@@ -1807,7 +1807,7 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
   if (pep_bfd_is_dll (entry->the_bfd))
     return pep_implied_import_dll (entry->filename);
 #endif
-  return FALSE;
+  return false;
 }
 
 static void
@@ -2059,7 +2059,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
   return os;
 }
 
-static bfd_boolean
+static bool
 gld_${EMULATION_NAME}_open_dynamic_archive
   (const char *arch ATTRIBUTE_UNUSED,
    search_dirs_type *search,
@@ -2068,34 +2068,34 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   static const struct
     {
       const char * format;
-      bfd_boolean use_prefix;
+      bool use_prefix;
     }
   libname_fmt [] =
     {
       /* Preferred explicit import library for dll's.  */
-      { "lib%s.dll.a", FALSE },
+      { "lib%s.dll.a", false },
       /* Alternate explicit import library for dll's.  */
-      { "%s.dll.a", FALSE },
+      { "%s.dll.a", false },
       /* "libfoo.a" could be either an import lib or a static lib.
 	 For backwards compatibility, libfoo.a needs to precede
 	 libfoo.dll and foo.dll in the search.  */
-      { "lib%s.a", FALSE },
+      { "lib%s.a", false },
       /* The 'native' spelling of an import lib name is "foo.lib".  */
-      { "%s.lib", FALSE },
+      { "%s.lib", false },
       /* PR 22948 - Check for an import library.  */
-      { "lib%s.lib", FALSE },
+      { "lib%s.lib", false },
 #ifdef DLL_SUPPORT
       /* Try "<prefix>foo.dll" (preferred dll name, if specified).  */
-      {	"%s%s.dll", TRUE },
+      {	"%s%s.dll", true },
 #endif
       /* Try "libfoo.dll" (default preferred dll name).  */
-      {	"lib%s.dll", FALSE },
+      {	"lib%s.dll", false },
       /* Finally try 'native' dll name "foo.dll".  */
-      {  "%s.dll", FALSE },
+      {  "%s.dll", false },
       /* Note: If adding more formats to this table, make sure to check to
 	 see if their length is longer than libname_fmt[0].format, and if
 	 so, update the call to xmalloc() below.  */
-      { NULL, FALSE }
+      { NULL, false }
     };
   static unsigned int format_max_len = 0;
   const char * filename;
@@ -2105,7 +2105,7 @@ gld_${EMULATION_NAME}_open_dynamic_archive
 
 
   if (! entry->flags.maybe_archive || entry->flags.full_name_provided)
-    return FALSE;
+    return false;
 
   filename = entry->filename;
 
@@ -2157,12 +2157,12 @@ gld_${EMULATION_NAME}_open_dynamic_archive
   if (!libname_fmt[i].format)
     {
       free (full_string);
-      return FALSE;
+      return false;
     }
 
   entry->filename = full_string;
 
-  return TRUE;
+  return true;
 }
 
 static int

@@ -22,7 +22,7 @@ struct elf_internal_sym;
 struct elf_strtab_hash;
 struct ctf_dict;
 
-extern void ldelf_map_segments (bfd_boolean);
+extern void ldelf_map_segments (bool);
 extern int ldelf_emit_ctf_early (void);
 extern void ldelf_acquire_strings_for_ctf
   (struct ctf_dict *ctf_output, struct elf_strtab_hash *strtab);

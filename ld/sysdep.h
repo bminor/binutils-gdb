@@ -123,4 +123,6 @@ extern char *getenv ();
 extern char **environ;
 #endif
 
+#define POISON_BFD_BOOLEAN 1
+
 #endif /* ! defined (LD_SYSDEP_H) */

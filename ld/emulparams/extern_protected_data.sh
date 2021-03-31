@@ -5,7 +5,7 @@ PARSE_AND_LIST_OPTIONS_NOEXTEN_PROTECTED_DATA='
 
 PARSE_AND_LIST_ARGS_CASE_Z_NOEXTEN_PROTECTED_DATA='
       else if (strcmp (optarg, "noextern-protected-data") == 0)
-	link_info.extern_protected_data = FALSE;
+	link_info.extern_protected_data = false;
 '
 
 

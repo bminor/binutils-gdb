@@ -125,7 +125,7 @@ prelim_size_sections (void)
     {
       expld.phase = lang_mark_phase_enum;
       expld.dataseg.phase = exp_seg_none;
-      one_lang_size_sections_pass (NULL, FALSE);
+      one_lang_size_sections_pass (NULL, false);
       /* We must not cache anything from the preliminary sizing.  */
       lang_reset_memory_regions ();
     }
@@ -246,13 +246,13 @@ EOF
 if grep -q 'ld_elf32_spu_emulation' ldemul-list.h; then
   fragment <<EOF
 /* Special handling for embedded SPU executables.  */
-extern bfd_boolean embedded_spu_file (lang_input_statement_type *, const char *);
+extern bool embedded_spu_file (lang_input_statement_type *, const char *);
 
-static bfd_boolean
+static bool
 ppc_recognized_file (lang_input_statement_type *entry)
 {
   if (embedded_spu_file (entry, "-m32"))
-    return TRUE;
+    return true;
 
   return ldelf_load_symbols (entry);
 }
@@ -408,7 +408,7 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
     case OPTION_TRADITIONAL_FORMAT:
       notlsopt = 1;
       params.no_tls_get_addr_opt = 1;
-      return FALSE;
+      return false;
 
     case OPTION_PPC476_WORKAROUND:
       params.ppc476_workaround = 1;

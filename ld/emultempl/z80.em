@@ -46,7 +46,7 @@ z80_after_open (void)
   for (abfd = link_info.input_bfds; abfd != NULL; abfd = abfd->link.next)
     {
       const bfd_arch_info_type *info;
-      info = bfd_arch_get_compatible (link_info.output_bfd, abfd, FALSE);
+      info = bfd_arch_get_compatible (link_info.output_bfd, abfd, false);
       if (info == NULL)
 	einfo (_("%F%P: %pB: Instruction sets of object files incompatible\n"),
 	       abfd);

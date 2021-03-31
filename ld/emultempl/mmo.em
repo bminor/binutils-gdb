@@ -202,7 +202,7 @@ static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
   bfd_map_over_sections (link_info.output_bfd, mmo_wipe_sec_reloc_flag, NULL);
-  ldelf_map_segments (FALSE);
+  ldelf_map_segments (false);
 }
 
 /* To get on-demand global register allocation right, we need to parse the
