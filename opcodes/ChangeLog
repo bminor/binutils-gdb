@@ -1,3 +1,8 @@
+2021-04-01  Alan Modra  <amodra@gmail.com>
+
+	PR 27675
+	* ppc-opc.c (powerpc_opcodes): Add mfummcr2 and mfmmcr2.
+
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
 	* sysdep.h (POISON_BFD_BOOLEAN): Define.
