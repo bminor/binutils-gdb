@@ -8599,7 +8599,7 @@ static const struct dis386 rm_table[][8] = {
 #define NOTRACK_PREFIX	(0x3e | 0x100)
 
 /* Remember if the current op is a jump instruction.  */
-static bfd_boolean op_is_jump = FALSE;
+static bool op_is_jump = false;
 
 static int
 ckprefix (void)
@@ -9708,7 +9708,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
 
   /* Reset jump operation indicator.  */
-  op_is_jump = FALSE;
+  op_is_jump = false;
 
   {
     int jump_detection = 0;
@@ -9730,7 +9730,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     /* Determine if this is a jump or branch.  */
     if ((jump_detection & 0x3) == 0x3)
       {
-	op_is_jump = TRUE;
+	op_is_jump = true;
 	if (jump_detection & 0x4)
 	  the_info->insn_type = dis_condbranch;
 	else
@@ -11548,7 +11548,7 @@ OP_E_memory (int bytemode, int sizeflag)
 			 || bytemode == v_bndmk_mode
 			 || bytemode == bnd_mode
 			 || bytemode == bnd_swap_mode);
-      bfd_boolean check_gather = FALSE;
+      bool check_gather = false;
       const char **indexes64 = names64;
       const char **indexes32 = names32;
 

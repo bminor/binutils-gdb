@@ -399,14 +399,14 @@ static unsigned short vle_opcd_indices[VLE_OPCD_SEGS + 1];
 #define SPE2_OPCD_SEGS (1 + SPE2_XOP_TO_SEG (SPE2_XOP (-1)))
 static unsigned short spe2_opcd_indices[SPE2_OPCD_SEGS + 1];
 
-static bfd_boolean
+static bool
 ppc_symbol_is_valid (asymbol *sym,
 		     struct disassemble_info *info ATTRIBUTE_UNUSED)
 {
   elf_symbol_type * est;
 
   if (sym == NULL)
-    return FALSE;
+    return false;
 
   est = elf_symbol_from (sym);
   
@@ -416,9 +416,9 @@ ppc_symbol_is_valid (asymbol *sym,
       && ELF_ST_VISIBILITY (est->internal_elf_sym.st_other) == STV_HIDDEN
       && ELF_ST_BIND (est->internal_elf_sym.st_info) == STB_LOCAL
       && ELF_ST_TYPE (est->internal_elf_sym.st_info) == STT_NOTYPE)
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Calculate opcode table indices to speed up disassembly,
@@ -530,7 +530,7 @@ operand_value_powerpc (const struct powerpc_operand *operand,
 
 /* Determine whether the optional operand(s) should be printed.  */
 
-static bfd_boolean
+static bool
 skip_optional_operands (const unsigned char *opindex,
 			uint64_t insn, ppc_cpu_t dialect)
 {
@@ -541,7 +541,7 @@ skip_optional_operands (const unsigned char *opindex,
     {
       operand = &powerpc_operands[*opindex];
       if ((operand->flags & PPC_OPERAND_NEXT) != 0)
-	return FALSE;
+	return false;
       if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
 	{
 	  /* Negative count is used as a flag to extract function.  */
@@ -549,11 +549,11 @@ skip_optional_operands (const unsigned char *opindex,
 	  if (operand_value_powerpc (operand, insn, dialect)
 	      != ppc_optional_operand_value (operand, insn, dialect,
 					     num_optional))
-	    return FALSE;
+	    return false;
 	}
     }
 
-  return TRUE;
+  return true;
 }
 
 /* Find a match for INSN in the opcode table, given machine DIALECT.  */
@@ -683,7 +683,7 @@ lookup_vle (uint64_t insn)
     {
       uint64_t table_opcd = opcode->opcode;
       uint64_t table_mask = opcode->mask;
-      bfd_boolean table_op_is_short = PPC_OP_SE_VLE(table_mask);
+      bool table_op_is_short = PPC_OP_SE_VLE(table_mask);
       uint64_t insn2;
       const unsigned char *opindex;
       const struct powerpc_operand *operand;
@@ -861,7 +861,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	need_7spaces = 7,
 	need_paren
       } op_separator;
-      bfd_boolean skip_optional;
+      bool skip_optional;
       int blanks;
 
       (*info->fprintf_func) (info->stream, "%s", opcode->name);
@@ -872,7 +872,7 @@ print_insn_powerpc (bfd_vma memaddr,
 
       /* Now extract and print the operands.  */
       op_separator = blanks;
-      skip_optional = FALSE;
+      skip_optional = false;
       for (opindex = opcode->operands; *opindex != 0; opindex++)
 	{
 	  int64_t value;

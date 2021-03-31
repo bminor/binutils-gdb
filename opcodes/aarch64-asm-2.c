@@ -603,7 +603,7 @@ aarch64_find_real_opcode (const aarch64_opcode *opcode)
   return aarch64_opcode_table + value;
 }
 
-bfd_boolean
+bool
 aarch64_insert_operand (const aarch64_operand *self,
 			   const aarch64_opnd_info *info,
 			   aarch64_insn *code, const aarch64_inst *inst,

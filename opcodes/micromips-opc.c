@@ -72,25 +72,25 @@ decode_micromips_operand (const char *p)
 	case 'y': MAPPED_REG (0, 0, GP, reg_31_map);
 	case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
 
-	case 'A': INT_ADJ (7, 0, 63, 2, FALSE);	 /* (-64 .. 63) << 2 */
-	case 'B': MAPPED_INT (3, 1, int_b_map, FALSE);
-	case 'C': MAPPED_INT (4, 0, int_c_map, TRUE);
+	case 'A': INT_ADJ (7, 0, 63, 2, false);	 /* (-64 .. 63) << 2 */
+	case 'B': MAPPED_INT (3, 1, int_b_map, false);
+	case 'C': MAPPED_INT (4, 0, int_c_map, true);
 	case 'D': BRANCH (10, 0, 1);
 	case 'E': BRANCH (7, 0, 1);
 	case 'F': HINT (4, 0);
-	case 'G': INT_ADJ (4, 0, 14, 0, FALSE);	 /* (-1 .. 14) */
-	case 'H': INT_ADJ (4, 0, 15, 1, FALSE);	 /* (0 .. 15) << 1 */
-	case 'I': INT_ADJ (7, 0, 126, 0, FALSE); /* (-1 .. 126) */
-	case 'J': INT_ADJ (4, 0, 15, 2, FALSE);	 /* (0 .. 15) << 2 */
-	case 'L': INT_ADJ (4, 0, 15, 0, FALSE);	 /* (0 .. 15) */
-	case 'M': INT_ADJ (3, 1, 8, 0, FALSE);   /* (1 .. 8) */
+	case 'G': INT_ADJ (4, 0, 14, 0, false);	 /* (-1 .. 14) */
+	case 'H': INT_ADJ (4, 0, 15, 1, false);	 /* (0 .. 15) << 1 */
+	case 'I': INT_ADJ (7, 0, 126, 0, false); /* (-1 .. 126) */
+	case 'J': INT_ADJ (4, 0, 15, 2, false);	 /* (0 .. 15) << 2 */
+	case 'L': INT_ADJ (4, 0, 15, 0, false);	 /* (0 .. 15) */
+	case 'M': INT_ADJ (3, 1, 8, 0, false);   /* (1 .. 8) */
 	case 'N': SPECIAL (2, 4, LWM_SWM_LIST);
 	case 'O': HINT (4, 0);
-	case 'P': INT_ADJ (5, 0, 31, 2, FALSE);	 /* (0 .. 31) << 2 */
-	case 'Q': INT_ADJ (23, 0, 4194303, 2, FALSE);
+	case 'P': INT_ADJ (5, 0, 31, 2, false);	 /* (0 .. 31) << 2 */
+	case 'Q': INT_ADJ (23, 0, 4194303, 2, false);
 	  					 /* (-4194304 .. 4194303) */
-	case 'U': INT_ADJ (5, 0, 31, 2, FALSE);	 /* (0 .. 31) << 2 */
-	case 'W': INT_ADJ (6, 1, 63, 2, FALSE);	 /* (0 .. 63) << 2 */
+	case 'U': INT_ADJ (5, 0, 31, 2, false);	 /* (0 .. 31) << 2 */
+	case 'W': INT_ADJ (6, 1, 63, 2, false);	 /* (0 .. 63) << 2 */
 	case 'X': SINT (4, 1);
 	case 'Y': SPECIAL (9, 1, ADDIUSP_INT);
 	case 'Z': UINT (0, 0);			 /* 0 only */
@@ -101,17 +101,17 @@ decode_micromips_operand (const char *p)
       switch (p[1])
 	{
 	case 'A': BIT (5, 6, 0);		 /* (0 .. 31) */
-	case 'B': MSB (5, 11, 1, TRUE, 32);	 /* (1 .. 32), 32-bit op */
-	case 'C': MSB (5, 11, 1, FALSE, 32);	 /* (1 .. 32), 32-bit op */
+	case 'B': MSB (5, 11, 1, true, 32);	 /* (1 .. 32), 32-bit op */
+	case 'C': MSB (5, 11, 1, false, 32);	 /* (1 .. 32), 32-bit op */
 	case 'E': BIT (5, 6, 32);		 /* (32 .. 63) */
-	case 'F': MSB (5, 11, 33, TRUE, 64);	 /* (33 .. 64), 64-bit op */
-	case 'G': MSB (5, 11, 33, FALSE, 64);	 /* (33 .. 64), 64-bit op */
-	case 'H': MSB (5, 11, 1, FALSE, 64);	 /* (1 .. 32), 64-bit op */
+	case 'F': MSB (5, 11, 33, true, 64);	 /* (33 .. 64), 64-bit op */
+	case 'G': MSB (5, 11, 33, false, 64);	 /* (33 .. 64), 64-bit op */
+	case 'H': MSB (5, 11, 1, false, 64);	 /* (1 .. 32), 64-bit op */
 	case 'J': HINT (10, 16);
-	case 'T': INT_ADJ (10, 16, 511, 0, FALSE);	/* (-512 .. 511) << 0 */
-	case 'U': INT_ADJ (10, 16, 511, 1, FALSE);	/* (-512 .. 511) << 1 */
-	case 'V': INT_ADJ (10, 16, 511, 2, FALSE);	/* (-512 .. 511) << 2 */
-	case 'W': INT_ADJ (10, 16, 511, 3, FALSE);	/* (-512 .. 511) << 3 */
+	case 'T': INT_ADJ (10, 16, 511, 0, false);	/* (-512 .. 511) << 0 */
+	case 'U': INT_ADJ (10, 16, 511, 1, false);	/* (-512 .. 511) << 1 */
+	case 'V': INT_ADJ (10, 16, 511, 2, false);	/* (-512 .. 511) << 2 */
+	case 'W': INT_ADJ (10, 16, 511, 3, false);	/* (-512 .. 511) << 3 */
 
 	case 'd': REG (5, 6, MSA);
 	case 'e': REG (5, 11, MSA);

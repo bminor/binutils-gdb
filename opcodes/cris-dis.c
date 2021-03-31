@@ -74,7 +74,7 @@ struct cris_disasm_data
 {
   /* Whether to print something less confusing if we find something
      matching a switch-construct.  */
-  bfd_boolean trace_case;
+  bool trace_case;
 
   /* Whether this code is flagged as crisv32.  FIXME: Should be an enum
      that includes "compatible".  */
@@ -99,7 +99,7 @@ static int cris_constraint
 /* Parse disassembler options and store state in info.  FIXME: For the
    time being, we abuse static variables.  */
 
-static bfd_boolean
+static bool
 cris_parse_disassembler_options (disassemble_info *info,
 				 enum cris_disass_family distype)
 {
@@ -108,7 +108,7 @@ cris_parse_disassembler_options (disassemble_info *info,
   info->private_data = calloc (1, sizeof (struct cris_disasm_data));
   disdata = (struct cris_disasm_data *) info->private_data;
   if (disdata == NULL)
-    return FALSE;
+    return false;
 
   /* Default true.  */
   disdata->trace_case
@@ -116,7 +116,7 @@ cris_parse_disassembler_options (disassemble_info *info,
        || (strcmp (info->disassembler_options, "nocase") != 0));
 
   disdata->distype = distype;
-  return TRUE;
+  return true;
 }
 
 static const struct cris_spec_reg *
@@ -594,7 +594,7 @@ static char *
 format_reg (struct cris_disasm_data *disdata,
 	    int regno,
 	    char *outbuffer_start,
-	    bfd_boolean with_reg_prefix)
+	    bool with_reg_prefix)
 {
   char *outbuffer = outbuffer_start;
 
@@ -628,7 +628,7 @@ format_reg (struct cris_disasm_data *disdata,
 static char *
 format_sup_reg (unsigned int regno,
 		char *outbuffer_start,
-		bfd_boolean with_reg_prefix)
+		bool with_reg_prefix)
 {
   char *outbuffer = outbuffer_start;
   int i;
@@ -741,7 +741,7 @@ print_with_operands (const struct cris_opcode *opcodep,
 		     const struct cris_opcode *prefix_opcodep,
 		     unsigned int prefix_insn,
 		     unsigned char *prefix_buffer,
-		     bfd_boolean with_reg_prefix)
+		     bool with_reg_prefix)
 {
   /* Get a buffer of somewhat reasonable size where we store
      intermediate parts of the insn.  */
@@ -1389,7 +1389,7 @@ print_with_operands (const struct cris_opcode *opcodep,
 static int
 print_insn_cris_generic (bfd_vma memaddr,
 			 disassemble_info *info,
-			 bfd_boolean with_reg_prefix)
+			 bool with_reg_prefix)
 {
   int nbytes;
   unsigned int insn;
@@ -1581,7 +1581,7 @@ print_insn_cris_with_register_prefix (bfd_vma vma,
   if (info->private_data == NULL
       && !cris_parse_disassembler_options (info, cris_dis_v0_v10))
     return -1;
-  return print_insn_cris_generic (vma, info, TRUE);
+  return print_insn_cris_generic (vma, info, true);
 }
 
 /* Disassemble, prefixing register names with `$'.  CRIS v32.  */
@@ -1593,7 +1593,7 @@ print_insn_crisv32_with_register_prefix (bfd_vma vma,
   if (info->private_data == NULL
       && !cris_parse_disassembler_options (info, cris_dis_v32))
     return -1;
-  return print_insn_cris_generic (vma, info, TRUE);
+  return print_insn_cris_generic (vma, info, true);
 }
 
 /* Disassemble, prefixing register names with `$'.
@@ -1606,7 +1606,7 @@ print_insn_crisv10_v32_with_register_prefix (bfd_vma vma,
   if (info->private_data == NULL
       && !cris_parse_disassembler_options (info, cris_dis_common_v10_v32))
     return -1;
-  return print_insn_cris_generic (vma, info, TRUE);
+  return print_insn_cris_generic (vma, info, true);
 }
 
 /* Disassemble, no prefixes on register names.  CRIS v0..v10.  */
@@ -1618,7 +1618,7 @@ print_insn_cris_without_register_prefix (bfd_vma vma,
   if (info->private_data == NULL
       && !cris_parse_disassembler_options (info, cris_dis_v0_v10))
     return -1;
-  return print_insn_cris_generic (vma, info, FALSE);
+  return print_insn_cris_generic (vma, info, false);
 }
 
 /* Disassemble, no prefixes on register names.  CRIS v32.  */
@@ -1630,7 +1630,7 @@ print_insn_crisv32_without_register_prefix (bfd_vma vma,
   if (info->private_data == NULL
       && !cris_parse_disassembler_options (info, cris_dis_v32))
     return -1;
-  return print_insn_cris_generic (vma, info, FALSE);
+  return print_insn_cris_generic (vma, info, false);
 }
 
 /* Disassemble, no prefixes on register names.
@@ -1643,7 +1643,7 @@ print_insn_crisv10_v32_without_register_prefix (bfd_vma vma,
   if (info->private_data == NULL
       && !cris_parse_disassembler_options (info, cris_dis_common_v10_v32))
     return -1;
-  return print_insn_cris_generic (vma, info, FALSE);
+  return print_insn_cris_generic (vma, info, false);
 }
 
 /* Return a disassembler-function that prints registers with a `$' prefix,

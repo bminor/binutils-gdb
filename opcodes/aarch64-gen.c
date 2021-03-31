@@ -984,7 +984,7 @@ print_operand_inserter (void)
     printf ("Enter print_operand_inserter\n");
 
   printf ("\n");
-  printf ("bfd_boolean\n");
+  printf ("bool\n");
   printf ("aarch64_insert_operand (const aarch64_operand *self,\n\
 			   const aarch64_opnd_info *info,\n\
 			   aarch64_insn *code, const aarch64_inst *inst,\n\
@@ -1041,7 +1041,7 @@ print_operand_extractor (void)
     printf ("Enter print_operand_extractor\n");
 
   printf ("\n");
-  printf ("bfd_boolean\n");
+  printf ("bool\n");
   printf ("aarch64_extract_operand (const aarch64_operand *self,\n\
 			   aarch64_opnd_info *info,\n\
 			   aarch64_insn code, const aarch64_inst *inst,\n\

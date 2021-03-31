@@ -71,3 +71,5 @@ extern char *stpcpy (char *__dest, const char *__src);
 #define OPCODES_SIGSETJMP(buf)		setjmp(buf)
 #define OPCODES_SIGLONGJMP(buf,val)	longjmp((buf), (val))
 #endif
+
+#define POISON_BFD_BOOLEAN 1

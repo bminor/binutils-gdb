@@ -77,8 +77,8 @@ enum wasm_class
 
 struct wasm32_private_data
 {
-  bfd_boolean print_registers;
-  bfd_boolean print_well_known_globals;
+  bool print_registers;
+  bool print_well_known_globals;
 
   /* Limit valid symbols to those with a given prefix.  */
   const char *section_prefix;
@@ -121,9 +121,9 @@ parse_wasm32_disassembler_options (struct disassemble_info *info,
   while (opts != NULL)
     {
       if (startswith (opts, "registers"))
-        private->print_registers = TRUE;
+        private->print_registers = true;
       else if (startswith (opts, "globals"))
-        private->print_well_known_globals = TRUE;
+        private->print_well_known_globals = true;
 
       opts = strchr (opts, ',');
       if (opts)
@@ -135,24 +135,24 @@ parse_wasm32_disassembler_options (struct disassemble_info *info,
    are unhelpful to print, and arguments to a "call" insn, which we
    want to be in a section matching a given prefix.  */
 
-static bfd_boolean
+static bool
 wasm32_symbol_is_valid (asymbol *sym,
                         struct disassemble_info *info)
 {
   struct wasm32_private_data *private_data = info->private_data;
 
   if (sym == NULL)
-    return FALSE;
+    return false;
 
   if (strcmp(sym->section->name, "*ABS*") == 0)
-    return FALSE;
+    return false;
 
   if (private_data && private_data->section_prefix != NULL
       && strncmp (sym->section->name, private_data->section_prefix,
                   strlen (private_data->section_prefix)))
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Initialize the disassembler structures for INFO.  */
@@ -164,8 +164,8 @@ disassemble_init_wasm32 (struct disassemble_info *info)
     {
       static struct wasm32_private_data private;
 
-      private.print_registers = FALSE;
-      private.print_well_known_globals = FALSE;
+      private.print_registers = false;
+      private.print_well_known_globals = false;
       private.section_prefix = NULL;
 
       info->private_data = &private;
@@ -189,11 +189,11 @@ disassemble_init_wasm32 (struct disassemble_info *info)
    wasm_read_leb128 ().  */
 
 static uint64_t
-wasm_read_leb128 (bfd_vma                   pc,
-                  struct disassemble_info * info,
-                  bfd_boolean *             error_return,
-                  unsigned int *            length_return,
-                  bfd_boolean               sign)
+wasm_read_leb128 (bfd_vma pc,
+                  struct disassemble_info *info,
+                  bool *error_return,
+                  unsigned int *length_return,
+                  bool sign)
 {
   uint64_t result = 0;
   unsigned int num_read = 0;
@@ -288,7 +288,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
   uint64_t val;
   int len;
   unsigned int bytes_read;
-  bfd_boolean error;
+  bool error;
 
   if (info->read_memory_func (pc, buffer, 1, info))
     return -1;
@@ -312,7 +312,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
 
   if (op->clas == wasm_typed)
     {
-      val = wasm_read_leb128 (pc + len, info, &error, &bytes_read, FALSE);
+      val = wasm_read_leb128 (pc + len, info, &error, &bytes_read, false);
       if (error)
 	return -1;
       len += bytes_read;
@@ -357,7 +357,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
       {
 	uint32_t target_count, i;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	target_count = val;
 	if (error || target_count != val || target_count == (uint32_t) -1)
 	  return -1;
@@ -367,7 +367,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
 	  {
 	    uint32_t target;
 	    val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				    FALSE);
+				    false);
 	    target = val;
 	    if (error || target != val)
 	      return -1;
@@ -382,7 +382,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
       {
 	uint32_t depth;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	depth = val;
 	if (error || depth != val)
 	  return -1;
@@ -396,7 +396,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
 
     case wasm_constant_i32:
     case wasm_constant_i64:
-      val = wasm_read_leb128 (pc + len, info, &error, &bytes_read, TRUE);
+      val = wasm_read_leb128 (pc + len, info, &error, &bytes_read, true);
       if (error)
 	return -1;
       len += bytes_read;
@@ -433,7 +433,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
       {
 	uint32_t function_index;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	function_index = val;
 	if (error || function_index != val)
 	  return -1;
@@ -449,14 +449,14 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
       {
 	uint32_t type_index, xtra_index;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	type_index = val;
 	if (error || type_index != val)
 	  return -1;
 	len += bytes_read;
 	prin (stream, " %u", type_index);
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	xtra_index = val;
 	if (error || xtra_index != val)
 	  return -1;
@@ -471,7 +471,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
       {
 	uint32_t local_index;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	local_index = val;
 	if (error || local_index != val)
 	  return -1;
@@ -509,7 +509,7 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
       {
 	uint32_t reserved_size;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	reserved_size = val;
 	if (error || reserved_size != val)
 	  return -1;
@@ -523,13 +523,13 @@ print_insn_wasm32 (bfd_vma pc, struct disassemble_info *info)
       {
 	uint32_t flags, offset;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	flags = val;
 	if (error || flags != val)
 	  return -1;
 	len += bytes_read;
 	val = wasm_read_leb128 (pc + len, info, &error, &bytes_read,
-				FALSE);
+				false);
 	offset = val;
 	if (error || offset != val)
 	  return -1;

@@ -73,7 +73,7 @@ typedef struct _nios2_disassembler_state
   nios2_opcode_hash *hash[OPCODE_HASH_SIZE];
   nios2_opcode_hash *ps_hash[OPCODE_HASH_SIZE];
   const struct nios2_opcode *nop;
-  bfd_boolean init;
+  bool init;
 } nios2_disassembler_state;
 
 static nios2_disassembler_state

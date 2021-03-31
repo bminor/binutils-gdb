@@ -55,7 +55,7 @@ set_default_riscv_dis_options (void)
   no_aliases = 0;
 }
 
-static bfd_boolean
+static bool
 parse_riscv_dis_option_without_args (const char *option)
 {
   if (strcmp (option, "no-aliases") == 0)
@@ -66,8 +66,8 @@ parse_riscv_dis_option_without_args (const char *option)
       riscv_fpr_names = riscv_fpr_names_numeric;
     }
   else
-    return FALSE;
-  return TRUE;
+    return false;
+  return true;
 }
 
 static void
@@ -374,7 +374,7 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 	case 'E':
 	  {
 	    static const char *riscv_csr_hash[4096]; /* Total 2^12 CSRs.  */
-	    static bfd_boolean init_csr = FALSE;
+	    static bool init_csr = false;
 	    unsigned int csr = EXTRACT_OPERAND (CSR, l);
 
 	    if (!init_csr)
@@ -429,7 +429,7 @@ static int
 riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
   const struct riscv_opcode *op;
-  static bfd_boolean init = 0;
+  static bool init = 0;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
   int insnlen;
@@ -616,14 +616,14 @@ riscv_get_disassembler (bfd *abfd)
 /* Prevent use of the fake labels that are generated as part of the DWARF
    and for relaxable relocations in the assembler.  */
 
-bfd_boolean
+bool
 riscv_symbol_is_valid (asymbol * sym,
                        struct disassemble_info * info ATTRIBUTE_UNUSED)
 {
   const char * name;
 
   if (sym == NULL)
-    return FALSE;
+    return false;
 
   name = bfd_asymbol_name (sym);
 

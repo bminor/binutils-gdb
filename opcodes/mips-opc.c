@@ -43,19 +43,19 @@ decode_mips_operand (const char *p)
     case '-':
       switch (p[1])
 	{
-	case 'a': INT_ADJ (19, 0, 262143, 2, FALSE);
-	case 'b': INT_ADJ (18, 0, 131071, 3, FALSE);
+	case 'a': INT_ADJ (19, 0, 262143, 2, false);
+	case 'b': INT_ADJ (18, 0, 131071, 3, false);
 	case 'd': SPECIAL (0, 0, REPEAT_DEST_REG);
 	case 'm': SPECIAL (20, 6, SAVE_RESTORE_LIST);
 	case 's': SPECIAL (5, 21, NON_ZERO_REG);
 	case 't': SPECIAL (5, 16, NON_ZERO_REG);
-	case 'u': PREV_CHECK (5, 16, TRUE, FALSE, FALSE, FALSE);
-	case 'v': PREV_CHECK (5, 16, TRUE, TRUE, FALSE, FALSE);
-	case 'w': PREV_CHECK (5, 16, FALSE, TRUE, TRUE, TRUE);
-	case 'x': PREV_CHECK (5, 21, TRUE, FALSE, FALSE, TRUE);
-	case 'y': PREV_CHECK (5, 21, FALSE, TRUE, FALSE, FALSE);
-	case 'A': PCREL (19, 0, TRUE, 2, 2, FALSE, FALSE);
-	case 'B': PCREL (18, 0, TRUE, 3, 3, FALSE, FALSE);
+	case 'u': PREV_CHECK (5, 16, true, false, false, false);
+	case 'v': PREV_CHECK (5, 16, true, true, false, false);
+	case 'w': PREV_CHECK (5, 16, false, true, true, true);
+	case 'x': PREV_CHECK (5, 21, true, false, false, true);
+	case 'y': PREV_CHECK (5, 21, false, true, false, false);
+	case 'A': PCREL (19, 0, true, 2, 2, false, false);
+	case 'B': PCREL (18, 0, true, 3, 3, false, false);
 	}
       break;
 
@@ -74,12 +74,12 @@ decode_mips_operand (const char *p)
 	case '0': REG (5, 16, VI);
 
 	case 'A': BIT (5, 6, 0);		/* (0 .. 31) */
-	case 'B': MSB (5, 11, 1, TRUE, 32);	/* (1 .. 32), 32-bit op */
-	case 'C': MSB (5, 11, 1, FALSE, 32);	/* (1 .. 32), 32-bit op */
+	case 'B': MSB (5, 11, 1, true, 32);	/* (1 .. 32), 32-bit op */
+	case 'C': MSB (5, 11, 1, false, 32);	/* (1 .. 32), 32-bit op */
 	case 'E': BIT (5, 6, 32);		/* (32 .. 63) */
-	case 'F': MSB (5, 11, 33, TRUE, 64);	/* (33 .. 64), 64-bit op */
-	case 'G': MSB (5, 11, 33, FALSE, 64);	/* (33 .. 64), 64-bit op */
-	case 'H': MSB (5, 11, 1, FALSE, 64);	/* (1 .. 32), 64-bit op */
+	case 'F': MSB (5, 11, 33, true, 64);	/* (33 .. 64), 64-bit op */
+	case 'G': MSB (5, 11, 33, false, 64);	/* (33 .. 64), 64-bit op */
+	case 'H': MSB (5, 11, 1, false, 64);	/* (1 .. 32), 64-bit op */
 	case 'I': UINT (2, 6);
 	case 'J': HINT (10, 11);
 	case 'K': SPECIAL (4, 21, VU0_MATCH_SUFFIX);
@@ -90,20 +90,20 @@ decode_mips_operand (const char *p)
 	case 'P': BIT (5, 6, 32);		/* (32 .. 63) */
 	case 'Q': SINT (10, 6);
 	case 'R': SPECIAL (0, 0, PC);
-	case 'S': MSB (5, 11, 0, FALSE, 63);	/* (0 .. 31), 64-bit op */
-	case 'T': INT_ADJ (10, 16, 511, 0, FALSE); /* (-512 .. 511) << 0 */
-	case 'U': INT_ADJ (10, 16, 511, 1, FALSE); /* (-512 .. 511) << 1 */
-	case 'V': INT_ADJ (10, 16, 511, 2, FALSE); /* (-512 .. 511) << 2 */
-	case 'W': INT_ADJ (10, 16, 511, 3, FALSE); /* (-512 .. 511) << 3 */
+	case 'S': MSB (5, 11, 0, false, 63);	/* (0 .. 31), 64-bit op */
+	case 'T': INT_ADJ (10, 16, 511, 0, false); /* (-512 .. 511) << 0 */
+	case 'U': INT_ADJ (10, 16, 511, 1, false); /* (-512 .. 511) << 1 */
+	case 'V': INT_ADJ (10, 16, 511, 2, false); /* (-512 .. 511) << 2 */
+	case 'W': INT_ADJ (10, 16, 511, 3, false); /* (-512 .. 511) << 3 */
 	case 'X': BIT (5, 16, 32);		/* (32 .. 63) */
 	case 'Z': REG (5, 0, FP);
 
 	case 'a': SINT (8, 6);
 	case 'b': SINT (8, 3);
-	case 'c': INT_ADJ (9, 6, 255, 4, FALSE); /* (-256 .. 255) << 4 */
+	case 'c': INT_ADJ (9, 6, 255, 4, false); /* (-256 .. 255) << 4 */
 	case 'd': REG (5, 6, MSA);
 	case 'e': REG (5, 11, MSA);
-	case 'f': INT_ADJ (15, 6, 32767, 3, TRUE);
+	case 'f': INT_ADJ (15, 6, 32767, 3, true);
 	case 'g': SINT (5, 6);
 	case 'h': REG (5, 16, MSA);
 	case 'i': JALX (26, 0, 2);
@@ -116,7 +116,7 @@ decode_mips_operand (const char *p)
 	case 'p': BIT (5, 6, 0);		/* (0 .. 31), 32-bit op */
 	case 'q': REG (0, 0, R5900_Q);
 	case 'r': REG (0, 0, R5900_R);
-	case 's': MSB (5, 11, 0, FALSE, 31);	/* (0 .. 31) */
+	case 's': MSB (5, 11, 0, false, 31);	/* (0 .. 31) */
 	case 't': REG (5, 16, COPRO);
 	case 'u': SPECIAL (3, 16, IMM_INDEX);
 	case 'v': SPECIAL (2, 16, IMM_INDEX);

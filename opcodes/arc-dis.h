@@ -117,7 +117,7 @@ struct arc_instruction
   bfd_vma address;
 
   /* Whether this is a valid instruction.  */
-  bfd_boolean valid;
+  bool valid;
 
   insn_class_t insn_class;
 

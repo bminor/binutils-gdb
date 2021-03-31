@@ -98,9 +98,9 @@ generic_symbol_at_address (bfd_vma addr ATTRIBUTE_UNUSED,
 
 /* Just return TRUE.  */
 
-bfd_boolean
+bool
 generic_symbol_is_valid (asymbol * sym ATTRIBUTE_UNUSED,
 			 struct disassemble_info *info ATTRIBUTE_UNUSED)
 {
-  return TRUE;
+  return true;
 }

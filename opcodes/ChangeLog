@@ -1,5 +1,23 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* sysdep.h (POISON_BFD_BOOLEAN): Define.
+	* aarch64-asm-2.c, * aarch64-asm.c, * aarch64-asm.h,
+	* aarch64-dis-2.c, * aarch64-dis.c, * aarch64-dis.h,
+	* aarch64-gen.c, * aarch64-opc.c, * aarch64-opc.h, * arc-dis.c,
+	* arc-dis.h, * arc-fxi.h, * arc-opc.c, * arm-dis.c, * bfin-dis.c,
+	* cris-dis.c, * csky-dis.c, * csky-opc.h, * dis-buf.c,
+	* disassemble.c, * frv-opc.c, * frv-opc.h, * h8300-dis.c,
+	* i386-dis.c, * m68k-dis.c, * metag-dis.c, * microblaze-dis.c,
+	* microblaze-dis.h, * micromips-opc.c, * mips-dis.c,
+	* mips-formats.h, * mips-opc.c, * mips16-opc.c, * mmix-dis.c,
+	* msp430-dis.c, * nds32-dis.c, * nfp-dis.c, * nios2-dis.c,
+	* ppc-dis.c, * riscv-dis.c, * score-dis.c, * score7-dis.c,
+	* tic6x-dis.c, * v850-dis.c, * vax-dis.c, * wasm32-dis.c,
+	* xtensa-dis.c: Replace bfd_boolean with bool, FALSE with false,
+	and TRUE with true throughout.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* aarch64-dis.c: Include stdint.h in place of bfd_stdint.h.
 	* aarch64-dis.h: Likewise.
 	* aarch64-opc.c: Likewise.
