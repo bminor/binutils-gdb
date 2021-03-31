@@ -188,4 +188,4 @@ extern symbolS *expr_build_dot (void);
 
 int resolve_expression (expressionS *);
 
-extern bfd_boolean literal_prefix_dollar_hex;
+extern bool literal_prefix_dollar_hex;

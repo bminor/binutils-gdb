@@ -43,9 +43,9 @@
 #define md_number_to_chars           number_to_chars_bigendian
 
 int d30v_cleanup (int);
-#define md_cleanup()		     d30v_cleanup (FALSE)
+#define md_cleanup()		     d30v_cleanup (false)
 #define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR)	\
-  (NEXT_CHAR == ':' && d30v_cleanup (FALSE))
+  (NEXT_CHAR == ':' && d30v_cleanup (false))
 void d30v_start_line (void);
 #define md_start_line_hook()	     d30v_start_line ()
 

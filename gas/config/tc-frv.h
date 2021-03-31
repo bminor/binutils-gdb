@@ -27,7 +27,7 @@
 
 #define TARGET_FORMAT (frv_md_fdpic_enabled () \
 		       ? "elf32-frvfdpic" : "elf32-frv")
-extern bfd_boolean frv_md_fdpic_enabled (void);
+extern bool frv_md_fdpic_enabled (void);
 
 #define TARGET_BYTES_BIG_ENDIAN 1
 
@@ -53,7 +53,7 @@ extern long frv_relax_frag (fragS *, long);
 
 #define tc_fix_adjustable(FIX) frv_fix_adjustable (FIX)
 struct fix;
-extern bfd_boolean frv_fix_adjustable (struct fix *);
+extern bool frv_fix_adjustable (struct fix *);
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) frv_force_relocation (fix)

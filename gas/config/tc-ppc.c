@@ -46,7 +46,7 @@ static int set_target_endian = 0;
 
 /* Whether to use user friendly register names.  */
 #ifndef TARGET_REG_NAMES_P
-#define TARGET_REG_NAMES_P FALSE
+#define TARGET_REG_NAMES_P false
 #endif
 
 /* Macros for calculating LO, HI, HA, HIGHER, HIGHERA, HIGHEST,
@@ -83,7 +83,7 @@ static int set_target_endian = 0;
    applied to constants.  */
 #define REPORT_OVERFLOW_HI 0
 
-static bfd_boolean reg_names_p = TARGET_REG_NAMES_P;
+static bool reg_names_p = TARGET_REG_NAMES_P;
 
 static void ppc_macro (char *, const struct powerpc_macro *);
 static void ppc_byte (int);
@@ -816,7 +816,7 @@ reg_name_search (const struct pd_reg *regs, int regcount, const char *name)
  *      original state.
  */
 
-static bfd_boolean
+static bool
 register_name (expressionS *expressionP)
 {
   const struct pd_reg *reg;
@@ -830,7 +830,7 @@ register_name (expressionS *expressionP)
     name = ++input_line_pointer;
 
   else if (!reg_names_p || !ISALPHA (name[0]))
-    return FALSE;
+    return false;
 
   c = get_symbol_name (&name);
   reg = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
@@ -848,12 +848,12 @@ register_name (expressionS *expressionP)
       /* Make the rest nice.  */
       expressionP->X_add_symbol = NULL;
       expressionP->X_op_symbol = NULL;
-      return TRUE;
+      return true;
     }
 
   /* Reset the line as if we had not done anything.  */
   input_line_pointer = start;
-  return FALSE;
+  return false;
 }
 
 /* This function is called for each symbol seen in an expression.  It
@@ -861,7 +861,7 @@ register_name (expressionS *expressionP)
    to use for condition codes.  */
 
 /* Whether to do the special parsing.  */
-static bfd_boolean cr_operand;
+static bool cr_operand;
 
 /* Names to recognize in a condition code.  This table is sorted.  */
 static const struct pd_reg cr_names[] =
@@ -980,12 +980,12 @@ static flagword ppc_flags = 0;
 
 /* Whether this is Solaris or not.  */
 #ifdef TARGET_SOLARIS_COMMENT
-#define SOLARIS_P TRUE
+#define SOLARIS_P true
 #else
-#define SOLARIS_P FALSE
+#define SOLARIS_P false
 #endif
 
-static bfd_boolean msolaris = SOLARIS_P;
+static bool msolaris = SOLARIS_P;
 #endif
 
 #ifdef OBJ_XCOFF
@@ -1006,7 +1006,7 @@ struct ppc_xcoff_section ppc_xcoff_tbss_section;
 
 /* Return true if the ppc_xcoff_section structure is already
    initialized.  */
-static bfd_boolean
+static bool
 ppc_xcoff_section_is_initialized (struct ppc_xcoff_section *section)
 {
   return section->segment != NULL;
@@ -1017,7 +1017,7 @@ ppc_xcoff_section_is_initialized (struct ppc_xcoff_section *section)
    and .tdata.  These symbols won't be output.  */
 static void
 ppc_init_xcoff_section (struct ppc_xcoff_section *s, segT seg,
-			bfd_boolean need_dummy)
+			bool need_dummy)
 {
   s->segment = seg;
   s->next_subsegment = 2;
@@ -1194,10 +1194,10 @@ md_parse_option (int c, const char *arg)
 	}
 
       else if (strcmp (arg, "regnames") == 0)
-	reg_names_p = TRUE;
+	reg_names_p = true;
 
       else if (strcmp (arg, "no-regnames") == 0)
-	reg_names_p = FALSE;
+	reg_names_p = false;
 
 #ifdef OBJ_ELF
       /* -mrelocatable/-mrelocatable-lib -- warn about initializations
@@ -1236,13 +1236,13 @@ md_parse_option (int c, const char *arg)
 
       else if (strcmp (arg, "solaris") == 0)
 	{
-	  msolaris = TRUE;
+	  msolaris = true;
 	  ppc_comment_chars = ppc_solaris_comment_chars;
 	}
 
       else if (strcmp (arg, "no-solaris") == 0)
 	{
-	  msolaris = FALSE;
+	  msolaris = false;
 	  ppc_comment_chars = ppc_eabi_comment_chars;
 	}
       else if (strcmp (arg, "spe2") == 0)
@@ -1545,7 +1545,7 @@ ppc_target_format (void)
 /* Validate one entry in powerpc_opcodes[] or vle_opcodes[].
    Return TRUE if there's a problem, otherwise FALSE.  */
 
-static bfd_boolean
+static bool
 insn_validate (const struct powerpc_opcode *op)
 {
   const unsigned char *o;
@@ -1555,17 +1555,17 @@ insn_validate (const struct powerpc_opcode *op)
   if ((op->opcode & omask) != op->opcode)
     {
       as_bad (_("mask trims opcode bits for %s"), op->name);
-      return TRUE;
+      return true;
     }
 
   /* The operands must not overlap the opcode or each other.  */
   for (o = op->operands; *o; ++o)
     {
-      bfd_boolean optional = FALSE;
+      bool optional = false;
       if (*o >= num_powerpc_operands)
         {
 	  as_bad (_("operand index error for %s"), op->name);
-	  return TRUE;
+	  return true;
         }
       else
         {
@@ -1592,20 +1592,20 @@ insn_validate (const struct powerpc_opcode *op)
 	    {
 	      as_bad (_("operand %d overlap in %s"),
 		      (int) (o - op->operands), op->name);
-	      return TRUE;
+	      return true;
 	    }
 	  omask |= mask;
 	  if ((operand->flags & PPC_OPERAND_OPTIONAL) != 0)
-	    optional = TRUE;
+	    optional = true;
 	  else if (optional)
 	    {
 	      as_bad (_("non-optional operand %d follows optional operand in %s"),
 		      (int) (o - op->operands), op->name);
-	      return TRUE;
+	      return true;
 	    }
         }
     }
-  return FALSE;
+  return false;
 }
 
 /* Insert opcodes and macros into hash tables.  Called at startup and
@@ -1618,7 +1618,7 @@ ppc_setup_opcodes (void)
   const struct powerpc_opcode *op_end;
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
-  bfd_boolean bad_insn = FALSE;
+  bool bad_insn = false;
 
   if (ppc_hash != NULL)
     htab_delete (ppc_hash);
@@ -1650,7 +1650,7 @@ ppc_setup_opcodes (void)
 	  if (mask != right_bit)
 	    {
 	      as_bad (_("powerpc_operands[%d].bitm invalid"), i);
-	      bad_insn = TRUE;
+	      bad_insn = true;
 	    }
 	  for (j = i + 1; j < num_powerpc_operands; ++j)
 	    if (memcmp (&powerpc_operands[i], &powerpc_operands[j],
@@ -1658,7 +1658,7 @@ ppc_setup_opcodes (void)
 	      {
 		as_bad (_("powerpc_operands[%d] duplicates powerpc_operands[%d]"),
 			j, i);
-		bad_insn = TRUE;
+		bad_insn = true;
 	      }
 	}
     }
@@ -1683,20 +1683,20 @@ ppc_setup_opcodes (void)
 	      && new_opcode < PPC_OP (op[-1].opcode))
 	    {
 	      as_bad (_("major opcode is not sorted for %s"), op->name);
-	      bad_insn = TRUE;
+	      bad_insn = true;
 	    }
 
 	  if ((op->flags & PPC_OPCODE_VLE) != 0)
 	    {
 	      as_bad (_("%s is enabled by vle flag"), op->name);
-	      bad_insn = TRUE;
+	      bad_insn = true;
 	    }
 	  if (PPC_OP (op->opcode) != 4
 	      && PPC_OP (op->opcode) != 31
 	      && (op->deprecated & PPC_OPCODE_VLE) == 0)
 	    {
 	      as_bad (_("%s not disabled by vle flag"), op->name);
-	      bad_insn = TRUE;
+	      bad_insn = true;
 	    }
 	  bad_insn |= insn_validate (op);
 	}
@@ -1706,7 +1706,7 @@ ppc_setup_opcodes (void)
 	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	{
 	  as_bad (_("duplicate %s"), op->name);
-	  bad_insn = TRUE;
+	  bad_insn = true;
 	}
     }
 
@@ -1734,7 +1734,7 @@ ppc_setup_opcodes (void)
 	      && new_opcode < PPC_PREFIX_SEG (op[-1].opcode))
 	    {
 	      as_bad (_("major opcode is not sorted for %s"), op->name);
-	      bad_insn = TRUE;
+	      bad_insn = true;
 	    }
 	  bad_insn |= insn_validate (op);
 	}
@@ -1744,7 +1744,7 @@ ppc_setup_opcodes (void)
 	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	{
 	  as_bad (_("duplicate %s"), op->name);
-	  bad_insn = TRUE;
+	  bad_insn = true;
 	}
     }
 
@@ -1772,7 +1772,7 @@ ppc_setup_opcodes (void)
 	      && new_seg < VLE_OP_TO_SEG (VLE_OP (op[-1].opcode, op[-1].mask)))
 	    {
 	      as_bad (_("major opcode is not sorted for %s"), op->name);
-	      bad_insn = TRUE;
+	      bad_insn = true;
 	    }
 
 	  bad_insn |= insn_validate (op);
@@ -1783,7 +1783,7 @@ ppc_setup_opcodes (void)
 	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	{
 	  as_bad (_("duplicate %s"), op->name);
-	  bad_insn = TRUE;
+	  bad_insn = true;
 	}
     }
 
@@ -1810,7 +1810,7 @@ ppc_setup_opcodes (void)
 		if (new_seg < old_seg)
 		  {
 		  as_bad (_("major opcode is not sorted for %s"), op->name);
-		  bad_insn = TRUE;
+		  bad_insn = true;
 		  }
 		}
 
@@ -1822,7 +1822,7 @@ ppc_setup_opcodes (void)
 	      && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
 	    {
 	      as_bad (_("duplicate %s"), op->name);
-	      bad_insn = TRUE;
+	      bad_insn = true;
 	    }
 	}
 
@@ -1840,7 +1840,7 @@ ppc_setup_opcodes (void)
 	&& str_hash_insert (ppc_macro_hash, macro->name, macro, 0) != NULL)
       {
 	as_bad (_("duplicate %s"), macro->name);
-	bad_insn = TRUE;
+	bad_insn = true;
       }
 
   if (bad_insn)
@@ -1881,9 +1881,9 @@ md_begin (void)
   /* Create XCOFF sections with .text in first, as it's creating dummy symbols
      to serve as initial csects.  This forces the text csects to precede the
      data csects.  These symbols will not be output.  */
-  ppc_init_xcoff_section (&ppc_xcoff_text_section, text_section, TRUE);
-  ppc_init_xcoff_section (&ppc_xcoff_data_section, data_section, TRUE);
-  ppc_init_xcoff_section (&ppc_xcoff_bss_section, bss_section, FALSE);
+  ppc_init_xcoff_section (&ppc_xcoff_text_section, text_section, true);
+  ppc_init_xcoff_section (&ppc_xcoff_data_section, data_section, true);
+  ppc_init_xcoff_section (&ppc_xcoff_bss_section, bss_section, false);
 #endif
 }
 
@@ -2930,10 +2930,10 @@ struct ppc_fixup
    pc-relative in PC_RELATIVE.  */
 
 static unsigned int
-fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
+fixup_size (bfd_reloc_code_real_type reloc, bool *pc_relative)
 {
   unsigned int size = 0;
-  bfd_boolean pcrel = FALSE;
+  bool pcrel = false;
 
   switch (reloc)
     {
@@ -3077,7 +3077,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
 #endif
     case BFD_RELOC_PPC_VLE_REL8:
       size = 2;
-      pcrel = TRUE;
+      pcrel = true;
       break;
 
     case BFD_RELOC_32:
@@ -3137,7 +3137,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_PPC_VLE_REL15:
     case BFD_RELOC_PPC_VLE_REL24:
       size = 4;
-      pcrel = TRUE;
+      pcrel = true;
       break;
 
 #ifndef OBJ_XCOFF
@@ -3182,7 +3182,7 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_PPC64_PCREL34:
     case BFD_RELOC_PPC64_PLT_PCREL34:
       size = 8;
-      pcrel = TRUE;
+      pcrel = true;
       break;
 
     default:
@@ -3430,11 +3430,11 @@ md_assemble (char *str)
 	  if (((operand->flags & PPC_OPERAND_CR_REG) != 0)
 	      || (operand->flags & PPC_OPERAND_CR_BIT) != 0)
 	    {
-	      cr_operand = TRUE;
+	      cr_operand = true;
 	      lex_type['%'] |= LEX_BEGIN_NAME;
 	    }
 	  expression (&ex);
-	  cr_operand = FALSE;
+	  cr_operand = false;
 	  lex_type['%'] = save_lex;
 	}
 
@@ -4071,7 +4071,7 @@ md_assemble (char *str)
       fixS *fixP;
       if (fixups[i].reloc != BFD_RELOC_NONE)
 	{
-	  bfd_boolean pcrel;
+	  bool pcrel;
 	  unsigned int size = fixup_size (fixups[i].reloc, &pcrel);
 	  int offset = target_big_endian ? (insn_length - size) : 0;
 
@@ -4257,7 +4257,7 @@ ppc_byte (int ignore ATTRIBUTE_UNUSED)
 
 /* This is set if we are creating a .stabx symbol, since we don't want
    to handle symbol suffixes for such symbols.  */
-static bfd_boolean ppc_stab_symbol;
+static bool ppc_stab_symbol;
 
 /* The .comm and .lcomm pseudo-ops for XCOFF.  XCOFF puts common
    symbols in the .bss segment as though they were local common
@@ -4379,7 +4379,7 @@ ppc_comm (int lcomm)
       if (!ppc_xcoff_section_is_initialized (section))
 	{
 	  ppc_init_xcoff_section (section,
-				  subseg_new (".tbss", 0), FALSE);
+				  subseg_new (".tbss", 0), false);
 	  bfd_set_section_flags (section->segment,
 				 SEC_ALLOC | SEC_THREAD_LOCAL);
 	  seg_info (section->segment)->bss = 1;
@@ -4537,7 +4537,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
 	  if (!ppc_xcoff_section_is_initialized (section))
 	    {
 	      ppc_init_xcoff_section (section, subseg_new (".tdata", 0),
-					TRUE);
+				      true);
 	      bfd_set_section_flags (section->segment, SEC_ALLOC
 				     | SEC_LOAD | SEC_RELOC | SEC_DATA
 				     | SEC_THREAD_LOCAL);
@@ -4549,7 +4549,7 @@ ppc_change_csect (symbolS *sym, offsetT align)
 	  if (!ppc_xcoff_section_is_initialized (section))
 	    {
 	      ppc_init_xcoff_section (section, subseg_new (".tbss", 0),
-				      FALSE);
+				      false);
 	      bfd_set_section_flags (section->segment, SEC_ALLOC |
 				     SEC_THREAD_LOCAL);
 	      seg_info (section->segment)->bss = 1;
@@ -4879,7 +4879,7 @@ ppc_ref (int ignore ATTRIBUTE_UNUSED)
       c = get_symbol_name (&name);
 
       fix_at_start (symbol_get_frag (ppc_current_csect), 0,
-		    symbol_find_or_make (name), 0, FALSE, BFD_RELOC_NONE);
+		    symbol_find_or_make (name), 0, false, BFD_RELOC_NONE);
 
       *input_line_pointer = c;
       SKIP_WHITESPACE_AFTER_NAME ();
@@ -4955,9 +4955,9 @@ ppc_stabx (int ignore ATTRIBUTE_UNUSED)
     }
   ++input_line_pointer;
 
-  ppc_stab_symbol = TRUE;
+  ppc_stab_symbol = true;
   sym = symbol_make (name);
-  ppc_stab_symbol = FALSE;
+  ppc_stab_symbol = false;
 
   symbol_get_tc (sym)->real_name = name;
 
@@ -5836,7 +5836,7 @@ ppc_symbol_new_hook (symbolS *sym)
    seen.  It tells ppc_adjust_symtab whether it needs to look through
    the symbols.  */
 
-static bfd_boolean ppc_saw_abs;
+static bool ppc_saw_abs;
 
 /* Change the name of a symbol just before writing it out.  Set the
    real name if the .rename pseudo-op was used.  Otherwise, remove any
@@ -5979,7 +5979,7 @@ ppc_frob_symbol (symbolS *sym)
 	{
 	  /* This is an absolute symbol.  The csect will be created by
 	     ppc_adjust_symtab.  */
-	  ppc_saw_abs = TRUE;
+	  ppc_saw_abs = true;
 	  a->x_csect.x_smtyp = XTY_LD;
 	  if (symbol_get_tc (sym)->symbol_class == -1)
 	    symbol_get_tc (sym)->symbol_class = XMC_XO;
@@ -6157,7 +6157,7 @@ ppc_adjust_symtab (void)
       coffsymbol (symbol_get_bfdsym (sym))->native[i].fix_scnlen = 1;
     }
 
-  ppc_saw_abs = FALSE;
+  ppc_saw_abs = false;
 }
 
 /* Set the VMA for a section.  This is called on all the sections in

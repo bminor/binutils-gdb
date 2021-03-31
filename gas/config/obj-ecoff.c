@@ -189,7 +189,7 @@ obj_ecoff_set_ext (symbolS *sym, EXTR *ext)
   know (bfd_asymbol_flavour (symbol_get_bfdsym (sym))
 	== bfd_target_ecoff_flavour);
   esym = ecoffsymbol (symbol_get_bfdsym (sym));
-  esym->local = FALSE;
+  esym->local = false;
   esym->native = xmalloc (debug_swap->external_ext_size);
   (*debug_swap->swap_ext_out) (stdoutput, ext, esym->native);
 }

@@ -57,6 +57,6 @@
 
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
 
-extern void         iq2000_frob_file         (void);
-extern bfd_boolean  iq2000_fix_adjustable    (struct fix *);
-extern int          iq2000_force_relocation  (struct fix *);
+extern void iq2000_frob_file (void);
+extern bool iq2000_fix_adjustable (struct fix *);
+extern int iq2000_force_relocation (struct fix *);

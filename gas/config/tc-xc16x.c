@@ -228,7 +228,7 @@ md_parse_option (int c ATTRIBUTE_UNUSED,
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }
 
 valueT

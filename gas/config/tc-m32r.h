@@ -70,7 +70,7 @@ extern void m32r_handle_align (fragS *);
 #define md_apply_fix gas_cgen_md_apply_fix
 
 #define tc_fix_adjustable(FIX) m32r_fix_adjustable (FIX)
-extern bfd_boolean m32r_fix_adjustable (struct fix *);
+extern bool m32r_fix_adjustable (struct fix *);
 
 /* After creating a fixup for an instruction operand, we need to check for
    HI16 relocs and queue them up for later sorting.  */

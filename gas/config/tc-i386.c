@@ -322,10 +322,10 @@ struct _i386_insn
     unsigned char prefix[MAX_PREFIXES];
 
     /* Register is in low 3 bits of opcode.  */
-    bfd_boolean short_form;
+    bool short_form;
 
     /* The operand to a branch insn indicates an absolute branch.  */
-    bfd_boolean jumpabsolute;
+    bool jumpabsolute;
 
     /* Extended states.  */
     enum
@@ -345,7 +345,7 @@ struct _i386_insn
       } xstate;
 
     /* Has GOTPC or TLS relocation.  */
-    bfd_boolean has_gotpc_tls_reloc;
+    bool has_gotpc_tls_reloc;
 
     /* RM and SIB are the modrm byte and the sib byte where the
        addressing modes of this insn are encoded.  */
@@ -422,10 +422,10 @@ struct _i386_insn
       } disp_encoding;
 
     /* Prefer the REX byte in encoding.  */
-    bfd_boolean rex_encoding;
+    bool rex_encoding;
 
     /* Disable instruction size optimization.  */
-    bfd_boolean no_optimize;
+    bool no_optimize;
 
     /* How to encode vector instructions.  */
     enum
@@ -3806,7 +3806,7 @@ build_vex_prefix (const insn_template *t)
     }
 }
 
-static INLINE bfd_boolean
+static INLINE bool
 is_evex_encoding (const insn_template *t)
 {
   return t->opcode_modifier.evex || t->opcode_modifier.disp8memshift
@@ -3814,7 +3814,7 @@ is_evex_encoding (const insn_template *t)
 	 || t->opcode_modifier.sae;
 }
 
-static INLINE bfd_boolean
+static INLINE bool
 is_any_vex_encoding (const insn_template *t)
 {
   return t->opcode_modifier.vex || is_evex_encoding (t);
@@ -5022,7 +5022,7 @@ md_assemble (char *line)
 	    && i.op[x].regs->reg_num > 3)
 	  {
 	    gas_assert (!(i.op[x].regs->reg_flags & RegRex));
-	    i.rex_encoding = FALSE;
+	    i.rex_encoding = false;
 	    break;
 	  }
 
@@ -5164,11 +5164,11 @@ parse_insn (char *line, char *mnemonic)
 		  break;
 		case Prefix_REX:
 		  /* {rex} */
-		  i.rex_encoding = TRUE;
+		  i.rex_encoding = true;
 		  break;
 		case Prefix_NoOptimize:
 		  /* {nooptimize} */
-		  i.no_optimize = TRUE;
+		  i.no_optimize = true;
 		  break;
 		default:
 		  abort ();
@@ -6375,7 +6375,7 @@ match_template (char mnem_suffix)
 	      break;
 	  if (j < MAX_OPERANDS)
 	    {
-	      bfd_boolean override = (i.prefix[ADDR_PREFIX] != 0);
+	      bool override = (i.prefix[ADDR_PREFIX] != 0);
 
 	      addr_prefix_disp = j;
 
@@ -6785,7 +6785,7 @@ check_string (void)
 static int
 process_suffix (void)
 {
-  bfd_boolean is_crc32 = FALSE, is_movx = FALSE;
+  bool is_crc32 = false, is_movx = false;
 
   /* If matched instruction specifies an explicit instruction mnemonic
      suffix, use it.  */
@@ -7810,7 +7810,7 @@ process_operands (void)
 }
 
 static INLINE void set_rex_vrex (const reg_entry *r, unsigned int rex_bit,
-				 bfd_boolean do_sse2avx)
+				 bool do_sse2avx)
 {
   if (r->reg_flags & RegRex)
     {
@@ -8042,14 +8042,14 @@ build_modrm_byte (void)
 	  i.rm.reg = i.op[dest].regs->reg_num;
 	  i.rm.regmem = i.op[source].regs->reg_num;
 	  set_rex_vrex (i.op[dest].regs, REX_R, i.tm.opcode_modifier.sse2avx);
-	  set_rex_vrex (i.op[source].regs, REX_B, FALSE);
+	  set_rex_vrex (i.op[source].regs, REX_B, false);
 	}
       else
 	{
 	  i.rm.reg = i.op[source].regs->reg_num;
 	  i.rm.regmem = i.op[dest].regs->reg_num;
 	  set_rex_vrex (i.op[dest].regs, REX_B, i.tm.opcode_modifier.sse2avx);
-	  set_rex_vrex (i.op[source].regs, REX_R, FALSE);
+	  set_rex_vrex (i.op[source].regs, REX_R, false);
 	}
       if (flag_code != CODE_64BIT && (i.rex & REX_R))
 	{
@@ -8111,7 +8111,7 @@ build_modrm_byte (void)
 		    i.sib.index = NO_INDEX_REGISTER;
 		  else
 		    i.sib.index = i.index_reg->reg_num;
-		  set_rex_vrex (i.index_reg, REX_X, FALSE);
+		  set_rex_vrex (i.index_reg, REX_X, false);
 		}
 	    }
 
@@ -8628,41 +8628,41 @@ output_branch (void)
 /* Return TRUE iff PLT32 relocation should be used for branching to
    symbol S.  */
 
-static bfd_boolean
+static bool
 need_plt32_p (symbolS *s)
 {
   /* PLT32 relocation is ELF only.  */
   if (!IS_ELF)
-    return FALSE;
+    return false;
 
 #ifdef TE_SOLARIS
   /* Don't emit PLT32 relocation on Solaris: neither native linker nor
      krtld support it.  */
-  return FALSE;
+  return false;
 #endif
 
   /* Since there is no need to prepare for PLT branch on x86-64, we
      can generate R_X86_64_PLT32, instead of R_X86_64_PC32, which can
      be used as a marker for 32-bit PC-relative branches.  */
   if (!object_64bit)
-    return FALSE;
+    return false;
 
   if (s == NULL)
-    return FALSE;
+    return false;
 
   /* Weak or undefined symbol need PLT32 relocation.  */
   if (S_IS_WEAK (s) || !S_IS_DEFINED (s))
-    return TRUE;
+    return true;
 
   /* Non-global symbol doesn't need PLT32 relocation.  */
   if (! S_IS_EXTERNAL (s))
-    return FALSE;
+    return false;
 
   /* Other global symbols need PLT32 relocation.  NB: Symbol with
      non-default visibilities are treated as normal global symbol
      so that PLT32 relocation can be used as a marker for 32-bit
      PC-relative branches.  It is useful for linker relaxation.  */
-  return TRUE;
+  return true;
 }
 #endif
 
@@ -9815,7 +9815,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		  if (!object_64bit)
 		    {
 		      reloc_type = BFD_RELOC_386_GOTPC;
-		      i.has_gotpc_tls_reloc = TRUE;
+		      i.has_gotpc_tls_reloc = true;
 		      i.op[n].imms->X_add_number +=
 			encoding_length (insn_start_frag, insn_start_off, p);
 		    }
@@ -9843,7 +9843,7 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 		    case BFD_RELOC_X86_64_GOTTPOFF:
 		    case BFD_RELOC_X86_64_GOTPC32_TLSDESC:
 		    case BFD_RELOC_X86_64_TLSDESC_CALL:
-		      i.has_gotpc_tls_reloc = TRUE;
+		      i.has_gotpc_tls_reloc = true;
 		    default:
 		      break;
 		    }
@@ -9992,7 +9992,7 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 		    reloc_type = BFD_RELOC_X86_64_GOTPC32;
 		  else if (size == 8)
 		    reloc_type = BFD_RELOC_X86_64_GOTPC64;
-		  i.has_gotpc_tls_reloc = TRUE;
+		  i.has_gotpc_tls_reloc = true;
 		  i.op[n].imms->X_add_number +=
 		    encoding_length (insn_start_frag, insn_start_off, p);
 		}
@@ -10063,64 +10063,64 @@ lex_got (enum bfd_reloc_code_real *rel,
     int len;
     const enum bfd_reloc_code_real rel[2];
     const i386_operand_type types64;
-    bfd_boolean need_GOT_symbol;
+    bool need_GOT_symbol;
   } gotrel[] = {
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
     { STRING_COMMA_LEN ("SIZE"),      { BFD_RELOC_SIZE32,
 					BFD_RELOC_SIZE32 },
-      OPERAND_TYPE_IMM32_64, FALSE },
+      OPERAND_TYPE_IMM32_64, false },
 #endif
     { STRING_COMMA_LEN ("PLTOFF"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_PLTOFF64 },
-      OPERAND_TYPE_IMM64, TRUE },
+      OPERAND_TYPE_IMM64, true },
     { STRING_COMMA_LEN ("PLT"),      { BFD_RELOC_386_PLT32,
 				       BFD_RELOC_X86_64_PLT32    },
-      OPERAND_TYPE_IMM32_32S_DISP32, FALSE },
+      OPERAND_TYPE_IMM32_32S_DISP32, false },
     { STRING_COMMA_LEN ("GOTPLT"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPLT64 },
-      OPERAND_TYPE_IMM64_DISP64, TRUE },
+      OPERAND_TYPE_IMM64_DISP64, true },
     { STRING_COMMA_LEN ("GOTOFF"),   { BFD_RELOC_386_GOTOFF,
 				       BFD_RELOC_X86_64_GOTOFF64 },
-      OPERAND_TYPE_IMM64_DISP64, TRUE },
+      OPERAND_TYPE_IMM64_DISP64, true },
     { STRING_COMMA_LEN ("GOTPCREL"), { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPCREL },
-      OPERAND_TYPE_IMM32_32S_DISP32, TRUE },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TLSGD"),    { BFD_RELOC_386_TLS_GD,
 				       BFD_RELOC_X86_64_TLSGD    },
-      OPERAND_TYPE_IMM32_32S_DISP32, TRUE },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TLSLDM"),   { BFD_RELOC_386_TLS_LDM,
 				       _dummy_first_bfd_reloc_code_real },
-      OPERAND_TYPE_NONE, TRUE },
+      OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("TLSLD"),    { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_TLSLD    },
-      OPERAND_TYPE_IMM32_32S_DISP32, TRUE },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("GOTTPOFF"), { BFD_RELOC_386_TLS_IE_32,
 				       BFD_RELOC_X86_64_GOTTPOFF },
-      OPERAND_TYPE_IMM32_32S_DISP32, TRUE },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TPOFF"),    { BFD_RELOC_386_TLS_LE_32,
 				       BFD_RELOC_X86_64_TPOFF32  },
-      OPERAND_TYPE_IMM32_32S_64_DISP32_64, TRUE },
+      OPERAND_TYPE_IMM32_32S_64_DISP32_64, true },
     { STRING_COMMA_LEN ("NTPOFF"),   { BFD_RELOC_386_TLS_LE,
 				       _dummy_first_bfd_reloc_code_real },
-      OPERAND_TYPE_NONE, TRUE },
+      OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("DTPOFF"),   { BFD_RELOC_386_TLS_LDO_32,
 				       BFD_RELOC_X86_64_DTPOFF32 },
-      OPERAND_TYPE_IMM32_32S_64_DISP32_64, TRUE },
+      OPERAND_TYPE_IMM32_32S_64_DISP32_64, true },
     { STRING_COMMA_LEN ("GOTNTPOFF"),{ BFD_RELOC_386_TLS_GOTIE,
 				       _dummy_first_bfd_reloc_code_real },
-      OPERAND_TYPE_NONE, TRUE },
+      OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("INDNTPOFF"),{ BFD_RELOC_386_TLS_IE,
 				       _dummy_first_bfd_reloc_code_real },
-      OPERAND_TYPE_NONE, TRUE },
+      OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("GOT"),      { BFD_RELOC_386_GOT32,
 				       BFD_RELOC_X86_64_GOT32    },
-      OPERAND_TYPE_IMM32_32S_64_DISP32, TRUE },
+      OPERAND_TYPE_IMM32_32S_64_DISP32, true },
     { STRING_COMMA_LEN ("TLSDESC"),  { BFD_RELOC_386_TLS_GOTDESC,
 				       BFD_RELOC_X86_64_GOTPC32_TLSDESC },
-      OPERAND_TYPE_IMM32_32S_DISP32, TRUE },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TLSCALL"),  { BFD_RELOC_386_TLS_DESC_CALL,
 				       BFD_RELOC_X86_64_TLSDESC_CALL },
-      OPERAND_TYPE_IMM32_32S_DISP32, TRUE },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
   };
   char *cp;
   unsigned int j;
@@ -10757,7 +10757,7 @@ i386_displacement (char *disp_start, char *disp_end)
 	 branch template.  */
       static templates aux_templates;
       const insn_template *t = current_templates->start;
-      bfd_boolean has_intel64 = FALSE;
+      bool has_intel64 = false;
 
       aux_templates.start = t;
       while (++t < current_templates->end)
@@ -10766,7 +10766,7 @@ i386_displacement (char *disp_start, char *disp_end)
 	      != current_templates->start->opcode_modifier.jump)
 	    break;
 	  if ((t->opcode_modifier.isa64 >= INTEL64))
-	    has_intel64 = TRUE;
+	    has_intel64 = true;
 	}
       if (t < current_templates->end)
 	{
@@ -11272,7 +11272,7 @@ maybe_adjust_templates (void)
   if (t < current_templates->end)
     {
       static templates aux_templates;
-      bfd_boolean recheck;
+      bool recheck;
 
       aux_templates.start = t;
       for (; t < current_templates->end; ++t)
@@ -11319,7 +11319,7 @@ i386_att_operand (char *operand_string)
       ++op_string;
       if (is_space_char (*op_string))
 	++op_string;
-      i.jumpabsolute = TRUE;
+      i.jumpabsolute = true;
     }
 
   /* Check if operand is a register.  */
@@ -11358,7 +11358,7 @@ i386_att_operand (char *operand_string)
 	      ++op_string;
 	      if (is_space_char (*op_string))
 		++op_string;
-	      i.jumpabsolute = TRUE;
+	      i.jumpabsolute = true;
 	    }
 	  goto do_memory_reference;
 	}
@@ -12593,7 +12593,7 @@ md_atof (int type, char *litP, int *sizeP)
 {
   /* This outputs the LITTLENUMs in REVERSE order;
      in accord with the bigendian 386.  */
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }
 
 static char output_invalid_buf[sizeof (unsigned char) * 2 + 6];
@@ -12612,58 +12612,58 @@ output_invalid (int c)
 
 /* Verify that @r can be used in the current context.  */
 
-static bfd_boolean check_register (const reg_entry *r)
+static bool check_register (const reg_entry *r)
 {
   if (allow_pseudo_reg)
-    return TRUE;
+    return true;
 
   if (operand_type_all_zero (&r->reg_type))
-    return FALSE;
+    return false;
 
   if ((r->reg_type.bitfield.dword
        || (r->reg_type.bitfield.class == SReg && r->reg_num > 3)
        || r->reg_type.bitfield.class == RegCR
        || r->reg_type.bitfield.class == RegDR)
       && !cpu_arch_flags.bitfield.cpui386)
-    return FALSE;
+    return false;
 
   if (r->reg_type.bitfield.class == RegTR
       && (flag_code == CODE_64BIT
 	  || !cpu_arch_flags.bitfield.cpui386
 	  || cpu_arch_isa_flags.bitfield.cpui586
 	  || cpu_arch_isa_flags.bitfield.cpui686))
-    return FALSE;
+    return false;
 
   if (r->reg_type.bitfield.class == RegMMX && !cpu_arch_flags.bitfield.cpummx)
-    return FALSE;
+    return false;
 
   if (!cpu_arch_flags.bitfield.cpuavx512f)
     {
       if (r->reg_type.bitfield.zmmword
 	  || r->reg_type.bitfield.class == RegMask)
-	return FALSE;
+	return false;
 
       if (!cpu_arch_flags.bitfield.cpuavx)
 	{
 	  if (r->reg_type.bitfield.ymmword)
-	    return FALSE;
+	    return false;
 
 	  if (!cpu_arch_flags.bitfield.cpusse && r->reg_type.bitfield.xmmword)
-	    return FALSE;
+	    return false;
 	}
     }
 
   if (r->reg_type.bitfield.tmmword
       && (!cpu_arch_flags.bitfield.cpuamx_tile
           || flag_code != CODE_64BIT))
-    return FALSE;
+    return false;
 
   if (r->reg_type.bitfield.class == RegBND && !cpu_arch_flags.bitfield.cpumpx)
-    return FALSE;
+    return false;
 
   /* Don't allow fake index register unless allow_index_reg isn't 0. */
   if (!allow_index_reg && r->reg_num == RegIZ)
-    return FALSE;
+    return false;
 
   /* Upper 16 vector registers are only available with VREX in 64bit
      mode, and require EVEX encoding.  */
@@ -12671,7 +12671,7 @@ static bfd_boolean check_register (const reg_entry *r)
     {
       if (!cpu_arch_flags.bitfield.cpuavx512f
 	  || flag_code != CODE_64BIT)
-	return FALSE;
+	return false;
 
       if (i.vec_encoding == vex_encoding_default)
 	i.vec_encoding = vex_encoding_evex;
@@ -12682,13 +12682,13 @@ static bfd_boolean check_register (const reg_entry *r)
   if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)
       && (!cpu_arch_flags.bitfield.cpulm || r->reg_type.bitfield.class != RegCR)
       && flag_code != CODE_64BIT)
-    return FALSE;
+    return false;
 
   if (r->reg_type.bitfield.class == SReg && r->reg_num == RegFlat
       && !intel_syntax)
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* REG_STRING starts *before* REGISTER_PREFIX.  */

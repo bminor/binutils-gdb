@@ -1,5 +1,53 @@
 2021-03-31  Alan Modra  <amodra@gmail.com>
 
+	* as.h (POISON_BFD_BOOLEAN): Define.
+	* as.c, * as.h, * atof-generic.c, * config/atof-ieee.c,
+	* config/bfin-aux.h, * config/obj-coff.c, * config/obj-ecoff.c,
+	* config/obj-elf.c, * config/obj-elf.h, * config/obj-som.c,
+	* config/tc-aarch64.c, * config/tc-alpha.c, * config/tc-arc.c,
+	* config/tc-arc.h, * config/tc-arm.c, * config/tc-arm.h,
+	* config/tc-avr.c, * config/tc-avr.h, * config/tc-bfin.c,
+	* config/tc-bfin.h, * config/tc-bpf.c, * config/tc-cris.c,
+	* config/tc-csky.c, * config/tc-csky.h, * config/tc-d10v.c,
+	* config/tc-d10v.h, * config/tc-d30v.c, * config/tc-d30v.h,
+	* config/tc-dlx.c, * config/tc-dlx.h, * config/tc-epiphany.c,
+	* config/tc-epiphany.h, * config/tc-fr30.c, * config/tc-fr30.h,
+	* config/tc-frv.c, * config/tc-frv.h, * config/tc-ft32.c,
+	* config/tc-ft32.h, * config/tc-h8300.c, * config/tc-hppa.c,
+	* config/tc-i386-intel.c, * config/tc-i386.c, * config/tc-ia64.c,
+	* config/tc-ip2k.c, * config/tc-iq2000.c, * config/tc-iq2000.h,
+	* config/tc-lm32.c, * config/tc-lm32.h, * config/tc-m32c.c,
+	* config/tc-m32c.h, * config/tc-m32r.c, * config/tc-m32r.h,
+	* config/tc-m68hc11.c, * config/tc-m68k.c, * config/tc-mcore.c,
+	* config/tc-mcore.h, * config/tc-mep.c, * config/tc-mep.h,
+	* config/tc-metag.c, * config/tc-metag.h,
+	* config/tc-microblaze.c, * config/tc-mips.c, * config/tc-mips.h,
+	* config/tc-mmix.c, * config/tc-mn10200.c, * config/tc-mn10300.c,
+	* config/tc-mn10300.h, * config/tc-moxie.c, * config/tc-msp430.c,
+	* config/tc-msp430.h, * config/tc-mt.c, * config/tc-mt.h,
+	* config/tc-nds32.c, * config/tc-nds32.h, * config/tc-nios2.c,
+	* config/tc-ns32k.c, * config/tc-or1k.c, * config/tc-or1k.h,
+	* config/tc-pdp11.c, * config/tc-ppc.c, * config/tc-pru.c,
+	* config/tc-pru.h, * config/tc-riscv.c, * config/tc-riscv.h,
+	* config/tc-rx.c, * config/tc-rx.h, * config/tc-s12z.c,
+	* config/tc-s12z.h, * config/tc-s390.c, * config/tc-score.c,
+	* config/tc-score.h, * config/tc-score7.c, * config/tc-sh.c,
+	* config/tc-sh.h, * config/tc-spu.c, * config/tc-tic54x.c,
+	* config/tc-tic6x.c, * config/tc-tic6x.h, * config/tc-tilegx.c,
+	* config/tc-tilepro.c, * config/tc-v850.c, * config/tc-v850.h,
+	* config/tc-visium.c, * config/tc-visium.h, * config/tc-wasm32.c,
+	* config/tc-wasm32.h, * config/tc-xc16x.c, * config/tc-xgate.c,
+	* config/tc-xstormy16.c, * config/tc-xstormy16.h,
+	* config/tc-xtensa.c, * config/tc-xtensa.h, * config/tc-z80.c,
+	* config/tc-z8k.c, * config/xtensa-istack.h,
+	* config/xtensa-relax.c, * config/xtensa-relax.h, * dw2gencfi.c,
+	* dwarf2dbg.c, * dwarf2dbg.h, * expr.c, * expr.h, * frags.c,
+	* frags.h, * listing.c, * macro.c, * output-file.c, * read.c,
+	* read.h, * stabs.c, * symbols.c, * write.c: Replace bfd_boolean
+	with bool, FALSE with false, and TRUE with true.
+
+2021-03-31  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-aarch64.c: Include stdint.h in place of bfd_stdint.h.
 	* config/tc-crx.c: Likewise.
 	* config/tc-nds32.h: Likewise.

@@ -767,19 +767,19 @@ i386_intel_operand (char *operand_string, int got_a_float)
       || current_templates->start->opcode_modifier.jump == JUMP_DWORD
       || current_templates->start->opcode_modifier.jump == JUMP_INTERSEGMENT)
     {
-      bfd_boolean jumpabsolute = FALSE;
+      bool jumpabsolute = false;
 
       if (i.op[this_operand].regs
 	  || intel_state.base
 	  || intel_state.index
 	  || intel_state.is_mem > 1)
-	jumpabsolute = TRUE;
+	jumpabsolute = true;
       else
 	switch (intel_state.op_modifier)
 	  {
 	  case O_near_ptr:
 	    if (intel_state.seg)
-	      jumpabsolute = TRUE;
+	      jumpabsolute = true;
 	    else
 	      intel_state.is_mem = 1;
 	    break;
@@ -791,14 +791,14 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		if (intel_state.op_modifier == O_absent)
 		  {
 		    if (intel_state.is_indirect == 1)
-		      jumpabsolute = TRUE;
+		      jumpabsolute = true;
 		    break;
 		  }
 		as_bad (_("cannot infer the segment part of the operand"));
 		return 0;
 	      }
 	    else if (S_GET_SEGMENT (intel_state.seg) == reg_section)
-	      jumpabsolute = TRUE;
+	      jumpabsolute = true;
 	    else
 	      {
 		i386_operand_type types;
@@ -832,12 +832,12 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	      }
 	    break;
 	  default:
-	    jumpabsolute = TRUE;
+	    jumpabsolute = true;
 	    break;
 	  }
       if (jumpabsolute)
 	{
-	  i.jumpabsolute = TRUE;
+	  i.jumpabsolute = true;
 	  intel_state.is_mem |= 1;
 	}
     }

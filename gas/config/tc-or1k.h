@@ -46,7 +46,7 @@ extern const char or1k_comment_chars [];
 #define md_apply_fix or1k_apply_fix
 extern void or1k_apply_fix (struct fix *, valueT *, segT);
 
-extern bfd_boolean or1k_fix_adjustable (struct fix *);
+extern bool or1k_fix_adjustable (struct fix *);
 #define tc_fix_adjustable(FIX) or1k_fix_adjustable (FIX)
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */

@@ -110,7 +110,7 @@ struct dwcfi_seg_list
 };
 
 #ifdef SUPPORT_COMPACT_EH
-static bfd_boolean compact_eh;
+static bool compact_eh;
 #else
 #define compact_eh 0
 #endif
@@ -181,7 +181,7 @@ encoding_size (unsigned char encoding)
    emit a byte containing ENCODING.  */
 
 static void
-emit_expr_encoded (expressionS *exp, int encoding, bfd_boolean emit_encoding)
+emit_expr_encoded (expressionS *exp, int encoding, bool emit_encoding)
 {
   unsigned int size = encoding_size (encoding);
   bfd_reloc_code_real_type code;
@@ -438,7 +438,7 @@ alloc_fde_entry (void)
 /* Construct a new INSN structure and add it to the end of the insn list
    for the currently active FDE.  */
 
-static bfd_boolean cfi_sections_set = FALSE;
+static bool cfi_sections_set = false;
 static int cfi_sections = CFI_EMIT_eh_frame;
 int all_cfi_sections = 0;
 static struct fde_entry *last_fde;
@@ -487,7 +487,7 @@ void
 cfi_set_sections (void)
 {
   frchain_now->frch_cfi_data->cur_fde_data->sections = all_cfi_sections;
-  cfi_sections_set = TRUE;
+  cfi_sections_set = true;
 }
 
 /* Universal functions to store new instructions.  */
@@ -1228,7 +1228,7 @@ dot_cfi_sections (int ignored ATTRIBUTE_UNUSED)
 	else if (strncmp (name, ".eh_frame_entry",
 			  sizeof ".eh_frame_entry") == 0)
 	  {
-	    compact_eh = TRUE;
+	    compact_eh = true;
 	    sections |= CFI_EMIT_eh_frame_compact;
 	  }
 #endif
@@ -1302,7 +1302,7 @@ dot_cfi_startproc (int ignored ATTRIBUTE_UNUSED)
     }
   demand_empty_rest_of_line ();
 
-  cfi_sections_set = TRUE;
+  cfi_sections_set = true;
   all_cfi_sections |= cfi_sections;
   cfi_set_sections ();
   frchain_now->frch_cfi_data->cur_cfa_offset = 0;
@@ -1329,7 +1329,7 @@ dot_cfi_endproc (int ignored ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
 
-  cfi_sections_set = TRUE;
+  cfi_sections_set = true;
   if ((cfi_sections & CFI_EMIT_target) != 0)
     tc_cfi_endproc (last_fde);
 }
@@ -1392,7 +1392,7 @@ dot_cfi_fde_data (int ignored ATTRIBUTE_UNUSED)
 
   last_fde = frchain_now->frch_cfi_data->cur_fde_data;
 
-  cfi_sections_set = TRUE;
+  cfi_sections_set = true;
   if ((cfi_sections & CFI_EMIT_target) != 0
       || (cfi_sections & CFI_EMIT_eh_frame_compact) != 0)
     {
@@ -1464,7 +1464,7 @@ output_compact_unwind_data (struct fde_entry *fde, int align)
   else if (fde->per_encoding != DW_EH_PE_omit)
     {
       *p = 0;
-      emit_expr_encoded (&fde->personality, fde->per_encoding, FALSE);
+      emit_expr_encoded (&fde->personality, fde->per_encoding, false);
       data_size += encoding_size (fde->per_encoding);
     }
   else
@@ -1816,7 +1816,7 @@ output_cfi_insn (struct cfi_insn_data *insn)
 }
 
 static void
-output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
+output_cie (struct cie_entry *cie, bool eh_frame, int align)
 {
   symbolS *after_size_address, *end_address;
   expressionS exp;
@@ -1893,7 +1893,7 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
 	augmentation_size += 1 + encoding_size (cie->per_encoding);
       out_uleb128 (augmentation_size);		/* Augmentation size.  */
 
-      emit_expr_encoded (&cie->personality, cie->per_encoding, TRUE);
+      emit_expr_encoded (&cie->personality, cie->per_encoding, true);
 
       if (cie->lsda_encoding != DW_EH_PE_omit)
 	out_one (cie->lsda_encoding);
@@ -1940,7 +1940,7 @@ output_cie (struct cie_entry *cie, bfd_boolean eh_frame, int align)
 
 static void
 output_fde (struct fde_entry *fde, struct cie_entry *cie,
-	    bfd_boolean eh_frame, struct cfi_insn_data *first,
+	    bool eh_frame, struct cfi_insn_data *first,
 	    int align)
 {
   symbolS *after_size_address, *end_address;
@@ -2034,7 +2034,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   if (eh_frame)
     out_uleb128 (augmentation_size);		/* Augmentation size.  */
 
-  emit_expr_encoded (&fde->lsda, cie->lsda_encoding, FALSE);
+  emit_expr_encoded (&fde->lsda, cie->lsda_encoding, false);
 
   for (; first; first = first->next)
     if (CUR_SEG (first) == CUR_SEG (fde))
@@ -2045,7 +2045,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
 }
 
 static struct cie_entry *
-select_cie_for_fde (struct fde_entry *fde, bfd_boolean eh_frame,
+select_cie_for_fde (struct fde_entry *fde, bool eh_frame,
 		    struct cfi_insn_data **pfirst, int align)
 {
   struct cfi_insn_data *i, *j;
@@ -2243,7 +2243,7 @@ cfi_emit_eh_header (symbolS *sym, bfd_vma addend)
 
   exp.X_add_number = addend;
   exp.X_add_symbol = sym;
-  emit_expr_encoded (&exp, DW_EH_PE_sdata4 | DW_EH_PE_pcrel, FALSE);
+  emit_expr_encoded (&exp, DW_EH_PE_sdata4 | DW_EH_PE_pcrel, false);
 }
 
 static void
@@ -2292,7 +2292,7 @@ cfi_finish (void)
   if (all_fde_data == 0)
     return;
 
-  cfi_sections_set = TRUE;
+  cfi_sections_set = true;
   if ((all_cfi_sections & CFI_EMIT_eh_frame) != 0
       || (all_cfi_sections & CFI_EMIT_eh_frame_compact) != 0)
     {
@@ -2377,9 +2377,9 @@ cfi_finish (void)
 		  fde->end_address = fde->start_address;
 		}
 
-	      cie = select_cie_for_fde (fde, TRUE, &first, 2);
+	      cie = select_cie_for_fde (fde, true, &first, 2);
 	      fde->eh_loc = symbol_temp_new_now ();
-	      output_fde (fde, cie, TRUE, first,
+	      output_fde (fde, cie, true, first,
 			  fde->next == NULL ? EH_FRAME_ALIGNMENT : 2);
 	    }
 	}
@@ -2479,7 +2479,7 @@ cfi_finish (void)
       flag_traditional_format = save_flag_traditional_format;
     }
 
-  cfi_sections_set = TRUE;
+  cfi_sections_set = true;
   if ((all_cfi_sections & CFI_EMIT_debug_frame) != 0)
     {
       int alignment = ffs (DWARF2_ADDR_SIZE (stdoutput)) - 1;
@@ -2536,8 +2536,8 @@ cfi_finish (void)
 	      fde->per_encoding = DW_EH_PE_omit;
 	      fde->lsda_encoding = DW_EH_PE_omit;
 	      cfi_change_reg_numbers (fde->data, ccseg);
-	      cie = select_cie_for_fde (fde, FALSE, &first, alignment);
-	      output_fde (fde, cie, FALSE, first, alignment);
+	      cie = select_cie_for_fde (fde, false, &first, alignment);
+	      output_fde (fde, cie, false, first, alignment);
 	    }
 	}
       while (SUPPORT_FRAME_LINKONCE && seek_next_seg == 2);

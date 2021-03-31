@@ -130,7 +130,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
     {
       /* Try to find the first pseudo op on the line.  */
       size_t i = line_start;
-      bfd_boolean had_colon = FALSE;
+      bool had_colon = false;
 
       /* With normal syntax we can suck what we want till we get
 	 to the dot.  With the alternate, labels have to start in
@@ -171,7 +171,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	    }
 	  i++;
 	  line_start = i;
-	  had_colon = TRUE;
+	  had_colon = true;
 	}
 
       /* Skip trailing whitespace.  */
@@ -1360,11 +1360,11 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
     }
   else
     {
-      bfd_boolean in_quotes = FALSE;
+      bool in_quotes = false;
 
       if (irpc && in->ptr[idx] == '"')
 	{
-	  in_quotes = TRUE;
+	  in_quotes = true;
 	  ++idx;
 	}
 

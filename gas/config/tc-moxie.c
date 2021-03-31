@@ -529,7 +529,7 @@ md_assemble (char *str)
 		     (p - frag_now->fr_literal),
 		     2,
 		     &arg,
-		     TRUE,
+		     true,
 		     BFD_RELOC_MOXIE_10_PCREL);
       }
       break;

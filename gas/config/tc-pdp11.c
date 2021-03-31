@@ -484,7 +484,7 @@ parse_op_no_deferred (char *str, struct pdp11_code *operand)
       str = parse_expression (str + 1, operand);
       if (operand->error)
 	return str;
-      operand->additional = TRUE;
+      operand->additional = true;
       operand->word = operand->reloc.exp.X_add_number;
       switch (operand->reloc.exp.X_op)
 	{
@@ -566,7 +566,7 @@ parse_op_no_deferred (char *str, struct pdp11_code *operand)
 	  }
 
 	str++;
-	operand->additional = TRUE;
+	operand->additional = true;
 	operand->code |= 060;
 	switch (operand->reloc.exp.X_op)
 	  {
@@ -728,10 +728,10 @@ md_assemble (char *instruction_string)
   insn.code = op->opcode;
   insn.reloc.type = BFD_RELOC_NONE;
   op1.error = NULL;
-  op1.additional = FALSE;
+  op1.additional = false;
   op1.reloc.type = BFD_RELOC_NONE;
   op2.error = NULL;
-  op2.additional = FALSE;
+  op2.additional = false;
   op2.reloc.type = BFD_RELOC_NONE;
 
   str = p;

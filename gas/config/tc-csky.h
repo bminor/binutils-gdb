@@ -97,7 +97,7 @@ extern void csky_cons_fix_new (fragS *,
 			       expressionS *,
 			       bfd_reloc_code_real_type);
 extern int csky_force_relocation (fixS *);
-extern bfd_boolean csky_fix_adjustable (fixS *);
+extern bool csky_fix_adjustable (fixS *);
 extern void csky_cfi_frame_initial_instructions (void);
 extern int tc_csky_regname_to_dw2regnum (char *);
 extern long csky_relax_frag (segT, fragS *, long);

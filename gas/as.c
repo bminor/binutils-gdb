@@ -108,7 +108,7 @@ unsigned int dwarf_level = 3;
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
-bfd_boolean flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
+bool flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
 #endif
 
 /* Keep the output file.  */
@@ -862,7 +862,7 @@ This program has absolutely no warranty.\n"));
 	  break;
 
 	case OPTION_GDWARF_SECTIONS:
-	  flag_dwarf_sections = TRUE;
+	  flag_dwarf_sections = true;
 	  break;
 
         case OPTION_GDWARF_CIE_VERSION:
@@ -961,9 +961,9 @@ This program has absolutely no warranty.\n"));
 
 	case OPTION_SIZE_CHECK:
 	  if (strcasecmp (optarg, "error") == 0)
-	    flag_allow_nonconst_size = FALSE;
+	    flag_allow_nonconst_size = false;
 	  else if (strcasecmp (optarg, "warning") == 0)
-	    flag_allow_nonconst_size = TRUE;
+	    flag_allow_nonconst_size = true;
 	  else
 	    as_fatal (_("Invalid --size-check= option: `%s'"), optarg);
 	  break;
@@ -984,9 +984,9 @@ This program has absolutely no warranty.\n"));
 
 	case OPTION_ELF_BUILD_NOTES:
 	  if (strcasecmp (optarg, "no") == 0)
-	    flag_generate_build_notes = FALSE;
+	    flag_generate_build_notes = false;
 	  else if (strcasecmp (optarg, "yes") == 0)
-	    flag_generate_build_notes = TRUE;
+	    flag_generate_build_notes = true;
 	  else
 	    as_fatal (_("Invalid --generate-missing-build-notes option: `%s'"),
 		      optarg);

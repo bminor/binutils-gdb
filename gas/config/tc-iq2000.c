@@ -731,10 +731,10 @@ md_operand (expressionS * exp)
 const char *
 md_atof (int type, char * litP, int * sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
-bfd_boolean
+bool
 iq2000_fix_adjustable (fixS * fixP)
 {
   bfd_reloc_code_real_type reloc_type;
@@ -751,21 +751,21 @@ iq2000_fix_adjustable (fixS * fixP)
     reloc_type = fixP->fx_r_type;
 
   if (fixP->fx_addsy == NULL)
-    return TRUE;
+    return true;
 
   /* Prevent all adjustments to global symbols.  */
   if (S_IS_EXTERNAL (fixP->fx_addsy))
-    return FALSE;
+    return false;
 
   if (S_IS_WEAK (fixP->fx_addsy))
-    return FALSE;
+    return false;
 
   /* We need the symbol name for the VTABLE entries.  */
   if (   reloc_type == BFD_RELOC_VTABLE_INHERIT
       || reloc_type == BFD_RELOC_VTABLE_ENTRY)
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 static void

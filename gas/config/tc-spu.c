@@ -707,7 +707,7 @@ get_imm (const char *param, struct spu_insn *insn, int arg)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 #ifndef WORKING_DOT_WORD

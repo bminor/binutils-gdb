@@ -161,7 +161,7 @@ md_begin (void)
   /* Set the machine type.  */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_ip2k, ip2k_mach);
 
-  literal_prefix_dollar_hex = TRUE;
+  literal_prefix_dollar_hex = true;
 }
 
 
@@ -315,7 +315,7 @@ md_number_to_chars (char * buf, valueT val, int n)
 const char *
 md_atof (int type, char * litP, int *  sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 

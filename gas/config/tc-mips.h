@@ -149,7 +149,7 @@ extern int mips_force_relocation (struct fix *);
    || mips_force_relocation (FIX))
 
 #define TC_FORCE_RELOCATION_ABS(FIX) mips_force_relocation_abs (FIX)
-extern bfd_boolean mips_force_relocation_abs (struct fix *);
+extern bool mips_force_relocation_abs (struct fix *);
 
 /* Register mask variables.  These are set by the MIPS assembly code
    and used by ECOFF and possibly other object file formats.  */

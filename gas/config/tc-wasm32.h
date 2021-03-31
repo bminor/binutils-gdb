@@ -78,7 +78,7 @@ extern int wasm32_force_relocation (struct fix *);
 #define HANDLE_ALIGN(fragP)
 
 
-extern bfd_boolean wasm32_fix_adjustable (struct fix *);
+extern bool wasm32_fix_adjustable (struct fix *);
 #define tc_fix_adjustable(FIX) wasm32_fix_adjustable (FIX)
 
 /* Type names for blocks and signatures.  */

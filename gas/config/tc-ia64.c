@@ -164,7 +164,7 @@ struct label_fix
 {
   struct label_fix *next;
   struct symbol *sym;
-  bfd_boolean dw2_mark_labels;
+  bool dw2_mark_labels;
 };
 
 #ifdef TE_VMS
@@ -947,7 +947,7 @@ ia64_flush_insns (void)
   segT saved_seg;
   subsegT saved_subseg;
   unw_rec_list *ptr;
-  bfd_boolean mark;
+  bool mark;
 
   if (!md.last_text_seg)
     return;
@@ -962,7 +962,7 @@ ia64_flush_insns (void)
 
   /* In case there are labels following the last instruction, resolve
      those now.  */
-  mark = FALSE;
+  mark = false;
   for (lfix = CURR_SLOT.label_fixups; lfix; lfix = lfix->next)
     {
       symbol_set_value_now (lfix->sym);
@@ -6520,7 +6520,7 @@ emit_one_bundle (void)
   int n, i, j, first, curr, last_slot;
   bfd_vma t0 = 0, t1 = 0;
   struct label_fix *lfix;
-  bfd_boolean mark_label;
+  bool mark_label;
   struct insn_fix *ifix;
   char mnemonic[16];
   fixS *fix;
@@ -6847,7 +6847,7 @@ emit_one_bundle (void)
 	continue;		/* Try next slot.  */
 
       /* Now is a good time to fix up the labels for this insn.  */
-      mark_label = FALSE;
+      mark_label = false;
       for (lfix = md.slot[curr].label_fixups; lfix; lfix = lfix->next)
 	{
 	  S_SET_VALUE (lfix->sym, frag_now_fix () - 16);
@@ -7755,7 +7755,7 @@ ia64_frob_label (struct symbol *sym)
       fix = XOBNEW (&notes, struct label_fix);
       fix->sym = sym;
       fix->next = CURR_SLOT.tag_fixups;
-      fix->dw2_mark_labels = FALSE;
+      fix->dw2_mark_labels = false;
       CURR_SLOT.tag_fixups = fix;
 
       return;

@@ -844,7 +844,7 @@ can_make_parallel (m32r_insn *a, m32r_insn *b)
       || CGEN_FIELDS_BITSIZE (&b->fields) != 16)
     abort ();
 
-  if (first_writes_to_seconds_operands (a, b, TRUE))
+  if (first_writes_to_seconds_operands (a, b, true))
     return _("instructions write to the same destination register.");
 
   a_pipe = CGEN_INSN_ATTR_VALUE (a->insn, CGEN_INSN_PIPE);
@@ -1118,11 +1118,11 @@ assemble_two_insns (char *str1, char *str2, int parallel_p)
 
   if (parallel_p && warn_explicit_parallel_conflicts)
     {
-      if (first_writes_to_seconds_operands (&first, &second, FALSE))
+      if (first_writes_to_seconds_operands (&first, &second, false))
 	/* xgettext:c-format  */
 	as_warn (_("%s: output of 1st instruction is the same as an input to 2nd instruction - is this intentional ?"), str2);
 
-      if (first_writes_to_seconds_operands (&second, &first, FALSE))
+      if (first_writes_to_seconds_operands (&second, &first, false))
 	/* xgettext:c-format  */
 	as_warn (_("%s: output of 2nd instruction is the same as an input to 1st instruction - is this intentional ?"), str2);
     }
@@ -1287,7 +1287,7 @@ md_assemble (char *str)
   else
     {
       int on_32bit_boundary_p;
-      int swap = FALSE;
+      int swap = false;
 
       if (CGEN_INSN_BITSIZE (insn.insn) != 16)
 	abort ();
@@ -1342,12 +1342,12 @@ md_assemble (char *str)
 	  && parallel ()
 	  && CGEN_INSN_ATTR_VALUE (insn.orig_insn, CGEN_INSN_RELAXABLE) == 0
 	  && ! writes_to_pc (&prev_insn)
-	  && ! first_writes_to_seconds_operands (&prev_insn, &insn, FALSE))
+	  && ! first_writes_to_seconds_operands (&prev_insn, &insn, false))
 	{
 	  if (can_make_parallel (&prev_insn, &insn) == NULL)
 	    make_parallel (insn.buffer);
 	  else if (can_make_parallel (&insn, &prev_insn) == NULL)
-	    swap = TRUE;
+	    swap = true;
 	}
 
       expand_debug_syms (insn.debug_sym_link, 1);
@@ -2125,7 +2125,7 @@ m32r_elf_section_change_hook (void)
 /* Return true if can adjust the reloc to be relative to its section
    (such as .data) instead of relative to some symbol.  */
 
-bfd_boolean
+bool
 m32r_fix_adjustable (fixS *fixP)
 {
   bfd_reloc_code_real_type reloc_type;

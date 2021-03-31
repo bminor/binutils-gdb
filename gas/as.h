@@ -411,7 +411,7 @@ enum debug_info_type
 
 extern enum debug_info_type debug_type;
 extern int use_gnu_debug_info_extensions;
-COMMON bfd_boolean flag_dwarf_sections;
+COMMON bool flag_dwarf_sections;
 extern int flag_dwarf_cie_version;
 extern unsigned int dwarf_level;
 
@@ -487,7 +487,7 @@ char * app_push (void);
 
 char * atof_ieee (char *, int, LITTLENUM_TYPE *);
 char * atof_ieee_detail (char *, int, int, LITTLENUM_TYPE *, FLONUM_TYPE *);
-const char * ieee_md_atof (int, char *, int *, bfd_boolean);
+const char * ieee_md_atof (int, char *, int *, bool);
 const char * vax_md_atof (int, char *, int *);
 char * input_scrub_include_file (const char *, char *);
 void   input_scrub_insert_line (const char *);
@@ -609,7 +609,7 @@ extern int flag_use_elf_stt_common;
 
 /* TRUE iff GNU Build attribute notes should
    be generated if none are in the input files.  */
-extern bfd_boolean flag_generate_build_notes;
+extern bool flag_generate_build_notes;
 
 /* If section name substitution sequences should be honored */
 COMMON int flag_sectname_subst;
@@ -661,5 +661,7 @@ COMMON int flag_sectname_subst;
 #else
 #define SEC_OCTETS 0
 #endif
+
+#define POISON_BFD_BOOLEAN 1
 
 #endif /* GAS */

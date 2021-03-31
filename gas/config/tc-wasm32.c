@@ -138,7 +138,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }
 
 /* No machine-dependent frags.  */
@@ -184,17 +184,17 @@ md_section_align (asection * seg, valueT addr)
 /* Apply a fixup, return TRUE if done (and no relocation is
    needed).  */
 
-static bfd_boolean
+static bool
 apply_full_field_fix (fixS * fixP, char *buf, bfd_vma val, int size)
 {
   if (fixP->fx_addsy != NULL || fixP->fx_pcrel)
     {
       fixP->fx_addnumber = val;
-      return FALSE;
+      return false;
     }
 
   number_to_chars_littleendian (buf, val, size);
-  return TRUE;
+  return true;
 }
 
 /* Apply a fixup (potentially PC-relative), set the fx_done flag if
@@ -236,7 +236,7 @@ skip_space (char *s)
 
 /* Allow '/' in opcodes.  */
 
-static inline bfd_boolean
+static inline bool
 is_part_of_opcode (char c)
 {
   return is_part_of_name (c) || (c == '/');
@@ -333,7 +333,7 @@ wasm32_put_uleb128 (unsigned long value)
    symbol, or a special relocation for <expr>@got, <expr>@gotcode, and
    <expr>@plt{__sigchar_<signature>}.  */
 
-static bfd_boolean
+static bool
 wasm32_leb128 (char **line, int bits, int sign)
 {
   char *t = input_line_pointer;
@@ -455,7 +455,7 @@ wasm32_leb128 (char **line, int bits, int sign)
 /* Read an integer expression and produce an unsigned LEB128 integer,
    or a relocation for it.  */
 
-static bfd_boolean
+static bool
 wasm32_uleb128 (char **line, int bits)
 {
   return wasm32_leb128 (line, bits, 0);
@@ -464,7 +464,7 @@ wasm32_uleb128 (char **line, int bits)
 /* Read an integer expression and produce a signed LEB128 integer, or
    a relocation for it.  */
 
-static bfd_boolean
+static bool
 wasm32_sleb128 (char **line, int bits)
 {
   return wasm32_leb128 (line, bits, 1);
@@ -777,17 +777,17 @@ wasm32_force_relocation (fixS * f)
 /* Don't replace PLT/GOT relocations with section symbols, so they
    don't get an addend.  */
 
-bfd_boolean
+bool
 wasm32_fix_adjustable (fixS * fixP)
 {
   if (fixP->fx_addsy == NULL)
-    return TRUE;
+    return true;
 
   if (fixP->fx_r_type == BFD_RELOC_WASM32_LEB128_PLT
       || fixP->fx_r_type == BFD_RELOC_WASM32_LEB128_GOT)
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Generate a reloc for FIXP.  */

@@ -52,7 +52,7 @@ output_file_create (const char *name)
 void
 output_file_close (const char *filename)
 {
-  bfd_boolean res;
+  bool res;
 
   if (stdoutput == NULL)
     return;

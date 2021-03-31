@@ -380,15 +380,15 @@ md_pcrel_from_section (fixS * fixP, segT sec)
 
 /* Return true if we can partially resolve a relocation now.  */
 
-bfd_boolean
+bool
 lm32_fix_adjustable (fixS * fixP)
 {
   /* We need the symbol name for the VTABLE entries */
   if (fixP->fx_r_type == BFD_RELOC_VTABLE_INHERIT
       || fixP->fx_r_type == BFD_RELOC_VTABLE_ENTRY)
-    return FALSE;
+    return false;
 
-  return TRUE;
+  return true;
 }
 
 /* Relaxation isn't required/supported on this target.  */

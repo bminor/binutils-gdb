@@ -968,7 +968,7 @@ md_assemble (char *str)
 const char *
 md_atof (int type, char *litP, int *sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 /* Write out big-endian.  */
@@ -978,7 +978,7 @@ md_number_to_chars (char *buf, valueT val, int n)
   number_to_chars_bigendian (buf, val, n);
 }
 
-bfd_boolean
+bool
 md_dlx_fix_adjustable (fixS *fixP)
 {
   /* We need the symbol name for the VTABLE entries.  */

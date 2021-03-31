@@ -560,7 +560,7 @@ rebuffer_line (file_info_type *  file,
   long pos;
   long pos2;
   int c;
-  bfd_boolean found = FALSE;
+  bool found = false;
 
   /* Sanity checks.  */
   if (file == NULL || buffer == NULL || size <= 1 || file->linenum <= linenum)
@@ -630,7 +630,7 @@ rebuffer_line (file_info_type *  file,
 	      if (current_line == linenum)
 		{
 		  /* We have found the start of the line we seek.  */
-		  found = TRUE;
+		  found = true;
 
 		  /* FIXME: We could skip the read-in-the-line code
 		     below if we know that we already have the whole

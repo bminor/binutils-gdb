@@ -233,7 +233,7 @@ atof_generic (/* return pointer to just AFTER number we read.  */
 
 	      if ( /* seen_significant_digit || */ c > '0')
 		{
-		  seen_significant_digit = TRUE;
+		  seen_significant_digit = true;
 		}
 	    }
 	  else

@@ -179,7 +179,7 @@ md_begin (void)
   /* Set the machine type.  */
   bfd_default_set_arch_mach (stdoutput, bfd_arch_mt, mt_mach);
 
-  literal_prefix_dollar_hex = TRUE;
+  literal_prefix_dollar_hex = true;
 }
 
 void
@@ -438,7 +438,7 @@ md_number_to_chars (char * buf, valueT val, int n)
 const char *
 md_atof (int type, char * litP, int * sizeP)
 {
-  return ieee_md_atof (type, litP, sizeP, FALSE);
+  return ieee_md_atof (type, litP, sizeP, false);
 }
 
 /* See whether we need to force a relocation into the output file.  */
@@ -458,7 +458,7 @@ mt_apply_fix (fixS *fixP, valueT *valueP, segT seg)
   gas_cgen_md_apply_fix (fixP, valueP, seg);
 }
 
-bfd_boolean
+bool
 mt_fix_adjustable (fixS * fixP)
 {
   if ((int) fixP->fx_r_type >= (int) BFD_RELOC_UNUSED)
@@ -472,14 +472,14 @@ mt_fix_adjustable (fixS * fixP)
     }
 
   if (fixP->fx_addsy == NULL)
-    return TRUE;
+    return true;
 
   /* Prevent all adjustments to global symbols.  */
   if (S_IS_EXTERNAL (fixP->fx_addsy))
-    return FALSE;
+    return false;
 
   if (S_IS_WEAK (fixP->fx_addsy))
-    return FALSE;
+    return false;
 
-  return 1;
+  return true;
 }

@@ -5584,7 +5584,7 @@ md_atof (int type, char *litP, int *sizeP)
       return vax_md_atof (type, litP, sizeP);
 
     default:
-      return ieee_md_atof (type, litP, sizeP, FALSE);
+      return ieee_md_atof (type, litP, sizeP, false);
     }
 }
 

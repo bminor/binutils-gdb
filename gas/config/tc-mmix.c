@@ -2287,7 +2287,7 @@ md_atof (int type, char *litP, int *sizeP)
      The testsuite wants it, and it's customary.
      We'll deal with the real problems when they come; we share the
      problem with most other ports.  */
-  return ieee_md_atof (type, litP, sizeP, TRUE);
+  return ieee_md_atof (type, litP, sizeP, true);
 }
 
 /* Convert variable-sized frags into one or more fixups.  */

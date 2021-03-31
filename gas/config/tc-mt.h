@@ -61,5 +61,5 @@ extern void gas_cgen_md_operand (expressionS *);
 extern int mt_force_relocation (struct fix *);
 
 #define tc_fix_adjustable(fixP) mt_fix_adjustable (fixP)
-extern bfd_boolean mt_fix_adjustable (struct fix *);
+extern bool mt_fix_adjustable (struct fix *);
 

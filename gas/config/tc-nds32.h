@@ -71,7 +71,7 @@ extern const char * nds32_target_format (void);
 
 /* expr.c */
 extern int nds32_parse_name (char const *, expressionS *, enum expr_mode, char *);
-extern bfd_boolean nds32_allow_local_subtract (expressionS *, expressionS *, segT);
+extern bool nds32_allow_local_subtract (expressionS *, expressionS *, segT);
 #define md_parse_name(name, exprP, mode, nextcharP) \
 	nds32_parse_name (name, exprP, mode, nextcharP)
 #define md_allow_local_subtract(lhs,rhs,sect)	nds32_allow_local_subtract (lhs, rhs, sect)
@@ -81,7 +81,7 @@ extern bfd_boolean nds32_allow_local_subtract (expressionS *, expressionS *, seg
 
 /* write.c.  */
 extern long nds32_pcrel_from_section (struct fix *, segT);
-extern bfd_boolean nds32_fix_adjustable (struct fix *);
+extern bool nds32_fix_adjustable (struct fix *);
 extern void nds32_frob_file (void);
 extern void nds32_post_relax_hook (void);
 extern void nds32_frob_file_before_fix (void);
@@ -264,7 +264,7 @@ typedef struct nds32_cond_field
   int offset;
   int bitpos; /* Register position.  */
   int bitmask; /* Number of register bits.  */
-  bfd_boolean signed_extend;
+  bool signed_extend;
 } nds32_cond_field_t;
 
 /* The max relaxation pattern is 20-bytes including the nop.  */

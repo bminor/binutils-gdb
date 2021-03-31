@@ -46,7 +46,7 @@
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 #define tc_fix_adjustable(FIX) epiphany_fix_adjustable (FIX)
-extern bfd_boolean epiphany_fix_adjustable (struct fix *);
+extern bool epiphany_fix_adjustable (struct fix *);
 
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP,SEC)
 
