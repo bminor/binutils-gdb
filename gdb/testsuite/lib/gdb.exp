@@ -5270,6 +5270,12 @@ proc default_gdb_init { test_file_name } {
     # tests.
     setenv TERM "dumb"
 
+    # If DEBUGINFOD_URLS is set, gdb will try to download sources and
+    # debug info for f.i. system libraries.  Prevent this.
+    if { [info exists env(DEBUGINFOD_URLS)] } {
+	unsetenv DEBUGINFOD_URLS
+    }
+
     # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
     # environment, we don't want these modifications to the history
     # settings.
