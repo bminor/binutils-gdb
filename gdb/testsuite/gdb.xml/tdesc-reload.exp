@@ -70,8 +70,11 @@ if ![runto_main] then {
 
 # Run info registers just to check this appears to run fine with the
 # new target description.
-gdb_test "info all-registers" ".*" \
-    "Run info registers"
+gdb_test_multiple "info all-registers" "Run info registers" -lbl {
+    -re -wrap "" {
+	pass $gdb_test_name
+    }
+}
 
 # Write out the current target description.
 gdb_test_no_output "pipe maint print xml-tdesc | cat > $xml_file_3" \

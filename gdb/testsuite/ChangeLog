@@ -1,3 +1,7 @@
+2021-04-27  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.xml/tdesc-reload.exp: Pass -lbl.
+
 2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 
