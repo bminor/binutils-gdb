@@ -1,3 +1,11 @@
+2021-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	Backported from mainline.
+	2021-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/26659
+	* cofflink.c (_bfd_coff_generic_relocate_section): Ignore overflow.
+
 2021-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27587

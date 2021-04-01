@@ -3118,6 +3118,21 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	  return FALSE;
 	case bfd_reloc_overflow:
 	  {
+
+	    /* Ignore any weak undef symbols that may have overflowed.  Due to
+	       PR ld/19011 the base address is now in the upper 64-bit address
+	       range.  This means that when _bfd_final_link_relocate calculates
+	       the overlow it takes the distance between the symbol and the VMA
+	       which will now always overflow as 0 - 64-bit addr > 32-bit range
+	       of the relocation.  This ends up creating PR ld/26659.  */
+	    if (val == 0
+		/* Reverse the hack where 4 is subtracted from the addend.  */
+		&& (addend + 4) == 0
+		&& sym->n_sclass == C_NT_WEAK
+		&& bfd_coff_classify_symbol (output_bfd, sym)
+		     == COFF_SYMBOL_UNDEFINED)
+	      break;
+
 	    const char *name;
 	    char buf[SYMNMLEN + 1];
 

@@ -1,3 +1,13 @@
+2021-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	Backported from mainline
+	2021-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/26659
+	* testsuite/ld-pe/pe.exp:
+	* testsuite/ld-pe/pr26659-weak-undef-sym.d: New test.
+	* testsuite/ld-pe/pr26659-weak-undef-sym.s: New test.
+
 2021-03-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/27587
