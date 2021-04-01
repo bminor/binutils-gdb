@@ -1,3 +1,8 @@
+2021-02-28  Boris Staletic  <boris.staletic@gmail.com>
+
+	* gdb/python/lib/gdb/__init__.py: Use importlib on python 3.4+
+	to avoid deprecation warnings.
+
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
 	* cp-name-parser.y: Use startswith instead of strncmp.
