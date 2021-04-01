@@ -7511,17 +7511,24 @@ proc readnow { args } {
     } else {
 	set re ""
     }
+
+    set readnow_p 0
+    # Given the listing from the following command can be very verbose, match
+    # the patterns line-by-line.  This prevents timeouts from waiting for
+    # too much data to come at once.
     set cmd "maint print objfiles $re"
-    gdb_test_multiple $cmd "" {
-	-re -wrap "\r\n.gdb_index: faked for \"readnow\"\r\n.*" {
-	    return 1
+    gdb_test_multiple $cmd "" -lbl {
+	-re "\r\n.gdb_index: faked for \"readnow\"" {
+	    # Record the we've seen the above pattern.
+	    set readnow_p 1
+	    exp_continue
 	}
 	-re -wrap "" {
-	    return 0
+	    # We don't care about any other input.
 	}
     }
 
-    return 0
+    return $readnow_p
 }
 
 # Return 1 if partial symbols are available.  Otherwise, return 0.

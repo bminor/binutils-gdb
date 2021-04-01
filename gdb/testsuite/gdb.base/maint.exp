@@ -230,9 +230,6 @@ gdb_test_multiple "maint print objfiles" "" -lbl {
 	set symtabs 1
 	exp_continue
     }
-    -re " at $hex," {
-	exp_continue
-    }
     -re -wrap "" {
 	pass $gdb_test_name
     }

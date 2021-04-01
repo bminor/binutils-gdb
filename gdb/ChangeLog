@@ -1,3 +1,9 @@
+2021-04-27  Luis Machado  <luis.machado@linaro.org>
+
+	* psymtab.c (psymbol_functions::dump): Output newline.
+	Remove wrap.
+	* symmisc.c (dump_objfile): Likewise.
+
 2021-04-27  Michael Weghorn  <m.weghorn@posteo.de>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 

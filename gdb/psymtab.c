@@ -885,8 +885,7 @@ psymbol_functions::dump (struct objfile *objfile)
 	  printf_filtered ("%s at ",
 			   psymtab->filename);
 	  gdb_print_host_address (psymtab, gdb_stdout);
-	  printf_filtered (", ");
-	  wrap_here ("  ");
+	  printf_filtered ("\n");
 	}
       printf_filtered ("\n\n");
     }

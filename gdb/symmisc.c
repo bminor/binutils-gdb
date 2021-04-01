@@ -131,12 +131,9 @@ dump_objfile (struct objfile *objfile)
 	      printf_filtered ("%s at ",
 			       symtab_to_filename_for_display (symtab));
 	      gdb_print_host_address (symtab, gdb_stdout);
-	      printf_filtered (", ");
 	      if (SYMTAB_OBJFILE (symtab) != objfile)
-		{
-		  printf_filtered ("NOT ON CHAIN!  ");
-		}
-	      wrap_here ("  ");
+		printf_filtered (", NOT ON CHAIN!");
+	      printf_filtered ("\n");
 	    }
 	}
       printf_filtered ("\n\n");
