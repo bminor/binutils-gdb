@@ -126,7 +126,7 @@ sim_engine_run (SIM_DESC sd,
   int cycs;
   word WLhash;
   ubyte carry;
-  int imm_unsigned;
+  bool imm_unsigned;
   short ra, rb, rd;
   long immword;
   uword oldpc, newpc;

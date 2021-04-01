@@ -1,3 +1,7 @@
+2021-04-01  Martin Liska  <mliska@suse.cz>
+
+	* interp.c (sim_engine_run): Use bool instead of int.
+
 2021-02-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
