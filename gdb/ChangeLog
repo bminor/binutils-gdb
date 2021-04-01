@@ -1,5 +1,34 @@
 2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* symtab.c (struct info_sources_filter): New.
+	(info_sources_filter::info_sources_filter): New function.
+	(info_sources_filter::matches): New function.
+	(info_sources_filter::print): New function.
+	(struct filename_partial_match_opts): Moved to later in the file
+	and update the comment.
+	(struct output_source_filename_data)
+	<output_source_filename_data>: New constructor.  <regexp>: Delete,
+	this is now in info_sources_filter.  <c_regexp>: Delete, this is
+	now in info_sources_filter.  <reset_output>: New member function.
+	<filename_seen_cache>: Rename to m_filename_seen_cache, change
+	from being a pointer, to being an actual object.  <first>: Rename
+	to m_first.  <print_header>: New member function. <partial_match>:
+	Delete.
+	(output_source_filename_data::output): Update now
+	m_filename_seen_cache is no longer a pointer, and for other member
+	variable name changes. Add a header comment.
+	(print_info_sources_header): Renamed to...
+	(output_source_filename_data::print_header): ...this.  Update now
+	it's a member function and to take account of member variable
+	renaming.
+	(info_sources_command): Add a header comment, delete stack local
+	filename_seen_cache, initialization of output_source_filename_data
+	is now done by the constructor.  Call print_header member function
+	instead of print_info_sources_header, call reset_output member
+	function instead of manually performing the reset.
+
+2021-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2/read.c (struct dwarf2_base_index_functions)
 	<has_unexpanded_symtabs>: Declare.
 	(dwarf2_base_index_functions::has_unexpanded_symtabs): Define new

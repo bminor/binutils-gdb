@@ -4200,37 +4200,168 @@ operator_chars (const char *p, const char **end)
 }
 
 
-/* What part to match in a file name.  */
-
-struct filename_partial_match_opts
+/* Class used to encapsulate the filename filtering for the "info sources"
+   command.  */
+struct info_sources_filter
 {
-  /* Only match the directory name part.   */
-  bool dirname = false;
+  /* If filename filtering is being used (see M_C_REGEXP) then which part
+     of the filename is being filtered against?  */
+  enum class match_on
+  {
+    /* Match against the full filename.  */
+    FULLNAME,
 
-  /* Only match the basename part.  */
-  bool basename = false;
+    /* Match only against the directory part of the full filename.  */
+    DIRNAME,
+
+    /* Match only against the basename part of the full filename.  */
+    BASENAME
+  };
+
+  /* Create a filter of MATCH_TYPE using regular expression REGEXP.  If
+     REGEXP is nullptr then all files will match the filter and MATCH_TYPE
+     is ignored.
+
+     The string pointed too by REGEXP must remain live and unchanged for
+     this lifetime of this object as the object only retains a copy of the
+     pointer.  */
+  info_sources_filter (match_on match_type, const char *regexp);
+
+  DISABLE_COPY_AND_ASSIGN (info_sources_filter);
+
+  /* Does FULLNAME match the filter defined by this object, return true if
+     it does, otherwise, return false.  If there is no filtering defined
+     then this function will always return true.  */
+  bool matches (const char *fullname) const;
+
+  /* Print a single line describing this filter, used as part of the "info
+     sources" command output.  If there is no filter in place then nothing
+     is printed.  */
+  void print () const;
+
+private:
+
+  /* The type of filtering in place.  */
+  match_on m_match_type;
+
+  /* Points to the original regexp used to create this filter.  */
+  const char *m_regexp;
+
+  /* A compiled version of M_REGEXP.  This object is only given a value if
+     M_REGEXP is not nullptr and is not the empty string.  */
+  gdb::optional<compiled_regex> m_c_regexp;
 };
 
-/* Data structure to maintain printing state for output_source_filename.  */
+/* See class declaration.  */
+
+info_sources_filter::info_sources_filter (match_on match_type,
+                                          const char *regexp)
+  : m_match_type (match_type),
+    m_regexp (regexp)
+{
+  /* Setup the compiled regular expression M_C_REGEXP based on M_REGEXP.  */
+  if (m_regexp != nullptr && *m_regexp != '\0')
+    {
+      gdb_assert (m_regexp != nullptr);
+
+      int cflags = REG_NOSUB;
+#ifdef HAVE_CASE_INSENSITIVE_FILE_SYSTEM
+      cflags |= REG_ICASE;
+#endif
+      m_c_regexp.emplace (m_regexp, cflags, _("Invalid regexp"));
+    }
+}
+
+/* See class declaration.  */
+
+bool
+info_sources_filter::matches (const char *fullname) const
+{
+  /* Does it match regexp?  */
+  if (m_c_regexp.has_value ())
+    {
+      const char *to_match;
+      std::string dirname;
+
+      switch (m_match_type)
+        {
+        case match_on::DIRNAME:
+          dirname = ldirname (fullname);
+          to_match = dirname.c_str ();
+          break;
+        case match_on::BASENAME:
+          to_match = lbasename (fullname);
+          break;
+        case match_on::FULLNAME:
+          to_match = fullname;
+          break;
+        }
+
+      if (m_c_regexp->exec (to_match, 0, NULL, 0) != 0)
+        return false;
+    }
+
+  return true;
+}
+
+/* See class declaration.  */
+
+void
+info_sources_filter::print () const
+{
+  if (m_c_regexp.has_value ())
+    {
+      gdb_assert (m_regexp != nullptr);
+
+      switch (m_match_type)
+	{
+	case match_on::DIRNAME:
+	  printf_filtered (_("(dirname matching regular expression \"%s\")"),
+			   m_regexp);
+	  break;
+	case match_on::BASENAME:
+	  printf_filtered (_("(basename matching regular expression \"%s\")"),
+			   m_regexp);
+	  break;
+	case match_on::FULLNAME:
+	  printf_filtered (_("(filename matching regular expression \"%s\")"),
+			   m_regexp);
+	  break;
+	}
+    }
+}
+
+/* Data structure to maintain the state used for printing the results of
+   the 'info sources' command.  */
 
 struct output_source_filename_data
 {
-  /* Output only filenames matching REGEXP.  */
-  std::string regexp;
-  gdb::optional<compiled_regex> c_regexp;
-  /* Possibly only match a part of the filename.  */
-  filename_partial_match_opts partial_match;
+  /* Create an object for displaying the results of the 'info sources'
+     command.  FILTER must remain valid and unchanged for the lifetime of
+     this object as this object retains a reference to FILTER.  */
+  output_source_filename_data (const info_sources_filter &filter)
+    : m_filter (filter)
+  { /* Nothing.  */ }
 
+  DISABLE_COPY_AND_ASSIGN (output_source_filename_data);
 
-  /* Cache of what we've seen so far.  */
-  struct filename_seen_cache *filename_seen_cache;
+  /* Reset enough state of this object so we can match against a new set of
+     files.  The existing regular expression is retained though.  */
+  void reset_output ()
+  {
+    m_first = true;
+    m_filename_seen_cache.clear ();
+  }
 
-  /* Flag of whether we're printing the first one.  */
-  int first;
-
-  /* Worker for sources_info.  Force line breaks at ,'s.
-     NAME is the name to print.  */
+  /* Worker for sources_info.  Force line breaks at ,'s.  NAME is the name
+     to print.  */
   void output (const char *name);
+
+  /* Prints the header messages for the source files that will be printed
+     with the matching info present in the current object state.
+     SYMBOL_MSG is a message that describes what will or has been done with
+     the symbols of the matching source files.  */
+  void print_header (const char *symbol_msg);
 
   /* An overload suitable for use as a callback to
      quick_symbol_functions::map_symbol_filenames.  */
@@ -4238,7 +4369,20 @@ struct output_source_filename_data
   {
     output (fullname != nullptr ? fullname : filename);
   }
+
+private:
+
+  /* Flag of whether we're printing the first one.  */
+  bool m_first = true;
+
+  /* Cache of what we've seen so far.  */
+  filename_seen_cache m_filename_seen_cache;
+
+  /* How source filename should be filtered.  */
+  const info_sources_filter &m_filter;
 };
+
+/* See comment in class declaration above.  */
 
 void
 output_source_filename_data::output (const char *name)
@@ -4252,41 +4396,44 @@ output_source_filename_data::output (const char *name)
      situation.  I'm not sure whether this can also happen for
      symtabs; it doesn't hurt to check.  */
 
-  /* Was NAME already seen?  */
-  if (filename_seen_cache->seen (name))
-    {
-      /* Yes; don't print it again.  */
-      return;
-    }
+  /* Was NAME already seen?  If so, then don't print it again.  */
+  if (m_filename_seen_cache.seen (name))
+    return;
 
-  /* Does it match regexp?  */
-  if (c_regexp.has_value ())
-    {
-      const char *to_match;
-      std::string dirname;
-
-      if (partial_match.dirname)
-	{
-	  dirname = ldirname (name);
-	  to_match = dirname.c_str ();
-	}
-      else if (partial_match.basename)
-	to_match = lbasename (name);
-      else
-	to_match = name;
-
-      if (c_regexp->exec (to_match, 0, NULL, 0) != 0)
-	return;
-    }
+  /* If the filter rejects this file then don't print it.  */
+  if (!m_filter.matches (name))
+    return;
 
   /* Print it and reset *FIRST.  */
-  if (! first)
+  if (!m_first)
     printf_filtered (", ");
-  first = 0;
+  m_first = false;
 
   wrap_here ("");
   fputs_styled (name, file_name_style.style (), gdb_stdout);
 }
+
+/* See comment is class declaration above.  */
+
+void
+output_source_filename_data::print_header (const char *symbol_msg)
+{
+  puts_filtered (symbol_msg);
+  m_filter.print ();
+  puts_filtered ("\n");
+}
+
+/* For the 'info sources' command, what part of the file names should we be
+   matching the user supplied regular expression against?  */
+
+struct filename_partial_match_opts
+{
+  /* Only match the directory name part.   */
+  bool dirname = false;
+
+  /* Only match the basename part.  */
+  bool basename = false;
+};
 
 using isrc_flag_option_def
   = gdb::option::flag_option_def<filename_partial_match_opts>;
@@ -4316,31 +4463,6 @@ make_info_sources_options_def_group (filename_partial_match_opts *isrc_opts)
   return {{info_sources_option_defs}, isrc_opts};
 }
 
-/* Prints the header message for the source files that will be printed
-   with the matching info present in DATA.  SYMBOL_MSG is a message
-   that tells what will or has been done with the symbols of the
-   matching source files.  */
-
-static void
-print_info_sources_header (const char *symbol_msg,
-			   const struct output_source_filename_data *data)
-{
-  puts_filtered (symbol_msg);
-  if (!data->regexp.empty ())
-    {
-      if (data->partial_match.dirname)
-	printf_filtered (_("(dirname matching regular expression \"%s\")"),
-			 data->regexp.c_str ());
-      else if (data->partial_match.basename)
-	printf_filtered (_("(basename matching regular expression \"%s\")"),
-			 data->regexp.c_str ());
-      else
-	printf_filtered (_("(filename matching regular expression \"%s\")"),
-			 data->regexp.c_str ());
-    }
-  puts_filtered ("\n");
-}
-
 /* Completer for "info sources".  */
 
 static void
@@ -4354,49 +4476,41 @@ info_sources_command_completer (cmd_list_element *ignore,
     return;
 }
 
+/* Implement the 'info sources' command.  */
+
 static void
 info_sources_command (const char *args, int from_tty)
 {
-  struct output_source_filename_data data;
-
   if (!have_full_symbols () && !have_partial_symbols ())
-    {
-      error (_("No symbol table is loaded.  Use the \"file\" command."));
-    }
+    error (_("No symbol table is loaded.  Use the \"file\" command."));
 
-  filename_seen_cache filenames_seen;
-
-  auto group = make_info_sources_options_def_group (&data.partial_match);
-
+  filename_partial_match_opts match_opts;
+  auto group = make_info_sources_options_def_group (&match_opts);
   gdb::option::process_options
     (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_ERROR, group);
 
-  if (args != NULL && *args != '\000')
-    data.regexp = args;
-
-  data.filename_seen_cache = &filenames_seen;
-  data.first = 1;
-
-  if (data.partial_match.dirname && data.partial_match.basename)
+  if (match_opts.dirname && match_opts.basename)
     error (_("You cannot give both -basename and -dirname to 'info sources'."));
-  if ((data.partial_match.dirname || data.partial_match.basename)
-      && data.regexp.empty ())
-     error (_("Missing REGEXP for 'info sources'."));
 
-  if (data.regexp.empty ())
-    data.c_regexp.reset ();
+  const char *regex = nullptr;
+  if (args != nullptr && *args != '\000')
+    regex = args;
+
+  if ((match_opts.dirname || match_opts.basename) && regex == nullptr)
+    error (_("Missing REGEXP for 'info sources'."));
+
+  info_sources_filter::match_on match_type;
+  if (match_opts.dirname)
+    match_type = info_sources_filter::match_on::DIRNAME;
+  else if (match_opts.basename)
+    match_type = info_sources_filter::match_on::BASENAME;
   else
-    {
-      int cflags = REG_NOSUB;
-#ifdef HAVE_CASE_INSENSITIVE_FILE_SYSTEM
-      cflags |= REG_ICASE;
-#endif
-      data.c_regexp.emplace (data.regexp.c_str (), cflags,
-			     _("Invalid regexp"));
-    }
+    match_type = info_sources_filter::match_on::FULLNAME;
 
-  print_info_sources_header
-    (_("Source files for which symbols have been read in:\n"), &data);
+  info_sources_filter filter (match_type, regex);
+  output_source_filename_data data (filter);
+
+  data.print_header (_("Source files for which symbols have been read in:\n"));
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
@@ -4412,11 +4526,9 @@ info_sources_command (const char *args, int from_tty)
     }
   printf_filtered ("\n\n");
 
-  print_info_sources_header
-    (_("Source files for which symbols will be read in on demand:\n"), &data);
+  data.print_header (_("Source files for which symbols will be read in on demand:\n"));
 
-  filenames_seen.clear ();
-  data.first = 1;
+  data.reset_output ();
   map_symbol_filenames (data, true /*need_fullname*/);
   printf_filtered ("\n");
 }
