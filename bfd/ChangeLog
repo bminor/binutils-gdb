@@ -1,3 +1,8 @@
+2021-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/26659
+	* cofflink.c (_bfd_coff_generic_relocate_section): Ignore overflow.
+
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
 	* ecoff.c (strneq): Remove strneq and use startswith.

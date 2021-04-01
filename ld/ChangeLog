@@ -1,3 +1,10 @@
+2021-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/26659
+	* testsuite/ld-pe/pe.exp: Add test.
+	* testsuite/ld-pe/pr26659-weak-undef-sym.d: New test.
+	* testsuite/ld-pe/pr26659-weak-undef-sym.s: New test.
+
 2021-04-01  Martin Liska  <mliska@suse.cz>
 
 	* ldbuildid.c (strneq): Remove strneq and use startswith.
